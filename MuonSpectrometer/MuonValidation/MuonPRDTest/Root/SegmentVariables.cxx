@@ -17,7 +17,7 @@ namespace MuonPRDTest {
 
         for (const auto summary : {"nPrecisionOutliers", "nTriggerPhiOutliers", "nTriggerEtaOutliers",
                                    "nPrecisionHoles", "nTriggerPhiHoles", "nTriggerEtaHoles"}) {
-            auto br = std::make_unique<AuxElementBranch<std::uint8_t>>(tree, std::format("{:}_{:}", outName, summary));
+            auto br = std::make_unique<AuxElementBranch<std::uint8_t>>(tree, std::format("{:}_{:}", outName, summary), summary);
             br->setDefault(0);
             addVariable(std::move(br));
         }

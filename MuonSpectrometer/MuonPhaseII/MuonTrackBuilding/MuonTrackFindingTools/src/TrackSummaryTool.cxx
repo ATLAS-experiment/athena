@@ -210,9 +210,18 @@ namespace MuonR4 {
             const LayerIndex lay = toLayerIndex(seg->chamberIndex());
             const bool small = isSmall(seg->chamberIndex());
             if (!m_reDoSegments) {
-                summary.value(Cat_t::Precision, Stat_t::OnTrack, lay, small) = seg->nPrecisionHits();
+                summary.value(Cat_t::Precision,  Stat_t::OnTrack, lay, small) = seg->nPrecisionHits();
                 summary.value(Cat_t::TriggerEta, Stat_t::OnTrack, lay, small) = seg->nTrigEtaLayers();
                 summary.value(Cat_t::TriggerPhi, Stat_t::OnTrack, lay, small) = seg->nPhiLayers();
+
+                summary.value(Cat_t::Precision,  Stat_t::Outlier, lay, small) = seg->nPrecisionOutliers();
+                summary.value(Cat_t::TriggerEta, Stat_t::Outlier, lay, small) = seg->nTriggerEtaOutliers();
+                summary.value(Cat_t::TriggerPhi, Stat_t::Outlier, lay, small) = seg->nTriggerPhiOutliers();
+
+                summary.value(Cat_t::Precision,  Stat_t::Hole, lay, small) = seg->nPrecisionHoles();
+                summary.value(Cat_t::TriggerEta, Stat_t::Hole, lay, small) = seg->nTriggerEtaHoles();
+                summary.value(Cat_t::TriggerPhi, Stat_t::Hole, lay, small) = seg->nTriggerPhiHoles();
+
             } else {
                 const std::size_t nHits = nMeasurements(*seg);
                 for (std::size_t hit = 0; hit < nHits; ++hit) {

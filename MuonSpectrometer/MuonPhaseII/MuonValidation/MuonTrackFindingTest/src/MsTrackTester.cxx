@@ -225,14 +225,16 @@ namespace MuonValR4 {
         static const std::vector<std::string> trackSummaries{
                  // Inner
                 "innerSmallHits", "innerLargeHits", "innerSmallHoles", "innerLargeHoles",
+                "innerClosePrecisionHits",
                 // Middle
                 "middleSmallHits", "middleLargeHits", "middleSmallHoles",
-                "middleLargeHoles",
+                "middleLargeHoles", "middleClosePrecisionHits",
                 // Outer
                 "outerSmallHits", "outerLargeHits", "outerSmallHoles", "outerLargeHoles",
+                "outerClosePrecisionHits",
                 // Extended
                 "extendedSmallHits", "extendedLargeHits", "extendedSmallHoles",
-                "extendedLargeHoles",
+                "extendedLargeHoles", "extendedClosePrecisionHits",
                 "innerTriggerEtaHits", "innerTriggerPhiHits", 
                 "middleTriggerEtaHits", "middleTriggerPhiHits",
                 "outerTriggerEtaHits", "outerTriggerPhiHits", 
@@ -259,6 +261,20 @@ namespace MuonValR4 {
         m_seedSummary = std::make_shared<TrackSummaryModule>(m_tree, "MsTrkSeed", m_summaryTool.get());
         m_muonTrks = std::make_shared<IParticleFourMomBranch>(m_tree, "ActsMuons");
         m_muonTrks->addVariable(std::make_unique<TrackChi2Branch>(*m_muonTrks));
+        m_muonTrks->addVariable(std::make_unique<GenericPartDecorBranch<xAOD::Muon,std::uint16_t>>(
+            m_tree, std::format("{:}_nIter", m_muonTrks->name()), [](const xAOD::Muon& p) -> std::uint16_t {
+                using enum xAOD::Muon::TrackParticleType;
+                const xAOD::TrackParticle* msTrk = p.trackParticle(MuonSpectrometerTrackParticle);
+                if (!msTrk) {
+                    return 0;
+                }
+                auto actsTrk = ActsTrk::getActsTrack(*msTrk);
+                if (!actsTrk) {
+                    return 0;
+                }
+
+                return actsTrk->component<std::uint32_t>("Gx2fnUpdateColumn"); 
+            }));
         m_muonTrks->addVariable<uint16_t>("allAuthors");
         m_muonTrks->addVariable<uint16_t>("author");
         /// Link the reconstructed segments to the muon
@@ -267,7 +283,7 @@ namespace MuonValR4 {
                     std::format("{:}_segmentLinks", m_muonTrks->name()), [&] (const xAOD::Muon& p){
                     std::vector<unsigned short> idx{};
                     for (unsigned seg = 0 ; seg < p.nMuonSegments(); ++seg) {
-                            idx.push_back(m_recoSegs->push_back(*p.muonSegment(seg)));
+                        idx.push_back(m_recoSegs->push_back(*p.muonSegment(seg)));
                     }
                     return idx;
                 }));
@@ -426,6 +442,14 @@ namespace MuonValR4 {
             m_seedType+= Acts::toUnderlying(seed.location());
             m_seedSector += seed.sector().sector();
             m_seedSummary->push_back(ctx, seed);
+
+            auto startPars = m_seedingTool->estimateStartParameters(ctx, seed);
+            if (startPars.ok()) {
+                m_seedDir += (*startPars).direction();
+            } else {
+                m_seedDir += Amg::Vector3D::UnitZ();
+            }
+            // m_seedDir
             ATH_MSG_VERBOSE(" Dump new seed: "<<seed);
             for (const xAOD::MuonSegment* seg : seed.segments()){
                 m_seedRecoSegMatch[seedIdx].push_back(m_recoSegs->push_back(*seg));
@@ -442,6 +466,7 @@ namespace MuonValR4 {
             m_seedLength+= seedLength;
             m_seedThetaCone+=theta;
             m_seedQP += m_seedingTool->estimateQtimesP(gctx->context(), seed, magField) / Gaudi::Units::GeV; 
+            m_seedGood += startPars.ok();
         }
         /** Link the truth muons to the seeds */
         for (auto& [truthMuon, matches] : truthToSeedMatchCounter) {
