@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "SurveyConstraint.h"
@@ -877,6 +877,7 @@ int SurveyConstraint::getWeightPixEC(//const Identifier& ModuleID,
 				     Amg::MatrixX& weight) {
   
   AmgSymMatrix(6) covar;
+  covar.setZero();
   // in local coords, set errors to be diagonal, with values provided by Gil and Ron
   covar(0,0) = m_TransXRand*m_TransXRand;
   covar(1,1) = m_TransYRand*m_TransYRand;
@@ -895,6 +896,7 @@ int SurveyConstraint::getWeightPixB(//const Identifier& ModuleID,
 				    Amg::MatrixX& weight) {
   
   AmgSymMatrix(6) covar;
+  covar.setZero();
   // in local coords, set errors to be diagonal, with values to be provided by Vadim
   covar(0,0) = m_TransXRandPixB*m_TransXRandPixB;
   covar(1,1) = m_TransYRandPixB*m_TransYRandPixB;
@@ -913,6 +915,7 @@ int SurveyConstraint::getWeightSCTEC(//const Identifier& ModuleID,
 				     Amg::MatrixX& weight) {
   
   AmgSymMatrix(6) covar;
+  covar.setZero();
   // in local coords, set errors to be diagonal, with values to be provided by Steve Snow
   covar(0,0) = m_TransXRandSCTEC*m_TransXRandSCTEC;
   covar(1,1) = m_TransYRandSCTEC*m_TransYRandSCTEC;
@@ -931,6 +934,7 @@ int SurveyConstraint::getWeightSCTB(//const Identifier& ModuleID,
 				    Amg::MatrixX& weight) {
   
   AmgSymMatrix(6) covar;
+  covar.setZero();
  
   // in local coords, set errors to be diagonal, with values to be provided by Stephen Gibson
   covar(0,0) = m_TransXRandSCTB*m_TransXRandSCTB;
