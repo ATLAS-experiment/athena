@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRIGMETMONITORING_TRIGMETMONITORALGORITHM_H
@@ -54,7 +54,7 @@ class TrigMETMonitorAlgorithm : public AthMonitorAlgorithm {
   SG::ReadHandleKey<xAOD::VertexContainer> m_vertex_key{this, "vertex_key", "HLT_IDVertex_FS", "HLT vertex container name"};
   SG::ReadHandleKey<xAOD::VertexContainer> m_offline_vertex_key{this, "offline_vertex_key", "PrimaryVertices", "Offline vertex container name"};
 
-  SG::ReadHandleKey<xAOD::EnergySumRoI> m_lvl1_roi_key{this, "l1_roi_key", "LVL1EnergySumRoI", "L1 energy sum ROI container name"};
+  SG::ReadHandleKey<xAOD::EnergySumRoI> m_lvl1_roi_key{this, "l1_roi_key", "", "L1 energy sum ROI container name"};
 
   SG::ReadHandleKey<xAOD::jFexMETRoIContainer> m_l1_jFexMet_key{this, "l1_jFexMet_key", "L1_jFexMETRoI", "L1 jFex MET container name"};
   SG::ReadHandleKey<xAOD::jFexSumETRoIContainer> m_l1_jFexSumEt_key{this, "l1_jFexSumEt_key", "L1_jFexSumETRoI", "L1 jFex sumEt container name"};
