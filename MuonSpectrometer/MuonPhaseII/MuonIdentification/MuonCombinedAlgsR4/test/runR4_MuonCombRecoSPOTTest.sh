@@ -20,7 +20,7 @@ Reco_tf.py \
     --geometrySQLiteFullPath "${GEOMODEL_DB_FILE}" \
     --geometryVersion "default:${ATLAS_GEO_TAG}" \
     --conditionsTag "default:${ATLAS_CONDDB_TAG}" \
-    --preInclude "all:ActsConfig.ActsCIFlags.actsWorkflowFlags" \
+    --preInclude "all:ActsConfig.ActsCIFlags.actsProductionFlags" \
     --preExec "all:flags.Scheduler.CheckDependencies=True;flags.Scheduler.ShowDataDeps=True;flags.Scheduler.ShowDataFlow=True;flags.Scheduler.ShowControlFlow = True;flags.Detector.EnablePLR=False;flags.Detector.EnableBCMPrime=False;flags.Acts.TrackingGeometry.UseBlueprint = True;flags.Acts.doLargeRadius=False" \
     --postExec "default:flags.dump(evaluate=True);cfg.printConfig(withDetails=True, summariseProps=True);" \
     --postInclude 'all:PyJobTransforms.UseFrontier' \
