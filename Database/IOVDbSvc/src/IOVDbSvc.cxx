@@ -32,6 +32,7 @@
 #include <ranges>
 #include <utility>
 
+#include "CrestApi/CrestLogger.h"
 
 namespace {
 
@@ -921,6 +922,9 @@ StatusCode IOVDbSvc::setupFolders() {
 
   // getting the pairs: folder name - CREST tag name:
   if (m_par_source == "CREST"){
+    auto mLevel = static_cast<std::underlying_type_t<MSG::Level>>(msg().level());
+    Crest::LogLevel cLevel = static_cast<Crest::LogLevel>(mLevel);
+    Crest::Logger::setLogLevel(cLevel);	  
     m_cresttagmap.clear();
     m_cresttagmap = CoralCrestManager::getGlobalTagMap(m_par_crestServer,m_par_globalTag);
   }
