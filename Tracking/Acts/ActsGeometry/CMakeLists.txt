@@ -58,7 +58,6 @@ atlas_add_component( ActsGeometry
                      src/WriteTrackingGeometry.cxx
                      src/ActsWriteTrackingGeometryTransforms.cxx
                      src/ExtrapolationTool.cxx
-                     src/ActsMaterialJsonWriterTool.cxx
                      src/TrackingGeometryTool.cxx
                      src/ActsCaloTrackingVolumeBuilder.cxx
                      src/ITkMaterialDecoratorTool.cxx
