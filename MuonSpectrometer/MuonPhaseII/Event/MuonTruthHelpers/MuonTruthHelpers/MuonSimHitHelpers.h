@@ -24,6 +24,18 @@ namespace MuonR4 {
     const xAOD::MuonSimHit* getTruthMatchedHit(const xAOD::MuonMeasurement& prdHit);
     /** @brief: Returns all sim hits matched to a xAOD::MuonSegment */
     std::unordered_set<const xAOD::MuonSimHit*> getMatchingSimHits(const xAOD::MuonSegment& segment);
+    /** @brief Adds the sim hits matched to a single space point into `hits`.
+     *
+     * The truth match from the primary measurement is inserted first. If the
+     * space point is two-dimensional, the truth match from the secondary
+     * measurement is also inserted, provided it is valid and distinct from the
+     * primary hit.
+     */
+    void addMatchingSimHits(
+        const SpacePoint& sp,
+        std::unordered_set<const xAOD::MuonSimHit*>& hits);
+    /** @brief Returns the sim hits matched to a single space point. */
+    std::unordered_set<const xAOD::MuonSimHit*> getMatchingSimHits(const SpacePoint& sp);
     /** @brief Returns all sim hits that are matched to a collection of space points. For each spacepoint, the hit truth matching to
      *         the primary and secondary prd are retrieved. The secondary hit is only added if it's different from the primary one. */
     std::unordered_set<const xAOD::MuonSimHit*> getMatchingSimHits(const std::vector<const SpacePoint*>& spacePoints);
