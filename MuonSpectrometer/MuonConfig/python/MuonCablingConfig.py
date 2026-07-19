@@ -70,6 +70,13 @@ def TGCCablingConfigCfg(flags, name="TgcCablingCondAlg", **kwargs):
     kwargs.setdefault("databaseASDtoPPdiff", 'ASD2PP_diff_12_OFL.db' if flags.Input.isMC else 'ASD2PP_diff_12_ONL.db')
     the_alg = CompFactory.Muon.TgcCablingCondAlg(name, **kwargs)
     acc.addCondAlgo(the_alg, primary = True)
+    if kwargs["isRun4"]:
+        from IOVDbSvc.IOVDbSvcConfig import addFolders
+        dbName = "TGC_OFL" if flags.Input.isMC else "TGC"
+        cablingFolder = "/TGC/CABLING/MAP"
+        acc.merge(addFolders(flags, [cablingFolder], detDb=dbName, className="CondAttrListCollection"))
+        tgcCablingAlg = CompFactory.Muon.TgcCablingAlg("TgcCablingAlg", ReadKey=cablingFolder)
+        acc.addCondAlgo(tgcCablingAlg)
     return acc
 
 # This should be checked by experts since I just wrote it based on 
