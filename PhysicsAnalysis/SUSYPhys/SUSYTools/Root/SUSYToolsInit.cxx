@@ -1078,25 +1078,30 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
       ATH_MSG_DEBUG( "Setting data type to " << data_type);
     }
 
-    m_eleEffMapFilePathRun2 = "ElectronEfficiencyCorrection/2015_2018/rel21.2/Precision_Summer2020_v1/map4.txt";
+    m_eleEffMapFilePathTriggerRun2 = "ElectronEfficiencyCorrection/2015_2018/rel21.2/Precision_Summer2020_v1/map4.txt";
+    m_eleEffMapFilePathTriggerRun3 = "ElectronEfficiencyCorrection/2015_2025/rel22.2/2025_Run3_Consolidated_Recommendation_v4/map2.txt";
 
     if(!m_isRun3) {
-      ATH_MSG_INFO( "Running on Run2 samples; Using egamma SF tools from R21 map ");
-      ATH_MSG_INFO( m_eleEffMapFilePathRun2);
+      ATH_MSG_INFO( "Running on Run2 samples; Using egamma SF tools from R21 map for trigger");
+      ATH_MSG_INFO( m_eleEffMapFilePathTriggerRun2);
+    } else {
+      ATH_MSG_INFO( "Running on Run3 samples; Using different egamma SF tools map for trigger");
+      ATH_MSG_INFO( m_eleEffMapFilePathTriggerRun3);
     }
 
     toolName = "AsgElectronEfficiencyCorrectionTool_reco";
-    CONFIG_EG_EFF_TOOL_KEY(m_elecEfficiencySFTool_reco, toolName, "RecoKey", "Reconstruction", m_isRun3? m_eleEffMapFilePath : m_eleEffMapFilePathRun2);
+    CONFIG_EG_EFF_TOOL_KEY(m_elecEfficiencySFTool_reco, toolName, "RecoKey", "Reconstruction", m_eleEffMapFilePath);
 
     //-- get KEYS supported by egamma SF tools
-    std::vector<std::string> eSF_keys = getElSFkeys( m_isRun3? m_eleEffMapFilePath : m_eleEffMapFilePathRun2);
+    std::vector<std::string> eSF_keys = getElSFkeys( m_eleEffMapFilePath);
+    std::vector<std::string> eSF_keys_trigger = getElSFkeys( m_isRun3? m_eleEffMapFilePathTriggerRun3 : m_eleEffMapFilePathTriggerRun2);
 
     if (m_eleId.find("NoPix") != std::string::npos || m_eleId == "VeryLooseLLH" || m_eleId == "LooseLLH" || m_eleId == "Medium") {
       ATH_MSG_WARNING("Not configuring electron ID and trigger scale factors for " << m_eleId);
     }
     else {
       // This needs to be formatted for the scale factors: no _Rel20, no LH label, etc.
-      std::string eleId = TString(m_eleId).ReplaceAll("AndBLayer", "BLayer").ReplaceAll("LLH", "").Data();
+      std::string eleId = TString(m_eleId).ReplaceAll("AndBLayer", "BLayer").ReplaceAll("LLH", "LH").Data();
 
       if (m_eleId.find("DNN") != std::string::npos) {
         eleId = TString(eleId).ReplaceAll("DNNnoCF", "").ReplaceAll("DNN", "").ReplaceAll("Loose", "LooseBLayer").Data();
@@ -1105,7 +1110,7 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
 
       // electron id
       toolName = "AsgElectronEfficiencyCorrectionTool_id_" + m_eleId;
-      CONFIG_EG_EFF_TOOL_KEY(m_elecEfficiencySFTool_id, toolName, "IdKey", eleId, m_isRun3? m_eleEffMapFilePath : m_eleEffMapFilePathRun2);
+      CONFIG_EG_EFF_TOOL_KEY(m_elecEfficiencySFTool_id, toolName, "IdKey", eleId, m_eleEffMapFilePath);
 
       // override map file use if correction file list is set for WP
       std::map<std::string,std::string> corrFNList;
@@ -1153,7 +1158,7 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
           m_elecEfficiencySFTool_iso.setTypeAndName("AsgElectronEfficiencyCorrectionTool/"+toolName);
 
           if ( m_EG_corrFNList.empty() ) {
-            ATH_CHECK( m_elecEfficiencySFTool_iso.setProperty("MapFilePath", m_isRun3? m_eleEffMapFilePath : m_eleEffMapFilePathRun2) );
+            ATH_CHECK( m_elecEfficiencySFTool_iso.setProperty("MapFilePath", m_eleEffMapFilePath) );
           } else {
             ATH_CHECK( m_elecEfficiencySFTool_iso.setProperty("CorrectionFileNameList", corrFNList) );
           }
@@ -1209,7 +1214,7 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
 
           m_elecEfficiencySFTool_isoHighPt.setTypeAndName("AsgElectronEfficiencyCorrectionTool/"+toolName);
 
-          ATH_CHECK( m_elecEfficiencySFTool_isoHighPt.setProperty("MapFilePath", m_isRun3? m_eleEffMapFilePath : m_eleEffMapFilePathRun2) );
+          ATH_CHECK( m_elecEfficiencySFTool_isoHighPt.setProperty("MapFilePath", m_eleEffMapFilePath) );
           ATH_CHECK( m_elecEfficiencySFTool_isoHighPt.setProperty("IdKey", eleId) );
           ATH_CHECK( m_elecEfficiencySFTool_isoHighPt.setProperty("IsoKey", EleIsohighPt) );
           if (!isData()) {
@@ -1225,8 +1230,9 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
   
       //single lepton
       
-      if(m_isRun3 && eleId.find("LooseBLayer") != std::string::npos) ATH_MSG_WARNING("Replacing 'LooseBLayer' with 'Loose' for Electron ID while configuring single-ele trigger SF using: " << m_eleEffMapFilePath);
-      std::string triggerEleID = m_isRun3? TString(eleId).ReplaceAll("LooseBLayer", "Loose").Data() : eleId;
+      if(m_isRun3 && eleId.find("LooseBLayer") != std::string::npos) ATH_MSG_WARNING("Replacing 'LooseBLayer' with 'Loose' for Electron ID while configuring single-ele trigger SF using: " << m_eleEffMapFilePathTriggerRun3);
+      // This needs to be formatted for the trigger scale factors: no LH label
+      std::string triggerEleID = m_isRun3? TString(eleId).ReplaceAll("LooseBLayer", "Loose").ReplaceAll("LH", "").Data() : TString(eleId).ReplaceAll("LH", "").Data();
       std::string triggerEleIso= m_eleIso_WP;
       
       // This is an hack to work with ElectronEfficiencyCorrection/2015_2025/rel22.2/2022_Summer_Prerecom_v1/map4.txt to allow 
@@ -1245,7 +1251,7 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
         if(pass_isRun3TrigSFFallback){
           ATH_MSG_INFO(" ************** This is only for testing/studying purpose! ************** ");
           ATH_MSG_INFO(" ************** For official recommendation, please get in contact with the SUSY Bkg Forum ************** ");
-          ATH_MSG_INFO("In the current map ("<<m_eleEffMapFilePath<<"), the only supported Electron ID working-points supported for Electron Trigger Scale Factor are 'Loose_Loose_VarRad' and 'Tight_Tight_VarRad' ");
+          ATH_MSG_INFO("In the current map ("<<m_eleEffMapFilePathTriggerRun3<<"), the only supported Electron ID working-points supported for Electron Trigger Scale Factor are 'Loose_Loose_VarRad' and 'Tight_Tight_VarRad' ");
           ATH_MSG_INFO("Only for single-lepton trigger scale factor, fall back to Electron ID:  -> "<< triggerEleID << " with Isolation: " << triggerEleIso);
         }
       }
@@ -1304,9 +1310,9 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
       
       ATH_MSG_INFO("eSF_keys: " << m_electronTriggerSFStringSingle<< "_"<<triggerEleID<<"_"<<triggerEleIso);
 
-      if (std::find(eSF_keys.begin(), eSF_keys.end(), m_electronTriggerSFStringSingle+"_"+triggerEleID+"_"+triggerEleIso) != eSF_keys.end()){
+      if (std::find(eSF_keys_trigger.begin(), eSF_keys_trigger.end(), m_electronTriggerSFStringSingle+"_"+triggerEleID+"_"+triggerEleIso) != eSF_keys_trigger.end()){
         triggerEleIso   = m_eleIso_WP;
-      } else if (std::find(eSF_keys.begin(), eSF_keys.end(), m_electronTriggerSFStringSingle+"_"+triggerEleID+"_"+m_el_iso_fallback[triggerEleIso]) != eSF_keys.end()){
+      } else if (std::find(eSF_keys_trigger.begin(), eSF_keys_trigger.end(), m_electronTriggerSFStringSingle+"_"+triggerEleID+"_"+m_el_iso_fallback[triggerEleIso]) != eSF_keys_trigger.end()){
         //--- Check to see if the only issue is an unknown isolation working point
         triggerEleIso = m_el_iso_fallback[triggerEleIso];
         ATH_MSG_WARNING("(AsgElectronEfficiencyCorrectionTool_trig_singleLep_*) Your selected electron Iso WP ("
@@ -1323,7 +1329,7 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
       toolName = "AsgElectronEfficiencyCorrectionTool_trig_singleLep_" + triggerEleID;
       if ( !m_elecEfficiencySFTool_trig_singleLep.isUserConfigured() ) {
         m_elecEfficiencySFTool_trig_singleLep.setTypeAndName("AsgElectronEfficiencyCorrectionTool/"+toolName);
-        ATH_CHECK( m_elecEfficiencySFTool_trig_singleLep.setProperty("MapFilePath", m_isRun3? m_eleEffMapFilePath : m_eleEffMapFilePathRun2) );
+        ATH_CHECK( m_elecEfficiencySFTool_trig_singleLep.setProperty("MapFilePath", m_isRun3? m_eleEffMapFilePathTriggerRun3 : m_eleEffMapFilePathTriggerRun2) );
         ATH_CHECK( m_elecEfficiencySFTool_trig_singleLep.setProperty("TriggerKey", m_electronTriggerSFStringSingle) );
         ATH_CHECK( m_elecEfficiencySFTool_trig_singleLep.setProperty("IdKey", triggerEleID) );
         ATH_CHECK( m_elecEfficiencySFTool_trig_singleLep.setProperty("IsoKey", triggerEleIso) );
@@ -1339,7 +1345,7 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
       toolName = "AsgElectronEfficiencyCorrectionTool_trigEff_singleLep_" + triggerEleID;
       if ( !m_elecEfficiencySFTool_trigEff_singleLep.isUserConfigured() ) {
         m_elecEfficiencySFTool_trigEff_singleLep.setTypeAndName("AsgElectronEfficiencyCorrectionTool/"+toolName);
-        ATH_CHECK( m_elecEfficiencySFTool_trigEff_singleLep.setProperty("MapFilePath", m_isRun3? m_eleEffMapFilePath : m_eleEffMapFilePathRun2) );
+        ATH_CHECK( m_elecEfficiencySFTool_trigEff_singleLep.setProperty("MapFilePath", m_isRun3? m_eleEffMapFilePathTriggerRun3 : m_eleEffMapFilePathTriggerRun2) );
         ATH_CHECK( m_elecEfficiencySFTool_trigEff_singleLep.setProperty("TriggerKey", "Eff_"+m_electronTriggerSFStringSingle) );
         ATH_CHECK( m_elecEfficiencySFTool_trigEff_singleLep.setProperty("IdKey", triggerEleID) );
         ATH_CHECK( m_elecEfficiencySFTool_trigEff_singleLep.setProperty("IsoKey", triggerEleIso) );
@@ -1375,9 +1381,9 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
     
         for(auto const& item : electronTriggerSFMapMixedLepton){
     
-          if (std::find(eSF_keys.begin(), eSF_keys.end(), item.second+"_"+eleId+"_"+m_eleIso_WP) != eSF_keys.end()){
+          if (std::find(eSF_keys_trigger.begin(), eSF_keys_trigger.end(), item.second+"_"+triggerEleID+"_"+m_eleIso_WP) != eSF_keys_trigger.end()){
             triggerMixedEleIso = m_eleIso_WP;
-          } else if (std::find(eSF_keys.begin(), eSF_keys.end(), item.second+"_"+eleId+"_"+m_el_iso_fallback[m_eleIso_WP]) != eSF_keys.end()){
+          } else if (std::find(eSF_keys_trigger.begin(), eSF_keys_trigger.end(), item.second+"_"+triggerEleID+"_"+m_el_iso_fallback[m_eleIso_WP]) != eSF_keys_trigger.end()){
             //--- Check to see if the only issue is an unknown isolation working point
             triggerMixedEleIso = m_el_iso_fallback[m_eleIso_WP];
             ATH_MSG_WARNING("(AsgElectronEfficiencyCorrectionTool_trig_mixLep_*) Your selected electron Iso WP ("
@@ -1390,13 +1396,13 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
             return StatusCode::FAILURE;
           }
     
-          ATH_MSG_VERBOSE ("Selected WP: " << item.second << "_" << eleId << "_" << triggerMixedEleIso);
+          ATH_MSG_VERBOSE ("Selected WP: " << item.second << "_" << triggerEleID << "_" << triggerMixedEleIso);
     
           toolName = "AsgElectronEfficiencyCorrectionTool_trig_mixLep_" + (item.first).substr(0,8) + m_eleId;
           auto t_sf = m_elecEfficiencySFTool_trig_mixLep.emplace(m_elecEfficiencySFTool_trig_mixLep.end(), "AsgElectronEfficiencyCorrectionTool/"+toolName);
-          ATH_CHECK( t_sf->setProperty("MapFilePath", m_isRun3? m_eleEffMapFilePath : m_eleEffMapFilePathRun2) );
+          ATH_CHECK( t_sf->setProperty("MapFilePath", m_isRun3? m_eleEffMapFilePathTriggerRun3 : m_eleEffMapFilePathTriggerRun2) );
           ATH_CHECK( t_sf->setProperty("TriggerKey", item.second) );
-          ATH_CHECK( t_sf->setProperty("IdKey", eleId) );
+          ATH_CHECK( t_sf->setProperty("IdKey", triggerEleID) );
           ATH_CHECK( t_sf->setProperty("IsoKey", triggerMixedEleIso) );
           ATH_CHECK( t_sf->setProperty("CorrelationModel", m_EG_corrModel) );
           if (!isData()) {
@@ -1413,9 +1419,9 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
     
           toolName = "AsgElectronEfficiencyCorrectionTool_trigEff_mixLep_" + (item.first).substr(0,8) + m_eleId;
           auto t_eff = m_elecEfficiencySFTool_trigEff_mixLep.emplace(m_elecEfficiencySFTool_trigEff_mixLep.end(), "AsgElectronEfficiencyCorrectionTool/"+toolName);
-          ATH_CHECK( t_eff->setProperty("MapFilePath", m_isRun3? m_eleEffMapFilePath : m_eleEffMapFilePathRun2) );
+          ATH_CHECK( t_eff->setProperty("MapFilePath", m_isRun3? m_eleEffMapFilePathTriggerRun3 : m_eleEffMapFilePathTriggerRun2) );
           ATH_CHECK( t_eff->setProperty("TriggerKey", "Eff_"+item.second) );
-          ATH_CHECK( t_eff->setProperty("IdKey", eleId) );
+          ATH_CHECK( t_eff->setProperty("IdKey", triggerEleID) );
           ATH_CHECK( t_eff->setProperty("IsoKey", triggerMixedEleIso) );
           ATH_CHECK( t_eff->setProperty("CorrelationModel", m_EG_corrModel) );
           if (!isData()) {

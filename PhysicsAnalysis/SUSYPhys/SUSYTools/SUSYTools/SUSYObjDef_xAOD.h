@@ -705,7 +705,8 @@ namespace ST {
     double m_elebaselined0sig;
     double m_elebaselinez0;
     std::string m_eleEffMapFilePath;
-    std::string m_eleEffMapFilePathRun2;
+    std::string m_eleEffMapFilePathTriggerRun2;
+    std::string m_eleEffMapFilePathTriggerRun3;
     bool   m_eleAllowRun3TrigSFFallback;
     bool   m_eleForceFullSimCalib;
 
