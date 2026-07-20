@@ -28,7 +28,8 @@ Reco_tf.py \
     --outputAODFile myAOD.pool.root \
     --imf False \
     --maxEvents ${NEVENTS} \
-    --perfmon "fullmonmt"
+    --perfmon "fullmonmt" \
+    --skipEvents 1
     
  
 
