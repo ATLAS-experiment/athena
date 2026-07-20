@@ -70,7 +70,7 @@ def TGCCablingConfigCfg(flags, name="TgcCablingCondAlg", **kwargs):
     kwargs.setdefault("databaseASDtoPPdiff", 'ASD2PP_diff_12_OFL.db' if flags.Input.isMC else 'ASD2PP_diff_12_ONL.db')
     the_alg = CompFactory.Muon.TgcCablingCondAlg(name, **kwargs)
     acc.addCondAlgo(the_alg, primary = True)
-    if kwargs["isRun4"]:
+    if flags.GeoModel.Run > LHCPeriod.Run3:
         from IOVDbSvc.IOVDbSvcConfig import addFolders
         dbName = "TGC_OFL" if flags.Input.isMC else "TGC"
         cablingFolder = "/TGC/CABLING/MAP"
