@@ -497,7 +497,6 @@ def minBiasPixel(flags: AthConfigFlags, instanceName: str, recoMode: str) -> Ath
   if recoMode=="InDet":
     flags.useSCT           = False
     flags.useSCTSeeding    = False
-    flags.useTRT           = False
 
     flags.roadWidth        = 12.0
     flags.Xi2max           = 15
