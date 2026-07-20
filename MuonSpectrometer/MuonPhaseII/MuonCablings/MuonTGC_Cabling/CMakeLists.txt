@@ -2,7 +2,7 @@ atlas_subdir( MuonTGC_Cabling )
 
 atlas_add_component(
     MuonTGC_Cabling
-    src/TgcCablingAlg.cxx
+    src/*.cxx
     src/components/MuonTGC_Cabling_entries.cxx
 
     LINK_LIBRARIES
