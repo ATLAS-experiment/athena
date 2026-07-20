@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // Include files
@@ -57,7 +57,10 @@ StatusCode DetDescrCnvSvc::initialize() {
     ATH_CHECK(addToDetStore(164875623, "AtlasID"));
     ATH_CHECK(addToDetStore(2516, "PixelID"));
     ATH_CHECK(addToDetStore(2517, "SCT_ID"));
-    ATH_CHECK(addToDetStore(2518, "TRT_ID"));
+
+    if (m_hasTRT)
+      ATH_CHECK(addToDetStore(2518, "TRT_ID"));
+
     ATH_CHECK(addToDetStore(131939624, "PLR_ID"));
     ATH_CHECK(addToDetStore(79264207, "HGTD_ID"));
     ATH_CHECK(addToDetStore(129452393, "SiliconID"));

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef INDETPHYSVALMONITORING_InDetPhysHitDecoratorAlg_H
@@ -102,6 +102,9 @@ private:
 
   Gaudi::Property<std::string> m_prefix
     {this, "Prefix", "", "Decoration prefix to avoid clashes."};
+
+  Gaudi::Property<bool> m_useTRT
+    {this, "useTRT", false, "Use TRT geometry"};
 
   mutable std::atomic<bool> m_alreadyWarned{false};
   // the following help identify a surface in the detector
