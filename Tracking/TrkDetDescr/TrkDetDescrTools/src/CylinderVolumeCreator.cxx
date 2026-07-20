@@ -1,18 +1,13 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
 // CylinderVolumeCreator.cxx, (c) ATLAS Detector software
 ///////////////////////////////////////////////////////////////////
 
-//Gaudi
-#include "GaudiKernel/SystemOfUnits.h"
 // Trk include
 #include "TrkDetDescrTools/CylinderVolumeCreator.h"
-#include "TrkDetDescrInterfaces/ILayerArrayCreator.h"
-#include "TrkDetDescrInterfaces/ITrackingVolumeArrayCreator.h"
-#include "TrkDetDescrInterfaces/ITrackingVolumeHelper.h"
 #include "TrkSurfaces/CylinderBounds.h"
 #include "TrkSurfaces/DiscBounds.h"
 #include "TrkVolumes/CylinderVolumeBounds.h"
@@ -30,28 +25,10 @@
 
 // constructor
 Trk::CylinderVolumeCreator::CylinderVolumeCreator(const std::string& t, const std::string& n, const IInterface* p)
-: AthAlgTool(t,n,p),
-  m_layerArrayCreator("Trk::LayerArrayCreator/LayerArrayCreator"),
-  m_trackingVolumeArrayCreator("Trk::TrackingVolumeArrayCreator/TrackingVolumeArrayCreator"),
-  m_trackingVolumeHelper("Trk::TrackingVolumeHelper/TrackingVolumeHelper"),
-  m_passiveLayerThickness(1*Gaudi::Units::mm),
-  m_passiveLayerPhiBins(1),
-  m_passiveLayerRzBins(100)
+: AthAlgTool(t,n,p)
 {
     declareInterface<ITrackingVolumeCreator>(this);
-    // the helper tools
-    declareProperty("LayerArrayCreator",          m_layerArrayCreator);
-    declareProperty("TrackingVolumeArrayCreator", m_trackingVolumeArrayCreator);
-    declareProperty("TrackingVolumeHelper",       m_trackingVolumeHelper);
-    // the parameters for the passive layers
-    declareProperty("PassiveLayerThickness",      m_passiveLayerThickness);
-    declareProperty("PassiveLayerBinsPhi",        m_passiveLayerPhiBins);
-    declareProperty("PassiveLayerBinsRZ",         m_passiveLayerRzBins);
 }
-
-// destructor
-Trk::CylinderVolumeCreator::~CylinderVolumeCreator()
-= default;
 
 
 // the interface methods

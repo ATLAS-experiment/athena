@@ -20,22 +20,14 @@
 
 // constructor
 Trk::BinnedLayerMaterialCreator::BinnedLayerMaterialCreator(const std::string& t, const std::string& n, const IInterface* p)
-: AthAlgTool(t,n,p),
-  m_compressedMaterialThickness(1.)
+: AthAlgTool(t,n,p)
 {
     declareInterface<Trk::ILayerMaterialCreator>(this);
     
     // give the map a name
     declareProperty("LayerMaterialName"                 , m_layerMaterialName);
     declareProperty("LayerMaterialDirectory"            , m_layerMaterialDirectory);
-    // setup for compressed layer creation
-    declareProperty("MaterialThickness"                 , m_compressedMaterialThickness);
-    
 }
-
-// destructor
-Trk::BinnedLayerMaterialCreator::~BinnedLayerMaterialCreator()
-= default;
 
 
 Trk::LayerMaterialProperties* Trk::BinnedLayerMaterialCreator::createLayerMaterial(const Trk::LayerMaterialRecord& lmr) const
