@@ -20,7 +20,7 @@
 class PlainEventExecutionTool : public extends<AthAlgTool, IEventExecutionTool> {
 public:
   PlainEventExecutionTool(const std::string& type, const std::string& name, const IInterface* parent);
-  virtual ~PlainEventExecutionTool() override;
+  virtual ~PlainEventExecutionTool() override {}
 
   virtual StatusCode executeEvent(MinimalEventLoopMgr* el,  EventContext&& ctx) {
     return el->executeEvent(std::move(ctx));

@@ -19,7 +19,7 @@ class IEventExecutionTool : virtual public IAlgTool {
 public: 
   DeclareInterfaceID(IEventExecutionTool, 1, 0);
 
-  virtual StatusCode executeEvent(MinimalEventLoopMgr*,  EventContext&& ctx);
+  virtual StatusCode executeEvent(MinimalEventLoopMgr*,  EventContext&& ctx) = 0;
 
   virtual ~IEventExecutionTool() override {}
 }; 
