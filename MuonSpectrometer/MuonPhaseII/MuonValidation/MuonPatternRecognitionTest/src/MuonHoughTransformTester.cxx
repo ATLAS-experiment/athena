@@ -15,33 +15,44 @@
 #include "MuonTruthHelpers/MuonSimHitHelpers.h"
 #include "Acts/Utilities/Enumerate.hpp"
 #include "GaudiKernel/PhysicalConstants.h"
-#include "MuonSpacePoint/SpacePointHelpers.h"
+#include "EventPrimitives/EventPrimitivesHelpers.h"
 
  #include "AthContainers/ConstDataVector.h"
  #include "xAODTruth/xAODTruthHelpers.h"
 
+ #include "Acts/Utilities/AlgebraHelpers.hpp"
+ #include "Acts/Definitions/Units.hpp"
 
 namespace {
     constexpr double c_inv = 1. /Gaudi::Units::c_light;
 
-    template <typename SegObj>
-
-    unsigned countMatched(const xAOD::MuonSegment* truthSeg,
-                          const SegObj& obj) {
-        return truthSeg != nullptr ?
-             std::ranges::count_if(getMatchingSimHits(obj), [truthSeg](const xAOD::MuonSimHit* hit) {
-                return MuonR4::getMatchedTruthSegment(*hit) == truthSeg;
-             }) : 0;
+bool isPrecision(const MuonR4::SpacePoint& hit) {
+    using enum xAOD::UncalibMeasType;
+    return hit.type() == MdtDriftCircleType || hit.type() == MMClusterType ||
+            (hit.type() == sTgcStripType && 
+            static_cast<const xAOD::sTgcMeasurement*>(hit.primaryMeasurement())->channelType() ==
+            sTgcIdHelper::sTgcChannelTypes::Strip);
+}
+bool isPrecision(const MuonR4::CalibratedSpacePoint& hit) {
+    using enum xAOD::UncalibMeasType;
+    if (hit.type() == xAOD::UncalibMeasType::Other){
+        return false;
     }
+    return isPrecision(*hit.spacePoint());
+}
+
 }
 
 
 namespace MuonValR4 {
     using namespace MuonR4;
     using namespace MuonVal;
-    using ObjectMatching = MuonHoughTransformTester::ObjectMatching;
-    
+    using namespace Muon::MuonStationIndex;
+    using namespace Acts::UnitLiterals;
 
+
+    using ObjectMatching = MuonHoughTransformTester::ObjectMatching;
+ 
     StatusCode MuonHoughTransformTester::initialize() {
         ATH_CHECK(m_geoCtxKey.initialize());
         
@@ -71,33 +82,44 @@ namespace MuonValR4 {
             m_tree.disableBranch(m_spMatchedToPattern.name());
             m_tree.disableBranch(m_spMatchedToSegment.name());
         }
+
+        for (std::size_t cov = 0 ; cov < m_segmentCov.size(); ++cov){
+            using namespace MuonR4::SegmentFit;
+            const auto [i, j] = Acts::symMatIndices<Acts::toUnderlying(ParamDefs::nPars)>(cov);
+            ParamDefs pI{static_cast<std::uint8_t>(i)},
+                      pJ{static_cast<std::uint8_t>(j)};
+            std::string brName = (pI!= pJ) ? std::format("segment_cov_{:}_{:}", pI, pJ)
+                                         : std::format("segment_cov_{:}", pI);
+            m_segmentCov[cov] = std::make_shared<MuonVal::VectorBranch<float>>(m_tree, brName);
+            m_tree.addBranch(m_segmentCov[cov]);
+        }
+
         ATH_CHECK(m_tree.init(this)); 
         ATH_CHECK(m_idHelperSvc.retrieve());
         ATH_CHECK(detStore()->retrieve(m_detMgr));
 
         ATH_CHECK(m_visionTool.retrieve(EnableTool{!m_visionTool.empty()}));
-        ATH_MSG_DEBUG("Succesfully initialised");
+        
         return StatusCode::SUCCESS;
     }
 
 
-    unsigned int MuonHoughTransformTester::countOnSameSide(const ActsTrk::GeometryContext& gctx,
-                                                           const xAOD::MuonSegment& truthSeg,
-                                                           const MuonR4::Segment& recoSeg) const{
+    unsigned int MuonHoughTransformTester::countOnSameSide(const xAOD::MuonSegment& truthSeg,
+                                                           const xAOD::MuonSegment& recoSeg) const{
         unsigned int same{0};
         using namespace SegmentFit;
+        const MuonR4::Segment* detailSeg = detailedSegment(recoSeg);
         const auto[truePos, trueDir] = makeLine(localSegmentPars(truthSeg)); 
-        const auto[recoPos, recoDir] = makeLine(localSegmentPars(gctx, recoSeg));
-        const std::vector<int> truthSigns = SeedingAux::strawSigns(truePos, trueDir, recoSeg.measurements());
-        const std::vector<int> recoSigns = SeedingAux::strawSigns(recoPos, recoDir, recoSeg.measurements());
+        const auto[recoPos, recoDir] = makeLine(localSegmentPars(recoSeg));
+        const std::vector<int> truthSigns = SeedingAux::strawSigns(truePos, trueDir, detailSeg->measurements());
+        const std::vector<int> recoSigns = SeedingAux::strawSigns(recoPos, recoDir, detailSeg->measurements());
         for (unsigned int s = 0 ; s < truthSigns.size(); ++s) {
             same += (truthSigns[s] != 0) && truthSigns[s] == recoSigns[s];
         }
         return same;
     }
     std::vector<ObjectMatching> 
-            MuonHoughTransformTester::matchWithTruth(const ActsTrk::GeometryContext& gctx,
-                                                     const MuonR4::SegmentSeedContainer& seedContainer,
+            MuonHoughTransformTester::matchWithTruth(const MuonR4::SegmentSeedContainer& seedContainer,
                                                      const xAOD::MuonSegmentContainer& segmentContainer,
                                                      const xAOD::MuonSegmentContainer* truthSegments) const {
         std::vector<ObjectMatching> allAssociations{};
@@ -109,13 +131,15 @@ namespace MuonValR4 {
             assert(segment != nullptr);
             std::vector<ObjectMatching>::iterator assoc_itr = allAssociations.end();
             const xAOD::MuonSegment* truthSeg = getMatchedTruthSegment(*recoSeg);
+            /** There is an associated truth egment */
             if (truthSeg) {
                 assoc_itr = std::ranges::find_if(allAssociations, [truthSeg](const ObjectMatching& obj){
                     return obj.truthSegment == truthSeg;
                 });
             }
+            /** Thus far no entry in the association map */
             if (assoc_itr == allAssociations.end()) {
-                ObjectMatching & newObj = allAssociations.emplace_back();
+                ObjectMatching& newObj = allAssociations.emplace_back();
                 newObj.chamber = m_detMgr->getSectorEnvelope(recoSeg->chamberIndex(),
                                                              recoSeg->sector(),
                                                              recoSeg->etaIndex());
@@ -123,36 +147,33 @@ namespace MuonValR4 {
                 assoc_itr = allAssociations.end() -1;
             }
             ObjectMatching& assocObj{*assoc_itr};
-            assocObj.matchedSegments.push_back(segment);
-            if (!truthSeg) {
-                assocObj.matchedSeeds.push_back(segment->parent());
-            }
+            assocObj.matchedSegments.push_back(recoSeg);
+            assocObj.matchedSeeds.push_back(segment->parent());
             assocObj.matchedSeedFoundSegment.push_back(1);
             usedSeeds.insert(segment->parent());
         }
         
         if (truthSegments) {
+            /** Sort the segments according to the drift signs */
             for (ObjectMatching& assocObj : allAssociations) {
                 if (!assocObj.truthSegment) {
                     continue;
                 }
                 std::ranges::sort(assocObj.matchedSegments, 
-                                  [&](const Segment* a, const Segment* b){
-                                        return countOnSameSide(gctx,*assocObj.truthSegment, *a) >
-                                               countOnSameSide(gctx,*assocObj.truthSegment, *b);
-                                  });
-                std::ranges::transform(assocObj.matchedSegments, std::back_inserter(assocObj.matchedSeeds),
-                                       &MuonR4::Segment::parent);
+                                [&](const xAOD::MuonSegment* a, 
+                                    const xAOD::MuonSegment* b){
+                                    return countOnSameSide(*assocObj.truthSegment, *a) >
+                                           countOnSameSide(*assocObj.truthSegment, *b);
+                                });
             }
-            
         }
-        /// Next loop over all seeds
+        /** Loop over all remaining seeds and attempt to match them to a segment */
         for (const SegmentSeed* seed : seedContainer) {
             /// Don't recycle the  used seeds again
             if (usedSeeds.count(seed)) {
                 continue;
             }
-            /// Find the best matching truth segment
+            /** Find the segment that matches best to the seed */
             std::vector<std::pair<const xAOD::MuonSegment*, std::size_t>> segCounts{};
             std::unordered_set<const xAOD::MuonSimHit* > matchedHits = getMatchingSimHits(*seed);
             for (const xAOD::MuonSimHit* hit : matchedHits) {
@@ -242,12 +263,12 @@ namespace MuonValR4 {
                     <<", segments: "<<recoSegments->size() 
                     <<", truth segments: "<<(truthSegments? truthSegments->size() : -1)
                     <<".");
-        std::vector<ObjectMatching> objects = matchWithTruth(gctx, *segmentSeeds.asDataVector(), 
+        std::vector<ObjectMatching> objects = matchWithTruth(*segmentSeeds.asDataVector(), 
                                                              *recoSegments, truthSegments);
         for (const ObjectMatching& obj : objects) {
             fillChamberInfo(obj.chamber);
             fillSeedInfo(obj);
-            fillSegmentInfo(gctx, obj);
+            fillSegmentInfo(obj);
             if(m_isMC) fillTruthInfo(gctx, obj.truthSegment);
             ATH_CHECK(m_tree.fill(ctx));
         }
@@ -275,27 +296,32 @@ namespace MuonValR4 {
         m_out_gen_Q = acc_charge(*segment);
 
         const auto [chamberPos, chamberDir] = SegmentFit::makeLine(SegmentFit::localSegmentPars(*segment));
-        m_out_gen_nHits = segment->nPrecisionHits()+segment->nPhiLayers() + segment->nTrigEtaLayers(); 
-        using namespace Muon::MuonStationIndex;
-
-        ATH_MSG_DEBUG("Number of precision Hits in the truth segment is "<<segment->nPrecisionHits()<<" and number of phi layers is "<<segment->nPhiLayers()<<" and number of trigger eta layers is "<<segment->nTrigEtaLayers());
-
-        m_out_gen_nMDTHits = segment->nPrecisionHits() * (segment->technology() == TechnologyIndex::MDT); 
-        m_out_gen_nNswHits = segment->nPrecisionHits() * (segment->technology() != TechnologyIndex::MDT); 
-        m_out_gen_nTGCHits = (segment->nPhiLayers() + segment->nTrigEtaLayers()) * !isBarrel(segment->chamberIndex());
-        m_out_gen_nRPCHits = (segment->nPhiLayers() + segment->nTrigEtaLayers()) *  isBarrel(segment->chamberIndex());
         
-        unsigned nMMHits{0}, nSTGHits{0};
+        ATH_MSG_DEBUG("Number of precision Hits in the truth segment is "<<segment->nPrecisionHits()<<" and number of phi layers is "
+                    <<segment->nPhiLayers()<<" and number of trigger eta layers is "<<segment->nTrigEtaLayers());
+        m_out_gen_nPrecHits = segment->nPrecisionHits();
+        m_out_gen_nTrigEtaHits = segment->nTrigEtaLayers();
+        m_out_gen_nTrigPhiHits = segment->nPhiLayers();
+        unsigned nMmEtaHits{0}, nMmStereoHits{0}, nStgcHits{0};
         for (const xAOD::MuonSimHit* simHit : getMatchingSimHits(*segment)) {
-            const TechnologyIndex simIdx = m_idHelperSvc->technologyIndex(simHit->identify());
-            nMMHits  += simIdx == TechnologyIndex::MM;
-            nSTGHits += simIdx == TechnologyIndex::STGC;
+            if (!m_out_gen_truthBeta.isUpdated()) {
+                m_out_gen_truthBeta = simHit->beta();
+                m_out_gen_truthPdgId = simHit->pdgId();
+            }
+            nStgcHits += m_idHelperSvc->technologyIndex(simHit->identify()) == TechnologyIndex::STGC;
+            if(m_idHelperSvc->technologyIndex(simHit->identify()) != TechnologyIndex::MM) {
+                continue;
+            }
+            const bool isStereo = m_idHelperSvc->mmIdHelper().isStereo(simHit->identify());
+            nMmEtaHits += (!isStereo);
+            nMmStereoHits += isStereo;
         }
-        m_out_gen_nMmHits = nMMHits;
-        m_out_gen_nSTGCHits = nSTGHits;
+        m_out_gen_nMmEtaHits = nMmEtaHits;
+        m_out_gen_nMmStereoHits = nMmStereoHits;
+        m_out_gen_nStgcHits = nStgcHits;
 
-        m_out_gen_tantheta = houghTanBeta(chamberDir); 
-        m_out_gen_tanphi   = houghTanAlpha(chamberDir);
+        m_out_gen_tanbeta = houghTanBeta(chamberDir); 
+        m_out_gen_tanalpha = houghTanAlpha(chamberDir);
         m_out_gen_y0 = chamberPos.y(); 
         m_out_gen_x0 = chamberPos.x(); 
         m_out_gen_time = segment->t0();
@@ -315,17 +341,11 @@ namespace MuonValR4 {
         m_out_gen_minYhit = minYhit;
         m_out_gen_maxYhit = maxYhit;
 
-        ATH_MSG_DEBUG("A true max on chamber index "<<m_out_chamberIndex.getVariable()<<" side "<<m_out_stationSide.getVariable()<<" phi "<<m_out_stationPhi.getVariable()<<" with "
-                    <<m_out_gen_nMDTHits.getVariable()<<" MDT and "<<m_out_gen_nRPCHits.getVariable()+m_out_gen_nTGCHits.getVariable()<< " trigger hits is at "
-                    <<m_out_gen_tantheta.getVariable()<<" and "<<m_out_gen_y0.getVariable()); 
-
         const xAOD::TruthParticle* truthMuon = getTruthMatchedParticle(*segment);
         if (truthMuon) {
             using namespace xAOD::TruthHelpers;
             m_out_gen_truthType   = getParticleTruthType(*truthMuon);
             m_out_gen_truthOrigin = getParticleTruthOrigin(*truthMuon);
-            m_out_gen_truthBeta   = truthMuon->p4().Beta();
-            m_out_gen_truthPdgId  = truthMuon->pdgId();
         }
     }
     void MuonHoughTransformTester::fillBucketInfo(const SpacePointBucket& bucket) {
@@ -360,7 +380,7 @@ namespace MuonValR4 {
 
 
         m_out_nPrecSpacePoints = std::ranges::count_if(bucket, [](const SpacePointBucket::value_type& sp){
-            return isPrecisionHit(*sp);
+            return isPrecision(*sp);
         });
         m_out_nPhiSpacePoints = std::ranges::count_if(bucket, [](const SpacePointBucket::value_type& sp){
             return sp->measuresPhi();
@@ -372,7 +392,7 @@ namespace MuonValR4 {
             return m_visionTool->isLabeled(*sp);
         });
         m_out_nTruePrecSpacePoints = std::ranges::count_if(bucket,[this](const SpacePointBucket::value_type& sp){
-            return isPrecisionHit(*sp) && m_visionTool->isLabeled(*sp);
+            return isPrecision(*sp) && m_visionTool->isLabeled(*sp);
         });
         m_out_nTruePhiSpacePoints = std::ranges::count_if(bucket,[this](const SpacePointBucket::value_type& sp){
             return sp->measuresPhi() && m_visionTool->isLabeled(*sp);
@@ -395,139 +415,346 @@ namespace MuonValR4 {
             m_out_seed_maxYhit.push_back(maxYhit);
 
             m_out_seed_hasPhiExtension.push_back(seed->hasPhiExtension()); 
-            m_out_seed_nMatchedHits.push_back(countMatched(obj.truthSegment, *seed));
             m_out_seed_y0.push_back(seed->interceptY());
-            m_out_seed_tantheta.push_back(seed->tanBeta());
+            m_out_seed_tanbeta.push_back(seed->tanBeta());
             if (seed->hasPhiExtension()){
                 m_out_seed_x0.push_back(seed->interceptX());
-                m_out_seed_tanphi.push_back(seed->tanAlpha());
+                m_out_seed_tanalpha.push_back(seed->tanAlpha());
             } else{
                 m_out_seed_x0.push_back(-999);
-                m_out_seed_tanphi.push_back(-999);
+                m_out_seed_tanalpha.push_back(-999);
             }
-         
-            m_out_seed_nHits.push_back(seed->getHitsInMax().size());
-            unsigned nMdtSeed{0}, nRpcSeed{0}, nTgcSeed{0}, nMmEtaSeed{0}, nMmStereoSeed{0},
-                     nsTgcStripSeed{0}, nsTgcWireSeed{0}, nsTgcPadSeed{0}; 
-            unsigned nPrecHits{0}, nEtaHits{0}, nPhiHits{0}, nTrueHits{0}, nTruePrecHits{0}, nTrueEtaHits{0}, nTruePhiHits{0};
-            std::vector<unsigned char> treeIdxs{};
-          
-            for (const HoughHitType & houghSP: seed->getHitsInMax()){                
-                if (m_writeSpacePoints){
-                    unsigned treeIdx = m_spTester->push_back(*houghSP);
-                    treeIdxs.push_back(treeIdx);
-                }
-                nPrecHits += isPrecisionHit(*houghSP);
-                nPhiHits  += houghSP->measuresPhi();
-                nEtaHits  += houghSP->measuresEta();
-
-                if (m_visionTool.isEnabled()) {
-                    nTrueHits += m_visionTool->isLabeled(*houghSP);
-                    nTruePrecHits += m_visionTool->isLabeled(*houghSP) && isPrecisionHit(*houghSP);
-                    nTruePhiHits += m_visionTool->isLabeled(*houghSP) && houghSP->measuresPhi();
-                    nTrueEtaHits += m_visionTool->isLabeled(*houghSP) && houghSP->measuresEta();
-                }
-                switch (houghSP->type()) {
-                    case xAOD::UncalibMeasType::MdtDriftCircleType: 
-                        ++nMdtSeed;
-                        break;
-                    case xAOD::UncalibMeasType::RpcStripType:
-                        nRpcSeed+=houghSP->measuresEta();
-                        nRpcSeed+=houghSP->measuresPhi();
-                        break;
-                    case xAOD::UncalibMeasType::TgcStripType:
-                        nTgcSeed+=houghSP->measuresEta();
-                        nTgcSeed+=houghSP->measuresPhi();
-                        break;
-                    case xAOD::UncalibMeasType::sTgcStripType: {
-                        const Identifier sTgc = houghSP->primaryMeasurement()->identify();
-                        const Identifier sTgc2 = houghSP->secondaryMeasurement() ? 
-                                                houghSP->secondaryMeasurement()->identify() : Identifier{};
-                        const sTgcIdHelper& idHelper{m_idHelperSvc->stgcIdHelper()};
-                        const int primType = idHelper.channelType(sTgc);
-                        const int secType = idHelper.channelType(sTgc2);
-                        nsTgcStripSeed += primType == sTgcIdHelper::sTgcChannelTypes::Strip;
-                        nsTgcWireSeed  += primType == sTgcIdHelper::sTgcChannelTypes::Wire;
-                        nsTgcPadSeed   += primType == sTgcIdHelper::sTgcChannelTypes::Pad;
-
-                        nsTgcWireSeed += secType == sTgcIdHelper::sTgcChannelTypes::Wire;
-                        nsTgcPadSeed += primType != sTgcIdHelper::sTgcChannelTypes::Pad && 
-                                        secType == sTgcIdHelper::sTgcChannelTypes::Pad;
-                        break;
-                    } case xAOD::UncalibMeasType::MMClusterType:{
-                        if (m_idHelperSvc->mmIdHelper().isStereo(houghSP->identify())) {
-                            ++nMmEtaSeed;
-                        } else {
-                            ++nMmStereoSeed;
-                        }
-                        break;
-                    }default:
-                        ATH_MSG_WARNING("Technology "<<houghSP->identify()  <<" not yet implemented");                        
-                }                    
-            }
-            m_out_seed_nMdt.push_back(nMdtSeed);
-            m_out_seed_nRpc.push_back(nRpcSeed);
-            m_out_seed_nTgc.push_back(nTgcSeed);
-
-            m_out_seed_nMmEta.push_back(nMmEtaSeed);
-            m_out_seed_nMmStereo.push_back(nMmStereoSeed);
-
-            m_out_seed_nsTgcStrip.push_back(nsTgcStripSeed);
-            m_out_seed_nsTgcWire.push_back(nsTgcWireSeed);
-            m_out_seed_nsTgcPad.push_back(nsTgcPadSeed);
-
-            m_out_seed_nPrecHits.push_back(nPrecHits);
-            m_out_seed_nEtaHits.push_back(nEtaHits); 
-            m_out_seed_nPhiHits.push_back(nPhiHits);
-
-            m_out_seed_nTrueHits.push_back(nTrueHits);
-            m_out_seed_nTruePrecHits.push_back(nTruePrecHits);            
-            m_out_seed_nTrueEtaHits.push_back(nTrueEtaHits);
-            m_out_seed_nTruePhiHits.push_back(nTruePhiHits);
-
             m_out_seed_ledToSegment.push_back(obj.matchedSeedFoundSegment.at(iseed));
+
+
+            /** Helper lambda to shorten a bit the syntax to count the hits
+             *  of a certain kind  */
+            auto hitCounter = [seed](auto lambda) {
+                return std::count_if(seed->getHitsInMax().begin(),
+                                     seed->getHitsInMax().end(), lambda);
+            };
+
+            m_out_seed_nPrecHits += hitCounter([](const SpacePoint* sp) {
+                                        return isPrecision(*sp);
+                                    });
+            m_out_seed_nEtaHits += hitCounter([](const SpacePoint* sp) {
+                                        return !isPrecision(*sp) && sp->measuresEta();
+                                    });
+            m_out_seed_nPhiHits += hitCounter([](const SpacePoint* sp) {
+                                        return sp->measuresPhi();
+                                    });
+
+            m_out_seed_nTruePrecHits += hitCounter([this](const SpacePoint* sp) {
+                                        return isPrecision(*sp) &&
+                                              (!m_visionTool.isEnabled() || m_visionTool->isLabeled(*sp));
+                                    });
+            m_out_seed_nTrueEtaHits += hitCounter([this](const SpacePoint* sp) {
+                                        return !isPrecision(*sp) && sp->measuresEta() &&
+                                              (!m_visionTool.isEnabled() || m_visionTool->isLabeled(*sp));
+                                    });
+            m_out_seed_nTruePhiHits += hitCounter([this](const SpacePoint* sp) {
+                                        return sp->measuresPhi() &&
+                                              (!m_visionTool.isEnabled() || m_visionTool->isLabeled(*sp));
+                                    });
+
+            /***
+             *          Split hit counts for the NSW!
+             */
+            m_out_seed_nMmEtaHits += hitCounter([this](const SpacePoint* sp){
+                return sp->type() == xAOD::UncalibMeasType::MMClusterType &&
+                       !m_idHelperSvc->mmIdHelper().isStereo(sp->identify());
+            });
+            m_out_seed_nMmStereoHits += hitCounter([this](const SpacePoint* sp){
+                return sp->type() == xAOD::UncalibMeasType::MMClusterType &&
+                       m_idHelperSvc->mmIdHelper().isStereo(sp->identify());
+            });
+
+            m_out_seed_nsTgcStripHits+=hitCounter([this](const SpacePoint* sp){
+                return sp->type() == xAOD::UncalibMeasType::sTgcStripType &&
+                       isPrecision(*sp);
+            });
+            m_out_seed_nsTgcWireHits+=hitCounter([this](const SpacePoint* sp) {
+                return sp->type() == xAOD::UncalibMeasType::sTgcStripType &&
+                       sp->measuresPhi() &&
+                       m_idHelperSvc->stgcIdHelper().channelType(sp->identify()) !=
+                       sTgcIdHelper::sTgcChannelTypes::Pad;
+            });
+            m_out_seed_nsTgcPadHits.push_back(hitCounter([this](const SpacePoint* sp){
+                return sp->type() == xAOD::UncalibMeasType::sTgcStripType &&
+                       m_idHelperSvc->stgcIdHelper().channelType(sp->identify()) ==
+                       sTgcIdHelper::sTgcChannelTypes::Pad;
+            }));
+
+            /** True hit count */
+            m_out_seed_nTrueMmEtaHits += hitCounter([this](const SpacePoint* sp){
+                return sp->type() == xAOD::UncalibMeasType::MMClusterType &&
+                        (!m_visionTool.isEnabled() || m_visionTool->isLabeled(*sp))  &&
+                       !m_idHelperSvc->mmIdHelper().isStereo(sp->identify());
+            });
+            m_out_seed_nTrueMmStereoHits += hitCounter([this](const SpacePoint* sp){
+                return sp->type() == xAOD::UncalibMeasType::MMClusterType &&
+                       (!m_visionTool.isEnabled() || m_visionTool->isLabeled(*sp)) &&
+                       m_idHelperSvc->mmIdHelper().isStereo(sp->identify());
+            });
+
+            m_out_seed_nTruesTgcStripHits+=hitCounter([this](const SpacePoint* sp){
+                return sp->type() == xAOD::UncalibMeasType::sTgcStripType &&
+                        (!m_visionTool.isEnabled() || m_visionTool->isLabeled(*sp)) &&
+                       isPrecision(*sp);
+            });
+            m_out_seed_nTruesTgcWireHits+=hitCounter([this](const SpacePoint* sp) {
+                return sp->type() == xAOD::UncalibMeasType::sTgcStripType &&
+                       (!m_visionTool.isEnabled() || m_visionTool->isLabeled(*sp)) &&
+                       sp->measuresPhi() &&
+                       m_idHelperSvc->stgcIdHelper().channelType(sp->identify()) !=
+                       sTgcIdHelper::sTgcChannelTypes::Pad;
+            });
+            m_out_seed_nTruesTgcPadHits.push_back(hitCounter([this](const SpacePoint* sp){
+                return sp->type() == xAOD::UncalibMeasType::sTgcStripType &&
+                        (!m_visionTool.isEnabled() || m_visionTool->isLabeled(*sp)) &&
+                       m_idHelperSvc->stgcIdHelper().channelType(sp->identify()) ==
+                       sTgcIdHelper::sTgcChannelTypes::Pad;
+            }));
+
             if (m_writeSpacePoints) {
+                std::vector<unsigned char> treeIdxs{};
+                for (const HoughHitType & houghSP: seed->getHitsInMax()){                
+                    if (m_writeSpacePoints){
+                        unsigned treeIdx = m_spTester->push_back(*houghSP);
+                        treeIdxs.push_back(treeIdx);
+                    }
+                }
                 m_spMatchedToPattern[iseed] = std::move(treeIdxs);
-                
             } 
         }
     }
     
-    void MuonHoughTransformTester::fillSegmentInfo(const ActsTrk::GeometryContext& gctx,
-                                                   const ObjectMatching& obj){
+    void MuonHoughTransformTester::fillSegmentInfo(const ObjectMatching& obj){
         using namespace SegmentFit;
 
         m_out_segment_n = obj.matchedSegments.size(); 
-        for (const Segment* segment : obj.matchedSegments) {
-            m_out_segment_hasPhi.push_back(std::ranges::any_of(segment->measurements(), 
-                                                [](const auto& meas){  return meas->measuresPhi();}));
-            m_out_segment_fitIter.push_back(segment->nFitIterations());
-            m_out_segment_truthMatchedHits.push_back(countMatched(obj.truthSegment, *segment));
-            m_out_segment_chi2.push_back(segment->chi2());
-            m_out_segment_nDoF.push_back(segment->nDoF());
-            m_out_segment_hasTimeFit.push_back(segment->hasTimeFit());
+        for (const xAOD::MuonSegment* segment : obj.matchedSegments) {
 
-            m_out_segment_err_x0.push_back(segment->covariance()(Acts::toUnderlying(ParamDefs::x0), Acts::toUnderlying(ParamDefs::x0)));
-            m_out_segment_err_y0.push_back(segment->covariance()(Acts::toUnderlying(ParamDefs::y0), Acts::toUnderlying(ParamDefs::y0)));
-            m_out_segment_err_tantheta.push_back(segment->covariance()(Acts::toUnderlying(ParamDefs::theta), Acts::toUnderlying(ParamDefs::theta)));
-            m_out_segment_err_tanphi.push_back(segment->covariance()(Acts::toUnderlying(ParamDefs::phi), Acts::toUnderlying(ParamDefs::phi)));
-            m_out_segment_err_time.push_back(segment->covariance()(Acts::toUnderlying(ParamDefs::t0), Acts::toUnderlying(ParamDefs::t0)));
-            const auto [locPos, locDir] = makeLine(localSegmentPars(gctx, *segment));
-            m_out_segment_tanphi.push_back(houghTanAlpha(locDir));
-            m_out_segment_tantheta.push_back(houghTanBeta(locDir));
-            m_out_segment_y0.push_back(locPos.y());
-            m_out_segment_x0.push_back(locPos.x());
-            m_out_segment_time.push_back(segment->segementT0() + segment->position().mag() * c_inv);
+            /** Parameters and covariance  */
+            const auto pars = localSegmentPars(*segment);
+            const auto cov = localSegmentCov(*segment);
+ 
+            m_out_segment_theta.push_back(pars[Acts::toUnderlying(ParamDefs::theta)]);
+            m_out_segment_phi.push_back(pars[Acts::toUnderlying(ParamDefs::phi)]);
+            m_out_segment_y0.push_back(pars[Acts::toUnderlying(ParamDefs::y0)]);
+            m_out_segment_x0.push_back(pars[Acts::toUnderlying(ParamDefs::x0)]);
+            m_out_segment_time.push_back(pars[Acts::toUnderlying(ParamDefs::t0)] + 
+                                         segment->position().mag() * c_inv);
 
-            unsigned nMdtHits{0}, nRpcEtaHits{0}, nRpcPhiHits{0}, nTgcEtaHits{0}, nTgcPhiHits{0},
-                     nMmEtaHits{0}, nMmStereoHits{0}, nStgcStripHits{0},nStgcWireHits{0}, nStgcPadHits{0};
-            unsigned nTrueHits{0}, nTruePrecHits{0}, nTrueEtaHits{0}, nTruePhiHits{0};
+            for (std::size_t i =0; i < Acts::toUnderlying(ParamDefs::nPars); ++i) {
+                for (std::size_t j = 0; j <=i; ++j) {
+                    const std::size_t vecIdx = Acts::vecIdxFromSymMat<Acts::toUnderlying(ParamDefs::nPars)>(i,j);
+                    m_segmentCov[vecIdx]->push_back((*cov)(i,j));
+                }
+            }
+
+            /** Fit quality */
+            const MuonR4::Segment* detailSeg = detailedSegment(*segment);
+            m_out_segment_fitIter.push_back(detailSeg->nFitIterations());
+            m_out_segment_chi2.push_back(segment->chiSquared());
+            m_out_segment_nDoF.push_back(segment->numberDoF());
+            m_out_segment_hasTimeFit.push_back(detailSeg->hasTimeFit());
+            /** Helper lambda to shorten a bit the syntax to count the hits
+             *  of a certain kind  */
+            auto hitCounter = [detailSeg](auto lambda) {
+                return std::count_if(detailSeg->measurements().begin(),
+                                     detailSeg->measurements().end(), lambda);
+            };
+            const unsigned nAuxilliary = hitCounter([](const auto& m){
+                 return m->type() == xAOD::UncalibMeasType::Other;
+            });        
+            m_out_segment_nPrecHits +=  segment->nPrecisionHits();
+            m_out_segment_nTrigEtaHits += segment->nTrigEtaLayers() - nAuxilliary;
+            m_out_segment_nTrigPhiHits += segment->nPhiLayers() - nAuxilliary;
             
-            double minYhit = std::numeric_limits<double>::max();
-            double maxYhit = -1 * std::numeric_limits<double>::max();
+            m_out_segment_nPrecOutliers += segment->nPrecisionOutliers();
+            m_out_segment_nTrigEtaOutliers += segment->nTriggerEtaOutliers();
+            m_out_segment_nTrigPhiOutliers += segment->nTriggerPhiOutliers();
+        
+            m_out_segment_nPrecHoles += segment->nPrecisionHoles();
+            m_out_segment_nTrigEtaHoles += segment->nTriggerEtaHoles();
+            m_out_segment_nTrigPhiHoles += segment->nTriggerPhiHoles();
+            /** True matched precision hit */
+            m_out_segment_nTruePrecHits += hitCounter([this](const auto& meas) {
+                return meas->fitState() == CalibratedSpacePoint::State::Valid &&
+                       isPrecision(*meas) && (!m_visionTool.isEnabled() || 
+                       m_visionTool->isLabeled(*meas->spacePoint()));
+            });
+            /** True matched trigger eta hit */
+            m_out_segment_nTrueTrigEtaHits += hitCounter([this](const auto& meas) {
+                return meas->fitState() == CalibratedSpacePoint::State::Valid &&
+                       !isPrecision(*meas) && meas->measuresEta() && 
+                       meas->spacePoint() &&
+                       (!m_visionTool.isEnabled() || m_visionTool->isLabeled(*meas->spacePoint()));
+            });
+            /** True matched trigger phi hit */
+            m_out_segment_nTrueTrigPhiHits += hitCounter([this](const auto& meas) {
+                return meas->fitState() == CalibratedSpacePoint::State::Valid &&
+                       !isPrecision(*meas) && meas->measuresPhi() && 
+                       meas->spacePoint() &&
+                       (!m_visionTool.isEnabled() || m_visionTool->isLabeled(*meas->spacePoint()));
+            });
+            /** True matched precision outlier */
+            m_out_segment_nTruePrecOutliers += hitCounter([this](const auto& meas) {
+                return meas->fitState() != CalibratedSpacePoint::State::Valid &&
+                       isPrecision(*meas) && (!m_visionTool.isEnabled() || 
+                       m_visionTool->isLabeled(*meas->spacePoint()));
+            });
+            /** True matched trigger eta outlier */
+            m_out_segment_nTrueTrigEtaOutliers += hitCounter([this](const auto& meas) {
+                return meas->fitState() != CalibratedSpacePoint::State::Valid &&
+                       !isPrecision(*meas) && meas->measuresEta() && 
+                       meas->spacePoint() &&
+                       (!m_visionTool.isEnabled() || m_visionTool->isLabeled(*meas->spacePoint()));
+            });
+            /** True matched trigger phi outlier */
+            m_out_segment_nTrueTrigPhiOutliers += hitCounter([this](const auto& meas) {
+                return meas->fitState() != CalibratedSpacePoint::State::Valid &&
+                       !isPrecision(*meas) && meas->measuresPhi() && 
+                       meas->spacePoint() &&
+                       (!m_visionTool.isEnabled() || m_visionTool->isLabeled(*meas->spacePoint()));
+            });
 
-            std::vector<unsigned char> matched;
-            for (const auto & meas : segment->measurements()){
+            /***
+             *          Split hit counts for the NSW!
+             */
+            m_out_segment_nMmEtaHits.push_back(hitCounter([this](const auto& meas){
+                return meas->fitState() == CalibratedSpacePoint::State::Valid &&
+                       meas->type() == xAOD::UncalibMeasType::MMClusterType &&
+                       !m_idHelperSvc->mmIdHelper().isStereo(meas->spacePoint()->identify());
+            }));
+            m_out_segment_nMmStereoHits.push_back(hitCounter([this](const auto& meas){
+                return meas->fitState() == CalibratedSpacePoint::State::Valid &&
+                       meas->type() == xAOD::UncalibMeasType::MMClusterType &&
+                       m_idHelperSvc->mmIdHelper().isStereo(meas->spacePoint()->identify());
+            }));
+            m_out_segment_nMmEtaOutliers.push_back(hitCounter([this](const auto& meas){
+                return meas->fitState() != CalibratedSpacePoint::State::Valid &&
+                       meas->type() == xAOD::UncalibMeasType::MMClusterType &&
+                       !m_idHelperSvc->mmIdHelper().isStereo(meas->spacePoint()->identify());
+            }));
+            m_out_segment_nMmStereoOutliers.push_back(hitCounter([this](const auto& meas){
+                return meas->fitState() != CalibratedSpacePoint::State::Valid &&
+                       meas->type() == xAOD::UncalibMeasType::MMClusterType &&
+                       m_idHelperSvc->mmIdHelper().isStereo(meas->spacePoint()->identify());
+            }));
+
+            m_out_segment_nSTgcStripHits.push_back(hitCounter([this](const auto& meas){
+                return meas->fitState() == CalibratedSpacePoint::State::Valid &&
+                       meas->type() == xAOD::UncalibMeasType::sTgcStripType &&
+                       isPrecision(*meas);
+            }));
+            m_out_segment_nSTgcWireHits.push_back(hitCounter([this](const auto& meas){
+                return meas->fitState() == CalibratedSpacePoint::State::Valid &&
+                       meas->type() == xAOD::UncalibMeasType::sTgcStripType &&
+                       meas->measuresPhi() &&
+                       m_idHelperSvc->stgcIdHelper().channelType(meas->spacePoint()->identify()) !=
+                       sTgcIdHelper::sTgcChannelTypes::Pad;
+            }));
+            m_out_segment_nSTgcPadHits.push_back(hitCounter([this](const auto& meas){
+                return meas->fitState() == CalibratedSpacePoint::State::Valid &&
+                       meas->type() == xAOD::UncalibMeasType::sTgcStripType &&
+                       m_idHelperSvc->stgcIdHelper().channelType(meas->spacePoint()->identify()) ==
+                       sTgcIdHelper::sTgcChannelTypes::Pad;
+            }));
+            m_out_segment_nSTgcStripOutliers.push_back(hitCounter([this](const auto& meas){
+                return meas->fitState() != CalibratedSpacePoint::State::Valid &&
+                       meas->type() == xAOD::UncalibMeasType::sTgcStripType &&
+                       isPrecision(*meas);
+            }));
+            m_out_segment_nSTgcWireOutliers.push_back(hitCounter([this](const auto& meas){
+                return meas->fitState() != CalibratedSpacePoint::State::Valid &&
+                       meas->type() == xAOD::UncalibMeasType::sTgcStripType &&
+                       meas->measuresPhi() &&
+                       m_idHelperSvc->stgcIdHelper().channelType(meas->spacePoint()->identify()) !=
+                       sTgcIdHelper::sTgcChannelTypes::Pad;
+            }));
+            m_out_segment_nSTgcPadOutliers.push_back(hitCounter([this](const auto& meas){
+                return meas->fitState() != CalibratedSpacePoint::State::Valid &&
+                       meas->type() == xAOD::UncalibMeasType::sTgcStripType &&
+                       m_idHelperSvc->stgcIdHelper().channelType(meas->spacePoint()->identify()) ==
+                       sTgcIdHelper::sTgcChannelTypes::Pad;
+            }));
+            /**        True NSW hit counts  */
+            m_out_segment_nMmTrueEtaHits.push_back(hitCounter([this](const auto& meas){
+                return meas->fitState() == CalibratedSpacePoint::State::Valid &&
+                       meas->type() == xAOD::UncalibMeasType::MMClusterType &&
+                       (!m_visionTool.isEnabled() || m_visionTool->isLabeled(*meas->spacePoint())) &&
+                       !m_idHelperSvc->mmIdHelper().isStereo(meas->spacePoint()->identify());
+            }));
+            m_out_segment_nMmTrueStereoHits.push_back(hitCounter([this](const auto& meas){
+                return meas->fitState() == CalibratedSpacePoint::State::Valid &&
+                       meas->type() == xAOD::UncalibMeasType::MMClusterType &&
+                       (!m_visionTool.isEnabled() || m_visionTool->isLabeled(*meas->spacePoint())) &&
+                       m_idHelperSvc->mmIdHelper().isStereo(meas->spacePoint()->identify());
+            }));
+            m_out_segment_nMmTrueEtaOutliers.push_back(hitCounter([this](const auto& meas){
+                return meas->fitState() != CalibratedSpacePoint::State::Valid &&
+                       meas->type() == xAOD::UncalibMeasType::MMClusterType &&
+                       (!m_visionTool.isEnabled() || m_visionTool->isLabeled(*meas->spacePoint())) &&
+                       !m_idHelperSvc->mmIdHelper().isStereo(meas->spacePoint()->identify());
+            }));
+            m_out_segment_nMmTrueStereoOutliers.push_back(hitCounter([this](const auto& meas){
+                return meas->fitState() != CalibratedSpacePoint::State::Valid &&
+                       meas->type() == xAOD::UncalibMeasType::MMClusterType &&
+                       (!m_visionTool.isEnabled() || m_visionTool->isLabeled(*meas->spacePoint())) &&
+                       m_idHelperSvc->mmIdHelper().isStereo(meas->spacePoint()->identify());
+            }));
+            m_out_segment_nSTgcTrueStripHits.push_back(hitCounter([this](const auto& meas){
+                return meas->fitState() == CalibratedSpacePoint::State::Valid &&
+                       meas->type() == xAOD::UncalibMeasType::sTgcStripType &&
+                       (!m_visionTool.isEnabled() || m_visionTool->isLabeled(*meas->spacePoint())) &&
+                       isPrecision(*meas);
+            }));
+            m_out_segment_nSTgcTrueWireHits.push_back(hitCounter([this](const auto& meas){
+                return meas->fitState() == CalibratedSpacePoint::State::Valid &&
+                       meas->type() == xAOD::UncalibMeasType::sTgcStripType &&
+                       (!m_visionTool.isEnabled() || m_visionTool->isLabeled(*meas->spacePoint())) &&
+                       meas->measuresPhi() &&
+                       m_idHelperSvc->stgcIdHelper().channelType(meas->spacePoint()->identify()) !=
+                       sTgcIdHelper::sTgcChannelTypes::Pad;
+            }));
+            m_out_segment_nSTgcTruePadHits.push_back(hitCounter([this](const auto& meas){
+                return meas->fitState() == CalibratedSpacePoint::State::Valid &&
+                       meas->type() == xAOD::UncalibMeasType::sTgcStripType &&
+                       (!m_visionTool.isEnabled() || m_visionTool->isLabeled(*meas->spacePoint())) &&
+                       m_idHelperSvc->stgcIdHelper().channelType(meas->spacePoint()->identify()) ==
+                       sTgcIdHelper::sTgcChannelTypes::Pad;
+            }));
+            m_out_segment_nSTgcTrueStripOutliers.push_back(hitCounter([this](const auto& meas){
+                return meas->fitState() != CalibratedSpacePoint::State::Valid &&
+                       meas->type() == xAOD::UncalibMeasType::sTgcStripType &&
+                       (!m_visionTool.isEnabled() || m_visionTool->isLabeled(*meas->spacePoint())) &&
+                       isPrecision(*meas);
+            }));
+            m_out_segment_nSTgcTrueWireOutliers.push_back(hitCounter([this](const auto& meas){
+                return meas->fitState() != CalibratedSpacePoint::State::Valid &&
+                       meas->type() == xAOD::UncalibMeasType::sTgcStripType &&
+                       (!m_visionTool.isEnabled() || m_visionTool->isLabeled(*meas->spacePoint())) &&
+                       meas->measuresPhi() &&
+                       m_idHelperSvc->stgcIdHelper().channelType(meas->spacePoint()->identify()) !=
+                       sTgcIdHelper::sTgcChannelTypes::Pad;
+            }));
+            m_out_segment_nSTgcTruePadOutliers.push_back(hitCounter([this](const auto& meas){
+                return meas->fitState() != CalibratedSpacePoint::State::Valid &&
+                       meas->type() == xAOD::UncalibMeasType::sTgcStripType &&
+                       (!m_visionTool.isEnabled() || m_visionTool->isLabeled(*meas->spacePoint())) &&
+                       m_idHelperSvc->stgcIdHelper().channelType(meas->spacePoint()->identify()) ==
+                       sTgcIdHelper::sTgcChannelTypes::Pad;
+            }));
+
+            double minYhit = 1._km;
+            double maxYhit = -1._km;
+            double minYTruehit = 1._km;
+            double maxYTruehit = -1._km;
+  
+            std::vector<unsigned char> matched{};
+            for (const auto & meas : detailSeg->measurements()){
                 // skip dummy measurement from beam spot constraint
                 ATH_MSG_VERBOSE(__func__<<"() - "<<__LINE__<<" Dump "<<(*meas));
                 if (meas->type() == xAOD::UncalibMeasType::Other) {
@@ -535,6 +762,10 @@ namespace MuonValR4 {
                 }
                 minYhit = std::min(meas->localPosition().y(),minYhit); 
                 maxYhit = std::max(meas->localPosition().y(),maxYhit);
+                if (!m_visionTool.isEnabled() || m_visionTool->isLabeled(*meas->spacePoint())) {
+                    minYTruehit = std::min(meas->localPosition().y(), minYTruehit); 
+                    maxYTruehit = std::max(meas->localPosition().y(), maxYTruehit);
+                }
                 if (m_writeSpacePoints) {
                     unsigned treeIdx = m_spTester->push_back(*meas->spacePoint());
                     if (treeIdx >= matched.size()){
@@ -542,64 +773,12 @@ namespace MuonValR4 {
                     }
                     matched[treeIdx] = true;
                 }
-                if (m_visionTool.isEnabled()) {
-                    nTrueHits += m_visionTool->isLabeled(*meas->spacePoint());
-                    nTruePrecHits += isPrecisionHit(*meas) && m_visionTool->isLabeled(*meas->spacePoint());
-                    nTrueEtaHits += meas->measuresEta() && m_visionTool->isLabeled(*meas->spacePoint());
-                    nTruePhiHits += meas->measuresPhi() && m_visionTool->isLabeled(*meas->spacePoint());
-                }
-                switch (meas->type()) {
-                    case xAOD::UncalibMeasType::MdtDriftCircleType:
-                        ++nMdtHits;
-                        break;
-                    case xAOD::UncalibMeasType::RpcStripType:
-                        nRpcEtaHits += meas->measuresEta();
-                        nRpcPhiHits += meas->measuresPhi();
-                        break;
-                    case xAOD::UncalibMeasType::TgcStripType:
-                        nTgcEtaHits += meas->measuresEta();
-                        nTgcPhiHits += meas->measuresPhi();
-                        break;
-                    case xAOD::UncalibMeasType::MMClusterType:{
-                        const MmIdHelper& idHelper{m_idHelperSvc->mmIdHelper()};
-                        nMmEtaHits += !idHelper.isStereo(meas->spacePoint()->identify());
-                        nMmStereoHits += !idHelper.isStereo(meas->spacePoint()->identify());
-                        break;
-                    } case xAOD::UncalibMeasType::sTgcStripType: {
-                        const auto* prd = static_cast<const xAOD::sTgcMeasurement*>(meas->spacePoint()->primaryMeasurement());
-                        const int primType = prd->channelType();
-                        prd = dynamic_cast<const xAOD::sTgcMeasurement*>(meas->spacePoint()->secondaryMeasurement());
-                        const int secType = (prd != nullptr ? prd->channelType() : -1);
-                        nStgcStripHits += primType == sTgcIdHelper::sTgcChannelTypes::Strip;
-                        nStgcWireHits  += primType == sTgcIdHelper::sTgcChannelTypes::Wire;
-                        nStgcPadHits   += primType == sTgcIdHelper::sTgcChannelTypes::Pad;
-                        nStgcWireHits  += secType == sTgcIdHelper::sTgcChannelTypes::Wire;
-                        nStgcPadHits   += primType != secType && secType == sTgcIdHelper::sTgcChannelTypes::Pad;
-                        break;
-                    } default:
-                        break;
-                }
             }
-            m_out_segment_nMdtHits.push_back(nMdtHits);
-            m_out_segment_nRpcEtaHits.push_back(nRpcEtaHits);
-            m_out_segment_nRpcPhiHits.push_back(nRpcPhiHits);
-            m_out_segment_nTgcEtaHits.push_back(nTgcEtaHits);
-            m_out_segment_nTgcPhiHits.push_back(nTgcPhiHits);
-
-            m_out_segment_nMmEtaHits.push_back(nMmEtaHits);
-            m_out_segment_nMmStereoHits.push_back(nMmStereoHits);
-            m_out_segment_nsTgcStripHits.push_back(nStgcStripHits);
-            m_out_segment_nsTgcWireHits.push_back(nStgcWireHits);
-            m_out_segment_nsTgcPadpHits.push_back(nStgcPadHits);
-        
-
-            m_out_segment_nTrueHits.push_back(nTrueHits);
-            m_out_segment_nTruePrecHits.push_back(nTruePrecHits);
-            m_out_segment_nTruePhiHits.push_back(nTruePhiHits);
-            m_out_segment_nTrueEtaHits.push_back(nTrueEtaHits);
-
-            m_out_segment_minYhit.push_back(minYhit);
-            m_out_segment_maxYhit.push_back(maxYhit);
+   
+            m_out_segment_minYhit += minYhit;
+            m_out_segment_maxYhit += maxYhit;
+            m_out_segment_minTrueYhit += minYTruehit;
+            m_out_segment_maxTrueYhit += maxYTruehit;
             if (m_writeSpacePoints) {
                 m_spMatchedToSegment.push_back(std::move(matched));
             }
