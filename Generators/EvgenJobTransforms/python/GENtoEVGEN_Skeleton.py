@@ -315,6 +315,12 @@ def fromRunArgs(runArgs):
         cfg.merge(FixHepMCCfg(flags,
                               PurgeUnstableWithoutEndVtx=gens_purgenoendvtx(generatorsList)))
 
+    # Merge GenWeightDeclarationCfg to declare the number 
+    # of generator weights to the CutFlowSvc
+    if output_pool_file and not flags.Input.Files:
+        from EvgenProdTools.EvgenProdToolsConfig import GenWeightDeclarationCfg
+        cfg.merge(GenWeightDeclarationCfg(flags))
+
     # Sanity check the event record (not appropriate for all generators)
     from GeneratorConfig.GenConfigHelpers import gens_testhepmc
     if not txt_only_mode and gens_testhepmc(generators):
@@ -416,13 +422,15 @@ def fromRunArgs(runArgs):
 
         # Configure output stream
         from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
-        cfg.merge(OutputStreamCfg(flags, "EVNT", ["McEventCollection#*"]))
+        cfg.merge(OutputStreamCfg(flags, "EVNT", ["McEventCollection#*"],
+                                  MetadataItemList=["IOVMetaDataContainer#*"]))
 
         # Add in-file MetaData
         from AthenaConfiguration.Enums import MetadataCategory
         from xAODMetaDataCnv.InfileMetaDataConfig import SetupMetaDataForStreamCfg
         cfg.merge(SetupMetaDataForStreamCfg(flags, "EVNT",
-                                            createMetadata=[MetadataCategory.CutFlowMetaData, MetadataCategory.TruthMetaData]))
+                                            createMetadata=[MetadataCategory.CutFlowMetaData,
+                                                            MetadataCategory.TruthMetaData]))
 
     # Post-include
     processPostInclude(runArgs, flags, cfg)

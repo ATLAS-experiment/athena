@@ -31,14 +31,28 @@ def _get_nevents(flags, safety):
 
 
 def _prepare_lhe_for_shower(produced_output, lhe_file):
+    # The supported lhe file formats are .lhe, .lhe.gz, .tar.gz, and .tgz.
+    # .tar.gz and .tgz are tarballs that contain a single .lhe file
+    # .gz files can be read directly by Pythia so we don't want to unzip them.
+    if (produced_output and produced_output.endswith(".gz")
+            and not produced_output.endswith((".tar.gz", ".tgz"))):
+        compressed_lhe_file = (
+            lhe_file if lhe_file.endswith(".gz") else f"{lhe_file}.gz"
+        )
+        if _symlink_first_existing(
+                compressed_lhe_file, [produced_output], overwrite=True):
+            return
+        raise RuntimeError(
+            "Could not prepare compressed LHE file for showering. "
+            f"Expected: {produced_output}"
+        )
+
     primary_output = None
     if produced_output:
         if produced_output.endswith(".tar.gz"):
             root = produced_output[:-7]
         elif produced_output.endswith(".tgz"):
             root = produced_output[:-4]
-        elif produced_output.endswith(".gz"):
-            root = produced_output[:-3]
         else:
             root, _ = os.path.splitext(produced_output)
         primary_output = f"{root}.events"

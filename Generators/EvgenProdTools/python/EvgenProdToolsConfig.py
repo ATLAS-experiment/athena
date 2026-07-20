@@ -22,6 +22,13 @@ def FixHepMCCfg(flags, name="FixHepMC", **kwargs):
     return acc
 
 
+def GenWeightDeclarationCfg(flags, name="GenWeightDeclaration", **kwargs):
+    acc = ComponentAccumulator(EvgenSequenceFactory(EvgenSequence.PreFilter))
+    acc.addService(CompFactory.HepMCWeightSvc("HepMCWeightSvc"))
+    acc.addEventAlgo(CompFactory.GenWeightDeclaration(name, **kwargs))
+    return acc
+
+
 def CountHepMCCfg(flags, name="CountHepMC", **kwargs):
     kwargs.setdefault("InputEventInfo", "TMPEvtInfo")
     kwargs.setdefault("OutputEventInfo", "EventInfo")
