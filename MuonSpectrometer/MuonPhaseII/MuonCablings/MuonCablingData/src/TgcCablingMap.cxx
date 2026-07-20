@@ -6,7 +6,7 @@
 
 #include <format>
 
-namespace Muon {
+namespace MuonR4 {
 
 TgcCablingMap::TgcCablingMap(const Muon::IMuonIdHelperSvc* idHelperSvc) :
     m_tgcIdHelper{idHelperSvc->tgcIdHelper()} {}
