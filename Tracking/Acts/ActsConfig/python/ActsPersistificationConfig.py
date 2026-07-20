@@ -132,7 +132,8 @@ def PersistifyTrackParticles(flags,
                                      '-TTVA_AMVFWeights']
         # acts track link
         if not flags.Acts.EDM.PersistifyTracks:
-            trackparticles_shortlist.append('-actsTrack')
+            trackparticles_shortlist += ['-actsTrack',
+                                         '-hgtdTrackLink']
 
         trackparticles_variables = ".".join(trackparticles_shortlist)        
         # remove track decorations used internally by FTAG software
