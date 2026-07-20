@@ -87,24 +87,17 @@ def _symlink_first_existing(link_name, candidates, overwrite=False):
     """
     Helper function to symlink the first existing file in candidates to link_name.
     """
-    print("nnnnnnnn")
-    print(link_name)
-    print(candidates)
     if os.path.exists(link_name) and not overwrite:
         return True
 
     for candidate in candidates:
         if not candidate or not os.path.exists(candidate):
-            print("ooooooooo")
             print(os.path.exists(candidate))
             continue
         if os.path.abspath(candidate) == os.path.abspath(link_name):
-            print("pppppppp")
             print(os.path.abspath(link_name))
             return True
         if os.path.lexists(link_name):
-            print("qqqqqqq")
-
             os.remove(link_name)
         os.symlink(os.path.abspath(candidate), link_name)
         return True
