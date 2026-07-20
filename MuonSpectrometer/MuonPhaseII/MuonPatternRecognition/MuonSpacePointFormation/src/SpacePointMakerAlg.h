@@ -48,6 +48,19 @@ namespace MuonR4{
             StatusCode finalize() override;
         
         private:
+            /**  @brief Helper struct to define the bucket parameters for a given chamber. The bucket parameters are used to define the size of the buckets in which the space points are sorted. */
+            struct BucketParameters {
+                double spacePointWindow{0.8 * Gaudi::Units::m};
+                double maxBucketLength{2.0 * Gaudi::Units::m};
+                double spacePointOverlap{0.25 * Gaudi::Units::m};
+            };
+
+            /** @brief Helper struct to store the resolved bucket parameters for a given chamber. */
+            struct ResolvedParameter {
+                double value{0.};
+                bool matched{false};
+            };
+
             /** @brief Helper class to keep track of how many eta+phi, eta and phi only space points are built
              *         in various detector regions. The SpacePointStatistics split the counts per muon station layer,
              *         i.e., BarrelInner, BarrelMiddle, EndCapInner, etc. are distinct categoriges. Each category
@@ -175,18 +188,45 @@ namespace MuonR4{
 
             /** @brief Returns whether the space point is beyond the bucket boundary.
              *  @param spacePoint: Space point candidate to add to the bucket
-             *  @param sortedPoints: Container of all defined buckets in the chamber */
+             *  @param sortedPoints: Container of all defined buckets in the chamber
+             *  @param bucketParams: Parameters defining the bucket properties
+             *  @return True if the space point should start a new bucket, false otherwise */
             bool splitBucket(const SpacePoint& spacePoint,
                              const double firstSpPos,
-                             const SpacePointBucketVec& sortedPoints) const;
+                             const SpacePointBucketVec& sortedPoints,
+                             const BucketParameters& bucketParams) const;
             /** @brief Closes the current processed bucket and creates a new one. Space points of the previous bucket
              *         within the overlap region to the first space point of the new bucket are copied over
              * @param refSp: First new space point which will be added to the new bucket.
-             * @param sortedPoints: List of all processed buckets in the chamber. The list is augmented by 1 element */
+             * @param sortedPoints: List of all processed buckets in the chamber. The list is augmented by 1 element 
+             * @param bucketParams: Parameters defining the bucket properties
+             */
             void newBucket(const SpacePoint& refSp,
-                           SpacePointBucketVec& sortedPoints) const;
+                           SpacePointBucketVec& sortedPoints,
+                           const BucketParameters& bucketParams) const;
 
-            
+            using BucketPatternMap = std::map<std::string, double, std::less<>>;
+
+            /** @brief Returns a string key for a chamber, based on the space point identifier.
+             *  @param chamber: Chamber for which to generate the key
+             *  @return A string representing the chamber key (e.g. EML_eta-1_phi3) */
+            std::string chamberConfigKey(const MuonGMR4::Chamber& chamber) const;
+
+            /** @brief Resolves the bucket parameters for a given chamber, based on the chamber key and the configured patterns.
+             *  @param chamber: Chamber for which to resolve the bucket parameters
+             *  @return A BucketParameters struct containing the resolved parameters for the chamber */
+            std::optional<BucketParameters> resolveBucketParameters(const MuonGMR4::Chamber& chamber) const;
+            /** @brief Resolves a specific parameter for a given chamber key, based on the configured patterns.
+             *  @param chamberKey: Key (e.g. EML_eta-1_phi3) of the chamber
+             *  @param defaultValue: Default value to use if no match is found
+             *  @param patterns: Map of patterns to values
+             *  @return The resolved parameter value */
+            ResolvedParameter resolveParameter( const std::string_view chamberKey, const double defaultValue, const BucketPatternMap& patterns) const; 
+            /** @brief Returns the bucket parameters for a given space point.
+             *  @param spacePoint: Space point for which to get the bucket parameters
+             *  @return A reference to the BucketParameters struct for the space point */
+            const BucketParameters& getBucketParameters(const SpacePoint& spacePoint) const;
+
             SG::ReadHandleKey<xAOD::MdtDriftCircleContainer> m_mdtKey{this, "MdtKey", "xMdtMeasurements",
                                                                       "Key to the uncalibrated Drift circle measurements"};
             
@@ -202,21 +242,45 @@ namespace MuonR4{
             SG::ReadHandleKey<xAOD::sTgcMeasContainer> m_stgcKey{this, "sTgcKey", "xAODsTgcMeasurements"};
 
 
-            SG::ReadHandleKey<ActsTrk::GeometryContext> m_geoCtxKey{this, "AlignmentKey", "ActsAlignment", "cond handle key"};
+            ActsTrk::GeoContextReadKey_t m_geoCtxKey{this, "AlignmentKey", "ActsAlignment", "cond handle key"};
+
+            const MuonGMR4::MuonDetectorManager* m_detMgr{nullptr};
 
             ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{this, "IdHelperSvc",  "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
             
             SG::WriteHandleKey<SpacePointContainer> m_writeKey{this, "WriteKey", "MuonSpacePoints"};
 
+            /** @brief Default space point window size (Max distance between the two eta hits). Can be overridden by chamber-specific patterns 
+             * @param spacePointWindowSize: Default space point window size in meters */
             Gaudi::Property<double> m_spacePointWindow{this, "spacePointWindowSize", 0.8*Gaudi::Units::m,
                                                        "Maximal distance between consecutive hits in a bucket"};
-
+            /** @brief Default maximum bucket length (the width of the bucket in local y coordinate). Can be overridden by chamber-specific patterns
+             * @param maxBucketLength: Default maximum bucket length in meters */
             Gaudi::Property<double> m_maxBucketLength{this, "maxBucketLength", 2.*Gaudi::Units::m,
                                                        "Maximal size of a space point bucket"};
             
+            /** @brief Default space point overlap (the margin around the edge of the bucket which is also coppied into another bucket). Can be overridden by chamber-specific patterns
+             * @param spacePointOverlap: Default space point overlap in meters */
             Gaudi::Property<double> m_spacePointOverlap{this, "spacePointOverlap", 25.*Gaudi::Units::cm,
                                                         "Hits that are within <spacePointOverlap> of the bucket margin. "
                                                         "Are copied to the next bucket"};
+
+            /** @brief Chamber-pattern dependent space point window. Example: cfg.getEventAlgo("MuonSpacePointMakerAlg").spacePointWindowPatterns = {"BIL_eta3_phi3": 0.2 * m, "BML*": 0.5 * m, "BOL_eta3*": 0.7 * m} */
+            Gaudi::Property<BucketPatternMap> m_spacePointWindowPatterns{ this, "spacePointWindowPatterns", {},
+                                                    "Chamber-pattern dependent space point window. " "Examples: BML*=0.5, BIL_eta3_phi3=0.2"};
+
+            /** @brief Chamber-pattern dependent maximum bucket length. Example: cfg.getEventAlgo("MuonSpacePointMakerAlg").maxBucketLengthPatterns = {"BIL_eta3_phi3": 0.2 * m, "BML*": 0.5 * m} */
+            Gaudi::Property<BucketPatternMap> m_maxBucketLengthPatterns{ this, "maxBucketLengthPatterns", {},
+                                                    "Chamber-pattern dependent max bucket length. " "Examples: BML*=0.5, BIL_eta3_phi3=0.2"};
+            
+            /** @brief Chamber-pattern dependent space point overlap. Example: cfg.getEventAlgo("MuonSpacePointMakerAlg").spacePointOverlapPatterns = {"BIL_eta3_phi3": 0.2 * m, "BML*": 0.5 * m} */
+            Gaudi::Property<BucketPatternMap> m_spacePointOverlapPatterns{ this, "spacePointOverlapPatterns", {},
+                                                    "Chamber-dependent overrides of spacePointOverlap" };
+
+            /** @brief Map of bucket parameters for each chamber */
+            std::unordered_map<const MuonGMR4::Chamber*, BucketParameters> m_bucketParameters{};
+            /** @brief Default bucket parameters used if no chamber-specific parameters are found, defaults into m_spacePointWindow, m_maxBucketLength, and m_spacePointOverlap */
+            BucketParameters m_defaultBucketParameters{};
     
             Gaudi::Property<bool> m_doStat{this, "doStats", false, 
                                            "If enabled the algorithm keeps track how many hits have been made" };

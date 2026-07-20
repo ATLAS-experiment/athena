@@ -95,10 +95,9 @@ StatusCode MDTHitAnalysis::initialize() {
 }
 
 
-StatusCode MDTHitAnalysis::execute() {
+StatusCode MDTHitAnalysis::execute(const EventContext& ctx) {
   ATH_MSG_DEBUG( "In MDTHitAnalysis::execute()" );
 
-  const EventContext& ctx{Gaudi::Hive::currentContext()};
   const MDTSimHitCollection* mdt_container{nullptr};
   ATH_CHECK(SG::get(mdt_container, m_readKey, ctx));
   for (MDTSimHitCollection::const_iterator i_hit = mdt_container->begin(); i_hit != mdt_container->end(); ++i_hit) {

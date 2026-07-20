@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
  */
 
 ///////////////////////////////////////////////////////////////////
@@ -294,7 +294,7 @@ private:
 
   /** Actual heavy lifting implementation for extrapolate
   */
-  virtual Trk::CacheOwnedPtr<Trk::TrackParameters> extrapolateImpl(
+  Trk::CacheOwnedPtr<Trk::TrackParameters> extrapolateImpl(
     const EventContext& ctx,
     Cache& cache,
     Trk::CacheOwnedPtr<Trk::TrackParameters> parm,

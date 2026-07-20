@@ -70,6 +70,8 @@ class ShutUp(object):
     def __del__ (self):
        self.save_err.close()
        self.save_out.close()
+       self.quiet_err.close()
+       self.quiet_out.close()
        return
     
     def mute(self):

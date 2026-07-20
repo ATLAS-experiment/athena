@@ -27,7 +27,7 @@ class ATLAS_NOT_THREAD_SAFE PixelChargeToTConversion : public AthAlgorithm{
   ~PixelChargeToTConversion();
   
   StatusCode initialize();
-  StatusCode execute();
+  StatusCode execute(const EventContext& ctx);
   StatusCode finalize();
   
  private:

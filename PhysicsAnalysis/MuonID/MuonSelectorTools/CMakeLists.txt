@@ -52,11 +52,11 @@ endif()
 atlas_add_test( ut_MuonSelectorToolsTester_data
    SCRIPT test/ut_MuonSelectorToolsTester_data.sh
    PROPERTIES TIMEOUT 450
-   POST_EXEC_SCRIPT nopost.sh )
+   POST_EXEC_SCRIPT noerror.sh )
 atlas_add_test( ut_MuonSelectorToolsTester_MC
    SCRIPT test/ut_MuonSelectorToolsTester_MC.sh
    PROPERTIES TIMEOUT 450
-   POST_EXEC_SCRIPT nopost.sh )
+   POST_EXEC_SCRIPT noerror.sh )
 
 # Install files from the package:
 atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )

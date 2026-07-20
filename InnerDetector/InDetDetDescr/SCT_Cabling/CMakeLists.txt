@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( SCT_Cabling )
@@ -31,7 +31,7 @@ atlas_add_test( SCT_OnlineId_test
   test/SCT_OnlineId_test.cxx 
   INCLUDE_DIRS  ${Boost_INCLUDE_DIRS}  
   LINK_LIBRARIES ${Boost_LIBRARIES} CxxUtils SCT_CablingLib
-  POST_EXEC_SCRIPT nopost.sh
+  POST_EXEC_SCRIPT noerror.sh
 )
 
 atlas_add_test( SCT_CablingCondAlgFromText_test
@@ -40,7 +40,7 @@ atlas_add_test( SCT_CablingCondAlgFromText_test
   LINK_LIBRARIES ${Boost_LIBRARIES} TestTools AthenaBaseComps GaudiKernel 
     AthenaPoolUtilities  PathResolver StoreGateLib IdDictParser SCT_CablingLib 
     InDetIdentifier
-  POST_EXEC_SCRIPT "nopost.sh"
+  POST_EXEC_SCRIPT noerror.sh
 )
 
 atlas_install_joboptions(share/*.txt)

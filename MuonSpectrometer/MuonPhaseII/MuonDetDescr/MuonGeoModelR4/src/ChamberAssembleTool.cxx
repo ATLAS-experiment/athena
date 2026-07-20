@@ -90,7 +90,7 @@ VolBoundPtr_t
          return volBoundSet.makeBounds<Acts::TrapezoidVolumeBounds>(pars.halfShortWidth, pars.halfLongWidth, 
                                                                     pars.halfHeight, pars.halfThickness );
       } default:
-         THROW_EXCEPTION("Unsupported detector type "<<to_string(chambEle->detectorType()));
+         THROW_EXCEPTION("Unsupported detector type "<<chambEle->detectorType());
    }
    return nullptr;
 }

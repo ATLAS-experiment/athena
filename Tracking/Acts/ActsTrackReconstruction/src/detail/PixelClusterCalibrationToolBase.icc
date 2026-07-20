@@ -6,6 +6,9 @@
 #include <PixelReadoutGeometry/PixelModuleDesign.h>
 #include "InDetReadoutGeometry/SiDetectorElement.h"
 #include "InDetMeasurementUtilities/Helpers.h"
+#include "Acts/Surfaces/PlaneSurface.hpp"
+
+#include "TrackStateFlagHelper.h"
 
 #include <stdexcept>
 
@@ -13,9 +16,8 @@ namespace ActsTrk::detail {
 
 template <typename traj_t>
 const InDetDD::SiDetectorElement&
-PixelClusterCalibratorCommon<traj_t>::getDetectorElement(const Acts::Surface &surface) const
-{
-    const ActsDetectorElement* detElem = dynamic_cast<const ActsDetectorElement*>(surface.surfacePlacement());
+PixelClusterCalibratorCommon<traj_t>::getDetectorElement(const Acts::Surface &surface) const {
+    const auto* detElem = getActsDetectorElement(surface);
     const InDetDD::SiDetectorElement *
        siDetElement = detElem ? dynamic_cast<const InDetDD::SiDetectorElement *>(detElem->upstreamDetectorElement())
                               : nullptr;
@@ -58,28 +60,35 @@ PixelClusterCalibratorCommon<traj_t>::tanAnglesOfIncidence(const EventContext &c
 }
 
 template <typename derived_t, typename traj_t>
-std::pair<typename PixelClusterCalibratorCommon<traj_t>::Pos,
-          typename PixelClusterCalibratorCommon<traj_t>::Cov>
+void
 PixelClusterCalibratorBase<derived_t, traj_t>::calibrate(
     const Acts::GeometryContext& gctx,
     const Acts::CalibrationContext& cctx,
     const xAOD::PixelCluster& cluster,
-    const typename PixelClusterCalibratorBase<derived_t, traj_t>::TrackStateProxy& state) const
+    typename PixelClusterCalibratorBase<derived_t, traj_t>::TrackStateProxy& trackState) const
 {
     const EventContext& ctx = *cctx.get<const EventContext*>();
-    const InDetDD::SiDetectorElement &detElement = this->getDetectorElement(state.referenceSurface());
-    Acts::Vector3 direction = Acts::makeDirectionFromPhiTheta(state.parameters()[Acts::eBoundPhi],
-                                                              state.parameters()[Acts::eBoundTheta]);
-    return derived().calibrate(ctx, gctx, cctx, cluster, detElement, this->tanAnglesOfIncidence(ctx,
-                                                                                                gctx,
-                                                                                                state.referenceSurface(),
-                                                                                                detElement,
-                                                                                                direction));
+    const InDetDD::SiDetectorElement &detElement = this->getDetectorElement(trackState.referenceSurface());
+    Acts::Vector3 direction = Acts::makeDirectionFromPhiTheta(trackState.parameters()[Acts::eBoundPhi],
+                                                              trackState.parameters()[Acts::eBoundTheta]);
+    auto [pos,cov,flags] = derived().calibrate(ctx, gctx, cctx, cluster, detElement, this->tanAnglesOfIncidence(ctx,
+                                                                                                              gctx,
+                                                                                                              trackState.referenceSurface(),
+                                                                                                              detElement,
+                                                                                                              direction));
+    assert( !trackState.hasCalibrated());
+    trackState.allocateCalibrated(2);
+    trackState.template calibrated<2>() = pos.template cast<double>();
+    trackState.template calibratedCovariance<2>() = cov.template cast<double>();
+    if (testTrackStateFlag(Acts::TrackStateFlag::IsSplitHit, flags)) {
+       trackState.typeFlags().setIsSplitHit();
+    }
 }
 
 template <typename derived_t, typename traj_t>
-std::pair<typename PixelClusterCalibratorCommon<traj_t>::Pos,
-          typename PixelClusterCalibratorCommon<traj_t>::Cov>
+std::tuple<typename PixelClusterCalibratorCommon<traj_t>::Pos,
+           typename PixelClusterCalibratorCommon<traj_t>::Cov,
+           unsigned int>
 PixelClusterCalibratorBase<derived_t, traj_t>::calibrate(const Acts::GeometryContext& gctx,
                                                          const Acts::CalibrationContext& cctx,
                                                          const Acts::Surface& surface,
@@ -97,30 +106,29 @@ PixelClusterCalibratorBase<derived_t, traj_t>::calibrate(const Acts::GeometryCon
                                                                                                       direction));
 }
 
-
 template <typename derived_t, typename traj_t>
 void
 PixelClusterCalibratorBase<derived_t, traj_t>
   ::connectOnTrackCalibrator(PixelClusterCalibratorBase<derived_t, traj_t>::OnTrackCalibrator& calibrator) const
 {
    using CalibFuncPtr_t =
-      std::pair<typename PixelClusterCalibratorCommon<traj_t>::Pos,
-                typename PixelClusterCalibratorCommon<traj_t>::Cov>
-      (PixelClusterCalibratorBase<derived_t, traj_t>:: *)(const Acts::GeometryContext&,
-                                                          const Acts::CalibrationContext&,
-                                                          const xAOD::PixelCluster&,
-                                                          const TrackStateProxy&) const;
+      void(PixelClusterCalibratorBase<derived_t, traj_t>:: *)(const Acts::GeometryContext&,
+                                                              const Acts::CalibrationContext&,
+                                                              const xAOD::PixelCluster&,
+                                                              TrackStateProxy&) const;
 
    calibrator. template connect<static_cast<CalibFuncPtr_t>(&PixelClusterCalibratorBase<derived_t, traj_t>::calibrate)>(this);
 }
+
 
 template <typename derived_t, typename traj_t>
 void
 PixelClusterCalibratorBase<derived_t,traj_t>
  ::connectCalibrator(typename PixelClusterCalibratorBase<derived_t,traj_t>::Calibrator &calibrator) const {
    using CalibFuncPtr_t =
-      std::pair<typename PixelClusterCalibratorCommon<traj_t>::Pos,
-                typename PixelClusterCalibratorCommon<traj_t>::Cov>
+      std::tuple<typename PixelClusterCalibratorCommon<traj_t>::Pos,
+                 typename PixelClusterCalibratorCommon<traj_t>::Cov,
+                 unsigned int>
       (PixelClusterCalibratorBase<derived_t, traj_t>:: *)(const Acts::GeometryContext&,
                                                           const Acts::CalibrationContext&,
                                                           const Acts::Surface&,

@@ -95,6 +95,8 @@ def ActsGnnModuleMapFinderToolCfg(flags, name='ActsGnnModuleMapFinderTool', **kw
     kwargs.setdefault("edgeCut", flags.Tracking.GNN.ActsPipeline.edgeCut)
     kwargs.setdefault("numTrtContexts", flags.Tracking.GNN.ActsPipeline.numTrtContexts)
     kwargs.setdefault("minCandidateMeasurements", flags.Tracking.GNN.ActsPipeline.minCandidateMeasurements)
+    kwargs.setdefault("useEdgeLayerConnector", flags.Tracking.GNN.ActsPipeline.useEdgeLayerConnector)
+    kwargs.setdefault("elcMaxHitsPerTrack", flags.Tracking.GNN.ActsPipeline.elcMaxHitsPerTrack)
     kwargs.setdefault("SpacepointFeatureTool", acc.popToolsAndMerge(SpacepointFeatureToolCfg(flags)))
 
     acc.setPrivateTools(CompFactory.InDet.ActsGnnModuleMapFinderTool(name, **kwargs))
@@ -179,6 +181,7 @@ def GNNEndToEndTrackMaker(flags, name="GNNEndToEndTrackMaker", **kwargs):
 
     kwargs.setdefault("areInputClusters", flags.Tracking.GNN.useClusterTracks)
     kwargs.setdefault("doRecoTrackCuts", flags.Tracking.GNN.doRecoTrackCuts)
+    kwargs.setdefault("saveEdgeScore", flags.Tracking.GNN.ActsPipeline.saveEdgeScore)
 
     # add eta dependent cut service
     if "InDetEtaDependentCutSvc" not in kwargs:

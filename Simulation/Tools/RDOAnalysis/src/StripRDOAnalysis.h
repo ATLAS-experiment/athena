@@ -41,7 +41,7 @@ public:
   StripRDOAnalysis(const std::string& name, ISvcLocator* pSvcLocator);
 
   virtual StatusCode initialize() override final;
-  virtual StatusCode execute() override final;
+  virtual StatusCode execute(const EventContext& ctx) override final;
 
 private:
   SG::ReadHandleKey<SCT_RDO_Container> m_inputKey {this, "CollectionName", "ITkStripRDOs", "Input ITk Strip RDO collection name"};

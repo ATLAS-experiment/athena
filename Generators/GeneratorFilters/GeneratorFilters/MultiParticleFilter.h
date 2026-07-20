@@ -28,7 +28,7 @@ public:
         virtual ~MultiParticleFilter();
         virtual StatusCode filterInitialize();
         virtual StatusCode filterFinalize();
-        virtual StatusCode filterEvent();
+        virtual StatusCode filterEvent(const EventContext& ctx);
 
 private:
 	// Setable Properties:

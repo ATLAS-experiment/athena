@@ -56,10 +56,10 @@ StatusCode MuonHoughDataNtuple::finalize()
   return StatusCode::SUCCESS;
 }
 
-StatusCode MuonHoughDataNtuple::execute() 
+StatusCode MuonHoughDataNtuple::execute(const EventContext& ctx) 
 {
   // retrieve containers
-  const EventContext & context = Gaudi::Hive::currentContext();
+  const EventContext & context = ctx;
   SG::ReadHandle<Muon::HoughDataPerSectorVec> houghSecVec{m_houghDataPerSectorVecKey, context};
 
   SG::ReadHandle<xAOD::MuonSegmentContainer> truthSegContainer(m_truthSegmentsKey, context);

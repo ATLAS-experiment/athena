@@ -490,7 +490,11 @@ int main (int argc, char** argv)
   std::cout << "AthContainers/JaggedVecAccessor_test\n";
   test1();
   test2();
-  //coverity[TAINTED_SCALAR]
-  test_forward_fill (argc >= 2 ? atoi(argv[1]) : 0);
+  int n = argc >= 2 ? atoi(argv[1]) : 0;
+  if (n < 0 || n > 100*1000*1000) {
+    std::cerr << "Argument out of range.\n";
+    return 1;
+  }
+  test_forward_fill (n);
   return 0;
 }

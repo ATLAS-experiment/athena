@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "AthContainers/DataVector.h"
@@ -530,12 +530,14 @@ namespace InDet {
     TGeoMedium*   med=new TGeoMedium("Vacuum",1,mat);
     TGeoVolume*   top = gm->MakeBox("Silicon",med,2000.,2000.,10000.);
     gm->SetTopVolume(top);
-    TGeoVolume*   Si_cog[60000]; //where does 22000 come from? For ITk this is too small it seems. Make configurable?
-    TGeoVolume*   Si[60000];
+    static constexpr std::size_t nElements{60'000};
+    //avoid large stack use; simple arrays would use 2.4Mb stack total
+    std::vector<TGeoVolume*>  Si_cog(nElements); 
+    std::vector<TGeoVolume*>   Si(nElements);
     int           Si_count=0;
-    TGeoTranslation* tr[60000];
-    TGeoRotation*    ro[60000];
-    TGeoCombiTrans*  mx[60000];
+    std::vector<TGeoTranslation*> tr(nElements);
+    std::vector<TGeoRotation* >   ro(nElements);
+    std::vector<TGeoCombiTrans*>  mx(nElements);
 
     TGeoTranslation* nulltrans=new TGeoTranslation(0.0,0.0,0.0);
     TGeoRotation*    nullrota=new TGeoRotation();

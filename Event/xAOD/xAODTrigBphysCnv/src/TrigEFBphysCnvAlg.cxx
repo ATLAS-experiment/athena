@@ -44,7 +44,7 @@ namespace xAODMaker {
         return StatusCode::SUCCESS;
     }
 
-    StatusCode TrigEFBphysCnvAlg::execute() {
+    StatusCode TrigEFBphysCnvAlg::execute(const EventContext& /*ctx*/) {
         
         // Retrieve the AOD container:
         const TrigEFBphysContainer* aod = nullptr;

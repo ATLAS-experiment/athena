@@ -41,7 +41,7 @@ class GetLCSinglePionsPerf : public AthAlgorithm
     GetLCSinglePionsPerf(const std::string& name, ISvcLocator* pSvcLocator);
     virtual ~GetLCSinglePionsPerf();
     virtual StatusCode initialize();
-    virtual StatusCode execute();
+    virtual StatusCode execute(const EventContext& ctx);
     virtual StatusCode finalize();
 
     static double angle_mollier_factor(double x);

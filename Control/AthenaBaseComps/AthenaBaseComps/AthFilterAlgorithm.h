@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // AthFilterAlgorithm.h 
@@ -30,9 +30,8 @@ class AthFilterAlgorithm
   /////////////////////////////////////////////////////////////////// 
  public: 
 
-  // Copy constructor: 
-
-  /// Constructor with parameters: 
+  /// Constructor with parameters:
+  [[deprecated("Please use FilterReporter instead")]]
   AthFilterAlgorithm( const std::string& name, ISvcLocator* pSvcLocator );
 
   /// Destructor: 
@@ -51,9 +50,9 @@ class AthFilterAlgorithm
    *  and of any sub-algorithms which it creates.
    */
   virtual StatusCode sysInitialize() override;
-  
+
   /// Set the filter passed flag to the specified state
-  virtual void setFilterPassed( bool state ) const;
+  virtual void setFilterPassed( bool state, const EventContext& ctx ) const override;
 
   /// @brief helper method to ease the setting of this filter's description
   /// in derived classes

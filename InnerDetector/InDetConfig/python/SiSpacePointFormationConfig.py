@@ -12,6 +12,16 @@ def InDetToXAODSpacePointConversionCfg(flags,
     kwargs.setdefault('ProcessPixel', flags.Detector.EnableITkPixel)
     kwargs.setdefault('ProcessStrip', flags.Detector.EnableITkStrip and not flags.Tracking.doITkFastTracking)
     acc.addEventAlgo( CompFactory.InDet.InDetToXAODSpacePointConversion(name, **kwargs) )
+
+    # Persistification
+    if flags.Acts.EDM.PersistifySpacePoints:
+        from ActsConfig.ActsPersistificationConfig import PersistifySpacePoints
+        pixelSpacePointCollections = None if not kwargs['ProcessPixel'] else ['ITkPixelSpacePoints']
+        stripSpacePointCollections = None if not kwargs['ProcessStrip'] else ['ITkStripSpacePoints', 'ITkStripOverlapSpacePoints']
+        acc.merge(PersistifySpacePoints(flags,
+                                        pixelSpacePointCollections=pixelSpacePointCollections,
+                                        stripSpacePointCollections=stripSpacePointCollections))
+
     return acc
 
 def IDInDetToXAODSpacePointConversionCfg(flags,
@@ -40,6 +50,15 @@ def IDInDetToXAODSpacePointConversionCfg(flags,
     kwargs.setdefault('StripDetEleCollKey', "SCT_DetectorElementCollection")
 
     acc.addEventAlgo( CompFactory.InDet.InDetToXAODSpacePointConversion(name, **kwargs) )
+
+    # Persistification
+    if flags.Acts.EDM.PersistifySpacePoints:
+        from ActsConfig.ActsPersistificationConfig import PersistifySpacePoints
+        pixelSpacePointCollections = None if not kwargs['ProcessPixel'] else ['PixelSpacePoints']
+        stripSpacePointCollections = None if not kwargs['ProcessStrip'] else ['SCT_SpacePoints', 'OverlapSpacePoints']
+        acc.merge(PersistifySpacePoints(flags,
+                                        pixelSpacePointCollections=pixelSpacePointCollections,
+                                        stripSpacePointCollections=stripSpacePointCollections))
     return acc
 
 def InDetSiElementPropertiesTableCondAlgCfg(

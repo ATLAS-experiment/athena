@@ -14,7 +14,7 @@ atlas_add_library( ActsToolInterfacesLib
                    LINK_LIBRARIES
 		     Acts::Core
 		     ActsEventLib
-		     ActsGeometryLib
+		     ActsGeometryInterfacesLib
 		     BeamSpotConditionsData
 		     GaudiKernel
 		     HGTD_RawData

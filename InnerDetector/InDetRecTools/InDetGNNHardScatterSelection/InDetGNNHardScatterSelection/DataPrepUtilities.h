@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef INDET_DATA_PREP_UTILITIES_H
@@ -32,7 +32,7 @@ namespace InDetGNNHardScatterSelection {
   struct HSGNNInputConfig
   {
     std::string name;
-    EDMType type;
+    EDMType type{};
     std::string default_flag;
   };
 

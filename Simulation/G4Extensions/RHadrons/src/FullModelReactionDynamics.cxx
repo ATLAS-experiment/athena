@@ -60,8 +60,7 @@
 #include "G4HadronicException.hh"
 #endif
 #include <signal.h>
-//#include "G4ParticleTable.hh"
-
+#include <limits>
 // #include "DumpFrame.hh"
 
 /*         G4double GetQValue(G4ReactionProduct * aSec)
@@ -2677,7 +2676,8 @@ G4double FullModelReactionDynamics::GenerateNBodyEvent(
         {
           emmin += mass[i-1];
           emmax += mass[i];
-          G4double wtfc = 0.0;
+          //changed from 0.0 to std::numeric_limits<G4double>::denorm_min(), 20 Jun 2026
+          G4double wtfc = std::numeric_limits<G4double>::denorm_min();
           if( emmax*emmax > 0.0 )
             {
               G4double arg = emmax*emmax
@@ -2685,7 +2685,8 @@ G4double FullModelReactionDynamics::GenerateNBodyEvent(
                 - 2.0*(emmin*emmin+mass[i]*mass[i]);
               if( arg > 0.0 )wtfc = 0.5*std::sqrt( arg );
             }
-          if( wtfc == 0.0 )
+          //changed from 0.0 to std::numeric_limits<G4double>::denorm_min(), 20 Jun 2026
+          if( wtfc <= std::numeric_limits<G4double>::denorm_min() )
             {
               lzero = false;
               break;
@@ -2707,11 +2708,12 @@ G4double FullModelReactionDynamics::GenerateNBodyEvent(
       wtmax = std::log( std::pow( kineticEnergy, vecLen-2 ) * ffq[vecLen-1] / totalE );
     }
   lzero = true;
-  G4double pd[50];
+  G4double pd[50]{};
   //G4double *pd = new G4double [vecLen-1];
   for( i=0; i<vecLen-1; ++i )
-    {
-      pd[i] = 0.0;
+    { 
+      //changed from 0.0 to std::numeric_limits<G4double>::denorm_min(), 20 Jun 2026
+      pd[i] = std::numeric_limits<G4double>::denorm_min();
       if( emm[i+1]*emm[i+1] > 0.0 )
         {
           G4double arg = emm[i+1]*emm[i+1]
@@ -2720,7 +2722,8 @@ G4double FullModelReactionDynamics::GenerateNBodyEvent(
             - 2.0*(emm[i]*emm[i]+mass[i+1]*mass[i+1]);
           if( arg > 0.0 )pd[i] = 0.5*std::sqrt( arg );
         }
-      if( pd[i] <= 0.0 )    //  changed from  ==  on 02 April 98
+      //changed from 0.0 to std::numeric_limits<G4double>::denorm_min(), 20 Jun 2026
+      if( pd[i] <= std::numeric_limits<G4double>::denorm_min() )    //  changed from  ==  on 02 April 98
         lzero = false;
       else
         wtmax += std::log( pd[i] );

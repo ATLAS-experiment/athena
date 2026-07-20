@@ -77,7 +77,6 @@ if args.postExec:
 
 command = """ prun --exec \
        "{COMMAND};" \
-     --noBuild \
      --inDS={INDS} \
      --outDS={OUTDS} \
      --disableAutoRetry \

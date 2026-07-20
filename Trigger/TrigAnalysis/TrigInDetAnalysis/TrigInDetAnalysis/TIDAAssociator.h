@@ -18,6 +18,7 @@
 #include <cmath>
 #include <map>
 #include <memory>
+#include <stdexcept>
 
 namespace TIDA { 
 
@@ -36,8 +37,6 @@ public:
   { } 
   
   virtual ~Associator() { } 
-
-  virtual Associator* clone() = 0;
 
   virtual std::unique_ptr<Associator> uclone() const = 0;
 

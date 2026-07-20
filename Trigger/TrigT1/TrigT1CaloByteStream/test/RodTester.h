@@ -34,7 +34,7 @@ class RodTester : public AthAlgorithm {
    virtual ~RodTester();
 
    virtual StatusCode initialize();
-   virtual StatusCode execute();
+   virtual StatusCode execute(const EventContext& ctx);
    virtual StatusCode finalize();
 
  private:

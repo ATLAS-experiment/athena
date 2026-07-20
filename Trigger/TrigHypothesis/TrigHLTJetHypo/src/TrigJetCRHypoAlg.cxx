@@ -69,7 +69,7 @@ StatusCode TrigJetCRHypoAlg::execute( const EventContext& context ) const {
     
 
    const std::vector<LinkInfo< xAOD::JetContainer > >jetELs = 
-      findLinks< xAOD::JetContainer >( previousDecision, featureString().c_str(), TrigDefs::lastFeatureOfType);
+      findLinks< xAOD::JetContainer >(context,  previousDecision, featureString().c_str(), TrigDefs::lastFeatureOfType);
       d->setObjectLink<xAOD::JetContainer>( featureString(), jetELs.at(0).link );
       DecisionIDContainer previousDecisionIDs;
       decisionIDs(previousDecision, previousDecisionIDs);

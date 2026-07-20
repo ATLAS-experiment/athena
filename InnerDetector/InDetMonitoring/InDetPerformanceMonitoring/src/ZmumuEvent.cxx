@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //==================================================================================
@@ -301,18 +301,18 @@ bool ZmumuEvent::EventSelection(ZTYPE eType)
   m_eventselectioncount_ptofsecondmuon++;
 
   // Invariant mass window
-  if ( m_fInvariantMass[eType]  < m_MassWindowLow  ) {
+  if ( m_fInvariantMass.at(eType)  < m_MassWindowLow  ) {
     if(m_doDebug) {std::cout <<" * ZmumuEvent * Failing mass window low cut:  reco m= " << m_fInvariantMass[eType] << " > " <<  m_MassWindowLow << std::endl;}
     return false;
   }
-  if ( m_fInvariantMass[eType]  > m_MassWindowHigh ) {
+  if ( m_fInvariantMass.at(eType)  > m_MassWindowHigh ) {
     if(m_doDebug) {std::cout <<" * ZmumuEvent * Failing mass window high cut:  reco m= " << m_fInvariantMass[eType] << " > " <<  m_MassWindowHigh << std::endl;}
     return false;
   }
   m_eventselectioncount_masswindow++;
 
   // opening angle
-  if ( m_fMuonDispersion[eType] <  m_OpeningAngleCut  ) {        
+  if ( m_fMuonDispersion.at(eType) <  m_OpeningAngleCut  ) {    //eType can be 4     
     if(m_doDebug) {std::cout <<" * ZmumuEvent * Failing opening angle cut. Opening angle " << m_fMuonDispersion[eType] << " < " <<  m_OpeningAngleCut << std::endl;}
     return false;
   }

@@ -12,7 +12,7 @@
 #include "xAODEventInfo/EventInfo.h"
 #include "xAODBPhys/BPhysHypoHelper.h"
 #include <algorithm>
-#include "HepPDT/ParticleDataTable.hh"
+#include "GeneratorModules/GenData.h"
 #include "TrkVKalVrtFitter/VxCascadeInfo.h"
 #include "TruthUtils/HepMCHelpers.h"
 
@@ -52,19 +52,16 @@ namespace DerivationFramework {
     ATH_CHECK( m_CascadeTools.retrieve() );
     ATH_MSG_INFO("Retrieved tool " << m_CascadeTools);
 
-    ATH_CHECK( m_partPropSvc.retrieve() );
-    const HepPDT::ParticleDataTable* pdt = m_partPropSvc->PDT();
-
-    // retrieve particle masses
-    m_mass_electron = BPhysPVCascadeTools::getParticleMass(pdt, MC::ELECTRON);
-    m_mass_muon     = BPhysPVCascadeTools::getParticleMass(pdt, MC::MUON);
-    m_mass_pion     = BPhysPVCascadeTools::getParticleMass(pdt, MC::PIPLUS);
-    m_mass_proton   = BPhysPVCascadeTools::getParticleMass(pdt, MC::PROTON);
-    m_mass_lambda   = BPhysPVCascadeTools::getParticleMass(pdt, MC::LAMBDA0);
-    m_mass_ks       = BPhysPVCascadeTools::getParticleMass(pdt, MC::K0S);
-    m_mass_jpsi     = BPhysPVCascadeTools::getParticleMass(pdt, MC::JPSI);
-    m_mass_b0       = BPhysPVCascadeTools::getParticleMass(pdt, MC::B0);
-    m_mass_lambdaB  = BPhysPVCascadeTools::getParticleMass(pdt, MC::LAMBDAB0);
+    auto gendata = std::make_shared<GenData>();
+    m_mass_electron = gendata->particleMass(MC::ELECTRON).value();
+    m_mass_muon     = gendata->particleMass(MC::MUON).value();
+    m_mass_pion     = gendata->particleMass(MC::PIPLUS).value();
+    m_mass_proton   = gendata->particleMass(MC::PROTON).value();
+    m_mass_lambda   = gendata->particleMass(MC::LAMBDA0).value();
+    m_mass_ks       = gendata->particleMass(MC::K0S).value();
+    m_mass_jpsi     = gendata->particleMass(MC::JPSI).value();
+    m_mass_b0       = gendata->particleMass(MC::B0).value();
+    m_mass_lambdaB  = gendata->particleMass(MC::LAMBDAB0).value();
     ATH_CHECK(m_RelinkContainers.initialize());
 
     return StatusCode::SUCCESS;

@@ -23,7 +23,7 @@ public:
   MergeHijingPars(const std::string& name, ISvcLocator* svcLoc);
   virtual ~MergeHijingPars() = default;
   StatusCode initialize() override final;
-  StatusCode execute() override final;
+  StatusCode execute(const EventContext& ctx) override final;
   bool isClonable() const override final { return true; }
 
 private:

@@ -86,7 +86,10 @@ def IOVDbSvcCfg(flags, **kwargs):
 def addFolders(flags, folderStrings, detDb=None, className=None, extensible=False, tag=None, db=None, modifiers=''):
     tagString = ''
     if tag is not None:
-        tagString = '<tag>%s</tag>' % tag
+        if flags.IOVDb.UseCREST:
+            tagString = '<ctag>%s</ctag>' % tag
+        else: #COOL variant
+            tagString = '<tag>%s</tag>' % tag
 
     # Convenience hack: Allow a single string as parameter:
     if isinstance(folderStrings, str):
@@ -135,6 +138,8 @@ def addFolderList(flags, listOfFolderInfoTuple, extensible=False, db=None, modif
             elif os.access(detDb, os.R_OK):
                 # Assume slqite file
                 fs = f'<db>sqlite://;schema={detDb};dbname={dbName}</db> {fs}'
+            elif detDb.startswith("crest_fs:"):
+                fs = f'<db>{detDb}</db> {fs}'
             else:
                 raise ConfigurationError(f'Error, db shorthand {detDb} not known, nor found as sqlite file')
             # Append database string to folder-name

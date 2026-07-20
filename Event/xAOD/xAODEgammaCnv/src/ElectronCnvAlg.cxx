@@ -42,7 +42,7 @@ namespace xAODMaker {
     return StatusCode::SUCCESS;
   }
 
-  StatusCode ElectronCnvAlg::execute() {
+  StatusCode ElectronCnvAlg::execute(const EventContext& /*ctx*/) {
     
     // Retrieve the AOD particles:
     const egammaContainer* aod = evtStore()->tryConstRetrieve<egammaContainer>(m_aodContainerName); 

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // **********************************************************************
@@ -142,7 +142,7 @@ StatusCode IDAlignMonGenericTracksAlg::fillHistograms( const EventContext& ctx )
   using namespace Monitored;
  
   // For histogram naming
-  auto genericTrackGroup = getGroup("IDA_Tracks");
+  const auto & genericTrackGroup = getGroup("IDA_Tracks");
 
   //counters
   int ntrkMax=0;
@@ -567,6 +567,10 @@ StatusCode IDAlignMonGenericTracksAlg::fillHistograms( const EventContext& ctx )
     float pT = charge*trkpt;
     auto pT_m = Monitored::Scalar<float>( "m_pT", pT );
     auto errPt_m = Monitored::Scalar<float>( "m_errPt", Err_Pt );
+    if (qOverP == 0.){
+      ATH_MSG_ERROR("qOverP denominator is zero");
+      return StatusCode::FAILURE;
+    }
     auto pTRes_m = Monitored::Scalar<float>( "m_pTRes", std::fabs(Err_qOverP / qOverP) );
 
     //d0 (BS) vs Eta, vs Phi (Phi, Barrel, EndCap A, EndCap C), vs pT // Eta vs Npixhits_per_track, SCT, TRT // Eta for positive and negative tracks 

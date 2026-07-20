@@ -33,13 +33,21 @@ def ITkActsTrackParticleCreationCfg(flags,
 
     prefix = "ActsCombined" if not flags.hasCategory("Tracking.ActiveConfig") else flags.Tracking.ActiveConfig.extension
     prefix += f"To{TrackParticleContainer}"
-    from ActsConfig.ActsTrackFindingConfig import ActsTrackToTrackParticleCnvAlgCfg
+    from ActsConfig.ActsEventCnvConfig import ActsTrackToTrackParticleCnvAlgCfg, xAODtoTrkConverterAlgCfg
     acc.merge(ActsTrackToTrackParticleCnvAlgCfg(flags,
                                                 name = f"{prefix}TrackToTrackParticleCnvAlg",
                                                 ACTSTracksLocation = TrackContainers,
                                                 TrackParticlesOutKey = TrackParticleContainer,
                                                 PerigeeExpression = PerigeeExpression))
-    
+    ### Do not convert Temporary track particles from the heavy ion chain
+    ### or TrackContainer made up of ITk track seeds (No track parameters)
+    if "Temporary" not in TrackParticleContainer and \
+       "Seed" not in TrackParticleContainer:
+        acc.merge(xAODtoTrkConverterAlgCfg(flags,
+                                       name=f"{prefix}TrackParticleToTrkCnvAlg",
+                                       TrackParticles = TrackParticleContainer,
+                                       OutTrackContainer="Combined{tracks}Tracks".format(tracks = 
+                                                        TrackParticleContainer[:TrackParticleContainer.rfind("Track")]) ))
     if flags.Tracking.doTruth :
         from AthenaCommon.Constants import WARNING, INFO
         track_to_truth_maps = []
@@ -71,31 +79,9 @@ def ITkActsTrackParticleCreationCfg(flags,
     # to Vertex we need to create a temporary track particle collection wrt the BeamLine
     # which does not need to be persistified
     if persistifyCollection:
-        # excluded track aux data
-        excludedAuxData = ('-clusterAssociation.-TTVA_AMVFVertices_forReco.-AssoClustersUFO'
-                           '.-TTVA_AMVFWeights_forReco')
-        # remove track decorations used internally by FTAG software
-        from InDetConfig.InDetTrackOutputConfig import FTAG_AUXDATA
-        excludedAuxData += '.-'.join([''] + FTAG_AUXDATA)
-
-        # exclude TTVA decorations
-        excludedAuxData += '.-TTVA_AMVFVertices.-TTVA_AMVFWeights'
-
-        # exclude IDTIDE decorations
-        from DerivationFrameworkInDet.IDTIDE import IDTIDE_AOD_EXCLUDED_AUXDATA
-        excludedAuxData += '.-'.join([''] + IDTIDE_AOD_EXCLUDED_AUXDATA)
-        from DerivationFrameworkInDet.IDTRKVALID import IDTRKVALID_AOD_EXCLUDED_AUXDATA
-        excludedAuxData += '.-'.join([''] + IDTRKVALID_AOD_EXCLUDED_AUXDATA)
-        if not flags.Acts.EDM.PersistifyTracks:
-            excludedAuxData += '.-actsTrack'
-
-        toAOD = []
-        toAOD += [f"xAOD::TrackParticleContainer#{TrackParticleContainer}",
-                  f"xAOD::TrackParticleAuxContainer#{TrackParticleContainer}Aux.{excludedAuxData}"]
-        
-        from OutputStreamAthenaPool.OutputStreamConfig import addToAOD    
-        acc.merge(addToAOD(flags, toAOD))
-    
+        from ActsConfig.ActsPersistificationConfig import PersistifyTrackParticles
+        acc.merge(PersistifyTrackParticles(flags,
+                                           trackParticleCollections=[TrackParticleContainer]))
     return acc
 
 
@@ -117,8 +103,10 @@ def ITkActsTrackParticlePersistificationCfg(flags) -> ComponentAccumulator:
         # If we do not want the track collection to be merged with another collection
         # then we immediately create the track particles from it
         # Naming convention for track particles: InDet{extension}TrackParticles
+        # (unless the pass overrides it via storedTrackParticlesExtension)
         acts_tracks = f"{flags.Tracking.ActiveConfig.extension}Tracks" if not flags.Acts.doAmbiguityResolution else f"{flags.Tracking.ActiveConfig.extension}ResolvedTracks"
-        TrackParticles = f'InDet{flags.Tracking.ActiveConfig.extension}TrackParticles'
+        from InDetConfig.ITkActsHelpers import separateTrackParticleContainerName
+        TrackParticles = separateTrackParticleContainerName(flags)
         acc.merge(ITkActsTrackParticleCreationCfg(flags,
                                                   TrackContainers = [acts_tracks],
                                                   TrackParticleContainer = TrackParticles))

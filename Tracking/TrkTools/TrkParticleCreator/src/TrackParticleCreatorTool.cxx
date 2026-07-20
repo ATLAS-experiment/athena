@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /***************************************************************************
@@ -161,9 +161,11 @@ TrackParticleCreatorTool::initialize()
     return StatusCode::FAILURE;
   }
 
-  if (detStore()->retrieve(m_trtID, "TRT_ID").isFailure()) {
-    ATH_MSG_FATAL("Could not get TRT_ID ");
-    return StatusCode::FAILURE;
+  if (m_doSharedTRTHits) {
+    if (detStore()->retrieve(m_trtID, "TRT_ID").isFailure()) {
+      ATH_MSG_FATAL("Could not get TRT_ID ");
+      return StatusCode::FAILURE;
+    }
   }
 
   if (!m_IBLParameterSvc.empty()) {
@@ -1024,10 +1026,12 @@ TrackParticleCreatorTool::addDetailedHitInformation(const Trk::TrackStates* trac
 
   uint8_t nContribPixelBarrelFlatLayers     = static_cast<uint8_t>(detailedInfo.getContributionFromRegion(Trk::pixelBarrelFlat    ));
   uint8_t nContribPixelBarrelInclinedLayers = static_cast<uint8_t>(detailedInfo.getContributionFromRegion(Trk::pixelBarrelInclined));
+  uint8_t nContribPixelBarrelLayers         = static_cast<uint8_t>(nContribPixelBarrelFlatLayers+nContribPixelBarrelInclinedLayers);
   uint8_t nContribPixelEndcap               = static_cast<uint8_t>(detailedInfo.getContributionFromRegion(Trk::pixelEndcap        ));
 
   uint8_t nPixelBarrelFlatHits     = static_cast<uint8_t>(detailedInfo.getHitsFromRegion(Trk::pixelBarrelFlat    ));
   uint8_t nPixelBarrelInclinedHits = static_cast<uint8_t>(detailedInfo.getHitsFromRegion(Trk::pixelBarrelInclined));
+  uint8_t nPixelBarrelHits         = static_cast<uint8_t>(nPixelBarrelFlatHits+nPixelBarrelInclinedHits);
   uint8_t nPixelEndcapHits         = static_cast<uint8_t>(detailedInfo.getHitsFromRegion(Trk::pixelEndcap        ));
 
   uint8_t nInnermostPixelLayerEndcapHits = static_cast<uint8_t>(detailedInfo.getHits(Trk::pixelEndcap, 0));
@@ -1035,12 +1039,16 @@ TrackParticleCreatorTool::addDetailedHitInformation(const Trk::TrackStates* trac
 								      + detailedInfo.getHits(Trk::pixelEndcap, 2)); // L0.5 shorties + L1
 
   tp.setSummaryValue(nContribPixelLayers, xAOD::numberOfContribPixelLayers);
-  tp.setSummaryValue(nContribPixelBarrelFlatLayers, xAOD::numberOfContribPixelBarrelFlatLayers);
-  tp.setSummaryValue(nContribPixelBarrelInclinedLayers, xAOD::numberOfContribPixelBarrelInclinedLayers);
+  tp.setSummaryValue(nContribPixelBarrelLayers, xAOD::numberOfContribPixelBarrelLayers);
   tp.setSummaryValue(nContribPixelEndcap, xAOD::numberOfContribPixelEndcap);
-  tp.setSummaryValue(nPixelBarrelFlatHits, xAOD::numberOfPixelBarrelFlatHits);
-  tp.setSummaryValue(nPixelBarrelInclinedHits, xAOD::numberOfPixelBarrelInclinedHits);
-  tp.setSummaryValue(nPixelEndcapHits, xAOD::numberOfPixelEndcapHits);
+  if (m_itkDecorationLevel>=s_expertLevel) {
+     tp.setSummaryValue(nPixelBarrelHits, xAOD::numberOfPixelBarrelHits);
+     tp.setSummaryValue(nContribPixelBarrelFlatLayers, xAOD::numberOfContribPixelBarrelFlatLayers);
+     tp.setSummaryValue(nContribPixelBarrelInclinedLayers, xAOD::numberOfContribPixelBarrelInclinedLayers);
+     tp.setSummaryValue(nPixelBarrelFlatHits, xAOD::numberOfPixelBarrelFlatHits);
+     tp.setSummaryValue(nPixelBarrelInclinedHits, xAOD::numberOfPixelBarrelInclinedHits);
+     tp.setSummaryValue(nPixelEndcapHits, xAOD::numberOfPixelEndcapHits);
+  }
   tp.setSummaryValue(nInnermostPixelLayerEndcapHits, xAOD::numberOfInnermostPixelLayerEndcapHits);
   tp.setSummaryValue(nNextToInnermostPixelLayerEndcapHits, xAOD::numberOfNextToInnermostPixelLayerEndcapHits);
 

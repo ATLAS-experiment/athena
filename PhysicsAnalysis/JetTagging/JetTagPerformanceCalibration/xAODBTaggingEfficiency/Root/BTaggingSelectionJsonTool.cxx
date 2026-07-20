@@ -109,6 +109,22 @@ StatusCode BTaggingSelectionJsonTool::initialize() {
 
 StatusCode BTaggingSelectionJsonTool::loadBinConfig(const json& pT_mass_2d_cutvalue, BinConfig& config) const
 {
+    // pTbins defines the bin edges, so there must be exactly one fewer pT bin (WP entry) than
+    // there are edges. The pT_mass_2d_cutvalue dict holds the "pTbins" edge list plus one entry
+    // per pT bin, so its total size must equal the number of pT bin edges.
+    if (pT_mass_2d_cutvalue["pTbins"].size() != pT_mass_2d_cutvalue.size()) {
+        const std::string binCountMsg = "We expect N bin edges for N-1 bins, but there are " +
+            std::to_string(pT_mass_2d_cutvalue["pTbins"].size()) + " pT bin edges but " +
+            std::to_string(pT_mass_2d_cutvalue.size() - 1) +
+            " entries in the pT_mass_2d_cutvalue dict. Please check the JSON file: " + m_json_config_path;
+        if (m_allowBinCountMismatch) {
+            ATH_MSG_WARNING(binCountMsg + " Continuing because AllowBinCountMismatch is set.");
+        } else {
+            ATH_MSG_ERROR(binCountMsg);
+            return StatusCode::FAILURE;
+        }
+    }
+
     for (unsigned int ipT = 0; ipT < pT_mass_2d_cutvalue["pTbins"].size(); ++ipT) {
         const json& pt = pT_mass_2d_cutvalue["pTbins"][ipT];
         config.pTbins.push_back(BTaggingToolUtil::getExtendedFloat(pt));
@@ -132,6 +148,20 @@ StatusCode BTaggingSelectionJsonTool::loadBinConfig(const json& pT_mass_2d_cutva
 
             config.massbins.push_back(std::move(mass_values));
             config.OPCutValues.push_back(std::move(cut_values));
+
+            // We expect N mass bins (edges) and N-1 cut values for each pT bin. Accessing the
+            // cut value for a jet in the final mass bin would otherwise read outside the vector.
+            if (config.massbins.back().size() != config.OPCutValues.back().size() + 1) {
+                const std::string binCountMsg = "Expected to have N mass bins and N-1 cut values for pT bin " +
+                    pT_key + " Instead found " + std::to_string(config.massbins.back().size()) +
+                    " mass bins and " + std::to_string(config.OPCutValues.back().size()) + " cut values.";
+                if (m_allowBinCountMismatch) {
+                    ATH_MSG_WARNING(binCountMsg + " Continuing because AllowBinCountMismatch is set.");
+                } else {
+                    ATH_MSG_ERROR(binCountMsg);
+                    return StatusCode::FAILURE;
+                }
+            }
         }
     }
 

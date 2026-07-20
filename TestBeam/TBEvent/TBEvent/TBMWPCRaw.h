@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TBEVENT_TBMWPCRAW_H
@@ -11,12 +11,13 @@
 //                                                                  //
 //////////////////////////////////////////////////////////////////////
 
-#include <string>
-#include <vector>
+
 #include "AthenaKernel/CLASS_DEF.h"
 #include "AthContainers/DataVector.h"
 #include "TBEvent/TBBeamDetector.h"
-
+#include <string>
+#include <string_view>
+#include <vector>
 
 
 class TBMWPCRaw : public TBBeamDetector
@@ -31,7 +32,7 @@ class TBMWPCRaw : public TBBeamDetector
   /////////////////////////////////
 
   TBMWPCRaw();  
-  TBMWPCRaw(const std::string& thisBPCName);
+  TBMWPCRaw(std::string_view thisBPCName);
   ~TBMWPCRaw();
 
   ///////////////////////

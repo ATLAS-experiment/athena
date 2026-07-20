@@ -24,7 +24,7 @@ public:
     virtual ~TgcDigtThresholdTestAlg();
 
     virtual StatusCode initialize() override;
-    virtual StatusCode execute() override;
+    virtual StatusCode execute(const EventContext& ctx) override;
 
 private:
     SG::ReadCondHandleKey<TgcDigitThresholdData> m_readKey{this, "ReadKey", "TgcEnergyThresholds", "Key of the Energy threshold data"};

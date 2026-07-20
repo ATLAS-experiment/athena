@@ -18,7 +18,6 @@
 #include "AtlasDetDescr/AtlasRegion.h"
 #include "CxxUtils/checker_macros.h"
 
-#include "MCTruth/AtlasG4EventUserInfo.h"
 #include "MCTruth/PrimaryParticleInformation.h"
 #include "MCTruth/TrackHelper.h"
 #include "MCTruth/TrackInformation.h"
@@ -33,7 +32,6 @@
 #include "G4TransportationManager.hh"
 #include "G4LogicalVolumeStore.hh"
 
-#include "G4EventManager.hh"
 #include "G4Event.hh"
 #include "G4PrimaryParticle.hh"
 
@@ -48,14 +46,12 @@ namespace iGeant4 {
 void TrackProcessorUserActionBase::BeginOfEventAction(const G4Event*)
 {
   m_curBaseISP = nullptr;
-  m_atlasG4EvtUserInfo = ::iGeant4::ISFG4Helper::getAtlasG4EventUserInfo();
   return;
 }
 
 void TrackProcessorUserActionBase::EndOfEventAction(const G4Event*)
 {
   m_curBaseISP = nullptr;
-  m_atlasG4EvtUserInfo = nullptr;
   return;
 }
 
@@ -66,6 +62,12 @@ void TrackProcessorUserActionBase::UserSteppingAction(const G4Step* aStep)
   //TODO ELLI ATH_MSG_DEBUG( "Currently simulating TrackID = " << aStep->GetTrack()->GetTrackID() <<
   //TODO ELLI                " inside geoID = " << curGeoID );
 
+  // AdePT currently does not return the G4Secondary vector per G4Step. As the vector is required to attach
+  // the G4VUserInfo in the PreUserTrackingAction below, the G4VUserInfo is not available, which
+  // would lead to nullptr access crashes
+#ifdef ATHSIMULATION_USE_ADEPT
+  return;
+#endif
   //
   // call the ISFSteppingAction method of the implementation
   //
@@ -75,28 +77,36 @@ void TrackProcessorUserActionBase::UserSteppingAction(const G4Step* aStep)
   // propagate the current ISFParticle link to all secondaries
   //
   const std::vector<const G4Track*>  *secondaryVector = aStep->GetSecondaryInCurrentStep();
-  for ( auto* aConstSecondaryTrack : *secondaryVector ) {
-    // get a non-const G4Track for current secondary (nasty!)
-    G4Track* aSecondaryTrack ATLAS_THREAD_SAFE = const_cast<G4Track*>( aConstSecondaryTrack ); // imposed by Geant4 interface
+  if (secondaryVector && !secondaryVector->empty()) {
+    for ( auto* aConstSecondaryTrack : *secondaryVector ) {
+      // get a non-const G4Track for current secondary (nasty!)
+      G4Track* aSecondaryTrack ATLAS_THREAD_SAFE = const_cast<G4Track*>( aConstSecondaryTrack ); // imposed by Geant4 interface
 
-    auto *trackInfo = ::iGeant4::ISFG4Helper::getISFTrackInfo(*aSecondaryTrack);
+      auto *trackInfo = ::iGeant4::ISFG4Helper::getISFTrackInfo(*aSecondaryTrack);
 
-    // G4Tracks aready returned to ISF will have a TrackInformation attached to them
-    bool particleReturnedToISF = trackInfo && trackInfo->GetReturnedToISF();
-    if (!particleReturnedToISF) {
-      HepMC::GenParticlePtr generationZeroGenParticle{};
-      ::iGeant4::ISFG4Helper::attachTrackInfoToNewG4Track( *aSecondaryTrack,
-                                                *m_curBaseISP,
-                                                VTrackInformation::Secondary,
-                                                generationZeroGenParticle );
-    }
-  } // <- loop over secondaries from this step
+      // G4Tracks aready returned to ISF will have a TrackInformation attached to them
+      bool particleReturnedToISF = trackInfo && trackInfo->GetReturnedToISF();
+      if (!particleReturnedToISF) {
+        HepMC::GenParticlePtr generationZeroGenParticle{};
+        ::iGeant4::ISFG4Helper::attachTrackInfoToNewG4Track( *aSecondaryTrack,
+                                                  *m_curBaseISP,
+                                                  VTrackInformation::Secondary,
+                                                  generationZeroGenParticle );
+      }
+    } // <- loop over secondaries from this step
+  }
 
   return;
 }
 
 void TrackProcessorUserActionBase::PreUserTrackingAction(const G4Track* aTrack)
 {
+  // AdePT currently does not return the G4Secondary vector per G4Step. As the vector is required to attach
+  // the G4VUserInfo below the G4VUserInfo is not available, which would lead to nullptr access crashes
+#ifdef ATHSIMULATION_USE_ADEPT
+  return;
+#endif
+
   bool isPrimary = ! aTrack->GetParentID();
   if (isPrimary) {
     G4Track* nonConstTrack ATLAS_THREAD_SAFE = const_cast<G4Track*> (aTrack); // imposed by Geant4 interface
@@ -158,8 +168,10 @@ void TrackProcessorUserActionBase::setupPrimary(G4Track& aTrack)
 
   int regenerationNr = primaryPartInfo->GetRegenerationNr();
 
-  HepMC::GenParticlePtr primaryGenParticle = truthBinding->getGenerationZeroGenParticle();
+  // Keep the legacy classification based on generation-zero identity; the
+  // true primary is stored separately on TrackInformation by ISFG4Helper.
   HepMC::GenParticlePtr generationZeroGenParticle = truthBinding->getGenerationZeroGenParticle();
+  HepMC::GenParticlePtr primaryGenParticle = generationZeroGenParticle;
   HepMC::GenParticlePtr currentGenParticle = truthBinding->getCurrentGenParticle();
 
   auto classification = classify(primaryGenParticle,
@@ -173,9 +185,7 @@ void TrackProcessorUserActionBase::setupPrimary(G4Track& aTrack)
                                                                  generationZeroGenParticle );
   newTrackInfo->SetRegenerationNr(regenerationNr);
 
-  updateCachedParticleInfo(baseISP,
-                     primaryGenParticle,
-                     currentGenParticle);
+  updateCurrentBaseISFParticle(baseISP);
 
   return;
 }
@@ -184,22 +194,16 @@ void TrackProcessorUserActionBase::setupSecondary(const G4Track& aTrack)
 {
   auto* trackInfo = ::iGeant4::ISFG4Helper::getISFTrackInfo(aTrack);
 
-  HepMC::GenParticlePtr currentGenParticle = trackInfo->GetCurrentGenParticle();
-  HepMC::GenParticlePtr primaryGenParticle = trackInfo->GetPrimaryGenParticle();
   ISF::ISFParticle* baseISFParticle = trackInfo->GetBaseISFParticle();
 
-  updateCachedParticleInfo(baseISFParticle, primaryGenParticle, currentGenParticle);
+  updateCurrentBaseISFParticle(baseISFParticle);
 
   return;
 }
 
-void TrackProcessorUserActionBase::updateCachedParticleInfo(ISF::ISFParticle* baseISFParticle,
-                                                      HepMC::ConstGenParticlePtr primaryGenParticle,
-                                                      HepMC::GenParticlePtr currentGenParticle)
+void TrackProcessorUserActionBase::updateCurrentBaseISFParticle(ISF::ISFParticle* baseISFParticle)
 {
   m_curBaseISP = baseISFParticle;
-  m_atlasG4EvtUserInfo->SetCurrentPrimaryGenParticle( primaryGenParticle );
-  m_atlasG4EvtUserInfo->SetCurrentGenParticle( currentGenParticle );
   return;
 }
 

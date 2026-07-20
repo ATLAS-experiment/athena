@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -37,13 +37,9 @@ class ISCT_SensorsTool: virtual public IAlgTool {
 
   ///Fill vector with sensors info
   virtual void getSensorsData(std::vector<std::string>& userVector, const EventContext& ctx) const =0;
-  virtual void getSensorsData(std::vector<std::string>& userVector) const =0;
   virtual const SCT_SensorCondData* getSensorsData(const unsigned int truncatedSerialNumber, const EventContext& ctx) const =0;
-  virtual const SCT_SensorCondData* getSensorsData(const unsigned int truncatedSerialNumber) const =0;
   virtual std::string getManufacturer(unsigned int truncatedSerialNumber, const EventContext& ctx) const =0;
-  virtual std::string getManufacturer(unsigned int truncatedSerialNumber) const =0;
   virtual void printManufacturers(const EventContext& ctx) const =0;
-  virtual void printManufacturers() const =0;
 };
 
 #endif // ISCT_SensorsTool_h

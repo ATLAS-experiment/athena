@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /** 
@@ -22,7 +22,7 @@
 #include "CLHEP/Geometry/Transform3D.h"
 
 #include <string>
-#include <iostream>
+#include <string_view>
 #include <fstream>
 
 namespace InDetDD {
@@ -38,7 +38,7 @@ class GetDetectorLocalFrames:public AthAlgorithm {
  public:
     GetDetectorLocalFrames (const std::string& name, ISvcLocator* pSvcLocator);
     StatusCode initialize();
-    StatusCode execute();
+    StatusCode execute(const EventContext& ctx);
     StatusCode finalize();
 
  private:
@@ -48,7 +48,7 @@ class GetDetectorLocalFrames:public AthAlgorithm {
     void writeSCTFrames();
     void writeTRTFrames();
     void writeTransForm(const HepGeom::Transform3D& transform);
-    void writeVector(const std::string& name, const Amg::Vector3D& vector);
+    void writeVector(std::string_view name, const Amg::Vector3D& vector);
 
     /** Name of the Output file */
     std::string m_outputFileName;
@@ -61,15 +61,15 @@ class GetDetectorLocalFrames:public AthAlgorithm {
     SG::ReadCondHandleKey<InDetDD::SiDetectorElementCollection> m_SCTDetEleCollKey{this, "SCTDetEleCollKey", "SCT_DetectorElementCollection", "Key of SiDetectorElementCollection for SCT"};
     
     /** TRT Data */
-    int m_trt_barrel_ec;
-    int m_trt_layer_or_wheel;
-    int m_trt_phi_module;
-    int m_trt_straw_layer;
-    int m_trt_straw;
+    int m_trt_barrel_ec{};
+    int m_trt_layer_or_wheel{};
+    int m_trt_phi_module{};
+    int m_trt_straw_layer{};
+    int m_trt_straw{};
     
     /** Tools */
-    const TRT_ID *m_TRTHelper;
-    const InDetDD::TRT_DetectorManager *m_TRTDetectorManager;
+    const TRT_ID *m_TRTHelper{};
+    const InDetDD::TRT_DetectorManager *m_TRTDetectorManager{};
     
     /** Counter */
     int m_eventCount{-1};

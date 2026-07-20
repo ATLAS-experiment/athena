@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from InDetConfig.InDetTrackOutputConfig import FTAG_AUXDATA
@@ -16,6 +16,10 @@ def ITkTrackRecoOutputCfg(flags, extensions_list=None):
                        '.-TTVA_AMVFWeights_forReco')
     # remove track decorations used internally by FTAG software
     excludedAuxData += '.-'.join([''] + FTAG_AUXDATA)
+    excludedAuxData += ('.-trackParameterCovarianceMatrices'
+                        '.-parameterX.-parameterY.-parameterZ'
+                        '.-parameterPX.-parameterPY.-parameterPZ'
+                        '.-parameterPosition')
 
     # exclude TTVA decorations
     excludedAuxData += '.-TTVA_AMVFVertices.-TTVA_AMVFWeights'

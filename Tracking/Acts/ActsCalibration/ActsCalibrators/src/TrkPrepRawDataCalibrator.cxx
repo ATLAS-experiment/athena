@@ -4,17 +4,14 @@
 #include "ActsCalibrators/TrkPrepRawDataCalibrator.h"
 
 namespace ActsTrk::detail {
-  TrkPrepRawDataCalibrator::TrkPrepRawDataCalibrator(const ActsTrk::IActsToTrkConverterTool* convTool,
+  TrkPrepRawDataCalibrator::TrkPrepRawDataCalibrator(const ActsTrk::IGeometryRealmConvTool* convTool,
                                                      const Trk::IRIO_OnTrackCreator* rotCreator):
       m_convTool{convTool}, m_rotCreator{rotCreator} {}
   
-  TrkPrepRawDataCalibrator::SourceLink_t 
+  const Trk::PrepRawData*
         TrkPrepRawDataCalibrator::unpack(const Acts::SourceLink& sl) {
-    SourceLink_t prd = sl.template get<SourceLink_t>();
-    assert(prd != nullptr);
-    return prd;
-  }
-  Acts::SourceLink TrkPrepRawDataCalibrator::pack(const SourceLink_t prd) {
-    return Acts::SourceLink{prd};
+    const SourceLink_t& prd = sl.template get<SourceLink_t>();
+    return std::holds_alternative<const Trk::PrepRawData*>(prd) ? 
+           std::get<const Trk::PrepRawData*>(prd) : nullptr;
   }
 }

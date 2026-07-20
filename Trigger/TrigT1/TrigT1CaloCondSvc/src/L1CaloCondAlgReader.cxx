@@ -47,28 +47,28 @@ StatusCode  L1CaloCondAlgReader:: initialize ()
 }
 
 
-StatusCode  L1CaloCondAlgReader:: execute ()
+StatusCode  L1CaloCondAlgReader:: execute (const EventContext& ctx)
 {
   
   ATH_MSG_INFO( "start execute " << name() ); 
 
 
 
-  SG::ReadHandle<xAOD::TriggerTowerContainer>tts(m_legacy);   
+  SG::ReadHandle<xAOD::TriggerTowerContainer>tts(m_legacy, ctx);   
   ATH_MSG_INFO("size Trigger Tower Container " << tts->size());
   
-  SG::ReadCondHandle<L1CaloDisabledTowersContainer> disTowers( m_disabledTowersContainer);
-  SG::ReadCondHandle<L1CaloDerivedRunParsContainer> derRunPars( m_derivedRunParsContainer);
-  SG::ReadCondHandle<L1CaloPprChanCalibContainer> pprChanCalib( m_pprChanCalibContainer);
-  SG::ReadCondHandle<L1CaloPprChanDefaultsContainer> pprChanDefaults( m_pprChanDefaultsContainer);
-  SG::ReadCondHandle<L1CaloPpmFineTimeRefsContainer> ppmFineTimeRefs( m_ppmFineTimeRefsContainer);
-  SG::ReadCondHandle<L1CaloRunParametersContainer> runParameters( m_runParametersContainer);
-  SG::ReadCondHandle<L1CaloPprChanStrategyContainer> pprChanStrategy(  m_pprChanStrategyContainer);
-  SG::ReadCondHandle<L1CaloPpmDeadChannelsContainer> ppmDeadChannels ( m_ppmDeadChannelsContainer);
-  SG::ReadCondHandle<L1CaloPprConditionsContainerRun2>  pprConditionsRun2( m_pprConditionsContainerRun2);
-  SG::ReadCondHandle<L1CaloPprDisabledChannelContainerRun2>  pprDisabledChannel(m_pprDisabledChannelContainer);
-  SG::ReadCondHandle<L1CaloReadoutConfigContainer> readoutConfig(m_readoutConfigContainer);
-  SG::ReadCondHandle<L1CaloReadoutConfigContainerJSON> readoutConfigJSON(m_readoutConfigContainerJSON);
+  SG::ReadCondHandle<L1CaloDisabledTowersContainer> disTowers( m_disabledTowersContainer, ctx );
+  SG::ReadCondHandle<L1CaloDerivedRunParsContainer> derRunPars( m_derivedRunParsContainer, ctx );
+  SG::ReadCondHandle<L1CaloPprChanCalibContainer> pprChanCalib( m_pprChanCalibContainer, ctx );
+  SG::ReadCondHandle<L1CaloPprChanDefaultsContainer> pprChanDefaults( m_pprChanDefaultsContainer, ctx );
+  SG::ReadCondHandle<L1CaloPpmFineTimeRefsContainer> ppmFineTimeRefs( m_ppmFineTimeRefsContainer, ctx );
+  SG::ReadCondHandle<L1CaloRunParametersContainer> runParameters( m_runParametersContainer, ctx );
+  SG::ReadCondHandle<L1CaloPprChanStrategyContainer> pprChanStrategy(  m_pprChanStrategyContainer, ctx );
+  SG::ReadCondHandle<L1CaloPpmDeadChannelsContainer> ppmDeadChannels ( m_ppmDeadChannelsContainer, ctx );
+  SG::ReadCondHandle<L1CaloPprConditionsContainerRun2>  pprConditionsRun2( m_pprConditionsContainerRun2, ctx );
+  SG::ReadCondHandle<L1CaloPprDisabledChannelContainerRun2>  pprDisabledChannel( m_pprDisabledChannelContainer, ctx );
+  SG::ReadCondHandle<L1CaloReadoutConfigContainer> readoutConfig( m_readoutConfigContainer, ctx );
+  SG::ReadCondHandle<L1CaloReadoutConfigContainerJSON> readoutConfigJSON( m_readoutConfigContainerJSON, ctx );
 
 
   

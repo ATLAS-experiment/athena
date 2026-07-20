@@ -86,7 +86,11 @@ namespace MuonR4{
         /// Smear the parameters
         for (ParamDefs precPar : {ParamDefs::y0, ParamDefs::theta,
                                   ParamDefs::x0, ParamDefs::phi}) { 
-            if (precPar == ParamDefs::phi && !segment.summary().nPhiHits) {
+            if (precPar == ParamDefs::x0 && 
+                std::ranges::none_of(segment.measurements(),
+                                    [](const auto& meas) { 
+                                        return meas->measuresPhi(); 
+                                    })) {
                 break;
             }
             const unsigned idx = Acts::toUnderlying(precPar);
@@ -151,8 +155,9 @@ namespace MuonR4{
         auto& auxMeasHandle{*handleCreation};
         using Link_t = ElementLink<xAOD::MuonSegmentContainer>;
         SG::WriteDecorHandle<xAOD::MuonSegmentContainer, Link_t> dec_segLink{m_linkKey, ctx};
-        using ParDecor_t = SG::WriteDecorHandle<xAOD::MuonSegmentContainer, 
-                                                xAOD::MeasVector<Acts::toUnderlying(ParamDefs::nPars)>>;
+
+        using SegPars_t = xAOD::PosAccessor<Acts::toUnderlying(ParamDefs::nPars)>::element_type;
+        using ParDecor_t = SG::WriteDecorHandle<xAOD::MuonSegmentContainer,  SegPars_t>;
         
         ParDecor_t dec_locPars{m_localParsKey, ctx};
         ParDecor_t dec_seedPars{m_seedParsKey, ctx};
@@ -201,7 +206,7 @@ namespace MuonR4{
             const Amg::Vector3D planeNormal = sectorTrf.linear().col(2);
 
             m_calibTool->stampSignsOnMeasurements(*reFitMe);
-            line.updateParameters(localSegmentPars(gctx,  *MuonR4::detailedSegment(*reFitMe)));
+            line.updateParameters(localSegmentPars(*reFitMe));
             /// Fetch a smeared segment position & direction
             const auto [seedPos, seedDir] = smearSegment(gctx, *MuonR4::detailedSegment(*reFitMe), randEngine);
             /// Decorate the initial seed parameters to the segment
@@ -394,13 +399,13 @@ namespace MuonR4{
             }
             saveDisplay("goodone");
 
-            MuonR4::Segment::HitSummary summary{};
+            std::uint8_t nPrecHits{0}, nTrigEtaHits{0}, nTrigPhiHits{0};
             /// Fetch the measurements from the track state
             std::vector<const xAOD::UncalibratedMeasurement*> goodMeas{};
             unsigned int itr{0};
-            tracks.trackStateContainer().visitBackwards(track.tipIndex(),[&](const auto& state){
+            for (const auto state :track.trackStatesReversed()) {
                 if (!state.hasUncalibratedSourceLink()){
-                    return;
+                    continue;
                 }
                 goodMeas.insert(goodMeas.begin(),
                                 ActsTrk::detail::xAODUncalibMeasCalibrator::unpack(state.getUncalibratedSourceLink()));
@@ -409,19 +414,20 @@ namespace MuonR4{
                                 <<", id: "<<m_surfAccessor.get(goodMeas.front())->geometryId());
 
                 const xAOD::UncalibratedMeasurement* m = goodMeas.front();
-                const bool isPrecHit = (m->type() == xAOD::UncalibMeasType::MdtDriftCircleType ||
-                                        m->type() == xAOD::UncalibMeasType::MMClusterType ||
-                                       (m->type() == xAOD::UncalibMeasType::sTgcStripType && 
-                                         !m_idHelperSvc->measuresPhi(xAOD::identify(m))));
-
-                summary.nPrecHits += isPrecHit;
-                if (m->type() == xAOD::UncalibMeasType::Other || 
-                    m_idHelperSvc->measuresPhi(xAOD::identify(m))){
-                    ++summary.nPhiHits;
+                if (xAOD::isPrecisionHit(m)) {
+                    ++nPrecHits;
+                    nTrigPhiHits += m->numDimensions() == 2;
+                } else if (m->type() == xAOD::UncalibMeasType::Other) {
+                    ++nTrigEtaHits;
+                    ++nTrigPhiHits;
                 } else {
-                    summary.nEtaTrigHits += !isPrecHit;
+                    const auto* M = dynamic_cast<const xAOD::MuonMeasurement*>(m);
+                    assert(M != nullptr);
+                    nTrigEtaHits += (M->numDimensions() == 2 || !M->measuresPhi());
+                    nTrigPhiHits += (M->numDimensions() == 2 || M->measuresPhi());
+                    
                 }
-            });
+            }
 
             /// Direction is always expressed in global frame -> transform to local
             const Amg::Vector3D globDir = parameters.direction();
@@ -440,7 +446,10 @@ namespace MuonR4{
             newSegment->setPosition(globPos.x(), globPos.y(), globPos.z());
             
             newSegment->setFitQuality(track.chi2(), track.nDoF());
-            newSegment->setNHits(summary.nPrecHits, summary.nPhiHits, summary.nEtaTrigHits);
+            newSegment->setNHits(nPrecHits, nTrigPhiHits, nTrigEtaHits);
+            newSegment->setIdentifier(reFitMe->sector(), reFitMe->chamberIndex(), 
+                                      reFitMe->etaIndex(), reFitMe->technology());
+
             auto& locFitPars = dec_locPars(*newSegment);
             locFitPars[Acts::toUnderlying(ParamDefs::x0)] = refitSeg.x();
             locFitPars[Acts::toUnderlying(ParamDefs::y0)] = refitSeg.y();

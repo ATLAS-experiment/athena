@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -42,7 +42,7 @@ class SCT_CalibModuleListTool : public extends<AthAlgTool, ISCT_CalibModuleListT
       virtual StatusCode initialize();
       virtual StatusCode finalize();
       //@}
-      virtual StatusCode readModuleList(std::map<Identifier, std::set<Identifier>>& moduleList) const;
+      virtual StatusCode readModuleList(const EventContext& ctx, std::map<Identifier, std::set<Identifier>>& moduleList) const;
 
    private:
       const SCT_ID* m_pSCTHelper{nullptr};

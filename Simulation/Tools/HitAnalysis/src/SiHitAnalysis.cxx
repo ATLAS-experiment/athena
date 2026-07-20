@@ -223,7 +223,7 @@ StatusCode SiHitAnalysis::initialize()
 }
 
 
-StatusCode SiHitAnalysis::execute()
+StatusCode SiHitAnalysis::execute(const EventContext& ctx)
 {
   ATH_MSG_DEBUG("In SiHitAnalysis::execute()");
 
@@ -250,7 +250,6 @@ StatusCode SiHitAnalysis::execute()
   m_module_eta->clear();
   m_module_phi->clear();
 
-  const EventContext&ctx {Gaudi::Hive::currentContext()};
   const SiHitCollection* hitCollection{nullptr};
   ATH_CHECK(SG::get(hitCollection, m_hitsContainerKey, ctx));
   ATH_MSG_INFO("Event contains " << hitCollection->size() << " entries in " << m_hitsContainerKey.key());

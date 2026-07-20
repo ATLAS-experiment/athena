@@ -89,7 +89,7 @@ StatusCode DiBjetFilter::filterFinalize() {
 
 
 //---------------------------------------------------------------------------
-StatusCode DiBjetFilter::filterEvent() {
+StatusCode DiBjetFilter::filterEvent(const EventContext& ctx) {
 //---------------------------------------------------------------------------
 
   bool pass = false;
@@ -162,6 +162,6 @@ StatusCode DiBjetFilter::filterEvent() {
     m_SumOfWeigths_Pass += weight;
   }
 
-  setFilterPassed(pass);
+  setFilterPassed(pass, ctx);
   return StatusCode::SUCCESS;
 }

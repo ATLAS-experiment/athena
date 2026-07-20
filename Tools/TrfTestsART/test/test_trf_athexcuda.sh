@@ -3,7 +3,7 @@
 # art-description: athena AthExCUDA/TrackParticleCalibratorExampleConfig.py 
 # art-type: grid
 # art-include: main/Athena
-# art-architecture: '#&nvidia'
+# art-architecture: {"gpu_spec": {"vendor": "nvidia", "version": ">=13.1" }}
 
 # Print out some environment
 echo "----- nvidia-smi -----"

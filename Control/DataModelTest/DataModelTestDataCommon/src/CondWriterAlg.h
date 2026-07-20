@@ -50,7 +50,7 @@ public:
   /**
    * @brief Algorithm event processing.
    */
-  virtual StatusCode execute() override;
+  virtual StatusCode execute(const EventContext& ctx) override;
 
 
 private:

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // This file is basically a concatenation of all the *.cxx files.
@@ -388,7 +388,7 @@ GeoPixelDiskSupports::GeoPixelDiskSupports(InDetDD::PixelDetectorManager* ddmgr,
     m_rmax.push_back(rmax);
     m_zpos.push_back(zpos);
     m_halflength.push_back(halflength);
-    m_material.push_back(mat);
+    m_material.push_back(std::move(mat));
   }
 }
 
@@ -1121,7 +1121,7 @@ void GeoPixelServices::initialize(const std::string& a)
         m_rmax.push_back(r[1]);
         m_zpos.push_back(-zpos);
         m_halflength.push_back(halflength);
-        m_material.push_back(mat);
+        m_material.push_back(std::move(mat));
       }
       delete[] r;
       delete[] z;
@@ -1935,7 +1935,7 @@ string OraclePixGeoManager::PixelECCarbonMaterial(string a) {
 // % of r.l....
 //
 
-int OraclePixGeoManager::PixelServiceNFrame(string a) {
+int OraclePixGeoManager::PixelServiceNFrame(string_view a) {
   if(isBarrel() ) {
     if(a == "Inside") return (*m_PixelBarrelGeneral)[0]->getInt("NFRAMEIN");
     if(a == "Outside") return (*m_PixelBarrelGeneral)[0]->getInt("NFRAMEOUT");
@@ -1947,10 +1947,10 @@ int OraclePixGeoManager::PixelServiceNFrame(string a) {
   return 0;
 }
 
-double*  OraclePixGeoManager::PixelServiceR(string a, int n) {
+double*  OraclePixGeoManager::PixelServiceR(string_view a, int n) {
   double rmin=0.;
   double rmax=0.;
-  double *r = new double[2];
+  double *r = new double[2]{};
   if(isBarrel()) {
     if(a == "Inside") {
       rmin = (*m_PixelBarrelService)[n]->getDouble("RIN");
@@ -1983,8 +1983,8 @@ double*  OraclePixGeoManager::PixelServiceR(string a, int n) {
 }
 
 
-double* OraclePixGeoManager::PixelServiceZ(string a,int n) {
-  double* z = new double[2];
+double* OraclePixGeoManager::PixelServiceZ(std::string_view a,int n) {
+  double* z = new double[2]{};
   if(isBarrel()) {
     if(a == "Inside") {
       z[0] = (*m_PixelBarrelService)[n]->getDouble("ZIN");
@@ -2021,7 +2021,7 @@ double* OraclePixGeoManager::PixelServiceZ(string a,int n) {
 }
 
 
-int OraclePixGeoManager::PixelServiceLD(string a,int n) {
+int OraclePixGeoManager::PixelServiceLD(string_view a,int n) {
   if(isBarrel()) {
     if(a == "Inside") {return (*m_PixelBarrelService)[n]->getInt("LAYERNUM")-1;}
     else {return (*m_PixelBarrelService)[n+m_barrelInFrames]->getInt("LAYERNUM")-1;}
@@ -2033,7 +2033,7 @@ int OraclePixGeoManager::PixelServiceLD(string a,int n) {
   return 0;
 }
 
-string OraclePixGeoManager::PixelServiceMaterial(string a,int n) {
+string OraclePixGeoManager::PixelServiceMaterial(string_view a,int n) {
   int imat;
   if(isBarrel()) {
     string mat[11] = {
@@ -2095,40 +2095,40 @@ PixelDetectorManager* OraclePixGeoManager::GetPixelDDManager() {
 }  
 
 
-void  OraclePixGeoManager::SetDetElementName(std::string name) {
-  m_elementsObjectName = name;
+void  OraclePixGeoManager::SetDetElementName(std::string_view name) {
+  m_elementsObjectName.assign(name);
 }
 
 std::string  OraclePixGeoManager::GetDetElementName() {
   return m_elementsObjectName;
 }
 
-void  OraclePixGeoManager::SetDesignName(std::string name) {
-  m_designsObjectName = name;
+void  OraclePixGeoManager::SetDesignName(std::string_view name) {
+  m_designsObjectName.assign(name);
 }
 
 std::string  OraclePixGeoManager::GetDesignName() {
   return m_designsObjectName;
 }
 
-void  OraclePixGeoManager::SetBarrelModuleName(std::string name){
-  m_barrelDesignName = name;
+void  OraclePixGeoManager::SetBarrelModuleName(std::string_view name){
+  m_barrelDesignName.assign(name);
 }
 
 std::string  OraclePixGeoManager::GetBarrelModuleName(){
   return m_barrelDesignName;
 }
 
-void  OraclePixGeoManager::SetEndcapModuleName(std::string name) {
-  m_endcapDesignName = name;
+void  OraclePixGeoManager::SetEndcapModuleName(std::string_view name) {
+  m_endcapDesignName.assign(name);
 }
 
 std::string  OraclePixGeoManager::GetEndcapModuleName() {
   return m_endcapDesignName;
 }
 
-void  OraclePixGeoManager::SetLayer0ModuleName(std::string name) {
-  m_blayerDesignName = name;
+void  OraclePixGeoManager::SetLayer0ModuleName(std::string_view name) {
+  m_blayerDesignName.assign(name);
 }
 
 std::string  OraclePixGeoManager::GetLayer0ModuleName() {

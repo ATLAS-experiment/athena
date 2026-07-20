@@ -56,12 +56,12 @@ namespace CP {
     return mll > m_mll_lower && mll < m_mll_upper;
   }
 
-  StatusCode DileptonOSSFInvariantMassWindowSelectorAlg::execute() {
+  StatusCode DileptonOSSFInvariantMassWindowSelectorAlg::execute(const EventContext& ctx) {
 
     for (const auto &sys : m_systematicsList.systematicsVector()) {
 
       const xAOD::EventInfo *evtInfo = nullptr;
-      ANA_CHECK(m_eventInfoHandle.retrieve(evtInfo, sys));
+      ANA_CHECK(m_eventInfoHandle.retrieve(evtInfo, sys, ctx));
 
       m_decoration.setBool(*evtInfo, false, sys);
 
@@ -72,7 +72,7 @@ namespace CP {
 
       if (m_electronsHandle && !decision) {
         const xAOD::ElectronContainer *electrons = nullptr;
-        ANA_CHECK(m_electronsHandle.retrieve(electrons, sys));
+        ANA_CHECK(m_electronsHandle.retrieve(electrons, sys, ctx));
         for (size_t i = 0; i < electrons->size() && !decision; ++i) {
           const xAOD::Electron* e0 = (*electrons)[i];
           if (m_electronSelection && !m_electronSelection.getBool(*e0, sys)) continue;
@@ -87,7 +87,7 @@ namespace CP {
 
       if (m_muonsHandle && !decision) {
         const xAOD::MuonContainer *muons = nullptr;
-        ANA_CHECK(m_muonsHandle.retrieve(muons, sys));
+        ANA_CHECK(m_muonsHandle.retrieve(muons, sys, ctx));
         for (size_t i = 0; i < muons->size() && !decision; ++i) {
           const xAOD::Muon* m0 = (*muons)[i];
           if (m_muonSelection && !m_muonSelection.getBool(*m0, sys)) continue;
@@ -102,7 +102,7 @@ namespace CP {
 
       if (m_electronsTruthHandle && !decision) {
         const xAOD::TruthParticleContainer *truthElectrons = nullptr;
-        ANA_CHECK(m_electronsTruthHandle.retrieve(truthElectrons, sys));
+        ANA_CHECK(m_electronsTruthHandle.retrieve(truthElectrons, sys, ctx));
         for (size_t i = 0; i < truthElectrons->size() && !decision; ++i) {
           const xAOD::TruthParticle* e0 = (*truthElectrons)[i];
           if (m_electronTruthSelection && !m_electronTruthSelection.getBool(*e0, sys)) continue;
@@ -117,7 +117,7 @@ namespace CP {
 
       if (m_muonsTruthHandle && !decision) {
         const xAOD::TruthParticleContainer *truthMuons = nullptr;
-        ANA_CHECK(m_muonsTruthHandle.retrieve(truthMuons, sys));
+        ANA_CHECK(m_muonsTruthHandle.retrieve(truthMuons, sys, ctx));
         for (size_t i = 0; i < truthMuons->size() && !decision; ++i) {
           const xAOD::TruthParticle* m0 = (*truthMuons)[i];
           if (m_muonTruthSelection && !m_muonTruthSelection.getBool(*m0, sys)) continue;

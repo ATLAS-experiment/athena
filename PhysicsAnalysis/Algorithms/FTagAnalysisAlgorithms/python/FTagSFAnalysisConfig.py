@@ -218,7 +218,7 @@ class FTagJetSFBlock(ConfigBlock):
                 bTagConditionalWP = self.btagWP
 
                 alg = config.createAlgorithm( 'CP::BTaggingTriggerEfficiencyAlg',
-                                              'FTagEfficiencyTriggerScaleFactorAlg' + chain )
+                                              'FTagEfficiencyTriggerScaleFactorAlg' + chain_out )
                 config.addPrivateTool( 'offlineEfficiencyTool',
                                        'BTaggingEfficiencyTool' )
                 self.configureEfficiencyTool(

@@ -139,11 +139,7 @@ int TrigInDetTrackTruth::updateFamilyTree()
 	  log << MSG::DEBUG<< "Mother not found: go to next particle" <<endmsg;
 	  continue;
 	}  
-#ifdef HEPMC3
      auto p_mum = p_child_vtx->particles_in().begin();
-#else
-      HepMC::GenVertex::particles_in_const_iterator p_mum = p_child_vtx->particles_in_const_begin();
-#endif
       log << MSG::DEBUG<< "Mother GenParticle (" << *p_mum << ") found; PDG id=" 
 	  << (*p_mum)->pdg_id() << "; status=" << (*p_mum)->status()
 	  << "; pT=" << (*p_mum)->momentum().perp() 

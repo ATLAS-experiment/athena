@@ -7,7 +7,6 @@
 #include <cmath>
 #include <cstdlib>
 
-#include "HepPDT/ParticleData.hh"
 #include "ISF_FastCaloSimEvent/TFCSBinnedShowerBase.h"
 #include "ISF_FastCaloSimEvent/TFCSCenterPositionCalculation.h"
 #include "ISF_FastCaloSimEvent/TFCSExtrapolationState.h"

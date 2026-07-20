@@ -1,9 +1,9 @@
 #!/usr/bin/env python
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
-# art-description: Test of HI data 2023 workflow, runs athenaHLT with PhysP1 HI menu
+# art-description: Test of HI data 2023 workflow, runs athenaEF with PhysP1 HI menu
 # art-type: build
-# art-include: main/Athena/x86_64-el9-gcc14-opt
+# art-include: main/Athena/x86_64-el9-gcc15-opt
 # art-include: 24.0/Athena
 
 import sys
@@ -13,7 +13,7 @@ from TrigValTools.TrigValSteering import Test, ExecStep, CheckSteps
 triggermenu = 'PhysicsP1_HI_run3_v1'
 
 ex = ExecStep.ExecStep()
-ex.type = 'athenaHLT'
+ex.type = 'athenaEF'
 ex.job_options = 'TriggerJobOpts.runHLT'
 ex.input = 'data_hi_2023'
 ex.flags = [

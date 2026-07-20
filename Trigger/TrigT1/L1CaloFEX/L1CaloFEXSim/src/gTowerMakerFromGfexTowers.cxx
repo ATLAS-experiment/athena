@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+    Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //***************************************************************************
@@ -30,7 +30,7 @@
 namespace LVL1 {
     
 gTowerMakerFromGfexTowers::gTowerMakerFromGfexTowers(const std::string& name, ISvcLocator* pSvcLocator)
-    :  AthAlgorithm(name, pSvcLocator)
+    :  AthReentrantAlgorithm(name, pSvcLocator)
 {}
 
 
@@ -46,39 +46,29 @@ StatusCode gTowerMakerFromGfexTowers::initialize()
 }
 
 
-StatusCode gTowerMakerFromGfexTowers::execute() 
+StatusCode gTowerMakerFromGfexTowers::execute(const EventContext& ctx) const
 {
     ATH_MSG_DEBUG("Executing " << name() << ", input: " << m_gDataTowerKey.key() << ", output: " << m_gTowerContainerSGKey.key());
-    
-    const EventContext& ctx = Gaudi::Hive::currentContext();
 
     //Reading the decoded Data gTower container
-    SG::ReadHandle<xAOD::gFexTowerContainer> gDataTowerContainer;
-    bool gDataTowerFilled = false;
-
-    gDataTowerContainer = SG::ReadHandle<xAOD::gFexTowerContainer>(m_gDataTowerKey, ctx);
+    SG::ReadHandle<xAOD::gFexTowerContainer> gDataTowerContainer = SG::ReadHandle<xAOD::gFexTowerContainer>(m_gDataTowerKey, ctx);
     if(!gDataTowerContainer.isValid()) {
         ATH_MSG_FATAL("Could not retrieve collection " << gDataTowerContainer.key() );
         return StatusCode::FAILURE;
     }      
-    gDataTowerFilled = !gDataTowerContainer->empty();
 
     // STEP 0 - Make a fresh local gTowerContainer
     std::unique_ptr<gTowerContainer> local_gTowerContainerRaw = std::make_unique<gTowerContainer>();
 
     // STEP 1 - Make some gTowers and fill the local container (This is the one the simulation reads)
-    m_gTowerBuilderTool->init(local_gTowerContainerRaw);
+    m_gTowerBuilderTool->BuildAllTowers(local_gTowerContainerRaw);
     
     // STEP 2 - Mapping gFexTowers with decoded Energies
-    if( gDataTowerFilled ) {
+    if( !gDataTowerContainer->empty() ) {
         
-        SG::ReadHandle<xAOD::gFexTowerContainer> * data_gTowerContainer = &gDataTowerContainer;
-        
-        data_gTowerContainer = &gDataTowerContainer;
-        
-        ATH_MSG_DEBUG("Collection used to build the gTower for simulation: " << (*data_gTowerContainer).key() << " with size: "<<(*data_gTowerContainer)->size() << ". Expected towers 1152");
+        ATH_MSG_DEBUG("Collection used to build the gTower for simulation: " << gDataTowerContainer.key() << " with size: "<< gDataTowerContainer->size() << ". Expected towers 1152");
 
-        for(const xAOD::gFexTower* my_gTower : *(*data_gTowerContainer) ) {
+        for(const xAOD::gFexTower* my_gTower : *gDataTowerContainer) {
 
             unsigned int TTID = my_gTower->gFEXtowerID(); //This is the simulation tower ID
 
@@ -111,9 +101,6 @@ StatusCode gTowerMakerFromGfexTowers::execute()
     // STEP 3 - Write the completed gTowerContainer into StoreGate (move the local copy in memory)
     SG::WriteHandle<LVL1::gTowerContainer> gTowerContainerSG(m_gTowerContainerSGKey, ctx);
     ATH_CHECK(gTowerContainerSG.record(std::move( local_gTowerContainerRaw ) ) );
-
-    // STEP 4 - Close and clean the event
-    m_gTowerBuilderTool->reset();
 
     return StatusCode::SUCCESS;
 }

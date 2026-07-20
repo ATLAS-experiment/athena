@@ -10,7 +10,7 @@
 #include "StoreGate/WriteHandleKey.h"
 #include "TrkTrack/TrackCollection.h"
 #include "ActsEvent/TrackContainer.h"
-#include "ActsToolInterfaces/IActsToTrkConverterTool.h"
+#include "ActsToolInterfaces/ITrackConverterTool.h"
 
 namespace ActsTrk
 {
@@ -25,8 +25,8 @@ namespace ActsTrk
     virtual StatusCode execute(const EventContext &ctx) const override;
 
   private:
-    ToolHandle<ActsTrk::IActsToTrkConverterTool> m_ATLASConverterTool{this, "ATLASConverterTool", ""};
-    SG::ReadHandleKey<ActsTrk::TrackContainer> m_tracksContainerKey{this, "ACTSTracksLocation", "",  "Output track collection (ActsTrk variant)"};
+    ToolHandle<ITrackConverterTool> m_ATLASConverterTool{this, "ATLASConverterTool", ""};
+    SG::ReadHandleKey<TrackContainer> m_tracksContainerKey{this, "ACTSTracksLocation", "",  "Output track collection (ActsTrk variant)"};
     SG::WriteHandleKey<::TrackCollection> m_tracksKey{this, "TracksLocation", "", "Output track collection"};
 
   };

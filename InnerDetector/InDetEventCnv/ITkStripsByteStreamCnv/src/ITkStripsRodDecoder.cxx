@@ -133,7 +133,7 @@ StatusCode ITkStripsRodDecoder::fillCollection(const OFFLINE_FRAGMENTS_NAMESPACE
         HccHeadFound=0;
       }
       nPacket++;
-    }else if(((vecROBData_8bits[i] & 0xF8) == 0x18) && (((nPacket+1) % (packetSize/2)) == 5)){
+    }else if(packetSize!=0 && ((vecROBData_8bits[i] & 0xF8) == 0x18) && (((nPacket+1) % (packetSize/2)) == 5)){
       nPacket++;      
       ATH_MSG_DEBUG("Header found: " << std::bitset<16>(word16));
       nclusters=0;      
@@ -354,10 +354,10 @@ StatusCode ITkStripsRodDecoder::processHeader(const uint16_t word16,
   ATH_MSG_DEBUG("l0tag: " << (uint32_t)l0tag << " bcid_low: " << (uint32_t)bcid_low << " bcid_xor: " << (uint32_t)bcid_xor << " type: " << (uint32_t)type << " word16: " << std::bitset<16>(word16));
   
   if (type == 0x03) {  // PR Header
-    bool breakNow{false};
+    constexpr bool breakHere{false};
     ATH_MSG_DEBUG("PR Packet Found");
     if (hasError) sc = StatusCode::RECOVERABLE;
-    if (breakNow) return sc;
+    if (breakHere) return sc;
   } else {
     ATH_MSG_WARNING("Unexpected packet type (not PR): 0x" << std::hex << int(type));
     return sc;

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <limits>
@@ -37,13 +37,13 @@ struct Statistics
 struct outBranches
 {
   //ATLAS level info
-  uint32_t b_run_number;
-  uint32_t b_run_type;
-  uint32_t b_lumi_block;
-  uint32_t b_L1ID;
-  uint32_t b_BCID;
-  uint32_t b_BC_time_seconds; // unix time
-  uint32_t b_BC_time_nanoseconds; // nanoseconds additionally to the amount of seconds
+  uint32_t b_run_number = 0;
+  uint32_t b_run_type = 0;
+  uint32_t b_lumi_block = 0;
+  uint32_t b_L1ID = 0;
+  uint32_t b_BCID = 0;
+  uint32_t b_BC_time_seconds = 0; // unix time
+  uint32_t b_BC_time_nanoseconds = 0; // nanoseconds additionally to the amount of seconds
 
   //each event has multple ROBs (e.g. multiple sectors)
   //each ROB then has multiple elinks

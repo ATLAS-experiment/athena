@@ -21,7 +21,6 @@
 
 // McParticleEvent includes
 #include "McParticleEvent/TruthParticleParamDefs.h"
-#include "HepPDT/ParticleDataTable.hh"
 
 // Forward declarations
 class McEventCollection;
@@ -112,10 +111,6 @@ class TruthIsolationTool : virtual public ITruthIsolationTool,
   // Private data: 
   /////////////////////////////////////////////////////////////////// 
  private: 
-
-  /** Particle Property service
-   */
-  const HepPDT::ParticleDataTable * m_pdt;
 
   /// Prefix for the @c TruthEtIsolations container. This is the string which
   /// will be prepended to the key of the @c McEventCollection to build the

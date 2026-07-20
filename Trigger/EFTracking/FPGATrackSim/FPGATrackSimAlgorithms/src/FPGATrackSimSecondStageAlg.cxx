@@ -100,9 +100,8 @@ StatusCode FPGATrackSimSecondStageAlg::initialize()
 //                          MAIN EXECUTE ROUTINE                             //
 ///////////////////////////////////////////////////////////////////////////////
 
-StatusCode FPGATrackSimSecondStageAlg::execute()
+StatusCode FPGATrackSimSecondStageAlg::execute(const EventContext& ctx)
 {
-    const EventContext& ctx = getContext();
     // Get reference to hits from StoreGate.
     // Hits have been procesed by the DataPrep algorithm. Now, we need to read them.
     // If they aren't passed, assume this means we are done.

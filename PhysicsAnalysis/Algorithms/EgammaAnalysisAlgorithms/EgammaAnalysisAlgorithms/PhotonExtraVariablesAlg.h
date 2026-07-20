@@ -21,7 +21,7 @@ namespace CP {
   public:
     using EL::AnaAlgorithm::AnaAlgorithm;
     virtual StatusCode initialize() override;
-    virtual StatusCode execute() override;
+    virtual StatusCode execute(const EventContext& ctx) override;
 
   private:
     CP::SysListHandle m_systematicsList {this};

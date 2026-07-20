@@ -117,7 +117,7 @@ private:
   bool isConverted(const xAOD::Photon& ph) const;
   bool findBin(const float absEta, const float etGeV, size_t& iEta, size_t& iEt) const;
   float getCut(const bool converted, const size_t iEta, const size_t iEt) const;
-  asg::AcceptData makeReject(const asg::AcceptInfo& info) const;
+  static asg::AcceptData makeReject(const asg::AcceptInfo& info) ;
   float getShowerShape(const xAOD::Photon& ph, xAOD::EgammaParameters::ShowerShapeType t, const char *name = "") const;
 
 };

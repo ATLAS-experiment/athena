@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -22,7 +22,7 @@
 TBBPCRaw::TBBPCRaw() : TBBeamDetector()
 { }
 
-TBBPCRaw::TBBPCRaw(const std::string&             thisBPCName,
+TBBPCRaw::TBBPCRaw(std::string_view             thisBPCName,
 		   const TBTDCRawCont*          theTDCCont,
 		   const std::vector<const TBTDCRaw*>& theTDCs,
 		   const TBADCRawCont*          theADCCont,

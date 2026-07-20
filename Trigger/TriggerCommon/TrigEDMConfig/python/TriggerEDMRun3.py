@@ -659,7 +659,7 @@ TriggerHLTListRun3 = [
     ('xAOD::TrigBphysAuxContainer#HLT_NoMuonDiElecPrecisionGSFAux.',        'BS ESD AODFULL AODSLIM AODBLSSLIM', 'Bphys'),
 
     # xAOD muons (msonly (x2: roi+FS), combined (x2: FS+RoI)
-    ('xAOD::MuonContainer#HLT_Muons_RoI',                                       'BS ESD AODFULL AODSLIM', 'Muon', [InViews('EFMuMSReco_RoIViews')]),
+    ('xAOD::MuonContainer#HLT_Muons_RoI',                                       'BS ESD AODFULL AODSLIM', 'Muon', [InViews('EFMuMSReco_RoIViews'), InViews("EFMuMSReco_RoI_newFastViews"), InViews("EFMuMSReco_RoI_mlbktViews")]),
     ('xAOD::MuonAuxContainer#HLT_Muons_RoIAux.',                                'BS ESD AODFULL AODSLIM', 'Muon'),
 
     ('xAOD::MuonContainer#HLT_Muons_FS',                                        'BS ESD AODFULL AODSLIM', 'Muon', [InViews('EFMuMSReco_FSViews')]),

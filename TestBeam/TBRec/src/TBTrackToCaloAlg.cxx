@@ -95,7 +95,7 @@ StatusCode TBTrackToCaloAlg::initialize()
 }
 
 // Execute method:
-StatusCode TBTrackToCaloAlg::execute() 
+StatusCode TBTrackToCaloAlg::execute(const EventContext& /*ctx*/) 
 {
   ATH_MSG_DEBUG ( "TBTrackToCaloAlg::execute()" );
 

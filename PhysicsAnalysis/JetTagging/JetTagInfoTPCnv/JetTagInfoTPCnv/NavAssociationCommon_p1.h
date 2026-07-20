@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef JETTAGINFOTPCNV_NavAssocationCommon_p1_H
@@ -22,7 +22,7 @@ namespace Analysis {
     /// Store the nav base classes
     TPObjRef m_navBase;
 
-    unsigned int m_keyIndex;
+    unsigned int m_keyIndex = 0;
     std::string m_name;
   };
 }

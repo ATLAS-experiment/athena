@@ -14,7 +14,6 @@ __pseudo_all__ = [ 'StatusCode',
                    'Svc',
                    'AlgTool',
                    'Aud',
-                   'AthFilterAlgorithm',
                    'services',
                    'algs'
                    ]

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /***********************************************************************
@@ -38,10 +38,10 @@ class SelectorBase : public AthAlgorithm {
  public:
     SelectorBase(const std::string& name, ISvcLocator* pSvcLocator);
     virtual ~SelectorBase(){;}
-    virtual StatusCode initialize();
+    virtual StatusCode initialize() override;
     virtual StatusCode userExecute(){return StatusCode::SUCCESS;}
-    StatusCode execute();
-    virtual StatusCode finalize();
+    virtual StatusCode execute(const EventContext& ctx) override;
+    virtual StatusCode finalize() override;
     bool pt_eta_range(double pt, double eta);
     // Derived class must supply
     // bool accept(const Contained*); 
@@ -135,7 +135,7 @@ template<class Derived>
 }
 
 template<class Derived>
-    StatusCode SelectorBase<Derived>::execute()
+    StatusCode SelectorBase<Derived>::execute(const EventContext& /*ctx*/)
 {
     typedef typename Derived::Container Container;
     //typedef typename Derived::Contained Contained;

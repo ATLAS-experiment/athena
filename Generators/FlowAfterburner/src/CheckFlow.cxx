@@ -129,13 +129,13 @@ StatusCode CheckFlow::initialize(){
   return StatusCode::SUCCESS;
 }
 
-StatusCode CheckFlow::execute() {
+StatusCode CheckFlow::execute(const EventContext& ctx) {
   msg(MSG::INFO) << ">>> CheckFlow from execute" << endmsg;
 
   //
   // Event parameters
   //
-  SG::ReadHandle<HijingEventParams> hijing_pars{m_hijingKey};
+  SG::ReadHandle<HijingEventParams> hijing_pars{m_hijingKey, ctx};
   float b = hijing_pars->get_b();
   float phiR = hijing_pars->get_bphi();
 

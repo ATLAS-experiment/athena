@@ -79,9 +79,6 @@ atlas_add_test( MD5_test
    SOURCES test/MD5_test.cxx
    LINK_LIBRARIES CxxUtils )
 
-atlas_add_test( ut_cxxutils_floatcompression_test
-   SOURCES test/ut_cxxutils_floatcompression_test.cxx
-   LINK_LIBRARIES CxxUtils )
 
 atlas_add_test( Compressor_test
    SOURCES test/Compressor_test.cxx
@@ -112,6 +109,10 @@ if ( IS_DIRECTORY /usr/include/ck )
     PRIVATE "-DHAVE_CK" )
 endif()
 
+atlas_add_test( HexString_test
+   SOURCES test/HexString_test.cxx
+    LINK_LIBRARIES CxxUtils
+    POST_EXEC_SCRIPT noerror.sh)
 
 atlas_add_test( ConcurrentMap_test
   SOURCES test/ConcurrentMap_test.cxx
@@ -161,6 +162,11 @@ atlas_add_test( transparent_string_hash_test
   LINK_LIBRARIES CxxUtils Boost::unit_test_framework
   POST_EXEC_SCRIPT noerror.sh
 )
+atlas_add_test( FloatCompressor_test
+  SOURCES test/FloatCompressor_test.cxx
+  LINK_LIBRARIES CxxUtils Boost::unit_test_framework
+  POST_EXEC_SCRIPT noerror.sh
+)
 
 
 # Set up the "simple" tests:
@@ -184,7 +190,8 @@ foreach( test sincos_test ArrayScanner_test Arrayrep_test
       normalizeFunctionName_test pputils_test StringParse_test
       range_with_at_test range_with_conv_test
       minmax_transformed_element_test xmalloc_test byteswap_test
-      RefCountedPtr_test throw_out_of_range_test iterator_range_test )
+      RefCountedPtr_test throw_out_of_range_test iterator_range_test 
+      crc_combine_test)
    atlas_add_test( ${test}
       SOURCES test/${test}.cxx
       LINK_LIBRARIES CxxUtils TestTools Boost::timer Boost::unit_test_framework)

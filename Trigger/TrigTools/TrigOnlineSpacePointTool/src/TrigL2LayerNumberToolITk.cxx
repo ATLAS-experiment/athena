@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "InDetIdentifier/SCT_ID.h"
@@ -173,7 +173,7 @@ void TrigL2LayerNumberToolITk::createModuleHashMap(std::map<std::tuple<int, int,
     
     for(std::vector<PhiEtaHashITk>::iterator hIt = (*it).second.begin();hIt != (*it).second.end();++hIt) {
    
-      const InDetDD::SiDetectorElement *p = NULL;
+      const InDetDD::SiDetectorElement *p = nullptr;
 
       if(subdetId == 1) {//pixel
 	m_pixelLayers[(*hIt).m_hash] = layerId;
@@ -202,8 +202,8 @@ void TrigL2LayerNumberToolITk::createModuleHashMap(std::map<std::tuple<int, int,
     m_layerGeometry[layerId].m_maxBound = maxBound;
   }
   
-  ATH_MSG_INFO("List of unique layers in Pixel and SCT :");
+  ATH_MSG_DEBUG("List of unique layers in Pixel and SCT :");
   for(int l=0;l<layerId;l++) {
-    ATH_MSG_INFO("Layer "<<l<<" ("<<m_layerGeometry[l].m_subdet<<") : reference coordinate ="<< m_layerGeometry[l].m_refCoord<<" boundaries: "<<m_layerGeometry[l].m_minBound<<" "<<m_layerGeometry[l].m_maxBound<<" type="<<m_layerGeometry[l].m_type);
+    ATH_MSG_DEBUG("Layer "<<l<<" ("<<m_layerGeometry[l].m_subdet<<") : reference coordinate ="<< m_layerGeometry[l].m_refCoord<<" boundaries: "<<m_layerGeometry[l].m_minBound<<" "<<m_layerGeometry[l].m_maxBound<<" type="<<m_layerGeometry[l].m_type);
   }
 }

@@ -3,21 +3,27 @@
   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #include <ActsGeoUtils/TransformCache.h>
+#include <ActsGeoUtils/SurfacePlacement.h>
+
 #include <GeoModelKernel/GeoVDetectorElement.h>
 
+#ifndef SIMULATIONBASE
+#   include "Acts/Surfaces/Surface.hpp"
+#endif
+
 namespace ActsTrk {
-    TransformCacheBase::~TransformCacheBase() {
+    AlignableGeoPositioning::~AlignableGeoPositioning() {
         TicketCounter::giveBackTicket(m_type, m_clientNo);
     }
-    TransformCacheBase::TransformCacheBase(const IdentifierHash& hash,
-                                           const DetectorType type): 
+    AlignableGeoPositioning::AlignableGeoPositioning(const IdentifierHash& hash,
+                                                     const DetectorType type): 
           m_hash{hash}, m_type{type} {}
 
-    void TransformCacheBase::releaseNominalCache() const {
+    void AlignableGeoPositioning::releaseNominalCache() const {
         m_nomCache.release();
     }
 
-    bool TransformCacheBase::storeTransform(DetectorAlignStore& store) const {
+    bool AlignableGeoPositioning::storeTransform(DetectorAlignStore& store) const {
         if (store.detType != detectorType() || 
             store.trackingAlignment->getTransform(m_clientNo) != nullptr){
             return false;
@@ -25,13 +31,19 @@ namespace ActsTrk {
         store.trackingAlignment->setTransform(m_clientNo, fetchTransform(&store));
         return true;
     }
-    DetectorType TransformCacheBase::detectorType() const { return m_type; }
+    DetectorType AlignableGeoPositioning::detectorType() const { return m_type; }
 
-    void TransformCache::releaseNominalCache() const {
-        TransformCacheBase::releaseNominalCache();
+    void IReadoutSurfacePositioning::releaseNominalCache() const {
+        AlignableGeoPositioning::releaseNominalCache();
         const GeoVDetectorElement* vParent = dynamic_cast<const GeoVDetectorElement*>(parent());
         if (vParent) {
             vParent->getMaterialGeom()->clearPositionInfo();
         }
     } 
+
+    IReadoutSurfacePositioning::~IReadoutSurfacePositioning() = default;
+#ifndef SIMULATIONBASE
+    const SurfacePlacement* IReadoutSurfacePositioning::placement() const { return m_placement.get(); }
+#endif
+
 }

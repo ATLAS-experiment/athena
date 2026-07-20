@@ -53,7 +53,7 @@ StatusCode egammaMaxECellAlg::initialize()
 /**
  * @brief Standard Gaudi @c execute method.
  */
-StatusCode egammaMaxECellAlg::execute()
+StatusCode egammaMaxECellAlg::execute(const EventContext& ctx)
 {
   StatusCode sc = StatusCode::SUCCESS;
 
@@ -68,7 +68,7 @@ StatusCode egammaMaxECellAlg::execute()
 #undef DECOR
 
   CHECK( m_getter->reset (m_allowMissing) );
-  SG::ReadCondHandle<LArOnOffIdMapping> cablingHdl{m_cablingKey};
+  SG::ReadCondHandle<LArOnOffIdMapping> cablingHdl{m_cablingKey, ctx};
   const LArOnOffIdMapping* cabling{*cablingHdl};
   if(!cabling){
      ATH_MSG_ERROR("Do not have mapping object " << m_cablingKey.key() );

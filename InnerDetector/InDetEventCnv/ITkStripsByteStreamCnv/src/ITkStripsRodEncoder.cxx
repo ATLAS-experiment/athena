@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "ITkStripsRodEncoder.h"
@@ -445,15 +445,15 @@ ITkStripsRodEncoder::offlineID(const SCT_RDORawData* rdo) const {
 }
 
 uint32_t
-ITkStripsRodEncoder::onlineID(const SCT_RDORawData* rdo) const {
+ITkStripsRodEncoder::onlineID(const SCT_RDORawData* rdo, const EventContext& ctx) const {
   const Identifier waferID{offlineID(rdo)};
   const IdentifierHash offlineIDHash{m_itkStripsID->wafer_hash(waferID)};
-  return static_cast<uint32_t>(m_cabling->getOnlineIdFromHash(offlineIDHash));
+  return static_cast<uint32_t>(m_cabling->getOnlineIdFromHash(offlineIDHash, ctx));
 }
 
 int
-ITkStripsRodEncoder::getRODLink(const SCT_RDORawData* rdo) const {
-  return rodLinkFromOnlineID(onlineID(rdo));
+ITkStripsRodEncoder::getRODLink(const SCT_RDORawData* rdo, const EventContext& ctx) const {
+  return rodLinkFromOnlineID(onlineID(rdo, ctx));
 }
 
 int
@@ -515,15 +515,15 @@ ITkStripsRodEncoder::getHeaderPhysicsPacket(int typ, uint8_t l0tag, uint8_t bc_c
 
 //the following may be needed for ITkStrips, but must have different implementation
 uint16_t
-ITkStripsRodEncoder::getHeaderUsingRDO(const SCT_RDORawData* rdo) const {
-  const int rodLink{getRODLink(rdo)};
+ITkStripsRodEncoder::getHeaderUsingRDO(const SCT_RDORawData* rdo, const EventContext& ctx) const {
+  const int rodLink{getRODLink(rdo, ctx)};
   const uint16_t linkHeader{static_cast<uint16_t>(0x2000 | (m_condensed.value() << 8) | rodLink)};
   return linkHeader;
 }
 
 uint16_t
-ITkStripsRodEncoder::getHeaderUsingHash(const IdentifierHash& linkHash, const int& errorWord) const {
-  const int rodLink{rodLinkFromOnlineID(m_cabling->getOnlineIdFromHash(linkHash))};
+ITkStripsRodEncoder::getHeaderUsingHash(const IdentifierHash& linkHash, const int& errorWord, const EventContext& ctx) const {
+  const int rodLink{rodLinkFromOnlineID(m_cabling->getOnlineIdFromHash(linkHash, ctx))};
   const uint16_t linkHeader{static_cast<uint16_t>(0x2000 | errorWord | (m_condensed.value() << 8) | rodLink)};
   return linkHeader;
 }

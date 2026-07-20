@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-	Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+	Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // TrkObserverTool.h 
@@ -66,7 +66,7 @@ namespace Trk {
 			struct CacheEntry {
 				EventContext::ContextEvt_t m_evt{EventContext::INVALID_CONTEXT_EVT};
 				// map with observed tracks and information
-				ObservedTrackMap* 	m_observedTrkMap;
+				ObservedTrackMap* 	m_observedTrkMap = nullptr;
 			};
 			mutable SG::SlotSpecificObj<CacheEntry> m_cache ATLAS_THREAD_SAFE; // Guarded by m_mutex
 

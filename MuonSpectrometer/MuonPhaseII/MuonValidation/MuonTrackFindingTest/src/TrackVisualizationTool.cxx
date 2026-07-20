@@ -3,7 +3,6 @@
 */
 #include "TrackVisualizationTool.h"
 
-#include "MuonTrackFindingTools/MsTrackSeeder.h"
 #include "MuonTrackEvent/TrackingHelpers.h"
 #include "MuonDetDescrUtils/MuonSectorMapping.h"
 #include "MuonVisualizationHelpersR4/VisualizationHelpers.h"
@@ -139,29 +138,28 @@ namespace MuonValR4{
             m_plotsDone = true;
         }
         ATH_CHECK(m_truthSegKey.initialize(SG::AllowEmpty));
+        ATH_CHECK(m_segmentKey.initialize());
         ATH_CHECK(m_geoCtxKey.initialize());
+        ATH_CHECK(m_seedingTool.retrieve());
         ATH_CHECK(m_extrapolationTool.retrieve(EnableTool{!m_extrapolationTool.empty()}));
         return StatusCode::SUCCESS;
     }
     void TrackVisualizationTool::displaySeeds(const EventContext& ctx,
-                                              const MsTrackSeeder& seederObj,
-                                              const xAOD::MuonSegmentContainer& segments,
                                               const MsTrackSeedContainer& seeds) const {
-        displaySeeds(ctx, seederObj, segments, seeds, PrimitivesVec_t{});
+        displaySeeds(ctx, seeds, PrimitivesVec_t{});
     }
     void TrackVisualizationTool::displaySeeds(const EventContext& ctx,
-                                              const MsTrackSeeder& seederObj,
-                                              const xAOD::MuonSegmentContainer& segments,
                                               const MsTrackSeedContainer& seeds,
                                               PrimitivesVec_t && extPrimitives) const {
-        if (m_plotsDone || segments.empty()) {
+        
+        
+        const xAOD::MuonSegmentContainer* segments{nullptr};
+        if (m_plotsDone || !SG::get(segments, m_segmentKey, ctx) || segments->empty()) {
             return;
         }
 
-
-
-        displaySeeds(ctx, seederObj, DisplayView::RZ, segments, seeds, clone(extPrimitives));        
-        displaySeeds(ctx, seederObj, DisplayView::XY, segments, seeds, std::move(extPrimitives));
+        displaySeeds(ctx, DisplayView::RZ, *segments, seeds, clone(extPrimitives));        
+        displaySeeds(ctx, DisplayView::XY, *segments, seeds, std::move(extPrimitives));
 
         //For each seed plot respective segment parameters
 
@@ -297,7 +295,6 @@ void TrackVisualizationTool::displaySeedSegmentsGlobalWithTruth(
 
 
     void TrackVisualizationTool::displaySeeds(const EventContext& ctx,
-                                              const MsTrackSeeder& seeder,
                                               const DisplayView view,
                                               const xAOD::MuonSegmentContainer& segments,
                                               const MsTrackSeedContainer& seeds,
@@ -315,7 +312,7 @@ void TrackVisualizationTool::displaySeedSegmentsGlobalWithTruth(
         
         PlotLegend legend{0.005,0.005, 0.6,0.1};
         /** First add the truth points*/
-        fillTruthSeedPoints(ctx, seeder, view, legend, *canvas);
+        fillTruthSeedPoints(ctx, view, legend, *canvas);
               
         auto onSeed = [&seeds](const xAOD::MuonSegment* segment,
                                const Location loc) {
@@ -328,32 +325,32 @@ void TrackVisualizationTool::displaySeedSegmentsGlobalWithTruth(
         if (!SG::get(gctx, m_geoCtxKey, ctx).isSuccess()) {
             THROW_EXCEPTION("Failed to fetch the geometry context "<<m_geoCtxKey.fullKey());
         }
+        const Acts::GeometryContext tgContext = gctx->context();
         bool drawnPoint{false};
 
         for (const xAOD::MuonSegment* segment: segments) {
             using enum Location;
-            using enum MsTrackSeeder::SectorProjector;
+            using enum ExpandedSector::SectorProjector;
             using namespace Muon;
             const MuonGMR4::SpectrometerSector* msSector = detailedSegment(*segment)->msSector();
             const auto chIdx = segment->chamberIndex();
             const int mColor = msSector->barrel() ? ColorBarrel : (msSector->side() > 0 ? ColorEndcapA : ColorEndcapC);
 
             for (const auto secProj : {leftOverlap, center, rightOverlap}) {
-                if (!sectorMap.insideSector(segment->sector() + Acts::toUnderlying(secProj),
-                                            segment->position().phi())){
+                const ExpandedSector sector{static_cast<unsigned>(segment->sector()), secProj};
+                if (ExpandedSector{segment->position().phi()} != sector){
                     continue;
                 }
 
                 for (const Location loc : {Barrel, Endcap}) {
-                    const Amg::Vector2D projPos{seeder.expressOnCylinder(*gctx, *segment, loc, secProj)};
-                    if (!seeder.withinBounds(projPos, loc)) {
+                    const Amg::Vector2D projPos{m_seedingTool->expressOnCylinder(tgContext, *segment, loc, sector)};
+                    if (!m_seedingTool->withinBounds(projPos, loc)) {
                         continue;
                     }
                     drawnPoint = true;
                     const bool isGood = onSeed(segment, loc);
                     const int mStyle = stationMarkerSyle(chIdx, true, isGood);
-                    const double phi = seeder.projectedPhi(segment->sector(), secProj);
-                    const Amg::Vector2D markerPos{viewVector(phi, projPos, view)};
+                    const Amg::Vector2D markerPos{viewVector(sector.phi(), projPos, view)};
                     extPrimitives.emplace_back( drawMarker(markerPos, mStyle, mColor)); //Is this necessary?
                     canvas->add( drawMarker(markerPos, mStyle, mColor));
 
@@ -408,7 +405,6 @@ void TrackVisualizationTool::displaySeedSegmentsGlobalWithTruth(
         legend.fillPrimitives(*canvas);
     }
     void TrackVisualizationTool::fillTruthSeedPoints(const EventContext& ctx,
-                                                     const MsTrackSeeder& seeder,
                                                      const DisplayView view,
                                                      PlotLegend& legend, 
                                                      Canvas_t& canvas) const {
@@ -423,29 +419,23 @@ void TrackVisualizationTool::displaySeedSegmentsGlobalWithTruth(
         if (!SG::get(gctx, m_geoCtxKey, ctx).isSuccess()) {
             THROW_EXCEPTION("Failed to fetch the geometry context "<<m_geoCtxKey.fullKey());
         }
-
+        const Acts::GeometryContext tgContext = gctx->context();
         bool addedEntry{false};
         for (const xAOD::MuonSegment* segment: *truthSegs) {
             const auto chIdx = segment->chamberIndex();
             const int mStyle = stationMarkerSyle(chIdx, true, true);
 
             using enum Location;
-            using enum MsTrackSeeder::SectorProjector;
-            for (const auto secProj : {leftOverlap, center, rightOverlap}) {
-                if (!sectorMap.insideSector(segment->sector() + Acts::toUnderlying(secProj),
-                                            segment->position().phi())){
+            using enum ExpandedSector::SectorProjector;
+            ExpandedSector sector{segment->position().phi()};
+            for (const Location loc : {Barrel, Endcap}) {
+                const Amg::Vector2D projected{m_seedingTool->expressOnCylinder(tgContext, *segment, loc, sector)};
+                if (!m_seedingTool->withinBounds(projected, loc)) {
                     continue;
                 }
-                for (const Location loc : {Barrel, Endcap}) {
-                    const Amg::Vector2D projected{seeder.expressOnCylinder(*gctx, *segment, loc, secProj)};
-                    if (!seeder.withinBounds(projected, loc)) {
-                        continue;
-                    }
-                    const double phi = MsTrackSeeder::projectedPhi(segment->sector(), secProj);
-                    canvas.add(drawMarker(viewVector(phi, projected, view), mStyle, truthColor, 3));
-                    legend.addMarker(mStyle, Muon::MuonStationIndex::layerName(Muon::MuonStationIndex::toLayerIndex(chIdx)), truthColor);
-                    addedEntry = true;
-                }
+                canvas.add(drawMarker(viewVector(sector.phi(), projected, view), mStyle, truthColor, 3));
+                legend.addMarker(mStyle, Muon::MuonStationIndex::layerName(Muon::MuonStationIndex::toLayerIndex(chIdx)), truthColor);
+                addedEntry = true;
             }
         }
         if (addedEntry) {

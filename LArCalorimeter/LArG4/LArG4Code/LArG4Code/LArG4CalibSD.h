@@ -16,6 +16,7 @@
 
 // Forward declarations
 class G4Step;
+class G4Track;
 class G4HCofThisEvent;
 
 class LArEM_ID;
@@ -81,10 +82,12 @@ protected:
   /// Constructs the calibration hit and saves it to the appropriate builder
   G4bool SimpleHit(const LArG4Identifier& a_ident,
                    const std::vector<double>& energies,
-                   bool deadMaterialHit = false);
+                   bool deadMaterialHit = false,
+                   const G4Track* track = nullptr);
 
   G4bool SrHit(const LArG4Identifier& a_ident, const LArG4Identifier& sr_id,
-               const std::vector<double>& energies);
+               const std::vector<double>& energies,
+               const G4Track* track = nullptr);
   /// Member variable - the calculator we'll use
   ILArCalibCalculatorSvc * m_calculator;
 

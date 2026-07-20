@@ -41,7 +41,7 @@ bool MdtToyTwinCablingDumpAlg::equipREwithTwins(const Identifier& detElId) const
 
     return m_detElIdToTwin.value().empty() && m_stationsToTwin.value().empty();
 }
-StatusCode MdtToyTwinCablingDumpAlg::execute() {
+StatusCode MdtToyTwinCablingDumpAlg::execute(const EventContext& /*ctx*/) {
   using Mapping = Muon::HedgehogBoard::Mapping;
   using HedgeHogBoardPtr = Muon::HedgehogBoard::HedgehogBoardPtr;
   auto createMap = [this](const uint8_t tubeLayers, const uint16_t id) {

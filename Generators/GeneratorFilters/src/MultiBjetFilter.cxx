@@ -79,12 +79,11 @@ CLHEP::HepRandomEngine* MultiBjetFilter::getRandomEngine(const std::string& stre
 }
 
 
-StatusCode MultiBjetFilter::filterEvent() {
-  const EventContext& ctx = Gaudi::Hive::currentContext();
+StatusCode MultiBjetFilter::filterEvent(const EventContext& ctx) {
   CLHEP::HepRandomEngine* rndm = this->getRandomEngine("MultiBjetFilter", ctx);
   if (!rndm) {
     ATH_MSG_WARNING("Failed to retrieve random number engine " << "MultiBjetFilter");
-    setFilterPassed(false);
+    setFilterPassed(false, ctx);
     return StatusCode::FAILURE;
   }
 
@@ -122,7 +121,7 @@ StatusCode MultiBjetFilter::filterEvent() {
 
   int bJetCounter = 0;
   double weight = 1;
-  for(const HepMC::GenEvent* genEvt : *events_const()) {
+  for(const HepMC::GenEvent* genEvt : *events_const(ctx)) {
     weight = genEvt->weights().front();
 
     // Make a vector containing all the event's b-hadrons
@@ -185,6 +184,6 @@ StatusCode MultiBjetFilter::filterEvent() {
 
   } // pass vs inclusive
 
-  setFilterPassed(pass);
+  setFilterPassed(pass, ctx);
   return StatusCode::SUCCESS;
 }

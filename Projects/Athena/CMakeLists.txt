@@ -7,27 +7,6 @@ string( STRIP ${_version} _version )
 project( Athena VERSION ${_version} LANGUAGES C CXX Fortran )
 unset( _version )
 
-# Turn on CUDA as an available compiler, if it's available.
-include( CheckLanguage )
-check_language( CUDA )
-if( CMAKE_CUDA_COMPILER )
-   enable_language( CUDA )
-endif()
-# Use C++20 with CUDA.
-set( CMAKE_CUDA_STANDARD 20 CACHE STRING "CUDA C++ standard to use" )
-# Force the compilation of CUDA code for only compute capability 5.2 for now.
-# Mainly to get rid of warnings from 11.0 about not supporting older compute
-# capabilities anymore.
-set( CMAKE_CUDA_ARCHITECTURES "all-major" CACHE STRING
-   "CUDA architectures to build code for" )
-
-set( CMAKE_CUDA_FLAGS "${CMAKE_CUDA_FLAGS} -Wno-deprecated-gpu-targets" )
-
-# Turn on HIP as a compiler, if it's available.
-check_language( HIP )
-if( CMAKE_HIP_COMPILER )
-   enable_language( HIP )
-endif()
 # Use C++20 with HIP.
 set( CMAKE_HIP_STANDARD 20 CACHE STRING "HIP C++ standard to use" )
 
@@ -51,9 +30,9 @@ if( LCG_NIGHTLY )
     set( TDAQ_VERSION "99-00-00" CACHE STRING
        "The version of tdaq to use for the build" )
 else()
-    set( TDAQ-COMMON_VERSION "13-00-00" CACHE STRING
+    set( TDAQ-COMMON_VERSION "14-00-00" CACHE STRING
        "The version of tdaq-common to use for the build" )
-    set( TDAQ_VERSION "13-00-00" CACHE STRING
+    set( TDAQ_VERSION "14-00-00" CACHE STRING
        "The version of tdaq to use for the build" )
 endif()
 
@@ -66,9 +45,6 @@ set( TDAQ_ATROOT
    CACHE PATH "The directory to pick up tdaq from" )
 mark_as_advanced( TDAQ-COMMON_ATROOT TDAQ_PROJECT_NAME
    TDAQ_ATROOT )
-
-# HepMC3
-set( HEPMC3_USE TRUE CACHE BOOL "Build with HepMC3" )
 
 # Configure flake8:
 set( ATLAS_FLAKE8 flake8_atlas --isolated --select ATL,B,F,E101,E7,E9,W6
@@ -103,6 +79,19 @@ find_package( AthenaExternals REQUIRED )
 find_package( Gaudi )
 find_package( tdaq-common )
 find_package( tdaq )
+
+# Turn on CUDA as an available compiler, if it's available.
+include( CheckLanguage )
+check_language( CUDA )
+if( CMAKE_CUDA_COMPILER )
+   enable_language( CUDA )
+endif()
+
+# Turn on HIP as a compiler, if it's available.
+check_language( HIP )
+if( CMAKE_HIP_COMPILER )
+   enable_language( HIP )
+endif()
 
 # Set up CppCheck.
 if( ATLAS_USE_CPPCHECK )
@@ -169,6 +158,11 @@ set( AthenaPoolUtilitiesTest_DIR
 set( xAODUtilities_DIR
    "${CMAKE_SOURCE_DIR}/../../Event/xAOD/xAODCore/cmake"
    CACHE PATH "Directory holding the xAODUtilities module" )
+
+# Set up where to find the AtlasGeant4Utilities CMake code.
+set( AtlasGeant4Utilities_DIR
+   "${CMAKE_SOURCE_DIR}/../../Simulation/AtlasGeant4/cmake"
+   CACHE PATH "Directory holding the AtlasGeant4Utilities module" )
 
 # Make the local CMake files visible to AtlasCMake.
 list( INSERT CMAKE_MODULE_PATH 0 ${CMAKE_SOURCE_DIR}/cmake )

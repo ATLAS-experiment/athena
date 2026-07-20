@@ -3,6 +3,7 @@
   for the benefit of the ATLAS collaboration
 */
 #include "GraphBucketFilterTool.h"
+#include "InferenceUtils.h"
 #include "BucketGraphUtils.h"
 
 #include "AthenaBaseComps/AthMsgStreamMacros.h"
@@ -10,8 +11,6 @@
 #include "StoreGate/WriteHandle.h"
 #include "MuonTrackEvent/TrackingHelpers.h"
 #include "MuonPatternEvent/SegmentFitterEventData.h"
-#include <fmt/format.h>
-#include <fmt/ranges.h>
 #include <nlohmann/json.hpp>
 
 #include <algorithm>
@@ -201,6 +200,17 @@ StatusCode GraphBucketFilterTool::runGraphInference(const EventContext& ctx,
     ATH_MSG_DEBUG("No training-like graph nodes found. Passed through "
                   << passThroughNonModelBuckets
                   << " non-model buckets without ONNX inference.");
+    if (m_printFilterSummary) {
+      ATH_MSG_INFO("BucketFilterSummary event=" << ctx.evt()
+                   << " input=" << inputBuckets->size()
+                   << " model_input=0"
+                   << " model_kept=0"
+                   << " output=" << passThroughNonModelBuckets
+                   << " rejected=0"
+                   << " non_model_passthrough=" << passThroughNonModelBuckets
+                   << " expected_signal=n/a"
+                   << " expected_signal_kept=n/a");
+    }
     return StatusCode::SUCCESS;
   }
 
@@ -229,7 +239,15 @@ StatusCode GraphBucketFilterTool::runGraphInference(const EventContext& ctx,
     outputMode = OutputMode::SingleOutput;
     numPred = static_cast<size_t>(outShape[0]);
   } else {
-    ATH_MSG_ERROR("Unexpected ONNX output tensor shape = [" << fmt::format("{}", fmt::join(outShape, ","))
+    auto outShapeString = [](const std::vector<int64_t>& v) {
+        std::ostringstream oss;
+        if (!v.empty()) {
+            std::copy(v.begin(), v.end() - 1, std::ostream_iterator<int64_t>(oss, ","));
+            oss << v.back();
+        }
+        return oss.str();
+    };	  
+    ATH_MSG_ERROR("Unexpected ONNX output tensor shape = [" << outShapeString(outShape)
                   << "]  (expected [N,3] or [N] or [N,1]).");
     return StatusCode::FAILURE;
   }
@@ -281,16 +299,25 @@ StatusCode GraphBucketFilterTool::runGraphInference(const EventContext& ctx,
     ATH_CHECK(buildSegmentCountMap(ctx, segmentCounts));
   }
 
+  const bool doDebugDump =
+      !m_debugDumpFile.value().empty() &&
+      (m_debugDumpMaxEvents.value() == 0 ||
+       m_debugDumpEvents.load(std::memory_order_relaxed) < m_debugDumpMaxEvents.value());
+
   std::vector<int> selectedClasses;
   std::vector<int> keepFlags;
   std::vector<int> labels;
   std::vector<int> hasTruthFlags;
   std::vector<int> hasSegmentFlags;
-  selectedClasses.reserve(numPred);
-  keepFlags.reserve(numPred);
-  labels.reserve(numPred);
-  hasTruthFlags.reserve(numPred);
-  hasSegmentFlags.reserve(numPred);
+  if (doDebugDump) {
+    selectedClasses.reserve(numPred);
+    keepFlags.reserve(numPred);
+    if (m_printLabels.value()) {
+      labels.reserve(numPred);
+      hasTruthFlags.reserve(numPred);
+      hasSegmentFlags.reserve(numPred);
+    }
+  }
 
   size_t labelledGoodBuckets = 0;
   size_t labelledGoodKept = 0;
@@ -343,7 +370,7 @@ StatusCode GraphBucketFilterTool::runGraphInference(const EventContext& ctx,
     } else {
       const float rawScore = outputPtr[predIdx];
       const float score = m_singleOutputIsLogit.value()
-          ? 1.f / (1.f + std::exp(-rawScore))
+          ? InferenceUtils::sigmoid(rawScore)
           : rawScore;
       keepBucket = (score > scoreThreshold);
       if (keepBucket) {
@@ -361,14 +388,18 @@ StatusCode GraphBucketFilterTool::runGraphInference(const EventContext& ctx,
                     << " -> keep=" << (keepBucket ? "yes" : "no"));
     }
 
-    selectedClasses.push_back(selectedClass); 
-    keepFlags.push_back(keepBucket);
+    if (doDebugDump) {
+      selectedClasses.push_back(selectedClass);
+      keepFlags.push_back(keepBucket);
+    }
 
     if (m_printLabels.value()) {
       const BucketLabelInfo labelInfo = computeBucketLabel(*bucket, segmentCounts);
-      labels.push_back(labelInfo.label);
-      hasTruthFlags.push_back(labelInfo.hasTruth);
-      hasSegmentFlags.push_back(labelInfo.hasSegment);
+      if (doDebugDump) {
+        labels.push_back(labelInfo.label);
+        hasTruthFlags.push_back(labelInfo.hasTruth);
+        hasSegmentFlags.push_back(labelInfo.hasSegment);
+      }
 
       if (labelInfo.label == 1) {
         ++labelledGoodBuckets;
@@ -434,7 +465,25 @@ StatusCode GraphBucketFilterTool::runGraphInference(const EventContext& ctx,
                  << " unknown_label=" << labelledUnknownBuckets);
   }
 
-  if (!m_debugDumpFile.value().empty()) {
+  if (m_printFilterSummary) {
+    ATH_MSG_INFO("BucketFilterSummary event=" << ctx.evt()
+                 << " input=" << inputBuckets->size()
+                 << " model_input=" << validBuckets
+                 << " model_kept=" << keptByModel
+                 << " output=" << kept
+                 << " rejected=" << (inputBuckets->size() - kept)
+                 << " non_model_passthrough=" << passThroughNonModelBuckets);
+    if (m_printLabels) {
+      ATH_MSG_INFO("BucketFilterTruthSummary event=" << ctx.evt()
+                   << " expected_signal=" << labelledGoodBuckets
+                   << " expected_signal_kept=" << labelledGoodKept
+                   << " expected_background=" << labelledBadBuckets
+                   << " expected_background_kept=" << labelledBadKept
+                   << " unknown_label=" << labelledUnknownBuckets);
+    }
+  }
+
+  if (doDebugDump) {
     DebugDumpEventData eventData;
     eventData.outputMode =
         (outputMode == OutputMode::MultiClass3) ? "multiclass3" : "single_output";

@@ -38,6 +38,7 @@ namespace MuonG4{
                                 re->storeAlignedTransforms(*trfCache);
                                 re->getMaterialGeom()->getAbsoluteTransform(trfCache->geoModelAlignment.get());
                                 re->getMaterialGeom()->clearPositionInfo();
+                                re->storeAlignedTransforms(*trfCache);
                             });
         ATH_CHECK(writeHandle.record(std::move(trfCache)));
         return StatusCode::SUCCESS;

@@ -461,11 +461,7 @@ void EvtTauolaEngine::decayTauEvent( EvtParticle* tauParticle )
 
     // Now pass the event to Tauola for processing
     // Create a Tauola event object
-#ifdef HEPMC3
     Tauolapp::TauolaHepMC3Event tauolaEvent( theEvent.get() );
-#else
-    Tauolapp::TauolaHepMCEvent tauolaEvent( theEvent.get() );
-#endif
 
     // Run the Tauola algorithm
     tauolaEvent.decayTaus();
@@ -478,15 +474,7 @@ void EvtTauolaEngine::decayTauEvent( EvtParticle* tauParticle )
     // re-decayed since we check at the start of this function if the tau particle has
     // any daughters before running Tauola decayTaus().
 
-#ifdef HEPMC3
     for ( auto aParticle : theEvent->particles() ) {
-#else
-    HepMC::GenEvent::particle_iterator eventIter;
-    for ( eventIter = theEvent->particles_begin();
-          eventIter != theEvent->particles_end(); ++eventIter ) {
-        // Check to see if we have a tau particle
-        HepMC::GenParticle* aParticle = ( *eventIter );
-#endif
 
         if ( aParticle && abs( aParticle->pdg_id() ) == m_tauPDG ) {
             // Find out what EvtParticle corresponds to the HepMC particle.
@@ -507,17 +495,8 @@ void EvtTauolaEngine::decayTauEvent( EvtParticle* tauParticle )
                 std::vector<EvtVector4R> daugP4Vect;
 
                 // Loop through all descendants
-#ifdef HEPMC3
                 for ( auto tauDaug :
                       HepMC3::Relatives::DESCENDANTS( std::move(endVertex) ) ) {
-#else
-                HepMC::GenVertex::particle_iterator tauIter;
-                // Loop through all descendants
-                for ( tauIter = endVertex->particles_begin( HepMC::descendants );
-                      tauIter != endVertex->particles_end( HepMC::descendants );
-                      ++tauIter ) {
-                    HepMC::GenParticle* tauDaug = ( *tauIter );
-#endif
                     // Check to see if this descendant has its own decay vertex, e.g. rho resonance.
                     // If so, skip this daughter and continue looping through the descendant list
                     // until we reach the final "stable" products (e.g. pi pi from rho -> pi pi).

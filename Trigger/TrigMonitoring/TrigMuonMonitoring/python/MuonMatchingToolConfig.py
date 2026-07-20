@@ -12,6 +12,13 @@ def MuonMatchingToolConfig(flags):
     matchTool.TrigThresholdDecisionTool = acc.popToolsAndMerge(TrigThresholdDecisionToolCfg(flags, 
                                                                                             name="TrigThresholdDecisionTool", 
                                                                                             AODinput = flags.Trigger.triggerConfig == 'INFILE'))
+    
+    # Check wheter we are running the phase-2 menu
+    from TrigConfigSvc.TriggerConfigAccess import getHLTMenuAccess
+    isRun4Menu = (getHLTMenuAccess(flags).name()).find("run4") != -1
+    if not isRun4Menu:
+        matchTool.EFFastRecoSAContainerName = ""
+
     acc.setPrivateTools(matchTool)
 
     return acc

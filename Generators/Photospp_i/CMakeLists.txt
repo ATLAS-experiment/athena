@@ -5,11 +5,7 @@ atlas_subdir( Photospp_i )
 
 # External dependencies:
 find_package( CLHEP )
-if (HEPMC3_USE)
 find_package( Photospp COMPONENTS Photospp PhotosppHepMC3 )
-else()
-find_package( Photospp COMPONENTS Photospp PhotosppHepMC )
-endif()
 
 # Remove the --as-needed linker flags:
 atlas_disable_as_needed()

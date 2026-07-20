@@ -12,7 +12,6 @@
 #include "TrkiPatFitter/iPatGlobalFitter.h"
 
 #include "GaudiKernel/SystemOfUnits.h"
-#include "GaudiKernel/ThreadLocalContext.h"
 #include "TrkiPatFitterUtils/ExtrapolationType.h"
 #include "TrkiPatFitterUtils/FitMeasurement.h"
 #include "TrkiPatFitterUtils/FitParameters.h"

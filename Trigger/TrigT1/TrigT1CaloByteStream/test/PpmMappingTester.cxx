@@ -84,7 +84,7 @@ StatusCode PpmMappingTester::finalize()
   return StatusCode::SUCCESS;
 }
 
-StatusCode PpmMappingTester::execute()
+StatusCode PpmMappingTester::execute(const EventContext& ctx)
 {
   // Timing tests
 

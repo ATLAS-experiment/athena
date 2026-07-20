@@ -26,7 +26,6 @@
 #include "BeamSpotConditionsData/BeamSpotData.h"
 #include "TrkParameters/TrackParameters.h"
 #include "GeoPrimitives/GeoPrimitives.h" //Needed for Amg::Vector3D
-#include "GaudiKernel/IPartPropSvc.h"
 #include <atomic>
 
 #include "InDetConversionFinderTools/VertexPointEstimator.h"
@@ -91,10 +90,6 @@ namespace Trk
   class V0Tools;
 }
 
-namespace HepPDT{
-  class ParticleDataTable;
-}
-
 namespace InDet
 {
   static const InterfaceID IID_InDetV0FinderTool("InDetV0FinderTool", 1, 0);
@@ -145,7 +140,6 @@ namespace InDet
     PublicToolHandle<Trk::IExtrapolator> m_extrapolator{
       this, "Extrapolator", "Trk::Extrapolator"};
 
-    const HepPDT::ParticleDataTable *m_particleDataTable = nullptr;
 
     BooleanProperty m_doSimpleV0{this, "doSimpleV0", false};            //!< = true equivalent to the old InDetSimpleV0Finder (false)
     BooleanProperty m_useorigin{this, "useorigin", true};               //!< = true only using tracks that have no vertex association (true)
@@ -252,7 +246,6 @@ namespace InDet
     SG::ReadHandleKeyArray<xAOD::TrackParticleContainer> m_RelinkContainers{this, "RelinkTracks", {}, "Track Containers if they need to be relinked through indirect use" };
     ElementLink<xAOD::TrackParticleContainer> makeLink(const xAOD::TrackParticle*, const std::vector<const xAOD::TrackParticleContainer*>&) const;
 
-    ServiceHandle<IPartPropSvc> m_partPropSvc{this, "PartPropSvc", "PartPropSvc"};
   };
 
 }//end of namespace InDet

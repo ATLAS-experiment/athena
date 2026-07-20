@@ -31,7 +31,7 @@ class LArHVCorrMaker : public AthAlgorithm
   virtual StatusCode initialize() override;
 
   // Algorithm execution
-  virtual StatusCode execute() override;
+  virtual StatusCode execute(const EventContext& ctx) override;
 
   // Algorithm finalization
   virtual StatusCode stop() override;

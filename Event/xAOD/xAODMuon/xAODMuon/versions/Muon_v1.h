@@ -1,7 +1,5 @@
-// Dear emacs, this is -*- c++ -*-
-
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // $Id: Muon_v1.h 745098 2016-05-05 15:47:04Z wleight $
@@ -25,7 +23,19 @@
 #include "xAODMuon/MuonSegmentContainer.h"
 
 #include <bitset>
-#include <stdint.h>
+#include <cstdint>
+#include <ostream>
+#include <string_view>
+
+/** @brief Helper macro to declare the ostream operator foe the various
+ *         muon enum */
+#define DECLARE_ENUM_OSTREAM(enumType)                            \
+    static std::string_view toString(const enumType obj);         \
+                                                                  \
+    inline friend std::ostream& operator<<(std::ostream& ostr,    \
+                                            const enumType obj) { \
+      return (ostr<<toString(obj));                               \
+    }                                                             \
 
 // ROOT include(s):
 #include "Math/Vector4D.h"
@@ -40,6 +50,18 @@ namespace xAOD {
   public:
     /// inject the enums
     #include "xAODMuon/versions/MuonEnums.def"
+    /** @brief Pipe the author to a string object */
+    DECLARE_ENUM_OSTREAM(Author);
+    /** @brief Pipe the muon type to a string object */
+    DECLARE_ENUM_OSTREAM(MuonType);
+    /** @brief Pipe the muon quality to a string object */
+    DECLARE_ENUM_OSTREAM(Quality);
+    /** @brief Pipe the track particle to a string object */
+    DECLARE_ENUM_OSTREAM(TrackParticleType);
+    /** @brief The muon parameter to a string object */
+    DECLARE_ENUM_OSTREAM(ParamDef);
+    /** @brief The muon energy loss to a string object */
+    DECLARE_ENUM_OSTREAM(EnergyLossType);
     /// Default constructor
     Muon_v1() = default;
 
@@ -55,17 +77,17 @@ namespace xAOD {
     /// @name IParticle functions
     /// @{
     /// The transverse momentum (\f$p_T\f$) of the particle.
-    virtual double           pt() const;
+    virtual double           pt() const override;
     /// The pseudorapidity (\f$\eta\f$) of the particle.
-    virtual double           eta() const;
+    virtual double           eta() const override;
     /// The azimuthal angle (\f$\phi\f$) of the particle.
-    virtual double           phi() const;
+    virtual double           phi() const override;
     /// The invariant mass of the particle..
-    virtual double           m() const;
+    virtual double           m() const override;
     /// The total energy of the particle.
-    virtual double           e() const;
+    virtual double           e() const override;
     /// The true rapidity (y) of the particle.
-    virtual double           rapidity() const;
+    virtual double           rapidity() const override;
 
     /// Set method for IParticle values
     void setP4(double pt, double eta, double phi);
@@ -74,7 +96,7 @@ namespace xAOD {
     typedef IParticle::FourMom_t FourMom_t;
 
     /// The full 4-momentum of the particle.
-    virtual FourMom_t p4() const;
+    virtual FourMom_t p4() const override;
 
     /// Base 4 Momentum type for Muon
     typedef ROOT::Math::LorentzVector<ROOT::Math::PtEtaPhiM4D<double> > GenVecFourMom_t;
@@ -83,7 +105,7 @@ namespace xAOD {
     GenVecFourMom_t genvecP4() const;
 
     /// The type of the object as a simple enumeration
-    virtual Type::ObjectType type() const;
+    virtual Type::ObjectType type() const override;
     /// @}
 
     /// @name Charge
@@ -102,7 +124,7 @@ namespace xAOD {
     /// Returns 'true' if 'author' is the an author of this muon.
     bool isAuthor ( const Author author ) const;
     /// set author
-    void setAuthor(Author auth);
+    void setAuthor(const Author auth);
     /// Get all the authors of this Muon.
     /// For example during overlap checking, the same Muon may have been reconstructed by many different algorithms. This method returns a 16bit
     /// number, where each bit represents a muon algorithm, defined as follows (the lowest bit is indicates that something has gone wrong):
@@ -111,7 +133,7 @@ namespace xAOD {
     uint16_t allAuthors() const;
     void setAllAuthors(uint16_t authors);
     /// add author to all authors
-    void addAllAuthor( const Author author );
+    void addAllAuthor(const Author author );
 
     /// @}
 
@@ -193,7 +215,7 @@ namespace xAOD {
 
     /// get/set the Quality enum in bits 0-2, preserving higher-bit flags
     Quality quality() const;
-    void setQuality(Quality);
+    void setQuality(const Quality);
 
     /// MCP ID hit cuts - get/set the corresponding status bit in the quality decoration.
     bool passesIDCuts() const;
@@ -255,8 +277,6 @@ namespace xAOD {
     /// Set method for Isolation corection Bitset.
     bool setIsolationCorrectionBitset(uint32_t value, const Iso::IsolationFlavour flavour );
 
-    /// @}
-
     /// @name Links
     /// With the following methods you can retrieve links to the objects used to identify this muon - depending on how the muon was built the link may
     /// or may not be valid (i.e. a muon built from a standalone MS track won't have an ID TrackParticle associated to it).
@@ -275,7 +295,7 @@ namespace xAOD {
     /// This method can throw a std::runtime_error exception if either the 'muontype' is unknown, or if the type is MuonStandAlone,
     /// but there is no available extrapolatedMuonSpectrometerTrackParticleLink or muonSpectrometerTrackParticleLink to return.
     const ElementLink< TrackParticleContainer >& primaryTrackParticleLink() const;
-
+    /// @}
     /// @brief Returns a pointer (which should not usually be NULL, but might be if the muon has been stripped of information) to the
     /// primary TrackParticle corresponding to the MuonType of this muon.
     ///This is determined in the following order:
@@ -284,6 +304,7 @@ namespace xAOD {
     ///  3. ExtrapolatedMuonSpectrometerTrackParticle
     ///  4. MSOnlyExtrapolatedMuonSpectrometerTrackParticle
     ///  5. MuonSpectrometerTrackParticle
+     [[deprecated("primaryTrackParticle() - Please use the trackParticle function to retrieve the primary track particle")]]
     const TrackParticle* primaryTrackParticle() const;
 
     /// @brief Returns an ElementLink to the InnerDetector TrackParticle used in identification of this muon.
@@ -296,12 +317,12 @@ namespace xAOD {
     const ElementLink< TrackParticleContainer >& extrapolatedMuonSpectrometerTrackParticleLink() const;
     /// @brief Returns an ElementLink to the MS-only Extrapolated Muon Spectrometer TrackParticle used in identification of this muon.
     const ElementLink< TrackParticleContainer >& msOnlyExtrapolatedMuonSpectrometerTrackParticleLink() const;
-
     /// @brief Returns an ElementLink to the  TrackParticle used in identification of this muon.
     const ElementLink< TrackParticleContainer >& trackParticleLink( TrackParticleType type) const;
+
     /// @brief Set method for TrackParticle links.
     void setTrackParticleLink(TrackParticleType type, const ElementLink< TrackParticleContainer >& link);
-    /// @brief Returns a pointer (which can be NULL) to the  TrackParticle used in identification of this muon.
+    /// @brief Returns a pointer (which can be a nullptr) to the  TrackParticle used in identification of this muon.
     const TrackParticle* trackParticle( TrackParticleType type) const;
 
     /// @brief Returns an ElementLinkto the cluster associated to this muon.
@@ -342,6 +363,8 @@ namespace xAOD {
 
 } // namespace xAOD
 
+
+#undef DECLARE_ENUM_OSTREAM
 // Declare IParticle as a base class of Muon_v1:
 #include "AthContainers/DataVector.h"
   DATAVECTOR_BASE( xAOD::Muon_v1, xAOD::IParticle );

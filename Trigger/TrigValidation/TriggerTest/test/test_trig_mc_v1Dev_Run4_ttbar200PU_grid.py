@@ -3,7 +3,7 @@
 
 # art-description: Trigger RDO->RDO_TRIG athena for Run4 with ttbar mu=200
 # art-type: grid
-# art-include: main/Athena/x86_64-el9-gcc14-opt
+# art-include: main/Athena/x86_64-el9-gcc15-opt
 # art-input: group.trig-hlt.mc21_14TeV.601229.PhPy8EG_A14_ttbar_hdamp258p75_SingleLep.recon.RDO.e8481_s4494_r16635
 # art-input-nfiles: 1
 # art-athena-mt: 8
@@ -32,7 +32,7 @@ ex = MCGridStep(
 )
 ex.input = 'ttbar_pu200_Run4'
 
-ex.flags = [
+ex.flags += [
     'ITk.doTruth=False',
     'Tracking.doTruth=False',
 ]

@@ -47,7 +47,7 @@ StatusCode xAODJetFilter::filterInitialize() {
   return StatusCode::SUCCESS;
 }
 
-StatusCode xAODJetFilter::filterEvent() {
+StatusCode xAODJetFilter::filterEvent(const EventContext& ctx) {
   // Init grid
   //coverity[STACK_USE]
   double etgrid[m_grphi][m_greta];    // clean it out before we start
@@ -63,7 +63,7 @@ StatusCode xAODJetFilter::filterEvent() {
 
 // Retrieve TruthGen container from xAOD Gen slimmer, contains all particles witout barcode_zero and 
 // duplicated barcode ones
-  SG::ReadHandle<xAOD::TruthParticleContainer> xTruthParticleContainer{m_truthPartContKey};
+  SG::ReadHandle<xAOD::TruthParticleContainer> xTruthParticleContainer{m_truthPartContKey, ctx};
   if (!xTruthParticleContainer.isValid()) {
     ATH_MSG_ERROR("No TruthParticle collection with name " << m_truthPartContKey.key() << " found in StoreGate!");
     return StatusCode::FAILURE;
@@ -252,7 +252,7 @@ StatusCode xAODJetFilter::filterEvent() {
       return StatusCode::SUCCESS;
     }
   }
-  setFilterPassed(false);  // it failed to find any useful jets
+  setFilterPassed(false, ctx);  // it failed to find any useful jets
   m_Jets.clear();          // clean out the found jets
   return StatusCode::SUCCESS;
 }

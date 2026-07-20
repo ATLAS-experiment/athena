@@ -6,7 +6,9 @@
 #include "../GNNSeedingTrackMaker.h"
 #include "../SpacepointFeatureTool.h"
 #include "../GNNTrackFinderTritonTool.h"
+#ifdef ACTS_GNN_WITH_MODULEMAP
 #include "../ActsGnnModuleMapFinderTool.h"
+#endif
 
 using namespace InDet;
 

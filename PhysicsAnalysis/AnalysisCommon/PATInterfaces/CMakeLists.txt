@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( PATInterfaces )
@@ -30,7 +30,7 @@ macro( _add_test name )
    atlas_add_test( ${name}
       SOURCES test/${name}.cxx
       LINK_LIBRARIES PATInterfaces RootCoreUtils
-      POST_EXEC_SCRIPT nopost.sh )
+      POST_EXEC_SCRIPT noerror.sh )
 endmacro( _add_test )
 
 # Test(s) in the package:
@@ -38,13 +38,14 @@ atlas_add_test( gt_SystematicsCache
    SOURCES test/gt_SystematicsCache.cxx
    INCLUDE_DIRS ${GTEST_INCLUDE_DIRS}
    LINK_LIBRARIES ${GTEST_LIBRARIES} PATInterfaces RootCoreUtils
-   POST_EXEC_SCRIPT nopost.sh )
+   POST_EXEC_SCRIPT noerror.sh )
 
 atlas_add_test( gt_SystematicSet
    SOURCES test/gt_SystematicSet.cxx
    INCLUDE_DIRS ${GTEST_INCLUDE_DIRS}
    LINK_LIBRARIES ${GTEST_LIBRARIES} PATInterfaces RootCoreUtils
-   POST_EXEC_SCRIPT nopost.sh )
+   LOG_IGNORE_PATTERN "unsupported systematic variation"
+   POST_EXEC_SCRIPT noerror.sh )
 
 _add_test( ut_SystematicSet_unordered_map )
 _add_test( ut_SystematicVariation )
@@ -53,15 +54,15 @@ _add_test( ut_stream_systematics )
 
 atlas_add_test( ut_syst_constructors
    SCRIPT test/ut_syst_constructors.py
-   POST_EXEC_SCRIPT nopost.sh )
+   POST_EXEC_SCRIPT noerror.sh )
 
 atlas_add_test( ut_syst_dict
    SCRIPT test/ut_syst_dict.py
-   POST_EXEC_SCRIPT nopost.sh )
+   POST_EXEC_SCRIPT noerror.sh )
 
 atlas_add_test( ut_syst_equality
    SCRIPT test/ut_syst_equality.py
-   POST_EXEC_SCRIPT nopost.sh )
+   POST_EXEC_SCRIPT noerror.sh )
 
 # Clean up:
 unset( _add_test )

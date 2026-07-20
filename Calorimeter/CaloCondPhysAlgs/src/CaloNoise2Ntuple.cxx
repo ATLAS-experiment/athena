@@ -54,7 +54,7 @@ StatusCode CaloNoise2Ntuple::initialize()
 
 }
 //__________________________________________________________________________
-StatusCode CaloNoise2Ntuple::execute()
+StatusCode CaloNoise2Ntuple::execute(const EventContext& /*ctx*/)
 {
   ATH_MSG_DEBUG ("CaloNoise2Ntuple execute()" );
   

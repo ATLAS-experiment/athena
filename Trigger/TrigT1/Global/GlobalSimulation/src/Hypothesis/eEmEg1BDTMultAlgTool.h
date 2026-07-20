@@ -5,9 +5,9 @@
 #ifndef GLOBALSIM_EEMEG1BDTMULTALGTOOL_H
 #define GLOBALSIM_EEMEG1BDTMULTALGTOOL_H
 
-#include "AthenaBaseComps/AthAlgTool.h"
 
-#include "../GlobalSimComponents/ITIPwriterAlgTool.h"
+#include "../GlobalSimComponents/ITIPWriterAlgTool.h"
+#include "../GlobalSimComponents/TIPWriterAlgTool.h"
 #include "../IO/eEmEg1BDTTOB.h"
 
 #include "ICommonSelector.h"
@@ -23,7 +23,7 @@ namespace GlobalSim {
    */
 
 
-  class eEmEg1BDTMultAlgTool: public extends<AthAlgTool, ITIPwriterAlgTool> {
+  class eEmEg1BDTMultAlgTool: public extends<TIPWriterAlgTool, ITIPWriterAlgTool> {
 
   public:
     eEmEg1BDTMultAlgTool(const std::string& type,
@@ -35,8 +35,9 @@ namespace GlobalSim {
     /** @brief Initialize function running before first event */
     virtual StatusCode initialize() override;
 
-    virtual StatusCode updateTIP(std::bitset<s_nbits_TIP>&,
-				 const EventContext&) const override;
+    using TIPWriterAlgTool::updateTIP;
+
+    virtual StatusCode countPassingTOBs(const EventContext&, unsigned int& N_pass_tobs) const override;
 
     virtual std::string toString() const override;
 
@@ -101,19 +102,6 @@ namespace GlobalSim {
       "unknown",
       "Eg1BDT cut_operator"};
     
-    Gaudi::Property<int> m_TIP_position {
-      this,
-      "TIPposition",
-      0,
-      "start position to write into the TIP"};
-
-    
-    Gaudi::Property<int> m_n_multbits {
-      this,
-      "n_multbits",
-      3,
-      "number of bits to write into the TIP"};
-
     Gaudi::Property<std::string> m_menu_name {
       this,
       "menu_name",
@@ -127,9 +115,6 @@ namespace GlobalSim {
       false,
       "flag to enable debug dumps"
     };
-
-
-    ulong m_maxtob{0};
 
   };
 }

@@ -93,13 +93,13 @@ namespace EL
 
 
   StatusCode AlgorithmTimerWrapper ::
-  execute ()
+  execute (const EventContext& ctx)
   {
     using namespace msgEventLoop;
     RCU_CHANGE_INVARIANT (this);
 
     auto start = clock_type::now();
-    auto result = m_algorithm->execute ();
+    auto result = m_algorithm->execute (ctx);
     auto stop = clock_type::now();
     m_time_event += stop - start;
     return result;

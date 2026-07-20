@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "./ISF_HitAnalysis.h"
@@ -49,7 +49,6 @@
 #include "TrkExInterfaces/IExtrapolator.h"
 #include "TrkMaterialOnTrack/EnergyLoss.h"
 #include "TrkGeometry/TrackingGeometry.h"
-#include "HepPDT/ParticleData.hh"
 //#########################
 
 #include "TTree.h"
@@ -128,14 +127,6 @@ StatusCode ISF_HitAnalysis::initialize ATLAS_NOT_THREAD_SAFE ()
   // Grab the Ntuple and histogramming service for the tree
   ATH_CHECK(m_thistSvc.retrieve());
 
-  //#########################
-  ATH_CHECK(m_partPropSvc.retrieve());
-
-  m_particleDataTable = (HepPDT::ParticleDataTable*) m_partPropSvc->PDT();
-  if(m_particleDataTable == nullptr) {
-    ATH_MSG_ERROR("PDG table not found");
-    return StatusCode::FAILURE;
-  }
   //#########################
   std::unique_ptr<TFile> dummyFile = std::unique_ptr<TFile>(TFile::Open("dummyFile.root", "RECREATE")); //This is added to suppress the error messages about memory-resident trees
   m_tree = new TTree("FCS_ParametrizationInput", "FCS_ParametrizationInput");
@@ -391,12 +382,12 @@ StatusCode ISF_HitAnalysis::finalize ATLAS_NOT_THREAD_SAFE ()
 
  /** now add branches and leaves to the tree */
 
- using GEOCELL = struct
+ struct GEOCELL
  {
-  Long64_t identifier;
-  Int_t calosample;
-  float eta,phi,r,eta_raw,phi_raw,r_raw,x,y,z,x_raw,y_raw,z_raw;
-  float deta,dphi,dr,dx,dy,dz;
+  Long64_t identifier = 0;
+  Int_t calosample = 0;
+  float eta = 0,phi = 0,r = 0,eta_raw = 0,phi_raw = 0,r_raw = 0,x = 0,y = 0,z = 0,x_raw = 0,y_raw = 0,z_raw = 0;
+  float deta = 0,dphi = 0,dr = 0,dx = 0,dy = 0,dz = 0;
  };
 
  static GEOCELL geocell;
@@ -478,7 +469,7 @@ StatusCode ISF_HitAnalysis::finalize ATLAS_NOT_THREAD_SAFE ()
 } //finalize
 
 
-StatusCode ISF_HitAnalysis::execute()
+StatusCode ISF_HitAnalysis::execute(const EventContext& ctx)
 {
 
  ATH_MSG_DEBUG( "In ISF_HitAnalysis::execute()" );
@@ -489,10 +480,10 @@ StatusCode ISF_HitAnalysis::execute()
   return StatusCode::FAILURE;
  }
 
- SG::ReadCondHandle<ILArfSampl> fSamplHdl(m_fSamplKey,Gaudi::Hive::currentContext());
+ SG::ReadCondHandle<ILArfSampl> fSamplHdl(m_fSamplKey,ctx);
  const ILArfSampl* fSampl=*fSamplHdl;
 
- SG::ReadCondHandle<TileSamplingFraction> tileSamplingFraction(m_tileSamplingFractionKey,Gaudi::Hive::currentContext());
+ SG::ReadCondHandle<TileSamplingFraction> tileSamplingFraction(m_tileSamplingFractionKey,ctx);
  ATH_CHECK( tileSamplingFraction.isValid() );
 
 
@@ -591,7 +582,7 @@ StatusCode ISF_HitAnalysis::execute()
 
  //##########################
 
- SG::ReadCondHandle<CaloDetDescrManager> caloMgrHandle{m_caloMgrKey,Gaudi::Hive::currentContext()};
+ SG::ReadCondHandle<CaloDetDescrManager> caloMgrHandle{m_caloMgrKey,ctx};
  ATH_CHECK(caloMgrHandle.isValid());
  const CaloDetDescrManager* calo_dd_man = *caloMgrHandle;
 
@@ -694,11 +685,7 @@ StatusCode ISF_HitAnalysis::execute()
        if(loopEnd==-1) {
          loopEnd = particles_size; //is this the correct thing?
        }
-#ifdef HEPMC3
        for (const auto& part: *(*mcEvent->begin()))
-#else
-       for (const auto part: *(*mcEvent->begin()))
-#endif
        {
          
          ATH_MSG_DEBUG("Number truth particles="<<particles_size<<" loopEnd="<<loopEnd);
@@ -1333,7 +1320,7 @@ std::vector<Trk::HitInfo>* ISF_HitAnalysis::caloHits(const HepMC::GenParticle& p
  std::vector<Trk::HitInfo>*     hitVector =  new std::vector<Trk::HitInfo>;
 
  int     pdgId    = part.pdg_id();
- double  charge   = HepPDT::ParticleID(pdgId).charge();
+ double  charge   = MC::charge(pdgId);
 
  // particle Hypothesis for the extrapolation
  Trk::ParticleHypothesis pHypothesis = m_pdgToParticleHypothesis.convert(pdgId,charge);

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -72,8 +72,8 @@ public:
   QList<AODHandleBase*> handlesList;
 
   //For iteration:
-  std::vector<VertexHandle*>::iterator itHandles;
-  std::vector<VertexHandle*>::iterator itHandlesEnd;
+  std::vector<VertexHandle*>::iterator itHandles{};
+  std::vector<VertexHandle*>::iterator itHandlesEnd{};
 
   //Extra widgets;
   VertexCollectionSettingsButton* collSettingsButton = nullptr;

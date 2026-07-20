@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////
@@ -104,10 +104,10 @@ PixelClusterOnTrackTool::initialize() {
 
 InDet::PixelClusterOnTrack *
 PixelClusterOnTrackTool::correct
-  (const Trk::PrepRawData &rio, const Trk::TrackParameters &trackPar, const EventContext& /*ctx*/) const {
+  (const Trk::PrepRawData &rio, const Trk::TrackParameters &trackPar, const EventContext& ctx) const {
 
   if (not m_applyNNcorrection){
-    return correctDefault(rio, trackPar);
+    return correctDefault(rio, trackPar, ctx);
   }else {
     if (m_errorStrategy == 0 || m_errorStrategy == 1) {
       // version from Giacinto
@@ -122,14 +122,14 @@ PixelClusterOnTrackTool::correct
       if (!pix) {
         return nullptr;
       }
-      const Trk::ClusterSplitProbabilityContainer::ProbabilityInfo &splitProb = getClusterSplittingProbability(pix);
+      const Trk::ClusterSplitProbabilityContainer::ProbabilityInfo &splitProb = getClusterSplittingProbability(pix, ctx);
       if (splitProb.isSplit()) {
-        return correctNN(rio, trackPar);
+        return correctNN(rio, trackPar, ctx);
       } else {
-        return correctDefault(rio, trackPar);
+        return correctDefault(rio, trackPar, ctx);
       }
     } else {
-      return correctNN(rio, trackPar);
+      return correctNN(rio, trackPar, ctx);
     }
   }
 }
@@ -141,7 +141,7 @@ PixelClusterOnTrackTool::correct
  */
 InDet::PixelClusterOnTrack *
 PixelClusterOnTrackTool::correctDefault
-  (const Trk::PrepRawData &rio, const Trk::TrackParameters &trackPar) const {
+  (const Trk::PrepRawData &rio, const Trk::TrackParameters &trackPar, const EventContext& ctx) const {
   using CLHEP::micrometer;
 
 
@@ -190,7 +190,7 @@ PixelClusterOnTrackTool::correctDefault
     double bowphi = std::atan2(trkphicomp, trknormcomp);
     double boweta = std::atan2(trketacomp, trknormcomp);
 
-    float tanl = m_lorentzAngleTool->getTanLorentzAngle(idHash, Gaudi::Hive::currentContext());
+    float tanl = m_lorentzAngleTool->getTanLorentzAngle(idHash, ctx);
     int readoutside = element->design().readoutSide();
 
     // map the angles of inward-going tracks onto [-PI/2, PI/2]
@@ -259,12 +259,12 @@ PixelClusterOnTrackTool::correctDefault
       design->positionFromColumnRow(colmax, rowmax);
 
     InDetDD::SiLocalPosition centroid = 0.25 * (pos1 + pos2 + pos3 + pos4);
-    double shift = m_lorentzAngleTool->getLorentzShift(idHash, Gaudi::Hive::currentContext());
+    double shift = m_lorentzAngleTool->getLorentzShift(idHash, ctx);
     int nrows = rowmax - rowmin + 1;
     int ncol = colmax - colmin + 1;
 
     // TOT interpolation for collision data
-    SG::ReadCondHandle<ITk::PixelOfflineCalibData> offlineITkCalibDataHandle(m_clusterITkErrorKey);
+    SG::ReadCondHandle<ITk::PixelOfflineCalibData> offlineITkCalibDataHandle(m_clusterITkErrorKey, ctx);
 
     if (m_positionStrategy > 0 && omegaphi > -0.5 && omegaeta > -0.5) {
       localphi = centroid.xPhi() + shift;
@@ -332,7 +332,7 @@ PixelClusterOnTrackTool::correctDefault
 
   // create new copy of error matrix
   if (!m_pixelErrorScalingKey.key().empty()) {
-    SG::ReadCondHandle<RIO_OnTrackErrorScaling> error_scaling( m_pixelErrorScalingKey );
+    SG::ReadCondHandle<RIO_OnTrackErrorScaling> error_scaling( m_pixelErrorScalingKey, ctx );
     cov = Trk::ErrorScalingCast<PixelRIO_OnTrackErrorScaling>(*error_scaling)
               ->getScaledCovariance(std::move(cov), *m_pixelid,
                                     element->identify());
@@ -347,7 +347,7 @@ PixelClusterOnTrackTool::correctDefault
 InDet::PixelClusterOnTrack*
 PixelClusterOnTrackTool::correct
   (const Trk::PrepRawData &rio, const Trk::TrackParameters &trackPar,
-  const ITk::PixelClusterStrategy strategy) const {
+   const ITk::PixelClusterStrategy strategy, const EventContext& ctx) const {
   int initial_errorStrategy;
   InDet::PixelClusterOnTrack *newROT;
 
@@ -356,12 +356,12 @@ PixelClusterOnTrackTool::correct
   case PixelClusterStrategy::SHARED:
     initial_errorStrategy = m_errorStrategy;
     m_errorStrategy = 0; // error as size of cluster /sqrt(12)
-    newROT = correct(rio, trackPar);
+    newROT = correct(rio, trackPar, ctx);
     m_errorStrategy = initial_errorStrategy;
     return newROT;
 
   default:
-    return correct(rio, trackPar);
+    return correct(rio, trackPar, ctx);
   }
 }
 
@@ -369,7 +369,8 @@ PixelClusterOnTrackTool::correct
 InDet::PixelClusterOnTrack *
 PixelClusterOnTrackTool::correctNN
   (const Trk::PrepRawData &rio,
-   const Trk::TrackParameters &trackPar) const {
+   const Trk::TrackParameters &trackPar,
+   const EventContext& ctx) const {
 
   const InDet::PixelCluster *pixelPrepCluster = nullptr;
   if (rio.type(Trk::PrepRawDataType::PixelCluster)) {
@@ -407,12 +408,12 @@ PixelClusterOnTrackTool::correctNN
   Amg::MatrixX finalerrormatrix;
 
   if (m_usingTIDE_Ambi) {
-    if (!getErrorsTIDE_Ambi(pixelPrepCluster, trackPar, finalposition, finalerrormatrix)) {
-      return correctDefault(rio, trackPar);
+    if (!getErrorsTIDE_Ambi(pixelPrepCluster, trackPar, finalposition, finalerrormatrix, ctx)) {
+      return correctDefault(rio, trackPar, ctx);
     }
   }else {
-    if (!getErrorsDefaultAmbi(pixelPrepCluster, trackPar, finalposition, finalerrormatrix)) {
-      return correctDefault(rio, trackPar);
+    if (!getErrorsDefaultAmbi(pixelPrepCluster, trackPar, finalposition, finalerrormatrix, ctx)) {
+      return correctDefault(rio, trackPar, ctx);
     }
   }
 
@@ -428,7 +429,7 @@ PixelClusterOnTrackTool::correctNN
   Amg::MatrixX cov = finalerrormatrix;
   // create new copy of error matrix
   if (!m_pixelErrorScalingKey.key().empty()) {
-    SG::ReadCondHandle<RIO_OnTrackErrorScaling> error_scaling( m_pixelErrorScalingKey );
+    SG::ReadCondHandle<RIO_OnTrackErrorScaling> error_scaling( m_pixelErrorScalingKey, ctx );
     cov = Trk::ErrorScalingCast<PixelRIO_OnTrackErrorScaling>(*error_scaling)
               ->getScaledCovariance(std::move(cov), *m_pixelid,
                                     element->identify());
@@ -454,13 +455,14 @@ bool
 PixelClusterOnTrackTool::getErrorsDefaultAmbi(const InDet::PixelCluster *pixelPrepCluster,
                                               const Trk::TrackParameters &trackPar,
                                               Amg::Vector2D &finalposition,
-                                              Amg::MatrixX &finalerrormatrix) const {
+                                              Amg::MatrixX &finalerrormatrix,
+                                              const EventContext& ctx) const {
   std::vector<Amg::Vector2D> vectorOfPositions;
   int numberOfSubclusters = 1;
   vectorOfPositions.push_back(pixelPrepCluster->localPosition());
 
   if (m_applyNNcorrection){
-    SG::ReadHandle<InDet::PixelGangedClusterAmbiguities> splitClusterMap(m_splitClusterMapKey);
+    SG::ReadHandle<InDet::PixelGangedClusterAmbiguities> splitClusterMap(m_splitClusterMapKey, ctx);
     InDet::PixelGangedClusterAmbiguities::const_iterator mapBegin = splitClusterMap->begin();
     InDet::PixelGangedClusterAmbiguities::const_iterator mapEnd = splitClusterMap->end();
     for (InDet::PixelGangedClusterAmbiguities::const_iterator mapIter = mapBegin; mapIter != mapEnd; ++mapIter) {
@@ -602,12 +604,13 @@ bool
 PixelClusterOnTrackTool::getErrorsTIDE_Ambi(const InDet::PixelCluster *pixelPrepCluster,
                                             const Trk::TrackParameters &trackPar,
                                             Amg::Vector2D &finalposition,
-                                            Amg::MatrixX &finalerrormatrix) const {
-  const Trk::ClusterSplitProbabilityContainer::ProbabilityInfo &splitProb = getClusterSplittingProbability(pixelPrepCluster);
+                                            Amg::MatrixX &finalerrormatrix,
+                                            const EventContext& ctx) const {
+  const Trk::ClusterSplitProbabilityContainer::ProbabilityInfo &splitProb = getClusterSplittingProbability(pixelPrepCluster, ctx);
   std::vector<Amg::Vector2D> vectorOfPositions;
   int numberOfSubclusters = 1;
   if(m_applyNNcorrection){
-    SG::ReadHandle<InDet::PixelGangedClusterAmbiguities> splitClusterMap(m_splitClusterMapKey);
+    SG::ReadHandle<InDet::PixelGangedClusterAmbiguities> splitClusterMap(m_splitClusterMapKey, ctx);
     numberOfSubclusters = 1 + splitClusterMap->count(pixelPrepCluster);
 
     if (splitClusterMap->count(pixelPrepCluster) == 0 && splitProb.isSplit()) {

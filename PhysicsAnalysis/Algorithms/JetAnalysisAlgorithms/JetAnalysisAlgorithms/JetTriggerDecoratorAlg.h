@@ -6,16 +6,17 @@
 #define ASG_ANALYSIS_ALGORITHMS__JET_TRIGGER_DECORATOR_ALG_H
 
 #include <AnaAlgorithm/AnaAlgorithm.h>
-#include <SystematicsHandles/SysReadHandle.h>
-#include <SystematicsHandles/SysListHandle.h>
-#include <SystematicsHandles/SysWriteDecorHandle.h>
 #include <AsgTools/PropertyWrapper.h>
-
+#include <AsgTools/ToolHandle.h>
+#include <SystematicsHandles/SysListHandle.h>
+#include <SystematicsHandles/SysReadHandle.h>
+#include <SystematicsHandles/SysWriteDecorHandle.h>
+#include <TrigBtagEmulationTool/ITrigBtagEmulationTool.h>
+#include <TrigConfInterfaces/ITrigConfigTool.h>
+#include <TrigDecisionTool/TrigDecisionTool.h>
 #include <xAODJet/JetContainer.h>
 #include <xAODTrigger/JetRoIContainer.h>
-#include <TrigDecisionTool/TrigDecisionTool.h>
-#include <TrigBtagEmulationTool/ITrigBtagEmulationTool.h>
-
+#include <xAODTrigger/jFexSRJetRoIContainer.h>
 
 namespace CP
 {
@@ -27,9 +28,11 @@ namespace CP
 			   ISvcLocator *svcLoc = nullptr);
 
     StatusCode initialize () override;
-    StatusCode execute () override;
+    StatusCode execute (const EventContext& ctx) override;
 
-  private:
+   private:
+    // Lazily rebuilt in execute() — beginInputFile() fires before xAODConfigSvc publishes the menu (map::at).
+    StatusCode rebuildJfexThresholdTable(const EventContext& ctx);
 
     /// \brief the systematics list we run
     SysListHandle m_systematicsList {this};
@@ -39,7 +42,12 @@ namespace CP
 	this, "jets", "", "the jet container to use"};
 
     SG::ReadHandleKey<xAOD::JetRoIContainer> m_L1JetsInKey{
-      this, "L1Jets", "LVL1JetRoIs", "L1 jet container"
+      this, "L1Jets", "LVL1JetRoIs", "Legacy L1Calo jet RoI container"
+    };
+    // Phase-I L1Calo jFEX SR jet RoI container (data 2024+ / mc23e).
+    SG::ReadHandleKey<xAOD::jFexSRJetRoIContainer> m_L1JetsPhaseIInKey{
+      this, "L1JetsPhaseI", "L1_jFexSRJetRoI",
+      "Phase-I L1Calo jFEX SR jet RoI container"
     };
     SG::ReadHandleKey<xAOD::JetContainer> m_HLTJetsInKey {
       this, "HLTJets", "HLT_AntiKt4EMPFlowJets_subresjesgscIS_ftf_bJets",
@@ -55,11 +63,47 @@ namespace CP
     Gaudi::Property<std::vector<std::string>> m_triggerNavBug{
       this, "triggerBugList", {}, "List of buggy triggers"
     };
-    Gaudi::Property<float> m_dR{this, "dR", 0.4};
+    Gaudi::Property<float> m_l1dR{this, "l1dR_cut", 0.4,
+        "ΔR cone for L1 (jFEX) matching"};
+    Gaudi::Property<float> m_hltDR{this, "hltDR_cut", 0.4,
+        "ΔR cone for HLT matching"};
 
-    ToolHandle<Trig::TrigDecisionTool> m_trigDecisionTool;
+    // PublicToolHandle: TrigDecisionTool is a shared singleton; a private
+    // ToolHandle would try to instantiate a duplicate and fail.
+#ifndef XAOD_STANDALONE
+    // For AthAnalysis and Athena, PublicToolHandle exist
+    PublicToolHandle<Trig::TrigDecisionTool> m_trigDecisionTool{
+        this, "TrigDecisionTool", "Trig::TrigDecisionTool/TrigDecisionTool",
+        "trigger decision tool"};
+#else
+    // For AnalysisBase use ToolHandle as PublicToolHandle is not available
+    ToolHandle<Trig::TrigDecisionTool> m_trigDecisionTool{
+        this, "TrigDecisionTool", "Trig::TrigDecisionTool/TrigDecisionTool",
+        "trigger decision tool"};
+#endif
     ToolHandle<Trig::ITrigBtagEmulationTool> m_emulationTool
       {this, "trigEmulationTool", "", "Jet trigger emulation tool, to be used for Run 2"};
+
+    Gaudi::Property<bool> m_usePhaseIL1{
+      this, "usePhaseIL1", false,
+      "If true, use Phase-I L1Calo jFEX SR jet RoI container for L1 matching."
+    };
+
+    Gaudi::Property<std::string> m_l1ThresholdType{
+      this, "l1ThresholdType", "jJ",
+      "L1 threshold type for jFEX bit→name lookup (Phase-I L1 only)."
+    };
+
+    ToolHandle<TrigConf::ITrigConfigTool> m_trigConfigTool{
+      this, "TrigConfigTool", "TrigConf::xAODConfigTool/xAODConfigTool",
+      "Trigger configuration tool (Phase-I L1 menu access)"
+    };
+
+    // Phase-I L1 bit→name table, built lazily; rebuilt on menu-name change.
+    std::vector<std::string> m_jfexThresholdNames;
+    bool m_thresholdNamesLoaded{false};
+    std::string m_cachedL1MenuName;
+
 
     Gaudi::Property<bool> m_doL1Matching{this, "doL1Matching", false,
 	"do trigger L1 matching?" };
@@ -76,7 +120,8 @@ namespace CP
     CP::SysWriteDecorHandle<float> m_HLTPt_decor {this, "HLTPt", "", "HLT-matched pt"};
     CP::SysWriteDecorHandle<float> m_HLTEta_decor {this, "HLTEta", "", "HLT-matched eta"};
     CP::SysWriteDecorHandle<float> m_HLTPhi_decor {this, "HLTPhi", "", "HLT-matched phi"};
-    CP::SysWriteDecorHandle<float> m_HLTDR_decor {this, "HLTDR", "", "HLT-matched thresholds"};
+    CP::SysWriteDecorHandle<float> m_HLTDR_decor{this, "HLTDR", "",
+                                                 "HLT-matched dR"};
     CP::SysWriteDecorHandle<std::vector<int>> m_HLTThreshold_decor {this, "HLTThreshold", "", "HLT-matched thresholds"};
 
     bool isSameJet(const xAOD::IParticle *jet1, const xAOD::IParticle *jet2) const;

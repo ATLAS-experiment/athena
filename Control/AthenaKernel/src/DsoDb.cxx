@@ -26,7 +26,6 @@
 #include "boost/tokenizer.hpp"
 
 #include "boost/algorithm/string.hpp"
-#include <boost/regex.hpp>
 
 // ROOT includes
 #include "TClassEdit.h"
@@ -66,9 +65,7 @@ namespace {
     if (libname == dll) {
       return false;
     }
-    static const boost::regex e("\\w*?.dll");
-    return !libname.starts_with(SHLIB_PREFIX) &&
-            boost::regex_match(libname, e);
+    return !libname.starts_with(SHLIB_PREFIX) && libname.ends_with(dll);
   }
 
   inline

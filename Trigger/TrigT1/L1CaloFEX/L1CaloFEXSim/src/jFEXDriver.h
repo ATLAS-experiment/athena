@@ -26,7 +26,7 @@ class jFEXDriver : public AthAlgorithm
         virtual ~jFEXDriver();
 
         virtual StatusCode initialize();
-        virtual StatusCode execute();
+        virtual StatusCode execute(const EventContext& ctx);
         StatusCode finalize();
 
     private:

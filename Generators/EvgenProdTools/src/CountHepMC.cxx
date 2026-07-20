@@ -61,7 +61,7 @@ StatusCode CountHepMC::initialize()
   return StatusCode::SUCCESS;
 }
 
-StatusCode CountHepMC::execute() {
+StatusCode CountHepMC::execute(const EventContext& ctx) {
 
   /// @todo Replace the old event ?
   m_nPass++;
@@ -74,22 +74,12 @@ StatusCode CountHepMC::execute() {
     return StatusCode::FAILURE;
   }
 
-#ifndef HEPMC3
-   /// crash the run if event number gets above 32bit int.
-   constexpr long long int max32 = std::pow(2, 31) - 1;
-   if (newnum >= max32) {
-      ATH_MSG_ERROR("Event number " << newnum << " exceeds 32bit limit. In HepMC2 it is not allowed.");
-      return StatusCode::FAILURE;
-  }
-#else
 // Temporary solution to suppress the Warnings from HepMC3 printed for every event. 
 // Will be removed when generators authors fix the way they fill the x-section or when we switch to a new HepMC3 version , where the printout is limited.
    if (m_nPass == 100) {
       ATH_MSG_INFO("After " << m_nPass << " events we switch off HepMC3 warnings to avoid blowing up logs.");
       HepMC3::Setup::set_print_warnings(false);
       }
-#endif
-
   if (m_corHepMC) {
     std::string   key = m_inputKeyName;
     // retrieve event from Transient Store (Storegate)
@@ -110,8 +100,8 @@ StatusCode CountHepMC::execute() {
   xAOD::EventInfo* outputEvtInfo{nullptr};
   int inpRunNumber{-1};
   if(m_corEvtID||m_corRunNumber||m_copyRunNumber) {
-    SG::ReadHandle<xAOD::EventInfo> inputEvtInfoHandle(m_inputEvtInfoKey);
-    SG::WriteHandle<xAOD::EventInfo> outputEvtInfoHandle(m_outputEvtInfoKey);
+    SG::ReadHandle<xAOD::EventInfo> inputEvtInfoHandle(m_inputEvtInfoKey, ctx);
+    SG::WriteHandle<xAOD::EventInfo> outputEvtInfoHandle(m_outputEvtInfoKey, ctx);
     ATH_CHECK(outputEvtInfoHandle.record(std::make_unique<xAOD::EventInfo>(), std::make_unique<xAOD::EventAuxInfo>()));
 
     outputEvtInfo = outputEvtInfoHandle.ptr();
@@ -124,7 +114,7 @@ StatusCode CountHepMC::execute() {
 
     inpRunNumber = inputEvtInfoHandle->runNumber();
     if(!m_mcWeightsKey.empty()) {
-      SG::ReadDecorHandle<xAOD::EventInfo,std::vector<float>> mcWeights(m_mcWeightsKey);
+      SG::ReadDecorHandle<xAOD::EventInfo,std::vector<float>> mcWeights(m_mcWeightsKey, ctx);
       outputEvtInfo->setMCEventWeights(mcWeights(0));
     }
   }

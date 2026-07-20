@@ -16,8 +16,7 @@ StatusCode MdtAsBuiltJsonDumpAlg::initialize() {
     ATH_CHECK(m_idHelperSvc.retrieve());
     return StatusCode::SUCCESS;
   }
-StatusCode MdtAsBuiltJsonDumpAlg::execute(){
-  const EventContext& ctx = Gaudi::Hive::currentContext();
+StatusCode MdtAsBuiltJsonDumpAlg::execute(const EventContext& ctx){
   SG::ReadCondHandle<MdtAsBuiltContainer> asBuiltContainer{m_readKey, ctx};
   if (!asBuiltContainer.isValid()){
     ATH_MSG_FATAL("Failed to load ALine container "<<m_readKey.fullKey());

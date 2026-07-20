@@ -58,7 +58,7 @@ public:
   /**
    * @brief Empty Execute method
    */
-  StatusCode execute() {return StatusCode::SUCCESS;}
+  StatusCode execute(const EventContext&) {return StatusCode::SUCCESS;}
 
    /**
    * @brief stop(() method.

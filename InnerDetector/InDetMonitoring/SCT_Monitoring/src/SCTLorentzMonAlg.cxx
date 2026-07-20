@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "SCTLorentzMonAlg.h"
@@ -292,8 +292,8 @@ StatusCode SCTLorentzMonAlg::fillHistograms(const EventContext& ctx) const {
 	    yVar += "_1";
 	  }
 
-	  auto phiToWaferAcc{Monitored::Scalar<float>(xVar, phiToWafer)};
-	  auto nStripAcc{Monitored::Scalar<int>(yVar, nStrip)};
+	  auto phiToWaferAcc{Monitored::Scalar<float>(std::move(xVar), phiToWafer)};
+	  auto nStripAcc{Monitored::Scalar<int>(std::move(yVar), nStrip)};
 	  auto isCentralAcc{Monitored::Scalar<bool>("isCentral", (std::abs(etaTrack) < 0.5))};
 	  fill("SCTLorentzMonitor", phiToWaferAcc, nStripAcc, isCentralAcc);
 	}// end if passesCuts

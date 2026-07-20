@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -14,7 +14,6 @@
 #include "TrkDetDescrUtils/LayerIndex.h"
 #include "TrkDetDescrUtils/BinUtility.h"
 // TrkGeometry
-#include "TrkGeometry/LayerMaterialRecord.h"
 #include "TrkGeometry/TrackingVolume.h"
 #include "TrkGeometry/MaterialStep.h"
 #include "TrkGeometry/MaterialLayer.h"
@@ -33,58 +32,6 @@
 #ifdef TRKDETDESCR_MEMUSAGE
 #include <unistd.h>
 #endif
-
-Trk::MaterialMapping::MaterialMapping(const std::string& name, ISvcLocator* pSvcLocator)
-: AthAlgorithm(name,pSvcLocator),
-  m_checkForEmptyHits(true),
-  m_mappingVolumeName("Atlas"),
-  m_mappingVolume(nullptr),
-  m_inputMaterialStepCollection("MaterialStepRecords"),
-  m_etaCutOff(6.0),
-  m_etaSide(0),
-  m_useLayerThickness(false),
-  m_associationType(1),
-  m_mapMaterial(true),
-  m_mapComposition(false),
-  m_minCompositionFraction(0.005),
-  m_elementTable(nullptr),
-  m_inputEventElementTable("ElementTable"),
-  m_accumulatedMaterialXX0(0.),
-  m_accumulatedRhoS(0.),
-  m_mapped(0),
-  m_unmapped(0),
-  m_skippedOutside(0),
-  m_layerMaterialScreenOutput(0)
-#ifdef TRKDETDESCR_MEMUSAGE
-  ,m_memoryLogger()
-#endif
-{
-    // the name of the volume to map
-    declareProperty("MappingVolumeName"           , m_mappingVolumeName);
-    // the extrapolation engine
-    declareProperty("CheckForEmptyHits"           , m_checkForEmptyHits);
-    // general steering
-    declareProperty("EtaCutOff"                   , m_etaCutOff);
-    declareProperty("EtaSide"                     , m_etaSide);
-    // the toolhandle of the MaterialMapper to be used
-    declareProperty("MapMaterial"                 , m_mapMaterial);
-    // Composition related parameters
-    declareProperty("MapComposition"              , m_mapComposition);
-    declareProperty("MinCompositionFraction"      , m_minCompositionFraction);
-    // Steer the layer thickness
-    declareProperty("UseActualLayerThicknesss"    , m_useLayerThickness);
-    // some job setup
-    declareProperty("MaterialAssociationType"     , m_associationType);
-    declareProperty("InputMaterialStepCollection" , m_inputMaterialStepCollection);
-    declareProperty("InputElementTable"           , m_inputEventElementTable);
-    // Output screen stuff
-    declareProperty("MaterialScreenOutputLevel"   , m_layerMaterialScreenOutput);
-
-}
-
-Trk::MaterialMapping::~MaterialMapping()
-= default;
-
 
 StatusCode Trk::MaterialMapping::initialize()
 {
@@ -114,7 +61,7 @@ StatusCode Trk::MaterialMapping::initialize()
 }
 
 
-StatusCode Trk::MaterialMapping::execute()
+StatusCode Trk::MaterialMapping::execute(const EventContext& ctx)
 {
     ATH_MSG_VERBOSE("MaterialMapping execute() start");
 
@@ -130,12 +77,12 @@ StatusCode Trk::MaterialMapping::execute()
       ATH_MSG_VERBOSE("Mapping volume correctly retrieved from tracking geometry");
 
 
-    SG::ReadHandle<MaterialStepCollection> materialStepCollection(m_inputMaterialStepCollection);
+    SG::ReadHandle<MaterialStepCollection> materialStepCollection(m_inputMaterialStepCollection, ctx);
 
         // --------- prepare the element table ---------------------------------------------------
 
     if (m_mapComposition) {
-      SG::ReadHandle<Trk::ElementTable> eTableEvent(m_inputEventElementTable);
+      SG::ReadHandle<Trk::ElementTable> eTableEvent(m_inputEventElementTable, ctx);
       (*m_elementTable) += (*eTableEvent);  // accummulate the table
     }
 
@@ -606,9 +553,10 @@ void Trk::MaterialMapping::insertLayerMaterialRecord(const Trk::Layer& lay){
  // now fill the layer material record
  if (layerMaterialBinUtility){
      // create a new Layer Material record in the map
-     Trk::LayerMaterialRecord  lmr((m_useLayerThickness ? lay.thickness() : 1.),
-                                   layerMaterialBinUtility,
-                                   (Trk::MaterialAssociationType)m_associationType);
+     Trk::LayerMaterialRecord  lmr
+       ((m_useLayerThickness ? lay.thickness() : 1.),
+	layerMaterialBinUtility,
+	static_cast<Trk::MaterialAssociationType>(m_associationType.value()));
      // and fill it into the map
      m_layerRecords[&lay] = lmr;
  }

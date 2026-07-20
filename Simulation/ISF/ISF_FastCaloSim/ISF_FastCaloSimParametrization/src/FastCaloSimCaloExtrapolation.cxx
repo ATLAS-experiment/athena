@@ -5,7 +5,6 @@
 /* Athena includes */
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "GaudiKernel/ToolHandle.h"
-#include "GaudiKernel/IPartPropSvc.h"
 
 #include "CxxUtils/inline_hints.h"
 /* Header include */
@@ -19,9 +18,6 @@
 /* Geometry primitives */
 #include "GeoPrimitives/GeoPrimitivesHelpers.h"
 #include "GeoPrimitives/CLHEPtoEigenConverter.h"
-
-/* Particle data */
-#include "HepPDT/ParticleDataTable.hh"
 
 /* Tracking includes */
 #include "TrkGeometry/TrackingGeometry.h"

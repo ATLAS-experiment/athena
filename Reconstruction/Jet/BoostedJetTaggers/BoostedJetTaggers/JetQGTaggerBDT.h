@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef JETQGTAGGERBDT_H_
@@ -51,11 +51,11 @@ namespace CP {
         /// Slot-specific TMVA tool and associated variables
         struct Tagger {
           std::unique_ptr<TMVA::Reader> tmva;
-          float pt;
-          float eta;
-          float ntracks;
-          float trackwidth;
-          float trackC1;
+          float pt{};
+          float eta{};
+          float ntracks{};
+          float trackwidth{};
+          float trackC1{};
         };
 
         mutable SG::SlotSpecificObj<Tagger> m_bdtTagger ATLAS_THREAD_SAFE;
@@ -63,7 +63,7 @@ namespace CP {
 
         asg::AnaToolHandle<InDet::IInDetTrackSelectionTool> m_trkSelectionTool;
 
-        int m_mode;
+        int m_mode{};
 
         /// WriteDecorHandle keys
         SG::WriteDecorHandleKey<xAOD::JetContainer> m_decScoreKey{this, "QGTaggerBDTScore", "QGTaggerBDTScore", "SG key for QGTaggerBDTScore"};

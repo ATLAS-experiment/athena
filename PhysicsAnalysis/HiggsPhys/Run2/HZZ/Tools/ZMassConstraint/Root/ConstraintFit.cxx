@@ -160,16 +160,16 @@ namespace ZMassConstraint
 
         // For the momentum, 
         // Get the track particle according to the requested muon type for the covariance matrix
-        const xAOD::TrackParticle* track = mu.primaryTrackParticle();
+        const xAOD::TrackParticle* track = mu.trackParticle(xAOD::Muon::TrackParticleType::Primary);
         bool set4vec = false;
-        if (((isMS_MCMT == muonType) || (isID_MCMT == muonType)) && xAOD::Muon::Combined == mu.muonType()) {
+        if (((isMS_MCMT == muonType) || (isID_MCMT == muonType)) && xAOD::Muon::MuonType::Combined == mu.muonType()) {
             if (isMS_MCMT  == muonType) { 
                 track = mu.trackParticle(xAOD::Muon::MuonSpectrometerTrackParticle);
                 if (!muonSpectrometerPt.isAvailable(mu))
                     ATH_MSG_ERROR( "addParticle:  - could not get muonSpectrometerPt from muon. Please applyCorrection with the MuonCalibAndSmearTool");
                 if (!track) {
                     ATH_MSG_ERROR( "addParticle:  - Combined muon is missing MS track particle. Using combined track particle");
-                    track = mu.primaryTrackParticle();
+                    track = mu.trackParticle(xAOD::Muon::TrackParticleType::Primary);
                 }
                 mu4vec.SetPtEtaPhiM(muonSpectrometerPt(mu), track->eta(), track->phi(), mu.m());
                 set4vec = true;

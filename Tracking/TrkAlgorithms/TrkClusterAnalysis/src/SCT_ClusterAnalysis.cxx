@@ -61,7 +61,7 @@ StatusCode SCT_ClusterAnalysis::initialize() {
     return StatusCode::SUCCESS;
 }
 
-StatusCode SCT_ClusterAnalysis::execute() {
+StatusCode SCT_ClusterAnalysis::execute(const EventContext& ctx) {
     ATH_MSG_DEBUG(" In SCT_ClusterAnalysis::execute()" );
 
     m_barrelEndcap->clear();
@@ -82,7 +82,6 @@ StatusCode SCT_ClusterAnalysis::execute() {
     m_sizeX->clear();
     m_sizeY->clear();
 
-    const EventContext& ctx = getContext();
 
     SG::ReadHandle<InDet::SCT_ClusterContainer> stripContainer (m_inputKey, ctx);
     if( stripContainer.isValid() ) {

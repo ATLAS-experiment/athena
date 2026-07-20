@@ -13,6 +13,8 @@
 #include "ActsInterop/TableUtils.h"
 #include "Acts/Surfaces/PerigeeSurface.hpp"
 
+#include "ActsEvent/TrackContainerUtils.h"
+
 namespace ActsTrk {
   struct TrackFindingBaseAlg::CKF_pimpl : public detail::CKF_config {};
 
@@ -60,6 +62,7 @@ namespace ActsTrk {
     ATH_MSG_DEBUG("   " << m_maxSharedHits);
     ATH_MSG_DEBUG("   " << m_maxChi2);
     ATH_MSG_DEBUG("   " << m_branchStopperPtMinFactor);
+    ATH_MSG_DEBUG("   " << m_seedRefitPtMinFactor);
     ATH_MSG_DEBUG("   " << m_branchStopperAbsEtaMaxExtra);
     ATH_MSG_DEBUG("   " << m_branchStopperMeasCutReduce);
     ATH_MSG_DEBUG("   " << m_branchStopperAbsEtaMeasCut);
@@ -75,7 +78,6 @@ namespace ActsTrk {
     ATH_CHECK(m_trackingGeometryTool.retrieve());
     ATH_CHECK(m_extrapolationTool.retrieve());
     ATH_CHECK(m_trackStatePrinter.retrieve(EnableTool{not m_trackStatePrinter.empty()}));
-    ATH_CHECK(m_ATLASConverterTool.retrieve());
     ATH_CHECK(m_fitterTool.retrieve());
     ATH_CHECK(m_pixelCalibTool.retrieve(EnableTool{not m_pixelCalibTool.empty()}));
     ATH_CHECK(m_stripCalibTool.retrieve(EnableTool{not m_stripCalibTool.empty()}));
@@ -262,7 +264,7 @@ namespace ActsTrk {
       auto surfacePtr = const_cast<Acts::Surface&>(origSurface).shared_from_this();
 
       Acts::BoundTrackParameters newParams(
-          std::static_pointer_cast<const Acts::Surface>(surfacePtr),
+          std::static_pointer_cast<const Acts::Surface>(std::move(surfacePtr)),
           secondInitialParameters.parameters(), 
           std::make_optional(inflatedCovariance),
           secondInitialParameters.particleHypothesis());
@@ -285,7 +287,7 @@ namespace ActsTrk {
 
   xAOD::UncalibMeasType TrackFindingBaseAlg::measurementType (const detail::RecoTrackContainer::TrackStateProxy &trackState) {
     if (trackState.hasReferenceSurface()) {
-      if (const auto *actsDetElem = dynamic_cast<const IDetectorElementBase *>(trackState.referenceSurface().surfacePlacement())) {
+      if (const auto *actsDetElem = dynamic_cast<const ISurfacePlacement*>(trackState.referenceSurface().surfacePlacement())) {
         switch (actsDetElem->detectorType()) {
         case DetectorType::Pixel:
           return xAOD::UncalibMeasType::PixelClusterType;
@@ -406,17 +408,20 @@ namespace ActsTrk {
   }
 
 
-  void TrackFindingBaseAlg::addCounts(detail::RecoTrackContainer& tracksContainer)
+   void TrackFindingBaseAlg::addCountsAndProperties(detail::RecoTrackContainer& tracksContainer,bool addCounts)
   {
-    tracksContainer.addColumn<unsigned int>("nPixelHits");
-    tracksContainer.addColumn<unsigned int>("nStripHits");
-    tracksContainer.addColumn<unsigned int>("nHgtdHits");
-    tracksContainer.addColumn<unsigned int>("nPixelHoles");
-    tracksContainer.addColumn<unsigned int>("nStripHoles");
-    tracksContainer.addColumn<unsigned int>("nHgtdHoles");
-    tracksContainer.addColumn<unsigned int>("nPixelOutliers");
-    tracksContainer.addColumn<unsigned int>("nStripOutliers");
-    tracksContainer.addColumn<unsigned int>("nHgtdOutliers");
+    if (addCounts) {
+       tracksContainer.addColumn<unsigned int>("nPixelHits");
+       tracksContainer.addColumn<unsigned int>("nStripHits");
+       tracksContainer.addColumn<unsigned int>("nHgtdHits");
+       tracksContainer.addColumn<unsigned int>("nPixelHoles");
+       tracksContainer.addColumn<unsigned int>("nStripHoles");
+       tracksContainer.addColumn<unsigned int>("nHgtdHoles");
+       tracksContainer.addColumn<unsigned int>("nPixelOutliers");
+       tracksContainer.addColumn<unsigned int>("nStripOutliers");
+       tracksContainer.addColumn<unsigned int>("nHgtdOutliers");
+    }
+    ActsTrk::TrackContainerUtils::addFitterTypeProperty(tracksContainer);
   }
 
   void TrackFindingBaseAlg::initCounts(const detail::RecoTrackContainer::TrackProxy &track)
@@ -586,6 +591,7 @@ namespace ActsTrk {
                                           std::make_pair(kNDuplicateSeeds, "Duplicate seeds"),
                                           std::make_pair(kNNoEstimatedParams, "Initial param estimation failed"),
                                           std::make_pair(kNRejectedRefinedSeeds, "Rejected refined parameters"),
+                                          std::make_pair(kNSeedRefitFailure, "Seed refit Kalman fit failure"),
                                           std::make_pair(kNOutputTracks, "CKF tracks"),
                                           std::make_pair(kNSelectedTracks, "selected tracks"),
                                           std::make_pair(kNResolvedTracks, "resolved tracks"),

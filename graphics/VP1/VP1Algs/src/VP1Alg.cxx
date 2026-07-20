@@ -119,7 +119,7 @@ StatusCode VP1Alg::initialize()
 }
 
 //____________________________________________________________________
-StatusCode VP1Alg::execute()
+StatusCode VP1Alg::execute(const EventContext& /*ctx*/)
 {
 
     // Here you do everything that needs to be done on every single

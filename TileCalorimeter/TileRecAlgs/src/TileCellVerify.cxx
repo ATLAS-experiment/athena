@@ -74,13 +74,13 @@ StatusCode TileCellVerify::initialize() {
   return StatusCode::SUCCESS;
 }
 
-StatusCode TileCellVerify::execute() {
+StatusCode TileCellVerify::execute(const EventContext& ctx) {
 
   // step1: read two cell containers from TES
-  SG::ReadHandle<CaloCellContainer> cellContainer1(m_cellContainer1Key);
+  SG::ReadHandle<CaloCellContainer> cellContainer1(m_cellContainer1Key, ctx);
   ATH_CHECK(cellContainer1.isValid());
 
-  SG::ReadHandle<CaloCellContainer> cellContainer2(m_cellContainer2Key);
+  SG::ReadHandle<CaloCellContainer> cellContainer2(m_cellContainer2Key, ctx);
   ATH_CHECK(cellContainer2.isValid());
 
   // step2: first compare the number of cells in the two containers

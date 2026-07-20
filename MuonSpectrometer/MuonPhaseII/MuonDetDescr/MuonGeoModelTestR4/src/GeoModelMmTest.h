@@ -22,7 +22,7 @@ class GeoModelMmTest : public AthHistogramAlgorithm{
 
         ~GeoModelMmTest() = default;
 
-        StatusCode execute() override; 
+        StatusCode execute(const EventContext& ctx) override; 
         StatusCode initialize() override;        
         StatusCode finalize() override;
 
@@ -32,7 +32,7 @@ class GeoModelMmTest : public AthHistogramAlgorithm{
       ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{this, "IdHelperSvc", 
                                                 "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
 
-      SG::ReadHandleKey<ActsTrk::GeometryContext> m_geoCtxKey{this, "AlignmentKey", "ActsAlignment", "cond handle key"};
+      ActsTrk::GeoContextReadKey_t m_geoCtxKey{this, "AlignmentKey", "ActsAlignment", "cond handle key"};
 
       /// Set of stations to be tested
       std::set<Identifier> m_testStations{};

@@ -17,7 +17,7 @@ StatusCode LArBadFeb2Ascii::initialize() {
   return StatusCode::SUCCESS;
 }
 
-StatusCode LArBadFeb2Ascii::execute() 
+StatusCode LArBadFeb2Ascii::execute(const EventContext& /*ctx*/) 
 {return StatusCode::SUCCESS;}
 
 StatusCode LArBadFeb2Ascii::finalize() {

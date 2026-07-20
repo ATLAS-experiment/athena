@@ -41,7 +41,7 @@ namespace xAODMaker {
       return StatusCode::SUCCESS;
    }
 
-   StatusCode JEMHitsCnvAlg::execute() {
+   StatusCode JEMHitsCnvAlg::execute(const EventContext& /*ctx*/) {
       
       // Retrieve the ESD container:
       const JEMHitsCollection* esd = nullptr;

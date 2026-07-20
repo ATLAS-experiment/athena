@@ -1,19 +1,11 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
+
+/// @author Nils Krumnack
 
 #ifndef SAMPLE_HANDLER__SAMPLE_META_H
 #define SAMPLE_HANDLER__SAMPLE_META_H
-
-//          
-// Distributed under the Boost Software License, Version 1.0.
-//    (See accompanying file LICENSE_1_0.txt or copy at
-//          http://www.boost.org/LICENSE_1_0.txt)
-
-// Please feel free to contact me (krumnack@iastate.edu) for bug
-// reports, feature suggestions, praise and complaints.
-
-
 
 #include <SampleHandler/Global.h>
 
@@ -90,7 +82,7 @@ namespace SH
     // private interface
     //
 
-    ClassDef (SampleMeta, 1);
+    ClassDefOverride (SampleMeta, 1);
   };
 }
 

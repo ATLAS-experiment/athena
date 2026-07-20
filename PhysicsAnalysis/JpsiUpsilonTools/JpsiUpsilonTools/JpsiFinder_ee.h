@@ -14,7 +14,7 @@
 #define JpsiFinder_ee_H
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "GaudiKernel/ToolHandle.h"
-#include "GaudiKernel/IPartPropSvc.h"
+#include "GeneratorModules/GenData.h"
 
 #include "xAODEgamma/ElectronFwd.h"
 #include "xAODEgamma/ElectronContainer.h"
@@ -28,6 +28,7 @@
 
 #include "StoreGate/ReadHandleKey.h"
 #include "StoreGate/ReadDecorHandle.h"
+#include <memory>
 /////////////////////////////////////////////////////////////////////////////
 
 namespace Trk {
@@ -107,7 +108,7 @@ namespace Analysis {
         ToolHandle < Trk::IVertexFitter > m_iVertexFitter;
         ToolHandle < Trk::ITrackSelectorTool > m_trkSelector;
         ToolHandle < InDet::VertexPointEstimator > m_vertexEstimator;
-        ServiceHandle<IPartPropSvc> m_partPropSvc{this, "PartPropSvc", "PartPropSvc"};
+        std::shared_ptr<GenData> m_gendata{nullptr};
         bool m_egammaCuts;
         std::string m_elSelection;
         bool m_doTagAndProbe;

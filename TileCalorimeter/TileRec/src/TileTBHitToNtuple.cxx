@@ -99,7 +99,7 @@ StatusCode TileTBHitToNtuple::initialize()
   return StatusCode::SUCCESS;
 }
 
-StatusCode TileTBHitToNtuple::execute()
+StatusCode TileTBHitToNtuple::execute(const EventContext& /*ctx*/)
 {
 
   // step1: read Hit for ancillary

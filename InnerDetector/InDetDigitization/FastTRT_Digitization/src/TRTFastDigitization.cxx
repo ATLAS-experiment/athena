@@ -29,11 +29,11 @@ StatusCode TRTFastDigitization::initialize() {
 // Execute method:
 //----------------------------------------------------------------------
 
-StatusCode TRTFastDigitization::execute() {
+StatusCode TRTFastDigitization::execute(const EventContext& ctx) {
 
   ATH_MSG_VERBOSE ( "execute()" );
 
-  ATH_CHECK (m_digTool->processAllSubEvents(Gaudi::Hive::currentContext()));
+  ATH_CHECK (m_digTool->processAllSubEvents(ctx));
 
   ATH_MSG_DEBUG ( "m_digTool->processAllSubEvents()" );
 

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "RoIPEBInfoWriterTool.h"
@@ -37,7 +37,7 @@ PEBInfoWriterToolBase::PEBInfo RoIPEBInfoWriterTool::createPEBInfo(const EventCo
   ATH_MSG_DEBUG("Processing RoI " << **(input.roiEL));
   // Assert we're not being passed a full-scan RoI which makes no sense for RoI-based PEB
   if ((*input.roiEL)->isFullscan()) {
-    auto met_feature_vec = TrigCompositeUtils::findLinks<xAOD::TrigMissingETContainer>(input.decision, TrigCompositeUtils::featureString(), TrigDefs::lastFeatureOfType);
+    auto met_feature_vec = TrigCompositeUtils::findLinks<xAOD::TrigMissingETContainer>(ctx, input.decision, TrigCompositeUtils::featureString(), TrigDefs::lastFeatureOfType);
     if (not met_feature_vec.empty()) {
       ATH_MSG_DEBUG("Ignoring MET leg passed to RoIPEBInfoWriterTool");
       return pebi;

@@ -5,6 +5,7 @@
 // IOVDbFolder.cxx - helper class for IOVDbSvc to manage folder & data cache
 // Richard Hawkings, started 24/11/08
 
+#include "AthenaBaseComps/AthMsgStreamMacros.h"
 #include "GaudiKernel/Bootstrap.h"
 #include "GaudiKernel/IOpaqueAddress.h"
 #include "GaudiKernel/GenericAddress.h"
@@ -107,8 +108,30 @@ IOVDbFolder::IOVDbFolder(IOVDbConn* conn,
   m_cachepar = folderprop.cache();
   // check for <noover> - disables using tag override read from input file
   m_notagoverride=folderprop.noTagOverride();
+
+
+  //Override of CREST reading location for this folder
+  std::string dbconn;
+  folderprop.getKey("db", "",dbconn);
+  if (dbconn.find("crest")!=std::string::npos) {
+    //CREST override for this folder
+    m_source="CREST";
+    //strip crest_fs prefix ... 
+    const std::string fsPrefix("crest_fs:");
+    if (dbconn.starts_with(fsPrefix)) dbconn=dbconn.substr(fsPrefix.size());
+    ATH_MSG_INFO("Crest server for folder " << m_foldername << " overridden to " << dbconn);
+    m_crestServer=dbconn;
+  }
+
+  //Override of the crest-tag for this folder
+  std::string crestFldrTag;
+  if (folderprop.getKey("ctag","",crestFldrTag)) {
+      ATH_MSG_INFO("Crest Tag " << m_crestTag << " overridden by job options to " << crestFldrTag <<  " for folder " << m_foldername);
+      m_crestTag=crestFldrTag;
+  }
+  
   if (m_source == "CREST"){
-    m_crest_mng.emplace(CoralCrestManager(crestServer,m_crestTag));
+    m_crest_mng.emplace(CoralCrestManager(m_crestServer,m_crestTag));
   }
   if (m_notagoverride) ATH_MSG_INFO( "Inputfile tag override disabled for " << m_foldername );
 
@@ -1163,18 +1186,18 @@ void IOVDbFolder::dumpFile(const std::string& dumpName
   myFile<<s_openJson;
   if(json) {
     // Dump COOL data
-    myFile<<json->description()<<s_delimiterJson<<std::endl;
-    myFile<<json->payloadSpec()<<s_delimiterJson<<std::endl;
+    myFile<<json->description()<<s_delimiterJson<<'\n';
+    myFile<<json->payloadSpec()<<s_delimiterJson<<'\n';
     if(!skipCoolIoV) {
-      myFile<<json->iov()<<s_delimiterJson<<std::endl;
+      myFile<<json->iov()<<s_delimiterJson<<'\n';
     }
-    myFile<<json->payload()<<std::endl;
+    myFile<<json->payload()<<'\n';
   }
   else {
     // Dump CREST data
-    myFile<<"\"node_description\" : \""<<m_folderDescription<< '\"'<<s_delimiterJson<<std::endl;
-    myFile<<"\"folder_payloadspec\": \""<<mng->getPayloadSpec()<< '\"'<<s_delimiterJson<<std::endl;
-    myFile<<"\"data_array\" : "<<mng->dumpPayload(crestVkey)<<std::endl;
+    myFile<<"\"node_description\" : \""<<m_folderDescription<< '\"'<<s_delimiterJson<<'\n';
+    myFile<<"\"folder_payloadspec\": \""<<mng->getPayloadSpec()<< '\"'<<s_delimiterJson<<'\n';
+    myFile<<"\"data_array\" : "<<mng->dumpPayload(crestVkey)<<'\n';
   }
   myFile<<s_closeJson;
 }

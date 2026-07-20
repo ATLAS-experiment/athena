@@ -4,6 +4,7 @@
 
 
 #include "DiTauRec/DiTauConstituentFinder.h"
+#include "fastjet/PseudoJet.hh"
 
 DiTauConstituentFinder::DiTauConstituentFinder(const std::string& type,
 		       const std::string& name,

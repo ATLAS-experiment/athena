@@ -21,7 +21,7 @@ class KLFitterFinalizeOutputAlg final : public EL::AnaAlgorithm {
  public:
   KLFitterFinalizeOutputAlg(const std::string &name, ISvcLocator *pSvcLocator);
   virtual StatusCode initialize() final;
-  virtual StatusCode execute() final;
+  virtual StatusCode execute(const EventContext& ctx) final;
 
  private:
   CP::SysListHandle m_systematicsList{this};

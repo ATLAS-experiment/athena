@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
  */
 
 /**
@@ -112,7 +112,7 @@ Root::TElectronEfficiencyCorrectionTool::initialize()
       const std::unique_ptr<char[]> fname(
         gSystem->ExpandPathName(m_corrFileNameList[0].c_str()));
       std::unique_ptr<TMD5> tmd = std::make_unique<TMD5>();
-      const char* tmd_as_string = tmd->FileChecksum(fname.get())->AsString();
+      const char* tmd_as_string = TMD5::FileChecksum(fname.get())->AsString();
       m_seed = *(reinterpret_cast<const unsigned long int*>(tmd_as_string));
       ATH_MSG_DEBUG("Seed (automatically) set to " << m_seed);
     } else {
@@ -240,6 +240,7 @@ Root::TElectronEfficiencyCorrectionTool::calculate(
       smallEt++;
       invalid = true;
     }
+
     // invalid if we are above max eta
     if (std::abs(yValue) >= histEdge.etaMax) {
       etaCov++;
@@ -325,7 +326,7 @@ Root::TElectronEfficiencyCorrectionTool::calculate(
    */
   double statErr = -999;
   const std::vector<HistArray>& statVector = currentmap.at(mapkey::stat);
-  if (!statVector.empty()) {
+  if (runnumberIndex < static_cast<int> (statVector.size())) {
     if (!statVector[runnumberIndex].empty()) {
       statErr = static_cast<TH1*>(statVector[runnumberIndex][index].get())
                   ->GetBinContent(globalBinNumber);
@@ -337,7 +338,7 @@ Root::TElectronEfficiencyCorrectionTool::calculate(
    */
   double val = statErr;
   const std::vector<HistArray>& uncorrVector = currentmap.at(mapkey::uncorr);
-  if (!uncorrVector.empty()) {
+  if (runnumberIndex < static_cast<int>(uncorrVector.size())) {
     if (!uncorrVector.at(runnumberIndex).empty()) {
       const double valAdd =
         static_cast<TH1*>(uncorrVector[runnumberIndex][index].get())
@@ -586,7 +587,6 @@ Root::TElectronEfficiencyCorrectionTool::getNbins(
 int
 Root::TElectronEfficiencyCorrectionTool::getHistograms()
 {
-
   ATH_MSG_DEBUG(" (file: " << __FILE__ << ", line: " << __LINE__ << ")\n"
                            << "Entering function getHistograms");
   // Cache the current directory in the root file
@@ -654,6 +654,43 @@ Root::TElectronEfficiencyCorrectionTool::getHistograms()
       gDirectory = origDir;
     } // End: directory loop
   }   // End: file loop
+
+  // SF Histogram edges caching
+  fillHistEdges(m_histList.at(mapkey::sf), m_histEdges);
+  size_t histListSize = m_histList.at(mapkey::sf).size();
+  size_t edgeListSize = m_histEdges.size();
+  if (histListSize != edgeListSize) {
+    ATH_MSG_ERROR("Histo List and Edge List differ in Run period entries "
+                  << histListSize << " vs " << edgeListSize);
+    return 0;
+  }
+  for (size_t i = 0; i < histListSize; ++i) {
+    if (m_histList.at(mapkey::sf).at(i).size() != m_histEdges.at(i).size()) {
+      ATH_MSG_ERROR(
+          "Histo List and Edge List differ for the Run period in entry" << i);
+      return 0;
+    }
+  }
+
+  // Caching of Bin edges for Fast simul SF
+  fillHistEdges(m_fastHistList.at(mapkey::sf), m_fastHistEdges);
+  histListSize = m_fastHistList.at(mapkey::sf).size();
+  edgeListSize = m_fastHistEdges.size();
+  if (histListSize != edgeListSize) {
+    ATH_MSG_ERROR("Fast Histo List and Edge List differ in Run period entries "
+                  << histListSize << " vs " << edgeListSize);
+    return 0;
+  }
+  for (size_t i = 0; i < histListSize; ++i) {
+    if (m_fastHistList.at(mapkey::sf).at(i).size() !=
+        m_fastHistEdges.at(i).size()) {
+      ATH_MSG_ERROR(
+          "Fast Histo List and Edge List differ for the Run period in entry"
+          << i);
+      return 0;
+    }
+  }
+
   return 1;
 }
 /*
@@ -770,9 +807,6 @@ Root::TElectronEfficiencyCorrectionTool::setupHistogramsInFolder(
       return 0;
     }
   }
-  //Histogram edges
-  fillHistEdges(m_histList.at(mapkey::sf), m_histEdges);
-  fillHistEdges(m_fastHistList.at(mapkey::sf), m_fastHistEdges);
 
   // Toys
   if (m_doToyMC || m_doCombToyMC) {

@@ -8,7 +8,7 @@ class LArBlockCorrections:public AthAlgorithm {
  public:
   LArBlockCorrections(const std::string& name, ISvcLocator* pSvcLocator);
   StatusCode initialize();
-  StatusCode execute() {return StatusCode::SUCCESS;}
+  StatusCode execute(const EventContext&) {return StatusCode::SUCCESS;}
   StatusCode finalize() {return StatusCode::SUCCESS;}
 
 };

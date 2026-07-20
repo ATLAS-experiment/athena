@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRK_SURFACENTUPLEBRANCH_H
@@ -48,8 +48,8 @@ namespace Trk {
     TransformNtupleBranch m_transform;
     VectorNtupleBranch    m_center;
     VectorNtupleBranch    m_normal;
-    int                   m_id;
-  };   
+    int                   m_id = 0;
+  };
 
 }
 

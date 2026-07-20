@@ -108,7 +108,7 @@ StatusCode CaloCellCalcEnergyCorr::finalize()
   return StatusCode::SUCCESS;
 }
 
-StatusCode CaloCellCalcEnergyCorr::execute()
+StatusCode CaloCellCalcEnergyCorr::execute(const EventContext& /*ctx*/)
 {  
   return StatusCode::SUCCESS;
 }

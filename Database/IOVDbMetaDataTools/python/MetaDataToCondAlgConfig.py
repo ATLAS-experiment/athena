@@ -23,6 +23,10 @@ def MetaDataToCondAlgCfg(flags, folderName, name=None):
     """
     result = ComponentAccumulator()
 
+    # Ensure the in-file IOV metadata is actually loaded into the MetaDataStore.
+    from AthenaServices.MetaDataSvcConfig import MetaDataSvcCfg
+    result.merge(MetaDataSvcCfg(flags, ['IOVDbMetaDataTool']))
+
     if name is None:
         # Create a name from the folder path (e.g., "/Digitization/Parameters" -> "DigiParamsMetaDataToCondAlg")
         cleanName = folderName.replace("/", "").replace("Parameters", "Params")

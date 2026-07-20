@@ -103,7 +103,7 @@ class DsoDb(_Dso.PyDsoDb):
 
     def load_type (self, typename):
         rflx_type = self.rflx_type(typename)
-        if not(rflx_type is None):
+        if rflx_type is not None:
             rflx_name = rflx_type.Name(RflxEnums.DICTSCOPE)
             if rflx_name != '':
                 return rflx_name

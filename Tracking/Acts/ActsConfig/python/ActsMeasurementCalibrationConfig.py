@@ -16,8 +16,7 @@ def ActsAnalogueClusteringToolCfg(flags,
     acc.merge(ITkPixelOfflineCalibCondAlgCfg(flags))
 
     from ActsConfig.ActsConfigFlags import PixelErrorStrategy
-    
-    kwargs.setdefault('UseWeightedPosition', flags.Acts.Clusters.UseWeightedPosition)
+
     kwargs.setdefault("PerformCovarianceCalibration", flags.Acts.OnTrackCalibration.performCovarianceCalibration)
     kwargs.setdefault("PixelOfflineCalibData", "ITkPixelOfflineCalibData")
     kwargs.setdefault("errorStrategy", PixelErrorStrategy.PITCH.value if flags.Acts.Clusters.UsePixelBroadErrors
@@ -33,7 +32,22 @@ def ActsAnalogueClusteringToolCfg(flags,
         from SiLorentzAngleTool.ITkPixelLorentzAngleConfig import ITkPixelLorentzAngleToolCfg
         kwargs.setdefault("PixelLorentzAngleTool", acc.popToolsAndMerge(ITkPixelLorentzAngleToolCfg(flags)))
 
-    acc.setPrivateTools(CompFactory.ActsTrk.ITkAnalogueClusteringTool(name, **kwargs))
+
+    from ActsConfig.ActsConfigFlags import PixelCalibrationStrategy
+    ClusteringToolType = None
+    if flags.Acts.PixelCalibrationStrategy is  PixelCalibrationStrategy.NNClustering:
+        ClusteringToolType = CompFactory.ActsTrk.ITkNNClusterCalibratorTool
+        from InDetConfig.SiClusterizationToolConfig import OnnxNNCondAlgCfg
+        acc.merge(OnnxNNCondAlgCfg(flags,
+                                   NumberNetworkPath=flags.Acts.PixelNNCalibrationModelsFolder+'number.onnx',
+                                   PositionNetwork1Path=flags.Acts.PixelNNCalibrationModelsFolder+'pos1.onnx',
+                                   PositionNetwork2Path=flags.Acts.PixelNNCalibrationModelsFolder+'pos2.onnx',
+                                   PositionNetwork3Path=flags.Acts.PixelNNCalibrationModelsFolder+'pos3.onnx'))
+    else:
+        ClusteringToolType = CompFactory.ActsTrk.ITkAnalogueClusteringTool
+
+
+    acc.setPrivateTools(ClusteringToolType(name, **kwargs))
     return acc
 
 def ActsStripCalibrationToolCfg(flags,
@@ -42,14 +56,14 @@ def ActsStripCalibrationToolCfg(flags,
 
     if not flags.Detector.GeometryITk:
         raise Exception("Acts Strip calibration only supports ITk!")
-    
+
     acc = ComponentAccumulator()
 
     from ActsConfig.ActsConfigFlags import StripClusteringErrorMode,StripErrorStrategy
-    
+
     kwargs.setdefault("PerformCovarianceCalibration", True)
     kwargs.setdefault("errorStrategy", StripErrorStrategy.PITCH.value if flags.Acts.Clusters.StripClusteringErrorMode == StripClusteringErrorMode.WIDTH
                       else StripErrorStrategy.CLUSTERING.value)
-    
+
     acc.setPrivateTools(CompFactory.ActsTrk.ITkStripCalibrationTool(name, **kwargs))
     return acc

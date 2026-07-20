@@ -135,7 +135,7 @@ class RpcReadoutElement : public MuonReadoutElement {
                                      const unsigned doubPhi, 
                                      const bool measPhi);
     
-    friend class ActsTrk::TransformCacheDetEle<RpcReadoutElement>;
+    friend class ActsTrk::ReadoutSurfacePositioning<RpcReadoutElement>;
 
 
         /// Access to the StripLayer associated to a given measurement Hash
@@ -175,10 +175,10 @@ std::ostream& operator<<(std::ostream& ostr, const RpcReadoutElement::parameterB
 
 namespace ActsTrk{
     template <> Amg::Transform3D 
-        TransformCacheDetEle<MuonGMR4::RpcReadoutElement>::fetchTransform(const DetectorAlignStore* store) const;
+        ReadoutSurfacePositioning<MuonGMR4::RpcReadoutElement>::fetchTransform(const DetectorAlignStore* store) const;
     /** Identifier of the transform cache equivalent to the Identifier of the first strip inside the gasGap */
     template <> Identifier
-        TransformCacheDetEle<MuonGMR4::RpcReadoutElement>::identify() const;
+        ReadoutSurfacePositioning<MuonGMR4::RpcReadoutElement>::identify() const;
 }
 
 

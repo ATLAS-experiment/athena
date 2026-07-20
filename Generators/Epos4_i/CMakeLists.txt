@@ -11,10 +11,6 @@ if (NOT EPOS4_FOUND)
     message(STATUS "EPOS4 not available, not building package")
     return()
 endif()
-if (NOT HEPMC3_USE)
-    message(STATUS "EPOS4 not compatible with HepMC2, not building package")
-    return()
-endif()
 
 # Remove the --as-needed linker flags:
 atlas_disable_as_needed()
@@ -26,7 +22,7 @@ atlas_add_library( Epos4_iLib
                    INCLUDE_DIRS ${CLHEP_INCLUDE_DIRS}
                    DEFINITIONS ${CLHEP_DEFINITIONS}
                    LINK_LIBRARIES  GeneratorModulesLib
-                   PRIVATE_LINK_LIBRARIES AtlasHepMCLib AtlasHepMCfioLib ${CLHEP_LIBRARIES} GaudiKernel TruthUtils ${EPOS4_LIBRARIES})
+                   PRIVATE_LINK_LIBRARIES AtlasHepMCLib ${CLHEP_LIBRARIES} GaudiKernel TruthUtils ${EPOS4_LIBRARIES})
 
 atlas_add_component( Epos4_i
                      src/components/*.cxx

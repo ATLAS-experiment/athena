@@ -16,7 +16,7 @@ class FakeLArTimeOffset : public AthAlgorithm {
   ~FakeLArTimeOffset();
 
   StatusCode initialize();
-  StatusCode execute();
+  StatusCode execute(const EventContext& ctx);
   StatusCode finalize();
  private:
   std::vector<unsigned> m_FEBids;

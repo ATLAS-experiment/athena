@@ -8,8 +8,6 @@ atlas_subdir( G4AtlasServices )
 # External dependencies:
 find_package( CLHEP )
 find_package( Geant4 )
-find_package( TBB )
-find_package( XercesC )
 find_package( ROOT COMPONENTS Core Tree MathCore Hist RIO pthread )
 # Component(s) in the package:
 atlas_add_library( G4AtlasServices
@@ -17,8 +15,8 @@ atlas_add_library( G4AtlasServices
                    src/components/*.cxx
                    OBJECT
                    NO_PUBLIC_HEADERS
-                   PRIVATE_INCLUDE_DIRS ${GEANT4_INCLUDE_DIRS} ${XERCESC_INCLUDE_DIRS} ${CLHEP_INCLUDE_DIRS} ${TBB_INCLUDE_DIRS}  ${ROOT_INCLUDE_DIRS} 
-                   PRIVATE_LINK_LIBRARIES ${GEANT4_LIBRARIES} ${XERCESC_LIBRARIES} ${CLHEP_LIBRARIES} ${TBB_LIBRARIES} ${ROOT_LIBRARIES}
+                   PRIVATE_INCLUDE_DIRS ${GEANT4_INCLUDE_DIRS} ${CLHEP_INCLUDE_DIRS} ${ROOT_INCLUDE_DIRS}
+                   PRIVATE_LINK_LIBRARIES ${GEANT4_LIBRARIES} ${CLHEP_LIBRARIES} ${ROOT_LIBRARIES}
 		     GaudiKernel AthenaBaseComps 
 		     G4AtlasInterfaces G4AtlasToolsLib G4RunManagement G4PhysicsLists PathResolver MagFieldElements)
 set_target_properties( G4AtlasServices PROPERTIES INTERPROCEDURAL_OPTIMIZATION ${ATLAS_GEANT4_USE_LTO} )
@@ -26,12 +24,12 @@ set_target_properties( G4AtlasServices PROPERTIES INTERPROCEDURAL_OPTIMIZATION $
 #test G4AtlasFieldServices
 atlas_add_test( G4AtlasFieldServices_test
                 SCRIPT test/G4AtlasFieldServices_test.py
-                POST_EXEC_SCRIPT nopost.sh )
+                POST_EXEC_SCRIPT noerror.sh )
 
 #test G4AtlasServicesConfig
 atlas_add_test( G4AtlasServicesConfig_test
                 SCRIPT test/G4AtlasServicesConfig_test.py
-                POST_EXEC_SCRIPT nopost.sh )
+                POST_EXEC_SCRIPT noerror.sh )
 
 # Install files from the package:
 atlas_install_python_modules( python/*.py

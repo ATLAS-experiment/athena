@@ -1,0 +1,80 @@
+<?xml version = "1.0" encoding="UTF-8"?>
+<GlobalSimAlgConfig>
+  <desc>Set up GlobalSim with an eGammaBDT and Jet1 chain</desc>
+  <!-- TOB Writers-->
+  <TOBWriters>
+    <AlgTool class="eFexCvtrAlgTool" name="eFexCvtrAlgTool"/>
+    <AlgTool class="Egamma1BDTAlgTool" name="Egamma1BDTAlgTool"/>
+    <AlgTool class="GlobalCellTowerAlgTool" name="GlobalCellTowerAlgTool"/>
+    <AlgTool class="gFexRhoCvtrAlgTool" name="gFexRhoCvtrAlgTool"/>
+    <AlgTool class="GlobalJet1AlgTool" name="GlobalJet1AlgTool">
+      <child class="GlobalCellTowerAlgTool" name="GlobalCellTowerAlgTool" slot="in0"/>
+    </AlgTool>
+  </TOBWriters>
+  <!-- TIP Writers-->
+  <TIPWriters>
+    <AlgTool class="eEmMultAlgTool" name="eEmMultAlgTool_0">
+      <!-- rhad-->
+      <property name="rhad" value="1"/>
+      <property name="rhad_op" value="&gt;="/>
+      <!-- reta-->
+      <property name="reta" value="1"/>
+      <property name="reta_op" value="&gt;="/>
+      <!-- wstot-->
+      <property name="wstot" value="1"/>
+      <property name="wstot_op" value="&gt;="/>
+      <property name="TIPposition" value="0" type="int"/>
+      <property name="TIPwidth" value="3" type="int"/>
+      <child class="eFexCvtrAlgTool" name="eFexCvtrAlgTool" slot="in0"/>
+    </AlgTool>
+    <AlgTool class="eEmEg1BDTMultAlgTool" name="eEmEg1BDTMultAlgTool_0">
+      <property name="Eg1BDT" value='128'/>
+      <property name="Eg1BDT_op" value="&gt;="/>
+      <property name="TIPposition" value="3" type="int" />
+      <property name="TIPwidth" value="3" type="int" />
+      <child class="Egamma1BDTAlgTool" name="Egamma1BDTAlgTool" slot="in0"/>
+    </AlgTool>
+    <AlgTool class="CommonMultAlgTool" name="CommonMultAlgTool_0">
+      <property name="CommonTOBsKey" value="GlobalJet1Jets"/>
+      <property name="et_low" value="0"/>  
+      <property name="TIPposition" value="6" type="int"/>
+      <property name="TIPwidth" value="3" type="int"/>
+      <child class="GlobalJet1AlgTool" name="GlobalJet1AlgTool" slot="in0"/>
+    </AlgTool>
+    <AlgTool class="CommonMultAlgTool" name="CommonMultAlgTool_1">
+      <property name="CommonTOBsKey" value="GlobalJet1Jets"/>
+      <property name="et_low" value="500"/>  
+      <property name="TIPposition" value="9" type="int"/>
+      <property name="TIPwidth" value="3" type="int"/>
+      <child class="GlobalJet1AlgTool" name="GlobalJet1AlgTool" slot="in0"/>
+    </AlgTool>
+    <AlgTool class="CommonMultAlgTool" name="CommonMultAlgTool_2">
+      <property name="CommonTOBsKey" value="GlobalJet1Jets"/>
+      <property name="et_low" value="1000"/>  
+      <property name="TIPposition" value="12" type="int"/>
+      <property name="TIPwidth" value="3" type="int"/>
+      <child class="GlobalJet1AlgTool" name="GlobalJet1AlgTool" slot="in0"/>
+    </AlgTool>
+    <AlgTool class="CommonMultAlgTool" name="CommonMultAlgTool_3">
+      <property name="CommonTOBsKey" value="GlobalJet1Jets"/>
+      <property name="et_low" value="1500"/>  
+      <property name="TIPposition" value="15" type="int"/>
+      <property name="TIPwidth" value="3" type="int"/>
+      <child class="GlobalJet1AlgTool" name="GlobalJet1AlgTool" slot="in0"/>
+    </AlgTool>
+    <AlgTool class="CommonMultAlgTool" name="CommonMultAlgTool_4">
+      <property name="CommonTOBsKey" value="GlobalJet1Jets"/>
+      <property name="et_low" value="2000"/>  
+      <property name="TIPposition" value="18" type="int"/>
+      <property name="TIPwidth" value="3" type="int"/>
+      <child class="GlobalJet1AlgTool" name="GlobalJet1AlgTool" slot="in0"/>
+    </AlgTool>
+    <AlgTool class="CommonMultAlgTool" name="CommonMultAlgTool_5">
+      <property name="CommonTOBsKey" value="GlobalJet1Jets"/>
+      <property name="et_low" value="2500"/>  
+      <property name="TIPposition" value="21" type="int"/>
+      <property name="TIPwidth" value="3" type="int"/>
+      <child class="GlobalJet1AlgTool" name="GlobalJet1AlgTool" slot="in0"/>
+    </AlgTool>
+</TIPWriters>
+</GlobalSimAlgConfig>

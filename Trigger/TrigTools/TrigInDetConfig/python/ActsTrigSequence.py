@@ -156,7 +156,8 @@ class ActsTrigSequence(InnerTrackerTrigSequence):
                                      InputSpacePoints=['ITkPixelSpacePoints_Cached'] if self.flags.Acts.useCache else ['ITkPixelSpacepoints_'+self.signature], 
                                      useFastTracking=True))
 
-    from ActsConfig.ActsTrackFindingConfig import ActsMainTrackFindingAlgCfg, ActsTrackToTrackParticleCnvAlgCfg
+    from ActsConfig.ActsTrackFindingConfig import ActsMainTrackFindingAlgCfg
+    from ActsConfig.ActsEventCnvConfig import ActsTrackToTrackParticleCnvAlgCfg
     measurements = ["ITkPixelClusters_Cached" if self.flags.Acts.useCache else "ITkPixelClusters_"+self.signature,
                     "ITkStripClusters_Cached" if self.flags.Acts.useCache else "ITkStripClusters_"+self.signature]
 
@@ -165,7 +166,6 @@ class ActsTrigSequence(InnerTrackerTrigSequence):
                                               ACTSTracksLocation=self.flags.Tracking.ActiveConfig.trkTracks_FTF,
                                               SeedLabels=["PPP"],
                                               SeedContainerKeys=["ActsPixelSeeds"],
-                                              DetectorElementsKeys=['ITkPixelDetectorElementCollection'],
                                               UncalibratedMeasurementContainerKeys=measurements)
      
     acc.merge(trackfinding)
@@ -193,7 +193,7 @@ class ActsTrigSequence(InnerTrackerTrigSequence):
   def xAODParticleCreation(self) -> ComponentAccumulator:
     acc = ComponentAccumulator()
 
-    from ActsConfig.ActsTrackFindingConfig import ActsTrackToTrackParticleCnvAlgCfg
+    from ActsConfig.ActsEventCnvConfig import ActsTrackToTrackParticleCnvAlgCfg
     acc.merge(ActsTrackToTrackParticleCnvAlgCfg(self.flags,
                                                 "ActsTrackParticleCreator_Ambi_"+self.signature, 
                                                 ACTSTracksLocation=[self.flags.Tracking.ActiveConfig.trkTracks_IDTrig], 

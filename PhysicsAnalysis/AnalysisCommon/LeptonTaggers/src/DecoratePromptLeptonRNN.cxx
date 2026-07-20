@@ -12,7 +12,6 @@
 #include "xAODTracking/TrackParticlexAODHelpers.h"
 #include "xAODEgamma/EgammaxAODHelpers.h"
 #include "StoreGate/DecorKeyHelpers.h"
-#include "GaudiKernel/ThreadLocalContext.h"
 
 // ROOT
 #include "TH1.h"
@@ -68,14 +67,13 @@ StatusCode Prompt::DecoratePromptLeptonRNN::initialize()
 }
 
 //=============================================================================
-StatusCode Prompt::DecoratePromptLeptonRNN::execute()
+StatusCode Prompt::DecoratePromptLeptonRNN::execute(const EventContext& ctx)
 {
   //
   // Process current event
   //
   TimerScopeHelper timer(m_timerEvent);
 
-  const EventContext& ctx = Gaudi::Hive::currentContext();
 
   ATH_MSG_DEBUG("execute() - begin...");
 

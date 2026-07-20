@@ -22,4 +22,4 @@ atlas_install_python_modules( python/*.py )
 # Test(s) in the package.
 atlas_add_test( LinearTransformExample
    SCRIPT athena.py --threads=1 AthExHIP/LinearTransformExampleConfig.py
-   POST_EXEC_SCRIPT nopost.sh)
+   POST_EXEC_SCRIPT noerror.sh)

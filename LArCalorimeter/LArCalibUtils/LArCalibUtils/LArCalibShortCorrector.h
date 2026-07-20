@@ -30,7 +30,7 @@ class ATLAS_NOT_THREAD_SAFE LArCalibShortCorrector : public AthAlgorithm
 
   //standard algorithm methods
   virtual StatusCode initialize() override;
-  virtual StatusCode execute() override;
+  virtual StatusCode execute(const EventContext& ctx) override;
 
 
  private:

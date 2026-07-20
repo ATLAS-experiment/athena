@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 //***************************************************************************
 //    gFEXFPGA - Defines FPGA tools
@@ -12,7 +12,6 @@
 #define gFEXFPGA_H
 
 #include "AthenaBaseComps/AthAlgTool.h"
-#include "AthenaKernel/CLASS_DEF.h"
 #include "L1CaloFEXToolInterfaces/IgFEXFPGA.h"
 #include "L1CaloFEXSim/gTowerContainer.h"
 #include "L1CaloFEXSim/gFEXOutputCollection.h"
@@ -34,39 +33,18 @@ namespace LVL1
     /** Destructor */
     virtual ~gFEXFPGA();
 
-    virtual StatusCode init(int id) override;
-    virtual void reset() override;
-    virtual int getID() const override { return m_fpgaId; }
-
     // virtual void SetTowersAndCells_SG(gTowersCentral) override ;
     // virtual void SetTowersAndCells_SG(gTowersForward) override ;
 
     // virtual void GetEnergyMatrix(gTowersCentral &) const override ;
     // virtual void GetEnergyMatrix(gTowersForward &) const override ;
 
-    virtual void FillgTowerEDMCentral(SG::WriteHandle<xAOD::gFexTowerContainer> &, gTowersCentral &, gTowersType &, gTowersType &, gTowersType &) override;
-    virtual void FillgTowerEDMForward(SG::WriteHandle<xAOD::gFexTowerContainer> &, gTowersForward &, gTowersForward &, gTowersType &, gTowersType &, gTowersType &) override;
+    virtual void FillgTowerEDMCentral(const EventContext& , SG::WriteHandle<xAOD::gFexTowerContainer> &, int, const gTowersCentral &, gTowersType &, gTowersType &, gTowersType &) const override;
+    virtual void FillgTowerEDMForward(const EventContext& , SG::WriteHandle<xAOD::gFexTowerContainer> &, int, const gTowersForward &, const gTowersForward &, gTowersType &, gTowersType &, gTowersType &) const override;
 
     /** Internal data */
   private:
     SG::ReadCondHandleKey<gFEXDBCondData> m_DBToolKey{this, "DBToolKey", "gFEXDBParams", "Database tool key"};
-
-    int m_fpgaId = -1;
-
-     gTowersType m_offsetsDefaultA   = {{{0}}};
-     gTowersType m_noiseCutsDefaultA = {{{0}}};
-     gTowersType m_slopesDefaultA    = {{{0}}};
-     
-     gTowersType m_offsetsDefaultB  = {{{0}}};
-     gTowersType m_noiseCutsDefaultB= {{{0}}};
-     gTowersType m_slopesDefaultB   = {{{0}}};
-
-     gTowersType m_offsetsDefaultC   = {{{0}}};
-     gTowersType m_noiseCutsDefaultC = {{{0}}};
-     gTowersType m_slopesDefaultC    = {{{0}}};
-
-    // gTowersCentral m_gTowersIDs_central;
-    // gTowersForward m_gTowersIDs_forward;
 
     void gtCalib(gTowersType &twrs, const gTowersType &offsets, const gTowersType &noiseCuts, const gTowersType &slopes) const;
 

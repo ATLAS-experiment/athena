@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #undef NDEBUG
@@ -108,7 +108,7 @@ class DummyAlgorithm: public AthAlgorithm {
 
     }
 
-    virtual StatusCode execute() override {
+    virtual StatusCode execute(const EventContext&) override {
       return StatusCode::SUCCESS;
     }
 };

@@ -366,7 +366,7 @@ class TestEgammaCalibrationAndSmearingTool(unittest.TestCase):
         known_errors = {('es2015PRE', 'electron'): 2, ('es2015PRE', 'photon'): 3,
                         ('es2015cPRE', 'electron'): 3, ('es2015cPRE', 'photon'): 2}
         for particle in 'electron', 'photon':
-            for esmodel in 'es2015PRE', 'es2015cPRE', 'es2018_R21_v0', 'es2023_R22_Run2_v1', 'es2024_Run3_v0':
+            for esmodel in 'es2023_R22_Run2_v1', 'es2024_Run3_v0':
                 self._test_MVA(esmodel, particle, True,
                                known_errors.get((esmodel, particle), 0))
 

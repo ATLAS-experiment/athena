@@ -18,7 +18,7 @@
 
 class TriggerMuonValidationPlots : public PlotBase {
 public:
-    TriggerMuonValidationPlots(PlotBase* pParent, const std::string& sDir, std::vector<unsigned int> authors, bool isData,
+    TriggerMuonValidationPlots(PlotBase* pParent, const std::string& sDir, std::set<int> authors, bool isData,
                                bool doTrigMuonL1Validation, bool doTrigMuonL2Validation, bool doTrigMuonEFValidation,
                                std::vector<std::vector<std::string>> ChainSeed, std::vector<std::string> L1MuonItems);
 

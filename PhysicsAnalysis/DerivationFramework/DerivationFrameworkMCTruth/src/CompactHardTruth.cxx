@@ -101,7 +101,7 @@ StatusCode CompactHardTruth::finalize() {
   return StatusCode::SUCCESS;
 }
 
-StatusCode CompactHardTruth::execute() {
+StatusCode CompactHardTruth::execute(const EventContext& /*ctx*/) {
 
   ++m_evtCount;
   // if( m_evtCount%100 == 0 ){
@@ -203,7 +203,6 @@ StatusCode CompactHardTruth::execute() {
 
   std::vector<HepMC::GenVertexPtr> hadVertices;
 
-#ifdef HEPMC3
   for (auto& hadv: thinEvt->vertices()) {
     if (!hadv) continue;
     if (hadv->particles_in().size() < 2) continue;
@@ -224,37 +223,6 @@ StatusCode CompactHardTruth::execute() {
     if (isHadVtx) hadVertices.push_back(hadv);
     if (doDebug && isHadVtx) ATH_MSG_VERBOSE("Hadronization vertex " << hadv);
   }
-#else
-  HepMC::GenEvent::vertex_iterator hadv = thinEvt->vertices_begin();
-  HepMC::GenEvent::vertex_iterator hadvB = thinEvt->vertices_begin();
-  HepMC::GenEvent::vertex_iterator hadvE = thinEvt->vertices_end();
-
-  for (; hadv != hadvE; ++hadv) {
-    if (!(*hadv)) continue;
-    if ((*hadv)->particles_in_size() < 2) continue;
-    if ((*hadv)->particles_out_size() < 1) continue;
-
-    // Check hadronization vertex
-    // isHad is true if at least one hadron
-    // q qbar -> pi is allowed, but q qbar -> W... is not
-    bool isHadVtx = true;
-    bool isHadOut = false;
-    HepMC::GenVertex::particles_in_const_iterator inp = (*hadv)->particles_in_const_begin();
-    HepMC::GenVertex::particles_in_const_iterator inpE = (*hadv)->particles_in_const_end();
-    for (; inp != inpE; ++inp) {
-      if (!(MC::isParton(*inp)|| MC::isDiquark(*inp))) { isHadVtx = false; break;}
-    }
-    HepMC::GenVertex::particles_out_const_iterator vp = (*hadv)->particles_out_const_begin();
-    HepMC::GenVertex::particles_out_const_iterator vpE = (*hadv)->particles_out_const_end();
-    for (; vp != vpE; ++vp) {
-      if (MC::isParton(*vp)|| MC::isDiquark(*vp)) isHadVtx = false;
-      if (MC::isHadron(*vp)) isHadOut = true;
-    }
-    isHadVtx = isHadVtx && isHadOut;
-    if (isHadVtx) hadVertices.push_back(*hadv);
-    if (doDebug && isHadVtx) ATH_MSG_VERBOSE("Hadronization vertex " << *hadv);
-  }
-#endif
 
   if (hadVertices.empty()) {
     ATH_MSG_WARNING("No hadronization vertices for event " << nEvent);
@@ -268,7 +236,6 @@ StatusCode CompactHardTruth::execute() {
   // Remove and delete all descendants
   //////////////////////////////////////////////////////////
 
-#ifdef HEPMC3
   for (unsigned int iv = 0; iv < hadVertices.size(); ++iv) {
     HepMC::GenVertexPtr ivtx = hadVertices[iv];
     if (doDebug) ATH_MSG_DEBUG("Removing partons from hadVertex " << ivtx);
@@ -289,39 +256,12 @@ StatusCode CompactHardTruth::execute() {
       deleteP.push_back(std::move(pout));
     }
   }
-#else
-  for (unsigned int iv = 0; iv < hadVertices.size(); ++iv) {
-    HepMC::GenVertex* ivtx = hadVertices[iv];
-    if (doDebug) ATH_MSG_DEBUG("Removing partons from hadVertex " << ivtx);
-    HepMC::GenVertex::particles_in_const_iterator pin = ivtx->particles_in_const_begin();
-    HepMC::GenVertex::particles_in_const_iterator pinE = ivtx->particles_in_const_end();
-    for (; pin != pinE; ++pin) {
-      removePV.emplace_back(ivtx, *pin);
-    }
-  }
-
-  // Remove all descendant particles. Will remove empty vertices later.
-  // Might have parton decays of hadrons - hence delete sort/unique
-  for (unsigned int iv = 0; iv < hadVertices.size(); ++iv) {
-    HepMC::GenVertex* ivtx = hadVertices[iv];
-    HepMC::GenVertex::particle_iterator pout = ivtx->particles_begin(HepMC::descendants);
-    HepMC::GenVertex::particle_iterator poutE = ivtx->particles_end(HepMC::descendants);
-    for (; pout != poutE; ++pout) {
-      HepMC::GenVertex* vpar = (*pout)->production_vertex();
-      if (vpar) removePV.emplace_back(vpar, *pout);
-      HepMC::GenVertex* vend = (*pout)->end_vertex();
-      if (vend) removePV.emplace_back(vend, *pout);
-      deleteP.push_back(*pout);
-    }
-  }
-#endif
 
   // Remove empty vertices
   // Remove all particles from Geant vertices
   // Remove and delete Geant vertices and particles
   // All Geant particles should have Geant parent vertex
 
-#ifdef HEPMC3
   for (auto hadv:thinEvt->vertices()) {
     // Empth vertices
     if (hadv->particles_in().size() == 0 && hadv->particles_out().size() == 0) {
@@ -341,45 +281,14 @@ StatusCode CompactHardTruth::execute() {
     removeV.push_back(hadv);
     deleteV.push_back(std::move(hadv));
   }
-#else
-  for (hadv = hadvB; hadv != hadvE; ++hadv) {
-
-    // Empth vertices
-    if ((*hadv)->particles_in_size() == 0 && (*hadv)->particles_out_size() == 0) {
-      removeV.push_back(*hadv);
-      deleteV.push_back(*hadv);
-    }
-
-    // Geant vertices/particles
-    if (!HepMC::is_simulation_vertex(*hadv)) continue;
-    HepMC::GenVertex::particles_in_const_iterator pin = (*hadv)->particles_in_const_begin();
-    HepMC::GenVertex::particles_in_const_iterator pinE = (*hadv)->particles_in_const_end();
-    for (; pin != pinE; ++pin) {
-      removePV.emplace_back(*hadv, *pin);
-      if (HepMC::is_simulation_particle(*pin)) { deleteP.push_back(*pin); }
-    }
-    HepMC::GenVertex::particles_out_const_iterator pout = (*hadv)->particles_out_const_begin();
-    HepMC::GenVertex::particles_out_const_iterator poutE = (*hadv)->particles_out_const_end();
-    for (; pout != poutE; ++pout) {
-      removePV.emplace_back(*hadv, *pout);
-      if (HepMC::is_simulation_particle(*pout)) { deleteP.push_back(*pout); }
-    }
-    removeV.push_back(*hadv);
-    deleteV.push_back(*hadv);
-  }
-#endif
 
   // Actually implement changes
 
   for (unsigned int i = 0; i < removePV.size(); ++i) {
     HepMC::GenVertexPtr v = removePV[i].first;
     HepMC::GenParticlePtr p = removePV[i].second;
-#ifdef HEPMC3
     v->remove_particle_in(p);
     v->remove_particle_out(std::move(p));
-#else
-    v->remove_particle(p);
-#endif
   }
 
   for (unsigned int i = 0; i < addoutPV.size(); ++i) {
@@ -387,7 +296,6 @@ StatusCode CompactHardTruth::execute() {
     HepMC::GenParticlePtr p = addoutPV[i].second;
     v->add_particle_out(std::move(p));
   }
-#ifdef HEPMC3
   for (unsigned int iv = 1; iv < hadVertices.size(); ++iv) {
     HepMC::GenVertexPtr v = hadVertices[iv];
     if (v->particles_in().size() != 0 || v->particles_out().size() != 0) {
@@ -396,34 +304,6 @@ StatusCode CompactHardTruth::execute() {
     }
     thinEvt->remove_vertex(hadVertices[iv]);
   }
-//AV: HepMC3 uses smart pointers
-#else
-
-  for (unsigned int iv = 1; iv < hadVertices.size(); ++iv) {
-    HepMC::GenVertex* v = hadVertices[iv];
-    if (v->particles_in_size() != 0 || v->particles_out_size() != 0) {
-      ATH_MSG_WARNING("Removing vertex " << HepMC::uniqueID(v) << " for event " << nEvent << " with in/out particles " << v->particles_in_size() << " " << v->particles_out_size());
-    }
-    if (!thinEvt->remove_vertex(hadVertices[iv])) { ATH_MSG_WARNING("Error removing vertex " << HepMC::uniqueID(v) << " for event " << nEvent); }
-  }
-
-  // Delete removed particles/vertices
-
-  if (doDebug) ATH_MSG_DEBUG("Deleting hadronization vertices " << deleteV.size());
-  deleteV.sort();
-  deleteV.unique();
-  for (dvItr = deleteV.begin(); dvItr != deleteV.end(); ++dvItr) {
-    if (doDebug) ATH_MSG_VERBOSE("Deleting vertex " << HepMC::uniqueID(*dvItr));
-    if (*dvItr) delete (*dvItr);
-  }
-
-  deleteP.sort();
-  deleteP.unique();
-  for (dpItr = deleteP.begin(); dpItr != deleteP.end(); ++dpItr) {
-    if (doDebug) ATH_MSG_VERBOSE("Deleting particle " << HepMC::uniqueID(*dpItr));
-    if (*dpItr) delete (*dpItr);
-  }
-#endif
 
   ////////////////////////
   // Cluster final partons
@@ -468,7 +348,6 @@ StatusCode CompactHardTruth::execute() {
     addoutPV.clear();
     removeV.clear();
     changePK.clear();
-#ifdef HEPMC3
     // Find final partons
     for (auto fp: thinEvt->particles() ) {
       int iCase = 0;
@@ -637,217 +516,6 @@ StatusCode CompactHardTruth::execute() {
         if (doDebug) ATH_MSG_DEBUG("Case not found " << pvtx << " " << fp << " " << pvtx->particles_in().size() << " " << pvtx->particles_out().size());
       }
     } // end final parton loop
-#else
-
-    HepMC::GenEvent::particle_iterator finp = thinEvt->particles_begin();
-    HepMC::GenEvent::particle_iterator finpB = thinEvt->particles_begin();
-    HepMC::GenEvent::particle_iterator finpE = thinEvt->particles_end();
-
-    // Find final partons
-    for (finp = finpB; finp != finpE; ++finp) {
-      int iCase = 0;
-
-      HepMC::GenParticle* fp = *finp;
-      if (!((MC::isParton(fp)|| MC::isDiquark(fp)) && fp->end_vertex() == nullptr)) continue;
-      if (doDebug) ATH_MSG_DEBUG("Starting final parton " << HepMC::uniqueID(fp));
-
-      // Production/end vertices
-      HepMC::GenVertex* pvtx = fp->production_vertex();
-      if (!pvtx) {
-        ATH_MSG_WARNING("Missing production for final parton " << HepMC::uniqueID(fp));
-        continue;
-      }
-      if (doDebug) ATH_MSG_DEBUG("Final parton " << HepMC::uniqueID(pvtx) << " " << HepMC::uniqueID(fp));
-
-      ////////////
-      // Case 1->1
-      ////////////
-
-      // One-particle decay; use final particle
-      // ppvtx -> pp -> pvtx -> fp
-
-      if (pvtx->particles_in_size() == 1 && pvtx->particles_out_size() == 1) {
-        // Incoming particle to parent vertex
-        HepMC::GenVertex::particles_in_const_iterator pitr = pvtx->particles_in_const_begin();
-        HepMC::GenParticle* pp = *pitr;
-        if (!pp || HepMC::uniqueID(pp) == 0) {
-          ATH_MSG_DEBUG("1->1: missing pp for fp " << HepMC::uniqueID(fp));
-          ++m_missCount;
-          continue;
-        }
-        // Its parent vertex
-        HepMC::GenVertex* ppvtx = pp->production_vertex();
-        if (!ppvtx || HepMC::uniqueID(ppvtx) == 0) {
-          ATH_MSG_DEBUG("1->1: missing ppvtx for fp " << HepMC::uniqueID(fp));
-          ++m_missCount;
-          continue;
-        }
-        moreP = true;
-        iCase = 1;
-
-        removePV.emplace_back(ppvtx, pp);
-        removePV.emplace_back(pvtx, pp);
-        deleteP.push_back(pp);
-        removeV.push_back(pvtx);
-        deleteV.push_back(pvtx);
-        addoutPV.emplace_back(ppvtx, fp);
-        if (doDebug) { ATH_MSG_DEBUG("1->1: ppvtx,pp,pvtx,fp,evtx " << HepMC::uniqueID(ppvtx) << " " << HepMC::uniqueID(pp) << " " << HepMC::uniqueID(pvtx) << " " << HepMC::uniqueID(fp)); }
-      }
-
-      ////////////
-      // Case 2->1
-      ////////////
-
-      // Color recombination. Momentum is conserved so just keep 2.
-      // Drop 1 and vertex.
-      // ppvtx1,ppvtx2 -> pp1,pp2 -> pvtx -> fp
-      // Recombination should not affect hard physics!
-
-      if (pvtx->particles_in_size() == 2 && pvtx->particles_out_size() == 1) {
-        // Incoming particles to parent vertex
-        HepMC::GenVertex::particles_in_const_iterator pitr = pvtx->particles_in_const_begin();
-        HepMC::GenParticle* pp1 = *pitr;
-        ++pitr;
-        HepMC::GenParticle* pp2 = *pitr;
-
-        // Check for 2->1->2 initial state interactions in Herwig++
-        // Initial partons have pt=0, use pt<0.001MeV
-        if (std::abs(pp1->momentum().perp()) < 1.e-3) continue;
-        if (std::abs(pp2->momentum().perp()) < 1.e-3) continue;
-        // Their parent vertices
-        HepMC::GenVertex* ppvtx1 = pp1->production_vertex();
-        HepMC::GenVertex* ppvtx2 = pp2->production_vertex();
-        if (!ppvtx1 || HepMC::uniqueID(ppvtx1) == 0) {
-          ATH_MSG_DEBUG("2->1: missing ppvtx1 for fp " << HepMC::uniqueID(fp));
-          ++m_missCount;
-          continue;
-        }
-        if (!ppvtx2 || HepMC::uniqueID(ppvtx2) == 0) {
-          ATH_MSG_DEBUG("2->1: missing ppvtx2 for fp " << HepMC::uniqueID(fp));
-          ++m_missCount;
-          continue;
-        }
-
-        moreP = true;
-        iCase = 2;
-
-        removePV.emplace_back(pvtx, fp);
-        removePV.emplace_back(pvtx, pp1);
-        removePV.emplace_back(pvtx, pp2);
-        deleteP.push_back(fp);
-        removeV.push_back(pvtx);
-        deleteV.push_back(pvtx);
-
-        if (doDebug) {
-          ATH_MSG_DEBUG("2->1: ppvtx1,pp1,ppvtx2,pp2,pvtx,fp " << HepMC::uniqueID(ppvtx1) << " " << HepMC::uniqueID(pp1) << " " << HepMC::uniqueID(ppvtx2) << " " << HepMC::uniqueID(pp2) << " " << HepMC::uniqueID(pvtx) << " "
-                                                               << HepMC::uniqueID(fp));
-        }
-      }
-
-      ////////////
-      // Case 1->2
-      ////////////
-
-      // Parton branching. Momentum not conserved; 2 momenta correct
-      // Drop only if mass is below cut
-      // ppvtx -> pp -> pvtx -> pout1,pout2/fp
-
-      if (pvtx->particles_in_size() == 1 && pvtx->particles_out_size() == 2) {
-        HepMC::GenVertex::particles_out_const_iterator poutitr = pvtx->particles_out_const_begin();
-        HepMC::GenParticle* pout1 = *poutitr;
-        ++poutitr;
-        HepMC::GenParticle* pout2 = *poutitr;
-
-        // Require two final partons and avoid duplication
-        if (fp == pout1) {
-          if (!((MC::isParton(pout2)|| MC::isDiquark(pout2)) && pout2->end_vertex() == nullptr)) {
-            if (doDebug) ATH_MSG_DEBUG("1->2: not final " << HepMC::uniqueID(pout2));
-            continue;
-          }
-        } else if (fp == pout2) {
-          if (!((MC::isParton(pout1)|| MC::isDiquark(pout1)) && pout1->end_vertex() == nullptr)) {
-            if (doDebug) ATH_MSG_DEBUG("1->2: not final " << HepMC::uniqueID(pout1));
-            continue;
-          }
-        } else {
-          ATH_MSG_WARNING("1->2: No match found for branching " << HepMC::uniqueID(fp) << " " << HepMC::uniqueID(pvtx) << " " << HepMC::uniqueID(pout1) << " " << HepMC::uniqueID(pout2));
-          continue;
-        }
-        if (fp != pout1) continue;
-        // Incoming particle
-        HepMC::GenVertex::particles_in_const_iterator pitr = pvtx->particles_in_const_begin();
-        HepMC::GenParticle* pp = *pitr;
-
-        // Do not merge initial partons (pt<1MeV or m<-1MeV)
-        if (pout1->momentum().m() < -1.0 || pout1->momentum().perp() < 1.0) continue;
-        if (pout2->momentum().m() < -1.0 || pout2->momentum().perp() < 1.0) continue;
-
-        // Parton pair mass cut
-        HepMC::FourVector p12 = vtxOutMom(pvtx);
-        double m12 = p12.m();
-        if (m12 < 0) {
-          if (fabs(m12) > 10. + 1.0e-5 * p12.e()) {
-            ATH_MSG_WARNING("Spacelike mass^2 for parton sum " << m12 << " " << HepMC::uniqueID(pp) << " " << HepMC::uniqueID(pvtx) << " " << HepMC::uniqueID(pout1) << " " << HepMC::uniqueID(pout2));
-          }
-          m12 = 0;
-        }
-        if (doDebug) ATH_MSG_DEBUG("1->2: parton pair mass " << m12);
-        // If mass > cut, keep pair
-        if (m12 > m_partonCut) {
-          if (doDebug) ATH_MSG_DEBUG("Keeping 1->2: parton mass " << m12);
-          continue;
-        }
-
-        // Associated vertices
-        HepMC::GenVertex* ppvtx = pp->production_vertex();
-        if (!ppvtx || HepMC::uniqueID(ppvtx) == 0) {
-          ATH_MSG_DEBUG("1->2: missing ppvtx for fp " << HepMC::uniqueID(fp));
-          ++m_missCount;
-          continue;
-        }
-
-        // Merge branching
-        moreP = true;
-        iCase = 3;
-        if (doDebug) ATH_MSG_DEBUG("Merging 1->2: mass " << p12.m());
-
-        changePK.emplace_back(pp, p12);
-        removePV.emplace_back(pvtx, pp);
-        removePV.emplace_back(pvtx, pout1);
-        removePV.emplace_back(pvtx, pout2);
-
-        deleteP.push_back(pout1);
-        deleteP.push_back(pout2);
-        removeV.push_back(pvtx);
-        deleteV.push_back(pvtx);
-
-        if (doDebug) {
-          ATH_MSG_DEBUG("Merge 1->2: ppvtx,pp,pvtx,pout1,pout2,evtx " << ppvtx << " " << pp << " " << pvtx << " " << pout1 << " "
-                                                                      << pout2);
-          ATH_MSG_DEBUG("Merge 1->2: id " << pp->pdg_id() << " " << pout1->pdg_id() << " " << pout2->pdg_id());
-        }
-      } // end 1->2 case
-
-      /////////////////////////
-      // Incoming proton vertex
-      /////////////////////////
-
-      // Do nothing
-      if (pvtx->particles_in_size() == 1) {
-        // Incoming particle to parent vertex
-        HepMC::GenVertex::particles_in_const_iterator pitr = pvtx->particles_in_const_begin();
-        HepMC::GenParticle* pp = *pitr;
-        if (std::abs(pp->pdg_id()) == MC::PROTON) iCase = -1;
-      }
-
-      // Case not found
-      // Need test for 2->2 in underlying event
-      if (iCase == 0) {
-        if (doDebug) ATH_MSG_DEBUG("Case not found " << HepMC::uniqueID(pvtx) << " " << HepMC::uniqueID(fp) << " " << pvtx->particles_in_size() << " " << pvtx->particles_out_size());
-      }
-
-    } // end final parton loop
-#endif
 
     // Actually implement changes -- remove particles from vertices
     // Parton ends free, so no addinPV
@@ -857,12 +525,8 @@ StatusCode CompactHardTruth::execute() {
       HepMC::GenVertexPtr v = removePV[i].first;
       HepMC::GenParticlePtr p = removePV[i].second;
       if (doDebug) ATH_MSG_VERBOSE("Removing v,p " << v << " " << p);
-#ifdef HEPMC3
       v->remove_particle_in(p);
       v->remove_particle_out(std::move(p));
-#else      
-      v->remove_particle(p);
-#endif
     }
 
     // Actually implement changes -- add particles to vertices
@@ -884,44 +548,14 @@ StatusCode CompactHardTruth::execute() {
     // Actually implement changes -- remove vertices
     if (doDebug) ATH_MSG_DEBUG("Actually remove vertices " << removeV.size());
     for (unsigned int i = 0; i < removeV.size(); ++i) {
-#ifdef HEPMC3
       int nv = thinEvt->vertices().size();
       if (doDebug) { ATH_MSG_VERBOSE("Removing vertex " << removeV[i] << " " << nv << " " << thinEvt->vertices().size()); }
       thinEvt->remove_vertex(removeV[i]);
-#else
-      int nv = thinEvt->vertices_size();
-      if (thinEvt->remove_vertex(removeV[i])) {
-        if (doDebug) { ATH_MSG_VERBOSE("Removed vertex " << removeV[i] << " " << nv << " " << thinEvt->vertices_size()); }
-      } else {
-        ATH_MSG_WARNING("Failed to remove vertex " << removeV[i]);
-      }
-#endif
     }
     if (doDebug) ATH_MSG_DEBUG("End while(moreP) pass " << moreP);
 
   } // end moreP
 
-#ifdef HEPMC3
-//AV HepMC3 uses smartpointers. This part is not needed.
-#else
-  // Delete removed particles/vertices
-  if (doDebug) ATH_MSG_DEBUG("Deleting vertices " << deleteV.size());
-  deleteV.sort();
-  deleteV.unique();
-  for (dvItr = deleteV.begin(); dvItr != deleteV.end(); ++dvItr) {
-    if (doDebug) ATH_MSG_VERBOSE("Deleting vertex " << (*dvItr));
-    if (*dvItr) delete (*dvItr);
-  }
-
-  if (doDebug) ATH_MSG_DEBUG("Deleting particles " << deleteP.size());
-  deleteP.sort();
-  deleteP.unique();
-  for (dpItr = deleteP.begin(); dpItr != deleteP.end(); ++dpItr) {
-    if (doDebug) ATH_MSG_VERBOSE("Deleting particle " << (*dpItr));
-    if (*dpItr) delete (*dpItr);
-  }
-
-#endif
   //////////////////////////////
   // Strip soft underlying stuff
   //////////////////////////////
@@ -936,7 +570,6 @@ StatusCode CompactHardTruth::execute() {
   // Find all particles connected to hard process(es) with m_T>10GeV
   std::list<HepMC::GenParticlePtr> pNotHad;
   std::list<HepMC::GenParticlePtr> pHard;
-#ifdef HEPMC3
   std::vector<HepMC::GenParticlePtr> beams=thinEvt->beams();
   for (auto fp: thinEvt->particles()) {
      HepMC::GenVertexPtr pvtx = fp->production_vertex();
@@ -989,79 +622,9 @@ StatusCode CompactHardTruth::execute() {
     if (doDebug) ATH_MSG_DEBUG("Hard GenParticles total " << nhard);
   }
 
-#else
-//AV: This algorithm is terribly slow. For each particle the descendants and ancestors are called.
-  HepMC::GenParticle* beams[2];
-  beams[0] = thinEvt->beam_particles().first;
-  beams[1] = thinEvt->beam_particles().second;
-
-  HepMC::GenEvent::particle_iterator finp = thinEvt->particles_begin();
-  HepMC::GenEvent::particle_iterator finpE = thinEvt->particles_end();
-
-  for (; finp != finpE; ++finp) {
-    HepMC::GenParticle* fp = *finp;
-    HepMC::GenVertex* pvtx = fp->production_vertex();
-    if (!pvtx) continue;
-
-    double ep = fp->momentum().e();
-    double pzp = fp->momentum().pz();
-    double mtmax = (ep + pzp) * (ep - pzp);
-    HepMC::GenVertex::particle_iterator gpar = fp->production_vertex()->particles_begin(HepMC::ancestors);
-    HepMC::GenVertex::particle_iterator gparB = gpar;
-    HepMC::GenVertex::particle_iterator gparE = fp->production_vertex()->particles_end(HepMC::ancestors);
-
-    for (; gpar != gparE; ++gpar) {
-      double e = (*gpar)->momentum().e();
-      double pz = (*gpar)->momentum().pz();
-      mtmax = std::max((e+pz)*(e-pz), mtmax);
-    }
-
-    // Keep hard particles and all ancestors
-    pNotHad.push_back(fp);
-    int ida = std::abs(fp->pdg_id());
-    bool keepid = (ida > 10 && ida < 20) || (ida > 1000000 && ida < 9000000);
-    if (mtmax > m_hardCut * m_hardCut || keepid) {
-      pHard.push_back(fp);
-      for (gpar = gparB; gpar != gparE; ++gpar)
-        pHard.push_back(*gpar);
-    }
-
-    // Also keep all descendants of interesting particles
-    // Include leptons to get photons in Sherpa with no Z parent
-    // All hard descendants would include soft initial radiation
-    // Will remove duplicates with list sort/unique
-    bool keepid2 = ida == 6 || (ida >= 11 && ida <= 16) || (ida >= 23 && ida <= 37) || (ida > 1000000 && ida < 9000000);
-    if (keepid2 && fp->end_vertex()) {
-      HepMC::GenVertex::particle_iterator des = fp->end_vertex()->particles_begin(HepMC::descendants);
-      HepMC::GenVertex::particle_iterator desE = fp->end_vertex()->particles_end(HepMC::descendants);
-      for (; des != desE; ++des)
-        pHard.push_back(*des);
-    }
-  }
-
-  // Sort/unique lists
-  pNotHad.sort();
-  pNotHad.unique();
-  pHard.sort();
-  pHard.unique();
-
-  // Dump information
-  if (doDebug) {
-    std::list<HepMC::GenParticle*>::iterator hItr2 = pHard.begin();
-    std::list<HepMC::GenParticle*>::iterator hItr2E = pHard.end();
-    int nhard = 0;
-    for (; hItr2 != hItr2E; ++hItr2) {
-      ++nhard;
-      ATH_MSG_DEBUG("Hard GenParticles " << (*hItr2) );
-    }
-    if (doDebug) ATH_MSG_DEBUG("Hard GenParticles total " << nhard);
-  }
-
-#endif
   // Remove non-hadronization, non-hard GenParticles from vertices
   // and delete them using lists constructed above.
   // Any 1->1 vertices created will be removed below.
-#ifdef HEPMC3
   for (auto p: pNotHad) {
     // Skip hard ones
     bool isHard = false;
@@ -1078,35 +641,6 @@ StatusCode CompactHardTruth::execute() {
     HepMC::GenVertexPtr evtx = p->end_vertex();
     if (evtx) evtx->remove_particle_in(std::move(p));
    }
-#else
-
-  std::list<HepMC::GenParticle*>::iterator pItr = pNotHad.begin();
-  std::list<HepMC::GenParticle*>::iterator pItrE = pNotHad.end();
-
-  std::list<HepMC::GenParticle*>::iterator hItr = pHard.begin();
-  std::list<HepMC::GenParticle*>::iterator hItrB = pHard.begin();
-  std::list<HepMC::GenParticle*>::iterator hItrE = pHard.end();
-
-  for (; pItr != pItrE; ++pItr) {
-    HepMC::GenParticle* p = *pItr;
-
-    // Skip hard ones
-    bool isHard = false;
-    for (hItr = hItrB; hItr != hItrE; ++hItr) {
-      if (p == (*hItr)) {
-        isHard = true;
-        break;
-      }
-    }
-    if (doDebug) ATH_MSG_DEBUG("Particle bc/isHard " << HepMC::uniqueID(p) << " " << isHard);
-    if (isHard) continue;
-    HepMC::GenVertex* pvtx = p->production_vertex();
-    if (pvtx) pvtx->remove_particle(p);
-    HepMC::GenVertex* evtx = p->end_vertex();
-    if (evtx) evtx->remove_particle(p);
-    delete p;
-  }
-#endif
 
   /////////////////////////////////////////////////////////
   // Remove and delete vertices with no remaining particles
@@ -1115,7 +649,6 @@ StatusCode CompactHardTruth::execute() {
   removeV.clear();
   deleteV.clear();
 
-#ifdef HEPMC3
   for (auto vtx: thinEvt->vertices()) {
     if (vtx->particles_in().size() != 0) continue;
     if (vtx->particles_out().size() != 0) continue;
@@ -1127,32 +660,6 @@ StatusCode CompactHardTruth::execute() {
     if (doDebug) ATH_MSG_VERBOSE("Removing vertex " << removeV[i]);
     thinEvt->remove_vertex(removeV[i]);
   }
-#else
-  HepMC::GenEvent::vertex_iterator vtx = thinEvt->vertices_begin();
-  HepMC::GenEvent::vertex_iterator vtxE = thinEvt->vertices_end();
-  for (; vtx != vtxE; ++vtx) {
-    if ((*vtx)->particles_in_size() != 0) continue;
-    if ((*vtx)->particles_out_size() != 0) continue;
-    removeV.push_back(*vtx);
-    deleteV.push_back(*vtx);
-  }
-
-  if (doDebug) ATH_MSG_DEBUG("Removing/deleting 0-particle vertices " << removeV.size() << " " << deleteV.size());
-  for (unsigned int i = 0; i < removeV.size(); ++i) {
-    if (thinEvt->remove_vertex(removeV[i])) {
-      if (doDebug) ATH_MSG_VERBOSE("Removed vertex " << removeV[i]);
-    } else {
-      ATH_MSG_WARNING("Failed to remove vertex " << removeV[i]);
-    }
-  }
-
-  deleteV.sort();
-  deleteV.unique();
-  for (dvItr = deleteV.begin(); dvItr != deleteV.end(); ++dvItr) {
-    if (doDebug) ATH_MSG_VERBOSE("Deleting vertex " << (*dvItr));
-    if (*dvItr) delete (*dvItr);
-  }
-#endif
 
   ////////////////////////////////
   // Remove remaining 1-1 vertices
@@ -1168,7 +675,6 @@ StatusCode CompactHardTruth::execute() {
   // Always keep child
   // pvtx -> pin -> vtx11 -> pout -> evtx
 
-#ifdef HEPMC3
   bool moreV1 = true;
   HepMC::GenVertexPtr vtx11;
   HepMC::GenParticlePtr pin;
@@ -1209,53 +715,6 @@ StatusCode CompactHardTruth::execute() {
        if (doDebug) ATH_MSG_DEBUG("One-body new pvtx " << pvtx << " " << pvtx->particles_in().size() << " " << pvtx->particles_out().size());
     }
   }
-#else
-  bool moreV1 = true;
-  HepMC::GenVertex* vtx11;
-  HepMC::GenParticle* pin;
-  HepMC::GenParticle* pout;
-
-  while (moreV1) {
-    moreV1 = false;
-
-    HepMC::GenEvent::vertex_iterator v = thinEvt->vertices_begin();
-    HepMC::GenEvent::vertex_iterator vE = thinEvt->vertices_end();
-
-    // Find next 1->1 vertex
-    for (; v != vE; ++v) {
-      if ((*v)->particles_in_size() != 1) continue;
-      if ((*v)->particles_out_size() != 1) continue;
-      pin = *((*v)->particles_in_const_begin());
-      pout = *((*v)->particles_out_const_begin());
-      if (pin->pdg_id() != pout->pdg_id()) continue;
-      // Sherpa does 1-body decay of incoming protons :-(
-      if (pin == beams[0] || pin == beams[1]) continue;
-      HepMC::GenVertex* pvtx = pin->production_vertex();
-      if (!pvtx || HepMC::uniqueID(pvtx) == 0) {
-        ATH_MSG_DEBUG("1->1: missing pvtx for vertex " << HepMC::uniqueID(*v));
-        ++m_missCount;
-        continue;
-      }
-
-      moreV1 = true;
-      vtx11 = (*v);
-      if (doDebug) ATH_MSG_DEBUG("One-body " << HepMC::uniqueID(pin) << " " << HepMC::uniqueID(vtx11) << " " << HepMC::uniqueID(pout));
-      break;
-    }
-    if (moreV1) {
-      HepMC::GenVertex* pvtx = pin->production_vertex();
-      pvtx->remove_particle(pin);
-      pvtx->add_particle_out(pout);
-      vtx11->remove_particle(pin);
-      vtx11->remove_particle(pout);
-      thinEvt->remove_vertex(vtx11);
-      delete pin;
-      delete vtx11;
-      if (doDebug) ATH_MSG_DEBUG("One-body new pvtx " << HepMC::uniqueID(pvtx) << " " << pvtx->particles_in_size() << " " << pvtx->particles_out_size());
-    }
-  }
-
-#endif
   /////////////////////////////////////
   // Remove dangling particles/vertices
   /////////////////////////////////////
@@ -1271,7 +730,6 @@ StatusCode CompactHardTruth::execute() {
     deleteP.clear();
     deleteV.clear();
 
-#ifdef HEPMC3
     for (auto badv:  thinEvt->vertices()) {
       if (!badv) continue;
       if (badv->particles_in().size() != 1 || badv->particles_out().size() != 0) continue;
@@ -1300,54 +758,6 @@ StatusCode CompactHardTruth::execute() {
     for (unsigned int i = 0; i < removeV.size(); ++i) {
       thinEvt->remove_vertex(removeV[i]);
     }
-//AV: HepMC3 uses smart pointers
-#else
-    HepMC::GenEvent::vertex_iterator badv = thinEvt->vertices_begin();
-    HepMC::GenEvent::vertex_iterator badvE = thinEvt->vertices_end();
-
-    for (; badv != badvE; ++badv) {
-      if (!(*badv)) continue;
-      if ((*badv)->particles_in_size() != 1 || (*badv)->particles_out_size() != 0) continue;
-      HepMC::GenVertex::particles_in_const_iterator pitr = (*badv)->particles_in_const_begin();
-      HepMC::GenParticle* pp = *pitr;
-      if (pp->production_vertex()) continue;
-      double pt = pp->momentum().perp();
-      if (pt > m_danglePtMax) m_danglePtMax = pt;
-      ++m_dangleFound;
-      if (pt > m_danglePtCut) continue;
-      if (doDebug) ATH_MSG_DEBUG("1->0: removing pp,badv,pt " << pp << " " << *badv << " " << pt);
-      removePV.emplace_back(*badv, pp);
-      deleteP.push_back(pp);
-      removeV.push_back(*badv);
-      deleteV.push_back(*badv);
-      ++m_dangleRemoved;
-    }
-
-    // Actually implement changes -- remove particles from vertices
-    for (unsigned int i = 0; i < removePV.size(); ++i) {
-      HepMC::GenVertex* v = removePV[i].first;
-      HepMC::GenParticle* p = removePV[i].second;
-      v->remove_particle(p);
-    }
-
-    // Actually implement changes -- remove vertices
-    for (unsigned int i = 0; i < removeV.size(); ++i) {
-      if (!thinEvt->remove_vertex(removeV[i])) { ATH_MSG_WARNING("1->0: Failed to remove vertex " << removeV[i]); }
-    }
-
-    // Delete removed particles/vertices
-    deleteV.sort();
-    deleteV.unique();
-    for (dvItr = deleteV.begin(); dvItr != deleteV.end(); ++dvItr) {
-      if (*dvItr) delete (*dvItr);
-    }
-
-    deleteP.sort();
-    deleteP.unique();
-    for (dpItr = deleteP.begin(); dpItr != deleteP.end(); ++dpItr) {
-      if (*dpItr) delete (*dpItr);
-    }
-#endif
   } // end m_danglePtCut
 
   /////////////////////////
@@ -1378,47 +788,15 @@ StatusCode CompactHardTruth::execute() {
 // Total cluster FourVectors
 
 HepMC::FourVector CompactHardTruth::vtxInMom(HepMC::ConstGenVertexPtr v) {
-#ifdef HEPMC3
   HepMC::FourVector ret(0.0,0.0,0.0,0.0);
   for (auto p: v->particles_in()) ret+=p->momentum();
   return ret;
-#else
-  double px = 0;
-  double py = 0;
-  double pz = 0;
-  double e = 0;
-  HepMC::GenVertex::particles_in_const_iterator it = v->particles_in_const_begin();
-  HepMC::GenVertex::particles_in_const_iterator itE = v->particles_in_const_end();
-  for (; it != itE; ++it) {
-    px += (*it)->momentum().px();
-    py += (*it)->momentum().py();
-    pz += (*it)->momentum().pz();
-    e += (*it)->momentum().e();
-  }
-  return HepMC::FourVector(px, py, pz, e);
-#endif
 }
 
 HepMC::FourVector CompactHardTruth::vtxOutMom(HepMC::ConstGenVertexPtr v) {
-#ifdef HEPMC3
   HepMC::FourVector ret(0.0,0.0,0.0,0.0);
   for (auto p: v->particles_out()) ret+=p->momentum();
   return ret;
-#else
-  double px = 0;
-  double py = 0;
-  double pz = 0;
-  double e = 0;
-  HepMC::GenVertex::particles_out_const_iterator it = v->particles_out_const_begin();
-  HepMC::GenVertex::particles_out_const_iterator itE = v->particles_out_const_end();
-  for (; it != itE; ++it) {
-    px += (*it)->momentum().px();
-    py += (*it)->momentum().py();
-    pz += (*it)->momentum().pz();
-    e += (*it)->momentum().e();
-  }
-  return HepMC::FourVector(px, py, pz, e);
-#endif
 }
 
 } // namespace DerivationFramework

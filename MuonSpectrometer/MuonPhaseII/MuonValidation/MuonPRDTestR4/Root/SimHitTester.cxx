@@ -4,6 +4,8 @@
 
 #include "MuonPRDTestR4/SimHitTester.h"
 #include "StoreGate/ReadHandle.h"
+
+#include <format>
 namespace MuonValR4{
     SimHitTester::SimHitTester(MuonTesterTree& tree,
                                const std::string& inContainer,
@@ -11,7 +13,7 @@ namespace MuonValR4{
                                MSG::Level msgLvl):
         TesterModuleBase{tree, inContainer, msgLvl},
         m_key{inContainer},
-        m_collName{ActsTrk::to_string(detType)+"SimHits"} {
+        m_collName{std::format("{:}SimHits", detType)} {
       switch (detType) {
          case ActsTrk::DetectorType::Mdt:
             m_identifier = std::make_shared<MdtIdentifierBranch>(tree, m_collName);
@@ -29,7 +31,7 @@ namespace MuonValR4{
             m_identifier = std::make_shared<MmIdentifierBranch>(tree, m_collName);
             break;
         default:
-            ATH_MSG_WARNING("Unsupported detector type "<<ActsTrk::to_string(detType));
+            ATH_MSG_WARNING("Unsupported detector type "<<detType<<".");
       };
 
     }

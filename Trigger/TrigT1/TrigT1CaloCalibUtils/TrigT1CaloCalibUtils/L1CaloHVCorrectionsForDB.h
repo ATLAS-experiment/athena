@@ -36,7 +36,7 @@ class L1CaloHVCorrectionsForDB : public AthAlgorithm
     virtual ~L1CaloHVCorrectionsForDB();
 
     StatusCode initialize();
-    StatusCode execute();
+    StatusCode execute(const EventContext& ctx);
     StatusCode finalize();
 
  private:

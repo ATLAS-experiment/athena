@@ -21,12 +21,14 @@ namespace MuonR4::SegmentFit{
     using HitLayerVec = SpacePointPerLayerSplitter::HitLayVec;
 
     SeederStateBase::SeederStateBase(const SegmentSeed* parentSeed,
-                                    const ISpacePointCalibrator* calibrator,
-                                    const bool calibratePull):
+                                     const ISpacePointCalibrator* calibrator, 
+                                     const bool calibratePull,
+                                     SeedSelector_t&& seedSelector):
         SpacePointPerLayerSplitter{parentSeed->getHitsInMax()},
         m_parent{parentSeed}, 
-        m_calibrator{calibrator}, 
-        m_calibratePull{calibratePull} {}
+        m_calibrator{calibrator},
+        m_calibratePull{calibratePull},
+        m_selector{std::move(seedSelector)} {}
 
     const SegmentSeed* SeederStateBase::parent() const { return m_parent; }
 
@@ -78,6 +80,11 @@ namespace MuonR4::SegmentFit{
     bool SeederStateBase::stopSeeding(const std::size_t lowerLayer, 
                                         const std::size_t upperLayer) const {
         return lowerLayer >= firstLayerFrom2ndMl() || lowerLayer >= upperLayer;
+    }
+
+    bool SeederStateBase::goodForSeeding(const Amg::Vector3D& tangentPos,
+                                         const Amg::Vector3D& tangentDir) const {
+        return !m_selector || m_selector(tangentPos, tangentDir);
     }
    
 }

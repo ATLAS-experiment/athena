@@ -16,6 +16,11 @@
 
 namespace ActsTrk {
 
+template <typename T_RDO_Container>
+struct RDOContainerTraits {
+   using PerModuleRDOs = typename T_RDO_Container::base_value_type;
+};
+
 // forward declaration (defintion  Tracking/Acts/ActsDataPreparation/src/details/CellContainer.h)
 template <typename coordinates_t, std::size_t NDIM, std::unsigned_integral index_t>
 struct CellContainer;
@@ -24,7 +29,7 @@ template <typename T_RDO_Container, typename T_OutputContainer, std::size_t NDIM
 class ICellClusteringToolBase : virtual public IAlgTool {
 public:
   using RDOContainer = T_RDO_Container;
-  using RawDataCollection = typename RDOContainer::base_value_type;
+  using RawDataCollection = RDOContainerTraits<T_RDO_Container>::PerModuleRDOs;
   using ClusterContainer = T_OutputContainer;
 
   using CellContainer = ActsTrk::CellContainer<coordinate_t,NDIM,std::uint16_t>;

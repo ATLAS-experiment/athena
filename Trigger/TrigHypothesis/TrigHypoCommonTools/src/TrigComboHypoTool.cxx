@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigComboHypoTool.h"
@@ -126,7 +126,7 @@ StatusCode TrigComboHypoTool::initialize()
 }
 
 
-StatusCode TrigComboHypoTool::decide(Combo::LegDecisionsMap& passingLegs, const EventContext& /*context*/) const {
+StatusCode TrigComboHypoTool::decide(Combo::LegDecisionsMap& passingLegs, const EventContext& context) const {
 
   // if no combinations passed, then exit 
   if (passingLegs.empty()) {
@@ -267,7 +267,7 @@ StatusCode TrigComboHypoTool::decide(Combo::LegDecisionsMap& passingLegs, const 
       }
 
       try {
-        lastDecision = executeAlgStep(combinationToCheck, *iVarInfo, values);
+        lastDecision = executeAlgStep(context, combinationToCheck, *iVarInfo, values);
         ATH_MSG_DEBUG("Combination " << (iterations - 1) << " decided to be " <<  (lastDecision ? "passing" : "failing") << " " << iVarInfo->varTag);
       } catch (std::exception& e) {
         ATH_MSG_ERROR(e.what());
@@ -346,11 +346,11 @@ StatusCode TrigComboHypoTool::decide(Combo::LegDecisionsMap& passingLegs, const 
 }
 
 
-bool TrigComboHypoTool::executeAlgStep(const Combination& combination, const VarInfo& varInfo, std::vector<float> &vals) const {
+bool TrigComboHypoTool::executeAlgStep(const EventContext& context, const Combination& combination, const VarInfo& varInfo, std::vector<float> &vals) const {
   ATH_MSG_DEBUG("Executing selection " << varInfo.index << " of " << m_varInfo_vec.size() << ": " << varInfo.rangeStr());
 
   std::pair<KineInfo,KineInfo> kinepair;
-  if(!fillPairKinematics(kinepair, combination, varInfo)) {
+  if(!fillPairKinematics(context, kinepair, combination, varInfo)) {
     ATH_MSG_ERROR("Failed to extract kinematics of feature pair!");
     return false;
   }
@@ -442,7 +442,7 @@ bool TrigComboHypoTool::fillLegDecisions_diffLeg(std::pair<Combo::LegDecision,Co
 }
 
 
-bool TrigComboHypoTool::fillPairKinematics(std::pair<KineInfo,KineInfo>& kinepair, const Combination& combination, const VarInfo& varInfo) const {
+bool TrigComboHypoTool::fillPairKinematics(const EventContext& context, std::pair<KineInfo,KineInfo>& kinepair, const Combination& combination, const VarInfo& varInfo) const {
     ATH_MSG_VERBOSE("  Decision objects available = "<< combination);
     // Check that there are enough features
     size_t nFeatures(combination.size());
@@ -454,12 +454,12 @@ bool TrigComboHypoTool::fillPairKinematics(std::pair<KineInfo,KineInfo>& kinepai
     if (varInfo.legsAreEqual) {fillLegDecisions_sameLeg(legpair,combination,varInfo.legA);}
     else {fillLegDecisions_diffLeg(legpair,combination,varInfo.legA,varInfo.legB);}
     ATH_MSG_VERBOSE("    Fill leg A kinematics");
-    if(!fillKineInfo(kinepair.first,legpair.first,varInfo.legA_is_MET)) {
+    if(!fillKineInfo(context,kinepair.first,legpair.first,varInfo.legA_is_MET)) {
       ATH_MSG_ERROR("Failed to extract requisite kinematic info from leg " << varInfo.legA << "!");
       return false;
     }
     ATH_MSG_VERBOSE("    Fill leg B kinematics");
-    if(!fillKineInfo(kinepair.second,legpair.second,varInfo.legB_is_MET)) {
+    if(!fillKineInfo(context,kinepair.second,legpair.second,varInfo.legB_is_MET)) {
       ATH_MSG_ERROR("Failed to extract requisite kinematic info from leg " << varInfo.legB << "!");
       return false;
     }
@@ -467,10 +467,10 @@ bool TrigComboHypoTool::fillPairKinematics(std::pair<KineInfo,KineInfo>& kinepai
   }
 
 
-bool TrigComboHypoTool::fillKineInfo(TrigComboHypoTool::KineInfo& kinematics, Combo::LegDecision decision, bool isMET) const {
+bool TrigComboHypoTool::fillKineInfo(const EventContext& context, TrigComboHypoTool::KineInfo& kinematics, Combo::LegDecision decision, bool isMET) const {
   float eta, phi, pt;
   if (isMET) {
-    auto pLink = TrigCompositeUtils::findLink<xAOD::TrigMissingETContainer>( *decision.second, featureString() ).link;
+    auto pLink = TrigCompositeUtils::findLink<xAOD::TrigMissingETContainer>(context,  *decision.second, featureString() ).link;
     if (!pLink.isValid()){
       ATH_MSG_ERROR("link for MET not valid");
       return false;
@@ -480,7 +480,7 @@ bool TrigComboHypoTool::fillKineInfo(TrigComboHypoTool::KineInfo& kinematics, Co
     phi = metv.phi();
     pt  = metv.r();
   } else {
-    auto pLink = TrigCompositeUtils::findLink<xAOD::IParticleContainer>( *decision.second, featureString() ).link;
+    auto pLink = TrigCompositeUtils::findLink<xAOD::IParticleContainer>(context,  *decision.second, featureString() ).link;
     if (!pLink.isValid()){
       ATH_MSG_ERROR("link for IParticle not valid");
       return false;

@@ -564,7 +564,7 @@ StatusCode JetTagMonitorAlgorithm::fillHistograms( const EventContext& ctx ) con
 	// NO QUALITY (previously tight muons)
 	if (softMuonItr->muonType()!= xAOD::Muon::MuonType::Combined ||
       softMuonItr->author() == xAOD::Muon::Author::STACO) continue; //combined
-	if (softMuonItr->primaryTrackParticle()->d0() > 0.4) continue; // d0 cut < 0.4 mm
+	if (softMuonItr->trackParticle(xAOD::Muon::TrackParticleType::Primary)->d0() > 0.4) continue; // d0 cut < 0.4 mm
 	//this need to be done at jet level
 	SMTJets_dr = (jetItr->p4()).DeltaR(softMuonItr->p4());
 	if ( SMTJets_dr >= 0.4) continue; //jet muon DR < 0.4

@@ -1,12 +1,15 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef MUONRECTOOLINTERFACESR4_IROOTVISUALIZATIONSERVICE_H
 #define MUONRECTOOLINTERFACESR4_IROOTVISUALIZATIONSERVICE_H
 
 #include <GaudiKernel/IService.h>
 #include <cstdint>
-
+#include <string>
+#include <string_view>
+#include <array>
+#include <memory>
 class TObject;
 class EventContext;
 
@@ -98,7 +101,7 @@ namespace MuonValR4{
                      *  @param drawOpt: Option to be parsed to the draw command later
                      *                  (e.g. HIST) */
                     virtual void add(PrimitivePtr_t&& drawMe,
-                                    const std::string& drawOpt="") = 0;
+                                    std::string_view drawOpt="") = 0;
                     /** @brief Add a vector of TObjects to the ICanvasObject for later drawing
                      *         onto a TCanvas
                      *  @param drawMe: List of unique TObject pointers */

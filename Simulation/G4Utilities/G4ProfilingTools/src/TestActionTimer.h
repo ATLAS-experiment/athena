@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //////////////////////////////////////////////////////////////////
@@ -95,18 +95,18 @@ namespace G4UA
        First timers are by subdetector, second few are by particle
        These are not straightforward for the non-expert to interpret*/
     enum { eEMB, eEMEC, eFC1, eFC23, eFCO, eHEC, eCry, eLAr, eHCB,
-           ePre, eMu, ePx, eSct, eITkPix, eITkStrip, eSev, eTrt, eOther,
-           eElec, ePos, eGam, eNeut, eMax };
+      ePre, eMu, ePx, eSct, eITkPix, eITkStrip, eSev, eTrt, eHGTD, eOther,
+      eElec, ePos, eGam, eNeut, eMax };
 
   private:
 
-    Report m_report;
+    Report m_report{};
 
-    G4Timer* m_runTimer;                     //!< Timer for the entire run
-    G4Timer* m_eventTimer;                   //!< Timer for this event
-    double  m_eventTime;           //!< Double for storing this event
+    G4Timer* m_runTimer{};                     //!< Timer for the entire run
+    G4Timer* m_eventTimer{};                   //!< Timer for this event
+    double  m_eventTime{};           //!< Double for storing this event
 
-    std::vector<G4Timer*> m_timer;           //!< Vector of timers for each of the enum
+    std::vector<G4Timer*> m_timer{};           //!< Vector of timers for each of the enum
 
     double TimerSum(G4Timer* timer) const;   //!< Gets the appropriate time from the timer for adding to the sum
 

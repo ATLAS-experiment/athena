@@ -47,12 +47,12 @@
 + Control/SGTools
 + Control/StoreGate
 + Control/StoreGateBindings
++ Control/Valkyrie
 + Control/xAODRootAccess
 + Control/xAODRootAccessInterfaces
 #+ Database/.*
 + Database/APR/CollectionSvc
 + Database/APR/PersistencySvc
-+ Database/APR/RootCollection
 + Database/APR/RootStorageSvc
 + Database/APR/StorageSvc
 + Database/AthenaPOOL/AthenaPoolCnvSvc

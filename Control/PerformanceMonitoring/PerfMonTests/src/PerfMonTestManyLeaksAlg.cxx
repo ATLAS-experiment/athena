@@ -39,7 +39,7 @@ StatusCode ManyLeaksAlg::initialize()
   return StatusCode::SUCCESS;
 }
 
-StatusCode ManyLeaksAlg::execute()
+StatusCode ManyLeaksAlg::execute(const EventContext& /*ctx*/)
 {
   ATH_MSG_DEBUG ( "Executing " << name() << "..." ) ;
   

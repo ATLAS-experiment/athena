@@ -42,7 +42,7 @@ public:
     VertexDecoratorAlg(const std::string& name, ISvcLocator *pSvcLocator);
 
     StatusCode initialize() override;
-    StatusCode execute() override;
+    StatusCode execute(const EventContext& ctx) override;
 private:
 
     // Members for configurable properties
@@ -92,6 +92,15 @@ private:
     SG::WriteDecorHandleKey<xAOD::VertexContainer> m_mDecor_gnnScore{
       this, "GNNScoreKey", "HSGN2_phsvertex", "Score from HSGNN"};
       
+    SG::WriteDecorHandleKey<xAOD::VertexContainer> m_mDecor_nElectrons {
+      this, "decor_nElectrons", "nElectrons", ""};
+    SG::WriteDecorHandleKey<xAOD::VertexContainer> m_mDecor_nMuons {
+      this, "decor_nMuons", "nMuons", ""};
+    SG::WriteDecorHandleKey<xAOD::VertexContainer> m_mDecor_nJets {
+      this, "decor_nJets", "nJets", ""};
+    SG::WriteDecorHandleKey<xAOD::VertexContainer> m_mDecor_nPhotons {
+      this, "decor_nPhotons", "nPhotons", ""};
+
     SG::WriteHandleKey<xAOD::CompositeParticleContainer> m_multiPhotonsOutKey{
       this, "multiPhotonsOut", "MultiPhotons", "Output container for multi-photon node"};
     SG::WriteDecorHandleKey<xAOD::VertexContainer> m_multiPhotonLinksKey{

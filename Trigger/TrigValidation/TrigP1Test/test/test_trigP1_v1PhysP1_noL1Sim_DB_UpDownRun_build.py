@@ -3,7 +3,7 @@
 
 # art-description: Trigger athenaHLT test of DB upload (inlcuding duplicate), download and running.
 # art-type: build
-# art-include: main/Athena/x86_64-el9-gcc14-opt
+# art-include: main/Athena/x86_64-el9-gcc15-opt
 # art-include: 24.0/Athena
 
 from TrigValTools.TrigValSteering import Test, ExecStep, CheckSteps
@@ -40,7 +40,7 @@ moveJSON.prmon = False
 # - copy authentication files as can't be read on afs/eos, set TRIGGER_DB_ART to use these files
 # - copy TNS lookup file as not in ART container
 # - export missing ART username into env
-trigDBsetup =  '&& source /cvmfs/atlas.cern.ch/repo/sw/tdaq/tdaq/prod/installed/setup.sh \
+trigDBsetup =  '&& source ${TDAQ_INST_PATH}/setup.sh \
   && export TRIGGER_DB_ART=1 \
   && export EOS_MGM_URL=root://eosuser.cern.ch \
   && xrdcp root://eosuser.cern.ch//eos/user/t/trigcomm/.dbauth/run3/write/dblookup.xml . \

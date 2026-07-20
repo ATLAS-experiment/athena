@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #include "GeneratorFilters/TauFilter.h"
 #include "CLHEP/Vector/LorentzVector.h"
@@ -85,7 +85,7 @@ StatusCode TauFilter::filterFinalize() {
 
 CLHEP::HepLorentzVector TauFilter::sumDaughterNeutrinos(const HepMC::ConstGenParticlePtr& part ) {
   CLHEP::HepLorentzVector nu( 0, 0, 0, 0);
-  if ( ( (std::abs( part->pdg_id() ) == 12 ) || ( std::abs( part->pdg_id() ) == 14 ) || ( std::abs( part->pdg_id() ) == 16 )) 
+  if ( MC::isSMNeutrino(part)
        && MC::isPhysical(part) ) {
     nu.setPx(part->momentum().px());
     nu.setPy(part->momentum().py());
@@ -102,15 +102,14 @@ CLHEP::HepLorentzVector TauFilter::sumDaughterNeutrinos(const HepMC::ConstGenPar
 }
 
 
-StatusCode TauFilter::filterEvent() {
+StatusCode TauFilter::filterEvent(const EventContext& ctx) {
   // Get random number engine
   CLHEP::HepRandomEngine* rndm{};
   if(m_HasTightRegion) {
-    const EventContext& ctx = Gaudi::Hive::currentContext();
     rndm = this->getRandomEngine(name(), ctx);
     if (!rndm) {
       ATH_MSG_ERROR("Failed to retrieve random number engine for TauFilter");
-      setFilterPassed(false);
+      setFilterPassed(false, ctx);
       return StatusCode::SUCCESS;
     }
   }
@@ -130,15 +129,15 @@ StatusCode TauFilter::filterEvent() {
   int ntauhad_tight = 0;
   double weight = 1;
 
-  for (const HepMC::GenEvent* genEvt : *events_const()) {
+  for (const HepMC::GenEvent* genEvt : *events_const(ctx)) {
     int eventNumber = genEvt->event_number();
 
     if(m_filterEventNumber==1 && (eventNumber%2)==0) {
-      setFilterPassed(false);
+      setFilterPassed(false, ctx);
       return StatusCode::SUCCESS;
     }
     else if(m_filterEventNumber==2 && (eventNumber%2)==1) {
-      setFilterPassed(false);
+      setFilterPassed(false, ctx);
       return StatusCode::SUCCESS;
     }
     
@@ -163,11 +162,11 @@ StatusCode TauFilter::filterEvent() {
         for ( const auto& beg: *(tau->end_vertex()) ) {
           if ( (beg)->production_vertex() != tau->end_vertex() ) continue; 
          
-          else if ( std::abs( (beg)->pdg_id() ) == 12 ) tauType = 1;   //Tau decays into an electron
+          else if ( std::abs( (beg)->pdg_id() ) == MC::NU_E ) tauType = 1;   //Tau decays into an electron
          
-          else if ( std::abs( (beg)->pdg_id() ) == 14 ) tauType = 2;   //Tau decays into an muon
+          else if ( std::abs( (beg)->pdg_id() ) == MC::NU_MU ) tauType = 2;   //Tau decays into an muon
                   	
-          else if ( std::abs( (beg)->pdg_id() ) == 15 ) tauType = 11;  //Tau radiates a particle and decays into another tau
+          else if ( MC::isTau(beg) ) tauType = 11;  //Tau radiates a particle and decays into another tau
         
 				}
 
@@ -309,7 +308,7 @@ StatusCode TauFilter::filterEvent() {
     // Get MC event collection for setting weight
     const McEventCollection* mecc = 0;
     if ( evtStore()->retrieve( mecc ).isFailure() || !mecc ){
-      setFilterPassed(false);
+      setFilterPassed(false, ctx);
       ATH_MSG_ERROR("Could not retrieve MC Event Collection - weight might not work");
       return StatusCode::SUCCESS;
     }
@@ -331,7 +330,7 @@ StatusCode TauFilter::filterEvent() {
 	
 	if (m_ReverseFilter) pass = !pass; //If reverse filter is active, flip the truth value of pass
 	
-	setFilterPassed(pass);
+	setFilterPassed(pass, ctx);
   
   return StatusCode::SUCCESS;
 }

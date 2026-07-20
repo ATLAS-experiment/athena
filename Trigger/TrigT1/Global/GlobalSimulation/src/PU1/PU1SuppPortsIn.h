@@ -32,7 +32,7 @@ namespace GlobalSim {
  */
 struct PU1SuppPortsIn {
   /// 256-bit TOB stored as four 64-bit unsigned integers
-  std::array<uint64_t, 4> m_I_PU1TobData;
+  std::array<uint64_t, 4> m_I_PU1TobData{};
 
   /// Rho value as a 16-bit initialized unsigned integer
   uint16_t m_rho{0};

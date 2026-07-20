@@ -82,11 +82,11 @@ StatusCode TileBeamElemToCell::initialize()
 //* Execution
 //****************************************************************************
 
-StatusCode TileBeamElemToCell::execute()
+StatusCode TileBeamElemToCell::execute(const EventContext& ctx)
 {
 
   // create new container
-  SG::WriteHandle<CaloCellContainer> cellContainer(m_cellContainerKey);
+  SG::WriteHandle<CaloCellContainer> cellContainer(m_cellContainerKey, ctx);
 
   /* Register the set of TileCells to the event store. */
   ATH_CHECK( cellContainer.record(std::make_unique<CaloCellContainer>()) );
@@ -94,7 +94,7 @@ StatusCode TileBeamElemToCell::execute()
   //**
   //* Get TileBeamElems
   //**
-  SG::ReadHandle<TileBeamElemContainer> beamElemContainer(m_beamElemContainerKey);
+  SG::ReadHandle<TileBeamElemContainer> beamElemContainer(m_beamElemContainerKey, ctx);
 
   if(!beamElemContainer.isValid()) {
    ATH_MSG_WARNING( "No signal from beam elements; container '"

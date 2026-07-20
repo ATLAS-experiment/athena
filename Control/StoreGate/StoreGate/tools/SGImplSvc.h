@@ -230,18 +230,20 @@ public:
 
   //@}
 
+  using IProxyDict::proxy;
+
   /// get proxy for a given data object address in memory
   virtual SG::DataProxy* proxy(const void* const pTransient) const override final;
 
   /// get default proxy with given id. Returns 0 to flag failure
   /// Deprecated for the event store.
-  virtual SG::DataProxy* proxy(const CLID& id) const final;
+  SG::DataProxy* proxy(const CLID& id) const;
 
   /// get proxy with given id and key. Returns 0 to flag failure
   virtual SG::DataProxy* proxy(const CLID& id, const std::string& key) const override final;
   /// get proxy with given id and key. Returns 0 to flag failure
   /// (overload to prevent a char* to be interpreted as a bool.)
-  virtual SG::DataProxy* proxy(const CLID& id, const char* key) const final
+  SG::DataProxy* proxy(const CLID& id, const char* key) const
   { return this->proxy(id, std::string(key)); }
 
   /// Raw addition of a proxy to the store.
@@ -286,14 +288,14 @@ public:
   //@{
   /// get default proxy with given id, optionally checking validity.
   ///  @returns 0 to flag failure
-  virtual SG::DataProxy* proxy(const CLID& id, bool checkValid) const;
+  SG::DataProxy* proxy(const CLID& id, bool checkValid) const;
   /// get proxy with given id and key, optionally checking validity.
   ///  @returns 0 to flag failure
-  virtual SG::DataProxy* proxy(const CLID& id, const std::string& key, bool checkValid) const;
+  SG::DataProxy* proxy(const CLID& id, const std::string& key, bool checkValid) const;
   /// get proxy with given id and key, optionally checking validity.
   ///  @returns 0 to flag failure
   /// (overload to prevent a char* to be interpreted as a bool.)
-  virtual SG::DataProxy* proxy(const CLID& id, const char* key, bool checkValid) const
+  SG::DataProxy* proxy(const CLID& id, const char* key, bool checkValid) const
   { return this->proxy(id, std::string(key), checkValid); }
 
   /// return the list of all current proxies in store

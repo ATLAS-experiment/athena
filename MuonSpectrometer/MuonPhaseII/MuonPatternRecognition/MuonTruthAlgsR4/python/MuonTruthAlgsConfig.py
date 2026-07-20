@@ -99,10 +99,14 @@ def SimHitToTruthPartAlgCfg(flags, useSDO = False):
 
 def TruthHitSummaryAlgCfg(flags, name="MuonTruthHitSummaryAlg", **kwargs):
     result = ComponentAccumulator()
-    from MuonTrackFindingAlgs.TrackFindingConfig import TrackSummaryToolCfg
+    from MuonTrackFindingAlgs.TrackFindingConfig import TrackSummaryToolCfg, TrackSummaryLockCfg
     kwargs.setdefault("SummaryTool", result.popToolsAndMerge(TrackSummaryToolCfg(flags,  
                                                                 fillHoles=False, fillOutliers=False, 
                                                                 recomputeSegment =False)))
+    ### Schedule 
+    kwargs.setdefault("ExtraOutputs", [('xAOD::TruthParticleContainer', 'MuonTruthParticles.truthHitSummary')])
+    result.merge(TrackSummaryLockCfg(flags, inContainer="MuonTruthParticles", fillHoles = False, 
+                                            fillOutliers = False, ExtraInputs = kwargs["ExtraOutputs"]))
     the_alg = CompFactory.MuonR4.TruthHitSummaryAlg(name, **kwargs)
     result.addEventAlgo(the_alg, primary = True)
     return result
@@ -155,6 +159,17 @@ def MuonTruthSegConnectorAlgCfg(flags, name="MuonTruthSegConnector",**kwargs):
     result.addEventAlgo(the_alg, primary = True)
     return result
 
+
+def MuonToTruthAssocAlgCfg(flags, name="MuonToTruthMatchingAlg", **kwargs):
+    result = ComponentAccumulator()
+    if not flags.Muon.setupTruthAlgorithms:
+        return result
+    tracks = []
+    if flags.Reco.EnableTracking: tracks +=["InDetTrackParticles"]
+    kwargs.setdefault("TrackKeys", tracks)
+    the_alg = CompFactory.MuonR4.MuonToTruthAssocAlg(name, **kwargs)
+    result.addEventAlgo(the_alg, primary = True)
+    return result
 
 # Fragment for algs producing (and decorating) truth objects
 def MuonTruthObjCreatorsCfg(flags, useSDO=True):

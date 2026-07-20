@@ -198,7 +198,7 @@ class RatesAnalysisAlg: public ::AthAnalysisAlgorithm {
 
  private: 
 
-  virtual StatusCode execute(); //!< In first call - register all triggers. Then load event weighting parameters, fill trigger decisions, compute group rates.
+  virtual StatusCode execute(const EventContext& ctx); //!< In first call - register all triggers. Then load event weighting parameters, fill trigger decisions, compute group rates.
   virtual StatusCode finalize(); //!< Print rates
 
   StatusCode populateTriggers(); //!< Register all triggers to emulate. This is actually done at the start of the event loop such that the TDT has access to the configuration.

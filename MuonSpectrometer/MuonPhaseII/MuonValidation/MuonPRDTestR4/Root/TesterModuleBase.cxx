@@ -1,10 +1,11 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonPRDTestR4/TesterModuleBase.h"
 #include "GeoModelKernel/throwExcept.h"
 #include "StoreGate/ReadHandle.h"
+#include "StoreGate/ReadCondHandle.h"
 #include "StoreGate/StoreGateSvc.h"
 
 namespace MuonValR4 {
@@ -20,11 +21,11 @@ namespace MuonValR4 {
         return m_detMgr;
     }
     const ActsTrk::GeometryContext& TesterModuleBase::getGeoCtx(const EventContext& ctx) const {
-        SG::ReadHandle handle{m_geoCtxKey, ctx};
-        if (!handle.isValid()) {
+        const ActsTrk::GeometryContext* geoCtx{nullptr};
+        if (!SG::get(geoCtx, m_geoCtxKey, ctx).isSuccess()) {
             THROW_EXCEPTION("Failed to retrieve "<<m_geoCtxKey.fullKey());
         }
-        return *handle;
+        return *geoCtx;
     }
 
     bool TesterModuleBase::init() {

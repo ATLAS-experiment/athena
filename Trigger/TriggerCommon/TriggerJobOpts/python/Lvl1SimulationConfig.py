@@ -29,8 +29,8 @@ def Lvl1SimulationCfg(flags, seqName = None):
 
     if flags.Trigger.enableL0Muon:
         acc.addSequence(seqAND('L0MuonSimSeq'), parentName='L1SimSeq')
-        from TriggerJobOpts.L0MuonSimulationConfig import L0MuonSimulationCfg
-        acc.merge(L0MuonSimulationCfg(flags), sequenceName='L0MuonSimSeq')
+        from TriggerJobOpts.Lvl1MuonSimulationConfig import Lvl1MuonSimulationCfg
+        acc.merge(Lvl1MuonSimulationCfg(flags), sequenceName='L0MuonSimSeq')
     elif flags.Trigger.enableL1MuonPhase1:
         acc.addSequence(seqAND('L1MuonSimSeq'), parentName='L1SimSeq')
         from TriggerJobOpts.Lvl1MuonSimulationConfig import Lvl1MuonSimulationCfg
@@ -42,10 +42,10 @@ def Lvl1SimulationCfg(flags, seqName = None):
         acc.merge(L1TopoSimulationCfg(flags), sequenceName='L1TopoSimSeq')
 
     if flags.Trigger.L1.doGlobal:
-        globalSimSeqName = 'L0GlobalSimSeq'
+        globalSimSeqName = 'L1GlobalSimSeq'
         acc.addSequence(parOR(globalSimSeqName), parentName='L1SimSeq')
-        from GlobalSimulation.GlobalL1TopoSimulation import GlobalL1TopoSimulationCfg
-        acc.merge(GlobalL1TopoSimulationCfg(flags), sequenceName=globalSimSeqName)
+        from GlobalSimulation.GlobalSimulationConfig import GlobalSimulationCfg
+        acc.merge(GlobalSimulationCfg(flags), sequenceName=globalSimSeqName)
 
     if flags.Trigger.doZDC:
         acc.addSequence(seqAND('L1ZDCSimSeq'),parentName='L1SimSeq')

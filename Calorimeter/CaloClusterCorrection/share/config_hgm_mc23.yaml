@@ -1,0 +1,235 @@
+# CONFIGURATION FILE FOR HGM MODEL
+#
+# Skeleton file: config_hgm_example.yaml
+#
+# Comments:
+# This file is ideally used before the HGM training as the features and target definition, hyperparameters and prediction type.
+# Nothing should be changed within the HGM definition if the basic architecture is unchanged.
+# - To be implemented: 
+#       - Feature & target definition 
+#       - After the HGM training, the 'parameter' key in the feature dict is overwritten by the preprocessing scales
+#         (not relevant for pytorch, but necessary for athena use)
+#
+#
+#
+# Comments March 3, 2025:
+#
+# Function names:
+# ‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐
+#
+# The present tool implementation in c++ knows the following functions:
+#
+# c++ name       | parameters                       | Comment
+# ‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐+‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐+‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐
+# Linear         | [offset,slope]                   | linear transformation offset+slope*x
+# Standard       | [mean,standard_dev]              | standardization (x‐mean)/standard_dev
+# Log            | []                               | ln(x)
+# LogTen         | []                               | log_10(x)
+# CubeRoot       | []                               | |x|^1/3*sign(x)
+# LogStandard    | [mean,standard_dev]              | ln standardization (ln(x)‐mean)/standard_dev (mean,standard_dev from ln(x) distribution in training sample)
+# LogTenStandard | [min,epsilon,mean,standard_dev]  | log_10 standardization (log_10(x)‐mean)/standard_dev (mean,standard_dev from log_10(x) distribution in training sample)
+#                                                       if xmin<=0: x=x-xmin+epsilon; else: xmin=0; epsilon=0
+# MaxAbsolute    | [max_value]                      | x/|max_value|
+#
+# python or c++ syntax could be used as well. It is easy to build dictionaries in c++.
+#
+# Feature data descriptors:
+# ‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐
+#
+# I think the default yaml structure to describe a feature could be
+# <feature_name>:
+# name_pt: <name> #name in pytorch
+# unit: None           ‐ a unit specifier using Gaudi standard symbols https://acode‐browser1.usatlas.bnl.gov/lxr/source/Gaudi/GaudiKernel/include/GaudiKernel/SystemOfUnits.h
+#                           (combinations using math operators are possible)
+# preprocessing        ‐ a sequence of pre‐processor function names (see above). In principle c++ or python synatx could be used, but then we need a convention for variable and
+#                           parameter names, like x = variable and { p } = { p0, p1, ... } for parameters (without the {}).
+# parameter: []        ‐ the above men tioned set of parameteres { p }, like [ <p0>, <p1>, ... ]; can be empty (use [] in this case, or leave open?)
+# index: 0             ‐ position (row #) in input tensor
+
+
+
+
+name: config_hgm_mc23
+
+data:
+  truth: &Truth
+    r_e_calculated:
+      trained_name: r_ems
+      preprocessing: 
+        processors: [ LogTen ]
+  features: &Features
+    clusterE:
+      trained_name: e_ems
+      kine_name: Energy
+      unit: GeV
+      position: 0
+      preprocessing: 
+        processors: [ LogTenStandard ]
+        parameters: [ 0, 0, 0.5766209774423007, 0.6339320738741636 ]
+        shapes:     [ 4 ]     
+    clusterEta:
+      trained_name: y_ems
+      kine_name: Rapidity
+      position: 1   
+      preprocessing: 
+        processors: [ Standard ]
+        parameters: [ 0.007599881823824373, 1.1447404342370562 ]
+        shapes:     [ 2 ] 
+    cluster_SIGNIFICANCE:
+      trained_name: m_sig
+      position: 2
+      preprocessing: 
+        processors: [ LogTenStandard ]
+        parameters: [ 0, 0, 0.7883709531312437, 0.47747859619047434 ]
+        shapes:     [ 4 ]     
+    cluster_time:
+      trained_name: t_ems
+      unit: ns
+      position: 3 
+      preprocessing: 
+        processors: [ MaxAbsolute ]
+        parameters: [ 256.52423095703125]
+        shapes: [ 1 ]
+    cluster_SECOND_TIME:
+      trained_name: m_tim
+      unit: ns*ns
+      position: 4
+      preprocessing: 
+        processors: [ LogTenStandard ]
+        parameters: [ 0.0, 1e-10, 0.40680159158553814, 2.435533633931277 ]
+        shapes: [ 4 ]
+    cluster_CENTER_LAMBDA:
+      trained_name: m_lam
+      unit: mm
+      position: 5
+      preprocessing: 
+        processors: [ LogTenStandard ]
+        parameters: [ 0, 0, 2.430847993361648, 0.4515173263914026 ]
+        shapes: [ 4 ]
+    cluster_CENTER_MAG:  
+      trained_name: m_cog
+      unit: mm
+      position: 6
+      preprocessing: 
+        processors: [ Standard ]
+        parameters: [ 2994.807292010656, 1074.3775155747257 ]
+        shapes: [ 2 ]
+    cluster_ENG_FRAC_EM_INCL: #new feature!!!
+      trained_name: m_fem
+      position: 7
+      preprocessing:
+        processors: [ MinMaxNorm ] 
+        parameters: [ -1123.34521484375, 19768.548828125 ]
+        shapes: [ 2 ]
+    cluster_FIRST_ENG_DENS:
+      trained_name: m_rho
+      unit: GeV/mm3
+      position: 8
+      preprocessing: 
+        processors: [ LogTenStandard ]
+        parameters: [ 0, 0, -6.140204666325937, 0.6693527371070433]
+        shapes: [ 4 ]
+    cluster_LONGITUDINAL:
+      trained_name: m_lon
+      position: 9
+      preprocessing: 
+        processors: [ Standard ]
+        parameters: [ 0.7185987759662663, 0.20238991143119345 ]
+        shapes: [ 2 ]
+    cluster_LATERAL:
+      trained_name: m_lat
+      position: 10
+      preprocessing: 
+        processors: [ Standard ]
+        parameters: [ 0.775975650415203, 0.18266410782555784 ]
+        shapes: [ 2 ]
+    cluster_PTD:
+      trained_name: m_ptd
+      position: 11
+      preprocessing: 
+        processors: [ Standard ]
+        parameters: [ 0.3540573500181857, 0.1400028164349145]
+        shapes: [ 2 ]
+    cluster_ISOLATION:
+      trained_name: m_iso
+      position: 12
+      preprocessing: 
+        processors: [ Standard ]
+        parameters: [ 0.6706663459991491, 0.23618198196980586]
+        shapes: [ 2 ]
+    nPrimVtx:
+      trained_name: p_npv
+      position: 13
+      preprocessing: 
+        processors: [ Standard ]
+        parameters: [ 28.834555764705883, 8.28773220767808 ]
+        shapes: [ 2 ]
+    avgMu:
+      trained_name: p_mmu
+      position: 14
+      preprocessing: 
+        processors: [ Standard ]
+        parameters: [ 50.24665173830045, 13.864408496482337]
+        shapes: [ 2 ]
+
+
+model: &Model
+    model_name: hgm-mc23-85e5-2e6-5e6
+    onnx_path: CaloClusterCorrection/hgm_mc23_85e5-2e6-5e6.onnx
+    
+    init_args:
+        init_args: 
+        num_layers: 4
+        layers: [ 64, 64, 64, 64 ]
+        layers_activation: [ ReLU, ReLU, ReLU, ReLU ]
+        num_mixtures: &NumMixtures 3
+        num_nodes: 64
+        activation: ReLU 
+        in_names: [features, layer0, activation1, layer1, activation2, layer2, activation3, layer3, activation4, layer4]
+        
+    train_args:
+        loss_function: Heteroscedastic Gaussian mixture  
+        optimizer: Adam
+        num_epochs: 150
+        batch_size_trn: 4096
+        batch_size_tst: 512
+        learning_rate: 0.0001
+        lr_milestones: [25, 100]
+        val_every: 2
+        save_every: 25
+        weight_decay: 0
+
+    data_args:
+        mc_release: mc23
+        data_size_trn: 8500000
+        data_size_val: 2000000
+        data_size_tst: 5000000
+        batch_idxs: []
+    output:
+        mus:
+            trained_name: means
+            description: Means of the Gaussian Mixture (log10 space)
+            shape: *NumMixtures
+        sigmas:
+            trained_name: sigmas
+            converters: [Exponential]
+            description: Standard deviations of the Gaussian Mixture (log10 space)
+            shape: *NumMixtures
+        alphas:
+            trained_name: alphas
+            description: Weights of the Gaussian Mixture
+            shape: *NumMixtures
+
+   
+    prediction:
+        mode:
+            name: mode with max LH
+            name_class: HGMPrediction
+            postprocessing: [MeanValueFromLogMean]
+            scan: Linear
+            range_fractions: [0.9,1.1]
+            nstep: 1000
+        sigma_syst:
+            name: systematic uncertainty prediction
+            name_class: HGMPrediction
+            postprocessing: [StdDevFromLogVariance]

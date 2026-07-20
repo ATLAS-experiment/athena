@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -59,7 +59,7 @@ StatusCode InDetGlobalLRTMonAlg::fillHistograms( const EventContext& ctx ) const
   ATH_MSG_DEBUG("Filling InDetGlobalLRTMonAlg");
   
   // For histogram naming
-  auto lrtGroup = getGroup("LRT");
+  const auto & lrtGroup = getGroup("LRT");
   
   int lb       = GetEventInfo(ctx)->lumiBlock();
   auto lb_m    = Monitored::Scalar<int>( "m_lb", lb );

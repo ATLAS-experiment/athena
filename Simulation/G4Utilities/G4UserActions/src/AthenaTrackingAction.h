@@ -25,9 +25,9 @@ namespace G4UA
 
       /// @brief Called before tracking a new particle.
       ///
-      /// If the track meets certain conditions, we save it in the
-      /// AtlasG4EventUserInfo and possibly construct a new AtlasTrajectory
-      /// which will be used for writing out truth particles later.
+      /// If the track meets certain conditions, we construct a new
+      /// AtlasTrajectory which will be used for writing out truth particles
+      /// later.
       virtual void PreUserTrackingAction(const G4Track*) override final;
 
       /// @brief Called after tracking a particle.

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // ----------------------------------------------
@@ -16,18 +16,11 @@
 #define GENERATORFILTERSXAODBSIGNALFILTER_H
 
 #include "GeneratorModules/GenFilter.h"
-#include "GaudiKernel/NTuple.h"
-#include <vector>
+#include "GeneratorModules/GenData.h"
 
-#include "AtlasHepMC/GenEvent.h"
-#include "AtlasHepMC/GenParticle.h"
-#include "AtlasHepMC/GenVertex.h"
-#include "TTree.h"
-#include "TLorentzVector.h"
-
-#include "xAODTruth/TruthEvent.h"
-#include "xAODTruth/TruthEventContainer.h"
 #include "xAODTruth/TruthParticle.h"
+#include "xAODTruth/TruthParticleContainer.h"
+class TLorentzVector;
 
 class xAODBSignalFilter : public GenFilter
 {
@@ -36,7 +29,7 @@ public:
   using GenFilter::GenFilter;
 
   virtual StatusCode filterInitialize() override final;
-  virtual StatusCode filterEvent() override final;
+  virtual StatusCode filterEvent(const EventContext& ctx) override final;
   virtual StatusCode filterFinalize() override final;
 
 private:
@@ -113,6 +106,7 @@ private:
 
   // Print child (for debug)
   void PrintChild(const xAOD::TruthParticle* child, const std::string& treeIDStr, const bool fromFinalB) const;
+  std::shared_ptr<GenData> m_gendata{nullptr};
 
 };
 

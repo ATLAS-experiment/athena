@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // Header for this module
@@ -62,13 +62,12 @@ StatusCode VBFMjjIntervalFilter::filterInitialize() {
 }
 
 
-StatusCode VBFMjjIntervalFilter::filterEvent() {
+StatusCode VBFMjjIntervalFilter::filterEvent(const EventContext& ctx) {
   // Get random number engine
-  const EventContext& ctx = Gaudi::Hive::currentContext();
   CLHEP::HepRandomEngine* rndm = this->getRandomEngine(name(), ctx);
   if (!rndm) {
     ATH_MSG_ERROR("Failed to retrieve random number engine VBFMjjIntervalFilter");
-    setFilterPassed(false);
+    setFilterPassed(false, ctx);
     return StatusCode::SUCCESS;
   }
 
@@ -78,7 +77,7 @@ StatusCode VBFMjjIntervalFilter::filterEvent() {
        evtStore()->retrieve( truthJetCollection, m_TruthJetContainerName).isFailure() ||
        !truthJetCollection ) {
     ATH_MSG_ERROR("No xAOD::JetContainer found in StoreGate with key " << m_TruthJetContainerName);
-    setFilterPassed(false);
+    setFilterPassed(false, ctx);
     return StatusCode::SUCCESS;
   }
 
@@ -112,9 +111,9 @@ StatusCode VBFMjjIntervalFilter::filterEvent() {
 	  int leptonic = 0;
 	  for (const auto& beg:  *(tau->end_vertex()) ) {
 	    if (  beg->production_vertex() != tau->end_vertex() ) continue;
-	    if ( std::abs( beg->pdg_id() ) == 12 ) leptonic = 1;
-	    if ( std::abs( beg->pdg_id() ) == 14 ) leptonic = 2;
-	    if ( std::abs( beg->pdg_id() ) == 15 ) leptonic = 11;
+	    if ( std::abs( beg->pdg_id() ) == MC::NU_E ) leptonic = 1;
+	    else if ( std::abs( beg->pdg_id() ) == MC::NU_MU ) leptonic = 2;
+	    else if ( MC::isTau(beg) ) leptonic = 11;
 	  }
 	  
 	  if (leptonic == 0) {
@@ -163,7 +162,7 @@ StatusCode VBFMjjIntervalFilter::filterEvent() {
     eventWeight = getEventWeight(filteredJets.asDataVector());
     double rnd = rndm->flat();
     if (1.0/eventWeight < rnd) {
-      setFilterPassed(false);
+      setFilterPassed(false, ctx);
       ATH_MSG_DEBUG("Event failed weighting. Weight is " << eventWeight);
       return StatusCode::SUCCESS;
     }
@@ -171,7 +170,7 @@ StatusCode VBFMjjIntervalFilter::filterEvent() {
     // Get MC event collection for setting weight
     const McEventCollection* mecc = 0;
     if ( evtStore()->retrieve( mecc ).isFailure() || !mecc ){
-      setFilterPassed(false);
+      setFilterPassed(false, ctx);
       ATH_MSG_ERROR("Could not retrieve MC Event Collection - weight might not work");
       return StatusCode::SUCCESS;
     }
@@ -192,25 +191,25 @@ StatusCode VBFMjjIntervalFilter::filterEvent() {
     //just compute mjj, dphi etc 
     bool pass = ApplyMassDphi(filteredJets.asDataVector());
     if(!pass){
-      setFilterPassed(false);
+      setFilterPassed(false, ctx);
       ATH_MSG_DEBUG("Event failed filter");
       return StatusCode::SUCCESS; 
     }
     if(m_ApplyNjet){
       if(filteredJets.size()<m_NJetsMin){
-	setFilterPassed(false);
+	setFilterPassed(false, ctx);
 	return StatusCode::SUCCESS;
       }
       if(m_NJetsMax>0){
 	if(filteredJets.size()>m_NJetsMax){
-	  setFilterPassed(false);
+	  setFilterPassed(false, ctx);
 	  return StatusCode::SUCCESS;
 	}
       }//Njets < 
     }//Apply Njets filter 
   }
   // Made it to the end - success!
-  setFilterPassed(true);
+  setFilterPassed(true, ctx);
   return StatusCode::SUCCESS;
 }
 
@@ -298,7 +297,7 @@ double VBFMjjIntervalFilter::getEventWeight(const xAOD::JetContainer *jets) cons
  TLorentzVector VBFMjjIntervalFilter::sumDaughterNeutrinos(const HepMC::ConstGenParticlePtr& part ) const{
   TLorentzVector nu( 0, 0, 0, 0);
 
-  if ( ( std::abs( part->pdg_id() ) == 12 ) || ( std::abs( part->pdg_id() ) == 14 ) || ( std::abs( part->pdg_id() ) == 16 ) ) {
+  if ( MC::isSMNeutrino(part) ) {
     nu.SetPx(part->momentum().px());
     nu.SetPy(part->momentum().py());
     nu.SetPz(part->momentum().pz());

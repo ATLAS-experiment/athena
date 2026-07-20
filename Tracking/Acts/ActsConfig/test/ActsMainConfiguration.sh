@@ -6,7 +6,7 @@ ignore_pattern=$2
 
 n_events=1
 input_rdo=$(python -c "from AthenaConfiguration.TestDefaults import defaultTestFiles; print(defaultTestFiles.RDO_RUN4[0])")
-
+conditions_tag=$(python -c "from AthenaConfiguration.TestDefaults import defaultConditionsTags; print(defaultConditionsTags.RUN4_MC)")
 
 echo "*** Running ACTS reconstruction with extra args: "${extraArgs}
 
@@ -19,10 +19,10 @@ Reco_tf.py \
     	       flags.DQ.useTrigger=False; \
 	       flags.Output.HISTFileName=\"ActsMonitoringOutput.root\"; \
 	       ${extraArgs}" \
-    --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude,ActsConfig.ActsCIFlags.actsWorkflowFlags" \
+    --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude,ActsConfig.ActsCIFlags.actsProductionFlags" \
     --ignorePatterns "${ignore_pattern}" \
+    --conditionsTag ${conditions_tag} \
     --inputRDOFile ${input_rdo} \
     --outputAODFile AOD.pool.root \
     --maxEvents ${n_events} \
     --multithreaded
-

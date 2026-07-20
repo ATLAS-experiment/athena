@@ -113,10 +113,4 @@ def MuonPatternRecognitionCfg(flags, suffix = ""):
         result.merge(RecoSegmentTruthAssocCfg(flags,
                                               name=f"MuonSegmentsFromR4TruthMatching{suffix}",
                                               SegmentKey="MuonSegmentsFromR4"))
-    if flags.Muon.scheduleActsReco:
-        from MuonSegmentCnv.MuonSegmentCnvConfig import MuonR4SegmentCnvAlgCfg
-        result.merge(MuonR4SegmentCnvAlgCfg(flags,
-                                            name=f"MuonR4SegmentCnvAlg{suffix}",
-                                            ReadSegments = segmentContainers,
-                                            WriteKey="TrackMuonSegments"))
     return result

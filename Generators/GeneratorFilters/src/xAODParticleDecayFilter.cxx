@@ -15,10 +15,10 @@ StatusCode xAODParticleDecayFilter::filterInitialize()
     return StatusCode::SUCCESS;
 }
 
-StatusCode xAODParticleDecayFilter::filterEvent()
+StatusCode xAODParticleDecayFilter::filterEvent(const EventContext& ctx)
 {
 
-    ATH_MSG_DEBUG("xAODParticleDecayFilter::filterEvent()");
+    ATH_MSG_DEBUG("xAODParticleDecayFilter::filterEvent(const EventContext& ctx)");
 
     //Create child targets - a map of pdgId along with how many particles
     //with that pdgId that we want
@@ -33,10 +33,10 @@ StatusCode xAODParticleDecayFilter::filterEvent()
         else childTargets[childPdgId] = 1;
     }
 
-    ATH_MSG_DEBUG("xAODParticleDecayFilter::filterEvent()");
+    ATH_MSG_DEBUG("xAODParticleDecayFilter::filterEvent(const EventContext& ctx)");
 // Retrieve TruthGen container from xAOD Gen slimmer, contains all particles witout barcode_zero and
 // duplicated barcode ones
-  SG::ReadHandle<xAOD::TruthParticleContainer> xTruthParticleContainer{m_truthPartContKey};
+  SG::ReadHandle<xAOD::TruthParticleContainer> xTruthParticleContainer{m_truthPartContKey, ctx};
   CHECK(xTruthParticleContainer.isValid());
 
   // Loop over all particles in the event 
@@ -72,7 +72,7 @@ StatusCode xAODParticleDecayFilter::filterEvent()
                 if (std::all_of(childTargets.begin(), childTargets.end(), [&](const std::pair<unsigned int, unsigned int> &p) { return p.second == childCounters[p.first]; }) && childCounters[nonListValue] == 0)
                 {
                     ATH_MSG_DEBUG("Filter passed");
-                    setFilterPassed(true);
+                    setFilterPassed(true, ctx);
                     return StatusCode::SUCCESS;
                 }
             } // end if particle has parent pdg id
@@ -80,6 +80,6 @@ StatusCode xAODParticleDecayFilter::filterEvent()
     
 
     // if we get here, no particle was found with the required set of children
-    setFilterPassed(false);
+    setFilterPassed(false, ctx);
     return StatusCode::SUCCESS;
 }

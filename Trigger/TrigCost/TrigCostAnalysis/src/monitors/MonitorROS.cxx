@@ -1,11 +1,14 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MonitorROS.h"
 #include "../counters/CounterROS.h"
 
 #include <algorithm>
+#include <set>
+#include <utility>
+
 
 MonitorROS::MonitorROS(const std::string& name, const MonitoredRange* parent)
   : MonitorBase(name, parent) {
@@ -17,9 +20,9 @@ StatusCode MonitorROS::newEvent(const CostData& data, const float weight) {
   if (data.rosCollection().empty()){
     ATH_MSG_DEBUG("The ROS collection is empty!");
   }
-
+  const std::string robsIdStr{"robs_id"};
   for (const xAOD::TrigComposite* tc : data.rosCollection()) {
-    auto robIds = tc->getDetail<std::vector<uint32_t>>("robs_id");
+    auto robIds = tc->getDetail<std::vector<uint32_t>>(robsIdStr);
     // Create set of unique ROS for this request
     std::set<std::string> rosPerRequest;
     for (uint32_t robId : robIds) {

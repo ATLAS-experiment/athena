@@ -6,6 +6,12 @@ def ActsTrackReconstructionCfg(flags,
                                   previousExtension: str = None) -> ComponentAccumulator:
     acc = ComponentAccumulator()
 
+    # Vertex reconstruction using spacepoints
+    if flags.Tracking.ActiveConfig.useHoughVertexFilter:
+        from InDetPriVxFinder.HoughVtxFinderConfig import HoughVtxFinderCfg
+        acc.merge(HoughVtxFinderCfg(flags,
+                                    inputPixelSpacePoints = "PixelSpacePoints"))
+
     # Seeding
     from ActsConfig.ActsSeedingInDetConfig import ActsInDetSeedingCfg
     acc.merge(ActsInDetSeedingCfg(flags))

@@ -1,14 +1,15 @@
 /*
   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
-/*
- */
 /**
  * @file TileEvent/TileMutableDataContainer.icc
  * @author scott snyder <snyder@bnl.gov>
  * @date Oct, 2018
  * @brief Helper for holding non-const raw data prior to recording in SG.
  */
+
+
+#include <stdexcept>
 
 
 /**
@@ -91,10 +92,13 @@ StatusCode
 TileMutableDataContainer<BASE>::addCollection (std::unique_ptr<Collection> coll,
                                                IdentifierHash hash)
 {
+  if (!hash.is_valid()) {
+    throw std::out_of_range ("TileMutableDataContainer::addCollection");
+  }
   if (hash >= m_mutableCollections.size()) {
     m_mutableCollections.resize (hash+1);
   }
-  m_mutableCollections[hash] = coll.get();
+  m_mutableCollections.at(hash) = coll.get();
   return BASE::addOrDelete (std::move (coll), hash);
 }
 

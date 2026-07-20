@@ -14,11 +14,11 @@ SplitPhotonFilter::SplitPhotonFilter(const std::string& name, ISvcLocator* pSvcL
 }
 
 
-StatusCode SplitPhotonFilter::filterEvent() {
+StatusCode SplitPhotonFilter::filterEvent(const EventContext& ctx) {
   int NPhotons = 0;
   bool GoodFlav = m_dauPdg.size() == 0 ? true : false;
   McEventCollection::const_iterator itr;
-  for (itr = events_const()->begin(); itr!=events_const()->end(); ++itr) {
+  for (itr = events_const(ctx)->begin(); itr!=events_const(ctx)->end(); ++itr) {
     const HepMC::GenEvent* genEvt = (*itr);
 
 // ** Loop on all particles **
@@ -31,13 +31,8 @@ StatusCode SplitPhotonFilter::filterEvent() {
 
 	  // First find a direct photon (not from hadron decay)
           bool fromHadron(false);
-#ifdef HEPMC3
           auto firstParent1 = part -> production_vertex() -> particles_in().begin();
           auto endParent1 = part -> production_vertex() -> particles_in().end();
-#else
-          auto  firstParent1 = part->production_vertex()->particles_begin(HepMC::parents);
-          auto  endParent1 = part->production_vertex()->particles_end(HepMC::parents);
-#endif
         for (auto thisParent1 = firstParent1; thisParent1 != endParent1; ++thisParent1 ) {
             int pdgindex =  abs((*thisParent1)->pdg_id());
             if (pdgindex > 100) {
@@ -52,13 +47,8 @@ StatusCode SplitPhotonFilter::filterEvent() {
 	    ATH_MSG_DEBUG("A split photon");
 
 // find daughters
-#ifdef HEPMC3
             auto dauBegin = part->end_vertex()->particles_out().begin();
             auto dauEnd   = part->end_vertex()->particles_out().end();
-#else
-	    auto dauBegin = part->end_vertex()->particles_begin(HepMC::children);
-	    auto dauEnd   = part->end_vertex()->particles_end(HepMC::children);
-#endif
 	    for (auto dau = dauBegin; dau != dauEnd; dau++) {
 	      int pdgid = (*dau)->pdg_id();
 	      if (std::find(m_dauPdg.begin(),m_dauPdg.end(),abs(pdgid)) != m_dauPdg.end())
@@ -76,6 +66,6 @@ StatusCode SplitPhotonFilter::filterEvent() {
   
 
   if (NPhotons >= m_NPhotons && GoodFlav) return StatusCode::SUCCESS;
-  setFilterPassed(false);
+  setFilterPassed(false, ctx);
   return StatusCode::SUCCESS;
 }

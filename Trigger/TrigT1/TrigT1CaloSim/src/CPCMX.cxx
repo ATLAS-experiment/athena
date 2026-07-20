@@ -79,7 +79,7 @@ StatusCode CPCMX::initialize()
 //
 
 
-StatusCode CPCMX::execute( )
+StatusCode CPCMX::execute(const EventContext& ctx)
 {
     
   /*
@@ -96,9 +96,9 @@ StatusCode CPCMX::execute( )
   
   /** Create containers for BS simulation */
   DataVector<CMXCPTob>*  CMXTobs = new DataVector<CMXCPTob>;
-  ATH_CHECK(SG::makeHandle(m_CMXCPTobLocation).record( std::unique_ptr<DataVector<CMXCPTob>>(CMXTobs ) ));
+  ATH_CHECK(SG::makeHandle(m_CMXCPTobLocation, ctx).record( std::unique_ptr<DataVector<CMXCPTob>>(CMXTobs ) ));
   DataVector<CMXCPHits>* CMXHits = new DataVector<CMXCPHits>;
-  ATH_CHECK(SG::makeHandle(m_CMXCPHitsLocation).record( std::unique_ptr<DataVector<CMXCPHits>>(CMXHits ) ));
+  ATH_CHECK(SG::makeHandle(m_CMXCPHitsLocation, ctx).record( std::unique_ptr<DataVector<CMXCPHits>>(CMXHits ) ));
 
 
   /** Create and initialise arrays for storing hit results */
@@ -123,7 +123,7 @@ StatusCode CPCMX::execute( )
   
   
   // Create objects to store TOBs for L1Topo
-  SG::WriteHandle<DataVector<CPCMXTopoData>> topoData = SG::makeHandle(m_TopoOutputLocation);
+  SG::WriteHandle<DataVector<CPCMXTopoData>> topoData = SG::makeHandle(m_TopoOutputLocation, ctx);
   ATH_CHECK(topoData.record(std::make_unique<DataVector<CPCMXTopoData>>()));
   for (int crate = 0; crate < 4; ++crate) {
     for (int cmx = 0; cmx < 2; ++cmx) {
@@ -136,7 +136,7 @@ StatusCode CPCMX::execute( )
   bool cpmOverflow[2] = {false, false};
 
   /** Get EM and Tau Trigger Thresholds */
-  auto l1Menu = SG::makeHandle( m_L1MenuKey );
+  auto l1Menu = SG::makeHandle( m_L1MenuKey , ctx);
 
 
   float cpScale = l1Menu->thrExtraInfo().EM().emScale();
@@ -149,7 +149,7 @@ StatusCode CPCMX::execute( )
   }
 
   /** Retrieve the CPCMXData (backplane data packages) */
-  SG::ReadHandle<t_cpmDataContainer> bpData = SG::makeHandle(m_CPMCMXDataLocation);
+  SG::ReadHandle<t_cpmDataContainer> bpData = SG::makeHandle(m_CPMCMXDataLocation, ctx);
   // Analyse module results
   t_cpmDataContainer::const_iterator it = bpData->begin();
   for ( ; it != bpData->end(); ++it) {
@@ -236,7 +236,7 @@ StatusCode CPCMX::execute( )
     cableWord3 |= ( Hits[1][i+8]<<(3*i) );
   }
 
-  SG::WriteHandle<EmTauCTP> emTauCTP = SG::makeHandle(m_CTPOutputKey);
+  SG::WriteHandle<EmTauCTP> emTauCTP = SG::makeHandle(m_CTPOutputKey, ctx);
   ATH_CHECK(emTauCTP.record(std::make_unique<EmTauCTP>(cableWord0, cableWord1, cableWord2, cableWord3)));
 
   // Form and store CPCMXHits

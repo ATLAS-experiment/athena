@@ -5,7 +5,7 @@
 #include "BeamHaloGenerator/BeamHaloParticle.h"
 #include "BeamHaloGenerator/MarsParticle.h"
 #include "BeamHaloGenerator/FlukaParticle.h"
-#include "HepPDT/ParticleDataTable.hh"
+#include "GeneratorModules/GenData.h"
 #include <iostream>
 #include <cmath>
 
@@ -15,7 +15,8 @@ BeamHaloParticle::BeamHaloParticle(): m_pdgId(0),
 				      m_fourVector(), 
 				      m_positionAtScoringPlane(), 
 				      m_weight(0.),
-                                      m_positionAtPrimary() {
+                                      m_positionAtPrimary(),
+                                      m_gendata(std::make_shared<GenData>()) {
 }
 
 //---------------------------------------------------------------------
@@ -26,7 +27,9 @@ BeamHaloParticle::BeamHaloParticle(long pdgId,
 				   double weight): m_pdgId(pdgId), 
 						   m_fourVector(fourVector), 
 						   m_positionAtScoringPlane(positionAtScoringPlane), 
-						   m_weight(weight) {
+						   m_weight(weight),
+                                    m_positionAtPrimary(),
+                                    m_gendata(std::make_shared<GenData>()) {
 }
 
 //---------------------------------------------------------------------
@@ -39,7 +42,8 @@ BeamHaloParticle::BeamHaloParticle(long pdgId,
                                                                          m_fourVector(fourVector),
                                                                          m_positionAtScoringPlane(positionAtScoringPlane),
                                                                          m_weight(weight),
-                                                                         m_positionAtPrimary(positionAtPrimary) {
+                                                                         m_positionAtPrimary(positionAtPrimary),
+                                                                         m_gendata(std::make_shared<GenData>()) {
 }
 
 //---------------------------------------------------------------------
@@ -49,7 +53,7 @@ BeamHaloParticle::BeamHaloParticle(long pdgId,
 
 //---------------------------------------------------------------------
 
-int BeamHaloParticle::fill(const HepPDT::ParticleDataTable *particleDataTable,
+int BeamHaloParticle::fill(
 			   MarsParticle *marsParticle) {
   double p_sq, mod_p, pz, mass, energy;
   
@@ -60,15 +64,12 @@ int BeamHaloParticle::fill(const HepPDT::ParticleDataTable *particleDataTable,
   }
   
   // Read mass from pdg table
-  const HepPDT::ParticleData* particleData = particleDataTable->particle(HepPDT::ParticleID(std::abs(m_pdgId)));
-  mass = 0;
-  if(particleData) {
-    mass = particleData->mass().value();
-  }
-  else {
+  auto massOpt = m_gendata->particleMass(m_pdgId);
+  if(!massOpt.has_value()) {
     std::cerr << "PDG code " << m_pdgId << " is not in the particle data table." << std::endl;
     return 1;
   }
+  mass = massOpt.value();
 
   // Mars uses GeV, convert to MeV then calculate |p|
   //   from relativistic kinetic energy (using c=1):
@@ -110,7 +111,7 @@ int BeamHaloParticle::fill(const HepPDT::ParticleDataTable *particleDataTable,
 
 //-------------------------------------------------------------------------------------------------
 
-int BeamHaloParticle::fill(const HepPDT::ParticleDataTable *particleDataTable,
+int BeamHaloParticle::fill(
 			   FlukaParticle *flukaParticle) {
   double p_sq, mod_p, pz, mass, energy;
 
@@ -124,15 +125,12 @@ int BeamHaloParticle::fill(const HepPDT::ParticleDataTable *particleDataTable,
   }
 
   // Read mass from pdg table
-  const HepPDT::ParticleData* particleData = particleDataTable->particle(HepPDT::ParticleID(std::abs(m_pdgId)));
-  mass = 0;
-  if(particleData) {
-    mass = particleData->mass().value();
-  }
-  else {
+  auto massOpt = m_gendata->particleMass(m_pdgId);
+  if(!massOpt.has_value()) {
     std::cerr << "PDG code " << m_pdgId << " is not in the particle data table." << std::endl;
     return 1;
   }
+  mass = massOpt.value();
 
   // FLUKA uses GeV, convert to MeV then calculate |p|
   //   from relativistic kinetic energy (using c=1):

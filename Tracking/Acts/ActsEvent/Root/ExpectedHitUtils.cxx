@@ -20,21 +20,22 @@ namespace ActsTrk::detail {
                                                 perigee_parameters,
                                                 Acts::Direction::Forward(),
                                                 pathLimit);
-    if (result.ok()) {
-      for (const Acts::detail::Step &step : result->first ) {
+    if (!result.ok()) {
+        return expected_layer_pattern;
+    }
+    for (const Acts::detail::Step &step : result->first ) {
         // @TODO boundary check ?, does layer number match layer numbering in athena ?
         // @TODO filter out dead modules
-        if (step.geoID.sensitive()) {
-          if (step.surface && step.surface->surfacePlacement()) {
-            const ActsDetectorElement *
-              actsDetEl = dynamic_cast<const ActsDetectorElement *>(step.surface->surfacePlacement());
-            if (actsDetEl) {
-              addToExpectedLayerPattern(expected_layer_pattern, *actsDetEl);
-            }
-          }
+        if (!step.geoID.sensitive()) {
+            continue;
         }
-      }
+        const auto* actsDetEl = getActsDetectorElement(step.surface);
+        if (actsDetEl) {
+          addToExpectedLayerPattern(expected_layer_pattern, *actsDetEl);
+        }
+        
     }
+    
 
     return expected_layer_pattern;
   }

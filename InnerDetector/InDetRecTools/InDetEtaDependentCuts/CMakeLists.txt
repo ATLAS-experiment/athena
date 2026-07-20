@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( InDetEtaDependentCuts )
@@ -21,5 +21,7 @@ atlas_add_test( InDetEtaDependentCutsSvc_test
    SOURCES test/InDetEtaDependentCutsSvc_test.cxx 
    INCLUDE_DIRS ${Boost_INCLUDE_DIRS} ${ROOT_INCLUDE_DIRS}
    LINK_LIBRARIES ${Boost_LIBRARIES} ${ROOT_LIBRARIES} AthenaBaseComps CxxUtils GaudiKernel InDetRecToolInterfaces TestTools
-   POST_EXEC_SCRIPT "nopost.sh" )
+   # Intentional ERROR.
+   LOG_IGNORE_PATTERN "CutName not recognized"
+   POST_EXEC_SCRIPT noerror.sh )
 

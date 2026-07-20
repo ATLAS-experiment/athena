@@ -1,5 +1,3 @@
-// Dear emacs, this is -*- c++ -*-
-
 /*
   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
@@ -7,28 +5,28 @@
 #ifndef XAODCREATORALGS_TRACKPARTICLECREATOR_H
 #define XAODCREATORALGS_TRACKPARTICLECREATOR_H
 
-// System include(s):
-#include <string>
 
 // Athena/Gaudi include(s):
 #include "AthenaBaseComps/AthReentrantAlgorithm.h"
-#include "GaudiKernel/ToolHandle.h"
+
 #include "ParticleTruth/TrackParticleTruthCollection.h"
 #include "xAODTracking/TrackParticleContainer.h"
 #include "GeneratorObjects/xAODTruthParticleLink.h"
 #include "TrkTruthData/TrackTruthCollection.h"
 #include "MCTruthClassifier/IMCTruthClassifier.h"
-#include "xAODTracking/TrackParticleAuxContainer.h"
-#include "Particle/TrackParticleContainer.h"
 #include "TrkTrack/TrackCollection.h"
 #include "xAODTracking/TrackParticle.h"
 #include "xAODTracking/VertexContainer.h"
 #include "TrkValInterfaces/ITrkObserverTool.h"
 #include "AthenaKernel/SlotSpecificObj.h"
+
 #include "StoreGate/WriteDecorHandleKey.h"
+#include "StoreGate/WriteHandleKey.h"
+#include "StoreGate/ReadHandleKey.h"
+
+
 // Local include(s):
 #include "xAODTrackingCnv/ITrackParticleMonitoring.h"
-#include "xAODTrackingCnv/IRecTrackParticleContainerCnvTool.h"
 #include "xAODTrackingCnv/ITrackCollectionCnvTool.h"
 #include "TrkToolInterfaces/ITrackParticleCreatorTool.h"
 #include "AthenaMonitoringKernel/GenericMonitoringTool.h"
@@ -51,7 +49,7 @@ namespace xAODMaker {
 
   public:
     /// Regular algorithm constructor
-    TrackParticleCnvAlg( const std::string& name, ISvcLocator* svcLoc );
+    using AthReentrantAlgorithm::AthReentrantAlgorithm;
 
     /// Function initialising the algorithm
     virtual StatusCode initialize();
@@ -68,20 +66,11 @@ namespace xAODMaker {
     /// ToolHandle to particle creator
     ToolHandle<Trk::ITrackParticleCreatorTool> m_particleCreator{this,  "TrackParticleCreator", "Trk::TrackParticleCreatorTool/TrackParticleCreatorTool" };
     /// ToolHandle to truth classifier
-    ToolHandle<IMCTruthClassifier> m_truthClassifier{
-      this,
-      "MCTruthClassifier",
-      "MCTruthClassifier/MCTruthClassifier",
-      " MCTruthClassifier Instance to use "
-    };
+    ToolHandle<IMCTruthClassifier> m_truthClassifier{this, "MCTruthClassifier", "MCTruthClassifier/MCTruthClassifier",
+                                                     " MCTruthClassifier Instance to use "};
 
     // handles to the converting tools
     ToolHandle<xAODMaker::ITrackCollectionCnvTool> m_TrackCollectionCnvTool{this, "TrackCollectionCnvTool", "xAODMaker::TrackCollectionCnvTool/TrackCollectionCnvTool"};
-    ToolHandle<xAODMaker::IRecTrackParticleContainerCnvTool>
-      m_RecTrackParticleContainerCnvTool{this, "RecTrackParticleContainerCnvTool", "xAODMaker::RecTrackParticleContainerCnvTool/"
-      "RecTrackParticleContainerCnvTool" };
-
-    SG::ReadHandleKey<Rec::TrackParticleContainer> m_aod{this, "AODContainerName", "TrackParticleCandidate"};
 
     SG::ReadHandleKey<TrackCollection> m_tracks{this, "TrackContainerName", "Tracks"};
 
@@ -90,11 +79,13 @@ namespace xAODMaker {
     SG::WriteHandleKey<xAOD::TrackParticleContainer> m_xaodout{this, "xAODTrackParticlesFromTracksContainerName", "InDetTrackParticles"};
 
 
-    SG::WriteHandleKey<xAOD::TrackParticleContainer> m_xaodTrackParticlesout{this, "xAODContainerName", "ConvertedTrackParticleCandidate" };
-
-
+    SG::WriteDecorHandleKey<xAOD::TrackParticleContainer> m_truthTypeKey{this, "TruthTypeKey", m_xaodout, "truthType"};
+    SG::WriteDecorHandleKey<xAOD::TrackParticleContainer> m_truthOriginKey{this, "TruthOriginKey", m_xaodout, "truthOrigin"};
+    SG::WriteDecorHandleKey<xAOD::TrackParticleContainer> m_truthClassKey{this, "TruthClassKey", m_xaodout, "truthClassification"};
+    SG::WriteDecorHandleKey<xAOD::TrackParticleContainer> m_truthProbKey{this, "TruthMatchProbKey", m_xaodout, "truthMatchProbability"};
+    SG::WriteDecorHandleKey<xAOD::TrackParticleContainer> m_trackLinkKey{this, "TrackLinkKey", m_xaodout, "trackLink"};
+    
     SG::ReadHandleKey<xAODTruthParticleLinkVector> m_truthParticleLinkVec{this, "xAODTruthLinkVector", "xAODTruthLinks"};
-    SG::ReadHandleKey<TrackParticleTruthCollection> m_aodTruth{this, "AODTruthContainerName" , ""};
     SG::ReadHandleKey<TrackTruthCollection> m_trackTruth{this, "TrackTruthContainerName", ""};
 
     // Allow monitoring of track parameters during conversion
@@ -108,34 +99,16 @@ namespace xAODMaker {
     Gaudi::Property<bool> m_augmentObservedTracks{this, "AugmentObservedTracks", false, "augment observed tracks"};
     SG::ReadHandleKey<ObservedTrackMap> m_tracksMap{this, "TracksMapName", "" , "name of observed tracks map saved in store"};
 
-
-    /// toggle on converting AOD track particles to xAOD
-    Gaudi::Property<bool> m_convertAODTrackParticles{this, "ConvertTrackParticles", true};
-
     /// toggle on converting tracks to xAOD
     Gaudi::Property<bool> m_convertTracks{this, "ConvertTracks", false};
 
-    template<typename CONT, typename TRUTHCONT, typename CONVTOOL>
-    int convert(const EventContext& ctx,
-                const CONT&,
-                const TRUTHCONT&,
-                CONVTOOL& tool,
-                SG::WriteHandle<xAOD::TrackParticleContainer>&,
-                const xAODTruthParticleLinkVector*,
-                const xAOD::Vertex* primaryVertex = nullptr,
-                const ObservedTrackMap* obs_track_map = 0) const;
-
-    inline xAOD::TrackParticle* createParticle(
-      xAOD::TrackParticleContainer& xaod,
-      const Rec::TrackParticleContainer& container,
-      const Rec::TrackParticle& tp,
-      const EventContext& ctx);
-
-    inline xAOD::TrackParticle* createParticle(
-      xAOD::TrackParticleContainer& xaod,
-      const TrackCollection& container,
-      const Trk::Track& tp,
-      const EventContext& ctx);
+    StatusCode convert(const EventContext& ctx,
+                      const TrackCollection& trackColl,
+                      const TrackTruthCollection* assocTruthColl,
+                      xAOD::TrackParticleContainer& outTrackCont,
+                      const xAODTruthParticleLinkVector*,
+                      const xAOD::Vertex* primaryVertex ,
+                      const ObservedTrackMap* obs_track_map) const;
 
     }; // class TrackParticleCnvAlg
 

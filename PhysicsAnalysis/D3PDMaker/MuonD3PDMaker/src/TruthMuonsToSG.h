@@ -28,7 +28,7 @@ class TruthMuonsToSG: public AthAlgorithm {
   
   StatusCode initialize();
   StatusCode finalize();
-  StatusCode execute();
+  StatusCode execute(const EventContext& ctx);
 
  private:
   std::string m_truthContainerKey;

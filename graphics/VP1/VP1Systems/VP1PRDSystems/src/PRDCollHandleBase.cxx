@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "VP1PRDSystems/PRDCollHandleBase.h"
@@ -42,7 +42,7 @@ public:
 
   //Collection definition:
   QString storegate_key;
-  PRDDetType::Type detType;
+  PRDDetType::Type detType{};
 
   template <class T>
   bool actualLoad();//Templated according to collection type.
@@ -51,7 +51,7 @@ public:
   VP1ExtraSepLayerHelper * sephelper_simple = nullptr;
   SoSeparator * sep_lods = nullptr;
   std::map<int,std::pair<SoLevelOfDetail*,std::pair<VP1ExtraSepLayerHelper*,VP1ExtraSepLayerHelper*> > > regionindex2lodhelpers;//idx->(sephelperdetailed,sephelpersimple)
-  DETAIL generalprddetaillevel;
+  DETAIL generalprddetaillevel{};
   void updateDetailSepAttachments();
 
   SoMaterial * highlightmaterial = nullptr;

@@ -242,13 +242,13 @@ ConfigurableAlg::setParameters(const ParameterSpace & parameters) {
 
 
 const TCS::Parameter &
-ConfigurableAlg::parameter(const std::string & parameterName) const {
+ConfigurableAlg::parameter(std::string_view parameterName) const {
    return parameters().parameter(parameterName);
 }
 
 
 const TCS::Parameter &
-ConfigurableAlg::parameter(const std::string & parameterName, unsigned int selection) const {
+ConfigurableAlg::parameter(std::string_view parameterName, unsigned int selection) const {
    return parameters().parameter(parameterName, selection);
 }
 
@@ -269,29 +269,30 @@ void ConfigurableAlg::registerHist(TH2 * h) {
    m_impl->registerHist(h);
 }
 
-void ConfigurableAlg::bookHist(std::vector<std::string> &regName, const std::string& name, const std::string& title, const int binx, const int xmin, const int xmax) {
+void ConfigurableAlg::bookHist(std::vector<std::string> &regName, std::string_view name, std::string_view title, const int binx, const int xmin, const int xmax) {
   std::string xmin_str = ToString(xmin);
   std::string xmax_str = ToString(xmax);
-  std::string newTitle = title;
-  std::string newName = name;
+  std::string newTitle{title};
+  std::string newName{name};
 
-  newTitle = xmin_str+title+xmax_str;
-  newName = name+"_"+xmin_str+title+xmax_str;
+  
+  newName = newName+"_"+xmin_str+newTitle+xmax_str;
+  newTitle = xmin_str+newTitle+xmax_str;
   std::replace( newName.begin(), newName.end(), '-', 'n');
   std::replace( newName.begin(), newName.end(), ' ', '_');
 
   regName.push_back(m_name+"/"+newName);
 
   // Add units to axis labels
-  std::string xTitle = title;
+  std::string xTitle{title};
   if (m_isLegacyTopo) {
-    if (title == "ETA" || title == "DETA" || title == "PHI" || title == "DPHI" || title == "DR") { xTitle = title+"#times10"; }
-    if (title == "PT" || title == "ET" || title == "HT" || title == "INVM" || title == "MT")     { xTitle = title+" [GeV]"; } 
+    if (title == "ETA" || title == "DETA" || title == "PHI" || title == "DPHI" || title == "DR") { xTitle += "#times10"; }
+    if (title == "PT" || title == "ET" || title == "HT" || title == "INVM" || title == "MT")     { xTitle +=" [GeV]"; } 
   } 
   else {
-    if (title == "ETA" || title == "DETA" || title == "DR")                                  { xTitle = title+"#times40"; }
-    if (title == "PHI" || title == "DPHI")                                                   { xTitle = title+"#times20"; }
-    if (title == "PT" || title == "ET" || title == "HT" || title == "INVM" || title == "MT") { xTitle = title+" [100 MeV]"; } 
+    if (title == "ETA" || title == "DETA" || title == "DR")                                  { xTitle +="#times40"; }
+    if (title == "PHI" || title == "DPHI")                                                   { xTitle +="#times20"; }
+    if (title == "PT" || title == "ET" || title == "HT" || title == "INVM" || title == "MT") { xTitle +=" [100 MeV]"; } 
   }
  
   int xmin_new,xmax_new,binx_new=binx;
@@ -319,15 +320,15 @@ void ConfigurableAlg::bookHist(std::vector<std::string> &regName, const std::str
     dr_max *= 4;
   }
 
-  if ( title.find("ETA") != std::string::npos ){
+  if ( title.find("ETA") != std::string_view::npos ){
     xmin_new=-eta_max;
     xmax_new=eta_max;
   }
-  if ( title.find("PHI") != std::string::npos || title.find("DPHI") != std::string::npos ){
+  if ( title.find("PHI") != std::string_view::npos || title.find("DPHI") != std::string_view::npos ){
     xmin_new=0;
     xmax_new=phi_max;
   }
-  if ( title.find("DETA") != std::string::npos || title.find("DR") != std::string::npos ){
+  if ( title.find("DETA") != std::string_view::npos || title.find("DR") != std::string_view::npos ){
     xmin_new=0;
     xmax_new=dr_max;
   }
@@ -346,19 +347,19 @@ void ConfigurableAlg::bookHistMult(std::vector<std::string> &regName, const std:
   m_impl->registerHist(h);
 }
 
-void ConfigurableAlg::bookHist(std::vector<std::string> &regName, const std::string& name, const std::string& title, const int binx, const int xmin, const int xmax, const int biny, const int ymin, const int ymax) {
+void ConfigurableAlg::bookHist(std::vector<std::string> &regName, std::string_view name, std::string_view title, const int binx, const int xmin, const int xmax, const int biny, const int ymin, const int ymax) {
   auto usPos = title.find(" vs ");
-  std::string xName = title.substr(0,usPos);
-  std::string yName = title.substr(usPos+4);
+  std::string xName{title.substr(0,usPos)};
+  std::string yName{title.substr(usPos+4)};
   std::string xmin_str = ToString(xmin);
   std::string xmax_str = ToString(xmax);
   std::string ymin_str = ToString(ymin);
   std::string ymax_str = ToString(ymax);
-  std::string newTitle = title;
-  std::string newName = name;
+  std::string newTitle{title};
+  std::string newName{name};
 
   newTitle = xmin_str+xName+xmax_str+" vs "+ymin_str+yName+ymax_str;
-  newName = name+"_"+xmin_str+xName+xmax_str+"_"+ymin_str+yName+ymax_str;
+  newName = newName+"_"+xmin_str+xName+xmax_str+"_"+ymin_str+yName+ymax_str;
   std::replace( newName.begin(), newName.end(), '-', 'n');
   std::replace( newName.begin(), newName.end(), ' ', '_');
 

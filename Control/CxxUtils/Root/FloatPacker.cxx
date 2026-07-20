@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file CxxUtils/src/FloatPacker.cxx
@@ -12,185 +12,188 @@
 #include "CxxUtils/ones.h"
 #include "CxxUtils/trapping_fp.h"
 #include <limits>
-#include <string>
 #include <sstream>
 #include <iomanip>
 #include <stdexcept>
-#ifndef __APPLE__
-#include <ieee754.h>  // ??? Is this standardized?
-#else
-//ieee754.h doesn't exist on MacOSX
-union ieee754_double
-{
-  long double d;
-  struct {
-    unsigned int negative:1;
-    unsigned int exponent:11;
-    /* Together these comprise the mantissa.  */
-    unsigned int mantissa0:20;
-    unsigned int mantissa1:32;
-  } ieee;
-  struct {
-    unsigned int negative:1;
-    unsigned int exponent:11;
-    // cppcheck-suppress unusedStructMember
-    unsigned int quiet_nan:1;
-    /* Together these comprise the mantissa.  */
-    unsigned int mantissa0:19;
-    unsigned int mantissa1:32;
-  } ieee_nan;
-};
-
-#define IEEE754_DOUBLE_BIAS  0x3ff /* Added to exponent.  */
-
-#endif
-#include <stdint.h>
-
+#include <bit>
+#include <cstdint>
 
 namespace {
+  /// Abbreviation.
+  typedef CxxUtils::FloatPacker::Packdest Packdest;
+  //
+  static_assert(std::numeric_limits<double>::is_iec559);
+  static_assert(std::numeric_limits<double>::digits == 53);
+  static_assert(std::numeric_limits<Packdest>::digits == 32);
 
+  constexpr std::uint64_t double_sign_mask     = 0x8000000000000000ULL;
+  constexpr std::uint64_t double_exponent_mask = 0x7ff0000000000000ULL;
+  constexpr std::uint64_t double_mantissa_mask = 0x000fffffffffffffULL;
+  
+  constexpr int ieee754_double_bias = 0x3ff;
+  constexpr int ieee754_double_exponent_bits = 11;
+  constexpr int ieee754_double_mantissa_bits = 52;
+  constexpr int ieee754_double_exponent_shift = 52;
+  
+  constexpr std::uint64_t
+  doubleToBits(double value) noexcept
+  {
+    return std::bit_cast<std::uint64_t>(value);
+  }
+  
+  constexpr double
+  bitsToDouble(std::uint64_t bits) noexcept
+  {
+    return std::bit_cast<double>(bits);
+  }
+  
+  constexpr bool
+  isZeroBits(std::uint64_t bits) noexcept
+  {
+    return (bits & ~double_sign_mask) == 0;
+  }
+  
+  constexpr bool
+  isNegativeBits(std::uint64_t bits) noexcept
+  {
+    return (bits & double_sign_mask) != 0;
+  }
+  
+  constexpr int
+  biasedExponent(std::uint64_t bits) noexcept
+  {
+    return static_cast<int>(
+      (bits & double_exponent_mask) >> ieee754_double_exponent_shift);
+  }
+  
+  constexpr std::uint64_t
+  doubleMantissaBits(std::uint64_t bits) noexcept
+  {
+    return bits & double_mantissa_mask;
+  }
 
-
-/**
- * @brief We sometimes need to be able to access a double
- *        as ints.
- */
-union double_or_int {
-  ieee754_double d;
-  uint32_t i[2];
-};
-
-
-const int ieee754_double_bias = 0x3ff;
-const int ieee754_double_exponent_bits = 11;
-const int ieee754_double_mantissa0_bits = 20;
-const int ieee754_double_mantissa1_bits = 32;
-
-
-/// Abbreviation.
-typedef CxxUtils::FloatPacker::Packdest Packdest;
-
-/// Size of @c Packdest in bits.
-const int packdest_bits = std::numeric_limits<Packdest>::digits;
-
-
-// Handy constant: A Packdest with 1 in the high bit.
-const Packdest high_packdest_bit = (1U << (packdest_bits - 1));
-
-const Packdest ieee754_double_exponent_mask =
-  (1U << ieee754_double_exponent_bits) - 1;
-
-
-/**
- * @brief  Return the largest (signed) integer that can be represented
- *         With @c nbits bits.
- *         Boundary case: nbits=0 should return -1.
- * @param nbits Number of bits.
- */
-inline
-int max_int (int nbits)
-{
-  return ((1U << nbits) >> 1) - 1;
-}
-
-
-/**
- * @brief  Return the smallest (signed) integer that can be represented
- *         With @c nbits bits.
- *         Boundary case: nbits=0 should return -1.
- * @param nbits Number of bits.
- */
-inline
-int min_int (int nbits)
-{
-  return static_cast<int>(~0U << nbits) >> 1;
-}
-
-
-/**
- * @brief Renormalize a denormal number.
- * @param exponent[inout] The exponent of the number.
- *                        Should initially be the denormal flag value.
- *                        Will be modified in place.
- * @param mantissa[inout] The mantissa of the number.
- *                        Will be modified in place.
- */
-void renormalize_denormal (int& exponent,
-                           Packdest& mantissa)
-{
-  if (mantissa == 0)
-    exponent -= packdest_bits; // Lost precision here.
-  else {
-    while ((mantissa & high_packdest_bit) == 0) {
-      --exponent;
+  
+  
+  /// Size of @c Packdest in bits.
+  const int packdest_bits = std::numeric_limits<Packdest>::digits;
+  
+  
+  // Handy constant: A Packdest with 1 in the high bit.
+  const Packdest high_packdest_bit = (1U << (packdest_bits - 1));
+  
+  const Packdest ieee754_double_exponent_all_ones =
+  (Packdest{1} << ieee754_double_exponent_bits) - 1;
+  
+  
+  /**
+   * @brief  Return the largest (signed) integer that can be represented
+   *         With @c nbits bits.
+   *         Boundary case: nbits=0 should return -1.
+   * @param nbits Number of bits.
+   */
+  inline
+  int max_int (int nbits)
+  {
+    return ((1U << nbits) >> 1) - 1;
+  }
+  
+  
+  /**
+   * @brief  Return the smallest (signed) integer that can be represented
+   *         With @c nbits bits.
+   *         Boundary case: nbits=0 should return -1.
+   * @param nbits Number of bits.
+   */
+  inline
+  int min_int (int nbits)
+  {
+    return static_cast<int>(~0U << nbits) >> 1;
+  }
+  
+  
+  /**
+   * @brief Renormalize a denormal number.
+   * @param exponent[inout] The exponent of the number.
+   *                        Should initially be the denormal flag value.
+   *                        Will be modified in place.
+   * @param mantissa[inout] The mantissa of the number.
+   *                        Will be modified in place.
+   */
+  void renormalize_denormal (int& exponent,
+                             Packdest& mantissa)
+  {
+    if (mantissa == 0)
+      exponent -= packdest_bits; // Lost precision here.
+    else {
+      while ((mantissa & high_packdest_bit) == 0) {
+        --exponent;
+        mantissa <<= 1;
+      }
       mantissa <<= 1;
     }
-    mantissa <<= 1;
   }
-}
 
-
-/**
- * @brief If the number given by @a exponent and @a mantissa is too small
- *           to be represented by a normalized number in a representation
- *           where @a min_exp is the exponent value flagging denormals, convert
- *           it to a denormal representation.
- *
- * @param min_exp The denormal marker exponent value.
- * @param round_bits Number of bits to consider for rounding.
- * @param exponent[inout] The exponent of the number.
- *                        Will be modified in place.
- * param mantissa[inout] The mantissa of the number.
- *                       Will be modified in place.
- */
-void underflow_to_denormal (int min_exp,
-                            int round_bits,
-                            int& exponent,
-                            Packdest& mantissa)
-{
-  if (exponent <= min_exp) {
-    Packdest mantissa_in = mantissa;
-
-    // Denormalize the mantissa.
-    mantissa = (mantissa >> 1) | high_packdest_bit;
-
-    // Now shift it right.
-    int shift = min_exp - exponent;
-    if (shift < packdest_bits)
-      mantissa >>= shift;
-    else
-      mantissa = 0; // underflow to 0.
-
-    // Flag it as denormal.
-    exponent = min_exp;
-
-    // Handle rounding, if desired.
-    if (round_bits) {
-      //
-      //                                   +- packdest_bits - round_bits - 1
-      //                  |- round_bits  -|v
-      //    mantissa:     .................X....
-      //                       v- shift+1 -^
-      //    mantissa_in:  .....X................
-      //                       ^
-      //                       +- packdest_bits - round_bits + shift
-      //
-      int orig_pos = packdest_bits - round_bits + shift;
-      if (orig_pos < packdest_bits &&
-          ((static_cast<Packdest> (1) << orig_pos) & mantissa_in) != 0)
-      {
-        Packdest lsb = (static_cast<Packdest> (1) <<
-                        (packdest_bits - round_bits));
-        Packdest lsbmask = ~ (lsb - 1);
-
-        // ??? If we overflow here, it means we have to go back
-        //     to a normalized representation.  Just punt for now.
-        if ((mantissa & lsbmask) != lsbmask)
-          mantissa += lsb;
+  /**
+   * @brief If the number given by @a exponent and @a mantissa is too small
+   *           to be represented by a normalized number in a representation
+   *           where @a min_exp is the exponent value flagging denormals, convert
+   *           it to a denormal representation.
+   *
+   * @param min_exp The denormal marker exponent value.
+   * @param round_bits Number of bits to consider for rounding.
+   * @param exponent[inout] The exponent of the number.
+   *                        Will be modified in place.
+   * param mantissa[inout] The mantissa of the number.
+   *                       Will be modified in place.
+   */
+  void underflow_to_denormal (int min_exp,
+                              int round_bits,
+                              int& exponent,
+                              Packdest& mantissa)
+  {
+    if (exponent <= min_exp) {
+      const Packdest mantissa_in = mantissa;
+  
+      // Denormalize the mantissa.
+      mantissa = (mantissa >> 1) | high_packdest_bit;
+  
+      // Now shift it right.
+      int shift = min_exp - exponent;
+      if (shift < packdest_bits)
+        mantissa >>= shift;
+      else
+        mantissa = 0; // underflow to 0.
+  
+      // Flag it as denormal.
+      exponent = min_exp;
+  
+      // Handle rounding, if desired.
+      if (round_bits) {
+        //
+        //                                   +- packdest_bits - round_bits - 1
+        //                  |- round_bits  -|v
+        //    mantissa:     .................X....
+        //                       v- shift+1 -^
+        //    mantissa_in:  .....X................
+        //                       ^
+        //                       +- packdest_bits - round_bits + shift
+        //
+        int orig_pos = packdest_bits - round_bits + shift;
+        if (orig_pos < packdest_bits &&
+            ((static_cast<Packdest> (1) << orig_pos) & mantissa_in) != 0)
+        {
+          Packdest lsb = (static_cast<Packdest> (1) <<
+                          (packdest_bits - round_bits));
+          Packdest lsbmask = ~ (lsb - 1);
+  
+          // ??? If we overflow here, it means we have to go back
+          //     to a normalized representation.  Just punt for now.
+          if ((mantissa & lsbmask) != lsbmask)
+            mantissa += lsb;
+        }
       }
     }
   }
-}
 
 
 } // unnamed namespace
@@ -269,87 +272,87 @@ FloatPacker::FloatPacker (int nbits,
 FloatPacker::Packdest
 FloatPacker::pack (double src, std::string* err /*= nullptr*/) const
 {
-  double_or_int d;
-  d.d.d = src;
+  double d = src;
+  std::uint64_t bits = doubleToBits(d);
 
   // Fast-path for zero.  (Purely an optimization.)
   // Note: can't use a double compare here.  On some architectures (eg, MIPS)
   // a denormal will compare equal to zero.
-  if (d.i[0] == 0 && d.i[1] == 0)
+  if (bits == 0) {
     return 0;
-
-  // Check for NaN and infinity.
-  if (d.d.ieee.exponent == ieee754_double_exponent_mask) {
-    if (err) {
-      std::ostringstream os;
-      os << "Bad float number: " << src << " (" << std::setbase(16) << d.i[0]
-         << " " << d.i[1] << ")";
-      *err = os.str();
-    }
-    d.d.d = 0;
   }
 
-  if (m_invscale)
-    d.d.d *= m_invscale;
+  // Check for NaN and infinity.
+  if (biasedExponent(bits) == ieee754_double_exponent_all_ones) {    
+    if (err) {
+      std::ostringstream os;
+      os << "Bad float number: " << src << " ("
+         << std::setbase(16)
+         << static_cast<std::uint32_t>(bits)
+         << " "
+         << static_cast<std::uint32_t>(bits >> 32)
+         << ")";
+      *err = os.str();
+    }
+    d = 0;
+    bits = doubleToBits(d);
+  }
 
+  if (m_invscale){
+    d *= m_invscale;
+    bits = doubleToBits(d);
+  }
   bool was_negative = false;
-  if (d.d.ieee.negative != 0) {
+  if (isNegativeBits(bits)) {
     if (m_is_signed) {
       was_negative = true;
-      d.d.d = -d.d.d;
+      d = -d;
+      bits = doubleToBits(d);
     }
     else {
       // Don't complain on -0.
-      if (d.d.d < 0 && err) {
+      if (d < 0 && err) {
         std::ostringstream os;
         os << "Float overflow during packing: " << src;
         *err = os.str();
       }
-      d.d.d = 0;
+      d = 0;
+      bits = doubleToBits(d);
     }
   }
 
   // Check for zero again.
   // (Also need to preserve the sign; the scale division may
   // have underflowed.)
-  if (d.i[0] == 0 && d.i[1] == 0) {
-    if (was_negative)
-      return m_signmask;
-    else
-      return 0;
+  if (isZeroBits(bits)) {
+    return was_negative ? m_signmask : 0;
   }
 
   // Get packdest_bits bits of mantissa.
-
-  Packdest mantissa =
-    (d.d.ieee.mantissa0 << (packdest_bits -
-                          ieee754_double_mantissa0_bits)) |
-    (d.d.ieee.mantissa1 >>
-     (ieee754_double_mantissa1_bits -
-      (packdest_bits - ieee754_double_mantissa0_bits)));
-
-  // Get the unbiased exponent.
-  int exponent =
-    static_cast<int> (d.d.ieee.exponent) - ieee754_double_bias;
+  const std::uint64_t fullMantissa = doubleMantissaBits(bits);
+  Packdest mantissa = static_cast<Packdest>(
+    fullMantissa >> (ieee754_double_mantissa_bits - packdest_bits));
+  int exponent = biasedExponent(bits) - ieee754_double_bias;
 
   // Do rounding, if requested.
   if (m_round) {
-    Packdest lsbmask = (1 << (packdest_bits - m_npack));
-    int roundbit;
-    Packdest roundmask;
+    const Packdest lsbmask = Packdest{1} << (packdest_bits - m_npack);
+    Packdest roundmask = ~Packdest{0};
+    bool roundbit = false;
+
     if (lsbmask > 1) {
-      roundbit = (mantissa & (lsbmask >> 1));
-      roundmask = ~ static_cast<Packdest> (roundbit - 1);
+      roundbit = (mantissa & (lsbmask >> 1)) != 0;
+      roundmask = ~static_cast<Packdest>((lsbmask >> 1) - 1);
     }
     else {
-      roundbit = (d.d.ieee.mantissa1 &
-                  ((1 << ((ieee754_double_mantissa1_bits -
-                           (packdest_bits -
-                            ieee754_double_mantissa0_bits)) - 1))));
-      roundmask = ~ static_cast<Packdest> (0);
+      // We are keeping all packdest_bits bits of the extracted mantissa.
+      // The rounding bit is therefore the next bit below those bits in the
+      // original 52-bit double mantissa.
+      constexpr int shift = ieee754_double_mantissa_bits - packdest_bits;
+      roundbit = (fullMantissa & (std::uint64_t{1} << (shift - 1))) != 0;
     }
 
-    if (roundbit != 0) {
+    if (roundbit) {
       // Handle the case where it would overflow.
       if ((mantissa & roundmask) == roundmask) {
         mantissa >>= 1;
@@ -401,81 +404,76 @@ FloatPacker::pack (double src, std::string* err /*= nullptr*/) const
  * @param err If non-null, then this string will be set to a description
  *            of any error that occurs.
  */
-double FloatPacker::unpack (Packdest val, std::string* err /*= nullptr*/) const
+double
+FloatPacker::unpack(Packdest val, std::string* err /*= nullptr*/) const
 {
   // Fast-path for 0.
-  if (val == 0)
+  if (val == 0) {
     return 0;
+  }
 
   // Break apart the packed value.
-  bool was_negative = false;
-  if ((val & m_signmask) != 0)
-    was_negative = true;
+  const bool was_negative = (val & m_signmask) != 0;
 
-  double d;
+  double d = 0;
 
   // Fast path for fixed-point representations.
   if (m_nexp == 0) {
-    Packdest mantissa = (val & m_npack_ones);
-    d = mantissa / ((double)m_npack_ones + 1);
-    if (was_negative)
+    const Packdest mantissa = val & m_npack_ones;
+    d = mantissa / (static_cast<double>(m_npack_ones) + 1);
+
+    if (was_negative) {
       d *= -1;
+    }
   }
   else {
     // Get the mantissa.
     Packdest mantissa = (val & m_npack_ones) << (packdest_bits - m_npack);
-
     // General case.
     // Get the exponent.
-    int exponent = ((val >> m_npack) & m_nexp_ones);
+    int exponent = static_cast<int>((val >> m_npack) & m_nexp_ones);
     exponent += m_min_exp; // unbias.
-
-    ieee754_double dd;
 
     // Handle denormals.
     if (exponent == m_min_exp) {
       // Maybe it was -0?
       if (mantissa == 0) {
-        dd.d = 0;
-        if (was_negative)
-          dd.ieee.negative = 1;
-        return dd.d;
+        std::uint64_t bits = 0;
+        if (was_negative) {
+          bits |= double_sign_mask;
+        }
+        return bitsToDouble(bits);
       }
-
-      renormalize_denormal (exponent, mantissa);
+      renormalize_denormal(exponent, mantissa);
     }
-
     // Complain about overflow.
-    if (exponent >= max_int (ieee754_double_exponent_bits)) {
+    if (exponent >= max_int(ieee754_double_exponent_bits)) {
       if (err) {
         std::ostringstream os;
         os << "Overflow while unpacking float; exponent: " << exponent;
         *err = os.str();
       }
-      exponent = max_int (ieee754_double_exponent_bits) + 1;
+      exponent = max_int(ieee754_double_exponent_bits) + 1;
       mantissa = 0; // Infinity.
     }
-
     // Underflow into denormal.
-    underflow_to_denormal ( - ieee754_double_bias, 0,
-                            exponent, mantissa);
-
+    underflow_to_denormal(-ieee754_double_bias, 0, exponent, mantissa);
     // Pack into a double.
-    dd.ieee.negative = was_negative ? 1 : 0;
-    dd.ieee.exponent = exponent + ieee754_double_bias;
-    dd.ieee.mantissa0 =
-      (mantissa >> (packdest_bits - ieee754_double_mantissa0_bits));
-    dd.ieee.mantissa1 =
-      (mantissa << (ieee754_double_mantissa0_bits -
-                    (packdest_bits - ieee754_double_mantissa1_bits)));
-    d = dd.d;
+    std::uint64_t bits = 0;
+    if (was_negative) {
+      bits |= double_sign_mask;
+    }
+    bits |= static_cast<std::uint64_t>(exponent + ieee754_double_bias)
+            << ieee754_double_exponent_shift;
+    bits |= static_cast<std::uint64_t>(mantissa)
+            << (ieee754_double_mantissa_bits - packdest_bits);
+    d = bitsToDouble(bits);
   }
-
   // Set the result.
-  if (m_scale)
+  if (m_scale) {
     d *= m_scale;
+  }
   return d;
 }
-
 
 } // namespace CxxUtils

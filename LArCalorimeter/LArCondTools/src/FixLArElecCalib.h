@@ -40,7 +40,7 @@ class FixLArElecCalib : public AthAlgorithm
   virtual ~FixLArElecCalib() = default;
 
   virtual StatusCode initialize() override;
-  virtual StatusCode execute() override;
+  virtual StatusCode execute(const EventContext& ctx) override;
   virtual StatusCode finalize() override {return StatusCode::SUCCESS;}  
   virtual StatusCode stop ATLAS_NOT_THREAD_SAFE () override;
 

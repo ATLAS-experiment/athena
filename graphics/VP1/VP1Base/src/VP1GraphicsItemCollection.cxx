@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////
@@ -46,7 +46,7 @@ public:
   //will be the first against the wall when the revolution comes):
   QSet<QGraphicsItem*> movableitems;
 
-  VP1GraphicsItemCollection::INTERACTIONMODE interactionmode;
+  VP1GraphicsItemCollection::INTERACTIONMODE interactionmode{};
 
 };
 

@@ -66,8 +66,8 @@ class TileCalibDrawerOfc : public TileCalibDrawerBase {
                                          , int32_t            nPhases
                                          , uint16_t           nChans
                                          , uint16_t           nGains
-                                         , const std::string& author = ""
-                                         , const std::string& comment = ""
+                                         , std::string_view author = ""
+                                         , std::string_view comment = ""
                                          , uint64_t           timeStamp = 0);
 
   /** @brief Returns a pointer to a const TileCalibDrawerOfc. */
@@ -143,8 +143,8 @@ class TileCalibDrawerOfc : public TileCalibDrawerBase {
             , int32_t  nPhases
             , uint16_t nChans
             , uint16_t nGains
-            , const std::string& author=""
-            , const std::string& comment=""
+            , std::string_view author=""
+            , std::string_view comment=""
             , uint64_t timeStamp=0);
   
   /** @brief Sets OFC data.

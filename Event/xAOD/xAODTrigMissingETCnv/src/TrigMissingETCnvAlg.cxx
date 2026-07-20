@@ -41,7 +41,7 @@ namespace xAODMaker {
       return StatusCode::SUCCESS;
    }
 
-   StatusCode TrigMissingETCnvAlg::execute() {
+   StatusCode TrigMissingETCnvAlg::execute(const EventContext& /*ctx*/) {
 
       // Check if the input is available:
       if( ! evtStore()->contains< TrigMissingETContainer >( m_aodKey ) ) {

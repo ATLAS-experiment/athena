@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -156,7 +156,7 @@ CP::ElectronChargeEfficiencyCorrectionTool::initialize()
 
   for (unsigned int j = 0; j < names.size(); j++) {
 
-    std::string name = names.at(j);
+    const std::string& name = names.at(j);
     ATH_MSG_DEBUG("Got ROOT object with name: " << name);
     if (name.find(Form("SFCentral_")) != std::string::npos) {
       ATH_MSG_VERBOSE("Found name 'SFCentral_' in ROOT object name");

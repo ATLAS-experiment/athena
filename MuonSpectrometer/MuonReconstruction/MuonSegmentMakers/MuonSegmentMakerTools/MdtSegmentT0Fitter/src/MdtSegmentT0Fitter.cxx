@@ -15,6 +15,8 @@
 #include "MuonRIO_OnTrack/MdtDriftCircleOnTrack.h"
 #include "MuonPrepRawData/MdtPrepData.h"
 
+#include "CxxUtils/FPControl.h"
+
 #include "Minuit2/Minuit2Minimizer.h"
 #include "Math/Functor.h"
 #include "TMath.h"
@@ -457,7 +459,7 @@ namespace TrkDriftCircleMath {
 
     ATH_MSG_DEBUG("positive radii ML1 " <<  nml1p << " ML2 " <<  nml2p << " negative radii ML1 " << nml1n << " ML " << nml2n << " used hits " << used << " t0 Error " << t0Error);
 
-    constexpr std::array<Double_t,3> step{0.01 , 0.01 , 2.0 };
+    constexpr std::array<Double_t,3> step{0.01 , 0.01 , 0.1 };
     // starting point
     std::array<Double_t,3> variable{theta,d,0};
     // if t0Seed value from outside use this
@@ -481,13 +483,26 @@ namespace TrkDriftCircleMath {
     
     minimum.SetFunction(minFunct);
 
+    
+    // Suppress the FPE, for future we should study topology and eliminate bad input candidates before it reaches minuit
+    // An example: MuGirlStauAlg.MuonStauRecoToo...MdtSegmentT0Fitter positive radii ML1 3 ML2 3 negative radii ML1 1 ML 0 used hits 7 t0 Error 10
+    // For more details see: ATLASRECTS-8052
+    {
+
+      CxxUtils::FPControl ctl;
+      ctl.disable (CxxUtils::FPControl::Exc::divbyzero);
+      ctl.disable (CxxUtils::FPControl::Exc::invalid);
+
+
     // do the minimization
-    const bool minuit_succedded = minimum.Minimize();
-    const int minuitStatus = minimum.Status();
-    if (!minuit_succedded || minuitStatus != 0) {
-      ATH_MSG_DEBUG("Minuit fit failed with status " << minuitStatus);
-      return false;
-    }
+      const bool minuit_succedded = minimum.Minimize();
+      const int minuitStatus = minimum.Status();
+      if (!minuit_succedded || minuitStatus != 0) {
+        ATH_MSG_DEBUG("Minuit fit failed with status " << minuitStatus);
+        return false;
+      }
+
+   }
 
     const double *results = minimum.X();
     const double *errors = minimum.Errors();

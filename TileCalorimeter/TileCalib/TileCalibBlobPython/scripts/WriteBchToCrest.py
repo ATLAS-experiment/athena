@@ -156,9 +156,12 @@ log.info("Initializing bad channels from %s folder %s with tag %s", inSchema, fo
 
 iovList = []
 iovUntil = []
-blobReader = TileCalibCrest.TileBlobReaderCrest(inSchema, folderPath, folderTag, max(run,beg), lumi, 0, 0)
-if folderPath and not (folderTag.upper().startswith("TILE") or folderTag.upper().startswith("CALO")):
-    folderTag = blobReader.getFolderTag(folderPath,None,folderTag)
+
+blobReader = TileCalibCrest.TileBlobReaderCrest(inSchema, folderPath, folderTag, None, None, 0, 0)
+tag = blobReader.getTag()
+if tag != "unknown":
+    folderTag = tag
+
 if iov:
     #=== filling the iovList
     log.info( "Looking for IOVs" )

@@ -60,6 +60,11 @@ def ActsPixelSeedingToolCfg(flags,
         [40, 260],
         [140, 260],
         [0, 0]])
+    
+    kwargs.setdefault("useHVCollisionRegion", flags.Tracking.ActiveConfig.useHoughVertexFilter)
+    kwargs.setdefault("hvCollisionRegionTolerance", 10. * ActsUnits.mm)
+    kwargs.setdefault("inputHoughVtx", "HoughVertices" if flags.Tracking.ActiveConfig.useHoughVertexFilter else "")
+
     acc.setPrivateTools(CompFactory.ActsTrk.GridTripletSeedingTool(name, **kwargs))
     return acc
 
@@ -163,7 +168,10 @@ def ActsStripSeedingToolCfg(flags,
     kwargs.setdefault("rBinEdges", [0, kwargs['rMax']])
     kwargs.setdefault("collisionRegionMin", -200. * ActsUnits.mm)
     kwargs.setdefault("collisionRegionMax", 200. * ActsUnits.mm)
-
+    kwargs.setdefault("useHVCollisionRegion", flags.Tracking.ActiveConfig.useHoughVertexFilter)
+    kwargs.setdefault("hvCollisionRegionTolerance", 10. * ActsUnits.mm)
+    kwargs.setdefault("inputHoughVtx", "HoughVertices" if flags.Tracking.ActiveConfig.useHoughVertexFilter else "")
+    
     acc.setPrivateTools(CompFactory.ActsTrk.GridTripletSeedingTool(name, **kwargs))
     return acc
 
@@ -173,6 +181,15 @@ def ActsLargeRadiusStripSeedingToolCfg(flags,
     ## LRT-specific seeding cuts
     kwargs.setdefault("interactionPointCut", True)
     kwargs.setdefault("impactMax", 300. * ActsUnits.mm)
+    ## per-pair azimuthal-swing doublet cut: rejects doublets whose azimuthal
+    ## separation exceeds what a track with |d0| < impactMax can produce
+    kwargs.setdefault("doubletDPhiCut", True)
+    kwargs.setdefault("doubletDPhiCap", 0.10)
+    ## deltaRMax only affects the grid phi-bin width (the doublet finders use
+    ## deltaRMin/MaxTopSP/BottomSP); the bins widen with the impact-parameter
+    ## term |asin(impactMax/(gridRMax-deltaRMax)) - asin(impactMax/gridRMax)|,
+    ## so this value controls how much phi is enumerated per middle space point
+    kwargs.setdefault("deltaRMax", 400. * ActsUnits.mm)
     kwargs.setdefault("collisionRegionMin", -500. * ActsUnits.mm)
     kwargs.setdefault("collisionRegionMax", 500. * ActsUnits.mm)
     kwargs.setdefault("deltaRMiddleMaxSPRange", 75 * ActsUnits.mm)

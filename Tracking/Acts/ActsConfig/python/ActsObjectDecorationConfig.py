@@ -320,3 +320,10 @@ def ActsInDetStripClusterSiHitDecoratorAlgCfg(flags,
     kwargs.setdefault('StripDetEleCollKey', 'SCT_DetectorElementCollection')
     acc.addEventAlgo(CompFactory.ActsTrk.StripClusterSiHitDecoratorAlg(name, **kwargs))
     return acc
+
+def ActsGNNScoreDecoratorAlgCfg(flags,
+                                name: str = "ActsGNNScoreDecoratorAlg",
+                                **kwargs) -> ComponentAccumulator:
+    acc = ComponentAccumulator()
+    acc.addEventAlgo(CompFactory.ActsTrk.GNNScoreDecoratorAlg(name, **kwargs))
+    return acc

@@ -47,15 +47,15 @@ namespace CP
 
 
   StatusCode AsgEventScaleFactorAlg ::
-  execute ()
+  execute (const EventContext& ctx)
   {
     for (const auto& sys : m_systematicsList.systematicsVector())
     {
       const xAOD::EventInfo *eventInfo = nullptr;
-      ANA_CHECK (m_eventInfoHandle.retrieve (eventInfo, sys));
+      ANA_CHECK (m_eventInfoHandle.retrieve (eventInfo, sys, ctx));
 
       const xAOD::IParticleContainer *particles = nullptr;
-      ANA_CHECK (m_particleHandle.retrieve (particles, sys));
+      ANA_CHECK (m_particleHandle.retrieve (particles, sys, ctx));
 
       float scaleFactor = 1;
       for (const xAOD::IParticle *particle : *particles)

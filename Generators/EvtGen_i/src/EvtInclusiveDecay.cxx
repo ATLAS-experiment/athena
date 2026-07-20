@@ -38,10 +38,8 @@
 #include "GaudiKernel/MsgStream.h"
 #include "GaudiKernel/ISvcLocator.h"
 #include "GaudiKernel/DataSvc.h"
-#include "GaudiKernel/IPartPropSvc.h"
 #include "StoreGate/StoreGateSvc.h"
 #include "GeneratorObjects/McEventCollection.h"
-#include "HepPID/ParticleName.hh"
 
 #include "AthenaKernel/RNGWrapper.h"
 #include "CLHEP/Random/RandFlat.h"
@@ -214,10 +212,9 @@ CLHEP::HepRandomEngine* EvtInclusiveDecay::getRandomEngineDuringInitialize(const
 }
 
 
-StatusCode EvtInclusiveDecay::execute() {
+StatusCode EvtInclusiveDecay::execute(const EventContext& ctx) {
   ATH_MSG_DEBUG("EvtInclusiveDecay executing");
 
-  const EventContext& ctx = Gaudi::Hive::currentContext();
   reseedRandomEngine(m_randomStreamName, ctx);
 
   std::string   key = m_inputKeyName;
@@ -273,11 +270,7 @@ StatusCode EvtInclusiveDecay::execute() {
 
       for (auto p: toBeDecayed) {
         if (p == 0) {
-#ifdef HEPMC3
           msg(MSG::ERROR ) << "Overlapping decay tree for particle" << p <<endmsg;
-#else
-          msg(MSG::ERROR ) << "Overlapping decay tree encountered for barcode " << HepMC::barcode(p) << endmsg;
-#endif
           return StatusCode::FAILURE;
         }
         decayParticle(hepMC,std::move(p));
@@ -296,11 +289,7 @@ StatusCode EvtInclusiveDecay::execute() {
     // Store the number of decay attempts in event weights std::map, only if repeated decays enabled
 
     if(m_maxNRepeatedDecays > 1) {
-#ifdef HEPMC3
       hepMC->weight("nEvtGenDecayAttempts") = loopCounter;
-#else
-      hepMC->weights()["nEvtGenDecayAttempts"] = loopCounter;
-#endif
     }
     // Print HepMC in tree format if desired (after finishing all EvtGen decays)
     if (m_printHepMCAfterEvtGen) {
@@ -326,13 +315,12 @@ StatusCode EvtInclusiveDecay::finalize() {
     ATH_MSG_INFO("The following particles were checked and didn't have any decay channels:");
     if (msgLvl(MSG::INFO)) {
       std::cout << std::endl;
-      std::cout << " Particle code    Name from HepPDT        # Occurences" << std::endl;
-      std::cout << "------------------------------------------------------"  << std::endl;
+      std::cout << " Particle code        # Occurences" << std::endl;
+      std::cout << "----------------------------------"  << std::endl;
       for (std::map<int,long>::iterator p = m_noDecayChannels.begin(); p!=m_noDecayChannels.end(); ++p) {
         int id = p->first;
         int count = p->second;
         std::cout << std::setw(14) << id
-                  << std::setw(20) << HepPID::particleName(id)
                   << std::setw(20) << count
                   << std::endl;
       }
@@ -395,26 +383,10 @@ StatusCode EvtInclusiveDecay::traverseDecayTree(HepMC::GenParticlePtr p,
 void EvtInclusiveDecay::removeDecayTree(HepMC::GenEvent* hepMC, HepMC::GenParticlePtr p) {
   auto v = p->end_vertex();
   if (v) {
-#ifdef HEPMC3
     //This is recursive in HepMC3. But explicit deletion is allowed as well.
     hepMC->remove_vertex(std::move(v));
     p->set_status(1);   // For now, flag particle as undecayed (stable)
     ATH_MSG_DEBUG("Removed existing " << pdgName(p) << " " << p  );
-#else
-    std::set<int> vtxBarCodesToDelete;
-    vtxBarCodesToDelete.insert(v->barcode());
-    for (HepMC::GenVertex::vertex_iterator itv = v->vertices_begin(HepMC::descendants);
-                                           itv != v->vertices_end(HepMC::descendants);
-                                           ++itv)
-      vtxBarCodesToDelete.insert((*itv)->barcode());
-    for (std::set<int>::iterator itb = vtxBarCodesToDelete.begin(); itb != vtxBarCodesToDelete.end(); ++itb) {
-      auto vdel = hepMC->barcode_to_vertex(*itb);
-      hepMC->remove_vertex(vdel);
-      delete vdel;
-    }
-    p->set_status(1);   // For now, flag particle as undecayed (stable)
-    ATH_MSG_DEBUG("Removed existing " << pdgName(p) << " (barcode " << p->barcode() << ")" << " decay tree with " << vtxBarCodesToDelete.size() << " vertices");
-#endif
   }
 }
 
@@ -706,12 +678,7 @@ unsigned int EvtInclusiveDecay::printTree(HepMC::GenParticlePtr p, std::set<HepM
 std::string EvtInclusiveDecay::pdgName(HepMC::ConstGenParticlePtr p, bool statusHighlighting, std::set<HepMC::GenParticlePtr,ParticleIdCompare>* particleSet) {
   std::ostringstream buf;
   bool inlist = false;
-#ifdef HEPMC3
   if (particleSet) for (const auto& pinl: *particleSet) if (pinl&&p) if (pinl.get() == p.get()) inlist=true;
-#else
-  auto p_nc ATLAS_THREAD_SAFE = const_cast<HepMC::GenParticlePtr> (p);
-  if (particleSet) inlist = (particleSet->find(p_nc) != particleSet->end());
-#endif
   if (statusHighlighting) {
     if ( ((particleSet!=0) && (inlist)) ||
          ((particleSet==0) && isToBeDecayed(p,false)) )
@@ -725,7 +692,6 @@ std::string EvtInclusiveDecay::pdgName(HepMC::ConstGenParticlePtr p, bool status
   }
   if (p){
     buf << p->pdg_id();
-    buf << "/" << HepPID::particleName(p->pdg_id());
     if (statusHighlighting) {
       buf << "\033[0m";   // revert color attributes
     }

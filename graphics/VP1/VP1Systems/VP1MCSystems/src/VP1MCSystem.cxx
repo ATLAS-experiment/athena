@@ -2,8 +2,6 @@
   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "HepPDT/ParticleDataTable.hh"
-#include "HepPDT/ParticleData.hh"
 #include "VP1MCSystems/VP1MCSystem.h"
 #include "ui_vp1mccontroller.h"
 #include "VP1Utils/VP1SGContentsHelper.h"
@@ -92,16 +90,6 @@ void VP1MCSystem::Imp::zeroFormat(QTreeWidgetItem *item) {
 }
 
 void VP1MCSystem::Imp::handle(QTreeWidgetItem *item, const HepMC::GenParticle &theParticle) {
-  
-#ifdef PD
-  const HepPDT::ParticleDataTable * dataTable = pps->PDT();
-  const HepPDT::ParticleData      * particleData = dataTable->particle(iabs(theParticle.pdg_id()));
-  // Generate text
-  if (particleData) {
-  }
-  else {
-  }
-#endif
 
   std::ostringstream partStream, pidStream, massStream, ptStream, etaStream, phiStream;
 

@@ -1,12 +1,13 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRIGCOSTANALYSIS_MONITORCHAINALGORITHM_H
 #define TRIGCOSTANALYSIS_MONITORCHAINALGORITHM_H 1
 
 #include "../MonitorBase.h"
-
+#include <memory>
+#include <string>
 /**
  * @class MonitorChainAlgorithm
  * @brief Concrete implementation of Monitor to monitor all Algorithm instances associated with chain in an event.

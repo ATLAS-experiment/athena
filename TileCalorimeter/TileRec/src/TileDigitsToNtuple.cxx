@@ -100,10 +100,10 @@ StatusCode TileDigitsToNtuple::initialize() {
 //* Execution
 //****************************************************************************
 
-StatusCode TileDigitsToNtuple::execute() {
+StatusCode TileDigitsToNtuple::execute(const EventContext& ctx) {
 
   // step1: read TileDigitss from TDS
-  SG::ReadHandle<TileDigitsContainer> digitsContainer(m_digitsContainerKey);
+  SG::ReadHandle<TileDigitsContainer> digitsContainer(m_digitsContainerKey, ctx);
   ATH_CHECK( digitsContainer.isValid() );
 
   m_nChannel = 0;

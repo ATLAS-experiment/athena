@@ -18,53 +18,90 @@
 #include "AthenaMonitoringKernel/Monitored.h"
 
 #include <string>
+#include <stdexcept>
 
 namespace TIDA {
-
-template<typename T> 
-class Histogram { 
+ 
+class HistogramBase { 
 
 public:
-
-  Histogram() : m_monTool(0), m_name("") { } 
   
-  Histogram( ToolHandle<GenericMonitoringTool>* m, const std::string& name ) : m_monTool(m), m_name(name)  { 
-    //    std::cout << "book: " << m_name << "  " << m_monTool->name() << std::endl;
+  HistogramBase() : m_monTool(0), m_name("UNINITIALISED"), m_varname(), m_initialised(false) { } 
+  
+  HistogramBase( ToolHandle<GenericMonitoringTool>* m, const std::string& name, const std::string& domain="" ) :
+    m_monTool(m), m_name(name), m_varname(domain.empty() ? name : domain+"_"+name), m_initialised(false)  { 
+    if ( !m_name.empty() && m_monTool ) m_initialised = true;
   } 
 
-  void Fill( T d ) const { 
-    if ( m_monTool ) { 
-        //  std::cout << "Histogram::Fill() monTool " << m_monTool << "\tname: " << m_name << "\td: " << d << "\t" << monTool()->name() << std::endl;
-        auto s = Monitored::Scalar<T>( m_name, d ); 
-        Monitored::Group( *m_monTool, s );
-    }
-    else std::cerr << "Histogram " << m_name << "\tmonTool not defined" << std::endl;
-  }
+  const std::string&    name() const { return m_name; }
+  const std::string& varname() const { return m_varname; }
 
-  void Fill( T d, T w ) const { 
-    if ( m_monTool ) { 
-        // std::cout << "Histogram::Fill() monTool " << m_monTool << "\tname: " << m_name << "\td: " << d << "\tw:" << w << std::endl;
-	auto s  = Monitored::Scalar<T>( m_name, d );
-	auto sw = Monitored::Scalar<T>( m_name+"_weight", w ); 
-	Monitored::Group( *m_monTool, s, sw );
-    }
-    else std::cerr << "Histogram " << m_name << "\tmonTool not defined" << std::endl;
-  }
-
-  const std::string& name() const { return m_name; }
-
-  ToolHandle<GenericMonitoringTool>* monTool() const { return m_monTool; };
-
-  const Histogram* operator->() const { return this; }
+  bool           initialised() const { return m_initialised; }
   
+  const ToolHandle<GenericMonitoringTool>* monTool() const { return m_monTool; };
+
 private:
 
   ToolHandle<GenericMonitoringTool>* m_monTool;
 
   std::string m_name;
+  std::string m_varname;
 
+  bool        m_initialised;
+  
 };
 
+
+template<typename T> 
+class Histogram : public HistogramBase { 
+
+public:
+
+  using HistogramBase::HistogramBase;
+  
+  void Fill( T d ) const {
+    if ( !initialised() ) throw std::runtime_error("TIDA::Histogram not initialised: "+name());
+    auto s = Monitored::Scalar<T>( varname(), d ); 
+    Monitored::Group( *monTool(), s );
+  }
+
+  void Fill( T d, T w ) const {
+    if ( !initialised() ) throw std::runtime_error("TIDA::Histogram not initialised: "+name());
+    auto s  = Monitored::Scalar<T>( varname(), d ); 
+    auto sw = Monitored::Scalar<T>( varname()+"_weight", w ); 
+    Monitored::Group( *monTool(), s, sw );
+  }
+
+  const Histogram* operator->() const { return this; }
+  
+};
+
+
+template<typename T,typename U=T> 
+class Histogram2D : public HistogramBase { 
+
+public:
+
+  using HistogramBase::HistogramBase;
+  
+  void Fill( T x, U y ) const {
+    if ( !initialised() ) throw std::runtime_error("TIDA::Histogram not initialised: "+name());
+    auto sx = Monitored::Scalar<T>( varname()+"__x", x ); 
+    auto sy = Monitored::Scalar<T>( varname()+"__y", y ); 
+    Monitored::Group( *monTool(), sx, sy );
+  }
+
+  void Fill( T x, U y, T w) const {
+    if ( !initialised() ) throw std::runtime_error("TIDA::Histogram not initialised: "+name());
+    auto sx  = Monitored::Scalar<T>( varname()+"__x", x ); 
+    auto sy  = Monitored::Scalar<T>( varname()+"__y", y ); 
+    auto sw  = Monitored::Scalar<T>( varname()+"_weight", w ); 
+    Monitored::Group( *monTool(), sx, sy, sw );
+  }
+  
+  const Histogram2D* operator->() const { return this; }
+  
+};
 
 
 }

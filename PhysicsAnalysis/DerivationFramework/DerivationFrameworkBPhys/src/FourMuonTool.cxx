@@ -35,8 +35,6 @@ namespace DerivationFramework {
     ATH_CHECK( m_iVertexFitter.retrieve() );
     ATH_MSG_DEBUG("Retrieved tool " << m_iVertexFitter);
 
-    // retrieving V0 Fitter
-    ATH_CHECK( m_iV0VertexFitter.retrieve(DisableTool{!m_useV0Fitter}));
 
     // Get the track selector tool from ToolSvc
     ATH_CHECK ( m_trkSelector.retrieve() );
@@ -190,6 +188,9 @@ namespace DerivationFramework {
       }
     }
     ATH_MSG_DEBUG("quadruplet container size " << quadVxContainer->size());
+    if(quadVxContainer->size() > 500){
+      ATH_MSG_WARNING("Event Run: " << evt->runNumber() << " Event: " << evt->eventNumber() << " quadruplet container size " << quadVxContainer->size());
+    }
 
     return StatusCode::SUCCESS;;
   }
@@ -205,22 +206,8 @@ namespace DerivationFramework {
                                                   const xAOD::TrackParticleContainer* importedTrackCollection,
                                                   const Amg::Vector3D &beamSpot) const {
 
-    const Trk::TrkV0VertexFitter* concreteVertexFitter=0;
-    if (m_useV0Fitter) {
-      // making a concrete fitter for the V0Fitter
-      concreteVertexFitter = dynamic_cast<const Trk::TrkV0VertexFitter * >(&(*m_iV0VertexFitter));
-      if(concreteVertexFitter == 0) {
-        ATH_MSG_FATAL("The vertex fitter passed is not a V0 Vertex Fitter");
-        return nullptr;
-      }
-    }
 
-    std::unique_ptr<xAOD::Vertex> myVxCandidate;
-    if (m_useV0Fitter) {
-      myVxCandidate = concreteVertexFitter->fit(ctx, inputTracks, beamSpot /*vertex startingPoint*/ );
-    } else {
-      myVxCandidate = m_iVertexFitter->fit(ctx, inputTracks, beamSpot /*vertex startingPoint*/ );
-    }
+    std::unique_ptr<xAOD::Vertex> myVxCandidate = m_iVertexFitter->fit(ctx, inputTracks, beamSpot /*vertex startingPoint*/ );
 
     if(myVxCandidate) BPhysPVTools::PrepareVertexLinks(myVxCandidate.get(), importedTrackCollection);
 

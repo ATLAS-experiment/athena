@@ -81,7 +81,7 @@ namespace CP
   getName (const CP::SystematicSet& sys) const
   {
     const auto& data = getData (sys);
-    return std::get<0> (data);
+    return data.name;
   }
 
 
@@ -99,7 +99,7 @@ namespace CP
        const CP::SystematicSet& sys) const
   {
     const auto& data = getData (sys);
-    std::get<1> (data) (object) = value;
+    data.decorator (object) = value;
   }
 
 
@@ -111,7 +111,7 @@ namespace CP
     const auto& data = getData (sys);
     SG::AuxVectorData* cont_nc ATLAS_THREAD_SAFE =
       const_cast<SG::AuxVectorData*> (object.container());
-    cont_nc->lockDecoration (std::get<1> (data).auxid());
+    cont_nc->lockDecoration (data.decorator.auxid());
   }
 
 
@@ -134,7 +134,7 @@ namespace CP
       std::string newName;
       ANA_CHECK (svc.makeSystematicsName (newName, m_decorName, sys));
       ANA_MSG_DEBUG ("SysWriteDecorHandle: " << newName << " (" << sys.name() << ")");
-      m_dataCache.emplace (sys, std::make_tuple (newName, newName));
+      m_sysData.emplace (sys, SysData{newName, SG::Decorator<T>{newName}});
     }
     ANA_CHECK (svc.setDecorSystematics (m_objectHandle->getNamePattern(), m_decorName, fullAffecting));
     ANA_CHECK (m_objectHandle->addDecorationDependency (svc, m_decorName, true));
@@ -147,10 +147,10 @@ namespace CP
   SysWriteDecorHandle<T> ::
   getData (const CP::SystematicSet& sys) const
   {
-    auto cache = m_dataCache.find (sys);
-    if (cache == m_dataCache.end())
+    auto cache = m_sysData.find (sys);
+    if (cache == m_sysData.end())
     {
-      if (m_dataCache.empty())
+      if (m_sysData.empty())
         throw std::logic_error ("uninitialized SysWriteDecorHandle (" + m_decorName + ")");
       else
         throw std::logic_error ("unsupported systematic in SysWriteDecorHandle (" + m_decorName + "): (" + sys.name() + ")");

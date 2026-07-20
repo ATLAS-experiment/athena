@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Daniel Werner
@@ -33,7 +33,7 @@ namespace CP
   public:
     using EL::AnaAlgorithm::AnaAlgorithm;
     StatusCode initialize () override;
-    StatusCode execute () override;
+    StatusCode execute (const EventContext& ctx) override;
 
 
 
@@ -67,7 +67,7 @@ namespace CP
     ServiceHandle<ISelectionNameSvc> m_nameSvc {"SelectionNameSvc", "InDetTrackSelectionAlg"};
 
     /// \brief the bits to set for an object failing the preselection
-    SelectionType m_setOnFail;
+    SelectionType m_setOnFail{};
 
     asg::AcceptInfo m_acceptInfo;
 

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Marco Rimoldi
@@ -12,7 +12,6 @@
 #include <SystematicsHandles/SysReadHandle.h>
 #include <SystematicsHandles/SysWriteHandle.h>
 #include <SystematicsHandles/SysWriteDecorHandle.h>
-#include <SelectionHelpers/SysReadSelectionHandle.h>
 #include <SystematicsHandles/SysFilterReporterParams.h>
 #include <AsgTools/PropertyWrapper.h>
 
@@ -40,7 +39,7 @@ namespace CP
 
   public:
     virtual StatusCode initialize() final override;
-    virtual StatusCode execute() final override;
+    virtual StatusCode execute(const EventContext& ctx) final override;
 
     /// \brief trigger decision tool handle
   private:
@@ -63,9 +62,6 @@ namespace CP
 
     /// \brief input particle collection
     SysReadHandle<xAOD::IParticleContainer> m_particlesHandle { this, "particles", "", "the particle container to use"};
-
-    /// \brief input particle selection
-    SysReadSelectionHandle m_particleSelection {this, "particleSelection", "", "the selection on the input particles"};
 
   };
 

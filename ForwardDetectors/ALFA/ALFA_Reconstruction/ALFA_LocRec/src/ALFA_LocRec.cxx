@@ -208,7 +208,7 @@ StatusCode ALFA_LocRec::initialize()
 	return StatusCode::SUCCESS;
 }
 
-StatusCode ALFA_LocRec::execute()
+StatusCode ALFA_LocRec::execute(const EventContext& ctx)
 {
 	ATH_MSG_DEBUG("begin ALFA_LocRec::execute()");
 
@@ -222,7 +222,7 @@ StatusCode ALFA_LocRec::execute()
 	ListODHits.clear();
 
 	m_eventNum = 0;
-	SG::ReadHandle<xAOD::EventInfo> eventInfo (m_eventInfoKey,getContext());
+	SG::ReadHandle<xAOD::EventInfo> eventInfo (m_eventInfoKey, ctx);
 	if(!eventInfo.isValid()) {
 		ATH_MSG_ERROR("ALFA_LocRec, Cannot get event info.");
 //		return sc;

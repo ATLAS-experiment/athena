@@ -18,7 +18,7 @@
 #include "RelationalAccess/ICursor.h"
 #include "RelationalAccess/IQuery.h"
 
-#include "boost/regex.hpp"
+#include <regex>
 
 #include <set>
 #include <iostream>
@@ -506,14 +506,14 @@ TrigConf::JobOptionTableLoader::assembleSplitParameters2( JobOptionTable& jot, c
 
    std::map<AssembledPar, std::vector<std::string>, APlessthan > assembled_params;
 
-   boost::regex pname_exp("(.*)__IPC__(\\d+)");
-   boost::cmatch matches;
+   std::regex pname_exp("(.*)__IPC__(\\d+)");
+   std::cmatch matches;
 
    //   for(unsigned int i=0; i<splitparams.size(); ++i) {
    for(const SplitParam & splitpar: splitparams ) {
       //const SplitParam & splitpar = splitparams[i];
 
-      if(boost::regex_match(splitpar.name.c_str(), matches, pname_exp)) {
+      if(std::regex_match(splitpar.name.c_str(), matches, pname_exp)) {
 
          const std::string& comp_alias = splitpar.alias;
          std::string par_name(matches[1].first, matches[1].second);

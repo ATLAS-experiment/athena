@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef AGDDDetectorPositioner_H
@@ -19,21 +19,21 @@ class AGDDDetector;
 struct Identifiers {
 	std::string detectorType;
 	std::string detectorAddress;
-	int phiIndex;
-	int etaIndex;
-	int radIndex;
-	int sideIndex;
-	int mlayerIndex;
-	int spare1;
-	int spare2;
+	int phiIndex{};
+	int etaIndex{};
+	int radIndex{};
+	int sideIndex{};
+	int mlayerIndex{};
+	int spare1{};
+	int spare2{};
 };
 
 struct DetectorPositionParameters {
     DetectorPositionParameters():Zposition(0),Radius(0),PhiStart(0),Phi(0) {;}
-    double Zposition;
-    double Radius;
-    double PhiStart;
-	double Phi;
+    double Zposition{};
+    double Radius{};
+    double PhiStart{};
+	double Phi{};
 };
 
 class AGDDDetectorPositioner:public AGDDPositioner {
@@ -44,13 +44,13 @@ public:
                            const GeoTrf::Transform3D& t);
     virtual ~AGDDDetectorPositioner()=default;
 
-	Identifiers ID;
+	Identifiers ID{};
 
-	DetectorPositionParameters position;
+	DetectorPositionParameters position{};
 	
-	AGDDDetector* theDetector;
+	AGDDDetector* theDetector{};
 	
-	GeoFullPhysVol* theVolume;
+	GeoFullPhysVol* theVolume{};
 	
 	// accessors
 	

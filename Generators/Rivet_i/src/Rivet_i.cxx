@@ -138,10 +138,9 @@ StatusCode Rivet_i::initialize ATLAS_NOT_THREAD_SAFE () {
 }
 
 
-StatusCode Rivet_i::execute() {
+StatusCode Rivet_i::execute(const EventContext& ctx) {
   ATH_MSG_DEBUG("Rivet_i execute");
 
-  const EventContext& ctx = getContext();
 
   m_needsConversion = !evtStore()->contains<McEventCollection>(m_genEventKey);
   ATH_MSG_DEBUG("Rivet_i needs xAOD::Truth to HepMC::GenEvent conversion? " << m_needsConversion);
@@ -269,7 +268,6 @@ std::unique_ptr<HepMC::GenEvent> Rivet_i::checkEvent(const HepMC::GenEvent& even
   }
 
   // weight-name cleaning
-#ifdef HEPMC3
   std::shared_ptr<HepMC3::GenRunInfo> modRunInfo;
   if (event.run_info()) {
     modRunInfo = std::make_shared<HepMC3::GenRunInfo>(*(event.run_info().get()));
@@ -311,51 +309,7 @@ std::unique_ptr<HepMC::GenEvent> Rivet_i::checkEvent(const HepMC::GenEvent& even
     }
     modEvent->run_info()->set_weight_names(w_names);
   }
-#else
-  const HepMC::WeightContainer& old_wc = event.weights();
-  std::vector<std::string> old_wnames = old_wc.weight_names();
-  if (old_wnames.size()) {
-    HepMC::WeightContainer& new_wc = modEvent->weights();
-    new_wc.clear();
-    std::vector<std::pair<std::string,std::string> > w_subs = {
-      {" nominal ",""},
-      {" set = ","_"},
-      {" = ","_"},
-      {"=",""},
-      {",",""},
-      {".",""},
-      {":",""},
-      {" ","_"},
-      {"#","num"},
-      {"\n","_"},
-      {"/","over"}
-    };
-    std::map<std::string, double> new_name_to_value;
-    std::map<std::string, std::string> old_name_to_new_name;
-    for (const std::string& old_name : old_wnames) {
-      std::string wname = std::string(old_name);
-      double value = old_wc[old_name];
-      for (const auto& sub : w_subs) {
-        size_t start_pos = wname.find(sub.first);
-        while (start_pos != std::string::npos) {
-          wname.replace(start_pos, sub.first.length(), sub.second);
-          start_pos = wname.find(sub.first);
-        }
-      }
-      new_name_to_value[wname] = value;
-      old_name_to_new_name[old_name] = wname;
-    }
-    auto itEnd = old_name_to_new_name.end();
-    for (const std::string& old_name : old_wnames) {
-      if (old_name_to_new_name.find(old_name) == itEnd)  continue;
-      const std::string& new_name = old_name_to_new_name[old_name];
-      new_wc[ new_name ] = new_name_to_value[new_name];
-    }
-    // end of weight-name cleaning
-  }
-#endif
 
-#ifdef HEPMC3
   modEvent->set_units(HepMC3::Units::GEV, HepMC3::Units::MM);
   if (modEvent->particles().size() == 1) modEvent->set_beam_particles(modEvent->particles().front(), modEvent->particles().front());
   if (m_patchBeams) {
@@ -383,29 +337,13 @@ std::unique_ptr<HepMC::GenEvent> Rivet_i::checkEvent(const HepMC::GenEvent& even
   if (modEvent->beams().front()->momentum().e() > 50000.0) {
     MeV2GeV(*modEvent);
   }
-#else
-  modEvent->use_units(HepMC::Units::GEV, HepMC::Units::MM);
-  if (modEvent->particles_size() == 1)  modEvent->set_beam_particles(*modEvent->particles_begin(), *modEvent->particles_begin());
-  if (modEvent->beam_particles().first->momentum().e() > 50000.0) {
-    MeV2GeV(*modEvent);
-  }
-#endif
 
   return modEvent;
 }
 
 void Rivet_i::MeV2GeV(HepMC::GenEvent& evt) {
-#ifdef HEPMC3
   for (auto& p: evt.particles()) {
     p->set_momentum(p->momentum()*0.001);
-#else
-  for (HepMC::GenParticlePtr p: evt) {
-    const HepMC::FourVector& mom = p->momentum();
-    p->set_momentum(HepMC::FourVector (mom.px()*0.001,
-                                       mom.py()*0.001,
-                                       mom.pz()*0.001,
-                                       mom.e()*0.001));
-#endif
     p->set_generated_mass(p->generated_mass()*0.001);
   }
 }

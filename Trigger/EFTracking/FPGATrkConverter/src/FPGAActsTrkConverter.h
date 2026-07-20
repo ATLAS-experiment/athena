@@ -40,7 +40,7 @@ class FPGAActsTrkConverter : public extends<AthAlgTool,IFPGAActsTrkConverter> {
     StatusCode matchTrackMeasurements(const EventContext& ctx,
                                       const XAOD_CLUSTER& cluster,
                                       const FPGATrackSimHit & trackHit,
-                                      std::vector<ActsTrk::ATLASUncalibSourceLink>& measurements,
+                                      std::vector<const xAOD::UncalibratedMeasurement* >& measurements,
                                       const DataVector<XAOD_CLUSTER>& clusterContainer) const;
     
     private:

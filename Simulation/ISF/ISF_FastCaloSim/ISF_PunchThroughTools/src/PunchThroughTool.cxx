@@ -26,8 +26,8 @@
 #include "AtlasHepMC/GenVertex.h"
 #include "AtlasHepMC/GenParticle.h"
 #include "AtlasHepMC/GenEvent.h"
-#include "HepPDT/ParticleDataTable.hh"
 #include "TruthUtils/MagicNumbers.h"
+#include "TruthUtils/HepMCHelpers.h"
 
 // CLHEP
 #include "CLHEP/Random/RandFlat.h"
@@ -126,17 +126,8 @@ StatusCode ISF::PunchThroughTool::initialize()
     return StatusCode::FAILURE;
   }
 
-  // retrieve the ParticleProperties handle
-  ATH_CHECK( m_particlePropSvc.retrieve() );
-
-  // and the particle data table
-  m_particleDataTable = m_particlePropSvc->PDT();
-  if (!m_particleDataTable)
-    {
-      ATH_MSG_FATAL( " [ punchthrough ] Could not get ParticleDataTable! Cannot associate pdg code with charge! Abort. " );
-      return StatusCode::FAILURE;
-    }
-
+  m_gendata = std::make_shared<GenData>();
+  
   // Geometry identifier service
   if ( !m_geoIDSvc.empty() && m_geoIDSvc.retrieve().isFailure())
     {
@@ -498,7 +489,7 @@ int ISF::PunchThroughTool::getAllParticles(const ISF::ISFParticle &isfp, ISFPart
         }
 
       // get the energy of the particle which was just created
-      const double restMass = m_particleDataTable->particle(std::abs(pdg))->mass();
+      const double restMass = m_gendata->particleMass(std::abs(pdg)).value();
       double curEnergy = std::sqrt(par->momentum().mag2() + restMass*restMass);
 
       // calculate the maximum energy to be available for all
@@ -1105,7 +1096,7 @@ ISF::PunchThroughTool::registerParticle(int pdg, bool doAntiparticle,
       particle->setPCA4PDF(std::move(pdf_pca4));
 
       // (8.) set some additional particle and simulation properties
-      const double restMass = m_particleDataTable->particle(std::abs(pdg))->mass();
+      const double restMass = m_gendata->particleMass(std::abs(pdg)).value();
       minEnergy = ( minEnergy > restMass ) ? minEnergy : restMass;
       particle->setMinEnergy(minEnergy);
       particle->setMaxNumParticles(maxNumParticles);
@@ -1269,13 +1260,13 @@ ISF::ISFParticle* ISF::PunchThroughTool::createExitPs( const ISF::ISFParticle &i
   // the given theta and phi
 
   Amg::Vector3D mom;
-  double mass = m_particleDataTable->particle(std::abs(pdg))->mass();
+  double mass = m_gendata->particleMass(std::abs(pdg)).value();
   Amg::setRThetaPhi( mom, std::sqrt(energy*energy - mass*mass), momTheta, momPhi);
   ATH_MSG_DEBUG("setRThetaPhi pre input parameters: energy = "<< energy <<" mass = "<< mass);
   ATH_MSG_DEBUG("setRThetaPhi input parameters: std::sqrt(energy*energy - mass*mass) = "<< std::sqrt(energy*energy - mass*mass) <<" momTheta = "<< momTheta <<" momPhi = "<< momPhi);
 
 
-  double charge = m_particleDataTable->particle(std::abs(pdg))->charge();
+  double charge = MC::charge(std::abs(pdg));
   // since the PDT table only has abs(PID) values for the charge
   charge *= (pdg > 0.) ?  1. : -1.;
 

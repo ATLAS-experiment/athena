@@ -14,10 +14,10 @@
 #include "xAODInDetMeasurement/PixelClusterContainer.h"
 
 // ACTS CORE
-#include "Acts/Seeding2/GraphBasedTrackSeeder.hpp"
+#include "Acts/Seeding/GraphBasedTrackSeeder.hpp"
 #include "Acts/Definitions/Units.hpp"
-#include "Acts/EventData/SeedContainer2.hpp"
-#include "Acts/EventData/SpacePointContainer2.hpp"
+#include "Acts/EventData/SeedContainer.hpp"
+#include "Acts/EventData/SpacePointContainer.hpp"
 
 //for det elements, not sure which need: 
 #include "TrigInDetToolInterfaces/ITrigL2LayerNumberTool.h"

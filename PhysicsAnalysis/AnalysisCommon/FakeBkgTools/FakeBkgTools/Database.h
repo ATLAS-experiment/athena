@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef FAKEBKGTOOLS_DATABASE_H
@@ -36,7 +36,7 @@ public:
     void reset();
     bool needEventInfo() const;
     
-    bool fillEfficiencies(ParticleData& pd, const xAOD::IParticle& p, const xAOD::EventInfo& eventInfo, std::string& error) const;
+    bool fillEfficiencies(ParticleData& pd, const xAOD::IParticle& p, const xAOD::EventInfo* eventInfo, std::string& error) const;
     unsigned getXmlLineNumber(const char* pos) const;
     
     enum EfficiencyType
@@ -79,7 +79,7 @@ public:
         std::vector<Efficiency> m_efficiencies;
         std::vector<BoundType> m_bounds;
         std::vector<Dimension> m_dimensions;
-        InputType inputType;
+        InputType inputType {};
         unsigned numberOfBins() const
         {
             unsigned nBins = 1;
@@ -197,9 +197,9 @@ protected:
     
     /// Methods used to fill efficiencies
     static FakeBkgTools::Efficiency* selectEfficiency(FakeBkgTools::ParticleData& pd, const xAOD::IParticle& p, EfficiencyType type);
-    bool retrieveParameterValue(const xAOD::IParticle& p, const xAOD::EventInfo& eventInfo, const Param& param, EfficiencyTable::BoundType& val) const;
+    bool retrieveParameterValue(const xAOD::IParticle& p, const xAOD::EventInfo* eventInfo, const Param& param, EfficiencyTable::BoundType& val) const;
     EfficiencyType getSourceType(EfficiencyType wantedType) const;
-    int readEfficiencyFromTable(Efficiency& eff, const EfficiencyTable& table, std::map<unsigned, EfficiencyTable::BoundType>& cachedParamVals, const xAOD::IParticle& p, const xAOD::EventInfo& eventInfo, std::string& error) const;
+    int readEfficiencyFromTable(Efficiency& eff, const EfficiencyTable& table, std::map<unsigned, EfficiencyTable::BoundType>& cachedParamVals, const xAOD::IParticle& p, const xAOD::EventInfo* eventInfo, std::string& error) const;
 
     /// Helper methods
     template<typename ReturnValue, typename... Args>

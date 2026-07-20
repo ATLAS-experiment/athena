@@ -57,6 +57,7 @@
 #include "GeneratorFilters/ChargedTracksWeightFilter.h"
 #include "GeneratorFilters/DecaysFinalStateFilter.h"
 #include "GeneratorFilters/DecayTimeFilter.h"
+#include "GeneratorFilters/DecayVolumeFilter.h"
 #include "GeneratorFilters/DiLeptonMassFilter.h"
 #include "GeneratorFilters/DirectPhotonFilter.h"
 #include "GeneratorFilters/ElectronFilter.h"
@@ -166,6 +167,7 @@ DECLARE_COMPONENT( ChargedTracksFilter )
 DECLARE_COMPONENT( ChargedTracksWeightFilter )
 DECLARE_COMPONENT( DecaysFinalStateFilter ) 
 DECLARE_COMPONENT( DecayTimeFilter )
+DECLARE_COMPONENT( DecayVolumeFilter )
 DECLARE_COMPONENT( DiLeptonMassFilter )
 DECLARE_COMPONENT( DirectPhotonFilter )
 DECLARE_COMPONENT( ElectronFilter ) 

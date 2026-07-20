@@ -21,47 +21,59 @@
 #include "src/detail/CurvilinearCovarianceHelper.h"
 #include "src/detail/HitSummaryDataUtils.h"
 #include "ActsEvent/ExpectedHitUtils.h"
+#include "ActsEvent/TrackContainerUtils.h"
 #include "MuonTrackEvent/HitSummary.h"
 
 #include <Acts/Definitions/TrackParametrization.hpp>
 #include <Acts/Utilities/Helpers.hpp>
+#include <Acts/Utilities/MathHelpers.hpp>
+#include <Acts/Definitions/Tolerance.hpp>
 #include <tuple>
 
 namespace {
+   constexpr float toFloat(const double x) {
 
-   template <typename T, class T_SquareMatrix>
-   inline void lowerTriangleToVector(const T_SquareMatrix& covMatrix,
-                                     std::vector<T>& vec, unsigned int n_rows_max) {
+      if (std::abs(x) < Acts::s_epsilon) {
+         return 0.f;
+      }
+      constexpr double min = 3.*static_cast<double>(std::numeric_limits<float>::min());
+      constexpr double max = static_cast<double>(std::numeric_limits<float>::max());
+      const double clampedX = std::copysign(std::clamp(std::abs(x), min, max), x);
+
+      return static_cast<float>(clampedX);
+   }
+    template <int nRowsMax, int nMatSize>
+   inline void lowerTriangleToVector(const Acts::SquareMatrix<nMatSize>& covMatrix,
+                                     std::vector<float>& vec) {
       assert( covMatrix.rows() == covMatrix.cols());
+      static_assert(nRowsMax > 0);
+      static_assert(nMatSize > 0);
+      constexpr int nRows = std::min(nRowsMax, nMatSize);
       vec.clear();
-      unsigned int n_rows = std::min(n_rows_max, static_cast<unsigned int>(covMatrix.rows()));
-      vec.reserve((n_rows+1)*n_rows/2);
-      for (unsigned int i = 0; i < n_rows; ++i) {
-         for (unsigned int j = 0; j <= i; ++j) {
-            vec.emplace_back(covMatrix(i, j));
+      vec.reserve(Acts::sumUpToN(nRows));
+      for (int i = 0; i < nRows; ++i) {
+         for (int j = 0; j <= i; ++j) {
+            vec.emplace_back(toFloat(covMatrix(i, j)));
          }
       }
    }
 
-   template <typename T, class T_SquareMatrix>
-   inline void lowerTriangleToVectorScaleLastRow(const T_SquareMatrix& covMatrix,
-                                                 std::vector<T>& vec, unsigned int n_rows_max,
-                                                 typename T_SquareMatrix::Scalar last_element_scale) {
-      assert( covMatrix.rows() == covMatrix.cols());
+   template <int nRowsMax, int nMatSize>
+   inline void lowerTriangleToVectorScaleLastRow(const Acts::SquareMatrix<nMatSize>& covMatrix,
+                                                 std::vector<float>& vec,
+                                                 const double last_element_scale) {
       vec.clear();
-      unsigned int n_rows = std::min(n_rows_max, static_cast<unsigned int>(covMatrix.rows()));
-      vec.reserve((n_rows+1)*n_rows/2);
-      for (unsigned int i = 0; i < n_rows; ++i) {
-         for (unsigned int j = 0; j <= i; ++j) {
-            vec.emplace_back(covMatrix(i, j));
+      static_assert(nRowsMax > 0);
+      static_assert(nMatSize > 0);
+      constexpr int nRows = std::min(nRowsMax, nMatSize);
+      vec.reserve(Acts::sumUpToN(nRows));
+      for (int i = 0; i < nRows; ++i) {
+         for (int j = 0; j <= i; ++j) {
+            const double covVal = covMatrix(i,j) * 
+               ( i == Acts::eBoundQOverP || j == Acts::eBoundQOverP ? 
+                              last_element_scale : 1.);
+            vec.emplace_back(toFloat(covVal));
          }
-      }
-      typename std::vector<T>::iterator cov_iter = vec.end();
-      --cov_iter;
-      *cov_iter *= last_element_scale;
-      for (unsigned int i=0; i<n_rows_max; ++i) {
-         *cov_iter *= last_element_scale;
-         --cov_iter;
       }
    }
 
@@ -77,6 +89,7 @@ namespace {
       }
       ret.at(Acts::toUnderlying(xAOD::UncalibMeasType::PixelClusterType)) = xAOD::numberOfPixelHits;
       ret.at(Acts::toUnderlying(xAOD::UncalibMeasType::StripClusterType)) = xAOD::numberOfSCTHits;
+      ret.at(Acts::toUnderlying(xAOD::UncalibMeasType::HGTDClusterType))  = xAOD::numberOfHGTDHits;
       return ret;
    }
 }
@@ -151,9 +164,18 @@ namespace ActsTrk {
                                            boundParams[Acts::eBoundTheta],
                                            boundParams[Acts::eBoundQOverP] * 1_MeV);
 
+      if (m_hgtdDecorationLevel>0) {
+         static const SG::Accessor<float> perigeeTime("time");
+         perigeeTime(track_particle) = ActsTrk::timeToAthena(boundParams[Acts::eBoundTime]);
+      }
+
       if (perigeeParam.covariance().has_value()) {
-         lowerTriangleToVectorScaleLastRow(perigeeParam.covariance().value(), tmp_cov_vector, 5, 1_MeV);
+         lowerTriangleToVectorScaleLastRow<5>(perigeeParam.covariance().value(), tmp_cov_vector, 1_MeV);
          track_particle.setDefiningParametersCovMatrixVec(tmp_cov_vector);
+         if (m_hgtdDecorationLevel>0) {
+            static const SG::Accessor<float> perigeeTimeResolution("timeResolution");
+            perigeeTimeResolution(track_particle) = ActsTrk::timeToAthena(perigeeParam.covariance().value()(Acts::eBoundTime,Acts::eBoundTime));
+         }
       }
 
       // optional beam tilt
@@ -165,7 +187,12 @@ namespace ActsTrk {
       // fit info, quality
       track_particle.setFitQuality(track.chi2(), track.nDoF());
       track_particle.setPatternRecognitionInfo(m_patternRecognitionInfo.value());
-      track_particle.setTrackFitter(static_cast<xAOD::TrackFitter>(m_trackFitter.value()));
+      if (ActsTrk::TrackContainerUtils::hasFitterType(track)) {
+         track_particle.setTrackFitter(ActsTrk::TrackContainerUtils::fitterType(track));
+      }
+      else {
+         track_particle.setTrackFitter(static_cast<xAOD::TrackFitter>(m_trackFitter.value()));
+      }
 
       const Acts::ParticleHypothesis& hypothesis = track.particleHypothesis();
       track_particle.setParticleHypothesis(ParticleHypothesis::convert(hypothesis));
@@ -174,37 +201,45 @@ namespace ActsTrk {
       std::array<std::array<uint8_t, Acts::toUnderlying(ActsTrk::detail::HitCategory::N)>,
                  Acts::toUnderlying(xAOD::UncalibMeasType::nTypes)> specialHitCounts{};
 
+      ActsTrk::detail::TimeInfo time_info;
       ActsTrk::detail::SumOfValues chi2_stat;
       gatherTrackSummaryData(track,
                              measurementToSummaryType,
                              chi2_stat,
                              hitInfo,
                              tmp_param_state_idx,
-                             specialHitCounts);
+                             specialHitCounts,
+                             time_info);
 
       // pixel summaries
-      std::array<std::tuple<uint8_t, uint8_t, uint8_t, bool>, 4> copy_summary {
+      static constexpr std::array<std::tuple<uint8_t, uint8_t, uint8_t, bool>, 5> copy_summary {
          std::make_tuple(static_cast<uint8_t>(ActsTrk::detail::HitSummaryData::pixelTotal),
                          static_cast<uint8_t>(xAOD::numberOfContribPixelLayers),
                          static_cast<uint8_t>(xAOD::numberOfPixelHits),
                          false),
-
+         std::make_tuple(static_cast<uint8_t>(ActsTrk::detail::HitSummaryData::pixelBarrel),
+                         static_cast<uint8_t>(xAOD::numberOfContribPixelBarrelLayers),
+                         static_cast<uint8_t>(xAOD::numberOfPixelBarrelHits),
+                         true),
+         std::make_tuple(static_cast<uint8_t>(ActsTrk::detail::HitSummaryData::pixelEndcap),
+                         static_cast<uint8_t>(xAOD::numberOfContribPixelEndcap),
+                         static_cast<uint8_t>(xAOD::numberOfPixelEndcapHits),
+                         true),
          std::make_tuple(static_cast<uint8_t>(ActsTrk::detail::HitSummaryData::pixelBarrelFlat),
                          static_cast<uint8_t>(xAOD::numberOfContribPixelBarrelFlatLayers),
                          static_cast<uint8_t>(xAOD::numberOfPixelBarrelFlatHits),
                          true),
-
          std::make_tuple(static_cast<uint8_t>(ActsTrk::detail::HitSummaryData::pixelBarrelInclined),
                          static_cast<uint8_t>(xAOD::numberOfContribPixelBarrelInclinedLayers),
                          static_cast<uint8_t>(xAOD::numberOfPixelBarrelInclinedHits),
-                         true),
+                         true)
+      };
 
-         std::make_tuple(static_cast<uint8_t>(ActsTrk::detail::HitSummaryData::pixelEndcap),
-                         static_cast<uint8_t>(xAOD::numberOfContribPixelEndcap),
-                         static_cast<uint8_t>(xAOD::numberOfPixelEndcapHits),
-                         true) };
-
-      for (auto [src_region, dest_xaod_summary_layer, dest_xaod_summary_hits, add_outlier] : copy_summary) {
+      // if not adding expert level decorations only set the total
+      for (auto [src_region, dest_xaod_summary_layer, dest_xaod_summary_hits, add_outlier] : std::span(copy_summary.begin(),
+                                                                                                       m_itkDecorationLevel>=s_expertLevel
+                                                                                                       ? copy_summary.end()
+                                                                                                       : copy_summary.begin()+1)) {
          setSummaryValue(track_particle,
                          hitInfo.contributingLayers(static_cast<ActsTrk::detail::HitSummaryData::DetectorRegion>(src_region)),
                          static_cast<xAOD::SummaryType>(dest_xaod_summary_layer));
@@ -233,11 +268,11 @@ namespace ActsTrk {
                       + hitInfo.sum<ActsTrk::detail::HitSummaryData::Outlier>(ActsTrk::detail::HitSummaryData::pixelEndcap, 2),
                       xAOD::numberOfNextToInnermostPixelLayerEndcapOutliers);
       setSummaryValue(track_particle,
-                      hitInfo.contributingOutlierHits(ActsTrk::detail::HitSummaryData::pixelTotal),
-                      xAOD::numberOfPixelOutliers);
-      setSummaryValue(track_particle,
                       specialHitCounts[Acts::toUnderlying(xAOD::UncalibMeasType::PixelClusterType)][Acts::toUnderlying(ActsTrk::detail::HitCategory::Hole)],
                       xAOD::numberOfPixelHoles);
+      setSummaryValue(track_particle,
+                      specialHitCounts[Acts::toUnderlying(xAOD::UncalibMeasType::PixelClusterType)][Acts::toUnderlying(ActsTrk::detail::HitCategory::DeadSensor)],
+                      xAOD::numberOfPixelDeadSensors);
       setSummaryValue(track_particle,
                       hitInfo.sum<ActsTrk::detail::HitSummaryData::SharedHit>(ActsTrk::detail::HitSummaryData::pixelEndcap, 0),
                       xAOD::numberOfInnermostPixelLayerSharedEndcapHits);
@@ -245,9 +280,6 @@ namespace ActsTrk {
                       hitInfo.sum<ActsTrk::detail::HitSummaryData::SharedHit>(ActsTrk::detail::HitSummaryData::pixelEndcap, 1)
                       + hitInfo.sum<ActsTrk::detail::HitSummaryData::SharedHit>(ActsTrk::detail::HitSummaryData::pixelEndcap, 2),
                       xAOD::numberOfNextToInnermostPixelLayerSharedEndcapHits);
-      setSummaryValue(track_particle,
-                      hitInfo.contributingSharedHits(ActsTrk::detail::HitSummaryData::pixelTotal),
-                      xAOD::numberOfPixelSharedHits);
 
       // expected layer pattern
       std::array<unsigned int, 4> expect_layer_pattern{};
@@ -290,19 +322,39 @@ namespace ActsTrk {
                       static_cast<unsigned int>(hitInfo.sum<ActsTrk::detail::HitSummaryData::SharedHit>(ActsTrk::detail::HitSummaryData::pixelBarrelFlat, 1)),
                       xAOD::numberOfNextToInnermostPixelLayerSharedHits);
 
-      // Strip summaries
-      setSummaryValue(track_particle,
-                      hitInfo.contributingHits(ActsTrk::detail::HitSummaryData::stripTotal),
-                      xAOD::numberOfSCTHits);
-      setSummaryValue(track_particle,
-                      hitInfo.contributingOutlierHits(ActsTrk::detail::HitSummaryData::stripTotal),
-                      xAOD::numberOfSCTOutliers);
-      setSummaryValue(track_particle,
-                      hitInfo.contributingSharedHits(ActsTrk::detail::HitSummaryData::stripTotal),
-                      xAOD::numberOfSCTSharedHits);
+      // Strip, HGTD and seom pixel summaries
+      std::array<std::tuple<ActsTrk::detail::HitSummaryData::DetectorRegion,
+                            ActsTrk::detail::HitSummaryData::CountType,
+                            xAOD::SummaryType> ,8 > copy_summary_types = {
+         // pixel _hits_ are copied above
+         std::make_tuple(ActsTrk::detail::HitSummaryData::pixelTotal,ActsTrk::detail::HitSummaryData::CountType::Outlier,xAOD::numberOfPixelOutliers),
+         std::make_tuple(ActsTrk::detail::HitSummaryData::pixelTotal, ActsTrk::detail::HitSummaryData::CountType::SharedHit, xAOD::numberOfPixelSharedHits),
+         std::make_tuple(ActsTrk::detail::HitSummaryData::stripTotal,ActsTrk::detail::HitSummaryData::CountType::Hit,xAOD::numberOfSCTHits),
+         std::make_tuple(ActsTrk::detail::HitSummaryData::stripTotal,ActsTrk::detail::HitSummaryData::CountType::Outlier,xAOD::numberOfSCTOutliers),
+         std::make_tuple(ActsTrk::detail::HitSummaryData::stripTotal,ActsTrk::detail::HitSummaryData::CountType::SharedHit,xAOD::numberOfSCTSharedHits),
+         std::make_tuple(ActsTrk::detail::HitSummaryData::hgtdTotal,ActsTrk::detail::HitSummaryData::CountType::Hit,xAOD::numberOfHGTDHits),
+         std::make_tuple(ActsTrk::detail::HitSummaryData::hgtdTotal,ActsTrk::detail::HitSummaryData::CountType::Outlier,xAOD::numberOfHGTDOutliers),
+         std::make_tuple(ActsTrk::detail::HitSummaryData::hgtdTotal,ActsTrk::detail::HitSummaryData::CountType::SharedHit,xAOD::numberOfHGTDSharedHits)
+      };
+
+      for (auto [region,count_type,dest_summary_type] : std::span(copy_summary_types.begin(),
+                                                                  copy_summary_types.begin()+(m_hgtdDecorationLevel>0
+                                                                                              ? copy_summary_types.size()
+                                                                                              : copy_summary_types.size()-3) )) {
+         setSummaryValue(track_particle,hitInfo.contributingHits(region, count_type),dest_summary_type);
+      }
       setSummaryValue(track_particle,
                       specialHitCounts[Acts::toUnderlying(xAOD::UncalibMeasType::StripClusterType)][Acts::toUnderlying(ActsTrk::detail::HitCategory::Hole)],
                       xAOD::numberOfSCTHoles);
+      setSummaryValue(track_particle,
+                      specialHitCounts[Acts::toUnderlying(xAOD::UncalibMeasType::StripClusterType)][Acts::toUnderlying(ActsTrk::detail::HitCategory::DeadSensor)],
+                      xAOD::numberOfSCTDeadSensors);
+      if (m_hgtdDecorationLevel>0) {
+        setSummaryValue(
+              track_particle,
+              specialHitCounts[Acts::toUnderlying(xAOD::UncalibMeasType::HGTDClusterType)][Acts::toUnderlying(ActsTrk::detail::HitCategory::Hole)],
+              xAOD::numberOfHGTDHoles);
+      }
 
       double biased_chi2_variance = chi2_stat.biasedVariance();
       setSummaryValue(track_particle,
@@ -316,6 +368,28 @@ namespace ActsTrk {
                       + hitInfo.contributingOutlierHits(ActsTrk::detail::HitSummaryData::stripTotal),
                       xAOD::numberOfOutliersOnTrack);
 
+      if (m_hgtdDecorationLevel>0) {
+         static const SG::Accessor<uint8_t> hasValidTime("hasValidTime");
+         static const SG::Accessor<uint32_t> hgtdSummary("HGTDSummaryinfo");
+         using HitSummaryData=ActsTrk::detail::HitSummaryData;
+         unsigned int n_hgtd_hits = hitInfo.contributingHits(static_cast<HitSummaryData::DetectorRegion>(HitSummaryData::hgtdTotal));
+         unsigned int n_hgtd_outliers = hitInfo.contributingOutlierHits(static_cast<HitSummaryData::DetectorRegion>(HitSummaryData::hgtdTotal));
+         hasValidTime(track_particle) = n_hgtd_hits > 2 || n_hgtd_hits>n_hgtd_outliers;
+         unsigned int hgtd_hit_pattern = (n_hgtd_hits>0u
+                                          ? hitInfo.layerPattern(static_cast<HitSummaryData::DetectorRegion>(HitSummaryData::hgtdTotal),
+                                                                 true /* include outlier */)
+                                          : 0u);
+         hgtdSummary(track_particle) = hgtd_hit_pattern;
+         if (m_hgtdDecorationLevel>=s_expertLevel) {
+            static const SG::Accessor<float> meanTime("HGTDMeanTime");
+            static const SG::Accessor<float> timeResolution("HGTDMeanTimeResolution");
+            static const SG::Accessor<float> hgtdChi2("HGTDChi2");
+            meanTime(track_particle) = time_info.mean;
+            timeResolution(track_particle) = time_info.resolution;
+            hgtdChi2(track_particle) = static_cast<float>(time_info.chi2);
+         }
+      }
+
       // @TODO select states for which parameters are stored
       if (m_firstAndLastParamOnly && tmp_param_state_idx.size() > 2) {
          tmp_param_state_idx[1] = tmp_param_state_idx.back();
@@ -326,59 +400,69 @@ namespace ActsTrk {
       parametersVec.clear();
       parametersVec.reserve(tmp_param_state_idx.size());
 
-      for (std::vector<ActsTrk::TrackStateBackend::ConstTrackStateProxy::IndexType>::const_reverse_iterator
-              idx_iter = tmp_param_state_idx.rbegin();
-           idx_iter != tmp_param_state_idx.rend();
-           ++idx_iter) {
-         ActsTrk::TrackStateBackend::ConstTrackStateProxy
-            state = track.container().trackStateContainer().getTrackState(*idx_iter);
-         const Acts::BoundTrackParameters actsParam = track.createParametersFromState(state);
+      // Check if this is a seed track (TSOS mask = None, no Predicted/Filtered/Calibrated)
+      // For seed tracks, perigee parameters are already set from SeedsToTrackParamsAlg, skip per-TSOS loop
+      bool isSeedTrack = tmp_param_state_idx.empty() ? false
+         : track.container().trackStateContainer().getTrackState(tmp_param_state_idx.front()).getMask() == Acts::TrackStatePropMask::None;
 
-         Acts::Vector3 position = actsParam.position(gctx.context());
-         Acts::Vector3 momentum = actsParam.momentum();
-
-         // scaling from Acts momentum units (GeV) to Athena Units (MeV)
-         for (unsigned int i = 0; i < momentum.rows(); ++i) {
-            momentum(i) *= inv_1_MeV;
-         }
-
-         if (actsParam.covariance()) {
-            Acts::MagneticFieldContext mfContext = m_extrapolationTool->getMagneticFieldContext(ctx);
-            Acts::GeometryContext tgContext = gctx.context();
-
-            magnFieldVect.setZero();
-            fieldCache.getField(position.data(), magnFieldVect.data());
-            // scaling from Athena magnetic field units kT to Acts units T
-            {
-               using namespace Acts::UnitLiterals;
-               magnFieldVect *= 1000_T;
-            }
-
-            auto curvilinear_cov_result = ActsTrk::detail::convertActsBoundCovToCurvilinearParam(tgContext, actsParam, magnFieldVect, hypothesis);
-            if (curvilinear_cov_result.has_value()) {
-               Acts::BoundMatrix& curvilinear_cov = curvilinear_cov_result.value();
-
-               // convert q/p components from GeV (Acts) to MeV (Athena)
-               for (unsigned int col_i = 0; col_i < 4; ++col_i) {
-                  curvilinear_cov(col_i, 4) *= 1_MeV;
-                  curvilinear_cov(4, col_i) *= 1_MeV;
-               }
-               curvilinear_cov(4, 4) *= (1_MeV * 1_MeV);
-
-               std::size_t param_idx = parametersVec.size();
-               // only use the 5x5 sub-matrix of the full covariance matrix
-               lowerTriangleToVector(curvilinear_cov, tmp_cov_vector, 5);
-               if (tmp_cov_vector.size() != 15) {
-                  ATH_MSG_ERROR("Invalid size of lower triangle cov " << tmp_cov_vector.size() << " != 15"
-                                << " input matrix : " << curvilinear_cov.rows() << " x " << curvilinear_cov.cols());
-               }
-               track_particle.setTrackParameterCovarianceMatrix(param_idx, tmp_cov_vector);
-            }
-         }
-         parametersVec.emplace_back(std::vector<float>{
-            static_cast<float>(position[0]), static_cast<float>(position[1]), static_cast<float>(position[2]),
-            static_cast<float>(momentum[0]), static_cast<float>(momentum[1]), static_cast<float>(momentum[2]) });
+      if (isSeedTrack) {
+         ATH_MSG_DEBUG("Seed track detected, skipping per-TSOS parameter extraction");
       }
+      else {
+         for (std::vector<ActsTrk::TrackStateBackend::ConstTrackStateProxy::IndexType>::const_reverse_iterator
+            idx_iter = tmp_param_state_idx.rbegin();
+            idx_iter != tmp_param_state_idx.rend();
+            ++idx_iter) {
+            ActsTrk::TrackStateBackend::ConstTrackStateProxy
+               state = track.container().trackStateContainer().getTrackState(*idx_iter);
+            const Acts::BoundTrackParameters actsParam = track.createParametersFromState(state);
+
+            Acts::Vector3 position = actsParam.position(gctx.context());
+            Acts::Vector3 momentum = actsParam.momentum();
+
+            // scaling from Acts momentum units (GeV) to Athena Units (MeV)
+            for (unsigned int i = 0; i < momentum.rows(); ++i) {
+               momentum(i) *= inv_1_MeV;
+            }
+
+            if (actsParam.covariance()) {
+               Acts::MagneticFieldContext mfContext = m_extrapolationTool->getMagneticFieldContext(ctx);
+               Acts::GeometryContext tgContext = gctx.context();
+
+               magnFieldVect.setZero();
+               fieldCache.getField(position.data(), magnFieldVect.data());
+               // scaling from Athena magnetic field units kT to Acts units T
+               {
+                  using namespace Acts::UnitLiterals;
+                  magnFieldVect *= 1000_T;
+               }
+
+               auto curvilinear_cov_result = ActsTrk::detail::convertActsBoundCovToCurvilinearParam(tgContext, actsParam, magnFieldVect, hypothesis);
+               if (curvilinear_cov_result.has_value()) {
+                  Acts::BoundMatrix& curvilinear_cov = curvilinear_cov_result.value();
+
+                  // convert q/p components from GeV (Acts) to MeV (Athena)
+                  for (unsigned int col_i = 0; col_i < 4; ++col_i) {
+                     curvilinear_cov(col_i, 4) *= 1_MeV;
+                     curvilinear_cov(4, col_i) *= 1_MeV;
+                  }
+                  curvilinear_cov(4, 4) *= (1_MeV * 1_MeV);
+
+                  std::size_t param_idx = parametersVec.size();
+                  // only use the 5x5 sub-matrix of the full covariance matrix
+                  lowerTriangleToVector<5>(curvilinear_cov, tmp_cov_vector);
+                  if (tmp_cov_vector.size() != 15) {
+                     ATH_MSG_ERROR("Invalid size of lower triangle cov " << tmp_cov_vector.size() << " != 15"
+                        << " input matrix : " << curvilinear_cov.rows() << " x " << curvilinear_cov.cols());
+                  }
+                  track_particle.setTrackParameterCovarianceMatrix(param_idx, tmp_cov_vector);
+               }
+            }
+            parametersVec.emplace_back(std::vector<float>{
+               static_cast<float>(position[0]), static_cast<float>(position[1]), static_cast<float>(position[2]),
+                  static_cast<float>(momentum[0]), static_cast<float>(momentum[1]), static_cast<float>(momentum[2]) });
+         }
+      }  // end else (isSeedTrack)
       for (const std::vector<float>& param : parametersVec) {
          if (param.size() != 6) {
             ATH_MSG_ERROR("Invalid size of param element " << param.size() << " != 6");

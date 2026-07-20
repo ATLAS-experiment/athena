@@ -15,7 +15,7 @@ MultiElectronFilter::MultiElectronFilter(const std::string& name, ISvcLocator* p
 }
 
 
-StatusCode MultiElectronFilter::filterEvent() {
+StatusCode MultiElectronFilter::filterEvent(const EventContext& ctx) {
   McEventCollection::const_iterator itr;
   int numElectrons = 0;
   for (itr = events()->begin(); itr != events()->end(); ++itr) {
@@ -29,6 +29,6 @@ StatusCode MultiElectronFilter::filterEvent() {
 	}
   }
   ATH_MSG_DEBUG("Found " << numElectrons << " Electrons");
-  setFilterPassed(numElectrons >= m_NElectrons);
+  setFilterPassed(numElectrons >= m_NElectrons, ctx);
   return StatusCode::SUCCESS;
 }

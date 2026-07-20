@@ -18,7 +18,11 @@ def IOVDbTestAlgFlags():
    flags.IOVDb.DBConnection = "sqlite://;schema=mytest.db;dbname=TESTCOOL"
    flags.IOVDb.DatabaseInstance = ""
    flags.IOVDb.GlobalTag = ""
-   flags.PoolSvc.DefaultContainerType = "ROOTTREE"
+   flags.Output.DefaultContainerType = "ROOTTREE"
+
+   #Use Run3 for now...                                                                   
+   from AthenaConfiguration.TestDefaults import defaultGeometryTags
+   flags.GeoModel.AtlasVersion = defaultGeometryTags.RUN3
 
    return flags
 

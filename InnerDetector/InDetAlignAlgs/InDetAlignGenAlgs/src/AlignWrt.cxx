@@ -140,7 +140,7 @@ StatusCode InDetAlignWrt::initialize() {
   return StatusCode::SUCCESS;
 }
 
-StatusCode InDetAlignWrt::execute() {
+StatusCode InDetAlignWrt::execute(const EventContext& /*ctx*/) {
 
   if (!m_setup) {
     m_setup=true;

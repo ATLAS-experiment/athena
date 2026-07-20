@@ -1,5 +1,5 @@
 /*
-Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "InDetGNNHardScatterSelection/ConstituentsLoader.h"
@@ -30,13 +30,12 @@ namespace {
     ConstituentsInputConfig config;
     config.name = name;
     config.order = ConstituentsSortOrder::PT_DESCENDING;
+    const std::string matchName{"iparticle type matching"};
     for (const auto& varname: input_variables) {
       InputVariableConfig input;
       input.name = varname;
-      input.type = FlavorTagInference::str::match_first(type_regexes, input.name,
-                                "iparticle type matching");
-
-      config.inputs.push_back(input);
+      input.type = FlavorTagInference::str::match_first(type_regexes, input.name, matchName);
+      config.inputs.push_back(std::move(input));
     }
     return config;
   }
@@ -56,7 +55,7 @@ namespace InDetGNNHardScatterSelection {
           // iparticle variables
           // ConstituentsEDMType picked correspond to the first matching regex
   //        {"(photon_deltaZ|photon_deltaZ_wBeamSpot)"_r, ConstituentsEDMType::FLOAT},
-          {"(pt|eta|phi|energy|deltaZ0|trkpt|trketa|trkphi|gsftrkpt|gsftrketa|gsftrkphi|cluster_eta|cluster_phi|isAmbiguous|vertexWeight|ntracks_ga|photon_deltaZ|photon_deltaZ_wBeamSpot)"_r, ConstituentsEDMType::CUSTOM_GETTER}
+          {"(pt|eta|phi|energy|deltaZ0|trkpt|trketa|trkphi|gsftrkpt|gsftrketa|gsftrkphi|cluster_eta|cluster_phi|isAmbiguous|vertexWeight|ntracks_ga|photon_deltaZ|photon_deltaZ_wBeamSpot|d0|z0)"_r, ConstituentsEDMType::CUSTOM_GETTER}
       };
       
       if (name.find("tracks_all_sd0sort") != std::string::npos){

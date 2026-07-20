@@ -519,9 +519,9 @@ bool TRTCalibrator::calibrate ATLAS_NOT_THREAD_SAFE () {
       //dangerous cast reproduces pre-existing c style cast
       myFile.read (reinterpret_cast<char*>(&npop),sizeof(int)); //number of populated bins
       if (myFile.eof()) break;
-      int* chist=new int[2*npop+2]; //the histogram
+      std::vector<int> chist(2 * npop + 2);
       //dangerous cast reproduces pre-existing c style cast
-      if (npop>0) myFile.read (reinterpret_cast<char*>(chist+2), sizeof(int)*2*npop);
+      if (npop>0) myFile.read (reinterpret_cast<char*>(chist.data()+2), sizeof(int)*2*npop);
       //dangerous cast reproduces pre-existing c style cast
       myFile.read (reinterpret_cast<char*>(&isid),sizeof(int)); //the straw id 
       sid = (float)isid;
@@ -650,21 +650,21 @@ bool TRTCalibrator::calibrate ATLAS_NOT_THREAD_SAFE () {
       //add histogram to the Calibrators (A and C side separated)
    if(!m_DoArXenonSep){  
   
-      nTRThist += TRT.AddHit(m_Tkey,hitdata,chist,true);
+      nTRThist += TRT.AddHit(m_Tkey,hitdata,chist.data(),true);
       if (Detector.CheckSelection(hitdata.det)) { //only add the histogram if it is in the selection
-        if (m_SplitBarrel) ndethist += Detector.AddHit(m_Dkey,hitdata,chist,true);
-        else ndethist += Detector.AddHit(m_Dkey_acc,hitdata,chist,true);
+        if (m_SplitBarrel) ndethist += Detector.AddHit(m_Dkey,hitdata,chist.data(),true);
+        else ndethist += Detector.AddHit(m_Dkey_acc,hitdata,chist.data(),true);
         if (Layer.CheckSelection(hitdata.lay)) {
-          if (m_SplitBarrel) nlayhist += Layer.AddHit(m_Lkey,hitdata,chist,true);
-          else { nlayhist += Layer.AddHit(m_Lkey_acc,hitdata,chist,true); continue;}
+          if (m_SplitBarrel) nlayhist += Layer.AddHit(m_Lkey,hitdata,chist.data(),true);
+          else { nlayhist += Layer.AddHit(m_Lkey_acc,hitdata,chist.data(),true); continue;}
           if (Module.CheckSelection(hitdata.mod)) {
-            nmodhist += Module.AddHit(m_Mkey,hitdata,chist,true);
+            nmodhist += Module.AddHit(m_Mkey,hitdata,chist.data(),true);
             if (Board.CheckSelection(hitdata.brd)) {
-              nbrdhist += Board.AddHit(m_Bkey,hitdata,chist,true);
+              nbrdhist += Board.AddHit(m_Bkey,hitdata,chist.data(),true);
               if (Chip.CheckSelection(hitdata.chp)) {
-                nchphist += Chip.AddHit(m_Ckey,hitdata,chist,true);
+                nchphist += Chip.AddHit(m_Ckey,hitdata,chist.data(),true);
                 if (Straw.CheckSelection(hitdata.stw))
-                  nstwhist += Straw.AddHit(m_Skey,hitdata,chist,true);
+                  nstwhist += Straw.AddHit(m_Skey,hitdata,chist.data(),true);
               }
             }
           }
@@ -673,21 +673,21 @@ bool TRTCalibrator::calibrate ATLAS_NOT_THREAD_SAFE () {
       ihist++;
    } else  
    if(isArgonStraw==0){                      // Separate Ar and Xe in endcaps. Here Xe
-      nTRThist += TRT.AddHit(m_Tkey,hitdata,chist,true);
+      nTRThist += TRT.AddHit(m_Tkey,hitdata,chist.data(),true);
       if (Detector.CheckSelection(hitdata.det)) { //only add the histogram if it is in the selection
-        if (m_SplitBarrel) ndethist += Detector.AddHit(m_Dkey,hitdata,chist,true);
-        else ndethist += Detector.AddHit(m_Dkey_acc,hitdata,chist,true);
+        if (m_SplitBarrel) ndethist += Detector.AddHit(m_Dkey,hitdata,chist.data(),true);
+        else ndethist += Detector.AddHit(m_Dkey_acc,hitdata,chist.data(),true);
         if (Layer.CheckSelection(hitdata.lay)) {
-          if (m_SplitBarrel) nlayhist += Layer.AddHit(m_Lkey,hitdata,chist,true);
-          else { nlayhist += Layer.AddHit(m_Lkey_acc,hitdata,chist,true); continue;}
+          if (m_SplitBarrel) nlayhist += Layer.AddHit(m_Lkey,hitdata,chist.data(),true);
+          else { nlayhist += Layer.AddHit(m_Lkey_acc,hitdata,chist.data(),true); continue;}
           if (Module.CheckSelection(hitdata.mod)) {
-            nmodhist += Module.AddHit(m_Mkey,hitdata,chist,true);
+            nmodhist += Module.AddHit(m_Mkey,hitdata,chist.data(),true);
             if (Board.CheckSelection(hitdata.brd)) {
-              nbrdhist += Board.AddHit(m_Bkey,hitdata,chist,true);
+              nbrdhist += Board.AddHit(m_Bkey,hitdata,chist.data(),true);
               if (Chip.CheckSelection(hitdata.chp)) {
-                nchphist += Chip.AddHit(m_Ckey,hitdata,chist,true);
+                nchphist += Chip.AddHit(m_Ckey,hitdata,chist.data(),true);
                 if (Straw.CheckSelection(hitdata.stw)) {
-                  nstwhist += Straw.AddHit(m_Skey,hitdata,chist,true);
+                  nstwhist += Straw.AddHit(m_Skey,hitdata,chist.data(),true);
                 }
               }
             }
@@ -696,21 +696,21 @@ bool TRTCalibrator::calibrate ATLAS_NOT_THREAD_SAFE () {
       }                         // Here it closes
       ihist++;
    } else {               // ARGON HITS
-      nTRThistAr += TRT_Ar.AddHit(m_Tkey,hitdata,chist,true);
+      nTRThistAr += TRT_Ar.AddHit(m_Tkey,hitdata,chist.data(),true);
       if (Detector_Ar.CheckSelection(hitdata.det)) { //only add the histogram if it is in the selection
-        if (m_SplitBarrel) ndethistAr += Detector_Ar.AddHit(m_Dkey,hitdata,chist,true);
-        else ndethistAr += Detector_Ar.AddHit(m_Dkey_acc,hitdata,chist,true);
+        if (m_SplitBarrel) ndethistAr += Detector_Ar.AddHit(m_Dkey,hitdata,chist.data(),true);
+        else ndethistAr += Detector_Ar.AddHit(m_Dkey_acc,hitdata,chist.data(),true);
         if (Layer_Ar.CheckSelection(hitdata.lay)) {
-          if (m_SplitBarrel) nlayhistAr += Layer_Ar.AddHit(m_Lkey,hitdata,chist,true);
-          else { nlayhistAr += Layer_Ar.AddHit(m_Lkey_acc,hitdata,chist,true); continue;}
+          if (m_SplitBarrel) nlayhistAr += Layer_Ar.AddHit(m_Lkey,hitdata,chist.data(),true);
+          else { nlayhistAr += Layer_Ar.AddHit(m_Lkey_acc,hitdata,chist.data(),true); continue;}
           if (Module_Ar.CheckSelection(hitdata.mod)) {
-            nmodhistAr += Module_Ar.AddHit(m_Mkey,hitdata,chist,true);
+            nmodhistAr += Module_Ar.AddHit(m_Mkey,hitdata,chist.data(),true);
             if (Board_Ar.CheckSelection(hitdata.brd)) {
-              nbrdhistAr += Board_Ar.AddHit(m_Bkey,hitdata,chist,true);
+              nbrdhistAr += Board_Ar.AddHit(m_Bkey,hitdata,chist.data(),true);
               if (Chip_Ar.CheckSelection(hitdata.chp)) {
-                nchphistAr += Chip_Ar.AddHit(m_Ckey,hitdata,chist,true);
+                nchphistAr += Chip_Ar.AddHit(m_Ckey,hitdata,chist.data(),true);
                 if (Straw_Ar.CheckSelection(hitdata.stw)) {
-                  nstwhistAr += Straw_Ar.AddHit(m_Skey,hitdata,chist,true);
+                  nstwhistAr += Straw_Ar.AddHit(m_Skey,hitdata,chist.data(),true);
                 }
               }
             }
@@ -727,7 +727,6 @@ bool TRTCalibrator::calibrate ATLAS_NOT_THREAD_SAFE () {
     }
       
       ihist++;
-      delete [] chist;
     } // Finish Straw Loop
    
     ATH_MSG_INFO( Form("%7i HISTOGRAMS READ, UNITS ADDED: %i %i %2i %3i %3i %4i %6i",ihist+1,nTRThist, ndethist, nlayhist, nmodhist, nbrdhist, nchphist, nstwhist) );
@@ -801,8 +800,8 @@ bool TRTCalibrator::calibrate ATLAS_NOT_THREAD_SAFE () {
     if (TRT.Skip()) break;
     if (TRT.HasKey(pt.first)) {
       trtdir = TRT.Calibrate(histfile.get(),pt.first,SubLev(m_options,1),&startdata);
-      if (TRT.printt0) t0calfile << Form("-3 -1 -1 -1 -1 : %e %e",TRT.data[pt.first].t0,TRT.data[pt.first].t0err) << std::endl;
-      if (TRT.printrt) rtcalfile << Form("-3 -1 -1 -1 -1 : %i %e %e %e %e",rtint,TRT.data[pt.first].rtpar[0],TRT.data[pt.first].rtpar[1],TRT.data[pt.first].rtpar[2],TRT.data[pt.first].rtpar[3]) << std::endl;
+      if (TRT.printt0) t0calfile << Form("-3 -1 -1 -1 -1 : %e %e",TRT.data[pt.first].t0,TRT.data[pt.first].t0err) << '\n';
+      if (TRT.printrt) rtcalfile << Form("-3 -1 -1 -1 -1 : %i %e %e %e %e",rtint,TRT.data[pt.first].rtpar[0],TRT.data[pt.first].rtpar[1],TRT.data[pt.first].rtpar[2],TRT.data[pt.first].rtpar[3]) << '\n';
     }
     for (std::pair<const std::string, BDlayer>& pd : pt.second.d) {
       
@@ -815,11 +814,11 @@ bool TRTCalibrator::calibrate ATLAS_NOT_THREAD_SAFE () {
         if(Layer.Skip()) break;
         if(Layer.HasKey(pl.first)){
           laydir = Layer.Calibrate(detdir,pl.first,SubLev(m_options,3),&Detector.data[pd.first]);
-          if (Layer.printt0) t0calfile << Form("%i %i -1 -1 -1 : %e %e",Layer.data[pl.first].det,Layer.data[pl.first].lay,Layer.data[pl.first].t0,Layer.data[pl.first].t0err) << std::endl;
-          if (Layer.printrt) rtcalfile    << Form("%i %i -1 -1 -1 : %i %e %e %e %e",Layer.data[pl.first].det,Layer.data[pl.first].lay,rtint,Layer.data[pl.first].rtpar[0],Layer.data[pl.first].rtpar[1],Layer.data[pl.first].rtpar[2],Layer.data[pl.first].rtpar[3]) << std::endl;
+          if (Layer.printt0) t0calfile << Form("%i %i -1 -1 -1 : %e %e",Layer.data[pl.first].det,Layer.data[pl.first].lay,Layer.data[pl.first].t0,Layer.data[pl.first].t0err) << '\n';
+          if (Layer.printrt) rtcalfile    << Form("%i %i -1 -1 -1 : %i %e %e %e %e",Layer.data[pl.first].det,Layer.data[pl.first].lay,rtint,Layer.data[pl.first].rtpar[0],Layer.data[pl.first].rtpar[1],Layer.data[pl.first].rtpar[2],Layer.data[pl.first].rtpar[3]) << '\n';
           if (!m_SplitBarrel) {
-            if (Layer.printt0) t0calfile    << Form("%i %i -1 -1 -1 : %e %e",-Layer.data[pl.first].det,Layer.data[pl.first].lay,Layer.data[pl.first].t0,Layer.data[pl.first].t0err) << std::endl;
-            if (Layer.printrt) rtcalfile    << Form("%i %i -1 -1 -1 : %i %e %e %e %e",-Layer.data[pl.first].det,Layer.data[pl.first].lay,rtint,Layer.data[pl.first].rtpar[0],Layer.data[pl.first].rtpar[1],Layer.data[pl.first].rtpar[2],Layer.data[pl.first].rtpar[3]) << std::endl;
+            if (Layer.printt0) t0calfile    << Form("%i %i -1 -1 -1 : %e %e",-Layer.data[pl.first].det,Layer.data[pl.first].lay,Layer.data[pl.first].t0,Layer.data[pl.first].t0err) << '\n';
+            if (Layer.printrt) rtcalfile    << Form("%i %i -1 -1 -1 : %i %e %e %e %e",-Layer.data[pl.first].det,Layer.data[pl.first].lay,rtint,Layer.data[pl.first].rtpar[0],Layer.data[pl.first].rtpar[1],Layer.data[pl.first].rtpar[2],Layer.data[pl.first].rtpar[3]) << '\n';
           }
         }
         for (std::pair<const std::string, BDboard>& pm : pl.second.m) {
@@ -827,8 +826,8 @@ bool TRTCalibrator::calibrate ATLAS_NOT_THREAD_SAFE () {
           if(Module.Skip()) break; 
           if(Module.HasKey(pm.first)){ 
             moddir = Module.Calibrate(laydir,pm.first,SubLev(m_options,4),&Layer.data[pl.first]);
-            if (Module.printt0) t0calfile << Form("%i %i %i -1 -1 : %e %e",Module.data[pm.first].det,Module.data[pm.first].lay,Module.data[pm.first].mod,Module.data[pm.first].t0,Module.data[pm.first].t0err) << std::endl;
-            if (Module.printrt) rtcalfile    << Form("%i %i %i -1 -1 : %i %e %e %e %e",Module.data[pm.first].det,Module.data[pm.first].lay,Module.data[pm.first].mod,rtint,Module.data[pm.first].rtpar[0],Module.data[pm.first].rtpar[1],Module.data[pm.first].rtpar[2],Module.data[pm.first].rtpar[3]) << std::endl;
+            if (Module.printt0) t0calfile << Form("%i %i %i -1 -1 : %e %e",Module.data[pm.first].det,Module.data[pm.first].lay,Module.data[pm.first].mod,Module.data[pm.first].t0,Module.data[pm.first].t0err) << '\n';
+            if (Module.printrt) rtcalfile    << Form("%i %i %i -1 -1 : %i %e %e %e %e",Module.data[pm.first].det,Module.data[pm.first].lay,Module.data[pm.first].mod,rtint,Module.data[pm.first].rtpar[0],Module.data[pm.first].rtpar[1],Module.data[pm.first].rtpar[2],Module.data[pm.first].rtpar[3]) << '\n';
           } 
           for (std::pair<const std::string, BDchip>& pb : pm.second.b) {
 
@@ -847,8 +846,8 @@ bool TRTCalibrator::calibrate ATLAS_NOT_THREAD_SAFE () {
                 if(Straw.Skip()) break;
                 if(Straw.HasKey(ps.first)){ 
                   Straw.Calibrate(chpdir,ps.first,SubLev(m_options,7),&Chip.data[pc.first]);
-                  if (Straw.printt0) t0calfile << Form("%i %i %i %i %i : %e %e",Straw.data[ps.first].det,Straw.data[ps.first].lay,Straw.data[ps.first].mod,Straw.data[ps.first].stl,Straw.data[ps.first].stw,Straw.data[ps.first].t0,Straw.data[ps.first].t0err) << std::endl;
-                  if (Straw.printrt) rtcalfile << Form("%i %i %i %i %i : %i %e %e %e %e",Straw.data[ps.first].det,Straw.data[ps.first].lay,Straw.data[ps.first].mod,Straw.data[ps.first].stl,Straw.data[ps.first].stw,rtint,Straw.data[ps.first].rtpar[0],Straw.data[ps.first].rtpar[1],Straw.data[ps.first].rtpar[2],Straw.data[ps.first].rtpar[3]) << std::endl;
+                  if (Straw.printt0) t0calfile << Form("%i %i %i %i %i : %e %e",Straw.data[ps.first].det,Straw.data[ps.first].lay,Straw.data[ps.first].mod,Straw.data[ps.first].stl,Straw.data[ps.first].stw,Straw.data[ps.first].t0,Straw.data[ps.first].t0err) << '\n';
+                  if (Straw.printrt) rtcalfile << Form("%i %i %i %i %i : %i %e %e %e %e",Straw.data[ps.first].det,Straw.data[ps.first].lay,Straw.data[ps.first].mod,Straw.data[ps.first].stl,Straw.data[ps.first].stw,rtint,Straw.data[ps.first].rtpar[0],Straw.data[ps.first].rtpar[1],Straw.data[ps.first].rtpar[2],Straw.data[ps.first].rtpar[3]) << '\n';
                 
 
                 }
@@ -894,8 +893,8 @@ bool TRTCalibrator::calibrate ATLAS_NOT_THREAD_SAFE () {
           if(Module_Ar.Skip()) break;
           if(Module_Ar.HasKey(pm.first)){
             moddirAr = Module_Ar.Calibrate(laydirAr,pm.first,SubLev(m_options,4),&Layer_Ar.data[pl.first]);
-            if (Module_Ar.printt0) t0calfile << Form("%i %i %i -1 -1 : %e %e",Module_Ar.data[pm.first].det,Module_Ar.data[pm.first].lay,Module_Ar.data[pm.first].mod,Module_Ar.data[pm.first].t0,Module_Ar.data[pm.first].t0err) << std::endl;
-            if (Layer_Ar.printrt) rtcalfile    << Form("%i %i %i -1 -1 : %i %e %e %e %e",Module_Ar.data[pm.first].det,Module_Ar.data[pm.first].lay,Module_Ar.data[pm.first].mod,rtint,Module_Ar.data[pm.first].rtpar[0],Module_Ar.data[pm.first].rtpar[1],Module_Ar.data[pm.first].rtpar[2],Module_Ar.data[pm.first].rtpar[3]) << std::endl;
+            if (Module_Ar.printt0) t0calfile << Form("%i %i %i -1 -1 : %e %e",Module_Ar.data[pm.first].det,Module_Ar.data[pm.first].lay,Module_Ar.data[pm.first].mod,Module_Ar.data[pm.first].t0,Module_Ar.data[pm.first].t0err) << '\n';
+            if (Layer_Ar.printrt) rtcalfile    << Form("%i %i %i -1 -1 : %i %e %e %e %e",Module_Ar.data[pm.first].det,Module_Ar.data[pm.first].lay,Module_Ar.data[pm.first].mod,rtint,Module_Ar.data[pm.first].rtpar[0],Module_Ar.data[pm.first].rtpar[1],Module_Ar.data[pm.first].rtpar[2],Module_Ar.data[pm.first].rtpar[3]) << '\n';
           }
           for (std::pair<const std::string, BDchip>& pb : pm.second.b) {
             if(Board_Ar.Skip()) break;
@@ -913,8 +912,8 @@ bool TRTCalibrator::calibrate ATLAS_NOT_THREAD_SAFE () {
                 if(Straw_Ar.Skip()) break;
                 if(Straw_Ar.HasKey(ps.first)){
                   Straw_Ar.Calibrate(chpdirAr,ps.first,SubLev(m_options,7),&Chip_Ar.data[pc.first]);
-                  if (Straw_Ar.printt0) t0calfile << Form("%i %i %i %i %i : %e %e",Straw_Ar.data[ps.first].det,Straw_Ar.data[ps.first].lay,Straw_Ar.data[ps.first].mod,Straw_Ar.data[ps.first].stl,Straw_Ar.data[ps.first].stw,Straw_Ar.data[ps.first].t0,Straw_Ar.data[ps.first].t0err) << std::endl;
-                  if (Straw_Ar.printrt) rtcalfile << Form("%i %i %i %i %i : %i %e %e %e %e",Straw_Ar.data[ps.first].det,Straw_Ar.data[ps.first].lay,Straw_Ar.data[ps.first].mod,Straw_Ar.data[ps.first].stl,Straw_Ar.data[ps.first].stw,rtint,Straw_Ar.data[ps.first].rtpar[0],Straw_Ar.data[ps.first].rtpar[1],Straw_Ar.data[ps.first].rtpar[2],Straw_Ar.data[ps.first].rtpar[3]) << std::endl;
+                  if (Straw_Ar.printt0) t0calfile << Form("%i %i %i %i %i : %e %e",Straw_Ar.data[ps.first].det,Straw_Ar.data[ps.first].lay,Straw_Ar.data[ps.first].mod,Straw_Ar.data[ps.first].stl,Straw_Ar.data[ps.first].stw,Straw_Ar.data[ps.first].t0,Straw_Ar.data[ps.first].t0err) << '\n';
+                  if (Straw_Ar.printrt) rtcalfile << Form("%i %i %i %i %i : %i %e %e %e %e",Straw_Ar.data[ps.first].det,Straw_Ar.data[ps.first].lay,Straw_Ar.data[ps.first].mod,Straw_Ar.data[ps.first].stl,Straw_Ar.data[ps.first].stw,rtint,Straw_Ar.data[ps.first].rtpar[0],Straw_Ar.data[ps.first].rtpar[1],Straw_Ar.data[ps.first].rtpar[2],Straw_Ar.data[ps.first].rtpar[3]) << '\n';
                 }
               }
             }

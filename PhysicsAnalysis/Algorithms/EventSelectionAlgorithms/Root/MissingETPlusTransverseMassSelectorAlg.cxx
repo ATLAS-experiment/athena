@@ -29,7 +29,7 @@ namespace CP {
     return StatusCode::SUCCESS;
   }
 
-  StatusCode MissingETPlusTransverseMassSelectorAlg::execute() {
+  StatusCode MissingETPlusTransverseMassSelectorAlg::execute(const EventContext& ctx) {
     // accessors
     static const SG::ConstAccessor<float> acc_pt_dressed("pt_dressed");
     static const SG::ConstAccessor<float> acc_phi_dressed("phi_dressed");
@@ -37,7 +37,7 @@ namespace CP {
     for (const auto &sys : m_systematicsList.systematicsVector()) {
       // retrieve the EventInfo
       const xAOD::EventInfo *evtInfo = nullptr;
-      ANA_CHECK(m_eventInfoHandle.retrieve(evtInfo, sys));
+      ANA_CHECK(m_eventInfoHandle.retrieve(evtInfo, sys, ctx));
 
       // default-decorate EventInfo
       m_decoration.setBool(*evtInfo, 0, sys);
@@ -48,15 +48,15 @@ namespace CP {
 
       // retrieve the MET container
       const xAOD::MissingETContainer *met = nullptr;
-      ANA_CHECK(m_metHandle.retrieve(met, sys));
+      ANA_CHECK(m_metHandle.retrieve(met, sys, ctx));
       // retrieve the electron container
       const xAOD::IParticleContainer *electrons = nullptr;
       if (m_electronsHandle)
-	ANA_CHECK(m_electronsHandle.retrieve(electrons, sys));
+	ANA_CHECK(m_electronsHandle.retrieve(electrons, sys, ctx));
       // retrieve the electron container
       const xAOD::IParticleContainer *muons = nullptr;
       if (m_muonsHandle)
-	ANA_CHECK(m_muonsHandle.retrieve(muons, sys));
+	ANA_CHECK(m_muonsHandle.retrieve(muons, sys, ctx));
 
       // compute the W boson transverse mass
       if ((*met)[m_metTerm.value()] == nullptr) {

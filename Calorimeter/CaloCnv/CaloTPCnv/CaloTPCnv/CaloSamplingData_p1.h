@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //Dear emacs, this is -*-c++-*-
@@ -10,7 +10,7 @@
 
 class CaloSamplingData_p1 {
  public:
-  unsigned int m_varTypePattern;
+  unsigned int m_varTypePattern{};
   std::vector<std::vector<float> > m_dataStore;
 
 };

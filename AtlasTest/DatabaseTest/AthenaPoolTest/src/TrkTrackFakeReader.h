@@ -48,7 +48,7 @@ public:
     virtual StatusCode initialize();
 
     /// Algorithm execute once per event
-    virtual StatusCode execute(); 
+    virtual StatusCode execute(const EventContext& ctx); 
 
     /// Algorithm finalize at end of job
     virtual StatusCode finalize();

@@ -55,4 +55,4 @@ atlas_add_test( mergeBSfiles
                        && ln -s ${trigbs_testFileRun3} test_mergeBSfiles_input2/file2.data
                        && trigbs_mergeBSfiles.py -v -r -N 5 -n 10 mergedBS test_mergeBSfiles_input1 test_mergeBSfiles_input2
                        && meta-reader mergedBS.*
-                LOG_IGNORE_PATTERN "file_guid" )
+                LOG_IGNORE_PATTERN "file_guid|file_size" )

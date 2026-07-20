@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRIGT1CALOBYTESTREAM_CPBYTESTREAMTOOL_H
@@ -88,7 +88,7 @@ class CpByteStreamTool : public AthAlgTool {
    struct LocalData
    {
      /// Tower channels to accept (1=Core, 2=Overlap)
-     int coreOverlap;
+     int coreOverlap = 0;
      /// Unpacking error code
      unsigned int rodErr = 0;
      /// Hits0 vector for unpacking
@@ -108,7 +108,7 @@ class CpByteStreamTool : public AthAlgTool {
      /// Had error data vector for unpacking
      std::vector<int> hadErrVec;
      /// Trigger tower key provider
-     LVL1::TriggerTowerKey* towerKey;
+     LVL1::TriggerTowerKey* towerKey = nullptr;
    };
 
    enum CollectionType { CPM_TOWERS, CPM_HITS, CMM_CP_HITS };

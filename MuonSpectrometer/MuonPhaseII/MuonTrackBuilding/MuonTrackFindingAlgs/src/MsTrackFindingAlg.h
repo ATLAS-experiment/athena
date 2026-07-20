@@ -1,11 +1,10 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef MUONTRACKFINIDNGALGS_MSTRACKFINIDNGALG_H
 #define MUONTRACKFINIDNGALGS_MSTRACKFINIDNGALG_H
 
 #include "AthenaBaseComps/AthReentrantAlgorithm.h"
-
 
 #include "StoreGate/ReadCondHandleKey.h"
 #include "StoreGate/ReadHandleKeyArray.h"
@@ -17,6 +16,8 @@
 
 #include "xAODMuon/MuonSegmentContainer.h"
 #include "MuonTrackEvent/MsTrackSeed.h"
+#include "MuonRecToolInterfacesR4/ITrackSummaryTool.h"
+
 
 #include "ActsEvent/TrackContainer.h"
 #include "ActsGeometryInterfaces/IExtrapolationTool.h"
@@ -24,14 +25,11 @@
 #include "ActsToolInterfaces/IFitterTool.h"
 
 #include "MuonIdHelpers/IMuonIdHelperSvc.h"
-#include "MuonRecToolInterfacesR4/ISegmentSelectionTool.h"
 #include "MuonRecToolInterfacesR4/ISpacePointCalibrator.h"
 #include "MuonRecToolInterfacesR4/ITrackVisualizationTool.h"
-
+#include "MuonRecToolInterfacesR4/ITrackSeedingTool.h"
 
 #include "ActsEvent/TrackContainerHandlesHelper.h"
-#include "MuonTrackFindingTools/MsTrackSeeder.h"
-#include "MuonTrackFindingTools/MlMsTrackSeeder.h"
 #include "GaudiKernel/SystemOfUnits.h"
 
 
@@ -50,13 +48,6 @@ namespace MuonR4{
             using OptBoundPars_t = Acts::Result<Acts::BoundTrackParameters>;
             using MeasVec_t = std::vector<const xAOD::UncalibratedMeasurement*>;
         private:
-            /** @brief Iterates over the search tree and combines close-by segments to a track seed.
-             *         Seeds with the same segments as other seeds are deduplicated
-             *  @param ctx: The event's context to access StoreGate & Conditions
-             *  @param segments: Full segment container */
-            std::unique_ptr<MsTrackSeedContainer> findTrackSeeds(const EventContext& ctx,
-                                                                 const xAOD::MuonSegmentContainer& segments) const;
-
             /** @brief Attempts to fit the track seed candidate to a full track and returns whether the
              *         fit succeeded.
              *  @param gCtx: Geometry context to access the alignment of the surfaces
@@ -73,28 +64,21 @@ namespace MuonR4{
 
             /** @brief Prepares the input by the fit by collecting the measurements on the segment & 
              *  @param gCtx: Geometry context to access the alignment of the surfaces
-             *  @param mCtxc: Magnetic field context to access the field map during the fit
              *  @param cCtx: Calibration context to access the calibration constants from Store gate
              *               during the track state filling
              *  @param seed: The seed of interest to fit */
             std::pair<OptBoundPars_t, MeasVec_t> prepareFit(const Acts::GeometryContext& tgContext,
-                                                            const Acts::MagneticFieldContext& mfContext,
                                                             const Acts::CalibrationContext& calContext,
                                                             const MsTrackSeed& seed) const;
 
-            const MsTrackSeeder& baselineSeeder() const;
-            
-            /** @brief Declare the data dependency on the standard Mdt+Rpc+Tgc segment container
-             *         & on the NSW segment container */
-            SG::ReadHandleKey<xAOD::MuonSegmentContainer> m_segmentKey{this, "SegmentContainer", "MuonSegmentsFromR4" };
             /** @brief IdHelperSvc to decode the Identifiers */
             ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{this, "IdHelperSvc",  "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
             /** @brief Pointer to the MuonDetectorManager */
             const MuonGMR4::MuonDetectorManager* m_detMgr{nullptr};
             /** @brief Temporary container write handle to push the seeds to store gate for later efficiency analysis */
             SG::WriteHandleKey<MsTrackSeedContainer> m_msTrkSeedKey{this, "MsTrkSeedKey", "MsTrackSeeds"};
-            /** @brief Segment selection tool to pick the good quality segments */
-            ToolHandle<ISegmentSelectionTool> m_segSelector{this, "SegmentSelectionTool" , "" };
+            /** @brief The track seeding tool to construct the seed candidates and to estimate the initial parameters */
+            ToolHandle<ITrackSeedingTool> m_seedingTool{this, "SeedingTool", ""};
             /** @brief Track fitting tool */
             ToolHandle<ActsTrk::IFitterTool> m_trackFitTool{this, "FittingTool", ""};
             /** @brief Calibration tool to fill the track states */
@@ -105,6 +89,8 @@ namespace MuonR4{
             ToolHandle<ActsTrk::IExtrapolationTool> m_extrapolationTool{this, "ExtrapolationTool" ,"" };
             /** @brief Visualization tool to debug the track finding */
             ToolHandle<MuonValR4::ITrackVisualizationTool> m_visualizationTool{this, "VisualizationTool", ""};
+            /** @brief Handle to the muon summary tool */
+            ToolHandle<MuonR4::ITrackSummaryTool> m_summaryTool{this, "SummaryTool" , ""};
             /** @brief Maximum search window to search segments for */
             Gaudi::Property<double> m_seedHalfLength{this, "SeedHalfLength", 50.*Gaudi::Units::cm};
             /** @brief Key to the output track container */
@@ -125,10 +111,6 @@ namespace MuonR4{
                 "Run baseline seeding independently for ML candidate groups in parallel"};
             SG::ReadDecorHandleKey<xAOD::MuonSegmentContainer> m_mlCandidateDecorKey{
                 this, "MlCandidateDecorationKey", "", "Scheduler dependency on ML candidate decoration"};
-            /** @brief Pointer to the actual seeder implementation */
-            std::unique_ptr<MsTrackSeeder> m_seeder{};
-            /** @brief Optional ML-wrapper seeder implementation */
-            std::unique_ptr<MlMsTrackSeeder> m_mlSeeder{};
     };      
 }
 

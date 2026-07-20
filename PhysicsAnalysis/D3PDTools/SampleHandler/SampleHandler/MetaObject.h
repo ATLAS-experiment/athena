@@ -1,19 +1,11 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
+
+/// @author Nils Krumnack
 
 #ifndef SAMPLE_HANDLER_META_OBJECT_HH
 #define SAMPLE_HANDLER_META_OBJECT_HH
-
-//          - 2012.
-// Distributed under the Boost Software License, Version 1.0.
-//    (See accompanying file LICENSE_1_0.txt or copy at
-//          http://www.boost.org/LICENSE_1_0.txt)
-
-// Please feel free to contact me (krumnack@iastate.edu) for bug
-// reports, feature suggestions, praise and complaints.
-
-
 
 #include <SampleHandler/Global.h>
 #include <RootCoreUtils/Assert.h>
@@ -408,6 +400,7 @@ namespace SH
     ///   out of memory II
   public:
     virtual void Add (TObject *meta_swallow);
+    virtual void Add (TObject *meta_swallow, Option_t*);
 
 
     /// \brief clear out the content of the collection

@@ -19,7 +19,6 @@ from .Physics_pp_run3_v1 import (PhysicsStream,
                                  SingleBjetGroup,
                                  MultiBjetGroup,
                                  SingleTauGroup,
-                                 DiTauGroup,
                                  MultiTauGroup,
                                  MultiPhotonGroup,
                                  TauBJetGroup,
@@ -327,15 +326,6 @@ def getDevSignatures():
         ChainProp(name='HLT_j175C_35smcINF_95bgntwoxt_j260C_35smcINF_a10sd_cssk_pf_jes_ftf_preselj200_L1gLJ140p0ETA25', groups=DevGroup+MultiBjetGroup, l1SeedThresholds=2*['FSNOSEED']),
         ChainProp(name='HLT_j260C_35smcINF_95bgntwoxt_j175C_35smcINF_a10sd_cssk_pf_jes_ftf_preselj200_L1gLJ140p0ETA25', groups=DevGroup+MultiBjetGroup, l1SeedThresholds=2*['FSNOSEED']),
         ######################################################################################################################################################################################################################################################
-        #HH->bbbb
-        # Phase-1 added ATR-28761
-        ChainProp(name="HLT_j55c_020jvt_j40c_020jvt_j20c_020jvt_j20c_020jvt_SHARED_2j20c_020jvt_bgn177_pf_ftf_presel2c20XX2c20b85_L1MU8F_2jJ40_jJ50", l1SeedThresholds=['FSNOSEED']*5, groups=MultiBjetGroup + DevGroup),
-        ChainProp(name="HLT_j40c_020jvt_j40c_020jvt_j20c_020jvt_j20c_020jvt_SHARED_2j20c_020jvt_bgn177_pf_ftf_presel2c20XX2c20b85_L1MU8F_2jJ40_jJ50", l1SeedThresholds=['FSNOSEED']*5, groups=MultiBjetGroup + DevGroup),
-        ChainProp(name="HLT_j55c_020jvt_j28c_020jvt_j20c_020jvt_j20c_020jvt_SHARED_2j20c_020jvt_bgn177_pf_ftf_presel2c20XX2c20b85_L1MU8F_2jJ40_jJ50", l1SeedThresholds=['FSNOSEED']*5, groups=MultiBjetGroup + DevGroup),
-        ChainProp(name="HLT_j40c_020jvt_j28c_020jvt_j20c_020jvt_j20c_020jvt_SHARED_2j20c_020jvt_bgn177_pf_ftf_presel2c20XX2c20b85_L1MU8F_2jJ40_jJ50", l1SeedThresholds=['FSNOSEED']*5, groups=MultiBjetGroup + DevGroup),
-        ChainProp(name="HLT_j75c_020jvt_j50c_020jvt_j20c_020jvt_j20c_020jvt_SHARED_2j20c_020jvt_bgn177_pf_ftf_presel2c20XX2c20b85_L1MU8F_2jJ40_jJ50", l1SeedThresholds=['FSNOSEED']*5, groups=MultiBjetGroup + DevGroup),
-        ChainProp(name="HLT_j75c_020jvt_j40c_020jvt_j25c_020jvt_j20c_020jvt_SHARED_2j20c_020jvt_bgn177_pf_ftf_presel2c20XX2c20b85_L1MU8F_2jJ40_jJ50", l1SeedThresholds=['FSNOSEED']*5, groups=MultiBjetGroup + DevGroup),
-
         # Tests of potential TLA chains for cost/rate
 
         # ATR-29016: EOF TLA chains aiming for H->cc+ISRJet signature
@@ -356,21 +346,6 @@ def getDevSignatures():
         ChainProp(name='HLT_tau35_mediumGNTau_HitZ_tau25_mediumGNTau_HitZ_03dRAB30_L1cTAU30M_2cTAU20M_DR-eTAU30eTAU20-jJ55', l1SeedThresholds=['cTAU30M', 'cTAU20M'], groups=SupportPhIGroup+MultiTauGroup+Topo2Group, monGroups=['tauMon:online', 'tauMon:shifter']),
         ChainProp(name='HLT_tau35_mediumGNTau_HitZ_tau25_mediumGNTau_HitZ_03dRAB_L1cTAU30M_2cTAU20M_4jJ30p0ETA25', l1SeedThresholds=['cTAU30M', 'cTAU20M'], groups=SupportPhIGroup+MultiTauGroup+Topo2Group, monGroups=['tauMon:online', 'tauMon:shifter']),
         ChainProp(name='HLT_tau35_mediumGNTau_HitZ_tau25_mediumGNTau_HitZ_03dRAB_L1cTAU30M_2cTAU20M', l1SeedThresholds=['cTAU30M', 'cTAU20M'], groups=SupportPhIGroup+MultiTauGroup+Topo2Group, monGroups=['tauMon:online', 'tauMon:shifter']),
-
-
-        # GNTauExt test chains for 2026 (ATR-32383)
-        ChainProp(name='HLT_tau20_mediumvar1noperfGNTauDev1_L1cTAU20M', groups=SingleTauGroup+SupportPhIGroup+DevGroup, monGroups=['tauMon:online', 'tauMon:t0']),
-        ChainProp(name='HLT_tau160_mediumvar1noperfGNTauDev1_L1eTAU140', groups=SingleTauGroup+SupportPhIGroup+DevGroup, monGroups=['tauMon:online', 'tauMon:t0']),
-        ChainProp(name='HLT_tau35_mediumvar1noperfGNTauDev1_tau25_mediumvar1noperfGNTauDev1_03dRAB30_L1cTAU30M_2cTAU20M_DR-eTAU30eTAU20-jJ55', l1SeedThresholds=['cTAU30M', 'cTAU20M'], groups=SupportPhIGroup+MultiTauGroup+Topo2Group, monGroups=['tauMon:online', 'tauMon:shifter']),
-        ChainProp(name='HLT_tau35_mediumvar1noperfGNTauDev1_tau25_mediumvar1noperfGNTauDev1_03dRAB_L1cTAU30M_2cTAU20M_4jJ30p0ETA25', l1SeedThresholds=['cTAU30M', 'cTAU20M'], groups=SupportPhIGroup+MultiTauGroup+Topo2Group, monGroups=['tauMon:online', 'tauMon:shifter']),
-        ChainProp(name='HLT_tau35_mediumvar1noperfGNTauDev1_tau25_mediumvar1noperfGNTauDev1_03dRAB_L1cTAU30M_2cTAU20M', l1SeedThresholds=['cTAU30M', 'cTAU20M'], groups=SupportPhIGroup+MultiTauGroup+Topo2Group, monGroups=['tauMon:online', 'tauMon:shifter']),
-
-        ChainProp(name='HLT_tau20_mediumvar2noperfGNTauDev1_L1cTAU20M', groups=SingleTauGroup+SupportPhIGroup+DevGroup, monGroups=['tauMon:online', 'tauMon:t0']),
-        ChainProp(name='HLT_tau160_mediumvar2noperfGNTauDev1_L1eTAU140', groups=SingleTauGroup+SupportPhIGroup+DevGroup, monGroups=['tauMon:online', 'tauMon:t0']),
-        ChainProp(name='HLT_tau35_mediumvar2noperfGNTauDev1_tau25_mediumvar2noperfGNTauDev1_03dRAB30_L1cTAU30M_2cTAU20M_DR-eTAU30eTAU20-jJ55', l1SeedThresholds=['cTAU30M', 'cTAU20M'], groups=SupportPhIGroup+MultiTauGroup+Topo2Group, monGroups=['tauMon:online', 'tauMon:shifter']),
-        ChainProp(name='HLT_tau35_mediumvar2noperfGNTauDev1_tau25_mediumvar2noperfGNTauDev1_03dRAB_L1cTAU30M_2cTAU20M_4jJ30p0ETA25', l1SeedThresholds=['cTAU30M', 'cTAU20M'], groups=SupportPhIGroup+MultiTauGroup+Topo2Group, monGroups=['tauMon:online', 'tauMon:shifter']),
-        ChainProp(name='HLT_tau35_mediumvar2noperfGNTauDev1_tau25_mediumvar2noperfGNTauDev1_03dRAB_L1cTAU30M_2cTAU20M', l1SeedThresholds=['cTAU30M', 'cTAU20M'], groups=SupportPhIGroup+MultiTauGroup+Topo2Group, monGroups=['tauMon:online', 'tauMon:shifter']),
-
 
         # Single tau Loose and Tight variations
         ChainProp(name='HLT_tau20_mediumGNTau_L1cTAU20M', groups=SingleTauGroup+DevGroup, monGroups=['tauMon:t0']),
@@ -427,80 +402,6 @@ def getDevSignatures():
         # LRT tau chains (ATR-23787)
         ChainProp(name="HLT_tau25_idperf_tracktwoLLP_L1cTAU20M", groups=DevGroup),
         ChainProp(name="HLT_tau25_idperf_trackLRT_L1cTAU20M", groups=DevGroup, monGroups=['tauMon:t0']),
-
-        # Boosted high-pT di-tau chains (ATR-30999)
-        # ntrk <= 5
-        ChainProp(name='HLT_j250_a10sd_cssk_ditauOmni2Trk5_pf_jes_ftf_preselj200_L1jJ160',              l1SeedThresholds=['FSNOSEED'], groups=DiTauGroup+DevGroup),
-        ChainProp(name='HLT_j250_a10sd_cssk_ditauOmni3Trk5_pf_jes_ftf_preselj200_L1jJ160',              l1SeedThresholds=['FSNOSEED'], groups=DiTauGroup+DevGroup),
-        ChainProp(name='HLT_j250_a10sd_cssk_ditauOmni4Trk5_pf_jes_ftf_preselj200_L1jJ160',              l1SeedThresholds=['FSNOSEED'], groups=DiTauGroup+DevGroup),
-        ChainProp(name='HLT_j250_a10sd_cssk_ditauOmni5Trk5_pf_jes_ftf_preselj200_L1jJ160',              l1SeedThresholds=['FSNOSEED'], groups=DiTauGroup+DevGroup),
-        ChainProp(name='HLT_j250_a10sd_cssk_ditauOmni6Trk5_pf_jes_ftf_preselj200_L1jJ160',              l1SeedThresholds=['FSNOSEED'], groups=DiTauGroup+DevGroup),
-        ChainProp(name='HLT_j250_a10sd_cssk_ditauOmni7Trk5_pf_jes_ftf_preselj200_L1jJ160',              l1SeedThresholds=['FSNOSEED'], groups=DiTauGroup+DevGroup),
-        ChainProp(name='HLT_j250_a10sd_cssk_ditauOmni8Trk5_pf_jes_ftf_preselj200_L1jJ160',              l1SeedThresholds=['FSNOSEED'], groups=DiTauGroup+DevGroup),
-        ChainProp(name='HLT_j250_a10sd_cssk_ditauOmni9Trk5_pf_jes_ftf_preselj200_L1jJ160',              l1SeedThresholds=['FSNOSEED'], groups=DiTauGroup+DevGroup),
-        # ntrk <= 3
-        ChainProp(name='HLT_j250_a10sd_cssk_ditauOmni0Trk3_pf_jes_ftf_preselj200_L1jJ160',              l1SeedThresholds=['FSNOSEED'], groups=DiTauGroup+DevGroup),
-        ChainProp(name='HLT_j250_a10sd_cssk_ditauOmni2Trk3_pf_jes_ftf_preselj200_L1jJ160',              l1SeedThresholds=['FSNOSEED'], groups=DiTauGroup+DevGroup),
-        ChainProp(name='HLT_j250_a10sd_cssk_ditauOmni3Trk3_pf_jes_ftf_preselj200_L1jJ160',              l1SeedThresholds=['FSNOSEED'], groups=DiTauGroup+DevGroup),
-        ChainProp(name='HLT_j250_a10sd_cssk_ditauOmni4Trk3_pf_jes_ftf_preselj200_L1jJ160',              l1SeedThresholds=['FSNOSEED'], groups=DiTauGroup+DevGroup),
-        ChainProp(name='HLT_j250_a10sd_cssk_ditauOmni5Trk3_pf_jes_ftf_preselj200_L1jJ160',              l1SeedThresholds=['FSNOSEED'], groups=DiTauGroup+DevGroup),
-        ChainProp(name='HLT_j250_a10sd_cssk_ditauOmni6Trk3_pf_jes_ftf_preselj200_L1jJ160',              l1SeedThresholds=['FSNOSEED'], groups=DiTauGroup+DevGroup),
-        ChainProp(name='HLT_j250_a10sd_cssk_ditauOmni7Trk3_pf_jes_ftf_preselj200_L1jJ160',              l1SeedThresholds=['FSNOSEED'], groups=DiTauGroup+DevGroup),
-        ChainProp(name='HLT_j250_a10sd_cssk_ditauOmni8Trk3_pf_jes_ftf_preselj200_L1jJ160',              l1SeedThresholds=['FSNOSEED'], groups=DiTauGroup+DevGroup),
-        ChainProp(name='HLT_j250_a10sd_cssk_ditauOmni9Trk3_pf_jes_ftf_preselj200_L1jJ160',              l1SeedThresholds=['FSNOSEED'], groups=DiTauGroup+DevGroup),
-        # Alternative L1 seed
-        # ntrk <= 5
-        ChainProp(name='HLT_j250_a10sd_cssk_ditauOmni2Trk5_pf_jes_ftf_preselj200_L1gLJ140p0ETA25',      l1SeedThresholds=['FSNOSEED'], groups=DiTauGroup+DevGroup),
-        ChainProp(name='HLT_j250_a10sd_cssk_ditauOmni3Trk5_pf_jes_ftf_preselj200_L1gLJ140p0ETA25',      l1SeedThresholds=['FSNOSEED'], groups=DiTauGroup+DevGroup),
-        ChainProp(name='HLT_j250_a10sd_cssk_ditauOmni4Trk5_pf_jes_ftf_preselj200_L1gLJ140p0ETA25',      l1SeedThresholds=['FSNOSEED'], groups=DiTauGroup+DevGroup),
-        ChainProp(name='HLT_j250_a10sd_cssk_ditauOmni5Trk5_pf_jes_ftf_preselj200_L1gLJ140p0ETA25',      l1SeedThresholds=['FSNOSEED'], groups=DiTauGroup+DevGroup),
-        ChainProp(name='HLT_j250_a10sd_cssk_ditauOmni6Trk5_pf_jes_ftf_preselj200_L1gLJ140p0ETA25',      l1SeedThresholds=['FSNOSEED'], groups=DiTauGroup+DevGroup),
-        ChainProp(name='HLT_j250_a10sd_cssk_ditauOmni7Trk5_pf_jes_ftf_preselj200_L1gLJ140p0ETA25',      l1SeedThresholds=['FSNOSEED'], groups=DiTauGroup+DevGroup),
-        ChainProp(name='HLT_j250_a10sd_cssk_ditauOmni8Trk5_pf_jes_ftf_preselj200_L1gLJ140p0ETA25',      l1SeedThresholds=['FSNOSEED'], groups=DiTauGroup+DevGroup),
-        ChainProp(name='HLT_j250_a10sd_cssk_ditauOmni9Trk5_pf_jes_ftf_preselj200_L1gLJ140p0ETA25',      l1SeedThresholds=['FSNOSEED'], groups=DiTauGroup+DevGroup),
-        # ntrk <= 3
-        ChainProp(name='HLT_j250_a10sd_cssk_ditauOmni0Trk3_pf_jes_ftf_preselj200_L1gLJ140p0ETA25',      l1SeedThresholds=['FSNOSEED'], groups=DiTauGroup+DevGroup),
-        ChainProp(name='HLT_j250_a10sd_cssk_ditauOmni2Trk3_pf_jes_ftf_preselj200_L1gLJ140p0ETA25',      l1SeedThresholds=['FSNOSEED'], groups=DiTauGroup+DevGroup),
-        ChainProp(name='HLT_j250_a10sd_cssk_ditauOmni3Trk3_pf_jes_ftf_preselj200_L1gLJ140p0ETA25',      l1SeedThresholds=['FSNOSEED'], groups=DiTauGroup+DevGroup),
-        ChainProp(name='HLT_j250_a10sd_cssk_ditauOmni4Trk3_pf_jes_ftf_preselj200_L1gLJ140p0ETA25',      l1SeedThresholds=['FSNOSEED'], groups=DiTauGroup+DevGroup),
-        ChainProp(name='HLT_j250_a10sd_cssk_ditauOmni5Trk3_pf_jes_ftf_preselj200_L1gLJ140p0ETA25',      l1SeedThresholds=['FSNOSEED'], groups=DiTauGroup+DevGroup),
-        ChainProp(name='HLT_j250_a10sd_cssk_ditauOmni6Trk3_pf_jes_ftf_preselj200_L1gLJ140p0ETA25',      l1SeedThresholds=['FSNOSEED'], groups=DiTauGroup+DevGroup),
-        ChainProp(name='HLT_j250_a10sd_cssk_ditauOmni7Trk3_pf_jes_ftf_preselj200_L1gLJ140p0ETA25',      l1SeedThresholds=['FSNOSEED'], groups=DiTauGroup+DevGroup),
-        ChainProp(name='HLT_j250_a10sd_cssk_ditauOmni8Trk3_pf_jes_ftf_preselj200_L1gLJ140p0ETA25',      l1SeedThresholds=['FSNOSEED'], groups=DiTauGroup+DevGroup),
-        ChainProp(name='HLT_j250_a10sd_cssk_ditauOmni9Trk3_pf_jes_ftf_preselj200_L1gLJ140p0ETA25',      l1SeedThresholds=['FSNOSEED'], groups=DiTauGroup+DevGroup),
-        # Looser ditauOmni cuts Trk4 chains
-        ChainProp(name='HLT_j250_a10sd_cssk_ditauOmni01Trk4_pf_jes_ftf_preselj200_L1jJ160',             l1SeedThresholds=['FSNOSEED'], groups=DiTauGroup+DevGroup),
-        ChainProp(name='HLT_j250_a10sd_cssk_ditauOmni02Trk4_pf_jes_ftf_preselj200_L1jJ160',             l1SeedThresholds=['FSNOSEED'], groups=DiTauGroup+DevGroup),
-        ChainProp(name='HLT_j250_a10sd_cssk_ditauOmni03Trk4_pf_jes_ftf_preselj200_L1jJ160',             l1SeedThresholds=['FSNOSEED'], groups=DiTauGroup+DevGroup),
-        ChainProp(name='HLT_j250_a10sd_cssk_ditauOmni04Trk4_pf_jes_ftf_preselj200_L1jJ160',             l1SeedThresholds=['FSNOSEED'], groups=DiTauGroup+DevGroup),
-        ChainProp(name='HLT_j250_a10sd_cssk_ditauOmni05Trk4_pf_jes_ftf_preselj200_L1jJ160',             l1SeedThresholds=['FSNOSEED'], groups=DiTauGroup+DevGroup),
-        ChainProp(name='HLT_j250_a10sd_cssk_ditauOmni06Trk4_pf_jes_ftf_preselj200_L1jJ160',             l1SeedThresholds=['FSNOSEED'], groups=DiTauGroup+DevGroup),
-        ChainProp(name='HLT_j250_a10sd_cssk_ditauOmni07Trk4_pf_jes_ftf_preselj200_L1jJ160',             l1SeedThresholds=['FSNOSEED'], groups=DiTauGroup+DevGroup),
-        ChainProp(name='HLT_j250_a10sd_cssk_ditauOmni08Trk4_pf_jes_ftf_preselj200_L1jJ160',             l1SeedThresholds=['FSNOSEED'], groups=DiTauGroup+DevGroup),
-        ChainProp(name='HLT_j250_a10sd_cssk_ditauOmni09Trk4_pf_jes_ftf_preselj200_L1jJ160',             l1SeedThresholds=['FSNOSEED'], groups=DiTauGroup+DevGroup),
-        ChainProp(name='HLT_j250_a10sd_cssk_ditauOmni1Trk4_pf_jes_ftf_preselj200_L1jJ160',              l1SeedThresholds=['FSNOSEED'], groups=DiTauGroup+DevGroup),
-        # Looser ditauOmni cuts Trk5 chains
-        ChainProp(name='HLT_j250_a10sd_cssk_ditauOmni01Trk5_pf_jes_ftf_preselj200_L1jJ160',             l1SeedThresholds=['FSNOSEED'], groups=DiTauGroup+DevGroup),
-        ChainProp(name='HLT_j250_a10sd_cssk_ditauOmni02Trk5_pf_jes_ftf_preselj200_L1jJ160',             l1SeedThresholds=['FSNOSEED'], groups=DiTauGroup+DevGroup),
-        ChainProp(name='HLT_j250_a10sd_cssk_ditauOmni03Trk5_pf_jes_ftf_preselj200_L1jJ160',             l1SeedThresholds=['FSNOSEED'], groups=DiTauGroup+DevGroup),
-        ChainProp(name='HLT_j250_a10sd_cssk_ditauOmni04Trk5_pf_jes_ftf_preselj200_L1jJ160',             l1SeedThresholds=['FSNOSEED'], groups=DiTauGroup+DevGroup),
-        ChainProp(name='HLT_j250_a10sd_cssk_ditauOmni05Trk5_pf_jes_ftf_preselj200_L1jJ160',             l1SeedThresholds=['FSNOSEED'], groups=DiTauGroup+DevGroup),
-        ChainProp(name='HLT_j250_a10sd_cssk_ditauOmni06Trk5_pf_jes_ftf_preselj200_L1jJ160',             l1SeedThresholds=['FSNOSEED'], groups=DiTauGroup+DevGroup),
-        ChainProp(name='HLT_j250_a10sd_cssk_ditauOmni07Trk5_pf_jes_ftf_preselj200_L1jJ160',             l1SeedThresholds=['FSNOSEED'], groups=DiTauGroup+DevGroup),
-        ChainProp(name='HLT_j250_a10sd_cssk_ditauOmni08Trk5_pf_jes_ftf_preselj200_L1jJ160',             l1SeedThresholds=['FSNOSEED'], groups=DiTauGroup+DevGroup),
-        ChainProp(name='HLT_j250_a10sd_cssk_ditauOmni09Trk5_pf_jes_ftf_preselj200_L1jJ160',             l1SeedThresholds=['FSNOSEED'], groups=DiTauGroup+DevGroup),
-
-        # ATR-31631 - test chains for boosted ditauOmni0Trk4 chains with elevated pT
-        ChainProp(name='HLT_j260_a10sd_cssk_ditauOmni0Trk4_pf_jes_ftf_preselj200_L1jJ160',              l1SeedThresholds=['FSNOSEED'], groups=DiTauGroup+DevGroup),
-        ChainProp(name='HLT_j270_a10sd_cssk_ditauOmni0Trk4_pf_jes_ftf_preselj200_L1jJ160',              l1SeedThresholds=['FSNOSEED'], groups=DiTauGroup+DevGroup),
-        ChainProp(name='HLT_j280_a10sd_cssk_ditauOmni0Trk4_pf_jes_ftf_preselj200_L1jJ160',              l1SeedThresholds=['FSNOSEED'], groups=DiTauGroup+DevGroup),
-        ChainProp(name='HLT_j290_a10sd_cssk_ditauOmni0Trk4_pf_jes_ftf_preselj200_L1jJ160',              l1SeedThresholds=['FSNOSEED'], groups=DiTauGroup+DevGroup),
-        ChainProp(name='HLT_j300_a10sd_cssk_ditauOmni0Trk4_pf_jes_ftf_preselj200_L1jJ160',              l1SeedThresholds=['FSNOSEED'], groups=DiTauGroup+DevGroup),
-        ChainProp(name='HLT_j310_a10sd_cssk_ditauOmni0Trk4_pf_jes_ftf_preselj200_L1jJ160',              l1SeedThresholds=['FSNOSEED'], groups=DiTauGroup+DevGroup),
-        ChainProp(name='HLT_j320_a10sd_cssk_ditauOmni0Trk4_pf_jes_ftf_preselj200_L1jJ160',              l1SeedThresholds=['FSNOSEED'], groups=DiTauGroup+DevGroup),
-        ChainProp(name='HLT_j330_a10sd_cssk_ditauOmni0Trk4_pf_jes_ftf_preselj200_L1jJ160',              l1SeedThresholds=['FSNOSEED'], groups=DiTauGroup+DevGroup),
-        ChainProp(name='HLT_j340_a10sd_cssk_ditauOmni0Trk4_pf_jes_ftf_preselj200_L1jJ160',              l1SeedThresholds=['FSNOSEED'], groups=DiTauGroup+DevGroup),
-        ChainProp(name='HLT_j350_a10sd_cssk_ditauOmni0Trk4_pf_jes_ftf_preselj200_L1jJ160',              l1SeedThresholds=['FSNOSEED'], groups=DiTauGroup+DevGroup),
     ]
 
     chains['Bphysics'] = [
@@ -638,12 +539,6 @@ def getDevSignatures():
         ChainProp(name='HLT_g50_nopid_g10_nopid_j50c_020jvt_pf_ftf_115masswisoABC135_L12eEM24L', l1SeedThresholds=['eEM24L','eEM24L', 'FSNOSEED'], stream=[PhysicsStream], groups=PrimaryPhIGroup+MultiPhotonGroup+SingleJetGroup),
 
 
-        # GNTauExt test chains for 2026 (ATR-32383)
-        ChainProp(name='HLT_mu24_ivarmedium_tau20_mediumvar1noperfGNTauDev1_probe_L1cTAU20M_03dRAB_L1MU14FCH', l1SeedThresholds=['MU14FCH', 'PROBEcTAU20M'], groups=TagAndProbePhIGroup+SingleMuonGroup, monGroups=['tauMon:t0']),
-        ChainProp(name='HLT_e26_lhtight_ivarloose_tau20_mediumvar1noperfGNTauDev1_probe_L1cTAU20M_03dRAB_L1eEM26M', l1SeedThresholds=['eEM26M', 'PROBEcTAU20M'], groups=TagAndProbePhIGroup+SingleElectronGroup, monGroups=['tauMon:t0']),
-
-        ChainProp(name='HLT_mu24_ivarmedium_tau20_mediumvar2noperfGNTauDev1_probe_L1cTAU20M_03dRAB_L1MU14FCH', l1SeedThresholds=['MU14FCH', 'PROBEcTAU20M'], groups=TagAndProbePhIGroup+SingleMuonGroup, monGroups=['tauMon:t0']),
-        ChainProp(name='HLT_e26_lhtight_ivarloose_tau20_mediumvar2noperfGNTauDev1_probe_L1cTAU20M_03dRAB_L1eEM26M', l1SeedThresholds=['eEM26M', 'PROBEcTAU20M'], groups=TagAndProbePhIGroup+SingleElectronGroup, monGroups=['tauMon:t0']),
     ]
 
     chains['Beamspot'] = [

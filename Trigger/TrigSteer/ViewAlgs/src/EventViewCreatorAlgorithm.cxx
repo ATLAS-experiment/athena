@@ -1,7 +1,7 @@
 /*
   General-purpose view creation algorithm <bwynne@cern.ch>
   
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "EventViewCreatorAlgorithm.h"
@@ -109,7 +109,7 @@ StatusCode EventViewCreatorAlgorithm::execute( const EventContext& context ) con
       
     // cachedIndex and useCached are to do with a)
     size_t cachedIndex = std::numeric_limits<std::size_t>::max();
-    const bool useCached = checkCache(cachedViews, outputDecision, cachedIndex, matchingCache);
+    const bool useCached = checkCache(context, cachedViews, outputDecision, cachedIndex, matchingCache);
 
     // roiIt is to do with b) and c)
     auto roiIt = find(RoIsFromDecision.begin(), RoIsFromDecision.end(), roiEL);
@@ -139,19 +139,19 @@ StatusCode EventViewCreatorAlgorithm::execute( const EventContext& context ) con
         newView->setFilter( m_viewFallFilter );
       }
       // Set parent view, if required. Note: Must be called before we link the new view to outputDecision.
-      ATH_CHECK(linkViewToParent(outputDecision, newView));
+      ATH_CHECK(linkViewToParent(context, outputDecision, newView));
       // Add the single ROI into the view to seed it.
       ATH_CHECK(placeRoIInView(roiEL, viewVector->back(), context));
       // Special muon case - following from a FullScan view, seed each new View with its MuonCombined::MuonCandidate
       if (m_placeMuonInView) {
-        std::vector<LinkInfo<xAOD::MuonContainer>> muonELInfo = findLinks<xAOD::MuonContainer>(outputDecision, featureString(), TrigDefs::lastFeatureOfType);
+        std::vector<LinkInfo<xAOD::MuonContainer>> muonELInfo = findLinks<xAOD::MuonContainer>(context, outputDecision, featureString(), TrigDefs::lastFeatureOfType);
         ATH_CHECK( muonELInfo.size() == 1 );
         ATH_CHECK( muonELInfo.at(0).isValid() );
         ATH_CHECK( placeMuonInView( *(muonELInfo.at(0).link), viewVector->back(), context ) );
       }
       // Special jet case - following from a FullScan view, seed each new View with its xAOD::Jet
       if (m_placeJetInView) {
-        std::vector<LinkInfo<xAOD::JetContainer>> jetELInfo = findLinks<xAOD::JetContainer>(outputDecision, featureString(), TrigDefs::lastFeatureOfType);
+        std::vector<LinkInfo<xAOD::JetContainer>> jetELInfo = findLinks<xAOD::JetContainer>(context, outputDecision, featureString(), TrigDefs::lastFeatureOfType);
         ATH_CHECK( jetELInfo.size() == 1 );
         ATH_CHECK( jetELInfo.at(0).isValid() );
         ATH_CHECK( placeJetInView( *(jetELInfo.at(0).link), viewVector->back(), context ) );
@@ -188,11 +188,11 @@ bool endsWith(const std::string& value, const std::string& ending) {
   return std::equal(ending.rbegin(), ending.rend(), value.rbegin());
 }
 
-std::vector<LinkInfo<ViewContainer>> EventViewCreatorAlgorithm::viewsToLink(const Decision* outputDecision) const { 
-  return findLinks<ViewContainer>(outputDecision, viewString(), TrigDefs::lastFeatureOfType);
+std::vector<LinkInfo<ViewContainer>> EventViewCreatorAlgorithm::viewsToLink(const EventContext& context, const Decision* outputDecision) const {
+  return findLinks<ViewContainer>(context, outputDecision, viewString(), TrigDefs::lastFeatureOfType);
 }
 
-bool EventViewCreatorAlgorithm::checkCache(const DecisionContainer* cachedViews, const Decision* outputDecision, size_t& cachedIndex, MatchingCache& matchingCache) const {
+bool EventViewCreatorAlgorithm::checkCache(const EventContext& context, const DecisionContainer* cachedViews, const Decision* outputDecision, size_t& cachedIndex, MatchingCache& matchingCache) const {
   if (cachedViews == nullptr or m_cacheDisabled) {
     return false; // No cached input configured, which is fine.
   }
@@ -200,7 +200,7 @@ bool EventViewCreatorAlgorithm::checkCache(const DecisionContainer* cachedViews,
   // If we ever stop using cached views mid-processing of a chain, then it is by far safer to continue to not use cached views in all following steps. See for example towards the end of ATR-25996
   // We can tell this by querying for View instances in previous steps and looking for evidence of the instance being cached (no "_probe" postfix, from initiall "tag" pass)
   // or not cached (with "_probe" postfix, from second "probe" pass)
-  std::vector<LinkInfo<ViewContainer>> previousStepViews = findLinks<ViewContainer>(outputDecision, viewString(), TrigDefs::allFeaturesOfType);
+  std::vector<LinkInfo<ViewContainer>> previousStepViews = findLinks<ViewContainer>(context, outputDecision, viewString(), TrigDefs::allFeaturesOfType);
   // If this collection is empty then we're the 1st step, so OK to look for a cached EventView to re-use. Otherwise...
   if (previousStepViews.size()) { 
     // If there are one or more prior steps, we want to focus on the most recent which will be the first entry in the vector
@@ -231,7 +231,7 @@ bool EventViewCreatorAlgorithm::checkCache(const DecisionContainer* cachedViews,
     const SG::View* view = *(cachedViews->at(cachedIndex)->objectLink<ViewContainer>(viewString()));
 
     // What prior views would we have linked if we were spawning a new View here in probe?
-    std::vector<LinkInfo<ViewContainer>> viewsToLinkVector = viewsToLink(outputDecision);
+    std::vector<LinkInfo<ViewContainer>> viewsToLinkVector = viewsToLink(context, outputDecision);
     for (const LinkInfo<ViewContainer>& toLinkLI : viewsToLinkVector) {
       const SG::View* toLink = *(toLinkLI.link);
       // Was toLink linked as a proxy back in the tag stage?
@@ -268,7 +268,7 @@ StatusCode EventViewCreatorAlgorithm::populateMatchingCacheWithCachedViews(const
 }
 
 
-StatusCode EventViewCreatorAlgorithm::linkViewToParent( const TrigCompositeUtils::Decision* outputDecision, SG::View* newView ) const {
+StatusCode EventViewCreatorAlgorithm::linkViewToParent( const EventContext& context, const TrigCompositeUtils::Decision* outputDecision, SG::View* newView ) const {
   if (!m_requireParentView) {
     ATH_MSG_DEBUG("Parent view linking not required");
     return StatusCode::SUCCESS;
@@ -279,7 +279,7 @@ StatusCode EventViewCreatorAlgorithm::linkViewToParent( const TrigCompositeUtils
       << viewString() << "' link. Call this fn BEFORE linking the new View.");
     return StatusCode::FAILURE;
   }
-  std::vector<LinkInfo<ViewContainer>> viewsToLinkVector = viewsToLink(outputDecision);
+  std::vector<LinkInfo<ViewContainer>> viewsToLinkVector = viewsToLink(context, outputDecision);
   if (viewsToLinkVector.size() == 0) {
     ATH_MSG_ERROR("Could not find the parent View, but 'RequireParentView' is true.");
     return StatusCode::FAILURE;

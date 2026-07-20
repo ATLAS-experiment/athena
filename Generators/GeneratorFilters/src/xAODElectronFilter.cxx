@@ -10,9 +10,9 @@ StatusCode xAODElectronFilter::filterInitialize()
   return StatusCode::SUCCESS;
 }
 
-StatusCode xAODElectronFilter::filterEvent() {
+StatusCode xAODElectronFilter::filterEvent(const EventContext& ctx) {
   // Retrieve full TruthParticle container
-  SG::ReadHandle<xAOD::TruthParticleContainer> xTruthParticleContainer{m_truthPartContKey};
+  SG::ReadHandle<xAOD::TruthParticleContainer> xTruthParticleContainer{m_truthPartContKey, ctx};
   CHECK(xTruthParticleContainer.isValid());
 
   for (const xAOD::TruthParticle* part : *xTruthParticleContainer) {
@@ -21,7 +21,7 @@ StatusCode xAODElectronFilter::filterEvent() {
       return StatusCode::SUCCESS;
   }
 
-  setFilterPassed(false);
+  setFilterPassed(false, ctx);
   return StatusCode::SUCCESS;
 }
 

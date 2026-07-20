@@ -18,7 +18,7 @@ public:
     virtual ~MetaDataAlg() = default;
 
     StatusCode initialize() override;
-    StatusCode execute() override;
+    StatusCode execute(const EventContext& ctx) override;
     StatusCode finalize() override;
     StatusCode beginInputFile() override;
     unsigned int cardinality() const override final { return 1; }

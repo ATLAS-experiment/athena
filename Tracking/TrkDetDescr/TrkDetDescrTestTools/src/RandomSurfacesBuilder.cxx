@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -21,24 +21,14 @@
 
 // constructor
 Trk::RandomSurfaceBuilder::RandomSurfaceBuilder(const std::string& t, const std::string& n, const IInterface* p)
-: AthAlgTool(t,n,p),    
-  m_gaussDist(nullptr),
-  m_flatDist(nullptr),
-  m_numberOfSurfaces(100),
-  m_enableCones(false)
+: AthAlgTool(t,n,p)
 {
-   
     declareInterface<ISurfaceBuilder>(this);
-   
-    // the active dimensions
-    declareProperty("NumberOfSurfaces", m_numberOfSurfaces);
-    declareProperty("WorldDimensions",  m_worldDimensions);
 }
 
 // destructor
 Trk::RandomSurfaceBuilder::~RandomSurfaceBuilder()
 {
-    delete m_gaussDist;
     delete m_flatDist;
 }
 
@@ -53,7 +43,6 @@ StatusCode Trk::RandomSurfaceBuilder::initialize()
    ATH_CHECK( m_rndmSvc.isValid() );
 
    // intialize the random number generators
-   m_gaussDist = new Rndm::Numbers(m_rndmSvc, Rndm::Gauss(0.,1.));
    m_flatDist  = new Rndm::Numbers(m_rndmSvc, Rndm::Flat(0.,1.));
    
    return StatusCode::SUCCESS;
@@ -92,7 +81,7 @@ const Trk::Surface* Trk::RandomSurfaceBuilder::surface() const
     int sType = std::floor(m_flatDist->shoot()*6);
         
     // neglect 0 if you don't do cones
-    if (!m_enableCones && !sType){
+    if (!sType){
         while (!sType)
          sType = std::floor(m_flatDist->shoot()*6);   
     }

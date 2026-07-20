@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #include "LArRecEvent/LArEventBitInfo.h"
 #include "TrigMETMonitorAlgorithm.h"
@@ -25,7 +25,7 @@ StatusCode TrigMETMonitorAlgorithm::initialize() {
     ATH_CHECK( m_tracks_key.initialize() );
     ATH_CHECK( m_vertex_key.initialize() );
     ATH_CHECK( m_offline_vertex_key.initialize() );
-    ATH_CHECK( m_lvl1_roi_key.initialize() );
+    ATH_CHECK( m_lvl1_roi_key.initialize(SG::AllowEmpty) );
     ATH_CHECK( m_l1_jFexMet_key.initialize() );
     ATH_CHECK( m_l1_jFexSumEt_key.initialize() );
     ATH_CHECK( m_l1_gFexJwojScalar_key.initialize() );
@@ -114,9 +114,11 @@ StatusCode TrigMETMonitorAlgorithm::fillHistograms( const EventContext& ctx ) co
     }
 
     // access L1 met containers
-    SG::ReadHandle<xAOD::EnergySumRoI> l1_roi_cont(m_lvl1_roi_key, ctx);
-    if (! l1_roi_cont.isValid() ) {
-        ATH_MSG_DEBUG("Container "<< m_lvl1_roi_key << " does not exist");
+    std::optional<SG::ReadHandle<xAOD::EnergySumRoI>> l1_roi_cont_rh;
+    const xAOD::EnergySumRoI* l1_roi_cont = nullptr;
+    if (!m_lvl1_roi_key.empty()) {
+      l1_roi_cont_rh.emplace(m_lvl1_roi_key, ctx);
+      if (l1_roi_cont_rh->isValid()) l1_roi_cont = l1_roi_cont_rh->cptr();
     }
 
     // access L1 Fex met containers
@@ -449,17 +451,13 @@ StatusCode TrigMETMonitorAlgorithm::fillHistograms( const EventContext& ctx ) co
 
     // access L1 MET values
     for (const std::string& alg : m_algsL1) {
-      SG::ReadHandle<xAOD::EnergySumRoI> l1_met_cont;
-      if (alg == "roi" && l1_roi_cont.isValid()) {
-        l1_met_cont = l1_roi_cont;
-      }
+      if (alg == "roi" && l1_roi_cont != nullptr) {
 
-      if ( l1_met_cont.isValid() ) {
-        if ((l1_met_cont->energyX())>-9e12 && (l1_met_cont->energyX())<9e12 && (l1_met_cont->energyY())>-9e12 && (l1_met_cont->energyY())<9e12) {
-          float L1_met_Ex = - l1_met_cont->energyX()/Gaudi::Units::GeV;
-          float L1_met_Ey = - l1_met_cont->energyY()/Gaudi::Units::GeV;
+        if ((l1_roi_cont->energyX())>-9e12 && (l1_roi_cont->energyX())<9e12 && (l1_roi_cont->energyY())>-9e12 && (l1_roi_cont->energyY())<9e12) {
+          float L1_met_Ex = - l1_roi_cont->energyX()/Gaudi::Units::GeV;
+          float L1_met_Ey = - l1_roi_cont->energyY()/Gaudi::Units::GeV;
           float L1_met_Et = std::sqrt(L1_met_Ex*L1_met_Ex + L1_met_Ey*L1_met_Ey);
-          float L1_met_sumEt = l1_met_cont->energyT()/Gaudi::Units::GeV;
+          float L1_met_sumEt = l1_roi_cont->energyT()/Gaudi::Units::GeV;
           float L1_met_Ex_log = signed_log(L1_met_Ex, epsilon);
           float L1_met_Ey_log = signed_log(L1_met_Ey, epsilon);
           float L1_met_Et_log = signed_log(L1_met_Et, epsilon);
@@ -684,7 +682,7 @@ StatusCode TrigMETMonitorAlgorithm::fillHistograms( const EventContext& ctx ) co
 
     // get L1 MET for pre-selection
     float L1_roiMet_Et = 0;
-    if ( l1_roi_cont.isValid() ) {
+    if ( l1_roi_cont != nullptr ) {
       if ((l1_roi_cont->energyX())>-9e12 && (l1_roi_cont->energyX())<9e12 && (l1_roi_cont->energyY())>-9e12 && (l1_roi_cont->energyY())<9e12) {
 	      float Ex = - l1_roi_cont->energyX()/Gaudi::Units::GeV;
 	      float Ey = - l1_roi_cont->energyY()/Gaudi::Units::GeV;

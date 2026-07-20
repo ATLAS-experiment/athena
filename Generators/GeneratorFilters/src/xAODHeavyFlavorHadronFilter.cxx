@@ -34,7 +34,7 @@ StatusCode xAODHeavyFlavorHadronFilter::filterFinalize() {
 }
 
 
-StatusCode xAODHeavyFlavorHadronFilter::filterEvent() {
+StatusCode xAODHeavyFlavorHadronFilter::filterEvent(const EventContext& ctx) {
   bool pass = false;
   bool bPass = false;
   bool cPass = false;
@@ -47,7 +47,7 @@ StatusCode xAODHeavyFlavorHadronFilter::filterEvent() {
   std::vector<const xAOD::Jet *> jets;
   if (m_RequireTruthJet) {
     // Retrieve jet container
-    SG::ReadHandle<xAOD::JetContainer>  truthjetTES{m_TruthJetContainerName};
+    SG::ReadHandle<xAOD::JetContainer>  truthjetTES{m_TruthJetContainerName, ctx};
     CHECK(truthjetTES.isValid());
     for (const xAOD::Jet* truthJet : *truthjetTES) {
       if (truthJet->pt() > m_jetPtMin && std::abs(truthJet->eta()) < m_jetEtaMax) {
@@ -58,7 +58,7 @@ StatusCode xAODHeavyFlavorHadronFilter::filterEvent() {
 
   // Retrieve TruthGen container from xAOD Gen slimmer, contains all particles witout barcode_zero and 
   // duplicated barcode ones
-  SG::ReadHandle<xAOD::TruthParticleContainer> xTruthParticleContainer{m_truthPartContKey};
+  SG::ReadHandle<xAOD::TruthParticleContainer> xTruthParticleContainer{m_truthPartContKey, ctx};
   CHECK(xTruthParticleContainer.isValid());
 
   for (const xAOD::TruthParticle* part : *xTruthParticleContainer) {
@@ -164,7 +164,7 @@ StatusCode xAODHeavyFlavorHadronFilter::filterEvent() {
   if (BHadronPass) m_NBHadronPass++;
   if (DHadronPass) m_NDHadronPass++;
   if (PDGIDPass)   m_NPDGIDPass++;
-  setFilterPassed(pass);
+  setFilterPassed(pass, ctx);
 
   return StatusCode::SUCCESS;
 }

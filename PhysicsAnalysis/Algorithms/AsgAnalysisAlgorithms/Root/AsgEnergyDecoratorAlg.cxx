@@ -17,12 +17,12 @@ namespace CP {
     return StatusCode::SUCCESS;
   }
 
-  StatusCode AsgEnergyDecoratorAlg::execute() {
+  StatusCode AsgEnergyDecoratorAlg::execute(const EventContext& ctx) {
 
     for (const auto &sys : m_systematicsList.systematicsVector()) {
 
       const xAOD::IParticleContainer *particles = nullptr;
-      ANA_CHECK(m_particlesHandle.retrieve (particles, sys));
+      ANA_CHECK(m_particlesHandle.retrieve (particles, sys, ctx));
 
       for (const xAOD::IParticle *particle : *particles) {
         m_energyDecor.set(*particle, particle->e(), sys);

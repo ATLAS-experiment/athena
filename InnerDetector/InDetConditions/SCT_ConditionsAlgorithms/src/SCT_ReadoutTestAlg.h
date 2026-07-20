@@ -41,7 +41,7 @@ class SCT_ReadoutTestAlg : public AthAlgorithm {
 
   /** Usual framework methods for an Algorithm*/
   virtual StatusCode initialize() override;
-  virtual StatusCode execute() override;
+  virtual StatusCode execute(const EventContext& ctx) override;
   virtual StatusCode finalize() override;
    
  private:

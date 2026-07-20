@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef MUONVISUALIZATIONHELPERSR4_DRAWCANVASOBJECT_H
 #define MUONVISUALIZATIONHELPERSR4_DRAWCANVASOBJECT_H
@@ -9,6 +9,8 @@
 #include <Acts/Utilities/ArrayHelpers.hpp>
 #include <limits>
 #include <atomic>
+#include <string>
+#include <vector>
 
 namespace MuonValR4::detail {
     class DrawCanvasObject : public IRootVisualizationService::ICanvasObject {
@@ -25,7 +27,7 @@ namespace MuonValR4::detail {
             virtual void expandPad(const double x, const double y) override final;
 
             virtual void add(PrimitivePtr_t&& drawMe,
-                             const std::string& drawOpt ="") override final;
+                             std::string_view drawOpt ="") override final;
             virtual void add(std::vector<PrimitivePtr_t>&& drawMe) override final;
 
             virtual double corner(const AxisRanges r) const override final;

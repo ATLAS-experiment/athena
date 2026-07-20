@@ -45,10 +45,10 @@ namespace CP
   }
 
   StatusCode AsgLeptonTrackDecorationAlg ::
-  execute ()
+  execute (const EventContext& ctx)
   {
-    SG::ReadHandle<xAOD::EventInfo> eventInfo(m_eventInfoKey);
-    SG::ReadHandle<xAOD::VertexContainer> vertices(m_primaryVerticesKey);
+    SG::ReadHandle<xAOD::EventInfo> eventInfo(m_eventInfoKey, ctx);
+    SG::ReadHandle<xAOD::VertexContainer> vertices(m_primaryVerticesKey, ctx);
     const xAOD::Vertex *primaryVertex {nullptr};
 
     for (const xAOD::Vertex *vertex : *vertices)
@@ -70,7 +70,7 @@ namespace CP
       if (!m_smearingTool.empty())
         ANA_CHECK (m_smearingTool->applySystematicVariation (sys));
       const xAOD::IParticleContainer *particles = nullptr;
-      ANA_CHECK (m_particlesHandle.retrieve (particles, sys));
+      ANA_CHECK (m_particlesHandle.retrieve (particles, sys, ctx));
       for (const xAOD::IParticle *particle : *particles)
       {
         float d0sig = -999;
@@ -81,7 +81,7 @@ namespace CP
 
         const xAOD::TrackParticle *track {nullptr};
         if (const xAOD::Muon *muon = dynamic_cast<const xAOD::Muon *>(particle)){
-          track = muon->primaryTrackParticle();
+          track = muon->trackParticle(xAOD::Muon::TrackParticleType::Primary);
         } else if (const xAOD::Electron *electron = dynamic_cast<const xAOD::Electron *>(particle)){
           track = electron->trackParticle();
         } else {

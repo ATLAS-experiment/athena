@@ -66,6 +66,8 @@ class TGCChannelSLBIn : public TGCChannelId {
     static const int s_lengthSD[];
     static const int s_lengthWT[];
     static const int s_lengthST[];
+    static const int s_lengthWI[];
+    static const int s_lengthSI[];
     static const int s_adjacentCell[];
     static const int s_adjacentWD[];
     static const int s_adjacentSD[];

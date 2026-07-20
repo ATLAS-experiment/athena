@@ -38,7 +38,7 @@ class TileRawCorrelatedNoise: public AthAlgorithm {
     virtual ~TileRawCorrelatedNoise();
 
     virtual StatusCode initialize();
-    virtual StatusCode execute();
+    virtual StatusCode execute(const EventContext& ctx);
     virtual StatusCode finalize();
 
   private:

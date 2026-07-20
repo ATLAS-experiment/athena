@@ -30,7 +30,7 @@ namespace CP {
       return StatusCode::SUCCESS;
    }
 
-   StatusCode RNtupleTreeMakerAlg::execute() {
+   StatusCode RNtupleTreeMakerAlg::execute(const EventContext& /*ctx*/) {
       if( ! m_isInitialized ) {
          m_model = ROOT::RNTupleModel::Create();
          if ( !m_model ) {

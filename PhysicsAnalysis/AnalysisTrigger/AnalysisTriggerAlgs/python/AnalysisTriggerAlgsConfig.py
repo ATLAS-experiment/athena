@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -14,7 +14,7 @@ def RoIBResultToxAODCfg(flags):
 
     acc = ComponentAccumulator()
     alg = CompFactory.RoIBResultToxAOD('RoIBResultToxAOD')
-    alg.DoMuon = flags.Detector.EnableMuon and not (flags.Trigger.enableL1MuonPhase1 or flags.Trigger.enableL0Muon)
+    alg.DoMuon = flags.Detector.EnableMuon and flags.Trigger.L1.doMuon and not (flags.Trigger.enableL1MuonPhase1 or flags.Trigger.enableL0Muon)
     alg.DoCalo = flags.Detector.EnableCalo and flags.Trigger.enableL1CaloLegacy
 
     if flags.Input.Format is Format.POOL:
@@ -56,8 +56,9 @@ def RoIBResultToxAODCfg(flags):
             (alg.xAODKeyJetEt.Type, alg.xAODKeyJetEt.Path),
             (alg.xAODKeyJet.Type,   alg.xAODKeyJet.Path)
         ]
-        from  TrigConfigSvc.TrigConfigSvcCfg import L1ConfigSvcCfg
-        acc.merge(L1ConfigSvcCfg(flags))
+
+    from  TrigConfigSvc.TrigConfigSvcCfg import L1ConfigSvcCfg
+    acc.merge(L1ConfigSvcCfg(flags))
 
     acc.addEventAlgo(alg)
 

@@ -49,7 +49,7 @@ StatusCode Trk::SingleTrackDiffAlg::initialize() {
     return StatusCode::SUCCESS;
 }
 
-StatusCode Trk::SingleTrackDiffAlg::execute() {
+StatusCode Trk::SingleTrackDiffAlg::execute(const EventContext& /*ctx*/) {
     if (msgLvl(MSG::VERBOSE)) msg(MSG::VERBOSE)    << "SingleTrackDiffAlg execute() start" << endmsg;
 
     StatusCode sc = StatusCode::SUCCESS;

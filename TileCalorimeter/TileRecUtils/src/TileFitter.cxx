@@ -13,9 +13,9 @@
 
 #include "TileRecUtils/TileFitter.h"
 #include "TileRecUtils/TileFilterResult.h"
+#include <format>
 #include <iostream>
 #include <iomanip>
-#include "boost/io/ios_state.hpp"
 
 //std::vector<double> Amp;
 
@@ -189,19 +189,16 @@ std::vector<double>& TileFitter::getErr() {
 }
 // ============================================================================== 
 void TileFitter::printMat(CLHEP::HepMatrix &mat) {
-  boost::io::ios_base_all_saver coutsave(std::cout);
   int nrow = mat.num_row();
   int ncol = mat.num_col();
-  std::cout << "  nrow=" << nrow << ", ncol=" << ncol << std::endl;
-  std::streamsize oldprec = std::cout.precision(4);
+  std::cout << std::format("  nrow={}, ncol={}\n", nrow, ncol);
   for (int irow = 0; irow < nrow; irow++) {
-    std::cout << " irow=" << irow << ": Mat=";
+    std::cout << std::format(" irow={}: Mat=", irow);
     for (int icol = 0; icol < ncol; icol++) {
-      std::cout << std::setw(7) /* << std::setprecision(4) */<< mat[irow][icol];
+      std::cout << std::format("{:>7.4g}", mat[irow][icol]);
     }
     std::cout << std::endl;
   }
-  std::cout.precision(oldprec);
 }
 // ============================================================================== 
 void TileFitter::printVec(CLHEP::HepVector &vec) {

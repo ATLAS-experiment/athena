@@ -9,9 +9,8 @@
 #include "InDetMeasurementUtilities/Helpers.h"
 #include "StoreGate/ReadDecorHandle.h"
 #include "ActsEvent/TrackContainer.h"
-#include "ActsGeometry/ATLASSourceLink.h"
 #include "ActsEvent/Decoration.h"
-
+#include "ActsCalibrators/xAODUncalibMeasCalibrator.h"
 
 namespace ActsTrk {
   
@@ -289,12 +288,12 @@ StatusCode PixelClusterTruthDecoratorAlg::labelMeasurementToKeep(const EventCont
 			  auto flags = state.typeFlags();
 			  if (not flags.hasMeasurement()) return;
 			  
-			  auto sl = state.getUncalibratedSourceLink().template get<ATLASUncalibSourceLink>();
-			  if (sl == nullptr) return;
-			  
-			  const xAOD::UncalibratedMeasurement &cluster = getUncalibratedMeasurement(sl);    
-			  if (cluster.type() != xAOD::UncalibMeasType::PixelClusterType) return;
-			  labels.at(cluster.index()) = true;
+			  auto cluster = detail::xAODUncalibMeasCalibrator::unpack(state.getUncalibratedSourceLink());;
+			  if (cluster == nullptr) {
+          return;
+        }
+			  if (cluster->type() != xAOD::UncalibMeasType::PixelClusterType) return;
+			  labels.at(cluster->index()) = true;
 			});
     } // loop on tracks
   } // loop on read handle keys

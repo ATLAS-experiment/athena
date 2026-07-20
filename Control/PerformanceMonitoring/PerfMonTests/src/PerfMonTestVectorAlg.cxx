@@ -1,13 +1,14 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-#include <map>
-#include <vector>
+
 #include "AthenaBaseComps/AthMsgStreamMacros.h"
 
 #include "Hit.h"
 #include "PerfMonTestVectorAlg.h"
+#include <map>
+#include <vector>
 
 /* #define DEBUG_ME 1 */
 
@@ -17,7 +18,7 @@ using namespace::std;
 typedef vector<DHit> HitContainer;
 
 
-StatusCode VectorAlg::execute()
+StatusCode VectorAlg::execute(const EventContext& /*ctx*/)
 {  
   ATH_MSG_DEBUG("Executing ");
   HitContainer vhit;
@@ -39,6 +40,8 @@ StatusCode VectorAlg::execute()
 #endif
     vhit.push_back(DHit(i,i,i));
     vcap=vhit.capacity();
+    //I'm going to assume this is deliberate, as it is for a tutorial
+    //coverity[WRAPPER_ESCAPE]
     p3=&vhit[i];
     if (m_mapIt.value()) m_mixMap[i]=p3;
     if (vold != vcap) cout << "iteration " << i << " new capacity " << vcap <<endl;

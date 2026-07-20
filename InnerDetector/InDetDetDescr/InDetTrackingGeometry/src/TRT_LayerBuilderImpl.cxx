@@ -1,5 +1,5 @@
 /*
- Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+ Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "InDetTrackingGeometry/TRT_LayerBuilderImpl.h"
@@ -323,6 +323,7 @@ InDet::TRT_LayerBuilderImpl::cylindricalLayersImpl(const InDetDD::TRT_DetElement
           phiMax += 0.5*phiStep;
           // correct for the +pi/-pi module
           // now create the BinUtility
+          //coverity[DIVIDE_BY_ZERO:FALSE]
           auto layerStrawPhiZUtility = Trk::BinUtility(sectorStraws/2,phiMin,phiMax,Trk::open, Trk::binPhi);
           layerStrawPhiZUtility  += Trk::BinUtility(2,-layerZmax, layerZmax, Trk::open, Trk::binZ);
           // create the 2D BinnedArray
@@ -564,7 +565,6 @@ InDet::TRT_LayerBuilderImpl::discLayersImpl(const InDetDD::TRT_DetElementContain
             int numberOfStraws = 0;
 
             // check if dynamic cast worked
-            if (fullDiscBounds){
               // get a reference element for dimensions
               const InDetDD::TRT_EndcapElement* sectorDiscElement = trtContainer->getEndcapDetElement(iposneg, iwheel, ilayer, 0); // TODO share this line
 
@@ -671,7 +671,6 @@ InDet::TRT_LayerBuilderImpl::discLayersImpl(const InDetDD::TRT_DetElementContain
                                                   aDescriptor);
 
               if (currentLayer) endcapLayers->push_back(currentLayer);
-            } // end of sectorDiscBounds if
           } // end of layer loop
         } // end of wheel loop
 

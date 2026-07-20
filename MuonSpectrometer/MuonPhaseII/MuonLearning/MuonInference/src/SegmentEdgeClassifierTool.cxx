@@ -1,11 +1,15 @@
 #include "SegmentEdgeClassifierTool.h"
+#include "InferenceUtils.h"
 #include "MuonInferenceInterfaces/GraphData.h"
 #include "xAODMuon/MuonSegment.h"
 #include "CxxUtils/checker_macros.h"
 #include "GaudiKernel/SystemOfUnits.h"
+#include <nlohmann/json.hpp>
 #include <algorithm>
 #include <array>
 #include <cmath>
+#include <fstream>
+#include <mutex>
 #include <map>
 #include <optional>
 #include <sstream>
@@ -32,11 +36,6 @@ int segmentLayerCount(const xAOD::MuonSegment& seg) {
 inline int sectorDistance(int a, int b, int mod) {
   int d = std::abs(a - b);
   return mod > 0 ? std::min(d, mod - d) : d;
-}
-
-/// Sigmoid activation function: 1 / (1 + exp(-x))
-inline float sigmoid(float x) {
-  return 1.f / (1.f + std::exp(-x));
 }
 
 std::optional<MuonML::SegmentNodeFeatureId> nodeFeatureIdFromName(const std::string& name) {
@@ -158,6 +157,40 @@ StatusCode SegmentEdgeClassifierTool::initialize() {
 
   m_cosMin = std::cos(m_maxDeltaThetaDeg.value() * Gaudi::Units::deg);
 
+  if (!m_debugDumpFile.value().empty()) {
+    std::ofstream out{m_debugDumpFile.value(), std::ios::out | std::ios::trunc};
+    if (!out) {
+      ATH_MSG_ERROR("Could not create segment-edge debug dump file: "
+                    << m_debugDumpFile.value());
+      return StatusCode::FAILURE;
+    }
+
+    nlohmann::ordered_json metadata;
+    metadata["record_type"] = "metadata";
+    metadata["format_version"] = 1;
+    metadata["tool"] = "SegmentEdgeClassifierTool";
+    metadata["input_names"] = {m_inputNodeName.value(),
+                               m_inputEdgeIndexName.value(),
+                               m_inputEdgeAttrName.value()};
+    metadata["output_name"] = m_outputName.value();
+    metadata["x_feature_names"] = m_nodeFeatureNames;
+    metadata["edge_attr_feature_names"] = {
+        "deltaPositionX_m", "deltaPositionY_m", "deltaPositionZ_m",
+        "distance_m", "cos_opening_angle", "same_chamber", "same_sector"};
+    metadata["edge_index_layout"] = "row_major_2_by_E";
+    metadata["edge_order"] = "directed src_to_dst; row 0 then row 1";
+    metadata["max_delta_theta_deg"] = m_maxDeltaThetaDeg.value();
+    metadata["max_delta_sector"] = m_maxDeltaSector.value();
+    metadata["sector_modulo"] = m_sectorModulo.value();
+    metadata["debug_dump_max_events"] = m_debugDumpMaxEvents.value();
+    out << metadata.dump() << '\n';
+
+    ATH_MSG_INFO("Writing segment-edge ONNX debug dump to "
+                 << m_debugDumpFile.value()
+                 << " (DebugDumpMaxEvents="
+                 << m_debugDumpMaxEvents.value() << ")");
+  }
+
   return StatusCode::SUCCESS;
 }
 
@@ -271,9 +304,15 @@ StatusCode SegmentEdgeClassifierTool::buildGraph(const EventContext&, const xAOD
   return StatusCode::SUCCESS;
 }
 
-StatusCode SegmentEdgeClassifierTool::classifyEdges(const EventContext&, const SegmentEdgeGraph& graph, std::vector<SegmentEdgeScore>& scores) const {
+StatusCode SegmentEdgeClassifierTool::classifyEdges(const EventContext& ctx,
+                                                     const SegmentEdgeGraph& graph,
+                                                     std::vector<SegmentEdgeScore>& scores) const {
   scores.clear();
-  if (!graph.nEdges) return StatusCode::SUCCESS;
+  if (!graph.nNodes) return StatusCode::SUCCESS;
+  if (!graph.nEdges) {
+    ATH_CHECK(dumpDebugEvent(ctx, graph, scores));
+    return StatusCode::SUCCESS;
+  }
 
   if (graph.nodeFeatures.size() != graph.nNodes * kNodeFeatureCount) {
     ATH_MSG_ERROR("Unexpected node feature size " << graph.nodeFeatures.size()
@@ -368,8 +407,120 @@ StatusCode SegmentEdgeClassifierTool::classifyEdges(const EventContext&, const S
   scores.reserve(graph.nEdges);
   for (std::size_t e=0; e<graph.nEdges; ++e) {
     const float l = logits[e];
-    scores.push_back({std::size_t(graph.edgeIndex[2 * e]), std::size_t(graph.edgeIndex[2 * e + 1]), l, sigmoid(l)});
+    scores.push_back({std::size_t(graph.edgeIndex[2 * e]),
+                      std::size_t(graph.edgeIndex[2 * e + 1]),
+                      l,
+                      InferenceUtils::sigmoid(l)});
   }
+
+  ATH_CHECK(dumpDebugEvent(ctx, graph, scores));
+  return StatusCode::SUCCESS;
+}
+
+StatusCode SegmentEdgeClassifierTool::dumpDebugEvent(
+    const EventContext& ctx,
+    const SegmentEdgeGraph& graph,
+    const std::vector<SegmentEdgeScore>& scores) const {
+  if (m_debugDumpFile.value().empty()) return StatusCode::SUCCESS;
+
+  std::lock_guard<std::mutex> lock{m_debugDumpMutex};
+  if (m_debugDumpMaxEvents.value() != 0 &&
+      m_debugDumpEvents.load(std::memory_order_relaxed) >=
+          m_debugDumpMaxEvents.value()) {
+    return StatusCode::SUCCESS;
+  }
+
+  if (graph.nodeFeatures.size() != graph.nNodes * kNodeFeatureCount ||
+      graph.edgeIndex.size() != graph.nEdges * 2 ||
+      graph.edgeFeatures.size() != graph.nEdges * kEdgeFeatureCount ||
+      scores.size() != graph.nEdges) {
+    ATH_MSG_ERROR("Cannot write segment-edge debug dump: inconsistent graph/output sizes"
+                  << " nodes=" << graph.nNodes
+                  << " nodeFeatures=" << graph.nodeFeatures.size()
+                  << " edges=" << graph.nEdges
+                  << " edgeIndex=" << graph.edgeIndex.size()
+                  << " edgeFeatures=" << graph.edgeFeatures.size()
+                  << " scores=" << scores.size());
+    return StatusCode::FAILURE;
+  }
+
+  nlohmann::json x = nlohmann::json::array();
+  x.get_ref<nlohmann::json::array_t&>().reserve(graph.nodeFeatures.size());
+  for (const float value : graph.nodeFeatures) {
+    x.push_back(std::isfinite(value) ? nlohmann::json(value)
+                                     : nlohmann::json(nullptr));
+  }
+
+  nlohmann::json edgeIndex = nlohmann::json::array();
+  edgeIndex.get_ref<nlohmann::json::array_t&>().reserve(graph.nEdges * 2);
+  // This is the actual ONNX [2,E] row-major buffer: all sources then all destinations.
+  for (std::size_t edge = 0; edge < graph.nEdges; ++edge) {
+    edgeIndex.push_back(graph.edgeIndex[2 * edge]);
+  }
+  for (std::size_t edge = 0; edge < graph.nEdges; ++edge) {
+    edgeIndex.push_back(graph.edgeIndex[2 * edge + 1]);
+  }
+
+  nlohmann::json edgeAttr = nlohmann::json::array();
+  edgeAttr.get_ref<nlohmann::json::array_t&>().reserve(graph.edgeFeatures.size());
+  for (const float value : graph.edgeFeatures) {
+    edgeAttr.push_back(std::isfinite(value) ? nlohmann::json(value)
+                                            : nlohmann::json(nullptr));
+  }
+
+  nlohmann::json logits = nlohmann::json::array();
+  nlohmann::json probabilities = nlohmann::json::array();
+  nlohmann::json edgeSrc = nlohmann::json::array();
+  nlohmann::json edgeDst = nlohmann::json::array();
+  logits.get_ref<nlohmann::json::array_t&>().reserve(scores.size());
+  probabilities.get_ref<nlohmann::json::array_t&>().reserve(scores.size());
+  edgeSrc.get_ref<nlohmann::json::array_t&>().reserve(scores.size());
+  edgeDst.get_ref<nlohmann::json::array_t&>().reserve(scores.size());
+  for (const SegmentEdgeScore& score : scores) {
+    edgeSrc.push_back(score.src);
+    edgeDst.push_back(score.dst);
+    logits.push_back(std::isfinite(score.logit) ? nlohmann::json(score.logit)
+                                                : nlohmann::json(nullptr));
+    probabilities.push_back(std::isfinite(score.probability)
+                                ? nlohmann::json(score.probability)
+                                : nlohmann::json(nullptr));
+  }
+
+  std::ofstream out{m_debugDumpFile.value(), std::ios::out | std::ios::app};
+  if (!out) {
+    ATH_MSG_ERROR("Could not append to segment-edge debug dump file: "
+                  << m_debugDumpFile.value());
+    return StatusCode::FAILURE;
+  }
+
+  const unsigned int dumpIndex =
+      m_debugDumpEvents.fetch_add(1, std::memory_order_relaxed);
+  nlohmann::ordered_json event;
+  event["record_type"] = "event";
+  event["format_version"] = 1;
+  event["dump_index"] = dumpIndex;
+  event["run_number"] = ctx.eventID().run_number();
+  event["lumi_block"] = ctx.eventID().lumi_block();
+  event["event_number"] = ctx.eventID().event_number();
+  event["slot"] = ctx.slot();
+  event["n_nodes"] = graph.nNodes;
+  event["n_edges"] = graph.nEdges;
+  event["x_shape"] = {graph.nNodes, kNodeFeatureCount};
+  event["edge_index_shape"] = {2, graph.nEdges};
+  event["edge_attr_shape"] = {graph.nEdges, kEdgeFeatureCount};
+  event["logits_shape"] = {graph.nEdges};
+  event["x"] = std::move(x);
+  event["edge_index"] = std::move(edgeIndex);
+  event["edge_attr"] = std::move(edgeAttr);
+  event["edge_src"] = std::move(edgeSrc);
+  event["edge_dst"] = std::move(edgeDst);
+  event["logits"] = std::move(logits);
+  event["probabilities"] = std::move(probabilities);
+  out << event.dump() << '\n';
+
+  ATH_MSG_DEBUG("Wrote segment-edge debug event " << dumpIndex
+                << " to " << m_debugDumpFile.value());
+
   return StatusCode::SUCCESS;
 }
 

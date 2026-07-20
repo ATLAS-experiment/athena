@@ -70,18 +70,19 @@ namespace InDet {
     operator bool() const {
       return !matrixOfToT.empty();
     }
-    int sizeX = 0;
-    int sizeY = 0;
-    std::vector<std::vector<float> > matrixOfToT;
-    std::vector<float> vectorOfPitchesY;
-    int ClusterPixLayer = 0;
-    int ClusterPixBarrelEC = 0;
-    float phi = 0;
-    float theta = 0;
-    float etaModule = 0;
-    bool useTrackInfo = 0;
-    int columnWeightedPosition = 0;
-    int rowWeightedPosition = 0;
+    int sizeX = 0; //! cluster span measured in pixels (seems unfilled)
+    int sizeY = 0; //! cluster span measured in pixels (seems unfilled)
+    std::vector<std::vector<float> > matrixOfToT; //! 2D array of charges or ToTs (depending on filling tool configuration)
+    std::vector<float> vectorOfPitchesY; //! dimensions of pixels in mm along Y
+    std::vector<float> vectorOfPitchesX; //! same along X
+    int ClusterPixLayer = 0; //! layer index: as returned by PixelID::layer_disk
+    int ClusterPixBarrelEC = 0; //! global cluster location barrel vs endcap: as returned by: PixelID::barrel_ec
+    float phi = 0; //! azimuthal incidence angle 
+    float theta = 0; //! polar incidence angle
+    float etaModule = 0; //! module eta index as returned by PixelID:eta_module
+    bool useTrackInfo = 0; //! flag to indicate if incidence angles (phi, theta) should be used in inference
+    int columnWeightedPosition = 0; //! mean position along y
+    int rowWeightedPosition = 0; //! mean position along x
   };
 
   static const InterfaceID IID_NnClusterizationFactory("InDet::NnClusterizationFactory", 1, 0);
@@ -168,9 +169,8 @@ namespace InDet {
         std::vector<Amg::MatrixX>& errors) const;
 
     // For error formatting in lwtnn cases
-    static double correctedRMSX(double posPixels) ;
-
-    double correctedRMSY(double posPixels, std::vector<float>& pitches) const; 
+    double correctedRMS(double posPixels, const std::vector<float>& pitches,
+                        unsigned int size) const;
 
      /* algorithmic component */
     NNinput createInput(const InDet::PixelCluster& pCluster,
@@ -312,6 +312,12 @@ namespace InDet {
 
     Gaudi::Property<bool> m_useRecenteringNNWithTracks
        {this, "useRecenteringNNWithTracks",false,"Recenter x position when evaluating NN with track input."};
+
+    Gaudi::Property<bool> m_useXPitches
+       {this, "useXPitches", false,
+        "Also feed the phi-direction (X) pixel pitch vector as NN input "
+        "(ONNX only). Off by default so existing 60-input models are "
+        "unaffected; needs a (60 + sizeX)-input model when enabled."};
 
     Gaudi::Property<unsigned int> m_sizeX
        {this, "sizeX",7,"Size of pixel matrix along X"};

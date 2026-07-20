@@ -41,7 +41,6 @@ public:
   
   virtual ~Associator_DeltaRMatcher() { } 
 
-  virtual TrackAssociator* clone() override { return new Associator_DeltaRMatcher(*this); }
 
   virtual std::unique_ptr<TrackAssociator> uclone() const override { return std::make_unique<Associator_DeltaRMatcher>(*this); }
 
@@ -68,7 +67,6 @@ public:
 
   virtual ~Associator_SecondBestpTMatcher() { }
 
-  virtual TrackAssociator* clone() override { return new Associator_SecondBestpTMatcher(*this); }
 
   virtual std::unique_ptr<TrackAssociator> uclone() const override { return std::make_unique<Associator_SecondBestpTMatcher>(*this); }
   
@@ -92,7 +90,6 @@ public:
 
   virtual ~Associator_BestDeltaRMatcher() { } 
 
-  virtual TrackAssociator* clone() override { return new Associator_BestDeltaRMatcher(*this); }
 
   virtual std::unique_ptr<TrackAssociator> uclone() const override { return std::make_unique<Associator_BestDeltaRMatcher>(*this); }
 
@@ -122,13 +119,10 @@ public:
     m_deta2(deta*deta),
     m_dphi2(dphi*dphi),
     m_dzed2(dzed*dzed)
-  {
-    std::cout << "Associator: Best RZ Matcher" << std::endl;
-  } 
+  {  } 
 
   virtual ~Associator_BestDeltaRZMatcher() { } 
 
-  virtual TrackAssociator* clone() override { return new Associator_BestDeltaRZMatcher(*this); }
 
   virtual std::unique_ptr<TrackAssociator> uclone() const override { return std::make_unique<Associator_BestDeltaRZMatcher>(*this); }
 
@@ -169,12 +163,11 @@ public:
     m_dphi2(dphi*dphi),
     m_dzed2(dzed*dzed)
   {
-    std::cout << "Associator: Best RZ Matcher" << std::endl;
+    //    std::cout << "Associator: Best RZ Matcher" << std::endl;
   } 
 
   virtual ~Associator_BestDeltaRZSinThetaMatcher() { } 
 
-  virtual TrackAssociator* clone() override { return new Associator_BestDeltaRZSinThetaMatcher(*this); }
 
   virtual std::unique_ptr<TrackAssociator> uclone() const override { return std::make_unique<Associator_BestDeltaRZSinThetaMatcher>(*this); }
   
@@ -212,14 +205,11 @@ class Associator_BestSigmaMatcher : public Associator_BestMatcher {
 public:
 
   Associator_BestSigmaMatcher(const std::string& name, double dsigma=1) : 
-    Associator_BestMatcher(name, dsigma) 
-  { 
-    std::cout << "Associator: Best Sigma Matcher" << std::endl;
+    Associator_BestMatcher(name, dsigma)   { 
   } 
 
   virtual ~Associator_BestSigmaMatcher() { } 
 
-  virtual TrackAssociator* clone() override { return new Associator_BestSigmaMatcher(*this); }
 
   virtual std::unique_ptr<TrackAssociator> uclone() const override { return std::make_unique<Associator_BestSigmaMatcher>(*this); }
   
@@ -245,12 +235,6 @@ public:
     return dr;
   }
 
-protected: 
-
-  double m_deta2;
-  double m_dphi2;
-  double m_dzed2;
-
 };
 
 
@@ -267,7 +251,6 @@ public:
 
   virtual ~Associator_BestDeltaPhiMatcher() { } 
 
-  virtual TrackAssociator* clone() override { return new Associator_BestDeltaPhiMatcher(*this); }
 
   virtual std::unique_ptr<TrackAssociator> uclone() const override { return std::make_unique<Associator_BestDeltaPhiMatcher>(*this); }
   

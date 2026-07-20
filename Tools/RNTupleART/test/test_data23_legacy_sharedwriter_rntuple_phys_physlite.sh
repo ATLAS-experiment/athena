@@ -9,18 +9,17 @@
 # art-output: log.*
 # art-athena-mt: 8
 
-NEVENTS="2000"
+AOD_File=$(python -c "from AthenaConfiguration.TestDefaults import defaultTestFiles; print(defaultTestFiles.AOD_RUN3_DATA[0])")
 
 ATHENA_CORE_NUMBER=8 \
 timeout 64800 \
 Derivation_tf.py \
-  --maxEvents="${NEVENTS}" \
   --multiprocess="True" \
   --sharedWriter="True" \
   --parallelCompression="False" \
-  --inputAODFile="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/CampaignInputs/data23/AOD/data23_13p6TeV.00453713.physics_Main.recon.AOD.f1357/2012events.data23_13p6TeV.00453713.physics_Main.recon.AOD.f1357._lb1416._0006.1" \
+  --inputAODFile="${AOD_File}" \
   --outputDAODFile="pool.root" \
   --formats "PHYS" "PHYSLITE" \
-  --preExec="flags.PoolSvc.DefaultContainerType=\"ROOTRNTUPLE\";";
+  --preExec="flags.Output.DefaultContainerType=\"ROOTRNTUPLE\";";
 
 echo "art-result: $? derivation";

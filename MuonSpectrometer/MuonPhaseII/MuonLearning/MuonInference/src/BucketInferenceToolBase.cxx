@@ -4,7 +4,7 @@
 */
 #include "BucketInferenceToolBase.h"
 
-#include "AthOnnxComps/OnnxRuntimeSessionToolCUDA.h"
+#include "InferenceUtils.h"
 #include "AthenaBaseComps/AthMsgStreamMacros.h"
 #include "StoreGate/ReadHandle.h"
 #include "StoreGate/StoreGateSvc.h"
@@ -71,15 +71,13 @@ StatusCode BucketInferenceToolBase::setupModel() {
   ATH_CHECK(m_readKey.initialize());
   ATH_CHECK(m_geoCtxKey.initialize());
 
-  // Detect CUDA provider by dynamic-casting the concrete session tool.
-  if (const auto* cudaTool = dynamic_cast<const AthOnnx::OnnxRuntimeSessionToolCUDA*>(
-          m_onnxSessionTool.get())) {
-    m_isCuda       = true;
-    m_cudaDeviceId = cudaTool->deviceId();
+  const InferenceUtils::SessionBackend backend = InferenceUtils::sessionBackend(m_onnxSessionTool);
+  m_isCuda = backend.isCuda;
+  m_cudaDeviceId = backend.cudaDeviceId;
+  if (m_isCuda) {
     ATH_MSG_INFO("ONNX session is running on CUDA device " << m_cudaDeviceId
                  << ". I/O binding will be used.");
   } else {
-    m_isCuda = false;
     ATH_MSG_INFO("ONNX session is running on CPU.");
   }
 
@@ -88,11 +86,15 @@ StatusCode BucketInferenceToolBase::setupModel() {
 
 StatusCode BucketInferenceToolBase::buildFeaturesOnly(const EventContext& ctx,
                                                       GraphRawData& graphData) const {
-  graphData.graph = std::make_unique<InferenceGraph>();
+  
+  graphData.graph.reset();
   graphData.srcEdges.clear();
   graphData.desEdges.clear();
+  graphData.edgeIndexPacked.clear();
   graphData.featureLeaves.clear();
   graphData.spacePointsInBucket.clear();
+  graphData.graph = std::make_unique<InferenceGraph>();
+  graphData.graph->dataTensor.reserve(1); // features input; outputs are reserved in runNamedInference()
 
   const MuonR4::SpacePointContainer* buckets{nullptr};
   ATH_CHECK(SG::get(buckets, m_readKey, ctx));
@@ -165,7 +167,9 @@ StatusCode BucketInferenceToolBase::buildTransformerInputs(const EventContext& c
   }
 
   // Rebuild graph with exactly 2 inputs: features [1,S,6], pad_mask [1,S]
+  graphData.graph.reset();
   graphData.graph = std::make_unique<InferenceGraph>();
+  graphData.graph->dataTensor.reserve(2); // features and pad_mask inputs; outputs are reserved in runNamedInference()
 
   Ort::MemoryInfo memInfo = Ort::MemoryInfo::CreateCpu(OrtDeviceAllocator, OrtMemTypeCPU);
 
@@ -195,7 +199,15 @@ StatusCode BucketInferenceToolBase::buildTransformerInputs(const EventContext& c
 
 StatusCode BucketInferenceToolBase::buildGraph(const EventContext& ctx,
                                                GraphRawData& graphData) const {
-  ATH_CHECK(buildFeaturesOnly(ctx, graphData));
+  
+  graphData.graph.reset();
+  graphData.srcEdges.clear();
+  graphData.desEdges.clear();
+  graphData.featureLeaves.clear();
+  graphData.spacePointsInBucket.clear();
+  graphData.edgeIndexPacked.clear();
+  graphData.graph = std::make_unique<InferenceGraph>();
+  graphData.graph->dataTensor.reserve(2); // features and edge_index inputs; outputs are reserved in runNamedInference()
 
   const MuonR4::SpacePointContainer* buckets{nullptr};
   ATH_CHECK(SG::get(buckets, m_readKey, ctx));
@@ -204,38 +216,56 @@ StatusCode BucketInferenceToolBase::buildGraph(const EventContext& ctx,
   ATH_CHECK(SG::get(gctx, m_geoCtxKey, ctx));
 
   std::vector<BucketGraphUtils::NodeAux> nodes;
-  std::vector<float> throwawayFeatures;
-  std::vector<int64_t> throwawaySp;  // int64_t
-  BucketGraphUtils::buildNodesAndFeatures(*buckets, *gctx, nodes, throwawayFeatures, throwawaySp);
+
+  BucketGraphUtils::buildNodesAndFeatures(*buckets, *gctx, nodes,
+                                          graphData.featureLeaves,
+                                          graphData.spacePointsInBucket);
 
   const int64_t numNodes = static_cast<int64_t>(nodes.size());
+  ATH_MSG_DEBUG("Total buckets: " << buckets->size()
+                << " -> nodes (size>0): " << numNodes
+                << " | features.size()=" << graphData.featureLeaves.size());
+
   if (numNodes == 0) {
     ATH_MSG_WARNING("No valid buckets found (all have size 0.0). Skipping graph building.");
     return StatusCode::SUCCESS;
   }
 
-  std::vector<int64_t> srcEdges, dstEdges;
+  const int64_t nFeatPerNode = static_cast<int64_t>(kBucketFeatureCount);
+  if (numNodes * nFeatPerNode != static_cast<int64_t>(graphData.featureLeaves.size())) {
+    ATH_MSG_ERROR("Feature size mismatch: expected " << (numNodes * nFeatPerNode)
+                  << " got " << graphData.featureLeaves.size());
+    return StatusCode::FAILURE;
+  }
+
+  Ort::MemoryInfo memInfo = Ort::MemoryInfo::CreateCpu(OrtDeviceAllocator, OrtMemTypeCPU);
+  std::vector<int64_t> featShape{numNodes, nFeatPerNode};
+  graphData.graph->dataTensor.emplace_back(
+      Ort::Value::CreateTensor<float>(memInfo,
+                                      graphData.featureLeaves.data(),
+                                      graphData.featureLeaves.size(),
+                                      featShape.data(),
+                                      featShape.size()));
+
   BucketGraphUtils::buildSparseEdges(nodes,
                                      m_minLayers,
                                      m_maxChamberDelta,
                                      m_maxSectorDelta,
                                      m_maxDistXY,
                                      m_maxAbsDz,
-                                     srcEdges, dstEdges);
+                                     graphData.srcEdges, graphData.desEdges);
   if (m_validateEdges) {
     size_t bad = 0;
-    std::vector<int64_t> newSrc;
-    std::vector<int64_t> newDst;
-    newSrc.reserve(srcEdges.size());
-    newDst.reserve(dstEdges.size());
-    for (size_t k = 0; k < srcEdges.size(); ++k) {
-      const int64_t u = srcEdges[k];
-      const int64_t v = dstEdges[k];
+    size_t write = 0;
+    for (size_t k = 0; k < graphData.srcEdges.size(); ++k) {
+      const int64_t u = graphData.srcEdges[k];
+      const int64_t v = graphData.desEdges[k];
       const bool okU = (u >= 0 && u < numNodes);
       const bool okV = (v >= 0 && v < numNodes);
       if (okU && okV) {
-        newSrc.push_back(u);
-        newDst.push_back(v);
+        graphData.srcEdges[write] = u;
+        graphData.desEdges[write] = v;
+        ++write;
       } else {
         ++bad;
         ATH_MSG_DEBUG( "Drop invalid edge " << k << ": (" << u << "->" << v
@@ -244,46 +274,48 @@ StatusCode BucketInferenceToolBase::buildGraph(const EventContext& ctx,
     }
     if (bad) {
       ATH_MSG_WARNING( "Removed " << bad << " invalid edges out of "
-                        << srcEdges.size());
-      srcEdges.swap(newSrc);
-      dstEdges.swap(newDst);
+                        << graphData.srcEdges.size());
+      graphData.srcEdges.resize(write);
+      graphData.desEdges.resize(write);
     }
   }
 
-  const size_t E = srcEdges.size();
+  const size_t E = graphData.srcEdges.size();
 
   if (msgLvl(MSG::DEBUG)) {
     // DEBUG: Count connections per node
     ATH_MSG_DEBUG("Edges built: " << E);
-    const unsigned int dumpE = std::min<unsigned int>(m_debugDumpFirstNEdges, E);
-    for (unsigned int k = 0; k < dumpE; ++k) {
-      ATH_MSG_DEBUG("EDGE[" << k << "]: " << srcEdges[k] << " -> " << dstEdges[k]);
+    const size_t dumpE = std::min<std::size_t>(m_debugDumpFirstNEdges.value(), E);
+    for (size_t k = 0; k < dumpE; ++k) {
+      ATH_MSG_DEBUG("EDGE[" << k << "]: "
+                    << graphData.srcEdges[k] << " -> "
+                    << graphData.desEdges[k]);
     }
+
     std::vector<int> nodeConnections(numNodes, 0);
-    for (size_t k = 0; k < srcEdges.size(); ++k) {
-      const int64_t u = srcEdges[k];
-      const int64_t v = dstEdges[k];
+    for (size_t k = 0; k < graphData.srcEdges.size(); ++k) {
+      const int64_t u = graphData.srcEdges[k];
+      const int64_t v = graphData.desEdges[k];
       if (u >= 0 && u < numNodes) nodeConnections[u]++;
       if (v >= 0 && v < numNodes) nodeConnections[v]++;
     }
 
-    ATH_MSG_INFO("=== DEBUGGING: Node Connections (first 10 nodes) ===");
+    ATH_MSG_DEBUG("=== DEBUGGING: Node Connections (first 10 nodes) ===");
     const int64_t debugNodeCount = std::min(numNodes, static_cast<int64_t>(10));
     for (int64_t i = 0; i < debugNodeCount; ++i) {
       ATH_MSG_DEBUG("Node[" << i << "] connections: " << nodeConnections[i]);
     }
     ATH_MSG_DEBUG("=== END DEBUG NODE CONNECTIONS ===");
 
-    // DEBUG: Show detailed edge connections for first 10 nodes
     ATH_MSG_DEBUG("=== DEBUGGING: Detailed Edge Connections (first 10 nodes) ===");
     for (int64_t nodeIdx = 0; nodeIdx < debugNodeCount; ++nodeIdx) {
       std::stringstream connections;
       connections << "Node[" << nodeIdx << "] connected to: ";
       bool foundAny = false;
 
-      for (size_t k = 0; k < srcEdges.size(); ++k) {
-        const int64_t u = srcEdges[k];
-        const int64_t v = dstEdges[k];
+      for (size_t k = 0; k < graphData.srcEdges.size(); ++k) {
+        const int64_t u = graphData.srcEdges[k];
+        const int64_t v = graphData.desEdges[k];
 
         if (u == nodeIdx) {
           if (foundAny) connections << ", ";
@@ -302,10 +334,16 @@ StatusCode BucketInferenceToolBase::buildGraph(const EventContext& ctx,
     ATH_MSG_DEBUG("=== END DEBUG DETAILED CONNECTIONS ===");
   }
 
-  graphData.edgeIndexPacked.clear();
-  const size_t Efinal = BucketGraphUtils::packEdgeIndex(srcEdges, dstEdges, graphData.edgeIndexPacked);
+  nodes = {};
 
-  Ort::MemoryInfo memInfo = Ort::MemoryInfo::CreateCpu(OrtDeviceAllocator, OrtMemTypeCPU);
+  graphData.edgeIndexPacked.clear();
+  const size_t Efinal = BucketGraphUtils::packEdgeIndex(graphData.srcEdges,
+                                                       graphData.desEdges,
+                                                       graphData.edgeIndexPacked);
+
+  graphData.srcEdges.clear();
+  graphData.desEdges.clear();
+
   std::vector<int64_t> edgeShape{2, static_cast<int64_t>(Efinal)};
   graphData.graph->dataTensor.emplace_back(
       Ort::Value::CreateTensor<int64_t>(memInfo,
@@ -329,6 +367,15 @@ StatusCode BucketInferenceToolBase::runNamedInference(
   }
   if (graphData.graph->dataTensor.empty()) {
     ATH_MSG_ERROR("No input tensors prepared for inference.");
+    return StatusCode::FAILURE;
+  }
+
+  // Reserve the final size here from the actual I/O lists instead 
+  // of hard-coding assumptions in the graph builders.
+  graphData.graph->dataTensor.reserve(inputNames.size() + outputNames.size());
+  if (graphData.graph->dataTensor.size() < inputNames.size()) {
+    ATH_MSG_ERROR("Prepared " << graphData.graph->dataTensor.size()
+                  << " tensors but inference expects " << inputNames.size() << " inputs.");
     return StatusCode::FAILURE;
   }
 
@@ -453,7 +500,7 @@ StatusCode BucketInferenceToolBase::runNamedInference(
       model().Run(run_options,
                   inputNames.data(),
                   graphData.graph->dataTensor.data(),
-                  graphData.graph->dataTensor.size(),
+                  inputNames.size(),
                   outputNames.data(),
                   outputNames.size());
 

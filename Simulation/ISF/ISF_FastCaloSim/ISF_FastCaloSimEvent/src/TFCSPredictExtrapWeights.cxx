@@ -12,9 +12,6 @@
 #include "TFile.h"
 #include "TClass.h"
 
-#include "HepPDT/ParticleData.hh"
-#include "HepPDT/ParticleDataTable.hh"
-
 #include "CLHEP/Random/RandGauss.h"
 #include "CLHEP/Random/RandFlat.h"
 

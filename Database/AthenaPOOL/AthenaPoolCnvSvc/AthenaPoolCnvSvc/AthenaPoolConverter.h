@@ -106,13 +106,10 @@ protected:
 protected: // data
    ServiceHandle<StoreGateSvc> m_detStore;
    ServiceHandle<IAthenaPoolCnvSvc> m_athenaPoolCnvSvc;
-   ServiceHandle<IPoolSvc> m_poolSvc;
 
    typedef std::mutex CallMutex;
    CallMutex m_conv_mut;
 
-   /// Default container type (from PoolSvc)
-   int m_defContainerType;
 };
 
 #endif

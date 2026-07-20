@@ -6,34 +6,27 @@
 #define ACTSGEOMETRY_GLOBALCHISQUAREFITTERTOOL_H
 
 #include "AthenaBaseComps/AthAlgTool.h"
-#include "TrkEventPrimitives/PdgToParticleHypothesis.h"
-#include "TrkFitterInterfaces/ITrackFitter.h"
-#include "TrkPrepRawData/PrepRawData.h"
-#include "TrkToolInterfaces/IBoundaryCheckTool.h"
-#include "TrkToolInterfaces/IExtendedTrackSummaryTool.h"
+#include "ActsToolInterfaces/IFitterTool.h"
 #include "TrkToolInterfaces/IRIO_OnTrackCreator.h"
 #include "src/detail/FitterHelperFunctions.h"
-
+#include "src/detail/OnTrackCalibrator.h"
 
 #include "MuonRecToolInterfacesR4/ISpacePointCalibrator.h"
 // ACTS
 #include "Acts/EventData/BoundTrackParameters.hpp"
-#include "Acts/EventData/TrackProxy.hpp"
 #include "Acts/EventData/VectorTrackContainer.hpp"
 #include "Acts/Geometry/GeometryIdentifier.hpp"
-#include "Acts/MagneticField/MagneticFieldProvider.hpp"
 #include "Acts/Propagator/Navigator.hpp"
 #include "Acts/Propagator/Propagator.hpp"
-#include "Acts/Propagator/SympyStepper.hpp"
 #include "Acts/Propagator/StraightLineStepper.hpp"
 #include "Acts/Propagator/EigenStepper.hpp"
 #include "Acts/TrackFitting/GlobalChiSquareFitter.hpp"
 
 // PACKAGE
 #include "ActsEvent/TrackContainer.h"
-#include "ActsToolInterfaces/IActsToTrkConverterTool.h"
 #include "ActsGeometryInterfaces/IExtrapolationTool.h"
 #include "ActsGeometryInterfaces/ITrackingGeometryTool.h"
+#include "ActsGeometryInterfaces/IGeometryRealmConvTool.h"
 
 #include "ActsCalibrators/TrkMeasurementCalibrator.h"
 #include "ActsCalibrators/TrkPrepRawDataCalibrator.h"
@@ -42,18 +35,7 @@
 #include "ActsCalibrators/xAODUncalibMeasSurfAcc.h"
 #include "ActsCalibrators/xAODUncalibMeasCalibrator.h"
 
-// STL
-#include <cmath>   //std::abs
-#include <limits>  //for numeric_limits
-#include <memory>  //unique_ptr
-#include <string>
-
-#include "ActsToolInterfaces/IFitterTool.h"
-
-
-
 namespace Trk {
-class Track;
 class PrepRawData;
 }  // namespace Trk
 
@@ -62,7 +44,7 @@ namespace ActsTrk {
 
 
 class GlobalChiSquareFitterTool
-    : public extends<AthAlgTool, Trk::ITrackFitter, IFitterTool> {
+    : public extends<AthAlgTool, IFitterTool> {
  public:
 
   using base_class::base_class;
@@ -71,39 +53,9 @@ class GlobalChiSquareFitterTool
   // standard Athena methods
   virtual StatusCode initialize() override;
 
-  //! refit a track
-  virtual std::unique_ptr<Trk::Track> fit(
-      const EventContext& ctx, const Trk::Track&,
-      const Trk::RunOutlierRemoval runOutlier = false,
-      const Trk::ParticleHypothesis matEffects =
-          Trk::nonInteracting) const override;
-
-  //! fit a set of PrepRawData objects
-  virtual std::unique_ptr<Trk::Track> fit(
-      const EventContext& ctx, const Trk::PrepRawDataSet&,
-      const Trk::TrackParameters&,
-      const Trk::RunOutlierRemoval runOutlier = false,
-      const Trk::ParticleHypothesis matEffects =
-          Trk::nonInteracting) const override;
-
-  //! fit a set of MeasurementBase objects
-  virtual std::unique_ptr<Trk::Track> fit(
-      const EventContext& ctx, const Trk::MeasurementSet&,
-      const Trk::TrackParameters&,
-      const Trk::RunOutlierRemoval runOutlier = false,
-      const Trk::ParticleHypothesis matEffects =
-          Trk::nonInteracting) const override;
-
-  //! extend a track fit including a new set of PrepRawData objects
-  virtual std::unique_ptr<Trk::Track> fit(
-      const EventContext& ctx, const Trk::Track&, const Trk::PrepRawDataSet&,
-      const Trk::RunOutlierRemoval runOutlier = false,
-      const Trk::ParticleHypothesis matEffects =
-          Trk::nonInteracting) const override;
-
   //! fit a set of xAOD uncalibrated Measurements
   virtual std::unique_ptr<MutableTrackContainer> fit(
-      const std::vector<ATLASUncalibSourceLink>& clusterList,
+      const std::vector<const xAOD::UncalibratedMeasurement*>& clusterList,
       const Acts::BoundTrackParameters& initialParams,
       const Acts::GeometryContext& tgContext,
       const Acts::MagneticFieldContext& mfContext,
@@ -112,20 +64,6 @@ class GlobalChiSquareFitterTool
           nullptr  // optional target surface - defaults to perigee in global
                    // origin
   ) const override;
-
-  //! extend a track fit including a new set of MeasurementBase objects
-  virtual std::unique_ptr<Trk::Track> fit(
-      const EventContext& ctx, const Trk::Track&, const Trk::MeasurementSet&,
-      const Trk::RunOutlierRemoval runOutlier = false,
-      const Trk::ParticleHypothesis matEffects =
-          Trk::nonInteracting) const override;
-
-  //! combined track fit
-  virtual std::unique_ptr<Trk::Track> fit(
-      const EventContext& ctx, const Trk::Track& intrk1,
-      const Trk::Track& intrk2, const Trk::RunOutlierRemoval runOutlier = false,
-      const Trk::ParticleHypothesis matEffects =
-          Trk::nonInteracting) const override;
 
   //! Acts seed fit
   virtual std::unique_ptr<MutableTrackContainer> fit(
@@ -143,6 +81,18 @@ class GlobalChiSquareFitterTool
     MutableTrackContainer& trackContainer,
     const Acts::PerigeeSurface& pSurface) const override;
 
+  //! fit a set of source links
+  virtual std::unique_ptr<MutableTrackContainer> fit(
+      const std::vector<Acts::SourceLink>& sourceLinks,
+      const Acts::BoundTrackParameters& initialParams,
+      const Acts::GeometryContext& tgContext,
+      const Acts::MagneticFieldContext& mfContext,
+      const Acts::CalibrationContext& calContext,
+      const Acts::Surface* targetSurface =
+          nullptr  // optional target surface - defaults to perigee in global
+                   // origin
+  ) const override;
+
 
     /// Type erased track fitter function.
     using StraightPropagator_t = Acts::Propagator<Acts::StraightLineStepper, Acts::Navigator>;
@@ -157,16 +107,9 @@ class GlobalChiSquareFitterTool
     using Gx2FitterExtension_t = Acts::Experimental::Gx2FitterExtensions<MutableTrackStateBackend>;
    
   private:
-   using TrackFitResult_t = IActsToTrkConverterTool::TrackFitResult_t;
-    /** @brief Calls the underlying Acts::Gx2Fitter for a given configuration of measurements
-     *  @param sourceLinks: List of measurements to fit
-     *  @param initialPars: Initial estimate of the track parameters 
-     *  @param gx2fOptions: Configuration options needed to execute the fit
-     *  @param tracks: Track container into which the new track is appended */
-    TrackFitResult_t fit(const std::vector<Acts::SourceLink>& soureLinks,
-                         const Acts::BoundTrackParameters& initialPars,
-                         const Gx2FitterOptions_t& gx2fOptions, 
-                         MutableTrackContainer& tracks) const;
+    /** @brief Abrivate the track state proxy */
+    using TrackState_t = MutableTrackStateBackend::TrackStateProxy;
+
     /** @brief Helper method to pack the last information (Calibration, Alignment, B-Field, etc.)
      *         for the fit. The parsed context objects need to prevail the call of the fit
      * @param tgContext: Reference to the geometry context
@@ -181,10 +124,10 @@ class GlobalChiSquareFitterTool
                                     const Acts::Surface* surface,
                                     detail::SourceLinkType slType) const;
    
-    ToolHandle<ActsTrk::IExtrapolationTool> m_extrapolationTool{this, "ExtrapolationTool", ""};
+    ToolHandle<IExtrapolationTool> m_extrapolationTool{this, "ExtrapolationTool", ""};
     PublicToolHandle<ITrackingGeometryTool> m_trackingGeometryTool{this, "TrackingGeometryTool", ""};
-    ToolHandle<IActsToTrkConverterTool> m_ATLASConverterTool{this, "ATLASConverterTool", ""};
-
+    PublicToolHandle<IGeometryRealmConvTool> m_geometryConvTool{this, "GeometryRealmConvTool", ""};
+    
     ToolHandle<MuonR4::ISpacePointCalibrator> m_muonCalibrator{this, "MuonCalibrationTool", ""};
 
     ToolHandle<Trk::IRIO_OnTrackCreator> m_ROTcreator{this, "RotCreatorTool", ""};
@@ -199,8 +142,6 @@ class GlobalChiSquareFitterTool
     Gaudi::Property<bool> m_option_includeELoss{this, "IncludeELoss", true};
     /** @brief Consider multiple scattering of the particle */
     Gaudi::Property<bool> m_option_includeScat{this, "IncludeScattering", true};
-    /** @brief Convert the PRD to a ROT during the calibration */
-    Gaudi::Property<bool> m_doReFitFromPRD{this, "DoReFitFromPRD", false};
     /** @brief Option to toggle whether a straight line fitter shall be used */
     Gaudi::Property<bool> m_doStraightLine{this, "DoStraightLine" , false};
     /** @brief Account for non linear effects from free -> bound jacobian  */
@@ -219,6 +160,10 @@ class GlobalChiSquareFitterTool
     detail::xAODUncalibMeasSurfAcc m_unalibMeasSurfAcc{};
     /** @brief Calibrator for the uncalibrated xAOD::UnCalibratedMeasurement objects */
     detail::xAODUncalibMeasCalibrator m_uncalibMeasCalibrator{};
+    /** @brief Calibrator of the ID / ITk measurements */
+    using xAODItkCalibrator_t = detail::OnTrackCalibrator<ActsTrk::MutableTrackStateBackend> ;
+    xAODItkCalibrator_t m_idCalibrator{};
+
     /** @brief Array of all configured fitter extensions depending on which source link type is in use */
     static constexpr unsigned s_nExtensions = static_cast<unsigned>(detail::SourceLinkType::nTypes);
     std::array<Gx2FitterExtension_t, s_nExtensions>  m_gx2fExtensions{};

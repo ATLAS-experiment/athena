@@ -3,7 +3,7 @@
 
 # art-description: Trigger test with full Run 4 menu using Acts tracking 
 # art-type: build
-# art-include: main/Athena/x86_64-el9-gcc14-opt
+# art-include: main/Athena/x86_64-el9-gcc15-opt
 # Skipping art-output which has no effect for build tests.
 # If you create a grid version, check art-output in existing grid tests.
 
@@ -22,14 +22,13 @@ run.input = 'ttbar_pu200_Run4'
 
 actsTracking = True
 
-run.flags = [f'Trigger.useActsTracking={actsTracking}',
+run.flags += [f'Trigger.useActsTracking={actsTracking}',
              f'Acts.GsfRefitActs={actsTracking}',
              f'Acts.useCache={actsTracking}',
              'Tracking.doITkFastTracking=True',
              'Trigger.doRuntimeNaviVal=True',
              'ITk.doTruth=False',
              'Tracking.doTruth=False',
-             f'IOVDb.GlobalTag={defaultConditionsTags.RUN4_MC}',
              ]
 
 # The full test configuration

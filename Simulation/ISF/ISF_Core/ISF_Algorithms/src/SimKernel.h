@@ -76,7 +76,7 @@ namespace ISF {
 
     /** Athena algorithm's interface method initialize() */
     StatusCode  initialize(); /** Athena algorithm's interface method execute() */
-    StatusCode  execute();
+    StatusCode  execute(const EventContext& ctx);
 
     /** Athena algorithm's interface method finalize() */
     StatusCode  finalize();

@@ -1,5 +1,5 @@
 /*
- *   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+ *   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRACKINGGEOMETRYCONDALGTEST_H
@@ -28,7 +28,7 @@ namespace Trk{
 class ATLAS_NOT_THREAD_SAFE TrackingGeometryCondAlgTest : public AthCondAlgorithm // execute not thread-safe
 {
 public:
-    TrackingGeometryCondAlgTest(const std::string& name, ISvcLocator* pSvcLocator);
+    using AthCondAlgorithm::AthCondAlgorithm;
     virtual ~TrackingGeometryCondAlgTest() override = default;
 
     virtual StatusCode initialize() override;
@@ -38,9 +38,14 @@ public:
 private:
 
   /// Input conditions object.
-  SG::ReadCondHandleKey<TrackingGeometry>   m_trackingGeometryReadKey{this, "TrackingGeometryReadKey", "AtlasTrackingGeometry", "Key of input TrackingGeometry"};
-  ServiceHandle<Trk::ITrackingGeometrySvc>  m_trackingGeometrySvc;       //!< ToolHandle to the TrackingGeometrySvc
-  ToolHandleArray<Trk::IGeometryProcessor>  m_trackingGeometryProcessors; //!< Tool to write out a Display format for external viewers
+  SG::ReadCondHandleKey<TrackingGeometry> m_trackingGeometryReadKey{this,
+      "TrackingGeometryReadKey", "AtlasTrackingGeometry", "Key of input TrackingGeometry"};
+  ServiceHandle<Trk::ITrackingGeometrySvc> m_trackingGeometrySvc{this,
+    "TrackingGeometrySvc", "TrackingGeometrySvc/AtlasTrackingGeometrySvc"};
+
+  ToolHandleArray<Trk::IGeometryProcessor> m_trackingGeometryProcessors{
+    this, "GeometryProcessors", {},
+    "Tool to write out a Display format for external viewers"};
 
 };
 }

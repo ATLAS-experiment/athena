@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ZDC_LUCRODDATA_H
@@ -13,11 +13,11 @@
 #include <sstream>
 #include <iostream>
 
-typedef struct ZdcLucrodChannelType {
+struct ZdcLucrodChannel {
 
-  unsigned int id;
+  unsigned int id = 0;
   std::vector <uint16_t> waveform;
-} ZdcLucrodChannel;
+};
 
 
 

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArReadoutGeometry/HECCell.h"
@@ -49,8 +49,7 @@ void HECCell::initHV (std::vector<const HECHVSubgap*>& subgaps) const
 
   const HECHVModule& hvMod = hvManager.getHVModule(iSide,iPhi,iSampling);
   for (unsigned int iSubgap=0;iSubgap<4;iSubgap++) {
-    const HECHVSubgap& hvElec = hvMod.getSubgap(iSubgap);
-    subgaps.push_back(&hvElec);
+    subgaps.push_back(&hvMod.getSubgap(iSubgap));
   }
 } 
 

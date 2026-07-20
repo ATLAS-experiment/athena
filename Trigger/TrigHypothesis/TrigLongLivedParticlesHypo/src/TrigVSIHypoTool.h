@@ -1,5 +1,5 @@
 /*
-Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef TRIGVSI_TRACKCOUNTHYPOTOOL_H
 #define TRIGVSI_TRACKCOUNTHYPOTOOL_H
@@ -24,7 +24,7 @@ class TrigVSIHypoTool : virtual public ::AthAlgTool
       virtual StatusCode initialize() override;
 
       struct eventVtxInfo {
-         TrigCompositeUtils::Decision*    decision;
+         TrigCompositeUtils::Decision*    decision = nullptr;
          std::vector<const xAOD::Vertex*> vertices;
          const TrigCompositeUtils::DecisionIDContainer previousDecisionIDs;
       };

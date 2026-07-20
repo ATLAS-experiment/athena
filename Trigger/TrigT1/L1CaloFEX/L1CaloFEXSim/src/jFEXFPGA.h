@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //***************************************************************************
@@ -25,7 +25,6 @@
 #include "L1CaloFEXToolInterfaces/IjFEXForwardElecAlgo.h" //handle
 #include "L1CaloFEXToolInterfaces/IjFEXPileupAndNoise.h" //handle
 #include "L1CaloFEXToolInterfaces/IjFEXFormTOBs.h" //handle
-#include "CaloEvent/CaloCellContainer.h" //member
 
 #include "L1CaloFEXSim/FEXAlgoSpaceDefs.h"
 #include "TrigConfData/L1Menu.h" //handle
@@ -65,7 +64,7 @@ namespace LVL1 {
 
     virtual void reset() override ;
 
-    virtual int ID() override {return m_id;}
+    virtual int ID() const override {return m_id;}
 
     virtual void SetTowersAndCells_SG( int [][FEXAlgoSpaceDefs::jFEX_wide_algoSpace_width] ) override ;
     virtual void SetTowersAndCells_SG( int [][FEXAlgoSpaceDefs::jFEX_thin_algoSpace_width] ) override ;
@@ -86,10 +85,10 @@ namespace LVL1 {
     /**Form a tob word out of the potential candidate MET tob */
     virtual std::vector<std::unique_ptr<jFEXTOB>> getMetTOBs() override;    
     
-    int getTTowerET_EM     (unsigned int TTID ) override; 
-    int getTTowerET_HAD    (unsigned int TTID ) override; 
-    int getTTowerET        (unsigned int TTID ) override; 
-    int getTTowerET_forMET (unsigned int TTID ) override; 
+    int getTTowerET_EM     (unsigned int TTID ) const override;
+    int getTTowerET_HAD    (unsigned int TTID ) const override;
+    int getTTowerET        (unsigned int TTID ) const override; 
+    int getTTowerET_forMET (unsigned int TTID ) const override; 
     
    /** Internal data */
   private:
@@ -114,20 +113,8 @@ namespace LVL1 {
     int m_jTowersIDs_Wide [FEXAlgoSpaceDefs::jFEX_algoSpace_height][FEXAlgoSpaceDefs::jFEX_wide_algoSpace_width] = {{0}};
     int m_jTowersIDs_Thin [FEXAlgoSpaceDefs::jFEX_algoSpace_height][FEXAlgoSpaceDefs::jFEX_thin_algoSpace_width] = {{0}};
     
-    std::unordered_map<int,jTower> m_jTowersColl;
-    std::unordered_map<int,std::vector<int> > m_map_Etvalues_FPGA;
     std::unordered_map<int,std::vector<int> > m_map_HAD_Etvalues_FPGA;
     std::unordered_map<int,std::vector<int> > m_map_EM_Etvalues_FPGA;
-    
-
-    std::unordered_map<int, jFEXForwardJetsInfo> m_FCALJets; 
-    std::unordered_map<uint, jFEXForwardElecInfo> m_ForwardElecs;
-
-    int m_SRJetET{};
-    int m_LRJetET{};
-
-    // FIXME: unused?
-    //CaloCellContainer m_sCellsCollection;
 
     SG::ReadHandleKey<LVL1::jTowerContainer> m_jTowerContainerKey {this, "MyETowers", "jTowerContainer", "Input container for jTowers"};
     SG::ReadHandleKey<TrigConf::L1Menu> m_l1MenuKey{this, "L1TriggerMenu", "DetectorStore+L1TriggerMenu","Name of the L1Menu object to read configuration from"}; 

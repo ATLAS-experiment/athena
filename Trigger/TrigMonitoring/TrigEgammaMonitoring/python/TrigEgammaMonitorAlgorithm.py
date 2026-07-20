@@ -1,5 +1,4 @@
-#
-#  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 #
 
 '''@file TrigEgammaMonitorAlgorithm.py
@@ -11,6 +10,7 @@
 @brief Egamma trigger python configuration for the Run III AthenaMonitoring package, based on the example by E. Bergeaas Kuutmann
 '''
 from AthenaCommon.Logging import logging
+
 log_trigeg = logging.getLogger( 'TrigEgammaMonitorAlgorithm' )
 
 
@@ -69,7 +69,7 @@ if __name__=='__main__':
 
 
     # If you want to turn on more detailed messages ...
-    #trigEgammaMonitorAcc.getEventAlgo('TrigEgammaMonAlg').OutputLevel = 2 # DEBUG
+    #trigEgammaMonitorAcc.getEventAlgo('TrigEgammaMonitorTagAndProbeZeeg').OutputLevel = 2 # DEBUG
     cfg.printConfig(withDetails=False) # set True for exhaustive info
 
-    cfg.run(20) #use cfg.run(20) to only run on first 20 events
+    cfg.run(60) #use cfg.run(20) to only run on first 20 events

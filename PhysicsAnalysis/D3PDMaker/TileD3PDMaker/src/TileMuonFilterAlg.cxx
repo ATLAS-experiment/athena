@@ -52,7 +52,7 @@ StatusCode TileMuonFilterAlg::initialize(){
 } 
 
 //=======================================
-StatusCode TileMuonFilterAlg::execute(){
+StatusCode TileMuonFilterAlg::execute(const EventContext& /*ctx*/){
 //=======================================
    switch(m_trackType)
    {
@@ -139,7 +139,7 @@ StatusCode TileMuonFilterAlg::execute(){
       case 0:  muon_track = muon->trackParticle(xAOD::Muon::CombinedTrackParticle);          break;
       case 1:  muon_track = muon->trackParticle(xAOD::Muon::InnerDetectorTrackParticle);     break;
       case 2:  muon_track = muon->trackParticle(xAOD::Muon::MuonSpectrometerTrackParticle);  break;
-      default: muon_track = muon->primaryTrackParticle();                                    break;
+      default: muon_track = muon->trackParticle(xAOD::Muon::TrackParticleType::Primary);                                    break;
     } // SWITCH
     if(!muon_track) continue;
     cut[4]++;
@@ -192,7 +192,7 @@ StatusCode TileMuonFilterAlg::execute(){
       case 0:  muon_track = muon->trackParticle(xAOD::Muon::CombinedTrackParticle);          break;
       case 1:  muon_track = muon->trackParticle(xAOD::Muon::InnerDetectorTrackParticle);     break;
       case 2:  muon_track = muon->trackParticle(xAOD::Muon::MuonSpectrometerTrackParticle);  break;
-      default: muon_track = muon->primaryTrackParticle();                                    break;
+      default: muon_track = muon->trackParticle(xAOD::Muon::TrackParticleType::Primary);                                    break;
     } // SWITCH
     if(!muon_track) continue;  
 

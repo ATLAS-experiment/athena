@@ -175,11 +175,11 @@ StatusCode TrigBhhComboHypo::mergeTracksFromViews(TrigBhhState& state) const {
   for (const Decision* decision : state.previousDecisions()) {
     if (!TrigCompositeUtils::isAnyIDPassing(decision, m_allowedIDs)) continue;
 
-    auto viewLinkInfo = TrigCompositeUtils::findLink<ViewContainer>(decision, TrigCompositeUtils::viewString(), true);
+    auto viewLinkInfo = TrigCompositeUtils::findLink<ViewContainer>(state.context(), decision, TrigCompositeUtils::viewString(), true);
     ATH_CHECK( viewLinkInfo.isValid() );
     auto view = *viewLinkInfo.link;
 
-    auto roiLinkInfo = TrigCompositeUtils::findLink<TrigRoiDescriptorCollection>(decision, TrigCompositeUtils::roiString(), true);
+    auto roiLinkInfo = TrigCompositeUtils::findLink<TrigRoiDescriptorCollection>(state.context(), decision, TrigCompositeUtils::roiString(), true);
     ATH_CHECK( roiLinkInfo.isValid() );
     const auto roi = *roiLinkInfo.link;
 

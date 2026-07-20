@@ -32,6 +32,7 @@
 #include <ranges>
 #include <utility>
 
+#include "CrestApi/CrestLogger.h"
 
 namespace {
 
@@ -486,6 +487,11 @@ StatusCode IOVDbSvc::updateAddress(StoreID::type storeID, SG::TransientAddress* 
      // This problem is mitigated by limiting the scope of the dblock here.
      Athena::DBLock dblock;
      ATH_MSG_DEBUG("Validity key "<<vkey);
+     if (folder->source() == "CREST") {
+        if (!folder->readMeta() && !folder->cacheValid((vkey))){
+          fitr->second->loadCache(vkey, m_par_cacheAlign,m_globalTag,m_par_onlineMode);
+      }
+    } else { //COOL reading 
      if (!folder->readMeta() && !folder->cacheValid(vkey)) {
         // mark this folder as not-dropped so cache-read will succeed
         folder->setDropped(false);
@@ -497,7 +503,7 @@ StatusCode IOVDbSvc::updateAddress(StoreID::type storeID, SG::TransientAddress* 
            return StatusCode::FAILURE;
         }
      }
-
+    }//end cool part 
      // data should now be in cache
      // setup address and range
      {
@@ -557,19 +563,26 @@ StatusCode IOVDbSvc::getRange( const CLID&        clid,
   tag = folder->key();
 
   // obtain the validity key for this folder (includes overrides)
-  cool::ValidityKey vkey=folder->iovTime(time);
-  if (!folder->readMeta() && !folder->cacheValid(vkey)) {
-    // mark this folder as not-dropped so cache-read will succeed
-    folder->setDropped(false);
-    // reload cache for this folder (and all others sharing this DB connection)
-    ATH_MSG_DEBUG( "Triggering cache load for folder " << folder->folderName() );
-    if (loadCaches(folder->conn(),&time).isFailure()) {
-      ATH_MSG_ERROR( "Cache load failed for at least one folder from " << folder->conn()->name()
-                     << ". You may see errors from other folders sharing the same connection." );
-      return StatusCode::FAILURE;
+  cool::ValidityKey vkey = folder->iovTime(time);
+  if (folder->source() == "CREST") {
+      if (!folder->readMeta() && !folder->cacheValid((vkey))){
+        fitr->second->loadCache(vkey, m_par_cacheAlign,m_globalTag,m_par_onlineMode);
+      }
+  } else {
+    if (!folder->readMeta() && !folder->cacheValid(vkey)) {
+      // mark this folder as not-dropped so cache-read will succeed
+      folder->setDropped(false);
+      // reload cache for this folder (and all others sharing this DB
+      // connection)
+      ATH_MSG_DEBUG("Triggering cache load for folder " << folder->folderName());
+      if (loadCaches(folder->conn(), &time).isFailure()) {
+        ATH_MSG_ERROR("Cache load failed for at least one folder from " << folder->conn()->name()
+                                                                        << ". You may see errors from other folders sharing the "
+                                                                           "same connection.");
+        return StatusCode::FAILURE;
+      }
     }
   }
-
   // data should now be in cache
   address.reset();
   // setup address and range
@@ -909,6 +922,9 @@ StatusCode IOVDbSvc::setupFolders() {
 
   // getting the pairs: folder name - CREST tag name:
   if (m_par_source == "CREST"){
+    auto mLevel = static_cast<std::underlying_type_t<MSG::Level>>(msg().level());
+    Crest::LogLevel cLevel = static_cast<Crest::LogLevel>(mLevel);
+    Crest::Logger::setLogLevel(cLevel);	  
     m_cresttagmap.clear();
     m_cresttagmap = CoralCrestManager::getGlobalTagMap(m_par_crestServer,m_par_globalTag);
   }

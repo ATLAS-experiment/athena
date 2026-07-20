@@ -65,7 +65,7 @@ namespace EL
       ::StatusCode initialize (const AlgorithmWorkerData& /*workerData*/) override
       { ++initializeCount; return StatusCode::SUCCESS; }
 
-      ::StatusCode execute () override
+      ::StatusCode execute (const EventContext& /*ctx*/) override
       {
         ++executeCount;
         if (requestSkip)

@@ -14,7 +14,7 @@
  
 #include "AthenaBaseComps/AthAlgorithm.h"
 
-#include "../GlobalSimComponents/ITIPwriterAlgTool.h"
+#include "../GlobalSimComponents/ITIPWriterAlgTool.h"
 #include "../IO/eEmTOB.h" 
 
 #include <string>
@@ -39,7 +39,7 @@ namespace GlobalSim {
     eEmMultTestBench(const std::string& name, ISvcLocator *pSvcLocator);
 
     virtual StatusCode initialize () override;
-    virtual StatusCode execute () override;
+    virtual StatusCode execute (const EventContext& ctx) override;
 
   private:
 

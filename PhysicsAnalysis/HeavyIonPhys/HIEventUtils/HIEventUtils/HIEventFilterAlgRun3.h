@@ -11,16 +11,16 @@
 // FrameWork includes
 #include "AsgDataHandles/ReadHandleKey.h"
 #include "AthenaBaseComps/AthReentrantAlgorithm.h"
+#include "AthenaMonitoringKernel/GenericMonitoringTool.h"
+#include "EventBookkeeperTools/FilterReporterParams.h"
 #include "HIEventUtils/IHIEventSelectionToolRun3.h"
 #include "StoreGate/WriteDecorHandleKey.h"
+#include "xAODCaloEvent/CaloClusterContainer.h"
 #include "xAODEventInfo/EventInfo.h"
 #include "xAODForward/ZdcModuleContainer.h"
 #include "xAODHIEvent/HIEventShapeContainer.h"
 #include "xAODTracking/TrackParticleContainer.h"
 #include "xAODTracking/VertexContainer.h"
-#include "EventBookkeeperTools/FilterReporterParams.h"
-
-#include "AthenaMonitoringKernel/GenericMonitoringTool.h"
 
 namespace HI {
 
@@ -60,6 +60,8 @@ class HIEventFilterAlgRun3 : public ::AthReentrantAlgorithm {
       this, "HIEventShape", "HIEventShape", "Vertices key"};
   SG::ReadHandleKey<xAOD::ZdcModuleContainer> m_zdcKey{
       this, "ZDC", "ZDCModules", "Vertices key"};
+  SG::ReadHandleKey<xAOD::CaloClusterContainer> m_clustersKey{
+      this, "CaloClusters", "CaloCalTopoClusters", "Key for calo clusters"};
 
   SG::WriteDecorHandleKey<xAOD::EventInfo> m_decisionBitsKey{
       this, "HIEventSelection", m_eventInfoKey, "HIEventSelection",
@@ -68,15 +70,21 @@ class HIEventFilterAlgRun3 : public ::AthReentrantAlgorithm {
   ToolHandle<HI::IHIEventSelectionToolRun3> m_tool{this, "SelectionTool",
                                                    "HIEventSelectionToolRun3"};
 
-  ToolHandle<GenericMonitoringTool> m_monTool{ this, "MonTool", "", "Tool to monitor performance of selection" };
+  ToolHandle<GenericMonitoringTool> m_monTool{
+      this, "MonTool", "", "Tool to monitor performance of selection"};
 
   FilterReporterParams m_filterParams{
       this, "HIEventFilterRun3",
       "Records number of events that pass the filter"};
 
-  auto isRequested(const mask_t mask, HI::SelectionMask req) const {
+  bool isSet(const mask_t mask, HI::SelectionMask req) const {
     return (mask & static_cast<mask_t>(req)) != 0;
   }
+
+  bool isRequested(const mask_t mask, HI::SelectionMask req) const {
+    return isSet(mask, req);
+  }
+
 
   void store(HI::SelectionMask m, mask_t& mask) const {
     mask |= static_cast<mask_t>(m);

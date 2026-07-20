@@ -80,7 +80,7 @@ AsgElectronEfficiencyCorrectionTool::AsgElectronEfficiencyCorrectionTool(
     m_corrFileNameList,
     "List of file names that store the correction factors for simulation.");
   declareProperty("MapFilePath",
-                  m_mapFile = "ElectronEfficiencyCorrection/2015_2025/rel22.2/2025_Run3_Consolidated_Recommendation_v4/map2.txt",
+                  m_mapFile = "ElectronEfficiencyCorrection/2015_2025/rel22.2/2026_Run2Run3_Recommendation_v1/map1.txt",
                   "Full path to the map file");
   declareProperty(
     "RecoKey", m_recoKey = "", "Key associated with reconstruction");
@@ -212,7 +212,7 @@ AsgElectronEfficiencyCorrectionTool::initialize()
     if (ifile.find("efficiencySF.offline.Fwd") != std::string::npos) {
       m_sysSubstring = "FwdID_";
     }
-    if (ifile.find("efficiencySF.Isolation") != std::string::npos) {
+    if (ifile.find("efficiencySF.Isolation") != std::string::npos || ifile.find("efficiencySF.isolation") != std::string::npos) {
       m_sysSubstring = "Iso_";
     }
     if (ifile.find("efficiency.") != std::string::npos) {

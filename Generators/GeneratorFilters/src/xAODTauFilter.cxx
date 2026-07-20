@@ -55,15 +55,14 @@ StatusCode xAODTauFilter::filterFinalize() {
 }
 
 
-StatusCode xAODTauFilter::filterEvent() {
+StatusCode xAODTauFilter::filterEvent(const EventContext& ctx) {
   // Get random number engine
   CLHEP::HepRandomEngine* rndm{};
   if(m_HasTightRegion) {
-    const EventContext& ctx = Gaudi::Hive::currentContext();
     rndm = this->getRandomEngine(name(), ctx);
     if (!rndm) {
       ATH_MSG_ERROR("Failed to retrieve random number engine for xAODTauFilter");
-      setFilterPassed(false);
+      setFilterPassed(false, ctx);
       return StatusCode::SUCCESS;
     }
   }
@@ -82,19 +81,19 @@ StatusCode xAODTauFilter::filterEvent() {
   double weight = 1;
 
 
-  SG::ReadHandle<xAOD::TruthParticleContainer> xTruthParticleContainer{m_truthPartContKey};
+  SG::ReadHandle<xAOD::TruthParticleContainer> xTruthParticleContainer{m_truthPartContKey, ctx};
   CHECK(xTruthParticleContainer.isValid());
 
   //get the weight of the event from McEventCollection
-  setFilterPassed(false);
-  for(const HepMC::GenEvent* genEvt : *events_const()) {
+  setFilterPassed(false, ctx);
+  for(const HepMC::GenEvent* genEvt : *events_const(ctx)) {
     int eventNumber = genEvt->event_number();
     if(m_filterEventNumber==1 && (eventNumber%2)==0) {
-      setFilterPassed(false);
+      setFilterPassed(false, ctx);
       return StatusCode::SUCCESS;
     }
     else if(m_filterEventNumber==2 && (eventNumber%2)==1) {
-      setFilterPassed(false);
+      setFilterPassed(false, ctx);
       return StatusCode::SUCCESS;
     }
     
@@ -261,7 +260,7 @@ StatusCode xAODTauFilter::filterEvent() {
     // Get MC event collection for setting weight
     const McEventCollection* mecc = 0;
     if ( evtStore()->retrieve( mecc ).isFailure() || !mecc ){ // FIXME keyless retrieve
-      setFilterPassed(false);
+      setFilterPassed(false, ctx);
       ATH_MSG_ERROR("Could not retrieve MC Event Collection - weight might not work");
       return StatusCode::SUCCESS;
     }
@@ -282,10 +281,7 @@ StatusCode xAODTauFilter::filterEvent() {
 	(*mec)[i]->weights().push_back( existingWeight*extra_weight );
       }
 
-#ifdef HEPMC3
-      static const std::string filterWeightStr{"filterWeight"};
-      (*mec)[i]->add_attribute(filterWeightStr, std::make_shared<HepMC3::DoubleAttribute>(extra_weight));
-#endif
+      (*mec)[i]->add_attribute(HepMCStr::filterWeight, std::make_shared<HepMC3::DoubleAttribute>(extra_weight));
 
     }
   }
@@ -294,7 +290,7 @@ StatusCode xAODTauFilter::filterEvent() {
 	
 	if (m_ReverseFilter) pass = !pass; //If reverse filter is active, flip the truth value of pass
 	
-	setFilterPassed(pass);
+	setFilterPassed(pass, ctx);
   
   return StatusCode::SUCCESS;
 }

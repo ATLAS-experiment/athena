@@ -94,7 +94,8 @@ Trig::DecisionAccess::associateToEventView(SG::ReadHandle<CONTAINER>& inViewCont
                                            const std::string& roiName) const {
   using TrigCompositeUtils::LinkInfo;
   using TrigCompositeUtils::findLink;
-  LinkInfo<TrigRoiDescriptorCollection> roiLI = findLink<TrigRoiDescriptorCollection>(decisionObject, roiName);
+  const EventContext& ctx = Gaudi::Hive::currentContext();
+  LinkInfo<TrigRoiDescriptorCollection> roiLI = findLink<TrigRoiDescriptorCollection>(ctx, decisionObject, roiName);
   // We don't actually need to be able to resolve the ElementLink, but we should check that one was returned from the Navigation.
   if (roiLI.link.key() == 0) {
     ATH_MSG_ERROR("Unable to locate an ElementLink with name " << roiName << " from given Decision object.");

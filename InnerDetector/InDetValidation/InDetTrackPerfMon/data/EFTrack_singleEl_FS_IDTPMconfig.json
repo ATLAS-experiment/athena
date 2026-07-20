@@ -1,0 +1,31 @@
+{
+    "TruthElectrons" : {
+        "enabled" : true,
+        "TestType"  : "Offline",
+        "RefType"   : "Truth",
+        "OfflineTrkKey" : "_TRKCOLLNAME_",
+        "MatchingType"  : "TruthMatch",
+        "plotTechnicalEfficiencies" : true,
+        "useActsSiMeasurements" : true,
+        "SelectTruthObject"  : "Electron",
+        "plotFakeRates" : false,
+        "plotVertexParameters" : false,
+        "OfflineVtxKey" : "",
+        "TruthVtxKey" : ""
+    },
+    "TruthElectrons_EFsel" : {
+        "enabled" : true,
+        "TestType"  : "Offline",
+        "RefType"   : "Truth",
+        "OfflineTrkKey" : "_TRKCOLLNAME_",
+        "MatchingType"  : "TruthMatch",
+        "OfflineQualityWP" : "EFTracking",
+        "plotTechnicalEfficiencies" : true,
+        "useActsSiMeasurements" : true,
+        "SelectTruthObject"  : "Electron",
+        "plotFakeRates" : false,
+        "plotVertexParameters" : false,
+        "OfflineVtxKey" : "",
+        "TruthVtxKey" : ""
+    }
+}

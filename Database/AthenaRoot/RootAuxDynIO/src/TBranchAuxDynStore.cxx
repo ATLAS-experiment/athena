@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -67,6 +67,7 @@ bool TBranchAuxDynStore::readData(SG::auxid_t auxid)
       return false;
    }
 
+   SG::AuxStoreInternal::toTransient (m_ctx, auxid);
    SG::AuxTypeRegistry& r = SG::AuxTypeRegistry::instance();
    SG::auxid_t linked_auxid = r.linkedVariable (auxid);
    if (linked_auxid != SG::null_auxid) {

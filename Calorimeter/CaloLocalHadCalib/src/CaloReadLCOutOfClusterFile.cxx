@@ -142,7 +142,7 @@ StatusCode CaloReadLCOutOfClusterFile::initialize() {
   return StatusCode::SUCCESS;
 }
 
-StatusCode  CaloReadLCOutOfClusterFile::execute() 
+StatusCode  CaloReadLCOutOfClusterFile::execute(const EventContext& /*ctx*/) 
 { 
   return StatusCode::SUCCESS;
 }

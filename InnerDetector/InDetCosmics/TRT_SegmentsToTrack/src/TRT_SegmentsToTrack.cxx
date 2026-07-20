@@ -134,10 +134,9 @@ StatusCode InDet::TRT_SegmentsToTrack::finalize()
   return StatusCode::SUCCESS;
 }
 
-StatusCode InDet::TRT_SegmentsToTrack::execute()
+StatusCode InDet::TRT_SegmentsToTrack::execute(const EventContext& ctx)
 {
   int segmentCounter=0;
-  const EventContext& ctx = Gaudi::Hive::currentContext();
   m_events++;
 
   ATH_MSG_DEBUG(name() << " execute() start");

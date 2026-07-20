@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 #
 # @author Baptiste Ravina
 
@@ -22,6 +22,6 @@ atlas_install_data( data/* )
 
 atlas_add_test( TestCPRunPL
    SCRIPT CPRun.py --text-config TruthParticleLevelAnalysisAlgorithms/test_configuration_Run2_PL.yaml -e 30 --input-list $ASG_TEST_FILE_MC
-   POST_EXEC_SCRIPT nopost.sh
+   POST_EXEC_SCRIPT noerror.sh
    PROPERTIES TIMEOUT 400 
 )

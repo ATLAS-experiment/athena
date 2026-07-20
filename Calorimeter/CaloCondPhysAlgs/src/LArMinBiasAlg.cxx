@@ -95,23 +95,22 @@
   }
   
   //__________________________________________________________________________
-  StatusCode LArMinBiasAlg::execute()
+  StatusCode LArMinBiasAlg::execute(const EventContext& ctx)
   {
     //.............................................
     
     ATH_MSG_DEBUG(" LArMinBiasAlg execute()");
 
-    const EventContext& ctx = Gaudi::Hive::currentContext();
 
     if (m_first) {
 
       const CaloDetDescrManager_Base *cMgr=nullptr;
       if(m_isSC){
-         SG::ReadCondHandle<CaloSuperCellDetDescrManager> caloMgrHandle{m_caloSCMgrKey};
+         SG::ReadCondHandle<CaloSuperCellDetDescrManager> caloMgrHandle{m_caloSCMgrKey, ctx};
          ATH_CHECK(caloMgrHandle.isValid());
          cMgr=(const CaloDetDescrManager_Base *)(*caloMgrHandle);
       } else {
-         SG::ReadCondHandle<CaloDetDescrManager> caloMgrHandle{m_caloMgrKey};
+         SG::ReadCondHandle<CaloDetDescrManager> caloMgrHandle{m_caloMgrKey, ctx};
          ATH_CHECK(caloMgrHandle.isValid());
          cMgr=(const CaloDetDescrManager_Base *)(*caloMgrHandle);
       }
@@ -186,7 +185,7 @@
       m_first=false;
     }
 
-    SG::ReadHandle<xAOD::EventInfo> eventInfo(m_eventInfoKey);
+    SG::ReadHandle<xAOD::EventInfo> eventInfo(m_eventInfoKey, ctx);
     if (!eventInfo.isValid()) {
       ATH_MSG_ERROR ("Could not retrieve EventInfo");
       return StatusCode::FAILURE;

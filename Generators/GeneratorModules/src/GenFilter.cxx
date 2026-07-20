@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "GeneratorModules/GenFilter.h"
@@ -9,9 +9,7 @@ GenFilter::GenFilter(const std::string& name, ISvcLocator* pSvcLocator)
   : GenBase(name, pSvcLocator)
 {
   declareProperty("TotalPassed", m_nNeeded=-1);
-#ifdef HEPMC3
   declareProperty("KeepAllEvents", m_keepAll=false);
-#endif
   m_nPass = 0;
   m_nFail = 0;
 }
@@ -26,20 +24,16 @@ StatusCode GenFilter::initialize() {
 }
 
 
-StatusCode GenFilter::execute() {
-  if (events_const()->empty()) {
+StatusCode GenFilter::execute(const EventContext& ctx) {
+  if (events_const(ctx)->empty()) {
     ATH_MSG_ERROR("No events found in McEventCollection");
     return StatusCode::FAILURE;
-  } else if (events_const()->size() > 1) {
+  } else if (events_const(ctx)->size() > 1) {
     /// @todo Probably the filter should only look at the first event... right?
     ATH_MSG_WARNING("More than one event in current McEventCollection -- which is valid?");
   }
-  StatusCode sc = filterEvent();
-#ifdef HEPMC3
-  if (filterPassed() || m_keepAll ) {
-#else
-  if (filterPassed() ) {
-#endif
+  StatusCode sc = filterEvent(ctx);
+  if (filterPassed(ctx) || m_keepAll ) {
     ATH_MSG_DEBUG("Event passed filter");
     m_nPass += 1;
   } else {

@@ -14,13 +14,14 @@
 #include "StoreGate/ReadHandle.h"
 #include "StoreGate/WriteDecorHandle.h"
 
+#include <optional>
+
 #include "xAODInDetMeasurement/PixelCluster.h"
 #include "xAODInDetMeasurement/StripCluster.h"
 #include "Acts/Utilities/TrackHelpers.hpp"
 
 #include "ActsEvent/TrackContainer.h"
-#include "ActsGeometry/ATLASSourceLink.h"
-
+#include "ActsCalibrators/xAODUncalibMeasCalibrator.h"
 namespace HGTD {
 
 TrackTimeDefAndQualityAlg::TrackTimeDefAndQualityAlg(const std::string& name,
@@ -31,6 +32,7 @@ StatusCode TrackTimeDefAndQualityAlg::initialize() {
 
   ATH_CHECK(m_trackParticleContainerKey.initialize());
   ATH_CHECK(m_layerHasExtensionKey.initialize());
+  ATH_CHECK(m_holesHGTDKey.initialize(!m_doActs)); //HGTD_holes not produced in ActsHGTDTrackExtensionAlg for now so make it optional
   ATH_CHECK(m_layerClusterTimeKey.initialize());
   ATH_CHECK(m_layerClusterTruthClassKey.initialize());
   ATH_CHECK(m_time_dec_key.initialize());
@@ -46,17 +48,8 @@ StatusCode TrackTimeDefAndQualityAlg::initialize() {
 
 StatusCode TrackTimeDefAndQualityAlg::execute(const EventContext& ctx) const {
 
-  SG::ReadHandle<xAOD::TrackParticleContainer> trk_ptkl_container_handle(
-      m_trackParticleContainerKey, ctx);
-  ATH_CHECK( trk_ptkl_container_handle.isValid() );
-  const xAOD::TrackParticleContainer* track_particles =
-      trk_ptkl_container_handle.cptr();
-  if (not track_particles) {
-    ATH_MSG_ERROR(
-        "[TrackTimeDefAndQualityAlg] TrackParticleContainer not found, "
-        "aborting execute!");
-    return StatusCode::FAILURE;
-  }
+  const xAOD::TrackParticleContainer* track_particles{nullptr};
+  ATH_CHECK(SG::get(track_particles, m_trackParticleContainerKey, ctx));
 
   SG::WriteDecorHandle<xAOD::TrackParticleContainer, float> time_handle(
       m_time_dec_key, ctx);
@@ -79,13 +72,21 @@ StatusCode TrackTimeDefAndQualityAlg::execute(const EventContext& ctx) const {
       layerClusterTruthClassHandle(m_layerClusterTruthClassKey, ctx);
   ATH_CHECK(layerClusterTruthClassHandle.isValid());
 
-  
+  static const std::vector<char> s_no_holes(4, false);
+  std::optional<SG::ReadDecorHandle<xAOD::TrackParticleContainer, std::vector<char>>>
+      holesHGTDHandle;
+  if (!m_doActs) {
+    holesHGTDHandle.emplace(m_holesHGTDKey, ctx);
+    ATH_CHECK(holesHGTDHandle->isValid());
+  }
+
   for (const auto* track_ptkl : *track_particles) {
     // runs the time consistency checks
     // if no hits are found in HGTD, returns a default time
     const std::vector<float>& times = layerClusterTimeHandle(*track_ptkl);
     const std::vector<char>& has_clusters = layerHasExtensionHandle(*track_ptkl);
     const std::vector<int>& hit_classification = layerClusterTruthClassHandle(*track_ptkl);
+    const std::vector<char>& holes_HGTD = m_doActs ? s_no_holes : (*holesHGTDHandle)(*track_ptkl);
 
     CleaningResult res = runTimeConsistencyCuts(times,
 						has_clusters,
@@ -106,6 +107,17 @@ StatusCode TrackTimeDefAndQualityAlg::execute(const EventContext& ctx) const {
       }
     }
     res.m_field |= (prime_pattern << m_primes_ptrn_sft);
+
+    // expected pattern : 'on which HGTD layer a hit was expected?' which means extrapolation has
+    // reached an active sensor, whether a matching cluster was found or not. 
+    // So ‘expected = has_cluster OR HGTD_holes’. 
+    short expected_pattern = 0x0;
+    for (short i = 0; i < s_hgtd_layers; i++) {
+      if (has_clusters.at(i) || holes_HGTD.at(i))  {
+        expected_pattern |= (1 << i);
+      }
+    }
+    res.m_field |= (expected_pattern << m_exp_ptrn_sft);
 
     // decorate the track again with this info
     time_handle(*track_ptkl) = res.m_time;
@@ -388,24 +400,22 @@ std::pair<float, float> TrackTimeDefAndQualityAlg::getRadiusAndZ(const xAOD::Tra
     const auto lastMeasurementState = Acts::findLastMeasurementState(track);
     const auto state = lastMeasurementState.value();
 
-    auto sl = state.getUncalibratedSourceLink().template get<ActsTrk::ATLASUncalibSourceLink>();
-    assert( sl != nullptr);
-    const xAOD::UncalibratedMeasurement &cluster = ActsTrk::getUncalibratedMeasurement(sl);
-    xAOD::UncalibMeasType clusterType = cluster.type();
+    const xAOD::UncalibratedMeasurement *cluster = ActsTrk::detail::xAODUncalibMeasCalibrator::unpack(state.getUncalibratedSourceLink());
+    xAOD::UncalibMeasType clusterType = cluster->type();
 
     switch (clusterType) {
     case xAOD::UncalibMeasType::PixelClusterType:
       {
-	auto glob = static_cast<const xAOD::PixelCluster*>(&cluster)->globalPosition();
-	radius = std::sqrt( glob(0, 0) * glob(0, 0) + glob(1, 0) * glob(1, 0) );
-	abs_z = std::abs( glob(2, 0) );
+        auto glob = static_cast<const xAOD::PixelCluster*>(cluster)->globalPosition();
+        radius = glob.perp();
+        abs_z = std::abs(glob.z());
       }
       break;
     case xAOD::UncalibMeasType::StripClusterType:
       {
-	auto glob = static_cast<const xAOD::StripCluster*>(&cluster)->globalPosition();
-        radius = std::sqrt( glob(0, 0) * glob(0, 0) + glob(1, 0) * glob(1, 0) );
-        abs_z =	std::abs( glob(2, 0) );
+        auto glob = static_cast<const xAOD::StripCluster*>(cluster)->globalPosition();
+        radius = glob.perp();
+        abs_z = std::abs(glob.z());
       }
       break;
     case xAOD::UncalibMeasType::HGTDClusterType:

@@ -116,10 +116,9 @@ StatusCode LArCaliWaveBuilder::initialize()
 }
 
 
-StatusCode LArCaliWaveBuilder::execute() 
+StatusCode LArCaliWaveBuilder::execute(const EventContext& ctx) 
 {
  // using EvtId
- const EventContext& ctx = getContext();
  m_event_counter=ctx.eventID().event_number()+1;// evt. starts from 0
 
  const LArCalibParams* calibParams = nullptr;
@@ -131,7 +130,7 @@ StatusCode LArCaliWaveBuilder::execute()
 
     unsigned counter=m_event_counter;
     if(m_useAccumulatedDigits) {
-       if (counter % calibParams->NTrigger(HWIdentifier(1007091712)) != 0U) return StatusCode::SUCCESS;
+       if (static_cast<int>(counter % calibParams->NTrigger(HWIdentifier(1007091712))) != 0) return StatusCode::SUCCESS;
     }
 
     counter /= calibParams->NTrigger(HWIdentifier(1007091712));     
@@ -149,6 +148,7 @@ StatusCode LArCaliWaveBuilder::execute()
 
     ATH_MSG_DEBUG("Good event "<<m_event_counter<<" : "<<counter<<" for pattern " << m_usePatt << " out of " << numPatt << " patterns " << calibParams->NTrigger(HWIdentifier(1007091712)) <<" triggers "<<iDAC<<" iDAC "<<iDel<<" iDel");
     ATH_MSG_DEBUG("Good event "<<m_NSubStep*iDAC*iDel*numPatt+ m_NSubStep*(m_usePatt-1) <<" : " << m_NSubStep*iDAC*iDel*numPatt + m_NSubStep*m_usePatt);
+
 
     SG::ReadCondHandle<LArCalibLineMapping> clHdl{m_calibMapKey, ctx};
     clcabling =*clHdl;

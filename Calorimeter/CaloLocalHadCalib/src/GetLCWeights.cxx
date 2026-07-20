@@ -352,9 +352,8 @@ StatusCode GetLCWeights::finalize()
 
 //###############################################################################
 
-StatusCode GetLCWeights::execute()
+StatusCode GetLCWeights::execute(const EventContext& ctx)
 {
-  const EventContext& ctx = getContext();
   SG::ReadHandle<xAOD::CaloClusterContainer> cc (m_clusterCollName, ctx);
 
   std::vector<const CaloCalibrationHitContainer *> v_cchc;

@@ -18,7 +18,7 @@ ChargedTracksFilter::ChargedTracksFilter(const std::string& name, ISvcLocator* p
 }
 
 
-StatusCode ChargedTracksFilter::filterEvent() {
+StatusCode ChargedTracksFilter::filterEvent(const EventContext& ctx) {
   int nChargedTracks = 0;
 
   // Loop over all events in McEventCollection
@@ -56,7 +56,7 @@ StatusCode ChargedTracksFilter::filterEvent() {
 
   // Record passed status  
   setFilterPassed( ((m_NTracksMax == -1) || (nChargedTracks <= m_NTracksMax)) && 
-		   ((m_NTracks    == -1) || (nChargedTracks >= m_NTracks   )) );
+		   ((m_NTracks    == -1) || (nChargedTracks >= m_NTracks   )), ctx );
 
   return StatusCode::SUCCESS;
 }

@@ -262,7 +262,7 @@ class NswSegmentFinderAlg : public AthReentrantAlgorithm {
         SG::WriteHandleKey<SegmentContainer> m_writeSegmentKey{this, "MuonNswSegmentWriteKey", "MuonNswSegments"};
 
         // access to the ACTS geometry context 
-        SG::ReadHandleKey<ActsTrk::GeometryContext> m_geoCtxKey{this, "AlignmentKey", "ActsAlignment", "cond handle key"};
+        ActsTrk::GeoContextReadKey_t m_geoCtxKey{this, "AlignmentKey", "ActsAlignment", "cond handle key"};
 
         // access to the Muon Id Helper
         ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc {this, "MuonIdHelperSvc", "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};

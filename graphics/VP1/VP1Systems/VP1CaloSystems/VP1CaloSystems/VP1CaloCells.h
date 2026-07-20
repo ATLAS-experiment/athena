@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef VP1CALOSYSTEMS_VP1CALOCELL_H
@@ -52,11 +52,11 @@ class VP1CC_GlobalCuts
       && allowedEta==other.allowedEta
       && allowedPhi==other.allowedPhi; }
 
-  bool sideA;
-  bool sideC;
+  bool sideA = false;
+  bool sideC = false;
   VP1Interval allowedEta;
   QList<VP1Interval> allowedPhi;
-  double clipRadius;
+  double clipRadius = 0;
 };
 
 // ************* Enums *****************
@@ -390,16 +390,16 @@ class VP1CC_TileCrack : public VP1CC_Tile
 
 typedef std::map<int, GeoTrf::Transform3D, std::less<int> > VP1CC_MbtsXfMap;
 
-typedef struct
+struct VP1CC_MbtsScinInfo
 {
-  double dx1;  //-|
-  double dx2;  // |
-  double dy1;  // |-Scintillator shape parameters
-  double dy2;  // |
-  double dz;   //-|
+  double dx1 = 0;  //-|
+  double dx2 = 0;  // |
+  double dy1 = 0;  // |-Scintillator shape parameters
+  double dy2 = 0;  // |
+  double dz = 0;   //-|
   VP1CC_MbtsXfMap aTransforms; // Absolute positions on the A side
   VP1CC_MbtsXfMap cTransforms; // Absolute positions on the C side
-} VP1CC_MbtsScinInfo;
+};
 
 // The instance of this map contains 2 elements
 // 0 - scintillators at lower R

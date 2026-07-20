@@ -31,7 +31,7 @@ class LArDeltaRespPredictor : public AthAlgorithm
 
   //standard algorithm methods
   StatusCode initialize() ; 
-  StatusCode execute() {return StatusCode::SUCCESS;} //empty method
+  StatusCode execute(const EventContext&) {return StatusCode::SUCCESS;} //empty method
   StatusCode stop();
   StatusCode finalize(){return StatusCode::SUCCESS;}
  

@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+    Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 //***************************************************************************
 //    gTowerBuilder - Builds gTowers (readout elements of gFEX)
@@ -28,18 +28,15 @@ class gTowerBuilder: public AthAlgTool, virtual public IgTowerBuilder {
   gTowerBuilder(const std::string& type,const std::string& name,const IInterface* parent);
   virtual ~gTowerBuilder() = default;
 
-  virtual void init(std::unique_ptr<gTowerContainer> & gTowerContainerRaw) override ;
-  virtual void execute(std::unique_ptr<gTowerContainer> & gTowerContainerRaw) const override;
-  virtual void reset() override ;
+  virtual void BuildAllTowers(std::unique_ptr<gTowerContainer> & gTowerContainerRaw) const override ;
 
- private:
+private:
 
   virtual void BuildEMBgTowers(std::unique_ptr<gTowerContainer> & gTowerContainerRaw) const override ;
   virtual void BuildTransEMBgTowers(std::unique_ptr<gTowerContainer> & gTowerContainerRaw) const override ;
   virtual void BuildEMEgTowers(std::unique_ptr<gTowerContainer> & gTowerContainerRaw) const override ;
   virtual void BuildFwdEMECgTowers(std::unique_ptr<gTowerContainer> & gTowerContainerRaw) const override ;
   virtual void BuildFCALgTowers(std::unique_ptr<gTowerContainer> & gTowerContainerRaw) const override ;
-  virtual void BuildAllTowers(std::unique_ptr<gTowerContainer> & gTowerContainerRaw) const override ;
   virtual void BuildSingleTower(std::unique_ptr<gTowerContainer> & gTowerContainerRaw, int eta, int phi, int nphi, int keybase, int posneg) const override ;
 
 };

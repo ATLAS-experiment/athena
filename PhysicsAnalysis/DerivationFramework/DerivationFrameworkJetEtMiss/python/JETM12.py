@@ -29,7 +29,7 @@ def JETM12SkimmingToolCfg(flags):
     from DerivationFrameworkTools.DerivationFrameworkToolsConfig import (
         xAODStringSkimmingToolCfg)
 
-    tracks = 'InDetTrackParticles.TrkIsoPt1000_ptcone20 < 0.12*InDetTrackParticles.pt && InDetTrackParticles.DFCommonTightPrimary && abs(DFCommonInDetTrackZ0AtPV*sin(InDetTrackParticles.theta)) < 5.0*mm'
+    tracks = 'InDetTrackParticles.TrkIsoPt1000_ptcone20 < 0.12*InDetTrackParticles.pt && InDetTrackParticles.DFCommonTightPrimary && abs(InDetTrackParticles.DFCommonInDetTrackZ0AtPV*sin(InDetTrackParticles.theta)) < 5.0*mm'
 
     trackRequirements = '(InDetTrackParticles.pt > 6.*GeV && '+tracks+' )'
     trackRequirementsMu = '(InDetTrackParticles.pt > 40.*GeV && '+tracks+' )'
@@ -39,7 +39,7 @@ def JETM12SkimmingToolCfg(flags):
     if flags.GeoModel.Run >= LHCPeriod.Run4:
         jetRequirementsTtbar = '(AntiKt4EMPFlowJets.pt > 18*GeV)'
 
-    trackRequirementsNoIso = '(InDetTrackParticles.pt > 10.*GeV && abs(DFCommonInDetTrackZ0AtPV*sin(InDetTrackParticles.theta)) < 5.0*mm )'
+    trackRequirementsNoIso = '(InDetTrackParticles.pt > 10.*GeV && abs(InDetTrackParticles.DFCommonInDetTrackZ0AtPV*sin(InDetTrackParticles.theta)) < 5.0*mm )'
 
     muonsRequirements = '(Muons.pt >= 20.*GeV) && (abs(Muons.eta) < 2.6) && (Muons.DFCommonMuonPassPreselection)'
     electronsRequirements = '(Electrons.pt > 20.*GeV) && (abs(Electrons.eta) < 2.6) && ((Electrons.Loose) || (Electrons.DFCommonElectronsLHLoose))'
@@ -249,7 +249,7 @@ def JETM12KernelCfg(flags, name='JETM12Kernel', **kwargs):
     from DerivationFrameworkInDet.InDetToolsConfig import TrackParticleThinningCfg, MuonTrackParticleThinningCfg, EgammaTrackParticleThinningCfg, TauTrackParticleThinningCfg
 
     # Increased cut (w.r.t. R21) on abs(z0) for new TTVA working points
-    JETM12_thinning_expression = "( InDetTrackParticles.pt > 6*GeV && InDetTrackParticles.DFCommonTightPrimary && abs(DFCommonInDetTrackZ0AtPV*sin(InDetTrackParticles.theta)) < 5.0*mm )"
+    JETM12_thinning_expression = "( InDetTrackParticles.pt > 6*GeV && InDetTrackParticles.DFCommonTightPrimary && abs(InDetTrackParticles.DFCommonInDetTrackZ0AtPV*sin(InDetTrackParticles.theta)) < 5.0*mm )"
     JETM12TrackParticleThinningTool = acc.getPrimaryAndMerge(TrackParticleThinningCfg(
         flags,
         name                    = "JETM12TrackParticleThinningTool",
@@ -300,7 +300,7 @@ def JETM12KernelCfg(flags, name='JETM12Kernel', **kwargs):
 
     #CaloClusterThinning
     from DerivationFrameworkCalo.DerivationFrameworkCaloConfig import CaloClusterThinningCfg
-    selectionString = "( InDetTrackParticles.pt > 6*GeV && InDetTrackParticles.DFCommonTightPrimary && abs(DFCommonInDetTrackZ0AtPV*sin(InDetTrackParticles.theta)) < 5.0*mm )"
+    selectionString = "( InDetTrackParticles.pt > 6*GeV && InDetTrackParticles.DFCommonTightPrimary && abs(InDetTrackParticles.DFCommonInDetTrackZ0AtPV*sin(InDetTrackParticles.theta)) < 5.0*mm )"
     JETM12CaloThinningTool = acc.getPrimaryAndMerge(CaloClusterThinningCfg(flags,
                                                                            name                  = "JETM12CaloClusterThinning",
                                                                            StreamName            = kwargs['StreamName'],
@@ -395,7 +395,7 @@ def JETM12Cfg(flags):
     # Output stream    
     JETM12ItemList = JETM12SlimmingHelper.GetItemList()
     acc.merge(OutputStreamCfg(flags, "DAOD_JETM12", ItemList=JETM12ItemList, AcceptAlgs=["JETM12Kernel"]))
-    acc.merge(SetupMetaDataForStreamCfg(flags, "DAOD_JETM12", AcceptAlgs=["JETM12Kernel"], createMetadata=[MetadataCategory.CutFlowMetaData]))
+    acc.merge(SetupMetaDataForStreamCfg(flags, "DAOD_JETM12", AcceptAlgs=["JETM12Kernel"], createMetadata=[MetadataCategory.CutFlowMetaData,MetadataCategory.TruthMetaData]))
 
     return acc
 

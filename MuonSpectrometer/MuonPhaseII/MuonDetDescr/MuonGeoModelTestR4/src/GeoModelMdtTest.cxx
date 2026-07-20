@@ -245,9 +245,8 @@ StatusCode GeoModelMdtTest::finalize() {
     ATH_CHECK(m_tree.write());
     return StatusCode::SUCCESS;
 }
-StatusCode GeoModelMdtTest::execute() {
-    const EventContext& ctx{Gaudi::Hive::currentContext()};
-    
+StatusCode GeoModelMdtTest::execute(const EventContext& ctx) {
+        
     const ActsTrk::GeometryContext* geoContextHandle{nullptr};
     ATH_CHECK(SG::get(geoContextHandle, m_geoCtxKey, ctx));
 

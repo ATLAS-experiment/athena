@@ -24,21 +24,17 @@ StatusCode DecayTimeFilter::filterInitialize() {
   return StatusCode::SUCCESS;
 }
 
-double calcmag(const HepMC::FourVector& vect){
-    return std::sqrt(vect.x() * vect.x() + vect.y() * vect.y() + vect.z() * vect.z());
-}
-
 double DecayTimeFilter::tau(const HepMC::ConstGenParticlePtr& ptr) const {
     auto startpos = ptr->production_vertex()->position ();
     auto endpos = ptr->end_vertex() ->position ();
     HepMC::FourVector diff(endpos.x() - startpos.x(), endpos.y() - startpos.y(), endpos.z() - startpos.z(), endpos.t() - startpos.t());
-    double mag = calcmag(diff);
+    double mag = diff.length();
     double length = mag;
     HepMC::FourVector p = ptr->momentum ();
-    return (1000./299.792458) * (length * ptr->generated_mass() / calcmag(p));
+    return (1000./299.792458) * (length * ptr->generated_mass() / p.length());
 }
 
-StatusCode DecayTimeFilter::filterEvent() {
+StatusCode DecayTimeFilter::filterEvent(const EventContext& ctx) {
   int nPassPDG = 0;
   bool passed = true;
   for (McEventCollection::const_iterator itr = events()->begin(); itr != events()->end(); ++itr) {
@@ -53,6 +49,6 @@ StatusCode DecayTimeFilter::filterEvent() {
        }
     }
   }
-  setFilterPassed((nPassPDG > 0) & passed);
+  setFilterPassed((nPassPDG > 0) & passed, ctx);
   return StatusCode::SUCCESS;
 }

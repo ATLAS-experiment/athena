@@ -40,7 +40,16 @@ namespace MuonR4 {
       }
       return ostr;
     }
-    MsTrackSeed::MsTrackSeed(const Location loc, const int sector): 
+    std::string MsTrackSeed::toString(const Location loc) {
+        switch (loc) {
+          using enum Location;
+          case Undefined: return "Undefined";
+          case Barrel: return "Barrel";
+          case Endcap: return "Endcap";
+        }
+        return "";
+    }
+    MsTrackSeed::MsTrackSeed(const Location loc, const ExpandedSector sector): 
           m_loc{loc}, m_sector{sector}{}
     MsTrackSeed::Location MsTrackSeed::location() const { return m_loc; }
     std::vector<const SpacePointBucket*> MsTrackSeed::buckets() const { 

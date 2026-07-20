@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 # ====================================================================
 # EGAM1.py
 # This defines DAOD_EGAM1, a skimmed DAOD format for Run 3.
@@ -371,7 +371,7 @@ def EGAM1KernelCfg(flags, name="EGAM1Kernel", **kwargs):
         thinning_expression = " && ".join(
             [
                 "(InDetTrackParticles.DFCommonTightPrimary)",
-                "(abs(DFCommonInDetTrackZ0AtPV)*sin(InDetTrackParticles.theta)<3*mm)",
+                "(abs(InDetTrackParticles.DFCommonInDetTrackZ0AtPV)*sin(InDetTrackParticles.theta)<3*mm)",
                 "(InDetTrackParticles.pt>10*GeV)",
             ]
         )

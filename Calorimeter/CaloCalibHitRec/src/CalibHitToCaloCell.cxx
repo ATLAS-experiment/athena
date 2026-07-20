@@ -67,9 +67,9 @@ StatusCode CalibHitToCaloCell::initialize()
 
 
 /////////////////   EXECUTE   //////////////////////
-StatusCode CalibHitToCaloCell::execute()
+StatusCode CalibHitToCaloCell::execute(const EventContext& ctx)
 {
-    SG::ReadCondHandle<CaloDetDescrManager> caloMgrHandle{m_caloMgrKey};
+    SG::ReadCondHandle<CaloDetDescrManager> caloMgrHandle{m_caloMgrKey, ctx};
     ATH_CHECK(caloMgrHandle.isValid());
     const CaloDetDescrManager* caloDDMgr = *caloMgrHandle;
 

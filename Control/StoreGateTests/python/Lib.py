@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # @file: StoreGateTests/python/Lib.py
 # @purpose: a set of Py-components to tests py-record performances
@@ -6,6 +6,7 @@
 
 from AthenaPython.PyAthena import StatusCode
 import AthenaPython.PyAthena as PyAthena
+import ROOT
 
 class PySgStressProducer( PyAthena.Alg ):
     """A simple python algorithm to create PayLoads
@@ -48,6 +49,7 @@ class PySgStressProducer( PyAthena.Alg ):
             dv = _makePayLoadDv()
             data = _makePayLoad()
             dv.push_back( data )
+            ROOT.SetOwnership (data, False)
             try:
                 _sg_record(dv, outName)
             except Exception:

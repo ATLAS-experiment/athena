@@ -123,7 +123,7 @@ StatusCode MuDstarFilter::filterFinalize() {
 }
 
 //---------------------------------------------------------------------------
-StatusCode MuDstarFilter::filterEvent() {
+StatusCode MuDstarFilter::filterEvent(const EventContext& ctx) {
   //---------------------------------------------------------------------------
 
   // Loop over all events in McEventCollection 
@@ -131,16 +131,12 @@ StatusCode MuDstarFilter::filterEvent() {
 
   ATH_MSG_DEBUG(" MuDstarFilter filtering ");
 
-  for (itr = events_const() -> begin(); itr != events_const() -> end(); ++itr) {
+  for (itr = events_const(ctx) -> begin(); itr != events_const(ctx) -> end(); ++itr) {
 
     double primx = 0.;
     double primy = 0.;
 
-    #ifdef HEPMC3
     HepMC::ConstGenVertexPtr vprim = * (( * itr) -> vertices().begin());
-    #else
-    HepMC::GenVertexPtr vprim = * (( * itr) -> vertices_begin());
-    #endif
 
     primx = vprim -> position().x();
     primy = vprim -> position().y();
@@ -192,17 +188,9 @@ StatusCode MuDstarFilter::filterEvent() {
           if (Rxy < m_RxyMinDstar) continue;
 
           // Child
-          #ifdef HEPMC3
           auto firstChild = pitr -> end_vertex() -> particles_out().begin();
           auto endChild = pitr -> end_vertex() -> particles_out().end();
           auto thisChild = firstChild;
-          #else
-          HepMC::GenVertex::particle_iterator firstChild =
-            pitr -> end_vertex() -> particles_begin(HepMC::children);
-          HepMC::GenVertex::particle_iterator endChild =
-            pitr -> end_vertex() -> particles_end(HepMC::children);
-          HepMC::GenVertex::particle_iterator thisChild = firstChild;
-          #endif
 
           if (( * firstChild) -> pdg_id() == pitr -> pdg_id()) continue;
 
@@ -260,18 +248,9 @@ StatusCode MuDstarFilter::filterEvent() {
 
             if (std::abs(( * thisChild) -> pdg_id()) == MC::D0) {
               if ((( * thisChild) -> end_vertex())) {
-                #ifdef HEPMC3
                 auto firstChild1 = ( * thisChild) -> end_vertex() -> particles_out().begin();
                 auto endChild1 = ( * thisChild) -> end_vertex() -> particles_out().end();
                 auto thisChild1 = firstChild1;
-                #else
-                HepMC::GenVertex::particle_iterator firstChild1 =
-                  ( * thisChild) -> end_vertex() -> particles_begin(HepMC::children);
-                HepMC::GenVertex::particle_iterator endChild1 =
-                  ( * thisChild) -> end_vertex() -> particles_end(HepMC::children);
-                HepMC::GenVertex::particle_iterator thisChild1 = firstChild1;
-
-                #endif
 
                 for (; thisChild1 != endChild1; ++thisChild1) {
 
@@ -329,18 +308,9 @@ StatusCode MuDstarFilter::filterEvent() {
                   } else if ((( * thisChild1) -> end_vertex())) {
 
                     //
-                    #ifdef HEPMC3
                     auto firstChild2 = ( * thisChild1) -> end_vertex() -> particles_out().begin();
                     auto endChild2 = ( * thisChild1) -> end_vertex() -> particles_out().end();
                     auto thisChild2 = firstChild2;
-                    #else
-                    HepMC::GenVertex::particle_iterator firstChild2 =
-                      ( * thisChild1) -> end_vertex() -> particles_begin(HepMC::children);
-                    HepMC::GenVertex::particle_iterator endChild2 =
-                      ( * thisChild1) -> end_vertex() -> particles_end(HepMC::children);
-                    HepMC::GenVertex::particle_iterator thisChild2 = firstChild2;
-
-                    #endif
                     for (; thisChild2 != endChild2; ++thisChild2) {
 
                       if (!MC::isPhysical(*thisChild2)) continue; // photos history line
@@ -480,7 +450,7 @@ StatusCode MuDstarFilter::filterEvent() {
                       ATH_MSG_INFO("MuDstarFilter: NumChildD0neutrinos, NumChildD0gammas = " << NumChildD0neutrinos << " , " << NumChildD0gammas );
                       ATH_MSG_INFO("MuDstarFilter: pis_pdg, K_pdg, ChargeD0Child1, ChargeD0Child2 = " << pis_pdg << " , " << K_pdg << " , " << ChargeD0Child1 << " , " << ChargeD0Child2 );
 
-                      setFilterPassed(true);
+                      setFilterPassed(true, ctx);
                       return StatusCode::SUCCESS;
                     }
                   } // for i
@@ -497,7 +467,7 @@ StatusCode MuDstarFilter::filterEvent() {
   //
   // if we get here we have failed
   //
-  setFilterPassed(false);
+  setFilterPassed(false, ctx);
   return StatusCode::SUCCESS;
 }
 

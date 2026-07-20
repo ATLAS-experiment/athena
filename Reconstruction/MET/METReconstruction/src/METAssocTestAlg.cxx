@@ -38,7 +38,7 @@ namespace met {
 
   StatusCode METAssocTestAlg::finalize() { return StatusCode::SUCCESS; }
 
-  StatusCode METAssocTestAlg::execute()
+  StatusCode METAssocTestAlg::execute(const EventContext& /*ctx*/)
   {
 
 

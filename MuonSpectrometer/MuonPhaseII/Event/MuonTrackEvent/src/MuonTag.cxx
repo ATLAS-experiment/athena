@@ -49,7 +49,7 @@ namespace MuonR4 {
         m_msTrack = msTrack;
     }
 
-    void MuonTag::setSegments(const std::span<const xAOD::MuonSegment*> segs){
+    void MuonTag::setSegments(const std::span<const xAOD::MuonSegment* const> segs){
         m_segments.insert(m_segments.end(), segs.begin(), segs.end());
     }
       
@@ -61,5 +61,17 @@ namespace MuonR4 {
     }
     void MuonTag::setSummary(HitSummary&& summary) {
         m_summary = std::make_unique<HitSummary>(std::move(summary));
+    } 
+    bool MuonTag::setExtrapolatedParsID(const Acts::HashedString& parName,
+                                        Acts::BoundTrackParameters&& pars) {
+        return m_idTrkPars.emplace(std::make_pair(parName, std::move(pars))).second;
+    }
+    std::optional<Acts::BoundTrackParameters> 
+        MuonTag::extrapolatedParsID(const Acts::HashedString& parName) const {
+        ExtTpMap_t::const_iterator itr =  m_idTrkPars.find(parName);
+        if (itr != m_idTrkPars.end()){
+            return itr->second;
+        }
+        return std::nullopt;
     }
 }

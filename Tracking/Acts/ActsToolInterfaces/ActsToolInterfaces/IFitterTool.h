@@ -8,7 +8,6 @@
 #include "GaudiKernel/IAlgTool.h"
 #include "GaudiKernel/EventContext.h"
 
-#include "ActsGeometry/ATLASSourceLink.h"
 
 #include "ActsEvent/TrackContainer.h"
 #include "ActsEvent/SeedContainer.h"
@@ -17,6 +16,7 @@
 #include "Acts/Geometry/GeometryContext.hpp"
 #include "Acts/MagneticField/MagneticFieldContext.hpp"
 #include "Acts/Utilities/CalibrationContext.hpp"
+#include "Acts/Surfaces/PerigeeSurface.hpp"
 #include "xAODMeasurementBase/UncalibratedMeasurement.h"
 #include "TrkTrack/Track.h"
 namespace ActsTrk {
@@ -44,7 +44,7 @@ namespace ActsTrk {
                                                
     /** @brief Attempt to fit a trajectory from a list of uncalibrated measurements. The measurements need
      *         to be sorted such that the associated surfaces are passed in consecutive order by the 
-     *         constructed trajectory. For a betterfit convergence, the method takes an external estimate
+     *         constructed trajectory. For a better fit convergence, the method takes an external estimate
      *         of the track parameters.    
      *  @param measList: List of pointers to the uncalibrated measurements to consider for fitting
      *  @param initialParams: Rough parameter estimate used to start the fit 
@@ -59,10 +59,28 @@ namespace ActsTrk {
                                                          const Acts::CalibrationContext& calContext,
                                                          const Acts::Surface* targetSurface = nullptr) const = 0;
 
+
+    /** @brief Attempt to fit a trajectory from a list of source links. The underlying measurements need
+     *         to be sorted such that the associated surfaces are passed in consecutive order by the 
+     *         constructed trajectory. For a better fit convergence, the method takes an external estimate
+     *         of the track parameters.    
+     *  @param sourceLinks: List of source links to consider for fitting
+     *  @param initialParams: Rough parameter estimate used to start the fit 
+     *  @param tgContext: Geometry context to fetch the aligned positions of each surface
+     *  @param mfContext: Reference to the magnetic field context having the ATLAS magnetic field wrapped
+     *  @param calContext: Reference to the CalibrationContext which is wrapping the pointer to the Gaudi-event context     
+     *  @return: In case of fit-failure, a nullptr otherwise a unique_ptr to the fitted trajectories from the fit */
+    virtual std::unique_ptr< MutableTrackContainer > fit(const std::vector<Acts::SourceLink>& sourceLinks,
+                                                         const Acts::BoundTrackParameters& initialParams,
+                                                         const Acts::GeometryContext& tgContext,
+                                                         const Acts::MagneticFieldContext& mfContext,
+                                                         const Acts::CalibrationContext& calContext,
+                                                         const Acts::Surface* targetSurface = nullptr) const = 0;
+
     virtual StatusCode fit(const EventContext& ctx,
                            const TrackContainer::ConstTrackProxy& track,          
                            MutableTrackContainer& trackContainer,
-			   const Acts::PerigeeSurface& pSurface) const = 0;
+	                         const Acts::PerigeeSurface& pSurface) const = 0;
     
   };
   

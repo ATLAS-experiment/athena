@@ -199,7 +199,7 @@ def TRT_LayerBuilderCfg(flags, name='TRT_LayerBuilder', useCond=True, **kwargs):
                 and flags.Sim.ISF.Simulator.usesFatras()
 
     kwargs.setdefault("ModelLayersOnly", 
-                      not(flags.Beam.Type is BeamType.Cosmics) and \
+                      flags.Beam.Type is not BeamType.Cosmics and \
                       not(useFatras))
                       
     if not useFatras:

@@ -133,11 +133,9 @@ class TruthParticle : public ParticleImpl<
    */
   int barcode() const;
 
-#ifdef HEPMC3
   /** Forwards the HepMC::GenParticle::id() information
    */
   int id() const;
-#endif
 
   /** Forwards the HepMC::GenParticle::barcode() information
    */
@@ -205,14 +203,6 @@ class TruthParticle : public ParticleImpl<
 
   /// Return the PDG-Id of the i-th child of this particle
   int pdgDecay( const std::size_t i ) const;
-
-#ifdef HEPMC3
-//FIXME
-#else
-  /// conversion operator: convert a @c TruthParticle to its underlying
-  /// @c HepMC::GenParticle
-  operator const HepMC::GenParticle&() const;
-#endif
 
   evtIndex_t genEventIndex() const {return m_nGenEventIdx;}
 
@@ -312,12 +302,10 @@ inline int TruthParticle::barcode() const
   return HepMC::barcode(genParticle());
 }
 
-#ifdef HEPMC3
 inline int TruthParticle::id() const
 {
   return genParticle()->id();
 }
-#endif
 
 inline unsigned int TruthParticle::nParents() const 
 { return m_mothers.size(); }
@@ -325,18 +313,6 @@ inline unsigned int TruthParticle::nParents() const
 inline unsigned int TruthParticle::nDecay() const 
 { return m_children.size(); }
 
-#ifdef HEPMC3
-
-//FIXME
-#else
-
-inline
-TruthParticle::operator const HepMC::GenParticle&() const
-{
-  return *genParticle();
-}
-
-#endif
 inline void TruthParticle::setCharge( const ChargeType charge )
 {
   this->particleBase().setCharge( charge );

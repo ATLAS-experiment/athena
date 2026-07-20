@@ -32,8 +32,8 @@ class Sample(EvgenConfig):
         pdf_set = MadGraphPDFSets.NNPDF30NLOnf4
 
         # This sample is LHE-only by construction: no showering stage.
-        from MadGraphControl.MadGraphConfig import MadGraph_LHE_Cfg
-        return MadGraph_LHE_Cfg(
+        from MadGraphControl.MadGraphConfig import MadGraphCfg
+        return MadGraphCfg(
             flags,
             process_definition=process_def,
             settings=settings,
@@ -41,7 +41,7 @@ class Sample(EvgenConfig):
         )
 
         # Non-default settings can be passed via the kwargs, for example:
-        # return MadGraph_LHE_Cfg(
+        # return MadGraphCfg(
         #     flags,
         #     process_definition=process_def,
         #     settings=settings,

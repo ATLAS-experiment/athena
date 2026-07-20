@@ -1,61 +1,47 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // Calls IWeightTool objects for each event and stores SumOfWeights
 // for each of these computations
 //
 // Author: Danilo Ferreira de Lima <dferreir@cern.ch>
-/////////////////////////////////////////////////////////////////// 
+///////////////////////////////////////////////////////////////////
 
 #ifndef REWEIGHTUTILS_SUMOFWEIGHTSALG_H
 #define REWEIGHTUTILS_SUMOFWEIGHTSALG_H
 
 // Include the base class
-#include "AthenaBaseComps/AthFilterAlgorithm.h"
+#include "AthenaBaseComps/AthReentrantAlgorithm.h"
+#include "AthenaKernel/ICutFlowSvc.h"
 #include "CxxUtils/checker_macros.h"
 #include "GaudiKernel/ToolHandle.h"
 
-#include <vector>
 #include <string>
-
-// EDM includes
-
-#include "xAODCutFlow/CutBookkeeper.h"
+#include <vector>
 
 class IWeightTool;
 
-class SumOfWeightsAlg : public ::AthFilterAlgorithm { 
-   
-   public: 
-   
-     /// Constructor with parameters: 
-     SumOfWeightsAlg(const std::string& name, ISvcLocator* pSvcLocator);
-   
-     /// Destructor: 
-     ~SumOfWeightsAlg(); 
-   
-     /// Athena algorithm's Hooks
-     StatusCode  initialize ATLAS_NOT_THREAD_SAFE ();
-     StatusCode  execute();
-     StatusCode  finalize();
-   
-   private: 
-   
-     /// Default constructor: 
-     SumOfWeightsAlg();
+class SumOfWeightsAlg : public AthReentrantAlgorithm {
 
-     /// Athena configured tools
-     ToolHandleArray<IWeightTool> m_weightTools;
+  public:
+    using AthReentrantAlgorithm::AthReentrantAlgorithm;
 
-     /// number of events processed
-     unsigned long m_eventsProcessed;
+    /// Athena algorithm's Hooks
+    virtual StatusCode initialize ATLAS_NOT_THREAD_SAFE () override;
+    virtual StatusCode execute(const EventContext& ctx) const override;
 
-     /// cut IDs
-     std::vector<CutIdentifier> m_cutIDs;
+  private:
 
-}; 
+    /// Athena configured components
+    ServiceHandle<ICutFlowSvc> m_cutFlowSvc{ this, "CutFlowSvc", "CutFlowSvc/CutFlowSvc", "Pointer to the CutFlowSvc"};
+    PublicToolHandleArray<IWeightTool> m_weightTools{ this, "WeightTools", {}, "List of WeightTools to be called for each event"};
+
+    /// cut IDs
+    std::vector<CutIdentifier> m_cutIDs;
+
+};
 
 #endif //> !REWEIGHTUTILS_SUMOFWEIGHTSALG_H

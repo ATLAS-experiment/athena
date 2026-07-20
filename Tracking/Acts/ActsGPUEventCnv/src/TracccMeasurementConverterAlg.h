@@ -1,0 +1,105 @@
+/*
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
+*/
+#ifndef ACTSGPUEVENT_TRACCCMEASUREMENTCONVERTERALG_H
+#define ACTSGPUEVENT_TRACCCMEASUREMENTCONVERTERALG_H
+
+#include "AthenaBaseComps/AthReentrantAlgorithm.h"
+#include "StoreGate/ReadHandleKey.h"
+#include "StoreGate/WriteHandleKey.h"
+
+#include "ActsGPUEvent/TracccMeasurementCollection.h"
+#include "traccc/edm/measurement_collection.hpp"
+#include "AthDeviceInterfaces/IMemoryResourceTool.h"
+#include "AthDeviceInterfaces/ICopyTool.h"
+
+#include "xAODInDetMeasurement/PixelClusterContainer.h"
+#include "xAODInDetMeasurement/PixelClusterAuxContainer.h"
+#include "xAODInDetMeasurement/StripClusterContainer.h"
+#include "xAODInDetMeasurement/StripClusterAuxContainer.h"
+#include "xAODInDetMeasurement/SpacePointContainer.h"
+#include "xAODInDetMeasurement/SpacePointAuxContainer.h"
+
+#include "InDetIdentifier/PixelID.h"
+#include "InDetIdentifier/SCT_ID.h"
+#include "InDetReadoutGeometry/SiDetectorElement.h"
+#include "PixelReadoutGeometry/PixelDetectorManager.h"
+#include "SCT_ReadoutGeometry/SCT_DetectorManager.h"
+
+#include "ActsGPUInterfaces/IDeviceDetectorDescriptionProviderSvc.h"
+
+#include "GaudiKernel/ToolHandle.h"
+
+namespace ActsTrk {
+
+/**
+ * @class TracccMeasurementConverterAlg
+ *
+ * @brief Algorithm converting traccc measurements (device buffer) to xAOD clusters (host container)
+ *
+ * This algorithm retrieves the input traccc measurement collection device buffer from the event store,
+ * copies the data to host buffer and converts the traccc measurements to xAOD clusters.
+ * In case the clusters require the associated RDOs (e.g., for truth matching),
+ * the algorithm also retrieves the traccc cluster collection device buffer from the event store,
+ * and uses the cell indices stored in the traccc clusters to construct an RDO list associated with each xAOD cluster.
+ *
+ * @author Neža Ribarič <neza.ribaric@cern.ch>
+ */
+class TracccMeasurementConverterAlg : public AthReentrantAlgorithm
+{
+public:
+  using AthReentrantAlgorithm::AthReentrantAlgorithm;
+
+  /// Function initializing the algorithm
+  virtual StatusCode initialize() override;
+  /// Function executing the algorithm
+  virtual StatusCode execute(const EventContext& ctx) const override;
+  /// Function finalizing the algorthm
+  virtual StatusCode finalize() override;
+
+private:
+
+  /// @name The input device traccc measurement collection name
+  SG::ReadHandleKey<traccc::edm::measurement_collection::const_view> m_inputMeasKey{
+      this, "InputMeasurements", "TracccMeasurements",
+      "Input traccc measurement collection buffer"};
+
+  /// @name The output host resident cluster collection names
+  /// {@
+  SG::WriteHandleKey<xAOD::PixelClusterContainer> m_outputPixelKey{
+      this, "OutputPixelClusters", "ITkTracccPixelClusters",
+      "Output xAOD pixel cluster container"};
+  SG::WriteHandleKey<xAOD::StripClusterContainer> m_outputStripKey{
+      this, "OutputStripClusters", "ITkTracccStripClusters",
+      "Output xAOD strip cluster container"};
+  /// @}
+
+  /// @name The host memory resource tool to use for memory allocations
+  ToolHandle<AthDevice::IMemoryResourceTool> m_hostMR{
+    this, "HostMR", "", "Host memory resource tool"};
+  /// @name The copy tool used for copying data from device
+  ToolHandle<AthDevice::ICopyTool> m_copy{
+      this, "CopyProviderTool", "", "Vecmem copy provider tool"};
+  /// @name The detector description service providing the Athena<->Detray ID map
+  ServiceHandle<ActsTrk::IDeviceDetectorDescriptionProviderSvc> m_detDescSvc{
+    this, "DetectorDescriptionSvc", "ActsTrk::JSONDeviceDetectorDescriptionProviderSvc"};
+
+  /// The object counters for debug prints in finalize method
+  /// {@
+  mutable std::atomic<int> m_nPix = 0;
+  mutable std::atomic<int> m_nStrip = 0;
+  mutable std::atomic<int> m_nMeas = 0;
+  /// @}
+
+
+  const std::unordered_map<uint64_t, Identifier>* m_detrayToAthena{};
+
+  const PixelID* m_pixelID{nullptr};
+  const SCT_ID*  m_stripID{nullptr};
+  const InDetDD::PixelDetectorManager* m_pixelManager{nullptr};
+  const InDetDD::SCT_DetectorManager*  m_stripManager{nullptr};
+};
+
+} // namespace ActsTrk
+
+#endif // ACTSGPUEVENT_TRACCCMEASUREMENTCONVERTERALG_H

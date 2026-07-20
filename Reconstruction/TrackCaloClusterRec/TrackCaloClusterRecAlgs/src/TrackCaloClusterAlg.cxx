@@ -36,13 +36,13 @@ StatusCode TrackCaloClusterAlg::initialize() {
 }
 
 // *****************************************************
-StatusCode TrackCaloClusterAlg::execute() {  
+StatusCode TrackCaloClusterAlg::execute(const EventContext& ctx) {  
   ATH_MSG_DEBUG ("Executing " << name() << "...");
 
-  SG::ReadHandle<TrackCaloClusterInfo> tccInfo(m_tccInfoHandle);
+  SG::ReadHandle<TrackCaloClusterInfo> tccInfo(m_tccInfoHandle, ctx);
   
   // Create containers
-  SG::WriteHandle<xAOD::FlowElementContainer> tccContainer(m_outputTCCHandle) ;
+  SG::WriteHandle<xAOD::FlowElementContainer> tccContainer(m_outputTCCHandle, ctx) ;
   ATH_CHECK( tccContainer.record (std::make_unique<xAOD::FlowElementContainer>(),
 				  std::make_unique<xAOD::FlowElementAuxContainer>()) );
   ATH_MSG_DEBUG( "Recorded TrackCaloClusterContainer with key: " << m_outputTCCHandle.key()  );
@@ -50,7 +50,7 @@ StatusCode TrackCaloClusterAlg::execute() {
   // Optionnaly recopy an existing container.
   // This option is mainly to enable functionalities of the original alg. 
   if(! m_copiedTCCHandle.empty() ){
-    SG::ReadHandle<xAOD::FlowElementContainer> tccToCopy(m_copiedTCCHandle) ;
+    SG::ReadHandle<xAOD::FlowElementContainer> tccToCopy(m_copiedTCCHandle, ctx) ;
     for(const xAOD::FlowElement* tobecopied: *tccToCopy){
       xAOD::FlowElement* tcc = new xAOD::FlowElement;
       tccContainer->push_back(tcc);

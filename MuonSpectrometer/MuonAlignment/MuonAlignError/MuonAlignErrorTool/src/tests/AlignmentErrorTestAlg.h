@@ -17,7 +17,7 @@ class AlignmentErrorTestAlg : public AthAlgorithm {
   ~AlignmentErrorTestAlg() override = default;
 
   StatusCode initialize() override;
-  StatusCode execute() override;
+  StatusCode execute(const EventContext& ctx) override;
 
  private:
   ToolHandle<Trk::ITrkAlignmentDeviationTool> m_alignmentErrorTool{

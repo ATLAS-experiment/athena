@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -118,9 +118,9 @@ public:
   float last_propMaxRadius = 0.0F;
   Trk::ITrackFitter * last_trackFitter = nullptr;
   Muon::MuonEDMPrinterTool * muonedmprintertool = nullptr;
-  TrackCommonFlags::SELECTIONMODE last_selectionMode;
+  TrackCommonFlags::SELECTIONMODE last_selectionMode{};
   bool last_showTruthAscObjs = false;
-  TrackCommonFlags::DETAILLEVEL last_assocObjDetailLevel;
+  TrackCommonFlags::DETAILLEVEL last_assocObjDetailLevel{};
   TrackCommonFlags::TSOSPartsFlags last_shownTSOSParts;
   TrackCommonFlags::TSOSPartsFlags last_customColouredTSOSParts;
   bool last_useShortTRTMeasurements = false;

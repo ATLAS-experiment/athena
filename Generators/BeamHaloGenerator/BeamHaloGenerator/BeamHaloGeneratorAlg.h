@@ -11,6 +11,7 @@
 #include "TH1F.h"
 
 #include <string>
+#include <memory>
 
 class BeamHaloGenerator;
 

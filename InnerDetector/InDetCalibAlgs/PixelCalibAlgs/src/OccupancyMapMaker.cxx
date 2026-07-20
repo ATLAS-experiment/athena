@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // PixelCalibAlgs
@@ -296,10 +296,9 @@ StatusCode OccupancyMapMaker::registerHistograms(){
 // execute
 //
 //=========================================================
-StatusCode OccupancyMapMaker::execute(){
+StatusCode OccupancyMapMaker::execute(const EventContext& ctx){
   ATH_MSG_DEBUG( "Executing OccupancyMapMaker" );
 
-  const EventContext& ctx = Gaudi::Hive::currentContext();
 
   // check LB is in allowed range
   unsigned int LB =  ctx.eventID().lumi_block();
@@ -671,7 +670,7 @@ StatusCode OccupancyMapMaker::finalize() {
         else if( type == "Long-Ganged" )      thiscut *= m_longPixelMultiplier * m_gangedPixelMultiplier;
 
         if( type != "Invalid" ){
-	  double occupancy = 0;
+	  double occupancy = minOccupancy;
 	  if( m_nEvents != 0 ) 
 	    occupancy = static_cast<double>(m_hitMaps[modHash]->GetBinContent(pixel_eta+1, pixel_phi+1)) /
 	      static_cast<double>(m_nEvents);

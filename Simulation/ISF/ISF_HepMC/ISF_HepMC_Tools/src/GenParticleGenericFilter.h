@@ -53,19 +53,11 @@ namespace ISF {
     virtual StatusCode  initialize() override final;
 
     /// Interface method that returns whether the given particle passes all cuts or not
-#ifdef HEPMC3
     virtual bool pass(const HepMC::ConstGenParticlePtr& particle) const override final;
-#else
-    virtual bool pass(const HepMC::GenParticle& particle) const override final;
-#endif
 
   private:
     /// Check whether the given particle passes all configure cuts or not
-#ifdef HEPMC3
     bool check_cuts_passed(const HepMC::ConstGenParticlePtr& particle) const;
-#else
-    bool check_cuts_passed(const HepMC::GenParticle& particle) const;
-#endif
 
     /// the cuts defined by the use
     Gaudi::Property<double> m_minEta{this, "MinEta", std::numeric_limits<double>::lowest(), "Minimum Particle Pseudorapidity"};     //!< min pseudorapidity cut

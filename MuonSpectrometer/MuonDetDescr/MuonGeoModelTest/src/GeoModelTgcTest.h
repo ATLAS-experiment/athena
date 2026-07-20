@@ -23,7 +23,7 @@ class GeoModelTgcTest : public AthHistogramAlgorithm {
     using AthHistogramAlgorithm::AthHistogramAlgorithm;
 
     StatusCode initialize() override;
-    StatusCode execute() override;
+    StatusCode execute(const EventContext& ctx) override;
     StatusCode finalize() override;
     unsigned int cardinality() const override final { return 1; }
 

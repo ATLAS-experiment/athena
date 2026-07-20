@@ -348,7 +348,7 @@ StatusCode PixelRDOAnalysis::initialize() {
   return StatusCode::SUCCESS;
 }
 
-StatusCode PixelRDOAnalysis::execute() {
+StatusCode PixelRDOAnalysis::execute(const EventContext& ctx) {
   ATH_MSG_DEBUG(" In ITkPixelRDOAnalysis::execute()" );
 
   m_rdoID->clear();
@@ -392,7 +392,6 @@ StatusCode PixelRDOAnalysis::execute() {
     m_localZ->clear();
   }
   // Raw Data
-  const EventContext& ctx{Gaudi::Hive::currentContext()};
 
   const PixelRDO_Container* p_pixelRDO_cont{nullptr};
   ATH_CHECK(SG::get(p_pixelRDO_cont, m_inputKey, ctx));

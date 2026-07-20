@@ -2,22 +2,13 @@
   Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
 */
 
+/// @author Nils Krumnack
+
 #ifndef EVENT_LOOP_ALGS__WHITE_BOARD_SVC_H
 #define EVENT_LOOP_ALGS__WHITE_BOARD_SVC_H
 
-//          
-// Distributed under the Boost Software License, Version 1.0.
-//    (See accompanying file LICENSE_1_0.txt or copy at
-//          http://www.boost.org/LICENSE_1_0.txt)
-
-// Please feel free to contact me (krumnack@iastate.edu) for bug
-// reports, feature suggestions, praise and complaints.
-
-
 /// This module defines a base class for classes that implement an
-/// interface to a white board service.  The interface provided in
-/// this module is intended for the general user.  The module is
-/// considered to be in the pre-alpha stage.
+/// interface to a white board service.
 
 
 

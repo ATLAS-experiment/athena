@@ -1,7 +1,7 @@
 // Dear emacs, this is -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // $Id: xAODPrimitives.h 576255 2013-12-19 12:54:41Z emoyse $
@@ -285,6 +285,11 @@ namespace xAOD {
     numberOfTRTXenonHits            =46,  //!< number of TRT hits on track in straws with xenon [unit8_t].
     numberOfTRTSharedHits           =62,  //!< number of TRT hits used by more than one track
 
+    numberOfHGTDHits               =69,  //!< number of HGTD hits [unit8_t].
+    numberOfHGTDOutliers           =72,  //!< number of HGTD outliers [unit8_t].
+    numberOfHGTDHoles              =75,  //!< number of HGTD layers on track with absence of hits [unit8_t].
+    numberOfHGTDSharedHits         =86,  //!< number of HGTD all-layer hits shared by several tracks [unit8_t].
+
     // --- Muon Spectrometer
     numberOfPrecisionLayers = 7,       //!< layers with at least 3 hits [unit8_t].
     numberOfPrecisionHoleLayers = 8,   //!< layers with holes AND no hits [unit8_t].
@@ -306,18 +311,18 @@ namespace xAOD {
     TRTTrackOccupancy               = 67,  //!< TRT track occupancy. 
 
     // New ITk SummaryTypes, not inherited from Trk::TrkSummary
-    numberOfContribPixelBarrelFlatLayers     = 68,  //!< number of contributing barrel flat layers of the pixel detector [unit8_t].
-    numberOfContribPixelBarrelInclinedLayers = 69,  //!< number of contributing barrel inclined layers of the pixel detector [unit8_t].
+    numberOfContribPixelBarrelLayers         = 68,  //!< number of contributing barrel flat layers of the pixel detector [unit8_t].
     numberOfContribPixelEndcap               = 70,  //!< number of contributing endcap layers of the pixel detector [unit8_t].
-    numberOfPixelBarrelFlatHits              = 71,  //!< these are the pixel hits, in the barrel flat layers [unit8_t].
-    numberOfPixelBarrelInclinedHits          = 72,  //!< these are the pixel hits, in the barrel inclined layers [unit8_t].
+    numberOfPixelBarrelHits                  = 71,  //!< these are the pixel hits, in the barrel flat layers [unit8_t].
     numberOfPixelEndcapHits                  = 73,  //!< these are the pixel hits, in the endcap layers [unit8_t].
-    numberOfPixelBarrelFlatHoles             = 74,  //!< number of pixel barrel flat layers on track with absence of hits [unit8_t].
-    numberOfPixelBarrelInclinedHoles         = 75,  //!< number of pixel barrel flat inclined on track with absence of hits [unit8_t].
-    numberOfPixelEndcapHoles                 = 76,  //!< number of pixel endcap layers on track with absence of hits [unit8_t].
+
+    numberOfContribPixelBarrelFlatLayers     = 87,  //!< number of contributing barrel flat layers of the pixel detector [unit8_t].
+    numberOfContribPixelBarrelInclinedLayers = 88,  //!< number of contributing barrel inclined layers of the pixel detector [unit8_t].
+    numberOfPixelBarrelFlatHits              = 89,  //!< these are the pixel hits, in the barrel flat layers [unit8_t].
+    numberOfPixelBarrelInclinedHits          = 90,  //!< these are the pixel hits, in the barrel inclined layers [unit8_t].
 
     // -- numbers...
-    numberOfTrackSummaryTypes       = 86
+    numberOfTrackSummaryTypes       = 91
   };
 
   /// Enumerates the different types of information stored in Summary. 

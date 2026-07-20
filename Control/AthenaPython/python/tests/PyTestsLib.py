@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # @file: AthenaPython/python/tests/PyTestsLib.py
 # @purpose: a set of py-components to test various aspects of PyAthena
@@ -43,8 +43,8 @@ class MyAlg( PyAthena.Alg ):
 ##         _info( "content of StoreGate..." )
 ##         self.sg.dump()
         _info("hasattr('_cppHandle'): %s", hasattr(self,'_cppHandle'))
-        self._cppHandle.setFilterPassed(self.filterPassed)
-        _info("has passed filter: %s", bool(self._cppHandle.filterPassed()))
+        self._cppHandle.setFilterPassed(self.filterPassed, self.getContext())
+        _info("has passed filter: %s", bool(self._cppHandle.filterPassed(self.getContext())))
         return StatusCode.Success
 
     def finalize(self):

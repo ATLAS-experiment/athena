@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // Local includes
@@ -135,6 +135,14 @@ StatusCode G4AtlasAlg::initialize ATLAS_NOT_THREAD_SAFE ()
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 void G4AtlasAlg::initializeOnce()
 {
+  // Needed to ensure Geant4 knows it's in MT mode as we use a custom run manager
+  // Nominally the custom managers should do this, but was needed before for Celeritas integration
+  // We put it back in here for now in case
+  // TODO: Review if still needed!
+  G4Threading::SetMultithreadedApplication(m_useMT);
+  ATH_MSG_INFO("Multi-threading is " << (G4Threading::IsMultithreadedApplication() ? "enabled" : "disabled") 
+    << "WorkerThread" << G4Threading::IsWorkerThread());
+
   // Assign physics list
   if(m_physListSvc.retrieve().isFailure()) {
     throw std::runtime_error("Could not initialize ATLAS PhysicsListSvc!");
@@ -155,6 +163,9 @@ void G4AtlasAlg::initializeOnce()
 #ifdef G4MULTITHREADED
     auto* runMgr ATLAS_THREAD_SAFE = // protected by std::call_once above
       G4AtlasMTRunManager::GetG4AtlasMTRunManager();
+    ATH_MSG_INFO("Configuring G4AtlasMTRunManager with " << cardinality() << " threads");
+
+    runMgr->SetNumberOfThreads(cardinality());
     m_physListSvc->SetPhysicsList();
     runMgr->SetDetConstructionTool( m_detConstruction.get() );
     runMgr->SetPhysListSvc( m_physListSvc.typeAndName() );
@@ -315,7 +326,7 @@ void G4AtlasAlg::finalizeOnce()
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
-StatusCode G4AtlasAlg::execute()
+StatusCode G4AtlasAlg::execute(const EventContext& ctx)
 {
   static std::atomic<unsigned int> n_Event=0;
   ATH_MSG_DEBUG("++++++++++++  G4AtlasAlg execute  ++++++++++++");
@@ -337,7 +348,6 @@ StatusCode G4AtlasAlg::execute()
     }
   }
 
-  const EventContext& ctx = Gaudi::Hive::currentContext();
   // Set the RNG to use for this event. We need to reset it for MT jobs
   // because of the mismatch between Gaudi slot-local and G4 thread-local RNG.
   ATHRNG::RNGWrapper* rngWrapper = m_rndmGenSvc->getEngine(this, m_randomStreamName);
@@ -354,14 +364,14 @@ StatusCode G4AtlasAlg::execute()
   ATH_CHECK(m_userActionSvc->BeginOfAthenaEvent(*hitCollections));
   ATH_CHECK(m_fastSimTool->BeginOfAthenaEvent(*hitCollections));
 
-  SG::ReadHandle<McEventCollection> inputTruthCollection(m_inputTruthCollectionKey);
+  SG::ReadHandle<McEventCollection> inputTruthCollection(m_inputTruthCollectionKey, ctx);
   if (!inputTruthCollection.isValid()) {
     ATH_MSG_FATAL("Unable to read input GenEvent collection " << inputTruthCollection.name() << " in store " << inputTruthCollection.store());
     return StatusCode::FAILURE;
   }
   ATH_MSG_DEBUG("Found input GenEvent collection " << inputTruthCollection.name() << " in store " << inputTruthCollection.store());
   // create the output Truth collection
-  SG::WriteHandle<McEventCollection> outputTruthCollection(m_outputTruthCollectionKey);
+  SG::WriteHandle<McEventCollection> outputTruthCollection(m_outputTruthCollectionKey, ctx);
   std::unique_ptr<McEventCollection> shadowTruth{};
   if (m_useShadowEvent) {
     outputTruthCollection = std::make_unique<McEventCollection>();
@@ -431,7 +441,7 @@ StatusCode G4AtlasAlg::execute()
       ATH_MSG_WARNING("Simulation will now go on to the next event ");
       if (m_killAbortedEvents) {
         ATH_MSG_WARNING("setFilterPassed is now False");
-        setFilterPassed(false);
+        setFilterPassed(false, ctx);
       }
       if (m_flagAbortedEvents) {
         SG::ReadHandle<xAOD::EventInfo> eventInfo(m_eventInfoKey, ctx);

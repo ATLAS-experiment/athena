@@ -354,17 +354,17 @@ StatusCode LArCaliWaveBuilderXtalk::initializeCabling(const LArOnOffIdMapping* c
 }
 
 //=========================================================================================================
-StatusCode LArCaliWaveBuilderXtalk::execute()
+StatusCode LArCaliWaveBuilderXtalk::execute(const EventContext& ctx)
 //=========================================================================================================
 {
-  SG::ReadCondHandle<LArOnOffIdMapping> cablingHdl{m_cablingKey};
+  SG::ReadCondHandle<LArOnOffIdMapping> cablingHdl{m_cablingKey, ctx};
   const LArOnOffIdMapping* cabling{*cablingHdl};
   if(!cabling) {
      ATH_MSG_ERROR("Do not have mapping object " << m_cablingKey.key());
      return StatusCode::FAILURE;
   }
 
-  SG::ReadCondHandle<LArCalibLineMapping> clHdl{m_CLKey};
+  SG::ReadCondHandle<LArCalibLineMapping> clHdl{m_CLKey, ctx};
   const LArCalibLineMapping *clCont {*clHdl};
   if(!clCont) {
      ATH_MSG_ERROR("Do not have calibration mapping object " << m_CLKey.key());

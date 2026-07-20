@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "xAODTrigger/TrigCompositeContainer.h"
@@ -55,10 +55,12 @@ StatusCode CounterAlgorithm::newEvent(const CostData& data, size_t index, const 
 
   // Monitor data requests per algorithm
   if (data.algToRequestMap().count(index)) {
+    const std::string historyStr{"robs_history"};
+    const std::string sizeStr{"robs_size"};
     for (size_t requestIdx : data.algToRequestMap().at(index)) {
       const xAOD::TrigComposite* request = data.rosCollection().at(requestIdx);
-      const std::vector<unsigned> robs_history = request->getDetail<std::vector<unsigned>>("robs_history");
-      const std::vector<uint32_t> robs_size = request->getDetail<std::vector<uint32_t>>("robs_size");
+      const std::vector<unsigned> robs_history = request->getDetail<std::vector<unsigned>>(historyStr);
+      const std::vector<uint32_t> robs_size = request->getDetail<std::vector<uint32_t>>(sizeStr);
 
       bool networkRequestIncremented = false;
       for (size_t i = 0; i < robs_size.size(); ++i) {

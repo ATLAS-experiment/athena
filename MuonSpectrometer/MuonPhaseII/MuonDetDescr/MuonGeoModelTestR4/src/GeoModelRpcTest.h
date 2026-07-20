@@ -25,7 +25,7 @@ class GeoModelRpcTest : public AthHistogramAlgorithm{
 
         ~GeoModelRpcTest() = default;
 
-        StatusCode execute() override;        
+        StatusCode execute(const EventContext& ctx) override;        
         StatusCode initialize() override;        
         StatusCode finalize() override;
 
@@ -47,7 +47,7 @@ class GeoModelRpcTest : public AthHistogramAlgorithm{
       ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{this, "IdHelperSvc", 
                                                 "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
 
-      SG::ReadHandleKey<ActsTrk::GeometryContext> m_geoCtxKey{this, "AlignmentKey", "ActsAlignment", "cond handle key"};
+      ActsTrk::GeoContextReadKey_t m_geoCtxKey{this, "AlignmentKey", "ActsAlignment", "cond handle key"};
 
       /// Set of stations to be tested
       std::set<Identifier> m_testStations{};

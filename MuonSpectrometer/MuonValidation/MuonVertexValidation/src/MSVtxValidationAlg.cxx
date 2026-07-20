@@ -517,10 +517,9 @@ StatusCode MSVtxValidationAlg::fillMSVtxIsolation(const xAOD::Vertex* msVtx, con
 }
 
 
-StatusCode MSVtxValidationAlg::execute() {  
+StatusCode MSVtxValidationAlg::execute(const EventContext& ctx) {  
     ATH_MSG_DEBUG ("Executing " << name() << "...");
 
-    const EventContext& ctx = Gaudi::Hive::currentContext();
 
     // event variables
     const xAOD::EventInfo* eventInfo{nullptr};

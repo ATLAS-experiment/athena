@@ -1,5 +1,5 @@
 /*
-Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigSteeringEvent/TrigRoiDescriptorCollection.h"
@@ -42,7 +42,7 @@ StatusCode ViewCreatorJetSuperROITool::attachROILinks( TrigCompositeUtils::Decis
   TrigCompositeUtils::Decision* outputDecision = decisions[0];
 
   // Link name should probably be configurable
-  const TrigCompositeUtils::LinkInfo< xAOD::JetContainer> leadingjetlink = TrigCompositeUtils::findLink< xAOD::JetContainer >(outputDecision, "LeadingPreselJet", TrigDefs::lastFeatureOfType);
+  const TrigCompositeUtils::LinkInfo< xAOD::JetContainer> leadingjetlink = TrigCompositeUtils::findLink< xAOD::JetContainer >(ctx, outputDecision, "LeadingPreselJet", TrigDefs::lastFeatureOfType);
   if(!leadingjetlink.link.isValid()) {
     ATH_MSG_ERROR("Received invalid jet link from decision object! " << leadingjetlink.link);
     return StatusCode::FAILURE;

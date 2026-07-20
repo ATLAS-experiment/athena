@@ -9,6 +9,10 @@
 #include "MuonTrackEvent/HitSummary.h"
 #include "AthContainers/DataVector.h"
 
+#include "Acts/EventData/BoundTrackParameters.hpp"
+#include "Acts/Utilities/HashedString.hpp"
+
+
 #include <span>
 #include <optional>
 #include <variant>
@@ -27,6 +31,8 @@ namespace MuonR4 {
         using Author = xAOD::Muon::Author;
         /** @brief Recylce the Parameter definition enum from the Muon */
         using ParamDef = xAOD::Muon::ParamDef;
+        /** @brief Define the track particle type */
+        using TrkType = xAOD::Muon::TrackParticleType;
         /** @brief Extra parameters are either floats or ints  */
         using ParamData_t = std::variant<float, int>;
         /** @brief Returns the segments associated with the tag */
@@ -51,7 +57,21 @@ namespace MuonR4 {
          * @param par: The parameter to retrieve */
         template <typename T>
         std::optional<T> parameter(const ParamDef par) const;
-
+        /** @brief Store extrapolated track parameters of the ID track. 
+                   The parameters are stored under a unique name 
+                   which is evaluated at compile time via
+                   @ref Acts::HashedString.
+            @param parName: The hashed string under which the parameters
+                            shall be stored
+            @param pars: The extrapolated track parameters to store.
+            @return whether the insertion was successful */
+        bool setExtrapolatedParsID(const Acts::HashedString& parName,
+                                   Acts::BoundTrackParameters&& pars);
+        /** @brief Returns the cached extrapolated ID track parameters
+            @param parName: Hashed string under which the parameters have
+                            been cached via @ref setExtrapolatedParsID call.*/
+        std::optional<Acts::BoundTrackParameters> 
+            extrapolatedParsID(const Acts::HashedString& parName) const;
         /** @brief Sets the inner detector track particle
          *  @param idTrack: Pointer to the ID track particle */
         void setIdTrack(const xAOD::TrackParticle* idTrack);
@@ -62,7 +82,7 @@ namespace MuonR4 {
          *  @param msTrack Pointer to the MS track particle */
         void setMsTrack(const xAOD::TrackParticle* msTrack);
         /** @brief Sets the segments associated with this tag */
-        void setSegments(const std::span<const xAOD::MuonSegment*> segs);
+        void setSegments(const std::span<const xAOD::MuonSegment* const> segs);
         /** @brief Set a parameter to be decorated to the final muon
          *  @param par: Enum encoding which quantity is represented by the data
          *  @param data: The actual data held */
@@ -75,8 +95,12 @@ namespace MuonR4 {
         const HitSummary* summary() const;
     private:
         using ParamMap_t = std::unordered_map<ParamDef, ParamData_t>;
-        /** @brief Storeage of extra parameters */
+        /** @brief Storage of extra parameters */
         ParamMap_t m_params{};
+        /** @brief Storage of track parameters along the track */
+        using ExtTpMap_t = std::unordered_map<Acts::HashedString, Acts::BoundTrackParameters>;
+        /** @brief Storage of the track parameters along the ID track */
+        ExtTpMap_t m_idTrkPars{};
         /** @brief List of associated segments */
         std::vector<const xAOD::MuonSegment*> m_segments{};
         /** @brief Pointer to the muon track summary */

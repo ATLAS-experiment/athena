@@ -7,10 +7,10 @@ atlas_subdir( ISF_Geant4CommonTools )
 
 # Component(s) in the package:
 atlas_add_library( ISF_Geant4CommonTools
-                   OBJECT
-                   NO_PUBLIC_HEADERS
                    src/*.cxx
                    src/components/*.cxx
+                   OBJECT
+                   NO_PUBLIC_HEADERS
                    PRIVATE_LINK_LIBRARIES GaudiKernel AthenaBaseComps ISF_Event ISF_InterfacesLib G4AtlasToolsLib )
 set_target_properties( ISF_Geant4CommonTools PROPERTIES INTERPROCEDURAL_OPTIMIZATION ${ATLAS_GEANT4_USE_LTO} )
 

@@ -3,7 +3,7 @@
 */
 
 #include "src/detail/AtlasUncalibSourceLinkAccessor.h"
-
+#include "ActsCalibrators/xAODUncalibMeasCalibrator.h"
 #include <algorithm>
 
 namespace ActsTrk::detail {
@@ -65,9 +65,11 @@ inline auto SharedHitCounter::computeSharedHits(typename track_container_t::Trac
     if (removeSharedHits and !state.typeFlags().isSharedHit())
       continue;
     
-    auto sl = state.getUncalibratedSourceLink().template get<ATLASUncalibSourceLink>();
-    const xAOD::UncalibratedMeasurement& hit = getUncalibratedMeasurement(sl);
-    std::size_t hitIndex = indexFun(hit);
+    auto hit = detail::xAODUncalibMeasCalibrator::unpack(state.getUncalibratedSourceLink());
+    if (!hit) {
+      continue;
+    }
+    std::size_t hitIndex = indexFun(*hit);
     if (!(hitIndex < m_firstTrackStateOnTheHit.size())) {
       state.typeFlags().setIsSharedHit(false);
       // Save ATH_MSG_ERROR() for the caller, since for simplicity and efficiency this class doesn't have access to AthMsgStream.

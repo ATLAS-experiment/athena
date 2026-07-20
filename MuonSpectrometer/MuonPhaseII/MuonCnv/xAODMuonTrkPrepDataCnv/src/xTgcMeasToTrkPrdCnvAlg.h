@@ -10,12 +10,15 @@
 #include "StoreGate/ReadCondHandleKey.h"
 #include "StoreGate/ReadHandleKey.h"
 #include "StoreGate/WriteHandleKey.h"
+#include "StoreGate/WriteDecorHandleKey.h"
 
 #include "xAODMuonPrepData/TgcStripContainer.h"
 #include "MuonPrepRawData/TgcPrepDataContainer.h"
 #include "MuonReadoutGeometry/MuonDetectorManager.h"
 
+
 namespace MuonR4 {
+    /** @brief Conversion algorithm to turn xAOD TGC measurements into Trk::TgcPrepData */
     class xTgcMeasToTrkPrdCnvAlg : public AthReentrantAlgorithm {
         public:
             using AthReentrantAlgorithm::AthReentrantAlgorithm;
@@ -28,6 +31,8 @@ namespace MuonR4 {
             ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{this, "MuonIdHelperSvc", "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
 
             SG::ReadHandleKey<xAOD::TgcStripContainer> m_readKey{this, "ReadKey", "xTgcStrips"};
+
+            SG::WriteDecorHandleKey<xAOD::TgcStripContainer> m_linkKey{this, "PrdLinkKey", m_readKey, "tgcTrkPrdLink"};
 
             SG::WriteHandleKey<Muon::TgcPrepDataContainer>  m_writeKey{this, "WriteKey", "TGC_MeasurementsAllBCs", "Key for RPC PRD Container"};
 

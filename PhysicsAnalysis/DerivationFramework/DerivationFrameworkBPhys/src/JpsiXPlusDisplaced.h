@@ -8,7 +8,6 @@
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "GaudiKernel/ToolHandle.h"
 #include "GaudiKernel/ServiceHandle.h"
-#include "GaudiKernel/IPartPropSvc.h"
 #include "DerivationFrameworkInterfaces/IAugmentationTool.h"
 #include "JpsiUpsilonTools/PrimaryVertexRefitter.h"
 #include "xAODTracking/VertexContainer.h"
@@ -178,8 +177,6 @@ namespace DerivationFramework {
     unsigned int m_maxV0Candidates{};
     unsigned int m_maxDisVCandidates{};
     unsigned int m_maxMainVCandidates{};
-
-    ServiceHandle<IPartPropSvc> m_partPropSvc{this, "PartPropSvc", "PartPropSvc"};
 
     ToolHandle < Trk::TrkVKalVrtFitter >             m_iVertexFitter;
     ToolHandle < Trk::TrkV0VertexFitter >            m_iV0Fitter;

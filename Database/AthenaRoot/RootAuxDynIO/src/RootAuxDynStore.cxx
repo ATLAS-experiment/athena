@@ -4,6 +4,7 @@
 
 #include "AthContainers/exceptions.h"
 #include "AthContainersInterfaces/IAuxTypeVector.h"
+#include "GaudiKernel/ThreadLocalContext.h"
 
 #include "RootAuxDynStore.h"
 #include "RootAuxDynReader.h"
@@ -13,6 +14,7 @@ RootAuxDynStore::RootAuxDynStore(RootAuxDynReader& reader,
                                  long long entry, bool standalone, std::recursive_mutex* iomtx)
   : SG::AuxStoreInternal( standalone ),
     m_entry(entry),
+    m_ctx (Gaudi::Hive::currentContext()),
     m_iomutex(iomtx)
 {
    for( auto id : reader.auxIDs() ) {

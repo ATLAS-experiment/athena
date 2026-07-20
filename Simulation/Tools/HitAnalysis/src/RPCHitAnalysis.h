@@ -18,7 +18,7 @@ class RPCHitAnalysis : public AthHistogramAlgorithm {
    ~RPCHitAnalysis() = default;
 
    virtual StatusCode initialize() override final;
-   virtual StatusCode execute() override final;
+   virtual StatusCode execute(const EventContext& ctx) override final;
 
  private:
 

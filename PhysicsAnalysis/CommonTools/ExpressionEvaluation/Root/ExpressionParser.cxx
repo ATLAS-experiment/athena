@@ -47,14 +47,11 @@ namespace ExpressionParsing {
 
   ExpressionParser::~ExpressionParser()
   {
-    if (m_vm) {
-      delete m_vm;
-    }
   }
 
   void ExpressionParser::setup()
   {
-    m_vm = new VirtualMachine();
+
   }
 
   bool ExpressionParser::loadExpression(const std::string &expression)
@@ -81,7 +78,7 @@ namespace ExpressionParsing {
 
     Compiler compiler(m_code, m_proxyLoader, m_unitInterpreter);
     compiler(expr);
-
+    m_code.shrink_to_fit();
     return true;
   }
 
@@ -97,13 +94,15 @@ namespace ExpressionParsing {
 
   StackElement ExpressionParser::evaluate(const EventContext& ctx) const
   {
-     return m_vm->execute(ctx, m_code);
+     VirtualMachine vm{};
+     return vm.execute(ctx, m_code);
   }
 
   StackElement ExpressionParser::evaluate() const
   {
      const EventContext& ctx = Gaudi::Hive::currentContext();
-     return m_vm->execute(ctx, m_code);
+     VirtualMachine vm{};
+     return vm.execute(ctx, m_code);
   }
 
   bool ExpressionParser::evaluateAsBool() const

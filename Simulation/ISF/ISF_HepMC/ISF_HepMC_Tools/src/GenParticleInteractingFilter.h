@@ -37,14 +37,8 @@ namespace ISF {
 
     /** Framework methods */
     virtual StatusCode initialize() override final;
-#ifdef HEPMC3
     /** passes through to the private version */
     virtual bool pass(const HepMC::ConstGenParticlePtr& particle ) const override final;
-#else
-
-    /** passes through to the private version */
-    virtual bool pass(const HepMC::GenParticle& particle ) const override final;
-#endif
 
     /** Additional PDG codes to classify as interacting */
     Gaudi::Property<std::vector<int>> m_additionalInteractingParticleTypes{this, "AdditionalInteractingParticleTypes", {}};

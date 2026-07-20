@@ -10,7 +10,6 @@
 #include "AthenaKernel/ExtendedEventContext.h"
 #include "AthenaKernel/IProxyDict.h"
 #include "AtlasHepMC/GenEvent_fwd.h"
-#include "AtlasHepMC/GenParticle.h"
 #include "HitManagement/HitCollectionMap.h"
 
 #include <G4EventManager.hh>
@@ -20,11 +19,9 @@
 /** @class AtlasG4EventUserInfo
 
  * @brief This class is attached to G4Event objects as
- * UserInformation. It holds a pointer to the HepMC::GenEvent which
- * was used to create the G4Event.
- * NB As with VTrackInformation, the GenParticlePtr held by the
- * AtlasG4EventUserInfo object can change during simulation (i.e. each
- * time the track undergoes a non-destructive interaction).
+ * UserInformation. It holds event-wide state such as the HepMC::GenEvent
+ * used to create the G4Event and the hit collection map. Per-track truth
+ * particles are stored on TrackInformation.
  */
 class AtlasG4EventUserInfo: public G4VUserEventInformation {
 public:
@@ -44,37 +41,6 @@ public:
    * create the G4Event. Only called in ISF::InputConverter::ISF_to_G4Event(...).
    */
   void SetHepMCEvent(HepMC::GenEvent*);
-
-  /**
-   * @brief return a pointer to the HepMC::GenParticle used to create
-   * the current G4PrimaryParticle. (Used in G4VFastSimulationModel
-   * implementations and Sensitive Detectors which record
-   * CaloCalibrationHits.) TODO Rename
-   */
-  HepMC::ConstGenParticlePtr GetCurrentPrimaryGenParticle() const {return m_currentPrimaryGenParticle;}
-  /**
-   * @brief set m_currentPrimaryGenParticle, the pointer to the
-   * HepMC::GenParticle used to create the current
-   * G4PrimaryParticle. This pointer is updated each time there is a
-   * new G4PrimaryParticle. Called from
-   * (AthenaTrackingAction/TrackProcessorUserActionBase)::
-   * PreUserTrackingAction(...). TODO Rename
-   */
-  void SetCurrentPrimaryGenParticle(HepMC::ConstGenParticlePtr p) {m_currentPrimaryGenParticle = std::move(p);}
-
-  /**
-   * @brief return a pointer to the GenParticle corresponding to the
-   * current G4Track (if there is one). TODO Rename
-   */
-  HepMC::GenParticlePtr GetCurrentGenParticle() {return m_currentGenParticle;}
-  HepMC::ConstGenParticlePtr GetCurrentGenParticle() const {return m_currentGenParticle;}
-  /**
-   * @brief set m_currentGenParticle, the pointer to the GenParticle
-   * corresponding to the current G4Track. This will be updated each
-   * time an interaction of the G4Track is recorded to the
-   * HepMC::GenEvent. TODO Rename
-   */
-  void SetCurrentGenParticle(HepMC::GenParticlePtr p) {m_currentGenParticle = std::move(p);}
 
   /**
    * @brief return the value of G4Track::GetTrackID() for the last
@@ -143,8 +109,6 @@ private:
   const EventContext& m_eventContext;
   IProxyDict* m_eventStore{};
   HepMC::GenEvent *m_theEvent{};
-  HepMC::ConstGenParticlePtr m_currentPrimaryGenParticle{};
-  HepMC::GenParticlePtr m_currentGenParticle{};
 
   std::shared_ptr<HitCollectionMap> m_hitCollectionMap{std::make_shared<HitCollectionMap>()};
 

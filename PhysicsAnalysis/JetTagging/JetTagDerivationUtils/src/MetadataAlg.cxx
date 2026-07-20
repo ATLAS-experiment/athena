@@ -96,7 +96,7 @@ namespace ftag {
     return StatusCode::SUCCESS;
   }
 
-  StatusCode MetadataAlg::execute()
+  StatusCode MetadataAlg::execute(const EventContext& /*ctx*/)
   {
     return StatusCode::SUCCESS;
   }

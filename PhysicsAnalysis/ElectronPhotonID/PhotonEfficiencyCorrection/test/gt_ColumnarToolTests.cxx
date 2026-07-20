@@ -37,7 +37,7 @@ TEST_F (ColumnarMemoryTest, AsgPhotonEfficiencyCorrectionTool)
     return;
 
   auto tool = std::make_unique<AsgPhotonEfficiencyCorrectionTool> (makeUniqueName());
-  ASSERT_SUCCESS (tool->setProperty ("MapFilePath", "PhotonEfficiencyCorrection/2015_2025/rel22.2/2024_FinalRun2_Recommendation_v1/map1.txt"));
+  ASSERT_SUCCESS (tool->setProperty ("MapFilePath", "PhotonEfficiencyCorrection/2015_2025/rel22.2/2026_Run3Consolidated_Recommendation_v1/map0.txt"));
   ASSERT_SUCCESS (tool->setProperty ("ForceDataType", unsigned (PATCore::ParticleDataType::Full)));
   ASSERT_SUCCESS (tool->initialize ());
   ColumnarTestToolHandle toolHandle (*tool);
@@ -132,7 +132,7 @@ private:
 TEST_F (ColumnarPhysLiteTest, AsgPhotonEfficiencyCorrectionTool)
 {
   auto tool = std::make_unique<AsgPhotonEfficiencyCorrectionTool> (makeUniqueName());
-  ASSERT_SUCCESS (tool->setProperty ("MapFilePath", "PhotonEfficiencyCorrection/2015_2025/rel22.2/2024_FinalRun2_Recommendation_v1/map1.txt"));
+  ASSERT_SUCCESS (tool->setProperty ("MapFilePath", "PhotonEfficiencyCorrection/2015_2025/rel22.2/2026_Run3Consolidated_Recommendation_v1/map0.txt"));
   ASSERT_SUCCESS (tool->setProperty ("ForceDataType", unsigned (PATCore::ParticleDataType::Full)));
 
   // add a dummy column for the test

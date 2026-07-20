@@ -78,9 +78,10 @@ def read_metadata(filenames, file_type = None, mode = 'lite', promote = None, me
     :return: a dictionary of metadata for the given input file.
     """
 
-    # make the mode available in the _convert methods
-    global _gbl_mode
+    # make the mode and run available in the _convert methods
+    global _gbl_mode, _gbl_run
     _gbl_mode = mode
+    _gbl_run = None
 
     from RootUtils import PyROOTFixes  # noqa F401
 
@@ -122,12 +123,14 @@ def read_metadata(filenames, file_type = None, mode = 'lite', promote = None, me
     for filename in filenames:
         meta_dict[filename] = {}
         current_file_type = None
+        # reset the global Run for each file to not propagate and old value
+        _gbl_run = None
         # Determine the file_type of the input and store this information into meta_dict
         if not file_type:
             if os.path.isfile(filename):
                 
                 if ignoreNonExistingLocalFiles and not regex_URI_scheme.match(filename) and gSystem.AccessPathName(filename): # Attention, bizarre convention of return value!! 
-                    msg.warn('Ignoring not accessible file: {}'.format(filename))
+                    msg.warning('Ignoring not accessible file: {}'.format(filename))
                     continue
                     
                 with open(filename, 'rb') as binary_file:
@@ -168,7 +171,7 @@ def read_metadata(filenames, file_type = None, mode = 'lite', promote = None, me
         if current_file_type == 'POOL':
             
             if ignoreNonExistingLocalFiles and not regex_URI_scheme.match(filename) and gSystem.AccessPathName(filename): # Attention, bizarre convention of return value!! 
-                msg.warn('Ignoring not accessible file: {}'.format(filename))
+                msg.warning('Ignoring not accessible file: {}'.format(filename))
                 continue
                     
             import ROOT
@@ -624,6 +627,14 @@ def read_metadata(filenames, file_type = None, mode = 'lite', promote = None, me
                     if meta_key_filter:
                         meta_dict[filename] = {}
 
+                    # Find the RunNumber from EventStreamInfo, so only the relevant IOVs are read later
+                    for key, obj in persistent_instances.items():
+                        if key.startswith('EventStreamInfo'):
+                            data = _convert_value(obj, None)
+                            if data and 'runNumbers' in data and len(data['runNumbers']) == 1:
+                                _gbl_run = data['runNumbers'][0]
+                                msg.debug("Found RunNumber in EventStreamInfo: %d", _gbl_run)
+
                     # read the metadata
                     for name, content in persistent_instances.items():
                         key = name
@@ -715,7 +726,7 @@ def read_metadata(filenames, file_type = None, mode = 'lite', promote = None, me
                     for key, value in meta_dict[filename]['/TagInfo'].items():
                         if isinstance(value, list) and value:
                             if len(unique_values := set(value)) > 1:
-                                msg.warn(
+                                msg.warning(
                                     f"Found multiple values for {key}: {value}. "
                                     "Looking for possible duplicates."
                                 )
@@ -736,7 +747,7 @@ def read_metadata(filenames, file_type = None, mode = 'lite', promote = None, me
                                     for atag in parent_tags:
                                         # Do not remove the last tag!
                                         if len(unique_amitags)>1:
-                                            msg.warn(f"Removing parent AMI tag {atag}")
+                                            msg.warning(f"Removing parent AMI tag {atag}")
                                             unique_amitags.remove(atag)
                                     if len(unique_amitags) == 1:
                                         maybe_ok = True
@@ -759,7 +770,7 @@ def read_metadata(filenames, file_type = None, mode = 'lite', promote = None, me
                                 elif key in ["AtlasRelease", "IOVDbGlobalTag", "AODFixVersion"]:
                                     maybe_ok = True
                                 if maybe_ok:
-                                    msg.warn(
+                                    msg.warning(
                                         f"Multiple values for {key} may mean the same, or "
                                         "the input file was produced in multi-step job. "
                                         f"Ignoring all but the first entry: {key} = {value[0]}"
@@ -793,7 +804,7 @@ def read_metadata(filenames, file_type = None, mode = 'lite', promote = None, me
         elif current_file_type == 'BS':
             
             if ignoreNonExistingLocalFiles and not regex_URI_scheme.match(filename) and not os.path.isfile(filename): 
-                msg.warn('Ignoring not accessible file: {}'.format(filename))
+                msg.warning('Ignoring not accessible file: {}'.format(filename))
                 continue
             
             import eformat
@@ -916,7 +927,7 @@ def read_metadata(filenames, file_type = None, mode = 'lite', promote = None, me
                     else:
                         msg.debug(f"{meta_dict[filename]=}")
                 else:
-                    msg.warn(f"Event-less BS {filename=}, will not read metadata information from the first event")
+                    msg.warning(f"Event-less BS {filename=}, will not read metadata information from the first event")
 
                 # fix for ATEAM-122
                 if len(bs_metadata.get('eventTypes', '')) == 0:  # see: ATMETADATA-6
@@ -1075,8 +1086,12 @@ def _convert_value(value, aux = None):
             elif cl.__cpp_name__ == 'IOVPayloadContainer_p1':
                 if _gbl_mode == 'iov':
                     return _extract_iov_detailed(value)
-                else:
-                    return _extract_fields_iov( value, range(value.m_attrIndexes.size()) )
+                elif _gbl_run is not None:
+                    r =  _extract_iov_for_run(value, _gbl_run)
+                    if r is not None:
+                        return r
+                    # fall through to the default extraction if no IOV found for the run
+                return _extract_fields_iov( value, range(value.m_attrIndexes.size()) )
 
             elif cl.__cpp_name__ == 'xAOD::EventFormat_v1':
                 return _extract_fields_ef(value)
@@ -1166,7 +1181,6 @@ def _get_attribute_val(iov_container, attr_name, attr_idx):
 
 def _extract_fields_iov( iov_container, idx_range ):
      result = {}
-
      for idx in idx_range:
          attr_idx = iov_container.m_attrIndexes[idx]
          name_idx = attr_idx.nameIndex()
@@ -1193,10 +1207,39 @@ def _extract_fields_iov( iov_container, idx_range ):
      return result
 
 
+def _extract_iov_for_run(iov_container, run):
+    def extract_payload(iov_container, payload):
+        result = {}
+        for attrList in payload.m_attrLists:
+            r = _extract_fields_iov( iov_container, range(attrList.m_firstIndex, attrList.m_lastIndex) )
+            for name, content in r.items():
+                if name not in result:
+                    result[name] = [content]
+                elif content not in result[name]:
+                    result[name].append(content)
+        # turn single element lists into single values
+        for name, content in result.items():
+            if len(content) == 1:
+                result[name] = content[0]
+            elif len(content) == 0:
+                # to be consistent with the old code
+                result[name] = None
+        return result
+
+    for payload in iov_container.m_payloadVec:
+        if run >= payload.m_start>>32 and run < payload.m_stop>>32:
+            return extract_payload(iov_container, payload)
+    # IOV for the requested run not found
+    if len(iov_container.m_payloadVec) > 0:
+        # print a warning only if there was actually some payload in the container
+        msg.warning('No IOV found for run %d', run)
+    return None
+
+
 def _extract_iov_detailed(iov_container):
     def iovtostr(t):
         # break iov time into high and low halves (run number usually in the higher half)
-        return "({h}:{l})".format(h=t>>32, l=t&(2^32-1))
+        return "({h}:{l})".format(h=t>>32, l=t&(2**32-1))
 
     def extract_list_collection(iov_container, listCollection ):
         result = {}
@@ -1403,7 +1446,7 @@ def _extract_fields_triggermenu(interface, aux):
             L1Items   = [ _convert_value(item) for item in firstMenu.itemNames() ]
             HLTChains = [ _convert_value(chain) for chain in firstMenu.chainNames() ]
     except Exception as err: # noqa: F841
-        msg.warn('Problem reading xAOD::TriggerMenu:')
+        msg.warning('Problem reading xAOD::TriggerMenu:')
 
     result = {}
     result['L1Items'] = L1Items
@@ -1433,11 +1476,11 @@ def _extract_fields_triggermenujson(interface, aux):
                 return result
 
             else:
-                msg.warn('Got an xAOD::TriggerMenuJson called {0} but only expecting hltmenu or l1menu'.format(decoded['filetype']))
+                msg.warning('Got an xAOD::TriggerMenuJson called {0} but only expecting hltmenu or l1menu'.format(decoded['filetype']))
                 return {}
                 
     except Exception as err: # noqa: F841
-        msg.warn('Problem reading xAOD::TriggerMenuJson')
+        msg.warning('Problem reading xAOD::TriggerMenuJson')
 
     return result
 

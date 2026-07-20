@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef JETTAGINFOTPCNV_SoftElectronInfo_P1_H
@@ -26,7 +26,7 @@ namespace Analysis {
 
     /// All of this data will be written out.
     std::vector<float> m_vectorOfTrackProb;
-    float m_nTrackProb;
+    float m_nTrackProb = 0;
     /// Vector of SETrackInfo objects.
     std::vector<TPObjRef> m_trackinfo;
   };

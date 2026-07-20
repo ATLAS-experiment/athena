@@ -31,7 +31,7 @@ StatusCode AthJetReclusteringAlgo::finalize() {
   return StatusCode::SUCCESS;
 }
 
-StatusCode AthJetReclusteringAlgo::execute() {
+StatusCode AthJetReclusteringAlgo::execute(const EventContext& /*ctx*/) {
   ATH_MSG_DEBUG ("Executing " << name() << "...");
 
   int retCode = m_jetRecTool->execute();

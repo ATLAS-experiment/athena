@@ -22,7 +22,6 @@
 
 // MCTruth includes
 #include "MCTruth/TrackHelper.h"
-#include "MCTruth/AtlasG4EventUserInfo.h"
 #include "MCTruth/TrackInformation.h"
 #include "MCTruth/VTrackInformation.h"
 
@@ -164,7 +163,8 @@ namespace G4UA {
         //               " and is returned to ISF.");
 
         const ISF::ISFParticle*    parent = curISP;
-        HepMC::GenParticlePtr currentGenParticle = m_atlasG4EvtUserInfo->GetCurrentGenParticle();
+        auto* trackInfo = ::iGeant4::ISFG4Helper::getISFTrackInfo(*aTrack);
+        HepMC::GenParticlePtr currentGenParticle = trackInfo ? trackInfo->GetCurrentGenParticle() : nullptr;
         this->returnParticleToISF(aTrack, parent, currentGenParticle, nextGeoID); // TODO CHECK THIS LOGIC
       }
 
@@ -173,48 +173,50 @@ namespace G4UA {
       //
       const std::vector<const G4Track*> *secondaryVector = aStep->GetSecondaryInCurrentStep();
       // loop over new secondaries
-      for ( auto* aConstTrack_2nd : *secondaryVector ) {
-        // get a non-const G4Track for current secondary (nasty!)
-        G4Track *aTrack_2nd ATLAS_THREAD_SAFE = const_cast<G4Track*>( aConstTrack_2nd ); // imposed by Geant4 interface
+      if (secondaryVector && !secondaryVector->empty()) {
+        for ( auto* aConstTrack_2nd : *secondaryVector ) {
+          // get a non-const G4Track for current secondary (nasty!)
+          G4Track *aTrack_2nd ATLAS_THREAD_SAFE = const_cast<G4Track*>( aConstTrack_2nd ); // imposed by Geant4 interface
 
-        // check if new secondary position is behind boundary
-        const G4ThreeVector&             pos_2nd = aTrack_2nd->GetPosition();
-        AtlasDetDescr::AtlasRegion nextGeoID_2nd = m_geoIDSvcQuick->identifyGeoID( pos_2nd.x(),
-                                                                                   pos_2nd.y(),
-                                                                                   pos_2nd.z() );
-        if( nextGeoID_2nd!=curGeoID ) {
-          // secondary was generated in this step and has
-          // a different geoID than the currently tracked one
+          // check if new secondary position is behind boundary
+          const G4ThreeVector&             pos_2nd = aTrack_2nd->GetPosition();
+          AtlasDetDescr::AtlasRegion nextGeoID_2nd = m_geoIDSvcQuick->identifyGeoID( pos_2nd.x(),
+                                                                                    pos_2nd.y(),
+                                                                                    pos_2nd.z() );
+          if( nextGeoID_2nd!=curGeoID ) {
+            // secondary was generated in this step and has
+            // a different geoID than the currently tracked one
 
-          if ( aTrack_2nd->GetKineticEnergy() < m_config.passBackEkinThreshold ) {
-            // kinetic energy of secondary particle below threshold
-            // ATH_MSG_DEBUG(" -> Secondary particle generated in this G4Step does not pass Ekin cut." <<
-            //               " Not returned to ISF.");
-            if ( m_config.killBoundaryParticlesBelowThreshold ) {
-              // TODO: should we use fKillTrackAndSecondaries instead?
-              aTrack_2nd->SetTrackStatus( fStopAndKill );
+            if ( aTrack_2nd->GetKineticEnergy() < m_config.passBackEkinThreshold ) {
+              // kinetic energy of secondary particle below threshold
+              // ATH_MSG_DEBUG(" -> Secondary particle generated in this G4Step does not pass Ekin cut." <<
+              //               " Not returned to ISF.");
+              if ( m_config.killBoundaryParticlesBelowThreshold ) {
+                // TODO: should we use fKillTrackAndSecondaries instead?
+                aTrack_2nd->SetTrackStatus( fStopAndKill );
+              } else {
+                // TODO: link G4Track to ISF particle with the new GeoID
+              }
             } else {
-              // TODO: link G4Track to ISF particle with the new GeoID
+              // secondary particle is above kinetic energy threshold
+              // -> return it to ISF
+              // ATH_MSG_DEBUG(" -> Secondary particle generated in this G4Step is returned to ISF.");
+
+              // attach TrackInformation instance to the new secondary G4Track
+              ISF::ISFParticle *parent                  = curISP;
+              HepMC::GenParticlePtr generationZeroGenParticle = nullptr;
+              ::iGeant4::ISFG4Helper::attachTrackInfoToNewG4Track( *aTrack_2nd,
+                                                        *parent,
+                                                        VTrackInformation::Secondary,
+                                                        generationZeroGenParticle );
+
+              HepMC::GenParticlePtr currentGenParticle{};
+              returnParticleToISF(aTrack_2nd, parent, currentGenParticle, nextGeoID_2nd); // TODO CHECK THIS LOGIC
             }
-          } else {
-            // secondary particle is above kinetic energy threshold
-            // -> return it to ISF
-            // ATH_MSG_DEBUG(" -> Secondary particle generated in this G4Step is returned to ISF.");
-
-            // attach TrackInformation instance to the new secondary G4Track
-            ISF::ISFParticle *parent                  = curISP;
-            HepMC::GenParticlePtr generationZeroGenParticle = nullptr;
-            ::iGeant4::ISFG4Helper::attachTrackInfoToNewG4Track( *aTrack_2nd,
-                                                       *parent,
-                                                       VTrackInformation::Secondary,
-                                                       generationZeroGenParticle );
-
-            HepMC::GenParticlePtr currentGenParticle{};
-            returnParticleToISF(aTrack_2nd, parent, currentGenParticle, nextGeoID_2nd); // TODO CHECK THIS LOGIC
           }
-        }
 
-      } // <-- end loop over new secondaries
+        } // <-- end loop over new secondaries
+      } // <-- end if secondary vector has entries
 
       return;
     }
@@ -232,7 +234,7 @@ namespace G4UA {
       }
 
       HepMC::GenParticlePtr         primaryGenParticle = trackInfo->GetPrimaryGenParticle();
-      HepMC::GenParticlePtr  generationZeroGenParticle = trackInfo->GetCurrentGenParticle(); // TODO CHECK THIS LOGIC
+      HepMC::GenParticlePtr  generationZeroGenParticle = trackInfo->GetGenerationZeroGenParticle();
 
       ISF::TruthBinding* tBinding = new ISF::TruthBinding(currentGenParticle, primaryGenParticle, generationZeroGenParticle);
 

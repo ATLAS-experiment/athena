@@ -22,7 +22,7 @@ class JetFFSmearingAlg final : public EL::AnaAlgorithm {
  public:
   using EL::AnaAlgorithm::AnaAlgorithm;
   virtual StatusCode initialize() override;
-  virtual StatusCode execute() override;
+  virtual StatusCode execute(const EventContext& ctx) override;
 
   /// \brief the large-R jet FF smearing tool
  private:

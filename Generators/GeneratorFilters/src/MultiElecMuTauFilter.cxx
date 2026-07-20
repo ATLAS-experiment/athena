@@ -19,7 +19,7 @@ declareProperty("TwoSameSignLightLeptonsOneHadTau",  m_TwoSameSignLightLeptonsOn
 }
 
 
-StatusCode MultiElecMuTauFilter::filterEvent() {
+StatusCode MultiElecMuTauFilter::filterEvent(const EventContext& ctx) {
   int numLeptons = 0;
   int numLightLeptons = 0;
   int numHadTaus = 0;
@@ -68,13 +68,13 @@ StatusCode MultiElecMuTauFilter::filterEvent() {
           }
 
           // Ignore leptonic decays
-          if (std::abs(citr->pdg_id()) == 13 || std::abs(citr->pdg_id()) == 11) {
+          if ( MC::isMuon(citr) || MC::isElectron(citr) ) {
             tau = nullptr;
             break;
           }
 
           // Find tau decay nu
-          if (std::abs(citr->pdg_id()) == 16) {
+          if (std::abs(citr->pdg_id()) == MC::NU_TAU) {
             taunu = citr;
           }
         }
@@ -106,7 +106,7 @@ StatusCode MultiElecMuTauFilter::filterEvent() {
       passed_event = true;
     }
   }
-  setFilterPassed(passed_event);
+  setFilterPassed(passed_event, ctx);
 
   return StatusCode::SUCCESS;
 }

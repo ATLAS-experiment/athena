@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArAlignDbAlg.h"
@@ -48,13 +48,12 @@ StatusCode LArAlignDbAlg::initialize()
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
 
-StatusCode LArAlignDbAlg::execute() 
+StatusCode LArAlignDbAlg::execute(const EventContext& ctx)
 {
   ATH_MSG_DEBUG(" in execute() "  );
 
-  const EventContext& context = getContext();
-  int nrun = context.eventID().run_number();
-  int nevt = context.eventID().event_number();
+  int nrun = ctx.eventID().run_number();
+  int nevt = ctx.eventID().event_number();
 
   ATH_MSG_DEBUG( " Event: [" << nrun << "," << nevt << "]"  );
 

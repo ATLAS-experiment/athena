@@ -41,7 +41,7 @@ namespace MuonValR4{
     virtual ~MuonHoughTransformTester()  = default;
 
     virtual StatusCode initialize() override;
-    virtual StatusCode execute() override;
+    virtual StatusCode execute(const EventContext& ctx) override;
     virtual StatusCode finalize() override;
     
     using TruthHitCol = std::unordered_set<const xAOD::MuonSimHit*>;
@@ -110,7 +110,7 @@ namespace MuonValR4{
     /** @brief List of the space point containers in the event legacy + NSW containers */
     SG::ReadHandleKeyArray<MuonR4::SpacePointContainer> m_spKeys{this, "SpacePointKeys", {"MuonSpacePoints"}};
     /** @brief Tracking geometry context */
-    SG::ReadHandleKey<ActsTrk::GeometryContext> m_geoCtxKey{this, "AlignmentKey", "ActsAlignment", "cond handle key"};
+    ActsTrk::GeoContextReadKey_t m_geoCtxKey{this, "AlignmentKey", "ActsAlignment", "cond handle key"};
 
     ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{this, "MuonIdHelperSvc", "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
     
@@ -131,7 +131,7 @@ namespace MuonValR4{
 
     MuonVal::ScalarBranch<float>& m_out_bucketStart{m_tree.newScalar<float>("bucketStart", 1)};
     MuonVal::ScalarBranch<float>& m_out_bucketEnd{m_tree.newScalar<float>("bucketEnd", -1)};
-    MuonVal::ScalarBranch<float>& m_out_bucketHitGap{m_tree.newScalar<float>("bucketHiGap", 0.)};
+    MuonVal::ScalarBranch<float>& m_out_bucketEtaHitGap{m_tree.newScalar<float>("bucketEtaHitGap", 0.)};
 
     /// @brief Branch dumping all the space points from the difference buckets
     std::shared_ptr<SpacePointTesterModule> m_spTester{};
@@ -173,6 +173,8 @@ namespace MuonValR4{
 
     MuonVal::ScalarBranch<int>& m_out_gen_truthOrigin{m_tree.newScalar<int>("genTruthOrigin", -1)};
     MuonVal::ScalarBranch<int>& m_out_gen_truthType{m_tree.newScalar<int>("genTruthType", -1)};
+    MuonVal::ScalarBranch<float>& m_out_gen_truthBeta{m_tree.newScalar<float>("genTruthBeta", -1)};
+    MuonVal::ScalarBranch<int>& m_out_gen_truthPdgId{m_tree.newScalar<int>("genTruthPdgId", 0)};
     
     /** @brief Truth - hit count summary */
     MuonVal::ScalarBranch<unsigned short>& m_out_gen_nHits{m_tree.newScalar<unsigned short>("genNHits",0)};

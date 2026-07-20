@@ -3,6 +3,7 @@
 
 # ttbar mu=200 input
 input_rdo=$(python -c "from AthenaConfiguration.TestDefaults import defaultTestFiles; print(defaultTestFiles.RDO_RUN4[0])")
+conditions_tag=$(python -c "from AthenaConfiguration.TestDefaults import defaultConditionsTags; print(defaultConditionsTags.RUN4_MC)")
 n_events=2
 
 # Run reconstruction and produce AOD with persistified Acts EDM
@@ -13,6 +14,8 @@ Reco_tf.py \
   	     flags.Acts.EDM.PersistifySpacePoints=True; \
 	     flags.Acts.EDM.PersistifyTracks=True;" \
   --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude,ActsConfig.ActsCIFlags.actsLegacyWorkflowFlags" \
+  --conditionsTag ${conditions_tag} \
+  --postExec "cfg.printConfig(withDetails=True, summariseProps=True);" \
   --inputRDOFile ${input_rdo} \
   --outputAODFile AOD.pool.root \
   --maxEvents ${n_events} \

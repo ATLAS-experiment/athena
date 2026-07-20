@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////
@@ -38,7 +38,7 @@ class ATLAS_NOT_THREAD_SAFE DumpGeo: public AthAlgorithm
   ~DumpGeo()=default;
 
   StatusCode initialize();
-  StatusCode execute() {return StatusCode::SUCCESS;};
+  StatusCode execute(const EventContext&) {return StatusCode::SUCCESS;};
 
  private:
   // Properties

@@ -311,26 +311,16 @@ def ActsIDClusterizationCfg(flags,
             else:
                 kwargs.setdefault('StripClusterPreparationAlg.InputCollection', '')
                 kwargs.setdefault('StripClusterPreparationAlg.InputIDC', f'{flags.Tracking.ActiveConfig.extension}StripClustersCache')
+
     # Persistification
     if flags.Acts.EDM.PersistifyClusters and kwargs['runReconstruction']:
-        toAOD = []
-        if kwargs['processPixels']:
-            pixel_cluster_shortlist = ['-validationMeasurementLink']
-            pixel_cluster_variables = '.'.join(pixel_cluster_shortlist)
-            
-            pixelClusterCollection = kwargs['PixelClusterizationAlg.ClustersKey']
-            toAOD += [f'xAOD::PixelClusterContainer#{pixelClusterCollection}',
-                      f'xAOD::PixelClusterAuxContainer#{pixelClusterCollection}Aux.{pixel_cluster_variables}']
-            
-        if kwargs['processStrips']:
-            strip_cluster_shortlist = ['-validationMeasurementLink']
-            strip_cluster_variables = '.'.join(strip_cluster_shortlist)
-            
-            stripClusterCollection = kwargs['StripClusterizationAlg.ClustersKey']
-            toAOD += [f"xAOD::StripClusterContainer#{stripClusterCollection}",
-                      f"xAOD::StripClusterAuxContainer#{stripClusterCollection}Aux.{strip_cluster_variables}"]
-            
-        from OutputStreamAthenaPool.OutputStreamConfig import addToAOD    
-        acc.merge(addToAOD(flags, toAOD))
+        from ActsConfig.ActsPersistificationConfig import PersistifyClusters
+        pixelClusterCollections = None if not kwargs['processPixels'] else [kwargs['PixelClusterizationAlg.ClustersKey']]
+        stripClusterCollections = None if not kwargs['processStrips'] else [kwargs['StripClusterizationAlg.ClustersKey']]
+        acc.merge(PersistifyClusters(flags,
+                                     pixelClusterCollections=pixelClusterCollections,
+                                     stripClusterCollections=stripClusterCollections,
+                                     hgtdClusterCollections=None))
+
     acc.merge(ActsIDMainClusterizationCfg(flags, RoIs=roisName, **kwargs))
     return acc

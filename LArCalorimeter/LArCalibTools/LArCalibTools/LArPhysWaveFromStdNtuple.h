@@ -27,7 +27,7 @@ class LArPhysWaveFromStdNtuple : public AthAlgorithm
 
   //standard algorithm methods
   StatusCode initialize() {return StatusCode::SUCCESS;}
-  StatusCode execute() {return StatusCode::SUCCESS;}
+  StatusCode execute(const EventContext&) {return StatusCode::SUCCESS;}
   StatusCode finalize(){return StatusCode::SUCCESS;}
   StatusCode stop();
  

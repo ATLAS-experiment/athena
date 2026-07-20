@@ -10,12 +10,12 @@ class MockGenericMonitoringTool : public GenericMonitoringTool {
       : GenericMonitoringTool("MockGenericMonitoringTool", "MonTool", parent) {}
 
     std::function<uint32_t()> mock_lumiBlock;
-    uint32_t lumiBlock() override {
+    uint32_t lumiBlock() const override {
       return mock_lumiBlock ? mock_lumiBlock() : 0;
     }
 
     std::function<uint32_t()> mock_runNumber;
-    uint32_t runNumber() override {
+    uint32_t runNumber() const override {
       return mock_runNumber ? mock_runNumber() : 0;
     }
 };

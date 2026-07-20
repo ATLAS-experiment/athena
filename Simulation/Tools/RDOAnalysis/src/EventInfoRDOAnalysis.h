@@ -24,7 +24,7 @@ public:
   ~EventInfoRDOAnalysis() = default;
   
   virtual StatusCode initialize() override final;
-  virtual StatusCode execute() override final;
+  virtual StatusCode execute(const EventContext& ctx) override final;
 
 private:
   SG::ReadHandleKey<xAOD::EventInfo> m_eventInfoKey {this, "EventInfo", "EventInfo", "Input event info key name"};

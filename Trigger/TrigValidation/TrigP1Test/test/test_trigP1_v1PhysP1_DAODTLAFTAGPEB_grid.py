@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 # Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
-# art-description: Test of P1+Tier0 workflow, runs athenaHLT with PhysicsP1_pp_run3_v1 menu followed by offline reco and monitoring (incl. EDM)
+# art-description: Test of P1+Tier0 workflow, runs athenaEF with PhysicsP1_pp_run3_v1 menu followed by offline reco and monitoring (incl. EDM)
 # art-type: grid
-# art-include: main/Athena/x86_64-el9-gcc14-opt
+# art-include: main/Athena/x86_64-el9-gcc15-opt
 # art-include: 24.0/Athena
 # art-input: group.trig-hlt.data25_13p6TeV.00500306.physics_Main.daq.RAW
 # art-input-nfiles: 1
@@ -33,9 +33,8 @@ triggermenu = 'PhysicsP1_pp_run3_v1_HLTReprocessing_prescale'
 
 # HLT step (BS->BS)
 hlt = ExecStep.ExecStep()
-hlt.type = 'athenaHLT'
+hlt.type = 'athenaEF'
 hlt.job_options = 'TriggerJobOpts.runHLT'
-hlt.forks = 1
 hlt.threads = 8
 hlt.concurrent_events = 8
 hlt.input = 'data_Main'

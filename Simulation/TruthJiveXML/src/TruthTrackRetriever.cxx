@@ -4,8 +4,6 @@
 
 #include "TruthTrackRetriever.h"
 
-#include "HepPDT/ParticleData.hh"
-#include "HepPDT/ParticleDataTable.hh"
 #include "GaudiKernel/SystemOfUnits.h" 
 #include "EventPrimitives/EventPrimitives.h"
 
@@ -88,11 +86,9 @@ namespace JiveXML {
     for ( McEvtCollItr = McEvtColl->begin(); McEvtCollItr != McEvtColl->end(); ++McEvtCollItr){
 
       //Loop over particles in the event
-#ifdef HEPMC3
-      const auto &barcodes = (*McEvtCollItr)->attribute<HepMC::GenEventBarcodes> ("barcodes");
+      const auto &barcodes = (*McEvtCollItr)->attribute<HepMC::GenEventBarcodes> (HepMCStr::barcodes);
       std::map<int,int> id_to_barcode_map;
       if (barcodes) id_to_barcode_map = barcodes->id_to_barcode_map();
-#endif      
       for (const auto& particle:  *(*McEvtCollItr) ) {
         
         //Additional cuts for decaying particles
@@ -109,11 +105,7 @@ namespace JiveXML {
         phi.emplace_back( (thePhi<0) ? thePhi+=2*M_PI : thePhi );
         eta.emplace_back( particle->momentum().pseudoRapidity() );
         code.emplace_back( particle->pdg_id() );
-#ifdef HEPMC3
         id.emplace_back( id_to_barcode_map.at(particle->id() ));
-#else
-        id.emplace_back( HepMC::barcode(*particle) );
-#endif
 
         // Get the vertex information
         const auto& vertexprod =  particle->production_vertex();

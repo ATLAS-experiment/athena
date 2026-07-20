@@ -1,7 +1,7 @@
 // Dear emacs, this is -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TESTATHENACONSTRAINTFIT_H
@@ -21,9 +21,9 @@ public:
     TestAthenaConstraintFit( const std::string& name, ISvcLocator* svcLoc );
   
     /// Function initialising the algorithm
-    virtual StatusCode initialize();
+    virtual StatusCode initialize() override;
     /// Function executing the algorithm
-    virtual StatusCode execute();
+    virtual StatusCode execute(const EventContext& ctx) override;
   
 private:
     std::string m_electronContName;

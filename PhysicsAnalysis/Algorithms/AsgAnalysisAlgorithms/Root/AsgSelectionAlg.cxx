@@ -59,7 +59,7 @@ namespace CP
 
 
   StatusCode AsgSelectionAlg ::
-  execute ()
+  execute (const EventContext& ctx)
   {
     for (const auto& sys : m_systematicsList.systematicsVector())
     {
@@ -67,7 +67,7 @@ namespace CP
         ANA_CHECK (m_systematicsTool->applySystematicVariation (sys));
 
       const xAOD::IParticleContainer *particles = nullptr;
-      ANA_CHECK (m_particlesHandle.retrieve (particles, sys));
+      ANA_CHECK (m_particlesHandle.retrieve (particles, sys, ctx));
       for (const xAOD::IParticle *particle : *particles)
       {
         if (m_preselection.getBool (*particle, sys))

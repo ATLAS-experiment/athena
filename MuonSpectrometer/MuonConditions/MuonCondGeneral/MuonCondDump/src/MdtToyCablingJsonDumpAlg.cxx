@@ -24,7 +24,7 @@ StatusCode MdtToyCablingJsonDumpAlg::initialize() {
     }
     return StatusCode::SUCCESS;
 }
-StatusCode MdtToyCablingJsonDumpAlg::execute() {
+StatusCode MdtToyCablingJsonDumpAlg::execute(const EventContext& /*ctx*/) {
   
   
   

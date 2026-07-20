@@ -16,6 +16,7 @@
 #include "src/ITkAlignMonResidualsAlg.h"
 #include "src/ActsInspectTruthContentAlg.h"
 #include "src/ReadoutGeoDumpAlg.h"
+#include "src/ExtrapolationTestAlg.h"
 // Tools
 #include "src/PhysValTool.h"
 
@@ -33,5 +34,6 @@ DECLARE_COMPONENT( ActsTrk::SeedsToTrackParamsAlg )
 DECLARE_COMPONENT( ActsTrk::ITkAlignMonResidualsAlg )
 DECLARE_COMPONENT( ActsTrk::ActsInspectTruthContentAlg )
 DECLARE_COMPONENT( ActsTrk::ReadoutGeoDumpAlg )
+DECLARE_COMPONENT( ActsTrk::ExtrapolationTestAlg)
 // Tools
 DECLARE_COMPONENT( ActsTrk::PhysValTool )

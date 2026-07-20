@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file  CaloSwGap_v3.cxx
@@ -19,19 +19,20 @@
 #include "StoreGate/ReadHandle.h"
 #include <cmath>
 #include <iostream>
+#include <numbers>
 
 
 using xAOD::CaloCluster;
 using CaloClusterCorr::interpolate;
-using CLHEP::pi;
-using CLHEP::twopi;
+using std::numbers::pi;
 
 
 namespace {
 
 
-const double deta = 0.2;
-const double dphi = twopi / 64. ;
+inline constexpr double twopi = 2*pi;
+inline constexpr double deta = 0.2;
+inline constexpr double dphi = twopi / 64. ;
 
 
 } // anonymous namespace

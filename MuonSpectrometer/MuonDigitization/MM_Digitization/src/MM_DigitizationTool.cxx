@@ -742,7 +742,7 @@ StatusCode MM_DigitizationTool::doDigitization(const EventContext& ctx) {
 
         // Combine all strips (for this VMM) into a single VMM-level object
         //
-        MM_ElectronicsToolInput stripDigitOutputAllHits = combinedStripResponseAllHits(v_stripDigitOutput);
+        MM_ElectronicsToolInput stripDigitOutputAllHits = combinedStripResponseAllHits(ctx, v_stripDigitOutput);
         if (!m_idHelperSvc->isMM(stripDigitOutputAllHits.digitID())) {
             ATH_MSG_WARNING("Identifier from stripdigitOutputAllHits " 
                             << m_idHelperSvc->toString(stripDigitOutputAllHits.digitID())
@@ -815,10 +815,9 @@ StatusCode MM_DigitizationTool::doDigitization(const EventContext& ctx) {
     return StatusCode::SUCCESS;
 }
 
-MM_ElectronicsToolInput MM_DigitizationTool::combinedStripResponseAllHits(const std::vector<MM_ElectronicsToolInput>& v_stripDigitOutput) {
+MM_ElectronicsToolInput MM_DigitizationTool::combinedStripResponseAllHits(const EventContext& ctx,
+                                                                          const std::vector<MM_ElectronicsToolInput>& v_stripDigitOutput) {
     // set up pointer to conditions object
-    const EventContext& ctx = Gaudi::Hive::currentContext();
-    
     const NswCalibDbThresholdData* thresholdData {nullptr};
     if(m_useCondThresholds){
         SG::ReadCondHandle<NswCalibDbThresholdData> readThresholds{m_condThrshldsKey, ctx};

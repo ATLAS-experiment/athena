@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 //////////////////////////////
 //
@@ -48,7 +48,7 @@ StatusCode TRTStrawStatusRead::initialize()
     return StatusCode::SUCCESS;
 }
 
-StatusCode TRTStrawStatusRead::execute()
+StatusCode TRTStrawStatusRead::execute(const EventContext& /*ctx*/)
 {
 
     StatusCode sc = StatusCode::SUCCESS;
@@ -148,8 +148,7 @@ StatusCode TRTStrawStatusRead::writeToTextFile(const std::string &filename)
                 bec = m_trtid->barrel_ec(id);
                 lay = m_trtid->layer_or_wheel(id);
                 sec = m_trtid->phi_module(id);
-                slay = m_trtid->straw_layer(id);
-                straw = m_trtid->straw(id);
+                
 
                 stat = m_status->getStatus(id, Gaudi::Hive::currentContext());
                 if (stat != TRTCond::StrawStatus::Good)

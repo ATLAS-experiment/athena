@@ -1,10 +1,10 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #include "AthenaMonitoringKernel/MonitoredCollection.h"
 #include "xAODMeasurementBase/UncalibratedMeasurementContainer.h"
-#include "ActsGeometry/ATLASSourceLink.h"
 
+#include "ActsCalibrators/xAODUncalibMeasCalibrator.h"
 #include "TrackAnalysisAlg.h"
 
 template <> 
@@ -45,15 +45,14 @@ namespace ActsTrk {
            &hit_counts_out
            ](const typename ActsTrk::TrackStateBackend::ConstTrackStateProxy &state) -> void
           {
+
              if (state.hasUncalibratedSourceLink()) {
-                try {
-                   const xAOD::UncalibratedMeasurement *
-                      measurement = &(ActsTrk::getUncalibratedMeasurement(state.getUncalibratedSourceLink().get<ATLASUncalibSourceLink>()));
-                   assert( static_cast<unsigned int >(measurement->type() < xAOD::UncalibMeasType::nTypes));
-                   ++hit_counts_out[static_cast<unsigned int >(measurement->type())];
+                const xAOD::UncalibratedMeasurement * measurement = detail::xAODUncalibMeasCalibrator::unpack(state.getUncalibratedSourceLink());
+                if (measurement) {
+                    assert( static_cast<unsigned int >(measurement->type() < xAOD::UncalibMeasType::nTypes));
+                    ++hit_counts_out[static_cast<unsigned int >(measurement->type())];
                 }
-                catch (std::bad_any_cast &) {
-                }
+                
              }
           });
         return hit_counts_out;
@@ -64,9 +63,8 @@ namespace ActsTrk {
     ATH_MSG_DEBUG( "Filling Histograms for " << name() << " ... " );
 
     // Retrieve the tracks
-    SG::ReadHandle<ActsTrk::TrackContainer> trackHandle = SG::makeHandle(m_tracksKey, ctx);
-    ATH_CHECK(trackHandle.isValid());
-    const ActsTrk::TrackContainer *tracks = trackHandle.cptr();
+    const ActsTrk::TrackContainer *tracks{nullptr};
+    ATH_CHECK(SG::get(tracks, m_tracksKey, ctx));
     using ConstTrackProxy = ActsTrk::TrackContainer::ConstTrackProxy;
 
     // TODO this  copy will be eliminated once the TrackContainer has [] operator
@@ -101,12 +99,11 @@ namespace ActsTrk {
 			  if (not flags.isSharedHit()) return;
 			  ++nShared;
 			  // get measurement -> if barrel/endcap and layer number
-			  auto sl = state.getUncalibratedSourceLink().template get<ATLASUncalibSourceLink>();
-			  assert( sl != nullptr);
-			  const xAOD::UncalibratedMeasurement &cluster = getUncalibratedMeasurement(sl);
-			  xAOD::DetectorIDHashType idHash = cluster.identifierHash();
+			  auto cluster = detail::xAODUncalibMeasCalibrator::unpack(state.getUncalibratedSourceLink());
+			  assert( cluster != nullptr);
+			  xAOD::DetectorIDHashType idHash = cluster->identifierHash();
 
-			  xAOD::UncalibMeasType clusterType = cluster.type();
+			  xAOD::UncalibMeasType clusterType = cluster->type();
 			  if (clusterType == xAOD::UncalibMeasType::PixelClusterType) {
 			    const Identifier& id = m_pixelID->wafer_id(idHash);
 			    auto barrel_or_endcap = m_pixelID->barrel_ec(id);

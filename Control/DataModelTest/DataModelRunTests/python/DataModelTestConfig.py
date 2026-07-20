@@ -47,10 +47,13 @@ def DataModelTestFlags (infile = None, evtMax = 20, **kw):
     flags.Input.isMC = True
     flags.IOVDb.GlobalTag = ''
     flags.Input.MCCampaign = Campaign.Unknown
+    #Run3 for now
+    from AthenaConfiguration.TestDefaults import defaultGeometryTags
+    flags.GeoModel.AtlasVersion = defaultGeometryTags.RUN3
     flags.fillFromArgs()
 
     if flags.rntuple:
-        flags.PoolSvc.DefaultContainerType = 'ROOTRNTUPLE'
+        flags.Output.DefaultContainerType = 'ROOTRNTUPLE'
         def to_rntup (s):
             return s.replace ('.root', '.rntup.root')
         flags.Input.Files = [to_rntup(f) for f in flags.Input.Files]
@@ -105,7 +108,7 @@ def DataModelTestCfg (flags, testName,
         cfg.merge (LoadReadDictsCfg (flags))
 
     # Prevent races when we run tests in parallel in the same directory.
-    if 'ROOTRNTUPLE' in flags.PoolSvc.DefaultContainerType:
+    if 'ROOTRNTUPLE' in flags.Output.DefaultContainerType:
         testName = testName + '_rntup'
     fileCatalog = testName + '_catalog.xml'
     from AthenaPoolCnvSvc.PoolCommonConfig import PoolSvcCfg
@@ -207,7 +210,7 @@ def LoadReadDictsCfg (flags):
 
 
 def rnt (flags):
-    is_rntuple = 'ROOTRNTUPLE' in flags.PoolSvc.DefaultContainerType
+    is_rntuple = 'ROOTRNTUPLE' in flags.Output.DefaultContainerType
     if is_rntuple:
         return True, lambda k: ''
     return False, lambda k:k

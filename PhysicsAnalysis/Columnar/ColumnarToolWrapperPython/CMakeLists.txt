@@ -25,27 +25,27 @@ if (XAOD_STANDALONE)
     SOURCES test/gt_PythonToolHandle.cxx
     INCLUDE_DIRS ${GTEST_INCLUDE_DIRS}
     LINK_LIBRARIES ${GTEST_LIBRARIES} ColumnarToolWrapperPythonLib AsgTestingLib ColumnarExampleToolsLib
-    POST_EXEC_SCRIPT nopost.sh )
+    POST_EXEC_SCRIPT noerror.sh )
 
   #atlas_add_test( ColumnarToolWrapperPython_import
   #  SCRIPT ${Python_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/test/test_import.py
-  #  POST_EXEC_SCRIPT nopost.sh )
+  #  POST_EXEC_SCRIPT noerror.sh )
 
   #atlas_add_test( ColumnarToolWrapperPython_atlascp
   #  SCRIPT ${Python_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/test/test_atlascp.py
-  #  POST_EXEC_SCRIPT nopost.sh )
+  #  POST_EXEC_SCRIPT noerror.sh )
 
   #atlas_add_test( ColumnarToolWrapperPython_example_tools
   #  SCRIPT ${Python_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/test/test_example_tools.py
-  #  POST_EXEC_SCRIPT nopost.sh )
+  #  POST_EXEC_SCRIPT noerror.sh )
 
   #atlas_add_test( ColumnarToolWrapperPython_wrapper
   #  SCRIPT ${Python_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/test/test_wrapper.py
-  #  POST_EXEC_SCRIPT nopost.sh )
+  #  POST_EXEC_SCRIPT noerror.sh )
 
   #atlas_add_test( ColumnarToolWrapperPython_bindings
   #  SCRIPT ${Python_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/test/test_bindings.py
-  #  POST_EXEC_SCRIPT nopost.sh )
+  #  POST_EXEC_SCRIPT noerror.sh )
 endif ()
 
 # nanobind needs Development.Module. Development.Embed is additionally
@@ -121,7 +121,7 @@ target_include_directories(
   PRIVATE
   "${CMAKE_CURRENT_SOURCE_DIR}/ColumnarToolWrapperPython"
 )
-target_link_libraries(python_tool_handle PRIVATE ColumnarToolWrapperPythonLib ColumnarCoreLib Python::Python)
+target_link_libraries(python_tool_handle PRIVATE ColumnarToolWrapperPythonLib ColumnarCoreLib CxxUtils Python::Python)
 
 # ATLAS CMake needs to be told about the Python libraries at link time.
 # This is NOT required for normal CMake.

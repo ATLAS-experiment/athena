@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 #====================================================================
 # DAOD_JETM4.py
 #====================================================================
@@ -38,7 +38,7 @@ def JETM4KernelCfg(flags, name='JETM4Kernel', **kwargs):
     from DerivationFrameworkInDet.InDetToolsConfig import TrackParticleThinningCfg, MuonTrackParticleThinningCfg, EgammaTrackParticleThinningCfg, TauTrackParticleThinningCfg
 
     # https://twiki.cern.ch/twiki/bin/viewauth/AtlasProtected/DaodRecommendations
-    JETM4_thinning_expression = "( abs(InDetTrackParticles.d0) < 5*mm ) && ( abs(DFCommonInDetTrackZ0AtPV*sin(InDetTrackParticles.theta)) < 5*mm )"
+    JETM4_thinning_expression = "( abs(InDetTrackParticles.d0) < 5*mm ) && ( abs(InDetTrackParticles.DFCommonInDetTrackZ0AtPV*sin(InDetTrackParticles.theta)) < 5*mm )"
     JETM4TrackParticleThinningTool = acc.getPrimaryAndMerge(TrackParticleThinningCfg(
         flags,
         name                    = "JETM4TrackParticleThinningTool",
@@ -233,7 +233,7 @@ def JETM4Cfg(flags):
     # Output stream    
     JETM4ItemList = JETM4SlimmingHelper.GetItemList()
     acc.merge(OutputStreamCfg(flags, "DAOD_JETM4", ItemList=JETM4ItemList, AcceptAlgs=["JETM4Kernel"]))
-    acc.merge(SetupMetaDataForStreamCfg(flags, "DAOD_JETM4", AcceptAlgs=["JETM4Kernel"], createMetadata=[MetadataCategory.CutFlowMetaData]))
+    acc.merge(SetupMetaDataForStreamCfg(flags, "DAOD_JETM4", AcceptAlgs=["JETM4Kernel"], createMetadata=[MetadataCategory.CutFlowMetaData,MetadataCategory.TruthMetaData]))
 
     return acc
 

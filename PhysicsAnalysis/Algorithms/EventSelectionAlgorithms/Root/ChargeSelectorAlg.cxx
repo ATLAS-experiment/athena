@@ -34,11 +34,11 @@ namespace CP {
     return StatusCode::SUCCESS;
   }
 
-  StatusCode ChargeSelectorAlg::execute() {
+  StatusCode ChargeSelectorAlg::execute(const EventContext& ctx) {
     for (const auto &sys : m_systematicsList.systematicsVector()) {
       // retrieve the EventInfo
       const xAOD::EventInfo *evtInfo = nullptr;
-      ANA_CHECK(m_eventInfoHandle.retrieve(evtInfo, sys));
+      ANA_CHECK(m_eventInfoHandle.retrieve(evtInfo, sys, ctx));
 
       // default-decorate EventInfo
       m_decoration.setBool(*evtInfo, 0, sys);
@@ -50,27 +50,27 @@ namespace CP {
       // retrieve the electron container
       const xAOD::ElectronContainer *electrons = nullptr;
       if (m_electronsHandle)
-	ANA_CHECK(m_electronsHandle.retrieve(electrons, sys));
+	ANA_CHECK(m_electronsHandle.retrieve(electrons, sys, ctx));
       // retrieve the muon container
       const xAOD::MuonContainer *muons = nullptr;
       if (m_muonsHandle)
-	ANA_CHECK(m_muonsHandle.retrieve(muons, sys));
+	ANA_CHECK(m_muonsHandle.retrieve(muons, sys, ctx));
       // retrieve the tau-jet container
       const xAOD::TauJetContainer *taus = nullptr;
       if (m_tausHandle)
-	ANA_CHECK(m_tausHandle.retrieve(taus, sys));
+	ANA_CHECK(m_tausHandle.retrieve(taus, sys, ctx));
       // retrieve the truth electron container
       const xAOD::TruthParticleContainer *truthElectrons = nullptr;
       if (m_electronsTruthHandle)
-	ANA_CHECK(m_electronsTruthHandle.retrieve(truthElectrons, sys));
+	ANA_CHECK(m_electronsTruthHandle.retrieve(truthElectrons, sys, ctx));
       // retrieve the truth muon container
       const xAOD::TruthParticleContainer *truthMuons = nullptr;
       if (m_muonsTruthHandle)
-	ANA_CHECK(m_muonsTruthHandle.retrieve(truthMuons, sys));
+	ANA_CHECK(m_muonsTruthHandle.retrieve(truthMuons, sys, ctx));
       // retrieve the truth tau container
       const xAOD::TruthParticleContainer *truthTaus = nullptr;
       if (m_tausTruthHandle)
-	ANA_CHECK(m_tausTruthHandle.retrieve(truthTaus, sys));
+	ANA_CHECK(m_tausTruthHandle.retrieve(truthTaus, sys, ctx));
 
       // apply the requested selection and compute the local charge
       int total_charge = 0;

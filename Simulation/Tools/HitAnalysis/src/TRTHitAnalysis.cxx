@@ -93,7 +93,7 @@ StatusCode TRTHitAnalysis::initialize() {
 }		 
 
 
-StatusCode TRTHitAnalysis::execute() {
+StatusCode TRTHitAnalysis::execute(const EventContext& ctx) {
   ATH_MSG_DEBUG( "In TRTHitAnalysis::execute()" );
 
   m_TRT_x->clear();
@@ -108,7 +108,6 @@ StatusCode TRTHitAnalysis::execute() {
   m_TRT_kine_nonphotons->clear();
   m_TRT_barcode->clear();
   
-  const EventContext& ctx{Gaudi::Hive::currentContext()};
   const TRTUncompressedHitCollection* p_collection{nullptr};
   ATH_CHECK(SG::get(p_collection, m_readKey, ctx));
   for (TRTUncompressedHitConstIter i_hit = p_collection->begin(); i_hit != p_collection->end(); ++i_hit) {

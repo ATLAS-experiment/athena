@@ -24,9 +24,7 @@
 //---------------
 // C++ Headers --
 //---------------
-#include <iterator>
-#include <sstream>
-#include <set>
+
 
 #include "CaloEvent/CaloCell.h"
 #include "CaloSimEvent/CaloCalibrationHit.h"
@@ -40,12 +38,65 @@
 #include "TruthUtils/MagicNumbers.h"
 
 #include <CLHEP/Vector/LorentzVector.h>
-#include <cmath>
+
+#include <iterator>
+#include <sstream>
+#include <string_view>
+#include <utility>
 
 
 using CLHEP::HepLorentzVector;
 using CLHEP::MeV;
 using CLHEP::cm;
+
+namespace {
+
+constexpr std::array<std::pair<std::string_view, xAOD::CaloCluster::MomentType>, 19>
+  s_validMomentNames{{
+    {"ENG_CALIB_TOT", xAOD::CaloCluster::ENG_CALIB_TOT},
+    {"ENG_CALIB_OUT_L", xAOD::CaloCluster::ENG_CALIB_OUT_L},
+    {"ENG_CALIB_OUT_M", xAOD::CaloCluster::ENG_CALIB_OUT_M},
+    {"ENG_CALIB_OUT_T", xAOD::CaloCluster::ENG_CALIB_OUT_T},
+    {"ENG_CALIB_EMB0", xAOD::CaloCluster::ENG_CALIB_EMB0},
+    {"ENG_CALIB_EME0", xAOD::CaloCluster::ENG_CALIB_EME0},
+    {"ENG_CALIB_TILEG3", xAOD::CaloCluster::ENG_CALIB_TILEG3},
+    {"ENG_CALIB_DEAD_TOT", xAOD::CaloCluster::ENG_CALIB_DEAD_TOT},
+    {"ENG_CALIB_DEAD_EMB0", xAOD::CaloCluster::ENG_CALIB_DEAD_EMB0},
+    {"ENG_CALIB_DEAD_TILE0", xAOD::CaloCluster::ENG_CALIB_DEAD_TILE0},
+    {"ENG_CALIB_DEAD_TILEG3", xAOD::CaloCluster::ENG_CALIB_DEAD_TILEG3},
+    {"ENG_CALIB_DEAD_EME0", xAOD::CaloCluster::ENG_CALIB_DEAD_EME0},
+    {"ENG_CALIB_DEAD_HEC0", xAOD::CaloCluster::ENG_CALIB_DEAD_HEC0},
+    {"ENG_CALIB_DEAD_FCAL", xAOD::CaloCluster::ENG_CALIB_DEAD_FCAL},
+    {"ENG_CALIB_DEAD_LEAKAGE", xAOD::CaloCluster::ENG_CALIB_DEAD_LEAKAGE},
+    {"ENG_CALIB_DEAD_UNCLASS", xAOD::CaloCluster::ENG_CALIB_DEAD_UNCLASS},
+    {"ENG_CALIB_FRAC_EM", xAOD::CaloCluster::ENG_CALIB_FRAC_EM},
+    {"ENG_CALIB_FRAC_HAD", xAOD::CaloCluster::ENG_CALIB_FRAC_HAD},
+    {"ENG_CALIB_FRAC_REST", xAOD::CaloCluster::ENG_CALIB_FRAC_REST}
+  }};
+
+constexpr std::array<std::string_view, 19> s_aodMomentNames{{
+  "ENG_CALIB_TOT",
+  "ENG_CALIB_OUT_L",
+  "ENG_CALIB_OUT_M",
+  "ENG_CALIB_OUT_T",
+  "ENG_CALIB_EMB0",
+  "ENG_CALIB_EME0",
+  "ENG_CALIB_TILEG3",
+  "ENG_CALIB_DEAD_TOT",
+  "ENG_CALIB_DEAD_EMB0",
+  "ENG_CALIB_DEAD_TILE0",
+  "ENG_CALIB_DEAD_TILEG3",
+  "ENG_CALIB_DEAD_EME0",
+  "ENG_CALIB_DEAD_HEC0",
+  "ENG_CALIB_DEAD_FCAL",
+  "ENG_CALIB_DEAD_LEAKAGE",
+  "ENG_CALIB_DEAD_UNCLASS",
+  "ENG_CALIB_FRAC_EM",
+  "ENG_CALIB_FRAC_HAD",
+  "ENG_CALIB_FRAC_REST"
+}};
+
+} // namespace
 
 
 //###############################################################################
@@ -53,12 +104,58 @@ using CLHEP::cm;
 CaloCalibClusterMomentsMaker2::CaloCalibClusterMomentsMaker2(const std::string& type, 
                                                              const std::string& name,
                                                              const IInterface* parent)
-  : AthAlgTool(type, name, parent)
+  : AthAlgTool(type, name, parent), 
+    m_calo_id(nullptr),
+    m_caloDM_ID(nullptr),
+    m_caloDmDescrManager(nullptr),
+    m_useParticleID(true),
+    m_energyMin(200*MeV),
+    m_energyMinCalib(20*MeV),
+    m_apars_alpha(0.5),
+    m_apars_r0(0.2),
+    m_MatchDmType(kMatchDmLoose)
 {
   declareInterface<CaloClusterCollectionProcessor>(this);
+  // Name(s) of Moments to calculate
+  declareProperty("MomentsNames", m_momentsNames);
+  m_validNames.reserve(s_validMomentNames.size());
+  for (const auto& [thisName, moment] : s_validMomentNames) {
+    m_validNames.emplace_back(thisName, moment);
+  }
+
+  // Name(s) of Moments which can be stored on the AOD - all others go to ESD
+  m_momentsNamesAOD.reserve(s_aodMomentNames.size());
+  for (const std::string_view thisName : s_aodMomentNames) {
+    m_momentsNamesAOD.emplace_back(thisName);
+  }
+
+  declareProperty("AODMomentsNames", m_momentsNamesAOD);
+  declareProperty("CalibrationHitContainerNames", m_CalibrationHitContainerNames);
+  declareProperty("DMCalibrationHitContainerNames", m_DMCalibrationHitContainerNames);
+  m_n_phi_out = 127; // not more than 127 since we store indices (-127,...-1,0,...,126) and have 8 bits only
+  m_n_eta_out = 127;
+  m_out_phi_max = M_PI;
+  m_out_eta_max = 6;
+
+  m_rmaxOut[0] = 1.0;
+  m_rmaxOut[1] = 0.5; 
+  m_rmaxOut[2] = 0.3;
+
   for (int im = 0; im < 3; im++) {
     m_i_phi_eta[im].resize(m_n_eta_out);
   }
+  m_doDeadEnergySharing = false;
+  m_foundAllContainers = false;
+  m_doOutOfClusterL = false;
+  m_doOutOfClusterM = false;
+  m_doOutOfClusterT = false;
+  m_doDeadL = false;
+  m_doDeadM = false;
+  m_doDeadT = false;
+  m_doCalibFrac = false;
+
+  declareProperty("MatchDmType", m_MatchDmType);
+  declareProperty("UseParticleID", m_useParticleID);
 }
 
 
@@ -506,107 +603,16 @@ CaloCalibClusterMomentsMaker2::execute(const EventContext& ctx,
   }
 
   if (m_doDeadEnergySharing && pClusList) {
-
-    for (const CaloCalibrationHitContainer* dmcchc : v_dmcchc) {
-      for (const CaloCalibrationHit* hit : *dmcchc) {
-        Identifier myId = hit->cellID();
-        if (m_calo_id->is_lar_dm(myId) || m_calo_id->is_tile_dm(myId)) {
-          CaloDmDescrElement* myCDDE(nullptr);
-          myCDDE = m_caloDmDescrManager->get_element(myId);
-          if ( myCDDE ) {
-            int uniqueID(HepMC::UNDEFINED_ID);
-            if (useParticleID) {
-              uniqueID = HepMC::uniqueID(hit);
-            }
-
-            int jeO = (int)floor(m_n_eta_out * (myCDDE->eta() / m_out_eta_max));
-            if ( jeO >= -m_n_eta_out && jeO < m_n_eta_out ) {
-              int jpO = (int)floor(m_n_phi_out * (myCDDE->phi() / m_out_phi_max));
-              if ( jpO < -m_n_phi_out ) {
-                jpO += 2 * m_n_phi_out;
-              }
-              if ( jpO >= m_n_phi_out ) {
-                jpO -= 2 * m_n_phi_out;
-              }
-
-              /* ****************************************
-               share energy of DM hit among different clusters
-               ***************************************** */
-              int nDmArea = m_caloDmDescrManager->get_dm_area(myId);
-              const CaloDmRegion *dmRegion = m_caloDmDescrManager->get_dm_region(myId);
-              int hitClusVecIndex = 0;
-              std::vector<int> hitClusIndex(theClusColl->size());
-              std::vector<double> hitClusEffEnergy(theClusColl->size());
-              double hitClusNorm = 0.0;
-
-              // loop over clusters which match given DM hit
-              for (unsigned int i_cls = 0;
-                   i_cls < (*pClusList)[(jpO + m_n_phi_out) * (2 * m_n_eta_out + 1) + jeO + m_n_eta_out].size();
-                   i_cls++) {
-                int iClus = (*pClusList)[(jpO + m_n_phi_out) * (2 * m_n_eta_out + 1) + jeO + m_n_eta_out][i_cls];
-                xAOD::CaloCluster * theCluster = theClusColl->at(iClus);
-
-                MyClusInfo& clusInfo = clusInfoVec[iClus];
-                auto pos = clusInfo.engCalibParticle.find(uniqueID);
-                if (pos != clusInfo.engCalibParticle.end()) {
-                  double engClusTruthUniqueIDCalib = pos->second.engTot;
-
-                  if (engClusTruthUniqueIDCalib > m_energyMinCalib && theCluster->e() > m_energyMin) {
-                    double sum_smp_energy = 0.0;
-                    // loop over calo sampling numbers registered for given DM area
-                    for (unsigned int i_smp = 0; i_smp < dmRegion->m_CaloSampleNeighbours.size(); i_smp++) {
-                      CaloSampling::CaloSample nsmp =
-                          (CaloSampling::CaloSample) dmRegion->m_CaloSampleNeighbours[i_smp];
-                      if ( (dmRegion->m_CaloSampleEtaMin[i_smp] - 0.5) <= theCluster->eta() &&
-                           theCluster->eta() <= (dmRegion->m_CaloSampleEtaMax[i_smp] + 0.5) ) {
-                        sum_smp_energy += pos->second.engSmp[nsmp];
-                      }
-                    }
-                    if (sum_smp_energy > 0.0) {
-                      double phi_diff = myCDDE->phi() - theCluster->phi();
-                      if (phi_diff <= -M_PI) {
-                        phi_diff += 2. * M_PI;
-                      } else if (phi_diff > M_PI) {
-                        phi_diff -= 2. * M_PI;
-                      }
-                      double eta_diff = (myCDDE->eta() - theCluster->eta());
-                      float distance = sqrt(eta_diff * eta_diff + phi_diff * phi_diff);
-
-                      double effEner = pow(sum_smp_energy, m_apars_alpha) * exp(-distance / m_apars_r0);
-
-                      hitClusIndex[hitClusVecIndex] = iClus;
-                      hitClusEffEnergy[hitClusVecIndex++] = effEner;
-                      hitClusNorm += effEner;
-                    }
-                  } // good energetic cluster
-                } // we found a uniqueID
-              } // loop over clusters in the list
-
-              hitClusIndex.resize(hitClusVecIndex);
-              hitClusEffEnergy.resize(hitClusVecIndex);
-
-              // now we have to calculate weight for assignment hit energy to cluster
-              if (hitClusNorm > 0.0) {
-                const double inv_hitClusNorm = 1. / hitClusNorm;
-                for (unsigned int i_cls = 0; i_cls < hitClusIndex.size(); i_cls++) {
-                  int iClus = hitClusIndex[i_cls];
-                  double dm_weight = hitClusEffEnergy[i_cls] * inv_hitClusNorm;
-                  if (dm_weight > 1.0 || dm_weight < 0.0) {
-                    std::cout << "CaloCalibClusterMomentsMaker2::execute() ->Error! Strange weight "
-                              << dm_weight << std::endl;
-                    std::cout << hitClusEffEnergy[i_cls] << " " << hitClusNorm << std::endl;
-                  }
-                  clusInfoVec[iClus].engCalibDeadInArea[nDmArea] += hit->energyTotal() * dm_weight;
-                  clusInfoVec[iClus].engCalibDeadInArea[CaloDmDescrArea::DMA_ALL] += hit->energyTotal() * dm_weight;
-                }
-              } // hit clus norm
-
-            } // loop over united ieta*iphi
-          } // myCDDE
-        } // tile and lar
-      } // loop over DM calibration hits
-    } // loop over containers
-
+    accumulateDeadMaterialEnergy(
+        v_dmcchc,
+        *theClusColl,
+        clusInfoVec,
+        *pClusList,
+        useParticleID,
+        [&clusInfoVec](int iClus, int /*uniqueID*/, int nDmArea, double energy) {
+          clusInfoVec[iClus].engCalibDeadInArea[nDmArea] += energy;
+          clusInfoVec[iClus].engCalibDeadInArea[CaloDmDescrArea::DMA_ALL] += energy;
+        });
   } // doDeadEnergySharing
 
   // fraction of calibration energies caused by different particles

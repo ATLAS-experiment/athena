@@ -15,7 +15,6 @@
 
 //Athena includes
 #include "AtlasDetDescr/AtlasRegion.h"
-#include "MCTruth/AtlasG4EventUserInfo.h"
 #include "MCTruth/VTrackInformation.h"
 
 // Geant4 includes
@@ -23,9 +22,9 @@
 #include "G4DynamicParticle.hh"
 #include "G4TouchableHistory.hh"
 #include "G4Event.hh"
-#include "G4EventManager.hh"
 #include "G4Step.hh"
 #include "G4TransportationManager.hh"
+#include "G4VProcess.hh"
 
 //External includes
 #include "AtlasHepMC/GenVertex.h"
@@ -233,16 +232,9 @@ namespace G4UA{
 	if (currentGenParticle)  { // mc truth known
 	  while (currentGenParticle && vtx ) {
 	    int pdgID=currentGenParticle->pdg_id();
-#ifdef HEPMC3
 	    const HepMC::GenParticlePtr  genmom = vtx->particles_in().size()>0 ? vtx->particles_in().front() : nullptr;
 	    if ( genmom && pdgID!=genmom->pdg_id() ) m_gen++;
 	    else if (vtx->particles_out().size()>0 && currentGenParticle!=vtx->particles_out().front()) m_gen++;
-
-#else
-	    HepMC::GenParticlePtr genmom = vtx->particles_in_size()>0 ? *(vtx->particles_in_const_begin()) : nullptr;
-	    if ( genmom && pdgID!=genmom->pdg_id() ) m_gen++;
-	    else if (vtx->particles_out_size()>0 && currentGenParticle!=*(vtx->particles_out_const_begin())) m_gen++;
-#endif
 	    vtx = genmom ? genmom->production_vertex() : nullptr;
 	    currentGenParticle = genmom;
 	  }
@@ -312,9 +304,7 @@ namespace G4UA{
 	if (process->GetProcessSubType()==2 ) m_ionloss+=eloss;
 	if (process->GetProcessSubType()==3 ) m_radloss+=eloss;
 	
-	AtlasG4EventUserInfo* atlasG4EvtUserInfo = static_cast<AtlasG4EventUserInfo*> (G4EventManager::GetEventManager()->GetConstCurrentEvent()->GetUserInformation());
-	VTrackInformation * trackInfo = static_cast<VTrackInformation*>(track->GetUserInformation());
-	::iGeant4::Geant4TruthIncident truth( aStep, *trackInfo->GetBaseISFParticle(), geoID, atlasG4EvtUserInfo);
+	::iGeant4::Geant4TruthIncident truth( aStep, geoID);
 	unsigned int nSec = truth.numberOfChildren();
 	if (nSec>0 || !trackIsAlive ) {      // save interaction info
 	  //std::cout <<"interaction:"<< process->GetProcessSubType() <<":"<<nSec<< std::endl;

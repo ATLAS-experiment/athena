@@ -2724,6 +2724,7 @@ double MissingMassCalculator::dTheta3DLimit(const int &tau_type, const int &limi
 #endif
 
   double limit = 1.0;
+  // cppcheck-suppress identicalConditionAfterEarlyExit; in #ifdef above
   if (limit_code == 0)
     limit = 0.0;
   double par[3] = {0.0, 0.0, 0.0};

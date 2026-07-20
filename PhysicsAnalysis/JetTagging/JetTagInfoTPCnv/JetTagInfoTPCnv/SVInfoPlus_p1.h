@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef JETTAGINFOTPCNV_SVInfoBaseInfo_P1_H
@@ -28,12 +28,12 @@ namespace Analysis {
     // Points to a Trk::RecVertex
     TPObjRef m_recsvx;
 
-    long int       m_NGTinJet;
-    long int       m_NGTinSvx;
-    long int       m_N2Tpair;
-    float          m_masssvx;
-    float          m_efracsvx;
-    float          m_normdist;
+    long int       m_NGTinJet = 0;
+    long int       m_NGTinSvx = 0;
+    long int       m_N2Tpair = 0;
+    float          m_masssvx = 0;
+    float          m_efracsvx = 0;
+    float          m_normdist = 0;
 
     // Points to SVTrackInfo list - which is just some element pointers.
     ElementLinkIntVector_p1 m_trackinfo;

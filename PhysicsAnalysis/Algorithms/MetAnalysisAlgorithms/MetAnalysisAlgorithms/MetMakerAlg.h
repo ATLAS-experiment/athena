@@ -40,7 +40,7 @@ namespace CP
   public:
     using EL::AnaAlgorithm::AnaAlgorithm;
     StatusCode initialize () override;
-    StatusCode execute () override;
+    StatusCode execute (const EventContext& ctx) override;
 
 
 
@@ -158,9 +158,20 @@ namespace CP
     SysWriteHandle<xAOD::MissingETContainer,xAOD::MissingETAuxContainer> m_metHandle {
       this, "met", "MissingET_%SYS%", "the met collection we produce"};
 
-    /// \brief whether to switch order of taus and muons 
+    /// \brief whether to switch order of taus and muons
   private:
     Gaudi::Property<bool> m_switchTauMuonOrder {this, "switchTauMu", false, "whether to switch order of taus and muons"};
+
+    /// \brief whether to run NN-based MET inference (evaluateNNMET) after rebuildJetMET
+  private:
+    Gaudi::Property<bool> m_evaluateNNMET {this, "evaluateNNMET", false,
+      "run NN MET inference after rebuildJetMET; requires a maker tool that "
+      "overrides evaluateNNMET (e.g. met::METNet). Skips the need for MetBuilderAlg."};
+
+    /// \brief the name of the total MET term written by evaluateNNMET
+  private:
+    Gaudi::Property<std::string> m_finalKey {this, "finalKey", "Final",
+      "name of the total MET term written by evaluateNNMET"};
   };
 }
 

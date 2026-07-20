@@ -300,7 +300,7 @@ StatusCode TileRDOAnalysis::initialize() {
   return StatusCode::SUCCESS;
 }
 
-StatusCode TileRDOAnalysis::execute() {
+StatusCode TileRDOAnalysis::execute(const EventContext& ctx) {
   ATH_MSG_DEBUG( "In TileRDOAnalysis::execute()" );
 
   if(m_tree){
@@ -351,7 +351,7 @@ StatusCode TileRDOAnalysis::execute() {
   if (!m_presampling) {
 
       if (!m_inputRawChKey.empty()) {
-        SG::ReadHandle<TileRawChannelContainer> rawChannelContainer(m_inputRawChKey);
+        SG::ReadHandle<TileRawChannelContainer> rawChannelContainer(m_inputRawChKey, ctx);
         ATH_CHECK(rawChannelContainer.isValid());
         // loop over tile raw channels container
 
@@ -405,7 +405,7 @@ StatusCode TileRDOAnalysis::execute() {
       // Muon Receiver Raw Channels
 
       if (!m_inputMuRcvRawChKey.empty()) {
-        SG::ReadHandle<TileRawChannelContainer> muRawChannelContainer(m_inputMuRcvRawChKey);
+        SG::ReadHandle<TileRawChannelContainer> muRawChannelContainer(m_inputMuRcvRawChKey, ctx);
         ATH_CHECK(muRawChannelContainer.isValid());
         // loop over muon receiver raw channels container
         for (const TileRawChannelCollection* muRawChannelCollection : *muRawChannelContainer) {
@@ -443,7 +443,7 @@ StatusCode TileRDOAnalysis::execute() {
       // Tile Container - TileMuonReceiverContainer
 
       if (!m_inputMuRcvKey.empty()) {
-        SG::ReadHandle<TileMuonReceiverContainer> muRcvContainer(m_inputMuRcvKey);
+        SG::ReadHandle<TileMuonReceiverContainer> muRcvContainer(m_inputMuRcvKey, ctx);
         ATH_CHECK(muRcvContainer.isValid());
         // loop over muon receiver container
 
@@ -482,7 +482,7 @@ StatusCode TileRDOAnalysis::execute() {
       // Raw Tile L1 Trigger Towers
 
       if (!m_inputMBTS_TTL1Key.empty()) {
-        SG::ReadHandle<TileTTL1Container> ttl1MBTSContainer(m_inputMBTS_TTL1Key);
+        SG::ReadHandle<TileTTL1Container> ttl1MBTSContainer(m_inputMBTS_TTL1Key, ctx);
         ATH_CHECK(ttl1MBTSContainer.isValid());
         // loop over TTL1 MBTS container
 
@@ -503,7 +503,7 @@ StatusCode TileRDOAnalysis::execute() {
       }
 
       if (!m_inputTileTTL1Key.empty()) {
-        SG::ReadHandle<TileTTL1Container> ttl1Container(m_inputTileTTL1Key);
+        SG::ReadHandle<TileTTL1Container> ttl1Container(m_inputTileTTL1Key, ctx);
         ATH_CHECK(ttl1Container.isValid());
         // loop over TTL1 container
         for (const TileTTL1* tile_TTL1 : *ttl1Container) {
@@ -536,7 +536,7 @@ StatusCode TileRDOAnalysis::execute() {
 
 
       if (!m_inputL2Key.empty()) {
-        SG::ReadHandle<TileL2Container> l2Container(m_inputL2Key);
+        SG::ReadHandle<TileL2Container> l2Container(m_inputL2Key, ctx);
         ATH_CHECK(l2Container.isValid());
         // loop over L2 container
         for (const TileL2* tile_L2 : *l2Container) {
@@ -598,7 +598,7 @@ StatusCode TileRDOAnalysis::execute() {
   // TileDigitsContainer - TileDigitsFlt
 
   if (!m_inputDigitsFltKey.empty()) {
-    SG::ReadHandle<TileDigitsContainer> digitsContainer(m_inputDigitsFltKey);
+    SG::ReadHandle<TileDigitsContainer> digitsContainer(m_inputDigitsFltKey, ctx);
     ATH_CHECK(digitsContainer.isValid());
     // loop over tile digits container
     for (const TileDigitsCollection* digitsCollection : *digitsContainer) {
@@ -623,7 +623,7 @@ StatusCode TileRDOAnalysis::execute() {
   // TileDigitsContainer - MuRcvDigitsCnt
 
   if (!m_inputDigitsMuRcvKey.empty()) {
-    SG::ReadHandle<TileDigitsContainer> muRcvDigitsContainer(m_inputDigitsMuRcvKey);
+    SG::ReadHandle<TileDigitsContainer> muRcvDigitsContainer(m_inputDigitsMuRcvKey, ctx);
     ATH_CHECK(muRcvDigitsContainer.isValid());
     // loop over tile digits container
     for (const TileDigitsCollection* muRcvDigitsCollection : *muRcvDigitsContainer) {

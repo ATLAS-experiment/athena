@@ -144,9 +144,7 @@ StatusCode FixLArElecCalib::initialize() {
   return StatusCode::SUCCESS;
 }
 
-StatusCode FixLArElecCalib::execute() {
-
-  const EventContext& ctx = Gaudi::Hive::currentContext();  
+StatusCode FixLArElecCalib::execute(const EventContext& ctx) {
 
   SG::ReadCondHandle<LArOnOffIdMapping> cablingHdl{m_cablingKey, ctx};
   const LArOnOffIdMapping* cabling{*cablingHdl};
@@ -1762,7 +1760,7 @@ StatusCode FixLArElecCalib::fix13(const LArOnOffIdMapping *cabling) {
 	else continue;
 	HWIdentifier hwid = cabling->createSignalChannelID(chid);
 	if ( i == 0 ){
-        of << "Off ID\t\tSCID\t\tOnl ID\t\tFT\tslot\tB-E pos_neg\tSamp\teta\tphi\tFEB_ID\t\tSHWID\t" << std::endl;
+        of << "Off ID\t\tSCID\t\tOnl ID\t\tFT\tslot\tB-E pos_neg\tSamp\teta\tphi\tFEB_ID\t\tSHWID\t" << '\n';
 	}
 	of << chid.get_identifier32().get_compact() << "\t0x" <<
 		SCID.get_identifier32().get_compact() << "\t0x" <<
@@ -1824,7 +1822,7 @@ StatusCode FixLArElecCalib::fix13(const LArOnOffIdMapping *cabling) {
 	of << " " << m_online_idhelper->channel_name(hwid) << " " << m_sonline_idhelper->channel_name(shwid);
 	of << std::dec;
 	of << " " << onl_hash << " " << off_hash;
-	of << std::endl;
+	of << '\n';
 
 	if ( m_scell_idhelper->calo_cell_hash( SCID ).value() < 40000 )
 	OrderOffHash_OnlID[m_scell_idhelper->calo_cell_hash( SCID ).value()]  =  shwid.get_identifier32().get_compact();
@@ -1832,7 +1830,7 @@ StatusCode FixLArElecCalib::fix13(const LArOnOffIdMapping *cabling) {
 	OrderOnlHash_OffID[m_sonline_idhelper->channel_Hash( shwid ).value()]  =  SCID.get_identifier32().get_compact();
     }
     of << "Hash check.  Onl : " << min_onl_hash << " " << max_onl_hash;
-    of << ";   Off : " << min_off_hash << " " << max_off_hash << std::endl;;
+    of << ";   Off : " << min_off_hash << " " << max_off_hash << '\n';;
     of.close();
 
     channel_size = m_hec_idhelper->channel_hash_max();
@@ -1842,7 +1840,7 @@ StatusCode FixLArElecCalib::fix13(const LArOnOffIdMapping *cabling) {
     max_off_hash = 0;
     std::ofstream of1("AllChannels_HEC.txt");
 
-    of1 << "Off ID\t\tSCID\t\tOnl ID\t\tFT\tslot\tB-E pos_neg\tSamp\teta\tphi\tFEB_ID\t\tSHWID\t" << std::endl;
+    of1 << "Off ID\t\tSCID\t\tOnl ID\t\tFT\tslot\tB-E pos_neg\tSamp\teta\tphi\tFEB_ID\t\tSHWID\t" << '\n';
     for(size_t i = 0; i < channel_size ; i++) {
         Identifier chid = m_hec_idhelper->channel_id(i);
         if ( ! ( m_hec_idhelper->is_lar_hec( chid )  ) ) continue;
@@ -1898,7 +1896,7 @@ StatusCode FixLArElecCalib::fix13(const LArOnOffIdMapping *cabling) {
         of1 << " " << m_online_idhelper->channel_name(hwid) << " " << m_sonline_idhelper->channel_name(shwid);
         of1 << std::dec;
         of1 << " " << onl_hash << " " << off_hash;
-        of1 << std::endl;
+        of1 << '\n';
 
         OrderOffHash_OnlID[m_scell_idhelper->calo_cell_hash( SCID ).value()]  =  shwid.get_identifier32().get_compact();
         OrderOnlHash_OffID[m_sonline_idhelper->channel_Hash( shwid ).value()]  =  SCID.get_identifier32().get_compact();
@@ -1911,7 +1909,7 @@ StatusCode FixLArElecCalib::fix13(const LArOnOffIdMapping *cabling) {
     max_off_hash = 0;
     std::ofstream of3("AllChannels_FCAL.txt");
 
-    of3 << "Off ID\t\tSCID\t\tOnl ID\t\tFT\tslot\tB-E pos_neg\tSamp\teta\tphi\tFEB_ID\t\tSHWID\t" << std::endl;
+    of3 << "Off ID\t\tSCID\t\tOnl ID\t\tFT\tslot\tB-E pos_neg\tSamp\teta\tphi\tFEB_ID\t\tSHWID\t" << '\n';
     for(size_t i = 0; i < channel_size ; i++) {
         Identifier chid = m_fcal_idhelper->channel_id(i);
         if ( ! ( m_fcal_idhelper->is_lar_fcal( chid )  ) ) continue;
@@ -1952,14 +1950,14 @@ StatusCode FixLArElecCalib::fix13(const LArOnOffIdMapping *cabling) {
         of3 << " " << m_online_idhelper->channel_name(hwid) << " " << m_sonline_idhelper->channel_name(shwid);
         of3 << std::dec;
         of3 << " " << onl_hash << " " << off_hash;
-        of3 << std::endl;
+        of3 << '\n';
 
         OrderOffHash_OnlID[m_scell_idhelper->calo_cell_hash( SCID ).value()]  =  shwid.get_identifier32().get_compact();
         OrderOnlHash_OffID[m_sonline_idhelper->channel_Hash( shwid ).value()]  =  SCID.get_identifier32().get_compact();
     }
 
     of3 << "Hash check.  Onl : " << min_onl_hash << " " << max_onl_hash;
-    of3 << ";   Off : " << min_off_hash << " " << max_off_hash << std::endl;;
+    of3 << ";   Off : " << min_off_hash << " " << max_off_hash << '\n';;
     of3.close();
 
 
@@ -1989,10 +1987,10 @@ StatusCode FixLArElecCalib::fix13(const LArOnOffIdMapping *cabling) {
 
     ATH_CHECK( detStore()->record(std::move(al_onOff),"/LAR/IdentifierOfl/OnOffIdMap_SC") );
 
-    hashes << "idx \t Off2OnlId \t Onl2OffId" << std::endl;
+    hashes << "idx \t Off2OnlId \t Onl2OffId" << '\n';
     for(size_t ii=0;ii<40000;ii++)
       if ( (OrderOffHash_OnlID[ii] != 0) || ( OrderOnlHash_OffID[ii] != 0 ) )
-	hashes << std::dec << ii << std::hex << " \t " << OrderOffHash_OnlID[ii]  << " \t\t " << OrderOnlHash_OffID[ii]  << std::endl;
+	hashes << std::dec << ii << std::hex << " \t " << OrderOffHash_OnlID[ii]  << " \t\t " << OrderOnlHash_OffID[ii]  << '\n';
     hashes.close();
 
     return StatusCode::SUCCESS;

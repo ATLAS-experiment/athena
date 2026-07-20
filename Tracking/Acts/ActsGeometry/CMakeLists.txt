@@ -16,11 +16,10 @@ atlas_add_library( ActsGeometryLib
                    src/ActsDetectorElement.cxx
                    src/ActsLayerBuilder.cxx
                    src/ActsStrawLayerBuilder.cxx
-                   src/ActsHGTDLayerBuilder.cxx
-                   src/ActsTrackingGeometrySvc.cxx
-                   src/ItkBlueprintNodeBuilder.cxx    
+                   src/ActsHGTDLayerBuilder.cxx                   
+                   src/BeamPipeBlueprintNodeBuilder.cxx
+                   src/ItkBlueprintNodeBuilder.cxx
                    src/CaloBlueprintNodeBuilder.cxx
-                   src/TrackingGeoAlignVisitor.cxx
                    src/util/*.cxx
                    PUBLIC_HEADERS ActsGeometry
                    INCLUDE_DIRS ${Boost_INCLUDE_DIRS} ${ROOT_INCLUDE_DIRS} ${TBB_INCLUDE_DIRS}
@@ -51,21 +50,19 @@ atlas_add_library( ActsGeometryLib
                    TrkSurfaces
                    xAODMeasurementBase
                    PRIVATE_LINK_LIBRARIES
-                   PathResolver
                    TrkGeometry
                    BeamPipeGeoModelLib
                    )
 
 atlas_add_component( ActsGeometry
-                     src/ActsExtrapolationAlg.cxx
-                     src/ActsWriteTrackingGeometry.cxx
+                     src/WriteTrackingGeometry.cxx
                      src/ActsWriteTrackingGeometryTransforms.cxx
                      src/ExtrapolationTool.cxx
-                     src/ActsMaterialJsonWriterTool.cxx
-                     src/ActsTrackingGeometryTool.cxx
-                     src/ActsPropStepRootWriterSvc.cxx
+                     src/TrackingGeometryTool.cxx
                      src/ActsCaloTrackingVolumeBuilder.cxx
                      src/ITkMaterialDecoratorTool.cxx
+                     src/TrackingGeometrySvc.cxx
+                     src/TrackingGeoAlignVisitor.cxx
                      src/ActsVolumeIdToDetectorElementCollectionMappingAlg.cxx
                      src/components/*.cxx
                      INCLUDE_DIRS ${GEOMODEL_INCLUDE_DIRS} ${CLHEP_INCLUDE_DIRS} ${ROOT_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS}
@@ -87,13 +84,16 @@ atlas_add_component( ActsGeometry
                      TrkParameters
                      TrkSurfaces
                      Acts::PluginGeoModel
+                     PathResolver
+                     BeamPipeGeoModelLib
                     )
 
 # Install files from the package:
 atlas_install_joboptions( scripts/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
 atlas_install_scripts( test/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
 
-atlas_add_dictionary( ActsGeometryDict
-                      ActsGeometry/ActsGeometryDict.h
-                      ActsGeometry/selection.xml 
-                      LINK_LIBRARIES ActsGeometryLib)
+atlas_add_test( CombinedGen3TrackTest
+                PROPERTIES TIMEOUT 2000
+                PRIVATE_WORKING_DIRECTORY
+                SCRIPT ActsITkMuonCaloTest.py
+                POST_EXEC_SCRIPT noerror.sh)

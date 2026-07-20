@@ -1,15 +1,16 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-#include <iomanip>
-#include <iostream>
+
 
 #include "TrigConfHLTData/HLTPrescale.h"
 #include "TrigConfHLTData/HLTFrame.h"
 #include "TrigConfHLTData/HLTChain.h"
 #include "TrigConfHLTData/HLTChainList.h"
 
+#include <iomanip>
+#include <iostream>
 using namespace std;
 using namespace TrigConf;
 
@@ -32,16 +33,16 @@ TrigConf::HLTPrescale::setRerunPrescale(const std::string& targetName, float ps)
 }
 
 std::pair<bool, float>
-TrigConf::HLTPrescale::getRerunPrescale(const std::string& targetName) const {
-   std::unordered_map<std::string, float>::const_iterator i = m_rerun_prescale.find(targetName);
+TrigConf::HLTPrescale::getRerunPrescale(std::string_view targetName) const {
+   PrescaleMap_t::const_iterator i = m_rerun_prescale.find(targetName);
    bool found = (i!=m_rerun_prescale.end());
    float ps = found ? i->second : 0;
    return std::make_pair(found,ps);
 }
 
 std::pair<bool, float>
-TrigConf::HLTPrescale::getStreamPrescale(const std::string& streamName) const {
-   std::unordered_map<std::string, float>::const_iterator i = m_stream_prescale.find(streamName);
+TrigConf::HLTPrescale::getStreamPrescale(std::string_view streamName) const {
+   PrescaleMap_t::const_iterator i = m_stream_prescale.find(streamName);
    bool found = i!=m_stream_prescale.end();
    float ps = found ? i->second : 0;
    return std::make_pair(found,ps);

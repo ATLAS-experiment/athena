@@ -104,7 +104,7 @@ StatusCode LArRDOAnalysis::initialize() {
   return StatusCode::SUCCESS;
 }
 
-StatusCode LArRDOAnalysis::execute() {
+StatusCode LArRDOAnalysis::execute(const EventContext& ctx) {
   ATH_MSG_DEBUG( "In LArRDOAnalysis::execute()" );
   
   if(m_tree){
@@ -125,7 +125,6 @@ StatusCode LArRDOAnalysis::execute() {
     m_digiSamples->clear();
   }
 
-  const EventContext& ctx{Gaudi::Hive::currentContext()};
   const LArRawChannelContainer* p_larRawCont{nullptr};
   ATH_CHECK(SG::get(p_larRawCont, m_inputRawChannelKey, ctx));
 

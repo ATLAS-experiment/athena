@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "SCT_ConfigurationConditionsTool.h"
@@ -152,21 +152,10 @@ void SCT_ConfigurationConditionsTool::getDetectorElementStatus(const EventContex
   }
 }
 
-bool SCT_ConfigurationConditionsTool::isGood(const Identifier& elementId, InDetConditions::Hierarchy h) const {
-  const EventContext& ctx{Gaudi::Hive::currentContext()};
-
-  return isGood(elementId, ctx, h);
-}
-
 // Is a wafer with this IdentifierHash good?
 bool SCT_ConfigurationConditionsTool::isGood(const IdentifierHash& hashId, const EventContext& ctx) const {
   const Identifier elementId{m_pHelper->wafer_id(hashId)};
   return isGood(elementId, ctx, InDetConditions::SCT_SIDE);
-}
-
-bool SCT_ConfigurationConditionsTool::isGood(const IdentifierHash& hashId) const {
-  const EventContext& ctx{Gaudi::Hive::currentContext()};
-  return isGood(hashId, ctx);
 }
 
 // Is a chip with this Identifier good?
@@ -244,11 +233,6 @@ int SCT_ConfigurationConditionsTool::getChip(const Identifier& stripId, const Ev
   return SCT::getChip(*m_pHelper, *pElement, stripId);
 }
 
-int SCT_ConfigurationConditionsTool::getChip(const Identifier& stripId) const {
-  const EventContext& ctx{Gaudi::Hive::currentContext()};
-  return getChip(stripId, ctx);
-}
-
 const std::set<Identifier>* SCT_ConfigurationConditionsTool::badModules(const EventContext& ctx) const {
   const SCT_ConfigurationCondData* condData{getCondData(ctx)};
   if (condData==nullptr) {
@@ -257,11 +241,6 @@ const std::set<Identifier>* SCT_ConfigurationConditionsTool::badModules(const Ev
   }
 
   return condData->getBadModuleIds();
-}
-
-const std::set<Identifier>* SCT_ConfigurationConditionsTool::badModules() const {
-  const EventContext& ctx{Gaudi::Hive::currentContext()};
-  return badModules(ctx);
 }
 
 void SCT_ConfigurationConditionsTool::badStrips(const Identifier& moduleId, std::set<Identifier>& strips, const EventContext& ctx, bool ignoreBadModules, bool ignoreBadChips) const {
@@ -280,7 +259,7 @@ void SCT_ConfigurationConditionsTool::badStrips(const Identifier& moduleId, std:
   for (const Identifier& badStripId: *(condData->getBadStripIds())) {
     if (ignoreBadChips) {
       // Ignore strips in bad chips
-      const int chip{getChip(badStripId)};
+      const int chip{getChip(badStripId, ctx)};
       if (chip!=invalidChipNumber) {
         unsigned int chipStatusWord{condData->getBadChips(moduleId)};
         if ((chipStatusWord & (1 << chip)) != 0) continue;
@@ -290,11 +269,6 @@ void SCT_ConfigurationConditionsTool::badStrips(const Identifier& moduleId, std:
   }
 }
 
-void SCT_ConfigurationConditionsTool::badStrips(const Identifier& moduleId, std::set<Identifier>& strips, bool ignoreBadModules, bool ignoreBadChips) const {
-  const EventContext& ctx{Gaudi::Hive::currentContext()};
-  return badStrips(moduleId, strips, ctx, ignoreBadModules, ignoreBadChips);
-}
-       
 std::pair<bool, bool> SCT_ConfigurationConditionsTool::badLinks(const IdentifierHash& hash, const EventContext& ctx) const {
   // Bad links for a given module
   // Bad convetion is used. true is for good link and false is for bad link...
@@ -307,11 +281,6 @@ std::pair<bool, bool> SCT_ConfigurationConditionsTool::badLinks(const Identifier
   return condData->areBadLinks(hash);
 }
 
-std::pair<bool, bool> SCT_ConfigurationConditionsTool::badLinks(const IdentifierHash& hash) const {
-  const EventContext& ctx{Gaudi::Hive::currentContext()};
-  return badLinks(hash, ctx);
-}
-
 const std::map<IdentifierHash, std::pair<bool, bool>>* SCT_ConfigurationConditionsTool::badLinks(const EventContext& ctx) const {
   const SCT_ConfigurationCondData* condData{getCondData(ctx)};
   if (condData==nullptr) {
@@ -322,11 +291,6 @@ const std::map<IdentifierHash, std::pair<bool, bool>>* SCT_ConfigurationConditio
   return condData->getBadLinks();
 }
 
-const std::map<IdentifierHash, std::pair<bool, bool>>* SCT_ConfigurationConditionsTool::badLinks() const {
-  const EventContext& ctx{Gaudi::Hive::currentContext()};
-  return badLinks(ctx);
-}
-
 const std::map<Identifier, unsigned int>* SCT_ConfigurationConditionsTool::badChips(const EventContext& ctx) const {
   const SCT_ConfigurationCondData* condData{getCondData(ctx)};
   if (condData==nullptr) {
@@ -335,11 +299,6 @@ const std::map<Identifier, unsigned int>* SCT_ConfigurationConditionsTool::badCh
   }
 
   return condData->getBadChips();
-}
-
-const std::map<Identifier, unsigned int>* SCT_ConfigurationConditionsTool::badChips() const {
-  const EventContext& ctx{Gaudi::Hive::currentContext()};
-  return badChips(ctx);
 }
 
 unsigned int SCT_ConfigurationConditionsTool::badChips(const Identifier& moduleId, const EventContext& ctx) const {
@@ -353,11 +312,7 @@ unsigned int SCT_ConfigurationConditionsTool::badChips(const Identifier& moduleI
   return condData->getBadChips(moduleId);
 }
 
-unsigned int SCT_ConfigurationConditionsTool::badChips(const Identifier& moduleId) const {
-  const EventContext& ctx{Gaudi::Hive::currentContext()};
-  return badChips(moduleId, ctx);
-}
-void 
+void
 SCT_ConfigurationConditionsTool::badStrips(std::set<Identifier>& strips, const EventContext& ctx, bool ignoreBadModules, bool ignoreBadChips) const {
   const SCT_ConfigurationCondData* condData{getCondData(ctx)};
   if (condData==nullptr) {
@@ -378,7 +333,7 @@ SCT_ConfigurationConditionsTool::badStrips(std::set<Identifier>& strips, const E
     }
     // Ignore strips in bad chips
     if (ignoreBadChips) {
-      const int chip{getChip(badStripId)};
+      const int chip{getChip(badStripId, ctx)};
       if (chip!=invalidChipNumber) {
         unsigned int chipStatusWord{condData->getBadChips(moduleId)};
         if ((chipStatusWord & (1 << chip)) != 0) continue;
@@ -386,12 +341,6 @@ SCT_ConfigurationConditionsTool::badStrips(std::set<Identifier>& strips, const E
     }
     strips.insert(badStripId);
   }
-}
-
-void 
-SCT_ConfigurationConditionsTool::badStrips(std::set<Identifier>& strips, bool ignoreBadModules, bool ignoreBadChips) const {
-  const EventContext& ctx{Gaudi::Hive::currentContext()};
-  badStrips(strips, ctx, ignoreBadModules, ignoreBadChips);
 }
 
 const SCT_ConfigurationCondData*

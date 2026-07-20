@@ -24,7 +24,7 @@ public:
     MuonPatternCombinationDetailedTrackTruthMaker(const std::string &name, ISvcLocator *pSvcLocator);
 
     virtual StatusCode initialize();
-    virtual StatusCode execute();
+    virtual StatusCode execute(const EventContext& ctx);
 
 private:
     Gaudi::Property<std::vector<std::string>> m_PRD_TruthNames{

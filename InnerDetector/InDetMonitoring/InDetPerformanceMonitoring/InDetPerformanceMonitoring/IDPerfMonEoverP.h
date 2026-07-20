@@ -91,7 +91,7 @@ class IDPerfMonEoverP : public AthAlgorithm
   /** @brief Gaudi algorithm hooks*/
   StatusCode initialize();
   StatusCode finalize();
-  StatusCode execute();
+  StatusCode execute(const EventContext& ctx);
 
  private:
   /** @brief addToValidationNutple*/

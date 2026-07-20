@@ -2,6 +2,7 @@
 
 # art-description: RDOtoBStoAOD for Run 4
 # art-type: grid
+# art-include: main/Athena
 # art-athena-mt: 8
 
 : ${events:=100} #Allow overwriting from command line

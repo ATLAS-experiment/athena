@@ -544,20 +544,14 @@ def ActsBaseSeedAnalysisAlgCfg(flags,
     from AthenaMonitoring import AthMonitorCfgHelper
     helper = AthMonitorCfgHelper(flags, extension + 'SeedAnalysisAlgCfg')
 
-    from ActsConfig.ActsGeometryConfig import ActsTrackingGeometryToolCfg
-    geoTool = acc.getPrimaryAndMerge(ActsTrackingGeometryToolCfg(flags))
-    acc.addPublicTool(geoTool)
-    
-    # ATLAS Converter Tool
-    from ActsConfig.ActsEventCnvConfig import ActsToTrkConverterToolCfg
-    converterTool = acc.popToolsAndMerge(ActsToTrkConverterToolCfg(flags))
-    
     # Track Param Estimation Tool
     from ActsConfig.ActsTrackParamsEstimationConfig import ActsTrackParamsEstimationToolCfg
     trackEstimationTool = acc.popToolsAndMerge(ActsTrackParamsEstimationToolCfg(flags))
     
-    kwargs.setdefault('TrackingGeometryTool', acc.getPublicTool(geoTool.name)) # PublicToolHandle
-    kwargs.setdefault('ATLASConverterTool', converterTool)
+    from ActsConfig.ActsGeometryConfig import ActsTrackingGeometryToolCfg, ActsGeometryRealmConvTool
+    kwargs.setdefault("TrackingGeometryTool", acc.getPrimaryAndMerge(ActsTrackingGeometryToolCfg(flags)))
+    kwargs.setdefault("GeometryRealmConvTool", acc.getPrimaryAndMerge(ActsGeometryRealmConvTool(flags)))
+
     kwargs.setdefault('TrackParamsEstimationTool', trackEstimationTool)
 
     monitoringAlgorithm = helper.addAlgorithm(CompFactory.ActsTrk.SeedAnalysisAlg, name, **kwargs)
@@ -758,16 +752,9 @@ def ActsBaseSeedsToTrackParamsAlgCfg(flags,
             acc.popToolsAndMerge(ActsExtrapolationToolCfg(flags, MaxSteps=10000)),
         )
 
-    if 'TrackingGeometryTool' not in kwargs:
-        from ActsConfig.ActsGeometryConfig import ActsTrackingGeometryToolCfg
-        kwargs.setdefault(
-            'TrackingGeometryTool',
-            acc.getPrimaryAndMerge(ActsTrackingGeometryToolCfg(flags)),
-        )
-
-    if 'ATLASConverterTool' not in kwargs:
-        from ActsConfig.ActsEventCnvConfig import ActsToTrkConverterToolCfg
-        kwargs.setdefault('ATLASConverterTool', acc.popToolsAndMerge(ActsToTrkConverterToolCfg(flags)))
+    from ActsConfig.ActsGeometryConfig import ActsTrackingGeometryToolCfg, ActsGeometryRealmConvTool
+    kwargs.setdefault("TrackingGeometryTool", acc.getPrimaryAndMerge(ActsTrackingGeometryToolCfg(flags)))
+    kwargs.setdefault("GeometryRealmConvTool", acc.getPrimaryAndMerge(ActsGeometryRealmConvTool(flags)))
 
     if 'TrackParamsEstimationTool' not in kwargs:
         from ActsConfig.ActsTrackParamsEstimationConfig import ActsTrackParamsEstimationToolCfg

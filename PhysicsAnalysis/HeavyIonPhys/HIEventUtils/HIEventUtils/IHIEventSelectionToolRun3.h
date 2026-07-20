@@ -6,6 +6,7 @@
 #define HIEVENTUTILS_IHIEVENTSELECTIONTOOLRUN3_H__
 
 #include "AsgTools/IAsgTool.h"
+#include "xAODCaloEvent/CaloClusterContainer.h"
 #include "xAODEventInfo/EventInfo.h"
 #include "xAODForward/ZdcModuleContainer.h"
 #include "xAODHIEvent/HIEventShapeContainer.h"
@@ -49,14 +50,17 @@ enum class SelectionMask : unsigned int {
   NoPUFCalVsZDCAny =
       NoPUFCalVsZDCLoose | NoPUFCalVsZDCNominal | NoPUFCalVsZDCTight,
   NoPUOOSingleVertexNominal = bit(7),
-  NoPUZDCPresampler = bit(8), // at the moment there is only one cut (shall we have Nominal Loose & Tight)
+  NoPUZDCPresampler = bit(8),  // at the moment there is only one cut (shall we
+                               // have Nominal Loose & Tight)
+  TopoClusterInFCal = bit(9),
 
   // default cuts for PB
   PBDefault = NoEventError | NoPUFCalVsZDCLoose |
-              NoPUZDCPresampler,  // | NoPUFCalVsNTrackLoose , this needs to be added again when we have cut values
+              NoPUZDCPresampler,  // | NoPUFCalVsNTrackLoose , this needs to be
+                                  // added again when we have cut values
   // default cuts for OO
   OODefault = NoEventError | NoPUOOSingleVertexNominal | NoPUFCalVsNTrackLoose |
-              NoPUFCalVsZDCLoose
+              NoPUFCalVsZDCLoose | TopoClusterInFCal
 
 };
 
@@ -104,7 +108,7 @@ class IHIEventSelectionToolRun3 : public virtual asg::IAsgTool {
   virtual int nTrk(IonDataType dataType,
                    const xAOD::TrackParticleContainer* tracks,
                    const xAOD::VertexContainer* vertices,
-                   const double min_pt_cut=-1) const = 0;
+                   const double min_pt_cut = -1) const = 0;
 
   virtual bool noPUFCalVsNtracks(
       IonDataType dataType, float fcalEt, int ntrk,
@@ -127,6 +131,12 @@ class IHIEventSelectionToolRun3 : public virtual asg::IAsgTool {
   /// @brief true if this is NOT pileup event
   virtual bool noPUOOVertexCuts(
       IonDataType dataType, const xAOD::VertexContainer* vertices) const = 0;
+
+  /// @brief checks if topo cluster (TC) presence in FCal requirement passes
+  /// @return true if TC are present
+  /// see documentation: https://atlas-heavy-ions.docs.cern.ch/analyzes/2025/
+  virtual bool tcInFCalPresent(
+      IonDataType dataType, const xAOD::CaloClusterContainer* topos) const = 0;
 
   /// @brief translates info in EV into HI data type
   virtual IonDataType toDataType(const xAOD::EventInfo* eventInfo) const = 0;

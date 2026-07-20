@@ -1,11 +1,12 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "xAODTrigger/TrigCompositeContainer.h"
 #include "TrigDataAccessMonitoring/ROBDataMonitor.h"
 
 #include "CounterSequence.h"
+#include <cstdint>
 
 
 CounterSequence::CounterSequence(const std::string& name, const MonitorBase* parent) 
@@ -28,29 +29,33 @@ StatusCode CounterSequence::newEvent(const CostData& data, size_t index, const f
   ATH_CHECK( increment("Sequence_perEvent", weight) );
   float viewTime = 0;
   // Monitor algorithms associated with sequence name
+  const std::string slotStr{"slot"};
+  const std::string startStr{"start"};
+  const std::string stopStr{"stop"};
   for (const size_t algIndex :  data.sequencersMap().at(getName()).at(index)){
     
     const xAOD::TrigComposite* alg = data.costCollection().at(algIndex);
-    const uint32_t slot = alg->getDetail<uint32_t>("slot");
+    const uint32_t slot = alg->getDetail<uint32_t>(slotStr);
     if (slot != data.onlineSlot()) {
       continue; // When monitoring the master slot, this Monitor ignores algs running in different slots 
     }
 
     ATH_CHECK( increment("AlgCalls_perEvent", weight) );
 
-    const uint64_t start = alg->getDetail<uint64_t>("start"); // in mus
-    const uint64_t stop  = alg->getDetail<uint64_t>("stop"); // in mus
+    const uint64_t start = alg->getDetail<uint64_t>(startStr); // in mus
+    const uint64_t stop  = alg->getDetail<uint64_t>(stopStr); // in mus
     const float cpuTime = timeToMilliSec(start, stop);
     ATH_CHECK( fill("Time_perEvent", cpuTime, weight) );
     viewTime += cpuTime;
 
     // Monitor data requests
     if (!data.algToRequestMap().count(algIndex)) continue;
-
+    static const std::string historyStr{"robs_history"};
+    static const std::string sizeStr{"robs_size"};
     for (size_t requestIdx : data.algToRequestMap().at(algIndex)) {
       const xAOD::TrigComposite* request = data.rosCollection().at(requestIdx);
-      const std::vector<unsigned> robs_history = request->getDetail<std::vector<unsigned>>("robs_history");
-      const std::vector<uint32_t> robs_size = request->getDetail<std::vector<uint32_t>>("robs_size");
+      const std::vector<unsigned> robs_history = request->getDetail<std::vector<unsigned>>(historyStr);
+      const std::vector<uint32_t> robs_size = request->getDetail<std::vector<uint32_t>>(sizeStr);
 
       bool networkRequestIncremented = false;
       for (size_t i = 0; i < robs_size.size(); ++i) {
@@ -72,7 +77,7 @@ StatusCode CounterSequence::newEvent(const CostData& data, size_t index, const f
         ATH_CHECK( increment("NetworkRequest_perEvent", weight) );
       }
 
-      const float rosTime = timeToMilliSec(request->getDetail<uint64_t>("start"), request->getDetail<uint64_t>("stop"));
+      const float rosTime = timeToMilliSec(request->getDetail<uint64_t>(startStr), request->getDetail<uint64_t>(stopStr));
       ATH_CHECK( fill("RequestTime_perEvent", rosTime, weight) );
     }
   }

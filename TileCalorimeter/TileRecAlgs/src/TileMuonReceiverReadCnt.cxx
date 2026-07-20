@@ -72,11 +72,11 @@ StatusCode TileMuonReceiverReadCnt::initialize() {
   return StatusCode::SUCCESS;
 }
 
-StatusCode TileMuonReceiverReadCnt::execute() {
+StatusCode TileMuonReceiverReadCnt::execute(const EventContext& ctx) {
 
   // step1: read the tile muon receiver container from TES
   //
-  SG::ReadHandle<TileMuonReceiverContainer> muonReceiverContainer(m_muonReceiverContainerKey);
+  SG::ReadHandle<TileMuonReceiverContainer> muonReceiverContainer(m_muonReceiverContainerKey, ctx);
   if (muonReceiverContainer.isValid()) {
 
     ATH_MSG_INFO( "Reading the TileMuRcvContainer: " << m_muonReceiverContainerKey.key());
@@ -127,7 +127,7 @@ StatusCode TileMuonReceiverReadCnt::execute() {
     ATH_MSG_INFO("Container " << m_muonReceiverContainerKey.key() << " not found") ;
   }
 
-  SG::ReadHandle<TileRawChannelContainer> rawChannelContainer(m_rawChannelContainerKey);
+  SG::ReadHandle<TileRawChannelContainer> rawChannelContainer(m_rawChannelContainerKey, ctx);
   if (rawChannelContainer.isValid()) {
 
     const float TMDB_AMPLITUDE_FACTOR = 1.0;
@@ -154,7 +154,7 @@ StatusCode TileMuonReceiverReadCnt::execute() {
       ATH_MSG_INFO("Container " << m_rawChannelContainerKey.key() << " not found") ;
   }
   
-  SG::ReadHandle<TileDigitsContainer> digitsContainer(m_digitsContainerKey);
+  SG::ReadHandle<TileDigitsContainer> digitsContainer(m_digitsContainerKey, ctx);
   if (digitsContainer.isValid()) {
 
     ATH_MSG_INFO( "Reading the TileDigitsContainer: " << m_digitsContainerKey.key());

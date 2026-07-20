@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -33,15 +33,6 @@
 #define AUXDATA(OBJ, TYP, NAME) \
   static const SG::AuxElement::Accessor<TYP> acc_##NAME (#NAME);  acc_##NAME(*(OBJ))
 
-/////////////////////////////////////////////////////////////////////
-//
-//         Constructor with parameters:
-//
-/////////////////////////////////////////////////////////////////////
-TRT_PrepDataToxAOD::TRT_PrepDataToxAOD(const std::string &name, ISvcLocator *pSvcLocator) :
-  AthAlgorithm(name,pSvcLocator)
-{
-}
 
 /////////////////////////////////////////////////////////////////////
 //
@@ -80,11 +71,11 @@ StatusCode TRT_PrepDataToxAOD::initialize()
 //        Execute method: 
 //
 /////////////////////////////////////////////////////////////////////
-StatusCode TRT_PrepDataToxAOD::execute() 
+StatusCode TRT_PrepDataToxAOD::execute(const EventContext& ctx) 
 {
   //This is needed for the algorithm. If not there, it fails
 
-  SG::ReadHandle<InDet::TRT_DriftCircleContainer> h_trtPrds(m_driftcirclecontainer);
+  SG::ReadHandle<InDet::TRT_DriftCircleContainer> h_trtPrds(m_driftcirclecontainer, ctx);
   if (not h_trtPrds.isValid()) {
     ATH_MSG_ERROR("Cannot retrieve TRT PrepDataContainer " << m_driftcirclecontainer.key());
     return StatusCode::FAILURE;
@@ -95,7 +86,7 @@ StatusCode TRT_PrepDataToxAOD::execute()
 
   const PRD_MultiTruthCollection* prdmtColl = nullptr; // to be used in the loop later
   if (m_useTruthInfo && (!m_multiTruth.key().empty())  ) {
-    SG::ReadHandle<PRD_MultiTruthCollection> h_prdmtColl(m_multiTruth);
+    SG::ReadHandle<PRD_MultiTruthCollection> h_prdmtColl(m_multiTruth, ctx);
     if (not h_prdmtColl.isValid()){
       if (m_firstEventWarnings) {
 	ATH_MSG_WARNING("PRD MultiTruth collection not available (" << m_multiTruth.key() << "). Skipping this info although requested.");}
@@ -109,7 +100,7 @@ StatusCode TRT_PrepDataToxAOD::execute()
 
   const InDetSimDataCollection* sdoCollection = nullptr; // to be used in the loop later
   if (m_writeSDOs && m_useTruthInfo && (!m_SDOcontainer.key().empty()) ) {
-    SG::ReadHandle<InDetSimDataCollection> h_sdoCollection(m_SDOcontainer);
+    SG::ReadHandle<InDetSimDataCollection> h_sdoCollection(m_SDOcontainer, ctx);
     if (not h_sdoCollection.isValid()) {
       if (m_firstEventWarnings){
 	ATH_MSG_WARNING("SDO Collection not available (" << m_SDOcontainer.key() << "). Skipping this info although requested.");}
@@ -120,10 +111,10 @@ StatusCode TRT_PrepDataToxAOD::execute()
 
 
   // Create the xAOD container and its auxiliary store:
-  SG::WriteHandle<xAOD::TrackMeasurementValidationContainer> xaod(m_xAodContainer);
+  SG::WriteHandle<xAOD::TrackMeasurementValidationContainer> xaod(m_xAodContainer, ctx);
   ATH_CHECK(xaod.record(std::make_unique<xAOD::TrackMeasurementValidationContainer>(),std::make_unique<xAOD::TrackMeasurementValidationAuxContainer>() ) );
 
-  SG::WriteHandle<std::vector<unsigned int>> offsets(m_xAodOffset);
+  SG::WriteHandle<std::vector<unsigned int>> offsets(m_xAodOffset, ctx);
   ATH_CHECK(offsets.record(std::make_unique<std::vector<unsigned int>>(m_TRTHelper->straw_layer_hash_max() , 0)  ));
   
   InDet::TRT_DriftCircleContainer::const_iterator it = h_trtPrds->begin();
@@ -258,7 +249,7 @@ StatusCode TRT_PrepDataToxAOD::execute()
       
       char gas_type = kUnset;
       if (!m_TRTStrawSummaryTool.empty()) {
-        int stat = m_TRTStrawSummaryTool->getStatusHT(surfaceID, Gaudi::Hive::currentContext());
+        int stat = m_TRTStrawSummaryTool->getStatusHT(surfaceID, ctx);
         
         if       ( stat==1 || stat==4 ) { gas_type = kArgon; }
         else if  ( stat==5 )            { gas_type = kKrypton; }
@@ -276,7 +267,7 @@ StatusCode TRT_PrepDataToxAOD::execute()
 	  for (auto i = range.first; i != range.second; ++i) {
 	    uniqueIDs.push_back( HepMC::uniqueID(i->second) );
 	  }
-	  AUXDATA(xprd,  std::vector<int> , truth_barcode) = uniqueIDs; // TODO rename variable to be consistent?
+	  AUXDATA(xprd,  std::vector<int> , truth_barcode) = std::move(uniqueIDs); // TODO rename variable to be consistent?
 	}
       }
       if (m_writeSDOs) {

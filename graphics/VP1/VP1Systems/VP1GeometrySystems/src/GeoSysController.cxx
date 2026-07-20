@@ -101,6 +101,7 @@ GeoSysController::GeoSysController(IVP1System * sys)
     m_d->ui.groupBox_misc->setVisible(false);
     m_d->ui_muon.groupBox_muonchamberconfig->setVisible(false);
     m_d->ui_misc.groupBox_show_NSW_chambers->setVisible(false);
+    m_d->ui_misc.groupBox_show_HGTD->setVisible(false);
     m_d->ui_int.checkBox_AutomaticMuonChamberEndViews->setVisible(false);
     message("GeoModel not properly initialised.");
   } else {
@@ -108,7 +109,8 @@ GeoSysController::GeoSysController(IVP1System * sys)
 					      || VP1JobConfigInfo::hasSCTGeometry()
 					      || VP1JobConfigInfo::hasTRTGeometry()
 					      || VP1JobConfigInfo::hasITkGeometry()
-					      || VP1JobConfigInfo::hasInDetServiceMaterialGeometry());
+					      || VP1JobConfigInfo::hasInDetServiceMaterialGeometry()
+                || VP1JobConfigInfo::hasHGTDGeometry());
     m_d->ui_misc.groupBox_pixelactivemodules->setVisible(VP1JobConfigInfo::hasPixelGeometry() || VP1JobConfigInfo::hasITkGeometry() );
     m_d->ui_misc.groupBox_sctactivemodules->setVisible(VP1JobConfigInfo::hasSCTGeometry() || VP1JobConfigInfo::hasITkGeometry() );
     m_d->ui.groupBox_calorimeters->setVisible(VP1JobConfigInfo::hasLArGeometry()
@@ -118,6 +120,7 @@ GeoSysController::GeoSysController(IVP1System * sys)
     m_d->ui_int.checkBox_print_muonstationinfo->setVisible(VP1JobConfigInfo::hasMuonGeometry());
     m_d->ui_muon.groupBox_muonchamberconfig->setVisible(VP1JobConfigInfo::hasMuonGeometry());
     m_d->ui_misc.groupBox_show_NSW_chambers->setVisible(VP1JobConfigInfo::hasMuonNSWGeometry());
+    m_d->ui_misc.groupBox_show_HGTD->setVisible(VP1JobConfigInfo::hasHGTDGeometry());
     m_d->ui_int.checkBox_AutomaticMuonChamberEndViews->setVisible(VP1JobConfigInfo::hasMuonGeometry());
   }
   #endif
@@ -183,6 +186,9 @@ GeoSysController::GeoSysController(IVP1System * sys)
   connect(m_d->ui_misc.toolButton_nswchambers_adapt,SIGNAL(clicked(bool)),this,SLOT(emit_autoAdaptMuonNSW()));
   connect(m_d->ui_misc.toolButton_nswchambers_reset,SIGNAL(clicked(bool)),this,SLOT(emit_autoAdaptMuonNSW()));
 
+  connect(m_d->ui_misc.toolButton_hgtd_adapt,SIGNAL(clicked(bool)),this,SLOT(emit_autoAdaptHGTD()));
+  connect(m_d->ui_misc.toolButton_hgtd_reset,SIGNAL(clicked(bool)),this,SLOT(emit_autoAdaptHGTD()));
+
   connect(m_d->ui_misc.toolButton_pixelmod_reset,SIGNAL(clicked(bool)),this,SLOT(emit_resetSubSystems()));
   connect(m_d->ui_misc.toolButton_sctmod_reset,SIGNAL(clicked(bool)),this,SLOT(emit_resetSubSystems()));
   connect(m_d->ui_muon.pushButton_muonadapt_resetToAllChambers,SIGNAL(clicked()),this,SLOT(emit_resetSubSystems()));
@@ -197,6 +203,7 @@ GeoSysController::GeoSysController(IVP1System * sys)
   // Phase-II
   m_d->subSysCheckBoxMap[VP1GeoFlags::ITkPixel] = m_d->ui.checkBox_ITkPixel;
   m_d->subSysCheckBoxMap[VP1GeoFlags::ITkStrip] = m_d->ui.checkBox_ITkStrip;
+  m_d->subSysCheckBoxMap[VP1GeoFlags::HGTD] = m_d->ui.checkBox_HGTD;
 
   // CALO
   m_d->subSysCheckBoxMap[VP1GeoFlags::LAr] = m_d->ui.checkBox_LAr;
@@ -584,6 +591,32 @@ void GeoSysController::emit_autoAdaptMuonNSW()
 }
 
 
+//____________________________________________________________________
+void GeoSysController::emit_autoAdaptHGTD()
+{
+  bool reset = false;
+  if (sender()==m_d->ui_misc.toolButton_hgtd_reset) {
+    reset = true;
+  }
+  bool flex = m_d->ui_misc.checkBox_HGTD_Flex->isChecked();
+  bool hybrid = m_d->ui_misc.checkBox_HGTD_Hybrid->isChecked();
+  bool glue = m_d->ui_misc.checkBox_HGTD_Glue->isChecked();
+  bool sensors = m_d->ui_misc.checkBox_HGTD_Sensors->isChecked();
+  bool inactive = m_d->ui_misc.checkBox_HGTD_Inactive->isChecked();
+  bool asic = m_d->ui_misc.checkBox_HGTD_ASIC->isChecked();
+  bool supportPlate = m_d->ui_misc.checkBox_HGTD_SupportPlate->isChecked();
+  bool frontCover = m_d->ui_misc.checkBox_HGTD_FrontCover->isChecked();
+  bool backCover = m_d->ui_misc.checkBox_HGTD_BackCover->isChecked();
+  bool moderatorIn = m_d->ui_misc.checkBox_HGTD_ModeratorIn->isChecked();
+  bool moderatorOut = m_d->ui_misc.checkBox_HGTD_ModeratorOut->isChecked();
+  bool outerRCover = m_d->ui_misc.checkBox_HGTD_OuterRCover->isChecked();
+  bool coolingLines = m_d->ui_misc.checkBox_HGTD_CoolingLines->isChecked();
+
+  messageVerbose ("Emitting autoAdaptHGTD("+str(reset)+","+str(flex)+","+str(hybrid)+","+str(glue)+","+str(sensors)+","+str(inactive)+","+str(asic)+","+str(supportPlate)+","+str(frontCover)+","+str(backCover)+","+str(moderatorIn)+","+str(moderatorOut)+","+str(outerRCover)+","+str(coolingLines)+")");
+  emit autoAdaptHGTD(reset, flex, hybrid, glue, sensors, inactive, asic, supportPlate, frontCover, backCover, moderatorIn, moderatorOut, outerRCover, coolingLines);
+}
+
+
 
 //____________________________________________________________________
 void GeoSysController::emit_autoIconifyByVolumeOrMaterialName()
@@ -653,7 +686,7 @@ void GeoSysController::emit_resetSubSystems()
 //____________________________________________________________________
 int GeoSysController::currentSettingsVersion() const
 {
-  return 6;
+  return 9;
 }
 
 //____________________________________________________________________
@@ -706,6 +739,21 @@ void GeoSysController::actualSaveSettings(VP1Serialise&s) const
   s.save(m_d->ui_misc.checkBox_NSW_Passive_Spacer);
   s.save(m_d->ui_misc.checkBox_NSW_Passive_Structure);
   s.save(m_d->ui_misc.checkBox_NSW_Passive_APlate);
+  // version >=7
+  s.save(m_d->ui_misc.checkBox_HGTD_Flex);
+  s.save(m_d->ui_misc.checkBox_HGTD_Hybrid);
+  s.save(m_d->ui_misc.checkBox_HGTD_Glue);
+  s.save(m_d->ui_misc.checkBox_HGTD_Sensors);
+  s.save(m_d->ui_misc.checkBox_HGTD_Inactive);
+  s.save(m_d->ui_misc.checkBox_HGTD_ASIC);
+  // version >=9
+  s.save(m_d->ui_misc.checkBox_HGTD_SupportPlate);
+  s.save(m_d->ui_misc.checkBox_HGTD_FrontCover);
+  s.save(m_d->ui_misc.checkBox_HGTD_BackCover);
+  s.save(m_d->ui_misc.checkBox_HGTD_ModeratorIn);
+  s.save(m_d->ui_misc.checkBox_HGTD_ModeratorOut);
+  s.save(m_d->ui_misc.checkBox_HGTD_OuterRCover);
+  s.save(m_d->ui_misc.checkBox_HGTD_CoolingLines);
   
   
   s.ignoreWidget(m_d->ui_disp.matButton_lastSel);
@@ -782,6 +830,23 @@ void GeoSysController::actualRestoreSettings(VP1Deserialise& s)
     s.restore(m_d->ui_misc.checkBox_NSW_Passive_Structure);
     s.restore(m_d->ui_misc.checkBox_NSW_Passive_APlate);
   }
+  if (s.version()>=7){
+    s.restore(m_d->ui_misc.checkBox_HGTD_Flex);
+    s.restore(m_d->ui_misc.checkBox_HGTD_Hybrid);
+    s.restore(m_d->ui_misc.checkBox_HGTD_Glue);
+    s.restore(m_d->ui_misc.checkBox_HGTD_Sensors);
+    s.restore(m_d->ui_misc.checkBox_HGTD_Inactive);
+    s.restore(m_d->ui_misc.checkBox_HGTD_ASIC);
+  }
+  if (s.version()>=9){
+    s.restore(m_d->ui_misc.checkBox_HGTD_SupportPlate);
+    s.restore(m_d->ui_misc.checkBox_HGTD_FrontCover);
+    s.restore(m_d->ui_misc.checkBox_HGTD_BackCover);
+    s.restore(m_d->ui_misc.checkBox_HGTD_ModeratorIn);
+    s.restore(m_d->ui_misc.checkBox_HGTD_ModeratorOut);
+    s.restore(m_d->ui_misc.checkBox_HGTD_OuterRCover);
+    s.restore(m_d->ui_misc.checkBox_HGTD_CoolingLines);
+  }
 
   s.ignoreWidget(m_d->ui_disp.matButton_lastSel);
   std::map<VP1GeoFlags::SubSystemFlag,QCheckBox*>::const_iterator it,itE(m_d->subSysCheckBoxMap.end());
@@ -803,6 +868,3 @@ POSSIBLECHANGE_IMP(showVolumeOutLines)
 POSSIBLECHANGE_IMP(muonChamberAdaptionStyle)
 POSSIBLECHANGE_IMP(labels)
 POSSIBLECHANGE_IMP(labelPosOffset)
-
-
-

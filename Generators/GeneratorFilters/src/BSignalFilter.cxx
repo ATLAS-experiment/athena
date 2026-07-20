@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // -----------------------------------------------------------------------------------------------
@@ -25,10 +25,11 @@
 #include "GeneratorFilters/BSignalFilter.h"
 #include "TruthUtils/HepMCHelpers.h"
 #include "CLHEP/Vector/LorentzVector.h"
+#include "TLorentzVector.h"
 #include "TruthUtils/MagicNumbers.h"
 
 #include <sstream>
-
+#include <cmath>
 
 BSignalFilter::BSignalFilter(const std::string& name, ISvcLocator* pSvcLocator) :
   GenFilter(name, pSvcLocator)
@@ -84,13 +85,14 @@ BSignalFilter::BSignalFilter(const std::string& name, ISvcLocator* pSvcLocator) 
 }
 
 
-StatusCode BSignalFilter::filterEvent()
+StatusCode BSignalFilter::filterEvent(const EventContext& ctx)
 {
   ATH_MSG_INFO("");
   ATH_MSG_INFO(" ---------------------------------- ");
   ATH_MSG_INFO(" >>> BSignalFilter::FilterEvent <<< ");
   ATH_MSG_INFO(" ---------------------------------- ");
   ATH_MSG_INFO("");
+  m_gendata = std::make_shared<GenData>();
 
   // ** Return ERROR and exit if the user has not selected the PDGid of the B-meson/hadron signal **
   if ( m_cuts_f_e_on || m_cuts_f_mu_on || m_cuts_f_had_on || m_cuts_f_gam_on || m_cuts_f_K0_on )
@@ -198,13 +200,8 @@ StatusCode BSignalFilter::filterEvent()
 		  // ** Reject whole event if any of B-hadrons in the event is not decayed **
 		  if( MC::isStable(part)) { acceptEvent = false; }
 
-#ifdef HEPMC3
 		  auto  firstParent = part->production_vertex()->particles_in().begin();
 		  auto lastParent  = part->production_vertex()->particles_in().end();
-#else
-		  auto  firstParent = part->production_vertex()->particles_begin(HepMC::parents);
-		  auto lastParent  = part->production_vertex()->particles_end(HepMC::parents);
-#endif
           for (auto  thisParent = firstParent; thisParent != lastParent; ++thisParent ) {
             if (MC::isBottomMeson(*thisParent) || MC::isBottomBaryon(*thisParent) ) motherIsB = true;
           }
@@ -219,12 +216,9 @@ StatusCode BSignalFilter::filterEvent()
 	      // ** New B-signal found, output message and find whole decay tree **
 	      if( newBChain )
                 {
-		  const HepPDT::ParticleData* HadronData = particleData(particleID);
-		  std::string HadronName = "unknown particle";
-		  if (HadronData){
-		    HadronName = HadronData->name();
-		    if (particleID < 0) HadronName = "anti - " + HadronName;
-		  }
+                  const auto HadronData = m_gendata->particleName(std::abs(particleID));
+                    std::string HadronName = "unknown particle";
+                  if (HadronData) HadronName = ((particleID < 0) ? std::string("anti - ") : std::string("")) + *HadronData;
 		  ATH_MSG_DEBUG("");
 		  ATH_MSG_DEBUG(" ------------------------------------------ ");
 		  ATH_MSG_DEBUG(" *** BSignalFilter.cxx: B-signal found ***  ");
@@ -269,7 +263,7 @@ StatusCode BSignalFilter::filterEvent()
 			      ATH_MSG_DEBUG("");
 			      ATH_MSG_DEBUG(" *** INVARIANT MASS CUTS ON PARTICLES ACTIVATED! *** ");
 			      ATH_MSG_DEBUG("");
-                              if (m_InvMass_switch     ) ATH_MSG_DEBUG("     -- Mass cuts -->>  " << m_InvMassMin      << " < mass < "       << m_InvMassMax      << " MeV");
+            ATH_MSG_DEBUG("     -- Mass cuts -->>  " << m_InvMassMin      << " < mass < "       << m_InvMassMax      << " MeV");
 			      //
 			      double invMass = ( CandPart1 + CandPart2 ).M();
                               double invMass_total = total_4mom.M();
@@ -351,14 +345,14 @@ StatusCode BSignalFilter::filterEvent()
       ATH_MSG_DEBUG("");
       if( !acceptEvent )
         {
-	  setFilterPassed(false);
+	  setFilterPassed(false, ctx);
 	  m_rejectedAll++;
 	  ATH_MSG_DEBUG(" ==========================");
 	  ATH_MSG_DEBUG("  Event REJECTED by Filter ");
 	  ATH_MSG_DEBUG(" ==========================");
         }else
         {
-	  setFilterPassed(true);
+	  setFilterPassed(true, ctx);
 	  ATH_MSG_DEBUG(" ==========================");
 	  ATH_MSG_DEBUG("  Event ACCEPTED by Filter ");
 	  ATH_MSG_DEBUG(" ==========================");
@@ -453,13 +447,8 @@ void BSignalFilter::FindAllChildren(const HepMC::ConstGenParticlePtr& mother,std
 	return;
       }
   }
-#ifdef HEPMC3
  auto firstChild = mother->end_vertex()->particles_out().begin();
  auto lastChild  = mother->end_vertex()->particles_out().end();
-#else
- auto firstChild = mother->end_vertex()->particles_begin(HepMC::children);
- auto lastChild  = mother->end_vertex()->particles_end(HepMC::children);
-#endif
 
   int childCnt = 0;
   std::string childIDStr;
@@ -478,9 +467,9 @@ void BSignalFilter::FindAllChildren(const HepMC::ConstGenParticlePtr& mother,std
     }
 
   // ** Main loop: iterate over all children, call method recursively.
-  //Note: Iterators changed between HEPMC2 and HEPMC3; the previous version
+  //Note: Iterators changed between HEPMC v2 and HEPMC v3; the previous version
   //was a custom iterator which could be incremented indefinitely, always returning
-  //'end' when necessary. In HEPMC3, these are standard library iterators
+  //'end' when necessary. In HEPMC v3, these are standard library iterators
   for (auto thisChild = firstChild; thisChild != lastChild; ++thisChild)
     {
       childCnt++;
@@ -633,12 +622,9 @@ void BSignalFilter::PrintChild(const HepMC::ConstGenParticlePtr& child,
 {
   int pID = child->pdg_id();
   // ** Find name **
-  const HepPDT::ParticleData* pData = particleData(std::abs(pID));
+  const auto pData = m_gendata->particleName(std::abs(pID));
   std::string pName = "unknown particle";
-  if (pData){
-    pName = pData->name();
-    if (pID < 0) pName = "anti - " + pName;
-  }
+  if (pData) pName = ((pID < 0) ? std::string("anti - ") : std::string("")) + *pData;
   ATH_MSG_DEBUG("    " << treeIDStr << "   " << "Child  (" << pName
 		<< ") " << child<<" , from final B = " << fromFinalB);
 

@@ -127,7 +127,7 @@ StatusCode TileMuonReceiverDecisionToNtuple::initialize()
 }
 
 // execute
-StatusCode TileMuonReceiverDecisionToNtuple::execute()
+StatusCode TileMuonReceiverDecisionToNtuple::execute(const EventContext& /*ctx*/)
 {
   // step1: read container and declare temporary vectors
   //

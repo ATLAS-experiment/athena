@@ -77,7 +77,7 @@ namespace xAODMaker {
       return StatusCode::SUCCESS;
    }
 
-   StatusCode AuxStoreWrapper::execute() {
+   StatusCode AuxStoreWrapper::execute(const EventContext& /*ctx*/) {
 
       // The StoreGate content before the object wrapping:
       ATH_MSG_VERBOSE( "Event store before wrapping:\n" << evtStore()->dump() );

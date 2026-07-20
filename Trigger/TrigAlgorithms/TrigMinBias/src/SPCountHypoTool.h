@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef TRIGMINBIAS_SPCOUNTHYPOTOOL_H
 #define TRIGMINBIAS_SPCOUNTHYPOTOOL_H
@@ -17,8 +17,8 @@ class SPCountHypoTool : virtual public AthCheckedComponent<::AthAlgTool> {
   virtual StatusCode initialize() override;
 
   struct SPCountsInfo {
-    TrigCompositeUtils::Decision *decision;
-    const xAOD::TrigComposite *counts;
+    TrigCompositeUtils::Decision *decision = nullptr;
+    const xAOD::TrigComposite *counts = nullptr;
     const TrigCompositeUtils::DecisionIDContainer previousDecisionIDs;
   };
 

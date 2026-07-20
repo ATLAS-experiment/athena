@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRIGCOMBOHYPO_TRIGCOMBOHYPOTOOL_H
@@ -83,10 +83,10 @@ class TrigComboHypoTool:  public ComboHypoToolBase {
 
   /// Override the ComboHypoToolBase::decide in order to optimise combination generation
   /// This is to avoid excessive combinatorics for complex multileg chains
-  StatusCode decide(Combo::LegDecisionsMap& passingLegs, const EventContext& /*ctx*/) const final;
+  StatusCode decide(Combo::LegDecisionsMap& passingLegs, const EventContext& context) const final;
 
   /// Implementation of selection on individual variables
-  bool executeAlgStep(const Combination& combination, const VarInfo&, std::vector<float>& values) const;
+  bool executeAlgStep(const EventContext& context, const Combination& combination, const VarInfo&, std::vector<float>& values) const;
   /// Computation of the variables from the specified kinematics
   float compute(const std::pair<KineInfo,KineInfo>& kinepair, ComboHypoVars var) const;
 
@@ -95,8 +95,8 @@ class TrigComboHypoTool:  public ComboHypoToolBase {
   /// or exactly one object each from two legs.
   bool fillLegDecisions_sameLeg(std::pair<Combo::LegDecision,Combo::LegDecision>& legpair, const Combination& combination, uint32_t leg) const;
   bool fillLegDecisions_diffLeg(std::pair<Combo::LegDecision,Combo::LegDecision>& legpair, const Combination& combination, uint32_t legA, uint32_t legB) const;
-  bool fillPairKinematics(std::pair<KineInfo,KineInfo>& kinepair, const Combination& combination, const VarInfo& varInfo) const;
-  bool fillKineInfo(KineInfo& kinematics, Combo::LegDecision decision, bool isMET) const;
+  bool fillPairKinematics(const EventContext& context, std::pair<KineInfo,KineInfo>& kinepair, const Combination& combination, const VarInfo& varInfo) const;
+  bool fillKineInfo(const EventContext& context, KineInfo& kinematics, Combo::LegDecision decision, bool isMET) const;
 
   /// Gaudi configuration hooks
   // flags

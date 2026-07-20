@@ -1,15 +1,10 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
   */
 #include "ActsVolumeIdToDetectorElementCollectionMappingAlg.h"
 
-// PACKAGE
-#include "ActsGeometryInterfaces/GeometryContext.h"
-
 // ATHENA
 #include "AthenaKernel/IOVInfiniteRange.h"
-#include "StoreGate/ReadHandle.h"
-#include "StoreGate/WriteHandle.h"
 
 #include "StoreGate/WriteCondHandle.h"
 
@@ -80,29 +75,21 @@ ActsVolumeIdToDetectorElementCollectionMappingAlg::createDetectorElementToVolume
                                                                                                          unsigned int> &detector_element_to_volume_id)
 const
 {
-   using Counter = struct { unsigned int n_detector_elements, n_missing_detector_elements, n_wrong_type; };
+   struct Counter { unsigned int n_detector_elements{0}; 
+                    unsigned int n_missing_detector_elements{0};
+                    unsigned int n_wrong_type{0}; };
    Counter counter {0u,0u,0u};
    acts_tracking_geometry.visitSurfaces([&counter, &detector_element_to_volume_id](const Acts::Surface *surface_ptr) {
-      if (!surface_ptr) return;
-      const Acts::Surface &surface = *surface_ptr;
-      const Acts::SurfacePlacementBase* detector_element = surface.surfacePlacement();
-      if (detector_element) {
-         const ActsDetectorElement *acts_detector_element = dynamic_cast<const ActsDetectorElement*>(detector_element);
-         if (acts_detector_element) {
-            const auto*trk_detector_element  = dynamic_cast<const Trk::TrkDetElementBase*>(acts_detector_element->upstreamDetectorElement());
-            if(trk_detector_element  != nullptr) {
-               detector_element_to_volume_id.insert( std::make_pair( trk_detector_element->identify().get_compact(), surface.geometryId().volume()));
-            }
-            else {
-               ++counter.n_wrong_type;
-            }
-         }
-         else {
+      const auto* acts_detector_element = getActsDetectorElement(surface_ptr);
+      if (acts_detector_element) {
+         const auto*trk_detector_element  = dynamic_cast<const Trk::TrkDetElementBase*>(acts_detector_element->upstreamDetectorElement());
+         if(trk_detector_element  != nullptr) {
+            detector_element_to_volume_id.insert( std::make_pair( trk_detector_element->identify().get_compact(), surface_ptr->geometryId().volume()));
+         } else {
             ++counter.n_wrong_type;
          }
-         ++counter.n_detector_elements;
-      }
-      else {
+          ++counter.n_detector_elements;
+      } else {
          ++counter.n_missing_detector_elements;
       }
    }, true /*sensitive surfaces*/);

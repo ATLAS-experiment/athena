@@ -37,6 +37,87 @@ LArRawDataReadingAlg::LArRawDataReadingAlg(const std::string& name, ISvcLocator*
 
   ATH_CHECK(m_robDataProviderSvc.retrieve());
   ATH_CHECK(detStore()->retrieve(m_onlineId,"LArOnlineID"));  
+  //
+  //Fill FT list if only Barrel/EC and side is given:
+  if (m_vBEPreselection.size() &&  m_vPosNegPreselection.size() &&  m_vFTPreselection.size()==0) {
+    std::set<unsigned> fts;
+    if (std::find(m_vBEPreselection.begin(),m_vBEPreselection.end(),0)!=m_vBEPreselection.end()) { //Barrel selected
+      fts.insert({0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31});
+    }
+    if (std::find(m_vBEPreselection.begin(),m_vBEPreselection.end(),1)!=m_vBEPreselection.end()) { //Endcap selected
+      fts.insert({0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24});
+    }
+    m_vFTPreselection.value().insert(m_vFTPreselection.begin(),fts.begin(),fts.end());
+  }
+
+  //Build list of preselected Feedthroughs
+  if (m_vBEPreselection.size() &&  m_vPosNegPreselection.size() && m_vFTPreselection.size()) {
+    ATH_MSG_INFO("Building list of selected feedthroughs");
+    for (const unsigned iBE : m_vBEPreselection) {
+      for (const unsigned iPN: m_vPosNegPreselection) {
+	for (const unsigned iFT: m_vFTPreselection) {
+	  HWIdentifier finalFTId=m_onlineId->feedthrough_Id(iBE,iPN,iFT);
+	  //unsigned int finalFTId32 = finalFTId.get_identifier32().get_compact();
+	  ATH_MSG_INFO("Adding feedthrough Barrel/Endcap=" << iBE << " pos/neg=" << iPN << " FT=" << iFT 
+		       //<< " (0x" << std::hex << finalFTId.get_identifier32().get_compact() << std::dec << ")");
+		       << " " << std::hex << finalFTId << std::dec << ")");
+	  m_vFinalPreselection.insert(finalFTId);
+	}
+      }
+    }
+  }//end if something set
+
+  if (!m_subCaloPreselection.value().empty()) {
+    ATH_MSG_INFO("Adding list of selected subcalo"<<m_subCaloPreselection.value());
+    std::set<HWIdentifier> subcaloFTs;
+    if (m_subCaloPreselection.value().compare("EM")==0) {
+      for (auto febid : m_onlineId->feb_range()) {
+	if (m_onlineId->isEMBchannel(febid) || m_onlineId->isEMECchannel(febid)) {
+	  subcaloFTs.insert(m_onlineId->feedthrough_Id(febid));
+	}
+      }
+    }
+    else if (m_subCaloPreselection.value().find("HEC")!=std::string::npos || m_subCaloPreselection.value().find("FCAL")!=std::string::npos) {
+        if (m_subCaloPreselection.value().find("HEC")!=std::string::npos) {
+         for (auto febid : m_onlineId->feb_range()) {
+           if (m_onlineId->isHECchannel(febid)) {
+             subcaloFTs.insert(m_onlineId->feedthrough_Id(febid));
+           } 
+         }
+       }
+       if (m_subCaloPreselection.value().find("FCAL")!=std::string::npos) {
+         for (auto febid : m_onlineId->feb_range()) {
+           if (m_onlineId->isFCALchannel(febid)) {
+             subcaloFTs.insert(m_onlineId->feedthrough_Id(febid));
+           } 
+         }
+       }
+    } else {
+      ATH_MSG_ERROR("Configuration problem, property 'SubCaloPreselection' set to " << m_subCaloPreselection.value() << ", expect 'EM', 'HEC' or 'FCAL'");
+      return StatusCode::FAILURE;
+    }
+    std::cout << "set sizes:" << subcaloFTs.size() << ", " << m_vFinalPreselection.size() << std::endl;
+    if (m_vFinalPreselection.size()>0) {
+      //Form the intersection of the preselection give as subdet and side/FT/slot
+      for(auto it = m_vFinalPreselection.begin(); it != m_vFinalPreselection.end(); ) {
+	if (subcaloFTs.find(*it)==subcaloFTs.end()) 
+	  it=m_vFinalPreselection.erase(it);
+	else 
+	  ++it;
+      }
+      if (m_vFinalPreselection.empty()) {
+	ATH_MSG_WARNING("Apparently inconistent configuration of FT preselections. No preselection left after intersecting 'SubCaloPreselection' with 'PosNeg/BE/FT' preselection");
+      }
+    }
+    else {
+      m_vFinalPreselection.swap(subcaloFTs);
+    }
+  }//end if subCaloPreselection set
+
+  if (!m_vFinalPreselection.empty()) {
+    ATH_MSG_INFO("Give pre-selection covers " << m_vFinalPreselection.size() << " feedthroughts. first is: "<< MSG::hex << *(m_vFinalPreselection.begin()) << MSG::dec <<" Will ignore bytestream data from other feedthroughs.");
+  }
+
   return StatusCode::SUCCESS;
 }     
   
@@ -202,6 +283,17 @@ StatusCode LArRawDataReadingAlg::execute(const EventContext& ctx) const {
 	  continue; //Jump to next FEB
         }
       }
+
+      if (m_vFinalPreselection.size()) {
+	const auto ftId=m_onlineId->feedthrough_Id(fId);
+	if (m_vFinalPreselection.find(ftId)==m_vFinalPreselection.end()) {
+	  ATH_MSG_DEBUG("Feedthrough with id " << MSG::hex << ftId << MSG::dec <<" not in preselection. Ignored.");
+	  continue;
+	} else {
+           ATH_MSG_DEBUG("Feedthrough with id " << MSG::hex << ftId << MSG::dec <<" is preselected.");
+        }
+      }
+
       const int NthisFebChannel=m_onlineId->channelInSlotMax(fId);
 
       //Decode RawChanels (if requested)

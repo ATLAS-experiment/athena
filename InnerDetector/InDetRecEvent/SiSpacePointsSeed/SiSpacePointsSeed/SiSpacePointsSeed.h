@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////////////////////
@@ -85,8 +85,8 @@ namespace InDet {
    const double& dzdr_t() const;
    const double& pt() const;
 
-   virtual MsgStream& dump(MsgStream& out) const;
-   virtual std::ostream& dump(std::ostream& out) const;
+   MsgStream& dump(MsgStream& out) const;
+   std::ostream& dump(std::ostream& out) const;
 
    /////////////////////////////////////////////////////////////////////////////////
    // Protected data members

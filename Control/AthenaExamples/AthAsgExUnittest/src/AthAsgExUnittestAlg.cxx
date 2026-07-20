@@ -28,13 +28,13 @@ StatusCode AthAsgExUnittestAlg::finalize() {
   return StatusCode::SUCCESS;
 }
 
-StatusCode AthAsgExUnittestAlg::execute() {  
+StatusCode AthAsgExUnittestAlg::execute(const EventContext& ctx) {
   ATH_MSG_DEBUG( "Executing " << name() << "..." );
-  setFilterPassed(false); //optional: start with algorithm not passed
+  setFilterPassed(false, ctx); //optional: start with algorithm not passed
 
   // Real algorithm here
 
-  setFilterPassed(true); //if got here, assume that means algorithm passed
+  setFilterPassed(true, ctx); //if got here, assume that means algorithm passed
   return StatusCode::SUCCESS;
 }
 

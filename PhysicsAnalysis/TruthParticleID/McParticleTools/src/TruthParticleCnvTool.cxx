@@ -13,7 +13,6 @@
 #include <sstream>
 
 // FrameWork includes
-#include "GaudiKernel/IPartPropSvc.h"
 #include "GaudiKernel/ThreadLocalContext.h"
 
 // CLHEP/HepMC includes
@@ -22,7 +21,6 @@
 #include "AtlasHepMC/GenVertex.h"
 #include "AtlasHepMC/Polarization.h"
 #include "TruthUtils/HepMCHelpers.h"
-#include "HepPDT/ParticleData.hh"
 
 // McParticleKernel includes
 #include "McParticleKernel/ITruthIsolationTool.h"
@@ -51,7 +49,6 @@ TruthParticleCnvTool::TruthParticleCnvTool( const std::string& type,
   base_class( type, name, parent ),
   m_dataType         ( ParticleDataType::True ),
   m_vxCandidatesName ( ),
-  m_pdt              ( nullptr ),
   m_selectSignalTypeProp ( 0 )
 {
   //
@@ -100,20 +97,6 @@ TruthParticleCnvTool::~TruthParticleCnvTool()
 StatusCode TruthParticleCnvTool::initialize()
 {
   ATH_MSG_INFO("Initializing " << name() << "...");
-
-  // Get the Particle Properties Service
-  ServiceHandle<IPartPropSvc> partPropSvc("PartPropSvc", name());
-  if ( !partPropSvc.retrieve().isSuccess() ) {
-    ATH_MSG_ERROR(" Could not initialize Particle Properties Service");
-    return StatusCode::FAILURE;
-  }      
-
-  m_pdt = partPropSvc->PDT();
-  if ( nullptr == m_pdt ) {
-    ATH_MSG_ERROR("Could not retrieve HepPDT::ParticleDataTable from "\
-		  "ParticleProperties Service !!");
-    return StatusCode::FAILURE;
-  }
 
   // retrieve the TruthIsolation tool only if asked for.
   if ( m_doEtIsolation.value() ) {
@@ -228,12 +211,6 @@ TruthParticleCnvTool::convert( const McEventCollection * mcCollection,
 {
   ATH_MSG_DEBUG("Converting McEventCollection to TruthParticleContainer");
 
-  if ( nullptr == m_pdt ) {
-    ATH_MSG_ERROR("Could not convert McEventCollection into "\
-		  "TruthParticleContainer if NO ParticleDataTable is "\
-		  "available !!");
-    return StatusCode::FAILURE;
-  }
   
   if ( nullptr == mcCollection ) {
     ATH_MSG_WARNING("Null pointer to McEventCollection !");
@@ -261,19 +238,14 @@ TruthParticleCnvTool::convert( const McEventCollection * mcCollection,
   TruthParticleContainer::Map_t bcToMcPart = container->m_particles;
 
   
-#ifdef HEPMC3
   // Process particles in barcode order.
-  auto bcmapatt = evt->attribute<HepMC::GenEventBarcodes>("barcodes");
+  auto bcmapatt = evt->attribute<HepMC::GenEventBarcodes>(HepMCStr::barcodes);
   if (!bcmapatt){
     ATH_MSG_ERROR("TruthParticleCnvTool.cxx: Event does not contain barcodes attribute");
     return StatusCode::FAILURE;
   } 
   std::map<int, HepMC3::ConstGenParticlePtr> bcmap = bcmapatt->barcode_to_particle_map();
   for (const auto &[bc,hepMcPart]: bcmap) {
-#else
-  for (auto hepMcPart: *evt) {
-    int bc = HepMC::barcode(hepMcPart);
-#endif
 
     TruthParticle * mcPart = new TruthParticle( hepMcPart, container );
     container->push_back( mcPart );

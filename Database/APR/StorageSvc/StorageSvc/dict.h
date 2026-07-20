@@ -21,6 +21,7 @@
 #include "StorageSvc/DbOption.h"
 #include "StorageSvc/DbString.h"
 #include "StorageSvc/DbColumn.h"
+#include "StorageSvc/DbType.h"
 #include "StorageSvc/DbTypeInfo.h"
 
 #include "StorageSvc/SimpleUtilityBase.h"

@@ -4,9 +4,6 @@
 <!DOCTYPE hdef SYSTEM "InDetPVMPlotDefCommon.dtd"[
 <!-- eta coverage of the tracker -->
 <!ENTITY ETA "3.0">
-
-<!-- Tracking Recommendation Plots -->
-<!ENTITY EtaBinsTrkRec "120">
 ]>
 
 <hdef xmlns:xi="http://www.w3.org/2001/XInclude">

@@ -12,9 +12,9 @@
 #include "GaudiKernel/ToolHandle.h"
 
 // Tools
-#include "ActsToolInterfaces/IActsToTrkConverterTool.h"
 #include "ActsGeometryInterfaces/IExtrapolationTool.h"
 #include "ActsGeometryInterfaces/ITrackingGeometryTool.h"
+#include "ActsGeometryInterfaces/IGeometryRealmConvTool.h"
 #include "ActsToolInterfaces/ITrackParamsEstimationTool.h"
 #include "src/TrackStatePrinterTool.h"
 #include "ActsCalibrators/xAODUncalibMeasSurfAcc.h"
@@ -90,7 +90,6 @@ namespace ActsTrk {
     ToolHandle<ActsTrk::IExtrapolationTool> m_extrapolationTool{this, "ExtrapolationTool", ""};
     PublicToolHandle<ActsTrk::ITrackingGeometryTool> m_trackingGeometryTool{this, "TrackingGeometryTool", ""};
     ToolHandle<ActsTrk::TrackStatePrinterTool> m_trackStatePrinter{this, "TrackStatePrinter", "", "optional track state printer"};
-    ToolHandle<ActsTrk::IActsToTrkConverterTool > m_ATLASConverterTool{this, "ATLASConverterTool", ""};
     ToolHandle<ActsTrk::IFitterTool> m_fitterTool{this, "FitterTool", "", "Fitter Tool for Seeds"};
     ToolHandle<ActsTrk::IPixelOnTrackCalibratorTool<detail::RecoTrackStateContainer>> m_pixelCalibTool{this, "PixelCalibrator", "", "Opt. pixel measurement calibrator"};
     ToolHandle<ActsTrk::IStripOnTrackCalibratorTool<detail::RecoTrackStateContainer>> m_stripCalibTool{this, "StripCalibrator", "", "Opt. strip measurement calibrator"};
@@ -114,6 +113,7 @@ namespace ActsTrk {
     Gaudi::Property<bool> m_inflateCovarianceTwoWay{this, "inflateCovarianceTwoWay", false, "inflate covariance matrix at the beginning of two-way track finding"};
     Gaudi::Property<double> m_twoWayinflateCovarianceFactor{this, "twoWayinflateCovarianceFactor", 1.0, "factor to multiply the initial covariance matrix at the beginning of two-way track finding"};
     Gaudi::Property<double> m_branchStopperPtMinFactor{this, "branchStopperPtMinFactor", 1.0, "factor to multiply ptMin cut when used in the branch stopper"};
+    Gaudi::Property<double> m_seedRefitPtMinFactor{this, "seedRefitPtMinFactor", 1.0, "factor to multiply ptMin cut when used in the seed refit"};
     Gaudi::Property<double> m_branchStopperAbsEtaMaxExtra{this, "branchStopperAbsEtaMaxExtra", 0.0, "increase absEtaMax cut when used in the branch stopper"};
     Gaudi::Property<double> m_branchStopperMeasCutReduce{this, "branchStopperMeasCutReduce", 2, "how much to reduce the minMeas requirement for the branch stopper"};
     Gaudi::Property<double> m_branchStopperAbsEtaMeasCut{this, "branchStopperAbsEtaMeasCut", 1.2, "the minimum |eta| to apply the reduction to the minMeas requirement for the branch stopper"};
@@ -167,6 +167,7 @@ namespace ActsTrk {
       kNDuplicateSeeds,
       kNNoEstimatedParams,
       kNOutputTracks,
+      kNSeedRefitFailure,
       kNRejectedRefinedSeeds,
       kNSelectedTracks,
       kNStoppedTracksMaxHoles,
@@ -247,7 +248,7 @@ namespace ActsTrk {
      * @return Unique pointer to updated parameters
      */
     template <class MeasurementSource>
-    std::unique_ptr<Acts::BoundTrackParameters> doRefit(
+    std::variant<std::unique_ptr<Acts::BoundTrackParameters>, TrackFindingBaseAlg::EStat> doRefit(
         const MeasurementSource &measurement,
         const Acts::BoundTrackParameters &initialParameters,
         const DetectorContextHolder &detContext,
@@ -314,7 +315,7 @@ namespace ActsTrk {
     };
     static constexpr BranchState s_branchState{};
 
-    static void addCounts(detail::RecoTrackContainer &tracksContainer);
+    static void addCountsAndProperties(detail::RecoTrackContainer &tracksContainer, bool add_counts);
     static void initCounts(const detail::RecoTrackContainer::TrackProxy &track);
     static void updateCounts(const detail::RecoTrackContainer::TrackProxy &track,
                              Acts::ConstTrackStateTypeMap typeFlags,

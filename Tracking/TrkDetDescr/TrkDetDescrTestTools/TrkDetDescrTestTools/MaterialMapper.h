@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -260,31 +260,35 @@ namespace Trk {
         ServiceHandle<IIncidentSvc>          m_incidentSvc;
         ServiceHandle<ITHistSvc>             m_histSvc;
 
-        int                   m_materialAssociationType;
-
         // (1) ------------------------- Tree name of the total material statistics
-        unsigned int          m_maxMappingEvents;
-        mutable unsigned int  m_processedEvents;
-        
-        std::string           m_totalMaterialTree;
+        Gaudi::Property<unsigned int> m_maxMappingEvents
+          {this, "MaximumMappingEvents", 100000,
+           "The maximum mapping events to control the output file size"};
+        mutable unsigned int  m_processedEvents = 0;
 
         // (2) ------------------------  Ntuple output of material effects validation
-        TTree*                m_validationTree;            //!< The validation tree
-        std::string           m_validationTreeName;        //!< validation tree name - to be accessed by this from root
-        std::string           m_validationTreeDescription; //!< validation tree description - second argument in TTree
-        std::string           m_validationTreeFolder;      //!< stream/folder to for the TTree to be written out
+        TTree*                m_validationTree = nullptr;            //!< The validation tree
+        Gaudi::Property<std::string> m_validationTreeName
+          {this, "ValidationTreeName", "MaterialMapper",
+           "validation tree name - to be accessed by this from root"};
+        Gaudi::Property<std::string> m_validationTreeDescription
+          {this, "ValidationTreeDescription", "Material Effects Updator information",
+           "validation tree description - second argument in TTree"};
+        Gaudi::Property<std::string> m_validationTreeFolder
+          {this, "ValidationTreeFolder", "/val/MaterialMapper",
+           "stream/folder to for the TTree to be written out"};
 
 
         // Spatial information
-        mutable int           m_materialSteps;                                          //!< number of update positions
-        mutable float         m_averageEta;                                             //!< average eta
-        mutable float         m_averagePhi;                                             //!< average ogu
-        mutable float         m_mappedPath;                                             //!< total mapped path
-        mutable float         m_mappedPathInX0;                                         //!< total mapped path in X0
-        mutable float         m_mappedPathInL0;                                         //!< total mapped path in L0
-        mutable float         m_mappedPathRho;                                          //!< total mapped path times rho
-        mutable float         m_mappedPathZARho;                                        //!< total mapped path times (Z/A)*rho
-        mutable float         m_unmappedPathInX0;                                       //!< total path in x0 in these events lost        
+        mutable int           m_materialSteps = 0;                                          //!< number of update positions
+        mutable float         m_averageEta{};                                             //!< average eta
+        mutable float         m_averagePhi{};                                             //!< average ogu
+        mutable float         m_mappedPath{};                                             //!< total mapped path
+        mutable float         m_mappedPathInX0{};                                         //!< total mapped path in X0
+        mutable float         m_mappedPathInL0{};                                         //!< total mapped path in L0
+        mutable float         m_mappedPathRho{};                                          //!< total mapped path times rho
+        mutable float         m_mappedPathZARho{};                                        //!< total mapped path times (Z/A)*rho
+        mutable float         m_unmappedPathInX0{};                                       //!< total path in x0 in these events lost
         mutable int           m_mapped[TRKDETDESCRTOOLS_MAXSTEPS]{};                      //!< mapped or not mapped
         mutable float         m_materialAccumPathInX0[TRKDETDESCRTOOLS_MAXSTEPS]{};       //!< accumulated path length in x0
         mutable float         m_materialAccumPathZARho[TRKDETDESCRTOOLS_MAXSTEPS]{};      //!< accumulated path length times (Z/A)*rho
@@ -305,20 +309,25 @@ namespace Trk {
         mutable float         m_materialProjDistance[TRKDETDESCRTOOLS_MAXSTEPS]{};        //!< the distance to the projected hit
 
         // Per Volume Validation
-        bool                  m_volumeValidation;
-        std::string           m_volumeTreePrefix;
+        Gaudi::Property<bool> m_volumeValidation
+          {this, "TrackingVolumeValidation", true};
+        Gaudi::Property<std::string> m_volumeTreePrefix
+          {this, "TrackingVolumeTreePrefix", "VolumeMaterial"};
         mutable std::map< const Trk::TrackingVolume*, VolumeTreeObject* > m_volumeTrees;
         mutable std::map< const Trk::TrackingVolume*, VolumeTreeObject* > m_volumeTreesUnmapped;
 
         // Per Layer Validation
-        bool                  m_layerValidation;
-        std::string           m_layerTreePrefix;
+        Gaudi::Property<bool> m_layerValidation{this, "DetailedLayerValidation", true};
+        Gaudi::Property<std::string> m_layerTreePrefix
+          {this, "DetailedLayerTreePrefix", "LayerMaterial_"};
         mutable std::map< const Trk::Layer*, LayerTreeObject* >           m_layerTrees;
         mutable std::map< const Trk::Layer*, LayerTreeObject* >           m_layerFullTrees;
 
         // Per Surface Validation
-        bool                  m_surfaceValidation;
-        std::string           m_surfaceTreePrefix;
+        Gaudi::Property<bool> m_surfaceValidation
+          {this, "DetailedSurfaceValidation", true};
+        Gaudi::Property<std::string> m_surfaceTreePrefix
+          {this, "DetailedSurfaceTreePrefix", "SurfaceMaterial_"};
         mutable std::map< const Trk::Layer*, SurfaceTreeObject* >         m_surfaceTrees;
 
     };

@@ -18,6 +18,7 @@
 
 namespace TrigCompositeUtils
 {
+
   enum class FilterType
   {
     /// Allow all combinations
@@ -29,26 +30,28 @@ namespace TrigCompositeUtils
     /// Do not allow any two objects to share an initial RoI
     UniqueInitialRoIs
   };
-  /// Helper fucntion that returns true if no objects are repeated
+  /// Helper function that returns true if no objects are repeated
   bool uniqueObjects(const std::vector<LinkInfo<xAOD::IParticleContainer>> &links);
   /// Helper function that returns true if no objects share an initial RoI
   bool uniqueInitialRoIs(const std::vector<LinkInfo<xAOD::IParticleContainer>> &links);
   /// Helper function that returns true if no objects share a final RoI
   bool uniqueRoIs(const std::vector<LinkInfo<xAOD::IParticleContainer>> &links);
 
-  /// Get a lambda corresponding to the specified FilterType enum.
-  std::function<bool(const std::vector<LinkInfo<xAOD::IParticleContainer>> &)> getFilter(FilterType filter);
   class IPartCombItr
   {
   public:
     using VecLInfo_t = std::vector<LinkInfo<xAOD::IParticleContainer>>;
     using LInfoItr_t = VecLInfo_t::const_iterator;
+    using FilterFunc_t = std::function<bool(const IPartCombItr::VecLInfo_t &)>;
 
     using iterator_category = std::input_iterator_tag;
     using value_type = VecLInfo_t;
     using reference = const value_type &;
     using pointer = const value_type *;
     using difference_type = std::ptrdiff_t;
+
+    /// Get a function corresponding to the specified FilterType enum.
+    static FilterFunc_t getFilter(FilterType filter);
 
     /// A default constructed iterator acts as a past-the-end iterator
     IPartCombItr();
@@ -64,7 +67,7 @@ namespace TrigCompositeUtils
      */
     IPartCombItr(
         const std::vector<std::tuple<std::size_t, LInfoItr_t, LInfoItr_t>> &pieces,
-        std::function<bool(const VecLInfo_t &)> filter);
+        FilterFunc_t filter);
 
     /**
      * @brief The direct constructor
@@ -112,7 +115,7 @@ namespace TrigCompositeUtils
     bool operator!=(const IPartCombItr &other) const;
 
   private:
-    std::function<bool(const VecLInfo_t &)> m_filter;
+    FilterFunc_t m_filter;
     std::vector<LInfoItr_t> m_linkInfoItrs;
     ProductItr<KFromNItr> m_idxItr;
     void readCurrent();

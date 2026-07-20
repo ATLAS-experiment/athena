@@ -36,6 +36,7 @@
 #include "LArCalibUtils/LArCalibPatchingAlg.h"
 #include "LArCalibUtils/LArCalibCopyAlg.h"
 #include "../LArConditionsMergerAlg.h"
+#include "../LArR4ElecCalibCalculator.h"
 
 
 using LArRampPatcher = LArCalibPatchingAlg<LArRampComplete>;
@@ -102,3 +103,5 @@ DECLARE_COMPONENT( LArDetCellParamsMerger )
 DECLARE_COMPONENT( LArCaliPulseParamsMerger )
 DECLARE_COMPONENT( LArPhysWaveMerger )
 DECLARE_COMPONENT( LArCaliWaveMerger )
+
+DECLARE_COMPONENT( LArR4ElecCalibCalculator )

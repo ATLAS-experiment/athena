@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /********************************************************************
@@ -22,8 +22,9 @@ Updated:  March 12, 2005   (MB)
 #include "CaloDetDescr/CaloDetDescrManager.h"
 #include "CaloGeoHelpers/CaloPhiRange.h"
 #include <cmath> 
+#include <numbers>
 
-using CLHEP::pi;
+using std::numbers::pi;
 
 
 // make correction to one cluster 

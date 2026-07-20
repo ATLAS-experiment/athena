@@ -47,6 +47,12 @@ namespace {
     
     return {static_cast<int>(d), d != v};
   }
+
+  // Placeholder (mm) for an unset coordinate in correctedRMS.
+  constexpr double unsetPos = -100.;
+
+  // Nominal pixel phi pitch (mm) for the lwtnn X position error.
+  constexpr double legacyPhiPitch = 0.05;
 }
 
 
@@ -144,6 +150,14 @@ namespace InDet {
 	      ATH_MSG_VERBOSE("Expect NN " << s_nnTypeNames[type_i] << " for " << n_particles << " particle(s) at index " << a_nn_id );
       }
     }
+    // The X pitches are only fed to the ONNX network; the lwtnn and TTN
+    // variable orders have no slot for them.
+    if (m_useXPitches && !m_useONNX) {
+      ATH_MSG_FATAL("useXPitches=True is only supported with the ONNX backend "
+                    "(useONNX=True): the lwtnn VariableOrder and the "
+                    "TTrainedNetwork inputs do not include the X pitches.");
+      return StatusCode::FAILURE;
+    }
     ATH_CHECK( m_readKeyWithoutTrack.initialize( !m_readKeyWithoutTrack.key().empty() ) );
     ATH_CHECK( m_readKeyWithTrack.initialize( !m_readKeyWithTrack.key().empty() ) );
     ATH_CHECK( m_readKeyJSON.initialize( !m_readKeyJSON.key().empty() ) );
@@ -212,13 +226,15 @@ namespace InDet {
 
   NnClusterizationFactory::InputVector 
   NnClusterizationFactory::eigenInput(NNinput & input) const{
-    // we know the size to be
-    //  - m_sizeX x m_sizeY pixel ToT values
-    //  - m_sizeY pitch sizes in y
-    //  - 2 values: detector location 
-    //  - 2 values: track incidence angles 
-    //  - optional: eta module
-    const auto vecSize{calculateVectorDimension(input.useTrackInfo)};
+    // Input layout: m_sizeX x m_sizeY ToT values, m_sizeY y pitches, the
+    // detector location and the track incidence angles. The no-track lwtnn
+    // networks also take eta module as a trailing value; the ONNX networks do
+    // not. When m_useXPitches is set, the ONNX layout adds the m_sizeX x pitches
+    // after the y pitches, for a matching (60 + m_sizeX)-input model.
+    const bool appendEtaModule{!m_useONNX && !input.useTrackInfo};
+    const auto vecSize{(m_useONNX ? calculateVectorDimension(true)
+                                  : calculateVectorDimension(input.useTrackInfo))
+                       + (m_useXPitches ? m_sizeX.value() : 0u)};
     Eigen::VectorXd valuesVector( vecSize );
     // Fill it!
     // Variable names here need to match the ones in the configuration...
@@ -233,6 +249,11 @@ namespace InDet {
     for (const auto & pitch : input.vectorOfPitchesY) {
       valuesVector[location++] = pitch;
     }
+    if (m_useXPitches) {
+      for (const auto & pitch : input.vectorOfPitchesX) {
+        valuesVector[location++] = pitch;
+      }
+    }
     valuesVector[location] = input.ClusterPixLayer;
     location++;
     valuesVector[location] = input.ClusterPixBarrelEC;
@@ -241,7 +262,7 @@ namespace InDet {
     location++;
     valuesVector[location] = input.theta;
     location++;
-    if (!input.useTrackInfo) { 
+    if (appendEtaModule) {
       valuesVector[location] = input.etaModule;
       location++;
     }
@@ -548,10 +569,12 @@ namespace InDet {
       // Values returned by NN are inverse of variance, and we want variances.
       const float rawRmsX = std::sqrt(1.0/position[3]); //prec_x
       const float rawRmsY = std::sqrt(1.0/position[4]); //prec_y
-      // Now convert to real space units
-      const double rmsX = correctedRMSX(rawRmsX);
-      const double rmsY = correctedRMSY(rawRmsY, rawInput.vectorOfPitchesY);
-      ATH_MSG_DEBUG(" Estimated RMS errors (1) x: " << rmsX << ", y: " << rmsY);  
+      // Convert to real space units: x uses the nominal pixel pitch, y
+      // integrates the actual pitches. (estimatePositionsONNX uses correctedRMS
+      // for both directions.)
+      const double rmsX = rawRmsX * legacyPhiPitch;
+      const double rmsY = correctedRMS(rawRmsY, rawInput.vectorOfPitchesY, m_sizeY);
+      ATH_MSG_DEBUG(" Estimated RMS errors (1) x: " << rmsX << ", y: " << rmsY);
       // Fill matrix    
       Amg::MatrixX erm(2,2);
       erm.setZero();
@@ -565,28 +588,24 @@ namespace InDet {
     return myPositions;
   }
 
-  double 
-  NnClusterizationFactory::correctedRMSX(double posPixels) {
-    // This gives location in pixels
-    constexpr double pitch = 0.05;
-    const double corrected = posPixels * pitch;
-    return corrected;
-  }
-
-  double 
-  NnClusterizationFactory::correctedRMSY(double posPixels,
-                                         std::vector<float>& pitches) const{
-    double p = posPixels + (m_sizeY - 1) * 0.5;
-    double p_Y = -100;
-    double p_center = -100;
+  double
+  NnClusterizationFactory::correctedRMS(double posPixels,
+                                        const std::vector<float>& pitches,
+                                        unsigned int size) const{
+    // Convert a pixel-unit RMS to a distance by integrating the actual pitches,
+    // so non-uniform pitch (ITk long/end pixels, 25 um modules) is handled.
+    // size is m_sizeX in phi (x), m_sizeY in eta (y).
+    double p = posPixels + (size - 1) * 0.5;
+    double p_pos = unsetPos;
+    double p_center = unsetPos;
     double p_actual = 0;
-    for (unsigned int  i = 0; i < m_sizeY; i++) {
-      if (p >= i and p <= (i + 1)) p_Y = p_actual + (p - i + 0.5) * pitches.at(i);
-      if (i == (m_sizeY - 1) / 2) p_center = p_actual + 0.5 * pitches.at(i);
+    for (unsigned int  i = 0; i < size; i++) {
+      if (p >= i and p <= (i + 1)) p_pos = p_actual + (p - i + 0.5) * pitches.at(i);
+      if (i == (size - 1) / 2) p_center = p_actual + 0.5 * pitches.at(i);
       p_actual += pitches.at(i);
     }
-    return std::abs(p_Y - p_center);
-  }  
+    return std::abs(p_pos - p_center);
+  }
 
   void 
   NnClusterizationFactory::getErrorMatrixFromOutput(std::vector<double>& outputX,
@@ -901,7 +920,15 @@ namespace InDet {
     for (unsigned int  a=0;a<m_sizeX;a++){
       input.matrixOfToT.emplace_back(m_sizeY, 0.0);
     }
-    input.vectorOfPitchesY.assign(m_sizeY, 0.4);
+    // Seed the pitches for cells with no hit. For ONNX (ITk) take the nominal
+    // from the design, so non-uniform sensors (e.g. 50x50 or 25x100 um) get the
+    // right value; for lwtnn keep the 0.4 eta seed the models were trained with.
+    if (m_useXPitches) {
+      input.vectorOfPitchesY.assign(m_sizeY, design->etaPitch());
+      input.vectorOfPitchesX.assign(m_sizeX, design->phiPitch());
+    } else {
+      input.vectorOfPitchesY.assign(m_sizeY, 0.4);
+    }
     rdosBegin = rdos.begin();
     charge = chListRecreated.begin();
     chargeEnd = chListRecreated.end();
@@ -926,6 +953,7 @@ namespace InDet {
       InDetDD::SiCellId cellId = element->cellIdFromIdentifier(*rdosBegin);
       InDetDD::SiDiodesParameters diodeParameters = design->parameters(cellId);
       double pitchY = diodeParameters.width().xEta();
+      double pitchX = diodeParameters.width().xPhi();
       if (not m_useToT) {
         input.matrixOfToT[absrow][abscol]=*charge;
       } else {
@@ -943,7 +971,11 @@ namespace InDet {
         }
        
       }
-      if (std::abs(pitchY-0.4)>1e-5){
+      if (m_useXPitches) {
+        input.vectorOfPitchesY[abscol]=pitchY;
+        input.vectorOfPitchesX[absrow]=pitchX;
+      } else if (std::abs(pitchY-0.4)>1e-5){
+        // lwtnn: only override the 0.4 seed for long pixels
         input.vectorOfPitchesY[abscol]=pitchY;
       }
     }//end iteration on rdos
@@ -1149,8 +1181,8 @@ namespace InDet {
       }
       const float rawRmsX = (prec_x > 0) ? std::sqrt(1.0f / prec_x) : 0.01f;
       const float rawRmsY = (prec_y > 0) ? std::sqrt(1.0f / prec_y) : 0.01f;
-      const double rmsX = correctedRMSX(rawRmsX);
-      const double rmsY = correctedRMSY(rawRmsY, rawInput.vectorOfPitchesY);
+      const double rmsX = correctedRMS(rawRmsX, rawInput.vectorOfPitchesX, m_sizeX);
+      const double rmsY = correctedRMS(rawRmsY, rawInput.vectorOfPitchesY, m_sizeY);
 
       Amg::MatrixX erm(2, 2);
       erm.setZero();

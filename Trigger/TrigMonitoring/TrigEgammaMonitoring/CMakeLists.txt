@@ -13,8 +13,8 @@ atlas_add_component( TrigEgammaMonitoring
                      src/components/*.cxx
                      INCLUDE_DIRS ${Boost_INCLUDE_DIRS}
                      LINK_LIBRARIES ${Boost_LIBRARIES} AthenaBaseComps AthenaMonitoringKernelLib AthenaMonitoringLib
-                     EgammaAnalysisInterfacesLib GaudiKernel PATCoreLib StoreGateLib 
-                     TrigDecisionToolLib TrigAnalysisHelpersLib TrigEgammaMatchingToolLib
+                     EgammaAnalysisInterfacesLib GaudiKernel PATCoreLib StoreGateLib TriggerMatchingToolLib
+                     TrigDecisionToolLib TrigAnalysisHelpersLib TrigEgammaMatchingToolLib TrigCompositeUtilsLib
                      TrigEgammaEmulationToolLib xAODBase xAODEgamma xAODEventInfo xAODJet
                      xAODMissingET xAODTracking xAODTrigCalo xAODTrigEgamma xAODTrigger 
                      xAODTruth egammaRecEvent LArRecEvent)
@@ -26,3 +26,4 @@ set_target_properties( TrigEgammaMonitoring
 
 # Install files from the package:
 atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
+

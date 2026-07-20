@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration # ====================================================================
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration # ====================================================================
 # EGAM7.py
 # This defines DAOD_EGAM7, a skimmed DAOD format for Run 3.
 # Keep events passing OR of electron triggers, or inclusive
@@ -223,7 +223,7 @@ def EGAM7KernelCfg(flags, name="EGAM7Kernel", **kwargs):
         thinning_expression = " && ".join(
             [
                 "(InDetTrackParticles.DFCommonTightPrimary)",
-                "(abs(DFCommonInDetTrackZ0AtPV)*sin(InDetTrackParticles.theta)<3*mm)",
+                "(abs(InDetTrackParticles.DFCommonInDetTrackZ0AtPV)*sin(InDetTrackParticles.theta)<3*mm)",
                 "(InDetTrackParticles.pt>10*GeV)",
             ]
         )

@@ -25,7 +25,7 @@ namespace CP
                           ISvcLocator *svcLoc = nullptr);
 
     virtual StatusCode initialize() final;
-    virtual StatusCode execute() final;
+    virtual StatusCode execute(const EventContext& ctx) final;
     virtual StatusCode finalize() final;
 
   private:

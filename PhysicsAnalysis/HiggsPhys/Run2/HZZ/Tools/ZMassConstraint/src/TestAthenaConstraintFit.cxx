@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // EDM include(s):
@@ -35,7 +35,7 @@ StatusCode TestAthenaConstraintFit::initialize()
 }
 
 
-StatusCode TestAthenaConstraintFit::execute()
+StatusCode TestAthenaConstraintFit::execute(const EventContext& /*ctx*/)
 {
   const xAOD::EventInfo* ei = 0;
   ATH_CHECK( evtStore()->retrieve(ei) );

@@ -25,7 +25,6 @@
 #include "LArHV/HECHVSubgap.h"
 #include "LArReadoutGeometry/FCALTile.h"
 #include "LArHV/FCALHVLine.h"
-#include "GaudiKernel/ThreadLocalContext.h"
 
 #include <fstream>
 #include <cstdlib>
@@ -66,11 +65,10 @@ StatusCode LArHVPathologyDbAlg::initialize()
   return StatusCode::SUCCESS;
 }
 
-StatusCode LArHVPathologyDbAlg::execute()
+StatusCode LArHVPathologyDbAlg::execute(const EventContext& ctx)
 {
   ATH_MSG_INFO(" in execute()");
 
-  const EventContext& ctx = Gaudi::Hive::currentContext();
 
   int nevt = ctx.eventID().event_number();
   if (nevt!=1) return StatusCode::SUCCESS;

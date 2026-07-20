@@ -39,12 +39,12 @@ namespace CP
 
 
   StatusCode TauTruthMatchingAlg ::
-  execute ()
+  execute (const EventContext& ctx)
   {
     for (const auto& sys : m_systematicsList.systematicsVector())
     {
       const xAOD::TauJetContainer *taus = nullptr;
-      ANA_CHECK (m_tauHandle.retrieve (taus, sys));
+      ANA_CHECK (m_tauHandle.retrieve (taus, sys, ctx));
       for (const xAOD::TauJet *tau : *taus)
       {
         if (m_preselection.getBool (*tau, sys))

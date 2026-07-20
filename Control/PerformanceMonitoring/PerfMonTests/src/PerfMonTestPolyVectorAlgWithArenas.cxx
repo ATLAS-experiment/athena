@@ -15,7 +15,7 @@ using namespace PerfMonTest;
 typedef DataVector<IHit> HitPtrContainer;
 
 
-StatusCode PolyVectorAlgWithArenas::execute()
+StatusCode PolyVectorAlgWithArenas::execute(const EventContext& /*ctx*/)
 {  
   DataPool<DHit> dhitPool;
   DataPool<FHit> fhitPool;

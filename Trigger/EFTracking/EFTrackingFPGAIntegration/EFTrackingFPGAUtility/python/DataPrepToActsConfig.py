@@ -111,7 +111,7 @@ def DataPrepToActsCfg(flags, **kwargs) -> ComponentAccumulator:
     acc.merge(ActsTrackFindingValidationAlgCfg(flags, **extractChildKwargs(prefix='ActsTrackFindingValidation.', **kwargs)))
 
     # Convert ActsTrk::TrackContainer to xAOD::TrackParticleContainer
-    from ActsConfig.ActsTrackFindingConfig import ActsTrackToTrackParticleCnvAlgCfg
+    from ActsConfig.ActsEventCnvConfig import ActsTrackToTrackParticleCnvAlgCfg
     kwargs.setdefault('ActsTrackToTrackParticleCnv.name', 'ActsTrackToTrackParticleCnvAlg')
     kwargs.setdefault('ActsTrackToTrackParticleCnv.ACTSTracksLocation', ['FPGAActsTracks'])
     kwargs.setdefault('ActsTrackToTrackParticleCnv.TrackParticlesOutKey', 'FPGATrackParticles')

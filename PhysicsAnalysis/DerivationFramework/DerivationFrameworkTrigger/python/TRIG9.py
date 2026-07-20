@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 #========================================================================
 # TRIG9.py
 # This defines DAOD_TRIG9, a DAOD format for Run 3.
@@ -42,7 +42,7 @@ def TRIG9KernelCfg(flags, name='TRIG9Kernel', **kwargs):
     # Thinning tools...
     # track thinning
     from DerivationFrameworkInDet.InDetToolsConfig import TrackParticleThinningCfg
-    tp_thinning_expression = "InDetTrackParticles.DFCommonTightPrimary && abs(DFCommonInDetTrackZ0AtPV)*sin(InDetTrackParticles.theta) < 3.0*mm && InDetTrackParticles.pt > 10*GeV"
+    tp_thinning_expression = "InDetTrackParticles.DFCommonTightPrimary && abs(InDetTrackParticles.DFCommonInDetTrackZ0AtPV)*sin(InDetTrackParticles.theta) < 3.0*mm && InDetTrackParticles.pt > 10*GeV"
     TRIG9TrackParticleThinningTool = acc.getPrimaryAndMerge(TrackParticleThinningCfg(
             flags,
             name                    = 'TRIG9TrackParticleThinningTool',

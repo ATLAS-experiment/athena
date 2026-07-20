@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "HiveTool.h"
@@ -49,7 +49,7 @@ HiveTool::finalize() {
   return StatusCode::SUCCESS;
 }
 
-StatusCode HiveTool::doSomething() const {
+StatusCode HiveTool::doSomething(const EventContext& ctx) const {
   ATH_MSG_INFO ("doSomething()");
 
   int val = 0;
@@ -57,7 +57,7 @@ StatusCode HiveTool::doSomething() const {
   if (m_rdh1.key() == "") {
     ATH_MSG_INFO("RH not valid - not retrieving");
   } else {    
-  SG::ReadHandle<HiveDataObj> rh( m_rdh1 );
+    SG::ReadHandle<HiveDataObj> rh( m_rdh1, ctx );
     ATH_MSG_INFO("  read: " << rh.key() << " = " << rh->val() );
     val = rh->val();
   }
@@ -65,7 +65,7 @@ StatusCode HiveTool::doSomething() const {
   if (m_wrh1.key() == "") {
     ATH_MSG_INFO("WH not valid - not writing");
   } else {
-    SG::WriteHandle<HiveDataObj> wrh1( m_wrh1 );
+    SG::WriteHandle<HiveDataObj> wrh1( m_wrh1, ctx );
     ATH_CHECK(wrh1.record(std::make_unique< HiveDataObj >(val + 666)));
 
     ATH_MSG_INFO("  write: " << wrh1.key() << " = " << wrh1->val() );

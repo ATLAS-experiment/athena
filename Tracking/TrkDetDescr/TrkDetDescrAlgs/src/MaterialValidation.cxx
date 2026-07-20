@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -16,7 +16,6 @@
 #include "TrkGeometry/LayerMaterialProperties.h"
 #include "TrkGeometry/MaterialProperties.h"
 #include "TrkGeometry/AssociatedMaterial.h"
-#include "TrkDetDescrInterfaces/IMaterialMapper.h"
 #include "TrkNeutralParameters/NeutralParameters.h"
 
 // test
@@ -25,28 +24,6 @@
 // Gaudi Units
 #include "GaudiKernel/SystemOfUnits.h"
 
-
-Trk::MaterialValidation::MaterialValidation(const std::string& name, ISvcLocator* pSvcLocator)
-: AthAlgorithm(name,pSvcLocator)    ,
-  m_materialMapper("Trk::MaterialMapper/MappingMaterialMapper"),
-  m_maxMaterialValidationEvents(25000),
-  m_flatDist(nullptr),
-  m_etaMin(-3.),
-  m_etaMax(3.),
-  m_runNativeNavigation(true),
-  m_accTinX0(0)
-{
-
-    // ---------------------- The Material Mapping -------------------------- //
-    // the toolhandle of the MaterialMapper to be used
-    declareProperty("MaterialMapper"               , m_materialMapper);
-    declareProperty("MaximumMappingEvents"         , m_maxMaterialValidationEvents);
-    // ---------------------- Range setup ----------------------------------- //
-    declareProperty("MinEta"                      , m_etaMin);
-    declareProperty("MaxEta"                      , m_etaMax);
-    // ---------------------- Native navigation ----------------------------- //
-    declareProperty("NativeNavigation"            , m_runNativeNavigation);
-}
 
 Trk::MaterialValidation::~MaterialValidation()
 {
@@ -69,7 +46,7 @@ StatusCode Trk::MaterialValidation::initialize()
 }
 
 
-StatusCode Trk::MaterialValidation::execute()
+StatusCode Trk::MaterialValidation::execute(const EventContext& /*ctx*/)
 {
     ATH_MSG_VERBOSE( "MaterialValidation execute() start ================================================" );
 

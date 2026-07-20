@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef EVENTTPCNV_TRIGGERINFO_P2_H
@@ -22,7 +22,7 @@ public:
     public:
         std::string  m_name;
         std::string  m_type;
-        bool         m_obeysLumiblock;
+        bool         m_obeysLumiblock = false;
     };
 
     typedef unsigned int number_type;

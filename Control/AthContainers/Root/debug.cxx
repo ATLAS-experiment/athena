@@ -25,6 +25,7 @@
 #include <vector>
 #include <sstream>
 #include <iostream>
+#include <cstring>
 
 
 namespace SGdebug {
@@ -299,7 +300,7 @@ std::string aux_var_as_string (SG::auxid_t auxid, const void* p, size_t i)
 
   const SG::AuxTypeRegistry& r = SG::AuxTypeRegistry::instance();
   const std::type_info* ti = r.getType(auxid);
-#define CONVERT(T) if (ti == &typeid(T)) convert (os, *reinterpret_cast<const T*>(p)); else
+#define CONVERT(T) if (ti == &typeid(T) || strcmp(ti->name(), typeid(T).name())==0) convert (os, *reinterpret_cast<const T*>(p)); else
 #define CONVERT1(T) CONVERT(T) CONVERT(std::vector<T>)
   CONVERT1 (int)
   CONVERT1 (unsigned int)

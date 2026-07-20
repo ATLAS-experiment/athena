@@ -24,7 +24,6 @@
 #include "AtlasHepMC/GenEvent.h"
 #include "AtlasHepMC/GenParticle.h"
 
-#include "HepPDT/ParticleDataTable.hh"
 
 #include "EvtGenBase/EvtParticle.hh"
 #include "EvtGen/EvtGen.hh"
@@ -59,7 +58,7 @@ public:
   virtual ~EvtInclusiveDecay();
 
   StatusCode initialize();
-  StatusCode execute();
+  StatusCode execute(const EventContext& ctx);
   StatusCode finalize();
   std::string xmlpath(void);
   struct ParticleIdCompare {bool operator()(const HepMC::GenParticlePtr& a,const HepMC::GenParticlePtr& b) const {return (a)&&(b)&&(a->momentum().e() < b->momentum().e());}};

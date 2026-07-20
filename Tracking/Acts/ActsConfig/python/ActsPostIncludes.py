@@ -5,88 +5,31 @@ from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 def PersistifyActsEDMCfg(flags) -> ComponentAccumulator:
     acc = ComponentAccumulator()
 
-    toAOD = []
-
     if flags.Acts.EDM.PersistifyClusters or flags.Acts.EDM.PersistifySpacePoints:
-        pixel_cluster_shortlist = ['-pixelClusterLink']
-        strip_cluster_shortlist = ['-sctClusterLink']
-        
-        pixel_cluster_variables = '.'.join(pixel_cluster_shortlist)
-        strip_cluster_variables = '.'.join(strip_cluster_shortlist)
-
-        toAOD += ['xAOD::PixelClusterContainer#ITkPixelClusters',
-                  'xAOD::PixelClusterAuxContainer#ITkPixelClustersAux.' + pixel_cluster_variables,
-                  'xAOD::StripClusterContainer#ITkStripClusters',
-                  'xAOD::StripClusterAuxContainer#ITkStripClustersAux.' + strip_cluster_variables]
-
-        if flags.Reco.EnableHGTDExtension:
-            hgtd_cluster_shortlist = ['-hgtdClusterLink']
-
-            hgtd_cluster_variables = '.'.join(hgtd_cluster_shortlist)
-            
-            toAOD += ['xAOD::HGTDClusterContainer#HGTD_Clusters',
-                      'xAOD::HGTDClusterAuxContainer#HGTD_ClustersAux.' + hgtd_cluster_variables]
-
-        if flags.Acts.doITkConversion:
-            toAOD += ['xAOD::StripClusterContainer#ITkConversionStripClusters',
-                      'xAOD::StripClusterAuxContainer#ITkConversionStripClustersAux.' + strip_cluster_variables]
+        from ActsConfig.ActsPersistificationConfig import PersistifyClusters
+        acc.merge(PersistifyClusters(flags,
+                                     pixelClusterCollections=['ITkPixelClusters'],
+                                     stripClusterCollections=['ITkStripClusters'],
+                                     hgtdClusterCollections=None if not flags.Reco.EnableHGTDExtension else ['HGTD_Clusters']))
 
     if flags.Acts.EDM.PersistifySpacePoints:
-        pixel_spacepoint_shortlist = ['-measurements',
-                                      '-pixelSpacePointLink']
-        strip_spacepoint_shortlist = ['topHalfStripLength', 
-                                      'bottomHalfStripLength', 
-                                      'topStripDirection',
-                                      'bottomStripDirection',
-                                      'stripCenterDistance',
-                                      'topStripCenter',
-                                      'measurementLink']
-
-        pixel_spacepoint_variables = '.'.join(pixel_spacepoint_shortlist)
-        strip_spacepoint_variables = '.'.join(strip_spacepoint_shortlist)
-        
-        toAOD += ['xAOD::SpacePointContainer#ITkPixelSpacePoints',
-                  'xAOD::SpacePointAuxContainer#ITkPixelSpacePointsAux.' + pixel_spacepoint_variables,
-                  'xAOD::SpacePointContainer#ITkStripSpacePoints',
-                  'xAOD::SpacePointAuxContainer#ITkStripSpacePointsAux.' + strip_spacepoint_variables,
-                  'xAOD::SpacePointContainer#ITkStripOverlapSpacePoints',
-                  'xAOD::SpacePointAuxContainer#ITkStripOverlapSpacePointsAux.' + strip_spacepoint_variables]
+        from ActsConfig.ActsPersistificationConfig import PersistifySpacePoints
+        acc.merge(PersistifySpacePoints(flags,
+                                        pixelSpacePointCollections=['ITkPixelSpacePoints'],
+                                        stripSpacePointCollections=['ITkStripSpacePoints', 'ITkStripOverlapSpacePoints']))
 
     if flags.Acts.EDM.PersistifyTracks:
         trackPrefixes = ['Acts', 'ActsResolved',
-                         'LargeD0', 'LargeD0Resolved',
+                         'ActsLargeRadius', 'ActsLargeRadiusResolved',
                          'ActsConversion', 'ActsConversionResolved',
                          'ActsHeavyIon', 'ActsHeavyIonResolved']
-        for prefix in trackPrefixes:
-            toAOD +=  [f"xAOD::TrackSummaryContainer#{prefix}TrackSummary",
-                       f"xAOD::TrackSummaryAuxContainer#{prefix}TrackSummaryAux.",
-                       f"xAOD::TrackStateContainer#{prefix}TrackStates",
-                       f"xAOD::TrackStateAuxContainer#{prefix}TrackStatesAux.-uncalibratedMeasurement",
-                       f"xAOD::TrackParametersContainer#{prefix}TrackParameters",
-                       f"xAOD::TrackParametersAuxContainer#{prefix}TrackParametersAux.",
-                       f"xAOD::TrackJacobianContainer#{prefix}TrackJacobians",
-                       f"xAOD::TrackJacobianAuxContainer#{prefix}TrackJacobiansAux.",
-                       f"xAOD::TrackMeasurementContainer#{prefix}TrackMeasurements",
-                       f"xAOD::TrackMeasurementAuxContainer#{prefix}TrackMeasurementsAux.",
-                       f"xAOD::TrackSurfaceContainer#{prefix}TrackStateSurfaces",
-                       f"xAOD::TrackSurfaceAuxContainer#{prefix}TrackStateSurfacesAux.",
-                       f"xAOD::TrackSurfaceContainer#{prefix}TrackSurfaces",
-                       f"xAOD::TrackSurfaceAuxContainer#{prefix}TrackSurfacesAux."]
+        from ActsConfig.ActsPersistificationConfig import PersistifyTracks
+        acc.merge(PersistifyTracks(flags,
+                                   extensions=trackPrefixes))
 
-    # add track particles created by the Acts TrackToTrackParticleCnvAlg to the AOD
-    trackCnvPrefixes = ["Acts"]
-    trackparticles_shortlist = [] if flags.Acts.EDM.PersistifyTracks else ['-actsTrack']
-    trackparticles_variables = ".".join(trackparticles_shortlist)
-    for prefix in trackCnvPrefixes:
-        toAOD += [f"xAOD::TrackParticleContainer#InDet{prefix}TrackParticles",
-                  f"xAOD::TrackParticleAuxContainer#InDet{prefix}TrackParticlesAux." + trackparticles_variables]
-
-    # If there is nothing to persistify, returns an empty CA
-    if len(toAOD) == 0:
-        return acc
-
-    from OutputStreamAthenaPool.OutputStreamConfig import addToAOD    
-    acc.merge(addToAOD(flags, toAOD))
+    from ActsConfig.ActsPersistificationConfig import PersistifyTrackParticles
+    acc.merge(PersistifyTrackParticles(flags,
+                                       trackParticleCollections=['InDetActsTrackParticles']))
     return acc
 
 def ACTSClusterPostInclude(flags) -> ComponentAccumulator:

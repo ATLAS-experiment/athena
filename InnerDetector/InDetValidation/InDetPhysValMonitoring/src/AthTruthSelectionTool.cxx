@@ -166,10 +166,10 @@ AthTruthSelectionTool::initialize() {
           const Amg::Vector3D position(xPos, yPos, z_truth);
           const Amg::Vector3D momentum(p.px(), p.py(), p.pz());
           const Trk::CurvilinearParameters cParameters(position, momentum, p.charge());
-          const Trk::TrackParameters *exParameters = m_extrapolator->extrapolate(Gaudi::Hive::currentContext(),
+          auto exParameters = m_extrapolator->extrapolate(Gaudi::Hive::currentContext(),
                                                                                  cParameters, 
                                                                                  *m_cylinder, 
-                                                                                 Trk::anyDirection, false, Trk::pion).release();
+                                                                                 Trk::anyDirection, false, Trk::pion);
           if (!exParameters) {
             ATH_MSG_VERBOSE("Failed extrapolation. Rejecting track.");
             return false;
@@ -185,7 +185,6 @@ AthTruthSelectionTool::initialize() {
           return false;
         }, "SelectCylinder"));
   } else if (m_zDisc > 0) {
-    //m_cutList.add(Accept_t(acceptExtrapolatedTPToSurface, "SelectDisc"));
     if (not m_disc1 || not m_disc2) { //m_disc2 == 0 implied
       ATH_MSG_VERBOSE("Creating and caching disc surface");
       Amg::Transform3D trnsf_shiftZ = Amg::Transform3D(Amg::Translation3D(0.,0.,m_zDisc));
@@ -208,9 +207,9 @@ AthTruthSelectionTool::initialize() {
           const Amg::Vector3D position(xPos, yPos, z_truth);
           const Amg::Vector3D momentum(p.px(), p.py(), p.pz());
           const Trk::CurvilinearParameters cParameters(position, momentum, p.charge());
-          const Trk::TrackParameters *exParameters = m_extrapolator->extrapolate(Gaudi::Hive::currentContext(),
+          auto exParameters = m_extrapolator->extrapolate(Gaudi::Hive::currentContext(),
                                                                                  cParameters, 
-                                                                                 *m_disc1, Trk::anyDirection, true, Trk::pion).release();
+                                                                                 *m_disc1, Trk::anyDirection, true, Trk::pion);
           if (exParameters) {
             //since boundary check is true, should be enough to say we've hit the disk..
             ATH_MSG_VERBOSE("Successfully extrapolated track to disk at +" << m_zDisc << ": " << *exParameters);
@@ -223,7 +222,7 @@ AthTruthSelectionTool::initialize() {
             //else...
             ATH_MSG_VERBOSE("Strange, extrapolation succeeded but extrapolated position not within disc radius! Test next disc");
           }
-          exParameters = m_extrapolator->extrapolate(Gaudi::Hive::currentContext(),cParameters, *m_disc2, Trk::anyDirection, true, Trk::pion).release();
+          exParameters = m_extrapolator->extrapolate(Gaudi::Hive::currentContext(),cParameters, *m_disc2, Trk::anyDirection, true, Trk::pion);
           if (exParameters) {
             //since boundary check is true, should be enough to say we've hit the disk..
             ATH_MSG_VERBOSE("Successfully extrapolated track to disk at -" << m_zDisc << ": " << *exParameters);

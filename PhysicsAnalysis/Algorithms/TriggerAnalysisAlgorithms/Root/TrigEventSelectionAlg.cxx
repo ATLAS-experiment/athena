@@ -41,7 +41,7 @@ StatusCode CP::TrigEventSelectionAlg::initialize()
   return StatusCode::SUCCESS;
 }
 
-StatusCode CP::TrigEventSelectionAlg::execute()
+StatusCode CP::TrigEventSelectionAlg::execute(const EventContext& /*ctx*/)
 {
   FilterReporter filter (m_filterParams, m_noFilter.value());
 

@@ -39,7 +39,7 @@ namespace CP
     return StatusCode::SUCCESS;
   }
 
-  StatusCode SystObjectLinkerAlg ::execute(const EventContext&) const
+  StatusCode SystObjectLinkerAlg ::execute(const EventContext& ctx) const
   {
 
     // Populate a map of systematics hash to container, so we
@@ -55,7 +55,7 @@ namespace CP
     for (const auto& sys : m_systematicsList.systematicsVector())
     {
         const xAOD::IParticleContainer* sys_container = nullptr;
-        ATH_CHECK( m_inputHandle.retrieve(sys_container, sys) );
+        ATH_CHECK( m_inputHandle.retrieve(sys_container, sys, ctx) );
 
         // Record the hash for the nominal
         if(sys.name().empty()) {nominal_hash = sys.hash();}

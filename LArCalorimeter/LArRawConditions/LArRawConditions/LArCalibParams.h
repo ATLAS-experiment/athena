@@ -1,7 +1,7 @@
 //Dear emacs, this is -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef LARRAWCONDITIONS_LARCALIBPARAMS_H
@@ -62,7 +62,7 @@ class LArCalibParams {
 
   class CalibBoard {
   public:
-    unsigned m_nTrigger;
+    unsigned m_nTrigger = 0;
     std::vector<unsigned> m_Pattern;
     std::vector<unsigned> m_DAC;
     std::vector<unsigned> m_Delay;

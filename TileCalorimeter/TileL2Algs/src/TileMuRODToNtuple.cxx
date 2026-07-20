@@ -78,10 +78,10 @@ StatusCode TileMuRODToNtuple::initialize() {
   return StatusCode::SUCCESS;
 }
 
-StatusCode TileMuRODToNtuple::execute() {
+StatusCode TileMuRODToNtuple::execute(const EventContext& ctx) {
 
   // step1: read from TDS
-  SG::ReadHandle<TileL2Container> l2Container(m_l2ContainerKey);
+  SG::ReadHandle<TileL2Container> l2Container(m_l2ContainerKey, ctx);
   ATH_CHECK( l2Container.isValid() );
 
   m_ntag = 0;

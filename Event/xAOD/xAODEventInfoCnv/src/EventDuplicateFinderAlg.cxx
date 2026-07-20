@@ -32,7 +32,7 @@ namespace xAODReader {
       return StatusCode::SUCCESS;
    }
 
-   StatusCode EventDuplicateFinderAlg::execute() {
+   StatusCode EventDuplicateFinderAlg::execute(const EventContext& /*ctx*/) {
 
       // Retrieve the EI object:
       const xAOD::EventInfo* ei = nullptr;

@@ -28,10 +28,10 @@ namespace CP
   namespace detail
   {
     StatusCode ShallowCopy<xAOD::IParticleContainer> ::
-    getCopy (MsgStream& msgStream, StoreType& store,
+    getCopy (MsgStream& msgStream, const EventContext& ctx,
              xAOD::IParticleContainer*& object,
              const xAOD::IParticleContainer *inputObject,
-             const std::string& outputName, const std::string& auxName)
+             const std::string& outputName)
     {
       // this is probably not the best way to do this, but doing this
       // the proper way will require an xAOD expert to do it.
@@ -50,8 +50,8 @@ namespace CP
           const TYPE *in = dynamic_cast< const TYPE* >( inputObject );         \
           if( in ) {                                                           \
              TYPE *out = nullptr;                                              \
-             ANA_CHECK( ShallowCopy<TYPE>::getCopy( msgStream, store, out, in, \
-                                                    outputName, auxName ) );   \
+             ANA_CHECK( ShallowCopy<TYPE>::getCopy( msgStream, ctx, out, in,   \
+                                                    outputName ) );            \
              object = out;                                                     \
              return StatusCode::SUCCESS;                                       \
           }                                                                    \

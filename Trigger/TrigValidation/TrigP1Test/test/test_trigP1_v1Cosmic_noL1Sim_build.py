@@ -1,15 +1,15 @@
 #!/usr/bin/env python
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
-# art-description: Trigger athenaHLT test of the Cosmic_run3_v1 menu on express stream from a cosmic run
+# art-description: Trigger athenaEF test of the Cosmic_run3_v1 menu on express stream from a cosmic run
 # art-type: build
-# art-include: main/Athena/x86_64-el9-gcc14-opt
+# art-include: main/Athena/x86_64-el9-gcc15-opt
 # art-include: 24.0/Athena
 
 from TrigValTools.TrigValSteering import Test, ExecStep, CheckSteps
 
 ex = ExecStep.ExecStep()
-ex.type = 'athenaHLT'
+ex.type = 'athenaEF'
 ex.job_options = 'TriggerJobOpts.runHLT'
 ex.input = 'data_cos'
 ex.max_events = 100

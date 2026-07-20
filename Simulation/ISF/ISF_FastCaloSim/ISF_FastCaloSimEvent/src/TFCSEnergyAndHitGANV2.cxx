@@ -6,8 +6,7 @@
 
 #include "CLHEP/Random/RandFlat.h"
 #include "CLHEP/Random/RandGauss.h"
-#include "HepPDT/ParticleData.hh"
-#include "HepPDT/ParticleDataTable.hh"
+#include "TruthUtils/HepMCHelpers.h"
 #include "TruthUtils/ParticleConstants.h"
 #include "ISF_FastCaloSimEvent/TFCSCenterPositionCalculation.h"
 #include "ISF_FastCaloSimEvent/TFCSExtrapolationState.h"
@@ -124,7 +123,7 @@ bool TFCSEnergyAndHitGANV2::fillEnergy(
   }
 
   const int pdgId = truth->pdgid();
-  const float charge = HepPDT::ParticleID(pdgId).charge();
+  const float charge = MC::charge(pdgId);
 
   float Einit;
   const float Ekin = truth->Ekin();
@@ -170,7 +169,13 @@ bool TFCSEnergyAndHitGANV2::fillEnergy(
   for (const auto &[layer, h] : binsInLayers) {
     // attempt to debug intermittent ci issues described in
     // https://its.cern.ch/jira/browse/ATLASSIM-7031
-    if (h.IsZombie()) {
+    if (h.IsZombie() || h.IsOnHeap() || dynamic_cast<const TH2D*>(&h) == nullptr) {
+      ATH_MSG_ERROR("Histogram for layer " << layer << " is broken; " <<
+                    "zombie: " << h.IsZombie() <<
+                    "on heap: " << h.IsOnHeap() <<
+                    "dynamic type: " << typeid(h).name());
+      ATH_MSG_INFO("See ATLASSIM-7031.");
+
       ATH_MSG_INFO("Got truth state: ");
       truth->Print();
 
@@ -183,7 +188,6 @@ bool TFCSEnergyAndHitGANV2::fillEnergy(
       ATH_MSG_INFO("Got GAN XML parameters: ");
       m_param.Print();
 
-      ATH_MSG_ERROR("Histogram pointer for layer " << layer << " is broken");
       return false;
     }
 

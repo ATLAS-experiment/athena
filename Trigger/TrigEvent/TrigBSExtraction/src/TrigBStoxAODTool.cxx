@@ -514,11 +514,6 @@ StatusCode TrigBStoxAODTool::initialize(){
 		     new BStoXAODHelper::DefaultHelper<
 		     TrackCollection,xAOD::TrackParticleContainer,xAODMaker::ITrackCollectionCnvTool,true>(m_trackCollectionTool)) );
   
-  m_helpers.insert( std::pair<CLID,BStoXAODHelper::DefaultHelper<
-		    Rec::TrackParticleContainer,xAOD::TrackParticleContainer,xAODMaker::IRecTrackParticleContainerCnvTool,true>* >
-		    (ClassID_traits<Rec::TrackParticleContainer>::ID(),
-		     new BStoXAODHelper::DefaultHelper<
-		     Rec::TrackParticleContainer,xAOD::TrackParticleContainer,xAODMaker::IRecTrackParticleContainerCnvTool,true>(m_recTrackParticleContTool)) );
   
   m_helpers.insert( std::pair<CLID,BStoXAODHelper::DefaultHelper<
 		    Analysis::TauJetContainer,xAOD::TauJetContainer,xAODMaker::ITauJetCnvTool>* >

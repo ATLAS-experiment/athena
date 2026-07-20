@@ -5,10 +5,17 @@
 #include "MuonFastRecoEvent/GlobalPattern.h"
 #include "MuonDetDescrUtils/MuonSectorMapping.h"
 
+namespace {
+    double inDegrees(double angle) {
+        return angle / Gaudi::Units::deg;
+    }
+}
 namespace MuonR4 {
 
-GlobalPattern::GlobalPattern(HitCollection&& hitPerStation)
-    : m_hitsInStation(std::move(hitPerStation)) {};
+GlobalPattern::GlobalPattern(HitCollection&& hitPerStation,
+                             BucketCollection&& bucketPerStation)
+    : m_hitsInStation(std::move(hitPerStation)),
+      m_parentBuckets(std::move(bucketPerStation)) {};
 
 std::vector<GlobalPattern::StIndex> GlobalPattern::getStations() const {
     std::vector<StIndex> out{};
@@ -27,6 +34,15 @@ const std::vector<GlobalPattern::HitType>& GlobalPattern::hitsInStation(StIndex 
     return empty;
 }
 
+const std::vector<const SpacePointBucket*>& GlobalPattern::bucketsInStation(StIndex station) const {
+    const auto& it = m_parentBuckets.find(station);
+    if (it != m_parentBuckets.end()) {
+        return it->second;
+    }
+    static const std::vector<const SpacePointBucket*> empty{};
+    return empty;
+}
+
 double GlobalPattern::sectorPhi() const { 
     static const Muon::MuonSectorMapping sectorMap{};
     return sectorMap.sectorOverlapPhi(sector(), secondarySector()); 
@@ -34,8 +50,8 @@ double GlobalPattern::sectorPhi() const {
 
 void GlobalPattern::print(std::ostream& ostr) const {
     ostr<<"SpacePoint Pattern, Sector: "<< sector() << "  & " <<  (isSectorOverlap() ? std::to_string(secondarySector()) : "-")
-                                        <<", theta: "<<theta() << ", Phi: "<<phi()<< " Sector Phi: "<<sectorPhi()
-        <<", nPrecisionHits: "<<nPrecisionHits()<<", nEtaNonPrecisionHits: "<<nEtaNonPrecisionHits()<<", nPhiHits: "<<nPhiHits()
+                                        <<", theta: "<<inDegrees(theta()) << ", Phi: "<<inDegrees(phi())<< " Sector Phi: "<<inDegrees(sectorPhi())
+        <<", nPrecisionLayers: "<<nPrecisionLayers()<<", nTriggerLayers: "<<nTriggerLayers()<<", nPhiLayers: "<<nPhiLayers()
         <<", mean normalized residual squared: "<<meanNormResidual2();    
     ostr<<", Hit per station: \n";
     for (const auto& [station, hits] : m_hitsInStation) {

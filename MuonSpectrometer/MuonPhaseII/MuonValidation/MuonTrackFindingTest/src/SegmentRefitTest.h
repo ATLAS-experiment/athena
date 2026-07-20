@@ -19,7 +19,7 @@ namespace MuonValR4{
         public:
             using AthHistogramAlgorithm::AthHistogramAlgorithm;
             virtual StatusCode initialize() override final;
-            virtual StatusCode execute() override final;
+            virtual StatusCode execute(const EventContext& ctx) override final;
             virtual StatusCode finalize() override final;
 
         private:
@@ -49,13 +49,13 @@ namespace MuonValR4{
             /** @brief Local Phi before the refit */
             MuonVal::ScalarBranch<float>& m_preFitPhi{m_tree.newScalar<float>("preFitPhi")};
             /** @brief Uncertainty on the fitted local X (prefit) */
-            MuonVal::ScalarBranch<float>& m_uncertLocX{m_tree.newScalar<float>("uncertLocX")};
+            MuonVal::ScalarBranch<float>& m_uncertLocX{m_tree.newScalar<float>("uncertLocX", -1.)};
             /** @brief Uncertainty on the fitted local Y (prefit) */
-            MuonVal::ScalarBranch<float>& m_uncertLocY{m_tree.newScalar<float>("uncertLocY")};
+            MuonVal::ScalarBranch<float>& m_uncertLocY{m_tree.newScalar<float>("uncertLocY", -1.)};
             /** @brief Uncertainty on the fitted local Theta (prefit) */
-            MuonVal::ScalarBranch<float>& m_uncertTheta{m_tree.newScalar<float>("uncertTheta")};
+            MuonVal::ScalarBranch<float>& m_uncertTheta{m_tree.newScalar<float>("uncertTheta", -1.)};
             /** @brief Uncertainty on the fitted local Phi (prefit) */
-            MuonVal::ScalarBranch<float>& m_uncertPhi{m_tree.newScalar<float>("uncertPhi")};
+            MuonVal::ScalarBranch<float>& m_uncertPhi{m_tree.newScalar<float>("uncertPhi", -1.)};
 
             /** @brief Chi2 of the segment before the refit */
             MuonVal::ScalarBranch<float>& m_preFitChi2{m_tree.newScalar<float>("preFitChi2")};

@@ -6,9 +6,6 @@
 #include "LeptonTaggers/DecoratePromptLeptonImproved.h"
 #include "LeptonTaggers/PromptUtils.h"
 
-#include "GaudiKernel/ThreadLocalContext.h"
-
-
 // ROOT
 #include "TMVA/Config.h"
 #include "TH1.h"
@@ -141,14 +138,13 @@ StatusCode Prompt::DecoratePromptLeptonImproved::finalize()
 
 
 //=============================================================================
-StatusCode Prompt::DecoratePromptLeptonImproved::execute()
+StatusCode Prompt::DecoratePromptLeptonImproved::execute(const EventContext& ctx)
 {
   //
   // Start execute timer
   //
   TimerScopeHelper timer(m_timerExec);
 
-  const EventContext& ctx = Gaudi::Hive::currentContext();
 
   //
   // Retrieve containers from evtStore
@@ -478,7 +474,7 @@ void Prompt::DecoratePromptLeptonImproved::decorateMuon(
     //
     // Get mutual variables, passing track as argument
     //
-    getMutualVariables(muon, *match.second, muon.primaryTrackParticle(), vars);
+    getMutualVariables(muon, *match.second, muon.trackParticle(xAOD::Muon::TrackParticleType::Primary), vars);
 
     //
     // Add variables to TMVA Reader
@@ -600,9 +596,7 @@ void Prompt::DecoratePromptLeptonImproved::getMuonAnpVariables(
   //
   double calE = -99.0, peloss = -99.0, caloClusterERel = -99.0;
 
-  if(muon.clusterLink().isValid()) {
-    const xAOD::CaloCluster* cluster = *(muon.clusterLink());
-
+  if(const xAOD::CaloCluster* cluster = muon.cluster()) {
     if(accessMuonCalE.isAvailable(*cluster) && accessMuonParamEnergyLoss.isAvailable(muon)) {
       calE   = accessMuonCalE(*cluster);
       peloss = accessMuonParamEnergyLoss(muon);

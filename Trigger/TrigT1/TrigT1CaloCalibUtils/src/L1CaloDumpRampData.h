@@ -16,7 +16,7 @@ class L1CaloDumpRampData: public ::AthHistogramAlgorithm
   virtual ~L1CaloDumpRampData(); 
 
   virtual StatusCode initialize();
-  virtual StatusCode execute();
+  virtual StatusCode execute(const EventContext& ctx);
   virtual StatusCode finalize();
   
  private: 

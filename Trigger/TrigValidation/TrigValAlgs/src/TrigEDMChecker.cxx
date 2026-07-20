@@ -44,8 +44,6 @@
 #include "TrigParticle/TrigElectronContainer.h"
 #include "TrigParticle/TrigTauContainer.h"
 #include "TrigSteeringEvent/HLTResult.h"
-#include "TrigInDetEvent/TrigInDetTrackCollection.h"
-#include "TrigInDetTruthEvent/TrigInDetTrackTruthMap.h"
 #include "TrigInDetEvent/TrigTauTracksInfo.h"
 #include "TrigInDetEvent/TrigVertexCollection.h"
 #include "TrigCaloEvent/TrigEMCluster.h"
@@ -142,7 +140,6 @@ TrigEDMChecker::TrigEDMChecker(const std::string& name, ISvcLocator* pSvcLocator
   declareProperty("doDumpHLTResult", m_doDumpHLTResult = false);
   declareProperty("doDumpTrigTauContainer", m_doDumpTrigTauContainer = false);
   declareProperty("doDumpTrigTauTracksInfo", m_doDumpTrigTauTracksInfo = false);
-  declareProperty("doDumpTrigInDetTrackCollection", m_doDumpTrigInDetTrackCollection = false);
   declareProperty("doDumpTrigVertexCollection", m_doDumpTrigVertexCollection = false);
   declareProperty("doDumpTrigEMCluster", m_doDumpTrigEMCluster = false);
   declareProperty("doDumpTrigEMClusterContainer", m_doDumpTrigEMClusterContainer = false);
@@ -202,7 +199,6 @@ StatusCode TrigEDMChecker::initialize() {
   ATH_MSG_INFO("REGTEST m_doDumpHLTResult                = " << m_doDumpHLTResult );
   ATH_MSG_INFO("REGTEST m_doDumpTrigTauContainer         = " << m_doDumpTrigTauContainer );
   ATH_MSG_INFO("REGTEST m_doDumpTrigTauTracksInfo        = " << m_doDumpTrigTauTracksInfo );
-  ATH_MSG_INFO("REGTEST m_doDumpTrigInDetTrackCollection = " << m_doDumpTrigInDetTrackCollection );
   ATH_MSG_INFO("REGTEST m_doDumpTrigVertexCollection     = " << m_doDumpTrigVertexCollection );
   ATH_MSG_INFO("REGTEST m_doDumpTrigEMCluster            = " << m_doDumpTrigEMCluster );
   ATH_MSG_INFO("REGTEST m_doDumpTrigEMClusterContainer   = " << m_doDumpTrigEMClusterContainer );
@@ -240,7 +236,7 @@ StatusCode TrigEDMChecker::initialize() {
 }
 
 
-StatusCode TrigEDMChecker::execute() {
+StatusCode TrigEDMChecker::execute(const EventContext& ctx) {
 
   /* fwinkl, Mar 20222:
      Some attempt was made to make the code pass the thread-checker. Methods that
@@ -252,11 +248,11 @@ StatusCode TrigEDMChecker::execute() {
      being checked and will hopefully be written in a thread-safe manner, i.e. using
      ReadHandleKeys. If someone is very eager they could migrate all uses of DataHandles...
   */
-  StatusCode sc ATLAS_THREAD_SAFE = do_execute();
+  StatusCode sc ATLAS_THREAD_SAFE = do_execute(ctx);
   return sc;
 }
 
-StatusCode TrigEDMChecker::do_execute ATLAS_NOT_THREAD_SAFE() {
+StatusCode TrigEDMChecker::do_execute ATLAS_NOT_THREAD_SAFE(const EventContext& ctx) {
 
   ATH_MSG_INFO( " ==========START of event===========" );
 
@@ -485,13 +481,6 @@ StatusCode TrigEDMChecker::do_execute ATLAS_NOT_THREAD_SAFE() {
 		}
 	}
 
-	if(m_doDumpTrigInDetTrackCollection){
-		StatusCode sc = dumpTrigInDetTrackCollection();
-		if (sc.isFailure()) {
-          ATH_MSG_ERROR("The method dumpTrigInDetTrackCollection() failed");
-		}
-	}
-
 	if(m_doDumpAll || m_doDumpTrigVertexCollection){
       StatusCode sc = dumpTrigVertexCollection();
       if (sc.isFailure()) {
@@ -546,7 +535,7 @@ StatusCode TrigEDMChecker::do_execute ATLAS_NOT_THREAD_SAFE() {
   }
 
   if (m_doDumpAll || m_doDumpNavigation) {
-    StatusCode sc = dumpNavigation();
+    StatusCode sc = dumpNavigation(ctx);
     if ( sc.isFailure() ) {
       ATH_MSG_ERROR("The method dumpNavigation() failed");
     }
@@ -564,8 +553,7 @@ StatusCode TrigEDMChecker::do_execute ATLAS_NOT_THREAD_SAFE() {
     std::string trigCompositeSteering;
     bool pass;
     ATH_CHECK(TrigCompositeNavigationToDot(trigCompositeSteering, pass));
-    const EventContext& context = Gaudi::Hive::currentContext();
-    const std::string evtNumber = std::to_string(context.eventID().event_number());
+    const std::string evtNumber = std::to_string(ctx.eventID().event_number());
     const std::string passStr = (pass ? "Pass" : "Fail"); 
     std::ofstream ofile(std::string("NavGraph_" + m_dumpNavForChain + "_Ev" + evtNumber + "_" + passStr + ".dot").c_str());
     ofile << trigCompositeSteering;
@@ -2123,150 +2111,6 @@ StatusCode TrigEDMChecker::dumpHLTResult() {
   return StatusCode::SUCCESS;
 }
 
-
-
-
-//////////////////////////////////////////////////////////////////////////////////
-
-StatusCode TrigEDMChecker::dumpTrigInDetTrackCollection() {
-
-  std::string TrigInDetTrackTags[]={ "HLT_TrigIDSCAN_Jet",
-                                     "HLT_TrigIDSCAN_Tau",
-                                     "HLT_TrigIDSCAN_eGamma",
-                                     "HLT_TrigIDSCAN_Muon",
-                                     "HLT_TrigIDSCAN_muonIso",
-                                     "HLT_TrigIDSCAN_Bphysics",
-                                     "HLT_TrigIDSCAN_FullScan",
-                                     "HLT_TrigIDSCAN_Cosmics",
-                                     "HLT_TrigIDSCAN_eGamma_Brem",
-                                     "HLT_TrigIDSCAN_Tile",
-                                     "HLT_TrigSiTrack_eGamma",
-                                     "HLT_TrigSiTrack_Muon",
-                                     "HLT_TrigSiTrack_muonIso",
-                                     "HLT_TrigSiTrack_Tau",
-                                     "HLT_TrigSiTrack_Jet",
-                                     "HLT_TrigSiTrack_Bphysics",
-                                     "HLT_TrigSiTrack_FullScan",
-                                     "HLT_TrigSiTrack_Cosmics",
-                                     "HLT_TRTSegmentFinder",
-                                     "HLT_TRTxK"};
-  int ntag=20;
-
-  ATH_MSG_DEBUG("in dumpTrigInDetTrackCollection()");
-
-  const TrigInDetTrackTruthMap* pTruthMap(nullptr);
-  bool gotTruthMap = false;
-
-  if (evtStore()->contains<TrigInDetTrackTruthMap>("TrigInDetTrackTruthMap")) {
-    StatusCode sc=evtStore()->retrieve(pTruthMap,"TrigInDetTrackTruthMap");
-    if (sc.isFailure())
-      {
-        ATH_MSG_WARNING(" could not retrieve TrackTruthMap with key TrigInDetTruthMap");
-      } else {
-      gotTruthMap=true;
-      //      pTruthMap->print();
-    }
-  }
-  else ATH_MSG_DEBUG(" didn't find any TrackTruthMap objects with key TrigInDetTruthMap");
-
-  ATH_MSG_INFO("REGTEST ==========START of TrigInDetTrackCollection DUMP===========");
-
-  for (int iTag=0; iTag < ntag; iTag++) {
-    const TrigInDetTrackCollection* trigInDetTrackCollection = nullptr;
-    StatusCode sc = evtStore()->retrieve(trigInDetTrackCollection,TrigInDetTrackTags[iTag] );
-    if (sc.isFailure()) {
-      ATH_MSG_DEBUG("REGTEST No TrigInDetTrackCollection found with key " << TrigInDetTrackTags[iTag]);
-      continue;
-    }
-    ATH_MSG_INFO("REGTEST TrigInDetTrackCollections retrieved with key "
-                 << TrigInDetTrackTags[iTag]);
-
-    ATH_MSG_INFO("REGTEST TrigInDetTrackCollection->size() returns " << trigInDetTrackCollection->size());
-
-    TrigInDetTrackCollection::const_iterator trkItr  = trigInDetTrackCollection->begin();
-    TrigInDetTrackCollection::const_iterator trkItrE = trigInDetTrackCollection->end();
-
-    for (int j=0; trkItr != trkItrE; ++trkItr, ++j ) {
-
-      ATH_MSG_INFO("REGTEST Looking at TrigInDetTrack " << j);
-
-      ATH_MSG_INFO("REGTEST TrigInDetTrack->algorithmId() returns " << (*trkItr)->algorithmId());
-      ATH_MSG_INFO("REGTEST TrigInDetTrack->chi2() returns " << (*trkItr)->chi2());
-      ATH_MSG_INFO("REGTEST TrigInDetTrack->NStrawHits() returns " << (*trkItr)->NStrawHits());
-
-      ATH_MSG_INFO("REGTEST TrigInDetTrack->NStraw() returns " << (*trkItr)->NStraw());
-      ATH_MSG_INFO("REGTEST TrigInDetTrack->NStrawTime() returns " << (*trkItr)->NStrawTime());
-      ATH_MSG_INFO("REGTEST TrigInDetTrack->NTRHits() returns " << (*trkItr)->NTRHits());
-
-      ATH_MSG_INFO("REGTEST Looking at TrigInDetFitTrack->param()");
-      const TrigInDetTrackFitPar* my_param = (*trkItr)->param();
-
-      ATH_MSG_INFO("REGTEST TrigInDetTrackFitPar->a0() returns " << my_param->a0());
-      ATH_MSG_INFO("REGTEST TrigInDetTrackFitPar->z0() returns " << my_param->z0());
-      ATH_MSG_INFO("REGTEST TrigInDetTrackFitPar->phi0() returns " << my_param->phi0());
-      ATH_MSG_INFO("REGTEST TrigInDetTrackFitPar->eta() returns " << my_param->eta());
-      ATH_MSG_INFO("REGTEST TrigInDetTrackFitPar->pT() returns " << my_param->pT());
-      ATH_MSG_INFO("REGTEST TrigInDetTrackFitPar->ea0() returns " << my_param->ea0());
-      ATH_MSG_INFO("REGTEST TrigInDetTrackFitPar->ez0() returns " << my_param->ez0());
-      ATH_MSG_INFO("REGTEST TrigInDetTrackFitPar->ephi0() returns " << my_param->ephi0());
-      ATH_MSG_INFO("REGTEST TrigInDetTrackFitPar->eeta() returns " << my_param->eeta());
-      ATH_MSG_INFO("REGTEST TrigInDetTrackFitPar->epT() returns " << my_param->epT());
-      ATH_MSG_INFO("REGTEST TrigInDetTrackFitPar->surfaceType() returns " << my_param->surfaceType());
-      ATH_MSG_INFO("REGTEST TrigInDetTrackFitPar->surfaceCoordinate() returns " << my_param->surfaceCoordinate());
-      ATH_MSG_INFO("REGTEST Looking at covarience matrix: ");
-
-      const std::vector<double>* const my_cov = my_param->cov();
-      if (!my_cov) {
-        ATH_MSG_INFO("REGTEST covarience matrix NULL (not stored)");
-      } else {
-        std::vector<double> tempcov = *my_cov;
-        std::vector<double>::iterator iter;
-        int k;
-        for(iter = tempcov.begin(), k=0; iter != tempcov.end(); ++iter, ++k){
-          ATH_MSG_INFO("REGTEST TrigInDetTrackFitPar->cov() element " << k << " is " << (*iter));
-        }
-      }
-      if (gotTruthMap) {
-        if (!(pTruthMap->hasTruth((*trkItr)))) {
-          ATH_MSG_DEBUG(" REGTEST Track has no truth info  ");
-        } else {
-          ATH_MSG_DEBUG(" Track has truth info:  ");
-          const TrigInDetTrackTruth* pTRTtruth = pTruthMap->truth((*trkItr));
-          int nMatches = pTRTtruth->nrMatches() ;
-          if (nMatches==0) {
-            ATH_MSG_INFO(" REGTEST Track has no truth matches");
-          } else {
-            ATH_MSG_INFO("REGTEST number of matched truth hits: Si: " <<  pTruthMap->bestMatchSiHits((*trkItr))
-                         << " TRT: " <<   pTruthMap->bestMatchTRTHits((*trkItr)));
-            if (pTruthMap->bestMatchSiHits((*trkItr)) > 0) {
-
-              const HepMcParticleLink* pSiTruth = pTruthMap->bestMatchSi((*trkItr));
-
-              ATH_MSG_INFO("REGTEST Si match to kine ref " <<  pSiTruth->barcode());
-              if (pSiTruth->cptr() != 0) {
-                ATH_MSG_INFO("REGTEST Si PDG id " << pSiTruth->cptr()->pdg_id());
-              }
-            }
-
-            if (pTruthMap->bestMatchTRTHits((*trkItr)) > 0) {
-              const HepMcParticleLink* pTRTtruth = pTruthMap->bestMatchTRT((*trkItr));
-
-              ATH_MSG_INFO("REGTEST TRT match to kine ref " <<  pTRTtruth->barcode());
-              if (pTRTtruth->cptr() != 0) {
-                ATH_MSG_INFO("REGTEST TRT PDG id " << pTRTtruth->cptr()->pdg_id());
-              }
-            }
-          }
-        }
-      } // if (gotTruthMap)
-    }
-  }
-
-  ATH_MSG_INFO("REGTEST ==========END of TrigInDetTrackCollection DUMP===========");
-  ATH_MSG_DEBUG("dumpTrigInDetTrackCollection() succeeded");
-
-  return StatusCode::SUCCESS;
-}
 
 
 /////////////////////////////////////////////////////////////////////
@@ -4434,7 +4278,7 @@ StatusCode TrigEDMChecker::TrigCompositeNavigationToDot(std::string& returnValue
   return StatusCode::SUCCESS;
 }
 
-StatusCode TrigEDMChecker::dumpNavigation()
+StatusCode TrigEDMChecker::dumpNavigation(const EventContext& ctx)
 {
   // Get object from store
   const xAOD::TrigNavigation * navigationHandle = nullptr;
@@ -4534,7 +4378,7 @@ StatusCode TrigEDMChecker::dumpNavigation()
   }
 
   // Make the decision container
-  SG::WriteHandle< TrigCompositeUtils::DecisionContainer > outputNavigation = TrigCompositeUtils::createAndStore( m_decisionsKey, getContext() ); 
+  SG::WriteHandle< TrigCompositeUtils::DecisionContainer > outputNavigation = TrigCompositeUtils::createAndStore( m_decisionsKey, ctx );
   auto decisionOutput = outputNavigation.ptr();
 
   // Find unique chains associated with a feature

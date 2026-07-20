@@ -21,7 +21,6 @@
 
 class TH1;
 class TH2;
-class TRandom3;
 class TFile;
 
 namespace InDet {
@@ -73,10 +72,8 @@ namespace InDet {
 
     float getNomTrkEff(const xAOD::TrackParticle*) const;
 
-    Gaudi::Property<int> m_seed{this, "Seed", 0,
-      "Seed used to initialize the RNG"};
-    std::unique_ptr<TRandom3> m_rnd; //!
-    mutable std::mutex m_rndMutex; //!
+    Gaudi::Property<int> m_seed{this, "Seed", 2,
+      "Seed offset mixed with per-track phi/eta hash for deterministic RNG"};
     Gaudi::Property<double> m_deltaR{this, "DeltaR", 0.1,
       "Delta-R cut in which to apply jet-track efficiency rejection"};
     Gaudi::Property<double> m_minJetPt{this, "minJetPt", 200000.,
@@ -85,6 +82,8 @@ namespace InDet {
       "Option to scale the effect of the systematic (default 1)"};
 
     std::unique_ptr<TH2> m_trkNomEff = nullptr; //!
+
+    mutable std::mutex m_sysLock;
 
     // allow the user to configure which calibration file to use if desired
     Gaudi::Property<std::string> m_calibFileNomEff{this, "calibFileNomEff",

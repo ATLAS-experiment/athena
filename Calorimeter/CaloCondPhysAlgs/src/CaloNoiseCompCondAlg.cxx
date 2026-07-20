@@ -1108,8 +1108,9 @@ CaloNoiseCompCondAlg::elecNoiseRMS(const CaloDetDescrElement* caloDDE,
       //:::::::::::::::::
       gain_shifted=gain_wanted-shift_gain;
       //:::::::::::::::::
-      sigma = sigmaVector->at(gain_shifted);
+      sigma = sigmaVector->at(gain_shifted);//check gain_shifted is in bounds here
       //:::::::::::::::::
+      //coverity[INTEGER_OVERFLOW]
       sigma = this->calculateElecNoiseForLAR(idCaloHash) [gain_shifted];
       //:::::::::::::::::
       if(this->isBadValue(sigma)) 

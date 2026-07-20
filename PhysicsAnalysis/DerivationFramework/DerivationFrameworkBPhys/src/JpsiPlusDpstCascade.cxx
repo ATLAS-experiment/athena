@@ -14,7 +14,7 @@
 #include "xAODBPhys/BPhysHypoHelper.h"
 #include <algorithm>
 #include "xAODTracking/VertexContainer.h"
-#include "HepPDT/ParticleDataTable.hh"
+#include "GeneratorModules/GenData.h"
 #include "TruthUtils/HepMCHelpers.h"
 
 #include "TrkVKalVrtFitter/VxCascadeInfo.h"
@@ -39,19 +39,15 @@ namespace DerivationFramework {
         // Get the beam spot service
         ATH_CHECK(m_eventInfo_key.initialize());
 
-        ATH_CHECK( m_partPropSvc.retrieve() );
-        auto pdt = m_partPropSvc->PDT();
-
-        // retrieve particle masses
-        if(m_mass_jpsi < 0. ) m_mass_jpsi = BPhysPVCascadeTools::getParticleMass(pdt, MC::JPSI);
-        if(m_vtx0MassHypo < 0.) m_vtx0MassHypo = BPhysPVCascadeTools::getParticleMass(pdt, MC::BCPLUS);
-        if(m_vtx1MassHypo < 0.) m_vtx1MassHypo = BPhysPVCascadeTools::getParticleMass(pdt, MC::D0);
-
-        if(m_vtx0Daug1MassHypo < 0.) m_vtx0Daug1MassHypo = BPhysPVCascadeTools::getParticleMass(pdt, MC::MUON);
-        if(m_vtx0Daug2MassHypo < 0.) m_vtx0Daug2MassHypo = BPhysPVCascadeTools::getParticleMass(pdt, MC::MUON);
-        if(m_vtx0Daug3MassHypo < 0.) m_vtx0Daug3MassHypo = BPhysPVCascadeTools::getParticleMass(pdt, MC::PIPLUS);
-        if(m_vtx1Daug1MassHypo < 0.) m_vtx1Daug1MassHypo = BPhysPVCascadeTools::getParticleMass(pdt, MC::PIPLUS);
-        if(m_vtx1Daug2MassHypo < 0.) m_vtx1Daug2MassHypo = BPhysPVCascadeTools::getParticleMass(pdt, MC::KPLUS);
+        auto gendata = std::make_shared<GenData>();
+        if(m_mass_jpsi < 0. ) m_mass_jpsi = gendata->particleMass(MC::JPSI).value();
+        if(m_vtx0MassHypo < 0.) m_vtx0MassHypo = gendata->particleMass(MC::BCPLUS).value();
+        if(m_vtx1MassHypo < 0.) m_vtx1MassHypo = gendata->particleMass(MC::D0).value();
+        if(m_vtx0Daug1MassHypo < 0.) m_vtx0Daug1MassHypo = gendata->particleMass(MC::MUON).value();
+        if(m_vtx0Daug2MassHypo < 0.) m_vtx0Daug2MassHypo = gendata->particleMass(MC::MUON).value();
+        if(m_vtx0Daug3MassHypo < 0.) m_vtx0Daug3MassHypo = gendata->particleMass(MC::PIPLUS).value();
+        if(m_vtx1Daug1MassHypo < 0.) m_vtx1Daug1MassHypo = gendata->particleMass(MC::PIPLUS).value();
+        if(m_vtx1Daug2MassHypo < 0.) m_vtx1Daug2MassHypo = gendata->particleMass(MC::KPLUS).value();
 
         return StatusCode::SUCCESS;
     }

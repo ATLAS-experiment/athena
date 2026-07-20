@@ -59,10 +59,12 @@ class TrackFitterType(FlagEnum):
 #   measurements for extending tracks (AnalogueClustering)
 # - or only apply the AnalogueClustering to selected measurements
 #   (AnalogueClusteringAfterSelection)
+# - or perform AnalogueClustering with NN corrections
 class PixelCalibrationStrategy(FlagEnum):
     Uncalibrated = "Uncalibrated"
     AnalogueClustering = "AnalogueClustering"
     AnalogueClusteringAfterSelection = "AnalogueClusteringAfterSelection"
+    NNClustering = "NNClustering"
 
 # Flag for strip calibration strategy during track finding
 # - use cluster as is (Uncalibrated)
@@ -78,10 +80,14 @@ def createActsConfigFlags():
     actscf = AthConfigFlags()
     
     # General Flags
-    actscf.addFlag('Acts.EDM.PersistifyClusters', lambda pcf: pcf.Acts.EDM.PersistifySpacePoints)
-    actscf.addFlag('Acts.EDM.PersistifySpacePoints', False)
+    actscf.addFlag('Acts.EDM.PersistifyClusters', lambda pcf: pcf.Acts.EDM.PersistifySpacePoints and not pcf.Tracking.StoreSlimmedDataPreparation)
+    actscf.addFlag('Acts.EDM.PersistifySpacePoints', lambda pcf: pcf.Tracking.StoreSlimmedDataPreparation)
     actscf.addFlag('Acts.EDM.PersistifyTracks', False)
+    # set to True to use the PhaseII pixel and strip RAW data EDM
+    actscf.addFlag('Acts.EDM.PhaseII', False)
     actscf.addFlag('Acts.useCache', False)
+    # special persistifications
+    actscf.addFlag('Acts.EDM.SlimContent', lambda pcf: pcf.Tracking.StoreSlimmedDataPreparation)
     
     # Scheduling
     from InDetConfig.ITkActsHelpers import primaryPassUsesActs
@@ -150,6 +156,8 @@ def createActsConfigFlags():
     actscf.addFlag('Acts.branchStopperAbsEtaMeasCut', 1.2)
     actscf.addFlag('Acts.forceTrackOnSeed', lambda pcf: not(pcf.Acts.SeedingStrategy is SeedingStrategy.GbtsFtf and
                                                             pcf.Acts.PixelCalibrationStrategy is PixelCalibrationStrategy.AnalogueClusteringAfterSelection)) # forceTrackOnSeed does not seem to work with GBTS seeds and analogue cluster calibration
+    actscf.addFlag('Acts.PixelNNCalibrationModelsFolder', '<default>') # locaton of models for pixel ONNX files, extpected content of the foder are: number.onnx, pos1.onnx, pos2.onnx, pos3.onnx
+                                                                       # this flag is used only if PixelCalibrationStrategy is PixelNN
         
     # Ambiguity resolution    
     actscf.addFlag('Acts.doAmbiguityResolution', True)
@@ -175,5 +183,20 @@ def createActsConfigFlags():
 
     # Decorations
     actscf.addFlag('Acts.decoratePRD.sdoSiHit', lambda pcf: pcf.Tracking.doTIDE_AmbiTrackMonitoring)
-    
+
+    # GNN specific flags (scoped)
+    actscf.addFlag("Acts.GNN.Enable", False)
+    actscf.addFlag("Acts.GNN.ModuleMapPath", "<default>")
+    actscf.addFlag("Acts.GNN.ModelPath", "<default>")
+    actscf.addFlag("Acts.GNN.NumTrtContexts", 1)
+    actscf.addFlag("Acts.GNN.MaxGpuInstances", 1)
+    actscf.addFlag("Acts.GNN.VarianceInflation", 1.0)
+    actscf.addFlag("Acts.GNN.TightSeeds", False)
+    actscf.addFlag("Acts.GNN.MinCandidateMeasurements", 7)
+    actscf.addFlag("Acts.GNN.MinDeltaR", 15.0)
+    actscf.addFlag("Acts.GNN.EdgeCut", 0.5)
+    actscf.addFlag("Acts.GNN.RelaxCentralHoleSel", False)
+    actscf.addFlag("Acts.GNN.RelaxMeasurementSel", True)
+    actscf.addFlag("Acts.GNN.OfflineZ0Sel", False)
+
     return actscf

@@ -36,16 +36,16 @@ namespace CP
 
 
   StatusCode JetGhostMuonAssociationAlg ::
-  execute ()
+  execute (const EventContext& ctx)
   {
     for (const auto& sys : m_systematicsList.systematicsVector())
     {
       xAOD::JetContainer *jets = nullptr;
-      ANA_CHECK (m_jetHandle.getCopy (jets, sys));
+      ANA_CHECK (m_jetHandle.getCopy (jets, sys, ctx));
 
       // associate the ghost muons to the jets (needed by MET muon-jet OR later)
       const xAOD::MuonContainer* muons = nullptr;
-      ANA_CHECK (m_muonHandle.retrieve (muons, sys));
+      ANA_CHECK (m_muonHandle.retrieve (muons, sys, ctx));
       met::addGhostMuonsToJets(*muons, *jets);
     }
 

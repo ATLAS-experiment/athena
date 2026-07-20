@@ -12,7 +12,7 @@ public:
 
   CheckCloningFactor(const std::string& name, ISvcLocator* pSvcLocator);
   StatusCode initialize();
-  StatusCode execute();
+  StatusCode execute(const EventContext& ctx);
   StatusCode finalize();
 
   std::string m_key;

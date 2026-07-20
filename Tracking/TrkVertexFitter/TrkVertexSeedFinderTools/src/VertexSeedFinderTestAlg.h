@@ -35,7 +35,7 @@ public:
   virtual StatusCode initialize() override;
 
   /// Execute the algorithm.
-  virtual StatusCode execute() override;
+  virtual StatusCode execute(const EventContext& ctx) override;
 
 
 private:

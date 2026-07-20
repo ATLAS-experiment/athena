@@ -94,7 +94,7 @@ namespace VKalVrtAthena {
     virtual ~VrtSecInclusive() override;
 
     virtual StatusCode initialize() override;
-    virtual StatusCode execute() override;
+    virtual StatusCode execute(const EventContext& ctx) override;
     virtual StatusCode initEvent();
 
   private:

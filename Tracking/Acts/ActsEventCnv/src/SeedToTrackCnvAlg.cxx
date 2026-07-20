@@ -1,9 +1,8 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <vector>
-#include "ActsGeometry/ATLASSourceLink.h"
 #include "ActsGeometry/SurfaceOfMeasurementUtil.h"
 #include "Acts/Definitions/Algebra.hpp"
 #include "xAODMeasurementBase/MeasurementDefs.h"
@@ -81,7 +80,8 @@ StatusCode SeedToTrackCnvAlg::execute(const EventContext& context) const {
             assert(surf);
             auto actsTSOS = trackStateContainer.getTrackState(trackStateContainer.addTrackState(Acts::TrackStatePropMask::None, tsosPreviousIndex));
             actsTSOS.setReferenceSurface(surf->getSharedPtr());
-            actsTSOS.setUncalibratedSourceLink(detail::xAODUncalibMeasCalibrator::pack(umeas));
+            actsTSOS.setUncalibratedSourceLink(detail::MeasurementCalibratorBase::pack(umeas));
+            actsTSOS.typeFlags().setIsMeasurement();
             actsTrack.tipIndex() = actsTSOS.index();
             tsosPreviousIndex = actsTrack.tipIndex();
           }

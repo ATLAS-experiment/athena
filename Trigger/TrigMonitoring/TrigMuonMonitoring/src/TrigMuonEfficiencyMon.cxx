@@ -89,7 +89,12 @@ StatusCode TrigMuonEfficiencyMon :: fillVariablesPerOfflineMuonPerChain(const Ev
   if(L1pass){
     if(m_doL2SA){
       bool activestate = false;
-      m_matchTool->matchL2SA(ctx, mu, chain, activestate);
+      const bool isPh2FastReco = chain.find("newFast") != std::string::npos;
+      if (isPh2FastReco) {
+        m_matchTool->matchFastRecoSA(ctx, mu, chain, activestate);
+      } else {
+        m_matchTool->matchL2SA(ctx, mu, chain, activestate);
+      }
       L2SApass = activestate;
     } else {
       L2SApass = true;
@@ -204,9 +209,9 @@ StatusCode TrigMuonEfficiencyMon :: selectMuonsTagAndProbe(const EventContext& c
       bool bit_mass = (dimu_mass > m_mass_lowlim) && (dimu_mass < m_mass_highlim);
       bool bit_dR = lvmu1.DeltaR(lvmu2)>0.5;
       if(m_use_extrapolator){
-	const xAOD::TrackParticle *track1 = mu1->primaryTrackParticle();
+	const xAOD::TrackParticle *track1 = mu1->trackParticle(xAOD::Muon::TrackParticleType::Primary);
 	const Trk::TrackParameters *extTrack1 = m_matchTool->extTrackToPivot(ctx, track1);
-	const xAOD::TrackParticle *track2 = mu2->primaryTrackParticle();
+	const xAOD::TrackParticle *track2 = mu2->trackParticle(xAOD::Muon::TrackParticleType::Primary);
 	const Trk::TrackParameters *extTrack2 = m_matchTool->extTrackToPivot(ctx, track2);
 	if(extTrack1 && extTrack2){
 	  TLorentzVector lvext1 = lvmu1;
@@ -241,7 +246,7 @@ StatusCode TrigMuonEfficiencyMon :: selectMuonsTagAndProbe(const EventContext& c
     
     if(pass1){
       if(std::find(probes.begin(), probes.end(), dimu.second)==probes.end()){
-	if(m_BarrelOnly){
+	      if(m_BarrelOnly){
           if( std::abs( dimu.second->eta() ) > 0. && std::abs( dimu.second->eta() ) < 1.05 ) probes.push_back(dimu.second);
         }
         else probes.push_back(dimu.second);
@@ -249,7 +254,7 @@ StatusCode TrigMuonEfficiencyMon :: selectMuonsTagAndProbe(const EventContext& c
     }
     if(pass2){
       if(std::find(probes.begin(), probes.end(), dimu.first)==probes.end()){
-	if(m_BarrelOnly){
+	      if(m_BarrelOnly){
           if( std::abs( dimu.first->eta() ) > 0. && std::abs( dimu.first->eta() ) < 1.05 ) probes.push_back(dimu.first);
         }
         else probes.push_back(dimu.first);

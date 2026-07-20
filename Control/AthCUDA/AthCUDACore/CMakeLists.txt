@@ -3,9 +3,15 @@
 # Set the name of the package.
 atlas_subdir( AthCUDACore )
 
+# Bail out if CUDA is not available.
+if( NOT CMAKE_CUDA_COMPILER )
+   return()
+endif()
+
 # Necessary external(s).
 find_package( TBB )
 find_package( Threads )
+find_package( CUDAToolkit )
 
 # Component(s) in the package.
 atlas_add_library( AthCUDACoreLib
@@ -13,7 +19,7 @@ atlas_add_library( AthCUDACoreLib
    SHARED
    PUBLIC_HEADERS AthCUDACore
    INCLUDE_DIRS ${TBB_INCLUDE_DIRS}
-   LINK_LIBRARIES ${TBB_LIBRARIES} GaudiKernel
+   LINK_LIBRARIES ${TBB_LIBRARIES} GaudiKernel CUDA::cudart
    PRIVATE_LINK_LIBRARIES Threads::Threads AthCUDAInterfacesLib CxxUtils )
 
 # Unit test(s) in the package.

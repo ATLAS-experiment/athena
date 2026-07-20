@@ -1,5 +1,5 @@
 /*
-Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "InDetGNNHardScatterSelection/DataPrepUtilities.h"
@@ -124,12 +124,12 @@ namespace InDetGNNHardScatterSelection {
       TypeRegexes type_regexes = {
         {".*_isDefaults"_r, EDMType::CHAR},
         {"sumPt2|chi2Over_ndf|z_asymmetry|weighted_z_asymmetry|z_kurtosis|z_skewness|photon_deltaz|photon_deltaPhi|actualIntPerXing"_r, EDMType::FLOAT},
-        {"ntrk"_r, EDMType::INT},
+        {"ntrk|nElectrons|nMuons|nJets|nPhotons"_r, EDMType::INT},
         {"(log_)?pt|abs_eta|eta|phi|energy|mass|sumPt"_r, EDMType::CUSTOM_GETTER},
       };
 
       StringRegexes default_flag_regexes{
-        {"ntrk|sumPt2|chi2Over_ndf|z_asymmetry|weighted_z_asymmetry|z_kurtosis|z_skewness|photon_deltaz|photon_deltaPhi|actualIntPerXing"_r, ""},
+        {"ntrk|sumPt2|chi2Over_ndf|z_asymmetry|weighted_z_asymmetry|z_kurtosis|z_skewness|photon_deltaz|photon_deltaPhi|actualIntPerXing|nElectrons|nMuons|nJets|nPhotons"_r, ""},
         {"((log_)?pt|abs_eta|eta|phi|energy|mass|sumPt)"_r, ""}}; // no default for custom cases
 
       std::vector<HSGNNInputConfig> input_config;
@@ -177,7 +177,7 @@ for (const auto& el: constituent_names){
         if (input.type != EDMType::CUSTOM_GETTER) {
           auto filler = internal::get::varFromVertex(input.name, input.type,
                                          input.default_flag);
-          varsFromVertex.push_back(filler);
+          varsFromVertex.push_back(std::move(filler));
         } else {
           varsFromVertex.push_back(getter_utils::customGetterAndName(input.name));
         }

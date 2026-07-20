@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+    Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 //***************************************************************************
 //    gSuperCellTowerMapper - supercells and Tile tower assignment to gTowers
@@ -12,10 +12,10 @@
 #ifndef GSUPERCELLTOWERMAPPER_H
 #define GSUPERCELLTOWERMAPPER_H
 
-// STL
-#include <string>
 #include "L1CaloFEXToolInterfaces/IgSuperCellTowerMapper.h"
+#include "xAODTrigL1Calo/TriggerTowerContainer.h"
 
+#include <string>
 
 class CaloIdManager;
 
@@ -34,7 +34,6 @@ class gSuperCellTowerMapper: public AthAlgTool, virtual public IgSuperCellTowerM
   virtual StatusCode AssignSuperCellsToTowers(std::unique_ptr<gTowerContainer> & my_gTowerContainerRaw) const override;
   virtual StatusCode AssignTriggerTowerMapper(std::unique_ptr<gTowerContainer> & my_gTowerContainerRaw) const override;
 
-  virtual void reset() override;
 
  private:
 

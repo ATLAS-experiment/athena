@@ -46,20 +46,20 @@ StatusCode PU1SuppTestBenchAlg::initialize() {
 }
 
 /// Athena execute method (runs once per event)
-StatusCode PU1SuppTestBenchAlg::execute() {
+StatusCode PU1SuppTestBenchAlg::execute(const EventContext& ctx) {
   if (m_fifo_ptr >= m_fifos.size()) {
     ATH_MSG_ERROR("No more FIFO data to write");
     return StatusCode::FAILURE;
   }
 
   // Write TOB FIFO to event store
-  SG::WriteHandle<GepAlgoPU1SuppFIFO> h_write(m_suppFIFO_WriteKey);
+  SG::WriteHandle<GepAlgoPU1SuppFIFO> h_write(m_suppFIFO_WriteKey, ctx);
   CHECK(h_write.record(std::move(m_fifos[m_fifo_ptr])));
 
   // Write dummy expectation to event store (placeholder)
   auto expectations = std::make_unique<PU1SuppExpectations>("0000", "0000");
   SG::WriteHandle<PU1SuppExpectations> h_write_exp(
-      m_PU1SuppExpectations_WriteKey);
+      m_PU1SuppExpectations_WriteKey, ctx);
   CHECK(h_write_exp.record(std::move(expectations)));
 
   ++m_fifo_ptr;

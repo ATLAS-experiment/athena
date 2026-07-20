@@ -33,7 +33,7 @@ class SCT_RDOAnalysis : public AthAlgorithm {
   ~SCT_RDOAnalysis() = default;
 
   virtual StatusCode initialize() override final;
-  virtual StatusCode execute() override final;
+  virtual StatusCode execute(const EventContext& ctx) override final;
   virtual StatusCode finalize() override final;
 
  private:

@@ -24,6 +24,7 @@ CXXUTILS_TRAPPING_FP;
 #include <xAODMuonPrepData/sTgcMeasurement.h>
 #include <xAODMuonPrepData/MdtDriftCircle.h>
 #include <xAODMuonPrepData/MMCluster.h>
+#include <xAODMuonPrepData/UtilFunctions.h>
 
 
 namespace MuonR4::SegmentFit{
@@ -188,6 +189,10 @@ namespace MuonR4::SegmentFit{
                                       HitVec_t&& calibHits) const {
         
         const Acts::CalibrationContext cctx = ActsTrk::getCalibrationContext(ctx);
+        if (!checkPrecHitCount(calibHits) ) {
+            ATH_MSG_VERBOSE(__func__<<"() - "<<__LINE__ <<": Not enough degree of freedom available. What shall be fitted?!");
+            return nullptr;
+        }
         if (m_cfg.visionTool) {
             Result_t preFit{};
             preFit.parameters = startPars;
@@ -245,10 +250,9 @@ namespace MuonR4::SegmentFit{
                                            const Amg::Transform3D& localToGlobal,
                                            const LinePar_t& startPars,
                                            Result_t& fitResult) const {
-      
 
-        if (countPrecHits(fitResult.measurements) < m_cfg.nPrecHitCut || fitResult.nDoF == 0
-            || fitResult.nIter > m_fitter.config().maxIter) {
+        if (!checkPrecHitCount(fitResult.measurements) || 
+            fitResult.nIter > m_fitter.config().maxIter) {
             ATH_MSG_VERBOSE(__func__<<"() - "<<__LINE__ 
                             <<": No degree of freedom available. What shall be removed?!. nDoF: "
                             <<fitResult.nDoF<<", n-meas: "<<countPrecHits(fitResult.measurements)
@@ -285,6 +289,14 @@ namespace MuonR4::SegmentFit{
                 });
         fitResult.measurements.back()->setFitState(HitState::Outlier);
         ATH_MSG_VERBOSE(__func__<<"() - "<<__LINE__<<" Mark "<<(*fitResult.measurements.back())<<" as outlier");
+
+        /** Check again the available DOF and number of precision hits after hit removal */
+        if (!checkPrecHitCount(fitResult.measurements)) {
+            ATH_MSG_VERBOSE(__func__<<"() - "<<__LINE__ 
+                <<": No degree of freedom available after outlier removal. n-meas: "
+                <<countPrecHits(fitResult.measurements)<<std::endl<<print(fitResult.measurements));
+            return false;
+        }
 
         /** Refit the segment line without the measurement */
         Result_t newAttempt = callLineFit(cctx, startPars, localToGlobal, 
@@ -454,7 +466,7 @@ namespace MuonR4::SegmentFit{
                 const double dist = signedDistance(locPos, locDir, hit->localPosition(), hit->sensorDirection());
                 const auto* dc = static_cast<const xAOD::MdtDriftCircle*>(hit->primaryMeasurement());
                 // Check whether the tube is crossed by the hit 
-                if (Acts::abs(dist) >= dc->readoutElement()->innerTubeRadius()) {
+                if (std::abs(dist) >= dc->readoutElement()->innerTubeRadius()) {
                     continue;
                 }
             } else {
@@ -575,5 +587,66 @@ namespace MuonR4::SegmentFit{
         eraseWrongHits(toRecover);
         return true;
     }        
-   
+    inline bool SegmentLineFitter::checkPrecHitCount(const HitVec_t& candidateHits) const {
+        using namespace Muon::MuonStationIndex;
+
+        const size_t nPrecHits = countPrecHits(candidateHits);
+        if (nPrecHits < m_cfg.nPrecHitCut) {
+            ATH_MSG_VERBOSE(__func__<<"() - "<<__LINE__<<": Not enough precision hits for segment fit. "
+                <<nPrecHits<<" < "<<m_cfg.nPrecHitCut);
+            return false;
+        }
+
+        const auto firstHit {std::ranges::find_if(candidateHits, [](const Hit_t& hit){
+            return hit->spacePoint() != nullptr;
+        })};
+        assert(firstHit != candidateHits.end());
+        if (toStationIndex((*firstHit)->spacePoint()->msSector()->chamberIndex()) == StIndex::EI &&
+            std::ranges::any_of(candidateHits, [](const Hit_t& hit){
+                return xAOD::isNSW(hit->type()); })) {
+
+            std::array<std::size_t, 3> nStrips{Acts::filledArray<std::size_t, 3>(0u)};
+            std::size_t nPhiHits {0u};
+            for (const Hit_t& hit : candidateHits) {
+                if (!isGoodHit(*hit)) {
+                    continue;
+                }
+                
+                if (hit->type() == xAOD::UncalibMeasType::sTgcStripType) {
+                    nStrips[0] += isPrecisionHit(*hit);
+                    nPhiHits += hit->measuresPhi();
+                    continue;
+                } else if (hit->type() == xAOD::UncalibMeasType::MMClusterType) {
+                    const auto* mmClust = dynamic_cast<const xAOD::MMCluster*>(hit->spacePoint()->primaryMeasurement());
+                    assert(mmClust);
+                    const auto& design = mmClust->readoutElement()->stripLayer(mmClust->measurementHash()).design();
+                    if (!design.hasStereoAngle()) {
+                        ++nStrips[0];
+                    } else if (design.stereoAngle() > 0.) {
+                        ++nStrips[1];
+                    } else {
+                        ++nStrips[2];
+                    }
+                }
+            }
+            /** Check whether there is at least one of each micromega strip type.
+             *  To have a sane topology we need to have at least 2 strips from one kind. */
+            std::size_t nEtaOrientations = 
+                std::ranges::count_if(nStrips, [](std::size_t n){ return n > 0; });
+            if (nEtaOrientations == 3u) {
+                nEtaOrientations += std::ranges::any_of(  nStrips, [](std::size_t n){ return n > 1; });
+            }
+            ATH_MSG_VERBOSE(__func__<<"() - "<<__LINE__<<":  nHits: "<<candidateHits.size()
+                <<", nPhiHits: "<<nPhiHits<<", nEtaOrientations: "<<nEtaOrientations
+                <<", N X-strips: "<<nStrips[0]<<", U-strips: "<<nStrips[1]<<", V-strips: "<<nStrips[2]);
+
+            if ( nEtaOrientations == 4u ||
+                (nEtaOrientations == 3u && nPhiHits >= 1u) ||
+                (nEtaOrientations == 2u && nPhiHits >= 2u)) {
+                return true;
+            }
+            return false;
+        }
+        return true;
+    }
 }

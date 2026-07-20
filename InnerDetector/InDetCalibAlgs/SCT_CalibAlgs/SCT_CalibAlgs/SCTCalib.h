@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -48,6 +48,7 @@
 
 // STL headers
 #include <string>
+#include <string_view>
 #include <vector>
 #include <utility>
 #include <map>
@@ -68,7 +69,7 @@ class SCTCalib : public AthAlgorithm {
       SCTCalib( const std::string &name, ISvcLocator* pSvcLocator ) ;
       ~SCTCalib() = default;
       virtual StatusCode initialize() override;
-      virtual StatusCode execute() override;
+      virtual StatusCode execute(const EventContext& ctx) override;
       virtual StatusCode stop ATLAS_NOT_THREAD_SAFE () override; // Thread unsafe getNoisyStrip, getDeadStrip, getNoiseOccupancy, getRawOccupancy, getEfficiency, getBSErrors, getLorentzAngle methods are used.
       virtual StatusCode finalize() override;
 
@@ -272,7 +273,7 @@ class SCTCalib : public AthAlgorithm {
       // To handle XML file for DB
       StatusCode openXML4DB(std::ofstream&, const char*, const char*, const IOVTime&, const IOVTime&) const;
       StatusCode closeXML4DB(std::ofstream&) const;
-      StatusCode addToXML4DB(std::ofstream&, const Identifier&, const char*, float, const char*) const;
+      StatusCode addToXML4DB(std::ofstream&, const Identifier&, std::string_view, float, std::string_view) const;
 
       // To handle XML file for Summary
       StatusCode openXML4MonSummary(std::ofstream&, const char*) const;
@@ -301,7 +302,7 @@ class SCTCalib : public AthAlgorithm {
       getNumNoisyStrips(const Identifier& waferId) const;
 
       StatusCode
-      addStripsToList(Identifier& waferId, std::set<Identifier>& stripIdList, bool isNoisy, bool isNew) const;
+      addStripsToList(const EventContext& ctx, Identifier& waferId, std::set<Identifier>& stripIdList, bool isNoisy, bool isNew) const;
 
       StatusCode
       writeModuleListToCool ATLAS_NOT_THREAD_SAFE // Thread unsafe SCTCalibWriteTool::createCondObjects method is used.

@@ -31,7 +31,7 @@ class VP1TrkInitializer: public AthAlgorithm
   ~VP1TrkInitializer();
 
   StatusCode initialize();
-  StatusCode execute();
+  StatusCode execute(const EventContext& ctx);
   StatusCode finalize();
 
  private:

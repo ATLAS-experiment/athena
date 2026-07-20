@@ -39,7 +39,7 @@ class TileExpertDump: public AthAlgorithm {
     ~TileExpertDump();
 
     StatusCode initialize();
-    StatusCode execute();
+    StatusCode execute(const EventContext& ctx);
     StatusCode finalize();
 
     StatusCode setEmExpertOptions();

@@ -5,12 +5,15 @@
 #include "MCTruthSteppingAction.h"
 #include "MCTruth/AtlasG4EventUserInfo.h"
 #include "MCTruth/TrackHelper.h"
+#include "MCTruth/TrackInformation.h"
 
 #include "G4Event.hh"
 #include "G4Step.hh"
 #include "G4StepPoint.hh"
 #include "G4TouchableHistory.hh"
+#include "G4Track.hh"
 
+#include <memory>
 
 namespace G4UA
 {
@@ -86,6 +89,8 @@ namespace G4UA
   //---------------------------------------------------------------------------
   void MCTruthSteppingAction::UserSteppingAction(const G4Step* aStep)
   {
+    propagatePrimaryInfoToSecondaries(aStep);
+
     if (m_recordingEnvelopes.size() == 0) return;
     TrackHelper trackHelper(aStep->GetTrack());
     if (trackHelper.IsSecondary()) return;
@@ -127,6 +132,36 @@ namespace G4UA
         // Done with this volume.
         break;
       }
+    }
+  }
+
+  void MCTruthSteppingAction::propagatePrimaryInfoToSecondaries(const G4Step* aStep) const
+  {
+    if (!aStep) {
+      return;
+    }
+
+    TrackHelper parentHelper(aStep->GetTrack());
+    TrackInformation* parentInfo = parentHelper.GetTrackInformation();
+    HepMC::GenParticlePtr primaryGenParticle = parentInfo ? parentInfo->GetPrimaryGenParticle() : nullptr;
+    if (!primaryGenParticle) {
+      return;
+    }
+
+    const std::vector<const G4Track*>* secondaries = aStep->GetSecondaryInCurrentStep();
+    if (!secondaries) {
+      return;
+    }
+
+    for (const G4Track* secondary : *secondaries) {
+      if (!secondary || secondary->GetUserInformation()) {
+        continue;
+      }
+
+      auto trackInfo = std::make_unique<TrackInformation>();
+      trackInfo->SetPrimaryGenParticle(primaryGenParticle);
+      trackInfo->SetClassification(TrackInformation::Secondary);
+      secondary->SetUserInformation(trackInfo.release());
     }
   }
 

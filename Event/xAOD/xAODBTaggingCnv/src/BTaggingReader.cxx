@@ -36,7 +36,7 @@ namespace xAODReader {
     return StatusCode::SUCCESS;
   }
 
-  StatusCode BTaggingReader::execute() {
+  StatusCode BTaggingReader::execute(const EventContext& /*ctx*/) {
 
     // Retrieve the container:
     const xAOD::BTaggingContainer* btagging =

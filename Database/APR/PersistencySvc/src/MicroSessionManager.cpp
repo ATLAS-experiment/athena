@@ -70,10 +70,11 @@ pool::MicroSessionManager::connect( Io::IoFlag mode,
                                     mode );
     m_registry.registerDatabaseHandler( db );
     m_databaseHandlers.insert( db );
-  } catch( std::runtime_error& /* error */) {
+  } catch( const std::runtime_error& /* error */) {
+    delete db;
     m_storageSvc->endSession().ignore();
     m_inSession = false;
-    return 0;
+    return nullptr;
   }
 
   if( m_databaseHandlers.empty() && m_inSession ) {

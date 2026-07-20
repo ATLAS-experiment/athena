@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MM_DIGITIZATIONTOOL_H
@@ -108,7 +108,7 @@ private:
     StatusCode doDigitization(const EventContext& ctx);
 
     bool checkMMSimHit(const MMSimHit& /* hit */) const;
-    MM_ElectronicsToolInput combinedStripResponseAllHits(const std::vector<MM_ElectronicsToolInput>& v_stripDigitOutput);
+    MM_ElectronicsToolInput combinedStripResponseAllHits(const EventContext& ctx, const std::vector<MM_ElectronicsToolInput>& v_stripDigitOutput);
 
     ServiceHandle<IAthRNGSvc> m_rndmSvc{this, "RndmSvc", "AthRNGSvc", "Random Number Service used in Muon digitization"};
     Gaudi::Property<std::string> m_rndmEngineName{this, "RndmEngine", "MuonDigitization", "Random engine name"};

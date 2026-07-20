@@ -110,6 +110,7 @@ namespace {
         if ( type_info == typeid(std::vector<char>) ) return makeVecField<char>(model, fieldName, rawPtr, ops);
         if ( type_info == typeid(std::vector<unsigned char>) ) return makeVecField<unsigned char>(model, fieldName, rawPtr, ops);
         if ( type_info == typeid(std::vector<bool>) ) return makeVecField<bool>(model, fieldName, rawPtr, ops);
+        if ( type_info == typeid(std::vector<std::string>) ) return makeVecField<std::string>(model, fieldName, rawPtr, ops);
 
         if ( type_info == typeid(std::string) ) {
             auto ptr = model.MakeField<std::string>(fieldName);

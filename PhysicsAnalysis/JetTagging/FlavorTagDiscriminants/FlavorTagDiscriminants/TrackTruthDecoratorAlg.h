@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRACK_TRUTH_DECORATOR_ALG_HH
@@ -36,44 +36,47 @@ namespace FlavorTagDiscriminants {
     SG::ReadHandleKey< xAOD::MuonContainer > m_MuonContainerKey {
       this, "muonContainer", "Muons",
         "Key for the input muon collection"};
+    SG::ReadHandleKey< xAOD::TruthParticleContainer > m_truthParticleContainerKey {
+      this, "truthParticleContainer", "TruthParticles",
+      "Key for the input truth particle container"};
 
     // Accessors for truth particles
     using RDHK = SG::ReadDecorHandleKey< xAOD::TruthParticleContainer >;
     RDHK m_acc_type_label {
-      this, "acc_ftagTruthTypeLabel", "ftagTruthTypeLabel", 
+      this, "acc_ftagTruthTypeLabel", m_truthParticleContainerKey, "ftagTruthTypeLabel",
         "Accessor for the truth type label of the truth particle"};
     RDHK m_acc_source_label {
-      this, "acc_ftagTruthSourceLabel", "ftagTruthSourceLabel", 
+      this, "acc_ftagTruthSourceLabel", m_truthParticleContainerKey, "ftagTruthSourceLabel",
         "Accessor for the truth label for the source of secondary particles"};
     RDHK m_acc_vertex_index {
-      this, "acc_ftagTruthVertexIndex", "ftagTruthVertexIndex", 
+      this, "acc_ftagTruthVertexIndex", m_truthParticleContainerKey, "ftagTruthVertexIndex",
         "Accessor for the vertex index of the truth particle"};
     RDHK m_acc_parent_uniqueID {
-      this, "acc_ftagTruthParentBarcode", "ftagTruthParentBarcode",
+      this, "acc_ftagTruthParentBarcode", m_truthParticleContainerKey, "ftagTruthParentBarcode",
         "Accessor for the uniqueID of the parent of linked truth particle"};
 
     // Decorators for tracks
     using WDHK = SG::WriteDecorHandleKey< xAOD::TrackParticleContainer >;
     WDHK m_dec_origin_label {
-      this, "dec_ftagTruthOriginLabel", "ftagTruthOriginLabel", 
+      this, "dec_ftagTruthOriginLabel", m_TrackContainerKey, "ftagTruthOriginLabel",
         "Exclusive origin label of the track"};
     WDHK m_dec_type_label {
-      this, "dec_ftagTruthTypeLabel", "ftagTruthTypeLabel", 
+      this, "dec_ftagTruthTypeLabel", m_TrackContainerKey, "ftagTruthTypeLabel",
         "Exclusive truth type label of the track"};
     WDHK m_dec_source_label {
-      this, "dec_ftagTruthSourceLabel", "ftagTruthSourceLabel", 
+      this, "dec_ftagTruthSourceLabel", m_TrackContainerKey, "ftagTruthSourceLabel",
         "Exclusive truth label for the source of secondary tracks"};
     WDHK m_dec_vertex_index {
-      this, "dec_ftagTruthVertexIndex", "ftagTruthVertexIndex", 
+      this, "dec_ftagTruthVertexIndex", m_TrackContainerKey, "ftagTruthVertexIndex",
         "ftagTruth vertex index of the track"};
     WDHK m_dec_uniqueID {
-      this, "dec_ftagTruthBarcode", "ftagTruthBarcode",
+      this, "dec_ftagTruthBarcode", m_TrackContainerKey, "ftagTruthBarcode",
         "UniqueID of linked truth particle"};
     WDHK m_dec_parent_uniqueID {
-      this, "dec_ftagTruthParentBarcode", "ftagTruthParentBarcode",
+      this, "dec_ftagTruthParentBarcode", m_TrackContainerKey, "ftagTruthParentBarcode",
         "UniqueID of parent of linked truth particle"};
     WDHK m_dec_muon_origin_label {
-      this, "dec_ftagTruthMuonOriginLabel", "ftagTruthMuonOriginLabel", 
+      this, "dec_ftagTruthMuonOriginLabel", m_TrackContainerKey, "ftagTruthMuonOriginLabel",
         "Exclusive origin label of the muon"};
 
 

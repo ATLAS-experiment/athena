@@ -70,12 +70,12 @@ StatusCode TileLaserCalibAlg::initialize() {
 
 /////////////////////////////////////////////////////
 
-StatusCode TileLaserCalibAlg::execute() {
+StatusCode TileLaserCalibAlg::execute(const EventContext& ctx) {
 
   ATH_MSG_DEBUG( "Running on execute! TileLaserCalibAlg" );
 
   // Get the run number and type once for all 
-  auto event = m_RobSvc->getEvent(Gaudi::Hive::currentContext());
+  auto event = m_RobSvc->getEvent(ctx);
 
   if (m_runNo == 0) {
     m_runNo = static_cast<uint32_t>(event->run_no());

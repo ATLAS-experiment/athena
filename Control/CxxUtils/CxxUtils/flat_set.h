@@ -37,7 +37,7 @@ namespace CxxUtils {
   // void for the third argument matches the defaults in
   // boost/container/container_fwd.hpp
   template <class KEY, class COMPARE = std::less<KEY>, class KEYCONTAINER = void>
-  using flat_set = boost::container::flat_set<KEY, COMPARE, KEYCONTANER>;
+  using flat_set = boost::container::flat_set<KEY, COMPARE, KEYCONTAINER>;
 }
 
 #endif

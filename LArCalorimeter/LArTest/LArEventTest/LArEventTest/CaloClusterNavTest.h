@@ -15,7 +15,7 @@ class CaloClusterNavTest: public AthAlgorithm
   CaloClusterNavTest(const std::string& name, ISvcLocator* pSvcLocator);
   virtual ~CaloClusterNavTest();
   
-  virtual StatusCode execute() ; 
+  virtual StatusCode execute(const EventContext& ctx) ; 
   virtual StatusCode initialize();
   virtual StatusCode finalize();
   

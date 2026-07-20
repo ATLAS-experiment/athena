@@ -39,12 +39,6 @@ StatusCode ClusterAtMLScaleTool::setClustersToMLScale(xAOD::CaloClusterContainer
                       << m_clusterMLCorrectedEnergyKey.key());
         return StatusCode::FAILURE;
     }
-    
-    if (!dec.isAvailable()) {
-        ATH_MSG_ERROR("Missing decoration: " << m_clusterMLCorrectedEnergyKey.key());
-        return StatusCode::FAILURE;
-    }
-
 
     for (xAOD::CaloCluster* cl : cont) {
         if (!cl) continue;

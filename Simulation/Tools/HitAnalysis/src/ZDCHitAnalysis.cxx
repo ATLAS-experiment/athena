@@ -59,7 +59,7 @@ StatusCode ZDCHitAnalysis::initialize() {
 }
 
 
-StatusCode ZDCHitAnalysis::execute() {
+StatusCode ZDCHitAnalysis::execute(const EventContext& ctx) {
   ATH_MSG_DEBUG( "In ZDCHitAnalysis::execute()" );
   
   m_zdc_fiber_side->clear();
@@ -73,7 +73,6 @@ StatusCode ZDCHitAnalysis::execute() {
   int channel_fiber = -1;
 
   ZDC_SimFiberHit_ConstIterator fiberhi;
-  const EventContext& ctx{Gaudi::Hive::currentContext()};
   const ZDC_SimFiberHit_Collection* fiberiter{nullptr};
   ATH_CHECK(SG::get(fiberiter, m_readKey, ctx));
   for (fiberhi=(*fiberiter).begin(); fiberhi != (*fiberiter).end(); ++fiberhi) {

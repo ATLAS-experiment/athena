@@ -1308,21 +1308,20 @@ LVL1CTP::CTPSimulation::storeMetadata() {
    }
    std::scoped_lock<std::mutex> metadataLock(s_metadataMutex);
    for (const auto & path : storedPaths) {
-      size_t pos = path.find_last_of('/');
-      auto splitPath = std::make_pair(path.substr(0, pos), path.substr(pos + 1));
-      std::string treePath = splitPath.first + "/metadata";
-      std::string interval("run");
-      char triggerData[] = "<none>";
-      const std::string mergeDataStr = "<default>";
-      std::vector<char> mergeData{mergeDataStr.begin(), mergeDataStr.end()};
-      mergeData.push_back('\0');
-      interval = "run";
+      auto pos = path.find_last_of('/');
+      std::string histName = path.substr(pos+1);
+      const std::string treePath = path.substr(0, pos) + "/metadata";
+      //must be non-const so root can use the string buffer    
+      std::string interval{"run"};
+      std::string triggerData{"<none>"};
+      //coverity[UNNECESSARY_STRING_COPY]
+      std::string mergeData{"<default>"};
       if (!m_histSvc->existsTree(treePath)) {
          auto tree = std::make_unique<TTree>("metadata", "Monitoring Metadata");
          tree->SetDirectory(nullptr);
-         tree->Branch("Name", &(splitPath.second[0]), "Name/C");
-         tree->Branch("Interval", &(interval[0]), "Interval/C");
-         tree->Branch("TriggerChain", triggerData, "TriggerChain/C");
+         tree->Branch("Name", histName.data(), "Name/C");
+         tree->Branch("Interval", interval.data(), "Interval/C");
+         tree->Branch("TriggerChain", triggerData.data(), "TriggerChain/C");
          tree->Branch("MergeMethod", mergeData.data(), "MergeMethod/C");
          tree->Fill();
          if (!m_histSvc->regTree(treePath, std::move(tree))) {
@@ -1333,9 +1332,9 @@ LVL1CTP::CTPSimulation::storeMetadata() {
       } else {
          TTree *tree{nullptr};
          if (m_histSvc->getTree(treePath, tree).isSuccess()) {
-            tree->SetBranchAddress("Name", &(splitPath.second[0]));
-            tree->SetBranchAddress("Interval", &(interval[0]));
-            tree->SetBranchAddress("TriggerChain", triggerData);
+            tree->SetBranchAddress("Name", histName.data());
+            tree->SetBranchAddress("Interval", interval.data());
+            tree->SetBranchAddress("TriggerChain", triggerData.data());
             tree->SetBranchAddress("MergeMethod", mergeData.data());
             tree->Fill();
          } else {

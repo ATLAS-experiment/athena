@@ -71,7 +71,7 @@ StatusCode DumpLArRawChannels::initialize()
 }
 
 
-StatusCode DumpLArRawChannels::execute()
+StatusCode DumpLArRawChannels::execute(const EventContext& ctx)
 {
  m_count++; 
  ATH_MSG_INFO ( "======== executing event "<< m_count << " ========" );
@@ -85,7 +85,7 @@ StatusCode DumpLArRawChannels::execute()
      m_evt=thisEventInfo->eventNumber();
    }
 
- SG::ReadCondHandle<LArOnOffIdMapping> larCablingHdl(m_cablingKey);
+ SG::ReadCondHandle<LArOnOffIdMapping> larCablingHdl(m_cablingKey, ctx);
  const LArOnOffIdMapping* cabling=*larCablingHdl;
  if(!cabling) {
      ATH_MSG_ERROR("Could not get LArOnOffIdMapping !!");

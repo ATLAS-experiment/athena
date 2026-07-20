@@ -24,7 +24,7 @@ StatusCode FPGATrackSimDumpDetStatusAlgo::initialize(){
 }
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-StatusCode FPGATrackSimDumpDetStatusAlgo::execute() {    
+StatusCode FPGATrackSimDumpDetStatusAlgo::execute(const EventContext& /*ctx*/) {    
   
   if (m_DumpBadModules) {
     // These are not available yet

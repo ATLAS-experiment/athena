@@ -23,6 +23,11 @@ flags.Exec.MaxEvents = -1
 flags.Common.MsgSuppression = False
 flags.Exec.DebugMessageComponents = [ "ReadExampleElectron", "PoolSvc", "AthenaPoolCnvSvc",
                                       "AthenaPoolAddressProviderSvc", "MetaDataSvc", "EventSelector" ]
+
+#Run3 for now
+from AthenaConfiguration.TestDefaults import defaultGeometryTags
+flags.GeoModel.AtlasVersion = defaultGeometryTags.RUN3
+
 flags.lock()
 
 # Main services

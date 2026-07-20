@@ -16,7 +16,7 @@ public:
   HGTD_Digitization(const std::string &name, ISvcLocator *pSvcLocator);
   virtual ~HGTD_Digitization() = default;
   virtual StatusCode initialize() override final;
-  virtual StatusCode execute() override final;
+  virtual StatusCode execute(const EventContext& ctx) override final;
   virtual bool isClonable() const override final { return true; }
 
 private:

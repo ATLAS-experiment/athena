@@ -169,8 +169,7 @@ namespace MuonValR4{
         }
         return StatusCode::SUCCESS;
     }
-    StatusCode xMuonHitAnalysis::execute() {
-        const EventContext& ctx{Gaudi::Hive::currentContext()};
+    StatusCode xMuonHitAnalysis::execute(const EventContext& ctx) {
         const xAOD::MuonSimHitContainer* simHits{nullptr};
         const ActsTrk::GeometryContext* gctx{nullptr};
         ATH_CHECK(SG::get(simHits, m_inputKey, ctx));

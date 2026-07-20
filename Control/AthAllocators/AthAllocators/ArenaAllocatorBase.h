@@ -1,7 +1,7 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -152,33 +152,33 @@ public:
     std::string name;
 
     /// The size in bytes of the individual elements we're allocating.
-    size_t eltSize;
+    size_t eltSize = 0;
 
     /// The minimum size that this Allocator allows for an element.
-    size_t minSize;
+    size_t minSize = 0;
 
     /// The number of elements we should allocate in a single block
     /// (hint only).
-    size_t nblock;
+    size_t nblock = 0;
 
     /// Offset from the start of a free element to a pointer to be used
     /// by the allocator.  Only used if the allocator requires it.
-    size_t linkOffset;
+    size_t linkOffset = 0;
 
     /// Constructor function for elements.
 
-    func_t* constructor;
+    func_t* constructor = nullptr;
     /// Destructor function for elements.
-    func_t* destructor;
+    func_t* destructor = nullptr;
 
     /// Clear function for elements.
-    func_t* clear;
+    func_t* clear = nullptr;
 
     /// If true, @c clear can be called more than once on a given element.
-    bool canReclear;
+    bool canReclear = false;
 
     /// If true, the @c clear call cannot be skipped before @c destructor.
-    bool mustClear;
+    bool mustClear = false;
   };
 
 

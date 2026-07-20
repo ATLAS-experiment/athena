@@ -197,7 +197,7 @@ namespace LArG4 {
       static const G4double s_inv_AverageGap;
 
       struct Fold_Efield_Map{
-        G4bool    FieldMapPrepared;
+        G4bool    FieldMapPrepared = false;
         G4double*  FieldMap{};           // [NumberOfRadialLayers][ZYWeight][MaxNofPoints];
         G4double* MinZofLayer{};        //these are limits of the
         G4double* MaxZofLayer{};        //area where  the FieldMap can
@@ -209,15 +209,15 @@ namespace LArG4 {
         G4int*    pLayer{};
       };
 
-      struct Wheel_Efield_Map {G4bool          FieldMapPrepared;
-        G4int           NumberOfRadialLayer;
+      struct Wheel_Efield_Map {G4bool          FieldMapPrepared = false;
+        G4int           NumberOfRadialLayer = 0;
         G4double*       RadiusOfLayers{};
         G4double*       FoldinAngleOfLayers{};
         G4double*       HalfLArGapSizeOfLayers{};
         Fold_Efield_Map* Fold{};
-        Fold_Efield_Map Fold0;
-        Fold_Efield_Map Fold1;
-        G4double  GridShift;
+        Fold_Efield_Map Fold0{};
+        Fold_Efield_Map Fold1{};
+        G4double  GridShift = 0;
       };
 
       Wheel_Efield_Map m_ChCollInner{},m_ChCollOuter{}; // used as const after init

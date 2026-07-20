@@ -116,7 +116,10 @@ StatusCode IOVDbMetaDataTool::initialize()
       ATH_MSG_DEBUG("Registering folder " << folderName << " with " << parameters.size() - 2
                     << " parameters, IOV [" << beginRun << ", " << endRun << "]");
 
-      ATH_CHECK(registerFolder(folderName));
+      // Parameter folders are read back as a single AthenaAttributeList, so use that
+      // description (clid 40774348) rather than the CondAttrListCollection default.
+      static const std::string attrListDescr{"<timeStamp>run-event</timeStamp><addrHeader><address_header service_type=\"71\" clid=\"40774348\" /></addrHeader><typeName>AthenaAttributeList</typeName>"};
+      ATH_CHECK(registerFolder(folderName, attrListDescr));
 
       // Build payload for MetaDataStore
       // Note: AttributeListSpecification has protected destructor, must use new
@@ -135,10 +138,12 @@ StatusCode IOVDbMetaDataTool::initialize()
         }
       }
 
+      // Magic channel 0xFFFF + per-channel IOV: read back as AthenaAttributeList,
+      // matching IOVDbFolder::addMetaAttrList.
       auto payload = std::make_unique<CondAttrListCollection>(true);
-      payload->addNewStart(IOVTime(beginRun, 0));
-      payload->addNewStop(IOVTime(endRun, IOVTime::MAXEVENT));
-      payload->add(0, attrList);
+      const IOVRange range(IOVTime(beginRun, 0), IOVTime(endRun, IOVTime::MAXEVENT));
+      payload->add(0xFFFF, attrList);
+      payload->add(0xFFFF, range);
 
       ATH_MSG_DEBUG("Created payload with IOV [" << beginRun << ", " << endRun << "]");
 

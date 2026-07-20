@@ -19,13 +19,13 @@
 #include "ISF_Interfaces/IGeoIDSvc.h"
 
 // Gaudi & StoreGate
-#include "GaudiKernel/IPartPropSvc.h"
 
 #include "GeoPrimitives/GeoPrimitives.h"
 
 #include "ISF_Event/ISFParticleContainer.h"
 
 #include "AtlasHepMC/GenEvent_fwd.h"
+#include "GeneratorModules/GenData.h"
 
 class XMLCoreNode;
 
@@ -35,9 +35,6 @@ class XMLCoreNode;
 
 class TFile;
 
-namespace HepPDT {
-  class ParticleDataTable;
-}
 
 namespace ISF {
   class PunchThroughParticle;
@@ -63,6 +60,7 @@ namespace ISF {
     const ISF::ISFParticleVector* computePunchThroughParticles(const ISF::ISFParticle &isfp, const TFCSSimulationState& simulstate, CLHEP::HepRandomEngine* rndmEngine) const;
 
   private:
+    std::shared_ptr<GenData> m_gendata{nullptr};
     struct InfoMap
     {
       InfoMap (const XMLCoreNode& node);
@@ -160,9 +158,6 @@ namespace ISF {
     double                               m_z1{0.};
     double                               m_z2{0.};
 
-    /** ParticleDataTable needed to get connection pdg_code <-> charge */
-    const HepPDT::ParticleDataTable*    m_particleDataTable{nullptr};
-
     /** ROOT objects */
     TFile*                              m_fileLookupTable{nullptr};   //!< the punch-through lookup table file
 
@@ -199,7 +194,6 @@ namespace ISF {
     /*---------------------------------------------------------------------
      *  ServiceHandles
      *---------------------------------------------------------------------*/
-    ServiceHandle<IPartPropSvc>          m_particlePropSvc{this, "PartPropSvc", "PartPropSvc", "particle properties svc"};
     ServiceHandle<IGeoIDSvc>             m_geoIDSvc{this, "GeoIDSvc", "ISF::GeoIDSvc"};
     ServiceHandle<IEnvelopeDefSvc>       m_envDefSvc{this, "EnvelopeDefSvc", "AtlasGeometry_EnvelopeDefSvc"};
 

@@ -29,8 +29,8 @@ StatusCode BCM_Digitization::initialize()
 //----------------------------------------------------------------------
 // Execute method:
 //----------------------------------------------------------------------
-StatusCode BCM_Digitization::execute()
+StatusCode BCM_Digitization::execute(const EventContext& ctx)
 {
   ATH_MSG_DEBUG ( "execute()" );
-  return m_digTool->processAllSubEvents(Gaudi::Hive::currentContext());
+  return m_digTool->processAllSubEvents(ctx);
 }

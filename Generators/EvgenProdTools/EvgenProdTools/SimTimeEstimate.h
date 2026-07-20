@@ -20,7 +20,7 @@ class SimTimeEstimate : public GenBase {
 public:
 
   SimTimeEstimate(const std::string& name, ISvcLocator* pSvcLocator);
-  virtual StatusCode execute() override;
+  virtual StatusCode execute(const EventContext& ctx) override;
   virtual StatusCode finalize() override;
 
  private:

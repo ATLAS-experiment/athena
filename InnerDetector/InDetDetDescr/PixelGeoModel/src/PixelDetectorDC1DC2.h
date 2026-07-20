@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -12,6 +12,7 @@
 #include "RDBAccessSvc/IRDBRecordset.h"
 #include "RDBAccessSvc/IRDBAccessSvc.h" //for IRDBRecordset_ptr typedef
 #include "GeoModelKernel/GeoVPhysVol.h"
+#include <string_view>
 #include <string>
 #include <vector>
 
@@ -399,16 +400,16 @@ class PixelGeometryManager : public AthMessaging {
   //
   // DESIGN AND ELEMENT NAMES
   // ------------------------
-  virtual void SetDetElementName(std::string)=0;
+  virtual void SetDetElementName(std::string_view)=0;
   virtual std::string GetDetElementName()=0;
-  virtual void SetDesignName(std::string)=0;
+  virtual void SetDesignName(std::string_view)=0;
   virtual std::string GetDesignName()=0;
 
-  virtual void SetBarrelModuleName(std::string)=0;
+  virtual void SetBarrelModuleName(std::string_view)=0;
   virtual std::string GetBarrelModuleName()=0;
-  virtual void SetEndcapModuleName(std::string)=0;
+  virtual void SetEndcapModuleName(std::string_view)=0;
   virtual std::string GetEndcapModuleName()=0;
-  virtual void SetLayer0ModuleName(std::string)=0;
+  virtual void SetLayer0ModuleName(std::string_view)=0;
   virtual std::string GetLayer0ModuleName()=0;
 
   //
@@ -497,11 +498,11 @@ class PixelGeometryManager : public AthMessaging {
   virtual std::string PixelECCarbonMaterial(std::string)=0;
 
   // Services
-  virtual double* PixelServiceR(std::string, int )=0;
-  virtual double* PixelServiceZ(std::string, int )=0;
-  virtual std::string PixelServiceMaterial(std::string, int )=0;
-  virtual int PixelServiceLD(std::string, int )=0;
-  virtual int PixelServiceNFrame(std::string)=0;
+  virtual double* PixelServiceR(std::string_view, int )=0;
+  virtual double* PixelServiceZ(std::string_view, int )=0;
+  virtual std::string PixelServiceMaterial(std::string_view, int )=0;
+  virtual int PixelServiceLD(std::string_view, int )=0;
+  virtual int PixelServiceNFrame(std::string_view)=0;
 
   //  Atlas Global volume (from ATLS)
   virtual double GetATLSRadius()=0;
@@ -714,16 +715,16 @@ class OraclePixGeoManager : public PixelGeometryManager {
   //
   // DESIGN AND ELEMENT NAMES
   // ------------------------
-  virtual void SetDetElementName(std::string) override;
+  virtual void SetDetElementName(std::string_view) override;
   virtual std::string GetDetElementName() override;
-  virtual void SetDesignName(std::string) override;
+  virtual void SetDesignName(std::string_view) override;
   virtual std::string GetDesignName() override;
 
-  virtual void SetBarrelModuleName(std::string) override;
+  virtual void SetBarrelModuleName(std::string_view) override;
   virtual std::string GetBarrelModuleName() override;
-  virtual void SetEndcapModuleName(std::string) override;
+  virtual void SetEndcapModuleName(std::string_view) override;
   virtual std::string GetEndcapModuleName() override;
-  virtual void SetLayer0ModuleName(std::string) override;
+  virtual void SetLayer0ModuleName(std::string_view) override;
   virtual std::string GetLayer0ModuleName() override;
 
   //
@@ -812,11 +813,11 @@ class OraclePixGeoManager : public PixelGeometryManager {
   virtual std::string PixelECCarbonMaterial(std::string) override;
 
   // Services
-  virtual double* PixelServiceR(std::string, int ) override;
-  virtual double* PixelServiceZ(std::string, int ) override;
-  virtual std::string PixelServiceMaterial(std::string, int ) override;
-  virtual int PixelServiceLD(std::string, int ) override;
-  virtual int PixelServiceNFrame(std::string) override;
+  virtual double* PixelServiceR(std::string_view, int ) override;
+  virtual double* PixelServiceZ(std::string_view, int ) override;
+  virtual std::string PixelServiceMaterial(std::string_view, int ) override;
+  virtual int PixelServiceLD(std::string_view, int ) override;
+  virtual int PixelServiceNFrame(std::string_view) override;
 
   //  Atlas Global volume (from ATLS)
   inline virtual double GetATLSRadius() override;

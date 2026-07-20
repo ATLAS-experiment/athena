@@ -83,7 +83,7 @@ ActsTrk::HoughVtxFinderTool::findVertex(const EventContext &ctx,
                                             << vertexFinder->config().defVtxPosition[1] << ", "
                                             << vertexFinder->config().defVtxPosition[2]);
 
-  Acts::SpacePointContainer2 spacePoints(Acts::SpacePointColumns::X | 
+  Acts::SpacePointContainer spacePoints(Acts::SpacePointColumns::X | 
                                           Acts::SpacePointColumns::Y |
                                           Acts::SpacePointColumns::Z);
   spacePoints.reserve(spacePointContainer.size(), 0);

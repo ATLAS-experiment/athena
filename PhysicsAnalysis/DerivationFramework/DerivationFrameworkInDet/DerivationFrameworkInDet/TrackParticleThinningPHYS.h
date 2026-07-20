@@ -20,9 +20,11 @@ namespace DerivationFramework {
 
   private:
     virtual std::vector<int> updateMask(const EventContext& ctx, const xAOD::TrackParticleContainer* trackParticles) const override final;
-    SG::ReadHandleKey< std::vector<float> > m_trackZ0PVKey{ this, "Z0SGEntryName", "", "Collection of floats corresponding to z0 wrt PV for tracks" };
+    SG::ReadDecorHandleKey<xAOD::TrackParticleContainer> m_trackZ0PVKey{
+      this, "Z0SGEntryName", m_inDetSGKey, "DFCommonInDetTrackZ0AtPV",
+        "Decoration key for z0 wrt PV"};
     SG::ReadDecorHandleKey<xAOD::TrackParticleContainer> m_tightPrimaryKey{
-        this, "TightPrimaryKey", "InDetTrackParticles.DFCommonTightPrimary",
+      this, "TightPrimaryKey", m_inDetSGKey, "DFCommonTightPrimary",
         "Decoration key for tight primary selection"};
   };
 }

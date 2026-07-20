@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrkAlignGenAlgs/SelectEventNumber.h"
@@ -30,7 +30,7 @@ StatusCode SelectEventNumber::initialize()
 }
 
 //___________________________________________________________________________
-StatusCode SelectEventNumber::execute() 
+StatusCode SelectEventNumber::execute(const EventContext& ctx)
 {
   ATH_MSG_DEBUG("in SelectEventNumber::execute()");
 
@@ -60,7 +60,7 @@ StatusCode SelectEventNumber::execute()
 
   ATH_MSG_DEBUG("setting filter passed to "<<goodevt);
 
-  setFilterPassed(goodevt);
+  setFilterPassed(goodevt, ctx);
   
   ATH_MSG_DEBUG("goodevt "<<goodevt);
   return StatusCode::SUCCESS;

@@ -41,13 +41,13 @@ StatusCode ISF::ActsFatrasSimTool::initialize() {
     return StatusCode::FAILURE;
   }
 
-  // Acts Extrapolator
-  ATH_CHECK(m_extrapolationTool.retrieve());
-  ATH_MSG_INFO( "- ActsExtrapolationTool : " << m_extrapolationTool.typeAndName() );
-
   // retrive tracking geo tool
   ATH_CHECK(m_trackingGeometryTool.retrieve());
   m_trackingGeometry = m_trackingGeometryTool->trackingGeometry();
+
+  // Acts Extrapolator
+  ATH_CHECK(m_extrapolationTool.retrieve());
+  ATH_MSG_INFO( "- ActsExtrapolationTool : " << m_extrapolationTool.typeAndName() );
   
   //retrive Magnetfield tool
   ATH_MSG_VERBOSE("Using ATLAS magnetic field service");

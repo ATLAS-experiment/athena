@@ -113,3 +113,17 @@ def ITkPixelCnvToolCfg(flags, name = "ITkPixelCnvTool",
 
     acc.addPublicTool(CompFactory.ITkPixelCnvTool(name, **kwargs), primary=True)
     return acc
+
+
+def ITkPixelCsvWaferIdAlgCfg(flags,
+                               name = "ITkPixelCsvWaferIdAlg",
+                               OutputFile: str = "ITkPixelWaferIds.txt",
+                               **kwargs) -> ComponentAccumulator:
+    acc = ComponentAccumulator()
+
+    from PixelGeoModelXml.ITkPixelGeoModelConfig import ITkPixelReadoutGeometryCfg
+    acc.merge(ITkPixelReadoutGeometryCfg(flags))
+
+    kwargs.setdefault("OutputFile", OutputFile)
+    acc.addEventAlgo(CompFactory.ITkPixelCsvWaferIdAlg(name, **kwargs))
+    return acc

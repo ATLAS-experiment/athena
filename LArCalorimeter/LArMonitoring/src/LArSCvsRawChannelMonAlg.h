@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef LARCELLREC_LARSCVSRAWCHANNELMONALG_H
@@ -93,8 +93,8 @@ public:
   
   std::map<std::string,int> m_toolmapPerLayer;
   
-  const LArOnlineID* m_onlineID;
-  const CaloCell_ID* m_calo_id;
+  const LArOnlineID* m_onlineID{};
+  const CaloCell_ID* m_calo_id{};
   ToolHandle<ICaloSuperCellIDTool>  m_scidtool{this, "CaloSuperCellIDTool", "CaloSuperCellIDTool", "Offline / SuperCell ID mapping tool"};
 
   LArBadChannelMask m_bcMask;

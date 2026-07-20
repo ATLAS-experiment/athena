@@ -1,6 +1,6 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 /*
- * Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration.
  */
 /**
  * @file AthenaKernel/ThinningInfo.h
@@ -40,7 +40,7 @@ class ThinningInfo
 {
 public:
   /// Thinning for the object.
-  const ThinningDecisionBase* m_decision;
+  const ThinningDecisionBase* m_decision = nullptr;
 
   /// Set of auxids not to be written for this object.
   /// (In principle, we should use SG::auxid_set_t here, but there

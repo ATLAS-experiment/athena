@@ -50,7 +50,7 @@ class TileDigiNoiseCalibAlg: public AthAlgorithm {
 
     // Functions
     virtual StatusCode initialize() override; //only array initialization is done here
-    virtual StatusCode execute() override;
+    virtual StatusCode execute(const EventContext& ctx) override;
     virtual StatusCode finalize() override;
 
   private:

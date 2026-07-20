@@ -6,19 +6,28 @@
 
 # ttbar mu=200 input
 input_rdo=$(python -c "from AthenaConfiguration.TestDefaults import defaultTestFiles; print(defaultTestFiles.RDO_RUN4[0])")
+conditions_tag=$(python -c "from AthenaConfiguration.TestDefaults import defaultConditionsTags; print(defaultConditionsTags.RUN4_MC)")
 n_events=5
 
 ignore_pattern=""
 
+export ATHENA_CORE_NUMBER=1
+
 Reco_tf.py \
+  --multithreaded True \
   --preExec "flags.Exec.FPE=-1; \
 	     flags.Acts.doLargeRadius=True; \
 	     flags.Acts.doLowPt=True; \
+	     flags.Scheduler.CheckDependencies=True; \
+	     flags.Scheduler.ShowDataDeps=True; \
+	     flags.Scheduler.ShowDataFlow=True; \
+	     flags.Scheduler.ShowControlFlow = True; \
 	     flags.Detector.EnableCalo=True;" \
   --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingRecoPreInclude,ActsConfig.ActsCIFlags.actsLegacyWorkflowFlags" \
   --outputDAOD_IDTRKVALIDFile DAOD.IDTRKVALID.pool.root \
   --outputDAOD_IDTIDEFile DAOD.CTIDE.pool.root \
   --ignorePatterns "${ignore_pattern}" \
+  --conditionsTag ${conditions_tag} \
   --inputRDOFile ${input_rdo} \
   --outputAODFile AOD.pool.root \
   --maxEvents ${n_events}

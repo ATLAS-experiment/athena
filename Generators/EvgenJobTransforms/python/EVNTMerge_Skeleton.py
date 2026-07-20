@@ -40,6 +40,9 @@ def fromRunArgs(runArgs):
     else:
         raise RuntimeError("No outputEVNT_MRGFile defined")
 
+    # Temporary measure until we switch to using CREST by default everywhere
+    flags.IOVDb.UseCREST = False
+
     # Pre-include
     processPreInclude(runArgs, flags)
 

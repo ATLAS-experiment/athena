@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( ThinningUtils )
@@ -21,16 +21,16 @@ atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
 
 atlas_add_test(ThinTRTStandaloneConfig_test
                SCRIPT python -m ThinningUtils.ThinTRTStandaloneConfig
-               POST_EXEC_SCRIPT nopost.sh)
+               POST_EXEC_SCRIPT noerror.sh)
 
 atlas_add_test(ThinNegativeEnergyCaloClusters_test
                SCRIPT python -m ThinningUtils.ThinNegativeEnergyCaloClustersConfig
-               POST_EXEC_SCRIPT nopost.sh)
+               POST_EXEC_SCRIPT noerror.sh)
 
 atlas_add_test(ThinInDetForwardTrackParticlesConfig_test
                SCRIPT python -m ThinningUtils.ThinInDetForwardTrackParticlesConfig
-               POST_EXEC_SCRIPT nopost.sh)
+               POST_EXEC_SCRIPT noerror.sh)
                
 atlas_add_test(ThinGeantTruthConfig_test
                SCRIPT python -m ThinningUtils.ThinGeantTruthConfig
-               POST_EXEC_SCRIPT nopost.sh)
+               POST_EXEC_SCRIPT noerror.sh)

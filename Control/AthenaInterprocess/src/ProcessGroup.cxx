@@ -20,7 +20,7 @@ using namespace boost::interprocess;
 
 
 //- helper -------------------------------------------------------------------
-static inline AthenaInterprocess::SharedQueue create_queue( const std::string& owner, int count )
+static inline AthenaInterprocess::SharedQueue create_queue( std::string_view owner, int count )
 {
    std::ostringstream s;
    s << "athenamp_" << owner << '_' << getpid() << '_' << count << '_' << AthenaInterprocess::randString() << std::ends;

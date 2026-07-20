@@ -79,8 +79,7 @@ StatusCode ActsTrk::MaterialTrackReader::finalize() {
 }
 
 StatusCode
-ActsTrk::MaterialTrackReader::execute () {
-    const EventContext& ctx{Gaudi::Hive::currentContext()};
+ActsTrk::MaterialTrackReader::execute (const EventContext& ctx) {
     // Write to the collection to the EventStore
     SG::WriteHandle materialTracks{m_materialTrackCollectionKey, ctx};
 

@@ -98,7 +98,7 @@ StatusCode ZdcRec::initialize()
 //==================================================================================================
 
 //==================================================================================================
-StatusCode ZdcRec::execute()
+StatusCode ZdcRec::execute(const EventContext& /*ctx*/)
 {
 
   ZdcRawChannelCollection::iterator iter;

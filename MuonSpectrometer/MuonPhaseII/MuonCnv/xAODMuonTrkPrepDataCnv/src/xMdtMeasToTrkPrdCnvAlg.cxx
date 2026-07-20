@@ -12,12 +12,19 @@
 #include "xAODMuonPrepData/MdtDriftCircleContainer.h"
 #include "xAODMuonPrepData/MdtTwinDriftCircleContainer.h"
 
+
+namespace{
+    using Link_t = ElementLink<Muon::MdtPrepDataCollection>;
+    static const SG::Decorator<Link_t> dec_link{"mdtTrkPrdLink"};
+}
+
 namespace MuonR4{
     StatusCode xMdtMeasToTrkPrdCnvAlg::initialize() {
         ATH_CHECK(m_idHelperSvc.retrieve());
         ATH_CHECK(m_readKey.initialize());
         ATH_CHECK(m_writeKey.initialize());
         ATH_CHECK(m_detMgrKey.initialize());
+        ATH_CHECK(m_linkKey.initialize());
         return StatusCode::SUCCESS;
     }
     StatusCode xMdtMeasToTrkPrdCnvAlg::execute(const EventContext& ctx) const {
@@ -65,6 +72,7 @@ namespace MuonR4{
                                                                outEle, twin->tdc(), twin->adc(),
                                                                twin->twinTdc(), twin->twinAdc(), twin->status());
             }
+            dec_link(*meas) = Link_t{*coll, coll->size()};
             prd->setHashAndIndex(coll->identifyHash(), coll->size());
             coll->push_back(std::move(prd));
         }
@@ -72,7 +80,9 @@ namespace MuonR4{
         /// Write everything to disk in the end
         auto outContainer = std::make_unique<Muon::MdtPrepDataContainer>(idHelper.module_hash_max());
         for (std::unique_ptr<Muon::MdtPrepDataCollection>& coll : prdCollections){
-            if (!coll) continue;
+            if (!coll) {
+                continue;
+            }
             const IdentifierHash hash = coll->identifyHash();
             ATH_CHECK(outContainer->addCollection(coll.release(), hash));
         }

@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( BTagging )
@@ -31,7 +31,11 @@ atlas_install_scripts(
 # install test scripts
 atlas_add_test(FlavorTaggingTest
   SCRIPT testFlavorTagging --n-events 20 -o slow.h5
-  POST_EXEC_SCRIPT nopost.sh )
+  # JetH5Writer explicitly creates NANs.
+  LOG_IGNORE_PATTERN "FPE INVALID"
+  POST_EXEC_SCRIPT noerror.sh )
 atlas_add_test(FasterBTaggingTest
   SCRIPT testFlavorTagging --n-events 20 --fast -o fast.h5
-  POST_EXEC_SCRIPT nopost.sh )
+  # JetH5Writer explicitly creates NANs.
+  LOG_IGNORE_PATTERN "FPE INVALID"
+  POST_EXEC_SCRIPT noerror.sh )

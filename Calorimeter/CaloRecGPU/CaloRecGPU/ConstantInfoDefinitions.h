@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 //
 // Dear emacs, this is -*- c++ -*-
 //
@@ -219,33 +219,33 @@ public:
 
   struct GeometryArr
   {
-    float x[NCaloCells];
-    float y[NCaloCells];
-    float z[NCaloCells];
-    float r[NCaloCells];
-    float eta[NCaloCells];
-    float phi[NCaloCells];
+    float x[NCaloCells]{};
+    float y[NCaloCells]{};
+    float z[NCaloCells]{};
+    float r[NCaloCells]{};
+    float eta[NCaloCells]{};
+    float phi[NCaloCells]{};
 
-    float dx[NCaloCells];
-    float dy[NCaloCells];
-    float dz[NCaloCells];
-    float dr[NCaloCells];
-    float deta[NCaloCells];
-    float dphi[NCaloCells];
+    float dx[NCaloCells]{};
+    float dy[NCaloCells]{};
+    float dz[NCaloCells]{};
+    float dr[NCaloCells]{};
+    float deta[NCaloCells]{};
+    float dphi[NCaloCells]{};
 
-    float volume[NCaloCells];
+    float volume[NCaloCells]{};
     
-    int   nCellsPerSampling[NumSamplings];
+    int   nCellsPerSampling[NumSamplings]{};
 
-    NeighArr neighbours;
+    NeighArr neighbours{};
     
 #if CALORECGPU_ADD_FULL_PAIRS_LIST_TO_CONSTANT_INFORMATION
-    NeighPairsArr neighPairs;
+    NeighPairsArr neighPairs{};
 #endif
 
     EtaPhiToCellMap etaPhiToCell;
 
-    OtherCellInfo::carrier otherCellInfo[NCaloCells];
+    OtherCellInfo::carrier otherCellInfo[NCaloCells]{};
 
     constexpr static bool is_tile (const int cell)
     {
@@ -462,14 +462,14 @@ public:
   {
     static constexpr int s_numDoubleGaussianConstants = 4;
 
-    float noise[NCaloCells][NumGainStates];
+    float noise[NCaloCells][NumGainStates]{};
     //Given the low number of possible gain sates
 
-    float double_gaussian_constants[s_numDoubleGaussianConstants][NTileCells][NumGainStates];
+    float double_gaussian_constants[s_numDoubleGaussianConstants][NTileCells][NumGainStates]{};
 
-    CellNoiseProperties::carrier noise_properties;
+    CellNoiseProperties::carrier noise_properties{};
 
-    float luminosity;
+    float luminosity{};
 
     constexpr float get_noise(const int cell, const int gain) const
     {

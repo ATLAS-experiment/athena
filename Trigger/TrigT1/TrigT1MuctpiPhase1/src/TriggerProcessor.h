@@ -11,11 +11,7 @@
 
 #include "TrigT1Interfaces/Lvl1MuCTPIInputPhase1.h"
 
-#include <vector>
-#include <list>
-#include <map>
 #include <string>
-#include <utility>
 
 namespace TrigConf {
   class L1Menu;

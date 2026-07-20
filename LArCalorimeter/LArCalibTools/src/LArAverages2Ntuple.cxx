@@ -66,11 +66,10 @@ StatusCode LArAverages2Ntuple::initialize()
 
 }
 
-StatusCode LArAverages2Ntuple::execute()
+StatusCode LArAverages2Ntuple::execute(const EventContext& ctx)
 {
   ATH_MSG_DEBUG ( "in execute" );
   
-  const EventContext& ctx = Gaudi::Hive::currentContext();
 
   const LArAccumulatedCalibDigitContainer* accuDigitContainer = nullptr;
   SG::ReadHandle<LArAccumulatedCalibDigitContainer> Hdl{m_contKey, ctx};

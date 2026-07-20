@@ -78,7 +78,7 @@ public:
   /**       Create  LArTTL1  object
             save in TES (2 containers: 1 EM, 1 hadronic)
   */
-  virtual StatusCode execute() override;
+  virtual StatusCode execute(const EventContext& ctx) override;
 
   virtual StatusCode finalize() override;
   virtual void handle(const Incident&) override;

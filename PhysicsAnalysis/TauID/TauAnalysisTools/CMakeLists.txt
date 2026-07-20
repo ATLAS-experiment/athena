@@ -17,7 +17,7 @@ atlas_add_library( TauAnalysisToolsLib
    LINK_LIBRARIES ${ROOT_LIBRARIES} ${ONNXRUNTIME_LIBRARIES} 
                   AsgTools xAODEgamma xAODMuon xAODJet xAODTau xAODTracking 
                   xAODTruth TruthUtils PATCoreLib PATInterfaces tauRecToolsLib 
-                  MCTruthClassifierLib TruthUtils AsgAnalysisInterfaces
+                  AsgAnalysisInterfaces
                   xAODCore xAODBTagging AthOnnxInterfaces AthOnnxUtilsLib ColumnarCoreLib ColumnarTauLib ColumnarEventInfoLib
                   ColumnarTruthLib ColumnarJetLib TruthUtils
    PRIVATE_LINK_LIBRARIES AthLinks xAODEventInfo xAODMetaData PathResolver )
@@ -59,7 +59,7 @@ if( NOT XAOD_STANDALONE )
       INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
       LINK_LIBRARIES ${ROOT_LIBRARIES} AthAnalysisBaseCompsLib POOLRootAccessLib
       GaudiKernel AsgTools xAODTau TauAnalysisToolsLib CxxUtils ColumnarCoreLib ColumnarTauLib ColumnarEventInfoLib
-      POST_EXEC_SCRIPT nopost.sh )
+      POST_EXEC_SCRIPT noerror.sh )
 endif()
 
 # Install files from the package:

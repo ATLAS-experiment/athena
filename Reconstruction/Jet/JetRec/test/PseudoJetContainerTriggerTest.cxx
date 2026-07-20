@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "CxxUtils/checker_macros.h"
@@ -41,7 +41,7 @@ using xAOD::JetFourMom_t;
 // This allows adding consitituents, but not associated particles
 // The Extractor is supplied with an isTrigger flag which
 // switches off the setting of associated particles in the jet.
-// If an attempt is made to strore such particls (jet->.setAssociatedObjects
+// If an attempt is made to strore such particles (jet->setAssociatedObjects)
 // an SG::ExcBadAuxVar exception is thrown.
 
 class PseudoJetContainerTriggerTest: public ::testing::Test {

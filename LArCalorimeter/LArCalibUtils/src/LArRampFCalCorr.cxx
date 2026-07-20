@@ -42,7 +42,7 @@ StatusCode LArRampFCalCorr::initialize(){
   return StatusCode::SUCCESS;
 }
 
-StatusCode LArRampFCalCorr::execute() {return StatusCode::SUCCESS;}
+StatusCode LArRampFCalCorr::execute(const EventContext& /*ctx*/) {return StatusCode::SUCCESS;}
 
 StatusCode LArRampFCalCorr::stop(){
 

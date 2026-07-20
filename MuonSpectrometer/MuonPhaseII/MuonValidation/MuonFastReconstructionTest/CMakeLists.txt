@@ -19,3 +19,10 @@ atlas_add_component( MuonFastReconstructionTest
 
 # Install files from the package:
 atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
+
+
+atlas_add_test( TestFastMuonReco
+                SCRIPT python -m MuonFastReconstructionTest.MuonFastReconstructionTesterConfig --nEvents 1 --noPerfMon
+                PRIVATE_WORKING_DIRECTORY
+                POST_EXEC_SCRIPT nopost.sh
+                PROPERTIES TIMEOUT 1200)

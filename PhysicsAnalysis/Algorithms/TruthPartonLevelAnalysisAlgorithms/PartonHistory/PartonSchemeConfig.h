@@ -35,7 +35,7 @@ enum class SpecialFillType {
 
 /// Parameterizes one special fill call.
 struct SpecialFillOp {
-  SpecialFillType type;
+  SpecialFillType type {};
   std::string parent = "";        ///< for Z/W/Gamma: parent string arg
   std::string mode = "resonant";  ///< for Z/W/H: mode string arg
   int count = 1;                  ///< for Z/W: nZs or nWs
@@ -62,7 +62,7 @@ enum class DecoratorGroup {
 
 /// Parameterized Z or W decorator initialisation (needs count/extended args).
 struct DecoratorZW {
-  enum Type { Z, W } type;
+  enum Type { Z, W } type {Z};
   int count = 1;
   bool extended = false;  ///< only relevant for Z
 };

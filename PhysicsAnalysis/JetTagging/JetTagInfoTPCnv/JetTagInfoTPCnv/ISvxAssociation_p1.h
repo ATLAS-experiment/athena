@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef JETTAGINFOTPCNV_ISvxAssociation_p1_H
@@ -18,7 +18,7 @@ namespace Analysis {
 
   class ISvxAssociation_p1 {
   public:
-    unsigned int m_keyIndex;
+    unsigned int m_keyIndex = 0;
     std::string m_name;
   };
 }

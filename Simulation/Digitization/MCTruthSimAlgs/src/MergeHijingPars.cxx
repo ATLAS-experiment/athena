@@ -18,7 +18,7 @@ StatusCode MergeHijingPars::initialize() {
   return StatusCode::SUCCESS;
 }
 
-StatusCode MergeHijingPars::execute() {
+StatusCode MergeHijingPars::execute(const EventContext& ctx) {
   ATH_MSG_DEBUG("execute()");
-  return m_mergeTool->processAllSubEvents(Gaudi::Hive::currentContext());
+  return m_mergeTool->processAllSubEvents(ctx);
 }

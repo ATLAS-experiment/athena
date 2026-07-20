@@ -17,6 +17,10 @@ def HGTD_RecoCfg(flags):
 
         from HGTD_Config.HGTD_TrackTimeExtensionConfig import TrackTimeExtensionCfg
         result.merge(TrackTimeExtensionCfg(flags))
+
+        from HGTD_Config.HGTD_TrackTimeExtensionConfig import TimeCompatibilityCheckCfg #ITk holes
+        result.merge(TimeCompatibilityCheckCfg(flags))
+        
     else:
         from ActsConfig.ActsClusterizationConfig import ActsHgtdClusterizationAlgCfg
         result.merge(ActsHgtdClusterizationAlgCfg(flags))
@@ -25,11 +29,18 @@ def HGTD_RecoCfg(flags):
         result.merge(ActsHGTDTrackExtensionAlgCfg(flags))
 
         if flags.Tracking.doTruth:
+
+            # HGTD clusters to truth matching
+            from ActsConfig.ActsTruthConfig import ActsHgtdClusterToTruthAssociationAlgCfg
+            result.merge(ActsHgtdClusterToTruthAssociationAlgCfg(flags,DepositedEnergyMin=0))
+
+            # Extensions to truth matching
             from ActsConfig.ActsHGTDTrackExtensionAlgConfig import HGTDTruthTrackDecorationAlgCfg
             result.merge(HGTDTruthTrackDecorationAlgCfg(flags))
         
-    from HGTD_Config.HGTD_TrackTimeExtensionConfig import TrackTimeDefAndQualityAlgCfg
-    result.merge(TrackTimeDefAndQualityAlgCfg(flags))
+    if not flags.Acts.useHGTDClusterInTrackFinding:
+        from HGTD_Config.HGTD_TrackTimeExtensionConfig import TrackTimeDefAndQualityAlgCfg
+        result.merge(TrackTimeDefAndQualityAlgCfg(flags))
 
     from HGTD_Config.HGTD_VertexTimeConfig import VertexTimeAlgCfg
     result.merge(VertexTimeAlgCfg(flags))

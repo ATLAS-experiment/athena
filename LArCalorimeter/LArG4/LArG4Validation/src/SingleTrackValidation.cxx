@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "SingleTrackValidation.h"
@@ -14,9 +14,9 @@
 // To get the Magnetic Field:
 #include "CLHEP/GenericFunctions/FixedConstant.hh"
 
-// To get the particle properties:
-#include "HepPDT/ParticleDataTable.hh"
-#include "HepPDT/ParticleData.hh"
+// TruthUtils
+#include "TruthUtils/HepMCHelpers.h"
+
 
 // To extrapolate:
 #include "AtlasBComponent.h"
@@ -68,7 +68,6 @@ public:
   Clockwork() {}
   ~Clockwork() {}
 
-  IPartPropSvc*      partPropSvc{nullptr};
   ITHistSvc*         histSvc{nullptr};
   const CaloCell_ID* cellId{nullptr};
   NTuple::Tuple* nt = nullptr;
@@ -158,8 +157,6 @@ StatusCode SingleTrackValidation::initialize() {
   // to obtain charge & type & other properties of the primary particle and  //
   // other particles that may turn up in the debris.                         //
   //                                                                         //
-  ATH_CHECK(m_ppSvc.retrieve());
-  m_c->partPropSvc = m_ppSvc.get();
   ATH_CHECK(m_histSvc.retrieve());
   m_c->histSvc = m_histSvc.get();
   ATH_CHECK(detStore()->retrieve(m_c->cellId, "CaloCell_ID"));
@@ -254,7 +251,7 @@ StatusCode SingleTrackValidation::initialize() {
   return StatusCode::SUCCESS;
 }
 
-StatusCode SingleTrackValidation::execute() {
+StatusCode SingleTrackValidation::execute(const EventContext& ctx) {
 
   if (m_c->cpuTime==0) {
     m_c->cpuTime=getCpu();
@@ -263,9 +260,8 @@ StatusCode SingleTrackValidation::execute() {
   m_c->cpuTime= getCpu()-m_c->cpuTime;
   m_histos[156]->Fill( m_c->cpuTime/100. , 1. );
 
-  const EventContext& context = getContext();
-  int RunNum=context.eventID().run_number();
-  int EvtNum=context.eventID().event_number();
+  int RunNum=ctx.eventID().run_number();
+  int EvtNum=ctx.eventID().event_number();
   double RunStr=double(RunNum);
   double EvtStr=double(EvtNum);
   m_c->EventNo=EvtStr;
@@ -275,7 +271,7 @@ StatusCode SingleTrackValidation::execute() {
 
   MagField::AtlasFieldCache    fieldCache;
   // Get field cache object
-  SG::ReadCondHandle<AtlasFieldCacheCondObj> readHandle{m_fieldCacheCondObjInputKey};
+  SG::ReadCondHandle<AtlasFieldCacheCondObj> readHandle{m_fieldCacheCondObjInputKey, ctx};
   const AtlasFieldCacheCondObj* fieldCondObj{*readHandle};
   if (fieldCondObj == nullptr) {
     ATH_MSG_ERROR("Failed to retrieve AtlasFieldCacheCondObj with key " << m_fieldCacheCondObjInputKey.key());
@@ -284,15 +280,11 @@ StatusCode SingleTrackValidation::execute() {
   fieldCondObj->getInitializedCache (fieldCache);
 
   // Get the MC Truth Information
-  SG::ReadHandle<McEventCollection> mcEvent{m_truthKey};
+  SG::ReadHandle<McEventCollection> mcEvent{m_truthKey, ctx};
   for (const HepMC::GenEvent* e : *mcEvent) {
 
     // Get just the primary, call it "theParticle"
     auto theParticle = *HepMC::begin(*e);
-
-    // Fetch whatever particle properties will be used in the following:
-    const HepPDT::ParticleDataTable * dataTable = m_c->partPropSvc->PDT();
-    const HepPDT::ParticleData      * particleData = dataTable->particle(iabs(theParticle->pdg_id()));
 
     // Get the kinematic variables:
     HepLorentzVector momentum(theParticle->momentum().px(),
@@ -302,7 +294,7 @@ StatusCode SingleTrackValidation::execute() {
     Point3D<double>       origin(theParticle->production_vertex()->position().x(),
                                  theParticle->production_vertex()->position().y(),
                                  theParticle->production_vertex()->position().z());
-    double           charge = theParticle->pdg_id() > 0 ? particleData->charge() : - particleData->charge();
+    double           charge = MC::charge(theParticle->pdg_id());
     // Put Eta and Phi into the Ntuple
     m_c->phi = theParticle->momentum().phi();
     m_c->eta = -log(tan(theParticle->momentum().theta()/2));
@@ -366,7 +358,7 @@ StatusCode SingleTrackValidation::execute() {
     double thetaImpact = std::acos(z/radImpact);
     double etaImpact   = -std::log(std::tan(thetaImpact/2));
 
-    SG::ReadCondHandle<CaloDetDescrManager> caloMgrHandle{m_caloMgrKey};
+    SG::ReadCondHandle<CaloDetDescrManager> caloMgrHandle{m_caloMgrKey, ctx};
     ATH_CHECK(caloMgrHandle.isValid());
     const CaloDetDescrManager* caloMgr = *caloMgrHandle;
     const CaloDetDescrElement *element[15]={nullptr};

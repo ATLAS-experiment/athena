@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( CaloConditions )
@@ -19,6 +19,10 @@ atlas_add_dictionary( CaloConditionsDict
                       CaloConditions/CaloConditionsDict.h
                       CaloConditions/selection.xml
                       LINK_LIBRARIES CaloConditions )
+if( CMAKE_INTERPROCEDURAL_OPTIMIZATION AND CMAKE_COMPILER_IS_GNUCXX )
+  # Suppress spurious warnings seen in the LTO build.
+  set_target_properties( CaloConditionsDict PROPERTIES LINK_FLAGS " -Wno-alloc-size-larger-than "  )
+endif()
 
 atlas_add_test( ToolConstants_test
                 SOURCES

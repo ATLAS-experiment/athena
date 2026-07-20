@@ -54,6 +54,8 @@ def ByteStreamReadCfg(flags, type_names=None):
         )
         result.addPublicTool(mcEventInfoTool)
 
+        result.merge(SGInputLoaderCfg(flags, [('ByteStreamMetadataContainer', 'InputMetaDataStore+ByteStreamMetadata')]))
+
     eiName = "EventInfo"
     if flags.Common.isOnline and not any(flags.Input.Files) and not (flags.Trigger.doHLT or flags.Trigger.doLVL1):
         bytestream_input = CompFactory.ByteStreamEmonInputSvc("ByteStreamInputSvc")

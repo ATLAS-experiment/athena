@@ -142,7 +142,7 @@ StatusCode LArTTL1Calib::initialize() {
   return StatusCode::SUCCESS;
 }
 
-StatusCode LArTTL1Calib::execute() {
+StatusCode LArTTL1Calib::execute(const EventContext& /*ctx*/) {
   // +======================================================================+
   // +                                                                      +
   // + Author: F. Ledroit                                                   +

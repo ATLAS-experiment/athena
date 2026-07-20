@@ -1,7 +1,8 @@
 
 
 #include "DrawCanvasObject.h"
-
+#include <algorithm>
+#include <utility>
 
 namespace MuonValR4::detail {
     using PrimitivePtr_t = DrawCanvasObject::PrimitivePtr_t;
@@ -57,7 +58,7 @@ namespace MuonValR4::detail {
         expand(x, m_axisRanges[0]);
         expand(y, m_axisRanges[1]);
     }
-    void DrawCanvasObject::add(PrimitivePtr_t&& drawMe, const std::string& drawOpt) {
+    void DrawCanvasObject::add(PrimitivePtr_t&& drawMe, std::string_view drawOpt) {
         m_primitives.emplace_back(std::move(drawMe), drawOpt);
     }
     void DrawCanvasObject::add(std::vector<PrimitivePtr_t> && drawMe) {

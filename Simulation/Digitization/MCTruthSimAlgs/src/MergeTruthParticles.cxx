@@ -19,7 +19,7 @@ StatusCode MergeTruthParticles::initialize() {
  return StatusCode::SUCCESS;
 }
 
-StatusCode MergeTruthParticles::execute() {
+StatusCode MergeTruthParticles::execute(const EventContext& ctx) {
   ATH_MSG_DEBUG("execute()");
-  return m_mergeTool->processAllSubEvents(Gaudi::Hive::currentContext());
+  return m_mergeTool->processAllSubEvents(ctx);
 }

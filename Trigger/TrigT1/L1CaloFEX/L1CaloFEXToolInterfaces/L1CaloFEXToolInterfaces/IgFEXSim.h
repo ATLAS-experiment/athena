@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -23,34 +23,20 @@ Interface definition for gFEXSim
   public:
     static const InterfaceID& interfaceID( ) ;
 
-    virtual void reset() = 0;
-
-    virtual void execute() = 0;
-
-    virtual StatusCode executegFEXSim(const gTowersIDs& tmp, gFEXOutputCollection* gFEXOutputs) = 0;
-
-    virtual std::vector<uint32_t> getgRhoTOBs() const =0;
-
-    virtual std::vector<uint32_t> getgBlockTOBs() const =0;
-
-    virtual std::vector<uint32_t> getgJetTOBs() const =0;
-
-    virtual std::vector<int32_t> getgScalarEJwojTOBs() const =0;
- 
-    virtual std::vector<uint32_t> getgMETComponentsJwojTOBs() const =0;
-
-    virtual std::vector<uint32_t> getgMHTComponentsJwojTOBs() const =0;
-
-    virtual std::vector<uint32_t> getgMSTComponentsJwojTOBs() const =0;
-
-    virtual std::vector<uint32_t> getgMETComponentsNoiseCutTOBs() const =0;
-
-    virtual std::vector<uint32_t> getgMETComponentsRmsTOBs() const =0;
-
-    virtual std::vector<uint32_t> getgScalarENoiseCutTOBs() const =0;
-
-    virtual std::vector<uint32_t> getgScalarERmsTOBs() const =0;
-
+    virtual StatusCode execute(const EventContext& ctx,
+                               const gTowersIDs& tmp_gTowersIDs_subset,
+                               gFEXOutputCollection* gFEXOutputs,
+                               std::vector<uint32_t>& gRhoTobWords,
+                               std::vector<uint32_t>& gBlockTobWords,
+                               std::vector<uint32_t>& gJetTobWords,
+                               std::vector<int32_t>&  gScalarEJwojTobWords,
+                               std::vector<uint32_t>& gMETComponentsJwojTobWords,
+                               std::vector<uint32_t>& gMHTComponentsJwojTobWords,
+                               std::vector<uint32_t>& gMSTComponentsJwojTobWords,
+                               std::vector<uint32_t>& gMETComponentsNoiseCutTobWords,
+                               std::vector<uint32_t>& gMETComponentsRmsTobWords,
+                               std::vector<uint32_t>& gScalarENoiseCutTobWords,
+                               std::vector<uint32_t>& gScalarERmsTobWordss) const = 0;
 
   private:
 

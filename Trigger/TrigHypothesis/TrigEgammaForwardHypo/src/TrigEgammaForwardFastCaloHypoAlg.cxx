@@ -56,7 +56,7 @@ StatusCode TrigEgammaForwardFastCaloHypoAlg::execute( const EventContext& contex
   size_t counter=0;
   for ( const auto previousDecision: *previousDecisionsHandle ) {
     //get RoI  
-    auto roiELInfo = TCU::findLink<TrigRoiDescriptorCollection>( previousDecision, TCU::initialRoIString() );
+    auto roiELInfo = TCU::findLink<TrigRoiDescriptorCollection>(context,  previousDecision, TCU::initialRoIString() );
     
     ATH_CHECK( roiELInfo.isValid() );
     const TrigRoiDescriptor* roi = *(roiELInfo.link);

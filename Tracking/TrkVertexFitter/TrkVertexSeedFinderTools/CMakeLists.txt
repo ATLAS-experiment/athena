@@ -3,9 +3,6 @@
 # Declare the package name:
 atlas_subdir( TrkVertexSeedFinderTools )
 
-# External dependencies:
-find_package( HepPDT )
-
 atlas_add_library( TrkVertexSeedFinderToolsLib
                    TrkVertexSeedFinderTools/*.h
                    INTERFACE
@@ -17,8 +14,7 @@ atlas_add_library( TrkVertexSeedFinderToolsLib
 atlas_add_component( TrkVertexSeedFinderTools
                      src/*.cxx
                      src/components/*.cxx
-                     INCLUDE_DIRS ${HEPPDT_INCLUDE_DIRS}
-                     LINK_LIBRARIES ${HEPPDT_LIBRARIES} AtlasHepMCLib EventPrimitives GaudiKernel GeneratorObjects
+                     LINK_LIBRARIES TruthUtils AtlasHepMCLib EventPrimitives GaudiKernel GeneratorObjects
                      GeoPrimitives StoreGateLib TestTools TrkEventPrimitives TrkParameters TrkTrack
                      TrkVertexFitterInterfaces TrkVertexSeedFinderToolsLib TrkVertexSeedFinderUtilsLib )
 

@@ -105,7 +105,7 @@ TrigJetHypoAlg::decide(const xAOD::JetContainer* jets,
     // Needs a dummy feature link -- we will specify the input RoI which triggers special behaviour in the ComboHypo, equivilant to the "noCombo" below
     if(!newDecision->hasObjectLink(TrigCompositeUtils::featureString())) {
       newDecision->setObjectLink<TrigRoiDescriptorCollection>(TrigCompositeUtils::featureString(), 
-							      TrigCompositeUtils::findLink<TrigRoiDescriptorCollection>(newDecision, TrigCompositeUtils::initialRoIString()).link);
+							      TrigCompositeUtils::findLink<TrigRoiDescriptorCollection>(context, newDecision, TrigCompositeUtils::initialRoIString()).link);
       }
     // We need to fill the jetHypoInputs vector, pairing each jet with
     // the same newDecision object, such that it is updated if the hypo

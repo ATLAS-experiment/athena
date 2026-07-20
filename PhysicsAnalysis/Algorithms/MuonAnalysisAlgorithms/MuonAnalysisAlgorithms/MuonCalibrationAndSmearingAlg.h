@@ -28,13 +28,22 @@ namespace CP
   public:
     using EL::AnaAlgorithm::AnaAlgorithm;
     StatusCode initialize () override;
-    StatusCode execute () override;
+    StatusCode execute (const EventContext& ctx) override;
 
 
 
     /// \brief the smearing tool
   private:
     ToolHandle<IMuonCalibrationAndSmearingTool> m_calibrationAndSmearingTool {this, "calibrationAndSmearingTool", "CP::MuonCalibrationAndSmearingTool", "the calibration and smearing tool we apply"};
+
+    /// \brief an optional calibration tool applied only to ZeroPixelHit muons.
+    /// Defaulted to an empty handle and only used when configured.
+  private:
+    ToolHandle<IMuonCalibrationAndSmearingTool> m_calibrationAndSmearingTool_ZeroPix {this, "calibrationAndSmearingTool_ZeroPix", "", "optional calibration and smearing tool applied only to ZeroPixelHit muons"};
+
+    /// \brief the muonType value used for the ZeroPix calibration tool
+  private:
+    Gaudi::Property<int> m_zeroPixMuonType {this, "zeroPixMuonType", xAOD::Muon::MuonType::ZeroPixelHit, "muonType value used for the ZeroPix calibration tool"};
 
     /// \brief whether to skip the nominal correction (for PHYSLITE)
   private:

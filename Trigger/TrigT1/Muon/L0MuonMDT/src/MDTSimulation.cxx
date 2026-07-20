@@ -40,7 +40,7 @@ namespace L0Muon {
 
 
   
-    for(const auto& cand : *barrelCandidates) {
+    for(const xAOD::RPCCandData_v1* cand : *barrelCandidates) {
 
       float m=0, b=0;
 

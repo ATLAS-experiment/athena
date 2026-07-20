@@ -31,7 +31,7 @@ StatusCode BackgroundWordTest::initialize()
 
 //----------------------------------------------------------------
 
-StatusCode BackgroundWordTest::execute()
+StatusCode BackgroundWordTest::execute(const EventContext& /*ctx*/)
 {
    ///////////////////////// 
    // get the EventInfo

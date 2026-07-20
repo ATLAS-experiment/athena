@@ -26,7 +26,7 @@ public:
   DumpAllSystematics( const std::string& name, ISvcLocator* svcLoc );
 
   virtual StatusCode initialize();
-  virtual StatusCode execute();
+  virtual StatusCode execute(const EventContext& ctx);
   virtual StatusCode  finalize();
 
   std::string m_particle_name;

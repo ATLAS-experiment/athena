@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 //***************************************************************************
 //    gFEXSim - Simulation of the gFEX module
@@ -45,68 +45,26 @@ namespace LVL1 {
     /** Destructor */
     virtual ~gFEXSim();
 
-    virtual void reset () override ;
-
-    virtual void execute() override ;
-
     virtual StatusCode initialize() override ;
 
-    virtual StatusCode executegFEXSim(const gTowersIDs& tmp, gFEXOutputCollection* gFEXOutputs) override;
-
-    virtual std::vector<uint32_t> getgRhoTOBs() const override;
-
-    virtual std::vector<uint32_t> getgBlockTOBs() const override;
-
-    virtual std::vector<uint32_t> getgJetTOBs() const override;
-
-    virtual std::vector<int32_t> getgScalarEJwojTOBs() const override;
- 
-    virtual std::vector<uint32_t> getgMETComponentsJwojTOBs() const override;
-
-    virtual std::vector<uint32_t> getgMHTComponentsJwojTOBs() const override;
-
-    virtual std::vector<uint32_t> getgMSTComponentsJwojTOBs() const override;
-
-    virtual std::vector<uint32_t> getgMETComponentsNoiseCutTOBs() const override;
-
-    virtual std::vector<uint32_t> getgMETComponentsRmsTOBs() const override;
-
-    virtual std::vector<uint32_t> getgScalarENoiseCutTOBs() const override;
-
-    virtual std::vector<uint32_t> getgScalarERmsTOBs() const override;
-
+    virtual StatusCode execute(const EventContext& ctx,
+			       const gTowersIDs& tmp_gTowersIDs_subset,
+			       gFEXOutputCollection* gFEXOutputs,
+			       std::vector<uint32_t>& gRhoTobWords,
+			       std::vector<uint32_t>& gBlockTobWords,
+			       std::vector<uint32_t>& gJetTobWords,
+			       std::vector<int32_t>&  gScalarEJwojTobWords,
+			       std::vector<uint32_t>& gMETComponentsJwojTobWords,
+			       std::vector<uint32_t>& gMHTComponentsJwojTobWords,
+			       std::vector<uint32_t>& gMSTComponentsJwojTobWords,
+			       std::vector<uint32_t>& gMETComponentsNoiseCutTobWords,
+			       std::vector<uint32_t>& gMETComponentsRmsTobWords,
+			       std::vector<uint32_t>& gScalarENoiseCutTobWords,
+			       std::vector<uint32_t>& gScalarERmsTobWords) const override;
 
 
     /** Internal data */
   private:
-
-    gTowersIDs m_gTowersIDs;
-
-    CaloCellContainer m_sCellsCollection;
-
-    std::vector<uint32_t>  m_gRhoTobWords;
-
-    std::vector<uint32_t>  m_gBlockTobWords;
-
-    std::vector<uint32_t>  m_gJetTobWords;
-
-    std::vector<int32_t>  m_gScalarEJwojTobWords;
-
-    std::vector<uint32_t>  m_gMETComponentsJwojTobWords;
-
-    std::vector<uint32_t>  m_gMHTComponentsJwojTobWords;
-
-    std::vector<uint32_t>  m_gMSTComponentsJwojTobWords;
-
-    std::vector<uint32_t>  m_gMETComponentsNoiseCutTobWords;
-
-    std::vector<uint32_t>  m_gMETComponentsRmsTobWords;
-
-    std::vector<uint32_t>  m_gScalarENoiseCutTobWords;
-
-    std::vector<uint32_t>  m_gScalarERmsTobWords;
-
-
 
     ToolHandle<IgFEXFPGA> m_gFEXFPGA_Tool {this, "gFEXFPGATool", "LVL1::gFEXFPGA", "Tool that simulates the FPGA hardware"};
 

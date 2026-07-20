@@ -205,9 +205,9 @@ StatusCode HitMapBuilder::registerHistograms() {
 
     // Construct IBL Planar later
     std::string LBCategory;
-    std::string occ2dDir = "Occupancy2d";
-    std::string occLBDir = "OccupancyLb";
-    std::string totDir = "ToT";
+    const static std::string occ2dDir = "Occupancy2d";
+    const static std::string occLBDir = "OccupancyLb";
+    const static std::string totDir = "ToT";
 
     // Category: All
     LBCategory = "All";
@@ -331,10 +331,9 @@ StatusCode HitMapBuilder::registerHistograms() {
 // execute
 //
 //=========================================================
-StatusCode HitMapBuilder::execute() {
+StatusCode HitMapBuilder::execute(const EventContext& ctx) {
   ATH_MSG_DEBUG( "Executing HitMapBuilder" );
 
-  const EventContext& ctx = Gaudi::Hive::currentContext();
 
   // check LB is in allowed range
   int LB =  static_cast<int>(ctx.eventID().lumi_block());
@@ -490,9 +489,9 @@ StatusCode HitMapBuilder::finalize() {
 
     // Construct IBL Planar later
     std::string LBCategory;
-    std::string occ2dDir = "Occupancy2d";
-    std::string occLBDir = "OccupancyLb";
-    std::string totDir = "ToT";
+    static const std::string occ2dDir = "Occupancy2d";
+    static const std::string occLBDir = "OccupancyLb";
+    static const std::string totDir = "ToT";
 
     // Category: All
     LBCategory = "All";

@@ -491,7 +491,7 @@ namespace InDet{
 
      if(FitProb > 0.001) {
        if(Momentum.M() <c_vrtBCMassLimit) {
-	 if( Chi2PerTrk[Outlier] < m_secTrkChi2Cut*m_chiScale[std::min(int(listSecondTracks.size()),10)] ) break;  // Solution found
+	 if( Chi2PerTrk.at(Outlier) < m_secTrkChi2Cut*m_chiScale[std::min(int(listSecondTracks.size()),10)] ) break;  // Solution found
        } else {
 	 double minM = 1.e12;
 	 int minT = -1;
@@ -532,7 +532,7 @@ namespace InDet{
 
    // cppcheck-suppress containerOutOfBounds; Chi2PerTrk is not empty if we get here
    ATH_MSG_DEBUG("SecVrt fit converged. Ntr="<< listSecondTracks.size()<<" Chi2="<<Chi2
-		 <<" Chi2_trk="<<Chi2PerTrk[Outlier]<<" Prob="<<FitProb<<" M="<<Momentum.M()<<" Dir="<<projSV_PV(fitVertex,primVrt,jetDir));
+		 <<" Chi2_trk="<<Chi2PerTrk.at(Outlier)<<" Prob="<<FitProb<<" M="<<Momentum.M()<<" Dir="<<projSV_PV(fitVertex,primVrt,jetDir));
 
    if( listSecondTracks.size()==2 ){
      if( Momentum.M() > c_vrtBCMassLimit

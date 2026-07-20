@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ATHENAPOOLCNVSVC_ATHENAPOOLSHAREDIOCNVSVC_H
@@ -16,6 +16,11 @@
 
 // Forward declarations
 class Guid;
+
+namespace RootAuxDynIO {
+   class IFactoryTool;
+   class IAuxDynShare;
+}
 
 template <class TYPE> class SvcFactory;
 
@@ -109,12 +114,16 @@ public:
    /// Standard Service Constructor
    AthenaPoolSharedIOCnvSvc(const std::string& name, ISvcLocator* pSvcLocator);
    /// Destructor
-   virtual ~AthenaPoolSharedIOCnvSvc() = default;
+   virtual ~AthenaPoolSharedIOCnvSvc();
 
 private: // data
    ServiceHandle<IAthenaSerializeSvc> m_serializeSvc{this,"AthenaRootSerializeSvc","AthenaRootSerializeSvc"};
+   std::unique_ptr<RootAuxDynIO::IFactoryTool> m_auxDynTool;
    ToolHandle<IAthenaIPCTool>    m_inputStreamingTool{this,"InputStreamingTool",{}};
+   std::unique_ptr<RootAuxDynIO::IAuxDynShare> m_auxInput;
    ToolHandle<IAthenaIPCTool>    m_outputStreamingTool{this,"OutputStreamingTool",{}};
+   std::unique_ptr<RootAuxDynIO::IAuxDynShare> m_auxOutput;
+
    bool m_streamServerActive=false;
    int m_metadataClient=0;
 

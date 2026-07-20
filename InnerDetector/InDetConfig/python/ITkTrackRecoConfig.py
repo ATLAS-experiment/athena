@@ -7,7 +7,7 @@ from AthenaCommon.Constants import WARNING, INFO
 
 _flags_set = []  # For caching
 _extensions_list = [] # For caching, possible legacy / validate Passes/Configurations
-_actsExtensions  = ['Acts', 'ActsLegacy', 'ActsConversion', 'LargeD0', 'ActsLowPt', 'ActsValidateF100', 'ActsValidateF150', 'ActsValidateLargeRadiusStandalone'] # Possible Acts Alone Passes/Configurations
+_actsExtensions  = ['Acts', 'ActsLegacy', 'ActsConversion', 'ActsLargeRadius', 'ActsLowPt', 'ActsValidateF100', 'ActsValidateF150', 'ActsValidateLargeRadiusStandalone'] # Possible Acts Alone Passes/Configurations
 _outputExtensions  = [] # Passes/Configurations to be passed to the output job option
 
 def CombinedTrackingPassFlagSets(flags, resetCache=False):
@@ -176,19 +176,21 @@ def ITkStoreTrackSeparateContainerCfg(flags,
             AssociationMapName=""))
     else:
         # Workflows that use Acts Tracks
-        from ActsConfig.ActsTrackFindingConfig import ActsTrackToTrackParticleCnvAlgCfg
+        from ActsConfig.ActsEventCnvConfig import ActsTrackToTrackParticleCnvAlgCfg
         # The following few lines will disappear once we have imposed a proper nomenclature for our algorithms and collection
         prefix = flags.Tracking.ActiveConfig.extension
+        from InDetConfig.ITkActsHelpers import separateTrackParticleContainerName
+        TrackParticleContainer = separateTrackParticleContainerName(flags)
         result.merge(ActsTrackToTrackParticleCnvAlgCfg(flags, f"{prefix}ResolvedTrackToAltTrackParticleCnvAlg",
                                                        ACTSTracksLocation=[TrackContainer],
-                                                       TrackParticlesOutKey=f'InDet{prefix}TrackParticles'))
-        
+                                                       TrackParticlesOutKey=TrackParticleContainer))
+
         if flags.Tracking.doTruth :
             from ActsConfig.ActsTruthConfig import ActsTrackParticleTruthDecorationAlgCfg
             result.merge(ActsTrackParticleTruthDecorationAlgCfg(flags,
                                                                 name=f'{TrackContainer}ParticleTruthDecorationAlg',
                                                                 TrackToTruthAssociationMaps = [f'{TrackContainer}ToTruthParticleAssociation'],
-                                                                TrackParticleContainerName = f'InDet{prefix}TrackParticles'
+                                                                TrackParticleContainerName = TrackParticleContainer
                                                                 ))
     return result
 
@@ -304,7 +306,7 @@ def ITkActsTrackFinalCfg(flags,
         return acc
     
     # Schedule Track particle creation
-    from ActsConfig.ActsTrackFindingConfig import ActsTrackToTrackParticleCnvAlgCfg
+    from ActsConfig.ActsEventCnvConfig import ActsTrackToTrackParticleCnvAlgCfg
     acc.merge(ActsTrackToTrackParticleCnvAlgCfg(flags, "ActsCombinedTrackToTrackParticleCnvAlg",
                                                 ACTSTracksLocation=InputCombinedITkTracks,
                                                 TrackParticlesOutKey=ActsTrackContainerName))
@@ -394,7 +396,7 @@ def ITkTrackFinalCfg(flags,
             'ActsValidateAmbiguityResolution' in splitProbName or \
             'ActsValidateScoreBasedAmbiguityResolution' in splitProbName or \
             'ActsConversion' in splitProbName or \
-            'LargeD0' in splitProbName or \
+            'ActsLargeRadius' in splitProbName or \
             'ActsValidateLargeRadiusStandalone' in splitProbName or \
             'ActsLowPt' in splitProbName or \
             ('Acts' in  splitProbName and 'Validate' not in splitProbName) ))
@@ -671,15 +673,20 @@ def ITkTrackRecoCfg(flags) -> ComponentAccumulator:
             if current_flags.Tracking.doStoreSiSPSeededTracks:
                 from InDetConfig.ITkPersistificationConfig import ITkSiSPSeededTracksFinalCfg
                 result.merge(ITkSiSPSeededTracksFinalCfg(current_flags))
-
+            
     if flags.Tracking.doStats:
         if _extensions_list:
             result.merge(ITkStatsCfg(
                 flags_set[0], # Use cuts from primary pass
                 StatTrackCollections=StatTrackCollections,
                 StatTrackTruthCollections=StatTrackTruthCollections))
-
-
+    
+    # GNN edges score decoration
+    if flags.Tracking.GNN.ActsPipeline.saveEdgeScore:
+        from ActsConfig.ActsObjectDecorationConfig import ActsGNNScoreDecoratorAlgCfg
+        result.merge(ActsGNNScoreDecoratorAlgCfg(flags,
+            name="ActsGNNScoreDecoratorAlg"))
+            
     ## ACTS Specific write PRDInfo
     if flags.Tracking.writeExtendedSi_PRDInfo:
         if _extensions_list:
@@ -688,7 +695,7 @@ def ITkTrackRecoCfg(flags) -> ComponentAccumulator:
             #Acts algorithm
         else:
             result.merge(ITkActsExtendedPRDInfoCfg(flags))
-            
+
     # output
     from InDetConfig.ITkTrackOutputConfig import ITkTrackRecoOutputCfg
     result.merge(ITkTrackRecoOutputCfg(flags, _outputExtensions))

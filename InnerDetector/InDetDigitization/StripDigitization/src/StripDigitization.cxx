@@ -28,9 +28,9 @@ StatusCode StripDigitization::initialize() {
 // Execute method:
 //----------------------------------------------------------------------
 
-StatusCode StripDigitization::execute() {
+StatusCode StripDigitization::execute(const EventContext& ctx) {
   ATH_MSG_DEBUG("execute()");
-  return m_stripDigitizationTool->processAllSubEvents(Gaudi::Hive::currentContext());
+  return m_stripDigitizationTool->processAllSubEvents(ctx);
 }
 
 } // namespace ITk

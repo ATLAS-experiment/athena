@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
  */
 
 ///////////////////////////////////////////////////////////////////
@@ -502,7 +502,7 @@ Trk::Extrapolator::extrapolateM(const EventContext& ctx,
   // assign the temporary states
   std::vector<const Trk::TrackStateOnSurface*>* tmpMatStates = cache.m_matstates;
   cache.m_matstates = nullptr;
-  // retunr the material states
+  // return the material states
   return tmpMatStates;
 }
 
@@ -2235,7 +2235,7 @@ Trk::Extrapolator::extrapolateImpl(const EventContext& ctx,
     if (updateLastValid) {
       cache.m_lastValidParameters = nextParameters;
     }
-    // avoid the oszillation
+    // avoid the oscillation
     previousVolume = lastVolume;
     // for the next step to termine if infinite loop occurs
     lastVolume = nextVolume;
@@ -3006,7 +3006,7 @@ Trk::Extrapolator::insideVolumeStaticLayers(const EventContext& ctx,
             currentUpdatorCache, *nextParameters, *associatedLayer, dir,
             particle, matupmode));
       }
-      // collect the material : either for extrapolateM or for the valdiation
+      // collect the material : either for extrapolateM or for the validation
       if (nextParameters && cache.m_matstates) {
         addMaterialEffectsOnTrack(
           ctx, cache, prop, nextParameters, *associatedLayer, tvol, dir, particle);
@@ -3282,17 +3282,17 @@ Trk::Extrapolator::extrapolateFromLayerToLayer(const EventContext& ctx,
 
   // initialize the loop
   const Trk::Layer* nextLayer = startLayer;
-  // avoiding straight loops and oszillations
+  // avoiding straight loops and oscillations
   const Trk::Layer* lastLayer = nullptr;
   const Trk::Layer* previousLayer = nullptr;
   // pars & fallback
   Trk::CacheOwnedPtr<Trk::TrackParameters> currPar = parm;
   Trk::CacheOwnedPtr<Trk::TrackParameters> navParameters = navParm;
   // avoid initial perpendicular check if:
-  // -  navParameters and currPar have different perpendicular direction (resolved in navigaiton)
+  // -  navParameters and currPar have different perpendicular direction (resolved in navigation)
   bool perpCheck = radialDirection(*currPar, dir) * radialDirection(*navParameters, dir) > 0;
 
-  // break conditions: --------- handeled by layerAttempts
+  // break conditions: --------- handled by layerAttempts
   unsigned int failedAttempts = 0;
 
   // get the max attempts from the volume
@@ -3420,7 +3420,7 @@ Trk::Extrapolator::extrapolateToDestinationLayer(const EventContext& ctx,
     preUpdatedParameters = destParameters;
   }
 
-  // collect the material : either for extrapolateM or for the valdiation
+  // collect the material : either for extrapolateM or for the validation
   if (cache.m_matstates && preUpdatedParameters &&
       currentUpdator && !startIsDestLayer &&
       lay.preUpdateMaterialFactor(*destParameters, dir) >= 0.01) {

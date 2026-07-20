@@ -1,18 +1,16 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( TrigGlobalEfficiencyCorrection )
 
 # External dependencies:
-find_package( Boost )
 find_package( ROOT COMPONENTS RIO )
 
 # Component(s) in the package:
 atlas_add_library( TrigGlobalEfficiencyCorrectionLib
    TrigGlobalEfficiencyCorrection/*.h Root/*.cxx
    PUBLIC_HEADERS TrigGlobalEfficiencyCorrection
-   INCLUDE_DIRS ${Boost_INCLUDE_DIRS}
-   LINK_LIBRARIES ${Boost_LIBRARIES} AsgMessagingLib AsgTools AthContainers EgammaAnalysisInterfacesLib MuonAnalysisInterfacesLib TriggerAnalysisInterfaces TriggerMatchingToolLib xAODBase xAODEgamma
+   LINK_LIBRARIES AsgMessagingLib AsgTools AthContainers EgammaAnalysisInterfacesLib MuonAnalysisInterfacesLib TriggerAnalysisInterfaces TriggerMatchingToolLib xAODBase xAODEgamma CxxUtils
    PRIVATE_LINK_LIBRARIES PathResolver xAODEventInfo )
 
 atlas_add_component( TrigGlobalEfficiencyCorrection
@@ -50,8 +48,8 @@ atlas_install_python_modules( python/*.py )
 # Test(s) in the package:
 atlas_add_test( Tool
    SCRIPT TrigGlobEffCorrValidation --quiet --fast --skip-if-athena
-   POST_EXEC_SCRIPT nopost.sh )
+   POST_EXEC_SCRIPT noerror.sh )
 
 atlas_add_test( CPTools
    SCRIPT TrigGlobEffCorrExample4 --quiet
-   POST_EXEC_SCRIPT nopost.sh )
+   POST_EXEC_SCRIPT noerror.sh )

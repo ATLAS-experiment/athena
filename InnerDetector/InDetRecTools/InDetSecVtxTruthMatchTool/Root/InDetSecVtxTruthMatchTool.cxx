@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #include "InDetSecVtxTruthMatchTool/InDetSecVtxTruthMatchTool.h"
 #include "InDetTrackSystematicsTools/InDetTrackTruthOriginDefs.h" // <-- Add this
@@ -99,14 +99,14 @@ StatusCode InDetSecVtxTruthMatchTool::matchVertices( std::vector<const xAOD::Ver
     //create the vector we will add as matching info decoration later
     std::vector<VertexTruthMatchInfo> matchinfo;
 
-    const xAOD::Vertex::TrackParticleLinks_t& trackParticles = trkAcc( *vtx );
-    size_t ntracks = trackParticles.size();
+    const xAOD::Vertex::TrackParticleLinks_t& theseParticles = trkAcc( *vtx );
+    size_t ntracks = theseParticles.size();
     const std::vector<float> & trkWeights = weightAcc( *vtx );
 
     xAOD::Vertex::TrackParticleLinks_t trkMuSATrkParts; // For MuSA mode, we will populate this with MuSA track particles
 
     // Create a local variable for track particles to use in the rest of the function
-    const xAOD::Vertex::TrackParticleLinks_t& trkParts = m_doMuSA ? trkMuSATrkParts : trackParticles;
+    const xAOD::Vertex::TrackParticleLinks_t& trkParts = m_doMuSA ? trkMuSATrkParts : theseParticles;
     
     if ( m_doMuSA ) {
       // MuSA also creates new "MuSA Track" collection which does not have truth particle links
@@ -115,7 +115,7 @@ StatusCode InDetSecVtxTruthMatchTool::matchVertices( std::vector<const xAOD::Ver
       const SG::AuxElement::Accessor<ElementLink<xAOD::TrackParticleContainer>> acc_MSTPLink("MuSATrk_MSTPLink");
       // populate the MuSA track particle vector
       trkMuSATrkParts.reserve(ntracks);
-      for (const auto& trkLink : trackParticles) {
+      for (const auto& trkLink : theseParticles) {
         if (!trkLink.isValid()) continue;
         const xAOD::TrackParticle& trackParticle = **trkLink;
         if (acc_MSTPLink.isAvailable(trackParticle)) {
@@ -133,7 +133,7 @@ StatusCode InDetSecVtxTruthMatchTool::matchVertices( std::vector<const xAOD::Ver
     
     //if don't have track particles
     if ((!trkAcc.isAvailable(*vtx) || !weightAcc.isAvailable(*vtx)) && !m_doMuSA) {
-      ATH_MSG_WARNING("trackParticles or trackWeights not available, vertex is missing info");
+      ATH_MSG_WARNING("theseParticles or trackWeights not available, vertex is missing info");
       continue;
     }
     if ( trkWeights.size() != ntracks ) {
@@ -157,7 +157,7 @@ StatusCode InDetSecVtxTruthMatchTool::matchVertices( std::vector<const xAOD::Ver
       ATH_MSG_DEBUG("Checking track number " << t);
 
       // First check if the original track particle link is valid
-      if (!trackParticles[t].isValid()) {
+      if (!theseParticles[t].isValid()) {
         ATH_MSG_DEBUG("Original track " << t << " is bad!");
         continue;
       }
@@ -267,7 +267,7 @@ StatusCode InDetSecVtxTruthMatchTool::matchVertices( std::vector<const xAOD::Ver
     float fakeScore = fakePt/totalPt;
     float otherScore = otherPt/totalPt;
 
-    matchInfoDecor ( *vtx ) = matchinfo;
+    matchInfoDecor ( *vtx ) = std::move(matchinfo);
     fakeScoreDecor ( *vtx ) = fakeScore;
     otherScoreDecor( *vtx ) = otherScore;
 
@@ -355,7 +355,7 @@ StatusCode InDetSecVtxTruthMatchTool::matchVertices( std::vector<const xAOD::Ver
 
             ElementLink<xAOD::VertexContainer> splitLink_jk;
             splitLink_jk.setElement( recoVerticesToMatch[k] );
-            splitLink_jk.setStorableObject( *dynamic_cast<const xAOD::VertexContainer*>(recoVerticesToMatch[k]->container()));
+            splitLink_jk.setStorableObject( *static_cast<const xAOD::VertexContainer*>(recoVerticesToMatch[k]->container()));
             splitPartnerDecor( *recoVerticesToMatch[j] ).emplace_back(splitLink_jk);
           }
           //then keep track that we found this one
@@ -442,93 +442,93 @@ std::vector<int> InDetSecVtxTruthMatchTool::checkParticle(const xAOD::TruthParti
     ATH_MSG_DEBUG("Insufficient pt to reconstruct the particle");
     return {0,0,0};
   }
-  else{
+  
 
-    for(const xAOD::TrackParticle* trkPart : *trkCont){
-      // Handle differently for MuSA vs standard mode
-      if (m_doMuSA) {
-        if (!trk_truthPartAcc.isAvailable(*trkPart)) {
-          ATH_MSG_DEBUG("Truth link not available on MS track");
-          continue;
+  for(const xAOD::TrackParticle* trkPart : *trkCont){
+    // Handle differently for MuSA vs standard mode
+    if (m_doMuSA) {
+      if (!trk_truthPartAcc.isAvailable(*trkPart)) {
+        ATH_MSG_DEBUG("Truth link not available on MS track");
+        continue;
+      }
+      const ElementLink<xAOD::TruthParticleContainer>& truthLink = trk_truthPartAcc(*trkPart);
+      if (!truthLink.isValid()) {
+        ATH_MSG_DEBUG("Truth link on MS track not valid");
+        continue;
+      }
+      const xAOD::TruthParticle& linkedTruth = **truthLink;
+      if (HepMC::is_same_particle(linkedTruth, truthPart)) {
+        // We found a match between truth particle and MS track!
+        if (!muonCont) {
+          ATH_MSG_DEBUG("Muon container unavailable in MuSA mode; cannot evaluate acceptance criteria.");
+          return {1,0,0};
         }
-        const ElementLink<xAOD::TruthParticleContainer>& truthLink = trk_truthPartAcc(*trkPart);
-        if (!truthLink.isValid()) {
-          ATH_MSG_DEBUG("Truth link on MS track not valid");
-          continue;
+
+        const xAOD::Muon* saMuon = findStandAloneMuon(*trkPart, muonCont);
+        if (!saMuon) {
+          ATH_MSG_DEBUG("Muon track matched but is not associated with a StandAlone muon.");
+          return {1,0,0};
         }
-        const xAOD::TruthParticle& linkedTruth = **truthLink;
-        if (HepMC::is_same_particle(linkedTruth, truthPart)) {
-          // We found a match between truth particle and MS track!
-          if (!muonCont) {
-            ATH_MSG_DEBUG("Muon container unavailable in MuSA mode; cannot evaluate acceptance criteria.");
-            return {1,0,0};
-          }
 
-          const xAOD::Muon* saMuon = findStandAloneMuon(*trkPart, muonCont);
-          if (!saMuon) {
-            ATH_MSG_DEBUG("Muon track matched but is not associated with a StandAlone muon.");
-            return {1,0,0};
-          }
-
-          float spectrometerFieldIntegral = 0.0f;
-          if (!saMuon->parameter(spectrometerFieldIntegral, xAOD::Muon::ParamDef::spectrometerFieldIntegral)) {
-            ATH_MSG_DEBUG("Standalone muon missing spectrometer field integral parameter; proceeding without field cut.");
-          } else if (spectrometerFieldIntegral < 0.1f) {
-            ATH_MSG_DEBUG("Skipping SA muon with spectrometerFieldIntegral " << spectrometerFieldIntegral << " T*m!");
-            return {1,1,0};
-          }
-
-          const bool passesKinematic = std::abs(trkPart->eta()) < 2.5 && trkPart->pt() < 13000000; // emulates bad egg MSTP rejection used in MuSA algorithm
-          if (passesKinematic) {
-            ATH_MSG_DEBUG("Standalone muon passes MuSA kinematic requirements.");
-            return {1,1,1};
-          }
-
-          ATH_MSG_DEBUG("Standalone muon failed MuSA kinematic requirements.");
+        float spectrometerFieldIntegral = 0.0f;
+        if (!saMuon->parameter(spectrometerFieldIntegral, xAOD::Muon::ParamDef::spectrometerFieldIntegral)) {
+          ATH_MSG_DEBUG("Standalone muon missing spectrometer field integral parameter; proceeding without field cut.");
+        } else if (spectrometerFieldIntegral < 0.1f) {
+          ATH_MSG_DEBUG("Skipping SA muon with spectrometerFieldIntegral " << spectrometerFieldIntegral << " T*m!");
           return {1,1,0};
         }
-      }
-      
-      // Standard mode - check truth matching
-      if (!trk_truthPartAcc.isAvailable(*trkPart)) {
-        ATH_MSG_DEBUG("truthParticleLink not available on track");
-        continue;
-      }
-      
-      const ElementLink<xAOD::TruthParticleContainer> & truthPartLink = trk_truthPartAcc(*trkPart);
-      
-      // Check if truth match probability is available
-      float matchProb = 0.0;
-      if (trk_truthProbAcc.isAvailable(*trkPart)) {
-        matchProb = trk_truthProbAcc(*trkPart);
-      } else {
-        ATH_MSG_DEBUG("truthMatchProbability not available on track");
-        continue;
-      }
 
-      if(truthPartLink.isValid() && matchProb > m_trkMatchProb) {
-        const xAOD::TruthParticle& tmpPart = **truthPartLink;
-        if( HepMC::is_same_particle(tmpPart,truthPart) ) {
-          if(trackPass.isAvailable( *trkPart )) {
-            if(trackPass( *trkPart )) {
-              ATH_MSG_DEBUG("Particle has a track that passes track selection.");
-              return {1,1,1};
-            } else {
-              ATH_MSG_DEBUG("Particle has a track, but did not pass track selection.");
-              return {1,1,0};
-            }
-          } else {
-            ATH_MSG_DEBUG("Track selection decoration not available, calling the track selected");
+        const bool passesKinematic = std::abs(trkPart->eta()) < 2.5 && trkPart->pt() < 13000000; // emulates bad egg MSTP rejection used in MuSA algorithm
+        if (passesKinematic) {
+          ATH_MSG_DEBUG("Standalone muon passes MuSA kinematic requirements.");
+          return {1,1,1};
+        }
+
+        ATH_MSG_DEBUG("Standalone muon failed MuSA kinematic requirements.");
+        return {1,1,0};
+      }
+    }
+    
+    // Standard mode - check truth matching
+    if (!trk_truthPartAcc.isAvailable(*trkPart)) {
+      ATH_MSG_DEBUG("truthParticleLink not available on track");
+      continue;
+    }
+    
+    const ElementLink<xAOD::TruthParticleContainer> & truthPartLink = trk_truthPartAcc(*trkPart);
+    
+    // Check if truth match probability is available
+    float matchProb = 0.0;
+    if (trk_truthProbAcc.isAvailable(*trkPart)) {
+      matchProb = trk_truthProbAcc(*trkPart);
+    } else {
+      ATH_MSG_DEBUG("truthMatchProbability not available on track");
+      continue;
+    }
+
+    if(truthPartLink.isValid() && matchProb > m_trkMatchProb) {
+      const xAOD::TruthParticle& tmpPart = **truthPartLink;
+      if( HepMC::is_same_particle(tmpPart,truthPart) ) {
+        if(trackPass.isAvailable( *trkPart )) {
+          if(trackPass( *trkPart )) {
+            ATH_MSG_DEBUG("Particle has a track that passes track selection.");
             return {1,1,1};
+          } else {
+            ATH_MSG_DEBUG("Particle has a track, but did not pass track selection.");
+            return {1,1,0};
           }
+        } else {
+          ATH_MSG_DEBUG("Track selection decoration not available, calling the track selected");
+          return {1,1,1};
         }
       }
     }
-    ATH_MSG_DEBUG("Particle has enough pt.");
-    return {1,0,0};
-    
   }
-  return {0,0,0};
+  ATH_MSG_DEBUG("Particle has enough pt.");
+  return {1,0,0};
+  
+
+  
 }
 
 const xAOD::Muon* InDetSecVtxTruthMatchTool::findStandAloneMuon(const xAOD::TrackParticle& mstp,
@@ -571,7 +571,7 @@ int InDetSecVtxTruthMatchTool::checkProduction( const xAOD::TruthParticle & trut
       return HepMC::uniqueID(parentVertex);
     }
     // recurse on parent
-    return checkProduction(*parent, truthVerticesToMatch);
+    return checkProduction(*parent, std::move(truthVerticesToMatch));
   }
   return HepMC::INVALID_VERTEX_ID;
 }

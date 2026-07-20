@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // See similar workaround the lack of CLID in standalone releases in TrigComposite_v1.h
@@ -825,7 +825,7 @@ namespace TrigCompositeUtils {
     const std::string& chainName,
     const std::vector<LinkInfo<xAOD::IParticleContainer>>& features,
     const std::vector<std::size_t>& legMultiplicities,
-    const std::function<bool(const std::vector<LinkInfo<xAOD::IParticleContainer>>&)>& filter)
+    const IPartCombItr::FilterFunc_t& filter)
   {
     Combinations combinations(filter);
     combinations.reserve(legMultiplicities.size());
@@ -855,14 +855,14 @@ namespace TrigCompositeUtils {
     const std::vector<std::size_t>& legMultiplicities,
     FilterType filter)
   {
-    return buildCombinations(chainName, features, legMultiplicities, getFilter(filter));
+    return buildCombinations(chainName, features, legMultiplicities, IPartCombItr::getFilter(filter));
   }
 
   Combinations buildCombinations(
     const std::string& chainName,
     const std::vector<LinkInfo<xAOD::IParticleContainer>>& features,
     const TrigConf::HLTChain *chainInfo,
-    const std::function<bool(const std::vector<LinkInfo<xAOD::IParticleContainer>>&)>& filter)
+    const IPartCombItr::FilterFunc_t& filter)
   {
     return buildCombinations(chainName, features, chainInfo->leg_multiplicities(), filter);
   }
@@ -873,7 +873,7 @@ namespace TrigCompositeUtils {
     const TrigConf::HLTChain *chainInfo,
     FilterType filter)
   {
-    return buildCombinations(chainName, features, chainInfo, getFilter(filter));
+    return buildCombinations(chainName, features, chainInfo, IPartCombItr::getFilter(filter));
   }
 
 

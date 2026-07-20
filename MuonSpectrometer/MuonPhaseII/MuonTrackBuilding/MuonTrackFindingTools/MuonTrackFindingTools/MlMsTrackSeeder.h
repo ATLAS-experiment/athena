@@ -28,7 +28,6 @@ public:
   const MsTrackSeeder& baselineSeeder() const { return m_baselineSeeder; }
 
   std::unique_ptr<MsTrackSeedContainer> findTrackSeeds(const EventContext& ctx,
-                                                       const ActsTrk::GeometryContext& gctx,
                                                        const xAOD::MuonSegmentContainer& segments) const;
 
 private:

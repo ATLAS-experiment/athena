@@ -77,6 +77,7 @@ def Muon1SelectionCfg(flags,
         ### Accept every muon around a truth particle
         acc.merge(DiMuonTaggingAlgCfg(flags,
                                       name                    = "MuonTruthTagging",
+                                      TruthKey                = "TruthMuons",
                                       Mu1PtMin                = 2.*Units.GeV,
                                       Mu1RequireQual          = True,
                                       Mu2PtMin                = 60.*Units.TeV, # Dummy value

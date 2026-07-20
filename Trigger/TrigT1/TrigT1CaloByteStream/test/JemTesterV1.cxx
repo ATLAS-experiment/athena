@@ -85,7 +85,7 @@ StatusCode JemTesterV1::initialize()
 
 // Execute
 
-StatusCode JemTesterV1::execute()
+StatusCode JemTesterV1::execute(const EventContext& ctx)
 {
   if ( !msgLvl(MSG::INFO) ) return StatusCode::SUCCESS;
   msg(MSG::INFO);

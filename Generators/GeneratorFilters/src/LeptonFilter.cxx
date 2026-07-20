@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // GeneratorFilters/LeptonFilter
@@ -25,7 +25,7 @@ LeptonFilter::LeptonFilter(const std::string& name, ISvcLocator* pSvcLocator)
 }
 
 
-StatusCode LeptonFilter::filterEvent() {
+StatusCode LeptonFilter::filterEvent(const EventContext& ctx) {
   // Loop over all events in McEventCollection and extract the leading lepton pt
   double leading_lepton_pt = 0;
 
@@ -40,12 +40,10 @@ StatusCode LeptonFilter::filterEvent() {
       if ( !MC::isStable(part)) continue;
 
       // We are specifically looking for electrons (+-11) and muons (+-13)
-      const long pid = part->pdg_id();
-      const long apid = std::abs(pid);
-      if (apid == 11 || apid == 13) {
+      if (MC::isElectron(part) || MC::isMuon(part)) {
         const double pT = part->momentum().perp();
         const double eta = part->momentum().pseudoRapidity();
-        const std::string pname = ((apid == 11) ? "electron" : "muon");
+        const std::string pname = ((MC::isElectron(part)) ? "electron" : "muon");
         ATH_MSG_DEBUG( "Found " << pname
 		       << ": pT, eta = " << pT << ", " << eta );
         
@@ -60,15 +58,15 @@ StatusCode LeptonFilter::filterEvent() {
   ATH_MSG_DEBUG ( "Leading lepton pt = " << leading_lepton_pt << "within |eta| <= " << m_EtaRange);
 
   if (leading_lepton_pt < m_Ptmin) {
-    setFilterPassed(false);
+    setFilterPassed(false, ctx);
     ATH_MSG_DEBUG( "Fail: no e or mu found "
 		   << " with pT >= " << m_Ptmin);
   } else if (leading_lepton_pt >= m_Ptmax) {
-    setFilterPassed(false);
+    setFilterPassed(false, ctx);
     ATH_MSG_DEBUG ( "Fail: high pt lepton veto "
 		    << " pT < " << m_Ptmax );
   } else {
-    setFilterPassed(true);
+    setFilterPassed(true, ctx);
     ATH_MSG_DEBUG ( "Within min and max pt cuts " << m_Ptmin << ", " 
 		    << m_Ptmax );
   }

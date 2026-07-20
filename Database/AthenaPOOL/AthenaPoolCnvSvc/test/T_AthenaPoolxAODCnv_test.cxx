@@ -117,8 +117,10 @@ void test1 (ISvcLocator* svcloc, TestCnvSvc& testsvc)
   assert (cnv.createObj (&taddr, pObj).isSuccess());
   auto* trans2 = SG::Storable_cast<DataVector<Y_v2> > (pObj);
   assert (trans2->size() == 10);
-  for (size_t i = 0; i < 10; i++)
+  for (size_t i = 0; i < 10; i++) {
     assert ((*trans2)[i]->m_a == (int)i);
+    assert ((*trans2)[i]->m_yy == 1234);
+  }
   assert (trans2->getConstStoreLink().dataID() == "keyAux.");
   delete pObj;
   delete pers1;
@@ -127,6 +129,7 @@ void test1 (ISvcLocator* svcloc, TestCnvSvc& testsvc)
   DataVector<Y_v1> pers_old;
   for (size_t i=0; i < N; i++)
     pers_old.push_back (new Y_v1(i));
+  // cppcheck-suppress danglingLifetime
   testsvc.m_pers1 = &pers_old;
   token = std::make_unique<Token>();
   token->setClassID (Guid (YCont_v1_guid));
@@ -135,8 +138,10 @@ void test1 (ISvcLocator* svcloc, TestCnvSvc& testsvc)
   assert (cnv.createObj (&taddr, pObj).isSuccess());
   auto* trans3 = SG::Storable_cast<DataVector<Y_v2> > (pObj);
   assert (trans3->size() == 10);
-  for (size_t i = 0; i < 10; i++)
+  for (size_t i = 0; i < 10; i++) {
     assert ((*trans3)[i]->m_a == (int)i*3);
+    assert ((*trans3)[i]->m_yy == 1234);
+  }
   assert (trans3->getConstStoreLink().dataID() == "keyAux.");
   delete pObj;
 
@@ -145,6 +150,7 @@ void test1 (ISvcLocator* svcloc, TestCnvSvc& testsvc)
   taddr.setToken (std::move (token));
   pObj = nullptr;
   assert (cnv.createObj (&taddr, pObj).isFailure());
+  testsvc.m_pers1 = nullptr;
 }
 
 

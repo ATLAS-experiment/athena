@@ -74,7 +74,7 @@ StatusCode SCTErrMonAlg::fillHistograms(const EventContext& ctx) const {
   const unsigned int wafer_hash_max{static_cast<unsigned int>(m_pSCTHelper->wafer_hash_max())};
   for (unsigned int iHash{0}; iHash<wafer_hash_max; iHash++) {
     const IdentifierHash hash{iHash};
-    if (not m_flaggedTool->isGood(hash)) {
+    if (not m_flaggedTool->isGood(hash, ctx)) {
       const Identifier wafer_id{m_pSCTHelper->wafer_id(hash)};
       const unsigned barrel_ec{bec2Index(m_pSCTHelper->barrel_ec(wafer_id))};
       nFlaggedWafers[barrel_ec]++;
@@ -106,6 +106,7 @@ StatusCode SCTErrMonAlg::fillHistograms(const EventContext& ctx) const {
     int moduleOut{0};
     SCT_ID::const_id_iterator waferIterator{m_pSCTHelper->wafer_begin()};
     SCT_ID::const_id_iterator waferEnd{m_pSCTHelper->wafer_end()};
+    const std::string errMonName{"SCTErrMonitor"};
     for (; waferIterator not_eq waferEnd; ++waferIterator) {
       Identifier waferId{*waferIterator};
       int layer{m_pSCTHelper->layer_disk(waferId)};
@@ -118,20 +119,20 @@ StatusCode SCTErrMonAlg::fillHistograms(const EventContext& ctx) const {
       if (barrel_ec == ENDCAP_A) reg = ENDCAP_A_INDEX;
       if (barrel_ec == ENDCAP_C) reg = ENDCAP_C_INDEX;
 
-      int IN{m_configurationTool->isGood(waferId, InDetConditions::SCT_SIDE) ? 0 : 1};
+      int IN{m_configurationTool->isGood(waferId, ctx, InDetConditions::SCT_SIDE) ? 0 : 1};
       if (m_pSCTHelper->side(waferId) == 0) { // Use only side 0 to check module level
         if (IN == 1) {
           moduleOut++;
           auto mEtaAcc{Monitored::Scalar<int>("eta_out", eta)};
           auto mPhiAcc{Monitored::Scalar<int>("phi_out", phi)};
           auto mOutAcc{Monitored::Scalar<int>(std::string("modulemap")+subDetNameShort[reg].Data()+std::to_string(layer)+"_"+std::to_string(side), IN)};
-          fill("SCTErrMonitor", mEtaAcc, mPhiAcc, mOutAcc);
+          fill(errMonName, mEtaAcc, mPhiAcc, mOutAcc);
         }
       }
     }
     auto moduleOutBinAcc{Monitored::Scalar<int>("moduleOutBin", 0)};
     auto moduleOutAcc{Monitored::Scalar<int>("moduleOut", moduleOut)};
-    fill("SCTErrMonitor", moduleOutBinAcc, moduleOutAcc);
+    fill(errMonName, moduleOutBinAcc, moduleOutAcc);
   }
 
   return StatusCode::SUCCESS;
@@ -151,7 +152,7 @@ SCTErrMonAlg::stop() {
 StatusCode
 SCTErrMonAlg::fillConfigurationDetails(const EventContext& ctx) const {
   ATH_MSG_DEBUG("Inside fillConfigurationDetails()");
-  unsigned int nBadMods{static_cast<unsigned int>(m_configurationTool->badModules()->size())}; // bad modules
+  unsigned int nBadMods{static_cast<unsigned int>(m_configurationTool->badModules(ctx)->size())}; // bad modules
   const std::map<IdentifierHash, std::pair<bool, bool>>* badLinks{m_configurationTool->badLinks(ctx)}; // bad links
   unsigned int nBadLink0{0}, nBadLink1{0}, nBadLinkBoth{0};
   for (const std::pair<const IdentifierHash, std::pair<bool, bool>>& link: *badLinks) {
@@ -241,7 +242,8 @@ SCTErrMonAlg::fillByteStreamErrors(const EventContext& ctx) const {
     auto nBSErrorsAcc{Monitored::Scalar<int>("n_"+SCT_ByteStreamErrors::ErrorTypeDescription[errType], nBSErrors)};
     fill("SCTErrMonitor", lumiBlockAcc, nBSErrorsAcc);
   }
-
+  //Total stack use for this function is 1'623'676 bytes.
+  //coverity[STACK_USE]
   categoryErrorMap_t categoryErrorMap;
   std::array<int, N_REGIONS_INC_GENERAL> nMaskedLinks{};
   nMaskedLinks.fill(0);
@@ -296,7 +298,7 @@ SCTErrMonAlg::fillByteStreamErrors(const EventContext& ctx) const {
     }
   }
   
-
+  //coverity[DEADCODE]
    bool doCoverage = false;
   {
     std::lock_guard<std::mutex> lock(m_mutex);
@@ -348,11 +350,11 @@ SCTErrMonAlg::fillByteStreamErrors(const EventContext& ctx) const {
     }
 
     std::set<IdentifierHash> sctHash[numberOfProblemForCoverage]{{}};
-    disabledSCT(sctHash[disabled]);
+    disabledSCT(ctx, sctHash[disabled]);
     errorSCT(sctHash[badLinkError], sctHash[badRODError], sctHash[badError]);
     summarySCT(sctHash[allRegion], sctHash[summary]);
     float psTripModules{0.};
-    psTripDCSSCT(sctHash[psTripDCS], psTripModules);
+    psTripDCSSCT(ctx, sctHash[psTripDCS], psTripModules);
 
     sctHash[summary].clear();
     sctHash[summary].insert(sctHash[disabled].begin(),sctHash[disabled].end()); // disabled
@@ -473,7 +475,7 @@ SCTErrMonAlg::fillByteStreamErrorsHelper(const std::set<IdentifierHash>& errors,
   b_category[CategoryErrors::ABCDERROR_INVALID] = (err_type == SCT_ByteStreamErrors::ABCDError_Invalid);
   b_category[CategoryErrors::RODSIMULATEDDATA] = (err_type == SCT_ByteStreamErrors::RODSimulatedData);
   
-  std::vector<int> numErrorsPerLumi[N_REGIONS];
+  std::array<std::vector<int>,N_REGIONS>  numErrorsPerLumi;
   if (m_doPerLumiErrors) {
     for (int reg{0}; reg<N_REGIONS; reg++) {
       const int nLayers{n_layers[reg]*2};
@@ -513,7 +515,7 @@ SCTErrMonAlg::fillByteStreamErrorsHelper(const std::set<IdentifierHash>& errors,
       }
     }
 
-    if (m_doPerLumiErrors) numErrorsPerLumi[regionIndex][layer]++;
+    if (m_doPerLumiErrors) numErrorsPerLumi.at(regionIndex)[layer]++;
 
     for (int errCate{0}; errCate < CategoryErrors::N_ERRCATEGORY; ++errCate) {
       if (b_category[errCate] and regionIndex!=GENERAL_INDEX) {
@@ -572,10 +574,10 @@ SCTErrMonAlg::numByteStreamErrors(const std::set<IdentifierHash>& errors, int& n
   }
 }
 
-bool SCTErrMonAlg::disabledSCT(std::set<IdentifierHash>& sctHashDisabled) const {
+bool SCTErrMonAlg::disabledSCT(const EventContext& ctx, std::set<IdentifierHash>& sctHashDisabled) const {
   bool altered{false};
   sctHashDisabled.clear();
-  const std::set<Identifier>* badModules{m_configurationTool->badModules()};
+  const std::set<Identifier>* badModules{m_configurationTool->badModules(ctx)};
 
   for (const Identifier& badModule: *badModules) {
     altered = true;
@@ -641,7 +643,7 @@ bool SCTErrMonAlg::summarySCT(std::set<IdentifierHash>& sctHashAll, std::set<Ide
 }
 
 // Power supply trip (SCT_DCSConditionsTool)
-bool SCTErrMonAlg::psTripDCSSCT(std::set<IdentifierHash>& sctHashPSTripDCS, float& psTripModules) const {
+bool SCTErrMonAlg::psTripDCSSCT(const EventContext& ctx, std::set<IdentifierHash>& sctHashPSTripDCS, float& psTripModules) const {
   bool altered{false};
   sctHashPSTripDCS.clear();
 
@@ -649,7 +651,7 @@ bool SCTErrMonAlg::psTripDCSSCT(std::set<IdentifierHash>& sctHashPSTripDCS, floa
   int npsw{0};
   for (unsigned int i{0}; i<maxHash; i++) {
     IdentifierHash hash{i};
-    if (m_useDCS and (not m_dcsTool->isGood(hash))) {
+    if (m_useDCS and (not m_dcsTool->isGood(hash, ctx))) {
       npsw++; //Counting the number of PS sides
       altered = true;
       sctHashPSTripDCS.insert(hash);

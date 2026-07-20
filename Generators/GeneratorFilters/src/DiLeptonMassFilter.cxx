@@ -59,7 +59,7 @@ StatusCode DiLeptonMassFilter::filterFinalize() {
 }
 
 
-StatusCode DiLeptonMassFilter::filterEvent() {
+StatusCode DiLeptonMassFilter::filterEvent(const EventContext& ctx) {
   McEventCollection::const_iterator itr;
   for (itr = events()->begin(); itr!=events()->end(); ++itr) {
     m_AthenaCalls++;
@@ -116,6 +116,6 @@ StatusCode DiLeptonMassFilter::filterEvent() {
     }
   }
 
-  setFilterPassed(false);
+  setFilterPassed(false, ctx);
   return StatusCode::SUCCESS;
 }

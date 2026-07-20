@@ -42,7 +42,7 @@ class ATLAS_NOT_THREAD_SAFE LArShapeCompleteMakerAlg : public AthAlgorithm
 
   //standart algorithm methods
   virtual StatusCode initialize() override final;
-  virtual StatusCode execute() override final;
+  virtual StatusCode execute(const EventContext& ctx) override final;
   virtual StatusCode finalize() override final;
 
   //virtual StatusCode fillHistograms(const EventContext& ctx) const override final;

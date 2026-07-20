@@ -15,34 +15,28 @@ MuonParamPlots::MuonParamPlots(PlotBase* pParent, const std::string& sDir)
 {}
 
 void MuonParamPlots::initializePlots() {
-    msInnerMatchChi2 = Book1D(
-        "msInnerMatchChi2",
-        "inner match #chi^{2};inner match #chi^{2};;Entries", 100, 0., 100.);
+    msInnerMatchChi2 = Book1D("msInnerMatchChi2",
+                             "inner match #chi^{2};inner match #chi^{2};;Entries", 100, 0., 100.);
 
     ELoss = Book1D("ELoss", "ELoss;ELoss [GeV];Entries", 100, 0, 20);
-    ELossSigma =
-        Book1D("ELossSigma", "ELossSigma;ELossSgima [GeV];Entries", 50, 0, 5);
+    ELossSigma = Book1D("ELossSigma", "ELossSigma;ELossSgima [GeV];Entries", 50, 0, 5);
 
-    paramELoss =
-        Book1D("paramELoss", "paramELoss;paramELoss [GeV];Entries", 50, 0, 10);
-    measELoss =
-        Book1D("measELoss", "measELoss;measELoss [GeV];Entries", 100, 0, 20);
+    paramELoss = Book1D("paramELoss", "paramELoss;paramELoss [GeV];Entries", 50, 0, 10);
+    measELoss = Book1D("measELoss", "measELoss;measELoss [GeV];Entries", 100, 0, 20);
 }
 
 void MuonParamPlots::fill(const xAOD::Muon& mu, float weight) {
-    FillPlot(msInnerMatchChi2, mu, xAOD::Muon::msInnerMatchChi2, weight);
-    FillPlot(ELoss, mu, xAOD::Muon::EnergyLoss, 0.001, weight);
-    FillPlot(measELoss, mu, xAOD::Muon::MeasEnergyLoss, 0.001, weight);
-    FillPlot(ELossSigma, mu, xAOD::Muon::EnergyLossSigma, 0.001, weight);
-    FillPlot(paramELoss, mu, xAOD::Muon::ParamEnergyLoss, 0.001, weight);
+    FillPlot(msInnerMatchChi2, mu, xAOD::Muon::ParamDef::msInnerMatchChi2, weight);
+    FillPlot(ELoss, mu,      xAOD::Muon::ParamDef::EnergyLoss, 0.001, weight);
+    FillPlot(measELoss, mu,  xAOD::Muon::ParamDef::MeasEnergyLoss, 0.001, weight);
+    FillPlot(ELossSigma, mu, xAOD::Muon::ParamDef::EnergyLossSigma, 0.001, weight);
+    FillPlot(paramELoss, mu, xAOD::Muon::ParamDef::ParamEnergyLoss, 0.001, weight);
 }
 
 void MuonParamPlots::FillPlot(TH1* hist, const xAOD::Muon& mu,
                               const xAOD::Muon::ParamDef paramDef, float scale,
                               float weight) {
-    if (mu.author() == xAOD::Muon::CaloTag ||
-        mu.author() == xAOD::Muon::CaloLikelihood ||
-        mu.author() == xAOD::Muon::ExtrapolateMuonToIP) {
+    if (mu.muonType() == xAOD::Muon::MuonType::CaloTagged) {
         return;  // protection
     }
     float fpar = 0;

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // Class header
@@ -33,14 +33,14 @@ bool differentBunchXing (xAOD::EventInfo::SubEvent i, xAOD::EventInfo::SubEvent 
 }
 
 
-StatusCode PileUpToolsAlg::execute()
+StatusCode PileUpToolsAlg::execute(const EventContext& ctx)
 {
   ATH_MSG_DEBUG ("in execute()");
 
   /////////////////////////////////////////////////////////////////////
   // Get the overlaid event header, print out event and run number
 
-  SG::ReadHandle<xAOD::EventInfo> evt(m_eventInfoKey);
+  SG::ReadHandle<xAOD::EventInfo> evt(m_eventInfoKey, ctx);
   if (!evt.isValid()) {
     ATH_MSG_ERROR("Could not get xAOD::EventInfo " << evt.name() << " from store " << evt.store());
     return StatusCode::FAILURE;
@@ -86,7 +86,7 @@ StatusCode PileUpToolsAlg::execute()
       // Reset the filters
       puToolHandle->resetFilter();
       ATH_MSG_VERBOSE ( puToolHandle->name() << " will get " << eventsToProcessByTool[&(*puToolHandle)] << " subevents to process." );
-      ATH_CHECK(puToolHandle->prepareEvent(Gaudi::Hive::currentContext(), eventsToProcessByTool[&(*puToolHandle)]));
+      ATH_CHECK(puToolHandle->prepareEvent(ctx, eventsToProcessByTool[&(*puToolHandle)]));
     }
 
   // Loop over bunch-crossings and call processBunchXing for each
@@ -118,12 +118,12 @@ StatusCode PileUpToolsAlg::execute()
   for(auto& puToolHandle : m_puTools)
     {
       ATH_MSG_VERBOSE(__FILE__<<":"<<__LINE__<<" --- Call to mergeEvent on "<<puToolHandle->name());
-      ATH_CHECK(puToolHandle->mergeEvent(Gaudi::Hive::currentContext()));
+      ATH_CHECK(puToolHandle->mergeEvent(ctx));
       // Check if the event was filtered out by the current PileUpTool.
       if (!puToolHandle->filterPassed())
         {
           ATH_MSG_VERBOSE( "Filter " << puToolHandle->name() << " failed - will stop the event" );
-          this->setFilterPassed(false);
+          this->setFilterPassed(false, ctx);
         }
     }
 

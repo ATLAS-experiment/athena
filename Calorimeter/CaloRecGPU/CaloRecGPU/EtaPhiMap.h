@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 //
 // Dear emacs, this is -*- c++ -*-
 //
@@ -41,14 +41,14 @@ namespace CaloRecGPU
     static constexpr float s_phi_max   =  + Helpers::Constants::pi<float>;
     static constexpr float s_delta_phi = (s_phi_max - s_phi_min) / phi_grid;
 
-    float m_eta_limits[1 + !continuous];
-    float m_delta_eta;
+    float m_eta_limits[1 + !continuous]{};
+    float m_delta_eta{};
     
     static constexpr int s_eta_grid_size = eta_grid * (1 + !continuous);
 
-    int   m_cells           [s_eta_grid_size][phi_grid][s_max_overlap_cells];
-    float m_eta_coordinates [s_eta_grid_size][phi_grid][s_max_overlap_cells];
-    float m_phi_coordinates [s_eta_grid_size][phi_grid][s_max_overlap_cells];
+    int   m_cells           [s_eta_grid_size][phi_grid][s_max_overlap_cells]{};
+    float m_eta_coordinates [s_eta_grid_size][phi_grid][s_max_overlap_cells]{};
+    float m_phi_coordinates [s_eta_grid_size][phi_grid][s_max_overlap_cells]{};
     //If respect_deltas is true:
     // -> m_{eta, phi}_coordinates[h][f][n] > 0
     //    means the cell ends at this fraction of the grid.
@@ -373,16 +373,16 @@ namespace CaloRecGPU
 
     struct FinishInitializingTemporaries
     {
-      int   cells  [s_eta_grid_size][phi_grid][s_max_overlap_cells];
-      float etas   [s_eta_grid_size][phi_grid][s_max_overlap_cells];
-      float phis   [s_eta_grid_size][phi_grid][s_max_overlap_cells];
+      int   cells  [s_eta_grid_size][phi_grid][s_max_overlap_cells]{};
+      float etas   [s_eta_grid_size][phi_grid][s_max_overlap_cells]{};
+      float phis   [s_eta_grid_size][phi_grid][s_max_overlap_cells]{};
 
       static constexpr int s_max_cells = phi_grid * s_eta_grid_size;
 
-      int grid_list[2][s_max_cells];
-      int counter[2];
-      bool select;
-      char added[s_max_cells];
+      int grid_list[2][s_max_cells]{};
+      int counter[2]{};
+      bool select{};
+      char added[s_max_cells]{};
 
       constexpr const int & get_counter() const
       {
@@ -1088,34 +1088,34 @@ namespace CaloRecGPU
     //Samplings have custom, hard-coded sizes to save space.
     //Could've gone with one-size-fits all maxima,
     //but it'd likely be unnecessarily wasteful.
-    EtaPhiMapEntry<126,  66, false,  true,  0> sampling_0;       //PreSamplerB
-    EtaPhiMapEntry<958, 262, false, false,  1> sampling_1;       //EMB1
-    EtaPhiMapEntry<124, 262, false, false,  2> sampling_2;       //EMB2
-    EtaPhiMapEntry< 58, 262, false, false,  3> sampling_3;       //EMB3
-    EtaPhiMapEntry< 25,  68, false, false,  4> sampling_4;       //PreSamplerE
-    EtaPhiMapEntry<732,  68, false, false,  5> sampling_5;       //EME1
-    EtaPhiMapEntry<150, 260, false, false,  6> sampling_6;       //EME2
-    EtaPhiMapEntry< 72, 260, false, false,  7> sampling_7;       //EME3
-    EtaPhiMapEntry< 40,  66, false, false,  8> sampling_8;       //HEC0
-    EtaPhiMapEntry< 34,  66, false, false,  9> sampling_9;       //HEC1
-    EtaPhiMapEntry< 32,  66, false, false, 10> sampling_10;      //HEC2
-    EtaPhiMapEntry< 34,  66, false, false, 11> sampling_11;      //HEC3
-    EtaPhiMapEntry< 24,  66,  true,  true, 12> sampling_12;      //TileBar0
-    EtaPhiMapEntry< 20,  66,  true,  true, 13> sampling_13;      //TileBar1
-    EtaPhiMapEntry< 10,  66,  true,  true, 14> sampling_14;      //TileBar2
-    EtaPhiMapEntry<  6,  66,  true, false, 15> sampling_15;      //TileGap1
-    EtaPhiMapEntry<  6,  66,  true, false, 16> sampling_16;      //TileGap2
-    EtaPhiMapEntry< 16,  66,  true, false, 17> sampling_17;      //TileGap3
-    EtaPhiMapEntry< 12,  66,  true, false, 18> sampling_18;      //TileExt0
-    EtaPhiMapEntry< 12,  66,  true, false, 19> sampling_19;      //TileExt1
-    EtaPhiMapEntry<  6,  66,  true, false, 20> sampling_20;      //TileExt2
-    EtaPhiMapEntry<148, 232, false, false, 21> sampling_21;      //FCAL0
-    EtaPhiMapEntry< 98, 164, false, false, 22> sampling_22;      //FCAL1
-    EtaPhiMapEntry< 64, 130, false, false, 23> sampling_23;      //FCAL2
-    EtaPhiMapEntry<  1,   1,  true,  true, 24> sampling_24;      //MINIFCAL0
-    EtaPhiMapEntry<  1,   1,  true,  true, 25> sampling_25;      //MINIFCAL1
-    EtaPhiMapEntry<  1,   1,  true,  true, 26> sampling_26;      //MINIFCAL2
-    EtaPhiMapEntry<  1,   1,  true,  true, 27> sampling_27;      //MINIFCAL3
+    EtaPhiMapEntry<126,  66, false,  true,  0> sampling_0{};       //PreSamplerB
+    EtaPhiMapEntry<958, 262, false, false,  1> sampling_1{};       //EMB1
+    EtaPhiMapEntry<124, 262, false, false,  2> sampling_2{};       //EMB2
+    EtaPhiMapEntry< 58, 262, false, false,  3> sampling_3{};       //EMB3
+    EtaPhiMapEntry< 25,  68, false, false,  4> sampling_4{};       //PreSamplerE
+    EtaPhiMapEntry<732,  68, false, false,  5> sampling_5{};       //EME1
+    EtaPhiMapEntry<150, 260, false, false,  6> sampling_6{};       //EME2
+    EtaPhiMapEntry< 72, 260, false, false,  7> sampling_7{};       //EME3
+    EtaPhiMapEntry< 40,  66, false, false,  8> sampling_8{};       //HEC0
+    EtaPhiMapEntry< 34,  66, false, false,  9> sampling_9{};       //HEC1
+    EtaPhiMapEntry< 32,  66, false, false, 10> sampling_10{};      //HEC2
+    EtaPhiMapEntry< 34,  66, false, false, 11> sampling_11{};      //HEC3
+    EtaPhiMapEntry< 24,  66,  true,  true, 12> sampling_12{};      //TileBar0
+    EtaPhiMapEntry< 20,  66,  true,  true, 13> sampling_13{};      //TileBar1
+    EtaPhiMapEntry< 10,  66,  true,  true, 14> sampling_14{};      //TileBar2
+    EtaPhiMapEntry<  6,  66,  true, false, 15> sampling_15{};      //TileGap1
+    EtaPhiMapEntry<  6,  66,  true, false, 16> sampling_16{};      //TileGap2
+    EtaPhiMapEntry< 16,  66,  true, false, 17> sampling_17{};      //TileGap3
+    EtaPhiMapEntry< 12,  66,  true, false, 18> sampling_18{};      //TileExt0
+    EtaPhiMapEntry< 12,  66,  true, false, 19> sampling_19{};      //TileExt1
+    EtaPhiMapEntry<  6,  66,  true, false, 20> sampling_20{};      //TileExt2
+    EtaPhiMapEntry<148, 232, false, false, 21> sampling_21{};      //FCAL0
+    EtaPhiMapEntry< 98, 164, false, false, 22> sampling_22{};      //FCAL1
+    EtaPhiMapEntry< 64, 130, false, false, 23> sampling_23{};      //FCAL2
+    EtaPhiMapEntry<  1,   1,  true,  true, 24> sampling_24{};      //MINIFCAL0
+    EtaPhiMapEntry<  1,   1,  true,  true, 25> sampling_25{};      //MINIFCAL1
+    EtaPhiMapEntry<  1,   1,  true,  true, 26> sampling_26{};      //MINIFCAL2
+    EtaPhiMapEntry<  1,   1,  true,  true, 27> sampling_27{};      //MINIFCAL3
 
     static_assert(NumSamplings == 28, "Written under the assumption there are 28 samplings.");
 

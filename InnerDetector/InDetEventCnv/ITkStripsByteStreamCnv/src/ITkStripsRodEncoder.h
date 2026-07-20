@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
  
 #ifndef ITkStripsRawDataByteStreamCnv_ITkStripsRodEncoder_h
@@ -134,19 +134,19 @@ ITkStripsRodEncoder : public extends<AthAlgTool, IITkStripsRodEncoder>{
   Identifier offlineID(const SCT_RDORawData* rdo) const;
 
   /** Get the online Identifier from the RDO. */
-  uint32_t onlineID(const SCT_RDORawData* rdo) const;
+  uint32_t onlineID(const SCT_RDORawData* rdo, const EventContext& ctx) const;
 
   /** Get the ROD link number info in the RDO header data. */
-  int getRODLink(const SCT_RDORawData* rdo) const;
+  int getRODLink(const SCT_RDORawData* rdo, const EventContext& ctx) const;
 
   /** Get the 16-bit word for a header with Type (PR or LP), L0Tag event and BCID */
   uint16_t getHeaderPhysicsPacket(int typ, uint8_t l0tag, uint8_t bc_count) const;
 
   /** Get the 16-bit word for a header for a hit. */
-  uint16_t getHeaderUsingRDO(const SCT_RDORawData* rdo) const;
+  uint16_t getHeaderUsingRDO(const SCT_RDORawData* rdo, const EventContext& ctx) const;
   
   /** Get the 16-bit word for a header for a link with a ByteStream error. */
-  uint16_t getHeaderUsingHash(const IdentifierHash& linkHash, const int& errorWord) const;
+  uint16_t getHeaderUsingHash(const IdentifierHash& linkHash, const int& errorWord, const EventContext& ctx) const;
   
   /** Get the 16-bit word for a trailer, with or without ByteStream errors. */
   uint16_t getTrailer(const int& errorWord) const;

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "SiSPSeededTrackFinderData/SiTrajectory_xk.h"
@@ -40,12 +40,12 @@ void InDet::SiTrajectory_xk::erase(int n)
 ///////////////////////////////////////////////////////////////////
 
 Trk::TrackStates
-InDet::SiTrajectory_xk::convertToTrackStateOnSurface(int cosmic)
+InDet::SiTrajectory_xk::convertToTrackStateOnSurface(int cosmic, const EventContext& ctx)
 {
   if (!cosmic ||  m_elements[m_elementsMap[m_firstElement]].parametersUB().parameters()[2] < 0.) {
-    return convertToTrackStateOnSurface();
+    return convertToTrackStateOnSurface(ctx);
   }
-  return convertToTrackStateOnSurfaceWithNewDirection();
+  return convertToTrackStateOnSurfaceWithNewDirection(ctx);
 }
 
 ///////////////////////////////////////////////////////////////////
@@ -53,7 +53,7 @@ InDet::SiTrajectory_xk::convertToTrackStateOnSurface(int cosmic)
 ///////////////////////////////////////////////////////////////////
 
 Trk::TrackStates
-InDet::SiTrajectory_xk::convertToTrackStateOnSurface()
+InDet::SiTrajectory_xk::convertToTrackStateOnSurface(const EventContext& ctx)
 {
 
   auto dtsos = Trk::TrackStates();
@@ -65,7 +65,7 @@ InDet::SiTrajectory_xk::convertToTrackStateOnSurface()
   int i = m_firstElement;
   
   const Trk::TrackStateOnSurface* 
-    tsos = m_elements[m_elementsMap[i]].trackStateOnSurface(false,true,multi,1);
+    tsos = m_elements[m_elementsMap[i]].trackStateOnSurface(false,true,multi,1,ctx);
 
   if (tsos) dtsos.push_back(tsos);
 
@@ -73,13 +73,13 @@ InDet::SiTrajectory_xk::convertToTrackStateOnSurface()
 
     int m = m_elementsMap[i];
     if (m_elements[m].cluster() || m_elements[m].clusterNoAdd() ) {
-      tsos = m_elements[m].trackStateOnSurface(false,false,multi,0);
+      tsos = m_elements[m].trackStateOnSurface(false,false,multi,0,ctx);
       if (tsos) dtsos.push_back(tsos);
     }
   }
 
   i = m_lastElement;
-  tsos = m_elements[m_elementsMap[i]].trackStateOnSurface(false,false,multi,2);
+  tsos = m_elements[m_elementsMap[i]].trackStateOnSurface(false,false,multi,2,ctx);
   if (tsos) dtsos.push_back(tsos);
 
   if (multi) {
@@ -100,7 +100,7 @@ InDet::SiTrajectory_xk::convertToTrackStateOnSurface()
 ///////////////////////////////////////////////////////////////////
 
 Trk::TrackStates
-InDet::SiTrajectory_xk::convertToTrackStateOnSurfaceWithNewDirection()
+InDet::SiTrajectory_xk::convertToTrackStateOnSurfaceWithNewDirection(const EventContext& ctx)
 {
 
   auto dtsos = Trk::TrackStates();
@@ -111,7 +111,7 @@ InDet::SiTrajectory_xk::convertToTrackStateOnSurfaceWithNewDirection()
   int i = m_lastElement;
 
   const Trk::TrackStateOnSurface* 
-    tsos = m_elements[m_elementsMap[i]].trackStateOnSurface(true,true,multi,2);
+    tsos = m_elements[m_elementsMap[i]].trackStateOnSurface(true,true,multi,2,ctx);
 
   if (tsos) dtsos.push_back(tsos);
 
@@ -119,13 +119,13 @@ InDet::SiTrajectory_xk::convertToTrackStateOnSurfaceWithNewDirection()
 
     int m = m_elementsMap[i];
     if (m_elements[m].cluster() || m_elements[m].clusterNoAdd() ) {
-      tsos = m_elements[m].trackStateOnSurface(true,false,multi,0);
+      tsos = m_elements[m].trackStateOnSurface(true,false,multi,0,ctx);
       if (tsos) dtsos.push_back(tsos);
     }
   }
 
   i = m_firstElement;
-  tsos = m_elements[m_elementsMap[i]].trackStateOnSurface(true,false,multi,1);
+  tsos = m_elements[m_elementsMap[i]].trackStateOnSurface(true,false,multi,1,ctx);
   if (tsos) dtsos.push_back(tsos);
 
   return dtsos;
@@ -1069,7 +1069,9 @@ bool InDet::SiTrajectory_xk::globalPositionsToClusters
 
       pv[0]     = dx*Ax[0]+dy*Ax[1]+dz*Ax[2];
       pv[1]     = dx*Ay[0]+dy*Ay[1]+dz*Ay[2];
-
+      //setParametersWithCovariance detects whether su is 'owned' elsewhere
+      //the ownership patterns could be improved, though.
+      //coverity[MULTIPLE_INIT_SMART_PTRS]
       Tp.setParametersWithCovariance(su,pv,cv);
 
       if (!sct) m_elements[0].CloseClusterSeach(Tp, (*iter_boundaryLink), pib, pie);
@@ -1193,6 +1195,8 @@ bool InDet::SiTrajectory_xk::backwardExtension(int itmax, const EventContext& ct
   int                     TE    [100]         ;
   const InDet::SiCluster* CL    [100]         ;
   double                  XI2B  [100]         ;
+  //Local variable PUB uses 27200 bytes of stack space
+  //coverity[STACK_USE]
   Trk::PatternTrackParameters PUB[100]        ;
   Trk::PatternTrackParameters  PA             ;
  
@@ -1305,7 +1309,7 @@ bool InDet::SiTrajectory_xk::backwardExtension(int itmax, const EventContext& ct
 	      ndfbest += Ei.ndf();
 	      if (l<0) l=lbest;
             }
-            m_elementsMap[lbest] = m_elementsMap[i];
+            m_elementsMap.at(lbest) = m_elementsMap.at(i);
           }
    
         }
@@ -1315,7 +1319,7 @@ bool InDet::SiTrajectory_xk::backwardExtension(int itmax, const EventContext& ct
         if (dn!=0) {
 
           for (int i=L; i!= m_nElements; ++i) {
-            m_elementsMap[i-dn]=m_elementsMap[i];
+            m_elementsMap.at(i-dn)=m_elementsMap.at(i);
           }
 
           L            -=dn;
@@ -1754,7 +1758,7 @@ bool InDet::SiTrajectory_xk::forwardExtension(bool smoother,int itmax, const Eve
     if (index_currentElement < 0 ) break;
     /// if we are not in the last iteration, final preparation for iterating by making our new start 
     /// point skip the cluster used there so far. 
-    if (iteration!=itm && !m_elements[m_elementsMap[index_currentElement]].addNextClusterF()) break;
+    if (iteration!=itm && !m_elements.at(m_elementsMap.at(index_currentElement)).addNextClusterF()) break;
   }
 
   /// if reaching max iterations, reset iteration counter to the last iteration that was run 

@@ -20,7 +20,7 @@ StatusCode MergeTrackRecordCollection::initialize() {
  return StatusCode::SUCCESS;
 }
 
-StatusCode MergeTrackRecordCollection::execute() {
+StatusCode MergeTrackRecordCollection::execute(const EventContext& ctx) {
   ATH_MSG_DEBUG("execute()");
-  return m_mergeTool->processAllSubEvents(Gaudi::Hive::currentContext());
+  return m_mergeTool->processAllSubEvents(ctx);
 }

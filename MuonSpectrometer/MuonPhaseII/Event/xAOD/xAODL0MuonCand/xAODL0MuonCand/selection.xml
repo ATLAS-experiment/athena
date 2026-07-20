@@ -39,5 +39,17 @@
     <class name="xAOD::MDTCandDataAuxContainer_v1"
        id="2BC4B152-8548-477A-B50F-7B44D3E0AAC2" />
     <typedef name = "xAOD::MDTCandDataAuxContainer" />
+
+    <!-- xAOD::NSWCandData interface type(s). -->
+    <class name="xAOD::NSWCandData_v1" />
+    <class name="xAOD::NSWCandDataContainer_v1"
+        id="A116DA58-859E-4E72-BD9B-9EF8D14CA320" />
+    <typedef name="xAOD::NSWCandData" />
+    <typedef name="xAOD::NSWCandDataContainer" />
+
+    <!-- xAOD::NSWCandData auxiliary type(s). -->  
+    <class name="xAOD::NSWCandDataAuxContainer_v1"
+        id="1F67B34D-12F7-47CE-98C2-B7DBF73AA478" />
+    <typedef name="xAOD::NSWCandDataAuxContainer" />
        
 </lcgdict>

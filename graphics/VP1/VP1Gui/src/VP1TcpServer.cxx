@@ -24,7 +24,7 @@
 class VP1TcpServer::Imp {
 public:
   VP1TcpServer * tcpserv{};
-  quint16 port;
+  quint16 port = 0;
   QTcpServer tcpserver;
   QMap<QTcpSocket *,quint16> sockets2blocksize;
   QTcpSocket * recognisedSocket(QObject*) const;

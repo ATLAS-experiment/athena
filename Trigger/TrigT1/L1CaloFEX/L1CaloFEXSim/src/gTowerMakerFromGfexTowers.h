@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef gTowerMakerFromGfexTowers_H
@@ -9,7 +9,7 @@
 #include <string>
 
 // Athena/Gaudi
-#include "AthenaBaseComps/AthAlgorithm.h"
+#include "AthenaBaseComps/AthReentrantAlgorithm.h"
 #include "gTowerBuilder.h"
 #include "L1CaloFEXSim/gTowerContainer.h"
 #include "xAODTrigL1Calo/gFexTowerContainer.h"
@@ -20,7 +20,7 @@ class CaloIdManager;
 
 namespace LVL1 {
 
-class gTowerMakerFromGfexTowers : public AthAlgorithm
+class gTowerMakerFromGfexTowers : public AthReentrantAlgorithm
 {
     public:
 
@@ -28,7 +28,7 @@ class gTowerMakerFromGfexTowers : public AthAlgorithm
         virtual ~gTowerMakerFromGfexTowers() = default;
 
         virtual StatusCode initialize() override;
-        virtual StatusCode execute() override;
+        virtual StatusCode execute(const EventContext& ctx) const override;
 
     private:
         

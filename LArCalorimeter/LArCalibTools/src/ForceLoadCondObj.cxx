@@ -32,7 +32,7 @@ StatusCode ForceLoadCondObj::finalize() {
   return StatusCode::SUCCESS;
 }
 
-StatusCode ForceLoadCondObj::execute() {
+StatusCode ForceLoadCondObj::execute(const EventContext& /*ctx*/) {
   //Loop through objects
   for (unsigned int iobj=0;iobj<m_objectList.size();++iobj) {
     // if object name contains a '#', it represents a specific typename#key

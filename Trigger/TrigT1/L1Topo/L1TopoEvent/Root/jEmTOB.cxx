@@ -1,17 +1,18 @@
-//  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+//  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 #include "L1TopoEvent/jEmTOB.h"
+#include <iostream>
 
 thread_local TCS::Heap<TCS::jEmTOB> TCS::jEmTOB::fg_heap("jEm");
 
 // constructors
 // default constructor
-TCS::jEmTOB::jEmTOB(uint32_t roiWord, const std::string& tobName) :
+TCS::jEmTOB::jEmTOB(uint32_t roiWord, std::string_view tobName) :
    BaseTOB( roiWord,tobName )
 {}
 
 // constructor with initial values
-TCS::jEmTOB::jEmTOB(unsigned int Et, int eta, unsigned phi, uint32_t roiWord, const std::string& tobName) :
+TCS::jEmTOB::jEmTOB(unsigned int Et, int eta, unsigned phi, uint32_t roiWord, std::string_view tobName) :
    BaseTOB( roiWord,tobName )
    , m_Et(Et)
    , m_eta(eta)

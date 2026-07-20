@@ -19,6 +19,7 @@
 #include "xAODTrigger/gFexGlobalRoIContainer.h"
 #include "xAODTrigger/MuonRoIContainer.h"
 #include "xAODTrigger/TrigCompositeContainer.h"
+#include "xAODTrigger/CTPResult.h"
 
 // Athena includes
 #include "AthenaBaseComps/AthReentrantAlgorithm.h"
@@ -117,8 +118,12 @@ private:
     "Tools decorating RoI containers with threshold patterns"
   };
 
+  // CTP result
+  SG::ReadHandleKey<xAOD::CTPResult> m_CTPKey {
+    this, "CTPKey", "CTPResult",
+    "Key of the CTP result to be linked to L1 Trigger Result"};
+
   // Placeholder for other L1 xAOD outputs:
-  // - CTP result
   // - L1Topo result
   // - the remaining Run-3 L1Calo RoIs
 

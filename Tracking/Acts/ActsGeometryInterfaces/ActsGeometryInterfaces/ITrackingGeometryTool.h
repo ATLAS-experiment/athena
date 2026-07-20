@@ -1,18 +1,19 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ACTSGEOMETRYINTERFACES_IACTSTRACKINGGEOMETRYTOOL_H
 #define ACTSGEOMETRYINTERFACES_IACTSTRACKINGGEOMETRYTOOL_H
 
 #include "ActsGeometryInterfaces/GeometryContext.h"
-#include "AthenaBaseComps/AthAlgTool.h"
+
 #include "GaudiKernel/EventContext.h"
 #include "GaudiKernel/IAlgTool.h"
 #include "GaudiKernel/IInterface.h"
 
 namespace Acts {
     class TrackingGeometry;
+    class TrackingVolume;
 }
 
 namespace ActsTrk{
@@ -35,6 +36,9 @@ class ITrackingGeometryTool : virtual public IAlgTool {
         /** @brief Returns the pointer to the identifier mapping between Acts::surface ID
          *         & IdentifierHash of the ITk surfaces */
         virtual const ActsTrk::DetectorElementToActsGeometryIdMap* surfaceIdMap() const= 0;
+        /** @brief Returns the envelope volume from the tracking geometry that's 
+                   containing all volumes of the subsystem  */
+        virtual const Acts::TrackingVolume* getEnvelope(const SystemEnvelope envType) const = 0;
 
 };
 }

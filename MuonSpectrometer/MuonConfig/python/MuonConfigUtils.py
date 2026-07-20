@@ -2,7 +2,7 @@
 
 
 ### Configuration snippet to setup the THistSvc
-def setupHistSvcCfg(flags, outFile: str, outStream: str):
+def setupHistSvcCfg(flags, outFile: str, outStream: str, autoFlush: int = -30000000, autoSave: int = -30000000):
     from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
     result = ComponentAccumulator()
     if len(outFile) == 0: 
@@ -11,7 +11,7 @@ def setupHistSvcCfg(flags, outFile: str, outStream: str):
         raise ValueError("The outstream must not be empty")
 
     from AthenaConfiguration.ComponentFactory import CompFactory
-    histSvc = CompFactory.THistSvc(Output=[f"{outStream} DATAFILE='{outFile}', OPT='RECREATE'"])
+    histSvc = CompFactory.THistSvc(Output=[f"{outStream} DATAFILE='{outFile}', OPT='RECREATE'"], AutoFlush=autoFlush, AutoSave=autoSave)
     print(f"Register new stream {outStream} piped to {outFile}")
     result.addService(histSvc, primary=True)
     return result

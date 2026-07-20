@@ -218,7 +218,7 @@ class TextConfig(ConfigFactory):
             if blockName not in self._order[self.ROOTNAME]:
                 if not blockName:
                     blockName = list(self._config[blockName].keys())[0]
-                raise ValueError(f"Unkown block {blockName} in yaml file")
+                raise ValueError(f"Unknown block {blockName} in yaml file")
 
         # configure blocks
         configSeq = ConfigSequence()
@@ -295,7 +295,7 @@ class TextConfig(ConfigFactory):
             # propagate special extra options to subalgs
             extraOptionsForAlg = extraOptions.copy() if extraOptions is not None else None
             if extraOptionsForAlg is None:
-                extraOptionsList = ["skipOnData", "skipOnMC", "onlyForDSIDs"]
+                extraOptionsList = ["skipOnData", "skipOnMC", "skipWithSystematics", "onlyForDSIDs"]
                 for i in algOpts:
                     if i['name'] in extraOptionsList and i['defaultValue'] != i['value']:
                         if extraOptionsForAlg is None:

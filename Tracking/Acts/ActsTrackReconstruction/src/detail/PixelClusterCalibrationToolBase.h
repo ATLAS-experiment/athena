@@ -14,6 +14,8 @@
 
 #include "ActsToolInterfaces/IPixelOnTrackCalibratorTool.h"
 
+#include "Acts/EventData/TrackStateType.hpp"
+
 namespace ActsTrk::detail {
    /// @brief the base options the options of the options of every PixelClusterCalibrator must be based on
    struct PixelClusterCalibratorOptionsBase {
@@ -103,23 +105,22 @@ namespace ActsTrk::detail {
          return *static_cast<const derived_t *>(this);
       }
 
-      std::pair<Pos, Cov> calibrate(const Acts::GeometryContext&,
-                                    const Acts::CalibrationContext&,
-                                    const xAOD::PixelCluster&,
-                                    const TrackStateProxy&) const;
+      void calibrate(const Acts::GeometryContext&,
+                     const Acts::CalibrationContext&,
+                     const xAOD::PixelCluster&,
+                     TrackStateProxy&) const;
 
-      std::pair<Pos, Cov> calibrate(const Acts::GeometryContext&,
-                                    const Acts::CalibrationContext&,
-                                    const Acts::Surface&,
-                                    const xAOD::PixelCluster&,
-                                    const Acts::BoundTrackParameters&) const;
+      std::tuple<Pos, Cov, unsigned int> calibrate(const Acts::GeometryContext&,
+                                                   const Acts::CalibrationContext&,
+                                                   const Acts::Surface&,
+                                                   const xAOD::PixelCluster&,
+                                                   const Acts::BoundTrackParameters&) const;
 
       /// @brief connect the calibrator (derived class) to the given OnTrack calaibrator delegate
       virtual void connectOnTrackCalibrator(OnTrackCalibrator& calibrator) const override;
 
       /// @brief connect the calibrator (derived class) to the given OnBoundState calaibrator delegate
       virtual void connectCalibrator(Calibrator& calibrator) const override;
-
    };
 
    /// @brief base class of a Pixel cluster calibration tool

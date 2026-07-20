@@ -34,7 +34,7 @@ namespace CP {
     /// Regular Algorithm constructor
     SecVertexTruthMatchAlg( const std::string& name, ISvcLocator* svcLoc );
     virtual StatusCode initialize() override;
-    virtual StatusCode execute() override;
+    virtual StatusCode execute(const EventContext& ctx) override;
 
   private:
     // Input (reco) Secondary Vertices

@@ -87,7 +87,7 @@ namespace CP
 
         // Create the Sagitta tool
         if (m_MuonIntSagittaTool.empty()) {
-            m_MuonIntSagittaTool.setTypeAndName("CP::MuonCalibIntSagittaTool/MCaST_Sagitta");
+            m_MuonIntSagittaTool.setTypeAndName("CP::MuonCalibIntSagittaTool/" + name() + "_MCaST_Sagitta");
             ATH_CHECK(m_MuonIntSagittaTool.setProperty("release", m_release.value()));
             ATH_CHECK(m_MuonIntSagittaTool.setProperty("systematicScheme", m_sysScheme.value()));
 	    ATH_CHECK(m_MuonIntSagittaTool.setProperty("calibMode", m_calibMode));
@@ -98,7 +98,7 @@ namespace CP
 
         // Create the scale smear tool
         if (m_MuonIntScaleSmearTool.empty()) {
-            m_MuonIntScaleSmearTool.setTypeAndName("CP::MuonCalibIntScaleSmearTool/MCaST_ScaleSmear");
+            m_MuonIntScaleSmearTool.setTypeAndName("CP::MuonCalibIntScaleSmearTool/" + name() + "_MCaST_ScaleSmear");
             ATH_CHECK(m_MuonIntScaleSmearTool.setProperty("release", m_release.value()));
             ATH_CHECK(m_MuonIntScaleSmearTool.setProperty("systematicScheme", m_sysScheme.value()));
             ATH_CHECK(m_MuonIntScaleSmearTool.setProperty("calibMode", m_calibMode));
@@ -108,7 +108,7 @@ namespace CP
         /// Create the high pT tool            
         if (m_extra_highpt_smearing || m_2stations_highpt_smearing) {
             if (m_MuonIntHighTSmearTool.empty()) {
-                m_MuonIntHighTSmearTool.setTypeAndName("CP::MuonCalibIntHighpTSmearTool/MCaST_highPtScaleSmear");
+                m_MuonIntHighTSmearTool.setTypeAndName("CP::MuonCalibIntHighpTSmearTool/" + name() + "_MCaST_highPtScaleSmear");
                 ATH_CHECK(m_MuonIntHighTSmearTool.setProperty("release", m_release.value()));
                 ATH_CHECK(m_MuonIntHighTSmearTool.setProperty("OutputLevel", msg().level()));
             }

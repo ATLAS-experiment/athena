@@ -46,7 +46,7 @@ if (NOT COLUMNAR_ANALYSIS)
     SOURCES test/gt_BootstrapGenerator.cxx
     INCLUDE_DIRS ${GTEST_INCLUDE_DIRS}
     LINK_LIBRARIES ${GTEST_LIBRARIES} AsgTestingLib AsgAnalysisAlgorithmsLib CxxUtils
-    POST_EXEC_SCRIPT nopost.sh )
+    POST_EXEC_SCRIPT noerror.sh )
 
 
   if( NOT XAOD_STANDALONE )
@@ -55,11 +55,11 @@ if (NOT COLUMNAR_ANALYSIS)
 
     atlas_add_test( PMGTruthWeightsAlg
       SCRIPT testPMGTruthWeightsAlg.py --max-events 10
-      POST_EXEC_SCRIPT nopost.sh )
+      POST_EXEC_SCRIPT noerror.sh )
 
     atlas_add_test( PileupReweightingAlg
       SCRIPT testPileupReweightingAlgConfig.py --max-events 10
-      POST_EXEC_SCRIPT nopost.sh )
+      POST_EXEC_SCRIPT noerror.sh )
 
   endif()
 
@@ -67,7 +67,7 @@ if (NOT COLUMNAR_ANALYSIS)
   # in the output file
   atlas_add_test( TestFullTermsOutput
     SCRIPT CPRun.py --input-list $ASG_TEST_FILE_RUN3_MC --text-config AsgAnalysisAlgorithms/test_full_terms_output.yaml -e 150
-    POST_EXEC_SCRIPT nopost.sh
+    POST_EXEC_SCRIPT noerror.sh
     PRIVATE_WORKING_DIRECTORY
     PROPERTIES TIMEOUT 400
   )
@@ -76,7 +76,7 @@ if (NOT COLUMNAR_ANALYSIS)
   # in the output file
   atlas_add_test( TestEventShapeOutput
     SCRIPT CPRun.py --input-list $ASG_TEST_FILE_RUN3_MC --text-config AsgAnalysisAlgorithms/test_event_shape_output.yaml -e 150
-    POST_EXEC_SCRIPT nopost.sh
+    POST_EXEC_SCRIPT noerror.sh
     PRIVATE_WORKING_DIRECTORY
     PROPERTIES TIMEOUT 400
   )
@@ -87,7 +87,7 @@ if (NOT COLUMNAR_ANALYSIS)
   atlas_add_test( TestSingleOR
     PRE_EXEC_SCRIPT "CPRun.py --input-list $ASG_TEST_FILE_RUN3_MC --text-config AsgAnalysisAlgorithms/test_single_OR.yaml -e 150 -o output_singleOR.root"
     SCRIPT testOutputContent.py --input_file output_singleOR.root --tree_name analysis --forbidden-branches el_select_passesOR_NOSYS jet_select_passesOR_NOSYS mu_select_passesOR_NOSYS ph_select_passesOR_NOSYS tau_select_passesOR_NOSYS
-    POST_EXEC_SCRIPT nopost.sh
+    POST_EXEC_SCRIPT noerror.sh
     PRIVATE_WORKING_DIRECTORY
     PROPERTIES TIMEOUT 400
   )
@@ -97,7 +97,7 @@ if (NOT COLUMNAR_ANALYSIS)
   atlas_add_test( TestSingleORNoEnforce
     PRE_EXEC_SCRIPT "CPRun.py --input-list $ASG_TEST_FILE_RUN3_MC --text-config AsgAnalysisAlgorithms/test_single_OR_noEnforce.yaml -e 150 -o output_singleOR_noEnforce.root"
     SCRIPT testOutputContent.py --input_file output_singleOR_noEnforce.root --tree_name analysis --branches el_select_passesOR_NOSYS jet_select_passesOR_NOSYS mu_select_passesOR_NOSYS ph_select_passesOR_NOSYS tau_select_passesOR_NOSYS
-    POST_EXEC_SCRIPT nopost.sh
+    POST_EXEC_SCRIPT noerror.sh
     PRIVATE_WORKING_DIRECTORY
     PROPERTIES TIMEOUT 400
   )
@@ -107,7 +107,7 @@ if (NOT COLUMNAR_ANALYSIS)
   atlas_add_test( TestMultipleORs
     PRE_EXEC_SCRIPT "CPRun.py --input-list $ASG_TEST_FILE_RUN3_MC --text-config AsgAnalysisAlgorithms/test_multiple_ORs.yaml -e 150 -o output_multipleORs.root"
     SCRIPT testOutputContent.py --input_file output_multipleORs.root --tree_name analysis --branches el_select_passesOR_postJvt_NOSYS el_select_passesOR_preJvt_NOSYS jet_select_passesOR_postJvt_NOSYS jet_select_passesOR_preJvt_NOSYS mu_select_passesOR_postJvt_NOSYS mu_select_passesOR_preJvt_NOSYS ph_select_passesOR_postJvt_NOSYS ph_select_passesOR_preJvt_NOSYS tau_select_passesOR_postJvt_NOSYS tau_select_passesOR_preJvt_NOSYS
-    POST_EXEC_SCRIPT nopost.sh
+    POST_EXEC_SCRIPT noerror.sh
     PRIVATE_WORKING_DIRECTORY
     PROPERTIES TIMEOUT 400
   )

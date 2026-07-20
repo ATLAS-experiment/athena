@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /** 
@@ -35,6 +35,7 @@
 #include <cstdlib>
 #include <string>
 #include <vector>
+#include <iostream>
 
 /** Constructor */
 GetDetectorPositions::GetDetectorPositions(std::string const&  name, ISvcLocator* pSvcLocator) :
@@ -96,7 +97,7 @@ StatusCode GetDetectorPositions::initialize(){
 }
 
 /** execute */
-StatusCode GetDetectorPositions::execute() {
+StatusCode GetDetectorPositions::execute(const EventContext& /*ctx*/) {
   
   if (msgLvl(MSG::VERBOSE)) msg(MSG::VERBOSE) << "execute() check global position" << endmsg;
   

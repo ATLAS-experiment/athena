@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "AnalysisJiveXML/TauJetRetriever.h"
@@ -46,7 +46,7 @@ namespace JiveXML {
     if (msgLvl(MSG::DEBUG)) msg(MSG::DEBUG) << "in retrieveAll()" << endmsg;
     
     SG::ConstIterator<Analysis::TauJetContainer> iterator, end;
-    const Analysis::TauJetContainer* tauCont;
+    const Analysis::TauJetContainer* tauCont = nullptr;
     
     //obtain the default collection first
     if (msgLvl(MSG::DEBUG)) msg(MSG::DEBUG)  << "Trying to retrieve " << dataTypeName() << " (" << m_sgKey << ")" << endmsg;

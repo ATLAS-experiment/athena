@@ -43,12 +43,11 @@ StatusCode ActsWriteTrackingGeometryTransforms::initialize() {
   return StatusCode::SUCCESS;
 }
 
-StatusCode ActsWriteTrackingGeometryTransforms::execute() {
+StatusCode ActsWriteTrackingGeometryTransforms::execute(const EventContext& ctx) {
   
   ATH_MSG_DEBUG("In ActsWriteTrackingGeometryTransforms::execute");
 
 
-  const EventContext& ctx = Gaudi::Hive::currentContext();
   
   auto trackingGeometry = m_trackingGeometryTool->trackingGeometry();
   ATH_MSG_DEBUG("Retrieved tracking Geometry");
@@ -61,10 +60,10 @@ StatusCode ActsWriteTrackingGeometryTransforms::execute() {
   std::ofstream os(m_outputName, std::ios_base::app);
 
   trackingGeometry->visitSurfaces([&] (const Acts::Surface* srf) {
-    const Acts::SurfacePlacementBase *detElem = srf->surfacePlacement();
-    const auto *gmde = static_cast<const ActsDetectorElement *>(detElem);
-
-
+    const auto *gmde = getActsDetectorElement(srf);
+    if (!gmde) {
+        return;
+    }
     if(dynamic_cast<const InDetDD::TRT_BaseElement*>(gmde->upstreamDetectorElement()) != nullptr) { 
       return;
     }

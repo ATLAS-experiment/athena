@@ -220,17 +220,17 @@ bool IParticleCollHandle_Muon::load()
       messageDebug("WARNING: Ignoring null Muon pointer.");
       continue;
     }
-    // if ((*it)->primaryTrackParticle()->charge()==0.0) {
+    // if ((*it)->trackParticle(xAOD::Muon::TrackParticleType::Primary)->charge()==0.0) {
     //   messageDebug("WARNING: Ignoring Muon which claims to be neutral (charge()==0.0).");
     //   continue;
     // }
     IParticleHandle_Muon* muonH = new IParticleHandle_Muon(this,*it);
     addHandle(muonH );
     //std::cout << "muons ---> " << muonH->muon().eta() // debug
-    //          << ", " << muonH->muon().primaryTrackParticle() << std::endl;    
-    if( muonH->muon().primaryTrackParticle() ) {
+    //          << ", " << muonH->muon().trackParticle(xAOD::Muon::TrackParticleType::Primary) << std::endl;    
+    if( muonH->muon().trackParticle(xAOD::Muon::TrackParticleType::Primary) ) {
         m_d->hasPrimaryTrackParticleInfo = true;
-        listOfTrackParticles << muonH->muon().primaryTrackParticle();
+        listOfTrackParticles << muonH->muon().trackParticle(xAOD::Muon::TrackParticleType::Primary);
     } else {
         m_d->hasPrimaryTrackParticleInfo = false;
         printMsgNoTrackParticle();

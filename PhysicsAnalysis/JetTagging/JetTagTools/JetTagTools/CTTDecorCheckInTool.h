@@ -35,7 +35,7 @@ class CTTDecorCheckInTool : public AthAlgorithm
       virtual ~CTTDecorCheckInTool() = default;
 
       virtual StatusCode initialize() override;
-      virtual StatusCode execute() override;
+      virtual StatusCode execute(const EventContext& ctx) override;
 
 //------------------------------------------------------------------------------------------------------------------
 // Private data and functions

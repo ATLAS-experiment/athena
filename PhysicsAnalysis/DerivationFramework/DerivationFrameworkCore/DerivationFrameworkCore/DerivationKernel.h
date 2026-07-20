@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef DERIVATIONFRAMEWORK_DERIVATIONKERNEL_H
@@ -7,9 +7,9 @@
 
 #include <string>
 #include <vector>
-#include <list>
 
-#include "AthenaBaseComps/AthFilterAlgorithm.h"
+#include "AthenaBaseComps/AthAlgorithm.h"
+#include "EventBookkeeperTools/FilterReporterParams.h"
 #include "GaudiKernel/ToolHandle.h"
 #include "GaudiKernel/ServiceHandle.h"
 #include "DerivationFrameworkInterfaces/ISkimmingTool.h"
@@ -20,12 +20,13 @@
 namespace DerivationFramework {
 
   /////////////////////////////////////////////////////////////////////////////
-  class DerivationKernel : public AthFilterAlgorithm {
+  class DerivationKernel : public AthAlgorithm {
 
   public:
-    DerivationKernel (const std::string& name, ISvcLocator* pSvcLocator);
+    using AthAlgorithm::AthAlgorithm;
+
     virtual StatusCode initialize() override;
-    virtual StatusCode execute() override;
+    virtual StatusCode execute(const EventContext& ctx) override;
     virtual StatusCode finalize() override;
   private:
     // Tools etc
@@ -36,6 +37,9 @@ namespace DerivationFramework {
 
     Gaudi::Property<bool> m_runSkimmingFirst{this, "RunSkimmingFirst", false};
     Gaudi::Property<bool> m_doChronoStat{this,"doChronoStat",true,"use ChronoStatSvc (only in serial jobs)"};
+
+    FilterReporterParams m_filterParams {this, "GoodRunsList", "Good Runs Lists selection"};
+
     // Some counters
     int m_eventCounter{};
     int m_acceptCntr{};

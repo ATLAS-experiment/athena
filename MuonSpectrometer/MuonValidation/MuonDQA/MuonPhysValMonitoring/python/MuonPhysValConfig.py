@@ -27,8 +27,8 @@ def PhysValMuonCfg(flags, name="muphysval", **kwargs):
     kwargs.setdefault("IsoTool", acc.popToolsAndMerge(MuonPhysValIsolationSelCfg(flags)))
     from InDetConfig.InDetTrackSelectorToolConfig import MuonCombinedInDetDetailedTrackSelectorToolCfg
     kwargs.setdefault("TrackSelector",acc.popToolsAndMerge(MuonCombinedInDetDetailedTrackSelectorToolCfg(flags)))
-    from MuonSelectorTools.MuonSelectorToolsConfig import MuonSelectionToolCfg
-    kwargs.setdefault("MuonSelector", acc.popToolsAndMerge(MuonSelectionToolCfg(flags)))
+    from MuonSelectorTools.MuonSelectorToolsConfig import MuonLoosenedNonCalibratedSelectionToolCfg
+    kwargs.setdefault("MuonSelector", acc.popToolsAndMerge(MuonLoosenedNonCalibratedSelectionToolCfg(flags)))
     from MuonConfig.MuonRecToolsConfig import MuonEDMPrinterToolCfg
     edmprinter = acc.getPrimaryAndMerge(MuonEDMPrinterToolCfg(flags))
     kwargs.setdefault("MuonPrinter", CompFactory.Rec.MuonPrintingTool(MuonStationPrinter=edmprinter))

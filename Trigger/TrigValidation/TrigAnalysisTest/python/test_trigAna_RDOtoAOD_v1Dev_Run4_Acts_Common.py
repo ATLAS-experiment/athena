@@ -29,7 +29,7 @@ def prepare_acts_rdo2aod(pipeline : str):
     rdo2aod.args += ' --CA "all:True"'
     rdo2aod.args += ' --perfmon fullmonmt'
     rdo2aod.args += f' --preExec "all:{preExec};"'
-    rdo2aod.args += ' --preInclude "all:Campaigns.PhaseIIPileUp200" "RAWtoALL:ActsConfig.ActsCIFlags.actsWorkflowFlags"'
+    rdo2aod.args += ' --preInclude "all:Campaigns.PhaseIIPileUp200" "RAWtoALL:ActsConfig.ActsCIFlags.actsProductionFlags"'
     rdo2aod.args += ' --conditionsTag f"default:{defaultConditionsTags.RUN4_MC}"'
     rdo2aod.args += ' --ignorePatterns ""'
     rdo2aod.timeout = 5400 # default = 3600 s
@@ -40,6 +40,8 @@ def prepare_acts_rdo2aod(pipeline : str):
                      'Acts.GsfDirectNavigation=True',
                      'Tracking.doITkFastTracking=True',
                      'Trigger.doRuntimeNaviVal=True',
+                     'Scheduler.ShowDataDeps = True',
+                     'Scheduler.ShowDataFlow = True',
                      f'IOVDb.GlobalTag=\'{defaultConditionsTags.RUN4_MC}\'',
                      ]
 

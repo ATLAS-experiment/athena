@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef SCT_RAWDATATOXAOD_H
@@ -26,7 +26,7 @@ class SCT_ID;
  **/
 class SCT_RawDataToxAOD : public AthReentrantAlgorithm {
 public:
-  SCT_RawDataToxAOD(const std::string& name, ISvcLocator* pSvcLocator);
+  using AthReentrantAlgorithm::AthReentrantAlgorithm;
 
   virtual StatusCode initialize() override;
   virtual StatusCode execute(const EventContext& ctx) const override;

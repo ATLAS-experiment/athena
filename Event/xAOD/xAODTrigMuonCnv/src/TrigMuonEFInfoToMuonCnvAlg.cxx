@@ -58,7 +58,7 @@ StatusCode TrigMuonEFInfoToMuonCnvAlg::finalize() {
   return StatusCode::SUCCESS;
 }
 
-StatusCode TrigMuonEFInfoToMuonCnvAlg::execute() {
+StatusCode TrigMuonEFInfoToMuonCnvAlg::execute(const EventContext& /*ctx*/) {
     
     // Retrieve the AOD particles:
     const TrigMuonEFInfoContainer* aod = evtStore()->tryConstRetrieve<TrigMuonEFInfoContainer>(m_aodContainerName);

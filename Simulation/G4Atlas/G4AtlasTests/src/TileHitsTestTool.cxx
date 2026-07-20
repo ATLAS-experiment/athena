@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TileHitsTestTool.h"
@@ -56,7 +56,7 @@ StatusCode TileHitsTestTool::initialize() {
   _TH1D(m_mbts_phi,"mbts_phi",8,-0.5,7.5);
   _TH2D(m_mbts_sidetaphi,"mbts_sidetaphi",5,-2.5,2.5,7,-0.5,7.5);
 
-  _TH1D(m_etot,(detName+"_etot").c_str(),100,0.,500.);
+  _TH1D(m_etot,detName+"_etot",100,0.,500.);
 
   return StatusCode::SUCCESS;
 }

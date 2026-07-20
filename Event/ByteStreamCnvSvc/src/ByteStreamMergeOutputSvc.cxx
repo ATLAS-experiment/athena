@@ -112,6 +112,9 @@ bool  ByteStreamMergeOutputSvc::putEvent(const RawEvent* newEvent) {
    uint32_t count = eformat::write::copy(*(mergedEventWrite->bind()), buffer, rawSize);
    if (count != rawSize) {
       ATH_MSG_ERROR("Memcopy failed " << count << " " << rawSize);
+      for (auto& [_, rob] : robsToAdd) { delete rob; }
+      delete mergedEventWrite;
+      delete [] buffer;
       return false;
    }
    RawEvent newRawEvent(buffer);

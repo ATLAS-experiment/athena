@@ -55,11 +55,7 @@ float PileUpTruthDecoration::getPVtxZ(SG::ReadHandle<McEventCollection>& inputCo
   const HepMC::GenEvent* genEvt = *(inputCollection->begin());
 //AV: this should be vertex with id=-3, but it is not a standard.
 // This function should be rediscussed and standartized.
-#ifdef HEPMC3
   const HepMC::ConstGenVertexPtr hScatVx = genEvt->vertices().size()<3 ? nullptr : genEvt->vertices().at(3-1);
-#else
-  HepMC::ConstGenVertexPtr hScatVx = HepMC::barcode_to_vertex(genEvt,-3);
-#endif
   if (hScatVx) {
     HepMC::FourVector pmvxpos=hScatVx->position();
     return static_cast<float>(pmvxpos.z());

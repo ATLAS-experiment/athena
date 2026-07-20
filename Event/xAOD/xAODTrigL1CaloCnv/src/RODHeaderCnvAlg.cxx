@@ -41,7 +41,7 @@ namespace xAODMaker {
       return StatusCode::SUCCESS;
    }
 
-   StatusCode RODHeaderCnvAlg::execute() {
+   StatusCode RODHeaderCnvAlg::execute(const EventContext& /*ctx*/) {
       
       // Retrieve the ESD container:
       const RODHeaderCollection* esd = nullptr;

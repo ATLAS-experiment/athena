@@ -170,10 +170,10 @@ public:
     AthContainers_detail::atomic<const IAuxTypeVectorFactory*> m_factory;
 
     /// Type of the aux data item.
-    const std::type_info* m_ti;
+    const std::type_info* m_ti{};
 
     /// Type of the vector allocator.   May be null for a dynamic type;
-    const std::type_info* m_ti_alloc;
+    const std::type_info* m_ti_alloc{};
 
     /// Name of the vector allocator.
     std::string m_alloc_name;
@@ -185,7 +185,7 @@ public:
     std::string m_clsname;
 
     /// auxid of a linked variable, or null_auxid.
-    auxid_t m_linked;
+    auxid_t m_linked = 0;
 
     /// Additional type flags.
     Flags m_flags;

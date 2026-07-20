@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef GENERATORMODULES_GENBASE_H
@@ -7,7 +7,6 @@
 
 #include "AthenaBaseComps/AthAlgorithm.h"
 #include "GaudiKernel/ServiceHandle.h"
-#include "GaudiKernel/IPartPropSvc.h"
 #include "GaudiKernel/IIncidentSvc.h"
 #include "AthenaKernel/errorcheck.h"
 #include "CxxUtils/checker_macros.h"
@@ -18,8 +17,6 @@
 #include "AtlasHepMC/GenVertex.h"
 #include "TruthUtils/MagicNumbers.h"
 
-#include "HepPDT/ParticleData.hh"
-#include "HepPDT/ParticleDataTable.hh"
 
 #include <string>
 #include <vector>
@@ -37,7 +34,6 @@
 ///
 /// The common behavior currently consists of:
 ///   - Standard access to the event collection and its first member
-///   - Providing access to the HepPDT ParticleProperties Table
 ///   - Including standard HepMC and Athena framework headers and CMT uses
 ///
 /// The following virtual methods should be overloaded in the child class:
@@ -62,7 +58,7 @@ public:
   /// @name Event loop algorithm methods
   //@{
   virtual StatusCode initialize() override;
-  virtual StatusCode execute() override { return StatusCode::SUCCESS; }
+  virtual StatusCode execute(const EventContext&) override { return StatusCode::SUCCESS; }
   //@}
 
 
@@ -80,10 +76,11 @@ public:
   }
 
   /// Access the current signal event (const)
-  const HepMC::GenEvent* event_const() const {
-    if (events_const()->empty())
+  const HepMC::GenEvent* event_const( const EventContext& ctx ) const {
+    const McEventCollection* coll = events_const(ctx);
+    if (coll->empty())
       ATH_MSG_ERROR("Const McEventCollection is empty during first event access");
-    return *(events_const()->begin());
+    return *(coll->begin());
   }
 
   /// @brief Access the current event's McEventCollection
@@ -93,9 +90,6 @@ public:
   McEventCollection* events ATLAS_NOT_CONST_THREAD_SAFE ();
 
   /// Access the current event's McEventCollection (const)
-  const McEventCollection* events_const() const {
-    return events_const( getContext() );
-  }
   const McEventCollection* events_const( const EventContext& ctx ) const {
     SG::ReadHandle<McEventCollection> ret = SG::makeHandle(m_mcevents_const, ctx);
     if (!ret.isValid())
@@ -105,28 +99,6 @@ public:
 
   //@}
 
-
-  /// @name Particle data accessors
-  //@{
-
-  /// Access the particle property service
-  const ServiceHandle<IPartPropSvc> partPropSvc() const {
-    return m_ppSvc;
-  }
-
-  /// Get a particle data table
-  const HepPDT::ParticleDataTable& particleTable() const {
-    return *(m_ppSvc->PDT());
-  }
-
-  /// Shorter alias to get a particle data table
-  const HepPDT::ParticleDataTable& pdt() const { return particleTable(); }
-
-  /// Access an element in the particle data table
-  const HepPDT::ParticleData* particleData(int pid) const {
-    return pdt().particle(HepPDT::ParticleID(std::abs(pid)));
-  }
-  //@}
 
 protected:
 
@@ -140,8 +112,6 @@ protected:
 
 private:
 
-  /// Handle on the particle property service
-  ServiceHandle<IPartPropSvc> m_ppSvc{this, "PartPropSvc", "PartPropSvc"};
 
   /// Const handle to the MC event collection
   SG::ReadHandleKey<McEventCollection> m_mcevents_const{ this, "McEventKey", "GEN_EVENT", "StoreGate key of the MC event collection" };

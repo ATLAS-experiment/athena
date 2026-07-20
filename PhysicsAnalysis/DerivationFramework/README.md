@@ -55,7 +55,7 @@ The derivations themselves are coded up entirely in the form of AlgTools. These 
 
 It should be noted that in fact this division between skimming, thinning and augmentation is rather cosmetic, since a skimming tool could equally contain thinning and record commands inside it, which would be executed when the `eventPassesFilter()` method was called. It should also be noted that slimming is not included in the above list, since it is done directly by the streaming mechanism and so does not require a tool.
 
-Each DAOD making job must create an instance of the Kernel algorithm. This is an Athena AthFilterAlgorithm which takes lists of tools as arguments and then, one by one, calls the `addBranches()`, `doThinning()` and `eventPassesFilter()` methods. If all of the `eventPassesFilter()` calls return true, the `setFilterPassed()` method (inherited from the AthFilterAlgorithm) is set to true, and then, provided the Kernel is registered as an `acceptAlg` with the output stream, the event will be written to disk. The CutFlowSvc is also called automatically due to the use of the AthFilterAlgorithm. The Kernel only has AND logic (so if any one skimming tool returns false then the filter as a whole will return false). The reason for this is that OR is possible via the output stream, so if more complex logic is needed then one simply sets up more than one Kernel. This can be revised if necessary.
+Each DAOD making job must create an instance of the Kernel algorithm. This is an Athena `AthAlgorithm` which takes lists of tools as arguments and then, one by one, calls the `addBranches()`, `doThinning()` and `eventPassesFilter()` methods. If all of the `eventPassesFilter()` calls return true, the `FilterReporter` is set to true, and then, provided the Kernel is registered as an `acceptAlg` with the output stream, the event will be written to disk. The `CutFlowSvc` is also called automatically due to the use of the `FilterReporter`. The Kernel only has AND logic (so if any one skimming tool returns false then the filter as a whole will return false). The reason for this is that OR is possible via the output stream, so if more complex logic is needed then one simply sets up more than one Kernel. This can be revised if necessary.
 
 It is important to realise that an individual setting up a derivation never needs to modify the kernel - it is simply a shell for scheduling the tools in Athena. Everything about a specific derivation should be in the tools.
 
@@ -533,7 +533,7 @@ They are demonstrated in the [PHYS format](https://gitlab.cern.ch/atlas/athena/-
 ```python
 from DerivationFrameworkInDet.InDetToolsConfig import TrackParticleThinningCfg
 
-PHYS_thinning_expression = "InDetTrackParticles.DFCommonTightPrimary && abs(DFCommonInDetTrackZ0AtPV)*sin(InDetTrackParticles.theta) < 3.0*mm && InDetTrackParticles.pt > 10*GeV"
+PHYS_thinning_expression = "InDetTrackParticles.DFCommonTightPrimary && abs(InDetTrackParticles.DFCommonInDetTrackZ0AtPV)*sin(InDetTrackParticles.theta) < 3.0*mm && InDetTrackParticles.pt > 10*GeV"
 
 PHYSTrackParticleThinningTool = acc.getPrimaryAndMerge(TrackParticleThinningCfg(
     ConfigFlags,

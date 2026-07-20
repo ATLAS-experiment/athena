@@ -41,9 +41,9 @@
 #include "Acts/Definitions/ParticleData.hpp"
 #include "ActsFatras/EventData/GenerationProcess.hpp"
 #include "ActsFatras/Kernel/InteractionList.hpp"
-#include "ActsFatras/Kernel/SingleParticleSimulation.hpp"
-#include "ActsFatras/Kernel/SingleParticleSimulationResult.hpp"
 #include "ActsFatras/Kernel/MultiParticleSimulation.hpp"
+#include "ActsFatras/Kernel/SingleParticleSimulationResult.hpp"
+#include "ActsFatras/Kernel/detail/SimulationActor.hpp"
 #include "ActsFatras/Physics/Decay/NoDecay.hpp"
 #include "ActsFatras/Physics/StandardInteractions.hpp"
 #include "ActsFatras/Physics/ElectroMagnetic/PhotonConversion.hpp"
@@ -315,13 +315,13 @@ class ActsFatrasSimTool : public BaseSimulatorTool {
   Gaudi::Property<bool> m_includeGgradient{this, "IncludeGgradient", true, "Boolean flag for inclusion of d(dEds)d(q/p) into energy loss"};
   Gaudi::Property<double> m_momentumCutOff{this, "MomentumCutOff", 0., "Cut-off value for the momentum in SI units"};
   // Propergator option
-  Gaudi::Property<double> m_maxStep{this, "MaxSteps", 1000,
+  Gaudi::Property<double> m_maxStep{this, "MaxSteps", 2000,
        "Max number of steps"};
   Gaudi::Property<double> m_maxRungeKuttaStepTrials{this, "MaxRungeKuttaStepTrials", 10000,
        "Maximum number of Runge-Kutta steps for the stepper step call"};
   Gaudi::Property<double> m_maxStepSize{this, "MaxStepSize", 3.0,
       "Max step size (converted to Acts::UnitConstants::m)"};
-  Gaudi::Property<double> m_pathLimit{this, "PathLimit", 100.0,
+  Gaudi::Property<double> m_pathLimit{this, "PathLimit", 3000.0,
       "Track path limit (converted to Acts::UnitConstants::cm)"};
   Gaudi::Property<bool> m_loopProtection{this, "LoopProtection", true,
       "Loop protection, it adapts the pathLimit"};

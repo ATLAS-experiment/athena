@@ -16,14 +16,11 @@
 #include "GaudiKernel/ServiceHandle.h"
 #include "GaudiKernel/ToolHandle.h"
 
-namespace HepPDT {
-  class ParticleDataTable;
-}
 #include "AtlasHepMC/GenEvent_fwd.h"
 #include "AtlasHepMC/GenParticle_fwd.h"
 #include "TruthUtils/MagicNumbers.h"
+#include "GeneratorModules/GenData.h"
 
-class IPartPropSvc;
 class McEventCollection;
 namespace ISFTesting {
   class InputConverter_test;
@@ -82,12 +79,8 @@ namespace ISF {
    private:
     const G4ParticleDefinition* getG4ParticleDefinition(int pdgcode) const;
 
-#ifdef HEPMC3
     G4PrimaryParticle* getDaughterG4PrimaryParticle(const HepMC::ConstGenParticlePtr& gp) const;
     G4PrimaryParticle* getDaughterG4PrimaryParticle(const HepMC::GenParticlePtr& gp, bool makeLinkToTruth=true) const;
-#else
-    G4PrimaryParticle* getDaughterG4PrimaryParticle(HepMC::GenParticle& gp, bool makeLinkToTruth=true) const;
-#endif
 
     G4PrimaryParticle* getG4PrimaryParticle(ISF::ISFParticle& isp, bool useHepMC, HepMC::GenEvent *shadowGenEvent) const;
 
@@ -95,9 +88,7 @@ namespace ISF {
                             bool useHepMC,
                             HepMC::GenEvent* shadowGenEvent) const;
 
-#ifdef HEPMC3
     void processPredefinedDecays(const HepMC::ConstGenParticlePtr& genpart, ISF::ISFParticle& isp, G4PrimaryParticle* g4particle) const;
-#endif
     void processPredefinedDecays(const HepMC::GenParticlePtr& genpart, ISF::ISFParticle& isp, G4PrimaryParticle* g4particle, bool makeLinkToTruth=true) const;
 
     bool matchedGenParticles(const HepMC::ConstGenParticlePtr& p1,
@@ -109,28 +100,19 @@ namespace ISF {
     bool isInsideG4WorldVolume(const ISF::ISFParticle& isp, const G4VSolid* worldSolid) const;
 
     /** get right GenParticle mass */
-#ifdef HEPMC3
     double getParticleMass(const HepMC::ConstGenParticlePtr& p) const;
-#else
-    double getParticleMass(const HepMC::GenParticle& p) const;
-#endif
 
     /** get all generator particles which pass filters */
     std::vector<HepMC::GenParticlePtr > getSelectedParticles(HepMC::GenEvent& evnt, bool legacyOrdering=false) const;
 
     /** check if the given particle passes all filters */
-#ifdef HEPMC3
     bool passesFilters(const HepMC::ConstGenParticlePtr& p) const;
-#else
-    bool passesFilters(const HepMC::GenParticle& p) const;
-#endif
 
     /** convert GenParticle to ISFParticle */
     ISF::ISFParticle* convertParticle(const HepMC::GenParticlePtr& genPartPtr) const;
 
     /** ParticlePropertyService and ParticleDataTable */
-    ServiceHandle<IPartPropSvc>           m_particlePropSvc;          //!< particle properties svc to retrieve PDT
-    const HepPDT::ParticleDataTable      *m_particleDataTable;        //!< PDT used to look up particle masses
+    std::shared_ptr<GenData> m_gendata{nullptr};
 
     bool                                  m_useGeneratedParticleMass; //!< use GenParticle::generated_mass() in simulation
 

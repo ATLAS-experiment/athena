@@ -35,11 +35,10 @@
 #include "TileByteStream/TileBeamElemContByteStreamCnv.h"
 #include "TileTBRec/TileTBStat.h"
 
-#include "boost/io/ios_state.hpp"
-
 #include <iostream>
 #include <ctime>
 #include <cmath>
+#include <format>
 
 // Constructor & deconstructor
 /** @class TileTBStat
@@ -73,24 +72,25 @@ double StatDouble::getChi2() {
 }
 
 void StatDouble::print(const char* s, bool minMaxOnly) {
-  boost::io::ios_base_all_saver coutsave(std::cout);
-  std::cout << s << " " << std::fixed;
   if (minMaxOnly) {
-    if (Counter > 0)
-      std::cout << " "   << std::setw(4) << std::setprecision(1) << Min 
-                << " - " << std::setw(4) << std::setprecision(1) << Max;
-    else
-      std::cout << " ---- - ----";
+    if (Counter > 0) {
+      //coverity[RW.CONSTEVAL_CALL_NONCONSTANT:FALSE]
+      std::cout << std::format("{} {:4.1f} - {:4.1f}\n", s, Min, Max);
   } else {
-    if (Counter > 0)
-      std::cout << " "        << std::setw(4) << std::setprecision(1) << Min 
-                << " - "      << std::setw(4) << std::setprecision(1) << Max
-                << "  mean= " << std::setw(6) << std::setprecision(3) << getMean()
-                << " rms= "   << std::setw(5) << std::setprecision(3) << getChi2();
-    else
-      std::cout << " ---- - ----  mean= ------ rms= -----";
+      std::cout << std::format("{} ---- - ----\n", s);
   }
-  std::cout << std::endl;
+  } else {
+    if (Counter > 0) {
+      std::cout << std::format("{} {:4.1f} - {:4.1f}  mean= {:6.3f} rms= {:5.3f}\n",
+                               s,
+                               Min,
+                               Max,
+                               getMean(),
+                               getChi2());
+    } else {
+      std::cout << std::format("{} ---- - ----  mean= ------ rms= -----\n", s);
+    }
+  }
 }
 
 StatInt::StatInt() {
@@ -193,9 +193,8 @@ StatusCode TileTBStat::initialize() {
   return StatusCode::SUCCESS;
 } 
 
-StatusCode TileTBStat::execute() {
+StatusCode TileTBStat::execute(const EventContext& ctx) {
 
-  const EventContext& ctx = Gaudi::Hive::currentContext();
   const TileDQstatus* dqStatus = SG::makeHandle (m_dqStatusKey, ctx).get();
 
   static std::atomic<bool> first=true;

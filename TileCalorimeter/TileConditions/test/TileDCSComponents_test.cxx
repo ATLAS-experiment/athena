@@ -157,7 +157,7 @@ class DummyAlgorithm: public AthAlgorithm {
 
     }
 
-    virtual StatusCode execute() override {
+    virtual StatusCode execute(const EventContext&) override {
       return StatusCode::SUCCESS;
     }
 };

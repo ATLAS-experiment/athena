@@ -22,7 +22,7 @@ class MultiBjetFilter:public GenFilter {
     virtual ~MultiBjetFilter();
     virtual StatusCode filterInitialize();
     virtual StatusCode filterFinalize();
-    virtual StatusCode filterEvent();
+    virtual StatusCode filterEvent(const EventContext& ctx);
 
 private:
 

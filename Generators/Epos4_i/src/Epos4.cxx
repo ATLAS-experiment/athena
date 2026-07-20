@@ -17,12 +17,11 @@
 #include <xAODEventInfo/EventInfo.h>
 
 #include "AtlasHepMC/GenEvent.h"
+#include "AtlasHepMC/IO_GenEvent.h"
 #include "AtlasHepMC/HeavyIon.h"
 #include "AtlasHepMC/SimpleVector.h"
 
-#include "HepMC3/GenEvent.h"
 #include "HepMC3/Print.h"
-#include "HepMC3/Writer.h"
 
 
 #include <cstdlib> //for std::getenv
@@ -356,7 +355,6 @@ StatusCode Epos4::fillEvt(HepMC::GenEvent *evt) {
   ATH_MSG_DEBUG("Event #" << m_events 
               << " | particles: " << e.particles().size()
               << " | vertices: " << e.vertices().size());
-  
   *evt = e;
   return StatusCode::SUCCESS;
 }

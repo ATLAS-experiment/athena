@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #include "InDetGNNHardScatterSelection/CustomGetterUtils.h"
 
@@ -153,11 +153,32 @@ namespace {
         return p.phi();
       });
     }
+
+    if (name == "d0") {
+      return CJGetter<T>([](const T& p, const Vertex&) {
+        if constexpr (std::is_same_v<T, xAOD::TrackParticle>) {
+          const xAOD::TrackParticle* trackParticle = static_cast<const xAOD::TrackParticle*>(&p);
+          return trackParticle->d0();
+        }
+        return (float)0.;
+      });
+    }
+
+    if (name == "z0") {
+      return CJGetter<T>([](const T& p, const Vertex&) {
+        if constexpr (std::is_same_v<T, xAOD::TrackParticle>) {
+          const xAOD::TrackParticle* trackParticle = static_cast<const xAOD::TrackParticle*>(&p);
+          return trackParticle->z0();
+        }
+        return (float)0.;
+      });
+    }
+
     if (name == "vertexWeight") {
       return CJGetter<T>([](const T& p, const xAOD::Vertex& vertex) {
         for (size_t i = 0; i < vertex.nTrackParticles(); i++) {
           const xAOD::TrackParticle* trackParticle = dynamic_cast<const xAOD::TrackParticle*>(&p);
-          if (vertex.trackParticle(i) == trackParticle) return vertex.trackWeight(i);
+          if (trackParticle and (vertex.trackParticle(i) == trackParticle)) return vertex.trackWeight(i);
         }
         return (float)0.;
       });
@@ -178,6 +199,10 @@ namespace {
           if (tp) {
             return tp->z0() + tp->vz() - vertex.z();
           }
+        } else if constexpr (std::is_same_v<T, xAOD::TrackParticle>) {
+          const xAOD::TrackParticle* trackParticle = static_cast<const xAOD::TrackParticle*>(&p);
+          return trackParticle->z0() + trackParticle->vz() - vertex.z();
+          
         }
         return (float)0.;
       });
@@ -345,7 +370,7 @@ namespace {
     std::function<std::pair<std::string, double>(const xAOD::Vertex&)>
     customGetterAndName(const std::string& name) {
       auto getter = customGetter(name);
-      return [name, getter](const xAOD::Vertex& j) {
+      return [name, getter = std::move(getter)](const xAOD::Vertex& j) {
                return std::make_pair(name, getter(j));
              };
     }
@@ -374,7 +399,7 @@ namespace {
     CustomSequenceGetter<T>::customNamedSeqGetterWithDeps(const std::string& name) {
       auto [getter, deps] = customSequenceGetterWithDeps<T>(name);
       return {
-        [n=name, g=getter](const xAOD::Vertex& j,
+        [n=name, g=std::move(getter)](const xAOD::Vertex& j,
                        const std::vector<const T*>& t) {
           return std::make_pair(n, g(j, t));
         },

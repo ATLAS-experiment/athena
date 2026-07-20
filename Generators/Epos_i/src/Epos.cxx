@@ -38,6 +38,47 @@ extern "C" double atl_epos_rndm_( int* )
 {
     return CLHEP::RandFlat::shoot(p_rndmEngine);
 }
+
+// ----------------------------------------------------------------------
+// Translations of DRanf.F, Ranfini.F, Rangen.F Fortran routines.
+// These replace the original Fortran source files.
+// ----------------------------------------------------------------------
+
+// dranf: returns a uniform double in (0,1), retrying on boundary values.
+extern "C" double dranf_( int* dummy )
+{
+    double r;
+    do {
+        r = atl_epos_rndm_( dummy );
+    } while ( r <= 0.0 || r >= 1.0 );
+    return r;
+}
+
+// ranfgt / ranfst: seed query/set stubs (no-op in this implementation).
+extern "C" void ranfgt_( double* /*seed*/ ) {}
+extern "C" void ranfst_( double* /*seed*/ ) {}
+
+// ranfini: random-number initialisation stub (no-op in this implementation).
+extern "C" void ranfini_( int* /*iseed*/, int* /*iseq*/, int* /*iqq*/ ) {}
+
+// rangen: single-precision wrapper around dranf_, retrying on boundary values.
+extern "C" float rangen_()
+{
+    int dummy = 0;
+    float r;
+    do {
+        r = static_cast<float>( dranf_( &dummy ) );
+    } while ( r <= 0.0f || r >= 1.0f );
+    return r;
+}
+
+// drangen: double-precision wrapper around dranf_.
+extern "C" double drangen_( double* dummy )
+{
+    int idummy = static_cast<int>( *dummy );
+    return dranf_( &idummy );
+}
+
 // ----------------------------------------------------------------------
 // Epos Fortran bindings.
 // ----------------------------------------------------------------------
@@ -184,7 +225,6 @@ StatusCode Epos::genFinalize()
 StatusCode Epos::fillEvt( HepMC::GenEvent* evt )
 {
     CRMChepevt<HepMC::GenParticlePtr, HepMC::GenVertexPtr, HepMC::FourVector, HepMC::GenEvent> hepevtconverter;
-#ifdef HEPMC3
     hepevtconverter.convert(*evt);
     evt->set_event_number(m_events);
     HepMC::fillBarcodesAttribute(evt);
@@ -195,18 +235,6 @@ StatusCode Epos::fillEvt( HepMC::GenEvent* evt )
     m_runinfo->set_weight_names(names);
     evt->set_run_info(m_runinfo);
     evt->set_units(HepMC3::Units::MEV, HepMC3::Units::MM);
-#else
-    /// We use the old approach for HepMC2, as the CRMC 2.0.1 has a bug that prevents us from using the same approach as for HepMC3.
-    /// This should be changed once the bug is fixed.
-    hepevtconverter.convert();
-    for (auto& v: hepevtconverter.vertices()) evt->add_vertex(v);
-    if  (hepevtconverter.beams().size() == 2) evt->set_beam_particles(hepevtconverter.beams()[0],hepevtconverter.beams()[1]);
-    if  (hepevtconverter.beams().size() == 1) evt->set_beam_particles(hepevtconverter.beams()[0],nullptr);
-    evt->set_event_number(m_events);
-    HepMC::set_random_states(evt, m_seeds );
-    evt->weights().push_back(1.0);
-    MC::GeVToMeV(evt); //Only scales momenta and masses
-#endif
 
     std::vector<HepMC::GenParticlePtr> beams;
 
@@ -224,7 +252,6 @@ StatusCode Epos::fillEvt( HepMC::GenEvent* evt )
 
     // Heavy Ion and Signal ID from Epos to HepMC
 
-#ifdef HEPMC3
     HepMC::GenHeavyIonPtr ion= std::make_shared<HepMC::GenHeavyIon>();
     ion->Ncoll_hard=cevt_.kohevt;
     ion->Npart_proj=cevt_.npjevt;
@@ -239,21 +266,6 @@ StatusCode Epos::fillEvt( HepMC::GenEvent* evt )
     ion->event_plane_angle=cevt_.phievt;
     ion->eccentricity=-1;  //c2evt_.fglevt,  //correct name but not defined
     ion->sigma_inel_NN=1e9*hadr5_.sigine;
-#else
-    HepMC::HeavyIon ion(cevt_.kohevt,
-                        cevt_.npjevt,
-                        cevt_.ntgevt,
-                        cevt_.kolevt,
-                        cevt_.npnevt + cevt_.ntnevt,
-                        cevt_.nppevt + cevt_.ntpevt,
-                        -1,
-                        -1,
-                        -1,
-                        cevt_.bimevt,
-                        cevt_.phievt,
-                        -1,  //c2evt_.fglevt,  //correct name but not defined
-                        1e9*hadr5_.sigine);
-#endif
 
     evt->set_heavy_ion(std::move(ion));
 
@@ -279,13 +291,8 @@ StatusCode Epos::fillEvt( HepMC::GenEvent* evt )
     xsigtot = xsigine = xsigela = xsigdd = xsigsd = xsloela = xsigtotaa = xsigineaa = xsigelaaa = 0.0;
     crmc_xsection_f_(xsigtot, xsigine, xsigela, xsigdd, xsigsd, xsloela, xsigtotaa, xsigineaa, xsigelaaa);
     xsigtot *= 1000000;         // [mb] to [nb] conversion
-#ifdef HEPMC3
     std::shared_ptr<HepMC3::GenCrossSection> xsec = std::make_shared<HepMC3::GenCrossSection>();
     xsec->set_cross_section(xsigine, 0.0);
-#else
-    HepMC::GenCrossSection xsec;
-    xsec.set_cross_section(xsigine, 0.0);
-#endif
     evt->set_cross_section(std::move(xsec));
 
     return StatusCode::SUCCESS;

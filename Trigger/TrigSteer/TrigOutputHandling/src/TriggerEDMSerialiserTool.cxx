@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <cstring>
@@ -168,12 +168,12 @@ StatusCode TriggerEDMSerialiserTool::addCollectionToSerialise(const std::string&
         }
         sel.selectAux( variableNames );
       }
-      addressVec.push_back( {transientType, persistentType, clid, std::string(key), moduleIdVec, Address::Category::xAODAux, truncationMode, sel} );
+      addressVec.push_back( {transientType, persistentType, std::move(classDesc), clid, std::string(key), moduleIdVec, Address::Category::xAODAux, truncationMode, sel} );
     } else {
-      addressVec.push_back( {transientType, persistentType, clid, std::string(key), moduleIdVec, Address::Category::xAODInterface, truncationMode} );
+      addressVec.push_back( {transientType, persistentType, std::move(classDesc), clid, std::string(key), moduleIdVec, Address::Category::xAODInterface, truncationMode} );
     }
   } else { // an old T/P type
-    addressVec.push_back( {transientType, persistentType, clid, std::string(key), moduleIdVec, Address::Category::OldTP, truncationMode} );
+    addressVec.push_back( {transientType, persistentType, std::move(classDesc), clid, std::string(key), moduleIdVec, Address::Category::OldTP, truncationMode} );
   }
   return StatusCode::SUCCESS;
 }
@@ -206,7 +206,6 @@ StatusCode TriggerEDMSerialiserTool::fillPayload( const void* data, size_t sz, s
 
 
 StatusCode TriggerEDMSerialiserTool::serialiseDynAux( DataObject* dObj, const Address& address, std::vector<uint32_t>& buffer, size_t& nDynWritten ) const {
-  ATH_MSG_DEBUG( "" );
   ATH_MSG_DEBUG( "About to start streaming aux data of " << address.key );
   DataBucketBase* dObjAux = dynamic_cast<DataBucketBase*>(dObj);
   ATH_CHECK( dObjAux != nullptr );
@@ -235,8 +234,7 @@ StatusCode TriggerEDMSerialiserTool::serialiseDynAux( DataObject* dObj, const Ad
     ATH_CHECK( tinfo != nullptr );
     TClass* cls = TClass::GetClass (*tinfo);
     ATH_CHECK( cls != nullptr );
-    ATH_MSG_DEBUG( "" );
-    ATH_MSG_DEBUG( "Streaming '" << decorationName << "' of type '" << typeName 
+    ATH_MSG_DEBUG( "Streaming '" << decorationName << "' of type '" << typeName
       << "' fulltype '" << fullTypeName << "' aux ID '" << auxVarID << "' class '" << cls->GetName() );
 
     CLID clid{0};
@@ -249,7 +247,7 @@ StatusCode TriggerEDMSerialiserTool::serialiseDynAux( DataObject* dObj, const Ad
     }
     ATH_MSG_DEBUG( "CLID " << clid );
 
-    RootType classDesc = RootType::ByNameNoQuiet( cls->GetName() );
+    RootType classDesc( cls );
 
     const void* rawptr = auxStoreIO->getIOData( auxVarID );
     ATH_CHECK( rawptr != nullptr );
@@ -265,7 +263,7 @@ StatusCode TriggerEDMSerialiserTool::serialiseDynAux( DataObject* dObj, const Ad
 
     std::vector<uint32_t> fragment;
 
-    Address auxAddress { typeName, cls->GetName(), clid, decorationName, address.moduleIdVec, Address::Category::xAODDecoration };
+    Address auxAddress { typeName, cls->GetName(), std::move(classDesc), clid, decorationName, address.moduleIdVec, Address::Category::xAODDecoration };
 
     ATH_CHECK( makeHeader( auxAddress, fragment ) );
     ATH_CHECK( fillPayload( mem, sz, fragment ) );
@@ -282,9 +280,8 @@ StatusCode TriggerEDMSerialiserTool::serialiseDynAux( DataObject* dObj, const Ad
 
 StatusCode TriggerEDMSerialiserTool::serialiseContainer( void* data, const Address& address, std::vector<uint32_t>& buffer ) const {
 
-  RootType classDesc = RootType::ByNameNoQuiet( address.persType );
   size_t sz=0;
-  void* mem = m_serializerSvc->serialize( data, classDesc, sz );
+  void* mem = m_serializerSvc->serialize( data, address.classDesc, sz );
 
   ATH_MSG_DEBUG( "Streamed to buffer at address " << mem << " of " << sz << " bytes" );
 
@@ -316,14 +313,13 @@ StatusCode TriggerEDMSerialiserTool::serialisexAODAuxContainer(
   ATH_MSG_DEBUG("xAOD Aux Container");
 
   void* copy = data;
-  RootType classDesc = RootType::ByNameNoQuiet( address.persType );
   //Get the Base Info given clid.
   const SG::BaseInfoBase* bib = SG::BaseInfoBase::find (address.clid);
   //cast data to xAOD::AuxContainerBase
   void* data_interface = bib->cast (data, ClassID_traits<xAOD::AuxContainerBase>::ID());
   if (data_interface != nullptr) {
     const xAOD::AuxContainerBase* store = reinterpret_cast<const xAOD::AuxContainerBase*> (data_interface);
-    copy = classDesc.Construct();
+    copy = address.classDesc.Construct();
     //cast copy to xAOD::AuxContainerBase
     void* copy_interface = bib->cast (copy, ClassID_traits<xAOD::AuxContainerBase>::ID());
     xAOD::AuxContainerBase* copy_store = reinterpret_cast<xAOD::AuxContainerBase*> (copy_interface);
@@ -335,7 +331,7 @@ StatusCode TriggerEDMSerialiserTool::serialisexAODAuxContainer(
   ATH_CHECK( serialiseContainer( copy, address, buffer ) );
 
   if (copy != data) {
-    classDesc.Destruct (copy);
+    address.classDesc.Destruct (copy);
   }
 
   size_t baseSize = buffer.size();
@@ -362,8 +358,7 @@ StatusCode TriggerEDMSerialiserTool::serialiseTPContainer( void* data, const Add
   ATH_CHECK ( converterPersistentType == address.persType );
   ATH_CHECK( serialiseContainer( persistent, address, buffer ) );
 
-  RootType classDesc = RootType::ByNameNoQuiet( address.persType );
-  classDesc.Destruct( persistent );
+  address.classDesc.Destruct( persistent );
 
   return StatusCode::SUCCESS;
 }

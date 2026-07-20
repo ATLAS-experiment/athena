@@ -63,7 +63,7 @@ void ActsFatrasWriteHandler::createHits(const ISF::ISFParticle& isp,
 {
     ATH_MSG_VERBOSE(name() << " particle " << isp << " with " << hits.size() << " hits");
     for (auto& hit:hits){
-      double energyDeposit = hit.depositedEnergy() / Acts::UnitConstants::MeV;
+      double energyDeposit = ActsTrk::energyToAthena(hit.depositedEnergy());
       double time          = ActsTrk::timeToAthena(hit.time());
 
       // get the ACTS geo identifier
@@ -71,8 +71,10 @@ void ActsFatrasWriteHandler::createHits(const ISF::ISFParticle& isp,
       // get the ACTS surface
       try {
         auto acts_surface = trackingGeometry->findSurface(hit_geoid);
-        const ActsDetectorElement* acts_de = dynamic_cast<const ActsDetectorElement*>(acts_surface->surfacePlacement());
-
+        const auto* acts_de = getActsDetectorElement(acts_surface);
+        if (!acts_de){
+            continue;
+        }
         const Trk::Surface& hitSurface = acts_de->atlasSurface();
         ATH_MSG_VERBOSE(name() << " Surface position global atlas: " << hitSurface.center());
         // get the ATLAS identifier and hash identifier

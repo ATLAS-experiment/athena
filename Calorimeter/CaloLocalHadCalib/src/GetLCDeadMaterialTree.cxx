@@ -187,26 +187,21 @@ StatusCode GetLCDeadMaterialTree::finalize()
 /* ****************************************************************************
 
 ***************************************************************************** */
-StatusCode GetLCDeadMaterialTree::execute()
+StatusCode GetLCDeadMaterialTree::execute(const EventContext& ctx)
 {
   //bool useLink = true;
 
   /* ********************************************
   access to cluster container
   ******************************************** */
-  SG::ReadHandle<xAOD::CaloClusterContainer> pClusColl (m_clusterCollName);
+  SG::ReadHandle<xAOD::CaloClusterContainer> pClusColl (m_clusterCollName, ctx);
 
   /* ********************************************
   reading primary particle
   ******************************************** */
   const McEventCollection* truthEvent=nullptr;
   ATH_CHECK( evtStore()->retrieve(truthEvent, "TruthEvent") );
-#ifdef HEPMC3
   const HepMC::ConstGenParticlePtr& gen  = truthEvent->at(0)->particles().front();
-#else
-  HepMC::GenEvent::particle_const_iterator pit  = truthEvent->at(0)->particles_begin();
-  const HepMC::GenParticle * gen  = *pit;
-#endif
 
   double mc_eta = gen->momentum().pseudoRapidity();
   double mc_phi = gen->momentum().phi();
@@ -279,7 +274,7 @@ StatusCode GetLCDeadMaterialTree::execute()
     }
 
     if(m_doSaveCalibClusInfo) {
-      SG::ReadHandle<xAOD::CaloClusterContainer> pClusCollCalib (m_clusterCollNameCalib);
+      SG::ReadHandle<xAOD::CaloClusterContainer> pClusCollCalib (m_clusterCollNameCalib, ctx);
       if(pClusColl->size() != pClusCollCalib->size()) {
         ATH_MSG_WARNING( "Different size of calibrated and uncalibrated cluster collection " 
                          << pClusColl->size() << " " << pClusCollCalib->size()  );

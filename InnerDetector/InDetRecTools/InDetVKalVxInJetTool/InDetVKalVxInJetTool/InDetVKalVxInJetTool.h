@@ -126,7 +126,7 @@ namespace InDet {
       struct Hists {
         StatusCode book (ITHistSvc& histSvc, const std::string& histDir);
         TTree* m_tuple{};
-        DevTuple* m_curTup;
+        DevTuple* m_curTup = nullptr;
         TH1D* m_hb_massPiPi{};
         TH1D* m_hb_massPiPi1{};
         TH1D* m_hb_massPPi{};
@@ -289,56 +289,56 @@ namespace InDet {
      { 
        static const int maxNTrk=100;
        static const int maxNVrt=100;
-       int nTrkInJet;
-       float ewgt;
-       float ptjet;
-       float etajet;
-       float phijet;
-       float etatrk[maxNTrk];
-       float p_prob[maxNTrk];
-       float s_prob[maxNTrk];
-       int   idMC[maxNTrk];
-       float SigR[maxNTrk];
-       float SigZ[maxNTrk];
-       float   d0[maxNTrk];
-       float   Z0[maxNTrk];
-       float pTvsJet[maxNTrk];
-       float  prodTJ[maxNTrk];
-       float    wgtB[maxNTrk];
-       float    wgtL[maxNTrk];
-       float    wgtG[maxNTrk];
-       float   sig3D[maxNTrk];
-       int    chg[maxNTrk];
-       int  nVrtT[maxNTrk];
-       float TotM;
-       int   nVrt;
-       float VrtDist2D[maxNVrt];
-       float VrtSig3D[maxNVrt];
-       float VrtSig2D[maxNVrt];
-       float VrtDR[maxNVrt];
-       float VrtdRtt[maxNVrt];
-       float VrtErrR[maxNVrt];
-       float mass[maxNVrt];
-       float Chi2[maxNVrt];
-       int   itrk[maxNVrt];
-       int   jtrk[maxNVrt];
-       int badVrt[maxNVrt];
-       int    ibl[maxNVrt];
-       int     bl[maxNVrt];
-       float fhitR[maxNVrt];
-       int        NTHF;
-       int   itHF[maxNVrt];
+       int nTrkInJet = 0;
+       float ewgt = 0;
+       float ptjet = 0;
+       float etajet = 0;
+       float phijet = 0;
+       float etatrk[maxNTrk] = {0};
+       float p_prob[maxNTrk] = {0};
+       float s_prob[maxNTrk] = {0};
+       int   idMC[maxNTrk] = {0};
+       float SigR[maxNTrk] = {0};
+       float SigZ[maxNTrk] = {0};
+       float   d0[maxNTrk] = {0};
+       float   Z0[maxNTrk] = {0};
+       float pTvsJet[maxNTrk] = {0};
+       float  prodTJ[maxNTrk] = {0};
+       float    wgtB[maxNTrk] = {0};
+       float    wgtL[maxNTrk] = {0};
+       float    wgtG[maxNTrk] = {0};
+       float   sig3D[maxNTrk] = {0};
+       int    chg[maxNTrk] = {0};
+       int  nVrtT[maxNTrk] = {0};
+       float TotM = 0;
+       int   nVrt = 0;
+       float VrtDist2D[maxNVrt] = {0};
+       float VrtSig3D[maxNVrt] = {0};
+       float VrtSig2D[maxNVrt] = {0};
+       float VrtDR[maxNVrt] = {0};
+       float VrtdRtt[maxNVrt] = {0};
+       float VrtErrR[maxNVrt] = {0};
+       float mass[maxNVrt] = {0};
+       float Chi2[maxNVrt] = {0};
+       int   itrk[maxNVrt] = {0};
+       int   jtrk[maxNVrt] = {0};
+       int badVrt[maxNVrt] = {0};
+       int    ibl[maxNVrt] = {0};
+       int     bl[maxNVrt] = {0};
+       float fhitR[maxNVrt] = {0};
+       int        NTHF = 0;
+       int   itHF[maxNVrt] = {0};
        //---
-       int   nNVrt;
-       float NVrtDist2D[maxNVrt];
-       float NVrtSig3D[maxNVrt];
-       int   NVrtNT[maxNVrt];
-       int   NVrtTrkI[maxNVrt];
-       float NVrtM[maxNVrt];
-       float NVrtChi2[maxNVrt];
-       float NVrtMaxW[maxNVrt];
-       float NVrtAveW[maxNVrt];
-       float NVrtDR[maxNVrt];
+       int   nNVrt = 0;
+       float NVrtDist2D[maxNVrt] = {0};
+       float NVrtSig3D[maxNVrt] = {0};
+       int   NVrtNT[maxNVrt] = {0};
+       int   NVrtTrkI[maxNVrt] = {0};
+       float NVrtM[maxNVrt] = {0};
+       float NVrtChi2[maxNVrt] = {0};
+       float NVrtMaxW[maxNVrt] = {0};
+       float NVrtAveW[maxNVrt] = {0};
+       float NVrtDR[maxNVrt] = {0};
      };
 
      struct Vrt2Tr 
@@ -346,7 +346,7 @@ namespace InDet {
          int badVrt=0;
          Amg::Vector3D     fitVertex;
          TLorentzVector    momentum;
-         long int   vertexCharge;
+         long int   vertexCharge = 0;
          std::vector<double> errorMatrix;
          std::vector<double> chi2PerTrk;
          std::vector< std::vector<double> > trkAtVrt;
@@ -365,8 +365,8 @@ namespace InDet {
       struct WrkVrt 
      {   bool Good=true;
          std::deque<long int> selTrk;
-         Amg::Vector3D     vertex;
-         TLorentzVector    vertexMom;
+         Amg::Vector3D     vertex{0., 0. ,0.};
+         TLorentzVector    vertexMom{};
          long int   vertexCharge{};
          std::vector<double> vertexCov;
          std::vector<double> chi2PerTrk;
@@ -598,7 +598,7 @@ namespace InDet {
     { 
       std::vector<int> new_clique(0);
       for(auto i = clq.begin(); i != clq.end(); ++i) new_clique.push_back(*i);
-      m_allCliques.push_back(new_clique);
+      m_allCliques.push_back(std::move(new_clique));
     }
 
     std::vector< std::vector<int> > & m_allCliques;

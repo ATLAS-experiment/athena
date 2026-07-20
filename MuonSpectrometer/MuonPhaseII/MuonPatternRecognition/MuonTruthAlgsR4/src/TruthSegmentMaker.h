@@ -58,7 +58,7 @@ namespace MuonR4{
           using LinkDecor_t = SG::WriteDecorHandle<xAOD::MuonSegmentContainer, HitLinkVec_t>;
           using FloatDecor_t = SG::WriteDecorHandle<xAOD::MuonSegmentContainer, float>;
 
-          using SegPars_t = xAOD::MeasVector<Acts::toUnderlying(SegmentFit::ParamDefs::nPars)>;
+          using SegPars_t = xAOD::PosAccessor<Acts::toUnderlying(SegmentFit::ParamDefs::nPars)>::element_type;
           using SegParDecor_t = SG::WriteDecorHandle<xAOD::MuonSegmentContainer, SegPars_t>;
         
           /** @brief Helper struct to ship the write DecorHandles and the reference to the output
@@ -68,7 +68,7 @@ namespace MuonR4{
               *         the truth segments, the refefrence to the TruthSegmentMaker to initialize the
               *         WriteDecorHandles and the event context */
               WriteDecorHolder(xAOD::MuonSegmentContainer& outContainer,
-                                const TruthSegmentMaker& parent,
+                               const TruthSegmentMaker& parent,
                                const EventContext& ctx):
                   segments{outContainer},
                   paramDecor{parent.m_locParKey, ctx},
@@ -129,7 +129,7 @@ namespace MuonR4{
           /** @brief List of sim hit containers from which the truth segments shall be retrieved */
           SG::ReadHandleKeyArray<xAOD::MuonSimHitContainer> m_readKeys{this, "SimHitKeys", {}};
           /** @brief Key to the geometry context. Needed to align the hits inside ATLAS */
-          SG::ReadHandleKey<ActsTrk::GeometryContext> m_geoCtxKey{this, "AlignmentKey", "ActsAlignment", "cond handle key"};
+          ActsTrk::GeoContextReadKey_t m_geoCtxKey{this, "AlignmentKey", "ActsAlignment", "cond handle key"};
           /** @brief Key under which the segment Container will be recorded in StoreGate */
           SG::WriteHandleKey<xAOD::MuonSegmentContainer> m_segmentKey{this, "WriteKey", "MuonTruthSegments"};
           /** @brief Decoration key of the associated sim hit links */

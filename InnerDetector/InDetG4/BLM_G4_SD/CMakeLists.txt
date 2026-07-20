@@ -1,9 +1,10 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( BLM_G4_SD )
 
 # External dependencies:
+find_package( AtlasGeant4Utilities )
 find_package( CLHEP )
 find_package( Geant4 )
 find_package( GTest )
@@ -25,14 +26,14 @@ atlas_add_library( BLM_G4_SD
 # Test(s) in the package:
 atlas_add_test( BLM_G4_SDToolConfig_test
                 SCRIPT test/BLM_G4_SDToolConfig_test.py
-                POST_EXEC_SCRIPT nopost.sh )
+                POST_EXEC_SCRIPT noerror.sh )
 
 atlas_add_test( BLMSensorSD_gtest
                 SOURCES
                 test/BLMSensorSD_gtest.cxx
                 INCLUDE_DIRS ${GEANT4_INCLUDE_DIRS} ${GTEST_INCLUDE_DIRS}
                 LINK_LIBRARIES ${GEANT4_LIBRARIES} ${GTEST_LIBRARIES} AtlasHepMCLib G4AtlasToolsLib InDetSimEvent MCTruth StoreGateLib TestTools BLM_G4_SDLib
-                POST_EXEC_SCRIPT nopost.sh )
+                POST_EXEC_SCRIPT noerror.sh )
 
 # Turn on/off LTO for all targets in the package.
 set_target_properties(
@@ -41,6 +42,9 @@ set_target_properties(
    BLM_G4_SD_BLMSensorSD_gtest
    PROPERTIES
    INTERPROCEDURAL_OPTIMIZATION ${ATLAS_GEANT4_USE_LTO} )
+
+# Turn on/off CUDA device symbol resolution for tests (Geant4 links to VecGeom, which is CUDA-enabled)
+atlas_configure_g4_targets( TARGETS BLM_G4_SD_BLMSensorSD_gtest )
 
 # Install files from the package:
 atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )

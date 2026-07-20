@@ -16,14 +16,14 @@ namespace ISF {
 
  * @brief Instances of classes derived from this class are attached as
  * UserInformation to G4Tracks. It extends G4VUserTrackInformation.
- * The GenParticlePtr held by the VTrackInformation object can change
- * during simulation (i.e. each time the track undergoes a
+ * The current GenParticlePtr held by derived VTrackInformation objects
+ * can change during simulation (i.e. each time the track undergoes a
  * non-destructive interaction).
- * The member variables are m_classify: a classification of the
- * current G4Track (Primary, Regenerated Primary, Registered
- * Secondary, Secondary) and m_primaryGenParticle: a pointer to the
- * GenParticle used to create the initial G4PrimaryParticle from which
- * the current G4Track decends.
+ * The member variables are m_classify: a classification of the current
+ * G4Track (Primary, Regenerated Primary, Registered Secondary,
+ * Secondary) and m_primaryGenParticle: a pointer to the GenParticle
+ * used to create the initial G4PrimaryParticle from which the current
+ * G4Track descends.
 
  * Dervived classes also provide access to the GenParticle corresponding to the current G4Track (if one exists)
  */
@@ -72,6 +72,18 @@ public:
    * the G4Track is recorded to the HepMC::GenEvent.
    */
   virtual void SetCurrentGenParticle(HepMC::GenParticlePtr);
+
+  /**
+   * @brief return a pointer to the simulation truth particle before any
+   * regeneration happened.
+   */
+  virtual HepMC::ConstGenParticlePtr GetGenerationZeroGenParticle() const {return nullptr;}
+  virtual HepMC::GenParticlePtr GetGenerationZeroGenParticle() {return nullptr;}
+  /**
+   * @brief set the pointer to the simulation truth particle before any
+   * regeneration happened.
+   */
+  virtual void SetGenerationZeroGenParticle(HepMC::GenParticlePtr);
 
   /**
    * @brief return a pointer to the ISFParticle corresponding to the

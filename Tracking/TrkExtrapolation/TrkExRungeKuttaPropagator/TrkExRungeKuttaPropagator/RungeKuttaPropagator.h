@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
  */
 
 /////////////////////////////////////////////////////////////////////////////////
@@ -358,9 +358,9 @@ public:
   struct Cache
   {
     MagField::AtlasFieldCache m_fieldCache;
-    double m_field[3];
-    double m_direction;
-    double m_step;
+    double m_field[3] = {};
+    double m_direction = 0;
+    double m_step = 0;
     double m_maxPath = 10000.;
     double m_dlt = .000200;
     double m_helixStep = 1;

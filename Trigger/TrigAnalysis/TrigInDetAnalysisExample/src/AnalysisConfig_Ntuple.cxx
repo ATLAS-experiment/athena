@@ -84,7 +84,6 @@ HepMC::ConstGenParticlePtr fromParent( int pdg_id, HepMC::ConstGenParticlePtr p,
   auto vertex = p->production_vertex();
   if ( !vertex) return 0; // has no production vertex !!!
 
-#ifdef HEPMC3
   if ( vertex->particles_in().size() < 1 ) return 0;  /// recursive stopping conditions
 
   /// useful debug
@@ -100,23 +99,6 @@ HepMC::ConstGenParticlePtr fromParent( int pdg_id, HepMC::ConstGenParticlePtr p,
       return parent;
     }  /// recursive stopping conditions
   }
-#else  
-  if ( vertex->particles_in_size() < 1 ) return 0;  /// recursive stopping conditions
-
-  HepMC::GenVertex::particles_in_const_iterator in  = vertex->particles_in_const_begin();
-  HepMC::GenVertex::particles_in_const_iterator end = vertex->particles_in_const_end();
-  while ( in!=end ) {
-    const HepMC::GenParticle* parent = fromParent( pdg_id, *in, printout );
-    TruthParticle t(*in);
-    // if ( printout ) std::cout << "\tvalue for particle " << *in << "  " << t.pdgId() << "\tparent " << parent << std::endl;
-    if ( parent && std::abs(parent->pdg_id())==pdg_id) { 
-      //if ( printout ) std::cout << "found tau! - in parents" << std::endl; 
-      return parent;
-    }   /// recursive stopping conditions
-    in++;
-  }
-#endif
-  
   return 0;
 }
   

@@ -1,6 +1,6 @@
 // this file is -*- C++ -*-
 /*
-  Copyright (C) 2020, 2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2020, 2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRACKCALOCLUSTERREC_TRACKCALOCLUSTERRECTOOLS_TCCHELPERS_H
@@ -43,9 +43,9 @@ namespace TCCHelpers {
 
   
     
-    const CP::ITrackVertexAssociationTool* m_trackVertexAssoTool;
-    float m_clusterEcut;
-    bool m_useEnergy;
+    const CP::ITrackVertexAssociationTool* m_trackVertexAssoTool{};
+    float m_clusterEcut{};
+    bool m_useEnergy{};
     const SG::ReadDecorHandleKey<xAOD::TrackParticleContainer>* m_linkdecorkey=nullptr;   // in order to access ReadDecorHandles inside the struct, pass the (initialised) key as a pointer from the parent algorithm into the struct, so we can build the ReadDecorHandle inside the struct function. 
 
     virtual void processPFO(const xAOD::TrackParticle* trk, const xAOD::FlowElement* pfo) = 0;

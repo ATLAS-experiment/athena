@@ -44,7 +44,7 @@ namespace xAODMaker {
         return StatusCode::SUCCESS;
     }
 
-    StatusCode TrigL2BphysCnvAlg::execute() {
+    StatusCode TrigL2BphysCnvAlg::execute(const EventContext& /*ctx*/) {
         
         // Retrieve the AOD container:
         const TrigL2BphysContainer* aod = nullptr;

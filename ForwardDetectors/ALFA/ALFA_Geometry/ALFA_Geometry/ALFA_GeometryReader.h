@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -47,14 +47,14 @@ struct RPPINS{
 typedef RPPINS* PRPPINS;
 
 struct RPPOSPARAMS {
-	char szLabel[8];
+	char szLabel[8]{};
 	HepGeom::Point3D<double> IdealMainPoint;
 	HepGeom::Point3D<double> IdealMainPointInStation;
 	HepGeom::Point3D<double> IdealRefPoint; //reference point of RP's detector
-	bool bIsLow;
-	eAStationName eASName;
+	bool bIsLow{};
+	eAStationName eASName{};
 	RPPINS RefPins;
-	double fCurrentLVDTmm;
+	double fCurrentLVDTmm{};
 	HepGeom::Vector3D<double> DetectorNormal;
 
 	//RP transform matrix in main point of the station (which ideally lies on the beam axis) - positioning of the RP's main point
@@ -81,7 +81,7 @@ struct RPPOSPARAMS {
 typedef RPPOSPARAMS* PRPPOSPARAMS;
 
 struct ASPOSPARAMS {
-	char szLabel[8];
+	char szLabel[8]{};
 	HepGeom::Point3D<double> IdealMainPoint;
 
 	//station transform matrix in the ATLAS coord. system and ideal ref points
@@ -103,7 +103,7 @@ struct FIBERPARAMS {
 	struct {
 			union {
 				double fCentreXPos;
-				double fCentreYPos;
+				double fCentreYPos{};
 			};
 			double fAngle = 0;
 	} fcs_cladding;
@@ -131,8 +131,8 @@ struct FIBERPARAMS {
 typedef FIBERPARAMS* PFIBERPARAMS;
 
 struct PLATEPARAMS {
-	double fUCladdingSizeX;
-	double fVCladdingSizeX;
+	double fUCladdingSizeX{};
+	double fVCladdingSizeX{};
 };
 typedef PLATEPARAMS* PPLATEPARAMS;
 
@@ -171,38 +171,38 @@ struct ROMAPOT {
 typedef ROMAPOT PROMAPOT;
 
 struct CFGRPPOSPARAMS {
-	int /*eRPPositionType*/ eRPPosType;
-	int /*eGeoSourceType*/ eMDGeoType;
-	int /*eGeoSourceType*/ eODGeoType;
+	int /*eRPPositionType*/ eRPPosType{};
+	int /*eGeoSourceType*/ eMDGeoType{};
+	int /*eGeoSourceType*/ eODGeoType{};
 	std::string strMDConnString;
 	std::string strODConnString;
 
-	double fCurrentLVDTmm;
+	double fCurrentLVDTmm{};
 	struct {
 		double fYOffset;
 		double fXOffset;
 		double fTheta;
-	} swcorr;
+	} swcorr{};
 
 	struct {
-		bool bIsEnabledUserTranform;
+		bool bIsEnabledUserTranform = false;
 		HepGeom::Point3D<double> UserOriginOfDetTransInRPot;
 		HepGeom::Transform3D UserTransformOfDetInRPot;
 		HepGeom::Transform3D UserTransformOfRPInStation;
-	} usercorr;
+	} usercorr{};
 };
 typedef CFGRPPOSPARAMS* PCFGRPPOSPARAMS;
 
 struct GEOMETRYCONFIGURATION {
-	int /*eMetrologyType*/ eRPMetrologyGeoType;
+	int /*eMetrologyType*/ eRPMetrologyGeoType{};
 	std::string strRPMetrologyConnString;
-	bool bShiftToX97Pos;
+	bool bShiftToX97Pos{};
 
-	double fNominalZPosA7L1;
-	double fNominalZPosB7L1;
-	double fNominalZPosA7R1;
-	double fNominalZPosB7R1;
-	CFGRPPOSPARAMS CfgRPosParams[RPOTSCNT];
+	double fNominalZPosA7L1{};
+	double fNominalZPosB7L1{};
+	double fNominalZPosA7R1{};
+	double fNominalZPosB7R1{};
+	CFGRPPOSPARAMS CfgRPosParams[RPOTSCNT]{};
 
 	//bool bEnableUserLVDT;
 	void clear();

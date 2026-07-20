@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef XAOD_ANALYSIS
 
@@ -130,6 +130,7 @@ TestHepMC::TestHepMC(const std::string& name, ISvcLocator* pSvcLocator)
 
 StatusCode TestHepMC::initialize() {
   CHECK(GenBase::initialize());
+  m_gendata = std::make_shared<GenData>();
 
   if (m_doHist){
     CHECK(m_thistSvc.retrieve());
@@ -267,13 +268,13 @@ StatusCode TestHepMC::initialize() {
 }
 
 
-StatusCode TestHepMC::execute() {
+StatusCode TestHepMC::execute(const EventContext& ctx) {
 
   // Holder for filter outcome; allows us to check all filters on each event and diagnose multiple problems at once
   bool filter_pass = true;
 
   // Loop over all events in McEventCollection
-  for(const HepMC::GenEvent* evt : *events_const()) {
+  for(const HepMC::GenEvent* evt : *events_const(ctx)) {
     double totalPx = 0;
     double totalPy = 0;
     double totalPz = 0;
@@ -293,7 +294,6 @@ StatusCode TestHepMC::execute() {
       if (m_maxloops > 0 && m_looper.loop_particles().size() > static_cast<std::size_t>(m_maxloops) ) filter_pass = false;
     }
 
-#ifdef HEPMC3
     const auto xsec = evt->cross_section();
     if (!xsec) {
       ATH_MSG_WARNING("WATCH OUT: event is missing the generator cross-section!");
@@ -323,9 +323,6 @@ StatusCode TestHepMC::execute() {
       /// Uncomment for full debug HepMC3::Print::content(*evt);
       for (const auto& part: beams_t) HepMC3::Print::line(part);
     }
-#else
-    auto beams = evt->beam_particles();
-#endif
     double cmenergy = m_cm_energy;
     if (!HepMC::valid_beam_particles(evt)) {
       ATH_MSG_WARNING("Invalid beam particle pointers -- this generator interface should be fixed");
@@ -367,7 +364,7 @@ StatusCode TestHepMC::execute() {
 
       if (m_cm_energy > 0 && std::abs(cmenergy - m_cm_energy) > m_cme_diff) {
         ATH_MSG_FATAL("Beam particles have incorrect energy: " << m_cm_energy/Gaudi::Units::GeV << " GeV expected, vs. " << cmenergy/Gaudi::Units::GeV << " GeV found");
-        setFilterPassed(false);
+        setFilterPassed(false, ctx);
         if (m_doHist){
           m_h_beamparticle1_Energy->Fill(beams.first->momentum().e()/Gaudi::Units::GeV);
           m_h_beamparticle2_Energy->Fill(beams.second->momentum().e()/Gaudi::Units::GeV);
@@ -383,12 +380,7 @@ StatusCode TestHepMC::execute() {
     int vtxDisplacedstatuscode12CheckRateCnt=0;
     int vtxDisplacedstatuscodenot12CheckRateCnt=0;
     int vtxDisplacedMoreThan_1m_CheckRateCnt=0;
-#ifdef HEPMC3
     for (const auto& vtx: evt->vertices()) {
-#else
-    for (auto vitr = evt->vertices_begin(); vitr != evt->vertices_end(); ++vitr ) {
-      const HepMC::GenVertex* vtx = *vitr;
-#endif
       const HepMC::FourVector pos = vtx->position();
 
       // Check for NaNs and infs in vertex position components
@@ -422,12 +414,7 @@ StatusCode TestHepMC::execute() {
         ATH_MSG_WARNING("Found vertex position displaced by less than " << m_min_dist_trans
                         << "mm in transverse distance: " << dist_trans << "mm");
 
-#ifdef HEPMC3
         for (const auto& part: vtx->particles_in()) {
-#else
-        for (auto part_it = vtx->particles_in_const_begin(); part_it != vtx->particles_in_const_end(); ++part_it) {
-          auto part = (*part_it);
-#endif
           if (m_dumpEvent){
             ATH_MSG_WARNING("Incoming particle : ");
             HepMC::Print::line(msg( MSG::WARNING ).stream(), part);
@@ -442,12 +429,7 @@ StatusCode TestHepMC::execute() {
       if (dist_trans2 > m_max_dist_trans*m_max_dist_trans) {
         ATH_MSG_WARNING("Found vertex position displaced by more than " << m_max_dist_trans << "mm in transverse distance: " << dist_trans << "mm");
 
-#ifdef HEPMC3
         for (const auto& part: vtx->particles_in()) {
-#else
-        for (auto part_it = vtx->particles_in_const_begin(); part_it != vtx->particles_in_const_end(); ++part_it) {
-        auto part=(*part_it);
-#endif
           if (m_dumpEvent){
             ATH_MSG_WARNING("Outgoing particle : ");
             HepMC::Print::line(msg( MSG::WARNING ).stream(),part);
@@ -456,12 +438,7 @@ StatusCode TestHepMC::execute() {
           ATH_MSG_WARNING("end vertex        = " << part->end_vertex()->position().x() << ", " << part->end_vertex()->position().y() << ", " << part->end_vertex()->position().z());
           if (m_dumpEvent) ATH_MSG_WARNING("parents info: ");
           if (part->production_vertex()) {
-#ifdef HEPMC3
             for(const auto& p_parents: part->production_vertex()->particles_in()) {
-#else
-            for(auto p_parents_it = part->production_vertex()->particles_in_const_begin(); p_parents_it != part->production_vertex()->particles_in_const_end(); ++p_parents_it) {
-            auto p_parents=(*p_parents_it);
-#endif
               if (m_dumpEvent){
                 msg(MSG::WARNING) << "\t";
                 HepMC::Print::line( msg( MSG::WARNING ).stream() , p_parents );
@@ -540,11 +517,11 @@ StatusCode TestHepMC::execute() {
 
       //check stable particle lifetimes
       if (MC::isStable(pstatus)) {
-        const HepPDT::ParticleData* pd = particleData(ppdgid);
-        if (pd != NULL) {
-          double plifetime = pd->lifetime()*1e+12;  // why lifetime doesn't come in common units???
-          if (plifetime != 0 && plifetime < m_min_tau) { // particles with infinite lifetime get a 0 in the PDT
-            ATH_MSG_WARNING("Stable particle found with lifetime = " << plifetime << "~ns!!");
+        const auto plifetime = m_gendata->particleLifetime(ppdgid);
+        if (plifetime) {
+          double lifetime = plifetime.value()*1e+12;  // why lifetime doesn't come in common units???
+          if (lifetime != 0 && lifetime < m_min_tau) { // particles with infinite lifetime get a 0 in the PDT
+            ATH_MSG_WARNING("Stable particle found with lifetime = " << lifetime << "~ns!!");
             if (m_dumpEvent) HepMC::Print::line(std::cout,pitr);
 
             ++m_Status1ShortLifetime;
@@ -632,12 +609,7 @@ StatusCode TestHepMC::execute() {
         auto vtx = pitr->end_vertex();
         if (vtx) {
           double p_energy = 0;
-#ifdef HEPMC3
           for (auto  desc: HepMC::descendant_particles(vtx)) {
-#else
-          for (auto  desc_it = vtx->particles_begin(HepMC::descendants); desc_it != vtx->particles_end(HepMC::descendants); ++desc_it) {
-          auto desc=(*desc_it);
-#endif
             if (std::abs(desc->pdg_id()) == m_pdg) tau_child = 1;
             if ( MC::isStable(desc) ) p_energy += desc->momentum().e();
           }
@@ -815,7 +787,7 @@ StatusCode TestHepMC::execute() {
 
   // End of execution for each event - update filter value
   if (!filter_pass){
-    setFilterPassed(false);
+    setFilterPassed(false, ctx);
     ++m_nFail;
   } else {
     ++m_nPass;

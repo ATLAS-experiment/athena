@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRIGCOSTANALYSIS_COUNTERCHAIN_H
@@ -57,7 +57,7 @@ class CounterChain : public CounterBase {
     virtual StatusCode newEvent(const CostData& data, size_t index, const float weight = 1.) override;
 
   private:
-    bool m_isInitialized;
+    bool m_isInitialized{};
 };
 
 #endif // TRIGCOSTANALYSIS_COUNTERALGORITHM_H

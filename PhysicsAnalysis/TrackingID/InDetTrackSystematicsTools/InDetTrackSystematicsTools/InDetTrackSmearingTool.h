@@ -22,7 +22,6 @@
 #include <TFile.h>
 #include <TH2F.h>
 #include <TF2.h>
-#include <TRandom3.h>
 
 namespace InDet {
 
@@ -88,6 +87,8 @@ namespace InDet {
 
     // allow the user to configure which calibration files to use if desired
     Gaudi::Property<std::string> m_calibFileIP_CTIDE{this, "calibFileIP_CTIDE", ""};
+    Gaudi::Property<int> m_seed{this, "Seed", 4,
+        "Seed offset mixed with per-track phi/eta hash for deterministic RNG"};
   }; /// class InDetTrackSmearingTool
 
 } /// namespace InDet

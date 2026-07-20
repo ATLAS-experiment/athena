@@ -42,10 +42,10 @@ def defineJetCalibTool(jetdef, modspec):
     from JetCalibTools.JetCalibStepsConfig import calibToolFromConfigFile
 
     # Get the yaml file and calibration sequence
-    cfg, calibSeq, forceCalibSeq = getJetCalibToolSettings(jetdef, modspec)
+    cfg, calibSeqOverride = getJetCalibToolSettings(jetdef, modspec)
     path_configFile = PathResolver.FindCalibFile(cfg) 
     toolname = "jetcalib_new_{0}_{1}".format(jetdef.basename,modspec)
-    jct = calibToolFromConfigFile(jetdef._cflags, path_configFile, toolname, forceCalibSeq, calibSeq)
+    jct = calibToolFromConfigFile(jetdef._cflags, path_configFile, toolname, calibSeqOverride)
 
     return jct
 
@@ -54,7 +54,7 @@ def defineJetCalibTool(jetdef, modspec):
 def getJetCalibToolPrereqs(jetdef, modspec):
     from JetCalibTools.JetCalibStepsConfig import load_yaml_cfg
 
-    cfg = calibdic_T0[jetdef.basename]
+    cfg, calibSeqOverride = getJetCalibToolSettings(jetdef, modspec)
     configDic = load_yaml_cfg(cfg)
 
     prereqs = ["mod:ConstitFourMom"]
@@ -116,18 +116,15 @@ def getJetCalibToolSettings(jetdef, modspec):
     ##############################
 
     # Per default, the calibration sequence is determined from the yaml file
-    calibSeq = ""
-    forceCalibSeq = False
+    calibSeqOverride = None
     # Check if specified in configuration (e.g. for low / no pT jet collections)
     if len(calibspecs) > 2:
-        forceCalibSeq = True
-        calibSeq = calibspecs[2]
+        calibSeqOverride = calibspecs[2]
     # Check if T0 configuration, if yes, want to apply only certain calibrations
     elif context == "T0":
-        forceCalibSeq = True
-        calibSeq = "JetArea_Residual_EtaJES"
+        calibSeqOverride = "JetArea_Residual_EtaJES"
         if jetcollection == "AntiKt10UFOCSSKSoftDropBeta100Zcut10":
-            calibSeq = "EtaJES_JMS"
+            calibSeqOverride = "EtaJES_JMS"
 
     ##########################################
     # Retrieve the yaml file for JetCalibTools
@@ -142,4 +139,4 @@ def getJetCalibToolSettings(jetdef, modspec):
     else:
         cfg = calibdic[context][jetcollection]
 
-    return cfg, calibSeq, forceCalibSeq
+    return cfg, calibSeqOverride

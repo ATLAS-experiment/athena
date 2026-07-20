@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef JETTAGINFOTPCNV_MultiSVInfoPlus_P1_H
@@ -24,10 +24,10 @@ namespace Analysis {
     TPObjRef m_BaseTagInfo;
 
  
-    long int       m_NGTinJet;
-    long int       m_NGTinSvx;
-    long int       m_N2Tpair;
-    float          m_normdist;
+    long int       m_NGTinJet = 0;
+    long int       m_NGTinSvx = 0;
+    long int       m_N2Tpair = 0;
+    float          m_normdist = 0;
 
     std::vector<TPObjRef> m_vtxInfo;
 

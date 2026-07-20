@@ -219,10 +219,8 @@ namespace MuonValR4 {
         ATH_CHECK(m_tree.write());
         return StatusCode::SUCCESS;
     }
-    StatusCode MuonHoughTransformTester::execute()  {
+    StatusCode MuonHoughTransformTester::execute(const EventContext& ctx) {
         
-        const EventContext & ctx = Gaudi::Hive::currentContext();
-
         const ActsTrk::GeometryContext* gctxPtr{nullptr};
         ATH_CHECK(SG::get(gctxPtr, m_geoCtxKey, ctx));
         const ActsTrk::GeometryContext& gctx{*gctxPtr};
@@ -279,6 +277,9 @@ namespace MuonValR4 {
         const auto [chamberPos, chamberDir] = SegmentFit::makeLine(SegmentFit::localSegmentPars(*segment));
         m_out_gen_nHits = segment->nPrecisionHits()+segment->nPhiLayers() + segment->nTrigEtaLayers(); 
         using namespace Muon::MuonStationIndex;
+
+        ATH_MSG_DEBUG("Number of precision Hits in the truth segment is "<<segment->nPrecisionHits()<<" and number of phi layers is "<<segment->nPhiLayers()<<" and number of trigger eta layers is "<<segment->nTrigEtaLayers());
+
         m_out_gen_nMDTHits = segment->nPrecisionHits() * (segment->technology() == TechnologyIndex::MDT); 
         m_out_gen_nNswHits = segment->nPrecisionHits() * (segment->technology() != TechnologyIndex::MDT); 
         m_out_gen_nTGCHits = (segment->nPhiLayers() + segment->nTrigEtaLayers()) * !isBarrel(segment->chamberIndex());
@@ -323,27 +324,41 @@ namespace MuonValR4 {
             using namespace xAOD::TruthHelpers;
             m_out_gen_truthType   = getParticleTruthType(*truthMuon);
             m_out_gen_truthOrigin = getParticleTruthOrigin(*truthMuon);
+            m_out_gen_truthBeta   = truthMuon->p4().Beta();
+            m_out_gen_truthPdgId  = truthMuon->pdgId();
         }
     }
     void MuonHoughTransformTester::fillBucketInfo(const SpacePointBucket& bucket) {
         m_out_bucketEnd = bucket.coveredMax();
         m_out_bucketStart = bucket.coveredMin();
         m_out_nSpacePoints = bucket.size();
-        double maxHitGap{-1.f};
-        for (auto itr = bucket.begin(); itr != bucket.end(); ++itr){
-            if (!(*itr)->measuresEta()) {
-                continue;
+
+        ATH_MSG_DEBUG("Filling bucket with "<<bucket.size()<<" space points between "<< bucket.coveredMin() <<" and "<< bucket.coveredMax() ); 
+
+        // Because the space points are first ordered by layers and then local y within the layer we need to resort them to compute the max gap in y between consecutive hits in the bucket
+        std::vector<const MuonR4::SpacePoint*> etaHits{};
+        etaHits.reserve(bucket.size());
+        for (const auto& sp : bucket) {
+            if (sp->measuresEta()) {
+                etaHits.push_back(sp.get());
             }
-            auto itr1 = std::find_if(itr+1, bucket.end(),[](const SpacePointBucket::value_type& sp){
-                return sp->measuresEta();
-            });
-            if (itr1 == bucket.end()){
-                break;
-            }
-            maxHitGap = std::max(maxHitGap, std::abs( (*itr)->localPosition().y() - 
-                                                      (*itr1)->localPosition().y()));
         }
-        m_out_bucketHitGap = maxHitGap;
+        std::ranges::sort(etaHits, [](const MuonR4::SpacePoint* a,
+                                      const MuonR4::SpacePoint* b) {
+            return a->localPosition().y() < b->localPosition().y();
+        });
+
+
+        double maxEtaHitGap{-1.f};
+        for (std::size_t i = 1; i < etaHits.size(); ++i) {
+            maxEtaHitGap = std::max(maxEtaHitGap,
+                                 std::abs(etaHits[i]->localPosition().y()
+                                        - etaHits[i - 1]->localPosition().y()));
+        }
+
+        m_out_bucketEtaHitGap = maxEtaHitGap;
+
+
         m_out_nPrecSpacePoints = std::ranges::count_if(bucket, [](const SpacePointBucket::value_type& sp){
             return isPrecisionHit(*sp);
         });

@@ -18,18 +18,20 @@ StatusCode ActsTrk::RandomProtoTrackCreatorTool::findProtoTracks(const EventCont
 								 const xAOD::StripClusterContainer & stripContainer,
 								 std::vector<ActsTrk::ProtoTrack> & foundProtoTracks ) const {
     // Sample N random hits for example
-    std::vector<ActsTrk::ATLASUncalibSourceLink> dummyPoints;  
+    ATH_MSG_VERBOSE("Generate a random proto track in "<<ctx.eventID()<<" from "<<pixelContainer.size()<<" pixel measurements "
+                    <<", "<<stripContainer.size()<<" strip measurements");
+    std::vector<const xAOD::UncalibratedMeasurement*> dummyPoints;  
     size_t nPix = 1; 
     size_t nStrip = 7; 
     for (size_t k = 0; k < nPix; ++k){
         auto index = rand() % pixelContainer.size();
-        dummyPoints.push_back(makeATLASUncalibSourceLink(&pixelContainer, index, ctx));
+        dummyPoints.push_back(pixelContainer.at(index));
     }
 
 
     for (size_t k = 0; k < nStrip; ++k){
         auto index = rand() % stripContainer.size();
-        dummyPoints.push_back(makeATLASUncalibSourceLink(&stripContainer, index, ctx));
+        dummyPoints.push_back(stripContainer.at(index));
     }
 
     ATH_MSG_DEBUG("Made a proto-track with " <<dummyPoints.size()<<" random clusters");
@@ -54,12 +56,11 @@ Amg::Vector3D ActsTrk::RandomProtoTrackCreatorTool::getMeasurementPos(const xAOD
 }
 
 
-std::unique_ptr<Acts::BoundTrackParameters> ActsTrk::RandomProtoTrackCreatorTool::makeDummyParams (const ActsTrk::ATLASUncalibSourceLink & firstPRD) const{
+std::unique_ptr<Acts::BoundTrackParameters> ActsTrk::RandomProtoTrackCreatorTool::makeDummyParams (const xAOD::UncalibratedMeasurement*  measurement) const{
 
-  const xAOD::UncalibratedMeasurement* measurement = &getUncalibratedMeasurement(firstPRD);
   using namespace Acts::UnitLiterals;
   std::shared_ptr<const Acts::Surface> actsSurface = Acts::Surface::makeShared<Acts::PerigeeSurface>(
-        Acts::Vector3(0., 0., 0.));
+        Acts::Vector3::Zero());
   Acts::BoundVector params;
 
   auto globalPos = getMeasurementPos(measurement); 

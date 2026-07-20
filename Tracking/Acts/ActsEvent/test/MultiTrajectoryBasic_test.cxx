@@ -28,6 +28,9 @@
 #include "xAODTracking/TrackState.h"
 #include "xAODTracking/TrackSurfaceAuxContainer.h"
 
+#include "ActsCalibBase/MeasurementCalibratorBase.h"
+#include "xAODInDetMeasurement/PixelCluster.h"
+
 namespace {
 
 using namespace Acts;
@@ -344,15 +347,17 @@ BOOST_FIXTURE_TEST_CASE(Dynamic_columns, EmptyMTJ) {
 BOOST_FIXTURE_TEST_CASE(UncalibratedSourceLink, EmptyMTJ) {
   auto index = mtj->addTrackState();
   using namespace Acts::HashedStringLiteral;
-
-  auto link1 = Acts::SourceLink(reinterpret_cast<const xAOD::UncalibratedMeasurement *>(0xDEADBEEF));  // a fictional geometry ID
+  using namespace ActsTrk::detail;
+  auto newMeasurement = std::make_unique<xAOD::PixelCluster>();
+  auto link1 = MeasurementCalibratorBase::pack(newMeasurement.get());  // a fictional geometry ID
+  MeasurementCalibratorBase::unpackBase(link1);
   auto ts = mtj->getTrackState(index);
-  ts.setUncalibratedSourceLink(std::move(link1));  // set link at position 0
+  ts.setUncalibratedSourceLink(MeasurementCalibratorBase::pack(newMeasurement.get()));  // set link at position 0
   // get it back
-  auto link1Back = ts.getUncalibratedSourceLink();
-  auto ptrBack =
-       link1Back.get<const xAOD::UncalibratedMeasurement *>();
-  BOOST_CHECK_EQUAL(static_cast<const void *>(ptrBack), reinterpret_cast<const void *>(0xDEADBEEF));
+  auto link1Back = MeasurementCalibratorBase::unpackBase(ts.getUncalibratedSourceLink());
+  BOOST_CHECK_EQUAL(std::holds_alternative<const xAOD::UncalibratedMeasurement*>(link1Back), true);
+  auto ptrBack = std::get<const xAOD::UncalibratedMeasurement*>(link1Back);
+  BOOST_CHECK_EQUAL(newMeasurement.get(), ptrBack);
 }
 
 BOOST_FIXTURE_TEST_CASE(Clear, EmptyMTJ) {
@@ -869,12 +874,15 @@ BOOST_FIXTURE_TEST_CASE(TrackStateProxyStorage, EmptyMTJ) {
   BOOST_CHECK_EQUAL(ts.chi2(), pc.chi2);
 
   // set SourceLink to a pointer to a fictional measurement and get it back
-  auto link = Acts::SourceLink(reinterpret_cast<const xAOD::UncalibratedMeasurement *>(0xDEADBEEF));
+  using namespace ActsTrk::detail;
+
+  auto link = MeasurementCalibratorBase::pack(reinterpret_cast<const xAOD::UncalibratedMeasurement *>(0xDEADBEEF));
   ts.setUncalibratedSourceLink(Acts::SourceLink{link});
+
   BOOST_CHECK_EQUAL(
-      static_cast<const void *>(ts.getUncalibratedSourceLink()
-                                .get<const xAOD::UncalibratedMeasurement *>()),
-      static_cast<const void *>(link.get<const xAOD::UncalibratedMeasurement *>()));
+      static_cast<const void *>(std::get<const xAOD::UncalibratedMeasurement*>(
+                            MeasurementCalibratorBase::unpackBase(ts.getUncalibratedSourceLink()))),
+      static_cast<const void *>(std::get<const xAOD::UncalibratedMeasurement*>(MeasurementCalibratorBase::unpackBase(link))));
 }
 
 BOOST_FIXTURE_TEST_CASE(InsertRefSurface, EmptyMTJ) {

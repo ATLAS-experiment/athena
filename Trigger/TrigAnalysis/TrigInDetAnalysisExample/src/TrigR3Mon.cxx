@@ -554,7 +554,6 @@ StatusCode TrigR3Mon::bookHistograms() {
 
 
 
-//StatusCode TrigR3Mon::execute() {
 StatusCode TrigR3Mon::fillHistograms(const EventContext &/*context*/) const {
 
   ATH_MSG_DEBUG( " ----- enter fill() ----- " );

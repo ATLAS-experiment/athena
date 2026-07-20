@@ -1,7 +1,7 @@
 //-*- C++ -*-
 
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -28,10 +28,9 @@ class LArFillDSPConfig: public AthAlgorithm
   virtual ~LArFillDSPConfig(); 
 
   // Athena algorithm's Hooks
-  StatusCode  initialize();
-  StatusCode  execute() {return StatusCode::SUCCESS;}
-  StatusCode  finalize() {return StatusCode::SUCCESS;}
-  virtual StatusCode  stop();
+  virtual StatusCode  initialize() override;
+  virtual StatusCode  execute(const EventContext&) override {return StatusCode::SUCCESS;}
+  virtual StatusCode  stop() override;
 
  private: 
   /// Default constructor: 

@@ -70,7 +70,7 @@ def TLA0KernelCfg(flags, name='TLA0Kernel', **kwargs):
         SGKey                   = "Electrons",
         InDetTrackParticlesKey  = "InDetTrackParticles"))
 
-    TLA0_thinning_expression = "InDetTrackParticles.DFTLA0Loose && ( abs(InDetTrackParticles.d0) < 5.0*mm ) && ( abs(DFCommonInDetTrackZ0AtPV*sin(InDetTrackParticles.theta)) < 5.0*mm )"
+    TLA0_thinning_expression = "InDetTrackParticles.DFTLA0Loose && ( abs(InDetTrackParticles.d0) < 5.0*mm ) && ( abs(InDetTrackParticles.DFCommonInDetTrackZ0AtPV*sin(InDetTrackParticles.theta)) < 5.0*mm )"
 
     TLA0Akt4JetTPThinningTool  = acc.getPrimaryAndMerge(JetTrackParticleThinningCfg(
         flags,

@@ -33,7 +33,7 @@ namespace G4UA
     /// @brief Initialize run actions on the main Geant4 thread
     virtual StatusCode initializeActionsMaster() = 0;
 
-    /// @brief Initialize all the user actions for the current thread.
+    /// @brief Initialize all the user actions for the current Geant4 worker thread.
     virtual StatusCode initializeActions() = 0;
 
     // For ISF, get UserActions that could have stored secondary particles

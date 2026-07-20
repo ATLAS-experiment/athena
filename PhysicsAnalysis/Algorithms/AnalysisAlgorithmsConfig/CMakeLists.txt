@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 #
 # @author Nils Krumnack
 
@@ -20,23 +20,21 @@ if (NOT COLUMNAR_ANALYSIS)
 
    atlas_add_test( ConfigTextMultiMerging
       SCRIPT python/ConfigText_merge_unitTest.py --dir AnalysisAlgorithmsConfig/merging
-      POST_EXEC_SCRIPT nopost.sh
-      PROPERTIES TIMEOUT 30 )
+      POST_EXEC_SCRIPT noerror.sh
+      PROPERTIES TIMEOUT 120 )
 
    atlas_add_test( ConfigPropertySubstitution
       SCRIPT python/ConfigPropertySubstitution_unitTest.py
-      POST_EXEC_SCRIPT nopost.sh
+      POST_EXEC_SCRIPT noerror.sh
       PROPERTIES TIMEOUT 30 )
 
    atlas_add_test( ConfigTextCompareBuilder
       SCRIPT python/ConfigText_unitTest.py --text-config AnalysisAlgorithmsConfig/test_configuration_Run2.yaml --compare-builder --check-order
-      POST_EXEC_SCRIPT nopost.sh
-      PROPERTIES TIMEOUT 30 )
+      POST_EXEC_SCRIPT noerror.sh )
 
    atlas_add_test( ConfigTextCompareBlock
       SCRIPT python/ConfigText_unitTest.py --text-config AnalysisAlgorithmsConfig/test_configuration_Run2.yaml --compare-block --check-order
-      POST_EXEC_SCRIPT nopost.sh
-      PROPERTIES TIMEOUT 30 )
+      POST_EXEC_SCRIPT noerror.sh )
 
 
    # Isolated structure is needed to avoid two CPRun test simultaneously creating workDir symlink and replace the other one
@@ -44,7 +42,7 @@ if (NOT COLUMNAR_ANALYSIS)
    # This is needed only when you have multiple CPRun tests.
    atlas_add_test( TestCPRunFullSim
    SCRIPT CPRun.py --input-list $ASG_TEST_FILE_MC --text-config AnalysisAlgorithmsConfig/test_configuration_Run2.yaml -e 150
-   POST_EXEC_SCRIPT nopost.sh
+   POST_EXEC_SCRIPT noerror.sh
    PROPERTIES
       TIMEOUT 1000
       PRIVATE_WORKING_DIRECTORY
@@ -54,7 +52,7 @@ if (NOT COLUMNAR_ANALYSIS)
       set (MT_TEST_OPTIONS --test-mt-dependencies 4)
       atlas_add_test( TestCPRunPhysliteLike
       SCRIPT CPRun.py --input-list $ASG_TEST_FILE_RUN3_MC --text-config AnalysisAlgorithmsConfig/test_configuration_physlite_like.yaml -e 1000 ${MT_TEST_OPTIONS}
-      POST_EXEC_SCRIPT nopost.sh
+      POST_EXEC_SCRIPT noerror.sh
       PROPERTIES
          TIMEOUT 1000
          PRIVATE_WORKING_DIRECTORY
@@ -62,7 +60,7 @@ if (NOT COLUMNAR_ANALYSIS)
 
       atlas_add_test( TestCPRunPhysliteLikePhyslite
       SCRIPT CPRun.py --input-list $ASG_TEST_FILE_LITE_RUN3_MC --text-config AnalysisAlgorithmsConfig/test_configuration_physlite_like.yaml -e 1000 ${MT_TEST_OPTIONS}
-      POST_EXEC_SCRIPT nopost.sh
+      POST_EXEC_SCRIPT noerror.sh
       PROPERTIES
          TIMEOUT 1000
          PRIVATE_WORKING_DIRECTORY

@@ -18,9 +18,6 @@
 // Forward declarations
 #include "AtlasHepMC/GenEvent_fwd.h"
 #include "AtlasHepMC/IO_GenEvent.h"
-#ifdef HEPMC3
-#include "HepMC3/WriterAscii.h"
-#endif
 
 class IFastSimDedicatedSD;
 class ILArG4ShowerLibSvc;
@@ -89,11 +86,7 @@ private:
 
   // data members for configuration
   bool m_generate_starting_points;
-#ifdef HEPMC3
   std::shared_ptr<HepMC3::WriterAscii>  m_starting_points_file;
-#else
-  std::shared_ptr<HepMC::IO_GenEvent>  m_starting_points_file;
-#endif
   std::string m_detector_tag_str;
   std::map<std::string,int> m_detmap;
 

@@ -33,7 +33,7 @@ StatusCode LArOFCBinAlg::initialize() {
   return LArCond2NtupleBase::initialize();
 }
 
-StatusCode LArOFCBinAlg::execute() {
+StatusCode LArOFCBinAlg::execute(const EventContext& ctx) {
 
 
   NTuple::Item<long> ntold, ntnew, ntcorr;
@@ -97,7 +97,7 @@ StatusCode LArOFCBinAlg::execute() {
     ATH_MSG_ERROR( "Failed to register container with key " << m_outputContainer << " to StoreGate" );
   }
 
-  SG::ReadCondHandle<LArOnOffIdMapping> cablingHdl{cablingKey()};
+  SG::ReadCondHandle<LArOnOffIdMapping> cablingHdl{cablingKey(), ctx};
   const LArOnOffIdMapping* cabling{*cablingHdl};
   if(!cabling) {
       ATH_MSG_ERROR( "Do not have cabling mapping from key " << cablingKey().key() );

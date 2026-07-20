@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef DECISIONHANDLING_TRIG3VARCOMBOHYPOTOOL_H
@@ -65,16 +65,16 @@ class Trig3VarComboHypoTool:  public ComboHypoToolBase {
 
   /// Override the ComboHypoToolBase::decide in order to optimise combination generation
   /// This is to avoid excessive combinatorics for complex multileg chains
-  StatusCode decide(Combo::LegDecisionsMap& passingLegs, const EventContext& /*ctx*/) const final;
+  StatusCode decide(Combo::LegDecisionsMap& passingLegs, const EventContext& context) const final;
 
   /// Implementation of selection on individual variables
-  bool executeAlgStep(const Combination& combination, const VarInfo&, std::vector<float>& values) const;
+  bool executeAlgStep(const EventContext& context, const Combination& combination, const VarInfo&, std::vector<float>& values) const;
   /// Computation of the variables from the specified kinematics
   float compute(const std::tuple<KineInfo,KineInfo,KineInfo>& kinetrio, ComboHypoVars var) const;
 
   bool fillLegDecisions_diffLeg(std::tuple<Combo::LegDecision,Combo::LegDecision,Combo::LegDecision>& legtrio, const Combination& combination, uint32_t legA, uint32_t legB, uint32_t legC) const;
-  bool fillTrioKinematics(std::tuple<KineInfo,KineInfo,KineInfo>& kinetrio, const Combination& combination, const VarInfo& varInfo) const;
-  bool fillKineInfo(KineInfo& kinematics, Combo::LegDecision decision, bool isMET) const;
+  bool fillTrioKinematics(const EventContext& context, std::tuple<KineInfo,KineInfo,KineInfo>& kinetrio, const Combination& combination, const VarInfo& varInfo) const;
+  bool fillKineInfo(const EventContext& context, KineInfo& kinematics, Combo::LegDecision decision, bool isMET) const;
 
   /// Gaudi configuration hooks
   // flags

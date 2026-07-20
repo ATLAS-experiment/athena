@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "ActsGnnModuleMapFinderTool.h"
@@ -12,9 +12,12 @@
 #include "ActsPlugins/Gnn/OnnxEdgeClassifier.hpp"
 #include "ActsPlugins/Gnn/TensorRTEdgeClassifier.hpp"
 #include "ActsPlugins/Gnn/TorchEdgeClassifier.hpp"
+#include "ActsPlugins/Gnn/EdgeLayerConnector.hpp"
 
+#include "AthenaBaseComps/AthMsgStreamMacros.h"
 #include "TrkPrepRawData/PrepRawData.h"
 #include "InDetReadoutGeometry/SiDetectorElement.h"
+#include "ActsGnnHookTool.h"
 
 #include <algorithm>
 #include <numeric>
@@ -83,22 +86,33 @@ StatusCode InDet::ActsGnnModuleMapFinderTool::initialize() {
   }
 
   // 3. Track builder
+  std::shared_ptr<ActsPlugins::TrackBuildingBase> tb;
   ATH_MSG_INFO("Configure CC&JunctionRemoval as graph segmentation algorithm");
-  ActsPlugins::CudaTrackBuilding::Config tbCfg;
-  tbCfg.doJunctionRemoval = true;
-  auto tb = std::make_shared<ActsPlugins::CudaTrackBuilding>(
-      tbCfg, m_logger->cloneWithSuffix("CC&JR"));
+  if( m_useEdgeLayerConnector ) {
+    ActsPlugins::EdgeLayerConnector::Config tbCfg;
+    tbCfg.maxHitsPerTrack = m_elcMaxHitsPerTrack;
+    tbCfg.blockSize = 512;
+    tbCfg.weightsCut = m_edgeCut;
+    tb = std::make_shared<ActsPlugins::EdgeLayerConnector>(
+        tbCfg, m_logger->cloneWithSuffix("ELC"));
+  } else {
+    ActsPlugins::CudaTrackBuilding::Config tbCfg;
+    tbCfg.doJunctionRemoval = true;
+    tb = std::make_shared<ActsPlugins::CudaTrackBuilding>(
+        tbCfg, m_logger->cloneWithSuffix("CC&JR"));
+  }
 
   // 4. Assemble pipeline
   m_gnnPipeline = std::make_unique<ActsPlugins::GnnPipeline>(
-      gc, std::vector{gnn}, tb, m_logger->cloneWithSuffix("Pipeline"));
+      gc, std::vector{std::move(gnn)}, tb, m_logger->cloneWithSuffix("Pipeline"));
 
   return StatusCode::SUCCESS;
 }
 
 StatusCode InDet::ActsGnnModuleMapFinderTool::getTracks(
     const std::vector<const Trk::SpacePoint*>& spacepoints,
-    std::vector<std::vector<uint32_t>>& tracks) const {
+    std::vector<std::vector<uint32_t>>& tracks,
+    std::unordered_map<int, std::unordered_map<int, float>>* edgeMap) const {
 
   const std::size_t nSP = spacepoints.size();
 
@@ -131,7 +145,26 @@ StatusCode InDet::ActsGnnModuleMapFinderTool::getTracks(
   auto candidates = [&] {
     std::unique_lock<std::mutex> lock;
     if (m_runMutex) lock = std::unique_lock<std::mutex>(*m_runMutex);
-    return m_gnnPipeline->run(features, moduleIds, ids, ActsPlugins::Device::Cuda(0));
+    
+    if (edgeMap != nullptr) {
+      ScoredGraphHook hook;
+      auto result = m_gnnPipeline->run(features, moduleIds, ids, ActsPlugins::Device::Cuda(0), hook);
+
+      // Retrieve edgeScores and edgeIndex from hook
+      const std::vector<float>& edgeScores = hook.getEdgeScores();
+      const std::vector<std::int64_t>& edgeIndex = hook.getEdgeIndex();
+      const std::size_t nEdges = edgeScores.size();
+
+      // Create a map to acces edge score (sorted indices back to original spacepoint indices)
+      for (std::size_t i = 0; i < nEdges; ++i) {
+          std::int64_t src = edgeIndex[i];
+          std::int64_t dst = edgeIndex[nEdges + i];
+          (*edgeMap)[sortIdx[src]][sortIdx[dst]] = edgeScores[i];
+      }
+      return result;
+    }
+
+    return m_gnnPipeline->run(features, moduleIds, ids, ActsPlugins::Device::Cuda(0));;
   }();
 
   ATH_MSG_DEBUG("GNN pipeline returned " << candidates.size() << " candidates");
@@ -161,10 +194,10 @@ StatusCode InDet::ActsGnnModuleMapFinderTool::getTracks(
 }
 
 MsgStream& InDet::ActsGnnModuleMapFinderTool::dump(MsgStream& out) const {
-  out << std::endl;
-  out << "|---------------------------------------------------------------------|" << std::endl;
-  out << "| ActsGnnModuleMapFinderTool                                          |" << std::endl;
-  out << "|---------------------------------------------------------------------|" << std::endl;
+  out << "\n";
+  out << "|---------------------------------------------------------------------|\n" ;
+  out << "| ActsGnnModuleMapFinderTool                                          |\n" ;
+  out << "|---------------------------------------------------------------------|\n" ;
   return out;
 }
 

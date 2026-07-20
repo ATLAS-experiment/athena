@@ -306,7 +306,7 @@ StatusCode TrigMultiTrkComboHypo::mergeLeptonsFromDecisions(TrigMultiTrkState<T>
       leptonEL = decision->objectLink<T>(TrigCompositeUtils::featureString());
     }
     else {
-      auto leptonLinkInfo = TrigCompositeUtils::findLink<T>(decision, TrigCompositeUtils::featureString(), true);
+      auto leptonLinkInfo = TrigCompositeUtils::findLink<T>(state.context(), decision, TrigCompositeUtils::featureString(), true);
       ATH_CHECK( leptonLinkInfo.isValid() );
       leptonEL = leptonLinkInfo.link;
     }
@@ -394,7 +394,7 @@ StatusCode TrigMultiTrkComboHypo::mergeTracksFromViews(TrigMultiTrkStateBase& st
   for (const Decision* decision : state.previousDecisions()) {
     if (!TrigCompositeUtils::isAnyIDPassing(decision, m_allowedIDs)) continue;
 
-    auto viewLinkInfo = TrigCompositeUtils::findLink<ViewContainer>(decision, TrigCompositeUtils::viewString(), true);
+    auto viewLinkInfo = TrigCompositeUtils::findLink<ViewContainer>(state.context(), decision, TrigCompositeUtils::viewString(), true);
     ATH_CHECK( viewLinkInfo.isValid() );
     const SG::View* view = *viewLinkInfo.link;
     if (views.find(view) != views.end()) continue;  // tracks from this view have already been fetched
@@ -736,7 +736,7 @@ StatusCode TrigMultiTrkComboHypo::processMergedElectrons(TrigMultiTrkState<xAOD:
     leptons.push_back({electronEL, std::vector<ElementLink<DecisionContainer>>(1, decisionEL), decisionIDs});
 
     // get initialRoI this electron originating from
-    auto roiInfo = TrigCompositeUtils::findLink<TrigRoiDescriptorCollection>(decision, TrigCompositeUtils::initialRoIString(), true);
+    auto roiInfo = TrigCompositeUtils::findLink<TrigRoiDescriptorCollection>(state.context(), decision, TrigCompositeUtils::initialRoIString(), true);
     ATH_CHECK( roiInfo.isValid() );
     auto initialRoI = *roiInfo.link;
 
@@ -792,7 +792,7 @@ StatusCode TrigMultiTrkComboHypo::findMuTrkCandidates(TrigMultiTrkState<xAOD::Mu
 
     ATH_MSG_DEBUG( "Found muon (CombinedTrackParticle): " << muon->pt() << " / " << muon->eta() << " / " << muon->phi() << " / " << muon->charge() );
 
-    auto viewLinkInfo = TrigCompositeUtils::findLink<ViewContainer>(decision, TrigCompositeUtils::viewString(), true);
+    auto viewLinkInfo = TrigCompositeUtils::findLink<ViewContainer>(state.context(), decision, TrigCompositeUtils::viewString(), true);
     ATH_CHECK( viewLinkInfo.isValid() );
     auto view = *viewLinkInfo.link;
 

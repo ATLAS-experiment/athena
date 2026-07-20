@@ -4,7 +4,8 @@
 #ifndef ACTSCALIBBASE_SOURCELINKTYPE_H
 #define ACTSCALIBBASE_SOURCELINKTYPE_H
 
-
+#include "GeoPrimitives/GeoPrimitives.h"
+///
 #include "Acts/Utilities/OstreamFormatter.hpp"
 namespace ActsTrk::detail{
     /** @brief Enumeration to distinguish between the ATLAS EDM -> Acts::SourceLink variants */

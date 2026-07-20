@@ -21,11 +21,11 @@ from TrigEDMConfig.TriggerEDM import recordable
 #-----------------------------------------------------#
 ### ************* Step1  ************* ###
 #-----------------------------------------------------#
-def muFastAlgSequenceCfg(flags, selCAName="", is_probe_leg=False):
-
+def muFastAlgSequenceCfg(flags, selCAName="", useNewFast=False, is_probe_leg=False):
+    
     selAccSA = SelectionCA('L2MuFastSel'+selCAName, isProbe=is_probe_leg)
     
-    viewName="L2MuFastReco"
+    viewName= "L2MuFastRecoPhII" if useNewFast else "L2MuFastReco"
 
     recoSA = InViewRecoCA(name=viewName, isProbe=is_probe_leg)
 
@@ -42,34 +42,38 @@ def muFastAlgSequenceCfg(flags, selCAName="", is_probe_leg=False):
       extraLoads += [( 'xAOD::TrigCompositeContainer', 'StoreGateSvc+%s' % decision )]
 
     from .MuonRecoSequences  import  isCosmic
-    acc = ComponentAccumulator()
-    seql2sa = seqAND("L2MuonSASeq{}".format("_probe" if is_probe_leg else ""))
-    acc.addSequence(seql2sa)
-    muFastRecoSeq = muFastRecoSequenceCfg( muonflags, viewName+'RoIs', doFullScanID= isCosmic(flags), extraLoads=extraLoads )
-    sequenceOut = muNames.L2SAName
-    acc.merge(muFastRecoSeq, sequenceName=seql2sa.name)
+    muFastRecoSeq = muFastRecoSequenceCfg( muonflags, viewName+'RoIs', doFullScanID= isCosmic(flags), extraLoads=extraLoads, useNewFast=useNewFast )
+    sequenceOut = muNames.L2SANamePhII if useNewFast else muNames.L2SAName
 
-    ##### L2 mutli-track mode #####
-    seqFilter = seqAND("L2MuonMTSeq{}".format("_probe" if is_probe_leg else ""))
-    acc.addSequence(seqFilter)
-    from TrigMuonEF.TrigMuonEFConfig import MuonChainFilterAlgCfg
-    MultiTrackChains = getMultiTrackChainNames()
-    MultiTrackChainFilter = MuonChainFilterAlgCfg(muonflags, "SAFilterMultiTrackChains", ChainsToFilter = MultiTrackChains, 
-                                                  InputDecisions = filterInput,
-                                                  L2MuFastContainer = muNames.L2SAName+"l2mtmode", 
-                                                  L2MuCombContainer = muNames.L2CBName+"l2mtmode",
-                                                  WriteMuFast = True, NotGate = True)
+    if useNewFast:
+        recoSA.mergeReco(muFastRecoSeq)
+    else:
+        acc = ComponentAccumulator()
+        seql2sa = seqAND("L2MuonSASeq{}".format("_probe" if is_probe_leg else ""))
+        acc.addSequence(seql2sa)
+        acc.merge(muFastRecoSeq, sequenceName=seql2sa.name)
 
-    acc.merge(MultiTrackChainFilter, sequenceName=seqFilter.name)
-    muFastl2mtRecoSeq = muFastRecoSequenceCfg( muonflags, viewName+'RoIs', doFullScanID= isCosmic(flags), l2mtmode=True )
-    acc.merge(muFastl2mtRecoSeq, sequenceName=seqFilter.name)
-    recoSA.mergeReco(acc)
+        ##### L2 mutli-track mode #####
+        seqFilter = seqAND("L2MuonMTSeq{}".format("_probe" if is_probe_leg else ""))
+        acc.addSequence(seqFilter)
+        from TrigMuonEF.TrigMuonEFConfig import MuonChainFilterAlgCfg
+        MultiTrackChains = getMultiTrackChainNames()
+        MultiTrackChainFilter = MuonChainFilterAlgCfg(muonflags, "SAFilterMultiTrackChains", ChainsToFilter = MultiTrackChains, 
+                                                    InputDecisions = filterInput,
+                                                    L2MuFastContainer = muNames.L2SAName+"l2mtmode", 
+                                                    L2MuCombContainer = muNames.L2CBName+"l2mtmode",
+                                                    WriteMuFast = True, NotGate = True)
+
+        acc.merge(MultiTrackChainFilter, sequenceName=seqFilter.name)
+        muFastl2mtRecoSeq = muFastRecoSequenceCfg( muonflags, viewName+'RoIs', doFullScanID= isCosmic(flags), l2mtmode=True )
+        acc.merge(muFastl2mtRecoSeq, sequenceName=seqFilter.name)
+
+        recoSA.mergeReco(acc)
 
     from TrigGenericAlgs.TrigGenericAlgsConfig import ROBPrefetchingAlgCfg_Muon
     robPrefetch = ROBPrefetchingAlgCfg_Muon(flags, nameSuffix=viewName+'_probe' if is_probe_leg else viewName)
 
     selAccSA.mergeReco(recoSA, robPrefetchCA=robPrefetch)
-
 
     return (selAccSA, sequenceOut)
 
@@ -102,20 +106,30 @@ def muFastCalibAlgSequenceCfg(flags, is_probe_leg=False):
 
 
 @AccumulatorCache
-def muFastSequenceGenCfg(flags, is_probe_leg=False):
+def muFastSequenceGenCfg(flags, useNewFast=False, is_probe_leg=False):
 
-    (selAcc, sequenceOut) = muFastAlgSequenceCfg(flags, "", is_probe_leg)
+    suffix = f'{"_newFast" if useNewFast else ""}'
+    (selAcc, sequenceOut) = muFastAlgSequenceCfg(flags, selCAName=suffix, useNewFast=useNewFast, is_probe_leg=is_probe_leg)
 
-    from TrigMuonHypo.TrigMuonHypoConfig import TrigMufastHypoAlgCfg, TrigMufastHypoToolFromDict
-    l2saHypo = TrigMufastHypoAlgCfg( flags,
-                                     name = 'TrigL2MufastHypoAlg',
-                                     MuonL2SAInfoFromMuFastAlg = sequenceOut)
+    if useNewFast:
+        from TrigMuonHypo.TrigMuonHypoConfig import TrigMuonEFHypoAlgCfg, TrigMuonEFFastRecoSAHypoToolFromDict
+        l2saHypo = TrigMuonEFHypoAlgCfg( flags,
+                                         name = 'TrigEFMufastHypoAlg',
+                                         MuonDecisions = sequenceOut,
+                                         IncludeSAmuons=True)
+        HypoToolGen = TrigMuonEFFastRecoSAHypoToolFromDict
+
+    else:
+        from TrigMuonHypo.TrigMuonHypoConfig import TrigMufastHypoAlgCfg, TrigMufastHypoToolFromDict
+        l2saHypo = TrigMufastHypoAlgCfg( flags,
+                                         name = 'TrigL2MufastHypoAlg',
+                                         MuonL2SAInfoFromMuFastAlg = sequenceOut)
+        HypoToolGen = TrigMufastHypoToolFromDict
 
     selAcc.addHypoAlgo(l2saHypo)
-    
-    l2saSequence = MenuSequence(flags, selAcc,
-                                  HypoToolGen = TrigMufastHypoToolFromDict)
 
+    l2saSequence = MenuSequence(flags, selAcc,
+                                HypoToolGen = HypoToolGen)
 
     return l2saSequence
 
@@ -123,7 +137,7 @@ def muFastSequenceGenCfg(flags, is_probe_leg=False):
 @AccumulatorCache
 def muFastCalibSequenceGenCfg(flags, is_probe_leg=False):
 
-    (selAcc, sequenceOut) = muFastCalibAlgSequenceCfg(flags, is_probe_leg)
+    (selAcc, sequenceOut) = muFastCalibAlgSequenceCfg(flags, is_probe_leg=is_probe_leg)
 
     from TrigMuonHypo.TrigMuonHypoConfig import TrigMufastHypoAlgCfg, TrigMufastHypoToolFromDict
     l2saHypo = TrigMufastHypoAlgCfg( flags,
@@ -142,7 +156,7 @@ def muFastCalibSequenceGenCfg(flags, is_probe_leg=False):
 @AccumulatorCache
 def mul2mtSAOvlpRmSequenceGenCfg(flags, is_probe_leg=False):
 
-    (selAcc, sequenceOut) = muFastAlgSequenceCfg(flags, "mt", is_probe_leg)
+    (selAcc, sequenceOut) = muFastAlgSequenceCfg(flags, selCAName="mt", is_probe_leg=is_probe_leg)
 
     from TrigMuonHypo.TrigMuonHypoConfig import TrigMufastHypoAlgCfg, TrigMufastHypoToolFromDict
     l2saHypo = TrigMufastHypoAlgCfg( flags,
@@ -392,8 +406,8 @@ def mul2mtCBOvlpRmSequenceGenCfg(flags, is_probe_leg=False, trackingMode = "FTF"
 ###  EFSA step ###
 ######################
 
-def muEFSAAlgSequenceCfg(flags, is_probe_leg=False, useBucketFilter=False, useNewFast=False):
-    suffix = f'{"_newFast" if useNewFast else ""}{"_mlbkt" if useBucketFilter else ""}'
+def muEFSAAlgSequenceCfg(flags, suffix="", is_probe_leg=False, useBucketFilter=False, useNewFast=False):
+    
     selAccMS = SelectionCA(f'EFMuMSSel_RoI{suffix}', isProbe=is_probe_leg)
     
     viewName=f"EFMuMSReco_RoI{suffix}"
@@ -428,7 +442,9 @@ def muEFSAAlgSequenceCfg(flags, is_probe_leg=False, useBucketFilter=False, useNe
     #Run decoding again since we are using updated RoIs
     recoMS.mergeReco(muonDecodeCfg(muonflags,RoIs=viewName+"RoIs"))
     ### get EF reco sequence ###    
-    muEFSARecoSequenceAcc, sequenceOut = muEFSARecoSequenceCfg(muonflags, viewName+'RoIs', f'RoI{suffix}', useBucketFilter=useBucketFilter)
+    muEFSARecoSequenceAcc, sequenceOut = muEFSARecoSequenceCfg(muonflags, RoIs = viewName+'RoIs', 
+                                                                          suffix = f'RoI{suffix}', 
+                                                                          useBucketFilter=useBucketFilter)
     recoMS.mergeReco(muEFSARecoSequenceAcc)
 
     from TrigGenericAlgs.TrigGenericAlgsConfig import ROBPrefetchingAlgCfg_Muon
@@ -441,10 +457,17 @@ def muEFSAAlgSequenceCfg(flags, is_probe_leg=False, useBucketFilter=False, useNe
 @AccumulatorCache
 def muEFSASequenceGenCfg(flags, is_probe_leg=False, useBucketFilter=False, useNewFast=False):
 
-    (selAcc, sequenceOut) = muEFSAAlgSequenceCfg(flags, is_probe_leg, useBucketFilter=useBucketFilter, useNewFast=useNewFast)
+    if flags.Trigger.Offline.SA.Muon.scheduleActsReco and flags.Trigger.Offline.SA.Muon.usePhaseIIGeoSetup:
+        suffix = f'PhII{"_newFast" if useNewFast else ""}{"_mlbkt" if useBucketFilter else ""}'
+    else:
+        suffix=""
+        
+    (selAcc, sequenceOut) = muEFSAAlgSequenceCfg(flags, suffix=suffix, 
+                                                        is_probe_leg=is_probe_leg, 
+                                                        useBucketFilter=useBucketFilter, 
+                                                        useNewFast=useNewFast)
 
     from TrigMuonHypo.TrigMuonHypoConfig import TrigMuonEFHypoAlgCfg, TrigMuonEFMSonlyHypoToolFromDict
-    suffix = f'{"_newFast" if useNewFast else ""}{"_mlbkt" if useBucketFilter else ""}'
     efmuMSHypo = TrigMuonEFHypoAlgCfg( flags,
                               name = f'TrigMuonEFMSonlyHypo_RoI{suffix}',
                               MuonDecisions = sequenceOut,

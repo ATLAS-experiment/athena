@@ -5,6 +5,7 @@
 #include "xAODInDetMeasurement/ContainerAccessor.h"
 #include "ActsInterop/TableUtils.h"
 #include "AthAllocators/DataPool.h"
+#include "RDOCollectionAdapter.h"
 
 namespace ActsTrk {
 
@@ -159,21 +160,22 @@ StatusCode ClusterizationAlg<IClusteringTool, useCache>::execute(const EventCont
       }          
 
       // unpack RDOs and store them
-      const RawDataCollection* rdos = rdoContainer->indexFindPtr(id);
-      if (not rdos or rdos->empty()) {
+      std::optional<RDOCollectionAdapter<RDOContainer> > optional_RDOs = RDOCollectionAdapter<RDOContainer>::make(*rdoContainer,id);
+      if (not optional_RDOs or optional_RDOs.value()->empty()) {
 	continue;
       }
+      RDOCollectionAdapter<RDOContainer> RDOs=optional_RDOs.value();
 
       if constexpr (useCache) {
 	idclocks.push_back( std::move(cache_wh) );
       }
       // make ACTS clusters
       ATH_CHECK( m_clusteringTool->clusterize(ctx,
-					      *rdos,
+					      *RDOs,
 					      *detEleStatus,
 					      *element,
 					      cellContainer) );
-      nRDOs+=rdos->size();
+      nRDOs+=RDOs->size();
       nClusters += cellContainer.m_moduleClusterRange.back().nClusters();
     } // loop on IDs
   } // loop on ROIs

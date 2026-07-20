@@ -381,7 +381,7 @@ xAODTestTypelessRead::testit_view (const std::string& key)
 /**
  * @brief Algorithm event processing.
  */
-StatusCode xAODTestTypelessRead::execute()
+StatusCode xAODTestTypelessRead::execute(const EventContext& /*ctx*/)
 {
   ++m_count;
   ATH_MSG_INFO (m_count);

@@ -11,6 +11,7 @@
 #include "AthenaBaseComps/AthReentrantAlgorithm.h"
 #include "StoreGate/ReadHandleKey.h"
 #include "StoreGate/ReadDecorHandleKeyArray.h"
+#include "StoreGate/ReadCondHandleKey.h"
 #include "StoreGate/WriteHandleKey.h"
 #include "StoreGate/WriteDecorHandleKeyArray.h"
 #include "AthenaMonitoringKernel/GenericMonitoringTool.h"
@@ -24,6 +25,8 @@
 #include "xAODJet/JetContainer.h"
 #include "xAODTau/TauJetContainer.h"
 #include "xAODTau/TauTrackContainer.h"
+
+#include "BeamSpotConditionsData/BeamSpotData.h"
 
 #include <map>
 #include <memory>
@@ -88,14 +91,21 @@ private:
     SG::ReadHandleKey<xAOD::TauJetContainer> m_tauJetInputKey {this, "InputTauJetContainer", "", "Input TauJet container"};
     SG::ReadDecorHandleKeyArray<xAOD::TauJetContainer> m_tauJetInputDecorKeysArray {this, "InputTauJetCopyDecorKeys", {}, "Array of input TauJet decoration keys to copy on the output TauJet"};
     SG::ReadHandleKey<xAOD::TauTrackContainer> m_tauTrackInputKey {this, "InputTauTrackContainer", "", "Input TauTrack container" };
-    SG::ReadDecorHandleKey<xAOD::TauJetContainer> m_hitsInputDecorKey{this, "InputTauJetHitsKey", "", "Input TauJet hits decoration key"};
+    SG::ReadDecorHandleKey<xAOD::TauJetContainer> m_hitsInputDecorKey {this, "InputTauJetHitsKey", "", "Input TauJet hits decoration key"};
 
     // Outputs
     SG::WriteHandleKey<xAOD::JetContainer> m_tauSeedOutputKey {this, "OutputJetSeed", "", "Output jets which are seeds for tau jets"};
     SG::WriteHandleKey<xAOD::TauJetContainer> m_tauJetOutputKey {this, "OutputTauJetContainer", "", "Output TauJet container"};
     SG::WriteDecorHandleKeyArray<xAOD::TauJetContainer> m_tauJetOutputDecorKeysArray;
     SG::WriteHandleKey<xAOD::TauTrackContainer> m_tauTrackOutputKey {this, "OutputTauTrackContainer", "", "Output TauTrack container"};
-    SG::WriteDecorHandleKey<xAOD::TauJetContainer> m_hitsOutputDecorKey{this, "OutputTauJetHitsKey", "", "Output TauJet hits decoration key"};
+    SG::WriteDecorHandleKey<xAOD::TauJetContainer> m_hitsOutputDecorKey {this, "OutputTauJetHitsKey", "", "Output TauJet hits decoration key"};
+
+    // Shift HitZ inferences to detector coordinates
+    Gaudi::Property<std::map<std::string, std::string>> m_shiftToDetectorCoordinates {this, "ShiftToDetectorCoordinates", {}, "Map of HitZ regression z variable to the corresponding shifted variable to be filled in the monitoring"};
+    SG::ReadDecorHandleKeyArray<xAOD::TauJetContainer> m_shiftToDetectorCoordinatesInDecorKeysArray {this, "ShiftToDetectorCoordinatesInDecorKeys", m_tauJetOutputKey, {}};
+    SG::WriteDecorHandleKeyArray<xAOD::TauJetContainer> m_shiftToDetectorCoordinatesOutDecorKeysArray {this, "ShiftToDetectorCoordinatesOutDecorKeys", m_tauJetOutputKey, {}};
+    SG::ReadCondHandleKey<InDet::BeamSpotData> m_beamSpotKey {this, "BeamSpotKey", "BeamSpotData", "Key for BeamSpot condition data"};
+
 
 
     Mode m_reco_mode = FromClusters;

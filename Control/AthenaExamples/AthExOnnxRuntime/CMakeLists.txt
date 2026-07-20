@@ -4,14 +4,13 @@
 atlas_subdir( AthExOnnxRuntime )
 
 find_package( onnxruntime )
-find_package( fmt )
 
 # Component(s) in the package.
 atlas_add_component( AthExOnnxRuntime
    src/*.h src/*.cxx src/components/*.cxx
    INCLUDE_DIRS ${ONNXRUNTIME_INCLUDE_DIRS}
    LINK_LIBRARIES ${ONNXRUNTIME_LIBRARIES} AthenaBaseComps GaudiKernel PathResolver
-   AthOnnxInterfaces AthOnnxUtilsLib AsgServicesLib ${FMT_LIBRARIES}
+   AthOnnxInterfaces AthOnnxUtilsLib AsgServicesLib
 )
 
 # Install files from the package:

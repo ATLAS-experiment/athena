@@ -43,7 +43,7 @@ StatusCode TBDMContainerSplitter::finalize()
   return StatusCode::SUCCESS;
 }
 
-StatusCode TBDMContainerSplitter::execute()
+StatusCode TBDMContainerSplitter::execute(const EventContext& ctx)
 {
   ATH_MSG_DEBUG ( "Executing TBDMContainerSplitter " );
 
@@ -53,7 +53,7 @@ StatusCode TBDMContainerSplitter::execute()
   if ( sc.isFailure() ) {
     ATH_MSG_ERROR
       ( "Cannot retrieve CaloCalibrationHitContainer "<<m_DMHitsKey<<" from StoreGate" );
-    setFilterPassed(false);
+    setFilterPassed(false, ctx);
     return StatusCode::SUCCESS;
   }
   // Create two new DMCont
@@ -81,18 +81,18 @@ StatusCode TBDMContainerSplitter::execute()
   sc = evtStore()->record(outDMContCalo, m_DMHitsCaloKey);
   if ( sc.isFailure() ) {
          ATH_MSG_ERROR ( "Could not store: "<<m_DMHitsCaloKey<<" to StoreGate" );
-         setFilterPassed(false);
+         setFilterPassed(false, ctx);
          return StatusCode::SUCCESS;
   }
   sc = evtStore()->record(outDMContLeak, m_DMHitsLeakKey);
   if ( sc.isFailure() ) {
          ATH_MSG_ERROR ( "Could not store: "<<m_DMHitsLeakKey<<" to StoreGate" );
-         setFilterPassed(false);
+         setFilterPassed(false, ctx);
          return StatusCode::SUCCESS;
   }
 
 
-  setFilterPassed(true);
+  setFilterPassed(true, ctx);
   return StatusCode::SUCCESS;
 
 }

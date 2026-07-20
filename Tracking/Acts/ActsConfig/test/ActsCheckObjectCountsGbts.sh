@@ -3,6 +3,7 @@
 
 # ttbar mu=200 input
 input_rdo=$(python -c "from AthenaConfiguration.TestDefaults import defaultTestFiles; print(defaultTestFiles.RDO_RUN4[0])")
+conditions_tag=$(python -c "from AthenaConfiguration.TestDefaults import defaultConditionsTags; print(defaultConditionsTags.RUN4_MC)")
 n_events=5
 log_file="reco.log"
 
@@ -13,12 +14,12 @@ Reco_tf.py \
   --preExec "flags.Exec.FPE=-1; \
        from ActsConfig.ActsConfigFlags import SeedingStrategy; \
        flags.Acts.SeedingStrategy=SeedingStrategy.Gbts; \
-       flags.Tracking.doTruth=False; \
        flags.Tracking.doPixelDigitalClustering=True; \
        from ActsConfig.ActsConfigFlags import PixelCalibrationStrategy; \
        flags.Acts.PixelCalibrationStrategy=PixelCalibrationStrategy.Uncalibrated;" \
-  --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude,ActsConfig.ActsCIFlags.actsWorkflowFlags" \
+  --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude,ActsConfig.ActsCIFlags.actsProductionFlags" \
   --ignorePatterns "${ignore_pattern}" \
+  --conditionsTag ${conditions_tag} \
   --inputRDOFile ${input_rdo} \
   --outputAODFile AOD.pool.root \
   --maxEvents ${n_events} \

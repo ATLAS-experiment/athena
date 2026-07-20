@@ -35,7 +35,7 @@ StatusCode TrigMuonEFInfoCnvTestAlg::initialize() {
     return StatusCode::SUCCESS;
 }
 
-StatusCode TrigMuonEFInfoCnvTestAlg::execute() {
+StatusCode TrigMuonEFInfoCnvTestAlg::execute(const EventContext& /*ctx*/) {
 
   // Retrieve the TrigMuonEFInfoContainer
   const TrigMuonEFInfoContainer* infocont = evtStore()->tryConstRetrieve<TrigMuonEFInfoContainer>(m_aodContainerName);
@@ -174,7 +174,7 @@ StatusCode TrigMuonEFInfoCnvTestAlg::comparePrimaryTracks(const TrigMuonEFInfoTr
   if( infotrk->hasCombinedTrack() ) {
     primtrk = infotrk->CombinedTrack();
   }
-  ATH_CHECK(compareTracks(primtrk, muon->primaryTrackParticle()));
+  ATH_CHECK(compareTracks(primtrk, muon->trackParticle(xAOD::Muon::TrackParticleType::Primary)));
 
   ATH_MSG_DEBUG("Passed check on primary track");
 

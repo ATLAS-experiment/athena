@@ -83,6 +83,28 @@ namespace MuonR4{
                                    const double interceptY) const ;  
             /// @brief Returns whether the hit is a precision hit or not
             static bool isPrecisionHit(const HoughHitType& hit);
+
+            /// @brief visualize the accumulator for a given bucket and its maxima
+            /// @param ctx: EventContext to parse to the visualization tool
+            /// @param data: event data object
+            /// @param bucket: Bucket within which the pattern recognition is performed
+            /// @param maxima: EtaHoughMaxima found by the island ACTS algorithm to visualize
+            void visualizeBucketAccumulator(const EventContext& ctx, 
+                                            HoughEventData& data, 
+                                            HoughSetupForBucket& bucket, 
+                                            const std::vector<ActsPeakFinderForMuon::Maximum>& maxima) const;
+
+            /// @brief visualize the seed for a given bucket and its maximum
+            /// @param ctx: EventContext to parse to the visualization tool
+            /// @param bucket: Bucket within which the pattern recognition is performed
+            /// @param seed: SegmentSeed found by the island ACTS algorithm to visualize
+            /// @param seedPassedSelection: Flag to indicate whether the seed passed the selection criteria or not
+            void visualizeBucketSeed(const EventContext& ctx,
+                                     HoughSetupForBucket& bucket,
+                                     const SegmentSeed& seed,
+                                     bool seedPassedSelection) const;
+
+
             // target resolution in the angle
             DoubleProperty m_targetResoTanTheta{this, "ResolutionTargetTanTheta", 0.05};
             // target resolution in the y intercept
@@ -122,7 +144,7 @@ namespace MuonR4{
             // output maxima for downstram processing
             SG::WriteHandleKey<EtaHoughMaxContainer> m_maxima{this, "EtaHoughMaxContainer", "MuonHoughStationMaxima"};
             // ACTS geometry context
-            SG::ReadHandleKey<ActsTrk::GeometryContext> m_geoCtxKey{this, "AlignmentKey", "ActsAlignment", "cond handle key"};
+            ActsTrk::GeoContextReadKey_t m_geoCtxKey{this, "AlignmentKey", "ActsAlignment", "cond handle key"};
             /// Pattern visualization tool
             ToolHandle<MuonValR4::IPatternVisualizationTool> m_visionTool{this, "VisualizationTool", ""};
 

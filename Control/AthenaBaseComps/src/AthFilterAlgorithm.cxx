@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // AthFilterAlgorithm.cxx
@@ -96,12 +96,11 @@ AthFilterAlgorithm::sysInitialize()
 
 /// Set the filter passed flag to the specified state
 void
-AthFilterAlgorithm::setFilterPassed( bool state ) const
+AthFilterAlgorithm::setFilterPassed( bool state, const EventContext& ctx ) const
 {
-  AthAlgorithm::setFilterPassed(state);
+  AthAlgorithm::setFilterPassed(state, ctx);
 
   if (state) {
-    const EventContext& ctx = Gaudi::Hive::currentContext();
     SG::ReadHandle<xAOD::EventInfo> evtInfo (m_eventInfoKey, ctx);
     // Only try to access the mcEventWeight if we are running on Monte Carlo, duhhh!
     if ( evtInfo->eventType(xAOD::EventInfo::IS_SIMULATION) ) {

@@ -28,7 +28,7 @@ class LArAverages2Ntuple : public LArCond2NtupleBase
 
   //standard algorithm methods
   virtual StatusCode initialize() override final;
-  virtual StatusCode execute() override final;
+  virtual StatusCode execute(const EventContext& ctx) override final;
 
  private:
   const LArOnlineID_Base* m_onlineHelper = nullptr;

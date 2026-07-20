@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "GeneratorFilters/VBFForwardJetsFilter.h"
@@ -88,7 +88,7 @@ StatusCode VBFForwardJetsFilter::filterInitialize() {
 }
 
 
-StatusCode VBFForwardJetsFilter::filterEvent() {
+StatusCode VBFForwardJetsFilter::filterEvent(const EventContext& ctx) {
   const xAOD::JetContainer* truthjetTES;
   CHECK(evtStore()->retrieve(truthjetTES, m_TruthJetContainerName));
   ATH_MSG_DEBUG("xAOD::JetContainer size = " << truthjetTES->size());
@@ -100,7 +100,6 @@ StatusCode VBFForwardJetsFilter::filterEvent() {
   McEventCollection::const_iterator itr;
   for (itr = events()->begin(); itr!=events()->end(); ++itr) {
     const HepMC::GenEvent* genEvt = (*itr);
-#ifdef HEPMC3
     for (const auto& pitr: *genEvt) {
       // photon
       if ( MC::isPhoton(pitr) && MC::isStable(pitr) &&
@@ -120,9 +119,9 @@ StatusCode VBFForwardJetsFilter::filterEvent() {
         int leptonic = 0;
         for (const auto& beg: tau->end_vertex()->particles_out() ) {
           if ( beg->production_vertex() != tau->end_vertex() ) continue;
-          if ( std::abs( beg->pdg_id() ) == 12 ) leptonic = 1;
-          if ( std::abs( beg->pdg_id() ) == 14 ) leptonic = 2;
-          if ( std::abs( beg->pdg_id() ) == 15 ) leptonic = 11;
+          if ( std::abs( beg->pdg_id() ) == MC::NU_E ) leptonic = 1;
+          else if ( std::abs( beg->pdg_id() ) == MC::NU_MU ) leptonic = 2;
+          else if ( MC::isTau(beg) ) leptonic = 11;
         }
 
         if (leptonic == 0) {
@@ -134,51 +133,10 @@ StatusCode VBFForwardJetsFilter::filterEvent() {
           if (tauvis.vect().perp() >= m_LGMinPt && std::abs(tauvis.vect().pseudoRapidity()) <= m_LGMaxEta) {
             MCTruthTauList.push_back(tauvis);
             ATH_MSG_INFO("had-tau pt(Gaudi::Units::GeV) = " << tauvis.vect().perp()/Gaudi::Units::GeV << " eta = " << tauvis.vect().pseudoRapidity());
-          } 
+          }
         }
       }
     }
-#else
-    for (HepMC::GenEvent::particle_const_iterator pitr = genEvt->particles_begin(); pitr != genEvt->particles_end(); ++pitr) {
-      // photon
-      if ( MC::isPhoton(*pitr) && MC::isStable(*pitr) &&
-           (*pitr)->momentum().perp() >= m_LGMinPt && std::abs((*pitr)->momentum().pseudoRapidity()) <= m_LGMaxEta) {
-        MCTruthPhotonList.push_back((*pitr));
-        ATH_MSG_INFO("photon pt(Gaudi::Units::GeV) = " << (*pitr)->momentum().perp()/Gaudi::Units::GeV << " eta = " << (*pitr)->momentum().pseudoRapidity());
-      }
-      // electon
-      if ( MC::isElectron(*pitr) && MC::isStable(*pitr) &&
-           (*pitr)->momentum().perp() >= m_LGMinPt && std::abs((*pitr)->momentum().pseudoRapidity()) <= m_LGMaxEta) {
-        MCTruthElectronList.push_back((*pitr));
-        ATH_MSG_INFO("electron pt(Gaudi::Units::GeV) = " << (*pitr)->momentum().perp()/Gaudi::Units::GeV << " eta = " << (*pitr)->momentum().pseudoRapidity());
-      }
-      // tau
-      if ( MC::isTau(*pitr) && MC::isPhysical(*pitr) ) {
-        HepMC::GenParticle *tau = (*pitr);
-        HepMC::GenVertex::particles_out_const_iterator begin = tau->end_vertex()->particles_out_const_begin();
-        HepMC::GenVertex::particles_out_const_iterator end = tau->end_vertex()->particles_out_const_end();
-        int leptonic = 0;
-        for ( ; begin != end; begin++ ) {
-          if ( (*begin)->production_vertex() != tau->end_vertex() ) continue;
-          if ( std::abs( (*begin)->pdg_id() ) == 12 ) leptonic = 1;
-          if ( std::abs( (*begin)->pdg_id() ) == 14 ) leptonic = 2;
-          if ( std::abs( (*begin)->pdg_id() ) == 15 ) leptonic = 11;
-        }
-
-        if (leptonic == 0) {
-          CLHEP::HepLorentzVector nutau = sumDaughterNeutrinos( tau );
-          CLHEP::HepLorentzVector tauvis = CLHEP::HepLorentzVector(tau->momentum().px()-nutau.px(),
-                                                          tau->momentum().py()-nutau.py(),
-                                                          tau->momentum().pz()-nutau.pz(),
-                                                          tau->momentum().e()-nutau.e());
-          if (tauvis.vect().perp() >= m_LGMinPt && std::abs(tauvis.vect().pseudoRapidity()) <= m_LGMaxEta) {
-            MCTruthTauList.push_back(tauvis);
-            ATH_MSG_INFO("had-tau pt(Gaudi::Units::GeV) = " << tauvis.vect().perp()/Gaudi::Units::GeV << " eta = " << tauvis.vect().pseudoRapidity());
-          } 
-        }
-      }
-    }
-#endif
   }
 
   // Select TruthJets
@@ -275,7 +233,7 @@ StatusCode VBFForwardJetsFilter::filterEvent() {
   // cppcheck-suppress shiftNegative
   ATH_MSG_INFO("JJ     OK? : " << flagJJ);
 
-  setFilterPassed(flagNJets != 0 && flag1stJet != 0 && flag2ndJet != 0 && flagSign != 0 && flagJJ != 0);
+  setFilterPassed(flagNJets != 0 && flag1stJet != 0 && flag2ndJet != 0 && flagSign != 0 && flagJJ != 0, ctx);
   return StatusCode::SUCCESS;
 }
 
@@ -283,7 +241,7 @@ StatusCode VBFForwardJetsFilter::filterEvent() {
 CLHEP::HepLorentzVector VBFForwardJetsFilter::sumDaughterNeutrinos(const HepMC::ConstGenParticlePtr& part ) const{
   CLHEP::HepLorentzVector nu( 0, 0, 0, 0);
 
-  if ( ( std::abs( part->pdg_id() ) == 12 ) || ( std::abs( part->pdg_id() ) == 14 ) || ( std::abs( part->pdg_id() ) == 16 ) ) {
+  if ( MC::isSMNeutrino(part) ) {
     nu.setPx(part->momentum().px());
     nu.setPy(part->momentum().py());
     nu.setPz(part->momentum().pz());

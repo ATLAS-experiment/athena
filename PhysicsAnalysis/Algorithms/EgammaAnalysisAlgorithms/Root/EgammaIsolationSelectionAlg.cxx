@@ -45,12 +45,12 @@ namespace CP
 
 
   StatusCode EgammaIsolationSelectionAlg ::
-  execute ()
+  execute (const EventContext& ctx)
   {
     for (const auto& sys : m_systematicsList.systematicsVector())
     {
       const xAOD::EgammaContainer *egammas = nullptr;
-      ANA_CHECK (m_egammasHandle.retrieve (egammas, sys));
+      ANA_CHECK (m_egammasHandle.retrieve (egammas, sys, ctx));
       for (const xAOD::Egamma *egamma : *egammas)
       {
         if (m_preselection.getBool (*egamma, sys))

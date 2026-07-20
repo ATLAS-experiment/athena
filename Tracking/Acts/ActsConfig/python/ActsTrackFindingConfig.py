@@ -88,7 +88,6 @@ def ActsMainTrackFindingAlgCfg(flags,
     # Maybe it is best to start with strips where the occupancy is lower.
     kwargs.setdefault("SeedLabels", seedOrder(flags, pixel=["PPP"], strip=["SSS"]))
     kwargs.setdefault("SeedContainerKeys", seedOrder(flags, pixel=["ActsPixelSeeds"], strip=["ActsStripSeeds"]))
-    kwargs.setdefault('DetectorElementsKeys', seedOrder(flags, pixel=['ITkPixelDetectorElementCollection'], strip=['ITkStripDetectorElementCollection']))
     if flags.Acts.Tracks.doAnalysis:
         kwargs.setdefault("SeedDestiny", [f'{seedkey}Destiny' for seedkey in kwargs["SeedContainerKeys"]])
 
@@ -126,6 +125,8 @@ def ActsMainTrackFindingAlgCfg(flags,
 
     kwargs.setdefault("branchStopperPtMinFactor", 0.9)
     kwargs.setdefault("branchStopperAbsEtaMaxExtra", 0.1)
+    if not flags.Tracking.ActiveConfig.isLargeD0:   # consider seedRefitPtMinFactor later, with other LRT optimisations
+        kwargs.setdefault("seedRefitPtMinFactor", 0.9)
 
     # Loosen the requirement on the minimum number of measurements on track candidate
     # during track finding for tracks above a certain eta
@@ -166,10 +167,6 @@ def ActsMainTrackFindingAlgCfg(flags,
             acc.getPrimaryAndMerge(ActsTrackingGeometryToolCfg(flags)),
         )
 
-    if 'ATLASConverterTool' not in kwargs:
-        from ActsConfig.ActsEventCnvConfig import ActsToTrkConverterToolCfg
-        kwargs.setdefault('ATLASConverterTool', acc.popToolsAndMerge(ActsToTrkConverterToolCfg(flags)))
-
     if 'TrackParamsEstimationTool' not in kwargs:
         from ActsConfig.ActsTrackParamsEstimationConfig import ActsTrackParamsEstimationToolCfg
 
@@ -204,12 +201,13 @@ def ActsMainTrackFindingAlgCfg(flags,
     if 'PixelCalibrator' not in kwargs:
         from AthenaConfiguration.Enums import BeamType
 
-        if not (flags.Beam.Type is BeamType.Cosmics):
+        if flags.Beam.Type is not BeamType.Cosmics:
             from ActsConfig.ActsConfigFlags import PixelCalibrationStrategy
             from ActsConfig.ActsMeasurementCalibrationConfig import ActsAnalogueClusteringToolCfg
             
             if flags.Acts.PixelCalibrationStrategy in (PixelCalibrationStrategy.AnalogueClustering,
-                                                       PixelCalibrationStrategy.AnalogueClusteringAfterSelection) :
+                                                       PixelCalibrationStrategy.AnalogueClusteringAfterSelection,
+                                                       PixelCalibrationStrategy.NNClustering):
 
                 kwargs.setdefault(
                     'PixelCalibrator',
@@ -219,7 +217,7 @@ def ActsMainTrackFindingAlgCfg(flags,
 
     if 'StripCalibrator' not in kwargs:
         from AthenaConfiguration.Enums import BeamType
-        if not (flags.Beam.Type is BeamType.Cosmics):
+        if flags.Beam.Type is not BeamType.Cosmics:
             from ActsConfig.ActsMeasurementCalibrationConfig import ActsStripCalibrationToolCfg
             from ActsConfig.ActsConfigFlags import StripCalibrationStrategy
 
@@ -295,7 +293,6 @@ def ActsTrackFindingCfg(flags,
     kwargs.setdefault('UncalibratedMeasurementContainerKeys', isdet(flags, pixel=[pixelClusters], strip=[stripClusters], hgtd=[hgtdClusters]))
     kwargs.setdefault('SeedLabels', seedOrder(flags, pixel=pixelSeedLabels, strip=stripSeedLabels))
     kwargs.setdefault('SeedContainerKeys', seedOrder(flags, pixel=pixelSeedKeys, strip=stripSeedKeys))
-    kwargs.setdefault('DetectorElementsKeys', seedOrder(flags, pixel=pixelDetElements, strip=stripDetElements))
     kwargs.setdefault("refitSeeds", seedOrder(flags, pixel=pixelRefit, strip=stripRefit))
 
     acc.merge(ActsMainTrackFindingAlgCfg(flags,
@@ -310,12 +307,13 @@ def ActsTrackFindingCfg(flags,
                                           TracksLocation=f"{flags.Tracking.ActiveConfig.extension}Tracks"))
 
         # Seed To Track Monitoring
-        if len(kwargs["SeedContainerKeys"]) != len(kwargs["DetectorElementsKeys"]):
+        DetectorElementsKeys=seedOrder(flags, pixel=pixelDetElements, strip=stripDetElements)
+        if len(kwargs["SeedContainerKeys"]) != len(DetectorElementsKeys):
             raise AttributeError("SeedContainerKeys and DetectorElementsKeys must have same size")
 
         for i in range(0, len(kwargs["SeedContainerKeys"])):
             seedKey = kwargs["SeedContainerKeys"][i]
-            detElKey = kwargs["DetectorElementsKeys"][i]
+            detElKey = DetectorElementsKeys[i]
 
             # make seed params
             from ActsConfig.ActsAnalysisConfig import ActsBaseSeedsToTrackParamsAlgCfg
@@ -335,32 +333,73 @@ def ActsTrackFindingCfg(flags,
     # Persistification
     if flags.Acts.EDM.PersistifyTracks:
         trackColl = kwargs['ACTSTracksLocation']
-        from ActsConfig.ActsTrackFindingConfig import ActsToXAODTrackConverterAlgCfg
+        from ActsConfig.ActsEventCnvConfig import ActsToXAODTrackConverterAlgCfg
         acc.merge(ActsToXAODTrackConverterAlgCfg(flags,
                                                  name = f'{trackColl}ToXAODConverterAlg',
                                                  InputActsTracksLocation = trackColl,
                                                  OutputActsTracksLocation = trackColl))
-        
-        toAOD = []
+
         prefix = f"{flags.Tracking.ActiveConfig.extension}"
-        toAOD += [f"xAOD::TrackSummaryContainer#{prefix}TrackSummary",
-                  f"xAOD::TrackSummaryAuxContainer#{prefix}TrackSummaryAux.",
-                  f"xAOD::TrackStateContainer#{prefix}TrackStates",
-                  f"xAOD::TrackStateAuxContainer#{prefix}TrackStatesAux.-uncalibratedMeasurement",
-                  f"xAOD::TrackParametersContainer#{prefix}TrackParameters",
-                  f"xAOD::TrackParametersAuxContainer#{prefix}TrackParametersAux.",
-                  f"xAOD::TrackJacobianContainer#{prefix}TrackJacobians",
-                  f"xAOD::TrackJacobianAuxContainer#{prefix}TrackJacobiansAux.",
-                  f"xAOD::TrackMeasurementContainer#{prefix}TrackMeasurements",
-                  f"xAOD::TrackMeasurementAuxContainer#{prefix}TrackMeasurementsAux.",
-                  f"xAOD::TrackSurfaceContainer#{prefix}TrackStateSurfaces",
-                  f"xAOD::TrackSurfaceAuxContainer#{prefix}TrackStateSurfacesAux.",
-                  f"xAOD::TrackSurfaceContainer#{prefix}TrackSurfaces",
-                  f"xAOD::TrackSurfaceAuxContainer#{prefix}TrackSurfacesAux."]
-        from OutputStreamAthenaPool.OutputStreamConfig import addToAOD
-        acc.merge(addToAOD(flags, toAOD))
-        
+        from ActsConfig.ActsPersistificationConfig import PersistifyTracks
+        acc.merge(PersistifyTracks(flags,
+                                   extensions=[prefix]))
+
     return acc
+
+
+def ActsTrackFindingGNNCfg(flags, **kwargs) -> ComponentAccumulator:
+    acc = ComponentAccumulator()
+
+    # This is added in the seeding step of the CKF chain...
+    from BeamSpotConditions.BeamSpotConditionsConfig import BeamSpotCondAlgCfg
+    acc.merge(BeamSpotCondAlgCfg(flags))
+    
+    # Adopt standard convention
+    kwargs.setdefault('ACTSTracksLocation', f"{flags.Tracking.ActiveConfig.extension}Tracks")
+
+    kwargs.setdefault("moduleMapPath", flags.Acts.GNN.ModuleMapPath)
+    kwargs.setdefault("gnnPath", flags.Acts.GNN.ModelPath)
+    kwargs.setdefault("numTrtContexts", flags.Acts.GNN.NumTrtContexts)
+    kwargs.setdefault("maxGpuInstances", flags.Acts.GNN.MaxGpuInstances)
+    kwargs.setdefault("varianceInflation", flags.Acts.GNN.VarianceInflation)
+    kwargs.setdefault("tightSeeds", flags.Acts.GNN.TightSeeds)
+    kwargs.setdefault("edgeCut", flags.Acts.GNN.EdgeCut)
+    kwargs.setdefault("minCandidateMeasurements", flags.Acts.GNN.MinCandidateMeasurements)
+    kwargs.setdefault("minDeltaR", flags.Acts.GNN.MinDeltaR)
+    kwargs.setdefault("relaxCentralHoleSel", flags.Acts.GNN.RelaxCentralHoleSel)
+    kwargs.setdefault("relaxMeasurementSel", flags.Acts.GNN.RelaxMeasurementSel)
+    kwargs.setdefault("offlineZ0Sel", flags.Acts.GNN.OfflineZ0Sel)
+
+    # Wire parameter estimation and fitter tools like the main Acts path
+    if 'TrackParamsEstimationTool' not in kwargs:
+        from ActsConfig.ActsTrackParamsEstimationConfig import ActsTrackParamsEstimationToolCfg
+        kwargs.setdefault('TrackParamsEstimationTool', acc.popToolsAndMerge(ActsTrackParamsEstimationToolCfg(flags)))
+
+    if 'FitterTool' not in kwargs:
+        from ActsConfig.ActsTrackFittingConfig import ActsFitterCfg
+        kwargs.setdefault('FitterTool', acc.popToolsAndMerge(ActsFitterCfg(flags, ReverseFilteringPt=0, OutlierChi2Cut=float('inf'))))
+
+    if 'TrackingGeometryTool' not in kwargs:
+        from ActsConfig.ActsGeometryConfig import ActsTrackingGeometryToolCfg
+        kwargs.setdefault(
+            "TrackingGeometryTool",
+            acc.getPrimaryAndMerge(ActsTrackingGeometryToolCfg(flags)),
+        )
+
+    if 'ExtrapolationTool' not in kwargs:
+        from ActsConfig.ActsGeometryConfig import ActsExtrapolationToolCfg
+        kwargs.setdefault(
+            "ExtrapolationTool",
+            acc.popToolsAndMerge(ActsExtrapolationToolCfg(flags, MaxSteps=10000)),
+        )
+
+    acc.addEventAlgo(
+        CompFactory.ActsTrk.TrackFindingGNNAlg("TrackFindingGNNAlg", **kwargs)
+    )
+
+    return acc
+
+
 
 
 def ActsMainScoreBasedAmbiguityResolutionAlgCfg(flags,
@@ -434,98 +473,17 @@ def ActsAmbiguityResolutionCfg(flags,
     # Persistification
     if flags.Acts.EDM.PersistifyTracks:
         trackColl = kwargs['ResolvedTracksLocation']
-        from ActsConfig.ActsTrackFindingConfig import ActsToXAODTrackConverterAlgCfg
+        from ActsConfig.ActsEventCnvConfig import ActsToXAODTrackConverterAlgCfg
         acc.merge(ActsToXAODTrackConverterAlgCfg(flags,
                                                  name = f'{trackColl}ToXAODConverterAlg',
                                                  InputActsTracksLocation = trackColl,
                                                  OutputActsTracksLocation = trackColl))
-        
-        toAOD = []
+
         prefix = f"{flags.Tracking.ActiveConfig.extension}Resolved"
-        toAOD += [f"xAOD::TrackSummaryContainer#{prefix}TrackSummary",
-                  f"xAOD::TrackSummaryAuxContainer#{prefix}TrackSummaryAux.",
-                  f"xAOD::TrackStateContainer#{prefix}TrackStates",
-                  f"xAOD::TrackStateAuxContainer#{prefix}TrackStatesAux.-uncalibratedMeasurement",
-                  f"xAOD::TrackParametersContainer#{prefix}TrackParameters",
-                  f"xAOD::TrackParametersAuxContainer#{prefix}TrackParametersAux.",
-                  f"xAOD::TrackJacobianContainer#{prefix}TrackJacobians",
-                  f"xAOD::TrackJacobianAuxContainer#{prefix}TrackJacobiansAux.",
-                  f"xAOD::TrackMeasurementContainer#{prefix}TrackMeasurements",
-                  f"xAOD::TrackMeasurementAuxContainer#{prefix}TrackMeasurementsAux.",
-                  f"xAOD::TrackSurfaceContainer#{prefix}TrackStateSurfaces",
-                  f"xAOD::TrackSurfaceAuxContainer#{prefix}TrackStateSurfacesAux.",
-                  f"xAOD::TrackSurfaceContainer#{prefix}TrackSurfaces",
-                  f"xAOD::TrackSurfaceAuxContainer#{prefix}TrackSurfacesAux."]        
-        from OutputStreamAthenaPool.OutputStreamConfig import addToAOD    
-        acc.merge(addToAOD(flags, toAOD))
+        from ActsConfig.ActsPersistificationConfig import PersistifyTracks
+        acc.merge(PersistifyTracks(flags,
+                                   extensions=[prefix]))
 
     return acc
 
-def ActsTrackToTrackParticleCnvToolCfg(flags,
-                                       name: str = "ActsTrackToTrackParticleCnvTool",
-                                       **kwargs) -> ComponentAccumulator:
-    acc = ComponentAccumulator()
 
-    # To produce AtlasFieldCacheCondObj
-    from MagFieldServices.MagFieldServicesConfig import (
-        AtlasFieldCacheCondAlgCfg)
-    acc.merge(AtlasFieldCacheCondAlgCfg(flags))
-
-    from ActsConfig.ActsGeometryConfig import ActsExtrapolationToolCfg
-    kwargs.setdefault('ExtrapolationTool', acc.popToolsAndMerge(ActsExtrapolationToolCfg(flags)) )
-    from ActsConfig.ActsGeometryConfig import ActsTrackingGeometryToolCfg
-    kwargs.setdefault("TrackingGeometryTool", acc.getPrimaryAndMerge(ActsTrackingGeometryToolCfg(flags)))
-    kwargs.setdefault('FirstAndLastParameterOnly',True)
-    kwargs.setdefault('ComputeExpectedLayerPattern',True)
-
-
-    acc.setPrivateTools(CompFactory.ActsTrk.TrackToTrackParticleCnvTool(name, **kwargs))
-    return acc
-
-
-def ActsTrackToTrackParticleCnvAlgCfg(flags,
-                                      name: str = "ActsTrackToTrackParticleCnvAlg",
-                                      **kwargs) -> ComponentAccumulator:
-    acc = ComponentAccumulator()
-
-    # Beam Spot Cond is a requirement
-    from BeamSpotConditions.BeamSpotConditionsConfig import BeamSpotCondAlgCfg
-    acc.merge(BeamSpotCondAlgCfg(flags))
-
-    # Configure TrackToTrackParticleConvTool
-    tool_kwargs = {}
-    if "ExtrapolationTool" in kwargs:
-        tool_kwargs["ExtrapolationTool"] = kwargs.pop("ExtrapolationTool")
-    if "FirstAndLastParameterOnly" in kwargs:
-        tool_kwargs["FirstAndLastParameterOnly"] = kwargs.pop("FirstAndLastParameterOnly")
-    if "ComputeExpectedLayerPattern" in kwargs:
-        tool_kwargs["ComputeExpectedLayerPattern"] = kwargs.pop("ComputeExpectedLayerPattern")
-    if "MuonSummaryTool" in kwargs:
-        tool_kwargs["MuonSummaryTool"] = kwargs.pop("MuonSummaryTool")
-    if 'TrackToTrackParticleCnvTool' not in kwargs:
-        kwargs['TrackToTrackParticleCnvTool'] = acc.popToolsAndMerge(
-            ActsTrackToTrackParticleCnvToolCfg(flags, **tool_kwargs))
-
-    kwargs.setdefault('BeamSpotKey', 'BeamSpotData')
-    kwargs.setdefault("PerigeeExpression", flags.Tracking.perigeeExpression)
-    kwargs.setdefault('VertexContainerKey', 'PrimaryVertices')
-
-    acc.addEventAlgo(
-        CompFactory.ActsTrk.TrackToTrackParticleCnvAlg(name, **kwargs))
-
-    return acc
-
-def ActsToXAODTrackConverterAlgCfg(flags,
-                                   name: str = "ActsToXAODTrackConverterAlg",
-                                   **kwargs) -> ComponentAccumulator:
-    acc = ComponentAccumulator()
-
-    kwargs.setdefault('InputActsTracksLocation', '')
-    kwargs.setdefault('OutputActsTracksLocation', '')
-
-    if 'TrackingGeometryTool' not in kwargs:
-        from ActsConfig.ActsGeometryConfig import ActsTrackingGeometryToolCfg
-        kwargs.setdefault('TrackingGeometryTool', acc.getPrimaryAndMerge(ActsTrackingGeometryToolCfg(flags)))
-    
-    acc.addEventAlgo(CompFactory.ActsTrk.ActsToXAODTrackConverterAlg(name, **kwargs))    
-    return acc

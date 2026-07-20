@@ -24,13 +24,25 @@ atlas_add_dictionary( CollectionSvcDict
 atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
 
 if( NOT GENERATIONBASE )
-  atlas_add_test( Factory_test
-                  SOURCES test/Factory_test.cxx
-		  LINK_LIBRARIES CollectionSvc PersistentDataModel
-                  PROPERTIES TIMEOUT 300 )
-
   atlas_add_test( collSorting_test
                   SCRIPT test/test_CollSort.py
                   POST_EXEC_SCRIPT noerror.sh )
+
+  atlas_add_test( ttree_coll_rw_test
+                  SOURCES test/ttree_rw_test.cxx test/rw_test.cxx
+                  LINK_LIBRARIES ${CORAL_LIBRARIES} CollectionSvc 
+                     PersistentDataModel StorageSvc CxxUtils AthenaKernel
+                  LOG_IGNORE_PATTERN "POOLCollectionID.*Value=" )
+
+  atlas_add_test( rntuple_coll_rw_test
+                  SOURCES test/rntuple_rw_test.cxx test/rw_test.cxx
+	                LINK_LIBRARIES ${CORAL_LIBRARIES} CollectionSvc 
+                    PersistentDataModel StorageSvc CxxUtils AthenaKernel
+                  LOG_IGNORE_PATTERN "POOLCollectionID.*Value=" )
+
+  # wait for the test collections to be created, then sort them
+  atlas_add_test( sort_test
+                  SCRIPT test/sort_test.py
+                  DEPENDS ttree_coll_rw_test rntuple_coll_rw_test )
 
 endif()

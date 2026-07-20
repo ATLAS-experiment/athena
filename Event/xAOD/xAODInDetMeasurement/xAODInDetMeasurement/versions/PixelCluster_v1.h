@@ -11,6 +11,7 @@
 #include "xAODInDetMeasurement/JaggedVecEltCache.h"
 #include "AthContainers/JaggedVecAccessor.h"
 #include "xAODCore/VariableStruct.h"
+#include "xAODInDetMeasurement/ArrayFloat3.h"
 
 namespace xAOD {
 
@@ -125,7 +126,7 @@ public:
       AUXSTORE_VARSTRUCT_VAR(xAOD::DetectorIDHashType,             identifierHash);
       AUXSTORE_VARSTRUCT_VAR(xAOD::PosAccessor<2>::element_type,   localPositionDim2);
       AUXSTORE_VARSTRUCT_VAR(xAOD::CovAccessor<2>::element_type,   localCovarianceDim2);
-      AUXSTORE_VARSTRUCT_VAR(xAOD::PosAccessor<3>::element_type,   globalPosition);
+      AUXSTORE_VARSTRUCT_VAR(xAOD::ArrayFloat3,                    globalPosition);
       AUXSTORE_VARSTRUCT_VAR(int,                                  channelsInPhi);
       AUXSTORE_VARSTRUCT_VAR(int,                                  channelsInEta);
       AUXSTORE_VARSTRUCT_VAR(float,                                widthInEta);

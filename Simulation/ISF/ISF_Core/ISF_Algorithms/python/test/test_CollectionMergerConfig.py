@@ -37,6 +37,7 @@ class Test_generate_mergeable_collection_name(unittest.TestCase):
         result.printConfig(withDetails=True, summariseProps=True, prefix='CATest')
         expected_collection_name = 'aTestCollection_TESTSUFFIX'
         self.assertEqual(expected_collection_name, actual_collection_name)
+        result.wasMerged()
 
     def test_isISFRunAndHITSMergingRequiredWithEmptyCollectionMergerAlgorithm_expectCollectionAddedToCollectionMergerAlgorithm(self):
         flags = initConfigFlags()
@@ -66,6 +67,7 @@ class Test_generate_mergeable_collection_name(unittest.TestCase):
         expected_collection_merger_input = ['aTestCollection_TESTSUFFIX']
         self.assertEqual(expected_collection_merger_input,
                          actual_collection_merger_input)
+        result.wasMerged()
 
     def test_isISFRunAndHITSMergingRequiredWithDuplicateCollection_expectCollectionAddedOnceToCollectionMergerAlgorithm(self):
         flags = initConfigFlags()
@@ -104,6 +106,7 @@ class Test_generate_mergeable_collection_name(unittest.TestCase):
         self.assertEqual(expected_collection_name, duplicate_collection_name)
         self.assertEqual(expected_collection_merger_input,
                          actual_collection_merger_input)
+        result.wasMerged()
 
     def test_isISFRunAndNoHITSMergingRequired_expectBareCollectionNameReturned(self):
         flags = initConfigFlags()
@@ -127,6 +130,7 @@ class Test_generate_mergeable_collection_name(unittest.TestCase):
         result.printConfig(withDetails=True, summariseProps=True, prefix='CATest')
         expected_collection_name = 'aTestCollection'
         self.assertEqual(expected_collection_name, actual_collection_name)
+        result.wasMerged()
 
     def test_isISFRunAndNoHITSMergingRequiredWithEmptyCollectionMergerAlgorithm_expectCollectionMergerAlgorithmUntouched(self):
         flags = initConfigFlags()
@@ -156,6 +160,7 @@ class Test_generate_mergeable_collection_name(unittest.TestCase):
         expected_collection_merger_input = None # we don't expect ISF_CollectionMerger to have been created
         self.assertEqual(expected_collection_merger_input,
                          actual_collection_merger_input)
+        result.wasMerged()
 
     def test_isNotISFRunAndNoHITSMergingRequired_expectBareCollectioNameReturned(self):
         flags = initConfigFlags()
@@ -178,6 +183,7 @@ class Test_generate_mergeable_collection_name(unittest.TestCase):
         result.printConfig(withDetails=True, summariseProps=True, prefix='CATest')
         expected_collection_name = 'aTestCollection'
         self.assertEqual(expected_collection_name, actual_collection_name)
+        result.wasMerged()
 
     def test_isNotISFRunAndHITSMergingRequired_expectBareCollectioNameReturned(self):
         flags = initConfigFlags()
@@ -200,6 +206,7 @@ class Test_generate_mergeable_collection_name(unittest.TestCase):
         result.printConfig(withDetails=True, summariseProps=True, prefix='CATest')
         expected_collection_name = 'aTestCollection'
         self.assertEqual(expected_collection_name, actual_collection_name)
+        result.wasMerged()
 
     def test_isNotISFRunAndNoHITSMergingRequired_expectCollectionMergerAlgorithmUntouched(self):
         flags = initConfigFlags()
@@ -228,6 +235,7 @@ class Test_generate_mergeable_collection_name(unittest.TestCase):
         expected_collection_merger_input = None # we don't expect ISF_CollectionMerger to have been created
         self.assertEqual(expected_collection_merger_input,
                          actual_collection_merger_input)
+        result.wasMerged()
 
     def test_isNotISFRunAndHITSMergingRequired_expectCollectionMergerAlgorithmUntouched(self):
         flags = initConfigFlags()
@@ -256,6 +264,7 @@ class Test_generate_mergeable_collection_name(unittest.TestCase):
         expected_collection_merger_input = None # we don't expect ISF_CollectionMerger to have been created
         self.assertEqual(expected_collection_merger_input,
                          actual_collection_merger_input)
+        result.wasMerged()
 
 
 if __name__ == '__main__':

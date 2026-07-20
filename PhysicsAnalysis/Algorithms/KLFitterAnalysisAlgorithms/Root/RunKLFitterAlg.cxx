@@ -296,7 +296,7 @@ StatusCode RunKLFitterAlg::initialize() {
   return StatusCode::SUCCESS;
 }
 
-StatusCode RunKLFitterAlg::execute() {
+StatusCode RunKLFitterAlg::execute(const EventContext& /*ctx*/) {
   for (const auto &sys : m_systematicsList.systematicsVector()) {
     ANA_CHECK(execute_syst(sys));
   }

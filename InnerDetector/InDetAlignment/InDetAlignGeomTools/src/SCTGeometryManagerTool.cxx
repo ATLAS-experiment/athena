@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "AthContainers/DataVector.h"
@@ -694,13 +694,12 @@ namespace InDet {
               mod->addDetElement(Trk::AlignModule::SCT,element,transform);
               // and fill the corresponding map
               (*sctIdHashMap)[element->identifyHash()] = mod;
+              // for the stave alignment frame rotation we use the one of the iEta=1
+              // non-stereo side (which is the module local frame)
+              if(iEta==1 && !element->isStereo())
+                rotation = element->moduleTransform().rotation();
+              }
             }
-
-            // for the stave alignment frame rotation we use the one of the iEta=1
-            // non-stereo side (which is the module local frame)
-            if(iEta==1 && !element->isStereo())
-              rotation = element->moduleTransform().rotation();
-          }
         }
 
         // we set the alignment frame to be the CoG of the stave

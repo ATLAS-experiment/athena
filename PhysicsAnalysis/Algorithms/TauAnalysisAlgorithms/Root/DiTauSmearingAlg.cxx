@@ -34,13 +34,13 @@ namespace CP
 
 
   StatusCode DiTauSmearingAlg ::
-  execute ()
+  execute (const EventContext& ctx)
   {
     for (const auto& sys : m_systematicsList.systematicsVector())
     {
       ANA_CHECK (m_smearingTool->applySystematicVariation (sys));
       xAOD::DiTauJetContainer *taus = nullptr;
-      ANA_CHECK (m_tauHandle.getCopy (taus, sys));
+      ANA_CHECK (m_tauHandle.getCopy (taus, sys, ctx));
       for (xAOD::DiTauJet *tau : *taus)
       {
         if (m_preselection.getBool (*tau, sys))

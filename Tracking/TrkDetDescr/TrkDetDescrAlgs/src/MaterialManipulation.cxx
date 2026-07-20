@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -10,29 +10,11 @@
 #include "GaudiKernel/SystemOfUnits.h"
 //TrkDetDescr Algs, Interfaces, Utils
 #include "MaterialManipulation.h"
-#include "TrkDetDescrInterfaces/ILayerMaterialManipulator.h"
 #include "TrkDetDescrUtils/LayerIndex.h"
 #include "TrkGeometry/LayerMaterialProperties.h"
 #include "TrkGeometry/LayerMaterialMap.h"
 #include "TrkGeometry/ElementTable.h"
 
-
-Trk::MaterialManipulation::MaterialManipulation(const std::string& name, ISvcLocator* pSvcLocator)
-: AthAlgorithm(name,pSvcLocator),
-  m_inputLayerMaterialMapName("/GLOBAL/TrackingGeo/Input"),
-  m_inputLayerMaterialMap(nullptr),
-  m_outputLayerMaterialMapName("/GLOBAL/TrackingGeo/Output"),
-  m_layerMaterialManipulator("")
-{
-    declareProperty("LayerMaterialManipulator",  m_layerMaterialManipulator);
-    // input - output definition
-    declareProperty("LayerMaterialMapNameInput",   m_inputLayerMaterialMapName);
-    declareProperty("LayerMaterialMapNameOutput",  m_outputLayerMaterialMapName);
-
-}
-
-Trk::MaterialManipulation::~MaterialManipulation()
-= default;
 
 StatusCode Trk::MaterialManipulation::initialize()
 {
@@ -46,7 +28,7 @@ StatusCode Trk::MaterialManipulation::initialize()
 }
 
 
-StatusCode Trk::MaterialManipulation::execute()
+StatusCode Trk::MaterialManipulation::execute(const EventContext& /*ctx*/)
 {
     ATH_MSG_VERBOSE("MaterialManipulation execute() start");
 

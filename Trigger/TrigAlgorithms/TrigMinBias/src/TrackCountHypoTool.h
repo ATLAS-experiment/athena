@@ -1,5 +1,5 @@
 /*
-Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef TRIGMINBIAS_TRACKCOUNTHYPOTOOL_H
 #define TRIGMINBIAS_TRACKCOUNTHYPOTOOL_H
@@ -19,8 +19,8 @@ public:
     const IInterface* parent);
 
   struct TrkCountsInfo {
-    TrigCompositeUtils::Decision* decision;
-    const xAOD::TrigComposite* counts;
+    TrigCompositeUtils::Decision* decision = nullptr;
+    const xAOD::TrigComposite* counts = nullptr;
     const TrigCompositeUtils::DecisionIDContainer previousDecisionIDs;
   };
 

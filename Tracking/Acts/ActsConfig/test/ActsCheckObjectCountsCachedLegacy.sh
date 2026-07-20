@@ -3,7 +3,7 @@
 
 # ttbar mu=200 input
 input_rdo=$(python -c "from AthenaConfiguration.TestDefaults import defaultTestFiles; print(defaultTestFiles.RDO_RUN4[0])")
-
+conditions_tag=$(python -c "from AthenaConfiguration.TestDefaults import defaultConditionsTags; print(defaultConditionsTags.RUN4_MC)")
 n_events=5
 log_file="reco.log"
 
@@ -12,14 +12,14 @@ ignore_pattern=""
 export ATHENA_CORE_NUMBER=1
 Reco_tf.py \
   --preExec "flags.Exec.FPE=-1; \
-       	     flags.Detector.EnableMuon=False; \
-	     flags.Tracking.doTruth=False; \
-	     flags.Tracking.doITkConversion=False; \
-	     flags.Acts.doLargeRadius=True; \
-	     flags.Acts.doLowPt=True; \
-	     flags.Acts.useCache=True;" \
+       flags.Detector.EnableMuon=False; \
+       flags.Tracking.doITkConversion=False; \
+       flags.Acts.doLargeRadius=True; \
+       flags.Acts.doLowPt=True; \
+       flags.Acts.useCache=True;" \
   --preInclude "ActsConfig.ActsCIFlags.actsLegacyWorkflowFlags" \
   --ignorePatterns "${ignore_pattern}" \
+  --conditionsTag ${conditions_tag} \
   --inputRDOFile ${input_rdo} \
   --outputAODFile AOD.pool.root \
   --maxEvents ${n_events} \

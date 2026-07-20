@@ -172,7 +172,7 @@ StatusCode CSCHitAnalysis::initialize() {
 }
 
 
-StatusCode CSCHitAnalysis::execute() {
+StatusCode CSCHitAnalysis::execute(const EventContext& /*ctx*/) {
   ATH_MSG_DEBUG( "In CSCHitAnalysis::execute()" );
   
   m_hits_x->clear();

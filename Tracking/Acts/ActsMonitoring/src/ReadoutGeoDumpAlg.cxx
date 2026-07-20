@@ -5,7 +5,7 @@
 
 
 #include "Acts/Geometry/TrackingGeometry.hpp"
-#include  "ActsGeometryInterfaces/IDetectorElement.h"
+#include  "ActsGeometryInterfaces/ISurfacePlacement.h"
 namespace ActsTrk {
 
     StatusCode ReadoutGeoDumpAlg::initialize() {
@@ -26,11 +26,10 @@ namespace ActsTrk {
         ATH_CHECK(m_tree.write());
          return StatusCode::SUCCESS;
     }
-    StatusCode ReadoutGeoDumpAlg::execute() {
+    StatusCode ReadoutGeoDumpAlg::execute(const EventContext& ctx) {
         if (m_executed) {
             return StatusCode::SUCCESS;
         }
-        const EventContext& ctx{Gaudi::Hive::currentContext()};
 
         const GeometryContext& gctx{m_trackingGeoTool->getGeometryContext(ctx)};
 
@@ -38,10 +37,10 @@ namespace ActsTrk {
         
         trackingGeo->visitSurfaces([&](const Acts::Surface* surface){
             // We only want alignable surfaces
-            if (!surface->isAlignable()) {
+            if (!surface->isAlignable() || !surface->isSensitive()) {
                 return;
             }
-            const auto* detEl = dynamic_cast<const IDetectorElement*>(surface->surfacePlacement());
+            const auto* detEl = dynamic_cast<const ISurfacePlacement*>(surface->surfacePlacement());
             // Somehow it's not a known detector element
             if (!detEl) {
                 return;

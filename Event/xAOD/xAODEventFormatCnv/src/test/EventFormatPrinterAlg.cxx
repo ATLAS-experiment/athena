@@ -25,7 +25,7 @@ namespace xAODMakerTest {
       return StatusCode::SUCCESS;
    }
 
-   StatusCode EventFormatPrinterAlg::execute() {
+   StatusCode EventFormatPrinterAlg::execute(const EventContext& /*ctx*/) {
      // determine the EventFormat key
      auto fmd =
          m_metaDataStore->tryConstRetrieve<xAOD::FileMetaData>("FileMetaData");

@@ -49,11 +49,11 @@ StatusCode LArCellContFakeWriter::initialize()
 }
 
 // Execute method:
-StatusCode LArCellContFakeWriter::execute() 
+StatusCode LArCellContFakeWriter::execute(const EventContext& ctx) 
 {
     ATH_MSG_DEBUG("LArCellContFakeWriter::execute()" );
 
-    SG::ReadCondHandle<CaloDetDescrManager> caloMgrHandle{m_caloMgrKey};
+    SG::ReadCondHandle<CaloDetDescrManager> caloMgrHandle{m_caloMgrKey, ctx};
     ATH_CHECK(caloMgrHandle.isValid());
 
     LArCellContFakeCreator creator;

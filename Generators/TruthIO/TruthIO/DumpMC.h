@@ -14,7 +14,7 @@ public:
 
   DumpMC(const std::string& name, ISvcLocator* pSvcLocator);
   StatusCode initialize();
-  StatusCode execute();
+  StatusCode execute(const EventContext& ctx);
 
   std::string m_keyout;
   bool m_VerboseOutput;

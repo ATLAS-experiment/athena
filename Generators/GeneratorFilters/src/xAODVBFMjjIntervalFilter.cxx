@@ -34,25 +34,24 @@ StatusCode xAODVBFMjjIntervalFilter::filterInitialize()
     return StatusCode::SUCCESS;
 }
 
-StatusCode xAODVBFMjjIntervalFilter::filterEvent()
+StatusCode xAODVBFMjjIntervalFilter::filterEvent(const EventContext& ctx)
 {
     // Get random number engine
-    const EventContext& ctx = Gaudi::Hive::currentContext();
     CLHEP::HepRandomEngine* rndm = this->getRandomEngine(name(), ctx);
     if (!rndm)
     {
         ATH_MSG_ERROR("Failed to retrieve random number engine xAODVBFMjjIntervalFilter");
-        setFilterPassed(false);
+        setFilterPassed(false, ctx);
         return StatusCode::FAILURE;
     }
 
     // Retrieve jet container
-    SG::ReadHandle<xAOD::JetContainer>  truthJetCollection{m_TruthJetContainerName};
+    SG::ReadHandle<xAOD::JetContainer>  truthJetCollection{m_TruthJetContainerName, ctx};
     CHECK(truthJetCollection.isValid());
 
     // Retrieve TruthGen container from xAOD Gen slimmer, contains all particles witout barcode_zero and
     // duplicated barcode ones
-    SG::ReadHandle<xAOD::TruthParticleContainer> xTruthParticleContainer{m_truthPartContKey};
+    SG::ReadHandle<xAOD::TruthParticleContainer> xTruthParticleContainer{m_truthPartContKey, ctx};
     CHECK(xTruthParticleContainer.isValid());
 
 
@@ -159,7 +158,7 @@ StatusCode xAODVBFMjjIntervalFilter::filterEvent()
         double rnd = rndm->flat();
         if (1.0 / eventWeight < rnd)
         {
-            setFilterPassed(false);
+            setFilterPassed(false, ctx);
             ATH_MSG_DEBUG("Event failed weighting. Weight is " << eventWeight);
             return StatusCode::SUCCESS;
         }
@@ -168,7 +167,7 @@ StatusCode xAODVBFMjjIntervalFilter::filterEvent()
         const McEventCollection* mecc = 0;
         if (evtStore()->retrieve(mecc).isFailure() || !mecc) // FIXME keyless retrieve
         {
-            setFilterPassed(false);
+            setFilterPassed(false, ctx);
             ATH_MSG_ERROR("Could not retrieve MC Event Collection - weight might not work");
             return StatusCode::SUCCESS;
         }
@@ -194,10 +193,7 @@ StatusCode xAODVBFMjjIntervalFilter::filterEvent()
                 (*mec)[i]->weights().push_back(eventWeight * m_norm * existingWeight);
             }
 
-#ifdef HEPMC3
-      static const std::string filterWeightStr{"filterWeight"};
-      (*mec)[i]->add_attribute(filterWeightStr, std::make_shared<HepMC3::DoubleAttribute>(eventWeight*m_norm));
-#endif
+      (*mec)[i]->add_attribute(HepMCStr::filterWeight, std::make_shared<HepMC3::DoubleAttribute>(eventWeight*m_norm));
 
         }
     } // Apply weighting
@@ -207,7 +203,7 @@ StatusCode xAODVBFMjjIntervalFilter::filterEvent()
         bool pass = ApplyMassDphi(&filteredJets);
         if (!pass)
         {
-            setFilterPassed(false);
+            setFilterPassed(false, ctx);
             ATH_MSG_DEBUG("Event failed filter");
             return StatusCode::SUCCESS;
         }
@@ -215,21 +211,21 @@ StatusCode xAODVBFMjjIntervalFilter::filterEvent()
         {
             if (filteredJets.size() < m_NJetsMin)
             {
-                setFilterPassed(false);
+                setFilterPassed(false, ctx);
                 return StatusCode::SUCCESS;
             }
             if (m_NJetsMax > 0)
             {
                 if (filteredJets.size() > m_NJetsMax)
                 {
-                    setFilterPassed(false);
+                    setFilterPassed(false, ctx);
                     return StatusCode::SUCCESS;
                 }
             } // Njets <
         }     // Apply Njets filter
     }
     // Made it to the end - success!
-    setFilterPassed(true);
+    setFilterPassed(true, ctx);
     return StatusCode::SUCCESS;
 }
 

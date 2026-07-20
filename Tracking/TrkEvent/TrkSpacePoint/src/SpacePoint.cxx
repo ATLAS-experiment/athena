@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -70,7 +70,15 @@ namespace Trk
            // cppcheck-suppress constStatement
            0., 0., 0.;
 
+    // Suppress false-positive uninitialized warning seen with gcc15.
+#if __GNUC__ >= 15
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wmaybe-uninitialized"
+#endif
     const Amg::RotationMatrix3D& R = associatedSurface().transform().rotation();
+#if __GNUC__ >= 15
+#pragma GCC diagnostic pop
+#endif
     m_globalCovariance = R * cov * R.transpose();
   }
 

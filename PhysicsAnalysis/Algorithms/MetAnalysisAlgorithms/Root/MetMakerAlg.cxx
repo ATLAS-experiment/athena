@@ -16,6 +16,7 @@
 #include <xAODMissingET/MissingETAssociationHelper.h>
 
 #include "AthContainers/ConstDataVector.h"
+#include "AthContainers/Decorator.h"
 
 //
 // method implementations
@@ -69,7 +70,7 @@ namespace CP
 
 
   StatusCode MetMakerAlg ::
-  execute ()
+  execute (const EventContext& ctx)
   {
     const xAOD::MissingETContainer* metcore {nullptr};
     ANA_CHECK (evtStore()->retrieve(metcore, m_metCoreName));
@@ -91,7 +92,7 @@ namespace CP
       ConstDataVector<xAOD::IParticleContainer> invisSelected(SG::VIEW_ELEMENTS);
       for (size_t i = 0; i < m_invisHandles.size(); ++i) {
         const xAOD::IParticleContainer* invisible = nullptr;
-        ATH_CHECK( m_invisHandles.at(i).retrieve(invisible, sys) );
+        ATH_CHECK( m_invisHandles.at(i).retrieve(invisible, sys, ctx) );
         for (const xAOD::IParticle *invisParticle : *invisible) {
           if (m_invisSelections.at(i).getBool(*invisParticle, sys))
             invisSelected.push_back(invisParticle);
@@ -108,6 +109,14 @@ namespace CP
              xAOD::Type::ObjectType type,
              const std::string& term) -> StatusCode {
           if (!handle) {
+            // The NN MET input vector needs a term for every hard-object type,
+            // so a missing handle is a configuration error on the NN path.
+            if (m_evaluateNNMET) {
+              ANA_MSG_ERROR ("evaluateNNMET requires a container for every "
+                             "hard-object type, but the handle for term \""
+                             << term << "\" is not configured");
+              return StatusCode::FAILURE;
+            }
             return StatusCode::SUCCESS;
           }
           const xAOD::IParticleContainer* particles = nullptr;
@@ -142,7 +151,7 @@ namespace CP
 
 
       const xAOD::JetContainer *jets {nullptr};
-      ANA_CHECK (m_jetsHandle.retrieve (jets, sys));
+      ANA_CHECK (m_jetsHandle.retrieve (jets, sys, ctx));
 
       if (m_doTrackMet)
       {
@@ -150,6 +159,24 @@ namespace CP
       } else
       {
         ANA_CHECK (m_makerTool->rebuildJetMET (m_jetsKey, m_softTermKey, met.get(), jets, metcore, metHelper, m_doJetJVT));
+      }
+
+      // Optionally run the NN-based MET (e.g. met::METNet). For NN tools,
+      // rebuildJetMET only assembles the network inputs; evaluateNNMET runs the
+      // inference and adds the total term directly. We then decorate met/phi on
+      // every term exactly as MetBuilderAlg would, so the NN path needs no
+      // builder afterwards (a builder sum would clobber the NN Final term).
+      if (m_evaluateNNMET)
+      {
+        ANA_CHECK (m_makerTool->evaluateNNMET (m_finalKey, met.get()));
+        static const SG::Decorator<float> met_met_dec ("met");
+        static const SG::Decorator<float> met_phi_dec ("phi");
+        for (const xAOD::MissingET *metTerm : *met)
+        {
+          if (!metTerm) continue;
+          met_met_dec (*metTerm) = metTerm->met();
+          met_phi_dec (*metTerm) = metTerm->phi();
+        }
       }
 
       // Systematics
@@ -174,7 +201,7 @@ namespace CP
         ANA_CHECK (m_systematicsTool->applyCorrection (*softTerm, metHelper));
       }
 
-      ANA_CHECK (m_metHandle.record (std::move (met), std::move (aux), sys));
+      ANA_CHECK (m_metHandle.record (std::move (met), std::move (aux), sys, ctx));
     }
 
     return StatusCode::SUCCESS;

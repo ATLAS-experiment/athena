@@ -77,8 +77,7 @@ StatusCode TileOFC2DBAlg::initialize() {
 
 //
 //_________________________________________________________________________  
-StatusCode TileOFC2DBAlg::execute() {
-  const EventContext &ctx = Gaudi::Hive::currentContext();
+StatusCode TileOFC2DBAlg::execute(const EventContext& ctx) {
 
   //=== print run/evt/lbn/time info for each event
   SG::ReadHandle<xAOD::EventInfo> eventInfo(m_eventInfoKey, ctx);

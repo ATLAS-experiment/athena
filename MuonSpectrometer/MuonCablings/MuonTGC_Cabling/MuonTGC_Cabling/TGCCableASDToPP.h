@@ -48,8 +48,8 @@ class TGCCableASDToPP : public TGCCable {
    private:
     // reverse layers in Forward sector
 
-    static constexpr std::array<int, 9> s_stripForward{2, 1, 0, 4, 3,
-                                                       6, 5, 8, 7};
+    static constexpr std::array<int, 10> s_stripForward{2, 1, 0, 4, 3,
+                                                        6, 5, 8, 7, 9};
 
    private:
     using ForwardSectorDB =

@@ -60,7 +60,7 @@ StatusCode FindDuplicatedLArDigits::initialize()
   return StatusCode::SUCCESS;
 }  
 
-StatusCode FindDuplicatedLArDigits::execute()
+StatusCode FindDuplicatedLArDigits::execute(const EventContext& /*ctx*/)
 {
   // Retrieve EventInfo
   const xAOD::EventInfo* thisEventInfo;

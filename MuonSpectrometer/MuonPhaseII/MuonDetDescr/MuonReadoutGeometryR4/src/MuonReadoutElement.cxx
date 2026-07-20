@@ -4,7 +4,7 @@
 #include "MuonReadoutGeometryR4/MuonReadoutElement.h"
 #include "MuonReadoutGeometryR4/SpectrometerSector.h"
 #include "ActsGeoUtils/TransformCache.h"
-#include "ActsGeoUtils/SurfaceCache.h"
+#include "ActsGeoUtils/SurfacePlacement.h"
 #ifndef SIMULATIONBASE
 #    include "Acts/Surfaces/LineBounds.hpp"
 #    include "Acts/Surfaces/PlanarBounds.hpp"
@@ -35,7 +35,7 @@ StatusCode MuonReadoutElement::createGeoTransform() {
        ATH_MSG_FATAL("The readout element "<<idHelperSvc()->toStringDetEl(identify())<<" has no assigned alignable node");
        return StatusCode::FAILURE;
     }
-    m_centralTrfCache = std::make_unique<TransformCacheDetEle<MuonReadoutElement>>(geoTransformHash(), this);
+    m_centralTrfCache = std::make_unique<ReadoutSurfacePositioning<MuonReadoutElement>>(geoTransformHash(), this);
     return StatusCode::SUCCESS;
 }
 IdentifierHash MuonReadoutElement::geoTransformHash() {     
@@ -84,8 +84,8 @@ const Acts::Transform3& MuonReadoutElement::localToGlobalTransform(const Acts::G
     return localToGlobalTransform(*gctx, geoTransformHash());
 }
 std::shared_ptr<Acts::Surface> MuonReadoutElement::surfacePtr(const IdentifierHash& hash) const {
-    SurfaceCacheSet::const_iterator cache = m_surfaces.find(hash);
-    if(cache != m_surfaces.end()) return (*cache)->getSurface();
+    const  IReadoutSurfacePositioning* cache = transformCache(hash);
+    if(cache  && cache->placement()) return cache->placement()->getSurface();
     ATH_MSG_FATAL(__FILE__<<":"<<__LINE__<<" "<<__func__<<"() -- Hash "<<hash
                <<" is unknown to "<<idHelperSvc()->toStringDetEl(identify()));
     return nullptr;
@@ -100,43 +100,37 @@ StatusCode MuonReadoutElement::strawSurfaceFactory(const IdentifierHash& hash,
                                                    std::shared_ptr<const Acts::LineBounds> lBounds) {
 
     //get the local to global transform cache
-    const TransformCache* cache = transformCache(hash);
+    IReadoutSurfacePositioning* cache = transformCache(hash);
     if (!cache) {
         ATH_MSG_FATAL(__FILE__<<":"<<__LINE__<<" - "<<idHelperSvc()->toString(identify())
                    <<" no transform cache available for hash "<<hash);
         return StatusCode::FAILURE;
     }
-
-    auto insert_itr = m_surfaces.insert(std::make_unique<SurfaceCache>(cache));
-    if(!insert_itr.second){
+    auto placement =  SurfacePlacement::makeShared<Acts::StrawSurface>(*cache, std::move(lBounds));
+    if(!placement){
         ATH_MSG_FATAL(__FILE__<<":"<<__LINE__<<" - "<<idHelperSvc()->toString(identify())
                    <<" Insertion to muon surface cache failed for hash "<<hash);
         return StatusCode::FAILURE;
     }
-    //Create straw surface for the surface cache
-    (*insert_itr.first)->setSurface(Acts::Surface::makeShared<Acts::StrawSurface>(lBounds, **insert_itr.first));
     return StatusCode::SUCCESS;
-
 }
 
 StatusCode MuonReadoutElement::planeSurfaceFactory(const IdentifierHash& hash, 
                                                    std::shared_ptr<const Acts::PlanarBounds> pBounds){
 
     //get the local to global transform cache
-    const TransformCache* cache = transformCache(hash);
+    IReadoutSurfacePositioning* cache = transformCache(hash);
     if (!cache) {
         ATH_MSG_FATAL(__FILE__<<":"<<__LINE__<<" - "<<idHelperSvc()->toString(identify())
                    <<" no transform cache available for hash "<<hash);
         return StatusCode::FAILURE;
     }
-    auto insert_itr = m_surfaces.insert(std::make_unique<SurfaceCache>(cache));
-    if(!insert_itr.second){
+    auto placement =  SurfacePlacement::makeShared<Acts::PlaneSurface>(*cache, std::move(pBounds));
+    if(!placement) {
         ATH_MSG_FATAL(__FILE__<<":"<<__LINE__<<" - "<<idHelperSvc()->toString(identify())
                    <<" Insertion to muon surface cache failed for hash "<<hash);
         return StatusCode::FAILURE;
     }
-    //Create a plane surface for the surface cache
-    (*insert_itr.first)->setSurface(Acts::Surface::makeShared<Acts::PlaneSurface>(pBounds, **insert_itr.first));
     return StatusCode::SUCCESS;
 }
 
@@ -149,10 +143,10 @@ void MuonReadoutElement::setSectorLink(const SpectrometerSector* envelope) {
 
 std::vector<std::shared_ptr<Acts::Surface>> MuonReadoutElement::getSurfaces() const {
     std::vector<std::shared_ptr<Acts::Surface>> surfaces{};
-    surfaces.reserve(m_surfaces.size());
-    for (const std::unique_ptr<SurfaceCache>& cache : m_surfaces) {
-        if (cache->hash() != geoTransformHash()) {
-            surfaces.push_back(cache->getSurface());
+    surfaces.reserve(m_localToGlobalCaches.size());
+    for (const auto& cache : m_localToGlobalCaches) {
+        if (cache && cache->placement()) {
+            surfaces.push_back(cache->placement()->getSurface());
             ATH_MSG_VERBOSE("Add surface "<<idHelperSvc()->toString(cache->identify())
                            <<std::endl<<(surfaces.back()->bounds()));
         }

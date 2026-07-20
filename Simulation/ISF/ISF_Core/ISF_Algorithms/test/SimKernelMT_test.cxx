@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -278,6 +278,10 @@ DECLARE_COMPONENT( MockEntryLayerTool )
       m_mockSimulationSelector = retrieveTool<MockSimulationSelector>(mockSimulationSelectorName);
       m_mockEntryLayerTool = retrieveTool<MockEntryLayerTool>(mockEntryLayerToolName);
       m_sg = svcLoc->service("StoreGateSvc");
+
+      // create a dummy EventContext
+      m_ctx.setExtension( Atlas::ExtendedEventContext( m_sg ) );
+      Gaudi::Hive::setCurrentContext( m_ctx );
     }
 
     template<typename T>
@@ -322,14 +326,10 @@ DECLARE_COMPONENT( MockEntryLayerTool )
     }
 
     void setEmptyInputOutputCollections() {
-      // create a dummy EventContext
-      EventContext ctx;
-      ctx.setExtension( Atlas::ExtendedEventContext( m_sg ) );
-      Gaudi::Hive::setCurrentContext( ctx );
       auto inputEvgen = std::make_unique<McEventCollection>();
       SG::WriteHandleKey<McEventCollection> testInputEvgenKey{"emptyTestInputEvgenCollection"};
       ASSERT_TRUE(testInputEvgenKey.initialize().isSuccess());
-      SG::WriteHandle<McEventCollection> testInputEvgenHandle(testInputEvgenKey, ctx);
+      SG::WriteHandle<McEventCollection> testInputEvgenHandle(testInputEvgenKey, m_ctx);
       EXPECT_TRUE( testInputEvgenHandle.record( std::move(inputEvgen) ).isSuccess() );
       EXPECT_TRUE( m_alg->setProperty("InputEvgenCollection", "emptyTestInputEvgenCollection").isSuccess() );
       EXPECT_TRUE( m_alg->setProperty("OutputTruthCollection", "testOutputTruthCollection").isSuccess() );
@@ -359,6 +359,7 @@ DECLARE_COMPONENT( MockEntryLayerTool )
     std::unique_ptr<ISF::SimKernelMT> m_alg;
 
     SmartIF<StoreGateSvc> m_sg;
+    EventContext m_ctx;
 
     // mocked Athena components
     ISFTesting::MockGeoIDSvc* m_mockGeoIDSvc{};
@@ -375,18 +376,10 @@ DECLARE_COMPONENT( MockEntryLayerTool )
   // checks if the two given HepMC::GenEvent instances are equal.
   // returns true if they are equal, false otherwise
   bool GenEventsEq(const HepMC::GenEvent& a, const HepMC::GenEvent& b) {
-#ifdef HEPMC3
     auto aVertexIterator = a.vertices().begin();
     auto bVertexIterator = b.vertices().begin();
     auto aVertexIteratorEnd = a.vertices().end();
     auto bVertexIteratorEnd = b.vertices().end();
-#else
-    HepMC::GenEvent::vertex_const_iterator aVertexIterator = a.vertices_begin();
-    HepMC::GenEvent::vertex_const_iterator bVertexIterator = b.vertices_begin();
-    const auto& aVertexIteratorEnd = a.vertices_end();
-    const auto& bVertexIteratorEnd = b.vertices_end();
-#endif
-
     bool eventsAreEqual = true;
 
     do {
@@ -467,7 +460,7 @@ DECLARE_COMPONENT( MockEntryLayerTool )
     EXPECT_TRUE( m_alg->setProperty("InputConverter", mockInputConverterName).isSuccess() );
 
     ASSERT_TRUE( m_alg->initialize().isSuccess() );
-    ASSERT_TRUE( m_alg->execute().isFailure() );
+    ASSERT_TRUE( m_alg->execute(m_ctx).isFailure() );
   }
 
 
@@ -476,37 +469,27 @@ DECLARE_COMPONENT( MockEntryLayerTool )
     EXPECT_TRUE( m_alg->setProperty("OutputTruthCollection", "testOutputTruthCollection").isSuccess() );
     EXPECT_TRUE( m_alg->setProperty("InputConverter", mockInputConverterName).isSuccess() );
 
-    // create a dummy EventContext
-    EventContext ctx;
-    ctx.setExtension( Atlas::ExtendedEventContext( m_sg ) );
-    Gaudi::Hive::setCurrentContext( ctx );
-
     auto inputEvgen = std::make_unique<McEventCollection>();
     SG::WriteHandleKey<McEventCollection> testInputEvgenKey{"testInputEvgenCollection"};
     ASSERT_TRUE(testInputEvgenKey.initialize().isSuccess());
-    SG::WriteHandle<McEventCollection> testInputEvgenHandle(testInputEvgenKey, ctx);
+    SG::WriteHandle<McEventCollection> testInputEvgenHandle(testInputEvgenKey, m_ctx);
     EXPECT_TRUE( testInputEvgenHandle.record( std::move(inputEvgen) ).isSuccess() );
 
     ASSERT_TRUE( m_alg->initialize().isSuccess() );
-    ASSERT_TRUE( m_alg->execute().isSuccess() );
+    ASSERT_TRUE( m_alg->execute(m_ctx).isSuccess() );
     SG::ReadHandle<McEventCollection> testOutputTruthHandle("testOutputTruthCollection");
     ASSERT_TRUE( testOutputTruthHandle.isValid() );
   }
 
 
   TEST_F(SimKernelMT_test, emptyInputCollection_expectSuccess) {
-    // create a dummy EventContext
-    EventContext ctx;
-    ctx.setExtension( Atlas::ExtendedEventContext( m_sg ) );
-    Gaudi::Hive::setCurrentContext( ctx );
-
     auto inputEvgen = std::make_unique<McEventCollection>();
     auto* genEvent = new HepMC::GenEvent{};
     HepMC::fillBarcodesAttribute(genEvent);
     inputEvgen->push_back(genEvent);
     SG::WriteHandleKey<McEventCollection> testInputEvgenKey{"testInputEvgenCollection"};
     ASSERT_TRUE(testInputEvgenKey.initialize().isSuccess());
-    SG::WriteHandle<McEventCollection> testInputEvgenHandle(testInputEvgenKey, ctx);
+    SG::WriteHandle<McEventCollection> testInputEvgenHandle(testInputEvgenKey, m_ctx);
     EXPECT_TRUE( testInputEvgenHandle.record( std::move(inputEvgen) ).isSuccess() );
 
     EXPECT_TRUE( m_alg->setProperty("InputEvgenCollection", "testInputEvgenCollection").isSuccess() );
@@ -514,16 +497,11 @@ DECLARE_COMPONENT( MockEntryLayerTool )
     EXPECT_TRUE( m_alg->setProperty("InputConverter", mockInputConverterName).isSuccess() );
     EXPECT_TRUE( m_alg->initialize().isSuccess() );
 
-    ASSERT_TRUE( m_alg->execute().isSuccess() );
+    ASSERT_TRUE( m_alg->execute(m_ctx).isSuccess() );
   }
 
 
   TEST_F(SimKernelMT_test, filledInputCollection_expectFullConversion) {
-    // create a dummy EventContext
-    EventContext ctx;
-    ctx.setExtension( Atlas::ExtendedEventContext( m_sg ) );
-    Gaudi::Hive::setCurrentContext( ctx );
-
     auto* genEvent = new HepMC::GenEvent{};
     HepMC::GenParticlePtr  genPart = HepMC::newGenParticlePtr();
     HepMC::FourVector mom{12.3, 45.6, 78.9, 0.12};
@@ -540,7 +518,7 @@ DECLARE_COMPONENT( MockEntryLayerTool )
     inputEvgen->push_back(genEvent);
     SG::WriteHandleKey<McEventCollection> testInputEvgenKey{"testInputEvgenCollection"};
     ASSERT_TRUE(testInputEvgenKey.initialize().isSuccess());
-    SG::WriteHandle<McEventCollection> testInputEvgenHandle(testInputEvgenKey, ctx);
+    SG::WriteHandle<McEventCollection> testInputEvgenHandle(testInputEvgenKey, m_ctx);
     EXPECT_TRUE( testInputEvgenHandle.record( std::move(inputEvgen) ).isSuccess() );
 
     EXPECT_TRUE( m_alg->setProperty("InputEvgenCollection", "testInputEvgenCollection").isSuccess() );
@@ -553,7 +531,7 @@ DECLARE_COMPONENT( MockEntryLayerTool )
                                                 ::testing::_) )
       .WillOnce(::testing::Return(StatusCode::SUCCESS));
 
-    ASSERT_TRUE( m_alg->execute().isSuccess() );
+    ASSERT_TRUE( m_alg->execute(m_ctx).isSuccess() );
   }
 
 
@@ -561,7 +539,7 @@ DECLARE_COMPONENT( MockEntryLayerTool )
     this->setEmptyInputOutputCollections();
     EXPECT_TRUE( m_alg->initialize().isSuccess() );
 
-    ASSERT_TRUE( m_alg->execute().isSuccess() );
+    ASSERT_TRUE( m_alg->execute(m_ctx).isSuccess() );
   }
 
 
@@ -577,7 +555,7 @@ DECLARE_COMPONENT( MockEntryLayerTool )
     this->setEmptyInputOutputCollections();
     EXPECT_TRUE( m_alg->initialize().isSuccess() );
 
-    ASSERT_TRUE( m_alg->execute().isSuccess() );
+    ASSERT_TRUE( m_alg->execute(m_ctx).isSuccess() );
   }
 
 
@@ -750,11 +728,6 @@ DECLARE_COMPONENT( MockEntryLayerTool )
 
 
   TEST_F(SimKernelMT_test, filledInputCollectionAndEmptySimulationTools_expectConvertedParticleSentToParticleKiller) {
-    // create a dummy EventContext
-    EventContext ctx;
-    ctx.setExtension( Atlas::ExtendedEventContext( m_sg ) );
-    Gaudi::Hive::setCurrentContext( ctx );
-
     auto* genEvent = new HepMC::GenEvent{};
     HepMC::FourVector mom{12.3, 45.6, 78.9, 1234.5};
     HepMC::GenParticlePtr  genPart = HepMC::newGenParticlePtr(mom,
@@ -770,7 +743,7 @@ DECLARE_COMPONENT( MockEntryLayerTool )
     inputEvgen->push_back(genEvent);
     SG::WriteHandleKey<McEventCollection> testInputEvgenKey{"testInputEvgenCollection"};
     ASSERT_TRUE(testInputEvgenKey.initialize().isSuccess());
-    SG::WriteHandle<McEventCollection> testInputEvgenHandle(testInputEvgenKey, ctx);
+    SG::WriteHandle<McEventCollection> testInputEvgenHandle(testInputEvgenKey, m_ctx);
     EXPECT_TRUE( testInputEvgenHandle.record( std::move(inputEvgen) ).isSuccess() );
 
     EXPECT_TRUE( m_alg->setProperty("InputEvgenCollection", "testInputEvgenCollection").isSuccess() );
@@ -808,7 +781,7 @@ DECLARE_COMPONENT( MockEntryLayerTool )
       .Times(1)
       .WillOnce(::testing::Return(AtlasDetDescr::fAtlasID));
 
-    ASSERT_TRUE( m_alg->execute().isSuccess() );
+    ASSERT_TRUE( m_alg->execute(m_ctx).isSuccess() );
   }
 
 

@@ -102,6 +102,7 @@ private:
   Gaudi::Property<std::string> m_sTriggerSFMeasurement{this, "TriggerSFMeasurement", "combined"}; 
   Gaudi::Property<bool> m_bUseTauSubstructure{this, "UseTauSubstructure", false}; 
   Gaudi::Property<int> m_iJetIDLevel{this, "JetIDLevel", static_cast<int>(JETIDNONE)}; 
+  Gaudi::Property<bool> m_useGNTau{this, "useGNTau",  false};
   Gaudi::Property<int> m_iEleIDLevel{this, "EleIDLevel", static_cast<int>(ELEIDNONE)};
   Gaudi::Property<std::string> m_sCampaign{this, "Campaign", ""};
   Gaudi::Property<bool> m_useFastSim{this, "useFastSim", false};

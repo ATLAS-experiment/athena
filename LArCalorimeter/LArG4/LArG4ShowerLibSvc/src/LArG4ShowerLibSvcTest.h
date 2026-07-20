@@ -18,7 +18,7 @@ public:
 
   virtual StatusCode initialize() override;
   virtual StatusCode finalize() override;
-  virtual StatusCode execute() override;
+  virtual StatusCode execute(const EventContext& ctx) override;
 
 private:
   ServiceHandle<ILArG4ShowerLibSvc> m_showerLibSvc{this, "LArG4ShowerLibSvc", "LArG4ShowerLibSvc"};

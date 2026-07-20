@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( ISF_Algorithms )
@@ -28,12 +28,13 @@ atlas_add_test( CollectionMerger_test
    INCLUDE_DIRS ${GTEST_INCLUDE_DIRS} #${GMOCK_INCLUDE_DIRS}
    LINK_LIBRARIES ${GTEST_LIBRARIES} AthenaBaseComps CxxUtils InDetSimEvent LArSimEvent
    MuonSimEvent StoreGateLib TestTools TileSimEvent #${GMOCK_LIBRARIES}
-   POST_EXEC_SCRIPT nopost.sh
+   POST_EXEC_SCRIPT noerror.sh
+   LOG_IGNORE_PATTERN "mergeCollections|recordObject failed"
    ENVIRONMENT "JOBOPTSEARCHPATH=${CMAKE_CURRENT_SOURCE_DIR}/share" )
 
 atlas_add_test(collection_merger_helpers_CA_tests
                SCRIPT python/test/test_CollectionMergerConfig.py
-               POST_EXEC_SCRIPT nopost.sh)
+               POST_EXEC_SCRIPT noerror.sh)
 
 atlas_add_test( SimKernelMT_test
                 SOURCES
@@ -45,7 +46,8 @@ atlas_add_test( SimKernelMT_test
                 LINK_LIBRARIES ${GMOCK_LIBRARIES} ${GTEST_LIBRARIES} AthenaBaseComps AtlasDetDescr AtlasHepMCLib
                 CxxUtils GaudiKernel GeneratorObjects GeoPrimitives HepMC_InterfacesLib ISF_Event ISF_InterfacesLib
                 StoreGateLib TrackRecordLib TruthUtils GoogleTestTools
-                POST_EXEC_SCRIPT nopost.sh
+                POST_EXEC_SCRIPT noerror.sh
+                LOG_IGNORE_PATTERN "Cannot initialize a Read/Write/Update handle with a null key|FAILURE: m_input|with the same flavor|DoesntExistInputCollection|No SimulationTool with flavor 2|FAILURE: m_output"
                 ENVIRONMENT
                 "JOBOPTSEARCHPATH=${CMAKE_CURRENT_SOURCE_DIR}/test"
                 )

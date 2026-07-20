@@ -29,9 +29,9 @@
 #include "InDetSimData/InDetSimDataCollection.h"
 #include "TruthUtils/MagicNumbers.h"
 
-#include "TMath.h" 
 #include "CLHEP/Geometry/Point3D.h"
 
+#include <numbers>
 #include <map>
 
 #define AUXDATA(OBJ, TYP, NAME) \
@@ -41,43 +41,9 @@ namespace {
    unsigned int makeKey(short phi, char eta, char layer) {
       return phi | (eta << 16) |  (layer << 24);
    }
+   using std::numbers::pi;
 }
 
-/////////////////////////////////////////////////////////////////////
-//
-//         Constructor with parameters:
-//
-/////////////////////////////////////////////////////////////////////
-PixelPrepDataToxAOD::PixelPrepDataToxAOD(const std::string &name, ISvcLocator *pSvcLocator) :
-  AthAlgorithm(name,pSvcLocator),
-  m_PixelHelper(nullptr),
-  m_useSiHitsGeometryMatching(true),
-  m_firstEventWarnings(true),
-  m_need_sihits{false}
-{ 
-  // --- Steering and configuration flags
- 
-  declareProperty("UseTruthInfo", m_useTruthInfo=false);
-  declareProperty("UseSiHitsGeometryMatching", m_useSiHitsGeometryMatching=true);
-  declareProperty("WriteSDOs", m_writeSDOs = false);
-  declareProperty("WriteSiHits", m_writeSiHits = false);
-  declareProperty("WriteNNinformation", m_writeNNinformation = true);
-  declareProperty("WriteRDOinformation", m_writeRDOinformation = true);
-  declareProperty("WriteExtendedPRDinformation", m_writeExtendedPRDinformation = false);
-
-  // --- Configuration keys
-  declareProperty("SiClusterContainer",  m_clustercontainer_key = "PixelClusters");
-  declareProperty("MC_SDOs", m_SDOcontainer_key = "PixelSDO_Map");
-  declareProperty("MC_Hits", m_sihitContainer_key = "PixelHits");
-  declareProperty("PRD_MultiTruth", m_multiTruth_key = "PRD_MultiTruthPixel");
-  //Keep this the same as input for now, for consistency with downstream assumptions
-  declareProperty("OutputClusterContainer",  m_write_xaod_key = "PixelClusters");
-
-  // --- Services and Tools
-  declare(m_write_xaod_key);
-  declare(m_write_offsets);
-
-}
 
 /////////////////////////////////////////////////////////////////////
 //
@@ -114,7 +80,6 @@ StatusCode PixelPrepDataToxAOD::initialize()
   ATH_CHECK(m_truthParticleLinks.initialize( m_useTruthInfo && !m_truthParticleLinks.empty()));
 
   ATH_CHECK(m_write_xaod_key.initialize());
-  m_write_offsets = m_clustercontainer_key.key() + "Offsets";
   ATH_CHECK(m_write_offsets.initialize());
 
   ATH_CHECK(m_clusterSplitProbContainer.initialize( !m_clusterSplitProbContainer.key().empty()));
@@ -127,9 +92,8 @@ StatusCode PixelPrepDataToxAOD::initialize()
 //        Execute method: 
 //
 /////////////////////////////////////////////////////////////////////
-StatusCode PixelPrepDataToxAOD::execute() 
+StatusCode PixelPrepDataToxAOD::execute(const EventContext& ctx) 
 {
-  const EventContext& ctx = Gaudi::Hive::currentContext();
   //Mandatory. Require if the algorithm is scheduled.
   SG::ReadHandle<InDet::PixelClusterContainer> PixelClusterContainer(m_clustercontainer_key,ctx);
   
@@ -346,10 +310,10 @@ StatusCode PixelPrepDataToxAOD::execute()
       }
       AUXDATA(xprd,uint64_t,detectorElementID) = detElementId;
 
-      if(m_writeExtendedPRDinformation){
+      if(m_writeExtendedPRDinformation && de){
 	AUXDATA(xprd,int,waferID) = m_PixelHelper->wafer_hash(de->identify());
 
-	const InDetDD::PixelModuleDesign* design = dynamic_cast<const InDetDD::PixelModuleDesign*>(&de->design());
+	const InDetDD::PixelModuleDesign* design = static_cast<const InDetDD::PixelModuleDesign*>(&de->design());
 	InDetDD::SiLocalPosition pos1 = design->positionFromColumnRow(colmin,rowmin);
 	InDetDD::SiLocalPosition pos2 = design->positionFromColumnRow(colmax,rowmin);
 	InDetDD::SiLocalPosition pos3 = design->positionFromColumnRow(colmin,rowmax);
@@ -386,14 +350,13 @@ StatusCode PixelPrepDataToxAOD::execute()
                }
             }
             // @TODO provide possibility to move tp_indices to its final destination
-            AUXDATA(xprd,std::vector<unsigned int>, truth_index) = tp_indices;
+            AUXDATA(xprd,std::vector<unsigned int>, truth_index) = std::move(tp_indices);
          }
          std::vector<int> uniqueIDs;
          for (auto i = range.first; i != range.second; ++i) {
            uniqueIDs.push_back( HepMC::uniqueID(i->second) );
          }
-         // @TODO move vector
-         AUXDATA(xprd,std::vector<int>, truth_barcode) = uniqueIDs; // TODO rename variable to be consistent?
+         AUXDATA(xprd,std::vector<int>, truth_barcode) = std::move(uniqueIDs); // TODO rename variable to be consistent?
       }
       
       std::vector< std::vector< int > > sdo_tracks;
@@ -486,12 +449,12 @@ std::vector< std::vector< int > > PixelPrepDataToxAOD::addSDOInformation( xAOD::
       sdoDepEnergy[nDepos] = deposit.second;
       nDepos++;
     }
-    sdo_depositsUniqueID.push_back( sdoDepUID );
-    sdo_depositsEnergy.push_back( sdoDepEnergy );
+    sdo_depositsUniqueID.push_back( std::move(sdoDepUID) );
+    sdo_depositsEnergy.push_back( std::move(sdoDepEnergy) );
   }
-  AUXDATA(xprd,std::vector<int>,sdo_words)  = sdo_word;
+  AUXDATA(xprd,std::vector<int>,sdo_words)  = std::move(sdo_word);
   AUXDATA(xprd,std::vector< std::vector<int> >,sdo_depositsBarcode)  = sdo_depositsUniqueID; // TODO rename variable to be consistent?
-  AUXDATA(xprd,std::vector< std::vector<float> >,sdo_depositsEnergy) = sdo_depositsEnergy;
+  AUXDATA(xprd,std::vector< std::vector<float> >,sdo_depositsEnergy) = std::move(sdo_depositsEnergy);
   
   return sdo_depositsUniqueID;
 }
@@ -548,18 +511,18 @@ void  PixelPrepDataToxAOD::addSiHitInformation( xAOD::TrackMeasurementValidation
     }
   }
 
-  AUXDATA(xprd,std::vector<float>,sihit_energyDeposit) = sihit_energyDeposit;
-  AUXDATA(xprd,std::vector<float>,sihit_meanTime) = sihit_meanTime;
-  AUXDATA(xprd,std::vector<int>,sihit_barcode) = sihit_uniqueID; // TODO rename variable to be consistent?
-  AUXDATA(xprd,std::vector<int>,sihit_pdgid) = sihit_pdgid;
+  AUXDATA(xprd,std::vector<float>,sihit_energyDeposit) = std::move(sihit_energyDeposit);
+  AUXDATA(xprd,std::vector<float>,sihit_meanTime) = std::move(sihit_meanTime);
+  AUXDATA(xprd,std::vector<int>,sihit_barcode) = std::move(sihit_uniqueID); // TODO rename variable to be consistent?
+  AUXDATA(xprd,std::vector<int>,sihit_pdgid) = std::move(sihit_pdgid);
   
-  AUXDATA(xprd,std::vector<float>,sihit_startPosX) = sihit_startPosX;
-  AUXDATA(xprd,std::vector<float>,sihit_startPosY) = sihit_startPosY;
-  AUXDATA(xprd,std::vector<float>,sihit_startPosZ) = sihit_startPosZ;
+  AUXDATA(xprd,std::vector<float>,sihit_startPosX) = std::move(sihit_startPosX);
+  AUXDATA(xprd,std::vector<float>,sihit_startPosY) = std::move(sihit_startPosY);
+  AUXDATA(xprd,std::vector<float>,sihit_startPosZ) = std::move(sihit_startPosZ);
 
-  AUXDATA(xprd,std::vector<float>,sihit_endPosX) = sihit_endPosX;
-  AUXDATA(xprd,std::vector<float>,sihit_endPosY) = sihit_endPosY;
-  AUXDATA(xprd,std::vector<float>,sihit_endPosZ) = sihit_endPosZ;
+  AUXDATA(xprd,std::vector<float>,sihit_endPosX) = std::move(sihit_endPosX);
+  AUXDATA(xprd,std::vector<float>,sihit_endPosY) = std::move(sihit_endPosY);
+  AUXDATA(xprd,std::vector<float>,sihit_endPosZ) = std::move(sihit_endPosZ);
 
 
 }
@@ -755,14 +718,14 @@ void PixelPrepDataToxAOD::addRdoInformation(xAOD::TrackMeasurementValidation* xp
   }//end iteration on rdos
 
 
-  AUXDATA(xprd, std::vector<int>,rdo_phi_pixel_index)  = phiIndexList;
-  AUXDATA(xprd, std::vector<int>,rdo_eta_pixel_index)  = etaIndexList;
+  AUXDATA(xprd, std::vector<int>,rdo_phi_pixel_index)  = std::move(phiIndexList);
+  AUXDATA(xprd, std::vector<int>,rdo_eta_pixel_index)  = std::move(etaIndexList);
   AUXDATA(xprd, std::vector<float>,rdo_charge)  = chList;
   AUXDATA(xprd, std::vector<int>,rdo_tot)  = totList;
   
-  AUXDATA(xprd, std::vector<float>,rdo_Cterm) = CTerm;
-  AUXDATA(xprd, std::vector<float>,rdo_Aterm) = ATerm;
-  AUXDATA(xprd, std::vector<float>,rdo_Eterm) = ETerm;
+  AUXDATA(xprd, std::vector<float>,rdo_Cterm) = std::move(CTerm);
+  AUXDATA(xprd, std::vector<float>,rdo_Aterm) = std::move(ATerm);
+  AUXDATA(xprd, std::vector<float>,rdo_Eterm) = std::move(ETerm);
 
 }
 
@@ -852,7 +815,11 @@ void PixelPrepDataToxAOD::addNNInformation(xAOD::TrackMeasurementValidation* xpr
 
   std::vector< std::vector<float> > matrixOfToT (sizeX, std::vector<float>(sizeY,0) );
   std::vector< std::vector<float> > matrixOfCharge(sizeX, std::vector<float>(sizeY,0));
-  std::vector<float> vectorOfPitchesY(sizeY,0.4);
+  // Seed with the module's nominal pitch (from the design), as in
+  // NnClusterizationFactory::createInput; correct for ITk (25x100 / 50x50 um)
+  // where the old literal 0.4 (eta) seed and the >0.1 fill guard were both wrong.
+  std::vector<float> vectorOfPitchesY(sizeY, design->etaPitch());
+  std::vector<float> vectorOfPitchesX(sizeX, design->phiPitch());
 
 
   //Itererate over all elements hits in the cluster and fill the charge and tot matrices 
@@ -887,6 +854,7 @@ void PixelPrepDataToxAOD::addNNInformation(xAOD::TrackMeasurementValidation* xpr
     InDetDD::SiCellId  cellId = de->cellIdFromIdentifier(*rdosBegin);
     InDetDD::SiDiodesParameters diodeParameters = design->parameters(cellId);
     float pitchY = diodeParameters.width().xEta();
+    float pitchX = diodeParameters.width().xPhi();
   
     if ( (not totList.empty()) && tot    != totList.end()) {
       matrixOfToT[absphiPixelIndex][absetaPixelIndex]   =*tot;
@@ -898,10 +866,11 @@ void PixelPrepDataToxAOD::addNNInformation(xAOD::TrackMeasurementValidation* xpr
      ++charge;
     } else matrixOfCharge[absphiPixelIndex][absetaPixelIndex] = -1;
   
-    if (pitchY > 0.1)
-    {
-      vectorOfPitchesY[absetaPixelIndex]=pitchY;
-    }
+    // Store the real per-cell pitch, built the same way as
+    // NnClusterizationFactory::createInput so the dumped training inputs match
+    // the runtime inference inputs.
+    vectorOfPitchesY[absetaPixelIndex]=pitchY;
+    vectorOfPitchesX[absphiPixelIndex]=pitchX;
   }//end iteration on rdos
   
 
@@ -927,16 +896,16 @@ void PixelPrepDataToxAOD::addNNInformation(xAOD::TrackMeasurementValidation* xpr
   double bowphi     = atan2(trkphicomp,trknormcomp);
   double boweta     = atan2(trketacomp,trknormcomp);
   double tanl = m_lorentzAngleTool->getTanLorentzAngle(de->identifyHash(),Gaudi::Hive::currentContext());
-  if(bowphi > TMath::Pi()/2) bowphi -= TMath::Pi();
-  if(bowphi < -TMath::Pi()/2) bowphi += TMath::Pi();
+  if(bowphi > pi/2) bowphi -= pi;
+  if(bowphi < -pi/2) bowphi += pi;
   int readoutside = design->readoutSide();
   double angle = atan(tan(bowphi)-readoutside*tanl);
 
 
   // Calculate the theta incidence angle
   ATH_MSG_VERBOSE( " Angle theta bef corr: " << boweta );
-  if (boweta>TMath::Pi()/2.) boweta-=TMath::Pi();
-  if (boweta<-TMath::Pi()/2.) boweta+=TMath::Pi();
+  if (boweta>pi/2.) boweta-=pi;
+  if (boweta<-pi/2.) boweta+=pi;
 
 
   ATH_MSG_VERBOSE(" Angle phi: " << angle << " theta: " << boweta );
@@ -966,9 +935,10 @@ void PixelPrepDataToxAOD::addNNInformation(xAOD::TrackMeasurementValidation* xpr
   AUXDATA(xprd, float, NN_phiBS) = angle;
   AUXDATA(xprd, float, NN_thetaBS) = boweta;
 
-  AUXDATA(xprd, std::vector<float>, NN_matrixOfToT)      = vectorOfToT;
-  AUXDATA(xprd, std::vector<float>, NN_matrixOfCharge)   = vectorOfCharge;
-  AUXDATA(xprd, std::vector<float>, NN_vectorOfPitchesY) = vectorOfPitchesY;
+  AUXDATA(xprd, std::vector<float>, NN_matrixOfToT)      = std::move(vectorOfToT);
+  AUXDATA(xprd, std::vector<float>, NN_matrixOfCharge)   = std::move(vectorOfCharge);
+  AUXDATA(xprd, std::vector<float>, NN_vectorOfPitchesY) = std::move(vectorOfPitchesY);
+  AUXDATA(xprd, std::vector<float>, NN_vectorOfPitchesX) = std::move(vectorOfPitchesX);
   
   
   AUXDATA(xprd, int, NN_etaPixelIndexWeightedPosition) = etaPixelIndexWeightedPosition;
@@ -1121,20 +1091,11 @@ void  PixelPrepDataToxAOD::addNNTruthInfo(  xAOD::TrackMeasurementValidation* xp
       truep[hitNumber]  = std::sqrt(mom.x()*mom.x()+mom.y()*mom.y()+mom.z()*mom.z());
       const auto vertex =  particle->production_vertex();
 //AV Please note that taking the first particle as a mother is ambiguous.
-#ifdef HEPMC3
       if ( vertex && !vertex->particles_in().empty()){
         const auto& mother_of_particle=vertex->particles_in().front();             
         motherUniqueID[hitNumber] =  HepMC::uniqueID(mother_of_particle);
         motherPdgid[hitNumber]    = mother_of_particle->pdg_id();
       }
-#else
-      if ( vertex ){
-        if( vertex->particles_in_const_begin() !=  vertex->particles_in_const_end() ){
-          motherUniqueID[hitNumber] =  HepMC::uniqueID(*vertex->particles_in_const_begin());
-          motherPdgid[hitNumber]    =  (*vertex->particles_in_const_begin())->pdg_id();
-        }
-      }
-#endif
     }
     chargeDep[hitNumber] = siHit.energyLoss() ;
     
@@ -1142,27 +1103,28 @@ void  PixelPrepDataToxAOD::addNNTruthInfo(  xAOD::TrackMeasurementValidation* xp
   }
 
 
-  AUXDATA(xprd, std::vector<float>, NN_positionsX) = positionsX;
-  AUXDATA(xprd, std::vector<float>, NN_positionsY) = positionsY;
+  AUXDATA(xprd, std::vector<float>, NN_positionsX) = std::move(positionsX);
+  AUXDATA(xprd, std::vector<float>, NN_positionsY) = std::move(positionsY);
 
-  AUXDATA(xprd, std::vector<float>, NN_positions_indexX) = positions_indexX;
-  AUXDATA(xprd, std::vector<float>, NN_positions_indexY) = positions_indexY;
+  AUXDATA(xprd, std::vector<float>, NN_positions_indexX) = std::move(positions_indexX);
+  AUXDATA(xprd, std::vector<float>, NN_positions_indexY) = std::move(positions_indexY);
 
-  AUXDATA(xprd, std::vector<float>, NN_theta)     = theta;
-  AUXDATA(xprd, std::vector<float>, NN_phi)       = phi;
+  AUXDATA(xprd, std::vector<float>, NN_theta)     = std::move(theta);
+  AUXDATA(xprd, std::vector<float>, NN_phi)       = std::move(phi);
 
-  AUXDATA(xprd, std::vector<int>, NN_barcode)     = uniqueID; // TODO Rename variable to be consistent?
-  AUXDATA(xprd, std::vector<int>, NN_pdgid)       = pdgid;
-  AUXDATA(xprd, std::vector<float>, NN_energyDep) = chargeDep;
-  AUXDATA(xprd, std::vector<float>, NN_trueP)     = truep;
+  AUXDATA(xprd, std::vector<int>, NN_barcode)     = std::move(uniqueID); // TODO Rename variable to be consistent?
+  AUXDATA(xprd, std::vector<int>, NN_pdgid)       = std::move(pdgid);
+  AUXDATA(xprd, std::vector<float>, NN_energyDep) = std::move(chargeDep);
+  AUXDATA(xprd, std::vector<float>, NN_trueP)     = std::move(truep);
 
-  AUXDATA(xprd, std::vector<int>, NN_motherBarcode) = motherUniqueID; // TODO Rename variable to be consistent?
-  AUXDATA(xprd, std::vector<int>, NN_motherPdgid)   = motherPdgid;
+  AUXDATA(xprd, std::vector<int>, NN_motherBarcode) = std::move(motherUniqueID); // TODO Rename variable to be consistent?
+  AUXDATA(xprd, std::vector<int>, NN_motherPdgid)   = std::move(motherPdgid);
  
 
-  AUXDATA(xprd, std::vector<float>, NN_pathlengthX) = pathlengthX;
-  AUXDATA(xprd, std::vector<float>, NN_pathlengthY) = pathlengthY;
-  AUXDATA(xprd, std::vector<float>, NN_pathlengthZ) = pathlengthZ;
+
+  AUXDATA(xprd, std::vector<float>, NN_pathlengthX) = std::move(pathlengthX);
+  AUXDATA(xprd, std::vector<float>, NN_pathlengthY) = std::move(pathlengthY);
+  AUXDATA(xprd, std::vector<float>, NN_pathlengthZ) = std::move(pathlengthZ);
 
 
 }

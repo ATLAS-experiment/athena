@@ -73,7 +73,7 @@ StatusCode RDOReaderDoubleSelector::initialize()
 }
 
 // Execute method:
-StatusCode RDOReaderDoubleSelector::execute()
+StatusCode RDOReaderDoubleSelector::execute(const EventContext& /*ctx*/)
 {
   ATH_MSG_DEBUG("RDOReaderDoubleSelector::execute()" );
 

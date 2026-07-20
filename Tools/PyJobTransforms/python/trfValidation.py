@@ -790,8 +790,8 @@ def returnIntegrityOfFile(file, functionName, **kwargs):
     msg.debug(f"Current process: {multiprocessing.current_process().name}")
 
     validationFunction = getattr(trfFileValidationFunctions, functionName)
-    msg.debug(f"Calling {validationFunction.__name__}({file}, "
-              f"{", ".join(f"{k}={v}" for k, v in kwargs.items())})")
+    args = ", ".join(f"{k}={v}" for k, v in kwargs.items())
+    msg.debug(f"Calling {validationFunction.__name__}({file}, {args}) ")
     return validationFunction(file, **kwargs)
 
 
@@ -955,17 +955,20 @@ def performStandardFileValidation(dictionary, io, parallelMode = False, multithr
                     msg.error("file integrity metadata update unsuccessful")
 
         metadataKeys = ('nentries', 'file_guid')
-        msg.info(f"{", ".join(fileList)}: Checking {", ".join(map(repr, metadataKeys))} ...")
+        msg.info(f"{', '.join(fileList)}: Checking {', '.join(map(repr, metadataKeys))} ...")
         metadata = {fname: arg.getMetadata(fname, metadataKeys=metadataKeys)[fname]
                     for fname, arg in zip(fileList, argList, strict=True)}
         success = {fname: md for fname, md in metadata.items() if None not in md.values()}
         if len(success):
-            msg.info(f"Checked\n\t{"\n\t".join(
-                f"{fname}: {" ".join(f"{k}={v}" for k, v in md.items())}"
-                for fname, md in success.items())}")
+            lines = [
+                f"{fname}: {' '.join(f'{k}={v}' for k, v in md.items())}"
+                for fname, md in success.items()
+            ]
+            msg.info("Checked\n\t" + "\n\t".join(lines))
         if len(success) != len(metadata):
-            errmsg = f"{", ".join(fname for fname in metadata if fname not in success)}:" \
-                f" Could not determine '{"' and/or '".join(metadataKeys)}'"
+            missing = ", ".join(fname for fname in metadata if fname not in success)
+            keys = '" and/or "'.join(metadataKeys)
+            errmsg = f'{missing}: Could not determine "{keys}"'
             msg.error(errmsg)
             raise trfExceptions.TransformValidationException(trfExit.nameToCode('TRF_EXEC_VALIDATION_FAIL'), errmsg)
         msg.info('Stopping parallel file validation')

@@ -33,6 +33,11 @@
 
 #include "../PFUnifiedMatchingTool.h"
 #include "../PFUnifiedSubtractionOnlyTool.h"
+#include "../PFUnifiedLCCalibTool.h"
+#include "../PFUnifiedMomentCalculatorTool.h"
+#include "../PFUnifiedRadialEnergyCalculatorTool.h"
+#include "../PFUnifiedMatchingTruthTool.h"
+#include "../PFUnifiedSubtractionOnlyTruthTool.h"
 
 DECLARE_COMPONENT( PFLeptonSelector )
 DECLARE_COMPONENT( PFClusterSelectorTool )
@@ -65,3 +70,8 @@ DECLARE_COMPONENT( PFRadialEnergyCalculatorTool )
 
 DECLARE_COMPONENT( PFUnifiedMatchingTool )
 DECLARE_COMPONENT( PFUnifiedSubtractionOnlyTool )
+DECLARE_COMPONENT( PFUnifiedLCCalibTool )
+DECLARE_COMPONENT( PFUnifiedMomentCalculatorTool )
+DECLARE_COMPONENT( PFUnifiedRadialEnergyCalculatorTool )
+DECLARE_COMPONENT( PFUnifiedMatchingTruthTool )
+DECLARE_COMPONENT( PFUnifiedSubtractionOnlyTruthTool )

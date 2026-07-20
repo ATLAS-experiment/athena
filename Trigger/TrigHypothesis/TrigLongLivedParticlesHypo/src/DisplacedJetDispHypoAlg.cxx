@@ -73,7 +73,7 @@ StatusCode DisplacedJetDispHypoAlg::execute(const EventContext& context) const
   DisplacedJetBeamspotInfo beamspot_info(beamSpotHandle.retrieve());
 
   for(const TrigCompositeUtils::Decision* previousDecision: *previousDecisionsHandle){
-    const auto viewELInfo = findLink< ViewContainer >( previousDecision, viewString() );
+    const auto viewELInfo = findLink< ViewContainer >(context,  previousDecision, viewString() );
     ATH_CHECK( viewELInfo.isValid() );
 
     TrigCompositeUtils::Decision* d = newDecisionIn(decisions, previousDecision, hypoAlgNodeName(), context);
@@ -92,7 +92,7 @@ StatusCode DisplacedJetDispHypoAlg::execute(const EventContext& context) const
     const xAOD::TrackParticleContainer* lrtTracks = lrtHandle.get();
 
     //get the linked jet feature
-    std::vector<TrigCompositeUtils::LinkInfo<xAOD::JetContainer>> jet_feature_links = TrigCompositeUtils::findLinks<xAOD::JetContainer>(previousDecision, TrigCompositeUtils::featureString(), TrigDefs::lastFeatureOfType);
+    std::vector<TrigCompositeUtils::LinkInfo<xAOD::JetContainer>> jet_feature_links = TrigCompositeUtils::findLinks<xAOD::JetContainer>(context, previousDecision, TrigCompositeUtils::featureString(), TrigDefs::lastFeatureOfType);
     ATH_CHECK(jet_feature_links.size() == 1); //ensure we only have 1 link
     const TrigCompositeUtils::LinkInfo<xAOD::JetContainer> jet_feature_link = jet_feature_links.at(0);
     //verify if the feature link is valid
@@ -103,7 +103,7 @@ StatusCode DisplacedJetDispHypoAlg::execute(const EventContext& context) const
     d->setObjectLink(featureString(), jet_feature_link.link);
 
     //get my count object which has been linked to the decision
-    auto count_links = TrigCompositeUtils::findLinks<xAOD::TrigCompositeContainer>(previousDecision, "djtrig_counts");
+    auto count_links = TrigCompositeUtils::findLinks<xAOD::TrigCompositeContainer>(context, previousDecision, "djtrig_counts");
     ATH_CHECK(count_links.size() == 1); //ensure we only have 1 link
     auto count_link = count_links.at(0);
     ATH_CHECK(count_link.isValid());

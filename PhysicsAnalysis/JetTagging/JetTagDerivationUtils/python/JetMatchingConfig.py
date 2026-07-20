@@ -12,7 +12,7 @@ def JetMatchingCfg(flags, target, source=None,
                    floats_to_copy=[],
                    ints_to_copy=[],
                    chars_to_copy=[],
-                   no_copy_suffix=False,
+                   add_suffix_with_source=True,
                    source_minimum_pt=0,
                    pt_priority_with_delta_r=-1,
                    particle_link_name=None,
@@ -36,15 +36,16 @@ def JetMatchingCfg(flags, target, source=None,
 
     if source_name is None:
         source_name = 'Or'.join(sources)
+
     dr_str = f'deltaRTo{source_name}'
     deta_str = f'deltaEtaTo{source_name}'
     dphi_str = f'deltaPhiTo{source_name}'
     dpt_str = f'deltaPtTo{source_name}'
-    to_suffix = f'From{source_name}'
     match_str = f'matchedTo{source_name}'
     n_match_str = f'numberOfMatchesTo{source_name}'
+
     def to(f):
-        return f if no_copy_suffix else f + to_suffix
+        return f + f'From{source_name}' if add_suffix_with_source else f
 
     ca = ComponentAccumulator()
     ca.addEventAlgo(

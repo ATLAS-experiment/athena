@@ -259,9 +259,9 @@ namespace MuonValR4 {
         
         printOnCanvas(std::format("Seed hit: {}", m_idHelperSvc->toString(patternVisual.seed->identify())));
         printOnCanvas(std::format("Chamber: {}", m_idHelperSvc->toStringChamber(bucket.front()->identify())));
-        printOnCanvas(std::format("nPrec: {:d}", pat.nPrecisionHits()));
-        printOnCanvas(std::format("nEtaNonPrec: {:d}", pat.nEtaNonPrecisionHits()));
-        printOnCanvas(std::format("nPhi: {:d}", pat.nPhiHits()));
+        printOnCanvas(std::format("nPrec: {:d}", pat.nPrecisionLayers()));
+        printOnCanvas(std::format("nEtaNonPrec: {:d}", pat.nTriggerLayers()));
+        printOnCanvas(std::format("nPhi: {:d}", pat.nPhiLayers()));
         printOnCanvas(std::format("theta: {:.2f}^{{#circ}}", inDegrees(pat.theta())));
         printOnCanvas(std::format("phi: {:.2f}^{{#circ}}", inDegrees(pat.phi())));
         printOnCanvas(std::format("MeanNormResidual: {:.2f}", pat.meanNormResidual2()));

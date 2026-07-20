@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 #ifndef L1TopoEvent_ClusterTOB
 #define L1TopoEvent_ClusterTOB
@@ -6,7 +6,7 @@
 #include "L1TopoEvent/Heap.h"
 #include "L1TopoEvent/BaseTOB.h"
 
-#include <iostream>
+#include <iosfwd>
 
 namespace TCS {
     
@@ -19,10 +19,10 @@ namespace TCS {
       static unsigned int nBitsPhi() { return g_nBitsPhi; }
 
       // default constructor
-      ClusterTOB(uint32_t roiWord = 0, const std::string& tobName = "ClusterTOB");
+      ClusterTOB(uint32_t roiWord = 0, std::string_view tobName = "ClusterTOB");
       
       // constructor with individual values
-      ClusterTOB(unsigned int et, unsigned int isolation, int eta, int phi, inputTOBType_t tobType = NONE, uint32_t roiWord = 0, const std::string& tobName = "ClusterTOB");
+      ClusterTOB(unsigned int et, unsigned int isolation, int eta, int phi, inputTOBType_t tobType = NONE, uint32_t roiWord = 0, std::string_view tobName = "ClusterTOB");
 
       // constructor with initial values
       ClusterTOB(const ClusterTOB & cluster);

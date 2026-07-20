@@ -12,27 +12,33 @@ os.environ["ORT_LOGGING_LEVEL"] = "3"  # 3 = ERROR
 if __name__ == "__main__":
     from MuonGeoModelTestR4.testGeoModel import SetupArgParser, MuonPhaseIITestDefaults
     parser = SetupArgParser()
+    from MuonInference.InferenceConfig import (
+        DEFAULT_BUCKET_MODEL_PATH,
+        DEFAULT_BUCKET_SCORE_THRESHOLD,
+        DEFAULT_BUCKET_SINGLE_OUTPUT_MODE,
+    )
     parser.set_defaults(nEvents = -1)
     parser.set_defaults(outRootFile="InferenceHoughTest.root")
-    parser.set_defaults(noMM=True)
-    parser.set_defaults(noSTGC=True)
-    parser.set_defaults(inputFile=MuonPhaseIITestDefaults.HITS_PG_R3)
+    parser.set_defaults(inputFile=MuonPhaseIITestDefaults.RDO_R4)
+    parser.set_defaults(defaultGeoFile="RUN4")
     
-    parser.add_argument("--noPerfMon", help="If set to true, full perfmonMT is enabled",
+    parser.add_argument("--doPerfMon", help="If set to true, full perfmonMT is enabled",
                         default=False, action='store_true')
-    parser.add_argument("--use-gpu", action="store_true", dest="use_gpu", default=True,
-                       help="Use GPU for ONNX inference (default: True)")
-    parser.add_argument("--use-cpu", dest="use_gpu", action="store_false",
-                       help="Use CPU for ONNX inference")
+    parser.add_argument("--use-cpu", action="store_true", default=False, help="Use CPU for ONNX inference")
     parser.add_argument("--athenaDebug", action="store_true", default=False,
                        help="Enable DEBUG verbosity for bucket inference components in MessageSvc")
     parser.add_argument("--athenaVerbose", action="store_true", default=False,
                        help="Enable VERBOSE verbosity for bucket inference components in MessageSvc")
-    parser.add_argument("--bucket-model-path", dest="bucket_model_path",
-                        default="/eos/project-i01/f/fcc-ml/ddicroce/ATLAS_MuonSpectrometer/KubeFlow/Inference_EdgeClassifier/athena/MuonSpectrometer/MuonPhaseII/MuonLearning/MuonInference/models/edgecnn_bucket_sparse_best.onnx",
+    parser.add_argument("--bucket-model-path", dest="bucket_model_path", default=DEFAULT_BUCKET_MODEL_PATH,
                         help="Absolute path (or PathResolver key) for the bucket ONNX model")
-    parser.add_argument("--score-threshold", type=float, default=0.2, dest="score_threshold",
+    parser.add_argument("--score-threshold", type=float, default=DEFAULT_BUCKET_SCORE_THRESHOLD, dest="score_threshold",
                         help="Keep bucket if single-output score > threshold (default: 0.2)")
+    parser.add_argument("--output-name", default="logits", dest="output_name")
+    score_mode = parser.add_mutually_exclusive_group()
+    score_mode.add_argument("--single-output-mode", choices=("logit", "prob"), default=DEFAULT_BUCKET_SINGLE_OUTPUT_MODE, dest="single_output_mode",
+        help="Scalar ONNX-output interpretation. 'logit' applies sigmoid before thresholding.")
+    score_mode.add_argument("--is-logit", action="store_const", const="logit", dest="single_output_mode", help="alias for --single-output-mode logit.")
+    score_mode.add_argument("--is-prob", action="store_const", const="prob", dest="single_output_mode", help="alias for --single-output-mode prob.")    
     parser.add_argument("--bucket-debug-dump-file", default="", dest="bucket_debug_dump_file",
                         help=("Optional JSONL output file with Athena-side bucket ONNX."))
     parser.add_argument("--bucket-debug-dump-max-events", type=int, default=0, dest="bucket_debug_dump_max_events",
@@ -51,15 +57,13 @@ if __name__ == "__main__":
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
     
     flags = initConfigFlags()
-    flags.PerfMon.doFullMonMT = not args.noPerfMon
+    flags.PerfMon.doFullMonMT = getattr(args, "doPerfMon", False)
     if args.athenaDebug or args.athenaVerbose:
         flags.Common.MsgSuppression = False
 
     from AthOnnxComps.OnnxRuntimeFlags import OnnxRuntimeType
     # Use command line argument if provided, otherwise default to True
-    use_gpu_requested = args.use_gpu if args.use_gpu is not None else True
-    # Runtime check for GPU availability. Prefer ONNXRuntime provider list,
-    # fall back to PyTorch if ONNX runtime isn't available.
+    use_gpu_requested = not args.use_cpu
     gpu_available = False
     try:
         import onnxruntime as ort
@@ -108,6 +112,8 @@ if __name__ == "__main__":
     bucket_tool_kwargs = dict(
         ModelPath=args.bucket_model_path,
         ScoreThreshold=args.score_threshold,
+        OutputName=args.output_name,
+        SingleOutputMode=args.single_output_mode,
         DebugDumpFile=args.bucket_debug_dump_file,
         DebugDumpMaxEvents=args.bucket_debug_dump_max_events,
         PrintLabels=args.bucket_print_labels,
@@ -142,5 +148,3 @@ if __name__ == "__main__":
                                             VisualizationTool = cfg.popToolsAndMerge(PatternVisualizationToolCfg(flags, CanvasLimits =0))))
 
     executeTest(cfg)
-    
-

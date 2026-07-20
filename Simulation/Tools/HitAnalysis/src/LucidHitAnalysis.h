@@ -17,7 +17,7 @@ class LucidHitAnalysis : public AthHistogramAlgorithm {
   ~LucidHitAnalysis() = default;
 
   virtual StatusCode initialize() override final;
-  virtual StatusCode execute() override final;
+  virtual StatusCode execute(const EventContext& ctx) override final;
 
  private:
 

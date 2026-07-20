@@ -11,7 +11,7 @@ class MultiElectronFilter : public GenFilter {
 public:
 
   MultiElectronFilter(const std::string& name, ISvcLocator* pSvcLocator);
-  virtual StatusCode filterEvent();
+  virtual StatusCode filterEvent(const EventContext& ctx);
 
 private:
 

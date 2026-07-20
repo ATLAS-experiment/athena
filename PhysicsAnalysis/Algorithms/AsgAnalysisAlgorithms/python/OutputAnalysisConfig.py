@@ -185,10 +185,7 @@ class OutputAnalysisConfig (ConfigBlock):
             outputDict = config.getOutputVars (containerName)
             for outputName in outputDict :
                 outputConfig = copy.deepcopy (outputDict[outputName])
-                if containerName != outputConfig.origContainerName or config.checkOutputContainer(containerName):
-                    outputConfig.outputContainerName = containerName + '_%SYS%'
-                else:
-                    outputConfig.outputContainerName = config.readName(containerName)
+                outputConfig.outputContainerName = config.readName(containerName)
                 outputConfig.prefix = prefix
                 # if the container is a MET container with all terms, we
                 # also need to write out the name of each MET term

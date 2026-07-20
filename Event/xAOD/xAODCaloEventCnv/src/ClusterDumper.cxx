@@ -43,8 +43,8 @@ StatusCode ClusterDumper::finalize() {
    return StatusCode::SUCCESS;
 }
  
-StatusCode ClusterDumper::execute() {
-  SG::ReadHandle<xAOD::CaloClusterContainer> clustercontainer{m_containerName};
+StatusCode ClusterDumper::execute(const EventContext& ctx) {
+  SG::ReadHandle<xAOD::CaloClusterContainer> clustercontainer{m_containerName, ctx};
   ATH_MSG_DEBUG( "Retrieved clusters with key: " << m_containerName.key() );
 
   const CaloClusterCellLinkContainer* cclptr=nullptr;
@@ -56,7 +56,7 @@ StatusCode ClusterDumper::execute() {
     ATH_MSG_INFO("Did not find corresponding cell-link container");
 
   std::lock_guard<std::mutex> fileLock{m_fileMutex};
-  SG::ReadHandle<xAOD::EventInfo> eventInfo (m_eventInfoKey);
+  SG::ReadHandle<xAOD::EventInfo> eventInfo (m_eventInfoKey, ctx);
   (*m_out) << "Run " << eventInfo->runNumber() << ", evt " << eventInfo->eventNumber() << " contains " << clustercontainer->size() << " CaloClusters" << std::endl;
 
   for (const auto itr: *clustercontainer) {

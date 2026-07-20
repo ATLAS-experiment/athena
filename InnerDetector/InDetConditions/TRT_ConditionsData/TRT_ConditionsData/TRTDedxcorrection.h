@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRTDEDXCORRECTION_H
@@ -28,67 +28,67 @@ struct TRTDedxcorrection {
 
   static constexpr int nGasTypes = 3;
   
-  double paraDivideByLengthDedxP1[nGasTypes];
-  double paraDivideByLengthDedxP2[nGasTypes];
-  double paraDivideByLengthDedxP3[nGasTypes];
-  double paraDivideByLengthDedxP4[nGasTypes];
-  double paraDivideByLengthDedxP5[nGasTypes];
+  double paraDivideByLengthDedxP1[nGasTypes] = {0};
+  double paraDivideByLengthDedxP2[nGasTypes] = {0};
+  double paraDivideByLengthDedxP3[nGasTypes] = {0};
+  double paraDivideByLengthDedxP4[nGasTypes] = {0};
+  double paraDivideByLengthDedxP5[nGasTypes] = {0};
 
-  double paraDedxP1[nGasTypes];
-  double paraDedxP2[nGasTypes];
-  double paraDedxP3[nGasTypes];
-  double paraDedxP4[nGasTypes];
-  double paraDedxP5[nGasTypes];
+  double paraDedxP1[nGasTypes] = {0};
+  double paraDedxP2[nGasTypes] = {0};
+  double paraDedxP3[nGasTypes] = {0};
+  double paraDedxP4[nGasTypes] = {0};
+  double paraDedxP5[nGasTypes] = {0};
 
       
   // resolution depends on the number of hits (and is different for e)
   static constexpr int nParametersResolution = 4; //Polynomial function 3rd used
-  double resolution[nGasTypes][nParametersResolution];
-  double resolutionElectron[nGasTypes][nParametersResolution];
+  double resolution[nGasTypes][nParametersResolution] = {{0}};
+  double resolutionElectron[nGasTypes][nParametersResolution] = {{0}};
 
   // corrections for pile-up (as a function of NVtx linear behavior observed)
   // was in principle also done separately for different detector regions
   // should be checked in more details when high pileup data available
 
-  double normOffsetData[nGasTypes];  // offset in normalization between data and MC
-  double normSlopeTot[nGasTypes];    // nvtx dependence for ToT
-  double normSlopeTotDivideByLength[nGasTypes];   // nvtx dependence for ToT/L
-  double normOffsetTot[nGasTypes];   // nvtx dependence for ToT
-  double normOffsetTotDivideByLength[nGasTypes];  // nvtx dependence for ToT/L
-  int normNzero[nGasTypes];           // for which average NVtx the fit parameters were determined
+  double normOffsetData[nGasTypes] = {0};  // offset in normalization between data and MC
+  double normSlopeTot[nGasTypes] = {0};    // nvtx dependence for ToT
+  double normSlopeTotDivideByLength[nGasTypes] = {0};   // nvtx dependence for ToT/L
+  double normOffsetTot[nGasTypes] = {0};   // nvtx dependence for ToT
+  double normOffsetTotDivideByLength[nGasTypes] = {0};  // nvtx dependence for ToT/L
+  int normNzero[nGasTypes] = {0};           // for which average NVtx the fit parameters were determined
 
   static constexpr int nParametersLongStrawsRZ = 3240;
   static constexpr int nParametersShortStrawsRZ = 216;
   static constexpr int nParametersEndcapRZ = 336;
       
-  double paraLongCorrRZ[nGasTypes][nParametersLongStrawsRZ];
-  double paraShortCorrRZ[nGasTypes][nParametersShortStrawsRZ];
-  double paraEndCorrRZ[nGasTypes][nParametersEndcapRZ];
-  double paraLongCorrRZMC[nGasTypes][nParametersLongStrawsRZ];
-  double paraShortCorrRZMC[nGasTypes][nParametersShortStrawsRZ];
-  double paraEndCorrRZMC[nGasTypes][nParametersEndcapRZ];
+  double paraLongCorrRZ[nGasTypes][nParametersLongStrawsRZ] = {{0}};
+  double paraShortCorrRZ[nGasTypes][nParametersShortStrawsRZ] = {{0}};
+  double paraEndCorrRZ[nGasTypes][nParametersEndcapRZ] = {{0}};
+  double paraLongCorrRZMC[nGasTypes][nParametersLongStrawsRZ] = {{0}};
+  double paraShortCorrRZMC[nGasTypes][nParametersShortStrawsRZ] = {{0}};
+  double paraEndCorrRZMC[nGasTypes][nParametersEndcapRZ] = {{0}};
 
   static constexpr int nParametersLongStrawsRZDivideByLength = 630;
   static constexpr int nParametersShortStrawsRZDivideByLength = 63;
   static constexpr int nParametersEndcapRZDivideByLength = 252;
   
-  double paraLongCorrRZDivideByLengthMC[nGasTypes][nParametersLongStrawsRZDivideByLength];
-  double paraShortCorrRZDivideByLengthMC[nGasTypes][nParametersShortStrawsRZDivideByLength];
-  double paraEndCorrRZDivideByLengthMC[nGasTypes][nParametersEndcapRZDivideByLength];
-  double paraLongCorrRZDivideByLengthDATA[nGasTypes][nParametersLongStrawsRZDivideByLength];
-  double paraShortCorrRZDivideByLengthDATA[nGasTypes][nParametersShortStrawsRZDivideByLength];
-  double paraEndCorrRZDivideByLengthDATA[nGasTypes][nParametersEndcapRZDivideByLength]; 
+  double paraLongCorrRZDivideByLengthMC[nGasTypes][nParametersLongStrawsRZDivideByLength] = {{0}};
+  double paraShortCorrRZDivideByLengthMC[nGasTypes][nParametersShortStrawsRZDivideByLength] = {{0}};
+  double paraEndCorrRZDivideByLengthMC[nGasTypes][nParametersEndcapRZDivideByLength] = {{0}};
+  double paraLongCorrRZDivideByLengthDATA[nGasTypes][nParametersLongStrawsRZDivideByLength] = {{0}};
+  double paraShortCorrRZDivideByLengthDATA[nGasTypes][nParametersShortStrawsRZDivideByLength] = {{0}};
+  double paraEndCorrRZDivideByLengthDATA[nGasTypes][nParametersEndcapRZDivideByLength] = {{0}};
 
   static constexpr int nParametersLongStrawsMimic = 1800;
   static constexpr int nParametersShortStrawsMimic = 180;
   static constexpr int nParametersEndcapMimic = 560;
 
-  float paraLongMimicToXeMC[nGasTypes][nParametersLongStrawsMimic];
-  float paraLongMimicToXeDATA[nGasTypes][nParametersLongStrawsMimic];
-  float paraShortMimicToXeMC[nGasTypes][nParametersShortStrawsMimic];
-  float paraShortMimicToXeDATA[nGasTypes][nParametersShortStrawsMimic];
-  float paraEndMimicToXeMC[nGasTypes][nParametersEndcapMimic];
-  float paraEndMimicToXeDATA[nGasTypes][nParametersEndcapMimic];
+  float paraLongMimicToXeMC[nGasTypes][nParametersLongStrawsMimic] = {{0}};
+  float paraLongMimicToXeDATA[nGasTypes][nParametersLongStrawsMimic] = {{0}};
+  float paraShortMimicToXeMC[nGasTypes][nParametersShortStrawsMimic] = {{0}};
+  float paraShortMimicToXeDATA[nGasTypes][nParametersShortStrawsMimic] = {{0}};
+  float paraEndMimicToXeMC[nGasTypes][nParametersEndcapMimic] = {{0}};
+  float paraEndMimicToXeDATA[nGasTypes][nParametersEndcapMimic] = {{0}};
  
   //==============================================================  
   

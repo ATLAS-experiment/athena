@@ -19,9 +19,9 @@ class eFEXDriver : public AthAlgorithm
   eFEXDriver(const std::string& name, ISvcLocator* pSvcLocator);
   virtual ~eFEXDriver();
 
-  virtual StatusCode initialize();
-  virtual StatusCode execute(/*const EventContext& ctx*/);// const;
-  StatusCode finalize();
+  virtual StatusCode initialize() override;
+  virtual StatusCode execute(const EventContext& ctx) override;
+  virtual StatusCode finalize() override;
 
  private:
 

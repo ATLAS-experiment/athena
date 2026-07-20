@@ -58,6 +58,9 @@ namespace G4UA{
     }
 
     void MCTruthUserAction::PreUserTrackingAction(const G4Track* inTrack){
+      // The G4Trajectory is currently attached to the TrackingManager. Therefore, only one Trajectory can
+      // be handled at the time, so it must be disabled for parallel tracking on the GPU
+#ifndef ATHSIMULATION_USE_ADEPT
 
       TrackHelper trackHelper(inTrack);
 
@@ -73,11 +76,19 @@ namespace G4UA{
         // TODO: check that the 'temp' object is actually deleted by the G4TrackingManager
         //       after FADS::FadsTrackingAction::GetTrackingAction()->ResetTraj() is executed
       }
+#else
+      // Prevent unused parameter warning.
+      (void)inTrack;
+#endif
 
     }
 
     void MCTruthUserAction::PostUserTrackingAction(const G4Track*){
+      // The G4Trajectory is currently attached to the TrackingManager. Therefore, only one Trajectory can
+      // be handled at the time, so it must be disabled for parallel tracking on the GPU
+#ifndef ATHSIMULATION_USE_ADEPT
       G4EventManager::GetEventManager()->GetTrackingManager()->SetStoreTrajectory(false);
+#endif
     }
   } // namespace iGeant4
 

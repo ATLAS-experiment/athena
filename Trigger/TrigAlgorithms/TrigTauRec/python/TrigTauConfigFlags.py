@@ -31,6 +31,7 @@ def createTrigTauConfigFlags():
     flags.addFlag('Trigger.Offline.Tau.HitZ.OutputPTau', getHitZVariables('HitZ')[0])
     flags.addFlag('Trigger.Offline.Tau.HitZ.NodeNameJet', 'HitZ_z0_stddev') # z-position regression sigma
     flags.addFlag('Trigger.Offline.Tau.HitZ.OutputPJet', getHitZVariables('HitZ')[1])
+    flags.addFlag('Trigger.Offline.Tau.HitZ.BeamSpotCoordinates', True) # The HitZ inference uses BeamSpot coordinates
     flags.addFlag('Trigger.Offline.Tau.HitZ.OutputDiscriminant', -1) # Disable
     flags.addFlag('Trigger.Offline.Tau.HitZ.DefaultMaxZ0Sigma', 10)
 

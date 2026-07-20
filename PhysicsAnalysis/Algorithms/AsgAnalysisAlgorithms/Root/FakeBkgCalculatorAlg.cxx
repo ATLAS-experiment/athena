@@ -30,7 +30,7 @@ namespace CP {
     return StatusCode::SUCCESS;
   }
 
-  StatusCode FakeBkgCalculatorAlg::execute() {
+  StatusCode FakeBkgCalculatorAlg::execute(const EventContext& ctx) {
 
     static const SG::Decorator<char> dec_lepton_tight("TightForFakeBkgCalculation");
     static const SG::Accessor<char> flagAcc("TightForFakeBkgCalculation");
@@ -41,13 +41,13 @@ namespace CP {
       const xAOD::ElectronContainer *electrons = nullptr;
       const xAOD::MuonContainer *muons = nullptr;
 
-      ANA_CHECK(m_eventInfoHandle.retrieve(evtInfo, sys));
+      ANA_CHECK(m_eventInfoHandle.retrieve(evtInfo, sys, ctx));
 
       m_fakeToolOutput.set(*evtInfo, -1, sys); // default value
       if ( m_preselection && !m_preselection.getBool(*evtInfo, sys)) continue;
 
-      ANA_CHECK(m_electronsHandle.retrieve(electrons, sys));
-      ANA_CHECK(m_muonsHandle.retrieve(muons, sys));
+      ANA_CHECK(m_electronsHandle.retrieve(electrons, sys, ctx));
+      ANA_CHECK(m_muonsHandle.retrieve(muons, sys, ctx));
 
       ConstDataVector<xAOD::IParticleContainer> leptons(SG::VIEW_ELEMENTS);
       for (const xAOD::Electron *t : *electrons) {

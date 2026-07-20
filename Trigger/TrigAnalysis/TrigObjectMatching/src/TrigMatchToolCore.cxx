@@ -5,7 +5,7 @@
 // $Id$
 
 // Boost include(s):
-#include "boost/regex.hpp"
+#include <regex>
 
 // Local include(s):
 #include "TrigObjectMatching/TrigMatchToolCore.h"
@@ -198,8 +198,7 @@ TrigMatchToolCore::ChainNameIndex::propagateChainNames( const std::string &chain
       // if its not in the cache, we need to check
       // if we can build it from the cache.
       // regex support
-      boost::regex compiled( chainName );
-      boost::cmatch what;
+      std::regex compiled( chainName );
       std::string chains;
 
       std::map< std::string, std::string >::const_iterator iter =
@@ -208,7 +207,7 @@ TrigMatchToolCore::ChainNameIndex::propagateChainNames( const std::string &chain
          m_l1l2Map.end();
       for( ; iter != end; ++iter ) {
          // check if the l1 chain matches the regex supplied by chainName
-         if( boost::regex_match( iter->first.c_str(), what, compiled ) ) {
+         if( std::regex_match( iter->first.c_str(), compiled ) ) {
             if( chains.empty() ) {
                chains += iter->second;
             } else {

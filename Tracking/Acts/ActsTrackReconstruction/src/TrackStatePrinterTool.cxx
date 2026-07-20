@@ -92,8 +92,7 @@ namespace ActsTrk
   atlasSurfaceName(const Acts::Surface *measurement_surface)
   {
      if (measurement_surface) {
-        const ActsDetectorElement *
-           acts_detector_element = dynamic_cast<const ActsDetectorElement *>(measurement_surface->surfacePlacement());
+        const auto* acts_detector_element = getActsDetectorElement(measurement_surface);
         if (acts_detector_element) {
            const InDetDD::SiDetectorElement *detElem = dynamic_cast< const InDetDD::SiDetectorElement *>(acts_detector_element->upstreamDetectorElement());
            if (detElem) {
@@ -247,10 +246,8 @@ namespace ActsTrk
       auto glob = surface->localToGlobal(tgContext, loc, Acts::Vector3::Zero());
       printVec3(glob);
 
-      if (compareMeasurementTransforms)
-      {
-        const ActsDetectorElement *
-            acts_detector_element = dynamic_cast<const ActsDetectorElement *>(surface->surfacePlacement());
+      if (compareMeasurementTransforms) {
+        const auto* acts_detector_element = getActsDetectorElement(surface);
         if (acts_detector_element) {
            const InDetDD::SiDetectorElement *detElem = dynamic_cast< const InDetDD::SiDetectorElement *>(acts_detector_element->upstreamDetectorElement());
 
@@ -366,17 +363,17 @@ namespace ActsTrk
     }
     else if (measurement->type() == xAOD::UncalibMeasType::StripClusterType)
     {
-      const small_vector<const xAOD::SpacePoint *> &spvec = measToSp.at(measurement->index());
-      if (spvec.empty())
-      {
+      if (measurement->index() >= measToSp.size() || measToSp.at(measurement->index()).empty()) {
+        // If we didn't load the SpacePoints, then just print the 1D measurement coordinates.
+        // **TODO** fix bug where measToSp isn't completely filled for ITkActsLargeRadiusPass.
+        // The other entries are empty, so it doesn't really make a difference.
         printMeasurement(tgContext, surface_ptr,
                          localPositionStrip2D(tgContext, *measurement, surface_ptr, nullptr),
                          m_compareMeasurementTransforms);
-      }
-      else
-      {
+        ATH_MSG_DEBUG("No SpacePoints for strip measurement " << measurement->index() << " (" << measToSp.size() << " associated SPs)");
+      } else {
         size_t isp = 0;
-        for (auto *sp : spvec)
+        for (auto *sp : measToSp.at(measurement->index()))
         {
           if (isp++)
           {

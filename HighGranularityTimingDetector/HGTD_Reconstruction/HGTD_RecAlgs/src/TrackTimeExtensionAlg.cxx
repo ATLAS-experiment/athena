@@ -44,7 +44,7 @@ StatusCode TrackTimeExtensionAlg::initialize() {
   ATH_CHECK(m_layerPrimaryExpectedKey.initialize());
   ATH_CHECK(m_extrapXKey.initialize());
   ATH_CHECK(m_extrapYKey.initialize());
-
+  ATH_CHECK(m_holesHGTDKey.initialize());
 
   return StatusCode::SUCCESS;
 }
@@ -159,7 +159,8 @@ TrackTimeExtensionAlg::DecorHandles::DecorHandles
       layerClusterMergedHandle (tool.m_layerClusterMergedKey, ctx),
       layerPrimaryExpectedHandle (tool.m_layerPrimaryExpectedKey, ctx),
       extrapXHandle (tool.m_extrapXKey, ctx),
-      extrapYHandle (tool.m_extrapYKey, ctx)
+      extrapYHandle (tool.m_extrapYKey, ctx),
+      holesHGTDHandle(tool.m_holesHGTDKey, ctx)
 {
 }
 
@@ -192,7 +193,7 @@ StatusCode TrackTimeExtensionAlg::decorateTrackParticle(
         extension.m_hits.at(i);
     const HGTD_Cluster* primary_cluster = extension.m_truth_primary_hits.at(i);
 
-    primary_exists_vec.push_back(primary_cluster != nullptr);
+    primary_exists_vec.push_back(primary_cluster != nullptr);   
 
     if (trk_state) {
       ATH_MSG_DEBUG("[decorateTrackParticle] extension found");
@@ -265,6 +266,7 @@ StatusCode TrackTimeExtensionAlg::decorateTrackParticle(
   dh.layerPrimaryExpectedHandle(*track_ptkl) = primary_exists_vec;
   dh.extrapXHandle(*track_ptkl) = extension.m_extrap_x;
   dh.extrapYHandle(*track_ptkl) = extension.m_extrap_y;
+  dh.holesHGTDHandle(*track_ptkl) = extension.m_holes_hgtd;
 
   return StatusCode::SUCCESS;
 }

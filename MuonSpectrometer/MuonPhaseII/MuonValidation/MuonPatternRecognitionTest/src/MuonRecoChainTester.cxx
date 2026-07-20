@@ -122,10 +122,9 @@ namespace MuonValR4{
                                 });
     }
 
-    StatusCode MuonRecoChainTester::execute() {
+    StatusCode MuonRecoChainTester::execute(const EventContext& ctx) {
     
-      const EventContext& ctx{Gaudi::Hive::currentContext()};
-      const xAOD::TrackParticleContainer* legacyTrks{nullptr};
+            const xAOD::TrackParticleContainer* legacyTrks{nullptr};
       ATH_CHECK(SG::get(legacyTrks, m_legacyTrackKey, ctx));
 
       const xAOD::TrackParticleContainer* trksFromHoughR4{nullptr};

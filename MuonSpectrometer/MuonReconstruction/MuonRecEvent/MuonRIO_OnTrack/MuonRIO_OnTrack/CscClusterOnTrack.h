@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //
@@ -133,12 +133,12 @@ private:
   const MuonGM::CscReadoutElement* m_detEl;
 
   /** cluster position measurement status */
-  CscClusterStatus m_status;
+  CscClusterStatus m_status{};
 
   /** cluster time measurement status */
-  CscTimeStatus m_timeStatus;
+  CscTimeStatus m_timeStatus{};
 
-  float m_time;
+  float m_time = 0;
 };
 
 ///////////////////////////////////////////////////////////////////

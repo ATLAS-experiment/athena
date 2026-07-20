@@ -6,6 +6,7 @@
 #define EFLOWREC_PFDATA_H
 
 #include "EtaPhiLUT.h"
+#include <vector>
 
 class eflowCaloObjectContainer;
 class eflowRecTrack;
@@ -13,7 +14,7 @@ class eflowRecCluster;
 
 struct PFData
   {
-    eflowCaloObjectContainer *caloObjects;
+    eflowCaloObjectContainer *caloObjects{};
     std::vector<eflowRecTrack *> tracks;
     std::vector<eflowRecCluster *> clusters;
     eflowRec::EtaPhiLUT clusterLUT;

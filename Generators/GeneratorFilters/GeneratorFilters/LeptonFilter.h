@@ -39,7 +39,7 @@ public:
   }
 
   /// Do the filtering
-  virtual StatusCode filterEvent();
+  virtual StatusCode filterEvent(const EventContext& ctx);
 
 
 private:

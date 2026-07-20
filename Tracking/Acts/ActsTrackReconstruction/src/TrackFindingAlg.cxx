@@ -13,10 +13,12 @@
 // ACTS
 #include "Acts/Geometry/TrackingGeometry.hpp"
 #include "Acts/Geometry/GeometryIdentifier.hpp"
+#include "Acts/Utilities/Helpers.hpp"
 #include "Acts/Utilities/TrackHelpers.hpp"
 #include "Acts/TrackFitting/MbfSmoother.hpp"
 #include "Acts/Utilities/Logger.hpp"
 #include "ActsInterop/Logger.h"
+#include "ActsCalibrators/SourceLinkHash.h"
 
 // ActsTrk
 #include "ActsCalibBase/CalibrationContext.h"
@@ -24,6 +26,7 @@
 #include "ActsGeometry/ActsDetectorElement.h"
 #include "ActsGeometryInterfaces/GeometryContext.h"
 #include "ActsEvent/ExpectedHitUtils.h"
+#include "ActsEvent/TrackContainerUtils.h"
 #include "src/detail/TrackFindingMeasurements.h"
 #include "src/detail/SharedHitCounter.h"
 
@@ -37,18 +40,7 @@
 #include <variant>
 
 namespace {
-  static std::size_t sourceLinkHash(const Acts::SourceLink& slink) {
-    const ActsTrk::ATLASUncalibSourceLink &atlasSourceLink = slink.get<ActsTrk::ATLASUncalibSourceLink>();
-    const xAOD::UncalibratedMeasurement &uncalibMeas = ActsTrk::getUncalibratedMeasurement(atlasSourceLink);
-    return uncalibMeas.identifier();
-  }
-
-  static bool sourceLinkEquality(const Acts::SourceLink& a, const Acts::SourceLink& b) {
-    const xAOD::UncalibratedMeasurement &uncalibMeas_a = ActsTrk::getUncalibratedMeasurement(a.get<ActsTrk::ATLASUncalibSourceLink>());
-    const xAOD::UncalibratedMeasurement &uncalibMeas_b = ActsTrk::getUncalibratedMeasurement(b.get<ActsTrk::ATLASUncalibSourceLink>());
-    return uncalibMeas_a.identifier() == uncalibMeas_b.identifier();
-  }
-
+ 
   static std::optional<ActsTrk::detail::RecoTrackStateContainerProxy> getFirstMeasurementFromTrack(typename ActsTrk::detail::RecoTrackContainer::TrackProxy trackProxy) {
     std::optional<ActsTrk::detail::RecoTrackStateContainerProxy> firstMeasurement {std::nullopt};
     for (auto st : trackProxy.trackStatesReversed()) {
@@ -94,7 +86,6 @@ namespace ActsTrk
 
     ATH_CHECK(m_paramEstimationTool.retrieve());
     ATH_CHECK(m_seedContainerKeys.initialize());
-    ATH_CHECK(m_detEleCollKeys.initialize());
     ATH_CHECK(m_uncalibratedMeasurementContainerKeys.initialize());
     ATH_CHECK(m_volumeIdToDetectorElementCollMapKey.initialize());
     ATH_CHECK(m_detElStatus.initialize());
@@ -102,18 +93,6 @@ namespace ActsTrk
 
     m_storeDestinies = not m_seedDestiny.empty();
     ATH_CHECK(m_seedDestiny.initialize(m_storeDestinies));
-
-    if (m_seedContainerKeys.size() != m_detEleCollKeys.size())
-      {
-        ATH_MSG_FATAL("There are " << m_detEleCollKeys.size() << " DetectorElementsKeys, but " << m_seedContainerKeys.size() << " SeedContainerKeys");
-        return StatusCode::FAILURE;
-      }
-
-    if (m_detEleCollKeys.size() != m_seedLabels.size())
-      {
-        ATH_MSG_FATAL("There are " << m_seedLabels.size() << " SeedLabels, but " << m_detEleCollKeys.size() << " DetectorElementsKeys");
-        return StatusCode::FAILURE;
-      }
 
     if (m_useTopSpRZboundary.size() != 2)
       {
@@ -252,9 +231,6 @@ namespace ActsTrk
     // ===================== CONDS ====================== //
     // ================================================== //
 
-    std::vector<const InDetDD::SiDetectorElementCollection*> detElementsCollections;
-    std::size_t total_detElems = 0;
-    ATH_CHECK(getContainersFromKeys(ctx, m_detEleCollKeys, detElementsCollections, total_detElems));
 
     // ================================================== //
     // ===================== COMPUTATION ================ //
@@ -269,9 +245,7 @@ namespace ActsTrk
     detail::RecoTrackContainer actsTracksContainer(actsTrackBackend,
                                                    actsTrackStateBackend);
 
-    if (m_addCounts) {
-      addCounts(actsTracksContainer);
-    }
+    addCountsAndProperties(actsTracksContainer, m_addCounts.value());
 
     detail::ExpectedLayerPatternHelper::add(actsTracksContainer);
 
@@ -299,7 +273,6 @@ namespace ActsTrk
                              sharedHits,
                              duplicateSeedDetector,
                              *seedContainers.at(icontainer),
-                             *detElementsCollections.at(icontainer),
                              actsTracksContainer,
                              icontainer,
                              icontainer < m_seedLabels.size() ? m_seedLabels[icontainer].c_str() : m_seedContainerKeys[icontainer].key().c_str(),
@@ -360,14 +333,12 @@ namespace ActsTrk
     detail::RecoTrackContainer resolvedTracksContainer(resolvedTrackBackend, resolvedTrackStateBackend);
     detail::ExpectedLayerPatternHelper::add(resolvedTracksContainer);
 
-    if (m_addCounts) {
-      addCounts(resolvedTracksContainer);
-    }
+    addCountsAndProperties(resolvedTracksContainer, m_addCounts.value());
 
     // Start ambiguity resolution
     Acts::GreedyAmbiguityResolution::State state;
-    m_ambi->computeInitialState(actsTracksContainer, state, &sourceLinkHash,
-                                &sourceLinkEquality);
+    m_ambi->computeInitialState(actsTracksContainer, state, &detail::sourceLinkHash,
+                                &detail::sourceLinkEquality);
     m_ambi->resolve(state);
 
     // Copy the resolved tracks into the output container
@@ -439,7 +410,6 @@ namespace ActsTrk
                               detail::SharedHitCounter &sharedHits,
                               detail::DuplicateSeedDetector &duplicateSeedDetector,
                               const ActsTrk::SeedContainer &seeds,
-                              const InDetDD::SiDetectorElementCollection& detElements,
                               detail::RecoTrackContainer &actsTracksContainer,
                               std::size_t typeIndex,
                               const char *seedType,
@@ -457,9 +427,7 @@ namespace ActsTrk
     Acts::VectorMultiTrajectory trackStateBackend;
     detail::RecoTrackContainer tracksContainerTemp(trackBackend, trackStateBackend);
 
-    if (m_addCounts) {
-      addCounts(tracksContainerTemp);
-    }
+    addCountsAndProperties(tracksContainerTemp, m_addCounts.value());
 
     detail::ExpectedLayerPatternHelper::add(tracksContainerTemp);
 
@@ -486,12 +454,17 @@ namespace ActsTrk
 
     // Function for Estimate Track Parameters
     auto retrieveSurfaceFunction =
-      [this, &detElements] (const ActsTrk::Seed& seed, bool useTopSp) -> const Acts::Surface& {
+       [detectorElementToGeometryIdMapPtr=m_trackingGeometryTool->surfaceIdMap(),
+        actsTrackingGeometryPtr=m_trackingGeometryTool->trackingGeometry().get()] (const ActsTrk::Seed& seed, bool useTopSp) -> const Acts::Surface& {
         const xAOD::SpacePoint* sp = useTopSp ? seed.sp().back() : seed.sp().front();
-        const InDetDD::SiDetectorElement* element = detElements.getDetectorElement(useTopSp ? sp->elementIdList().back()
-                                                                                   : sp->elementIdList().front());
-        const Trk::Surface& atlas_surface = element->surface();
-        return *m_ATLASConverterTool->trkSurfaceToActsSurface(atlas_surface);
+        const xAOD::UncalibratedMeasurement* meas = useTopSp ? sp->measurements().back() : sp->measurements().front();
+        const auto geoid_iter = detectorElementToGeometryIdMapPtr->find(ActsTrk::makeDetectorElementKey(meas->type(), meas->identifierHash()));
+        if (geoid_iter == detectorElementToGeometryIdMapPtr->end()) {
+           throw std::runtime_error("measurement not linked to Acts surface.");
+        }
+        const Acts::Surface *surface = actsTrackingGeometryPtr->findSurface( DetectorElementToActsGeometryIdMap::getValue(*geoid_iter) );
+        assert(surface);
+        return *surface;
       };
 
 
@@ -511,6 +484,8 @@ namespace ActsTrk
 
         // Check if the seed is a duplicate seed
         const bool isDupSeed = duplicateSeedDetector.isDuplicate(typeIndex, iseed);
+        xAOD::TrackFitter current_fitter = xAOD::KalmanFitter;
+        // @TODO introduce additional enums to distinguish Acts CKF from other implementations?
 
         if (isDupSeed) {
           ATH_MSG_DEBUG("skip " << seedType << " seed " << iseed << " - already found");
@@ -557,18 +532,25 @@ namespace ActsTrk
         ++event_stat[category_i][kNUsedSeeds];
 
         // Optional refit track parameters to get more refined value
-        std::unique_ptr<Acts::BoundTrackParameters> refitSeedParameters;
+        std::unique_ptr<Acts::BoundTrackParameters> refitSeedParameters;  // owner if refit used
         if (refitSeeds) {
-          refitSeedParameters = doRefit(seed, *initialParameters, detContext, reverseSearch);
-          if (refitSeedParameters.get() == nullptr) {
-            ++event_stat[category_i][kNRejectedRefinedSeeds];
-            if (m_storeDestinies) destiny->at(iseed) = DestinyType::FAILURE;
-            continue;
-          }
-          if (refitSeedParameters.get() != initialParameters) {
-            initialParameters = refitSeedParameters.get();
-            printSeed(iseed, detContext, seeds, *initialParameters, measurementIndex, nPrinted, seedType, true);
-          }
+          bool rejectedRefinedSeed = false;
+          std::visit(
+              Acts::overloaded{
+                  [&](std::unique_ptr<Acts::BoundTrackParameters> refitResult) {
+                    refitSeedParameters = std::move(refitResult);
+                    initialParameters = refitSeedParameters.get();
+                    printSeed(iseed, detContext, seeds, *initialParameters, measurementIndex, nPrinted, seedType, true);
+                  },
+                  [&](EStat refitError) {
+                    ++event_stat[category_i][refitError];
+                    if (refitError == kNRejectedRefinedSeeds) {
+                      if (m_storeDestinies) destiny->at(iseed) = DestinyType::FAILURE;
+                      rejectedRefinedSeed = true;  // skip seed
+                    }
+                  }},
+              doRefit(seed, *initialParameters, detContext, reverseSearch));
+          if (rejectedRefinedSeed) continue;
         }
 
         auto measurementRangesForced =
@@ -597,6 +579,7 @@ namespace ActsTrk
         // loop on the tracks we have just found from the seed
         std::size_t nfirst = 0;
         for (TrkProxy &firstTrack : tracksForSeed) {
+          ActsTrk::TrackContainerUtils::setFitterType(firstTrack,current_fitter);
           // smoothing
           auto smoothingResult = Acts::smoothTrack(detContext.geometry, firstTrack, logger(), Acts::MbfSmoother());
           if (!smoothingResult.ok()) {
@@ -756,7 +739,7 @@ namespace ActsTrk
                                                              return;
 
                                                            // Fill the duplicate selector
-                                                           auto sl = state.getUncalibratedSourceLink().template get<ATLASUncalibSourceLink>();
+                                                           auto sl = detail::xAODUncalibMeasCalibrator::unpack(state.getUncalibratedSourceLink());;
                                                            duplicateSeedDetector.addMeasurement(sl, measurementIndex);
                                                          }); // end visitBackwards
   }
@@ -783,27 +766,28 @@ namespace ActsTrk
       if (det_el_status) {
         ++counter.n_volumes_with_status;
         volume_ptr->visitSurfaces([&counter, det_el_status, &measurements,this](const Acts::Surface *surface_ptr) {
-          if (!surface_ptr) return;
-          const Acts::Surface &surface = *surface_ptr;
-          const Acts::SurfacePlacementBase* detector_element = surface.surfacePlacement();
-          if (detector_element) {
-            ++counter.n_detector_elements;
-            const ActsDetectorElement *acts_detector_element = static_cast<const ActsDetectorElement*>(detector_element);
-            if (!det_el_status->isGood( acts_detector_element->identifyHash() )) {
-              ActsTrk::detail::MeasurementRange old_range = measurements.markSurfaceInsensitive(surface_ptr->geometryId());
-              if (!old_range.empty()) {
-                auto geoid_to_string = [](const Acts::GeometryIdentifier &id) -> std::string  {
-                  std::stringstream amsg;
-                  amsg << id;
-                  return amsg.str();
-                };
-                std::string a_msg ( geoid_to_string(surface_ptr->geometryId()));
-                ATH_MSG_WARNING("Reject " << (old_range.elementEndIndex() - old_range.elementBeginIndex())
-                                << " measurements because surface " << a_msg);
-              }
-              ++counter.n_disabled_detector_elements;
-            }
+
+          const auto* acts_detector_element = getActsDetectorElement(surface_ptr);
+          if (!acts_detector_element) {
+            return;
           }
+          ++counter.n_detector_elements;
+         
+          if (!det_el_status->isGood( acts_detector_element->identifyHash() )) {
+            ActsTrk::detail::MeasurementRange old_range = measurements.markSurfaceInsensitive(surface_ptr->geometryId());
+            if (!old_range.empty()) {
+              auto geoid_to_string = [](const Acts::GeometryIdentifier &id) -> std::string  {
+                std::stringstream amsg;
+                amsg << id;
+                return amsg.str();
+              };
+              std::string a_msg ( geoid_to_string(surface_ptr->geometryId()));
+              ATH_MSG_WARNING("Reject " << (old_range.elementEndIndex() - old_range.elementBeginIndex())
+                              << " measurements because surface " << a_msg);
+            }
+            ++counter.n_disabled_detector_elements;
+          }
+          
         }, true /*only sensitive surfaces*/);
       }
       else {
@@ -861,13 +845,11 @@ struct Collector {
     }
 
     assert(result != nullptr && "Result type is nullptr");
-
-    if (currentSurface->surfacePlacement() != nullptr) {
-      const auto* detElem = dynamic_cast<const ActsDetectorElement*>(currentSurface->surfacePlacement());
-      if(detElem != nullptr) {
-        detail::addToExpectedLayerPattern(*result, *detElem);
-      }
+    const auto* detElem = getActsDetectorElement(currentSurface);
+    if(detElem != nullptr) {
+      detail::addToExpectedLayerPattern(*result, *detElem);
     }
+    
 
     return Acts::Result<void>::success();
   }
@@ -981,12 +963,9 @@ Acts::Result<void> TrackFindingAlg::extrapolateTrackToReferenceSurface(
 
     // Before trimming, inspect encountered surfaces from all track states
     for(const auto ts : track.trackStatesReversed()) {
-      const auto& surface = ts.referenceSurface();
-      if(surface.surfacePlacement() != nullptr) {
-        const auto* detElem = dynamic_cast<const ActsDetectorElement*>(surface.surfacePlacement());
-        if(detElem != nullptr) {
-          detail::addToExpectedLayerPattern(expectedLayerPattern, *detElem);
-        }
+      const auto* detElem = getActsDetectorElement(ts.referenceSurface());
+      if(detElem != nullptr) {
+        detail::addToExpectedLayerPattern(expectedLayerPattern, *detElem);
       }
     }
 

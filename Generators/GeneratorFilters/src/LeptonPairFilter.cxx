@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // --------------------------------------------------
@@ -101,7 +101,7 @@ StatusCode LeptonPairFilter::filterFinalize() {
 
 
 //---------------------------------------------------------------------------
-StatusCode LeptonPairFilter::filterEvent() {
+StatusCode LeptonPairFilter::filterEvent(const EventContext& ctx) {
 //---------------------------------------------------------------------------
 
   // Loop over all events in McEventCollection
@@ -113,14 +113,13 @@ StatusCode LeptonPairFilter::filterEvent() {
   for (itr = events()->begin(); itr!=events()->end(); ++itr) {
     // Loop over all particles in the event
     const HepMC::GenEvent* genEvt = (*itr);
-#ifdef HEPMC3
     for(const auto& pitr: genEvt->particles()) {
       if( !MC::isStable(pitr) ) continue;
 	// check stable particles only
 	// We do not place requirements on their origins (updated: optionally rejecting hadron decays)
 	// save pdg ids of found leptons
 	// do not consider taus
-	  if( std::abs(pitr->pdg_id()) !=  11  && std::abs(pitr->pdg_id()) !=  13) continue;
+	if( !(MC::isElectron(pitr) || MC::isMuon(pitr)) ) continue;
 	  //only consider leptons which satisfy  pt and eta requirements
 	  if( (pitr->momentum().perp() < m_Ptmin) || std::abs(pitr->momentum().pseudoRapidity()) > m_EtaRange) continue;
 			  if(m_onlyMassiveParents)
@@ -133,8 +132,7 @@ StatusCode LeptonPairFilter::filterEvent() {
 					  if(!vxp) break;
 					  if(vxp->particles_in().size()!=1) break;
 					  p = vxp->particles_in().at(0);
-					  const int pdg = std::abs(p->pdg_id());
-					  if(!((pdg>=11 && pdg<=16) || pdg==22))
+					  if(!(MC::isSMLepton(p) || MC::isPhoton(p)))
 					  {
 						  massiveParent = (p->generated_mass()>20000);
 						  break;
@@ -150,52 +148,6 @@ StatusCode LeptonPairFilter::filterEvent() {
 			for (auto thisParent: pitr->production_vertex()->particles_in()) parentPDG_tmp.push_back(thisParent->pdg_id());
 			vLeptonParentPDGIDs.push_back(std::move(parentPDG_tmp));
        }
-#else
-    for(HepMC::GenEvent::particle_const_iterator pitr=genEvt->particles_begin();
-	pitr!=genEvt->particles_end(); ++pitr )
-      if( MC::isStable(*pitr) )
-	// check stable particles only
-	// We do not place requirements on their origins (updated: optionally rejecting hadron decays)
-	// save pdg ids of found leptons
-	// do not consider taus
-	{
-	  if( MC::isElectron(*pitr) || MC::isMuon(*pitr) ){
-	      	//only consider leptons which satisfy  pt and eta requirements
-	        if( ((*pitr)->momentum().perp() >= m_Ptmin) && std::abs((*pitr)->momentum().pseudoRapidity()) <=m_EtaRange){
-			  if(m_onlyMassiveParents)
-			  {
-				  auto p = *pitr;
-				  bool massiveParent = false;
-				  while(p)
-				  {
-					  auto vxp = p->production_vertex();
-					  if(!vxp) break;
-					  if(vxp->particles_in_size()!=1) break;
-					  p = *vxp->particles_in_const_begin();
-					  if(!MC::isSMLepton(p) || MC::isPhoton(p))
-					  {
-						  massiveParent = (p->generated_mass()>20000);
-						  break;
-					  }
-				  }
-				  if(!massiveParent) continue;
-			  }
-	      		vLeptonPDGIDs.push_back((*pitr)->pdg_id());
-			vLeptonPt.push_back((*pitr)->momentum().perp());
-			vLeptonEta.push_back((*pitr)->momentum().pseudoRapidity());
-			HepMC::GenVertex::particle_iterator firstParent =
-			  (*pitr)->production_vertex()->particles_begin(HepMC::parents);
-			HepMC::GenVertex::particle_iterator endParent =
-			  (*pitr)->production_vertex()->particles_end(HepMC::parents);
-			HepMC::GenVertex::particle_iterator thisParent = firstParent;
-			std::vector<int> parentPDG_tmp;
-			for(; thisParent != endParent; ++thisParent) parentPDG_tmp.push_back((*thisParent)->pdg_id());
-
-			vLeptonParentPDGIDs.push_back(parentPDG_tmp);
-		}
-	  }//end if pdg_id
-       }
-#endif
   }//end loop over collections
 
   int nLeptons = vLeptonPDGIDs.size();
@@ -273,7 +225,7 @@ StatusCode LeptonPairFilter::filterEvent() {
   }
 
   // if we get here we have failed
-  setFilterPassed(false);
+  setFilterPassed(false, ctx);
   ATH_MSG_INFO("Fail"  );
   return StatusCode::SUCCESS;
 }

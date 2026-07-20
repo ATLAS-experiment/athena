@@ -41,7 +41,7 @@ namespace xAODMaker {
       return StatusCode::SUCCESS;
    }
 
-   StatusCode MuonRoICnvAlg::execute() {
+   StatusCode MuonRoICnvAlg::execute(const EventContext& /*ctx*/) {
 
       // Retrieve the AOD container:
       const LVL1_ROI* aod = nullptr;

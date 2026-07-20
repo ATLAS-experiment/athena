@@ -9,8 +9,8 @@ find_package( Acts COMPONENTS Core PluginJson )
 atlas_add_library( ActsCalibratorsLib
                    src/*.cxx
                    PUBLIC_HEADERS ActsCalibrators
-                   LINK_LIBRARIES Acts::Core ActsCalibBase ActsGeometryLib TrkEventPrimitives TrkMeasurementBase
-                                  TrkSurfaces ActsToolInterfacesLib TrkToolInterfaces GeoPrimitives
+                   LINK_LIBRARIES Acts::Core ActsCalibBase ActsEventLib ActsGeometryInterfacesLib TrkEventPrimitives TrkMeasurementBase
+                                  TrkSurfaces TrkToolInterfaces GeoPrimitives
                                   TrkRIO_OnTrack InDetMeasurementUtilitiesLib InDetRIO_OnTrack HGTD_RIO_OnTrack
                     PRIVATE_LINK_LIBRARIES xAODMuonPrepData xAODAuxiliaryMeasurement)
 

@@ -273,11 +273,23 @@ def trigTauRecMergedCaloHitsCfg(
 
     from TriggerMenuMT.HLT.Tau.TauConfigurationTools import getTauIDScoreVariables
     hitz_monitoring = {}
+    hitz_shift_to_detector = {}
     id_score_monitoring = {}
 
     from TriggerMenuMT.HLT.Tau.TauConfigurationTools import getHitZVariables
     for alg in hitz_algs + presel_algs:
         log.debug('Configuring TrigTauRecMerged with the ONNX Tau inference: %s', alg)
+
+        ptau_sfx = None
+        if alg in hitz_algs:
+            hitz_monitoring[alg] = (z0_var, _) = getHitZVariables(alg)
+
+            # HitZ z0 regressions are w.r.t. beamspot; will shift it in TrigTauRec
+            alg_flags = getattr(flags.Trigger.Offline.Tau, alg)
+            if hasattr(alg_flags, 'BeamSpotCoordinates') and alg_flags.BeamSpotCoordinates:
+                ptau_sfx = 'wrt_beamspot'
+                hitz_shift_to_detector[f'{z0_var}_{ptau_sfx}'] = z0_var
+
 
         # ONNX inference
         tools.append(acc.popToolsAndMerge(trigTauJetONNXEvaluatorCfg(
@@ -285,11 +297,9 @@ def trigTauRecMergedCaloHitsCfg(
             tau_id=alg, 
             tau_container=output_taus,
             hits_decoration_container=hits_decoration,
+            ptau_sfx=ptau_sfx,
         )))
         acc.addPublicTool(tools[-1])
-
-        if alg in hitz_algs:
-            hitz_monitoring[alg] = getHitZVariables(alg)
 
         if alg in presel_algs:
             # ID score flattening and WPs
@@ -317,6 +327,7 @@ def trigTauRecMergedCaloHitsCfg(
         ),
         MonitoredHitZRegressions=hitz_monitoring,
         MonitoredIDScores=id_score_monitoring,
+        ShiftToDetectorCoordinates=hitz_shift_to_detector,
         InputRoIs=input_rois,
         InputTauJetContainer='HLT_TrigTauRecMerged_CaloMVAOnly',
         InputTauJetHitsKey=hits_decoration,

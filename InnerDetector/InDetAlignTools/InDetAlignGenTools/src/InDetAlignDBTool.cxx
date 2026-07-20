@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // InDetAlignDBTool.cxx
@@ -12,9 +12,7 @@
 #include "AthenaPoolUtilities/CondAttrListCollection.h"
 #include "AthenaPoolUtilities/AthenaAttributeList.h"
 
-#include <cmath>
-#include <fstream>
-#include <iostream>
+
 
 #include "GaudiKernel/NTuple.h"
 #include "GaudiKernel/INTupleSvc.h"
@@ -38,6 +36,12 @@
 #include "RegistrationServices/IIOVRegistrationSvc.h"
 
 #include "InDetAlignDBTool.h"
+
+#include <cmath>
+#include <fstream>
+#include <iostream>
+
+
 
 // alignment DBS ntuple 9002 definition
 NTuple::Item<long> nt_dettype;
@@ -310,7 +314,7 @@ void InDetAlignDBTool::createDB() const
                 // for this level 3 key is seen
                 std::vector<std::string>::const_iterator ix = find(level2.begin(),level2.end(),key);
                 if (ix==level2.end()) {
-                    level2.push_back(key);
+                    level2.push_back(std::move(key));
                     // construct identifier of level 2 transform
                     Identifier ident2;
                     if(testPixel){
@@ -658,7 +662,7 @@ void InDetAlignDBTool::writeFile(const bool ntuple, const std::string& file)
     const AlignableTransform* pat;
     if ((pat=cgetTransPtr(*iobj))) {
       ++nobj;
-      if (!ntuple) *outfile << *iobj << std::endl;
+      if (!ntuple) *outfile << *iobj << '\n';
       for (AlignableTransform::AlignTransMem_citr cit=pat->begin();
         cit!=pat->end();++cit) {
         const Identifier& ident=cit->identify();
@@ -714,7 +718,7 @@ void InDetAlignDBTool::writeFile(const bool ntuple, const std::string& file)
         } else {
                 *outfile << "2 " << det << " " << 2*bec << " " << layer << " " << sector <<
             " " << ring << " " << side << " " << dx << " "  << dy << " "
-             << dz << " " << alpha/CLHEP::mrad << " " << beta/CLHEP::mrad << " " << gamma/CLHEP::mrad << std::endl;
+             << dz << " " << alpha/CLHEP::mrad << " " << beta/CLHEP::mrad << " " << gamma/CLHEP::mrad << '\n';
             ATH_MSG_VERBOSE("Found AlignableTransform for key "
             << *iobj << " when writing output file");
         }
@@ -739,7 +743,7 @@ void InDetAlignDBTool::writeIBLDistFile( const std::string& file)
 
   ATH_MSG_DEBUG( "writeFile: Write IBLDist DB in text file: " << file );
   outfile=new std::ofstream(file.c_str());
-  *outfile << "/Indet/IBLDist" << std::endl;
+  *outfile << "/Indet/IBLDist" << '\n';
 
   const CondAttrListCollection* atrlistcol=nullptr;
   if (StatusCode::SUCCESS==detStore()->retrieve(atrlistcol,"/Indet/IBLDist")) {
@@ -750,7 +754,7 @@ void InDetAlignDBTool::writeIBLDistFile( const std::string& file)
       *outfile  << citr->first << " " << atrlist["stave"].data<int>()
 		<< " " << atrlist["eta"].data<int>()
 		<< " " << atrlist["mag"].data<float>()
-		<< " " << atrlist["base"].data<float>() << std::endl;
+		<< " " << atrlist["base"].data<float>() << '\n';
     }
   }
   else {
@@ -776,7 +780,7 @@ void InDetAlignDBTool::writeGlobalFolderFile( const std::string& file)
 
     for (std::vector<std::string>::iterator it = folder_list.begin(); it != folder_list.end(); ++it){
 
-      *outfile << *it << std::endl;
+      *outfile << *it << '\n';
 
       const CondAttrListCollection* atrlistcol=nullptr;
       if (StatusCode::SUCCESS==detStore()->retrieve(atrlistcol,*it)) {
@@ -796,7 +800,7 @@ void InDetAlignDBTool::writeGlobalFolderFile( const std::string& file)
 		    << " "     << atrlist["Tz"].data<float>()
 		    << " "     << atrlist["Rx"].data<float>()
 		    << " "     << atrlist["Ry"].data<float>()
-		    << " "     << atrlist["Rz"].data<float>() << std::endl;
+		    << " "     << atrlist["Rz"].data<float>() << '\n';
 	}
       }
       else {
@@ -849,7 +853,7 @@ void InDetAlignDBTool::readTextFile(const std::string& file) const {
 
     if (tmpstr[0] == '/') {
       // Its a valid channel name
-      channelName = tmpstr;
+      channelName = std::move(tmpstr);
       ATH_MSG_DEBUG("Read in AlignableTransform data, key " << channelName );
       // find the AlignableTransform with this key
       pat = nullptr;
@@ -1192,7 +1196,7 @@ StatusCode InDetAlignDBTool::outputObjs() {
     ATH_MSG_DEBUG( "starting to register typeKey for IBLDist" );
     IAthenaOutputStreamTool::TypeKeyPairs typekeys_IBLDist(1);
     IAthenaOutputStreamTool::TypeKeyPair pair("CondAttrListCollection", "/Indet/IBLDist");
-    typekeys_IBLDist[0] = pair;
+    typekeys_IBLDist[0] = std::move(pair);
 
     // write objects to stream
     if (StatusCode::SUCCESS!=m_par_condstream->streamObjects(typekeys_IBLDist)) {

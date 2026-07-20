@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "SiLorentzAngleTool.h"
@@ -62,24 +62,24 @@ double SiLorentzAngleTool::getLorentzShift(const IdentifierHash& elementHash, co
   return s_invalidValue;
 }
 
-double SiLorentzAngleTool::getLorentzShift(const IdentifierHash& elementHash, const Amg::Vector2D& locPos) const {
-  if (m_ignoreLocalPos) return getLorentzShift(elementHash, Gaudi::Hive::currentContext());
+double SiLorentzAngleTool::getLorentzShift(const IdentifierHash& elementHash, const Amg::Vector2D& locPos, const EventContext& ctx) const {
+  if (m_ignoreLocalPos) return getLorentzShift(elementHash, ctx);
   // The cache is used to store the results. The cache is therefore invalidated if we specify a position.
-  return getValue(elementHash, locPos, LorentzShift);
+  return getValue(elementHash, locPos, LorentzShift, ctx);
 }
 
-double SiLorentzAngleTool::getLorentzShiftEta(const IdentifierHash& elementHash) const {
-  const SiLorentzAngleCondData* condData{getCondData(Gaudi::Hive::currentContext())};
+double SiLorentzAngleTool::getLorentzShiftEta(const IdentifierHash& elementHash, const EventContext& ctx) const {
+  const SiLorentzAngleCondData* condData{getCondData(ctx)};
   if (condData) {
     return condData->getLorentzShiftEta(elementHash);
   }
   return s_invalidValue;
 }
 
-double SiLorentzAngleTool::getLorentzShiftEta(const IdentifierHash& elementHash, const Amg::Vector2D& locPos) const {
-  if (m_ignoreLocalPos) return getLorentzShiftEta(elementHash);
+double SiLorentzAngleTool::getLorentzShiftEta(const IdentifierHash& elementHash, const Amg::Vector2D& locPos, const EventContext& ctx) const {
+  if (m_ignoreLocalPos) return getLorentzShiftEta(elementHash, ctx);
   // The cache is used to store the results. The cache is therefore invalidated if we specify a position.
-  return getValue(elementHash, locPos, LorentzShiftEta);
+  return getValue(elementHash, locPos, LorentzShiftEta, ctx);
 }
 
 double SiLorentzAngleTool::getTanLorentzAngle(const IdentifierHash& elementHash, const EventContext& ctx) const {
@@ -90,64 +90,64 @@ double SiLorentzAngleTool::getTanLorentzAngle(const IdentifierHash& elementHash,
   return s_invalidValue;
 }
 
-double SiLorentzAngleTool::getTanLorentzAngle(const IdentifierHash& elementHash, const Amg::Vector2D& locPos) const {
-  if (m_ignoreLocalPos) return getTanLorentzAngle(elementHash, Gaudi::Hive::currentContext());
+double SiLorentzAngleTool::getTanLorentzAngle(const IdentifierHash& elementHash, const Amg::Vector2D& locPos, const EventContext& ctx) const {
+  if (m_ignoreLocalPos) return getTanLorentzAngle(elementHash, ctx);
   // The cache is used to store the results. The cache is therefore invalidated if we specify a position.
-  return getValue(elementHash, locPos, TanLorentzAngle);
+  return getValue(elementHash, locPos, TanLorentzAngle, ctx);
 }
 
-double SiLorentzAngleTool::getTanLorentzAngleEta(const IdentifierHash& elementHash) const {
-  const SiLorentzAngleCondData* condData{getCondData(Gaudi::Hive::currentContext())};
+double SiLorentzAngleTool::getTanLorentzAngleEta(const IdentifierHash& elementHash, const EventContext& ctx) const {
+  const SiLorentzAngleCondData* condData{getCondData(ctx)};
   if (condData) {
     return condData->getTanLorentzAngleEta(elementHash);
   }
   return s_invalidValue;
 }
 
-double SiLorentzAngleTool::getTanLorentzAngleEta(const IdentifierHash& elementHash, const Amg::Vector2D& locPos) const {
-  if (m_ignoreLocalPos) return getTanLorentzAngleEta(elementHash);
+double SiLorentzAngleTool::getTanLorentzAngleEta(const IdentifierHash& elementHash, const Amg::Vector2D& locPos, const EventContext& ctx) const {
+  if (m_ignoreLocalPos) return getTanLorentzAngleEta(elementHash, ctx);
   // The cache is used to store the results. The cache is therefore invalidated if we specify a position.
-  return getValue(elementHash, locPos, TanLorentzAngleEta);
+  return getValue(elementHash, locPos, TanLorentzAngleEta, ctx);
 }
 
-double SiLorentzAngleTool::getBiasVoltage(const IdentifierHash& elementHash) const {
-  const SiLorentzAngleCondData* condData{getCondData(Gaudi::Hive::currentContext())};
+double SiLorentzAngleTool::getBiasVoltage(const IdentifierHash& elementHash, const EventContext& ctx) const {
+  const SiLorentzAngleCondData* condData{getCondData(ctx)};
   if (condData) {
     return condData->getBiasVoltage(elementHash);
   }
   return s_invalidValue;
 }
 
-double SiLorentzAngleTool::getTemperature(const IdentifierHash& elementHash) const {
-  const SiLorentzAngleCondData* condData{getCondData(Gaudi::Hive::currentContext())};
+double SiLorentzAngleTool::getTemperature(const IdentifierHash& elementHash, const EventContext& ctx) const {
+  const SiLorentzAngleCondData* condData{getCondData(ctx)};
   if (condData) {
     return condData->getTemperature(elementHash);
   }
   return s_invalidValue;
 }
 
-double SiLorentzAngleTool::getDepletionVoltage(const IdentifierHash& elementHash) const {
-  const SiLorentzAngleCondData* condData{getCondData(Gaudi::Hive::currentContext())};
+double SiLorentzAngleTool::getDepletionVoltage(const IdentifierHash& elementHash, const EventContext& ctx) const {
+  const SiLorentzAngleCondData* condData{getCondData(ctx)};
   if (condData) {
     return condData->getDepletionVoltage(elementHash);
   }
   return s_invalidValue;
 }
    
-double SiLorentzAngleTool::getValue(const IdentifierHash& elementHash, const Amg::Vector2D& locPos, Variable variable) const {
+double SiLorentzAngleTool::getValue(const IdentifierHash& elementHash, const Amg::Vector2D& locPos, Variable variable, const EventContext& ctx) const {
   if (not (variable==TanLorentzAngle or variable==LorentzShift or variable==TanLorentzAngleEta or variable==LorentzShiftEta)) {
     ATH_MSG_WARNING("getValue with Variable=" << variable << " is not available");
     return s_invalidValue;
   }
 
-  double temperature{getTemperature(elementHash)};
-  double deplVoltage{getDepletionVoltage(elementHash)};
-  double biasVoltage{getBiasVoltage(elementHash)};
+  double temperature{getTemperature(elementHash, ctx)};
+  double deplVoltage{getDepletionVoltage(elementHash, ctx)};
+  double biasVoltage{getBiasVoltage(elementHash, ctx)};
 
   // Calculate depletion depth. If biasVoltage is less than depletionVoltage
   // the detector is not fully depleted and we need to take this into account.
   // We take absolute values just in case voltages are signed.
-  const InDetDD::SiDetectorElement* element{getDetectorElement(elementHash)};
+  const InDetDD::SiDetectorElement* element{getDetectorElement(elementHash, ctx)};
   double depletionDepth{element->thickness()};
   if (deplVoltage==0.0) ATH_MSG_WARNING("Depletion voltage in "<<__FILE__<<" is zero, which might be a bug.");
   if (std::abs(biasVoltage) < std::abs(deplVoltage)) {
@@ -163,9 +163,9 @@ double SiLorentzAngleTool::getValue(const IdentifierHash& elementHash, const Amg
   mobility = siProperties.signedHallMobility(element->carrierType());
   // Get magnetic field.
   Amg::Vector3D pointvec{element->globalPosition(locPos)};
-  Amg::Vector3D magneticField{getMagneticField(pointvec)};
+  Amg::Vector3D magneticField{getMagneticField(pointvec, ctx)};
 
-  double correctionFactor{getCorrectionFactor()};
+  double correctionFactor{getCorrectionFactor(ctx)};
 
   // The angles are in the hit frame. This is because that is what is needed by the digization and also
   // gives a more physical sign of the angle (ie dosen't flip sign when the detector is flipped).
@@ -198,21 +198,21 @@ double SiLorentzAngleTool::getValue(const IdentifierHash& elementHash, const Amg
   return s_invalidValue;
 }
 
-double SiLorentzAngleTool::getCorrectionFactor() const
+double SiLorentzAngleTool::getCorrectionFactor(const EventContext& ctx) const
 {
-  const SiLorentzAngleCondData* condData{getCondData(Gaudi::Hive::currentContext())};
+  const SiLorentzAngleCondData* condData{getCondData(ctx)};
   if (condData) {
     return condData->getCorrectionFactor();
   }
   return s_invalidValue;
 }
 
-Amg::Vector3D SiLorentzAngleTool::getMagneticField(const Amg::Vector3D& pointvec) const {
+Amg::Vector3D SiLorentzAngleTool::getMagneticField(const Amg::Vector3D& pointvec, const EventContext& ctx) const {
   // Get the magnetic field.
   bool useMagFieldCache{m_useMagFieldCache};
   MagField::AtlasFieldCache fieldCache;
   if (useMagFieldCache) {
-    SG::ReadCondHandle<AtlasFieldCacheCondObj> readHandle{m_fieldCondObjInputKey, Gaudi::Hive::currentContext()};
+    SG::ReadCondHandle<AtlasFieldCacheCondObj> readHandle{m_fieldCondObjInputKey, ctx};
     const AtlasFieldCacheCondObj* fieldCondObj{*readHandle};
     if (fieldCondObj == nullptr) {
       ATH_MSG_ERROR("SCTSiLorentzAngleCondAlg : Failed to retrieve AtlasFieldCacheCondObj with key " << m_fieldCondObjInputKey.key());
@@ -246,8 +246,8 @@ const SiLorentzAngleCondData* SiLorentzAngleTool::getCondData(const EventContext
   return nullptr;
 }
 
-const InDetDD::SiDetectorElement* SiLorentzAngleTool::getDetectorElement(const IdentifierHash& waferHash) const {
-  SG::ReadCondHandle<InDetDD::SiDetectorElementCollection> handle{m_detEleCollKey};
+const InDetDD::SiDetectorElement* SiLorentzAngleTool::getDetectorElement(const IdentifierHash& waferHash, const EventContext& ctx) const {
+  SG::ReadCondHandle<InDetDD::SiDetectorElementCollection> handle{m_detEleCollKey, ctx};
   const InDetDD::SiDetectorElementCollection* elements{nullptr};
   if (handle.isValid()) elements = *handle;
   if (elements!=nullptr) return elements->getDetectorElement(waferHash);

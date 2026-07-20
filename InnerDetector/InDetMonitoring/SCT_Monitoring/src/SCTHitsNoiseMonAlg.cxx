@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "SCTHitsNoiseMonAlg.h"
@@ -93,6 +93,8 @@ StatusCode SCTHitsNoiseMonAlg::fillHistograms(const EventContext& ctx) const {
   ++m_numberOfEventsRecent;
 
   // If track hits are selected, make the vector of track rdo identifiers
+  //Total stack use for this function is 473316 bytes.
+  //coverity[STACK_USE]
   std::array<std::unordered_set<Identifier>, N_WAFERS> rdosOnTracks;
   if (m_doTrackHits) {
     if (makeVectorOfTrackRDOIdentifiers(rdosOnTracks, ctx).isFailure()) {
@@ -383,7 +385,7 @@ StatusCode SCTHitsNoiseMonAlg::generalHistsandNoise(const std::array<std::unorde
 
   for (unsigned int iHash{0}; iHash<N_WAFERS; iHash++) {
     const IdentifierHash wafer_hash{iHash};
-    if (not m_ConfigurationTool->isGood(wafer_hash)) continue;
+    if (not m_ConfigurationTool->isGood(wafer_hash, ctx)) continue;
 
     const Identifier wafer_id{m_pSCTHelper->wafer_id(wafer_hash)};
     const int barrel_ec{m_pSCTHelper->barrel_ec(wafer_id)};

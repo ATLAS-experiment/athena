@@ -4,7 +4,7 @@ from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 
 
-def RootReadCfg(flags, tupleName):
+def RootReadCfg(flags, tupleName, **kw):
     """Creates a ComponentAccumulator instance containing the
     athena services required for ROOT file reading.
     """
@@ -15,7 +15,8 @@ def RootReadCfg(flags, tupleName):
     evSel = CompFactory.Athena.RootNtupleEventSelector("EventSelector",
                                                        InputCollections = flags.Input.Files,
                                                        TupleName = tupleName,
-                                                       SkipEvents = flags.Exec.SkipEvents)
+                                                       SkipEvents = flags.Exec.SkipEvents,
+                                                       **kw)
     cfg.addService(evSel)
     cfg.addService( CompFactory.Athena.NtupleCnvSvc() )
 

@@ -59,10 +59,10 @@ class ATLAS_NOT_THREAD_SAFE CaloHadDMCoeffMinim {
     class MinimSample {
       public:
         std::vector<float >   clsm_smp_energy_unw;
-        int ibin;
-        double edmtrue;
-        double weight;
-        double sigma2;
+        int ibin{};
+        double edmtrue{};
+        double weight{};
+        double sigma2{};
     };
  
     CaloHadDMCoeffMinim();
@@ -81,25 +81,25 @@ class ATLAS_NOT_THREAD_SAFE CaloHadDMCoeffMinim {
     }
 
     static CaloHadDMCoeffMinim *s_instance;
-    CaloHadDMCoeffData *m_data;
+    CaloHadDMCoeffData *m_data{};
     std::unique_ptr<CaloLocalHadCoeffHelper> m_HadDMHelper;
     CaloLocalHadCoeff *m_HadDMCoeff;
 
-    bool m_isTestbeam;
-    int m_nstep_fcn;
-    int m_iBinGlob;
+    bool m_isTestbeam{};
+    int m_nstep_fcn{};
+    int m_iBinGlob{};
     std::vector<MinimPar > m_minimPars;
     std::map<int, std::vector<MinimPar > > m_minimResults;
     std::vector<std::unique_ptr<MinimSample> > m_minimSample;
     std::vector<MinimSample *> m_minimSubSample;
     std::vector<int > m_sample_size;
-    double m_engClusMin;
-    double m_engBeamMin;
-    int m_area_index;
-    double m_distance_cut;
+    double m_engClusMin{};
+    double m_engBeamMin{};
+    int m_area_index{};
+    double m_distance_cut{};
 
     std::string m_NormalizationType;
-    int m_NormalizationTypeNumber;
+    int m_NormalizationTypeNumber{};
 
     CaloHadDMCoeffMinim (const CaloHadDMCoeffMinim&);
     CaloHadDMCoeffMinim& operator= (const CaloHadDMCoeffMinim&);

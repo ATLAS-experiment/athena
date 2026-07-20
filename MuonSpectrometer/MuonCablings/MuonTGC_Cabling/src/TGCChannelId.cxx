@@ -45,7 +45,7 @@ int TGCChannelId::getGasGap() const {
         getLayer() == 8) {
         return 2;
     }
-    if (getLayer() == 2) {
+    if (getLayer() == 2 || getLayer() == 9) {   // getLayer() == 9 is only possible for Run 4+
         return 3;
     }
     return -1;
@@ -66,7 +66,7 @@ void TGCChannelId::setLayer(int v_layer) {
     if (m_layer >= 5 && m_layer <= 6) {
         setStation(StationType::M3);
     }
-    if (m_layer >= 7 && m_layer <= 8) {
+    if (m_layer >= 7 && m_layer <= 9) {
         setStation(StationType::M4);
         if (m_sector != -1) {
             m_octant = m_sector / 3;
@@ -106,7 +106,7 @@ void TGCChannelId::setSignalAndLayer(TGCId::SignalType signal, int layer) {
         } else if (m_signal == SignalType::Strip) {
             m_module = ModuleType::SD;
         }
-    } else if (m_layer >= 7 && m_layer <= 8) {
+    } else if (m_layer >= 7 && m_layer <= 9) {
         setStation(StationType::M4);
         if (m_signal == SignalType::Wire) {
             m_module = ModuleType::WI;

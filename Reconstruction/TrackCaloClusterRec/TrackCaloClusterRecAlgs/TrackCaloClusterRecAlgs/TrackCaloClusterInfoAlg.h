@@ -35,7 +35,7 @@ public:
   virtual ~TrackCaloClusterInfoAlg() {}
   
   virtual StatusCode  initialize() override;
-  virtual StatusCode  execute() override ;
+  virtual StatusCode  execute(const EventContext& ctx) override ;
   
   
 protected:

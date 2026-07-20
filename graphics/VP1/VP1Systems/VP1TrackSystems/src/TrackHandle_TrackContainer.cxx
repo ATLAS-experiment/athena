@@ -16,7 +16,6 @@
 #include "Acts/Surfaces/PerigeeSurface.hpp"
 #include "Acts/Surfaces/Surface.hpp"
 #include "ActsEvent/TrackParameters.h"
-#include "ActsGeometry/ATLASSourceLink.h"
 #include "ActsGeometry/ActsDetectorElement.h"
 #include "CLHEP/Units/SystemOfUnits.h"
 #include "VP1Base/VP1Msg.h"
@@ -404,7 +403,7 @@ TrkObjToString::MeasurementType TrackHandle_TrackContainer::measurementType(
     const ActsTrk::TrackContainer::ConstTrackStateProxy& state) const {
   TrkObjToString::MeasurementType type = TrkObjToString::Unknown;
   if (state.hasReferenceSurface()) {
-      const auto *actsElement = dynamic_cast<const ActsDetectorElement *>(
+      const auto *actsElement = dynamic_cast<const ActsTrk::ISurfacePlacement*>(
           state.referenceSurface().surfacePlacement());
       if (actsElement && common()->muonIdHelperSvc().get()) {
         auto& idhelper = common()->muonIdHelperSvc()->mdtIdHelper(); // This is a lazy way to get an AtlasID helper. Not ideal if muon geometry is off.
@@ -431,8 +430,7 @@ QString TrackHandle_TrackContainer::measurementText(
     const ActsTrk::TrackContainer::ConstTrackStateProxy& state) const {
   QString text("Unknown Measurement");
   if (state.hasReferenceSurface()) {
-    const auto* actsElement = dynamic_cast<const ActsDetectorElement*>(
-        state.referenceSurface().surfacePlacement());
+    const auto* actsElement = getActsDetectorElement(state.referenceSurface());
     if (actsElement) {
       auto& helperSvc = common()->muonIdHelperSvc();
       if (helperSvc->isMuon(actsElement->identify()))

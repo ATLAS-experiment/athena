@@ -1,10 +1,10 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( xAODBTaggingEfficiency )
 
 # External dependencies:
-find_package( ROOT COMPONENTS Cint Core Tree MathCore Hist RIO pthread MathMore Minuit Minuit2 Matrix Physics HistPainter Rint )
+find_package( ROOT COMPONENTS Core Tree MathCore Hist RIO MathMore Minuit Minuit2 Matrix Physics HistPainter Rint )
 find_package( onnxruntime )
 
 atlas_add_root_dictionary( xAODBTaggingEfficiencyLib xAODBTaggingEfficiencyLibDictSource ROOT_HEADERS xAODBTaggingEfficiency/TruthTagResults.h xAODBTaggingEfficiency/BTaggingToolUtil.h Root/LinkDef.h )
@@ -38,7 +38,7 @@ atlas_add_dictionary( xAODBTaggingEfficiencyDict
 # Add tests scripts for Athena, AthAnalysis and AnalysisBase
 atlas_add_executable(
   BTaggingToolsTester
-  util/BTaggingToolsTester.cxx 
+  util/BTaggingToolsTester.cxx
   INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
   LINK_LIBRARIES ${ROOT_LIBRARIES} AsgTools xAODJet xAODBTagging PATInterfaces FTagAnalysisInterfacesLib
 )
@@ -54,6 +54,12 @@ atlas_add_executable(
   BTaggingJsonToolsTester
   util/BTaggingJsonToolsTester.cxx
   LINK_LIBRARIES xAODRootAccess AsgTools FTagAnalysisInterfacesLib
+)
+
+atlas_add_executable(
+  BTaggingSelectionJsonInstantiationTester
+  util/BTaggingSelectionJsonInstantiationTester.cxx
+  LINK_LIBRARIES xAODRootAccess AsgTools FTagAnalysisInterfacesLib PathResolver
 )
 
 atlas_add_executable(
@@ -102,6 +108,8 @@ target_link_libraries( BTaggingEfficiencyToolTester
   PRIVATE ${XAOD_ACCESS_LIB} )
 target_link_libraries( BTaggingJsonToolsTester
   PRIVATE ${XAOD_ACCESS_LIB} )
+target_link_libraries( BTaggingSelectionJsonInstantiationTester
+  PRIVATE ${XAOD_ACCESS_LIB} )
 target_link_libraries( BTaggingEigenVectorRecompositionToolTester
   PRIVATE ${XAOD_ACCESS_LIB} )
 target_link_libraries( BTaggingSystematicStrategyComparison
@@ -115,88 +123,93 @@ set(FTAG_LATEST_CDI_RUN2_PCBT xAODBTaggingEfficiency/13TeV/MC20_2025-06-17_GN2v0
 set(FTAG_LATEST_CDI_RUN2_PCFT xAODBTaggingEfficiency/13TeV/MC20_2025-06-17_GN2v01_v4.root)
 set(FTAG_LATEST_CDI_RUN3_PCBT xAODBTaggingEfficiency/13p6TeV/MC23_2026_05_13_GN2v01_v0.root)
 set(FTAG_LATEST_CDI_RUN3_PCFT xAODBTaggingEfficiency/13p6TeV/MC23_2026_05_13_GN2v01_v0.root)
-set(FTAG_XBB_LATEST_JSON /cvmfs/atlas.cern.ch/repo/sw/database/GroupData/xAODBTaggingEfficiency/13And13p6TeV/MC20And23_2025-03-17_GN2Xv01-noSF_v1.json)
+set(FTAG_XBB_LATEST_JSON xAODBTaggingEfficiency/13And13p6TeV/MC20And23_2025-03-17_GN2Xv01-noSF_v1.json)
 
 # Test for Athena, AthAnalysis and AnalysisBase
 atlas_add_test(
   ut_BTaggingToolsExample
   SCRIPT BTaggingToolsExample ${FTAG_INPUT_RUN3_DAOD}
-  POST_EXEC_SCRIPT nopost.sh
+  POST_EXEC_SCRIPT noerror.sh
 )
 atlas_add_test(
   ut_BTaggingJsonToolsTest
   SCRIPT BTaggingJsonToolsTester ${FTAG_INPUT_RUN3_DAOD} ${FTAG_XBB_LATEST_JSON} GN2Xv01 FlatMassQCDEff_0p25
-  POST_EXEC_SCRIPT nopost.sh
+  POST_EXEC_SCRIPT noerror.sh
+)
+atlas_add_test(
+  ut_BTaggingSelectionJsonInstantiation
+  SCRIPT BTaggingSelectionJsonInstantiationTester ${FTAG_XBB_LATEST_JSON}
+  POST_EXEC_SCRIPT noerror.sh
 )
 atlas_add_test(
   ut_BTaggingToolsTest
   SCRIPT BTaggingToolsTester ${FTAG_INPUT_RUN3_DAOD} ${FTAG_LATEST_CDI_RUN3_PCBT} GN2v01 FixedCutBEff_77 1d
-  POST_EXEC_SCRIPT nopost.sh
+  POST_EXEC_SCRIPT noerror.sh
 )
 atlas_add_test(
   ut_BTaggingSelectionTool_continuous
   SCRIPT BTaggingSelectionToolTester ${FTAG_INPUT_RUN3_DAOD} ${FTAG_LATEST_CDI_RUN3_PCBT} GN2v01 Continuous
-  POST_EXEC_SCRIPT nopost.sh
+  POST_EXEC_SCRIPT noerror.sh
 )
 atlas_add_test(
   ut_BTaggingEigenVectorRecompositionToolTester_Run3_PCBT_Loose
   SCRIPT BTaggingEigenVectorRecompositionToolTester ${FTAG_LATEST_CDI_RUN3_PCBT} GN2v01 Continuous Loose
-  POST_EXEC_SCRIPT nopost.sh
+  POST_EXEC_SCRIPT noerror.sh
 )
 atlas_add_test(
   ut_BTaggingEigenVectorRecompositionToolTester_Run3_PCBT_Medium
   SCRIPT BTaggingEigenVectorRecompositionToolTester ${FTAG_LATEST_CDI_RUN3_PCBT} GN2v01 Continuous Medium
-  POST_EXEC_SCRIPT nopost.sh
+  POST_EXEC_SCRIPT noerror.sh
 )
 atlas_add_test(
   ut_BTaggingEigenVectorRecompositionToolTester_Run3_PCBT_Tight
   SCRIPT BTaggingEigenVectorRecompositionToolTester ${FTAG_LATEST_CDI_RUN3_PCBT} GN2v01 Continuous Tight
-  POST_EXEC_SCRIPT nopost.sh
+  POST_EXEC_SCRIPT noerror.sh
 )
 atlas_add_test(
   ut_BTaggingEigenVectorRecompositionToolTester_Run2_PCBT_Loose
   SCRIPT BTaggingEigenVectorRecompositionToolTester ${FTAG_LATEST_CDI_RUN2_PCBT} GN2v01 Continuous Loose
-  POST_EXEC_SCRIPT nopost.sh
+  POST_EXEC_SCRIPT noerror.sh
 )
 atlas_add_test(
   ut_BTaggingEigenVectorRecompositionToolTester_Run2_PCBT_Medium
   SCRIPT BTaggingEigenVectorRecompositionToolTester ${FTAG_LATEST_CDI_RUN2_PCBT} GN2v01 Continuous Medium
-  POST_EXEC_SCRIPT nopost.sh
+  POST_EXEC_SCRIPT noerror.sh
 )
 atlas_add_test(
   ut_BTaggingEigenVectorRecompositionToolTester_Run2_PCBT_Tight
   SCRIPT BTaggingEigenVectorRecompositionToolTester ${FTAG_LATEST_CDI_RUN2_PCBT} GN2v01 Continuous Tight
-  POST_EXEC_SCRIPT nopost.sh
+  POST_EXEC_SCRIPT noerror.sh
 )
 atlas_add_test(
   ut_BTaggingEigenVectorRecompositionToolTester_Run2_PCFT_Loose
   SCRIPT BTaggingEigenVectorRecompositionToolTester ${FTAG_LATEST_CDI_RUN2_PCFT} GN2v01 Continuous2D Loose
-  POST_EXEC_SCRIPT nopost.sh
+  POST_EXEC_SCRIPT noerror.sh
 )
 atlas_add_test(
   ut_BTaggingEigenVectorRecompositionToolTester_Run2_PCFT_Medium
   SCRIPT BTaggingEigenVectorRecompositionToolTester ${FTAG_LATEST_CDI_RUN2_PCFT} GN2v01 Continuous2D Medium
-  POST_EXEC_SCRIPT nopost.sh
+  POST_EXEC_SCRIPT noerror.sh
 )
 atlas_add_test(
   ut_BTaggingEigenVectorRecompositionToolTester_Run2_PCFT_Tight
   SCRIPT BTaggingEigenVectorRecompositionToolTester ${FTAG_LATEST_CDI_RUN2_PCFT} GN2v01 Continuous2D Tight
-  POST_EXEC_SCRIPT nopost.sh
+  POST_EXEC_SCRIPT noerror.sh
 )
 atlas_add_test(
   ut_BTaggingEigenVectorRecompositionToolTester_Run3_PCFT_Loose
   SCRIPT BTaggingEigenVectorRecompositionToolTester ${FTAG_LATEST_CDI_RUN3_PCFT} GN2v01 Continuous2D Loose
-  POST_EXEC_SCRIPT nopost.sh
+  POST_EXEC_SCRIPT noerror.sh
 )
 atlas_add_test(
   ut_BTaggingEigenVectorRecompositionToolTester_Run3_PCFT_Medium
   SCRIPT BTaggingEigenVectorRecompositionToolTester ${FTAG_LATEST_CDI_RUN3_PCFT} GN2v01 Continuous2D Medium
-  POST_EXEC_SCRIPT nopost.sh
+  POST_EXEC_SCRIPT noerror.sh
 )
 atlas_add_test(
   ut_BTaggingEigenVectorRecompositionToolTester_Run3_PCFT_Tight
   SCRIPT BTaggingEigenVectorRecompositionToolTester ${FTAG_LATEST_CDI_RUN3_PCFT} GN2v01 Continuous2D Tight
-  POST_EXEC_SCRIPT nopost.sh
+  POST_EXEC_SCRIPT noerror.sh
 )
 atlas_add_test(
   ut_BTaggingEfficiencyToolTester_Run3_PCBT
@@ -225,7 +238,7 @@ atlas_add_test(
 atlas_add_test(
   ut_BTaggingSystematicStrategyComparison
   SCRIPT BTaggingSystematicStrategyComparison ${FTAG_INPUT_RUN3_DAOD} ${FTAG_LATEST_CDI_RUN3_PCBT} GN2v01 Continuous
-  POST_EXEC_SCRIPT nopost.sh
+  POST_EXEC_SCRIPT noerror.sh
 )
 
 unset(FTAG_INPUT_RUN2_DAOD)

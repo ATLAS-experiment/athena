@@ -111,9 +111,11 @@ int test1 ATLAS_NOT_THREAD_SAFE (int argc, char* argv[]) {
     std::vector<float> coeffs1 = evr_tool->getCoefficients(label, evIdx+1);
     float norm1 = std::sqrt(std::inner_product(coeffs1.begin(), coeffs1.end(), coeffs1.begin(), 0.0f));
     ANA_MSG_DEBUG("Norm of Eigenvector " << (evIdx + 1)<< " is " << norm1);
-    std::vector<float> coeffs2 = evr_tool->getCoefficients(label, evIdx+2);
-    float norm2 = std::sqrt(std::inner_product(coeffs2.begin(), coeffs2.end(), coeffs2.begin(), 0.0f));
-    ANA_MSG_DEBUG("Norm of Eigenvector " << (evIdx + 2)<< " is " << norm2);
+    if (evr_tool->getNumEigenVectors(label) > 2) {
+      std::vector<float> coeffs2 = evr_tool->getCoefficients(label, evIdx+2);
+      float norm2 = std::sqrt(std::inner_product(coeffs2.begin(), coeffs2.end(), coeffs2.begin(), 0.0f));
+      ANA_MSG_DEBUG("Norm of Eigenvector " << (evIdx + 2)<< " is " << norm2);
+    }
     ANA_MSG_DEBUG("----------------------------------");
 
     /**

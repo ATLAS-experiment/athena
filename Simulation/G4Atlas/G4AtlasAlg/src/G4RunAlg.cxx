@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // Local includes
@@ -93,7 +93,7 @@ StatusCode G4RunAlg::initialize ATLAS_NOT_THREAD_SAFE ()
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
-StatusCode G4RunAlg::execute()
+StatusCode G4RunAlg::execute(const EventContext& ctx)
 {
   static std::atomic<unsigned int> n_Event=0;
   ATH_MSG_DEBUG("++++++++++++  G4RunAlg execute  ++++++++++++");
@@ -116,20 +116,19 @@ StatusCode G4RunAlg::execute()
     }
   }
 
-  const EventContext& ctx = Gaudi::Hive::currentContext();
   // Set the RNG to use for this event. We need to reset it for MT jobs
   // because of the mismatch between Gaudi slot-local and G4 thread-local RNG.
   ATHRNG::RNGWrapper* rngWrapper = m_rndmGenSvc->getEngine(this, m_randomStreamName);
   rngWrapper->setSeed( m_randomStreamName,  ctx);
 
-  SG::ReadHandle<McEventCollection> inputTruthCollection(m_inputTruthCollectionKey);
+  SG::ReadHandle<McEventCollection> inputTruthCollection(m_inputTruthCollectionKey, ctx);
   if (!inputTruthCollection.isValid()) {
     ATH_MSG_FATAL("Unable to read input GenEvent collection " << inputTruthCollection.name() << " in store " << inputTruthCollection.store());
     return StatusCode::FAILURE;
   }
   ATH_MSG_DEBUG("Found input GenEvent collection " << inputTruthCollection.name() << " in store " << inputTruthCollection.store());
   // create the output Truth collection
-  SG::WriteHandle<McEventCollection> outputTruthCollection(m_outputTruthCollectionKey);
+  SG::WriteHandle<McEventCollection> outputTruthCollection(m_outputTruthCollectionKey, ctx);
   std::unique_ptr<McEventCollection> shadowTruth{};
   if (m_useShadowEvent) {
     outputTruthCollection = std::make_unique<McEventCollection>();
@@ -199,7 +198,7 @@ StatusCode G4RunAlg::execute()
       ATH_MSG_WARNING("Simulation will now go on to the next event ");
       if (m_killAbortedEvents) {
         ATH_MSG_WARNING("setFilterPassed is now False");
-        setFilterPassed(false);
+        setFilterPassed(false, ctx);
       }
       if (m_flagAbortedEvents) {
         SG::ReadHandle<xAOD::EventInfo> eventInfo(m_eventInfoKey, ctx);

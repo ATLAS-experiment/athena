@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef INDETALIGNMENT_CREATEMISALIGNALG_H
@@ -8,11 +8,7 @@
 // CreateMisalignAlg.h
 //
 
-// #include <map>
-#include <vector>
-
 // Gaudi includes
-// #include "GaudiKernel/Algorithm.h"
 #include "AthenaBaseComps/AthAlgorithm.h"
 
 #include "GaudiKernel/NTuple.h"
@@ -23,15 +19,13 @@
 #include "CLHEP/Matrix/Vector.h"
 #include "CLHEP/Geometry/Transform3D.h"
 
-// Write output into ROOT Trees
-#include "TTree.h"
-
 #include "Identifier/Identifier.h"
 #include "InDetAlignGenTools/IInDetAlignDBTool.h"
 #include "TRT_ConditionsServices/ITRT_AlignDbSvc.h"
 #include "InDetReadoutGeometry/SiDetectorElementCollection.h"
 #include "TRT_ReadoutGeometry/TRT_DetElementContainer.h"
 #include "StoreGate/ReadCondHandleKey.h"
+#include <vector>
 
 //Forward declaration
 class IdentifierHash;
@@ -56,7 +50,7 @@ public:
     /** standard Athena-Algorithm method */
     StatusCode          initialize();
     /** standard Athena-Algorithm method */
-    StatusCode          execute();
+    StatusCode          execute(const EventContext& ctx);
     /** standard Athena-Algorithm method */
     StatusCode          finalize();
 
@@ -101,6 +95,12 @@ private:
     double                                 m_ScalePixelIBL;
     double                                 m_ScalePixelDBM;
     double                                 m_IBLBowingTshift;    //!< The relative temp shift of set point that intriduces bowing (sign is important)
+    int                                    m_targetLayer;         //!< ITk barrel layer selector for dedicated ITk modes (-1 means all layers)
+    int                                    m_targetLayerMax;      //!< Upper ITk barrel layer selector for layer-range modes (-999 means unused)
+    std::string                            m_endcapShiftConvention; //!< Endcap z-shift convention for mode 41
+    double                                 m_radialShift;        //!< Barrel radial shift for mode 43
+    std::string                            m_radialShiftConvention; //!< Barrel radial shift convention for mode 43
+    std::string                            m_radialSubdetector;  //!< Subdetector selector for mode 43: Pixel, Strip, or Both
     double                                 m_ScalePixelBarrel;
     double                                 m_ScalePixelEndcap;
     double                                 m_ScaleSCTBarrel;

@@ -22,10 +22,9 @@
 #include "CaloEvent/CaloCell.h"
 #include "CaloEvent/CaloCellContainer.h"
 
-#include "boost/io/ios_state.hpp"
-
 #include <iostream>
 #include <fstream>
+#include <format>
 #include <iomanip>
 
 #include <vector>
@@ -158,7 +157,7 @@ TBXMLCaloCellWriterTool::writeEvent(std::ostream& outStream,
     {
       // write container tag
       outStream << "<!-- TBXMLCaloCellWriterTool: begin write cell container "
-		<< m_includedCalos[i] << " -->" << std::endl;
+		<< m_includedCalos[i] << " -->" << '\n';
 
       std::vector<std::string> theCellAttrNames;
       theCellAttrNames.push_back("name");
@@ -168,17 +167,13 @@ TBXMLCaloCellWriterTool::writeEvent(std::ostream& outStream,
       theCellAttrNames.push_back("etype");
       std::vector<std::string> theCellAttrValues;
       theCellAttrValues.push_back(m_includedCalos[i]);
-      std::ostringstream theCols; 
-      theCols << m_nCols << std::ends;
 
       // get data size
       unsigned int dataSize = theContainer->nCellsCalo(m_caloIndices[i]);
       unsigned int nRows = 
 	(unsigned int)ceil( (double)dataSize / (double)m_nCols );
-      std::ostringstream theRows;
-      theRows << nRows << std::ends;
-      theCellAttrValues.push_back(theCols.str());
-      theCellAttrValues.push_back(theRows.str());
+      theCellAttrValues.push_back(std::to_string(m_nCols));
+      theCellAttrValues.push_back(std::to_string(nRows));
       theCellAttrValues.push_back("uint");
       theCellAttrValues.push_back("double");
       this->openElement(outStream,"CaloCellContainer",
@@ -258,27 +253,27 @@ TBXMLCaloCellWriterTool::writeEvent(std::ostream& outStream,
 		  outStream << "     ";
 		}
 	      theIndex -= (int)baseIndex;
-              boost::io::ios_base_all_saver streamsave (outStream);
-	      outStream 
-		<< std::setw(10) << std::setfill(' ') << theIndex << " "
-		<< std::setw(3)  << std::setfill(' ') << subIndex << " "
-		<< std::setw(3)  << std::setfill(' ') << lyrIndex << " "
-		<< std::setw(3)  << std::setfill(' ') << regIndex << " "
-		<< std::setw(3)  << std::setfill(' ') << etaIndex << " "
-		<< std::setw(3)  << std::setfill(' ') << phiIndex << " "
-		<< std::setw(10) << std::setprecision(5) << theEnergy;
+	      //coverity[RW.CONSTEVAL_CALL_NONCONSTANT:FALSE]
+        outStream << std::format("{:>10} {:>3} {:>3} {:>3} {:>3} {:>3} {:>10.5g}",
+                                     theIndex.value(),
+                                     subIndex,
+                                     lyrIndex,
+                                     regIndex,
+                                     etaIndex,
+                                     phiIndex,
+                                     theEnergy);
 	      theCtr++;
 	      if ( (isTerminated = ( theCtr % m_nCols )) == 0 )
 		{
-		  outStream << std::endl;
+		  outStream << '\n';
 		}
 	    }
 	}
-      if ( ! isTerminated ) outStream << std::endl;
+      if ( ! isTerminated ) outStream << '\n';
       this->closeElement(outStream);
       // write container tag
       outStream << "<!-- TBXMLCaloCellWriterTool: end write cell container "
-		<< m_includedCalos[i] << " -->" << std::endl;
+		<< m_includedCalos[i] << " -->" << '\n';
     }
   
   return StatusCode::SUCCESS;
@@ -297,13 +292,7 @@ TBXMLCaloCellWriterTool::writeRunFiles(const std::string& fileDir,
   // Write Dictionary //
   //////////////////////
 
-  // construct directory and file name
-  std::ostringstream thisFileName;
-  thisFileName << fileDir << "/geom." 
-	       << std::setw(6) << std::setfill('0')
-	       << runNumber << ".xml" << std::ends;
-
-  std::ofstream thisFileStream((thisFileName.str()).c_str());
+  std::ofstream thisFileStream(std::format("{}/geom.{:06}.xml", fileDir, runNumber));
 
   // Document type
   std::vector<std::string> theRunElements;
@@ -345,7 +334,7 @@ TBXMLCaloCellWriterTool::writeRunFiles(const std::string& fileDir,
 	{
 	  theRunValues[i] = "FCalMod0";
 	  theRunAttr[i] = 
-	    theRunAttr[i].substr(0,theRunAttr[i].find_first_of(" "));
+	    theRunAttr[i].substr(0,theRunAttr[i].find_first_of(' '));
 	}
     }
   this->openElement(thisFileStream,"FCalGeomTable",theRunAttr,theRunValues);
@@ -359,32 +348,25 @@ TBXMLCaloCellWriterTool::writeRunFiles(const std::string& fileDir,
 		 << "   Y [cm]   "
 		 << "   Z [cm]   "
 		 << "  TileSize  "
-		 << "-->" << std::endl;
+		 << "-->\n";
 
   // find big/small tile indicator -> to be replaced
-  std::map<int,double> smallestDx;
-  std::map<int,double> largestDx;
-  for ( unsigned int iCtr = (unsigned int)safeIndex; 
-	iCtr <= (unsigned int)lastIndex; iCtr++ )
-    {
-      IdentifierHash theIndex(iCtr);
-      Identifier theId = m_idHelper->cell_id(theIndex);
-      int theCalo      = m_idHelper->sub_calo(theId);
-      const CaloDetDescrElement* theElement = 
-	caloDetMgr->get_element(theIndex);
-      double dx        = theElement->dx();
-      // check tile size
-      if ( smallestDx.find(theCalo) == smallestDx.end() )
-	{
-	  smallestDx[theCalo] = dx;
-	  largestDx[theCalo]  = dx;
-	}
-      else
-	{
-	  if ( dx < smallestDx[theCalo] ) smallestDx[theCalo] = dx;
-	  if ( dx > largestDx[theCalo] )  largestDx[theCalo]  = dx;
-	}
-    }
+  std::unordered_map<int, double> smallestDx;
+  smallestDx.reserve(8);                    // usually only 3-4 sub-calos
+  
+  for (unsigned int iCtr = safeIndex; iCtr <= lastIndex; ++iCtr)
+  {
+      const Identifier theId = m_idHelper->cell_id(IdentifierHash(iCtr));
+      const int theCalo = m_idHelper->sub_calo(theId);
+  
+      const CaloDetDescrElement* theElement = caloDetMgr->get_element(IdentifierHash(iCtr));
+      const double dx = theElement->dx();
+  
+      // One-lookup minimum update (very fast)
+      auto [it, inserted] = smallestDx.try_emplace(theCalo, dx);
+      if (!inserted && dx < it->second)
+          it->second = dx;
+  }
 
   // get geometry
   for (unsigned int iCtr=(unsigned int)firstIndex; 
@@ -423,7 +405,7 @@ TBXMLCaloCellWriterTool::writeRunFiles(const std::string& fileDir,
 		     << std::setw(10) << std::setprecision(5) << theZ << "  "
 		     << "       "
 		     << std::setw(2)  << std::setfill(' ')    << tileSize 
-		     << std::endl;
+		     << '\n';
 	}
   ATH_CHECK(this->finalize(thisFileStream));
   thisFileStream.close();

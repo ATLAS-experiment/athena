@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -42,11 +42,11 @@ class TRT_PrepDataToxAOD : public AthAlgorithm  {
 public:
   enum EGasType {kUnset=-128,kXenon=0,kArgon=1,kKrypton=2, kEmAr=6,kEmKr=7};
   // Constructor with parameters:
-  TRT_PrepDataToxAOD(const std::string &name,ISvcLocator *pSvcLocator);
+  using AthAlgorithm::AthAlgorithm;
 
   // Basic algorithm methods:
   virtual StatusCode initialize(); 
-  virtual StatusCode execute();
+  virtual StatusCode execute(const EventContext& ctx);
   virtual StatusCode finalize();
 
 private:

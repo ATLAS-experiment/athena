@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigT1CaloCalibUtils/L1CaloRampMaker.h"
@@ -114,7 +114,7 @@ StatusCode L1CaloRampMaker::initialize()
     return StatusCode::SUCCESS;
 }
 
-StatusCode L1CaloRampMaker::execute()
+StatusCode L1CaloRampMaker::execute(const EventContext& ctx)
 {
     // Skip spurious events
     unsigned int wantedEvents = m_nEventsPerStep*m_nSteps;
@@ -144,7 +144,6 @@ StatusCode L1CaloRampMaker::execute()
     }
 
   
-    const EventContext& ctx = getContext();
     
     SG::ReadHandle<CaloCellContainer> cells{ m_caloCellsKey,ctx};
   
@@ -248,8 +247,8 @@ StatusCode L1CaloRampMaker::execute()
     }
 
     // Reading L1Calo conditions 
-    SG::ReadCondHandle<L1CaloPprDisabledChannelContainerRun2>  pprDisabledChannel(m_pprDisabledChannelContainer);
-    SG::ReadCondHandle<L1CaloPprChanCalibContainer> pprChanCalib( m_pprChanCalibContainer);
+    SG::ReadCondHandle<L1CaloPprDisabledChannelContainerRun2>  pprDisabledChannel(m_pprDisabledChannelContainer, ctx);
+    SG::ReadCondHandle<L1CaloPprChanCalibContainer> pprChanCalib( m_pprChanCalibContainer, ctx);
     
     auto specialChannelRangeEnd = m_specialChannelRange.end();
     bool nextStep = (m_nEvent % m_nEventsPerStep == 0);
@@ -262,7 +261,7 @@ StatusCode L1CaloRampMaker::execute()
         if(*max >= m_fadcSaturationCut) continue;
 	
 	// skip disabled channels
-        if(m_ttTool->disabledChannel(tt->coolId())) continue;
+        if(m_ttTool->disabledChannel(ctx, tt->coolId())) continue;
 
         bool isTile = m_xAODTTTools->isTile(*tt);
 	if (this->validTower(isTile)) {

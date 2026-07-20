@@ -14,8 +14,7 @@
 #include "TMath.h"
 #include "TH2.h"
 
-#include "HepPDT/ParticleData.hh"
-#include "HepPDT/ParticleDataTable.hh"
+#include "TruthUtils/HepMCHelpers.h"
 
 //=============================================
 //======= TFCS2DFunctionLateralShapeParametrization =========
@@ -68,7 +67,7 @@ FCSReturnCode TFCS2DFunctionLateralShapeParametrization::simulate_hit(
   }
 
   const int pdgId = truth->pdgid();
-  const double charge = HepPDT::ParticleID(pdgId).charge();
+  const double charge = MC::charge(pdgId);
 
   const int cs = calosample();
   const double center_eta = hit.center_eta();

@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( xAODCoreAthenaPool )
@@ -13,4 +13,4 @@ atlas_add_poolcnv_library( xAODCoreAthenaPoolPoolCnv
    xAOD::ShallowAuxContainer xAOD::ShallowAuxInfo
    xAOD::BaseContainer
    CNV_PFX xAOD
-   LINK_LIBRARIES AthContainers AthenaKernel AthenaPoolCnvSvcLib xAODCore )
+   LINK_LIBRARIES AthContainers AthenaKernel AthenaPoolCnvSvcLib xAODCore GaudiKernel )

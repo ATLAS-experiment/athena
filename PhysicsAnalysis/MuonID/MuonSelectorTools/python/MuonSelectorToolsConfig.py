@@ -10,6 +10,14 @@ from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.Enums import LHCPeriod
 
+def MuonLoosenedNonCalibratedSelectionToolCfg(flags, name="MuonLoosenedNonCalibratedSelectionTool", **kwargs):
+    """Configure the muon selection tool"""
+    kwargs.setdefault("DisablePtCuts", True)
+    kwargs.setdefault("TurnOffMomCorr", True)
+    return MuonSelectionToolCfg(flags, name, **kwargs)
+
+
+#Pretty much copy of the above but without expert flags on disabling pt cuts and turning off momentum corrections. This is for use in physics analysis
 def MuonSelectionToolCfg(flags, name="MuonSelectionTool", **kwargs):
     """Configure the muon selection tool"""
     acc = ComponentAccumulator()
@@ -25,8 +33,6 @@ def MuonSelectionToolCfg(flags, name="MuonSelectionTool", **kwargs):
     execution_provider = OnnxRuntimeType.CPU
     # Set defaults AFTER ort_tool is available
     kwargs.setdefault("IsRun3Geo", flags.GeoModel.Run >= LHCPeriod.Run3)
-    kwargs.setdefault("DisablePtCuts", True)
-    kwargs.setdefault("TurnOffMomCorr", True)
     kwargs.setdefault("ORTInferenceTool", 
                       acc.popToolsAndMerge(OnnxRuntimeInferenceToolCfg(flags, model_fname, execution_provider, name=f"{name}_ORTInferenceTool")))
 
@@ -36,4 +42,3 @@ def MuonSelectionToolCfg(flags, name="MuonSelectionTool", **kwargs):
     acc.setPrivateTools(the_tool)
     return acc
  
-

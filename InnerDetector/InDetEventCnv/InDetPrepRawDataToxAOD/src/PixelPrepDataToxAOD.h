@@ -65,11 +65,11 @@ class PixelPrepDataToxAOD : public AthAlgorithm  {
 
 public:
   // Constructor with parameters:
-  PixelPrepDataToxAOD(const std::string &name,ISvcLocator *pSvcLocator);
+  using AthAlgorithm::AthAlgorithm;
 
   // Basic algorithm methods:
   virtual StatusCode initialize();
-  virtual StatusCode execute();
+  virtual StatusCode execute(const EventContext& ctx);
   virtual StatusCode finalize();
 
 private:
@@ -109,15 +109,17 @@ private:
                                                  int *rcolMin = 0,
                                                  int *rcolMax = 0 ) const;
 
-  const PixelID *m_PixelHelper;
+  const PixelID *m_PixelHelper = nullptr;
 
-  bool  m_useTruthInfo;
-  bool  m_writeSDOs;
-  bool  m_writeSiHits;
-  bool  m_writeNNinformation;
-  bool  m_writeRDOinformation;
-  bool  m_writeExtendedPRDinformation;
-  bool m_useSiHitsGeometryMatching;
+  Gaudi::Property<bool> m_useTruthInfo{this, "UseTruthInfo", false};
+  Gaudi::Property<bool> m_writeSDOs{this, "WriteSDOs", false};
+  Gaudi::Property<bool> m_writeSiHits{this, "WriteSiHits", false};
+  Gaudi::Property<bool> m_writeNNinformation{this, "WriteNNinformation", true};
+  Gaudi::Property<bool> m_writeRDOinformation{this, "WriteRDOinformation", true};
+  Gaudi::Property<bool> m_writeExtendedPRDinformation
+    {this, "WriteExtendedPRDinformation", false};
+  Gaudi::Property<bool> m_useSiHitsGeometryMatching
+    {this, "UseSiHitsGeometryMatching", true};
 
   ServiceHandle<InDetDD::IPixelReadoutManager> m_pixelReadout
   {this, "PixelReadoutManager", "PixelReadoutManager", "Pixel readout manager" };
@@ -150,18 +152,24 @@ private:
   mutable std::atomic<unsigned int> m_haveTruthLink {};
   mutable std::atomic<unsigned int> m_missingTruthParticle {};
   mutable std::atomic<unsigned int> m_missingParentParticle {};
-  bool m_firstEventWarnings;
-  bool m_need_sihits;
+  bool m_firstEventWarnings = true;
+  bool m_need_sihits = false;
 
-  SG::ReadHandleKey<InDet::PixelClusterContainer> m_clustercontainer_key;
-  SG::ReadHandleKey<SiHitCollection> m_sihitContainer_key;
-  SG::ReadHandleKey<InDetSimDataCollection> m_SDOcontainer_key;
-  SG::ReadHandleKey<PRD_MultiTruthCollection> m_multiTruth_key;
+  SG::ReadHandleKey<InDet::PixelClusterContainer> m_clustercontainer_key
+    {this, "SiClusterContainer", "PixelClusters"};
+  SG::ReadHandleKey<SiHitCollection> m_sihitContainer_key
+    {this, "MC_Hits", "PixelHits"};
+  SG::ReadHandleKey<InDetSimDataCollection> m_SDOcontainer_key
+    {this, "MC_SDOs", "PixelSDO_Map"};
+  SG::ReadHandleKey<PRD_MultiTruthCollection> m_multiTruth_key
+    {this, "PRD_MultiTruth", "PRD_MultiTruthPixel"};
   SG::ReadHandleKey<xAODTruthParticleLinkVector> m_truthParticleLinks
      {this,"InputTruthParticleLinks","","The key for the truth particle link collection."};
 
-  SG::WriteHandleKey<xAOD::TrackMeasurementValidationContainer> m_write_xaod_key;
-  SG::WriteHandleKey<std::vector<unsigned int>> m_write_offsets;
+  SG::WriteHandleKey<xAOD::TrackMeasurementValidationContainer> m_write_xaod_key
+    {this, "OutputClusterContainer", "PixelClusters"};
+  SG::WriteHandleKey<std::vector<unsigned int>> m_write_offsets
+    {this, "PixelxAodOffset", "PixelClustersOffsets"};
 };
 
 

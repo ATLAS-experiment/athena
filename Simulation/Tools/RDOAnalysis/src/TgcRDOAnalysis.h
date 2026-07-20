@@ -22,7 +22,7 @@ namespace MuonVal{
             using AthHistogramAlgorithm::AthHistogramAlgorithm;
             virtual ~TgcRDOAnalysis()= default;
             virtual StatusCode initialize() override final;
-            virtual StatusCode execute() override final;
+            virtual StatusCode execute(const EventContext& ctx) override final;
  
         private:
             SG::ReadHandleKey<TgcRdoContainer> m_inputKey{this, "InputKey", "TGCRDO"};

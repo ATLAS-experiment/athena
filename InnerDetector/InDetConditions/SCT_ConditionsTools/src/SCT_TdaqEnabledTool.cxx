@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -54,25 +54,11 @@ SCT_TdaqEnabledTool::isGood(const Identifier& elementId, const EventContext& ctx
   return isGood(hashId, ctx);
 }
 
-bool 
-SCT_TdaqEnabledTool::isGood(const Identifier& elementId, InDetConditions::Hierarchy h) const {
-  const EventContext& ctx{Gaudi::Hive::currentContext()};
-
-  return isGood(elementId, ctx, h);
-}
-
 bool
 SCT_TdaqEnabledTool::isGood(const IdentifierHash& hashId, const EventContext& ctx) const {
   const SCT_TdaqEnabledCondData* condData{getCondData(ctx)};
   if (condData==nullptr) return false;
   return condData->isGood(hashId);
-}
-
-bool
-SCT_TdaqEnabledTool::isGood(const IdentifierHash& hashId) const {
-  const EventContext& ctx{Gaudi::Hive::currentContext()};
-
-  return isGood(hashId, ctx);
 }
 
 void

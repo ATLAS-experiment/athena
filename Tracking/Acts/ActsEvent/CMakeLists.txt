@@ -16,6 +16,7 @@ atlas_add_library( ActsEventLib
    Acts::Core
    ActsGeometryLib
    ActsGeometryInterfacesLib
+   ActsCalibBase
    AthContainers
    AthContainersInterfaces
    AthenaKernel
@@ -27,6 +28,7 @@ atlas_add_library( ActsEventLib
    xAODMeasurementBase
    xAODTracking
    xAODTruth
+   xAODCaloEvent
    xAODAuxiliaryMeasurement
    PRIVATE_LINK_LIBRARIES
       ActsGeoUtils

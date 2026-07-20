@@ -1,9 +1,9 @@
 #!/usr/bin/env python
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
-# art-description: Compare athenaHLT configuration with Dev_pp_run3_v1 menu and different threads/slots/forks settings
+# art-description: Compare athenaEF configuration with Dev_pp_run3_v1 menu and different threads/slots/forks settings
 # art-type: build
-# art-include: main/Athena/x86_64-el9-gcc14-opt
+# art-include: main/Athena/x86_64-el9-gcc15-opt
 # art-include: 24.0/Athena
 
 from TrigValTools.TrigValSteering import Test, ExecStep, CheckSteps, Step
@@ -12,9 +12,9 @@ from TrigValTools.TrigValSteering import Test, ExecStep, CheckSteps, Step
 def make_exec_steps(nforks, nthreads, nslots):
     id_str = '{:d}f_{:d}s_{:d}t'.format(nforks, nthreads, nslots)
 
-    # Step dumping athenaHLT config
+    # Step dumping config
     ex = ExecStep.ExecStep('Config.'+id_str)
-    ex.type = 'athenaHLT'
+    ex.type = 'athenaEF'
     ex.job_options = 'TriggerJobOpts.runHLT'
     ex.input = 'data'
     ex.forks = nforks

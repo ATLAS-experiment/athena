@@ -16,7 +16,7 @@ TrigEgammaMonitorAnalysisAlgorithm::~TrigEgammaMonitorAnalysisAlgorithm()
 
 StatusCode TrigEgammaMonitorAnalysisAlgorithm::initialize() 
 {
-  
+  ATH_MSG_INFO("TrigEgammaMonitorAnalysisAlgorithm::initialize()..."); 
   ATH_CHECK(TrigEgammaMonitorBaseAlgorithm::initialize());
  
   return StatusCode::SUCCESS;
@@ -53,11 +53,12 @@ void TrigEgammaMonitorAnalysisAlgorithm::fillEfficiencies( const EventContext& c
   std::vector<asg::AcceptData> emu_accept_vec;
   std::vector<asg::AcceptData> emu_accept_iso_vec;
 
+  ATH_MSG_DEBUG("Inside fillEfficiencies:  pairObject which is passed to function is:  " << pairObjs.size());
 
   for( auto pairObj : pairObjs ){
 
+	  ATH_MSG_DEBUG("Print decision = " << pairObj.second);
 	  if(pairObj.first->type()==xAOD::Type::Electron){
-
         auto passBits=tdt()->isPassedBits(info.trigger);
           if(!((passBits & TrigDefs::L1_isPassedAfterVeto)  && ((passBits & TrigDefs::EF_prescaled)==0))){
             ATH_MSG_DEBUG("Prescaled trigger: " << info.trigger << " Skipping to normalize efficiencies");
@@ -68,7 +69,11 @@ void TrigEgammaMonitorAnalysisAlgorithm::fillEfficiencies( const EventContext& c
 		  if(et < info.etthr-5.0) continue; 
 
 	  }else if(pairObj.first->type()==xAOD::Type::Photon){
+		  ATH_MSG_DEBUG("FILL EFFICIENCY IS LOOKING AT PHOTONS");
 		  float et = getCluster_et(pairObj.first)/Gaudi::Units::GeV;
+		  ATH_MSG_DEBUG("raw cluster et (MeV?) = " << getCluster_et(pairObj.first));
+		  ATH_MSG_DEBUG("et: " << et);
+		  ATH_MSG_DEBUG("info.etthr: " << info.etthr);
 		  if(et < info.etthr-5.0) continue; 
 
 		  // Applying FixedCutLoose isolation on the offline photon as recommended  in the twiki:
@@ -76,8 +81,13 @@ void TrigEgammaMonitorAnalysisAlgorithm::fillEfficiencies( const EventContext& c
 		  bool pass_CaloIso = getIsolation_topoetcone20(pairObj.first)/getCluster_et(pairObj.first) < 0.065;
 		  bool pass_trkIso = getIsolation_ptcone20(pairObj.first)/getCluster_et(pairObj.first) < 0.05; 
 
+		  ATH_MSG_DEBUG(" pass_CaloIso  :" <<  pass_CaloIso );
+		  ATH_MSG_DEBUG("  pass_trkIso :" <<  pass_trkIso );
+
 		  if (!pass_CaloIso || !pass_trkIso){
+			  ATH_MSG_DEBUG("Did not passed FixedCutLoose offline isolationFixedCutLoose offline isolation");
 			  continue; // pass FixedCutLoose offline isolation
+
 		  }
 	  } // Offline photon
 
@@ -85,7 +95,7 @@ void TrigEgammaMonitorAnalysisAlgorithm::fillEfficiencies( const EventContext& c
     // Good pair to be measure
     if(m_doEmulation){ // Emulation
         bool valid=false;
-        auto acceptData = m_emulatorTool->emulate( pairObj.second, info.trigger , valid);
+        auto acceptData = m_emulatorTool->emulate(ctx, pairObj.second, info.trigger, valid);
         // skip this probe since the emulation is not possible. Avoid diff denominators between emulation and efficiecy
         if(!valid) {
             ATH_MSG_DEBUG("Emulation fail. Skip this probe...");
@@ -101,7 +111,7 @@ void TrigEgammaMonitorAnalysisAlgorithm::fillEfficiencies( const EventContext& c
     // Good pair to be measure
     { // Efficiency
         pair_vec.push_back(pairObj);
-        auto acceptData = setAccept( pairObj.second, info, onlyHLT );
+        auto acceptData = setAccept( ctx, pairObj.second, info, onlyHLT );
         accept_vec.push_back(acceptData);
         static const SG::Decorator<bool> IsolatedDec("Isolated");
         if( IsolatedDec(*pairObj.first) ){
@@ -115,9 +125,9 @@ void TrigEgammaMonitorAnalysisAlgorithm::fillEfficiencies( const EventContext& c
 
   std::string dirname= "Efficiency";
   std::string l2step = "FastElectron";
-  if( info.signature == "Electron" ){
+  if( info.signature == "Electron" or info.signature == "e" ){
     l2step = "FastElectron";
-  }else if( info.signature == "Photon" ){
+  }else if( info.signature == "Photon" or info.signature == "g" ){
     l2step = "FastPhoton";
   }
   fillEfficiency(ctx, "L1Calo"        , "L1Calo"   , info.pidname, info, pair_vec , accept_vec, dirname);
@@ -125,6 +135,10 @@ void TrigEgammaMonitorAnalysisAlgorithm::fillEfficiencies( const EventContext& c
   fillEfficiency(ctx, l2step          , "L2"       , info.pidname, info, pair_vec , accept_vec, dirname);
   fillEfficiency(ctx, "PrecisionCalo" , "EFCalo"   , info.pidname, info, pair_vec , accept_vec, dirname);
   fillEfficiency(ctx, "HLT"           , "HLT"      , info.pidname, info, pair_vec , accept_vec, dirname);
+
+  ATH_MSG_DEBUG("THE SIZE OF PAIR_VEC IS:  " << pair_vec.size());
+  ATH_MSG_DEBUG("THE SIZE OF accept_VEC IS:  " << accept_vec.size());
+  ATH_MSG_DEBUG("INFO.PIDNAME: " << info.pidname);
   
   
   if( m_detailedHists ){
@@ -153,13 +167,16 @@ void TrigEgammaMonitorAnalysisAlgorithm::fillEfficiencies( const EventContext& c
 
 }
 
+// *********************************************************************************
+
 
 void TrigEgammaMonitorAnalysisAlgorithm::fillEfficiency( const EventContext& ctx,
                                                          const std::string &subgroup,
                                                          const std::string &level,
                                                          const std::string &pidword,
                                                          const TrigInfo& info,
-                                                         const std::vector< std::pair< const xAOD::Egamma *, const TrigCompositeUtils::Decision* >>& pairObjs,
+                                                         const std::vector< std::pair< const xAOD::Egamma *, 
+							 const TrigCompositeUtils::Decision* >>& pairObjs,
                                                          const std::vector< asg::AcceptData >& acceptObjs ,
                                                          const std::string& dirname ) const
 {
@@ -376,6 +393,7 @@ void TrigEgammaMonitorAnalysisAlgorithm::fillEfficiency( const EventContext& ctx
 }
 // *********************************************************************************
 
+
 void TrigEgammaMonitorAnalysisAlgorithm::fillInefficiency( const std::string &pidword,
                                                          const TrigInfo& info,
                                                          const std::vector< std::pair< const xAOD::Egamma *, 
@@ -452,7 +470,7 @@ void TrigEgammaMonitorAnalysisAlgorithm::fillDistributions( const EventContext& 
         std::vector<const xAOD::EmTauRoI*> l1_vec;
         for( auto &initRoi: initRois ){               
             if( !initRoi.link.isValid() ) continue;      
-            const auto *feat = match()->getL1Feature( initRoi.source );
+            const auto *feat = match()->getL1Feature( ctx, initRoi.source );
             if(feat) l1_vec.push_back(feat);
         }
         fillL1Calo( trigger, l1_vec );
@@ -460,7 +478,7 @@ void TrigEgammaMonitorAnalysisAlgorithm::fillDistributions( const EventContext& 
         std::vector<const xAOD::eFexEMRoI*> l1_vec;
         for( auto &initRoi: initRois ){               
             if( !initRoi.link.isValid() ) continue;      
-            const auto *feat = match()->getL1eEMFeature( initRoi.source );
+            const auto *feat = match()->getL1eEMFeature( ctx, initRoi.source );
             if(feat) l1_vec.push_back(feat);
         }
         fillL1eEM( trigger, l1_vec );
@@ -484,7 +502,7 @@ void TrigEgammaMonitorAnalysisAlgorithm::fillDistributions( const EventContext& 
   // EFCalo
   {
     std::string key = match()->key("PrecisionCalo_Electron");
-    if(info.signature == "Photon") key = match()->key("PrecisionCalo_Photon");
+    if(info.signature == "Photon" or info.signature == "g") key = match()->key("PrecisionCalo_Photon");
     if(info.lrt) key = match()->key("PrecisionCalo_LRT");
     if(info.ion) key = match()->key("PrecisionCalo_HI");
     
@@ -499,7 +517,7 @@ void TrigEgammaMonitorAnalysisAlgorithm::fillDistributions( const EventContext& 
     fillEFCalo( trigger,  clus_vec );
   }
 
-  if ( info.signature == "Electron" ){
+  if ( info.signature == "Electron" or info.signature == "e" ){
       
       // L2 Electron
       {
@@ -536,7 +554,7 @@ void TrigEgammaMonitorAnalysisAlgorithm::fillDistributions( const EventContext& 
           fillShowerShapes( trigger, eg_vec, true );
           fillTracking( ctx, trigger, el_vec, true );
       }
-  }else if ( info.signature == "Photon"){
+  }else if ( info.signature == "Photon" or info.signature == "g"){
         // Fast Photon
       {
           std::string key = match()->key("FastPhotons");         
@@ -569,7 +587,6 @@ void TrigEgammaMonitorAnalysisAlgorithm::fillDistributions( const EventContext& 
   }
 
 }
-
 
 
 
@@ -773,8 +790,7 @@ void TrigEgammaMonitorAnalysisAlgorithm::fillShowerShapes(const std::string &tri
     
     std::vector<float> Rhad_vec, Rhad1_vec, Reta_vec, Rphi_vec, weta1_vec, weta2_vec, 
       f1_vec, f3_vec, eratio_vec, et_vec, highet_vec , eta_vec, phi_vec, topoetcone20_vec, topoetcone40_shift_vec, 
-      topoetcone20_rel_vec, topoetcone40_shift_rel_vec;
- 
+      topoetcone20_rel_vec, topoetcone40_shift_rel_vec, ptvarcone20_rel_vec, pt_vec, mu_vec, pt_track_vec, z0_vec, res_etVsEt_vec, res_eprobht_vec, res_cnv_et_vec;
 
     auto Rhad_col               = Monitored::Collection("Rhad"     , Rhad_vec    );
     auto Rhad1_col              = Monitored::Collection("Rhad1"    , Rhad1_vec   );
@@ -793,6 +809,14 @@ void TrigEgammaMonitorAnalysisAlgorithm::fillShowerShapes(const std::string &tri
     auto topoetcone40_shift_col = Monitored::Collection("topoetcone40_shift",  topoetcone40_shift_vec );
     auto topoetcone20_rel_col   = Monitored::Collection("topoetcone20_rel", topoetcone20_rel_vec);
     auto topoetcone40_shift_rel_col   = Monitored::Collection("topoetcone40_shift_rel",  topoetcone40_shift_rel_vec );
+    auto ptvarcone20_rel_col    = Monitored::Collection("ptvarcone20_rel",  ptvarcone20_rel_vec );
+    auto pt_col                 = Monitored::Collection("pt",  pt_vec );
+    auto mu_col                 = Monitored::Collection("mu",  mu_vec );
+    auto pt_track_col           = Monitored::Collection("pt_track",  pt_track_vec );
+    auto z0_col                 = Monitored::Collection("z0",  z0_vec );
+    auto res_etVsEt_col         = Monitored::Collection("res_etVsEt",  res_etVsEt_vec );
+    auto res_eprobht_col        = Monitored::Collection("res_eprobht",  res_eprobht_vec );
+    auto res_cnv_et_col         = Monitored::Collection("res_cnv_et",  res_cnv_et_vec );
      
     for ( const auto *eg : eg_vec ){
 
@@ -823,7 +847,7 @@ void TrigEgammaMonitorAnalysisAlgorithm::fillShowerShapes(const std::string &tri
 
     fill( monGroup, Rhad_col, Rhad1_col, Reta_col, Rphi_col, weta1_col, weta2_col, 
           f1_col, f3_col, eratio_col, et_col, highet_col , eta_col, phi_col, topoetcone20_col, topoetcone40_shift_col, 
-          topoetcone20_rel_col, topoetcone40_shift_rel_col );
+          topoetcone20_rel_col, topoetcone40_shift_rel_col, ptvarcone20_rel_col, pt_col, mu_col, pt_track_col, z0_col, res_etVsEt_col, res_eprobht_col, res_cnv_et_col);
 
 }
 
@@ -954,7 +978,7 @@ void TrigEgammaMonitorAnalysisAlgorithm::fillResolutions( const EventContext& ct
       //
       // Get only off and l1 where the offline object passed by the offline pid selector
       //
-      const auto *l1 = match()->getL1Feature( feat  );
+      const auto *l1 = match()->getL1Feature( ctx, feat  );
       if(eg->type()==xAOD::Type::Electron){
         const xAOD::Electron* el = static_cast<const xAOD::Electron*>(eg);
         float et = getEt(el)/Gaudi::Units::GeV;
@@ -979,10 +1003,10 @@ void TrigEgammaMonitorAnalysisAlgorithm::fillResolutions( const EventContext& ct
   fillL2CaloResolution( trigger, pair_eg_vec ); 
   
   // Fill HLT electron for all onl objects found
-  if ( info.signature=="Electron"){
+  if ( info.signature=="Electron" or info.signature == "e"){
     fillHLTElectronResolution( ctx, trigger, pair_eg_vec, info );
   }  
-  else if ( info.signature=="Photon"){
+  else if ( info.signature=="Photon" or info.signature == "g"){
     fillHLTPhotonResolution( ctx, trigger, pair_eg_vec, info );
     }
 
@@ -1059,12 +1083,13 @@ void TrigEgammaMonitorAnalysisAlgorithm::fillHLTElectronResolution(const EventCo
     std::vector<float> res_pt_vec, res_et_vec, res_phi_vec, res_eta_vec, res_deta1_vec, res_deta2_vec, res_dphi2_vec, res_dphiresc_vec,
     res_z0_vec, res_d0_vec, res_d0sig_vec, res_eprobht_vec, res_npixhits_vec, res_nscthits_vec, res_Rhad_vec, res_Rhad1_vec, res_Reta_vec,
     res_Rphi_vec, res_weta1_vec, res_weta2_vec, res_wtots1_vec, res_f1_vec, res_f3_vec, res_eratio_vec, res_ethad_vec, res_ethad1_vec,
-    et_vec, eta_vec, mu_vec;
+    et_vec, eta_vec, mu_vec, pt_vec;
     std::vector<float> res_ptcone20_vec, res_ptcone20_rel_vec, res_ptvarcone20_vec, res_ptvarcone20_rel_vec;
     std::vector<float> res_etInEta0_vec, res_etInEta1_vec, res_etInEta2_vec, res_etInEta3_vec;
 
 
     auto et_col           = Monitored::Collection( "et"             , et_vec                );
+    auto pt_col           = Monitored::Collection( "pt"             , pt_vec                );
     auto eta_col          = Monitored::Collection( "eta"            , eta_vec               );
     auto mu_col           = Monitored::Collection( "mu"             , mu_vec                );
 
@@ -1382,6 +1407,7 @@ void TrigEgammaMonitorAnalysisAlgorithm::fillHLTElectronResolution(const EventCo
     // Fill everything
     fill( monGroup        ,
           et_col          ,
+          pt_col          ,
           eta_col         ,
           mu_col          ,
           res_pt_col      , 
@@ -1437,7 +1463,7 @@ void TrigEgammaMonitorAnalysisAlgorithm::fillHLTPhotonResolution(const EventCont
     std::vector<float> res_phi_vec, res_eta_vec, res_Rhad_vec, res_Rhad1_vec, res_Reta_vec, res_ethad_vec, res_ethad1_vec,
     res_Rphi_vec, res_weta1_vec, res_weta2_vec, res_wtots1_vec, res_f1_vec, res_f3_vec, res_eratio_vec, et_vec, eta_vec, mu_vec;
     
-    std::vector<float> res_et_vec, res_et_cnv_vec, res_et_uncnv_vec;
+    std::vector<float> res_et_vec, res_et_cnv_vec, res_et_uncnv_vec, res_cnv_et_vec, res_uncnv_et_vec;
     std::vector<float> res_etInEta0_vec, res_etInEta1_vec, res_etInEta2_vec, res_etInEta3_vec;
     std::vector<float> res_cnv_etInEta0_vec, res_cnv_etInEta1_vec, res_cnv_etInEta2_vec, res_cnv_etInEta3_vec;
     std::vector<float> res_uncnv_etInEta0_vec, res_uncnv_etInEta1_vec, res_uncnv_etInEta2_vec, res_uncnv_etInEta3_vec;
@@ -1469,6 +1495,8 @@ void TrigEgammaMonitorAnalysisAlgorithm::fillHLTPhotonResolution(const EventCont
 
     auto res_et_col             = Monitored::Collection( "res_et"               , res_et_vec            );
     auto res_et_cnv_col         = Monitored::Collection( "res_et_cnv"           , res_et_cnv_vec        );
+    auto res_cnv_et_col         = Monitored::Collection( "res_cnv_et"           , res_cnv_et_vec        );
+    auto res_uncnv_et_col         = Monitored::Collection( "res_uncnv_et"           , res_uncnv_et_vec        );
     auto res_et_uncnv_col       = Monitored::Collection( "res_et_uncnv"         , res_et_uncnv_vec      );
     auto res_etInEta0_col       = Monitored::Collection( "res_etInEta0"         , res_etInEta0_vec      );
     auto res_etInEta1_col       = Monitored::Collection( "res_etInEta1"         , res_etInEta1_vec      );
@@ -1721,6 +1749,8 @@ void TrigEgammaMonitorAnalysisAlgorithm::fillHLTPhotonResolution(const EventCont
           res_cnv_etInEta2_col,
           res_cnv_etInEta3_col,
           res_et_cnv_col,
+          res_cnv_et_col,
+          res_uncnv_et_col,
           res_uncnv_etInEta0_col,
           res_uncnv_etInEta1_col,
           res_uncnv_etInEta2_col,
@@ -1741,7 +1771,7 @@ void TrigEgammaMonitorAnalysisAlgorithm::fillL2CaloResolution(const std::string 
     auto monGroup = getGroup( trigger + "_Resolutions_L2Calo" );
 
     std::vector<float> res_et_vec, res_phi_vec, res_eta_vec, res_Rhad_vec, res_Rhad1_vec, res_Reta_vec, res_ethad_vec, res_ethad1_vec,
-    res_Rphi_vec, res_weta2_vec, res_f1_vec, res_f3_vec, res_eratio_vec, et_vec, eta_vec;
+    res_Rphi_vec, res_weta2_vec, res_f1_vec, res_f3_vec, res_eratio_vec, et_vec, eta_vec, res_etVsEt_vec;
     
 
     auto et_col           = Monitored::Collection( "et"             , et_vec                );
@@ -1759,6 +1789,9 @@ void TrigEgammaMonitorAnalysisAlgorithm::fillL2CaloResolution(const std::string 
     auto res_f1_col       = Monitored::Collection( "res_f1"         , res_f1_vec            );
     auto res_f3_col       = Monitored::Collection( "res_f3"         , res_f3_vec            );
     auto res_eratio_col   = Monitored::Collection( "res_eratio"     , res_eratio_vec        );
+    auto res_etVsEt_col   = Monitored::Collection( "res_etVsEt"     , res_etVsEt_vec        );
+
+
 
 
     for ( const auto & pairObj : pairObjs ){
@@ -1910,7 +1943,8 @@ void TrigEgammaMonitorAnalysisAlgorithm::fillL2CaloResolution(const std::string 
           res_weta2_col   , 
           res_f1_col      , 
           res_f3_col      , 
-          res_eratio_col  
+          res_eratio_col  ,  
+          res_etVsEt_col
           );
 
 }

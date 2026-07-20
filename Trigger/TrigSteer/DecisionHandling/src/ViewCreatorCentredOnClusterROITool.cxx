@@ -1,6 +1,6 @@
 
 /*
-Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigSteeringEvent/TrigRoiDescriptorCollection.h"
@@ -24,7 +24,7 @@ StatusCode ViewCreatorCentredOnClusterROITool::attachROILinks(TrigCompositeUtils
   SG::WriteHandle<TrigRoiDescriptorCollection> roisWriteHandle = createAndStoreNoAux(m_roisWriteHandleKey, ctx);
   
   for ( Decision* outputDecision : decisions ) { 
-    const std::vector<LinkInfo<xAOD::TrigEMClusterContainer>> myClusters = findLinks<xAOD::TrigEMClusterContainer>(outputDecision, m_clusterLinkName, TrigDefs::lastFeatureOfType);
+    const std::vector<LinkInfo<xAOD::TrigEMClusterContainer>> myClusters = findLinks<xAOD::TrigEMClusterContainer>(ctx, outputDecision, m_clusterLinkName, TrigDefs::lastFeatureOfType);
     
     if (myClusters.size() == 0) {
       ATH_MSG_ERROR("Found zero xAOD::TrigEMClusters '" << m_clusterLinkName << "' for Decision object index " << outputDecision->index());

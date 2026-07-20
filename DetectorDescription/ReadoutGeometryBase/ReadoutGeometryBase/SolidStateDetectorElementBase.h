@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -692,12 +692,12 @@ namespace InDetDD {
       Amg::Vector3D m_center;
       HepGeom::Vector3D<double> m_centerCLHEP;
       Amg::Vector3D m_origin;
-      double m_minZ;
-      double m_maxZ;
-      double m_minR;
-      double m_maxR;
-      double m_minPhi;
-      double m_maxPhi;
+      double m_minZ = 0;
+      double m_maxZ = 0;
+      double m_minR = 0;
+      double m_maxR = 0;
+      double m_minPhi = 0;
+      double m_maxPhi = 0;
     };
     CxxUtils::CachedValue<CachedVals> m_cache;
 

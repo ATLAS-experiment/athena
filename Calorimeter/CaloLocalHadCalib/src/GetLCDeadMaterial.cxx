@@ -240,7 +240,7 @@ StatusCode GetLCDeadMaterial::finalize()
 /* ****************************************************************************
 
 ***************************************************************************** */
-StatusCode GetLCDeadMaterial::execute()
+StatusCode GetLCDeadMaterial::execute(const EventContext& /*ctx*/)
 {
   ATH_MSG_INFO( " Nothing to be done in execute() method "  );
   return StatusCode::SUCCESS;

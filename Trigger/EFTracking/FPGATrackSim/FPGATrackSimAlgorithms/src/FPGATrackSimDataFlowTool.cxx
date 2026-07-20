@@ -394,18 +394,21 @@ FPGATrackSimDataFlowTool::addDataFlow(float const n, std::string_view key, bool 
     if (isInt) {
       const auto maxIt = m_dataFlowDataI_max.find(key);
       const auto histIt = m_dataFlowHistsI.find(key);
-      const int max = maxIt->second;
-      TH1I* h = histIt->second;
-      h->SetBins(max + 1, -0.5, max + 0.5);
-      h->Fill(n);
+      if ((maxIt != m_dataFlowDataI_max.end()) and (histIt != m_dataFlowHistsI.end()))[[likely]]{
+        const int max = maxIt->second;
+        TH1I* h = histIt->second;
+        h->SetBins(max + 1, -0.5, max + 0.5);
+        h->Fill(n);
+      }
     } else {
       const auto maxIt = m_dataFlowDataF_max.find(key);
       const auto histIt = m_dataFlowHistsF.find(key);
-
-      const float max = maxIt->second;
-      TH1F* h = histIt->second;
-      h->SetBins((std::round(max) + 1) * 100, -0.5, std::round(max) + 0.5);
-      h->Fill(n);
+      if ((maxIt != m_dataFlowDataF_max.end()) and (histIt != m_dataFlowHistsF.end()))[[likely]]{
+        const float max = maxIt->second;
+        TH1F* h = histIt->second;
+        h->SetBins((std::round(max) + 1) * 100, -0.5, std::round(max) + 0.5);
+        h->Fill(n);
+      }
     }
   }
 

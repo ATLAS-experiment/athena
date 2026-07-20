@@ -9,6 +9,8 @@
 #include <InDetPrepRawData/SiWidth.h>
 #include <TrkSurfaces/Surface.h>
 
+#include "details/PixelRDOCollectionAdapter.h"
+
 #include <algorithm>
 #include <array>
 #include <cassert>
@@ -20,85 +22,112 @@
 using CLHEP::micrometer;
 
 namespace {
-   inline bool isFEI3(const InDetDD::SiDetectorElement& element) {
-      const InDetDD::PixelModuleDesign& design =
-         static_cast<const InDetDD::PixelModuleDesign&>(element.design());
-      return  design.getReadoutTechnology() == InDetDD::PixelReadoutTechnology::FEI3;
-   }
 
-   inline bool
-   isGanged(Identifier rdoID,
-            const InDetDD::SiDetectorElement& element)
-   {
-      InDetDD::SiCellId cellID = element.cellIdFromIdentifier( rdoID );
-      return  ( element.numberOfConnectedCells( cellID ) > 1 );
-   }
-
-   inline std::optional<std::array<std::int16_t,2> >
-   getGangedCoordinates(const std::array<std::int16_t,2> &coordinates,
-                        const InDetDD::SiDetectorElement& element)
-   {
-      // If the pixel is ganged, returns a new identifier for it
-      InDetDD::SiCellId cellID(coordinates[0],coordinates[1]);
-      if ( element.numberOfConnectedCells( cellID ) > 1 ) {
-         InDetDD::SiCellId gangedCellID = element.connectedCell( cellID, 1 );
-         return std::array<std::int16_t,2>{ static_cast<std::int16_t>(gangedCellID.phiIndex()),
-                                            static_cast<std::int16_t>(gangedCellID.etaIndex())};
-      }
-      return std::nullopt;
-   }
    template <typename T1, typename T2>
    T1 check_integer_cast(T2 a) {
       assert( std::in_range<T1>(a) );
       return static_cast<T1>(a);
    }
+
+   inline bool isFEI3(const InDetDD::PixelModuleDesign& design) {
+      return  design.getReadoutTechnology() == InDetDD::PixelReadoutTechnology::FEI3;
+   }
+
+   template <typename IndexType>
+   inline std::optional<std::array<std::int16_t,2> >
+   getGangedCoordinates(const std::array<IndexType,2> &coordinates,
+                        const InDetDD::PixelModuleDesign& design)
+   {
+      // If the pixel is ganged, returns a new identifier for it
+      InDetDD::SiCellId cellId(check_integer_cast<int>(coordinates[0]),check_integer_cast<int>(coordinates[1]));
+      InDetDD::SiReadoutCellId readoutId = design.readoutIdOfCell(cellId);
+      if ( design.numberOfConnectedCells( readoutId ) > 1 ) {
+         InDetDD::SiCellId gangedCellId = design.connectedCell( readoutId, 1 );
+         return std::array<std::int16_t,2>{ static_cast<std::int16_t>(gangedCellId.phiIndex()),
+                                            static_cast<std::int16_t>(gangedCellId.etaIndex())};
+      }
+      return std::nullopt;
+   }
+
+   // PixelRDO_Container
+   std::array<std::int16_t,2>
+   makeCellCoordinates(const std::array<InDetDD::PixelDiodeTree::CellIndexType,2> &diode_idx) {
+      return std::array<std::int16_t,2>{
+         check_integer_cast<std::int16_t>(diode_idx[0]),
+         check_integer_cast<std::int16_t>(diode_idx[1])};
+   }
+   // PixelRDO_Container
+   const std::array<InDetDD::PixelDiodeTree::CellIndexType,2> &
+   makeDiodeIdx(const std::array<InDetDD::PixelDiodeTree::CellIndexType,2> &diode_idx) {
+      return diode_idx;
+   }
+
+   // PhaseIIPixelRawDataContainer
+   std::array<std::int16_t,2>
+   makeCellCoordinates(const std::array<std::int16_t,2> &diode_idx) {
+      return diode_idx;
+   }
+   // PhaseIIPixelRawDataContainer
+   std::array<InDetDD::PixelDiodeTree::CellIndexType,2>
+   makeDiodeIdx(const std::array<std::int16_t,2> &diode_idx) {
+      return std::array<InDetDD::PixelDiodeTree::CellIndexType,2>{
+         check_integer_cast<InDetDD::PixelDiodeTree::CellIndexType>(diode_idx[0]),
+         check_integer_cast<InDetDD::PixelDiodeTree::CellIndexType>(diode_idx[1])};
+   }
+
 }
 
 namespace ActsTrk {
 
-StatusCode PixelClusteringTool::initialize()
+template <typename T_RDOContainer>
+StatusCode PixelClusteringToolImpl<T_RDOContainer>::initialize()
 {
-  ATH_MSG_DEBUG("Initializing " << name() << " ...");
+  ATH_MSG_DEBUG("Initializing " << this->name() << " ...");
 
   ATH_MSG_DEBUG("   " << m_addCorners );
   ATH_MSG_DEBUG("   " << m_useWeightedPos );
   ATH_MSG_DEBUG("   " << m_broadErrors );
   ATH_MSG_DEBUG("   " << m_checkGanged );
     
-  ATH_CHECK(m_pixelLorentzAngleTool.retrieve());
+  ATH_CHECK(this->m_pixelLorentzAngleTool.retrieve());
 
-  ATH_CHECK(m_chargeDataKey.initialize(not m_chargeDataKey.empty()));
+  ATH_CHECK(this->m_chargeDataKey.initialize(not m_chargeDataKey.empty()));
 
   ATH_MSG_INFO("   Charge Data Key:" << m_chargeDataKey);
   ATH_MSG_INFO("   ID Helper Name:" << m_idHelperName);
 
-  ATH_CHECK( detStore()->retrieve(m_pixelID, m_idHelperName) );
+  ATH_CHECK( this->detStore()->retrieve(m_pixelID, m_idHelperName) );
   
-  ATH_MSG_DEBUG(name() << " successfully initialized");
+  ATH_MSG_DEBUG(this->name() << " successfully initialized");
   return StatusCode::SUCCESS;
 }
 
-PixelClusteringTool::PixelClusteringTool(
+template <typename T_RDOContainer>
+PixelClusteringToolImpl<T_RDOContainer>::PixelClusteringToolImpl(
     const std::string& type, const std::string& name, const IInterface* parent)
     : base_class(type,name,parent)
 {}
 
+
+template <typename T_RDOContainer>
 template <bool GANGED>
 std::pair<unsigned int, unsigned int>
-PixelClusteringTool::countCellsImpl(const RDOContainer& rdoContainer,
-                                    const std::vector<IdentifierHash> &listOfIds,
-                                    const InDetDD::SiDetectorElementCollection &detector_elements) const {
-   auto getNHits =[](const InDetRawDataCollection<PixelRDORawData> &RDOs,
-                     const InDetDD::SiDetectorElementCollection &detector_elements )
+PixelClusteringToolImpl<T_RDOContainer>::countCellsImpl(const T_RDOContainer& rdo_collection,
+                                                        const std::vector<IdentifierHash> &listOfIds,
+                                                        const InDetDD::SiDetectorElementCollection &detector_elements) const {
+   auto getNHits =[](const ActsTrk::RDOContainerTraits<T_RDOContainer>::PerModuleRDOs &RDOs,
+                     const InDetDD::SiDetectorElementCollection &detector_elements,
+		     const PixelID* pixelID)
       -> unsigned int
    {
       unsigned int n_hits = RDOs.size();
       if constexpr(GANGED) {
-         const InDetDD::SiDetectorElement *element = detector_elements.at(RDOs.identifyHash());
-         assert(element);
-         if (isFEI3(*element)) {
-            for(const PixelRDORawData* rdo : RDOs) {
-               if (isGanged(rdo->identify(), *element)) {
+         assert(detector_elements.at(RDOs.identifyHash()));
+         assert(dynamic_cast<const InDetDD::PixelModuleDesign *>(&detector_elements.at(RDOs.identifyHash())->design()) != nullptr);
+         const InDetDD::PixelModuleDesign &design = static_cast<const InDetDD::PixelModuleDesign &>(detector_elements.at(RDOs.identifyHash())->design());
+         if (isFEI3(design)) {
+            for(RDOAdapter<T_RDOContainer> rdo : RDOs) {
+               if (rdo.isGanged(design, *pixelID)) {
                   ++n_hits;
                }
             }
@@ -108,17 +137,17 @@ PixelClusteringTool::countCellsImpl(const RDOContainer& rdoContainer,
    };
    unsigned int n_hits=0u;
    if (listOfIds.empty()) {
-      for (const InDetRawDataCollection<PixelRDORawData> *RDOs : rdoContainer) {
-         assert( RDOs);
-         n_hits += getNHits(*RDOs, detector_elements);
+      for (const RDOCollectionAdapter<T_RDOContainer> RDOs : RDOCollectionAdapter<T_RDOContainer>::range(rdo_collection)) {
+         assert( RDOs.isValid());
+         n_hits += getNHits(*RDOs, detector_elements, m_pixelID);
       }
    }
    else {
       for (const IdentifierHash& id : listOfIds) {
          if (not id.is_valid()) continue;
-         const InDetRawDataCollection<PixelRDORawData> *RDOs = rdoContainer.indexFindPtr(id);
-         if (RDOs) {
-            n_hits += getNHits(*RDOs, detector_elements);
+         std::optional<RDOCollectionAdapter<T_RDOContainer> > RDOs = RDOCollectionAdapter<T_RDOContainer>::make(rdo_collection,id);
+         if (RDOs.has_value()) {
+	   n_hits += getNHits(*(RDOs.value()), detector_elements, m_pixelID);
          }
       }
    }
@@ -129,10 +158,11 @@ PixelClusteringTool::countCellsImpl(const RDOContainer& rdoContainer,
    return {n_hits,n_hits};
 }
 
+template <typename T_RDOContainer>
 std::pair<unsigned int, unsigned int>
-PixelClusteringTool::countCells(const RDOContainer& rdo_collection,
-                                const std::vector<IdentifierHash> &listOfIds,
-                                const InDetDD::SiDetectorElementCollection &detector_elements) const {
+PixelClusteringToolImpl<T_RDOContainer>::countCells(const T_RDOContainer& rdo_collection,
+                                                const std::vector<IdentifierHash> &listOfIds,
+                                                const InDetDD::SiDetectorElementCollection &detector_elements) const {
    if (m_isITk || !m_checkGanged ) {
       return countCellsImpl<false>(rdo_collection,listOfIds, detector_elements);
    }
@@ -141,17 +171,17 @@ PixelClusteringTool::countCells(const RDOContainer& rdo_collection,
    }
 }
 
-
+template <typename T_RDOContainer>
 StatusCode
-PixelClusteringTool::makeCluster(size_t icluster,
-                                 const PixelClusteringTool::ClusterProxy &cluster,
-				 const InDetDD::SiDetectorElement& element,
-				 const InDetDD::PixelModuleDesign& design,
-                                 const InDetRawDataCollection<PixelRDORawData> &rdos,
-				 const PixelChargeCalibCondData *calibData,
-				 const PixelChargeCalibCondData::CalibrationStrategy calibStrategy,
-				 const double lorentzShift,
-                                 xAOD::PixelCluster::ClusterVars& clusterVars) const
+PixelClusteringToolImpl<T_RDOContainer>::makeCluster(size_t icluster,
+                                                 const PixelClusteringToolImpl<T_RDOContainer>::ClusterProxy &cluster,
+                                                 const InDetDD::SiDetectorElement& element,
+                                                 const InDetDD::PixelModuleDesign& design,
+                                                 const ActsTrk::RDOContainerTraits<T_RDOContainer>::PerModuleRDOs &rdos,
+                                                 const PixelChargeCalibCondData *calibData,
+                                                 const PixelChargeCalibCondData::CalibrationStrategy calibStrategy,
+                                                 const double lorentzShift,
+                                                 xAOD::PixelCluster::ClusterVars& clusterVars) const
 { 
 
   Amg::Vector2D pos_acc(0,0);
@@ -178,14 +208,10 @@ PixelClusteringTool::makeCluster(size_t icluster,
   std::optional<Identifier::value_type> first_rdo_id;
   int cluster_lvl1min = std::numeric_limits<int>::max();
 
-  using CellProxy = InPlaceClusterization::CellProxy<const IPixelClusteringTool::CellContainer>;
+  using CellProxy = InPlaceClusterization::CellProxy<const typename IClusteringToolType::CellContainer>;
   for (CellProxy cellProxy : cluster) {
 
     //Construct the identifier class
-    Identifier rdo_id = m_pixelID->pixel_id(module_id, cellProxy.coordinates()[0], cellProxy.coordinates()[1]);
-    if (!first_rdo_id.has_value()) {
-       first_rdo_id=rdo_id.get_compact();
-    }
 
     // We temporary comment this since it is not used
     // TODO: Check how the ganged info is used in legacy
@@ -194,9 +220,21 @@ PixelClusteringTool::makeCluster(size_t icluster,
     // 	m_pixelRDOTool->isGanged(id, element).has_value();
     // }
     assert(cellProxy.srcIndex() < rdos.size());
-    const PixelRDORawData *rdo = rdos[cellProxy.srcIndex()];
-    cluster_lvl1min = std::min(cluster_lvl1min, rdo->getLVL1A());
-    const int tot = rdo->getToT();
+
+    RDOAdapter<T_RDOContainer> rdo(rdos[cellProxy.srcIndex()]);
+    if constexpr(std::is_same_v<T_RDOContainer, PhaseIIPixelRawDataContainer>) {
+       assert( rdo.index() >= rdos.beginIndex() && rdo.index() < rdos.endIndex() );
+    }
+
+    Identifier rdo_id = rdo.computeIdentifier(*m_pixelID,module_id, cellProxy);
+    if (!first_rdo_id.has_value()) {
+       first_rdo_id=rdo_id.get_compact();
+    }
+
+    assert(rdo.getLVL1A()>=0 &&  rdo.getLVL1A() < std::numeric_limits<uint8_t>::max());
+    cluster_lvl1min = std::min(cluster_lvl1min, static_cast<int>(rdo.getLVL1A()) );
+
+    const int tot = rdo.getToT();
     float charge = tot;
 
     std::array<InDetDD::PixelDiodeTree::CellIndexType,2> diode_idx
@@ -330,18 +368,19 @@ PixelClusteringTool::makeCluster(size_t icluster,
   return StatusCode::SUCCESS;
 }
 
+template <typename T_RDOContainer>
 StatusCode
-PixelClusteringTool::clusterize([[maybe_unused]] const EventContext& ctx,
-                                const RawDataCollection& RDOs,
-                                const InDet::SiDetectorElementStatus& pixelDetElStatus,
-                                const InDetDD::SiDetectorElement& element,
-                                IPixelClusteringTool::CellContainer &cellContainer) const
+PixelClusteringToolImpl<T_RDOContainer>::clusterize([[maybe_unused]] const EventContext& ctx,
+                                                const ActsTrk::RDOContainerTraits<T_RDOContainer>::PerModuleRDOs &RDOs,
+                                                const InDet::SiDetectorElementStatus& pixelDetElStatus,
+                                                const InDetDD::SiDetectorElement& element,
+                                                ActsTrk::RDOContainerTraits<T_RDOContainer>::IClusteringToolType::CellContainer &cellContainer) const
 {
   IdentifierHash idHash = RDOs.identifyHash();
-  IPixelClusteringTool::CellContainer::ModuleRangeGuard rangeGuard(cellContainer.startNewModule(idHash));
+  typename IClusteringToolType::CellContainer::ModuleRangeGuard rangeGuard(cellContainer.startNewModule(idHash));
   if ( pixelDetElStatus.isGood(idHash) ) {
      // Retrieve the cells from the detector element
-     std::span<IPixelClusteringTool::CellContainer::Cell>
+     std::span<typename IClusteringToolType::CellContainer::Cell>
         cellRange = unpackRDOs(RDOs, pixelDetElStatus, element, cellContainer);
 
      static constexpr unsigned int SORT_BY_LOCAL_X=0u;
@@ -350,7 +389,7 @@ PixelClusteringTool::clusterize([[maybe_unused]] const EventContext& ctx,
                                                     CL::defaultConnectionHelper<CL::EConnectionType::CommonEdgeOrCorner>(cellRange));
      // set the cell range per cluster
      Acts::InPlaceClusterization::for_each_cluster(cellRange,
-                                                   [&cellContainer](std::span<IPixelClusteringTool::CellContainer::Cell> &/*the_range*/,
+                                                   [&cellContainer](std::span<typename IClusteringToolType::CellContainer::Cell> &/*the_range*/,
                                                                     unsigned int idx_begin,
                                                                     unsigned int idx_end) {
         cellContainer.registerNewCluster(idx_begin,idx_end);
@@ -364,22 +403,25 @@ PixelClusteringTool::clusterize([[maybe_unused]] const EventContext& ctx,
 }
 
 
-std::any PixelClusteringTool::createEventDataCache(xAOD::PixelClusterContainer& cont,
+template <typename T_RDOContainer>
+std::any PixelClusteringToolImpl<T_RDOContainer>::createEventDataCache(xAOD::PixelClusterContainer& cont,
                                                    [[maybe_unused]] std::size_t nClusterRDOs) const
 {
   return std::any (xAOD::PixelCluster::ClusterVars (cont, nClusterRDOs));
 }
 
 
+template <typename T_RDOContainer>
 StatusCode
-PixelClusteringTool::makeClusters(const EventContext& ctx,
-                                  const RDOContainer &rdoContainer,
-                                  const IPixelClusteringTool::CellContainer& cellContainer,
-                                  unsigned int imodule,
-                                  const InDetDD::SiDetectorElement& element,
-                                  unsigned int icluster,
-                                  [[maybe_unused]] xAOD::PixelClusterContainer& cont,
-                                  std::any& cache) const
+PixelClusteringToolImpl<T_RDOContainer>::makeClusters(
+   const EventContext& ctx,
+   const T_RDOContainer &rdoContainer,
+   const typename ActsTrk::RDOContainerTraits<T_RDOContainer>::IClusteringToolType::CellContainer& cellContainer,
+   unsigned int imodule,
+   const InDetDD::SiDetectorElement& element,
+   unsigned int icluster,
+   [[maybe_unused]] xAOD::PixelClusterContainer& cont,
+   std::any& cache) const
 {
   // Retrieve the calibration data
   const PixelChargeCalibCondData *calibData = nullptr;
@@ -407,12 +449,13 @@ PixelClusteringTool::makeClusters(const EventContext& ctx,
   auto* clusterVars = std::any_cast<xAOD::PixelCluster::ClusterVars> (&cache);
   if (!clusterVars) throw std::bad_any_cast();
 
-  const InDetRawDataCollection<PixelRDORawData>* rdos = rdoContainer.indexFindPtr(idHash);
-  if (!rdos) return StatusCode::FAILURE;
+  std::optional<RDOCollectionAdapter<T_RDOContainer> > rdos_optional(RDOCollectionAdapter<T_RDOContainer>::make(rdoContainer,idHash));
+  if (!rdos_optional.has_value()) return StatusCode::FAILURE;
+  const RDOCollectionAdapter<T_RDOContainer> &rdos(*rdos_optional);
 
-  using CellContainerProxy = InPlaceClusterization::CellContainerProxy<const IPixelClusteringTool::CellContainer>;
-  using ModuleProxy = InPlaceClusterization::ModuleProxy<const IPixelClusteringTool::CellContainer>;
-  using ClusterProxy = InPlaceClusterization::ClusterProxy<const IPixelClusteringTool::CellContainer>;
+  using CellContainerProxy = InPlaceClusterization::CellContainerProxy<const typename IClusteringToolType::CellContainer>;
+  using ModuleProxy = InPlaceClusterization::ModuleProxy<const typename IClusteringToolType::CellContainer>;
+  using ClusterProxy = InPlaceClusterization::ClusterProxy<const typename IClusteringToolType::CellContainer>;
   CellContainerProxy cellContainerProxy(&cellContainer);
   ModuleProxy moduleProxy(cellContainerProxy[imodule]);
 
@@ -431,38 +474,34 @@ PixelClusteringTool::makeClusters(const EventContext& ctx,
   return StatusCode::SUCCESS;
 }
 
-std::span<IPixelClusteringTool::CellContainer::Cell>
-PixelClusteringTool::unpackRDOs(const RawDataCollection& RDOs,
-				const InDet::SiDetectorElementStatus& pixelDetElStatus,
-				const InDetDD::SiDetectorElement& element,
-                                IPixelClusteringTool::CellContainer &cellContainer) const
+template <typename T_RDOContainer>
+std::span<typename ActsTrk::RDOContainerTraits<T_RDOContainer>::IClusteringToolType::CellContainer::Cell>
+PixelClusteringToolImpl<T_RDOContainer>::unpackRDOs(
+    const ActsTrk::RDOContainerTraits<T_RDOContainer>::PerModuleRDOs &RDOs,
+    const InDet::SiDetectorElementStatus& pixelDetElStatus,
+    const InDetDD::SiDetectorElement& element,
+    typename ActsTrk::RDOContainerTraits<T_RDOContainer>::IClusteringToolType::CellContainer &cellContainer) const
 {
   // Get the element design
   const InDetDD::PixelModuleDesign& design =
     static_cast<const InDetDD::PixelModuleDesign&>(element.design());
   
-  bool check_ganged = !m_isITk  && m_checkGanged && isFEI3(element);
+  bool check_ganged = !m_isITk  && m_checkGanged && isFEI3(design);
 
-  IPixelClusteringTool::CellContainer::ModuleRangeGuard rangeGuard(cellContainer, RDOs.identifyHash() );
+  typename IClusteringToolType::CellContainer::ModuleRangeGuard rangeGuard(cellContainer, RDOs.identifyHash() );
   unsigned int rdo_i=0;
-  for (const auto *const rdo : RDOs) {
-    const Identifier& rdoID = rdo->identify();
-
-    std::array<InDetDD::PixelDiodeTree::CellIndexType,2> diode_idx
-      = InDetDD::PixelDiodeTree::makeCellIndex(m_pixelID->phi_index(rdoID),
-                                               m_pixelID->eta_index(rdoID));
-    InDetDD::PixelDiodeTree::DiodeProxy si_param ( design.diodeProxyFromIdx(diode_idx));
+  for (RDOAdapter<T_RDOContainer> rdo : RDOs) {
+    auto coordinates=rdo.coordinates(*m_pixelID);
+    InDetDD::PixelDiodeTree::DiodeProxy si_param ( design.diodeProxyFromIdx(makeDiodeIdx(coordinates)));
     std::uint32_t fe = design.getFE(si_param);
-    
+
     // check if good RDO
     // the pixel RDO tool here says always good if m_useModuleMap is false
     if (pixelDetElStatus.isChipGood(rangeGuard.identifyHash(), fe)) {
-       std::array<std::int16_t,2> coordinates{check_integer_cast<int16_t>(diode_idx[0]),
-                                              check_integer_cast<int16_t>(diode_idx[1])};
-       cellContainer.emplace_back_cell(coordinates, rdo_i);
+       cellContainer.emplace_back_cell(makeCellCoordinates(coordinates), rdo_i);
     
        if ( check_ganged ) {
-          std::optional<std::array<std::int16_t,2> > gangedCoordinates = getGangedCoordinates(coordinates, element);
+          std::optional<std::array<std::int16_t,2> > gangedCoordinates = getGangedCoordinates(coordinates, design);
           if (gangedCoordinates.has_value()) {
              cellContainer.emplace_back_cell(*gangedCoordinates, rdo_i);
           }
@@ -474,4 +513,6 @@ PixelClusteringTool::unpackRDOs(const RawDataCollection& RDOs,
   return rangeGuard.moduleCellSpan();
 }
 
+template class PixelClusteringToolImpl<PixelRDO_Container>;
+template class PixelClusteringToolImpl<PhaseIIPixelRawDataContainer>;
 } // namespace ActsTrk

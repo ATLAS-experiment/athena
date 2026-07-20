@@ -8,7 +8,8 @@
 
 #include "AthenaBaseComps/AthAlgTool.h"
 
-
+#include "ActsGeometryInterfaces/GeometryDefs.h"
+/// Ensure that the ATLAS eigen extension is included first
 #include "Acts/Geometry/BlueprintNode.hpp"
 #include "Acts/Geometry/GeometryIdentifier.hpp"
 

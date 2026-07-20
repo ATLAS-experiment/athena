@@ -97,7 +97,7 @@ StatusCode TRTCalibrationMgr::initialize(){
 
 //---------------------------------------------------------------------
 
-StatusCode TRTCalibrationMgr::execute(){
+StatusCode TRTCalibrationMgr::execute(const EventContext& ctx){
 
     if (m_docalibrate){
         ATH_MSG_INFO("skipping execute() calibrating instead");
@@ -120,7 +120,7 @@ StatusCode TRTCalibrationMgr::execute(){
 
     // Get Primary vertices. Skip events without three good tracks on vertex.
 
-    SG::ReadHandle<xAOD::VertexContainer> vertices(m_verticesKey);
+    SG::ReadHandle<xAOD::VertexContainer> vertices(m_verticesKey, ctx);
     if (not vertices.isValid())
     {
         ATH_MSG_DEBUG("Couldn't retrieve VertexContainer with key: PrimaryVertices");
@@ -143,7 +143,7 @@ StatusCode TRTCalibrationMgr::execute(){
     }
 
     // get event info pointer
-    SG::ReadHandle<xAOD::EventInfo> EventInfo(m_EventInfoKey);
+    SG::ReadHandle<xAOD::EventInfo> EventInfo(m_EventInfoKey, ctx);
     if (not EventInfo.isValid())
     {
         ATH_MSG_FATAL("skipping event, could not get EventInfo");
@@ -153,7 +153,7 @@ StatusCode TRTCalibrationMgr::execute(){
     // Loop over tracks; get track info and accumulate it
     const Trk::Track *aTrack;
 
-    SG::ReadHandle<TrackCollection> trks(m_TrkCollection);
+    SG::ReadHandle<TrackCollection> trks(m_TrkCollection, ctx);
     // retrieve all tracks, but only from one collection (CombinedInDetTracks)
 
     if (trks.isValid())
@@ -183,7 +183,7 @@ StatusCode TRTCalibrationMgr::execute(){
                 {
                     // Refit Track with new ROT creator
                     Trk::RunOutlierRemoval runOutlier = true;
-                    aTrack = m_trackFitter->fit(Gaudi::Hive::currentContext(), *aTrack, runOutlier, aTrack->info().particleHypothesis()).release();
+                    aTrack = m_trackFitter->fit(ctx, *aTrack, runOutlier, aTrack->info().particleHypothesis()).release();
                 }
                 // Check selection if requested
                 if (aTrack)

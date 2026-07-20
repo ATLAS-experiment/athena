@@ -36,26 +36,26 @@ StatusCode LArCablingTest::initialize() {
 
 
 
-StatusCode LArCablingTest::execute() {
+StatusCode LArCablingTest::execute(const EventContext& ctx) {
 
   std::ofstream outfile;
   if (m_print) {
     outfile.open("identifiers.txt");
     outfile << "hash id bec pn FT SL chan id calo pn sampl reg eta phi calib" << std::endl;
   }
-  SG::ReadCondHandle<LArOnOffIdMapping> cablingHdl{m_cablingKey};
+  SG::ReadCondHandle<LArOnOffIdMapping> cablingHdl{m_cablingKey, ctx};
   const LArOnOffIdMapping* cabling{*cablingHdl};
   if(!cabling){
      ATH_MSG_ERROR("Do not have mapping object " << m_cablingKey.key() );
      return StatusCode::FAILURE;
   }
-  SG::ReadCondHandle<LArCalibLineMapping> clHdl{m_CLKey};
+  SG::ReadCondHandle<LArCalibLineMapping> clHdl{m_CLKey, ctx};
   const LArCalibLineMapping *clCont {*clHdl};
   if(!clCont){
      ATH_MSG_ERROR("Do not have calib mapping object " << m_CLKey.key() );
      return StatusCode::FAILURE;
   }
-  SG::ReadCondHandle<LArFebRodMapping> rodHdl{m_RodKey};
+  SG::ReadCondHandle<LArFebRodMapping> rodHdl{m_RodKey, ctx};
   const LArFebRodMapping *rodCont {*rodHdl};
   if(!rodCont){
      ATH_MSG_ERROR("Do not have ROD mapping object " << m_RodKey.key() );

@@ -51,13 +51,13 @@ StatusCode CP::BootstrapGeneratorAlg::initialize()
   return StatusCode::SUCCESS;
 }
 
-StatusCode CP::BootstrapGeneratorAlg::execute()
+StatusCode CP::BootstrapGeneratorAlg::execute(const EventContext& ctx)
 {
   for (const auto &sys : m_systematicsList.systematicsVector())
     {
       // retrieve the EventInfo
       const xAOD::EventInfo *evtInfo = nullptr;
-      ANA_CHECK(m_eventInfoHandle.retrieve(evtInfo, sys));
+      ANA_CHECK(m_eventInfoHandle.retrieve(evtInfo, sys, ctx));
 
       // generate a unique seed from runNumber, eventNumber and DSID!
       m_bootstrap.setSeed(evtInfo->eventNumber(), evtInfo->runNumber(), m_data ? 0 : evtInfo->mcChannelNumber());

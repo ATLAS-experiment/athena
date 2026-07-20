@@ -58,6 +58,21 @@ namespace MuonR4{
                           const LayerIndex layer, const bool isSmall) {
         return m_counts[translate(cat, status, layer, isSmall)];
     }
+
+    HitSummary::value_type HitSummary::nPrecisionStations() const {
+        value_type precisionStations{0} ;
+        for (const auto lay: {LayerIndex::Inner, LayerIndex::Middle, LayerIndex::Outer  , LayerIndex::Extended, LayerIndex::BarrelExtended}){            
+            for (const bool small: {false, true}) {
+                if (value(HitCategory::Precision, Status::OnTrack, lay, small) > 2) {
+                    ++precisionStations;
+                    // if the large sector has more than 2 hits we should not check the small one to avoid double counting
+                    break;
+                }
+            }
+        }
+        return precisionStations;
+    }
+
     void HitSummary::print(std::ostream& ostr) const {
         using ColumnArray_t = std::array<std::string, 6>;
         std::vector<ColumnArray_t> summaryTable{ColumnArray_t{"layer", "sector", "type",

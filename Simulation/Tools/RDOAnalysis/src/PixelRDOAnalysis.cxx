@@ -331,7 +331,7 @@ StatusCode PixelRDOAnalysis::initialize() {
   return StatusCode::SUCCESS;
 }
 
-StatusCode PixelRDOAnalysis::execute() {
+StatusCode PixelRDOAnalysis::execute(const EventContext& ctx) {
   ATH_MSG_DEBUG(" In PixelRDOAnalysis::execute()" );
 
   m_rdoID->clear();
@@ -366,10 +366,10 @@ StatusCode PixelRDOAnalysis::execute() {
   m_charge_vec->clear();
 
   // Raw Data
-  SG::ReadHandle<PixelRDO_Container> p_pixelRDO_cont (m_inputKey);
+  SG::ReadHandle<PixelRDO_Container> p_pixelRDO_cont (m_inputKey, ctx);
   //Adding SimMap and McEvent here for added truthMatching checks
-  SG::ReadHandle<InDetSimDataCollection> simDataMapPixel (m_inputTruthKey);
-  SG::ReadHandle<McEventCollection> mcEventCollection (m_inputMcEventCollectionKey);
+  SG::ReadHandle<InDetSimDataCollection> simDataMapPixel (m_inputTruthKey, ctx);
+  SG::ReadHandle<McEventCollection> mcEventCollection (m_inputMcEventCollectionKey, ctx);
   bool doTruthMatching = true;
   const HepMC::GenEvent* hardScatterEvent(nullptr);
 

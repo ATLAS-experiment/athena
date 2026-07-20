@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 //////////////////////////////
 //
@@ -61,7 +61,7 @@ StatusCode TRTStrawStatusWrite::initialize()
     return StatusCode::SUCCESS;
 }
 
-StatusCode TRTStrawStatusWrite::execute()
+StatusCode TRTStrawStatusWrite::execute(const EventContext& /*ctx*/)
 {
     return StatusCode::SUCCESS;
 }
@@ -246,7 +246,7 @@ StatusCode TRTStrawStatusWrite::readStatFromTextFile(const std::string &filename
         // I don't know why to set this extra bit 8 here for dead straws. Been always like that. (PH)
         strawstatus->set(id, 1);
         Identifier ID = m_trtid->straw_id(bec, sector, layer, strawlayer, straw);
-        set_status_temp(strawstatus, ID, status == 1 ? true : false);
+        set_status_temp(strawstatus, ID, (status == 1) );
     }
 
     ATH_MSG_INFO(" Dead straws BA layer 0");

@@ -1,4 +1,5 @@
 include("EvgenProdTools/StdEvgenSetup.py")
+include("Epos4_i/configFile.py")
 
 theApp.EvtMax = 10000 
 

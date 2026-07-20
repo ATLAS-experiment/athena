@@ -15,7 +15,7 @@ MultiMuonFilter::MultiMuonFilter(const std::string& name, ISvcLocator* pSvcLocat
 }
 
 
-StatusCode MultiMuonFilter::filterEvent() {
+StatusCode MultiMuonFilter::filterEvent(const EventContext& ctx) {
   McEventCollection::const_iterator itr;
   int numMuons = 0;
   for (itr = events()->begin(); itr != events()->end(); ++itr) {
@@ -28,6 +28,6 @@ StatusCode MultiMuonFilter::filterEvent() {
   }
 
   ATH_MSG_DEBUG("Found " << numMuons << " Muons");
-  setFilterPassed(numMuons >= m_NMuons);
+  setFilterPassed(numMuons >= m_NMuons, ctx);
   return StatusCode::SUCCESS;
 }

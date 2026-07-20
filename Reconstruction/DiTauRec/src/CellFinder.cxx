@@ -1,9 +1,10 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 
 #include "DiTauRec/CellFinder.h"
+#include "fastjet/PseudoJet.hh"
 
 CellFinder::CellFinder(const std::string& type,
 		       const std::string& name,

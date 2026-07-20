@@ -5,8 +5,9 @@
 #include "src/ActsInspectTruthContentAlg.h"
 #include "ActsInterop/TableUtils.h"
 #include "TruthUtils/MagicNumbers.h"
+
+#include "ActsCalibrators/xAODUncalibMeasCalibrator.h"
 #include <unordered_map>
-#include "ActsGeometry/ATLASSourceLink.h"
 
 namespace ActsTrk {
 
@@ -337,15 +338,15 @@ namespace ActsTrk {
 						++nConsideredMeasurements;
 						
 						// get cluster
-						auto sl = state.getUncalibratedSourceLink().template get<ATLASUncalibSourceLink>();
-						assert( sl != nullptr);
-						const xAOD::UncalibratedMeasurement &meas = getUncalibratedMeasurement(sl);
+						auto meas = detail::xAODUncalibMeasCalibrator::unpack(state.getUncalibratedSourceLink());
+						assert( meas != nullptr);
+					
 						
-						std::size_t clusterTypeIndex = Acts::toUnderlying(meas.type());
+						std::size_t clusterTypeIndex = Acts::toUnderlying(meas->type());
 						++onTrackStat[Acts::toUnderlying(EStatClusters::kNTotal)][clusterTypeIndex];
 						
 						const ActsTrk::MeasurementToTruthParticleAssociation* truth = truths[clusterTypeIndex];
-						const auto& tps = truth->at(meas.index());
+						const auto& tps = truth->at(meas->index());
 
 						if (tps.empty()) {
 						  ++onTrackStat[Acts::toUnderlying(EStatClusters::kNClustersWithNoBarcode)][clusterTypeIndex];

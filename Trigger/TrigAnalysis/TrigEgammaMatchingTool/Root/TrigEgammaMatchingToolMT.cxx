@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -71,7 +71,7 @@ std::string TrigEgammaMatchingToolMT::key( const std::string& key) const
 
 //!=======================================================================
 
-bool TrigEgammaMatchingToolMT::isPassed(const xAOD::Egamma *eg,const std::string &trigger, unsigned int condition ) const
+bool TrigEgammaMatchingToolMT::isPassed(const EventContext& ctx, const xAOD::Egamma *eg,const std::string &trigger, unsigned int condition ) const
 {
     const TrigCompositeUtils::Decision *dec=nullptr;
     if( match( eg, trigger, dec ) ){
@@ -80,10 +80,10 @@ bool TrigEgammaMatchingToolMT::isPassed(const xAOD::Egamma *eg,const std::string
           std::string key = this->key("Electrons_GSF");
           if(boost::contains(trigger,"nogsf")) key=this->key("Electrons");
           if(boost::contains(trigger,"lrt")) key=this->key("Electrons_LRT");
-          return ancestorPassed<xAOD::ElectronContainer>(dec, trigger,key, condition);
+          return ancestorPassed<xAOD::ElectronContainer>(ctx, dec, trigger,key, condition);
         }
         if(xAOD::EgammaHelpers::isPhoton(eg)){
-          return ancestorPassed<xAOD::PhotonContainer>(dec, trigger, key("Photons"), condition);
+          return ancestorPassed<xAOD::PhotonContainer>(ctx, dec, trigger, key("Photons"), condition);
         }
       }
     }
@@ -224,13 +224,13 @@ bool TrigEgammaMatchingToolMT::matchL1( const xAOD::Egamma* eg, const std::strin
 
 //!=======================================================================
  
-const xAOD::EmTauRoI* TrigEgammaMatchingToolMT::getL1Feature( const TrigCompositeUtils::Decision *dec ) const
+const xAOD::EmTauRoI* TrigEgammaMatchingToolMT::getL1Feature( const EventContext& ctx, const TrigCompositeUtils::Decision *dec ) const
 {
   if( !dec )  return nullptr;
-  auto initRoi = TrigCompositeUtils::findLink<TrigRoiDescriptorCollection>(dec, "initialRoI"); 
+  auto initRoi = TrigCompositeUtils::findLink<TrigRoiDescriptorCollection>(ctx, dec, "initialRoI");
   if( !initRoi.isValid() ) return nullptr;
 
-  SG::ReadHandle<xAOD::EmTauRoIContainer> l1_cont( m_emTauRoIKey, Gaudi::Hive::currentContext());
+  SG::ReadHandle<xAOD::EmTauRoIContainer> l1_cont( m_emTauRoIKey, ctx );
   if( !l1_cont.isValid() ) return nullptr;
 
   for( const auto *l1 : *l1_cont ){
@@ -244,23 +244,23 @@ const xAOD::EmTauRoI* TrigEgammaMatchingToolMT::getL1Feature( const TrigComposit
 
 //!=======================================================================
 
-const xAOD::eFexEMRoI* TrigEgammaMatchingToolMT::getL1eEMFeature( const TrigCompositeUtils::Decision *dec ) const
+const xAOD::eFexEMRoI* TrigEgammaMatchingToolMT::getL1eEMFeature( const EventContext& ctx, const TrigCompositeUtils::Decision *dec ) const
 {
   if( !dec )  return nullptr;
-  auto initRoi = TrigCompositeUtils::findLink<xAOD::eFexEMRoIContainer>(dec, "initialRecRoI"); 
+  auto initRoi = TrigCompositeUtils::findLink<xAOD::eFexEMRoIContainer>(ctx, dec, "initialRecRoI");
   if( !initRoi.isValid() ) return nullptr;
   return *(initRoi.link);
 } 
 
 //!=======================================================================
 
-const xAOD::TrigRingerRings* TrigEgammaMatchingToolMT::getRingsFeature( const TrigCompositeUtils::Decision *dec ) const
+const xAOD::TrigRingerRings* TrigEgammaMatchingToolMT::getRingsFeature( const EventContext& ctx, const TrigCompositeUtils::Decision *dec ) const
 {
   if( !dec )  return nullptr;
-  auto initRoi = TrigCompositeUtils::findLink<TrigRoiDescriptorCollection>(dec, "initialRoI"); 
+  auto initRoi = TrigCompositeUtils::findLink<TrigRoiDescriptorCollection>(ctx, dec, "initialRoI");
   if( !initRoi.isValid() ) return nullptr;
   
-  SG::ReadHandle<xAOD::TrigRingerRingsContainer> rg_cont( m_ringerKey, Gaudi::Hive::currentContext() );
+  SG::ReadHandle<xAOD::TrigRingerRingsContainer> rg_cont( m_ringerKey, ctx );
 
   if( !rg_cont.isValid() ) return nullptr;
 

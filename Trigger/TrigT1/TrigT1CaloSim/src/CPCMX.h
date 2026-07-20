@@ -69,7 +69,7 @@
    //------------------------------------------------------
 
    StatusCode initialize() ;
-   StatusCode execute() ;
+   StatusCode execute(const EventContext& ctx) ;
 
  private:
    /** Store CTP SLink data objects in the TES. */

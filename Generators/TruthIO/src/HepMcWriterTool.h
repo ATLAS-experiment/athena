@@ -21,20 +21,11 @@
 
 // Forward declaration
 #include "AtlasHepMC/GenEvent_fwd.h"
-#include "AtlasHepMC/IO_BaseClass.h"
-#ifdef HEPMC3
-#include "HepMC3/Writer.h"
-#include "HepMC3/WriterAsciiHepMC2.h"
-#endif 
+#include "AtlasHepMC/IO_GenEvent.h"
 class HepMcWriterTool : public extends<AthAlgTool, IIOHepMcTool>
 { 
 
-  /////////////////////////////////////////////////////////////////// 
-  // Public methods: 
-  /////////////////////////////////////////////////////////////////// 
  public: 
-
-  // Copy constructor: 
 
   /// Constructor with parameters: 
   HepMcWriterTool( const std::string& type, const std::string& name,  const IInterface* parent );
@@ -47,17 +38,10 @@ class HepMcWriterTool : public extends<AthAlgTool, IIOHepMcTool>
   StatusCode  execute();
   StatusCode  finalize();
 
-  /////////////////////////////////////////////////////////////////// 
-  // Non-const methods: 
-  /////////////////////////////////////////////////////////////////// 
-
   /** Process the @c HepMC::GenEvent through the I/O backend.
    */
   StatusCode write( const HepMC::GenEvent* evt );
 
-  /////////////////////////////////////////////////////////////////// 
-  // Protected methods: 
-  /////////////////////////////////////////////////////////////////// 
  protected: 
 
   /** Default constructor: 
@@ -69,9 +53,6 @@ class HepMcWriterTool : public extends<AthAlgTool, IIOHepMcTool>
    */
   void setupBackend( Gaudi::Details::PropertyBase& ioBackendURL );
 
-  /////////////////////////////////////////////////////////////////// 
-  // Protected data: 
-  /////////////////////////////////////////////////////////////////// 
  protected: 
 
   /** URL of the I/O back-end (only "ASCII" for now...) glued with
@@ -89,11 +70,7 @@ class HepMcWriterTool : public extends<AthAlgTool, IIOHepMcTool>
 
   /** Abstract base class for the back-end
    */
-#ifdef HEPMC3
-  HepMC3::Writer* m_ioBackend;
-#else   
-  HepMC::IO_BaseClass* m_ioBackend;
-#endif
+  std::shared_ptr<HepMC3::Writer> m_ioBackend{nullptr};
 
 }; 
 #endif //> MCPARTICLETOOLS_HEPMCWRITERTOOL_H

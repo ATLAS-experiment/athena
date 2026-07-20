@@ -89,7 +89,7 @@ StatusCode TrigOpMonitor::start()
   return StatusCode::SUCCESS;
 }
 
-StatusCode TrigOpMonitor::execute()
+StatusCode TrigOpMonitor::execute(const EventContext& ctx)
 {
   /* One-time fills */
   [[maybe_unused]] const static bool once = [&]() {
@@ -98,7 +98,6 @@ StatusCode TrigOpMonitor::execute()
   }();
 
   /* Per-LB fills */
-  const EventContext& ctx = getContext();
   if (m_previousLB != ctx.eventID().lumi_block()) { // New LB
     m_previousLB = ctx.eventID().lumi_block();
 

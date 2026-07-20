@@ -109,7 +109,7 @@ StatusCode TBDetDescrLoader::initialize()
   return StatusCode::SUCCESS;
 }
 
-StatusCode TBDetDescrLoader::execute() {
+StatusCode TBDetDescrLoader::execute(const EventContext& /*ctx*/) {
   StatusCode sc;
 
   TBElementContainer* pTBElementContainer;

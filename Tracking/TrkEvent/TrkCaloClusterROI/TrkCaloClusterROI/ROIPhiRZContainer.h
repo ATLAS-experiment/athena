@@ -102,7 +102,15 @@ protected:
       //Correct eta of ROI to take into account the z postion of the reference
       double newR   = roi.r() - other_r;
       double newZ   = roi.z() - other_z;
-      double newEta =  std::atanh( newZ / std::sqrt( newR*newR + newZ*newZ ) );
+      
+      //prevent +/- 1 arg of atanh
+      double atanh_check = newZ / std::sqrt( newR*newR + newZ*newZ);
+      double epsilon = std::numeric_limits<double>::epsilon();
+      if (std::abs(atanh_check) > 1.-epsilon){
+	atanh_check = (1.-epsilon)*std::abs(atanh_check)/atanh_check;
+      }
+      double newEta =  std::atanh(atanh_check);
+
       double delta_eta = std::abs(newEta - other_eta);
       return delta_eta;
    }

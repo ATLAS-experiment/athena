@@ -206,7 +206,7 @@ StatusCode TrigByteStreamCnvSvc::commitOutput(const std::string& /*outputFile*/,
   try {
     const eformat::write::node_t* top = re->bind();
     uint32_t rawEventSize = re->size_word();
-    rawEventPtr = std::make_unique<uint32_t[]>(rawEventSize);
+    rawEventPtr = std::make_unique_for_overwrite<uint32_t[]>(rawEventSize);
     uint32_t copiedSize = eformat::write::copy(*top,rawEventPtr.get(),rawEventSize);
     if(copiedSize!=rawEventSize) {
       ATH_MSG_ERROR("FullEventFragment serialisation failed");

@@ -66,7 +66,7 @@ struct ActiveSensor {
         return other.id < id;
     }
     friend std::ostream& operator<<(std::ostream& ostr, const ActiveSensor& sensor) {
-        ostr<<"Id: "<<sensor.id.get_compact()<<", type: "<<to_string(sensor.detType)
+        ostr<<"Id: "<<sensor.id.get_compact()<<", type: "<<sensor.detType
             <<", bounds ("<<sensor.boundType<<") "<<sensor.boundaryValues;
         return ostr;
     }
@@ -170,7 +170,7 @@ int main1( int argc, char** argv ) {
 
 
         if (test.detType != reference.detType) {
-            std::cerr<<"runActsGeoComparison() "<<__LINE__<<": The detector element types are different for "<<reference<<" test: "<<to_string(test.detType)<<std::endl;
+            std::cerr<<"runActsGeoComparison() "<<__LINE__<<": The detector element types are different for "<<reference<<" test: "<<test.detType<<std::endl;
             sensorOkay = false;
         }
 
