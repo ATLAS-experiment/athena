@@ -1,10 +1,11 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 
 def DetDescrCnvSvcCfg(flags, **kwargs):
     kwargs.setdefault("IdDictName", "IdDictParser/ATLAS_IDS.xml")
+    kwargs.setdefault("HasTRT", flags.Detector.GeometryTRT)
     kwargs.setdefault("HasCSC", flags.Detector.GeometryCSC)
     kwargs.setdefault("HasSTgc", flags.Detector.GeometrysTGC)
     kwargs.setdefault("HasMM", flags.Detector.GeometryMM)
