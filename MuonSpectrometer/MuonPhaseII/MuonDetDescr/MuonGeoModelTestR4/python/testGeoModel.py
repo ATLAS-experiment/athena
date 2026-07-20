@@ -85,6 +85,9 @@ class MuonPhaseIITestDefaults:
     #### Only the passive material
     GEODB_TOROID = "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonGeomRTT/GeoDB/MUON_TOROID.db"
 
+    ### Tracking geometry material map
+    TRKGEO_MATERIALMAP = "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonGeomRTT/material-maps.root"
+
 def SetupArgParser():
     from argparse import ArgumentParser
 
