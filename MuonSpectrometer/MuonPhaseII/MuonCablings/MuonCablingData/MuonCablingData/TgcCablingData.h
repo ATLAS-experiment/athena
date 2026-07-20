@@ -19,7 +19,7 @@
         return *this;\
     }
 
-namespace Muon {
+namespace MuonR4 {
 
 struct TgcCablingOfflineID {
     CABLING_OPERATORS(TgcCablingOfflineID)
