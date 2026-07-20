@@ -16,3 +16,4 @@ flags.Concurrency.NumOffloadThreads=3
 flags.lock()
 
 
+acc = MainServicesCfg(flags)

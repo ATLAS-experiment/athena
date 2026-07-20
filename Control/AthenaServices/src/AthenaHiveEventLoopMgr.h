@@ -36,6 +36,7 @@
 #include "GaudiKernel/IHiveWhiteBoard.h"
 #include "GaudiKernel/IScheduler.h"
 #include "GaudiKernel/IAlgExecStateSvc.h"
+#include "IEventExecutionTool.h"
 
 // Standard includes
 #include <functional>
@@ -145,6 +146,7 @@ protected:
   /// Initialize all algorithms and output streams
   StatusCode initializeAlgorithms();
 
+  ToolHandle<IEventExecutionTool> m_eventExecutionTool{this, "eventExecTool", "PlainEventExecutionTool/PlainEventExecutionTool", "Tool that wraps execution of the event"};
 
   //***********************************************************//
   // for Hive

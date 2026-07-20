@@ -2,6 +2,7 @@
 
 #include <iostream>
 #include <memory>
+#include <functional>
 #include <thread>
 #include <chrono>
 
@@ -21,6 +22,34 @@ void printEventInfoMessage(const EventInfoMessage& ei) {
       std::cout << "  timestamp: " << ei.timestamp();
       std::cout << "  timestampnsoffset: " << ei.timestampnsoffset();
       std::cout << "  bcid: " << ei.bcid() << std::endl;
+}
+
+// Minimal EventLoop manager that implements the gRPC service interface but
+// delegates the actual computation to an external "tool" (handler).
+class EventLoopMgr final : public UniversalOffloadService::Service {
+ public:
+  using Handler = std::function<Status(ServerContext*, const OffloadMessage*, OffloadMessage*)>;
+
+  explicit EventLoopMgr(Handler handler) : handler_(std::move(handler)) {}
+
+  Status doComputation(ServerContext* ctx, const OffloadMessage* request,
+                       OffloadMessage* response) override {
+    if (handler_) return handler_(ctx, request, response);
+    return Status(grpc::StatusCode::UNIMPLEMENTED, "No offload handler configured");
+  }
+
+ private:
+  Handler handler_;
+};
+
+// Placeholder that represents the separate tool implementing the computation.
+// Replace or implement this function in the real tool integration.
+Status offloadToolHandler(ServerContext* ctx, const OffloadMessage* request,
+                          OffloadMessage* response) {
+  (void)ctx;
+  (void)request;
+  (void)response;
+  return Status(grpc::StatusCode::UNIMPLEMENTED, "offloadToolHandler not implemented");
 }
 
 class TestServiceImpl final : public UniversalOffloadService::Service {
@@ -61,7 +90,7 @@ int main() {
 
   std::cerr << "protobuf version " << int(PROTOBUF_VERSION) << std::endl;
 
-  TestServiceImpl service;
+  EventLoopMgr service(offloadToolHandler);
 
   ServerBuilder builder;
   builder.AddListeningPort(address, grpc::InsecureServerCredentials());

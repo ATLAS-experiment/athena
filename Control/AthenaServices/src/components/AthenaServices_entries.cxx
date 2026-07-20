@@ -33,6 +33,8 @@
 #include "../MPIClusterSvc.h"
 #include "../ROOTMessageFilterSvc.h"
 #include "../TimeoutAlg.h"
+#include "../PlainEventExecutionTool.h"
+
 
 DECLARE_COMPONENT( AthenaOutputStream )
 DECLARE_COMPONENT( TestRandomSeqAlg )
@@ -66,3 +68,4 @@ DECLARE_COMPONENT( AthReadAlg )
 DECLARE_COMPONENT( MetaDataToolStub )
 DECLARE_COMPONENT( Athena::ROOTMessageFilterSvc )
 DECLARE_COMPONENT( TimeoutAlg )
+DECLARE_COMPONENT( PlainEventExecutionTool )

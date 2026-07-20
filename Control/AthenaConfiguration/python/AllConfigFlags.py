@@ -48,6 +48,7 @@ def initConfigFlags():
 
     #Multi-node with MPI
     acf.addFlag('Exec.MPI', False, help='run in MPI mode')
+    acf.addFlag('Exec.EFCompute', False, help='run in EF Compute mode') # would be better to have switch between all the options
 
     #Activate per-event log-output of StoreGate content
     acf.addFlag('Debug.DumpEvtStore', False, help='dump event store on each event')
