@@ -48,9 +48,9 @@ namespace xAOD
     }
 
     void ICandData_v1::setPt(float pt){
-        const float ptClamped = std::clamp(pt, 0.0f, s_ptRange);
+        const float ptClamped = std::clamp(pt, 0.0F, s_ptRange);
         const uint8_t ptBinary = static_cast<uint8_t>(
-            std::lround((ptClamped / s_ptRange) * static_cast<float>(s_ptBitRange)));
+            std::lround(ptClamped / s_ptResolution));
         static const SG::AuxElement::Accessor<uint8_t> acc(preFixStr + "pt");
         acc(*this) = ptBinary;
     }
