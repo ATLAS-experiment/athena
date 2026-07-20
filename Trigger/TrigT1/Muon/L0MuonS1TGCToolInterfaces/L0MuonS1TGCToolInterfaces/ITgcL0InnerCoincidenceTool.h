@@ -10,25 +10,15 @@
 
 namespace L0Muon {
 
-/**
- * @brief Interface for applying Inner Coincidence to transient TGC candidates.
- *
- * Implementations update the supplied candidates in place using information
- * from detectors inside the magnetic field.  Inner Coincidence may reassign
- * the operative TGC pT threshold and update coincidence or quality state; it
- * does not perform the final Track Selector ordering.  Implementations must
- * not retain event-dependent state between calls.
- */
+/** @brief Interface for applying Inner Coincidence to TGC candidates. */
 class ITgcL0InnerCoincidenceTool : virtual public IAlgTool {
  public:
   DeclareInterfaceID(ITgcL0InnerCoincidenceTool, 1, 0);
 
   /**
-   * @brief Apply Inner Coincidence to the transient candidates of one event.
-   * @param candidates Candidates to update in place.
+   * @brief Update candidates with Inner-Coincidence results.
+   * @param candidates Candidate collection to update.
    * @param ctx Event context.
-   * @return Success when the candidates were processed and remain valid for
-   *         the Track Selector stage.
    */
   virtual StatusCode apply(TgcL0CandidateContainer& candidates,
                            const EventContext& ctx) const = 0;

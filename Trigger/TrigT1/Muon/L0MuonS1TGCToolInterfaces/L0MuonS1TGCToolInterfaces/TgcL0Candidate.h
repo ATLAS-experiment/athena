@@ -9,23 +9,50 @@
 
 namespace L0Muon {
 
-/**
- * @brief Lightweight transient candidate exchanged between TGC tool stages.
- *
- * This type represents internal pre- and post-Inner-Coincidence state.  It is
- * deliberately separate from xAOD::TGCCandData, which is the finalized
- * downstream output of L0MuonS1TGC for MDTTP and L0MuonEndcap.
- */
+/** @brief Event-local candidate used by the TGC simulation tools. */
 struct TgcL0Candidate {
-  /// Candidate identifier within one trigger sector. Zero denotes no candidate.
+  /// Subdetector identifier.
+  std::uint16_t subdetectorId{0};
+  /// Trigger Sector identifier.
+  std::uint16_t sectorId{0};
+  /// Bunch-crossing tag.
+  std::uint16_t bcTag{0};
+
+  /// Pseudorapidity at the TGC pivot plane.
+  float eta{0.F};
+  /// Azimuth at the TGC pivot plane, in radians.
+  float phi{0.F};
+  /// Signed polar-angle residual, in radians.
+  float deltaTheta{0.F};
+  /// Signed azimuthal-angle residual, in radians.
+  float deltaPhi{0.F};
+
+  /// TGC pT estimate before Inner Coincidence, in GeV.
+  float preInnerCoincidencePt{0.F};
+  /// TGC pT estimate after Inner Coincidence, in GeV.
+  float pt{0.F};
+  /// Highest pT-threshold index before Inner Coincidence.
+  std::uint8_t preInnerCoincidenceThreshold{0};
+  /// Highest pT-threshold index after Inner Coincidence.
+  std::uint8_t threshold{0};
+  /// Charge sign: -1, 0, or +1.
+  std::int8_t charge{0};
+  /// Inner-Coincidence result.
+  bool hasInnerCoincidence{false};
+  /// GoodMag flag.
+  bool goodMagneticField{false};
+
+  /// Trigger Candidate identifier.
   std::uint8_t tcId{0};
-  /// TGC pT-threshold index before Inner Coincidence.
-  std::uint8_t preInnerCoincidencePtThreshold{0};
-  /// Operative TGC pT-threshold index after Inner Coincidence.
-  std::uint8_t ptThreshold{0};
+  /// Wire quality.
+  std::uint8_t wireQuality{0};
+  /// Track-Selector priority.
+  std::uint8_t selectorPriority{0};
+  /// Packed NSW segment information.
+  std::uint32_t nswSegment{0};
 };
 
-/// Transient collection passed between the TGC processing tools.
+/// Event-local candidate collection.
 using TgcL0CandidateContainer = std::vector<TgcL0Candidate>;
 
 }  // namespace L0Muon
