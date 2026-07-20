@@ -15,7 +15,6 @@
 #include "VertexCollectionSettingsButton.h"
 #include "VP1AODSystems/AODSystemController.h"
 #include "VP1AODSystems/VP1AODSystem.h"
-#include "VP1Utils/VP1ParticleData.h"
 #include "VP1Utils/VP1LinAlgUtils.h"
 
 #include "VP1Utils/VP1JobConfigInfo.h"

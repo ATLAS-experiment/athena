@@ -4,8 +4,6 @@
 
 #include "TruthMuonTrackRetriever.h"
 
-#include "GaudiKernel/IPartPropSvc.h"
-
 #include "AtlasHepMC/GenParticle.h"
 #include "TrackRecord/TrackRecord.h"
 #include "TrackRecord/TrackRecordCollection.h"
