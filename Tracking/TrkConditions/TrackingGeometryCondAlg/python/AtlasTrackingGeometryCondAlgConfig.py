@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.AccumulatorCache import AccumulatorCache
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
@@ -69,19 +69,14 @@ def GeometryBuilderCfg(flags, name='AtlasGeometryBuilder',
     if "TrackingVolumeArrayCreator" not in kwargs:
         from TrackingGeometryCondAlg.TrkDetDescrToolsConfig import (
             TrackingVolumeArrayCreatorCfg)
-        TrackingVolumeArrayCreator = result.popToolsAndMerge(
-            TrackingVolumeArrayCreatorCfg(flags))
-        result.addPublicTool(TrackingVolumeArrayCreator)
-        kwargs.setdefault("TrackingVolumeArrayCreator",
-                          TrackingVolumeArrayCreator)
+        kwargs.setdefault("TrackingVolumeArrayCreator", result.popToolsAndMerge(
+            TrackingVolumeArrayCreatorCfg(flags)))
 
     if "TrackingVolumeHelper" not in kwargs:
         from TrackingGeometryCondAlg.TrkDetDescrToolsConfig import (
             TrackingVolumeHelperCfg)
-        TrackingVolumeHelper = result.popToolsAndMerge(
-            TrackingVolumeHelperCfg(flags))
-        result.addPublicTool(TrackingVolumeHelper)
-        kwargs.setdefault("TrackingVolumeHelper", TrackingVolumeHelper)
+        kwargs.setdefault("TrackingVolumeHelper", result.popToolsAndMerge(
+            TrackingVolumeHelperCfg(flags)))
 
     # Depending on the job configuration, setup the various detector builders,
     # and add to atlas_geometry_builder

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -17,26 +17,14 @@
 
 // constructor
 Trk::CompressedLayerMaterialCreator::CompressedLayerMaterialCreator(const std::string& t, const std::string& n, const IInterface* p)
-: AthAlgTool(t,n,p),
-  m_compressedMaterialThickness(1.),
-  m_compressedMaterialX0Bins(256),
-  m_compressedMaterialZARhoBins(256)
+: AthAlgTool(t,n,p)
 {
     declareInterface<Trk::ILayerMaterialCreator>(this);
     
     // give the map a name
     declareProperty("LayerMaterialName"                 , m_layerMaterialName);
     declareProperty("LayerMaterialDirectory"            , m_layerMaterialDirectory);
-    // setup for compressed layer creation
-    declareProperty("MaterialThickness"                 , m_compressedMaterialThickness);
-    declareProperty("MaterialBinsX0"                    , m_compressedMaterialX0Bins);
-    declareProperty("MaterialBinsZARho"                 , m_compressedMaterialZARhoBins);
-    
 }
-
-// destructor
-Trk::CompressedLayerMaterialCreator::~CompressedLayerMaterialCreator()
-= default;
 
 Trk::LayerMaterialProperties* Trk::CompressedLayerMaterialCreator::createLayerMaterial(const Trk::LayerMaterialRecord& lmr) const
 {
