@@ -74,7 +74,7 @@ def BPHY28Kernel(flags):
        assumeDiMuons               = True,
        invMassUpper                = 100000.0,
        invMassLower                = 0.0,
-       Chi2Cut                     = 100.,
+       Chi2Cut                     = 50.,  # this is chi2 cut
        oppChargesOnly              = True,
        combOnly                    = True,
        atLeastOneComb              = False,
@@ -108,7 +108,7 @@ def BPHY28Kernel(flags):
          VtxMassHypo           = 3096.916,
          MassMin               = 2000.0,
          MassMax               = 3600.0,
-         Chi2Max               = 100, Do3d = False,
+         Chi2Max               = 50, Do3d = False,  # this is chi2 cut
          DoVertexType          = 7)
    augList += [ BPHY28_Select_Jpsi2mumu ]
 
@@ -119,11 +119,11 @@ def BPHY28Kernel(flags):
          kaonpionHypothesis          = False,
          trkThresholdPt              = 500.0,
          trkMaxEta                   = 3.0,
-         BMassUpper                  = 5900.0,
-         BMassLower                  = 4900.0,
+         BMassUpper                  = 6500.0,
+         BMassLower                  = 4500.0,
          DiTrackMassUpper            = 1220,
          DiTrackMassLower            = 820,
-         Chi2Cut                     = 100.0, # this is chi2/ndf cut
+         Chi2Cut                     = 10.0, # this is chi2/ndf cut
          TrkQuadrupletMassUpper      = 6000.0,
          TrkQuadrupletMassLower      = 4800.0,
          JpsiContainerKey            = MuMuContainerName,
@@ -155,9 +155,9 @@ def BPHY28Kernel(flags):
                                  V0Tools                    = V0Tools,
                                  TrkMasses                  = [105.658, 105.658, 493.677, 493.677],
                                  VtxMassHypo                = 5366.3,
-                                 MassMin                    = 4900.0,
-                                 MassMax                    = 5900.0, Do3d = False,
-                                 Chi2Max                    = 100)
+                                 MassMin                    = 4500.0,
+                                 MassMax                    = 6500.0, Do3d = False,
+                                 Chi2Max                    = 50)  # this is chi2 cut
    augList += [ BPHY28_Select_Bs2KKMuMu ]
 
 
@@ -176,6 +176,7 @@ def BPHY28Kernel(flags):
                                                                StreamName = streamName,
                                                                TrackParticleContainerName = "InDetTrackParticles",
                                                                VertexContainerNames       = thinTrkVtxList,
+                                                               AcceptanceRadius           = 1.0,
                                                                IgnoreFlags                = True )
    thinList += [ BPHY28_Thin_VtxTracks ]
 
@@ -185,6 +186,7 @@ def BPHY28Kernel(flags):
                                                                   StreamName = streamName,
                                                                   TrackParticleContainerName = "InDetLargeD0TrackParticles",
                                                                   VertexContainerNames       = thinTrkVtxList,
+                                                                  AcceptanceRadius           = 1.0,
                                                                   IgnoreFlags                = True )
       thinList += [ BPHY28_Thin_VtxTracks_LRT ]
 
