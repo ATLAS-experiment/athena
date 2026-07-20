@@ -66,6 +66,7 @@ struct ClusterMessage {
     std::pmr::memory_resource* allocating_memory_resource =
         nullptr;  // If this was received, we need to keep track of the memory
                   // resource used to allocate memory in order to free it
+    // This enforces the invariant that align is a valid alignment for T
     template <typename T>
     DataDescr(const T* ptr, std::size_t count = 1)
         : ptr((void*)ptr), len(count * sizeof(T)), align(alignof(T)) {}

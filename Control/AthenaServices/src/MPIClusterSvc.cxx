@@ -206,8 +206,23 @@ ClusterMessage MPIClusterSvc::waitReceiveMessage(ClusterComm communicator) {
       ClusterMessage::WireMsgBody& bdy = *body;
       // Decode the body to figure out what to recieve
       std::size_t len = (std::uint64_t(bdy[2]) << 32) + std::uint64_t(bdy[3]);
+      // Codex pointed out (impossible modulo corruption) point that bdy[4] >=
+      // 64 is a problem
+      if (bdy[4] >= 64) {
+        throw std::runtime_error("Received invalid alignment > 2^64");
+      }
       std::size_t align = 1ULL << bdy[4];
-      unsigned int dest = std::uint32_t(bdy[5]);
+      if (len % align != 0) {
+        ATH_MSG_ERROR("Received invalid alignment " << align << " for length "
+                                                    << len);
+        // throw an exception, the allocation will fail and with memory
+        // resources we need the correct length later to de-allocate.
+        throw std::runtime_error(
+            std::format("Received invalid cluster message. {} is not a valid "
+                        "alignment for length {}!",
+                        align, len));
+      }
+      auto dest = std::uint32_t(bdy[5]);
 
       if (dest >= m_destIDMemResMap.size()) {
         ATH_MSG_ERROR(
@@ -215,6 +230,7 @@ ClusterMessage MPIClusterSvc::waitReceiveMessage(ClusterComm communicator) {
             << dest
             << " which is not valid for this rank. Assuming CPU memory.");
         dest = 0;
+        bdy[5] = 0;  // So later decode works
       }
       char* ptr =
           static_cast<char*>(m_destIDMemResMap[dest]->allocate(len, align));

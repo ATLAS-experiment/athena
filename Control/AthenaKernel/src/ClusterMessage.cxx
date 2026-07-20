@@ -30,7 +30,16 @@ ClusterMessage::DataDescr::DataDescr(
       dest(std::uint32_t(body[5])),
       evtNumber((std::uint64_t(body[6]) << 32) + std::uint64_t(body[7])),
       fileNumber((std::uint64_t(body[8]) << 32) + std::uint64_t(body[9])),
-      allocating_memory_resource(allocating_memory_resource) {}
+      allocating_memory_resource(allocating_memory_resource) {
+  if (!std::has_single_bit(align) || len % align != 0) {
+    // Not ideal, but this should be checked and adjusted in MPIClusterSvc
+    // Frankly, it shouldn't even happen in the first place
+    throw std::logic_error(
+        std::format("{} is not a valid alignment for a length of {} bytes! "
+                    "This should be fixed in MPIClusterSvc",
+                    align, len));
+  }
+}
 
 ClusterMessage::DataDescr::~DataDescr() {
   if (allocating_memory_resource != nullptr) {
@@ -148,7 +157,10 @@ ClusterMessage::WireMsg ClusterMessage::wire_msg() const {
     body[1] = std::uint32_t(std::uint64_t(payload_local.ptr) & lower32);
     body[2] = std::uint32_t(std::uint64_t(payload_local.len) >> 32);
     body[3] = std::uint32_t(std::uint64_t(payload_local.len) & lower32);
-    body[4] = std::uint32_t(std::bit_ceil(payload_local.align));
+    // bit_ceil will technically do nothing, since class invariant should ensure
+    // align is a power of two
+    body[4] =
+        std::uint32_t(std::countr_zero(std::bit_ceil(payload_local.align)));
     body[5] = std::uint32_t(payload_local.dest);
     body[6] = std::uint32_t(std::uint64_t(payload_local.evtNumber) >> 32);
     body[7] = std::uint32_t(std::uint64_t(payload_local.evtNumber) & lower32);
