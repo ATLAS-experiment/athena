@@ -36,38 +36,8 @@ uint8_t TGCCandData_v1::tcId() const {
     return acc(*this) & TC_ID_BIT_MASK;
 }
 
-uint8_t TGCCandData_v1::passedPtThresholdIndex() const {
-    static const SG::ConstAccessor<uint8_t> acc(preFixStr + "passedPtThresholdIndex");
-    return acc(*this) & PT_THRESHOLD_BIT_MASK;
-}
-
-uint8_t TGCCandData_v1::estimatedPtValueIndex() const {
-    static const SG::ConstAccessor<uint8_t> acc(preFixStr + "estimatedPtValueIndex");
-    return acc(*this);
-}
-
 float TGCCandData_v1::ptValueGeV() const {
-    return 0.5F * static_cast<float>(estimatedPtValueIndex());
-}
-
-bool TGCCandData_v1::estimatedPtValueValid() const {
-    static const SG::ConstAccessor<uint8_t> acc(preFixStr + "estimatedPtValueValid");
-    return acc(*this) != 0;
-}
-
-bool TGCCandData_v1::side() const {
-    static const SG::ConstAccessor<uint8_t> acc(preFixStr + "side");
-    return (acc(*this) & 0x1) != 0;
-}
-
-uint8_t TGCCandData_v1::endcapFlag() const {
-    static const SG::ConstAccessor<uint8_t> acc(preFixStr + "endcapFlag");
-    return acc(*this) & 0x1;
-}
-
-uint8_t TGCCandData_v1::sector() const {
-    static const SG::ConstAccessor<uint8_t> acc(preFixStr + "sector");
-    return acc(*this) & 0x3f;
+    return ptResolution() * static_cast<float>(pt());
 }
 
 bool TGCCandData_v1::hasInnerCoincidence() const {
@@ -104,36 +74,6 @@ uint32_t TGCCandData_v1::nswSegment() const {
 void TGCCandData_v1::setTcId(uint8_t value) {
     static const SG::Accessor<uint8_t> acc(preFixStr + "tcId");
     acc(*this) = value & TC_ID_BIT_MASK;
-}
-
-void TGCCandData_v1::setPassedPtThresholdIndex(uint8_t value) {
-    static const SG::Accessor<uint8_t> acc(preFixStr + "passedPtThresholdIndex");
-    acc(*this) = std::min(value, PT_THRESHOLD_BIT_MASK);
-}
-
-void TGCCandData_v1::setEstimatedPtValueIndex(uint8_t value) {
-    static const SG::Accessor<uint8_t> acc(preFixStr + "estimatedPtValueIndex");
-    acc(*this) = value;
-}
-
-void TGCCandData_v1::setEstimatedPtValueValid(bool value) {
-    static const SG::Accessor<uint8_t> acc(preFixStr + "estimatedPtValueValid");
-    acc(*this) = value ? 1 : 0;
-}
-
-void TGCCandData_v1::setSide(bool value) {
-    static const SG::Accessor<uint8_t> acc(preFixStr + "side");
-    acc(*this) = value ? 1 : 0;
-}
-
-void TGCCandData_v1::setEndcapFlag(uint8_t value) {
-    static const SG::Accessor<uint8_t> acc(preFixStr + "endcapFlag");
-    acc(*this) = value & 0x1;
-}
-
-void TGCCandData_v1::setSector(uint8_t value) {
-    static const SG::Accessor<uint8_t> acc(preFixStr + "sector");
-    acc(*this) = value & 0x3f;
 }
 
 void TGCCandData_v1::setHasInnerCoincidence(bool value) {
