@@ -423,6 +423,7 @@ namespace MuonR4{
                 } else {
                     const auto* M = dynamic_cast<const xAOD::MuonMeasurement*>(m);
                     assert(M != nullptr);
+                    //coverity[FORWARD_NULL]
                     nTrigEtaHits += (M->numDimensions() == 2 || !M->measuresPhi());
                     nTrigPhiHits += (M->numDimensions() == 2 || M->measuresPhi());
                     

@@ -296,7 +296,8 @@ namespace MuonR4{
             increment.triggerEta += (!muonMeas|| !muonMeas->measuresPhi()) && !xAOD::isPrecisionHit(meas);
             // Count measurement holes of the trigger hits
             if (!isOutlier && meas->numDimensions() == 1) {
-                if (meas->type() == xAOD::UncalibMeasType::RpcStripType) {\
+                if (meas->type() == xAOD::UncalibMeasType::RpcStripType) {
+                  //coverity[FORWARD_NULL]
                     const auto* re = static_cast<const MuonGMR4::RpcReadoutElement*>(muonMeas->readoutElement());
                     if (!muonMeas->measuresPhi() && re->nPhiStrips()) {
                         ++holes.triggerPhi;
@@ -304,6 +305,7 @@ namespace MuonR4{
                         ++holes.triggerEta;
                     }
                 } else if (meas->type() == xAOD::UncalibMeasType::TgcStripType) {
+                    //coverity[FORWARD_NULL]
                     const auto* re = static_cast<const MuonGMR4::TgcReadoutElement*>(muonMeas->readoutElement());
                         if (!muonMeas->measuresPhi() && re->numStrips(muonMeas->layerHash())) {
                         ++holes.triggerPhi;
