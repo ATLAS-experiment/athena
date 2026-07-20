@@ -26,10 +26,6 @@ def StandaloneMuonOutputCfg(flags):
     aod_items += ["xAOD::MuonSegmentContainer#NCB_MuonSegments"]
     aod_items += ["xAOD::MuonSegmentAuxContainer#NCB_MuonSegmentsAux."]
 
-    if flags.Muon.scheduleActsReco:
-        aod_items += ["xAOD::MuonSegmentContainer#MuonSegmentsFromR4"]
-        aod_items += ["xAOD::MuonSegmentAuxContainer#MuonSegmentsFromR4Aux.-localSegPars.-parentSegment.-localSegCov"]
-
     # TrackParticles
     aod_items += ["xAOD::TrackParticleContainer#MuonSpectrometerTrackParticles"]
     aod_items += ["xAOD::TrackParticleAuxContainer#MuonSpectrometerTrackParticlesAux."]
@@ -71,22 +67,6 @@ def StandaloneMuonOutputCfg(flags):
     esd_items += ["Muon::TgcPrepDataContainer#TGC_MeasurementsAllBCs"]
     esd_items += ["Muon::MdtPrepDataContainer#MDT_DriftCircles"]
 
-    if flags.Muon.writexAODPRD:
-        exclude = ["", "mdtTrkPrdLink", "rpcTrkPrdLink", "tgcTrkPrdLink"]
-        for cont_t, cont_name in [("MdtDriftCircle", "xMdtDriftCircles"),
-                                  ("MdtTwinDriftCircle", "xMdtTwinDriftCircles"),
-                                  ("sTgcStrip", "xAODsTgcStrips"),
-                                  ("sTgcPad", "xAODsTgcPads"),
-                                  ("sTgcWire", "xAODsTgcWires"),
-                                  ("MMCluster", "xAODMMClusters"),
-                                  ("TgcStrip", "xTgcStrips"),
-                                  ("RpcStrip", "xRpcStrips" ),
-                                  ("RpcStrip2D", "xRpcBILStrips"),
-                                  ("CombinedMuonStrip", "CombinedMuonPrds" )]:
-            esd_items+=[f"xAOD::{cont_t}Container#{cont_name}",
-                        "xAOD::{cont_t}AuxContainer#{cont_name}Aux{exclude}".format(
-                            cont_t = cont_t,cont_name = cont_name,
-                            exclude = ".-".join(exclude))]
 
     # trigger related info for offline DQA
     esd_items += ["Muon::TgcCoinDataContainer#TrigT1CoinDataCollection"]
@@ -137,9 +117,6 @@ def StandaloneMuonOutputCfg(flags):
             if flags.Detector.EnablesTGC: esd_items+=["MuonSimDataCollection#sTGC_SDO"]
             if flags.Detector.EnableMM: esd_items+=["MuonSimDataCollection#MM_SDO"]
  
-            if flags.Muon.writexAODPRD:
-                for item in ["MDT_SDO","RPC_SDO","TGC_SDO","MM_SDO","sTGC_SDO"]:
-                    esd_items += [f"xAOD::MuonSimHitContainer#{item}", f"xAOD::MuonSimHitAuxContainer#{item}Aux."] 
 
     if flags.Output.doWriteESD:
         result.merge(OutputStreamCfg(flags, "ESD", esd_items))

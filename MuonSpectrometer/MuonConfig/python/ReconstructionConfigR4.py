@@ -1,6 +1,80 @@
 # Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 
+def MuonTrackContainersToPersistify(prefix : str):
+    toESD=[]
+    toESD += [f"xAOD::TrackSummaryContainer#{prefix}TrackSummary",
+              f"xAOD::TrackSummaryAuxContainer#{prefix}TrackSummaryAux.",
+              f"xAOD::TrackStateContainer#{prefix}TrackStates",
+              f"xAOD::TrackStateAuxContainer#{prefix}TrackStatesAux.-uncalibratedMeasurement",
+              f"xAOD::TrackParametersContainer#{prefix}TrackParameters",
+              f"xAOD::TrackParametersAuxContainer#{prefix}TrackParametersAux.",
+              f"xAOD::TrackJacobianContainer#{prefix}TrackJacobians",
+              f"xAOD::TrackJacobianAuxContainer#{prefix}TrackJacobiansAux.",
+              f"xAOD::TrackMeasurementContainer#{prefix}TrackMeasurements",
+              f"xAOD::TrackMeasurementAuxContainer#{prefix}TrackMeasurementsAux.",
+              f"xAOD::TrackSurfaceContainer#{prefix}TrackStateSurfaces",
+              f"xAOD::TrackSurfaceAuxContainer#{prefix}TrackStateSurfacesAux.",
+              f"xAOD::TrackSurfaceContainer#{prefix}TrackSurfaces",
+              f"xAOD::TrackSurfaceAuxContainer#{prefix}TrackSurfacesAux."]
+    return toESD
+
+def StandaloneMuonOutputCfg(flags):
+    from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
+    result = ComponentAccumulator()
+
+    aod_items = []
+    esd_items = []
+
+    
+    #Add the xAOD muon PRD containers to the ESD output 
+    exclude = ["", "mdtTrkPrdLink", "rpcTrkPrdLink", "tgcTrkPrdLink"]
+    for cont_t, cont_name in [("MdtDriftCircle", "xMdtDriftCircles"),
+                              ("MdtTwinDriftCircle", "xMdtTwinDriftCircles"),
+                              ("sTgcStrip", "xAODsTgcStrips"),
+                              ("sTgcPad", "xAODsTgcPads"),
+                              ("sTgcWire", "xAODsTgcWires"),
+                              ("MMCluster", "xAODMMClusters"),
+                              ("TgcStrip", "xTgcStrips"),
+                              ("RpcStrip", "xRpcStrips" ),
+                              ("RpcStrip2D", "xRpcBILStrips"),
+                              ("CombinedMuonStrip", "CombinedMuonPrds" )]:
+        esd_items+=[f"xAOD::{cont_t}Container#{cont_name}",
+                    "xAOD::{cont_t}AuxContainer#{cont_name}Aux{exclude}".format(
+                        cont_t = cont_t,cont_name = cont_name,
+                        exclude = ".-".join(exclude))]
+    
+    #add the SDOs to the ESD output if requested 
+    if flags.Muon.writeSDOs:
+        for item in ["MDT_SDO","RPC_SDO","TGC_SDO","MM_SDO","sTGC_SDO"]:
+            esd_items += [f"xAOD::MuonSimHitContainer#{item}", f"xAOD::MuonSimHitAuxContainer#{item}Aux."]
+    
+    
+    #add the segments to the AOD output
+    aod_items += ["xAOD::MuonSegmentContainer#MuonSegmentsFromR4"]
+    aod_items += ["xAOD::MuonSegmentAuxContainer#MuonSegmentsFromR4Aux.-localSegPars.-parentSegment.-localSegCov"]
+
+    #add MS track and track particle containers to the ESD output
+    aod_items += ["xAOD::TrackParticleContainer#MsTrackParticlesR4"]
+    aod_items += ["xAOD::TrackParticleAuxContainer#MsTrackParticlesR4Aux."]
+
+    # convert the Acts muon track to its xAOD representation and add it to the ESD output
+    if flags.Output.doWriteESD:
+        from ActsConfig.ActsEventCnvConfig import ActsToXAODTrackConverterAlgCfg
+        result.merge(ActsToXAODTrackConverterAlgCfg(flags, name = "MsTracksToXAODTrackConverterAlg", InputActsTracksLocation = "MsTracks", OutputActsTracksLocation="MsTracks"))
+        esd_items += MuonTrackContainersToPersistify("Ms")
+
+    #for now add also the muon container here. This should go into the combined config at some point
+    aod_items += ["xAOD::MuonContainer#MuonsR4"]
+
+    esd_items += aod_items
+    
+    if flags.Output.doWriteESD:
+        result.merge(OutputStreamCfg(flags, "ESD", esd_items))
+    if flags.Output.doWriteAOD:
+        result.merge(OutputStreamCfg(flags, "AOD", aod_items))
+    return result
+
 
 def MsTrkRecoChainConfig(flags):
     result = ComponentAccumulator()
@@ -72,4 +146,6 @@ def MuonReconstructionConfig(flags):
     from MuonTruthAlgsR4.MuonTruthAlgsConfig import MuonToTruthAssocAlgCfg
     result.merge(MuonToTruthAssocAlgCfg(flags))
     result.merge(MsTrkRecoChainConfig(flags))
+    if flags.Output.doWriteAOD or flags.Output.doWriteESD:
+        result.merge(StandaloneMuonOutputCfg(flags))
     return result
