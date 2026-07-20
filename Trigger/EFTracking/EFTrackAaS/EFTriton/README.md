@@ -34,12 +34,14 @@ Make sure to copy the image back to the proper directory if working from a diffe
 
 Server Setup
 
-To start up the Apptainer environment (assuming image name is the same as the sample), run the following command.
+To start up the Apptainer environment (assuming image name is the same as the sample), run the following command. We are binding the geometry files to this so that Apptainer can read them, labeled as geoDir.
 
 apptainer run --nv \
   --bind "$(pwd)/EFTriton:/work" \
   --bind /eos/project/a/atlas-eftracking/GPU/ITk_data/ATLAS-P2-RUN4-03-00-01:/geoDir \
   EFTriton/EFTritonAlgsPipelines/data/env/traccc-aas_v1p4_report.sif
+
+
 Testing Wrappers
 
 The wrappers, or standalones, feed into the backend to supply GPU pipeline information. They exist in EFTriton/EFTritonAlgsPipelines/src (.cpp) and EFTriton/EFTritonAlgsPipelines/EFTritonPipelines (.hpp). If modifying these and wish to test them with our sample event, compile and run using the following code from EFTritonAlgsPipelines. (If the cmake doesn’t work in Apptainer, run unset CC && unset CXX)
