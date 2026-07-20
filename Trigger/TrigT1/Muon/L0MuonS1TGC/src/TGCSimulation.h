@@ -1,42 +1,44 @@
 /*
-   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef L0MUONS1TGC_TGCSIMULATION_H
-#define L0MUONS1TGC_TGCSIMULATION_H 
+#define L0MUONS1TGC_TGCSIMULATION_H
 
 #include "AthenaBaseComps/AthReentrantAlgorithm.h"
 #include "AthenaMonitoringKernel/Monitored.h"
-
-#include "MuonDigitContainer/TgcDigitContainer.h"
-
-#include "xAODTrigger/MuonRoIContainer.h"
-
-#include "MuonTGC_Cabling/TgcCablingMap.h"
+#include "L0MuonS1TGCToolInterfaces/ITgcL0CandidateBuilderTool.h"
+#include "L0MuonS1TGCToolInterfaces/ITgcL0InnerCoincidenceTool.h"
+#include "L0MuonS1TGCToolInterfaces/ITgcL0TrackSelectorTool.h"
+#include "MuonRDO/TgcRdoContainer.h"
+#include "xAODL0MuonCand/TGCCandDataContainer.h"
 
 namespace L0Muon {
 
-class TGCSimulation : public ::AthReentrantAlgorithm { 
+class TGCSimulation : public AthReentrantAlgorithm {
  public:
   using AthReentrantAlgorithm::AthReentrantAlgorithm;
-  virtual ~TGCSimulation() = default;
 
-  virtual StatusCode  initialize() override;
-  virtual StatusCode  execute(const EventContext& ctx) const override;
+  StatusCode initialize() override;
+  StatusCode execute(const EventContext& ctx) const override;
 
  private:
-  /// RPC Digit container
-  SG::ReadHandleKey<TgcDigitContainer> m_keyTgcDigit{this, "InputDigit", "TGC_DIGITS", "Location of input TgcDigitContainer"};
-  /// Output RoIs
-  SG::WriteHandleKey<xAOD::MuonRoIContainer> m_outputMuonRoIKey{this, "L0MuonEndcapKey", "L0MuonEndcapRoI", "key for LVL0 Muon RoIs in the barrel" };
+  SG::ReadHandleKey<TgcRdoContainer> m_keyTgcRdo{
+      this, "InputRdo", "TGCRDO", "Location of the input TGC RDO container"};
+  SG::WriteHandleKey<xAOD::TGCCandDataContainer> m_outputKey{
+      this, "OutputKey", "L0MuonTGCCandData",
+      "TGC Sector Logic candidate output"};
 
-  /// TGC cabling map
-  SG::ReadCondHandleKey<Muon::TgcCablingMap> m_cablingKey{this, "CablingKey", "MuonTgc_CablingMap"};
+  ToolHandle<ITgcL0CandidateBuilderTool> m_candidateBuilderTool{
+      this, "CandidateBuilderTool", "", "TGC candidate-builder implementation"};
+  ToolHandle<ITgcL0InnerCoincidenceTool> m_innerCoincidenceTool{
+      this, "InnerCoincidenceTool", "", "TGC Inner-Coincidence implementation"};
+  ToolHandle<ITgcL0TrackSelectorTool> m_trackSelectorTool{
+      this, "TrackSelectorTool", "", "TGC Track-Selector implementation"};
 
-  ToolHandle<GenericMonitoringTool> m_monTool{this, "MonTool", "", "Monitoring Tool"};
-  
+  ToolHandle<GenericMonitoringTool> m_monTool{this, "MonTool", "",
+                                               "Monitoring tool"};
 };
 
-}   // end of namespace
+}  // namespace L0Muon
 
-#endif  // L0MUONS1TGC_TGCSIMULATION_H
-
+#endif
