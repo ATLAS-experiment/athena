@@ -1,7 +1,6 @@
 #!/bin/bash
-# art-description: Nightly test to compare G-200 vs C-000 (Full-scan) for EFTrack studies using ttbar pu200 sample
+# art-description: Nightly test to compare G-200 vs C-100 (Full-scan) for EFTrack studies using ttbar pu200 sample
 # art-type: grid
-# art-include: main/Athena/x86_64-el9-gcc14-opt
 # art-include: main/Athena/x86_64-el9-gcc15-opt
 # art-pathena-flags-add: --site=UKI-LT2-QMUL_GPU,UKI-NORTHGRID-MAN-HEP_GPU,FZK-LCG2_GPU
 # art-architecture: '#&nvidia'
@@ -22,9 +21,9 @@ OutSampleName="${pipelineName}_FS.${SampleName}"
 TrkCollName='TracccTrackParticles'
 TrkSeedCollName='TracccSeedTrackParticles'
 referencePath='/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/InDetTrackPerfMon/EFTrackRefereceHistograms/'
-referenceName="C000_FS.${SampleName}"
+referenceName="C100_FS.${SampleName}"
 referenceName_absPath="${referencePath}/IDTPM.${referenceName}.HIST.root"
-refLabel="C-000"
+refLabel="C-100"
 testLabel="G-200"
 
 ## search in $DATAPATH for matching files
