@@ -1,4 +1,4 @@
-#Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+#Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 
 import AthenaCommon.SystemOfUnits as Units
@@ -98,7 +98,6 @@ def createTrackingPassFlags():
                 not (pcf.Beam.Type is BeamType.Cosmics or pcf.Tracking.doLowMu))
 
     icf.addFlag("usePixel"       		  , lambda pcf : pcf.Detector.EnablePixel )
-    icf.addFlag("useTRT"        		  , lambda pcf : pcf.Detector.EnableTRT )
     icf.addFlag("useSCT"        		  , lambda pcf : pcf.Detector.EnableSCT )
     icf.addFlag("usePixelSeeding"        	  , lambda pcf : pcf.Detector.EnablePixel )
     icf.addFlag("useSCTSeeding"        	  	  , lambda pcf : pcf.Detector.EnableSCT )
@@ -660,7 +659,6 @@ def createForwardTracksTrackingPassFlags():
     icf.nHolesMax        = icf.maxHoles
     icf.nHolesGapMax     = icf.maxHoles
     icf.radMax           = 600. * Units.mm
-    icf.useTRT           = False # no TRT for forward tracks
     icf.doBremRecoverySi = False
     icf.doZBoundary      = False
 
@@ -700,7 +698,6 @@ def createVtxLumiTrackingPassFlags():
     icf.radMax                  = 600. * Units.mm
     icf.nHolesMax               = 2
     icf.nHolesGapMax            = 1
-    icf.useTRT                  = False
     icf.doBremRecoverySi        = False
 
     return icf
@@ -722,7 +719,6 @@ def createVtxLumiHeavyIonTrackingPassFlags():
     icf.roadWidth               = 20.
     icf.keepAllConfirmedPixelSeeds = False
     icf.maxSeedsPerSP_Pixels    = 5
-    icf.useTRT                  = False
     icf.doBremRecoverySi        = False
 
     return icf
@@ -738,7 +734,6 @@ def createVtxBeamSpotTrackingPassFlags():
     icf.radMax                  = 320. * Units.mm
     icf.nHolesMax               = 2
     icf.nHolesGapMax            = 1
-    icf.useTRT                  = False
     icf.doBremRecoverySi        = False
 
     return icf
@@ -801,7 +796,6 @@ def createHeavyIonTrackingPassFlags():
     icf.Xi2maxNoAdd      = 25.
     icf.radMax           = 600. * Units.mm # restrict to pixels + first SCT layer
     icf.roadWidth        = 20.
-    icf.useTRT           = False
     icf.doBremRecoverySi = False
     icf.doZBoundary      = False
     icf.maxSeedsPerSP_Pixels = 5
@@ -848,7 +842,6 @@ def createPixelTrackingPassFlags():
     icf.nHolesGapMax     = _pick( default = 1, hion = 0, cosmics = 3 )
     icf.useSCT           = False
     icf.useSCTSeeding    = False
-    icf.useTRT           = False
     icf.maxPrimaryImpact = lambda pcf: (
         1000. * Units.mm if pcf.Beam.Type is BeamType.Cosmics else
         10. * Units.mm if pcf.Tracking.doUPC else
@@ -895,7 +888,6 @@ def createDisappearingTrackingPassFlags():
     icf.nHolesMax        = 0
     icf.nHolesGapMax     = 0
     icf.useSCT           = True
-    icf.useTRT           = True
     icf.useSCTSeeding    = False
     icf.maxEta           = 2.2
     icf.doBremRecoverySi = False
@@ -915,7 +907,6 @@ def createSCTTrackingPassFlags():
     icf.minSiNotShared   = 5
     icf.usePixel         = False
     icf.usePixelSeeding  = False
-    icf.useTRT           = False
 
     def _minpt( pcf ):
         if pcf.Beam.Type is BeamType.Cosmics:
