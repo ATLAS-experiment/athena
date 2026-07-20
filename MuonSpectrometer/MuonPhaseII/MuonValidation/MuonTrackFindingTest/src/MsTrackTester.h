@@ -120,6 +120,8 @@ namespace MuonValR4{
 
         /** @brief Simple seed information */
         MuonVal::ThreeVectorBranch m_seedPos{m_tree, "MsTrkSeed_position"};
+        /** @brief Seed direction vector */
+        MuonVal::UnitThreeVectorBranch m_seedDir{m_tree, "MsTrkSeed_direction"};
         /** @brief Is the seed in the encap or in the barrel chambers */
         MuonVal::VectorBranch<char>& m_seedType{m_tree.newVector<char>("MsTrkSeed_type")};
         /** @brief Sector of the seed, even center, odd overlap regions, for details see:  */
@@ -128,6 +130,8 @@ namespace MuonValR4{
         MuonVal::VectorBranch<float>& m_seedLength{m_tree.newVector<float>("MsTrkSeed_length")};
         /** @brief Maximum angular difference between the segments part of the seed */
         MuonVal::VectorBranch<float>& m_seedThetaCone{m_tree.newVector<float>("MsTrkSeed_thetaCone")};
+        /** @brief Does the seeding tool construct valid parameters from the seed */
+        MuonVal::VectorBranch<char>& m_seedGood{m_tree.newVector<char>("MsTrkSeed_goodSeed")};
         /** @brief Estimated momentum times charge from the track seed */
         MuonVal::VectorBranch<float>& m_seedQP{m_tree.newVector<float>("MsTrkSeed_qTimesP")};
         /** @brief Link to the truth muon */

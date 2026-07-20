@@ -418,8 +418,8 @@ namespace MuonR4{
                     break;
                 } case Tgc: {
                     const auto* re = static_cast<const MuonGMR4::TgcReadoutElement*>(placement->detectorElement());
-                    holeCounter.triggerEta += (re->numWireGangs(placement->hash()));
-                    holeCounter.triggerPhi += (re->numStrips(placement->hash()));
+                    holeCounter.triggerEta += (re->numWireGangs(placement->hash())>0);
+                    holeCounter.triggerPhi += (re->numStrips(placement->hash())>0);
                     ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<" - Tgc hole detected "
                                 <<m_idHelperSvc->toStringGasGap(placement->identify())<<".");
                     break;
