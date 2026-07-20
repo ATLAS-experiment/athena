@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -221,7 +221,7 @@ ITk::StripClusterOnTrackTool::correct
 
     }
     // updating covariance
-    prevCov = mat;
+    prevCov = std::move(mat);
   }
 
   Trk::LocalParameters localParameters;
