@@ -28,9 +28,12 @@ namespace GlobalSim {
 
 
   // Main functional block running for each event
-  StatusCode GlobalJet1AlgTool::run(const EventContext& ctx) const {
+  StatusCode GlobalJet1AlgTool::run(const std::unique_ptr<IDataCollector>& dc,
+				    const EventContext& ctx) const {
 
     ATH_MSG_DEBUG("Building WTAConeJets");
+    if (dc){dc->collect(*this, "start");}
+
 
     // Read the GlobalCellTowers
     auto h_towerTOBs = SG::makeHandle(m_gblCellTowers, ctx);
@@ -81,6 +84,7 @@ namespace GlobalSim {
 
     CHECK(h_Jet1TOBs.record(std::move(jets))); 
 
+    if (dc){dc->collect(*this, "end");}
 
     return StatusCode::SUCCESS;
   }

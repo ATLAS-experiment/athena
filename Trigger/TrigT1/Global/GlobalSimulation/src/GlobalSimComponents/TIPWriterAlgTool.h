@@ -32,6 +32,7 @@ namespace GlobalSim {
     virtual StatusCode initialize() override;
 
     virtual StatusCode updateTIP(std::bitset<s_nbits_TIP>&,
+				 const std::unique_ptr<IDataCollector>&, 
 				 const EventContext&) const override;
 
     virtual StatusCode countPassingTOBs(const EventContext&, unsigned int&) const = 0;

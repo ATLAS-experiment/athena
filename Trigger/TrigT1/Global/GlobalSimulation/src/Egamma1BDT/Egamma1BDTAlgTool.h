@@ -14,6 +14,7 @@
 #include "../IO/eEmNbhoodTOB.h"
 #include "../IO/eEmEg1BDTTOB.h"
 
+#include "../Utilities/IDataCollector.h"
 
 #include "ap_int.h"
 #include "ap_fixed.h"
@@ -42,7 +43,8 @@ namespace GlobalSim {
     
     StatusCode initialize() override;
 
-    virtual StatusCode run(const EventContext& ctx) const override;
+    virtual StatusCode run(const std::unique_ptr<IDataCollector>&,
+			   const EventContext& ctx) const override;
     
     virtual std::string toString() const override;
 

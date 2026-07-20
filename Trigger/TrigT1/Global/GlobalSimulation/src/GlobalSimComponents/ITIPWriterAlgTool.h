@@ -7,6 +7,8 @@
 
 #include "GaudiKernel/IAlgTool.h"
 #include "GaudiKernel/EventContext.h"
+#include "../Utilities/IDataCollector.h"
+
 
 #include <string>
 #include <bitset>
@@ -27,6 +29,7 @@ namespace GlobalSim {
     virtual ~ITIPWriterAlgTool() = default;
 
     virtual StatusCode updateTIP(std::bitset<s_nbits_TIP>&,
+				 const std::unique_ptr<IDataCollector>&,
 				 const EventContext& ) const = 0;
 
     virtual std::bitset<s_nbits_TIP> getFullTIPWord() const = 0;
