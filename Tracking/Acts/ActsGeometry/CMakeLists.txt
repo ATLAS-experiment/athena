@@ -70,6 +70,7 @@ atlas_add_component( ActsGeometry
                      ActsGeometryInterfacesLib
                      ActsGeometryLib
                      ActsInteropLib
+                     ActsEventLib
                      EventPrimitives
                      GeoPrimitives
                      AthenaBaseComps

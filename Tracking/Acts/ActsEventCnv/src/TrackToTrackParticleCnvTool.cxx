@@ -5,16 +5,15 @@
 
 #include "xAODMeasurementBase/MeasurementDefs.h"
 #include "xAODTracking/TrackingPrimitives.h"
-#include "ActsGeometryInterfaces/ITrackingGeometryTool.h"
-#include "ActsGeometryInterfaces/GeometryContext.h"
-#include "ActsGeometry/ATLASMagneticFieldWrapper.h"
+
+#include "MagFieldConditions/AtlasFieldCacheCondObj.h"
+
+
 #include "Acts/Definitions/Units.hpp"
-#include "Acts/Propagator/detail/JacobianEngine.hpp"
-#include "ActsInterop/Logger.h"
 
 #include "MagFieldElements/AtlasFieldCache.h"
 #include "InDetReadoutGeometry/SiDetectorElement.h"
-#include "GeoPrimitives/GeoPrimitives.h"
+
 #include "GaudiKernel/PhysicalConstants.h"
 
 #include "ActsEvent/ParticleHypothesisEncoding.h"
@@ -96,25 +95,11 @@ namespace {
 
 namespace ActsTrk {
 
-   StatusCode TrackToTrackParticleCnvTool::initialize()
-   {
-      ATH_CHECK( m_trackingGeometryTool.retrieve() );
-      ATH_CHECK( m_extrapolationTool.retrieve() );
-      ATH_CHECK( m_fieldCacheCondObjInputKey.initialize() );
-      ATH_CHECK( m_muonSummaryTool.retrieve(EnableTool{!m_muonSummaryTool.empty()}));
+   StatusCode TrackToTrackParticleCnvTool::initialize() {
 
-      // propagator for conversion to curvilinear parameters
-      {
-         auto logger = makeActsAthenaLogger(this, "Prop");
-         Navigator::Config cfg{m_trackingGeometryTool->trackingGeometry()};
-         cfg.resolvePassive = false;
-         cfg.resolveMaterial = true;
-         cfg.resolveSensitive = true;
-         auto navigtor_logger = logger->cloneWithSuffix("Navigator");
-         m_propagator = std::make_unique<Propagator>(Stepper(std::make_shared<ATLASMagneticFieldWrapper>()),
-                                                     Navigator(cfg, std::move(navigtor_logger)),
-                                                     std::move(logger));
-      }
+      ATH_CHECK( m_extrapolationTool.retrieve() );
+      ATH_CHECK( m_muonSummaryTool.retrieve(EnableTool{!m_muonSummaryTool.empty()}));
+      ATH_CHECK(m_ctxProvider.initialize());
 
       return StatusCode::SUCCESS;
    }
@@ -126,16 +111,14 @@ namespace ActsTrk {
                                                    const InDet::BeamSpotData* beamspot_data) const {
       using namespace Acts::UnitLiterals;
 
-      const AtlasFieldCacheCondObj* field_cond_data{nullptr};
-      ATH_CHECK(SG::get(field_cond_data, m_fieldCacheCondObjInputKey, ctx));
       MagField::AtlasFieldCache fieldCache;
-      field_cond_data->getInitializedCache(fieldCache);
+      m_ctxProvider.getMagneticFieldContext(ctx).get<const AtlasFieldCacheCondObj*>()->getInitializedCache(fieldCache);
 
       if (m_muonSummaryTool.isEnabled()) {
          m_muonSummaryTool->copySummary(m_muonSummaryTool->makeSummary(ctx, track),
                                         track_particle);
       }
-      const GeometryContext& gctx = m_trackingGeometryTool->getGeometryContext(ctx);
+      const Acts::GeometryContext tgContext = m_ctxProvider.getGeometryContext(ctx);
 
       static const std::array<unsigned short, Acts::toUnderlying(xAOD::UncalibMeasType::nTypes)>
          measurementToSummaryType ATLAS_THREAD_SAFE (makeMeasurementToSummaryTypeMap());
@@ -417,7 +400,7 @@ namespace ActsTrk {
                state = track.container().trackStateContainer().getTrackState(*idx_iter);
             const Acts::BoundTrackParameters actsParam = track.createParametersFromState(state);
 
-            Acts::Vector3 position = actsParam.position(gctx.context());
+            Acts::Vector3 position = actsParam.position(tgContext);
             Acts::Vector3 momentum = actsParam.momentum();
 
             // scaling from Acts momentum units (GeV) to Athena Units (MeV)
@@ -426,8 +409,8 @@ namespace ActsTrk {
             }
 
             if (actsParam.covariance()) {
-               Acts::MagneticFieldContext mfContext = m_extrapolationTool->getMagneticFieldContext(ctx);
-               Acts::GeometryContext tgContext = gctx.context();
+               const Acts::MagneticFieldContext mfContext = m_ctxProvider.getMagneticFieldContext(ctx);
+               
 
                magnFieldVect.setZero();
                fieldCache.getField(position.data(), magnFieldVect.data());

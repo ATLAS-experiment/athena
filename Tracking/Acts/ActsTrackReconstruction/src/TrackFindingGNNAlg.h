@@ -11,8 +11,6 @@
 // Base Class
 #include "AthenaBaseComps/AthReentrantAlgorithm.h"
 
-// Gaudi includes
-#include "GaudiKernel/ToolHandle.h"
 
 // Tools
 #include "ActsGeometryInterfaces/IExtrapolationTool.h"
@@ -31,6 +29,7 @@
 #include "ActsEvent/TrackContainer.h"
 #include "ActsEvent/TrackParameters.h"
 #include "ActsEvent/TrackParametersContainer.h"
+#include "ActsEvent/ContextUtility.h"
 #include "ActsGeometry/DetectorElementToActsGeometryIdMap.h"
 #include "ActsToolInterfaces/IFitterTool.h"
 #include "ActsToolInterfaces/IOnTrackCalibratorTool.h"
@@ -75,19 +74,19 @@ private:
   // Tool Handles
   ToolHandle<GenericMonitoringTool> m_monTool{this, "MonTool", "",
                                               "Monitoring tool"};
-  ToolHandle<ActsTrk::IExtrapolationTool> m_extrapolationTool{
-      this, "ExtrapolationTool", ""};
   PublicToolHandle<ITrackingGeometryTool> m_trackingGeometryTool{
       this, "TrackingGeometryTool", ""};
-  ToolHandle<ActsTrk::ITrackParamsEstimationTool> m_paramEstimationTool{
+  ToolHandle<ITrackParamsEstimationTool> m_paramEstimationTool{
       this, "TrackParamsEstimationTool", "", "Track Param Estimation from Seeds"};
-  ToolHandle<ActsTrk::IFitterTool> m_fitterTool{
+  ToolHandle<IFitterTool> m_fitterTool{
       this, "FitterTool", "", "Track fitting tool"};
 
+  /** @brief Utility to fetch the geometry, magnetic field and calibration context in the event */
+  ContextUtility m_ctxProvider{this};
   ServiceHandle<IChronoStatSvc> m_chronoSvc{"ChronoStatSvc", name()};
 
   detail::xAODUncalibMeasSurfAcc m_uncalibMeasSurfAccessor{};
-  detail::OnTrackCalibrator<ActsTrk::MutableTrackStateBackend>
+  detail::OnTrackCalibrator<MutableTrackStateBackend>
       m_uncalibMeasCalibrator{};
 
   // Input: Spacepoint containers
@@ -102,7 +101,7 @@ private:
           this, "xAODInputSpacePointsOverlapContainerKey",
           "ITkStripOverlapSpacePoints"};
 
-  SG::WriteHandleKey<ActsTrk::TrackContainer> m_trackContainerKey{
+  SG::WriteHandleKey<TrackContainer> m_trackContainerKey{
       this, "ACTSTracksLocation", "",
       "Output track collection (ActsTrk variant)"};
 

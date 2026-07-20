@@ -8,11 +8,8 @@
 // Base Class
 #include "AthenaBaseComps/AthReentrantAlgorithm.h"
 
-// Gaudi includes
-#include "GaudiKernel/ToolHandle.h"
 
 // Tools
-#include "ActsGeometryInterfaces/IExtrapolationTool.h"
 #include "ActsGeometryInterfaces/ITrackingGeometryTool.h"
 #include "ActsGeometryInterfaces/IGeometryRealmConvTool.h"
 #include "ActsToolInterfaces/ITrackParamsEstimationTool.h"
@@ -36,6 +33,7 @@
 #include "src/detail/Definitions.h"
 #include "ActsEvent/TrackContainerHandlesHelper.h"
 #include "ActsEvent/TrackContainer.h"
+#include "ActsEvent/ContextUtility.h"
 
 namespace ActsTrk {
   namespace detail {
@@ -87,7 +85,6 @@ namespace ActsTrk {
 
     // Tool Handles
     ToolHandle<GenericMonitoringTool> m_monTool{this, "MonTool", "", "Monitoring tool"};
-    ToolHandle<ActsTrk::IExtrapolationTool> m_extrapolationTool{this, "ExtrapolationTool", ""};
     PublicToolHandle<ActsTrk::ITrackingGeometryTool> m_trackingGeometryTool{this, "TrackingGeometryTool", ""};
     ToolHandle<ActsTrk::TrackStatePrinterTool> m_trackStatePrinter{this, "TrackStatePrinter", "", "optional track state printer"};
     ToolHandle<ActsTrk::IFitterTool> m_fitterTool{this, "FitterTool", "", "Fitter Tool for Seeds"};
@@ -98,6 +95,8 @@ namespace ActsTrk {
     SG::WriteHandleKey<ActsTrk::TrackContainer> m_trackContainerKey{this, "ACTSTracksLocation", "", "Output track collection (ActsTrk variant)"};
     ActsTrk::MutableTrackContainerHandlesHelper m_tracksBackendHandlesHelper{this};
 
+    /** @brief Utility to fetch the geometry, magnetic field and calibration context in the event */
+    ContextUtility m_ctxProvider{this};
     // Configuration
     Gaudi::Property<unsigned int> m_maxPropagationStep{this, "maxPropagationStep", 1000, "Maximum number of steps for one propagate call"};
     Gaudi::Property<std::vector<double>> m_etaBins{this, "etaBins", {}, "bins in |eta| to specify variable selections"};

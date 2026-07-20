@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ACTSGEOMETRY_ACTSWRITETRACKINGGEOMETRYTRANSFORMS_H
@@ -7,16 +7,13 @@
 
 // ATHENA
 #include "AthenaBaseComps/AthAlgorithm.h"
-#include "GaudiKernel/ServiceHandle.h"
-#include "AthenaKernel/IAthRNGSvc.h"
-#include "Gaudi/Property.h"  /*no forward decl: typedef*/
-#include "GaudiKernel/ISvcLocator.h"
 #include "InDetIdentifier/PixelID.h"
 #include "InDetIdentifier/SCT_ID.h"
 
 
 // PACKAGE
 #include "ActsGeometryInterfaces/ITrackingGeometryTool.h"
+#include "ActsEvent/ContextUtility.h"
 
 // STL
 #include <fstream>
@@ -43,7 +40,10 @@ private:
   const PixelID *m_pixelID{nullptr};
   const SCT_ID  *m_SCT_ID{nullptr};
 
-  PublicToolHandle<ActsTrk::ITrackingGeometryTool> m_trackingGeometryTool{this, "TrackingGeometryTool", "ActsTrackingGeometryTool"};
+  PublicToolHandle<ActsTrk::ITrackingGeometryTool> m_trackingGeometryTool{this, "TrackingGeometryTool", ""};
+
+  /** @brief Context provider for geometry, magnetic field and calibration contexts */
+  ActsTrk::ContextUtility m_ctxProvider{this};
 
   Gaudi::Property<std::string> m_outputName{this, "OutputName", "transforms.csv", "Filename to write the transform output to"};
   Gaudi::Property<bool> m_writeFullTransform{this,"WriteFullTransform",false,"Decide if full transformation needs to be written"};

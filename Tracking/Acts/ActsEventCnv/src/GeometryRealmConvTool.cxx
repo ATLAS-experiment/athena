@@ -56,6 +56,7 @@ namespace ActsTrk{
               ATH_MSG_ERROR("The tool is initialized as a private tool but should be public");
               return StatusCode::FAILURE;
         }
+        ATH_CHECK(m_ctxProvider.initialize());
         ATH_CHECK(m_trackingGeometryTool.retrieve());
         m_trackingGeometryTool->trackingGeometry()->visitSurfaces([&](const Acts::Surface *surface) {
              // find acts surface with the same detector element ID
@@ -132,7 +133,7 @@ namespace ActsTrk{
     }
     SurfacePtr_t GeometryRealmConvTool::translateFreeSurface(const EventContext& ctx,
                                                              const Acts::Surface& surface) const {
-        const Acts::GeometryContext tgContext = m_trackingGeometryTool->getGeometryContext(ctx).context();
+        const Acts::GeometryContext tgContext = m_ctxProvider.getGeometryContext(ctx);
         const Amg::Transform3D& trf{surface.localToGlobalTransform(tgContext)};
         switch (surface.type()) {
             using enum Acts::Surface::SurfaceType;
@@ -224,7 +225,7 @@ namespace ActsTrk{
 
         std::shared_ptr<const Acts::Surface> actsSurface{};
         Acts::BoundVector params{};
-        const Acts::GeometryContext tgContext = m_trackingGeometryTool->getGeometryContext(ctx).context();
+        const Acts::GeometryContext tgContext = m_ctxProvider.getGeometryContext(ctx);
 
         // get the associated surface
         try {
@@ -321,7 +322,7 @@ namespace ActsTrk{
                         actsParameter.get<Acts::eBoundTheta>(),
                         actsParameter.get<Acts::eBoundQOverP>() * 1_MeV, discSurface, cov);
                 } else if (trkSurface->type() == Trk::SurfaceType::Plane) {
-                    const Acts::GeometryContext tgContext = m_trackingGeometryTool->getGeometryContext(ctx).context();
+                    const Acts::GeometryContext tgContext = m_ctxProvider.getGeometryContext(ctx);
                     auto& planeSurface{static_cast<const Trk::PlaneSurface&>(*trkSurface)};
                     // need to convert to plane position on plane surface (annulus bounds)
                     auto helperSurface = Acts::Surface::makeShared<Acts::PlaneSurface>(planeSurface.transform());
@@ -386,7 +387,7 @@ namespace ActsTrk{
                     actsParameter.get<Acts::eBoundTheta>(),
                     actsParameter.get<Acts::eBoundQOverP>() * 1_MeV, lineSurface, cov);
             } case Acts::Surface::SurfaceType::Curvilinear: {
-                const Acts::GeometryContext tgContext = m_trackingGeometryTool->getGeometryContext(ctx).context();
+                const Acts::GeometryContext tgContext = m_ctxProvider.getGeometryContext(ctx);
                 return std::make_unique<Trk::CurvilinearParameters>(
                     actsParameter.position(tgContext), actsParameter.get<Acts::eBoundPhi>(),
                     actsParameter.get<Acts::eBoundTheta>(),

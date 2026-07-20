@@ -137,7 +137,7 @@ ExtrapolationTool::initialize()
   Acts::Navigator::Config navConfig{m_trackingGeometryTool->trackingGeometry()};
   Acts::Navigator navigator{std::move(navConfig), logger().clone()};
   
-  ATH_CHECK(m_fieldCacheCondObjInputKey.initialize());
+  ATH_CHECK(m_ctxProvider.initialize());
   if (m_fieldMode == "ATLAS") {    
     ATH_MSG_INFO("Using ATLAS magnetic field service");
 
@@ -188,8 +188,8 @@ ExtrapolationTool::propagationSteps(const EventContext& ctx,
 
   ATH_MSG_VERBOSE(name() << "::" << __FUNCTION__ << " begin");
 
-  const Acts::MagneticFieldContext mfContext = getMagneticFieldContext(ctx);
-  const Acts::GeometryContext tgContext = m_trackingGeometryTool->getGeometryContext(ctx).context();
+  const Acts::MagneticFieldContext mfContext = m_ctxProvider.getMagneticFieldContext(ctx);
+  const Acts::GeometryContext tgContext = m_ctxProvider.getGeometryContext(ctx);
   
   PropagationOutput output;
 
@@ -244,8 +244,8 @@ Acts::Result<Acts::BoundTrackParameters>
 {
   ATH_MSG_VERBOSE(name() << "::" << __FUNCTION__ << " begin");
 
-  const Acts::MagneticFieldContext mfContext = getMagneticFieldContext(ctx);
-  const Acts::GeometryContext tgContext = m_trackingGeometryTool->getGeometryContext(ctx).context();
+  const Acts::MagneticFieldContext mfContext = m_ctxProvider.getMagneticFieldContext(ctx);
+  const Acts::GeometryContext tgContext = m_ctxProvider.getGeometryContext(ctx);
 
   auto parameters = std::visit([&](const auto& propagator) -> Acts::Result<Acts::BoundTrackParameters> {
       using Propagator = std::decay_t<decltype(propagator)>;
@@ -282,8 +282,8 @@ Acts::Result<ExtrapolationTool::PropagationOutput>
 
   PropagationOutput output;
 
-  const Acts::MagneticFieldContext mfContext = getMagneticFieldContext(ctx);
-  const Acts::GeometryContext tgContext = m_trackingGeometryTool->getGeometryContext(ctx).context();
+  const Acts::MagneticFieldContext mfContext = m_ctxProvider.getMagneticFieldContext(ctx);
+  const Acts::GeometryContext tgContext = m_ctxProvider.getGeometryContext(ctx);
 
   auto res = std::visit([&](const auto& propagator) -> Acts::Result<ExtrapolationTool::PropagationOutput> {
       using Propagator = std::decay_t<decltype(propagator)>;
@@ -333,8 +333,8 @@ Acts::Result<Acts::BoundTrackParameters>
   
   ATH_MSG_VERBOSE(name() << "::" << __FUNCTION__ << " begin");
   
-  const Acts::MagneticFieldContext mfContext = getMagneticFieldContext(ctx);
-  const Acts::GeometryContext tgContext = m_trackingGeometryTool->getGeometryContext(ctx).context();
+  const Acts::MagneticFieldContext mfContext = m_ctxProvider.getMagneticFieldContext(ctx);
+  const Acts::GeometryContext tgContext = m_ctxProvider.getGeometryContext(ctx);
 
   auto parameters = std::visit([&](const auto& propagator) -> Acts::Result<Acts::BoundTrackParameters> {
       using Propagator = std::decay_t<decltype(propagator)>;
@@ -362,13 +362,6 @@ Acts::Result<Acts::BoundTrackParameters>
   return parameters;
 }
 
-Acts::MagneticFieldContext ExtrapolationTool::getMagneticFieldContext(const EventContext& ctx) const {
-  const AtlasFieldCacheCondObj* fieldCondObj{nullptr};
-  if (!SG::get(fieldCondObj,m_fieldCacheCondObjInputKey, ctx).isSuccess()) {
-     throw std::runtime_error("Failed to retrieve conditions data from "+m_fieldCacheCondObjInputKey.key() + ".");
-  }
-  return Acts::MagneticFieldContext{fieldCondObj};
-}
 
 template<typename OptionsType>
 OptionsType ExtrapolationTool::prepareOptions(const Acts::GeometryContext& gctx,
@@ -399,8 +392,8 @@ Acts::Result<ExtrapolationTool::BoundParamVec_t>
                                           const Acts::BoundTrackParameters& startParameters,
                                           const SurfaceRecordOptions& recordOpts) const {
 
-    const Acts::MagneticFieldContext mfContext = getMagneticFieldContext(ctx);
-    const Acts::GeometryContext tgContext = m_trackingGeometryTool->getGeometryContext(ctx).context();
+  const Acts::MagneticFieldContext mfContext = m_ctxProvider.getMagneticFieldContext(ctx);
+  const Acts::GeometryContext tgContext = m_ctxProvider.getGeometryContext(ctx);
 
     return std::visit([&](const auto& propagator) -> Acts::Result<BoundParamVec_t> {
         using Propagator = std::decay_t<decltype(propagator)>;

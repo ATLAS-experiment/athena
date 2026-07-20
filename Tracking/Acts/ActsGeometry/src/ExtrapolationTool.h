@@ -8,10 +8,7 @@
 // ATHENA
 #include "GeoPrimitives/GeoPrimitives.h"
 #include "AthenaBaseComps/AthAlgTool.h"
-#include "GaudiKernel/IInterface.h"
-#include "GaudiKernel/ServiceHandle.h"
-#include "Gaudi/Property.h"
-#include "GaudiKernel/EventContext.h"
+
 #include "TrkEventPrimitives/ParticleHypothesis.h"
 #include "TrkEventPrimitives/PdgToParticleHypothesis.h"
 
@@ -24,6 +21,8 @@
 #include "ActsGeometryInterfaces/IExtrapolationTool.h"
 #include "ActsGeometryInterfaces/ITrackingGeometryTool.h"
 #include "ActsGeometry/ATLASMagneticFieldWrapper.h"
+
+#include "ActsEvent/ContextUtility.h"
 
 // ACTS
 #include "Acts/MagneticField/ConstantBField.hpp"
@@ -87,8 +86,6 @@ public:
                    const Acts::Surface& target,
                    Acts::Direction navDir, double pathLimit) const override;
          
-  /** @copydoc IExtrapolationTool::getMagneticFieldContext */
-  virtual Acts::MagneticFieldContext getMagneticFieldContext(const EventContext& ctx) const override;
   
   /** @copydoc IExtrapolationTool::propagateAndRecord */
   virtual Acts::Result<BoundParamVec_t> propagateAndRecord(const EventContext& ctx,
@@ -100,8 +97,8 @@ public:
 
   std::unique_ptr<const ActsExtrapolationDetail::VariantPropagator> m_varProp;
   std::unique_ptr<const Acts::Logger> m_logger{nullptr};
-
-  SG::ReadCondHandleKey<AtlasFieldCacheCondObj> m_fieldCacheCondObjInputKey {this, "AtlasFieldCacheCondObj", "fieldCondObj", "Name of the Magnetic Field conditions object key"};
+  /** @brief Utility to fetch the geometry, magnetic field and calibration context in the event */
+  ContextUtility m_ctxProvider{this};
 
   PublicToolHandle<ActsTrk::ITrackingGeometryTool> m_trackingGeometryTool{this, "TrackingGeometryTool", "ActsTrackingGeometryTool"};
 

@@ -25,6 +25,8 @@
 
 #include "xAODMeasurementBase/UncalibratedMeasurementContainer.h" 
 #include "ActsEvent/AuxiliaryMeasurementHandler.h"
+#include "ActsEvent/ContextUtility.h"
+
 
 namespace MuonR4{
     /** @brief The xAODSegmentCnvAlg takes MuonR4::Segments and  converts them 
@@ -162,6 +164,8 @@ namespace MuonR4{
             SG::WriteHandleKey<xAOD::CombinedMuonStripContainer> m_combMeasKey{this, "combinedPrdKey", "CombinedMuonPrds"};
             /** @brief Handler to parse the auxiliary beam spot constaint */
             ActsTrk::AuxiliaryMeasurementHandler m_auxMeasProv{this};
+            /** @brief Context provider for geometry, magnetic field and calibration contexts */
+            ActsTrk::ContextUtility m_ctxProvider{this};
             /** @brief Flag to convert the beamspot constaint as well */
             Gaudi::Property<bool> m_convertBeamSpot{this, "convertBeamSpot", false};
             /** @brief Flag to tell whether the hole summary shall be written */

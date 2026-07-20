@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ACTSCOLLECTIONALGS_TRACKCONTAINERREADER_H
@@ -12,6 +12,7 @@
 #include "ActsEvent/TrackContainerHandlesHelper.h"
 #include "ActsGeometryInterfaces/ITrackingGeometryTool.h"
 #include "ActsEvent/TrackContainer.h"
+#include "ActsEvent/ContextUtility.h"
 
 // STL includes
 #include <string>
@@ -32,6 +33,9 @@ private:
   PublicToolHandle<ActsTrk::ITrackingGeometryTool> m_trackingGeometryTool{this, "TrackingGeometryTool", "ActsTrackingGeometryTool"};
   ActsTrk::ConstTrackContainerHandlesHelper m_tracksBackendHandlesHelper{this};
   SG::WriteHandleKey<ActsTrk::TrackContainer> m_tracksKey{this, "TrackContainer", "TrackContainer"};
+  /** @brief Context provider for geometry, magnetic field and calibration contexts */
+  ActsTrk::ContextUtility m_ctxProvider{this};
+
 };
 }
 #endif // ACTSCOLLECTIONALGS_TRACKCONTAINERREADER_H

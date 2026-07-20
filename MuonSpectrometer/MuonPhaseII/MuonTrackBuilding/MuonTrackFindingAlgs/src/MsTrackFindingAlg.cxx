@@ -10,7 +10,6 @@
 
 
 #include "MuonReadoutGeometryR4/MuonDetectorDefs.h"
-#include "ActsCalibBase/CalibrationContext.h"
 #include "ActsCalibrators/xAODUncalibMeasCalibrator.h"
 #include "xAODMuonPrepData/UtilFunctions.h"
 
@@ -38,19 +37,13 @@ namespace MuonR4{
         ATH_CHECK(m_msTrkSeedKey.initialize(SG::AllowEmpty));
 
         ATH_CHECK(m_visualizationTool.retrieve(EnableTool{!m_visualizationTool.empty()}));
-        ATH_CHECK(m_trackingGeometryTool.retrieve());
-        ATH_CHECK(m_extrapolationTool.retrieve());
         ATH_CHECK(m_trackFitTool.retrieve());
         ATH_CHECK(m_calibTool.retrieve());
         ATH_CHECK(m_writeKey.initialize());
         ATH_CHECK(m_summaryTool.retrieve());
         ATH_CHECK(m_seedingTool.retrieve());
 
-        if (m_trackingGeometryTool->trackingGeometry()->geometryVersion() !=
-            Acts::TrackingGeometry::GeometryVersion::Gen3){
-            ATH_MSG_ERROR("The MS track fit requires the Gen 3 geometry format");
-            return StatusCode::FAILURE;
-        }
+        ATH_CHECK(m_ctxProvider.initialize());
         return StatusCode::SUCCESS;
     }
 
@@ -67,9 +60,9 @@ namespace MuonR4{
         if (!m_visualizationTool.empty()) {
             m_visualizationTool->displaySeeds(ctx, *seedContainer);
         }
-        const Acts::GeometryContext tgContext = m_trackingGeometryTool->getGeometryContext(ctx).context();
-        const Acts::MagneticFieldContext mfContext = m_extrapolationTool->getMagneticFieldContext(ctx);
-        const Acts::CalibrationContext calContext{ActsTrk::getCalibrationContext(ctx)};
+        const Acts::GeometryContext tgContext = m_ctxProvider.getGeometryContext(ctx);
+        const Acts::MagneticFieldContext mfContext = m_ctxProvider.getMagneticFieldContext(ctx);
+        const Acts::CalibrationContext calContext{m_ctxProvider.getCalibrationContext(ctx)};
         
         
         Acts::VectorTrackContainer trackBackend{};

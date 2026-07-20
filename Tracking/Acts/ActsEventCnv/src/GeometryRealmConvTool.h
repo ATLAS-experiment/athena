@@ -10,6 +10,7 @@
 #include "ActsGeometryInterfaces/IGeometryRealmConvTool.h"
 #include "ActsGeometryInterfaces/ITrackingGeometryTool.h"
 
+#include "ActsEvent/ContextUtility.h"
 #include "MuonReadoutGeometry/MuonDetectorManager.h"
 #include "StoreGate/ReadCondHandleKey.h"
 
@@ -59,7 +60,9 @@ namespace ActsTrk{
            
             PublicToolHandle<ITrackingGeometryTool> m_trackingGeometryTool{this, "TrackingGeometryTool", ""};
 
-            std::shared_ptr<const Acts::TrackingGeometry> m_trackingGeometry{};
+            /** @brief Context provider for geometry, magnetic field and calibration contexts */
+            ActsTrk::ContextUtility m_ctxProvider{this};
+
             std::unordered_map<Identifier, std::shared_ptr<const Acts::Surface>> m_actsSurfaceMap{};
 
             Gaudi::Property<bool> m_extractMuonSurfaces{this, "ExtractMuonSurfaces", false,

@@ -20,8 +20,7 @@ StatusCode WriteTrackingGeometry::initialize() {
   ATH_MSG_INFO("initializing");
 
   ATH_CHECK(m_trackingGeometryTool.retrieve());
-  // ATH_CHECK(m_materialJsonWriterTool.retrieve() );
-
+  ATH_CHECK(m_ctxProvider.initialize());
 
   return StatusCode::SUCCESS;
 }
@@ -41,7 +40,7 @@ StatusCode WriteTrackingGeometry::execute(const EventContext& ctx)  {
   m_dumped = true;
   
   /// Define the tacking geometry context
-  const Acts::GeometryContext tgContext = m_trackingGeometryTool->getGeometryContext(ctx).context();
+  const Acts::GeometryContext tgContext = m_ctxProvider.getGeometryContext(ctx);
 
   using Config_t  = Acts::TrackingGeometryJsonConverter::Config;
   

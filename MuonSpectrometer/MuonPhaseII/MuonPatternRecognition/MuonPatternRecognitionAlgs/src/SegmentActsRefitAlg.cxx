@@ -52,10 +52,10 @@ namespace MuonR4{
         ATH_CHECK(m_seedParsKey.initialize());
         ATH_CHECK(m_auxMeasProv.initialize(m_writeKey.key()));
         ATH_CHECK(m_calibTool.retrieve());
+        ATH_CHECK(m_ctxProvider.initialize());
 
         ATH_CHECK(m_idHelperSvc.retrieve());
         ATH_CHECK(m_trackingGeometryTool.retrieve());
-        ATH_CHECK(m_extrapolationTool.retrieve());
         ATH_CHECK(m_segSelector.retrieve());
         ATH_CHECK(detStore()->retrieve(m_detMgr));
 
@@ -75,13 +75,13 @@ namespace MuonR4{
         return StatusCode::SUCCESS;
     }
     std::tuple<Amg::Vector3D, Amg::Vector3D> 
-        SegmentActsRefitAlg::smearSegment(const ActsTrk::GeometryContext& gctx,
+        SegmentActsRefitAlg::smearSegment(const Acts::GeometryContext& tgContext,
                                           const MuonR4::Segment& segment,
                                           CLHEP::HepRandomEngine* engine) const{
         if (!m_smearSegPars) {
             return std::make_pair(segment.position(), segment.direction());
         }
-        const SegmentFit::Parameters segPars = localSegmentPars(gctx, segment);
+        const SegmentFit::Parameters segPars = localSegmentPars(tgContext, segment);
         SegmentFit::Parameters smearedPars = segPars;
         /// Smear the parameters
         for (ParamDefs precPar : {ParamDefs::y0, ParamDefs::theta,
@@ -109,10 +109,10 @@ namespace MuonR4{
             SeedingAux::strawSigns(smearLocPos, smearLocDir, segment.measurements())) {
             ATH_MSG_DEBUG("Parameter smearng from "<<toString(segPars)<<" -> "<<toString(smearedPars)
                         <<" changes the L/R ambiguity -> avoid for this test");
-            return smearSegment(gctx, segment, engine);
+            return smearSegment(tgContext, segment, engine);
         }
 
-        const Amg::Transform3D& locToGlob{segment.msSector()->localToGlobalTransform(gctx)};
+        const Amg::Transform3D& locToGlob{segment.msSector()->localToGlobalTransform(tgContext)};
         if (smearLocDir.z() < 0) {
             smearLocDir = -smearLocDir;
         }
@@ -131,11 +131,10 @@ namespace MuonR4{
         const xAOD::MuonSegmentContainer* segments{nullptr};
         ATH_CHECK(SG::get(segments, m_readKey, ctx));
         /// Create the context object
-        const ActsTrk::GeometryContext& gctx{m_trackingGeometryTool->getGeometryContext(ctx)};
         const std::shared_ptr<const Acts::TrackingGeometry> trackingGeo = m_trackingGeometryTool->trackingGeometry();
-        const Acts::GeometryContext tgContext = gctx.context();
-        const Acts::MagneticFieldContext mfContext = m_extrapolationTool->getMagneticFieldContext(ctx);
-        const Acts::CalibrationContext calContext = ActsTrk::getCalibrationContext(ctx);
+        const Acts::GeometryContext tgContext = m_ctxProvider.getGeometryContext(ctx);
+        const Acts::MagneticFieldContext mfContext = m_ctxProvider.getMagneticFieldContext(ctx);
+        const Acts::CalibrationContext calContext = m_ctxProvider.getCalibrationContext(ctx);
         
         /// Random engine to smear the segment parameters
         ATHRNG::RNGWrapper* rngWrapper = m_rndmSvc->getEngine(this, name());
@@ -202,13 +201,13 @@ namespace MuonR4{
                         m_detMgr->getSectorEnvelope(reFitMe->chamberIndex(), 
                                                     reFitMe->sector(), 
                                                     reFitMe->etaIndex());
-            const Amg::Transform3D& sectorTrf{msSector->localToGlobalTransform(gctx)};
+            const Amg::Transform3D& sectorTrf{msSector->localToGlobalTransform(tgContext)};
             const Amg::Vector3D planeNormal = sectorTrf.linear().col(2);
 
             m_calibTool->stampSignsOnMeasurements(*reFitMe);
             line.updateParameters(localSegmentPars(*reFitMe));
             /// Fetch a smeared segment position & direction
-            const auto [seedPos, seedDir] = smearSegment(gctx, *MuonR4::detailedSegment(*reFitMe), randEngine);
+            const auto [seedPos, seedDir] = smearSegment(tgContext, *MuonR4::detailedSegment(*reFitMe), randEngine);
             /// Decorate the initial seed parameters to the segment
             {
                 const Amg::Transform3D invTrf = sectorTrf.inverse();
@@ -266,11 +265,11 @@ namespace MuonR4{
                 constexpr double covVal = Acts::square(1._cm);
                 hitsToFit.push_back(auxMeasHandle.newMeasurement<1>(surfBeneath, ProjectorType::e1DimNoTime, AmgSymMatrix(1){covVal}));
                 if (m_drawEvent) {
-                    MuonValR4::drawMeasurement(gctx, hitsToFit.back(), visualHelper, Acts::s_viewGrid);
+                    MuonValR4::drawMeasurement(tgContext, hitsToFit.back(), visualHelper, Acts::s_viewGrid);
                 }
                 hitsToFit.push_back(auxMeasHandle.newMeasurement<1>(surfAbove, ProjectorType::e1DimNoTime, AmgSymMatrix(1){covVal}));
                 if (m_drawEvent) {
-                    MuonValR4::drawMeasurement(gctx, hitsToFit.back(), visualHelper, Acts::s_viewGrid);
+                    MuonValR4::drawMeasurement(tgContext, hitsToFit.back(), visualHelper, Acts::s_viewGrid);
                 }
             }
 
@@ -281,9 +280,9 @@ namespace MuonR4{
                                                   Amg::Transform3D::Identity(), Acts::s_viewPortal);
                 
                 /// Draw the reference segment as a red line
-                MuonValR4::drawSegmentLine(gctx, *reFitMe, visualHelper,
+                MuonValR4::drawSegmentLine(tgContext, *reFitMe, visualHelper,
                                 Acts::ViewConfig{.color = {220, 0, 0}});
-                MuonValR4::drawSegmentMeasurements(gctx, *reFitMe, visualHelper, Acts::s_viewSurface);
+                MuonValR4::drawSegmentMeasurements(tgContext, *reFitMe, visualHelper, Acts::s_viewSurface);
             }
             ATH_MSG_VERBOSE("Entrance position "<<Amg::toString(isectEntrance.position())
                         <<", path length: "<<isectEntrance.pathLength()<<", "
@@ -310,7 +309,7 @@ namespace MuonR4{
                                 (SeedingAux::strawSign(locPos,locDir, *meas) == 1 ? "R" : "L") : "X")
                         <<", geoId: "<<geoId;
                     if (geoId != Acts::GeometryIdentifier{}){
-                        const Amg::Vector3D globPos = meas->spacePoint()->msSector()->localToGlobalTransform(gctx) * 
+                        const Amg::Vector3D globPos = meas->spacePoint()->msSector()->localToGlobalTransform(tgContext) * 
                                                     meas->localPosition();
                         const Acts::GeometryIdentifier volId = geoId.withSensitive(0);
                         const Acts::TrackingVolume* volume = m_trackingGeometryTool->trackingGeometry()->findVolume(volId);
@@ -361,7 +360,7 @@ namespace MuonR4{
                 continue;
             }
             if (m_drawEvent) {
-                MuonValR4::drawBoundParameters(gctx, *initialPars, visualHelper,
+                MuonValR4::drawBoundParameters(tgContext, *initialPars, visualHelper,
                                                Acts::ViewConfig{.color={0,220,0}});
             }
             ATH_MSG_DEBUG("Initial parameters --  (loc0, loc1): "<<Amg::toString((*initialPars).localPosition())
@@ -393,7 +392,7 @@ namespace MuonR4{
 
             Acts::BoundTrackParameters parameters = track.createParametersAtReference();
             if (m_drawEvent) {
-                MuonValR4::drawBoundParameters(gctx, parameters, visualHelper,
+                MuonValR4::drawBoundParameters(tgContext, parameters, visualHelper,
                                                Acts::ViewConfig{.color={0,220,220}});
       
             }
@@ -437,7 +436,7 @@ namespace MuonR4{
             const Amg::Vector3D refitDir = globToLoc.linear() * globDir;
             /// Straight line extension to plane
             const Amg::Vector3D refitSeg = refitPos + Amg::intersect<3>(refitPos, refitDir, Amg::Vector3D::UnitZ(), 0).value_or(0.) * refitDir;
-            const Amg::Vector3D globPos{msSector->localToGlobalTransform(gctx) * refitSeg};
+            const Amg::Vector3D globPos{msSector->localToGlobalTransform(tgContext) * refitSeg};
 
             xAOD::MuonSegment* newSegment = outHandle->push_back(std::make_unique<xAOD::MuonSegment>());
             dec_segLink(*newSegment) = Link_t{*segments, reFitMe->index(), ctx};

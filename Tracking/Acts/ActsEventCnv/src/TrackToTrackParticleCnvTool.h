@@ -5,26 +5,25 @@
 #ifndef ACTSTRKFINDING_TRACKTOTRACKPARTICLECNVTOOL_H
 #define ACTSTRKFINDING_TRACKTOTRACKPARTICLECNVTOOL_H 1
 
+
 #include "AthenaBaseComps/AthAlgTool.h"
 
+#include "GeoPrimitives/GeoPrimitives.h"
+///
 #include "ActsToolInterfaces/ITrackToTrackParticleCnvTool.h"
-
 #include "ActsGeometryInterfaces/IExtrapolationTool.h"
-#include "ActsGeometryInterfaces/ITrackingGeometryTool.h"
 
-#include "MagFieldConditions/AtlasFieldCacheCondObj.h"
+#include "ActsEvent/ContextUtility.h"
+
+
 #include "InDetReadoutGeometry/SiDetectorElementCollection.h"
 #include "StoreGate/ReadCondHandleKey.h"
 #include "StoreGate/CondHandleKeyArray.h"
 
-#include "Acts/Propagator/EigenStepper.hpp"
-#include "Acts/Propagator/Propagator.hpp"
-#include "Acts/Propagator/Navigator.hpp"
 #include "Acts/Definitions/PdgParticle.hpp"
 #include "xAODTracking/TrackingPrimitives.h"
 #include "MuonRecToolInterfacesR4/ITrackSummaryTool.h"
 
-#include "Gaudi/Property.h"
 
 namespace ActsTrk {
 
@@ -42,24 +41,18 @@ namespace ActsTrk {
                                const InDet::BeamSpotData* beamspotData = nullptr) const override;
 
   private:
-    using Stepper = Acts::EigenStepper<>;
-    using Navigator = Acts::Navigator;
-    using Propagator = Acts::Propagator<Stepper, Navigator>;
-
+  
     Acts::BoundTrackParameters parametersAtPerigee(const EventContext& ctx,
                                                    const ActsTrk::TrackContainer::ConstTrackProxy& track,
                                                    const Acts::Surface& perigee_surface) const;
 
-    ToolHandle<ActsTrk::IExtrapolationTool> m_extrapolationTool
-       {this, "ExtrapolationTool", ""};
+   ToolHandle<ActsTrk::IExtrapolationTool> m_extrapolationTool{this, "ExtrapolationTool", ""};
 
-    PublicToolHandle<ActsTrk::ITrackingGeometryTool> m_trackingGeometryTool
-       {this, "TrackingGeometryTool", ""};
 
    PublicToolHandle<MuonR4::ITrackSummaryTool> m_muonSummaryTool{this, "MuonSummaryTool", ""}; 
-   SG::ReadCondHandleKey<AtlasFieldCacheCondObj> m_fieldCacheCondObjInputKey
-       {this, "AtlasFieldCacheCondObj", "fieldCondObj",
-        "Name of the Magnetic Field conditions object key"};
+
+   /** @brief Utility to fetch the geometry, magnetic field and calibration context in the event */
+  ContextUtility m_ctxProvider{this};
 
    Gaudi::Property<double> m_paramExtrapolationParLimit
        {this, "ExtrapolationPathLimit", std::numeric_limits<double>::max(),
@@ -95,7 +88,6 @@ namespace ActsTrk {
     Gaudi::Property<int> m_itkDecorationLevel
        {this, "ITkDecorationLevel", 1, ">=200 split counts for inclined and flat barrel." };
 
-    std::unique_ptr<Propagator> m_propagator;
   };
 
 }

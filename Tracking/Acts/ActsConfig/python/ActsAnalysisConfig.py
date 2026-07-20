@@ -745,15 +745,7 @@ def ActsBaseSeedsToTrackParamsAlgCfg(flags,
                                      **kwargs) -> ComponentAccumulator:
     acc = ComponentAccumulator()
 
-    if 'ExtrapolationTool' not in kwargs:
-        from ActsConfig.ActsGeometryConfig import ActsExtrapolationToolCfg
-        kwargs.setdefault(
-            'ExtrapolationTool',
-            acc.popToolsAndMerge(ActsExtrapolationToolCfg(flags, MaxSteps=10000)),
-        )
-
-    from ActsConfig.ActsGeometryConfig import ActsTrackingGeometryToolCfg, ActsGeometryRealmConvTool
-    kwargs.setdefault("TrackingGeometryTool", acc.getPrimaryAndMerge(ActsTrackingGeometryToolCfg(flags)))
+    from ActsConfig.ActsGeometryConfig import ActsGeometryRealmConvTool
     kwargs.setdefault("GeometryRealmConvTool", acc.getPrimaryAndMerge(ActsGeometryRealmConvTool(flags)))
 
     if 'TrackParamsEstimationTool' not in kwargs:

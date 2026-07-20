@@ -24,7 +24,6 @@
 
 // PACKAGE
 #include "ActsEvent/TrackContainer.h"
-#include "ActsGeometryInterfaces/IExtrapolationTool.h"
 #include "ActsGeometryInterfaces/ITrackingGeometryTool.h"
 #include "ActsGeometryInterfaces/IGeometryRealmConvTool.h"
 
@@ -124,7 +123,6 @@ class GlobalChiSquareFitterTool
                                     const Acts::Surface* surface,
                                     detail::SourceLinkType slType) const;
    
-    ToolHandle<IExtrapolationTool> m_extrapolationTool{this, "ExtrapolationTool", ""};
     PublicToolHandle<ITrackingGeometryTool> m_trackingGeometryTool{this, "TrackingGeometryTool", ""};
     PublicToolHandle<IGeometryRealmConvTool> m_geometryConvTool{this, "GeometryRealmConvTool", ""};
     

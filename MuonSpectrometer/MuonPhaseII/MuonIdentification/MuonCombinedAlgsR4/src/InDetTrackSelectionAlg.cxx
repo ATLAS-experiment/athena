@@ -50,6 +50,7 @@ namespace MuonCombinedR4 {
         ATH_CHECK(m_idTrkKey.initialize());
         ATH_CHECK(m_extensionDecorKey.initialize(m_useCaloExtension));
         ATH_CHECK(m_msTrkKey.initialize());
+        ATH_CHECK(m_ctxProvider.initialize());
         ATH_CHECK(m_selectionTool.retrieve(EnableTool{!m_selectionTool.empty()}));
         ATH_CHECK(m_trackingGeometryTool.retrieve());
         ATH_CHECK(m_extrapolationTool.retrieve());
@@ -126,7 +127,7 @@ namespace MuonCombinedR4 {
 
         const auto trackingGeometry = m_trackingGeometryTool->trackingGeometry();
     
-        const Acts::GeometryContext tgContext = m_trackingGeometryTool->getGeometryContext(ctx).context();
+        const Acts::GeometryContext tgContext = m_ctxProvider.getGeometryContext(ctx);
         const Acts::TrackingVolume* msEntrance = m_trackingGeometryTool->getEnvelope(ActsTrk::SystemEnvelope::CaloExit);
         ATH_MSG_DEBUG(__func__<<"() "<<__LINE__<<" - Extrapolate ID "<<print(idTrack)<<"\n to the calorimeter exit.\n"
                         <<msEntrance->volumeBounds()<<", id: "<<msEntrance->geometryId());
@@ -200,8 +201,8 @@ namespace MuonCombinedR4 {
                                                        const Acts::BoundTrackParameters& caloExitPars,
                                                        const std::span<const xAOD::MuonSegment*> candidateSegs) const {
         
-        const ActsTrk::GeometryContext& gctx{m_trackingGeometryTool->getGeometryContext(ctx)};
-        const Amg::Vector3D exitPos = caloExitPars.position(gctx.context());
+        const Acts::GeometryContext tgContext{m_ctxProvider.getGeometryContext(ctx)};
+        const Amg::Vector3D exitPos = caloExitPars.position(tgContext);
         const Amg::Vector3D exitDir = caloExitPars.direction();
         MuonR4::ExpandedSector exitSector{exitPos.phi()};
         const double caloEta = eta(caloExitPars);
@@ -241,7 +242,7 @@ namespace MuonCombinedR4 {
             }
             lastSector = msSector;
                                                     
-            const Amg::Transform3D toLocal = msSector->globalToLocalTransform(gctx);
+            const Amg::Transform3D toLocal = msSector->globalToLocalTransform(tgContext);
 
             const Amg::Vector3D locExitPos = toLocal * exitPos;
             const Amg::Vector3D locExitDir = toLocal.linear()* exitDir;

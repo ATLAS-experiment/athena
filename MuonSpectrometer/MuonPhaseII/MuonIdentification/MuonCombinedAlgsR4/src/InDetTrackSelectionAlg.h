@@ -13,7 +13,7 @@
 
 #include "xAODTracking/TrackParticleContainer.h"
 #include "ActsEvent/TrackContainer.h"
-
+#include "ActsEvent/ContextUtility.h"
 #include "MuonTrackEvent/MuonTag.h"
 #include "InDetTrackSelectionTool/IInDetTrackSelectionTool.h"
 
@@ -79,6 +79,8 @@ namespace MuonCombinedR4 {
             PublicToolHandle<ActsTrk::ITrackingGeometryTool> m_trackingGeometryTool{this, "TrackingGeometryTool", ""};
             /** @brief Track extrapolation tool */
             ToolHandle<ActsTrk::IExtrapolationTool> m_extrapolationTool{this, "ExtrapolationTool" ,"" };
+            /** @brief Context provider for geometry, magnetic field and calibration contexts */
+            ActsTrk::ContextUtility m_ctxProvider{this};
             /** @brief Flag toggling whether the last track parameters shall be retrieved 
              *          from the calo extension linked to the ID tracks */
             Gaudi::Property<bool> m_useCaloExtension{this, "useCaloExtension", true};

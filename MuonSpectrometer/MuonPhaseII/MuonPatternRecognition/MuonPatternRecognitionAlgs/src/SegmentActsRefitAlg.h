@@ -33,7 +33,7 @@
 #include "Acts/Propagator/StraightLineStepper.hpp"
 #include "Acts/TrackFitting/GlobalChiSquareFitter.hpp"
 
-
+#include "ActsEvent/ContextUtility.h"
 namespace CLHEP{
     class HepRandomEngine;
 }
@@ -70,7 +70,7 @@ namespace MuonR4{
              *  @param gctx: Geometry context to fetch the alignment of the segment
              *  @param segment: Reference to the segment to smear
              *  @param engine: Random engine to pass through the random number sequence */
-            std::tuple<Amg::Vector3D, Amg::Vector3D> smearSegment(const ActsTrk::GeometryContext& gctx,
+            std::tuple<Amg::Vector3D, Amg::Vector3D> smearSegment(const Acts::GeometryContext& gctx,
                                                                   const MuonR4::Segment& segment,
                                                                   CLHEP::HepRandomEngine* engine) const;
             /** @brief Declare the data dependency on the standard Mdt+Rpc+Tgc segment container */
@@ -88,8 +88,8 @@ namespace MuonR4{
             ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{this, "IdHelperSvc",  "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
             /** @brief Tracking geometry tool */
             PublicToolHandle<ActsTrk::ITrackingGeometryTool> m_trackingGeometryTool{this, "TrackingGeometryTool", ""};
-            /** @brief Track extrapolation tool */
-            ToolHandle<ActsTrk::IExtrapolationTool> m_extrapolationTool{this, "ExtrapolationTool" ,"" };
+            /** @brief Auxiliary class to access the magnetic field, geometry and calibration context */
+            ActsTrk::ContextUtility m_ctxProvider{this};
             /** @brief Segment selection tool to pick the good quality segments */
             ToolHandle<MuonR4::ISegmentSelectionTool> m_segSelector{this, "SegmentSelectionTool" , "" };
             /** @brief Range service to smear the segment parameters */

@@ -425,6 +425,7 @@ namespace ActsTrk
     ATH_MSG_DEBUG("   " << m_printFilteredStates);
 
     ATH_CHECK(m_trackingGeometryTool.retrieve());
+    ATH_CHECK(m_ctxProvider.initialize());
     m_surfAcc = detail::xAODUncalibMeasSurfAcc{m_trackingGeometryTool.get()};
     ATH_CHECK(m_spacePointKey.initialize());
 
@@ -475,7 +476,7 @@ namespace ActsTrk
                                            const std::vector<const xAOD::UncalibratedMeasurementContainer *> &clusterContainers,					  
                                            const std::vector<size_t> &offsets) const {
 
-    Acts::GeometryContext tgContext = m_trackingGeometryTool->getGeometryContext(ctx).context();
+    const Acts::GeometryContext tgContext = m_ctxProvider.getGeometryContext(ctx);
 
     auto measToSp = addSpacePoints(ctx, clusterContainers, offsets);
 

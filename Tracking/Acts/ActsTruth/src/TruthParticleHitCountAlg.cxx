@@ -43,15 +43,9 @@ namespace ActsTrk
      return out;
   }
 
-  TruthParticleHitCountAlg::TruthParticleHitCountAlg(const std::string &name,
-                                                         ISvcLocator *pSvcLocator)
-      : AthReentrantAlgorithm(name, pSvcLocator)
-  {
-  }
-
   StatusCode TruthParticleHitCountAlg::initialize()
   {
-     ATH_CHECK( m_trackingGeometryTool.retrieve() );
+     ATH_CHECK( m_ctxProvider.initialize() );
      ATH_CHECK( m_pixelClustersToTruth.initialize() );
      ATH_CHECK( m_stripClustersToTruth.initialize() );
      ATH_CHECK( m_hgtdClustersToTruth.initialize(not m_hgtdClustersToTruth.empty()) );
@@ -108,7 +102,7 @@ namespace ActsTrk
     ATH_CHECK(SG::get(hgtdClustersToTruthAssociation, m_hgtdClustersToTruth, ctx));
    
 
-    Acts::GeometryContext tgContext = m_trackingGeometryTool->getGeometryContext(ctx).context();
+    Acts::GeometryContext tgContext = m_ctxProvider.getGeometryContext(ctx);
 
     std::array<const ActsTrk::MeasurementToTruthParticleAssociation *,
                static_cast< std::underlying_type<xAOD::UncalibMeasType>::type >(xAOD::UncalibMeasType::nTypes)>

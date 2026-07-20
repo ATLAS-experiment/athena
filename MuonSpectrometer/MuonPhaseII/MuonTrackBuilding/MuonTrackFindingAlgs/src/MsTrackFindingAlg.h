@@ -20,8 +20,8 @@
 
 
 #include "ActsEvent/TrackContainer.h"
-#include "ActsGeometryInterfaces/IExtrapolationTool.h"
-#include "ActsGeometryInterfaces/ITrackingGeometryTool.h"
+#include "ActsEvent/ContextUtility.h"
+
 #include "ActsToolInterfaces/IFitterTool.h"
 
 #include "MuonIdHelpers/IMuonIdHelperSvc.h"
@@ -83,10 +83,8 @@ namespace MuonR4{
             ToolHandle<ActsTrk::IFitterTool> m_trackFitTool{this, "FittingTool", ""};
             /** @brief Calibration tool to fill the track states */
             ToolHandle<ISpacePointCalibrator> m_calibTool{this, "Calibrator", ""};
-            /** @brief Tracking geometry tool */
-            PublicToolHandle<ActsTrk::ITrackingGeometryTool> m_trackingGeometryTool{this, "TrackingGeometryTool", ""};
-            /** @brief Track extrapolation tool */
-            ToolHandle<ActsTrk::IExtrapolationTool> m_extrapolationTool{this, "ExtrapolationTool" ,"" };
+            /** @brief Utility to fetch the geometry, magnetic field and calibration context in the event */
+            ActsTrk::ContextUtility m_ctxProvider{this};
             /** @brief Visualization tool to debug the track finding */
             ToolHandle<MuonValR4::ITrackVisualizationTool> m_visualizationTool{this, "VisualizationTool", ""};
             /** @brief Handle to the muon summary tool */

@@ -751,7 +751,7 @@ NswSegmentFinderAlg::findSegmentsFromMaximum(const HoughMaximum &max,
             if (!simHit) {
                 continue;
             }
-            MuonValR4::drawSpacePoint(gctx, *sp, visualHelper);
+            MuonValR4::drawSpacePoint(gctx.context(), *sp, visualHelper);
         }
         visualHelper.write(std::format("Event_{:}_{:}_spacepoints_truth.obj", ctx.eventID().event_number(), max.getHitsInMax().front()->chamber()->identString()));       
     }
@@ -775,7 +775,7 @@ NswSegmentFinderAlg::findSegmentsFromMaximum(const HoughMaximum &max,
                                 <<Amg::toString(hit->localPosition())<<", dir: "
                                 <<Amg::toString(hit->sensorDirection()));
                      if(m_dumpObj){
-                        MuonValR4::drawSpacePoint(gctx, *hit, visualHelper);
+                        MuonValR4::drawSpacePoint(gctx.context(), *hit, visualHelper);
                      }
 
                 }
@@ -949,8 +949,8 @@ StatusCode NswSegmentFinderAlg::execute(const EventContext &ctx) const {
 
             if(m_dumpObj){
                 Acts::ObjVisualization3D visualHelper{};
-                MuonValR4::drawSegmentMeasurements(*gctx, *seg, visualHelper);
-                MuonValR4::drawSegmentLine(*gctx, *seg, visualHelper);
+                MuonValR4::drawSegmentMeasurements(gctx->context(), *seg, visualHelper);
+                MuonValR4::drawSegmentLine(gctx->context(), *seg, visualHelper);
                 visualHelper.write(std::format("Event_{:}_segment_{:}.obj", ctx.eventID().event_number(), seg->msSector()->identString()));
             }
             

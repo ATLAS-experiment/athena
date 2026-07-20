@@ -52,6 +52,7 @@ StatusCode ActsGeantFollowerHelper::initialize()
   ATH_CHECK(m_trackingGeometryTool.retrieve());
   ATH_CHECK(m_extrapolationEngine.retrieve());
   ATH_CHECK(m_actsExtrapolator.retrieve());
+  ATH_CHECK(m_ctxProvider.initialize());
 
   // create the new Tree
   m_validationTree = new TTree(m_validationTreeName.c_str(), m_validationTreeDescription.c_str());
@@ -154,7 +155,7 @@ void ActsGeantFollowerHelper::trackParticle(const G4ThreeVector& pos,
 {
   // const EventContext ctx;
   const EventContext &ctx = Gaudi::Hive::currentContext();
-  const ActsTrk::GeometryContext &gctx = m_trackingGeometryTool->getGeometryContext(ctx);
+  const Acts::GeometryContext tgContext = m_ctxProvider.getGeometryContext(ctx);
   auto trackingGeometry = m_trackingGeometryTool->trackingGeometry();
   // construct the initial parameters
   Amg::Vector3D npos(pos.x(),pos.y(),pos.z());
@@ -177,7 +178,7 @@ void ActsGeantFollowerHelper::trackParticle(const G4ThreeVector& pos,
     m_treeData->m_g4_steps   = -1;
     m_tX0Cache     = 0.;
     m_tX0CacheActs = 0.;
-    m_parameterCache = new Trk::CurvilinearParameters(npos, nmom, charge);
+    m_parameterCache = std::make_unique<Trk::CurvilinearParameters>(npos, nmom, charge);
 
     std::shared_ptr<Acts::PerigeeSurface> surface =
         Acts::Surface::makeShared<Acts::PerigeeSurface>(
@@ -191,7 +192,7 @@ void ActsGeantFollowerHelper::trackParticle(const G4ThreeVector& pos,
     Acts::ParticleHypothesis hypothesis{Acts::makeAbsolutePdgParticle(static_cast<Acts::PdgParticle>(pdg)),
                                         mass, static_cast<float>(charge)};
     m_actsParameterCache = Acts::BoundTrackParameters::create(
-        gctx.context(), surface, actsStart, dir, charge/(mom.mag()/1000), std::nullopt, hypothesis)
+        tgContext, surface, actsStart, dir, charge/(mom.mag()/1000), std::nullopt, hypothesis)
       .value();
   }
 
@@ -217,7 +218,7 @@ void ActsGeantFollowerHelper::trackParticle(const G4ThreeVector& pos,
     return;
   }
   // parameters of the G4 step point
-  Trk::CurvilinearParameters* g4Parameters = new Trk::CurvilinearParameters(npos, nmom, m_treeData->m_t_charge);
+  auto g4Parameters = std::make_unique<Trk::CurvilinearParameters>(npos, nmom, m_treeData->m_t_charge);
   // destination surface
   const Trk::PlaneSurface& destinationSurface = g4Parameters->associatedSurface();
   // extrapolate to the destination surface
@@ -227,7 +228,7 @@ void ActsGeantFollowerHelper::trackParticle(const G4ThreeVector& pos,
   ecc.addConfigurationMode(Trk::ExtrapolationMode::CollectMaterial);
   // call the extrapolation engine
   auto eCodeSteps = m_extrapolationEngine->extrapolate(ecc, &destinationSurface);
-  Trk::TrackParameters *trkParameters = ecc.endParameters;
+  std::unique_ptr<Trk::TrackParameters> trkParameters{ecc.endParameters};
   float X0ATLAS = ecc.materialX0;
 
   if(eCodeSteps.code != 2 ){
@@ -258,7 +259,7 @@ void ActsGeantFollowerHelper::trackParticle(const G4ThreeVector& pos,
   }
   float X0Acts = actsSteps->second.materialInX0;
 
-  int volID = trackingGeometry->lowestTrackingVolume(gctx.context(), actsParameters->position(gctx.context()))->geometryId().volume();
+  int volID = trackingGeometry->lowestTrackingVolume(tgContext, actsParameters->position(tgContext))->geometryId().volume();
 
   // fill the geant information and the trk information
   m_treeData->m_g4_pt[m_treeData->m_g4_steps]      =  mom.mag()/std::cosh(mom.eta());
@@ -312,12 +313,12 @@ void ActsGeantFollowerHelper::trackParticle(const G4ThreeVector& pos,
   m_treeData->m_acts_eta[m_treeData->m_g4_steps]    = actsParameters.ok() ? actsParameters->momentum().eta()     : 0.;
   m_treeData->m_acts_theta[m_treeData->m_g4_steps]  = actsParameters.ok() ? actsParameters->momentum().theta()   : 0.;
   m_treeData->m_acts_phi[m_treeData->m_g4_steps]    = actsParameters.ok() ? actsParameters->momentum().phi()     : 0.;
-  m_treeData->m_acts_x[m_treeData->m_g4_steps]      = actsParameters.ok() ? actsParameters->position(gctx.context()).x()   : 0.;
-  m_treeData->m_acts_y[m_treeData->m_g4_steps]      = actsParameters.ok() ? actsParameters->position(gctx.context()).y()   : 0.;
-  m_treeData->m_acts_z[m_treeData->m_g4_steps]      = actsParameters.ok() ? actsParameters->position(gctx.context()).z()   : 0.;
+  m_treeData->m_acts_x[m_treeData->m_g4_steps]      = actsParameters.ok() ? actsParameters->position(tgContext).x()   : 0.;
+  m_treeData->m_acts_y[m_treeData->m_g4_steps]      = actsParameters.ok() ? actsParameters->position(tgContext).y()   : 0.;
+  m_treeData->m_acts_z[m_treeData->m_g4_steps]      = actsParameters.ok() ? actsParameters->position(tgContext).z()   : 0.;
   // Incremental extrapolation, the extrapolation correspond to one step
   if(m_extrapolateIncrementally || m_treeData->m_g4_steps == 0){
-    float tActs = (actsParameters->position(gctx.context()) - m_actsParameterCache->position(gctx.context())).norm();
+    float tActs = (actsParameters->position(tgContext) - m_actsParameterCache->position(tgContext)).norm();
     m_tX0CacheActs                                    += X0Acts;
     m_treeData->m_acts_tX0[m_treeData->m_g4_steps]     = X0Acts;
     m_treeData->m_acts_accX0[m_treeData->m_g4_steps]   = m_tX0CacheActs;
@@ -329,7 +330,7 @@ void ActsGeantFollowerHelper::trackParticle(const G4ThreeVector& pos,
     Acts::Vector3 previousPos(m_treeData->m_acts_x[m_treeData->m_g4_steps-1],
                                m_treeData->m_acts_y[m_treeData->m_g4_steps-1],
                                m_treeData->m_acts_z[m_treeData->m_g4_steps-1]);
-    float tActs = (actsParameters->position(gctx.context()) - previousPos).norm();
+    float tActs = (actsParameters->position(tgContext) - previousPos).norm();
     m_treeData->m_acts_tX0[m_treeData->m_g4_steps]     = X0Acts - m_treeData->m_acts_accX0[m_treeData->m_g4_steps-1]   ;
     m_treeData->m_acts_accX0[m_treeData->m_g4_steps]   = X0Acts;
     m_treeData->m_acts_t[m_treeData->m_g4_steps]       = tActs;
@@ -338,14 +339,11 @@ void ActsGeantFollowerHelper::trackParticle(const G4ThreeVector& pos,
 
   // update the parameters if needed/configured
   if (m_extrapolateIncrementally && trkParameters && actsParameters.ok()) {
-    delete m_parameterCache;
     m_actsParameterCache.reset();
-    m_parameterCache = trkParameters;
+    m_parameterCache = std::move(trkParameters);
     m_actsParameterCache = actsParameters.value();
   }
   // delete cache and increment
-  delete g4Parameters;
-  destinationSurfaceActs.reset();
   m_tX0NonSensitiveCache = 0.;
   m_tNonSensitiveCache = 0.;
   ++m_treeData->m_g4_steps;
@@ -357,7 +355,6 @@ void ActsGeantFollowerHelper::endEvent()
   {
     // fill the validation tree
     m_validationTree->Fill();
-    delete m_parameterCache;
     m_actsParameterCache.reset();
   }
 }

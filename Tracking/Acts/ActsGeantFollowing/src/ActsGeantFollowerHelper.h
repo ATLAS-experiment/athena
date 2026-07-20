@@ -6,7 +6,9 @@
 #define ActsGeantFollowerHelper_H
 
 #include "AthenaBaseComps/AthAlgTool.h"
-#include "GaudiKernel/ToolHandle.h"
+
+#include "ActsEvent/ContextUtility.h"
+
 #include "TrkParameters/TrackParameters.h" //typedef, can't fwd declare
 #include "IActsGeantFollowerHelper.h"
 #include "G4ThreeVector.hh" //typedef, can't fwd declare
@@ -53,6 +55,8 @@ class ActsGeantFollowerHelper : public extends<AthAlgTool, IActsGeantFollowerHel
   private:
 
     PublicToolHandle<ActsTrk::ITrackingGeometryTool> m_trackingGeometryTool{this, "TrackingGeometryTool", "ActsTrackingGeometryTool"};
+    /** @brief Context provider for geometry, magnetic field and calibration contexts */
+    ActsTrk::ContextUtility m_ctxProvider{this};
 
 
     ToolHandle<Trk::IExtrapolationEngine>     m_extrapolationEngine{this, "ExtrapolationEngine", ""};
@@ -60,7 +64,7 @@ class ActsGeantFollowerHelper : public extends<AthAlgTool, IActsGeantFollowerHel
     Gaudi::Property<bool> m_extrapolateDirectly{this, "ExtrapolateDirectly", true};
     Gaudi::Property<bool> m_extrapolateIncrementally{this, "ExtrapolateIncrementally", true};
 
-    Trk::TrackParameters* m_parameterCache{nullptr};
+    std::unique_ptr<Trk::TrackParameters> m_parameterCache{nullptr};
     std::optional<Acts::BoundTrackParameters> m_actsParameterCache{std::nullopt};
     std::unique_ptr<std::vector<Acts::SurfaceHit>> m_actsSurfaceCache{};
     std::vector<Acts::SurfaceHit>::iterator m_actsSurfaceIterator{};

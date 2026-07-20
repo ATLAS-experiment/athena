@@ -176,13 +176,7 @@ def ActsMainTrackFindingAlgCfg(flags,
 
         kwargs.setdefault('TrackParamsEstimationTool', acc.popToolsAndMerge(ActsTrackParamsEstimationToolCfg(flags, **tpe_tool_kwargs)))
         
-    if 'ExtrapolationTool' not in kwargs:
-        from ActsConfig.ActsGeometryConfig import ActsExtrapolationToolCfg
-        kwargs.setdefault(
-            "ExtrapolationTool",
-            acc.popToolsAndMerge(ActsExtrapolationToolCfg(flags, MaxSteps=10000)),
-        )
-        
+
     if flags.Acts.doPrintTrackStates and 'TrackStatePrinter' not in kwargs:
         kwargs.setdefault(
             "TrackStatePrinter",
@@ -384,13 +378,6 @@ def ActsTrackFindingGNNCfg(flags, **kwargs) -> ComponentAccumulator:
         kwargs.setdefault(
             "TrackingGeometryTool",
             acc.getPrimaryAndMerge(ActsTrackingGeometryToolCfg(flags)),
-        )
-
-    if 'ExtrapolationTool' not in kwargs:
-        from ActsConfig.ActsGeometryConfig import ActsExtrapolationToolCfg
-        kwargs.setdefault(
-            "ExtrapolationTool",
-            acc.popToolsAndMerge(ActsExtrapolationToolCfg(flags, MaxSteps=10000)),
         )
 
     acc.addEventAlgo(

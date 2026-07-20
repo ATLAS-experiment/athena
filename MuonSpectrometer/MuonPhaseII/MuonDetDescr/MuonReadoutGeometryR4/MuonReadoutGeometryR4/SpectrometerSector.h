@@ -143,6 +143,11 @@ namespace MuonGMR4 {
             const Amg::Transform3D& localToGlobalTransform(const ActsTrk::GeometryContext& gctx) const;
             /** @brief Returns the global -> local transformation from the ATLAS global */
             Amg::Transform3D globalToLocalTransform(const ActsTrk::GeometryContext& gctx) const;
+            /** @brief  Returns the local -> global tarnsformation from the sector
+              * @param gctx: Geometry context carrrying the alignment transformations */
+            const Amg::Transform3D& localToGlobalTransform(const Acts::GeometryContext& tgContext) const;
+            /** @brief Returns the global -> local transformation from the ATLAS global */
+            Amg::Transform3D globalToLocalTransform(const Acts::GeometryContext& tgContext) const;
             /** @brief Returns the associated surface */
             const Acts::PlaneSurface& surface() const;
             /** @brief Returns the associated chambers with this sector */

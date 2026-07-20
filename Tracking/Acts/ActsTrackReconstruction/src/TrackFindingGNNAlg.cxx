@@ -18,10 +18,8 @@
 #include "Acts/Utilities/MathHelpers.hpp"
 
 // ActsTrk
-#include "ActsCalibBase/CalibrationContext.h"
 #include "ActsCalibBase/MeasurementCalibratorBase.h"
 #include "ActsEvent/TrackContainer.h"
-#include "ActsGeometry/ATLASMagneticFieldWrapper.h"
 #include "ActsGeometry/SurfaceOfMeasurementUtil.h"
 #include "ActsGeometryInterfaces/GeometryContext.h"
 #include "ActsInterop/Logger.h"
@@ -87,8 +85,8 @@ StatusCode TrackFindingGNNAlg::initialize() {
   m_logger = makeActsAthenaLogger(this, "Acts GNN Algorithm");
   ACTS_DEBUG("TrackFindingGNNAlg::initialize() - begin");
   ATH_CHECK(m_trackingGeometryTool.retrieve());
-  ATH_CHECK(m_extrapolationTool.retrieve());
   ATH_CHECK(m_trackContainerKey.initialize());
+  ATH_CHECK(m_ctxProvider.initialize());
   ATH_CHECK(m_xaodPixelSpacePointContainerKey.initialize());
   ATH_CHECK(m_xaodStripSpacePointContainerKey.initialize());
   ATH_CHECK(m_xaodStripSpacePointOverlapContainerKey.initialize());
@@ -224,11 +222,9 @@ StatusCode TrackFindingGNNAlg::execute(const EventContext &ctx) const {
   std::optional<Athena::Chrono> timer;
   timer.emplace("GNN get spacepoint handles", m_chronoSvc.get());
 
-  Acts::GeometryContext gctx =
-      m_trackingGeometryTool->getGeometryContext(ctx).context();
-  Acts::MagneticFieldContext mctx =
-      m_extrapolationTool->getMagneticFieldContext(ctx);
-  Acts::CalibrationContext cctx = ActsTrk::getCalibrationContext(ctx);
+  const Acts::GeometryContext gctx = m_ctxProvider.getGeometryContext(ctx);
+  const Acts::MagneticFieldContext mctx = m_ctxProvider.getMagneticFieldContext(ctx);
+  const Acts::CalibrationContext cctx = m_ctxProvider.getCalibrationContext(ctx);
 
   auto detElToGeoIdMap = m_trackingGeometryTool->surfaceIdMap();
 

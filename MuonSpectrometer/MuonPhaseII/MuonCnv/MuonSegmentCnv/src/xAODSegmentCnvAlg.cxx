@@ -56,6 +56,7 @@ namespace MuonR4{
         ATH_CHECK(m_auxMeasProv.initialize(m_writeKey.key(), m_convertBeamSpot));
         ATH_CHECK(m_trackingGeometryTool.retrieve(EnableTool{m_estimateHoles}));
         ATH_CHECK(m_extrapolationTool.retrieve(EnableTool{m_estimateHoles}));
+        ATH_CHECK(m_ctxProvider.initialize(m_estimateHoles));
         return StatusCode::SUCCESS;
     }
     StatusCode xAODSegmentCnvAlg::execute(const EventContext& ctx) const {
@@ -340,7 +341,7 @@ namespace MuonR4{
         }
         /// Calculate the segment start parameters
         if (m_estimateHoles) {
-            const Acts::GeometryContext tgContext = m_trackingGeometryTool->getGeometryContext(ctx).context();
+            const Acts::GeometryContext tgContext = m_ctxProvider.getGeometryContext(ctx);
             auto atSurface = startSurface->intersect(tgContext, segment.position(), segment.direction(),
                                                       Acts::BoundaryTolerance::Infinite()).closest();
         

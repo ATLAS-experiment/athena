@@ -61,7 +61,7 @@ namespace ActsTrk{
     ATH_CHECK(m_tracksBackendHandlesHelper.initialize(
         ActsTrk::prefixFromTrackContainerName(m_trackContainerKey.key())));
     ATH_CHECK(m_trackingGeometryTool.retrieve());
-    ATH_CHECK(m_extrapolationTool.retrieve());
+    ATH_CHECK(m_ctxProvider.initialize());
     ATH_CHECK(m_pixelCalibTool.retrieve(EnableTool{not m_pixelCalibTool.empty()}));
     ATH_CHECK(m_stripCalibTool.retrieve(EnableTool{not m_stripCalibTool.empty()}));
     ATH_CHECK(m_hgtdCalibTool.retrieve(EnableTool{not m_hgtdCalibTool.empty()}));
@@ -123,9 +123,8 @@ namespace ActsTrk{
     detail::RecoTrackContainer tracksContainerTemp(trackBackend, trackStateBackend);
 
     // Get Beam pos and make pSurface
-    SG::ReadCondHandle<InDet::BeamSpotData> beamSpotHandle = SG::makeHandle( m_beamSpotKey, context );
-    ATH_CHECK( beamSpotHandle.isValid() );
-    const InDet::BeamSpotData* beamSpotData = beamSpotHandle.cptr();
+    const InDet::BeamSpotData* beamSpotData{};
+    ATH_CHECK(SG::get(beamSpotData, m_beamSpotKey, context));
     
     // Beam Spot Position
     Acts::Vector3 beamPos( beamSpotData->beamPos().x() * Acts::UnitConstants::mm,
@@ -135,9 +134,9 @@ namespace ActsTrk{
     // Construct a perigee surface as the target surface
     std::shared_ptr<Acts::PerigeeSurface> perigeeSurface = Acts::Surface::makeShared<Acts::PerigeeSurface>(beamPos);
 
-    const Acts::GeometryContext tgContext = m_trackingGeometryTool->getGeometryContext(context).context();
-    const Acts::MagneticFieldContext mfContext = m_extrapolationTool->getMagneticFieldContext(context);
-    const Acts::CalibrationContext calContext{getCalibrationContext(context)};
+    const Acts::GeometryContext tgContext{m_ctxProvider.getGeometryContext(context)};
+    const Acts::MagneticFieldContext mfContext{m_ctxProvider.getMagneticFieldContext(context)};
+    const Acts::CalibrationContext calContext{m_ctxProvider.getCalibrationContext(context)};
    
     detail::xAODUncalibMeasSurfAcc surfAcc{m_trackingGeometryTool.get()};
 

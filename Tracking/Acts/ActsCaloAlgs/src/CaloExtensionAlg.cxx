@@ -54,6 +54,7 @@ namespace ActsTrk{
 
         ATH_CHECK(m_clusterContainerKey.initialize());
         ATH_CHECK(m_trackParticleContainerKey.initialize());
+        ATH_CHECK(m_ctxProvider.initialize());
         ATH_CHECK(m_extensionDecorKey.initialize());
         ATH_CHECK(m_caloDetDescrMgrKey.initialize(m_clusterSelector.isEnabled()));
         ATH_CHECK(m_caloExtensionKey.initialize());
@@ -155,7 +156,7 @@ namespace ActsTrk{
         ATH_CHECK(SG::get(caloClusters, m_clusterContainerKey, ctx));
         ATH_CHECK(SG::get(detMgr, m_caloDetDescrMgrKey, ctx));
         
-        const Acts::GeometryContext tgContext = m_trackingGeometryTool->getGeometryContext(ctx).context();
+        const Acts::GeometryContext tgContext = m_ctxProvider.getGeometryContext(ctx);
         /** Prepare the clusters to match */
         const SortedCluster_t coneClusters = selectAndSort(*caloClusters, detMgr);   
   

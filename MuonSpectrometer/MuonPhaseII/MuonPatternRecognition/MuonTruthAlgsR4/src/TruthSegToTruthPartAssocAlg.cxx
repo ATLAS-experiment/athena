@@ -50,7 +50,7 @@ namespace MuonR4{
         ATH_CHECK(m_segmentKey.initialize());
         ATH_CHECK(m_truthLinkKey.initialize());
         ATH_CHECK(m_idHelperSvc.retrieve());
-        ATH_CHECK(m_trackingGeometryTool.retrieve(EnableTool{m_includePileUpObjs}));
+        ATH_CHECK(m_ctxProvider.initialize());
         ATH_CHECK(m_extrapolationTool.retrieve(EnableTool{m_includePileUpObjs}));
         ATH_CHECK(detStore()->retrieve(m_detMgr));
         return StatusCode::SUCCESS;
@@ -223,8 +223,7 @@ namespace MuonR4{
         }
         std::vector<char> segmentMatched(pileUpSegments.size(), 0);
 
-        const ActsTrk::GeometryContext& gctx{m_trackingGeometryTool->getGeometryContext(ctx)};
-        const Acts::GeometryContext tgContext = gctx.context();
+        const Acts::GeometryContext tgContext = m_ctxProvider.getGeometryContext(ctx);
 
         for (const xAOD::TruthParticle* bkgMuon : pileUpMuons) {
             const Acts::Vector4 fourPos = vertexPos(*bkgMuon);
@@ -276,7 +275,7 @@ namespace MuonR4{
                     continue;
                 }
                 ///
-                const Amg::Vector2D dPosExtp = propPars->localPosition() - (sector->globalToLocalTransform(gctx) * segPos).segment<2>(0);
+                const Amg::Vector2D dPosExtp = propPars->localPosition() - (sector->globalToLocalTransform(tgContext) * segPos).segment<2>(0);
                 const double dThetaExtp = std::abs(segDir.theta() - propPars->theta());
                 const double dPhiExtp  = std::abs(segDir.phi() - propPars->phi());
                 ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<" - Parameter difference: "<<Amg::toString(dPosExtp)
