@@ -2,6 +2,7 @@
   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #include "AthenaKernel/ClusterMessage.h"
+
 #include <cstdint>
 
 ClusterMessage::DataDescr::DataDescr(DataDescr&& rhs) noexcept
@@ -34,7 +35,7 @@ ClusterMessage::DataDescr::~DataDescr() {
 ClusterMessage::DataDescr& ClusterMessage::DataDescr::operator=(
     DataDescr&& rhs) noexcept {
   if (received) {
-    std::free(ptr); //release the object memory before assigning a new one
+    std::free(ptr);  // release the object memory before assigning a new one
   }
   ptr = rhs.ptr;
   len = rhs.len;
@@ -112,8 +113,8 @@ ClusterMessage::ClusterMessage(const ClusterMessage::WireMsg& wire_msg) {
       payload = status;
     }
   } else {
-    if (header[2] >= 0) {
-      payload = header[2];
+    if (messageType == ClusterMessageType::ProvideEvent) {
+      payload = int(header[2]);
     }
   }
 }
@@ -125,23 +126,23 @@ ClusterMessage::WireMsg ClusterMessage::wire_msg() const {
   static thread_local int next_msg =
       1;  // This is only ever called from one thread per process
   WireMsgHdr header{};
-  header[0] = int(messageType);
+  header[0] = std::uint32_t(messageType);
   header[1] = source;
   if (payload.index() == 3) {
     next_msg = (next_msg % max_tag) + 1;
     header[2] = next_msg;
     WireMsgBody body{};
     const auto& payload_local = std::get<DataDescr>(payload);
-    body[0] = int(std::uint64_t(payload_local.ptr) >> 32);
-    body[1] = int(std::uint64_t(payload_local.ptr) & lower32);
-    body[2] = int(std::uint64_t(payload_local.len) >> 32);
-    body[3] = int(std::uint64_t(payload_local.len) & lower32);
-    body[4] = int(std::uint64_t(payload_local.align) >> 32);
-    body[5] = int(std::uint64_t(payload_local.align) & lower32);
-    body[6] = int(std::uint64_t(payload_local.evtNumber) >> 32);
-    body[7] = int(std::uint64_t(payload_local.evtNumber) & lower32);
-    body[8] = int(std::uint64_t(payload_local.fileNumber) >> 32);
-    body[9] = int(std::uint64_t(payload_local.fileNumber) & lower32);
+    body[0] = std::uint32_t(std::uint64_t(payload_local.ptr) >> 32);
+    body[1] = std::uint32_t(std::uint64_t(payload_local.ptr) & lower32);
+    body[2] = std::uint32_t(std::uint64_t(payload_local.len) >> 32);
+    body[3] = std::uint32_t(std::uint64_t(payload_local.len) & lower32);
+    body[4] = std::uint32_t(std::uint64_t(payload_local.align) >> 32);
+    body[5] = std::uint32_t(std::uint64_t(payload_local.align) & lower32);
+    body[6] = std::uint32_t(std::uint64_t(payload_local.evtNumber) >> 32);
+    body[7] = std::uint32_t(std::uint64_t(payload_local.evtNumber) & lower32);
+    body[8] = std::uint32_t(std::uint64_t(payload_local.fileNumber) >> 32);
+    body[9] = std::uint32_t(std::uint64_t(payload_local.fileNumber) & lower32);
     WireMsg msg{header, std::make_optional(body)};
     return msg;
   }
@@ -162,7 +163,7 @@ ClusterMessage::WireMsg ClusterMessage::wire_msg() const {
   if (payload.index() == 1) {  // if we have an int payload
     header[2] = std::get<int>(payload);
   } else {
-    header[2] = -1;
+    header[2] = 0;
   }
   WireMsg msg{header, std::nullopt};
   return msg;

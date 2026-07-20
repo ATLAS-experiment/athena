@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaCommon.Constants import INFO
@@ -20,7 +20,7 @@ def MainServicesMiniCfg(flags, loopMgr='AthenaEventLoopMgr', masterSequence='Ath
     if flags.Debug.NameAuditor:
         cfg.addAuditor(CompFactory.NameAuditor())
     if flags.Exec.StopOnSignal:
-        cfg.setAppProperty("StopOnSignal", True) 
+        cfg.setAppProperty("StopOnSignal", True)
         cfg.addService(CompFactory.Gaudi.Utils.StopSignalHandler(Signals=flags.Exec.StopOnSignal))
 
     return cfg
@@ -38,7 +38,7 @@ def AvalancheSchedulerSvcCfg(flags, **kwargs):
     kwargs.setdefault("DataDepsGraphAlgPattern", flags.Scheduler.DataDepsGraphAlgPattern)
     kwargs.setdefault("DataDepsGraphObjectPattern", flags.Scheduler.DataDepsGraphObjectPattern)
     kwargs.setdefault("NumOffloadThreads", flags.Concurrency.NumOffloadThreads)
-    
+
     cfg = ComponentAccumulator()
     scheduler = CompFactory.AvalancheSchedulerSvc(**kwargs)
     cfg.addService(scheduler, primary=True)
@@ -101,7 +101,12 @@ def MPIHiveEventLoopMgrCfg(flags):
         AvalancheSchedulerSvcCfg(flags, ThreadPoolSize=nThreads)
     )
 
-    cfg.merge(SQLiteDBSvcCfg(flags, name="LogDBSvc", dbPath="mpilog.db"))
+    # Log DBs are rank-exclusive so no locking is needed
+    cfg.merge(
+        SQLiteDBSvcCfg(
+            flags, name="LogDBSvc", dbPath="file:mpilog.db?nolock=1"
+        )
+    )
     cfg.addService(CompFactory.MPIClusterSvc("MPIClusterSvc", LogDatabaseSvc="SQLiteDBSvc/LogDBSvc"))
     elmgr = CompFactory.MPIHiveEventLoopMgr(
         MPIClusterSvc="MPIClusterSvc",
@@ -320,6 +325,19 @@ def MainServicesCfg(flags, LoopMgr='AthenaEventLoopMgr'):
         LoopMgr="PyAthenaEventLoopMgr"
         log.info("Interactive mode, switching to %s", LoopMgr)
     else:
+        # Guard incorrect MPI configurations
+        if flags.Exec.MPI:
+            # start msg here but don't use it if config is OK
+            msg = "ERRONEOUS CONFIGURATION FOR MPI:\n"
+            OK = True
+            if flags.Concurrency.NumThreads < 1:
+                msg = f"{msg} - Concurrency.NumThreads = {flags.Concurrency.NumThreads}, must be >= 1\n"
+                OK = False
+            if flags.Concurrency.NumProcs > 0:
+                msg = f"{msg} - Concurrency.NumProcs = {flags.Concurrency.NumProcs}, must be 0\n"
+                OK = False
+            if not OK:
+                raise Exception(msg)
         # Run a serial job for threads=0
         if flags.Concurrency.NumThreads > 0:
             if flags.Concurrency.NumConcurrentEvents==0:

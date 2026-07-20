@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef ATHENAKERNEL_IMPICLUSTERSVC_H
 #define ATHENAKERNEL_IMPICLUSTERSVC_H
@@ -50,11 +50,10 @@ class IMPIClusterSvc : virtual public IInterface {
   /// Run at start of event to add it to the log
   virtual void log_addEvent(int eventIdx, std::int64_t run_number,
                             std::int64_t event_number,
-                            std::int64_t request_time_ns,
-                            std::size_t slot) = 0;
+                            std::int64_t request_time_ns, std::size_t slot) = 0;
 
   /// Run at end of event to complete it in the log
-  virtual void log_completeEvent(std::int64_t run_number,
+  virtual void log_completeEvent(int eventIdx, std::int64_t run_number,
                                  std::int64_t event_number,
                                  std::int64_t status) = 0;
 };
