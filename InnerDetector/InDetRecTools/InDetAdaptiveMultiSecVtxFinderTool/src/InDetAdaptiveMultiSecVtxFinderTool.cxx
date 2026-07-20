@@ -14,9 +14,6 @@
 
 #include "InDetAdaptiveMultiSecVtxFinderTool.h"
 
-#include <map>
-#include <utility>
-#include <vector>
 
 #include "AthContainers/DataVector.h"
 #include "CLHEP/Matrix/SymMatrix.h"
@@ -50,6 +47,11 @@
 #include "xAODTracking/Vertex.h"
 #include "xAODTracking/VertexAuxContainer.h"
 #include "xAODTracking/VertexContainer.h"
+
+#include <map>
+#include <vector>
+#include <algorithm>
+#include <ranges>
 
 namespace InDet {
 
@@ -208,7 +210,7 @@ for (const Trk::ITrackLink* seedtrkAtVtxIter : seedTracks) { perigeeList.push_ba
                 new Trk::MvfFitInfo(constraintVertex, new Amg::Vector3D(seedVertex), new Amg::Vector3D(seedVertex));
             isInitialized(*actualCandidate) = false;
             std::vector<Trk::VxTrackAtVertex*> vectorOfTracks(0);
-            VTAV(*actualCandidate) = vectorOfTracks;
+            VTAV(*actualCandidate) = std::move(vectorOfTracks);
 
             for (Trk::ITrackLink* trkIter : origTracks) {
                 // now fill perigeesToFit list of track parameters from origTracks
@@ -273,28 +275,26 @@ for (const Trk::ITrackLink* seedtrkAtVtxIter : seedTracks) { perigeeList.push_ba
 
             if (!goodVertex) {
                 ATH_MSG_DEBUG("Bad vertex, deleting the vertex and clearing all pointers");
-
                 seededxAODVertex->setVertexType(xAOD::VxType::KinkVtx);
+                //actualCandidate is not nullptr here, addVtxToFit already dereferenced it
+                if (VTAV.isAvailable(*actualCandidate)) {
+                    for (auto *tav : VTAV(*actualCandidate)) {
+                        if (tav == nullptr) continue;
 
-                if (actualCandidate) {
-                    if (VTAV.isAvailable(*actualCandidate)) {
-                        for (auto *tav : VTAV(*actualCandidate)) {
-                            if (tav == nullptr) continue;
-
-                            (static_cast<Trk::MVFVxTrackAtVertex*>(tav))->setLinkToVertices(nullptr);
-                            delete tav;
-                            tav = nullptr;
-                        }
-                        VTAV(*actualCandidate).clear();
+                        (static_cast<Trk::MVFVxTrackAtVertex*>(tav))->setLinkToVertices(nullptr);
+                        delete tav;
+                        tav = nullptr;
                     }
-                    if (MvfFitInfo.isAvailable(*actualCandidate) && MvfFitInfo(*actualCandidate) != nullptr) {
-                        delete MvfFitInfo(*actualCandidate);
-                        MvfFitInfo(*actualCandidate) = nullptr;
-                    }
-
-                    delete actualCandidate;
-                    actualCandidate = nullptr;
+                    VTAV(*actualCandidate).clear();
                 }
+                if (MvfFitInfo.isAvailable(*actualCandidate) && MvfFitInfo(*actualCandidate) != nullptr) {
+                    delete MvfFitInfo(*actualCandidate);
+                    MvfFitInfo(*actualCandidate) = nullptr;
+                }
+
+                delete actualCandidate;
+                actualCandidate = nullptr;
+                
 
             } else {
                 ATH_MSG_DEBUG("I have found a good vertex!");
@@ -502,38 +502,25 @@ for (const Trk::ITrackLink* seedtrkAtVtxIter : seedTracks) { perigeeList.push_ba
                                                                   std::vector<Trk::ITrackLink*>& seedTracks) const {
         if (not actualCandidate) return 0;
         static const xAOD::Vertex::Decorator<std::vector<Trk::VxTrackAtVertex*>> VTAV("VTAV");
-
-        std::vector<Trk::ITrackLink*>::iterator seedBegin = seedTracks.begin();
-        std::vector<Trk::ITrackLink*>::iterator seedEnd = seedTracks.end();
-
         bool goodVertex = checkFit(actualCandidate);
-
         int nFound = 0;
-
         for (Trk::VxTrackAtVertex* trkAtVtxIter : VTAV(*actualCandidate)) {
             // delete the pointer to this vertex if the vertex was bad
             if (!goodVertex) {
 	      (static_cast<Trk::MVFVxTrackAtVertex*>(trkAtVtxIter))->linkToVertices()->vertices()->pop_back();
 	    }
-
-            std::vector<Trk::ITrackLink*>::iterator foundTrack = seedEnd;
-            for (std::vector<Trk::ITrackLink*>::iterator seedtrkiter = seedBegin; seedtrkiter != seedEnd; ++seedtrkiter) {
-                if ((*seedtrkiter)->parameters() == (trkAtVtxIter)->trackOrParticleLink()->parameters() &&
-                    (trkAtVtxIter)->weight() > m_minWghtAtVtx) {
-                    foundTrack = seedtrkiter;
-                }
+            if (trkAtVtxIter->weight() <= m_minWghtAtVtx) {
+              continue;
             }
+            auto foundTrack = std::ranges::find_if(seedTracks, [trkAtVtxIter, this](Trk::ITrackLink* seedTrack) {
+              return seedTrack->parameters() == trkAtVtxIter->trackOrParticleLink()->parameters();
+            });
 
-            if (foundTrack != seedEnd) {
+            if (foundTrack != seedTracks.end()) {
                 seedTracks.erase(foundTrack);
-
-                nFound += 1;
-
-                seedBegin = seedTracks.begin();
-                seedEnd = seedTracks.end();
+                ++nFound;
             }
         }
-
         return nFound;
     }
 
