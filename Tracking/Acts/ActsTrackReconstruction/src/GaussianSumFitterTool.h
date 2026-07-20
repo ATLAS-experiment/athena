@@ -7,7 +7,7 @@
 
 // ATHENA 
 #include "AthenaBaseComps/AthAlgTool.h"
-#include "GaudiKernel/ToolHandle.h"
+
 #include "TrkToolInterfaces/IRIO_OnTrackCreator.h"
 // ACTS
 #include "Acts/EventData/VectorMultiTrajectory.hpp"
@@ -21,7 +21,11 @@
 
 // PACKAGE
 #include "ActsEvent/TrackContainer.h"
-#include "ActsGeometryInterfaces/IExtrapolationTool.h"
+
+#include "ActsEvent/TrackParametersContainer.h"
+#include "ActsEvent/ContextUtility.h"
+
+
 #include "ActsGeometryInterfaces/ITrackingGeometryTool.h"
 #include "ActsGeometryInterfaces/IGeometryRealmConvTool.h"
 #include "ActsToolInterfaces/IFitterTool.h"
@@ -99,9 +103,10 @@ private:
  private:
   /** @brief Abrivate the track state proxy */
   using TrackState_t = MutableTrackStateBackend::TrackStateProxy;
-  ToolHandle<IExtrapolationTool> m_extrapolationTool{this, "ExtrapolationTool", ""};
   PublicToolHandle<ITrackingGeometryTool> m_trackingGeometryTool{this, "TrackingGeometryTool", ""};
   PublicToolHandle<IGeometryRealmConvTool> m_geometryConvTool{this, "GeometryRealmConvTool", ""};
+  /** @brief Utility to fetch the geometry, magnetic field and calibration context in the event */
+  ContextUtility m_ctxProvider{this};
 
   ToolHandle<Trk::IRIO_OnTrackCreator> m_ROTcreator{this, "RotCreatorTool", ""};
   // the settable job options

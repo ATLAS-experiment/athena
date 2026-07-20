@@ -10,8 +10,8 @@
 
 #include "ActsEvent/TrackContainer.h"
 #include "ActsEvent/PersistentTrackContainer.h"
-#include "ActsGeometryInterfaces/ITrackingGeometryTool.h"
 #include "ActsEvent/TrackContainerHandlesHelper.h"
+#include "ActsEvent/ContextUtility.h"
 
 namespace ActsTrk {
   /** @brief Conversion algorithm to transform the Acts track container into an
@@ -26,14 +26,15 @@ namespace ActsTrk {
     virtual StatusCode execute(const EventContext &ctx) const override;
 
   private:
+    /** @brief Auxiliary class to access the magnetic field, geometry and calibration context */
+    ContextUtility m_ctxProvider{this};
     /** @brief Key to access the track container considered for persitification */
     SG::ReadHandleKey< ActsTrk::TrackContainer > m_inputTrackContainerKey {this, "InputActsTracksLocation", ""};
     /** @brief Key under which the xAOD type track container will be written to storegate */
     SG::WriteHandleKey< ActsTrk::PersistentTrackContainer > m_outputTrackContainerKey {this, "OutputActsTracksLocation", ""};
     /** @brief Auxiliary class taking over the conversion of the Acts -> xAOD conversion */
     ActsTrk::MutableTrackContainerHandlesHelper m_tracksBackendHandlesHelper{this};
-    /** @brief Tracking geometry tool handling the alignment constants */
-    PublicToolHandle<ActsTrk::ITrackingGeometryTool> m_trackingGeometryTool{this, "TrackingGeometryTool", ""};
+
   };
 
 } // namespace

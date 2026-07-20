@@ -21,7 +21,7 @@
 #include "egammaInterfaces/IegammaCaloClusterSelector.h"
 
 #include "InDetTrackSelectionTool/IInDetTrackSelectionTool.h"
-
+#include "ActsEvent/ContextUtility.h"
 
 #include "Acts/Propagator/Propagator.hpp"
 #include "Acts/Propagator/Navigator.hpp"
@@ -119,6 +119,8 @@ namespace ActsTrk{
                                                                                 "Tool that makes the cluster selection"};
             /** @brief Tracking geometry tool */
             PublicToolHandle<ITrackingGeometryTool> m_trackingGeometryTool{this, "TrackingGeometryTool", ""};
+            /** @brief Context provider for geometry, magnetic field and calibration contexts */
+            ActsTrk::ContextUtility m_ctxProvider{this};
 
             /** @brief Acts extrapolation tool to record the surface intersections */
             ToolHandle<IExtrapolationTool> m_extrapolationTool{this, "ExtrapolationTool", ""};

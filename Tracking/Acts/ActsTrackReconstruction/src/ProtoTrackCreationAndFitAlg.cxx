@@ -1,10 +1,9 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "ProtoTrackCreationAndFitAlg.h"
 
-#include "ActsCalibBase/CalibrationContext.h"
 #include "xAODEventInfo/EventInfo.h"
 #include "src/detail/Definitions.h"
 #include <stdlib.h>
@@ -19,9 +18,7 @@ StatusCode ActsTrk::ProtoTrackCreationAndFitAlg::initialize() {
   ATH_CHECK(m_tracksBackendHandlesHelper.initialize(ActsTrk::prefixFromTrackContainerName(m_trackContainerKey.key())));
   ATH_CHECK(m_actsFitter.retrieve()); 
   ATH_CHECK(m_patternBuilder.retrieve());
-  ATH_CHECK(m_trackingGeometryTool.retrieve());
-  ATH_CHECK(m_extrapolationTool.retrieve());
-
+  ATH_CHECK(m_ctxProvider.initialize());
   return StatusCode::SUCCESS;
 }
 
@@ -62,9 +59,9 @@ StatusCode ActsTrk::ProtoTrackCreationAndFitAlg::execute(const EventContext & ct
   /// The block is borrowed from the ACTS TrackFindingAlg and 
   /// should eventually be retired when this is no longer needed / 
   /// automated. 
-  const Acts::GeometryContext tgContext = m_trackingGeometryTool->getGeometryContext(ctx).context();
-  const Acts::MagneticFieldContext mfContext = m_extrapolationTool->getMagneticFieldContext(ctx);
-  const Acts::CalibrationContext calContext{getCalibrationContext(ctx)};
+  const Acts::GeometryContext tgContext = m_ctxProvider.getGeometryContext(ctx);
+  const Acts::MagneticFieldContext mfContext = m_ctxProvider.getMagneticFieldContext(ctx);
+  const Acts::CalibrationContext calContext{m_ctxProvider.getCalibrationContext(ctx)};
   
   /// ----------------------------------------------------------
   /// and we are back to EF tracking!

@@ -9,6 +9,8 @@
 #include "GaudiKernel/SystemOfUnits.h"
 #include "Acts/Utilities/KDTree.hpp"
 
+#include "ActsEvent/ContextUtility.h"
+
 
 #include "xAODMuon/MuonSegmentContainer.h"
 #include "MuonTrackEvent/MsTrackSeed.h"
@@ -197,8 +199,9 @@ namespace MuonR4{
             ToolHandle<ISegmentSelectionTool> m_segSelector{this, "SegmentSelectionTool" , "" };
             /** @brief Tracking geometry tool */
             PublicToolHandle<ActsTrk::ITrackingGeometryTool> m_trackingGeometryTool{this, "TrackingGeometryTool", ""};
-            /** @brief Track extrapolation tool */
-            ToolHandle<ActsTrk::IExtrapolationTool> m_extrapolationTool{this, "ExtrapolationTool" ,"" };
+
+            /** @brief Utility to fetch the geometry, magnetic field and calibration context in the event */
+            ActsTrk::ContextUtility m_ctxProvider{this};
             /** @brief Declare the data dependency on the standard Mdt+Rpc+Tgc segment container
              *         & on the NSW segment container */
             SG::ReadHandleKey<xAOD::MuonSegmentContainer> m_segmentKey{this, "SegmentContainer", "MuonSegmentsFromR4" };

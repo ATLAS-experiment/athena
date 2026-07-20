@@ -71,7 +71,7 @@ StatusCode ActsToTrkConverterTool::initialize() {
   ATH_CHECK(m_trkSummaryTool.retrieve());
   ATH_CHECK(m_ROTcreator.retrieve());
   ATH_CHECK(m_geometryConvTool.retrieve());
-  ATH_CHECK(m_trackingGeometryTool.retrieve());
+  ATH_CHECK(m_ctxProvider.initialize());
   m_prdCalib = detail::TrkPrepRawDataCalibrator{m_geometryConvTool.get(), m_ROTcreator.get()};
   ATH_CHECK(m_keyMdt.initialize(SG::AllowEmpty));
   ATH_CHECK(m_keyRpc.initialize(SG::AllowEmpty));
@@ -101,7 +101,7 @@ ActsToTrkConverterTool::trkTrackToSourceLinks(const Trk::Track &track) const {
 void ActsToTrkConverterTool::convertTrkToActsContainer(const EventContext& ctx,
                                                        const TrackCollection& trackColl,
                                                        ActsTrk::MutableTrackContainer& outTrackcoll) const {
-  const Acts::GeometryContext tgContext = m_trackingGeometryTool->getGeometryContext(ctx).context();
+  const Acts::GeometryContext tgContext = m_ctxProvider.getGeometryContext(ctx);
   ATH_MSG_VERBOSE("Calling trkTrackCollectionToActsTrackContainer with "
                   << trackColl.size() << " tracks.");
   unsigned int trkCount = 0;
@@ -263,7 +263,7 @@ template <typename Proxy_t>
 
     ATH_MSG_DEBUG(__func__<<"() "<<__LINE__<<" - Check track "<<acts_track.tipIndex());
     const Acts::CalibrationContext cctx{getCalibrationContext(ctx)};
-    const Acts::GeometryContext tgContext{m_trackingGeometryTool->getGeometryContext(ctx).context()};
+    const Acts::GeometryContext tgContext{m_ctxProvider.getGeometryContext(ctx)};
    
     auto finalTrajectory = std::make_unique<Trk::TrackStates>();
 

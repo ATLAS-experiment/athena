@@ -4,7 +4,6 @@
 
 #include "ActsToTrkFitterWrapTool.h"
 
-#include "ActsCalibBase/CalibrationContext.h"
 #include "ActsCalibBase/MeasurementCalibratorBase.h"
 #include "ActsEvent/ParticleHypothesisEncoding.h"
 #include "ActsEvent/TrackContainerUtils.h"
@@ -15,11 +14,9 @@ namespace ActsTrk {
 
 StatusCode ActsToTrkFitterWrapTool::initialize() {
     ATH_CHECK(m_actsFitterTool.retrieve());
-    ATH_CHECK(m_trackingGeometryTool.retrieve());
-    ATH_CHECK(m_extrapolationTool.retrieve());
     ATH_CHECK(m_ATLASConverterTool.retrieve());
     ATH_CHECK(m_geometryConvTool.retrieve());
-
+    ATH_CHECK(m_ctxProvider.initialize());
     return StatusCode::SUCCESS;
 }
 
@@ -176,9 +173,9 @@ ActsToTrkFitterWrapTool::fitImpl(const EventContext& ctx,
     // Construct a perigee surface as the target surface
     auto pSurface = Acts::Surface::makeShared<Acts::PerigeeSurface>(Acts::Vector3::Zero());
   
-    const Acts::GeometryContext tgContext = m_trackingGeometryTool->getGeometryContext(ctx).context();
-    const Acts::MagneticFieldContext mfContext = m_extrapolationTool->getMagneticFieldContext(ctx);
-    const Acts::CalibrationContext calContext{getCalibrationContext(ctx)};
+    const Acts::GeometryContext tgContext{m_ctxProvider.getGeometryContext(ctx)};
+    const Acts::MagneticFieldContext mfContext{m_ctxProvider.getMagneticFieldContext(ctx)};
+    const Acts::CalibrationContext calContext{m_ctxProvider.getCalibrationContext(ctx)};
 
     std::unique_ptr<MutableTrackContainer> outTracks = 
         m_actsFitterTool->fit(measColl, params, tgContext, mfContext, calContext, pSurface.get());

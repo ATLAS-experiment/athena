@@ -10,7 +10,7 @@
 #include "MuonTesterTree/ThreeVectorBranch.h"
 #include "MuonPRDTest/SegmentVariables.h"
 
-#include "ActsGeometryInterfaces/ITrackingGeometryTool.h"
+#include "ActsEvent/ContextUtility.h"
 #include "MuonReadoutGeometryR4/MuonDetectorManager.h"
 #include "xAODMuon/MuonSegmentContainer.h"
 
@@ -36,8 +36,8 @@ namespace MuonValR4{
             const Acts::Surface& getSurface(const Identifier& simHitId) const;
             /** @brief Retrieves the surfaces associated with a segment */
             const Acts::Surface& getSurface(const xAOD::MuonSegment& segment) const;
-            /** @brief The tool handle of the tracking geometry tool */
-            PublicToolHandle<ActsTrk::ITrackingGeometryTool> m_trackingGeometryTool{this, "TrackingGeometryTool", ""};
+            /** @brief Context provider for geometry, magnetic field and calibration contexts */
+            ActsTrk::ContextUtility m_ctxProvider{this};
 
             /** @brief Data dependency on the truth segment container */
             SG::ReadHandleKey<xAOD::MuonSegmentContainer> m_segmentKey{this, "segmentKey", "MuonTruthSegments"};

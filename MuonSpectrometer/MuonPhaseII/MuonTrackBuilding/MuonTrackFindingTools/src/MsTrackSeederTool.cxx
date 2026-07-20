@@ -53,9 +53,9 @@ namespace MuonR4{
     using SearchTree_t = MsTrackSeederTool::SearchTree_t;
 
     StatusCode MsTrackSeederTool::initialize() {
+        ATH_CHECK(m_ctxProvider.initialize());
         ATH_CHECK(m_segSelector.retrieve());
         ATH_CHECK(m_trackingGeometryTool.retrieve());
-        ATH_CHECK(m_extrapolationTool.retrieve());
         ATH_CHECK(m_segmentKey.initialize(!m_segmentKey.empty()));
         ATH_CHECK(detStore()->retrieve(m_detMgr));
 
@@ -74,8 +74,8 @@ namespace MuonR4{
     Acts::Result<Acts::BoundTrackParameters> 
         MsTrackSeederTool::estimateStartParameters(const EventContext& ctx,
                                                    const MsTrackSeed& seed) const {
-            const Acts::GeometryContext tgContext = m_trackingGeometryTool->getGeometryContext(ctx).context();
-            const Acts::MagneticFieldContext mfContext = m_extrapolationTool->getMagneticFieldContext(ctx);
+            const Acts::GeometryContext tgContext = m_ctxProvider.getGeometryContext(ctx);
+            const Acts::MagneticFieldContext mfContext = m_ctxProvider.getMagneticFieldContext(ctx);
             MagField::AtlasFieldCache magField{};
             mfContext.get<const AtlasFieldCacheCondObj*>()->getInitializedCache(magField);
 
@@ -320,7 +320,7 @@ namespace MuonR4{
     double MsTrackSeederTool::estimateQtimesP(const EventContext& ctx,
                                               const Amg::Vector3D& planeNorm,
                                               std::span<const PosMomPair_t> circlePoints) const {
-        const Acts::MagneticFieldContext mfContext = m_extrapolationTool->getMagneticFieldContext(ctx);
+        const Acts::MagneticFieldContext mfContext = m_ctxProvider.getMagneticFieldContext(ctx);
         MagField::AtlasFieldCache magField{};
         mfContext.get<const AtlasFieldCacheCondObj*>()->getInitializedCache(magField);
         if (circlePoints.size() < 2 || circlePoints.size() > 3){
@@ -576,7 +576,7 @@ namespace MuonR4{
         
         const xAOD::MuonSegmentContainer* segments{nullptr};
         ATH_CHECK(SG::get(segments, m_segmentKey , ctx));
-        const Acts::GeometryContext tgContext = m_trackingGeometryTool->getGeometryContext(ctx).context();
+        const Acts::GeometryContext tgContext = m_ctxProvider.getGeometryContext(ctx);
         SearchTree_t orderedSegs{constructTree(tgContext, *segments)};
         MsTrackSeedContainer trackSeeds{};
         using enum SeedCoords;

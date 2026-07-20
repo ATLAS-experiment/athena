@@ -21,10 +21,10 @@
 #include "ActsCalibrators/SourceLinkHash.h"
 
 // ActsTrk
-#include "ActsCalibBase/CalibrationContext.h"
+
 #include "ActsEvent/TrackContainer.h"
 #include "ActsGeometry/ActsDetectorElement.h"
-#include "ActsGeometryInterfaces/GeometryContext.h"
+
 #include "ActsEvent/ExpectedHitUtils.h"
 #include "ActsEvent/TrackContainerUtils.h"
 #include "src/detail/TrackFindingMeasurements.h"
@@ -253,10 +253,10 @@ namespace ActsTrk
     event_stat.resize(m_stat.size());
 
     DetectorContextHolder detContext {
-      .geometry = m_trackingGeometryTool->getGeometryContext(ctx).context(),
-      .magField = m_extrapolationTool->getMagneticFieldContext(ctx),
+      .geometry = m_ctxProvider.getGeometryContext(ctx),
+      .magField = m_ctxProvider.getMagneticFieldContext(ctx),
       // CalibrationContext converter not implemented yet.
-      .calib = getCalibrationContext(ctx)
+      .calib = m_ctxProvider.getCalibrationContext(ctx)
     };
 
     detail::SharedHitCounter sharedHits;

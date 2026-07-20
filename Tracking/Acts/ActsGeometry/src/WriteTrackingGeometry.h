@@ -10,6 +10,7 @@
 
 // PACKAGE
 #include "ActsGeometryInterfaces/ITrackingGeometryTool.h"
+#include "ActsEvent/ContextUtility.h"
 
 // STL
 #include <fstream>
@@ -33,6 +34,9 @@ public:
 
 private:
     PublicToolHandle<ActsTrk::ITrackingGeometryTool> m_trackingGeometryTool{this, "TrackingGeometryTool", "ActsTrackingGeometryTool"};
+
+    /** @brief Context provider for geometry, magnetic field and calibration contexts */
+    ActsTrk::ContextUtility m_ctxProvider{this};
 
     Gaudi::Property<std::string> m_outFile{this, "outFile", "ActsTrackingGeometry.json"};
 

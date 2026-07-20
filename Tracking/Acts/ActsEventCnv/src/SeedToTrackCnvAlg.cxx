@@ -46,9 +46,6 @@ StatusCode SeedToTrackCnvAlg::execute(const EventContext& context) const {
   ActsTrk::MutableTrackContainer tracksContainer( std::move(trackBackend),
                                                   std::move(trackStateBackend) );
 
-  Acts::GeometryContext gctx = m_trackingGeometryTool->getGeometryContext(context).context();
-  std::shared_ptr<const Acts::TrackingGeometry> trackingGeometry = m_trackingGeometryTool->trackingGeometry();
-
   for (std::size_t i(0); i<m_seedContainerKey.size(); ++i) {
     ATH_MSG_DEBUG("Retrieving Seed Collection with key: " << m_seedContainerKey.at(i).key());
     ATH_MSG_DEBUG("Retrieving Track Parameter Estimation Collection with key: " << m_actsTrackParamsKey.at(i).key());

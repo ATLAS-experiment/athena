@@ -9,6 +9,7 @@
 
 #include "Identifier/Identifier.h"
 #include "MuonTesterTree/MuonTesterTree.h"
+#include "ActsEvent/ContextUtility.h"
 #include "MuonTesterTree/CoordTransformBranch.h"
 
 #include "Acts/Utilities/Helpers.hpp"
@@ -46,6 +47,9 @@ namespace ActsTrk {
 
             /** @brief Tool handle to the tracking geometry */
             PublicToolHandle<ITrackingGeometryTool> m_trackingGeoTool{this, "TrackingGeometryTool", ""};
+            /** @brief Context provider for geometry, magnetic field and calibration contexts */
+            ActsTrk::ContextUtility m_ctxProvider{this};
+
             /** @brief Configure which detector types shall be dumped */
             Gaudi::Property<std::set<unsigned short>> m_detTypes{this, "Detectors", {
                                                             Acts::toUnderlying(DetectorType::Pixel),

@@ -12,9 +12,6 @@ def TruthSegmentWriterCfg(flags, name="TruthSegmentWriter",
     result.merge(setupHistSvcCfg(flags, outFile=outFile,
                                     outStream="ActsMuonTruthDump"))
 
-    from ActsConfig.ActsGeometryConfig import ActsTrackingGeometryToolCfg
-    kwargs.setdefault("TrackingGeometryTool", result.getPrimaryAndMerge(ActsTrackingGeometryToolCfg(flags)))
-
     the_alg = CompFactory.MuonValR4.TruthSegmentWriter(name, **kwargs)
     result.addEventAlgo(the_alg, primary = True)
     return result
@@ -22,8 +19,6 @@ def TruthSegmentWriterCfg(flags, name="TruthSegmentWriter",
 
 def SpacePointWriterCfg(flags, name="SpacePointWriter", outFile="MuonSpacePoints.root", **kwargs):
     result = ComponentAccumulator()
-    from ActsConfig.ActsGeometryConfig import ActsTrackingGeometryToolCfg
-    kwargs.setdefault("TrackingGeometryTool", result.getPrimaryAndMerge(ActsTrackingGeometryToolCfg(flags)))
     from MuonConfig.MuonConfigUtils import setupHistSvcCfg
     result.merge(setupHistSvcCfg(flags, outFile=outFile,
                                         outStream="ActsMuonSpacePointDump"))

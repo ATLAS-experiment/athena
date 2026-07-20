@@ -8,8 +8,6 @@
 // Base Class
 #include "AthenaBaseComps/AthReentrantAlgorithm.h"
 
-// Gaudi includes
-#include "Gaudi/Property.h"
 
 // Handle Keys
 #include "StoreGate/ReadHandleKey.h"
@@ -18,6 +16,7 @@
 #include "ActsEvent/TruthParticleHitCounts.h"
 #include "ActsEvent/MeasurementToTruthParticleAssociation.h"
 #include "ActsEvent/TrackContainer.h"
+#include "ActsEvent/ContextUtility.h"
 #include "ActsGeometryInterfaces/ITrackingGeometryTool.h"
 #include "ActsTruth/ElasticDecayUtil.h"
 
@@ -44,17 +43,15 @@ namespace ActsTrk
   class TruthParticleHitCountAlg : public AthReentrantAlgorithm
   {
   public:
-    TruthParticleHitCountAlg(const std::string &name,
-                               ISvcLocator *pSvcLocator);
+    using AthReentrantAlgorithm::AthReentrantAlgorithm;
 
     virtual StatusCode initialize() override;
     virtual StatusCode finalize() override;
     virtual StatusCode execute(const EventContext &ctx) const override;
 
   private:
-     PublicToolHandle<ActsTrk::ITrackingGeometryTool> m_trackingGeometryTool
-        {this, "TrackingGeometryTool", ""};
-
+     /** @brief Context provider for geometry, magnetic field and calibration contexts */
+     ContextUtility m_ctxProvider{this};
      SG::ReadHandleKey<MeasurementToTruthParticleAssociation>  m_pixelClustersToTruth
         {this, "PixelClustersToTruthAssociationMap", "", "Association map from pixel measurements to generator particles." };
      SG::ReadHandleKey<MeasurementToTruthParticleAssociation>  m_stripClustersToTruth

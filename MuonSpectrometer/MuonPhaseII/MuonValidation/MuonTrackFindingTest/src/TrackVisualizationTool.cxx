@@ -465,8 +465,8 @@ void TrackVisualizationTool::displaySeedSegmentsGlobalWithTruth(
         }
         std::string segStr{removeNonAlphaNum(objName)};
         for (const xAOD::MuonSegment* seg : seed.segments()) {
-            MuonValR4::drawSegmentMeasurements(*gctx,* seg, visualHelper);
-            MuonValR4::drawSegmentLine(*gctx,*seg, visualHelper);
+            MuonValR4::drawSegmentMeasurements(gctx->context(),* seg, visualHelper);
+            MuonValR4::drawSegmentLine(gctx->context(), *seg, visualHelper);
             segStr += std::format("_{:}", MuonR4::printID(*seg));
         }
 

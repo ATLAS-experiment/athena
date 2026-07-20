@@ -10,6 +10,7 @@ namespace ActsTrk {
 
     StatusCode ReadoutGeoDumpAlg::initialize() {
         ATH_CHECK(m_tree.init(this));
+        ATH_CHECK(m_ctxProvider.initialize());
         ATH_CHECK(m_trackingGeoTool.retrieve());
         for (const auto type : m_detTypes){
             try{
@@ -31,7 +32,7 @@ namespace ActsTrk {
             return StatusCode::SUCCESS;
         }
 
-        const GeometryContext& gctx{m_trackingGeoTool->getGeometryContext(ctx)};
+        const Acts::GeometryContext tgContext{m_ctxProvider.getGeometryContext(ctx)};
 
         const auto trackingGeo = m_trackingGeoTool->trackingGeometry();
         
@@ -50,7 +51,7 @@ namespace ActsTrk {
                 return;
             }
             //
-            m_readoutTransform = surface->localToGlobalTransform(gctx.context());
+            m_readoutTransform = surface->localToGlobalTransform(tgContext);
             m_identifier = detEl->identify().get_compact();
             m_detType = Acts::toUnderlying(detEl->detectorType());
             const auto& bounds = surface->bounds();

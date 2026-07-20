@@ -1,24 +1,21 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
-
-#include <Gaudi/Property.h>
 #ifndef ACTSTRACKRECONSTRUCTION_PROTOTRACKCREATIONANDFITALG_H
 #define ACTSTRACKRECONSTRUCTION_PROTOTRACKCREATIONANDFITALG_H 1
 
 #include "AthenaBaseComps/AthReentrantAlgorithm.h"
 #include "TrkParameters/TrackParameters.h"
-#include "ActsGeometryInterfaces/IExtrapolationTool.h"
 
 #include "ActsToolInterfaces/IFitterTool.h"
 #include "ActsToolInterfaces/IProtoTrackCreatorTool.h"
 #include "xAODInDetMeasurement/StripClusterContainer.h"
 #include "xAODInDetMeasurement/PixelClusterContainer.h"
-#include "ActsGeometryInterfaces/ITrackingGeometryTool.h"
 #include "InDetReadoutGeometry/SiDetectorElementCollection.h"
 #include "StoreGate/CondHandleKeyArray.h"
 #include "ActsEvent/TrackContainerHandlesHelper.h"
 #include "ActsEvent/ProtoTrackCollection.h"
+#include "ActsEvent/ContextUtility.h"
 
 namespace ActsTrk{
     class ProtoTrackCreationAndFitAlg: public ::AthReentrantAlgorithm { 
@@ -40,21 +37,20 @@ namespace ActsTrk{
       // the strip clusters to read as input 
       SG::ReadHandleKey<xAOD::StripClusterContainer> m_StripClusters{this, "StripClusterContainer","","the strip clusters"};
       // the user-provided pattern recognition tool to test 
-      ToolHandle<ActsTrk::IProtoTrackCreatorTool> m_patternBuilder{this, "PatternBuilder", "", "the pattern builder to use"};
+      ToolHandle<IProtoTrackCreatorTool> m_patternBuilder{this, "PatternBuilder", "", "the pattern builder to use"};
       // the track fitter to use for the refit 
-      ToolHandle<ActsTrk::IFitterTool> m_actsFitter{this, "ActsFitter", "", "Choice of Acts Fitter (Kalman by default)"};
-      // tracking geometry - used to translate ATLAS to ACTS geometry
-      PublicToolHandle<ActsTrk::ITrackingGeometryTool> m_trackingGeometryTool{this, "TrackingGeometryTool", ""};
-      // ACTS extrapolation tool - provides the magnetic field 
-      ToolHandle<ActsTrk::IExtrapolationTool> m_extrapolationTool{this, "ExtrapolationTool", ""};
+      ToolHandle<IFitterTool> m_actsFitter{this, "ActsFitter", "", "Choice of Acts Fitter (Kalman by default)"};
+      
+      /** @brief Utility to fetch the geometry, magnetic field and calibration context in the event */
+      ContextUtility m_ctxProvider{this};
       // output location to write to 
-      SG::WriteHandleKey<ActsTrk::TrackContainer> m_trackContainerKey{this, "ACTSTracksLocation", "", "Output track collection (ActsTrk variant)"};
+      SG::WriteHandleKey<TrackContainer> m_trackContainerKey{this, "ACTSTracksLocation", "", "Output track collection (ActsTrk variant)"};
 
       // output location for proto tracks (can be empty)
-      SG::WriteHandleKey<ActsTrk::ProtoTrackCollection> m_protoTrackCollectionKey{this, "ProtoTracksLocation", "", "Output proto tracks as well"};
+      SG::WriteHandleKey<ProtoTrackCollection> m_protoTrackCollectionKey{this, "ProtoTracksLocation", "", "Output proto tracks as well"};
       Gaudi::Property<bool> m_copyParametersFromFit{this, "copyParametersFromFit", true, "If enabled proto tracks will have the same parameters as fitted tracks"};
       // acts helper for the output
-      ActsTrk::MutableTrackContainerHandlesHelper m_tracksBackendHandlesHelper{this};
+      MutableTrackContainerHandlesHelper m_tracksBackendHandlesHelper{this};
 
 
 

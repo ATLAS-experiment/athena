@@ -26,7 +26,7 @@ namespace MuonCombinedR4  {
         ATH_CHECK(m_segmentKey.initialize());
         ATH_CHECK(m_writeKey.initialize());
         ATH_CHECK(detStore()->retrieve(m_detMgr));
-        ATH_CHECK(m_trackingGeometryTool.retrieve());
+        ATH_CHECK(m_ctxProvider.initialize());
         ATH_CHECK(m_extrapolationTool.retrieve());
         return StatusCode::SUCCESS;
     }
@@ -134,7 +134,7 @@ namespace MuonCombinedR4  {
         std::optional<Acts::BoundTrackParameters> currentPars = idTag->extrapolatedParsID(caloExitParKey);
         
         const Acts::Surface* currentSurface{nullptr};
-        const Acts::GeometryContext tgContext{m_trackingGeometryTool->getGeometryContext(ctx).context()};
+        const Acts::GeometryContext tgContext{m_ctxProvider.getGeometryContext(ctx)};
 
         const xAOD::MuonSegment* bestMatch{nullptr};
         double bestChi2{std::numeric_limits<double>::max()};
@@ -211,7 +211,7 @@ namespace MuonCombinedR4  {
         const std::vector<const xAOD::MuonSegment*> candidateSegs = prepareSegments(ctx);
         ATH_MSG_DEBUG(__func__<<"() "<<__LINE__<<" - Try to match "<<idTracks->size()
             <<" ID tracks to "<<candidateSegs.size()<<" segments.");
-        const Acts::GeometryContext tgContext = m_trackingGeometryTool->getGeometryContext(ctx).context();
+        const Acts::GeometryContext tgContext = m_ctxProvider.getGeometryContext(ctx);
 
         
         MuTagCont_t outContainer{};

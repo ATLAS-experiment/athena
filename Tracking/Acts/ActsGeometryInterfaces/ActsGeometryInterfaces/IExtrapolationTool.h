@@ -157,10 +157,6 @@ namespace ActsTrk {
                                                                   const Acts::BoundTrackParameters& startParameters,
                                                                   Acts::Direction navDir = Acts::Direction::Forward(),
                                                                   double pathLimit = 1._km) const = 0;
-      /** @brief Retrieves the magnetic field conditions from the Conditions store & wraps them into
-       *         a Magnetic field context
-       *  @param ctx: Event context to fastly access the Conditions store */
-      virtual Acts::MagneticFieldContext getMagneticFieldContext(const EventContext& ctx) const = 0;
   };
 
 }

@@ -59,7 +59,7 @@ namespace ActsTrk {
 StatusCode GaussianSumFitterTool::initialize() {
   ATH_MSG_DEBUG(name() << "::" << __FUNCTION__);
   ATH_CHECK(m_trackingGeometryTool.retrieve());
-  ATH_CHECK(m_extrapolationTool.retrieve());
+  ATH_CHECK(m_ctxProvider.initialize());
   ATH_CHECK(m_geometryConvTool.retrieve());
   ATH_CHECK(m_ROTcreator.retrieve(EnableTool{!m_ROTcreator.empty()}));
   m_logger = makeActsAthenaLogger(this, "Acts Gaussian Sum Refit");
@@ -240,9 +240,9 @@ StatusCode GaussianSumFitterTool::fit(
     return StatusCode::SUCCESS;
   }
 
-  Acts::GeometryContext tgContext = m_trackingGeometryTool->getGeometryContext(ctx).context();
-  Acts::MagneticFieldContext mfContext = m_extrapolationTool->getMagneticFieldContext(ctx);
-  Acts::CalibrationContext calContext{getCalibrationContext(ctx)};
+  const Acts::GeometryContext tgContext{m_ctxProvider.getGeometryContext(ctx)};
+  const Acts::MagneticFieldContext mfContext{m_ctxProvider.getMagneticFieldContext(ctx)};
+  const Acts::CalibrationContext calContext{m_ctxProvider.getCalibrationContext(ctx)};
 
   std::unique_ptr< ActsTrk::MutableTrackContainer > refittedTracks = 
     fit(sourceLinks, initialParams, tgContext, mfContext, calContext, &pSurface);

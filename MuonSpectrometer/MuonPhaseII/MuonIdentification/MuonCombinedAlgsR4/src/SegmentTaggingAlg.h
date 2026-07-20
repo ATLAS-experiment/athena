@@ -13,8 +13,8 @@
 #include "xAODMuon/MuonSegmentContainer.h"
 #include "MuonReadoutGeometryR4/MuonDetectorManager.h"
 
-#include "ActsGeometryInterfaces/ITrackingGeometryTool.h"
 #include "ActsGeometryInterfaces/IExtrapolationTool.h"
+#include "ActsEvent/ContextUtility.h"
 
 namespace MuonCombinedR4 {
     class SegmentTaggingAlg: public AthReentrantAlgorithm {
@@ -67,8 +67,8 @@ namespace MuonCombinedR4 {
             SG::WriteHandleKey<MuonR4::MuonTagContainer> m_writeKey{this, "writeKey", "SegmentTags"};
             /** @brief Detector manager to retrieve the sector envelope surfaces */
             const MuonGMR4::MuonDetectorManager* m_detMgr{nullptr};
-            /** @brief Tracking geometry tool */
-            PublicToolHandle<ActsTrk::ITrackingGeometryTool> m_trackingGeometryTool{this, "TrackingGeometryTool", ""};
+            /** @brief Context provider for geometry, magnetic field and calibration contexts */
+            ActsTrk::ContextUtility m_ctxProvider{this};
             /** @brief Track extrapolation tool */
             ToolHandle<ActsTrk::IExtrapolationTool> m_extrapolationTool{this, "ExtrapolationTool" ,"" };
 

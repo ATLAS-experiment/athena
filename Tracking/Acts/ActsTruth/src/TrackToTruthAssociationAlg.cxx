@@ -23,15 +23,9 @@ namespace ActsTrk
      return out;
   }
 
-  TrackToTruthAssociationAlg::TrackToTruthAssociationAlg(const std::string &name,
-                                                         ISvcLocator *pSvcLocator)
-      : AthReentrantAlgorithm(name, pSvcLocator)
-  {
-  }
-
   StatusCode TrackToTruthAssociationAlg::initialize()
   {
-     ATH_CHECK( m_trackingGeometryTool.retrieve() );
+     ATH_CHECK( m_ctxProvider.initialize() );
      ATH_CHECK( m_tracksContainerKey.initialize() );
      ATH_CHECK( m_pixelClustersToTruth.initialize() );
      ATH_CHECK( m_stripClustersToTruth.initialize() );
@@ -127,7 +121,7 @@ namespace ActsTrk
     }
     track_association->resize( tracksContainer->size() );
     track_association->setSourceContainer(DataLink<ActsTrk::TrackContainer>(*tracksContainer,ctx));
-    Acts::GeometryContext tgContext = m_trackingGeometryTool->getGeometryContext(ctx).context();
+    Acts::GeometryContext tgContext = m_ctxProvider.getGeometryContext(ctx);
 
     std::array<const ActsTrk::MeasurementToTruthParticleAssociation *,
                static_cast< std::underlying_type<xAOD::UncalibMeasType>::type >(xAOD::UncalibMeasType::nTypes)>

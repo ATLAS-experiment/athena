@@ -47,10 +47,6 @@ def MaterialTrackWriterCfg(configFlags,
   from MuonConfig.MuonConfigUtils import setupHistSvcCfg
   acc.merge(setupHistSvcCfg(configFlags, outFile = FileName, outStream=kwargs["OutStream"]))
 
-  # Need geometry
-  if kwargs["useTrackingGeometry"]:
-    from ActsConfig.ActsGeometryConfig import ActsTrackingGeometryToolCfg
-    kwargs.setdefault("TrackingGeometryTool", acc.getPrimaryAndMerge(ActsTrackingGeometryToolCfg(configFlags)))
   acc.addEventAlgo(CompFactory.ActsTrk.MaterialTrackWriter(name, **kwargs), primary = True)
 
   return acc
