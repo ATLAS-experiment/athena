@@ -85,7 +85,7 @@ namespace InDet {
       //Loop over all elements (pixels/strips) in the cluster
       if(pixSdoColl.isValid()){
         for (auto rdoIter :  rdos){
-          auto simDataIter = pixSdoColl->find(rdoIter);
+          const auto & simDataIter = pixSdoColl->find(rdoIter);
           if (simDataIter != pixSdoColl->end()){
             // get the SimData and count the individual contributions
             auto simData = (simDataIter->second);

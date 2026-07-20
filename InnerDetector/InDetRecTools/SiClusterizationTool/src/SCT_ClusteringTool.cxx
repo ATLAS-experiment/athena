@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -297,7 +297,7 @@ namespace InDet {
     SCT_ClusteringTool::IdVec_t subCluster(clusterVector.begin(), pBadId);
     // Remove elements including the badId
     if (pBadId != clusterVector.end()) clusterVector.erase(clusterVector.begin(), ++pBadId);
-    if (not subCluster.empty()) idGroups.push_back(subCluster);
+    if (not subCluster.empty()) idGroups.push_back(std::move(subCluster));
     return recluster(clusterVector, idGroups);
   }
 

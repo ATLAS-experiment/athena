@@ -18,6 +18,7 @@
 #include "InDetIdentifier/PixelID.h"
 #include "InDetPrepRawData/PixelClusterSplitProb.h"
 #include "VxVertex/RecVertex.h"
+#include <numeric> //accumulate
 
 
 
@@ -116,21 +117,16 @@ namespace InDet
 
   InDet::PixelClusterSplitProb NnPixelClusterSplitProbTool::compileSplitProbability(std::vector<double>& vectorOfProbs ) const
   {
+    const std::vector<double>::iterator begin=vectorOfProbs.begin();
+    const std::vector<double>::iterator end=vectorOfProbs.end();
 
-
-    double sum=0;
-
-    std::vector<double>::iterator begin=vectorOfProbs.begin();
-    std::vector<double>::iterator end=vectorOfProbs.end();
-
-    for (std::vector<double>::iterator iter=begin;iter!=end;++iter)
-    {
-      sum+=*iter;
-    }
-
+    double sum=std::accumulate(begin, end, 0.);
     
     ATH_MSG_VERBOSE(" Sum of cluster probabilities is: "<<sum);
-
+    if (sum ==0.)[[unlikely]]{
+      ATH_MSG_ERROR("Sum of cluster probabilities is zero.");
+      return InDet::PixelClusterSplitProb(std::vector<double>());
+    }
     std::vector<double> vectorOfSplitProbs;
 
     for (std::vector<double>::iterator iter=begin;iter!=end;++iter)
@@ -149,6 +145,11 @@ namespace InDet
     for (std::vector<double>::iterator iter=begin;iter!=end;++iter,++count)
     {
       psum+=(*iter)/m_priorMultiplicityContent.value()[count];
+    }
+    
+    if (psum ==0.)[[unlikely]]{
+      ATH_MSG_ERROR("Sum of Probabilities (psum) is zero.");
+      return InDet::PixelClusterSplitProb(std::vector<double>());
     }
 
     count=0;
