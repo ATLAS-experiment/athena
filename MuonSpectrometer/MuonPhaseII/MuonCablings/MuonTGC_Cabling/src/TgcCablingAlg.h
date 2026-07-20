@@ -11,7 +11,7 @@
 
 #include <nlohmann/json.hpp>
 
-namespace Muon {
+namespace MuonR4 {
 
 class TgcCablingAlg : public AthReentrantAlgorithm {
 public:
