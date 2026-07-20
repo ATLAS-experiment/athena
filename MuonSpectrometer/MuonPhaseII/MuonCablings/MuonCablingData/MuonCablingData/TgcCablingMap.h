@@ -13,7 +13,7 @@
 
 class TgcIdHelper;
 
-namespace Muon {
+namespace MuonR4 {
 
 class IMuonIdHelperSvc;
 
