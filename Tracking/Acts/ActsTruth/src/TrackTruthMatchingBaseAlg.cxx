@@ -7,7 +7,7 @@
 #include "xAODTruth/TruthParticle.h"
 
 // for pdg_id -> name
-#include "HepPDT/ParticleDataTable.hh"
+#include "GeneratorModules/GenData.h"
 
 #include <iomanip>
 #include <cmath>
@@ -505,9 +505,10 @@ namespace ActsTrk
           std::vector<std::string> pdg_id_labels;
           pdg_id_labels.reserve( pdgId.size());
           pdg_id_labels.push_back("Other");
+          auto gendata = std::make_unique<GenData>();
           for (unsigned int pdg_i=1; pdg_i < pdgId.size(); ++pdg_i) {
              std::stringstream a_label;
-             a_label << HepPID::particleName(pdgId[pdg_i])  << " [" << pdgId[pdg_i] << "]";
+             a_label << gendata->particleName(pdgId[pdg_i]).value()  << " [" << pdgId[pdg_i] << "]";
              pdg_id_labels.push_back(  a_label.str() );
           }
           unsigned int max_pdg_id_slots=m_statPerPdgId.size()/(statPtBins.size()+2);
