@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonHoughTransformTester.h"
@@ -469,7 +469,7 @@ namespace MuonValR4 {
                        m_idHelperSvc->mmIdHelper().isStereo(sp->identify());
             });
 
-            m_out_seed_nsTgcStripHits+=hitCounter([this](const SpacePoint* sp){
+            m_out_seed_nsTgcStripHits+=hitCounter([](const SpacePoint* sp){
                 return sp->type() == xAOD::UncalibMeasType::sTgcStripType &&
                        isPrecision(*sp);
             });
@@ -644,7 +644,7 @@ namespace MuonValR4 {
                        m_idHelperSvc->mmIdHelper().isStereo(meas->spacePoint()->identify());
             }));
 
-            m_out_segment_nSTgcStripHits.push_back(hitCounter([this](const auto& meas){
+            m_out_segment_nSTgcStripHits.push_back(hitCounter([](const auto& meas){
                 return meas->fitState() == CalibratedSpacePoint::State::Valid &&
                        meas->type() == xAOD::UncalibMeasType::sTgcStripType &&
                        isPrecision(*meas);
@@ -662,7 +662,7 @@ namespace MuonValR4 {
                        m_idHelperSvc->stgcIdHelper().channelType(meas->spacePoint()->identify()) ==
                        sTgcIdHelper::sTgcChannelTypes::Pad;
             }));
-            m_out_segment_nSTgcStripOutliers.push_back(hitCounter([this](const auto& meas){
+            m_out_segment_nSTgcStripOutliers.push_back(hitCounter([](const auto& meas){
                 return meas->fitState() != CalibratedSpacePoint::State::Valid &&
                        meas->type() == xAOD::UncalibMeasType::sTgcStripType &&
                        isPrecision(*meas);
