@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 ## @package PyJobTransforms.transform
 #
@@ -462,7 +462,7 @@ class transform(object):
             self.setupSplitting()
 
             # Error if more than one executor in MPI mode
-            if 'mpi' in self._argdict:
+            if 'mpi' in self._argdict and self._argdict['mpi'].value:
                 if len(self._executorPath) > 1:
                     msg.error("MPI mode is not supported for jobs with more than one execution step!")
                     msg.error(f"We have {len(self._executorPath)}: {self._executorPath}")
@@ -485,7 +485,7 @@ class transform(object):
                     msg.error('Exception encountered during execution of {0}:{1}'.format(executor.name,e))
                 finally:
                     # Swap out the output files for the version with [] lists expanded
-                    if 'mpi' in self._argdict:
+                    if 'mpi' in self._argdict and self._argdict['mpi'].value:
                        new_data_dict = {**self._dataDictionary, **trfMPITools.mpiConfig["outputs"]}
                        self._dataDictionary = new_data_dict
                        executor.conf._dataDictionary = new_data_dict
@@ -673,7 +673,7 @@ class transform(object):
     #  is used (~everything, plus the Tier0 report at Tier0)
     def generateReport(self, reportType=None, fast=False, fileReport = defaultFileReport):
         msg.debug('Transform report generator')
-        if 'mpi' in self.argdict and not trfMPITools.mpiShouldValidate():
+        if 'mpi' in self.argdict and self.argdict['mpi'].value and not trfMPITools.mpiShouldValidate():
             msg.debug("Not in rank 0 -- not generating reports")
             return
 
@@ -842,7 +842,7 @@ class transform(object):
             ('outputFileValidation' in self._argdict and self._argdict['outputFileValidation'].value is False)
             ):
             msg.info('Standard output file validation turned off for transform %s.', self.name)
-        elif 'mpi' in self.argdict and not trfMPITools.mpiShouldValidate():
+        elif 'mpi' in self.argdict and self.argdict['mpi'].value and not trfMPITools.mpiShouldValidate():
             msg.info("MPI mode and not in rank 0 ∴ not validating partial outputs")
         else:
             msg.info('Validating output files')

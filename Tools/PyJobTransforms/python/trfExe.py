@@ -831,7 +831,7 @@ class scriptExecutor(transformExecutor):
         if 'checkEventCount' in self.conf.argdict and self.conf.argdict['checkEventCount'].returnMyValue(exe=self) is False:
             msg.info('Event counting for substep {0} is skipped'.format(self.name))
         else:
-            if 'mpi' in self.conf.argdict and not mpi.mpiShouldValidate():
+            if 'mpi' in self.conf.argdict and self.conf.argdict['mpi'].value and not mpi.mpiShouldValidate():
                 msg.info('MPI mode -- skipping output event count check')
             else:
                 checkcount=trfValidation.eventMatch(self)
@@ -1160,7 +1160,7 @@ class athenaExecutor(scriptExecutor):
             self._athenaMPWorkerTopDir = self._athenaMPFileReport = None
 
         ## Handle MPI setup
-        if 'mpi' in self.conf.argdict:
+        if 'mpi' in self.conf.argdict and self.conf.argdict['mpi'].value:
             msg.info("Running in MPI mode")
             mpi.setupMPIConfig(output, self.conf.dataDictionary)
 
@@ -1247,7 +1247,7 @@ class athenaExecutor(scriptExecutor):
     def postExecute(self):
         super(athenaExecutor, self).postExecute()
         # MPI merging
-        if 'mpi' in self.conf.argdict:
+        if 'mpi' in self.conf.argdict and self.conf.argdict['mpi'].value:
             mpi.mergeOutputs()
 
         # Handle executor substeps
@@ -2361,4 +2361,3 @@ class archiveExecutor(scriptExecutor):
                 )
             self._cmd.append('unarchive_wrapper.py')
         super(archiveExecutor, self).preExecute(input=input, output=output)
-
