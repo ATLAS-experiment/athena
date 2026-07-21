@@ -953,6 +953,124 @@ public:
    }
 };
 
+class ATLAS_NOT_THREAD_SAFE ZDCFitExpFermiInductPrePulse : public ZDCPrePulseFitWrapper
+{
+private:
+  float m_tau1{0};
+  float m_tau2{0};
+  float m_timeCorr{0};
+
+  double m_preNorm{1.};
+  
+  std::shared_ptr<TF1> m_expFermiInductFunc = 0;
+  std::shared_ptr<TF1> m_expFermiPreFunc = 0;
+
+public:
+  ZDCFitExpFermiInductPrePulse(const std::string& tag, float tmin, float tmax, float tau1, float tau2);
+  ~ZDCFitExpFermiInductPrePulse() {}
+
+  virtual void DoInitialize(float initialAmp, float initialT0, float ampMin, float ampMax) override;
+  virtual void SetT0FitLimits(float tMin, float tMax) override;
+
+
+  virtual void SetInitialPrePulse(float amp, float t0, float /*expamp = 0*/, bool /*fixPrePulseToZero = false*/) override
+  {
+    double ampMin, ampMax;
+    
+    GetWrapperTF1()->GetParLimits(2, ampMin, ampMax);
+    double initialAmp = std::min<double>(std::max<double>(amp, ampMin), ampMax);
+    
+    GetWrapperTF1()->SetParameter(2, initialAmp);
+    GetWrapperTF1()->SetParameter(3, t0);
+  }
+
+  virtual void SetPrePulseT0Range(float tmin, float tmax) override;
+  virtual void SetPostPulseT0Range(float /*tmin*/, float /*tmax*/, float /*initialPostT0*/) override {return;}
+
+  virtual void ConstrainFit() override;
+  virtual void UnconstrainFit() override;
+
+  virtual unsigned int GetPreT0ParIndex() const override {return 3;}
+
+  virtual float GetAmplitude() const override {return GetWrapperTF1()->GetParameter(0); }
+  virtual float GetAmpError() const override {return GetWrapperTF1()->GetParError(0); }
+
+  virtual float GetTau1() const override {return m_tau1;}
+  virtual float GetTau2() const override {return m_tau2;}
+
+  virtual float GetPreT0()  const override {return GetWrapperTF1()->GetParameter(3);}
+  virtual float GetPreAmp() const override {return GetWrapperTF1()->GetParameter(3);}
+
+  virtual float GetPostT0()  const override {return 0;}
+  virtual float GetPostAmp() const override {return 0;}
+
+  virtual float GetExpAmp() const override {return 0;}
+
+  virtual float GetTime() const override {
+    return GetWrapperTF1()->GetParameter(1) + m_timeCorr; // Correct the time to the maximum
+  }
+
+  virtual unsigned int GetNumShapeParameters() const override {return 3;}
+  
+  virtual float GetShapeParameter(size_t index) const override
+  {
+    if (index < 3) {
+      if (index == 0) return GetWrapperTF1()->GetParameter(4);
+      if (index == 1) return GetWrapperTF1()->GetParameter(6);
+      if (index == 2) return GetWrapperTF1()->GetParameter(7);
+    }
+    throw std::runtime_error("Fit parameter does not exist.");
+  }
+
+  virtual float GetBkgdMaxFraction() const override
+  {
+    const TF1* theTF1 = ZDCFitWrapper::GetWrapperTF1();
+
+    double maxTime = GetTime();
+
+    double amp = theTF1->GetParameter(0);
+    if (amp <= 0) return -1;
+    
+    double preAmp = theTF1->GetParameter(2);
+    double preT0 = theTF1->GetParameter(3);
+
+    double deltaTPre = maxTime - preT0;
+    double background = preAmp * m_preNorm * m_expFermiInductFunc->operator()(deltaTPre);
+
+    return background / (amp + background);
+  }
+
+  virtual double operator() (const double *x, const double *p) override
+  {
+    double t = x[0];
+
+    double amp = p[0];
+    double t0 = p[1];
+    double preAmp = p[2];
+    double preT0 = p[3];
+    double C = p[4];
+    double indA = p[5];
+    double indBFact = p[6];
+
+    m_expFermiInductFunc->SetParameter(6, indA);
+    m_expFermiInductFunc->SetParameter(7, indBFact);
+
+    double deltaT = t - t0;
+    double deltaTPre = t - preT0;
+
+    // We subtract off the  value of the pre-pulse at the minimum time (nominally 0,
+    //   but can change if we exclude early samples) to account for the subtraction of the pre-sample
+    //
+    double deltaPresamp = GetTMinAdjust() - preT0;
+
+    double pulse1 =  m_expFermiInductFunc->operator()(deltaT);
+    double pulse2 =  preAmp * m_preNorm * (m_expFermiPreFunc->operator()(deltaTPre) -
+					   m_expFermiPreFunc->operator()(deltaPresamp));
+
+    return C + pulse1 + pulse2;
+  }
+};
+
 
 // ----------------------------------------------------------------------
 class ATLAS_NOT_THREAD_SAFE ZDCFitExpFermiLinearFixedTaus : public ZDCFitWrapper

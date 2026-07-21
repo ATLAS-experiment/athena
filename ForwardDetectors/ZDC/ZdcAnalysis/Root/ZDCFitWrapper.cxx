@@ -846,6 +846,106 @@ void ZDCFitExpFermiInductPreExp::SetT0FitLimits(float t0Min, float t0Max)
   theTF1->SetParLimits(1, t0Min, t0Max);
 }
 
+ZDCFitExpFermiInductPrePulse::ZDCFitExpFermiInductPrePulse(const std::string& tag, float tmin, float tmax, float tau1, float tau2) :
+  ZDCPrePulseFitWrapper(std::make_shared<TF1>(("ExpFermiInductPrePulse" + tag).c_str(), this, tmin, tmax, 7)),
+  m_tau1(tau1), m_tau2(tau2)
+{
+  // Create the reference function that we use to evaluate ExpFermiFit more efficiently
+  //
+  std::string funcNameRefFunc = "ExpFermiInductPrePulseRefFunc" + tag;
+  std::string funcNamePreFunc = "ExpFermiInductPrePulsePreFunc" + tag;
+
+  m_expFermiInductFunc = std::make_shared<TF1>(funcNameRefFunc.c_str(), ZDCFermiExpFitInduct, tmin, tmax, 9);
+  m_expFermiInductFunc->SetParameter(0, 1);
+  m_expFermiInductFunc->SetParameter(1, 0);
+  m_expFermiInductFunc->SetParameter(2, m_tau1);
+  m_expFermiInductFunc->SetParameter(3, m_tau2);
+  m_expFermiInductFunc->SetParameter(4, 0);
+  m_expFermiInductFunc->SetParameter(5, 13.5);
+  m_expFermiInductFunc->SetParameter(6, 0.25);
+  m_expFermiInductFunc->SetParameter(7, 0.15);
+  m_expFermiInductFunc->SetParameter(8, 0.01);
+
+  m_expFermiPreFunc = std::make_shared<TF1>(funcNamePreFunc.c_str(), ZDCFermiExpFit, tmin, tmax, 9);
+
+  m_expFermiPreFunc->SetParameter(0, 1);
+  m_expFermiPreFunc->SetParameter(1, 0);
+  m_expFermiPreFunc->SetParameter(2, m_tau1);
+  m_expFermiPreFunc->SetParameter(3, m_tau2);
+  m_expFermiPreFunc->SetParameter(4, 0);
+  m_preNorm = 1. / m_expFermiPreFunc->GetMaximum();
+
+  // Now set up the actual TF1
+  //
+  std::shared_ptr<TF1> theTF1 = ZDCFitWrapper::GetWrapperTF1();
+
+  // The actual paerameters we fit
+  //
+  theTF1->SetParName(0, "Amp");
+  theTF1->SetParName(1, "T0");
+  theTF1->SetParName(2, "Amp_{pre}");
+  theTF1->SetParName(3, "T0_{pre}");
+  theTF1->SetParName(4, "C");
+  theTF1->SetParName(5, "IndA");
+  theTF1->SetParName(6, "IndBFact");
+
+  // BAC, parameter 0 limits now is set in DoInitialize
+  theTF1->SetParLimits(1, tmin, tmax);
+  theTF1->SetParLimits(2, -50, 50);
+  theTF1->SetParLimits(3, 0, 0.5);
+  theTF1->SetParLimits(4, -1, 1);
+}
+
+void ZDCFitExpFermiInductPrePulse::ConstrainFit()
+{
+}
+void ZDCFitExpFermiInductPrePulse::UnconstrainFit()
+{
+}
+
+void ZDCFitExpFermiInductPrePulse::SetPrePulseT0Range(float tmin, float tmax)
+{
+  if (tmin > GetTMin()) {
+    m_preT0Min = tmin;
+    GetWrapperTF1()->ReleaseParameter(3);
+    GetWrapperTF1()->SetParLimits(3, tmin, tmax);
+  }
+  else {
+    m_preT0Min = -25;
+    GetWrapperTF1()->SetParLimits(3, -25, tmax);
+  }
+  m_preT0Max = tmax;
+}
+
+void ZDCFitExpFermiInductPrePulse::DoInitialize(float initialAmp, float initialT0, float ampMin, float ampMax)
+{
+  GetWrapperTF1()->SetParameter(0, initialAmp);
+  GetWrapperTF1()->SetParameter(1, initialT0);
+  GetWrapperTF1()->SetParameter(2, 5);
+  GetWrapperTF1()->SetParameter(3, -10);
+  GetWrapperTF1()->SetParameter(4, 0);
+  GetWrapperTF1()->SetParameter(5, 0.25);
+  GetWrapperTF1()->SetParameter(6, 0.5);
+  
+  GetWrapperTF1()->SetParLimits(0, ampMin, ampMax);
+  // Set parameter errors for fit step size
+  //
+  double ampStep = std::min(0.05*initialAmp, std::abs(ampMax - initialAmp)/2.);
+  GetWrapperTF1()->SetParError(0, ampStep);
+  GetWrapperTF1()->SetParError(1, 1.0);
+  GetWrapperTF1()->SetParError(2, 0.05);
+  GetWrapperTF1()->SetParError(3, 1);
+  GetWrapperTF1()->SetParError(4, 5.0);
+  GetWrapperTF1()->SetParError(5, 0.1);
+  GetWrapperTF1()->SetParError(6, 0.1);
+}
+
+void ZDCFitExpFermiInductPrePulse::SetT0FitLimits(float t0Min, float t0Max)
+{
+  std::shared_ptr<TF1> theTF1 = GetWrapperTF1();
+  theTF1->SetParLimits(1, t0Min, t0Max);
+}
+
 
 // --------------------------------------------------------------------------------------------------------------------------------------------
 //
