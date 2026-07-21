@@ -1,8 +1,7 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 import os
 from AthenaConfiguration.AllConfigFlags import initConfigFlags
-from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.Enums import LHCPeriod
 from AthenaConfiguration.MainServicesConfig import MainServicesCfg
 from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
@@ -44,6 +43,7 @@ def TPCnvTest(infile, keys, useGeoModelSvc=False, useIOVDbSvc=False, doPixel=Fal
         flags.Detector.GeometryPixel = doPixel
         flags.Detector.GeometrySCT = doSCT
         flags.Detector.GeometryTRT = doTRT
+        flags.Detector.GeometryID = (doPixel or doSCT or doTRT)
         flags.Detector.GeometryLAr = doLAr
         flags.Detector.GeometryTile = doTile
         flags.Detector.GeometryMuon = doMuon
@@ -56,7 +56,6 @@ def TPCnvTest(infile, keys, useGeoModelSvc=False, useIOVDbSvc=False, doPixel=Fal
     acc.merge(PoolReadCfg(flags))
     if useIOVDbSvc:
         acc.merge(IOVDbSvcCfg(flags))
-    EventCnvSuperTool = None
     if useGeoModelSvc:
         if flags.Detector.GeometryPixel:
             from PixelGeoModel.PixelGeoModelConfig import PixelReadoutGeometryCfg
@@ -83,19 +82,18 @@ def TPCnvTest(infile, keys, useGeoModelSvc=False, useIOVDbSvc=False, doPixel=Fal
             from MuonConfig.MuonGeometryConfig import MuonGeoModelCfg
             acc.merge(MuonGeoModelCfg(flags))
         #acc.merge(ForDetGeometryCfg(flags))
+        if doTracks:
+            from TrkEventCnvTools.TrkEventCnvToolsConfig import (
+                TrkEventCnvSuperToolCfg)
+            acc.merge(TrkEventCnvSuperToolCfg(flags, MaxErrorCount=10))
         from AtlasGeoModel.GeoModelConfig import GeoModelCfg
         acc.merge(GeoModelCfg(flags))
         acc.getService("GeoModelSvc").IgnoreTagDifference = True
-        if doTracks:
-            # Doing this here as Trk.EventCnvSuperTool isn't part of all projects
-            Trk_EventCnvSuperTool=CompFactory.Trk.EventCnvSuperTool
-            EventCnvSuperTool = Trk_EventCnvSuperTool('EventCnvSuperTool', MaxErrorCount=10)
+
     acc.addEventAlgo(Dumper ('dumper', flags.Input.Files[0], keys, refpaths), 'AthAlgSeq')
     if adjustMessageSvc:
         acc.getService("MessageSvc").enableSuppression = True
         acc.getService("MessageSvc").Format = "% F%18W%S%7W%R%T %0W%M"
-    if EventCnvSuperTool is not None:
-        acc.addPublicTool(EventCnvSuperTool)
     if configOnly:
         f = open('new.pkl', 'wb')
         acc.store(f)

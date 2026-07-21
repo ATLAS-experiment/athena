@@ -39,4 +39,4 @@ if __name__ == "__main__":
         'MooreMuonChamberT0s',
     ]
 
-    TPCnvTest(infile, keys, useGeoModelSvc=True, doMuon=True)
+    TPCnvTest(infile, keys, useGeoModelSvc=True, doMuon=True, doTracks=True)
