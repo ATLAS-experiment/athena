@@ -1018,11 +1018,13 @@ def createHeavyIonLowPtTrackingPassFlags():
     icf.useVertexPositionDuringSeeding = True
     icf.useTRTExtension = False
 
+    icf.Xi2max           = 6.
+    icf.Xi2maxNoAdd      = 10.
     icf.usePrdAssociationTool = True
     icf.isLowPt          = True
     icf.minClusters      = 6
     icf.minSiNotShared   = 4
-    icf.maxShared        = 1   # cut is now on number of shared modules
+    icf.maxShared        = 2   # cut is now on number of shared modules
     icf.minPixel         = 2   # At least one pixel hit for low-pt (assoc. seeded on pixels!)
     icf.maxHoles         = 2
     icf.maxPixelHoles    = 1
