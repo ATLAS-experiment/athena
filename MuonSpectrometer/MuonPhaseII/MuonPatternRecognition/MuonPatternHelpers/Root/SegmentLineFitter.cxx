@@ -631,6 +631,7 @@ namespace MuonR4::SegmentFit{
             }
             /** Check whether there is at least one of each micromega strip type.
              *  To have a sane topology we need to have at least 2 strips from one kind. */
+
             std::size_t nEtaOrientations = 
                 std::ranges::count_if(nStrips, [](std::size_t n){ return n > 0; });
             if (nEtaOrientations == 3u) {
@@ -642,7 +643,8 @@ namespace MuonR4::SegmentFit{
 
             if ( nEtaOrientations == 4u ||
                 (nEtaOrientations == 3u && nPhiHits >= 1u) ||
-                (nEtaOrientations == 2u && nPhiHits >= 2u)) {
+                (nEtaOrientations == 2u && nPhiHits >= 2u)|| 
+                (std::ranges::any_of(nStrips, [](std::size_t n){ return n >= 2u; }) && nPhiHits >= 2u)) {
                 return true;
             }
             return false;
