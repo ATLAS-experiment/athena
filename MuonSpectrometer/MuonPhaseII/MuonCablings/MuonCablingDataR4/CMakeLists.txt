@@ -1,11 +1,11 @@
-atlas_subdir( MuonCablingData )
+atlas_subdir( MuonCablingDataR4 )
 
 atlas_add_library(
-    MuonCablingData
+	MuonCablingDataR4
     src/*.cxx
 
     PUBLIC_HEADERS
-    MuonCablingData
+    MuonCablingDataR4
 
     LINK_LIBRARIES
     AthenaKernel

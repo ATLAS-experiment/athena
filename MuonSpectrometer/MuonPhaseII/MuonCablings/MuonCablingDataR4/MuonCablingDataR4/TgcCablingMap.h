@@ -7,16 +7,17 @@
 #include <string>
 #include <unordered_map>
 
-#include "MuonCablingData/TgcCablingData.h"
+#include "MuonCablingDataR4/TgcCablingData.h"
 #include "Identifier/Identifier.h"
 #include "Identifier/IdentifierHash.h"
 
 class TgcIdHelper;
 
-namespace MuonR4 {
-
+namespace Muon{
 class IMuonIdHelperSvc;
+}
 
+namespace MuonR4{
 class TgcCablingMap {
 public:
     struct JsonEntry {
@@ -61,7 +62,7 @@ public:
     using ReadoutToOfflMap =
         std::multimap<TgcCablingReadoutID, ReadoutToOfflineAssociation>;
 
-    TgcCablingMap(const IMuonIdHelperSvc* idHelperSvc);
+    TgcCablingMap(const Muon::IMuonIdHelperSvc* idHelperSvc);
     ~TgcCablingMap();
 
     bool getOfflineId(TgcCablingData& cablingData, MsgStream& log) const;
@@ -91,6 +92,6 @@ std::ostream& operator<<(std::ostream& ostr,
 }  
 #include "AthenaKernel/CLASS_DEF.h"
 #include "AthenaKernel/CondCont.h"
-CLASS_DEF(Muon::TgcCablingMap, 52396898, 1);
-CONDCONT_DEF(Muon::TgcCablingMap, 150802588);
+CLASS_DEF(MuonR4::TgcCablingMap, 52396898, 1);
+CONDCONT_DEF(MuonR4::TgcCablingMap, 150802588);
 #endif

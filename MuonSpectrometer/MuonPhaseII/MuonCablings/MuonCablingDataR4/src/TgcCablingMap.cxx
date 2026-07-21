@@ -1,5 +1,5 @@
-#include "MuonCablingData/TgcCablingMap.h"
-#include "MuonCablingData/TgcCablingData.h"
+#include "MuonCablingDataR4/TgcCablingMap.h"
+#include "MuonCablingDataR4/TgcCablingData.h"
 
 #include "MuonIdHelpers/IMuonIdHelperSvc.h"
 #include "MuonIdHelpers/TgcIdHelper.h"

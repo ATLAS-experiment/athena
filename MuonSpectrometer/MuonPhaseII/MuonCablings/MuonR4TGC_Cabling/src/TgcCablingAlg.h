@@ -6,7 +6,7 @@
 #include "StoreGate/WriteCondHandleKey.h"
 
 #include "AthenaPoolUtilities/CondAttrListCollection.h"
-#include "MuonCablingData/TgcCablingMap.h"
+#include "MuonCablingDataR4/TgcCablingMap.h"
 #include "MuonIdHelpers/IMuonIdHelperSvc.h"
 
 #include <nlohmann/json.hpp>
@@ -29,7 +29,7 @@ private:
                         int stationPhi,
                         int16_t& slid) const;
 
-    ServiceHandle<IMuonIdHelperSvc> m_idHelperSvc{
+    ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{
         this,
         "MuonIdHelperSvc",
         "Muon::MuonIdHelperSvc/MuonIdHelperSvc",

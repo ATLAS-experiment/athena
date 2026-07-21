@@ -4,7 +4,7 @@
 #include "AthenaPoolUtilities/CondAttrListCollection.h"
 #include "CoralBase/Attribute.h"
 
-#include "MuonCablingData/TgcCablingMap.h"
+#include "MuonCablingDataR4/TgcCablingMap.h"
 
 namespace MuonR4 {
 
