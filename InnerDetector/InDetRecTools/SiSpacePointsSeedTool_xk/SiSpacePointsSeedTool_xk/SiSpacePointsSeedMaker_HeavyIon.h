@@ -160,10 +160,12 @@ namespace InDet {
     FloatProperty m_r1maxv{this, "maxVRadius1", 60.};
     FloatProperty m_r2minv{this, "minVRadius2", 70.};
     FloatProperty m_r2maxv{this, "maxVRadius2", 200.};
+    FloatProperty m_r3minv{this, "minVRadius3", 0.};
     FloatProperty m_drmin{this, "mindRadius", 10.};
     FloatProperty m_drmax{this, "maxdRadius", 270.};
     FloatProperty m_zmin{this, "minZ", -250.};
     FloatProperty m_zmax{this, "maxZ", +250.};
+    FloatProperty m_r_rmin{this, "radMin", 43.};
     FloatProperty m_r_rmax{this, "radMax", 600.};
     FloatProperty m_r_rstep{this, "radStep", 2.};
     FloatProperty m_dzver{this, "maxdZver", 5.};

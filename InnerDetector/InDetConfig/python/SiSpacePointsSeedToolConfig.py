@@ -3,6 +3,7 @@
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.Enums import BeamType
+from AthenaCommon import SystemOfUnits as Units
 
 
 def SiSpacePointsSeedMaker_CosmicCfg(
@@ -22,9 +23,20 @@ def SiSpacePointsSeedMaker_HeavyIonCfg(
     kwargs.setdefault("useVertexPosition", flags.Tracking.ActiveConfig.useVertexPositionDuringSeeding)
     if flags.Tracking.ActiveConfig.extension == "HeavyIonLowPt":
         kwargs.setdefault("pTmax", flags.Tracking.ActiveConfig.maxPT)
+        kwargs.setdefault("radMin", 0 * Units.mm)
         kwargs.setdefault("maxSeedsForSpacePoint", 4)
+        kwargs.setdefault("minVRadius1", 0 * Units.mm)
+        kwargs.setdefault("maxVRadius1", 70 * Units.mm)
+        kwargs.setdefault("minVRadius2", 70 * Units.mm)
+        kwargs.setdefault("maxVRadius2", 150 * Units.mm)
+        kwargs.setdefault("minVRadius3", 100 * Units.mm)  # 100
     else:
         kwargs.setdefault("maxSeedsForSpacePoint", 5)
+        kwargs.setdefault("minVRadius1", 0 * Units.mm)
+        kwargs.setdefault("maxVRadius1", 100 * Units.mm)
+        kwargs.setdefault("minVRadius2", 70 * Units.mm)
+        kwargs.setdefault("maxVRadius2", 200 * Units.mm)
+        kwargs.setdefault("minVRadius3", 0 * Units.mm)
 
     kwargs.setdefault("maxdImpact",
                       flags.Tracking.ActiveConfig.maxPrimaryImpact)

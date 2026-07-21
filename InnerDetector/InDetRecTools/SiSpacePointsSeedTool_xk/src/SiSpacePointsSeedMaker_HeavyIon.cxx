@@ -136,7 +136,7 @@ void InDet::SiSpacePointsSeedMaker_HeavyIon::newEvent(const EventContext& ctx, E
 	nOriginalSpacePoints += spc->size();
         for (const Trk::SpacePoint* sp: *spc) {	  
 	  float r = sp->r();
-          if (r < 43. || r>=m_r_rmax) continue;
+          if (r<m_r_rmin || r>=m_r_rmax) continue;
 	  if (prd_to_track_map_cptr and isUsed(sp,*prd_to_track_map_cptr)) continue;
 	  ++nSpacePoints;
 	  InDet::SiSpacePointForSeed* sps = newSpacePoint(data, sp);
@@ -163,7 +163,7 @@ void InDet::SiSpacePointsSeedMaker_HeavyIon::newEvent(const EventContext& ctx, E
       for (const SpacePointCollection* spc: *spacepointsSCT) {
         for (const Trk::SpacePoint* sp: *spc) {
 	  float r = sp->r();
-          if (r<0. || r>=m_r_rmax) continue;
+          if (r<m_r_rmin || r>=m_r_rmax) continue;
 	  if (prd_to_track_map_cptr and isUsed(sp,*prd_to_track_map_cptr)) continue;
 	  InDet::SiSpacePointForSeed* sps = newSpacePoint(data, sp);
 	  int ir = static_cast<int>(sps->radius()*irstep);
@@ -909,6 +909,12 @@ void InDet::SiSpacePointsSeedMaker_HeavyIon::production2Sp(EventData& data) cons
 	float X  = (*r0)->x();
 	float Y  = (*r0)->y();
 	float R  = (*r0)->radius();
+	/*
+	if (m_useVertexPosition) {
+	  std::cout << "-------------------------------------------------------------------------" << std::endl;
+	  std::cout << "middle r is: " << R << " with range [" << m_r2minv << ", " << m_r2maxv << "]" << std::endl;
+	}
+	*/
 	if (R<m_r2minv) continue;
         if (R>m_r2maxv) break;
 	float Z  = (*r0)->z();
@@ -927,6 +933,7 @@ void InDet::SiSpacePointsSeedMaker_HeavyIon::production2Sp(EventData& data) cons
 	  
 	  for (; r!=re; ++r) {
 	    float Rb =(*r)->radius();
+	    // if (m_useVertexPosition) std::cout << "other r is: " << Rb << " with range [" << m_r1minv << ", " << m_r1maxv << "]" << std::endl;
 	    if (Rb<m_r1minv) continue;
             if (Rb>m_r1maxv) break;
 	    float dR = R-Rb;
@@ -1047,6 +1054,8 @@ void InDet::SiSpacePointsSeedMaker_HeavyIon::production3Sp
     data.mapOneSeeds.erase(data.mapOneSeeds.begin(), data.mapOneSeeds.end());
 	
     float R  = (*r0)->radius();
+    if (R < m_r2minv) continue;
+    if (R > m_r2maxv) break;
 
     const Trk::SpacePoint* SP0 = (*r0)->spacepoint;
     if (SP0->clusterList().second) break;
@@ -1062,6 +1071,12 @@ void InDet::SiSpacePointsSeedMaker_HeavyIon::production3Sp
     for (int i=0; i<NB; ++i) {
       for (r=rb[i]; r!=rbe[i]; ++r) {
 	float Rb =(*r)->radius();
+	if (Rb < m_r1minv) {
+	  rb[i]=r;
+	  continue;
+	}
+	if (Rb > m_r1maxv) break;
+	
 	float dR = R-Rb;
 	if (dR > m_drmax) {rb[i]=r; continue;}
 	if (dR < m_drmin) break;
@@ -1088,6 +1103,10 @@ void InDet::SiSpacePointsSeedMaker_HeavyIon::production3Sp
     for (int i=0; i<NT; ++i) {
       for (r=rt[i]; r!=rte[i]; ++r) {
 	float Rt =(*r)->radius();
+	if (Rt < m_r3minv) {
+	  rt[i]=r;
+	  continue;
+	}
 	float dR = Rt-R;
         if (dR<m_drmin) {
           rt[i]=r;
@@ -1224,6 +1243,8 @@ void InDet::SiSpacePointsSeedMaker_HeavyIon::production3SpNoVertex
     data.mapOneSeeds.erase(data.mapOneSeeds.begin(), data.mapOneSeeds.end());
 	
     float R  = (*r0)->radius();
+    if (R < m_r2minv) continue;
+    if (R > m_r2maxv) break;
 
     const Trk::SpacePoint* SP0 = (*r0)->spacepoint;
 
@@ -1240,6 +1261,12 @@ void InDet::SiSpacePointsSeedMaker_HeavyIon::production3SpNoVertex
     for (int i=0; i<NB; ++i) {
       for (r=rb[i]; r!=rbe[i]; ++r) {
 	float Rb =(*r)->radius();
+	if (Rb < m_r1minv) {
+          rb[i]=r;
+          continue;
+        }
+        if (Rb > m_r1maxv) break;
+	
 	float dR = R-Rb;
  	if (dR > m_drmax) {
           rb[i]=r;
@@ -1268,6 +1295,10 @@ void InDet::SiSpacePointsSeedMaker_HeavyIon::production3SpNoVertex
     for (int i=0; i<NT; ++i) {
       for (r=rt[i]; r!=rte[i]; ++r) {
 	float Rt =(*r)->radius();
+	if (Rt < m_r3minv) {
+          rt[i]=r;
+          continue;
+        }
 	float dR = Rt-R;
         if (dR<m_drmin) {
           rt[i]=r;
