@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration.
  *
  * @file HGTD_Calibration/HGTD_Calibration/HGTD_TdcCalibrationTool.h
  *
@@ -33,7 +33,6 @@
 #include "InDetSimEvent/SiHit.h"
 #include "SiDigitization/SiSurfaceCharge.h"
 
-// ── Phase 1: Conditions DB integration ──
 #include "StoreGate/ReadCondHandleKey.h"
 #include "HGTD_Calibration/HGTD_TdcCalibData.h"
 
@@ -123,12 +122,10 @@ HGTD_TdcCalibrationTool(const std::string& type, const std::string& name,
   FloatProperty m_toa_bin_size {this, "TOABinSize", 20 * Athena::Units::picosecond,
     "Nominal TDC TOA bin size (fallback when conditions DB not available)"};
 
-  // ── Phase 1: Read calibration from conditions store ──
   SG::ReadCondHandleKey<HGTD_TdcCalibData> m_calibDataKey{
       this, "TdcCalibDataKey", "HGTD_TdcCalibData",
       "Key of HGTD_TdcCalibData conditions object"};
 
-  /// Flag to control whether to use conditions DB or property fallback
   BooleanProperty m_useCondDB{this, "UseCondDB", false,
       "If true, read toa_bin_size from conditions DB instead of property"};
 

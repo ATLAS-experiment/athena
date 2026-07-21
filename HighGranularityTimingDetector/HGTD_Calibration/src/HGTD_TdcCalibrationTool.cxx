@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration.
  *
  * @file HGTD_Calibration/src/HGTD_TdcCalibrationTool.cxx
  *
@@ -14,7 +14,10 @@
 #include "HGTD_Calibration/HGTD_TdcCalibrationTool.h"
 #include "CLHEP/Units/SystemOfUnits.h"
 #include "GaudiKernel/PhysicalConstants.h"
+#include "GaudiKernel/GaudiException.h"
 #include "StoreGate/ReadCondHandle.h"
+
+#include <cmath>
 
 HGTD_TdcCalibrationTool::HGTD_TdcCalibrationTool(const std::string &type,
                                             const std::string &name,
@@ -25,14 +28,20 @@ HGTD_TdcCalibrationTool::HGTD_TdcCalibrationTool(const std::string &type,
 StatusCode HGTD_TdcCalibrationTool::initialize() {
   ATH_MSG_DEBUG("initialize " << name());
 
+  if (!std::isfinite(m_toa_bin_size.value()) ||
+      m_toa_bin_size.value() <= 0.0F) {
+    ATH_MSG_FATAL("Invalid TOABinSize " << m_toa_bin_size
+                  << " ns; expected a finite positive value");
+    return StatusCode::FAILURE;
+  }
+
   if (m_useCondDB) {
     ATH_MSG_INFO("Will read TDC calibration from conditions DB"
                  << " (key: " << m_calibDataKey.key() << ")");
     ATH_CHECK(m_calibDataKey.initialize());
   } else {
-    ATH_MSG_INFO("Using hardcoded TOABinSize = " << m_toa_bin_size
+    ATH_MSG_INFO("Using configured TOABinSize = " << m_toa_bin_size
                  << " ns (conditions DB disabled)");
-    // Mark the key as not used so the scheduler doesn't wait for it
     ATH_CHECK(m_calibDataKey.initialize(false));
   }
 
@@ -41,14 +50,14 @@ StatusCode HGTD_TdcCalibrationTool::initialize() {
 
 float HGTD_TdcCalibrationTool::getToaBinSize() const {
   if (!m_useCondDB) {
-    return m_toa_bin_size;
+    return m_toa_bin_size.value();
   }
 
   SG::ReadCondHandle<HGTD_TdcCalibData> calibHandle{m_calibDataKey};
   if (!calibHandle.isValid()) {
-    ATH_MSG_WARNING("Could not retrieve HGTD_TdcCalibData from conditions store."
-                    " Falling back to property value: " << m_toa_bin_size);
-    return m_toa_bin_size;
+    ATH_MSG_FATAL("Could not retrieve HGTD_TdcCalibData from conditions store");
+    throw GaudiException("Invalid HGTD TDC calibration conditions handle",
+                         name(), StatusCode::FAILURE);
   }
 
   return calibHandle->toaBinSize();

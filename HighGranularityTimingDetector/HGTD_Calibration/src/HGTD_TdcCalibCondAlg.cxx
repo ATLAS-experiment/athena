@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration.
  *
  * @file HGTD_Calibration/src/HGTD_TdcCalibCondAlg.cxx
  *
@@ -12,7 +12,10 @@
  */
 
 #include "HGTD_TdcCalibCondAlg.h"
-#include "AthenaKernel/IOVInfiniteRange.h"
+
+#include <cmath>
+#include <exception>
+#include <memory>
 
 HGTD_TdcCalibCondAlg::HGTD_TdcCalibCondAlg(const std::string& name,
                                              ISvcLocator* pSvcLocator)
@@ -30,7 +33,6 @@ StatusCode HGTD_TdcCalibCondAlg::initialize() {
 StatusCode HGTD_TdcCalibCondAlg::execute(const EventContext& ctx) const {
   ATH_MSG_DEBUG("execute " << name());
 
-  // ── Check if output is already valid ──
   SG::WriteCondHandle<HGTD_TdcCalibData> writeHandle{m_writeKey, ctx};
   if (writeHandle.isValid()) {
     ATH_MSG_DEBUG("CondHandle " << writeHandle.fullKey()
@@ -38,40 +40,51 @@ StatusCode HGTD_TdcCalibCondAlg::execute(const EventContext& ctx) const {
     return StatusCode::SUCCESS;
   }
 
-  // ── Read input conditions data ──
   SG::ReadCondHandle<CondAttrListCollection> readHandle{m_readKey, ctx};
   if (!readHandle.isValid()) {
     ATH_MSG_FATAL("Could not read conditions data from " << m_readKey.key());
     return StatusCode::FAILURE;
   }
 
-  // Propagate the IOV range from the input
   writeHandle.addDependency(readHandle);
 
   const CondAttrListCollection* attrListColl = readHandle.cptr();
-
-  // ── Extract calibration values ──
-  auto calibData = std::make_unique<HGTD_TdcCalibData>();
-
-  // Phase 1: single global toa_bin_size value from channel 0
-  auto chanIt = attrListColl->chanAttrListPair(0);  // channel 0
-  if (chanIt != attrListColl->end()) {
-    const coral::AttributeList& attrList = chanIt->second;
-    if (attrList.exists("toa_bin_size")) {
-      float toaBinSize = attrList["toa_bin_size"].data<float>();
-      calibData->setToaBinSize(toaBinSize);
-      ATH_MSG_INFO("Read toa_bin_size = " << toaBinSize
-                   << " ns (" << toaBinSize * 1000 << " ps) from conditions DB");
-    } else {
-      ATH_MSG_WARNING("Attribute 'toa_bin_size' not found in channel 0. "
-                      "Using default value: " << calibData->toaBinSize() << " ns");
-    }
-  } else {
-    ATH_MSG_WARNING("Channel 0 not found in CondAttrListCollection. "
-                    "Using default value: " << calibData->toaBinSize() << " ns");
+  if (attrListColl == nullptr) {
+    ATH_MSG_FATAL("Conditions object " << m_readKey.key() << " is null");
+    return StatusCode::FAILURE;
   }
 
-  // ── Record the output ──
+  // Phase 1: single global toa_bin_size value from channel 0
+  const auto chanIt = attrListColl->chanAttrListPair(0);
+  if (chanIt == attrListColl->end()) {
+    ATH_MSG_FATAL("Channel 0 not found in " << m_readKey.key());
+    return StatusCode::FAILURE;
+  }
+
+  const coral::AttributeList& attrList = chanIt->second;
+  if (!attrList.exists("toa_bin_size") || attrList["toa_bin_size"].isNull()) {
+    ATH_MSG_FATAL("Attribute 'toa_bin_size' is missing or null in channel 0");
+    return StatusCode::FAILURE;
+  }
+
+  float toaBinSize = 0.0F;
+  try {
+    toaBinSize = attrList["toa_bin_size"].data<float>();
+  } catch (const std::exception& error) {
+    ATH_MSG_FATAL("Could not read 'toa_bin_size' as Float: " << error.what());
+    return StatusCode::FAILURE;
+  }
+
+  if (!std::isfinite(toaBinSize) || toaBinSize <= 0.0F) {
+    ATH_MSG_FATAL("Invalid toa_bin_size " << toaBinSize
+                  << " ns; expected a finite positive value");
+    return StatusCode::FAILURE;
+  }
+
+  ATH_MSG_INFO("Read toa_bin_size = " << toaBinSize
+               << " ns (" << toaBinSize * 1000 << " ps) from conditions DB");
+
+  auto calibData = std::make_unique<HGTD_TdcCalibData>(toaBinSize);
   if (writeHandle.record(std::move(calibData)).isFailure()) {
     ATH_MSG_FATAL("Could not record " << writeHandle.key()
                   << " with range " << writeHandle.getRange()
