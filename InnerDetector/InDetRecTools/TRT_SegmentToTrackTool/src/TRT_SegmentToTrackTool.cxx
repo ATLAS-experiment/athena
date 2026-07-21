@@ -667,6 +667,7 @@ namespace InDet {
 
       if (!perTrack || !perTrack->covariance()) {
         ATH_MSG_ERROR("Cast of perigee fails, should never happen !");
+        delete fitTrack;
         return nullptr;
       } else {
         ATH_MSG_VERBOSE ("Perigee after refit with fudges to make it converge : " << (*perTrack) );
@@ -731,7 +732,7 @@ namespace InDet {
 	    // check that new cov makes sense !
 	    const AmgSymMatrix(5)& CM = *perTrack->covariance();
 	    if( CM(1,1)==0.||CM(3,3)==0. ) {
-	      ATH_MSG_DEBUG ("Hacked perigee covariance is CRAP, reject track");
+	      ATH_MSG_DEBUG ("Hacked perigee covariance is no good, reject track");
 	      delete fitTrack; return nullptr;
 	    } else {
 	      ATH_MSG_VERBOSE ("Perigee after fit with scaled covariance matrix : " << *perTrack);
