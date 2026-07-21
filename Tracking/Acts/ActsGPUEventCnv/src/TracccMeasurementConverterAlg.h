@@ -9,6 +9,8 @@
 #include "StoreGate/WriteHandleKey.h"
 
 #include "ActsGPUEvent/TracccMeasurementCollection.h"
+#include "ActsGPUEvent/TracccSiliconClusterCollection.h"
+#include "ActsGPUEvent/TracccSiliconCellCollection.h"
 #include "traccc/edm/measurement_collection.hpp"
 #include "AthDeviceInterfaces/IMemoryResourceTool.h"
 #include "AthDeviceInterfaces/ICopyTool.h"
@@ -26,6 +28,14 @@
 #include "PixelReadoutGeometry/PixelDetectorManager.h"
 #include "SCT_ReadoutGeometry/SCT_DetectorManager.h"
 
+#include "PixelReadoutGeometry/PixelModuleDesign.h"
+#include "ReadoutGeometryBase/SiCellId.h"
+#include "SCT_ReadoutGeometry/SCT_BarrelModuleSideDesign.h"
+#include "SCT_ReadoutGeometry/SCT_ForwardModuleSideDesign.h"
+#include "SCT_ReadoutGeometry/SCT_ModuleSideDesign.h"
+#include "SCT_ReadoutGeometry/StripStereoAnnulusDesign.h"
+
+
 #include "ActsGPUInterfaces/IDeviceDetectorDescriptionProviderSvc.h"
 
 #include "GaudiKernel/ToolHandle.h"
@@ -39,7 +49,7 @@ namespace ActsTrk {
  *
  * This algorithm retrieves the input traccc measurement collection device buffer from the event store,
  * copies the data to host buffer and converts the traccc measurements to xAOD clusters.
- * In case the clusters require the associated RDOs (e.g., for truth matching),
+ * In case the clusters require the associated RDOs (e.g. for truth matching),
  * the algorithm also retrieves the traccc cluster collection device buffer from the event store,
  * and uses the cell indices stored in the traccc clusters to construct an RDO list associated with each xAOD cluster.
  *
@@ -59,12 +69,25 @@ public:
 
 private:
 
-  /// @name The input device traccc measurement collection name
-  SG::ReadHandleKey<traccc::edm::measurement_collection::const_view> m_inputMeasKey{
+  /// @name Bolean variable deciding weather the conversion includes cell to cluster association
+  Gaudi::Property<bool> m_convertClustersWithCells{
+      this, "ConvertClustersWithCells", true,
+      "Whether to associate cells with the clusters."};
+
+  /// @name The input device resident cluster, measurement and cell collection names
+  /// {@
+  SG::ReadHandleKey<traccc::edm::measurement_collection::buffer> m_inputMeasKey{
       this, "InputMeasurements", "TracccMeasurements",
       "Input traccc measurement collection buffer"};
+  SG::ReadHandleKey<traccc::edm::silicon_cluster_collection::buffer> m_inputClusterKey{
+      this, "InputClusters", "TracccClusters",
+      "Input traccc cluster collection buffer"};
+  SG::ReadHandleKey<traccc::edm::silicon_cell_collection::buffer> m_inputCellsKey{
+      this, "InputCells", "TracccCells",
+      "Input traccc cell collection buffer"};
+  /// @}
 
-  /// @name The output host resident cluster collection names
+  /// @name The output host resident cluster container names
   /// {@
   SG::WriteHandleKey<xAOD::PixelClusterContainer> m_outputPixelKey{
       this, "OutputPixelClusters", "ITkTracccPixelClusters",
@@ -91,13 +114,19 @@ private:
   mutable std::atomic<int> m_nMeas = 0;
   /// @}
 
-
+  /// The athena <-> detray identifier map
   const std::unordered_map<uint64_t, Identifier>* m_detrayToAthena{};
 
+  /// Conversion helpers (to retrieve module design, hash, etc.)
+  /// {@
   const PixelID* m_pixelID{nullptr};
   const SCT_ID*  m_stripID{nullptr};
+  Gaudi::Property<std::string> m_idHelperName {this, "IDHelperName", "PixelID",
+    "Pixel-like ID helper name to retrieve from DetectorStore"};
+
   const InDetDD::PixelDetectorManager* m_pixelManager{nullptr};
   const InDetDD::SCT_DetectorManager*  m_stripManager{nullptr};
+  /// @}
 };
 
 } // namespace ActsTrk
