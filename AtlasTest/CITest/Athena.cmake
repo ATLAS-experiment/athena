@@ -452,6 +452,9 @@ atlas_add_citest( ACTS_ActsBenchmarkWithSpotGbts
 atlas_add_citest( ACTS_ActsAnalogueClustering
   SCRIPT ActsAnalogueClustering.sh )
 
+atlas_add_citest( ACTS_ActsNNClustering
+  SCRIPT ActsNNClustering.sh )
+   
 atlas_add_citest( ACTS_CheckObjectCounts_Workflow_Legacy
   SCRIPT CheckCountTest.sh ActsCheckObjectCountsLegacy )
 
