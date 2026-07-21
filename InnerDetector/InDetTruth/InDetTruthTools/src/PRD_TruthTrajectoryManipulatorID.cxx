@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////
@@ -46,9 +46,10 @@ bool InDet::PRD_TruthTrajectoryManipulatorID::manipulateTruthTrajectory( Trk::PR
       const double prob_sct = 4.375;
       std::vector<const Trk::PrepRawData* >::iterator prdIter  = prdvec.prds.begin();
       std::vector<const Trk::PrepRawData* >::iterator prdIterE = prdvec.prds.end();
-
+      //should a better RNG be used?
       while( prdIter != prdIterE ){
             if( m_atlasId->is_pixel((*prdIter)->identify()) ){
+                //coverity[DC.WEAK_CRYPTO]
                 if( prob_pix > 0 ? rand()%100 <= prob_pix : false ){
                   prdIter = prdvec.prds.erase(prdIter);
                   prdIterE  = prdvec.prds.end();
@@ -56,6 +57,7 @@ bool InDet::PRD_TruthTrajectoryManipulatorID::manipulateTruthTrajectory( Trk::PR
                 else ++ prdIter;
             }
             else if( m_atlasId->is_sct((*prdIter)->identify()) ){
+                //coverity[DC.WEAK_CRYPTO]
                 if( rand()%100 <= prob_sct ){
                   prdIter = prdvec.prds.erase(prdIter);
                   prdIterE  = prdvec.prds.end();
