@@ -139,7 +139,7 @@ class NNClusterCalibratorToolImpl
 
   Gaudi::Property<int> m_minClusterSizeForNN{
       this, "minClusterSizeForNN", 0,
-      "how big the cluster needs to be to apply NN to it"};
+      "Use Analogue calibrator if size is smaller that this value"};
 
   SG::ReadCondHandleKey<OnnxNNCollection> m_readKeyONNX {
       this, "NnCollectionONNXReadKey", "PixelClusterNNONNX",
