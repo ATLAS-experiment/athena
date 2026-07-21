@@ -12,17 +12,16 @@ find_package( ROOT COMPONENTS Core Tree MathCore Hist RIO )
 atlas_add_root_dictionary( TBRecLib
                            TBRecLibDictSource
                            ROOT_HEADERS TBRec/TBH6RunHeader.h TBRec/LinkDef.h
-                           EXTERNAL_PACKAGES  ROOT Boost CLHEP )
+                           EXTERNAL_PACKAGES  ROOT CLHEP )
 
 atlas_add_library( TBRecLib
                    src/*.cxx
                    ${TBRecLibDictSource}
                    PUBLIC_HEADERS TBRec
                    INCLUDE_DIRS CxxUtils ${ROOT_INCLUDE_DIRS} ${CLHEP_INCLUDE_DIRS}
-                   PRIVATE_INCLUDE_DIRS ${Boost_INCLUDE_DIRS}
                    DEFINITIONS ${CLHEP_DEFINITIONS}
                    LINK_LIBRARIES ${ROOT_LIBRARIES} ${CLHEP_LIBRARIES} CaloEvent CaloGeoHelpers CaloIdentifier AthenaBaseComps AthenaKernel AthContainers GeoPrimitives Identifier xAODTracking GaudiKernel LArIdentifier LArRawEvent TBEvent TrkDetDescrUtils TrkParameters TrkTrack CaloUtilsLib StoreGateLib LArRawUtilsLib LArCablingLib CaloDetDescrLib TBCaloGeometryLib TBCondRunParLib
-                   PRIVATE_LINK_LIBRARIES ${Boost_LIBRARIES} CaloDmDetDescr CaloSimEvent CondDBObjects xAODCaloEvent LArG4TBSimEvent Particle PathResolver TrkSurfaces TrkEventPrimitives TrkExInterfaces CaloTrackingGeometryLib TrackRecordLib CaloConditions )
+                   PRIVATE_LINK_LIBRARIES  CaloDmDetDescr CaloSimEvent CondDBObjects xAODCaloEvent LArG4TBSimEvent Particle PathResolver TrkSurfaces TrkEventPrimitives TrkExInterfaces CaloTrackingGeometryLib TrackRecordLib CaloConditions )
 
 atlas_add_component( TBRec
                      src/components/*.cxx
