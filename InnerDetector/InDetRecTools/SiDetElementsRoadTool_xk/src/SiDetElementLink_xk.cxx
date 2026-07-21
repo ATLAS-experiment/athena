@@ -55,7 +55,7 @@ void InDet::SiDetElementLink_xk::set(const double* P, bool isITk)
 }
 
 ///////////////////////////////////////////////////////////////////
-// Detector element intersection using cashed information
+// Detector element intersection using cached information
 // Input  parameters: r[0] - X    a[0] - Ax 
 //                    r[1] - Y    a[1] - Ay
 //                    r[2] - Z    a[2] - Az
@@ -85,7 +85,7 @@ void InDet::SiDetElementLink_xk::intersect
 
 
 ///////////////////////////////////////////////////////////////////
-// Detector element intersection using cashed information
+// Detector element intersection using cached information
 // Input  parameters: r[0] - X    a[0] - Ax
 //                    r[1] - Y    a[1] - Ay
 //                    r[2] - Z    a[2] - Az

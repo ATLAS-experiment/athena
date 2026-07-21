@@ -73,7 +73,7 @@ StatusCode InDet::SiSpacePointsSeedMaker_ATLxk::initialize()
   }
 
   if (m_writeNtuple) {
-
+    //coverity[MISSING_LOCK]
     ATH_CHECK( m_thistSvc.retrieve() );
  
     m_treeName = (std::string("SeedTree_")+name());
@@ -2231,14 +2231,15 @@ void InDet::SiSpacePointsSeedMaker_ATLxk::newOneSeed
       || (data.keepAllConfirmedSeeds  && worstQualityInMap <= seedCandidateQuality  && isConfirmedSeed(p1,p3,seedCandidateQuality) && data.nOneSeeds < data.seedPerSpCapacity)
     /// c) we have reached the max number but always want to keep confirmed seeds 
     ///and the new seed of higher quality than the worst one so far, with the latter however being confirmed 
-      || (data.keepAllConfirmedSeeds  && worstQualityInMap >  seedCandidateQuality  && isConfirmedSeed(worstSeedSoFar->spacepoint0(),worstSeedSoFar->spacepoint2(),worstQualityInMap) && data.nOneSeeds < data.seedPerSpCapacity)
+      || (data.keepAllConfirmedSeeds  && worstQualityInMap >  seedCandidateQuality  && worstSeedSoFar
+      && isConfirmedSeed(worstSeedSoFar->spacepoint0(),worstSeedSoFar->spacepoint2(),worstQualityInMap) && data.nOneSeeds < data.seedPerSpCapacity)
     ){
     data.OneSeeds_Pro[data.nOneSeeds].set(p1,p2,p3,z);
     data.mapOneSeeds_Pro.insert(std::make_pair(seedCandidateQuality, &data.OneSeeds_Pro[data.nOneSeeds]));
     ++data.nOneSeeds;
   } 
   /// otherwise, we check if there is a poorer-quality seed that we can kick out
-  else if (worstQualityInMap > seedCandidateQuality){
+  else if (worstSeedSoFar && (worstQualityInMap > seedCandidateQuality)){
       /// Overwrite the parameters of the worst seed with the new one 
       worstSeedSoFar->set(p1,p2,p3,z);
       /// re-insert it with its proper quality to make sure it ends up in the right place 
@@ -2427,7 +2428,8 @@ void InDet::SiSpacePointsSeedMaker_ATLxk::fillSeeds(EventData& data) const
     } else {
       /// otherwise, extend the seed list and update the iterators 
       data.l_seeds_Pro.emplace_back(*(*it_seedCandidate).second);
-      theSeed = &(data.l_seeds_Pro.back());
+      //unused value, keep commented to avoid repetition
+      //theSeed = &(data.l_seeds_Pro.back());
       data.i_seede_Pro = data.l_seeds_Pro.end();
     }
     
