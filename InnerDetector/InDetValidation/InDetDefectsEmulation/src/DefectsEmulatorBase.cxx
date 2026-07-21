@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #include "DefectsEmulatorBase.h"
 #include "TH2.h"
@@ -95,6 +95,7 @@ namespace InDet{
               ATH_MSG_FATAL("Noise shape integral for pattern " << pattern_i << " not 1. but " << scale);
               return StatusCode::FAILURE;
            }
+           //coverity[DIVIDE_BY_ZERO:FALSE]
            scale = 1./scale;
            double sum =0.;
            for (double value : shape) {
