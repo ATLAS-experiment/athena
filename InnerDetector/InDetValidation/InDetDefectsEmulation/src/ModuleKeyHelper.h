@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
   */
 #ifndef INDET_MODULEKEYHELPER_H
 #define INDET_MODULEKEYHELPER_H
@@ -89,8 +89,9 @@ namespace InDet {
             | makeKeyPart<ROW_SHIFT,ROW_MASK>(row);
       }
 
-      /** Get the column index from a full key.
+      /** Get the column index from a full key. This is always zero if COL_MASK is zero.
        */
+      //coverity[CONSTANT_EXPRESSION_RESULT]
       static constexpr T getColumn(T key) { return (key & COL_MASK)   >> COL_SHIFT; }
 
       /** Get the row index from a full key.
@@ -107,6 +108,7 @@ namespace InDet {
 
       /** Get the column index from a full key.
        */
+      //coverity[CONSTANT_EXPRESSION_RESULT]
       static constexpr T getChip(T key)   { return (key & CHIP_MASK)  >> CHIP_SHIFT; }
 
       /** Get an associated defect type.
