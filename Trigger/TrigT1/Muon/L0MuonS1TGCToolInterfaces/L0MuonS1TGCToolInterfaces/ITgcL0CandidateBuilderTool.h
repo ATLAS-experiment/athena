@@ -11,27 +11,16 @@
 
 namespace L0Muon {
 
-/**
- * @brief Interface for constructing transient pre-Inner-Coincidence TGC
- *        candidates.
- *
- * Implementations consume the TGC RDO data for one event and append the
- * candidates reconstructed before Inner Coincidence to the supplied transient
- * container.  The transient candidates are internal to the L0MuonS1TGC
- * processing chain and are not the downstream xAOD::TGCCandData output.
- * Implementations must not retain event-dependent state between calls.
- */
+/** @brief Interface for building pre-Inner-Coincidence TGC candidates. */
 class ITgcL0CandidateBuilderTool : virtual public IAlgTool {
  public:
   DeclareInterfaceID(ITgcL0CandidateBuilderTool, 1, 0);
 
   /**
-   * @brief Build transient pre-Inner-Coincidence candidates from TGC RDO data.
-   * @param rdos Input TGC RDO container for the current event.
-   * @param candidates Container to which reconstructed candidates are appended.
+   * @brief Build candidates from TGC RDO data.
+   * @param rdos Input TGC RDO container.
+   * @param candidates Output candidate collection.
    * @param ctx Event context.
-   * @return Success when the input was processed and the output container is
-   *         valid.
    */
   virtual StatusCode build(const TgcRdoContainer& rdos,
                            TgcL0CandidateContainer& candidates,

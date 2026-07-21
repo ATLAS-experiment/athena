@@ -11,25 +11,16 @@
 
 namespace L0Muon {
 
-/**
- * @brief Interface for final TGC candidate ordering and downstream xAOD output.
- *
- * Implementations consume the transient post-Inner-Coincidence candidates,
- * apply the Track Selector ordering, and fill the supplied
- * xAOD::TGCCandDataContainer.  The output container is owned and recorded by
- * the calling algorithm.  Implementations must not retain event-dependent
- * state between calls.
- */
+/** @brief Interface for selecting TGC candidates and filling TGCCandData. */
 class ITgcL0TrackSelectorTool : virtual public IAlgTool {
  public:
   DeclareInterfaceID(ITgcL0TrackSelectorTool, 1, 0);
 
   /**
-   * @brief Select candidates and fill the downstream TGC candidate container.
-   * @param candidates Input transient post-Inner-Coincidence candidates.
-   * @param output Output xAOD container owned by the calling algorithm.
+   * @brief Select candidates and fill the output container.
+   * @param candidates Input candidate collection.
+   * @param output Output TGCCandData container.
    * @param ctx Event context.
-   * @return Success when selection and output conversion completed.
    */
   virtual StatusCode select(const TgcL0CandidateContainer& candidates,
                             xAOD::TGCCandDataContainer& output,
