@@ -1,14 +1,16 @@
 /**
-* Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration.
-*
-* @file HGTD_Calibration/src/HGTD_TdcCalibrationTool.h
-*
-* @author Rodrigo Estevam de Paula <rodrigo.estevam.de.paula@cern.ch>
-*
-* @date May, 2025
-*
-* @brief Simulation of ALTIROC Phase Shifter
-*/
+ * Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration.
+ *
+ * @file HGTD_Calibration/HGTD_Calibration/HGTD_TdcCalibrationTool.h
+ *
+ * @author Rodrigo Estevam de Paula <rodrigo.estevam.de.paula@cern.ch>
+ * @author Yuriy Volkotrub <yuriy.volkotrub@cern.ch> (CREST integration)
+ *
+ * @date May, 2025
+ *
+ * @brief Simulation of ALTIROC Phase Shifter.
+ *        Modified to read TDC calibration from conditions database.
+ */
 
 #ifndef HGTD_TDCCALIBRATIONTOOL_H
 #define HGTD_TDCCALIBRATIONTOOL_H
@@ -31,8 +33,12 @@
 #include "InDetSimEvent/SiHit.h"
 #include "SiDigitization/SiSurfaceCharge.h"
 
+// ── Phase 1: Conditions DB integration ──
+#include "StoreGate/ReadCondHandleKey.h"
+#include "HGTD_Calibration/HGTD_TdcCalibData.h"
+
 namespace HGTD {
-  constexpr unsigned int TOA_OVERLFLOW_MASK = 0x80; 
+  constexpr unsigned int TOA_OVERLFLOW_MASK = 0x80;
 }
 
 class HGTD_ID;
@@ -51,8 +57,7 @@ HGTD_TdcCalibrationTool(const std::string& type, const std::string& name,
                         const IInterface* parent);
 
   /** AlgTool initialize */
-  // Not overriding for now
-  // virtual StatusCode initialize() override final;
+  virtual StatusCode initialize() override final;
 
   /**
    * @brief Retrieves the TDC measurment window upper bound based on the sensor placement.
@@ -98,22 +103,35 @@ HGTD_TdcCalibrationTool(const std::string& type, const std::string& name,
 
   private:
 
+  /** @brief Get the effective TOA bin size.
+   *  Reads from conditions DB if available, otherwise falls back to property.
+   */
+  float getToaBinSize() const;
+
   FloatProperty m_active_window{this, "PS_ActiveRange", 2.5 * Athena::Units::nanosecond,
     "ALTIROC PS active range" };
 
   FloatProperty m_lhc_rise_edge{this, "LHC_RiseEdge",12.5 * Athena::Units::nanosecond,
     "LHC clock rise edge time" };
-    
+
   FloatProperty m_ps_large_step{this, "PS_LargeStep", 1.562 * Athena::Units::nanosecond,
     "ALTIROC PS large step"};
-    
+
   FloatProperty m_ps_small_step{this, "PS_SmallStep", 9.7 * Athena::Units::picosecond,
     "ALTIROC PS small step"};
 
-  FloatProperty m_toa_bin_size {this, "TOABinSize", 20 * Athena::Units::picosecond, 
-    "Nominal TDC TOA bin size"};
+  FloatProperty m_toa_bin_size {this, "TOABinSize", 20 * Athena::Units::picosecond,
+    "Nominal TDC TOA bin size (fallback when conditions DB not available)"};
+
+  // ── Phase 1: Read calibration from conditions store ──
+  SG::ReadCondHandleKey<HGTD_TdcCalibData> m_calibDataKey{
+      this, "TdcCalibDataKey", "HGTD_TdcCalibData",
+      "Key of HGTD_TdcCalibData conditions object"};
+
+  /// Flag to control whether to use conditions DB or property fallback
+  BooleanProperty m_useCondDB{this, "UseCondDB", false,
+      "If true, read toa_bin_size from conditions DB instead of property"};
 
 };
 
 #endif // HGTD_TDCCALIBRATIONTOOL_H
- 

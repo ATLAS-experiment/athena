@@ -4,13 +4,17 @@
  * @file HGTD_Calibration/src/HGTD_TdcCalibrationTool.cxx
  *
  * @author Rodrigo Estevam de Paula <rodrigo.estevam.de.paula@cern.ch>
+ * @author Yuriy Volkotrub <yuriy.volkotrub@cern.ch> (CREST integration)
  *
  * @date May, 2025
+ *
+ * @brief Modified to optionally read TDC calibration from conditions DB.
  */
 
 #include "HGTD_Calibration/HGTD_TdcCalibrationTool.h"
 #include "CLHEP/Units/SystemOfUnits.h"
 #include "GaudiKernel/PhysicalConstants.h"
+#include "StoreGate/ReadCondHandle.h"
 
 HGTD_TdcCalibrationTool::HGTD_TdcCalibrationTool(const std::string &type,
                                             const std::string &name,
@@ -18,9 +22,37 @@ HGTD_TdcCalibrationTool::HGTD_TdcCalibrationTool(const std::string &type,
     : AthAlgTool(type, name, parent)
 {}
 
-// StatusCode HGTD_TdcCalibrationTool::initialize() {
-//   return StatusCode::SUCCESS;
-// }
+StatusCode HGTD_TdcCalibrationTool::initialize() {
+  ATH_MSG_DEBUG("initialize " << name());
+
+  if (m_useCondDB) {
+    ATH_MSG_INFO("Will read TDC calibration from conditions DB"
+                 << " (key: " << m_calibDataKey.key() << ")");
+    ATH_CHECK(m_calibDataKey.initialize());
+  } else {
+    ATH_MSG_INFO("Using hardcoded TOABinSize = " << m_toa_bin_size
+                 << " ns (conditions DB disabled)");
+    // Mark the key as not used so the scheduler doesn't wait for it
+    ATH_CHECK(m_calibDataKey.initialize(false));
+  }
+
+  return StatusCode::SUCCESS;
+}
+
+float HGTD_TdcCalibrationTool::getToaBinSize() const {
+  if (!m_useCondDB) {
+    return m_toa_bin_size;
+  }
+
+  SG::ReadCondHandle<HGTD_TdcCalibData> calibHandle{m_calibDataKey};
+  if (!calibHandle.isValid()) {
+    ATH_MSG_WARNING("Could not retrieve HGTD_TdcCalibData from conditions store."
+                    " Falling back to property value: " << m_toa_bin_size);
+    return m_toa_bin_size;
+  }
+
+  return calibHandle->toaBinSize();
+}
 
 float HGTD_TdcCalibrationTool::activeWindowUpperBound(const InDetDD::SolidStateDetectorElementBase* element) const{
 
@@ -34,7 +66,7 @@ float HGTD_TdcCalibrationTool::activeWindowUpperBound(const InDetDD::SolidStateD
   }
   else if(hit_time_expected < m_lhc_rise_edge - 1.5*m_active_window){
     ATH_MSG_DEBUG("expected hit below calibration range");
-    return m_lhc_rise_edge.value() - m_active_window;    
+    return m_lhc_rise_edge.value() - m_active_window;
   }
 
   float window_walk = (hit_time_expected + m_active_window/2) - m_lhc_rise_edge;
@@ -60,33 +92,35 @@ float HGTD_TdcCalibrationTool::activeWindowUpperBound(const InDetDD::SolidStateD
 
 
 uint8_t HGTD_TdcCalibrationTool::Time2TOA(const InDetDD::SolidStateDetectorElementBase* element, float hit_time) const {
-  
+
   float  window_upper_bound = activeWindowUpperBound(element);
-  
-  //TOA time will be the distance between hit_time and upper bound of active window 
+  float  toa_bin_size = getToaBinSize();
+
+  //TOA time will be the distance between hit_time and upper bound of active window
   float tdc_time =  window_upper_bound - hit_time;
 
   // Check if hit is within the measurement window, if not return overflow flag
   if( tdc_time < 0 || tdc_time > 2.5){
     ATH_MSG_DEBUG("charge at " << hit_time
                                 << " outside of TOA TDC range ["
-                                << window_upper_bound - 2.5 << ", " 
+                                << window_upper_bound - 2.5 << ", "
                                 << window_upper_bound << "]" );
    return HGTD::TOA_OVERLFLOW_MASK;
   }
 
   //TOOD: Include TOA TDC bin size smearing here, for now only using nominal value
-  uint8_t toa = tdc_time/m_toa_bin_size;
+  uint8_t toa = tdc_time/toa_bin_size;
 
-  ATH_MSG_DEBUG("hit time: "<< hit_time << 
-    " hit time digitized: " << TOA2Time(element, toa) << 
+  ATH_MSG_DEBUG("hit time: "<< hit_time <<
+    " hit time digitized: " << TOA2Time(element, toa) <<
     " TOA: " <<  static_cast<unsigned int>(toa));
-  
-  return toa; 
+
+  return toa;
 
 }
 
 float HGTD_TdcCalibrationTool::TOA2Time(const InDetDD::SolidStateDetectorElementBase* element, uint8_t toa) const{
+  float toa_bin_size = getToaBinSize();
   // Using middle of bin as estimate to recover the digitized time
-  return activeWindowUpperBound(element) - (toa + 0.5)*m_toa_bin_size;
+  return activeWindowUpperBound(element) - (toa + 0.5)*toa_bin_size;
 }
