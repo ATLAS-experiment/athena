@@ -424,7 +424,7 @@ xAOD::TrackVertexAssociationMap TrackVertexAssociationTool::getMatchMapInternal(
         trktovxlist.push_back(track);
       }
     }
-    trktovxmap[vertex] = trktovxlist;
+    trktovxmap[vertex] = std::move(trktovxlist);
   }
 
   return trktovxmap;
@@ -475,7 +475,7 @@ xAOD::TrackVertexAssociationMap TrackVertexAssociationTool::getUniqueMatchMapInt
     xAOD::TrackVertexAssociationList trktovxlist;
     trktovxlist.clear();
     trktovxlist.reserve(trk_list.size());
-    trktovxmap[vertex] = trktovxlist;
+    trktovxmap[vertex] = std::move(trktovxlist);
   }
 
   for (const auto& track : trk_list) {

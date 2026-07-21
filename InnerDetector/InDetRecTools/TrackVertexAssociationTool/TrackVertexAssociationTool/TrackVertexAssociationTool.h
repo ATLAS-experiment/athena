@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRACKVERTEXASSOCIATIONTOOL_H
@@ -21,7 +21,6 @@
 // EDM includes
 #include "xAODEventInfo/EventInfo.h"
 #include "xAODTracking/TrackParticleContainer.h"
-#include "xAODTracking/TrackParticleContainerFwd.h"
 #include "xAODTracking/VertexFwd.h"
 #include "xAODTracking/VertexContainerFwd.h"
 
