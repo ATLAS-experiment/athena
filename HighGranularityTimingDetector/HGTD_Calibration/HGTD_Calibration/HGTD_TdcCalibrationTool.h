@@ -16,7 +16,9 @@
 #define HGTD_TDCCALIBRATIONTOOL_H
 
 #include <array>
+#include <memory>
 #include <map>
+#include <mutex>
 #include <string>
 #include <vector>
 #include <algorithm>
@@ -24,6 +26,8 @@
 
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "AthenaKernel/Units.h"
+#include "AthenaKernel/SlotSpecificObj.h"
+#include "AthenaPoolUtilities/CondAttrListCollection.h"
 
 #include "CLHEP/Random/RandomEngine.h"
 
@@ -34,7 +38,6 @@
 #include "SiDigitization/SiSurfaceCharge.h"
 
 #include "StoreGate/ReadCondHandleKey.h"
-#include "HGTD_Calibration/HGTD_TdcCalibData.h"
 
 namespace HGTD {
   constexpr unsigned int TOA_OVERLFLOW_MASK = 0x80;
@@ -102,10 +105,22 @@ HGTD_TdcCalibrationTool(const std::string& type, const std::string& name,
 
   private:
 
-  /** @brief Get the effective TOA bin size.
-   *  Reads from conditions DB if available, otherwise falls back to property.
-   */
-  float getToaBinSize() const;
+  using ToaBinSizes = std::vector<float>;
+
+  struct CalibrationCache {
+    const CondAttrListCollection* source{nullptr};
+    std::shared_ptr<const ToaBinSizes> toaBinSizes;
+  };
+
+  /** @brief Get the effective TOA bin sizes for the current conditions IOV. */
+  std::shared_ptr<const ToaBinSizes> getToaBinSizes() const;
+
+  /** @brief Read one TOA bin width per consecutive conditions channel. */
+  ToaBinSizes readToaBinSizes(const CondAttrListCollection& attrListColl) const;
+
+  /** @brief Convert a TOA code using an already-loaded calibration vector. */
+  float toa2Time(const InDetDD::SolidStateDetectorElementBase* element,
+                 uint8_t toa, const ToaBinSizes& toaBinSizes) const;
 
   FloatProperty m_active_window{this, "PS_ActiveRange", 2.5 * Athena::Units::nanosecond,
     "ALTIROC PS active range" };
@@ -122,12 +137,16 @@ HGTD_TdcCalibrationTool(const std::string& type, const std::string& name,
   FloatProperty m_toa_bin_size {this, "TOABinSize", 20 * Athena::Units::picosecond,
     "Nominal TDC TOA bin size (fallback when conditions DB not available)"};
 
-  SG::ReadCondHandleKey<HGTD_TdcCalibData> m_calibDataKey{
-      this, "TdcCalibDataKey", "HGTD_TdcCalibData",
-      "Key of HGTD_TdcCalibData conditions object"};
+  SG::ReadCondHandleKey<CondAttrListCollection> m_calibDataKey{
+      this, "TdcCalibKey", "/HGTD/Calibration/TdcBinSize",
+      "Key of the TDC calibration conditions folder"};
 
   BooleanProperty m_useCondDB{this, "UseCondDB", false,
       "If true, read toa_bin_size from conditions DB instead of property"};
+
+  std::shared_ptr<const ToaBinSizes> m_fallbackBinSizes;
+  mutable SG::SlotSpecificObj<std::mutex> m_cacheMutex ATLAS_THREAD_SAFE;
+  mutable SG::SlotSpecificObj<CalibrationCache> m_cache ATLAS_THREAD_SAFE;
 
 };
 

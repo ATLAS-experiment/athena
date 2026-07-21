@@ -13,8 +13,8 @@ atlas_add_library( HGTD_CalibrationLib HGTD_Calibration/*.h src/*.cxx
                   PRIVATE_INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
                   LINK_LIBRARIES ${CLHEP_LIBRARIES} ${ROOT_LIBRARIES}
                   HGTD_RawData AthenaKernel AthenaBaseComps
-                  StoreGateLib SiDigitization GaudiKernel InDetSimEvent
-                  PRIVATE_LINK_LIBRARIES AthenaPoolUtilities)
+                  AthenaPoolUtilities StoreGateLib SiDigitization GaudiKernel
+                  InDetSimEvent)
 
 atlas_add_component( HGTD_Calibration
                   src/*.cxx

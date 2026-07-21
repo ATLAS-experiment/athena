@@ -20,44 +20,31 @@ def HGTD_TdcCalibrationToolCfg(flags, name="HGTD_TdcCalibrationTool", **kwargs):
     )
 
     if use_cond_db:
-        acc.merge(HGTD_TdcCalibCondAlgCfg(flags))
+        folder = "/HGTD/Calibration/TdcBinSize"
+        folder_db = flags.HGTD.Calibration.TdcCalibDb
+        folder_tag = flags.HGTD.Calibration.TdcCalibTag
+        kwargs.setdefault("TdcCalibKey", folder)
+
+        from IOVDbSvc.IOVDbSvcConfig import addFolders
+
+        tag = folder_tag or None
+        modifiers = ""
+        if folder_db.startswith("crest_fs:"):
+            if not folder_tag:
+                raise ValueError(
+                    "HGTD.Calibration.TdcCalibTag must be set when using crest_fs"
+                )
+            # A per-folder CREST override uses <ctag> with a COOL global tag.
+            modifiers = f"<ctag>{folder_tag}</ctag>"
+            tag = None
+
+        acc.merge(addFolders(flags, folder,
+                             detDb=folder_db,
+                             className="CondAttrListCollection",
+                             tag=tag,
+                             modifiers=modifiers))
 
     acc.setPrivateTools(CompFactory.HGTD_TdcCalibrationTool(name, **kwargs))
-    return acc
-
-
-def HGTD_TdcCalibCondAlgCfg(flags, name="HGTD_TdcCalibCondAlg", **kwargs):
-    """Configure the TDC calibration conditions algorithm."""
-    acc = ComponentAccumulator()
-
-    folder = "/HGTD/Calibration/TdcBinSize"
-    folder_db = flags.HGTD.Calibration.TdcCalibDb
-    folder_tag = flags.HGTD.Calibration.TdcCalibTag
-
-    kwargs.setdefault("ReadKey", folder)
-    kwargs.setdefault("WriteKey", "HGTD_TdcCalibData")
-
-    from IOVDbSvc.IOVDbSvcConfig import addFolders
-
-    tag = folder_tag or None
-    modifiers = ""
-    if folder_db.startswith("crest_fs:"):
-        if not folder_tag:
-            raise ValueError(
-                "HGTD.Calibration.TdcCalibTag must be set when using crest_fs"
-            )
-        # A per-folder CREST override uses <ctag> even when the global backend is COOL.
-        modifiers = f"<ctag>{folder_tag}</ctag>"
-        tag = None
-
-    acc.merge(addFolders(flags, folder,
-                         detDb=folder_db,
-                         className="CondAttrListCollection",
-                         tag=tag,
-                         modifiers=modifiers))
-
-    acc.addCondAlgo(CompFactory.HGTD_TdcCalibCondAlg(name, **kwargs))
-
     return acc
 
 
