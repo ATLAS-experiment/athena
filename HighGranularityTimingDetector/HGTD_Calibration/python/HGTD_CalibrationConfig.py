@@ -29,17 +29,20 @@ def HGTD_TdcCalibrationToolCfg(flags, name="HGTD_TdcCalibrationTool", **kwargs):
 
         tag = folder_tag or None
         modifiers = ""
+        det_db = folder_db
         if folder_db.startswith("crest_fs:"):
             if not folder_tag:
                 raise ValueError(
                     "HGTD.Calibration.TdcCalibTag must be set when using crest_fs"
                 )
             # A per-folder CREST override uses <ctag> with a COOL global tag.
+            folder = f"<db>{folder_db}</db> {folder}"
+            det_db = None
             modifiers = f"<ctag>{folder_tag}</ctag>"
             tag = None
 
         acc.merge(addFolders(flags, folder,
-                             detDb=folder_db,
+                             detDb=det_db,
                              className="CondAttrListCollection",
                              tag=tag,
                              modifiers=modifiers))
