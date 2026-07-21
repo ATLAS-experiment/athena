@@ -55,8 +55,12 @@ def PhotonVariableCorrectionToolCfg(
 
 def ElectronPhotonVariableNFCorrectionToolCfg(
         flags, name="PhotonVariableNFCorrectionTool",
-        forceFold=-1, **kwargs):
-    """Configure the Normalizing Flow-based photon shower shape correction tool"""
+        nFolds=None, **kwargs):
+    """Configure the Normalizing Flow-based photon shower shape correction tool
+
+    nFolds: number of folds to use. If None (default), only 1 fold (fold 0) is used.
+    Otherwise must be >=1 and not exceed the NFolds value in the tool's config file.
+    """
     acc = ComponentAccumulator()
 
     from AthenaConfiguration.Enums import LHCPeriod
@@ -86,15 +90,13 @@ def ElectronPhotonVariableNFCorrectionToolCfg(
         )
 
     conf_key = kwargs.setdefault("ConfigFile", default_conf)
-    if forceFold>=0:
-        kwargs.setdefault("forceOneFold", True)
-        
+
     conf_file = PathResolver.FindCalibFile(conf_key)
     if not conf_file:
         raise RuntimeError(f"PathResolver cannot find {conf_key}")
 
     # Parse NFolds and ONNXnamePattern from config file
-    n_folds = None
+    n_folds_config = None
     pattern = None
     with open(conf_file, 'r') as f:
         for line in f:
@@ -105,21 +107,32 @@ def ElectronPhotonVariableNFCorrectionToolCfg(
             key   = key.strip()
             value = value.strip()
             if key == 'NFolds':
-                n_folds = int(value)
+                n_folds_config = int(value)
             elif key == 'ONNXnamePattern':
                 pattern = value
 
-    if n_folds is None or pattern is None:
+    if n_folds_config is None or pattern is None:
         raise RuntimeError(f'NFolds or ONNXnamePattern not found in config: {conf_file}')
+
+    # Number of folds to actually build/use. Defaults to 1 fold (fold 0) if not requested.
+    if nFolds is None:
+        n_folds_used = 1
+    else:
+        if nFolds < 1:
+            raise ValueError(f'nFolds must be >= 1, got {nFolds}')
+        if nFolds > n_folds_config:
+            raise ValueError(
+                f'Requested nFolds={nFolds} exceeds NFolds={n_folds_config} available in config: {conf_file}'
+            )
+        n_folds_used = nFolds
+
+    kwargs.setdefault("NFoldsOverride", n_folds_used)
 
     # Build forward and backward ONNX tools per fold
     forward_tools  = []
     backward_tools = []
-    for i in range(n_folds):
+    for i in range(n_folds_used):
 
-        if forceFold>=0 and i!=forceFold:
-            continue
-        
         fwd_session = CompFactory.AthOnnx.OnnxRuntimeSessionToolCPU(
             f'NFCorrectionORTSessionToolForward_{i}',
             ModelFileName=f'{pattern}_forward_{i}.onnx')
