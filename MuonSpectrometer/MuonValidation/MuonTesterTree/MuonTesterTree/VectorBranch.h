@@ -50,6 +50,14 @@ public:
     inline bool isUpdated() const;
     inline bool hasDefault() const;
 
+    inline friend std::ostream& operator<<(std::ostream& ostr, const VectorBranch& br) {
+        ostr<<br.name()<<": ";
+        if (br.isUpdated()){
+            ostr<<br.m_variable;
+        } else ostr<<"[]";
+        return ostr;
+    };
+
 private:
     std::vector<T> m_variable{};
     T m_default{};
