@@ -64,7 +64,7 @@ public:
  
   //Config variables
   SG::ReadHandleKey<xAOD::TrackParticleContainer> m_trackKey{this, "TrackParticlesKey", "InDetTrackParticles"};
-  std::string m_vtxContainer;                     //! vtx container name
+  Gaudi::Property<std::string> m_vtxContainer{this, "vtxContainer", "PrimaryVertices", "vertex container"};
   SG::ReadHandleKey<xAOD::JetContainer> m_jetKey{this, "JetsKey", "AntiKt4EMTopoJets_Selected"};
   SG::ReadDecorHandleKey<xAOD::JetContainer> m_jetConstitScalePtKey{this, "JetConstitScalePt", m_jetKey, "JetConstitScaleMomentum_pt"};
 
@@ -98,7 +98,7 @@ public:
   Gaudi::Property<bool> m_ipSaveHistosOnly{this, "ipSaveHistosOnly", true, "Flag to save histograms only"};   // Passed as a flag in the runAnalysis command line. Save the IP histograms only without dumping an IP ntuple.
 
   Gaudi::Property<bool> m_ipSaveAdditionalHistos{this,"ipSaveAdditionalHistos",true,"Flag to save AdditionalHistos"};
-  std::unique_ptr<IPhistos> m_IPhistos;           //!
+  std::unique_ptr<IPhistos> m_IPhistos = nullptr;           //!
   // variables that don't get filled at submission time should be
   // protected from being send from the submission node to the worker
   // node (done by the //!)

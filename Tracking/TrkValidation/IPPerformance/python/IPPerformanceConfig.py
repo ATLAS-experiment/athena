@@ -3,7 +3,6 @@
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaCommon.CFElements import seqAND
-#from AthenaConfiguration.Enums import LHCPeriod
 
 def EventStatusSelection_And_VertexSelectionCfg(flags):
 
@@ -72,13 +71,7 @@ def IPNtupleDumperCfg(flags,name="IPNtupleDumper", **kwargs):
             acc.popToolsAndMerge(InDetTrackSelectionTool_LoosePrimary_Cfg(flags)),
             acc.popToolsAndMerge(InDetTrackSelectionTool_TightPrimary_Cfg(flags)) ])
     
-    ipNtupleDumper = CompFactory.IPNtupleDumper(name, **kwargs)
-#    if flags.GeoModel.Run == LHCPeriod.Run2:
-#      ipNtupleDumper.JetsKey = "AntiKt4EMTopoJets_Selected"
-#    else:
-#      ipNtupleDumper.JetsKey = "AntiKt4EMPFlowJets"   
-    acc.addEventAlgo(ipNtupleDumper) 
-#    acc.addEventAlgo(CompFactory.IPNtupleDumper(name, **kwargs))
+    acc.addEventAlgo(CompFactory.IPNtupleDumper(name, **kwargs))
     return acc
 
 

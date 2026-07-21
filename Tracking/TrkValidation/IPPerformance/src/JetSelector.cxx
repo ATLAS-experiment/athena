@@ -78,10 +78,10 @@ StatusCode JetSelector :: initialize ()
   m_jet_cutflow_jvt_cut         = m_jet_cutflowHist->GetXaxis()->FindBin("JVT");
   
   if (m_jetKey.empty()) {
-    ATH_MSG_INFO("configure(): InputJetContainer is empty!");
+    ATH_MSG_INFO("InputJetContainer is empty!");
     return StatusCode::FAILURE;
   }
-  ATH_MSG_INFO("configure(): InputJetContainer: "<< m_jetKey.key());
+  ATH_MSG_INFO(" InputJetContainer: "<< m_jetKey.key());
   ATH_CHECK( m_jetKey.initialize() );
 
   m_decor   = "passSel";

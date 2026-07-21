@@ -19,17 +19,7 @@
 
 IPNtupleDumper::IPNtupleDumper(const std::string& name, ISvcLocator* pSvcLocator) 
 : AthAlgorithm(name, pSvcLocator)
-{
-  m_TruthPtCut         = 500.;
-  m_TruthEtaCut        = 2.5;
-  m_TruthMatchProb     = 0.5;
-  m_doTightTruthMatch  = true;
-  m_doGhostAssociation = true;
-  m_vtxContainer       = "PrimaryVertices";
-  m_deltaRCut          = 0.4;
-  m_IPhistos           = nullptr;
-  
-}
+{}
 
 IPNtupleDumper ::~IPNtupleDumper() {}
 
@@ -47,26 +37,26 @@ StatusCode IPNtupleDumper :: initialize ()
 
   ATH_MSG_INFO("initialize(): Initializing IPNtupleDumper..." );
   if (m_jetKey.empty()) {
-    ATH_MSG_INFO("IPNtupleDumper::configure(): InputJetContainer is empty!");
+    ATH_MSG_INFO("IPNtupleDumper: InputJetContainer is empty!");
     return StatusCode::FAILURE;
   }
-  ATH_MSG_INFO("IPNtupleDumper::configure(): InputJetContainer: "<< m_jetKey.key());
+  ATH_MSG_INFO("IPNtupleDumper: InputJetContainer: "<< m_jetKey.key());
   ATH_CHECK( m_jetKey.initialize() );
   ATH_CHECK( m_jetConstitScalePtKey.initialize() );
 
 
   if (m_trackKey.empty()) {
-    ATH_MSG_INFO("IPNtupleDumper::configure(): InputTrackContainer is empty!");
+    ATH_MSG_INFO("IPNtupleDumper: InputTrackContainer is empty!");
     return StatusCode::FAILURE;
   }
-  ATH_MSG_INFO("IPNtupleDumper::configure(): InputTrackContainer: "<< m_trackKey.key());
+  ATH_MSG_INFO("IPNtupleDumper: InputTrackContainer: "<< m_trackKey.key());
   ATH_CHECK( m_trackKey.initialize() );
 
   if (m_vtxContainer.empty()) {
-    ATH_MSG_INFO("IPNtupleDumper::configure(): InputVertexContainer is empty!");
+    ATH_MSG_INFO("IPNtupleDumper: InputVertexContainer is empty!");
     return StatusCode::FAILURE;
   }
-  ATH_MSG_INFO("IPNtupleDumper::configure(): InputVertexContainer: "<< m_vtxContainer);
+  ATH_MSG_INFO("IPNtupleDumper: InputVertexContainer: "<< m_vtxContainer);
   
   //Track to vertex tool
   ANA_CHECK(m_trktovxtool.retrieve());
@@ -92,18 +82,18 @@ StatusCode IPNtupleDumper :: initialize ()
   }
   else{ // Set up all the tools needed for IP studies
 
-    ATH_MSG_INFO("histInitialize(): Initializing IPhistos class");
+    ATH_MSG_INFO("histInitialize: Initializing IPhistos class");
     m_IPhistos = std::make_unique<IPhistos>("default_");
-    ATH_MSG_INFO("histInitialize(): Saving additonal IP histograms? "<<m_ipSaveAdditionalHistos);
+    ATH_MSG_INFO("histInitialize: Saving additonal IP histograms? "<<m_ipSaveAdditionalHistos);
     if(m_ipSaveAdditionalHistos) m_IPhistos->SaveAdditionalHistos();
-    ATH_MSG_INFO("histInitialize(): Defining 3D histograms");
+    ATH_MSG_INFO("histInitialize: Defining 3D histograms");
     m_IPhistos->define3DHistos();
     for (const auto& histEntry : m_IPhistos->get3DHistos()) {
       const std::string& histName = histEntry.first;
       TH3D* hist = histEntry.second;
       ANA_CHECK( histSvc->regHist("/MYSTREAM/"+histName,hist));
     }
-    ATH_MSG_INFO("histInitialize(): Defining 2D histograms");
+    ATH_MSG_INFO("histInitialize: Defining 2D histograms");
     m_IPhistos->define2DHistos();
     for (const auto& histEntry : m_IPhistos->get2DHistos()) {
       const std::string& histName = histEntry.first;
@@ -111,13 +101,13 @@ StatusCode IPNtupleDumper :: initialize ()
       ANA_CHECK( histSvc->regHist("/MYSTREAM/"+histName,hist));
     }
 
-    ATH_MSG_INFO("histInitialize(): Booking histograms");
+    ATH_MSG_INFO("histInitialize: Booking histograms");
     m_IPhistos->BookHistograms();
     for(TH1D* hist : m_IPhistos->get1Dvector()) {
         const std::string& histName = hist->GetName();
         ANA_CHECK( histSvc->regHist("/MYSTREAM/"+histName,hist));
     }
-    ATH_MSG_INFO("histInitialize(): Histograms booked successfully!");
+    ATH_MSG_INFO("histInitialize: Histograms booked successfully!");
 
   }
   // ===== IDTIDE =====
@@ -217,7 +207,7 @@ StatusCode IPNtupleDumper :: execute ()
     ATH_MSG_ERROR ("Couldn't retrieve xAOD::TrackParticles with key: " << m_trackKey.key() );
     return StatusCode::FAILURE;
   }
-
+  
   // MVGR : Retrieve AntiKt4EMPFlowJets. These are needed for weight corrections when using Run-3 data, as skimming in Run-3 no longer relies in EMTopoJets
   const xAOD::JetContainer* inAntiKt4EMPFlowJets = 0; 
   if (!evtStore()->retrieve(inAntiKt4EMPFlowJets, "AntiKt4EMPFlowJets").isSuccess()){ //retrieve the jets
@@ -1010,12 +1000,7 @@ bool IPNtupleDumper::PassJVTCut(const xAOD::Jet* jet)
   return -1;
 
 }
-/*bool IPNtupleDumper::PassNNJVTCut(const xAOD::Jet* jet) const
-{
-   const asg::AcceptData result = m_nnjvtTool->accept(jet);
-   return result.getCutResult(0);
-}
- */
+
 // Original truth-truth matching, based only on element link
 // No selection on truth particle of truth matching probability
 const xAOD::TruthParticle* IPNtupleDumper::getTrackTruthLink(const xAOD::TrackParticle* track) const 
