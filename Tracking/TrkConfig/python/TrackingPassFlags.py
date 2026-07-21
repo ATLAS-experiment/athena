@@ -976,8 +976,6 @@ def createHeavyIonTrackingPassFlags():
 
     icf.nHolesMax        = 0
     icf.nHolesGapMax     = 0
-    icf.Xi2max           = 6.
-    icf.Xi2maxNoAdd      = 10.
 
     # CutLevel dependendent flags:
     # CutLevel 3 MinBias
@@ -1007,7 +1005,6 @@ def createHeavyIonTrackingPassFlags():
     icf.radMax           = 380. * Units.mm # restrict to pixels + first SCT layer
     icf.useTRT           = False
     icf.doBremRecoverySi = False
-
     return icf
 
 def createHeavyIonLowPtTrackingPassFlags():
