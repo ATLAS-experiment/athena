@@ -73,7 +73,7 @@ def TGCCablingConfigCfg(flags, name="TgcCablingCondAlg", **kwargs):
     if flags.GeoModel.Run > LHCPeriod.Run3:
         from IOVDbSvc.IOVDbSvcConfig import addFolders
         dbName = "TGC_OFL" if flags.Input.isMC else "TGC"
-        cablingFolder = "/TGC/CABLING/MAP"
+        cablingFolder = "/TGC/CABLING/MAP_SCHEMA"
         acc.merge(addFolders(flags, [cablingFolder], detDb=dbName, className="CondAttrListCollection"))
         tgcCablingAlg = CompFactory.Muon.TgcCablingAlg("TgcCablingAlg", ReadKey=cablingFolder)
         acc.addCondAlgo(tgcCablingAlg)
