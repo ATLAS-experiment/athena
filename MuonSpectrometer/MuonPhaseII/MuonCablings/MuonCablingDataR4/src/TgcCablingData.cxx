@@ -3,7 +3,7 @@
 #include <format>
 #include <ostream>
 
-namespace Muon {
+namespace MuonR4 {
 
 std::ostream& operator<<(std::ostream& ostr,
                          const TgcCablingOfflineID& obj) {

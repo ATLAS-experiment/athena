@@ -11,7 +11,7 @@
 
 #include <nlohmann/json.hpp>
 
-namespace Muon {
+namespace MuonR4 {
 
 class TgcCablingAlg : public AthReentrantAlgorithm {
 public:
@@ -46,7 +46,7 @@ private:
     SG::ReadCondHandleKey<CondAttrListCollection> m_readKeyMap{
         this,
         "ReadKey",
-        "/TGC/CABLING/MAP",
+        "/TGC/CABLING/MAP_SCHEMA",
         "TGC cabling payload folder"
     };
 };

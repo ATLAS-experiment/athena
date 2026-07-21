@@ -1,3 +1,3 @@
 #include "../TgcCablingAlg.h"
 
-DECLARE_COMPONENT(Muon::TgcCablingAlg)
+DECLARE_COMPONENT(MuonR4::TgcCablingAlg)

@@ -6,7 +6,7 @@
 
 #include "MuonCablingData/TgcCablingMap.h"
 
-namespace Muon {
+namespace MuonR4 {
 
 TgcCablingAlg::TgcCablingAlg(const std::string& name, ISvcLocator* pSvcLocator)
     : AthReentrantAlgorithm{name, pSvcLocator} {}
