@@ -512,7 +512,7 @@ for (const Trk::ITrackLink* seedtrkAtVtxIter : seedTracks) { perigeeList.push_ba
             if (trkAtVtxIter->weight() <= m_minWghtAtVtx) {
               continue;
             }
-            auto foundTrack = std::ranges::find_if(seedTracks, [trkAtVtxIter, this](Trk::ITrackLink* seedTrack) {
+            auto foundTrack = std::ranges::find_if(seedTracks, [trkAtVtxIter](Trk::ITrackLink* seedTrack) {
               return seedTrack->parameters() == trkAtVtxIter->trackOrParticleLink()->parameters();
             });
 
