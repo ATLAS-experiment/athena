@@ -10,13 +10,15 @@
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
-from AthenaConfiguration.Enums import MetadataCategory
+from AthenaConfiguration.Enums import MetadataCategory, Format
 
 
 # Main algorithm config
 def TRIG8KernelCfg(flags, name='TRIG8Kernel', **kwargs):
     """Configure the derivation framework driving algorithm (kernel) for TRIG8"""
     acc = ComponentAccumulator()
+
+    is_bs = flags.Input.Format is Format.BS
 
     # Augmentations
 
@@ -49,9 +51,10 @@ def TRIG8KernelCfg(flags, name='TRIG8Kernel', **kwargs):
 
     augmentationTools = [ ]
 
-    # Common augmentations
-    from DerivationFrameworkPhys.PhysCommonConfig import PhysCommonAugmentationsCfg
-    acc.merge(PhysCommonAugmentationsCfg(flags, TriggerListsHelper = kwargs['TriggerListsHelper']))
+    if not is_bs:
+        # Common augmentations for AOD to DAOD
+        from DerivationFrameworkPhys.PhysCommonConfig import PhysCommonAugmentationsCfg
+        acc.merge(PhysCommonAugmentationsCfg(flags, TriggerListsHelper = kwargs['TriggerListsHelper']))
 
     if flags.Tracking.doLargeD0:
         # LRT Egamma
@@ -206,7 +209,15 @@ def TRIG8Cfg(flags):
     from xAODMetaDataCnv.InfileMetaDataConfig import SetupMetaDataForStreamCfg
     from DerivationFrameworkCore.SlimmingHelper import SlimmingHelper
 
-    TRIG8SlimmingHelper = SlimmingHelper("TRIG8SlimmingHelper", NamesAndTypes = flags.Input.TypedCollections, flags = flags)
+    # set up SlimmingHelper so that falls back on StaticNamesAndTypes if TypedCollections is empty (as is in the case when reading from RAW)
+    # NOTE: Ideally modify SlimmingHelper constructor to treat empty NamesandTypes list as no argument - requires change in core derivation code.
+    kwargs = dict()
+    namesAndTypes = flags.Input.TypedCollections
+    if isinstance(namesAndTypes, list) and len(namesAndTypes) > 0:
+        kwargs["NamesAndTypes"] = namesAndTypes
+
+    TRIG8SlimmingHelper = SlimmingHelper("TRIG8SlimmingHelper", flags = flags, **kwargs)
+
 
     TRIG8SlimmingHelper.SmartCollections = ["EventInfo",
                                             "Electrons",
@@ -219,6 +230,18 @@ def TRIG8Cfg(flags):
                                             "TauJets"
                                             ]
     if flags.Tracking.doLargeD0:
+        # dictionary update required for RAW->DAOD
+        TRIG8SlimmingHelper.AppendToDictionary.update({"LRTElectrons":"xAOD::ElectronContainer",
+                                                       "LRTElectronsAux":"xAOD::ElectronAuxContainer",
+                                                       "MuonsLRT": "xAOD::MuonContainer",
+                                                       "MuonsLRTAux": "xAOD::MuonAuxContainer",
+                                                       "InDetLargeD0TrackParticles": "xAOD::TrackParticleContainer",
+                                                       "InDetLargeD0TrackParticlesAux": "xAOD::TrackParticleAuxContainer",
+                                                       "LRTGSFTrackParticles": "xAOD::TrackParticleContainer",
+                                                       "LRTGSFTrackParticlesAux": "xAOD::TrackParticleAuxContainer",
+                                                       "LRTegammaClusters":"xAOD::CaloClusterContainer",
+                                                       "LRTegammaClustersAux":"xAOD::CaloClusterAuxContainer"})
+
         TRIG8SlimmingHelper.SmartCollections += ["LRTElectrons", "MuonsLRT",
                                                  "InDetLargeD0TrackParticles"]
 
@@ -230,7 +253,7 @@ def TRIG8Cfg(flags):
                                         "HLT_IDTrack_Electron_LRTGSF",
                                         "HLT_IDTrack_Muon_FTF", 
                                         "HLT_IDTrack_Muon_IDTrig", 
-                                        "HLT_IDTrack_MuonLRT_IDTrig", 
+                                        "HLT_IDTrack_MuonLRT_IDTrig", #FIXME Has many dynamic variables not recorded to AOD? (how to remove from here?)
                                         "HLT_IDTrack_MuonIso_FTF", 
                                         "HLT_IDTrack_MuonIso_IDTrig", 
                                         "HLT_IDTrack_MuonLRT_FTF", 
@@ -244,8 +267,8 @@ def TRIG8Cfg(flags):
                                         "HLT_IDTrack_FS_FTF", 
                                         "HLT_IDTrack_FSLRT_FTF", 
                                         "HLT_IDTrack_FSLRT_IDTrig", 
-                                        "HLT_IDTrack_DVLRT_FTF", 
-                                        "HLT_IDTrack_BeamSpot_FTF", 
+                                        #"HLT_IDTrack_DVLRT_FTF",    #FIXME Remove? Not stored in AOD so presumably not needed.
+                                        #"HLT_IDTrack_BeamSpot_FTF", #FIXME Remove? Not written even to BS.
                                         "HLT_IDTrack_JetSuper_FTF", 
                                         "HLT_IDTrack_Bjet_FTF", 
                                         "HLT_IDTrack_Bjet_IDTrig", 
@@ -260,6 +283,9 @@ def TRIG8Cfg(flags):
                                         "HLT_MET_tcpufit",
                                         "HLT_DisTrkBDTSel" ]
     if flags.Tracking.doTrackSegmentsDisappearing:
+        # dictionary update required for RAW->DAOD
+        TRIG8SlimmingHelper.AppendToDictionary.update({"InDetDisappearingTrackParticles": "xAOD::TrackParticleContainer",
+                                                       "InDetDisappearingTrackParticlesAux": "xAOD::TrackParticleAuxContainer"})
         TRIG8SlimmingHelper.AllVariables += ["InDetDisappearingTrackParticles"]
 
     TRIG8SlimmingHelper.StaticContent = [ 
@@ -307,7 +333,7 @@ def TRIG8Cfg(flags):
                             "TrigRoiDescriptorCollection#HLT_Roi_TauIsoBDT",
                             "TrigRoiDescriptorCollection#HLT_Roi_TauIsoBDT_probe",
                             "TrigRoiDescriptorCollection#HLT_Roi_JetPEBPhysicsTLA",
-                            "TrigRoiDescriptorCollection#HLT_Roi_DV",
+                            #"TrigRoiDescriptorCollection#HLT_Roi_DV", #FIXME Remove? Not stored in AOD so presumably not needed.
                             "TrigRoiDescriptorCollection#HLT_Roi_Bjet",
                             "TrigRoiDescriptorCollection#HLT_Roi_FS",
                             "TrigRoiDescriptorCollection#HLT_Roi_JetSuper",

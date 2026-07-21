@@ -158,6 +158,13 @@ def fromRunArgs(runArgs):
         flags.addFlag('Output.doWriteDAOD_L1CALO2', True)
         log.info("---------- Configured DAOD_L1CALO2 output")
 
+    if hasattr(runArgs, 'outputDAOD_TRIG8File'):
+        flagString = 'Output.DAOD_TRIG8FileName'
+        flags.addFlag(flagString, runArgs.outputDAOD_TRIG8File)
+        flags.Output.doWriteDAOD = True
+        flags.addFlag('Output.doWriteDAOD_TRIG8', True)
+        log.info("---------- Configured DAOD_TRIG8 output")
+
     if hasattr(runArgs, 'outputDESDM_PHOJETFile'):
         flagString = 'Output.DESDM_PHOJETFileName'
         flags.addFlag(flagString, runArgs.outputDESDM_PHOJETFile)
@@ -216,6 +223,9 @@ def fromRunArgs(runArgs):
     # Main reconstruction steering
     from RecJobTransforms.RecoSteering import RecoSteering
     cfg = RecoSteering(flags)
+
+    with open("myTRIG8TestCfg.pkl", "wb") as f: # FIXME
+        cfg.store(f)
 
     # Performance DPDs 
     cfg.flagPerfmonDomain('PerfDPD')
@@ -289,6 +299,12 @@ def fromRunArgs(runArgs):
         from DerivationFrameworkL1Calo.L1CALO2 import L1CALO2Cfg
         cfg.merge(L1CALO2Cfg(flags))
         log.info("---------- Configured L1CALO2 perfDPD")
+
+    # TRIG8 (TrigIDMon)
+    for flag in [key for key in flags._flagdict.keys() if ("Output.DAOD_TRIG8FileName" in key)]:
+        from DerivationFrameworkTrigger.TRIG8 import TRIG8Cfg
+        cfg.merge(TRIG8Cfg(flags))
+        log.info("---------- Configured TRIG8 perfDPD")
 
     # DESDM PHOJET
     for flag in [key for key in flags._flagdict.keys() if ("Output.DESDM_PHOJETFileName" in key)]:
