@@ -69,9 +69,6 @@ def _prepare_lhe_for_shower(produced_output, lhe_file):
                                     "tmp_LHE_events.events", 
                                     "events.events") 
                   if candidate]
-    print("mmmmmmm")
-    print(lhe_file)
-    print(candidates)
 
     if _symlink_first_existing(lhe_file, candidates, overwrite=True):
         return
