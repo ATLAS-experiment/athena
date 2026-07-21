@@ -24,10 +24,12 @@
 
 #include <algorithm>
 #include <math.h>
+#include <cmath>
+#include <numbers>
 #include <functional>
 #include <iostream>
 
-
+using namespace std::numbers;
 
 StatusCode CaloHitAnalysis::initialize() {
   ATH_MSG_DEBUG( "Initializing CaloHitAnalysis" );
@@ -46,11 +48,16 @@ StatusCode CaloHitAnalysis::initialize() {
   m_h_cell_e->StatOverflows();
   ATH_CHECK(histSvc()->regHist( m_path+m_h_cell_e->GetName(), m_h_cell_e));
 
-  m_h_cell_eta = new TH1D("h_Calo_cell_eta", "cell_eta", 50,-5.,5.);
+
+  m_h_cell_log_e = new TH1D("h_Calo_cell_log_e", "cell_log_e", 100,0.,std::log10(500.));
+  m_h_cell_log_e->StatOverflows();
+  ATH_CHECK(histSvc()->regHist( m_path+m_h_cell_log_e->GetName(), m_h_cell_log_e));
+
+  m_h_cell_eta = new TH1D("h_Calo_cell_eta", "cell_eta", 100,-5.,5.);
   m_h_cell_eta->StatOverflows();
   ATH_CHECK(histSvc()->regHist( m_path+m_h_cell_eta->GetName(), m_h_cell_eta));
 
-  m_h_cell_phi = new TH1D("h_Calo_cell_phi", "cell_phi", 50,-3.1416,3.1416);
+  m_h_cell_phi = new TH1D("h_Calo_cell_phi", "cell_phi", 64,-pi,pi);
   m_h_cell_phi->StatOverflows();
   ATH_CHECK(histSvc()->regHist( m_path+m_h_cell_phi->GetName(), m_h_cell_phi));
 
@@ -62,11 +69,11 @@ StatusCode CaloHitAnalysis::initialize() {
   m_h_cell_layer->StatOverflows();
   CHECK(histSvc()->regHist( m_path+m_h_cell_layer->GetName(), m_h_cell_layer));
 
-  m_h_cell_eta_Eweight = new TH1D("h_Calo_cell_eta_Eweight", "cell_eta_Eweight", 50,-5.,5.);
+  m_h_cell_eta_Eweight = new TH1D("h_Calo_cell_eta_Eweight", "cell_eta_Eweight", 100,-5.,5.);
   m_h_cell_eta_Eweight->StatOverflows();
   CHECK(histSvc()->regHist( m_path+m_h_cell_eta_Eweight->GetName(), m_h_cell_eta_Eweight));
 
-  m_h_cell_phi_Eweight = new TH1D("h_Calo_cell_phi_Eweight", "cell_phi_Eweight", 50,-3.1416,3.1416);
+  m_h_cell_phi_Eweight = new TH1D("h_Calo_cell_phi_Eweight", "cell_phi_Eweight", 64,-pi,pi);
   m_h_cell_phi_Eweight->StatOverflows();
   CHECK(histSvc()->regHist( m_path+m_h_cell_phi_Eweight->GetName(), m_h_cell_phi_Eweight));
 
@@ -86,7 +93,7 @@ StatusCode CaloHitAnalysis::initialize() {
   m_h_zr->StatOverflows();
   ATH_CHECK(histSvc()->regHist( m_path+m_h_zr->GetName(), m_h_zr));
 
-  m_h_etaphi = new TH2D("h_Calo_etaphi", "eta_phi", 50,-5.,5.,50, -3.1416, 3.1416);
+  m_h_etaphi = new TH2D("h_Calo_etaphi", "eta_phi", 50,-5.,5.,50, -pi, pi);
   m_h_etaphi->StatOverflows();
   ATH_CHECK(histSvc()->regHist( m_path+m_h_etaphi->GetName(), m_h_etaphi));
 
@@ -97,7 +104,7 @@ StatusCode CaloHitAnalysis::initialize() {
   m_h_eta_e = new TH2D("h_Calo_eta_e", "energy vs eta", 50, -5,5, 100,0,500);
   m_h_eta_e->StatOverflows();
 
-  m_h_phi_e = new TH2D("h_Calo_phi_e", "energy vs phi", 50, -3.1416,3.1416, 100,0,500);
+  m_h_phi_e = new TH2D("h_Calo_phi_e", "energy vs phi", 50, -pi,pi, 100,0,500);
   m_h_phi_e->StatOverflows();
 
   m_h_r_e = new TH2D("h_Calo_r_e", "energy vs radius", 100, 0,6000, 100,0,500);
@@ -114,13 +121,13 @@ StatusCode CaloHitAnalysis::initialize() {
   m_h_calib_eta = new TH1D("h_calib_eta", "calib. hits eta", 50,-5,5);
   m_h_calib_eta->StatOverflows();
 
-  m_h_calib_phi = new TH1D("h_calib_phi", "calib. hits phi", 50,-3.1416,3.1416);
+  m_h_calib_phi = new TH1D("h_calib_phi", "calib. hits phi", 50,-pi,pi);
   m_h_calib_phi->StatOverflows();
 
   m_h_calib_zr = new TH2D("h_calib_zr", "calib. hits z vs r", 100,-7000,7000,1000, 0,6000);
   m_h_calib_zr->StatOverflows();
 
-  m_h_calib_etaphi = new TH2D("h_calib_etaphi", "calib. hits eta vs phi",50,-5.,5., 50,-3.1416,3.1416);
+  m_h_calib_etaphi = new TH2D("h_calib_etaphi", "calib. hits eta vs phi",50,-5.,5., 50,-pi,pi);
   m_h_calib_etaphi->StatOverflows();
 
   m_h_calib_eEM = new TH1D("h_calib_eEM", "calib. hits EM energy", 100,0,100);
@@ -165,6 +172,7 @@ StatusCode CaloHitAnalysis::initialize() {
   m_tree->Branch("CellY", &m_cell_y);
   m_tree->Branch("CellZ", &m_cell_z);
   m_tree->Branch("CellE", &m_cell_e);
+  m_tree->Branch("CellLogE", &m_cell_log_e);
   m_tree->Branch("CellRadius", &m_cell_radius);
   m_tree->Branch("CellLayer", &m_cell_layer);
   m_tree->Branch("Time", &m_time);
@@ -189,6 +197,7 @@ StatusCode CaloHitAnalysis::execute(const EventContext& ctx) {
   m_cell_eta->clear();
   m_cell_phi->clear();
   m_cell_e->clear();
+  m_cell_log_e->clear();
   m_cell_x->clear();
   m_cell_y->clear();
   m_cell_z->clear();
@@ -220,6 +229,7 @@ StatusCode CaloHitAnalysis::execute(const EventContext& ctx) {
           for (int t=0; t<(i_hit).size(); ++t) tot_e += (i_hit).energy(t);
           for (int t=0; t<(i_hit).size(); ++t) tot_time += (i_hit).time(t);
           m_h_cell_e->Fill(tot_e);
+          m_h_cell_log_e->Fill(std::log10(tot_e));
           m_h_cell_eta->Fill(ddElement->eta());
           m_h_cell_phi->Fill(ddElement->phi()) ;
           m_h_cell_radius->Fill(ddElement->r());
@@ -241,6 +251,7 @@ StatusCode CaloHitAnalysis::execute(const EventContext& ctx) {
           m_cell_eta->push_back(ddElement->eta());
           m_cell_phi->push_back(ddElement->phi());
           m_cell_e->push_back(tot_e);
+          m_cell_log_e->push_back(std::log10(tot_e));
           m_cell_x->push_back(ddElement->x());
           m_cell_y->push_back(ddElement->y());
           m_cell_z->push_back(ddElement->z());
@@ -272,6 +283,7 @@ StatusCode CaloHitAnalysis::execute(const EventContext& ctx) {
           double z = hitElement->z();
 
           m_h_cell_e->Fill( energy );
+          m_h_cell_log_e->Fill( std::log10(energy) );
           m_h_cell_eta->Fill( eta );
           m_h_cell_phi->Fill( phi );
           m_h_cell_radius->Fill( radius );
@@ -292,6 +304,7 @@ StatusCode CaloHitAnalysis::execute(const EventContext& ctx) {
           m_cell_eta->push_back(eta);
           m_cell_phi->push_back(phi);
           m_cell_e->push_back(energy);
+          m_cell_log_e->push_back(std::log10(energy));
           m_cell_x->push_back(x);
           m_cell_y->push_back(y);
           m_cell_z->push_back(z);

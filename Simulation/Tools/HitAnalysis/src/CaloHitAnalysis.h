@@ -41,6 +41,7 @@ private:
   TH1* m_h_cell_eta{};
   TH1* m_h_cell_phi{};
   TH1* m_h_cell_e{};
+  TH1* m_h_cell_log_e{};
   TH1* m_h_cell_radius{};
   TH1* m_h_cell_layer{};
   // repeat the same 4 basic histograms but energy weighted
@@ -75,6 +76,7 @@ private:
   std::vector<float>* m_cell_y{};
   std::vector<float>* m_cell_z{};
   std::vector<float>* m_cell_e{};
+  std::vector<float>* m_cell_log_e{};
   std::vector<float>* m_cell_radius{};
   std::vector<int>*   m_cell_layer{};
   std::vector<float>* m_time{};
