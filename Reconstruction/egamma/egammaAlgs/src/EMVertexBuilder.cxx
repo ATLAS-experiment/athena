@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /***************************************************************************
@@ -78,7 +78,10 @@ StatusCode EMVertexBuilder::execute(const EventContext& ctx) const
   // Remove vertices with radii above m_maxRadius
   xAOD::VertexContainer::iterator itVtx = vertices->begin();
   xAOD::VertexContainer::iterator itVtxEnd = vertices->end();
-
+  static const SG::AuxElement::Accessor<float> accPx("px");
+  static const SG::AuxElement::Accessor<float> accPy("py");
+  static const SG::AuxElement::Accessor<float> accPz("pz");
+  //
   while (itVtx != itVtxEnd){
     xAOD::Vertex* vertex = *itVtx;
 
@@ -87,9 +90,6 @@ StatusCode EMVertexBuilder::execute(const EventContext& ctx) const
       momentum += m_EMExtrapolationTool->getMomentumAtVertex(ctx,*vertex, i);
     }
 
-    static const SG::AuxElement::Accessor<float> accPx("px");
-    static const SG::AuxElement::Accessor<float> accPy("py");
-    static const SG::AuxElement::Accessor<float> accPz("pz");
     accPx(*vertex) = momentum.x();
     accPy(*vertex) = momentum.y();
     accPz(*vertex) = momentum.z();

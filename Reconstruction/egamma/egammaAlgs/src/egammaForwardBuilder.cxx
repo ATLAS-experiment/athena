@@ -211,7 +211,7 @@ StatusCode egammaForwardBuilder::execute(const EventContext& ctx) const
 	m_MVACalibSvc->execute(*newCluster, xAOD::EgammaParameters::forwardelectron, gei).isFailure())
       { ATH_MSG_ERROR("Problem executing MVA cluster tool for fwd electron"); }
 
-    caloClusterLinks(*newCluster) = constituentLinks;
+    caloClusterLinks(*newCluster) = std::move(constituentLinks);
     outClusterContainer->push_back(std::move(newCluster));
 
     size_t index = outClusterContainer->size() - 1;
@@ -286,8 +286,8 @@ StatusCode egammaForwardBuilder::execute(const EventContext& ctx) const
     
     // Apply the Forward Electron selectors.
     for (size_t i = 0; i < m_forwardElectronIsEMSelectors.size(); ++i) {
-      const auto selector = m_forwardElectronIsEMSelectors[i];
-      const auto name = m_forwardElectronIsEMSelectorResultNames[i];
+      const auto & selector = m_forwardElectronIsEMSelectors[i];
+      const auto & name = m_forwardElectronIsEMSelectorResultNames[i];
 
       // Save the bool result.
       const asg::AcceptData accept = selector->accept(ctx, el);
