@@ -27,9 +27,6 @@ class ITrackingGeometryTool : virtual public IAlgTool {
         DeclareInterfaceID(ActsTrk::ITrackingGeometryTool, 1, 0);
         /** @brief Access to the built Acts tracking geometry  */
         virtual std::shared_ptr<const Acts::TrackingGeometry> trackingGeometry() const = 0;
-        /** @brief Retrieve the geometry context with alignment constants from store gate
-         *  @param ctx: eventCotnext to access store gate */
-        virtual const GeometryContext& getGeometryContext(const EventContext& ctx) const = 0;
         /** @brief Returns the refrence to the nominal GeometryContext. The context is hold
             by the tracking geometry service and does not contain any alignable transforms  */
         virtual const GeometryContext& getNominalGeometryContext() const = 0;

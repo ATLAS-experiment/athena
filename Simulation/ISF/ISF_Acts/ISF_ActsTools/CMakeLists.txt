@@ -16,7 +16,7 @@ atlas_add_component( ISF_ActsTools
                      TrkTrack ISF_Event AthenaKernel AtlasDetDescr GeoPrimitives
                      GaudiKernel GeneratorObjects ISF_Event StoreGateLib
                      GeoModelUtilities ActsInteropLib ActsGeometryLib TruthUtils
-                     ISF_InterfacesLib Acts::PluginJson
+                     ISF_InterfacesLib Acts::PluginJson ActsEventLib
                      InDetSimEvent)
 
 # Install files from the package:

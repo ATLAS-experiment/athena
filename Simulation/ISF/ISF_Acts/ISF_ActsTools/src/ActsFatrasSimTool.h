@@ -51,6 +51,8 @@
 // Tracking
 #include "ActsGeometryInterfaces/ITrackingGeometryTool.h"
 #include "ActsGeometry/ATLASMagneticFieldWrapper.h"
+#include "ActsEvent/ContextUtility.h"
+
 
 #include <algorithm>
 #include <cassert>
@@ -249,11 +251,10 @@ class ActsFatrasSimTool : public BaseSimulatorTool {
     return StatusCode::SUCCESS; };
   virtual ISF::SimulationFlavor simFlavor() const override{
     return ISF::Fatras; };
-
-  virtual Acts::MagneticFieldContext getMagneticFieldContext(
-    const EventContext&) const;
-
  private:
+  /** @brief Context provider for geometry, magnetic field and calibration contexts */
+  ActsTrk::ContextUtility m_ctxProvider{this};
+
   // For sihit creation
   SiHitCollection m_pixelSiHits;
   SiHitCollection m_sctSiHits;
@@ -290,9 +291,6 @@ class ActsFatrasSimTool : public BaseSimulatorTool {
   PublicToolHandle<ActsTrk::ITrackingGeometryTool> m_trackingGeometryTool{
       this, "TrackingGeometryTool", "ActsTrackingGeometryTool"};
   std::shared_ptr<const Acts::TrackingGeometry> m_trackingGeometry;
-
-  // Magnetic field
-  SG::ReadCondHandleKey<AtlasFieldCacheCondObj> m_fieldCacheCondObjInputKey {this, "AtlasFieldCacheCondObj", "fieldCondObj", "Name of the Magnetic Field conditions object key"};
 
   // Logging
   std::shared_ptr<const Acts::Logger> m_logger{nullptr};
