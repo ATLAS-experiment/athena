@@ -9,6 +9,8 @@
 
 // Framework includes
 #include "AthenaBaseComps/AthAlgTool.h"
+#include "AthenaKernel/SlotSpecificObj.h"
+
 #include "ByteStreamCnvSvcBase/IROBDataProviderSvc.h"
 // STL includes
 #include <string>
@@ -44,7 +46,7 @@ public:
    * The ROBs will be placed in the ROBDataProviderSvc instance, when unpacking all ROBs will unpacked
    * @return StatusCode::SUCCESS on success.
    */
-  virtual StatusCode unpack(const OffloadMessage& msg, const EventContext& context) const override;
+  virtual StatusCode unpack(const OffloadMessage& msg, const EventContext& context) override;
 
 
 private:
@@ -59,7 +61,15 @@ private:
    * @return true if the ROB is selected for sending.
    */
   bool isROBToBeSent(eformat::helper::SourceIdentifier sourceId) const;
-};
+
+  /**
+   * @brief cashe used wne unpacking 
+   * (presumably the ownership in the future can be given to other component)
+   */
+   SG::SlotSpecificObj<std::vector<uint32_t>> m_eventsDataCache;
+   SG::SlotSpecificObj<RawEvent> m_eventsCache;
+
+  };
 
 
 #endif // EFTRACKINGDATATRANSFER_BSPackagingTool_H

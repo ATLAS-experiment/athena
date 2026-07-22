@@ -21,6 +21,7 @@ StatusCode BSPackagingTool::initialize() {
 StatusCode BSPackagingTool::pack(OffloadMessage& msg,
                                  const EventContext& context) const {
 
+  msg.mutable_identifier()->assign("RawEvent");
   m_robsSvc->collectCompleteEventData(context);
   const RawEvent* fullEvent = m_robsSvc->getEvent(context);
   ATH_MSG_DEBUG(" event " << fullEvent->global_id() << " children "
@@ -54,11 +55,30 @@ StatusCode BSPackagingTool::pack(OffloadMessage& msg,
   return StatusCode::SUCCESS;
 }
 
-StatusCode BSPackagingTool::unpack(const OffloadMessage& msg, const EventContext& context) const {
-  // I do not know yet how to place the data in the event
-  for ( auto [strROBId, contant]:  msg.uint_branches() ) {
-
+StatusCode BSPackagingTool::unpack(const OffloadMessage& msg, const EventContext& context) {
+  // not a message for me, I only handle RawEvent
+  ATH_MSG_DEBUG("Asked to unpack " << msg.identifier() );
+  if (msg.identifier() != "RawEvent") {
+    return StatusCode::SUCCESS;
   }
+
+  std::vector<uint32_t>* eventData = m_eventsDataCache.get(context);
+  eventData->resize(0);
+  auto& header = msg.uint_branches().at("header");
+  eventData->insert(eventData->end(), std::begin(header.values()), std::end(header.values()));
+  
+  for ( auto& [strROBId, content]:  msg.uint_branches() ) {
+    if ( strROBId != "header" ) { // other framents are just ROBs
+      ATH_MSG_DEBUG("ROB is unpacked " << strROBId);
+      eventData->insert(eventData->end(), std::begin(content.values()), std::end(content.values()));
+    }
+  }
+  ATH_MSG_INFO("Constructed raw event of size " << eventData->size());
+  RawEvent* rawEvent = m_eventsCache.get(context);
+  rawEvent->assign(eventData->data());
+  // rawEvent->check();
+  // m_robsSvc->setNextEvent(context, rawEvent);
+  ATH_MSG_INFO("Event given to RawEvent");
   return StatusCode::SUCCESS;
 }
 

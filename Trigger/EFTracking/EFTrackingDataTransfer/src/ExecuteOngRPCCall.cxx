@@ -80,8 +80,12 @@ StatusCode ExecuteOngRPCCall::executeEvent(MinimalEventLoopMgr* el,
   while(! s_pendingRequests.try_pop(r) ) {
     // ATH_MSG_ALWAYS("Trying to pop");
     std::this_thread::sleep_for(std::chrono::milliseconds(100));
-  }
+  }  
   ATH_MSG_ALWAYS("Got input, upacking ...");
+  for ( auto& tool: m_packingTools) {
+    ATH_CHECK(tool->unpack(*(r->request), ctx));
+  }
+  ATH_MSG_ALWAYS("Upacking done, executing algorithms ...");
   StatusCode sc = el->executeEvent(std::move(ctx));
   ATH_MSG_ALWAYS("Processed, harvesting result ...");
   r->response->set_identifier("done");
@@ -110,14 +114,16 @@ StatusCode ExecuteOngRPCCall::initialize() {
     return StatusCode::FAILURE;
   }
 
-  ATH_MSG_ALWAYS("Server ready and waiting");
+  ATH_MSG_INFO("Server ready, putting it to waiting state");
   s_serverTask.run(  [] () { s_server->Wait(); });
-  // s_server->Wait();
-  ATH_MSG_ALWAYS("Post wait");
+  ATH_MSG_INFO("Server waiting");
+
+  ATH_CHECK(m_packingTools.retrieve());
 
   return StatusCode::SUCCESS;
 }
 
 StatusCode ExecuteOngRPCCall::finalize() {
+  // some sort of close-connection action would need to be implemented here
   return StatusCode::SUCCESS;
 }

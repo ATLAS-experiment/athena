@@ -11,7 +11,7 @@ from ByteStreamCnvSvc.ByteStreamConfig import ByteStreamReadCfg
 
 flags = initConfigFlags()
 flags.Input.Files = defaultTestFiles.RAW_RUN3 # this is completely dummy input to get event loop going
-flags.Exec.MaxEvents = 10
+flags.Exec.MaxEvents = -1
 flags.Exec.OutputLevel=INFO
 flags.Concurrency.NumThreads=3
 flags.Concurrency.NumOffloadThreads=3

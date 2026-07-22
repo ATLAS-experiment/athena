@@ -55,8 +55,6 @@ StatusCode AsyncgRPCComputeAlg::execute(const EventContext& context) const {
   OffloadMessage* responseMsg =
       google::protobuf::Arena::Create<OffloadMessage>(&arena);
 
-  requestMsg->mutable_identifier()->assign("RawEvent");
-
   auto* ei = requestMsg->mutable_event();
   fillEventInfo(context.eventID(), ei);
   ATH_MSG_DEBUG("Prepared input data, event number "

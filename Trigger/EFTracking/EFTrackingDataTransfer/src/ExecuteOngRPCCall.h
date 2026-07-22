@@ -8,6 +8,7 @@
 
 // Framework includes
 #include "AthenaBaseComps/AthAlgTool.h"
+#include "IPackagingTool.h"
 // STL includes
 #include <memory>
 #include <string>
@@ -31,6 +32,12 @@ class ExecuteOngRPCCall : public extends<AthAlgTool, IEventExecutionTool> {
   Gaudi::Property<std::string> m_address{
       this, "address", "0.0.0.0:50051",
       "IP:PORT address on which this tool will receive the data"};
+
+  ToolHandleArray<IPackagingTool> m_packingTools{
+      this,
+      "PackagingTools",
+      {},
+      "Tools that would unpack the data"};      
 };
 
 #endif  // EFTRACKINGDATATRANSFER_EXECUTEONGRPCCALL_H

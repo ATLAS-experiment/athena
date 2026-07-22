@@ -17,8 +17,13 @@ flags.lock()
 
 
 acc = MainServicesCfg(flags)
-# TODO, this should be configured in advance
+
+
+# TODO, this should be configured in advance, when ELMgr is configure
+robsSvc = acc.addService(CompFactory.ROBDataProviderSvc())
 el =acc.getService("AthenaHiveEventLoopMgr")
-el.eventExecTool=CompFactory.ExecuteOngRPCCall()
+unpackBS = CompFactory.BSPackagingTool("UnpackBS", OutputLevel=DEBUG, ROBDataProvider=robsSvc)
+execTool = CompFactory.ExecuteOngRPCCall( PackagingTools=[unpackBS])
+el.eventExecTool=execTool
 
 acc.run()
