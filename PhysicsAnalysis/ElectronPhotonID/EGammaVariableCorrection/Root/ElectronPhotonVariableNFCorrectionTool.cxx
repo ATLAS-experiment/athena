@@ -47,7 +47,6 @@ ElectronPhotonVariableNFCorrectionTool::ElectronPhotonVariableNFCorrectionTool(c
 // Select fold index based on event number (and optionally pT)
 int ElectronPhotonVariableNFCorrectionTool::selectFold(unsigned long long eventNumber, float phi) const
 {
-    if(m_forceOneFold) return 0;
     if (m_nFolds <= 1) return 0;
 
     unsigned long long key = eventNumber;
@@ -138,10 +137,20 @@ StatusCode ElectronPhotonVariableNFCorrectionTool::initialize()
     env.ReadFile(resolvedConfig.c_str(), kEnvLocal);
     env.IgnoreDuplicates(false);
 
-    m_nFolds = (m_forceOneFold)?1:env.GetValue("NFolds", 0);
-    if (m_nFolds <= 0) {
+    const int nFoldsConfig = env.GetValue("NFolds", 0);
+    if (nFoldsConfig <= 0) {
         ATH_MSG_ERROR("NFolds not set or invalid in config: " << resolvedConfig);
         return StatusCode::FAILURE;
+    }
+
+    if (m_nFoldsOverride > 0) {
+        if (m_nFoldsOverride > nFoldsConfig) {
+            ATH_MSG_ERROR("NFoldsOverride (" << m_nFoldsOverride.value() << ") exceeds NFolds in config (" << nFoldsConfig << ")");
+            return StatusCode::FAILURE;
+        }
+        m_nFolds = m_nFoldsOverride;
+    } else {
+        m_nFolds = nFoldsConfig;
     }
 
     TString pattern = env.GetValue("ONNXnamePattern", "");

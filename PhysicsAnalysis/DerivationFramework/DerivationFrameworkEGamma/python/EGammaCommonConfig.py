@@ -69,8 +69,9 @@ def EGammaCommonCfg(flags):
         acc.addPublicTool(PhotonVariableCorrectionTool)
         
         if isRun2orRun3:
+            nFoldsNF = flags.Egamma.NFoldsNF if flags.hasFlag('Egamma.NFoldsNF') else None
             PhotonVariableNFCorrectionTool = acc.popToolsAndMerge(
-                ElectronPhotonVariableNFCorrectionToolCfg(flags, forceFold=0)
+                ElectronPhotonVariableNFCorrectionToolCfg(flags, nFolds=nFoldsNF)
             )
             acc.addPublicTool(PhotonVariableNFCorrectionTool)
 
