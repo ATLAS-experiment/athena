@@ -188,6 +188,7 @@ def createTrackingConfigFlags():
     icf.addFlag("Tracking.writeExtendedSi_PRDInfo", False)
     icf.addFlag("Tracking.writeExtendedTRT_PRDInfo", False)
     icf.addFlag("Tracking.PRDInfo.KeepOnlyOnTrackMeasurements", False)
+    icf.addFlag("Tracking.writeExtendedHGTDInfo", False)
     
     # Only keep entries in xAOD TrackMeasurementValidation + TrackStateValidation containers for tracks passing user cut
     # Indicate detector technology from which clusters should be thinned
