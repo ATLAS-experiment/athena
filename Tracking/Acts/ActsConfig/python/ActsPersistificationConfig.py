@@ -123,6 +123,7 @@ def PersistifyTrackParticles(flags,
                                     '-AssoClustersUFO',
                                     '-TTVA_AMVFWeights_forReco',
                                     '-trackParameterCovarianceMatrices',
+                                    '-caloExtensionLink',
                                      '-parameterX', '-parameterY', '-parameterZ',
                                      '-parameterPX', '-parameterPY', '-parameterPZ',
                                      '-parameterPosition']
