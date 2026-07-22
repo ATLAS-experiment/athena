@@ -6,9 +6,9 @@
 #
 # Tau, flavour, met, Higgs, AFP, large-r are removed. 
 #
-# MC, Truth, Trigger, CloseByIsolation, IFF, HSGNN, FEAssociation
-# PFGlobalFlowElementLinking, TrackParticleThinningTool currently 
-# disabled (to be enabled in the future?)
+# MC, Truth, Trigger, CloseByIsolation, IFF, HSGNN, FEAssociation,
+# TrackParticleThinningTool currently disabled (to be enabled in 
+# the future?)
 #
 # HLT TLA Photons and EMclusters are added.
 # =======================================================================
@@ -107,8 +107,11 @@ def EGAMPEBCommonAugmentationsCfg(flags,**kwargs):
     acc.merge(JetEGAMPEBConfig(flags))
     #We also need to build links between the newly created jet constituents (GlobalFE)
     #and electrons,photons,muons and taus
-    # from eflowRec.PFCfg import PFGlobalFlowElementLinkingCfg    
-    # acc.merge(PFGlobalFlowElementLinkingCfg(flags))
+    from eflowRec.PFCfg import getEGamFlowElementAssocAlgorithm 
+    PFCfgresult=ComponentAccumulator()
+    kwargs.setdefault("useGlobal", True)
+    PFCfgresult.addEventAlgo(getEGamFlowElementAssocAlgorithm(flags, algName="PFEGamGlobalFlowElementAssoc", **kwargs))
+    acc.merge(PFCfgresult)
 
     # from AssociationUtils.AssociationUtilsConfig import FEAssociationCfg
     # acc.merge(FEAssociationCfg(flags,
