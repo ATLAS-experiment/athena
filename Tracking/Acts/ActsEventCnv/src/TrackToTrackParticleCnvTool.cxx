@@ -233,36 +233,101 @@ namespace ActsTrk {
                             : 0),
                          static_cast<xAOD::SummaryType>(dest_xaod_summary_hits));
       }
-      setSummaryValue(track_particle,
-                      hitInfo.sum<ActsTrk::detail::HitSummaryData::Hit>(ActsTrk::detail::HitSummaryData::pixelEndcap, 0)
-                      + hitInfo.sum<ActsTrk::detail::HitSummaryData::Outlier>(ActsTrk::detail::HitSummaryData::pixelEndcap, 0),
-                      xAOD::numberOfInnermostPixelLayerEndcapHits);
-      setSummaryValue(track_particle,
-                      hitInfo.sum<ActsTrk::detail::HitSummaryData::Outlier>(ActsTrk::detail::HitSummaryData::pixelEndcap, 0),
-                      xAOD::numberOfInnermostPixelLayerEndcapOutliers);
-      setSummaryValue(track_particle,
-                      hitInfo.sum<ActsTrk::detail::HitSummaryData::Hit>(ActsTrk::detail::HitSummaryData::pixelEndcap, 1)
-                      + hitInfo.sum<ActsTrk::detail::HitSummaryData::Hit>(ActsTrk::detail::HitSummaryData::pixelEndcap, 2)
-                      + hitInfo.sum<ActsTrk::detail::HitSummaryData::Outlier>(ActsTrk::detail::HitSummaryData::pixelEndcap, 1)
-                      + hitInfo.sum<ActsTrk::detail::HitSummaryData::Outlier>(ActsTrk::detail::HitSummaryData::pixelEndcap, 2),
-                      xAOD::numberOfNextToInnermostPixelLayerEndcapHits);
-      setSummaryValue(track_particle,
-                      hitInfo.sum<ActsTrk::detail::HitSummaryData::Outlier>(ActsTrk::detail::HitSummaryData::pixelEndcap, 1)
-                      + hitInfo.sum<ActsTrk::detail::HitSummaryData::Outlier>(ActsTrk::detail::HitSummaryData::pixelEndcap, 2),
-                      xAOD::numberOfNextToInnermostPixelLayerEndcapOutliers);
+
+      // map to xAOD::summaryType from [barrel, endcap] x [innermost, next-to-innerost] x [Hits,Outlier,Shared,Split]
+      static constexpr std::array<std::array<std::array<xAOD::SummaryType,4>,2>,2> summaryTypeMap
+      {
+        std::array<std::array<xAOD::SummaryType,4>,2>{ // Pixel barrel
+            std::array<xAOD::SummaryType,4>{   // innermost
+               xAOD::numberOfInnermostPixelLayerHits,
+               xAOD::numberOfInnermostPixelLayerOutliers,
+               xAOD::numberOfInnermostPixelLayerSharedHits,
+               xAOD::numberOfInnermostPixelLayerSplitHits},
+            std::array<xAOD::SummaryType,4>{ // next-to-innermost
+               xAOD::numberOfNextToInnermostPixelLayerHits,
+               xAOD::numberOfNextToInnermostPixelLayerOutliers,
+               xAOD::numberOfNextToInnermostPixelLayerSharedHits,
+               xAOD::numberOfNextToInnermostPixelLayerSplitHits} },
+
+         std::array<std::array<xAOD::SummaryType,4>,2>{ // Pixel endcap
+            std::array<xAOD::SummaryType,4>{// innermost
+               xAOD::numberOfInnermostPixelLayerEndcapHits,
+               xAOD::numberOfInnermostPixelLayerEndcapOutliers,
+               xAOD::numberOfInnermostPixelLayerSharedEndcapHits,
+               xAOD::numberOfInnermostPixelLayerSplitEndcapHits },
+            std::array<xAOD::SummaryType,4>{// next-to-innermost
+              xAOD::numberOfNextToInnermostPixelLayerEndcapHits,
+              xAOD::numberOfNextToInnermostPixelLayerEndcapOutliers,
+              xAOD::numberOfNextToInnermostPixelLayerSharedEndcapHits,
+              xAOD::numberOfNextToInnermostPixelLayerSplitEndcapHits}}
+      };
+
+      // counts for the innermost barrel and endcap layers
+      std::array< std::array< std::array<uint8_t,4>,3>, 2> pixel_counts {
+         std::array< std::array<uint8_t,4>,3>{ // barrel counts
+            hitInfo.sumPerCountType(ActsTrk::detail::HitSummaryData::pixelBarrelFlat, 0),
+            hitInfo.sumPerCountType(ActsTrk::detail::HitSummaryData::pixelBarrelFlat, 1),
+            std::array<std::uint8_t,4>{}},
+         std::array< std::array<uint8_t,4>,3>{ // endcap counts
+            hitInfo.sumPerCountType(ActsTrk::detail::HitSummaryData::pixelEndcap, 0),
+            hitInfo.sumPerCountType(ActsTrk::detail::HitSummaryData::pixelEndcap, 1),
+            hitInfo.sumPerCountType(ActsTrk::detail::HitSummaryData::pixelEndcap, 2)}
+      };
+
+      static constexpr std::array<std::array<std::array<unsigned int,2>,2>,2> innerlayer_range{
+         std::array<std::array<unsigned int,2>,2> { // barrel
+           std::array<unsigned int,2>{0u,1u}, // layer range [a,b) considered for innermost barrel:         0
+           std::array<unsigned int,2>{1u,2u}  // layer range [a,b) considered for next-to-innermost barrel: 1
+         },
+         std::array<std::array<unsigned int,2>,2> { // endcap
+           std::array<unsigned int,2>{0u,1u}, // layer range [a,b) considered for innermost endcap:         0
+           std::array<unsigned int,2>{1u,3u}  // layer range [a,b) considered for next-to-innermost endcap: 1,2
+         }
+      };
+
+      // iterate over barrel,endcap:
+      for (unsigned int barrel_endcap_i=0; barrel_endcap_i<2; ++barrel_endcap_i) {
+         // iterate over inner and next-to-inner most:
+         for (unsigned int innerlayer_range_i=0; innerlayer_range_i<2; ++innerlayer_range_i) {
+            // iterate over hit, outlier, shared, split
+            for (unsigned int count_type_i=0;
+                 count_type_i<static_cast<unsigned int>(ActsTrk::detail::HitSummaryData::CountType::NCountTypes);
+                 ++count_type_i) {
+               unsigned int count=0;
+               // iterate over layers to be considered for innermost and next-to-innermost
+               for (unsigned int innerlayer_i=innerlayer_range[barrel_endcap_i][innerlayer_range_i][0];
+                    innerlayer_i <  innerlayer_range[barrel_endcap_i][innerlayer_range_i][1];
+                    ++innerlayer_i) {
+                  assert( barrel_endcap_i < pixel_counts.size());
+                  assert( innerlayer_i < pixel_counts[barrel_endcap_i].size());
+                  assert( count_type_i < pixel_counts[barrel_endcap_i][innerlayer_i].size());
+                  count += pixel_counts[barrel_endcap_i][innerlayer_i][count_type_i];
+               }
+               if (barrel_endcap_i==1) {
+                  if (count_type_i==static_cast<unsigned int>(ActsTrk::detail::HitSummaryData::CountType::Hit)) {
+                     // "hit" count for end-caps in summary is hit+outlier
+                     for (unsigned int innerlayer_i=innerlayer_range[barrel_endcap_i][innerlayer_range_i][0];
+                          innerlayer_i <  innerlayer_range[barrel_endcap_i][innerlayer_range_i][1];
+                          ++innerlayer_i) {
+                        assert( static_cast<unsigned int>(ActsTrk::detail::HitSummaryData::CountType::Outlier) < pixel_counts[barrel_endcap_i][innerlayer_i].size());
+                        count += pixel_counts[barrel_endcap_i][innerlayer_i][static_cast<unsigned int>(ActsTrk::detail::HitSummaryData::CountType::Outlier)];
+                     }
+                  }
+               }
+               assert( barrel_endcap_i < summaryTypeMap.size());
+               assert( innerlayer_range_i < summaryTypeMap[barrel_endcap_i].size());
+               assert( count_type_i < summaryTypeMap[barrel_endcap_i][innerlayer_range_i].size());
+               setSummaryValue(track_particle, count, summaryTypeMap[barrel_endcap_i][innerlayer_range_i][count_type_i]);
+            }
+         }
+      }
+
       setSummaryValue(track_particle,
                       specialHitCounts[Acts::toUnderlying(xAOD::UncalibMeasType::PixelClusterType)][Acts::toUnderlying(ActsTrk::detail::HitCategory::Hole)],
                       xAOD::numberOfPixelHoles);
       setSummaryValue(track_particle,
                       specialHitCounts[Acts::toUnderlying(xAOD::UncalibMeasType::PixelClusterType)][Acts::toUnderlying(ActsTrk::detail::HitCategory::DeadSensor)],
                       xAOD::numberOfPixelDeadSensors);
-      setSummaryValue(track_particle,
-                      hitInfo.sum<ActsTrk::detail::HitSummaryData::SharedHit>(ActsTrk::detail::HitSummaryData::pixelEndcap, 0),
-                      xAOD::numberOfInnermostPixelLayerSharedEndcapHits);
-      setSummaryValue(track_particle,
-                      hitInfo.sum<ActsTrk::detail::HitSummaryData::SharedHit>(ActsTrk::detail::HitSummaryData::pixelEndcap, 1)
-                      + hitInfo.sum<ActsTrk::detail::HitSummaryData::SharedHit>(ActsTrk::detail::HitSummaryData::pixelEndcap, 2),
-                      xAOD::numberOfNextToInnermostPixelLayerSharedEndcapHits);
 
       // expected layer pattern
       std::array<unsigned int, 4> expect_layer_pattern{};
@@ -286,38 +351,23 @@ namespace ActsTrk {
       setSummaryValue(track_particle,
                       static_cast<uint8_t>((expect_layer_pattern[0] & (1<<1)) != 0),
                       xAOD::expectNextToInnermostPixelLayerHit);
-      setSummaryValue(track_particle,
-                      static_cast<unsigned int>(hitInfo.sum<ActsTrk::detail::HitSummaryData::Hit>(ActsTrk::detail::HitSummaryData::pixelBarrelFlat, 0)),
-                      xAOD::numberOfInnermostPixelLayerHits);
-      setSummaryValue(track_particle,
-                      static_cast<unsigned int>(hitInfo.sum<ActsTrk::detail::HitSummaryData::Outlier>(ActsTrk::detail::HitSummaryData::pixelBarrelFlat, 0)),
-                      xAOD::numberOfInnermostPixelLayerOutliers);
-      setSummaryValue(track_particle,
-                      static_cast<unsigned int>(hitInfo.sum<ActsTrk::detail::HitSummaryData::Hit>(ActsTrk::detail::HitSummaryData::pixelBarrelFlat, 1)),
-                      xAOD::numberOfNextToInnermostPixelLayerHits);
-      setSummaryValue(track_particle,
-                      static_cast<unsigned int>(hitInfo.sum<ActsTrk::detail::HitSummaryData::Outlier>(ActsTrk::detail::HitSummaryData::pixelBarrelFlat, 1)),
-                      xAOD::numberOfNextToInnermostPixelLayerOutliers);
-      setSummaryValue(track_particle,
-                      static_cast<unsigned int>(hitInfo.sum<ActsTrk::detail::HitSummaryData::SharedHit>(ActsTrk::detail::HitSummaryData::pixelBarrelFlat, 0)),
-                      xAOD::numberOfInnermostPixelLayerSharedHits);
-      setSummaryValue(track_particle,
-                      static_cast<unsigned int>(hitInfo.sum<ActsTrk::detail::HitSummaryData::SharedHit>(ActsTrk::detail::HitSummaryData::pixelBarrelFlat, 1)),
-                      xAOD::numberOfNextToInnermostPixelLayerSharedHits);
 
       // Strip, HGTD and seom pixel summaries
       std::array<std::tuple<ActsTrk::detail::HitSummaryData::DetectorRegion,
                             ActsTrk::detail::HitSummaryData::CountType,
-                            xAOD::SummaryType> ,8 > copy_summary_types = {
+                            xAOD::SummaryType> ,9 > copy_summary_types = {
          // pixel _hits_ are copied above
-         std::make_tuple(ActsTrk::detail::HitSummaryData::pixelTotal,ActsTrk::detail::HitSummaryData::CountType::Outlier,xAOD::numberOfPixelOutliers),
-         std::make_tuple(ActsTrk::detail::HitSummaryData::pixelTotal, ActsTrk::detail::HitSummaryData::CountType::SharedHit, xAOD::numberOfPixelSharedHits),
-         std::make_tuple(ActsTrk::detail::HitSummaryData::stripTotal,ActsTrk::detail::HitSummaryData::CountType::Hit,xAOD::numberOfSCTHits),
-         std::make_tuple(ActsTrk::detail::HitSummaryData::stripTotal,ActsTrk::detail::HitSummaryData::CountType::Outlier,xAOD::numberOfSCTOutliers),
-         std::make_tuple(ActsTrk::detail::HitSummaryData::stripTotal,ActsTrk::detail::HitSummaryData::CountType::SharedHit,xAOD::numberOfSCTSharedHits),
-         std::make_tuple(ActsTrk::detail::HitSummaryData::hgtdTotal,ActsTrk::detail::HitSummaryData::CountType::Hit,xAOD::numberOfHGTDHits),
-         std::make_tuple(ActsTrk::detail::HitSummaryData::hgtdTotal,ActsTrk::detail::HitSummaryData::CountType::Outlier,xAOD::numberOfHGTDOutliers),
-         std::make_tuple(ActsTrk::detail::HitSummaryData::hgtdTotal,ActsTrk::detail::HitSummaryData::CountType::SharedHit,xAOD::numberOfHGTDSharedHits)
+         std::make_tuple(ActsTrk::detail::HitSummaryData::pixelTotal,ActsTrk::detail::HitSummaryData::CountType::Outlier,   xAOD::numberOfPixelOutliers),
+         std::make_tuple(ActsTrk::detail::HitSummaryData::pixelTotal,ActsTrk::detail::HitSummaryData::CountType::SharedHit, xAOD::numberOfPixelSharedHits),
+         std::make_tuple(ActsTrk::detail::HitSummaryData::pixelTotal,ActsTrk::detail::HitSummaryData::CountType::SplitHit,  xAOD::numberOfPixelSplitHits),
+
+         std::make_tuple(ActsTrk::detail::HitSummaryData::stripTotal,ActsTrk::detail::HitSummaryData::CountType::Hit,       xAOD::numberOfSCTHits),
+         std::make_tuple(ActsTrk::detail::HitSummaryData::stripTotal,ActsTrk::detail::HitSummaryData::CountType::Outlier,   xAOD::numberOfSCTOutliers),
+         std::make_tuple(ActsTrk::detail::HitSummaryData::stripTotal,ActsTrk::detail::HitSummaryData::CountType::SharedHit, xAOD::numberOfSCTSharedHits),
+
+         std::make_tuple(ActsTrk::detail::HitSummaryData::hgtdTotal,ActsTrk::detail::HitSummaryData::CountType::Hit,        xAOD::numberOfHGTDHits),
+         std::make_tuple(ActsTrk::detail::HitSummaryData::hgtdTotal,ActsTrk::detail::HitSummaryData::CountType::Outlier,    xAOD::numberOfHGTDOutliers),
+         std::make_tuple(ActsTrk::detail::HitSummaryData::hgtdTotal,ActsTrk::detail::HitSummaryData::CountType::SharedHit,  xAOD::numberOfHGTDSharedHits)
       };
 
       for (auto [region,count_type,dest_summary_type] : std::span(copy_summary_types.begin(),
