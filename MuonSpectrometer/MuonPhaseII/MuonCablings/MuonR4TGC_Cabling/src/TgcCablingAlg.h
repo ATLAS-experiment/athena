@@ -15,7 +15,7 @@ namespace MuonR4 {
 
 class TgcCablingAlg : public AthCondAlgorithm {
 public:
-    TgcCablingAlg(const std::string& name, ISvcLocator* pSvcLocator);
+    using AthCondAlgorithm::AthCondAlgorithm;
 
     StatusCode initialize() override;
     StatusCode execute(const EventContext& ctx) const override;
