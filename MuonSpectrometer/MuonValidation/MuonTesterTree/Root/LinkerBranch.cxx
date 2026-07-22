@@ -10,8 +10,10 @@ namespace MuonVal{
                                const std::string& altName):
         VectorBranch<unsigned short>{parent.tree(), 
                                      std::format("{:}_{:}Link", parent.name(), altName.empty() ? linkColl->name() : altName)},
-        m_linkColl{linkColl},
-        m_linkerFunc{std::move(linker)} {}
+        m_linkColl{linkColl.get()},
+        m_linkerFunc{std::move(linker)} {
+            parent.getTree().addBranch(linkColl); 
+        }
 
     void LinkerBranch::operator+=(const xAOD::IParticle* p) {
         push_back(p);
@@ -24,9 +26,8 @@ namespace MuonVal{
     }
     void LinkerBranch::push_back(const xAOD::IParticle* p) {
         const xAOD::IParticle* related = m_linkerFunc(p);
-        ParticleBranch_ptr linkColl = m_linkColl.lock();
-        linkColl->push_back(related);
-        VectorBranch<unsigned short>::push_back(linkColl->find(related));
+        m_linkColl->push_back(related);
+        VectorBranch<unsigned short>::push_back(m_linkColl->find(related));
     }
 
     
@@ -46,9 +47,10 @@ namespace MuonVal{
         VectorBranch<unsigned short>{parent.tree(), 
                                      std::format("{:}_{:}Link", parent.name(), altName.empty() ? primColl->name() : altName)},
         m_parent{parent},
-        m_linkColl{primColl},
+        m_linkColl{primColl.get()},
         m_linkerFunc{std::move(linker)} {
         setDefault(-1);
+        parent.getTree().addBranch(primColl);
     }
 
     void BilateralLinkerBranch::push_back(const xAOD::IParticle* /* p*/) {
@@ -66,8 +68,7 @@ namespace MuonVal{
         if (m_parent.size()) {
             /** Allocate the memory */
             get(m_parent.size() -1);
-            ParticleBranch_ptr linkColl = m_linkColl.lock();
-            const std::vector<const xAOD::IParticle*>& linkeMe = linkColl->getCached();
+            const std::vector<const xAOD::IParticle*>& linkeMe = m_linkColl->getCached();
             for (std::size_t primToSec = 0 ; primToSec < linkeMe.size(); ++primToSec) {
                 const size_t linkIdx = m_parent.find(m_linkerFunc(linkeMe[primToSec]));
                 if (linkIdx < size()) {

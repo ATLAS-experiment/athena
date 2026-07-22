@@ -33,8 +33,12 @@ namespace ActsTrk{
             ATH_MSG_ERROR("Failed to initialize "<<m_surfaceKey.fullKey());
             return StatusCode::FAILURE;
         }
-            unsigned counter{1};
-    
+        m_viewKey = preFix;
+        if (!m_viewKey.initialize(used).isSuccess()) {
+            ATH_MSG_ERROR("Failed to initialize the view element key "<<m_viewKey.fullKey());
+            return StatusCode::FAILURE;
+        }
+        unsigned counter{1};
         for (auto& initMe : {&m_writeKey1D, &m_writeKey2D, &m_writeKey3D}){
             (*initMe) = std::format("{:}AuxiliaryMeasContainer{:}D", preFix, counter++);
             if (!initMe->initialize(used).isSuccess()) {
@@ -58,6 +62,7 @@ namespace ActsTrk{
         m_gctx{gctx},
         m_parent{parent}{}
     StatusCode AuxiliaryMeasurementHandler::MeasurementProvider::setupContainers() {
+        ATH_CHECK(m_viewHandle.record(std::make_unique<xAOD::AuxiliaryMeasurementContainer>(SG::VIEW_ELEMENTS)));        
         ATH_CHECK(recordContainer<xAOD::AuxiliaryMeasurementAuxContainer1D>(m_handle1D));
         ATH_CHECK(recordContainer<xAOD::AuxiliaryMeasurementAuxContainer2D>(m_handle2D));
         ATH_CHECK(recordContainer<xAOD::AuxiliaryMeasurementAuxContainer3D>(m_handle3D));

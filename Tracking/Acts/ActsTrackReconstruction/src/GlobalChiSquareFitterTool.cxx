@@ -95,7 +95,7 @@ StatusCode GlobalChiSquareFitterTool::initialize() {
         m_uncalibMeasCalibrator.connect<&MuonR4::ISpacePointCalibrator::calibrateSourceLink>(muonType, m_muonCalibrator.get());
       }
     }
-    for (const auto idType: {PixelClusterType, StripClusterType, Other, HGTDClusterType}) {
+    for (const auto idType: {PixelClusterType, StripClusterType, HGTDClusterType}) {
       m_uncalibMeasCalibrator.connect<&xAODItkCalibrator_t::calibrate>(idType, &m_idCalibrator);
     }
     

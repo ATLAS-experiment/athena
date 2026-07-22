@@ -44,7 +44,7 @@ namespace MuonVal{
         void operator+=(const xAOD::IParticle& p) override;
 
     private:
-        std::weak_ptr<IParticleFourMomBranch> m_linkColl;
+        IParticleFourMomBranch* m_linkColl{nullptr};
         Linker_t m_linkerFunc;
     };
 
@@ -74,7 +74,7 @@ namespace MuonVal{
                                   Linker_t linker,
                                   const std::string& altName);
             const IParticleFourMomBranch& m_parent;
-            std::weak_ptr<IParticleFourMomBranch> m_linkColl;
+            IParticleFourMomBranch* m_linkColl{nullptr};
             Linker_t m_linkerFunc;
     
 

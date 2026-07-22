@@ -39,6 +39,8 @@ namespace MuonR4 {
         const std::vector<const xAOD::MuonSegment*>& segments() const;
         /** @brief Returns the id track candidate from which the tag was built */
         const xAOD::TrackParticle* idTrack() const;
+        /** @brief Returns the associated extrapolated to IP MsTrack */
+        const xAOD::TrackParticle* meTrack() const;
         /** @brief Returns the combined track candidate from which the tag was built */
         const xAOD::TrackParticle* cbTrack() const;
         /** @brief Returns the ms track candidate from which the tag was built  */
@@ -81,6 +83,9 @@ namespace MuonR4 {
         /** @brief Sets the ms track particle 
          *  @param msTrack Pointer to the MS track particle */
         void setMsTrack(const xAOD::TrackParticle* msTrack);
+        /** @brief Sets the extrapolated MS track particle 
+         *  @param msTrack Pointer to the ME track particle */
+        void setMeTrack(const xAOD::TrackParticle* meTrack);
         /** @brief Sets the segments associated with this tag */
         void setSegments(const std::span<const xAOD::MuonSegment* const> segs);
         /** @brief Set a parameter to be decorated to the final muon
@@ -111,6 +116,8 @@ namespace MuonR4 {
         const xAOD::TrackParticle* m_msTrack{nullptr};
         /** @brief The pointer to the combiend track particle */
         const xAOD::TrackParticle* m_cbTrack{nullptr};
+        /** @brief The pointer to the extrapolated track particle */
+        const xAOD::TrackParticle* m_meTrack{nullptr};
         /** @brief the tag's author */
         Author m_author{Author::unknown};
     };

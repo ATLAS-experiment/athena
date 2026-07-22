@@ -261,20 +261,32 @@ namespace MuonValR4 {
         m_seedSummary = std::make_shared<TrackSummaryModule>(m_tree, "MsTrkSeed", m_summaryTool.get());
         m_muonTrks = std::make_shared<IParticleFourMomBranch>(m_tree, "ActsMuons");
         m_muonTrks->addVariable(std::make_unique<TrackChi2Branch>(*m_muonTrks));
-        m_muonTrks->addVariable(std::make_unique<GenericPartDecorBranch<xAOD::Muon,std::uint16_t>>(
-            m_tree, std::format("{:}_nIter", m_muonTrks->name()), [](const xAOD::Muon& p) -> std::uint16_t {
-                using enum xAOD::Muon::TrackParticleType;
-                const xAOD::TrackParticle* msTrk = p.trackParticle(MuonSpectrometerTrackParticle);
-                if (!msTrk) {
-                    return 0;
-                }
-                auto actsTrk = ActsTrk::getActsTrack(*msTrk);
-                if (!actsTrk) {
-                    return 0;
-                }
+        m_muonTrks->addVariable(std::make_unique<TrackFitIterBranch>(*m_muonTrks));
 
-                return actsTrk->component<std::uint32_t>("Gx2fnUpdateColumn"); 
-            }));
+        using TrkType = xAOD::Muon::TrackParticleType;
+        auto dumpTrack = [&](const std::string& trkName,
+                                  TrkType type) {
+            auto trkColl = std::make_shared<IParticleFourMomBranch>(m_tree, std::format("Acts{:}", trkName));
+            trkColl->addVariable(std::make_unique<TrackChi2Branch>(*trkColl));
+            trkColl->addVariable(std::make_unique<TrackFitIterBranch>(*trkColl));
+            trkColl->addVariable<float>("d0");
+            trkColl->addVariable<float>("z0");
+            for (const auto& summary : trackSummaries) {
+                trkColl->addVariable<uint8_t>(-1, summary); 
+            }
+            m_muonTrks->addVariable(std::make_unique<MuonVal::LinkerBranch>(*m_muonTrks, trkColl, 
+                                    [type](const xAOD::IParticle* muonP) -> const xAOD::IParticle* {
+                                        const auto* muon = dynamic_cast<const xAOD::Muon*>(muonP);
+                                        if (!muon) {
+                                            return nullptr;
+                                        }
+                                        return muon->trackParticle(type);
+                                    }, trkName));
+        };
+
+        dumpTrack("MsTrk", TrkType::MuonSpectrometerTrackParticle);
+        dumpTrack("MeTrk", TrkType::ExtrapolatedMuonSpectrometerTrackParticle);
+        
         m_muonTrks->addVariable<uint16_t>("allAuthors");
         m_muonTrks->addVariable<uint16_t>("author");
         /// Link the reconstructed segments to the muon
