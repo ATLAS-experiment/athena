@@ -59,12 +59,12 @@ ActsEgammaSelectedTrackCopy::initialize()
   std::vector<std::string> unmatchedVolumes;
 
   m_trackingGeometryTool->trackingGeometry()->visitVolumes([&](const Acts::TrackingVolume *vol) {
-    auto name = vol->volumeName();
+    const auto & name = vol->volumeName();
     if( volIndex.contains(name) ) {
       ATH_MSG_DEBUG(vol->volumeName() << " - " << vol->geometryId() << " - surfaces: " << vol->surfaces().size());
       m_barrelCaloGeoIds.at(volIndex.at(name)) = vol->geometryId();
     } else {
-      unmatchedVolumes.push_back(name);
+      unmatchedVolumes.push_back(std::move(name));
     }
   });
 
@@ -209,7 +209,7 @@ ActsEgammaSelectedTrackCopy::matchWithExtrapolation(const EventContext& ctx,
   std::shared_ptr<const Acts::Surface> lastSurface =
     Acts::CurvilinearSurface(lastPos, lastMom.normalized()).planeSurface()->getSharedPtr();
   Acts::BoundTrackParameters boundPars{
-    lastSurface,
+    std::move(lastSurface),
     lastBoundParams,
     std::nullopt,
     Acts::ParticleHypothesis::electron()
