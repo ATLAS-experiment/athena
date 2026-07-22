@@ -34,7 +34,6 @@
 #include <iomanip>
 #include <sstream>
 #include <utility>
-#include <vector>
 
 namespace Trk {
 
@@ -101,8 +100,8 @@ static const std::string track_types_string[InDet::N_TRACKTYPES]= {"all",
 								   };//LT added 06.21
  
 InDet::TrackStatHelper::TrackStatHelper(const std::string& TrackCollectionKey, const std::string& TrackTruthCollectionKey, bool careAboutTruth):
-  m_TrackCollectionKey       (std::move(TrackCollectionKey)),
-  m_TrackTruthCollectionKey  (std::move(TrackTruthCollectionKey)),
+  m_TrackCollectionKey       (TrackCollectionKey),
+  m_TrackTruthCollectionKey  (TrackTruthCollectionKey),
   m_truthMissing             (false),
   m_careAboutTruth           (careAboutTruth)
 {
@@ -144,6 +143,8 @@ void InDet::TrackStatHelper::addEvent(const EventContext& ctx,
 
   TracksCounter       tracks;
   HitsCounter         hits;
+  //Local variable trackSummarySum uses 17136 bytes of stack space
+  //coverity[STACK_USE]
   TrackSummaryCounter trackSummarySum;
   bool                author_found [Trk::TrackInfo::NumberOfTrackFitters];
   std::bitset<Trk::TrackInfo::NumberOfTrackRecoInfo>   reco_info;
