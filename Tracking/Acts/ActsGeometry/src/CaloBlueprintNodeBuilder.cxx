@@ -70,8 +70,9 @@ std::shared_ptr<BlueprintNode> ActsTrk::CaloBlueprintNodeBuilder::buildBlueprint
   // values of 0,100,100.
   std::shared_ptr<StaticBlueprintNode> itkCaloNode{};
   {
+    /// Numbers taken from https://gitlab.cern.ch/atlas/athena/-/blob/main/Tracking/TrkDetDescr/TrkDetDescrSvc/src/TrackingVolumesSvc.cxx
     auto envelope = std::make_unique<TrackingVolume>(Amg::Transform3D::Identity(),
-                                                     std::make_shared<CylinderVolumeBounds>(0., 100.0, 100.0),"ITkCalo");
+                                                     std::make_shared<CylinderVolumeBounds>(0., 4250.0, 6779.0),"ITkCalo");
     envelope->assignGeometryId(Acts::GeometryIdentifier{}.withVolume(s_caloEnvelopeID));
     itkCaloNode = std::make_shared<StaticBlueprintNode>(std::move(envelope));
   }
