@@ -24,6 +24,7 @@ if __name__=="__main__":
     flags.PerfMon.doFullMonMT = not args.noPerfMon
     flags.Muon.useMdtDcsData = lambda prevFlags: prevFlags.Input.isMC
     flags.PerfMon.OutputJSON="perfmonmt_MuonR4Reco.json"
+    flags.Muon.scheduleActsReco = True
 
     flags, cfg = setupGeoR4TestCfg(args,flags)
     
