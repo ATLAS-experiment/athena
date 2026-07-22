@@ -12,7 +12,7 @@ ClusterMessage::DataDescr::DataDescr(DataDescr&& rhs) noexcept
       align(rhs.align),
       dest(rhs.dest),
       evtNumber(rhs.evtNumber),
-      fileNumber(rhs.fileNumber),
+      requestNumber(rhs.requestNumber),
       allocating_memory_resource(rhs.allocating_memory_resource) {
   rhs.ptr = nullptr;
   rhs.len = 0;
@@ -29,7 +29,7 @@ ClusterMessage::DataDescr::DataDescr(
       align(std::uint64_t(1ULL << body[4])),
       dest(std::uint32_t(body[5])),
       evtNumber((std::uint64_t(body[6]) << 32) + std::uint64_t(body[7])),
-      fileNumber((std::uint64_t(body[8]) << 32) + std::uint64_t(body[9])),
+      requestNumber((std::uint64_t(body[8]) << 32) + std::uint64_t(body[9])),
       allocating_memory_resource(allocating_memory_resource) {
   if (!std::has_single_bit(align) || len % align != 0) {
     // Not ideal, but this should be checked and adjusted in MPIClusterSvc
@@ -58,7 +58,7 @@ ClusterMessage::DataDescr& ClusterMessage::DataDescr::operator=(
   align = rhs.align;
   dest = rhs.dest;
   evtNumber = rhs.evtNumber;
-  fileNumber = rhs.fileNumber;
+  requestNumber = rhs.requestNumber;
   allocating_memory_resource = rhs.allocating_memory_resource;
   rhs.ptr = nullptr;
   rhs.len = 0;
@@ -66,7 +66,7 @@ ClusterMessage::DataDescr& ClusterMessage::DataDescr::operator=(
   rhs.dest = 0;
   rhs.allocating_memory_resource = nullptr;
   rhs.evtNumber = 0;
-  rhs.fileNumber = 0;
+  rhs.requestNumber = 0;
   return *this;
 }
 
@@ -164,8 +164,9 @@ ClusterMessage::WireMsg ClusterMessage::wire_msg() const {
     body[5] = std::uint32_t(payload_local.dest);
     body[6] = std::uint32_t(std::uint64_t(payload_local.evtNumber) >> 32);
     body[7] = std::uint32_t(std::uint64_t(payload_local.evtNumber) & lower32);
-    body[8] = std::uint32_t(std::uint64_t(payload_local.fileNumber) >> 32);
-    body[9] = std::uint32_t(std::uint64_t(payload_local.fileNumber) & lower32);
+    body[8] = std::uint32_t(std::uint64_t(payload_local.requestNumber) >> 32);
+    body[9] =
+        std::uint32_t(std::uint64_t(payload_local.requestNumber) & lower32);
     WireMsg msg{header, std::make_optional(body)};
     return msg;
   }

@@ -61,7 +61,7 @@ struct ClusterMessage {
     // destination rank
 
     std::size_t evtNumber = 0;
-    std::size_t fileNumber = 0;
+    std::size_t requestNumber = 0;
 
     std::pmr::memory_resource* allocating_memory_resource =
         nullptr;  // If this was received, we need to keep track of the memory
