@@ -21,9 +21,6 @@
 class eflowAzimuth {
 public:
 eflowAzimuth(double phi): m_value(phi) { if (phi != -999. && !std::isnan(phi)) adjustRange(); }
-  eflowAzimuth(const eflowAzimuth& other): m_value(other.m_value) { }
-  eflowAzimuth& operator=(const eflowAzimuth& other) { if (this == &other) return *this; else { m_value = other.m_value; return *this; } }
-  ~eflowAzimuth() { }
 
   inline double operator ()() const { return m_value; }
   inline double operator =(double phi) {
@@ -61,7 +58,7 @@ eflowAzimuth(double phi): m_value(phi) { if (phi != -999. && !std::isnan(phi)) a
   }
 
 private:
-  double m_value;
+  double m_value{};
 
   inline double adjustRange(double a) {
     if (a <= -M_PI) {

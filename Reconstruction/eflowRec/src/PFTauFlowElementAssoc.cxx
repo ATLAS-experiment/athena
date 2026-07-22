@@ -1,5 +1,5 @@
 /*
- Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+ Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "PFTauFlowElementAssoc.h"
@@ -135,7 +135,7 @@ StatusCode PFTauFlowElementAssoc::execute(const EventContext &ctx) const {
     }
 
     // Add vector of elements links to the tau jets as a decoration to the FE container
-    neutralFETauWriteDecorHandle (*FE) = FETauJetLinks;
+    neutralFETauWriteDecorHandle (*FE) = std::move(FETauJetLinks);
 
   } // end neutral FE loop
 
@@ -162,7 +162,7 @@ StatusCode PFTauFlowElementAssoc::execute(const EventContext &ctx) const {
     }
 
     // Add vector of elements links to the tau jets as a decoration to the FE container
-    chargedFETauWriteDecorHandle (*FE) = FETauJetLinks;
+    chargedFETauWriteDecorHandle (*FE) = std::move(FETauJetLinks);
 
   } // end charged FE loop
 
