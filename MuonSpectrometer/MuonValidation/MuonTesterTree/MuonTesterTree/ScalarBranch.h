@@ -41,6 +41,11 @@ public:
     const T& getVariable() const;
     bool mustBeUpdated() const;
 
+    inline friend std::ostream& operator<<(std::ostream& ostr, const ScalarBranch& br) {
+        ostr<<br.name()<<": "<<(br.isUpdated() ? br.getDefault() : br.getVariable());
+        return ostr;
+    };
+
 private:
     T m_variable{};
     T m_default{};
