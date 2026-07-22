@@ -9,6 +9,14 @@ def SegmentSelectorCfg(flags, name="SegmentSelectionTool", **kwargs):
     result.setPrivateTools(the_tool)
     return result
 
+
+def MSExtrapolatorCfg(flags, name="MsExtrapolationTool", **kwargs):
+    from ActsConfig.ActsGeometryConfig import ActsExtrapolationToolCfg
+    return ActsExtrapolationToolCfg(flags, 
+            MaxSteps=10000,
+            InteractionEloss = flags.Muon.trackGeometryPassiveMaterial,
+            InteractionMultiScatering = flags.Muon.trackGeometryPassiveMaterial)
+
 def MSTrackFitterCfg(flags, name="MSTrackFitTool", **kwargs):
     result = ComponentAccumulator()
     from ActsConfig.ActsConfigFlags import TrackFitterType
@@ -111,9 +119,31 @@ def MuonActsToTrkConvCfg(flags, name="MuonActsToTrkConverterAlg", **kwargs):
                                           setupMuon = True, setupITk=False, **kwargs))
     return result 
 
-def MuidSaTagMakerAlgCfg(flags, name="MuonMuidTagSaAlg", **kwargs):
+
+def BeamSpotPreparatorAlgCfg(flags, name="MuonBeamSpotPreparator", **kwargs):
     result = ComponentAccumulator()
+    from BeamSpotConditions.BeamSpotConditionsConfig import BeamSpotCondAlgCfg
+    result.merge(BeamSpotCondAlgCfg(flags))
+    from MagFieldServices.MagFieldServicesConfig import AtlasFieldCacheCondAlgCfg
+    result.merge(AtlasFieldCacheCondAlgCfg(flags))
+    the_alg = CompFactory.MuonCombinedR4.BeamSpotPreparatorAlg(name, **kwargs)
+    result.addEventAlgo(the_alg, primary = True)
+    return result
+
+def MuidSaTagMakerAlgCfg(flags, name="MuonMuidTagSaAlg", **kwargs):
+    result = ComponentAccumulator() 
+    kwargs.setdefault("ExtrapolateToIP", (flags.Detector.GeometryID or flags.Detector.GeometryITk) and not flags.Muon.MuonTrigger )
+    kwargs.setdefault("RefitWithBeamSpot", (flags.Detector.GeometryID or flags.Detector.GeometryITk) and not flags.Muon.MuonTrigger )
     kwargs.setdefault("TrackSummaryTool", result.popToolsAndMerge(TrackSummaryToolCfg(flags)))
+    if kwargs["ExtrapolateToIP"]:
+        kwargs.setdefault("FittingTool", result.popToolsAndMerge(MSTrackFitterCfg(flags)))
+        kwargs.setdefault("ExtrapolationTool", result.popToolsAndMerge(MSExtrapolatorCfg(flags)))
+        from ActsConfig.ActsGeometryConfig import ActsTrackingGeometryToolCfg
+        kwargs.setdefault("TrackingGeometryTool", result.getPrimaryAndMerge(ActsTrackingGeometryToolCfg(flags)))
+        from ActsConfig.ActsEventCnvConfig import ActsTrackToTrackParticleCnvToolCfg
+        kwargs.setdefault("TrackToTrackParticleCnvTool", 
+            result.popToolsAndMerge(ActsTrackToTrackParticleCnvToolCfg(flags)))
+
     the_alg = CompFactory.MuonCombinedR4.StandaloneMuonTagAlg(name, **kwargs)
     result.addEventAlgo(the_alg, primary = True)
     return result
@@ -121,10 +151,9 @@ def MuidSaTagMakerAlgCfg(flags, name="MuonMuidTagSaAlg", **kwargs):
 
 def MuonInDetTrackSelectionAlgCfg(flags, name="MuonCombinedInDetCandidateAlgR4", **kwargs):
     result = ComponentAccumulator()
-    from ActsConfig.ActsGeometryConfig import ActsExtrapolationToolCfg
-    kwargs.setdefault("ExtrapolationTool", result.popToolsAndMerge(ActsExtrapolationToolCfg(flags, MaxSteps=10000, 
-                                                                                             InteractionEloss = True,
-                                                                                             InteractionMultiScatering = True)))
+    if not flags.Acts.TrackingGeometry.UseBlueprint:
+        raise RuntimeError("Cannot setup the InDet Candidate selection with Gen 1 geometry")
+    kwargs.setdefault("ExtrapolationTool", result.popToolsAndMerge(MSExtrapolatorCfg(flags)))
     from ActsConfig.ActsGeometryConfig import ActsTrackingGeometryToolCfg
     kwargs.setdefault("TrackingGeometryTool", result.getPrimaryAndMerge(ActsTrackingGeometryToolCfg(flags)))
     the_alg = CompFactory.MuonCombinedR4.InDetTrackSelectionAlg(name, **kwargs)
@@ -133,8 +162,7 @@ def MuonInDetTrackSelectionAlgCfg(flags, name="MuonCombinedInDetCandidateAlgR4",
 
 def MuonSegmentTaggingAlgCfg(flags, name="MuonCombinedSegmentTaggingAlgR4", **kwargs):
     result = ComponentAccumulator()
-    from ActsConfig.ActsGeometryConfig import ActsExtrapolationToolCfg
-    kwargs.setdefault("ExtrapolationTool", result.popToolsAndMerge(ActsExtrapolationToolCfg(flags, MaxSteps=10000)))
+    kwargs.setdefault("ExtrapolationTool", result.popToolsAndMerge(MSExtrapolatorCfg(flags, MaxSteps=10000)))
     the_alg = CompFactory.MuonCombinedR4.SegmentTaggingAlg(name, **kwargs)
     result.addEventAlgo(the_alg, primary = True)
     return result

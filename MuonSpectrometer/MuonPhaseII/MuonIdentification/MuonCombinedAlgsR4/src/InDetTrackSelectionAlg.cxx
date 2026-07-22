@@ -66,19 +66,24 @@ namespace MuonCombinedR4 {
     }
     StatusCode InDetTrackSelectionAlg::execute(const EventContext& ctx) const {
         const xAOD::TrackParticleContainer* idTracks{nullptr};
-        const MuonR4::MuonTagContainer* msTags{nullptr};
+        const xAOD::TrackParticleContainer* msTracks{nullptr};
         const xAOD::MuonSegmentContainer* msSegments{nullptr};
         ATH_CHECK(SG::get(idTracks, m_idTrkKey, ctx));
         ATH_CHECK(SG::get(msSegments, m_segmentKey, ctx));
-        ATH_CHECK(SG::get(msTags, m_msTrkKey, ctx));
+        ATH_CHECK(SG::get(msTracks, m_msTrkKey, ctx));
 
         std::vector<const xAOD::MuonSegment*> uncombinedSegments{};
         uncombinedSegments.reserve(msSegments->size());
         std::copy_if(msSegments->begin(), msSegments->end(), std::back_inserter(uncombinedSegments),
-                    [msTags](const xAOD::MuonSegment* segment){
-                        return std::none_of(msTags->begin(), msTags->end(),
-                                            [&segment](const MuonR4::MuonTag* tag){
-                                                return !Acts::rangeContainsValue(tag->segments(), segment);
+                    [msTracks](const xAOD::MuonSegment* segment){
+                        return std::none_of(msTracks->begin(), msTracks->end(),
+                                            [&segment](const xAOD::TrackParticle* msTrack) {
+                                                auto actsTrk = ActsTrk::getActsTrack(*msTrack);
+                                                if (!actsTrk) {
+                                                    return false;
+                                                }
+                                                return Acts::rangeContainsValue(actsTrk->component<std::vector<const xAOD::MuonSegment*>>("muonSegLinks"), 
+                                                                                segment);
                                             });
                     });
 
@@ -108,7 +113,7 @@ namespace MuonCombinedR4 {
                 /** Store the parameters at the calorimeter exit if the association to a
                     MS track or a segment is successful -> The tag is then available for
                     the combined fit, STACO, MuTagIMO && inside-> out chain */
-                if (compatibleWithMsTrk(*parsAtEntrance, *msTags) ||
+                if (compatibleWithMsTrk(*parsAtEntrance, *msTracks) ||
                     compatibleWithSegment(ctx, *parsAtEntrance, uncombinedSegments)) {
                     idTag->setExtrapolatedParsID(Acts::hashString("@CaloExit"),
                                                  std::move(*parsAtEntrance));
@@ -180,13 +185,12 @@ namespace MuonCombinedR4 {
     }
 
     bool InDetTrackSelectionAlg::compatibleWithMsTrk(const Acts::BoundTrackParameters& itkParameters,
-                                                     const MuonR4::MuonTagContainer& msTrks) const {
+                                                     const xAOD::TrackParticleContainer& msTrks) const {
 
         ATH_MSG_DEBUG(__func__<<"() "<<__LINE__<<" - Check whether the "<<itkParameters
             <<" are compatible with one of the "<<msTrks.size()<<" MS tracks.");
         if (std::any_of(msTrks.begin(), msTrks.end(), 
-                [&](const MuonR4::MuonTag* saTag) {
-                    const xAOD::TrackParticle* msTrack = saTag->msTrack();
+                [&](const xAOD::TrackParticle* msTrack) {
                     ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<" - Check MS "<<print(*msTrack));
                     return std::abs(msTrack->eta() - eta(itkParameters)) < m_dEtaCutMsTrk &&
                            std::abs(xAOD::P4Helpers::deltaPhi(msTrack->phi(),

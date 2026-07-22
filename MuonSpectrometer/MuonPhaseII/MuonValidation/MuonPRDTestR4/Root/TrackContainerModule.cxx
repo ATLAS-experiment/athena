@@ -5,39 +5,35 @@
 
 #include "StoreGate/ReadHandle.h"
 #include "ActsInterop/UnitConverters.h"
+#include "ActsEvent/Decoration.h"
 
+#include "xAODMuon/Muon.h"
 using namespace Acts;
 namespace MuonValR4{
-    TrackContainerModule::TrackContainerModule(MuonTesterTree& tree,
-                                               const std::string& inContainer,
-                                               MSG::Level msgLvl,
-                                               const std::string& collName):
-            TesterModuleBase{tree, inContainer, msgLvl},
-        m_key{inContainer},
-        m_collName{collName} {}
-        
-    bool TrackContainerModule::declare_keys() {
-        return declare_dependency(m_key);
-    }
-    bool TrackContainerModule::fill(const EventContext& ctx){
-        const ActsTrk::TrackContainer* tracks{nullptr};
-        if (!SG::get(tracks, m_key, ctx)) {
-            return false;
-        }
-        for (const auto track : *tracks) {
-            const Amg::Vector3D trkP4 = ActsTrk::convertMomFromActs(track.fourMomentum()).first;
-            const double chi2 = track.chi2();
-            const int q = track.charge();
-            const unsigned nDoF = track.nDoF();
 
-            m_trackPt += trkP4.perp();
-            m_trackEta += trkP4.eta();
-            m_trackPhi += trkP4.phi();
-            m_trackQ += q;
-            m_trackNdoF += nDoF;
-            m_trackChi2 += chi2;
-            m_parentSeed += track.component<std::size_t, Acts::hashString("parentSeed")>();
+
+    TrackFitIterBranch::TrackFitIterBranch(IParticleFourMomBranch& parent):
+        MuonVal::VectorBranch<std::uint16_t>{parent.tree(), std::format("{:}_nIter",parent.name())}{}
+    void TrackFitIterBranch::push_back(const xAOD::IParticle* p) {
+        const xAOD::TrackParticle* trk = nullptr;
+        if (p->type() == xAOD::Type::ObjectType::TrackParticle) {
+            trk = static_cast<const xAOD::TrackParticle*>(p);    
+        } else if (p->type() == xAOD::Type::ObjectType::Muon) {
+            trk = static_cast<const xAOD::Muon*>(p)->trackParticle(xAOD::Muon::TrackParticleType::Primary);
+        } else {
+            THROW_EXCEPTION("No track particle object has been given to " <<name());
         }
-        return true;
+
+        auto actsTrk = ActsTrk::getActsTrack(*trk);
+        constexpr auto iterColumn = Acts:: hashString("Gx2fnUpdateColumn");
+        if (!actsTrk || !actsTrk->hasColumn(iterColumn)) {
+            VectorBranch<std::uint16_t>::push_back(0);
+            return;
+        }
+        VectorBranch<std::uint16_t>::push_back(actsTrk->component<std::uint32_t>(iterColumn)); 
     }
+    void TrackFitIterBranch::push_back(const xAOD::IParticle& p) { push_back(&p); }
+    void TrackFitIterBranch::operator+=(const xAOD::IParticle* p) { push_back(p); }
+    void TrackFitIterBranch::operator+=(const xAOD::IParticle& p) { push_back(p); }
+
 }

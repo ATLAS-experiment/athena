@@ -34,7 +34,7 @@ namespace MuonR4 {
                                            const MuonGMR4::MuonReadoutElement* reEle,
                                            HitSummary& summary) const {
         if (!reEle) {
-            ATH_MSG_WARNING(__func__<<"() "<<__LINE__<<" No readout element associated "
+            ATH_MSG_WARNING(__func__<<"() "<<__LINE__<<" - No readout element associated "
                             <<m_idHelperSvc->toString(gasGapId));
             return;
         }
@@ -106,6 +106,9 @@ namespace MuonR4 {
                 }
                 if (state.hasUncalibratedSourceLink()) {
                     const auto* uncalib = dynamic_cast<const xAOD::MuonMeasurement*>(xAODUncalibMeasCalibrator::unpack(state.getUncalibratedSourceLink()));
+                    if (!uncalib) {
+                        return;
+                    }
                     // for the combined sTgc space point we have to fill the primary and secondary measuremment seperately to resolve the strip/pad/wire combinations
                     if(uncalib->numDimensions() == 0) {
                         const auto* combinedMeas = dynamic_cast<const xAOD::CombinedMuonStrip*>(uncalib);

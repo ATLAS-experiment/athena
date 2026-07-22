@@ -53,7 +53,7 @@ namespace MuonCombinedR4 {
                 @param caloExitPars: The ID track expressed at the  calo exit
                 @param msTrack: List of reconstructed MS track particles  */
             bool compatibleWithMsTrk(const Acts::BoundTrackParameters& caloExitPars,
-                                     const MuonR4::MuonTagContainer& msTracks) const;
+                                     const xAOD::TrackParticleContainer& msTracks) const;
             /** @brief Checks whether the ID track is compatible with a reconstructed 
                        segment which is not part of a reconstructed MS track. Matching
                        is based on straight line extrapolations and sector correspondence  */
@@ -66,7 +66,7 @@ namespace MuonCombinedR4 {
             SG::ReadDecorHandleKey<xAOD::TrackParticleContainer> m_extensionDecorKey{this, "CaloExtensionDecorKey", m_idTrkKey, "caloExtensionLink"};
             /** @brief Input key for the MS track particles. ID tracks are only considered if they can be
                       roughly matched to a MS track */
-            SG::ReadHandleKey<MuonR4::MuonTagContainer> m_msTrkKey{this, "MsTrackKey", "MuonTagsSA"};
+            SG::ReadHandleKey<xAOD::TrackParticleContainer> m_msTrkKey{this, "MsTrackKey", "MsTrackParticlesR4"};
             /** @brief To pass the selection criteria, ITk tracks can alternatively be matched to  */
             SG::ReadHandleKey<xAOD::MuonSegmentContainer> m_segmentKey{this, "SegmentKey", "MuonSegmentsFromR4"};
             /** @brief The output key for the selected track candidates */           

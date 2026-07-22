@@ -17,6 +17,7 @@ namespace MuonR4 {
     const xAOD::TrackParticle* MuonTag::idTrack() const { return m_idTrack; }
     const xAOD::TrackParticle* MuonTag::cbTrack() const { return m_cbTrack; }
     const xAOD::TrackParticle* MuonTag::msTrack() const { return m_msTrack; }
+    const xAOD::TrackParticle* MuonTag::meTrack() const { return m_meTrack; }
     const HitSummary* MuonTag::summary() const { return m_summary.get(); }
     void MuonTag::copyParameters(xAOD::Muon& muon) const {
         for (const auto& [par, data] : m_params) {
@@ -31,6 +32,8 @@ namespace MuonR4 {
             return m_cbTrack;
         } else if (m_idTrack != nullptr) {
             return m_idTrack;
+        } else if (m_meTrack != nullptr) {
+            return m_meTrack;
         }
         return m_msTrack;
     }
@@ -48,7 +51,10 @@ namespace MuonR4 {
         assert (msTrack != nullptr);
         m_msTrack = msTrack;
     }
-
+    void MuonTag::setMeTrack(const xAOD::TrackParticle* meTrack) {
+        assert(meTrack != nullptr);
+        m_meTrack = meTrack;
+    }
     void MuonTag::setSegments(const std::span<const xAOD::MuonSegment* const> segs){
         m_segments.insert(m_segments.end(), segs.begin(), segs.end());
     }

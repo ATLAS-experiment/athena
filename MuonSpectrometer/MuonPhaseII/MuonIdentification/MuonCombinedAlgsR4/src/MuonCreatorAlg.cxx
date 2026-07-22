@@ -126,6 +126,10 @@ void MuonCreatorAlg::createMuon(const EventContext& ctx,
             newMuon->setTrackParticleLink(Trk_t::InnerDetectorTrackParticle,
                                           linkParticle(ctx, tag->idTrack()));
         }
+         if (!p4Set || !newMuon->trackParticle(Trk_t::ExtrapolatedMuonSpectrometerTrackParticle)){
+            newMuon->setTrackParticleLink(Trk_t::ExtrapolatedMuonSpectrometerTrackParticle,
+                                          linkParticle(ctx, tag->meTrack()));
+        }
         if (!p4Set || !newMuon->trackParticle(Trk_t::MuonSpectrometerTrackParticle)){
             newMuon->setTrackParticleLink(Trk_t::MuonSpectrometerTrackParticle,
                                           linkParticle(ctx, tag->msTrack()));
