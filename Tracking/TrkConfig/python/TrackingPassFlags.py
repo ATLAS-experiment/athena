@@ -1021,14 +1021,15 @@ def createHeavyIonLowPtTrackingPassFlags():
     icf.isLowPt          = True
     icf.minClusters      = 6
     icf.minSiNotShared   = 4
-    icf.maxShared        = 2   # cut is now on number of shared modules
     icf.minPixel         = 2   # At least one pixel hit for low-pt (assoc. seeded on pixels!)
+    # this is for the Ambi
     icf.maxHoles         = 2
+    # this is for the CKF
+    icf.nHolesMax        = icf.maxHoles - 1
     icf.maxPixelHoles    = 1
     icf.maxSctHoles      = 2
     icf.maxDoubleHoles   = 1
     icf.radMax           = 380. * Units.mm
-    icf.nHolesMax        = icf.maxHoles
     icf.nHolesGapMax     = icf.maxHoles # not as tight as 2*maxDoubleHoles
     icf.maxPrimaryImpact = 10. * Units.mm
     icf.maxdImpactPPSSeeds = 2. * Units.mm
