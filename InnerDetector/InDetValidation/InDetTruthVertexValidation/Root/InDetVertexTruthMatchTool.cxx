@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "InDetTruthVertexValidation/InDetVertexTruthMatchTool.h"
@@ -233,9 +233,9 @@ StatusCode InDetVertexTruthMatchTool::matchVertices( const xAOD::VertexContainer
       ATH_MSG_DEBUG("trackParticles or trackWeights not available, setting fake");
       // Add invalid link for fakes
       matchinfo.emplace_back( ElementLink<xAOD::TruthEventBaseContainer>(), 1., 0. );
-      matchInfoDecor( *vxit ) = matchinfo;
+      matchInfoDecor( *vxit ) = std::move(matchinfo);
       rawMatchinfo.emplace_back( ElementLink<xAOD::TruthEventBaseContainer>(), 1., 0. );
-      rawMatchInfoDecor( *vxit ) = rawMatchinfo;
+      rawMatchInfoDecor( *vxit ) = std::move(rawMatchinfo);
       nHSTrkDecor( *vxit ) = 0;
       continue;
     }
