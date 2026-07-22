@@ -6,34 +6,43 @@
 #ifndef ATLASHEPMC_ATTRIBUTENAMES_H
 #define ATLASHEPMC_ATTRIBUTENAMES_H
 #include <string>
+
+// Declare the attribute variables.
+// ATLASHEPMC_ATTRIBNAME can be defined before including this file
+// to make the definitions.
+#ifndef ATLASHEPMC_ATTRIBNAME
+# define ATLASHEPMC_ATTRIBNAME(N) extern const std::string N
+#endif
 namespace HepMCStr {
- inline const std::string BunchCrossingTime{"BunchCrossingTime"};
- inline const std::string LHERecord{"LHERecord"};
- inline const std::string PileUpType{"PileUpType"};
- inline const std::string ShadowParticle{"ShadowParticle"};
- inline const std::string ShadowParticleId{"ShadowParticleId"};
- inline const std::string alphaQCD{"alphaQCD"};
- inline const std::string alphaQED{"alphaQED"};
- inline const std::string barcode{"barcode"};
- inline const std::string barcodes{"barcodes"};
- inline const std::string cycles{"cycles"};
- inline const std::string event_scale{"event_scale"};
- inline const std::string filterHT{"filterHT"};
- inline const std::string filterMET{"filterMET"};
- inline const std::string filterWeight{"filterWeight"};
- inline const std::string flow{"flow"};
- inline const std::string flow1{"flow1"};
- inline const std::string flow2{"flow2"};
- inline const std::string flow3{"flow3"};
- inline const std::string flows{"flows"};
- inline const std::string long_long_event_number{"long_long_event_number"};
- inline const std::string mpi{"mpi"};
- inline const std::string phi{"phi"};
- inline const std::string random_states{"random_states"};
- inline const std::string signal_process_id{"signal_process_id"};
- inline const std::string signal_process_vertex{"signal_process_vertex"};
- inline const std::string signal_vertex_id{"signal_vertex_id"};
- inline const std::string theta{"theta"};
- inline const std::string weights{"weights"};
+ATLASHEPMC_ATTRIBNAME(BunchCrossingTime);
+ATLASHEPMC_ATTRIBNAME(LHERecord);
+ATLASHEPMC_ATTRIBNAME(PileUpType);
+ATLASHEPMC_ATTRIBNAME(ShadowParticle);
+ATLASHEPMC_ATTRIBNAME(ShadowParticleId);
+ATLASHEPMC_ATTRIBNAME(alphaQCD);
+ATLASHEPMC_ATTRIBNAME(alphaQED);
+ATLASHEPMC_ATTRIBNAME(barcode);
+ATLASHEPMC_ATTRIBNAME(barcodes);
+ATLASHEPMC_ATTRIBNAME(cycles);
+ATLASHEPMC_ATTRIBNAME(event_scale);
+ATLASHEPMC_ATTRIBNAME(filterHT);
+ATLASHEPMC_ATTRIBNAME(filterMET);
+ATLASHEPMC_ATTRIBNAME(filterWeight);
+ATLASHEPMC_ATTRIBNAME(flow);
+ATLASHEPMC_ATTRIBNAME(flow1);
+ATLASHEPMC_ATTRIBNAME(flow2);
+ATLASHEPMC_ATTRIBNAME(flow3);
+ATLASHEPMC_ATTRIBNAME(flows);
+ATLASHEPMC_ATTRIBNAME(long_long_event_number);
+ATLASHEPMC_ATTRIBNAME(mpi);
+ATLASHEPMC_ATTRIBNAME(phi);
+ATLASHEPMC_ATTRIBNAME(random_states);
+ATLASHEPMC_ATTRIBNAME(signal_process_id);
+ATLASHEPMC_ATTRIBNAME(signal_process_vertex);
+ATLASHEPMC_ATTRIBNAME(signal_vertex_id);
+ATLASHEPMC_ATTRIBNAME(theta);
+ATLASHEPMC_ATTRIBNAME(weights);
 }
+
+#undef ATLASHEPMC_ATTRIBNAME
 #endif
