@@ -34,6 +34,7 @@ StatusCode JetPFlowSelectionAlg::initialize() {
   ATH_CHECK(m_neutralFEMuonsReadDecorKey.initialize());
   ATH_CHECK(m_chargedFE_energy_match_muonReadHandleKey.initialize());
 
+  if (m_isEgammaPEB) ATH_MSG_WARNING("Using EgammaPEB PFlow! Checks for MuonFEs will be skipped.");
 
   return StatusCode::SUCCESS;
 }
@@ -105,8 +106,15 @@ StatusCode JetPFlowSelectionAlg::execute(const EventContext& ctx) const {
   // Loop over Charged FE objects
   for ( const xAOD::FlowElement* fe : *ChargedPFlowObjects ) {
 
-    bool isMuonToExclude = muonHelper.checkMuonLinks(chargedFE_MuonLinks(*fe), m_muonIDToExclude);
-    bool isMuonToInclude = muonHelper.checkMuonLinks(chargedFE_MuonLinks(*fe), m_muonIDToInclude);
+    bool isMuonToExclude;
+    bool isMuonToInclude;
+    if (m_isEgammaPEB) {
+      isMuonToExclude = false;
+      isMuonToInclude = false;
+    } else {
+      isMuonToExclude = muonHelper.checkMuonLinks(chargedFE_MuonLinks(*fe), m_muonIDToExclude);
+      isMuonToInclude = muonHelper.checkMuonLinks(chargedFE_MuonLinks(*fe), m_muonIDToInclude);
+    }
     bool isElectronToInclude = electronHelper.checkElectronLinks(chargedFE_ElectronLinks(*fe), m_electronIDToInclude);
     bool isElectronToExclude = electronHelper.checkElectronLinks(chargedFE_ElectronLinks(*fe), m_electronIDToExclude);
 
@@ -141,8 +149,15 @@ StatusCode JetPFlowSelectionAlg::execute(const EventContext& ctx) const {
   // Loop over Neutral FE objects
   for ( const xAOD::FlowElement* fe : *NeutralPFlowObjects ) {
 
-    bool isMuonToExclude = muonHelper.checkMuonLinks(neutralFE_MuonLinks(*fe), m_muonIDToExclude);
-    bool isMuonToInclude = muonHelper.checkMuonLinks(neutralFE_MuonLinks(*fe), m_muonIDToInclude);
+    bool isMuonToExclude;
+    bool isMuonToInclude;
+    if (m_isEgammaPEB) {
+      isMuonToExclude = false;
+      isMuonToInclude = false;
+    } else {
+      isMuonToExclude = muonHelper.checkMuonLinks(neutralFE_MuonLinks(*fe), m_muonIDToExclude);
+      isMuonToInclude = muonHelper.checkMuonLinks(neutralFE_MuonLinks(*fe), m_muonIDToInclude);
+    }
     bool isElectronToInclude = electronHelper.checkElectronLinks(neutralFE_ElectronLinks(*fe), m_electronIDToInclude);
     bool isElectronToExclude = electronHelper.checkElectronLinks(neutralFE_ElectronLinks(*fe), m_electronIDToExclude);
 

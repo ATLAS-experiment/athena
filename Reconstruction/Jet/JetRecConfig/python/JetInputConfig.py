@@ -71,13 +71,20 @@ def buildPV0TrackSel(parentjetdef, spec):
     return alg
 
 
-def buildPFlowSel(parentjetdef, spec):
+def buildPFlowSel(parentjetdef, spec, egammaPEB=False):
+    print("JS: testing egammaPEB")
+    print("JS: imput stream is ", parentjetdef._cflags.Input.TriggerStream)
+    egammaPEB = parentjetdef._cflags.Input.TriggerStream=='physics_EgammaPEBTLA' or egammaPEB
+    if egammaPEB:
+        print("WARNING:JetInputConfig: buildPFlowSel: Configuring muon-less reconstruction for EgammaPEB stream")
+        
     return  CompFactory.JetPFlowSelectionAlg( "pflowselalg",
                                               electronIDToExclude = "LHMedium",
                                               ChargedPFlowInputContainer  = "JetETMissChargedParticleFlowObjects",
                                               NeutralPFlowInputContainer  = "JetETMissNeutralParticleFlowObjects",
                                               ChargedPFlowOutputContainer = "GlobalChargedParticleFlowObjects",
-                                              NeutralPFlowOutputContainer = "GlobalNeutralParticleFlowObjects"
+                                              NeutralPFlowOutputContainer = "GlobalNeutralParticleFlowObjects",
+                                              isEgammaPEB = egammaPEB # Autoconfigure muon-less reconstruction
                                              )
 
 #This is to be used to seed tau jets which exclude electrons.

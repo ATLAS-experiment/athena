@@ -9,6 +9,7 @@ from .JetDefinition import  JetDefinition
 # Ghost-associated particles for the standard small R jets 
 # *********************************************************
 standardghosts =  ["Track","MuonSegment","Truth","Tower"]
+standardghosts_EgammaPEB = ["Track","Truth","Tower"] # No muon segments in the EGammaPEB stream
 
 
 flavourghosts = [ "BHadronsInitial", "BHadronsFinal", "BQuarksFinal",
@@ -95,6 +96,15 @@ AntiKt4EMPFlow = JetDefinition("AntiKt",0.4,cst.GPFlow,
 AntiKt4EMPFlow_deriv = AntiKt4EMPFlow.clone(
     ghostdefs = AntiKt4EMPFlow.ghostdefs+["UnAssocMuonSegment"],
     modifiers = AntiKt4EMPFlow.modifiers+("JetPtAssociation","fJVT","NNJVT","CaloEnergiesClus","JetPileupLabel","qgtransformer")+truthlabels
+)
+
+AntiKt4EMPFlow_EgammaPEB = AntiKt4EMPFlow.clone(
+    ghostdefs = standardghosts_EgammaPEB+flavourghosts
+)
+
+AntiKt4EMPFlow_EgammaPEB_deriv = AntiKt4EMPFlow_deriv.clone(
+    ghostdefs = standardghosts_EgammaPEB+flavourghosts,
+    modifiers = AntiKt4EMPFlow.modifiers+("JetPtAssociation","NNJVT","CaloEnergiesClus","JetPileupLabel","qgtransformer")+truthlabels   #no fJVT
 )
 
 AntiKt4EMPFlowML = JetDefinition("AntiKt",0.4,cst.GPFlowML,
