@@ -6,7 +6,7 @@
 #
 # Tau, flavour, met, Higgs, AFP, large-r are removed. 
 #
-# MC, Truth, Trigger, CloseByIsolation, IFF, HSGNN, FEAssociation,
+# MC, Truth, Trigger, CloseByIsolation, IFF, HSGNN,
 # TrackParticleThinningTool currently disabled (to be enabled in 
 # the future?)
 #
@@ -113,12 +113,12 @@ def EGAMPEBCommonAugmentationsCfg(flags,**kwargs):
     PFCfgresult.addEventAlgo(getEGamFlowElementAssocAlgorithm(flags, algName="PFEGamGlobalFlowElementAssoc", **kwargs))
     acc.merge(PFCfgresult)
 
-    # from AssociationUtils.AssociationUtilsConfig import FEAssociationCfg
-    # acc.merge(FEAssociationCfg(flags,
-    #     SmallRJetChargedFELinksDecorKey="",
-    #     SmallRJetNeutralFELinksDecorKey="",
-    #     LargeRJetChargedFELinksDecorKey="",
-    #     LargeRJetNeutralFELinksDecorKey=""))
+    from AssociationUtils.AssociationUtilsConfig import FEAssociationCfg
+    acc.merge(FEAssociationCfg(flags,
+        SmallRJetChargedFELinksDecorKey="",
+        SmallRJetNeutralFELinksDecorKey="",
+        LargeRJetChargedFELinksDecorKey="",
+        LargeRJetNeutralFELinksDecorKey=""))
     
     # # Trigger matching and postprocessing
     # if flags.Reco.EnableTrigger or flags.Trigger.triggerConfig == 'INFILE':
@@ -202,9 +202,7 @@ def EGAMPEBCoreCfg(flags, name_tag='EGAMPEB', StreamName='StreamDAOD_EGAMPEB', T
                                            "PrimaryVertices",
                                            "InDetTrackParticles",
                                            "AntiKt4EMTopoJets",
-                                           "AntiKt4EMPFlowJets",
-                                           "MET_Baseline_AntiKt4EMTopo",
-                                           "MET_Baseline_AntiKt4EMPFlow"
+                                           "AntiKt4EMPFlowJets"
                                           ]
 
     excludedVertexAuxData = "-vxTrackAtVertex.-MvfFitInfo.-isInitialized.-VTAV"
