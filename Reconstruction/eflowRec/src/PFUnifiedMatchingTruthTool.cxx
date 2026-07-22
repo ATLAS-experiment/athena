@@ -63,6 +63,8 @@ unsigned int PFUnifiedMatchingTruthTool::matchAndCreateEflowCaloObj(const EventC
   const unsigned int nCaloObj = data.caloObjects->size();
 
   /* loop tracks in data.tracks and do matching */
+  typedef ElementLink<xAOD::TruthParticleContainer> TruthLink;
+  const SG::AuxElement::Accessor<TruthLink> truthLinkAccessor("truthParticleLink");
   for (auto *thisEfRecTrack : data.tracks)
   {
     /** No point to do anything if e/p reference bin does not exist */
@@ -84,9 +86,8 @@ unsigned int PFUnifiedMatchingTruthTool::matchAndCreateEflowCaloObj(const EventC
 
 
     const xAOD::TruthParticle* trackMatchedTruthParticle = nullptr;
-    typedef ElementLink<xAOD::TruthParticleContainer> TruthLink;
 
-    const static SG::AuxElement::Accessor<TruthLink> truthLinkAccessor("truthParticleLink");
+    
     
     TruthLink truthLink = truthLinkAccessor(*(thisEfRecTrack->getTrack()));
     //if not valid don't print a WARNING because this is an expected condition as discussed here:

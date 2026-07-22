@@ -1,5 +1,5 @@
 /*  
-    Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+    Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "StoreGate/WriteDecorHandle.h" 
@@ -112,15 +112,15 @@ StatusCode PFEGamFlowElementAssoc::execute(const EventContext &ctx) const
     std::vector<PhotonLink_t> FEPhotonLinks;
 
     //nullptr catch for removed NFE clusters - only comes up if using AOD where the alg might have some skimmed components
-    if(FE->otherObjects().empty() || FE->otherObjects().at(0)==nullptr){
-      neutralFEElectronWriteDecorHandle(*FE)=FEElectronLinks;
-      neutralFEPhotonWriteDecorHandle(*FE)=FEPhotonLinks;
+    if(FE->otherObjects().empty() || FE->otherObjects().front()==nullptr){
+      neutralFEElectronWriteDecorHandle(*FE) = std::move(FEElectronLinks);
+      neutralFEPhotonWriteDecorHandle(*FE) = std::move(FEPhotonLinks);
       continue;
     }  
 
     //Obtain the index of the FE calo-cluster    
-    size_t FEClusterIndex=FE->otherObjects().at(0)->index();
-    double FE_cluster_E=FE->otherObjects().at(0)->p4().E();
+    size_t FEClusterIndex=FE->otherObjects().front()->index();
+    double FE_cluster_E=FE->otherObjects().front()->p4().E();
     bool neg_E_cluster=(FE_cluster_E<0);
     
     //Loop over electrons:
@@ -177,8 +177,8 @@ StatusCode PFEGamFlowElementAssoc::execute(const EventContext &ctx) const
     }// end of photon loop
     ATH_MSG_VERBOSE("NFE: Photon Loop complete");      
     //Add vector of electron element links as decoration to FlowElement container
-    neutralFEElectronWriteDecorHandle(*FE)=FEElectronLinks;
-    neutralFEPhotonWriteDecorHandle(*FE)=FEPhotonLinks;
+    neutralFEElectronWriteDecorHandle(*FE)= std::move(FEElectronLinks);
+    neutralFEPhotonWriteDecorHandle(*FE)= std::move(FEPhotonLinks);
     ATH_MSG_VERBOSE("NFE::WriteHandle mapping");
   } // end neutral FE loop
   ATH_MSG_VERBOSE("NFE: Loop finished");
@@ -191,13 +191,13 @@ StatusCode PFEGamFlowElementAssoc::execute(const EventContext &ctx) const
     std::vector<PhotonLink_t> FEPhotonLinks;
 
     // Charged Flow Element catch for a case where there are removed tracks - should only apply if running from AOD
-    if(FE->chargedObjects().empty() || FE->chargedObjects().at(0)==nullptr){
-      chargedFEElectronWriteDecorHandle (*FE) = FEElectronLinks;  
-      chargedFEPhotonWriteDecorHandle (*FE) = FEPhotonLinks;
+    if(FE->chargedObjects().empty() || FE->chargedObjects().front()==nullptr){
+      chargedFEElectronWriteDecorHandle (*FE) = std::move(FEElectronLinks);  
+      chargedFEPhotonWriteDecorHandle (*FE) = std::move(FEPhotonLinks);
       continue;
     }
     // retrieve the track from the Flow element
-    size_t FETrackIndex=FE->chargedObjects().at(0)->index();
+    size_t FETrackIndex=FE->chargedObjects().front()->index();
 
     //loop over electrons
     for (const xAOD::Electron* electron: *electronChargedFEWriteDecorHandle){
@@ -243,9 +243,9 @@ StatusCode PFEGamFlowElementAssoc::execute(const EventContext &ctx) const
 
 
     // Add vector of electron element links as decoration to FE container     
-    chargedFEElectronWriteDecorHandle (*FE) = FEElectronLinks;  
+    chargedFEElectronWriteDecorHandle (*FE) = std::move(FEElectronLinks);  
     // Add vector of photon element links as decoration to FE container
-    chargedFEPhotonWriteDecorHandle (*FE) = FEPhotonLinks;
+    chargedFEPhotonWriteDecorHandle (*FE) = std::move(FEPhotonLinks);
 
   } // end of charged FE loop
   
