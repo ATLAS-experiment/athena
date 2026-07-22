@@ -412,7 +412,7 @@ StatusCode AthenaOutputStream::execute(const EventContext& ctx) {
       }
    }
    // Write the event if the event is accepted
-   if (isEventAccepted()) {
+   if (isEventAccepted(ctx)) {
       if (write(ctx).isFailure()) {
          failed = true;
       }
