@@ -346,3 +346,7 @@ HLT_mu6_ivarloose_mu6_11invmAB24_L12MU5VF
 HLT_mu6_ivarloose_mu6_24invmAB60_L12MU5VF
 HLT_mu6_ivarloose_mu6_b11invmAB24vtx20_L12MU5VF
 HLT_mu6_ivarloose_mu6_b24invmAB60vtx20_L12MU5VF
+
+# EGAMPEB - need to move inside EGAMPEB deriv
+HLT_2g13_loose_EgammaPEBTLA_L12DR15-0M30-2eEM12L
+HLT_2g13_loose_EgammaPEBTLA_L113DR25-25M70-2eEM12L

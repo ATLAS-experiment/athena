@@ -11,7 +11,8 @@
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.Enums import LHCPeriod
-
+from AthenaCommon.Logging import logging
+egammalog = logging.getLogger('EGammaCommonConfig')
 
 def EGammaCommonCfg(flags):
     """Main config method for e-gamma decorations"""
@@ -47,9 +48,9 @@ def EGammaCommonCfg(flags):
         isFullSim = flags.Sim.ISF.Simulator.isFullSim()
     isRun2orRun3 = flags.GeoModel.Run in (LHCPeriod.Run2, LHCPeriod.Run3)
 
-    print("EGammaCommon: isMC = ", isMC)
+    egammalog.info("isMC = %s", isMC)
     if isMC:
-        print("EGammaCommon: isFullSim = ", isFullSim)
+        egammalog.info("isFullSim = %s", isFullSim)
 
     if isMC:
         from EGammaVariableCorrection.EGammaVariableCorrectionConfig import (
@@ -947,7 +948,11 @@ def EGammaCommonCfg(flags):
     # =======================================
     from IsolationAlgs.DerivationTrackIsoConfig import DerivationTrackIsoCfg
 
-    acc.merge(DerivationTrackIsoCfg(flags, object_types=("Electrons", "Muons")))
+    if (flags.Input.TriggerStream == "physics_EgammaPEBTLA"):
+        egammalog.warning("Detected physics_EgammaPEBTLA stream, only electrons will be processed for track isolation")
+        acc.merge(DerivationTrackIsoCfg(flags, object_types=("Electrons")))
+    else:
+        acc.merge(DerivationTrackIsoCfg(flags, object_types=("Electrons", "Muons")))
 
     hasFlowObject = (
         "JetETMissChargedParticleFlowObjects" in flags.Input.Collections

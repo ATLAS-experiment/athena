@@ -7,6 +7,8 @@
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
+from AthenaCommon.Logging import logging
+jetlog = logging.getLogger('JetCommonConfig')
 
 def JetCommonCfg(ConfigFlags):
     """Main config for jet reconstruction and decorations"""
@@ -105,16 +107,25 @@ def AddEventCleanFlagsCfg(ConfigFlags, workingPoints = ['Loose', 'Tight', 'Loose
     acc.merge(AddJvtDecorationAlgCfg(ConfigFlags, algName="JvtPassDecorAlg_EMTopo", jetContainer='AntiKt4EMTopo'))
     acc.merge(AddJvtDecorationAlgCfg(ConfigFlags, algName="JvtPassDecorAlg", jetContainer='AntiKt4EMPFlow'))
 
-    from DerivationFrameworkTau.TauCommonConfig import AddTauAugmentationCfg
-    acc.merge(AddTauAugmentationCfg(ConfigFlags, wp="GNTauLoose"))
+    if (ConfigFlags.Input.TriggerStream != 'physics_EgammaPEBTLA'):
+        from DerivationFrameworkTau.TauCommonConfig import AddTauAugmentationCfg
+        acc.merge(AddTauAugmentationCfg(ConfigFlags, wp="GNTauLoose"))
+    else:
+        jetlog.warning("EgammaPEB stream detected, skipping tau augmentation")
+        
     acc.addSequence(CompFactory.AthSequencer('EventCleanSeq', Sequential=True))
-
     # Overlap for EMTopo
     from AssociationUtils.AssociationUtilsConfig import OverlapRemovalToolCfg
     inputLabel_legacy = 'selected_eventClean_EMTopo'
     outputLabel_legacy = 'DFCommonJets_passOR_EMTopo'
     bJetLabel = '' #default
     tauLabel = 'DFTauGNTauLoose'
+    muonKey = 'Muons'
+    tauKey = 'TauJets'
+    if (ConfigFlags.Input.TriggerStream == 'physics_EgammaPEBTLA'):
+        muonKey = '' # don't use muons for overlap removal in EgammaPEB stream
+        tauKey = '' # don't use taus for overlap removal in EgammaPEB stream
+        
     orTool_legacy = acc.popToolsAndMerge(OverlapRemovalToolCfg(ConfigFlags,inputLabel=inputLabel_legacy,outputLabel=outputLabel_legacy,bJetLabel=bJetLabel))
     algOR_legacy = CompFactory.OverlapRemovalGenUseAlg('OverlapRemovalGenUseAlg_EMTopo',
                                                 JetKey="AntiKt4EMTopoJets",
@@ -122,7 +133,9 @@ def AddEventCleanFlagsCfg(ConfigFlags, workingPoints = ['Loose', 'Tight', 'Loose
                                                 OverlapLabel=outputLabel_legacy,
                                                 OverlapRemovalTool=orTool_legacy,
                                                 TauLabel=tauLabel,
-                                                BJetLabel=bJetLabel
+                                                BJetLabel=bJetLabel,
+                                                MuonKey=muonKey,
+                                                TauKey=tauKey
                                                 )
     acc.addEventAlgo(algOR_legacy)
 
@@ -135,14 +148,19 @@ def AddEventCleanFlagsCfg(ConfigFlags, workingPoints = ['Loose', 'Tight', 'Loose
                                                 OverlapLabel=outputLabel,
                                                 OverlapRemovalTool=orTool,
                                                 TauLabel=tauLabel,
-                                                BJetLabel=bJetLabel)
+                                                BJetLabel=bJetLabel,
+                                                MuonKey=muonKey,
+                                                TauKey=tauKey)\
     acc.addEventAlgo(algOR)
 
-    CommonAugmentation = CompFactory.DerivationFramework.CommonAugmentation
-    from DerivationFrameworkMuons.MuonsToolsConfig import MuonJetDrToolCfg
-    muonJetDrTool = acc.getPrimaryAndMerge(MuonJetDrToolCfg(ConfigFlags, "MuonJetDrTool"))
-    acc.addEventAlgo(CommonAugmentation("DFCommonMuonsKernel2", AugmentationTools = [muonJetDrTool]))
-
+    if (ConfigFlags.Input.TriggerStream != 'physics_EgammaPEBTLA'):
+        CommonAugmentation = CompFactory.DerivationFramework.CommonAugmentation
+        from DerivationFrameworkMuons.MuonsToolsConfig import MuonJetDrToolCfg
+        muonJetDrTool = acc.getPrimaryAndMerge(MuonJetDrToolCfg(ConfigFlags, "MuonJetDrTool"))
+        acc.addEventAlgo(CommonAugmentation("DFCommonMuonsKernel2", AugmentationTools = [muonJetDrTool]))
+    else:
+        jetlog.warning("EgammaPEB stream detected, skipping muon-jet overlap removal")
+        
     from JetSelectorTools.JetSelectorToolsConfig import EventCleaningToolCfg,JetCleaningToolCfg
     
     supportedWPs = ['Loose', 'Tight', 'LooseLLP', 'VeryLooseLLP', 'SuperLooseLLP']
