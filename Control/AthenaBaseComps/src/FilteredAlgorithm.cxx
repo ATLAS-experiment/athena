@@ -2,37 +2,16 @@
   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-// Framework include files
-#include "GaudiKernel/IAlgManager.h"
-#include "GaudiKernel/ISvcLocator.h"
-#include "GaudiKernel/MsgStream.h"
 #include "AthenaBaseComps/FilteredAlgorithm.h"
-#include <cassert>
+
 #include <string>
 #include <vector>
 
-using std::string;
-using std::vector;
 
-// Standard Constructor
-FilteredAlgorithm::FilteredAlgorithm(const string& name, 
-                                     ISvcLocator* pSvcLocator) :
-  AthAlgorithm(name, pSvcLocator)
-{
-  assert( pSvcLocator );
-}
-
-// Standard Destructor
-FilteredAlgorithm::~FilteredAlgorithm()
-{}
-
-// initialize data writer
 StatusCode 
 FilteredAlgorithm::initialize() 
 {
-  ATH_MSG_DEBUG ("In initialize ");
-
-  // Decode the accept, required and veto Algorithms. 
+  // Decode the accept, required and veto Algorithms.
   // The logic is the following:
   //  a. The event is accepted if all lists are empty.
   //  b. The event is provisionally accepted if any Algorithm in the 
@@ -46,7 +25,6 @@ FilteredAlgorithm::initialize()
 
   // Use IDecisionSvc, FilteredAlgorithm is a wrapper around DecisionSvc
   ATH_CHECK(m_decSvc.retrieve());
-  ATH_MSG_DEBUG( "Found IDecisionSvc." );
 
   // Register stream, no matter what Properties it has
   if (!m_decSvc->addStream(this->name()).isSuccess()) {
@@ -54,74 +32,30 @@ FilteredAlgorithm::initialize()
   }
 
   // Propagate the FilteredAlgorithm's Properties to IDecisionSvc
-  for (std::vector<std::string>::const_iterator 
-        it = m_acceptNames.value().begin(),
-         end= m_acceptNames.value().end();
-       it != end;
-       ++it) {
-    ATH_MSG_DEBUG("Trying to add " << (*it) << " of stream " 
-                  << this->name() << " to AcceptAlg list");
-    if (!m_decSvc->addAcceptAlg((*it), this->name()).isSuccess()) {
-      ATH_MSG_ERROR("Couldn't add acceptAlg");
+  for (const std::string& alg : m_acceptNames.value()) {
+    if (!m_decSvc->addAcceptAlg(alg, this->name()).isSuccess()) {
+      ATH_MSG_ERROR("Could not add '" << alg << "' to AcceptAlg list");
     }
   }
 
-  for (std::vector<std::string>::const_iterator 
-        it = m_requireNames.value().begin(),
-        end= m_requireNames.value().end();
-      it != end;
-      ++it){
-    ATH_MSG_DEBUG("Trying to add " << (*it) << " of stream " 
-                  << this->name() << " to RequireAlg list");
-    if (!m_decSvc->addRequireAlg((*it), this->name()).isSuccess()) {
-      ATH_MSG_ERROR("Couldn't add requireAlg");
+  for (const std::string& alg : m_requireNames.value()) {
+    if (!m_decSvc->addRequireAlg(alg, this->name()).isSuccess()) {
+      ATH_MSG_ERROR("Could not add '" << alg << "' to RequireAlg list");
     }
   }
 
-  for (std::vector<std::string>::const_iterator 
-        it = m_vetoNames.value().begin(),
-        end= m_vetoNames.value().end();
-      it != end;
-      ++it){
-    ATH_MSG_DEBUG("Trying to add " << (*it) << " of stream " 
-                  << this->name() << " to VetoAlg list");
-    if (!m_decSvc->addVetoAlg((*it), this->name()).isSuccess()) {
-      ATH_MSG_ERROR("Couldn't add vetoAlg");
+  for (const std::string& alg : m_vetoNames.value()) {
+    if (!m_decSvc->addVetoAlg(alg, this->name()).isSuccess()) {
+      ATH_MSG_ERROR("Could not add '" << alg << "' to VetoAlg list");
     }
   }
-
-  ATH_MSG_DEBUG ("End initialize ");
-  
-  return StatusCode::SUCCESS;
-}
-
-
-StatusCode 
-FilteredAlgorithm::finalize() 
-{
 
   return StatusCode::SUCCESS;
 }
 
-StatusCode
-FilteredAlgorithm::execute(const EventContext& /*ctx*/) 
-{
-  return StatusCode::SUCCESS;
-}
 
 bool
-FilteredAlgorithm::isEventAccepted( ) const
+FilteredAlgorithm::isEventAccepted(const EventContext& ctx) const
 {
-  bool result = true;
-  const EventContext& ctx = Gaudi::Hive::currentContext();
-  if (ctx.valid()) {
-    result = m_decSvc->isEventAccepted(this->name(),ctx);
-    //ATH_MSG_DEBUG("res=" << result << " n=" << this->name() << " sl=" << ctx.slot() << " evt=" << ctx.eventID().event_number());
-  } else {
-    ATH_MSG_DEBUG("Not a threaded app");
-    result = m_decSvc->isEventAccepted(this->name());
-  }
-
-  return result;
+  return m_decSvc->isEventAccepted(this->name(), ctx);
 }
-
