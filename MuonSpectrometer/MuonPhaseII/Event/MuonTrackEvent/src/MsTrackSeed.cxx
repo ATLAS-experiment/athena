@@ -54,23 +54,15 @@ namespace MuonR4 {
     MsTrackSeed::Location MsTrackSeed::location() const { return m_loc; }
     std::vector<const SpacePointBucket*> MsTrackSeed::buckets() const { 
         std::vector<const SpacePointBucket*> returnMe{};
-        for (const Segment* seg : detailedSegments()){
+        for (const xAOD::MuonSegment* trfMe : segments()) {
+          if(const Segment* seg = detailedSegment(*trfMe); seg != nullptr){
             returnMe.push_back(seg->parent()->parentBucket());
+          }
         }
         return returnMe;
     }
     
-    const std::vector<const xAOD::MuonSegment*>& MsTrackSeed::segments() const { return m_segments; }
-    std::vector<const Segment*> MsTrackSeed::detailedSegments() const { 
-      std::vector<const Segment*> segs{};
-      segs.reserve(segments().size());
-      for (const xAOD::MuonSegment* trfMe : segments()) {
-         if(const Segment* seg = detailedSegment(*trfMe); seg != nullptr){
-            segs.push_back(seg);
-         }
-      } 
-      return segs; 
-    }
+    std::span<const xAOD::MuonSegment* const> MsTrackSeed::segments() const { return m_segments; }
     void MsTrackSeed::replaceSegment(const xAOD::MuonSegment* exist,
                                      const xAOD::MuonSegment* updated) {
         std::vector<const xAOD::MuonSegment*>::iterator itr = 
