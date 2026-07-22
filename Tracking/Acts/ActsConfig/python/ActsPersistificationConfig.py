@@ -135,6 +135,18 @@ def PersistifyTrackParticles(flags,
             trackparticles_shortlist += ['-actsTrack',
                                          '-hgtdTrackLink']
 
+        if not flags.Tracking.writeExtendedHGTDInfo:
+            trackparticles_shortlist += ['-HGTD_cluster_merged',
+                                         '-HGTD_cluster_raw_time',
+                                         '-HGTD_cluster_shadowed',
+                                         '-HGTD_cluster_time',
+                                         '-HGTD_cluster_truth_class',
+                                         '-HGTD_extrap_x',
+                                         '-HGTD_extrap_y',
+                                         '-HGTD_primary_expected',
+                                         '-HGTD_summaryinfo',
+                                         '-HGTD_times_of_compatible_hits']
+
         trackparticles_variables = ".".join(trackparticles_shortlist)        
         # remove track decorations used internally by FTAG software
         from InDetConfig.InDetTrackOutputConfig import FTAG_AUXDATA

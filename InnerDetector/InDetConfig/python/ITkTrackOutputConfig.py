@@ -33,6 +33,9 @@ def ITkTrackRecoOutputCfg(flags, extensions_list=None):
     if not flags.Tracking.writeExtendedSi_PRDInfo:
         excludedAuxData += '.-msosLink'
 
+    if not flags.Tracking.writeExtendedHGTDInfo:
+        excludedAuxData += '.-HGTD_cluster_merged.-HGTD_cluster_raw_time.-HGTD_cluster_shadowed.-HGTD_cluster_time.-HGTD_cluster_truth_class.-HGTD_extrap_x.-HGTD_extrap_y.-HGTD_primary_expected.-HGTD_summaryinfo.-HGTD_times_of_compatible_hits'
+
     # Save PRD
     toESD += [
         "InDet::SCT_ClusterContainer#ITkStripClusters",
