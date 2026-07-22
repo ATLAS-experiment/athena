@@ -164,7 +164,7 @@ StatusCode InDet::InDetEventSplitter::split_vertices() {
     }
   }  
 
-  //We need to add an approprate fraction of unfit tracks to the half and full vertex collections
+  //We need to add an appropriate fraction of unfit tracks to the half and full vertex collections
   //lets pull in the full list of tracks  
 
   if (m_savetpb and tpbTES){
@@ -174,8 +174,10 @@ StatusCode InDet::InDetEventSplitter::split_vertices() {
     oeNameString.reserve(20);
     for (const auto * tpb: *tpbTES){
       //it looks like our track collection is actually sorted by the vertex that they're in
-      //which means that just alternating odd vs even is equivalent to splitting the vertex first, then splitting the remining
+      //which means that just alternating odd vs even is equivalent to splitting the vertex first, then splitting the remaining
       //instead, we will just put in rand() call
+      //
+      //coverity[DC.WEAK_CRYPTO]
       m_isOdd = std::rand() % 2;
       oeNameString.clear();
       if (m_isOdd)  oeNameString = "odd";
@@ -183,9 +185,8 @@ StatusCode InDet::InDetEventSplitter::split_vertices() {
       sss.str("");
       sss << oeNameString << "_" << m_addToVx << "_Tracks";
       std::string oecontainerName = sss.str();   		  	
-      std::string allNameString = "all";
       sss.str("");
-      sss << allNameString << "_" << m_addToVx << "_Tracks";
+      sss << "all_" << m_addToVx << "_Tracks";
       std::string allcontainerName = sss.str();  
       Trk::TrackParticleBase *trkCopy1 = new Trk::TrackParticleBase(*tpb);
       Trk::TrackParticleBase *trkCopy2 = new Trk::TrackParticleBase(*tpb);
