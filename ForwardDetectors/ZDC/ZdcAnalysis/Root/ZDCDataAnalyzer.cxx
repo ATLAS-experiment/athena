@@ -877,8 +877,8 @@ void ZDCDataAnalyzer::DoNLcalibModuleSum()
 	      Had2CorrFact += std::pow(fHad2 - m_NLcalibFactors[iside][2][0],i)*m_NLcalibFactors[iside][2][i+1];
 	    }
 
-	  const std::string &dbgmsg = std::format("ZDCDataAnalyzer: {} {} {} {}\n",m_calibModuleSum[iside], EMCorrFact, Had1CorrFact, Had2CorrFact);
-	  (*m_msgFunc_p)(ZDCMsg::Debug, dbgmsg);
+	  // const std::string &dbgmsg = std::format("ZDCDataAnalyzer: {} {} {} {}\n",m_calibModuleSum[iside], EMCorrFact, Had1CorrFact, Had2CorrFact);
+	  // (*m_msgFunc_p)(ZDCMsg::Debug, dbgmsg);
 	  if ((EMCorrFact == 0.) or (Had1CorrFact == 0.) or (Had2CorrFact == 0.))[[unlikely]]{
 	    (*m_msgFunc_p)(ZDCMsg::Error,"ZDCDataAnalyzer::DoNLcalibModuleSum:  Denominator is zero");
 	    return;

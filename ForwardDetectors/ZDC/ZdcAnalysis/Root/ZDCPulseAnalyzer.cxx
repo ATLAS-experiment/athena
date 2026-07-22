@@ -1814,6 +1814,10 @@ void ZDCPulseAnalyzer::DoFit(bool refitLG)
     }
   }
 
+  // At this point we're don varying function parameters
+  //
+  fitWrapper->Finalize();
+  
   if (!m_fitFailed && m_saveFitFunc) {
     hist_p->GetListOfFunctions()->Clear();
 
@@ -1837,7 +1841,7 @@ void ZDCPulseAnalyzer::DoFit(bool refitLG)
       m_fitExpAmp = 0;
     }
     
-    m_fitTime      = fitWrapper->GetTime();
+    m_fitTime    = fitWrapper->GetTime();
     m_fitTimeSub = m_fitTime - t0Initial;
 
     m_fitChisq = result_ptr->Chi2();
