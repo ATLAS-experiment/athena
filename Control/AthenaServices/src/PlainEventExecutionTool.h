@@ -5,7 +5,7 @@
 #define ATHENASERVICES_PLAINEVENTEXECUTIONTOOL_H
 
 // Package includes
-#include "IEventExecutionTool.h"
+#include "AthenaKernel/IEventExecutionTool.h"
 
 // Framework includes
 #include "AthenaBaseComps/AthAlgTool.h"
@@ -23,6 +23,7 @@ public:
   virtual ~PlainEventExecutionTool() override {}
 
   virtual StatusCode executeEvent(MinimalEventLoopMgr* el,  EventContext&& ctx) {
+    ATH_MSG_ALWAYS("Execution diverted to the tool");
     return el->executeEvent(std::move(ctx));
   }
   virtual StatusCode initialize() override { return StatusCode::SUCCESS; }

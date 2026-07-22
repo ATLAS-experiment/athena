@@ -17,3 +17,8 @@ flags.lock()
 
 
 acc = MainServicesCfg(flags)
+# TODO, this should be configured in advance
+el =acc.getService("AthenaHiveEventLoopMgr")
+el.eventExecTool=CompFactory.ExecuteOngRPCCall()
+
+acc.run()

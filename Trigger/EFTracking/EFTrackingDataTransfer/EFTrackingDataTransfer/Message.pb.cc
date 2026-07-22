@@ -424,12 +424,12 @@ const char descriptor_table_protodef_Message_2eproto[] ABSL_ATTRIBUTE_SECTION_VA
     "\"\035\n\013FloatVector\022\016\n\006values\030\001 \003(\002\"\036\n\014Doubl"
     "eVector\022\016\n\006values\030\001 \003(\001\"\276\004\n\016OffloadMessa"
     "ge\022\022\n\nidentifier\030\001 \001(\t\022 \n\005event\030\002 \001(\0132\021."
-    "EventInfoMessage\0228\n\ruint_branches\030\n \003(\0132"
+    "EventInfoMessage\0228\n\ruint_branches\030\003 \003(\0132"
     "!.OffloadMessage.UintBranchesEntry\0226\n\014in"
-    "t_branches\030\013 \003(\0132 .OffloadMessage.IntBra"
-    "nchesEntry\022:\n\016float_branches\030\014 \003(\0132\".Off"
+    "t_branches\030\004 \003(\0132 .OffloadMessage.IntBra"
+    "nchesEntry\022:\n\016float_branches\030\005 \003(\0132\".Off"
     "loadMessage.FloatBranchesEntry\022<\n\017double"
-    "_branches\030\r \003(\0132#.OffloadMessage.DoubleB"
+    "_branches\030\006 \003(\0132#.OffloadMessage.DoubleB"
     "ranchesEntry\032@\n\021UintBranchesEntry\022\013\n\003key"
     "\030\001 \001(\t\022\032\n\005value\030\002 \001(\0132\013.UIntVector:\0028\001\032>"
     "\n\020IntBranchesEntry\022\013\n\003key\030\001 \001(\t\022\031\n\005value"
@@ -2126,9 +2126,9 @@ const ::_pbi::TcParseTable<1, 6, 9, 87, 2> OffloadMessage::_table_ = {
   {
     PROTOBUF_FIELD_OFFSET(OffloadMessage, _impl_._has_bits_),
     0, // no _extensions_
-    13, 8,  // max_field_number, fast_idx_mask
+    6, 8,  // max_field_number, fast_idx_mask
     offsetof(decltype(_table_), field_lookup_table),
-    4294959612,  // skipmap
+    4294967232,  // skipmap
     offsetof(decltype(_table_), field_entries),
     6,  // num_field_entries
     9,  // num_aux_entries
@@ -2155,16 +2155,16 @@ const ::_pbi::TcParseTable<1, 6, 9, 87, 2> OffloadMessage::_table_ = {
     // .EventInfoMessage event = 2;
     {PROTOBUF_FIELD_OFFSET(OffloadMessage, _impl_.event_), _Internal::kHasBitsOffset + 0, 0,
     (0 | ::_fl::kFcOptional | ::_fl::kMessage | ::_fl::kTvTable)},
-    // map<string, .UIntVector> uint_branches = 10;
+    // map<string, .UIntVector> uint_branches = 3;
     {PROTOBUF_FIELD_OFFSET(OffloadMessage, _impl_.uint_branches_), -1, 1,
     (0 | ::_fl::kFcRepeated | ::_fl::kMap)},
-    // map<string, .IntVector> int_branches = 11;
+    // map<string, .IntVector> int_branches = 4;
     {PROTOBUF_FIELD_OFFSET(OffloadMessage, _impl_.int_branches_), -1, 3,
     (0 | ::_fl::kFcRepeated | ::_fl::kMap)},
-    // map<string, .FloatVector> float_branches = 12;
+    // map<string, .FloatVector> float_branches = 5;
     {PROTOBUF_FIELD_OFFSET(OffloadMessage, _impl_.float_branches_), -1, 5,
     (0 | ::_fl::kFcRepeated | ::_fl::kMap)},
-    // map<string, .DoubleVector> double_branches = 13;
+    // map<string, .DoubleVector> double_branches = 6;
     {PROTOBUF_FIELD_OFFSET(OffloadMessage, _impl_.double_branches_), -1, 7,
     (0 | ::_fl::kFcRepeated | ::_fl::kMap)},
   }}, {{
@@ -2252,7 +2252,7 @@ PROTOBUF_NOINLINE void OffloadMessage::Clear() {
                 stream);
           }
 
-          // map<string, .UIntVector> uint_branches = 10;
+          // map<string, .UIntVector> uint_branches = 3;
           if (!this_._internal_uint_branches().empty()) {
             using MapType = ::google::protobuf::Map<std::string, ::UIntVector>;
             using WireHelper = _pbi::MapEntryFuncs<std::string, ::UIntVector,
@@ -2263,7 +2263,7 @@ PROTOBUF_NOINLINE void OffloadMessage::Clear() {
             if (stream->IsSerializationDeterministic() && field.size() > 1) {
               for (const auto& entry : ::google::protobuf::internal::MapSorterPtr<MapType>(field)) {
                 target = WireHelper::InternalSerialize(
-                    10, entry.first, entry.second, target, stream);
+                    3, entry.first, entry.second, target, stream);
                 ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
                     entry.first.data(), static_cast<int>(entry.first.length()),
  ::google::protobuf::internal::WireFormatLite::SERIALIZE, "OffloadMessage.uint_branches");
@@ -2271,7 +2271,7 @@ PROTOBUF_NOINLINE void OffloadMessage::Clear() {
             } else {
               for (const auto& entry : field) {
                 target = WireHelper::InternalSerialize(
-                    10, entry.first, entry.second, target, stream);
+                    3, entry.first, entry.second, target, stream);
                 ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
                     entry.first.data(), static_cast<int>(entry.first.length()),
  ::google::protobuf::internal::WireFormatLite::SERIALIZE, "OffloadMessage.uint_branches");
@@ -2279,7 +2279,7 @@ PROTOBUF_NOINLINE void OffloadMessage::Clear() {
             }
           }
 
-          // map<string, .IntVector> int_branches = 11;
+          // map<string, .IntVector> int_branches = 4;
           if (!this_._internal_int_branches().empty()) {
             using MapType = ::google::protobuf::Map<std::string, ::IntVector>;
             using WireHelper = _pbi::MapEntryFuncs<std::string, ::IntVector,
@@ -2290,7 +2290,7 @@ PROTOBUF_NOINLINE void OffloadMessage::Clear() {
             if (stream->IsSerializationDeterministic() && field.size() > 1) {
               for (const auto& entry : ::google::protobuf::internal::MapSorterPtr<MapType>(field)) {
                 target = WireHelper::InternalSerialize(
-                    11, entry.first, entry.second, target, stream);
+                    4, entry.first, entry.second, target, stream);
                 ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
                     entry.first.data(), static_cast<int>(entry.first.length()),
  ::google::protobuf::internal::WireFormatLite::SERIALIZE, "OffloadMessage.int_branches");
@@ -2298,7 +2298,7 @@ PROTOBUF_NOINLINE void OffloadMessage::Clear() {
             } else {
               for (const auto& entry : field) {
                 target = WireHelper::InternalSerialize(
-                    11, entry.first, entry.second, target, stream);
+                    4, entry.first, entry.second, target, stream);
                 ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
                     entry.first.data(), static_cast<int>(entry.first.length()),
  ::google::protobuf::internal::WireFormatLite::SERIALIZE, "OffloadMessage.int_branches");
@@ -2306,7 +2306,7 @@ PROTOBUF_NOINLINE void OffloadMessage::Clear() {
             }
           }
 
-          // map<string, .FloatVector> float_branches = 12;
+          // map<string, .FloatVector> float_branches = 5;
           if (!this_._internal_float_branches().empty()) {
             using MapType = ::google::protobuf::Map<std::string, ::FloatVector>;
             using WireHelper = _pbi::MapEntryFuncs<std::string, ::FloatVector,
@@ -2317,7 +2317,7 @@ PROTOBUF_NOINLINE void OffloadMessage::Clear() {
             if (stream->IsSerializationDeterministic() && field.size() > 1) {
               for (const auto& entry : ::google::protobuf::internal::MapSorterPtr<MapType>(field)) {
                 target = WireHelper::InternalSerialize(
-                    12, entry.first, entry.second, target, stream);
+                    5, entry.first, entry.second, target, stream);
                 ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
                     entry.first.data(), static_cast<int>(entry.first.length()),
  ::google::protobuf::internal::WireFormatLite::SERIALIZE, "OffloadMessage.float_branches");
@@ -2325,7 +2325,7 @@ PROTOBUF_NOINLINE void OffloadMessage::Clear() {
             } else {
               for (const auto& entry : field) {
                 target = WireHelper::InternalSerialize(
-                    12, entry.first, entry.second, target, stream);
+                    5, entry.first, entry.second, target, stream);
                 ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
                     entry.first.data(), static_cast<int>(entry.first.length()),
  ::google::protobuf::internal::WireFormatLite::SERIALIZE, "OffloadMessage.float_branches");
@@ -2333,7 +2333,7 @@ PROTOBUF_NOINLINE void OffloadMessage::Clear() {
             }
           }
 
-          // map<string, .DoubleVector> double_branches = 13;
+          // map<string, .DoubleVector> double_branches = 6;
           if (!this_._internal_double_branches().empty()) {
             using MapType = ::google::protobuf::Map<std::string, ::DoubleVector>;
             using WireHelper = _pbi::MapEntryFuncs<std::string, ::DoubleVector,
@@ -2344,7 +2344,7 @@ PROTOBUF_NOINLINE void OffloadMessage::Clear() {
             if (stream->IsSerializationDeterministic() && field.size() > 1) {
               for (const auto& entry : ::google::protobuf::internal::MapSorterPtr<MapType>(field)) {
                 target = WireHelper::InternalSerialize(
-                    13, entry.first, entry.second, target, stream);
+                    6, entry.first, entry.second, target, stream);
                 ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
                     entry.first.data(), static_cast<int>(entry.first.length()),
  ::google::protobuf::internal::WireFormatLite::SERIALIZE, "OffloadMessage.double_branches");
@@ -2352,7 +2352,7 @@ PROTOBUF_NOINLINE void OffloadMessage::Clear() {
             } else {
               for (const auto& entry : field) {
                 target = WireHelper::InternalSerialize(
-                    13, entry.first, entry.second, target, stream);
+                    6, entry.first, entry.second, target, stream);
                 ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
                     entry.first.data(), static_cast<int>(entry.first.length()),
  ::google::protobuf::internal::WireFormatLite::SERIALIZE, "OffloadMessage.double_branches");
@@ -2385,7 +2385,7 @@ PROTOBUF_NOINLINE void OffloadMessage::Clear() {
 
           ::_pbi::Prefetch5LinesFrom7Lines(&this_);
            {
-            // map<string, .UIntVector> uint_branches = 10;
+            // map<string, .UIntVector> uint_branches = 3;
              {
               total_size +=
                   1 * ::google::protobuf::internal::FromIntSize(this_._internal_uint_branches_size());
@@ -2395,7 +2395,7 @@ PROTOBUF_NOINLINE void OffloadMessage::Clear() {
                                                _pbi::WireFormatLite::TYPE_MESSAGE>::ByteSizeLong(entry.first, entry.second);
               }
             }
-            // map<string, .IntVector> int_branches = 11;
+            // map<string, .IntVector> int_branches = 4;
              {
               total_size +=
                   1 * ::google::protobuf::internal::FromIntSize(this_._internal_int_branches_size());
@@ -2405,7 +2405,7 @@ PROTOBUF_NOINLINE void OffloadMessage::Clear() {
                                                _pbi::WireFormatLite::TYPE_MESSAGE>::ByteSizeLong(entry.first, entry.second);
               }
             }
-            // map<string, .FloatVector> float_branches = 12;
+            // map<string, .FloatVector> float_branches = 5;
              {
               total_size +=
                   1 * ::google::protobuf::internal::FromIntSize(this_._internal_float_branches_size());
@@ -2415,7 +2415,7 @@ PROTOBUF_NOINLINE void OffloadMessage::Clear() {
                                                _pbi::WireFormatLite::TYPE_MESSAGE>::ByteSizeLong(entry.first, entry.second);
               }
             }
-            // map<string, .DoubleVector> double_branches = 13;
+            // map<string, .DoubleVector> double_branches = 6;
              {
               total_size +=
                   1 * ::google::protobuf::internal::FromIntSize(this_._internal_double_branches_size());

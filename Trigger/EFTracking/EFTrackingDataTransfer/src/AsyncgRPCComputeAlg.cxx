@@ -21,29 +21,7 @@ StatusCode AsyncgRPCComputeAlg::initialize() {
     ATH_MSG_ERROR("gRPC channel is not ready after 5 seconds, exiting ...");
     return StatusCode::FAILURE;
   }
-
   m_stub = std::make_unique<UniversalOffloadService::Stub>(channel);
-  google::protobuf::Arena arena;
-  OffloadMessage* requestMsg =
-      google::protobuf::Arena::Create<OffloadMessage>(&arena);
-
-  auto* ei = requestMsg->mutable_event();
-  ei->set_runnumber(0);
-  ei->set_eventnumber(1);
-  ei->set_lumiblock(2);
-  ei->set_timestamp(3);
-  ei->set_timestampnsoffset(4);
-  ei->set_bcid(5);
-
-  requestMsg->set_identifier("Enterprise to Starfleet Command.");
-
-  auto gRPCClientContext = std::make_unique<grpc::ClientContext>();
-  OffloadMessage* responseMsg =
-      google::protobuf::Arena::Create<OffloadMessage>(&arena);
-
-  auto status =
-      m_stub->doComputation(gRPCClientContext.get(), *requestMsg, responseMsg);
-  ATH_MSG_INFO("Service responded with: " << responseMsg->identifier());
 
   ATH_CHECK(m_packingTool.retrieve());
 

@@ -36,7 +36,7 @@
 #include "GaudiKernel/IHiveWhiteBoard.h"
 #include "GaudiKernel/IScheduler.h"
 #include "GaudiKernel/IAlgExecStateSvc.h"
-#include "IEventExecutionTool.h"
+#include "AthenaKernel/IEventExecutionTool.h"
 
 // Standard includes
 #include <functional>

@@ -1416,14 +1416,14 @@ class OffloadMessage final : public ::google::protobuf::Message
 
   // accessors -------------------------------------------------------
   enum : int {
-    kUintBranchesFieldNumber = 10,
-    kIntBranchesFieldNumber = 11,
-    kFloatBranchesFieldNumber = 12,
-    kDoubleBranchesFieldNumber = 13,
+    kUintBranchesFieldNumber = 3,
+    kIntBranchesFieldNumber = 4,
+    kFloatBranchesFieldNumber = 5,
+    kDoubleBranchesFieldNumber = 6,
     kIdentifierFieldNumber = 1,
     kEventFieldNumber = 2,
   };
-  // map<string, .UIntVector> uint_branches = 10;
+  // map<string, .UIntVector> uint_branches = 3;
   int uint_branches_size() const;
   private:
   int _internal_uint_branches_size() const;
@@ -1438,7 +1438,7 @@ class OffloadMessage final : public ::google::protobuf::Message
   ::google::protobuf::Map<std::string, ::UIntVector>* _internal_mutable_uint_branches();
 
   public:
-  // map<string, .IntVector> int_branches = 11;
+  // map<string, .IntVector> int_branches = 4;
   int int_branches_size() const;
   private:
   int _internal_int_branches_size() const;
@@ -1453,7 +1453,7 @@ class OffloadMessage final : public ::google::protobuf::Message
   ::google::protobuf::Map<std::string, ::IntVector>* _internal_mutable_int_branches();
 
   public:
-  // map<string, .FloatVector> float_branches = 12;
+  // map<string, .FloatVector> float_branches = 5;
   int float_branches_size() const;
   private:
   int _internal_float_branches_size() const;
@@ -1468,7 +1468,7 @@ class OffloadMessage final : public ::google::protobuf::Message
   ::google::protobuf::Map<std::string, ::FloatVector>* _internal_mutable_float_branches();
 
   public:
-  // map<string, .DoubleVector> double_branches = 13;
+  // map<string, .DoubleVector> double_branches = 6;
   int double_branches_size() const;
   private:
   int _internal_double_branches_size() const;
@@ -2090,7 +2090,7 @@ inline void OffloadMessage::set_allocated_event(::EventInfoMessage* value) {
   // @@protoc_insertion_point(field_set_allocated:OffloadMessage.event)
 }
 
-// map<string, .UIntVector> uint_branches = 10;
+// map<string, .UIntVector> uint_branches = 3;
 inline int OffloadMessage::_internal_uint_branches_size() const {
   return _internal_uint_branches().size();
 }
@@ -2118,7 +2118,7 @@ inline ::google::protobuf::Map<std::string, ::UIntVector>* OffloadMessage::mutab
   return _internal_mutable_uint_branches();
 }
 
-// map<string, .IntVector> int_branches = 11;
+// map<string, .IntVector> int_branches = 4;
 inline int OffloadMessage::_internal_int_branches_size() const {
   return _internal_int_branches().size();
 }
@@ -2146,7 +2146,7 @@ inline ::google::protobuf::Map<std::string, ::IntVector>* OffloadMessage::mutabl
   return _internal_mutable_int_branches();
 }
 
-// map<string, .FloatVector> float_branches = 12;
+// map<string, .FloatVector> float_branches = 5;
 inline int OffloadMessage::_internal_float_branches_size() const {
   return _internal_float_branches().size();
 }
@@ -2174,7 +2174,7 @@ inline ::google::protobuf::Map<std::string, ::FloatVector>* OffloadMessage::muta
   return _internal_mutable_float_branches();
 }
 
-// map<string, .DoubleVector> double_branches = 13;
+// map<string, .DoubleVector> double_branches = 6;
 inline int OffloadMessage::_internal_double_branches_size() const {
   return _internal_double_branches().size();
 }
