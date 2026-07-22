@@ -6,14 +6,17 @@
 #
 # Tau, flavour, met, Higgs, AFP, large-r are removed. 
 #
-# MC, Truth, Trigger, CloseByIsolation, IFF, HSGNN, 
-# PFGlobalFlowElementLinking, FEAssociation currently disabled.
+# MC, Truth, Trigger, CloseByIsolation, IFF, HSGNN, FEAssociation
+# PFGlobalFlowElementLinking, TrackParticleThinningTool currently 
+# disabled (to be enabled in the future?)
+#
+# HLT TLA Photons and EMclusters are added.
 # =======================================================================
 
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
-from AthenaConfiguration.Enums import MetadataCategory, LHCPeriod
+from AthenaConfiguration.Enums import MetadataCategory #, LHCPeriod
 from AthenaCommon.Logging import logging
 logEGAMPEB = logging.getLogger('EGAMPEB')
 
@@ -124,7 +127,7 @@ def EGAMPEBCommonAugmentationsCfg(flags,**kwargs):
     #     acc.merge(TriggerMatchingCommonRun3Cfg(
     #         flags, TriggerList = triggerListsHelper.Run3TriggerNames))
 
-    # return acc
+    return acc
 
 # Main algorithm config
 def EGAMPEBKernelCfg(flags, name='EGAMPEBKernel', **kwargs):
@@ -137,8 +140,7 @@ def EGAMPEBKernelCfg(flags, name='EGAMPEBKernel', **kwargs):
         acc.merge(GNNVertexCfg(flags))
 
     # Common augmentations
-    from DerivationFrameworkPhys.PhysCommonConfig import PhysCommonAugmentationsCfg
-    acc.merge(PhysCommonAugmentationsCfg(
+    acc.merge(EGAMPEBCommonAugmentationsCfg(
         flags, 
         TriggerListsHelper     = kwargs['TriggerListsHelper']
     ))
@@ -147,7 +149,7 @@ def EGAMPEBKernelCfg(flags, name='EGAMPEBKernel', **kwargs):
     # These are set up in PhysCommonThinningConfig. Only thing needed here the list of tools to schedule
     nametag = name.replace('Kernel', '') #get the name to label the tools below such that other formats can use this KernelCfg
     thinningToolsArgs = {
-        'TrackParticleThinningToolName'       : nametag+"TrackParticleThinningTool",
+        # 'TrackParticleThinningToolName'       : nametag+"TrackParticleThinningTool",
     } 
     # for AOD produced before 24.0.17, the electron removal tau is not available
     if flags.Tau.TauEleRM_isAvailable:
@@ -275,7 +277,7 @@ def EGAMPEBCoreCfg(flags, name_tag='EGAMPEB', StreamName='StreamDAOD_EGAMPEB', T
 
     #Trigger content for EgammaPEB 
     if flags.Input.TriggerStream=='physics_EgammaPEBTLA' and not flags.Input.isMC:
-        EGAMPEBSlimmingHelper.AllVariables += ['HLT_Photons']
+        EGAMPEBSlimmingHelper.AllVariables += ['HLT_egamma_Photons_TLA','HLT_CaloEMClusters_Photon']
 
     # Trigger matching
     # Run 3, or Run 2 with navigation conversion

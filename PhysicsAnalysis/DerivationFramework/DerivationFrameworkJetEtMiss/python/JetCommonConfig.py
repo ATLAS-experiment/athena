@@ -122,11 +122,16 @@ def AddEventCleanFlagsCfg(ConfigFlags, workingPoints = ['Loose', 'Tight', 'Loose
     tauLabel = 'DFTauGNTauLoose'
     muonKey = 'Muons'
     tauKey = 'TauJets'
+    doTauOR = True
+    doMuonOR = True
     if (ConfigFlags.Input.TriggerStream == 'physics_EgammaPEBTLA'):
+        jetlog.warning("EgammaPEB stream detected, skipping muon-jet and tau-jet overlap removal")
         muonKey = '' # don't use muons for overlap removal in EgammaPEB stream
         tauKey = '' # don't use taus for overlap removal in EgammaPEB stream
+        doTauOR = False
+        doMuonOR = False
         
-    orTool_legacy = acc.popToolsAndMerge(OverlapRemovalToolCfg(ConfigFlags,inputLabel=inputLabel_legacy,outputLabel=outputLabel_legacy,bJetLabel=bJetLabel))
+    orTool_legacy = acc.popToolsAndMerge(OverlapRemovalToolCfg(ConfigFlags,inputLabel=inputLabel_legacy,outputLabel=outputLabel_legacy,bJetLabel=bJetLabel,doMuons=doMuonOR,doTaus=doTauOR))
     algOR_legacy = CompFactory.OverlapRemovalGenUseAlg('OverlapRemovalGenUseAlg_EMTopo',
                                                 JetKey="AntiKt4EMTopoJets",
                                                 SelectionLabel=inputLabel_legacy,
@@ -142,7 +147,7 @@ def AddEventCleanFlagsCfg(ConfigFlags, workingPoints = ['Loose', 'Tight', 'Loose
     # Overlap for EMPFlow
     inputLabel = 'selected_eventClean_EMPFlow'
     outputLabel = 'DFCommonJets_passOR_EMPFlow'
-    orTool = acc.popToolsAndMerge(OverlapRemovalToolCfg(ConfigFlags,inputLabel=inputLabel,outputLabel=outputLabel,bJetLabel=bJetLabel))
+    orTool = acc.popToolsAndMerge(OverlapRemovalToolCfg(ConfigFlags,inputLabel=inputLabel,outputLabel=outputLabel,bJetLabel=bJetLabel,doMuons=doMuonOR,doTaus=doTauOR))
     algOR = CompFactory.OverlapRemovalGenUseAlg('OverlapRemovalGenUseAlg',
                                                 SelectionLabel=inputLabel,
                                                 OverlapLabel=outputLabel,
@@ -150,7 +155,7 @@ def AddEventCleanFlagsCfg(ConfigFlags, workingPoints = ['Loose', 'Tight', 'Loose
                                                 TauLabel=tauLabel,
                                                 BJetLabel=bJetLabel,
                                                 MuonKey=muonKey,
-                                                TauKey=tauKey)\
+                                                TauKey=tauKey)
     acc.addEventAlgo(algOR)
 
     if (ConfigFlags.Input.TriggerStream != 'physics_EgammaPEBTLA'):
