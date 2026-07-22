@@ -1111,6 +1111,7 @@ public:
     double indA = p[5];
     double indBFact = p[6];
 
+    m_expFermiInductFunc->SetParameter(0, amp);
     m_expFermiInductFunc->SetParameter(6, indA);
     m_expFermiInductFunc->SetParameter(7, indBFact);
 
@@ -1663,11 +1664,6 @@ double ZDCFermiExpFitInduct(const double* xvec, const double* pvec)
 
   double twoPiOverPeriod = 2.0*M_PI/period;
 
-  double tauRatio = tau2 / tau1;
-  double tauRatioMinunsOne = tauRatio - 1;
-
-  // double norm = std::pow(1. / tauRatioMinunsOne, 1. / (1.0 + tauRatio)) /
-  //   ( 1.0 + std::pow(1. / tauRatioMinunsOne, 1. / (1.0 + 1.0 / tauRatio))) ;
   double deltaT = t - t0;
   double norm = 1, expTerm = 1, fermiTerm = 1, inductTerm = 1;
   
