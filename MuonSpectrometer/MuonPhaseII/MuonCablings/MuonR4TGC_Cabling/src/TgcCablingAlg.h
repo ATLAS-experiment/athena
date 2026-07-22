@@ -1,7 +1,7 @@
 #ifndef MUONCABLINGDATA_TgcCablingAlg_H
 #define MUONCABLINGDATA_TgcCablingAlg_H
 
-#include "AthenaBaseComps/AthReentrantAlgorithm.h"
+#include "AthenaBaseComps/AthCondAlgorithm.h"
 #include "StoreGate/ReadCondHandleKey.h"
 #include "StoreGate/WriteCondHandleKey.h"
 
