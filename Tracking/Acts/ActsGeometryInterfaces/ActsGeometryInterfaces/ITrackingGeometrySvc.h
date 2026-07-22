@@ -19,7 +19,7 @@ namespace Acts {
 }
 
 namespace ActsTrk{
-    class DetectorElementToActsGeometryIdMap;
+    struct DetectorElementToActsGeometryIdMap;
 }
 
 namespace ActsTrk{
