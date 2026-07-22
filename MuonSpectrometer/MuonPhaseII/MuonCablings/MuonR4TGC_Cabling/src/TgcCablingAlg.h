@@ -13,7 +13,7 @@
 
 namespace MuonR4 {
 
-class TgcCablingAlg : public AthReentrantAlgorithm {
+class TgcCablingAlg : public AthCondAlgorithm {
 public:
     TgcCablingAlg(const std::string& name, ISvcLocator* pSvcLocator);
 
