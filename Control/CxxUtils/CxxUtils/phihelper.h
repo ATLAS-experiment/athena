@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file CxxUtils/phihelper.h
@@ -10,8 +10,9 @@
 #ifndef CXXUTILS_PHIHELPER_H
 #define CXXUTILS_PHIHELPER_H
 
+#include <numbers>
+#include <concepts>
 #include <cmath>
-#include <type_traits>
 
 namespace CxxUtils {
 
@@ -20,17 +21,16 @@ namespace CxxUtils {
    *
    * Odd positive (negative) multiples of pi map to (-)pi.
    */
-  template <typename T>
+  template <std::floating_point T>
   inline T wrapToPi(T phi)
   {
-    static_assert(std::is_floating_point<T>::value);
-
-    constexpr auto PI = static_cast<T>(M_PI);
+    constexpr T PI = std::numbers::pi_v<T>;
     // For large values this is faster:
     if (phi < -100 || phi > 100) {
       return std::remainder(phi, 2 * PI);
     }
-    while (phi > PI) phi -= 2 * PI;
+    while (phi > PI)
+      phi -= 2 * PI;
     while (phi < -PI) phi += 2 * PI;
     return phi;
   }
@@ -38,10 +38,9 @@ namespace CxxUtils {
   /**
    * Return difference phiA - phiB in range [-pi, pi]
    */
-  template <typename T>
+  template <std::floating_point T>
   inline T deltaPhi(T phiA, T phiB)
   {
-    static_assert(std::is_floating_point<T>::value);
     return wrapToPi(phiA - phiB);
   }
 
@@ -56,10 +55,9 @@ namespace CxxUtils {
    *
    * The returned value is within the range [-pi, pi].
    */
-  template <typename T>
+  template <std::floating_point T>
   inline T phiMean(T phiA, T phiB)
   {
-    static_assert(std::is_floating_point<T>::value);
     const T diff = wrapToPi(phiA - phiB);
     return wrapToPi(phiB + 0.5 * diff);
   }
@@ -73,12 +71,11 @@ namespace CxxUtils {
    *
    * The returned value is within the range [-pi, pi].
    */
-  template <typename T>
+  template <std::floating_point T>
   inline T phiBisect(T phiA, T phiB)
   {
-    static_assert(std::is_floating_point<T>::value);
     T phi = 0.5 * (phiA + phiB);
-    if (phiA > phiB) phi += M_PI;
+    if (phiA > phiB) phi += std::numbers::pi;
     return wrapToPi(phi);
   }
 
