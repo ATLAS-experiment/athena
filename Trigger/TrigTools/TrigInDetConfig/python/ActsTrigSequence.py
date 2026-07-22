@@ -47,13 +47,10 @@ class ActsTrigSequence(InnerTrackerTrigSequence):
         acc.merge(SGInputLoaderCfg(self.flags, Load=sgil_load))
 
     if self.flags.Acts.useCache:
-        ViewDataVerifier.DataObjects |= {( 'ActsTrk::Cache::Handles<xAOD::SpacePoint>::IDCBackend' , 'StoreGateSvc+ActsPixelSpacePointCache_Back' ),
-                                         ( 'ActsTrk::Cache::Handles<xAOD::PixelCluster>::IDCBackend' , 'StoreGateSvc+ActsPixelClusterCache_Back' ),
-                                         ( 'ActsTrk::Cache::Handles<xAOD::StripCluster>::IDCBackend' , 'StoreGateSvc+ActsStripClusterCache_Back' ),
-                                         ( 'ActsTrk::Cache::Handles<xAOD::PixelCluster>::IDC' , 'StoreGateSvc+ActsPixelClustersCache' ),
-                                         ( 'ActsTrk::Cache::Handles<xAOD::StripCluster>::IDC' , 'StoreGateSvc+ActsStripClustersCache' ),
-                                         ( 'ActsTrk::Cache::Handles<xAOD::SpacePoint>::IDC' , 'StoreGateSvc+ActsPixelSpacePointCache' )}
-
+      ViewDataVerifier.DataObjects |= {( 'ActsTrk::Cache::Handles<xAOD::SpacePoint>::IDCBackend' , 'StoreGateSvc+ActsPixelSpacePointCache_Back' ),
+                                       ( 'ActsTrk::Cache::Handles<xAOD::PixelCluster>::IDCBackend' , 'StoreGateSvc+ActsPixelClusterCache_Back' ),
+                                       ( 'ActsTrk::Cache::Handles<xAOD::StripCluster>::IDCBackend' , 'StoreGateSvc+ActsStripClusterCache_Back' ),
+                                       }
     ViewDataVerifier.DataObjects |= {
       ('InDet::SiDetectorElementStatus' ,   'StoreGateSvc+ITkPixelDetectorElementStatus' ),
       ('InDet::SiDetectorElementStatus' , 'StoreGateSvc+ITkStripDetectorElementStatus' ),
