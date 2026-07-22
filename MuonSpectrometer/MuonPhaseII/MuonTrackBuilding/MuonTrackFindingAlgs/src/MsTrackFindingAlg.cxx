@@ -207,7 +207,9 @@ namespace MuonR4{
          *  SegmentContainer from which the seeds are built */
         {
             fitTraject->addColumn<std::vector<const xAOD::MuonSegment*>>("muonSegLinks");
-            fitTraject->getTrack(0).component<std::vector<const xAOD::MuonSegment*>>("muonSegLinks") = seed.segments();
+            auto appendMe = seed.segments();
+            auto& toAppend = track.component<std::vector<const xAOD::MuonSegment*>>("muonSegLinks");
+            toAppend.insert(toAppend.end(), appendMe.begin(), appendMe.end());
         }
         outContainer.ensureDynamicColumns(*fitTraject);
         auto destProxy = outContainer.getTrack(outContainer.addTrack());

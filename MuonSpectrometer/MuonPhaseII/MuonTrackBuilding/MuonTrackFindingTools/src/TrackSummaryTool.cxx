@@ -207,7 +207,7 @@ namespace MuonR4 {
     }
 
     HitSummary TrackSummaryTool::makeSummary(const EventContext& /*ctx*/,
-                                             const std::vector<const xAOD::MuonSegment*> & segments) const {
+                                             std::span<const xAOD::MuonSegment* const> segments) const {
         HitSummary summary{};
         for (const xAOD::MuonSegment* seg : segments) {
             const LayerIndex lay = toLayerIndex(seg->chamberIndex());
