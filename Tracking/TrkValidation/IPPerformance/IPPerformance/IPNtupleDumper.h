@@ -3,9 +3,6 @@
 
 #include <AnaAlgorithm/AnaAlgorithm.h>
 
-// c++ include(s):
-#include <iterator>
-
 // Infrastructure include(s):
 #include "xAODRootAccess/Init.h"
 #include "xAODRootAccess/TEvent.h"
@@ -31,13 +28,13 @@
 #include "xAODTracking/Vertex.h"
 
 #include "TrigDecisionTool/TrigDecisionTool.h"
-
+#include <memory>
 // IP studies
 #include "IPPerformance/IPhistos.h"
 
 class TruthMatchProbabilityCut {
  protected:
-  double m_truthmatchprobabilitycut;
+  double m_truthmatchprobabilitycut{};
  public:
  TruthMatchProbabilityCut(double truthmatchprobabilitycut = 0.5) :
   m_truthmatchprobabilitycut (truthmatchprobabilitycut) {};
@@ -109,7 +106,7 @@ public:
   ToolHandleArray<InDet::IInDetTrackSelectionTool> m_trackselectionTools{this, "trackSelectionTools", {}};
   ToolHandle<CP::TrackVertexAssociationTool>    m_trktovxtool{this,"trktovxtool","CP::TrackVertexAssociationTool"};
   
-  TTree *m_t1; //!
+  TTree *m_t1{}; //!
   
   TH1D* m_h_SumOfEventWeights = nullptr; //! //MVGR: to help getting total SumOfWeights of MC slices
 
@@ -165,22 +162,22 @@ public:
   
   //========Tree Output Branches=======
   
-  int ntracks; //!
-  int runN;    //!
-  int evtN;    //!
-  float evtW;  //!
-  int lb;      //!
-  float mu;    //!
-  float bsx;   //!
-  float bsy;   //!
-  float bsz;   //!
-  float bsSigmax;   //!
-  float bsSigmay;   //!
-  float bsSigmaz;   //!
-  float pvx;   //!
-  float pvy;   //!
-  float pvz;   //!
-  int   pvN;   //!
+  int ntracks{}; //!
+  int runN{};    //!
+  int evtN{};    //!
+  float evtW{};  //!
+  int lb{};      //!
+  float mu{};    //!
+  float bsx{};   //!
+  float bsy{};   //!
+  float bsz{};   //!
+  float bsSigmax{};   //!
+  float bsSigmay{};   //!
+  float bsSigmaz{};   //!
+  float pvx{};   //!
+  float pvy{};   //!
+  float pvz{};   //!
+  int   pvN{};   //!
   
   //0 - LoosePrimary 
   //1 - TightPrimary 

@@ -26,7 +26,8 @@ class IPhistos : public BaseHistos
  private:
 
   bool m_saveAdditionalHistos = false;
-
+  
+  std::string m_name;
   TH1D* m_h_d0;
   TH1D* m_h_z0;
   TH1D* m_h_jetPt;

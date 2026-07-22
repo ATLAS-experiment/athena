@@ -6,7 +6,7 @@
 #include "TClass.h"
 #include <TRandom.h>
 #include <TProfile.h>
-IPhistos::IPhistos(const std::string& inputName) : BaseHistos(inputName)   
+IPhistos::IPhistos(const std::string& inputName) : BaseHistos()
 {
 
   m_name = inputName;

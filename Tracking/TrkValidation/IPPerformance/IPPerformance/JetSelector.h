@@ -35,22 +35,22 @@ public:
 
 private:
 
-  int m_pvLocation;       //!
+  int m_pvLocation{};       //!
   ServiceHandle<StoreGateSvc> m_storeGate{this,"StoreGateSvc","StoreGateSvc"};
 
    // cutflow
-  TH1D* m_jet_cutflowHist;  //!
-  TH1D* m_cutflowHist;          //!
+  TH1D* m_jet_cutflowHist{};  //!
+  TH1D* m_cutflowHist{};          //!
 
   ToolHandle<JetCleaningTool>   m_jetCleaning{this,"jetCleaning","JetCleaningTool"};
   /* object-level cutflow */
   
-  int   m_jet_cutflow_all;           //! 
-  int   m_jet_cutflow_cleaning_cut;  //!
-  int   m_jet_cutflow_ptmin_cut;     //!
-  int   m_jet_cutflow_eta_cut;       //!
-  int   m_jet_cutflow_e_cut;         //!
-  int   m_jet_cutflow_jvt_cut;       //!
+  int   m_jet_cutflow_all{};           //! 
+  int   m_jet_cutflow_cleaning_cut{};  //!
+  int   m_jet_cutflow_ptmin_cut{};     //!
+  int   m_jet_cutflow_eta_cut{};       //!
+  int   m_jet_cutflow_e_cut{};         //!
+  int   m_jet_cutflow_jvt_cut{};       //!
 
   // variables that don't get filled at submission time should be
   // protected from being send from the submission node to the worker

@@ -3,10 +3,6 @@
 #include "TClass.h"
 #include "TProfile.h"
 
-BaseHistos::BaseHistos(std::string inputName) 
-{
-  m_name = inputName; 
-}
 
 TH1D* BaseHistos::plot1D(const std::string& name,const std::string& xtitle, int nbinsX, double xmin, double xmax) {
   TH1D* h= new TH1D(name.c_str(),name.c_str(),nbinsX,xmin,xmax);

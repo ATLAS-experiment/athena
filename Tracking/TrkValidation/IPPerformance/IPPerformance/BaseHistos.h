@@ -11,7 +11,6 @@
 class BaseHistos {
 
  public:
-  BaseHistos(std::string inputName); 
   BaseHistos(){}; 
   virtual ~BaseHistos() {};
   
@@ -60,7 +59,6 @@ class BaseHistos {
     
  protected:
   
-  std::string m_name;
   
   std::map<std::string, std::vector<double> > m_Axes;
     
