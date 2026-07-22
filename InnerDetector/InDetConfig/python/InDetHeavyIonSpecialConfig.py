@@ -77,9 +77,8 @@ def lowPtPassCfg(flags):
     from TrkConfig.TrkTrackCollectionMergerConfig import TrackCollectionMergerAlgCfg
     acc.merge(TrackCollectionMergerAlgCfg(flags,
                                           name="TrackCollectionMergerLowPtAlg",
-#                                          InputCombinedTracks=['ResolvedTracks', 'ResolvedHeavyIonLowPtTracks'],
                                           InputCombinedTracks=['ExtendedTracks', 'ResolvedHeavyIonLowPtTracks'],
-#                                          InputCombinedTracks=['ExtendedTracks', 'ExtendedHeavyIonLowPtTracks'],
+#                                          InputCombinedTracks=['ExtendedTracks', 'SiSPSeededHeavyIonLowPtTracks'],
                                           OutputCombinedTracks=TrackContainer,
                                           AssociationMapName=f"PRDtoTrackMapMerge_{TrackContainer}"))
 
