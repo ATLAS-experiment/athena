@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -168,9 +168,7 @@ StatusCode IDTPM::OfflineTauDecoratorAlg::decorateTauTrack(
                          "prong (pt=" << tau->pt() <<
                          "). Decorating track." );
           IDTPM::decorateOrRejectQuietly( track, tau_decor[All], tauLink );
-          return StatusCode::SUCCESS;
         }
-
         /// Decoration for Tight tau
         if( isTight ) {
           IDTPM::decorateOrRejectQuietly( track, tau_decor[Tight], tauLink );
@@ -190,6 +188,7 @@ StatusCode IDTPM::OfflineTauDecoratorAlg::decorateTauTrack(
         if( isVeryLoose ) {
           IDTPM::decorateOrRejectQuietly( track, tau_decor[VeryLoose], tauLink );
         }
+
 
       } // if( tauTrack == &track ) 
 

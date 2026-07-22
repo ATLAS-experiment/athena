@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef INDETTRACKPERFMON_TRKPARAMETERSHELPER_H
@@ -200,7 +200,6 @@ namespace IDTPM {
     if( covs.size() < 15 ) {
       throw std::runtime_error(
         "TrackParticle without covariance matrix for defining parameters or the covariance matrix is wrong dimensionality.");
-      return 0.;
     }
     if( qOverP(p) <= 0. ) return 0.;
     float diff_qp = - pT(p) / std::fabs( qOverP(p) );
