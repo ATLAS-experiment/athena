@@ -1,9 +1,8 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /// local include(s)
-#include "TrackMatchingLookup.h"
 #include "TrackParametersHelper.h"
 #include "InDetTrackPerfMon/ITrackAnalysisDefinitionSvc.h"
 
@@ -97,19 +96,21 @@ StatusCode IDTPM::TrackMatchingLookupBase<T, R>::updateMaps(
   /// i.e. the first element will always be the best-matched test
   if( isRefInMaps(r) ) {
     typename mapRtoT_t::iterator mitr = m_mapRefToTest.find( &r );
-    ATH_MSG_DEBUG( "Reference already matched to other " <<
-                   mitr->second.size() << " test(s). Adding a new one..." );
-    /// copy of the matched test vector
-    std::vector< const T* > tvec = mitr->second;
-    /// Adding the new test track
-    tvec.push_back( &t );
-    /// sorting the vector by increasing distance
-    std::sort( tvec.begin(), tvec.end(),
-               [&]( const T* t1, const T* t2 ) -> bool{
-                  return ( getDist(*t1) < getDist(*t2) ); } );
-    /// update the vector in the map
-    mitr->second.clear();
-    mitr->second.insert( mitr->second.begin(), tvec.begin(), tvec.end() );
+    if (mitr != m_mapRefToTest.end()){
+      ATH_MSG_DEBUG( "Reference already matched to other " <<
+                     mitr->second.size() << " test(s). Adding a new one..." );
+      /// copy of the matched test vector
+      std::vector< const T* > tvec = mitr->second;
+      /// Adding the new test track
+      tvec.push_back( &t );
+      /// sorting the vector by increasing distance
+      std::sort( tvec.begin(), tvec.end(),
+                 [&]( const T* t1, const T* t2 ) -> bool{
+                    return ( getDist(*t1) < getDist(*t2) ); } );
+      /// update the vector in the map
+      mitr->second.clear();
+      mitr->second.insert( mitr->second.begin(), tvec.begin(), tvec.end() );
+    }
   }
   else {
     std::vector< const T* > tvec; // creating new vector of matched tests
