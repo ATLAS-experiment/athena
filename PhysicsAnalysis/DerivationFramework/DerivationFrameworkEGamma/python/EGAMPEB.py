@@ -9,6 +9,13 @@
 # MC, Truth, Trigger, CloseByIsolation, IFF, TrackParticleThinningTool 
 # are currently disabled (to be enabled in the future?)
 #
+# CloseByIsolation, TrackParticleThinningTool fail due to requesting
+# MDT geometry info, conditions config error?
+# 
+# IFF fails due to retriveing non-existant btag decoration
+#
+# Trigger fails due to missing HLTNav_Summary
+#
 # HLT TLA Photons and EMclusters are added.
 # =======================================================================
 
@@ -89,7 +96,6 @@ def EGAMPEBCommonAugmentationsCfg(flags,**kwargs):
 
     # InDet, Muon, Egamma common augmentations
     from DerivationFrameworkInDet.InDetCommonConfig import InDetCommonCfg
-    # from DerivationFrameworkMuons.MuonsCommonConfig import MuonsCommonCfg
     from DerivationFrameworkEGamma.EGammaCommonConfig import EGammaCommonCfg
     # TODO: need to find the new flags equivalent for the missing settings below, then we can
     # drop these kwargs and do everything via the flags
@@ -100,7 +106,6 @@ def EGAMPEBCommonAugmentationsCfg(flags,**kwargs):
                              DoR3LargeD0 = flags.Tracking.doLargeD0,
                              StoreSeparateLargeD0Container = flags.Tracking.storeSeparateLargeD0Container,
                              MergeLRT = False)) 
-    # acc.merge(MuonsCommonCfg(flags))
     acc.merge(EGammaCommonCfg(flags))
     # Jets,
     acc.merge(JetEGAMPEBConfig(flags))
@@ -273,14 +278,13 @@ def EGAMPEBCoreCfg(flags, name_tag='EGAMPEB', StreamName='StreamDAOD_EGAMPEB', T
     EGAMPEBSlimmingHelper.IncludeBJetTriggerByYearContent = False
 
     #Trigger content for EgammaPEB 
-    if flags.Input.TriggerStream=='physics_EgammaPEBTLA' and not flags.Input.isMC:
-        EGAMPEBSlimmingHelper.AllVariables += ['HLT_egamma_Photons_TLA','HLT_CaloEMClusters_Photon']
+    EGAMPEBSlimmingHelper.AllVariables += ['HLT_egamma_Photons_TLA','HLT_CaloEMClusters_Photon']
 
     # Trigger matching
     # Run 3, or Run 2 with navigation conversion
-    if flags.Trigger.EDMVersion == 3 or (flags.Trigger.EDMVersion == 2 and flags.Trigger.doEDMVersionConversion):
-        from TrigNavSlimmingMT.TrigNavSlimmingMTConfig import AddRun3TrigNavSlimmingCollectionsToSlimmingHelper
-        AddRun3TrigNavSlimmingCollectionsToSlimmingHelper(EGAMPEBSlimmingHelper)
+    # if flags.Trigger.EDMVersion == 3 or (flags.Trigger.EDMVersion == 2 and flags.Trigger.doEDMVersionConversion):
+    #     from TrigNavSlimmingMT.TrigNavSlimmingMTConfig import AddRun3TrigNavSlimmingCollectionsToSlimmingHelper
+    #     AddRun3TrigNavSlimmingCollectionsToSlimmingHelper(EGAMPEBSlimmingHelper)
 
     # L1 trigger objects
     from Campaigns.Utils import getDataYear
