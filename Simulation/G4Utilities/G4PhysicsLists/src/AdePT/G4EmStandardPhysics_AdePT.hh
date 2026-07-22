@@ -74,6 +74,9 @@ public:
 
   explicit G4EmStandardPhysics_AdePT(G4int ver=1, const G4String& name="G4EmStandard_AdePT", G4bool multipleStepsInMSCTransport=false);
 
+  G4EmStandardPhysics_AdePT(const G4EmStandardPhysics_AdePT&) = delete;
+  G4EmStandardPhysics_AdePT& operator=(const G4EmStandardPhysics_AdePT&) = delete;
+
   ~G4EmStandardPhysics_AdePT() override;
 
   void ConstructParticle() override;
