@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "DiTauRec/DiTauExtraVarDecorator.h"
@@ -462,7 +462,7 @@ StatusCode DiTauExtraVarDecorator::getTrackingInfo(xAOD::DiTauJet& xDiTau, Ditau
         TLorentzVector subjet_p4 = TLorentzVector();
         subjet_p4.SetPtEtaPhiE( xDiTau.subjetPt(i), xDiTau.subjetEta(i), xDiTau.subjetPhi(i), xDiTau.subjetE(i));
         subjetTrackingInfo.subjet_p4 = subjet_p4;
-        trackingInfo.vSubjetInfo.push_back(subjetTrackingInfo);
+        trackingInfo.vSubjetInfo.push_back(std::move(subjetTrackingInfo));
     }
     for (const auto track : trackingInfo.vTracks) {
         float dRMin = 999;
@@ -491,7 +491,7 @@ StatusCode DiTauExtraVarDecorator::getTrackingInfo(xAOD::DiTauJet& xDiTau, Ditau
     // find core track in subjets
     for (int i=0; i<nSubjets; ++i){
         for (const auto track : trackingInfo.vSubjetInfo[i].vTracks){
-            auto subjetTrackingInfo = trackingInfo.vSubjetInfo[i];
+            const auto & subjetTrackingInfo = trackingInfo.vSubjetInfo[i];
             if (subjetTrackingInfo.subjet_p4.DeltaR(track->p4()) < RCore){
                 trackingInfo.vSubjetInfo[i].vCoreTracks.push_back(track);
             }
