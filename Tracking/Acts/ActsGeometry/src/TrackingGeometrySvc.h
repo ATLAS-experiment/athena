@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ACTSGEOMETRY_ACTSTRACKINGGEOMETRYSVC_H
@@ -10,6 +10,7 @@
 
 // PACKAGE
 #include "ActsGeometryInterfaces/ITrackingGeometrySvc.h"
+#include "ActsGeometry/DetectorElementToActsGeometryIdMap.h"
 #include "ActsGeometryInterfaces/IActsTrackingVolumeBuilder.h"
 #include "ActsGeometryInterfaces/IBlueprintNodeBuilder.h"
 #include "ActsGeometryInterfaces/IRefineTrackingGeoTool.h"
@@ -62,7 +63,7 @@ public:
 
   TrackingGeometrySvc( const std::string& name, ISvcLocator* pSvcLocator );
     /** @copydoc ActsTrk::ITrackingGeometrySvc::trackingGeometry */
-  std::shared_ptr<const Acts::TrackingGeometry> trackingGeometry() override;
+  std::shared_ptr<const Acts::TrackingGeometry> trackingGeometry() const override;
   /** @copydoc ActsTrk::ITrackingGeometrySvc::populateAlignmentStore */
   unsigned int populateAlignmentStore(ActsTrk::DetectorAlignStore& store) const override;
 
@@ -70,8 +71,13 @@ public:
   const ActsTrk::GeometryContext& getNominalContext() const override;
   /** @copydoc ActsTrk::ITrackingGeometrySvc::getEnvelope */
   const Acts::TrackingVolume* getEnvelope(const ActsTrk::SystemEnvelope envType) const override;
-
+  /** @copydoc ActsTrk::ITrackingGeometrySvc::surfaceIdMap */
+  virtual const ActsTrk::DetectorElementToActsGeometryIdMap* surfaceIdMap() const override;
 private:
+  /** @brief Creates and popules the DetectorElement -> Acts::Surface geo identifier map from the geometry service */
+  std::unique_ptr<ActsTrk::DetectorElementToActsGeometryIdMap> createDetectorElementToGeoIdMap() const;
+
+
   ActsLayerBuilder::Config
   makeLayerBuilderConfig(const InDetDD::InDetDetectorManager* manager);
 
@@ -169,7 +175,7 @@ private:
   /// Special treatment for the innermost pixel layer to have more control on bin size to account for shallow angle tracks.
   Gaudi::Property<double> m_numberOfInnermostLayerBinsFactor{this, "NumberOfInnermostLayerBinsFactor",2.0};
   
-
+  std::unique_ptr<const ActsTrk::DetectorElementToActsGeometryIdMap> m_detIdMap{};
 };
 
 }

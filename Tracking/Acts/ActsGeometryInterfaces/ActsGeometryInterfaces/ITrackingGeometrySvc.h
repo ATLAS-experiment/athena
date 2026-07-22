@@ -19,6 +19,10 @@ namespace Acts {
 }
 
 namespace ActsTrk{
+    class DetectorElementToActsGeometryIdMap;
+}
+
+namespace ActsTrk{
 
 /** @brief Interface class for the ATLAS service providing the 
            ActsTrackingGeometry. The tracking geometry is built at
@@ -30,7 +34,7 @@ public:
 
     virtual ~ITrackingGeometrySvc() = default;
     /// Returns a pointer to the internal ACTS tracking geometry
-    virtual std::shared_ptr<const Acts::TrackingGeometry> trackingGeometry() = 0;
+    virtual std::shared_ptr<const Acts::TrackingGeometry> trackingGeometry() const = 0;
     /// Returns an empty nominal context without any alignment caches
     virtual const GeometryContext& getNominalContext() const = 0;
     /// Loops through the volumes of the tracking geometry and caches the aligned transforms in the store
@@ -38,6 +42,10 @@ public:
     /** @brief Returns the envelope volume from the tracking geometry that's 
                containing all volumes of the subsystem  */
     virtual const Acts::TrackingVolume* getEnvelope(const SystemEnvelope envType) const = 0;
+
+    /** @brief Returns the pointer to the identifier mapping between Acts::surface ID
+         *         & IdentifierHash of the ITk surfaces */
+    virtual const ActsTrk::DetectorElementToActsGeometryIdMap* surfaceIdMap() const= 0;
 };
 }
 

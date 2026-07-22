@@ -221,6 +221,10 @@ StatusCode TrackingGeometrySvc::initialize() {
         m_trackingGeometry->apply(printer);
         ATH_MSG_INFO("Built tracking geometry \n"<<printer.stream().str());
     }
+    m_detIdMap = createDetectorElementToGeoIdMap();
+    if (!m_detIdMap) {
+        return StatusCode::FAILURE;
+    }
 
     return StatusCode::SUCCESS;
   }
@@ -522,11 +526,19 @@ StatusCode TrackingGeometrySvc::initialize() {
     }
   }
 
+  m_detIdMap = createDetectorElementToGeoIdMap();
+  if (!m_detIdMap) {
+      return StatusCode::FAILURE;
+  }
+
+
   ATH_MSG_INFO("Acts TrackingGeometry construction completed");
 
   return StatusCode::SUCCESS;
 }
-
+const ActsTrk::DetectorElementToActsGeometryIdMap* TrackingGeometrySvc::surfaceIdMap() const {
+  return m_detIdMap.get();
+}
 bool TrackingGeometrySvc::runConsistencyChecks() const {
   bool result = true;
 
@@ -753,7 +765,7 @@ bool TrackingGeometrySvc::runConsistencyChecks() const {
 }
 
 std::shared_ptr<const Acts::TrackingGeometry>
-TrackingGeometrySvc::trackingGeometry() {
+TrackingGeometrySvc::trackingGeometry() const {
 
   ATH_MSG_VERBOSE("Retrieving tracking geometry");
   return m_trackingGeometry;
@@ -1234,5 +1246,80 @@ const Acts::TrackingVolume*
         THROW_EXCEPTION("There is no system envelope "<<envType);
       }
       return retVol;
+}
+
+std::unique_ptr<ActsTrk::DetectorElementToActsGeometryIdMap> 
+    TrackingGeometrySvc::createDetectorElementToGeoIdMap() const {
+    // create map from
+    auto detector_element_to_geoid = std::make_unique<DetectorElementToActsGeometryIdMap>();
+
+    struct Counter{ 
+        unsigned n_sensitive_elements{0};
+        unsigned n_detector_elements{0};
+        unsigned n_wrong_type{0};
+    };
+    Counter counter {};
+    trackingGeometry()->visitSurfaces([this, &counter, &detector_element_to_geoid](const Acts::Surface *surface) {
+        if (!surface || !surface->isSensitive()) {
+            ++counter.n_wrong_type;
+            return;
+        }
+        ++counter.n_sensitive_elements;
+        const auto* placement = dynamic_cast<const ISurfacePlacement*>(surface->surfacePlacement());
+        if (!placement) {           
+            return;
+        }
+
+        auto insert_id = [&detector_element_to_geoid, &surface, &counter](const xAOD::UncalibMeasType type,
+                                                                          const IdentifierHash& hash) {
+            detector_element_to_geoid->insert(std::make_pair(makeDetectorElementKey(type, hash),
+                                                             DetectorElementToActsGeometryIdMap::makeValue(surface->geometryId())));
+            ++counter.n_detector_elements;
+        };
+        switch(placement->detectorType()) {
+            using enum DetectorType;
+            case Pixel:
+                insert_id(xAOD::UncalibMeasType::PixelClusterType,
+                          getActsDetectorElement(surface)->identifyHash());
+                break;
+            case Sct:
+                insert_id(xAOD::UncalibMeasType::StripClusterType,
+                          getActsDetectorElement(surface)->identifyHash());
+                break;
+            case Hgtd:
+                insert_id(xAOD::UncalibMeasType::HGTDClusterType, 
+                         getActsDetectorElement(surface)->identifyHash());
+                break;
+            case Trt: {
+                break;
+            }
+            /// Muon system
+            case Mdt:
+            case Rpc:
+            case Tgc:
+            case Csc:
+            case Mm:
+            case sTgc:{
+                // surface map not needed for the muon detectors
+               ++counter.n_detector_elements; 
+               break;
+            }
+            case UnDefined:
+                ATH_MSG_ERROR("Undefined element encountered");
+                counter.n_detector_elements = 0;
+                return;
+        }
+    }, true /*sensitive surfaces*/);
+    ATH_MSG_INFO( "Surfaces without associated detector elements " << (counter.n_sensitive_elements -counter.n_detector_elements)
+                << " (with " << counter.n_detector_elements << ")" );
+    if (counter.n_sensitive_elements > 0 && 
+        counter.n_detector_elements==0) {
+        ATH_MSG_ERROR( "No surface with associated detector element" );
+        return nullptr;
+    }
+    if (counter.n_wrong_type>0) {
+        ATH_MSG_WARNING( "Surfaces associated to detector elements not of type Trk::TrkDetElementBase :" << counter.n_wrong_type);
+    }
+    return detector_element_to_geoid;
 }
 }
