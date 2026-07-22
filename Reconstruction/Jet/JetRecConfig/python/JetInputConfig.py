@@ -7,6 +7,8 @@
 # Author: P-A Delsart                                              #
 """
 from AthenaConfiguration.ComponentFactory import CompFactory
+from AthenaCommon import Logging
+jetlog = Logging.logging.getLogger('JetInputConfig')
 
 # we can't add the imports here, because some modules may not be available
 # in all releases (Ex: AthGeneration, AnalysisBase...) so we delay the imports
@@ -72,12 +74,9 @@ def buildPV0TrackSel(parentjetdef, spec):
 
 
 def buildPFlowSel(parentjetdef, spec, egammaPEB=False):
-    print("JS: testing egammaPEB")
-    print("JS: imput stream is ", parentjetdef._cflags.Input.TriggerStream)
     egammaPEB = parentjetdef._cflags.Input.TriggerStream=='physics_EgammaPEBTLA' or egammaPEB
     if egammaPEB:
-        print("WARNING:JetInputConfig: buildPFlowSel: Configuring muon-less reconstruction for EgammaPEB stream")
-        
+        jetlog.warning("Configuring muon-less reconstruction for EgammaPEB stream")
     return  CompFactory.JetPFlowSelectionAlg( "pflowselalg",
                                               electronIDToExclude = "LHMedium",
                                               ChargedPFlowInputContainer  = "JetETMissChargedParticleFlowObjects",
