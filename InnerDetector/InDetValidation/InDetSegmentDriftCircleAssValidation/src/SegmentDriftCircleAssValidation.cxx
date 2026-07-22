@@ -1,6 +1,8 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
+
+#include "InDetSegmentDriftCircleAssValidation/SegmentDriftCircleAssValidation.h"
 
 #include "GaudiKernel/MsgStream.h"
 #include "GaudiKernel/DataSvc.h"
@@ -15,7 +17,7 @@
 #include "TrkPseudoMeasurementOnTrack/PseudoMeasurementOnTrack.h"
 
 #include "AtlasHepMC/GenVertex.h"
-#include "InDetSegmentDriftCircleAssValidation/SegmentDriftCircleAssValidation.h"
+
 
 // ReadHandle
 #include "StoreGate/ReadHandle.h"
@@ -440,6 +442,7 @@ void InDet::SegmentDriftCircleAssValidation::efficiencyReconstruction()
   for (auto k: m_particles) {
 
     std::multimap<int,int>::iterator im = m_allParticles.find(k);
+    if (im == m_allParticles.end()) continue;
     int n = (*im).second;
       
     int m = 0;

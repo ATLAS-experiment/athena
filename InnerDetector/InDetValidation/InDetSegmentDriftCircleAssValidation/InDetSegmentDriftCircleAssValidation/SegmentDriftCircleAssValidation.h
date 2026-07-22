@@ -1,12 +1,11 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef SegmentDriftCircleAssValidation_H
 #define SegmentDriftCircleAssValidation_H
 
-#include <string>
-#include <map>
+
 #include "AthenaBaseComps/AthAlgorithm.h"
 #include "InDetPrepRawData/TRT_DriftCircleContainer.h"
 #include "AtlasHepMC/GenParticle.h"
@@ -19,6 +18,10 @@
 #include "InDetPrepRawData/TRT_DriftCircle.h"
 
 #include "StoreGate/ReadHandleKey.h"
+#include <string>
+#include <map>
+#include <list>
+#include <iosfwd>
 
 namespace InDet {
 

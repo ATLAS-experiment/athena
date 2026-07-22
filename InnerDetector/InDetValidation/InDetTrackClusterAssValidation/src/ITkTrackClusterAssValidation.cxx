@@ -1,20 +1,20 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "GaudiKernel/ServiceHandle.h"
-#include "TrkTrack/TrackCollection.h"
+#include "ITkTrackClusterAssValidation.h"
+
+
 #include "TrkRIO_OnTrack/RIO_OnTrack.h"
 #include "InDetPrepRawData/SCT_ClusterContainer.h"
 #include "InDetPrepRawData/PixelClusterContainer.h"
-#include "ITkTrackClusterAssValidation.h"
+
 #include "StoreGate/ReadHandle.h"
 #include "AtlasHepMC/GenVertex.h"
 #include "AtlasHepMC/GenParticle.h"
 #include "AtlasHepMC/GenVertex.h"
 #include "TruthUtils/HepMCHelpers.h"
 
-#include <cmath>
 
 ///////////////////////////////////////////////////////////////////
 // Constructor
@@ -1373,8 +1373,8 @@ ITk::TrackClusterAssValidation::findTruth
   if     (px && event_data.m_truthPix) {mc=event_data.m_truthPix->find(d->identify()); mce=event_data.m_truthPix->end();}
   else if(si && event_data.m_truthStrip) {mc=event_data.m_truthStrip->find(d->identify()); mce=event_data.m_truthStrip->end();}
   else {
-    const PRD_MultiTruthCollection *truth[] {event_data. m_truthPix,event_data.m_truthStrip};
-    for (int i=0; i<3; i++) {
+    const PRD_MultiTruthCollection *truth[] {event_data.m_truthPix,event_data.m_truthStrip};
+    for (int i=0; i!=2; ++i) {
         if (truth[i]) {
           mce=truth[i]->end();
           return truth[i]->end();

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "SecVtxValidationPlots.h"
@@ -7,6 +7,7 @@
 #include "xAODTracking/TrackParticleContainer.h"
 #include "xAODTracking/TrackParticle.h"
 #include "AthenaKernel/Units.h"
+#include <cmath>
 
 using Athena::Units::GeV;
 
@@ -51,7 +52,10 @@ void SecVtxValidationPlots::fill(const xAOD::Vertex* secVtx){
 
   size_t ntrk = trkParts.size();
   TLorentzVector sumP4(0,0,0,0);
-
+  //accessors used in loop; declare before entering
+  xAOD::TrackParticle::ConstAccessor< float > ptAcc( "pt_wrtSV" );
+  xAOD::TrackParticle::ConstAccessor< float > etaAcc( "eta_wrtSV" );
+  xAOD::TrackParticle::ConstAccessor< float > phiAcc( "phi_wrtSV" );
   for (const auto &trklink : trkParts) {
     if (!trklink.isValid()) {
       continue;
@@ -61,10 +65,6 @@ void SecVtxValidationPlots::fill(const xAOD::Vertex* secVtx){
     double trk_d0 = std::abs(trk.definingParameters()[0]);
     if(trk_d0 < minD0){ minD0 = trk_d0; }
     if(trk_d0 > maxD0){ maxD0 = trk_d0; }
-
-    xAOD::TrackParticle::ConstAccessor< float > ptAcc( "pt_wrtSV" );
-    xAOD::TrackParticle::ConstAccessor< float > etaAcc( "eta_wrtSV" );
-    xAOD::TrackParticle::ConstAccessor< float > phiAcc( "phi_wrtSV" );
 
     TLorentzVector trk_P4;
     trk_P4.SetPtEtaPhiM(ptAcc(trk), etaAcc(trk), phiAcc(trk), trk.p4().M());
