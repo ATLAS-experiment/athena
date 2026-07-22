@@ -6,9 +6,8 @@
 #
 # Tau, flavour, met, Higgs, AFP, large-r are removed. 
 #
-# MC, Truth, Trigger, CloseByIsolation, IFF, HSGNN,
-# TrackParticleThinningTool currently disabled (to be enabled in 
-# the future?)
+# MC, Truth, Trigger, CloseByIsolation, IFF, TrackParticleThinningTool 
+# are currently disabled (to be enabled in the future?)
 #
 # HLT TLA Photons and EMclusters are added.
 # =======================================================================
@@ -186,7 +185,7 @@ def EGAMPEBCoreCfg(flags, name_tag='EGAMPEB', StreamName='StreamDAOD_EGAMPEB', T
 
     # ## IFF augmentation - Adding Lepton Taggers
     # from LeptonTaggers.LeptonTaggersConfig import DecoratePLITAlgsCfg
-    # acc.merge(DecoratePLITAlgsCfg(flags))
+    # acc.merge(DecoratePLITAlgsCfg(flags, lepton_type="Electrons"))
     
     # ============================
     # Define contents of the format
@@ -224,18 +223,15 @@ def EGAMPEBCoreCfg(flags, name_tag='EGAMPEB', StreamName='StreamDAOD_EGAMPEB', T
                                           "TruthPrimaryVertices.t.x.y.z",
                                           "InDetTrackParticles.eProbabilityHT.numberOfTRTHits.numberOfTRTOutliers",
                                           "EventInfo.GenFiltHT.GenFiltMET.GenFiltHTinclNu.GenFiltPTZ.GenFiltFatJ.HF_Classification.HF_SimpleClassification.HF_ClassificationC5J20.HF_ClassificationC5J25.HF_ClassificationC15J20.HF_ClassificationC15J25",
-                                        #   "HLT_xAOD__TrigMissingETContainer_TrigEFMissingET.ex.ey",
-                                        #   "HLT_xAOD__TrigMissingETContainer_TrigEFMissingET_mht.ex.ey",
-                                        #   "HLT_AnomDet_ComboHypo.adScore"
                                           ]
 
     if addExtraVariables:
         EGAMPEBSlimmingHelper.ExtraVariables += addExtraVariables
 
-    # # HSGNN Score
-    # from TrkConfig.VertexFindingFlags import VertexSortingSetup
-    # if flags.Tracking.PriVertex.sortingSetup is VertexSortingSetup.GNNSorting:
-    #     EGAMPEBSlimmingHelper.ExtraVariables += ["PrimaryVertices.gnnScore"]
+    # HSGNN Score
+    from TrkConfig.VertexFindingFlags import VertexSortingSetup
+    if flags.Tracking.PriVertex.sortingSetup is VertexSortingSetup.GNNSorting:
+        EGAMPEBSlimmingHelper.ExtraVariables += ["PrimaryVertices.gnnScore"]
 
 
     # IFF extra content
