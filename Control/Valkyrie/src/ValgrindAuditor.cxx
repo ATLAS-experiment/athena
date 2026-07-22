@@ -18,7 +18,34 @@
 #include <regex>
 
 using std::string;
+namespace {
+  static std::string to_lower_copy(const std::string& s)
+  {
+    std::string result(s);
+    std::transform(result.begin(), result.end(), result.begin(),
+                   [](unsigned char c) { return std::tolower(c); });
+    return result;
+  }
 
+  // Helper to decode name/event pair from string (e.g. MyAlg.initialize)
+  StatusCode decodeNameEvt(const std::string& s, ValgrindAuditor::NameEvt& nameEvt)
+  {
+    // Find last(!) "." delimiter (earlier ones might be part of regexp)
+    string::size_type loc = s.rfind('.');
+    if ( loc==string::npos ) return StatusCode::FAILURE;
+
+    try {
+      nameEvt.first = ValgrindAuditor::Regex(s.substr(0,loc));
+    }
+    catch ( const std::regex_error& ) {
+      return StatusCode::FAILURE;
+    }
+    
+    nameEvt.second = s.substr(loc+1);
+    
+    return StatusCode::SUCCESS;
+  }
+}
 // Constructor
 ValgrindAuditor::ValgrindAuditor(const std::string& name,
                                  ISvcLocator* pSvcLocator)
@@ -148,8 +175,7 @@ void ValgrindAuditor::handle( const Incident& inc )
   }
 
   // Check if the incident appears at beginning or end of interval
-  std::vector< std::pair<NameEvt,NameEvt> >::const_iterator h;
-  for (h=m_hooks.begin(); h!=m_hooks.end(); ++h) {
+  for (auto h = m_hooks.begin(); h!=m_hooks.end(); ++h) {
     if ( h->first.second=="incident" ) do_before(inc.type(), "incident");
     if ( h->second.second=="incident" ) do_after(inc.type(), "incident");
   }
@@ -212,9 +238,8 @@ void ValgrindAuditor::do_afterExecute(const std::string& name)
  */
 void ValgrindAuditor::do_before(const std::string& name, const std::string& hook)
 {
-  std::vector< std::pair<NameEvt,NameEvt> >::const_iterator iter;
 
-  for (iter=m_hooks.begin(); iter!=m_hooks.end(); ++iter) {
+  for (auto iter=m_hooks.begin(); iter!=m_hooks.end(); ++iter) {
     if ( std::regex_match(name, iter->first.first) &&
          iter->first.second == hook ) {
       m_valSvc->callgrindStartInstrumentation();
@@ -230,9 +255,7 @@ void ValgrindAuditor::do_before(const std::string& name, const std::string& hook
  */
 void ValgrindAuditor::do_after(const std::string& name, const std::string& hook)
 {
-  std::vector< std::pair<NameEvt,NameEvt> >::const_iterator iter;
-
-  for (iter=m_hooks.begin(); iter!=m_hooks.end(); ++iter) {
+  for (auto iter=m_hooks.begin(); iter!=m_hooks.end(); ++iter) {
     if ( std::regex_match(name, iter->second.first) &&
          iter->second.second == hook ) {
       m_valSvc->callgrindStopInstrumentation();
@@ -254,34 +277,7 @@ void ValgrindAuditor::do_after(const std::string& name, const std::string& hook)
  * Decodes the intervals
  */
 
-namespace {
-  static std::string to_lower_copy(const std::string& s)
-  {
-    std::string result(s);
-    std::transform(result.begin(), result.end(), result.begin(),
-                   [](unsigned char c) { return std::tolower(c); });
-    return result;
-  }
 
-  // Helper to decode name/event pair from string (e.g. MyAlg.initialize)
-  StatusCode decodeNameEvt(const std::string& s, ValgrindAuditor::NameEvt& nameEvt)
-  {
-    // Find last(!) "." delimiter (earlier ones might be part of regexp)
-    string::size_type loc = s.rfind('.');
-    if ( loc==string::npos ) return StatusCode::FAILURE;
-
-    try {
-      nameEvt.first = std::regex(s.substr(0,loc));
-    }
-    catch ( const std::regex_error& ) {
-      return StatusCode::FAILURE;
-    }
-    
-    nameEvt.second = s.substr(loc+1);
-    
-    return StatusCode::SUCCESS;
-  }
-}
 
 StatusCode ValgrindAuditor::decodeIntervals()
 {  

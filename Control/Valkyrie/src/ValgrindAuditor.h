@@ -60,10 +60,17 @@ public:
   virtual void do_afterExecute(const std::string& name);
 
 public:
+  class Regex : public std::regex {
+  public:
+    Regex() = default;
+    explicit Regex(const std::string& pattern,std::regex::flag_type flags = std::regex::ECMAScript): std::regex(pattern, flags), m_pattern(pattern) {}
+    explicit Regex(const char* pattern, std::regex::flag_type flags = std::regex::ECMAScript): std::regex(pattern, flags), m_pattern(pattern) {}
+    const std::string& str() const {return m_pattern;}
+  private:
+    std::string m_pattern;
+  };
   /// Typedef for algorithm/event pair, e.g. ("MyAlg","initialize")
-  typedef std::pair<std::regex,std::string> NameEvt;
-
-
+  typedef std::pair<Regex, std::string> NameEvt;
 private:
   /// Handle to ValgrindSvc
   ServiceHandle<IValgrindSvc> m_valSvc;
