@@ -21,6 +21,11 @@ atlas_add_library( MuonEfficiencyCorrectionsLib
                   PATInterfaces AsgDataHandlesLib ColumnarCoreLib
    PRIVATE_LINK_LIBRARIES FourMomUtils xAODTrigger PathResolver )
 
+if( CMAKE_CXX_COMPILER_ID STREQUAL "GNU" AND CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL 16 )
+  # Work around gcc bug https://gcc.gnu.org/bugzilla/show_bug.cgi?id=122197
+  set_target_properties( MuonEfficiencyCorrectionsLib PROPERTIES COMPILE_FLAGS " --param max-devirt-targets=1 " )
+endif()
+
 if( NOT XAOD_STANDALONE )
    atlas_add_component( MuonEfficiencyCorrections
       src/*.h src/*.cxx src/components/*.cxx
