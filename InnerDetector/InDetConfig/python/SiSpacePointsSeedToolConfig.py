@@ -30,6 +30,7 @@ def SiSpacePointsSeedMaker_HeavyIonCfg(
         kwargs.setdefault("minVRadius2", 45 * Units.mm)
         kwargs.setdefault("maxVRadius2", 150 * Units.mm)
         kwargs.setdefault("minVRadius3", 70 * Units.mm)
+        kwargs.setdefault("radStep", 10)
     else:
         kwargs.setdefault("maxSeedsForSpacePoint", 5)
         kwargs.setdefault("minVRadius1", 0 * Units.mm)
