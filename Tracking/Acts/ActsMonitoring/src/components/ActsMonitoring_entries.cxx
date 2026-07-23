@@ -3,6 +3,7 @@
 */
 
 // Algs
+#include "src/ActsClusterComparisonAlg.h"
 #include "src/PixelClusterAnalysisAlg.h"
 #include "src/StripClusterAnalysisAlg.h"
 #include "src/HgtdClusterAnalysisAlg.h"
@@ -21,6 +22,7 @@
 #include "src/PhysValTool.h"
 
 // Algs
+DECLARE_COMPONENT( ActsTrk::ActsClusterComparisonAlg )
 DECLARE_COMPONENT( ActsTrk::PixelClusterAnalysisAlg )
 DECLARE_COMPONENT( ActsTrk::StripClusterAnalysisAlg )
 DECLARE_COMPONENT( ActsTrk::HgtdClusterAnalysisAlg )
