@@ -1020,7 +1020,7 @@ def createHeavyIonLowPtTrackingPassFlags():
     icf.usePrdAssociationTool = True
     icf.isLowPt          = True
     icf.minClusters      = 6
-    icf.minSiNotShared   = 4
+    icf.minSiNotShared   = 6
     icf.minPixel         = 2   # At least one pixel hit for low-pt (assoc. seeded on pixels!)
     # this is for the Ambi
     icf.maxHoles         = 2
