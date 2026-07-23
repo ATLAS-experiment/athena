@@ -5,7 +5,7 @@
 #define ACTSGPUDATAPREPARATION_CUDACLUSTERIZATIONALGPROVIDERTOOL_H
 
 #include "AthenaBaseComps/AthAlgTool.h"
-#include "AthDeviceInterfaces/IMemoryResourceTool.h"
+#include "AthDeviceInterfaces/IMemoryResourcesTool.h"
 #include "AthDeviceInterfaces/ICopyTool.h"
 #include "AthCUDAInterfaces/IStreamTool.h"
 #include "../IDeviceClusterizationAlgProviderTool.h"
@@ -38,8 +38,6 @@ public:
   using extends::extends;
   /// Function initializing the algorithm
   virtual StatusCode initialize() override;
-  /// Function finalizing the algorithm
-  virtual StatusCode finalize()   override;
 
   /// Function constructing the traccc cuda clusterization algorithm
   /// @return cuda clusterization algorithm and vecmem copy object
@@ -56,13 +54,10 @@ private:
 
   traccc::clustering_config m_clusteringConfig{};
 
-  /// @name The host and device memory resource tools
-  /// {@
-  ToolHandle<AthDevice::IMemoryResourceTool> m_hostMR{
-    this, "HostMR", "", "Host memory resource tool"};
-  ToolHandle<AthDevice::IMemoryResourceTool> m_deviceMR{
-    this, "DeviceMR", "", "Device memory resource tool"};
-  ///@}
+  /// @name The host and device memory resources tool to use for memory allocations
+  ToolHandle<AthDevice::IMemoryResourcesTool> m_MRs{
+        this, "MemoryResourcesTool", "",
+        "The memory resources tool to use for allocating memory on the device"};
 
   /// @name The device copy tool to use
   ToolHandle<AthDevice::ICopyTool> m_copy{

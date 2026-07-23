@@ -21,6 +21,12 @@ def isValidationPass(flags) -> bool:
 def isProductionPass(flags) -> bool:
     return not isValidationPass(flags)
 
+def primaryPassUsesDevice(flags) -> bool:
+    return (flags.Acts.Device.doClusterization or
+            flags.Acts.Device.doSpacePointFormation or
+            flags.Acts.Device.doSeeding or
+            flags.Acts.Device.doTrackReconstruction)
+
 def primaryPassUsesActs(flags) -> bool:
     from TrkConfig.TrkConfigFlags import ITkPrimaryPassConfig
     return flags.Tracking.ITkPrimaryPassConfig in [ITkPrimaryPassConfig.Acts, \
