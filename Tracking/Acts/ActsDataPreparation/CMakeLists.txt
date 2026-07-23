@@ -39,6 +39,7 @@ atlas_add_component( ActsDataPreparation
    HGTD_RawData
    HGTD_CalibrationLib
    ViewAlgsLib InDetIdentifier
+   CxxUtils
 )
 
 # Unit tests
