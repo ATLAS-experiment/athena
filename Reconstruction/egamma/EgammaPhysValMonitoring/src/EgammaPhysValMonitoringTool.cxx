@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // EgammaPhysValMonitoringTool.cxx 
@@ -10,8 +10,7 @@
 // PhysVal includes
 #include "EgammaPhysValMonitoringTool.h"
 
-// STL includes
-#include <vector>
+
 
 // FrameWork includes
 #include "GaudiKernel/IToolSvc.h"
@@ -31,6 +30,8 @@
 #include "AthContainers/ConstAccessor.h"
 
 #include "TruthUtils/HepMCHelpers.h"
+// STL includes
+#include <vector>
 
 using CLHEP::GeV;
 using namespace std;
@@ -335,7 +336,7 @@ StatusCode EgammaPhysValMonitoringTool::fillLRTElecHistograms(const xAOD::TruthP
   int numofele=0;
 
   float weight = eventInfo->beamSpotWeight();
-  
+  static const SG::ConstAccessor<int> truthTypeAcc ("truthType");
   for(const auto *const electron : *LRTElectrons){
     bool isElecPrompt=false;
 
@@ -358,7 +359,7 @@ StatusCode EgammaPhysValMonitoringTool::fillLRTElecHistograms(const xAOD::TruthP
     if (m_acc_electronLLH_TightNoPix.isAvailable(*electron)) electron->passSelection(pass_LHTightNoPix, "DFCommonElectronsLHTightNoPix");
     else pass_LHTightNoPix = static_cast<bool>(m_Electron_TightNoPix_LLHTool->accept(electron));
 
-    static const SG::ConstAccessor<int> truthTypeAcc ("truthType");
+    
     if(truthTypeAcc.isAvailable(*electron)) {
       MCTruthPartClassifier::ParticleType type = (MCTruthPartClassifier::ParticleType) truthTypeAcc(*electron);
       if(type==MCTruthPartClassifier::IsoElectron) {
