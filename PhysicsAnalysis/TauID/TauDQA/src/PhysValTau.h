@@ -42,6 +42,7 @@ public:
 private: 
   // properties
   Gaudi::Property<std::string> m_TauJetContainerName{this, "TauContainerName", "TauJets"};
+  Gaudi::Property<std::string> m_TruthTauJetContainerName{this, "TruthTauContainerName", "TruthTaus"};
   Gaudi::Property<bool> m_isMC{this, "isMC", false};
 
   // Tool used for truth-matching

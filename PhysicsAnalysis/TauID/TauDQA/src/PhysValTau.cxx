@@ -83,7 +83,22 @@ StatusCode PhysValTau::fillHistograms(const EventContext& /*ctx*/)
 
   ATH_MSG_DEBUG("Number of taus: " << taus->size());
 
-  
+  bool found_truth_taus = false;
+  const xAOD::TruthParticleContainer* truth_taus =  nullptr;
+  // Retrieve truth tau container for efficiency calculation
+  if ( m_isMC ) {
+      if(evtStore()->contains<xAOD::TruthParticleContainer>(m_TruthTauJetContainerName)){
+          ATH_CHECK( evtStore()->retrieve( truth_taus, m_TruthTauJetContainerName) );
+          found_truth_taus = true;   
+      } else {
+	  ATH_MSG_INFO("Input collection " << m_TruthTauJetContainerName << " not found. Won't do reco efficiency plots ..");    
+	  found_truth_taus = false;
+      }   
+  }
+  // Vectors to calculate the reco efficiency
+  std::vector<const xAOD::TruthParticle*> vec_truth_taus;
+  std::vector<const xAOD::TauJet*> vec_reco_taus;
+
   // Retrieve event info and beamSpotWeight
   const xAOD::EventInfo* eventInfo = nullptr;
   ATH_CHECK( evtStore()->retrieve(eventInfo, "EventInfo") );
@@ -164,6 +179,10 @@ StatusCode PhysValTau::fillHistograms(const EventContext& /*ctx*/)
 	    m_oTauValidationPlotsNominal->m_oMatchedTauEffPlotsNom.fill(*tau, weight, avg_mu);
 	    m_oTauValidationPlotsNominal->m_oMatchedTauRecoTauPlotsNom.fill(*tau, weight);
 	    m_oTauValidationPlotsNominal->m_oNewCoreMatchedPlotsNom.fill(*tau, weight);
+
+            if(found_truth_taus){
+              vec_reco_taus.push_back(tau); 
+	    }   
 	  }
 	  if ( recProng == 1 ) {
 	    if(m_TauJetContainerName=="TauJets"){
@@ -245,6 +264,17 @@ StatusCode PhysValTau::fillHistograms(const EventContext& /*ctx*/)
 	}
       }
     }
+  }
+
+  // plots for tau reco efficiency
+  if(found_truth_taus){
+    for (auto truth_tau : *truth_taus) {
+      vec_truth_taus.push_back(truth_tau);
+    }
+
+    // fill histograms
+    m_oTauValidationPlotsNominal->m_oMatchedTauRecoEffPlotsNom.fill(vec_truth_taus, vec_reco_taus, weight, avg_mu);
+    m_oTauValidationPlotsNominal->m_oMatchedTauTrkClassEffPlotsNom.fill(vec_truth_taus, vec_reco_taus, weight, avg_mu);
   }
 
   ATH_CHECK( m_truthTool->lockDecorations (*taus) );
