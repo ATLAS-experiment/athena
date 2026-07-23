@@ -997,12 +997,11 @@ StatusCode IOVDbSvc::setupFolders() {
 
   bool crestError=false;
   for (const auto& folderdata : allFolderdata) {
-    // find the connection specification first - db or dbConnection
+    // find the connection specification first
     // default is to use the 'default' connection
     IOVDbConn* conn=nullptr;
     std::string connstr;
-    if (folderdata.getKey("db","",connstr) || 
-        folderdata.getKey("dbConnection","",connstr)) {
+    if (folderdata.getKey("db","",connstr)) {
       // an explicit database name is specified
       // check if it is already present in the existing connections
       for (const auto & pThisConnection : m_connections) {
