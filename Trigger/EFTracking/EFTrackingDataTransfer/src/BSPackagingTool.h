@@ -46,7 +46,7 @@ public:
    * The ROBs will be placed in the ROBDataProviderSvc instance, when unpacking all ROBs will unpacked
    * @return StatusCode::SUCCESS on success.
    */
-  virtual StatusCode unpack(const OffloadMessage& msg, const EventContext& context) override;
+  virtual StatusCode unpack(const OffloadMessage& msg, const EventContext& context) const override;
 
 
 private:
@@ -66,8 +66,8 @@ private:
    * @brief cashe used wne unpacking 
    * (presumably the ownership in the future can be given to other component)
    */
-   SG::SlotSpecificObj<std::vector<uint32_t>> m_eventsDataCache;
-   SG::SlotSpecificObj<RawEvent> m_eventsCache;
+  // mutable SG::SlotSpecificObj<std::vector<uint32_t>> m_eventsDataCache;
+  mutable SG::SlotSpecificObj<RawEvent> m_eventsCache;
 
   };
 

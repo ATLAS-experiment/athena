@@ -1,7 +1,7 @@
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.AllConfigFlags import initConfigFlags
 from AthenaConfiguration.MainServicesConfig import MainServicesCfg
-from AthenaConfiguration.TestDefaults import defaultTestFiles
+from AthenaConfiguration.TestDefaults import defaultTestFiles, defaultGeometryTags
 # from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
 from AthenaCommon.Constants import DEBUG
 
@@ -9,7 +9,10 @@ from ByteStreamCnvSvc.ByteStreamConfig import ByteStreamReadCfg
 
 flags = initConfigFlags()
 flags.Input.Files = defaultTestFiles.RAW_RUN3 # this is completely dummy input to get event loop going
-flags.Exec.MaxEvents = 10
+flags.GeoModel.AtlasVersion =  defaultGeometryTags.RUN3
+
+flags.Exec.MaxEvents = -1
+
 # flags.Exec.OutputLevel=INFO
 flags.Concurrency.NumThreads=3
 flags.Concurrency.NumOffloadThreads=3
@@ -19,11 +22,15 @@ flags.lock()
 acc = MainServicesCfg(flags)
 
 
-# TODO, this should be configured in advance, when ELMgr is configure
+# TODO, this would be configured in advance, when ELMgr is configured
 robsSvc = acc.addService(CompFactory.ROBDataProviderSvc())
 el =acc.getService("AthenaHiveEventLoopMgr")
 unpackBS = CompFactory.BSPackagingTool("UnpackBS", OutputLevel=DEBUG, ROBDataProvider=robsSvc)
 execTool = CompFactory.ExecuteOngRPCCall( PackagingTools=[unpackBS])
 el.eventExecTool=execTool
+
+# from TrigT2CaloCommon.TrigCaloDataAccessConfig import trigCaloDataAccessSvcCfg
+# acc.merge(trigCaloDataAccessSvcCfg(flags))
+
 
 acc.run()

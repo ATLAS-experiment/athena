@@ -12,7 +12,7 @@ StatusCode AsyncgRPCComputeAlg::initialize() {
                                      grpc::InsecureChannelCredentials());
 
   channel->WaitForConnected(std::chrono::system_clock::now() +
-                            std::chrono::seconds(5));
+                            std::chrono::seconds(100));
 
   auto state = channel->GetState(true);
   if (state == GRPC_CHANNEL_READY) {

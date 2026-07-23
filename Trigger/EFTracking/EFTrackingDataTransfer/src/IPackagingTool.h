@@ -29,7 +29,7 @@ class IPackagingTool : virtual public IAlgTool {
     * @return StatusCode 
     */
   virtual StatusCode unpack(const OffloadMessage& msg,
-                            const EventContext& context) = 0;
+                            const EventContext& context) const = 0;
 };
 
 #endif  // EFTRACKINGDATATRANSFER_IPACKAGINGTOOL_H
