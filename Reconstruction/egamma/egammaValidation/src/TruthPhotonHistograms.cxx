@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TruthPhotonHistograms.h"
@@ -75,9 +75,7 @@ void TruthPhotonHistograms::fill(const xAOD::IParticle& phrec, float mu) {
   float trueR = -999;
   if (truth) {
     if (truth->pdgId() == 22 && truth->hasDecayVtx()) {
-
       trueR = truth->decayVtx()->perp();
-
     }
   }
 
@@ -94,7 +92,7 @@ void TruthPhotonHistograms::fill(const xAOD::IParticle& phrec, float mu) {
 
   // access reco photon from the xAOD::TruthParticle (can't use the IParticle* here)
   const auto *truthParticle = dynamic_cast<const xAOD::TruthParticle*>(&phrec);
-  if (truthParticle) {
+  if (truth && truthParticle) {
     const xAOD::Photon *photon = xAOD::EgammaHelpers::getRecoPhoton(truthParticle);
 
     if (photon) {

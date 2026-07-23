@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
  */
 
 // INCLUDE HEADER FILES:
@@ -176,14 +176,6 @@ EMShowerBuilder::CalcHadronicLeakage(xAOD::Egamma* eg,
   value = static_cast<float>(info.ehad1);
   eg->setShowerShapeValue(value, xAOD::EgammaParameters::ehad1);
   return StatusCode::SUCCESS;
-
-  /// @brief for OQ, augmented after with egammaOQFlagsBuilder
-  unsigned int iflag = 0;
-  if (info.nBadT0 > 0)
-    iflag |= (0x1 << xAOD::EgammaParameters::DeadCellTileS0);
-  if (info.nBadT0 > 0)
-    iflag |= (0x1 << xAOD::EgammaParameters::DeadCellTileS1S2);
-  eg->setOQ(iflag);
 }
 
 StatusCode
