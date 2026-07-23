@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 # Configuration of TrkVKalVrtFitter package
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
@@ -87,6 +87,7 @@ if __name__ == "__main__":
     from AthenaConfiguration.TestDefaults import defaultTestFiles
     flags.Input.Files = defaultTestFiles.RDO_RUN2
 
+    flags.fillFromArgs()
     flags.lock()
     flags.dump()
 
