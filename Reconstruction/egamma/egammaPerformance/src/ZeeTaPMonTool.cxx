@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////
@@ -192,7 +192,7 @@ StatusCode ZeeTaPMonTool::fillHistograms(const EventContext& ctx)
   float subl_et=-999;
   const xAOD::Electron *lead_el = nullptr;
   const xAOD::Electron *subl_el = nullptr;
-
+  const std::string looseStr{"LHLoose"};
   for (; e_iter!=e_end; ++e_iter) {
 
     if(!(*e_iter)) continue;
@@ -202,7 +202,7 @@ StatusCode ZeeTaPMonTool::fillHistograms(const EventContext& ctx)
     // Ask these electrons to be LHLoose
     bool isGood=false;
 
-    bool passed = (*e_iter)->passSelection(isGood,"LHLoose");
+    bool passed = (*e_iter)->passSelection(isGood,looseStr);
     if( passed || !isGood ) ATH_MSG_DEBUG("not a good LHLoose electron candidate found in TDS");
 
     // LHMedium
