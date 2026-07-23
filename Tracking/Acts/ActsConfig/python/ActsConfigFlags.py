@@ -130,6 +130,7 @@ def createActsConfigFlags():
     actscf.addFlag('Acts.Particles.doAnalysis', lambda pcf: pcf.Acts.doAnalysis)
     actscf.addFlag('Acts.storeTrackStateInfo', False)
     actscf.addFlag('Acts.doTruthInspection', False)
+    actscf.addFlag('Acts.doxAODToTrkConversion', False)
 
     # Cluster
     actscf.addFlag("Acts.Clusters.UseWeightedPosition", False)

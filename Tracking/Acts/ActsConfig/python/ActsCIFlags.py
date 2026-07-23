@@ -9,6 +9,8 @@ def actsProductionFlags(flags) -> None:
     """flags for ACTS reconstruction to be used for production jobs"""
     # Reco chain to ACTS flavour
     flags.Tracking.recoChain = [TrackingComponent.ActsChain]
+    # Save Trk::Track link for combined muon reconstruction
+    flags.Acts.doxAODToTrkConversion = True
     # Track reconstruction algorithms
     flags.Acts.doAmbiguityResolution = False
     flags.Tracking.doITkFastTracking = True
