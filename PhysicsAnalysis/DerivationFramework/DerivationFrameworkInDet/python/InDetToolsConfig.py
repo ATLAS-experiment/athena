@@ -9,6 +9,8 @@ from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.Enums import BeamType
 from AthenaCommon.Constants import INFO
+from AthenaCommon.Logging import logging
+logIDTools = logging.getLogger('InDetToolsConfig')
 
 # Track collection merger
 def InDetLRTMergeCfg(flags, name="InDetLRTMerge", **kwargs):
@@ -365,8 +367,12 @@ def DFITkTSOSKernelCfg(flags, name='DFITkTSOSKernel'):
     # ====================================================================
     tsos_augmentationTools = []
 
-    DFTSOS = acc.getPrimaryAndMerge(DFITkTrackStateOnSurfaceDecoratorCfg(flags))
-    tsos_augmentationTools.append(DFTSOS)
+    from InDetConfig.ITkActsHelpers import primaryPassUsesActs
+    if primaryPassUsesActs(flags):
+        logIDTools.warning("No TrackStateOnSurfaceDecorator available yet for ACTS")
+    else:
+        DFTSOS = acc.getPrimaryAndMerge(DFITkTrackStateOnSurfaceDecoratorCfg(flags))
+        tsos_augmentationTools.append(DFTSOS)
 
     # shared between IDTIDE and IDTRKVALID
     acc.addEventAlgo(CompFactory.DerivationFramework.DerivationKernel(
