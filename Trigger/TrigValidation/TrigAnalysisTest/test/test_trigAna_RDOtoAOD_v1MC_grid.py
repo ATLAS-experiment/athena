@@ -52,7 +52,8 @@ aod2daod.forks = 8
 aod2daod.explicit_input = True
 aod2daod.args = '--inputAODFile=AOD.pool.root --outputDAODFile=DAOD.pool.root --formats=PHYS'
 aod2daod.args += ' --sharedWriter=True --athenaMPMergeTargetSize "DAOD_*:0"'
-aod2daod.args += ' --asetup="all:Athena,main,latest"'
+# not needed for tests running in main
+#aod2daod.args += ' --asetup="all:Athena,main,latest"'
 
 test = Test.Test()
 test.art_type = 'grid'
