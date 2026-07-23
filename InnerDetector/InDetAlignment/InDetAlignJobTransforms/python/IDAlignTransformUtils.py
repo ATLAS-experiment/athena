@@ -64,7 +64,7 @@ def addIDAlignArguments(parser):
     parser.add_argument("--localgeo", default = trfArgClasses.argBool(False), action="store_true", help='Use local geometry XML files')
 
     ## Number of threads
-    parser.add_argument("--threads", default = 1, type = int, help='Number of threads')
+    parser.add_argument("--threads", default = trfArgClasses.argInt(1), type = trfArgClasses.argFactory(trfArgClasses.argInt), group = "ID alignment", help='Number of threads')
 
     ## Tags
     parser.add_argument("--globalTag", default = None, type = trfArgClasses.argFactory(trfArgClasses.argString), group = "ID alignment", help='Global tag')

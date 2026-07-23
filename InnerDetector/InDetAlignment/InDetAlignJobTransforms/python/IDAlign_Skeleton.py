@@ -202,39 +202,17 @@ def configureITkFlags(runArgs, flags):
     from InDetConfig.ConfigurationHelpers import OnlyTrackingPreInclude
     OnlyTrackingPreInclude(flags)
 
-    # ## Set Tags
-    # for tag in [tag for tag in dir(runArgs) if "Tag" in tag and tag != "globalTag"]:
-    #     setattr(flags.InDet.Align, tag, getattr(runArgs, tag))
-
-    # ## Set configuration for chosen alignment level
-    # from InDetAlignConfig.IDAlignFlags import setL3AlignmentFlags
-        
-    # if runArgs.alignLevel == 3:
-    #     setL3AlignmentFlags(flags)
-
-    # else:
-    #     raise Exception(f"No valid alignment level has been selected: '{runArgs.alignLevel}'")
-
-    print("solve!!!!_1")
 
     ## Update flags based on parser line args
 
     flags.ITk.Align.accumulate = runArgs.accumulate
     flags.ITk.Align.baseDir = os.path.abspath(runArgs.baseDir)
 
-    # if hasattr(runArgs, "alignITk"):
-    #     flags.ITk.Align.alignITk = runArgs.alignITk
-    # if hasattr(runArgs, "alignITkPixel"):
-    #     print("PixelStatus: ", runArgs.alignITkPixel)
-    #     flags.ITk.Align.alignITkPixel = runArgs.alignITkPixel
-    # if hasattr(runArgs, "alignITkStrip"):
-    #     flags.ITk.Align.alignITkStrip = runArgs.alignITkStrip
 
     alignITk = getattr(runArgs, "alignITk", False)
     alignITkPixel = getattr(runArgs, "alignITkPixel", False)
     alignITkStrip = getattr(runArgs, "alignITkStrip", False)
 
-    print("solve!!!!_2")
 
     flags.ITk.Align.alignITk = (
         alignITk or
@@ -242,43 +220,27 @@ def configureITkFlags(runArgs, flags):
     )
     flags.ITk.Align.alignITkPixel = alignITkPixel or flags.ITk.Align.alignITk
     flags.ITk.Align.alignITkStrip = alignITkStrip or flags.ITk.Align.alignITk
-    
-    print("solve!!!!_3")
 
-    flags.addFlag("ConstrainedTrackProvider.InputTracksCollection", runArgs.inputTracksCollection)
 
     flags.ITk.Align.writeSilicon = False
-
-    print("solve!!!!_4")
 
     
     # flags.ITk.Align.inputTFiles = [os.path.abspath(f) for f in runArgs.inputTFile]
 
     if runArgs.solve:
-        print("solve!!!!")
-        print(os.path.abspath(f) for f in runArgs.inputTFile)
-        print(runArgs.inputTFile[0])
         for f in runArgs.inputTFile:
-            print(f)
-        # flags.ITk.Align.inputTFiles = [os.path.abspath(f) for f in runArgs.inputTFile]
-        # flags.ITk.Align.inputTFiles = runArgs.inputTFile[0]
         flags.ITk.Align.inputTFiles = os.path.basename(runArgs.inputTFile[0])
     else:
         flags.ITk.Align.inputTFiles = []
 
-    print("solve!!!!_5")
 
     flags.Exec.MaxEvents = runArgs.maxEvents if not runArgs.solve else 1
 
     flags.IOVDb.GlobalTag = runArgs.globalTag
 
-    # # These are not present in runITkAlign.py
-    # flags.Exec.SkipEvents = runArgs.skipEvents if hasattr(runArgs, "skipEvents") else 0
-    # flags.Exec.OutputLevel = getattr(AthenaCommon.Constants, runArgs.logLevel)
-    # flags.Exec.FPE = -2
 
     if runArgs.localgeo:
-        flags.ITk.Geometry.AllLocal = True
+        flags.ITk.Geometry.AllLocal = False      # Original: True
 
     if not flags.Input.isMC and runArgs.isCosmics:
         from AthenaConfiguration.Enums import BeamType
@@ -306,16 +268,13 @@ def configureITkFlags(runArgs, flags):
         flags.BField.barrelToroidOn = False
         flags.BField.endcapToroidOn = False
 
-    print(dir(runArgs))
 
-    print(hasattr(runArgs, "localDB"))
-    print(runArgs.localDB)
     if hasattr(runArgs, "localDB") and runArgs.localDB:
-        print("localDB!!!")
         flags.ITk.Align.useLocalDatabase = True
         DBFile = runArgs.localDB
-        flags.IOVDb.DBConnection = (f"sqlite://;schema={runArgs.localDB};dbname=OFLCOND")
+        flags.IOVDb.DBConnection = f"sqlite://;schema={runArgs.localDB};dbname=OFLCOND"
         flags.ITk.Geometry.alignmentFolder = "/Indet/AlignITk"
+
 
 
     # databaseFilename     = 'MisalignmentSet%s.db' % (MisalignMode)
@@ -332,14 +291,11 @@ def configureITkFlags(runArgs, flags):
     if flags.ITk.Align.alignITkStrip:
         flags.ITk.Geometry.stripAlignable = True
 
-    
     if runArgs.threads > 0:
         flags.Concurrency.NumThreads = runArgs.threads
 
-
     # Lock flags
     flags.lock()
-    print("solve!!!!_6")
     return flags
 
 def fromRunArgsITk(runArgs, flags):
@@ -353,8 +309,27 @@ def fromRunArgsITk(runArgs, flags):
     if flags.ITk.Align.useLocalDatabase:
         from IOVDbSvc.IOVDbSvcConfig import addFolders, getSqliteContent
         print("Adding Align Folder "+flags.ITk.Geometry.alignmentFolder+" from local "+DBName+" Database in file "+runArgs.localDB)
-        cfg.merge(addFolders(flags,flags.ITk.Geometry.alignmentFolder,db=DBName,detDb=runArgs.localDB,tag=tag, className="AlignableTransformContainer")) 
-            
+
+        acc = addFolders(
+            flags,
+            flags.ITk.Geometry.alignmentFolder,
+            db=DBName,
+            detDb=runArgs.localDB,
+            tag=tag,
+            className="AlignableTransformContainer"
+        )
+
+        iovdb = acc.getService("IOVDbSvc")
+        for f in iovdb.Folders:
+
+        print("IOVDbSvc GlobalTag: ", flags.IOVDb.GlobalTag)
+        print( "flags.GeoModel.AtlasVersion: ", flags.GeoModel.AtlasVersion)
+        # print("cfg.getService(IOVDbSvc).Folders", cfg.getService("IOVDbSvc").Folders)
+        cfg.printConfig(withDetails=True)
+
+        cfg.merge(acc)
+        print("cfg.getService(IOVDbSvc).Folders", cfg.getService("IOVDbSvc").Folders)
+        
     
 
     from MuonConfig.MuonGeometryConfig import MuonIdHelperSvcCfg
@@ -510,11 +485,14 @@ def applyDetectorDefaults(runArgs, flags):
 
 def fromRunArgs(runArgs):
 
+
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
     flags = initConfigFlags()
 
+
     # Check if the input file is specified as RDO (parser argument)
     # If not, it is assumed to be the RAW file as default
+    if hasattr(runArgs, "inputRDOFile"):
         flags.Input.Files = [os.path.abspath(inputFile) for inputFile in runArgs.inputRDOFile]
     else:
         flags.Input.Files = [os.path.abspath(inputFile) for inputFile in runArgs.inputRAWFile]
@@ -525,6 +503,7 @@ def fromRunArgs(runArgs):
 
     # Configure flags based on the detector geometry
     if isITkGeometry(flags):
+        print("threads: ", runArgs.threads)
         flags.GeoModel.Align.Dynamic = False
         flags = configureITkFlags(runArgs, flags)
         return fromRunArgsITk(runArgs, flags)
