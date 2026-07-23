@@ -28,7 +28,7 @@ def StandaloneMuonOutputCfg(flags):
 
     
     #Add the xAOD muon PRD containers to the ESD output 
-    exclude = ["", "mdtTrkPrdLink", "rpcTrkPrdLink", "tgcTrkPrdLink"]
+    exclude = ["", "mdtTrkPrdLink", "rpcTrkPrdLink", "tgcTrkPrdLink", "segmentFitDriftSign"]
     for cont_t, cont_name in [("MdtDriftCircle", "xMdtDriftCircles"),
                               ("MdtTwinDriftCircle", "xMdtTwinDriftCircles"),
                               ("sTgcStrip", "xAODsTgcStrips"),
@@ -55,9 +55,9 @@ def StandaloneMuonOutputCfg(flags):
     aod_items += ["xAOD::MuonSegmentAuxContainer#MuonSegmentsFromR4Aux.-localSegPars.-parentSegment.-localSegCov"]
 
     #add MS track and track particle containers to the ESD output
-    aod_items += ["xAOD::TrackParticleContainer#MsTrackParticlesR4"]
-    aod_items += ["xAOD::TrackParticleAuxContainer#MsTrackParticlesR4Aux."]
-
+    for trk in [ "MsTrksAtIpTrackParticles", "MsTrackParticlesR4"]:
+        aod_items += [f"xAOD::TrackParticleContainer#{trk}",
+                      f"xAOD::TrackParticleAuxContainer#{trk}Aux."]
     # convert the Acts muon track to its xAOD representation and add it to the ESD output
     if flags.Output.doWriteESD:
         from ActsConfig.ActsEventCnvConfig import ActsToXAODTrackConverterAlgCfg
@@ -124,7 +124,8 @@ def MuonReconstructionConfig(flags):
 
     ### Track building
     from MuonTrackFindingAlgs.TrackFindingConfig import MSTrackFinderAlgCfg, MuidSaTagMakerAlgCfg, \
-                                                        StandaloneTrackPartCnvCfg, MuonCreatorAlgCfg
+                                                        StandaloneTrackPartCnvCfg, MuonCreatorAlgCfg, \
+                                                        TrackSummaryLockCfg
     result.merge(MSTrackFinderAlgCfg(flags))
     
     ### MuTag conversion to share same format as the combined chain
@@ -142,6 +143,8 @@ def MuonReconstructionConfig(flags):
     
     result.merge(MuidSaTagMakerAlgCfg(flags, ExtrapolateToIP = flags.Reco.EnableTracking,
                                              RefitWithBeamSpot =flags.Reco.EnableTracking))
+    if flags.Reco.EnableTracking:
+        result.merge(TrackSummaryLockCfg(flags, inContainer="MsTrksAtIpTrackParticles"))
 
     #### create the xAOD muons
     result.merge(MuonCreatorAlgCfg(flags, name = "MuonActsCreatorAlg",
