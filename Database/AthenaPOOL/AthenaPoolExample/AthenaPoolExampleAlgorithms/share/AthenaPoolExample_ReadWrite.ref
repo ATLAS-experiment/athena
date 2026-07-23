@@ -69,10 +69,7 @@ AthenaPoolAddressProviderSvc                        DEBUG Cannot retrieve DataHe
 EventInfoCnvAlg.EventInfoCnvTool                     INFO Beam spot information not available
 EventInfoCnvAlg.EventInfoCnvTool                     INFO Will not fill beam spot information into xAOD::EventInfo
 StreamReWrite                                       DEBUG In initialize
-StreamReWrite                                       DEBUG In initialize 
-StreamReWrite                                       DEBUG Found IDecisionSvc.
 DecisionSvc                                          INFO Inserting stream: StreamReWrite with no Algs
-StreamReWrite                                       DEBUG End initialize 
 StreamReWrite                                       DEBUG Found StoreGateSvc/StoreGateSvc store.
 StreamReWrite                                       DEBUG Found StoreGateSvc/MetaDataStore store.
 AthDictLoaderSvc                                     INFO in initialize...
