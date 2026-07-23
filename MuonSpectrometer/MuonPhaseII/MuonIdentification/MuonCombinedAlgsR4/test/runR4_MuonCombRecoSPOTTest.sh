@@ -29,7 +29,6 @@ Reco_tf.py \
     --imf False \
     --maxEvents ${NEVENTS} \
     --perfmon "fullmonmt" \
-    --skipEvents 1
     
  
 
