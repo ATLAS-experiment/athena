@@ -4,7 +4,7 @@ import glob
 import os
 import re
 import shutil
-from AthenaCommon import Logging
+from ... import Logging
 from ...decorators import timed
 from ...utility import LHE, ProcessManager, SingleProcessThread
 from xml.etree import ElementTree

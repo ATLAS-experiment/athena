@@ -1,7 +1,7 @@
 # Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 import os
-from AthenaCommon import Logging
+from ... import Logging
 from ..powheg_RES import PowhegRES
 
 ## Get handle to Athena logging

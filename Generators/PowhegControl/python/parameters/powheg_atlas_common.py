@@ -7,7 +7,45 @@
 
 ## Import python dictionary with particle parameters and EW parameters. Particle parameters in there are extracted from PDG API.
 ## When using the PDF values, the lepton masses are a bit more precise compared to the old ones, the quark masses are very different from the old ones, the W and H mass are also different, same holds for the width of the top quark and the H boson.
-from EvgenProdTools.offline_dict import parameters
+try:
+    from EvgenProdTools.offline_dict import parameters
+except ImportError:
+    parameters = {
+        'particles': {
+            '11': {'mass': 0.00051, 'width': 0.0},
+            '13': {'mass': 0.1057, 'width': 0.0},
+            '1': {'mass': 0.32, 'width': 0.0},
+            '2': {'mass': 0.32, 'width': 0.0},
+            '3': {'mass': 0.5, 'width': 0.0},
+            '4': {'mass': 1.55, 'width': 0.0},
+            '5': {'mass': 4.95, 'width': 0.0},
+            '6': {'mass': 172.5, 'width': 1.32},
+            '24': {'mass': 80.399, 'width': 2.085},
+            '23': {'mass': 91.1876, 'width': 2.4952},
+            '25': {'mass': 125.0, 'width': 0.00407},
+        },
+        'EW_parameters': {
+            'W_to_enu': 0.1082,
+            'W_to_leptons': 3 * 0.1082,
+            'W_to_hadrons': 1.0 - 3 * 0.1082,
+            't_to_Wb': 1.0,
+            't_to_Ws': 0.0,
+            't_to_Wd': 0.0,
+            'Vud': 0.97428,
+            'Vus': 0.2253,
+            'Vub': 0.00347,
+            'Vcd': 0.2252,
+            'Vcs': 0.97345,
+            'Vcb': 0.041,
+            'Vtd': 0.00862,
+            'Vts': 0.0403,
+            'Vtb': 0.999152,
+            'alphaem_0': 0.00729735252,
+            'alphaem': 0.00781653039,
+            'alphaqcd': 0.1185,
+            'G_F': 0.00001166397,
+        }
+    }
 # from ..decorators import Singleton
 
 class mass(object):
