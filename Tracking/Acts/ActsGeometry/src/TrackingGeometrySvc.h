@@ -110,6 +110,7 @@ private:
   
   Gaudi::Property<bool> m_useMaterialMap{this, "UseMaterialMap", false, ""};
   Gaudi::Property<bool> m_objDebugOutput{this, "ObjDebugOutput", false, ""};
+  Gaudi::Property<bool> m_keepGoingOnMaterialMergeFailure{this, "KeepGoingOnMaterialMergeFailure", false, ""};
   Gaudi::Property<std::string> m_materialMapInputFileBase{this, "MaterialMapInputFile", "", ""};
   Gaudi::Property<std::string> m_materialMapCalibFolder{this, "MaterialMapCalibFolder", ".", ""};
   Gaudi::Property<bool> m_buildBeamPipe{this, "BuildBeamPipe", false, ""};

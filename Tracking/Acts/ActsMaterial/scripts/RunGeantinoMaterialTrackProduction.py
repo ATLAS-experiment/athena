@@ -15,7 +15,7 @@ def setupArgParser():
     from argparse import ArgumentParser
     parser = ArgumentParser("RunGeantinoMaterialTrackProduction.py")
     parser.add_argument("--detectors", nargs="+",
-                        default=['ITkPixel', 'ITkStrip', 'Bpipe'],
+                        default=['ITkPixel', 'ITkStrip', 'HGTD', 'Bpipe'],
                         help="Specify the list of detectors")
     parser.add_argument("--localgeo", default=False, action="store_true",
                         help="Use local geometry Xml files")

@@ -188,7 +188,6 @@ void addStripEndcapLayer(
 namespace ActsTrk {
 
 StatusCode ItkBlueprintNodeBuilder::initialize() {
-
   // Retrieve the detector managers from the detector store for enabled systems
   if (m_buildPixel) {
     ATH_CHECK(detStore()->retrieve(m_itkPixelMgr, "ITkPixel"));
@@ -216,8 +215,10 @@ ItkBlueprintNodeBuilder::buildBlueprintNode(
   itk.setResizeStrategy(ResizeStrategy::Gap);
 
   itk.addMaterial("ItkNodeMain_Material", [&](auto& mat) {
-    mat.configureFace(NegativeDisc, {AxisR, Bound, 20}, {AxisPhi, Closed, 40});
-    mat.configureFace(PositiveDisc, {AxisR, Bound, 20}, {AxisPhi, Closed, 40});
+      if (m_buildStrip) {
+        mat.configureFace(NegativeDisc, {AxisR, Bound, 20}, {AxisPhi, Closed, 40});
+        mat.configureFace(PositiveDisc, {AxisR, Bound, 20}, {AxisPhi, Closed, 40});
+      }
 
     auto& innerContainer = mat.addCylinderContainer("ITkInnerContainer", AxisR);
 
@@ -623,8 +624,10 @@ void ItkBlueprintNodeBuilder::buildItkPixelBlueprintNode(
                            "_" + std::to_string(i);
 
           ec_stack.addMaterial(layerName + "_Material", [&](auto& mat) {
-            mat.configureFace(PositiveDisc, {AxisR, Bound, 10}, {AxisPhi, Closed, 40});
-            mat.configureFace(NegativeDisc, {AxisR, Bound, 10}, {AxisPhi, Closed, 40});
+            mat.configureFace(PositiveDisc, {AxisR, Bound, 10},
+                              {AxisPhi, Closed, 40});
+            mat.configureFace(NegativeDisc, {AxisR, Bound, 10},
+                              {AxisPhi, Closed, 40});
             addEndcapLayer(mat, layerName, surfaces);
           });
         }
@@ -681,10 +684,10 @@ void ItkBlueprintNodeBuilder::buildItkStripBlueprintNode(
     stripContainer.withGeometryIdentifier([this, &elements](auto& geoId) {
       geoId.setAllVolumeIdsTo(s_stripVolumeId).incrementLayerIds(1);
 
-      auto& brl_mat = geoId.addMaterial("Strip_Brl_Material", [&](auto& thisMat) {
-        thisMat.configureFace(NegativeDisc, {AxisR, Bound, 10},
+      auto& brl_mat = geoId.addMaterial("Strip_Brl_Material", [&](auto& mat) {
+        mat.configureFace(NegativeDisc, {AxisR, Bound, 10},
                           {AxisPhi, Closed, 10});
-        thisMat.configureFace(PositiveDisc, {AxisR, Bound, 10},
+        mat.configureFace(PositiveDisc, {AxisR, Bound, 10},
                           {AxisPhi, Closed, 10});
       });
       brl_mat.addCylinderContainer(

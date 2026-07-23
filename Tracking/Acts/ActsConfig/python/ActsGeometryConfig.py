@@ -13,6 +13,7 @@ def ActsTrackingGeometrySvcCfg(flags,
                                           DetectorType.Hgtd])
   kwargs.setdefault("UseBlueprint", flags.Acts.TrackingGeometry.UseBlueprint)
   kwargs.setdefault("ObjDebugOutput", flags.Acts.TrackingGeometry.ObjDebugOutput)
+  kwargs.setdefault("KeepGoingOnMaterialMergeFailure", flags.Acts.TrackingGeometry.KeepGoingOnMaterialMergeFailure)
 
   subDetectors = []
   blueprintTools = []
@@ -67,10 +68,13 @@ def ActsTrackingGeometrySvcCfg(flags,
 
   #first add the itk builder and then the muon system - this is the correct order
   if flags.Acts.TrackingGeometry.UseBlueprint:
+    if False: ### Disable the ITk material allocation until it's finalized
+        refineTools += [acc.popToolsAndMerge(ITkMaterialDecoratorToolCfg(flags))]
+    blueprintTools += [acc.popToolsAndMerge(BeamPipeBlueprintNodeBuilderCfg(flags))]
     if flags.Detector.GeometryITkPixel or flags.Detector.GeometryITkStrip:
-      if False: ### Disable the ITk material allocation until it's finalized
-          refineTools+= [acc.popToolsAndMerge(ITkMaterialDecoratorToolCfg(flags))]
       blueprintTools += [acc.popToolsAndMerge(ItkBlueprintNodeBuilderCfg(flags))]
+    if flags.Detector.GeometryHGTD:
+      blueprintTools += [acc.popToolsAndMerge(HgtdBlueprintNodeBuilderCfg(flags))]
     if flags.Detector.GeometryCalo:
       subDetectors += ["Calo"]
       blueprintTools += [acc.popToolsAndMerge(caloBlueprintNodeBuilderCfg(flags))]
@@ -271,13 +275,37 @@ def ActsInDetVolumeIdToDetectorCollectionMappingAlgCfg(flags,
     acc.addCondAlgo(CompFactory.ActsTrk.ActsVolumeIdToDetectorElementCollectionMappingAlg(name, **kwargs))
     return acc
 
+def BeamPipeBlueprintNodeBuilderCfg(
+    flags, name: str = "BeamPipeBlueprintNodeBuilder", **kwargs
+) -> ComponentAccumulator:
+    result = ComponentAccumulator()
+    kwargs.setdefault("loadFromDatabase", flags.Detector.GeometryBpipe)
+    result.setPrivateTools(
+        CompFactory.ActsTrk.BeamPipeBlueprintNodeBuilder(name, **kwargs)
+    )
+    return result
+
+
 def ItkBlueprintNodeBuilderCfg(flags,
                                    name: str = "ItkBlueprintNodeBuilder",
                                    **kwargs) -> ComponentAccumulator:
     result = ComponentAccumulator()
+    kwargs.setdefault("buildPixel", flags.Detector.GeometryITkPixel)
+    kwargs.setdefault("buildStrip", flags.Detector.GeometryITkStrip)
     the_tool = CompFactory.ActsTrk.ItkBlueprintNodeBuilder(name, **kwargs)
     result.setPrivateTools(the_tool)
     return result
+
+
+def HgtdBlueprintNodeBuilderCfg(
+    flags, name: str = "HgtdBlueprintNodeBuilder", **kwargs
+) -> ComponentAccumulator:
+    result = ComponentAccumulator()
+    the_tool = CompFactory.ActsTrk.HgtdBlueprintNodeBuilder(
+        name, **kwargs)
+    result.setPrivateTools(the_tool)
+    return result
+
 
 def caloBlueprintNodeBuilderCfg(flags,
                                    name: str = "CaloBlueprintNodeBuilder",

@@ -18,6 +18,7 @@ atlas_add_library( ActsGeometryLib
                    src/ActsStrawLayerBuilder.cxx
                    src/ActsHGTDLayerBuilder.cxx                   
                    src/BeamPipeBlueprintNodeBuilder.cxx
+                   src/HgtdBlueprintNodeBuilder.cxx
                    src/ItkBlueprintNodeBuilder.cxx
                    src/CaloBlueprintNodeBuilder.cxx
                    src/util/*.cxx
