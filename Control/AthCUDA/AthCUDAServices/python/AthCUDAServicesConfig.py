@@ -183,7 +183,7 @@ def SingleStreamToolCfg(flags, **kwargs):
     # Create an adaptor tool on top of the service, and set that as the main
     # component of the CA.
     streamTool = CompFactory.AthCUDA.StreamSvcAdaptorTool(
-        'SingleStreamTool', StreamSvc=streamSvc)
+        'CUDASingleStreamTool', StreamSvc=streamSvc)
     result.setPrivateTools(streamTool)
 
     # Return the CA.
@@ -204,7 +204,7 @@ def PerEventStreamToolCfg(flags, **kwargs):
     # Create an adaptor tool on top of the service, and set that as the main
     # component of the CA.
     streamTool = CompFactory.AthCUDA.StreamSvcAdaptorTool(
-        'PerEventStreamTool', StreamSvc=streamSvc)
+        'CUDAPerEventStreamTool', StreamSvc=streamSvc)
     result.setPrivateTools(streamTool)
 
     # Return the CA.

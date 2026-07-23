@@ -10,7 +10,7 @@
 #include "ActsGPUInterfaces/IDeviceDetectorDescriptionProviderSvc.h"
 
 #include "StoreGate/ReadCondHandleKey.h"
-#include "AthDeviceInterfaces/IMemoryResourceTool.h"
+#include "AthDeviceInterfaces/IMemoryResourcesTool.h"
 #include "AthDeviceInterfaces/ICopyTool.h"
 #include "InDetIdentifier/PixelID.h"
 #include "InDetIdentifier/SCT_ID.h"
@@ -74,13 +74,11 @@ public:
 private:
 
     ServiceHandle<StoreGateSvc> m_detStore{this, "DetectorStore", "StoreGateSvc/DetectorStore"};
-    /// @name The host and device memory resources tools to use for memory allocations
-    /// @{
-    ToolHandle<AthDevice::IMemoryResourceTool> m_hostMR{
-        this, "HostMR", "", "Host memory resource tool"};
-    ToolHandle<AthDevice::IMemoryResourceTool> m_deviceMR{
-        this, "DeviceMR", "", "Device memory resource tool"};
-    /// @}
+    /// @name The host and device memory resources tool to use for memory allocations
+    ToolHandle<AthDevice::IMemoryResourcesTool> m_MRs{
+        this, "MemoryResourcesTool", "",
+        "The memory resources tool to use for allocating memory on the device"};
+
     /// The copy tool used for copying data to device
     ToolHandle<AthDevice::ICopyTool> m_copy{
         this, "CopyProviderTool", "", "Vecmem copy provider tool"};

@@ -15,18 +15,11 @@ StatusCode CUDAClusterizationAlgProviderTool::initialize()
 {
   ATH_MSG_DEBUG("Initializing.");
 
-  ATH_CHECK(m_hostMR.retrieve());
-  ATH_CHECK(m_deviceMR.retrieve());
+  ATH_CHECK(m_MRs.retrieve());
   ATH_CHECK(m_copy.retrieve());
   ATH_CHECK(m_streamTool.retrieve());
 
   ATH_MSG_DEBUG("Successfully initialized");
-  return StatusCode::SUCCESS;
-}
-
-StatusCode CUDAClusterizationAlgProviderTool::finalize()
-{
-  ATH_MSG_DEBUG("Finalizing.");
   return StatusCode::SUCCESS;
 }
 
@@ -35,7 +28,7 @@ CUDAClusterizationAlgProviderTool::getClusterizationAlgorithm(const EventContext
 {
 
   ATH_MSG_VERBOSE("Constructing CUDA traccc clusterization algorithm");
-  traccc::memory_resource mr{m_deviceMR->mr(), &m_hostMR->mr()};
+  traccc::memory_resource mr{m_MRs->mainMR(), m_MRs->hostMR()};
   auto copy = m_copy->copy(ctx);
 
   return std::make_pair(copy, std::make_shared<traccc::cuda::clusterization_algorithm>(
@@ -52,7 +45,7 @@ CUDAClusterizationAlgProviderTool::getSortingAlgorithm(const EventContext& ctx) 
 {
 
   ATH_MSG_VERBOSE("Constructing CUDA traccc measurement sorting algorithm");
-  traccc::memory_resource mr{m_deviceMR->mr(), &m_hostMR->mr()};
+  traccc::memory_resource mr{m_MRs->mainMR(), m_MRs->hostMR()};
   auto copy = m_copy->copy(ctx);
 
   return std::make_pair(copy, std::make_shared<traccc::cuda::measurement_sorting_algorithm>(

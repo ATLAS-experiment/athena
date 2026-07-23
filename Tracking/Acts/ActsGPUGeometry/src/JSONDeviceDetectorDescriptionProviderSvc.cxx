@@ -25,13 +25,12 @@ StatusCode JSONDeviceDetectorDescriptionProviderSvc::initialize()
 {
   ATH_MSG_DEBUG("Initializing  device detector description provider service ");
 
-  ATH_CHECK(m_hostMR.retrieve());
-  ATH_CHECK(m_deviceMR.retrieve());
+  ATH_CHECK(m_MRs.retrieve());
   ATH_CHECK(m_copy.retrieve());
   ATH_CHECK(loadIdMaps());
 
-  auto hostDesign = std::make_unique<traccc::detector_design_description::host>(m_hostMR->mr());
-  auto hostCond   = std::make_unique<traccc::detector_conditions_description::host>(m_hostMR->mr());
+  auto hostDesign = std::make_unique<traccc::detector_design_description::host>(*m_MRs->hostMR());
+  auto hostCond   = std::make_unique<traccc::detector_conditions_description::host>(*m_MRs->hostMR());
 
   std::unique_ptr<traccc::detector_design_description::buffer>     deviceDesign;
   std::unique_ptr<traccc::detector_conditions_description::buffer> deviceCond;
@@ -72,7 +71,7 @@ StatusCode JSONDeviceDetectorDescriptionProviderSvc::initialize()
 
   deviceDesign =
         std::make_unique<traccc::detector_design_description::buffer>(
-          sizes, m_deviceMR->mr(), &(m_hostMR->mr()),
+          sizes, m_MRs->mainMR(), m_MRs->hostMR(),
           vecmem::data::buffer_type::resizable);
   (*copy).setup(*deviceDesign)->wait();
   (*copy)(vecmem::get_data(*hostDesign), *deviceDesign)->wait();
@@ -82,7 +81,7 @@ StatusCode JSONDeviceDetectorDescriptionProviderSvc::initialize()
       std::make_unique<traccc::detector_conditions_description::buffer>(
           static_cast<traccc::detector_conditions_description::buffer::size_type>(
               hostCond->size()),
-          m_deviceMR->mr());
+          m_MRs->mainMR());
   (*copy).setup(*deviceCond)->wait();
   (*copy)(vecmem::get_data(*hostCond), *deviceCond)->wait();
 

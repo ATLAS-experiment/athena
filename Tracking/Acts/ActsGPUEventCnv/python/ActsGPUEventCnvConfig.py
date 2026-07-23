@@ -2,6 +2,7 @@
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
+from AthDeviceComps.AthDeviceCompsConfig import HostMemoryResourceToolCfg, DeviceMemoryResourceToolCfg, CopyToolCfg
 
 # ============================================================
 # Algorithm configurations
@@ -11,6 +12,10 @@ def RDOtoTracccCellConverterAlgCfg(flags,
                                    name="RDOtoTracccCellConverterAlg",
                                    **kwargs) -> ComponentAccumulator:
     acc = ComponentAccumulator()
+
+    kwargs.setdefault("HostMR", acc.popToolsAndMerge(HostMemoryResourceToolCfg(flags)))
+    kwargs.setdefault("DeviceMR", acc.popToolsAndMerge(DeviceMemoryResourceToolCfg(flags)))
+    kwargs.setdefault("CopyProviderTool", acc.popToolsAndMerge(CopyToolCfg(flags)))
     kwargs.setdefault("PixelRDO",    "ITkPixelRDOs")
     kwargs.setdefault("StripRDO",    "ITkStripRDOs")
     kwargs.setdefault("TracccCells", "TracccCells")
@@ -23,6 +28,8 @@ def TracccMeasurementConverterAlgCfg(flags,
                                      name="TracccMeasurementConverterAlg",
                                      **kwargs) -> ComponentAccumulator:
     acc = ComponentAccumulator()
+    kwargs.setdefault("HostMR", acc.popToolsAndMerge(HostMemoryResourceToolCfg(flags)))
+    kwargs.setdefault("CopyProviderTool", acc.popToolsAndMerge(CopyToolCfg(flags)))
     kwargs.setdefault("InputMeasurements",   "TracccMeasurements")
     kwargs.setdefault("OutputPixelClusters", "ITkTracccPixelClusters")
     kwargs.setdefault("OutputStripClusters", "ITkTracccStripClusters")

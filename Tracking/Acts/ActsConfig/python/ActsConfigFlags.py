@@ -186,6 +186,13 @@ def createActsConfigFlags():
     # Decorations
     actscf.addFlag('Acts.decoratePRD.sdoSiHit', lambda pcf: pcf.Tracking.doTIDE_AmbiTrackMonitoring)
 
+    # GPU track reconstruction
+    actscf.addFlag("Acts.Device.doClusterization", False)
+    actscf.addFlag("Acts.Device.doSpacePointFormation", False)
+    actscf.addFlag("Acts.Device.doSeeding", False)
+    actscf.addFlag("Acts.Device.seedingStrategy", SeedingStrategy.GridTriplet, type=SeedingStrategy)
+    actscf.addFlag("Acts.Device.doTrackReconstruction", False)
+
     # GNN specific flags (scoped)
     actscf.addFlag("Acts.GNN.Enable", False)
     actscf.addFlag("Acts.GNN.ModuleMapPath", "<default>")

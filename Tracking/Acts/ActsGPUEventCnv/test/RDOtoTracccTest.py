@@ -9,28 +9,16 @@ from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaCommon.Constants import DEBUG
 
-from AthCUDAServices.AthCUDAServicesConfig import HostMemoryResourceToolCfg, DeviceMemoryResourceToolCfg, CopyToolCfg
-
 from ActsGPUGeometry.ActsGPUGeometryConfig import JSONDeviceDetectorDescriptionProviderSvcCfg
 from ActsGPUEventCnv.ActsGPUEventCnvConfig import RDOtoTracccCellConverterAlgCfg
 
 def RDOtoTracccCellConverterTest(flags) -> ComponentAccumulator:
     acc = ComponentAccumulator()
 
-    hostMR   = acc.popToolsAndMerge(HostMemoryResourceToolCfg(flags, name="HostMR"))
-    deviceMR = acc.popToolsAndMerge(DeviceMemoryResourceToolCfg(flags, name="DeviceMR"))
-    copyTool = acc.popToolsAndMerge(CopyToolCfg(flags, name="CopyProviderTool"))
-
     # Service runs first — loads all device detector description data into detStore
-    acc.merge(JSONDeviceDetectorDescriptionProviderSvcCfg(flags,
-        HostMR   = hostMR,
-        DeviceMR = deviceMR,
-        CopyProviderTool = copyTool))
+    acc.merge(JSONDeviceDetectorDescriptionProviderSvcCfg(flags))
 
-    acc.merge(RDOtoTracccCellConverterAlgCfg(flags,
-        HostMR  = hostMR,
-        DeviceMR = deviceMR,
-        CopyProviderTool = copyTool))
+    acc.merge(RDOtoTracccCellConverterAlgCfg(flags))
 
     return acc
 

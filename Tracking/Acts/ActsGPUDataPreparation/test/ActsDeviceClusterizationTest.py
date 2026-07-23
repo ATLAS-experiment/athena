@@ -7,46 +7,23 @@
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
+from AthenaCommon.Constants import DEBUG
 
-from AthCUDAServices.AthCUDAServicesConfig import HostMemoryResourceToolCfg, DeviceMemoryResourceToolCfg, CopyToolCfg, StreamToolCfg
-
-from ActsGPUDataPreparation.ActsGPUDataPreparationConfig import CUDAClusterizerToolCfg,  DeviceClusterizationAlgCfg
+from ActsGPUDataPreparation.ActsGPUDataPreparationConfig import DeviceClusterizationAlgCfg
 from ActsGPUEventCnv.ActsGPUEventCnvConfig import RDOtoTracccCellConverterAlgCfg, TracccMeasurementConverterAlgCfg
 from ActsGPUGeometry.ActsGPUGeometryConfig import JSONDeviceDetectorDescriptionProviderSvcCfg
 
 def GPUClusterizationCfg(flags) -> ComponentAccumulator:
     acc = ComponentAccumulator()
 
-    hostMR   = acc.popToolsAndMerge(HostMemoryResourceToolCfg(flags, name="HostMR"))
-    deviceMR = acc.popToolsAndMerge(DeviceMemoryResourceToolCfg(flags, name="DeviceMR"))
-    copyTool = acc.popToolsAndMerge(CopyToolCfg(flags, name="CopyProviderTool"))
-    streamTool = acc.popToolsAndMerge(StreamToolCfg(flags, name="StreamTool"))
-
     # Service runs first — loads all device detector description data into detStore
-    acc.merge(JSONDeviceDetectorDescriptionProviderSvcCfg(flags,
-        HostMR   = hostMR,
-        DeviceMR = deviceMR,
-        CopyProviderTool = copyTool))
+    acc.merge(JSONDeviceDetectorDescriptionProviderSvcCfg(flags))
 
-    clusterizerTool = acc.popToolsAndMerge(CUDAClusterizerToolCfg(flags,
-        HostMR  = hostMR,
-        DeviceMR = deviceMR,
-        CopyProviderTool = copyTool,
-        StreamTool = streamTool))
+    acc.merge(RDOtoTracccCellConverterAlgCfg(flags))
 
-    acc.merge(RDOtoTracccCellConverterAlgCfg(flags,
-        HostMR  = hostMR,
-        DeviceMR = deviceMR,
-        CopyProviderTool = copyTool))
+    acc.merge(DeviceClusterizationAlgCfg(flags))
 
-    acc.merge(DeviceClusterizationAlgCfg(flags,
-        ClusteringAlgProviderTool = clusterizerTool,
-        CopyProviderTool = copyTool,
-        DeviceMR = deviceMR))
-
-    acc.merge(TracccMeasurementConverterAlgCfg(flags,
-        CopyProviderTool = copyTool,
-        HostMR  = hostMR))
+    acc.merge(TracccMeasurementConverterAlgCfg(flags))
 
     return acc
 
