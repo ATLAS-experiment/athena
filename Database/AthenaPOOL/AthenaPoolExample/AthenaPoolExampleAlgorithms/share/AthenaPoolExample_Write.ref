@@ -28,10 +28,7 @@ WriteData                                           DEBUG data dependencies:
   + OUTPUT  ( 'ExampleHitContainer' , 'StoreGateSvc+MyHits' ) 
   + OUTPUT  ( 'ExampleHitContainer' , 'StoreGateSvc+PetersHits' ) 
 StreamStream1                                       DEBUG In initialize
-StreamStream1                                       DEBUG In initialize 
-StreamStream1                                       DEBUG Found IDecisionSvc.
 DecisionSvc                                          INFO Inserting stream: StreamStream1 with no Algs
-StreamStream1                                       DEBUG End initialize 
 StreamStream1                                       DEBUG Found StoreGateSvc/StoreGateSvc store.
 StreamStream1                                       DEBUG Found StoreGateSvc/MetaDataStore store.
 StreamStream1.StreamStream1Tool                      INFO Initializing StreamStream1.StreamStream1Tool

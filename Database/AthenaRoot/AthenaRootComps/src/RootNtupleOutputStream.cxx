@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <cassert>
@@ -167,7 +167,7 @@ RootNtupleOutputStream::handle(const Incident& inc)
     }
     // Always force a final commit in stop - mainly applies to AthenaPool 
     if (m_writeOnFinalize) {
-      if (!write().isSuccess()) {  // true mean write AND commit
+      if (!write(inc.context()).isSuccess()) {  // true mean write AND commit
         ATH_MSG_ERROR("Cannot write on finalize");
       }
     }
@@ -209,7 +209,7 @@ RootNtupleOutputStream::finalize()
 }
 
 StatusCode
-RootNtupleOutputStream::execute(const EventContext& /*ctx*/) 
+RootNtupleOutputStream::execute(const EventContext& ctx)
 {
   bool failed = false;
   for (std::vector<ToolHandle<IAthenaOutputTool> >::iterator 
@@ -222,7 +222,7 @@ RootNtupleOutputStream::execute(const EventContext& /*ctx*/)
     }
   }
   if (m_writeOnExecute) {
-    if (!write().isSuccess()) {
+    if (!write(ctx).isSuccess()) {
       failed = true;
     }
   }
@@ -243,13 +243,13 @@ RootNtupleOutputStream::execute(const EventContext& /*ctx*/)
 
 // Work entry point
 StatusCode
-RootNtupleOutputStream::write() 
+RootNtupleOutputStream::write(const EventContext& ctx)
 {
   bool failed = false;
   // Clear any previously existing item list
   clearSelection();
   // Test whether this event should be output
-  if (isEventAccepted()) {
+  if (isEventAccepted(ctx)) {
     // Connect the output file to the service
     if (m_streamer->connectOutput(m_outputName).isSuccess()) {
       // First check if there are any new items in the list

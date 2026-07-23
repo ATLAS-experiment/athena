@@ -16,10 +16,7 @@ ReWriteData                                         DEBUG data dependencies:
   + INPUT   ( 'ExampleHitContainer' , 'StoreGateSvc+MyHits' ) 
   + OUTPUT  ( 'ExampleTrackContainer' , 'StoreGateSvc+MyTracks' ) 
 StreamStream1                                       DEBUG In initialize
-StreamStream1                                       DEBUG In initialize 
-StreamStream1                                       DEBUG Found IDecisionSvc.
 DecisionSvc                                          INFO Inserting stream: StreamStream1 with no Algs
-StreamStream1                                       DEBUG End initialize 
 StreamStream1                                       DEBUG Found StoreGateSvc/StoreGateSvc store.
 StreamStream1                                       DEBUG Found StoreGateSvc/MetaDataStore store.
 AthDictLoaderSvc                                     INFO in initialize...
@@ -45,10 +42,7 @@ MakeInputDH                                         DEBUG data dependencies:
   + INPUT   ( 'DataHeader' , 'StoreGateSvc+StreamStream1' ) 
   + OUTPUT  ( 'DataHeader' , 'StoreGateSvc+StreamStream1_Input' ) 
 StreamStream2                                       DEBUG In initialize
-StreamStream2                                       DEBUG In initialize 
-StreamStream2                                       DEBUG Found IDecisionSvc.
 DecisionSvc                                          INFO Inserting stream: StreamStream2 with no Algs
-StreamStream2                                       DEBUG End initialize 
 StreamStream2                                       DEBUG Found StoreGateSvc/StoreGateSvc store.
 StreamStream2                                       DEBUG Found StoreGateSvc/MetaDataStore store.
 StreamStream2.StreamStream2Tool                      INFO Initializing StreamStream2.StreamStream2Tool
