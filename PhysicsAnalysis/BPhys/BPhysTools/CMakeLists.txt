@@ -73,7 +73,7 @@ atlas_add_test( SimpleEncrypter_test
   SOURCES test/SimpleEncrypter_test.cxx
   INCLUDE_DIRS ${Boost_INCLUDE_DIRS}
   LINK_LIBRARIES BPhysToolsLib ${Boost_LIBRARIES}
-  POST_EXEC_SCRIPT nopost.sh 
+  POST_EXEC_SCRIPT noerror.sh
 )
 
 
