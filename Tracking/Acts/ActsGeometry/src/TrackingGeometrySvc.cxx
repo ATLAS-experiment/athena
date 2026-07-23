@@ -189,8 +189,10 @@ StatusCode TrackingGeometrySvc::initialize() {
 
     root.addChild(std::move(currentTop));
     
+    Acts::Experimental::BlueprintOptions blueprintOptions;
+    blueprintOptions.keepGoingOnMaterialMergeFailure = m_keepGoingOnMaterialMergeFailure;
     std::unique_ptr<Acts::TrackingGeometry> trackingGeometry = blueprint->construct(
-      {}, getNominalContext().context(), *logger->clone(std::nullopt, Acts::Logging::DEBUG));
+      blueprintOptions, getNominalContext().context(), *logger->clone(std::nullopt, Acts::Logging::DEBUG));
 
     for (auto& refineVisitor : m_refineVisitors) {
         trackingGeometry->apply(*refineVisitor);
