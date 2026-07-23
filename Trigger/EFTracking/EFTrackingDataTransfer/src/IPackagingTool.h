@@ -25,11 +25,11 @@ class IPackagingTool : virtual public IAlgTool {
     * @brief unpacks from OffloadMessage
     * The implemtations should check the content and simply return early if the message is not to be decoded by this tool
     * @param msg input
-    * @param context event into which to unpack the data
+    * @param context event into which to unpack the data (it can potentially be updated)
     * @return StatusCode 
     */
   virtual StatusCode unpack(const OffloadMessage& msg,
-                            const EventContext& context) const = 0;
+                            EventContext& context) const = 0;
 };
 
 #endif  // EFTRACKINGDATATRANSFER_IPACKAGINGTOOL_H

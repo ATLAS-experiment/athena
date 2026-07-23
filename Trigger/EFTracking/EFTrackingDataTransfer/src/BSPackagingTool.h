@@ -46,7 +46,7 @@ public:
    * The ROBs will be placed in the ROBDataProviderSvc instance, when unpacking all ROBs will unpacked
    * @return StatusCode::SUCCESS on success.
    */
-  virtual StatusCode unpack(const OffloadMessage& msg, const EventContext& context) const override;
+  virtual StatusCode unpack(const OffloadMessage& msg, EventContext& context) const override;
 
 
 private:
@@ -65,10 +65,22 @@ private:
   /**
    * @brief cashe used wne unpacking 
    * (presumably the ownership in the future can be given to other component)
+   * this is only used in unpacking
    */
-  // mutable SG::SlotSpecificObj<std::vector<uint32_t>> m_eventsDataCache;
-  mutable SG::SlotSpecificObj<RawEvent> m_eventsCache;
+  struct Cache{
+    RawEvent event;
+    std::vector<uint32_t> data;
+  };
 
+  mutable SG::SlotSpecificObj<Cache> m_eventsCache;
+
+  /**
+   * @brief this massages eformat prior to sending
+   * 
+   * @param data header data
+   * @param totSize total number of words
+   */
+  void eformatFix(UIntVector& data, uint32_t totSize) const;
   };
 
 

@@ -13,6 +13,8 @@ message EventInfoMessage {
 
 // protobuf maps cannot directly contain repeated fields,
 // so we wrap the vectors.
+// tests with protobuf fixed32 should be done
+// in certain applications (e.g. BS it may allow to avoid copies) 
 message UIntVector {
   repeated uint32 values = 1;
 }

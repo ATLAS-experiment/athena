@@ -23,7 +23,7 @@ StatusCode AsyncgRPCComputeAlg::initialize() {
   }
   m_stub = std::make_unique<UniversalOffloadService::Stub>(channel);
 
-  ATH_CHECK(m_packingTool.retrieve());
+  ATH_CHECK(m_packingTools.retrieve());
 
   return StatusCode::SUCCESS;
 }
@@ -48,15 +48,13 @@ StatusCode AsyncgRPCComputeAlg::execute(const EventContext& context) const {
   google::protobuf::Arena arena;
   OffloadMessage* requestMsg =
       google::protobuf::Arena::Create<OffloadMessage>(&arena);
-
-  ATH_CHECK(m_packingTool->pack(*requestMsg, context));
+  for ( auto& tool : m_packingTools)
+    ATH_CHECK(tool->pack(*requestMsg, context));
 
   // OffloadMessage responseMsg;
   OffloadMessage* responseMsg =
       google::protobuf::Arena::Create<OffloadMessage>(&arena);
 
-  auto* ei = requestMsg->mutable_event();
-  fillEventInfo(context.eventID(), ei);
   ATH_MSG_DEBUG("Prepared input data, event number "
                 << context.eventID().event_number());
 

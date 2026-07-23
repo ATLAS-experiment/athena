@@ -35,11 +35,11 @@ class AsyncgRPCComputeAlg : public AthAsynchronousAlgorithm {
   virtual StatusCode finalize() override;
 
  private:
-  ToolHandle<IPackagingTool> m_packingTool{
+  ToolHandleArray<IPackagingTool> m_packingTools{
       this,
-      "PackagingTool",
+      "PackagingTools",
       {},
-      "Tool that fetches data from current context and encodes it into probuf "
+      "Tools that fetch data from current context and encodes it into probuf "
       "for sending"};
   // there will be a tool to decode the data back
   mutable std::unique_ptr<UniversalOffloadService::Stub> m_stub;

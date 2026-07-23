@@ -20,16 +20,17 @@ acc = MainServicesCfg(flags)
 
 acc.merge(ByteStreamReadCfg(flags))
 
-    
+
 packInDet = CompFactory.BSPackagingTool("PackInDet", detectors=["PIXEL", "SCT"])
 packCalo = CompFactory.BSPackagingTool("PackCalo", detectors=["LAR", "TILE"], )
+packEI = CompFactory.EventInfoPackagingTool("PackEI")
 
-acc.addEventAlgo(CompFactory.AsyncgRPCComputeAlg("CompAlg1",
-    PackagingTool=packInDet,
-    OutputLevel=DEBUG ))
+# acc.addEventAlgo(CompFactory.AsyncgRPCComputeAlg("CompAlg1",
+#     PackagingTool=packInDet,
+#     OutputLevel=DEBUG ))
 
 acc.addEventAlgo(CompFactory.AsyncgRPCComputeAlg("CompAlg2",
-    PackagingTool=packCalo,                       
+    PackagingTools=[packEI, packCalo],
     OutputLevel=DEBUG ))
 
 # ------------------------------------------------------------
@@ -37,7 +38,7 @@ acc.addEventAlgo(CompFactory.AsyncgRPCComputeAlg("CompAlg2",
 # ------------------------------------------------------------
 if __name__ == "__main__":
     sc = acc.run()
-    
+
     # exit code handling
     import sys
     sys.exit(not sc.isSuccess())
