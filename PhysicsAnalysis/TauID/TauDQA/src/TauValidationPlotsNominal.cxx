@@ -38,6 +38,9 @@ TauValidationPlotsNominal::TauValidationPlotsNominal(PlotBase* pParent, const st
   m_oMatchedTauEffPlotsNom(this, "Nominal/Matched/Eff/All/", sTauJetContainerName),
   m_oMatchedTauEff1PPlotsNom(this, "Nominal/Matched/Eff/1P/", sTauJetContainerName),
   m_oMatchedTauEff3PPlotsNom(this, "Nominal/Matched/Eff/3P/", sTauJetContainerName),
+  m_oMatchedTauRecoEffPlotsNom(this, "Nominal/Matched/RecoEff/", sTauJetContainerName),
+  m_oMatchedTauTrkClassEffPlotsNom(this, "Nominal/Matched/TrkClass/", sTauJetContainerName),
+
   m_oMatchedTauRecoTauPlotsNom(this, "Nominal/Matched/PFOs/", sTauJetContainerName),
   m_oMigrationPlotsNom(this, "Nominal/Matched/Migration/", sTauJetContainerName),
   m_oNewCoreMatchedPlotsNom(this, "Nominal/Matched/All/", sTauJetContainerName),

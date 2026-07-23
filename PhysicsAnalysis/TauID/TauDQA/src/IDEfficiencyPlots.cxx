@@ -1,19 +1,19 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "EfficiencyPlots.h"
+#include "IDEfficiencyPlots.h"
 #include "AthenaKernel/Units.h"
 
 namespace Tau{
 
-  EfficiencyPlots::EfficiencyPlots(PlotBase* pParent, const std::string& sDir, std::string sTauJetContainerName):
+  IDEfficiencyPlots::IDEfficiencyPlots(PlotBase* pParent, const std::string& sDir, std::string sTauJetContainerName):
     PlotBase(pParent, sDir),
     m_sTauJetContainerName(std::move(sTauJetContainerName))
   {	
   }
 
-  void EfficiencyPlots::initializePlots()
+  void IDEfficiencyPlots::initializePlots()
   {
     m_eff_pt_jetGNTauloose       = BookTProfile("Eff_Pt_jetGNTauloose"," Matched Tau loose GNTau eff in pt; pt; eff", 20, 0., 150.0);
     m_eff_pt_jetGNTaumed         = BookTProfile("Eff_Pt_jetGNTaumed","Matched Tau med GNTau eff in pt; pt; eff", 20, 0.0, 150.0);
@@ -43,7 +43,7 @@ namespace Tau{
 
   }
 
-  void EfficiencyPlots::fill(const xAOD::TauJet& tau, float weight, float avg_mu)
+  void IDEfficiencyPlots::fill(const xAOD::TauJet& tau, float weight, float avg_mu)
   {
     static const SG::ConstAccessor<char> acc_GNTauL("GNTauL_v0prune");
     double pass_loose = acc_GNTauL.withDefault(tau,false);

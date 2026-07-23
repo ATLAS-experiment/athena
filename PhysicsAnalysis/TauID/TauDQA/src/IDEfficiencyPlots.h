@@ -1,9 +1,9 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef TAUDQA_EFFICIENCYPLOTS_H
-#define TAUDQA_EFFICIENCYPLOTS_H
+#ifndef TAUDQA_IDEFFICIENCYPLOTS_H
+#define TAUDQA_IDEFFICIENCYPLOTS_H
 
 #include "TrkValHistUtils/PlotBase.h"
 #include "xAODTau/TauJet.h"
@@ -12,10 +12,10 @@ class TProfile;
 
 namespace Tau{
 
-class EfficiencyPlots: public PlotBase {
+class IDEfficiencyPlots: public PlotBase {
 public:
-  EfficiencyPlots(PlotBase *pParent, const std::string& sDir, std::string sTauJetContainerName);
-  virtual ~EfficiencyPlots() = default;
+  IDEfficiencyPlots(PlotBase *pParent, const std::string& sDir, std::string sTauJetContainerName);
+  virtual ~IDEfficiencyPlots() = default;
   
   void fill(const xAOD::TauJet& tau, float weight, float avg_mu);
 
