@@ -1,14 +1,14 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
-#include <algorithm>
+
 #include "InDetPrepRawData/PixelCluster.h"
 #include "InDetIdentifier/PixelID.h"
 #include "InDetIdentifier/SCT_ID.h"
 #include "SpacePointCopier.h"
 #include "AthContainers/ConstAccessor.h"
 #include "AthContainers/Accessor.h"
-
+#include <algorithm>
 SpacePointCopier::SpacePointCopier(const std::string& name, ISvcLocator* pSvcLocator) :
   AthReentrantAlgorithm(name, pSvcLocator)
 {
@@ -94,7 +94,9 @@ StatusCode SpacePointCopier::execute(const EventContext& context) const
 
       }
     }
-
+    static const SG::ConstAccessor<float> xAcc ("x");
+    static const SG::ConstAccessor<float> yAcc ("y");
+    static const SG::ConstAccessor<float> zAcc ("z");
 
     for ( auto coll: *SCTSPContainer ) {
       for ( auto sp: *coll ) {
@@ -111,10 +113,8 @@ StatusCode SpacePointCopier::execute(const EventContext& context) const
         module2(*item) = hashId2;     
       }
     }
+    
     for ( size_t i = 0; i < std::min(10ul, output->size()); ++i ) {
-      static const SG::ConstAccessor<float> xAcc ("x");
-      static const SG::ConstAccessor<float> yAcc ("y");
-      static const SG::ConstAccessor<float> zAcc ("z");
       ATH_MSG_DEBUG("Saves SP x y z: " << xAcc(*output->at(i))
                                        << " " << yAcc(*output->at(i))
                                        << " " << zAcc(*output->at(i)) );

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "BoostedJetTaggers/JSSTaggerUtils.h"
@@ -77,7 +77,7 @@ StatusCode JSSTaggerUtils::initialize(){
         ModelPath = PathResolverFindCalibFile(ConstTaggerFileName);
       }
       else if ( m_calibArea.find("eos") != std::string::npos) {
-        ModelPath = (ConstTaggerFileName);    
+        ModelPath = std::move(ConstTaggerFileName);    
       }
       else{
         ModelPath = PathResolverFindCalibFile(("BoostedJetTaggers/" + m_calibArea + "/" + ConstTaggerFileName).c_str());
@@ -117,7 +117,7 @@ StatusCode JSSTaggerUtils::initialize(){
         ModelPath = PathResolverFindCalibFile(HLTaggerFileName);
       }
       else if ( m_calibArea.find("eos") != std::string::npos) {
-        ModelPath = (HLTaggerFileName);    
+        ModelPath = std::move(HLTaggerFileName);    
       }
       else{
         ModelPath = PathResolverFindCalibFile(("BoostedJetTaggers/" + m_calibArea + "/" + HLTaggerFileName).c_str());
@@ -215,13 +215,13 @@ StatusCode JSSTaggerUtils::GetImageScore(const xAOD::JetContainer& jets) const {
     if( constituents.size() > 100 )
       constituentsForModel = std::vector<xAOD::JetConstituent> (constituents.begin(), constituents.begin() + MaxConstituents);
     else 
-      constituentsForModel = constituents;
+      constituentsForModel = std::move(constituents);
 
     // constituents - charged
     std::vector<xAOD::JetConstituent> csts_charged = constituentsForModel;
     csts_charged.erase( std::remove_if( csts_charged.begin(), csts_charged.end(),
                         [] (xAOD::JetConstituent constituent) -> bool {
-                          const xAOD::FlowElement* ufo = dynamic_cast<const xAOD::FlowElement*>(constituent.rawConstituent());
+                          const xAOD::FlowElement* ufo = static_cast<const xAOD::FlowElement*>(constituent.rawConstituent());
                           return ufo -> signalType() != xAOD::FlowElement::SignalType::Charged;
                         }), csts_charged.end()) ;
 
@@ -229,27 +229,27 @@ StatusCode JSSTaggerUtils::GetImageScore(const xAOD::JetContainer& jets) const {
     std::vector<xAOD::JetConstituent> csts_neutral = constituentsForModel;
     csts_neutral.erase( std::remove_if( csts_neutral.begin(), csts_neutral.end(),
                         [] (xAOD::JetConstituent constituent) -> bool {
-                          const xAOD::FlowElement* ufo = dynamic_cast<const xAOD::FlowElement*>(constituent.rawConstituent());
+                          const xAOD::FlowElement* ufo = static_cast<const xAOD::FlowElement*>(constituent.rawConstituent());
                           return ufo -> signalType() != xAOD::FlowElement::SignalType::Neutral;
                         }), csts_neutral.end()) ;
 
     // constituents - combined
-    std::vector<xAOD::JetConstituent> csts_combined = constituentsForModel;
+    std::vector<xAOD::JetConstituent> csts_combined = std::move(constituentsForModel);
     csts_combined.erase( std::remove_if( csts_combined.begin(), csts_combined.end(),
                         [] (xAOD::JetConstituent constituent){
-                          const xAOD::FlowElement* ufo = dynamic_cast<const xAOD::FlowElement*>(constituent.rawConstituent());
+                          const xAOD::FlowElement* ufo = static_cast<const xAOD::FlowElement*>(constituent.rawConstituent());
                           return ufo -> signalType() != xAOD::FlowElement::SignalType::Combined;
                         }), csts_combined.end()) ;
 
     // use ML tool on constituents
-    TH2D ImageCharged  = MakeJetImage("Charged" , jet, csts_charged );
-    TH2D ImageNeutral  = MakeJetImage("Neutral" , jet, csts_neutral );
-    TH2D ImageCombined = MakeJetImage("Combined", jet, csts_combined);
+    TH2D ImageCharged  = MakeJetImage("Charged" , jet, std::move(csts_charged) );
+    TH2D ImageNeutral  = MakeJetImage("Neutral" , jet, std::move(csts_neutral) );
+    TH2D ImageCombined = MakeJetImage("Combined", jet, std::move(csts_combined));
 
     std::vector<TH2D> Images = {ImageCharged, ImageNeutral, ImageCombined};
 
     // evaluate the model
-    score = m_MLBosonTagger -> retrieveConstituentsScore(Images);
+    score = m_MLBosonTagger -> retrieveConstituentsScore(std::move(Images));
 
     // save decorator
     decConstScore(*jet) = score;
@@ -264,6 +264,7 @@ StatusCode JSSTaggerUtils::GetConstScore(const xAOD::JetContainer& jets) const {
   SG::WriteDecorHandle<xAOD::JetContainer, float> decConstScore(m_decConstScoreKey);
   SG::WriteDecorHandle<xAOD::JetContainer, float> decNConstituents(m_decNConstituentsKey);
   SG::WriteDecorHandle<xAOD::JetContainer, float> decNTopoTowers(m_decNTopoTowersKey);
+  SG::AuxElement::ConstAccessor<std::vector<ElementLink<DataVector<xAOD::IParticle>>>> towersAcc("GhostTower");
 
   for(const xAOD::Jet *jet : jets){
 
@@ -284,7 +285,6 @@ StatusCode JSSTaggerUtils::GetConstScore(const xAOD::JetContainer& jets) const {
 
     // get towers
     std::vector<const xAOD::CaloCluster*> towers;
-    SG::AuxElement::ConstAccessor<std::vector<ElementLink<DataVector<xAOD::IParticle>>>> towersAcc("GhostTower");
     if (towersAcc.isAvailable(*jet)){
       // Vector of towers linked to jets
       std::vector<ElementLink<DataVector<xAOD::IParticle>>> towerLinks = towersAcc(*jet);
@@ -314,7 +314,7 @@ StatusCode JSSTaggerUtils::GetConstScore(const xAOD::JetContainer& jets) const {
       phi.push_back( cnst -> phi() );
       E.push_back( cnst -> e() );
     }
-    std::vector<std::vector<float>> towers_packed = {m, pT, eta, phi};
+    std::vector<std::vector<float>> towers_packed{std::move(m), std::move(pT), std::move(eta), std::move(phi)};
 
     // pack for the ML tool
     std::vector<std::vector<float>> inputs_packed = {
@@ -324,7 +324,7 @@ StatusCode JSSTaggerUtils::GetConstScore(const xAOD::JetContainer& jets) const {
 
     // evaluate the model
     if( (constituents.size() + towers.size()) > 1 )
-      score = m_MLBosonTagger -> retrieveConstituentsScore(inputs_packed);
+      score = m_MLBosonTagger -> retrieveConstituentsScore(std::move(inputs_packed));
 
     // save decorator
     decConstScore(*jet) = score;
@@ -342,7 +342,7 @@ StatusCode JSSTaggerUtils::GetConstScore(const xAOD::JetContainer& jets) const {
 StatusCode JSSTaggerUtils::GetQGConstScore(const xAOD::JetContainer& jets) const {
 
   SG::WriteDecorHandle<xAOD::JetContainer, float> decConstScore(m_decConstScoreKey);
-
+  SG::AuxElement::ConstAccessor<std::vector<ElementLink<DataVector<xAOD::IParticle>>>> towersAcc("GhostTower");
   for(const xAOD::Jet *jet : jets){
 
     // init value
@@ -354,7 +354,7 @@ StatusCode JSSTaggerUtils::GetQGConstScore(const xAOD::JetContainer& jets) const
 
     // get towers
     std::vector<const xAOD::CaloCluster*> towers;
-    SG::AuxElement::ConstAccessor<std::vector<ElementLink<DataVector<xAOD::IParticle>>>> towersAcc("GhostTower");
+    
     if (towersAcc.isAvailable(*jet)){
       // Vector of towers linked to jets
       std::vector<ElementLink<DataVector<xAOD::IParticle>>> towerLinks = towersAcc(*jet);
@@ -396,7 +396,7 @@ StatusCode JSSTaggerUtils::GetQGConstScore(const xAOD::JetContainer& jets) const
 
     for(long unsigned int f=0; f<pT.size(); f++){
       std::vector<float> features = { m.at(f), pT.at(f), eta.at(f), phi.at(f), E.at(f), isTower.at(f), px.at(f), py.at(f), pz.at(f) };
-      features_packed.push_back(features);
+      features_packed.push_back(std::move(features));
     }
 
     // sort them
@@ -427,7 +427,7 @@ StatusCode JSSTaggerUtils::GetQGConstScore(const xAOD::JetContainer& jets) const
       float type = feature_i.at(5);
 
       std::vector<float> vars = {log_pT, log_E, eta, phi, DR, log_m, type};
-      const_vars.push_back(vars);
+      const_vars.push_back(std::move(vars));
 
       // calculate variables: interactions
       std::vector<std::vector<float>> inter_vars_int;
@@ -460,16 +460,16 @@ StatusCode JSSTaggerUtils::GetQGConstScore(const xAOD::JetContainer& jets) const
                                     min_over_pT,
                                     log_mass
                                   };
-        inter_vars_int.push_back(vars);
+        inter_vars_int.push_back(std::move(vars));
 
       }
 
-      inter_vars.push_back(inter_vars_int);
+      inter_vars.push_back(std::move(inter_vars_int));
     }
 
     // evaluate the model
     if( (constituents.size() + towers.size()) > 1 ) 
-      score = m_MLBosonTagger -> retrieveConstituentsScore(const_vars, inter_vars);
+      score = m_MLBosonTagger -> retrieveConstituentsScore(std::move(const_vars), std::move(inter_vars));
 
     // save decorator
     decConstScore(*jet) = score;
@@ -496,7 +496,7 @@ StatusCode JSSTaggerUtils::GetHLScore(const xAOD::JetContainer& jets) const {
     std::map<std::string, double> JSSVars = GetJSSVars(*jet);
 
     // evaluate the model
-    score = m_MLBosonTagger_HL -> retrieveHighLevelScore(JSSVars);
+    score = m_MLBosonTagger_HL -> retrieveHighLevelScore(std::move(JSSVars));
     
     // save decorator
     decHLScore(*jet) = score;
@@ -635,7 +635,9 @@ StatusCode JSSTaggerUtils::ReadScaler(){
 
     auto Image = std::make_unique<TH2D>("Image_" + TagImage, "Image_" + TagImage, 
 			   m_nbins_eta, m_min_eta, m_max_eta, m_nbins_phi, m_min_phi, m_max_phi);
-
+    if (SumPT == 0.)[[unlikely]]{
+      throw std::runtime_error("SumPT is zero in JSSTaggerUtils::MakeJetImage");
+    }
     for( auto& cst : constituents ){
       eta = cst -> eta() - jet -> eta() ;
       phi = cst -> phi() - jet -> phi() ;
@@ -760,8 +762,14 @@ StatusCode JSSTaggerUtils::GetTopConstScore(const xAOD::JetContainer& jets) cons
       // calculate constituents variables
       float log_pT = log( pT.at(i));
       float log_E = log( E.at(i));
-      float log_pT_rel = log( pT.at(i) / sum_features_pT_scalar);
-      float log_E_rel = log( E.at(i) / sum_features_E);
+      float log_pT_rel {std::numeric_limits<float>::max()};
+      if  (sum_features_pT_scalar != 0.f )[[likely]]{
+        log_pT_rel = log( pT.at(i) / sum_features_pT_scalar);
+      }
+      float log_E_rel{std::numeric_limits<float>::max()};
+      if (sum_features_E != 0.f)[[likely]]{
+        log_E_rel = log( E.at(i) / sum_features_E);
+      }
       float Deta = eta_flip;
       float Dphi = phi_rot;
       float DR = sqrt(Deta*Deta + Dphi*Dphi);
@@ -810,10 +818,10 @@ StatusCode JSSTaggerUtils::GetTopConstScore(const xAOD::JetContainer& jets) cons
                                     log_delta,
                                     log_mass
                                   };
-        inter_vars_int.push_back(vars);
+        inter_vars_int.push_back(std::move(vars));
 
       }
-      inter_vars.push_back(inter_vars_int);
+      inter_vars.push_back(std::move(inter_vars_int));
 
     }
 
@@ -828,25 +836,24 @@ StatusCode JSSTaggerUtils::GetTopConstScore(const xAOD::JetContainer& jets) cons
       for(long unsigned int j=0; j<nInputConstituents; j++){
         vars_inter.push_back(vars);
       }
-      inter_vars.push_back(vars_inter);
+      inter_vars.push_back(std::move(vars_inter));
 
       // pack: mask variable
-      vars = {0.};
-      masks_vars.push_back(vars);
+
+      masks_vars.push_back({0.});
     }
 
     // further adjustment for interaction variables
+    std::vector<float> vars1 = {-18.4207, -18.4207, -18.4207, -18.4207};
     for(long unsigned int i=0; i<constituents.size(); i++){
-      std::vector<float> vars = {0., 0., 0., 0.};
-      vars = {-18.4207, -18.4207, -18.4207, -18.4207};
       for(long unsigned int j=constituents.size(); j<nInputConstituents; j++){
-        inter_vars.at(i).push_back(vars);
+        inter_vars.at(i).push_back(vars1);
       }
     }
 
     // evaluate the model
     if( constituents.size() > 1 ) 
-      score = m_MLBosonTagger -> retrieveConstituentsScore(const_vars, inter_vars, masks_vars);
+      score = m_MLBosonTagger -> retrieveConstituentsScore(std::move(const_vars), std::move(inter_vars), std::move(masks_vars));
 
     // save decorator
     // the model return the qcd node score
@@ -933,7 +940,7 @@ StatusCode JSSTaggerUtils::GetWConstScore(const xAOD::JetContainer& jets) const 
 
       // pack: constituents variables
       std::vector<float> vars = {log_E, log_pT, log_E_rel, log_pT_rel, Deta, Dphi, DR};
-      const_vars.push_back(vars);
+      const_vars.push_back(std::move(vars));
 
       // pack: mask variable
       vars = {1.};
@@ -964,15 +971,15 @@ StatusCode JSSTaggerUtils::GetWConstScore(const xAOD::JetContainer& jets) const 
                                     log_min_over_pT,
                                     log_mass
                                   };
-        inter_vars_int.push_back(vars);
+        inter_vars_int.push_back(std::move(vars));
       }
 
-      inter_vars.push_back(inter_vars_int);
+      inter_vars.push_back(std::move(inter_vars_int));
     }
 
     // evaluate the model
     if( constituents.size() > 1 ) 
-      score = m_MLBosonTagger -> retrieveConstituentsScore(const_vars, inter_vars, masks_vars);
+      score = m_MLBosonTagger -> retrieveConstituentsScore(std::move(const_vars), std::move(inter_vars), std::move(masks_vars));
 
     // save decorator
     decConstScore(*jet) = score;
@@ -1057,7 +1064,7 @@ StatusCode JSSTaggerUtils::GetPolarisationScore(const xAOD::JetContainer& jets) 
 
       // pack: mask variable
       vars = {1.};
-      masks_vars.push_back(vars);
+      masks_vars.push_back(std::move(vars));
 
       // explict interaction variables
       // calculate variables: interactions
@@ -1091,7 +1098,7 @@ StatusCode JSSTaggerUtils::GetPolarisationScore(const xAOD::JetContainer& jets) 
                                     log_min_over_pT,
                                     log_mass2
                                   };
-        inter_vars_int.push_back(vars);
+        inter_vars_int.push_back(std::move(vars));
       }
 
       inter_vars.push_back(inter_vars_int);
