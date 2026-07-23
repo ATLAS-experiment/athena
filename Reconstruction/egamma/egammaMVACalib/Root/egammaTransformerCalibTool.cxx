@@ -351,7 +351,9 @@ float egammaTransformerCalibTool::getEnergy(const xAOD::CaloCluster& clus,
             case 1: sum_cell_E_L1 += final_E; break;
             case 2: sum_cell_E_L2 += final_E; break;
             case 3: sum_cell_E_L3 += final_E; break;
+            /* case 4 is unreachable
             case 4: sum_cell_E_Gap += final_E; break;
+            */
         }
       }
     }
