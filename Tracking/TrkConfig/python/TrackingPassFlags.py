@@ -150,7 +150,7 @@ def createITkTrackingPassFlags():
         pcf.BField.configuredSolenoidFieldScale *
         (0.2 * Units.GeV if pcf.Tracking.doLowMu
          else 0.9 * Units.GeV)))
-    icf.addFlag("maxPrimaryImpactSeed"      , 2.0 * Units.mm)
+    icf.addFlag("maxPrimaryImpactSeed"      , 5.0 * Units.mm)
     icf.addFlag("maxZImpactSeed"            , 200.0 * Units.mm)
     icf.addFlag("useSeedFilter"             , True)
     icf.addFlag("useHoughVertexFilter"      , False) # experimental, keep False
@@ -166,7 +166,7 @@ def createITkTrackingPassFlags():
     icf.addFlag("maxPixelHoles"           , [2])
     icf.addFlag("maxSctHoles"             , [2])
     icf.addFlag("maxDoubleHoles"          , [1])
-    icf.addFlag("maxPrimaryImpact"        , [2.0 * Units.mm, 2.0 * Units.mm, 10.0 * Units.mm])
+    icf.addFlag("maxPrimaryImpact"        , [5.0 * Units.mm, 5.0 * Units.mm, 10.0 * Units.mm])
     icf.addFlag("maxEMImpact"             , [50.0 * Units.mm])
     icf.addFlag("maxZImpact"              , [200.0 * Units.mm])
 
@@ -238,7 +238,7 @@ def createITkTrackingPassFlags():
 def createITkHeavyIonTrackingPassFlags():
     icf = createITkTrackingPassFlags()
     icf.extension        = "HeavyIon"
-    icf.maxPrimaryImpact = [2.0 * Units.mm]
+    icf.maxPrimaryImpact = [5.0 * Units.mm]
     icf.minPT            = lambda pcf : (
         [0.4 *Units.GeV * pcf.BField.configuredSolenoidFieldScale])
     icf.minPTSeed        = lambda pcf : (
