@@ -48,9 +48,7 @@ using namespace Acts::UnitLiterals;
 
 namespace {
 /// The volume IDs for the HGTD volumes.
-constexpr std::size_t s_hgtdPosVolumeId = 30;
-constexpr std::size_t s_hgtdNegVolumeId = 31;
-
+using namespace ActsTrk::detail::GeoVolIds;
 using enum Acts::CylinderVolumeBounds::Face;
 using enum Acts::AxisDirection;
 using enum Acts::AxisBoundaryType;
