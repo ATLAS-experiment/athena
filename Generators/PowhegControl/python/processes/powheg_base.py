@@ -1,6 +1,6 @@
 # Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
-from AthenaCommon import Logging
+from .. import Logging
 from .configurable import Configurable
 from ..utility import check_svn_revision, FileParser
 import math

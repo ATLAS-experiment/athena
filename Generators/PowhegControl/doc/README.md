@@ -692,4 +692,37 @@ re-use of integration grids is explained [here](powheg_for_atlas#Re_using_integr
 
   - See the list [here](powheg_for_atlas#Multi_scale_improved_NLO)
 
+
+** How to test POWHEG process outside of Athena?**
+  Assuming the compilebox 8.12 was build for LCG_110 x86_64-el9-gcc15-opt
+```
+  source /cvmfs/sft.cern.ch/lcg/views/setupViews.sh LCG_110 x86_64-el9-gcc15-opt
+  cd athena/Henerators/PowhegControl
+```
+And run `python3 ./test.py`, where `test.py` has the following content
+```
+#!/usr/bin/env python3
+import os
+import sys
+
+# Set POWHEGPATH before importing PowhegControl
+os.environ["POWHEGPATH"] = "/cvmfs/sft.cern.ch/lcg/releases/LCG_110/MCGenerators/compilebox/08.12/x86_64-el9-gcc15-opt/"
+
+sys.path.insert(0, "./")
+
+from PowhegControl import PowhegControl
+
+class RunArgs:
+    pass
+
+run_args = RunArgs()
+run_args.randomSeed = 12345
+run_args.ecmEnergy = 13000
+run_args.maxEvents = 10
+
+pc = PowhegControl(process_name="bb", run_args=run_args)
+pc.generate()
+  ```
+
+
  -->

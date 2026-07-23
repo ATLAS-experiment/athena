@@ -1,7 +1,7 @@
 # Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
 
 import os
-from AthenaCommon import Logging
+from ... import Logging
 from ..external import ExternalPHOTOS
 from ..powheg_V2 import PowhegV2
 

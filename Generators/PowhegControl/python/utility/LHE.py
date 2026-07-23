@@ -7,7 +7,7 @@
 import re
 import glob
 import mmap
-from AthenaCommon import Logging
+from .. import Logging
 from xml.etree import ElementTree
 import gzip
 import io
