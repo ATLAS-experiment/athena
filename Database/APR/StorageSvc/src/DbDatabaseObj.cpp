@@ -26,6 +26,8 @@
 #include "StorageSvc/IDbDatabase.h"
 #include "StorageSvc/IDbContainer.h"
 
+#include "CxxUtils/MD5.h"
+
 #include <memory>
 #include <cstdio>
 #include <string_view>
@@ -40,11 +42,12 @@ std::ostream& operator << (std::ostream& os, const Token::OID_t oid ) {
 
 static const Guid s_localDb("00000000-0000-0000-0000-000000000000");
 
-void genMD5(const std::string& s, void* code);
-
 /// Produce the token keys only on demand for export
 void makeKey(const Token* tok, Guid& guid)  {
-    genMD5(tok->key(), &guid);
+   const std::string& s = tok->key();
+   MD5 checkSum((unsigned char*)s.c_str(), s.length());
+   void* id = (void*)(&guid);
+   checkSum.raw_digest((unsigned char*)(id));
 }
 
 // Standard Constructor
