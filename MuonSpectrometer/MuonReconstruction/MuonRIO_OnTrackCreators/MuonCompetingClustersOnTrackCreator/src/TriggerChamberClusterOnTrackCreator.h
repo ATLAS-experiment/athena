@@ -55,13 +55,13 @@ class TriggerChamberClusterOnTrackCreator
         std::list<int>& limitingChannels,
         std::vector<std::unique_ptr<const Muon::MuonClusterOnTrack>>& limitingRots) const;
 
-    std::vector<std::unique_ptr<const Muon::MuonClusterOnTrack>> createPrdRots(
-        const std::list<const Trk::PrepRawData*>& prds) const;
+    std::vector<std::unique_ptr<const Muon::MuonClusterOnTrack>> 
+                createPrdRots(std::vector<const Trk::PrepRawData*>& prds) const;
 
     void makeClustersBySurface(
         std::list<int>& limitingChannels,
         std::vector<std::unique_ptr<const Muon::MuonClusterOnTrack>>& limitingRots,
-        const std::list<const Trk::PrepRawData*>& prds,
+        const std::vector<const Trk::PrepRawData*>& prds,
         const std::vector<std::unique_ptr<const Muon::MuonClusterOnTrack>>& rots) const;
 
     void makeOverallParameters(
