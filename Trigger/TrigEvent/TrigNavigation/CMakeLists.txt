@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( TrigNavigation )
@@ -46,4 +46,4 @@ foreach( name TriggerElement_test Holder_test Registration_test Ownership_test H
 endforeach()
 
 # Install files from the package:
-atlas_install_joboptions( share/test.txt share/navigation2dot.py )
+atlas_install_joboptions( share/test.txt )
