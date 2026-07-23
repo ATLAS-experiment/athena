@@ -27,7 +27,6 @@ inline GenVertexPtr newGenVertexPtr(const HepMC3::FourVector& pos = HepMC3::Four
     v->set_status(i);
     return v;
 }
-inline int barcode_or_id(const ConstGenVertexPtr& p) { return p->id();}
 using HepMC3::GenVertex;
 }
 #endif
