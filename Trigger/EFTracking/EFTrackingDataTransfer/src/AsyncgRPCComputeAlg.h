@@ -31,7 +31,7 @@ class AsyncgRPCComputeAlg : public AthAsynchronousAlgorithm {
 
   virtual StatusCode initialize() override;
   virtual StatusCode execute(const EventContext& context) const override;
-  virtual StatusCode restoreAfterSuspend() const override;
+  // virtual StatusCode restoreAfterSuspend() const override;
   virtual StatusCode finalize() override;
 
  private:

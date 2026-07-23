@@ -59,36 +59,40 @@ StatusCode AsyncgRPCComputeAlg::execute(const EventContext& context) const {
                 << context.eventID().event_number());
 
   auto gRPCClientContext = std::make_unique<grpc::ClientContext>();
-  auto status =
-      m_stub->doComputation(gRPCClientContext.get(), *requestMsg, responseMsg);
-  ATH_MSG_INFO("Service responded with: " << responseMsg->identifier());
 
+  static constexpr bool useAsync = false;
+  if constexpr (!useAsync) {
+    auto status = m_stub->doComputation(gRPCClientContext.get(), *requestMsg,
+                                        responseMsg);
+    ATH_MSG_INFO("Service responded with: " << responseMsg->identifier());
+  } else {
+    // using Promise_t = boost::fibers::promise<OffloadMessage*>;
+    // using Future_t = boost::fibers::future<OffloadMessage*>;
+    using Promise_t = std::promise<OffloadMessage*>;
+    using Future_t = std::future<OffloadMessage*>;
+    Promise_t promise{};
+    Future_t future = promise.get_future();
 
-
-  // using Promise_t = boost::fibers::promise<OffloadMessage*>;
-  // using Future_t = boost::fibers::future<OffloadMessage*>;
-  // Promise_t promise{};
-  // Future_t future = promise.get_future();
-
-  // auto callback = [this, &promise, responseMsg](grpc::Status status) {
-  //   if (status.ok()) {
-  //     // ATH_MSG_ALWAYS("OK Response received for request "
-  //     //                << responseMsg->identifier());
-  //     promise.set_value(responseMsg);
-  //   } else {
-  //     // responseMsg->set_identifier("failed");
-  //   }
-  // };
-  // m_stub->async()->doComputation(gRPCClientContext.get(), requestMsg,
-  //                                responseMsg, callback);
-  // ATH_MSG_DEBUG("Computation request is sent");
-  // future.get(); // this is waiting
-  // ATH_CHECK(restoreAfterSuspend());
+    auto callback = [ &promise, responseMsg](grpc::Status status) {
+      if (status.ok()) {
+        promise.set_value(responseMsg);
+      } else {
+        responseMsg->set_identifier("failed");
+      }
+    };
+    m_stub->async()->doComputation(gRPCClientContext.get(), requestMsg,
+                                   responseMsg, callback);
+    ATH_MSG_DEBUG("Computation request is sent");
+    future.get();  // this is waiting
+    // ATH_CHECK(restoreAfterSuspend());
+    ATH_MSG_ALWAYS("Response received for request: "
+                   << responseMsg->identifier());
+  }
 
   return StatusCode::SUCCESS;
 }
 
-StatusCode AsyncgRPCComputeAlg::restoreAfterSuspend() const {
-  ATH_MSG_ALWAYS("Restored after suspend");
-  return StatusCode::SUCCESS;
-}
+// StatusCode AsyncgRPCComputeAlg::restoreAfterSuspend() const {
+//   ATH_MSG_ALWAYS("Restored after suspend");
+//   return StatusCode::SUCCESS;
+// }
