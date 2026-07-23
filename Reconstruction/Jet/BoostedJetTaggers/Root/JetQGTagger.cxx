@@ -712,7 +712,7 @@ namespace CP {
       ATH_MSG_DEBUG( "Path found = " << filename );
     }
     TFile* infile = TFile::Open(filename.c_str());
-    hist = dynamic_cast<TH2D*>(infile->Get(histname.c_str()));
+    hist = static_cast<TH2D*>(infile->Get(histname.c_str()));
     hist->SetDirectory(nullptr);
     return StatusCode::SUCCESS;
   }
