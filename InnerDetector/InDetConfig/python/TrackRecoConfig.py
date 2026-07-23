@@ -46,13 +46,10 @@ def CombinedTrackingPassFlagSets(flags, resetCache=False):
     if flags.Tracking.doLowPt:
         from TrkConfig.TrkConfigFlags import PrimaryPassConfig
         flagsLowPt = None
-        if flags.Tracking.PrimaryPassConfig is PrimaryPassConfig.HeavyIon:
-            flagsLowPt = flags.cloneAndReplace("Tracking.ActiveConfig",
-                                               "Tracking.HeavyIonLowPtPass")
-        else:
+        if flags.Tracking.PrimaryPassConfig is not PrimaryPassConfig.HeavyIon:
             flagsLowPt = flags.cloneAndReplace("Tracking.ActiveConfig",
                                                "Tracking.LowPtPass")
-        flags_set += [flagsLowPt]
+            flags_set += [flagsLowPt]
 
     # VeryLowPt pass
     if flags.Tracking.doVeryLowPt:
@@ -805,16 +802,12 @@ def ExtendedPRDInfoCfg(flags):
 #####################     Main ID tracking config       #####################
 ##############################################################################
 
-def InDetTrackRecoCfg(flags,
-                      doSpecial: bool = True):
+def InDetTrackRecoCfg(flags):
 
     # Bypass to ITk config
     if flags.Detector.GeometryITk:
         from InDetConfig.ITkTrackRecoConfig import ITkTrackRecoCfg
         return ITkTrackRecoCfg(flags)
-    if flags.Tracking.SpecialHiConfiguration and doSpecial:
-        from InDetConfig.InDetHeavyIonSpecialConfig import InDetHeavyIonSpecialCfg
-        return InDetHeavyIonSpecialCfg(flags)
 
     """Configures complete ID tracking """
     result = ComponentAccumulator()
@@ -1006,6 +999,15 @@ def InDetTrackRecoCfg(flags,
     from InDetConfig.InDetTrackOutputConfig import InDetTrackRecoOutputCfg
     result.merge(InDetTrackRecoOutputCfg(flags, _extensions_list))
 
+    # Special configuration for HI
+    from TrkConfig.TrkConfigFlags import PrimaryPassConfig
+    if flags.Tracking.PrimaryPassConfig is PrimaryPassConfig.HeavyIon and \
+       flags.Tracking.doLowPt:
+        from InDetConfig.InDetHeavyIonSpecialConfig import InDetHeavyIonSpecialCfg
+        result.merge(InDetHeavyIonSpecialCfg(flags))
+
+    result.printConfig(withDetails=False,
+                       summariseProps=False)
     return result
 
 # Run with python -m InDetConfig.TrackRecoConfig

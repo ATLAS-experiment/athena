@@ -120,13 +120,6 @@ def InDetHeavyIonSpecialCfg(flags,
     from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
     acc = ComponentAccumulator()
 
-    # Scheduling main pass as usual
-    from InDetConfig.TrackRecoConfig import InDetTrackRecoCfg
-    acc.merge(InDetTrackRecoCfg(flags,
-                                doSpecial=False))
     # Scheduling low pt pass for heavy ion
     acc.merge(lowPtPassCfg(flags))
-
-    acc.printConfig(withDetails=False,
-                    summariseProps=False)
     return acc
