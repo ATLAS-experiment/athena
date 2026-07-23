@@ -29,10 +29,12 @@ namespace GlobalSim {
   }
 
   StatusCode
-  Egamma1eRatioAlgTool::run(const EventContext& ctx) const {
+  Egamma1eRatioAlgTool::run(const std::unique_ptr<IDataCollector>& dc,
+			    const EventContext& ctx) const {
     ATH_MSG_DEBUG("run()");
 
-  
+    if (dc){dc->collect(*this, "start");}
+      
     // read in LArStrip neighborhoods from the event store
     auto in =
       SG::ReadHandle<IOBitwise::eEmNbhoodTOBContainer>(m_nbhdTOBContainerReadKey,
@@ -115,7 +117,9 @@ namespace GlobalSim {
 	}
       }
     }
-    
+
+    if (dc){dc->collect(*this, "end");}
+
     return StatusCode::SUCCESS;
   }
 

@@ -37,7 +37,12 @@ namespace GlobalSim {
   }
 
   
-  StatusCode CommonSortSelectAlgTool::run(const EventContext& ctx) const {
+  StatusCode
+  CommonSortSelectAlgTool::run(const std::unique_ptr<IDataCollector>& dc,
+			       const EventContext& ctx) const {
+
+    if (dc){dc->collect(*this, "start");}
+
     auto tobs =
       SG::ReadHandle<GlobalSim::IOBitwise::CommonTOBContainer>(m_inTOBContainerKey,
 								ctx);
@@ -83,6 +88,8 @@ namespace GlobalSim {
       h_out(m_outTOBContainerKey, ctx);
     
     CHECK(h_out.record(std::move(out_tobs)));
+
+    if (dc){dc->collect(*this, "end");}
 
     return StatusCode::SUCCESS;
   }

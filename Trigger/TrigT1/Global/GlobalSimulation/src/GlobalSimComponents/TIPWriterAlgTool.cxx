@@ -38,8 +38,11 @@ namespace GlobalSim {
   
   StatusCode TIPWriterAlgTool::updateTIP(
     std::bitset<s_nbits_TIP>& word,
+    const std::unique_ptr<IDataCollector>& dc, 
     const EventContext& ctx) const {
 
+    if (dc){dc->collect(*this, "start");}
+    
     unsigned int N_pass_tobs{0};
     ATH_CHECK( countPassingTOBs(ctx, N_pass_tobs) );
     ATH_MSG_DEBUG("no of passing TOBS" << N_pass_tobs);
@@ -48,6 +51,7 @@ namespace GlobalSim {
     word |= (count_bits << m_TIP_position);
     
     ATH_MSG_DEBUG("TIP word " << word);
+    if (dc){dc->collect(*this, "end");}
 
     return StatusCode::SUCCESS;
   }

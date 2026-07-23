@@ -10,6 +10,7 @@
 #include "../GlobalSimComponents/IGlobalSimAlgTool.h"
 #include "../IO/CommonTOB.h"
 #include "../IO/CommonTOBContainer.h"
+#include "../Utilities/IDataCollector.h"
 
 #include "ICommonSelector.h"
 
@@ -38,7 +39,8 @@ namespace GlobalSim {
 
     /** @brief Initialize function running before first event */
     virtual StatusCode initialize() override;
-    virtual StatusCode run(const EventContext&) const override;
+    virtual StatusCode run(const std::unique_ptr<IDataCollector>&,
+			   const EventContext&) const override;
     virtual std::string toString() const override;
 
   private:
