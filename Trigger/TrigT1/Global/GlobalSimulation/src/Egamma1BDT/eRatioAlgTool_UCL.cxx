@@ -2,7 +2,7 @@
   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "Egamma1eRatioAlgTool.h"
+#include "eRatioAlgTool_UCL.h"
 #include "../Utilities/dump.h"
 #include "../Utilities/dump.icc"
 #include "AthenaMonitoringKernel/Monitored.h"
@@ -13,13 +13,13 @@
 
 namespace GlobalSim {
 
-  Egamma1eRatioAlgTool::Egamma1eRatioAlgTool(const std::string& type,
+  eRatioAlgTool_UCL::eRatioAlgTool_UCL(const std::string& type,
 				       const std::string& name,
 				       const IInterface* parent) :
     base_class(type, name, parent){
   }
   
-  StatusCode Egamma1eRatioAlgTool::initialize() {
+  StatusCode eRatioAlgTool_UCL::initialize() {
        
     CHECK(m_nbhdTOBContainerReadKey.initialize());
     CHECK(m_eRatioKey.initialize());
@@ -29,8 +29,8 @@ namespace GlobalSim {
   }
 
   StatusCode
-  Egamma1eRatioAlgTool::run(const std::unique_ptr<IDataCollector>& dc,
-			    const EventContext& ctx) const {
+  eRatioAlgTool_UCL::run(const std::unique_ptr<IDataCollector>& dc,
+		     const EventContext& ctx) const {
     ATH_MSG_DEBUG("run()");
 
     if (dc){dc->collect(*this, "start");}
@@ -123,7 +123,7 @@ namespace GlobalSim {
     return StatusCode::SUCCESS;
   }
 
-  ap_int<16> Egamma1eRatioAlgTool::secondPeakSearch(const std::vector<ap_int<16>>& input,
+  ap_int<16> eRatioAlgTool_UCL::secondPeakSearch(const std::vector<ap_int<16>>& input,
 						      const ap_int<16> peak,
 						      const int startCell,
 						      const int endCell,
@@ -167,7 +167,7 @@ namespace GlobalSim {
   }
   
   std::vector<double>
-  Egamma1eRatioAlgTool::combine_phi(const IOBitwise::eEmNbhoodTOB* nbhdTOB) const  {
+  eRatioAlgTool_UCL::combine_phi(const IOBitwise::eEmNbhoodTOB* nbhdTOB) const  {
     auto result = std::vector<double>();
 
     const auto& phi_low = nbhdTOB->Neighbourhood().phi_low();
@@ -195,10 +195,10 @@ namespace GlobalSim {
     return result;
   }
 
-  std::string Egamma1eRatioAlgTool::toString() const {
+  std::string eRatioAlgTool_UCL::toString() const {
 
     std::stringstream ss;
-    ss << "Egamma1eRatioAlgTool. name: " << name() << '\n'
+    ss << "eRatioAlgTool_UCL. name: " << name() << '\n'
        << m_nbhdTOBContainerReadKey << '\n'
        << '\n';
     return ss.str();

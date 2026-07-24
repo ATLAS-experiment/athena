@@ -26,14 +26,14 @@
 #include <vector>
 
 namespace GlobalSim {
-  class Egamma1eRatioAlgTool: public extends<AthAlgTool, IGlobalSimAlgTool> {
+  class eRatioAlgTool_UCL: public extends<AthAlgTool, IGlobalSimAlgTool> {
     
   public:
-    Egamma1eRatioAlgTool(const std::string& type,
+    eRatioAlgTool_UCL(const std::string& type,
 			    const std::string& name,
 			    const IInterface* parent);
     
-    virtual ~Egamma1eRatioAlgTool() = default;
+    virtual ~eRatioAlgTool_UCL() = default;
     
     StatusCode initialize() override;
 
