@@ -32,11 +32,6 @@ namespace {
             ", chi2 (nDoF): "<<(idTrack.chiSquared() / idTrack.numberDoF())<<"("<<idTrack.numberDoF()<<") ";
         return ostr.str();
     }
-    /** @brief Enum value to retrieve the inner cylinder surface from the portals */
-    constexpr auto cylinderFace = Acts::toUnderlying(Acts::CylinderVolumeBounds::Face::OuterCylinder);
-    /** @brie Enume value to retrieve the two endcap discs from the entrance portals */
-    constexpr auto faceSideA = Acts::toUnderlying(Acts::CylinderVolumeBounds::Face::PositiveDisc);
-    constexpr auto faceSideC = Acts::toUnderlying(Acts::CylinderVolumeBounds::Face::NegativeDisc);
 
     using IdCandidateCont_t = xAOD::FillContainer<MuonR4::MuonTagContainer, void*>;
 
