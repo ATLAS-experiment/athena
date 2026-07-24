@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -82,7 +82,8 @@ namespace Trk {
 
        private:
         Trk::Layer*             checkAndReplaceEmptyLayer(Trk::Layer* lay) const;
-        int                     m_emptyLayerMode;       //!< 0 - do nothing, 1 - replace with navigation layer, 2 - delete
+        Gaudi::Property<int> m_emptyLayerMode{this, "EmptyLayerMode", 0,
+	  "0 - do nothing, 1 - replace with navigation layer, 2 - delete"};
     };
 
 } // end of namespace

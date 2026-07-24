@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // Trk include
@@ -8,11 +8,6 @@
 #include "TrkGeometry/CylinderLayer.h"
 #include "TrkGeometry/DiscLayer.h"
 
-// constructor
-Trk::LayerProvider::LayerProvider(const std::string& t, const std::string& n, const IInterface* p)
-: base_class(t,n,p)
-{
-}
 
 // initialize
 StatusCode Trk::LayerProvider::initialize()

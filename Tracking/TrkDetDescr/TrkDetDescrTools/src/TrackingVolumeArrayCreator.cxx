@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -55,9 +55,6 @@ TrackingVolumeArrayCreator::TrackingVolumeArrayCreator(const std::string& t,
 {
   declareInterface<ITrackingVolumeArrayCreator>(this);
 }
-
-// destructor
-TrackingVolumeArrayCreator::~TrackingVolumeArrayCreator() = default;
 
 std::unique_ptr<TrackingVolumeArray> TrackingVolumeArrayCreator::cylinderVolumesArrayInR(const std::vector<TrackingVolume*>& vols,
                                                                                          bool navtype) const {

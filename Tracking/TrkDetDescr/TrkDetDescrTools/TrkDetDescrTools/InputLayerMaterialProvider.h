@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -38,9 +38,6 @@ namespace Trk {
         /** Constructor */
         InputLayerMaterialProvider(const std::string&,const std::string&,const IInterface*);
 
-        /** Destructor */
-        virtual ~InputLayerMaterialProvider();
-
         /** Framework initialize() */
         virtual StatusCode initialize();
 
@@ -58,14 +55,21 @@ namespace Trk {
         /** Processor Action to work on Surfaces */
         virtual StatusCode process(Surface& surf, size_t level = 0) const;
 
-      private:
-         bool               m_constantMaterialToAllLayers;  //!< just assign a dummy material to all layers
-         float              m_constantThicknessInX0;        //!< constant material specifications
-         float              m_constantThicknessInL0;        //!< constant material specifications
-         float              m_constantAverageA;             //!< constant material specifications
-         float              m_constantAverageZ;             //!< constant material specifications
-         float              m_constantAverageRho;           //!< constant material specifications
-         MaterialProperties m_constantMaterialProperties;   //!< the set together material
+    private:
+      Gaudi::Property<bool> m_constantMaterialToAllLayers
+        {this, "AssignConstantMaterial", true,
+	 "just assign a dummy material to all layers"};
+      Gaudi::Property<float> m_constantThicknessInX0
+	{this, "ConstantMaterialInX0", 0.02};
+      Gaudi::Property<float> m_constantThicknessInL0
+	{this, "ConstantMaterialInL0", 0.06};
+      Gaudi::Property<float> m_constantAverageA
+	{this, "ConstantMaterialA", 14.};
+      Gaudi::Property<float> m_constantAverageZ
+	{this, "ConstantMaterialZ", 7.};
+      Gaudi::Property<float> m_constantAverageRho
+	{this, "ConstantMaterialRho", 0.00233};
+      MaterialProperties m_constantMaterialProperties{};   //!< the set together material
 
                         
         

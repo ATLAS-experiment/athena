@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRKDETDESCRTOOLS_LAYERPROVIDERIMPL_H
@@ -27,10 +27,7 @@ class LayerProviderImpl
 
 public:
   /** Constructor */
-  LayerProviderImpl(const std::string&, const std::string&, const IInterface*);
-
-  /** Destructor */
-  virtual ~LayerProviderImpl() = default;
+  using AthAlgTool::AthAlgTool;
 
  protected:
   static std::pair<const std::vector<Trk::Layer*>, const std::vector<Trk::Layer*> >

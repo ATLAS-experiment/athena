@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -19,18 +19,6 @@
 #include "TrkSurfaces/Surface.h"
 #include "StoreGate/ReadCondHandle.h"
 #include "CxxUtils/checker_macros.h"
-
-// constructor
-Trk::LayerMaterialProvider::LayerMaterialProvider(const std::string& t, const std::string& n, const IInterface* p)
-: base_class(t,n,p)
-{
-  declareProperty ("LayerMaterialMapName", m_layerMaterialMapName,
-                   "If LayerMaterialMapKey is not set, then fall back to retrieving this from the detector store.");
-}
-
-// destructor
-Trk::LayerMaterialProvider::~LayerMaterialProvider()
-= default;
 
 
 StatusCode Trk::LayerMaterialProvider::initialize()
