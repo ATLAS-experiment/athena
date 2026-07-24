@@ -19,6 +19,8 @@ StatusCode CUDAClusterizationAlgProviderTool::initialize()
   ATH_CHECK(m_copy.retrieve());
   ATH_CHECK(m_streamTool.retrieve());
 
+  m_clusteringConfig.sort_cells = m_sortCells;
+
   ATH_MSG_DEBUG("Successfully initialized");
   return StatusCode::SUCCESS;
 }

@@ -20,6 +20,7 @@ def CUDAClusterizerToolCfg(flags,
     kwargs.setdefault("MemoryResourcesTool", acc.popToolsAndMerge(MemoryResourcesToolCfg(flags)))
     kwargs.setdefault("CopyProviderTool", acc.popToolsAndMerge(CopyToolCfg(flags)))
     kwargs.setdefault("StreamTool", acc.popToolsAndMerge(StreamToolCfg(flags)))
+    kwargs.setdefault("CellSorting", flags.Acts.Device.doCellSorting)
 
     acc.setPrivateTools(
         CompFactory.ActsTrk.CUDAClusterizationAlgProviderTool(name, **kwargs))

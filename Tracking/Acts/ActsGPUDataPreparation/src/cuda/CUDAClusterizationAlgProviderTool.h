@@ -12,6 +12,7 @@
 
 #include "vecmem/utils/cuda/copy.hpp"
 
+#include <Gaudi/Property.h>
 #include <memory>
 #include <string>
 
@@ -54,6 +55,9 @@ private:
 
   traccc::clustering_config m_clusteringConfig{};
 
+  /// @name Whether to sort traccc cells on GPU prior to clusterization
+  Gaudi::Property<bool> m_sortCells{this, "CellSorting", true,
+    "Whether to sort traccc cells on GPU prior to clusterization"};
   /// @name The host and device memory resources tool to use for memory allocations
   ToolHandle<AthDevice::IMemoryResourcesTool> m_MRs{
         this, "MemoryResourcesTool", "",

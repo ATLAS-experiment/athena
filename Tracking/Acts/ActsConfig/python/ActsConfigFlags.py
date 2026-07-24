@@ -188,6 +188,7 @@ def createActsConfigFlags():
     actscf.addFlag('Acts.decoratePRD.sdoSiHit', lambda pcf: pcf.Tracking.doTIDE_AmbiTrackMonitoring)
 
     # GPU track reconstruction
+    actscf.addFlag("Acts.Device.doCellSorting", True)
     actscf.addFlag("Acts.Device.doClusterization", False)
     actscf.addFlag("Acts.Device.doSpacePointFormation", False)
     actscf.addFlag("Acts.Device.doSeeding", False)
