@@ -3,6 +3,7 @@
 import os
 import re
 import gzip
+import shutil
 import tarfile
 
 from AthenaCommon.Logging import logging
@@ -67,6 +68,26 @@ def _find_unique_file(pattern):
     return files[0]
 
 
+def _prepare_lhe_file(input_file, output_file):
+    """
+    Helper function to prepare LHE file for shower.
+    If the requested output file is uncompressed, 
+    make a symlink to the input file.
+    If the requested output file is compressed, 
+    compress the input file to the output file..
+    """
+    if not output_file.endswith(".gz"):
+        _mk_symlink(input_file, output_file)
+        return
+
+    if os.path.lexists(output_file):
+        os.remove(output_file)
+    evgenLog.info("Compressing %s to %s", input_file, output_file)
+    with open(input_file, "rb") as source:
+        with gzip.open(output_file, "wb") as destination:
+            shutil.copyfileobj(source, destination)
+
+
 def _merge_lhe_files(listOfFiles, outputFile):
     """
     This function merges a list of input LHE files into one output file.
@@ -82,7 +103,9 @@ def _merge_lhe_files(listOfFiles, outputFile):
         total_events += _count_lhe_events(file)
 
     wrote_header = False
-    with open(outputFile, "w") as output:
+    # Produce a compressed merged file when avoidExtracting is True
+    output_opener = gzip.open if outputFile.endswith(".gz") else open
+    with output_opener(outputFile, "wt") as output:
         for file in listOfFiles:
             inHeader = True
             header = ""
@@ -138,7 +161,7 @@ def _handle_input_files(generators, flags):
             break
     if eventsFile is None:
         if is_lhe_input:
-            eventsFile = "events.lhe"
+            eventsFile = "events.lhe.gz" if flags.Generator.avoidExtracting else "events.lhe"
         else:
             raise RuntimeError(f"Unknown type of ME generator: {generators}")
 
@@ -149,7 +172,9 @@ def _handle_input_files(generators, flags):
     def _input_root(path, keep_suffix_after_underscore=False):
         fname = os.path.basename(path)
         if any(ext in fname for ext in (".tar.", ".tgz", ".gz")):
-            return re.split(r"\.tar\.|\.tgz|\.gz", fname, maxsplit=1)[0]
+            fname = re.split(r"\.tar\.|\.tgz|\.gz", fname, maxsplit=1)[0]
+        if fname.endswith(".events"):
+            fname = fname[:-7]
         parts = fname.split("._", 1)
         if keep_suffix_after_underscore and len(parts) > 1:
             return parts[0] + "._" + parts[1].split(".", 1)[0]
@@ -158,12 +183,12 @@ def _handle_input_files(generators, flags):
     # If there is a single file, make a symlink. If multiple files, merge them into one output eventsFile.
     if len(genInputFiles) == 1:
         inputroot = _input_root(genInputFiles[0], keep_suffix_after_underscore=False)
-        if inputroot.endswith(".events"):
-            inputroot = inputroot[:-7]
         realEventsFile = _find_unique_file(f"*{inputroot}.*ev*ts")
-        _mk_symlink(realEventsFile, eventsFile)
         if is_lhe_input:
+            # Compress or symlink the extracted input according to the flag.
+            _prepare_lhe_file(realEventsFile, eventsFile)
             return _count_lhe_events(eventsFile)
+        _mk_symlink(realEventsFile, eventsFile)
         return None
 
     allFiles = []
@@ -176,8 +201,8 @@ def _handle_input_files(generators, flags):
         # The only input format where merging is permitted is LHE.
         with open(realEventsFile, "r") as f:
             first_line = f.readline()
-            if "LesHouche" not in first_line:
-                raise RuntimeError(f"{realEventsFile} is NOT a LesHouche file")
+            if "LesHouches" not in first_line:
+                raise RuntimeError(f"{realEventsFile} is NOT a LesHouches file")
         allFiles.append(realEventsFile)
     _merge_lhe_files(allFiles, eventsFile)
 
