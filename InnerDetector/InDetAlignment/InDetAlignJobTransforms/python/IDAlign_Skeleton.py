@@ -74,8 +74,6 @@ def getT0SolveDB(runArgs):
 
 
 def configureInDetFlags(runArgs, flags):
-
-    print("configure the InDet")
     
     ## Turn off ID parts if wished (may cause conflicts with level setting)
     for IDpart in runArgs.excludeIDPart:
@@ -155,9 +153,6 @@ def configureInDetFlags(runArgs, flags):
     flags.Exec.FPE = -2
     flags.IOVDb.GlobalTag = runArgs.globalTag
         
-    # flags.GeoModel.Align.Dynamic = True
-    # flags.GeoModel.AtlasVersion = runArgs.atlasVersion
-
     if not flags.Input.isMC and runArgs.isCosmics:
         from AthenaConfiguration.Enums import BeamType
         
@@ -221,14 +216,11 @@ def configureITkFlags(runArgs, flags):
     flags.ITk.Align.alignITkPixel = alignITkPixel or flags.ITk.Align.alignITk
     flags.ITk.Align.alignITkStrip = alignITkStrip or flags.ITk.Align.alignITk
 
+    flags.addFlag("ConstrainedTrackProvider.InputTracksCollection", runArgs.inputTracksCollection)
 
     flags.ITk.Align.writeSilicon = False
 
-    
-    # flags.ITk.Align.inputTFiles = [os.path.abspath(f) for f in runArgs.inputTFile]
-
     if runArgs.solve:
-        for f in runArgs.inputTFile:
         flags.ITk.Align.inputTFiles = os.path.basename(runArgs.inputTFile[0])
     else:
         flags.ITk.Align.inputTFiles = []
@@ -277,14 +269,6 @@ def configureITkFlags(runArgs, flags):
 
 
 
-    # databaseFilename     = 'MisalignmentSet%s.db' % (MisalignMode)
-    # flags.IOVDb.DBConnection="sqlite://;schema=%s;dbname=OFLCOND" % (databaseFilename) 
-    # flags.IOVDb.GlobalTag = defaultConditionsTags.RUN4_MC
-
-
-
-
-
     if flags.ITk.Align.alignITkPixel:
         flags.ITk.Geometry.pixelAlignable = True
 
@@ -308,7 +292,6 @@ def fromRunArgsITk(runArgs, flags):
 
     if flags.ITk.Align.useLocalDatabase:
         from IOVDbSvc.IOVDbSvcConfig import addFolders, getSqliteContent
-        print("Adding Align Folder "+flags.ITk.Geometry.alignmentFolder+" from local "+DBName+" Database in file "+runArgs.localDB)
 
         acc = addFolders(
             flags,
@@ -319,16 +302,8 @@ def fromRunArgsITk(runArgs, flags):
             className="AlignableTransformContainer"
         )
 
-        iovdb = acc.getService("IOVDbSvc")
-        for f in iovdb.Folders:
-
-        print("IOVDbSvc GlobalTag: ", flags.IOVDb.GlobalTag)
-        print( "flags.GeoModel.AtlasVersion: ", flags.GeoModel.AtlasVersion)
-        # print("cfg.getService(IOVDbSvc).Folders", cfg.getService("IOVDbSvc").Folders)
-        cfg.printConfig(withDetails=True)
-
         cfg.merge(acc)
-        print("cfg.getService(IOVDbSvc).Folders", cfg.getService("IOVDbSvc").Folders)
+
         
     
 
@@ -457,8 +432,7 @@ def applyDetectorDefaults(runArgs, flags):
     
     flags.GeoModel.AtlasVersion = runArgs.atlasVersion
     
-    isITk = isITkGeometry(flags)
-    print("evaluate itk: ", isITk)        
+    isITk = isITkGeometry(flags)       
 
     if getattr(runArgs, "inputTracksCollection", None) is None:
         runArgs.inputTracksCollection = (
@@ -503,7 +477,6 @@ def fromRunArgs(runArgs):
 
     # Configure flags based on the detector geometry
     if isITkGeometry(flags):
-        print("threads: ", runArgs.threads)
         flags.GeoModel.Align.Dynamic = False
         flags = configureITkFlags(runArgs, flags)
         return fromRunArgsITk(runArgs, flags)
