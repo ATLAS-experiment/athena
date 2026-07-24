@@ -22,6 +22,7 @@
 #include "TrkSpacePoint/SpacePointContainer.h" 
 #include "TrkSpacePoint/SpacePointOverlapCollection.h"
 #include "TrkEventUtils/PRDtoTrackMap.h"
+#include "GaudiKernel/ITHistSvc.h"
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // MagField cache
@@ -174,6 +175,7 @@ namespace InDet {
     FloatProperty m_diverpps{this, "maxdImpactPPS", 1.7};
     FloatProperty m_diversss{this, "maxdImpactSSS", 1000.};
     BooleanProperty m_useVertexPosition {this, "useVertexPosition", false};
+    BooleanProperty m_writeNtuple {this, "WriteNtuple", false, "Flag to write Validation Ntuples"};
     //@}
 
     /// @name Properties, which can be updated in initialize
@@ -212,6 +214,40 @@ namespace InDet {
     float m_sFv{0.};
     //@}
 
+    ServiceHandle<ITHistSvc> m_thistSvc {this, "THistSvc", "THistSvc", "Histogramming svc"};
+    TTree* m_outputTree {nullptr};
+
+    mutable std::mutex m_mutex;
+
+    std::string m_treeName {""};
+    std::string m_treeFolder {"/valNtuples/"};
+
+    mutable float m_d0 ATLAS_THREAD_SAFE = 0;
+    mutable float m_z0 ATLAS_THREAD_SAFE = 0;
+    mutable float m_pt ATLAS_THREAD_SAFE = 0;
+    mutable float m_eta ATLAS_THREAD_SAFE = 0;
+    mutable double m_x1 ATLAS_THREAD_SAFE = 0;
+    mutable double m_x2 ATLAS_THREAD_SAFE = 0;
+    mutable double m_x3 ATLAS_THREAD_SAFE = 0;
+    mutable double m_y1 ATLAS_THREAD_SAFE = 0;
+    mutable double m_y2 ATLAS_THREAD_SAFE = 0;
+    mutable double m_y3 ATLAS_THREAD_SAFE = 0;
+    mutable double m_z1 ATLAS_THREAD_SAFE = 0;
+    mutable double m_z2 ATLAS_THREAD_SAFE = 0;
+    mutable double m_z3 ATLAS_THREAD_SAFE = 0;
+    mutable double m_r1 ATLAS_THREAD_SAFE = 0;
+    mutable double m_r2 ATLAS_THREAD_SAFE = 0;
+    mutable double m_r3 ATLAS_THREAD_SAFE = 0;
+    mutable float m_quality ATLAS_THREAD_SAFE = 0;
+    mutable int m_type ATLAS_THREAD_SAFE = 0;
+    mutable double m_dzdr_t ATLAS_THREAD_SAFE = 0;
+    mutable double m_dzdr_b ATLAS_THREAD_SAFE = 0;
+    mutable bool m_givesTrack ATLAS_THREAD_SAFE = 0;
+    mutable float m_trackPt ATLAS_THREAD_SAFE = 0;
+    mutable float m_trackEta ATLAS_THREAD_SAFE = 0;
+    mutable long m_eventNumber ATLAS_THREAD_SAFE = 0;
+
+    
     ///////////////////////////////////////////////////////////////////
     // Private methods
     ///////////////////////////////////////////////////////////////////

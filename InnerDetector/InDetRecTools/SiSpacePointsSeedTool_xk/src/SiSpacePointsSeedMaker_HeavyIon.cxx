@@ -13,11 +13,15 @@
 ///////////////////////////////////////////////////////////////////
 
 #include "SiSpacePointsSeedTool_xk/SiSpacePointsSeedMaker_HeavyIon.h"
+#include "TrkTrack/Track.h"
+#include "TrkParameters/TrackParameters.h"
 
 #include <cmath>
 
 #include <iomanip>
 #include <ostream>
+
+#include <TTree.h>
 
 ///////////////////////////////////////////////////////////////////
 // Constructor
@@ -63,6 +67,43 @@ StatusCode InDet::SiSpacePointsSeedMaker_HeavyIon::initialize()
 
   m_initialized = true;
 
+  if (m_writeNtuple) {
+    ATH_CHECK( m_thistSvc.retrieve() );
+ 
+    m_treeName = (std::string("SeedTree_")+name());
+    std::replace( m_treeName.begin(), m_treeName.end(), '.', '_' );
+ 
+    m_outputTree = new TTree( m_treeName.c_str() , "SeedMakerValTool"); 
+
+    m_outputTree->Branch("eventNumber",    &m_eventNumber); 
+    m_outputTree->Branch("d0",             &m_d0);
+    m_outputTree->Branch("z0",             &m_z0);
+    m_outputTree->Branch("pt",             &m_pt);
+    m_outputTree->Branch("eta",            &m_eta);
+    m_outputTree->Branch("x1",             &m_x1);
+    m_outputTree->Branch("x2",             &m_x2);
+    m_outputTree->Branch("x3",             &m_x3);
+    m_outputTree->Branch("y1",             &m_y1);
+    m_outputTree->Branch("y2",             &m_y2);
+    m_outputTree->Branch("y3",             &m_y3);
+    m_outputTree->Branch("z1",             &m_z1);
+    m_outputTree->Branch("z2",             &m_z2);
+    m_outputTree->Branch("z3",             &m_z3);
+    m_outputTree->Branch("r1",             &m_r1);
+    m_outputTree->Branch("r2",             &m_r2);
+    m_outputTree->Branch("r3",             &m_r3);
+    m_outputTree->Branch("quality",        &m_quality);
+    m_outputTree->Branch("seedType",       &m_type);
+    m_outputTree->Branch("givesTrack",     &m_givesTrack);
+    m_outputTree->Branch("dzdr_b",  	   &m_dzdr_b);
+    m_outputTree->Branch("dzdr_t",         &m_dzdr_t);
+    m_outputTree->Branch("track_pt",       &m_trackPt);
+    m_outputTree->Branch("track_eta",      &m_trackEta);
+
+    TString fullTreeName = m_treeFolder + m_treeName;
+    ATH_CHECK(  m_thistSvc->regTree( fullTreeName.Data(), m_outputTree )  );
+  }
+  
   return sc;
 }
 
@@ -1114,6 +1155,7 @@ void InDet::SiSpacePointsSeedMaker_HeavyIon::production3Sp
 	float Zo = Z-R*Tz;
         if (!isZCompatible(data, Zo, Rb, Tz)) continue;
 	data.SP[Nb] = (*r);
+	if (m_writeNtuple) data.SP[Nb]->setDZDR(Tz);
         if (++Nb==m_maxsizeSP) goto breakb;
       }
     }
@@ -1147,6 +1189,7 @@ void InDet::SiSpacePointsSeedMaker_HeavyIon::production3Sp
 	float Zo = Z-R*Tz;
         if (!isZCompatible(data, Zo, R ,Tz)) continue;
   	data.SP[Nt] = (*r);
+	if (m_writeNtuple) data.SP[Nt]->setDZDR(Tz);
         if (++Nt==m_maxsizeSP) goto breakt;
       }
     }
@@ -1215,6 +1258,7 @@ void InDet::SiSpacePointsSeedMaker_HeavyIon::production3Sp
 	float Ts  = .5f*(Tzb+data.Tz[t])                          ;
 	float dt  =     Tzb-data.Tz[t]                           ;
 	float dT  = dt*dt-Erb-data.Er[t]-data.R[t]*(Ts*Ts*Rb2r+Rb2z);
+
 	if ( dT > ICSA) continue;
 	float dU  = data.U[t]-Ub; if (dU == 0.) continue ;
 	float A   = (data.V[t]-Vb)/dU                   ;
@@ -1227,6 +1271,13 @@ void InDet::SiSpacePointsSeedMaker_HeavyIon::production3Sp
 	if ( Im > imc ) continue;
 	Im = Im*Im+Iz;
 	newOneSeed(data, SPb, SP0, data.SP[t]->spacepoint, Zob, Im);
+
+	if (m_writeNtuple) {
+	  float	theta = std::atan(1.f / Ts);
+	  data.SP[t]->setEta(-std::log(std::tan(0.5f * theta)));
+	  data.SP[t]->setPt(std::sqrt(S2 / B2) / (1000.f * data.K)); 
+	}
+
       }
     }
     nseed += data.mapOneSeeds.size();
@@ -1306,6 +1357,7 @@ void InDet::SiSpacePointsSeedMaker_HeavyIon::production3SpNoVertex
 	float Zo = Z-R*Tz;
         if (!isZCompatible(data, Zo, Rb, Tz)) continue;
 	data.SP[Nb] = (*r);
+	if (m_writeNtuple) data.SP[Nb]->setDZDR(Tz);
         if (++Nb==m_maxsizeSP) goto breakb;
       }
     }
@@ -1337,6 +1389,7 @@ void InDet::SiSpacePointsSeedMaker_HeavyIon::production3SpNoVertex
 	float Zo = Z-R*Tz;
         if (!isZCompatible(data, Zo, R, Tz)) continue;
   	data.SP[Nt] = (*r);
+	if (m_writeNtuple) data.SP[Nt]->setDZDR(Tz);
         if (++Nt==m_maxsizeSP) goto breakt;
       }
     }
@@ -1405,6 +1458,7 @@ void InDet::SiSpacePointsSeedMaker_HeavyIon::production3SpNoVertex
 	float Ts  = .5f*(Tzb+data.Tz[t])                          ;
 	float dt  =     Tzb-data.Tz[t]                           ;
 	float dT  = dt*dt-Erb-data.Er[t]-data.R[t]*(Ts*Ts*Rb2r+Rb2z);
+	
 	if ( dT > ICSA) continue;
 	float dU  = data.U[t]-Ub;
         if (dU == 0.) continue;
@@ -1422,6 +1476,12 @@ void InDet::SiSpacePointsSeedMaker_HeavyIon::production3SpNoVertex
           continue;
         }
 	newOneSeed(data, SPb, SP0, data.SP[t]->spacepoint, Zob, Im);
+
+	if (m_writeNtuple) {
+	  float theta = std::atan(1.f / Ts);
+	  data.SP[t]->setEta(-std::log(std::tan(0.5f * theta)));
+	  data.SP[t]->setPt(std::sqrt(S2 / B2) / (1000.f * data.K));
+        }
       }
     }
     nseed += data.mapOneSeeds.size();
@@ -1616,9 +1676,49 @@ void InDet::SiSpacePointsSeedMaker_HeavyIon::initializeEventData(EventData& data
                   false); // checkEta not used
 }
 
-void InDet::SiSpacePointsSeedMaker_HeavyIon::writeNtuple(const SiSpacePointsSeed*, const Trk::Track*, int, long) const{
+void InDet::SiSpacePointsSeedMaker_HeavyIon::writeNtuple(const SiSpacePointsSeed* seed,
+							 const Trk::Track* track,
+							 int seedType,
+							 long eventNumber) const
+{
+  if (not m_writeNtuple) return;
+
+  std::lock_guard<std::mutex> lock(m_mutex);
+  
+  if (track != nullptr) {
+    m_trackPt = track->trackParameters()->front()->pT() / 1000.f;
+    m_trackEta = std::abs(track->trackParameters()->front()->eta());
+  } else {
+    m_trackPt = -1.;
+    m_trackEta = -1.; 
+  }
+
+  m_d0           =   seed->d0();
+  m_z0           =   seed->zVertex();
+  m_eta          =   seed->eta();
+  m_x1           =   seed->x1();
+  m_x2           =   seed->x2();
+  m_x3           =   seed->x3();
+  m_y1           =   seed->y1();
+  m_y2           =   seed->y2();
+  m_y3           =   seed->y3();      
+  m_z1           =   seed->z1();
+  m_z2           =   seed->z2();
+  m_z3           =   seed->z3();
+  m_r1           =   seed->r1();
+  m_r2           =   seed->r2();
+  m_r3           =   seed->r3();
+  m_type         =   seedType;
+  m_dzdr_b       =   seed->dzdr_b();
+  m_dzdr_t       =   seed->dzdr_t();
+  m_pt           =   seed->pt();
+  m_givesTrack   =   !(track == nullptr);
+  m_eventNumber  =   eventNumber;
+  
+  TTree* outputTree ATLAS_THREAD_SAFE = m_outputTree;
+  outputTree->Fill();  
 }
 
 bool InDet::SiSpacePointsSeedMaker_HeavyIon::getWriteNtupleBoolProperty() const{
-    return false;
+  return m_writeNtuple;
 }

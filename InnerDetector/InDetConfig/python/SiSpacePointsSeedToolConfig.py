@@ -20,6 +20,8 @@ def SiSpacePointsSeedMaker_CosmicCfg(
 def SiSpacePointsSeedMaker_HeavyIonCfg(
         flags, name="InDetSpSeedsMaker_HeavyIon", **kwargs):
     acc = ComponentAccumulator()
+    # Disable Overlap space points, they do not really contribute
+    kwargs["useOverlapSpCollection"] = False
     kwargs.setdefault("useVertexPosition", flags.Tracking.ActiveConfig.useVertexPositionDuringSeeding)
     if flags.Tracking.ActiveConfig.extension == "HeavyIonLowPt":
         kwargs.setdefault("pTmax", flags.Tracking.ActiveConfig.maxPT)
