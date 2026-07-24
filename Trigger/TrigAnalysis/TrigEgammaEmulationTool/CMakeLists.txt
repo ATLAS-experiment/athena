@@ -4,15 +4,13 @@
 atlas_subdir( TrigEgammaEmulationTool )
 
 # External dependencies:
-find_package( Boost )
 find_package( CLHEP )
 
 # Component(s) in the package:
 atlas_add_library( TrigEgammaEmulationToolLib
    Root/*.cxx
    PUBLIC_HEADERS TrigEgammaEmulationTool
-   PRIVATE_INCLUDE_DIRS ${Boost_INCLUDE_DIRS}
-   PRIVATE_LINK_LIBRARIES ${Boost_LIBRARIES} TrigSteeringEvent xAODRootAccess
+   PRIVATE_LINK_LIBRARIES TrigSteeringEvent xAODRootAccess
    LINK_LIBRARIES AsgTools AthContainers 
    ElectronPhotonSelectorToolsLib
    EgammaAnalysisInterfacesLib InDetTrackSelectionToolLib 

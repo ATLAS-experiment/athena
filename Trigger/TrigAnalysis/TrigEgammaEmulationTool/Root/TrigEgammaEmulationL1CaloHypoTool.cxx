@@ -3,7 +3,6 @@
 #include <utility>
 
 #include "TrigEgammaEmulationTool/TrigEgammaEmulationL1CaloHypoTool.h"
-#include "boost/algorithm/string.hpp"
 #include "GaudiKernel/SystemOfUnits.h"
 
 
@@ -52,7 +51,7 @@ bool TrigEgammaEmulationL1CaloHypoTool::decide(  const Trig::TrigData &input ) c
   ATH_MSG_DEBUG("hadCore = " << hadCore);
   ATH_MSG_DEBUG("emIsol  = " << emIsol);
   
-  if (boost::contains(l1item,"H")) {
+  if (l1item.contains("H")) {
     ATH_MSG_DEBUG("L1 (H) CUT");
     if (!isolationL1(m_hadCoreCutMin,m_hadCoreCutOff,m_hadCoreCutSlope,hadCore,emE)) {
       ATH_MSG_DEBUG("rejected");
@@ -61,7 +60,7 @@ bool TrigEgammaEmulationL1CaloHypoTool::decide(  const Trig::TrigData &input ) c
     ATH_MSG_DEBUG("accepted");
   }
 
-  if (boost::contains(l1item,"I")) {
+  if (l1item.contains("I")) {
     ATH_MSG_DEBUG("L1 (I) CUT");
     if (!isolationL1(m_emIsolCutMin,m_emIsolCutOff,m_emIsolCutSlope,emIsol,emE)) {
       ATH_MSG_DEBUG("rejected");
@@ -71,7 +70,7 @@ bool TrigEgammaEmulationL1CaloHypoTool::decide(  const Trig::TrigData &input ) c
   }
 
   ATH_MSG_DEBUG("Apply L1 Et cut " << m_l1threshold << " cluster emE " << emE << " eta " << eta);
-  if (boost::contains(l1item,"V")) {
+  if (l1item.contains("V")) {
     ATH_MSG_DEBUG("L1 (V) CUT");
     if (!variableEtL1(l1item,emE,eta)) {
       ATH_MSG_DEBUG("rejected");
