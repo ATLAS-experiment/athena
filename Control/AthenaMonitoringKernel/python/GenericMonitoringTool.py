@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 #
 
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -91,7 +91,7 @@ class GenericMonitoringArray:
         '''
         unAliased = varname.split(';')[0]
         _, aliasBase = _alias(varname)
-        if aliasBase is None or aliasBase.strip() == '':
+        if aliasBase is None or aliasBase == '':
             raise ValueError(f'Unable to define histogram using definition "{varname}" since we cannot determine its name')
         if pattern is not None:
             try:
@@ -202,7 +202,7 @@ def _alias(varname):
     if len(variableAliasSplit)==1:
         return varList, '_vs_'.join(reversed(varList))
     elif len(variableAliasSplit)==2:
-        return varList, variableAliasSplit[1]
+        return varList, variableAliasSplit[1].strip()
     else:
         message = 'Invalid variable or alias for {}. Histogram(s) not defined.'
         log.warning(message.format(varname))
@@ -326,7 +326,7 @@ def defineHistogram(flags, varname, type='TH1F', path=None,
 
     # Alias
     varList, alias = _alias(varname)
-    if alias is None or alias.strip() == '':
+    if alias is None or alias == '':
         log.warning(f'Unable to define histogram using definition "{varname}" since we cannot determine its name.')
         return ''
 
