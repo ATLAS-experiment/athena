@@ -319,6 +319,14 @@ def FastHitConvertToolCfg(flags, name="ISF_FastHitConvertTool", **kwargs):
 def CaloCellContainerSDCfg(flags, name='CaloCellContainerSD', **kwargs):
     """Configure the FastCaloSim calorimeter-cell sensitive detector."""
     result = ComponentAccumulator()
+    if flags.GeoModel.Align.LegacyConditionsAccess:
+        # EmptyCellBuilderTool accesses CaloDetDescrManager through a
+        # conditions handle.  In simulation, legacy alignment is already
+        # applied to the GeoModel tree, so build the corresponding static
+        # conditions object without additional alignment inputs.
+        result.addCondAlgo(CompFactory.CaloAlignCondAlg(
+            LArAlignmentStore="",
+            CaloCellPositionShiftFolder=""))
     kwargs.setdefault ('NoVolumes', True)
     kwargs.setdefault("OutputCollectionNames", ["DefaultCaloCellContainer"])
     # The conversion tool also creates mergeable FastCaloSim hit collections.

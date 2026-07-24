@@ -10,6 +10,7 @@
 + AtlasTest/CITest
 + AtlasTest/GoogleTestTools
 + AtlasTest/TestTools
++ Calorimeter/CaloAlignment/CaloAlignmentAlgs
 + Calorimeter/CaloCnv/CaloIdCnv
 + Calorimeter/CaloCnv/CaloSimEventAthenaPool
 + Calorimeter/CaloCnv/CaloSimEventTPCnv
@@ -214,6 +215,8 @@
 + InnerDetector/InDetSimUtils/TRT_TR_Process
 + LArCalorimeter/LArCOOLConditions
 + LArCalorimeter/LArCabling
++ LArCalorimeter/LArCnv/LArCondAthenaPool
++ LArCalorimeter/LArCnv/LArCondTPCnv
 + LArCalorimeter/LArCnv/LArIdCnv
 + LArCalorimeter/LArCnv/LArSimEventAthenaPool
 + LArCalorimeter/LArCnv/LArSimEventTPCnv
