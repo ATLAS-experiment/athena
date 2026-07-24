@@ -101,7 +101,7 @@ class ExtractExpertMonitoring(CheckSteps.InputDependentStep):
         self.output_stream = Step.Step.OutputStream.STDOUT_ONLY
 
     def configure(self, test):
-        self.args += ' {:s}:{:s}/HLT-Histogramming/*/EXPERT/* expert-monitoring.root'.format(self.input_file, self.path_prefix or '')
+        self.args += ' {:s}:{:s}/*Histogramming/*/EXPERT/* expert-monitoring.root'.format(self.input_file, self.path_prefix or '')
         super(ExtractExpertMonitoring, self).configure(test)
 
 
