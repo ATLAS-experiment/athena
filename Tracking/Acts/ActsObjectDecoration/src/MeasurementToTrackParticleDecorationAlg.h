@@ -21,7 +21,6 @@
 #include "StoreGate/WriteDecorHandleKey.h"
 #include "StoreGate/WriteDecorHandle.h"
 
-#include "ActsGeometryInterfaces/ITrackingGeometryTool.h"
 #include "xAODTracking/TrackParticleContainer.h"
 #include "Acts/Definitions/Units.hpp"
 #include "ActsEvent/TrackContainer.h"

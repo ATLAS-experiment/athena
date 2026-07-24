@@ -11,7 +11,7 @@ namespace ActsTrk {
     StatusCode ReadoutGeoDumpAlg::initialize() {
         ATH_CHECK(m_tree.init(this));
         ATH_CHECK(m_ctxProvider.initialize());
-        ATH_CHECK(m_trackingGeoTool.retrieve());
+        ATH_CHECK(m_trackingGeometrySvc.retrieve());
         for (const auto type : m_detTypes){
             try{
                 m_selTypes.insert(static_cast<DetectorType>(type));
@@ -34,7 +34,7 @@ namespace ActsTrk {
 
         const Acts::GeometryContext tgContext{m_ctxProvider.getGeometryContext(ctx)};
 
-        const auto trackingGeo = m_trackingGeoTool->trackingGeometry();
+        const auto trackingGeo = m_trackingGeometrySvc->trackingGeometry();
         
         trackingGeo->visitSurfaces([&](const Acts::Surface* surface){
             // We only want alignable surfaces

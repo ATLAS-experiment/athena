@@ -25,7 +25,7 @@
 
 #include "GaudiKernel/ToolHandle.h"
 #include "ActsToolInterfaces/ITrackParamsEstimationTool.h"
-#include "ActsGeometryInterfaces/ITrackingGeometryTool.h"
+#include "ActsGeometryInterfaces/ITrackingGeometrySvc.h"
 #include "ActsGeometryInterfaces/IGeometryRealmConvTool.h"
 
 #include "xAODEventInfo/EventInfo.h"
@@ -61,10 +61,11 @@ namespace ActsTrk {
       
   private:
     ToolHandle< ActsTrk::ITrackParamsEstimationTool > m_paramEstimationTool {this, "TrackParamsEstimationTool", "", "Track Param Estimation from Seeds"};
-    PublicToolHandle< ActsTrk::ITrackingGeometryTool > m_trackingGeometryTool {this, "TrackingGeometryTool", "ActsTrackingGeometryTool"};
+
     PublicToolHandle<IGeometryRealmConvTool> m_geometryConvTool{this, "GeometryRealmConvTool", ""};
 
     SG::ReadHandleKey< ActsTrk::SeedContainer > m_inputSeedColletionKey {this,  "InputSeedCollection", "", ""}; 
+    ServiceHandle<ActsTrk::ITrackingGeometrySvc> m_trackingGeometrySvc{this, "TrackingGeometrySvc", "ActsTrackingGeometrySvc"};
 
     SG::ReadHandleKey< PRD_MultiTruthCollection > m_prdTruth {this, "ITkClustersTruth", "", ""};
     SG::ReadCondHandleKey< InDetDD::SiDetectorElementCollection > m_detEleCollKey {this, "DetectorElements", "", "Key of input SiDetectorElementCollection"};

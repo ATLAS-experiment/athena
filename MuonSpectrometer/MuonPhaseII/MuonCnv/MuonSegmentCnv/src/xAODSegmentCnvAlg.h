@@ -13,7 +13,7 @@
 #include "xAODMuonViews/FillContainer.h"
 #include "StoreGate/WriteDecorHandle.h"
 
-#include "ActsGeometryInterfaces/ITrackingGeometryTool.h"
+#include "ActsGeometryInterfaces/ITrackingGeometrySvc.h"
 #include "ActsGeometryInterfaces/IExtrapolationTool.h"
 
 #include "MuonIdHelpers/IMuonIdHelperSvc.h"
@@ -144,7 +144,7 @@ namespace MuonR4{
             /** @brief Alignment container key */            
             ActsTrk::GeoContextReadKey_t m_geoCtxKey{this, "AlignmentKey", "ActsAlignment", "cond handle key"};
             /** @brief Tracking geometry tool to search for holes  */
-            PublicToolHandle<ActsTrk::ITrackingGeometryTool> m_trackingGeometryTool{this, "TrackingGeometryTool", ""};
+           ServiceHandle<ActsTrk::ITrackingGeometrySvc> m_trackingGeometrySvc{this, "TrackingGeometrySvc", "ActsTrackingGeometrySvc"};
              /** @brief Acts extrapolation tool to search for holes */
             ToolHandle<ActsTrk::IExtrapolationTool> m_extrapolationTool{this, "ExtrapolationTool", ""};
 

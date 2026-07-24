@@ -71,11 +71,6 @@ def ActsFatrasSimToolCfg(flags, name="ISF_ActsFatrasSimTool", **kwargs):
     from ISF_Services.ISF_ServicesCoreConfig import ATLFAST_GeoIDSvcCfg
     kwargs.setdefault("GeoIDSvc", acc.getPrimaryAndMerge(ATLFAST_GeoIDSvcCfg(flags)))
 
-    from ActsConfig.ActsGeometryConfig import ActsTrackingGeometrySvcCfg
-    acc.merge(ActsTrackingGeometrySvcCfg(flags))
- 
-    from ActsConfig.ActsGeometryConfig import ActsTrackingGeometryToolCfg
-    kwargs.setdefault("TrackingGeometryTool", acc.getPrimaryAndMerge(ActsTrackingGeometryToolCfg(flags)))
     from ActsConfig.ActsGeometryConfig import ActsExtrapolationToolCfg
     kwargs.setdefault("ExtrapolationTool", acc.popToolsAndMerge(ActsExtrapolationToolCfg(flags)))
 

@@ -49,9 +49,9 @@ ActsTrk::IterativePriVtxFinderTool::initialize()
   
   ATH_MSG_INFO("Initializing ACTS Iterative Vertex Finder tool");
   ATH_CHECK(m_ctxProvider.initialize());
-  ATH_CHECK( m_trackingGeometryTool.retrieve() );
+  ATH_CHECK( m_trackingGeometrySvc.retrieve() );
   std::shared_ptr<const Acts::TrackingGeometry> trackingGeometry
-    = m_trackingGeometryTool->trackingGeometry();
+    = m_trackingGeometrySvc->trackingGeometry();
 
   Acts::Navigator navigator( Acts::Navigator::Config{ trackingGeometry },
 			     logger().cloneWithSuffix("Navigator"));

@@ -54,7 +54,7 @@
 #include "ActsEvent/TrackContainer.h"
 
 // Tools
-#include "ActsGeometryInterfaces/ITrackingGeometryTool.h"
+#include "ActsGeometryInterfaces/ITrackingGeometrySvc.h"
 #include "ActsCalibrators/xAODUncalibMeasSurfAcc.h"
 #include "Acts/Surfaces/PerigeeSurface.hpp"
 

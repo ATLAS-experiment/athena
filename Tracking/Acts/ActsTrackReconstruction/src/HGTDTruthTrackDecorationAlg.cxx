@@ -10,7 +10,7 @@
 #include "ActsGeometry/ActsDetectorElement.h"
 #include "ActsGeometry/SurfaceOfMeasurementUtil.h"
 #include "GeoPrimitives/GeoPrimitivesToStringConverter.h"
-#include "ActsGeometryInterfaces/ITrackingGeometryTool.h"
+#include "ActsGeometryInterfaces/ITrackingGeometrySvc.h"
 #include "ActsCalibrators/xAODUncalibMeasSurfAcc.h"
 
 
@@ -47,11 +47,11 @@ namespace ActsTrk{
     ATH_CHECK( m_trackContainerKey.initialize() );
     ATH_CHECK( m_hgtdTrackLinkKey.initialize() );
     ATH_CHECK( m_truthParticleLinkKey.initialize() );
-    ATH_CHECK( m_trackingGeometryTool.retrieve());
+    ATH_CHECK( m_trackingGeometrySvc.retrieve());
     ATH_CHECK( m_uncalibratedMeasurementContainerKey_HGTD.initialize() );
 
     // Initialize surface accessor
-    m_surfAcc = ActsTrk::detail::xAODUncalibMeasSurfAcc{m_trackingGeometryTool.get()};
+    m_surfAcc = ActsTrk::detail::xAODUncalibMeasSurfAcc{m_trackingGeometrySvc.get()};
      ATH_CHECK(m_hgtdClustersToTruth.initialize(SG::AllowEmpty));
 
     return StatusCode::SUCCESS;

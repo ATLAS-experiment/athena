@@ -9,9 +9,9 @@
 #include "xAODMuonPrepData/UtilFunctions.h"
 
 namespace ActsTrk::detail{
-    xAODUncalibMeasSurfAcc::xAODUncalibMeasSurfAcc(const ActsTrk::ITrackingGeometryTool* trackGeoTool):
-        m_actsTrackingGeometry{trackGeoTool->trackingGeometry().get()},
-        m_detectorElementToGeometryIdMap{trackGeoTool->surfaceIdMap()}{}
+    xAODUncalibMeasSurfAcc::xAODUncalibMeasSurfAcc(const ActsTrk::ITrackingGeometrySvc* trackGeoSvc):
+        m_actsTrackingGeometry{trackGeoSvc->trackingGeometry().get()},
+        m_detectorElementToGeometryIdMap{trackGeoSvc->surfaceIdMap()}{}
            
     const Acts::Surface* xAODUncalibMeasSurfAcc::operator()(const Acts::SourceLink& sourceLink) const {
         return get(xAODUncalibMeasCalibrator::unpack(sourceLink));

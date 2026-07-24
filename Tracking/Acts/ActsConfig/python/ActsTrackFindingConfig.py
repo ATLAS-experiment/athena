@@ -44,13 +44,6 @@ def ActsTrackStatePrinterToolCfg(flags,
                                                 pixel=['ITkPixelSpacePoints_Cached'] if flags.Acts.useCache else ['ITkPixelSpacePoints'],
                                                 strip=['ITkStripSpacePoints_Cached', 'ITkStripOverlapSpacePoints_Cached'] if flags.Acts.useCache else ['ITkStripSpacePoints', 'ITkStripOverlapSpacePoints']))
 
-    if 'TrackingGeometryTool' not in kwargs:
-        from ActsConfig.ActsGeometryConfig import ActsTrackingGeometryToolCfg
-        kwargs.setdefault(
-            "TrackingGeometryTool",
-            acc.getPrimaryAndMerge(ActsTrackingGeometryToolCfg(flags)),
-        )
-
     acc.setPrivateTools(CompFactory.ActsTrk.TrackStatePrinterTool(name, **kwargs))
     return acc
 
@@ -63,6 +56,11 @@ def ActsMainTrackFindingAlgCfg(flags,
         return c if isinstance(c, list) else [c]
 
     acc = ComponentAccumulator()
+
+    from ActsAlignmentAlgs.AlignmentAlgsConfig import ActsGeometryContextAlgCfg
+    from ActsConfig.ActsGeometryConfig import ActsTrackingGeometrySvcCfg
+    acc.merge(ActsGeometryContextAlgCfg(flags))
+    acc.merge(ActsTrackingGeometrySvcCfg(flags))
 
     from ActsConfig.ActsGeometryConfig import ActsVolumeIdToDetectorCollectionMappingAlgCfg
     # Remove HGTD Volumes from the propagation unless we need it
@@ -160,12 +158,6 @@ def ActsMainTrackFindingAlgCfg(flags,
         kwargs.setdefault("ptMinMeasurements", seedOrder(flags, pixel=[3], strip=[6]))
         kwargs.setdefault("absEtaMaxMeasurements", seedOrder(flags, pixel=[3], strip=[999999]))
     
-    if 'TrackingGeometryTool' not in kwargs:
-        from ActsConfig.ActsGeometryConfig import ActsTrackingGeometryToolCfg
-        kwargs.setdefault(
-            "TrackingGeometryTool",
-            acc.getPrimaryAndMerge(ActsTrackingGeometryToolCfg(flags)),
-        )
 
     if 'TrackParamsEstimationTool' not in kwargs:
         from ActsConfig.ActsTrackParamsEstimationConfig import ActsTrackParamsEstimationToolCfg
@@ -372,13 +364,11 @@ def ActsTrackFindingGNNCfg(flags, **kwargs) -> ComponentAccumulator:
     if 'FitterTool' not in kwargs:
         from ActsConfig.ActsTrackFittingConfig import ActsFitterCfg
         kwargs.setdefault('FitterTool', acc.popToolsAndMerge(ActsFitterCfg(flags, ReverseFilteringPt=0, OutlierChi2Cut=float('inf'))))
-
-    if 'TrackingGeometryTool' not in kwargs:
-        from ActsConfig.ActsGeometryConfig import ActsTrackingGeometryToolCfg
-        kwargs.setdefault(
-            "TrackingGeometryTool",
-            acc.getPrimaryAndMerge(ActsTrackingGeometryToolCfg(flags)),
-        )
+    
+    from ActsAlignmentAlgs.AlignmentAlgsConfig import ActsGeometryContextAlgCfg
+    from ActsConfig.ActsGeometryConfig import ActsTrackingGeometrySvcCfg
+    acc.merge(ActsGeometryContextAlgCfg(flags))
+    acc.merge(ActsTrackingGeometrySvcCfg(flags))
 
     acc.addEventAlgo(
         CompFactory.ActsTrk.TrackFindingGNNAlg("TrackFindingGNNAlg", **kwargs)

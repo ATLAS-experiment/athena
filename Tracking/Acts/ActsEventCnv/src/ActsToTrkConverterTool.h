@@ -24,7 +24,6 @@
 
 // PACKAGE
 #include "ActsToolInterfaces/ITrackConverterTool.h"
-#include "ActsGeometryInterfaces/ITrackingGeometryTool.h"
 
 #include "ActsCalibBase/SourceLinkType.h"
 #include "ActsCalibrators/TrkMeasurementCalibrator.h"

@@ -17,7 +17,7 @@
 
 // PACKAGE
 #include "ActsGeometryInterfaces/GeometryContext.h"
-#include "ActsGeometryInterfaces/ITrackingGeometryTool.h"
+#include "ActsGeometryInterfaces/ITrackingGeometrySvc.h"
 #include "ActsInterop/Logger.h"
 
 // OTHER
@@ -36,7 +36,7 @@ StatusCode ExtrapolationTestAlg::initialize() {
 
   ATH_CHECK(m_rndmGenSvc.retrieve());
   ATH_CHECK(m_extrapolationTool.retrieve());
-  ATH_CHECK(m_trackingGeometryTool.retrieve());
+  ATH_CHECK(m_trackingGeometrySvc.retrieve());
   ATH_CHECK( m_materialTrackCollectionKey.initialize() );
   ATH_CHECK(m_tree.init(this));
   return StatusCode::SUCCESS;

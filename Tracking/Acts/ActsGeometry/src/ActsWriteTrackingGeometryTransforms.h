@@ -12,7 +12,7 @@
 
 
 // PACKAGE
-#include "ActsGeometryInterfaces/ITrackingGeometryTool.h"
+#include "ActsGeometryInterfaces/ITrackingGeometrySvc.h"
 #include "ActsEvent/ContextUtility.h"
 
 // STL
@@ -24,7 +24,6 @@ namespace Acts {
   class TrackingGeometry;
 }
 
-class ActsTrackingGeometryTool;
 
 class ActsWriteTrackingGeometryTransforms : public AthAlgorithm {
 public:
@@ -40,7 +39,7 @@ private:
   const PixelID *m_pixelID{nullptr};
   const SCT_ID  *m_SCT_ID{nullptr};
 
-  PublicToolHandle<ActsTrk::ITrackingGeometryTool> m_trackingGeometryTool{this, "TrackingGeometryTool", ""};
+ ServiceHandle<ActsTrk::ITrackingGeometrySvc> m_trackingGeometrySvc{this, "TrackingGeometrySvc", "ActsTrackingGeometrySvc"};
 
   /** @brief Context provider for geometry, magnetic field and calibration contexts */
   ActsTrk::ContextUtility m_ctxProvider{this};

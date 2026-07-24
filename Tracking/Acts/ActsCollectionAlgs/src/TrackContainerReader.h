@@ -10,7 +10,7 @@
 #include "GaudiKernel/EventContext.h"
 
 #include "ActsEvent/TrackContainerHandlesHelper.h"
-#include "ActsGeometryInterfaces/ITrackingGeometryTool.h"
+#include "ActsGeometryInterfaces/ITrackingGeometrySvc.h"
 #include "ActsEvent/TrackContainer.h"
 #include "ActsEvent/ContextUtility.h"
 
@@ -30,7 +30,7 @@ public:
   virtual StatusCode initialize() override final;
   virtual StatusCode execute(const EventContext& context) const override final;
 private:
-  PublicToolHandle<ActsTrk::ITrackingGeometryTool> m_trackingGeometryTool{this, "TrackingGeometryTool", "ActsTrackingGeometryTool"};
+  ServiceHandle<ActsTrk::ITrackingGeometrySvc> m_trackingGeometrySvc{this, "TrackingGeometrySvc", "ActsTrackingGeometrySvc"};
   ActsTrk::ConstTrackContainerHandlesHelper m_tracksBackendHandlesHelper{this};
   SG::WriteHandleKey<ActsTrk::TrackContainer> m_tracksKey{this, "TrackContainer", "TrackContainer"};
   /** @brief Context provider for geometry, magnetic field and calibration contexts */

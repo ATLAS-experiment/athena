@@ -17,7 +17,6 @@
 #include "../CaloBlueprintNodeBuilder.h"
 #include "../ITkMaterialDecoratorTool.h"
 #include "../WriteTrackingGeometry.h"
-#include "../TrackingGeometryTool.h"
 #include "../TrackingGeometrySvc.h"
 #include "../ExtrapolationTool.h"
 
@@ -35,5 +34,4 @@ DECLARE_COMPONENT(ActsTrk::CaloBlueprintNodeBuilder)
 DECLARE_COMPONENT(ActsTrk::ITkMaterialDecoratorTool)
 DECLARE_COMPONENT(ActsTrk::WriteTrackingGeometry)
 DECLARE_COMPONENT(ActsTrk::TrackingGeometrySvc)
-DECLARE_COMPONENT(ActsTrk::TrackingGeometryTool)
 

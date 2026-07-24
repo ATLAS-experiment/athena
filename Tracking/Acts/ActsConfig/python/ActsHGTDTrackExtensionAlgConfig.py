@@ -16,10 +16,6 @@ def ActsHGTDTrackExtensionAlgCfg(flags,
         from ActsConfig.ActsMonitoringConfig import ActsHGTDTrackExtensionMonitoringCfg
         kwargs.setdefault('MonTool', acc.popToolsAndMerge(ActsHGTDTrackExtensionMonitoringCfg(flags)))
 
-    if 'TrackingGeometryTool' not in kwargs:
-        from ActsConfig.ActsGeometryConfig import ActsTrackingGeometryToolCfg
-        kwargs.setdefault("TrackingGeometryTool", acc.getPrimaryAndMerge(ActsTrackingGeometryToolCfg(flags)))
-
     if enableTrackStatePrinter and 'TrackStatePrinter' not in kwargs:
         from ActsConfig.ActsTrackFindingConfig import ActsTrackStatePrinterToolCfg
         kwargs.setdefault("TrackStatePrinter", acc.popToolsAndMerge(ActsTrackStatePrinterToolCfg(flags)))
@@ -53,10 +49,6 @@ def HGTDTruthTrackDecorationAlgCfg(flags,
                                    **kwargs) -> ComponentAccumulator:
     acc = ComponentAccumulator()
     kwargs.setdefault("TrackParticleContainerName", "InDetTrackParticles")
-
-    if 'TrackingGeometryTool' not in kwargs:
-        from ActsConfig.ActsGeometryConfig import ActsTrackingGeometryToolCfg
-        kwargs.setdefault("TrackingGeometryTool", acc.getPrimaryAndMerge(ActsTrackingGeometryToolCfg(flags)))
 
     acc.addEventAlgo(CompFactory.ActsTrk.HGTDTruthTrackDecorationAlg(name, **kwargs))
     return acc

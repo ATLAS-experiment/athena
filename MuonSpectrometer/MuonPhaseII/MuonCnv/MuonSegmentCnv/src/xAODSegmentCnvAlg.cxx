@@ -54,7 +54,9 @@ namespace MuonR4{
         ATH_CHECK(m_combMeasKey.initialize());
         ATH_CHECK(m_prdStateKey.initialize());
         ATH_CHECK(m_auxMeasProv.initialize(m_writeKey.key(), m_convertBeamSpot));
-        ATH_CHECK(m_trackingGeometryTool.retrieve(EnableTool{m_estimateHoles}));
+        if (m_estimateHoles) {
+            ATH_CHECK(m_trackingGeometrySvc.retrieve());
+        }
         ATH_CHECK(m_extrapolationTool.retrieve(EnableTool{m_estimateHoles}));
         ATH_CHECK(m_ctxProvider.initialize(m_estimateHoles));
         return StatusCode::SUCCESS;
@@ -282,7 +284,7 @@ namespace MuonR4{
         const std::size_t nMeas = nMeasurements(segment);
 
         const Acts::Surface* startSurface{}, *lastSurface{};
-        const Acts::TrackingGeometry* trackingGeo = m_estimateHoles ? m_trackingGeometryTool->trackingGeometry().get() : nullptr;
+        const Acts::TrackingGeometry* trackingGeo = m_estimateHoles ? m_trackingGeometrySvc->trackingGeometry().get() : nullptr;
 
         ATH_MSG_DEBUG(__func__<<"() "<<__LINE__<<" - Loop over "<<nMeas<<" measurements.");
         for (std::size_t m = 0 ; m < nMeas; ++m) {

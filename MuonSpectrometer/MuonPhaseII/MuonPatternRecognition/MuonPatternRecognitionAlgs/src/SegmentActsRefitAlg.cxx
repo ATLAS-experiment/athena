@@ -55,21 +55,21 @@ namespace MuonR4{
         ATH_CHECK(m_ctxProvider.initialize());
 
         ATH_CHECK(m_idHelperSvc.retrieve());
-        ATH_CHECK(m_trackingGeometryTool.retrieve());
+        ATH_CHECK(m_trackingGeometrySvc.retrieve());
         ATH_CHECK(m_segSelector.retrieve());
         ATH_CHECK(detStore()->retrieve(m_detMgr));
 
         auto logger = makeActsAthenaLogger(this, "Fitter");
 
         Acts::StraightLineStepper stepper{};
-        Acts::Navigator::Config navConfig{m_trackingGeometryTool->trackingGeometry()};
+        Acts::Navigator::Config navConfig{m_trackingGeometrySvc->trackingGeometry()};
         Acts::Navigator navigator(std::move(navConfig), logger->clone());
         
         Propagator_t propagator{std::move(stepper), std::move(navigator), logger->clone()};
 
         m_fitter = std::make_unique<Fitter_t>(std::move(propagator), logger->clone());
 
-        m_surfAccessor = ActsTrk::detail::xAODUncalibMeasSurfAcc{m_trackingGeometryTool.get()};
+        m_surfAccessor = ActsTrk::detail::xAODUncalibMeasSurfAcc{m_trackingGeometrySvc.get()};
         m_fitExtension.surfaceAccessor.connect<&ActsTrk::detail::xAODUncalibMeasSurfAcc::operator()>(&m_surfAccessor);
         m_fitExtension.calibrator.connect<&MuonR4::ISpacePointCalibrator::calibrateSourceLink>(m_calibTool.get());
         return StatusCode::SUCCESS;
@@ -123,7 +123,7 @@ namespace MuonR4{
                                                             bool entrance) const {
 
         const Acts::GeometryIdentifier volId = m_surfAccessor.get(measurement)->geometryId().withSensitive(0);
-        const Acts::TrackingVolume* volume = m_trackingGeometryTool->trackingGeometry()->findVolume(volId);
+        const Acts::TrackingVolume* volume = m_trackingGeometrySvc->trackingGeometry()->findVolume(volId);
         return entrance ? MuonGMR4::bottomBoundary(*volume) :  MuonGMR4::topBoundary(*volume);
     }
     StatusCode SegmentActsRefitAlg::execute(const EventContext& ctx) const {
@@ -131,7 +131,7 @@ namespace MuonR4{
         const xAOD::MuonSegmentContainer* segments{nullptr};
         ATH_CHECK(SG::get(segments, m_readKey, ctx));
         /// Create the context object
-        const std::shared_ptr<const Acts::TrackingGeometry> trackingGeo = m_trackingGeometryTool->trackingGeometry();
+        const std::shared_ptr<const Acts::TrackingGeometry> trackingGeo = m_trackingGeometrySvc->trackingGeometry();
         const Acts::GeometryContext tgContext = m_ctxProvider.getGeometryContext(ctx);
         const Acts::MagneticFieldContext mfContext = m_ctxProvider.getMagneticFieldContext(ctx);
         const Acts::CalibrationContext calContext = m_ctxProvider.getCalibrationContext(ctx);
@@ -312,7 +312,7 @@ namespace MuonR4{
                         const Amg::Vector3D globPos = meas->spacePoint()->msSector()->localToGlobalTransform(tgContext) * 
                                                     meas->localPosition();
                         const Acts::GeometryIdentifier volId = geoId.withSensitive(0);
-                        const Acts::TrackingVolume* volume = m_trackingGeometryTool->trackingGeometry()->findVolume(volId);
+                        const Acts::TrackingVolume* volume = m_trackingGeometrySvc->trackingGeometry()->findVolume(volId);
                         const Acts::Vector2 lPos = (*surface->globalToLocal(tgContext,globPos, reFitMe->direction()));
                         sstr<<", inside volume: "<<volume->inside(tgContext, globPos);
                         sstr<<", inside surface: "<<surface->bounds().inside(lPos);

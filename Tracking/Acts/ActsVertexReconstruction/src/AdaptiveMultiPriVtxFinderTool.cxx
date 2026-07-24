@@ -52,9 +52,9 @@ ActsTrk::AdaptiveMultiPriVtxFinderTool::initialize()
 
     ATH_CHECK(m_ctxProvider.initialize());
     ATH_MSG_INFO("Initializing ACTS AMVF tool");
-    ATH_CHECK( m_trackingGeometryTool.retrieve() );
+    ATH_CHECK( m_trackingGeometrySvc.retrieve() );
     std::shared_ptr<const Acts::TrackingGeometry> trackingGeometry
-    = m_trackingGeometryTool->trackingGeometry();
+    = m_trackingGeometrySvc->trackingGeometry();
 
     // Logger
     m_logger = makeActsAthenaLogger(this, "Acts");

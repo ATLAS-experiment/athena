@@ -75,7 +75,7 @@ namespace ActsTrk {
     ATH_CHECK(m_tracksBackendHandlesHelper.initialize(ActsTrk::prefixFromTrackContainerName(m_trackContainerKey.key())));
 
     ATH_CHECK(m_monTool.retrieve(EnableTool{not m_monTool.empty()}));
-    ATH_CHECK(m_trackingGeometryTool.retrieve());
+    ATH_CHECK(m_trackingGeometrySvc.retrieve());
     ATH_CHECK(m_ctxProvider.initialize());
     ATH_CHECK(m_trackStatePrinter.retrieve(EnableTool{not m_trackStatePrinter.empty()}));
     ATH_CHECK(m_fitterTool.retrieve());
@@ -84,7 +84,7 @@ namespace ActsTrk {
     ATH_CHECK(m_hgtdCalibTool.retrieve(EnableTool{not m_hgtdCalibTool.empty()}));
 
     auto magneticField = std::make_unique<ATLASMagneticFieldWrapper>();
-    auto trackingGeometry = m_trackingGeometryTool->trackingGeometry();
+    auto trackingGeometry = m_trackingGeometrySvc->trackingGeometry();
 
     detail::Stepper stepper(std::move(magneticField));
     detail::Navigator::Config config{trackingGeometry};
@@ -163,7 +163,7 @@ namespace ActsTrk {
 
     trackFinder().ckfExtensions.updater.connect<&ActsTrk::detail::FitterHelperFunctions::gainMatrixUpdate<detail::RecoTrackStateContainer>>();
 
-    m_unalibMeasSurfAcc = detail::xAODUncalibMeasSurfAcc {m_trackingGeometryTool.get()};
+    m_unalibMeasSurfAcc = detail::xAODUncalibMeasSurfAcc {m_trackingGeometrySvc.get()};
 
     initStatTables();
 

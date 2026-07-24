@@ -57,8 +57,8 @@ namespace ActsTrk{
               return StatusCode::FAILURE;
         }
         ATH_CHECK(m_ctxProvider.initialize());
-        ATH_CHECK(m_trackingGeometryTool.retrieve());
-        m_trackingGeometryTool->trackingGeometry()->visitSurfaces([&](const Acts::Surface *surface) {
+        ATH_CHECK(m_trackingGeometrySvc.retrieve());
+        m_trackingGeometrySvc->trackingGeometry()->visitSurfaces([&](const Acts::Surface *surface) {
              // find acts surface with the same detector element ID
              if (!surface->isSensitive()) {
                 return;

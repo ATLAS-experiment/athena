@@ -18,7 +18,7 @@
 #include "Acts/Surfaces/Surface.hpp"
 #include "Acts/EventData/BoundTrackParameters.hpp"
 #include "Acts/Propagator/SurfaceCollector.hpp"
-#include "ActsGeometryInterfaces/ITrackingGeometryTool.h"
+#include "ActsGeometryInterfaces/ITrackingGeometrySvc.h"
 #include "ActsGeometryInterfaces/IExtrapolationTool.h"
 #include "TrkExInterfaces/IExtrapolationEngine.h"
 // FIXME: header-global macro for an array size constant!
@@ -54,7 +54,7 @@ class ActsGeantFollowerHelper : public extends<AthAlgTool, IActsGeantFollowerHel
 
   private:
 
-    PublicToolHandle<ActsTrk::ITrackingGeometryTool> m_trackingGeometryTool{this, "TrackingGeometryTool", "ActsTrackingGeometryTool"};
+    ServiceHandle<ActsTrk::ITrackingGeometrySvc> m_trackingGeometrySvc{this, "TrackingGeometrySvc", "ActsTrackingGeometrySvc"};
     /** @brief Context provider for geometry, magnetic field and calibration contexts */
     ActsTrk::ContextUtility m_ctxProvider{this};
 

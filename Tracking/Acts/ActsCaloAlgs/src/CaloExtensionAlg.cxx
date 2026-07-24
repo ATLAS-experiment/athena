@@ -49,7 +49,7 @@ namespace ActsTrk{
     StatusCode CaloExtensionAlg::initialize() {
         ATH_CHECK(m_clusterSelector.retrieve(EnableTool{!m_clusterSelector.empty()}));
         ATH_CHECK(m_trackSelector.retrieve(EnableTool{!m_trackSelector.empty()}));
-        ATH_CHECK(m_trackingGeometryTool.retrieve());
+        ATH_CHECK(m_trackingGeometrySvc.retrieve());
         ATH_CHECK(m_extrapolationTool.retrieve());
 
         ATH_CHECK(m_clusterContainerKey.initialize());
@@ -70,7 +70,7 @@ namespace ActsTrk{
                 <<volIndexNames.back().second);
         }
         /**  */
-        const Acts::TrackingVolume* caloExit = m_trackingGeometryTool->getEnvelope(SystemEnvelope::CaloExit);
+        const Acts::TrackingVolume* caloExit = m_trackingGeometrySvc->getEnvelope(SystemEnvelope::CaloExit);
         
         caloExit->visitVolumes([&](const Acts::TrackingVolume *vol) {
             ATH_MSG_DEBUG(__func__<<"() "<<__LINE__<<" - Check volume: "<<vol->volumeName()<<".");
@@ -116,7 +116,7 @@ namespace ActsTrk{
     std::unique_ptr<CaloExtension> CaloExtensionAlg::propagateToCaloExit(const EventContext& ctx,
                                                                          const xAOD::TrackParticle* track) const{
   
-        const Acts::TrackingVolume* caloExit = m_trackingGeometryTool->getEnvelope(SystemEnvelope::CaloExit);
+        const Acts::TrackingVolume* caloExit = m_trackingGeometrySvc->getEnvelope(SystemEnvelope::CaloExit);
        
         auto extension = std::make_unique<CaloExtension>(track);
         /// Retrieve the last track parameters with a measurement state

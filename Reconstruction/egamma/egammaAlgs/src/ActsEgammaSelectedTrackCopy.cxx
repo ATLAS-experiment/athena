@@ -43,7 +43,7 @@ ActsEgammaSelectedTrackCopy::initialize()
   ATH_CHECK(m_egammaCaloClusterSelector.retrieve());
   ATH_CHECK(m_caloDetDescrMgrKey.initialize());
   ATH_CHECK(m_extrapolationTool->initialize());
-  ATH_CHECK(m_trackingGeometryTool.retrieve());
+  ATH_CHECK(m_trackingGeometrySvc.retrieve());
 
   // Here we extract the geometry identifiers of the 4 calo volumes in the ACTS geometry
   // It seems more robust to do the matching with the volume name, since the geometry ID
@@ -58,7 +58,7 @@ ActsEgammaSelectedTrackCopy::initialize()
   // Debug info in case volume matching fails
   std::vector<std::string> unmatchedVolumes;
 
-  m_trackingGeometryTool->trackingGeometry()->visitVolumes([&](const Acts::TrackingVolume *vol) {
+  m_trackingGeometrySvc->trackingGeometry()->visitVolumes([&](const Acts::TrackingVolume *vol) {
     const auto & name = vol->volumeName();
     if( volIndex.contains(name) ) {
       ATH_MSG_DEBUG(vol->volumeName() << " - " << vol->geometryId() << " - surfaces: " << vol->surfaces().size());

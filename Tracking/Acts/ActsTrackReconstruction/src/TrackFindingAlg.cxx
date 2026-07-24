@@ -187,7 +187,7 @@ namespace ActsTrk
       ATH_MSG_DEBUG("Create " << uncalibratedMeasurementContainers[icontainer]->size() << " source links from measurements in " << m_uncalibratedMeasurementContainerKeys[icontainer].key());
       measurements.addMeasurements(icontainer,
                                    *uncalibratedMeasurementContainers[icontainer],
-                                   *m_trackingGeometryTool->surfaceIdMap(),
+                                   *m_trackingGeometrySvc->surfaceIdMap(),
                                    m_forceTrackOnSeed ? &measurementIndex : nullptr);
     }
 
@@ -454,8 +454,8 @@ namespace ActsTrk
 
     // Function for Estimate Track Parameters
     auto retrieveSurfaceFunction =
-       [detectorElementToGeometryIdMapPtr=m_trackingGeometryTool->surfaceIdMap(),
-        actsTrackingGeometryPtr=m_trackingGeometryTool->trackingGeometry().get()] (const ActsTrk::Seed& seed, bool useTopSp) -> const Acts::Surface& {
+       [detectorElementToGeometryIdMapPtr=m_trackingGeometrySvc->surfaceIdMap(),
+        actsTrackingGeometryPtr=m_trackingGeometrySvc->trackingGeometry().get()] (const ActsTrk::Seed& seed, bool useTopSp) -> const Acts::Surface& {
         const xAOD::SpacePoint* sp = useTopSp ? seed.sp().back() : seed.sp().front();
         const xAOD::UncalibratedMeasurement* meas = useTopSp ? sp->measurements().back() : sp->measurements().front();
         const auto geoid_iter = detectorElementToGeometryIdMapPtr->find(ActsTrk::makeDetectorElementKey(meas->type(), meas->identifierHash()));
@@ -748,7 +748,7 @@ namespace ActsTrk
                                                                            const std::vector< const InDet::SiDetectorElementStatus *> &det_el_status_arr,
                                                                            detail::TrackFindingMeasurements &measurements) const {
     const Acts::TrackingGeometry *
-      acts_tracking_geometry = m_trackingGeometryTool->trackingGeometry().get();
+      acts_tracking_geometry = m_trackingGeometrySvc->trackingGeometry().get();
     ATH_CHECK(acts_tracking_geometry != nullptr);
 
     using Counter = struct { unsigned int n_volumes, n_volumes_with_status, n_missing_detector_elements, n_detector_elements, n_disabled_detector_elements;};

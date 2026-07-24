@@ -20,7 +20,7 @@ ActsVolumeIdToDetectorElementCollectionMappingAlg::~ActsVolumeIdToDetectorElemen
 StatusCode ActsVolumeIdToDetectorElementCollectionMappingAlg::initialize() {
     ATH_CHECK(m_volumeIdToDetectorElementCollMapKey.initialize());
     ATH_CHECK(m_detEleCollKeys.initialize());
-    ATH_CHECK(m_trackingGeometryTool.retrieve());
+    ATH_CHECK(m_trackingGeometrySvc.retrieve());
     return StatusCode::SUCCESS;
 }
 
@@ -33,7 +33,7 @@ StatusCode ActsVolumeIdToDetectorElementCollectionMappingAlg::execute(const Even
 
     volumeIdTodetectorElementCollMap.addDependency (IOVInfiniteRange::infiniteTime());
 
-    const Acts::TrackingGeometry *acts_tracking_geometry=m_trackingGeometryTool->trackingGeometry().get();
+    const Acts::TrackingGeometry *acts_tracking_geometry=m_trackingGeometrySvc->trackingGeometry().get();
     ATH_CHECK( acts_tracking_geometry != nullptr);
 
     std::unique_ptr<ActsTrk::ActsVolumeIdToDetectorElementCollectionMap>

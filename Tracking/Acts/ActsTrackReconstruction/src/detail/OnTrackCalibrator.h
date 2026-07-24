@@ -12,7 +12,7 @@
 #include "ActsCalibBase/MeasurementCalibratorBase.h"
 #include "Acts/Geometry/TrackingGeometry.hpp"
 
-#include "ActsGeometryInterfaces/ITrackingGeometryTool.h"
+#include "ActsGeometryInterfaces/ITrackingGeometrySvc.h"
 #include "ActsCalibrators/xAODUncalibMeasSurfAcc.h"
 #include "xAODInDetMeasurement/PixelCluster.h"
 #include "xAODInDetMeasurement/StripCluster.h"
@@ -52,29 +52,29 @@ public:
     HGTDCalibrator hgtdCalibrator;
     /** @brief Constructs a calibrator which copies the local position & covariance of the ITk measurements 
      *         onto the track state
-     * @param trackGeoTool: Pointer to a valid tracking geometry tool to associate the surfaces to the measurements */
+     * @param trackGeoSvc: Pointer to a valid tracking geometry service to associate the surfaces to the measurements */
     static OnTrackCalibrator
-    NoCalibration(const ActsTrk::ITrackingGeometryTool* trackGeoTool) {
-       return OnTrackCalibrator(trackGeoTool);
+    NoCalibration(const ActsTrk::ITrackingGeometrySvc* trackGeoSvc) {
+       return OnTrackCalibrator(trackGeoSvc);
     }
 
     /** @brief Empty default constructor. Surface look will fail. */
     OnTrackCalibrator() = default;
 protected:
     /** @brief create a "NoCalibration" on track calibrator for all measurement types.*/
-    OnTrackCalibrator(const ActsTrk::ITrackingGeometryTool* trackGeoTool);
+    OnTrackCalibrator(const ActsTrk::ITrackingGeometrySvc* trackGeoSvc);
 public:
     /** @brief Standard cosntructor which activates the calibration of the ITk & HGTD measurements 
-     *         based on the best track predicition. It takes the configured instance to the TrackingGeometryTool
+     *         based on the best track predicition. It takes the TrackingGeometryService
      *         and then for each silicon measurement type a calibration tool handle. There's also the possibility
      *         to pass an empty tool, then the information from the measurement is directly copied onto the track state.     *         
-     *  @param trackGeoTool: Pointer to the tracking geometry tool to access the needed surfaces
-     *                        during the calibration
+     *  @param trackGeoSvc: Pointer to the tracking geometry service to access the needed surfaces
+     *                      during the calibration
      *  @param pixelTool: Reference to a (configured) calibration tool responsible for the PixelCluster measurements
      *  @param stripTool: Reference to a (configured) calibration tool responsible for the ITk strip measurements
      *  @param hdtdTool: Reference to a  (configured) calibration tool responsible for the HGTD strip measurements */
     OnTrackCalibrator(const EventContext &ctx,
-                      const ActsTrk::ITrackingGeometryTool* trackGeoTool,
+                      const ActsTrk::ITrackingGeometrySvc* trackGeoSvc,
                       const ToolHandle<IPixelOnTrackCalibratorTool<traj_t>> &pixelTool,
                       const ToolHandle<IStripOnTrackCalibratorTool<traj_t>> &stripTool,
                       const ToolHandle<IHGTDOnTrackCalibratorTool<traj_t>> &hgtdTool);

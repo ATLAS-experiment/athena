@@ -85,7 +85,7 @@ namespace ActsTrk {
     StatusCode ActsMuonTrackingGeometryTest::initialize() {
         ATH_CHECK(AthHistogramAlgorithm::initialize());
         ATH_CHECK(m_idHelperSvc.retrieve());
-        ATH_CHECK(m_trackingGeometryTool.retrieve());
+        ATH_CHECK(m_trackingGeometrySvc.retrieve());
         ATH_CHECK(m_detMgrKey.initialize());
         ATH_CHECK(m_rndmGenSvc.retrieve());
         ATH_CHECK(m_geoCtxKey.initialize());
@@ -123,7 +123,7 @@ namespace ActsTrk {
         auto anygctx = gctx->context();
 
         //Get the tracking geometry
-        auto trackingGeometry = m_trackingGeometryTool->trackingGeometry();
+        auto trackingGeometry = m_trackingGeometrySvc->trackingGeometry();
 
         if (!trackingGeometry) {
             ATH_MSG_ERROR("Failed to retrieve the tracking geometry");

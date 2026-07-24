@@ -19,7 +19,7 @@
 #include "ActsEvent/MeasurementToTruthParticleAssociation.h"
 #include "ActsEvent/TrackContainer.h"
 #include "ActsEvent/ContextUtility.h"
-#include "ActsGeometryInterfaces/ITrackingGeometryTool.h"
+#include "ActsGeometryInterfaces/ITrackingGeometrySvc.h"
 #include "ActsTruth/ElasticDecayUtil.h"
 
 #include <mutex>

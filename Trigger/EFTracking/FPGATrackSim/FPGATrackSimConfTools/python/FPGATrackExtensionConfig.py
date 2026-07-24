@@ -8,9 +8,11 @@ def FPGATrackExtensionAlgCfg(flags,enableTrackStatePrinter=False, **kwargs):
     kwargs.setdefault("PixelClusterContainer", "ITkPixelClusters")
     kwargs.setdefault("ACTSTracksLocation", "ExtendedFPGATracks")
 
-    if "TrackingGeometryTool" not in kwargs:
-        from ActsConfig.ActsGeometryConfig import ActsTrackingGeometryToolCfg
-        kwargs["TrackingGeometryTool"] = acc.getPrimaryAndMerge(ActsTrackingGeometryToolCfg(flags))
+    from ActsAlignmentAlgs.AlignmentAlgsConfig import ActsGeometryContextAlgCfg
+    from ActsConfig.ActsGeometryConfig import ActsTrackingGeometrySvcCfg
+
+    acc.merge(ActsTrackingGeometrySvcCfg(flags))
+    acc.merge(ActsGeometryContextAlgCfg(flags))
 
     if 'ActsFitter' not in kwargs:
         from ActsConfig.ActsTrackFittingConfig import ActsFitterCfg

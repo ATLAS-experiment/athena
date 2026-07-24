@@ -26,8 +26,8 @@ StatusCode SeedToTrackCnvAlg::initialize()
   ATH_CHECK(m_trackContainerKey.initialize());
   ATH_CHECK(m_tracksBackendHandlesHelper.initialize(ActsTrk::prefixFromTrackContainerName(m_trackContainerKey.key())));
   ATH_CHECK(m_actsTrackParamsKey.initialize());
-  ATH_CHECK(m_trackingGeometryTool.retrieve());
-  m_surfAcc = detail::xAODUncalibMeasSurfAcc{m_trackingGeometryTool.get()};
+  ATH_CHECK(m_trackingGeometrySvc.retrieve());
+  m_surfAcc = detail::xAODUncalibMeasSurfAcc{m_trackingGeometrySvc.get()};
   if (m_seedContainerKey.size() != m_actsTrackParamsKey.size()) {
     ATH_MSG_ERROR("Seed and Parameter containers have different sizes: "
       << m_seedContainerKey.size() << " for seeds and "

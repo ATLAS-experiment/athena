@@ -39,7 +39,7 @@ StatusCode ActsEMBremCollectionBuilder::initialize() {
 
   ATH_CHECK(m_actsFitter.retrieve());
   ATH_CHECK(m_cnvTool.retrieve());
-  ATH_CHECK(m_trackingGeometryTool.retrieve());
+  ATH_CHECK(m_trackingGeometrySvc.retrieve());
 
   std::string backendname{};
   try {
