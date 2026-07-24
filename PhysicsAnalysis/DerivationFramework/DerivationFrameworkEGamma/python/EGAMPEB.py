@@ -148,7 +148,7 @@ def EGAMPEBCommonAugmentationsCfg(flags,**kwargs):
 
     #     # This sets up the Run-3 style navigation slimming for trigger-matching from DAOD
     #     acc.merge(TriggerMatchingCommonRun3Cfg(
-    #         flags, TriggerList = triggerListsHelper.Run3TriggerNames))
+    #         flags, TriggerList = triggerListsHelper.Run3TriggerNames + ["HLT_2g13_loose_EgammaPEBTLA_L12DR15-0M30-2eEM12L","HLT_2g13_loose_EgammaPEBTLA_L113DR25-25M70-2eEM12L"]))
 
     return acc
 
