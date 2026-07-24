@@ -159,7 +159,6 @@ void InDet::SiSpacePointsSeedMaker_HeavyIon::newEvent(const EventContext& ctx, E
 
     SG::ReadHandle<SpacePointContainer> spacepointsSCT{m_spacepointsSCT, ctx};
     if (spacepointsSCT.isValid()) {
-
       for (const SpacePointCollection* spc: *spacepointsSCT) {
         for (const Trk::SpacePoint* sp: *spc) {
 	  float r = sp->r();
@@ -176,6 +175,30 @@ void InDet::SiSpacePointsSeedMaker_HeavyIon::newEvent(const EventContext& ctx, E
       }
     }
   }
+  
+  if (m_useOverlap && !data.checketa) {
+    SG::ReadHandle<SpacePointOverlapCollection> spacepointsOverlap{m_spacepointsOverlap, ctx};
+    if (spacepointsOverlap.isValid()) {
+      for (const Trk::SpacePoint* sp: *spacepointsOverlap) {
+	/// usual rejection of SP used in previous track finding passes if we run with the PRT to track map + check of the max radius
+	float r = sp->r();
+	if (r<m_r_rmin || r>=m_r_rmax) continue;
+	if (prd_to_track_map_cptr &&  isUsed(sp, *prd_to_track_map_cptr)) continue;
+	
+	/// SP creation, entry into list of the data object
+	InDet::SiSpacePointForSeed* sps = newSpacePoint(data, sp);
+	if (!sps) continue;
+
+	int ir = static_cast<int>(sps->radius()*irstep);
+	if (ir>irmax) ir = irmax;
+	data.r_Sorted[ir].push_back(sps);
+	++data.r_map[ir];
+	if (data.r_map[ir]==1) data.r_index[data.nr++] = ir;
+	++data.ns;
+      }
+    }
+  }
+  
   fillLists(data);
 }
 
