@@ -3,16 +3,12 @@
 # Declare the package name:
 atlas_subdir( TrigEgammaMonitoring )
 
-# External dependencies:
-find_package( Boost )
-
 # Component(s) in the package:
 atlas_add_component( TrigEgammaMonitoring
                      src/*.h
                      src/*.cxx
                      src/components/*.cxx
-                     INCLUDE_DIRS ${Boost_INCLUDE_DIRS}
-                     LINK_LIBRARIES ${Boost_LIBRARIES} AthenaBaseComps AthenaMonitoringKernelLib AthenaMonitoringLib
+                     LINK_LIBRARIES AthenaBaseComps AthenaMonitoringKernelLib AthenaMonitoringLib
                      EgammaAnalysisInterfacesLib GaudiKernel PATCoreLib StoreGateLib TriggerMatchingToolLib
                      TrigDecisionToolLib TrigAnalysisHelpersLib TrigEgammaMatchingToolLib TrigCompositeUtilsLib
                      TrigEgammaEmulationToolLib xAODBase xAODEgamma xAODEventInfo xAODJet

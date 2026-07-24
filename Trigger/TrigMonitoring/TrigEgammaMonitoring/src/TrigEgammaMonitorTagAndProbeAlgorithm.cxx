@@ -22,8 +22,6 @@
 #include "GaudiKernel/SystemOfUnits.h"
 #include "string"
 #include <algorithm>
-#include "boost/algorithm/string.hpp"
-#include <boost/tokenizer.hpp>
 #include "LArRecEvent/LArEventBitInfo.h"
 #include "StoreGate/ReadHandle.h"
 #include "AthContainers/Decorator.h"
@@ -32,7 +30,6 @@
 //**********************************************************************
 using namespace Trig;
 using namespace xAOD;
-using namespace boost;
 
 TrigEgammaMonitorTagAndProbeAlgorithm::TrigEgammaMonitorTagAndProbeAlgorithm( const std::string& name, ISvcLocator* pSvcLocator ):
   TrigEgammaMonitorAnalysisAlgorithm( name, pSvcLocator )

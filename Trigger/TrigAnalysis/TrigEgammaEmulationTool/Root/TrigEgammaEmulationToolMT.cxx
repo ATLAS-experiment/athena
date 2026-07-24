@@ -2,7 +2,6 @@
  *   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
  *   */
 
-#include "boost/algorithm/string.hpp"
 #include "TrigEgammaEmulationTool/TrigEgammaEmulationToolMT.h"
 
 using namespace Trig;
@@ -110,8 +109,8 @@ bool TrigEgammaEmulationToolMT::match( const EventContext& ctx,
   if(output.signature == "electron"){
     for (auto& trigger : m_electronTrigList){
 
-      if(boost::contains(output.trigger,"gsf") && !boost::contains(trigger,"gsf")) continue;
-      if(boost::contains(output.trigger,"lrt") && !boost::contains(trigger,"lrt")) continue;
+      if(output.trigger.contains("gsf") && !trigger.contains("gsf")) continue;
+      if(output.trigger.contains("lrt") && !trigger.contains("lrt")) continue;
 
       ATH_MSG_DEBUG("Matching with " << trigger );
 
@@ -263,8 +262,8 @@ bool TrigEgammaEmulationToolMT::match( const EventContext& ctx,
 TrigData::TrigData( const std::string& name )
 {
     this->signature = "electron"; // default
-    if(boost::contains(name,"HLT_e")) this->signature = "electron";
-    else if(boost::contains(name,"HLT_g")) this->signature = "photon";
+    if(name.contains("HLT_e")) this->signature = "electron";
+    else if(name.contains("HLT_g")) this->signature = "photon";
 }
 
 

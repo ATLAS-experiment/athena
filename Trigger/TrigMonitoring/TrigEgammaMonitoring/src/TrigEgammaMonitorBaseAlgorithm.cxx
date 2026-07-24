@@ -4,7 +4,9 @@
 
 #include "TrigEgammaMonitorBaseAlgorithm.h"
 
-
+#include <ranges>
+#include <string_view>
+#include <vector>
 
 TrigEgammaMonitorBaseAlgorithm::TrigEgammaMonitorBaseAlgorithm( const std::string& name, ISvcLocator* pSvcLocator )
   : AthMonitorAlgorithm(name,pSvcLocator),
@@ -674,18 +676,16 @@ void TrigEgammaMonitorBaseAlgorithm::setTrigInfo(const std::string& trigger){
     std::string signature = "";
     float threshold = 0;
     // HLT_e/gXX_(pidname/etcut/idperf)_*_L1EMXX to e/gXX_(pidname/etcut/idperf)_*_L1EMXX
-    if(boost::contains(hltinfo,"HLT")) hltinfo.erase(0,4);
-    
-
+    if(hltinfo.contains("HLT")) hltinfo.erase(0,4);
     std::vector<std::string> parts;
-    boost::split(parts,hltinfo,boost::is_any_of("_"));
+    for (auto&& part : hltinfo | std::views::split('_')) parts.emplace_back(part.begin(), part.end());
     std::string pidname;
 
     // e/gXX_(pidname/etcut/idperf)_*_L1EMXX
-    if(boost::contains(parts.at(0),"e")) {
+    if(parts.at(0).contains("e")) {
         signature = "Electron";
         pidname = m_defaultProbePidElectron;
-    }else if(boost::contains(parts.at(0),"g")) {
+    }else if(parts.at(0).contains("g")) {
         signature = "Photon";
         pidname = m_defaultProbePidPhoton;
     }else {
@@ -711,12 +711,12 @@ void TrigEgammaMonitorBaseAlgorithm::setTrigInfo(const std::string& trigger){
 
 
     // extra information
-    nogsf   = boost::contains(trigger,"nogsf");
-    lrt     = boost::contains(trigger,"lrt");
-    ion     = boost::contains(trigger,"ion");
+    nogsf   = trigger.contains("nogsf");
+    lrt     = trigger.contains("lrt");
+    ion     = trigger.contains("ion");
 
     for(auto& iso : isoNames){
-        if(boost::contains(trigger, iso)){
+        if(trigger.contains(iso)){
             isolation=iso; isolated=true; break;
         }
     }
@@ -728,7 +728,7 @@ void TrigEgammaMonitorBaseAlgorithm::setTrigInfo(const std::string& trigger){
 
     // L1EMXX
     std::string l1seed = getL1Item(trigger);
-    l1legacy = !boost::contains(l1seed, "eEM");
+    l1legacy = !l1seed.contains("eEM");
 
 
     ATH_MSG_DEBUG("=================== Chain Parser =======================");
@@ -854,7 +854,7 @@ void TrigEgammaMonitorBaseAlgorithm::setTrigInfoR3(const std::string& trigger){
     bool l1legacy=true;
     // L1EMXX
     std::string l1seed = getL1Item(trigger);
-    l1legacy = !boost::contains(l1seed, "eEM");
+    l1legacy = !l1seed.contains("eEM");
 
 
     std::vector<std::string> isoNames = {"ivarloose","ivarmedium","ivartight","icaloloose","icalomedium","icalotight"};
@@ -869,24 +869,22 @@ void TrigEgammaMonitorBaseAlgorithm::setTrigInfoR3(const std::string& trigger){
     std::string isolation="";
 
     // extra information
-    nogsf   = boost::contains(trigger,"nogsf");
-    lrt     = boost::contains(trigger,"lrt");
-    ion     = boost::contains(trigger,"ion");
+    nogsf   = trigger.contains("nogsf");
+    lrt     = trigger.contains("lrt");
+    ion     = trigger.contains("ion");
 
     for(auto& iso : isoNames){
-        if(boost::contains(trigger, iso)){
+        if(trigger.contains(iso)){
             isolation=iso; isolated=true; break;
         }
     }
-
     std::vector<std::string> parts;
-    boost::split(parts, trigger, boost::is_any_of("_"));
-
-    if(boost::contains(trigger, "idperf")){
+    for (auto&& part : trigger | std::views::split('_')) parts.emplace_back(part.begin(), part.end());
+    if(trigger.contains("idperf")){
         ATH_MSG_DEBUG("This is idperf");
         idperf=true;
     }
-    else if(boost::contains(trigger, "etcut")){
+    else if(trigger.contains("etcut")){
         ATH_MSG_DEBUG("This is etcut");
         etcut=true;
     }

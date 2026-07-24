@@ -22,8 +22,6 @@
 #include "GaudiKernel/SystemOfUnits.h"
 #include "string"
 #include <algorithm>
-#include "boost/algorithm/string.hpp"
-#include <boost/tokenizer.hpp>
 #include <typeinfo>
 #include "TrigSteeringEvent/Chain.h"
 #include "TrigDecisionTool/ChainGroup.h"
@@ -38,7 +36,6 @@
 //**********************************************************************
 using namespace Trig;
 using namespace xAOD;
-using namespace boost;
 #include <vector>
 #include <string>
 #include <iostream>
