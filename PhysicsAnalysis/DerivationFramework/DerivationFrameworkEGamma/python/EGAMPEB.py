@@ -72,6 +72,11 @@ def EGAMPEBCommonAugmentationsCfg(flags,**kwargs):
     """Configure the EGAMPEB augmentation, modified from common Phys"""
     acc = ComponentAccumulator()
 
+    from TrkConfig.VertexFindingFlags import VertexSortingSetup
+    if flags.Tracking.PriVertex.sortingSetup is VertexSortingSetup.GNNSorting:
+        from DerivationFrameworkPhys.GNNVertexConfig import GNNVertexCfg
+        acc.merge(GNNVertexCfg(flags))
+        
     # # MC truth
     # if flags.Input.isMC:
     #     from DerivationFrameworkMCTruth.MCTruthCommonConfig import (
@@ -151,11 +156,6 @@ def EGAMPEBCommonAugmentationsCfg(flags,**kwargs):
 def EGAMPEBKernelCfg(flags, name='EGAMPEBKernel', **kwargs):
     """Configure the derivation framework driving algorithm (kernel) for EGAMPEB"""
     acc = ComponentAccumulator()
-
-    from TrkConfig.VertexFindingFlags import VertexSortingSetup
-    if flags.Tracking.PriVertex.sortingSetup is VertexSortingSetup.GNNSorting:
-        from DerivationFrameworkPhys.GNNVertexConfig import GNNVertexCfg
-        acc.merge(GNNVertexCfg(flags))
 
     # Common augmentations
     acc.merge(EGAMPEBCommonAugmentationsCfg(
