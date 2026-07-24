@@ -9,13 +9,20 @@
 
 class TgcRdoContainer;
 
+namespace Muon {
+class IMuonIdHelperSvc;
+class TgcCablingMap;
+}
+
 namespace L0Muon {
 namespace TgcL0Floating {
 
-/** @brief Decode Run-3 TGC hit RDOs and group the decoded hits. */
 class RdoDecoder {
  public:
-  StatusCode decode(const TgcRdoContainer& rdos, HitGroups& hitGroups,
+  StatusCode decode(const TgcRdoContainer& rdos,
+                    const Muon::TgcCablingMap& cabling,
+                    const Muon::IMuonIdHelperSvc& idHelperSvc,
+                    HitGroups& hitGroups,
                     DecodeStatistics& statistics) const;
 };
 
