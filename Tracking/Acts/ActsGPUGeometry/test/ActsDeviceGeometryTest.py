@@ -16,7 +16,7 @@ from AthenaConfiguration.ComponentFactory import CompFactory
 
 from AthCUDAServices.AthCUDAServicesConfig import HostMemoryResourceToolCfg, DeviceMemoryResourceToolCfg, CopyToolCfg, StreamToolCfg
 
-from ActsGPUGeometry.ActsGPUGeometryConfig import JSONDeviceDetectorDescriptionProviderSvcCfg
+from ActsGPUGeometry.ActsGPUGeometryConfig import JSONDeviceDetectorDescriptionProviderSvcCfg, DeviceDetectorDescriptionCondAlgCfg, DeviceDetectorDescriptionValidationAlgCfg
 from ActsGPUDataPreparation.ActsGPUDataPreparationConfig import CUDAClusterizerToolCfg,  DeviceClusterizationAlgCfg
 from ActsGPUEventCnv.ActsGPUEventCnvConfig import RDOtoTracccCellConverterAlgCfg, TracccMeasurementConverterAlgCfg
 
@@ -34,8 +34,23 @@ if __name__ == "__main__":
 
     flags = initConfigFlags()
 
+    from AthenaConfiguration.Enums import ProductionStep
+    flags.Common.ProductionStep = ProductionStep.Simulation
+    from AthenaConfiguration.TestDefaults import defaultGeometryTags, defaultConditionsTags
+    flags.GeoModel.AtlasVersion = defaultGeometryTags.RUN4
+    flags.IOVDb.GlobalTag = defaultConditionsTags.RUN4_MC
+    flags.GeoModel.Align.Dynamic = False
+
+    flags.Detector.GeometryITkPixel = True
+    flags.Detector.GeometryITkStrip = True
+    flags.Detector.GeometryBpipe = True
+    flags.Detector.GeometryCalo = False
+    flags.Detector.GeometryMuon = False
+
     # ---- Input ----
     flags.Input.Files = defaultTestFiles.RDO_RUN4
+
+    flags.Exec.MaxEvents = 1
 
     flags.fillFromArgs()
 
@@ -45,6 +60,16 @@ if __name__ == "__main__":
     acc = MainServicesCfg(flags)
     from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
     acc.merge(PoolReadCfg(flags))
+
+    # Needed for PixelID and SCT_ID
+    from PixelGeoModelXml.ITkPixelGeoModelConfig import ITkPixelReadoutGeometryCfg
+    acc.merge(ITkPixelReadoutGeometryCfg(flags))
+    from StripGeoModelXml.ITkStripGeoModelConfig import ITkStripReadoutGeometryCfg
+    acc.merge(ITkStripReadoutGeometryCfg(flags))
+
+    from InDetConfig.SiSpacePointFormationConfig import ITkSiElementPropertiesTableCondAlgCfg
+    acc.merge(ITkSiElementPropertiesTableCondAlgCfg(flags))
+
 
     msg_svc = acc.getService('MessageSvc')
     msg_svc.Format = "%t % F%{:d}W%C%7W%R%T %0W%M".format(flags.Common.MsgSourceLength)

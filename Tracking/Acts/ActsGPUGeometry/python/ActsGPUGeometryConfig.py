@@ -28,3 +28,40 @@ def JSONDeviceDetectorDescriptionProviderSvcCfg(flags, **kwargs) -> ComponentAcc
     svc = CompFactory.ActsTrk.JSONDeviceDetectorDescriptionProviderSvc(**kwargs)
     acc.addService(svc, primary=True, create=True)
     return acc
+
+def DeviceDetectorDescriptionCondAlgCfg(flags, name="ActsDeviceDetectorDescriptionCondAlg", **kwargs) -> ComponentAccumulator:
+
+    acc = ComponentAccumulator()
+
+    if 'TrackingGeometryTool' not in kwargs:
+        from ActsConfig.ActsGeometryConfig import ActsTrackingGeometryToolCfg
+        kwargs.setdefault(
+            "TrackingGeometryTool",
+            acc.getPrimaryAndMerge(ActsTrackingGeometryToolCfg(flags)),
+        )
+
+    kwargs.setdefault("GeometryFile",     "dev/ACTS/detray-itk/detray_detector_geometry-for-fun.json")
+    kwargs.setdefault("DeviceDigitizationObjectName", "TracccDeviceDigitizationConfig")
+    kwargs.setdefault("HostDigitizationObjectName", "TracccHostDigitizationConfig")
+    kwargs.setdefault("DeviceConditionsObjectName", "TracccDeviceCondConfig")
+    kwargs.setdefault("HostConditionsObjectName", "TracccHostCondConfig")
+
+    the_alg = CompFactory.ActsTrk.DeviceDetectorDescriptionCondAlg(name, **kwargs)
+    acc.addCondAlgo(the_alg, primary = True)
+
+    return acc 
+
+
+def DeviceDetectorDescriptionValidationAlgCfg(flags, name="ActsDeviceDetectorDescriptionValidationAlg", **kwargs) -> ComponentAccumulator:
+
+    acc = ComponentAccumulator()
+
+    
+    kwargs.setdefault("HostDesignObjectName", "TracccHostDigitizationConfig")
+    kwargs.setdefault("HostCondKey", "TracccHostCondConfig")
+    kwargs.setdefault("RefHostDesignObjectName", "TracccHostDigitizationConfig")
+    kwargs.setdefault("RefHostCondKey", "TracccHostCondConfig")
+    
+    acc.addEventAlgo(
+        CompFactory.ActsTrk.DeviceDetectorDescriptionValidationAlg(name, **kwargs))
+    return acc        
