@@ -35,12 +35,23 @@ def JetEGAMPEBConfig(ConfigFlags):
 
     
     # modified StandardJetsInDerivCfg
-    from JetRecConfig.StandardSmallRJets import AntiKt4EMTopo_deriv, AntiKt4EMPFlow_EgammaPEB_deriv, flavourghosts 
+    from JetRecConfig.StandardSmallRJets import AntiKt4EMTopo_deriv, AntiKt4EMPFlow, AntiKt4EMPFlow_deriv, flavourghosts, truthlabels
     from JetRecConfig.JetRecConfig import JetRecCfg
 
     acc = ComponentAccumulator()
+    
+    standardghosts_EgammaPEB = ["Track","Truth","Tower"] # No muon segments in the EGammaPEB stream
 
-    AntiKt4EMTopo_EGammaPEB_deriv = AntiKt4EMTopo_deriv.clone(ghostdefs = ["Track","Truth","Tower"]+["TrackLRT"]+flavourghosts)
+    # AntiKt4EMPFlow_EgammaPEB = AntiKt4EMPFlow.clone(
+    #     ghostdefs = standardghosts_EgammaPEB+flavourghosts
+    # )
+
+    AntiKt4EMPFlow_EgammaPEB_deriv = AntiKt4EMPFlow_deriv.clone(
+        ghostdefs = standardghosts_EgammaPEB+flavourghosts,
+        modifiers = AntiKt4EMPFlow.modifiers+("JetPtAssociation","NNJVT","CaloEnergiesClus","JetPileupLabel","qgtransformer")+truthlabels   #no fJVT
+    )
+
+    AntiKt4EMTopo_EGammaPEB_deriv = AntiKt4EMTopo_deriv.clone(ghostdefs = standardghosts_EgammaPEB+["TrackLRT"]+flavourghosts)
 
     jetList = [AntiKt4EMTopo_EGammaPEB_deriv, AntiKt4EMPFlow_EgammaPEB_deriv]
 
