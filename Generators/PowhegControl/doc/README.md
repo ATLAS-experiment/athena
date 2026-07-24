@@ -2,6 +2,10 @@
 
 This directory contains the documentation and user instructions of the ATLAS Powheg interface. It is called [PowhegControl](https://gitlab.cern.ch/atlas/athena/tree/21.6/Generators/PowhegControl) and is a part of [Athena](https://gitlab.cern.ch/atlas/athena). PowhegControl provides an interface to the [Powheg Box](http://powhegbox.mib.infn.it) software installed on CVMFS.
 
+Athena now uses the  [compilebox](https://gitlab.cern.ch/compilebox/compilebox) packaging and build system for POWHEG Monte Carlo generators. 
+The Powheg Box installations used by Athena are built, packaged, and published via compilebox onto CVMFS in LCG release.. 
+This means that the Powheg binaries referenced by `$POWHEGPATH` are managed through compilebox and may follow compilebox naming and versioning conventions.
+
 This file contains the most relevant documentation for users. Further documentation of various advanced aspects is organised into additional files:
 
 * [Systematic variations (PDF, QCD scales, and beyond)](Generators/PowhegControl/doc/variations.md)
@@ -20,10 +24,11 @@ The current Powheg experts in ATLAS and maintainers of Powheg installations and 
 
 * **Dan Hayden** (@dhayden) — mostly handles Powheg source code and installation
 * **Marcos Miralles Lopez** (@mmiralle) — Powheg compilation and installation
-* **Stefan Richter** (@strichte) — mostly maintains PowhegControl interface, i.e. the Athena user interface to Powheg
+* **Stefan Richter** (@strichte) — mostly maintains PowhegControl interface, i.e. the Athena user interface to Powheg  (not active)
 * **Timothée Theveneaux-Pelzer** (@tpelzer) — mostly maintains PowhegControl interface
-* **Andrej Saibel** (@asaibel) —  PowhegControl interface
+* **Andrej Saibel** (@asaibel) —  PowhegControl interface (not active)
 * **Jan Kretzschmar** (@jkretz) — Powheg 'power user' happy to share his knowledge or help out with simple code changes
+* **Andrii VErbytskyi** (@averbyts) - compilebox developments
 * All of us provide help with software usage and physics questions to our best availability and ability
 
 For any questions about Powheg or PowhegControl, please **contact** the experts at [**atlas-generators-powhegcontrol-experts@cern.ch**](mailto:atlas-generators-powhegcontrol-experts@cern.ch)!
@@ -35,6 +40,8 @@ If you're interested in getting news about Powheg(Control) in general, you can s
 # Supported processes
 
 The currently installed processes are listed. If the version is of the form `PowhegControl-XX-XX-XX`, the process has been available since long and will be available for any future releases. In case the form is `ATLASOTF-XX-XX-YY`, you may cross-check with [these tables](https://twiki.cern.ch/twiki/bin/viewauth/AtlasProtected/PmgMcSoftware#Versions_release_21_6_AthGenerat) - generally you want the latest release if starting fresh.
+
+The process wrappers currently present in this PowhegControl checkout are taken from `Generators/PowhegControl/python/processes/powheg`. They correspond to the Athena process names that PowhegControl can instantiate and, when available through compilebox, run with the Powheg Box binaries.
 
 We try to make the naming of processes consistent in Athena. Therefore some processes are **named differently** than they are in Powheg Box wherever shown in the table.
 
@@ -49,9 +56,9 @@ We try to make the naming of processes consistent in Athena. Therefore some proc
 | `DMGG`             | -                         | dark matter                   | `PowhegControl-00-02-08`                                                 | [1310.4491](https://arxiv.org/abs/1310.4491)   |                      |
 | `DMS_tloop`        | -                         | dark matter                   | `PowhegControl-00-02-08`                                                 | [1503.00691](https://arxiv.org/abs/1503.00691) |                      |
 | `DMV`              | -                         | dark matter                   | `PowhegControl-00-02-08`                                                 | [1310.4491](https://arxiv.org/abs/1310.4491)   |                      |
-| `ggF_H`            | `ggH_quark-mass-effects`  | gg → H                        | `PowhegControl-00-02-00`                                                 | [1111.2854](https://arxiv.org/abs/1111.2854)   | in principle superseded by `Hj_MiNNLO`  |
-| `ggF_HH`           | `ggHH`                    | gg → HH                       | `PowhegControl-00-03-12`                                                 | [1703.09252](https://arxiv.org/abs/1703.09252) |                      |
-| `ggF_HZ`           | `ggHZ`                    | gg → H+Z                      | `PowhegControl-00-02-00`                                                 | no citation                                          |                      |
+| `ggF_H`            | `ggH_quark-mass-effects`  | gg -> H                        | `PowhegControl-00-02-00`                                                 | [1111.2854](https://arxiv.org/abs/1111.2854)   | in principle superseded by `Hj_MiNNLO`  |
+| `ggF_HH`           | `ggHH`                    | gg -> HH                       | `PowhegControl-00-03-12`                                                 | [1703.09252](https://arxiv.org/abs/1703.09252) |                      |
+| `ggF_HZ`           | `ggHZ`                    | gg -> H+Z                      | `PowhegControl-00-02-00`                                                 | no citation                                          |                      |
 | `Hj`               | `HJ`                      | Higgs+1 jet                   | `PowhegControl-00-02-05`                                                 | [1202.5475](https://arxiv.org/abs/1202.5475)   | can (could?) also do NNLOPS                     |
 | `Hj_MiNNLO`        | `HJMiNNLO`                | Higgs at NNLO                 | `ATLASOTF-05-01`                                                                     | [2006.04133](https://arxiv.org/abs/2006.04133) |                      |
 | `Hjj`              | `HJJ`                     | Higgs+2 jets                  | `PowhegControl-00-02-05`                                                 | [1202.5475](https://arxiv.org/abs/1202.5475)   |                      |
@@ -83,8 +90,8 @@ We try to make the naming of processes consistent in Athena. Therefore some proc
 | `W`                | -                         | W                             | `PowhegControl-00-00-09`                                                 | [0805.4802](https://arxiv.org/abs/0805.4802)   | in principle superseded by `W_EW`  |
 | `W_EW`             | `W_ew-BMNNP`              | W with/without NLO EW effects             | `PowhegControl-00-02-18`                                                 | [1202.0465](https://arxiv.org/abs/1202.0465)   | [Process-specific documentation](process_specific/W-Z_EW.md) |
 | `W_SMEFT`          | `W_smeft`                 | W in Standard Model Effective Field Theory | TODO                                                        | [1804.07407](https://arxiv.org/abs/1804.07407), see also [1703.04751](https://arxiv.org/abs/1703.04751) |                      |
-| `Wbb`              | `Wbb_dec`                 | W ( → l nu) + bbbar           | `PowhegControl-00-03-00`                                                 | [1502.01213](https://arxiv.org/abs/1502.01213) |                      |
-| `Wbbj`             | `Wbbj`                    | W ( → l nu) + bbbar + jet     | `PowhegControl-00-03-00`                                                 | [1502.01213](https://arxiv.org/abs/1502.01213) |                      |
+| `Wbb`              | `Wbb_dec`                 | W ( -> l nu) + bbbar           | `PowhegControl-00-03-00`                                                 | [1502.01213](https://arxiv.org/abs/1502.01213) |                      |
+| `Wbbj`             | `Wbbj`                    | W ( -> l nu) + bbbar + jet     | `PowhegControl-00-03-00`                                                 | [1502.01213](https://arxiv.org/abs/1502.01213) |                      |
 | `Wj`               | -                         | W+1 jet                       | `PowhegControl-00-00-09`                                                 | [1009.5594](https://arxiv.org/abs/1009.5594)   |                      |
 | `Wj_MiNNLO`        | `WjMiNNLO`                | W at NNLO                     | `ATLASOTF-05-01`                                                                     | [2006.04133](https://arxiv.org/abs/2006.04133) |                      |
 | `Wjj`              | -                         | W+2 jets                      | `PowhegControl-00-02-17`                                                 | [1303.5447](https://arxiv.org/abs/1303.5447)   |                      |
@@ -101,26 +108,52 @@ We try to make the naming of processes consistent in Athena. Therefore some proc
 | `Zj_MiNNLO`        | `ZjMiNNLO`                | Z/gamma* at NNLO                 | `ATLASOTF-05-01`                                                      | [2006.04133](https://arxiv.org/abs/2006.04133) |                      |
 | `Zjj`              | -                         | Z+2 jets                      | `PowhegControl-00-02-17`                                                 | [1303.5447](https://arxiv.org/abs/1303.5447)   |                      |
 | `ZZ`               | -                         | ZZ                            | `PowhegControl-00-00-08`                                                 | [1311.1365](https://arxiv.org/abs/1311.1365)   |
-
+| `bblvlv_Beta`     | `b_bbar_4l`              | ttbar / Wt interference, beta variant | `compilebox 8.12`                                       | [1607.04538](https://arxiv.org/abs/1607.04538) | variant of `bblvlv` |
+| `bblvlv_modified` | `b_bbar_4l`              | ttbar / Wt interference, modified interface | `compilebox 8.12`                             | [1607.04538](https://arxiv.org/abs/1607.04538) | variant of `bblvlv` |
+| `DY_SLQ`          | -                         | Drell-Yan leptoquark production (single) | `compilebox 8.12`                                               | [2207.00356](https://arxiv.org/abs/2207.00356) |                      |
+| `DY_VLQ`          | -                         | Drell-Yan leptoquark production (pair)   | `compilebox 8.12`                                               | [2209.12780](https://arxiv.org/abs/2209.12780) |                      |
+| `LQ_s_chan`       | -                         | s-channel leptoquark production         | `compilebox 8.12`                                               | [2209.02599](https://arxiv.org/abs/2209.02599) |                      |
+| `VBF_ZZ`          | -                         | VBF ZZ                                  | `compilebox 8.12`                                               | [1312.3252](https://arxiv.org/abs/1312.3252)   |                      |
+| `VV_pol`          | -                         | vector-boson polarization study          | `compilebox 8.12`                                               | [2311.05220](https://arxiv.org/abs/2311.05220) |                      |
+| `VV_pol_EFT`      | -                         | EFT study of vector-boson polarization   | `compilebox 8.12`                                               | [2507.21768](https://arxiv.org/abs/2507.21768) |                      |
+| `Wc`              | -                         | W + charm                                | `compilebox 8.12`                                               | [2304.13791](https://arxiv.org/abs/2304.13791) |                      |
+| `WWj`             | -                         | WW + jet                                 | `compilebox 8.12`                                               | [1606.07062](https://arxiv.org/abs/1606.07062) |                      |
+| `WWj_MiNNLO`      | `WWjMiNNLO`               | WW + jet at NNLO                         | `compilebox 8.12`                                               | [2103.12077](https://arxiv.org/abs/2103.12077) |                      |
+| `WZj_MiNNLO`      | `WZjMiNNLO`               | WZ at NNLO                               | `compilebox 8.12`                                               | [2208.12660](https://arxiv.org/abs/2208.12660) |                      |
+| `Wt_DR_modified`  | -                         | Wt with modified diagram removal         | `compilebox 8.12`                                               | [1009.2450](https://arxiv.org/abs/1009.2450)   | variant of `Wt_DR`  |
+| `ZZj_MiNNLO`      | `ZZjMiNNLO`              | ZZ + jet at NNLO                         | `compilebox 8.12`                                               | [2108.05337](https://arxiv.org/abs/2108.05337) |                      |
+| `Zgamj_MiNNLO`    | `ZgamjMiNNLO`            | Z/gamma* + jet at NNLO                   | `compilebox 8.12`                                               | [2010.10478](https://arxiv.org/abs/2010.10478) |                      |
+| `fourtops`        | -                         | four-top production                      | `compilebox 8.12`                                               | [2110.15159](https://arxiv.org/abs/2110.15159) |                      |
+| `gg4l`            | -                         | gg -> 4 leptons                           | `compilebox 8.12`                                               | [2102.07783](https://arxiv.org/abs/2102.07783) |                      |
+| `ggF_HH_SMEFT`    | -                         | gg -> HH in SMEFT                         | `compilebox 8.12`                                               | [2204.13045](https://arxiv.org/abs/2204.13045) |                      |
+| `ggF_HH_quartic`  | -                         | gg -> HH with quartic coupling variation  | `compilebox 8.12`                                               | [1810.04665](https://arxiv.org/abs/1810.04665) |                      |
+| `ttZ`             | -                         | ttZ                                      | `compilebox 8.12`                                               | [2112.08892](https://arxiv.org/abs/2112.08892) |                      |
+| `ttll`            | -                         | tt + ll                                  | `compilebox 8.12`                                               | [2112.08892](https://arxiv.org/abs/2112.08892) |                      |
 
 ## Requesting new processes
 
 If you would like a new process installed that is not on the list above, please let us know by creating a new [JIRA issue here](https://its.cern.ch/jira/browse/AGENE-968).
-If there are problems with the install/special instructions then the user is asked to debug and provide instructions for the proper installation.
+Athena now uses compilebox to build and publish Powheg binaries onto CVMFS, so new process support typically requires two parallel pieces of work:
+
+1. Adding the process to the compilebox packaging/build setup and publishing it to the appropriate LCG release.
+For compilebox-specific details, see the compilebox project documentation on GitLab: https://gitlab.cern.ch/compilebox/compilebox.
+2. Adding the Athena `PowhegControl` interface and job option support for that process.
+
 
 The standard steps needed are:
 
-| Step number | Person responsible | Description                                                                                                                         | Approximate time |
-| :---------- | :----------------- | :---------------------------------------------------------------------------------------------------------------------------------- | :--------------- |
-| 1           | You                | Identify a release of POWHEG in which this process exists and compiles correctly                                                    | 1 day            |
-| 2           | You                | Ask the Powheg on-the-fly authors to add this process                                                                               | \<1 day          |
-| 3           | Us                 | Download, compile and debug the code at CERN                                                                                        | 1 days           |
-| 4           | Us                 | Write a new interface class to ensure that PowhegControl knows about the process                                                    | 1 day            |
-| 5           | Us                 | Optimise the integration parameters for this process (if you know some which have been used previously, that would be a good start) | \>1 week         |
-| 6           | Us                 | Generate a small test sample of events                                                                                              | \~1 week         |
-| 7           | You/Us             | Test your generation setup works as expected                                                                                        | \~1 week         |
-| 8           | You                | Perform whatever validation is requested by the MC generators group                                                                 | \>1 week         |
-| 9           | You                | Make a JIRA request for whatever number of events you need                                                                          | \>1 week         |
+| Step number | Person responsible | Description                                                                                                                          | Approximate time |
+| :---------- | :----------------- | :----------------------------------------------------------------------------------------------------------------------------------- | :--------------- |
+| 1           | You                | Identify the Powheg Box/compilebox process name and any required source repository or version                                        | \>1 day          |
+| 2a          | You/Us             | Verify dependencies and that the process can be added to compilebox, create a merge request with the required changes                | 1-2 days         |
+| 2b          | You/Us             | If dependencies are missing -- prepare the dependencies and push them into LCG layer.                                                | 1-4 weeks        |
+| 3           | Us                 | Publish the new compilabox version, request it to be included into the LCG layer.                                                    | 1-2 days         |
+| 4           | You/Us             | Wait for the LCG layer.                                                                                                              | 1-2 weeks        |
+| 5           | You/Us             | Write the `PowhegControl` interface class and process defaults for Athena                                                            | 1 day            |
+| 6           | You/Us             | Update example job options, documentation, and any process-specific validation notes                                                 | 1-2 days         |
+| 7           | You/Us             | Generate a small test sample and verify the full Athena workflow including showering and output handling                             | \~1 week         |
+| 8           | You                | Perform any dedicated physics or MC validation requested by the MC generators group                                                  | \>1 week         |
+| 9           | You                | Make a JIRA request for the final production event count if the process is approved                                                  | \>1 week         |
 
 **New available processes are only added to Athena by request**, so please get in touch early if you're interested.
 
