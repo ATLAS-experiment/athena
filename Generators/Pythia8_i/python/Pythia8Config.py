@@ -250,8 +250,8 @@ def Pythia8_MadGraph_Cfg(flags, ShowerCfg=Pythia8BaseCfg, **kwargs):
     Pythia8BaseCfg) so tune/EvtGen fragments can be injected without
     instantiating Pythia8_i twice.
     """
-    # Keep compressed LHE input compressed when requested by the transform.
-    # This can still be overridden with LHEFile="myfile.lhe[.gz]".
+    # Match Pythia8's input name to the file prepared by EvgenHelpers.
+    # This can still be overridden by setting in the config LHEFile="myfile.lhe[.gz]".
     lhe_file = (
         "events.lhe.gz"
         if flags.Generator.avoidExtracting
