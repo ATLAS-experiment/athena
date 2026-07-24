@@ -122,7 +122,7 @@ namespace ActsTrk{
         /// Retrieve the last track parameters with a measurement state
         auto lastTrackPars = extension->lastParameters();
         using SurfaceRecordOptions = IExtrapolationTool::SurfaceRecordOptions;
-        SurfaceRecordOptions propOpts{caloExit, SurfaceRecordOptions::VolumeAbort::atExit};
+        SurfaceRecordOptions propOpts{caloExit, IExtrapolationTool::VolumeAbort::atExit};
         propOpts.recordMaterial = true;
         propOpts.recordPassive = true;
         propOpts.recordSensitive = true;

@@ -64,29 +64,39 @@ public:
   virtual Acts::Result<PropagationOutput> 
           propagationSteps(const EventContext& ctx,
                            const Acts::BoundTrackParameters& startParameters,
-                           Acts::Direction navDir, double pathLimit) const override final;
+                           const Acts::Direction navDir, 
+                           const double pathLimit) const override final;
 
   /** @copydoc IExtrapolationTool::propagate */
   virtual Acts::Result<Acts::BoundTrackParameters>
           propagate(const EventContext& ctx,
                     const Acts::BoundTrackParameters& startParameters,
-                    Acts::Direction navDir, double pathLimit) const override final;
+                    const Acts::Direction navDir, 
+                    const double pathLimit) const override final;
 
   /** @copydoc IExtrapolationTool::propagationSteps */
   virtual Acts::Result<PropagationOutput>
           propagationSteps(const EventContext& ctx,
                            const Acts::BoundTrackParameters& startParameters,
                            const Acts::Surface& target,
-                           Acts::Direction navDir, double pathLimit) const override;
+                           const Acts::Direction navDir, 
+                           const double pathLimit) const override;
  
   /** @copydoc IExtrapolationTool::propagate */
  virtual Acts::Result<Acts::BoundTrackParameters>
          propagate(const EventContext& ctx,
                    const Acts::BoundTrackParameters& startParameters,
                    const Acts::Surface& target,
-                   Acts::Direction navDir, double pathLimit) const override;
+                   const Acts::Direction navDir, 
+                   const double pathLimit) const override;
          
-  
+  /** @copydoc IExtrapolationTool::propagate */
+  virtual Acts::Result<Acts::BoundTrackParameters> propagate(const EventContext& ctx,
+                                                             const Acts::BoundTrackParameters& startParameters,
+                                                             const Acts::TrackingVolume& target,
+                                                             const VolumeAbort stopVolumeFlag,
+                                                             const Acts::Direction navDir,
+                                                             const double pathLimit) const override;
   /** @copydoc IExtrapolationTool::propagateAndRecord */
   virtual Acts::Result<BoundParamVec_t> propagateAndRecord(const EventContext& ctx,
                                                            const Acts::BoundTrackParameters& startParameters,
