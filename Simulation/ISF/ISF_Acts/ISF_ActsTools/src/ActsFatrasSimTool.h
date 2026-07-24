@@ -49,7 +49,7 @@
 #include "ActsFatras/Physics/ElectroMagnetic/PhotonConversion.hpp"
 #include "ActsFatras/Selectors/SurfaceSelectors.hpp"
 // Tracking
-#include "ActsGeometryInterfaces/ITrackingGeometryTool.h"
+#include "ActsGeometryInterfaces/ITrackingGeometrySvc.h"
 #include "ActsGeometry/ATLASMagneticFieldWrapper.h"
 #include "ActsEvent/ContextUtility.h"
 
@@ -288,8 +288,7 @@ class ActsFatrasSimTool : public BaseSimulatorTool {
   PublicToolHandle<ActsTrk::IExtrapolationTool> m_extrapolationTool{this, "ExtrapolationTool", "ActsExtrapolationTool"};
 
   // Tracking geometry
-  PublicToolHandle<ActsTrk::ITrackingGeometryTool> m_trackingGeometryTool{
-      this, "TrackingGeometryTool", "ActsTrackingGeometryTool"};
+  ServiceHandle<ActsTrk::ITrackingGeometrySvc> m_trackingGeometrySvc{this, "TrackingGeometrySvc", "ActsTrackingGeometrySvc"};
   std::shared_ptr<const Acts::TrackingGeometry> m_trackingGeometry;
 
   // Logging

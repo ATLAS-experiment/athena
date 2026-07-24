@@ -424,9 +424,9 @@ namespace ActsTrk
     ATH_MSG_DEBUG("   " << m_compareMeasurementTransforms);
     ATH_MSG_DEBUG("   " << m_printFilteredStates);
 
-    ATH_CHECK(m_trackingGeometryTool.retrieve());
+    ATH_CHECK(m_trackingGeometrySvc.retrieve());
     ATH_CHECK(m_ctxProvider.initialize());
-    m_surfAcc = detail::xAODUncalibMeasSurfAcc{m_trackingGeometryTool.get()};
+    m_surfAcc = detail::xAODUncalibMeasSurfAcc{m_trackingGeometrySvc.get()};
     ATH_CHECK(m_spacePointKey.initialize());
 
     return StatusCode::SUCCESS;

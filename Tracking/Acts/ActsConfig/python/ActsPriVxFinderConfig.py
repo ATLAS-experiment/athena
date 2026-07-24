@@ -16,12 +16,10 @@ def ActsGaussAdaptiveMultiFindingCfg(flags,
         kwargs.setdefault("TrackSelector", acc.popToolsAndMerge(
             VtxInDetTrackSelectionCfg(flags)))
 
-    if "TrackingGeometryTool" not in kwargs:
-        from ActsConfig.ActsGeometryConfig import ActsTrackingGeometryToolCfg
-        kwargs.setdefault("TrackingGeometryTool", acc.getPrimaryAndMerge(
-            ActsTrackingGeometryToolCfg(flags))) # PrivateToolHandle
-
-
+    from ActsAlignmentAlgs.AlignmentAlgsConfig import ActsGeometryContextAlgCfg
+    from ActsConfig.ActsGeometryConfig import ActsTrackingGeometrySvcCfg
+    acc.merge(ActsGeometryContextAlgCfg(flags))
+    acc.merge(ActsTrackingGeometrySvcCfg(flags))
     kwargs.setdefault("useBeamConstraint",
                       flags.Tracking.PriVertex.useBeamConstraint)
     kwargs.setdefault("tracksMaxZinterval",
@@ -70,11 +68,10 @@ def ActsIterativeFindingCfg(flags,
         kwargs.setdefault("TrackSelector", acc.popToolsAndMerge(
             VtxInDetTrackSelectionCfg(flags)))
 
-    if "TrackingGeometryTool" not in kwargs:
-        from ActsConfig.ActsGeometryConfig import ActsTrackingGeometryToolCfg
-        kwargs.setdefault("TrackingGeometryTool", acc.getPrimaryAndMerge(
-            ActsTrackingGeometryToolCfg(flags))) # PrivateToolHandle
-
+    from ActsAlignmentAlgs.AlignmentAlgsConfig import ActsGeometryContextAlgCfg
+    from ActsConfig.ActsGeometryConfig import ActsTrackingGeometrySvcCfg
+    acc.merge(ActsGeometryContextAlgCfg(flags))
+    acc.merge(ActsTrackingGeometrySvcCfg(flags))
     kwargs.setdefault("useBeamConstraint",
                       flags.Tracking.PriVertex.useBeamConstraint)
     kwargs.setdefault("significanceCutSeeding", 12)

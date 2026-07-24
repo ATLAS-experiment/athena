@@ -19,7 +19,7 @@ namespace ActsTrk{
 StatusCode WriteTrackingGeometry::initialize() {
   ATH_MSG_INFO("initializing");
 
-  ATH_CHECK(m_trackingGeometryTool.retrieve());
+  ATH_CHECK(m_trackingGeometrySvc.retrieve());
   ATH_CHECK(m_ctxProvider.initialize());
 
   return StatusCode::SUCCESS;
@@ -49,7 +49,7 @@ StatusCode WriteTrackingGeometry::execute(const EventContext& ctx)  {
   Acts::TrackingGeometryJsonConverter converter{cfg,  makeActsAthenaLogger(this, name())};
 
 
-  nlohmann::json trackGeo = converter.toJson(tgContext, *m_trackingGeometryTool->trackingGeometry());
+  nlohmann::json trackGeo = converter.toJson(tgContext, *m_trackingGeometrySvc->trackingGeometry());
 
 
   outFile<<trackGeo.dump(4);

@@ -43,8 +43,8 @@ StatusCode ISF::ActsFatrasSimTool::initialize() {
   }
 
   // retrive tracking geo tool
-  ATH_CHECK(m_trackingGeometryTool.retrieve());
-  m_trackingGeometry = m_trackingGeometryTool->trackingGeometry();
+  ATH_CHECK(m_trackingGeometrySvc.retrieve());
+  m_trackingGeometry = m_trackingGeometrySvc->trackingGeometry();
 
   // Acts Extrapolator
   ATH_CHECK(m_extrapolationTool.retrieve());

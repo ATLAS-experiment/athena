@@ -548,8 +548,7 @@ def ActsBaseSeedAnalysisAlgCfg(flags,
     from ActsConfig.ActsTrackParamsEstimationConfig import ActsTrackParamsEstimationToolCfg
     trackEstimationTool = acc.popToolsAndMerge(ActsTrackParamsEstimationToolCfg(flags))
     
-    from ActsConfig.ActsGeometryConfig import ActsTrackingGeometryToolCfg, ActsGeometryRealmConvTool
-    kwargs.setdefault("TrackingGeometryTool", acc.getPrimaryAndMerge(ActsTrackingGeometryToolCfg(flags)))
+    from ActsConfig.ActsGeometryConfig import ActsGeometryRealmConvTool
     kwargs.setdefault("GeometryRealmConvTool", acc.getPrimaryAndMerge(ActsGeometryRealmConvTool(flags)))
 
     kwargs.setdefault('TrackParamsEstimationTool', trackEstimationTool)
@@ -922,8 +921,10 @@ def ActsResidualAnalysisAlgCfg(flags,
 def ActsGeoDumpCfg(flags, name="ActsReadoutDump",
                    outFile="ActsGeoDump.root", **kwargs):
     result = ComponentAccumulator()
-    from ActsConfig.ActsGeometryConfig import ActsTrackingGeometryToolCfg
-    kwargs.setdefault("TrackingGeometryTool", result.getPrimaryAndMerge(ActsTrackingGeometryToolCfg(flags)))
+    from ActsAlignmentAlgs.AlignmentAlgsConfig import ActsGeometryContextAlgCfg
+    from ActsConfig.ActsGeometryConfig import ActsTrackingGeometrySvcCfg
+    result.merge(ActsTrackingGeometrySvcCfg(flags))
+    result.merge(ActsGeometryContextAlgCfg(flags))
     from ROOT.ActsTrk import DetectorType
     kwargs.setdefault("Detectors", [DetectorType.Pixel, DetectorType.Sct])
     from MuonConfig.MuonConfigUtils import setupHistSvcCfg

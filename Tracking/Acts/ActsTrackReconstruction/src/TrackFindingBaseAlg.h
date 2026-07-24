@@ -10,7 +10,7 @@
 
 
 // Tools
-#include "ActsGeometryInterfaces/ITrackingGeometryTool.h"
+#include "ActsGeometryInterfaces/ITrackingGeometrySvc.h"
 #include "ActsGeometryInterfaces/IGeometryRealmConvTool.h"
 #include "ActsToolInterfaces/ITrackParamsEstimationTool.h"
 #include "src/TrackStatePrinterTool.h"
@@ -85,7 +85,7 @@ namespace ActsTrk {
 
     // Tool Handles
     ToolHandle<GenericMonitoringTool> m_monTool{this, "MonTool", "", "Monitoring tool"};
-    PublicToolHandle<ActsTrk::ITrackingGeometryTool> m_trackingGeometryTool{this, "TrackingGeometryTool", ""};
+   ServiceHandle<ActsTrk::ITrackingGeometrySvc> m_trackingGeometrySvc{this, "TrackingGeometrySvc", "ActsTrackingGeometrySvc"};
     ToolHandle<ActsTrk::TrackStatePrinterTool> m_trackStatePrinter{this, "TrackStatePrinter", "", "optional track state printer"};
     ToolHandle<ActsTrk::IFitterTool> m_fitterTool{this, "FitterTool", "", "Fitter Tool for Seeds"};
     ToolHandle<ActsTrk::IPixelOnTrackCalibratorTool<detail::RecoTrackStateContainer>> m_pixelCalibTool{this, "PixelCalibrator", "", "Opt. pixel measurement calibrator"};

@@ -76,9 +76,8 @@ def MsTrackSeedingToolCfg(flags, name="MsTrackSeedingTool", **kwargs):
     result = ComponentAccumulator()
     kwargs.setdefault("SegmentSelectionTool", result.popToolsAndMerge(SegmentSelectorCfg(flags)))
 
-    from ActsConfig.ActsGeometryConfig import ActsTrackingGeometryToolCfg
-    kwargs.setdefault("TrackingGeometryTool", result.getPrimaryAndMerge(ActsTrackingGeometryToolCfg(flags)))
-
+    from ActsConfig.ActsGeometryConfig import ActsTrackingGeometrySvc
+    result.merge(ActsTrackingGeometrySvc(flags))
     the_tool = CompFactory.MuonR4.MsTrackSeederTool(name, **kwargs)
     result.setPrivateTools(the_tool)
     return result
@@ -138,11 +137,11 @@ def MuidSaTagMakerAlgCfg(flags, name="MuonMuidTagSaAlg", **kwargs):
     kwargs.setdefault("ExtrapolateToIP", (flags.Detector.GeometryID or flags.Detector.GeometryITk) and not flags.Muon.MuonTrigger )
     kwargs.setdefault("RefitWithBeamSpot", (flags.Detector.GeometryID or flags.Detector.GeometryITk) and not flags.Muon.MuonTrigger )
     kwargs.setdefault("TrackSummaryTool", result.popToolsAndMerge(TrackSummaryToolCfg(flags)))
+    from ActsConfig.ActsGeometryConfig import ActsTrackingGeometrySvcCfg
+    result.merge(ActsTrackingGeometrySvcCfg(flags))
     if kwargs["ExtrapolateToIP"]:
         kwargs.setdefault("FittingTool", result.popToolsAndMerge(MSTrackFitterCfg(flags)))
         kwargs.setdefault("ExtrapolationTool", result.popToolsAndMerge(MSExtrapolatorCfg(flags)))
-        from ActsConfig.ActsGeometryConfig import ActsTrackingGeometryToolCfg
-        kwargs.setdefault("TrackingGeometryTool", result.getPrimaryAndMerge(ActsTrackingGeometryToolCfg(flags)))
         from ActsConfig.ActsEventCnvConfig import ActsTrackToTrackParticleCnvToolCfg
         kwargs.setdefault("TrackToTrackParticleCnvTool", 
             result.popToolsAndMerge(ActsTrackToTrackParticleCnvToolCfg(flags)))
@@ -157,8 +156,8 @@ def MuonInDetTrackSelectionAlgCfg(flags, name="MuonCombinedInDetCandidateAlgR4",
     if not flags.Acts.TrackingGeometry.UseBlueprint:
         raise RuntimeError("Cannot setup the InDet Candidate selection with Gen 1 geometry")
     kwargs.setdefault("ExtrapolationTool", result.popToolsAndMerge(MSExtrapolatorCfg(flags)))
-    from ActsConfig.ActsGeometryConfig import ActsTrackingGeometryToolCfg
-    kwargs.setdefault("TrackingGeometryTool", result.getPrimaryAndMerge(ActsTrackingGeometryToolCfg(flags)))
+    from ActsConfig.ActsGeometryConfig import ActsTrackingGeometrySvcCfg
+    result.merge(ActsTrackingGeometrySvcCfg(flags))
     the_alg = CompFactory.MuonCombinedR4.InDetTrackSelectionAlg(name, **kwargs)
     result.addEventAlgo(the_alg, primary = True)
     return result

@@ -21,7 +21,7 @@
 #include "ActsInterop/Logger.h"
 
 // PACKAGE
-#include "ActsGeometryInterfaces/ITrackingGeometryTool.h"
+#include "ActsGeometryInterfaces/ITrackingGeometrySvc.h"
 #include "ActsGeometry/ATLASMagneticFieldWrapper.h"
 
 #include "ActsEvent/ContextUtility.h"
@@ -95,14 +95,6 @@ namespace ActsTrk {
     // Helper to compute "signal compatibility" for sorting vertices
     double estimateSignalCompatibility(xAOD::Vertex* vtx) const;
 
-    // Provide access to the geometry tool
-    virtual
-    const ActsTrk::ITrackingGeometryTool*
-    trackingGeometryTool() const
-    {
-      return m_trackingGeometryTool.get();
-    }
-
     /// logging instance
     std::unique_ptr<const Acts::Logger> m_logger {nullptr};
     const Acts::Logger &logger() const { return *m_logger; }
@@ -124,7 +116,7 @@ namespace ActsTrk {
     /** @brief Auxiliary class to access the magnetic field, geometry and calibration context */
     ContextUtility m_ctxProvider{this};
 
-    PublicToolHandle<ActsTrk::ITrackingGeometryTool> m_trackingGeometryTool{this, "TrackingGeometryTool", "", "ActsTrackingGeometryTool"};
+    ServiceHandle<ActsTrk::ITrackingGeometrySvc> m_trackingGeometrySvc{this, "TrackingGeometrySvc", "ActsTrackingGeometrySvc"};
 
     ToolHandle<InDet::IInDetTrackSelectionTool> m_trkFilter{this, "TrackSelector", "", "InDetTrackSelectionTool"};
     SG::ReadCondHandleKey<InDet::BeamSpotData> m_beamSpotKey {this, "BeamSpotKey", "BeamSpotData", "SG key for beam spot"};

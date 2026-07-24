@@ -17,7 +17,7 @@
 #include "MuonReadoutGeometryR4/MuonDetectorManager.h"
 #include "MuonRecToolInterfacesR4/ISegmentSelectionTool.h"
 #include "MuonRecToolInterfacesR4/ITrackSeedingDiagnosticsTool.h"
-#include "ActsGeometryInterfaces/ITrackingGeometryTool.h"
+#include "ActsGeometryInterfaces/ITrackingGeometrySvc.h"
 #include "ActsGeometryInterfaces/IExtrapolationTool.h"
 #include "MagFieldConditions/AtlasFieldCacheCondObj.h"
 
@@ -198,7 +198,7 @@ namespace MuonR4{
              *         two segments for their compatibilitiy */
             ToolHandle<ISegmentSelectionTool> m_segSelector{this, "SegmentSelectionTool" , "" };
             /** @brief Tracking geometry tool */
-            PublicToolHandle<ActsTrk::ITrackingGeometryTool> m_trackingGeometryTool{this, "TrackingGeometryTool", ""};
+           ServiceHandle<ActsTrk::ITrackingGeometrySvc> m_trackingGeometrySvc{this, "TrackingGeometrySvc", "ActsTrackingGeometrySvc"};
 
             /** @brief Utility to fetch the geometry, magnetic field and calibration context in the event */
             ActsTrk::ContextUtility m_ctxProvider{this};

@@ -14,7 +14,7 @@
 
 // Tools
 #include "ActsGeometryInterfaces/IExtrapolationTool.h"
-#include "ActsGeometryInterfaces/ITrackingGeometryTool.h"
+#include "ActsGeometryInterfaces/ITrackingGeometrySvc.h"
 #include "ActsToolInterfaces/ITrackParamsEstimationTool.h"
 #include "src/TrackStatePrinterTool.h"
 #include "ActsCalibrators/xAODUncalibMeasSurfAcc.h"
@@ -74,8 +74,7 @@ private:
   // Tool Handles
   ToolHandle<GenericMonitoringTool> m_monTool{this, "MonTool", "",
                                               "Monitoring tool"};
-  PublicToolHandle<ITrackingGeometryTool> m_trackingGeometryTool{
-      this, "TrackingGeometryTool", ""};
+  ServiceHandle<ActsTrk::ITrackingGeometrySvc> m_trackingGeometrySvc{this, "TrackingGeometrySvc", "ActsTrackingGeometrySvc"};
   ToolHandle<ITrackParamsEstimationTool> m_paramEstimationTool{
       this, "TrackParamsEstimationTool", "", "Track Param Estimation from Seeds"};
   ToolHandle<IFitterTool> m_fitterTool{

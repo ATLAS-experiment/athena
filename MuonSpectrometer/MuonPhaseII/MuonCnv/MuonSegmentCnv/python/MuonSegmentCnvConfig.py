@@ -38,8 +38,7 @@ def xAODSegmentCnvAlgCfg(flags, name="MuonR4xAODSegmentCnvAlg", **kwargs):
     kwargs.setdefault("estimateHoles", flags.Muon.scheduleActsReco)
 
     if kwargs["estimateHoles"]:
-          from ActsConfig.ActsGeometryConfig import ActsTrackingGeometryToolCfg, ActsExtrapolationToolCfg
-          kwargs.setdefault("TrackingGeometryTool", result.getPrimaryAndMerge(ActsTrackingGeometryToolCfg(flags)))
+          from ActsConfig.ActsGeometryConfig import ActsExtrapolationToolCfg
           kwargs.setdefault("ExtrapolationTool", result.popToolsAndMerge(ActsExtrapolationToolCfg(flags, 
                                                                                             MaxSteps=10000,
                                                                                             InteractionEloss = False,

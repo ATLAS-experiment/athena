@@ -21,7 +21,7 @@
 #include "ActsInterop/Logger.h"
 
 // PACKAGE
-#include "ActsGeometryInterfaces/ITrackingGeometryTool.h"
+#include "ActsGeometryInterfaces/ITrackingGeometrySvc.h"
 #include "ActsGeometryInterfaces/IExtrapolationTool.h"
 #include "ActsGeometryInterfaces/GeometryContext.h"
 #include "ActsGeometry/ATLASMagneticFieldWrapper.h"
@@ -104,13 +104,6 @@ namespace ActsTrk {
     Trk::Perigee* actsBoundToTrkPerigee(
     const Acts::BoundTrackParameters& bound, const Acts::Vector3& surfCenter) const;
 
-    virtual
-    const ActsTrk::ITrackingGeometryTool*
-    trackingGeometryTool() const
-    {
-      return m_trackingGeometryTool.get();
-    }
-
     using Propagator = Acts::Propagator<Acts::EigenStepper<>, Acts::Navigator>;
     using TrackLinearizer = Acts::HelicalTrackLinearizer;
     using VertexFitter = Acts::FullBilloirVertexFitter;
@@ -126,7 +119,7 @@ namespace ActsTrk {
     std::optional<TrackLinearizer> m_linearizer = std::nullopt;
 
 
-    PublicToolHandle<ITrackingGeometryTool> m_trackingGeometryTool{this, "TrackingGeometryTool", "", "ActsTrackingGeometryTool"};
+    ServiceHandle<ActsTrk::ITrackingGeometrySvc> m_trackingGeometrySvc{this, "TrackingGeometrySvc", "ActsTrackingGeometrySvc"};
     ToolHandle<InDet::IInDetTrackSelectionTool> m_trkFilter{this, "TrackSelector", "", "InDetTrackSelectionTool"};
     SG::ReadCondHandleKey<InDet::BeamSpotData> m_beamSpotKey {this, "BeamSpotKey", "BeamSpotData", "SG key for beam spot"};
 

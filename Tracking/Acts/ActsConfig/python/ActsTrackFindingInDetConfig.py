@@ -40,12 +40,10 @@ def ActsInDetTrackStatePrinterToolCfg(flags,
                                                 pixel=['PixelSpacePoints'],
                                                 strip=['SCT_SpacePoints', 'OverlapSpacePoints']))
 
-    if 'TrackingGeometryTool' not in kwargs:
-        from ActsConfig.ActsGeometryConfig import ActsTrackingGeometryToolCfg
-        kwargs.setdefault(
-            "TrackingGeometryTool",
-            acc.getPrimaryAndMerge(ActsTrackingGeometryToolCfg(flags)),
-        )
+    from ActsAlignmentAlgs.AlignmentAlgsConfig import ActsGeometryContextAlgCfg
+    from ActsConfig.ActsGeometryConfig import ActsTrackingGeometrySvcCfg
+    acc.merge(ActsGeometryContextAlgCfg(flags))
+    acc.merge(ActsTrackingGeometrySvcCfg(flags))
 
     acc.setPrivateTools(CompFactory.ActsTrk.TrackStatePrinterTool(name, **kwargs))
     return acc
@@ -154,8 +152,7 @@ def ActsInDetMainTrackFindingAlgCfg(flags,
         kwargs.setdefault("ptMinMeasurements", seedOrder(flags, pixel=[3], strip=[6]))
         kwargs.setdefault("absEtaMaxMeasurements", seedOrder(flags, pixel=[3], strip=[999999]))
 
-    from ActsConfig.ActsGeometryConfig import ActsTrackingGeometryToolCfg, ActsGeometryRealmConvTool
-    kwargs.setdefault("TrackingGeometryTool", acc.getPrimaryAndMerge(ActsTrackingGeometryToolCfg(flags)))
+    from ActsConfig.ActsGeometryConfig import ActsGeometryRealmConvTool
     kwargs.setdefault("GeometryRealmConvTool", acc.getPrimaryAndMerge(ActsGeometryRealmConvTool(flags)))
 
     if 'TrackParamsEstimationTool' not in kwargs:

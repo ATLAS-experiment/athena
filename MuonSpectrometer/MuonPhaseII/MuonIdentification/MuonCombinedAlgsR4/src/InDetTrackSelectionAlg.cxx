@@ -52,12 +52,12 @@ namespace MuonCombinedR4 {
         ATH_CHECK(m_msTrkKey.initialize());
         ATH_CHECK(m_ctxProvider.initialize());
         ATH_CHECK(m_selectionTool.retrieve(EnableTool{!m_selectionTool.empty()}));
-        ATH_CHECK(m_trackingGeometryTool.retrieve());
+        ATH_CHECK(m_trackingGeometrySvc.retrieve());
         ATH_CHECK(m_extrapolationTool.retrieve());
         ATH_CHECK(m_writeKey.initialize());
         ATH_CHECK(m_segmentKey.initialize());
         ATH_CHECK(detStore()->retrieve(m_detMgr));
-        if (m_trackingGeometryTool->trackingGeometry()->geometryVersion() !=
+        if (m_trackingGeometrySvc->trackingGeometry()->geometryVersion() !=
             Acts::TrackingGeometry::GeometryVersion::Gen3){
             ATH_MSG_ERROR("The ID track selection alg requires the Gen 3 geometry format");
             return StatusCode::FAILURE;
@@ -130,10 +130,10 @@ namespace MuonCombinedR4 {
         InDetTrackSelectionAlg::extrapolateToMsEntrance(const EventContext& ctx,
                                                         const xAOD::TrackParticle& idTrack) const {
 
-        const auto trackingGeometry = m_trackingGeometryTool->trackingGeometry();
+        const auto trackingGeometry = m_trackingGeometrySvc->trackingGeometry();
     
         const Acts::GeometryContext tgContext = m_ctxProvider.getGeometryContext(ctx);
-        const Acts::TrackingVolume* msEntrance = m_trackingGeometryTool->getEnvelope(ActsTrk::SystemEnvelope::CaloExit);
+        const Acts::TrackingVolume* msEntrance = m_trackingGeometrySvc->getEnvelope(ActsTrk::SystemEnvelope::CaloExit);
         ATH_MSG_DEBUG(__func__<<"() "<<__LINE__<<" - Extrapolate ID "<<print(idTrack)<<"\n to the calorimeter exit.\n"
                         <<msEntrance->volumeBounds()<<", id: "<<msEntrance->geometryId());
         /** Retrieve the last state of the track to extrapolate into the MS  */

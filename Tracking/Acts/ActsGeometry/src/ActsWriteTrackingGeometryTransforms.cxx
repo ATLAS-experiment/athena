@@ -36,7 +36,7 @@ StatusCode ActsWriteTrackingGeometryTransforms::initialize() {
   ATH_CHECK (detStore()->retrieve(m_pixelID, "PixelID") );
   ATH_CHECK (detStore()->retrieve(m_SCT_ID,"SCT_ID") );
   
-  ATH_CHECK(m_trackingGeometryTool.retrieve());
+  ATH_CHECK(m_trackingGeometrySvc.retrieve());
   ATH_CHECK(m_ctxProvider.initialize());
   
   std::ofstream os(m_outputName); // truncate
@@ -50,7 +50,7 @@ StatusCode ActsWriteTrackingGeometryTransforms::execute(const EventContext& ctx)
 
 
   
-  auto trackingGeometry = m_trackingGeometryTool->trackingGeometry();
+  auto trackingGeometry = m_trackingGeometrySvc->trackingGeometry();
   ATH_MSG_DEBUG("Retrieved tracking Geometry");
   const Acts::GeometryContext tgContext = m_ctxProvider.getGeometryContext(ctx);
   ATH_MSG_DEBUG("Retrieved geometry context");

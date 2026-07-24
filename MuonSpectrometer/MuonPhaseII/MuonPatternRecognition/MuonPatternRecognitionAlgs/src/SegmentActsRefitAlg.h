@@ -13,7 +13,7 @@
 #include "StoreGate/WriteDecorHandleKey.h"
 
 
-#include "ActsGeometryInterfaces/ITrackingGeometryTool.h"
+#include "ActsGeometryInterfaces/ITrackingGeometrySvc.h"
 #include "ActsGeometryInterfaces/IExtrapolationTool.h"
 #include "MuonRecToolInterfacesR4/ISegmentSelectionTool.h"
 #include "MuonRecToolInterfacesR4/ISpacePointCalibrator.h"
@@ -87,7 +87,7 @@ namespace MuonR4{
             /** @brief IdHelperSvc to decode the Identifiers */
             ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{this, "IdHelperSvc",  "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
             /** @brief Tracking geometry tool */
-            PublicToolHandle<ActsTrk::ITrackingGeometryTool> m_trackingGeometryTool{this, "TrackingGeometryTool", ""};
+           ServiceHandle<ActsTrk::ITrackingGeometrySvc> m_trackingGeometrySvc{this, "TrackingGeometrySvc", "ActsTrackingGeometrySvc"};
             /** @brief Auxiliary class to access the magnetic field, geometry and calibration context */
             ActsTrk::ContextUtility m_ctxProvider{this};
             /** @brief Segment selection tool to pick the good quality segments */

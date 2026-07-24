@@ -19,7 +19,7 @@
 #include "ActsToolInterfaces/IFitterTool.h"
 #include "ActsToolInterfaces/ITrackToTrackParticleCnvTool.h"
 #include "ActsGeometryInterfaces/IExtrapolationTool.h"
-#include "ActsGeometryInterfaces/ITrackingGeometryTool.h"
+#include "ActsGeometryInterfaces/ITrackingGeometrySvc.h"
 
 #include "ActsEvent/TrackContainer.h"
 #include "ActsEvent/ContextUtility.h"
@@ -72,7 +72,7 @@ namespace MuonCombinedR4{
             /** @brief Data dependency on the beam spot */
             SG::ReadHandleKey<xAOD::UncalibratedMeasurementContainer> m_beamSpotKey{this, "BeamSpotKey", "BeamSpotMeasurements"};
             /** @brief Tracking geometry tool */
-            PublicToolHandle<ActsTrk::ITrackingGeometryTool> m_trackingGeometryTool{this, "TrackingGeometryTool", ""};
+           ServiceHandle<ActsTrk::ITrackingGeometrySvc> m_trackingGeometrySvc{this, "TrackingGeometrySvc", "ActsTrackingGeometrySvc"};
             /** @brief Conversion tool from ACts -> xAOD:TrackParticle */
             ToolHandle<ActsTrk::ITrackToTrackParticleCnvTool> m_cnvTool{this, "TrackToTrackParticleCnvTool", ""};
             /** @brief Context provider for geometry, magnetic field and calibration contexts */

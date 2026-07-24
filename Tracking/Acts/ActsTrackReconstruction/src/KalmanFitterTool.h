@@ -19,7 +19,7 @@
 
 // PACKAGE
 #include "ActsEvent/TrackContainer.h"
-#include "ActsGeometryInterfaces/ITrackingGeometryTool.h"
+#include "ActsGeometryInterfaces/ITrackingGeometrySvc.h"
 #include "ActsGeometryInterfaces/IGeometryRealmConvTool.h"
 
 #include "ActsCalibrators/TrkMeasSurfaceAccessor.h"
@@ -111,7 +111,7 @@ private:
                                  detail::SourceLinkType slType) const;
 
 
-  PublicToolHandle<ITrackingGeometryTool> m_trackingGeometryTool{this, "TrackingGeometryTool", ""};
+ ServiceHandle<ActsTrk::ITrackingGeometrySvc> m_trackingGeometrySvc{this, "TrackingGeometrySvc", "ActsTrackingGeometrySvc"};
   PublicToolHandle<IGeometryRealmConvTool> m_geometryConvTool{this, "GeometryRealmConvTool", ""};
 
   ToolHandle<Trk::IRIO_OnTrackCreator> m_ROTcreator {this, "RotCreatorTool", ""};

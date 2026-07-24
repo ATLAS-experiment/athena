@@ -55,7 +55,7 @@ namespace MuonR4{
     StatusCode MsTrackSeederTool::initialize() {
         ATH_CHECK(m_ctxProvider.initialize());
         ATH_CHECK(m_segSelector.retrieve());
-        ATH_CHECK(m_trackingGeometryTool.retrieve());
+        ATH_CHECK(m_trackingGeometrySvc.retrieve());
         ATH_CHECK(m_segmentKey.initialize(!m_segmentKey.empty()));
         ATH_CHECK(detStore()->retrieve(m_detMgr));
 
@@ -123,7 +123,7 @@ namespace MuonR4{
             const Acts::GeometryIdentifier volId = volumeId(firstSurf);
       
             // Find the first measurement
-            const Acts::TrackingVolume* volume{m_trackingGeometryTool->trackingGeometry()->findVolume(volId)};
+            const Acts::TrackingVolume* volume{m_trackingGeometrySvc->trackingGeometry()->findVolume(volId)};
                        
             if (!volume) {
                 ATH_MSG_WARNING(__func__<<"() "<<__LINE__
@@ -257,7 +257,7 @@ namespace MuonR4{
                 wireDir = xAOD::muonSurface(measPtr).localToGlobalTransform(tgContext).linear().col(Amg::z);
                 break;
             } else if (xAOD::isNSW(measPtr->type())) {
-                wireDir =  m_trackingGeometryTool->trackingGeometry()->findVolume(volumeId(xAOD::muonSurface(measPtr)))->
+                wireDir =  m_trackingGeometrySvc->trackingGeometry()->findVolume(volumeId(xAOD::muonSurface(measPtr)))->
                                                   localToGlobalTransform(tgContext).linear().col(Amg::x);
                 break;
             }

@@ -8,7 +8,7 @@
 #include "AthenaBaseComps/AthAlgTool.h"
 
 #include "ActsGeometryInterfaces/IGeometryRealmConvTool.h"
-#include "ActsGeometryInterfaces/ITrackingGeometryTool.h"
+#include "ActsGeometryInterfaces/ITrackingGeometrySvc.h"
 
 #include "ActsEvent/ContextUtility.h"
 #include "MuonReadoutGeometry/MuonDetectorManager.h"
@@ -58,7 +58,7 @@ namespace ActsTrk{
             SurfacePtr_t translateFreeSurface(const EventContext& ctx,
                                               const Acts::Surface& surface) const;
            
-            PublicToolHandle<ITrackingGeometryTool> m_trackingGeometryTool{this, "TrackingGeometryTool", ""};
+           ServiceHandle<ActsTrk::ITrackingGeometrySvc> m_trackingGeometrySvc{this, "TrackingGeometrySvc", "ActsTrackingGeometrySvc"};
 
             /** @brief Context provider for geometry, magnetic field and calibration contexts */
             ActsTrk::ContextUtility m_ctxProvider{this};

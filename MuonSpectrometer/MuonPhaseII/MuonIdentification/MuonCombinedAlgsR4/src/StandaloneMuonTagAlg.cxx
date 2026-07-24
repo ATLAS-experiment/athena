@@ -24,7 +24,7 @@ namespace MuonCombinedR4{
 
         ATH_CHECK(m_trackFitTool.retrieve(EnableTool{m_refitWithBS}));
         ATH_CHECK(m_extrapolationTool.retrieve(EnableTool{m_extrapolateToIP}));
-        ATH_CHECK(m_trackingGeometryTool.retrieve(EnableTool{m_extrapolateToIP}));
+        ATH_CHECK(m_trackingGeometrySvc.retrieve());
         ATH_CHECK(m_cnvTool.retrieve(EnableTool{m_refitWithBS}));
         ATH_CHECK(m_beamSpotKey.initialize(m_extrapolateToIP));
         ATH_CHECK(m_ctxProvider.initialize(m_extrapolateToIP));
@@ -131,7 +131,7 @@ namespace MuonCombinedR4{
         auto startPars = ActsTrk::getActsTrack(msTrack)->createParametersAtReference();
         std::shared_ptr<const Acts::Surface> targetSurf{};
         if (ship.beamSpot) {
-            ActsTrk::detail::xAODUncalibMeasSurfAcc surfAcc{m_trackingGeometryTool.get()};
+            ActsTrk::detail::xAODUncalibMeasSurfAcc surfAcc{m_trackingGeometrySvc.get()};
             targetSurf = surfAcc.get(ship.beamSpot)->getSharedPtr();
         } else {
             targetSurf = Acts::Surface::makeShared<Acts::PerigeeSurface>(Amg::Transform3D::Identity());

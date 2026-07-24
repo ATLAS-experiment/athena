@@ -18,10 +18,6 @@ def ActsEgammaSelectedTrackCopyCfg(flags, name="ActsEgammaSelectedTrackCopy", **
     # Calo geometry only...
     assert flags.Detector.GeometryITk
 
-    if "TrackingGeometryTool" not in kwargs:
-        from ActsConfig.ActsGeometryConfig import ActsTrackingGeometryToolCfg
-        kwargs["TrackingGeometryTool"] = acc.getPrimaryAndMerge(ActsTrackingGeometryToolCfg(flags))
-
     if "egammaCaloClusterSelector" not in kwargs:
         from egammaCaloTools.egammaCaloToolsConfig import (
             egammaCaloClusterSelectorGSFCfg,

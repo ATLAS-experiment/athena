@@ -31,7 +31,7 @@ namespace ActsTrk {
 StatusCode KalmanFitterTool::initialize() {
 
   ATH_MSG_DEBUG(name() << "::" << __FUNCTION__);
-  ATH_CHECK(m_trackingGeometryTool.retrieve());
+  ATH_CHECK(m_trackingGeometrySvc.retrieve());
   ATH_CHECK(m_geometryConvTool.retrieve());
   ATH_CHECK(m_ROTcreator.retrieve(EnableTool{!m_ROTcreator.empty()}));
   m_logger = makeActsAthenaLogger(this, "KalmanRefit");
@@ -51,7 +51,7 @@ StatusCode KalmanFitterTool::initialize() {
                 logger().cloneWithSuffix("DirectKalmanFitter"));
 
   } else {
-    Acts::Navigator navigator( Acts::Navigator::Config{ m_trackingGeometryTool->trackingGeometry() },
+    Acts::Navigator navigator( Acts::Navigator::Config{ m_trackingGeometrySvc->trackingGeometry() },
             logger().cloneWithSuffix("Navigator"));
     Acts::Propagator<Acts::SympyStepper, Acts::Navigator> propagator(stepper, 
                       std::move(navigator),
@@ -92,8 +92,8 @@ StatusCode KalmanFitterTool::initialize() {
   }
   /// Configure the fit extensions for the uncalibrated measurement fits
   {
-    m_unalibMeasSurfAcc = detail::xAODUncalibMeasSurfAcc{m_trackingGeometryTool.get()}; 
-    m_uncalibMeasCalibrator = xAODUnCalibrator_t::NoCalibration(m_trackingGeometryTool.get());
+    m_unalibMeasSurfAcc = detail::xAODUncalibMeasSurfAcc{m_trackingGeometrySvc.get()}; 
+    m_uncalibMeasCalibrator = xAODUnCalibrator_t::NoCalibration(m_trackingGeometrySvc.get());
 
     FitterExtension_t& configureMe = m_kfExtensions[Acts::toUnderlying(detail::SourceLinkType::xAODUnCalibMeas)];
     configureMe = extensionTemplate;

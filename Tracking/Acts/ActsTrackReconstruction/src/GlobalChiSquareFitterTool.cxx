@@ -25,7 +25,7 @@ namespace ActsTrk {
 StatusCode GlobalChiSquareFitterTool::initialize() {
 
   ATH_MSG_DEBUG(name() << "::" << __FUNCTION__);
-  ATH_CHECK(m_trackingGeometryTool.retrieve());
+  ATH_CHECK(m_trackingGeometrySvc.retrieve());
   ATH_CHECK(m_ROTcreator.retrieve(EnableTool{!m_ROTcreator.empty()}));
   ATH_CHECK(m_geometryConvTool.retrieve());
   ATH_CHECK(m_muonCalibrator.retrieve(EnableTool{!m_muonCalibrator.empty()}));
@@ -34,7 +34,7 @@ StatusCode GlobalChiSquareFitterTool::initialize() {
   if (!m_doStraightLine){
       // Fitter
       CurvedPropagator_t::Stepper stepper{std::make_shared<ATLASMagneticFieldWrapper>()};
-      Acts::Navigator::Config navConfig{m_trackingGeometryTool->trackingGeometry()};
+      Acts::Navigator::Config navConfig{m_trackingGeometrySvc->trackingGeometry()};
       Acts::Navigator navigator(std::move(navConfig), logger().cloneWithSuffix("Navigator"));
       CurvedPropagator_t propagator{stepper, std::move(navigator), logger().cloneWithSuffix("Prop")};
 
@@ -42,7 +42,7 @@ StatusCode GlobalChiSquareFitterTool::initialize() {
                                                   logger().cloneWithSuffix("GlobalChiSquareFitter"));
   } else {
       Acts::StraightLineStepper stepper{};
-      Acts::Navigator::Config navConfig{m_trackingGeometryTool->trackingGeometry()};
+      Acts::Navigator::Config navConfig{m_trackingGeometrySvc->trackingGeometry()};
       Acts::Navigator navigator(std::move(navConfig), logger().cloneWithSuffix("Navigator"));
       StraightPropagator_t propagator{stepper, std::move(navigator), logger().cloneWithSuffix("Prop")};
 
@@ -79,14 +79,14 @@ StatusCode GlobalChiSquareFitterTool::initialize() {
     configureMe.surfaceAccessor.connect<&detail::TrkPrepRawDataSurfaceAcc::operator()>(&m_prdSurfaceAcc);
   }
   {
-    m_unalibMeasSurfAcc = detail::xAODUncalibMeasSurfAcc{m_trackingGeometryTool.get()};
+    m_unalibMeasSurfAcc = detail::xAODUncalibMeasSurfAcc{m_trackingGeometrySvc.get()};
 
     /// Needs to be filled with live.
     Gx2FitterExtension_t& configureMe = m_gx2fExtensions[Acts::toUnderlying(detail::SourceLinkType::xAODUnCalibMeas)];
     configureMe = extensionTemplate;
     configureMe.surfaceAccessor.connect<&detail::xAODUncalibMeasSurfAcc::operator()>(&m_unalibMeasSurfAcc);
     configureMe.calibrator.connect<&detail::xAODUncalibMeasCalibrator::calibrate>(&m_uncalibMeasCalibrator);
-    m_idCalibrator = xAODItkCalibrator_t::NoCalibration(m_trackingGeometryTool.get());
+    m_idCalibrator = xAODItkCalibrator_t::NoCalibration(m_trackingGeometrySvc.get());
 
     /// Connect the muon types with the muon calibrator
     using enum xAOD::UncalibMeasType;

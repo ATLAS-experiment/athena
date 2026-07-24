@@ -23,7 +23,7 @@
 #include "src/detail/Definitions.h"
 
 #include "ActsCalibrators/xAODUncalibMeasSurfAcc.h"
-#include "ActsGeometryInterfaces/ITrackingGeometryTool.h"
+#include "ActsGeometryInterfaces/ITrackingGeometrySvc.h"
 
 
 #include "xAODTruth/TruthParticleContainer.h"
@@ -67,7 +67,7 @@ namespace ActsTrk {
     SG::WriteDecorHandleKey<xAOD::TrackParticleContainer> m_layerPrimaryExpectedKey { this, "HGTD_primary_expected", m_trackParticleContainerName, "HGTD_primary_expected", "Decoration for primary expected cluster" };  
       
     ActsTrk::detail::xAODUncalibMeasSurfAcc m_surfAcc{};
-    PublicToolHandle<ActsTrk::ITrackingGeometryTool> m_trackingGeometryTool{this, "TrackingGeometryTool", ""};
+   ServiceHandle<ActsTrk::ITrackingGeometrySvc> m_trackingGeometrySvc{this, "TrackingGeometrySvc", "ActsTrackingGeometrySvc"};
 
     std::unique_ptr<SG::AuxElement::Accessor<int>> m_acc_nHgtdHits;
 

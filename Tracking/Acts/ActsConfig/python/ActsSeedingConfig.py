@@ -683,10 +683,6 @@ def ActsSeedToTrackCnvAlgCfg(flags,
   kwargs.setdefault('EstimatedTrackParametersKey', [])
   kwargs.setdefault('ACTSTracksLocation', f'SiSPTracksSeedSegments{flags.Tracking.ActiveConfig.extension}Tracks')
 
-  if 'TrackingGeometryTool' not in kwargs:
-    from ActsConfig.ActsGeometryConfig import ActsTrackingGeometryToolCfg
-    kwargs.setdefault('TrackingGeometryTool', acc.getPrimaryAndMerge(ActsTrackingGeometryToolCfg(flags)))
-
   acc.addEventAlgo(CompFactory.ActsTrk.SeedToTrackCnvAlg(name, **kwargs))
   return acc
 

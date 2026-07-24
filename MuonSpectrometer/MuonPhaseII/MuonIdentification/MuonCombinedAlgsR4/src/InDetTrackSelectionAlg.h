@@ -17,7 +17,7 @@
 #include "MuonTrackEvent/MuonTag.h"
 #include "InDetTrackSelectionTool/IInDetTrackSelectionTool.h"
 
-#include "ActsGeometryInterfaces/ITrackingGeometryTool.h"
+#include "ActsGeometryInterfaces/ITrackingGeometrySvc.h"
 #include "ActsGeometryInterfaces/IExtrapolationTool.h"
 #include "MuonReadoutGeometryR4/MuonDetectorManager.h"
 
@@ -76,7 +76,7 @@ namespace MuonCombinedR4 {
             /** @brief Track quality selection tool (optional) */
             ToolHandle<InDet::IInDetTrackSelectionTool> m_selectionTool{this, "TackSelectionTool" , ""};
             /** @brief Tracking geometry tool */
-            PublicToolHandle<ActsTrk::ITrackingGeometryTool> m_trackingGeometryTool{this, "TrackingGeometryTool", ""};
+           ServiceHandle<ActsTrk::ITrackingGeometrySvc> m_trackingGeometrySvc{this, "TrackingGeometrySvc", "ActsTrackingGeometrySvc"};
             /** @brief Track extrapolation tool */
             ToolHandle<ActsTrk::IExtrapolationTool> m_extrapolationTool{this, "ExtrapolationTool" ,"" };
             /** @brief Context provider for geometry, magnetic field and calibration contexts */

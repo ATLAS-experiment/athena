@@ -24,7 +24,7 @@
 #include "InDetReadoutGeometry/SiDetectorElementCollection.h"
 #include "xAODInDetMeasurement/PixelClusterContainer.h"
 #include "xAODInDetMeasurement/StripClusterContainer.h"
-#include "ActsGeometryInterfaces/ITrackingGeometryTool.h"
+#include "ActsGeometryInterfaces/ITrackingGeometrySvc.h"
 
 // Handle Keys
 #include "StoreGate/ReadHandleKey.h"

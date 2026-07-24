@@ -15,7 +15,10 @@ def ActsToTrkFitterCfg(flags,
 
     fitterKind = flags.Acts.trackFitterType  if fitterKind is None else fitterKind
 
-    from ActsConfig.ActsGeometryConfig import ActsGeometryRealmConvTool
+    from ActsAlignmentAlgs.AlignmentAlgsConfig import ActsGeometryContextAlgCfg
+    from ActsConfig.ActsGeometryConfig import ActsTrackingGeometrySvcCfg, ActsGeometryRealmConvTool
+    acc.merge(ActsGeometryContextAlgCfg(flags))
+    acc.merge(ActsTrackingGeometrySvcCfg(flags))
     kwargs.setdefault("GeometryRealmConvTool", acc.getPrimaryAndMerge(ActsGeometryRealmConvTool(flags)))
     if "ATLASConverterTool" not in kwargs:
         from ActsConfig.ActsEventCnvConfig import ActsToTrkConverterToolCfg
@@ -56,8 +59,10 @@ def ActsFitterCfg(flags,
 
     # Make sure this is set correctly!
     #  /eos/project-a/acts/public/MaterialMaps/ATLAS/material-maps-Pixel-SCT.json
-    from ActsConfig.ActsGeometryConfig import ActsTrackingGeometryToolCfg, ActsGeometryRealmConvTool
-    kwargs.setdefault("TrackingGeometryTool", acc.getPrimaryAndMerge(ActsTrackingGeometryToolCfg(flags)))
+    from ActsAlignmentAlgs.AlignmentAlgsConfig import ActsGeometryContextAlgCfg
+    from ActsConfig.ActsGeometryConfig import ActsTrackingGeometrySvcCfg, ActsGeometryRealmConvTool
+    acc.merge(ActsGeometryContextAlgCfg(flags))
+    acc.merge(ActsTrackingGeometrySvcCfg(flags))
     kwargs.setdefault("GeometryRealmConvTool", acc.getPrimaryAndMerge(ActsGeometryRealmConvTool(flags)))
 
     if fitterKind is TrackFitterType.KalmanFitter:

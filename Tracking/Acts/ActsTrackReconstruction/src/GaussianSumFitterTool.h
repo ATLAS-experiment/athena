@@ -26,7 +26,7 @@
 #include "ActsEvent/ContextUtility.h"
 
 
-#include "ActsGeometryInterfaces/ITrackingGeometryTool.h"
+#include "ActsGeometryInterfaces/ITrackingGeometrySvc.h"
 #include "ActsGeometryInterfaces/IGeometryRealmConvTool.h"
 #include "ActsToolInterfaces/IFitterTool.h"
 #include "src/detail/FitterHelperFunctions.h"
@@ -103,7 +103,7 @@ private:
  private:
   /** @brief Abrivate the track state proxy */
   using TrackState_t = MutableTrackStateBackend::TrackStateProxy;
-  PublicToolHandle<ITrackingGeometryTool> m_trackingGeometryTool{this, "TrackingGeometryTool", ""};
+ ServiceHandle<ActsTrk::ITrackingGeometrySvc> m_trackingGeometrySvc{this, "TrackingGeometrySvc", "ActsTrackingGeometrySvc"};
   PublicToolHandle<IGeometryRealmConvTool> m_geometryConvTool{this, "GeometryRealmConvTool", ""};
   /** @brief Utility to fetch the geometry, magnetic field and calibration context in the event */
   ContextUtility m_ctxProvider{this};

@@ -168,9 +168,9 @@ ExtrapolationTool::initialize()
 
   m_logger = makeActsAthenaLogger(this, name());
 
-  ATH_CHECK( m_trackingGeometryTool.retrieve() );
+  ATH_CHECK( m_trackingGeometrySvc.retrieve() );
 
-  Acts::Navigator::Config navConfig{m_trackingGeometryTool->trackingGeometry()};
+  Acts::Navigator::Config navConfig{m_trackingGeometrySvc->trackingGeometry()};
   Acts::Navigator navigator{std::move(navConfig), logger().clone()};
   
   ATH_CHECK(m_ctxProvider.initialize());

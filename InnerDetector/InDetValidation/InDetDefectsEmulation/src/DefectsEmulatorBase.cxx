@@ -23,7 +23,7 @@ namespace InDet{
   {}
 
   StatusCode DefectsEmulatorBase::initializeBase(unsigned int wafer_hash_max){
-     ATH_CHECK( m_trackingGeometryTool.retrieve( DisableTool{m_noiseProbability.empty()} ));
+     ATH_CHECK(m_trackingGeometrySvc.retrieve());
      if (!m_noiseProbability.value().empty()) {
         if (m_modulePattern.value().size() != m_noiseProbability.value().size()) {
            ATH_MSG_FATAL("Number of module patterns and noise probabilities  differs: "
@@ -47,7 +47,7 @@ namespace InDet{
         }
         m_noiseParamIdx.resize(wafer_hash_max, static_cast<unsigned short>(m_noiseProbability.size()));
         m_maxNShape=0;
-        std::shared_ptr<const Acts::TrackingGeometry> tracking_geometry = m_trackingGeometryTool->trackingGeometry();
+        const auto& tracking_geometry = m_trackingGeometrySvc->trackingGeometry();
 
         ModuleIdentifierMatchUtil::ModuleData_t module_data;
         std::vector<unsigned int> module_pattern_idx;

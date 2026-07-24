@@ -19,7 +19,7 @@
 
 // PACKAGE
 #include "ActsGeometryInterfaces/IExtrapolationTool.h"
-#include "ActsGeometryInterfaces/ITrackingGeometryTool.h"
+#include "ActsGeometryInterfaces/ITrackingGeometrySvc.h"
 #include "ActsGeometry/ATLASMagneticFieldWrapper.h"
 
 #include "ActsEvent/ContextUtility.h"
@@ -110,7 +110,7 @@ public:
   /** @brief Utility to fetch the geometry, magnetic field and calibration context in the event */
   ContextUtility m_ctxProvider{this};
 
-  PublicToolHandle<ActsTrk::ITrackingGeometryTool> m_trackingGeometryTool{this, "TrackingGeometryTool", "ActsTrackingGeometryTool"};
+  ServiceHandle<ActsTrk::ITrackingGeometrySvc> m_trackingGeometrySvc{this, "TrackingGeometrySvc", "ActsTrackingGeometrySvc"};
 
   Gaudi::Property<std::string> m_fieldMode{this, "FieldMode", "ATLAS", "Either ATLAS or Constant or StraightLine"};
   Gaudi::Property<std::vector<double>> m_constantFieldVector{this, "ConstantFieldVector", {0, 0, 0}, "Constant field value to use if FieldMode == Constant"};

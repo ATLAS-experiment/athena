@@ -115,7 +115,7 @@ StatusCode HGTDTrackExtensionAlg::initialize()
   ATH_CHECK(m_hgtdTrackLinkKey.initialize());
 
   // Initialize surface accessor
-  m_surfAcc = ActsTrk::detail::xAODUncalibMeasSurfAcc{m_trackingGeometryTool.get()};
+  m_surfAcc = ActsTrk::detail::xAODUncalibMeasSurfAcc{m_trackingGeometrySvc.get()};
 
   return StatusCode::SUCCESS;
 }
@@ -172,7 +172,7 @@ StatusCode HGTDTrackExtensionAlg::execute(const EventContext& ctx) const
                   " source links from measurements in " << m_uncalibratedMeasurementContainerKeys[icontainer].key());
     measurements.addMeasurements(icontainer,
                                   *uncalibratedMeasurementContainers[icontainer],
-                                  *m_trackingGeometryTool->surfaceIdMap(),
+                                  *m_trackingGeometrySvc->surfaceIdMap(),
                                   &measurementIndex);
   }
 
@@ -461,7 +461,7 @@ HGTDTrackExtensionAlg::TrackExtensionData HGTDTrackExtensionAlg::processTrackExt
   
   // Apply track smoothing before trying to access chi2 values
   Acts::GeometryContext geoContext = m_ctxProvider.getGeometryContext(ctx);
-  const Acts::TrackingGeometry* acts_tracking_geometry = m_trackingGeometryTool->trackingGeometry().get();
+  const Acts::TrackingGeometry* acts_tracking_geometry = m_trackingGeometrySvc->trackingGeometry().get();
 
   
   // Count measurements, holes, and HGTD hits specifically

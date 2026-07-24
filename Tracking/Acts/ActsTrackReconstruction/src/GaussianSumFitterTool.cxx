@@ -58,7 +58,7 @@ namespace ActsTrk {
 
 StatusCode GaussianSumFitterTool::initialize() {
   ATH_MSG_DEBUG(name() << "::" << __FUNCTION__);
-  ATH_CHECK(m_trackingGeometryTool.retrieve());
+  ATH_CHECK(m_trackingGeometrySvc.retrieve());
   ATH_CHECK(m_ctxProvider.initialize());
   ATH_CHECK(m_geometryConvTool.retrieve());
   ATH_CHECK(m_ROTcreator.retrieve(EnableTool{!m_ROTcreator.empty()}));
@@ -93,7 +93,7 @@ StatusCode GaussianSumFitterTool::initialize() {
 						    logger().cloneWithSuffix("DirectGaussianSumFitter"));
 
   } else {
-    Acts::Navigator navigator(Acts::Navigator::Config{ m_trackingGeometryTool->trackingGeometry() },
+    Acts::Navigator navigator(Acts::Navigator::Config{ m_trackingGeometrySvc->trackingGeometry() },
                               logger().cloneWithSuffix("Navigator") );
     Acts::Propagator<Acts::MultiEigenStepperLoop<>, Acts::Navigator> propagator(std::move(stepper), 
                       std::move(navigator),
@@ -133,8 +133,8 @@ StatusCode GaussianSumFitterTool::initialize() {
   }
   /// Configure the fit extensions for the uncalibrated measurement fits
   {
-    m_unalibMeasSurfAcc = detail::xAODUncalibMeasSurfAcc{m_trackingGeometryTool.get()}; 
-    m_uncalibMeasCalibrator = xAODUnCalibrator_t::NoCalibration(m_trackingGeometryTool.get());
+    m_unalibMeasSurfAcc = detail::xAODUncalibMeasSurfAcc{m_trackingGeometrySvc.get()}; 
+    m_uncalibMeasCalibrator = xAODUnCalibrator_t::NoCalibration(m_trackingGeometrySvc.get());
 
     m_refitCalibrator = std::make_unique<detail::RefittingCalibrator>(m_geometryConvTool.get(), m_ROTcreator.get());
     m_refitCalibrator->connect<&xAODUnCalibrator_t::calibrate>(xAOD::UncalibMeasType::PixelClusterType, &m_uncalibMeasCalibrator);

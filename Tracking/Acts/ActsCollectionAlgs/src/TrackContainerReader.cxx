@@ -10,7 +10,7 @@ namespace ActsTrk{
   
 StatusCode TrackContainerReader::initialize()
 {
-  ATH_CHECK(m_trackingGeometryTool.retrieve());
+  ATH_CHECK(m_trackingGeometrySvc.retrieve());
   ATH_CHECK(m_tracksKey.initialize());
   ATH_CHECK(m_ctxProvider.initialize());
   ATH_CHECK(m_tracksKey.key().find("Tracks") != std::string::npos);
@@ -21,7 +21,7 @@ StatusCode TrackContainerReader::initialize()
 
 StatusCode TrackContainerReader::execute(const EventContext& context) const
 {
-  std::shared_ptr<const Acts::TrackingGeometry> trackingGeometry = m_trackingGeometryTool->trackingGeometry();
+  std::shared_ptr<const Acts::TrackingGeometry> trackingGeometry = m_trackingGeometrySvc->trackingGeometry();
   Acts::GeometryContext geoContext = m_ctxProvider.getGeometryContext(context);  
 
   // Create persistent (i.e. xAOD backended) track collection

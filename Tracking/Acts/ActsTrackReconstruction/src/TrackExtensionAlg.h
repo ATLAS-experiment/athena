@@ -8,7 +8,7 @@
 
 // Tools
 #include "ActsGeometryInterfaces/IExtrapolationTool.h"
-#include "ActsGeometryInterfaces/ITrackingGeometryTool.h"
+#include "ActsGeometryInterfaces/ITrackingGeometrySvc.h"
 
 // ACTS
 #include "Acts/EventData/TrackContainer.hpp"
@@ -70,8 +70,7 @@ class TrackExtensionAlg : public AthReentrantAlgorithm {
     this, "BeamSpotKey", "BeamSpotData",
     "SG key for beam spot"};
   
-  PublicToolHandle<ActsTrk::ITrackingGeometryTool> m_trackingGeometryTool{
-      this, "TrackingGeometryTool", ""};
+  ServiceHandle<ActsTrk::ITrackingGeometrySvc> m_trackingGeometrySvc{this, "TrackingGeometrySvc", "ActsTrackingGeometrySvc"};
   /** @brief Utility to fetch the geometry, magnetic field and calibration context in the event */
   ContextUtility m_ctxProvider{this};
   ToolHandle<ActsTrk::IPixelOnTrackCalibratorTool<detail::RecoTrackStateContainer>>

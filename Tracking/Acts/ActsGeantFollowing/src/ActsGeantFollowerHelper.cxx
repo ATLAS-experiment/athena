@@ -25,7 +25,7 @@
 #include "Acts/Surfaces/PlaneSurface.hpp"
 #include "Acts/Surfaces/CurvilinearSurface.hpp"
 
-#include "ActsGeometryInterfaces/ITrackingGeometryTool.h"
+#include "ActsGeometryInterfaces/ITrackingGeometrySvc.h"
 #include "Acts/Geometry/GeometryContext.hpp"
 #include "Acts/Geometry/TrackingGeometry.hpp"
 
@@ -49,7 +49,7 @@ StatusCode ActsGeantFollowerHelper::initialize()
   //   ATH_MSG_ERROR("Could not retrieve Extrapolator " << m_extrapolator << " . Abort.");
   //   return StatusCode::FAILURE;
   // }
-  ATH_CHECK(m_trackingGeometryTool.retrieve());
+  ATH_CHECK(m_trackingGeometrySvc.retrieve());
   ATH_CHECK(m_extrapolationEngine.retrieve());
   ATH_CHECK(m_actsExtrapolator.retrieve());
   ATH_CHECK(m_ctxProvider.initialize());
@@ -156,7 +156,7 @@ void ActsGeantFollowerHelper::trackParticle(const G4ThreeVector& pos,
   // const EventContext ctx;
   const EventContext &ctx = Gaudi::Hive::currentContext();
   const Acts::GeometryContext tgContext = m_ctxProvider.getGeometryContext(ctx);
-  auto trackingGeometry = m_trackingGeometryTool->trackingGeometry();
+  auto trackingGeometry = m_trackingGeometrySvc->trackingGeometry();
   // construct the initial parameters
   Amg::Vector3D npos(pos.x(),pos.y(),pos.z());
   Amg::Vector3D nmom(mom.x(),mom.y(),mom.z());
