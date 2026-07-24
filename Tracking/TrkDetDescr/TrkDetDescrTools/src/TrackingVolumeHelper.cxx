@@ -52,8 +52,6 @@ TrackingVolumeHelper::TrackingVolumeHelper(const std::string& t, const std::stri
   TrackingVolumeManipulator() {
     declareInterface<ITrackingVolumeHelper>(this);
 }
-// destructor
-TrackingVolumeHelper::~TrackingVolumeHelper() = default;
 
 
 // the interface methods

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -61,8 +61,6 @@ public:
   TrackingVolumeHelper(const std::string&,
                        const std::string&,
                        const IInterface*);
-  /** Destructor */
-  virtual ~TrackingVolumeHelper();
 
   /** AlgTool initialize method */
   StatusCode initialize() override;

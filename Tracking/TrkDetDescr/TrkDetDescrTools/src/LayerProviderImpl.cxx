@@ -1,19 +1,11 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrkDetDescrTools/LayerProviderImpl.h"
 #include "TrkGeometry/CylinderLayer.h"
 #include "TrkGeometry/DiscLayer.h"
 #include "TrkGeometry/Layer.h"
-
-// constructor
-Trk::LayerProviderImpl::LayerProviderImpl(const std::string& t,
-                                          const std::string& n,
-                                          const IInterface* p)
-  : AthAlgTool(t, n, p)
-{
-}
 
 
 const std::vector<Trk::Layer*>

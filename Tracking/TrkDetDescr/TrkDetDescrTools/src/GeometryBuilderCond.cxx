@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -8,10 +8,6 @@
 
 // Trk include
 #include "TrkDetDescrTools/GeometryBuilderCond.h"
-#include "TrkDetDescrInterfaces/ITrackingVolumeBuilder.h"
-#include "TrkDetDescrInterfaces/ILayerBuilderCond.h"
-#include "TrkDetDescrInterfaces/ITrackingVolumeArrayCreator.h"
-#include "TrkDetDescrInterfaces/ITrackingVolumeHelper.h"
 #include "TrkVolumes/CylinderVolumeBounds.h"
 #include "TrkGeometry/TrackingVolume.h"
 #include "TrkGeometry/TrackingGeometry.h"
@@ -35,48 +31,10 @@
 // constructor
 Trk::GeometryBuilderCond::GeometryBuilderCond(const std::string& t, const std::string& n, const IInterface* p)
 : AthAlgTool(t,n,p),
-  TrackingVolumeManipulator(),
-#ifdef TRKDETDESCR_MEMUSAGE
-  m_memoryLogger(),
-#endif
-  m_createWorld(true),
-  m_navigationLevel(2),
-  m_worldDimension(),
-  m_worldMaterialProperties(),
-  m_trackingVolumeArrayCreator("Trk::TrackingVolumeArrayCreator/TrackingVolumeArrayCreator"),
-  m_trackingVolumeHelper("Trk::TrackingVolumeHelper/TrackingVolumeHelper"),
-  m_inDetGeometryBuilderCond("", this),
-  m_caloGeometry{},
-  m_caloGeometryBuilderCond("", this),
-  m_hgtdGeometry{},
-  m_hgtdGeometryBuilderCond("", this),
-  m_muonGeometry{},
-  m_muonGeometryBuilderCond("", this),
-  m_compactify(true),
-  m_synchronizeLayers(true)
+  TrackingVolumeManipulator()
 {
     declareInterface<IGeometryBuilderCond>(this);
-    // by hand declarations
-    declareProperty("CreateWorldManually",                  m_createWorld);
-    declareProperty("NavigationLevel",                      m_navigationLevel);
-    // (1) dimension & material
-    declareProperty("WorldDimension",                       m_worldDimension);
-    declareProperty("WorldMaterialProperties",              m_worldMaterialProperties);
-    // tool declarations ----------------------------------------------------------------
-    declareProperty("TrackingVolumeArrayCreator",           m_trackingVolumeArrayCreator);
-    declareProperty("TrackingVolumeHelper",                 m_trackingVolumeHelper);
-    declareProperty("InDetTrackingGeometryBuilder",         m_inDetGeometryBuilderCond);
-    declareProperty("HGTD_TrackingGeometryBuilder",         m_hgtdGeometryBuilderCond);
-    declareProperty("CaloTrackingGeometryBuilder",          m_caloGeometryBuilderCond);
-    declareProperty("MuonTrackingGeometryBuilder",          m_muonGeometryBuilderCond);
-    // optimize layer dimension & memory usage -------------------------------
-    declareProperty("Compactify",                           m_compactify );
-    declareProperty("SynchronizeLayers",                    m_synchronizeLayers );
 }
-
-// destructor
-Trk::GeometryBuilderCond::~GeometryBuilderCond()
-= default;
 
 
 // Athena standard methods
@@ -198,7 +156,7 @@ Trk::GeometryBuilderCond::atlasTrackingGeometry(const EventContext& ctx,
             // sign it
             inDetTrackingGeometry->sign(m_inDetGeometryBuilderCond->geometrySignature());
             // check whether the world has to be created or not
-            if (m_createWorld || m_hgtdGeometry || m_caloGeometry || m_muonGeometry) {
+            if (m_createWorld) {
                 // checkout the highest InDet volume
                 inDetVolume = inDetTrackingGeometry->checkoutHighestTrackingVolume();
                 // assign it as the highest volume
@@ -229,7 +187,7 @@ Trk::GeometryBuilderCond::atlasTrackingGeometry(const EventContext& ctx,
         if (hgtdTrackingGeometry) {
             // sign it
             hgtdTrackingGeometry->sign(m_hgtdGeometryBuilderCond->geometrySignature());
-            if (m_createWorld || m_caloGeometry || m_muonGeometry){
+            if (m_createWorld){
                 // check out the highest Calo volume
                 hgtdVolume = hgtdTrackingGeometry->checkoutHighestTrackingVolume();
                 // assign it as the highest volume (overwrite ID)
@@ -266,7 +224,7 @@ Trk::GeometryBuilderCond::atlasTrackingGeometry(const EventContext& ctx,
         if (caloTrackingGeometry) {
             // sign it
             caloTrackingGeometry->sign(m_caloGeometryBuilderCond->geometrySignature());
-            if (m_createWorld || m_muonGeometry){
+            if (m_createWorld){
                 // check out the highest Calo volume
                 caloVolume = caloTrackingGeometry->checkoutHighestTrackingVolume();
                 // assign it as the highest volume (overwrite ID)
@@ -480,7 +438,7 @@ Trk::GeometryBuilderCond::atlasTrackingGeometry(const EventContext& ctx,
 
     if (atlasTrackingGeometry) {
         if (m_navigationLevel < 3)
-            atlasTrackingGeometry->registerNavigationLevel( Trk::NavigationLevel(m_navigationLevel));
+	  atlasTrackingGeometry->registerNavigationLevel( Trk::NavigationLevel(m_navigationLevel.value()));
     }
     else ATH_MSG_WARNING( "atlasTrackingGeometry() ... atlasTrackingGeometry = 0, could not call registerNavigationLevel and propagateMagneticFieldProperties" );
 
