@@ -114,6 +114,7 @@ def AddEventCleanFlagsCfg(ConfigFlags, workingPoints = ['Loose', 'Tight', 'Loose
         jetlog.warning("EgammaPEB stream detected, skipping tau augmentation")
         
     acc.addSequence(CompFactory.AthSequencer('EventCleanSeq', Sequential=True))
+    
     # Overlap for EMTopo
     from AssociationUtils.AssociationUtilsConfig import OverlapRemovalToolCfg
     inputLabel_legacy = 'selected_eventClean_EMTopo'
