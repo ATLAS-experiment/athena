@@ -154,30 +154,12 @@ namespace MuonCombinedR4 {
                 idExitPars = lastExtensionPars;
             }
         }
-       
-        const Acts::GeometryIdentifier barrelId = msEntrance->geometryId().withBoundary(1 + cylinderFace);
-        const Acts::GeometryIdentifier endcapId = msEntrance->geometryId().withBoundary(1 + (idTrack.eta() > 0 ? faceSideA : faceSideC));        
-        const Acts::Surface* barrelEntance = trackingGeometry->findSurface(barrelId);
-        const Acts::Surface* endcapDisc = trackingGeometry->findSurface(endcapId);
-
-        const Acts::Surface* target = std::abs(idTrack.eta()) < 1.1 ? barrelEntance : endcapDisc;
-
-        ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<" - Target: "<<target->toString(tgContext)
-            <<", "<<target->geometryId()<<", alignable: "<<target->isAlignable()<<".");
-        auto caloPars = m_extrapolationTool->propagate(ctx, *idExitPars, *target);
+        ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<" - Extrapolate ID track to MS entrance "
+                        <<msEntrance->volumeBounds());
+        auto caloPars = m_extrapolationTool->propagate(ctx, *idExitPars, *msEntrance, 
+                            ActsTrk::IExtrapolationTool::VolumeAbort::atExit);
         if (caloPars.ok()) {
             ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<" - Extrapolation successful "<<(*caloPars));
-            return *caloPars;
-        }
-        if (std::abs(idTrack.eta()) > 0.9 && (target == barrelEntance)){
-            ATH_MSG_DEBUG(__func__<<"() "<<__LINE__<<" -  Track is in the transition region. Try the endcap as target.");
-            caloPars = m_extrapolationTool->propagate(ctx, *idExitPars, *endcapDisc);
-        } else if (std::abs(idTrack.eta()) < 1.2 && (target == endcapDisc)) {
-            ATH_MSG_DEBUG(__func__<<"() "<<__LINE__<<" -  Track is in the transition region. Try the barrel as target.");
-            caloPars = m_extrapolationTool->propagate(ctx, *idExitPars, *barrelEntance);
-        }
-        if (caloPars.ok()) {
-            ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<" - Transition recovery succeeded.");
             return *caloPars;
         }
         ATH_MSG_WARNING(__func__<<"() "<<__LINE__<<" - Failed to extrapolate ID "<<print(idTrack)<<".");

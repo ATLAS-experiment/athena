@@ -95,7 +95,10 @@ def MSTrackFinderAlgCfg(flags, name="MSTrackFinderAlg", **kwargs):
     from MuonSpacePointCalibrator.CalibrationConfig import MuonSpacePointCalibratorCfg
     kwargs.setdefault("Calibrator", result.popToolsAndMerge(MuonSpacePointCalibratorCfg(flags)))
     kwargs.setdefault("SummaryTool", result.popToolsAndMerge(TrackSummaryToolCfg(flags)))
-
+    kwargs.setdefault("expressAtMsEntrance",  flags.Detector.GeometryCalo)
+    #from AthenaCommon.Constants import VERBOSE
+    #kwargs.setdefault("OutputLevel", VERBOSE)
+    kwargs.setdefault("ExtrapolationTool", result.popToolsAndMerge(MSExtrapolatorCfg(flags)))
     the_alg = CompFactory.MuonR4.MsTrackFindingAlg(name, **kwargs)
     result.addEventAlgo(the_alg, primary = True)
     return result

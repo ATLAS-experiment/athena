@@ -23,6 +23,8 @@
 #include "ActsEvent/ContextUtility.h"
 
 #include "ActsToolInterfaces/IFitterTool.h"
+#include "ActsGeometryInterfaces/IExtrapolationTool.h"
+#include "ActsGeometryInterfaces/ITrackingGeometrySvc.h"
 
 #include "MuonIdHelpers/IMuonIdHelperSvc.h"
 #include "MuonRecToolInterfacesR4/ISpacePointCalibrator.h"
@@ -50,27 +52,29 @@ namespace MuonR4{
         private:
             /** @brief Attempts to fit the track seed candidate to a full track and returns whether the
              *         fit succeeded.
-             *  @param gCtx: Geometry context to access the alignment of the surfaces
-             *  @param mCtxc: Magnetic field context to access the field map during the fit
-             *  @param cCtx: Calibration context to access the calibration constants from Store gate
+             *  @param tgContext: Geometry context to access the alignment of the surfaces
+             *  @param mfContextc: Magnetic field context to access the field map during the fit
+             *  @param calContext: Calibration context to access the calibration constants from Store gate
              *               during the track state filling
              *  @param seed: The seed of interest to fit
              *  @param outContainer: Mutable track container to which the output track is written */
-            bool fitSeedCandidate(const Acts::GeometryContext& gCtx,
-                                  const Acts::MagneticFieldContext& mCtx,
-                                  const Acts::CalibrationContext& cCtx,
+            bool fitSeedCandidate(const Acts::GeometryContext& tgContext,
+                                  const Acts::MagneticFieldContext& mfContext,
+                                  const Acts::CalibrationContext& calContext,
                                   const MsTrackSeed& seed,
                                   ActsTrk::MutableTrackContainer& outContainer) const;
 
-            /** @brief Prepares the input by the fit by collecting the measurements on the segment & 
-             *  @param gCtx: Geometry context to access the alignment of the surfaces
-             *  @param cCtx: Calibration context to access the calibration constants from Store gate
+            /** @brief Prepares the input to the fit by collecting the measurements on the segment & 
+             *  @param tgContext: Geometry context to access the alignment of the surfaces
+             *  @param calContext: Calibration context to access the calibration constants from Store gate
              *               during the track state filling
              *  @param seed: The seed of interest to fit */
             std::pair<OptBoundPars_t, MeasVec_t> prepareFit(const Acts::GeometryContext& tgContext,
                                                             const Acts::CalibrationContext& calContext,
                                                             const MsTrackSeed& seed) const;
 
+            bool expressAtCaloExit(const EventContext& ctx,
+                                   ActsTrk::MutableTrackContainer::TrackProxy track) const;
             /** @brief IdHelperSvc to decode the Identifiers */
             ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{this, "IdHelperSvc",  "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
             /** @brief Pointer to the MuonDetectorManager */
@@ -83,32 +87,22 @@ namespace MuonR4{
             ToolHandle<ActsTrk::IFitterTool> m_trackFitTool{this, "FittingTool", ""};
             /** @brief Calibration tool to fill the track states */
             ToolHandle<ISpacePointCalibrator> m_calibTool{this, "Calibrator", ""};
+            /** @brief Track extrapolation tool */
+            ToolHandle<ActsTrk::IExtrapolationTool> m_extrapolationTool{this, "ExtrapolationTool" ,"" };
+            /** @brief Service handle to the tracking geometry service */
+            ServiceHandle<ActsTrk::ITrackingGeometrySvc> m_trackingGeometrySvc{this, "TrackingGeometrySvc", "ActsTrackingGeometrySvc"};
+            /** @brief Propagate the track at the MS entry and express its parameters */
+            Gaudi::Property<bool> m_expressAtMsEntrance{this, "expressAtMsEntrance", true};
+            /** @brief Ignore failed track extrapolations to the entrance */
+            Gaudi::Property<bool> m_ignoreFailedMsEntrance{this, "ignoreFailedExtpMsEntrance", true};
             /** @brief Utility to fetch the geometry, magnetic field and calibration context in the event */
             ActsTrk::ContextUtility m_ctxProvider{this};
             /** @brief Visualization tool to debug the track finding */
             ToolHandle<MuonValR4::ITrackVisualizationTool> m_visualizationTool{this, "VisualizationTool", ""};
             /** @brief Handle to the muon summary tool */
             ToolHandle<MuonR4::ITrackSummaryTool> m_summaryTool{this, "SummaryTool" , ""};
-            /** @brief Maximum search window to search segments for */
-            Gaudi::Property<double> m_seedHalfLength{this, "SeedHalfLength", 50.*Gaudi::Units::cm};
             /** @brief Key to the output track container */
             SG::WriteHandleKey<ActsTrk::TrackContainer> m_writeKey{this, "TrackWriteKey", "MsTracks"};
-            /** @brief Use ML-guided segment grouping before baseline seeding */
-            Gaudi::Property<bool> m_useMlSeeder{this, "UseMlSeeder", false, "Use segment-edge ML candidate ids to split seeding"};
-            /** @brief Segment decoration containing vector<unsigned> candidate IDs */
-            Gaudi::Property<std::string> m_mlCandidateDecoration{this, "MlCandidateDecoration", "trackCandidateIds", "Segment vector<unsigned> decoration with ML track-candidate ids"};
-            Gaudi::Property<unsigned> m_mlMinSegmentsPerCandidate{this, "MlMinSegmentsPerCandidate", 2};
-            Gaudi::Property<bool> m_mlFallbackToBaselineIfUndecorated{
-                this, "MlFallbackToBaselineIfUndecorated", true,
-                "Run baseline seeder if the input segment container has no ML decoration"};
-            Gaudi::Property<bool> m_mlFallbackToBaselineIfNoCandidates{
-                this, "MlFallbackToBaselineIfNoCandidates", false,
-                "Run baseline seeder if ML grouping produced no seed candidates"};
-            Gaudi::Property<bool> m_mlRunCandidatesInParallel{
-                this, "MlRunCandidatesInParallel", true,
-                "Run baseline seeding independently for ML candidate groups in parallel"};
-            SG::ReadDecorHandleKey<xAOD::MuonSegmentContainer> m_mlCandidateDecorKey{
-                this, "MlCandidateDecorationKey", "", "Scheduler dependency on ML candidate decoration"};
     };      
 }
 

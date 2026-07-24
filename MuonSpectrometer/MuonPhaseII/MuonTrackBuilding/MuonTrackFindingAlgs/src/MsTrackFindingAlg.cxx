@@ -42,6 +42,8 @@ namespace MuonR4{
         ATH_CHECK(m_writeKey.initialize());
         ATH_CHECK(m_summaryTool.retrieve());
         ATH_CHECK(m_seedingTool.retrieve());
+        ATH_CHECK(m_extrapolationTool.retrieve(EnableTool{m_expressAtMsEntrance}));
+        ATH_CHECK(m_trackingGeometrySvc.retrieve());
 
         ATH_CHECK(m_ctxProvider.initialize());
         return StatusCode::SUCCESS;
@@ -173,34 +175,19 @@ namespace MuonR4{
         }
  
         ActsTrk::MutableTrackContainer::TrackProxy track = fitTraject->getTrack(0);
-        const Amg::Vector3D trkP4 = ActsTrk::convertMomFromActs(track.fourMomentum()).first;
-        double pt = trkP4.perp() / 1000; //in GeV
-        if(pt < 2 ) {
-            double chi2PerDoF = track.chi2() / (std::max(track.nDoF(), 1u));
-            ATH_MSG_DEBUG(" ===cat dog: found low pt track candidate with pt "<<pt<<" GeV chi2/ndof "<< chi2PerDoF <<  " chi2 "<< track.chi2() << " nDOF "<< track.nDoF() <<"eta: "<<trkP4.eta());
-
-        track.container().trackStateContainer().visitBackwards(track.tipIndex(), [&](const auto& state) {
-            if(state.hasUncalibratedSourceLink()){
-                const auto* uncalib = dynamic_cast<const xAOD::MuonMeasurement*>(ActsTrk::detail::xAODUncalibMeasCalibrator::unpack(state.getUncalibratedSourceLink()));
-                if(uncalib){
-                    ATH_MSG_DEBUG("    has meas: "<<m_idHelperSvc->toString(xAOD::identify(uncalib)) << " state " << state.typeFlags());
-                }
-            }
-        }
-        );
-
-
         // Check the hit counts on track post fit and if we only have one station on track discard track
         // Eventually we should implement some recovery mechanism for track where we loose too many stations
-        MuonR4::HitSummary summary = m_summaryTool->makeSummary(ctx, fitTraject->getTrack(0));
+        MuonR4::HitSummary summary = m_summaryTool->makeSummary(ctx, track);
         ATH_MSG_DEBUG("Track has " << static_cast<std::uint32_t>(summary.nPrecisionStations()) << " precision layers with summary "<< summary);
         if(summary.nPrecisionStations()<2) {
             ATH_MSG_DEBUG("rejecting single station track");
             return false;
         }
+        if (!expressAtCaloExit(ctx, track)) {
 
-        
+            return false;
         }
+        
         /** Add the links to the segments making up this track as an extra
          *  column. Use the indices of the segment objects which can later
          *  be transformed into a full ElementLink as there is only one
@@ -213,12 +200,44 @@ namespace MuonR4{
         }
         outContainer.ensureDynamicColumns(*fitTraject);
         auto destProxy = outContainer.getTrack(outContainer.addTrack());
-        destProxy.copyFrom(fitTraject->getTrack(0));
+        destProxy.copyFrom(track);
         ATH_MSG_DEBUG(__func__<<"() "<<__LINE__<<" - Good track fit...");
         if (m_visualizationTool.isEnabled()) {
             m_visualizationTool->displayTrackSeedObj(ctx, seed, 
                 destProxy.createParametersAtReference(), "GoodFit");
         }
+        return true;
+    }
+    bool MsTrackFindingAlg::expressAtCaloExit(const EventContext& ctx,
+                                              ActsTrk::MutableTrackContainer::TrackProxy track) const {
+        if (!m_expressAtMsEntrance) {
+            return true;
+        }
+        const Acts::BoundTrackParameters startPars = track.createParametersAtReference();
+        const Acts::TrackingVolume* msEntrance = m_trackingGeometrySvc->getEnvelope(ActsTrk::SystemEnvelope::CaloExit);
+        const Acts::GeometryContext tgContext = m_ctxProvider.getGeometryContext(ctx);
+        ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<" - Extrapolate "<<startPars<<", "
+            <<startPars.referenceSurface().toString(tgContext)<<" to MS entrance: "<<msEntrance->volumeBounds());
+       
+        auto parsAtEntrance = m_extrapolationTool->propagate(ctx, startPars, *msEntrance, 
+                                                             ActsTrk::IExtrapolationTool::VolumeAbort::atEntrance,
+                                                             Acts::Direction::Backward());
+        
+        if (!parsAtEntrance.ok()) {
+            ATH_MSG_WARNING(__func__<<"() "<<__LINE__<<" - Failed to extrapolate "<<startPars<<" to MS entrance");
+            return m_ignoreFailedMsEntrance;
+        }
+        if (parsAtEntrance->referenceSurface().geometryId().withBoundary(0) != msEntrance->geometryId()) {
+            ATH_MSG_WARNING(__func__<<"() "<<__LINE__<<" - Parameter extrapolation to "<<(*parsAtEntrance)<<", @"
+                            << Amg::toString(parsAtEntrance->referenceSurface().localToGlobalTransform(tgContext))
+                            <<" did not end up at "<<msEntrance->geometryId()<<".");
+            return m_ignoreFailedMsEntrance;
+        }
+        ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<" - Extrapolated start parameters to "<<(*parsAtEntrance)
+                      <<", "<<parsAtEntrance->referenceSurface().toString(tgContext));
+        track.setReferenceSurface(parsAtEntrance->referenceSurface().getSharedPtr());
+        track.parameters() = parsAtEntrance->parameters();
+        track.covariance() = (*parsAtEntrance->covariance());
         return true;
     }
     

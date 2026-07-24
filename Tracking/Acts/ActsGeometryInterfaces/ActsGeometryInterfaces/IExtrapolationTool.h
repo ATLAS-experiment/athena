@@ -30,6 +30,13 @@ namespace ActsTrk {
   class IExtrapolationTool : virtual public IAlgTool {
     public:
       DeclareInterfaceID(ActsTrk::IExtrapolationTool, 1, 0);
+
+      /** @brief Enumeration to define at which stage the propagation shall
+       *         be terminated  */
+      enum class VolumeAbort: std::uint8_t{
+        atEntrance, //Propagation stops at entrance of the target volume
+        atExit, // Propagation stops as soon as the mother volume is entered
+      };
       /** @brief Abrivation of the recorded material  */
       using RecordedMaterial = Acts::MaterialInteractor::result_type;
       /** @brief Abrivation of the recorded steps and the allocated material. */
@@ -49,8 +56,8 @@ namespace ActsTrk {
        *         by the end of the world condition otherwise. */
       virtual Acts::Result<PropagationOutput> propagationSteps(const EventContext& ctx,
                         const Acts::BoundTrackParameters& startParameters,
-                        Acts::Direction navDir = Acts::Direction::Forward(),
-                        double pathLimit = 1._km) const = 0;
+                        const Acts::Direction navDir = Acts::Direction::Forward(),
+                        const double pathLimit = 1._km) const = 0;
       
       /** @brief Configuration struct to steer the propagation with surface record. 
        *         Bound track parameters are created at each intersected surface and
@@ -59,12 +66,6 @@ namespace ActsTrk {
        *         the crossing at sensitive, material or portal surfaces shall be
        *         recorded */
       struct SurfaceRecordOptions {
-          /** @brief Enumeration to define at which stage the propagation shall
-           *         be terminated  */
-          enum class VolumeAbort: std::uint8_t{
-              atEntrance, //Propagation stops at entrance of the target volume
-              atExit, // Propagation stops as soon as the mother volume is entered
-          };
           /** @brief Record option constructor with a target volume as input
            *  @param targetVol: Pointer to the target volume until which the extrapolator
            *                    shall propagate
@@ -89,6 +90,8 @@ namespace ActsTrk {
           /** @brief Flag toggling how the propagation should end if the
             *        volume is a target */
           VolumeAbort stopVolumeFlag{VolumeAbort::atExit};
+          /** @brief The direction of the extrapolation */
+          Acts::Direction navDir{Acts::Direction::Forward()};
           /** @brief Flag to toggle whether track parameters at sensitive
            *         surfaces shall be created if crossed */
           bool recordSensitive{true};
@@ -109,7 +112,6 @@ namespace ActsTrk {
       virtual Acts::Result<BoundParamVec_t> propagateAndRecord(const EventContext& ctx,
                                                                const Acts::BoundTrackParameters& startParameters,
                                                                const SurfaceRecordOptions& recordOpts) const = 0;
-
  
       /** @brief Extrapolate the track parameters from a start to a target surface and record
        *         the peformed steps & allocated parameters
@@ -125,8 +127,8 @@ namespace ActsTrk {
       virtual Acts::Result<PropagationOutput> propagationSteps(const EventContext& ctx,
                                                  const Acts::BoundTrackParameters& startParameters,
                                                  const Acts::Surface& target,
-                                                 Acts::Direction navDir = Acts::Direction::Forward(),
-                                                 double pathLimit = 1._km) const = 0;
+                                                 const Acts::Direction navDir = Acts::Direction::Forward(),
+                                                 const double pathLimit = 1._km) const = 0;
       /** @brief Extrapolates the track parameters from a start to a target surface and returns the 
        *         extrapolated track parameters on that surface. If the extrapolation fails, a nullopt
        *         is returned 
@@ -140,11 +142,30 @@ namespace ActsTrk {
        *  @param pathLimit: Maximum length of the propagated trajectory. The extrapolation is
        *         aborted if the limit is exceeded and the surface not yet reached. */
       virtual Acts::Result<Acts::BoundTrackParameters> propagate(const EventContext& ctx,
-                                                                  const Acts::BoundTrackParameters& startParameters,
-                                                                  const Acts::Surface& target,
-                                                                  Acts::Direction navDir = Acts::Direction::Forward(),
-                                                                  double pathLimit = 1._km) const = 0;
-      /** @brief
+                                                                 const Acts::BoundTrackParameters& startParameters,
+                                                                 const Acts::Surface& target,
+                                                                 const Acts::Direction navDir = Acts::Direction::Forward(),
+                                                                 const double pathLimit = 1._km) const = 0;
+      /** @brief Extrapolates the track parameters from the start parameters to a target tracking volume which
+       *         needs to be part of the tracking geometry. The extrapolation stops either if the mother volume 
+       *         is entered or the volume itself is entered
+       *  @param ctx: EventContext to fetch the alignment & magnetic field
+       *              from the conditions store
+       *  @param startParameters: Reference to the bound track parameters encoding
+       *         the start surface & the associated track parameters on the surface
+       *  @param target: Reference to the tracking volume into which the extrapolation shall happen
+       *  @param navDir: Run the propagation along (Foward) or opposite (Backward) to
+       *         the track parameter's direction 
+       *  @param stopVolumeFlag: Abort extrapolation at entrance or exit of the volume
+       *  @param pathLimit: Maximum length of the propagated trajectory. The extrapolation is
+       *         aborted if the limit is exceeded and the surface not yet reached. */
+      virtual Acts::Result<Acts::BoundTrackParameters> propagate(const EventContext& ctx,
+                                                                 const Acts::BoundTrackParameters& startParameters,
+                                                                 const Acts::TrackingVolume& target,
+                                                                 const VolumeAbort stopVolumeFlag,
+                                                                 const Acts::Direction navDir = Acts::Direction::Forward(),
+                                                                 const double pathLimit = 1._km) const = 0;
+      /** @brief Propagate the track parameters until the end of the world volume
        *  @param ctx: EventContext to fetch the alignment & magnetic field
        *              from the conditions store
        *  @param startParameters: Reference to the bound track parameters encoding
@@ -154,9 +175,9 @@ namespace ActsTrk {
        *  @param pathLimit: Maximum length of the propagated trajectory. The extrapolation is
        *         aborted if the limit is exceeded and no surface is not yet reached. */
       virtual Acts::Result<Acts::BoundTrackParameters> propagate(const EventContext& ctx,
-                                                                  const Acts::BoundTrackParameters& startParameters,
-                                                                  Acts::Direction navDir = Acts::Direction::Forward(),
-                                                                  double pathLimit = 1._km) const = 0;
+                                                                 const Acts::BoundTrackParameters& startParameters,
+                                                                 const Acts::Direction navDir = Acts::Direction::Forward(),
+                                                                 const double pathLimit = 1._km) const = 0;
   };
 
 }
