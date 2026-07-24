@@ -125,7 +125,7 @@ namespace MuonR4 {
                         return;
                     }
                     const auto* detEl = dynamic_cast<const ActsTrk::ISurfacePlacement*>(surf.surfacePlacement());
-                    if (!detEl) {
+                    if (!detEl || !MuonGMR4::isMuon(detEl->detectorType())) {
                         return;
                     }
                     incrementSummary(detEl->identify(), status, 1, summary);
