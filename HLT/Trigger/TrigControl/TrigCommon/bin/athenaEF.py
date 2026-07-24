@@ -529,7 +529,7 @@ class ConfigRunner:
    """
    def __init__(self, job_options_type, job_options_path, run_params=None,
                 properties=None, db_server=None, smk=None,
-                num_threads=1, num_slots=1, ef_files=None):
+                num_threads=1, num_slots=1, ef_overrides=None):
       """
       Args:
          job_options_type: "FILE" or "DB"
@@ -540,7 +540,7 @@ class ConfigRunner:
          smk: Super Master Key (for store() in DB mode)
          num_threads: Number of threads for AvalancheSchedulerSvc.ThreadPoolSize
          num_slots: Number of event slots for EventDataSvc.NSlots
-         ef_files: List of input files for EFInterfaceSvc
+         ef_overrides: EFInterfaceSvc properties overriding the DB/JSON configuration
       """
       self.job_options_type = job_options_type
       self.job_options_path = job_options_path
@@ -550,19 +550,19 @@ class ConfigRunner:
       self.smk = smk              # For store() in DB mode
       self.num_threads = num_threads
       self.num_slots = num_slots
-      self.ef_files = ef_files or []  # Input files for EFInterfaceSvc
+      self.ef_overrides = ef_overrides or {}  # CLI overrides for EFInterfaceSvc
       self._app = None
    
    @classmethod
    def from_json(cls, json_file, run_params=None, properties=None,
-                 num_threads=1, num_slots=1, ef_files=None):
+                 num_threads=1, num_slots=1, ef_overrides=None):
       """Create runner for JSON file (TYPE=FILE)"""
       return cls("FILE", os.path.abspath(json_file), run_params, properties,
-                 num_threads=num_threads, num_slots=num_slots, ef_files=ef_files)
+                 num_threads=num_threads, num_slots=num_slots, ef_overrides=ef_overrides)
    
    @classmethod
    def from_database(cls, db_server, smk, l1psk=None, hltpsk=None, run_params=None,
-                     num_threads=1, num_slots=1, ef_files=None):
+                     num_threads=1, num_slots=1, ef_overrides=None):
       """Create runner for database (TYPE=DB)"""
       # Build the DB connection string: server=X;smkey=Y;lvl1key=Z;hltkey=W
       db_path = f"server={db_server};smkey={smk}"
@@ -571,7 +571,7 @@ class ConfigRunner:
       if hltpsk is not None:
          db_path += f";hltkey={hltpsk}"
       return cls("DB", db_path, run_params, db_server=db_server, smk=smk,
-                 num_threads=num_threads, num_slots=num_slots, ef_files=ef_files)
+                 num_threads=num_threads, num_slots=num_slots, ef_overrides=ef_overrides)
       
    def run(self, maxEvents=None):
       """
@@ -620,28 +620,17 @@ class ConfigRunner:
       # All property overrides below use iProperty and must be done after configure()
       # but before initialize() - this is the same pattern as PSC (Psc.cxx)
       from GaudiPython.Bindings import iProperty
-      
-      # Override EFInterfaceSvc.NumEvents if user specified it (overrides DB value)
-      if maxEvents is not None:
-         log.info("Setting EFInterfaceSvc.NumEvents=%d (overriding DB value)", maxEvents)
-         iProperty("EFInterfaceSvc").NumEvents = maxEvents
-      
+
       # Set threading configuration
       log.info("Setting threading: ThreadPoolSize=%d, NSlots=%d", self.num_threads, self.num_slots)
       iProperty("AvalancheSchedulerSvc").ThreadPoolSize = self.num_threads
       iProperty("EventDataSvc").NSlots = self.num_slots
       
-      # Set input files and metadata for EFInterfaceSvc (overrides what's in DB/JSON config)
-      if self.ef_files:
-         log.info("Setting EFInterfaceSvc.Files = %s", self.ef_files)
-         iProperty("EFInterfaceSvc").Files = self.ef_files
-         iProperty("EFInterfaceSvc").T0ProjectTag = self.run_params.get('T0_project_tag', '')
-         iProperty("EFInterfaceSvc").BeamType = self.run_params.get('beam_type', 0)
-         iProperty("EFInterfaceSvc").BeamEnergy = self.run_params.get('beam_energy', 0)
-         iProperty("EFInterfaceSvc").TriggerType = self.run_params.get('trigger_type', 0)
-         iProperty("EFInterfaceSvc").Stream = self.run_params.get('stream', '')
-         iProperty("EFInterfaceSvc").Lumiblock = self.run_params.get('lumiblock', 0)
-         iProperty("EFInterfaceSvc").DetMask = self.run_params.get('detector_mask', '')
+      # Override EFInterfaceSvc properties explicitly given on the command line.
+      ef_svc = iProperty("EFInterfaceSvc")
+      for prop, value in self.ef_overrides.items():
+         log.info("Overriding EFInterfaceSvc.%s = %s (from command line)", prop, value)
+         setattr(ef_svc, prop, value)
       
       # If HLT PSK is set on command line, read it from DB instead of COOL (ATR-25974)
       # This is the same logic as TrigPSCPythonDbSetup.py
@@ -765,7 +754,7 @@ class ConfigRunner:
       return sc
 
 
-def load_from_json(json_file, run_params=None, num_threads=1, num_slots=1, ef_files=None):
+def load_from_json(json_file, run_params=None, num_threads=1, num_slots=1, ef_overrides=None):
    """
    Load configuration from a Gaudi joboptions JSON file.
    
@@ -782,11 +771,11 @@ def load_from_json(json_file, run_params=None, num_threads=1, num_slots=1, ef_fi
    return ConfigRunner.from_json(json_file, run_params, properties,
                                   num_threads=num_threads,
                                   num_slots=num_slots,
-                                  ef_files=ef_files)
+                                  ef_overrides=ef_overrides)
 
 
 def load_from_database(db_server, smk, l1psk=None, hltpsk=None, run_params=None,
-                       num_threads=1, num_slots=1, ef_files=None):
+                       num_threads=1, num_slots=1, ef_overrides=None):
    """
    Load configuration from trigger database using the Super Master Key (SMK).
    
@@ -797,7 +786,7 @@ def load_from_database(db_server, smk, l1psk=None, hltpsk=None, run_params=None,
    return ConfigRunner.from_database(db_server, smk, l1psk, hltpsk, run_params,
                                       num_threads=num_threads,
                                       num_slots=num_slots,
-                                      ef_files=ef_files)
+                                      ef_overrides=ef_overrides)
 
 
 ##
@@ -826,7 +815,8 @@ def check_args(parser, args):
    if not args.jobOptions and not args.use_database:
       parser.error("No job options file specified")
 
-   if (not args.file and not args.dump_config_exit and args.efdf_interface_library == 'TrigDFEmulator'):
+   if (not args.file and not args.dump_config_exit
+       and (args.efdf_interface_library or 'TrigDFEmulator') == 'TrigDFEmulator'):
       parser.error("--file is required unless using --dump-config-exit or online efdf-interface-library")
 
    if args.use_crest and not args.use_database:
@@ -1036,11 +1026,14 @@ def main():
    g = parser.add_argument_group('Input/Output')
    g.add_argument('--file', '--filesInput', '-f', action='append', help='input RAW file')
    g.add_argument('--save-output', '-o', metavar='FILE', help='output file name')
-   g.add_argument('--number-of-events', '--evtMax', '-n', metavar='N', type=int, default=-1, help='processes N events (default: -1, means all)')
-   g.add_argument('--skip-events', '--skipEvents', '-k', metavar='N', type=int, default=0, help='skip N first events')
-   g.add_argument('--loop-files', action='store_true', help='loop over input files if no more events')
-   g.add_argument('--efdf-interface-library', metavar='LIB', default='TrigDFEmulator',
-                  help='name of the EFDF interface shared library to load')
+   g.add_argument('--number-of-events', '--evtMax', '-n', metavar='N', type=int, default=None,
+                  help='processes N events (default: from DB/config, -1 means all)')
+   g.add_argument('--skip-events', '--skipEvents', '-k', metavar='N', type=int, default=None,
+                  help='skip N first events')
+   g.add_argument('--loop-files', action=argparse.BooleanOptionalAction, default=None,
+                  help='loop over input files if no more events')
+   g.add_argument('--efdf-interface-library', metavar='LIB', default=None,
+                  help='name of the EFDF interface shared library to load (default: TrigDFEmulator)')
 
    ## Performance and debugging
    g = parser.add_argument_group('Performance and debugging')
@@ -1186,11 +1179,11 @@ def main():
       flags.Input.ConditionsRunNumber = args.conditions_run
 
    # Set number of events
-   if args.number_of_events > 0:
+   if args.number_of_events is not None and args.number_of_events > 0:
       flags.Exec.MaxEvents = args.number_of_events
 
-   # Set skip events  
-   if args.skip_events > 0:
+   # Set skip events
+   if args.skip_events is not None and args.skip_events > 0:
       flags.Exec.SkipEvents = args.skip_events
 
    # NOTE: Do NOT set flags.Concurrency.NumThreads or NumConcurrentEvents here.
@@ -1202,22 +1195,45 @@ def main():
    # Configure EF ByteStream services (mandatory to run without HLTMPPU)
    # This provides the data flow interface that would normally come from HLTMPPU
    flags.Trigger.Online.useEFByteStreamSvc = True
-   ef = flags.Trigger.Online.EFInterface
+   # EFInterfaceSvc settings from the command line. 
+   # Only options explicitly given are collected, anything else keeps the value from the DB/jobOptions configuration
    ef_files = args.file if args.file else []
-   ef.Files          = ef_files
-   ef.OutputFileName = f"athenaEF_{args.save_output}" if args.save_output else ""
-   ef.LoopFiles    = args.loop_files
-   ef.NumEvents    = args.number_of_events
-   ef.SkipEvents   = args.skip_events
-   ef.RunNumber    = args.run_number
-   ef.T0ProjectTag = args.T0_project_tag
-   ef.BeamType     = args.beam_type
-   ef.BeamEnergy   = args.beam_energy
-   ef.TriggerType  = args.trigger_type
-   ef.Stream       = args.stream
-   ef.Lumiblock    = args.lumiblock
-   ef.DetMask      = args.file_detector_mask
-   ef.LibraryName  = args.efdf_interface_library
+   ef_overrides = {}
+   if ef_files:
+      ef_overrides['Files'] = ef_files
+      # Metadata read from the input file - always more accurate than DB values
+      ef_overrides.update({
+         'T0ProjectTag' : args.T0_project_tag,
+         'BeamType'     : args.beam_type,
+         'BeamEnergy'   : args.beam_energy,
+         'TriggerType'  : args.trigger_type,
+         'Stream'       : args.stream,
+         'Lumiblock'    : args.lumiblock,
+         'DetMask'      : args.file_detector_mask,
+      })
+   if args.run_number is not None:          # from -R, IS, or the input file
+      ef_overrides['RunNumber'] = args.run_number
+   if args.save_output is not None:
+      ef_overrides['OutputFileName'] = args.save_output
+   if args.loop_files is not None:
+      ef_overrides['LoopOverFiles'] = args.loop_files
+   if args.number_of_events is not None:
+      ef_overrides['NumEvents'] = args.number_of_events
+   if args.skip_events is not None:
+      ef_overrides['SkipEvents'] = args.skip_events
+   if args.efdf_interface_library is not None:
+      ef_overrides['EFDFInterfaceLibraryName'] = args.efdf_interface_library
+
+   # Apply to the flags for the CA-module path (getEFInterfaceSvc reads these)
+   _prop2flag = {'Files': 'Files', 'OutputFileName': 'OutputFileName',
+                 'LoopOverFiles': 'LoopFiles', 'NumEvents': 'NumEvents',
+                 'SkipEvents': 'SkipEvents', 'RunNumber': 'RunNumber',
+                 'T0ProjectTag': 'T0ProjectTag', 'BeamType': 'BeamType',
+                 'BeamEnergy': 'BeamEnergy', 'TriggerType': 'TriggerType',
+                 'Stream': 'Stream', 'Lumiblock': 'Lumiblock', 'DetMask': 'DetMask',
+                 'EFDFInterfaceLibraryName': 'LibraryName'}
+   for prop, value in ef_overrides.items():
+      setattr(flags.Trigger.Online.EFInterface, _prop2flag[prop], value)
 
    # Execute precommands
    if args.precommand:
@@ -1251,7 +1267,7 @@ def main():
       run_params = get_run_params(args).to_dict()
       acc = load_from_database(db_alias, args.smk, args.l1psk, args.hltpsk, run_params,
                                num_threads=args.threads, num_slots=args.concurrent_events,
-                               ef_files=ef_files)
+                               ef_overrides=ef_overrides)
       log.info("Configuration loaded from database")
 
    elif is_pickle:
@@ -1268,7 +1284,7 @@ def main():
       run_params = get_run_params(args).to_dict()
       acc = load_from_json(jobOptions, run_params,
                            num_threads=args.threads, num_slots=args.concurrent_events,
-                           ef_files=ef_files)
+                           ef_overrides=ef_overrides)
       log.info("Configuration loaded from JSON")
 
    else:
