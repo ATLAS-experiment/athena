@@ -648,6 +648,7 @@ if __name__ == "__main__":
     acc.merge( xAODChargedTracksFilterCommonCfg(flags))
     acc.merge( xAODChargedTracksWeightFilterCommonCfg(flags))
     acc.merge( xAODDecayTimeFilterCommonCfg(flags))
+    acc.merge( xAODDecayVolumeFilterCommonCfg(flags))
     acc.merge( xAODDecaysFinalStateFilterCommonCfg(flags))
     acc.merge( xAODDiLeptonMassFilterCommonCfg(flags))
     acc.merge( xAODDirectPhotonFilterCommonCfg(flags))
