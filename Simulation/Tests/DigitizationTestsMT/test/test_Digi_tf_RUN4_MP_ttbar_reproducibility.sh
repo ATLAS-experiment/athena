@@ -20,19 +20,16 @@ DigiOutFileNameMP0="RUN4_ttbar_MP_fork_evt0.RDO.pool.root"
 DigiOutFileNameMP1="RUN4_ttbar_MP_fork_evt1.RDO.pool.root"
 
 Events=50
-HSHitsFile="${ATLAS_REFERENCE_DATA}/PhaseIIUpgrade/HITS/ATLAS-P2-RUN4-04-00-00/mc21_14TeV.601229.PhPy8EG_A14_ttbar_hdamp258p75_SingleLep.simul.HITS.e8481_s4494/HITS.43777451._000083.pool.root.1"
-HighPtMinbiasHitsFiles="${ATLAS_REFERENCE_DATA}/PhaseIIUpgrade/HITS/ATLAS-P2-RUN4-04-00-00/mc21_14TeV.800831.Py8EG_minbias_inelastic_highjetphotonlepton.merge.HITS.e8481_s4494_s4492/*"
-LowPtMinbiasHitsFiles="${ATLAS_REFERENCE_DATA}/PhaseIIUpgrade/HITS/ATLAS-P2-RUN4-04-00-00/mc21_14TeV.900311.Epos_minbias_inelastic_lowjetphoton.merge.HITS.e8481_s4494_s4492/*"
+HSHitsFile="${ATLAS_REFERENCE_DATA}/PhaseIIUpgrade/HITS/ATLAS-P2-RUN4-04-00-00/ATLAS-P2-RUN4-05-00-00/mc21_14TeV.601229.PhPy8EG_A14_ttbar_hdamp258p75_SingleLep.simul.HITS.e8481_s4676/HITS.51318242._004216.pool.root.1"
+HighPtMinbiasHitsFiles="${ATLAS_REFERENCE_DATA}/PhaseIIUpgrade/HITS/ATLAS-P2-RUN4-05-00-00/mc21_14TeV.800831.Py8EG_minbias_inelastic_highjetphotonlepton.merge.HITS.e8481_s4676_s4677/*"
+LowPtMinbiasHitsFiles="${ATLAS_REFERENCE_DATA}/PhaseIIUpgrade/HITS/ATLAS-P2-RUN4-05-00-00/mc21_14TeV.900311.Epos_minbias_inelastic_lowjetphoton.merge.HITS.e8481_s4676_s4677/*"
 
-geotag="ATLAS-P2-RUN4-04-00-00"
 conditions=$(python -c "from AthenaConfiguration.TestDefaults import defaultConditionsTags; print(defaultConditionsTags.RUN4_MC)")
 
 Digi_tf.py \
---CA \
 --conditionsTag default:${conditions} \
 --digiSeedOffset1 170 --digiSeedOffset2 170 \
 --digiSteeringConf 'StandardSignalOnlyTruth' \
---geometryVersion default:${geotag} \
 --inputHITSFile ${HSHitsFile} \
 --inputHighPtMinbiasHitsFile ${HighPtMinbiasHitsFiles} \
 --inputLowPtMinbiasHitsFile ${LowPtMinbiasHitsFiles} \
@@ -61,11 +58,9 @@ echo "art-result: $rc1 RDOMerge_tf.py SP"
 
 Digi_tf.py \
 --multiprocess --athenaMPEventsBeforeFork 0 \
---CA \
 --conditionsTag default:${conditions} \
 --digiSeedOffset1 170 --digiSeedOffset2 170 \
 --digiSteeringConf 'StandardSignalOnlyTruth' \
---geometryVersion default:${geotag} \
 --inputHITSFile ${HSHitsFile} \
 --inputHighPtMinbiasHitsFile ${HighPtMinbiasHitsFiles} \
 --inputLowPtMinbiasHitsFile ${LowPtMinbiasHitsFiles} \
@@ -85,11 +80,9 @@ echo "art-result: $rc2 Digi_tf.py MP fork after 0"
 
 Digi_tf.py \
 --multiprocess --athenaMPEventsBeforeFork 1 \
---CA \
 --conditionsTag default:${conditions} \
 --digiSeedOffset1 170 --digiSeedOffset2 170 \
 --digiSteeringConf 'StandardSignalOnlyTruth' \
---geometryVersion default:${geotag} \
 --inputHITSFile ${HSHitsFile} \
 --inputHighPtMinbiasHitsFile ${HighPtMinbiasHitsFiles} \
 --inputLowPtMinbiasHitsFile ${LowPtMinbiasHitsFiles} \
