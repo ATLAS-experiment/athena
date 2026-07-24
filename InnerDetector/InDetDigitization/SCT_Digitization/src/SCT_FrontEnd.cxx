@@ -9,6 +9,7 @@
 #include "SiDigitization/IAmplifier.h"
 #include "SCT_ReadoutGeometry/SCT_DetectorManager.h"
 #include "SCT_ReadoutGeometry/SCT_ModuleSideDesign.h"
+#include "CxxUtils/trapping_fp.h"
 
 // Random number
 #include "CLHEP/Random/RandFlat.h"
@@ -279,6 +280,8 @@ StatusCode SCT_FrontEnd::prepareGainAndOffset(const EventContext& ctx, SiCharged
       gainRMS = gainRMSByChipVect[i] / gainMeanValue;
       offsetRMS = offsetRMSByChipVect[i] / m_Threshold;
     } else {
+      // Tell clang not to allow spurious FPEs.
+      CXXUTILS_TRAPPING_FP;
       gain[i] = 55.0f / gainMeanValue;
       offset[i] = 42.0f / m_Threshold;
       gainRMS = 1.3f / gainMeanValue;
@@ -984,6 +987,8 @@ StatusCode SCT_FrontEnd::addNoiseDiode(SiChargedDiodeCollection& collection, int
 }
 
 float SCT_FrontEnd::meanValue(std::vector<float>& calibDataVect) {
+  // Tell clang not to allow spurious FPEs.
+  CXXUTILS_TRAPPING_FP;
   float mean_value = 0.0;
   int nData = 0;
 

@@ -1,6 +1,11 @@
 /*
   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
+
+// Tell clang not to allow spurious FPEs.
+#include "CxxUtils/trapping_fp.h"
+CXXUTILS_TRAPPING_FP;
+
 #include "PixelClusteringTool.h"
 
 #include <xAODInDetMeasurement/PixelCluster.h>
@@ -183,7 +188,6 @@ PixelClusteringToolImpl<T_RDOContainer>::makeCluster(size_t icluster,
                                                  const double lorentzShift,
                                                  xAOD::PixelCluster::ClusterVars& clusterVars) const
 { 
-
   Amg::Vector2D pos_acc(0,0);
   float tot_acc = 0.f;
 
