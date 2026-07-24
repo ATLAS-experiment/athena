@@ -144,7 +144,7 @@ There are essentially 5 markups available:
       </td>
       <td>
         <table border="0" cellspacing="0" cellpadding="5">
-          <tr><td>&lt;dbConnection&gt;...&lt;/dbConnection&gt; or &lt;db&gt;...&lt;/db&gt;<br /><br /><br /></br></td></tr>
+          <tr><td>&lt;db&gt;...&lt;/db&gt; or &lt;db&gt;...&lt;/db&gt;<br /><br /><br /></br></td></tr>
         </table>
       </td>
     </tr>
@@ -154,7 +154,7 @@ There are essentially 5 markups available:
 
 The folder name can accept any characters, except for the markup
 strings used for the optional parameters (<tag>, <offset>,
-<dbConnection>, <channelSelection> and <forceRunNumber> at the current time).
+<db>, <channelSelection> and <forceRunNumber> at the current time).
 
 One can have several markups in the same folder specification.
 
@@ -162,8 +162,8 @@ Example:
 <pre>
 IOVDbSvc.Folders += [ "/IOVDb:Test/* <tag>myTagDC2</tag>" ]
 IOVDbSvc.Folders += [ "/IOVDb/Elsewhere/* <offset>0</offset>" ]
-IOVDbSvc.Folders += [ "/IOVDb_Test/* <tag>myTag</tag> <dbConnection>myServer.athome.org:ConditionsDB_Test</dbConnection>" ]
-IOVDbSvc.Folders += [ "/Test/* <tag>DC2</tag> <offset>-1</offset> <dbConnection>localServer:db</dbConnection>" ]
+IOVDbSvc.Folders += [ "/IOVDb_Test/* <tag>myTag</tag> <db>myServer.athome.org:ConditionsDB_Test</db>" ]
+IOVDbSvc.Folders += [ "/Test/* <tag>DC2</tag> <offset>-1</offset> <db>localServer:db</db>" ]
 IOVDbSvc.Folders += [ "/Test/ <forceRunNumber>12345</forceRunNumber>" ]
 </pre>
 
