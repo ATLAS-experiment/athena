@@ -809,30 +809,29 @@ def EGammaCommonCfg(flags):
             ]
         )
 
-    if flags.Derivation.Egamma.addMissingCellInfo:
-        from DerivationFrameworkCalo.DerivationFrameworkCaloConfig import (
-            EgammaCoreCellRecoveryCfg,
-        )
+    from egammaAlgs.egammaAODFixesConfig import runAODFix
+    _, fixes = runAODFix(flags)
+    # the topoIso fix already provides the decorations that this tool creates
+    if not('egammatopoIsoFix' in fixes):
+        if flags.Derivation.Egamma.addMissingCellInfo:
+            from DerivationFrameworkCalo.DerivationFrameworkCaloConfig import (
+                EgammaCoreCellRecoveryCfg,
+            )
 
-        CoreCellRecoveryTool = acc.popToolsAndMerge(
-            EgammaCoreCellRecoveryCfg(flags)
-        )
-        acc.addPublicTool(CoreCellRecoveryTool)
-        EGAugmentationTools.append(CoreCellRecoveryTool)
+            CoreCellRecoveryTool = acc.popToolsAndMerge(
+                EgammaCoreCellRecoveryCfg(flags)
+            )
+            acc.addPublicTool(CoreCellRecoveryTool)
+            EGAugmentationTools.append(CoreCellRecoveryTool)
 
-    if flags.Derivation.Egamma.addMissingCellInfo:
-        # decorate electrons and photons with the transformer calibrated energy
-        # the transformer models are trained with missing cell info
-        # the calibration should only be applied when missing cells are included
-        # since hion do not include neither missing cell or transformer-based calibration
-        from DerivationFrameworkEGamma.EGammaToolsConfig import EGammaEnergyCalibrationWrapperCfg
-        TransformerEnergyCalibration = acc.addPublicTool(acc.popToolsAndMerge(
-            EGammaEnergyCalibrationWrapperCfg(
-                flags,
-                name="TransformerEnergyCalibration",
+    from DerivationFrameworkEGamma.EGammaToolsConfig import EGammaEnergyCalibrationWrapperCfg
+    TransformerEnergyCalibration = acc.addPublicTool(acc.popToolsAndMerge(
+        EGammaEnergyCalibrationWrapperCfg(
+            flags,
+            name="TransformerEnergyCalibration",
             )
         ))
-        EGAugmentationTools.append(TransformerEnergyCalibration)
+    EGAugmentationTools.append(TransformerEnergyCalibration)
 
     # ==================================================
     # Truth Related tools

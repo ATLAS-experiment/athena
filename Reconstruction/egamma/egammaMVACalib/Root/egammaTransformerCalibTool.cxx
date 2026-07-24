@@ -203,6 +203,8 @@ float egammaTransformerCalibTool::getEnergy(const xAOD::CaloCluster& clus,
 	}
       }
     }
+    ATH_MSG_DEBUG("Eadded " << recoveryInfo.eCells[0] << " " << recoveryInfo.eCells[1]);
+    ATH_MSG_DEBUG("naddedCells = " << recoveryInfo.addedCells.size() << " " << recoveryInfo.nCells[0] << " " << recoveryInfo.nCells[1]);
 
     // --- 2. Apply Layer Calibration if needed ---
     bool isForward = (m_particleType == xAOD::EgammaParameters::forwardelectron);
@@ -217,7 +219,10 @@ float egammaTransformerCalibTool::getEnergy(const xAOD::CaloCluster& clus,
         return m_clusterEif0 ? clus.e() : 0.0f;
       }
       array_layer_scales = m_layerRecalibTool->getLayerCorrections(*eg, *eventInfo);
-    } 
+    }
+    ATH_MSG_DEBUG("Layer scale "
+		  << array_layer_scales[0] << " " << array_layer_scales[1] << " "
+		  << array_layer_scales[2] << " " << array_layer_scales[3]);
 
     if ( m_useExtraLayerScales ) {
         ATH_MSG_DEBUG("Applying extra layer scales for systematic studies, normally this is for MC events.");
@@ -236,6 +241,7 @@ float egammaTransformerCalibTool::getEnergy(const xAOD::CaloCluster& clus,
     double raw_Es1 = clus.energyBE(1);
     double raw_Es2 = clus.energyBE(2) + (recoverySucceeded && m_useFixForMissingCells ? recoveryInfo.eCells[0] : 0.0);
     double raw_Es3 = clus.energyBE(3) + (recoverySucceeded && m_useFixForMissingCells ? recoveryInfo.eCells[1] : 0.0);
+    ATH_MSG_DEBUG("raw Es " << raw_Es1 << " " << raw_Es2 << " " << raw_Es3);
 
     // --- 4. Cell Gathering ---
     std::vector<float> cells_E, cells_eta, cells_phi, cells_x, cells_y, cells_z;
@@ -360,6 +366,7 @@ float egammaTransformerCalibTool::getEnergy(const xAOD::CaloCluster& clus,
 
     // --- 5. Calculate Derived Features (Post-Loop) ---
     const size_t nCells = cells_E.size();
+    ATH_MSG_DEBUG("Total number of cells " << nCells);
     if (nCells == 0) {
       ATH_MSG_WARNING("No supported calorimeter cells; using configured fallback");
       return m_clusterEif0 ? clus.e() : 0.0f;
@@ -400,6 +407,10 @@ float egammaTransformerCalibTool::getEnergy(const xAOD::CaloCluster& clus,
     double ratio_Tile_total = (main_layers_sum != 0) ? (sum_cell_E_Gap / main_layers_sum) : 0.0;
 
     FlavorTagInference::InputMap gnn_input;
+
+    static const std::vector<std::string> featN = {
+      "Etot", "E0", "E1", "E2", "E3", "Egap", "cleta", "clphi", "E1/E2", "E0/E123", "Egap/E123",
+      "convR", "convEoP", "convPt1OPt2", "convT" };
 
     // Cluster Features
     std::vector<float> cluster_feats = {
@@ -462,8 +473,12 @@ float egammaTransformerCalibTool::getEnergy(const xAOD::CaloCluster& clus,
          cluster_feats.push_back(0.0f);
       }
     }
+    ATH_MSG_DEBUG("Cluster features ");
+    for (int ifeat = 0; auto f : cluster_feats) {
+      ATH_MSG_DEBUG("Cluster feature " << ifeat << " " << featN[ifeat] << " = " << f);
+      ifeat++;
+    }
 
-            
     gnn_input["cluster_features"] = FlavorTagInference::Inputs(cluster_feats, {1, (int64_t)cluster_feats.size()});
 
     // Cell Features
@@ -477,6 +492,10 @@ float egammaTransformerCalibTool::getEnergy(const xAOD::CaloCluster& clus,
         cell_feats_flat.push_back(cells_y[i]);
         cell_feats_flat.push_back(cells_z[i]);
         cell_feats_flat.push_back(static_cast<float>(cells_layer[i]));
+	ATH_MSG_DEBUG("Cluster feature for cell " << i << " "
+		      << "Layer " << cells_layer[i] << " deta = " << cells_deta[i] << " dphi = " << cells_dphi[i]
+		      << " x, y, z = " << cells_x[i] << " " << cells_y[i] << " " << cells_z[i]
+		      << " eFrac = " << cells_eFrac[i]);
     }
     gnn_input["cell_features"] = FlavorTagInference::Inputs(cell_feats_flat, {(int64_t)nCells, m_num_cell_features});
 
