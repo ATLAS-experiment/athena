@@ -473,6 +473,8 @@ namespace InDet
     BooleanProperty m_useEmClusSeed{this, "doEmCaloSeed", false};
     FloatProperty m_phiWidthEm{this, "phiWidthEM", 0.05};
     FloatProperty m_etaWidthEm{this, "etaWidthEM", 0.05};
+    
+    BooleanProperty m_removeSharedHitsInLoop{this, "removeSharedHitsInLoop", true};
 
     SG::ReadHandleKey<ROIPhiRZContainer> m_inputEmClusterContainerName{this, "EMROIPhiRZContainer", ""};
 

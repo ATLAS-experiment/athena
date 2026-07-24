@@ -76,6 +76,8 @@ def InDetAmbiTrackSelectionToolCfg(
         kwargs.setdefault("etaWidthEM", 0.05)
         # Skip ambi solver in hadronic ROI
         kwargs.setdefault("doSkipAmbiInROI", flags.Tracking.doSkipAmbiROI)
+        # new flag 15 July 2026 turn on/off removal of shared sct hits in loop
+        kwargs.setdefault("removeSharedHitsInLoop", True)
 
         if (flags.Tracking.doTIDE_AmbiTrackMonitoring and
                 flags.Tracking.ActiveConfig.extension == ""):

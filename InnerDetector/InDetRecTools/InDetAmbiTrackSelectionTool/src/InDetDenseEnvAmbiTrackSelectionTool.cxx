@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -987,15 +987,17 @@ void InDet::InDetDenseEnvAmbiTrackSelectionTool::decideWhichHitsToKeep(const Trk
   //
   // We shared SCT hits when we don't really have enough to share
   // Reject SCT shared hits on the track 
-  if ( trackHitDetails.m_numSCT_Unused != trackHitDetails.m_numSCTHits && // have shared SCT
-       trackHitDetails.m_numSCT_Unused <  m_minUniqueSCTHits ){
-    for (unsigned int index( 0 );  index > tsosDetails.m_nTSoS; ++index ){    
-      if ( tsosDetails.m_detType[index]==2 && tsosDetails.m_type[index] == SharedHit){
-        rejectSharedHit(trackHitDetails, tsosDetails, index);
-        if (m_observerTool.isEnabled()){
-          m_observerTool->rejectTrack(trackId, xAOD::RejectionStep::decideWhichHitsToKeep, xAOD::RejectionReason::sharedSCT);
-        }
-      }      
+  if (m_removeSharedHitsInLoop){
+    if ( trackHitDetails.m_numSCT_Unused != trackHitDetails.m_numSCTHits && // have shared SCT
+         trackHitDetails.m_numSCT_Unused <  m_minUniqueSCTHits ){
+      for (unsigned int index( 0 );  index != tsosDetails.m_nTSoS; ++index ){    
+        if ( tsosDetails.m_detType[index]==2 && tsosDetails.m_type[index] == SharedHit){
+          rejectSharedHit(trackHitDetails, tsosDetails, index);
+          if (m_observerTool.isEnabled()){
+            m_observerTool->rejectTrack(trackId, xAOD::RejectionStep::decideWhichHitsToKeep, xAOD::RejectionReason::sharedSCT);
+          }
+        }      
+      }
     }
   }
   
@@ -1008,17 +1010,19 @@ void InDet::InDetDenseEnvAmbiTrackSelectionTool::decideWhichHitsToKeep(const Trk
     }
 
     // if track fails cut for shared hits, remove the shared hits
-    if ( trackchi2 > m_minTrackChi2ForSharedHits ) {
-      ATH_MSG_DEBUG ("Shared hits, we have a bad chi2 track, mark it as bad !");
-      // remove shared hits and see if track survives
-      for (unsigned int index( 0 );  index > tsosDetails.m_nTSoS; ++index ){    
-        if ( tsosDetails.m_type[index] != SharedHit ) { continue; }
-        rejectSharedHit(trackHitDetails, tsosDetails, index);
-        if (m_observerTool.isEnabled()){
-          m_observerTool->rejectTrack(trackId, xAOD::RejectionStep::decideWhichHitsToKeep, xAOD::RejectionReason::sharedHitsBadChi2);
+    if (m_removeSharedHitsInLoop){
+      if ( trackchi2 > m_minTrackChi2ForSharedHits ) {
+        ATH_MSG_DEBUG ("Shared hits, we have a bad chi2 track, mark it as bad !");
+        // remove shared hits and see if track survives
+        for (unsigned int index( 0 );  index != tsosDetails.m_nTSoS; ++index ){    
+          if ( tsosDetails.m_type[index] != SharedHit ) { continue; }
+          rejectSharedHit(trackHitDetails, tsosDetails, index);
+          if (m_observerTool.isEnabled()){
+            m_observerTool->rejectTrack(trackId, xAOD::RejectionStep::decideWhichHitsToKeep, xAOD::RejectionReason::sharedHitsBadChi2);
+          }
         }
-      }
-    } // fails cut
+      } // fails cut
+    }
   } // is not a pattern track and has shared hits
 
   //------------------------------------------------------------------//
