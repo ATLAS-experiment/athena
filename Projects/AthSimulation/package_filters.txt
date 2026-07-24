@@ -240,6 +240,7 @@
 + LArCalorimeter/LArGeoModel/LArGeoHec
 + LArCalorimeter/LArGeoModel/LArGeoRAL
 + LArCalorimeter/LArRawConditions
++ LArCalorimeter/LArRecUtils
 + LArCalorimeter/LArGeoModel/LArGeoTBBarrel
 + LArCalorimeter/LArGeoModel/LArHV
 + LArCalorimeter/LArGeoModel/LArReadoutGeometry

@@ -3,6 +3,23 @@
 # Declare the package name:
 atlas_subdir( LArRecUtils )
 
+# AthSimulation needs the LAr calibration-condition components, but not the
+# full reconstruction utility library and its dependency chain.
+if( SIMULATIONBASE )
+   atlas_add_component( LArRecUtils
+                        src/LArMCSymCondAlg.cxx
+                        src/LArOnOffMappingAlg.cxx
+                        src/components/LArRecUtilsSimulation_entries.cxx
+                        LINK_LIBRARIES AthenaBaseComps AthenaKernel GaudiKernel
+                                       AthenaPoolUtilities CaloIdentifier
+                                       Identifier
+                                       LArCablingLib LArCOOLConditions
+                                       LArElecCalib LArIdentifier
+                                       LArRawConditions PersistentDataModel
+                                       StoreGateLib )
+   return()
+endif()
+
 # External dependencies:
 find_package( CLHEP )
 find_package( Eigen )
@@ -19,7 +36,7 @@ atlas_add_library( LArRecUtilsLib
                    PRIVATE_LINK_LIBRARIES ${CLHEP_LIBRARIES} ${CORAL_LIBRARIES} ${EIGEN_LIBRARIES} ${ROOT_LIBRARIES} AthenaPoolUtilities CaloConditions CaloDetDescrLib CaloEvent CaloGeoHelpers CaloInterfaceLib GaudiKernel Identifier LArCablingLib LArHV LArRawConditions LArReadoutGeometry PathResolver TestTools CaloTTDetDescr PersistentDataModel )
 
 atlas_add_component( LArRecUtils
-                     src/components/*.cxx
+                     src/components/LArRecUtils_entries.cxx
                      LINK_LIBRARIES LArRecUtilsLib )
 
 # Install files from the package:
