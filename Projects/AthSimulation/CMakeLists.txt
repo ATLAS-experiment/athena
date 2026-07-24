@@ -57,6 +57,10 @@ find_package( Gaudi )
 
 # External(s) needed at build and runtime:
 find_package( Frontier_Client )
+if( HDF5_LCGROOT AND NOT HDF5_ROOT AND "$ENV{HDF5_ROOT}" STREQUAL "" )
+   set( HDF5_ROOT "${HDF5_LCGROOT}" )
+endif()
+find_package( HDF5 REQUIRED COMPONENTS CXX )
 find_package( PNG )
 find_package( VDT )
 find_package( TIFF )

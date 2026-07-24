@@ -8,4 +8,4 @@ atlas_subdir( FastCaloSimHit )
 atlas_add_component( FastCaloSimHit
                      src/*.cxx
                      src/components/*.cxx
-                     LINK_LIBRARIES AthenaBaseComps GaudiKernel CaloInterfaceLib LArSimEvent TileSimEvent StoreGateLib TileConditionsLib CaloEvent CaloIdentifier CxxUtils TileEvent )
+                     LINK_LIBRARIES AthenaBaseComps GaudiKernel CaloInterfaceLib LArElecCalib LArSimEvent TileSimEvent StoreGateLib TileConditionsLib CaloEvent CaloIdentifier CxxUtils TileEvent )

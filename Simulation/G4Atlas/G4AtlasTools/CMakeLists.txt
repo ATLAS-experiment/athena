@@ -5,8 +5,13 @@ atlas_subdir( G4AtlasTools )
 
 # External dependencies:
 find_package( CLHEP )
-find_package( Geant4 )
 find_package( TBB )
+find_package( Geant4 )
+find_package( ROOT COMPONENTS Core Tree MathCore Hist RIO pthread ROOTDataFrame )
+find_package( FastCaloSim )
+find_package( lwtnn REQUIRED )
+find_package( LibXml2 REQUIRED )
+# FastCaloSim and punch-through tools build in both Athena and AthSimulation.
 
 # Possible extra dependencies:
 # Should only apply in case of Athena builds below (and not e.g in AthSimulation)
@@ -19,23 +24,16 @@ file(GLOB ALL_SRC_COMPONENT_FILES src/components/*.cxx)
 # define extra_incl, extra_lib for Athena builds (and not AthSimulation)
 if( NOT SIMULATIONBASE )
   find_package( Acts COMPONENTS PluginJson Fatras ) # for ActsFatrasG4
-  find_package( ROOT COMPONENTS Core MathCore Hist RIO pthread )
-  find_package( lwtnn )
 
-  # set extra_lib
-  set( extra_incl ${ROOT_INCLUDE_DIRS} ${LWTNN_INCLUDE_DIRS} )
-  set( extra_lib ${ROOT_LIBRARIES} ${LWTNN_LIBRARIES}
-       PathResolver ISF_InterfacesLib
-       Acts::Core Acts::Fatras Acts::PluginJson ActsEventLib ActsInteropLib ActsGeometryLib # for ActsFatrasG4 
+  # set extra_lib (ROOT, lwtnn and libxml2 are unconditional above: FastCaloSim
+  # needs them in AthSimulation too)
+  set( extra_lib Acts::Core Acts::Fatras Acts::PluginJson ActsEventLib ActsInteropLib ActsGeometryLib # for ActsFatrasG4
        GeoModelUtilities TrkTrack InDetSimEvent MCTruth # for ActsFatrasG4
        GeneratorObjects # for HepMcParticleLink
        StoreGateLib     # for ActsFatrasG4 (StoreGate/WriteHandleKeyArray)
-  )                     
+  )
 else()
-  # Filter out files that contain "PunchThrough" anywhere in their name
-  list(FILTER ALL_SRC_LIB_FILES EXCLUDE REGEX "PunchThrough")
-  list(FILTER ALL_SRC_COMPONENT_FILES EXCLUDE REGEX "PunchThrough")
-  # Filter out files that contain "ActsFatras" anywhere in their name 
+  # Filter out files that contain "ActsFatras" anywhere in their name
   list(FILTER ALL_SRC_LIB_FILES EXCLUDE REGEX "ActsFatras")
   list(FILTER ALL_SRC_COMPONENT_FILES EXCLUDE REGEX "ActsFatras")
 endif()
@@ -46,15 +44,16 @@ atlas_add_library( G4AtlasToolsLib
                    ${ALL_SRC_LIB_FILES}
                    OBJECT
                    PUBLIC_HEADERS G4AtlasTools
-                   INCLUDE_DIRS ${GEANT4_INCLUDE_DIRS} ${TBB_INCLUDE_DIRS} ${extra_incl}
-                   PRIVATE_INCLUDE_DIRS ${CLHEP_INCLUDE_DIRS} 
+                   INCLUDE_DIRS ${GEANT4_INCLUDE_DIRS} ${TBB_INCLUDE_DIRS} ${VDT_INCLUDE_DIR} ${ROOT_INCLUDE_DIRS} ${LWTNN_INCLUDE_DIRS} ${LIBXML2_INCLUDE_DIRS} ${extra_incl}
+                   PRIVATE_INCLUDE_DIRS ${CLHEP_INCLUDE_DIRS}
                    PRIVATE_DEFINITIONS ${CLHEP_DEFINITIONS}
-                   LINK_LIBRARIES ${GEANT4_LIBRARIES} ${TBB_LIBRARIES}
-                                  AthenaKernel AthenaBaseComps  
-                                  G4AtlasInterfaces HitManagement 
-                                  SubDetectorEnvelopesLib GeoPrimitives
+                   LINK_LIBRARIES ${GEANT4_LIBRARIES} ${TBB_LIBRARIES} ${ROOT_LIBRARIES} ${LWTNN_LIBRARIES} ${LIBXML2_LIBRARIES} ${FASTCALOSIM_LIBRARIES}
+                                  AthenaKernel AthenaBaseComps
+                                  G4AtlasInterfaces HitManagement
+                                  AtlasDetDescr SubDetectorEnvelopesLib GeoPrimitives
+                                  FCALGeoPlugin PathResolver ISF_InterfacesLib TruthUtils
                                   ${extra_lib}
-                   PRIVATE_LINK_LIBRARIES ${CLHEP_LIBRARIES} XMLCoreParser CxxUtils GaudiKernel PathResolver )
+                   PRIVATE_LINK_LIBRARIES ${CLHEP_LIBRARIES} XMLCoreParser CxxUtils GaudiKernel )
 set_target_properties( G4AtlasToolsLib PROPERTIES INTERPROCEDURAL_OPTIMIZATION ${ATLAS_GEANT4_USE_LTO} )
 
 atlas_add_library( G4AtlasTools

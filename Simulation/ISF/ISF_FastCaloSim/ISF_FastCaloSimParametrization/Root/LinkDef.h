@@ -1,10 +1,8 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifdef __CINT__
-#pragma link C++ class TFCSNNLateralShapeParametrization+;
-#pragma link C++ class TFCSSimpleLateralShapeParametrization+;
 #pragma link C++ class MeanAndRMS;
 #pragma link C++ class TreeReader;
 #pragma link C++ struct FCS_cell+;

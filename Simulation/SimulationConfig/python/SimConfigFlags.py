@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.AthConfigFlags import AthConfigFlags, isGaudiEnv
 from AthenaConfiguration.AutoConfigFlags import GetFileMD
@@ -237,10 +237,11 @@ def createSimConfigFlags():
 
     # FastCalo
     scf.addFlag("Sim.FastCalo.ParamsInputFilename", "FastCaloSim/MC23/TFCSparam_AF3_MC23_Sep23.root") # filename of the input parametrizations file
+    scf.addFlag("Sim.FastCalo.CaloGeoInputFolder", "FastCaloSim/MC23/GeoFiles") # calib-area folder holding the FastCaloSim calorimeter geometry files
     scf.addFlag("Sim.FastCalo.RunOnGPU", False) # Determines if run the FastCaloSim on GPU or not
     scf.addFlag("Sim.FastCalo.CaloCellsName", "AllCalo") # StoreGate collection name for FastCaloSim hits
     scf.addFlag("Sim.FastCalo.doPunchThrough", lambda prevFlags:
-                prevFlags.Sim.LArParameterization is LArParameterization.FastCaloSim) 
+                prevFlags.Sim.LArParameterization is LArParameterization.FastCaloSim)
 
     # FastChain
     # Setting the BCID for Out-of-Time PU events, list of int

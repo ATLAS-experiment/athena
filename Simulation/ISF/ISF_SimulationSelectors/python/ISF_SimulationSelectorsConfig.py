@@ -1,7 +1,7 @@
 """
 ISF_SimulationSelectors for ComponentAccumulator configuration
 
-Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 """
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -76,15 +76,6 @@ def DefaultFastCaloSimV2SelectorCfg(flags, name="ISF_DefaultFastCaloSimV2Selecto
         from ISF_FastCaloSimServices.ISF_FastCaloSimServicesConfig import FastCaloSimV2SvcCfg
         kwargs.setdefault("Simulator", acc.getPrimaryAndMerge(FastCaloSimV2SvcCfg(flags)))
     kwargs.setdefault("SimulationFlavor", SimulationFlavor.FastCaloSimV2)
-    acc.setPrivateTools(CompFactory.ISF.DefaultSimSelector(name, **kwargs))
-    return acc
-
-
-def DefaultDNNCaloSimSelectorCfg(flags, name="ISF_DefaultDNNCaloSimSelector", **kwargs):
-    acc = ComponentAccumulator()
-    if flags.Concurrency.NumThreads == 0 and not flags.Sim.ISF.Simulator.isMT():
-        from ISF_FastCaloSimServices.ISF_FastCaloSimServicesConfig import DNNCaloSimSvcCfg
-        kwargs.setdefault("Simulator", acc.getPrimaryAndMerge(DNNCaloSimSvcCfg(flags)))
     acc.setPrivateTools(CompFactory.ISF.DefaultSimSelector(name, **kwargs))
     return acc
 

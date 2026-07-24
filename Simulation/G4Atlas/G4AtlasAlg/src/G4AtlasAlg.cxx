@@ -71,17 +71,20 @@ StatusCode G4AtlasAlg::initialize ATLAS_NOT_THREAD_SAFE ()
 {
   ATH_MSG_DEBUG("Start of initialize()");
 
-  // Read the simplified geometry for FastCaloSim track transportation if requested
+  // All algorithm clones initialize on the master thread, so import once.
   if(!m_simplifiedGeoPath.empty()) {
     std::string geoFile = PathResolverFindCalibFile(m_simplifiedGeoPath);
-    
+
     if (geoFile.empty()) {
       ATH_MSG_FATAL("Could not find simplified geometry file: " << m_simplifiedGeoPath);
       return StatusCode::FAILURE;
     }
 
-    G4GDMLParser parser;
-    parser.Read(geoFile, false);
+    static std::once_flag simplifiedGeoOnceFlag;
+    std::call_once(simplifiedGeoOnceFlag, [&geoFile]() {
+      G4GDMLParser parser;
+      parser.Read(geoFile, false);
+    });
   }
 
   // Create the scoring manager if requested

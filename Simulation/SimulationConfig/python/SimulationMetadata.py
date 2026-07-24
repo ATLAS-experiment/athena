@@ -80,13 +80,12 @@ def collectSimulationMetadata(flags):
     ## Hard-coded simulation hit file magic number (for major changes)
     params['hitFileMagicNumber'] = '0' ##FIXME Remove this?
 
-    if flags.Sim.ISFRun:
-        params['Simulator'] = flags.Sim.ISF.Simulator.value
-        params['SimulationFlavour'] = flags.Sim.ISF.Simulator.value.replace('MT', '') # used by egamma
-    else:
-        # TODO hard-code for now, but set flag properly later
-        params['Simulator'] = 'AtlasG4'
-        params['SimulationFlavour'] = 'AtlasG4'
+    # The Simulator flavour drives the SimulationFlavour metadata for both ISF
+    # and non-ISF (G4AtlasAlg) jobs. The latter now includes the Geant4-based
+    # FastCaloSim (AF3): enableFastCaloSim sets Simulator=ATLFAST3MT, so this
+    # tags the output as 'ATLFAST3' (a plain AtlasG4 job stays 'AtlasG4').
+    params['Simulator'] = flags.Sim.ISF.Simulator.value
+    params['SimulationFlavour'] = flags.Sim.ISF.Simulator.value.replace('MT', '') # used by egamma
 
     ## Data overlay
     if flags.Common.isOverlay and flags.Overlay.DataOverlay:

@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.Enums import BeamType
 from SimulationConfig.SimEnums import BeamPipeSimMode, CalibrationRun, CavernBackground, InDetParameterization, LArParameterization
@@ -11,10 +11,6 @@ from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 def FastSimulationToolListCfg(flags):
     result = ComponentAccumulator()
     tools = []
-    if flags.Sim.LArParameterization is LArParameterization.FastCaloSim:
-        from G4FastSimulation.G4FastSimulationConfig import FastCaloSimCfg
-        tools += [ result.popToolsAndMerge(FastCaloSimCfg(flags)) ]
-
     if flags.Sim.InDetParameterization is InDetParameterization.FatrasG4:
         from G4FastSimulation.G4FastSimulationConfig import FatrasG4Cfg
         tools += [ result.popToolsAndMerge(FatrasG4Cfg(flags)) ]
@@ -94,25 +90,21 @@ def EmptyFastSimulationMasterToolCfg(flags, **kwargs):
     result.setPrivateTools(tool)
     return result
 
-def G4CaloTransportToolCfg(flags, name='G4CaloTransportTool', **kwargs):
+def FastCaloSimParametrizationToolCfg(flags, name="FastCaloSimParametrizationTool", **kwargs):
     result = ComponentAccumulator()
-    # Use simplified calorimeter geometry if path to simplified geometry is provided
-    # Otherwise, use the full geometry for the transport (Note that this will be very slow) 
-    kwargs.setdefault("UseSimplifiedGeo", bool(flags.Sim.SimplifiedGeoPath))
+    kwargs.setdefault("ParamsInputFilename", flags.Sim.FastCalo.ParamsInputFilename)
+    kwargs.setdefault("ParamsInputObject", "SelPDGID")
+    kwargs.setdefault("CaloGeoInputFolder", flags.Sim.FastCalo.CaloGeoInputFolder)
+    # Geometry tag is the one passed to the job (--geometryVersion), keeping the
+    # FastCaloSim geometry consistent with the rest of the simulation.
+    kwargs.setdefault("CaloGeoTag", flags.GeoModel.AtlasVersion)
+    # Simplified transport geometry: honour an explicitly configured path (also
+    # used by G4AtlasAlg in AtlasG4 jobs); otherwise the tool falls back to its
+    # built-in calib-area default. Needed e.g. in ISF jobs, where G4AtlasAlg
+    # does not run and the tool itself loads the transport GDML.
     if flags.Sim.SimplifiedGeoPath:
-        # What is the name of the logical world volume of the simplified geometry?
-        kwargs.setdefault('SimplifiedWorldLogName', "WorldLog")
-        # At what volume will we stop the transport?
-        kwargs.setdefault('TransportLimitVolume', "Envelope")
-        # What is the maximum number of Geant4 steps taken in the transport?
-        kwargs.setdefault('MaxSteps', 100)
-    else:
-        # At what volume will be stop the transport? 
-        kwargs.setdefault('TransportLimitVolume', "MuonSys")
-        # What is the maximum number of Geant4 steps taken in the transport?
-        kwargs.setdefault('MaxSteps', 5000)
-    
-    result.setPrivateTools(CompFactory.G4CaloTransportTool(name, **kwargs))
+        kwargs.setdefault("SimplifiedGeoPath", flags.Sim.SimplifiedGeoPath)
+    result.setPrivateTools(CompFactory.FastCaloSimParametrizationTool(name, **kwargs))
     return result
 
 def ActsFatrasG4ToolCfg(flags, name="ActsFatrasG4Tool", **kwargs):
@@ -245,11 +237,100 @@ def TrackFastSimSensitiveDetectorListCfg(flags):
     result.setPrivateTools(tools)
     return result
 
+def FastHitConvertToolCfg(flags, name="ISF_FastHitConvertTool", **kwargs):
+    """Configure conversion of FastCaloSim cells into LAr and Tile hits."""
+    from ISF_Algorithms.CollectionMergerConfig import CollectionMergerCfg
+
+    acc = ComponentAccumulator()
+    mergeable_collection_suffix = "_FastCaloSim"
+    region = "CALO"
+
+    EMB_hits_bare_collection_name = "LArHitEMB"
+    EMB_hits_merger_input_property = "LArEMBHits"
+    acc1, EMB_hits_collection_name = CollectionMergerCfg(
+        flags,
+        EMB_hits_bare_collection_name,
+        mergeable_collection_suffix,
+        EMB_hits_merger_input_property,
+        region)
+    acc.merge(acc1)
+
+    EMEC_hits_bare_collection_name = "LArHitEMEC"
+    EMEC_hits_merger_input_property = "LArEMECHits"
+    acc2, EMEC_hits_collection_name = CollectionMergerCfg(
+        flags,
+        EMEC_hits_bare_collection_name,
+        mergeable_collection_suffix,
+        EMEC_hits_merger_input_property,
+        region)
+    acc.merge(acc2)
+
+    FCAL_hits_bare_collection_name = "LArHitFCAL"
+    FCAL_hits_merger_input_property = "LArFCALHits"
+    acc3, FCAL_hits_collection_name = CollectionMergerCfg(
+        flags,
+        FCAL_hits_bare_collection_name,
+        mergeable_collection_suffix,
+        FCAL_hits_merger_input_property,
+        region)
+    acc.merge(acc3)
+
+    HEC_hits_bare_collection_name = "LArHitHEC"
+    HEC_hits_merger_input_property = "LArHECHits"
+    acc4, HEC_hits_collection_name = CollectionMergerCfg(
+        flags,
+        HEC_hits_bare_collection_name,
+        mergeable_collection_suffix,
+        HEC_hits_merger_input_property,
+        region)
+    acc.merge(acc4)
+
+    tile_hits_bare_collection_name = "TileHitVec"
+    tile_hits_merger_input_property = "TileHits"
+    acc5, tile_hits_collection_name = CollectionMergerCfg(
+        flags,
+        tile_hits_bare_collection_name,
+        mergeable_collection_suffix,
+        tile_hits_merger_input_property,
+        region)
+    acc.merge(acc5)
+
+    kwargs.setdefault("embHitContainername", EMB_hits_collection_name)
+    kwargs.setdefault("emecHitContainername", EMEC_hits_collection_name)
+    kwargs.setdefault("fcalHitContainername", FCAL_hits_collection_name)
+    kwargs.setdefault("hecHitContainername", HEC_hits_collection_name)
+
+    from TileConditions.TileCablingSvcConfig import TileCablingSvcCfg
+    acc.merge(TileCablingSvcCfg(flags))
+
+    from TileConditions.TileSamplingFractionConfig import TileSamplingFractionCondAlgCfg
+    acc.merge( TileSamplingFractionCondAlgCfg(flags) )
+
+    # FastHitConvertTool needs LAr sampling fractions to create LAr hits.
+    from LArConfiguration.LArElecCalibDBConfig import LArElecCalibDBCfg
+    acc.merge( LArElecCalibDBCfg(flags, ["fSampl"]) )
+
+    kwargs.setdefault("tileHitContainername", tile_hits_collection_name)
+
+    acc.setPrivateTools(CompFactory.FastHitConvertTool(name, **kwargs))
+    return acc
+
+
+def CaloCellContainerSDCfg(flags, name='CaloCellContainerSD', **kwargs):
+    """Configure the FastCaloSim calorimeter-cell sensitive detector."""
+    result = ComponentAccumulator()
+    kwargs.setdefault ('NoVolumes', True)
+    kwargs.setdefault("OutputCollectionNames", ["DefaultCaloCellContainer"])
+    # The conversion tool also creates mergeable FastCaloSim hit collections.
+    kwargs.setdefault("FastHitConvertTool",  result.addPublicTool(result.popToolsAndMerge(FastHitConvertToolCfg(flags))))
+    result.setPrivateTools(CompFactory.CaloCellContainerSDTool(name, **kwargs))
+    return result
+
+
 def CaloCellContainerSensitiveDetectorListCfg(flags):
     result = ComponentAccumulator()
     tools = []
     if flags.Sim.LArParameterization is LArParameterization.FastCaloSim:
-        from ISF_FastCaloSimParametrization.ISF_FastCaloSimParametrizationConfig import CaloCellContainerSDCfg
         tools += [ result.popToolsAndMerge(CaloCellContainerSDCfg(flags)) ]
     result.setPrivateTools(tools)
     return result

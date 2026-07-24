@@ -1,89 +1,24 @@
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 """ComponentAccumulator config of tools for ISF_FastCaloSimParametrization
 
-Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+NOTE: the parametrization-input ntuple algorithm (formerly ISF_HitAnalysis) now
+lives in G4FastSimulation as FastCaloSimParamHitAnalysis, using the same
+external FastCaloSim transport+extrapolation as the G4 FastCaloSim fast-sim
+model. It still runs offline from ESD, via ESDtoNTUP_FCS_Skeleton.py. See
+G4FastSimulation.G4FastSimulationConfig.FastCaloSimParamHitAnalysisCfg.
 """
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
-from IOVDbSvc.IOVDbSvcConfig import addFolders
-def ISF_HitAnalysisCfg(flags, name="ISF_HitAnalysis",
-                       NTruthParticles=1, saveAllBranches=False,
-                       doG4Hits=False, doClusterInfo=False,
-                       outputGeoFileName=None, **kwargs):
-    result = ComponentAccumulator()
-
-    from LArGeoAlgsNV.LArGMConfig import LArGMCfg
-    result.merge( LArGMCfg(flags) )
-    kwargs.setdefault("CaloDetDescrManager", "CaloDetDescrManager")
-
-    from TileConditions.TileSamplingFractionConfig import TileSamplingFractionCondAlgCfg
-    result.merge( TileSamplingFractionCondAlgCfg(flags) )
-    kwargs.setdefault("TileSamplingFraction", "TileSamplingFraction")
-
-    from TileConditions.TileCablingSvcConfig import TileCablingSvcCfg
-    kwargs.setdefault("TileCablingSvc", result.getPrimaryAndMerge(TileCablingSvcCfg(flags)))
-
-    kwargs.setdefault("NtupleFileName", 'ISF_HitAnalysis')
-    kwargs.setdefault("GeoFileName", 'ISF_Geometry')
-    histOutputArray = ["ISF_HitAnalysis DATAFILE='%s' OPT='RECREATE'" % (flags.Output.HISTFileName)] # FIXME top level directory name
-    if outputGeoFileName:
-        histOutputArray += ["ISF_Geometry DATAFILE='%s' OPT='RECREATE'" % (outputGeoFileName)] # FIXME top level directory name
-    result.addService(CompFactory.THistSvc(Output=histOutputArray))
-    kwargs.setdefault("NTruthParticles", NTruthParticles)
-
-    from FastCaloSim.FastCaloSimFactoryNew import NITimedExtrapolatorCfg
-    kwargs.setdefault("Extrapolator", result.addPublicTool(result.popToolsAndMerge(NITimedExtrapolatorCfg(flags))))
-    kwargs.setdefault("CaloCoordinateTool", result.addPublicTool(CompFactory.TBCaloCoordinate("TBCaloCoordinate")))
-    kwargs.setdefault("CaloEntrance", 'InDet::Containers::InnerDetector') #FIXME should this be configurable?
-    kwargs.setdefault("FastCaloSimCaloExtrapolation", result.addPublicTool(result.popToolsAndMerge(FastCaloSimCaloExtrapolationCfg(flags))))
-
-    kwargs.setdefault("CaloBoundaryR", 1148.0)
-    kwargs.setdefault("CaloBoundaryZ", 3550.0) #before: 3475.0
-    kwargs.setdefault("CaloMargin", 100) #=10cm
-    kwargs.setdefault("SaveAllBranches", saveAllBranches) #FIXME
-    kwargs.setdefault("DoAllCells", False)
-    kwargs.setdefault("DoLayers", True)
-    kwargs.setdefault("DoLayerSums", True)
-    kwargs.setdefault("DoG4Hits", doG4Hits) #FIXME
-    kwargs.setdefault("DoClusterInfo", doClusterInfo) #FIXME
-    kwargs.setdefault("TimingCut", 999999)
-
-    result.merge(addFolders(flags, ["/Simulation/Parameters", "/Digitization/Parameters"]))
-
-    result.addEventAlgo(CompFactory.ISF_HitAnalysis(name,**kwargs))
-    return result
-
-def FastCaloSimCaloTransportationCfg(flags, name="FastCaloSimCaloTransportation", **kwargs):
-    acc = ComponentAccumulator()
-    from FastCaloSim.FastCaloSimFactoryNew import NITimedExtrapolatorCfg
-    kwargs.setdefault("Extrapolator", acc.addPublicTool(acc.popToolsAndMerge(NITimedExtrapolatorCfg(flags))))
-    kwargs.setdefault("CaloEntrance", 'InDet::Containers::InnerDetector')
-    acc.setPrivateTools(CompFactory.FastCaloSimCaloTransportation(name, **kwargs))
-    return acc
-
-def FastCaloSimCaloExtrapolationCfg(flags, name="FastCaloSimCaloExtrapolation", **kwargs):
-    acc = ComponentAccumulator()
-    kwargs.setdefault("CaloBoundaryR", [1148.0, 120.0, 41.0])
-    kwargs.setdefault("CaloBoundaryZ", [3550.0, 4587.0, 4587.0])
-    kwargs.setdefault("CaloGeometryHelper", acc.addPublicTool(acc.popToolsAndMerge(FastCaloSimGeometryHelperCfg(flags))))
-    kwargs.setdefault("CaloTransportation", acc.addPublicTool(acc.popToolsAndMerge(FastCaloSimCaloTransportationCfg(flags))))
-    acc.setPrivateTools(CompFactory.FastCaloSimCaloExtrapolation(name, **kwargs))
-    return acc
 
 def FastCaloSimGeometryHelperCfg(flags, name="FastCaloSimGeometryHelper", **kwargs):
     acc = ComponentAccumulator()
     acc.setPrivateTools(CompFactory.FastCaloSimGeometryHelper(name, **kwargs))
     return acc
 
-def CaloCellContainerSDCfg(flags, name='CaloCellContainerSD', **kwargs):
-    acc = ComponentAccumulator()
-    kwargs.setdefault ('NoVolumes', True)
-    kwargs.setdefault("OutputCollectionNames", ["DefaultCaloCellContainer"])
-    # Add ISF_FastHitConvertTool, which will also take care 
-    # of creating mergable FastCaloSim HIT collections
-    from ISF_FastCaloSimServices.ISF_FastCaloSimServicesConfig import FastHitConvertToolCfg
-    kwargs.setdefault("FastHitConvertTool",  acc.addPublicTool(acc.popToolsAndMerge(FastHitConvertToolCfg(flags))))
-    acc.setPrivateTools(CompFactory.CaloCellContainerSDTool(name, **kwargs))
-    return acc
+# CaloCellContainerSDCfg has moved to the G4AtlasTools package (so that it is
+# available in AthSimulation); the SD C++ now lives in G4FastSimulation.
+# Re-exported here for back-compat.
+from G4AtlasTools.G4AtlasToolsConfig import CaloCellContainerSDCfg  # noqa: F401
 
 def ISF_FastCaloSimParametrization_SimPreInclude(flags):
     flags.Sim.RecordStepInfo=True

@@ -5,7 +5,8 @@ atlas_subdir( ISF_FastCaloSimServices )
 
 # External dependencies:
 find_package( CLHEP )
-find_package(lwtnn)
+find_package( Geant4 )
+find_package( FastCaloSim )
 
 # Option(s) for switching on GPU/CUDA support.
 set( _linkLibraries )
@@ -23,9 +24,9 @@ atlas_add_library( ISF_FastCaloSimServices
   OBJECT
   NO_PUBLIC_HEADERS
   PRIVATE_DEFINITIONS ${_definitions}
-  INCLUDE_DIRS ${CLHEP_INCLUDE_DIRS}  ${LWTNN_INCLUDE_DIRS}
-  LINK_LIBRARIES ${CLHEP_LIBRARIES} AtlasHepMCLib ${LWTNN_LIBRARIES}
-  AthenaBaseComps AthenaKernel GaudiKernel IdDictParser ISF_InterfacesLib
+  INCLUDE_DIRS ${CLHEP_INCLUDE_DIRS} ${GEANT4_INCLUDE_DIRS}
+  LINK_LIBRARIES ${CLHEP_LIBRARIES} ${GEANT4_LIBRARIES} AtlasHepMCLib ${FASTCALOSIM_LIBRARIES}
+  AthenaBaseComps AthenaKernel CaloIdentifier GaudiKernel IdDictParser Identifier ISF_InterfacesLib G4AtlasInterfaces
   TrkEventPrimitives TrkExInterfaces CaloEvent CaloDetDescrUtils StoreGateLib NavFourMom
   GeneratorObjects ISF_Event ISF_FastCaloSimEvent
   ISF_FastCaloSimInterfaces ISF_FastCaloSimParametrizationLib PathResolver
