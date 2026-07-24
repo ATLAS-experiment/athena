@@ -5,7 +5,7 @@
 #include "../GlobalSimComponents/GlobalSimulationAlg.h"
 
 #include "../Egamma1BDT/Egamma1BDTAlgTool.h"
-#include "../Egamma1/Egamma1eRatioAlgTool.h"
+#include "../Egamma1BDT/eRatioAlgTool_UCL.h"
 
 #include "../FEX_Unpacker/eFexRoIAlgTool.h"
 #include "../FEX_Unpacker/eFexCvtrAlgTool.h"
@@ -34,7 +34,7 @@
 DECLARE_COMPONENT(GlobalSim::GlobalSimulationAlg)
 
 DECLARE_COMPONENT(GlobalSim::Egamma1BDTAlgTool)
-DECLARE_COMPONENT(GlobalSim::Egamma1eRatioAlgTool)
+DECLARE_COMPONENT(GlobalSim::eRatioAlgTool_UCL)
 
 DECLARE_COMPONENT(GlobalSim::eFexRoIAlgTool)
 DECLARE_COMPONENT(GlobalSim::eFexCvtrAlgTool)
