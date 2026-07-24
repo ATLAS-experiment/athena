@@ -31,12 +31,24 @@ def ITkActsDeviceTrackRecoCfg(flags, *, previousExtension=None):
             name=f"{flags.Tracking.ActiveConfig.extension}RegionsOfInterestCreatorAlg"))
 
         print("Performing clusterization on device")
+
         # setup RDO converter
-        from ActsGPUEventCnv.ActsGPUEventCnvConfig import RDOtoTracccCellConverterAlgCfg
-        acc.merge(RDOtoTracccCellConverterAlgCfg(flags,
-            TracccCells = "TracccCellCollection",
-            HostConditionsObjectName="TracccHostCondConfig"
-        ))
+        if flags.Acts.EDM.PhaseII :
+            from ActsConfig.ActsPhaseIIRawDataEdmConfig import (
+                PhaseIIPixelRawDataContainerCfg,
+                PhaseIIStripRawDataContainerCfg,
+            )
+            acc.merge(PhaseIIPixelRawDataContainerCfg(flags))
+            acc.merge(PhaseIIStripRawDataContainerCfg(flags))
+            from ActsGPUEventCnv.ActsGPUEventCnvConfig import PhaseIIRDOtoTracccCellConverterAlgCfg
+            acc.merge(PhaseIIRDOtoTracccCellConverterAlgCfg(flags,
+                TracccCells = "TracccCellCollection",
+                ))
+        else:
+            from ActsGPUEventCnv.ActsGPUEventCnvConfig import RDOtoTracccCellConverterAlgCfg
+            acc.merge(RDOtoTracccCellConverterAlgCfg(flags,
+                TracccCells = "TracccCellCollection",
+                ))
 
         # setup traccc clusterization
         from ActsGPUDataPreparation.ActsGPUDataPreparationConfig import DeviceClusterizationAlgCfg
