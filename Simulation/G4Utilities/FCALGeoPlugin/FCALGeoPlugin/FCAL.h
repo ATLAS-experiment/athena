@@ -23,7 +23,7 @@ class FCal : public CaloGeo {
  public:
   FCal() = default;
 
-  ~FCal() override = default;
+  virtual ~FCal() = default;
 
   /// Set the backing calorimeter cell store.
   void set_geo(CaloGeo* geo) { m_geo = geo; }
