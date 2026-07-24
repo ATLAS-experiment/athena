@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 import re
 from AthenaCommon.Logging import logging
@@ -6,7 +6,7 @@ from AthenaCommon.Logging import logging
 #Helper method to determine if the input release is in particular release range. 
 #The boundaries rel1 and rel2 are inclusive.
 
-def releaseInRange(flags,rel1,rel2):
+def releaseInRange(flags,rel1,rel2,inputRelease=None):
     msg=logging.getLogger("releaseInRange")
 
     #This regex matches 3 and 4 digit release numbers
@@ -17,8 +17,9 @@ def releaseInRange(flags,rel1,rel2):
         if not relPattern.match(r):
             raise RuntimeError("Release number %s doesn't match the expected format"%r)
 
-    inputRelease=flags.Input.Release
-    
+    if inputRelease is None:
+        inputRelease=flags.Input.Release
+
     # protection against AOD with very old releases or not read correctly by MetaReader.py
     if inputRelease == "" or not inputRelease.startswith("Athena-"):
         msg.debug("flags.Input.Release is read as empty or it does not start with 'Athena-'")
