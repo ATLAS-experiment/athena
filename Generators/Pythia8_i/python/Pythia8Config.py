@@ -50,6 +50,10 @@ def Pythia8BaseCfg(flags, name="Pythia8_i", **kwargs):
     if "CollisionEnergy" not in kwargs:
         kwargs["CollisionEnergy"] = flags.Beam.Energy * 2 / GeV
 
+    # Random Seed and DSID
+    kwargs.setdefault("RandomSeed", flags.Random.SeedOffset)
+    kwargs.setdefault("Dsid", flags.Generator.DSID)
+
     # Load basic parameters
     base_cmds.extend([
         "6:m0 = 172.5",
