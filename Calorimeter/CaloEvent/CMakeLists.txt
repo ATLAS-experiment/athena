@@ -33,6 +33,8 @@ atlas_add_dictionary( CaloEventDict
 atlas_install_joboptions( share/*.txt )
 
 # Test(s) in the package:
+# Not built for AthSimulation, which does not run them.
+if( NOT GENERATIONBASE AND NOT SIMULATIONBASE )
 atlas_add_test( CaloCellContainer_test
    SOURCES test/CaloCellContainer_test.cxx
    LINK_LIBRARIES CaloDetDescrLib CaloIdentifier TestTools IdDictParser
@@ -67,3 +69,4 @@ atlas_add_test( CaloTowerSeg_test
 atlas_add_test( CaloTester_test
    SOURCES test/CaloTester_test.cxx
    LINK_LIBRARIES CaloEvent )
+endif()
