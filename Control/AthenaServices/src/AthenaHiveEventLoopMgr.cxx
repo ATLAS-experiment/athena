@@ -1091,18 +1091,30 @@ int AthenaHiveEventLoopMgr::declareEventRootAddress(EventContext& ctx){
     // No EventSelector is provided, so with no iterator it's up to us
     // to create an EventInfo
     // first event # == 1
-    unsigned int runNmb{1}, evtNmb{m_nevt + 1};
+    unsigned int runNmb{1}, evtNmb{m_nevt + 1}, lbNmb{0};
 
     // increment the run/lumiBlock number if desired
     if (m_flmbi != 0) {
       runNmb = m_nevt / m_flmbi + 1;
       evtNmb = m_nevt % m_flmbi + 1;
+      // Change lumiBlock# to match runNumber
+      lbNmb = runNmb;
     }
-    auto eid = std::make_unique<EventID> (runNmb,evtNmb, m_timeStamp);
-    // Change lumiBlock# to match runNumber
-    eid->set_lumi_block( runNmb );
 
     m_timeStamp += m_timeStampInt;
+    unsigned int timeStamp = m_timeStamp;
+    std::string eiName = "McEventInfo";
+    // if context has correct info already, use it
+    if ( ctx.eventID().event_number() != EventIDBase::UNDEFEVT) {
+      runNmb =  ctx.eventID().run_number();
+      evtNmb = ctx.eventID().event_number();
+      timeStamp = ctx.eventID().time_stamp();
+      lbNmb = ctx.eventID().lumi_block();
+      eiName = "EventInfo";
+    }
+
+    auto eid = std::make_unique<EventID> (runNmb,evtNmb, timeStamp);
+    eid->set_lumi_block( lbNmb );
 
     pEvent = std::make_unique<EventInfo>(std::move(eid),
                                          std::make_unique<EventType>());
@@ -1120,7 +1132,7 @@ int AthenaHiveEventLoopMgr::declareEventRootAddress(EventContext& ctx){
     ATH_MSG_DEBUG ( "recording EventInfo " << *pEvent->event_ID() << " in "
             << m_eventStore->name() );
 
-    sc = m_eventStore->record(std::move(pEvent), "McEventInfo");
+    sc = m_eventStore->record(std::move(pEvent), eiName);
     if( !sc.isSuccess() )  {
       ATH_MSG_ERROR ( "Error declaring event data object" );
       return -1;

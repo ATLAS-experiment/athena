@@ -3,6 +3,8 @@
 */
 
 #include "EventInfoPackagingTool.h"
+#include <xAODEventInfo/EventAuxInfo.h>
+#include <xAODEventInfo/EventInfo.h>
 
 #include "GaudiKernel/EventIDBase.h"
 
@@ -30,21 +32,25 @@ StatusCode EventInfoPackagingTool::unpack(const OffloadMessage& msg,
                                           EventContext& context) const {
   const ::EventInfoMessage& ei = msg.event();
 
-  EventIDBase eventId(ei.runnumber(),
-                      ei.eventnumber(),
-                      ei.timestamp(),
-                      ei.timestampnsoffset(),
-                      ei.bcid(),
-                      ei.lumiblock());
+  EventIDBase eventId(ei.runnumber(), ei.eventnumber(), ei.timestamp(),
+                      ei.timestampnsoffset(), ei.bcid(), ei.lumiblock());
 
   context.setEventID(eventId);
   context.setValid(true);
   const EventIDBase& restoredEventId = context.eventID();
-  ATH_MSG_INFO("Restored EventID: run=" << restoredEventId.run_number()
-               << ", event=" << restoredEventId.event_number()
-               << ", lumi=" << restoredEventId.lumi_block()
-               << ", timestamp=" << restoredEventId.time_stamp()
-               << ", timestampNsOffset=" << restoredEventId.time_stamp_ns_offset()
-               << ", bcid=" << restoredEventId.bunch_crossing_id());
+
+  auto outputEvent = std::make_unique<xAOD::EventInfo>();
+  auto outputEventAux = std::make_unique<xAOD::EventAuxInfo>();
+  outputEvent->setStore(outputEventAux.get());
+  outputEvent->setRunNumber(context.eventID().run_number());
+  outputEvent->setEventNumber(context.eventID().event_number());
+  outputEvent->setTimeStamp(context.eventID().time_stamp());
+  outputEvent->setTimeStampNSOffset(context.eventID().time_stamp_ns_offset());
+  outputEvent->setBCID(context.eventID().bunch_crossing_id());
+  outputEvent->setLumiBlock(context.eventID().lumi_block());
+
+  ATH_CHECK(evtStore()->record(std::move(outputEvent), "EventInfo"));
+  ATH_CHECK(evtStore()->record(std::move(outputEventAux), "EventInfoAux."));
+
   return StatusCode::SUCCESS;
 }

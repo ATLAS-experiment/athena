@@ -3,7 +3,7 @@ from AthenaConfiguration.AllConfigFlags import initConfigFlags
 from AthenaConfiguration.MainServicesConfig import MainServicesCfg
 from AthenaConfiguration.TestDefaults import defaultTestFiles, defaultGeometryTags, defaultConditionsTags
 # from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
-from AthenaCommon.Constants import DEBUG
+from AthenaCommon.Constants import DEBUG, VERBOSE
 
 from ByteStreamCnvSvc.ByteStreamConfig import ByteStreamReadCfg
 
@@ -26,13 +26,19 @@ acc = MainServicesCfg(flags)
 # TODO, this would be configured in advance, when ELMgr is configured
 robsSvc = acc.addService(CompFactory.ROBDataProviderSvc())
 el =acc.getService("AthenaHiveEventLoopMgr")
+el.OutputLevel=VERBOSE
 unpackEI = CompFactory.EventInfoPackagingTool("UnpackEI")
 unpackBS = CompFactory.BSPackagingTool("UnpackBS", OutputLevel=DEBUG, ROBDataProvider=robsSvc)
 execTool = CompFactory.ExecuteOngRPCCall( PackagingTools=[unpackEI, unpackBS])
 el.eventExecTool=execTool
 
-from TrigT2CaloCommon.TrigCaloDataAccessConfig import trigCaloDataAccessSvcCfg
-acc.merge(trigCaloDataAccessSvcCfg(flags))
+from CaloRec.CaloRecoConfig import CaloRecoCfg
+acc.merge(CaloRecoCfg(flags))
+# from TrigT2CaloCommon.TrigCaloDataAccessConfig import trigCaloDataAccessSvcCfg
+# acc.merge(trigCaloDataAccessSvcCfg(flags))
+
+# from TileRecUtils.TileCellMakerConfig import TileCellMakerCfg
+# acc.merge(TileCellMakerCfg(flags))
 
 
 acc.run()

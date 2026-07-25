@@ -81,31 +81,14 @@ StatusCode ExecuteOngRPCCall::executeEvent(MinimalEventLoopMgr* el,
     std::this_thread::sleep_for(std::chrono::milliseconds(100));
   }  
   ATH_MSG_ALWAYS("Got input, upacking ...");
-  {
-  const EventIDBase& restoredEventId = context.eventID();
-  ATH_MSG_INFO("Before decoding EventID: run=" << restoredEventId.run_number()
-               << ", event=" << restoredEventId.event_number()
-               << ", lumi=" << restoredEventId.lumi_block()
-               << ", timestamp=" << restoredEventId.time_stamp()
-               << ", timestampNsOffset=" << restoredEventId.time_stamp_ns_offset()
-               << ", bcid=" << restoredEventId.bunch_crossing_id());
-  }
   for ( auto& tool: m_packingTools) {
     ATH_CHECK(tool->unpack(*(r->request),  context));
   }
   ATH_MSG_ALWAYS("After decoding done, executing algorithms ...");
-  {
-  const EventIDBase& restoredEventId = context.eventID();
-  ATH_MSG_INFO("Restored EventID: run=" << restoredEventId.run_number()
-               << ", event=" << restoredEventId.event_number()
-               << ", lumi=" << restoredEventId.lumi_block()
-               << ", timestamp=" << restoredEventId.time_stamp()
-               << ", timestampNsOffset=" << restoredEventId.time_stamp_ns_offset()
-               << ", bcid=" << restoredEventId.bunch_crossing_id());
-  }
   StatusCode sc = el->executeEvent(std::move(context));
   ATH_MSG_ALWAYS("Processed, harvesting result ...");
   r->response->set_identifier("done");
+  ATH_MSG_INFO(evtStore()->dump());
   // TODO the OffloadMessage needs a field for execution status
   r->complete();
 
