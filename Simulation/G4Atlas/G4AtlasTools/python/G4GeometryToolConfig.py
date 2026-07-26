@@ -15,7 +15,7 @@ from G4AtlasTools.G4PhysicsRegionConfig import DriftWallPhysicsRegionToolCfg, Dr
 #the field config tools
 from G4AtlasTools.G4FieldConfig import ATLASFieldManagerToolCfg, TightMuonsATLASFieldManagerToolCfg, BeamPipeFieldManagerToolCfg, InDetFieldManagerToolCfg, ITkFieldManagerToolCfg, MuonsOnlyInCaloFieldManagerToolCfg, MuonFieldManagerToolCfg, Q1FwdFieldManagerToolCfg, Q2FwdFieldManagerToolCfg, Q3FwdFieldManagerToolCfg, D1FwdFieldManagerToolCfg, D2FwdFieldManagerToolCfg, Q4FwdFieldManagerToolCfg, Q5FwdFieldManagerToolCfg, Q6FwdFieldManagerToolCfg, Q7FwdFieldManagerToolCfg, Q1HKickFwdFieldManagerToolCfg, Q1VKickFwdFieldManagerToolCfg, Q2HKickFwdFieldManagerToolCfg, Q2VKickFwdFieldManagerToolCfg, Q3HKickFwdFieldManagerToolCfg, Q3VKickFwdFieldManagerToolCfg, Q4VKickAFwdFieldManagerToolCfg, Q4HKickFwdFieldManagerToolCfg, Q4VKickBFwdFieldManagerToolCfg, Q5HKickFwdFieldManagerToolCfg,  Q6VKickFwdFieldManagerToolCfg, FwdRegionFieldManagerToolCfg
 
-from G4AtlasTools.G4AtlasToolsConfig import SensitiveDetectorMasterToolCfg, G4CaloTransportToolCfg, G4FatrasTransportToolCfg, FastSimulationMasterToolCfg
+from G4AtlasTools.G4AtlasToolsConfig import SensitiveDetectorMasterToolCfg, G4CaloTransportToolCfg, FastSimulationMasterToolCfg
 
 CylindricalEnvelope, PolyconicalEnvelope, MaterialDescriptionTool,VoxelDensityTool,G4AtlasDetectorConstructionTool,BoxEnvelope=CompFactory.getComps("CylindricalEnvelope","PolyconicalEnvelope","MaterialDescriptionTool","VoxelDensityTool","G4AtlasDetectorConstructionTool","BoxEnvelope")
 
@@ -740,9 +740,6 @@ def G4AtlasDetectorConstructionToolCfg(flags, name="G4AtlasDetectorConstructionT
     
         if flags.Sim.LArParameterization is LArParameterization.FastCaloSim:
             kwargs.setdefault("G4CaloTransportTool", result.addPublicTool(result.popToolsAndMerge(G4CaloTransportToolCfg(flags))))
-
-        if flags.Sim.InDetParameterization is InDetParameterization.FatrasG4:
-            kwargs.setdefault("G4FatrasTransportTool", result.addPublicTool(result.popToolsAndMerge(G4FatrasTransportToolCfg(flags))))
 
         
     result.setPrivateTools(G4AtlasDetectorConstructionTool(name, **kwargs))

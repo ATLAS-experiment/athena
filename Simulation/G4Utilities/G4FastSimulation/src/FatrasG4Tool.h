@@ -8,9 +8,6 @@
 /* Fast simulation base include */
 #include "G4AtlasTools/FastSimulationBase.h"
 
-/* Geant4 transportation tool */
-#include "G4AtlasInterfaces/IG4FatrasTransportTool.h"
-
 class G4VFastSimulationModel;
 
 class FatrasG4Tool: public FastSimulationBase
@@ -25,13 +22,6 @@ protected:
    base classes. */
   virtual G4VFastSimulationModel* makeFastSimModel() override final;  
  
- private:
-  
-  // Flag to enable G4 transportation
-  Gaudi::Property<bool> m_doG4Transport{this, "doG4Transport", false, "Flag to enable G4 transportation"};
-
-  // Geant4 transportation tool
-  PublicToolHandle<IG4FatrasTransportTool> m_G4FatrasTransportTool{this, "G4FatrasTransportTool", "G4FatrasTransportTool", ""};
 };
 
 #endif //G4FASTSIMULATION_FATRASG4TOOL_H

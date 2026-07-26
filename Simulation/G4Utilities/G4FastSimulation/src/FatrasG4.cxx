@@ -7,7 +7,6 @@
 
 // FatrasG4 physics models
 #include "FatrasG4PhotonConversion.h"
-#include "FatrasG4ELoss.h"
 
 // Geant4 particle includes
 #include "G4Gamma.hh"
@@ -32,26 +31,21 @@
 // G4 sensitive detector includes
 #include "G4SDManager.hh"
 
-// #define FATRASG4_DEBUG
+#define FATRASG4_DEBUG
 // #define FATRASG4DOIT_DEBUG
 // #define FATRASG4DOIT_DEBUG_PHYSICS
-#define FATRASG4_DOCONVERSION
+// #define FATRASG4_DOCONVERSION
 
 void setTrackParams(G4Track* track, const G4FieldTrack* fieldTrackStep);
 
 
 FatrasG4::FatrasG4(const std::string& name,
                          G4Region* region,
-                         bool doG4Transport,
-                         const PublicToolHandle<IG4FatrasTransportTool>& G4FatrasTransportTool,
                          FatrasG4Tool * /*FatrasG4Tool*/)
 
 : G4VFastSimulationModel(name, region),
   m_photonConversion(),
-  m_eLoss(),
   m_generator(*G4Random::getTheEngine()),
-  m_doG4Transport(doG4Transport),
-  m_G4FatrasTransportTool(G4FatrasTransportTool)
 {
 }
 
@@ -96,6 +90,7 @@ G4bool FatrasG4::ModelTrigger(const G4FastTrack& fastTrack)
                                     <<" phi=" <<fastTrack.GetPrimaryTrack() -> GetMomentum().phi()                <<"\n"
                                     <<G4endl;
   #endif
+  return false;
 
   const G4ParticleDefinition * G4Particle = fastTrack.GetPrimaryTrack() -> GetDefinition();
   
@@ -124,6 +119,24 @@ void FatrasG4::DoIt(const G4FastTrack& fastTrack, G4FastStep& fastStep)
   const auto pdgEncoding = G4Particle -> GetPDGEncoding();
   const auto trackID = G4PrimaryTrack -> GetTrackID();
   const G4String materialName = G4PrimaryTrack -> GetVolume() -> GetLogicalVolume() -> GetMaterial() -> GetName();
+  G4Material* material = G4PrimaryTrack->GetVolume()
+                           ->GetLogicalVolume()
+                           ->GetMaterial();
+
+  G4cout << "Material: " << material->GetName() << G4endl;
+
+  const G4ElementVector* elements = material->GetElementVector();
+  const G4double* fractions = material->GetFractionVector();
+
+  for (size_t i = 0; i < material->GetNumberOfElements(); ++i)
+  {
+      G4cout << "  "
+             << (*elements)[i]->GetName()
+             << " (" << (*elements)[i]->GetSymbol() << ")"
+             << " Z=" << (*elements)[i]->GetZ()
+             << " mass fraction=" << fractions[i]
+             << G4endl;
+  }
 
   #ifdef FATRASG4DOIT_DEBUG
     G4cout << "[FatrasG4::DoIt] Material at start of transportation: " << materialName << G4endl;
@@ -189,83 +202,84 @@ void FatrasG4::DoIt(const G4FastTrack& fastTrack, G4FastStep& fastStep)
       stepLength = 0.0;
     }
 
-    if (isPhoton){
-      m_photonPathLength += stepLength;
-      #ifdef FATRASG4DOIT_DEBUG
-        G4cout << "[FatrasG4::DoIt] Photon path length: ";
-        G4cout << m_photonPathLength << "mm " << G4endl;
-      #endif
-      #ifdef FATRASG4_DOCONVERSION
-      if (m_photonPathLength >= m_x0Photon){
-        #ifdef FATRASG4DOIT_DEBUG_PHYSICS
-          G4cout << "[FatrasG4::DoIt] Running photon conversion. Photon path length: ";
-          G4cout << m_photonPathLength << "mm ";
-          G4cout << m_electronPathLength << "mm ";
-          G4cout << "Last step length: " << stepLength << "mm ";
-          G4cout << "Generated 9/7*X0: " << m_x0Photon << "mm." << G4endl;
-        #endif
-        m_photonConversion.run(m_generator, fastTrack, fastStep);
-        m_photonPathLength = 0.0;
+    // if (isPhoton){
+    //   m_photonPathLength += stepLength;
+    //   #ifdef FATRASG4DOIT_DEBUG
+    //     G4cout << "[FatrasG4::DoIt] Photon path length: ";
+    //     G4cout << m_photonPathLength << "mm " << G4endl;
+    //   #endif
+    //   #ifdef FATRASG4_DOCONVERSION
+    //   if (m_photonPathLength >= m_x0Photon){
+    //     #ifdef FATRASG4DOIT_DEBUG_PHYSICS
+    //       G4cout << "[FatrasG4::DoIt] Running photon conversion. Photon path length: ";
+    //       G4cout << m_photonPathLength << "mm ";
+    //       G4cout << m_electronPathLength << "mm ";
+    //       G4cout << "Last step length: " << stepLength << "mm ";
+    //       G4cout << "Generated 9/7*X0: " << m_x0Photon << "mm." << G4endl;
+    //     #endif
+    //     m_photonConversion.run(m_generator, fastTrack, fastStep);
+    //     m_photonPathLength = 0.0;
 
-        // Check if fastStep should be updated at 
-        // the end of FatrasG4::DoIt
-        interactionBreak = true;
-        break;
-      }
-      #endif
-    }
+    //     // Check if fastStep should be updated at 
+    //     // the end of FatrasG4::DoIt
+    //     interactionBreak = true;
+    //     break;
+    //   }
+    //   #endif
+    // }
     
-    if (isElectron){
-      m_electronPathLength += stepLength;
-      // if (stepLength != 0.0){
-      //   interactionBreak = m_eLoss.run(m_generator, stepLength, fastTrack, fastStep);
-      //   if (interactionBreak) break;
-      // }
-      /*
-      if (m_electronPathLength >= 100){
-        #ifdef FATRASG4DOIT_DEBUG
-          G4cout << "[FatrasG4::DoIt] Killing electron. Electron path length: ";
-          G4cout << m_electronPathLength << "mm ";
-          G4cout << "Last step length: " << stepLength << " mm " << G4endl;
+    // if (isElectron){
+    //   m_electronPathLength += stepLength;
+    //   // if (stepLength != 0.0){
+    //   //   interactionBreak = m_eLoss.run(m_generator, stepLength, fastTrack, fastStep);
+    //   //   if (interactionBreak) break;
+    //   // }
+    //   /*
+    //   if (m_electronPathLength >= 100){
+    //     #ifdef FATRASG4DOIT_DEBUG
+    //       G4cout << "[FatrasG4::DoIt] Killing electron. Electron path length: ";
+    //       G4cout << m_electronPathLength << "mm ";
+    //       G4cout << "Last step length: " << stepLength << " mm " << G4endl;
 
-        #endif
+    //     #endif
 
-        m_electronPathLength = 0.0;
-        fastStep.KillPrimaryTrack();
-        fastStep.ProposePrimaryTrackPathLength(0.0);
-        // Check if fastStep should be updated at 
-        // the end of FatrasG4::DoIt
-        interactionBreak = true;
-        break;
-      }
-      */
-    }
+    //     m_electronPathLength = 0.0;
+    //     fastStep.KillPrimaryTrack();
+    //     fastStep.ProposePrimaryTrackPathLength(0.0);
+    //     // Check if fastStep should be updated at 
+    //     // the end of FatrasG4::DoIt
+    //     interactionBreak = true;
+    //     break;
+    //   }
+    //   */
+    // }
 
-    if (isPositron){
-      m_positronPathLength += stepLength;
-      // if (stepLength != 0.0){
-      //   interactionBreak = m_eLoss.run(m_generator, stepLength, fastTrack, fastStep);
-      //   if (interactionBreak) break;
-      // }
-      /*
-      if (m_positronPathLength >= 100){
-        #ifdef FATRASG4DOIT_DEBUG
-          G4cout << "[FatrasG4::DoIt] Killing positron. Positron path length: ";
-          G4cout << m_positronPathLength << "mm ";
-          G4cout << m_positronPathLength << "mm ";
-          G4cout << "Last step length: " << stepLength << "mm " << G4endl;
-        #endif
+    // if (isPositron){
+    //   m_positronPathLength += stepLength;
+    //   // if (stepLength != 0.0){
+    //   //   interactionBreak = m_eLoss.run(m_generator, stepLength, fastTrack, fastStep);
+    //   //   if (interactionBreak) break;
+    //   // }
+    //   /*
+    //   if (m_positronPathLength >= 100){
+    //     #ifdef FATRASG4DOIT_DEBUG
+    //       G4cout << "[FatrasG4::DoIt] Killing positron. Positron path length: ";
+    //       G4cout << m_positronPathLength << "mm ";
+    //       G4cout << m_positronPathLength << "mm ";
+    //       G4cout << "Last step length: " << stepLength << "mm " << G4endl;
+    //     #endif
 
-        m_positronPathLength = 0.0;
-        fastStep.KillPrimaryTrack();
-        fastStep.ProposePrimaryTrackPathLength(0.0);
-        // Check if fastStep should be updated at 
-        // the end of FatrasG4::DoIt
-        interactionBreak = true;
-        break;
-      }
-      */
-    }
+    //     m_positronPathLength = 0.0;
+    //     fastStep.KillPrimaryTrack();
+    //     fastStep.ProposePrimaryTrackPathLength(0.0);
+    //     // Check if fastStep should be updated at 
+    //     // the end of FatrasG4::DoIt
+    //     interactionBreak = true;
+    //     break;
+    //   }
+    //   */
+    // }
+    
   }
   
   if (!interactionBreak){

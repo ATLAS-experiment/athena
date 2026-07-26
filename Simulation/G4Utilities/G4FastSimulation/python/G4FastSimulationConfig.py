@@ -20,15 +20,6 @@ def DeadMaterialShowerCfg(flags, **kwargs):
 
 def FatrasG4Cfg(flags, **kwargs):
     result = ComponentAccumulator()
-
-    # Set the G4FatrasTransportTool
-    from G4AtlasTools.G4AtlasToolsConfig import G4FatrasTransportToolCfg
-    kwargs.setdefault("G4FatrasTransportTool", result.addPublicTool(result.popToolsAndMerge(G4FatrasTransportToolCfg(flags))))
-    kwargs.setdefault('doG4Transport', True)
-
-    # Name of region where FatrasG4 will be triggered
-    kwargs.setdefault("RegionName", "InDet")
-
     result.setPrivateTools(CompFactory.FatrasG4Tool(name="FatrasG4", **kwargs))
     return result
 

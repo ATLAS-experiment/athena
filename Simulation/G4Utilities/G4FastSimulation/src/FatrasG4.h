@@ -6,10 +6,8 @@
 #define G4FASTSIMULATION_FATRASG4_H
 
 #include "G4VFastSimulationModel.hh"
-#include "G4AtlasInterfaces/IG4FatrasTransportTool.h"
 #include "FatrasG4Tool.h"
 #include "FatrasG4PhotonConversion.h"
-#include "FatrasG4ELoss.h"
 #include "Randomize.hh"
 
 class G4FieldTrack;
@@ -20,8 +18,6 @@ class FatrasG4 : public G4VFastSimulationModel
 public:
   FatrasG4(const std::string& name,
            G4Region* region,
-           bool doG4Transport,
-           const PublicToolHandle<IG4FatrasTransportTool>& G4FatrasTransportTool,
            FatrasG4Tool* FatrasG4Tool);
 
   ~FatrasG4() = default;
@@ -36,14 +32,8 @@ public:
 private:
   // Photon conversion model
   FatrasG4PhotonConversion m_photonConversion;
-  // Continuous energy loss model
-  FatrasG4ELoss m_eLoss;
   // RNG engine
   CLHEP::HepRandomEngine& m_generator;
-  // Bool flag to do Geant4 transport
-  bool m_doG4Transport;
-  // Geant4 Fatras transportation tool
-  PublicToolHandle<IG4FatrasTransportTool> m_G4FatrasTransportTool;
 
   // Particle path length
   double m_photonPathLength = 0.0;
