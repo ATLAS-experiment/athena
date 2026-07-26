@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRACKPARTICLEASSOCIATIONALGS_TRACKPARTICLECELLASSOCIATIONALG_H
@@ -9,6 +9,7 @@
 
 #include "GaudiKernel/ToolHandle.h"
 #include "StoreGate/ReadHandleKey.h"
+#include "StoreGate/ReadDecorHandleKey.h"
 #include "StoreGate/WriteHandleKey.h"
 
 #include "xAODTracking/TrackParticleContainer.h"
@@ -19,16 +20,15 @@
 #include "xAODAssociations/TrackParticleClusterAssociationContainer.h"
 #include "xAODAssociations/TrackParticleClusterAssociationAuxContainer.h"
 
+#include "RecoToolInterfaces/IParticleCaloCellAssociationTool.h"
+
 
 #include <string>
-namespace Rec {
-  class IParticleCaloCellAssociationTool;
-}
 
 class TrackParticleCellAssociationAlg : public AthReentrantAlgorithm
 {
  public:
-  TrackParticleCellAssociationAlg(const std::string& name, ISvcLocator* pSvcLocator);
+  using AthReentrantAlgorithm::AthReentrantAlgorithm;
 
   ~TrackParticleCellAssociationAlg();
 
@@ -38,11 +38,13 @@ class TrackParticleCellAssociationAlg : public AthReentrantAlgorithm
 
  private:
 
-  ToolHandle<Rec::IParticleCaloCellAssociationTool> m_caloCellAssociationTool;
+  ToolHandle<Rec::IParticleCaloCellAssociationTool> m_caloCellAssociationTool{this, "ParticleCaloCellAssociationTool", 
+                                                                              "Rec::ParticleCaloCellAssociationTool/ParticleCaloCellAssociationTool"};
 
   SG::ReadHandleKey<xAOD::TrackParticleContainer> m_trackParticleCollectionName{this,"TrackParticleContainerName", 
       "InDetTrackParticles","SG Key of track particle container"};
 
+  SG::ReadDecorHandleKey<xAOD::TrackParticleContainer> m_trkLinkKey{this, "TrackLinkKey", m_trackParticleCollectionName, "trackLink"};
   SG::WriteHandleKey<xAOD::CaloClusterContainer> m_clusterContainerName{this,"ClusterContainerName", 
       "InDetTrackParticlesAssociatedClusters","SG Key of output cluster container"};
 
@@ -53,7 +55,7 @@ class TrackParticleCellAssociationAlg : public AthReentrantAlgorithm
   SG::WriteHandleKey< xAOD::TrackParticleClusterAssociationContainer> m_associationContainerName{this,"AssociationContainerName",
       "InDetTrackParticlesClusterAssociations","SG Key of association container"};
 
-  double m_ptCut;
+  Gaudi::Property<double> m_ptCut{this, "PtCut", 10000};
 };
 
 
