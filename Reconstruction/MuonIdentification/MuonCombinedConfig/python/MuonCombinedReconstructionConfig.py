@@ -97,21 +97,46 @@ def MuGirlStauAlgCfg(flags, name="MuGirlStauAlg", **kwargs):
 
 
 def MuonCombinedMuonCandidateAlgCfg(flags, name="MuonCombinedMuonCandidateAlg", **kwargs):
-    from MuonCombinedConfig.MuonCombinedRecToolsConfig import MuonCandidateToolCfg
-
     result = ComponentAccumulator()
 
-    # EJWM - not completely sure where this comes from. Perhaps should be retrieved by a sub-tool?
     from CaloTools.CaloNoiseCondAlgConfig import CaloNoiseCondAlgCfg
+    from MuonConfig.MuonRecToolsConfig import MuonAmbiProcessorCfg
+    from MuonConfig.MuonRecToolsConfig import MuonEDMPrinterToolCfg
+    from MuonCombinedConfig.MuonCombinedRecToolsConfig import CombinedMuonTrackBuilderCfg, ExtrapolateMuonToIPToolCfg
     result.merge(CaloNoiseCondAlgCfg(flags, "totalNoise"))
 
-    tool_kwargs = {}
-    if flags.Beam.Type is BeamType.Cosmics:
-        tool_kwargs.setdefault("ExtrapolationStrategy", 1)
+    kwargs.setdefault("Printer", result.getPrimaryAndMerge(MuonEDMPrinterToolCfg(flags)))
+    if "TrackBuilder" not in kwargs:
+        kwargs.setdefault("TrackBuilder", result.popToolsAndMerge(
+            CombinedMuonTrackBuilderCfg(flags, name="CombinedMuonTrackBuilder")))
+    #   Why was this dependent on cosmics? will now always create this
+    #   if flags.Beam.Type is BeamType.Cosmics:
+    if flags.Muon.MuonTrigger and flags.Beam.Type is not BeamType.Cosmics:
+        # trigger definitely only uses the ExtrapolateToIPtool in cosmics mode
+        kwargs.setdefault("TrackExtrapolationTool", "")
+    else:
+        kwargs.setdefault("TrackExtrapolationTool", result.popToolsAndMerge(
+            ExtrapolateMuonToIPToolCfg(flags)))
+        kwargs.setdefault("SegmentContainer", "TrackMuonSegments")
+    kwargs.setdefault("AmbiguityProcessor", result.popToolsAndMerge(MuonAmbiProcessorCfg(flags)))
 
-    acc = MuonCandidateToolCfg(flags, **tool_kwargs)
-    kwargs.setdefault("MuonCandidateTool", acc.popPrivateTools())
-    result.merge(acc)
+    from TrkConfig.TrkTrackSummaryToolConfig import MuonTrackSummaryToolCfg
+    kwargs.setdefault("TrackSummaryTool", result.popToolsAndMerge(MuonTrackSummaryToolCfg(flags)))
+
+    # MuonIDHelperSvc already configured
+
+    if flags.Beam.Type is BeamType.Cosmics:
+        kwargs.setdefault("ExtrapolationStrategy", 1)
+
+    track_segment_association_tool = CompFactory.MuonCombined.TrackSegmentAssociationTool(
+        MuonEDMPrinterTool=result.getPrimaryAndMerge(MuonEDMPrinterToolCfg(flags)))
+
+    kwargs.setdefault("TrackSegmentAssociationTool", track_segment_association_tool)
+    result.addPublicTool(track_segment_association_tool)
+
+
+    if flags.Beam.Type is BeamType.Cosmics:
+        kwargs.setdefault("ExtrapolationStrategy", 1)
 
     alg = CompFactory.MuonCombinedMuonCandidateAlg(name, **kwargs)
     result.addEventAlgo(alg, primary=True)
