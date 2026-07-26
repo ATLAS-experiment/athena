@@ -45,7 +45,7 @@ FatrasG4::FatrasG4(const std::string& name,
 
 : G4VFastSimulationModel(name, region),
   m_photonConversion(),
-  m_generator(*G4Random::getTheEngine()),
+  m_generator(*G4Random::getTheEngine())
 {
 }
 
@@ -90,7 +90,7 @@ G4bool FatrasG4::ModelTrigger(const G4FastTrack& fastTrack)
                                     <<" phi=" <<fastTrack.GetPrimaryTrack() -> GetMomentum().phi()                <<"\n"
                                     <<G4endl;
   #endif
-  return false;
+  
 
   const G4ParticleDefinition * G4Particle = fastTrack.GetPrimaryTrack() -> GetDefinition();
   
@@ -99,14 +99,7 @@ G4bool FatrasG4::ModelTrigger(const G4FastTrack& fastTrack)
   bool isElectron  = G4Particle == G4Electron::Definition();
   bool isPositron  = G4Particle == G4Positron::Definition();
 
-  // Pass all photons, electrons and positrons to FatrasG4
-  if (isPhoton || isElectron || isPositron){
-    #ifdef FATRASG4_DEBUG
-      G4cout<<"[FatrasG4::ModelTrigger] Photons, electrons or positron. Model triggered."<<G4endl;
-    #endif
-    return true;
-  }
-  else return false;
+  return false;
 
 }
 
@@ -119,184 +112,6 @@ void FatrasG4::DoIt(const G4FastTrack& fastTrack, G4FastStep& fastStep)
   const auto pdgEncoding = G4Particle -> GetPDGEncoding();
   const auto trackID = G4PrimaryTrack -> GetTrackID();
   const G4String materialName = G4PrimaryTrack -> GetVolume() -> GetLogicalVolume() -> GetMaterial() -> GetName();
-  G4Material* material = G4PrimaryTrack->GetVolume()
-                           ->GetLogicalVolume()
-                           ->GetMaterial();
-
-  G4cout << "Material: " << material->GetName() << G4endl;
-
-  const G4ElementVector* elements = material->GetElementVector();
-  const G4double* fractions = material->GetFractionVector();
-
-  for (size_t i = 0; i < material->GetNumberOfElements(); ++i)
-  {
-      G4cout << "  "
-             << (*elements)[i]->GetName()
-             << " (" << (*elements)[i]->GetSymbol() << ")"
-             << " Z=" << (*elements)[i]->GetZ()
-             << " mass fraction=" << fractions[i]
-             << G4endl;
-  }
-
-  #ifdef FATRASG4DOIT_DEBUG
-    G4cout << "[FatrasG4::DoIt] Material at start of transportation: " << materialName << G4endl;
-    G4cout << "                 Particle PDG encoding: " << pdgEncoding << G4endl;
-    G4cout << "                 Track ID: " << trackID << G4endl;
-  #endif
-
-  // Check if it is an electron, positron or photon to apply
-  // the appropriate fast model
-  const bool isPhoton   = G4Particle == G4Gamma::Definition();
-  const bool isElectron = G4Particle == G4Electron::Definition();
-  const bool isPositron = G4Particle == G4Positron::Definition();
-  // Photons:
-  //    - Pair production
-  //
-  // Electrons:
-  //    - Bremsstrahlung emission
-  //    - Continuous energy loss
-  //    - Multiple scattering
-  //
-  // Positrons:
-  //    - Bremsstrahlung emission
-  //    - Continuous energy loss
-  //    - Multiple scattering
-  //    - Annihilation
-
-  if (isPhoton){
-    // Checks for track ID information
-    m_photonID = (m_photonID == -999) ? trackID : m_photonID;
-    m_photonPathLength = (m_prevPhotonID == -999) ? 0.0 : m_photonPathLength;
-    m_x0Photon = (m_prevPhotonID == -999 || m_photonID != m_prevPhotonID) ?
-      m_photonConversion.generatePathLimits(m_generator, fastTrack).first : m_x0Photon;
-  }
-  if (isElectron){
-    // Checks for track ID information
-    m_electronID = (m_electronID == -999) ? trackID : m_electronID;
-    m_electronPathLength = (m_prevElectronID == -999) ? 0.0 : m_electronPathLength;
-  }
-  if (isPositron){
-    // Checks for track ID information
-    m_positronID = (m_positronID == -999) ? trackID : m_positronID;
-    m_positronPathLength = (m_prevPositronID == -999) ? 0.0 : m_positronPathLength;
-  }
-
-  // Do transportation steps on the primary track.
-  bool interactionBreak = false;
-  auto steps = m_G4FatrasTransportTool -> transport(*G4PrimaryTrack);
-  for (unsigned int iStep = 1; iStep < steps.size(); iStep++){
-
-    // Get G4FieldTrack from each step
-    const G4FieldTrack& fieldTrack = steps[iStep];
-    auto stepLength = (fieldTrack.GetCurveLength() - steps[iStep-1].GetCurveLength());
-
-
-    #ifdef FATRASG4DOIT_DEBUG
-      G4cout << "[FatrasG4::DoIt] Pre-step material name: ";
-      G4cout << materialName << G4endl;
-      G4cout << "[FatrasG4::DoIt] Step length: ";
-      G4cout << stepLength << G4endl;
-    #endif
-
-    if (materialName == "std::Air"){
-      stepLength = 0.0;
-    }
-
-    // if (isPhoton){
-    //   m_photonPathLength += stepLength;
-    //   #ifdef FATRASG4DOIT_DEBUG
-    //     G4cout << "[FatrasG4::DoIt] Photon path length: ";
-    //     G4cout << m_photonPathLength << "mm " << G4endl;
-    //   #endif
-    //   #ifdef FATRASG4_DOCONVERSION
-    //   if (m_photonPathLength >= m_x0Photon){
-    //     #ifdef FATRASG4DOIT_DEBUG_PHYSICS
-    //       G4cout << "[FatrasG4::DoIt] Running photon conversion. Photon path length: ";
-    //       G4cout << m_photonPathLength << "mm ";
-    //       G4cout << m_electronPathLength << "mm ";
-    //       G4cout << "Last step length: " << stepLength << "mm ";
-    //       G4cout << "Generated 9/7*X0: " << m_x0Photon << "mm." << G4endl;
-    //     #endif
-    //     m_photonConversion.run(m_generator, fastTrack, fastStep);
-    //     m_photonPathLength = 0.0;
-
-    //     // Check if fastStep should be updated at 
-    //     // the end of FatrasG4::DoIt
-    //     interactionBreak = true;
-    //     break;
-    //   }
-    //   #endif
-    // }
-    
-    // if (isElectron){
-    //   m_electronPathLength += stepLength;
-    //   // if (stepLength != 0.0){
-    //   //   interactionBreak = m_eLoss.run(m_generator, stepLength, fastTrack, fastStep);
-    //   //   if (interactionBreak) break;
-    //   // }
-    //   /*
-    //   if (m_electronPathLength >= 100){
-    //     #ifdef FATRASG4DOIT_DEBUG
-    //       G4cout << "[FatrasG4::DoIt] Killing electron. Electron path length: ";
-    //       G4cout << m_electronPathLength << "mm ";
-    //       G4cout << "Last step length: " << stepLength << " mm " << G4endl;
-
-    //     #endif
-
-    //     m_electronPathLength = 0.0;
-    //     fastStep.KillPrimaryTrack();
-    //     fastStep.ProposePrimaryTrackPathLength(0.0);
-    //     // Check if fastStep should be updated at 
-    //     // the end of FatrasG4::DoIt
-    //     interactionBreak = true;
-    //     break;
-    //   }
-    //   */
-    // }
-
-    // if (isPositron){
-    //   m_positronPathLength += stepLength;
-    //   // if (stepLength != 0.0){
-    //   //   interactionBreak = m_eLoss.run(m_generator, stepLength, fastTrack, fastStep);
-    //   //   if (interactionBreak) break;
-    //   // }
-    //   /*
-    //   if (m_positronPathLength >= 100){
-    //     #ifdef FATRASG4DOIT_DEBUG
-    //       G4cout << "[FatrasG4::DoIt] Killing positron. Positron path length: ";
-    //       G4cout << m_positronPathLength << "mm ";
-    //       G4cout << m_positronPathLength << "mm ";
-    //       G4cout << "Last step length: " << stepLength << "mm " << G4endl;
-    //     #endif
-
-    //     m_positronPathLength = 0.0;
-    //     fastStep.KillPrimaryTrack();
-    //     fastStep.ProposePrimaryTrackPathLength(0.0);
-    //     // Check if fastStep should be updated at 
-    //     // the end of FatrasG4::DoIt
-    //     interactionBreak = true;
-    //     break;
-    //   }
-    //   */
-    // }
-    
-  }
-  
-  if (!interactionBreak){
-    // #ifdef FATRASG4DOIT_DEBUG
-    //   G4cout << "[FatrasG4::DoIt] Updating fastStep at the end of transport. No interaction happened." << G4endl;;
-    // #endif
-
-    const auto& lastStep = steps[steps.size()-1];
-    fastStep.ProposePrimaryTrackFinalPosition(lastStep.GetPosition(), false);
-    fastStep.ProposePrimaryTrackFinalMomentumDirection(lastStep.GetMomentumDirection(), false);
-    // fastStep.ProposePrimaryTrackFinalKineticEnergy(lastStep.GetKineticEnergy());
-  }
-
-  // Update particle track IDs at the end of DoIt
-  if (isPhoton) m_prevPhotonID = m_photonID;
-  if (isElectron) m_prevElectronID = m_electronID;
-  if (isPositron) m_prevPositronID = m_positronID;
 
   return;  
 }
