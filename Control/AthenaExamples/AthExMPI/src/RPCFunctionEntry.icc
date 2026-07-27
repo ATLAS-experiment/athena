@@ -1,0 +1,184 @@
+// Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
+#ifndef ATHEXMPI_RPCFUNCTIONENTRY_ICC
+#define ATHEXMPI_RPCFUNCTIONENTRY_ICC
+
+// Local include(s)
+#include "RPCFunctionEntry.h"
+
+// Athena include(s)
+#include "CxxUtils/XXH.h"
+
+// Boost include(s)
+#include <boost/callable_traits.hpp>
+#include <boost/mp11.hpp>
+
+// System include(s)
+#include <stdexcept>
+#include <tuple>
+#include <utility>
+
+namespace RemoteCall {
+
+inline const std::string& RPCFunctionEntry::name() const noexcept {
+  return m_name;
+}
+
+inline const std::vector<RPCArgEntry>& RPCFunctionEntry::arguments()
+    const noexcept {
+  return m_arguments;
+}
+
+inline const std::vector<RPCArgEntry>& RPCFunctionEntry::returnVals()
+    const noexcept {
+  return m_returnVals;
+}
+
+template <RPCSupported... Args>
+inline bool RPCFunctionEntry::validateArgTypes() const {
+  if (sizeof...(Args) != m_arguments.size()) {
+    // Number of arguments matches expected
+    return false;
+  }
+
+  // Each type matches
+  std::size_t counter = 0;
+  return ((typeid(Args) == *m_arguments[counter++].valType) && ...);
+}
+
+template <RPCSupported... Rs>
+inline std::tuple<std::unique_ptr<Rs>...> RPCFunctionEntry::retrieve(
+    std::vector<void*>&& returnVals) const {
+  if (sizeof...(Rs) != m_returnVals.size()) {
+    // Number of returnVals matches expected
+    throw std::logic_error(
+        "Requested number of return value types don't match RPCFunctionEntry");
+  }
+
+  // Each type matches
+  std::size_t counter = 0;
+  if (!((typeid(Rs) == *m_returnVals[counter++].valType) && ...)) {
+    throw std::logic_error(
+        "Requested return value types don't match RPCFunctionEntry");
+  }
+
+  auto returnValsMoved = std::move(returnVals);  // Empty source container
+  if (sizeof...(Rs) != returnValsMoved.size()) {
+    throw std::logic_error(
+        "std::vector<void*> passed to RPCFunctionEntry::retrieve has wrong "
+        "number of elements");
+  }
+
+  counter = 0;
+  return std::make_tuple(
+      std::unique_ptr<Rs>(static_cast<Rs*>(returnValsMoved[counter++]))...);
+}
+
+inline const RPCFunctionEntry::Wrapper& RPCFunctionEntry::wrapper()
+    const noexcept {
+  return m_wrapper;
+}
+
+inline bool RPCFunctionEntryHash::transparent_key_equal::operator()(
+    const RPCFunctionEntry& lhs, const RPCFunctionEntry& rhs) const noexcept {
+  return lhs.name() == rhs.name();
+}
+
+inline bool RPCFunctionEntryHash::transparent_key_equal::operator()(
+    const RPCFunctionEntry& lhs, std::size_t rhs) const noexcept {
+  return xxh3::hash64(lhs.name()) == rhs;
+}
+
+inline bool RPCFunctionEntryHash::transparent_key_equal::operator()(
+    const RPCFunctionEntry& lhs, std::string_view rhs) const noexcept {
+  return lhs.name() == rhs;
+}
+
+inline bool RPCFunctionEntryHash::transparent_key_equal::operator()(
+    std::size_t lhs, const RPCFunctionEntry& rhs) const noexcept {
+  return xxh3::hash64(rhs.name()) == lhs;
+}
+
+inline bool RPCFunctionEntryHash::transparent_key_equal::operator()(
+    std::string_view lhs, const RPCFunctionEntry& rhs) const noexcept {
+  return rhs.name() == lhs;
+}
+
+inline std::size_t RPCFunctionEntryHash::operator()(
+    const RPCFunctionEntry& x) const {
+  return xxh3::hash64(x.name());
+}
+
+inline std::size_t RPCFunctionEntryHash::operator()(
+    std::size_t nameHash) const {
+  return nameHash;
+}
+
+inline std::size_t RPCFunctionEntryHash::operator()(
+    std::string_view name) const {
+  return xxh3::hash64(name);
+}
+
+template <typename T>
+RPCArgEntry::RPCArgEntry(HostPtr<T> /* placeholder */)
+    : argType(ArgType::HostPtr),
+      valType(&typeid(T)),
+      len(sizeof(T)),
+      align(alignof(T)) {}
+
+template <typename T>
+RPCArgEntry::RPCArgEntry(DevicePtr<T> /* placeholder */)
+    : argType(ArgType::DevicePtr),
+      valType(&typeid(T)),
+      len(sizeof(T)),
+      align(alignof(T)) {}
+
+/// Create an RPCFunctionEntry
+template <RPCCallable F>
+RPCFunctionEntry::RPCFunctionEntry(F&& f, std::string name)
+    : m_name(std::move(name)) {
+  namespace ct = boost::callable_traits;
+  namespace mp11 = boost::mp11;
+  using arg_t = ct::args_t<F>;
+  // Wrapping in a tuple then flattening turns a plain return type into a
+  // single-element tuple.
+  using ret_tup_t = mp11::mp_flatten<std::tuple<ct::return_type_t<F>>>;
+
+  m_arguments.reserve(std::tuple_size_v<arg_t>);
+  m_returnVals.reserve(std::tuple_size_v<ret_tup_t>);
+
+  mp11::tuple_for_each(arg_t{},
+                       [&args = m_arguments](auto a) { args.emplace_back(a); });
+  mp11::tuple_for_each(
+      ret_tup_t{}, [&rets = m_returnVals](auto r) { rets.emplace_back(r); });
+
+  // Define the wrapper function.
+  m_wrapper = [f = std::forward<F>(f)](
+                  const std::vector<void*>& argsVec) -> std::vector<void*> {
+    if (argsVec.size() != std::tuple_size_v<arg_t>) {
+      throw std::logic_error(
+          "RPC function called with incorrect number of arguments");
+    }
+    auto makeArgs = [&argsVec]<std::size_t I>(
+                        mp11::mp_size_t<I>) -> std::tuple_element_t<I, arg_t> {
+      using T = std::tuple_element_t<I, arg_t>;
+      using inner_t = decltype(T::ptr);
+      return T{.ptr = static_cast<inner_t>(argsVec[I])};
+    };
+    arg_t args = mp11::tuple_transform(
+        makeArgs, mp11::mp_apply<std::tuple,
+                                 mp11::mp_iota_c<std::tuple_size_v<arg_t>>>{});
+
+    ret_tup_t result = std::apply(f, args);
+
+    std::vector<void*> resultVec;
+    resultVec.reserve(std::tuple_size_v<ret_tup_t>);
+    mp11::tuple_for_each(result, [&resultVec](auto p) {
+      resultVec.push_back(static_cast<void*>(p.ptr));
+    });
+    return resultVec;
+  };
+}
+
+}  // namespace RemoteCall
+
+#endif  // ATHEXMPI_RPCFUNCTIONENTRY_ICC

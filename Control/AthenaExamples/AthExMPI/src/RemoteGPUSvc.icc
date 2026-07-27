@@ -1,0 +1,93 @@
+// Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
+#ifndef ATHEXMPI_REMOTEGPUSVC_ICC
+#define ATHEXMPI_REMOTEGPUSVC_ICC
+
+// Local include(s)
+#include "RemoteGPUSvc.h"
+
+// Athena include(s)
+#include "AthenaKernel/ClusterMessage.h"
+
+// System include(s)
+#include <format>
+#include <utility>
+
+namespace RemoteCall {
+
+template <RPCCallable F>
+StatusCode RemoteGPUSvc::registerFunction(F&& f, std::string name) {
+  if (!m_registrationPermitted) {
+    ATH_MSG_ERROR(
+        "RPC function registration may only occur during initialization");
+    return StatusCode::FAILURE;
+  }
+  const bool added =
+      m_functionRegistry.emplace(std::forward<F>(f), std::move(name)).second;
+  return added ? StatusCode::SUCCESS : StatusCode::FAILURE;
+}
+
+/// Submit a request and suspend the asynchronous algorithm for its result.
+template <RPCSupported... R, RPCSupported... Args>
+std::tuple<std::unique_ptr<R>...> RemoteGPUSvc::call(
+    const EventContext& ctx, const AthAsynchronousAlgorithm& algorithm,
+    std::string_view functionName, const Args*... args) const {
+  if (isServer()) {
+    throw std::logic_error("Cannot submit a request from the server");
+  }
+
+  auto fn_iter = m_functionRegistry.find(functionName);
+  if (fn_iter == m_functionRegistry.end()) {
+    throw std::logic_error(std::format(
+        "Tried to call unregistered remote function {}", functionName));
+  }
+
+  if (!fn_iter->validateArgTypes<Args...>()) {
+    throw std::logic_error(std::format(
+        "Argument type mismatch in call to remote function {}", functionName));
+  }
+
+  auto request = std::make_unique<ClientRequest>(ctx.evt(), &*fn_iter);
+  auto request_future = request->completion.get_future();
+  {
+    // New scope so request_entry gets released before we suspend
+    decltype(m_clientRequests)::accessor request_entry;
+
+    m_clientRequests.insert(request_entry, request->id());
+    auto& [id, request_] =
+        *request_entry;  // need a second name for the request
+    request_ = std::move(request);
+
+    // Send the request. Start by sending the hash of the function name.
+    // The remote end knows this because it's the first message it has received
+    // from this rank with this request id.
+    startRequest(*request_);
+    // Now send each argument
+    (sendArg(*request_, args), ...);
+  }
+
+  // Wait for results to come back. This is handled in a dedicated thread.
+  // We moved from request so that is now empty, and we can re-use it
+  request = request_future.get();
+  algorithm.restoreAfterSuspend().orThrow(
+      "Failed to restore after waiting for a remote GPU request",
+      "RemoteGPUSvc");
+  return request->rpcFunction->retrieve<R...>(std::move(request->returnVals));
+}
+
+template <RPCSupported T>
+void RemoteGPUSvc::sendArg(ClientRequest& req, const T* arg) const {
+  ClusterMessage::DataDescr desc(arg);
+  desc.dest = req.rpcFunction->arguments()[req.argsSent].argType ==
+                      RPCArgEntry::ArgType::HostPtr
+                  ? 0
+                  : GPUDestID;
+  desc.evtNumber = req.eventNumber;
+  desc.requestNumber = req.id();
+  m_clusterSvc->sendMessage(
+      ServerRank, ClusterMessage(ClusterMessageType::Data, std::move(desc)),
+      ClusterComm::EventData);
+  ++req.argsSent;
+}
+}  // namespace RemoteCall
+
+#endif  // ATHEXMPI_REMOTEGPUSVC_ICC
