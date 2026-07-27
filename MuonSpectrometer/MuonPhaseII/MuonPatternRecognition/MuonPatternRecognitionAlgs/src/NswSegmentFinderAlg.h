@@ -12,6 +12,8 @@
 #include <MuonSpacePoint/SpacePointContainer.h>
 #include <MuonPatternEvent/MuonPatternContainer.h>
 #include <MuonPatternHelpers/SegmentLineFitter.h>
+#include <MuonPatternHelpers/SegmentAmbiSolver.h>
+
 
 #include <MuonIdHelpers/MmIdHelper.h>
 #include <MuonReadoutGeometryR4/MuonDetectorManager.h>
@@ -216,6 +218,12 @@ class NswSegmentFinderAlg : public AthReentrantAlgorithm {
                             const HitLayVec& hitLayers, 
                             UsedHitMarker_t& usedHits,
                             SegmentVec_t& segments) const;
+        
+        /** @brief Resolve the ambiguities of the segments per chamber and return the surviving segments
+         *  @param gctx The reference to the geometry context
+         *  @param segmentCandidates The reference to the segments to resolve the ambiguities */
+        void resolveAmbiguities(const ActsTrk::GeometryContext& gctx,
+                                SegmentVec_t& segmentCandidates) const;
 
         /** @brief Hits that are used in a good seed/segment built should be flagged as used and not contribute to other seed 
          * @param spacePoints The space points to be marked as used
@@ -275,6 +283,9 @@ class NswSegmentFinderAlg : public AthReentrantAlgorithm {
 
         // Pointer to the line segment fitter 
         std::unique_ptr<SegmentFit::SegmentLineFitter> m_lineFitter{};
+
+        // Pointer to the segment ambiguity solver
+        std::unique_ptr<SegmentFit::SegmentAmbiSolver> m_ambiSolver{};
   
         //the window in theta to search for hits in the seed extension
         DoubleProperty m_windowTheta {this, "thetaWindow", 2.5 * Gaudi::Units::deg};
