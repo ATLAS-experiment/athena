@@ -46,6 +46,7 @@ private:
   Gaudi::Property<bool> m_includeChargedMuonFE{this,"includeChargedMuonFE",false,"Include charged FE matched to muons"};
   Gaudi::Property<bool> m_excludeNeutralMuonFE{this,"excludeNeutralMuonFE",false,"Exclude neutral FE matched to muons"};
   Gaudi::Property<bool> m_includeNeutralMuonFE{this,"includeNeutralMuonFE",false,"Include neutral FE matched to muons"};
+  Gaudi::Property<bool> m_isEgammaPEB{this,"isEgammaPEB",false,"Special treatment for EGammaPEB stream, no Muons"};
 
   SG::ReadHandleKey<xAOD::FlowElementContainer> m_ChargedPFlowContainerKey = {this, "ChargedPFlowInputContainer", "", "The input Charged PFlow Objects"};
   SG::ReadHandleKey<xAOD::FlowElementContainer> m_NeutralPFlowContainerKey = {this, "NeutralPFlowInputContainer", "", "The input Neutral PFlow Objects"};
