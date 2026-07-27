@@ -324,10 +324,9 @@ class MGControl:
 
     def _add_seed_and_beam_settings(self):
         """Add seed and beam settings to runCardDict."""
-        # Check if the run arguments are already implemented.
-        if 'iseed' not in self.runCardDict: #if there is no setting in self.runCardDict for iseed
-            self.runCardDict['iseed'] = self.random_seed
-        if not self.isNLO and 'python_seed' not in self.runCardDict: #If the process is LO and there is no 'python_seed' setting in self.runCardDict
+        # Overwrite the run-card default seed with transform seed
+        self.runCardDict['iseed'] = self.random_seed
+        if not self.isNLO:
             self.runCardDict['python_seed'] = self.random_seed
         if 'beamenergy' in self.runCardDict: #if the beam energy is defined in self.runCardDict
             raise RuntimeError('Do not set beamenergy in the run card. Use flags (or runArgs during migration) instead.')
@@ -1011,4 +1010,3 @@ class ParamCard:
                         continue
                     
         mglog.info("Finished writing paramCardDict to param_card.dat")
-

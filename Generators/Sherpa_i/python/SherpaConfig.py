@@ -40,6 +40,8 @@ def _SherpaBaseCfg(flags, name="Sherpa_i", _base_fragment="", **kwargs):
     """
 
     kwargs.setdefault("PluginCode", "")
+    kwargs.setdefault("RandomSeed", flags.Random.SeedOffset)
+    kwargs.setdefault("Dsid", flags.Generator.DSID)
 
     # Build the Base.yaml fragment from an optional internal prefix plus Sherpa3 defaults.
     base_fragment = _base_fragment
