@@ -82,6 +82,9 @@ StatusCode TrigTauCaloRoiUpdater::execute(const EventContext& ctx) const
 
     ATH_MSG_DEBUG("Size of vector CaloCluster container is: " << RoICaloClusterContainer->size());
 
+    // store all good roicaloccluster in a vector
+    std::vector<TLorentzVector> cls_vec;
+
     // We first need to get the barycenter of the LCTopo jet, including all clusters
     TLorentzVector tau_barycenter;
     for(const xAOD::CaloCluster* cluster : *RoICaloClusterContainer) {
@@ -89,18 +92,17 @@ StatusCode TrigTauCaloRoiUpdater::execute(const EventContext& ctx) const
         if(cluster->e() < 0) continue;
 
         tau_barycenter += cluster->p4();
+	cls_vec.push_back(cluster->p4());
     }
 
     // Determine the LCTopo jet pT at the detector axis
     TLorentzVector tau_detector_axis;
-    for(const xAOD::CaloCluster* cluster : *RoICaloClusterContainer) {
-        // Skip clusters with negative energy
-        if(cluster->e() < 0) continue;
+    for (const auto& clsP4 : cls_vec) {
 
         // Skip clusters further than a maximum Delta R
-        if(tau_barycenter.DeltaR(cluster->p4()) > m_dRForCenter) continue;
+        if(tau_barycenter.DeltaR(clsP4) > m_dRForCenter) continue;
 
-        tau_detector_axis += cluster->p4();
+        tau_detector_axis += clsP4;
     }
 
 
