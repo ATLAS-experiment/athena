@@ -4,6 +4,11 @@
 
 /// @author Nils Krumnack
 
+/* 
+Alex Undrus: added comment to trigger a CI job (for probing ColumnarAnalysis in CI)
+*/
+
+/// COMMENT 
 
 #ifndef COLUMNAR_CORE_COLUMN_INFO_HELPERS_H
 #define COLUMNAR_CORE_COLUMN_INFO_HELPERS_H
