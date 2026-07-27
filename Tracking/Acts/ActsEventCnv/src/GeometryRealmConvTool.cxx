@@ -392,7 +392,8 @@ namespace ActsTrk{
                     actsParameter.position(tgContext), actsParameter.get<Acts::eBoundPhi>(),
                     actsParameter.get<Acts::eBoundTheta>(),
                     actsParameter.get<Acts::eBoundQOverP>() * 1_MeV, cov);
-            } case Acts::Surface::SurfaceType::Other: {
+            } case Acts::Surface::SurfaceType::Point:
+              case Acts::Surface::SurfaceType::Other: {
                 break;
             }
         }
