@@ -380,7 +380,7 @@ namespace CP
           SG::ConstAccessor<double> {nominalAuxName};
         else if (typeName == "int")
           SG::ConstAccessor<int> {nominalAuxName};
-        else if (typeName == "unsigned")
+        else if (typeName == "unsigned" || typeName == "unsigned_int")
           SG::ConstAccessor<unsigned> {nominalAuxName};
         else if (typeName == "unsigned_char")
           SG::ConstAccessor<unsigned char> {nominalAuxName};
