@@ -832,6 +832,8 @@ def check_args(parser, args):
    if args.use_crest and not args.use_database:
       parser.error("--use-crest requires --use-database")
 
+   if args.oh_monitoring and args.online_environment:
+      parser.error("--oh-monitoring (-M) and --online-environment are mutually exclusive.")
 
 def update_run_params(args, flags):
    """Update run parameters from IS, file, or conditions DB"""
@@ -996,6 +998,81 @@ def update_trigconf_keys(args, flags):
    else:
       log.info("Using trigger configuration keys from command line: SMK=%d, L1PSK=%d, HLTPSK=%d",
                args.smk, args.l1psk, args.hltpsk)
+
+def start_oh_infrastructure(args):
+   """Start a private TDAQ infrastructure (offline test of OH publication)."""
+   import shutil, socket, signal, subprocess, time
+
+   infra_script = shutil.which('athenaEF_tdaq_infra.py')
+   if infra_script is None:
+      log.error("athenaEF_tdaq_infra.py not found on PATH (required for -M)")
+      sys.exit(1)
+
+   partition = args.partition or 'athenaEF'
+   host = 'localhost'
+   # Get a free port for webis
+   s = socket.socket()
+   s.bind((host, 0))
+   port = s.getsockname()[1]
+   s.close()
+   oh_server = 'Histogramming'   # WebdaqHistSvc.OHServerName default
+   run_number = args.run_number if args.run_number is not None else 0
+
+   # Export variables for the -M case 
+   os.environ['TDAQ_PARTITION']   = partition
+   os.environ['TDAQ_WEBDAQ_BASE'] = f'http://{host}:{port}'
+   os.environ['TDAQ_OH_SERVER']   = oh_server
+
+   log.info("Starting private OH infrastructure: partition=%s, webdaq=%s, oh_server=%s",
+            partition, os.environ['TDAQ_WEBDAQ_BASE'], oh_server)
+
+   logfile = open('athenaEF_oh_infra.log', 'w')
+
+   # PR_SET_PDEATHSIG so the infrastructure is torn down (SIGTERM -> oh_cp +
+   # ipc_rm) if athenaEF dies unexpectedly, e.g. segfaults mid-run.
+   from ctypes import cdll
+   PR_SET_PDEATHSIG = 1
+   def _pdeathsig():
+      cdll['libc.so.6'].prctl(PR_SET_PDEATHSIG, signal.SIGTERM)
+
+   proc = subprocess.Popen(
+      [infra_script,
+       '--partition',   partition,
+       '--webdaq-port', str(port),
+       '--oh-server',   oh_server,
+       '--run-number',  str(run_number)],
+      stdout=logfile, stderr=subprocess.STDOUT,
+      preexec_fn=_pdeathsig, close_fds=True)
+
+   # Wait for the readiness marker (or early failure / timeout)
+   timeout = 120
+   deadline = time.time() + timeout
+   while time.time() < deadline:
+      if proc.poll() is not None:
+         log.error("OH infrastructure exited early (code %s); see %s", proc.returncode, logfile.name)
+         sys.exit(1)
+      with open(logfile.name) as f:
+         if 'ATHENAEF_INFRA_READY' in f.read():
+            log.info("OH infrastructure is ready")
+            return proc
+      time.sleep(1)
+
+   log.error("OH infrastructure did not become ready within %d s; see %s", timeout, logfile.name)
+   proc.terminate()
+   sys.exit(1)
+
+
+def stop_oh_infrastructure(proc):
+   """Terminate the private TDAQ infrastructure (SIGTERM triggers oh_cp + ipc_rm)."""
+   if proc is None or proc.poll() is not None:
+      return
+   import signal
+   log.info("Stopping OH infrastructure")
+   proc.send_signal(signal.SIGTERM)
+   try:
+      proc.wait(timeout=60)
+   except Exception:
+      proc.kill()
 
 
 class MyHelp(argparse.Action):
@@ -1392,6 +1469,9 @@ def main():
    if not os.path.exists(worker_dir):
       log.info("Creating worker directory: %s", worker_dir)
       os.makedirs(worker_dir, exist_ok=True)
+
+   # Start the private TDAQ infrastructure for -M
+   oh_infra = start_oh_infrastructure(args) if args.oh_monitoring else None
    
    if args.interactive:
       log.info("Interactive mode - call acc.run() to execute")
@@ -1411,6 +1491,8 @@ def main():
       except Exception:
          traceback.print_exc()
          exitcode = ExitCodes.UNKNOWN_EXCEPTION
+      finally:
+         stop_oh_infrastructure(oh_infra)
 
       log.info('Leaving with code %d: "%s"', exitcode, ExitCodes.what(exitcode))
       sys.exit(exitcode)
