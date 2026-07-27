@@ -80,11 +80,14 @@ StatusCode ExecuteOngRPCCall::executeEvent(MinimalEventLoopMgr* el,
   while(! s_pendingRequests.try_pop(r) ) {
     std::this_thread::sleep_for(std::chrono::milliseconds(100));
   }  
+
   ATH_MSG_ALWAYS("Got input, upacking ...");
+  
   for ( auto& tool: m_packingTools) {
     ATH_CHECK(tool->unpack(*(r->request),  context));
   }
   ATH_MSG_ALWAYS("After decoding done, executing algorithms ...");
+  ATH_MSG_INFO(evtStore()->dump());
   StatusCode sc = el->executeEvent(std::move(context));
   ATH_MSG_ALWAYS("Processed, harvesting result ...");
   r->response->set_identifier("done");

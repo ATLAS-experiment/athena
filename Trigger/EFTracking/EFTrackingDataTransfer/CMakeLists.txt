@@ -15,7 +15,7 @@ message(STATUS "Protobuf includes: ${Protobuf_INCLUDE_DIRS}")
 atlas_add_library(EFTrackingDataTransferLib
   src/*.cxx EFTrackingDataTransfer/*.pb.cc
   NO_PUBLIC_HEADERS
-  LINK_LIBRARIES AnaAlgorithmLib ByteStreamData ByteStreamCnvSvcBaseLib protobuf::libprotobuf gRPC::grpc++)
+  LINK_LIBRARIES AnaAlgorithmLib EventInfo ByteStreamData ByteStreamCnvSvcBaseLib protobuf::libprotobuf gRPC::grpc++)
 
 
 # tried that to generate c++ binding on the fly, failed

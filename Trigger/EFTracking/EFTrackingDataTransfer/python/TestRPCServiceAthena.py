@@ -32,10 +32,10 @@ unpackBS = CompFactory.BSPackagingTool("UnpackBS", OutputLevel=DEBUG, ROBDataPro
 execTool = CompFactory.ExecuteOngRPCCall( PackagingTools=[unpackEI, unpackBS])
 el.eventExecTool=execTool
 
+from TrigT2CaloCommon.TrigCaloDataAccessConfig import trigCaloDataAccessSvcCfg
+acc.merge(trigCaloDataAccessSvcCfg(flags))
 from CaloRec.CaloRecoConfig import CaloRecoCfg
 acc.merge(CaloRecoCfg(flags))
-# from TrigT2CaloCommon.TrigCaloDataAccessConfig import trigCaloDataAccessSvcCfg
-# acc.merge(trigCaloDataAccessSvcCfg(flags))
 
 # from TileRecUtils.TileCellMakerConfig import TileCellMakerCfg
 # acc.merge(TileCellMakerCfg(flags))
