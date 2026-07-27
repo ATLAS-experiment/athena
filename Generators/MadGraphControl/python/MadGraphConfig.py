@@ -55,9 +55,7 @@ def _prepare_lhe_for_shower(produced_output, lhe_file):
         elif produced_output.endswith(".tgz"):
             root = produced_output[:-4]
         elif produced_output.endswith(".gz"):
-
             root = produced_output[:-3]
-
         else:
             root, _ = os.path.splitext(produced_output)
         primary_output = f"{root}.events"
