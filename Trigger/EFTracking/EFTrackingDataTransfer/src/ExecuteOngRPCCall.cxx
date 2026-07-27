@@ -87,11 +87,11 @@ StatusCode ExecuteOngRPCCall::executeEvent(MinimalEventLoopMgr* el,
     ATH_CHECK(tool->unpack(*(r->request),  context));
   }
   ATH_MSG_ALWAYS("After decoding done, executing algorithms ...");
-  ATH_MSG_INFO(evtStore()->dump());
+  // ATH_MSG_INFO(evtStore()->dump());
   StatusCode sc = el->executeEvent(std::move(context));
   ATH_MSG_ALWAYS("Processed, harvesting result ...");
   r->response->set_identifier("done");
-  ATH_MSG_INFO(evtStore()->dump());
+  // ATH_MSG_INFO(evtStore()->dump());
   // TODO the OffloadMessage needs a field for execution status
   r->complete();
 

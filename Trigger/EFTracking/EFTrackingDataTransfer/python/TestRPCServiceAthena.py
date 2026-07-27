@@ -8,7 +8,7 @@ from AthenaCommon.Constants import DEBUG, VERBOSE
 from ByteStreamCnvSvc.ByteStreamConfig import ByteStreamReadCfg
 
 flags = initConfigFlags()
-flags.Input.Files = defaultTestFiles.RAW_RUN3 # this is completely dummy input to get event loop going
+flags.Input.Files = defaultTestFiles.RAW_RUN3_DATA22 # this is completely dummy input to get event loop going
 flags.GeoModel.AtlasVersion =  defaultGeometryTags.RUN3
 flags.IOVDb.GlobalTag = defaultConditionsTags.RUN3_DATA22
 
