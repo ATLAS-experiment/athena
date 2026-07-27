@@ -144,6 +144,8 @@ private:
   std::atomic<bool> m_stopFlag{false};
   /// The actual publication Task
   void monitoringTask(int, int, std::atomic<bool>&, boost::regex);
+  /// Final publication after stop
+  void publishAll(boost::regex nameSelect);
   /// Sync the publication to a multiple of the interval
   void syncPublish(long int, boost::posix_time::ptime);
   /// Sleep for a duration or until the stop flag is set

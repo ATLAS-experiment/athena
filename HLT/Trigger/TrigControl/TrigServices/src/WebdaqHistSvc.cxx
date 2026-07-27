@@ -131,6 +131,8 @@ StatusCode WebdaqHistSvc::stop()
       return StatusCode::FAILURE;
     }
   }
+  ATH_MSG_INFO("Performing final histogram publication before stop");
+  publishAll(m_PublicationIncludeNameRegex);
   ATH_MSG_DEBUG("Clearing list of histograms");
   m_hists.clear();
   m_histoMapUpdated = true;
@@ -357,6 +359,41 @@ std::set<std::string> WebdaqHistSvc::getSet(boost::regex nameSelect) const
   ATH_MSG_DEBUG("Number of histograms matched: " << l.size());
   std::set<std::string> HistoSet(l.begin(), l.end());
   return HistoSet;
+}
+
+/**************************************************************************************/
+
+void WebdaqHistSvc::publishAll(boost::regex nameSelect)
+{
+  std::string appName = m_jobOptionsSvc->get("DataFlowConfig.DF_ApplicationName");
+  std::set<std::string> HistoSet = getSet(nameSelect);
+  ATH_MSG_DEBUG("Final publication of " << HistoSet.size()
+                << " histograms for provider " << appName);
+
+  for (const std::string& id : HistoSet) {
+    std::string path = appName + '.' + id;
+    tbb::concurrent_hash_map<std::string, THistID>::const_accessor accessor;
+    if (!m_hists.find(accessor, id)) {
+      ATH_MSG_WARNING("Histogram with name " << id
+                      << " not found in histogram map (probably deregistered).");
+      continue;
+    }
+    TObject* obj = nullptr;
+    {
+      // Lock the OH mutex only for the clone, as monitoringTask does
+      oh_scoped_lock_histogram lock;
+      //coverity[FORWARD_NULL]
+      obj = accessor->second.obj->Clone();
+    }
+    if (obj == nullptr) {
+      ATH_MSG_ERROR("Failed to clone histogram " << id);
+      continue;
+    }
+    if (!webdaq::oh::put(m_partition, m_tdaqOHServerName, path, obj)) {
+      ATH_MSG_ERROR("Histogram publishing failed !");
+    }
+    delete obj;
+  }
 }
 
 /**************************************************************************************/
