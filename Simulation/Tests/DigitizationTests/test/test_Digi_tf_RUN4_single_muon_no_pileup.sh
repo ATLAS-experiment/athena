@@ -26,7 +26,7 @@ Digi_tf.py \
 --maxEvents ${Events} \
 --outputRDOFile ${DigiOutFileName} \
 --postInclude 'PyJobTransforms.UseFrontier' \
---preInclude 'HITtoRDO:Campaigns.PhaseIINoPileUp' \
+--preInclude 'HITtoRDO:Campaigns.MC23PhaseIINoPileUp' \
 --skipEvents 0
 
 rc=$?

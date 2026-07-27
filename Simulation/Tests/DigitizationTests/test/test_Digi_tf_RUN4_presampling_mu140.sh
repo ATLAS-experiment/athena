@@ -31,7 +31,7 @@ Digi_tf.py \
 --jobNumber 568 \
 --maxEvents ${Events} \
 --outputRDOFile ${DigiOutFileName} \
---preInclude 'HITtoRDO:Campaigns.PhaseIIPileUp140' \
+--preInclude 'HITtoRDO:Campaigns.MC23PhaseIIPileUp140' \
 --postInclude 'PyJobTransforms.UseFrontier' \
 --skipEvents 0
 

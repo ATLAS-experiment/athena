@@ -40,7 +40,7 @@ Reco_tf.py \
                flags.Scheduler.ShowDataDeps=True; \
                flags.Scheduler.ShowDataFlow=True; \
                flags.Scheduler.ShowControlFlow = True;" \
-    --preInclude "Campaigns.PhaseIINoPileUp,InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude" \
+    --preInclude "Campaigns.MC23PhaseIINoPileUp,InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude" \
     --postInclude "PyJobTransforms.UseFrontier" \
     --postExec "from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg; \
     	        cfg.merge( OutputStreamCfg(ConfigFlags, \"RDO\", [\"SiHitCollection#*\"]) );" \

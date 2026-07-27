@@ -19,11 +19,10 @@ conditions=$(python -c "from AthenaConfiguration.TestDefaults import defaultCond
 # RUN4 setup
 Sim_tf.py \
 --multithreaded \
---CA \
 --conditionsTag "default:${conditions}" \
 --simulator 'FullG4MT' \
 --postInclude 'default:PyJobTransforms.UseFrontier' \
---preInclude 'EVNTtoHITS:Campaigns.PhaseIISimulation' \
+--preInclude 'EVNTtoHITS:Campaigns.MC23PhaseIISimulation' \
 --geometryVersion "default:${geometry}" \
 --inputEVNTFile "$Input" \
 --outputHITSFile "$Output" \
@@ -37,7 +36,6 @@ echo "art-result: $rc simCA"
 rc2=-9999
 if [ $rc -eq 0 ]; then
   FilterHit_tf.py \
-  --CA \
   --TruthReductionScheme SingleGenParticle \
   --inputHITSFile "$Output" \
   --outputHITS_FILTFile "$OutputFilter"

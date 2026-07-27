@@ -30,7 +30,7 @@ from AthenaConfiguration.TestDefaults import defaultConditionsTags
 ex = MCGridStep(
     menu='MC_pp_run4_v1',
     global_tag=defaultConditionsTags.RUN4_MC,
-    mc_campaign='Campaigns.PhaseIIPileUp200'
+    mc_campaign='Campaigns.MC23PhaseIIPileUp200'
 )
 
 ex.input = 'ttbar_pu200_Run4'

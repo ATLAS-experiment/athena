@@ -22,7 +22,7 @@ conditions=$(python -c "from AthenaConfiguration.TestDefaults import defaultCond
 
 Digi_tf.py \
 --conditionsTag default:${conditions} \
---preInclude 'HITtoRDO:Campaigns.PhaseIIPileUp1' \
+--preInclude 'HITtoRDO:Campaigns.MC23PhaseIIPileUp1' \
 --postInclude 'PyJobTransforms.UseFrontier' \
 --runNumber="601229" \
 --digiSeedOffset1="74" \

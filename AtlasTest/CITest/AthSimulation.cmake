@@ -42,7 +42,7 @@ atlas_add_citest( SimulationRun3FullSimSQLiteGeoChecks
    DEPENDS_SUCCESS SimulationRun3FullSimSQLiteGeo )
 
 atlas_add_citest( SimulationRun4FullSim
-   SCRIPT RunWorkflowTests_Run4.py --CI -s -w FullSim --threads 4 -e '--maxEvents 10' --run-only
+   SCRIPT RunWorkflowTests_Run4.py --CI -s -w FullSim --threads 4 -e '--maxEvents 10 --preInclude="Campaigns.MC23PhaseIISimulation"' --run-only
    LOG_IGNORE_PATTERN "WARNING FPE"  # ignore FPEs from Geant4
    PROPERTIES PROCESSORS 4 )
 

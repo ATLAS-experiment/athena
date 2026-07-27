@@ -13,12 +13,11 @@ ATHENA_CORE_NUMBER=${NTHREADS} \
 Reco_tf.py \
       --maxEvents ${NEVENTS} \
       --perfmon 'fullmonmt' \
-      --CA 'all:True' \
       --multithreaded 'True' \
       --autoConfiguration 'everything' \
       --conditionsTag "default:${conditions}" \
       --postInclude 'all:PyJobTransforms.UseFrontier' \
-      --preInclude 'all:Campaigns.PhaseIIPileUp200' \
+      --preInclude 'all:Campaigns.MC23PhaseIIPileUp200' \
       --steering 'doRDO_TRIG' 'doRAWtoALL' \
       --preExec 'all:flags.Tracking.doITkFastTracking=False' \
       --postExec 'all:cfg.getService("AlgResourcePool").CountAlgorithmInstanceMisses = True' \
