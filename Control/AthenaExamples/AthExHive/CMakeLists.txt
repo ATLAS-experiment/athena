@@ -4,7 +4,6 @@
 atlas_subdir( AthExHive )
 
 # External dependencies:
-find_package( Boost COMPONENTS regex )
 find_package( CLHEP )
 
 # Component(s) in the package:
@@ -19,8 +18,8 @@ atlas_add_component( AthExHive
                      src/condEx/*.cxx
                      src/loopTest/*.cxx
                      src/components/*.cxx
-                     INCLUDE_DIRS ${Boost_INCLUDE_DIRS} ${CLHEP_INCLUDE_DIRS}
-                     LINK_LIBRARIES ${Boost_LIBRARIES} ${CLHEP_LIBRARIES} AthenaKernel AthenaBaseComps GaudiKernel StoreGateLib xAODEventInfo AthExHiveLib )
+                     INCLUDE_DIRS ${CLHEP_INCLUDE_DIRS}
+                     LINK_LIBRARIES ${CLHEP_LIBRARIES} AthenaKernel AthenaBaseComps GaudiKernel StoreGateLib xAODEventInfo AthExHiveLib )
 
 # Install files from the package:
 atlas_install_runtime( share/condDb.txt )
