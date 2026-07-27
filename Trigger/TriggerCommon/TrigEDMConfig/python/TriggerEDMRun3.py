@@ -267,7 +267,7 @@ TauJetCaloHitsPresel_vars_str = '.'.join(TauJetCaloHitsPresel_vars)
 
 TauJet_vars = []
 TauJet_vars += getTauIDVars('GNTau')
-TauJet_vars += getTauIDVars('GNTauDev1', wps=['Loose', 'Medium', 'LooseVar1', 'MediumVar1', 'LooseVar2', 'MediumVar2'])
+TauJet_vars += getTauIDVars('GNTauDev1', wps=['Loose', 'Medium'])
 TauJet_vars_str = '.'.join(TauJet_vars)
 
 TauTrack_vars = ['pt', 'eta', 'phi', 'flagSet', 'trackLinks', 'd0TJVA', 'd0SigTJVA', 'z0sinthetaTJVA', 'z0sinthetaSigTJVA']
