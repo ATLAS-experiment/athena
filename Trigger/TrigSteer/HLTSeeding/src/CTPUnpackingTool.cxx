@@ -8,7 +8,7 @@
 
 #include "AthenaMonitoringKernel/Monitored.h"
 
-#include <boost/algorithm/string.hpp>
+#include <ranges>
 
 using namespace HLT;
 
@@ -72,7 +72,7 @@ StatusCode CTPUnpackingTool::start() {
     } else if ( chain.l1item().find(',') != std::string::npos ) { // OR seeds
 
       std::vector<std::string> items;
-      boost::split(items, chain.l1item(), [](char c){return c == ',';});
+      for (auto&& itemRange : std::views::split(chain.l1item(), ',')) items.emplace_back(itemRange.begin(), itemRange.end());
       for ( const std::string& i: items ) {
          ATH_CHECK( addIfItemExists( i, chainID, true ) );
       }
