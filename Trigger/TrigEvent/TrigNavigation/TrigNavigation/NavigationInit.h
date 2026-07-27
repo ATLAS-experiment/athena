@@ -11,7 +11,6 @@
    * This code is from Scott Snyder
    */
 
-#include <boost/typeof/std/utility.hpp>
 #include <type_traits>
 #include "AthLinks/ElementLink.h"
 #include "AthLinks/DataLink.h"
