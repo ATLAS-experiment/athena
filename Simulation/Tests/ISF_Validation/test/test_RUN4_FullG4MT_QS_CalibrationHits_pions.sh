@@ -15,7 +15,6 @@ conditions=$(python -c "from AthenaConfiguration.TestDefaults import defaultCond
 
 # RUN4 setup
 Sim_tf.py \
---CA \
 --simulator 'FullG4MT_QS'  \
 --inputEVNTFile '/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/SimCoreTests/pi_E50_eta0-60.evgen.pool.root' \
 --outputHITSFile 'test.HITS.pool.root' \
@@ -24,7 +23,7 @@ Sim_tf.py \
 --randomSeed '10' \
 --geometryVersion "default:${geometry}" \
 --conditionsTag "default:${conditions}" \
---preInclude 'EVNTtoHITS:Campaigns.PhaseIISimulation,SimuJobTransforms.CalHits,SimuJobTransforms.ParticleID' \
+--preInclude 'EVNTtoHITS:Campaigns.MC23PhaseIISimulation,SimuJobTransforms.CalHits,SimuJobTransforms.ParticleID' \
 --postInclude 'PyJobTransforms.TransformUtils.UseFrontier' \
 --postExec 'with open("ConfigSimCA.pkl", "wb") as f: cfg.store(f)' \
 --imf False

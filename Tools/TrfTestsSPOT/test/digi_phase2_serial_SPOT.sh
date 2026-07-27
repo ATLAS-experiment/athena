@@ -16,7 +16,6 @@ conditions=$(python -c "from AthenaConfiguration.TestDefaults import defaultCond
 export TRF_ECHO=1;
 Digi_tf.py \
    --perfmon 'fullmonmt' \
-   --CA 'True'\
    --PileUpPresampling 'True' \
    --conditionsTag "${conditions}" \
    --digiSeedOffset1 '170' \
@@ -28,7 +27,7 @@ Digi_tf.py \
    --maxEvents ${NEVENTS} \
    --outputRDOFile 'myRDO.pool.root' \
    --postInclude 'PyJobTransforms.UseFrontier' \
-   --preInclude 'HITtoRDO:Campaigns.PhaseIIPileUp200' \
+   --preInclude 'HITtoRDO:Campaigns.MC23PhaseIIPileUp200' \
    --jobNumber '568' > __log.txt 2>&1;
 
 echo $? > __exitcode;

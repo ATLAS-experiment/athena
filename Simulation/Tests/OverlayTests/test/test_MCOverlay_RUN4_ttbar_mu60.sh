@@ -24,7 +24,6 @@ OverlayOutFile="RUN4_ttbar.mu60.overlay.RDO.pool.root"
 conditions=$(python -c "from AthenaConfiguration.TestDefaults import defaultConditionsTags; print(defaultConditionsTags.RUN4_MC)")
 
 Overlay_tf.py \
---CA \
 --conditionsTag ${conditions} \
 --digiSeedOffset1 170 --digiSeedOffset2 170 \
 --geometryVersion ATLAS-P2-RUN4-03-00-00 \
@@ -32,7 +31,7 @@ Overlay_tf.py \
 --inputRDO_BKGFile ${RDO_BKG_File} \
 --maxEvents ${events} \
 --outputRDOFile ${OverlayOutFile} \
---preInclude 'HITtoRDO:Campaigns.PhaseIIPileUp60' \
+--preInclude 'HITtoRDO:Campaigns.MC23PhaseIIPileUp60' \
 --postInclude 'PyJobTransforms.UseFrontier' \
 --skipEvents 0
 

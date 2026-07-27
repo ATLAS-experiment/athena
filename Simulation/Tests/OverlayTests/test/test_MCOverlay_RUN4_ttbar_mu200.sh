@@ -25,14 +25,13 @@ conditions=$(python -c "from AthenaConfiguration.TestDefaults import defaultCond
 
 
 Overlay_tf.py \
---CA \
 --conditionsTag ${conditions} \
 --digiSeedOffset1 170 --digiSeedOffset2 170 \
 --inputHITSFile ${HITS_File} \
 --inputRDO_BKGFile ${RDO_BKG_File} \
 --maxEvents ${events} \
 --outputRDOFile ${OverlayOutFile} \
---preInclude 'HITtoRDO:Campaigns.PhaseIIPileUp200' \
+--preInclude 'HITtoRDO:Campaigns.MC23PhaseIIPileUp200' \
 --postInclude 'PyJobTransforms.UseFrontier' \
 --skipEvents 0
 

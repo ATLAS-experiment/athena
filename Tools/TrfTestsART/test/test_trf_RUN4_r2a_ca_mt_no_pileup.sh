@@ -15,7 +15,7 @@ conditions=$(python -c "from AthenaConfiguration.TestDefaults import defaultCond
 
 Reco_tf.py \
   --conditionsTag "${conditions}" \
-  --preInclude "all:Campaigns.PhaseIINoPileUp" \
+  --preInclude "all:Campaigns.MC23PhaseIINoPileUp" \
   --postInclude "all:PyJobTransforms.UseFrontier.py" \
   --inputHITSFile "${HSHitsFile}" \
   --outputAODFile RUN4.AOD.pool.root \

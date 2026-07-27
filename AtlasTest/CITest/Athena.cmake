@@ -32,7 +32,7 @@ atlas_add_citest( SimulationRun3AF3Checks
    DEPENDS_SUCCESS SimulationRun3AF3 )
 
 atlas_add_citest( SimulationRun4FullSim
-   SCRIPT RunWorkflowTests_Run4.py --CI -s -w FullSim -e '--maxEvents 5' --no-output-checks
+   SCRIPT RunWorkflowTests_Run4.py --CI -s -w FullSim -e '--maxEvents 5 --preInclude="Campaigns.MC23PhaseIISimulation"' --no-output-checks
    LOG_IGNORE_PATTERN "WARNING FPE" )  # ignore FPEs from Geant4
 
 atlas_add_citest( PileUpPresamplingRun2
@@ -42,7 +42,7 @@ atlas_add_citest( PileUpPresamplingRun3
    SCRIPT RunWorkflowTests_Run3.py --CI -p -w PileUpPresampling -e '--maxEvents 5' --no-output-checks )
 
 atlas_add_citest( PileUpPresamplingRun4FullTruth
-   SCRIPT RunWorkflowTests_Run4.py --CI -p -w PileUpPresampling -e '--maxEvents 5' )
+   SCRIPT RunWorkflowTests_Run4.py --CI -p -w PileUpPresampling -e '--maxEvents 5 --preInclude="Campaigns.MC23PhaseIIPileUp200"' )
 
 atlas_add_citest( DataOverlayPreparationRun3
    SCRIPT RunWorkflowTests_Run3.py --CI -p -w MinbiasPreprocessing -e '--maxEvents 5 --conditionsTag CONDBR2-BLKPA-2023-07' )
@@ -129,7 +129,7 @@ atlas_add_citest( RecoRun3Data_Overlay
    DEPENDS_SUCCESS OverlayRun3DataChain )
 
 atlas_add_citest( RecoRun4MC
-   SCRIPT RunWorkflowTests_Run4.py --CI -r -w MCReco -e '--maxEvents 5 --inputHITSFile=../../SimulationRun4FullSim/run_s3761/myHITS.pool.root' # go two levels up as the test runs in a subfolder
+   SCRIPT RunWorkflowTests_Run4.py --CI -r -w MCReco -e '--maxEvents 5 --preInclude="Campaigns.MC23PhaseIINoPileUp" --inputHITSFile=../../SimulationRun4FullSim/run_s3761/myHITS.pool.root' # go two levels up as the test runs in a subfolder
    DEPENDS_SUCCESS SimulationRun4FullSim )
 
 #################################################################################
