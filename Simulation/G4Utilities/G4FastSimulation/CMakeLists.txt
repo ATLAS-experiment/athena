@@ -36,7 +36,7 @@ atlas_add_library( G4FastSimulation
                    src/components/*.cxx
                    OBJECT
                    NO_PUBLIC_HEADERS
-                   PRIVATE_INCLUDE_DIRS ${GEANT4_INCLUDE_DIRS} ${XERCESC_INCLUDE_DIRS} ${CLHEP_INCLUDE_DIRS} ${VDT_INCLUDE_DIR} ${ROOT_INCLUDE_DIRS}
+                   PRIVATE_INCLUDE_DIRS ${GEANT4_INCLUDE_DIRS} ${XERCESC_INCLUDE_DIRS} ${CLHEP_INCLUDE_DIRS} ${VDT_INCLUDE_DIRS} ${ROOT_INCLUDE_DIRS}
                    PRIVATE_LINK_LIBRARIES ${GEANT4_LIBRARIES} ${XERCESC_LIBRARIES} ${CLHEP_LIBRARIES} ${ROOT_LIBRARIES} ${FASTCALOSIM_LIBRARIES}
                        GaudiKernel G4AtlasToolsLib FCALGeoPlugin HitManagement
                        AthenaBaseComps AthenaKernel TruthUtils CxxUtils StoreGateLib MCTruth
