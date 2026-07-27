@@ -116,7 +116,7 @@ namespace ActsTrk {
       */
     StatusCode isPrimaryExpected(
       const xAOD::TruthParticle* truthParticle,
-      const xAOD::UncalibratedMeasurementContainer measurementContainer,
+      std::vector<int> measurement_layer_map[4],
       const ActsTrk::MeasurementToTruthParticleAssociation* association_map,
       std::vector<char> &isPrimaryExistsVec) const;    
 
