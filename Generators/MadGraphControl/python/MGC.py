@@ -763,22 +763,13 @@ class ParamCard:
                     continue #temp while I write function to get DECAY params
                 else:
                     l = line.strip()
-                    if len(l.split(' ',3)) >= 4:
-                        if l.split(' ',3)[1] == '' and not l.split(' ',3)[2].strip().startswith('#'): #checks if the the parameter has numerous keys
-                            key = l.split(' ',3)[0] +' ' +l.split(' ',3)[1] + l.split(' ',3)[2]
-                            value = l.split(' ',3)[3]
-                        else:
-                            key = l.split(' ',3)[0] +' ' +l.split(' ',3)[1]
-                            value = l.split(' ',3)[2] + ' '+ l.split(' ',3)[3]
-                    elif len(l.split(' ',3)) == 3:
-                        key = l.split(' ',3)[0]
-                        value = l.split(' ',3)[1] + ' '+ l.split(' ',3)[2]
-                    elif len(l.split(' ',3)) == 2:
-                        key = l.split(' ',3)[0]
-                        value = l.split(' ',3)[1]
-                    else:
-                        key = l.split(' ',3)[0]
-                        value = None
+                    data, separator, comment = l.partition('#')
+                    columns = data.split()
+                    if len(columns) < 2:
+                        continue
+                    key, value = ' '.join(columns[:-1]), columns[-1]
+                    if separator:
+                        value += ' # ' + comment.strip() + ' '
 
                     setting.update({key.strip() : value})
             
@@ -981,14 +972,7 @@ class ParamCard:
                     if name.lower() == 'decay':
                         continue
                     else:
-                        if len(l.split(' ',3)) >= 4:
-                            ID = (l.split(' ',3)[0] +' ' +l.split(' ',3)[1]).strip()
-                        elif len(l.split(' ',3)) == 3:
-                            ID = l.split(' ',3)[0].strip()
-                        elif len(l.split(' ',3)) == 2:
-                            ID = l.split(' ',3)[0].strip()
-                        else:
-                            ID = l.split(' ',3)[0].strip()
+                        ID = ' '.join(l.partition('#')[0].split()[:-1])
                         newCard.write(f"    {ID} {self.paramCardDict[name][ID]}\n")
                         nParams.append(ID)
                     
@@ -1011,4 +995,3 @@ class ParamCard:
                         continue
                     
         mglog.info("Finished writing paramCardDict to param_card.dat")
-
