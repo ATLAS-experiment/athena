@@ -66,6 +66,7 @@ def StandaloneMuonOutputCfg(flags):
 
     #for now add also the muon container here. This should go into the combined config at some point
     aod_items += ["xAOD::MuonContainer#MuonsR4"]
+    aod_items += ["xAOD::MuonAuxContainerR4#MuonsR4Aux."]
 
     esd_items += aod_items
     
