@@ -7,6 +7,9 @@ def TgcL0FloatingCandidateBuilderToolCfg(
     flags, name="L0Muon.TgcL0FloatingCandidateBuilderTool", **kwargs
 ):
     result = ComponentAccumulator()
+    from MuonConfig.MuonCablingConfig import TGCCablingConfigCfg
+
+    result.merge(TGCCablingConfigCfg(flags))
     result.setPrivateTools(CompFactory.L0Muon.TgcL0FloatingCandidateBuilderTool(
         name, **kwargs
     ))
