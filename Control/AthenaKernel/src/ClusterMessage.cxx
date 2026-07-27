@@ -6,6 +6,15 @@
 #include <bit>
 #include <cstdint>
 
+ClusterMessage::DataDescr::DataDescr(void* ptr, std::size_t len,
+                                     std::size_t align)
+    : ptr(ptr), len(len), align(align) {
+  if (!std::has_single_bit(align) || len % align != 0) {
+    throw std::logic_error(std::format(
+        "{} is not a valid alignment for a length of {} bytes!", align, len));
+  }
+}
+
 ClusterMessage::DataDescr::DataDescr(DataDescr&& rhs) noexcept
     : ptr(rhs.ptr),
       len(rhs.len),
@@ -68,6 +77,17 @@ ClusterMessage::DataDescr& ClusterMessage::DataDescr::operator=(
   rhs.evtNumber = 0;
   rhs.requestNumber = 0;
   return *this;
+}
+
+void* ClusterMessage::DataDescr::release() {
+  if (allocating_memory_resource != nullptr &&
+      allocating_memory_resource != std::pmr::new_delete_resource()) {
+    throw std::runtime_error(
+        "We can only release a DataDescr holding a CPU pointer");
+  }
+
+  allocating_memory_resource = nullptr;
+  return ptr;
 }
 
 ClusterMessage::ClusterMessage(ClusterMessageType mType, WorkerStatus payload)

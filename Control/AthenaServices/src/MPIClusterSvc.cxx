@@ -37,51 +37,53 @@ StatusCode MPIClusterSvc::initialize() {
   ATH_MSG_DEBUG("Got MPI_COMM_WORLD");
   m_rank = m_world.rank();
   ATH_MSG_INFO("On MPI rank {}", m_rank);
-  if (std::getenv("RANK") != std::to_string(m_rank)) {
-    const char* env_rank = std::getenv("RANK");
-    ATH_MSG_WARNING("MPI rank ({}) does not match $RANK = {}",
-                    m_rank, env_rank);
+  const char* env_rank = std::getenv("RANK");
+  // Could be nullptr if we're not using MPI to manage events
+  if (env_rank != nullptr && env_rank != std::to_string(m_rank)) {
+    ATH_MSG_WARNING("MPI rank ({}) does not match $RANK = {}", m_rank,
+                    env_rank);
   }
 
-  ATH_CHECK(m_mpiLog.retrieve());
-  m_mpiLog->createStatement("PRAGMA foreign_keys = ON").run();
+  if (!m_mpiLog.empty()) {
+    ATH_CHECK(m_mpiLog.retrieve());
+    m_mpiLog->createStatement("PRAGMA foreign_keys = ON").run();
 
-  m_mpiLog
-      ->createStatement(
-          "CREATE TABLE ranks (rank INTEGER PRIMARY KEY, "
-          "node TEXT, start_time FLOAT, end_time FLOAT)")
-      .run();
-  m_mpiLog
-      ->createStatement(
-          "INSERT INTO ranks (rank, node, start_time) "
-          "VALUES(?1, ?2, julianday('now'))")
-      .run(m_rank, m_env->processor_name());
-  m_mpiLog
-      ->createStatement(
-          "CREATE TABLE files (fileId INTEGER PRIMARY KEY, fileName TEXT)")
-      .run();
-  m_mpiLog
-      ->createStatement(
-          "CREATE TABLE event_log (rank INTEGER, id INTEGER UNIQUE,"
-          "inputFileId INTEGER,"
-          "runNumber INTEGER, eventNumber INTEGER, complete INTEGER,"
-          "status INTEGER, request_time_ns INTEGER, start_time FLOAT,"
-          "end_time FLOAT, PRIMARY KEY (runNumber, eventNumber, id), "
-          "FOREIGN KEY (rank) REFERENCES ranks(rank),"
-          "FOREIGN KEY (inputFileId) REFERENCES files(fileId))")
-      .run();
-  m_mpiLog_addEvent = m_mpiLog->createStatement(
-      "INSERT INTO event_log(id, rank, inputFileId, runNumber, eventNumber, "
-      "complete, "
-      "start_time, request_time_ns) "
-      "VALUES(?1, ?4, ?6, ?2, ?3, 0, julianday('now'), ?5)");
-  m_mpiLog_completeEvent = m_mpiLog->createStatement(
-      "UPDATE event_log SET complete = 1, status = ?4, end_time = "
-      "julianday('now') WHERE runNumber = ?2 "
-      "AND eventNumber = ?3 AND id = ?1");
-  m_mpiLog_addFile = m_mpiLog->createStatement(
-      "INSERT INTO files (fileId, fileName) VALUES(?1, ?2)");
-
+    m_mpiLog
+        ->createStatement(
+            "CREATE TABLE ranks (rank INTEGER PRIMARY KEY, "
+            "node TEXT, start_time FLOAT, end_time FLOAT)")
+        .run();
+    m_mpiLog
+        ->createStatement(
+            "INSERT INTO ranks (rank, node, start_time) "
+            "VALUES(?1, ?2, julianday('now'))")
+        .run(m_rank, m_env->processor_name());
+    m_mpiLog
+        ->createStatement(
+            "CREATE TABLE files (fileId INTEGER PRIMARY KEY, fileName TEXT)")
+        .run();
+    m_mpiLog
+        ->createStatement(
+            "CREATE TABLE event_log (rank INTEGER, id INTEGER UNIQUE,"
+            "inputFileId INTEGER,"
+            "runNumber INTEGER, eventNumber INTEGER, complete INTEGER,"
+            "status INTEGER, request_time_ns INTEGER, start_time FLOAT,"
+            "end_time FLOAT, PRIMARY KEY (runNumber, eventNumber, id), "
+            "FOREIGN KEY (rank) REFERENCES ranks(rank),"
+            "FOREIGN KEY (inputFileId) REFERENCES files(fileId))")
+        .run();
+    m_mpiLog_addEvent = m_mpiLog->createStatement(
+        "INSERT INTO event_log(id, rank, inputFileId, runNumber, eventNumber, "
+        "complete, "
+        "start_time, request_time_ns) "
+        "VALUES(?1, ?4, ?6, ?2, ?3, 0, julianday('now'), ?5)");
+    m_mpiLog_completeEvent = m_mpiLog->createStatement(
+        "UPDATE event_log SET complete = 1, status = ?4, end_time = "
+        "julianday('now') WHERE runNumber = ?2 "
+        "AND eventNumber = ?3 AND id = ?1");
+    m_mpiLog_addFile = m_mpiLog->createStatement(
+        "INSERT INTO files (fileId, fileName) VALUES(?1, ?2)");
+  }
   // Set up incident listener
   ServiceHandle<IIncidentSvc> incsvc("IncidentSvc", this->name());
   if (!incsvc.retrieve().isSuccess()) {
@@ -95,6 +97,9 @@ StatusCode MPIClusterSvc::initialize() {
 }
 
 StatusCode MPIClusterSvc::finalize() {
+  if (m_mpiLog.empty()) {
+    return StatusCode::SUCCESS;
+  }
   m_mpiLog
       ->createStatement(
           "UPDATE ranks SET end_time = julianday('now') WHERE rank = ?1")
@@ -250,6 +255,9 @@ void MPIClusterSvc::log_addEvent(int eventIdx, std::int64_t run_number,
                                  std::int64_t event_number,
                                  std::int64_t request_time_ns,
                                  std::size_t slot) {
+  if (m_mpiLog.empty()) {
+    ATH_MSG_WARNING("MPI SQLite log service is not setup!");
+  }
   m_mpiLog_addEvent.run(eventIdx, run_number, event_number, m_rank,
                         request_time_ns, m_inputFileSlotMap[slot]);
 }
@@ -257,6 +265,9 @@ void MPIClusterSvc::log_addEvent(int eventIdx, std::int64_t run_number,
 void MPIClusterSvc::log_completeEvent(int eventIdx, std::int64_t run_number,
                                       std::int64_t event_number,
                                       std::int64_t status) {
+  if (m_mpiLog.empty()) {
+    ATH_MSG_WARNING("MPI SQLite log service is not setup!");
+  }
   m_mpiLog_completeEvent.run(eventIdx, run_number, event_number, status);
 }
 

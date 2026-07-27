@@ -66,10 +66,14 @@ struct ClusterMessage {
     std::pmr::memory_resource* allocating_memory_resource =
         nullptr;  // If this was received, we need to keep track of the memory
                   // resource used to allocate memory in order to free it
+
     // This enforces the invariant that align is a valid alignment for T
     template <typename T>
-    DataDescr(const T* ptr, std::size_t count = 1)
+    DataDescr(T* ptr, std::size_t count = 1)
         : ptr((void*)ptr), len(count * sizeof(T)), align(alignof(T)) {}
+
+    // This constructor is required to send back void*s
+    DataDescr(void* ptr, std::size_t len, std::size_t align);
 
     DataDescr(DataDescr&& rhs) noexcept;
 
@@ -78,10 +82,11 @@ struct ClusterMessage {
 
     DataDescr(const WireMsgBody& body,
               std::pmr::memory_resource* allocating_memory_resource =
-                  std::pmr::get_default_resource());
+                  std::pmr::new_delete_resource());
 
     DataDescr& operator=(DataDescr&& rhs) noexcept;
 
+    void* release();
     ~DataDescr();
   };
 

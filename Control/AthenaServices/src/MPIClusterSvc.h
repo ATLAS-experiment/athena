@@ -76,7 +76,8 @@ class MPIClusterSvc
                                  std::int64_t status) override final;
 
   /// Add a new type of destination
-  virtual unsigned int registerMemoryResource(std::pmr::memory_resource* res);
+  virtual unsigned int registerMemoryResource(
+      std::pmr::memory_resource* res) override;
 
  private:
   std::unique_ptr<mpi3::environment> m_env;
@@ -98,6 +99,6 @@ class MPIClusterSvc
 
   // Hold a map of dest ID to memory resource
   std::vector<std::pmr::memory_resource*> m_destIDMemResMap{
-      std::pmr::get_default_resource()};
+      std::pmr::new_delete_resource()};
 };
 #endif  // ATHENASERVICES_MPICLUSTERSVC_H_
