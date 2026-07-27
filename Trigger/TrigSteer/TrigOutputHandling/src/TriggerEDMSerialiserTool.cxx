@@ -2,11 +2,10 @@
   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-#include <cstring>
-#include <boost/core/demangle.hpp>
-#include <boost/algorithm/string.hpp>
+#include "TriggerEDMSerialiserTool.h"
+#include "TriggerEDMCLIDs.h"
+
 #include "Gaudi/Interfaces/IOptionsSvc.h"
-#include "GaudiKernel/IToolSvc.h"
 #include "GaudiKernel/System.h"
 #include "AthenaKernel/BaseInfo.h"
 #include "AthenaKernel/StorableConversions.h"
@@ -14,14 +13,14 @@
 #include "AthContainers/AuxTypeRegistry.h"
 #include "AthContainers/tools/copyAuxStoreThinned.h"
 #include "AthContainers/debug.h"
-#include "xAODCore/AuxContainerBase.h"
-#include "xAODTrigger/TrigCompositeAuxContainer.h"
+#include "CxxUtils/StringUtilsTemplates.h"
 #include "TrigSerializeResult/StringSerializer.h"
 #include "TrigCompositeUtils/HLTIdentifier.h"
+#include "xAODCore/AuxContainerBase.h"
+#include "xAODTrigger/TrigCompositeAuxContainer.h"
 
-#include "TriggerEDMSerialiserTool.h"
-#include "TriggerEDMCLIDs.h"
-#include <CxxUtils/StringUtilsTemplates.h>
+#include <ranges>
+#include <string>
 #include <numeric>
 
 namespace {
@@ -102,21 +101,19 @@ StatusCode TriggerEDMSerialiserTool::addCollectionToSerialise(const std::string&
   const std::string_view configuredType = typeKeyAux.substr( 0, typeKeyAux.find('#') );
   const std::string_view key = typeKeyAux.substr( typeKeyAux.find('#')+1, typeKeyAux.find('.')-typeKeyAux.find('#') );
 
-  std::string transientType;
-  std::string persistentType;
   Address::Truncation truncationMode{Address::Truncation::Error};
 
-  if ( configuredType.find('_') == std::string::npos ) {
-    transientType = configuredType;
-  } else {
-    transientType  = configuredType.substr( 0, configuredType.find('_') );
-  }
+  const size_t pos = configuredType.find('_');
+  const std::string transientType{ pos==std::string::npos ? configuredType : configuredType.substr(0, pos) };
+
   CLID clid{0};
+  std::string persistentType;
   if ( m_clidSvc->getIDOfTypeName(transientType, clid).isFailure() )  {
     ATH_MSG_ERROR( "Can not find CLID for " << transientType << " that is needed for serialisation " << key );
     return StatusCode::FAILURE;
   }
   ATH_MSG_VERBOSE("Decoded transient type: " << transientType << " with the CLID " << clid );
+
   if ( transientType == configuredType ) {
     std::string realTypeName;
     if( m_clidSvc->getTypeInfoNameOfID( clid, realTypeName ).isFailure() ) {
@@ -138,7 +135,7 @@ StatusCode TriggerEDMSerialiserTool::addCollectionToSerialise(const std::string&
   }
 
   // Set truncation mode
-  if ( def.size() > 2 && def[2].find("allowTruncation") != std::string::npos ) {
+  if ( def.size() > 2 && def[2].contains("allowTruncation") ) {
     ATH_MSG_DEBUG("Truncation allowed for " << configuredType << "#" << key);
     truncationMode = Address::Truncation::Allowed;
   }
@@ -154,14 +151,13 @@ StatusCode TriggerEDMSerialiserTool::addCollectionToSerialise(const std::string&
   ATH_MSG_DEBUG( "Transient type " << transientType << " persistent type " << persistentType << " will be written to " << moduleIdVec.size() << " result ROBFragments with IDs: "
       << moduleIdVec << "" );
 
-  if ( persistentType.rfind("xAOD", 0) != std::string::npos ) { // xAOD - either interface of Aux
+  if ( persistentType.starts_with("xAOD") ) { // xAOD - either interface of Aux
     xAOD::AuxSelection sel;
-    if ( typeKeyAux.find('.') != std::string::npos ) { // Aux, possibly with selection of variables
+    if ( typeKeyAux.contains('.') ) { // Aux, possibly with selection of variables
       ATH_MSG_DEBUG( "with aux content: "  );
       const std::string allVars = std::string(typeKeyAux.substr( typeKeyAux.find('.')+1 ));
       if (!allVars.empty()) {
-        std::set<std::string> variableNames;
-        boost::split( variableNames, allVars, [](const char c){ return c == '.'; } );
+        const auto variableNames = allVars | std::views::split('.') | std::ranges::to<std::set<std::string>>();
         if (msgLvl(MSG::DEBUG)) {
           for ( const auto& el: variableNames ) {
             ATH_MSG_DEBUG( " \"" << el << "\""  );
@@ -650,14 +646,12 @@ StatusCode TriggerEDMSerialiserTool::fillDebugInfo(const TruncationInfoMap& trun
 }
 
 std::string TriggerEDMSerialiserTool::version( const std::string& name ) {
-  if ( name.find("DataVector") != std::string::npos ) {
-    size_t start = name.find('_');
+  if ( name.contains("DataVector") ) {
+    const size_t start = name.find('_');
     return name.substr( start, name.find('>') - start );
   }
-  if ( name.find('_') != std::string::npos ) {
-    return name.substr( name.find('_') );
-  }
-  return "";
+  const size_t pos = name.find('_');
+  return (pos == std::string::npos ? std::string{} : name.substr( pos ));
 }
 
 std::set<uint16_t> TriggerEDMSerialiserTool::activeModuleIDs(const HLT::HLTResultMT& result) {

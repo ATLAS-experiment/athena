@@ -30,7 +30,7 @@
 #include "PathResolver/PathResolver.h"
 
 #include <sys/resource.h>
-#include <cstring>
+#include <string>
 #include <regex>
 
 namespace {
@@ -332,13 +332,13 @@ StatusCode TriggerEDMDeserialiserAlg::deserialise( const Payload* dataptr ) cons
                      transientTypeName << " # " << key << " failed" );
       return StatusCode::FAILURE;
     }
-    const bool isxAODInterfaceContainer = (transientTypeName.rfind("xAOD", 0) != std::string::npos and
-                                           transientTypeName.find("Aux") == std::string::npos and
-                                           transientTypeName.find("ElementLink") == std::string::npos);
-    const bool isxAODAuxContainer       = (transientTypeName.rfind("xAOD", 0) != std::string::npos and
-                                           transientTypeName.find("Aux") != std::string::npos);
-    const bool isxAODDecoration	        = transientTypeName.find("vector") != std::string::npos;
-    const bool isTPContainer	        = persistentTypeName.find("_p")	!= std::string::npos;
+    const bool isxAODInterfaceContainer = (transientTypeName.starts_with("xAOD") and
+                                           not transientTypeName.contains("Aux") and
+                                           not transientTypeName.contains("ElementLink"));
+    const bool isxAODAuxContainer       = (transientTypeName.starts_with("xAOD") and
+                                           transientTypeName.contains("Aux"));
+    const bool isxAODDecoration	        = transientTypeName.contains("vector");
+    const bool isTPContainer	        = persistentTypeName.contains("_p");
     const bool isVersionChange          = versionChange(persistentTypeName, transientTypeInfoName);
 
     ATH_CHECK( checkSanity( transientTypeName, isxAODInterfaceContainer,
@@ -422,13 +422,13 @@ StatusCode TriggerEDMDeserialiserAlg::deserialise( const Payload* dataptr ) cons
 
 StatusCode TriggerEDMDeserialiserAlg::deserialiseDynAux( const std::string& transientTypeName, const std::string& persistentTypeName, const std::string& decorationName,
 							 void* obj,   WritableAuxStore* currentAuxStore, SG::AuxVectorBase* interfaceContainer ) const {
-  const bool isPacked = persistentTypeName.find("SG::PackedContainer") != std::string::npos;      
+  const bool isPacked = persistentTypeName.contains("SG::PackedContainer");
 
   SG::AuxTypeRegistry& registry = SG::AuxTypeRegistry::instance();     
   SG::auxid_t id = registry.findAuxID ( decorationName );
   if (id != SG::null_auxid ) {
     std::string regTypeName = stripStdVec( registry.getVecTypeName(id) );
-    if ( regTypeName != stripStdVec(transientTypeName) and transientTypeName.find("ElementLink") == std::string::npos )
+    if ( regTypeName != stripStdVec(transientTypeName) and not transientTypeName.contains("ElementLink") )
     {
       // Before giving up, also translate any typedefs in the transient name.
       RootUtils::Type tname (transientTypeName);
