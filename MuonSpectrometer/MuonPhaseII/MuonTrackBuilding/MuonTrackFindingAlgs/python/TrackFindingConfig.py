@@ -76,8 +76,8 @@ def MsTrackSeedingToolCfg(flags, name="MsTrackSeedingTool", **kwargs):
     result = ComponentAccumulator()
     kwargs.setdefault("SegmentSelectionTool", result.popToolsAndMerge(SegmentSelectorCfg(flags)))
 
-    from ActsConfig.ActsGeometryConfig import ActsTrackingGeometrySvc
-    result.merge(ActsTrackingGeometrySvc(flags))
+    from ActsConfig.ActsGeometryConfig import ActsTrackingGeometrySvcCfg
+    result.merge(ActsTrackingGeometrySvcCfg(flags))
     the_tool = CompFactory.MuonR4.MsTrackSeederTool(name, **kwargs)
     result.setPrivateTools(the_tool)
     return result
