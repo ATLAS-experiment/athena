@@ -160,7 +160,10 @@ namespace xAOD{
                  *         the chamber module hash. There's no cross-check whether the interpretion of both hashes is the same
                  *  @param idHash: IdentifierHash to search */
                 bool loadView(const IdentifierHash& idHash)
-                    requires(ChamberViewConcepts::identifierHashConcept<element_type>) {                   
+                    requires(ChamberViewConcepts::identifierHashConcept<element_type>) {
+                    if (m_begin != m_end && (*m_begin)->identifierHash() == idHash) {
+                        return true;
+                    }
                     m_begin = std::ranges::find_if(m_container,[&idHash](const_ref meas) {
                                                         return meas->identifierHash() == idHash;
                                                    });
@@ -195,6 +198,9 @@ namespace xAOD{
                                         });
                     return true;
                 }
+                /** @brief Returns the reference to the container from which the
+                 *         ChamberViewer was made */
+                const HitObjContainer& get() const { return m_container; }
 
             private:
                 /** @brief Returns the IdentifierHash from an Identifier */
