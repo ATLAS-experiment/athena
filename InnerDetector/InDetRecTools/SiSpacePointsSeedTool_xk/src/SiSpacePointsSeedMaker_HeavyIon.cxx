@@ -97,6 +97,8 @@ StatusCode InDet::SiSpacePointsSeedMaker_HeavyIon::initialize()
     m_outputTree->Branch("givesTrack",     &m_givesTrack);
     m_outputTree->Branch("dzdr_b",  	   &m_dzdr_b);
     m_outputTree->Branch("dzdr_t",         &m_dzdr_t);
+    m_outputTree->Branch("dr_b",           &m_dr_b);
+    m_outputTree->Branch("dr_t",           &m_dr_t);
     m_outputTree->Branch("track_pt",       &m_trackPt);
     m_outputTree->Branch("track_eta",      &m_trackEta);
 
@@ -838,7 +840,7 @@ void InDet::SiSpacePointsSeedMaker_HeavyIon::buildBeamFrameWork(const EventConte
 ///////////////////////////////////////////////////////////////////
 
 void  InDet::SiSpacePointsSeedMaker_HeavyIon::convertToBeamFrameWork
-(EventData& data, const Trk::SpacePoint*const& sp,float* r) 
+(EventData& data, const Trk::SpacePoint*const& sp,std::array<float, 3> &r) 
 {
   r[0] = static_cast<float>(sp->globalPosition().x())-data.xbeam[0];
   r[1] = static_cast<float>(sp->globalPosition().y())-data.ybeam[0];
@@ -973,12 +975,7 @@ void InDet::SiSpacePointsSeedMaker_HeavyIon::production2Sp(EventData& data) cons
 	float X  = (*r0)->x();
 	float Y  = (*r0)->y();
 	float R  = (*r0)->radius();
-	/*
-	if (m_useVertexPosition) {
-	  std::cout << "-------------------------------------------------------------------------" << std::endl;
-	  std::cout << "middle r is: " << R << " with range [" << m_r2minv << ", " << m_r2maxv << "]" << std::endl;
-	}
-	*/
+
 	if (R<m_r2minv) continue;
         if (R>m_r2maxv) break;
 	float Z  = (*r0)->z();
@@ -997,7 +994,6 @@ void InDet::SiSpacePointsSeedMaker_HeavyIon::production2Sp(EventData& data) cons
 	  
 	  for (; r!=re; ++r) {
 	    float Rb =(*r)->radius();
-	    // if (m_useVertexPosition) std::cout << "other r is: " << Rb << " with range [" << m_r1minv << ", " << m_r1maxv << "]" << std::endl;
 	    if (Rb<m_r1minv) continue;
             if (Rb>m_r1maxv) break;
 	    float dR = R-Rb;
@@ -1173,7 +1169,8 @@ void InDet::SiSpacePointsSeedMaker_HeavyIon::production3Sp
 	  continue;
 	}
 	float dR = Rt-R;
-        if (dR<m_drmin) {
+	//        if (dR<m_drmin) {
+	if (dR<28.) {
           rt[i]=r;
           continue;
         }
@@ -1586,14 +1583,14 @@ InDet::SiSpacePointForSeed* InDet::SiSpacePointsSeedMaker_HeavyIon::newSpacePoin
 {
   InDet::SiSpacePointForSeed* sps = nullptr;
 
-  float r[3];
+  std::array<float, 3> r{0,0,0};
   convertToBeamFrameWork(data, sp, r);
 
   if (data.i_spforseed!=data.l_spforseed.end()) {
     sps = &(*data.i_spforseed++);
-    sps->set(sp,r);
+    sps->set(sp,&r[0]);
   } else {
-    data.l_spforseed.emplace_back(sp, r);
+    data.l_spforseed.emplace_back(sp, &r[0]);
     sps = &(data.l_spforseed.back());
     data.i_spforseed = data.l_spforseed.end();
   }
@@ -1693,24 +1690,28 @@ void InDet::SiSpacePointsSeedMaker_HeavyIon::writeNtuple(const SiSpacePointsSeed
     m_trackEta = -1.; 
   }
 
+  const std::vector<const Trk::SpacePoint*>& sps = seed->spacePoints();
+  
   m_d0           =   seed->d0();
   m_z0           =   seed->zVertex();
-  m_eta          =   seed->eta();
-  m_x1           =   seed->x1();
-  m_x2           =   seed->x2();
-  m_x3           =   seed->x3();
-  m_y1           =   seed->y1();
-  m_y2           =   seed->y2();
-  m_y3           =   seed->y3();      
-  m_z1           =   seed->z1();
-  m_z2           =   seed->z2();
-  m_z3           =   seed->z3();
-  m_r1           =   seed->r1();
-  m_r2           =   seed->r2();
-  m_r3           =   seed->r3();
+  m_eta          =   sps[0]->globalPosition().eta();
+  m_x1           =   sps[0]->globalPosition().x();
+  m_x2           =   sps[1]->globalPosition().x();
+  m_x3           =   sps[2]->globalPosition().x();
+  m_y1           =   sps[0]->globalPosition().y();
+  m_y2           =   sps[1]->globalPosition().y();
+  m_y3           =   sps[2]->globalPosition().y();
+  m_z1           =   sps[0]->globalPosition().z();
+  m_z2           =   sps[1]->globalPosition().z();
+  m_z3           =   sps[2]->globalPosition().z();
+  m_r1           =   sps[0]->globalPosition().perp();
+  m_r2           =   sps[1]->globalPosition().perp();
+  m_r3           =   sps[2]->globalPosition().perp();
   m_type         =   seedType;
-  m_dzdr_b       =   seed->dzdr_b();
-  m_dzdr_t       =   seed->dzdr_t();
+  m_dzdr_b       =   ( sps[1]->globalPosition().z() -  sps[0]->globalPosition().z() )/( sps[1]->globalPosition().perp() - sps[0]->globalPosition().perp());
+  m_dzdr_t       =   ( sps[2]->globalPosition().z() - sps[1]->globalPosition().z()) / (sps[2]->globalPosition().perp() - sps[1]->globalPosition().perp());
+  m_dr_b         =   sps[1]->globalPosition().perp() - sps[0]->globalPosition().perp();
+  m_dr_t         =   sps[2]->globalPosition().perp() - sps[1]->globalPosition().perp();
   m_pt           =   seed->pt();
   m_givesTrack   =   !(track == nullptr);
   m_eventNumber  =   eventNumber;

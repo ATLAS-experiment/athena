@@ -242,6 +242,8 @@ namespace InDet {
     mutable int m_type ATLAS_THREAD_SAFE = 0;
     mutable double m_dzdr_t ATLAS_THREAD_SAFE = 0;
     mutable double m_dzdr_b ATLAS_THREAD_SAFE = 0;
+    mutable double m_dr_b ATLAS_THREAD_SAFE = 0;
+    mutable double m_dr_t ATLAS_THREAD_SAFE = 0;
     mutable bool m_givesTrack ATLAS_THREAD_SAFE = 0;
     mutable float m_trackPt ATLAS_THREAD_SAFE = 0;
     mutable float m_trackEta ATLAS_THREAD_SAFE = 0;
@@ -304,7 +306,7 @@ namespace InDet {
     void findNext(EventData& data) const;
     bool isZCompatible(EventData& data, float&,float&,float&) const;
     static float dZVertexMin(EventData& data, float&) ;
-    static void convertToBeamFrameWork(EventData& data, const Trk::SpacePoint*const&,float*) ;
+    static void convertToBeamFrameWork(EventData& data, const Trk::SpacePoint*const&,std::array<float, 3>&) ;
 
     void initializeEventData(EventData& data) const;
 
