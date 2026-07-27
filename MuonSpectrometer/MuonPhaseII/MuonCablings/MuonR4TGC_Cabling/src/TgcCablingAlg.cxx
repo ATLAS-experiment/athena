@@ -3,7 +3,7 @@
 #include "AthenaPoolUtilities/AthenaAttributeList.h"
 #include "AthenaPoolUtilities/CondAttrListCollection.h"
 #include "CoralBase/Attribute.h"
-
+#include "AthenaKernel/IOVInfiniteRange.h"
 #include "MuonCablingDataR4/TgcCablingMap.h"
 
 namespace MuonR4 {
@@ -31,6 +31,9 @@ StatusCode TgcCablingAlg::execute(const EventContext& ctx) const {
                                    << " is already valid.");
         return StatusCode::SUCCESS;
     }
+
+    writeCablingHandle.addDependency(
+    EventIDRange(IOVInfiniteRange::infiniteRunLB()));
 
     ATH_MSG_INFO("Load the TGC cabling");
 
@@ -165,7 +168,10 @@ StatusCode TgcCablingAlg::parsePayload(TgcCablingMap& cablingMap,
 
         const int stationNameIndex =
             m_idHelperSvc->tgcIdHelper().stationNameIndex(stationName);
-
+        if (stationNameIndex < 0) {
+            ATH_MSG_FATAL("Unknown TGC station name: " << stationName);
+            return StatusCode::FAILURE;
+        }
         const nlohmann::json& cellAddressMap = stationBlock.at("CellAddressMap");
 
         if (!cellAddressMap.is_array()) {
@@ -191,16 +197,16 @@ StatusCode TgcCablingAlg::parsePayload(TgcCablingMap& cablingMap,
 
             TgcCablingMap::JsonEntry entry{};
 
-            entry.stationName = stationName;
-            entry.stationNameIndex = static_cast<int16_t>(stationNameIndex);
+            entry.stationNameString = stationName;
+            entry.stationName = static_cast<int8_t>(stationNameIndex);
             entry.stationEta =
-                static_cast<int16_t>(cablPayload.at("stationEta").get<int>());
+                static_cast<int8_t>(cablPayload.at("stationEta").get<int>());
             entry.stationPhi =
-                static_cast<int16_t>(cablPayload.at("stationPhi").get<int>());
+                static_cast<int8_t>(cablPayload.at("stationPhi").get<int>());
             entry.gasGap =
-                static_cast<int16_t>(cablPayload.at("GasGap").get<int>());
+                static_cast<int8_t>(cablPayload.at("GasGap").get<int>());
             entry.isStrip =
-                static_cast<int16_t>(cablPayload.at("isStrip").get<int>());
+                static_cast<int8_t>(cablPayload.at("isStrip").get<int>());
             entry.ASDstartChannel =
                 static_cast<int16_t>(cablPayload.at("ASDstartChannel").get<int>());
             entry.reversed = cablPayload.at("reversed").get<bool>();
@@ -269,4 +275,4 @@ StatusCode TgcCablingAlg::parsePayload(TgcCablingMap& cablingMap,
     return StatusCode::SUCCESS;
 }
 
-}  // namespace Muon
+}  // namespace MuonR4

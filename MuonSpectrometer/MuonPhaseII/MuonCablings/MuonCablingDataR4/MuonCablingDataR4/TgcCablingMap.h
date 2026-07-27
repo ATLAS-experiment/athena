@@ -20,22 +20,13 @@ class IMuonIdHelperSvc;
 namespace MuonR4{
 class TgcCablingMap {
 public:
-    struct JsonEntry {
-    std::string stationName{};
-        int16_t stationNameIndex{0};
-
-        int16_t stationEta{0};
-        int16_t stationPhi{0};
-        int16_t gasGap{0};
-        int16_t isStrip{0};
-        int16_t ASDstartChannel{0};
-        int16_t channelRangeStart{0};
-        int16_t channelRangeEnd{0};
-        bool reversed{false};
-        int16_t SLID{0};
-        int16_t cellAddress1{-1};
-        int16_t cellAddress2{-1};
-        bool hasSecondCellAddress{false};
+    struct JsonEntry : public TgcCablingData {
+    std::string stationNameString{};
+    int16_t ASDstartChannel{0};
+    int16_t channelRangeStart{0};
+    int16_t channelRangeEnd{0};
+    bool reversed{false};
+    bool hasSecondCellAddress{false};
     };
 
     struct OfflineToReadoutAssociation {

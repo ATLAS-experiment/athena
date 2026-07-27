@@ -1,3 +1,7 @@
+/*
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
+*/
+
 #ifndef MUONCABLINGDATA_TgcCablingAlg_H
 #define MUONCABLINGDATA_TgcCablingAlg_H
 
