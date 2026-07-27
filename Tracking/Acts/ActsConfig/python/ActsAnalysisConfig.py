@@ -548,8 +548,8 @@ def ActsBaseSeedAnalysisAlgCfg(flags,
     from ActsConfig.ActsTrackParamsEstimationConfig import ActsTrackParamsEstimationToolCfg
     trackEstimationTool = acc.popToolsAndMerge(ActsTrackParamsEstimationToolCfg(flags))
     
-    from ActsConfig.ActsGeometryConfig import ActsGeometryRealmConvTool
-    kwargs.setdefault("GeometryRealmConvTool", acc.getPrimaryAndMerge(ActsGeometryRealmConvTool(flags)))
+    from ActsConfig.ActsGeometryConfig import ActsGeometryRealmConvToolCfg
+    kwargs.setdefault("GeometryRealmConvTool", acc.getPrimaryAndMerge(ActsGeometryRealmConvToolCfg(flags)))
 
     kwargs.setdefault('TrackParamsEstimationTool', trackEstimationTool)
 
@@ -744,8 +744,8 @@ def ActsBaseSeedsToTrackParamsAlgCfg(flags,
                                      **kwargs) -> ComponentAccumulator:
     acc = ComponentAccumulator()
 
-    from ActsConfig.ActsGeometryConfig import ActsGeometryRealmConvTool
-    kwargs.setdefault("GeometryRealmConvTool", acc.getPrimaryAndMerge(ActsGeometryRealmConvTool(flags)))
+    from ActsConfig.ActsGeometryConfig import ActsGeometryRealmConvToolCfg
+    kwargs.setdefault("GeometryRealmConvTool", acc.getPrimaryAndMerge(ActsGeometryRealmConvToolCfg(flags)))
 
     if 'TrackParamsEstimationTool' not in kwargs:
         from ActsConfig.ActsTrackParamsEstimationConfig import ActsTrackParamsEstimationToolCfg
