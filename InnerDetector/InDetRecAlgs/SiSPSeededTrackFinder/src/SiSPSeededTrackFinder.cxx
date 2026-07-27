@@ -206,6 +206,16 @@ StatusCode InDet::SiSPSeededTrackFinder::oldStrategy(const EventContext& ctx) co
     seedEventData.zCollisionMinimum = primaryVertex->z() - m_collisionTollerance;
     seedEventData.zCollisionMaximum = primaryVertex->z() + m_collisionTollerance;
   }
+
+  /// Get the value of the seed maker validation ntuple writing switch
+  bool doWriteNtuple = m_seedsmaker->getWriteNtupleBoolProperty();
+  long EvNumber = 0.;            //Event number variable to be used for the validation ntuple
+
+  if (doWriteNtuple) {
+    SG::ReadHandle<xAOD::EventInfo> eventInfo = SG::makeHandle(m_evtKey, ctx);
+    if(!eventInfo.isValid()) {EvNumber = -1.0;}
+    else {EvNumber = eventInfo->eventNumber();}
+  }
   
   bool ZVE = false;
   if (m_useZvertexTool) {
@@ -227,13 +237,21 @@ StatusCode InDet::SiSPSeededTrackFinder::oldStrategy(const EventContext& ctx) co
   Counter_t counter{};
   const InDet::SiSpacePointsSeed* seed = nullptr;
   std::multimap<double, Trk::Track*> qualitySortedTrackCandidates;
-  // Loop through all seed and reconsrtucted tracks collection preparation
+  // Loop through all seed and reconstructed tracks collection preparation
   //
   while ((seed = m_seedsmaker->next(ctx, seedEventData))) {
     ++counter[kNSeeds];
     std::list<Trk::Track*> trackList = m_trackmaker->getTracks(ctx, trackEventData, seed->spacePoints());
     for (Trk::Track* t: trackList) {
       qualitySortedTrackCandidates.insert(std::make_pair(-trackQuality(t), t));
+    }
+    if(doWriteNtuple) {
+      m_seedsmaker->writeNtuple(seed,
+				!trackList.empty()
+				? trackList.front()
+				: nullptr,
+				ISiSpacePointsSeedMaker::StripSeed,
+				EvNumber);
     }
     if (not ZVE and (counter[kNSeeds] >= m_maxNumberSeeds)) {
       ERR = true;

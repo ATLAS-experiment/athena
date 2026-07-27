@@ -51,6 +51,11 @@ def SiSpacePointsSeedMaker_HeavyIonCfg(
                       flags.Tracking.ActiveConfig.maxdImpactSSSSeeds)
     kwargs.setdefault("fieldScale",flags.BField.configuredSolenoidFieldScale)
 
+    if flags.Tracking.writeSeedValNtuple:
+        kwargs.setdefault("WriteNtuple", True)
+        acc.addService(CompFactory.THistSvc(
+            Output=["valNtuples DATAFILE='SeedMakerValidation.root' OPT='RECREATE'"]))
+
     acc.setPrivateTools(CompFactory.InDet.SiSpacePointsSeedMaker_HeavyIon(
         name+flags.Tracking.ActiveConfig.extension, **kwargs))
     return acc
