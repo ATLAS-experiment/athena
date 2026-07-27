@@ -97,6 +97,15 @@ def createMuonConfigFlags():
     mcf.addFlag("Muon.includePileUpTruth", False)
     #### Enable ML bucket filter inference for muon reconstruction
     mcf.addFlag("Muon.enableMLBucketFilter", False)
+    #### Express the MS track parameters at the MS entrance and perform 
+    #### matching with the ID tracks on this surface
+    mcf.addFlag("Muon.expressMsTrackAtEntrance", False)
+    #### Toggle whether the combined reconstruction builds a MuonSpectrometer Extrapolated track
+    #### Uncombned MS tracks are extrapolated back to the beamspot and then refitted with the beam spot
+    #### as an additional measurement. Combined tracks are refitted stripping off the ID measurements but
+    #### the beamspot
+    mcf.addFlag("Muon.buildMETrack", lambda prevFlags: prevFlags.Reco.EnableTracking and\
+                                                        not prevFlags.Muon.MuonTrigger )
 
     mcf.addFlag("Muon.doMSVertex", True) # Run MS vertex (arXiv:1311.7070)
     mcf.addFlag("Muon.doSegmentT0Fit",lambda prevFlags : prevFlags.Beam.Type is not BeamType.Collisions) # Fit MDT segments using a variable t0. Used for cosmics and single beam to compensate for large errors on the trigger time.

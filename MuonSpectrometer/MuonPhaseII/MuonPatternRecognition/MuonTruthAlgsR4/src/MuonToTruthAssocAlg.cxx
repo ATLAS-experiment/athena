@@ -69,10 +69,17 @@ namespace MuonR4{
                     continue;
                 }
             }
-            std::unordered_map<const xAOD::TruthParticle*, unsigned> counts{};
+            std::vector<std::pair<const xAOD::TruthParticle*, unsigned>> counts{};
             for (unsigned seg =0 ; seg < muon->nMuonSegments(); ++ seg) {
                 const xAOD::TruthParticle* truth = getTruthMatchedParticle(*muon->muonSegment(seg));
-                ++counts[truth];
+                auto itr = std::ranges::find_if(counts, [truth](const auto&  known){
+                    return known.first == truth;
+                });
+                if(itr != counts.end()) {
+                    ++itr->second;
+                } else {
+                    counts.emplace_back(std::make_pair(truth , 1));
+                }
             }
             if (counts.empty()) {
                 continue;

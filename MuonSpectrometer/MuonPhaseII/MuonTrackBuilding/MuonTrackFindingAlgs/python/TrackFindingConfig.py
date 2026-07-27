@@ -94,9 +94,7 @@ def MSTrackFinderAlgCfg(flags, name="MSTrackFinderAlg", **kwargs):
     from MuonSpacePointCalibrator.CalibrationConfig import MuonSpacePointCalibratorCfg
     kwargs.setdefault("Calibrator", result.popToolsAndMerge(MuonSpacePointCalibratorCfg(flags)))
     kwargs.setdefault("SummaryTool", result.popToolsAndMerge(TrackSummaryToolCfg(flags)))
-    kwargs.setdefault("expressAtMsEntrance",  flags.Detector.GeometryCalo)
-    #from AthenaCommon.Constants import VERBOSE
-    #kwargs.setdefault("OutputLevel", VERBOSE)
+    kwargs.setdefault("expressAtMsEntrance",  flags.Muon.expressMsTrackAtEntrance)
     kwargs.setdefault("ExtrapolationTool", result.popToolsAndMerge(MSExtrapolatorCfg(flags)))
     the_alg = CompFactory.MuonR4.MsTrackFindingAlg(name, **kwargs)
     result.addEventAlgo(the_alg, primary = True)
@@ -133,9 +131,9 @@ def BeamSpotPreparatorAlgCfg(flags, name="MuonBeamSpotPreparator", **kwargs):
     return result
 
 def MuidSaTagMakerAlgCfg(flags, name="MuonMuidTagSaAlg", **kwargs):
-    result = ComponentAccumulator() 
-    kwargs.setdefault("ExtrapolateToIP", (flags.Detector.GeometryID or flags.Detector.GeometryITk) and not flags.Muon.MuonTrigger )
-    kwargs.setdefault("RefitWithBeamSpot", (flags.Detector.GeometryID or flags.Detector.GeometryITk) and not flags.Muon.MuonTrigger )
+    result = ComponentAccumulator()
+    kwargs.setdefault("ExtrapolateToIP", flags.Muon.buildMETrack )
+    kwargs.setdefault("RefitWithBeamSpot", flags.Muon.buildMETrack )
     kwargs.setdefault("TrackSummaryTool", result.popToolsAndMerge(TrackSummaryToolCfg(flags)))
     from ActsConfig.ActsGeometryConfig import ActsTrackingGeometrySvcCfg
     result.merge(ActsTrackingGeometrySvcCfg(flags))
@@ -158,6 +156,7 @@ def MuonInDetTrackSelectionAlgCfg(flags, name="MuonCombinedInDetCandidateAlgR4",
     kwargs.setdefault("ExtrapolationTool", result.popToolsAndMerge(MSExtrapolatorCfg(flags)))
     from ActsConfig.ActsGeometryConfig import ActsTrackingGeometrySvcCfg
     result.merge(ActsTrackingGeometrySvcCfg(flags))
+    kwargs.setdefault("matchTracksOnSameSurface",  flags.Muon.expressMsTrackAtEntrance)
     the_alg = CompFactory.MuonCombinedR4.InDetTrackSelectionAlg(name, **kwargs)
     result.addEventAlgo(the_alg, primary = True)
     return result
