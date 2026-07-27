@@ -25,13 +25,17 @@ def listOfRecoReleases(flags):
     listOfRecoTags = []
     nr = 0
     nf = 0
-    for e in listOfTags:
+    for ie,e in enumerate(listOfTags):
+        # no idea why it can return an empty string...
+        msg.debug('tag %s at position %i',e,ie)
+        if not len(e):
+            continue
         if e[0] == 'r':
             nr += 1
-        listOfRecoTags.append(e)
+            listOfRecoTags.append(e)
         if e[0] == 'f':
             nf += 1
-        listOfRecoTags.append(e)
+            listOfRecoTags.append(e)
 
     msg.info('List of tags %s %s %s',' '.join(listOfTags),', of reco tags ',' '.join(listOfRecoTags))
     # use case : a DRAW file was produced at T0 (f-tag), and recoed in reprocessing (r-tag)
@@ -151,6 +155,7 @@ def egammaAODFixesCfg(flags, correctCluster = True):
     kwargs['CorrectCluster'] = correctCluster
     kwargs['FixAmbiguityLinks'] = (name.find('egammaAmbiguityLinksFix') >= 0)
     if correctCluster:
+          # First some detector config
           # TO BE UNDERSTOOD : why is this explicitely needed here (without it : ERROR SG::ExcNoCondCont: Can't retrieve CondCont from ReadCondHandle for key ConditionStore+LArBadChannel. Can't retrieve.)
           from LArBadChannelTool.LArBadChannelConfig import LArBadChannelCfg
           result.merge(LArBadChannelCfg(flags))
@@ -158,6 +163,9 @@ def egammaAODFixesCfg(flags, correctCluster = True):
           #result.merge( TileBadChannelsCondAlgCfg(flags, **kwargs) )
           from CaloBadChannelTool.CaloBadChanToolConfig import CaloBadChanToolCfg
           result.popToolsAndMerge( CaloBadChanToolCfg(flags) )
+          from LArGeoAlgsNV.LArGMConfig import LArGMCfg
+          result.merge(LArGMCfg(flags))
+          # then the AODFix itself
           result.merge(InputRenameCfg("xAOD::CaloClusterContainer", "egammaClusters", "old_egammaClusters"))
           result.merge(InputRenameCfg("xAOD::CaloClusterAuxContainer", "egammaClustersAux.", "old_egammaClustersAux."))
           result.merge(InputRenameCfg("CaloClusterCellLinkContainer", "egammaClusters_links", "old_egammaClusters_links"))
