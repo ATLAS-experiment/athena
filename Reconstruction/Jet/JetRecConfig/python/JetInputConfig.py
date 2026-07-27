@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 """
 # JetInputConfig: A helper module providing function to setup algorithms
 # in charge of preparing input sources to jets (ex: EventDensity algo, track
@@ -7,6 +7,8 @@
 # Author: P-A Delsart                                              #
 """
 from AthenaConfiguration.ComponentFactory import CompFactory
+from AthenaCommon import Logging
+jetlog = Logging.logging.getLogger('JetInputConfig')
 
 # we can't add the imports here, because some modules may not be available
 # in all releases (Ex: AthGeneration, AnalysisBase...) so we delay the imports
@@ -71,13 +73,17 @@ def buildPV0TrackSel(parentjetdef, spec):
     return alg
 
 
-def buildPFlowSel(parentjetdef, spec):
+def buildPFlowSel(parentjetdef, spec, egammaPEB=False):
+    egammaPEB = parentjetdef._cflags.Input.TriggerStream=='physics_EgammaPEBTLA' or egammaPEB
+    if egammaPEB:
+        jetlog.warning("Configuring muon-less reconstruction for EgammaPEB stream")
     return  CompFactory.JetPFlowSelectionAlg( "pflowselalg",
                                               electronIDToExclude = "LHMedium",
                                               ChargedPFlowInputContainer  = "JetETMissChargedParticleFlowObjects",
                                               NeutralPFlowInputContainer  = "JetETMissNeutralParticleFlowObjects",
                                               ChargedPFlowOutputContainer = "GlobalChargedParticleFlowObjects",
-                                              NeutralPFlowOutputContainer = "GlobalNeutralParticleFlowObjects"
+                                              NeutralPFlowOutputContainer = "GlobalNeutralParticleFlowObjects",
+                                              isEgammaPEB = egammaPEB # Autoconfigure muon-less reconstruction
                                              )
 
 #This is to be used to seed tau jets which exclude electrons.
