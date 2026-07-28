@@ -13,7 +13,6 @@
 #include <vector>
 #include <math.h>
 #include <atomic>
-#include <boost/iterator_adaptors.hpp>
 #include <boost/iterator/indirect_iterator.hpp>
 #include "AthenaKernel/CLASS_DEF.h"
 #include "AthenaKernel/ClassName.h"
