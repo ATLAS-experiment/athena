@@ -42,8 +42,9 @@ add_definitions(-DBITWISE_SIMULATION) # For JET1(WTAConeJet), need extra definit
 
 # Install files from the package:
 atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
-atlas_install_runtime(share/*.txt share/*.json )
-atlas_install_data( data/* share/*.xml )
+atlas_install_data( data/* )
+atlas_install_data( share/*.xml )
+
 atlas_install_joboptions( share/plugin_*.py )
 
 atlas_add_test(testEgamma1BDT_tv
@@ -56,16 +57,9 @@ atlas_add_test(testEgamma1BDT_tv
    )
 
 
-atlas_add_test( testEfex
-   SCRIPT python/run_Egamma1_LArStrip_Fex.py --evtMax 3
-   PRIVATE_WORKING_DIRECTORY
-   POST_EXEC_SCRIPT noerror.sh )
-
-
-atlas_add_test(test_eEmMult
-   SCRIPT python/run_hypo_mult_ctest.py --evtMax 1
-   PRIVATE_WORKING_DIRECTORY
-   POST_EXEC_SCRIPT noerror.sh )
-
-
+atlas_add_test( AllChains
+        SCRIPT "l1calo-ath-mon --postInclude GlobalSimulation/plugin_local_cfg.py   --filesInput RAW_RUN3_DATA24 --evtMax 10 IOVDb.GlobalTag='CONDBR2-BLKPA-2024-05' -- Trigger.L1.doeFex=True -- Trigger.L1.dogFex=True"
+        PROPERTIES TIMEOUT 600
+        PRIVATE_WORKING_DIRECTORY
+        POST_EXEC_SCRIPT noerror.sh )
 
