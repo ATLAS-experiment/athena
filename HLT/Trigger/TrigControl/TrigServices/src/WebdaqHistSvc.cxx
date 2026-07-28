@@ -4,14 +4,10 @@
 
 #include "WebdaqHistSvc.h"
 
-#include "GaudiKernel/ISvcLocator.h"
 #include "GaudiKernel/IIncidentSvc.h"
 #include "AthenaInterprocess/Incidents.h"
-
-#include "CxxUtils/checker_macros.h"
 #include "AthenaMonitoringKernel/OHLockedHist.h"
 
-#include "hltinterface/IInfoRegister.h"
 #include "webdaq/webdaq-root.hpp"
 #include "webdaq/webdaq.hpp"
 
@@ -25,14 +21,9 @@
 #include "TTree.h"
 #include <TBufferJSON.h>
 
-#include <boost/date_time/posix_time/posix_time_types.hpp>
 #include <boost/date_time/posix_time/posix_time.hpp>
 #include <boost/date_time/gregorian/gregorian_types.hpp>
 
-#include <cstdlib> 
-
-WebdaqHistSvc::WebdaqHistSvc(const std::string& name, ISvcLocator* svc) : base_class(name, svc)
-{}
 
 /**************************************************************************************/
 
@@ -56,12 +47,15 @@ StatusCode WebdaqHistSvc::initialize ATLAS_NOT_THREAD_SAFE()
   m_PublicationIncludeNameRegex = boost::regex(m_PublicationIncludeName.value());
   m_fastPublicationIncludeNameRegex = boost::regex(m_fastPublicationIncludeName.value());
 
-  // Retrieve and set OH mutex
+  // Create and set OH mutex
   ATH_MSG_INFO("Enabling use of OH histogram mutex");
   static std::mutex mutex; 
   oh_lock_histogram_mutex::set_histogram_mutex(mutex);
+
+  // Application name
   ATH_CHECK( m_jobOptionsSvc.retrieve() );
-  
+  m_appName = m_jobOptionsSvc->get("DataFlowConfig.DF_ApplicationName");
+
   //Retireve enviroment variables
   const char* tdaq_partition_cstr = std::getenv("TDAQ_PARTITION");
   if (tdaq_partition_cstr != nullptr) {
@@ -86,9 +80,12 @@ StatusCode WebdaqHistSvc::initialize ATLAS_NOT_THREAD_SAFE()
     m_tdaqOHServerName = m_OHServerName.value();
   } 
   ATH_MSG_INFO("TDAQ_OH_SERVER value: " << m_tdaqOHServerName);
+
+  // Incident handler
   ServiceHandle<IIncidentSvc> incSvc("IncidentSvc", name());
   ATH_CHECK( incSvc.retrieve() );
   incSvc->addListener(this, AthenaInterprocess::UpdateAfterFork::type());
+
   return StatusCode::SUCCESS;
 }
 
@@ -97,9 +94,13 @@ StatusCode WebdaqHistSvc::initialize ATLAS_NOT_THREAD_SAFE()
 void WebdaqHistSvc::handle(const Incident& incident)
 {
   if (incident.type() == AthenaInterprocess::UpdateAfterFork::type()) {
-    ATH_MSG_INFO("Going to initialize the monitoring Thread"); 
-    m_thread = std::thread( &WebdaqHistSvc::monitoringTask, this, m_numSlots, m_intervalSeconds, std::ref(m_histoMapUpdated), m_PublicationIncludeNameRegex);
-    m_threadFast = std::thread( &WebdaqHistSvc::monitoringTask, this, m_numSlotsFast, m_intervalSecondsFast, std::ref(m_histoMapUpdatedFast), m_fastPublicationIncludeNameRegex);
+    ATH_MSG_INFO("Going to initialize the monitoring thread");
+
+    m_thread = std::thread( &WebdaqHistSvc::monitoringTask, this, m_appName, m_numSlots, m_intervalSeconds, std::ref(m_histoMapUpdated), m_PublicationIncludeNameRegex);
+
+    // OH doesn't allow multiple providers for a given server.
+    // Need to modify the path for one of the threads to avoid the issue.
+    m_threadFast = std::thread( &WebdaqHistSvc::monitoringTask, this, m_appName+"_fast", m_numSlotsFast, m_intervalSecondsFast, std::ref(m_histoMapUpdatedFast), m_fastPublicationIncludeNameRegex);
   }
 }
 
@@ -347,7 +348,7 @@ std::vector<std::string> WebdaqHistSvc::getHists() const
 
 /**************************************************************************************/
 
-std::set<std::string> WebdaqHistSvc::getSet(boost::regex nameSelect) const
+std::set<std::string> WebdaqHistSvc::getSet(const boost::regex& nameSelect) const
 {
   std::vector<std::string> l;
   l.reserve(m_hists.size());
@@ -357,42 +358,52 @@ std::set<std::string> WebdaqHistSvc::getSet(boost::regex nameSelect) const
     }
   }
   ATH_MSG_DEBUG("Number of histograms matched: " << l.size());
-  std::set<std::string> HistoSet(l.begin(), l.end());
-  return HistoSet;
+  return {l.begin(), l.end()};
 }
 
 /**************************************************************************************/
+void WebdaqHistSvc::publish(const std::string& appName, const std::string& histID) const {
 
-void WebdaqHistSvc::publishAll(boost::regex nameSelect)
+  const std::string path = appName + '.' + histID;
+
+  ATH_MSG_DEBUG("Publishing to " << m_partition << " Histogram " << path << " to the OH server " << m_tdaqOHServerName);
+  tbb::concurrent_hash_map<std::string, THistID>::const_accessor accessor;
+  if (!m_hists.find(accessor, histID)) {
+    ATH_MSG_WARNING("Histogram with name " << histID << " not found in histogram map (probably deregistered).");
+    return;
+  }
+
+  ATH_MSG_DEBUG("Histogram found in map, going to lock mutex and then publish it");
+  //Here we clone the histogram to avoid locking the OH mutex during the whole publication
+  std::unique_ptr<TObject> obj;
+  {
+    //Locking the OH mutex before touching the Histogram
+    oh_scoped_lock_histogram lock;
+    //accessor is implicitly valid
+    //coverity[FORWARD_NULL]
+    obj.reset(accessor->second.obj->Clone());
+  }
+  if (obj == nullptr) {
+    ATH_MSG_ERROR("Failed to clone histogram " << histID);
+    return;
+  }
+  if (!webdaq::oh::put(m_partition, m_tdaqOHServerName, path, obj.get())) {
+    ATH_MSG_ERROR("Histogram publishing for " << histID << " failed");
+  }
+}
+
+
+/**************************************************************************************/
+
+
+void WebdaqHistSvc::publishAll(const boost::regex& nameSelect) const
 {
-  std::string appName = m_jobOptionsSvc->get("DataFlowConfig.DF_ApplicationName");
   std::set<std::string> HistoSet = getSet(nameSelect);
   ATH_MSG_DEBUG("Final publication of " << HistoSet.size()
-                << " histograms for provider " << appName);
+                << " histograms for provider " << m_appName);
 
   for (const std::string& id : HistoSet) {
-    std::string path = appName + '.' + id;
-    tbb::concurrent_hash_map<std::string, THistID>::const_accessor accessor;
-    if (!m_hists.find(accessor, id)) {
-      ATH_MSG_WARNING("Histogram with name " << id
-                      << " not found in histogram map (probably deregistered).");
-      continue;
-    }
-    TObject* obj = nullptr;
-    {
-      // Lock the OH mutex only for the clone, as monitoringTask does
-      oh_scoped_lock_histogram lock;
-      //coverity[FORWARD_NULL]
-      obj = accessor->second.obj->Clone();
-    }
-    if (obj == nullptr) {
-      ATH_MSG_ERROR("Failed to clone histogram " << id);
-      continue;
-    }
-    if (!webdaq::oh::put(m_partition, m_tdaqOHServerName, path, obj)) {
-      ATH_MSG_ERROR("Histogram publishing failed !");
-    }
-    delete obj;
+    publish(m_appName, id);
   }
 }
 
@@ -556,36 +567,33 @@ StatusCode WebdaqHistSvc::getShared(const std::string& id, LockedHandle<TH3>& lh
  * It divides the histograms into batches and publishes them in slots.
  * The method also handles synchronization to ensure that the publication happens at regular intervals.
  *
+ * @param appName Provider name for publication
  * @param numSlots Number of slots to divide the histograms into for publication.
  * @param intervalSeconds Interval in seconds between each publication cycle.
  * @param histoMapUpdated Atomic flag indicating if the histogram map has been updated.
  * @param nameSelect Regular expression to select histograms for publication.
  */
-void WebdaqHistSvc::monitoringTask(int numSlots, int intervalSeconds, std::atomic<bool>& histoMapUpdated, boost::regex nameSelect)
+void WebdaqHistSvc::monitoringTask(const std::string& appName, unsigned int numSlots, unsigned int intervalSeconds, std::atomic<bool>& histoMapUpdated, const boost::regex& nameSelect) const
 {
   ATH_MSG_INFO("Started monitoring task for partition: " << m_partition << "and regex: " << nameSelect.str());
-  std::string appName = m_jobOptionsSvc->get("DataFlowConfig.DF_ApplicationName");
-  // OH doesn't allow multiple providers for a given server
-  // Need to modify the path for one of the threads to avoid the issue
-  if (nameSelect != boost::regex(".*"))
-    appName = appName + "_fast";
-  
+
   // Set the publication period
-  boost::posix_time::time_duration interval{boost::posix_time::seconds(intervalSeconds)};
+  const boost::posix_time::time_duration interval{boost::posix_time::seconds(intervalSeconds)};
   ATH_MSG_DEBUG("Interval set to " << interval.total_seconds() << " seconds");
-  int interval_ms = interval.total_milliseconds();
-  if(numSlots == 0) numSlots = 1;
-  boost::posix_time::ptime epoch(boost::gregorian::date(2024,1,1)); 
+  const int interval_ms = interval.total_milliseconds();
+
+  if (numSlots == 0) numSlots = 1;
   // Sleep duration between slots (plus an extra slot for allowing a last sleep cycle)
-  boost::posix_time::time_duration slotSleepDuration = interval / (numSlots + 1);
+  const boost::posix_time::time_duration slotSleepDuration = interval / (numSlots + 1);
 
   // Create the Set of the histograms keys to order the histograms publication and reset the histoMapUpdated flag 
   std::set<std::string> HistoSet = getSet(nameSelect);
   histoMapUpdated = false;
 
   // Sync the publication to the period
+  const boost::posix_time::ptime epoch(boost::gregorian::date(2024,1,1));
   syncPublish(interval_ms, epoch);
-  ATH_MSG_DEBUG("Monitoring task synched");
+  ATH_MSG_DEBUG("Monitoring task synced");
 
   // Publication loop
   while (!m_stopFlag) 
@@ -597,21 +605,20 @@ void WebdaqHistSvc::monitoringTask(int numSlots, int intervalSeconds, std::atomi
       HistoSet = getSet(nameSelect);
       histoMapUpdated = false;
     }
-    size_t totalHists = HistoSet.size();
-    ATH_MSG_DEBUG("Going to publish " << totalHists << " histograms");
 
     // Divide the histograms in batches
-    size_t batchSize = (totalHists + numSlots - 1) / numSlots; // Ceiling division
-    ATH_MSG_DEBUG("Num of slots:" << numSlots << ", Interval_ms " << interval_ms << " milliseconds, Batch size: " << batchSize);
+    const size_t totalHists = HistoSet.size();
+    const size_t batchSize = (totalHists + numSlots - 1) / numSlots; // Ceiling division
+    ATH_MSG_DEBUG("Num of hists: " << totalHists << ", Num of slots:" << numSlots <<
+                  ", Interval_ms " << interval_ms << " milliseconds, Batch size: " << batchSize);
 
-    boost::posix_time::ptime start_time = boost::posix_time::microsec_clock::universal_time();
+    const boost::posix_time::ptime start_time = boost::posix_time::microsec_clock::universal_time();
     int counter = 0;
     int BatchCounter = 0;
     auto it = HistoSet.begin();
     while(it != HistoSet.end())
     {
-      boost::posix_time::ptime slot_start_time = boost::posix_time::microsec_clock::universal_time();
-      //Batch publication
+      const boost::posix_time::ptime slot_start_time = boost::posix_time::microsec_clock::universal_time();
       ATH_MSG_DEBUG("Batch publication number " << BatchCounter << "  starting.");
       for(size_t j = 0; j < batchSize; ++j)
       {
@@ -619,41 +626,9 @@ void WebdaqHistSvc::monitoringTask(int numSlots, int intervalSeconds, std::atomi
         {
           break;
         }
-        const std::string& id = *it;
-        std::string path = appName + '.' + id;
-        ATH_MSG_DEBUG("Publishing to " << m_partition << " Histogram " << path << " to the OH server " << m_tdaqOHServerName);
-        tbb::concurrent_hash_map<std::string, THistID>::const_accessor accessor;
-        if (!m_hists.find(accessor, id)) {
-          ATH_MSG_WARNING("Histogram with name " << id << " not found in histogram map (probably deregistered).");
-          it++;
-          continue;
-        }
-        else
-        {
-          ATH_MSG_DEBUG("Histogram found in map, going to lock mutex and then publish it");
-          //Here we clone the histogram to avoid locking the OH mutex during the whole publication 
-          TObject* obj = nullptr;
-          {
-            //Locking the OH mutex before touching the Histogram
-            oh_scoped_lock_histogram lock;
-            //accessor is implicitly valid
-            //coverity[FORWARD_NULL]
-            obj = accessor->second.obj->Clone(); 
-          }
-          if (obj == nullptr) {
-            ATH_MSG_ERROR("Failed to clone histogram " << id);
-            it++;
-            continue;
-          }
-          if (!webdaq::oh::put(m_partition, m_tdaqOHServerName, path, obj)) {
-            ATH_MSG_ERROR("Histogram publishing failed !");
-          }
-          //Delete the cloned histogram. This was creating a memory leak
-          ATH_MSG_DEBUG("Deleting cloned histogram");
-          delete obj;
-        }
-        it++;
-        counter++;
+        publish(appName, *it);
+        ++it;
+        ++counter;
       } 
       ATH_MSG_DEBUG("Batch publication completed, " << counter << " histograms published");
       // Sleep for slotSleepDuration - slot publication time, unless it's the last slot
@@ -665,25 +640,24 @@ void WebdaqHistSvc::monitoringTask(int numSlots, int intervalSeconds, std::atomi
           conditionedSleep(std::chrono::milliseconds(slot_sleep_time), m_stopFlag);
         }
       }
-      BatchCounter++;
+      ++BatchCounter;
     }
 
     //check if we exceeded the publication period
-    boost::posix_time::ptime end_time = boost::posix_time::microsec_clock::universal_time();
+    const boost::posix_time::ptime end_time = boost::posix_time::microsec_clock::universal_time();
     if (boost::posix_time::time_duration(end_time-start_time) > interval) {
       ATH_MSG_WARNING("Publication deadline missed, cycle exceeded the interval.. Total publication time " 
-      <<  boost::posix_time::to_simple_string(end_time-start_time));
+                      <<  boost::posix_time::to_simple_string(end_time-start_time));
     }
-    ATH_MSG_DEBUG("Completed the publication of " << counter << " histograms. Publication time: " << boost::posix_time::to_simple_string(end_time-start_time));
+    ATH_MSG_DEBUG("Completed the publication of " << counter << " histograms. "
+                  "Publication time: " << boost::posix_time::to_simple_string(end_time-start_time));
  
     //sleep till the next cycle
-    boost::posix_time::ptime now = boost::posix_time::microsec_clock::universal_time(); 
-    int nowMs = (now-epoch).total_milliseconds();
-    boost::posix_time::time_duration next_cycle(boost::posix_time::milliseconds(interval_ms - (nowMs % interval_ms)));
-    ATH_MSG_DEBUG("epoch " << epoch);
-    ATH_MSG_DEBUG("interval_ms" << interval_ms);
-    ATH_MSG_DEBUG("now_ms " << nowMs);
-    ATH_MSG_DEBUG("Sleeping for " << next_cycle.total_milliseconds() << " milliseconds till the next cycle");
+    const boost::posix_time::ptime now = boost::posix_time::microsec_clock::universal_time();
+    const int nowMs = (now-epoch).total_milliseconds();
+    const boost::posix_time::time_duration next_cycle(boost::posix_time::milliseconds(interval_ms - (nowMs % interval_ms)));
+    ATH_MSG_DEBUG("epoch " << epoch <<", interval_ms" << interval_ms << ", now_ms " << nowMs
+                  << "sleeping for " << next_cycle.total_milliseconds() << " milliseconds till the next cycle");
     conditionedSleep(std::chrono::milliseconds(next_cycle.total_milliseconds()), m_stopFlag);
   }
   ATH_MSG_INFO("Monitoring task stopped");
@@ -691,31 +665,31 @@ void WebdaqHistSvc::monitoringTask(int numSlots, int intervalSeconds, std::atomi
 
 /**************************************************************************************/
 
-void WebdaqHistSvc::syncPublish(long int interval_ms, boost::posix_time::ptime epoch)
+void WebdaqHistSvc::syncPublish(long int interval_ms, const boost::posix_time::ptime& epoch) const
 {
   //Sync the publication to a multple of the interval
   //Code taken from TDAQ monsvc https://gitlab.cern.ch/atlas-tdaq-software/monsvc/-/blob/master/src/PeriodicScheduler.cxx?ref_type=heads#L163
-  boost::posix_time::ptime now = boost::posix_time::microsec_clock::universal_time();
-  int now_ms = (now-epoch).total_milliseconds();
+  const boost::posix_time::ptime now = boost::posix_time::microsec_clock::universal_time();
+  const int now_ms = (now-epoch).total_milliseconds();
   //If now_ms % interval_ms == 0 we skip a cycle. Too bad.
-  boost::posix_time::time_duration sync(boost::posix_time::milliseconds(interval_ms - (now_ms % interval_ms)));
+  const boost::posix_time::time_duration sync(boost::posix_time::milliseconds(interval_ms - (now_ms % interval_ms)));
   //Do not sync if we are below 50 ms
   if (sync.total_milliseconds() > 50){
     std::this_thread::sleep_for(std::chrono::milliseconds(sync.total_milliseconds()));
   } 
 }
 
-void WebdaqHistSvc::conditionedSleep(std::chrono::milliseconds duration, const std::atomic<bool>& stopFlag) {
-  auto start = std::chrono::steady_clock::now();
+void WebdaqHistSvc::conditionedSleep(std::chrono::milliseconds duration, const std::atomic<bool>& stopFlag) const {
+  const auto start = std::chrono::steady_clock::now();
   while (true) {
     if (stopFlag.load()) {
       return;
     }
-    auto elapsed = std::chrono::steady_clock::now() - start;
+    const auto elapsed = std::chrono::steady_clock::now() - start;
     if (elapsed >= duration) {
       break;
     }
-    auto remaining = duration - std::chrono::duration_cast<std::chrono::milliseconds>(elapsed);
+    const auto remaining = duration - std::chrono::duration_cast<std::chrono::milliseconds>(elapsed);
     std::this_thread::sleep_for(std::min(std::chrono::milliseconds(500), remaining));
   }
 }
