@@ -269,6 +269,9 @@ namespace MuonValR4 {
             auto trkColl = std::make_shared<IParticleFourMomBranch>(m_tree, std::format("Acts{:}", trkName));
             trkColl->addVariable(std::make_unique<TrackChi2Branch>(*trkColl));
             trkColl->addVariable(std::make_unique<TrackFitIterBranch>(*trkColl));
+            trkColl->addVariable(std::make_unique<MaterialRecorderBranch>(*trkColl));
+            trkColl->addVariable(std::make_unique<EnergyLossBranch>(*trkColl));
+            
             trkColl->addVariable<float>("d0");
             trkColl->addVariable<float>("z0");
             for (const auto& summary : trackSummaries) {
