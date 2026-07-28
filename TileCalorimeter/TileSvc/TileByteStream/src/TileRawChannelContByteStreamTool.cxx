@@ -130,6 +130,7 @@ StatusCode TileRawChannelContByteStreamTool::finalize() {
 
 StatusCode TileRawChannelContByteStreamTool::convert(CONTAINER* rawChannelContainer, FullEventAssembler<TileHid2RESrcID> *fea) const
 {
+  const EventContext& ctx = Gaudi::Hive::currentContext();
   bool isTMDB = evtStore()->proxy(rawChannelContainer)->name() == "MuRcvRawChCnt";
 
   TileFragHash::TYPE contType = rawChannelContainer->get_type();
@@ -190,7 +191,7 @@ StatusCode TileRawChannelContByteStreamTool::convert(CONTAINER* rawChannelContai
       } else {
         if (oflCont) {
           if (quality > 15.0) quality = 15.0;
-          if (m_tileBadChanTool->getAdcStatus(drawerIdx, channel, adc).isBad()) quality += 16.;
+          if (m_tileBadChanTool->getAdcStatus(drawerIdx, channel, adc, ctx).isBad()) quality += 16.;
         }
         //amplitude = m_tileToolEmscale->channelCalib(drawerIdx, channel, adc, amplitude, inputUnit, outputUnit);
 
