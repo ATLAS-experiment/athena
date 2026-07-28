@@ -331,7 +331,7 @@ int ITkPixelCsvWaferIdAlg::phi_module(const std::vector<std::string>& spchain, c
         }
         else{ //outer flat barrel
             int phi = std::stoi(phi_str) - 1 ;
-            phi = (mod[2] == 'T') ? 2*phi + 1 : 2*phi; //(TOCHECK)
+            phi = (mod[2] == 'T') ? 2*phi + 1 : 2*phi;
             return phi;
         }
     }
@@ -604,19 +604,24 @@ std::bitset<32> ITkPixelCsvWaferIdAlg::sourceID(const std::vector<std::string>& 
     bitcheck(subdet, 16, 23, "SourceID : SubDetectorID " );
 
     std::vector<std::string> flx_card_device = splitFLX_card_device(flx);
-    unsigned int hostIndex = flxHost((unsigned int) std::stoi(flx_card_device[0]));
-    std::bitset<32> flxCard = std::bitset<32>(hostIndex); 
-    flxCard <<= 8; //shift left by 8 bits
-    bitcheck(flxCard, 8, 15, "SourceID : FELIX host " );
+    auto hostIndex = flxHost((unsigned int) std::stoi(flx_card_device[0]));
+    std::bitset<32> flx_host = std::bitset<32>(hostIndex.first); 
+    flx_host <<= 8; //shift left by 8 bits
+    bitcheck(flx_host, 8, 15, "SourceID : FELIX host " );
 
+    std::bitset<32> flxCard = std::bitset<32>(hostIndex.second);
+    flxCard <<= 7; //shift left by 7 bits
+    bitcheck(flxCard, 7, 7, "SourceID : FELIX card " );
 
     std::bitset<32> flxDev = std::bitset<32>(std::stoi(flx_card_device[1]) - 1 );
-    flxDev <<= 7; //shift left by 7 bits
-    bitcheck(flxDev, 7, 7, "SourceID : card device " ); 
+    flxDev <<= 6; //shift left by 6 bits
+    bitcheck(flxDev, 6, 6, "SourceID : card device " ); 
+
     std::bitset<32> dma_b = std::bitset<32>(dma);
-    dma_b <<= 5; //shift left by 5 bits
-    bitcheck(dma_b, 5, 6, "SourceID : DMA buffer index " ); 
-    b = subdet | flxCard | flxDev | dma_b;
+    dma_b <<= 4; //shift left by 4 bits
+    bitcheck(dma_b, 4, 5, "SourceID : DMA buffer index " ); 
+
+    b = subdet | flx_host | flxCard | flxDev | dma_b;
     return b;
 }
 
@@ -809,20 +814,26 @@ void ITkPixelCsvWaferIdAlg::bitcheck(std::bitset<32> b, uint32_t lsb_lim, uint32
 }
 
 
-unsigned int ITkPixelCsvWaferIdAlg::flxHost(unsigned int card) const {
-    auto it = std::find_if(m_felix_rows.begin(), m_felix_rows.end(),
+std::pair <unsigned int, unsigned int> ITkPixelCsvWaferIdAlg::flxHost(unsigned int card) const {
+    auto it1 = std::find_if(m_felix_rows.begin(), m_felix_rows.end(),
     [card](const FelixCsvRow& p) {
-        return (p.card1 == card) || (p.card2 == card);
+        return (p.card1 == card);
     });
+    auto it2 = std::find_if(m_felix_rows.begin(), m_felix_rows.end(),
+    [card](const FelixCsvRow& p) {
+        return (p.card2 == card);
+    });
+    auto it = (it1 != m_felix_rows.end()) ? it1 : ( (it2 != m_felix_rows.end()) ? it2 : m_felix_rows.end());
+    unsigned int Ncard = (it1 != m_felix_rows.end()) ? 0 : ( (it2 != m_felix_rows.end()) ? 1 : 0 );
     if (it != m_felix_rows.end()) {
         std::size_t index = it - m_felix_rows.begin();   
         std::string s= m_felix_rows[index].host;
         //Ex: pc-tdq-ro-pix-is-a-15, need to return 15
         std::size_t pos = s.rfind('-');
-        return (pos == std::string::npos) ? 0 : std::stoi(s.substr(pos + 1));
+        return (pos == std::string::npos) ? std::pair <unsigned int, unsigned int>(0,0) : std::pair <unsigned int, unsigned int>(std::stoi(s.substr(pos + 1)), Ncard);
     }
     else{
-        ATH_MSG_WARNING("Couldn't find a host for card number " << card << ", returning 0");
-        return 0;
+        ATH_MSG_WARNING("Couldn't find a host for card number " << card << ", returning (0, 0)");
+        return std::pair <unsigned int, unsigned int>(0, 0);
     }
 }

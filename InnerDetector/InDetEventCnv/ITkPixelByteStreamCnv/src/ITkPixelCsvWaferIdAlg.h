@@ -64,7 +64,7 @@ private:
     static std::vector<std::string> parseSPChain(const std::string& spChain);
     const StatusCode sanityCheck(std::string s) const;
     void bitcheck(std::bitset<32> b, uint32_t lsb_lim, uint32_t msb_lim , const std::string& s = "") const;
-    unsigned int flxHost(unsigned int card) const ;
+    std::pair<unsigned int, unsigned int> flxHost(unsigned int card) const ;
 
 
     std::vector<int> DmaBuffer() const;
