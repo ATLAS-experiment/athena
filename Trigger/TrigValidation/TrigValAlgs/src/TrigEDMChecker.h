@@ -165,7 +165,7 @@ class TrigEDMChecker : public AthAnalysisAlgorithm  {
    StatusCode dumpStoreGate();
 
    bool m_doTDTCheck;
-   StatusCode dumpTDT();
+   StatusCode dumpTDT(const EventContext& ctx);
 
    bool m_doDumpxAODTrigMinBias;
    StatusCode dumpxAODTrigMinBias();
