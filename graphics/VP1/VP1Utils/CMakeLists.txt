@@ -7,7 +7,6 @@ atlas_subdir( VP1Utils )
 find_package( CLHEP ) # TODO: to be removed when fully migrated to Eigen-based GeoTrf
 find_package( Coin3D )
 find_package( Eigen )
-find_package( HepPDT )
 find_package( Qt5 COMPONENTS Core )
 find_package( GeoModel COMPONENTS GeoModelKernel )
 
@@ -20,13 +19,13 @@ atlas_add_library( VP1Utils VP1Utils/*.h src/*.cxx src/*.cpp
    PUBLIC_HEADERS VP1Utils
    INCLUDE_DIRS ${CLHEP_INCLUDE_DIRS}
    INCLUDE_DIRS ${GEOMODEL_INCLUDE_DIRS}
-   PRIVATE_INCLUDE_DIRS ${HEPPDT_INCLUDE_DIRS} ${COIN3D_INCLUDE_DIRS}
+   PRIVATE_INCLUDE_DIRS ${COIN3D_INCLUDE_DIRS}
    ${EIGEN_INCLUDE_DIRS}
    DEFINITIONS ${CLHEP_DEFINITIONS}
    LINK_LIBRARIES ${CLHEP_LIBRARIES} ${GEOMODEL_LIBRARIES} EventPrimitives
    GaudiKernel VP1Base StoreGateLib AthDSoCallBacks MuonIdHelpersLib
-   GeoPrimitives Qt5::Core
-   PRIVATE_LINK_LIBRARIES ${HEPPDT_LIBRARIES} ${COIN3D_LIBRARIES}
+   GeoPrimitives Qt5::Core GeneratorModulesLib TruthUtils
+   PRIVATE_LINK_LIBRARIES ${COIN3D_LIBRARIES}
    ${EIGEN_LIBRARIES} CaloIdentifier CaloTTDetDescr CxxUtils AtlasDetDescr
    GeoModelUtilities Identifier InDetIdentifier
    InDetReadoutGeometry PixelReadoutGeometryLib SCT_ReadoutGeometry TRT_ReadoutGeometry InDetRIO_OnTrack LArReadoutGeometry
@@ -61,12 +60,12 @@ file(GLOB HEADERS ${module_dir}/HitsSoNodeManager.h
 atlas_add_library( VP1Utils ${SOURCES} ${HEADERS}
    PUBLIC_HEADERS VP1Utils
    INCLUDE_DIRS ${CLHEP_INCLUDE_DIRS}
-   PRIVATE_INCLUDE_DIRS ${HEPPDT_INCLUDE_DIRS} ${COIN3D_INCLUDE_DIRS}
+   PRIVATE_INCLUDE_DIRS ${COIN3D_INCLUDE_DIRS}
    ${EIGEN_INCLUDE_DIRS}
    LINK_LIBRARIES ${CLHEP_LIBRARIES} EventPrimitives ${GEOMODEL_LIBRARIES}
-   VP1Base
+   VP1Base GeneratorModulesLib TruthUtils
    GeoPrimitives Qt5::Core
-   PRIVATE_LINK_LIBRARIES ${HEPPDT_LIBRARIES} ${COIN3D_LIBRARIES}
+   PRIVATE_LINK_LIBRARIES ${COIN3D_LIBRARIES}
    ${EIGEN_LIBRARIES} CxxUtils
    GeoModelUtilities GeoSpecialShapes
    VP1HEPVis )
