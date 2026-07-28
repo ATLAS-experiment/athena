@@ -5,7 +5,7 @@
 #include <MuonEfficiencyCorrections/EfficiencyScaleFactor.h>
 #include <MuonEfficiencyCorrections/MuonEfficiencyScaleFactors.h>
 #include <MuonEfficiencyCorrections/EffiCollection.h>
-#include <TRandom2.h>
+#include <TRandom3.h>
 #include <TClass.h>
 namespace CP {
     const unsigned int EfficiencyScaleFactor::m_warningLimit = 10;
@@ -455,7 +455,7 @@ namespace CP {
     }
     void EfficiencyScaleFactor::GenerateReplicasFromHist(HistHandler* h, int nrep, int seed, EfficiencyScaleFactor::SFReplicaVec &replicas) {
         if (!h) return;
-        TRandom2 Rndm(seed);
+        TRandom3 Rndm(seed);
         replicas.clear();
         replicas.reserve(nrep);
         int nBins = h->nBins();
