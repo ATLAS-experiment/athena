@@ -75,7 +75,7 @@ public:
   typedef IEvtSelector::Context   EvtContext;
 
 protected:
-  typedef ServiceHandle<IIncidentSvc_t> IIncidentSvc_t;
+  typedef ServiceHandle<IIncidentSvc> IIncidentSvc_t;
   /// Reference to the incident service
   IIncidentSvc_t     m_incidentSvc;
 
