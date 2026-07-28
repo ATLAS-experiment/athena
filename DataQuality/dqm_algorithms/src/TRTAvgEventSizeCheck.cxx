@@ -19,6 +19,7 @@
 
 #include <limits>
 #include <cmath>
+#include <mutex>
 
 namespace /* anonymous */ {
 
@@ -35,7 +36,7 @@ private:
 
 private:
     static const char *m_name;
-    boost::mutex m_mutex; // not really required here because m_value is of primitive type float
+    std::mutex m_mutex; // not really required here because m_value is of primitive type float
     float m_value;
 };
 
@@ -49,7 +50,7 @@ TRTBeamConditions &TRTBeamConditions::instance()
 
 float TRTBeamConditions::get()
 {
-    boost::mutex::scoped_lock lock(m_mutex);
+    std::lock_guard<std::mutex> lock(m_mutex);
     return m_value;
 }
 
@@ -72,7 +73,7 @@ void TRTBeamConditions::callback(ISCallbackInfo *info)
         const long long now       = OWLTime().total_mksec_utc();
         const long long maxAge    = 5 * 60 * 1000000; // five minutes
 
-        boost::mutex::scoped_lock lock(m_mutex);
+        std::lock_guard<std::mutex> lock(m_mutex);
         if (now - timestamp < maxAge) {
             m_value = hitfraction.getValue();
         } else {

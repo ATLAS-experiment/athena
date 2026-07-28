@@ -13,7 +13,6 @@
 #include <dqm_core/Parameter.h>
 #include <dqm_core/SummaryMaker.h>
 #include <dqm_core/Result.h>
-#include <boost/thread/mutex.hpp>
 
 namespace dqm_algorithms
 {
