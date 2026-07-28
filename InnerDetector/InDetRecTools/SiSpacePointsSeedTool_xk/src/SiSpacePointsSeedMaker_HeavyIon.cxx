@@ -549,8 +549,11 @@ MsgStream& InDet::SiSpacePointsSeedMaker_HeavyIon::dumpConditions(EventData& dat
   out<<"| max radius second SP(2) | "
      <<std::setw(12)<<std::setprecision(5)<<m_r2maxv
      <<"                              |"<<endmsg;
-  out<<"| min space points dR     | "
-     <<std::setw(12)<<std::setprecision(5)<<m_drmin
+  out<<"| min space points dR (b)     | "
+     <<std::setw(12)<<std::setprecision(5)<<m_drmin_b
+     <<"                              |"<<endmsg;
+  out<<"| min space points dR (t)     | "
+     <<std::setw(12)<<std::setprecision(5)<<m_drmin_t
      <<"                              |"<<endmsg;
   out<<"| max space points dR     | "
      <<std::setw(12)<<std::setprecision(5)<<m_drmax
@@ -1139,7 +1142,7 @@ void InDet::SiSpacePointsSeedMaker_HeavyIon::production3Sp
 	
 	float dR = R-Rb;
 	if (dR > m_drmax) {rb[i]=r; continue;}
-	if (dR < m_drmin) break;
+	if (dR < m_drmin_b) break;
 	if ((*r)->sur()==sur0) continue;
 
 	float Tz = (Z-(*r)->z())/dR;
@@ -1169,8 +1172,7 @@ void InDet::SiSpacePointsSeedMaker_HeavyIon::production3Sp
 	  continue;
 	}
 	float dR = Rt-R;
-	//        if (dR<m_drmin) {
-	if (dR<28.) {
+	if (dR<m_drmin_t) {
           rt[i]=r;
           continue;
         }
@@ -1343,7 +1345,7 @@ void InDet::SiSpacePointsSeedMaker_HeavyIon::production3SpNoVertex
           rb[i]=r;
           continue;
         }
-	if (dR < m_drmin) break;
+	if (dR < m_drmin_b) break;
 	if ((*r)->sur()==sur0) continue;
 	if ( !pix && !(*r)->spacepoint->clusterList().second) continue;
 	float Tz = (Z-(*r)->z())/dR;
@@ -1372,7 +1374,7 @@ void InDet::SiSpacePointsSeedMaker_HeavyIon::production3SpNoVertex
           continue;
         }
 	float dR = Rt-R;
-        if (dR<m_drmin) {
+        if (dR<m_drmin_t) {
           rt[i]=r;
           continue;
         }
