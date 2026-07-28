@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // Tile includes
@@ -132,16 +132,6 @@ TileBadChanTool::getAdcStatus(const HWIdentifier& adc_id, const EventContext& ct
 //
 //____________________________________________________________________
 const TileBchStatus&
-TileBadChanTool::getAdcStatus(const HWIdentifier& adc_id) const {
-
-  const EventContext& ctx{Gaudi::Hive::currentContext()};
-  return getAdcStatus(adc_id, ctx);
-
-}
-
-//
-//____________________________________________________________________
-const TileBchStatus&
 TileBadChanTool::getAdcStatus(IdentifierHash hash_id, unsigned int adc) const {
 
   if (hash_id != TileHWID::NOT_VALID_HASH) {
@@ -184,32 +174,12 @@ TileBadChanTool::getChannelStatus(const HWIdentifier& channel_id, const EventCon
 //
 //____________________________________________________________________
 const TileBchStatus&
-TileBadChanTool::getChannelStatus(const HWIdentifier& channel_id) const {
-
-  const EventContext& ctx{Gaudi::Hive::currentContext()};
-  return getChannelStatus(channel_id, ctx);
-
-}
-
-//
-//____________________________________________________________________
-const TileBchStatus&
 TileBadChanTool::getChannelStatus(unsigned int drawerIdx, unsigned int channel, const EventContext& ctx) const {
 
   HWIdentifier channel_id = m_tileHWID->channel_id(m_roses[drawerIdx], m_drawers[drawerIdx], channel);
 
   SG::ReadCondHandle<TileBadChannels> badChannels(m_badChannelsKey, ctx);
   return badChannels->getChannelStatus(channel_id);
-
-}
-
-//
-//____________________________________________________________________
-const TileBchStatus&
-TileBadChanTool::getChannelStatus(unsigned int drawerIdx, unsigned int channel) const {
-
-  const EventContext& ctx{Gaudi::Hive::currentContext()};
-  return getChannelStatus(drawerIdx, channel, ctx);
 
 }
 
@@ -227,15 +197,6 @@ TileBadChanTool::getAdcStatus(unsigned int drawerIdx, unsigned int channel, unsi
 
 //
 //____________________________________________________________________
-const TileBchStatus&
-TileBadChanTool::getAdcStatus(unsigned int drawerIdx, unsigned int channel, unsigned int adc) const {
-
-  const EventContext& ctx{Gaudi::Hive::currentContext()};
-  return getAdcStatus(drawerIdx, channel, adc, ctx);
-
-}
-
-
 uint32_t TileBadChanTool::encodeStatus(const TileBchStatus& status) const {
   return TileBadChannels::encodeStatus(status);
 }
@@ -253,14 +214,6 @@ const std::vector<float>& TileBadChanTool::getTripsProbabilities(unsigned int ro
   return m_defaultTripsProbs;
 }
 
-const std::vector<float>& TileBadChanTool::getTripsProbabilities(unsigned int ros) const {
-
-  const EventContext& ctx{Gaudi::Hive::currentContext()};
-  return getTripsProbabilities(ros, ctx);
-
-}
-
-
 bool TileBadChanTool::isDrawerMasked(unsigned int frag_id, const EventContext& ctx) const {
 
   SG::ReadCondHandle<TileBadChannels> badChannels(m_badChannelsKey, ctx);
@@ -269,11 +222,4 @@ bool TileBadChanTool::isDrawerMasked(unsigned int frag_id, const EventContext& c
   return std::binary_search (maskedDrawers.begin(),
                              maskedDrawers.end(),
                              frag_id);
-}
-
-bool TileBadChanTool::isDrawerMasked(unsigned int frag_id) const {
-
-  const EventContext& ctx{Gaudi::Hive::currentContext()};
-  return isDrawerMasked(frag_id, ctx);
-
 }

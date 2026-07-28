@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 //  ***************************************************************************
 //  *   Author: John Morris (john.morris@cern.ch)                             *
@@ -804,6 +804,7 @@ namespace LVL1 {
     // Half gain counts as 0.5
     // No Gain counts as 1.0
 
+    const EventContext& ctx = Gaudi::Hive::currentContext();
 
     // Cast the CaloCell as a TileCell
     const TileCell *tileCell = dynamic_cast<const TileCell*>(cell);
@@ -823,7 +824,7 @@ namespace LVL1 {
     // PMT 1
     gain1 = tileCell->gain1();
     HWIdentifier adc_id1 = m_tileHWID->adc_id(hash1,(gain1<0)?1:gain1);
-    const TileBchStatus badChan1 = m_tileBadChanTool->getAdcStatus(adc_id1);
+    const TileBchStatus badChan1 = m_tileBadChanTool->getAdcStatus(adc_id1, ctx);
     adc1_noGainL1 = badChan1.isNoGainL1();
     adc1_halfGainL1 = badChan1.isHalfGainL1();
 
@@ -833,7 +834,7 @@ namespace LVL1 {
       pmt2Valid = true;
       gain2 = tileCell->gain2();
       HWIdentifier adc_id2 = m_tileHWID->adc_id(hash2,(gain2<0)?1:gain2);
-      const TileBchStatus badChan2 = m_tileBadChanTool->getAdcStatus(adc_id2);
+      const TileBchStatus badChan2 = m_tileBadChanTool->getAdcStatus(adc_id2, ctx);
       adc2_noGainL1 = badChan2.isNoGainL1();
       adc2_halfGainL1 = badChan2.isHalfGainL1();
     }
