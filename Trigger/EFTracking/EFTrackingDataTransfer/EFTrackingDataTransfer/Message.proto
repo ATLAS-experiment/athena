@@ -1,14 +1,20 @@
 syntax = "proto3";
 
+message EventMeta {
+  string key = 1;
+  string file_guid = 2;
+  sint64 event_offset = 3;
+}
 
 message EventInfoMessage {
-   uint32  runNumber         = 1;
-   uint64  eventNumber       = 2;
-   uint32  lumiBlock         = 3;
-   uint32  timeStamp         = 4;
-   uint32  timeStampNSOffset = 5;
-   uint32  bcid              = 6;
-   uint32  extendedLevel1ID  = 7;
+  uint32    runNumber         = 1;
+  uint64    eventNumber       = 2;
+  uint32    lumiBlock         = 3;
+  uint32    timeStamp         = 4;
+  uint32    timeStampNSOffset = 5;
+  uint32    bcid              = 6;
+  uint32    extendedLevel1ID  = 7;
+  EventMeta meta              = 8;
 }
 
 // protobuf maps cannot directly contain repeated fields,
@@ -30,7 +36,6 @@ message FloatVector {
 message DoubleVector {
   repeated double values = 1;
 }
-
 
 message OffloadMessage {
   string identifier = 1;

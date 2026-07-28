@@ -7,11 +7,13 @@
 #include <xAODEventInfo/EventAuxInfo.h>
 #include <xAODEventInfo/EventInfo.h>
 
+#include "ByteStreamCnvSvcBase/ByteStreamAddress.h"
 #include "EventInfo/EventInfo.h"
 #include "EventInfo/EventID.h"
 #include "EventInfo/EventType.h"
 
 #include "GaudiKernel/EventIDBase.h"
+#include "PersistentDataModel/DataHeader.h"
 
 EventInfoPackagingTool::EventInfoPackagingTool(const std::string& type,
                                                const std::string& name,
@@ -30,6 +32,13 @@ StatusCode EventInfoPackagingTool::pack(OffloadMessage& msg,
   ei->set_timestampnsoffset(context.eventID().time_stamp_ns_offset());
   ei->set_bcid(context.eventID().bunch_crossing_id());
 
+  const DataHeader* dataHeader = nullptr;
+  ATH_CHECK(evtStore()->retrieve(dataHeader, "ByteStreamDataHeader"));
+
+  ei->mutable_meta()->set_key("StreamRAW");
+  ei->mutable_meta()->set_file_guid(dataHeader->elements().at(0).getToken()->dbID().toString());
+  ei->mutable_meta()->set_event_offset(dataHeader->elements().at(0).getToken()->oid().second);
+
   return StatusCode::SUCCESS;
 }
 
@@ -43,6 +52,7 @@ StatusCode EventInfoPackagingTool::unpack(const OffloadMessage& msg,
   context.setEventID(eventId);
   context.setValid(true);
   const EventIDBase& restoredEventId = context.eventID();
+
   {
     auto outputEvent = std::make_unique<xAOD::EventInfo>();
     auto outputEventAux = std::make_unique<xAOD::EventAuxInfo>();
@@ -57,6 +67,7 @@ StatusCode EventInfoPackagingTool::unpack(const OffloadMessage& msg,
     ATH_CHECK(evtStore()->record(std::move(outputEvent), "EventInfo"));
     ATH_CHECK(evtStore()->record(std::move(outputEventAux), "EventInfoAux."));
   }
+
   {
     // produce as well the legacy EventInfo, should not be used anymore but it still is
     auto eid = std::make_unique<EventID>(
@@ -69,5 +80,62 @@ StatusCode EventInfoPackagingTool::unpack(const OffloadMessage& msg,
                                           std::make_unique<EventType>());
     ATH_CHECK(evtStore()->record(std::move(ei), "EventInfo"));
   }
+
+  {
+    // This is exactly what ByteStreamEventStorageInputSvc::generateDataHeader
+    // is doing, but we use correct file GUID and event offsets
+    auto makeBSProvenance = [&mei]() -> std::unique_ptr<DataHeaderElement> {
+      Token token;
+      token.setDb(mei.meta().key());
+      token.setTechnology(0x00001000);
+      token.setOid(Token::OID_t(0LL, mei.meta().event_offset()));
+
+      return std::make_unique<DataHeaderElement>(
+          ClassID_traits<DataHeader>::ID(), mei.meta().key(), std::move(token));
+    };
+
+    // Created data header element with BS provenance information
+    std::unique_ptr<DataHeaderElement> dataHeaderElement = makeBSProvenance();
+    // Create data header itself
+    std::unique_ptr<DataHeader> dataHeader = std::make_unique<DataHeader>();
+    // Declare header primary
+    dataHeader->setStatus(DataHeader::Input);
+    // Set processTag
+    dataHeader->setProcessTag(dataHeaderElement->getKey());
+    // add the data header element self reference to the object vector
+    dataHeader->insert(*std::move(dataHeaderElement));
+
+    // Now add ref to xAOD::EventInfo
+    auto bsaddr = std::make_unique<ByteStreamAddress>(
+        ClassID_traits<xAOD::EventInfo>::ID(), "EventInfo", "");
+    bsaddr->setEventContext(context);
+
+    ATH_CHECK(evtStore()->recordAddress("EventInfo", std::move(bsaddr)));
+    const SG::DataProxy* ptmpx = evtStore()->transientProxy(
+        ClassID_traits<xAOD::EventInfo>::ID(), "EventInfo");
+    if (ptmpx != nullptr) {
+      DataHeaderElement element(ptmpx, 0, "EventInfo");
+      dataHeader->insert(element);
+    }
+
+    // Now add ref to xAOD::EventAuxInfo
+    bsaddr = std::make_unique<ByteStreamAddress>(
+        ClassID_traits<xAOD::EventAuxInfo>::ID(), "EventInfoAux.", "");
+    bsaddr->setEventContext(context);
+
+    ATH_CHECK(evtStore()->recordAddress("EventInfoAux.", std::move(bsaddr)));
+    const SG::DataProxy* ptmpaux = evtStore()->transientProxy(
+        ClassID_traits<xAOD::EventAuxInfo>::ID(), "EventInfoAux.");
+    if (ptmpaux != 0) {
+      DataHeaderElement element(ptmpaux, 0, "EventInfoAux.");
+      dataHeader->insert(element);
+    }
+
+    // Record new data header.Boolean flags will allow it's deletion in case
+    // of skipped events.
+    ATH_CHECK(evtStore()->record<DataHeader>(
+        dataHeader.release(), "ByteStreamDataHeader", true, false, true));
+  }
+
   return StatusCode::SUCCESS;
 }

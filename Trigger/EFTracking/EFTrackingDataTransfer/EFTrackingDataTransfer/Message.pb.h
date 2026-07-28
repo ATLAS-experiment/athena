@@ -58,6 +58,9 @@ extern DoubleVectorDefaultTypeInternal _DoubleVector_default_instance_;
 class EventInfoMessage;
 struct EventInfoMessageDefaultTypeInternal;
 extern EventInfoMessageDefaultTypeInternal _EventInfoMessage_default_instance_;
+class EventMeta;
+struct EventMetaDefaultTypeInternal;
+extern EventMetaDefaultTypeInternal _EventMeta_default_instance_;
 class FloatVector;
 struct FloatVectorDefaultTypeInternal;
 extern FloatVectorDefaultTypeInternal _FloatVector_default_instance_;
@@ -148,7 +151,7 @@ class UIntVector final : public ::google::protobuf::Message
     return reinterpret_cast<const UIntVector*>(
         &_UIntVector_default_instance_);
   }
-  static constexpr int kIndexInFileMessages = 1;
+  static constexpr int kIndexInFileMessages = 2;
   friend void swap(UIntVector& a, UIntVector& b) { a.Swap(&b); }
   inline void Swap(UIntVector* other) {
     if (other == this) return;
@@ -345,7 +348,7 @@ class IntVector final : public ::google::protobuf::Message
     return reinterpret_cast<const IntVector*>(
         &_IntVector_default_instance_);
   }
-  static constexpr int kIndexInFileMessages = 2;
+  static constexpr int kIndexInFileMessages = 3;
   friend void swap(IntVector& a, IntVector& b) { a.Swap(&b); }
   inline void Swap(IntVector* other) {
     if (other == this) return;
@@ -542,7 +545,7 @@ class FloatVector final : public ::google::protobuf::Message
     return reinterpret_cast<const FloatVector*>(
         &_FloatVector_default_instance_);
   }
-  static constexpr int kIndexInFileMessages = 3;
+  static constexpr int kIndexInFileMessages = 4;
   friend void swap(FloatVector& a, FloatVector& b) { a.Swap(&b); }
   inline void Swap(FloatVector* other) {
     if (other == this) return;
@@ -683,23 +686,23 @@ class FloatVector final : public ::google::protobuf::Message
 };
 // -------------------------------------------------------------------
 
-class EventInfoMessage final : public ::google::protobuf::Message
-/* @@protoc_insertion_point(class_definition:EventInfoMessage) */ {
+class EventMeta final : public ::google::protobuf::Message
+/* @@protoc_insertion_point(class_definition:EventMeta) */ {
  public:
-  inline EventInfoMessage() : EventInfoMessage(nullptr) {}
-  ~EventInfoMessage() PROTOBUF_FINAL;
+  inline EventMeta() : EventMeta(nullptr) {}
+  ~EventMeta() PROTOBUF_FINAL;
   template <typename = void>
-  explicit PROTOBUF_CONSTEXPR EventInfoMessage(
+  explicit PROTOBUF_CONSTEXPR EventMeta(
       ::google::protobuf::internal::ConstantInitialized);
 
-  inline EventInfoMessage(const EventInfoMessage& from) : EventInfoMessage(nullptr, from) {}
-  inline EventInfoMessage(EventInfoMessage&& from) noexcept
-      : EventInfoMessage(nullptr, std::move(from)) {}
-  inline EventInfoMessage& operator=(const EventInfoMessage& from) {
+  inline EventMeta(const EventMeta& from) : EventMeta(nullptr, from) {}
+  inline EventMeta(EventMeta&& from) noexcept
+      : EventMeta(nullptr, std::move(from)) {}
+  inline EventMeta& operator=(const EventMeta& from) {
     CopyFrom(from);
     return *this;
   }
-  inline EventInfoMessage& operator=(EventInfoMessage&& from) noexcept {
+  inline EventMeta& operator=(EventMeta&& from) noexcept {
     if (this == &from) return *this;
     if (GetArena() == from.GetArena()
 #ifdef PROTOBUF_FORCE_COPY_IN_MOVE
@@ -731,16 +734,16 @@ class EventInfoMessage final : public ::google::protobuf::Message
   static const ::google::protobuf::Reflection* GetReflection() {
     return default_instance().GetMetadata().reflection;
   }
-  static const EventInfoMessage& default_instance() {
+  static const EventMeta& default_instance() {
     return *internal_default_instance();
   }
-  static inline const EventInfoMessage* internal_default_instance() {
-    return reinterpret_cast<const EventInfoMessage*>(
-        &_EventInfoMessage_default_instance_);
+  static inline const EventMeta* internal_default_instance() {
+    return reinterpret_cast<const EventMeta*>(
+        &_EventMeta_default_instance_);
   }
   static constexpr int kIndexInFileMessages = 0;
-  friend void swap(EventInfoMessage& a, EventInfoMessage& b) { a.Swap(&b); }
-  inline void Swap(EventInfoMessage* other) {
+  friend void swap(EventMeta& a, EventMeta& b) { a.Swap(&b); }
+  inline void Swap(EventMeta* other) {
     if (other == this) return;
 #ifdef PROTOBUF_FORCE_COPY_IN_SWAP
     if (GetArena() != nullptr && GetArena() == other->GetArena()) {
@@ -752,7 +755,7 @@ class EventInfoMessage final : public ::google::protobuf::Message
       ::google::protobuf::internal::GenericSwap(this, other);
     }
   }
-  void UnsafeArenaSwap(EventInfoMessage* other) {
+  void UnsafeArenaSwap(EventMeta* other) {
     if (other == this) return;
     ABSL_DCHECK(GetArena() == other->GetArena());
     InternalSwap(other);
@@ -760,13 +763,13 @@ class EventInfoMessage final : public ::google::protobuf::Message
 
   // implements Message ----------------------------------------------
 
-  EventInfoMessage* New(::google::protobuf::Arena* arena = nullptr) const PROTOBUF_FINAL {
-    return ::google::protobuf::Message::DefaultConstruct<EventInfoMessage>(arena);
+  EventMeta* New(::google::protobuf::Arena* arena = nullptr) const PROTOBUF_FINAL {
+    return ::google::protobuf::Message::DefaultConstruct<EventMeta>(arena);
   }
   using ::google::protobuf::Message::CopyFrom;
-  void CopyFrom(const EventInfoMessage& from);
+  void CopyFrom(const EventMeta& from);
   using ::google::protobuf::Message::MergeFrom;
-  void MergeFrom(const EventInfoMessage& from) { EventInfoMessage::MergeImpl(*this, from); }
+  void MergeFrom(const EventMeta& from) { EventMeta::MergeImpl(*this, from); }
 
   private:
   static void MergeImpl(
@@ -803,16 +806,16 @@ class EventInfoMessage final : public ::google::protobuf::Message
   private:
   void SharedCtor(::google::protobuf::Arena* arena);
   void SharedDtor();
-  void InternalSwap(EventInfoMessage* other);
+  void InternalSwap(EventMeta* other);
  private:
   friend class ::google::protobuf::internal::AnyMetadata;
-  static ::absl::string_view FullMessageName() { return "EventInfoMessage"; }
+  static ::absl::string_view FullMessageName() { return "EventMeta"; }
 
  protected:
-  explicit EventInfoMessage(::google::protobuf::Arena* arena);
-  EventInfoMessage(::google::protobuf::Arena* arena, const EventInfoMessage& from);
-  EventInfoMessage(::google::protobuf::Arena* arena, EventInfoMessage&& from) noexcept
-      : EventInfoMessage(arena) {
+  explicit EventMeta(::google::protobuf::Arena* arena);
+  EventMeta(::google::protobuf::Arena* arena, const EventMeta& from);
+  EventMeta(::google::protobuf::Arena* arena, EventMeta&& from) noexcept
+      : EventMeta(arena) {
     *this = ::std::move(from);
   }
   const ::google::protobuf::Message::ClassData* GetClassData() const PROTOBUF_FINAL;
@@ -824,95 +827,63 @@ class EventInfoMessage final : public ::google::protobuf::Message
 
   // accessors -------------------------------------------------------
   enum : int {
-    kEventNumberFieldNumber = 2,
-    kRunNumberFieldNumber = 1,
-    kLumiBlockFieldNumber = 3,
-    kTimeStampFieldNumber = 4,
-    kTimeStampNSOffsetFieldNumber = 5,
-    kBcidFieldNumber = 6,
-    kExtendedLevel1IDFieldNumber = 7,
+    kKeyFieldNumber = 1,
+    kFileGuidFieldNumber = 2,
+    kEventOffsetFieldNumber = 3,
   };
-  // uint64 eventNumber = 2;
-  void clear_eventnumber() ;
-  ::uint64_t eventnumber() const;
-  void set_eventnumber(::uint64_t value);
+  // string key = 1;
+  void clear_key() ;
+  const std::string& key() const;
+  template <typename Arg_ = const std::string&, typename... Args_>
+  void set_key(Arg_&& arg, Args_... args);
+  std::string* mutable_key();
+  PROTOBUF_NODISCARD std::string* release_key();
+  void set_allocated_key(std::string* value);
 
   private:
-  ::uint64_t _internal_eventnumber() const;
-  void _internal_set_eventnumber(::uint64_t value);
+  const std::string& _internal_key() const;
+  inline PROTOBUF_ALWAYS_INLINE void _internal_set_key(
+      const std::string& value);
+  std::string* _internal_mutable_key();
 
   public:
-  // uint32 runNumber = 1;
-  void clear_runnumber() ;
-  ::uint32_t runnumber() const;
-  void set_runnumber(::uint32_t value);
+  // string file_guid = 2;
+  void clear_file_guid() ;
+  const std::string& file_guid() const;
+  template <typename Arg_ = const std::string&, typename... Args_>
+  void set_file_guid(Arg_&& arg, Args_... args);
+  std::string* mutable_file_guid();
+  PROTOBUF_NODISCARD std::string* release_file_guid();
+  void set_allocated_file_guid(std::string* value);
 
   private:
-  ::uint32_t _internal_runnumber() const;
-  void _internal_set_runnumber(::uint32_t value);
+  const std::string& _internal_file_guid() const;
+  inline PROTOBUF_ALWAYS_INLINE void _internal_set_file_guid(
+      const std::string& value);
+  std::string* _internal_mutable_file_guid();
 
   public:
-  // uint32 lumiBlock = 3;
-  void clear_lumiblock() ;
-  ::uint32_t lumiblock() const;
-  void set_lumiblock(::uint32_t value);
+  // sint64 event_offset = 3;
+  void clear_event_offset() ;
+  ::int64_t event_offset() const;
+  void set_event_offset(::int64_t value);
 
   private:
-  ::uint32_t _internal_lumiblock() const;
-  void _internal_set_lumiblock(::uint32_t value);
+  ::int64_t _internal_event_offset() const;
+  void _internal_set_event_offset(::int64_t value);
 
   public:
-  // uint32 timeStamp = 4;
-  void clear_timestamp() ;
-  ::uint32_t timestamp() const;
-  void set_timestamp(::uint32_t value);
-
-  private:
-  ::uint32_t _internal_timestamp() const;
-  void _internal_set_timestamp(::uint32_t value);
-
-  public:
-  // uint32 timeStampNSOffset = 5;
-  void clear_timestampnsoffset() ;
-  ::uint32_t timestampnsoffset() const;
-  void set_timestampnsoffset(::uint32_t value);
-
-  private:
-  ::uint32_t _internal_timestampnsoffset() const;
-  void _internal_set_timestampnsoffset(::uint32_t value);
-
-  public:
-  // uint32 bcid = 6;
-  void clear_bcid() ;
-  ::uint32_t bcid() const;
-  void set_bcid(::uint32_t value);
-
-  private:
-  ::uint32_t _internal_bcid() const;
-  void _internal_set_bcid(::uint32_t value);
-
-  public:
-  // uint32 extendedLevel1ID = 7;
-  void clear_extendedlevel1id() ;
-  ::uint32_t extendedlevel1id() const;
-  void set_extendedlevel1id(::uint32_t value);
-
-  private:
-  ::uint32_t _internal_extendedlevel1id() const;
-  void _internal_set_extendedlevel1id(::uint32_t value);
-
-  public:
-  // @@protoc_insertion_point(class_scope:EventInfoMessage)
+  // @@protoc_insertion_point(class_scope:EventMeta)
  private:
   class _Internal;
   friend class ::google::protobuf::internal::TcParser;
   static const ::google::protobuf::internal::TcParseTable<
-      3, 7, 0,
-      0, 2>
+      2, 3, 0,
+      30, 2>
       _table_;
 
   static constexpr const void* _raw_default_instance_ =
-      &_EventInfoMessage_default_instance_;
+      &_EventMeta_default_instance_;
 
   friend class ::google::protobuf::MessageLite;
   friend class ::google::protobuf::Arena;
@@ -927,14 +898,10 @@ class EventInfoMessage final : public ::google::protobuf::Message
                           ::google::protobuf::Arena* arena);
     inline explicit Impl_(::google::protobuf::internal::InternalVisibility visibility,
                           ::google::protobuf::Arena* arena, const Impl_& from,
-                          const EventInfoMessage& from_msg);
-    ::uint64_t eventnumber_;
-    ::uint32_t runnumber_;
-    ::uint32_t lumiblock_;
-    ::uint32_t timestamp_;
-    ::uint32_t timestampnsoffset_;
-    ::uint32_t bcid_;
-    ::uint32_t extendedlevel1id_;
+                          const EventMeta& from_msg);
+    ::google::protobuf::internal::ArenaStringPtr key_;
+    ::google::protobuf::internal::ArenaStringPtr file_guid_;
+    ::int64_t event_offset_;
     mutable ::google::protobuf::internal::CachedSize _cached_size_;
     PROTOBUF_TSAN_DECLARE_MEMBER
   };
@@ -998,7 +965,7 @@ class DoubleVector final : public ::google::protobuf::Message
     return reinterpret_cast<const DoubleVector*>(
         &_DoubleVector_default_instance_);
   }
-  static constexpr int kIndexInFileMessages = 4;
+  static constexpr int kIndexInFileMessages = 5;
   friend void swap(DoubleVector& a, DoubleVector& b) { a.Swap(&b); }
   inline void Swap(DoubleVector* other) {
     if (other == this) return;
@@ -1275,6 +1242,284 @@ class OffloadMessage_DoubleBranchesEntry_DoNotUse final
 };
 // -------------------------------------------------------------------
 
+class EventInfoMessage final : public ::google::protobuf::Message
+/* @@protoc_insertion_point(class_definition:EventInfoMessage) */ {
+ public:
+  inline EventInfoMessage() : EventInfoMessage(nullptr) {}
+  ~EventInfoMessage() PROTOBUF_FINAL;
+  template <typename = void>
+  explicit PROTOBUF_CONSTEXPR EventInfoMessage(
+      ::google::protobuf::internal::ConstantInitialized);
+
+  inline EventInfoMessage(const EventInfoMessage& from) : EventInfoMessage(nullptr, from) {}
+  inline EventInfoMessage(EventInfoMessage&& from) noexcept
+      : EventInfoMessage(nullptr, std::move(from)) {}
+  inline EventInfoMessage& operator=(const EventInfoMessage& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline EventInfoMessage& operator=(EventInfoMessage&& from) noexcept {
+    if (this == &from) return *this;
+    if (GetArena() == from.GetArena()
+#ifdef PROTOBUF_FORCE_COPY_IN_MOVE
+        && GetArena() != nullptr
+#endif  // !PROTOBUF_FORCE_COPY_IN_MOVE
+    ) {
+      InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const
+      ABSL_ATTRIBUTE_LIFETIME_BOUND {
+    return _internal_metadata_.unknown_fields<::google::protobuf::UnknownFieldSet>(::google::protobuf::UnknownFieldSet::default_instance);
+  }
+  inline ::google::protobuf::UnknownFieldSet* mutable_unknown_fields()
+      ABSL_ATTRIBUTE_LIFETIME_BOUND {
+    return _internal_metadata_.mutable_unknown_fields<::google::protobuf::UnknownFieldSet>();
+  }
+
+  static const ::google::protobuf::Descriptor* descriptor() {
+    return GetDescriptor();
+  }
+  static const ::google::protobuf::Descriptor* GetDescriptor() {
+    return default_instance().GetMetadata().descriptor;
+  }
+  static const ::google::protobuf::Reflection* GetReflection() {
+    return default_instance().GetMetadata().reflection;
+  }
+  static const EventInfoMessage& default_instance() {
+    return *internal_default_instance();
+  }
+  static inline const EventInfoMessage* internal_default_instance() {
+    return reinterpret_cast<const EventInfoMessage*>(
+        &_EventInfoMessage_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages = 1;
+  friend void swap(EventInfoMessage& a, EventInfoMessage& b) { a.Swap(&b); }
+  inline void Swap(EventInfoMessage* other) {
+    if (other == this) return;
+#ifdef PROTOBUF_FORCE_COPY_IN_SWAP
+    if (GetArena() != nullptr && GetArena() == other->GetArena()) {
+#else   // PROTOBUF_FORCE_COPY_IN_SWAP
+    if (GetArena() == other->GetArena()) {
+#endif  // !PROTOBUF_FORCE_COPY_IN_SWAP
+      InternalSwap(other);
+    } else {
+      ::google::protobuf::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(EventInfoMessage* other) {
+    if (other == this) return;
+    ABSL_DCHECK(GetArena() == other->GetArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  EventInfoMessage* New(::google::protobuf::Arena* arena = nullptr) const PROTOBUF_FINAL {
+    return ::google::protobuf::Message::DefaultConstruct<EventInfoMessage>(arena);
+  }
+  using ::google::protobuf::Message::CopyFrom;
+  void CopyFrom(const EventInfoMessage& from);
+  using ::google::protobuf::Message::MergeFrom;
+  void MergeFrom(const EventInfoMessage& from) { EventInfoMessage::MergeImpl(*this, from); }
+
+  private:
+  static void MergeImpl(
+      ::google::protobuf::MessageLite& to_msg,
+      const ::google::protobuf::MessageLite& from_msg);
+
+  public:
+  bool IsInitialized() const {
+    return true;
+  }
+  ABSL_ATTRIBUTE_REINITIALIZES void Clear() PROTOBUF_FINAL;
+  #if defined(PROTOBUF_CUSTOM_VTABLE)
+  private:
+  static ::size_t ByteSizeLong(const ::google::protobuf::MessageLite& msg);
+  static ::uint8_t* _InternalSerialize(
+      const MessageLite& msg, ::uint8_t* target,
+      ::google::protobuf::io::EpsCopyOutputStream* stream);
+
+  public:
+  ::size_t ByteSizeLong() const { return ByteSizeLong(*this); }
+  ::uint8_t* _InternalSerialize(
+      ::uint8_t* target,
+      ::google::protobuf::io::EpsCopyOutputStream* stream) const {
+    return _InternalSerialize(*this, target, stream);
+  }
+  #else   // PROTOBUF_CUSTOM_VTABLE
+  ::size_t ByteSizeLong() const final;
+  ::uint8_t* _InternalSerialize(
+      ::uint8_t* target,
+      ::google::protobuf::io::EpsCopyOutputStream* stream) const final;
+  #endif  // PROTOBUF_CUSTOM_VTABLE
+  int GetCachedSize() const { return _impl_._cached_size_.Get(); }
+
+  private:
+  void SharedCtor(::google::protobuf::Arena* arena);
+  void SharedDtor();
+  void InternalSwap(EventInfoMessage* other);
+ private:
+  friend class ::google::protobuf::internal::AnyMetadata;
+  static ::absl::string_view FullMessageName() { return "EventInfoMessage"; }
+
+ protected:
+  explicit EventInfoMessage(::google::protobuf::Arena* arena);
+  EventInfoMessage(::google::protobuf::Arena* arena, const EventInfoMessage& from);
+  EventInfoMessage(::google::protobuf::Arena* arena, EventInfoMessage&& from) noexcept
+      : EventInfoMessage(arena) {
+    *this = ::std::move(from);
+  }
+  const ::google::protobuf::Message::ClassData* GetClassData() const PROTOBUF_FINAL;
+  static const ::google::protobuf::Message::ClassDataFull _class_data_;
+
+ public:
+  ::google::protobuf::Metadata GetMetadata() const;
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+  enum : int {
+    kMetaFieldNumber = 8,
+    kEventNumberFieldNumber = 2,
+    kRunNumberFieldNumber = 1,
+    kLumiBlockFieldNumber = 3,
+    kTimeStampFieldNumber = 4,
+    kTimeStampNSOffsetFieldNumber = 5,
+    kBcidFieldNumber = 6,
+    kExtendedLevel1IDFieldNumber = 7,
+  };
+  // .EventMeta meta = 8;
+  bool has_meta() const;
+  void clear_meta() ;
+  const ::EventMeta& meta() const;
+  PROTOBUF_NODISCARD ::EventMeta* release_meta();
+  ::EventMeta* mutable_meta();
+  void set_allocated_meta(::EventMeta* value);
+  void unsafe_arena_set_allocated_meta(::EventMeta* value);
+  ::EventMeta* unsafe_arena_release_meta();
+
+  private:
+  const ::EventMeta& _internal_meta() const;
+  ::EventMeta* _internal_mutable_meta();
+
+  public:
+  // uint64 eventNumber = 2;
+  void clear_eventnumber() ;
+  ::uint64_t eventnumber() const;
+  void set_eventnumber(::uint64_t value);
+
+  private:
+  ::uint64_t _internal_eventnumber() const;
+  void _internal_set_eventnumber(::uint64_t value);
+
+  public:
+  // uint32 runNumber = 1;
+  void clear_runnumber() ;
+  ::uint32_t runnumber() const;
+  void set_runnumber(::uint32_t value);
+
+  private:
+  ::uint32_t _internal_runnumber() const;
+  void _internal_set_runnumber(::uint32_t value);
+
+  public:
+  // uint32 lumiBlock = 3;
+  void clear_lumiblock() ;
+  ::uint32_t lumiblock() const;
+  void set_lumiblock(::uint32_t value);
+
+  private:
+  ::uint32_t _internal_lumiblock() const;
+  void _internal_set_lumiblock(::uint32_t value);
+
+  public:
+  // uint32 timeStamp = 4;
+  void clear_timestamp() ;
+  ::uint32_t timestamp() const;
+  void set_timestamp(::uint32_t value);
+
+  private:
+  ::uint32_t _internal_timestamp() const;
+  void _internal_set_timestamp(::uint32_t value);
+
+  public:
+  // uint32 timeStampNSOffset = 5;
+  void clear_timestampnsoffset() ;
+  ::uint32_t timestampnsoffset() const;
+  void set_timestampnsoffset(::uint32_t value);
+
+  private:
+  ::uint32_t _internal_timestampnsoffset() const;
+  void _internal_set_timestampnsoffset(::uint32_t value);
+
+  public:
+  // uint32 bcid = 6;
+  void clear_bcid() ;
+  ::uint32_t bcid() const;
+  void set_bcid(::uint32_t value);
+
+  private:
+  ::uint32_t _internal_bcid() const;
+  void _internal_set_bcid(::uint32_t value);
+
+  public:
+  // uint32 extendedLevel1ID = 7;
+  void clear_extendedlevel1id() ;
+  ::uint32_t extendedlevel1id() const;
+  void set_extendedlevel1id(::uint32_t value);
+
+  private:
+  ::uint32_t _internal_extendedlevel1id() const;
+  void _internal_set_extendedlevel1id(::uint32_t value);
+
+  public:
+  // @@protoc_insertion_point(class_scope:EventInfoMessage)
+ private:
+  class _Internal;
+  friend class ::google::protobuf::internal::TcParser;
+  static const ::google::protobuf::internal::TcParseTable<
+      3, 8, 1,
+      0, 2>
+      _table_;
+
+  static constexpr const void* _raw_default_instance_ =
+      &_EventInfoMessage_default_instance_;
+
+  friend class ::google::protobuf::MessageLite;
+  friend class ::google::protobuf::Arena;
+  template <typename T>
+  friend class ::google::protobuf::Arena::InternalHelper;
+  using InternalArenaConstructable_ = void;
+  using DestructorSkippable_ = void;
+  struct Impl_ {
+    inline explicit constexpr Impl_(
+        ::google::protobuf::internal::ConstantInitialized) noexcept;
+    inline explicit Impl_(::google::protobuf::internal::InternalVisibility visibility,
+                          ::google::protobuf::Arena* arena);
+    inline explicit Impl_(::google::protobuf::internal::InternalVisibility visibility,
+                          ::google::protobuf::Arena* arena, const Impl_& from,
+                          const EventInfoMessage& from_msg);
+    ::google::protobuf::internal::HasBits<1> _has_bits_;
+    mutable ::google::protobuf::internal::CachedSize _cached_size_;
+    ::EventMeta* meta_;
+    ::uint64_t eventnumber_;
+    ::uint32_t runnumber_;
+    ::uint32_t lumiblock_;
+    ::uint32_t timestamp_;
+    ::uint32_t timestampnsoffset_;
+    ::uint32_t bcid_;
+    ::uint32_t extendedlevel1id_;
+    PROTOBUF_TSAN_DECLARE_MEMBER
+  };
+  union { Impl_ _impl_; };
+  friend struct ::TableStruct_Message_2eproto;
+};
+// -------------------------------------------------------------------
+
 class OffloadMessage final : public ::google::protobuf::Message
 /* @@protoc_insertion_point(class_definition:OffloadMessage) */ {
  public:
@@ -1330,7 +1575,7 @@ class OffloadMessage final : public ::google::protobuf::Message
     return reinterpret_cast<const OffloadMessage*>(
         &_OffloadMessage_default_instance_);
   }
-  static constexpr int kIndexInFileMessages = 9;
+  static constexpr int kIndexInFileMessages = 10;
   friend void swap(OffloadMessage& a, OffloadMessage& b) { a.Swap(&b); }
   inline void Swap(OffloadMessage* other) {
     if (other == this) return;
@@ -1580,6 +1825,132 @@ class OffloadMessage final : public ::google::protobuf::Message
 #endif  // __GNUC__
 // -------------------------------------------------------------------
 
+// EventMeta
+
+// string key = 1;
+inline void EventMeta::clear_key() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.key_.ClearToEmpty();
+}
+inline const std::string& EventMeta::key() const
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_get:EventMeta.key)
+  return _internal_key();
+}
+template <typename Arg_, typename... Args_>
+inline PROTOBUF_ALWAYS_INLINE void EventMeta::set_key(Arg_&& arg,
+                                                     Args_... args) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.key_.Set(static_cast<Arg_&&>(arg), args..., GetArena());
+  // @@protoc_insertion_point(field_set:EventMeta.key)
+}
+inline std::string* EventMeta::mutable_key() ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  std::string* _s = _internal_mutable_key();
+  // @@protoc_insertion_point(field_mutable:EventMeta.key)
+  return _s;
+}
+inline const std::string& EventMeta::_internal_key() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.key_.Get();
+}
+inline void EventMeta::_internal_set_key(const std::string& value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.key_.Set(value, GetArena());
+}
+inline std::string* EventMeta::_internal_mutable_key() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  return _impl_.key_.Mutable( GetArena());
+}
+inline std::string* EventMeta::release_key() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  // @@protoc_insertion_point(field_release:EventMeta.key)
+  return _impl_.key_.Release();
+}
+inline void EventMeta::set_allocated_key(std::string* value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.key_.SetAllocated(value, GetArena());
+  #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
+        if (_impl_.key_.IsDefault()) {
+          _impl_.key_.Set("", GetArena());
+        }
+  #endif  // PROTOBUF_FORCE_COPY_DEFAULT_STRING
+  // @@protoc_insertion_point(field_set_allocated:EventMeta.key)
+}
+
+// string file_guid = 2;
+inline void EventMeta::clear_file_guid() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.file_guid_.ClearToEmpty();
+}
+inline const std::string& EventMeta::file_guid() const
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_get:EventMeta.file_guid)
+  return _internal_file_guid();
+}
+template <typename Arg_, typename... Args_>
+inline PROTOBUF_ALWAYS_INLINE void EventMeta::set_file_guid(Arg_&& arg,
+                                                     Args_... args) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.file_guid_.Set(static_cast<Arg_&&>(arg), args..., GetArena());
+  // @@protoc_insertion_point(field_set:EventMeta.file_guid)
+}
+inline std::string* EventMeta::mutable_file_guid() ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  std::string* _s = _internal_mutable_file_guid();
+  // @@protoc_insertion_point(field_mutable:EventMeta.file_guid)
+  return _s;
+}
+inline const std::string& EventMeta::_internal_file_guid() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.file_guid_.Get();
+}
+inline void EventMeta::_internal_set_file_guid(const std::string& value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.file_guid_.Set(value, GetArena());
+}
+inline std::string* EventMeta::_internal_mutable_file_guid() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  return _impl_.file_guid_.Mutable( GetArena());
+}
+inline std::string* EventMeta::release_file_guid() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  // @@protoc_insertion_point(field_release:EventMeta.file_guid)
+  return _impl_.file_guid_.Release();
+}
+inline void EventMeta::set_allocated_file_guid(std::string* value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.file_guid_.SetAllocated(value, GetArena());
+  #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
+        if (_impl_.file_guid_.IsDefault()) {
+          _impl_.file_guid_.Set("", GetArena());
+        }
+  #endif  // PROTOBUF_FORCE_COPY_DEFAULT_STRING
+  // @@protoc_insertion_point(field_set_allocated:EventMeta.file_guid)
+}
+
+// sint64 event_offset = 3;
+inline void EventMeta::clear_event_offset() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.event_offset_ = ::int64_t{0};
+}
+inline ::int64_t EventMeta::event_offset() const {
+  // @@protoc_insertion_point(field_get:EventMeta.event_offset)
+  return _internal_event_offset();
+}
+inline void EventMeta::set_event_offset(::int64_t value) {
+  _internal_set_event_offset(value);
+  // @@protoc_insertion_point(field_set:EventMeta.event_offset)
+}
+inline ::int64_t EventMeta::_internal_event_offset() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.event_offset_;
+}
+inline void EventMeta::_internal_set_event_offset(::int64_t value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.event_offset_ = value;
+}
+
+// -------------------------------------------------------------------
+
 // EventInfoMessage
 
 // uint32 runNumber = 1;
@@ -1734,6 +2105,102 @@ inline ::uint32_t EventInfoMessage::_internal_extendedlevel1id() const {
 inline void EventInfoMessage::_internal_set_extendedlevel1id(::uint32_t value) {
   ::google::protobuf::internal::TSanWrite(&_impl_);
   _impl_.extendedlevel1id_ = value;
+}
+
+// .EventMeta meta = 8;
+inline bool EventInfoMessage::has_meta() const {
+  bool value = (_impl_._has_bits_[0] & 0x00000001u) != 0;
+  PROTOBUF_ASSUME(!value || _impl_.meta_ != nullptr);
+  return value;
+}
+inline void EventInfoMessage::clear_meta() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  if (_impl_.meta_ != nullptr) _impl_.meta_->Clear();
+  _impl_._has_bits_[0] &= ~0x00000001u;
+}
+inline const ::EventMeta& EventInfoMessage::_internal_meta() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  const ::EventMeta* p = _impl_.meta_;
+  return p != nullptr ? *p : reinterpret_cast<const ::EventMeta&>(::_EventMeta_default_instance_);
+}
+inline const ::EventMeta& EventInfoMessage::meta() const ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_get:EventInfoMessage.meta)
+  return _internal_meta();
+}
+inline void EventInfoMessage::unsafe_arena_set_allocated_meta(::EventMeta* value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  if (GetArena() == nullptr) {
+    delete reinterpret_cast<::google::protobuf::MessageLite*>(_impl_.meta_);
+  }
+  _impl_.meta_ = reinterpret_cast<::EventMeta*>(value);
+  if (value != nullptr) {
+    _impl_._has_bits_[0] |= 0x00000001u;
+  } else {
+    _impl_._has_bits_[0] &= ~0x00000001u;
+  }
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:EventInfoMessage.meta)
+}
+inline ::EventMeta* EventInfoMessage::release_meta() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+
+  _impl_._has_bits_[0] &= ~0x00000001u;
+  ::EventMeta* released = _impl_.meta_;
+  _impl_.meta_ = nullptr;
+#ifdef PROTOBUF_FORCE_COPY_IN_RELEASE
+  auto* old = reinterpret_cast<::google::protobuf::MessageLite*>(released);
+  released = ::google::protobuf::internal::DuplicateIfNonNull(released);
+  if (GetArena() == nullptr) {
+    delete old;
+  }
+#else   // PROTOBUF_FORCE_COPY_IN_RELEASE
+  if (GetArena() != nullptr) {
+    released = ::google::protobuf::internal::DuplicateIfNonNull(released);
+  }
+#endif  // !PROTOBUF_FORCE_COPY_IN_RELEASE
+  return released;
+}
+inline ::EventMeta* EventInfoMessage::unsafe_arena_release_meta() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  // @@protoc_insertion_point(field_release:EventInfoMessage.meta)
+
+  _impl_._has_bits_[0] &= ~0x00000001u;
+  ::EventMeta* temp = _impl_.meta_;
+  _impl_.meta_ = nullptr;
+  return temp;
+}
+inline ::EventMeta* EventInfoMessage::_internal_mutable_meta() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  if (_impl_.meta_ == nullptr) {
+    auto* p = ::google::protobuf::Message::DefaultConstruct<::EventMeta>(GetArena());
+    _impl_.meta_ = reinterpret_cast<::EventMeta*>(p);
+  }
+  return _impl_.meta_;
+}
+inline ::EventMeta* EventInfoMessage::mutable_meta() ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  _impl_._has_bits_[0] |= 0x00000001u;
+  ::EventMeta* _msg = _internal_mutable_meta();
+  // @@protoc_insertion_point(field_mutable:EventInfoMessage.meta)
+  return _msg;
+}
+inline void EventInfoMessage::set_allocated_meta(::EventMeta* value) {
+  ::google::protobuf::Arena* message_arena = GetArena();
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  if (message_arena == nullptr) {
+    delete (_impl_.meta_);
+  }
+
+  if (value != nullptr) {
+    ::google::protobuf::Arena* submessage_arena = (value)->GetArena();
+    if (message_arena != submessage_arena) {
+      value = ::google::protobuf::internal::GetOwnedMessage(message_arena, value, submessage_arena);
+    }
+    _impl_._has_bits_[0] |= 0x00000001u;
+  } else {
+    _impl_._has_bits_[0] &= ~0x00000001u;
+  }
+
+  _impl_.meta_ = reinterpret_cast<::EventMeta*>(value);
+  // @@protoc_insertion_point(field_set_allocated:EventInfoMessage.meta)
 }
 
 // -------------------------------------------------------------------
