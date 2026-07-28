@@ -110,7 +110,7 @@ namespace ActsTrk {
       * @brief Checks if truth particle produced hits at each one of the HGTD layers
       *
       * @param truthParticle - truth particle associated with track
-      * @param measurementContainer - measurement container with HGTD clusters
+      * @param measurement_layer_map - vector of measurement ids for each layer
       * @param association_map - hgtd cluster to truth particles map 
       * @param isPrimaryExistsVec - vector to be return with the information about the  
       */
