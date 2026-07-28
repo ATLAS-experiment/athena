@@ -15,6 +15,7 @@
 
 // Forward declaration(s):
 class TTree;
+class EventContext;
 
 namespace xAOD {
 
@@ -31,7 +32,8 @@ class TAuxStore : public details::AuxStoreBase {
 
  public:
   /// Constructor
-  TAuxStore(std::string_view prefix = "", bool topStore = true,
+  TAuxStore(const EventContext& ctx,
+            std::string_view prefix = "", bool topStore = true,
             EStructMode mode = EStructMode::kUndefinedStore,
             int basketSize = 2048, int splitLevel = 0);
   /// Destructor

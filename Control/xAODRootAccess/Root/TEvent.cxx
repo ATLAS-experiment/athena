@@ -30,10 +30,6 @@
 #include "AthContainers/normalizedTypeinfoName.h"
 #include "AthContainersInterfaces/IAuxStoreHolder.h"
 #include "AthContainersInterfaces/IAuxStoreIO.h"
-#ifndef XAOD_STANDALONE
-#include "SGTools/CurrentEventStore.h"
-#include "SGTools/DataProxy.h"
-#endif  // not XAOD_STANDALONE
 #include "CxxUtils/ClassName.h"
 #include "CxxUtils/no_sanitize_undefined.h"
 
@@ -620,7 +616,8 @@ SG::IAuxStore* TEvent::recordAux(const std::string &key,
     }
     // Create and record the object:
     static constexpr bool TOP_STORE = true;
-    if (record(std::make_unique<TAuxStore>(key, TOP_STORE, mode), key)
+    if (record(std::make_unique<TAuxStore>(this->currentContext(),
+                                           key, TOP_STORE, mode), key)
             .isFailure()) {
       ATH_MSG_ERROR("Couldn't connect TAuxStore object to the output");
       return nullptr;
@@ -1394,6 +1391,7 @@ StatusCode TEvent::connectAux(const std::string &prefix, bool standalone) {
     // that take care of the auxiliary store access.
     static constexpr bool TOP_STORE = true;
     auto store = std::make_unique<TAuxStore>(
+        this->currentContext(),
         prefix, TOP_STORE,
         (standalone ? TAuxStore::EStructMode::kObjectStore
                     : TAuxStore::EStructMode::kContainerStore));
@@ -1458,6 +1456,7 @@ StatusCode TEvent::connectMetaAux(const std::string &prefix, bool standalone) {
     // that take care of the auxiliary store access.
     static constexpr bool TOP_STORE = true;
     auto store = std::make_unique<TAuxStore>(
+        this->currentContext(),
         prefix, TOP_STORE,
         (standalone ? TAuxStore::EStructMode::kObjectStore
                     : TAuxStore::EStructMode::kContainerStore));
@@ -1949,7 +1948,7 @@ StatusCode TEvent::initStats() {
 
       // Scan the branches using a temporary TAuxStore instance:
       static constexpr bool TOP_STORE = true;
-      TAuxStore temp(branchName, TOP_STORE, mode);
+      TAuxStore temp(this->currentContext(), branchName, TOP_STORE, mode);
       static constexpr bool PRINT_WARNINGS = false;
       ATH_CHECK(temp.readFrom(*m_inTree, PRINT_WARNINGS));
 
@@ -2108,13 +2107,21 @@ StatusCode TEvent::setUpDynamicStore(TObjectManager &mgr, ::TTree* tree) {
     return StatusCode::FAILURE;
   }
 
+  // If we read an auxiliary store, call toTransient on it.
+  const EventContext& ctx = this->currentContext();
+#ifndef XAOD_STANDALONE
+  if (SG::IAuxStore* istore = dynamic_cast<SG::IAuxStore*> (storeHolder)) {
+    istore->toTransient( ctx );
+  }
+#endif
+
   // Create a TAuxStore instance that will read the dynamic variables
   // of this container. Notice that the TAuxManager doesn't own the
   // TAuxStore object. It will be owned by the SG::IAuxStoreHolder
   // object.
   static constexpr bool TOP_STORE = false;
   auto store = std::make_unique<TAuxStore>(
-      mgr.branch()->GetName(), TOP_STORE,
+      ctx, mgr.branch()->GetName(), TOP_STORE,
       (storeHolder->getStoreType() == SG::IAuxStoreHolder::AST_ObjectStore
            ? TAuxStore::EStructMode::kObjectStore
            : TAuxStore::EStructMode::kContainerStore));

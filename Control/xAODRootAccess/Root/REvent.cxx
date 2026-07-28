@@ -25,6 +25,7 @@
 #include "AthContainersInterfaces/IAuxStoreHolder.h"
 #include "xAODCore/AuxContainerBase.h"
 #include "xAODCore/AuxInfoBase.h"
+#include "AthContainers/CurrentContext.h"
 #include "xAODCore/tools/IOStats.h"
 #include "xAODCore/tools/ReadStats.h"
 
@@ -1247,6 +1248,20 @@ StatusCode REvent::setAuxStore(const std::string& key,
     auxKey = key + "Aux:";
   }
 
+  // Get the aux store object.
+  RObjectManager* omgr = dynamic_cast<RObjectManager*>(auxMgr);
+  if (!omgr) {
+    ATH_MSG_FATAL("Auxiliary manager for \"" << auxKey
+                                             << "\" is not of the right type");
+    return StatusCode::FAILURE;
+  }
+  void* p = omgr->holder()->getAs(typeid(SG::IAuxStore));
+  SG::IAuxStore* store = reinterpret_cast<SG::IAuxStore*>(p);
+  if (store == nullptr) {
+    ATH_MSG_FATAL("There's a logic error in the code");
+    return StatusCode::FAILURE;
+  }
+
   if (!metadata) {
     // Make sure the auxiliary object is up to date.
     ::Int_t readBytes = auxMgr->getEntry();
@@ -1260,6 +1275,11 @@ StatusCode REvent::setAuxStore(const std::string& key,
       // Tell the dynamic store object to switch to a new entry.
       dynAuxMgr->second->getEntry();
     }
+
+#ifndef XAOD_STANDALONE
+    // Call toTransient on the aux store.
+    store->toTransient (this->currentContext());
+#endif
   }
 
   // Stop here if we've set up an auxiliary store.
@@ -1297,22 +1317,7 @@ StatusCode REvent::setAuxStore(const std::string& key,
     return StatusCode::FAILURE;
   }
 
-  // Get the concrete auxiliary manager:
-  RObjectManager* omgr = dynamic_cast<RObjectManager*>(auxMgr);
-  if (!omgr) {
-    ATH_MSG_FATAL("Auxiliary manager for \"" << auxKey
-                                             << "\" is not of the right type");
-    return StatusCode::FAILURE;
-  }
-  void* p = omgr->holder()->getAs(typeid(SG::IConstAuxStore));
-  const SG::IConstAuxStore* store =
-      reinterpret_cast<const SG::IConstAuxStore*>(p);
-  if (store == nullptr) {
-    ATH_MSG_FATAL("There's a logic error in the code");
-    return StatusCode::FAILURE;
-  }
-
-  // Connect the two:
+  // Connect with the aux store.
   if (vec) {
     vec->setStore(store);
   } else if (aux) {
@@ -1783,7 +1788,7 @@ StatusCode REvent::initStats() {
           (isContainer ? RAuxStore::EStructMode::kContainerStore
                        : RAuxStore::EStructMode::kObjectStore);
       static constexpr bool TOP_STORE = true;
-      RAuxStore temp(fieldName, TOP_STORE, mode);
+      RAuxStore temp(this->currentContext(), fieldName, TOP_STORE, mode);
       ATH_CHECK(temp.readFrom(*m_eventReader));
 
       // Add all the auxids to the statistics object:
@@ -1856,12 +1861,21 @@ StatusCode REvent::setUpDynamicStore(RObjectManager& mgr,
     return StatusCode::FAILURE;
   }
 
+  // If we read an auxiliary store, call toTransient on it.
+  const EventContext& ctx = this->currentContext();
+#ifndef XAOD_STANDALONE
+  if (SG::IAuxStore* istore = dynamic_cast<SG::IAuxStore*> (storeHolder)) {
+    istore->toTransient( ctx );
+  }
+#endif
+
   // Create an RAuxStore instance that will read the dynamic variables
   // of this container. Notice that the RAuxManager doesn't own the
   // RAuxStore object. It will be owned by the SG::IAuxStoreHolder
   // object.
   static constexpr bool TOP_STORE = false;
   auto store = std::make_unique<RAuxStore>(
+      ctx,
       fieldName, TOP_STORE,
       (storeHolder->getStoreType() == SG::IAuxStoreHolder::AST_ObjectStore
            ? RAuxStore::EStructMode::kObjectStore

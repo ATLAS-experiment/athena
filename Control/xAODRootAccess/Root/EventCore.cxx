@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 // Local include(s).
 #include "xAODRootAccess/Event.h"
@@ -9,8 +9,10 @@
 #include "xAODCore/tools/IOStats.h"
 #include "xAODCore/tools/PerfStats.h"
 #include "xAODRootAccessInterfaces/TActiveEvent.h"
+#include "AthContainers/CurrentContext.h"
 #ifndef XAOD_STANDALONE
-#include "SGTools/CurrentEventStore.h"
+# include "AthenaKernel/ExtendedEventContext.h"
+# include "SGTools/CurrentEventStore.h"
 #endif  // not XAOD_STANDALONE
 
 // ROOT include(s).
@@ -34,6 +36,11 @@ Event::Event(std::string_view name)
 
   // Make this the active event.
   setActive();
+
+#ifndef XAOD_STANDALONE
+  /// Set context for this event.
+  m_ctx.setExtension( Atlas::ExtendedEventContext( this ) );
+#endif
 }
 
 Event::~Event() {
@@ -299,6 +306,14 @@ void Event::printIOStats() const {
 
   // Simply do this via the xAODCore code:
   IOStats::instance().stats().Print("Summary");
+}
+
+const EventContext& Event::currentContext() const {
+#ifdef XAOD_STANDALONE
+  return Gaudi::Hive::currentContext();
+#else
+  return m_ctx;
+#endif
 }
 
 }  // namespace xAOD

@@ -8,6 +8,7 @@
 // Project include(s):
 #include "AsgMessaging/AsgMessaging.h"
 #include "AsgMessaging/StatusCode.h"
+#include "AthContainers/CurrentContext.h"
 #include "AthContainers/tools/threading.h"
 #include "AthContainers/tools/upgrade_mutex.h"
 #include "CxxUtils/checker_macros.h"
@@ -329,6 +330,10 @@ class Event : public TVirtualEvent,
   bool transientContains(const std::string& key, const std::type_info& ti,
                          bool metadata) const;
 
+  /// Return the event context corresponding to this event.
+  /// (Returns a dummy in standalone builds.)
+  const EventContext& currentContext() const;
+
   /// Definition of the internal data structure type
   using Object_t =
       std::unordered_map<std::string, std::unique_ptr<TVirtualManager>>;
@@ -398,6 +403,10 @@ class Event : public TVirtualEvent,
   /// Get the object describing one object/branch
   const BranchInfo* getBranchInfo(SG::sgkey_t sgkey) const;
 
+#ifndef XAOD_STANDALONE
+  /// The event context associated with this event.
+  EventContext m_ctx;
+#endif
   /// @}
 
 };  // class Event
