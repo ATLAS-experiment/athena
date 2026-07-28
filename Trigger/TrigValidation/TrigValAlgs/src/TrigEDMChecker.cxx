@@ -542,7 +542,7 @@ StatusCode TrigEDMChecker::do_execute ATLAS_NOT_THREAD_SAFE(const EventContext& 
   }
 
   if (m_doDumpAll || m_doTDTCheck) {
-    ATH_CHECK(dumpTDT());
+    ATH_CHECK(dumpTDT(ctx));
   }
 
   if (m_doDumpAll || m_doDumpAllTrigComposite || m_dumpTrigCompositeContainers.size() > 0) {
@@ -3855,7 +3855,7 @@ StatusCode TrigEDMChecker::dumpxAODVertex() {
 	return StatusCode::SUCCESS;
 }
 
-StatusCode TrigEDMChecker::dumpTDT() {
+StatusCode TrigEDMChecker::dumpTDT(const EventContext& ctx) {
   using namespace TrigCompositeUtils; // LinkInfo
   ATH_MSG_INFO( "REGTEST ==========START of TDT DUMP===========" );
   // Note: This minimal TDT dumper is for use during run-3 dev
@@ -3930,7 +3930,7 @@ StatusCode TrigEDMChecker::dumpTDT() {
   if (m_trigDec->getNavigationFormat() == "TrigComposite") {
     // Check associateToEventView helper function
     std::vector< LinkInfo<xAOD::IParticleContainer> > muons = m_trigDec->features<xAOD::IParticleContainer>("HLT_mu24_idperf_L1MU20", TrigDefs::Physics, "HLT_MuonL2CBInfo");
-    SG::ReadHandle<xAOD::TrackParticleContainer> muonTracksReadHandle(m_muonTracksKey, Gaudi::Hive::currentContext());
+    SG::ReadHandle<xAOD::TrackParticleContainer> muonTracksReadHandle(m_muonTracksKey, ctx);
     for (const LinkInfo<xAOD::IParticleContainer>& mu : muons) {
       // Note: auto here refers to type std::pair< xAOD::TrackParticleContainer::const_iterator, xAOD::TrackParticleContainer::const_iterator>
       const auto roiTrackItPair = m_trigDec->associateToEventView<xAOD::TrackParticleContainer>(muonTracksReadHandle, mu, "roi");
