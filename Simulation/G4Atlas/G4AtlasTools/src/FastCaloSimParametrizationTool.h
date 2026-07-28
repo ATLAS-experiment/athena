@@ -61,6 +61,18 @@ class FastCaloSimParametrizationTool
   Gaudi::Property<std::string> m_simplifiedGeoPath{
       this, "SimplifiedGeoPath", "FastCaloSim/MC23/GeoFiles/v02/simplified_geo.gdml",
       "Calib-area path of the simplified transport-geometry GDML file"};
+  Gaudi::Property<bool> m_useSimplifiedGeo{
+      this, "UseSimplifiedGeo", true,
+      "Use the simplified rather than the full Geant4 geometry for transport"};
+  Gaudi::Property<std::string> m_simplifiedWorldLogName{
+      this, "SimplifiedWorldLogName", "WorldLog",
+      "Logical world-volume name in the simplified geometry"};
+  Gaudi::Property<std::string> m_transportLimitVolume{
+      this, "TransportLimitVolume", "Envelope",
+      "Volume at which particle transport stops"};
+  Gaudi::Property<unsigned int> m_maxSteps{
+      this, "MaxSteps", 100,
+      "Maximum number of Geant4 transport steps"};
 
   std::unique_ptr<CaloGeo> m_caloGeo;
   std::unique_ptr<TFCSParametrizationBase> m_param;

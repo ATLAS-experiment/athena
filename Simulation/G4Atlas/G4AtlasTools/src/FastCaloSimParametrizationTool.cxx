@@ -29,9 +29,6 @@ public:
   }
 };
 
-// Logical world name in the simplified-geometry GDML file.
-constexpr const char* s_worldLogName = "WorldLog";
-
 }  // namespace
 
 FastCaloSimParametrizationTool::FastCaloSimParametrizationTool(
@@ -41,6 +38,14 @@ FastCaloSimParametrizationTool::FastCaloSimParametrizationTool(
 FastCaloSimParametrizationTool::~FastCaloSimParametrizationTool() = default;
 
 StatusCode FastCaloSimParametrizationTool::initialize() {
+
+  // Forward Athena configuration to the external transport helper.
+  m_caloTransportTool.setUseSimplifiedGeo(m_useSimplifiedGeo.value());
+  m_caloTransportTool.setSimplifiedWorldLogName(
+      m_simplifiedWorldLogName.value());
+  m_caloTransportTool.setTransportLimitVolume(
+      m_transportLimitVolume.value());
+  m_caloTransportTool.setMaxSteps(m_maxSteps.value());
 
   if (m_geoTag.value().empty()) {
     ATH_MSG_ERROR(
@@ -116,10 +121,12 @@ StatusCode FastCaloSimParametrizationTool::finalize() {
 }
 
 StatusCode FastCaloSimParametrizationTool::initializeTransportGeometry() {
-  // G4AtlasDetectorConstructionTool loads this geometry in Construct() when
-  // configured to; this is the fallback for setups that do not.
-  if (G4Threading::IsMasterThread() && !m_simplifiedGeoPath.value().empty() &&
-      !G4LogicalVolumeStore::GetInstance()->GetVolume(s_worldLogName, false)) {
+  // Detector construction normally loads the simplified GDML. Keep this
+  // fallback for setups that initialize FastCaloSim directly.
+  if (m_useSimplifiedGeo.value() && G4Threading::IsMasterThread() &&
+      !m_simplifiedGeoPath.value().empty() &&
+      !G4LogicalVolumeStore::GetInstance()->GetVolume(
+          m_simplifiedWorldLogName.value(), false)) {
     const std::string geoFile =
         PathResolverFindCalibFile(m_simplifiedGeoPath.value());
     if (geoFile.empty()) {
@@ -135,8 +142,7 @@ StatusCode FastCaloSimParametrizationTool::initializeTransportGeometry() {
   // Workers can use, but cannot create, the shared transport world.
   if (!m_caloTransportTool.initializeGeometry()) {
     ATH_MSG_FATAL(
-        "Failed to initialize the transport world volume. Ensure the "
-        "simplified transport geometry is loaded before this call.");
+        "Failed to initialize the configured transport world volume.");
     return StatusCode::FAILURE;
   }
   return StatusCode::SUCCESS;
