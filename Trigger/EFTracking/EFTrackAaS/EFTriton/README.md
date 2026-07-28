@@ -1,101 +1,145 @@
+# `traccc`-as-a-Service (`traccc-aaS`) with NVIDIA Triton
+
 Welcome to the EF Tracking implementation of traccc as-a-Service with NVIDIA Triton Inference Server. This document will demonstrate how to build, test, and run the server, as well as how to use it with our Python client. An Athena client edition will be updated.
 
 This repository runs traccc as-a-Service. This uses a custom backend, with a wrapper for GPU pipeline information, to launch the Triton server. This Triton server is launched with a model algorithm to transfer information between the client and the GPU. Currently, the model is built for the G200 pipeline, with more models to be included at a later date.
 
+---
 
-The following description will detail the setup for a working version of traccc as-a-Service with G200.
-This traccc setup is currently compatible at traccc v1.0.0, athena 25.0.45.
+## 1. Prerequisites & Environment Setup
 
+Select one of the two deployment workflows below depending on your machine environment.
 
-Environment Setup
+### Option A: Interactive Cluster Node (`ef-tb-g01`)
 
-In order to run, you need all the dependencies to build and run.  A sample Docker image has been preincluded and converted to a .sif for the Apptainer environment (traccc-aas_v1p4_report.sif). Else, a Dockerfile has been included in order to create your image if you so choose. These are located under /EFTritonAlgsPipelines/data/ .
+Use this option when building directly on an ATLAS cluster node against the CVMFS Athena nightlies and an installed Triton SDK.
 
-If creating your own image:
+1. **Source the Athena Environment**:
+   ```bash
+   asetup Athena,main,latest
+   ```
 
-Run this in a machine where you have sudo privileges, ideally. Make sure you have the directory in that machine. If running everything on a different machine than where the image is being built, then you only need that directory in the building machine.
-Now we’re going to build the docker image and then turn it into a .sif that Apptainer can run! You may choose your own image name for <image_name>.
+2. **Verify Toolchain & Triton SDK**:
+   Ensure Triton SDK `r23.04` is available under `/opt/triton-sdk/r23.04`.
+   ```bash
+   test -f /opt/triton-sdk/r23.04/include/triton/core/tritonbackend.h && echo "Triton SDK OK"
+   ```
 
-sudo docker build -t <image_name> .
-sudo apptainer build <path_for_image_location>/<image_name>.sif docker-daemon://<image name>:latest
+### Option B: Container Environment (Apptainer / Docker)
 
-If your machine gives you issues and says it doesn't have enough room to build the image, move the cache directory to a tmp directory. In that case, here's the build instructions:
+Use this option if you are deploying inside an isolated container image.
 
-sudo docker build -t <image name> .
+1. **Obtain or Build the Image**:
+   A pre-built container image is available on EOS:
+   ```text
+   /eos/project/a/atlas-eftracking/AaS/traccc-aas_v1p4_report.sif
+   ```
 
-mkdir -p /<path>/apptainer-tmp
+   To build a custom `.sif` image locally using Docker:
+   ```bash
+   # Build Docker image
+   sudo docker build -t traccc-aas:latest .
 
-sudo APPTAINER_TMPDIR=/<path_for_new_tmp>/apptainer-tmp \      
-  APPTAINER_CACHEDIR=/<path_for_new_tmp>/apptainer-tmp \
-  apptainer build /<path_for_image_location>/<image_name>.sif \ 
-  docker-daemon://<image_name>:latest
+   # Convert to Apptainer image (use a custom temp dir if disk space is low)
+   mkdir -p /tmp/apptainer-tmp
+   sudo APPTAINER_TMPDIR=/tmp/apptainer-tmp \
+        APPTAINER_CACHEDIR=/tmp/apptainer-tmp \
+        apptainer build traccc-aas_v1p4_report.sif docker-daemon://traccc-aas:latest
+   ```
 
-Make sure to copy the image back to the proper directory if working from a different machine.
+2. **Run the Container**:
+   Launch the container with GPU access (`--nv`) and bind your workspace and geometry data:
+   ```bash
+   apptainer run --nv \
+     --bind "$(pwd):/work" \
+     --bind /eos/project/a/atlas-eftracking/GPU/ITk_data/ATLAS-P2-RUN4-03-00-01:/geoDir \
+     traccc-aas_v1p4_report.sif
+   ```
 
-Server Setup
+---
 
-To start up the Apptainer environment (assuming image name is the same as the sample), run the following command. We are binding the geometry files to this so that Apptainer can read them, labeled as geoDir.
+## 2. Optional: Build and Test Standalone Wrappers
 
-apptainer run --nv \
-  --bind "$(pwd)/EFTriton:/work" \
-  --bind /eos/project/a/atlas-eftracking/GPU/ITk_data/ATLAS-P2-RUN4-03-00-01:/geoDir \
-  EFTriton/EFTritonAlgsPipelines/data/env/traccc-aas_v1p4_report.sif
+The standalone pipeline wrappers feed GPU algorithms into the backend. They live under `EFTritonAlgsPipelines/`.
 
+To test the G200 standalone executable independently with a sample event:
 
-Testing Wrappers
+```bash
+cd EFTritonAlgsPipelines
+mkdir -p build && cd build
 
-The wrappers, or standalones, feed into the backend to supply GPU pipeline information. They exist in EFTriton/EFTritonAlgsPipelines/src (.cpp) and EFTriton/EFTritonAlgsPipelines/EFTritonPipelines (.hpp). If modifying these and wish to test them with our sample event, compile and run using the following code from EFTritonAlgsPipelines. (If the cmake doesn’t work in Apptainer, run unset CC && unset CXX)
+# Unset compilers if running inside container with conflicting environment overrides
+unset CC CXX
 
-mkdir build
-cd build
-cmake ../
-cmake --build .
+cmake ..
+cmake --build . -j"$(nproc)"
 
 ./TracccG200Standalone ../../EFTritonTester/event000000000-cells.csv 0
+```
 
-Building Server Backend: EFTritonRunner
+---
 
-This is where we compile the full GPU/traccc setup for the backend. 
-Under EFTritonRunner, the backend file is /src/traccc-g200.cc, which contains the Triton backend information and includes the GPU wrappers within. 
-Compiling this will create our model, which will be placed in a new directory labeled model_g200 upon compilation, alongside a copy of the configuration file, config.pbtxt (which you can find and modify under /cfg). 
+## 3. Build the Triton Backend (`EFTritonRunner`)
 
-To compile the G200 backend from EFTritonRunner/G200:
+The backend source code (`src/traccc_g200.cc`) wraps the GPU pipeline and links against `traccc`, `covfie`, `vecmem`, `detray`, and the Triton Server SDK.
 
-mkdir build
-cd build/
-cmake -B . -S ../     -DCMAKE_INSTALL_PREFIX=../install/     -DCMAKE_BUILD_TYPE=Release
-cmake --build . --target install -- -j20
+Navigate to `EFTritonRunner/G200` to compile and install the model and library:
 
-Starting Triton Server
+```bash
+cd EFTritonRunner/G200
 
-After building the backend and creating the model repository with the necessary two files, you may now start up the Triton server!
+# Clear stale build cache
+rm -rf build install
 
- tritonserver \
-  --model-repository=/athena/Trigger/EFTracking/EFTrackAaS/EFTriton/EFTriton/EFTritonRunner/G200/model_g200/traccc-g200 \
+# Configure using environment variables set up by Athena
+cmake -S . -B build \
+  -DCMAKE_BUILD_TYPE=Release \
+  -DCMAKE_INSTALL_PREFIX="$PWD/install" \
+  -DTRITON_ROOT=/opt/triton-sdk/r23.04
+
+# Compile and Install
+cmake --build build --target install -j"$(nproc)"
+```
+
+Compilation places the required `libtriton_traccc.so` library and the model configuration (`config.pbtxt`) into `$PWD/install/model_repository`.
+
+---
+
+## 4. Start Triton Server
+
+Once compiled, launch the Triton server and pass the path to the newly installed model repository:
+
+```bash
+tritonserver \
+  --model-repository="$PWD/install/model_repository" \
   --load-model=traccc-g200 \
   --log-verbose=1
+```
 
-If seeking dynamic loading across multiple models, include the tag --model-control-mode=explicit \ .
+> **Note:** Add `--model-control-mode=explicit` if you intend to dynamically load or unload multiple models.
 
-Testbed Connections
+---
 
-If running this across multiple testbeds, consult this section.
-Open a new terminal on the node you would like your client to be located.
-Run the following command to connect the server node to the client node (in this example, that is connecting to G01, but can change G01 to whatever you want.)
+## 5. Running the Client
 
+### Multi-Node Setup (SSH Tunneling)
+If the server is running on worker node `ef-tb-g01` and your client is on a different node, open a terminal on the client node and set up an SSH tunnel:
+
+```bash
 ssh -L 8001:localhost:8001 $USER@ef-tb-g01
+```
 
+### Run Client
+Navigate to `EFTritonTester/` and run the Python client script:
 
-
-Client Running
-
-To run the client, open a new terminal on the client node of your choosing. If not connecting testbeds in the following section, do this in the same node as your active Triton server.
-
-Go to /EFTritonTester and run the following command.
-
+```bash
+cd EFTritonTester
 python TracccTritonClient.py
+```
 
+---
 
-For more details, a version of non-Athena based general traccc-aaS can be located at https://github.com/milescb/traccc-aaS/tree/main/client, and a CodiMD for tracking as a service with Athena is found at https://codimd.web.cern.ch/1FcLmapORpeBtAVL_M6h4A
+## References & Additional Links
 
-
+- **C++ Standalone Triton Client:** [traccc-aaS GitHub Client Guide](#)
+- **Athena Tracking-as-a-Service Guide:** [CERN CodiMD Notes](#)
