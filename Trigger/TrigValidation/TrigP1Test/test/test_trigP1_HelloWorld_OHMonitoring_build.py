@@ -16,7 +16,6 @@ ex.type = 'athenaEF'
 ex.job_options = 'AthExHelloWorld.HelloWorldConfig.HelloWorldCfg'
 ex.input = 'data'
 ex.args = '-M'
-ex.perfmon = False # perfmon currently not fully supported with athenaHLT -M
 
 test = Test.Test()
 test.art_type = 'build'
