@@ -53,6 +53,8 @@ from AthenaCommon.Constants import DEBUG
 from GlobalSimulation.Digraph import Digraph
 from  GlobalSimulation.graphAlgs import Topological
 
+from PathResolver import PathResolver
+
 import xml.etree.ElementTree as ET
 import os
 from collections import defaultdict
@@ -97,15 +99,22 @@ def GlobalSimulationAlgCfg(flags,
     logger.setLevel(OutputLevel)
     cfg = ComponentAccumulator()
 
-    if fn is None:
-        fn = os.environ.get('GS_CFG_FILE', None)
-        if fn is None:
-            logger.error('Please set export environment variable GS_CFG_FILE'
-                         ' with the name of a GlobalSim config xml file')
-            return cfg
-
+    fn = os.environ.get('GS_CFG_FILE', None)
+    if fn is not None:
+        if not os.path.exists(fn):
+            raise RuntimeError ('specified cfg file ' +  fn + ' does not exist')
+    else:
+        def_fn = "GlobalSimulation/globalSim_AllChainsCfg.xml"
+        logger.info('environment variable GS_CFG_FILE not set ' +
+                    'looking for default config file'+  def_fn)
+        fn = PathResolver.FindCalibFile(def_fn)
+        if not fn:
+            logger.info ('could not find default cfg file ' + def_fn +
+                         'giving up')
+            raise RuntimeError ('default cfg file ' +  def_fn + ' not found')
+ 
     logger.info('GlobalSim local config, cfg file: ' + fn)
-   
+
     def str_id(toolEl):
         """ obtain a string id for each AlgTool"""
         
@@ -340,7 +349,7 @@ def GlobalSimulationAlgCfg(flags,
         tname =  tool.__class__.__name__ + '/' + tool.name
 
         logger.debug('GS tool name ' + tname)
-        logger.debug('GS r_handle str(tool)' , str(tool))
+        logger.debug('GS r_handle str(tool) ' + str(tool))
 
         handle_name = read_handles.get(tool.__class__.__name__, None)
         if handle_name is None:
