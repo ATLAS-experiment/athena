@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 // Local include(s).
 #include "xAODRootAccess/RAuxStore.h"
@@ -15,6 +15,7 @@
 #include "AthContainers/AuxStoreInternal.h"
 #include "AthContainers/AuxTypeRegistry.h"
 #include "AthContainers/tools/AuxVectorInterface.h"
+#include "AthContainers/CurrentContext.h"
 
 // ROOT include(s).
 #include <TClass.h>
@@ -567,6 +568,13 @@ struct RAuxStore::impl {
     return StatusCode::SUCCESS;
   }
 
+  impl(const EventContext& ctx, Members& data)
+    : m_ctx(ctx), m_data(data)
+  {}
+
+  /// The context for this event.
+  const EventContext& m_ctx;
+
   /// Variables coming from @c AuxStoreBase
   Members& m_data;
 
@@ -579,7 +587,7 @@ struct RAuxStore::impl {
   bool m_inputScanned = false;
 
   /// The entry to load from the ntuple
-  ::Long64_t m_entry;
+  ::Long64_t m_entry = 0;
 
   /// Fields containing the various auxiliary variables
   std::vector<std::unique_ptr<RFieldHandle> > m_fields;
@@ -593,9 +601,10 @@ struct RAuxStore::impl {
 
 };  // struct RAuxStore::impl
 
-RAuxStore::RAuxStore(std::string_view prefix, bool topStore, EStructMode mode)
+RAuxStore::RAuxStore(const EventContext& ctx,
+                     std::string_view prefix, bool topStore, EStructMode mode)
     : details::AuxStoreBase(topStore, mode),
-      m_impl{std::make_unique<impl>(m_data)} {
+      m_impl{std::make_unique<impl>(ctx, m_data)} {
 
   setPrefix(prefix);
 }
@@ -703,10 +712,14 @@ StatusCode RAuxStore::getEntry(std::int64_t entry, int getall) {
   }
 
   // Get all the variables at once:
-  for (auto& field : m_impl->m_fields) {
+  for ([[maybe_unused]] SG::auxid_t auxid = 0; auto& field : m_impl->m_fields) {
     if (field) {
       RETURN_CHECK("xAOD::RAuxStore::getEntry", field->getEntry(entry));
+#ifndef XAOD_STANDALONE
+      m_data.m_vecs[auxid]->toTransient( m_impl->m_ctx );
+#endif
     }
+    ++auxid;
   }
 
   // Return gracefully.
@@ -763,6 +776,9 @@ StatusCode RAuxStore::getEntryFor(SG::auxid_t auxid) {
   assert(m_impl->m_fields[auxid]);
   RETURN_CHECK("xAOD::RAuxStore::getEntryFor",
                m_impl->m_fields[auxid]->getEntry(m_impl->m_entry));
+#ifndef XAOD_STANDALONE
+  m_data.m_vecs[auxid]->toTransient( m_impl->m_ctx );
+#endif
   return StatusCode::SUCCESS;
 }
 
@@ -933,6 +949,9 @@ StatusCode RAuxStore::setupInputData(SG::auxid_t auxid) {
   // Get the current entry.
   RETURN_CHECK("xAOD::RAuxStore::setupInputData",
                m_impl->m_fields[auxid]->getEntry(m_impl->m_entry));
+#ifndef XAOD_STANDALONE
+  m_data.m_vecs[auxid]->toTransient( m_impl->m_ctx );
+#endif
 
   // Remember which variable got created:
   m_data.m_auxIDs.insert(auxid);

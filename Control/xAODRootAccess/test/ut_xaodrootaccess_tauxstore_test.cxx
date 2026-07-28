@@ -68,7 +68,7 @@ StatusCode test_linked()
                                           SG::AuxVarFlags::None,
                                           auxid1);
   TTree tree ("t", "t");
-  xAOD::TAuxStore s( "fooAux." );
+  xAOD::TAuxStore s( Gaudi::Hive::currentContext(), "fooAux." );
   RETURN_CHECK( APP_NAME, s.readFrom (tree) );
   int* vp1 = reinterpret_cast<int*> (s.getData (auxid1, 10, 10));
   float* vp2 = reinterpret_cast<float*> (s.getData (auxid2, 3, 3));
@@ -123,7 +123,7 @@ StatusCode test_linked()
   }
 
   TTree tree2 ("t2", "t2");
-  xAOD::TAuxStore s2( "fooAux." );
+  xAOD::TAuxStore s2( Gaudi::Hive::currentContext(), "fooAux." );
   RETURN_CHECK( APP_NAME, s2.readFrom (tree2) );
   (void)s2.getData (auxid2, 6, 6);
   (void)s2.getData (auxid1, 4, 4);
@@ -146,7 +146,7 @@ StatusCode test_linked()
 StatusCode test_copyIDs()
 {
   TTree tree ("t", "t");
-  xAOD::TAuxStore s( "fooAux." );
+  xAOD::TAuxStore s( Gaudi::Hive::currentContext(), "fooAux." );
   RETURN_CHECK( APP_NAME, s.readFrom (tree) );
 
   SG::AuxTypeRegistry& r = SG::AuxTypeRegistry::instance();
@@ -185,7 +185,7 @@ StatusCode test_toTransient()
   SG::auxid_t auxid2 = r.getAuxID<TTest> ("ttest1");
 
   TTree tree ("t", "t");
-  xAOD::TAuxStore s( "fooAux." );
+  xAOD::TAuxStore s( Gaudi::Hive::currentContext(), "fooAux." );
   RETURN_CHECK( APP_NAME, s.readFrom (tree) );
 
   int* vp1 = reinterpret_cast<int*> (s.getData (auxid1, 3, 3));
@@ -244,7 +244,7 @@ int main() {
    ::Info( APP_NAME, "Created transient input TTree for the test" );
 
    // Create the object that we want to test:
-   xAOD::TAuxStore store( "PrefixAux." );
+   xAOD::TAuxStore store( Gaudi::Hive::currentContext(), "PrefixAux." );
    store.lock();
 
    // Connect it to this transient input tree:
