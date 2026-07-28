@@ -62,13 +62,15 @@ namespace JiveXML {
 
     ATH_MSG_DEBUG( "in retrieve()"  );
 
-    SG::ReadHandle<CaloCellContainer> cellContainer(m_sgKey);
+    const EventContext& ctx = Gaudi::Hive::currentContext();
+
+    SG::ReadHandle<CaloCellContainer> cellContainer(m_sgKey, ctx);
     if (!cellContainer.isValid()){
 	    ATH_MSG_WARNING( "Could not retrieve Calorimeter Cells "  );
     }
     else{
       if (m_tile) {
-        DataMap data = getCaloTileData(&(*cellContainer));
+        DataMap data = getCaloTileData(&(*cellContainer), ctx);
         ATH_CHECK( FormatTool->AddToEvent("TILE", m_sgKey.key(), &data) );
         ATH_MSG_DEBUG( "Tile retrieved"  );
       }
@@ -83,7 +85,7 @@ namespace JiveXML {
    * Retrieve Tile cell location and details
    * @param FormatTool the tool that will create formated output from the DataMap
    */
-  const DataMap CaloTileRetriever::getCaloTileData(const CaloCellContainer* cellContainer) {
+  const DataMap CaloTileRetriever::getCaloTileData(const CaloCellContainer* cellContainer, const EventContext& ctx) {
 
     ATH_MSG_DEBUG( "getTileData()"  );
     char rndStr[30];
@@ -164,7 +166,7 @@ namespace JiveXML {
 
     SG::ReadHandle<TileDigitsContainer> tileDigits;
     if (m_doTileDigit) {
-      tileDigits = SG::makeHandle(m_sgKeyTileDigits);
+      tileDigits = SG::makeHandle(m_sgKeyTileDigits, ctx);
       if (!tileDigits.isValid()){
          ATH_MSG_WARNING( "Could not retrieve TileDigits "  );
       }
@@ -172,7 +174,7 @@ namespace JiveXML {
 
     SG::ReadHandle<TileRawChannelContainer> RawChannelCnt;
     if (m_doTileCellDetails) {
-      RawChannelCnt = SG::makeHandle(m_sgKeyTileRawChannel);
+      RawChannelCnt = SG::makeHandle(m_sgKeyTileRawChannel, ctx);
       if (!RawChannelCnt.isValid()){
          ATH_MSG_WARNING( "Could not retrieve TileRawChannel "  );
       }
@@ -206,7 +208,7 @@ namespace JiveXML {
           int ros       = tileHWID->ros(hwid);
           int PMT = abs( cabling->channel2hole(ros,channel) );
           int drawerIdx = TileCalibUtils::getDrawerIdx(ros,drawer);
-          uint32_t tileAdcStatus = m_tileBadChanTool->encodeStatus(m_tileBadChanTool->getAdcStatus(drawerIdx,channel,adc));
+          uint32_t tileAdcStatus = m_tileBadChanTool->encodeStatus(m_tileBadChanTool->getAdcStatus(drawerIdx,channel,adc,ctx));
 
           amplitude = cell->amplitude();
           //Change amplitude units to ADC counts
@@ -415,7 +417,7 @@ namespace JiveXML {
               time += m_tileToolTiming->getSignalPhase(drawerIdx, channel, adc);
             }
 
-            uint32_t tileAdcStatus = m_tileBadChanTool->encodeStatus(m_tileBadChanTool->getAdcStatus(drawerIdx,channel,adc));
+            uint32_t tileAdcStatus = m_tileBadChanTool->encodeStatus(m_tileBadChanTool->getAdcStatus(drawerIdx,channel,adc,ctx));
             if (badch1) tileAdcStatus += 10;
 
             pmt1RawAmplitude.push_back(DataType(amp));
@@ -450,7 +452,7 @@ namespace JiveXML {
               time += m_tileToolTiming->getSignalPhase(drawerIdx, channel, adc);
             }
 
-            uint32_t tileAdcStatus = m_tileBadChanTool->encodeStatus(m_tileBadChanTool->getAdcStatus(drawerIdx,channel,adc));
+            uint32_t tileAdcStatus = m_tileBadChanTool->encodeStatus(m_tileBadChanTool->getAdcStatus(drawerIdx,channel,adc,ctx));
             if (badch2) tileAdcStatus += 10;
 
             pmt2RawAmplitude.push_back(DataType(amp));
