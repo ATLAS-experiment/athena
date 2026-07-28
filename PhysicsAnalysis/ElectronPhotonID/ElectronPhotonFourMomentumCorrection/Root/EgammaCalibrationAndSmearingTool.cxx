@@ -6,12 +6,16 @@
 #include <AsgTools/AsgToolConfig.h>
 
 #include <algorithm>
+#include <array>
+#include <bit>
+#include <cstdint>
 #include <format>
 #include <memory>
 #include <string>
 #include <utility>
 
 #include "AthContainers/ConstAccessor.h"
+#include "CxxUtils/XXH.h"
 #include "PATInterfaces/SystematicRegistry.h"
 #include "PathResolver/PathResolver.h"
 #include "xAODCaloEvent/CaloCluster.h"
@@ -301,13 +305,27 @@ EgammaCalibrationAndSmearingTool::EgammaCalibrationAndSmearingTool(
                              columnar::EgammaId egamma,
                              columnar::EventInfoId ei) {
         const Accessors& acc = *tool.m_accessors;
-        // avoid 0 as result, see
-        // https://root.cern.ch/root/html/TRandom3.html#TRandom3:SetSeed
         auto cluster = acc.caloClusterAcc(egamma)[0].value();
-        return 1 + static_cast<RandomNumber>(
-                       std::abs(acc.clusterPhiAcc(cluster)) * 1E6 +
-                       std::abs(acc.clusterEtaAcc(cluster)) * 1E3 +
-                       acc.eventNumberAcc(ei));
+        // Seed the generator with the same XXH3-based scheme as
+        // TRandom2RNGTestTool in ColumnarRNGTestTools: pack the cluster
+        // eta/phi (as their raw 32-bit float bit patterns), the event number
+        // and a per-tool seed base into a uint64 array and mix them with
+        // XXH3.  The underlying eta/phi storage is float, so static_cast<float>
+        // reproduces the exact bit pattern the test tool hashes.
+        const std::array<std::uint64_t, 4> seedComponents {
+            std::bit_cast<std::uint32_t>(static_cast<float>(acc.clusterPhiAcc(cluster))),
+            std::bit_cast<std::uint32_t>(static_cast<float>(acc.clusterEtaAcc(cluster))),
+            static_cast<std::uint64_t>(acc.eventNumberAcc(ei)),
+            tool.m_seedBase.value()};
+        RandomNumber seed = static_cast<RandomNumber>(xxh3::hash64(
+            seedComponents.data(),
+            seedComponents.size() * sizeof(std::uint64_t)));
+        // TRandom2 treats a zero seed specially (fixed internal sequence), so
+        // remap only that one value, see
+        // https://root.cern.ch/root/html/TRandom2.html#TRandom2:SetSeed
+        if (seed == 0)
+          seed = 1;
+        return seed;
       }),
       m_accessors(std::make_unique<Accessors>(*this)) {
 

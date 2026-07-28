@@ -926,12 +926,12 @@ class TestEgammaCalibrationAndSmearingTool(unittest.TestCase):
         # Create event info (simulation)
         ei = self.factory.create_eventinfo(True, 100000)
         # Define input-output data pairs for testing
-        input_output_data = [(self.factory.create_electron(0.1, 0.1, 100E3), 100562.79774458896),
-                             (self.factory.create_electron(0.2, 0.2, 100E3), 100068.17423063675),
-                             (self.factory.create_electron(0.2, 0.3, 100E3), 100384.75354227955),
-                             (self.factory.create_electron(-0.3, 0.4, 10E3), 9569.174785100586),
-                             (self.factory.create_electron(1.4, 0.5, 50E3), 53208.5974402613),
-                             (self.factory.create_electron(1.5, 0.0, 50E3), 64483.935351120526),
+        input_output_data = [(self.factory.create_electron(0.1, 0.1, 100E3), 100618.65399187425),
+                             (self.factory.create_electron(0.2, 0.2, 100E3), 100536.00234670167),
+                             (self.factory.create_electron(0.2, 0.3, 100E3), 100359.9053536401),
+                             (self.factory.create_electron(-0.3, 0.4, 10E3), 9528.042143659422),
+                             (self.factory.create_electron(1.4, 0.5, 50E3), 52510.71492247634),
+                             (self.factory.create_electron(1.5, 0.0, 50E3), 62284.03263508702),
                              ]
 
         for electron, expected_energy in input_output_data:
@@ -965,12 +965,12 @@ class TestEgammaCalibrationAndSmearingTool(unittest.TestCase):
         # Create event info (simulation)
         ei = self.factory.create_eventinfo(True, 100000)
         # Define input-output data pairs for testing
-        input_output_data = [(self.factory.create_photon(0.1, 0.1, 100E3, 0.), 100634.12948444803),
-                             (self.factory.create_photon(0.2, 0.2, 100E3, 0.), 100120.36498860142),
-                             (self.factory.create_photon(0.2, 0.3, 100E3, 0.), 100354.51812478289),
-                             (self.factory.create_photon(-0.3, 0.4, 10E3, 20.), 9458.821119983862),
-                             (self.factory.create_photon(1.4, 0.5, 50E3, 50.), 51758.190340163004),
-                             (self.factory.create_photon(1.5, 0.0, 50E3, 50.), 64124.40721471615),
+        input_output_data = [(self.factory.create_photon(0.1, 0.1, 100E3, 0.), 100690.02498970936),
+                             (self.factory.create_photon(0.2, 0.2, 100E3, 0.), 100588.44015208993),
+                             (self.factory.create_photon(0.2, 0.3, 100E3, 0.), 100329.67790541465),
+                             (self.factory.create_photon(-0.3, 0.4, 10E3, 20.), 9418.163168338056),
+                             (self.factory.create_photon(1.4, 0.5, 50E3, 50.), 51079.32983024723),
+                             (self.factory.create_photon(1.5, 0.0, 50E3, 50.), 61936.77194719062),
                              ]
 
         for photon, expected_energy in input_output_data:

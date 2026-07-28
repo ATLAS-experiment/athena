@@ -22,7 +22,7 @@ atlas_add_library( ElectronPhotonFourMomentumCorrectionLib
    xAODEventInfo PATInterfaces EgammaAnalysisInterfacesLib egammaUtils PATCoreAcceptLib
    xAODRootAccess ColumnarTrackingLib ColumnarEventInfoLib 
    PRIVATE_LINK_LIBRARIES  AthLinks xAODMetaData egammaLayerRecalibTool
-   PathResolver ${extra_libs} )
+   PathResolver CxxUtils ${extra_libs} )
 
 if( NOT XAOD_STANDALONE )
    atlas_add_component( ElectronPhotonFourMomentumCorrection

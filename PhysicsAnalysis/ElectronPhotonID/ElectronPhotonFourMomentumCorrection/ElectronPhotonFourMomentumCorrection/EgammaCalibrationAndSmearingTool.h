@@ -6,6 +6,7 @@
 #define EGAMMA_CALIB_TOOL_H_
 
 #include <array>
+#include <cstdint>
 #include <functional>
 #include <map>
 #include <memory>
@@ -301,6 +302,10 @@ class EgammaCalibrationAndSmearingTool
   Gaudi::Property<std::string> m_pVtxKey{
     this, "PrimaryVerticesKey", "PrimaryVertices",
       "Name of the primary vertex container"};
+
+  Gaudi::Property<std::uint64_t> m_seedBase{
+    this, "seedBase", 42,
+      "extra seed component to incorporate into the random seed"};
 
   void setupSystematics();
 

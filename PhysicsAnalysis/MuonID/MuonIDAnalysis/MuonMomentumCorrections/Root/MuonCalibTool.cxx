@@ -8,7 +8,11 @@
 #include "xAODCore/ShallowCopy.h"
 
 // Local include(s):
+#include <array>
+#include <bit>
 #include <cmath>
+#include <cstdint>
+#include "CxxUtils/XXH.h"
 #include "TRandom2.h"
 
 #include "MuonMomentumCorrections/MuonCalibTool.h"
@@ -531,8 +535,26 @@ namespace CP
         unsigned long long eventNumber = 0;
         if(m_expertMode_EvtNumber.value()!=0) eventNumber=m_expertMode_EvtNumber.value();
         else eventNumber = evtInfo(acc.eventNumberAcc);
-        // Construct a seed for the random number generator:
-        const UInt_t seed = 1 + std::abs(muonObj.CB.phi) * 1E6 + std::abs(muonObj.CB.eta) * 1E3 + eventNumber;
+        // Construct a seed for the random number generator, using the same
+        // XXH3-based scheme as TRandom2RNGTestTool in ColumnarRNGTestTools:
+        // pack the object's eta/phi (as their raw 32-bit float bit patterns),
+        // the event number and a per-tool seed base into a uint64 array and
+        // mix them with XXH3.  The underlying eta/phi storage is float, so
+        // static_cast<float> reproduces the exact bit pattern the test tool
+        // hashes.
+        const std::array<std::uint64_t, 4> seedComponents {
+            std::bit_cast<std::uint32_t>(static_cast<float>(muonObj.CB.phi)),
+            std::bit_cast<std::uint32_t>(static_cast<float>(muonObj.CB.eta)),
+            static_cast<std::uint64_t>(eventNumber),
+            m_seedBase.value()};
+        unsigned int seed = static_cast<unsigned int>(xxh3::hash64(
+            seedComponents.data(),
+            seedComponents.size() * sizeof(std::uint64_t)));
+        // TRandom2 treats a zero seed specially (fixed internal sequence), so
+        // remap only that one value, see
+        // https://root.cern.ch/root/html/TRandom2.html#TRandom2:SetSeed
+        if (seed == 0)
+            seed = 1;
         loc_random3.SetSeed(seed);
 
         muonObj.rnd_g0 = loc_random3.Gaus(0, 1);
