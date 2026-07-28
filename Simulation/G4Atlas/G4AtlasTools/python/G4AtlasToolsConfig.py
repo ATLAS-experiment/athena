@@ -99,9 +99,10 @@ def FastCaloSimParametrizationToolCfg(flags, name="FastCaloSimParametrizationToo
     # FastCaloSim geometry consistent with the rest of the simulation.
     kwargs.setdefault("CaloGeoTag", flags.GeoModel.AtlasVersion)
     # Simplified transport geometry: honour an explicitly configured path (also
-    # used by G4AtlasAlg in AtlasG4 jobs); otherwise the tool falls back to its
-    # built-in calib-area default. Needed e.g. in ISF jobs, where G4AtlasAlg
-    # does not run and the tool itself loads the transport GDML.
+    # used by G4AtlasDetectorConstructionTool, which imports the GDML on the
+    # Geant4 master thread); otherwise the tool falls back to its built-in
+    # calib-area default. Kept as a fallback for setups where the detector
+    # construction tool does not load the transport GDML itself.
     if flags.Sim.SimplifiedGeoPath:
         kwargs.setdefault("SimplifiedGeoPath", flags.Sim.SimplifiedGeoPath)
     result.setPrivateTools(CompFactory.FastCaloSimParametrizationTool(name, **kwargs))

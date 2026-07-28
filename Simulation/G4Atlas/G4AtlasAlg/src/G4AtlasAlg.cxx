@@ -20,7 +20,6 @@
 #include <G4Event.hh>
 
 #include "G4EventManager.hh"
-#include "G4GDMLParser.hh"
 #include "G4Navigator.hh"
 #include "G4ParallelWorldPhysics.hh"
 #include "G4PropagatorInField.hh"
@@ -43,7 +42,6 @@
 #include "GeoModelInterfaces/IGeoModelSvc.h"
 #include "HitManagement/HitCollectionMap.h"
 #include "MCTruth/AtlasG4EventUserInfo.h"
-#include "PathResolver/PathResolver.h"
 #include "StoreGate/ReadHandle.h"
 #include "StoreGate/WriteHandle.h"
 
@@ -70,22 +68,6 @@ G4AtlasAlg::G4AtlasAlg(const std::string& name, ISvcLocator* pSvcLocator)
 StatusCode G4AtlasAlg::initialize ATLAS_NOT_THREAD_SAFE ()
 {
   ATH_MSG_DEBUG("Start of initialize()");
-
-  // All algorithm clones initialize on the master thread, so import once.
-  if(!m_simplifiedGeoPath.empty()) {
-    std::string geoFile = PathResolverFindCalibFile(m_simplifiedGeoPath);
-
-    if (geoFile.empty()) {
-      ATH_MSG_FATAL("Could not find simplified geometry file: " << m_simplifiedGeoPath);
-      return StatusCode::FAILURE;
-    }
-
-    static std::once_flag simplifiedGeoOnceFlag;
-    std::call_once(simplifiedGeoOnceFlag, [&geoFile]() {
-      G4GDMLParser parser;
-      parser.Read(geoFile, false);
-    });
-  }
 
   // Create the scoring manager if requested
   if (m_recordFlux) G4ScoringManager::GetScoringManager();

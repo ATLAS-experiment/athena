@@ -18,6 +18,9 @@ PVNotifier::PVNotifier(G4GeometryNotifierSvc* gs)
 
 void PVNotifier::NotifyRegistration()
 {
+  if (!m_notifierSvc->GetNamePrefixing()) {
+    return;
+  }
   G4PhysicalVolumeStore* store = G4PhysicalVolumeStore::GetInstance();
   unsigned int current = store->size();
   G4VPhysicalVolume* lV = (*store)[current-1];

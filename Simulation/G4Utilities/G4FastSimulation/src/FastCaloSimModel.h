@@ -5,11 +5,11 @@
 #ifndef G4FASTSIMULATION_FASTCALOSIMMODEL_H
 #define G4FASTSIMULATION_FASTCALOSIMMODEL_H
 
-#include "GaudiKernel/ServiceHandle.h"
+#include "Gaudi/Property.h"
+#include "GaudiKernel/ToolHandle.h"
 #include "G4VFastSimulationModel.hh"
 #include "G4AtlasInterfaces/IPunchThroughSimWrapper.h"
-#include "AthenaKernel/IAthRNGSvc.h"
-#include "FastCaloSimTool.h"
+#include "G4AtlasInterfaces/IFastCaloSimParametrizationTool.h"
 
 class CaloCellContainerSD;
 class G4FieldTrack;
@@ -22,19 +22,14 @@ class FastCaloSimModel: public G4VFastSimulationModel
 
   FastCaloSimModel(const std::string& name,
                    G4Region* region,
-                   const ServiceHandle<IAthRNGSvc>& rndmGenSvc,
-                   const Gaudi::Property<std::string>& randomEngineName,
                    const Gaudi::Property<std::string>& CaloCellContainerSDName,
                    const PublicToolHandle<IFastCaloSimParametrizationTool>& FastCaloSimParametrizationTool,
                    const PublicToolHandle<IPunchThroughSimWrapper>& PunchThroughSimWrapper,
-                   const Gaudi::Property<bool>& doPunchThrough,
-                   FastCaloSimTool* FastCaloSimTool);
+                   const Gaudi::Property<bool>& doPunchThrough);
   ~FastCaloSimModel() override = default;
 
   G4bool IsApplicable(const G4ParticleDefinition&) override final;
   void DoIt(const G4FastTrack&, G4FastStep&) override final;
-  void StartOfAthenaEvent(const EventContext& ctx);
-  void EndOfAthenaEvent(const EventContext& ctx);
 
   /// Check the model's particle, energy, and geometry requirements.
   G4bool ModelTrigger(const G4FastTrack &) override final;
@@ -46,15 +41,10 @@ class FastCaloSimModel: public G4VFastSimulationModel
   G4bool passedIDCaloBoundary(const G4FastTrack& fastTrack);
 
  private:
-  ServiceHandle<IAthRNGSvc> m_rndmGenSvc;
-  Gaudi::Property<std::string> m_randomEngineName;
-  ATHRNG::RNGWrapper* m_rngWrapper{};
-
   Gaudi::Property<std::string> m_CaloCellContainerSDName;
   PublicToolHandle<IFastCaloSimParametrizationTool> m_FastCaloSimParametrizationTool;
   PublicToolHandle<IPunchThroughSimWrapper> m_PunchThroughSimWrapper;
   Gaudi::Property<bool> m_doPunchThrough;
-  FastCaloSimTool* m_FastCaloSimTool;
 };
 
 #endif  // G4FASTSIMULATION_FASTCALOSIMMODEL_H

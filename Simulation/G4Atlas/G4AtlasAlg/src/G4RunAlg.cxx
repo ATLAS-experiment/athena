@@ -8,7 +8,6 @@
 // Geant4 includes
 #include "G4Event.hh"
 #include "G4EventManager.hh"
-#include "G4GDMLParser.hh"
 #include "G4TrackingManager.hh"
 #include "G4PhysicalVolumeStore.hh"
 #include "G4GeometryManager.hh"
@@ -19,7 +18,6 @@
 #include "GeoModelInterfaces/IGeoModelSvc.h"
 #include "G4RunManagement/AtlasG4SyncEventUserInfo.h"
 #include "HitManagement/HitCollectionMap.h"
-#include "PathResolver/PathResolver.h"
 #include "StoreGate/ReadHandle.h"
 #include "StoreGate/WriteHandle.h"
 
@@ -34,18 +32,6 @@ static std::once_flag releaseGeoModelOnceFlag;
 StatusCode G4RunAlg::initialize ATLAS_NOT_THREAD_SAFE ()
 {
   ATH_MSG_DEBUG("Start of G4RunAlg::initialize()");
-
-  // Read the simplified geometry for FastCaloSim track transportation if requested
-  // TODO: should be moved to Geant4 main thread (detector construction)
-  if(!m_simplifiedGeoPath.empty()) {
-    std::string geoFile = PathResolverFindCalibFile(m_simplifiedGeoPath);
-    if (geoFile.empty()) {
-      ATH_MSG_FATAL("Could not find simplified geometry file: " << m_simplifiedGeoPath);
-      return StatusCode::FAILURE;
-    }
-    G4GDMLParser parser;
-    parser.Read(geoFile, false);
-  }
 
   // Truth service
   ATH_CHECK(m_truthRecordSvc.retrieve());

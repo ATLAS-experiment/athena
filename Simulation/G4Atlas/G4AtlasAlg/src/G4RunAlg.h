@@ -79,7 +79,6 @@ private:
   Gaudi::Property<bool> m_releaseGeoModel{this, "ReleaseGeoModel", true, ""};
   Gaudi::Property<bool> m_useShadowEvent{this, "UseShadowEvent", false, "New approach to selecting particles for simulation"};
   Gaudi::Property<std::string> m_randomStreamName{this, "RandomStreamName", "Geant4", ""};
-  Gaudi::Property<std::string> m_simplifiedGeoPath{this, "SimplifiedGeoPath", "", "Path to the simplified geometry file"};
   Gaudi::Property<std::map<std::string, std::string>> m_verbosities {this, "Verbosities", {}, "Map of G4 Verbosities to set for the simulation"};
   
   SG::ReadHandleKey<xAOD::EventInfo> m_eventInfoKey{this, "EventInfo", "EventInfo", "EventInfo key"};

@@ -61,10 +61,6 @@ def FastCaloSimCfg(flags, **kwargs):
     from G4AtlasTools.G4AtlasToolsConfig import FastCaloSimParametrizationToolCfg
     kwargs.setdefault("FastCaloSimParametrizationTool", result.addPublicTool(result.popToolsAndMerge(FastCaloSimParametrizationToolCfg(flags))))
 
-    from RngComps.RngCompsConfig import AthRNGSvcCfg
-    kwargs.setdefault("RandomSvc", result.getPrimaryAndMerge(AthRNGSvcCfg(flags)).name)
-    kwargs.setdefault("RandomStream", "FastCaloSimRnd")
-
     # Set the PunchThrough G4 part
     from G4AtlasTools.G4AtlasToolsConfig import PunchThroughSimWrapperCfg
     if "PunchThroughSimWrapper" not in kwargs:

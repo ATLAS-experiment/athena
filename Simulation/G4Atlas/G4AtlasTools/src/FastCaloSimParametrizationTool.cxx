@@ -116,7 +116,8 @@ StatusCode FastCaloSimParametrizationTool::finalize() {
 }
 
 StatusCode FastCaloSimParametrizationTool::initializeTransportGeometry() {
-  // AtlasG4 loads this geometry earlier; ISF relies on this fallback.
+  // G4AtlasDetectorConstructionTool loads this geometry in Construct() when
+  // configured to; this is the fallback for setups that do not.
   if (G4Threading::IsMasterThread() && !m_simplifiedGeoPath.value().empty() &&
       !G4LogicalVolumeStore::GetInstance()->GetVolume(s_worldLogName, false)) {
     const std::string geoFile =

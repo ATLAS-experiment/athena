@@ -5,7 +5,6 @@
 #include "FastCaloSimTool.h"
 #include "FastCaloSimModel.h"
 
-#include "AthenaKernel/RNGWrapper.h"
 #include "G4Exception.hh"
 
 #include <cstdlib>
@@ -18,41 +17,12 @@ FastCaloSimTool::FastCaloSimTool(const std::string& type, const std::string& nam
 StatusCode FastCaloSimTool::initialize()
 {
   ATH_CHECK(FastSimulationBase::initialize());
-  ATH_CHECK(m_rndmGenSvc.retrieve());
   ATH_CHECK(m_FastCaloSimParametrizationTool.retrieve());
   if (m_doPunchThrough) {
     ATH_CHECK(m_PunchThroughSimWrapper.retrieve());
   }
   return StatusCode::SUCCESS;
 }
-
-StatusCode FastCaloSimTool::BeginOfAthenaEvent(HitCollectionMap&){
-  const EventContext& ctx = Gaudi::Hive::currentContext();
-
-  FastCaloSimModel* localFastSimModel = m_fastSimModel.Get();
-  if( !localFastSimModel ){
-    ATH_MSG_ERROR ("BeginOfAthenaEvent: FastSimModel was never created!");
-    return StatusCode::FAILURE;
-  }
-  localFastSimModel->StartOfAthenaEvent(ctx);
-
-  return StatusCode::SUCCESS;
-}
-
-StatusCode FastCaloSimTool::EndOfAthenaEvent(HitCollectionMap&){
-
-  const EventContext& ctx = Gaudi::Hive::currentContext();
-
-  FastCaloSimModel* localFastSimModel = m_fastSimModel.Get();
-  if( !localFastSimModel ){
-    ATH_MSG_ERROR ("EndOfAthenaEvent: FastSimModel was never created!");
-    return StatusCode::FAILURE;
-  }
-  localFastSimModel->EndOfAthenaEvent(ctx);
-
-  return StatusCode::SUCCESS;
-}
-
 
 G4VFastSimulationModel* FastCaloSimTool::makeFastSimModel()
 {
@@ -67,12 +37,10 @@ G4VFastSimulationModel* FastCaloSimTool::makeFastSimModel()
   }
 
   // The base constructor registers the model with the configured region.
-  auto* model = new FastCaloSimModel(name(), region, m_rndmGenSvc,
-                                    m_randomEngineName,
+  auto* model = new FastCaloSimModel(name(), region,
                                     m_CaloCellContainerSDName,
                                     m_FastCaloSimParametrizationTool,
                                     m_PunchThroughSimWrapper,
-                                    m_doPunchThrough, this);
-  m_fastSimModel.Put(model);
+                                    m_doPunchThrough);
   return model;
 }

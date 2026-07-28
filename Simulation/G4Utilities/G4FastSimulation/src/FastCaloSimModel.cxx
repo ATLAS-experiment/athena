@@ -9,13 +9,12 @@
 #include "FastCaloSim/Core/TFCSTruthState.h"
 #include "FastCaloSim/Core/TFCSExtrapolationState.h"
 
-#include "AthenaKernel/RNGWrapper.h"
-
 #include "G4Gamma.hh"
 #include "G4Electron.hh"
 #include "G4Positron.hh"
 #include "G4PionPlus.hh"
 #include "G4PionMinus.hh"
+#include "Randomize.hh"
 
 #include "G4ParticleTable.hh"
 #include "TruthUtils/HepMCHelpers.h"
@@ -29,21 +28,16 @@
 
 FastCaloSimModel::FastCaloSimModel(const std::string& name,
                          G4Region* region,
-                         const ServiceHandle<IAthRNGSvc>& rndmGenSvc,
-                         const Gaudi::Property<std::string>& randomEngineName,
                          const Gaudi::Property<std::string>& CaloCellContainerSDName,
                          const PublicToolHandle<IFastCaloSimParametrizationTool>& FastCaloSimParametrizationTool,
                          const PublicToolHandle<IPunchThroughSimWrapper>& PunchThroughSimWrapper,
-                         const Gaudi::Property<bool>& doPunchThrough,
-                         FastCaloSimTool* FastCaloSimTool)
+                         const Gaudi::Property<bool>& doPunchThrough)
 
 : G4VFastSimulationModel(name, region),
-  m_rndmGenSvc(rndmGenSvc), m_randomEngineName(randomEngineName),
   m_CaloCellContainerSDName(CaloCellContainerSDName),
   m_FastCaloSimParametrizationTool(FastCaloSimParametrizationTool),
   m_PunchThroughSimWrapper(PunchThroughSimWrapper),
-  m_doPunchThrough(doPunchThrough),
-  m_FastCaloSimTool(FastCaloSimTool)
+  m_doPunchThrough(doPunchThrough)
 {
   // The transport world is shared, while each Geant4 thread needs its own
   // propagator. Both initialization calls are idempotent.
@@ -58,20 +52,6 @@ FastCaloSimModel::FastCaloSimModel(const std::string& name,
     std::abort();
   }
 }
-
-void FastCaloSimModel::StartOfAthenaEvent(const EventContext& ctx ){
-
-  m_rngWrapper = m_rndmGenSvc->getEngine(m_FastCaloSimTool, m_randomEngineName);
-  m_rngWrapper->setSeed( m_randomEngineName, ctx );
-
-  return;
-}
-
-void FastCaloSimModel::EndOfAthenaEvent(const EventContext&){
-
-  return;
-}
-
 
 G4bool FastCaloSimModel::IsApplicable(const G4ParticleDefinition& particleType)
 {
@@ -168,9 +148,9 @@ G4bool FastCaloSimModel::ModelTrigger(const G4FastTrack& fastTrack)
 
 void FastCaloSimModel::DoIt(const G4FastTrack& fastTrack, G4FastStep& fastStep)
 {
-
-  const EventContext& ctx = Gaudi::Hive::currentContext();
-  TFCSSimulationState simState(m_rngWrapper->getEngine(ctx));
+  // G4AtlasAlg/G4RunAlg seed Geant4's thread-local engine for each event.
+  CLHEP::HepRandomEngine* rngEngine = G4Random::getTheEngine();
+  TFCSSimulationState simState(rngEngine);
   TFCSTruthState truthState;
   TFCSExtrapolationState extrapolState;
 
@@ -248,8 +228,7 @@ void FastCaloSimModel::DoIt(const G4FastTrack& fastTrack, G4FastStep& fastStep)
     for (unsigned int i = 0; i < 24; i++){simEfrac.push_back(simState.Efrac(i));}
 
     m_PunchThroughSimWrapper->DoPunchThroughSim(
-      *ptable, m_rngWrapper->getEngine(ctx), simE, simEfrac, fastTrack,
-      fastStep);
+      *ptable, rngEngine, simE, simEfrac, fastTrack, fastStep);
   }
 
   simState.DoAuxInfoCleanup();

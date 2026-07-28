@@ -5,10 +5,13 @@
 // Include files
 #include <type_traits>
 
+#include "G4GDMLParser.hh"
 #include "G4GeometryManager.hh"
 #include "G4LogicalVolumeStore.hh"
 #include "G4PhysicalVolumeStore.hh"
 #include "G4Version.hh"
+
+#include "PathResolver/PathResolver.h"
 
 // local
 #include "G4AtlasTools/G4AtlasDetectorConstructionTool.h"
@@ -34,6 +37,15 @@ G4AtlasDetectorConstructionTool::G4AtlasDetectorConstructionTool( const std::str
 //=================================
 StatusCode G4AtlasDetectorConstructionTool::initialize( )
 {
+  // Resolve the file early, but let Geant4 import it in Construct().
+  if (!m_simplifiedGeoPath.value().empty()) {
+    m_simplifiedGeoFile = PathResolverFindCalibFile(m_simplifiedGeoPath.value());
+    if (m_simplifiedGeoFile.empty()) {
+      ATH_MSG_FATAL("Could not find simplified geometry file: " << m_simplifiedGeoPath.value());
+      return StatusCode::FAILURE;
+    }
+  }
+
   ATH_MSG_DEBUG( "Initializing Geometry configuration tools "  );
   for (auto it: m_configurationTools)
   {
@@ -43,6 +55,7 @@ StatusCode G4AtlasDetectorConstructionTool::initialize( )
 
   ATH_MSG_DEBUG( "Initializing World detectors in " << name() );
   ATH_CHECK( m_detTool.retrieve() );
+  ATH_CHECK( m_notifierSvc.retrieve() );
 
   ATH_MSG_DEBUG( "Initializing sensitive detectors in " << name() );
   ATH_CHECK( m_senDetTool.retrieve() );
@@ -100,6 +113,28 @@ G4AtlasDetectorConstructionTool::G4AtlasDetectorConstruction::
 
 G4VPhysicalVolume*
 G4AtlasDetectorConstructionTool::G4AtlasDetectorConstruction::Construct() {
+  // Import the FastCaloSim transport world on the Geant4 master thread, before
+  // workers create their fast-simulation models.
+  if (!m_detConstructionTool->m_simplifiedGeoFile.empty()) {
+    auto* logicalVolumeStore = G4LogicalVolumeStore::GetInstance();
+    if (!logicalVolumeStore->GetVolume("WorldLog", false)) {
+      ATH_MSG_INFO("Reading simplified transport geometry from "
+                   << m_detConstructionTool->m_simplifiedGeoFile);
+      // GDML references require the imported volumes to keep their file names.
+      const bool namePrefixing =
+          m_detConstructionTool->m_notifierSvc->GetNamePrefixing();
+      m_detConstructionTool->m_notifierSvc->SetNamePrefixing(false);
+      G4GDMLParser parser;
+      try {
+        parser.Read(m_detConstructionTool->m_simplifiedGeoFile, false);
+      } catch (...) {
+        m_detConstructionTool->m_notifierSvc->SetNamePrefixing(namePrefixing);
+        throw;
+      }
+      m_detConstructionTool->m_notifierSvc->SetNamePrefixing(namePrefixing);
+    }
+  }
+
   ATH_MSG_DEBUG("Detectors " << m_detConstructionTool->m_detTool.name()
                              << " being set as World");
   m_detConstructionTool->m_detTool->SetAsWorld();

@@ -42,9 +42,6 @@ def G4AtlasAlgCfg(flags, name="G4AtlasAlg", **kwargs):
         from G4AtlasTools.G4AtlasToolsConfig import PunchThroughG4ToolCfg
         physics_initialization_tools = kwargs.setdefault("PhysicsInitializationTools", [])
         physics_initialization_tools.append(result.addPublicTool(result.popToolsAndMerge(PunchThroughG4ToolCfg(flags))))
-        # Set the path to the simplified calorimeter geometry for particle transport if provided
-        if flags.Sim.SimplifiedGeoPath:
-            kwargs.setdefault('SimplifiedGeoPath', flags.Sim.SimplifiedGeoPath)
 
     if flags.Sim.InDetParameterization is InDetParameterization.FatrasG4:
         from G4AtlasTools.G4AtlasToolsConfig import ActsFatrasG4ToolCfg
@@ -58,11 +55,7 @@ def G4AtlasAlgCfg(flags, name="G4AtlasAlg", **kwargs):
 
         # Add to physics initialization
         physics_initialization_tools = kwargs.setdefault("PhysicsInitializationTools", [])
-        physics_initialization_tools.append(result.addPublicTool(result.popToolsAndMerge(ActsFatrasG4ToolCfg(flags)))) 
-    
-    # Set the path to the simplified calorimeter geometry for particle transport if provided
-    if flags.Sim.LArParameterization is LArParameterization.FastCaloSim and flags.Sim.SimplifiedGeoPath:
-        kwargs.setdefault("SimplifiedGeoPath", flags.Sim.SimplifiedGeoPath)
+        physics_initialization_tools.append(result.addPublicTool(result.popToolsAndMerge(ActsFatrasG4ToolCfg(flags))))
 
     ## Record the particle flux during the simulation
     kwargs.setdefault("RecordFlux", flags.Sim.RecordFlux)

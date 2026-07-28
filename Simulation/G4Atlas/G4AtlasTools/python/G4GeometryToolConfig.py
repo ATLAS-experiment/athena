@@ -713,6 +713,10 @@ def G4AtlasDetectorConstructionToolCfg(flags, name="G4AtlasDetectorConstructionT
     ## For now just have the same geometry configurations tools loaded for ATLAS and TestBeam
     kwargs.setdefault("GeometryConfigurationTools", result.popToolsAndMerge(GeometryConfigurationToolsCfg(flags)))
 
+    ## Load the FastCaloSim transport geometry during Geant4 construction.
+    if flags.Sim.LArParameterization is LArParameterization.FastCaloSim and flags.Sim.SimplifiedGeoPath:
+        kwargs.setdefault("SimplifiedGeoPath", flags.Sim.SimplifiedGeoPath)
+
     kwargs.setdefault("FastSimMasterTool", result.addPublicTool(result.popToolsAndMerge(FastSimulationMasterToolCfg(flags))))
 
     if "SenDetMasterTool" not in kwargs:

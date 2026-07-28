@@ -20,7 +20,9 @@ void LVNotifier::NotifyRegistration()
 {
   G4LogicalVolumeStore* store = G4LogicalVolumeStore::GetInstance();
   G4LogicalVolume* lV = store->back();
-  lV->SetName( m_notifierSvc->GetCurrentDetectorName() + "::" + lV->GetName() );
+  if (m_notifierSvc->GetNamePrefixing()) {
+    lV->SetName(m_notifierSvc->GetCurrentDetectorName() + "::" + lV->GetName());
+  }
 }
 
 void LVNotifier::NotifyDeRegistration()
