@@ -41,6 +41,7 @@ NNClusterCalibratorToolImpl<calib_data_t, traj_t>::createOptions(
     const EventContext& ctx) const {
   NNClusterCalibratorOptions<calib_data_t, traj_t> opt;
   opt.m_minClusterSizeForNN = m_minClusterSizeForNN;
+  opt.m_minClusterChargeForNN = m_minClusterChargeForNN;
   SG::ReadCondHandle<OnnxNNCollection> onnxCollection(m_readKeyONNX, ctx);
   if (!onnxCollection.isValid()) {
     ATH_MSG_FATAL("Failed to get ONNX network collection with key "
@@ -71,10 +72,9 @@ NNClusterCalibrator<calib_data_t, traj_t>::calibrate(
     const Acts::CalibrationContext& cctx, const xAOD::PixelCluster& cluster,
     const InDetDD::SiDetectorElement& detElement,
     const std::pair<float, float>& tan_incidence_angles) const {
-
-  if (static_cast<int>(cluster.chargeList().size()) <
-      m_options.m_minClusterSizeForNN) {
-
+    double totalCharge = std::accumulate(cluster.chargeList().begin(),cluster.chargeList().end(),0.0);
+    if (totalCharge < m_options.m_minClusterChargeForNN || cluster.chargeList().size() <
+      	m_options.m_minClusterSizeForNN) {
     return m_options.m_fallback->calibrate(ctx, gctx, cctx, cluster,
                                              detElement, tan_incidence_angles);
   }
