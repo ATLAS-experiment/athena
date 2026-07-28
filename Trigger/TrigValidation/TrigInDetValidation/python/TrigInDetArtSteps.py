@@ -149,13 +149,13 @@ class TrigCostStep(Step):
 
 
 ##################################################
-# Exec (athenaHLT) step running runHLT_Standalone.py on data
+# Exec (athenaEF) step running runHLT on data
 ##################################################
 class TrigInDetRecoData(ExecStep):
     def __init__(self, name='TrigInDetRecoData'):
 #        super(TrigInDetRecoData, self).__init__(name)
         ExecStep.__init__(self, name)
-        self.type = 'athenaHLT'
+        self.type = 'athenaEF'
         self.job_options = 'TriggerJobOpts.runHLT'
         self.max_events=-1
         self.required = True
