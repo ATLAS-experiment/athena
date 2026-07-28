@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /* 
@@ -102,6 +102,7 @@ namespace D3PD{
 
     StatusCode TileCellDetailsFillerTool::fill(const CaloCell& p){
         MsgStream log( msgSvc(), name() );
+        const EventContext& ctx = Gaudi::Hive::currentContext();
         log << MSG::DEBUG << " in TileCellDetailsFillerTool::fill()" << endmsg;
         const CaloCell* cell=&p;
         const TileCell* tilecell = dynamic_cast<const TileCell*> (cell);
@@ -135,7 +136,7 @@ namespace D3PD{
                     chan1 = m_tilehwid->channel(adc_id);
                     if (m_run2plus && partition > 2 && chan1 == E1_CHANNEL && m_notRealE1run2[partition - 3][module]) chan1 = -E1_CHANNEL;
                     pmt1  = m_cabling->channel2hole(partition,chan1);
-                    bad1 = m_tileBadChanTool->encodeStatus(m_tileBadChanTool->getAdcStatus(adc_id));
+                    bad1 = m_tileBadChanTool->encodeStatus(m_tileBadChanTool->getAdcStatus(adc_id, ctx));
                 }
                 if (hash2 != TileHWID::NOT_VALID_HASH) {
                     HWIdentifier adc_id = m_tilehwid->adc_id(hash2,gain2);
@@ -143,7 +144,7 @@ namespace D3PD{
                     if (hash1 == TileHWID::NOT_VALID_HASH) partition = m_tilehwid->ros(adc_id);
                     chan2 = m_tilehwid->channel(adc_id);
                     pmt2  = m_cabling->channel2hole(partition,chan2);
-                    bad2 = m_tileBadChanTool->encodeStatus(m_tileBadChanTool->getAdcStatus(adc_id));
+                    bad2 = m_tileBadChanTool->encodeStatus(m_tileBadChanTool->getAdcStatus(adc_id, ctx));
                 }
 
 
