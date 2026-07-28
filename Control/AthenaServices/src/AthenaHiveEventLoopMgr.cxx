@@ -1273,7 +1273,7 @@ int AthenaHiveEventLoopMgr::drainScheduler(int& finishedEvts) {
     ATH_MSG_DEBUG("Clearing slot "
                   << thisFinishedEvtContext->slot() << " (event "
                   << thisFinishedEvtContext->evt() << ") of the whiteboard");
-
+    m_eventExecutionTool->completeEvent(this, *thisFinishedEvtContext);
     StatusCode sc = clearWBSlot(thisFinishedEvtContext->slot());
     if (!sc.isSuccess()) {
       ATH_MSG_ERROR("Whiteboard slot " << thisFinishedEvtContext->slot()

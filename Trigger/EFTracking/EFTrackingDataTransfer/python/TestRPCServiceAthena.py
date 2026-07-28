@@ -29,7 +29,8 @@ el =acc.getService("AthenaHiveEventLoopMgr")
 el.OutputLevel=VERBOSE
 unpackEI = CompFactory.EventInfoPackagingTool("UnpackEI")
 unpackBS = CompFactory.BSPackagingTool("UnpackBS", OutputLevel=DEBUG, ROBDataProvider=robsSvc)
-execTool = CompFactory.ExecuteOngRPCCall( PackagingTools=[unpackEI, unpackBS])
+
+execTool = CompFactory.ExecuteOngRPCCall( UnpackingTools=[unpackEI, unpackBS])
 el.eventExecTool=execTool
 
 from TrigT2CaloCommon.TrigCaloDataAccessConfig import trigCaloDataAccessSvcCfg

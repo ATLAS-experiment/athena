@@ -376,6 +376,7 @@ StatusCode
 ByteStreamEventStorageInputSvc::generateDataHeader()
 {
   std::lock_guard<std::mutex> lock(m_readerMutex);
+  bool overwrite_ei = true;
 
   // get file GUID
   m_fileGUID = m_reader->GUID();
@@ -411,7 +412,9 @@ ByteStreamEventStorageInputSvc::generateDataHeader()
 
     // Clean up EventInfo from the previous event
     key = m_eventInfoKey.value();
-    ATH_CHECK(deleteEntry<xAOD::EventInfo>(key));
+    if (overwrite_ei) {
+      ATH_CHECK(deleteEntry<xAOD::EventInfo>(key));
+    }
     // Now add ref to xAOD::EventInfo
     auto bsaddr = std::make_unique<ByteStreamAddress>(
         ClassID_traits<xAOD::EventInfo>::ID(), key, "");
@@ -427,7 +430,9 @@ ByteStreamEventStorageInputSvc::generateDataHeader()
 
     // Clean up auxiliary EventInfo from the previous event
     key = m_eventInfoKey.value() + "Aux.";
-    ATH_CHECK(deleteEntry<xAOD::EventAuxInfo>(key));
+    if (overwrite_ei) {
+      ATH_CHECK(deleteEntry<xAOD::EventAuxInfo>(key));
+    }
     // Now add ref to xAOD::EventAuxInfo
     bsaddr = std::make_unique<ByteStreamAddress>(
         ClassID_traits<xAOD::EventAuxInfo>::ID(), key, "");

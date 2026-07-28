@@ -26,6 +26,10 @@ public:
     ATH_MSG_ALWAYS("Execution diverted to the tool");
     return el->executeEvent(std::move(ctx));
   }
+  virtual StatusCode completeEvent(MinimalEventLoopMgr*,  const EventContext& ctx) override {
+    return StatusCode::SUCCESS;
+  }
+
   virtual StatusCode initialize() override { return StatusCode::SUCCESS; }
   virtual StatusCode finalize() override{ return StatusCode::SUCCESS; };
 

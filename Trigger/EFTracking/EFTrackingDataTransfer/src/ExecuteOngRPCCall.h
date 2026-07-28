@@ -13,7 +13,6 @@
 #include <memory>
 #include <string>
 
-
 /**
  * @class ExecuteOngRPCCall tool that waits for gRPC call before invoking
  *executeEvent
@@ -26,18 +25,22 @@ class ExecuteOngRPCCall : public extends<AthAlgTool, IEventExecutionTool> {
   virtual StatusCode executeEvent(MinimalEventLoopMgr* el,
                                   EventContext&& ctx) override;
 
+  virtual StatusCode completeEvent(MinimalEventLoopMgr* el,
+                                   const EventContext& ctx) override;
+
   virtual StatusCode initialize() override;
   virtual StatusCode finalize() override;
+
  private:
   Gaudi::Property<std::string> m_address{
       this, "address", "0.0.0.0:50051",
       "IP:PORT address on which this tool will receive the data"};
 
+  ToolHandleArray<IPackagingTool> m_unpackingTools{
+      this, "UnpackingTools", {}, "Tools that would unpack the data"};
   ToolHandleArray<IPackagingTool> m_packingTools{
-      this,
-      "PackagingTools",
-      {},
-      "Tools that would unpack the data"};      
+      this, "PackingTools", {}, "Tools that would pack data on the way bacl the data"};
+
 };
 
 #endif  // EFTRACKINGDATATRANSFER_EXECUTEONGRPCCALL_H

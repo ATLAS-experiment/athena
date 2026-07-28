@@ -20,6 +20,7 @@ public:
   DeclareInterfaceID(IEventExecutionTool, 1, 0);
 
   virtual StatusCode executeEvent(MinimalEventLoopMgr*,  EventContext&& ctx) = 0;
+  virtual StatusCode completeEvent(MinimalEventLoopMgr*,  const EventContext& ctx) = 0;
 
   virtual ~IEventExecutionTool() override {}
 }; 
