@@ -136,7 +136,8 @@ def MadGraphCfg(
     process_definition,
     *,
     safety=None,
-    settings=None,
+    run_card_settings=None,
+    param_card_settings=None,
     pdf_setting=None,
     devices=None,
     catch_errors=None,
@@ -162,6 +163,10 @@ def MadGraphCfg(
 
     process_definition is required, the rest is optional.
 
+    run_card_settings maps run_card.dat settings to their requested values.
+    param_card_settings maps param_card.dat settings to dictionaries of
+    parameter indices and values.
+
     If prepare_lhe_for_shower is True, the produced LHE file will be 
     symlinked to lhe_file (default: events.lhe) 
     for later use in the showering step.
@@ -186,9 +191,11 @@ def MadGraphCfg(
         usePMGSettings=usePMGSettings,
     )
 
-    run_card_settings = {} if settings is None else dict(settings)
+    run_card_settings = {} if run_card_settings is None else dict(run_card_settings)
+    param_card_settings = {} if param_card_settings is None else dict(param_card_settings)
 
-    # Get nEvents
+    # Overwrite the number of events in the run_card_settings with the value
+    # determined from the flags and safety factor.
     run_card_settings["nevents"] = _get_nevents(flags, cfg["safety"])
 
     # Create the MGC instance
@@ -210,11 +217,13 @@ def MadGraphCfg(
 
     # Create the process directory
     process_dir = mgc.process_dir
-    MadGraphUtils.modify_run_card(
-        process_dir=process_dir,
-        flags=flags,
-        settings=run_card_settings,
-        pdf_setting=cfg["pdf_setting"],
+
+    # Modify the run_card settings in the process directory before generating events.
+    mgc.runCardDict.update(run_card_settings)
+
+    # Modify the parameter_card settings in the process directory before generating events.
+    mgc.paramCard.modify_paramCardDict(
+        params=param_card_settings
     )
 
     # Generate events

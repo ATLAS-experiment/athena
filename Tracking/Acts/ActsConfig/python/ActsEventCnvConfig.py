@@ -10,8 +10,8 @@ def ActsToTrkConverterToolCfg(flags,
                               **kwargs) -> ComponentAccumulator:
     acc = ComponentAccumulator()
 
-    from ActsConfig.ActsGeometryConfig import ActsGeometryRealmConvTool
-    kwargs.setdefault("GeometryRealmConvTool", acc.getPrimaryAndMerge(ActsGeometryRealmConvTool(flags)))
+    from ActsConfig.ActsGeometryConfig import ActsGeometryRealmConvToolCfg
+    kwargs.setdefault("GeometryRealmConvTool", acc.getPrimaryAndMerge(ActsGeometryRealmConvToolCfg(flags)))
 
     setupMuon = setupMuon and flags.Muon.usePhaseIIGeoSetup
     setupITk = setupITk and (flags.Detector.GeometryITk or flags.Detector.GeometryID)

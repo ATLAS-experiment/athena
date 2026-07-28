@@ -50,6 +50,7 @@ void encodeSurface(xAOD::SurfaceType& surfaceType,
       case Curvilinear:
         surfaceType = xAOD::SurfaceType::Curvilinear;
         break;
+      case Point:
       case Other:
         surfaceType = xAOD::SurfaceType::Other;
         break;

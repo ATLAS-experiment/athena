@@ -219,46 +219,6 @@ def ExtrapolateMuonToIPToolCfg(flags, name="ExtrapolateMuonToIPTool", **kwargs):
     return result
 
 
-def MuonCandidateToolCfg(flags, name="MuonCandidateTool", **kwargs):
-    from MuonConfig.MuonRecToolsConfig import MuonAmbiProcessorCfg
-    result = ComponentAccumulator()
-    muon_edm_printer = result.getPrimaryAndMerge(MuonEDMPrinterToolCfg(flags))
-    kwargs.setdefault("Printer", muon_edm_printer)
-    if "TrackBuilder" not in kwargs:
-        kwargs.setdefault("TrackBuilder", result.popToolsAndMerge(
-            CombinedMuonTrackBuilderCfg(flags, name="CombinedMuonTrackBuilder")))
-    #   Why was this dependent on cosmics? will now always create this
-    #   if flags.Beam.Type is BeamType.Cosmics:
-    if flags.Muon.MuonTrigger and flags.Beam.Type is not BeamType.Cosmics:
-        # trigger definitely only uses the ExtrapolateToIPtool in cosmics mode
-        kwargs.setdefault("TrackExtrapolationTool", "")
-    else:
-        kwargs.setdefault("TrackExtrapolationTool", result.popToolsAndMerge(
-            ExtrapolateMuonToIPToolCfg(flags)))
-        kwargs.setdefault("SegmentContainer", "TrackMuonSegments")
-    kwargs.setdefault("AmbiguityProcessor", result.popToolsAndMerge(
-        MuonAmbiProcessorCfg(flags)))
-
-    from TrkConfig.TrkTrackSummaryToolConfig import MuonTrackSummaryToolCfg
-    kwargs.setdefault("TrackSummaryTool", result.popToolsAndMerge(
-        MuonTrackSummaryToolCfg(flags)))
-
-    # MuonIDHelperSvc already configured
-
-    if flags.Beam.Type is BeamType.Cosmics:
-        kwargs.setdefault("ExtrapolationStrategy", 1)
-
-    track_segment_association_tool = CompFactory.MuonCombined.TrackSegmentAssociationTool(
-        MuonEDMPrinterTool=muon_edm_printer)
-    kwargs.setdefault("TrackSegmentAssociationTool",
-                      track_segment_association_tool)
-    result.addPublicTool(track_segment_association_tool)
-
-    tool = CompFactory.MuonCombined.MuonCandidateTool(name, **kwargs)
-    result.setPrivateTools(tool)
-    return result
-
-
 def MuonCombinedFitTagToolCfg(flags, name="MuonCombinedFitTagTool", **kwargs):
     if flags.Muon.MuonTrigger:
         kwargs.setdefault("VertexContainer", "")
@@ -435,8 +395,6 @@ def MuidCaloEnergyToolParamCfg(flags, name='MuidCaloEnergyToolParam', **kwargs):
 
 def MuidTrackIsolationCfg(flags, name='MuidTrackIsolation', **kwargs):
     from MagFieldServices.MagFieldServicesConfig import AtlasFieldCacheCondAlgCfg
-    kwargs.setdefault("InDetTracksLocation",
-                      "CombinedInDetTracks" if flags.Detector.GeometryID else "CombinedITkTracks")
     # RungeKuttaIntersector requires the magnetic field conditions
     result = AtlasFieldCacheCondAlgCfg(flags)
     tool = CompFactory.Rec.MuidTrackIsolation(name, **kwargs)

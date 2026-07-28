@@ -12,9 +12,8 @@ Reco_tf.py \
              flags.Scheduler.CheckDependencies=True; \
              flags.Scheduler.ShowDataDeps=True; \
              flags.Scheduler.ShowDataFlow=True; \
-             flags.Scheduler.ShowControlFlow = True; \
-             from Campaigns import PhaseIINoPileUp; PhaseIINoPileUp(flags);" \
-  --preInclude "all:InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude" "all:ActsConfig.ActsCIFlags.actsHeavyIonFlags" \
+             flags.Scheduler.ShowControlFlow = True;" \
+  --preInclude "Campaigns.MC23PhaseIINoPileUp,InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude,ActsConfig.ActsCIFlags.actsHeavyIonFlags" \
   --postInclude "all:PyJobTransforms.UseFrontier" \
   --postExec "all:cfg.printConfig(withDetails=True, summariseProps=True);" \
   --conditionsTag ${conditions_tag} \

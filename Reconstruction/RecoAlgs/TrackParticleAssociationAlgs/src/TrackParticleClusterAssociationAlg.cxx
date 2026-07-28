@@ -23,6 +23,7 @@ StatusCode TrackParticleClusterAssociationAlg::initialize()
   ATH_CHECK( m_detectorEtaDecor.initialize(m_doDetEta) );
   ATH_CHECK( m_assocClustersDecor.initialize() );
   ATH_CHECK( m_sigmaWidthKey.initialize() );
+  ATH_CHECK(m_trkLinkKey.initialize());
 
   ATH_CHECK(m_caloEntryParsDecor.initialize( !m_caloEntryParsDecor.empty() ) );
 

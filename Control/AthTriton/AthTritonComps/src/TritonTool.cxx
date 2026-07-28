@@ -47,6 +47,10 @@ template <>
 struct TritonDType<int64_t> {
   static constexpr const char* value = "INT64";
 };
+template <>
+struct TritonDType<uint8_t> {
+  static constexpr const char* value = "UINT8";
+};
 
 struct TritonTool::Impl : public AthMessaging {
 

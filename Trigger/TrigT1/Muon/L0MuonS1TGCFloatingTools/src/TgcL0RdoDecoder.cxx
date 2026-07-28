@@ -4,33 +4,35 @@
 
 #include "TgcL0RdoDecoder.h"
 
+#include "Identifier/Identifier.h"
+#include "MuonIdHelpers/IMuonIdHelperSvc.h"
 #include "MuonRDO/TgcRawData.h"
 #include "MuonRDO/TgcRdo.h"
 #include "MuonRDO/TgcRdoContainer.h"
+#include "MuonTGC_Cabling/TgcCablingMap.h"
+
+#include <string>
 
 namespace {
 
-L0Muon::TgcL0Floating::Station station(const TgcRawData::SlbType type) {
+L0Muon::TgcL0Floating::Station station(
+    const Identifier& identifier, const Muon::IMuonIdHelperSvc& idHelperSvc) {
   using L0Muon::TgcL0Floating::Station;
-  switch (type) {
-    case TgcRawData::SLB_TYPE_TRIPLET_WIRE:
-    case TgcRawData::SLB_TYPE_TRIPLET_STRIP:
-      return Station::M1;
-    case TgcRawData::SLB_TYPE_DOUBLET_WIRE:
-    case TgcRawData::SLB_TYPE_DOUBLET_STRIP:
-      return Station::M2M3;
-    case TgcRawData::SLB_TYPE_INNER_WIRE:
-    case TgcRawData::SLB_TYPE_INNER_STRIP:
-      return Station::Inner;
-    default:
-      return Station::Unknown;
+  const std::string stationName = idHelperSvc.tgcIdHelper().stationNameString(
+      idHelperSvc.tgcIdHelper().stationName(identifier));
+  if (stationName.rfind("T1", 0) == 0) {
+    return Station::M1;
   }
-}
-
-bool isStrip(const TgcRawData::SlbType type) {
-  return type == TgcRawData::SLB_TYPE_DOUBLET_STRIP ||
-         type == TgcRawData::SLB_TYPE_TRIPLET_STRIP ||
-         type == TgcRawData::SLB_TYPE_INNER_STRIP;
+  if (stationName.rfind("T2", 0) == 0) {
+    return Station::M2;
+  }
+  if (stationName.rfind("T3", 0) == 0) {
+    return Station::M3;
+  }
+  if (stationName.rfind("T4", 0) == 0) {
+    return Station::Inner;
+  }
+  return Station::Unknown;
 }
 
 }  // namespace
@@ -39,18 +41,20 @@ namespace L0Muon {
 namespace TgcL0Floating {
 
 StatusCode RdoDecoder::decode(const TgcRdoContainer& rdos,
+                              const Muon::TgcCablingMap& cabling,
+                              const Muon::IMuonIdHelperSvc& idHelperSvc,
                               HitGroups& hitGroups,
                               DecodeStatistics& statistics) const {
   hitGroups.clear();
   statistics = DecodeStatistics{};
 
-  // The decoder assumes the Run-3 ROD, SSW and SLB-based TGC RDO format.
+  // This decoder assumes the Run-3 ROD, SSW and SLB-based TGC RDO format.
   // The Run-4 TGC RDO will have a substantially different structure, and
-  // this decoder and its hit organization are expected to require a broad
-  // rewrite when that format becomes available. The HitGroups output is the
-  // boundary to the later reconstruction, so the downstream segment,
-  // candidate, Inner Coincidence and Track Selector code is not expected to
-  // require corresponding changes.
+  // this decoder and its hit organization will require a broad rewrite when
+  // that format becomes available. The HitGroups output is the boundary to
+  // the later reconstruction, so the downstream Station Coincidence,
+  // segment, candidate, Inner Coincidence and Track Selector code is not
+  // expected to require corresponding changes.
   for (const TgcRdo* rdo : rdos) {
     for (const TgcRawData* rawData : *rdo) {
       ++statistics.nRawData;
@@ -58,15 +62,32 @@ StatusCode RdoDecoder::decode(const TgcRdoContainer& rdos,
         continue;
       }
 
-      const Station hitStation = station(rawData->slbType());
-      const bool hitIsStrip = isStrip(rawData->slbType());
+      Identifier identifier;
+      const bool mapped = cabling.getOfflineIDfromReadoutID(
+          identifier, rawData->subDetectorId(), rawData->rodId(),
+          rawData->sswId(), rawData->slbId(), rawData->channel());
+      if (!mapped) {
+        ++statistics.nMappingFailures;
+        continue;
+      }
+
+      const Station hitStation = station(identifier, idHelperSvc);
+      const bool hitIsStrip = idHelperSvc.tgcIdHelper().isStrip(identifier);
       const Hit hit{
           .subDetectorId = rawData->subDetectorId(),
           .detectorSector = rawData->rodId(),
           .bcTag = rawData->bcTag(),
           .sswId = rawData->sswId(),
           .slbId = rawData->slbId(),
-          .channel = rawData->channel(),
+          .readoutChannel = rawData->channel(),
+          .stationEta = static_cast<std::int16_t>(
+              idHelperSvc.tgcIdHelper().stationEta(identifier)),
+          .stationPhi = static_cast<std::uint16_t>(
+              idHelperSvc.tgcIdHelper().stationPhi(identifier)),
+          .gasGap = static_cast<std::uint8_t>(
+              idHelperSvc.tgcIdHelper().gasGap(identifier)),
+          .channel = static_cast<std::uint16_t>(
+              idHelperSvc.tgcIdHelper().channel(identifier)),
           .station = hitStation,
           .isStrip = hitIsStrip,
       };
@@ -74,6 +95,8 @@ StatusCode RdoDecoder::decode(const TgcRdoContainer& rdos,
           .subDetectorId = hit.subDetectorId,
           .detectorSector = hit.detectorSector,
           .bcTag = hit.bcTag,
+          .stationEta = hit.stationEta,
+          .stationPhi = hit.stationPhi,
           .station = hit.station,
           .isStrip = hit.isStrip,
       };
@@ -89,8 +112,11 @@ StatusCode RdoDecoder::decode(const TgcRdoContainer& rdos,
         case Station::M1:
           ++statistics.nM1Hits;
           break;
-        case Station::M2M3:
-          ++statistics.nM2M3Hits;
+        case Station::M2:
+          ++statistics.nM2Hits;
+          break;
+        case Station::M3:
+          ++statistics.nM3Hits;
           break;
         case Station::Inner:
           ++statistics.nInnerHits;

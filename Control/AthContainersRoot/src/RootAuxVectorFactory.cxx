@@ -379,7 +379,7 @@ void RootAuxVector::storeDataSpan()
 
 /**
  * @brief Constructor.
- * @param vecClass The @c TClass for the vector object.
+ * @param objClass The @c TClass for the object.
  */
 RootAuxVectorFactory::RootAuxVectorFactory (TClass* objClass)
   : m_objClass (objClass),
@@ -616,9 +616,11 @@ void RootAuxVectorFactory::copyForOutput (SG::auxid_t auxid,
     }
   }
   else if (m_isEL == ELEMENT_LINK_NONPOINTER) {
+    TVirtualCollectionProxy* proxy = m_vecClass->GetCollectionProxy();
+    TClass* eltClass = proxy->GetValueClass();
     ATHCONTAINERS_ERROR("RootAuxVectorFactory::copyForOutput",
-                        std::string("Cannot apply thinning for ElementLink with non-pointer element: ") +
-                        m_vecClass->GetName());
+                        std::format("Tried to copy an auxiliary variable of type {}.  However, the target type is not a DataVector and does not have a pointer value type.  Such types are only fully supported for fully specified Factory objects, not for this dynamic factory using ROOT reflection information.  Perhaps you are trying to write this type by mistake.  Otherwise, try creating a SG::Accessor object for this type during event processing to ensure a proper Factory is available.",
+                                    eltClass->GetName()));
   }
 }
 

@@ -173,7 +173,7 @@ def ActsExtrapolationToolCfg(flags,
   return acc
 
 
-def ActsGeometryRealmConvTool(flags, name: str = "ActsGeometryRealmConvTool", **kwargs) -> ComponentAccumulator:
+def ActsGeometryRealmConvToolCfg(flags, name: str = "ActsGeometryRealmConvTool", **kwargs) -> ComponentAccumulator:
     acc = ComponentAccumulator()
     from ActsAlignmentAlgs.AlignmentAlgsConfig import ActsGeometryContextAlgCfg
     acc.merge(ActsGeometryContextAlgCfg(flags))

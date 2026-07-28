@@ -35,7 +35,7 @@ timeout 10800 AtlasG4_tf.py  \
   --maxEvents 100 \
   --multithreaded \
   --detectors 'Calo' \
-  --preInclude 'AtlasG4Tf:Campaigns.PhaseIISimulation,SimulationConfig.disablePhotonRussianRoulette,SimulationConfig.disableNeutronRussianRoulette,SimulationConfig.disableFrozenShowersFCalOnly' \
+  --preInclude 'AtlasG4Tf:Campaigns.MC23PhaseIISimulation,SimulationConfig.disablePhotonRussianRoulette,SimulationConfig.disableNeutronRussianRoulette,SimulationConfig.disableFrozenShowersFCalOnly' \
   --conditionsTag "${conditionsTag}" \
   --geometryVersion 'default:ATLAS-P2-RUN4-04-00-00' \
   --postExec 'with open("ConfigSimCA.pkl", "wb") as f: cfg.store(f)' \

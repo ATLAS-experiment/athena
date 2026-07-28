@@ -104,6 +104,10 @@ StatusCode NswSegmentFinderAlg::initialize() {
     
     m_lineFitter = std::make_unique<SegmentFit::SegmentLineFitter>(name(), std::move(fitCfg));
 
+    SegmentAmbiSolver::Config ambicfg{};
+    m_ambiSolver = std::make_unique<SegmentAmbiSolver>(name(), std::move(ambicfg));
+
+
     if(m_dumpSeedStatistics){
         m_seedCounter = std::make_unique<SeedStatistics>();
     }
@@ -286,13 +290,15 @@ NswSegmentFinderAlg::HitVec
         
         for (unsigned j = 0; j < layer.size(); ++j) {
             if (usedHits[i].get().at(j) > m_maxUsed) {
+                ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<" - Hit " << (*layer[j])<< " already used with counter " << usedHits[i].get().at(j) << ". Skip.");
                 continue;
             }
             auto hit = layer.at(j);
             const double pull = std::sqrt(SeedingAux::chi2Term(extrapPos, direction, *hit));
-            ATH_MSG_VERBOSE("Trying extension with hit " << m_idHelperSvc->toString(hit->identify())<<" and pull "<<pull);
+            ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<" - Trying extension with hit " << *hit<<" and pull "<<pull<<" has truth: "<< (getTruthMatchedHit(*hit->primaryMeasurement()) != nullptr ? "oui" : "non"));
             bool isPrecision = isPrecisionHit(*hit);
             double minPull = isPrecision ? precisionHit.minPull : noPrecisionHit.minPull;
+            ATH_MSG_VERBOSE("Current min pull for this layer is:  "<<minPull);
             //find the hit with the minimum pull (check at least three hits after we have increasing pulls)
             if (pull > minPull) {
                 triedHit+=1;  
@@ -433,7 +439,7 @@ void NswSegmentFinderAlg::processSegment(std::unique_ptr<Segment> segment,
         ATH_MSG_VERBOSE("Seed Rejection: Segment fit failed");
        
         if (m_markHitsFromSeed && seedHits.size() > m_minSeedHits) {
-            // Mark hits from extended seed (used increment by 1)
+            // Mark hits from extended seed (used increment by 1)            
             markHitsAsUsed(seedHits, hitLayers, usedHits, 1, false);
         }
         return;
@@ -461,6 +467,34 @@ void NswSegmentFinderAlg::processSegment(std::unique_ptr<Segment> segment,
 
 }
 
+void NswSegmentFinderAlg::resolveAmbiguities(const ActsTrk::GeometryContext& gctx, 
+                                             SegmentVec_t& segmentCandidates) const{
+
+    if(segmentCandidates.size()<=1){
+        ATH_MSG_VERBOSE("No segments to resolve ambiguities");
+        return;
+    }
+
+    ATH_MSG_VERBOSE("Resolving ambiguities for "<<segmentCandidates.size()<<" segments");
+
+    std::map<const MuonGMR4::SpectrometerSector*, SegmentVec_t,
+                 MuonGMR4::MuonDetectorManager::MSEnvelopeSorter> segmentsPerChamber{};
+    
+    //sort segments per chamber and resolve ambiguities per chamber
+    for (std::unique_ptr<Segment>& seg : segmentCandidates) {
+        const MuonGMR4::SpectrometerSector* chamb = seg->msSector();
+        segmentsPerChamber[chamb].push_back(std::move(seg));
+    }
+    segmentCandidates.clear();
+    for (auto& [chamber, resolveMe] : segmentsPerChamber) {    
+            SegmentVec_t resolvedSegments = m_ambiSolver->resolveAmbiguity(gctx, std::move(resolveMe));        
+            segmentCandidates.insert(segmentCandidates.end(), 
+                                     std::make_move_iterator(resolvedSegments.begin()),
+                                     std::make_move_iterator(resolvedSegments.end()));
+    }
+
+}
+
 std::pair<NswSegmentFinderAlg::SegmentSeedVec_t, NswSegmentFinderAlg::SegmentVec_t>
 NswSegmentFinderAlg::buildSegmentsFromSTGC(const EventContext& ctx,
                                            const ActsTrk::GeometryContext &gctx, 
@@ -482,11 +516,21 @@ NswSegmentFinderAlg::buildSegmentsFromSTGC(const EventContext& ctx,
         if (sp->type() != xAOD::UncalibMeasType::sTgcStripType) {
             THROW_EXCEPTION("Space point is not of sTgc type: "<<sp->msSector()->idHelperSvc()->toString(sp->identify()));
         }
-        const auto* prd = static_cast<const xAOD::sTgcMeasurement*>(sp->primaryMeasurement());
-        bool isCombined = sTgcChannelType(prd->channelType()) == "S" && sp->dimension() == 2;
-        bool isUnused = usedHits[layIdx].at(hitIdx) <= m_maxUsed;
-        return isCombined && isUnused;      
-   
+        if(sp->dimension() != 2){
+            ATH_MSG_VERBOSE("Ignoring the 1D measurement for seeding: "<<m_idHelperSvc->toString(sp->identify()));
+            return false;
+        }
+        const auto* prdPrim = static_cast<const xAOD::sTgcMeasurement*>(sp->primaryMeasurement());
+        const auto* prdSec = static_cast<const xAOD::sTgcMeasurement*>(sp->secondaryMeasurement());
+        //we know we have a 2D spacepoint can be: pad, strip+pad, strip+wire, wire+pad and we dont want pads appearing in this seeding stage
+        bool hasPad = prdSec ? prdSec->channelType()==sTgcIdHelper::sTgcChannelTypes::Pad : prdPrim->channelType()==sTgcIdHelper::sTgcChannelTypes::Pad;
+        if(hasPad){
+            ATH_MSG_VERBOSE("Ignoring the 2D pad measurement for seeding because of pads: "<<m_idHelperSvc->toString(sp->identify()));
+            return false;
+        }
+        bool isPrecision = isPrecisionHit(*sp);
+        return isPrecision && usedHits[layIdx].at(hitIdx) <= m_maxUsed;
+
     };
 
     // find the 2D measurements from the outermost layers - even move one layer inside 
@@ -495,7 +539,7 @@ NswSegmentFinderAlg::buildSegmentsFromSTGC(const EventContext& ctx,
             //in case of MM layers we stop - the layers are sorted in Z
             if(hitLayers[layIdx1].front()->type() == xAOD::UncalibMeasType::MMClusterType  || 
                hitLayers[layIdx2].front()->type() == xAOD::UncalibMeasType::MMClusterType){
-                ATH_MSG_VERBOSE("Outermost layers are MM - stop searching for sTgc Measurements");
+                ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<"Outermost layers are MM - stop searching for sTgc Measurements");
                 return std::make_pair(std::move(seeds), std::move(segments));
             }
 
@@ -520,6 +564,7 @@ NswSegmentFinderAlg::buildSegmentsFromSTGC(const EventContext& ctx,
                     }                   
                     //found 2D hits on the outermost layers - build a seed
                     HitVec seedHits{hit1, hit2};
+                    ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<"Attempt for STGC segment starting with the hits: " << *hit1 << ", " << *hit2);
                     //get the seed direction and position from the two 2D hits
                     const Amg::Vector3D seedPos = hit1->localPosition();
                      //express position in z=0
@@ -550,6 +595,7 @@ NswSegmentFinderAlg::buildSegmentsFromSTGC(const EventContext& ctx,
                         continue;
                     }
                     //fit the segment seed
+                    ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<" - Start to fit an STGC segment seed with "<<seed->getHitsInMax().size()<<" hits \n"<<print(seed->getHitsInMax()));
                     std::unique_ptr<Segment> segment = fitSegmentSeed(ctx, gctx, seed.get());  
                     processSegment(std::move(segment), seed->getHitsInMax(), hitLayers, usedHits, segments);
                     seeds.push_back(std::move(seed));
@@ -881,6 +927,8 @@ void NswSegmentFinderAlg::markHitsAsUsed(const HitVec& spacePoints,
                         usedHitMarker[lIdx][hIdx] += incr;
                     } 
                 }
+                ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<"- Marking hit "<<(*testHit)<<", used count: "
+                                <<usedHitMarker[lIdx][hIdx]);
             }
         }
     }
@@ -938,10 +986,58 @@ StatusCode NswSegmentFinderAlg::execute(const EventContext &ctx) const {
 
         }
 
-        for (auto &seg : segments) {
-            const Parameters pars = localSegmentPars(*gctx, *seg);
+        //Resolve ambiguities between segments before writing them to the output
+        ATH_MSG_VERBOSE("Before ambiguity resolution, there are in total "<<segments.size()<<" segments:");
+        for(const auto& seg : segments){
+            
+            if(msgLvl(MSG::VERBOSE)){
+                std::stringstream sstr{};
+                sstr<<"Segment chi2/ndof = "<<seg->chi2()/std::max(1u,seg->nDoF())<<", hits in the segment "
+                         <<seg->measurements().size()<<std::endl;        
+            
+                const Parameters pars = localSegmentPars(*gctx, *seg);
+                sstr<<"Segment parameters : "<<toString(pars)<<std::endl;
+                for(const auto& hit : seg->measurements()){
+                    bool hasTruth{false};
+                    if(hit->type()!=xAOD::UncalibMeasType::Other){
+                        hasTruth = (getTruthMatchedHit(*hit->spacePoint()->primaryMeasurement()) !=nullptr);
+                        
+                        sstr<<" *** Hit "<<m_idHelperSvc->toString(hit->spacePoint()->identify())<<", "
+                                        << Amg::toString(hit->spacePoint()->localPosition())<<", dir: "
+                                        <<Amg::toString(hit->spacePoint()->sensorDirection())<<", has truth matched: "<<hasTruth<<std::endl;
+                    }    
+                }
+                ATH_MSG_VERBOSE(sstr.str());          
+                    
+            }
+            
+        }
 
-            ATH_MSG_VERBOSE("Segment parameters : "<<toString(pars));
+
+        resolveAmbiguities(*gctx, segments);
+        ATH_MSG_VERBOSE("After ambiguity resolution, there are in total "<<segments.size()<<" segments:");
+
+        for (auto &seg : segments) {           
+            if(msgLvl(MSG::VERBOSE)){ 
+                std::stringstream sstr{};               
+                sstr<<"Segment chi2/ndof = "<<seg->chi2()/std::max(1u,seg->nDoF())<<", hits in the segment "
+                         <<seg->measurements().size()<<std::endl;        
+                const Parameters pars = localSegmentPars(*gctx, *seg);
+                sstr<<"Segment parameters : "<<toString(pars)<<std::endl;
+            
+                for(const auto& hit : seg->measurements()){
+                    bool hasTruth{false};
+                    if(hit->type()!=xAOD::UncalibMeasType::Other){
+                        hasTruth =  getTruthMatchedHit(*hit->spacePoint()->primaryMeasurement()) !=nullptr;
+                    
+                        sstr<<" *** Hit "<<m_idHelperSvc->toString(hit->spacePoint()->identify())<<", "
+                                    << Amg::toString(hit->spacePoint()->localPosition())<<", dir: "
+                                    <<Amg::toString(hit->spacePoint()->sensorDirection())<<", has truth matched: "<<hasTruth<<std::endl;
+                    }
+                }
+                ATH_MSG_VERBOSE(sstr.str());                
+            }
+            
 
             if (m_visionTool.isEnabled()) {          
                 m_visionTool->visualizeSegment(ctx, *seg, "#phi-segment");
@@ -957,6 +1053,8 @@ StatusCode NswSegmentFinderAlg::execute(const EventContext &ctx) const {
             writeSegments->push_back(std::move(seg));
             
         }
+       
+
     }
     
     return StatusCode::SUCCESS;
@@ -988,7 +1086,7 @@ void NswSegmentFinderAlg::SeedStatistics::printTableSeedStats(MsgStream& msg) co
     std::stringstream sstr{};
     sstr<<"Seed statistics per sector:"<<std::endl;
     sstr<<"-----------------------------------------------------"<<std::endl;
-    sstr<<"| Chamber | Phi | Eta | Seeds | ExtSeeds | Segments |"<<std::endl;
+    sstr<<"| Chamber | Phi | Eta | Seeds | ExtSeeds | FittedSegments |"<<std::endl;
     sstr<<"-----------------------------------------------------"<<std::endl;
 
     using namespace  Muon::MuonStationIndex;

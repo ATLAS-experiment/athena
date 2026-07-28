@@ -18,7 +18,7 @@ conditions=$(python -c "from AthenaConfiguration.TestDefaults import defaultCond
 Reco_tf.py \
   --conditionsTag ${conditions} \
   --digiSteeringConf "StandardSignalOnlyTruth" \
-  --preInclude "all:Campaigns.PhaseIIPileUp200" \
+  --preInclude "all:Campaigns.MC23PhaseIIPileUp200" \
   --postInclude "all:PyJobTransforms.UseFrontier" \
   --inputHITSFile "${HSHitsFile}" \
   --inputHighPtMinbiasHitsFile ${HighPtMinbiasHitsFiles} \

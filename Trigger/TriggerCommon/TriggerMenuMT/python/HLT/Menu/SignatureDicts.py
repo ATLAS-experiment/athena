@@ -740,7 +740,7 @@ TauChainParts = {
                         'verylooseGNTau', 'looseGNTau', 'mediumGNTau', 'tightGNTau',
 
                         # GNTauExt ID WPs:
-                        'mediumnoperfGNTauDev1', 'mediumvar1noperfGNTauDev1', 'mediumvar2noperfGNTauDev1',
+                        'mediumnoperfGNTauDev1', 
 
                         # RNN/DeepSet ID WPs (for tracktwoMVA/LLP/LRT reco with DeepSet/RNNLLP TauIDs):
                         'looseRNN', 'mediumRNN', 'tightRNN',

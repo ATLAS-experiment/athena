@@ -5,8 +5,8 @@
 #include <sstream>
 #include <iostream>
 #include <algorithm>
-
-#include <boost/tokenizer.hpp>
+#include <ranges>
+#include <string_view>
 
 #include "GaudiKernel/System.h"
 
@@ -153,10 +153,8 @@ Navigation::classKey2CLIDKey(const std::vector<std::string>& property,
     else {
       std::string aux_attr = key.substr(dotpos+1);
       key.erase (dotpos, std::string::npos);
-
-      typedef boost::tokenizer<boost::char_separator<char> > tokenizer;
-      boost::char_separator<char> sep(".");
-      tokenizer tokens (aux_attr, sep);
+      std::vector<std::string> tokens;
+      for (auto&& token : std::views::split(std::string_view{aux_attr}, '.')) tokens.emplace_back(token.begin(), token.end());
       sel.selectAux (std::set<std::string> (tokens.begin(), tokens.end()));
     }
 

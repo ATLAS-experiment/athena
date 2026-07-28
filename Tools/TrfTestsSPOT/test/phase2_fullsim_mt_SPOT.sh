@@ -13,14 +13,13 @@ conditions=$(python -c "from AthenaConfiguration.TestDefaults import defaultCond
 export TRF_ECHO=1;
 ATHENA_CORE_NUMBER=${NTHREADS} \
 Sim_tf.py \
-      --CA 'True' \
       --multithreaded 'True' \
       --maxEvents ${NEVENTS} \
       --perfmon 'fullmonmt' \
       --geometryVersion "default:${geometry}" \
       --conditionsTag "default:${conditions}" \
       --postInclude 'default:PyJobTransforms.UseFrontier' \
-      --preInclude 'EVNTtoHITS:Campaigns.PhaseIISimulation' \
+      --preInclude 'EVNTtoHITS:Campaigns.MC23PhaseIISimulation' \
       --postExec 'all:cfg.getService("AlgResourcePool").CountAlgorithmInstanceMisses = True' \
       --simulator 'FullG4MT' \
       --inputEVNTFile ${DATAFILE} \
