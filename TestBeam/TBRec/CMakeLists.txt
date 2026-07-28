@@ -4,7 +4,6 @@
 atlas_subdir( TBRec )
 
 # External dependencies:
-find_package( Boost )
 find_package( CLHEP )
 find_package( ROOT COMPONENTS Core Tree MathCore Hist RIO )
 
