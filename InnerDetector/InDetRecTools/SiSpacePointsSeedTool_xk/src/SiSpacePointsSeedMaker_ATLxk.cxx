@@ -907,6 +907,9 @@ bool InDet::SiSpacePointsSeedMaker_ATLxk::newVertices(EventData& data, const std
 
 void InDet::SiSpacePointsSeedMaker_ATLxk::buildFrameWork() 
 {
+  // Tell clang to optimize assuming that FP operations may trap.
+  CXXUTILS_TRAPPING_FP;
+
   m_ptmin = std::max( std::abs(m_ptmin), float(100.*m_fieldScale));
   /// ensure consistency in the transverse IP cuts 
   if (m_maxdImpactSSS < m_maxdImpact   ) m_maxdImpactSSS = m_maxdImpact;
