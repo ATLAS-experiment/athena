@@ -53,7 +53,7 @@ class TTree;
 class WebdaqHistSvc: public extends<AthService, ITHistSvc, IIncidentListener>
 { 
 public:
-  WebdaqHistSvc(const std::string& name, ISvcLocator *svc );
+  using base_class::base_class;
   virtual ~WebdaqHistSvc() noexcept override {}
 
   virtual StatusCode initialize ATLAS_NOT_THREAD_SAFE () override;
@@ -72,7 +72,7 @@ public:
   virtual StatusCode deReg(const std::string& name) override; //<! use this instead
 
   virtual std::vector<std::string> getHists() const override;
-  std::set<std::string> getSet(boost::regex) const;
+  std::set<std::string> getSet(const boost::regex&) const;
 
   virtual StatusCode regShared( const std::string&, std::unique_ptr<TH1>, LockedHandle<TH1>& ) override;
   virtual StatusCode regShared( const std::string&, std::unique_ptr<TH2>, LockedHandle<TH2>& ) override;
@@ -134,7 +134,7 @@ private:
   /// Helper struct that bundles the histogram, name and mutex
   struct THistID {
     THistID(const std::string& s, TObject* o) : id(s), obj(o) {};
-    THistID() : id(""), obj(nullptr) {}; 
+    THistID() = default;
     std::string id;
     TObject* obj{nullptr};
     std::unique_ptr<std::mutex> mutex;
@@ -143,18 +143,22 @@ private:
   /// Flag to stop the monitoring task
   std::atomic<bool> m_stopFlag{false};
   /// The actual publication Task
-  void monitoringTask(int, int, std::atomic<bool>&, boost::regex);
+  void monitoringTask(const std::string&, unsigned int, unsigned int, std::atomic<bool>&, const boost::regex&) const;
+  /// Publish one histogram
+  void publish(const std::string& appName, const std::string& histID) const;
   /// Final publication after stop
-  void publishAll(boost::regex nameSelect);
+  void publishAll(const boost::regex& nameSelect) const;
   /// Sync the publication to a multiple of the interval
-  void syncPublish(long int, boost::posix_time::ptime);
+  void syncPublish(long int, const boost::posix_time::ptime&) const;
   /// Sleep for a duration or until the stop flag is set
-  void conditionedSleep(std::chrono::milliseconds, const std::atomic<bool>&);
+  void conditionedSleep(std::chrono::milliseconds, const std::atomic<bool>&) const;
   /// Publication thread
   std::thread m_thread;
   std::thread m_threadFast;
   /// The partition to publish to
   std::string m_partition;
+  /// Application name
+  std::string m_appName;
   /// Webdaq configuration variable, see https://gitlab.cern.ch/atlas-tdaq-software/webdaq
   std::string m_tdaqWebdaqBase;
   /// The OH server name (TDAQ_OH_SERVER if defined, m_OHServerName otherwise)
@@ -190,10 +194,10 @@ private:
                                              "^/((run_[0-9]+/lb_[0-9]+/LB)|(SHIFT)|(EXPERT)|(DEBUG)|(EXPRESS)|(RUNSTAT))/.+/.+"};
   
   //New properties for the monitoring task
-  Gaudi::Property<int> m_numSlots{this, "NumSlots", 8, "Number of slots for the main monitoring task"};
-  Gaudi::Property<int> m_numSlotsFast{this, "NumSlotsFast", 1, "Number of slots for the fast monitoring task"};
-  Gaudi::Property<int> m_intervalSeconds{this, "IntervalSeconds", 80, "Interval between histogram publications periods in seconds"};
-  Gaudi::Property<int> m_intervalSecondsFast{this, "IntervalSecondsFast", 10, "Interval between histogram publications periods in seconds for the fast publication"};
+  Gaudi::Property<unsigned int> m_numSlots{this, "NumSlots", 8, "Number of slots for the main monitoring task"};
+  Gaudi::Property<unsigned int> m_numSlotsFast{this, "NumSlotsFast", 1, "Number of slots for the fast monitoring task"};
+  Gaudi::Property<unsigned int> m_intervalSeconds{this, "IntervalSeconds", 80, "Interval between histogram publications periods in seconds"};
+  Gaudi::Property<unsigned int> m_intervalSecondsFast{this, "IntervalSecondsFast", 10, "Interval between histogram publications periods in seconds for the fast publication"};
   Gaudi::Property<std::string> m_OHServerName{this, "OHServerName", "Histogramming", "Name of the OH server to publish histograms into"};
   Gaudi::Property<std::string> m_PublicationIncludeName{this, "PublicationIncludeName",".*","Regex to select histograms for publication"};
   Gaudi::Property<std::string> m_fastPublicationIncludeName{this, "FastPublicationIncludeName","^.EXPERT.HLTFramework.TrigSignatureMoni.*","Regex to select histograms for fast publication"};
