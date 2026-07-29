@@ -380,6 +380,12 @@ def MainServicesCfg(flags, LoopMgr='AthenaEventLoopMgr'):
     # the original bug.
     cfg.addService(CompFactory.ExceptionSvc(Catch="NONE"))
 
+    # Miscellaneous environment settings.
+    # This includes fixing the cache sizes that Eigen assumes, so that
+    # operations on large matrices will give identical results across
+    # hardware with differing cache sizes.
+    cfg.addService(CompFactory.AthEnvironmentSvc(), create=True)
+
     # ApplicationMgr properties:
     cfg.setAppProperty('AuditAlgorithms', True)
     cfg.setAppProperty('InitializationLoopCheck', False)
