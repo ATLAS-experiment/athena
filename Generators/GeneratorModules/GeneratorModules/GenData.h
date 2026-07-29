@@ -5,72 +5,49 @@
 #ifndef GENERATORMODULES_GENDATA_H
 #define GENERATORMODULES_GENDATA_H
 
-#include "AthenaBaseComps/AthAlgorithm.h"
 #include "GaudiKernel/ServiceHandle.h"
 #include "GaudiKernel/IPartPropSvc.h"
-#include "GaudiKernel/IIncidentSvc.h"
-#include "AthenaKernel/errorcheck.h"
-#include "StoreGate/ReadHandleKey.h"
-
-#include "HepPDT/ParticleData.hh"
-#include "HepPDT/ParticleDataTable.hh"
+#include "CxxUtils/checker_macros.h"
 
 #include <atomic>
+#include <optional>
 #include <string>
-#include <vector>
-#include <map>
-#include <cmath> //for std::abs
-#include <stdexcept>
-#include <stdlib.h>
-#include <cstdio>
-#include <iostream>
 
 ///GenData is a class for particle data access
 
 class GenData  {
 public:
 
-  GenData() { };
+  GenData();
 
-  virtual ~GenData() { }
+  GenData(const std::string& sname, const std::string& name);
 
-private:
-  /// Access an element in the particle data table
-  const HepPDT::ParticleData* particleData(int pid) const {
-    if (!m_initialized) {
-      if (m_ppSvc.retrieve().isFailure()) {
-            std::cerr<<  "GenData: failed to retrieve PartPropSvc\n";
-            std::abort();
-      }
-      m_initialized = true;
-    }
-    const int absPid = std::abs(pid);
-    return m_ppSvc->PDT()->particle(HepPDT::ParticleID(absPid));
-  }
-public:
+  virtual ~GenData() = default;
+
+  /// Get the mass of a particle by PDG ID
+  std::optional<double> particleMass(int pdgId) const;
+
+  /// Get the lifetime of a particle by PDG ID
+  std::optional<double> particleLifetime(int pdgId) const;
+
+  /// Get the name of a particle by PDG ID
+  std::optional<std::string> particleName(int pdgId) const;
   
-  std::optional<double> particleMass(int pdgId) const {
-    const HepPDT::ParticleData* particle = particleData(std::abs(pdgId));
-    return particle ? std::optional<double>{particle->mass().value()} : std::nullopt;
-  }
-
-  std::optional<double> particleLifetime(int pdgId) const {
-    const HepPDT::ParticleData* particle = particleData(std::abs(pdgId));
-    return particle ? std::optional<double>{particle->lifetime()} : std::nullopt;
-  }
-
-  std::optional<std::string> particleName(int pdgId) const {
-    const HepPDT::ParticleData* particle = particleData(std::abs(pdgId));
-    return particle ? std::optional<std::string>{particle->name()} : std::nullopt;
-  }
-
 private:
 
+  struct ParticleInfo {
+    std::optional<double> mass;
+    std::optional<double> lifetime;
+    std::optional<std::string> name;
+  };
+  ParticleInfo particleInfo(int absPid) const;
+  
   /// Handle on the particle property service
-  ServiceHandle<IPartPropSvc> m_ppSvc{"PartPropSvc", "GenData"};
+  std::string m_service_name{"PartPropSvc"};
+  std::string m_name{"GenData"};
+  ServiceHandle<IPartPropSvc> m_ppSvc;
   mutable std::atomic<bool> m_initialized{false};
 
 };
-
 
 #endif
