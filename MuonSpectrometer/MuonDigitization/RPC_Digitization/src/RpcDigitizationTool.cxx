@@ -12,6 +12,10 @@
 //             Stefania Spagnolo <stefania.spagnolo@le.infn.it>
 ////////////////////////////////////////////////////////////////////////////////
 
+// Tell clang to optimize assuming that FP operations may trap.
+#include "CxxUtils/trapping_fp.h"
+CXXUTILS_TRAPPING_FP;
+
 #include "RPC_Digitization/RpcDigitizationTool.h"
 
 // Inputs
