@@ -5,9 +5,7 @@
 #ifndef TRACKINGANALYSISALGORITHMS_PIXELDEDXUTILS_H
 #define TRACKINGANALYSISALGORITHMS_PIXELDEDXUTILS_H
 
-#include <map>
 #include <vector>
-#include <cmath>
 
 namespace PixelDEdx {
 

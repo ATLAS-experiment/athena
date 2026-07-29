@@ -3,7 +3,8 @@
 //
 
 #include "TrackingAnalysisAlgorithms/PixelDEdxUtils.h"
-
+#include <cmath>
+#include <map>
 namespace PixelDEdx {
   
   /// The functions below take PixelClusterStructs as input, a simple struct defined to abstract away the two EDMs.
