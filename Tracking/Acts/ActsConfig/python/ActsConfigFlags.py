@@ -156,6 +156,9 @@ def createActsConfigFlags():
     actscf.addFlag('Acts.useHGTDClusterInTrackFinding', False) # use HGTD cluster in track finding
     actscf.addFlag('Acts.branchStopperMeasCutReduce', 2)
     actscf.addFlag('Acts.branchStopperAbsEtaMeasCut', 1.2)
+    actscf.addFlag('Acts.SeedRefitOutlierChi2Cut', float('inf'))  # OutlierChi2Cut for the seed refit Kalman fitter, applied whenever a seed refit is scheduled. inf == disabled.
+    actscf.addFlag('Acts.LrtStripSeedRefit', True)  # Toggle the LRT strip-seed refit (KF on strip seeds before CKF). 
+    actscf.addFlag('Acts.stripCalibrationIterations', 1)  # Strip-SP calibration iterations in TrackParamsEstimationTool (all passes). 
     actscf.addFlag('Acts.forceTrackOnSeed', lambda pcf: not(pcf.Acts.SeedingStrategy is SeedingStrategy.GbtsFtf and
                                                             pcf.Acts.PixelCalibrationStrategy is PixelCalibrationStrategy.AnalogueClusteringAfterSelection)) # forceTrackOnSeed does not seem to work with GBTS seeds and analogue cluster calibration
     actscf.addFlag('Acts.PixelNNCalibrationModelsFolder', 'ITkPixelClusterization/nn-01-01-01/') # location of models for pixel ONNX files, extpected content of the foder are: number.onnx, pos1.onnx, pos2.onnx, pos3.onnx

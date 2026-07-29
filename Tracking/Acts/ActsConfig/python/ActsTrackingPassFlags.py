@@ -102,8 +102,8 @@ def createActsLargeRadiusTrackingPassFlags():
     icf.storedTrackParticlesExtension = "LargeD0"
 
     # Override acts default values
-    icf.Xi2max = [75]
-    icf.Xi2maxNoAdd = [100]
+    icf.Xi2max = [25]
+    icf.Xi2maxNoAdd = [50]
 
     # Mark as secondary pass
     icf.isSecondaryPass = True

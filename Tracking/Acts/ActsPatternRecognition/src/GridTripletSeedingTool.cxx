@@ -5,7 +5,9 @@
 #include "src/GridTripletSeedingTool.h"
 
 #include <cmath>
+#include <cstdint>
 #include <numbers>
+#include <vector>
 
 namespace ActsTrk {
 
@@ -223,12 +225,6 @@ StatusCode GridTripletSeedingTool::initialize() {
   m_bottomDoubletFinderCfg.cotThetaMax = m_cotThetaMax;
   m_bottomDoubletFinderCfg.minPt = m_minPt;
   m_bottomDoubletFinderCfg.helixCutTolerance = 1.;
-  if (m_useExperimentCuts || m_doubletDPhiCut) {
-    m_bottomDoubletFinderCfg.experimentCuts
-        .connect<&ActsTrk::GridTripletSeedingTool::doubletSelectionFunction>(
-            this);
-  }
-
   m_topDoubletFinderCfg = m_bottomDoubletFinderCfg;  // copy the bottom cuts
   m_topDoubletFinderCfg.candidateDirection = Acts::Direction::Forward();
   m_topDoubletFinderCfg.deltaRMin = m_deltaRMinTopSP;
@@ -344,6 +340,7 @@ bool GridTripletSeedingTool::spacePointSelectionFunction(
 }
 
 bool GridTripletSeedingTool::doubletSelectionFunction(
+    const std::vector<float>& spPhi, const std::vector<float>& spAsinD0OverR,
     const Acts::ConstSpacePointProxy& middle,
     const Acts::ConstSpacePointProxy& other, float cotTheta,
     bool isBottomCandidate) const {
@@ -354,26 +351,26 @@ bool GridTripletSeedingTool::doubletSelectionFunction(
     // widening only knows the full radial span; this applies the exact
     // per-pair bound before the doublet enters the triplet stage.
     // NB: this container only fills the packed coordinate columns, so the
-    // packed accessors xy()/zr() must be used here.
+    // packed accessor zr() must be used here.
     const float rM = middle.zr()[1];
     const float rO = other.zr()[1];
     const float rInner = std::min(rM, rO);
     const float rOuter = std::max(rM, rO);
-    const float d0 =
-        m_doubletDPhiD0Max < 0.f ? m_impactMax.value() : m_doubletDPhiD0Max.value();
 
-    const std::array<float, 2>& xyM = middle.xy();
-    const std::array<float, 2>& xyO = other.xy();
-    float dPhi = std::atan2(xyO[1], xyO[0]) - std::atan2(xyM[1], xyM[0]);
+    // phi(SP) and asin(d0/r) depend only on the SP (d0 is constant from the
+    // config), so they are computed once per SP in createSeeds and looked up
+    // via copiedFromIndex, avoiding two atan2 and two asin calls per
+    // candidate. asin(d0/r) is monotone in r, so the inner-minus-outer swing
+    // equals the absolute difference of the two per-SP terms.
+    const auto iM = middle.copiedFromIndex();
+    const auto iO = other.copiedFromIndex();
+    float dPhi = spPhi[iO] - spPhi[iM];
+    const float swing = std::abs(spAsinD0OverR[iO] - spAsinD0OverR[iM]);
     if (dPhi > std::numbers::pi_v<float>) {
       dPhi -= 2.f * std::numbers::pi_v<float>;
     } else if (dPhi < -std::numbers::pi_v<float>) {
       dPhi += 2.f * std::numbers::pi_v<float>;
     }
-
-    const float swing =
-        std::asin(std::min(1.f, d0 / std::max(rInner, 1.f))) -
-        std::asin(std::min(1.f, d0 / std::max(rOuter, 1.f)));
     const float bound = m_doubletDPhiConst +
                         m_doubletDPhiSlope * (rOuter - rInner) +
                         std::min(m_doubletDPhiCap.value(), swing);
@@ -456,6 +453,16 @@ StatusCode GridTripletSeedingTool::createSeeds(
   std::vector<float> selectedSpacePointsR;
   selectedXAODSpacePoints.reserve(totalSpacePoints);
   selectedSpacePointsR.reserve(totalSpacePoints);
+  // Per-SP inputs for the doublet dPhi selection (see
+  // doubletSelectionFunction); only filled when the cut is enabled.
+  std::vector<float> selectedSpacePointsPhi;
+  std::vector<float> selectedSpacePointsAsinD0OverR;
+  const float dPhiCutD0 =
+      m_doubletDPhiD0Max < 0.f ? m_impactMax.value() : m_doubletDPhiD0Max.value();
+  if (m_doubletDPhiCut) {
+    selectedSpacePointsPhi.reserve(totalSpacePoints);
+    selectedSpacePointsAsinD0OverR.reserve(totalSpacePoints);
+  }
 
   for (const xAOD::SpacePointContainer* spacePoints : spacePointCollections) {
     for (const xAOD::SpacePoint* sp : *spacePoints) {
@@ -472,6 +479,11 @@ StatusCode GridTripletSeedingTool::createSeeds(
       grid.insert(selectedXAODSpacePoints.size(), phi, z, r);
       selectedXAODSpacePoints.push_back(sp);
       selectedSpacePointsR.push_back(r);
+      if (m_doubletDPhiCut) {
+        selectedSpacePointsPhi.push_back(phi);
+        selectedSpacePointsAsinD0OverR.push_back(
+            std::asin(std::min(1.f, dPhiCutD0 / std::max(r, 1.f))));
+      }
     }
   }
 
@@ -560,6 +572,24 @@ StatusCode GridTripletSeedingTool::createSeeds(
   }();
 
   auto bottomDoubletFinderCfg = m_bottomDoubletFinderCfg;
+  auto topDoubletFinderCfg = m_topDoubletFinderCfg;
+
+  // set up the cache for the doublet selection function, which needs to know the per-SP phi and
+  // asin(d0/r) values for the middle and other SPs. The cache is filled in
+  // createSeeds, and the selection function is connected to the doublet finders below.
+  auto doubletSelection =
+      [this, &selectedSpacePointsPhi, &selectedSpacePointsAsinD0OverR](
+          const Acts::ConstSpacePointProxy& middle,
+          const Acts::ConstSpacePointProxy& other, float cotTheta,
+          bool isBottomCandidate) {
+        return doubletSelectionFunction(selectedSpacePointsPhi,
+                                        selectedSpacePointsAsinD0OverR, middle,
+                                        other, cotTheta, isBottomCandidate);
+      };
+  if (m_useExperimentCuts || m_doubletDPhiCut) {
+    bottomDoubletFinderCfg.experimentCuts.connect(doubletSelection);
+    topDoubletFinderCfg.experimentCuts.connect(doubletSelection);
+  }
 
   if(m_useHVCollisionRegion) {
     SG::ReadHandle<xAOD::VertexContainer> inputHoughVtx = SG::makeHandle(m_inputHoughVtxKey, ctx);
@@ -581,7 +611,7 @@ StatusCode GridTripletSeedingTool::createSeeds(
       Acts::DoubletSeedFinder::create(Acts::DoubletSeedFinder::DerivedConfig(
           bottomDoubletFinderCfg, bFieldInZ));
   auto topDoubletFinder = Acts::DoubletSeedFinder::create(
-      Acts::DoubletSeedFinder::DerivedConfig(m_topDoubletFinderCfg, bFieldInZ));
+      Acts::DoubletSeedFinder::DerivedConfig(topDoubletFinderCfg, bFieldInZ));
   auto tripletFinder = Acts::TripletSeedFinder::create(
       Acts::TripletSeedFinder::DerivedConfig(m_tripletFinderCfg, bFieldInZ));
 

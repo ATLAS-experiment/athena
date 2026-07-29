@@ -23,6 +23,7 @@
 // Other
 #include <memory>
 #include <optional>
+#include <vector>
 
 namespace ActsTrk {
 
@@ -388,7 +389,10 @@ class GridTripletSeedingTool
 
   bool spacePointSelectionFunction(const xAOD::SpacePoint* sp, float r) const;
 
-  bool doubletSelectionFunction(const Acts::ConstSpacePointProxy& middle,
+  /// doublet selection which caches per SP phi and asin(d0/r) values for the middle and other SPs
+  bool doubletSelectionFunction(const std::vector<float>& spPhi,
+                                const std::vector<float>& spAsinD0OverR,
+                                const Acts::ConstSpacePointProxy& middle,
                                 const Acts::ConstSpacePointProxy& other,
                                 float cotTheta, bool isBottomCandidate) const;
 
