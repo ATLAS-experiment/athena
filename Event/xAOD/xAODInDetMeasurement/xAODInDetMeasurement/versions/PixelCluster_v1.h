@@ -59,6 +59,8 @@ class PixelCluster_v1 : public UncalibratedMeasurement_v1 {
     /// Returns the list of charges of the channels building the cluster
     SG::ConstAccessor<SG::JaggedVecElt<float> >::element_type
     chargeList() const;
+    /// Returns the sum of the charges of the channels building the cluster
+    float totalCharge() const;
 
     /// Return the energy loss in the cluster in MeV
     float energyLoss() const;
@@ -94,6 +96,8 @@ class PixelCluster_v1 : public UncalibratedMeasurement_v1 {
     /// Sets the list of charges of the channels building the cluster
     void setChargelist(const std::vector<float>& charges);
     void setChargelist(std::span<float> charges);
+    /// Sets the total charge
+    void setTotalCharge(float totalCharge);
 
     /// Sets the energy loss in the cluster in MeV
     void setEnergyLoss(float dEdX);
@@ -130,6 +134,7 @@ public:
       AUXSTORE_VARSTRUCT_VAR(int,                                  channelsInPhi);
       AUXSTORE_VARSTRUCT_VAR(int,                                  channelsInEta);
       AUXSTORE_VARSTRUCT_VAR(float,                                widthInEta);
+      AUXSTORE_VARSTRUCT_VAR(float,                                totalCharge);
       AUXSTORE_VARSTRUCT_VAR(int,                                  lvl1a);
       // @TODO spans for all or just bare pointers and n_rdos only once ?
       xAOD::xAODInDetMeasurement::Utilities::JaggedVecEltCache<Identifier::value_type>     rdoList;

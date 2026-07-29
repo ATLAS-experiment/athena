@@ -15,6 +15,7 @@ PixelClusterAuxContainer_v1::PixelClusterAuxContainer_v1()
     AUX_VARIABLE(channelsInPhi);
     AUX_VARIABLE(channelsInEta);
     AUX_VARIABLE(widthInEta);
+    AUX_VARIABLE(totalCharge);
     AUX_VARIABLE(energyLoss);
     AUX_VARIABLE(lvl1a);
 }

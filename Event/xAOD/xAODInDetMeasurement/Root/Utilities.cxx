@@ -12,7 +12,7 @@ namespace xAOD::xAODInDetMeasurement::Utilities {
     static const SG::AuxElement::Accessor<SG::JaggedVecElt<float> > chargesAcc("chargeList");
     assert( chargesAcc.isAvailable( cluster ) );
     const std::vector<float>& charges = chargesAcc(cluster);
-    return std::accumulate(charges.begin(), charges.end(), 0.);
+    return std::accumulate(charges.begin(), charges.end(), 0.f);
   }
 
   int computeTotalToT( const SG::AuxElement& cluster) {
