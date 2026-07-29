@@ -55,14 +55,11 @@ StatusCode AthenaPoolCnvSvc::initialize() {
    extractPoolAttributes(m_inputPoolAttr, &m_inputAttr, &m_inputAttr, &m_inputAttr);
    // Extracting the INPUT POOL ItechnologySpecificAttributes which are to be printed for each event
    extractPoolAttributes(m_inputPoolAttrPerEvent, &m_inputAttrPerEvent, &m_inputAttrPerEvent, &m_inputAttrPerEvent);
-   // Setup incident for EndEvent to print out attributes each event
+   // Setup incident for ProcessEventAttributes to process attributes on each event
    ServiceHandle<IIncidentSvc> incSvc("IncidentSvc", name());
    long int pri = 1000;
-   if (!m_inputPoolAttrPerEvent.value().empty()) {
-      // Set to be listener for EndEvent
-      incSvc->addListener(this, "EndEvent", pri);
-      ATH_MSG_DEBUG("Subscribed to EndEvent for printing out input file attributes.");
-   }
+   // Set to be listener for ProcessEventAttributes
+   incSvc->addListener(this, "ProcessEventAttributes", pri);
    if (!processPoolAttributes(m_inputAttr, "", IPoolSvc::kInputStream, false, true, true).isSuccess()) {
       ATH_MSG_DEBUG("setInputAttribute failed setting POOL domain attributes.");
    }
@@ -449,9 +446,10 @@ StatusCode AthenaPoolCnvSvc::setInputAttributes(const std::string& fileName) {
 
 //______________________________________________________________________________
 void AthenaPoolCnvSvc::handle(const Incident& incident) {
-   if (incident.type() == "EndEvent") {
+   if (incident.type() == "ProcessEventAttributes") {
+      m_inputAttrPerEvent.push_back({"SET_ACTIVE_ENTRY", incident.source(), m_lastInputFileName, ""});
       if (!processPoolAttributes(m_inputAttrPerEvent, m_lastInputFileName, IPoolSvc::kInputStream).isSuccess()) {
-         ATH_MSG_DEBUG("handle EndEvent failed process POOL database attributes.");
+         ATH_MSG_DEBUG("handle ProcessEventAttributes failed process POOL database attributes.");
       }
    }
 }
