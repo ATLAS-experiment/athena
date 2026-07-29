@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( ALFA_Geometry )
@@ -20,7 +20,7 @@ atlas_add_test( ALFA_ConfigParams_test
   SOURCES test/ALFA_ConfigParams_test.cxx
   INCLUDE_DIRS  ${Boost_INCLUDE_DIRS} 
   LINK_LIBRARIES ALFA_Geometry ${Boost_LIBRARIES}
-  POST_EXEC_SCRIPT nopost.sh
+  POST_EXEC_SCRIPT noerror.sh
 )
 
 # Install files from the package:
