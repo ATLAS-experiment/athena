@@ -103,6 +103,8 @@ class FTagJetSFBlock(ConfigBlock):
         self.addOption ('bTagOnlineWP', None, type=str,
             info="online working point to use to configure the CDI access.",
             expertMode=True)
+        self.addOption ('bTagConditionalWP', "Continuous", type=str,
+            info="conditional working point.")
         # Peculiar case default value set to None while type is bool 
         # A default value will be assigned by the getReadFromBTaggingObject function 
         # if this flag is not set 
@@ -215,7 +217,7 @@ class FTagJetSFBlock(ConfigBlock):
                                      'Please make sure to configure manually bTagOnlineTagger and bTagOnlineWP')
 
                 bTagConditionalTagger = "ConditionalOffline" + self.btagger + "Given" + bTagOnlineTagger + "WP" + bTagOnlineWP.split("_")[-1]
-                bTagConditionalWP = self.btagWP
+                bTagConditionalWP = self.bTagConditionalWP
 
                 alg = config.createAlgorithm( 'CP::BTaggingTriggerEfficiencyAlg',
                                               'FTagEfficiencyTriggerScaleFactorAlg' + chain_out )
@@ -238,7 +240,9 @@ class FTagJetSFBlock(ConfigBlock):
 
                 alg.scaleFactorDecoration = 'ftag_effSF_' + selectionName + '_' + chain_out + '_%SYS%'
                 alg.matchingDecoration = 'ftag_jetTrigMatching_' + chain_out + '_%SYS%'
-                alg.bTagMatchingDecoration = 'ftag_bTagTrigMatching_' + chain_out + '_%SYS%'
+                alg.bTagTrigMatchingDecoration = 'ftag_bTagTrigMatching_' + chain_out + '_%SYS%'
+                if('Continuous' not in self.bTagConditionalWP):
+                    alg.bTagSelectionDecoration = 'ftag_select_' + self.btagger + '_' + self.bTagConditionalWP
                 alg.outOfValidity = 2  # continue silently, but decorate jet with outOfValidityDeco
                 alg.outOfValidityDeco = 'no_ftag_' + selectionName + '_' + chain_out + ',as_char'
                 alg.preselection = config.getPreselection (jetContainer, selectionName)
