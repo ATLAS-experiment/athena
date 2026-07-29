@@ -31,6 +31,7 @@
 #include <memory>
 #include <mutex>
 #include <shared_mutex>
+#include <cstdint>
 
 namespace CP {
 
@@ -56,17 +57,17 @@ namespace CP {
     /// @name Function(s) implementing the IPixelDEdxEqualizationTool interface
     /// @{
 
-    virtual double getTrackdEdxSF(const xAOD::TrackParticle& track, const int runNumber) const override;
-    virtual double getClusterdEdxSF(const PixelDEdx::PixelClusterStruct& cluster, const int runNumber) const override;
+    virtual double getTrackdEdxSF(const xAOD::TrackParticle& track, const uint32_t runNumber) const override;
+    virtual double getClusterdEdxSF(const PixelDEdx::PixelClusterStruct& cluster, const uint32_t runNumber) const override;
 
   private:
     
-    const std::vector<TrackSFRecord>& getRunTrackSFs(const int runNumber) const;
-    const std::vector<ClusterSFRecord>& getRunClusterSFs(const int runNumber) const;
+    const std::vector<TrackSFRecord>& getRunTrackSFs(const uint32_t runNumber) const;
+    const std::vector<ClusterSFRecord>& getRunClusterSFs(const uint32_t runNumber) const;
 
     template<typename RecordType>
     const std::vector<RecordType>& getRunSFs(
-                                             const int runNumber,
+                                             const uint32_t runNumber,
                                              std::map<int, std::vector<RecordType>>& cache,
                                              const std::string& treeName) const;
 

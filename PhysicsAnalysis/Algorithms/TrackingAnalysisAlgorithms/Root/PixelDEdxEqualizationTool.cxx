@@ -60,7 +60,7 @@ namespace CP {
    // Template helper function for common logic
   template<typename RecordType>
   const std::vector<RecordType>& PixelDEdxEqualizationTool::getRunSFs(
-                                                                      const int runNumber,
+                                                                      const uint32_t runNumber,
                                                                       std::map<int, std::vector<RecordType>>& cache,
                                                                       const std::string& treeName) const {
     
@@ -163,12 +163,12 @@ namespace CP {
   }
 
   // Specific implementation for TrackSFs
-  const std::vector<TrackSFRecord>& PixelDEdxEqualizationTool::getRunTrackSFs(const int runNumber) const {
+  const std::vector<TrackSFRecord>& PixelDEdxEqualizationTool::getRunTrackSFs(const uint32_t runNumber) const {
     return getRunSFs<TrackSFRecord>(runNumber, m_cachedTrackSFData, m_trackSFTreeName.value());
   }
 
   // Specific implementation for ClusterSFs
-  const std::vector<ClusterSFRecord>& PixelDEdxEqualizationTool::getRunClusterSFs(const int runNumber) const {
+  const std::vector<ClusterSFRecord>& PixelDEdxEqualizationTool::getRunClusterSFs(const uint32_t runNumber) const {
     return getRunSFs<ClusterSFRecord>(runNumber, m_cachedClusterSFData, m_clusterSFTreeName.value());
   }
 
@@ -176,7 +176,7 @@ namespace CP {
   /// Track Level EQ ///
   //////////////////////
 
-  double PixelDEdxEqualizationTool::getTrackdEdxSF(const xAOD::TrackParticle& track, const int runNumber) const {
+  double PixelDEdxEqualizationTool::getTrackdEdxSF(const xAOD::TrackParticle& track, const uint32_t runNumber) const {
 
     unsigned char stored_numberOfIBLOverflowsdEdx = 99;
     static const SG::AuxElement::ConstAccessor<unsigned char> nIBLOFAcc("numberOfIBLOverflowsdEdx");
@@ -234,7 +234,7 @@ namespace CP {
   /// Cluster Level EQ ///
   ////////////////////////
 
-  double PixelDEdxEqualizationTool::getClusterdEdxSF(const PixelDEdx::PixelClusterStruct& cluster, const int runNumber) const {
+  double PixelDEdxEqualizationTool::getClusterdEdxSF(const PixelDEdx::PixelClusterStruct& cluster, const uint32_t runNumber) const {
 
     // Get the cached vector of SF records for this run
     const auto& sfRecords = getRunClusterSFs(runNumber);
