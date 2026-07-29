@@ -27,10 +27,10 @@
 #include <ROOT/RDataFrame.hxx>
 
 // C++
-#include <cmath>
 #include <memory>
-#include <mutex>
 #include <shared_mutex>
+#include <map>
+#include <vector>
 #include <cstdint>
 
 namespace CP {
