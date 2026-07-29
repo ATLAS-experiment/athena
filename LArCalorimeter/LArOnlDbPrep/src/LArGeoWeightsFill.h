@@ -1,11 +1,11 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef LARGEOWEIGHTSFILL_H
 #define LARGEOWEIGHTSFILL_H
 
-#include "AthenaBaseComps/AthAlgorithm.h"
+#include "AthenaBaseComps/AthReentrantAlgorithm.h"
 #include "GaudiKernel/ToolHandle.h"
 #include "LArCabling/LArOnOffIdMapping.h"
 #include "StoreGate/ReadCondHandleKey.h"
@@ -14,28 +14,26 @@
 class StoreGateSvc;
 class LArOnlineID;
 
-class LArGeoWeightsFill:public AthAlgorithm {
+class LArGeoWeightsFill : public AthReentrantAlgorithm {
  public:
-  LArGeoWeightsFill(const std::string& name, ISvcLocator* pSvcLocator);
+  using AthReentrantAlgorithm::AthReentrantAlgorithm;
   ~LArGeoWeightsFill();
   virtual StatusCode initialize() override;
-  virtual StatusCode execute(const EventContext&) override {return StatusCode::SUCCESS;}
+  virtual StatusCode execute(const EventContext&) const override {return StatusCode::SUCCESS;}
   virtual StatusCode stop() override;
 
  private:
   SG::ReadCondHandleKey<LArOnOffIdMapping> m_cablingKey{this, "OnOffMap", "LArOnOffIdMap", "SG key for mapping object"};
   SG::ReadCondHandleKey<CaloDetDescrManager> m_caloMgrKey{this,"CaloDetDescrManager","CaloDetDescrManager","SG Key for CaloDetDescrManager in the Condition Store" };
 
-  const LArOnlineID* m_onlineID;
+  const LArOnlineID* m_onlineID = nullptr;
 
-  std::string m_nameOfSet;
-  std::string m_key;
+  StringProperty  m_key  { this, "Key", "GeoWeights" };
+  BooleanProperty m_fill { this, "Fill", true };
+  BooleanProperty m_dump { this, "Dump", false };
+  StringProperty  m_outFileName { this, "OutFile", "out.txt" };
 
-  bool m_fill, m_dump;
-  std::string m_outFileName;
-
-  ToolHandle < CaloTriggerTowerService > m_ttService;
-
+  ToolHandle < CaloTriggerTowerService > m_ttService { "CaloTriggerTowerService" };
 };
 
 #endif

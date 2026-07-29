@@ -21,41 +21,7 @@
 #include "LArCOOLConditions/LArDSPThresholdsFlat.h"
 #include "CoolKernel/StorageType.h"
 
-LArDSPThresholdFillInline::LArDSPThresholdFillInline(const std::string& name, ISvcLocator* pSvcLocator) :
-  AthAlgorithm(name,pSvcLocator),
-  m_onlineID(0),
-  m_workmode (FIXED)
-{
-
-  declareProperty("Fill",m_fill=true);
-  declareProperty("NameOfSet",m_nameOfSet);
-  declareProperty("Key",m_key="DSPThresholds");
-  declareProperty("mode",m_mode="fixed",
-		  "Select how to set thresholds. Allowed values are 'fixed','group' and 'noise'");
-
-  //For mode 'fixed'
-  declareProperty("tQThreshold",m_tqThrsh=250);
-  declareProperty("samplesThreshold",m_samplesThrsh=1000);
-
-  //For mode 'group'
-  declareProperty("ThresholdsPerCellGroup",m_cellGroupStr);
-
-  //For mode 'Noise'
-  declareProperty("sigmaNoiseSamples",m_sigmaNoiseSamples);
-  declareProperty("sigmaNoiseQt",m_sigmaNoiseQt);
-  declareProperty("usePileupNoiseSamples",m_usePileupNoiseSamples);
-  declareProperty("usePileupNoiseQt",m_usePileupNoiseQt);
-
-  //For channel masking
-  declareProperty("MaskBadChannels",m_maskBadChannels=false);
-  declareProperty("MaskedtQThreshold",m_maskedtqThrsh=static_cast<float>(0x7fffffff));
-  declareProperty("MaskedsamplesThreshold",m_maskedsamplesThrsh=static_cast<float>(0x7fffffff));
-
-  declareProperty("Dump",m_dump=false);
-  declareProperty("OutFile",m_outFileName="out.txt");
-}
-
-LArDSPThresholdFillInline::~LArDSPThresholdFillInline() {}
+LArDSPThresholdFillInline::~LArDSPThresholdFillInline() = default;
 
 
 StatusCode LArDSPThresholdFillInline::initialize() {
@@ -70,13 +36,13 @@ StatusCode LArDSPThresholdFillInline::initialize() {
   ATH_CHECK(m_bcMask.buildBitMask(m_problemsToMask,msg()));
 
 
-  if (m_mode.compare("fixed")==0) {
+  if (m_mode == "fixed") {
     m_workmode=FIXED;
     ATH_MSG_INFO ( "Will used fixed values defined by jobO " 
                    << name() <<".tQThreshold and "
                    << name() << ".samplesThreshold for DSP thresholds" );
   }
-  else if (m_mode.compare("group")==0) {
+  else if (m_mode == "group") {
     m_workmode=GROUP;
     ATH_MSG_INFO ( "Will used cell groups defined in jobO " << name() << ".CellGroup for DSP thresholds" );
     const CaloCell_ID* caloCellID = nullptr;
@@ -91,7 +57,7 @@ StatusCode LArDSPThresholdFillInline::initialize() {
       return StatusCode::FAILURE;
     }
   }
-  else if (m_mode.compare("noise")==0) {
+  else if (m_mode == "noise") {
     m_workmode=NOISE;
 
     if(m_usePileupNoiseSamples)
@@ -279,7 +245,7 @@ StatusCode LArDSPThresholdFillInline::stop() {
       ATH_MSG_ERROR("No output file specified");
       return StatusCode::FAILURE;
     }
-    outfile.open(m_outFileName.c_str(),std::ios::out);
+    outfile.open(m_outFileName,std::ios::out);
     if (outfile.is_open()) {
       ATH_MSG_INFO ( "Writing to file " << m_outFileName );
     }
