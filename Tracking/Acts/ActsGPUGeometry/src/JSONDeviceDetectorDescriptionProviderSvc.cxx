@@ -111,6 +111,10 @@ StatusCode JSONDeviceDetectorDescriptionProviderSvc::initialize()
   ATH_CHECK(m_detStore->record(std::move(deviceDetector), m_deviceDetectorName.value(), allowMods));
   ATH_CHECK(m_detStore->record(std::move(hostDetector), m_hostDetectorName.value(), allowMods));
 
+  ATH_MSG_DEBUG("Recorded host and device detector design description: " << m_hostDesignObjectName.value() << ", " << m_deviceDesignObjectName.value());
+  ATH_MSG_DEBUG("Recorded host and device detector conditions description: " << m_hostCondObjectName.value() << ", " << m_deviceCondObjectName.value());
+  ATH_MSG_DEBUG("Recorded host and device detector geometry description: " << m_hostDetectorName.value() << ", " << m_deviceDetectorName.value());
+
   ATH_MSG_DEBUG("Successfully initialized");
   return StatusCode::SUCCESS;
 }

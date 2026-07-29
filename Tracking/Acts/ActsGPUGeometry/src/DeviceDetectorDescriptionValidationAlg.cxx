@@ -51,10 +51,10 @@ StatusCode DeviceDetectorDescriptionValidationAlg::initialize()
 {
     ATH_MSG_DEBUG("Initializing detector description validation alg");
 
-    ATH_CHECK(m_hostCondKey.initialize());
+    ATH_CHECK(m_monCondKey.initialize());
     
 
-    if (m_hostDesignObjectName.value().empty() ||
+    if (m_monDesignObjectName.value().empty() ||
         m_refHostDesignObjectName.value().empty()) {
         ATH_MSG_FATAL("HostDesignObjectName / RefHostDesignObjectName must both be set");
         return StatusCode::FAILURE;
@@ -66,23 +66,23 @@ StatusCode DeviceDetectorDescriptionValidationAlg::initialize()
 StatusCode DeviceDetectorDescriptionValidationAlg::execute(const EventContext& ctx) const
 {
     // ---- candidate design (static, from detStore) ----
-    const traccc::detector_design_description::host* candDesign = nullptr;
-    ATH_CHECK(detStore()->retrieve(candDesign, m_hostDesignObjectName.value()));
+    const traccc::detector_design_description::host* monDesign = nullptr;
+    ATH_CHECK(detStore()->retrieve(monDesign, m_monDesignObjectName.value()));
 
     // ---- reference design (static, from detStore) ----
     const traccc::detector_design_description::host* refDesign = nullptr;
     ATH_CHECK(detStore()->retrieve(refDesign, m_refHostDesignObjectName.value()));
 
     // ---- candidate conditions (per-IOV) ----
-    SG::ReadCondHandle<traccc::detector_conditions_description::host> candCondHandle{m_hostCondKey, ctx};
-    ATH_CHECK(candCondHandle.isValid());
-    const traccc::detector_conditions_description::host* candCond = candCondHandle.cptr();
+    SG::ReadCondHandle<traccc::detector_conditions_description::host> monCondHandle{m_monCondKey, ctx};
+    ATH_CHECK(monCondHandle.isValid());
+    const traccc::detector_conditions_description::host* monCond = monCondHandle.cptr();
 
     // ---- reference conditions (static, read from JSON and stored in detStore) ----
     const traccc::detector_conditions_description::host* refCond = nullptr;
     ATH_CHECK(detStore()->retrieve(refCond, m_refHostCondKey.value()));
 
-    ATH_CHECK(validateDetectorDescription(*refDesign, *refCond, *candDesign, *candCond));
+    ATH_CHECK(validateDetectorDescription(*refDesign, *refCond, *monDesign, *monCond));
 
     return StatusCode::SUCCESS;
 }

@@ -20,11 +20,38 @@ from ActsGPUGeometry.ActsGPUGeometryConfig import JSONDeviceDetectorDescriptionP
 from ActsGPUDataPreparation.ActsGPUDataPreparationConfig import CUDAClusterizerToolCfg,  DeviceClusterizationAlgCfg
 from ActsGPUEventCnv.ActsGPUEventCnvConfig import RDOtoTracccCellConverterAlgCfg, TracccMeasurementConverterAlgCfg
 
+from AthenaCommon.Constants import DEBUG
+
 def GPUGeometryCfg(flags) -> ComponentAccumulator:
     acc = ComponentAccumulator()
 
     # Service runs first — loads all device detector description data into detStore
-    acc.merge(JSONDeviceDetectorDescriptionProviderSvcCfg(flags))
+    acc.merge(JSONDeviceDetectorDescriptionProviderSvcCfg(flags,
+        HostConditionsObjectName="JSONTracccHostCondConfig",
+        HostDigitizationObjectName="JSONTracccHostDigitizationConfig",
+        DeviceConditionsObjectName="JSONTracccDeviceCondConfig",
+        DeviceDigitizationObjectName="JSONTracccDeviceDigitizationConfig",
+        DeviceDetectorName="JSONTracccDeviceDetectorGeometry",
+        HostDetectorName="JSONTracccHostDetectorGeometry",
+        OutputLevel = DEBUG
+    ))
+
+    acc.merge(DeviceDetectorDescriptionCondAlgCfg(flags,
+        HostDetectorName = "JSONTracccHostDetectorGeometry",
+        HostConditionsObjectName="TracccHostCondConfig",
+        HostDigitizationObjectName="TracccHostDigitizationConfig",
+        DeviceConditionsObjectName="TracccDeviceCondConfig",
+        DeviceDigitizationObjectName="TracccDeviceDigitizationConfig",
+        OutputLevel = DEBUG,
+    ))
+
+    acc.merge(DeviceDetectorDescriptionValidationAlgCfg(flags,
+        MonDesignObjectName = "TracccHostDigitizationConfig",
+        MonCondKey = "TracccHostCondConfig",
+        RefHostDesignObjectName = "JSONTracccHostDigitizationConfig",
+        RefHostCondKey = "JSONTracccHostCondConfig",
+        OutputLevel = DEBUG
+    ))
 
     return acc
 

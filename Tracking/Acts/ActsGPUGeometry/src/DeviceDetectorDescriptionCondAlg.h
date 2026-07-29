@@ -11,12 +11,12 @@
 #include "GaudiKernel/ToolHandle.h"
 #include "PathResolver/PathResolver.h"
 #include "ActsGPUInterfaces/IDeviceDetectorDescriptionProviderSvc.h"
-#include "ActsGeometryInterfaces/ITrackingGeometryTool.h"
+#include "ActsGeometryInterfaces/ITrackingGeometrySvc.h"
 #include "InDetCondTools/ISiLorentzAngleTool.h"
 #include "SiSpacePointFormation/SiElementPropertiesTable.h"
 
 #include "StoreGate/ReadCondHandleKey.h"
-#include "AthDeviceInterfaces/IMemoryResourceTool.h"
+#include "AthDeviceInterfaces/IMemoryResourcesTool.h"
 #include "AthDeviceInterfaces/ICopyTool.h"
 #include "InDetIdentifier/PixelID.h"
 #include "InDetIdentifier/SCT_ID.h"
@@ -33,13 +33,13 @@
 #include "InDetReadoutGeometry/SiDetectorElement.h"
 #include "InDetIdentifier/SCT_ID.h"
 
-#include "ActsGeometryInterfaces/ITrackingGeometryTool.h"
 #include "Acts/Surfaces/Surface.hpp"
 #include "Acts/Geometry/TrackingGeometry.hpp"
 #include "Acts/Geometry/GeometryIdentifier.hpp"
 #include "ActsGeometry/ActsDetectorElement.h"
 #include "ActsGPUEvent/TracccDetectorConditionsDescription.h"
 #include "ActsGPUEvent/TracccDetectorDesignDescription.h"
+#include "ActsGPUEvent/TracccDetectorGeometryDescription.h"
 
 #include "traccc/io/read_detector.hpp"
 #include "traccc/geometry/detector_design_description.hpp"
@@ -125,19 +125,18 @@ private:
 
     /// @name The host and device memory resources tools to use for memory allocations
     /// @{
-    ToolHandle<AthDevice::IMemoryResourceTool> m_hostMR{
-        this, "HostMR", "", "Host memory resource tool"};
-    ToolHandle<AthDevice::IMemoryResourceTool> m_deviceMR{
-        this, "DeviceMR", "", "Device memory resource tool"};
+    ToolHandle<AthDevice::IMemoryResourcesTool> m_MRs{
+        this, "MemoryResourcesTool", "",
+        "The memory resources tool to use for allocating memory on the device"};
     /// @}
 
     /// The copy tool used for copying data to device
     ToolHandle<AthDevice::ICopyTool> m_copy{
         this, "CopyProviderTool", "", "Vecmem copy provider tool"};
 
-    Gaudi::Property<std::string> m_geometryFile{
-        this, "GeometryFile", "",
-        "Detray geometry JSON file"};    
+    Gaudi::Property<std::string> m_hostDetectorName{
+        this, "HostDetectorName", "",
+        "Detray host detector object"};    
 
     /// @name The output object names
     /// @{
@@ -156,11 +155,11 @@ private:
     /// @}
 
     SG::WriteCondHandleKey<traccc::detector_conditions_description::host> m_writeHostCondKey{
-        this, "WriteHostCondKey", "TracccHostConditionsObjectName",
+        this, "HostConditionsObjectName", "",
         "Key for writing the per-IOV traccc host conditions object"};
 
     SG::WriteCondHandleKey<traccc::detector_conditions_description::buffer> m_writeDeviceCondKey{
-        this, "WriteDeviceCondKey", "TracccDeviceConditionsObjectName",
+        this, "DeviceConditionsObjectName", "",
         "Key for writing the per-IOV traccc device conditions object"};
 
 
@@ -181,7 +180,8 @@ private:
         "Key of input SiElementPropertiesTable for strip"};
     /// @}
 
-    std::unique_ptr<traccc::host_detector> m_detrayDetector;
+    // std::unique_ptr<traccc::host_detector> m_hostDetector;
+    const traccc::host_detector* m_hostDetector{nullptr};
     std::vector<StaticCondEntry> m_staticCondEntries;
     std::vector<std::size_t> m_designSizes;  // for device buffer construction, reused every execute()
     // Athena Identifier -> row index in the conditions table (stable across
@@ -200,7 +200,7 @@ private:
 
     std::map<Identifier, moduleInfo> m_atlasModuleInfo;
 
-    PublicToolHandle<ActsTrk::ITrackingGeometryTool> m_trackingGeometryTool{this, "TrackingGeometryTool", "ActsTrackingGeometryTool"};
+    ServiceHandle<ActsTrk::ITrackingGeometrySvc> m_trackingGeometrySvc{this, "TrackingGeometrySvc", "ActsTrackingGeometrySvc"};
     ToolHandle<ISiLorentzAngleTool> m_stripLorentzAngleTool{
         this, "StripLorentzAngleTool", "SiLorentzAngleTool",
         "Tool to retrieve Lorentz angle"};
