@@ -118,7 +118,7 @@ Root::TElectronEfficiencyCorrectionTool::initialize()
     } else {
       ATH_MSG_DEBUG("Seed set to " << m_seed);
     }
-    m_Rndm = TRandom2(m_seed);
+    m_Rndm = TRandom3(m_seed);
   }
   /*
    * Load the needed histograms
