@@ -14,6 +14,10 @@ class IMuonIdHelperSvc;
 class TgcCablingMap;
 }
 
+namespace MuonGM {
+class MuonDetectorManager;
+}
+
 namespace L0Muon {
 namespace TgcL0Floating {
 
@@ -22,6 +26,7 @@ class RdoDecoder {
   StatusCode decode(const TgcRdoContainer& rdos,
                     const Muon::TgcCablingMap& cabling,
                     const Muon::IMuonIdHelperSvc& idHelperSvc,
+                    const MuonGM::MuonDetectorManager& detectorManager,
                     HitGroups& hitGroups,
                     DecodeStatistics& statistics) const;
 };

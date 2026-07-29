@@ -64,7 +64,7 @@ if __name__ == "__main__":
     from MuonConfig.MuonConfigUtils import executeTest
     parser = SetupArgParser()
     parser.set_defaults(inputFile=MuonPhaseIITestDefaults.RDO_R3)
-    parser.set_defaults(nEvents=20)
+    parser.set_defaults(nEvents=1000)
 
     args = parser.parse_args()
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
@@ -74,8 +74,23 @@ if __name__ == "__main__":
 
     flags, acc = setupGeoR4TestCfg(args, flags)
     from AthenaCommon.Constants import DEBUG
+    from L0MuonS1TGCFloatingTools.L0MuonS1TGCFloatingToolsConfig import (
+        TgcL0FloatingCandidateBuilderToolCfg,
+    )
 
-    acc.merge(L0MuonTGCSimCfg(flags, OutputLevel=DEBUG))
+    candidateBuilderTool = acc.popToolsAndMerge(
+        TgcL0FloatingCandidateBuilderToolCfg(
+            flags,
+            EnableTruthValidation=True,
+        )
+    )
+    acc.merge(
+        L0MuonTGCSimCfg(
+            flags,
+            OutputLevel=DEBUG,
+            CandidateBuilderTool=candidateBuilderTool,
+        )
+    )
 
     from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
 

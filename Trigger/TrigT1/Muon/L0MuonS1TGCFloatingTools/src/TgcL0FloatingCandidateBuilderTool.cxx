@@ -5,9 +5,17 @@
 #include "TgcL0FloatingCandidateBuilderTool.h"
 
 #include "StoreGate/ReadCondHandle.h"
+#include "StoreGate/ReadHandle.h"
 #include "TgcL0FloatingData.h"
 #include "TgcL0RdoDecoder.h"
+#include "TgcL0OverlapClassification.h"
+#include "TgcL0SegmentReconstruction.h"
 #include "TgcL0StationCoincidence.h"
+#include "TgcL0TruthValidation.h"
+
+#include <sstream>
+#include <utility>
+#include <vector>
 
 namespace {
 
@@ -46,6 +54,11 @@ namespace L0Muon {
 StatusCode TgcL0FloatingCandidateBuilderTool::initialize() {
   ATH_CHECK(m_idHelperSvc.retrieve());
   ATH_CHECK(m_cablingKey.initialize());
+  ATH_CHECK(m_detectorManagerKey.initialize());
+  ATH_CHECK(m_truthEventKey.initialize(m_enableTruthValidation));
+  if (m_enableTruthValidation) {
+    ATH_CHECK(m_truthExtrapolator.retrieve());
+  }
   return StatusCode::SUCCESS;
 }
 
@@ -57,15 +70,44 @@ StatusCode TgcL0FloatingCandidateBuilderTool::build(
   const Muon::TgcCablingMap* cabling{};
   ATH_CHECK(SG::get(cabling, m_cablingKey, ctx));
 
+  SG::ReadCondHandle<MuonGM::MuonDetectorManager> detectorManagerHandle{
+      m_detectorManagerKey, ctx};
+  if (!detectorManagerHandle.isValid()) {
+    ATH_MSG_ERROR("Failed to retrieve " << m_detectorManagerKey.fullKey());
+    return StatusCode::FAILURE;
+  }
+  const MuonGM::MuonDetectorManager* detectorManager =
+      detectorManagerHandle.cptr();
+
   TgcL0Floating::HitGroups hitGroups;
   TgcL0Floating::DecodeStatistics statistics;
   const TgcL0Floating::RdoDecoder decoder;
-  ATH_CHECK(decoder.decode(rdos, *cabling, *m_idHelperSvc, hitGroups,
-                           statistics));
+  ATH_CHECK(decoder.decode(rdos, *cabling, *m_idHelperSvc, *detectorManager,
+                           hitGroups, statistics));
 
   TgcL0Floating::StationCoincidenceContainer coincidences;
   const TgcL0Floating::StationCoincidenceBuilder coincidenceBuilder;
   ATH_CHECK(coincidenceBuilder.build(hitGroups, coincidences));
+
+
+  TgcL0Floating::SegmentReconstructionConfig segmentConfig;
+  segmentConfig.maxPivotWireStripDeltaEta =
+      m_maxPivotWireStripDeltaEta.value();
+  segmentConfig.maxPivotWireStripDeltaPhi =
+      m_maxPivotWireStripDeltaPhi.value();
+  segmentConfig.maxSegmentCombinationsPerGroup =
+      m_maxSegmentCombinationsPerGroup.value();
+  segmentConfig.maxCandidatesPerLocalBin =
+      m_maxCandidatesPerLocalBin.value();
+  TgcL0Floating::SegmentStatistics segmentStatistics;
+  const TgcL0Floating::SegmentReconstruction segmentReconstruction{
+      std::move(segmentConfig)};
+  ATH_CHECK(segmentReconstruction.build(coincidences, candidates,
+                                        segmentStatistics));
+
+  TgcL0Floating::OverlapClassificationStatistics overlapStatistics;
+  const TgcL0Floating::OverlapClassification overlapClassification;
+  overlapClassification.classify(candidates, overlapStatistics);
 
   CoincidenceQualityCounts totalCounts;
   CoincidenceQualityCounts m1WireCounts;
@@ -79,12 +121,12 @@ StatusCode TgcL0FloatingCandidateBuilderTool::build(
     countCoincidenceQuality(coincidence, totalCounts);
 
     CoincidenceQualityCounts* stationCounts{nullptr};
-    if (coincidence.key.station == TgcL0Floating::Station::M1) {
-      stationCounts = coincidence.key.isStrip ? &m1StripCounts : &m1WireCounts;
-    } else if (coincidence.key.station == TgcL0Floating::Station::M2) {
-      stationCounts = coincidence.key.isStrip ? &m2StripCounts : &m2WireCounts;
-    } else if (coincidence.key.station == TgcL0Floating::Station::M3) {
-      stationCounts = coincidence.key.isStrip ? &m3StripCounts : &m3WireCounts;
+    if (coincidence.station == TgcL0Floating::Station::M1) {
+      stationCounts = coincidence.isStrip ? &m1StripCounts : &m1WireCounts;
+    } else if (coincidence.station == TgcL0Floating::Station::M2) {
+      stationCounts = coincidence.isStrip ? &m2StripCounts : &m2WireCounts;
+    } else if (coincidence.station == TgcL0Floating::Station::M3) {
+      stationCounts = coincidence.isStrip ? &m3StripCounts : &m3WireCounts;
     }
     if (stationCounts != nullptr) {
       countCoincidenceQuality(coincidence, *stationCounts);
@@ -125,6 +167,134 @@ StatusCode TgcL0FloatingCandidateBuilderTool::build(
                 << m3WireCounts.nOneOfTwo << "), M3 strip=(2/2="
                 << m3StripCounts.nTwoOfTwo << ", 1/2="
                 << m3StripCounts.nOneOfTwo << ")");
+
+  ATH_MSG_DEBUG("Segment reconstruction: wire="
+                << segmentStatistics.nWireSegments << ", strip="
+                << segmentStatistics.nStripSegments << ", candidates="
+                << candidates.size() << " (M1M2M3="
+                << segmentStatistics.nM1M2M3Candidates << ", M1M2="
+                << segmentStatistics.nM1M2Candidates << ", M1M3="
+                << segmentStatistics.nM1M3Candidates << ", M2M3="
+                << segmentStatistics.nM2M3Candidates
+                << ", M1only="
+                << segmentStatistics.nM1OnlyPositionCandidates
+                << ", M2only="
+                << segmentStatistics.nM2OnlyPositionCandidates
+                << ", M3only="
+                << segmentStatistics.nM3OnlyPositionCandidates
+                << "), projectionRejected="
+                << segmentStatistics.nRejectedProjectionCombinations
+                << ", projectionDuplicates="
+                << segmentStatistics.nDuplicateProjectionSegments
+                << ", projectionLimited="
+                << segmentStatistics.nLimitedProjectionSegments
+                << ", pairRejected=" << segmentStatistics.nRejectedPairs
+                << ", candidateDuplicates="
+                << segmentStatistics.nDuplicateCandidates
+                << ", localDuplicates="
+                << segmentStatistics.nLocalDuplicateCandidates
+                << ", candidateLimited="
+                << segmentStatistics.nLimitedCandidates);
+
+  ATH_MSG_DEBUG("Overlap classification: groups="
+                << overlapStatistics.nGroups << ", candidates="
+                << overlapStatistics.nCandidates << ", maxMultiplicity="
+                << overlapStatistics.maxMultiplicity);
+
+  for (std::size_t groupId = 1U;
+       groupId <= overlapStatistics.nGroups; ++groupId) {
+    std::vector<std::size_t> memberIndices;
+    for (std::size_t index = 0U; index < candidates.size(); ++index) {
+      if (candidates[index].overlapGroupId == groupId) {
+        memberIndices.emplace_back(index);
+      }
+    }
+    if (memberIndices.empty()) continue;
+    std::ostringstream members;
+    for (std::size_t position = 0U; position < memberIndices.size(); ++position) {
+      if (position != 0U) members << ",";
+      members << memberIndices[position];
+    }
+    ATH_MSG_DEBUG("Overlap group detail: groupId="
+                  << groupId << ", multiplicity=" << memberIndices.size()
+                  << ", members=[" << members.str() << "]");
+  }
+
+  for (std::size_t candidateIndex = 0; candidateIndex < candidates.size();
+       ++candidateIndex) {
+    const TgcL0Candidate& candidate = candidates[candidateIndex];
+    ATH_MSG_DEBUG("Reconstructed candidate: index="
+                  << candidateIndex << ", bcTag=" << candidate.bcTag
+                  << ", subdetectorId=" << candidate.subdetectorId
+                  << ", triggerSector=" << candidate.sectorId
+                  << ", readoutSector=" << candidate.readoutSector
+                  << ", stationMask="
+                  << static_cast<unsigned int>(candidate.stationMask)
+                  << ", wireStationMask="
+                  << static_cast<unsigned int>(candidate.wireStationMask)
+                  << ", stripStationMask="
+                  << static_cast<unsigned int>(candidate.stripStationMask)
+                  << ", positionStationMask="
+                  << static_cast<unsigned int>(
+                         candidate.positionStationMask)
+                  << ", eta=" << candidate.eta << ", phi="
+                  << candidate.phi << ", deltaTheta="
+                  << candidate.deltaTheta << ", deltaPhi="
+                  << candidate.deltaPhi << ", wireQuality="
+                  << static_cast<unsigned int>(candidate.wireQuality)
+                  << ", wireQualities=("
+                  << static_cast<unsigned int>(candidate.m1WireQuality)
+                  << ","
+                  << static_cast<unsigned int>(candidate.m2WireQuality)
+                  << ","
+                  << static_cast<unsigned int>(candidate.m3WireQuality)
+                  << "), stripQualities=("
+                  << static_cast<unsigned int>(candidate.m1StripQuality)
+                  << ","
+                  << static_cast<unsigned int>(candidate.m2StripQuality)
+                  << ","
+                  << static_cast<unsigned int>(candidate.m3StripQuality)
+                  << "), chambers=(M1:" << candidate.m1StationEta << "/"
+                  << candidate.m1StationPhi << ", M2:"
+                  << candidate.m2StationEta << "/" << candidate.m2StationPhi
+                  << ", M3:" << candidate.m3StationEta << "/"
+                  << candidate.m3StationPhi << "), overlapGroupId="
+                  << candidate.overlapGroupId << ", overlapMultiplicity="
+                  << static_cast<unsigned int>(candidate.overlapMultiplicity)
+                  << ", inChamberOverlap=" << candidate.inChamberOverlap);
+  }
+
+  if (m_enableTruthValidation) {
+    SG::ReadHandle<McEventCollection> truthEvents{m_truthEventKey, ctx};
+    if (!truthEvents.isValid()) {
+      ATH_MSG_ERROR("Failed to retrieve " << m_truthEventKey.fullKey());
+      return StatusCode::FAILURE;
+    }
+    TgcL0Floating::TruthValidationConfig truthConfig;
+    truthConfig.maxMeanDeltaR = m_truthMatchMaxMeanDeltaR.value();
+    const TgcL0Floating::TruthValidation truthValidation{truthConfig};
+    TgcL0Floating::TruthValidationSummary truthSummary;
+    ATH_CHECK(truthValidation.validate(*truthEvents, *m_truthExtrapolator,
+                                       candidates, ctx, truthSummary));
+    ATH_MSG_DEBUG("Truth validation: selectedMuons="
+                  << truthSummary.nSelectedTruthMuons
+                  << ", nominalPlanesExtrapolated="
+                  << truthSummary.nFullyExtrapolatedTruthMuons
+                  << ", matchedMuons="
+                  << truthSummary.nTruthMuonsWithMatchedCandidate
+                  << ", unmatchedCandidates="
+                  << truthSummary.nUnmatchedCandidates);
+    ATH_MSG_DEBUG(
+        "Nearest truth-matched candidate masks "
+        "[M1M2M3,M1M2,M1M3,M2M3,M1,M2,M3]: ["
+        << truthSummary.nNearestMatchedByPositionMask[0x7U] << ","
+        << truthSummary.nNearestMatchedByPositionMask[0x3U] << ","
+        << truthSummary.nNearestMatchedByPositionMask[0x5U] << ","
+        << truthSummary.nNearestMatchedByPositionMask[0x6U] << ","
+        << truthSummary.nNearestMatchedByPositionMask[0x1U] << ","
+        << truthSummary.nNearestMatchedByPositionMask[0x2U] << ","
+        << truthSummary.nNearestMatchedByPositionMask[0x4U] << "]");
+  }
 
   return StatusCode::SUCCESS;
 }

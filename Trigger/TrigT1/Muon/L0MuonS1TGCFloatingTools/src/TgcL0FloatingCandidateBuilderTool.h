@@ -8,7 +8,13 @@
 #include "L0MuonS1TGCToolInterfaces/ITgcL0CandidateBuilderTool.h"
 #include "MuonIdHelpers/IMuonIdHelperSvc.h"
 #include "MuonTGC_Cabling/TgcCablingMap.h"
+#include "MuonReadoutGeometry/MuonDetectorManager.h"
+#include "GeneratorObjects/McEventCollection.h"
+#include "StoreGate/ReadHandleKey.h"
+#include "TrkExInterfaces/IExtrapolator.h"
 #include "StoreGate/ReadCondHandleKey.h"
+
+#include <vector>
 
 namespace L0Muon {
 
@@ -29,6 +35,34 @@ class TgcL0FloatingCandidateBuilderTool final
       this, "MuonIdHelperSvc", "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
   SG::ReadCondHandleKey<Muon::TgcCablingMap> m_cablingKey{
       this, "CablingKey", "MuonTgc_CablingMap"};
+  SG::ReadCondHandleKey<MuonGM::MuonDetectorManager> m_detectorManagerKey{
+      this, "DetectorManagerKey", "MuonDetectorManager"};
+
+  Gaudi::Property<bool> m_enableTruthValidation{
+      this, "EnableTruthValidation", false,
+      "Enable station-extrapolated truth diagnostics"};
+  SG::ReadHandleKey<McEventCollection> m_truthEventKey{
+      this, "TruthEventKey", "TruthEvent", "Input truth-event collection"};
+  ToolHandle<Trk::IExtrapolator> m_truthExtrapolator{
+      this, "TrackExtrapolator", "",
+      "Extrapolator used only by truth validation"};
+  Gaudi::Property<float> m_truthMatchMaxMeanDeltaR{
+      this, "TruthMatchMaxMeanDeltaR", 0.08F,
+      "Maximum station-averaged deltaR for a diagnostic truth match"};
+
+  Gaudi::Property<float> m_maxPivotWireStripDeltaEta{
+      this, "MaxPivotWireStripDeltaEta", -1.F,
+      "Maximum auxiliary eta-coordinate difference for same-station wire-strip association; negative disables the check"};
+  Gaudi::Property<float> m_maxPivotWireStripDeltaPhi{
+      this, "MaxPivotWireStripDeltaPhi", 0.35F,
+      "Maximum auxiliary phi-coordinate difference for same-station wire-strip association; negative disables the check"};
+  Gaudi::Property<unsigned int> m_maxSegmentCombinationsPerGroup{
+      this, "MaxSegmentCombinationsPerGroup", 8U,
+      "Old Floating projection/candidate working-set size per Trigger Sector "
+      "and BC"};
+  Gaudi::Property<unsigned int> m_maxCandidatesPerLocalBin{
+      this, "MaxCandidatesPerLocalBin", 8U,
+      "Maximum candidates retained per old Floating local eta-phi-pivot bin"};
 };
 
 }  // namespace L0Muon
