@@ -14,14 +14,14 @@ else()
 endif()
 
 # Find the external(s):
-find_package( ROOT COMPONENTS Core RIO MathCore Physics )
+find_package( ROOT COMPONENTS Core RIO MathCore Physics MathMore Matrix)
 
 # Component(s) in the package:
 atlas_add_library( DiTauMassToolsLib
    DiTauMassTools/*.h Root/*.cxx
    PUBLIC_HEADERS DiTauMassTools
    INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
-   LINK_LIBRARIES AsgTools PATInterfaces xAODMissingET xAODEventInfo xAODBase xAODTau
+   LINK_LIBRARIES ${ROOT_LIBRARIES} AsgTools PATInterfaces xAODMissingET xAODEventInfo xAODBase xAODTau
    PRIVATE_LINK_LIBRARIES PathResolver )
 
 atlas_add_component( DiTauMassTools

@@ -26,6 +26,7 @@
 #include <TFitResult.h>
 #include <TFitResultPtr.h>
 #include <TMatrixDSym.h>
+#include "TMatrixT.h"
 #include <TObject.h>
 #include <TVectorD.h>
 #include "Math/VectorUtil.h"
@@ -3170,3 +3171,72 @@ void MissingMassCalculator::SetUseFloatStopping(const bool val){
   m_fPhi1_split2->SetDirectory(0);
   m_fPhi2_split2->SetDirectory(0);
 }
+
+// Add CollinearMass calculation
+bool MissingMassCalculator::MassCollinear(const xAOD::IParticle *p0, const xAOD::IParticle *p1,
+                           const xAOD::MissingET *met,  // met
+                           const bool kMMCsynchronize,  // mmc sychronization
+                           double &mass, double &xp1, double &xp2) {  // result
+
+    TLorentzVector k1 = p0->p4();
+    TLorentzVector k2 = p1->p4();
+
+    /// redefine tau vectors if necessary - MMC sychronization
+    if (kMMCsynchronize) {
+        if (p0->type() == xAOD::Type::Tau) {
+            const xAOD::TauJet *tau0 = dynamic_cast<const xAOD::TauJet *>(p0);
+            k1.SetPtEtaPhiM(k1.Pt(), k1.Eta(), k1.Phi(),
+                            tau0->nTracks() < 3 ? 800. : 1200.);  // MeV
+        }
+
+        if (p1->type() == xAOD::Type::Tau) {
+            const xAOD::TauJet *tau1 = dynamic_cast<const xAOD::TauJet *>(p1);
+            k2.SetPtEtaPhiM(k2.Pt(), k2.Eta(), k2.Phi(),
+                            tau1->nTracks() < 3 ? 800. : 1200.);  // MeV
+        }
+    }
+
+    TMatrixD K(2, 2);
+    K(0, 0) = k1.Px();
+    K(0, 1) = k2.Px();
+    K(1, 0) = k1.Py();
+    K(1, 1) = k2.Py();
+
+    if (K.Determinant() == 0)
+        return false;
+
+    TMatrixD M(2, 1);
+    M(0, 0) = met->mpx();
+    M(1, 0) = met->mpy();
+
+    TMatrixD Kinv = K.Invert();
+
+    TMatrixD X(2, 1);
+    X = Kinv * M;
+
+    double X1 = X(0, 0);
+    double X2 = X(1, 0);
+    double x1 = 1. / (1. + X1);
+    double x2 = 1. / (1. + X2);
+
+    TLorentzVector par1 = k1 * (1 / x1);
+    TLorentzVector par2 = k2 * (1 / x2);
+
+    double m = (par1 + par2).M();
+
+    // return to caller
+    mass = m;
+
+    if (k1.Pt() > k2.Pt()) {
+        xp1 = x1;
+        xp2 = x2;
+    } else {
+        xp1 = x2;
+        xp2 = x1;
+    }
+
+    return true;
+}
+
+
+
