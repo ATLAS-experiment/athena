@@ -36,6 +36,7 @@ for (int i = 1; i <= NBINS; i++) \
 #include <iomanip>
 #include <memory>
 #include <cmath>
+#include <format>
 using namespace std;
 
 //Private Static Const data member initialization
@@ -327,7 +328,7 @@ StatusCode TRTMonitoringRun3RAW_Alg::checkTRTReadoutIntegrity(const xAOD::EventI
             ChipBSErrorsVsLB_x = lumiBlock;
             ChipBSErrorsVsLB_y = nBSErrors[ibe][iside];
         for (unsigned int i = 0; i < lumiBlock; i++) // we need this so the LastBinThreshold algorithm can find the last bin
-            fill("RDOShiftSmryRebinnedHistograms"+std::to_string(ibe)+std::to_string(iside), ChipBSErrorsVsLB_x, ChipBSErrorsVsLB_y);
+            fill(std::format("RDOShiftSmryRebinnedHistograms{}{}", ibe, iside), ChipBSErrorsVsLB_x, ChipBSErrorsVsLB_y);
         }
     }
 
@@ -346,7 +347,7 @@ StatusCode TRTMonitoringRun3RAW_Alg::checkTRTReadoutIntegrity(const xAOD::EventI
             RobBSErrorsVsLB_x = lumiBlock;
             RobBSErrorsVsLB_y = nRobErrors[ibe][iside];
             for (unsigned int i = 0; i < lumiBlock; i++) // we need this so the LastBinThreshold algorithm can find the last bin
-                fill("RDOShiftSmryRebinnedHistograms"+std::to_string(ibe)+std::to_string(iside), RobBSErrorsVsLB_x, RobBSErrorsVsLB_y);
+                fill(std::format("RDOShiftSmryRebinnedHistograms{}{}", ibe, iside), RobBSErrorsVsLB_x, RobBSErrorsVsLB_y);
         }
     }
 
