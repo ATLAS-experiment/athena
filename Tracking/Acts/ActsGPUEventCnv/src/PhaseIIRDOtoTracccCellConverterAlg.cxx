@@ -93,12 +93,20 @@ StatusCode PhaseIIRDOtoTracccCellConverterAlg::execute(const EventContext& ctx) 
     }
 
     for (PixelRawDataProxy pixel_rdo: module_rdo_container_proxy) {
+      float activation = 1.;
+      if (m_common.m_UsePixelToTForCellActivation) {
+        activation = static_cast<float>(pixel_rdo.getToT());
+        if (activation == 0.) {
+          ATH_MSG_ERROR("input data error: RDO must not have ToT=0; RDO index: "
+            << cell_index);
+        }
+      }
+
       traccc::edm::silicon_cell cell = cells.at(cell_index++);
       cell.channel0() = static_cast<uint32_t>(pixel_rdo.coordinates()[0]);
       cell.channel1() = static_cast<uint32_t>(pixel_rdo.coordinates()[1]);
       cell.module_index() = current_det_cond_idx;
-      cell.activation() = m_common.m_UsePixelToTForCellActivation ?
-        static_cast<float>(pixel_rdo.getToT()) : 1.;
+      cell.activation() = activation;
       cell.time() = 0;
     }
   }
