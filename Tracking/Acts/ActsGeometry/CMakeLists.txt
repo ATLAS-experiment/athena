@@ -93,8 +93,11 @@ atlas_add_component( ActsGeometry
 atlas_install_joboptions( scripts/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
 atlas_install_scripts( test/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
 
-atlas_add_test( CombinedGen3TrackTest
-                PROPERTIES TIMEOUT 2000
-                PRIVATE_WORKING_DIRECTORY
-                SCRIPT ActsITkMuonCaloTest.py
-                POST_EXEC_SCRIPT noerror.sh)
+if ( NOT "${CMAKE_BUILD_TYPE}" STREQUAL "Debug" )
+  # Disable this test in the debug build --- it takes too long to run.
+  atlas_add_test( CombinedGen3TrackTest
+                  PROPERTIES TIMEOUT 2000
+                  PRIVATE_WORKING_DIRECTORY
+                  SCRIPT ActsITkMuonCaloTest.py
+                  POST_EXEC_SCRIPT noerror.sh)
+endif()
