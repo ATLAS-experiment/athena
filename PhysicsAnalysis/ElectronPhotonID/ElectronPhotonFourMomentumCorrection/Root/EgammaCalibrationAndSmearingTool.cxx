@@ -6,12 +6,15 @@
 #include <AsgTools/AsgToolConfig.h>
 
 #include <algorithm>
+#include <bit>
+#include <cstdint>
 #include <format>
 #include <memory>
 #include <string>
 #include <utility>
 
 #include "AthContainers/ConstAccessor.h"
+#include "CxxUtils/FastReseededPRNG.h"
 #include "PATInterfaces/SystematicRegistry.h"
 #include "PathResolver/PathResolver.h"
 #include "xAODCaloEvent/CaloCluster.h"
@@ -301,13 +304,16 @@ EgammaCalibrationAndSmearingTool::EgammaCalibrationAndSmearingTool(
                              columnar::EgammaId egamma,
                              columnar::EventInfoId ei) {
         const Accessors& acc = *tool.m_accessors;
-        // avoid 0 as result, see
-        // https://root.cern.ch/root/html/TRandom3.html#TRandom3:SetSeed
         auto cluster = acc.caloClusterAcc(egamma)[0].value();
-        return 1 + static_cast<RandomNumber>(
-                       std::abs(acc.clusterPhiAcc(cluster)) * 1E6 +
-                       std::abs(acc.clusterEtaAcc(cluster)) * 1E3 +
-                       acc.eventNumberAcc(ei));
+        // Seed the generator the same way FastReseededRNGTestTool does: pass
+        // the cluster eta/phi (as their raw 32-bit float bit patterns), the
+        // event number and a per-tool seed base as separate seeds and let
+        // FastReseededPRNG's XXH3 hashing combine them.
+        return FastReseededPRNG(
+            std::bit_cast<std::uint32_t>(static_cast<float>(acc.clusterPhiAcc(cluster))),
+            std::bit_cast<std::uint32_t>(static_cast<float>(acc.clusterEtaAcc(cluster))),
+            static_cast<std::uint64_t>(acc.eventNumberAcc(ei)),
+            tool.m_seedBase.value());
       }),
       m_accessors(std::make_unique<Accessors>(*this)) {
 
@@ -1011,7 +1017,7 @@ CP::CorrectionCode EgammaCalibrationAndSmearingTool::applyCorrection(
   const Accessors& acc = *m_accessors;
 
   // only used in simulation (for the smearing)
-  RandomNumber seed = m_set_seed_function(*this, input, event_info);
+  FastReseededPRNG rng = m_set_seed_function(*this, input, event_info);
 
   columnar::ClusterId inputCluster = acc.caloClusterAcc (input)[0].value();
 
@@ -1249,7 +1255,7 @@ CP::CorrectionCode EgammaCalibrationAndSmearingTool::applyCorrection(
       acc.Es2Acc.isAvailable(inputCluster)
           ? acc.Es2Acc(inputCluster)
           : inputCluster(acc.energyBEAcc,2),
-      eraw, seed, oldtool_scale_flag_this_event(input, event_info),
+      eraw, rng, oldtool_scale_flag_this_event(input, event_info),
       oldtool_resolution_flag_this_event(input, event_info), m_TResolutionType,
       m_varSF);
 

@@ -85,7 +85,7 @@ TEST_F (ColumnarMemoryTest, EgammaCalibrationAndSmearingTool)
   // there is no special reason for this value, it is just what came
   // out of my first test run.  if the tool changes, feel free to
   // update this value.
-  columnMap.setExpectation ("Electrons.ptOut", {994900.75});
+  columnMap.setExpectation ("Electrons.ptOut", {1010090});
 
   columnMap.connectColumnsToTool ();
 

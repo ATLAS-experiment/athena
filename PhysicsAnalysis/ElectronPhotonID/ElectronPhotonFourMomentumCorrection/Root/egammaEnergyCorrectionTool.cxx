@@ -1852,7 +1852,7 @@ double egammaEnergyCorrectionTool::getCorrectedMomentum(
 double egammaEnergyCorrectionTool::getCorrectedEnergy(
     unsigned int runnumber, PATCore::ParticleDataType::DataType dataType,
     PATCore::ParticleType::Type ptype, double cl_eta, double cl_etaS2, double cl_etaCalo,
-    double energy, double energyS2, double eraw, RandomNumber random_seed,
+    double energy, double energyS2, double eraw, FastReseededPRNG& rng,
     egEnergyCorr::Scale::Variation scaleVar,
     egEnergyCorr::Resolution::Variation resVar,
     egEnergyCorr::Resolution::resolutionType resType, double varSF) const {
@@ -1969,7 +1969,7 @@ double egammaEnergyCorrectionTool::getCorrectedEnergy(
     if (resVar != egEnergyCorr::Resolution::None)
       fullyCorrectedEnergy *=
           getSmearingCorrection(cl_eta, cl_etaCalo, fullyCorrectedEnergy,
-                                random_seed, ptype, dataType, resVar, resType);
+                                rng, ptype, dataType, resVar, resType);
 
     ATH_MSG_DEBUG(std::format("after resolution correction = {:.2f}", fullyCorrectedEnergy));
   }
@@ -3010,7 +3010,7 @@ double egammaEnergyCorrectionTool::fcn_sigma(double energy, double Cdata,
 // derive smearing correction
 
 double egammaEnergyCorrectionTool::getSmearingCorrection(
-    double cl_eta, double cl_etaCalo, double energy, RandomNumber seed,
+    double cl_eta, double cl_etaCalo, double energy, FastReseededPRNG& rng,
     PATCore::ParticleType::Type ptype,
     PATCore::ParticleDataType::DataType dataType,
     egEnergyCorr::Resolution::Variation value,
@@ -3066,13 +3066,11 @@ double egammaEnergyCorrectionTool::getSmearingCorrection(
 
   const double sigma = sqrt(sigma2);
 
-  FastReseededPRNG rng(seed);
-
   const double DeltaE0 = std::normal_distribution<double>{ 0, sigma }(rng);
   const double cor0 = (energyGeV + DeltaE0) / energyGeV;
 
-  ATH_MSG_DEBUG("sigma|DeltaE0|cor0|seed = " << sigma << "|" << DeltaE0 << "|"
-                                             << cor0 << "|" << seed);
+  ATH_MSG_DEBUG("sigma|DeltaE0|cor0 = " << sigma << "|" << DeltaE0 << "|"
+                                        << cor0);
 
   return cor0;  // TODO: why not returning DeltaE0 and apply E -> E + DeltaE0 ?
 }

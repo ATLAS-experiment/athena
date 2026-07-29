@@ -8,7 +8,9 @@
 #include "xAODCore/ShallowCopy.h"
 
 // Local include(s):
+#include <bit>
 #include <cmath>
+#include <cstdint>
 #include <random>
 #include "CxxUtils/FastReseededPRNG.h"
 
@@ -530,10 +532,16 @@ namespace CP
         unsigned long long eventNumber = 0;
         if(m_expertMode_EvtNumber.value()!=0) eventNumber=m_expertMode_EvtNumber.value();
         else eventNumber = evtInfo(acc.eventNumberAcc);
-        // Construct a seed for the random number generator:
-        const UInt_t seed = 1 + std::abs(muonObj.CB.phi) * 1E6 + std::abs(muonObj.CB.eta) * 1E3 + eventNumber;
-        // Random number generation for smearing
-        FastReseededPRNG loc_random3(seed);
+        // Random number generation for smearing.  Seed the generator the same
+        // way FastReseededRNGTestTool does: pass the object's eta/phi (as their
+        // raw 32-bit float bit patterns), the event number and a per-tool seed
+        // base as separate seeds and let FastReseededPRNG's XXH3 hashing combine
+        // them.
+        FastReseededPRNG loc_random3(
+            std::bit_cast<std::uint32_t>(static_cast<float>(muonObj.CB.phi)),
+            std::bit_cast<std::uint32_t>(static_cast<float>(muonObj.CB.eta)),
+            static_cast<std::uint64_t>(eventNumber),
+            m_seedBase.value());
 
         muonObj.rnd_g0 = std::normal_distribution<double>{0, 1}(loc_random3);
         muonObj.rnd_g1 = std::normal_distribution<double>{0, 1}(loc_random3);
