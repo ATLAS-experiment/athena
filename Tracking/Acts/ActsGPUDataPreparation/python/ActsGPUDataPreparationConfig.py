@@ -26,6 +26,21 @@ def CUDAClusterizerToolCfg(flags,
         CompFactory.ActsTrk.CUDAClusterizationAlgProviderTool(name, **kwargs))
     return acc
 
+def CUDASPFormationToolCfg(flags,
+                                name="CUDASPFormationTool",
+                                **kwargs) -> ComponentAccumulator:
+    acc = ComponentAccumulator()
+
+    from AthCUDAServices.AthCUDAServicesConfig import StreamToolCfg
+
+    kwargs.setdefault("MemoryResourcesTool", acc.popToolsAndMerge(MemoryResourcesToolCfg(flags)))
+    kwargs.setdefault("CopyProviderTool", acc.popToolsAndMerge(CopyToolCfg(flags)))
+    kwargs.setdefault("StreamTool", acc.popToolsAndMerge(StreamToolCfg(flags)))
+
+    acc.setPrivateTools(
+        CompFactory.ActsTrk.CUDASPFormationAlgProviderTool(name, **kwargs))
+    return acc
+
 def DeviceClusterizationProviderToolCfg(flags,
                                    name="DeviceClusterizationProviderTool",
                                    **kwargs) -> ComponentAccumulator:
@@ -37,7 +52,18 @@ def DeviceClusterizationProviderToolCfg(flags,
     else:    
         acc.setPrivateTools(acc.popToolsAndMerge(CUDAClusterizerToolCfg(flags)))
         return  acc
-  
+
+def DeviceSPFormationProviderToolCfg(flags,
+                                   name="DeviceSPFormationProviderTool",
+                                   **kwargs) -> ComponentAccumulator:
+    acc = ComponentAccumulator()
+
+    if flags.Device.Backend is not DeviceBackend.CUDA:
+        raise ValueError(f"Unsupported device backend: {flags.Acts.DeviceBackend}")   
+        
+    else:    
+        acc.setPrivateTools(acc.popToolsAndMerge(CUDASPFormationToolCfg(flags)))
+        return  acc  
 
 
 # ============================================================
@@ -53,7 +79,6 @@ def DeviceClusterizationAlgCfg(flags,
     acc = ComponentAccumulator()
 
     kwargs.setdefault("DeviceMR", acc.popToolsAndMerge(DeviceMemoryResourceToolCfg(flags)))
-    kwargs.setdefault("CopyProviderTool", acc.popToolsAndMerge(CopyToolCfg(flags)))
     kwargs.setdefault("InputTracccCells", "TracccCells")
     kwargs.setdefault("OutputTracccMeasurements", "TracccMeasurements")
     kwargs.setdefault("OutputTracccClusters", "TracccClusterCollection")
@@ -64,4 +89,23 @@ def DeviceClusterizationAlgCfg(flags,
 
     acc.addEventAlgo(
         CompFactory.ActsTrk.DeviceClusterizationAlg(name, **kwargs))
+    return acc
+
+
+def DeviceSPFormationAlgCfg(flags,
+                               name="DeviceSPFormationAlg",
+                               previousExtension: str = None,
+                               **kwargs) -> ComponentAccumulator:
+
+    assert previousExtension is None or isinstance(previousExtension, str)                           
+    acc = ComponentAccumulator()
+
+    kwargs.setdefault("DeviceMR", acc.popToolsAndMerge(DeviceMemoryResourceToolCfg(flags)))
+    kwargs.setdefault("InputTracccMeasurements", "TracccMeas")
+    kwargs.setdefault("OutputTracccPixelSpacepoints", "TracccPixelSpacepoints")
+    kwargs.setdefault("SPFormationAlgProviderTool", acc.popToolsAndMerge(DeviceSPFormationProviderToolCfg(flags)))
+    kwargs.setdefault("DeviceDetectorName", "TracccDeviceDetectorGeometry")
+
+    acc.addEventAlgo(
+        CompFactory.ActsTrk.DeviceSPFormationAlg(name, **kwargs))
     return acc

@@ -77,9 +77,6 @@ private:
     ToolHandle<AthDevice::IMemoryResourceTool> m_deviceMR{
         this, "DeviceMR", "",
         "Device memory resource tool"};
-    /// @name The device copy tool to use for debug printing
-    ToolHandle<AthDevice::ICopyTool> m_copy{
-        this, "CopyProviderTool", "", "Vecmem copy provider tool"};
 
     /// @name The name of device resident input traccc cell collection
     SG::ReadHandleKey<traccc::edm::silicon_cell_collection::const_view> m_inputCellsKey{

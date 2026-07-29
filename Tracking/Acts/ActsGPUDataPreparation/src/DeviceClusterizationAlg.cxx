@@ -29,10 +29,6 @@ StatusCode DeviceClusterizationAlg::initialize()
   ATH_CHECK(detStore()->retrieve(m_deviceDesign, m_deviceDesignObjectName.value()));
   ATH_CHECK(detStore()->retrieve(m_deviceCond, m_deviceCondObjectName.value()));
 
-  // for debug prints only (size of device buffers)
-  ATH_CHECK(m_copy.retrieve());
-
-
   ATH_MSG_DEBUG("Successfully initialized");
   return StatusCode::SUCCESS;
 }
@@ -46,8 +42,6 @@ StatusCode DeviceClusterizationAlg::execute(const EventContext& ctx) const
   ATH_CHECK(inputTracccCells.isValid());
   ATH_MSG_DEBUG("Read traccc cells from '"
                          << m_inputCellsKey.key() << "'");
-
-  ATH_MSG_DEBUG("Receiving " << (m_copy->copy(ctx))->get_size(*inputTracccCells) << " cells.");
 
   // ---- 2. Get traccc clusterization alg ---------------------------------------------
   auto clustering_pair = m_clusteringAlgProviderTool->getClusterizationAlgorithm(ctx);
@@ -76,7 +70,7 @@ StatusCode DeviceClusterizationAlg::execute(const EventContext& ctx) const
   auto sortedTracccMeasurements =
       (*sorting_alg)(measurements_gpu_buffer);
 
-  ATH_MSG_DEBUG("Reconstructed " << (m_copy->copy(ctx))->get_size(measurements_gpu_buffer) << " measurements.");
+  ATH_MSG_DEBUG("Reconstructed " << (clustering_pair.first)->get_size(measurements_gpu_buffer) << " measurements.");
 
   // ---- 4. Write output traccc measurements to StoreGate -------------------------
   auto outputTracccMeas = SG::makeHandle(m_outputMeasKey, ctx);
