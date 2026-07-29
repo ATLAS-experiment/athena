@@ -5,7 +5,7 @@
 #ifndef LARDSPTHRESHOLDSFILLINGINLINE_H
 #define LARDSPTHRESHOLDSFILLINGINLINE_H
 
-#include "AthenaBaseComps/AthAlgorithm.h"
+#include "AthenaBaseComps/AthReentrantAlgorithm.h"
 #include "GaudiKernel/ToolHandle.h"
 #include "CaloIdentifier/CaloCellGroup.h"
 #include "LArRecConditions/LArBadChannelMask.h"
@@ -17,31 +17,46 @@
 
 class LArOnlineID;
 
-class LArDSPThresholdFillInline:public AthAlgorithm {
+class LArDSPThresholdFillInline : public AthReentrantAlgorithm {
  public:
-  LArDSPThresholdFillInline(const std::string& name, ISvcLocator* pSvcLocator);
+  using AthReentrantAlgorithm::AthReentrantAlgorithm;
   virtual ~LArDSPThresholdFillInline();
   virtual StatusCode initialize() override;
-  virtual StatusCode execute(const EventContext&) override {return StatusCode::SUCCESS;}
+  virtual StatusCode execute(const EventContext&) const override {return StatusCode::SUCCESS;}
   virtual StatusCode stop() override;
 
  private:
   SG::ReadCondHandleKey<LArOnOffIdMapping> m_cablingKey{this,"CablingKey","LArOnOffIdMap","SG Key of LArOnOffIdMapping object"};
   SG::ReadCondHandleKey<CaloDetDescrManager> m_caloMgrKey{this,"CaloDetDescrManager","CaloDetDescrManager","SG Key for CaloDetDescrManager in the Condition Store" };
 
-  const LArOnlineID* m_onlineID;
+  const LArOnlineID* m_onlineID = nullptr;
 
-  std::string m_nameOfSet;
-  std::string m_key;
-  std::string m_mode;
-  std::vector<std::string> m_cellGroupStr;
-  float m_tqThrsh{}, m_samplesThrsh{};
-  float m_maskedtqThrsh{}, m_maskedsamplesThrsh{};
-  float m_sigmaNoiseSamples = 0.0F, m_sigmaNoiseQt = 0.0F;
-  bool m_usePileupNoiseSamples = false, m_usePileupNoiseQt = false;
-  bool m_dump{}, m_maskBadChannels{};
-  std::string m_outFileName, m_inFileName;
-  bool m_fill{};
+  StringProperty m_nameOfSet { this, "NameOfSet", "" };
+  StringProperty m_key       { this, "Key",       "DSPThresholds" };
+  StringProperty m_mode      { this, "mode",      "fixed",
+                               "Select how to set thresholds. Allowed values are 'fixed','group' and 'noise'" };
+
+  // For mode 'group'
+  StringArrayProperty m_cellGroupStr { this, "ThresholdsPerCellGroup", {} };
+
+  // For mode 'fixed'
+  FloatProperty m_tqThrsh      { this, "tQThreshold",      250 };
+  FloatProperty m_samplesThrsh { this, "samplesThreshold", 1000 };
+
+  // For mode 'Noise'
+  FloatProperty m_sigmaNoiseSamples {this, "sigmaNoiseSamples", 0 };
+  FloatProperty m_sigmaNoiseQt {this, "sigmaNoiseQt", 0 };
+  BooleanProperty m_usePileupNoiseSamples {this, "usePileupNoiseSamples", false };
+  BooleanProperty m_usePileupNoiseQt {this, "usePileupNoiseQt", false };
+
+  // For channel masking
+  BooleanProperty m_maskBadChannels { this, "MaskBadChannels", false };
+  FloatProperty m_maskedtqThrsh { this, "MaskedtQThreshold", static_cast<float>(0x7fffffff) };
+  FloatProperty m_maskedsamplesThrsh { this, "MaskedsamplesThreshold", static_cast<float>(0x7fffffff) };
+
+  BooleanProperty m_dump { this, "Dump", false };
+  StringProperty m_outFileName { this, "OutFile", "out.txt" };
+  BooleanProperty m_fill { this, "Fill", true };
 
   SG::ReadCondHandleKey<CaloNoise> m_totalNoiseKey
     { this, "TotalNoiseKey", "totalNoise", "SG key for total noise" };
