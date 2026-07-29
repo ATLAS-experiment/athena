@@ -165,6 +165,7 @@ def ActsMainTrackFindingAlgCfg(flags,
         tpe_tool_kwargs = {}
         if flags.Tracking.ActiveConfig.isLargeD0:
             tpe_tool_kwargs["allowPropagatorFailure"] = True
+        tpe_tool_kwargs["stripCalibrationIterations"] = flags.Acts.stripCalibrationIterations
 
         kwargs.setdefault('TrackParamsEstimationTool', acc.popToolsAndMerge(ActsTrackParamsEstimationToolCfg(flags, **tpe_tool_kwargs)))
         
@@ -176,12 +177,21 @@ def ActsMainTrackFindingAlgCfg(flags,
         )
  
     if 'FitterTool' not in kwargs:
-        from ActsConfig.ActsTrackFittingConfig import ActsFitterCfg 
+        from ActsConfig.ActsTrackFittingConfig import ActsFitterCfg
+        # This fitter is only used for the seed refit, so restore a finite
+        # OutlierChi2Cut only if a refit is scheduled for at least one seed
+        # collection (currently the LRT strip seeds), letting the refit
+        # potentially downweight bad hits before they bias initial parameters fed to CKF.
+        # currently does nothing (flag defaults to inf == disabled)
+        if any(kwargs["refitSeeds"]):
+            seedRefitOutlierChi2Cut = flags.Acts.SeedRefitOutlierChi2Cut
+        else:
+            seedRefitOutlierChi2Cut = float('inf')
         kwargs.setdefault(
             'FitterTool',
             acc.popToolsAndMerge(ActsFitterCfg(flags, 
                                                ReverseFilteringPt=0,
-                                               OutlierChi2Cut=float('inf')))
+                                               OutlierChi2Cut=seedRefitOutlierChi2Cut))
         )
 
     if 'PixelCalibrator' not in kwargs:
@@ -264,7 +274,8 @@ def ActsTrackFindingCfg(flags,
     pixelRefit = [False]
     stripRefit = [False]
     if flags.Tracking.ActiveConfig.isLargeD0:
-        stripRefit = [True]
+        #allow to set whether we do a strip seed refit for LRT
+        stripRefit = [flags.Acts.LrtStripSeedRefit]
 
     if pixelSeedLabels is None:
         pixelSeedKeys = None
