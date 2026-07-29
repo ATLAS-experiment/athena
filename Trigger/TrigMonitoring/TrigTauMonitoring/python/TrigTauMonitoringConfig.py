@@ -220,7 +220,7 @@ class TrigTauMonAlgBuilder:
 
       if len(info.getL1TauItems()):
         for l1_tau_item in map(str, info.getL1TauItems()): # The objects are of type std::string by default, and 'in' doesn't work properly on them
-          is_phase_1 = 'eTAU' in l1_tau_item or 'jTAU' in l1_tau_item or 'cTAU' in l1_tau_item
+          is_phase_1 = 'eTAU' in l1_tau_item or 'cTAU' in l1_tau_item
           if is_phase_1 and l1_tau_item not in self.L1_Phase1_thresholds:
             # We have only one threshold entry, because we don't use eta-dependent thresholds for Phase 1 TAU items:
             self.L1_Phase1_thresholds[l1_tau_item] = float(L1_menu.thresholds()[l1_tau_item]['thrValues'][0]['value'])
@@ -927,9 +927,6 @@ class TrigTauMonAlgBuilder:
         mon_group.defineHistogram('L1cTauMatchedRoIIso', title='L1 cTAU Isolation score; E_{T}^{jTAU Iso}/E_{T}^{eTAU}; RoIs', xbins=50, xmin=0, xmax=5, opt='kAlwaysCreate')
         mon_group.defineHistogram('L1RoIcTauMatchedEtRatio', title='Et ratio between matched eTAU and jTAU RoIs; E_{T}^{jTAU}/E_{T}^{eTAU}; RoIs', xbins=40, xmin=0, xmax=4, opt='kAlwaysCreate')
         mon_group.defineHistogram('L1eFexRoIBDTScore' , title='L1 eTAU RoI BDT score; BDT Score; RoIs', xbins=128, xmin=512, xmax=1024, opt='kAlwaysCreate')
-
-    elif 'jTAU' in trigger:
-        mon_group.defineHistogram('L1jFexRoIIso', title='L1 jTAU RoI Isolation; jTAU Isolation [GeV]; N RoI', xbins=25, xmin=0, xmax=50, opt='kAlwaysCreate')
 
   def getCustomPtBinning(self, trigger, fine=False):
     info = self.getTriggerInfo(trigger)
