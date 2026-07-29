@@ -22,9 +22,10 @@ StatusCode DeviceDetectorDescriptionCondAlg::initialize()
 {
     ATH_MSG_DEBUG("Initializing  device detector description provider service ");
 
-    ATH_CHECK(m_hostMR.retrieve());
-    ATH_CHECK(m_deviceMR.retrieve());
+    ATH_CHECK(m_MRs.retrieve());
     ATH_CHECK(m_copy.retrieve());
+
+    ATH_CHECK(m_detStore->retrieve(m_hostDetector, m_hostDetectorName));
 
     ATH_CHECK(m_detStore->retrieve(m_pixelID, m_pixelIdHelperName) );
     ATH_CHECK(m_detStore->retrieve(m_stripID, m_stripIdHelperName));
@@ -47,9 +48,9 @@ StatusCode DeviceDetectorDescriptionCondAlg::initialize()
 
     // ---- 1. Get ACTS Tracking Geometry, populate Athena<->ACTS maps and fill module design (segmentation) information ----
     // all of these aare static upon construction through the run
-    if (!m_trackingGeometryTool.empty()) {
-        ATH_CHECK(m_trackingGeometryTool.retrieve());
-        m_trackingGeometry = m_trackingGeometryTool->trackingGeometry();
+    if (!m_trackingGeometrySvc.empty()) {
+        ATH_CHECK(m_trackingGeometrySvc.retrieve());
+        m_trackingGeometry = m_trackingGeometrySvc->trackingGeometry();
 
         m_trackingGeometry->visitSurfaces([&](const Acts::Surface *surface) {
             if (!surface) return;
@@ -155,13 +156,13 @@ StatusCode DeviceDetectorDescriptionCondAlg::initialize()
     ATH_MSG_INFO("Wrote segmentation info for " << m_atlasModuleInfo.size() << " modules");
 
     // ---- 2. Get Detray Tracking Geometry and populate Detray<->ACTS map ----
-    // this will in the future happen during ACTS geometry construction, but for now we load the geometry from file
     ATH_MSG_INFO("Loading traccc detector");
-    m_detrayDetector = std::make_unique<traccc::host_detector>();
-    traccc::io::read_detector(*m_detrayDetector, m_hostMR->mr(),
-                               PathResolverFindCalibFile(m_geometryFile.value()));
+    
+    const auto& itkDetector = m_hostDetector->as<traccc::itk_detector>();
 
-    const auto& itkDetector = m_detrayDetector->as<traccc::itk_detector>();
+    int found_detray = 0; 
+    int missing_detray = 0; 
+    int missing_detray_passives = 0;
 
     for (const auto& surface : itkDetector.surfaces()) {
         const auto geo_id = surface.source;
@@ -173,12 +174,17 @@ StatusCode DeviceDetectorDescriptionCondAlg::initialize()
             auto athena_id = m_actsToAthena.at(acts_geom_id);
             m_detrayToAthenaMap[detray_id] = athena_id;
             m_athenaToDetrayMap[athena_id] = detray_id;
+            found_detray++;
         } else {
-            ATH_MSG_DEBUG("we did not save key " << acts_geom_id);
+            ATH_MSG_VERBOSE("we did not save key " << acts_geom_id);
+            missing_detray++;
             if (surface.is_sensitive()) continue;
-            ATH_MSG_DEBUG("found this passive surface in detray: " << acts_geom_id);
+            ATH_MSG_VERBOSE("found this passive surface in detray: " << acts_geom_id);
+            missing_detray_passives++;
         }
     }
+
+    ATH_MSG_INFO("Traccc detector has " << found_detray << " surfaces matching ACTS and " << missing_detray << " additional sufaces, out of which " << missing_detray_passives << " are passive.");
 
     // ---- 3. Deduplicate the designs ----
     // there are only a hanful of unique module designs, only store unique values
@@ -228,7 +234,7 @@ StatusCode DeviceDetectorDescriptionCondAlg::initialize()
 
     // ---- 4. Write detector design object ----
 
-    auto hostDesign = std::make_unique<traccc::detector_design_description::host>(m_hostMR->mr());
+    auto hostDesign = std::make_unique<traccc::detector_design_description::host>(*m_MRs->hostMR());
     hostDesign->resize(designLookup.size());
     for (const auto& [key, id] : designLookup) {
         hostDesign->design_id()[id] = static_cast<int>(id);
@@ -253,7 +259,7 @@ StatusCode DeviceDetectorDescriptionCondAlg::initialize()
 
     auto initCopy = m_copy->copy(EventContext{});
     auto deviceDesign = std::make_unique<traccc::detector_design_description::buffer>(
-        m_designSizes, m_deviceMR->mr(), &(m_hostMR->mr()),
+        m_designSizes, m_MRs->mainMR(), m_MRs->hostMR(),
         vecmem::data::buffer_type::resizable);
     (*initCopy).setup(*deviceDesign)->wait();
     (*initCopy)(vecmem::get_data(*hostDesign), *deviceDesign)->wait();
@@ -261,6 +267,8 @@ StatusCode DeviceDetectorDescriptionCondAlg::initialize()
     constexpr bool allowMods = false;
     ATH_CHECK(m_detStore->record(std::move(deviceDesign), m_deviceDesignObjectName.value(), allowMods));
     ATH_CHECK(m_detStore->record(std::move(hostDesign), m_hostDesignObjectName.value(), allowMods));
+
+    ATH_MSG_DEBUG("Recorded host and device detector design description: " << m_hostDesignObjectName.value() << ", " << m_deviceDesignObjectName.value());
 
     return StatusCode::SUCCESS;
 }
@@ -276,7 +284,7 @@ StatusCode DeviceDetectorDescriptionCondAlg::execute(const EventContext& ctx) co
         return StatusCode::SUCCESS;
     }
 
-    auto hostCond = std::make_unique<traccc::detector_conditions_description::host>(m_hostMR->mr());
+    auto hostCond = std::make_unique<traccc::detector_conditions_description::host>(*m_MRs->hostMR());
     hostCond->resize(m_staticCondEntries.size());
 
     SG::ReadCondHandle<InDet::SiElementPropertiesTable> stripPropertiesHandle(m_stripPropertiesKey, ctx);
@@ -317,13 +325,15 @@ StatusCode DeviceDetectorDescriptionCondAlg::execute(const EventContext& ctx) co
                     m_stripID->module_id(entry.athenaId));
                 const int side = m_stripID->side(entry.athenaId);
                 const bool isAnnulus = (modIt != m_atlasModuleInfo.end()) && modIt->second.isAnnulus;
-                if(isAnnulus){
-                    shiftX = m_stripLorentzAngleTool->getLorentzShift(moduleHash + side, ctx);
-                    shiftY = 0.f;
-                } else {
-                    shiftX = m_stripLorentzAngleTool->getLorentzShift(moduleHash + side, ctx);
-                    shiftY = 0.f;
-                }    
+                shiftY = m_stripLorentzAngleTool->getLorentzShift(moduleHash + side, ctx);
+                shiftX = 0.f;
+                // if(isAnnulus){
+                //     shiftX = m_stripLorentzAngleTool->getLorentzShift(moduleHash + side, ctx);
+                //     shiftY = 0.f;
+                // } else {
+                //     shiftY = m_stripLorentzAngleTool->getLorentzShift(moduleHash + side, ctx);
+                //     shiftX = 0.f;
+                // }    
             }
         }
 
@@ -372,14 +382,15 @@ StatusCode DeviceDetectorDescriptionCondAlg::execute(const EventContext& ctx) co
     auto copy = m_copy->copy(ctx);
     auto deviceCond = std::make_unique<traccc::detector_conditions_description::buffer>(
         static_cast<traccc::detector_conditions_description::buffer::size_type>(hostCond->size()),
-        m_deviceMR->mr());
+        m_MRs->mainMR());
     (*copy).setup(*deviceCond)->wait();
     (*copy)(vecmem::get_data(*hostCond), *deviceCond)->wait();
 
     ATH_CHECK(writeHostHandle.record(std::move(hostCond)));
     ATH_CHECK(writeDeviceHandle.record(std::move(deviceCond)));
 
-    ATH_MSG_DEBUG("Recorded host and device detector description conditions");
+    ATH_MSG_DEBUG("Recorded host and device detector conditions description: " << m_writeHostCondKey.key() << ", " << m_writeDeviceCondKey.key());
+
     return StatusCode::SUCCESS;
 }
 

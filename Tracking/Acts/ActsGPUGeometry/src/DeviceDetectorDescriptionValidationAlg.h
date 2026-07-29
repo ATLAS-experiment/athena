@@ -45,10 +45,10 @@ private:
         const traccc::detector_conditions_description::host& candCond) const;
 
     // ---- candidate (production) design + conditions ----
-    Gaudi::Property<std::string> m_hostDesignObjectName{
-        this, "HostDesignObjectName", "", "Candidate host design object in detStore"};
-    SG::ReadCondHandleKey<traccc::detector_conditions_description::host> m_hostCondKey{
-        this, "HostCondKey", "DeviceDetectorDescriptionHostCond",
+    Gaudi::Property<std::string> m_monDesignObjectName{
+        this, "MonDesignObjectName", "", "Candidate host design object in detStore"};
+    SG::ReadCondHandleKey<traccc::detector_conditions_description::host> m_monCondKey{
+        this, "MonCondKey", "DeviceDetectorDescriptionHostCond",
         "Key for reading the candidate host conditions object"};
 
     // ---- reference design + conditions ----
