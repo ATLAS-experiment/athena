@@ -70,4 +70,5 @@ atlas_add_test( AthHistogramming_test
   LINK_LIBRARIES AthenaBaseComps TestTools
   ENVIRONMENT "JOBOPTSEARCHPATH=${CMAKE_CURRENT_SOURCE_DIR}/share"
   #ERROR messages are expected in the log
-  POST_EXEC_SCRIPT nopost.sh )
+  LOG_IGNORE_PATTERN "Got a zero pointer"
+  POST_EXEC_SCRIPT noerror.sh )
