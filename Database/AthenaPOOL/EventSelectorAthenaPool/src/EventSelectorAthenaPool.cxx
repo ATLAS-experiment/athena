@@ -586,6 +586,7 @@ StatusCode EventSelectorAthenaPool::createAddress(const IEvtSelector::Context& /
    }
    auto token = std::make_unique<Token>();
    token->fromString(tokenStr);
+   m_incidentSvc->fireIncident(Incident(tokenStr, "ProcessEventAttributes"));
    iop = new TokenAddress(pool::POOL_StorageType.type(), ClassID_traits<DataHeader>::ID(), "", "EventSelector", IPoolSvc::kInputStream, std::move(token));
    return StatusCode::SUCCESS;
 }
