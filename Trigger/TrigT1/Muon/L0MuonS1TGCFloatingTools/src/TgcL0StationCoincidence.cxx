@@ -5,24 +5,55 @@
 #include "TgcL0StationCoincidence.h"
 
 #include <algorithm>
+#include <array>
 #include <bit>
+#include <cmath>
 #include <cstdint>
-#include <map>
+#include <limits>
 #include <vector>
+
+namespace {
+
+using Hit = L0Muon::TgcL0Floating::Hit;
+using Station = L0Muon::TgcL0Floating::Station;
+
+std::size_t stationIndex(const Station station) {
+  if (station == Station::M1) return 0U;
+  if (station == Station::M2) return 1U;
+  return 2U;
+}
+
+bool isBigWheelStation(const Station station) {
+  return station == Station::M1 || station == Station::M2 ||
+         station == Station::M3;
+}
+
+bool betterRepresentativeHit(const Hit* lhs, const Hit* rhs,
+                             const std::uint16_t representativeChannel) {
+  if (rhs == nullptr) return true;
+  if (lhs == nullptr) return false;
+  const int lhsDifference = std::abs(static_cast<int>(lhs->channel) -
+                                     static_cast<int>(representativeChannel));
+  const int rhsDifference = std::abs(static_cast<int>(rhs->channel) -
+                                     static_cast<int>(representativeChannel));
+  if (lhsDifference != rhsDifference) return lhsDifference < rhsDifference;
+  if (lhs->gasGap != rhs->gasGap) return lhs->gasGap < rhs->gasGap;
+  return lhs->channel < rhs->channel;
+}
+
+}  // namespace
 
 namespace L0Muon {
 namespace TgcL0Floating {
 
 std::uint8_t StationCoincidenceBuilder::nominalLayers(
     const Station station, const bool isStrip) {
-  if (station == Station::M1 && !isStrip) {
-    return 3;
-  }
+  if (station == Station::M1 && !isStrip) return 3U;
   if (station == Station::M1 || station == Station::M2 ||
       station == Station::M3) {
-    return 2;
+    return 2U;
   }
-  return 0;
+  return 0U;
 }
 
 StatusCode StationCoincidenceBuilder::build(
@@ -30,42 +61,123 @@ StatusCode StationCoincidenceBuilder::build(
     StationCoincidenceContainer& coincidences) const {
   coincidences.clear();
 
-  for (const auto& [key, hits] : hitGroups) {
-    const std::uint8_t nNominalLayers = nominalLayers(key.station, key.isStrip);
-    if (nNominalLayers == 0 || hits.empty()) {
-      continue;
+  for (const auto& [key, groupHits] : hitGroups) {
+    std::array<std::array<std::vector<const Hit*>, 2>, 3> grouped{};
+    for (const Hit& hit : groupHits) {
+      if (!isBigWheelStation(hit.station)) continue;
+      grouped[stationIndex(hit.station)][hit.isStrip ? 1U : 0U].emplace_back(&hit);
     }
 
-    std::map<std::uint16_t, std::uint8_t> channelLayerMasks;
-    for (const Hit& hit : hits) {
-      // Keep the physical gas-gap numbering. In M1, strip readout is on
-      // gas gaps 1 and 3 although it has two instrumented strip layers.
-      if (hit.gasGap == 0 || hit.gasGap > 3) {
-        continue;
-      }
-      channelLayerMasks[hit.channel] |=
-          static_cast<std::uint8_t>(1U << (hit.gasGap - 1U));
-    }
+    for (std::size_t stationPosition = 0U; stationPosition < grouped.size();
+         ++stationPosition) {
+      const Station hitStation = static_cast<Station>(stationPosition);
+      for (std::size_t projection = 0U; projection < 2U; ++projection) {
+        const bool isStrip = projection == 1U;
+        std::vector<const Hit*>& hits = grouped[stationPosition][projection];
+        if (hits.empty()) continue;
 
-    for (const auto& [channel, layerMask] : channelLayerMasks) {
-      std::uint8_t combinedMask = layerMask;
-      const std::map<std::uint16_t, std::uint8_t>::const_iterator previous =
-          channelLayerMasks.find(static_cast<std::uint16_t>(channel - 1U));
-      if (channel > 0U && previous != channelLayerMasks.end()) {
-        combinedMask |= previous->second;
-      }
-      const std::map<std::uint16_t, std::uint8_t>::const_iterator next =
-          channelLayerMasks.find(static_cast<std::uint16_t>(channel + 1U));
-      if (next != channelLayerMasks.end()) {
-        combinedMask |= next->second;
-      }
+        std::sort(hits.begin(), hits.end(),
+                  [](const Hit* lhs, const Hit* rhs) {
+                    if (lhs->channel != rhs->channel) {
+                      return lhs->channel < rhs->channel;
+                    }
+                    if (lhs->gasGap != rhs->gasGap) {
+                      return lhs->gasGap < rhs->gasGap;
+                    }
+                    if (lhs->stationEta != rhs->stationEta) {
+                      return lhs->stationEta < rhs->stationEta;
+                    }
+                    return lhs->stationPhi < rhs->stationPhi;
+                  });
 
-      const std::uint8_t observedLayers = static_cast<std::uint8_t>(
-          std::popcount(static_cast<unsigned int>(combinedMask)));
-      coincidences.emplace_back(key, channel, combinedMask, observedLayers,
-                                nNominalLayers);
+        std::vector<const Hit*> cluster;
+        auto flushCluster = [&]() {
+          if (cluster.empty()) return;
+
+          std::uint32_t channelSum = 0U;
+          std::uint8_t layerMask = 0U;
+          float etaSum = 0.F;
+          float sinPhiSum = 0.F;
+          float cosPhiSum = 0.F;
+          float rSum = 0.F;
+          float zSum = 0.F;
+          for (const Hit* hit : cluster) {
+            channelSum += hit->channel;
+            if (hit->gasGap > 0U && hit->gasGap <= 3U) {
+              layerMask |= static_cast<std::uint8_t>(1U << (hit->gasGap - 1U));
+            }
+            etaSum += hit->eta;
+            sinPhiSum += std::sin(hit->phi);
+            cosPhiSum += std::cos(hit->phi);
+            rSum += hit->r;
+            zSum += hit->z;
+          }
+
+          const std::uint8_t observedLayers = static_cast<std::uint8_t>(
+              std::popcount(static_cast<unsigned int>(layerMask)));
+          if (observedLayers == 0U) {
+            cluster.clear();
+            return;
+          }
+
+          const std::uint16_t representativeChannel =
+              static_cast<std::uint16_t>(std::lround(
+                  static_cast<double>(channelSum) /
+                  static_cast<double>(cluster.size())));
+          const Hit* representativeHit = nullptr;
+          for (const Hit* hit : cluster) {
+            if (betterRepresentativeHit(hit, representativeHit,
+                                        representativeChannel)) {
+              representativeHit = hit;
+            }
+          }
+          if (representativeHit == nullptr) {
+            cluster.clear();
+            return;
+          }
+
+          const float scale = 1.F / static_cast<float>(cluster.size());
+          coincidences.emplace_back(
+              key, hitStation, isStrip, representativeHit->detectorSector,
+              representativeHit->stationEta, representativeHit->stationPhi,
+              representativeChannel, layerMask, observedLayers,
+              nominalLayers(hitStation, isStrip), etaSum * scale,
+              std::atan2(sinPhiSum, cosPhiSum), rSum * scale, zSum * scale);
+          cluster.clear();
+        };
+
+        std::uint16_t previousChannel = 0U;
+        bool hasPreviousChannel = false;
+        for (const Hit* hit : hits) {
+          if (!hasPreviousChannel ||
+              std::abs(static_cast<int>(hit->channel) -
+                       static_cast<int>(previousChannel)) <= 1) {
+            cluster.emplace_back(hit);
+          } else {
+            flushCluster();
+            cluster.emplace_back(hit);
+          }
+          previousChannel = hit->channel;
+          hasPreviousChannel = true;
+        }
+        flushCluster();
+      }
     }
   }
+
+  std::sort(coincidences.begin(), coincidences.end(),
+            [](const StationCoincidence& lhs,
+               const StationCoincidence& rhs) {
+              if (lhs.key.tie() != rhs.key.tie()) {
+                return lhs.key.tie() < rhs.key.tie();
+              }
+              if (lhs.station != rhs.station) return lhs.station < rhs.station;
+              if (lhs.isStrip != rhs.isStrip) return lhs.isStrip < rhs.isStrip;
+              if (lhs.observedLayers != rhs.observedLayers) {
+                return lhs.observedLayers > rhs.observedLayers;
+              }
+              return lhs.channel < rhs.channel;
+            });
   return StatusCode::SUCCESS;
 }
 

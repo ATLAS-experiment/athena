@@ -4,13 +4,18 @@
 
 #include "TgcL0RdoDecoder.h"
 
+#include "FourMomUtils/xAODP4Helpers.h"
 #include "Identifier/Identifier.h"
 #include "MuonIdHelpers/IMuonIdHelperSvc.h"
 #include "MuonRDO/TgcRawData.h"
 #include "MuonRDO/TgcRdo.h"
 #include "MuonRDO/TgcRdoContainer.h"
 #include "MuonTGC_Cabling/TgcCablingMap.h"
+#include "MuonReadoutGeometry/MuonDetectorManager.h"
+#include "MuonReadoutGeometry/TgcReadoutElement.h"
 
+#include <cmath>
+#include <numbers>
 #include <string>
 
 namespace {
@@ -20,19 +25,24 @@ L0Muon::TgcL0Floating::Station station(
   using L0Muon::TgcL0Floating::Station;
   const std::string stationName = idHelperSvc.tgcIdHelper().stationNameString(
       idHelperSvc.tgcIdHelper().stationName(identifier));
-  if (stationName.rfind("T1", 0) == 0) {
-    return Station::M1;
-  }
-  if (stationName.rfind("T2", 0) == 0) {
-    return Station::M2;
-  }
-  if (stationName.rfind("T3", 0) == 0) {
-    return Station::M3;
-  }
-  if (stationName.rfind("T4", 0) == 0) {
-    return Station::Inner;
-  }
+  if (stationName.rfind("T1", 0) == 0) return Station::M1;
+  if (stationName.rfind("T2", 0) == 0) return Station::M2;
+  if (stationName.rfind("T3", 0) == 0) return Station::M3;
+  if (stationName.rfind("T4", 0) == 0) return Station::Inner;
   return Station::Unknown;
+}
+
+std::uint16_t triggerSector(const float phi) {
+  if (!std::isfinite(phi)) return 0U;
+  constexpr std::uint16_t nSectors = 24U;
+  const float fullTurn = 2.F * std::numbers::pi_v<float>;
+  const float sectorWidth = fullTurn / static_cast<float>(nSectors);
+  float wrapped = static_cast<float>(xAOD::P4Helpers::deltaPhi(phi, 0.));
+  if (wrapped < 0.F) wrapped += fullTurn;
+  std::uint16_t sector = static_cast<std::uint16_t>(
+      std::floor(wrapped / sectorWidth)) + 2U;
+  if (sector > nSectors) sector -= nSectors;
+  return sector;
 }
 
 }  // namespace
@@ -43,24 +53,19 @@ namespace TgcL0Floating {
 StatusCode RdoDecoder::decode(const TgcRdoContainer& rdos,
                               const Muon::TgcCablingMap& cabling,
                               const Muon::IMuonIdHelperSvc& idHelperSvc,
+                              const MuonGM::MuonDetectorManager& detectorManager,
                               HitGroups& hitGroups,
                               DecodeStatistics& statistics) const {
   hitGroups.clear();
   statistics = DecodeStatistics{};
 
-  // This decoder assumes the Run-3 ROD, SSW and SLB-based TGC RDO format.
-  // The Run-4 TGC RDO will have a substantially different structure, and
-  // this decoder and its hit organization will require a broad rewrite when
-  // that format becomes available. The HitGroups output is the boundary to
-  // the later reconstruction, so the downstream Station Coincidence,
-  // segment, candidate, Inner Coincidence and Track Selector code is not
-  // expected to require corresponding changes.
+  // Run-3 RDO conversion is isolated here. Hits are routed immediately to the
+  // Phase-II side/Trigger-Sector/BC processing chain, as in the validated
+  // Floating simulation. Chamber identifiers remain hit provenance only.
   for (const TgcRdo* rdo : rdos) {
     for (const TgcRawData* rawData : *rdo) {
       ++statistics.nRawData;
-      if (rawData->type() != TgcRawData::TYPE_HIT) {
-        continue;
-      }
+      if (rawData->type() != TgcRawData::TYPE_HIT) continue;
 
       Identifier identifier;
       const bool mapped = cabling.getOfflineIDfromReadoutID(
@@ -73,8 +78,28 @@ StatusCode RdoDecoder::decode(const TgcRdoContainer& rdos,
 
       const Station hitStation = station(identifier, idHelperSvc);
       const bool hitIsStrip = idHelperSvc.tgcIdHelper().isStrip(identifier);
+      float eta = 0.F;
+      float phi = 0.F;
+      float r = 0.F;
+      float z = 0.F;
+      const MuonGM::TgcReadoutElement* readoutElement =
+          detectorManager.getTgcReadoutElement(identifier);
+      if (readoutElement != nullptr) {
+        const Amg::Vector3D globalPosition = readoutElement->channelPos(identifier);
+        eta = static_cast<float>(globalPosition.eta());
+        phi = static_cast<float>(globalPosition.phi());
+        r = static_cast<float>(globalPosition.perp());
+        z = static_cast<float>(globalPosition.z());
+      }
+      const std::uint16_t hitTriggerSector = triggerSector(phi);
+      if (hitTriggerSector == 0U) {
+        ++statistics.nMappingFailures;
+        continue;
+      }
+
       const Hit hit{
           .subDetectorId = rawData->subDetectorId(),
+          .triggerSector = hitTriggerSector,
           .detectorSector = rawData->rodId(),
           .bcTag = rawData->bcTag(),
           .sswId = rawData->sswId(),
@@ -90,24 +115,19 @@ StatusCode RdoDecoder::decode(const TgcRdoContainer& rdos,
               idHelperSvc.tgcIdHelper().channel(identifier)),
           .station = hitStation,
           .isStrip = hitIsStrip,
+          .eta = eta,
+          .phi = phi,
+          .r = r,
+          .z = z,
       };
-      const HitGroupKey key{
-          .subDetectorId = hit.subDetectorId,
-          .detectorSector = hit.detectorSector,
-          .bcTag = hit.bcTag,
-          .stationEta = hit.stationEta,
-          .stationPhi = hit.stationPhi,
-          .station = hit.station,
-          .isStrip = hit.isStrip,
-      };
-      hitGroups[key].push_back(hit);
+      const HitGroupKey key{.subDetectorId = hit.subDetectorId,
+                            .triggerSector = hit.triggerSector,
+                            .bcTag = hit.bcTag};
+      hitGroups[key].emplace_back(hit);
 
       ++statistics.nHits;
-      if (hitIsStrip) {
-        ++statistics.nStripHits;
-      } else {
-        ++statistics.nWireHits;
-      }
+      if (hitIsStrip) ++statistics.nStripHits;
+      else ++statistics.nWireHits;
       switch (hitStation) {
         case Station::M1:
           ++statistics.nM1Hits;

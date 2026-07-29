@@ -8,8 +8,7 @@ namespace L0Muon {
 namespace TgcL0Floating {
 
 HitGroupKey::Tuple HitGroupKey::tie() const {
-  return std::make_tuple(subDetectorId, detectorSector, bcTag, stationEta,
-                         stationPhi, station, isStrip);
+  return std::make_tuple(subDetectorId, triggerSector, bcTag);
 }
 
 bool HitGroupKey::operator<(const HitGroupKey& other) const {
