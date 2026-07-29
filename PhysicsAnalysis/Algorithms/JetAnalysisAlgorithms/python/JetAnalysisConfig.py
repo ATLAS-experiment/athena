@@ -193,6 +193,9 @@ class SmallRJetAnalysisConfig (ConfigBlock) :
             info="whether to calculate the forward JVT efficiency.")
         self.addOption ('runUncertainties', True, type=bool,
             info="whether to configure JetUncertaintiesTool.", expertMode=True)
+        self.addOption('uncertaintyAnalysisFiles', None, type=dict,
+            info="dictionary of dsids with entry corresponding to file containing gluon fraction histograms needed to calculate an analysis specific "
+            "jet flavor composition uncertainty.")
         self.addOption ('systematicsModelJES', "Category", type=str,
             info="the NP reduction scheme to use for JES: All, Global, Category, "
             "Scenario. The default is Category.")
@@ -326,6 +329,10 @@ class SmallRJetAnalysisConfig (ConfigBlock) :
         config.addPrivateTool( 'uncertaintiesTool', 'JetUncertaintiesTool' )
         jetUncertaintiesAlg.uncertaintiesTool.JetDefinition = jetCollectionName[:-4]
         jetUncertaintiesAlg.uncertaintiesTool.ConfigFile = configFile
+        from PathResolver import PathResolver
+        if self.uncertaintyAnalysisFiles is not None:
+          if config.dsid() in self.uncertaintyAnalysisFiles:
+            jetUncertaintiesAlg.uncertaintiesTool.AnalysisFile = PathResolver.FindCalibFile(self.uncertaintyAnalysisFiles[config.dsid()])
         if calibArea is not None:
             jetUncertaintiesAlg.uncertaintiesTool.CalibArea = calibArea
         jetUncertaintiesAlg.uncertaintiesTool.MCType = mcType
