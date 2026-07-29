@@ -19,12 +19,9 @@
 
 #include <AsgTools/PropertyWrapper.h>
 #include <AthContainers/ConstDataVector.h>
-#include <AsgDataHandles/WriteHandleKey.h>
 #include <AsgDataHandles/ReadHandleKeyArray.h>
 #include <AsgDataHandles/ReadDecorHandleKeyArray.h>
 #include <AsgDataHandles/ReadHandleKey.h>
-#include <AsgDataHandles/WriteHandle.h>
-#include <AsgDataHandles/ReadHandle.h>
 #include "AsgDataHandles/WriteDecorHandleKey.h"
 #include "AsgDataHandles/WriteDecorHandle.h"
 

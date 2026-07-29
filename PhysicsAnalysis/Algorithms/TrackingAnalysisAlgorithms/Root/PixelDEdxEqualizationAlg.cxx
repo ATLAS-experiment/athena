@@ -5,6 +5,10 @@
 // Local include(s):
 #include "TrackingAnalysisAlgorithms/PixelDEdxEqualizationAlg.h"
 
+#include <AsgDataHandles/WriteHandle.h>
+#include <AsgDataHandles/ReadHandle.h>
+
+
 namespace CP {
 
   PixelDEdxEqualizationAlg::PixelDEdxEqualizationAlg( const std::string& name,
