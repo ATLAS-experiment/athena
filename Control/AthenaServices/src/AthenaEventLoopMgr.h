@@ -170,6 +170,8 @@ public:
   virtual StatusCode seek(int evt) override;
   /// Return the current event count.
   virtual int curEvent() const override;
+  /// Supply absolute input event index for EvtIdModifierSvc. See IEventSeek.h.
+  virtual void setNextEventModifierIndex(long idx) override;
   /// Return the size of the collection.
   virtual int size() override;
   /// IIncidentListenet interfaces
@@ -195,6 +197,13 @@ private:
   StatusCode installEventContext(EventContext& ctx);
 
   int m_nevt{};
+  // Run-dependent EventID modifier index: absolute (skip-relative) input
+  // position of the first event of the current chunk, set by the MP consumer.
+  // -1 means "not set" -> fall back to m_nevt-1 (serial convention).
+  // m_curEvtModIdx is the value derived for the current event.
+  long m_evtModIdxBase{-1};
+  int  m_evtModBaseNevt{0};
+  long m_curEvtModIdx{-1};
   /// @property histogram write/update interval
   IntegerProperty m_writeInterval;
   bool m_writeHists{};
