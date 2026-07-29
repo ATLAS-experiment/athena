@@ -19,7 +19,7 @@ atlas_add_library( ElectronEfficiencyCorrectionLib
    PUBLIC_HEADERS ElectronEfficiencyCorrection
    INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
    PRIVATE_INCLUDE_DIRS ${Boost_INCLUDE_DIRS}
-   LINK_LIBRARIES ${ROOT_LIBRARIES} AthContainers AsgTools AnaAlgorithmLib AsgDataHandlesLib CxxUtils
+   LINK_LIBRARIES ${ROOT_LIBRARIES} AthContainers AsgTools AnaAlgorithmLib AsgDataHandlesLib
    ColumnarEgammaLib ColumnarClusterLib ColumnarEventInfoLib PATInterfaces PATCoreAcceptLib AsgMessagingLib EgammaAnalysisInterfacesLib
    PRIVATE_LINK_LIBRARIES ${Boost_LIBRARIES} ${extra_private_libs} xAODEventInfo AsgMessagingLib
    xAODMetaData PathResolver )

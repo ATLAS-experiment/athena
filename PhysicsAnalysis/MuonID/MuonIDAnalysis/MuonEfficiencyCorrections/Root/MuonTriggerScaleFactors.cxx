@@ -2,14 +2,12 @@
  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
  */
 
-#include "CxxUtils/FastReseededPRNG.h"
+#include "TRandom3.h"
 #include "TROOT.h"
 #include "TH1.h"
 #include "TH2.h"
 #include "TFile.h"
 #include "TKey.h"
-
-#include <random>
 
 #include "xAODMuon/MuonContainer.h"
 #include "MuonEfficiencyCorrections/MuonTriggerScaleFactors.h"
@@ -338,7 +336,7 @@ namespace CP {
     // Generate replicas of h for Toys with each bin of h varied with Gaussian distribution
     // with mean from bin content and sigma from bin error
     std::vector<TH1_Ptr> MuonTriggerScaleFactors::generateReplicas(TH1_Ptr h, int nrep, int seed) const {
-        FastReseededPRNG Rndm(seed);
+        TRandom3 Rndm(seed);
         std::vector<TH1_Ptr> replica_v;
         const int xbins = h->GetNbinsX(), ybins = h->GetNbinsY();
 
@@ -347,7 +345,7 @@ namespace CP {
 
             for (int x_i = 0; x_i <= xbins; ++x_i) {
                 for (int y_i = 0; y_i <= ybins; ++y_i) {
-                    replica->SetBinContent(x_i, y_i, std::normal_distribution<double>{h->GetBinContent(x_i, y_i), h->GetBinError(x_i, y_i)}(Rndm));
+                    replica->SetBinContent(x_i, y_i, Rndm.Gaus(h->GetBinContent(x_i, y_i), h->GetBinError(x_i, y_i)));
                 }
             }
             replica_v.push_back(TH1_Ptr(replica));

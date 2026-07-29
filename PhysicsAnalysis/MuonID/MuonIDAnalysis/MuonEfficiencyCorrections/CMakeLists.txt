@@ -19,7 +19,7 @@ atlas_add_library( MuonEfficiencyCorrectionsLib
    INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
    LINK_LIBRARIES ${ROOT_LIBRARIES} ${extra_libs} AsgTools ColumnarMuonLib ColumnarEventInfoLib MuonAnalysisInterfacesLib 
                   PATInterfaces AsgDataHandlesLib ColumnarCoreLib
-   PRIVATE_LINK_LIBRARIES CxxUtils FourMomUtils xAODTrigger PathResolver )
+   PRIVATE_LINK_LIBRARIES FourMomUtils xAODTrigger PathResolver )
 
 if( CMAKE_CXX_COMPILER_ID STREQUAL "GNU" AND CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL 16 )
   # Work around gcc bug https://gcc.gnu.org/bugzilla/show_bug.cgi?id=122197

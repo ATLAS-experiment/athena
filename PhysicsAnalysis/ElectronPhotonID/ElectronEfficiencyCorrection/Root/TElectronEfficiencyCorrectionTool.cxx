@@ -18,7 +18,6 @@
 #include <cmath>
 #include <iostream>
 #include <memory>
-#include <random>
 #include <cstring>
 // ROOT includes
 #include "TClass.h"
@@ -80,7 +79,7 @@ Root::TElectronEfficiencyCorrectionTool::TElectronEfficiencyCorrectionTool(
   , m_nSysMax(0)
   , m_histList{ mapkey::end }
   , m_fastHistList{ mapkey::end }
-  , m_Rndm(0)
+  , m_Rndm()
 {
 }
 
@@ -119,7 +118,7 @@ Root::TElectronEfficiencyCorrectionTool::initialize()
     } else {
       ATH_MSG_DEBUG("Seed set to " << m_seed);
     }
-    m_Rndm = FastReseededPRNG(m_seed);
+    m_Rndm = TRandom3(m_seed);
   }
   /*
    * Load the needed histograms
@@ -422,9 +421,7 @@ Root::TElectronEfficiencyCorrectionTool::buildSingleToyMC(
     }
     for (int toy = 0; toy < m_nToyMC; toy++) {
       tmpHists.at(toy)->SetBinContent(
-        bin,
-        (val * std::normal_distribution<double>{ 0, 1 }(m_Rndm)) +
-          sf->GetBinContent(bin));
+        bin, (val * m_Rndm.Gaus(0, 1)) + sf->GetBinContent(bin));
       randomCounter++;
       tmpHists.at(toy)->SetDirectory(nullptr);
     }
@@ -456,7 +453,7 @@ Root::TElectronEfficiencyCorrectionTool::buildSingleCombToyMC(
   // Create random numbers for the corr. uncertainties
   std::vector<double> rnd(nSys, 0);
   for (int s = 0; s < nSys; ++s) {
-    rnd[s] = std::normal_distribution<double>{ 0, 1 }(m_Rndm);
+    rnd[s] = m_Rndm.Gaus(0, 1);
     randomCounter++;
   }
   // Loop over all bins
@@ -468,7 +465,7 @@ Root::TElectronEfficiencyCorrectionTool::buildSingleCombToyMC(
       double valAdd = uncorr->GetBinContent(bin);
       val = sqrt(val * val + valAdd * valAdd);
     }
-    val = val * std::normal_distribution<double>{ 0, 1 }(m_Rndm);
+    val = val * m_Rndm.Gaus(0, 1);
     randomCounter++;
     // Add larger correlated systematics
     for (int s = 0; s < nSys; ++s) {
