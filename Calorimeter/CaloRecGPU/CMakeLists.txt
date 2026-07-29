@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # Set the name of the package.
 atlas_subdir( CaloRecGPU )
@@ -33,7 +33,7 @@ atlas_add_test( CaloRecUtilities_test
    test/CaloRecUtilities_test.cxx
    INCLUDE_DIRS ${Boost_INCLUDE_DIRS}
    LINK_LIBRARIES CaloRecGPULib ${Boost_LIBRARIES}
-   POST_EXEC_SCRIPT nopost.sh
+   POST_EXEC_SCRIPT noerror.sh
 )
 
 atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
