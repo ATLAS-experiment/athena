@@ -28,10 +28,6 @@
 #include "TrkAnalysisInterfaces/IPixelDEdxEqualizationTool.h"
 
 #include <string>
-#include <vdt/vdtMath.h> // for RDataFrame
-
-#include <TString.h>
-#include <ROOT/RDataFrame.hxx>
 
 namespace CP {
 
