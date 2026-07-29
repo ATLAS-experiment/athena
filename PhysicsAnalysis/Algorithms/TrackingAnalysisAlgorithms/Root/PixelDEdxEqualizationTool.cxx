@@ -96,11 +96,11 @@ namespace CP {
     // Get closest run number
     int closestRunNumber = *std::min_element(runNumbers.begin(), runNumbers.end(),
                                              [runNumber](int a, int b) {
-                                                 return std::abs(a - runNumber) < std::abs(b - runNumber);
+                                                 return std::abs(a - static_cast<int>(runNumber)) < std::abs(b - static_cast<int>(runNumber));
                                              });
 
     // Handle closest run number logic (similar as before)
-    if(runNumber != closestRunNumber) {
+    if(static_cast<int>(runNumber) != closestRunNumber) {
       if (runNumber == 284500 || runNumber == 300000 || runNumber == 310000 || //MC20
           runNumber == 410000 || runNumber == 450000 || runNumber == 470000 || runNumber == 495000) { //MC23
         ATH_MSG_WARNING("Could not find SFs for this MC sub-campaign!");

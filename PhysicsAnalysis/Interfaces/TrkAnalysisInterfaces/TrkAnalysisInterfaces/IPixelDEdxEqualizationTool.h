@@ -8,6 +8,8 @@
 
 #include "ROOT/RDataFrame.hxx"
 
+#include <cstdint>
+
 /// Forward declare
 namespace PixelDEdx {
   struct PixelClusterStruct;
@@ -41,8 +43,8 @@ namespace CP {
     
   public:
 
-    virtual double getTrackdEdxSF(const xAOD::TrackParticle& track, const int runNumber) const = 0;
-    virtual double getClusterdEdxSF(const PixelDEdx::PixelClusterStruct&, const int runNumber) const = 0;
+    virtual double getTrackdEdxSF(const xAOD::TrackParticle& track, const uint32_t runNumber) const = 0;
+    virtual double getClusterdEdxSF(const PixelDEdx::PixelClusterStruct&, const uint32_t runNumber) const = 0;
 
   }; //class IPixelDEdxEqualizationTool
 
