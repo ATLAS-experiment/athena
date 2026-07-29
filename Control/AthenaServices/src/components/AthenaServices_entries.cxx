@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 #include "../AthenaEventLoopMgr.h"
 #include "../PyAthenaEventLoopMgr.h"
@@ -33,6 +33,7 @@
 #include "../MPIClusterSvc.h"
 #include "../ROOTMessageFilterSvc.h"
 #include "../TimeoutAlg.h"
+#include "../AthEnvironmentSvc.h"
 
 DECLARE_COMPONENT( AthenaOutputStream )
 DECLARE_COMPONENT( TestRandomSeqAlg )
@@ -66,3 +67,4 @@ DECLARE_COMPONENT( AthReadAlg )
 DECLARE_COMPONENT( MetaDataToolStub )
 DECLARE_COMPONENT( Athena::ROOTMessageFilterSvc )
 DECLARE_COMPONENT( TimeoutAlg )
+DECLARE_COMPONENT( AthEnvironmentSvc )
