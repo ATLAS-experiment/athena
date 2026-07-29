@@ -24,6 +24,7 @@
 #include "AtlasDetDescr/AtlasDetectorID.h"
 
 #include "EventPrimitives/EventPrimitives.h"
+#include "xAODInDetMeasurement/Utilities.h"
 
 #include <memory>
 
@@ -110,6 +111,7 @@ public:
 	m_cluster->globalPosition() = globpos.cast<float>();
 	m_cluster->setToTlist(totList);
 	m_cluster->setChargelist(chargeList);
+	m_cluster->setTotalCharge( xAOD::xAODInDetMeasurement::Utilities::computeTotalCharge(*m_cluster) );
 	m_cluster->setLVL1A(lvl1a);
 	m_cluster->setChannelsInPhiEta(width.colRow()[0], width.colRow()[1]);
 	m_cluster->setWidthInEta(static_cast<float>(width.widthPhiRZ()[1]));

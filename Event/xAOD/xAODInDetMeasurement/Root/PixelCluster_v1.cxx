@@ -61,6 +61,9 @@ void xAOD::PixelCluster_v1::setChargelist(std::span<float> charges) {
    s_chargeListAcc.set(*this,charges);
 }
 
+AUXSTORE_PRIMITIVE_SETTER_AND_GETTER(xAOD::PixelCluster_v1, float, totalCharge,
+				     setTotalCharge)
+
 AUXSTORE_PRIMITIVE_GETTER(xAOD::PixelCluster_v1, int, channelsInPhi)
 
 AUXSTORE_PRIMITIVE_GETTER(xAOD::PixelCluster_v1, int, channelsInEta)

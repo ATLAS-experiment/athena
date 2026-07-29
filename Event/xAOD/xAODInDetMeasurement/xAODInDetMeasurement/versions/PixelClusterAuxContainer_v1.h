@@ -41,6 +41,7 @@ class PixelClusterAuxContainer_v1 : public AuxContainerBase {
     std::vector<float> widthInEta;
     AUXVAR_JAGGEDVEC_DECL(int,totList);
     AUXVAR_JAGGEDVEC_DECL(float,chargeList);
+    std::vector<float> totalCharge;
     std::vector<float> energyLoss;
     std::vector<int> lvl1a;
     /// @}
