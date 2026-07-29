@@ -1,8 +1,10 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaCommon.SystemOfUnits import GeV
 
+from TriggerMenuMT.HLT.Menu.Physics_pp_run3_v1 import SingleJetGroup
+from TriggerMenuMT.HLT.Config.Utility.ChainDefInMenu import ChainProp
 from TriggerMenuMT.HLT.Config.ControlFlow.HLTCFTools import NoHypoToolCreated
 from TrigHLTJetHypo.hypoConfigBuilder import hypotool_from_chaindict
 from TrigHLTJetHypo.TrigJetHypoMonitoringConfig import TrigJetHypoToolMonitoring
@@ -261,7 +263,8 @@ class TestStringMethods(unittest.TestCase):
 
         wid = max(len(c) for c in chain_names)
         for chain_name in chain_names:
-            chain_dict = dictFromChainName(flags, chain_name)
+            props = ChainProp(name=chain_name, l1SeedThresholds=['FSNOSEED'], groups=SingleJetGroup)
+            chain_dict = dictFromChainName(flags, props)
             tool = trigJetHypoToolFromDict(flags, chain_dict)
             self.assertIsNotNone(tool)
             logger.debug(chain_name.rjust(wid), str(tool))

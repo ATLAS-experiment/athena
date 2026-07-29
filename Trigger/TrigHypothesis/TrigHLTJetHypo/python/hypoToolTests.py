@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 """Make chain dicts for testing jet hypo config modules"""
 
 from TriggerMenuMT.HLT.Menu.Physics_pp_run3_v1 import (
@@ -30,6 +30,7 @@ class HypoToolStructure(unittest.TestCase):
         testData = [
             {'prop':
              ChainProp(name='HLT_j420_subresjesgscIS_ftf_L1J100',
+                       l1SeedThresholds=['FSNOSEED'],
                        groups=SingleJetGroup),
              'connections': dict(((0, [1]),
                                   (1, [2]),
@@ -41,6 +42,7 @@ class HypoToolStructure(unittest.TestCase):
             
             {'prop':
              ChainProp(name='HLT_j260f_L1J75_31ETA49',
+                       l1SeedThresholds=['FSNOSEED'],
                        groups=SingleJetGroup),
              'connections': dict(((0, [1]),
                                   (1, [2]),
@@ -76,6 +78,7 @@ class HypoToolStructure(unittest.TestCase):
 
         {
             'prop': ChainProp(name='HLT_j0_HT1000_L1J20',
+                              l1SeedThresholds=['FSNOSEED'],
                               groups=SingleJetGroup),
             
             'connections': dict(((0, [1]),
@@ -123,6 +126,7 @@ class HypoToolStructure(unittest.TestCase):
 
             {
                 'prop': ChainProp(name='HLT_j0_FBDJSHARED_L1J20',
+                                  l1SeedThresholds=['FSNOSEED'],
                                   groups=SingleJetGroup),
         
                 'connections': dict(((0, [1]),
@@ -159,6 +163,7 @@ class HypoToolStructure(unittest.TestCase):
             
             {
                 'prop': ChainProp(name='HLT_j0_FBDJNOSHARED10etXX20etXX34massXX50fbet_L1J20',
+                                  l1SeedThresholds=['FSNOSEED'],
                                   groups=SingleJetGroup),
                 
                 'connections': dict(((0, [1]),
@@ -176,6 +181,7 @@ class HypoToolStructure(unittest.TestCase):
 
             {
                 'prop': ChainProp(name='HLT_j45_pf_ftf_preselj20_L1J15',
+                                  l1SeedThresholds=['FSNOSEED'],
                                   groups=SingleJetGroup),
         
                 'connections': dict(((0, [1]),
@@ -188,6 +194,7 @@ class HypoToolStructure(unittest.TestCase):
             
             {
                 'prop': ChainProp(name='HLT_j85_ftf_MASK300ceta210XX300nphi10_L1J20',
+                                  l1SeedThresholds=['FSNOSEED'],
                                   groups=SingleJetGroup),
                 
                 
@@ -204,6 +211,7 @@ class HypoToolStructure(unittest.TestCase):
     
             {
                 'prop': ChainProp(name='HLT_j0_DIJET80j12etXX0j12eta240XX700djmass_L1J20',
+                                  l1SeedThresholds=['FSNOSEED'],
                                   groups=SingleJetGroup),
 
         
