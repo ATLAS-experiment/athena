@@ -16,8 +16,12 @@ from AthDeviceComps.AthDeviceCompsConfig import (
 def RDOtoTracccCellConverterAlgCfg(flags,
                                    name="RDOtoTracccCellConverterAlg",
                                    **kwargs) -> ComponentAccumulator:
+    #TODO: remove this once MC is fixed
+    if not flags.Tracking.doPixelDigitalClustering:
+        raise ValueError("clusterization on device is not compatible "
+            "with analog clustering at the moment due to incorrent "
+            "ToT values for Pixel hits in the simulation data.")
     acc = ComponentAccumulator()
-
     kwargs.setdefault("HostMR", acc.popToolsAndMerge(HostMemoryResourceToolCfg(flags)))
     kwargs.setdefault("DeviceMR", acc.popToolsAndMerge(DeviceMemoryResourceToolCfg(flags)))
     kwargs.setdefault("CopiesTool", acc.popToolsAndMerge(CopiesToolCfg(flags)))
@@ -34,6 +38,11 @@ def RDOtoTracccCellConverterAlgCfg(flags,
 def PhaseIIRDOtoTracccCellConverterAlgCfg(flags,
                                    name="PhaseIIRDOtoTracccCellConverterAlg",
                                    **kwargs) -> ComponentAccumulator:
+    #TODO: remove this once MC is fixed
+    if not flags.Tracking.doPixelDigitalClustering:
+        raise ValueError("clusterization on device is not compatible "
+            "with analog clustering at the moment due to incorrent "
+            "ToT values for Pixel hits in the simulation data.")
     acc = ComponentAccumulator()
     kwargs.setdefault("HostMR", acc.popToolsAndMerge(HostMemoryResourceToolCfg(flags)))
     kwargs.setdefault("DeviceMR", acc.popToolsAndMerge(DeviceMemoryResourceToolCfg(flags)))
@@ -66,9 +75,12 @@ def TracccMeasurementConverterAlgCfg(flags,
     acc = ComponentAccumulator()
     kwargs.setdefault("HostMR", acc.popToolsAndMerge(HostMemoryResourceToolCfg(flags)))
     kwargs.setdefault("CopyProviderTool", acc.popToolsAndMerge(CopyToolCfg(flags)))
-    kwargs.setdefault("InputMeasurements",   "TracccMeasurements")
+    kwargs.setdefault("InputMeasurements", "TracccMeasurements")
+    kwargs.setdefault("InputClusters", "TracccClusterCollection")
+    kwargs.setdefault("InputCells", "TracccCells")
     kwargs.setdefault("OutputPixelClusters", "ITkTracccPixelClusters")
     kwargs.setdefault("OutputStripClusters", "ITkTracccStripClusters")
+    kwargs.setdefault("ConvertClustersWithCells", False)
     acc.addEventAlgo(
         CompFactory.ActsTrk.TracccMeasurementConverterAlg(name, **kwargs))
     return acc

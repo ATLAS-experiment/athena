@@ -25,6 +25,12 @@ def ITkActsDeviceTrackRecoCfg(flags, *, previousExtension=None):
     # --- Clusterization ---
     if flags.Acts.Device.doClusterization:
 
+        #TODO: remove this once MC is fixed
+        if not flags.Tracking.doPixelDigitalClustering:
+            raise ValueError("clusterization on device is not compatible "
+                "with analog clustering at the moment due to incorrent "
+                "ToT values for Pixel hits in the simulation data.")
+
         # Create RoI for secondary passes (e.g. LargeD0) to reuse
         from ActsConfig.ActsRegionsOfInterestConfig import ActsRegionsOfInterestCreatorAlgCfg
         acc.merge(ActsRegionsOfInterestCreatorAlgCfg(flags,
