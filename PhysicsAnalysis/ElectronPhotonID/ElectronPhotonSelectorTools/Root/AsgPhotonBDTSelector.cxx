@@ -10,6 +10,7 @@
 
 #include "EGSelectorConfigurationMapping.h"
 #include "EgammaAnalysisHelpers/AsgEGammaConfigHelper.h"
+#include "xAODCaloEvent/CaloCluster.h"
 
 #include <algorithm>
 #include <cmath>
@@ -300,9 +301,14 @@ asg::AcceptData AsgPhotonBDTSelector::acceptBDT(const EventContext& /*ctx*/, con
   const float score = accScore(ph);
   acc.setCutResult(m_cutPosHasScore, true);
 
-  // Now we check the photon kinematics and the binning
-  const float absEta = std::abs(ph.eta());
-  const float etGeV  = ph.pt() * 1e-3f;
+  // Now we check the photon kinematics from cluster and the binning
+  const xAOD::CaloCluster* cluster = ph.caloCluster();
+  if (!cluster) {
+    setBit(FailOutOfRange);
+    return acc;
+  }
+  const float absEta = std::abs(cluster->eta());
+  const float etGeV  = cluster->pt() * 1e-3f;
 
   size_t iEta=0, iEt=0;
   if (!findBin(absEta, etGeV, iEta, iEt)) {

@@ -4,7 +4,9 @@
 
 #include "ElectronPhotonSelectorTools/PhotonBDTCalculator.h"
 #include "xAODEgamma/Photon.h"
+#include "xAODCaloEvent/CaloCluster.h"
 #include <limits>
+#include <cmath>
 
 namespace {
   // Internal helper function
@@ -15,6 +17,16 @@ namespace {
     if (!ph.showerShapeValue(out, t)) { return StatusCode::FAILURE; }
     return StatusCode::SUCCESS;
   }
+
+  inline StatusCode getClusterKinematics(const xAOD::Photon& ph, float& eta, float& ptGeV)
+  {
+    const xAOD::CaloCluster* cluster = ph.caloCluster();
+    if (!cluster) { return StatusCode::FAILURE; }
+    eta = cluster->eta();
+    ptGeV = cluster->pt() * 1e-3f;
+    return StatusCode::SUCCESS;
+  }
+
 } // end anonymous namespace
 
 namespace PhotonIDBDT {
@@ -37,9 +49,10 @@ StatusCode PhotonBDTCalculator::initialize() {
 StatusCode PhotonBDTCalculator::fillVariablesConv(const xAOD::Photon& ph, std::vector<float>& vars) const {
     vars.clear();
     vars.reserve(m_reserveVarsConv.value());
-    // Get photon kinematics
-    const float eta = ph.eta();
-    const float ptGeV = ph.pt() * 1e-3f; // convert to GeV
+    // Get photon kinematics from cluster
+    float eta = 0.f, ptGeV = 0.f;
+    ATH_CHECK(getClusterKinematics(ph, eta, ptGeV));
+
     const float ptGeV_capped = std::min(ptGeV, 700.f); // Cap pt at 700 GeV
     // Get shower shape variables
     float reta = 0.f, rphi = 0.f, weta2 = 0.f, fracs1 = 0.f, weta1 = 0.f, wtots1 = 0.f, rhad = 0.f, rhad1 = 0.f, eratio = 0.f, deltaE = 0.f;
@@ -53,6 +66,16 @@ StatusCode PhotonBDTCalculator::fillVariablesConv(const xAOD::Photon& ph, std::v
     ATH_CHECK(getShowerShape(ph, xAOD::EgammaParameters::Rhad1,  rhad1));
     ATH_CHECK(getShowerShape(ph, xAOD::EgammaParameters::Eratio, eratio));
     ATH_CHECK(getShowerShape(ph, xAOD::EgammaParameters::DeltaE, deltaE));
+
+    // LAr cell energies are quantised to integer MeV (LArRawChannel stores an int),
+    // so deltaE lives on a 1 MeV lattice. Normalizing flows produce a smooth
+    // distribution and cannot reproduce it, which gives the BDT artificial
+    // separation power. Round the BDT input back onto the lattice to match the
+    // training preprocessing. This is specific to this training.
+    // NB: this runs *after* the fudge/NF correction (see EGPhotonBDTToolWrapper),
+    // so it also quantises that correction.
+    deltaE = std::round(deltaE);
+
     // Fill variables in the order expected by the BDT tool
     vars.push_back(ptGeV_capped);
     vars.push_back(eta);
@@ -73,9 +96,10 @@ StatusCode PhotonBDTCalculator::fillVariablesConv(const xAOD::Photon& ph, std::v
 StatusCode PhotonBDTCalculator::fillVariablesUnconv(const xAOD::Photon& ph, std::vector<float>& vars) const {
     vars.clear();
     vars.reserve(m_reserveVarsUnconv.value());
-    // Get photon kinematics
-    const float eta = ph.eta();
-    const float ptGeV = ph.pt() * 1e-3f; // convert to GeV
+    // Get photon kinematics from cluster
+    float eta = 0.f, ptGeV = 0.f;
+    ATH_CHECK(getClusterKinematics(ph, eta, ptGeV));
+
     const float ptGeV_capped = std::min(ptGeV, 700.f); // Cap pt at 700 GeV
     // Get shower shape variables
     float reta = 0.f, rphi = 0.f, weta2 = 0.f, fracs1 = 0.f, weta1 = 0.f, wtots1 = 0.f, rhad = 0.f, rhad1 = 0.f, eratio = 0.f, deltaE = 0.f;
@@ -89,6 +113,16 @@ StatusCode PhotonBDTCalculator::fillVariablesUnconv(const xAOD::Photon& ph, std:
     ATH_CHECK(getShowerShape(ph, xAOD::EgammaParameters::Rhad1,  rhad1));
     ATH_CHECK(getShowerShape(ph, xAOD::EgammaParameters::Eratio, eratio));
     ATH_CHECK(getShowerShape(ph, xAOD::EgammaParameters::DeltaE, deltaE));
+
+    // LAr cell energies are quantised to integer MeV (LArRawChannel stores an int),
+    // so deltaE lives on a 1 MeV lattice. Normalizing flows produce a smooth
+    // distribution and cannot reproduce it, which gives the BDT artificial
+    // separation power. Round the BDT input back onto the lattice to match the
+    // training preprocessing. This is specific to this training.
+    // NB: this runs *after* the fudge/NF correction (see EGPhotonBDTToolWrapper),
+    // so it also quantises that correction.
+    deltaE = std::round(deltaE);
+    
     // Fill variables in the order expected by the BDT tool
     vars.push_back(ptGeV_capped);
     vars.push_back(eta);
