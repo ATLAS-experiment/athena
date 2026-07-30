@@ -4,13 +4,15 @@
 
 #include <charconv>
 #include <iostream>
-#include <boost/tokenizer.hpp>
+#include <vector>
+#include <ranges>
+#include <string_view>
 
 #include "interpretSeeds.h"
 
 //get the luxury level, if specified. In that case moves token past it
 inline
-void getLuxury( boost::tokenizer<boost::char_separator<char> >::iterator& token, short& luxLevel) {
+void getLuxury(std::vector<std::string>::iterator& token, short& luxLevel) {
   if ((*token) == "LUXURY") {
      ++token;
      uint32_t parsedValue = 0;
@@ -25,7 +27,7 @@ void getLuxury( boost::tokenizer<boost::char_separator<char> >::iterator& token,
 
 //get the luxury level, if specified. In that case moves token past it
 inline
-void getOffset( boost::tokenizer<boost::char_separator<char> >::iterator& token, uint32_t& offset) {
+void getOffset(std::vector<std::string>::iterator& token, uint32_t& offset) {
   if ((*token) == "OFFSET") {
      ++token;
      uint32_t parsedValue = 0;
@@ -42,13 +44,12 @@ bool interpretSeeds(const std::string& buffer,
 		    std::string& stream, uint32_t& seed1, uint32_t& seed2, short& luxury, uint32_t& offset)
 {
   //split the space-separated string in 3 or 5 or 7 words:	
-  typedef boost::tokenizer<boost::char_separator<char> > tokenizer;
-  boost::char_separator<char> sep(" ");
-  tokenizer tokens(buffer, sep);
-  int nToks(distance(tokens.begin(), tokens.end()));
+  std::vector<std::string> tokens;
+  for (auto&& range : std::string_view{buffer} | std::views::split(' ')) if (!range.empty()) tokens.emplace_back(range.begin(), range.end());
+  int nToks = static_cast<int>(tokens.size());
   bool status = (nToks == 3 || nToks == 5 || nToks == 7);
   if (status) {
-    tokenizer::iterator token(tokens.begin());
+    auto token = tokens.begin();
     stream = *token++;
     //FIXME, try permutations by hand. With more than two we'd need a parser
     getOffset(token, offset);
@@ -69,13 +70,12 @@ bool interpretSeeds(const std::string& buffer,
 		    std::string& stream, std::vector<uint32_t>& seeds) 
 {
   //split the space-separated string in 31 or 33 words:	
-  typedef boost::tokenizer<boost::char_separator<char> > tokenizer;
-  boost::char_separator<char> sep(" ");
-  tokenizer tokens(buffer, sep);
-  int nToks(distance(tokens.begin(), tokens.end()));
+  std::vector<std::string> tokens;
+  for (auto&& range : std::string_view{buffer} | std::views::split(' ')) if (!range.empty()) tokens.emplace_back(range.begin(), range.end());
+  int nToks = static_cast<int>(tokens.size());
   bool status = (nToks == 31 || nToks == 33 || nToks == 771);
   if (status) {
-    tokenizer::iterator token(tokens.begin());
+    auto token = tokens.begin();
     stream = *token++;
     --nToks;
     if (nToks == 32) nToks=30; //ranlux (FIXME NEEDED?)
