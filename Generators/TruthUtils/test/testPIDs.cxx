@@ -69,7 +69,7 @@ int main(int argc, char** argv) {
     TEST_FUNCTION(isExcited)
     TEST_FUNCTION(isGaugino)
     TEST_FUNCTION(isGeantino) // 30
-    TEST_FUNCTION(isGenSpecific)
+    TEST_FUNCTION(isGenInternal)
     TEST_FUNCTION(isGenericMultichargedParticle)
     TEST_FUNCTION(isGlueball)
     TEST_FUNCTION(isGluon)
@@ -98,7 +98,7 @@ int main(int argc, char** argv) {
     TEST_FUNCTION(isParton)
     TEST_FUNCTION(isPentaquark)
     TEST_FUNCTION(isPhoton)
-    TEST_FUNCTION(isPythia8Specific) // 60
+    TEST_FUNCTION(isGeneratorDefined) // 60
     TEST_FUNCTION(isQuark)
     TEST_FUNCTION(isRBaryon)
     TEST_FUNCTION(isRGlueball)
