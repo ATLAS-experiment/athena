@@ -34,8 +34,12 @@ void GeneralTauPlots::initializePlots(){
    m_ptGNTauTight = Book1D("ptGNTauSigTight",m_sTauJetContainerName+" GNTauSigTight; pt; # Taus", 20, 0.0, 150.0);
    m_ptGNTauTightHighPt = Book1D("ptGNTauSigTightHighPt", m_sTauJetContainerName+" GNTauSigTightHighPt; pt"+"; # Taus",20, 0.0, 1500.0);
 
-
-
+   m_tauTrackSummary = Book1D("tauTrackSummary", m_sTauJetContainerName+" Track Type Summary", 7,0,7);
+   m_tauTrackSummary->GetXaxis()->SetLabelSize(0.05);
+   for(int i=1; i<= 7;i++){
+      m_tauTrackSummary->GetXaxis()->SetBinLabel(i,m_lable[i-1]);
+   }
+ 
 }
   
 void GeneralTauPlots::fill(const xAOD::TauJet& tau, float weight) {
@@ -46,6 +50,7 @@ void GeneralTauPlots::fill(const xAOD::TauJet& tau, float weight) {
   m_tauNCoreTracks->Fill(tau.nTracks(xAOD::TauJetParameters::coreTrack), weight);
   m_tauNWideTracks->Fill(tau.nTracks(xAOD::TauJetParameters::wideTrack), weight); 
   m_ptHighPt->Fill(tau.pt()/Athena::Units::GeV, weight);
+
 
   static const SG::ConstAccessor<float> acc_RNNEleScore("RNNEleScore");
   if ( acc_RNNEleScore.isAvailable(tau) ) {
@@ -82,6 +87,22 @@ void GeneralTauPlots::fill(const xAOD::TauJet& tau, float weight) {
   if( acc_GNTauT.isAvailable(tau) && acc_GNTauT(tau)) {
      m_ptGNTauTight      ->Fill(tau.pt()/Athena::Units::GeV, weight);
      m_ptGNTauTightHighPt->Fill(tau.pt()/Athena::Units::GeV, weight);
+  }
+ 
+  // fill histogram with track summary type
+  for(int j=0; j < 7; j++){
+     int tracktype; 
+     if( j==0) { tracktype = tau.nTracks(xAOD::TauJetParameters::coreTrack);}
+     else if( j==1) { tracktype = tau.nTracks(xAOD::TauJetParameters::wideTrack);}
+     else if( j==2) { continue;}
+     else if( j==3) { tracktype = tau.nTracks();}
+     else if( j==4) { tracktype = tau.nTracks(xAOD::TauJetParameters::classifiedIsolation);}  
+     else if( j==5) { tracktype = tau.nTracks(xAOD::TauJetParameters::classifiedConversion);}
+     else { tracktype = tau.nTracks(xAOD::TauJetParameters::classifiedFake);} 
+
+     for(int i=0; i < tracktype; i++){
+       m_tauTrackSummary->Fill(j+0.5, weight);
+     }
   }
 }
 
