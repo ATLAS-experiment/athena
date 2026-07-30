@@ -78,6 +78,8 @@ class DiTauMassBlock(ConfigBlock):
                    info='save information about the reconstruction with the maximum-weight estimator.')
     self.addOption('saveLlhHisto', False, type=bool,
                    info='save likelihood histograms for debugging purpose. If enabled, it can slow down MMC running time.')
+    self.addOption('doCollinearApprox', False, type=bool,
+                   info='save additional variables (mass, x0, x1) from collinear approximation') 
 
     def instanceName (self) :
         """Return the instance name for this block"""
@@ -122,6 +124,7 @@ class DiTauMassBlock(ConfigBlock):
     alg.eventSelection = self.eventSelection
     alg.doMAXW         = self.doMAXW
     alg.doMLNU3P       = self.doMLNU3P
+    alg.doCollinearApprox = self.doCollinearApprox 
 
     config.addOutputVar('EventInfo', 'mmc_fit_status_%SYS%',  self.algName + 'mmc_fit_status')
     config.addOutputVar('EventInfo', 'mmc_mlm_mass_%SYS%',    self.algName + 'mmc_mlm_mass')
@@ -143,3 +146,8 @@ class DiTauMassBlock(ConfigBlock):
         config.addOutputVar('EventInfo', 'mmc_maxw_nu2_4vect_%SYS%',    self.algName + 'mmc_maxw_nu2_4vect')
         config.addOutputVar('EventInfo', 'mmc_maxw_tau1_4vect_%SYS%',   self.algName + 'mmc_maxw_tau1_4vect')
         config.addOutputVar('EventInfo', 'mmc_maxw_tau2_4vect_%SYS%',   self.algName + 'mmc_maxw_tau2_4vect')
+      if self.doCollinearApprox:
+        config.addOutputVar('EventInfo', 'coll_approx_mass_%SYS%', self.algName + 'coll_approx_mass')
+        config.addOutputVar('EventInfo', 'coll_approx_x0_%SYS%', self.algName + 'coll_approx_x0')
+        config.addOutputVar('EventInfo', 'coll_approx_x1_%SYS%', self.algName + 'coll_approx_x1')
+
