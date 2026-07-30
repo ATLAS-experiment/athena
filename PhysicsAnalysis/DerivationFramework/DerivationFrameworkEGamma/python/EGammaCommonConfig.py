@@ -20,6 +20,8 @@ def EGammaCommonCfg(flags):
 
     includeFwdElectrons = "ForwardElectrons" in flags.Input.Collections
 
+    print("Include Forward Electrons is ",includeFwdElectrons)
+    
     # ====================================================================
     # PHOTON ETA (=ETA2), ET (=E/COSH(ETA2))
     # ====================================================================
@@ -253,10 +255,17 @@ def EGammaCommonCfg(flags):
     # FWD ELECTRON LH SELECTORS
     # ====================================================================
     if includeFwdElectrons:
+
+        from IsolationAlgs.IsolationSteeringDerivConfig import FwdElectronIsolationSteeringDerivCfg
+        
+        acc.merge(FwdElectronIsolationSteeringDerivCfg(flags))
+
+        
         from ElectronPhotonSelectorTools.AsgForwardElectronLikelihoodToolConfig import (
             AsgForwardElectronLikelihoodToolCfg,
         )
 
+        
         ForwardElectronLHSelectorLoose = acc.popToolsAndMerge(
             AsgForwardElectronLikelihoodToolCfg(
                 flags,
@@ -947,7 +956,7 @@ def EGammaCommonCfg(flags):
     # =======================================
     from IsolationAlgs.DerivationTrackIsoConfig import DerivationTrackIsoCfg
 
-    acc.merge(DerivationTrackIsoCfg(flags, object_types=("Electrons", "Muons")))
+    acc.merge(DerivationTrackIsoCfg(flags, object_types=("Electrons", "Muons", "ForwardElectrons")))
 
     hasFlowObject = (
         "JetETMissChargedParticleFlowObjects" in flags.Input.Collections

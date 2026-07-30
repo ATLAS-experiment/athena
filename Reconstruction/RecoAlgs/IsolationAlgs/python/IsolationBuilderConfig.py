@@ -56,7 +56,7 @@ def egIsolationCfg(flags, name='egIsolation', noCalo=False, **kwargs):
                 [ isoPar.core57cells, isoPar.ptCorrection, isoPar.pileupCorrection ])
         else:
             isoCor.append(
-                [ isoPar.ptCorrection, isoPar.pileupCorrection ])
+                [ isoPar.coreCone, isoPar.pileupCorrection ])
         # do not do pileup correction if HI with subtracted clusters
         if flags.HeavyIon.Egamma.doSubtractedClusters:
             isoCor[-1] = [ x for x in isoCor[-1] if x != isoPar.pileupCorrection ]

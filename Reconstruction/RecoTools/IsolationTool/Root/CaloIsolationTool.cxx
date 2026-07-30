@@ -1190,19 +1190,11 @@ for( auto isoType : isoTypes ){
     ATH_MSG_DEBUG("particle: eta " << eta << " phi " << phi);
 
 
-    // I do not remember why I put areacore = 0 for fwdClus !!
+    // I do not remember why I put areacore = 0 for fwdClus !! Was removed seems to work allright
     float areacore = -999.;
-    if (fwdClus == nullptr) {
-      if (dEtaMax_core>0 && dPhiMax_core>0) areacore = 4*dEtaMax_core*dPhiMax_core;
-      else if (dR2Max_core>0) areacore = M_PI*dR2Max_core;
-    } else
-      areacore = 0;
-
+    if (dEtaMax_core>0 && dPhiMax_core>0) areacore = 4*dEtaMax_core*dPhiMax_core;
+    else if (dR2Max_core>0) areacore = M_PI*dR2Max_core;
     double topoCore(0.);
-    if (fwdClus) {
-      topoCore = fwdClus->p4(CaloCluster::State::UNCALIBRATED).Et();
-      ATH_MSG_DEBUG("Including " << topoCore << " in the core transverse energy of the fwd electron");
-    } else {
       for (const CaloCluster* cl : clusts) {
 	ATH_MSG_DEBUG("cl: eta " << cl->eta() << " phi " << cl->phi()
 		      << " E " << cl->p4(CaloCluster::State::UNCALIBRATED).E()
@@ -1215,30 +1207,25 @@ for( auto isoType : isoTypes ){
 	if(dPhiMax_core>0 && fabs(dEta) > dEtaMax_core) continue;
 	if(dR2Max_core>0 && dPhi*dPhi+dEta*dEta > dR2Max_core) continue;
 	ATH_MSG_DEBUG("dist: dPhi " << dPhi << " dEta " << dEta << " dR2 " << dPhi*dPhi+dEta*dEta);
-
 	/// get enenrgy
 	float et = (m_useEMScale ? cl->p4(CaloCluster::State::UNCALIBRATED).Et() : cl->pt() );
 	if(et <= 0 || fabs(cl->eta()) > 7.0) continue;
-
 	/// remove TileGap3
 	double ettg3 = cl->eSample(CaloSampling::TileGap3)/cosh(cl->p4(CaloCluster::State::UNCALIBRATED).Eta());
 	et -= ettg3;
 	if (fabs(ettg3) > 1)
 	  ATH_MSG_DEBUG("After TG3 removal, pt = " << et);
-
 	/// if only EM
 	double emfrac = 1.;
-	if(onlyEM){
+	if(onlyEM && !fwdClus){
 	  double eEM = cl->energyBE(0)+cl->energyBE(1)+cl->energyBE(2)+cl->energyBE(3);
 	  emfrac     = std::min(1., eEM / cl->p4(CaloCluster::State::UNCALIBRATED).E());
 	}
 	et *= emfrac;
-
 	/// add to the core
 	topoCore += et;
 	ATH_MSG_DEBUG("adding in core et: " << et << " (em frac = " << emfrac << " dR = " << sqrt(dPhi*dPhi+dEta*dEta) << ") total " << topoCore);
       }
-    }
 
     double topoCoreSC(0.);
     double test         = 0;
