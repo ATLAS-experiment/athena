@@ -93,7 +93,7 @@ def MPIHiveEventLoopMgrCfg(flags):
     cfg.addService(hivesvc)
 
     arp = CompFactory.AlgResourcePool(
-        TopAlg=["AthMasterSeq"]
+        TopAlg=["AthSequencer/AthMasterSeq"]
     )  # this should enable control flow
     cfg.addService(arp)
 
@@ -143,7 +143,7 @@ def AthenaHiveEventLoopMgrCfg(flags):
                                         NSlots = flags.Concurrency.NumConcurrentEvents)
     cfg.addService( hivesvc )
 
-    arp = CompFactory.AlgResourcePool(TopAlg = ["AthMasterSeq"]) #this should enable control flow
+    arp = CompFactory.AlgResourcePool(TopAlg = ["AthSequencer/AthMasterSeq"]) #this should enable control flow
     cfg.addService( arp )
 
     scheduler = cfg.getPrimaryAndMerge(AvalancheSchedulerSvcCfg(flags))
@@ -187,7 +187,7 @@ def AthenaMtesEventLoopMgrCfg(flags, mtEs=False, channel=''):
                                         NSlots = flags.Concurrency.NumConcurrentEvents)
     cfg.addService( hivesvc )
 
-    arp = CompFactory.AlgResourcePool(TopAlg = ["AthMasterSeq"]) #this should enable control flow
+    arp = CompFactory.AlgResourcePool(TopAlg = ["AthSequencer/AthMasterSeq"]) #this should enable control flow
     cfg.addService( arp )
 
     scheduler = cfg.getPrimaryAndMerge(AvalancheSchedulerSvcCfg(flags))
