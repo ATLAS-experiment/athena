@@ -19,12 +19,6 @@ Use this option when building directly on an ATLAS cluster node against the CVMF
    asetup Athena,main,latest
    ```
 
-2. **Verify Toolchain & Triton SDK**:
-   Ensure Triton SDK `r23.04` is available under `/opt/triton-sdk/r23.04`.
-   ```bash
-   test -f /opt/triton-sdk/r23.04/include/triton/core/tritonbackend.h && echo "Triton SDK OK"
-   ```
-
 ### Option B: Container Environment (Apptainer / Docker)
 
 Use this option if you are deploying inside an isolated container image.
@@ -112,7 +106,10 @@ rm -rf build install
 cmake -S . -B build \
   -DCMAKE_BUILD_TYPE=Release \
   -DCMAKE_INSTALL_PREFIX="$PWD/install" \
-  -DTRITON_ROOT=/opt/triton-sdk/r23.04
+  -DTRITON_ROOT=/opt/triton-sdk/r25.11 \
+  -DCMAKE_CXX_STANDARD=20 \
+  -DCMAKE_CXX_STANDARD_REQUIRED=ON \
+  -DCMAKE_CXX_EXTENSIONS=OFF
 
 # Compile and Install
 cmake --build build --target install -j"$(nproc)"
@@ -146,6 +143,8 @@ Two naming rules are load-bearing here:
 Once compiled, launch the Triton server and pass the path to the newly installed model repository:
 
 ```bash
+apptainer run --nv   --bind "${PWD}:/work" --bind /cvmfs:/cvmfs  --bind /eos/project/a/atlas-eftracking/GPU/ITk_data/ATLAS-P2-RUN4-03-00-01:/geoDir   /scratch/large/cahinder/traccc-aas_v1p4_report.sif
+
 source install/setup_env.sh
 
 tritonserver \
