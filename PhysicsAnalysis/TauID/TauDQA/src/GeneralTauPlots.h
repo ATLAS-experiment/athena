@@ -20,6 +20,16 @@ class GeneralTauPlots: public PlotBase {
       
       void fill(const xAOD::TauJet& tau, float weight);
 
+      const char *m_lable[7] = {
+	    "core",
+	    "wide",
+	    "",
+	    "charged",
+	    "isolated",
+	    "conversion",
+	    "fake",
+      };  
+
       Tau::TauKinematicPlots m_oTauKinematicPlots;
       TH1* m_tauCharge{};
       TH1* m_tauNChargedTracks{};
@@ -27,6 +37,7 @@ class GeneralTauPlots: public PlotBase {
       TH1* m_tauNCoreTracks{};
       TH1* m_tauNWideTracks{};
       TH1* m_ptHighPt{};
+      TH1* m_tauTrackSummary{};
 
       // RNN
       TH1* m_RNNEleScore{};
