@@ -212,6 +212,33 @@ install(
   DESTINATION model_repository/traccc_g200
 )
 
+#
+# Runtime environment helper
+#
+# traccc/detray/vecmem and the LCG gcc runtime are found through LD_LIBRARY_PATH,
+# which asetup sets here but which a Triton container does not inherit. Capture it now,
+# while we are still in the Athena environment, so the server can replay it.
+set(ATHENA_LD_LIBRARY_PATH "$ENV{LD_LIBRARY_PATH}")
+
+if(NOT ATHENA_LD_LIBRARY_PATH)
+  message(
+    WARNING
+    "LD_LIBRARY_PATH is empty; the generated setup_env.sh will not be usable. "
+    "Configure from a shell where 'asetup' has been sourced."
+  )
+endif()
+
+configure_file(
+  "${CMAKE_CURRENT_SOURCE_DIR}/cmake/setup_env.sh.in"
+  "${CMAKE_CURRENT_BINARY_DIR}/setup_env.sh"
+  @ONLY
+)
+
+install(
+  PROGRAMS "${CMAKE_CURRENT_BINARY_DIR}/setup_env.sh"
+  DESTINATION .
+)
+
 set(
   INSTALL_CONFIGDIR
   "${CMAKE_INSTALL_LIBDIR}/cmake/TracccBackend"

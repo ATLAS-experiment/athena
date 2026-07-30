@@ -51,10 +51,16 @@ Use this option if you are deploying inside an isolated container image.
    Launch the container with GPU access (`--nv`) and bind your workspace and geometry data:
    ```bash
    apptainer run --nv \
+     --bind /cvmfs:/cvmfs \
      --bind "$(pwd):/work" \
      --bind /eos/project/a/atlas-eftracking/GPU/ITk_data/ATLAS-P2-RUN4-03-00-01:/geoDir \
      traccc-aas_v1p4_report.sif
    ```
+
+   The `/cvmfs` bind is required whenever the backend was compiled on the host against
+   the CVMFS Athena nightlies: `libtriton_traccc.so` links `traccc`, `detray`, `vecmem`
+   and the LCG gcc runtime from there, and the loader needs those paths at server
+   start-up. See [Library resolution inside the container](#library-resolution-inside-the-container).
 
 ---
 
@@ -116,6 +122,7 @@ Compilation produces a self-contained model repository under `$PWD/install/model
 
 ```
 install/
+├── setup_env.sh                 # replays the build-time LD_LIBRARY_PATH
 └── model_repository/
     └── traccc_g200/             # model name, as passed to the client
         ├── config.pbtxt
@@ -139,6 +146,8 @@ Two naming rules are load-bearing here:
 Once compiled, launch the Triton server and pass the path to the newly installed model repository:
 
 ```bash
+source install/setup_env.sh
+
 tritonserver \
   --model-repository="$PWD/install/model_repository" \
   --log-verbose=1
@@ -147,6 +156,41 @@ tritonserver \
 > **Note:** To load or unload models dynamically, add
 > `--model-control-mode=explicit --load-model=traccc_g200`. `--load-model` is only
 > accepted in explicit mode; passing it on its own makes the server exit.
+
+### Library resolution inside the container
+
+Sourcing `setup_env.sh` is only necessary when the server runs somewhere that has not
+had `asetup` sourced — most commonly a Triton container running a backend compiled on
+the host. Skip it if you build and run in the same shell on `ef-tb-g01`.
+
+Symptom when it is missing:
+
+```text
+| traccc_g200 | 1 | UNAVAILABLE: Not found: unable to load shared library:
+                    libtraccc_io.so.1: cannot open shared object file
+```
+
+Triton names only the *first* unresolved dependency, which makes this look like a
+problem with one library rather than with the whole search path. To see the real extent:
+
+```bash
+ldd install/model_repository/traccc_g200/1/libtriton_traccc.so | grep 'not found'
+```
+
+Two things must both hold:
+
+1. `/cvmfs` is bound into the container (`--bind /cvmfs:/cvmfs`). The libraries physically
+   live there; no environment variable helps if the path is absent.
+2. `LD_LIBRARY_PATH` contains the CVMFS `AthenaExternals` and LCG directories, which is
+   what `setup_env.sh` restores. It *prepends*, preserving the `--nv` driver libraries
+   Apptainer injects on that variable.
+
+An `INSTALL_RPATH` baked into `libtriton_traccc.so` is deliberately **not** used here.
+Linkers default to `DT_RUNPATH`, which — unlike the obsolete `DT_RPATH` — is not
+inherited by transitive dependencies. It would let the loader find `libtraccc_io.so.1`,
+but not the `vecmem`, `detray` and `libstdc++` libraries that `libtraccc_io` itself
+needs, since the CVMFS libraries carry no `RUNPATH` of their own. `LD_LIBRARY_PATH`
+applies at every level of the chain and so covers all of them at once.
 
 ---
 
