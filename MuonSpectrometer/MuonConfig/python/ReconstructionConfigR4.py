@@ -136,14 +136,15 @@ def MuonReconstructionConfig(flags):
     MuonTags = ["MuonTagsSA"]
     ### Combined reconstruction chain
     if flags.Reco.EnableTracking:
-        from MuonTrackFindingAlgs.TrackFindingConfig import MuonInDetTrackSelectionAlgCfg, MuonSegmentTaggingAlgCfg, BeamSpotPreparatorAlgCfg
-        result.merge(BeamSpotPreparatorAlgCfg(flags))
+        from MuonTrackFindingAlgs.TrackFindingConfig import MuonInDetTrackSelectionAlgCfg, \
+                                                            MuonSegmentTaggingAlgCfg, \
+                                                            BeamSpotPreparatorAlgCfg
+        if flags.Muon.buildMETrack: result.merge(BeamSpotPreparatorAlgCfg(flags))
         result.merge(MuonInDetTrackSelectionAlgCfg(flags))
         result.merge(MuonSegmentTaggingAlgCfg(flags))
         MuonTags+= ["SegmentTags"]
     
-    result.merge(MuidSaTagMakerAlgCfg(flags, ExtrapolateToIP = flags.Reco.EnableTracking,
-                                             RefitWithBeamSpot =flags.Reco.EnableTracking))
+    result.merge(MuidSaTagMakerAlgCfg(flags))
     if flags.Reco.EnableTracking:
         result.merge(TrackSummaryLockCfg(flags, inContainer="MsTrksAtIpTrackParticles"))
 

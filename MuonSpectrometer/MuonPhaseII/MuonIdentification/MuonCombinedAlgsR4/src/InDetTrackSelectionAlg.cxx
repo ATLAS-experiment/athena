@@ -12,7 +12,11 @@
 #include "Acts/Utilities/HashedString.hpp"
 #include "Acts/Surfaces/PlaneSurface.hpp"
 #include "Acts/Surfaces/detail/PlanarHelper.hpp"
+#include "Acts/Surfaces/CylinderBounds.hpp"
+#include "Acts/Surfaces/DiscBounds.hpp"
 #include "Acts/Utilities/VectorHelpers.hpp"
+#include "Acts/Definitions/Units.hpp"
+
 
 #include "xAODMuonViews/FillContainer.h"
 #include "MuonTrackEvent/ExpandedSector.h"
@@ -23,6 +27,7 @@
 
 using namespace MuonR4::SegmentFit;
 using namespace Acts::VectorHelpers;
+using namespace Acts::UnitLiterals;
 
 namespace {
     inline std::string print(const xAOD::TrackParticle& idTrack) {
@@ -32,7 +37,7 @@ namespace {
             ", chi2 (nDoF): "<<(idTrack.chiSquared() / idTrack.numberDoF())<<"("<<idTrack.numberDoF()<<") ";
         return ostr.str();
     }
-
+    
     using IdCandidateCont_t = xAOD::FillContainer<MuonR4::MuonTagContainer, void*>;
 
 }
@@ -67,26 +72,35 @@ namespace MuonCombinedR4 {
         ATH_CHECK(SG::get(msSegments, m_segmentKey, ctx));
         ATH_CHECK(SG::get(msTracks, m_msTrkKey, ctx));
 
+        const Acts::GeometryContext tgContext{m_ctxProvider.getGeometryContext(ctx)};
+
         std::vector<const xAOD::MuonSegment*> uncombinedSegments{};
         uncombinedSegments.reserve(msSegments->size());
-        std::copy_if(msSegments->begin(), msSegments->end(), std::back_inserter(uncombinedSegments),
-                    [msTracks](const xAOD::MuonSegment* segment){
+        std::copy_if(msSegments->begin(), msSegments->end(), 
+                     std::back_inserter(uncombinedSegments),
+                     [msTracks, this](const xAOD::MuonSegment* segment){
                         return std::none_of(msTracks->begin(), msTracks->end(),
-                                            [&segment](const xAOD::TrackParticle* msTrack) {
-                                                auto actsTrk = ActsTrk::getActsTrack(*msTrack);
-                                                if (!actsTrk) {
-                                                    return false;
-                                                }
-                                                return Acts::rangeContainsValue(actsTrk->component<std::vector<const xAOD::MuonSegment*>>("muonSegLinks"), 
-                                                                                segment);
-                                            });
+                            [&segment, this](const xAOD::TrackParticle* msTrack) {
+                                auto actsTrk = ActsTrk::getActsTrack(*msTrack);
+                                if (!actsTrk) {
+                                    ATH_MSG_WARNING(__func__<<"() "<<__LINE__<<" - No acts track");
+                                    return false;
+                                }
+                                return Acts::rangeContainsValue(actsTrk->component<std::vector<const xAOD::MuonSegment*>>("muonSegLinks"), 
+                                                                segment);
+                            });
                     });
 
         ATH_MSG_DEBUG(__func__<<"() "<<__LINE__
             <<" - Select track candidates suitable for combined reconstruction amongst "
             <<idTracks->size()<<" ID tracks.");
         IdCandidateCont_t idCandidates{};
-
+        std::vector<Acts::BoundTrackParameters> msTrkPars{};
+        msTrkPars.reserve(msTracks->size());
+        std::transform(msTracks->begin(), msTracks->end(), std::back_inserter(msTrkPars),
+                       [](const xAOD::TrackParticle* trkPart){
+                           return ActsTrk::getActsTrack(*trkPart)->createParametersAtReference();
+                       });
         for (const xAOD::TrackParticle* idTrk : *idTracks) {
             /* Track does not satisfy the kinematic requirements
              * Or the optional track quality */
@@ -108,8 +122,8 @@ namespace MuonCombinedR4 {
                 /** Store the parameters at the calorimeter exit if the association to a
                     MS track or a segment is successful -> The tag is then available for
                     the combined fit, STACO, MuTagIMO && inside-> out chain */
-                if (compatibleWithMsTrk(*parsAtEntrance, *msTracks) ||
-                    compatibleWithSegment(ctx, *parsAtEntrance, uncombinedSegments)) {
+                if (compatibleWithMsTrk(tgContext, *parsAtEntrance, msTrkPars) ||
+                    compatibleWithSegment(tgContext, *parsAtEntrance, uncombinedSegments)) {
                     idTag->setExtrapolatedParsID(Acts::hashString("@CaloExit"),
                                                  std::move(*parsAtEntrance));
                 }
@@ -129,7 +143,7 @@ namespace MuonCombinedR4 {
     
         const Acts::GeometryContext tgContext = m_ctxProvider.getGeometryContext(ctx);
         const Acts::TrackingVolume* msEntrance = m_trackingGeometrySvc->getEnvelope(ActsTrk::SystemEnvelope::CaloExit);
-        ATH_MSG_DEBUG(__func__<<"() "<<__LINE__<<" - Extrapolate ID "<<print(idTrack)<<"\n to the calorimeter exit.\n"
+        ATH_MSG_ALWAYS(__func__<<"() "<<__LINE__<<" - Extrapolate ID "<<print(idTrack)<<"\n to the calorimeter exit.\n"
                         <<msEntrance->volumeBounds()<<", id: "<<msEntrance->geometryId());
         /** Retrieve the last state of the track to extrapolate into the MS  */
         auto idExitPars = lastTrackParameters(idTrack);
@@ -161,28 +175,113 @@ namespace MuonCombinedR4 {
         return std::nullopt;
     }
 
-    bool InDetTrackSelectionAlg::compatibleWithMsTrk(const Acts::BoundTrackParameters& itkParameters,
-                                                     const xAOD::TrackParticleContainer& msTrks) const {
+    inline double InDetTrackSelectionAlg::longitudinalParam(const Acts::BoundTrackParameters& pars) const{
+        switch (pars.referenceSurface().type()) {
+            using enum Acts::Surface::SurfaceType;
+            case Disc:
+                return pars.get<Acts::eBoundLoc0>();
+            case Cylinder:
+                return pars.get<Acts::eBoundLoc1>();
+            default:
+                ATH_MSG_WARNING(__func__<<"() "<<__LINE__<<" Surface type "<<pars.referenceSurface().type()
+                                <<" is not implemented");
+                break;
+        }
+        return -1._km;
+    }
+    inline bool InDetTrackSelectionAlg::closeToBoundary(const Acts::BoundTrackParameters& pars) const {
+        const double loc{std::abs(longitudinalParam(pars))};
+        const Acts::SurfaceBounds& bounds{pars.referenceSurface().bounds()};
+        switch (bounds.type()) {
+            using enum Acts::SurfaceBounds::BoundsType;
+            case eCylinder:{
+                using BoundEnum = Acts::CylinderBounds::BoundValues;
+                return std::abs(static_cast<const Acts::CylinderBounds&>(bounds).get(BoundEnum::eHalfLengthZ) - loc) < m_dLoc0CutMsTrk ;
+            }
+            case eDisc: {
+                return std::abs(static_cast<const Acts::DiscBounds&>(bounds).rMax() - loc) < m_dLoc0CutMsTrk;
+            } default: {
+                ATH_MSG_WARNING(__func__<<" - The bounds "<<bounds<<" are not implemented. "
+                    <<"Cannot perform bound check for \n"<<pars); 
+                break;
+            }
+        }
+        return false;
+    }
 
-        ATH_MSG_DEBUG(__func__<<"() "<<__LINE__<<" - Check whether the "<<itkParameters
-            <<" are compatible with one of the "<<msTrks.size()<<" MS tracks.");
-        if (std::any_of(msTrks.begin(), msTrks.end(), 
-                [&](const xAOD::TrackParticle* msTrack) {
-                    ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<" - Check MS "<<print(*msTrack));
-                    return std::abs(msTrack->eta() - eta(itkParameters)) < m_dEtaCutMsTrk &&
-                           std::abs(xAOD::P4Helpers::deltaPhi(msTrack->phi(),
-                                                              itkParameters.phi())) < m_dPhiCutMsTrk;
+    bool InDetTrackSelectionAlg::parametersCompatible(const Acts::GeometryContext& tgContext, 
+                                                      const Acts::BoundTrackParameters& caloExitPars,
+                                                      const Acts::BoundTrackParameters& msTrackPars) const {
+        
+        ATH_MSG_ALWAYS(__func__<<"() "<<__LINE__<<" - Check MS track \n@ "<<msTrackPars
+                                    <<", eta: "<<eta(msTrackPars));
+        const double dPhi = std::abs(xAOD::P4Helpers::deltaPhi(msTrackPars.phi(), caloExitPars.phi())) ;
+        const double dEta = std::abs(eta(msTrackPars) - eta(caloExitPars));
+        if(dPhi> m_dPhiCutMsTrk || dEta > m_dEtaCutMsTrk) {
+            ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<" - Angular cone does not match dEta: "
+                <<dEta <<" vs "<<m_dEtaCutMsTrk<<" or dPhi: "<<dPhi<<" vs "<<m_dPhiCutMsTrk);
+            return false;
+        }
+        if (!m_trackSameSurf) {
+            ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<" - Same surface requirement disabled");
+            return true;
+        }
+        if (msTrackPars.referenceSurface().geometryId() == 
+            caloExitPars.referenceSurface().geometryId()) {
+            const double dLoc0 = std::abs(longitudinalParam(msTrackPars) - 
+                                          longitudinalParam(caloExitPars));
+            ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<" - Evaluate local surface distance "
+                            <<dLoc0<<" vs. "<<m_dLoc0CutMsTrk<<".");
+            return dLoc0 < m_dLoc0CutMsTrk;
+        }
+        if (msTrackPars.referenceSurface().geometryId().withBoundary(0) !=
+            caloExitPars.referenceSurface().geometryId().withBoundary(0)) {
+            ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<" - Reference surfaces do not belong "
+                            <<" to the same volume. ");
+            return false;
+        }
+        if (!closeToBoundary(msTrackPars) || !closeToBoundary(caloExitPars)) {
+            ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<" - Parameters are not close to the bondary");
+            return false;
+        }
+        auto msAtCalo = caloExitPars.referenceSurface().intersect(tgContext,
+                                                                  msTrackPars.position(tgContext),
+                                                                  msTrackPars.direction()).closest();
+        if (!msAtCalo.isValid()) {
+            ATH_MSG_DEBUG(__func__<<"() "<<__LINE__<<" - Intersection failed ");
+            return false;
+        }
+        auto res = caloExitPars.referenceSurface().globalToLocal(tgContext, msAtCalo.position(), 
+                                                                  msTrackPars.direction());
+        if (!res.ok()){
+            ATH_MSG_DEBUG(__func__<<"() "<<__LINE__<<" - Transform failed");
+            return false;
+        }
+        using enum Acts::Surface::SurfaceType;
+        return std::abs((*res)[caloExitPars.referenceSurface().type() == Cylinder] - 
+                         longitudinalParam(caloExitPars)) <m_dLoc0CutMsTrk;
+    }
+
+    bool InDetTrackSelectionAlg::compatibleWithMsTrk(const Acts::GeometryContext& tgContext,
+                                                     const Acts::BoundTrackParameters& itkParameters,
+                                                     std::span<const Acts::BoundTrackParameters> msTrks) const {
+
+        ATH_MSG_DEBUG(__func__<<"() "<<__LINE__<<" - Check whether the parameters \n"<<itkParameters
+            <<", eta: "<<eta(itkParameters)<<" are compatible with one of the "<<msTrks.size()<<" MS tracks.");
+        if (std::ranges::any_of(msTrks, 
+                [&](const Acts::BoundTrackParameters& msPars) {
+                    return parametersCompatible(tgContext, itkParameters, msPars);
                 })) {
             ATH_MSG_DEBUG(__func__<<"() "<<__LINE__<<" Found a matching track.");
             return true;
         }
         return false;
     }
-    bool InDetTrackSelectionAlg::compatibleWithSegment(const EventContext& ctx,
+    bool InDetTrackSelectionAlg::compatibleWithSegment(const Acts::GeometryContext& tgContext,
                                                        const Acts::BoundTrackParameters& caloExitPars,
                                                        const std::span<const xAOD::MuonSegment*> candidateSegs) const {
         
-        const Acts::GeometryContext tgContext{m_ctxProvider.getGeometryContext(ctx)};
+
         const Amg::Vector3D exitPos = caloExitPars.position(tgContext);
         const Amg::Vector3D exitDir = caloExitPars.direction();
         MuonR4::ExpandedSector exitSector{exitPos.phi()};
@@ -192,7 +291,6 @@ namespace MuonCombinedR4 {
         Amg::Vector3D extPosOnSector{Amg::Vector3D::Zero()};
 
         for (const xAOD::MuonSegment* segment : candidateSegs) {
-
             MuonR4::ExpandedSector segSector{segment->position().phi()};
             ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<" - Check compatibility with "<<MuonR4::printID(*segment)
                         <<", sector: "<<segSector);

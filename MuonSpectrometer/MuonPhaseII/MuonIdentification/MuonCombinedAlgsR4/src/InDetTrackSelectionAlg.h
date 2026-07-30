@@ -50,14 +50,38 @@ namespace MuonCombinedR4 {
                        can be loosely matched with a reconsturcted MS track. The matching is
                        based on the angular cone between the MS & the ID track + separations 
                        on the local parameters on the cylinder
-                @param caloExitPars: The ID track expressed at the  calo exit
-                @param msTrack: List of reconstructed MS track particles  */
-            bool compatibleWithMsTrk(const Acts::BoundTrackParameters& caloExitPars,
-                                     const xAOD::TrackParticleContainer& msTracks) const;
+                @param tgContext: The geometry context to align the surfaces
+                @param caloExitPars: The ID track expressed at the calo exit
+                @param msTrack: List of the reference MS track parameters  */
+            bool compatibleWithMsTrk(const Acts::GeometryContext& tgContext,
+                                     const Acts::BoundTrackParameters& caloExitPars,
+                                     std::span<const Acts::BoundTrackParameters> msTracks) const;
+            /** @brief Evaluates whether the caloExit parameters and the MS track parameters 
+             *         are compatible with each other in terms of an angular cone.
+             *         Optionally, the radial displacement on the endcap discs
+             *         or the longitudinal displacement on the barrel cylinder
+             *         is checked to be within the limits.
+             *  @param tgContext: The geometry context to align the surfaces
+             *  @param caloExitPars: The ID track expressed at the calo exit
+             *  @param msTrackPars: Referene track parameters of the MS track */
+            bool parametersCompatible(const Acts::GeometryContext& tgContext, 
+                                      const Acts::BoundTrackParameters& caloExitPatrs,
+                                      const Acts::BoundTrackParameters& msTrackPars) const;
+
+             /** @brief Returns the longitudinal local track parameter which is defined as
+              *           - radial parameter in case of discs
+              *           - displacement along the cylinder axis for cylinders
+              * @param pars: Reference to the parameters of interest */
+            double longitudinalParam(const Acts::BoundTrackParameters& pars) const;
+            /** @brief Checks whether the longitudinal parameter is close to the surface boundary.
+             *         The interval size is given by @ref m_dLoc0CutMsTrk.
+             * @param pars: Reference to the local track parameters to check */
+            bool closeToBoundary(const Acts::BoundTrackParameters& pars) const;
+           
             /** @brief Checks whether the ID track is compatible with a reconstructed 
                        segment which is not part of a reconstructed MS track. Matching
                        is based on straight line extrapolations and sector correspondence  */
-            bool compatibleWithSegment(const EventContext& ctx,
+            bool compatibleWithSegment(const Acts::GeometryContext& tgContext,
                                        const Acts::BoundTrackParameters& caloExitPars,
                                        const std::span<const xAOD::MuonSegment*> candidateSegs) const;
             /** @brief The input key for the ID / ITk track particles */
@@ -88,9 +112,13 @@ namespace MuonCombinedR4 {
             Gaudi::Property<float> m_trackPt{this, "minPt", 2.5*Gaudi::Units::GeV};
             /** @brief Apply a maximum eta cut to stay within the MS acceptance */
             Gaudi::Property<float> m_trackEta{this, "maxEta", 2.8};
-            /** @brief Selection cuts for the MS tracks */
+            /** @brief Require that the matching between MS and ID track happens on the same 
+             *         surface */
+            Gaudi::Property <bool>  m_trackSameSurf{this, "matchTracksOnSameSurface", true};
+            /** @brief Selection cuts to test compability with the MS track */
             Gaudi::Property <float> m_dEtaCutMsTrk{this, "dEtaMaxMsTrk", 0.2};
             Gaudi::Property <float> m_dPhiCutMsTrk{this, "dPhiMsTrk", 5*Gaudi::Units::deg};
+            Gaudi::Property <float> m_dLoc0CutMsTrk{this, "dLoc0MsTrk", 50.*Gaudi::Units::cm};
             /** @brief Selection cuts for the Muon segments */
             Gaudi::Property <float> m_dEtaCutMsSeg{this, "dEtaMaxMsSegment",  0.3};
             Gaudi::Property <float> m_dY0CutMsSeg{this, "dY0MaxMsSegment", 40 * Gaudi::Units::cm};
