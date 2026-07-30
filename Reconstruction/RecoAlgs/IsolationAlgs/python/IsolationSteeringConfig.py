@@ -32,7 +32,6 @@ def IsolationSteeringCfg(flags, name = 'IsolationSteering'):
     if flags.Reco.EnableEgamma:
         acc.merge(egIsolationCfg(flags,name = 'photonIsolation'))
         acc.merge(egIsolationCfg(flags,name = 'electronIsolation'))
-        acc.merge(egIsolationCfg(flags,name = 'forwardElectronIsolation'))
     if flags.Reco.EnableCombinedMuon:
         acc.merge(muIsolationCfg(flags,name = 'muonIsolation'))
 
