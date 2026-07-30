@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////
@@ -23,6 +23,10 @@
 #include "GaudiKernel/IIncidentListener.h"
 #include "Gaudi/Property.h"
 
+//Tools
+#include "TrkExInterfaces/IExtrapolator.h"
+
+// C++
 #include <string>
 #include <vector>
 
@@ -44,6 +48,8 @@ class VP1Alg: public AthAlgorithm,
  private:
 
   // Properties
+  // -- Empty input, no data files, when we use VP1, for example, to inspect geometry
+  Gaudi::Property<bool> m_vp1Conf_emptyInput{this, "EmptyInput", false, "This is set to True if we start VP1 with no input, that is, no data files; that is used, for example, when using VP1 to ins[ect the detector description / geometry. Default: False"};
   // -- Athena-related
   Gaudi::Property<std::string> m_atlasRelease{this, "AtlasRelease", "", "The current, in use Atlas release"}; 
   // -- MultipleFiles mode
@@ -68,6 +74,9 @@ class VP1Alg: public AthAlgorithm,
   Gaudi::Property<bool> m_noGui{this, "noGUI", false, 
       "Flag to turn OFF the GUI. Default: FALSE (i.e., GUI is ON)"};
 
+
+  ToolHandle<Trk::IExtrapolator> m_extrapolator{this, "ExtrapolatorTool", "Trk::Extrapolator/AtlasExtrapolator"};
+   //ToolHandle<Trk::IExtrapolationEngine> m_extrapolator{this, "Extrapolator", "Trk::ExtrapolationEngine/AtlasExtrapolation"};
 
   VP1Gui * m_vp1gui;
 /* 
