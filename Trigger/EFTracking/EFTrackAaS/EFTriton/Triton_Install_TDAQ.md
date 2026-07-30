@@ -11,7 +11,7 @@ This document provides step-by-step instructions for:
 ## A1. Environment & Variable Setup
 
 setupATLAS
-asetup Athena,latest,miain
+asetup Athena,latest,main
 
 export TRITON_RELEASE=r25.11
 export TRITON_PREFIX=/opt/triton-sdk/${TRITON_RELEASE}
@@ -51,6 +51,8 @@ System RapidJSON (v1.1.0) fails under GCC 14 due to a const-assignment bug in Ge
 rm -rf "${RAPIDJSON_SRC}" "${RAPIDJSON_BUILD}"
 git clone https://github.com/Tencent/rapidjson.git "${RAPIDJSON_SRC}"
 
+Rapidjson has a known bug, so make this change below before you install it
+
 --- a/include/rapidjson/document.h
 +++ b/include/rapidjson/document.h
 @@ -316,7 +316,7 @@ struct GenericStringRef {
@@ -60,8 +62,7 @@ git clone https://github.com/Tencent/rapidjson.git "${RAPIDJSON_SRC}"
 -    GenericStringRef& operator=(const GenericStringRef& rhs) { s = rhs.s; length = rhs.length; }
 +    GenericStringRef& operator=(const GenericStringRef& rhs) { s = rhs.s; const_cast<SizeType&>(length) = rhs.length; return *this; }
 
-     //! implicit conversion to const Ch pointer
-     operator const Ch*() const { return s; }
+
 
 cmake \
   -S "${RAPIDJSON_SRC}" \
@@ -117,13 +118,6 @@ export CMAKE_PREFIX_PATH="${TRITON_ROOT}:${CMAKE_PREFIX_PATH:-}"
 export LD_LIBRARY_PATH="${TRITON_ROOT}/lib64:${TRITON_ROOT}/lib:${LD_LIBRARY_PATH:-}"
 EOF
 
-### A5.2 Validate SDK Package
-
-test -f "${TRITON_PREFIX}/include/triton/core/tritonbackend.h" && \
-test -f "${TRITON_PREFIX}/include/triton/core/tritonserver.h" && \
-find "${TRITON_PREFIX}" -name "TritonBackendConfig.cmake" | grep -q . && \
-echo "SUCCESS: Triton GPU SDK installed successfully at ${TRITON_PREFIX}"
-
 ---
 ---
 # PART B: Building & Running Full Triton Server Locally (Bare-Metal)
@@ -133,12 +127,6 @@ echo "SUCCESS: Triton GPU SDK installed successfully at ${TRITON_PREFIX}"
 export SERVER_WORK_DIR=/tmp/triton-server-r25.11
 git clone --branch r25.11 https://github.com/triton-inference-server/server.git "${SERVER_WORK_DIR}"
 cd "${SERVER_WORK_DIR}"
-
----
-
-## B2. Set Global CMake Policy Fallback
-
-export CMAKE_POLICY_VERSION_MINIMUM=3.5
 
 ---
 

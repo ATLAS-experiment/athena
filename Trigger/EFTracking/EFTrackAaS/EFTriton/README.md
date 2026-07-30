@@ -19,45 +19,6 @@ Use this option when building directly on an ATLAS cluster node against the CVMF
    asetup Athena,main,latest
    ```
 
-### Option B: Container Environment (Apptainer / Docker)
-
-Use this option if you are deploying inside an isolated container image.
-
-1. **Obtain or Build the Image**:
-   A pre-built container image is available on EOS:
-   ```text
-   /eos/project/a/atlas-eftracking/AaS/traccc-aas_v1p4_report.sif
-   ```
-
-   To build a custom `.sif` image locally using Docker:
-   ```bash
-   # Build Docker image
-   sudo docker build -t traccc-aas:latest .
-
-   # Convert to Apptainer image (use a custom temp dir if disk space is low)
-   mkdir -p /tmp/apptainer-tmp
-   sudo APPTAINER_TMPDIR=/tmp/apptainer-tmp \
-        APPTAINER_CACHEDIR=/tmp/apptainer-tmp \
-        apptainer build traccc-aas_v1p4_report.sif docker-daemon://traccc-aas:latest
-   ```
-
-2. **Run the Container**:
-   Launch the container with GPU access (`--nv`) and bind your workspace and geometry data:
-   ```bash
-   apptainer run --nv \
-     --bind /cvmfs:/cvmfs \
-     --bind "$(pwd):/work" \
-     --bind /eos/project/a/atlas-eftracking/GPU/ITk_data/ATLAS-P2-RUN4-03-00-01:/geoDir \
-     traccc-aas_v1p4_report.sif
-   ```
-
-   The `/cvmfs` bind is required whenever the backend was compiled on the host against
-   the CVMFS Athena nightlies: `libtriton_traccc.so` links `traccc`, `detray`, `vecmem`
-   and the LCG gcc runtime from there, and the loader needs those paths at server
-   start-up. See [Library resolution inside the container](#library-resolution-inside-the-container).
-
----
-
 ## 2. Build the Pipeline Wrappers (`EFTritonAlgsPipelines`)
 
 The pipeline wrappers feed GPU algorithms into the backend. They live under `EFTritonAlgsPipelines/`, and are header-only: they resolve `traccc`, `detray`, `vecmem`, `covfie` and CUDA from the Athena environment sourced in step 1.
@@ -143,7 +104,7 @@ Two naming rules are load-bearing here:
 Once compiled, launch the Triton server and pass the path to the newly installed model repository:
 
 ```bash
-apptainer run --nv   --bind "${PWD}:/work" --bind /cvmfs:/cvmfs  --bind /eos/project/a/atlas-eftracking/GPU/ITk_data/ATLAS-P2-RUN4-03-00-01:/geoDir   /scratch/large/cahinder/traccc-aas_v1p4_report.sif
+apptainer run --nv   --bind "${PWD}:/work" --bind /cvmfs:/cvmfs  --bind /eos/project/a/atlas-eftracking/GPU/ITk_data/ATLAS-P2-RUN4-03-00-01:/geoDir   /scratch/large/cahinder/tritontracccimage.sif
 
 source install/setup_env.sh
 
@@ -156,42 +117,6 @@ tritonserver \
 > `--model-control-mode=explicit --load-model=traccc_g200`. `--load-model` is only
 > accepted in explicit mode; passing it on its own makes the server exit.
 
-### Library resolution inside the container
-
-Sourcing `setup_env.sh` is only necessary when the server runs somewhere that has not
-had `asetup` sourced — most commonly a Triton container running a backend compiled on
-the host. Skip it if you build and run in the same shell on `ef-tb-g01`.
-
-Symptom when it is missing:
-
-```text
-| traccc_g200 | 1 | UNAVAILABLE: Not found: unable to load shared library:
-                    libtraccc_io.so.1: cannot open shared object file
-```
-
-Triton names only the *first* unresolved dependency, which makes this look like a
-problem with one library rather than with the whole search path. To see the real extent:
-
-```bash
-ldd install/model_repository/traccc_g200/1/libtriton_traccc.so | grep 'not found'
-```
-
-Two things must both hold:
-
-1. `/cvmfs` is bound into the container (`--bind /cvmfs:/cvmfs`). The libraries physically
-   live there; no environment variable helps if the path is absent.
-2. `LD_LIBRARY_PATH` contains the CVMFS `AthenaExternals` and LCG directories, which is
-   what `setup_env.sh` restores. It *prepends*, preserving the `--nv` driver libraries
-   Apptainer injects on that variable.
-
-An `INSTALL_RPATH` baked into `libtriton_traccc.so` is deliberately **not** used here.
-Linkers default to `DT_RUNPATH`, which — unlike the obsolete `DT_RPATH` — is not
-inherited by transitive dependencies. It would let the loader find `libtraccc_io.so.1`,
-but not the `vecmem`, `detray` and `libstdc++` libraries that `libtraccc_io` itself
-needs, since the CVMFS libraries carry no `RUNPATH` of their own. `LD_LIBRARY_PATH`
-applies at every level of the chain and so covers all of them at once.
-
----
 
 ## 5. Running the Client
 
@@ -211,8 +136,3 @@ python TracccTritonClient.py
 ```
 
 ---
-
-## References & Additional Links
-
-- **C++ Standalone Triton Client:** [traccc-aaS GitHub Client Guide](#)
-- **Athena Tracking-as-a-Service Guide:** [CERN CodiMD Notes](#)
