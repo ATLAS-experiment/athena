@@ -146,8 +146,9 @@ def fromRunArgs(runArgs):
         cfg.merge(FTagPEBJetTagConfig(flags))
 
     # setup Metadata writer
+    from AthenaConfiguration.Enums import MetadataCategory
     from xAODMetaDataCnv.InfileMetaDataConfig import SetupMetaDataForStreamCfg
-    cfg.merge(SetupMetaDataForStreamCfg(flags,'AOD'))
+    cfg.merge(SetupMetaDataForStreamCfg(flags,'AOD', createMetadata=[MetadataCategory.CutFlowMetaData]))
 
     # Write stream metadata into TagInfo
     from EventInfoMgt.TagInfoMgrConfig import TagInfoMgrCfg
