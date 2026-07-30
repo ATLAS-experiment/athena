@@ -52,9 +52,6 @@ private:
   int   m_jet_cutflow_e_cut{};         //!
   int   m_jet_cutflow_jvt_cut{};       //!
 
-  // variables that don't get filled at submission time should be
-  // protected from being send from the submission node to the worker
-  // node (done by the //!)
 public:
 
   // this is a standard constructor
@@ -68,8 +65,8 @@ public:
 
   // added functions not from Algorithm
   // why does this need to be virtual?
-  virtual int PassCuts( const xAOD::Jet* jet );
-  void CleanJets(const xAOD::JetContainer* cleanJetcopy , JetCleaningTool* m_jetCleaning);
+  virtual int passCuts( const xAOD::Jet* jet );
+  void cleanJets(const xAOD::JetContainer* cleanJetcopy , JetCleaningTool* m_jetCleaning);
   int getPrimaryVertexLocation(const xAOD::VertexContainer* vertexContainer);
 
 };

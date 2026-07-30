@@ -13,6 +13,9 @@
 
 #include "InDetTrackSelectionTool/InDetTrackSelectionTool.h"
 #include "TrackVertexAssociationTool/TrackVertexAssociationTool.h"
+#include "PATCore/IAsgSelectionTool.h"
+
+//#include <JetJvtEfficiency/NNJvtSelectionTool.h>
 
 #include "AthenaBaseComps/AthAlgorithm.h"
 #include "GaudiKernel/ToolHandle.h"
@@ -63,6 +66,7 @@ public:
   SG::ReadHandleKey<xAOD::TrackParticleContainer> m_trackKey{this, "TrackParticlesKey", "InDetTrackParticles"};
   Gaudi::Property<std::string> m_vtxContainer{this, "vtxContainer", "PrimaryVertices", "vertex container"};
   SG::ReadHandleKey<xAOD::JetContainer> m_jetKey{this, "JetsKey", "AntiKt4EMTopoJets_Selected"};
+  SG::ReadHandleKey<xAOD::JetContainer> m_uncalibratedJetKey{this,"UncalibratedJetsKey","AntiKt4EMTopoJets"};
   SG::ReadDecorHandleKey<xAOD::JetContainer> m_jetConstitScalePtKey{this, "JetConstitScalePt", m_jetKey, "JetConstitScaleMomentum_pt"};
 
   // IDTIDE
@@ -89,28 +93,24 @@ public:
   Gaudi::Property<bool>  m_doGhostAssociation{this, "DoGhostAssociation", true, "RetrieveTracks via ghostAssociation (true) or deltaR matching (false)"};
   Gaudi::Property<float> m_deltaRCut{this, "DeltaRCut", 0.4, "DeltaR cut for matching"};
 
-  Gaudi::Property<bool> m_ipHLTcorrection{this,"ipHLTcorrection",true,"Flags to HLTcorrection"}; // Passed as a flag in the runAnalysis command line. Include or not HLT prescale correction in data weights.
+  Gaudi::Property<bool>  m_ipHLTcorrection{this,"ipHLTcorrection",true,"Flags to HLTcorrection"}; // Passed as a flag in the runAnalysis command line. Include or not HLT prescale correction in data weights.
 
   // Flags and variables used for IP studies 
-  Gaudi::Property<bool> m_ipSaveHistosOnly{this, "ipSaveHistosOnly", true, "Flag to save histograms only"};   // Passed as a flag in the runAnalysis command line. Save the IP histograms only without dumping an IP ntuple.
+  Gaudi::Property<bool>  m_ipSaveHistosOnly{this, "ipSaveHistosOnly", true, "Flag to save histograms only"};   // Passed as a flag in the runAnalysis command line. Save the IP histograms only without dumping an IP ntuple.
 
-  Gaudi::Property<bool> m_ipSaveAdditionalHistos{this,"ipSaveAdditionalHistos",true,"Flag to save AdditionalHistos"};
+  Gaudi::Property<bool>  m_ipSaveAdditionalHistos{this,"ipSaveAdditionalHistos",true,"Flag to save AdditionalHistos"};
   std::unique_ptr<IPhistos> m_IPhistos = nullptr;           //!
-  // variables that don't get filled at submission time should be
-  // protected from being send from the submission node to the worker
-  // node (done by the //!)
 
-
-  Gaudi::Property<bool> m_isMC{this, "isMC", false, " whether the data is Monte Carlo"};
-  //TrackTruthHelpers* m_truthhelper; //!
+  Gaudi::Property<bool>  m_isMC{this, "isMC", false, " whether the data is Monte Carlo"};
   ToolHandleArray<InDet::IInDetTrackSelectionTool> m_trackselectionTools{this, "trackSelectionTools", {}};
   ToolHandle<CP::TrackVertexAssociationTool>    m_trktovxtool{this,"trktovxtool","CP::TrackVertexAssociationTool"};
-  
+  ToolHandle<IAsgSelectionTool> m_JVTSelectionTool{this,"JvtSelectionTool","JvtSelectionTool"};
+    
   TTree *m_t1{}; //!
   
   TH1D* m_h_SumOfEventWeights = nullptr; //! //MVGR: to help getting total SumOfWeights of MC slices
 
-  public:
+public:
   
   // this is a standard constructor
   IPNtupleDumper (const std::string& name, ISvcLocator* pSvcLocator = nullptr);
@@ -123,34 +123,28 @@ public:
 
   // these are the functions not inherited from Algorithm
   
-  void SetBranches(TTree* t);
-  void ResetVars();
-  bool CheckForAvailableDecorations(const xAOD::TrackParticleContainer* trkC, const std::string& m_derivationName);
-  StatusCode CheckIPDecorations(const EventContext& ctx);
+  void setBranches(TTree* t);
+  void resetVars();
+  StatusCode checkIPDecorations(const EventContext& ctx);
   const xAOD::TruthParticle* truthParticle(const xAOD::TrackParticle* ) const;
   bool passAcceptance(const xAOD::TruthParticle* truth) const;
-  std::string GetDerivationName(const xAOD::TrackParticleContainer* trkC);
   
-  void TrackToJetDeltaRAssociation(const xAOD::TrackParticle* trk, const xAOD::JetContainer* jets, float dRcut,float& deltaR, float& pT, float& Etajet, int& JVTjet);
+  void trackToJetDeltaRAssociation(const xAOD::TrackParticle* trk, const xAOD::JetContainer* jets, float dRcut,float& deltaR, float& pT, float& Etajet, int& JVTjet);
 
   //Get if a jet passes the JVT
-  bool PassJVTCut(const xAOD::Jet* jet);
+  bool passJVTCut(const xAOD::Jet* jet);
 
   //Using all tracks and Delta R matching
-  bool ProcessTrack_DeltaR(const xAOD::TrackParticle* track, const xAOD::JetContainer* jets, const xAOD::VertexContainer* vtxCont);
+  bool processTrackDeltaR(const xAOD::TrackParticle* track, const xAOD::JetContainer* jets, const xAOD::VertexContainer* vtxCont);
   
   //Using ghost associated tracks
-  bool ProcessTrack_GhostAssoc(const xAOD::TrackParticle* track, const xAOD::Jet* jet, const xAOD::VertexContainer* vtxCont);
+  bool processTrackGhostAssoc(const xAOD::TrackParticle* track, const xAOD::Jet* jet, const xAOD::VertexContainer* vtxCont);
   
-  void FillTreeVariables(const xAOD::TrackParticle* track,float deltaR_trk_jet, float pTjet, float Etajet, bool JVTjet);
+  void fillTreeVariables(const xAOD::TrackParticle* track,float deltaR_trk_jet, float pTjet, float Etajet, bool JVTjet);
 
   // Functions used when filling histograms for IP studies
-  StatusCode FillIPHistograms();
-  
-  //Get the truth link of a track
-  //This should go in a helper
-  //From https://gitlab.cern.ch:8443/nstyles/TruthStudies/blob/master/source/TruthAnalysis/src/TruthAnalysisAlg.cxx
-  
+  StatusCode fillIPHistograms();
+
   typedef ElementLink <xAOD::TruthParticleContainer > Link_t;
   
   const xAOD::TruthParticle* getTrackTruthLink(const xAOD::TrackParticle* track)  const ;

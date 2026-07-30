@@ -10,11 +10,11 @@ IPhistos::IPhistos(const std::string& inputName) : BaseHistos()
 {
 
   m_name = inputName;
-  BuildAxesMap();   
+  buildAxesMap();   
 
 }
 
-void IPhistos::BuildAxesMap()
+void IPhistos::buildAxesMap()
 {
   
   // TODO: automatize? based on IPtree directly
@@ -76,11 +76,6 @@ void IPhistos::BuildAxesMap()
   m_Axes["DR"] = axis;
   axis.clear();
 
- /* for (int i = 0; i <= 100; i++) {
-    axis.push_back(0.2 * i / 100.0);
-  }
-  m_Axes["DR"] = axis;
-  axis.clear();*/
   // DeltaR asymmetric Axis
   for (float x = 0.0; x <= 0.044; x += 0.004) axis.push_back(x);
   for (float x = 0.050; x <= 0.080; x += 0.006) axis.push_back(x);
@@ -117,13 +112,6 @@ void IPhistos::BuildAxesMap()
 
   m_Axes["d0"] = axis;
   axis.clear();
-  /*for (int i = 0; i <= m_nbins; i++) {
-    double x = m_xmind0 + i * (m_xmaxd0 - m_xmind0) / m_nbins;
-    axis.push_back(x);
-  }
-  m_Axes["d0"] = axis;
-  axis.clear();*/
-
 
 
   // z0 axis (symmetric)
@@ -133,10 +121,6 @@ void IPhistos::BuildAxesMap()
   axis.push_back(m_xminz0);
   axis.push_back(m_xmaxz0);
 
- /* for (int i = 0; i <= m_nbins; i++) {
-    double x = m_xminz0 + i * (m_xmaxz0 - m_xminz0) / m_nbins;
-    axis.push_back(x);
-  }*/
   m_Axes["z0"] = axis;
   axis.clear();
 
@@ -175,7 +159,7 @@ void IPhistos::BuildAxesMap()
     axis.clear();
   }
 
-} // End of BuildAxesMap()
+} // End of buildAxesMap()
 
 void IPhistos::define3DHistos()
 {
@@ -238,7 +222,7 @@ void IPhistos::define2DHistos()
 
 } // End of define2DHistos()
 
-void IPhistos::BookHistograms()
+void IPhistos::bookHistograms()
 {
 
   m_h_bsWidth = plot1D(m_name + "h_bsWidth", "bsWidth (xy) [um]", 150, 0, 15);
@@ -256,9 +240,9 @@ void IPhistos::BookHistograms()
   m_1D.push_back(m_h_jetPt);
   m_1D.push_back(m_h_deltaR_trk12);
   m_1D.push_back(m_h_count);
-} // End of BookHistograms()
+} // End of bookHistograms()
 
-void IPhistos::FillHistograms(float d0, float z0, float pt, float eta, float phi, float mu, float jetPt, float weight, float bsWidth, float deltaR_trk12)
+void IPhistos::fillHistograms(float d0, float z0, float pt, float eta, float phi, float mu, float jetPt, float weight, float bsWidth, float deltaR_trk12)
 {
     
     float w = weight;
@@ -326,4 +310,4 @@ void IPhistos::FillHistograms(float d0, float z0, float pt, float eta, float phi
       m_h_count->Fill(1, w);
     }
 
-} // End of FillHistograms()
+} // End of fillHistograms()

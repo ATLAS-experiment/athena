@@ -16,12 +16,12 @@ class IPhistos : public BaseHistos
   std::vector<TH1D*> get1Dvector() {
 	  return m_1D;
   };
-  void BookHistograms();
-  void FillHistograms(float d0, float z0, float pt, float eta, float phi, float mu, float jetPt, 
+  void bookHistograms();
+  void fillHistograms(float d0, float z0, float pt, float eta, float phi, float mu, float jetPt, 
                       float weight, float bsWidth, float deltaR_trk12);
-  void BuildAxesMap();
+  void buildAxesMap();
 
-  void SaveAdditionalHistos() { m_saveAdditionalHistos = true; };
+  void saveAdditionalHistos() { m_saveAdditionalHistos = true; };
 
  private:
 

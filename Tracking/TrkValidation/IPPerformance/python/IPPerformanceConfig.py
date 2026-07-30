@@ -3,6 +3,7 @@
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaCommon.CFElements import seqAND
+from AthenaConfiguration.Enums import LHCPeriod
 
 def EventStatusSelection_And_VertexSelectionCfg(flags):
 
@@ -15,34 +16,61 @@ def EventStatusSelection_And_VertexSelectionCfg(flags):
     acc.addEventAlgo(vertexSelectionAlg)
     return acc
 
-
 def JetCalibratorAlgCfg(flags):
     acc = ComponentAccumulator()
+
     from JetCalibTools.JetCalibToolsConfig import defineJetCalibTool
-    config = "JES_MC16Recommendation_Consolidated_EMTopo_Apr2019_Rel21.config"
-    if flags.Input.isMC:
-        if not flags.Sim.ISF.Simulator.isFullSim():
-            config = "JES_MC16Recommendation_AFII_EMTopo_Apr2019_Rel21.config"
-    if flags.Input.isMC:
-        CalibSequence = "JetArea_Residual_EtaJES_GSC_Smear"
+
+    # Run2 / Run3
+    if flags.GeoModel.Run is LHCPeriod.Run3:
+        jetCollection = "AntiKt4EMPFlow"
+        inputJets = "AntiKt4EMPFlowJets"
+        configPrefix = "PFlow"
     else:
-        CalibSequence = "JetArea_Residual_EtaJES_GSC_Insitu"
-    jct = defineJetCalibTool(jetcollection="AntiKt4EMTopo",context="AnalysisLatest",configfile=config,calibarea="00-04-82",calibseq=CalibSequence,data_type = "mc" if flags.Input.isMC else "data",
-          rhoname="auto", pvname="PrimaryVertices", gscdepth="auto")
+        jetCollection = "AntiKt4EMTopo"
+        inputJets = "AntiKt4EMTopoJets"
+        configPrefix = "EMTopo"
+
+    # Calibration config
+    if flags.Input.isMC and not flags.Sim.ISF.Simulator.isFullSim():
+        config = f"JES_MC16Recommendation_AFII_{configPrefix}_Apr2019_Rel21.config"
+    else:
+        config = f"JES_MC16Recommendation_Consolidated_{configPrefix}_Apr2019_Rel21.config"
+
+    calibSequence = (
+        "JetArea_Residual_EtaJES_GSC_Smear"
+        if flags.Input.isMC
+        else "JetArea_Residual_EtaJES_GSC_Insitu"
+    )
+    jct = defineJetCalibTool(jetcollection=jetCollection,context="AnalysisLatest",configfile=config,calibarea="00-04-82",calibseq=calibSequence,
+        data_type="mc" if flags.Input.isMC else "data",rhoname="auto",pvname="PrimaryVertices",gscdepth="auto",
+    )
     jetCalibratorAlg = CompFactory.JetCalibratorAlg("JetCalibratorAlg")
     jetCalibratorAlg.calibrationTool = jct
+    jetCalibratorAlg.InputJets = inputJets
+
     acc.addEventAlgo(jetCalibratorAlg)
     return acc
 
+
+
 def JetSelectorCfg(flags,name="JetSelector", **kwargs):
     acc = ComponentAccumulator()
+    
+    if flags.GeoModel.Run is LHCPeriod.Run3:
+        Jetdef = "AntiKt4EMPFlowJets"
+        outContainer = "AntiKt4EMPFlowJets_Selected"
+    else:
+        Jetdef = "AntiKt4EMTopoJets"
+        outContainer = "AntiKt4EMTopoJets_Selected"
 
     from JetSelectorTools.JetSelectorToolsConfig import JetCleaningToolCfg
-    jetCleaningTool = acc.popToolsAndMerge(JetCleaningToolCfg(flags,name="JetCleaningTool",jetdef="AntiKt4EMTopoJets",cleaningLevel="LooseBad",useDecorations=True))
+    jetCleaningTool = acc.popToolsAndMerge(JetCleaningToolCfg(flags,name="JetCleaningTool",jetdef=Jetdef,cleaningLevel="LooseBad",useDecorations=True))
 
     jetSelector = CompFactory.JetSelector("JetSelector", **kwargs)
     jetSelector.jetCleaning = jetCleaningTool
-
+    jetSelector.OutContainerName = outContainer
+    
     acc.addEventAlgo(jetSelector)
     return acc
 
@@ -71,7 +99,26 @@ def IPNtupleDumperCfg(flags,name="IPNtupleDumper", **kwargs):
             acc.popToolsAndMerge(InDetTrackSelectionTool_LoosePrimary_Cfg(flags)),
             acc.popToolsAndMerge(InDetTrackSelectionTool_TightPrimary_Cfg(flags)) ])
     
-    acc.addEventAlgo(CompFactory.IPNtupleDumper(name, **kwargs))
+
+    if flags.GeoModel.Run is LHCPeriod.Run3:
+        jetContainer = "AntiKt4EMPFlowJets_Selected"
+        inputJets = "AntiKt4EMPFlowJets"
+        jvtSelTool = CompFactory.CP.NNJvtSelectionTool("JVTSelection_{0}".format(jetContainer))
+        jvtSelTool.JetContainer = jetContainer
+        jvtSelTool.JvtMomentName = "Jvt"
+    else:
+        jetContainer = "AntiKt4EMTopoJets_Selected"
+        inputJets = "AntiKt4EMTopoJets"
+        jvtSelTool = CompFactory.CP.JvtSelectionTool("JVTSelection_{0}".format(jetContainer))
+        jvtSelTool.JetContainer = jetContainer
+        jvtSelTool.JvtMomentName = "Jvt"
+        jvtSelTool.IsPFlow = False
+
+    ipNtupleDumper = CompFactory.IPNtupleDumper(name, **kwargs)
+    ipNtupleDumper.JvtSelectionTool = jvtSelTool
+    ipNtupleDumper.JetsKey = jetContainer
+    ipNtupleDumper.UncalibratedJetsKey = inputJets
+    acc.addEventAlgo(ipNtupleDumper)
     return acc
 
 

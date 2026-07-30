@@ -90,11 +90,10 @@ StatusCode JetSelector :: initialize ()
     ATH_MSG_INFO(name()<<" Decorate Jets with :"<< m_decor);
   }
 
-  ANA_CHECK( m_jetCleaning.retrieve() );
-
-  ATH_MSG_INFO("initialize(): JetSelector Interface succesfully initialized!" );
-
+  ATH_CHECK( m_jetCleaning.retrieve() );
   ATH_CHECK(m_storeGate.retrieve());
+  
+  ATH_MSG_INFO("initialize(): JetSelector Interface succesfully initialized!" );
 
   return StatusCode::SUCCESS;
 }
@@ -145,18 +144,19 @@ StatusCode JetSelector :: execute ()
   const xAOD::VertexContainer *vertices = 0;
   if ( m_doJVT ) {
     if ( !evtStore()->retrieve( vertices, "PrimaryVertices").isSuccess() ){ 
-    ATH_MSG_ERROR("execute(): Failed to retrieve Input Vertex container from store. Exiting." );
-    return StatusCode::FAILURE; }
+      ATH_MSG_ERROR("execute(): Failed to retrieve Input Vertex container from store. Exiting." );
+      return StatusCode::FAILURE; 
+    }
     m_pvLocation = getPrimaryVertexLocation( vertices );
   }
 
-//Jet Cleaning first. 
-  CleanJets(inJets.cptr() , m_jetCleaning.get());
+  //Jet Cleaning first. 
+  cleanJets(inJets.cptr() , m_jetCleaning.get());
   static SG::AuxElement::Accessor< char > isCleanAcc("cleanJet");
   static SG::AuxElement::Decorator< char > passSelDecor( m_decor );
   
   for ( auto jet_itr : *inJets.cptr() ) { 
-    int passSel = this->PassCuts( jet_itr );
+    int passSel = this->passCuts( jet_itr );
     if ( m_decorateSelectedObjects ) {
       passSelDecor( *jet_itr ) = passSel;
     }
@@ -176,7 +176,7 @@ StatusCode JetSelector :: execute ()
 }
 
 
-int JetSelector::PassCuts( const xAOD::Jet* jet ) {
+int JetSelector::passCuts( const xAOD::Jet* jet ) {
   m_jet_cutflowHist->Fill( m_jet_cutflow_all, 1 );
 
   // clean jets
@@ -217,7 +217,7 @@ int JetSelector::PassCuts( const xAOD::Jet* jet ) {
   return 1;
 }
 
-void JetSelector::CleanJets(const xAOD::JetContainer* cleanJetcopy , JetCleaningTool* jetCleaning) {
+void JetSelector::cleanJets(const xAOD::JetContainer* cleanJetcopy , JetCleaningTool* jetCleaning) {
 
   for ( auto jet_itr : *cleanJetcopy ) {
 
