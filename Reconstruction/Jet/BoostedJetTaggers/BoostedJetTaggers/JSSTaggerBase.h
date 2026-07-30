@@ -189,6 +189,8 @@ class JSSTaggerBase :   public asg::AsgTool ,
 
     /// Decoration name
     std::string m_decorationName;
+    Gaudi::Property<std::string> m_scoreDecorationName{this, "scoreDecorationName", "", "tagger output scoure decoration name"};
+
 
     /// Flag to calculate scale factor
     bool m_calcSF{};
