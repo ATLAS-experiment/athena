@@ -23,6 +23,7 @@
 #include "VP1Base/VP1Controller.h"
 #include "VP1TrackSystems/TrackCommonFlags.h"
 #include "TrkEventPrimitives/ParticleHypothesis.h"
+
 #include <QFlags>
 
 class TrackCollWidget;
@@ -73,7 +74,8 @@ public:
   ///////////////////////////////////
   TrackCommonFlags::TrackPartsFlags shownTrackParts() const;
   int vertexProjectionAngle() const; //Ranges from 0-179 i.e. is in degrees. Might be disabled, in which case will be -ve.
-    
+   
+
   // double trackTubeRadius() const;//0 => don't show tubes for tracks
   enum PropagationOptionFlag {NoPropOptions=0x0000, IgnoreMEOT=0x0001, ExtendTrack=0x0002};
   Q_DECLARE_FLAGS(PropagationOptionFlags, PropagationOptionFlag)
