@@ -75,7 +75,7 @@ namespace HepMC {
 
 #if defined(XAOD_STANDALONE)
   // Needed as we can't pick up the helper functions from AtlasHepMC in this case
-  template <class T>  inline int barcode(const T& p){
+  template <class T> inline int barcode(const T& p){
     if constexpr (std::is_pointer_v<T> || is_smart_ptr_v<T>){ //T is ptr
       return p->barcode();
     }
@@ -83,7 +83,7 @@ namespace HepMC {
       return p.barcode();
     }
   }
-  template <>  inline int barcode(const int& p){ return p;}
+  template <> inline int barcode(const int& p) { return p;}
 #endif
   // Temporarily specialize uniqueID for xAOD::Truth classes ahead of the barcode migration - TODO remove this
   template <typename T> inline int uniqueID(const T&  p) {
@@ -157,43 +157,43 @@ namespace HepMC {
     }
   }
   /// @brief Function to calculate all the descendants(direction=1)/ancestors(direction=-1) of the particle.
-  template <class T>  inline std::deque<int> simulation_history(const T& p, const int direction ) { std::deque<int> res; res.push_back(uniqueID(p)); get_particle_history(p, res, direction); return res;}
+  template <class T> inline std::deque<int> simulation_history(const T& p, const int direction ) { std::deque<int> res; res.push_back(uniqueID(p)); get_particle_history(p, res, direction); return res;}
 
   namespace BarcodeBased {
     /// @brief Method to establish if a particle (or barcode) corresponds to truth-suppressed pile-up
-    template <class T>  inline bool is_truth_suppressed_pileup(const T& p){ return (barcode(p) == SUPPRESSED_PILEUP_BARCODE);}
+    template <class T> inline bool is_truth_suppressed_pileup(const T& p){ return (barcode(p) == SUPPRESSED_PILEUP_BARCODE);}
 
     /// @brief Method to establish if a if the object is linked to something which was never saved to the HepMC Truth - for example particle was too low energy to be recorded
-    template <class T>  inline bool no_truth_link(const T& p){ return (barcode(p) == UNDEFINED_ID);}
+    template <class T> inline bool no_truth_link(const T& p){ return (barcode(p) == UNDEFINED_ID);}
 
     /// @brief Helper function for SDO creation in PileUpTools
-    template <class T>  inline bool ignoreTruthLink(const T& p, bool vetoPileUp){ const int b = barcode(p);  return no_truth_link(b) || (vetoPileUp && is_truth_suppressed_pileup(b)); }
+    template <class T> inline bool ignoreTruthLink(const T& p, bool vetoPileUp){ const int b = barcode(p);  return no_truth_link(b) || (vetoPileUp && is_truth_suppressed_pileup(b)); }
 
     /// @brief Method to establish if a particle (or barcode) was created during the simulation (only to be used in legacy TP converters)
-    template <class T>  inline bool is_simulation_particle(const T& p){ return (barcode(p)>SIM_BARCODE_THRESHOLD);}
+    template <class T> inline bool is_simulation_particle(const T& p){ return (barcode(p)>SIM_BARCODE_THRESHOLD);}
 
     /// @brief Method to establish if a particle (or barcode) is a new seondary created during the simulation (only to be used in legacy TP converters)
-    template <class T>  inline bool is_sim_secondary(const T& p){ return (barcode(p)%SIM_REGENERATION_INCREMENT > SIM_BARCODE_THRESHOLD); }
+    template <class T> inline bool is_sim_secondary(const T& p){ return (barcode(p)%SIM_REGENERATION_INCREMENT > SIM_BARCODE_THRESHOLD); }
 
     /// @brief Method to return how many interactions a particle has undergone during simulation (only to be used in legacy TP converters).
-    template <class T>  inline int generations(const T& p){ return (barcode(p)/SIM_REGENERATION_INCREMENT);}
+    template <class T> inline int generations(const T& p){ return (barcode(p)/SIM_REGENERATION_INCREMENT);}
 
     /// @brief Method to establish if the vertex was created during simulation (only to be used in legacy TP converters)
-    template <class T>  inline bool is_simulation_vertex(const T& v){ return (barcode(v)<-SIM_BARCODE_THRESHOLD);}
+    template <class T> inline bool is_simulation_vertex(const T& v){ return (barcode(v)<-SIM_BARCODE_THRESHOLD);}
 
     /// @brief Method to establish if two particles in the GenEvent actually represent the same generated particle
-    template <class T1, class T2> inline bool is_same_generator_particle(const T1& p1,const T2& p2) { int b1 = barcode(p1); int b2 = barcode(p2); return  b1% SIM_REGENERATION_INCREMENT == b2 % SIM_REGENERATION_INCREMENT; }
+    template <class T1, class T2> inline bool is_same_generator_particle(const T1& p1, const T2& p2) { int b1 = barcode(p1); int b2 = barcode(p2); return  b1% SIM_REGENERATION_INCREMENT == b2 % SIM_REGENERATION_INCREMENT; }
 
     /// @brief Method to establish if two particles/vertices in the GenEvent actually represent the same generated particle
-    template <class T1, class T2> inline bool is_same_object(const T1& p1,const T2& p2) { int b1 = uniqueID(p1); int b2 = uniqueID(p2); return  b1 == b2; } // NB Still need to adapt CaloCalibrationHits
+    template <class T1, class T2> inline bool is_same_object(const T1& p1, const T2& p2) { int b1 = uniqueID(p1); int b2 = uniqueID(p2); return  b1 == b2; } // NB Still need to adapt CaloCalibrationHits
 
     /// @brief Method to check if the first particle is a descendant of the second in the simulation, i.e. particle p1 was produced simulations particle p2.
-    template <class T1, class T2> inline bool is_sim_descendant(const T1& p1,const T2& p2) { int b1 = barcode(p1); int b2 = barcode(p2); return b1 % SIM_REGENERATION_INCREMENT == b2;}
+    template <class T1, class T2> inline bool is_sim_descendant(const T1& p1, const T2& p2) { int b1 = barcode(p1); int b2 = barcode(p2); return b1 % SIM_REGENERATION_INCREMENT == b2;}
   }
 
   namespace StatusBased {
     /// @brief Method to establish if a particle corresponds to truth-suppressed pile-up
-    template <class T>  inline bool is_truth_suppressed_pileup(const T& p){
+    template <class T> inline bool is_truth_suppressed_pileup(const T& p){
       if constexpr (std::is_same_v<std::remove_const_t<T>, HepMcParticleLink>) {
         return p.getTruthSuppressionType() == EBC_PU_SUPPRESSED;
       }
@@ -206,7 +206,7 @@ namespace HepMC {
     }
 
     /// @brief Method to establish if a if the object is linked to something which was never saved to the HepMC Truth - for example particle was too low energy to be recorded
-    template <class T>  inline bool no_truth_link(const T& p){
+    template <class T> inline bool no_truth_link(const T& p){
       if constexpr (std::is_same_v<std::remove_const_t<T>, HepMcParticleLink>) {
         return p.linkIsNull();
       }
@@ -219,7 +219,7 @@ namespace HepMC {
     }
 
     /// @brief Helper function for SDO creation in PileUpTools
-    template <class T>  inline bool ignoreTruthLink(const T& p, bool vetoPileUp){
+    template <class T> inline bool ignoreTruthLink(const T& p, bool vetoPileUp){
       if constexpr (std::is_same_v<std::remove_const_t<remove_smart_pointer_t<std::remove_pointer_t<T>>>, HepMcParticleLink>) {
         return no_truth_link(p) || (vetoPileUp && is_truth_suppressed_pileup(p));
       }
@@ -229,19 +229,19 @@ namespace HepMC {
     }
 
     /// @brief Method to establish if a particle was created during the simulation based on the status value
-    template <class T>  inline bool is_simulation_particle(const T& p){ return (status(p)>SIM_STATUS_THRESHOLD);}
+    template <class T> inline bool is_simulation_particle(const T& p){ return (status(p)>SIM_STATUS_THRESHOLD);}
 
     /// @brief Method to establish if a particle is a new seondary created during the simulation based on the status value
-    template <class T>  inline bool is_sim_secondary(const T& p){ return (status(p)%SIM_STATUS_INCREMENT > SIM_STATUS_THRESHOLD); }
+    template <class T> inline bool is_sim_secondary(const T& p){ return (status(p)%SIM_STATUS_INCREMENT > SIM_STATUS_THRESHOLD); }
 
     /// @brief Method to return how many interactions a particle has undergone during simulation based on the status value
-    template <class T>  inline int generations(const T& p){ return (status(p)/SIM_STATUS_INCREMENT);}
+    template <class T> inline int generations(const T& p){ return (status(p)/SIM_STATUS_INCREMENT);}
 
     /// @brief Method to establish if the vertex was created during simulation from the status
-    template <class T>  inline bool is_simulation_vertex(const T& v){ return (status(v)>SIM_STATUS_THRESHOLD);}
+    template <class T> inline bool is_simulation_vertex(const T& v){ return (status(v)>SIM_STATUS_THRESHOLD);}
 
     /// @brief Method to establish if two particles in the GenEvent actually represent the same generated particle
-    template <class T1, class T2> inline bool is_same_generator_particle(const T1& p1,const T2& p2) {
+    template <class T1, class T2> inline bool is_same_generator_particle(const T1& p1, const T2& p2) {
       const int id1 = uniqueID(p1);
       const int id2 = uniqueID(p2);
       if (id1 == id2) { return true;} // simplest case
@@ -264,7 +264,7 @@ namespace HepMC {
     }
 
     /// @brief Method to establish if two particles/vertices in the GenEvent actually represent the same particle
-    template <class T1, class T2> inline bool is_same_object(const T1& p1,const T2& p2) {
+    template <class T1, class T2> inline bool is_same_object(const T1& p1, const T2& p2) {
       const int id1 = uniqueID(p1);
       const int id2 = uniqueID(p2);
       return (id1 == id2);
@@ -272,7 +272,7 @@ namespace HepMC {
 
 
     /// @brief Method to check if the first particle is a descendant of the second in the simulation, i.e. particle p1 was produced simulations particle p2.
-    template <class T1, class T2> inline bool is_sim_descendant(const T1& p1,const T2& p2) {
+    template <class T1, class T2> inline bool is_sim_descendant(const T1& p1, const T2& p2) {
       const int id1 = uniqueID(p1);
       const int id2 = uniqueID(p2);
       if (id1 == id2) { return true;} // simplest case
@@ -296,7 +296,7 @@ namespace HepMC {
   }
 
   /// @brief Method to establish if a particle (or barcode) corresponds to truth-suppressed pile-up (TODO update to be status based)
-  template <class T>  inline bool is_truth_suppressed_pileup(const T& p){
+  template <class T> inline bool is_truth_suppressed_pileup(const T& p){
     if constexpr (std::is_same_v<std::remove_const_t<remove_smart_pointer_t<std::remove_pointer_t<T>>>, HepMcParticleLink>) {
       return StatusBased::is_truth_suppressed_pileup(p);
     }
@@ -306,10 +306,10 @@ namespace HepMC {
   }
 
   /// @brief Method to establish if a if the object is linked to something which was never saved to the HepMC Truth - for example particle was too low energy to be recorded
-  template <class T>  inline bool no_truth_link(const T& p){ return StatusBased::no_truth_link(p);}
+  template <class T> inline bool no_truth_link(const T& p){ return StatusBased::no_truth_link(p);}
 
   /// @brief Helper function for SDO creation in PileUpTools
-  template <class T>  inline bool ignoreTruthLink(const T& p, bool vetoPileUp){
+  template <class T> inline bool ignoreTruthLink(const T& p, bool vetoPileUp){
     if constexpr (std::is_same_v<std::remove_const_t<remove_smart_pointer_t<std::remove_pointer_t<T>>>, HepMcParticleLink>) {
       return StatusBased::ignoreTruthLink(p, vetoPileUp);
     }
@@ -319,25 +319,25 @@ namespace HepMC {
   }
 
   /// @brief Method to establish if a particle (or barcode) was created during the simulation (TODO update to be status based)
-  template <class T>  inline bool is_simulation_particle(const T& p){ return StatusBased::is_simulation_particle(p);}
+  template <class T> inline bool is_simulation_particle(const T& p){ return StatusBased::is_simulation_particle(p);}
 
   /// @brief Method to return how many interactions a particle has undergone during simulation (TODO migrate to be based on status).
-  template <class T>  inline int generations(const T& p){ return StatusBased::generations(p);}
+  template <class T> inline int generations(const T& p){ return StatusBased::generations(p);}
 
   /// @brief Method to establish if the vertex was created during simulation (TODO migrate to be based on status).
-  template <class T>  inline bool is_simulation_vertex(const T& v){ return StatusBased::is_simulation_vertex(v);}
+  template <class T> inline bool is_simulation_vertex(const T& v){ return StatusBased::is_simulation_vertex(v);}
 
   /// @brief Method to establish if two particles in the GenEvent actually represent the same generated particle
-  template <class T1,class T2> inline bool is_same_generator_particle(const T1& p1,const T2& p2) { return StatusBased::is_same_generator_particle(p1, p2); }
+  template <class T1, class T2> inline bool is_same_generator_particle(const T1& p1, const T2& p2) { return StatusBased::is_same_generator_particle(p1, p2); }
 
   /// @brief Method to establish if two particles in the GenEvent actually represent the same  particle
-  template <class T1,class T2>  inline bool is_same_particle(const T1& p1,const T2& p2) { return StatusBased::is_same_object(p1, p2); }
+  template <class T1, class T2> inline bool is_same_particle(const T1& p1, const T2& p2) { return StatusBased::is_same_object(p1, p2); }
 
   /// @brief Method to establish if two particles in the GenEvent actually represent the same  vertex
-  template <class T1,class T2>  inline bool is_same_vertex(const T1& p1,const T2& p2) { return StatusBased::is_same_object(p1, p2); }
+  template <class T1, class T2> inline bool is_same_vertex(const T1& p1, const T2& p2) { return StatusBased::is_same_object(p1, p2); }
 
   /// @brief Method to check if the first particle is a descendant of the second in the simulation, i.e. particle p1 was produced simulations particle p2.
-  template <class T1,class T2> inline bool is_sim_descendant(const T1& p1,const T2& p2) { return StatusBased::is_sim_descendant(p1, p2);}
+  template <class T1, class T2> inline bool is_sim_descendant(const T1& p1, const T2& p2) { return StatusBased::is_sim_descendant(p1, p2);}
 
   /// @brief Function that converts the old scheme of labeling the simulation particles (barcodes) into the new scheme (statuses).
   template <class T> void old_to_new_simulation_scheme(T& evt) {
@@ -360,17 +360,17 @@ namespace HepMC {
   }
 
   /// @brief Get particle status in the new scheme from the barcode and status in the old scheme
-  inline int new_particle_status_from_old(const int oldStatus,const  int barcode) {
+  inline int new_particle_status_from_old(const int oldStatus, const  int barcode) {
     int generations_barcode_based = (barcode/SIM_REGENERATION_INCREMENT);
     bool is_sim_secondary_barcode_based = (barcode%SIM_REGENERATION_INCREMENT > SIM_BARCODE_THRESHOLD);
-    return oldStatus + SIM_STATUS_INCREMENT*generations_barcode_based + (is_sim_secondary_barcode_based? SIM_STATUS_THRESHOLD : 0); 
+    return oldStatus + SIM_STATUS_INCREMENT*generations_barcode_based + (is_sim_secondary_barcode_based? SIM_STATUS_THRESHOLD : 0);
   }
-  
+
   /// @brief Get particle status in the old scheme from the status in the new scheme
   inline int old_particle_status_from_new(const int newStatus) { return newStatus%SIM_STATUS_THRESHOLD; }
 
   /// @brief Get vertex status in the new scheme from the barcode and status in the old scheme
-  inline int new_vertex_status_from_old(const int oldStatus,const  int barcode) {
+  inline int new_vertex_status_from_old(const int oldStatus, const  int barcode) {
     bool is_simulation_vertex_barcode_based =  (barcode<-SIM_BARCODE_THRESHOLD);
     return (is_simulation_vertex_barcode_based? SIM_STATUS_THRESHOLD : 0) + oldStatus;
   }
