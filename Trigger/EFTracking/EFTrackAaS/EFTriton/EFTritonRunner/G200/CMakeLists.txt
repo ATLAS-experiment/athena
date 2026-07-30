@@ -154,23 +154,25 @@ endif()
 #
 # Installation
 #
+# The backend lives in the model's version directory, which is the first place
+# Triton looks for libtriton_<backend>.so. Keeping it here makes the model
+# repository self-contained: no --backend-directory needed on the command line,
+# and the version directory Triton insists on is populated by construction.
+set(
+  TRITON_MODEL_VERSION_DIR
+  "model_repository/traccc_g200/1"
+)
+
 install(
   TARGETS triton-traccc-backend
   EXPORT TracccBackendTargets
-  LIBRARY DESTINATION backends/traccc
-  RUNTIME DESTINATION backends/traccc
+  LIBRARY DESTINATION "${TRITON_MODEL_VERSION_DIR}"
+  RUNTIME DESTINATION "${TRITON_MODEL_VERSION_DIR}"
 )
 
 install(
   FILES cfg/config.pbtxt
   DESTINATION model_repository/traccc_g200
-)
-
-# Triton refuses to load a model unless at least one numeric version directory
-# exists. The backend carries the implementation, so the directory stays empty.
-install(
-  DIRECTORY
-  DESTINATION model_repository/traccc_g200/1
 )
 
 set(

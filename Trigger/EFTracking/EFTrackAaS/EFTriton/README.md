@@ -113,20 +113,25 @@ cmake -S . -B build \
 cmake --build build --target install -j"$(nproc)"
 ```
 
-Compilation places the required `libtriton_traccc.so` library into `$PWD/install/backends/traccc` and the model configuration (`config.pbtxt`) into `$PWD/install/model_repository/traccc_g200`, alongside an empty version directory `1/`.
-
-The layout Triton expects is therefore:
+Compilation produces a self-contained model repository under `$PWD/install/model_repository`:
 
 ```
 install/
-├── backends/
-│   └── traccc/                  # directory name == `backend: "traccc"` in config.pbtxt
-│       └── libtriton_traccc.so  # file name == libtriton_<backend>.so
 └── model_repository/
-    └── traccc_g200/
+    └── traccc_g200/             # model name, as passed to the client
         ├── config.pbtxt
-        └── 1/                   # empty: the backend, not a version artefact, holds the logic
+        └── 1/                   # version directory; Triton needs at least one
+            └── libtriton_traccc.so
 ```
+
+Two naming rules are load-bearing here:
+
+- The library basename must match `backend: "traccc"` in `config.pbtxt`, i.e.
+  `libtriton_<backend>.so`. The *model* name (`traccc_g200`) is independent of the
+  *backend* name (`traccc`).
+- Triton searches for the backend library in the model version directory first, then
+  the model directory, then the global backend directory. Installing it into `1/`
+  uses the first of those, so no `--backend-directory` flag is required.
 
 ---
 
@@ -137,12 +142,8 @@ Once compiled, launch the Triton server and pass the path to the newly installed
 ```bash
 tritonserver \
   --model-repository="$PWD/install/model_repository" \
-  --backend-directory="$PWD/install/backends" \
   --log-verbose=1
 ```
-
-> **Note:** `--backend-directory` is required. Without it Triton only searches its
-> built-in `/opt/tritonserver/backends` and will not find `libtriton_traccc.so`.
 
 > **Note:** To load or unload models dynamically, add
 > `--model-control-mode=explicit --load-model=traccc_g200`. `--load-model` is only
