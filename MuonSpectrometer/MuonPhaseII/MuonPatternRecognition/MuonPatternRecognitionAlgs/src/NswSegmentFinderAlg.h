@@ -318,7 +318,7 @@ class NswSegmentFinderAlg : public AthReentrantAlgorithm {
         UnsignedIntegerProperty m_maxClustersInLayer{this, "maxClustersInLayer", 8};
 
         //maximum number of dY window size for killing hits on the layer from the segments 
-        DoubleProperty m_maxdYWindow{this, "maxdYWindow", 4.*Gaudi::Units::cm};  
+        DoubleProperty m_maxdYWindow{this, "maxdYWindow", 2.*Gaudi::Units::cm};  
 
         //maximum tanAlpha for the seed quality check
         DoubleProperty m_maxTanAlpha{this, "maxTanAlpha", 0.2};
