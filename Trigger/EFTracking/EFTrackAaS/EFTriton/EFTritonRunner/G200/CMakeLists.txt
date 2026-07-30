@@ -13,6 +13,15 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
 #
+# RPATH Setup: Embed dependency paths (CUDA/Athena) into output binary
+#
+set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
+set(CMAKE_BUILD_WITH_INSTALL_RPATH TRUE)
+if(DEFINED ENV{CUDA_TOOLKIT_ROOT})
+  list(APPEND CMAKE_INSTALL_RPATH "$ORIGIN" "$ENV{CUDA_TOOLKIT_ROOT}/lib64")
+endif()
+
+#
 # User-configurable locations
 #
 set(
@@ -34,13 +43,19 @@ if(DEFINED ENV{CMAKE_PREFIX_PATH})
   list(APPEND CMAKE_PREFIX_PATH $ENV{CMAKE_PREFIX_PATH})
 endif()
 
-# 3. Dynamically extract the exact LCG release version from the environment
+# 3. Align CUDA Toolkit path with active 'asetup' environment
+if(DEFINED ENV{CUDA_TOOLKIT_ROOT})
+  set(CUDAToolkit_ROOT "$ENV{CUDA_TOOLKIT_ROOT}")
+elseif(DEFINED ENV{CUDA_HOME})
+  set(CUDAToolkit_ROOT "$ENV{CUDA_HOME}")
+endif()
+
+# 4. Dynamically extract the exact LCG release version from the environment
 set(DETECTED_LCG_RELEASE "")
 
 # Check high-level environment variables set by asetup
 foreach(ENV_VAR ROOT_INCLUDE_PATH LD_LIBRARY_PATH)
   if(DEFINED ENV{${ENV_VAR}} AND NOT DETECTED_LCG_RELEASE)
-    # Extract strings matching /LCG_<version>/ or /sw/lcg/releases/LCG_<version>/
     string(REGEX MATCH "(LCG_[A-Za-z0-9_]+)" MATCHED_LCG "$ENV{${ENV_VAR}}")
     if(MATCHED_LCG)
       set(DETECTED_LCG_RELEASE "${MATCHED_LCG}")
@@ -48,15 +63,13 @@ foreach(ENV_VAR ROOT_INCLUDE_PATH LD_LIBRARY_PATH)
   endif()
 endforeach()
 
-# Map the extracted release (e.g. LCG_109a_ATLAS_11) to the central SFT view path
+# Map the extracted release to central SFT view path
 if(DETECTED_LCG_RELEASE AND DEFINED ENV{ALRB_SFT_LCG} AND DEFINED ENV{LCG_PLATFORM})
-  # First try exact release match in SFT views (e.g. /cvmfs/sft.cern.ch/lcg/views/LCG_109a_ATLAS_11/x86_64-el9-gcc14-opt)
   set(EXACT_VIEW_PATH "$ENV{ALRB_SFT_LCG}/views/${DETECTED_LCG_RELEASE}/$ENV{LCG_PLATFORM}")
   
   if(EXISTS "${EXACT_VIEW_PATH}")
     list(APPEND CMAKE_PREFIX_PATH "${EXACT_VIEW_PATH}")
   else()
-    # Fallback: Glob for matching release series prefix (e.g., LCG_109a_ATLAS_*) if exact version directory isn't mirrored
     string(REGEX REPLACE "([0-9]+)$" "*" LCG_SERIES_PATTERN "${DETECTED_LCG_RELEASE}")
     file(GLOB LCG_VIEW_FALLBACKS "$ENV{ALRB_SFT_LCG}/views/${LCG_SERIES_PATTERN}/$ENV{LCG_PLATFORM}")
     if(LCG_VIEW_FALLBACKS)
@@ -77,10 +90,6 @@ find_package(CUDAToolkit REQUIRED)
 #
 # GPU pipeline wrappers
 #
-# The wrappers under EFTritonAlgsPipelines/EFTritonPipelines/ are header-only, so they
-# are consumed straight from the source tree rather than through an installed
-# EFTritonPipelines package. That keeps this project buildable on its own, without
-# having to configure, build and install EFTritonAlgsPipelines first.
 set(
   EFTRITON_PIPELINES_DIR
   "${CMAKE_CURRENT_SOURCE_DIR}/../../EFTritonAlgsPipelines"
@@ -130,7 +139,6 @@ target_include_directories(
     "${EFTRITON_PIPELINES_DIR}"
 )
 
-# Required by the algebra-plugins headers pulled in transitively by detray/traccc.
 target_compile_definitions(
   triton-traccc-backend
   PRIVATE
@@ -158,7 +166,7 @@ target_link_libraries(
     TritonCore::triton-core-serverstub
     TritonBackend::triton-backend-utils
 
-    # Athena/LCG traccc stack, as required by the pipeline headers
+    # Athena/LCG traccc stack
     vecmem::core
     vecmem::cuda
     traccc::io
@@ -168,9 +176,6 @@ target_link_libraries(
     traccc::cuda_utils
     detray::io
     detray::core
-
-    # <cuda_runtime_api.h> is included directly by src/traccc_g200.cc
-    CUDA::cudart
 )
 
 set_target_properties(
@@ -191,10 +196,6 @@ endif()
 #
 # Installation
 #
-# The backend lives in the model's version directory, which is the first place
-# Triton looks for libtriton_<backend>.so. Keeping it here makes the model
-# repository self-contained: no --backend-directory needed on the command line,
-# and the version directory Triton insists on is populated by construction.
 set(
   TRITON_MODEL_VERSION_DIR
   "model_repository/traccc_g200/1"
@@ -215,9 +216,6 @@ install(
 #
 # Runtime environment helper
 #
-# traccc/detray/vecmem and the LCG gcc runtime are found through LD_LIBRARY_PATH,
-# which asetup sets here but which a Triton container does not inherit. Capture it now,
-# while we are still in the Athena environment, so the server can replay it.
 set(ATHENA_LD_LIBRARY_PATH "$ENV{LD_LIBRARY_PATH}")
 
 if(NOT ATHENA_LD_LIBRARY_PATH)
