@@ -1,4 +1,4 @@
-backend: "traccc_g200"
+backend: "traccc"
 max_batch_size: 0
 input [
    {

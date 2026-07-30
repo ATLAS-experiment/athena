@@ -22,13 +22,6 @@ set(
   "Installed Triton SDK prefix"
 )
 
-set(
-  EFT_ALGS_PIPELINES_DIR
-  "${CMAKE_CURRENT_SOURCE_DIR}/../../EFTritonAlgsPipelines"
-  CACHE PATH
-  "Directory containing EFTritonAlgsPipelines headers"
-)
-
 #
 # Dynamic Dependencies Setup
 #
@@ -80,6 +73,10 @@ find_package(TritonBackend CONFIG REQUIRED)
 find_package(covfie CONFIG REQUIRED)
 find_package(traccc CONFIG REQUIRED)
 
+# Header-only GPU pipeline wrappers, built and installed from EFTritonAlgsPipelines.
+# Configure with -DCMAKE_PREFIX_PATH=<EFTritonAlgsPipelines install prefix>.
+find_package(EFTritonPipelines CONFIG REQUIRED)
+
 #
 # Backend library
 #
@@ -107,17 +104,10 @@ target_compile_features(
   cxx_std_20
 )
 
-target_compile_definitions(
-  triton-traccc-backend
-  PRIVATE
-  ALGEBRA_PLUGINS_INCLUDE_ARRAY
-)
-
 target_include_directories(
   triton-traccc-backend
   PRIVATE
     "${CMAKE_CURRENT_SOURCE_DIR}/src"
-    "${EFT_ALGS_PIPELINES_DIR}"
 )
 
 target_compile_options(
@@ -141,10 +131,9 @@ target_link_libraries(
     TritonCore::triton-core-serverstub
     TritonBackend::triton-backend-utils
 
-    # Athena/LCG traccc dependencies
-    vecmem::core vecmem::cuda traccc::io 
-    traccc::core traccc::device_common traccc::cuda traccc::cuda_utils
-    detray::io detray::core
+    # GPU pipeline headers; propagates the Athena/LCG traccc, detray, vecmem and CUDA
+    # dependencies plus ALGEBRA_PLUGINS_INCLUDE_ARRAY
+    EFTritonPipelines::pipelines
 )
 
 set_target_properties(
@@ -174,7 +163,14 @@ install(
 
 install(
   FILES cfg/config.pbtxt
-  DESTINATION model_repository/traccc-g200
+  DESTINATION model_repository/traccc_g200
+)
+
+# Triton refuses to load a model unless at least one numeric version directory
+# exists. The backend carries the implementation, so the directory stays empty.
+install(
+  DIRECTORY
+  DESTINATION model_repository/traccc_g200/1
 )
 
 set(

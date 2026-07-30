@@ -58,30 +58,40 @@ Use this option if you are deploying inside an isolated container image.
 
 ---
 
-## 2. Optional: Build and Test Standalone Wrappers
+## 2. Build the Pipeline Wrappers (`EFTritonAlgsPipelines`)
 
-The standalone pipeline wrappers feed GPU algorithms into the backend. They live under `EFTritonAlgsPipelines/`.
+The pipeline wrappers feed GPU algorithms into the backend. They live under `EFTritonAlgsPipelines/`, and are header-only: they resolve `traccc`, `detray`, `vecmem`, `covfie` and CUDA from the Athena environment sourced in step 1.
 
-To test the G200 standalone executable independently with a sample event:
+Build this **before** the backend — `EFTritonRunner` consumes the installed
+`EFTritonPipelines::pipelines` CMake target via `find_package()`.
 
 ```bash
 cd EFTritonAlgsPipelines
-mkdir -p build && cd build
 
 # Unset compilers if running inside container with conflicting environment overrides
 unset CC CXX
 
-cmake ..
-cmake --build . -j"$(nproc)"
+cmake -S . -B build \
+  -DCMAKE_BUILD_TYPE=Release \
+  -DCMAKE_INSTALL_PREFIX="$PWD/install"
 
-./TracccG200Standalone ../../EFTritonTester/event000000000-cells.csv 0
+cmake --build build --target install -j"$(nproc)"
+```
+
+This installs the headers under `install/include/EFTritonPipelines/` and the CMake package
+under `install/lib/cmake/EFTritonPipelines/`.
+
+To test the G200 standalone executable independently with a sample event:
+
+```bash
+./build/TracccG200Standalone ../EFTritonTester/event000000000-cells.csv 0
 ```
 
 ---
 
 ## 3. Build the Triton Backend (`EFTritonRunner`)
 
-The backend source code (`src/traccc_g200.cc`) wraps the GPU pipeline and links against `traccc`, `covfie`, `vecmem`, `detray`, and the Triton Server SDK.
+The backend source code (`src/traccc_g200.cc`) wraps the GPU pipeline and links against the Triton Server SDK plus `EFTritonPipelines::pipelines` from step 2, which propagates `traccc`, `covfie`, `vecmem`, `detray` and CUDA.
 
 Navigate to `EFTritonRunner/G200` to compile and install the model and library:
 
@@ -91,17 +101,32 @@ cd EFTritonRunner/G200
 # Clear stale build cache
 rm -rf build install
 
-# Configure using environment variables set up by Athena
+# Configure using environment variables set up by Athena.
+# CMAKE_PREFIX_PATH points at the EFTritonAlgsPipelines install prefix from step 2.
 cmake -S . -B build \
   -DCMAKE_BUILD_TYPE=Release \
   -DCMAKE_INSTALL_PREFIX="$PWD/install" \
-  -DTRITON_ROOT=/opt/triton-sdk/r23.04
+  -DTRITON_ROOT=/opt/triton-sdk/r23.04 \
+  -DCMAKE_PREFIX_PATH="$PWD/../../EFTritonAlgsPipelines/install"
 
 # Compile and Install
 cmake --build build --target install -j"$(nproc)"
 ```
 
-Compilation places the required `libtriton_traccc.so` library and the model configuration (`config.pbtxt`) into `$PWD/install/model_repository`.
+Compilation places the required `libtriton_traccc.so` library into `$PWD/install/backends/traccc` and the model configuration (`config.pbtxt`) into `$PWD/install/model_repository/traccc_g200`, alongside an empty version directory `1/`.
+
+The layout Triton expects is therefore:
+
+```
+install/
+├── backends/
+│   └── traccc/                  # directory name == `backend: "traccc"` in config.pbtxt
+│       └── libtriton_traccc.so  # file name == libtriton_<backend>.so
+└── model_repository/
+    └── traccc_g200/
+        ├── config.pbtxt
+        └── 1/                   # empty: the backend, not a version artefact, holds the logic
+```
 
 ---
 
@@ -112,11 +137,16 @@ Once compiled, launch the Triton server and pass the path to the newly installed
 ```bash
 tritonserver \
   --model-repository="$PWD/install/model_repository" \
-  --load-model=traccc-g200 \
+  --backend-directory="$PWD/install/backends" \
   --log-verbose=1
 ```
 
-> **Note:** Add `--model-control-mode=explicit` if you intend to dynamically load or unload multiple models.
+> **Note:** `--backend-directory` is required. Without it Triton only searches its
+> built-in `/opt/tritonserver/backends` and will not find `libtriton_traccc.so`.
+
+> **Note:** To load or unload models dynamically, add
+> `--model-control-mode=explicit --load-model=traccc_g200`. `--load-model` is only
+> accepted in explicit mode; passing it on its own makes the server exit.
 
 ---
 
