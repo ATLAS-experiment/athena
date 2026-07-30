@@ -26,7 +26,8 @@ def AODFixCfg(flags):
 
     # #Add list of known AOD Fixes here:
     from egammaAlgs.egammaAODFixesConfig import egammaAODFixesCfg
-    listOfFixes=[egammaAODFixesCfg,]
+    from LArCellRec.EventInfoClearAlgConfig import EventVetoCearAlgCfg
+    listOfFixes=[egammaAODFixesCfg,EventVetoCearAlgCfg]
 
     for aodFix in listOfFixes:
         aodFixName=aodFix.__name__ 
