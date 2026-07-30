@@ -371,10 +371,10 @@ namespace MuonR4::SegmentFit{
                 const auto* sTgcB = static_cast<const xAOD::sTgcMeasurement*>(b->spacePoint()->primaryMeasurement());
                 if (sTgcA->channelType() == xAOD::sTgcMeasurement::sTgcChannelTypes::Pad &&
                     sTgcB->channelType() == xAOD::sTgcMeasurement::sTgcChannelTypes::Strip) {
-                    return chi2b > m_cfg.recoveryPull;
+                    return std::sqrt(chi2b) > m_cfg.recoveryPull;
                 } else if (sTgcB->channelType() == xAOD::sTgcMeasurement::sTgcChannelTypes::Pad &&
                            sTgcA->channelType() == xAOD::sTgcMeasurement::sTgcChannelTypes::Strip) {
-                    return chi2a < m_cfg.recoveryPull;
+                    return std::sqrt(chi2a) < m_cfg.recoveryPull;
                 }
             }
             return chi2a < chi2b;
@@ -425,7 +425,13 @@ namespace MuonR4::SegmentFit{
                     <<oldResult.nDoF<<" vs. new chi2: "<<redChi2New<<", nDoF: "<<newResult.nDoF
                     <<" -- outlier removal: "<<m_cfg.outlierRemovalCut);
         if (newResult.nDoF == oldResult.nDoF) {
-            return redChi2New < redChi2Old;
+            //check the number of precision hits
+            const auto newPrecisionHits = countPrecHits(newResult.measurements);
+            const auto oldPrecisionHits = countPrecHits(oldResult.measurements);
+            ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<" Compare results -- old precHits: "<<oldPrecisionHits
+                        <<" vs. new precHits: "<<newPrecisionHits);
+            bool isbetter= (newPrecisionHits > oldPrecisionHits && redChi2New < m_cfg.outlierRemovalCut) || (redChi2New < redChi2Old);
+            return isbetter;
         }
         return (redChi2New < m_cfg.outlierRemovalCut && newResult.nDoF > oldResult.nDoF) ||
                (redChi2New > m_cfg.outlierRemovalCut && redChi2New < redChi2Old);
