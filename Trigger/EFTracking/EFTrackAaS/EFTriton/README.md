@@ -62,8 +62,9 @@ Use this option if you are deploying inside an isolated container image.
 
 The pipeline wrappers feed GPU algorithms into the backend. They live under `EFTritonAlgsPipelines/`, and are header-only: they resolve `traccc`, `detray`, `vecmem`, `covfie` and CUDA from the Athena environment sourced in step 1.
 
-Build this **before** the backend — `EFTritonRunner` consumes the installed
-`EFTritonPipelines::pipelines` CMake target via `find_package()`.
+This step is **optional** for building the backend. Because the wrappers are header-only,
+`EFTritonRunner` reads them straight out of this source tree; it does not need them
+installed. Build here when you want the `TracccG200Standalone` test driver below.
 
 ```bash
 cd EFTritonAlgsPipelines
@@ -91,7 +92,7 @@ To test the G200 standalone executable independently with a sample event:
 
 ## 3. Build the Triton Backend (`EFTritonRunner`)
 
-The backend source code (`src/traccc_g200.cc`) wraps the GPU pipeline and links against the Triton Server SDK plus `EFTritonPipelines::pipelines` from step 2, which propagates `traccc`, `covfie`, `vecmem`, `detray` and CUDA.
+The backend source code (`src/traccc_g200.cc`) wraps the GPU pipeline and links against the Triton Server SDK plus the `traccc`, `covfie`, `vecmem`, `detray` and CUDA libraries resolved from the Athena environment. The pipeline headers are picked up from `../../EFTritonAlgsPipelines`; override with `-DEFTRITON_PIPELINES_DIR=<dir>` if your checkout differs.
 
 Navigate to `EFTritonRunner/G200` to compile and install the model and library:
 
@@ -102,12 +103,10 @@ cd EFTritonRunner/G200
 rm -rf build install
 
 # Configure using environment variables set up by Athena.
-# CMAKE_PREFIX_PATH points at the EFTritonAlgsPipelines install prefix from step 2.
 cmake -S . -B build \
   -DCMAKE_BUILD_TYPE=Release \
   -DCMAKE_INSTALL_PREFIX="$PWD/install" \
-  -DTRITON_ROOT=/opt/triton-sdk/r23.04 \
-  -DCMAKE_PREFIX_PATH="$PWD/../../EFTritonAlgsPipelines/install"
+  -DTRITON_ROOT=/opt/triton-sdk/r23.04
 
 # Compile and Install
 cmake --build build --target install -j"$(nproc)"

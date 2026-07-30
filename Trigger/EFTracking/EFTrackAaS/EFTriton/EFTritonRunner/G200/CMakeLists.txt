@@ -72,10 +72,29 @@ find_package(TritonBackend CONFIG REQUIRED)
 
 find_package(covfie CONFIG REQUIRED)
 find_package(traccc CONFIG REQUIRED)
+find_package(CUDAToolkit REQUIRED)
 
-# Header-only GPU pipeline wrappers, built and installed from EFTritonAlgsPipelines.
-# Configure with -DCMAKE_PREFIX_PATH=<EFTritonAlgsPipelines install prefix>.
-find_package(EFTritonPipelines CONFIG REQUIRED)
+#
+# GPU pipeline wrappers
+#
+# The wrappers under EFTritonAlgsPipelines/EFTritonPipelines/ are header-only, so they
+# are consumed straight from the source tree rather than through an installed
+# EFTritonPipelines package. That keeps this project buildable on its own, without
+# having to configure, build and install EFTritonAlgsPipelines first.
+set(
+  EFTRITON_PIPELINES_DIR
+  "${CMAKE_CURRENT_SOURCE_DIR}/../../EFTritonAlgsPipelines"
+  CACHE PATH
+  "Directory containing the EFTritonPipelines/ header tree"
+)
+
+if(NOT EXISTS "${EFTRITON_PIPELINES_DIR}/EFTritonPipelines/TracccG200Standalone.hpp")
+  message(
+    FATAL_ERROR
+    "Pipeline headers not found under '${EFTRITON_PIPELINES_DIR}'. "
+    "Point -DEFTRITON_PIPELINES_DIR at the EFTritonAlgsPipelines directory."
+  )
+endif()
 
 #
 # Backend library
@@ -108,6 +127,14 @@ target_include_directories(
   triton-traccc-backend
   PRIVATE
     "${CMAKE_CURRENT_SOURCE_DIR}/src"
+    "${EFTRITON_PIPELINES_DIR}"
+)
+
+# Required by the algebra-plugins headers pulled in transitively by detray/traccc.
+target_compile_definitions(
+  triton-traccc-backend
+  PRIVATE
+  ALGEBRA_PLUGINS_INCLUDE_ARRAY
 )
 
 target_compile_options(
@@ -131,9 +158,19 @@ target_link_libraries(
     TritonCore::triton-core-serverstub
     TritonBackend::triton-backend-utils
 
-    # GPU pipeline headers; propagates the Athena/LCG traccc, detray, vecmem and CUDA
-    # dependencies plus ALGEBRA_PLUGINS_INCLUDE_ARRAY
-    EFTritonPipelines::pipelines
+    # Athena/LCG traccc stack, as required by the pipeline headers
+    vecmem::core
+    vecmem::cuda
+    traccc::io
+    traccc::core
+    traccc::device_common
+    traccc::cuda
+    traccc::cuda_utils
+    detray::io
+    detray::core
+
+    # <cuda_runtime_api.h> is included directly by src/traccc_g200.cc
+    CUDA::cudart
 )
 
 set_target_properties(
