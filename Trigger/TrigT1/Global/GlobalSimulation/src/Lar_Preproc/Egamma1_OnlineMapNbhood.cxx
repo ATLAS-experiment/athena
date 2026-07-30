@@ -443,7 +443,7 @@ namespace GlobalSim {
 	}
       } else {
 	//If we are not at the edge, and were not previously at the edge. Then...
-	if(std::abs(etaMax) < 2.475 && hashIdNext != hashIdDummy){
+	if(std::abs(etaMax) < 2.47 && hashIdNext != hashIdDummy){
 	  //Use the previous hashIDNext to look for the next cell in eta
 	  m_larem_id->get_neighbours(hashIdNext,LArNeighbours::nextInEta,neighbourList);
 	  ATH_MSG_DEBUG("Next in eta " << neighbourList[0] << " HashId " << hashId);
