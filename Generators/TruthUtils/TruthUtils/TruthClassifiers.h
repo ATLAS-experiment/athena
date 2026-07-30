@@ -112,7 +112,7 @@ inline ParticleType defTypeOfTau(ParticleOrigin TauOrig) {
 }
 
 
-inline ParticleType defTypeOfPhoton(ParticleOrigin PhotOrig) 
+inline ParticleType defTypeOfPhoton(ParticleOrigin PhotOrig)
 {
   if (PhotOrig == NonDefined) return UnknownPhoton;
 
@@ -147,8 +147,7 @@ template <class T> ParticleOrigin defJetOrig(const T& allJetMothers) {
 }
   enum MCTC_bits : unsigned int { HadTau=0, Tau, hadron, frombsm, uncat, isbsm, isgeant, stable, totalBits };
 
-template <class T>
-std::tuple<unsigned int, T> defOrigOfParticle(T thePart) {
+template <class T> std::tuple<unsigned int, T> defOrigOfParticle(T thePart) {
 
   T parent_hadron_ptr = nullptr;
 
@@ -160,7 +159,7 @@ std::tuple<unsigned int, T> defOrigOfParticle(T thePart) {
 
   auto prodVtx = thePart->production_vertex();
   if (isPhysical && prodVtx && !isGeant) {
-    fromHad = MC::isFromHadron(thePart, parent_hadron_ptr, fromTau, fromBSM); 
+    fromHad = MC::isFromHadron(thePart, parent_hadron_ptr, fromTau, fromBSM);
   }
   else  uncat = 1;
 
@@ -177,7 +176,8 @@ std::tuple<unsigned int, T> defOrigOfParticle(T thePart) {
 
   return std::make_tuple(outputvalue,parent_hadron_ptr);
 }
- inline int isPrompt(const unsigned int classify, bool allow_prompt_tau_decays = true) {
+
+inline int isPrompt(const unsigned int classify, bool allow_prompt_tau_decays = true) {
     std::bitset<MCTC_bits::totalBits> res(classify);
     if (res.test(MCTC_bits::uncat)) return -1;
     bool fromPromptTau = res.test(MCTC_bits::Tau) && !res.test(MCTC_bits::HadTau);
@@ -185,8 +185,7 @@ std::tuple<unsigned int, T> defOrigOfParticle(T thePart) {
     return !res.test(MCTC_bits::hadron);
   }
 
-template <class T> 
-ParticleOutCome defOutComeOfElectron(T thePart) {
+template <class T> ParticleOutCome defOutComeOfElectron(T thePart) {
   ParticleOutCome PartOutCome = UnknownOutCome;
   auto EndVert = MC::findSimulatedEndVertex(thePart);
   if (EndVert == nullptr) return NonInteract;
@@ -209,8 +208,8 @@ ParticleOutCome defOutComeOfElectron(T thePart) {
 
   return PartOutCome;
 }
-template <class T> 
-ParticleOutCome defOutComeOfMuon(T thePart) {
+
+template <class T> ParticleOutCome defOutComeOfMuon(T thePart) {
   ParticleOutCome PartOutCome = UnknownOutCome;
   auto EndVert = MC::findSimulatedEndVertex(thePart);
   if (EndVert == nullptr) return NonInteract;
@@ -236,8 +235,7 @@ ParticleOutCome defOutComeOfMuon(T thePart) {
 
   return PartOutCome;
 }
-template <class T> 
-ParticleOutCome defOutComeOfTau(T thePart) {
+template <class T> ParticleOutCome defOutComeOfTau(T thePart) {
   ParticleOutCome PartOutCome = UnknownOutCome;
   auto EndVert = MC::findSimulatedEndVertex(thePart);
   if (EndVert == nullptr) return NonInteract;
@@ -264,8 +262,8 @@ ParticleOutCome defOutComeOfTau(T thePart) {
 
   return PartOutCome;
 }
-template <class T> 
-ParticleOutCome defOutComeOfPhoton(T thePart) {
+
+template <class T> ParticleOutCome defOutComeOfPhoton(T thePart) {
   ParticleOutCome PartOutCome = UnknownOutCome;
   auto EndVert = MC::findSimulatedEndVertex(thePart);
   if (EndVert == nullptr) return UnConverted;
@@ -283,7 +281,7 @@ ParticleOutCome defOutComeOfPhoton(T thePart) {
     if (EndDaugType > 1000000000 || EndDaugType == 0 || abs(EndDaugType) == 2212 || abs(EndDaugType) == 2112) PhtOutNumOfNucFr++;
     if (EndDaugType == 11)  PhtOutNumOfEl++;
     if (EndDaugType == -11) PhtOutNumOfPos++;
-    if (MC::isHadron(p)&& !MC::isBeam(p) ) PhtOutNumOfHadr++;
+    if (MC::isHadron(p) && !MC::isBeam(p)) PhtOutNumOfHadr++;
   }
 
   if (PhtOutNumOfEl == 1 && PhtOutNumOfPos == 1 && NumOfPhtDaug == 2) PartOutCome = Converted;
@@ -291,8 +289,6 @@ ParticleOutCome defOutComeOfPhoton(T thePart) {
 
   return PartOutCome;
 }
-
-
 
 }
 #endif
