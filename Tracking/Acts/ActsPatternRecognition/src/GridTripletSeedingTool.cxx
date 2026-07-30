@@ -7,6 +7,8 @@
 #include <cmath>
 #include <cstdint>
 #include <numbers>
+#include <span>
+#include <string_view>
 #include <vector>
 
 namespace ActsTrk {
@@ -139,52 +141,87 @@ StatusCode GridTripletSeedingTool::initialize() {
   // Make the logger && Propagate to ACTS routines
   m_logger = makeActsAthenaLogger(this, "Acts");
 
-  if (m_zBinEdges.size() - 1 != m_zBinNeighborsTop.size() &&
-      not m_zBinNeighborsTop.empty()) {
-    ATH_MSG_ERROR("Inconsistent config zBinNeighborsTop");
+  // Both edge vectors define the bins of the corresponding grid axis, so n
+  // edges give n-1 bins. Guard against an empty vector before subtracting, the
+  // sizes are unsigned.
+  if (m_zBinEdges.size() < 2 || m_rBinEdges.size() < 2) {
+    ATH_MSG_ERROR("zBinEdges and rBinEdges must each contain at least two "
+                  "edges, got "
+                  << m_zBinEdges.size() << " and " << m_rBinEdges.size());
     return StatusCode::FAILURE;
   }
+  const std::size_t nZBins = m_zBinEdges.size() - 1;
+  const std::size_t nRBins = m_rBinEdges.size() - 1;
 
-  if (m_zBinEdges.size() - 1 != m_zBinNeighborsBottom.size() &&
-      not m_zBinNeighborsBottom.empty()) {
-    ATH_MSG_ERROR("Inconsistent config zBinNeighborsBottom");
-    return StatusCode::FAILURE;
-  }
-
-  if (m_rBinEdges.size() - 1 != m_rBinNeighborsTop.size() &&
-      not m_rBinNeighborsTop.empty()) {
-    ATH_MSG_ERROR("Inconsistent config rBinNeighborsTop");
-    return StatusCode::FAILURE;
-  }
-
-  if (m_rBinEdges.size() - 1 != m_rBinNeighborsBottom.size() &&
-      not m_rBinNeighborsBottom.empty()) {
-    ATH_MSG_ERROR("Inconsistent config rBinNeighborsBottom");
-    return StatusCode::FAILURE;
-  }
-
-  if (m_zBinsCustomLooping.size() != 0) {
-    // zBinsCustomLooping can contain a number of elements <= to the total
-    // number of bin in zBinEdges
-    for (std::size_t i : m_zBinsCustomLooping) {
-      if (i >= m_zBinEdges.size()) {
-        ATH_MSG_ERROR(
-            "Inconsistent config zBinsCustomLooping contains bins that are not "
-            "in zBinEdges");
-        return StatusCode::FAILURE;
-      }
+  // The neighbour vectors hold one entry per bin and are indexed 0-based by
+  // Acts::GridBinFinder. An empty vector means "one neighbour on each side".
+  auto checkNeighbors = [this](std::string_view name,
+                               std::span<const std::pair<int, int>> values,
+                               std::size_t nBins) {
+    if (values.empty() || values.size() == nBins) {
+      return true;
     }
+    ATH_MSG_ERROR("Inconsistent config " << name << ": got " << values.size()
+                                         << " entries but the grid has "
+                                         << nBins << " bins");
+    return false;
+  };
+
+  if (!checkNeighbors("zBinNeighborsTop", m_zBinNeighborsTop.value(), nZBins) ||
+      !checkNeighbors("zBinNeighborsBottom", m_zBinNeighborsBottom.value(),
+                      nZBins) ||
+      !checkNeighbors("rBinNeighborsTop", m_rBinNeighborsTop.value(), nRBins) ||
+      !checkNeighbors("rBinNeighborsBottom", m_rBinNeighborsBottom.value(),
+                      nRBins)) {
+    return StatusCode::FAILURE;
   }
 
-  if (m_rBinsCustomLooping.size() != 0) {
-    for (std::size_t i : m_rBinsCustomLooping) {
-      if (i >= m_rBinEdges.size()) {
-        ATH_MSG_ERROR(
-            "Inconsistent config rBinsCustomLooping contains bins that are not "
-            "in rBinEdges");
-        return StatusCode::FAILURE;
+  // The custom looping vectors are the Acts::BinnedGroup navigation and use
+  // the 1-based local bin numbering of the grid axis: valid entries run from 1
+  // to the number of bins. Bin 0 is the underflow bin, which never holds a
+  // space point, so listing it would silently drop an entry from the loop. A
+  // vector may list a subset of the bins in order to skip the remaining ones,
+  // but must not repeat a bin. An empty vector means all bins in their natural
+  // order.
+  auto checkLooping = [this](std::string_view name,
+                             std::span<const std::size_t> bins,
+                             std::size_t nBins) {
+    std::vector<bool> visited(nBins + 1, false);
+    for (std::size_t i : bins) {
+      if (i == 0 || i > nBins) {
+        ATH_MSG_ERROR("Inconsistent config "
+                      << name << ": bin " << i
+                      << " is out of range, the numbering is 1-based and the "
+                         "grid has "
+                      << nBins << " bins (valid entries are 1.." << nBins
+                      << ")");
+        return false;
       }
+      if (visited[i]) {
+        ATH_MSG_ERROR("Inconsistent config " << name << ": bin " << i
+                                             << " is listed more than once");
+        return false;
+      }
+      visited[i] = true;
     }
+    return true;
+  };
+
+  if (!checkLooping("zBinsCustomLooping", m_zBinsCustomLooping.value(),
+                    nZBins) ||
+      !checkLooping("rBinsCustomLooping", m_rBinsCustomLooping.value(),
+                    nRBins)) {
+    return StatusCode::FAILURE;
+  }
+
+  // rRangeMiddleSP is indexed 0-based by z bin in retrieveRadiusRangeForMiddle,
+  // so it needs exactly one entry per z bin. It is only read when the variable
+  // middle range is disabled.
+  if (!m_useVariableMiddleSPRange && m_rRangeMiddleSP.size() != nZBins) {
+    ATH_MSG_ERROR("Inconsistent config rRangeMiddleSP: got "
+                  << m_rRangeMiddleSP.size()
+                  << " entries but the grid has " << nZBins << " z bins");
+    return StatusCode::FAILURE;
   }
 
   m_gridCfg.minPt = m_minPt;

@@ -149,9 +149,18 @@ class GridTripletSeedingTool
       this,
       "zBinsCustomLooping",
       {2, 3, 4, 5, 12, 11, 10, 9, 7, 6, 8},
-      "defines order of z bins for looping"};
+      "defines order of z bins for looping; entries are 1-based local bin "
+      "indices, i.e. within 1..(zBinEdges.size()-1), and must not repeat. "
+      "Listing a subset skips the remaining bins, empty means all bins in "
+      "their natural order"};
   Gaudi::Property<std::vector<std::size_t>> m_rBinsCustomLooping{
-      this, "rBinsCustomLooping", {1}, "defines order of r bins for looping"};
+      this,
+      "rBinsCustomLooping",
+      {},
+      "defines order of r bins for looping; entries are 1-based local bin "
+      "indices, i.e. within 1..(rBinEdges.size()-1), and must not repeat. "
+      "Listing a subset skips the remaining bins, empty means all bins in "
+      "their natural order"};
   Gaudi::Property<bool> m_useVariableMiddleSPRange{
       this, "useVariableMiddleSPRange", true,
       "Enable variable range to search for middle SPs"};
