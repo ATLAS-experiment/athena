@@ -195,11 +195,9 @@ def signatureTrigTrackingFlags(mode : str) -> AthConfigFlags:
     "bjet"          : bjet,
     
     "fullScan"      : fullScan,
-    "FS"            : fullScan,
     "jetSuper"      : jetSuper,
 
     "beamSpot"      : beamSpot,
-    "BeamSpot"      : beamSpot,
     "beamSpotFS"    : beamSpotFS,
                 
     "cosmics"      : cosmics,
@@ -905,12 +903,12 @@ def collToRecordable(flags,name):
   record = True
   if firstStage:
     if signature in ["tauHitsHitZ","minBias","minBiasPixel","bjetLRT",
-                     "beamSpot","BeamSpot"]:
+                     "beamSpot"]:
       record = False
   else:
     if signature in ["tauHitsHitZ","tauCore","tauCoreHitZ","tauIso","tauIsoHitZ","tauIsoBDT",
-                     "jet","fullScan","FS","jetSuper","bhh",
-                     "beamSpot", "BeamSpot","beamSpotFS",
+                     "jet","fullScan","jetSuper","bhh",
+                     "beamSpot","beamSpotFS",
                      "bjetLRT","DJetLRT","DVtxLRT"]:
       record = False
 
