@@ -1,3 +1,7 @@
+/*
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
+*/
+
 #include <memory>
 #include <fstream>
 #include <sstream>
@@ -683,22 +687,18 @@ StatusCode TritonTracccTrackMaker::convertTracks(
     }
 
     // Debug stats
-    float chi2_sum = 0.;
     float chi2_min = std::numeric_limits<float>::max();
     float chi2_max = std::numeric_limits<float>::min();
 
-    float ndf_sum = 0.;
     float ndf_min = std::numeric_limits<float>::max();
     float ndf_max = std::numeric_limits<float>::min();
 
-    unsigned meas_sum = 0.;
     unsigned meas_min = std::numeric_limits<unsigned>::max();
     unsigned meas_max = std::numeric_limits<unsigned>::min();
 
     int excluded_ndf = 0;
     int excluded_no_sp = 0;
     int excluded_weird_state = 0;
-    int excluded_weird_global_params = 0;
 
     for (std::size_t i = 0; i < trackParams.size(); i++) {
         auto fit_res = trackParams.at(i);
@@ -861,19 +861,15 @@ StatusCode TritonTracccTrackMaker::convertTracks(
         } else if (track_validity == INVALID_GLOBAL) {
             ATH_MSG_INFO("excluding track " << i
                                              << " for weird global params");
-            excluded_weird_global_params += 1;
             track_container.removeTrack(actsTrack.index());
         }
 
 
         // Debug stats
-        chi2_sum += fit_res.chi2;
         chi2_min = std::min(fit_res.chi2, chi2_min);
         chi2_max = std::max(fit_res.chi2, chi2_max);
-        ndf_sum += fit_res.ndf;
         ndf_min = std::min(fit_res.ndf, ndf_min);
         ndf_max = std::max(fit_res.ndf, ndf_max);
-        meas_sum += states.local_x.size();
         meas_min = std::min<unsigned>(states.local_x.size(), meas_min);
         meas_max = std::max<unsigned>(states.local_x.size(), meas_max);
     }
