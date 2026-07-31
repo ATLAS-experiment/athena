@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArCalibTools/LArParamsFromStdNtuple.h"
@@ -20,23 +20,8 @@
 #include <string>
 
 
-LArParamsFromStdNtuple::LArParamsFromStdNtuple (const std::string& name, ISvcLocator* pSvcLocator) : AthAlgorithm(name, pSvcLocator)
-{  
-  declareProperty("FileNames", m_root_file_names);
-  declareProperty("NtupleName", m_ntuple_name="PARAMS");
-  declareProperty("StoreKey_Cali", m_store_key_cali="FromStdNtuple");
-  declareProperty("StoreKey_Det", m_store_key_det="FromStdNtuple");
-  declareProperty("GroupingType", m_groupingType="FeedThrough");
-}
-
 LArParamsFromStdNtuple::~LArParamsFromStdNtuple() 
 = default;
-
-StatusCode LArParamsFromStdNtuple::initialize() 
-{
-  return StatusCode::SUCCESS ;
-}
-
 
 StatusCode LArParamsFromStdNtuple::stop()
 {
@@ -46,7 +31,7 @@ StatusCode LArParamsFromStdNtuple::stop()
   const LArOnlineID* onlineHelper = nullptr;
   ATH_CHECK( detStore()->retrieve(onlineHelper, "LArOnlineID") );
 
-  TChain* outfit = new TChain(m_ntuple_name.c_str());
+  TChain* outfit = new TChain(m_ntuple_name.value().c_str());
   for (const std::string& s : m_root_file_names) {
     outfit->Add(s.c_str());
   }
@@ -113,6 +98,6 @@ StatusCode LArParamsFromStdNtuple::stop()
   ATH_CHECK( detStore()->record(std::move(larCaliPulseParams),m_store_key_cali) );
   ATH_CHECK( detStore()->record(std::move(larDetCellParams),m_store_key_det) );
 
-  ATH_MSG_INFO ( "LArParamsFromStdNtuple finalized!" );
+  ATH_MSG_INFO ( "LArParamsFromStdNtuple stopped!" );
   return StatusCode::SUCCESS;
 }

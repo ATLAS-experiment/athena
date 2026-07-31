@@ -15,8 +15,6 @@
 #include <fstream>
 #include <memory>
 
-LArPhysWaveFromAscii::LArPhysWaveFromAscii(const std::string & name, ISvcLocator * pSvcLocator):AthAlgorithm(name, pSvcLocator) {};
-
 LArPhysWaveFromAscii::~LArPhysWaveFromAscii()= default;
 
 StatusCode LArPhysWaveFromAscii::stop()

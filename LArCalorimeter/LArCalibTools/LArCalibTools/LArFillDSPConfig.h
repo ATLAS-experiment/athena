@@ -9,37 +9,35 @@
 #define LARCALIBTOOLS_LARFILLDSPCONFIG_H
 
 #include <string>
-#include "AthenaBaseComps/AthAlgorithm.h"
+#include "AthenaBaseComps/AthReentrantAlgorithm.h"
 #include "GaudiKernel/ToolHandle.h"
 
 class LArOnlineID;
 
-class LArFillDSPConfig: public AthAlgorithm
+class LArFillDSPConfig: public AthReentrantAlgorithm
 { 
 
   /////////////////////////////////////////////////////////////////// 
   // Public methods: 
   /////////////////////////////////////////////////////////////////// 
- public: 
-  /// Constructor with parameters: 
-  LArFillDSPConfig( const std::string& name, ISvcLocator* pSvcLocator );
+ public:
+  using AthReentrantAlgorithm::AthReentrantAlgorithm;
 
   /// Destructor: 
   virtual ~LArFillDSPConfig(); 
 
   // Athena algorithm's Hooks
-  virtual StatusCode  initialize() override;
-  virtual StatusCode  execute(const EventContext&) override {return StatusCode::SUCCESS;}
+  virtual StatusCode  execute(const EventContext&) const override {return StatusCode::SUCCESS;}
   virtual StatusCode  stop() override;
 
  private: 
   /// Default constructor: 
-  LArFillDSPConfig();
-  const LArOnlineID* m_onlineID;
+  LArFillDSPConfig() = delete;
+  const LArOnlineID* m_onlineID = nullptr;
 
-  std::string m_folderName;
-  bool m_dump;
-  bool m_lowmu;
+  StringProperty m_folderName { this, "Foldername", "/LAR/Configuraton/DSPConfiguration" };
+  BooleanProperty m_dump  { this, "Dump", true };
+  BooleanProperty m_lowmu { this, "isLowMu", false };
 }; 
 
 #endif 
