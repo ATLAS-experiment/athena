@@ -62,6 +62,12 @@ namespace MuonR4::SegmentFit{
                             return a->type() == xAOD::UncalibMeasType::Other;
                         }), hits.end());
         }
+        inline HitVec_t copyAndSort(HitVec_t hits) {
+            std::ranges::sort(hits,  [](const Hit_t& a, const Hit_t& b){
+                return a->localPosition().z() < b->localPosition().z(); 
+            });
+            return hits;
+        }
     } 
     SegmentLineFitter::Config::RangeArray 
         SegmentLineFitter::Config::defaultRanges() {
@@ -206,7 +212,7 @@ namespace MuonR4::SegmentFit{
             m_cfg.visionTool->visualizeSegment(ctx, *seedCopy, "Intermediate fit"); 
         }
         if (!removeOutliers(cctx, *parent, localToGlobal,
-                            segFit.converged? segFit.parameters : startPars,
+                            segFit.converged ? segFit.parameters : startPars,
                             segFit)) {
             return nullptr;
         }          
@@ -350,17 +356,23 @@ namespace MuonR4::SegmentFit{
         const SpacePointPerLayerSorter sorter{};
         /// We need to sort out strip hits on the same layer
         std::ranges::sort(hits, [&](const Hit_t&a ,const Hit_t& b){
+            // move the straws to the end of the vector
             if (a->isStraw() || b->isStraw()) {
                 return !a->isStraw();
             }
+            // move the beam spot to the end of the vector
             if (a->type() == xAOD::UncalibMeasType::Other || 
                 b->type() == xAOD::UncalibMeasType::Other) {
                 return a->type() != xAOD::UncalibMeasType::Other;
             }
+            // sort the strips by layer
             const unsigned lay_a = sorter.sectorLayerNum(*a->spacePoint());
             const unsigned lay_b = sorter.sectorLayerNum(*b->spacePoint());
             if (lay_a != lay_b) {
                 return lay_a < lay_b;
+            }
+            if (a->fitState() != b->fitState()) {
+                return a->fitState() == HitState::Valid;
             }
             const double chi2a = a->chi2Term();
             const double chi2b = b->chi2Term();
@@ -384,19 +396,21 @@ namespace MuonR4::SegmentFit{
         /// Loop over the hits to mark the less compatible hits on the layer as outlier
         for (HitVec_t::iterator itr = hits.begin(); itr != hits.end(); ++itr) {
             const Hit_t& hit_a{*itr};
-            if (hit_a->isStraw()){
+            // Straws and the beamspot are after all the strips have been passed
+            if (hit_a->isStraw() || hit_a->type() == xAOD::UncalibMeasType::Other) {
                 break;
             }
-            if(hit_a->fitState() == HitState::Duplicate || 
-               hit_a->type() == xAOD::UncalibMeasType::Other) {
+            if(hit_a->fitState() == HitState::Duplicate) {
                 continue;
             }
             const unsigned lay_a = sorter.sectorLayerNum(*hit_a->spacePoint());
             ///
             for (HitVec_t::iterator itr2 = itr + 1; itr2 != hits.end(); ++itr2) {
                 const Hit_t& hit_b{*itr2};
-                if (hit_b->type() == xAOD::UncalibMeasType::Other ||
-                    hit_b->fitState() == HitState::Duplicate) {
+                if (hit_b->type() == xAOD::UncalibMeasType::Other || hit_b->isStraw()) {
+                    break;
+                }
+                if (hit_b->fitState() == HitState::Duplicate) {
                     continue;
                 }
                 if (lay_a != sorter.sectorLayerNum(*hit_b->spacePoint())) {
@@ -421,17 +435,17 @@ namespace MuonR4::SegmentFit{
         }
         const double redChi2New = calcRedChi2(newResult);
         const double redChi2Old = calcRedChi2(oldResult);
-        ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<" Compare results -- old chi2: "<<redChi2Old<<", nDoF: "
+        ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<" - Compare results -- old chi2: "<<redChi2Old<<", nDoF: "
                     <<oldResult.nDoF<<" vs. new chi2: "<<redChi2New<<", nDoF: "<<newResult.nDoF
                     <<" -- outlier removal: "<<m_cfg.outlierRemovalCut);
         if (newResult.nDoF == oldResult.nDoF) {
             //check the number of precision hits
-            const auto newPrecisionHits = countPrecHits(newResult.measurements);
-            const auto oldPrecisionHits = countPrecHits(oldResult.measurements);
+            const std::size_t newPrecisionHits = countPrecHits(newResult.measurements);
+            const std::size_t oldPrecisionHits = countPrecHits(oldResult.measurements);
             ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<" Compare results -- old precHits: "<<oldPrecisionHits
                         <<" vs. new precHits: "<<newPrecisionHits);
-            bool isbetter= (newPrecisionHits > oldPrecisionHits && redChi2New < m_cfg.outlierRemovalCut) || (redChi2New < redChi2Old);
-            return isbetter;
+            return (newPrecisionHits > oldPrecisionHits && redChi2New < m_cfg.outlierRemovalCut) ||
+                   redChi2New < redChi2Old;
         }
         return (redChi2New < m_cfg.outlierRemovalCut && newResult.nDoF > oldResult.nDoF) ||
                (redChi2New > m_cfg.outlierRemovalCut && redChi2New < redChi2Old);
@@ -441,28 +455,28 @@ namespace MuonR4::SegmentFit{
                                       const Amg::Transform3D& localToGlobal,
                                       Result_t& toRecover) const {
         /** We've the first estimator of the segment fit */
-        ATH_MSG_VERBOSE(__func__<<"() - "<<__LINE__ <<": segment "<<toString(toRecover.parameters)
-                        <<", chi2: "<< calcRedChi2(toRecover) <<", nDoF: "<<toRecover.nDoF);
+        ATH_MSG_DEBUG(__func__<<"() - "<<__LINE__ <<": segment "<<toString(toRecover.parameters)
+                        <<", chi2: "<< calcRedChi2(toRecover) <<", nDoF: "<<toRecover.nDoF
+                        <<std::endl<<print(copyAndSort(toRecover.measurements)));
         /** Setup a map to replace space points if they better suite */
-        
- 
-        std::unordered_set<const SpacePoint*> usedSpacePoints{};
+        std::vector<const SpacePoint*> usedSpacePoints{};
+        usedSpacePoints.reserve(toRecover.measurements.size());
         for (auto& hit : toRecover.measurements) {
             ATH_MSG_VERBOSE(__func__<<"() - "<<__LINE__ <<": "<<(*hit)<<" is known");
-            usedSpacePoints.insert(hit->spacePoint());
+            usedSpacePoints.push_back(hit->spacePoint());
         }
-        /** */
+
         const EventContext& ctx{*cctx.get<const EventContext*>()};
         
         const double timeOff = toRecover.parameters[toUnderlying(ParamDefs::t0)];
         HitVec_t candidateHits{};
-        std::size_t hasCandidate{0};
+        std::size_t recovCandidates{0};
         const auto [locPos, locDir] = makeLine(toRecover.parameters);
 
          /// Loop over all hits in the parent bucket
         for (const auto& hit : *seed.parentBucket()){            
             /// Hit already used in the segment fit
-            if (usedSpacePoints.count(hit.get())){ 
+            if (Acts::rangeContainsValue(usedSpacePoints, hit.get())) { 
                 continue;
             }
             Hit_t calibHit{};
@@ -484,7 +498,7 @@ namespace MuonR4::SegmentFit{
                     continue;
                 }
                 /// Use the pull of the uncalibrated measurement to estimate whether 
-                ///  a calibration is actually worth
+                /// a calibration is actually worth
                 pull = std::sqrt(SeedingAux::chi2Term(locPos, locDir, *hit));
                 if (pull > 1.1 * m_cfg.recoveryPull) {
                     continue;
@@ -493,7 +507,7 @@ namespace MuonR4::SegmentFit{
             calibHit = m_cfg.calibrator->calibrate(ctx, hit.get(), locPos, locDir, ActsTrk::timeToActs(timeOff));
             calibHit->setChi2Term(SeedingAux::chi2Term(locPos, locDir, *calibHit));
             if (calibHit->chi2Term() <= Acts::square(m_cfg.recoveryPull)) {
-                hasCandidate += calibHit->fitState() == HitState::Valid;
+                recovCandidates += calibHit->fitState() == HitState::Valid;
                 ATH_MSG_VERBOSE(__func__<<"() - "<<__LINE__<<": Candidate hit for recovery "
                             <<(*calibHit));
             } else {
@@ -504,7 +518,7 @@ namespace MuonR4::SegmentFit{
             candidateHits.push_back(std::move(calibHit));                
         }
         /** No extra hit has been found */
-        if (!hasCandidate) {
+        if (!recovCandidates) {
             ATH_MSG_VERBOSE(__func__<<"() - "<<__LINE__<<": No space point candidates for recovery were found");
             toRecover.measurements.insert(toRecover.measurements.end(), 
                                           std::make_move_iterator(candidateHits.begin()),
@@ -512,8 +526,7 @@ namespace MuonR4::SegmentFit{
             eraseWrongHits(toRecover);
             return toRecover.nDoF > 0;
         }
-        ATH_MSG_VERBOSE(__func__<<"() - "<<__LINE__<<": Found "<<hasCandidate<<" space points for recovery. ");
-
+        ATH_MSG_VERBOSE(__func__<<"() - "<<__LINE__<<": Found "<<recovCandidates<<" space points for recovery. ");
 
         HitVec_t hitsForRecovery = toRecover.measurements;
         /// Remove the beamspot constraint measurement
@@ -521,9 +534,7 @@ namespace MuonR4::SegmentFit{
             removeBeamSpot(hitsForRecovery);
         }
 
-        hitsForRecovery.insert(hitsForRecovery.end(), 
-                               candidateHits.begin(),
-                               candidateHits.end());
+        hitsForRecovery.insert(hitsForRecovery.end(), candidateHits.begin(), candidateHits.end());
 
         cleanStripLayers(hitsForRecovery);
 
@@ -541,8 +552,8 @@ namespace MuonR4::SegmentFit{
             std::vector<const CalibratedSpacePoint*> stripOutliers{};
             stripOutliers.reserve(toRecover.measurements.size());
             /** Next check whether the recovery made measurements marked 
-             *  as outlier feasable to the hole recovery*/
-            unsigned recovLoop{(candidateHits.size() != hasCandidate)*m_cfg.nRecoveryLoops};
+             *  as outlier are feasable to the hole recovery*/
+            unsigned recovLoop{(candidateHits.size() == recovCandidates)*m_cfg.nRecoveryLoops};
             while (++recovLoop <= m_cfg.nRecoveryLoops) {   
                 ATH_MSG_VERBOSE(__func__<<"() - "<<__LINE__<<": Enter recovery loop "<<recovLoop<<".");
                 hitsForRecovery = toRecover.measurements;
@@ -569,10 +580,10 @@ namespace MuonR4::SegmentFit{
                 // Ensure that only one hit per layer is fit
                 cleanStripLayers(hitsForRecovery);
                 // Recovery turned out to be duplicates on the same layer
-                if (std::ranges::none_of(stripOutliers,[](const CalibratedSpacePoint* sp){
+                if (std::ranges::none_of(stripOutliers,[](const CalibratedSpacePoint* sp) {
                         return sp->fitState() == HitState::Valid;
                     })) {
-                    ATH_MSG_VERBOSE(__func__<<"() - "<<__LINE__<<": Outliers turned out to be duplicates.");
+                    ATH_MSG_VERBOSE(__func__<<"() - "<<__LINE__<<": Outliers turned out to be all duplicates.");
                     break;
                 }
                 ATH_MSG_VERBOSE(__func__<<"() - "<<__LINE__<<": Start fit without the outliers.");
@@ -589,6 +600,8 @@ namespace MuonR4::SegmentFit{
                 hit->setFitState(HitState::Outlier);
                 toRecover.measurements.push_back(std::move(hit));
             }
+            ATH_MSG_VERBOSE(__func__<<"() - "<<__LINE__<<": Reject refitted segment. Append hits as outliers: "
+                    <<std::endl<<print(copyAndSort(toRecover.measurements)));
         }
         eraseWrongHits(toRecover);
         return true;

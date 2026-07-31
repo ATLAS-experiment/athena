@@ -65,7 +65,7 @@ namespace MuonR4::SegmentFit {
                 /** @brief Minimum number of precision hits */
                 unsigned nPrecHitCut{3u};
                 /** @brief Maximum trials to recover outliers */
-                unsigned nRecoveryLoops{10u};
+                unsigned nRecoveryLoops{2u};
             };
             /** @brief Full configuration object */           
             struct Config : public Fitter_t::Config,
