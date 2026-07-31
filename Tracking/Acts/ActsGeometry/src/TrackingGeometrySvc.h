@@ -20,6 +20,12 @@
 // ACTS
 #include "Acts/Geometry/CylinderVolumeBuilder.hpp"
 
+#ifdef ACTSGEOMETRY_HAVE_DETRAY
+#include <ActsPlugins/Detray/DetrayGeometryConverter.hpp>
+#include <detray/core/detector.hpp>
+#include <detray/detectors/default_metadata.hpp>
+#endif
+
 // STL
 #include <map>
 
@@ -53,6 +59,20 @@ class BlueprintNode;
 
 
 namespace ActsTrk{
+
+#ifdef ACTSGEOMETRY_HAVE_DETRAY
+/// @brief Detray metadata used when converting the Acts::TrackingGeometry into
+///        a Detray geometry. detray::itk_metadata (generated for the ATLAS ITk,
+///        see DETRAY_GENERATE_METADATA in the ACTS build) only supports
+///        grid-based material maps, not homogeneous surface material, so it
+///        cannot be instantiated with DetrayGeometryConverter::convert(), which
+///        unconditionally requires homogeneous material support. detray::default_metadata
+///        supports both, and every mask shape used across the ATLAS ITk
+///        (rectangle, trapezoid, annulus, straw tube).
+using DetrayMetadata = detray::default_metadata<detray::array<float>>;
+using DetrayDetector = detray::detector<DetrayMetadata>;
+#endif
+
 class TrackingGeometrySvc : public extends<AthService, ActsTrk::ITrackingGeometrySvc> {
 public:
 
@@ -70,9 +90,26 @@ public:
   const Acts::TrackingVolume* getEnvelope(const ActsTrk::SystemEnvelope envType) const override;
   /** @copydoc ActsTrk::ITrackingGeometrySvc::surfaceIdMap */
   virtual const ActsTrk::DetectorElementToActsGeometryIdMap* surfaceIdMap() const override;
+
+#ifdef ACTSGEOMETRY_HAVE_DETRAY
+  /** @brief Returns the Detray geometry converted from the Acts::TrackingGeometry,
+             or nullptr if none was built. The service stays the owner: the
+             geometry is released in finalize(), while the memory resource it
+             was allocated from is still around.
+             Only populated when the BuildDetrayGeometry property is enabled.
+             Only available in builds where ACTS was compiled with the Detray
+             plugin (Acts::PluginDetray). */
+  const DetrayDetector* detrayGeometry() const { return m_detrayGeometry.get(); }
+#endif
+
 private:
   /** @brief Creates and popules the DetectorElement -> Acts::Surface geo identifier map from the geometry service */
   std::unique_ptr<ActsTrk::DetectorElementToActsGeometryIdMap> createDetectorElementToGeoIdMap() const;
+
+#ifdef ACTSGEOMETRY_HAVE_DETRAY
+  /** @brief Converts the built Acts::TrackingGeometry into a Detray geometry and stores it in m_detrayGeometry */
+  StatusCode buildDetrayGeometry();
+#endif
 
 
   ActsLayerBuilder::Config
@@ -160,6 +197,10 @@ private:
   std::set<ActsTrk::DetectorType> m_subDetNoAlign{};
 
   Gaudi::Property<bool> m_useBlueprint{this, "UseBlueprint", false, "Use the new Blueprint API for geometry construction"};
+
+  Gaudi::Property<bool> m_buildDetrayGeometry{this, "BuildDetrayGeometry", false,
+      "Convert the constructed Acts::TrackingGeometry into a Detray geometry. "
+      "Requires ACTS to have been built with the Detray plugin (Acts::PluginDetray)."};
   
   Gaudi::Property<std::string> m_blueprintGraphviz{this, "BlueprintGraphviz", 
                                                    "", "Write the blueprint graph to a file. No file will be written if empty"};
@@ -174,6 +215,10 @@ private:
   Gaudi::Property<double> m_numberOfInnermostLayerBinsFactor{this, "NumberOfInnermostLayerBinsFactor",2.0};
   
   std::unique_ptr<const ActsTrk::DetectorElementToActsGeometryIdMap> m_detIdMap{};
+
+#ifdef ACTSGEOMETRY_HAVE_DETRAY
+  std::shared_ptr<const DetrayDetector> m_detrayGeometry{nullptr};
+#endif
 };
 
 }
