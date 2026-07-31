@@ -46,35 +46,39 @@ atlas_add_test (EventLoop_gt_OutputStreamData
       SOURCES test/gt_OutputStreamData.cxx
       INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
       LINK_LIBRARIES ${ROOT_LIBRARIES} EventLoop AsgTestingLib
-      POST_EXEC_SCRIPT nopost.sh)
+      POST_EXEC_SCRIPT noerror.sh)
 
       atlas_add_test (EventLoop_gt_SubmitDirManager
       SOURCES test/gt_SubmitDirManager.cxx
       INCLUDE_DIRS ${Boost_INCLUDE_DIRS} ${ROOT_INCLUDE_DIRS}
       LINK_LIBRARIES ${Boost_LIBRARIES} ${ROOT_LIBRARIES} EventLoop AsgTestingLib
-      POST_EXEC_SCRIPT nopost.sh)
+      # Expected errors
+      LOG_IGNORE_PATTERN "submit directory can not end|on pnfs|refusing to overwrite|change the name"
+      POST_EXEC_SCRIPT noerror.sh)
 
 atlas_add_test (EventLoop_gt_DirectInputModule
       SOURCES test/gt_DirectInputModule.cxx
       INCLUDE_DIRS ${Boost_INCLUDE_DIRS} ${ROOT_INCLUDE_DIRS}
       LINK_LIBRARIES ${Boost_LIBRARIES} ${ROOT_LIBRARIES} EventLoop AsgTestingLib
-      POST_EXEC_SCRIPT nopost.sh)
+      POST_EXEC_SCRIPT noerror.sh)
 
 atlas_add_test (EventLoop_gt_MemoryMonitorModule
       SOURCES test/gt_MemoryMonitorModule.cxx
       LINK_LIBRARIES EventLoop AsgTestingLib
-      POST_EXEC_SCRIPT nopost.sh)
+      POST_EXEC_SCRIPT noerror.sh)
 
 atlas_add_test (EventLoop_gt_EventModule
       SOURCES test/gt_EventModule.cxx
       INCLUDE_DIRS ${Boost_INCLUDE_DIRS} ${ROOT_INCLUDE_DIRS}
       LINK_LIBRARIES ${Boost_LIBRARIES} ${ROOT_LIBRARIES} EventLoop AsgTestingLib
-      POST_EXEC_SCRIPT nopost.sh)
+      POST_EXEC_SCRIPT noerror.sh)
 
 atlas_add_test (EventLoop_gt_AlgorithmStateModule
       SOURCES test/gt_AlgorithmStateModule.cxx
       LINK_LIBRARIES EventLoop AsgTestingLib
-      POST_EXEC_SCRIPT nopost.sh)
+      # Expected errors
+      LOG_IGNORE_PATTERN "getting second initialize|algorithms have not been initialized|while calling execute"
+      POST_EXEC_SCRIPT noerror.sh)
 
 # Install files from the package:
 atlas_install_scripts( scripts/el_retrieve scripts/el_resubmit scripts/el_wait scripts/el_build_docker )
