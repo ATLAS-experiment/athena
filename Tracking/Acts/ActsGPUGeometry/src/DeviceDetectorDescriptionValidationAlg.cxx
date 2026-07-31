@@ -9,44 +9,6 @@
 
 namespace ActsTrk {
 
-namespace {
-
-// Content-based equality: same dimensionality + matching bin edges.
-// design_id itself is never compared directly since it's assigned
-// independently by deduplication pass.
-bool designsMatch(const traccc::detector_design_description::host& a,
-                   std::size_t ia,
-                   const traccc::detector_design_description::host& b,
-                   std::size_t ib, float positionTolerance) {
-    if (a.dimensions()[ia] != b.dimensions()[ib]) return false;
-
-    auto edgesMatch = [&](const auto& ex, const auto& ey) {
-        if (ex.size() != ey.size()) return false;
-        for (std::size_t k = 0; k < ex.size(); ++k) {
-            if (std::abs(static_cast<float>(ex[k]) - static_cast<float>(ey[k])) >
-                positionTolerance) {
-                return false;
-            }
-        }
-        return true;
-    };
-
-    return edgesMatch(a.bin_edges_x()[ia], b.bin_edges_x()[ib]) &&
-           edgesMatch(a.bin_edges_y()[ia], b.bin_edges_y()[ib]);
-}
-
-std::size_t findMatchingDesign(
-    const traccc::detector_design_description::host& design, std::size_t at,
-    const traccc::detector_design_description::host& candidate,
-    float positionTolerance) {
-    for (std::size_t j = 0; j < candidate.size(); ++j) {
-        if (designsMatch(design, at, candidate, j, positionTolerance)) return j;
-    }
-    return candidate.size();  // sentinel: no matching shape found
-}
-
-}  // namespace
-
 StatusCode DeviceDetectorDescriptionValidationAlg::initialize()
 {
     ATH_MSG_DEBUG("Initializing detector description validation alg");
@@ -87,6 +49,20 @@ StatusCode DeviceDetectorDescriptionValidationAlg::execute(const EventContext& c
     return StatusCode::SUCCESS;
 }
 
+StatusCode DeviceDetectorDescriptionValidationAlg::finalize()
+{
+
+     ATH_MSG_DEBUG("Finalizing detector description validation alg");
+    ATH_MSG_INFO("Checked " << m_nChecked << " shared surfaces ("
+                 << m_nMissingInCandidate << " missing in candidate), "
+                 << m_nIdMismatch << " ACTS Id mismatches, "
+                 << m_nDesignMismatch << " design mismatches, "
+                 << m_nShiftMismatch << " shift mismatches");
+
+    return StatusCode::SUCCESS;             
+
+}
+
 StatusCode DeviceDetectorDescriptionValidationAlg::validateDetectorDescription(
     const traccc::detector_design_description::host& refDesign,
     const traccc::detector_conditions_description::host& refCond,
@@ -100,25 +76,29 @@ StatusCode DeviceDetectorDescriptionValidationAlg::validateDetectorDescription(
         candByGeomId[candCond.geometry_id()[i].value()] = i;
     }
 
-    // ref design_id -> matching cand design row, cached per distinct shape.
-    std::unordered_map<unsigned int, std::size_t> designMatchCache;
-
-    std::size_t nChecked = 0;
-    std::size_t nMissingInCandidate = 0;
-    std::size_t nDesignMismatch = 0;
-    std::size_t nShiftMismatch = 0;
 
     for (std::size_t refIdx = 0; refIdx < refCond.size(); ++refIdx) {
         const auto geomIdValue = refCond.geometry_id()[refIdx].value();
         auto it = candByGeomId.find(geomIdValue);
         if (it == candByGeomId.end()) {
-            ++nMissingInCandidate;
+            ++m_nMissingInCandidate;
             ATH_MSG_DEBUG("geometry_id " << geomIdValue
                           << " present in reference, missing in candidate");
             continue;
         }
         const std::size_t candIdx = it->second;
-        ++nChecked;
+        ++m_nChecked;
+
+        // --- ACTS geometry ID ---
+        const auto& refID = refCond.acts_geometry_id()[refIdx];
+        const auto& candID = candCond.acts_geometry_id()[candIdx];
+        bool actsIdOk = (refID == candID);
+        if (!actsIdOk) {
+            ++m_nIdMismatch;
+            ATH_MSG_DEBUG("ACTS ID mismatch at geometry_id " << geomIdValue
+                         << ": ref= " << refID
+                         << " cand= " << candID);
+        }
 
         // --- Lorentz shift ---
         const auto& refShift = refCond.measurement_translation()[refIdx];
@@ -129,45 +109,96 @@ StatusCode DeviceDetectorDescriptionValidationAlg::validateDetectorDescription(
             std::abs(static_cast<float>(refShift[1]) -
                      static_cast<float>(candShift[1])) <= m_shiftTolerance.value();
         if (!shiftOk) {
-            ++nShiftMismatch;
-            ATH_MSG_INFO("Lorentz shift mismatch at geometry_id " << geomIdValue
+            ++m_nShiftMismatch;
+            ATH_MSG_DEBUG("Lorentz shift mismatch at geometry_id " << geomIdValue
                          << ": ref=(" << refShift[0] << "," << refShift[1]
                          << ") cand=(" << candShift[0] << "," << candShift[1] << ")");
         }
 
-        // --- Design content, matched through the conditions table's
-        //     module_to_design_id(), by shape rather than raw id value ---
+        // --- Design content, retrieved through the conditions table's
+        //     module_to_design_id(), compared by shape rather than raw id value ---
+
         const unsigned int refDesignId = refCond.module_to_design_id()[refIdx];
-        std::size_t candMatchIdx;
-        auto cacheIt = designMatchCache.find(refDesignId);
-        if (cacheIt != designMatchCache.end()) {
-            candMatchIdx = cacheIt->second;
-        } else {
-            candMatchIdx = findMatchingDesign(refDesign, refDesignId, candDesign,
-                                               m_positionTolerance.value());
-            designMatchCache.emplace(refDesignId, candMatchIdx);
-        }
-
         const unsigned int candDesignId = candCond.module_to_design_id()[candIdx];
-        const bool designOk =
-            (candMatchIdx != candDesign.size()) &&
-            (candDesignId == static_cast<unsigned int>(candMatchIdx));
 
-        if (!designOk) {
-            ++nDesignMismatch;
-            ATH_MSG_VERBOSE("Design mismatch at geometry_id " << geomIdValue
-                            << ": ref design_id=" << refDesignId
-                            << " cand design_id=" << candDesignId
-                            << (candMatchIdx == candDesign.size()
-                                    ? " (no shape in candidate matches reference)"
-                                    : ""));
+        const auto& refDesignEntry = refDesign.at(refDesignId);
+        const auto& candDesignEntry = candDesign.at(candDesignId);
+
+        bool designOk = true;
+
+        if(refDesignEntry.dimensions() != candDesignEntry.dimensions()){
+
+            designOk = false;
+            
+            ATH_MSG_DEBUG("Design mismatch at geometry_id " << geomIdValue
+                            << ": ref design dimensions=" << refDesignEntry.dimensions()
+                            << " cand design dimensions=" << candDesignEntry.dimensions());
         }
-    }
 
-    ATH_MSG_INFO("Checked " << nChecked << " shared surfaces ("
-                 << nMissingInCandidate << " missing in candidate), "
-                 << nDesignMismatch << " design mismatches, "
-                 << nShiftMismatch << " shift mismatches");
+        if(refDesignEntry.subspace() != candDesignEntry.subspace()){
+
+            designOk = false;
+            
+            ATH_MSG_DEBUG("Design mismatch at geometry_id " << geomIdValue
+                            << ": ref design subspace=" << refDesignEntry.subspace()
+                            << " cand design subspace=" << candDesignEntry.subspace());
+        }
+
+        if(refDesignEntry.bin_edges_x().size() != candDesignEntry.bin_edges_x().size()){
+
+            designOk = false;
+            
+            ATH_MSG_DEBUG("Design mismatch at geometry_id " << geomIdValue
+                            << ": ref design edges x size=" << refDesignEntry.bin_edges_x().size()
+                            << " cand design edges x size=" << candDesignEntry.bin_edges_x().size());
+        }else{
+
+            if(refDesignEntry.bin_edges_x() != candDesignEntry.bin_edges_x()){
+
+                designOk = false;
+
+                ATH_MSG_DEBUG("Design mismatch at geometry_id " << geomIdValue);
+
+                for(size_t b = 0; b < refDesignEntry.bin_edges_x().size(); b++){
+                    if(refDesignEntry.bin_edges_x().at(b) != candDesignEntry.bin_edges_x().at(b)){
+                        ATH_MSG_DEBUG("At entry " << b << " ref edge: " << refDesignEntry.bin_edges_x().at(b) << " vs cand edge " << candDesignEntry.bin_edges_x().at(b));
+                    }
+                    
+                }
+            }
+
+        }
+
+        if(refDesignEntry.bin_edges_y().size() != candDesignEntry.bin_edges_y().size()){
+
+            designOk = false;
+            
+            ATH_MSG_DEBUG("Design mismatch at geometry_id " << geomIdValue
+                            << ": ref design edges y size=" << refDesignEntry.bin_edges_y().size()
+                            << " cand design edges y size=" << candDesignEntry.bin_edges_y().size());
+        }else{
+
+            if(refDesignEntry.bin_edges_y() != candDesignEntry.bin_edges_y()){
+
+                designOk = false;
+
+                ATH_MSG_DEBUG("Design mismatch at geometry_id " << geomIdValue);
+
+                for(size_t b = 0; b < refDesignEntry.bin_edges_y().size(); b++){
+                    if(refDesignEntry.bin_edges_y().at(b) != candDesignEntry.bin_edges_y().at(b)){
+                        ATH_MSG_DEBUG("At entry " << b << " ref edge: " << refDesignEntry.bin_edges_y().at(b) << " vs cand edge " << candDesignEntry.bin_edges_y().at(b));
+                    }
+                    
+                }
+            }
+
+        }
+
+
+        if(!designOk) ++m_nDesignMismatch;
+        
+        
+    }
 
     return StatusCode::SUCCESS;
 }

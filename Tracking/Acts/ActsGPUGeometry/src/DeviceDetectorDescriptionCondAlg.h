@@ -56,6 +56,9 @@
 struct moduleInfo {
     bool pixel;
     bool isAnnulus;
+    bool equidistant_binning;
+    std::vector<traccc::scalar> row_centres;
+    std::vector<traccc::scalar> column_centres;
     float module_width;
     float module_length;
     int columns;
@@ -68,14 +71,14 @@ struct moduleInfo {
 struct designKey {
     bool pixel;
     bool isAnnulus;
-    int nBinsX;
-    int nBinsY;
+    std::vector<traccc::scalar> edgesX;
+    std::vector<traccc::scalar> edgesY;
     float width;
     float length;
 
     bool operator<(const designKey& other) const {
-    return std::tie(pixel, isAnnulus, nBinsX, nBinsY, width, length) <
-           std::tie(other.pixel, other.isAnnulus, other.nBinsX, other.nBinsY, other.width,
+    return std::tie(pixel, isAnnulus, edgesX, edgesY, width, length) <
+           std::tie(other.pixel, other.isAnnulus, other.edgesX, other.edgesY, other.width,
                         other.length);
     }
 };
