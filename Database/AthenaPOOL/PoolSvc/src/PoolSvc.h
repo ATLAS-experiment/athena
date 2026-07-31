@@ -98,11 +98,11 @@ public: // Non-static members
 
    /// @return void
    virtual
-   void startCatalog();
+   void startCatalog() override;
 
    /// @return void
    virtual
-   void commitCatalog();
+   void commitCatalog() override;
 
    /// @return void
    /// @param token [IN] filename/token string to be translated
