@@ -6,7 +6,6 @@
 
 #include "MuonTruthHelpers/MuonSimHitHelpers.h"
 #include "MuonTesterTree/MuonTesterTreeDict.h"
-#include "MuonTesterTree/TrackChi2Branch.h"
 #include "MuonPRDTest/SegmentVariables.h"
 #include "MuonPRDTest/ParticleVariables.h"
 #include "FourMomUtils/xAODP4Helpers.h"

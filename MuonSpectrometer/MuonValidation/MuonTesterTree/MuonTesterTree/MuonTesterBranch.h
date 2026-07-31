@@ -25,7 +25,7 @@ public:
     MuonTesterBranch(TTree* tree, const std::string& br_name);
 
     MuonTesterBranch(const MuonTesterBranch&) = delete;
-    void operator=(const MuonTesterBranch&) = delete;
+    MuonTesterBranch& operator=(const MuonTesterBranch&) = delete;
     virtual ~MuonTesterBranch();
 
     std::string name() const override final;
