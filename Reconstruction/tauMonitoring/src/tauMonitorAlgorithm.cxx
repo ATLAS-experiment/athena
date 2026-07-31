@@ -6,7 +6,6 @@
 
 #include "GaudiKernel/SystemOfUnits.h"
 #include "xAODCore/ShallowCopy.h"
-#include "AthContainers/ConstAccessor.h"
 #include <algorithm>
 
 using Gaudi::Units::GeV;
@@ -22,6 +21,8 @@ tauMonitorAlgorithm::~tauMonitorAlgorithm() {}
 StatusCode tauMonitorAlgorithm::initialize() {
 
   ATH_CHECK(m_TauContainerKey.initialize());
+ 
+  ATH_CHECK(m_TauTrackContainer.initialize());
 
   m_offlineGNTauScoreDecorKey = m_TauContainerKey.key() + "." + m_offlineGNTauScoreDecorKey.key();
   ATH_CHECK(m_offlineGNTauScoreDecorKey.initialize());
@@ -37,6 +38,33 @@ StatusCode tauMonitorAlgorithm::initialize() {
 
   m_offlineGNTauTightWPDecorKey = m_TauContainerKey.key() + "." + m_offlineGNTauTightWPDecorKey.key();
   ATH_CHECK(m_offlineGNTauTightWPDecorKey.initialize());
+
+  m_passThinningDecorKey = m_TauContainerKey.key() + "." + m_passThinningDecorKey.key();
+  ATH_CHECK(m_passThinningDecorKey.initialize());
+ 
+  m_EMFracFixedDecorKey = m_TauContainerKey.key() + "." + m_EMFracFixedDecorKey.key();
+  ATH_CHECK(m_EMFracFixedDecorKey.initialize());
+
+  m_d0SigTJVADecorKey = m_TauTrackContainer.key() + "." + m_d0SigTJVADecorKey.key();
+  ATH_CHECK(m_d0SigTJVADecorKey.initialize());
+
+  m_z0sinthetaSigTJVADecorKey = m_TauTrackContainer.key() + "." + m_z0sinthetaSigTJVADecorKey.key();
+  ATH_CHECK(m_z0sinthetaSigTJVADecorKey.initialize());
+
+  m_rnn_chargedScoreDecorKey = m_TauTrackContainer.key() + "." + m_rnn_chargedScoreDecorKey.key();
+  ATH_CHECK(m_rnn_chargedScoreDecorKey.initialize());
+
+  m_rnn_isolationScoreDecorKey = m_TauTrackContainer.key() + "." + m_rnn_isolationScoreDecorKey.key();
+  ATH_CHECK(m_rnn_isolationScoreDecorKey.initialize());
+
+  m_rnn_conversionScoreDecorKey = m_TauTrackContainer.key() + "." + m_rnn_conversionScoreDecorKey.key();
+  ATH_CHECK(m_rnn_conversionScoreDecorKey.initialize());
+
+  m_z0sinthetaTJVADecorKey = m_TauTrackContainer.key() + "." + m_z0sinthetaTJVADecorKey.key();
+  ATH_CHECK(m_z0sinthetaTJVADecorKey.initialize());
+
+  m_eProbabilityNNDecorKey = m_TauTrackContainer.key() + "." + m_eProbabilityNNDecorKey.key();
+  ATH_CHECK(m_eProbabilityNNDecorKey.initialize());
 
   return AthMonitorAlgorithm::initialize();
 }
@@ -239,11 +267,25 @@ StatusCode tauMonitorAlgorithm::fillHistograms(const EventContext &ctx) const {
 
   nTauCandidates = 0;
 
-  static const SG::ConstAccessor<char> passThinningAcc("passThinning");
+  // access decorations
+  SG::ReadDecorHandle<xAOD::TauJetContainer, char>  passThinning{m_passThinningDecorKey, ctx};
+  SG::ReadDecorHandle<xAOD::TauJetContainer, float> trans_score{m_offlineGNTauTransScoreDecorKey, ctx};
+  SG::ReadDecorHandle<xAOD::TauJetContainer, float> score{m_offlineGNTauScoreDecorKey, ctx};
+  SG::ReadDecorHandle<xAOD::TauJetContainer, char> tauid_loose{m_offlineGNTauLooseWPDecorKey, ctx};
+  SG::ReadDecorHandle<xAOD::TauJetContainer, char> tauid_medium{m_offlineGNTauMediumWPDecorKey, ctx};
+  SG::ReadDecorHandle<xAOD::TauJetContainer, char> tauid_tight{m_offlineGNTauTightWPDecorKey, ctx};
+  SG::ReadDecorHandle<xAOD::TauJetContainer, float> EMFracFixed{m_EMFracFixedDecorKey, ctx};
+  SG::ReadDecorHandle<xAOD::TauTrackContainer, float> d0SigTJVA{m_d0SigTJVADecorKey, ctx}; 
+  SG::ReadDecorHandle<xAOD::TauTrackContainer, float> z0sinthetaSigTJVA{m_z0sinthetaSigTJVADecorKey, ctx};
+  SG::ReadDecorHandle<xAOD::TauTrackContainer, float> rnn_chargedScore{m_rnn_chargedScoreDecorKey, ctx};
+  SG::ReadDecorHandle<xAOD::TauTrackContainer, float> rnn_isolationScore{m_rnn_isolationScoreDecorKey, ctx};
+  SG::ReadDecorHandle<xAOD::TauTrackContainer, float> rnn_conversionScore{m_rnn_conversionScoreDecorKey, ctx};
+  SG::ReadDecorHandle<xAOD::TauTrackContainer, float> z0sinthetaTJVA{m_z0sinthetaTJVADecorKey, ctx};
+  SG::ReadDecorHandle<xAOD::TauTrackContainer, float> eProbabilityNNAcc{m_eProbabilityNNDecorKey, ctx}; 
 
   for (const auto tau : *shallowTaus) {
 
-    if (!passThinningAcc.withDefault(*tau, true)) continue;
+    if (!passThinning.withDefault(*tau, true)) continue;
 
     tauEta = tau->eta();
     tauPhi = tau->phi();
@@ -270,22 +312,17 @@ StatusCode tauMonitorAlgorithm::fillHistograms(const EventContext &ctx) const {
     muonVeto = tau->isTau(xAOD::TauJetParameters::MuonVeto);
 
     // check to understand which TauID we can use
-    SG::ReadDecorHandle<xAOD::TauJetContainer, float> trans_score{m_offlineGNTauTransScoreDecorKey, ctx};
     if( trans_score.isAvailable()) {
 
       // we are using a special container decorated with GNTau
-      SG::ReadDecorHandle<xAOD::TauJetContainer, float> score{m_offlineGNTauScoreDecorKey, ctx};
       JetScore = score.isAvailable() ? score(*tau) : -1234;
 
       JetScoreSigTrans = trans_score(*tau);
 
-      SG::ReadDecorHandle<xAOD::TauJetContainer, char> tauid_loose{m_offlineGNTauLooseWPDecorKey, ctx};
       tauLoose = tauid_loose.isAvailable() ? tauid_loose(*tau) : -1234;
 
-      SG::ReadDecorHandle<xAOD::TauJetContainer, char> tauid_medium{m_offlineGNTauMediumWPDecorKey, ctx};
       tauMedium = tauid_medium.isAvailable() ? tauid_medium(*tau) : -1234;
 
-      SG::ReadDecorHandle<xAOD::TauJetContainer, char> tauid_tight{m_offlineGNTauTightWPDecorKey, ctx};
       tauTight = tauid_tight.isAvailable() ? tauid_tight(*tau) : -1234;
 
     } else{
@@ -310,8 +347,7 @@ StatusCode tauMonitorAlgorithm::fillHistograms(const EventContext &ctx) const {
 
     // TauB/Identification/EleVetoBDTinputs
     PSSFrac = tau->detail<float>(xAOD::TauJetParameters::PSSFraction);
-    static const SG::ConstAccessor<float> EMFracFixedAcc("EMFracFixed");
-    EMFrac = EMFracFixedAcc(*tau);
+    EMFrac = EMFracFixed(*tau);
 
     // TauB/SubStructure
     EMFracTrk = tau->detail<float>(xAOD::TauJetParameters::ChPiEMEOverCaloEME);
@@ -389,16 +425,14 @@ StatusCode tauMonitorAlgorithm::fillHistograms(const EventContext &ctx) const {
         trFlightPathSig =
             tau->detail<float>(xAOD::TauJetParameters::trFlightPathSig);
 
-        static const SG::ConstAccessor<float> d0SigTJVAAcc("d0SigTJVA");
-	if (d0SigTJVAAcc.isAvailable(*tau->track(0))) {
+	if (d0SigTJVA.isAvailable()){
 	  ipSigLeadTrk = tau->track(0)->d0SigTJVA();
 	}
 	else {
 	  ipSigLeadTrk = tau->detail<float>(xAOD::TauJetParameters::ipSigLeadTrk);
 	}
 
-        static const SG::ConstAccessor<float> z0sinthetaSigTJVAAcc("z0sinthetaSigTJVA");
-	if (z0sinthetaSigTJVAAcc.isAvailable(*tau->track(0))) {
+	if (z0sinthetaSigTJVA.isAvailable()) {
 	  ipZ0SinThetaSigLeadTrk = tau->track(0)->z0sinthetaSigTJVA();
 	}
 	else {
@@ -482,11 +516,6 @@ StatusCode tauMonitorAlgorithm::fillHistograms(const EventContext &ctx) const {
 
       fill(tool, trackLogSeedJetPt);
 
-      static const SG::ConstAccessor<float> acc_trackScoreCharged("rnn_chargedScore");
-      static const SG::ConstAccessor<float> acc_trackScoreIso("rnn_isolationScore");
-      static const SG::ConstAccessor<float> acc_trackScoreConv("rnn_conversionScore");
-      // rnn_fakeScore may not be available (it is not provided by the TauJets smart slimming list), it can be obtained from unitarity
-
       for (const xAOD::TauTrack *track : tau->allTracks()) {
 
         static const SG::Accessor<
@@ -504,8 +533,7 @@ StatusCode tauMonitorAlgorithm::fillHistograms(const EventContext &ctx) const {
         trackZ0sinthetaSigTJVA = 999.;
         float rConv = 999.;
         float rConvII = 999.;
-        static const SG::ConstAccessor<float> z0sinthetaTJVAAcc("z0sinthetaTJVA");
-        if (z0sinthetaTJVAAcc.isAvailable(*track)) {
+        if (z0sinthetaTJVA.isAvailable()) {
           d0TJVA = track->d0TJVA();
           trackZ0SinthetaTJVA = track->z0sinthetaTJVA();
           trackD0SigTJVA = track->d0SigTJVA();
@@ -540,7 +568,7 @@ StatusCode tauMonitorAlgorithm::fillHistograms(const EventContext &ctx) const {
         trackParticle->summaryValue(numberOfSCTHoles, xAOD::numberOfSCTHoles);
         float eProbabilityHT = 0.;
         trackParticle->summaryValue(eProbabilityHT, xAOD::eProbabilityHT);
-        static const SG::ConstAccessor<float> eProbabilityNNAcc("eProbabilityNN");
+
         float eProbabilityNN = eProbabilityNNAcc.withDefault(*trackParticle, -1);
         // hybrid variable (eProbabilityNN is not computed for tracks with pt
         // < 2 GeV)
@@ -570,10 +598,10 @@ StatusCode tauMonitorAlgorithm::fillHistograms(const EventContext &ctx) const {
              trackNSiHits,
              trackeProbabilityHT, trackeProbabilityNN, trackeProbabilityHTorNN);
 
-	if (acc_trackScoreCharged.isAvailable(*track)) {
-	  float chargedScore = acc_trackScoreCharged(*track);
-	  float isolationScore = acc_trackScoreIso(*track);
-	  float conversionScore = acc_trackScoreConv(*track);
+	if (rnn_chargedScore.isAvailable()) {
+	  float chargedScore = rnn_chargedScore(*track);
+	  float isolationScore = rnn_isolationScore(*track);
+	  float conversionScore = rnn_conversionScore(*track);
 	  float fakeScore = 1. - chargedScore - isolationScore - conversionScore;
 	  // ensure the probability is within [0.,1.]
 	  fakeScore = std::max(0.f, fakeScore);
