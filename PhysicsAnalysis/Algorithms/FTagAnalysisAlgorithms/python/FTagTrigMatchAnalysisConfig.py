@@ -6,7 +6,6 @@ from AthenaCommon.Logging import logging
 
 from AthenaConfiguration.Enums import LHCPeriod
 
-
 from TriggerAnalysisAlgorithms.TriggerAnalysisConfig import TriggerAnalysisBlock
 from TriggerAnalysisAlgorithms.TriggerAnalysisSFConfig import trigger_set
 
@@ -19,6 +18,7 @@ def makeJetManagerTool(config, containerName):
     jmTool.BTaggingLink = 'btaggingLink'
     jmTool.LHCPeriod = 2 if config.geometry() is LHCPeriod.Run2 else 3
     return jmTool
+
 
 def makeEmulationTool(config, toBeEmulatedTriggers):
     toolName = "TrigBtagEmulationTool"
@@ -52,38 +52,45 @@ def makeEmulationTool(config, toBeEmulatedTriggers):
             partDefinition += '|jvt:-99999'
             partDefinition += '|tagger:' + tagger
             partDefinition += '|jetpresel:nopresel'
-            partDefinition += '|dijetmass:None' # TODO: add invm chain support
+            partDefinition += '|dijetmass:None'  # TODO: add invm chain support
             partDefinition += '|isPFlow:False'
             partDefinition += '|isShared:False'
             partDefinition += '|GSCthreshold:' + gscthreshold
             chainParts.append(partDefinition)
         chainDefinitions[chain] = chainParts
 
-
-    decisionTool = config._algorithms[decisionToolName] if decisionToolName in config._algorithms else config.createPublicTool("Trig::TrigDecisionTool", decisionToolName)
+    decisionTool = (config._algorithms[decisionToolName]
+                    if decisionToolName in config._algorithms
+                    else config.createPublicTool("Trig::TrigDecisionTool",
+                                                 decisionToolName))
     emulationTool = config.createPublicTool("Trig::TrigBtagEmulationTool", toolName)
-    emulationTool.TrigDecisionTool = f"{decisionTool.getType()}/{decisionTool.getName()}"
+    emulationTool.TrigDecisionTool \
+        = f"{decisionTool.getType()}/{decisionTool.getName()}"
     emulationTool.LHCPeriod = 2 if config.geometry() is LHCPeriod.Run2 else 3
 
     if config.geometry() is LHCPeriod.Run2:
         from Campaigns.Utils import Campaign
-        InputJetContainer_a4tcemsubjesJet = 'HLT_xAOD__JetContainer_a4tcemsubjesFS' if config.campaign() == Campaign.MC20a else 'HLT_xAOD__JetContainer_a4tcemsubjesISFS'
+        InputJetContainer_a4tcemsubjesJet \
+            = ('HLT_xAOD__JetContainer_a4tcemsubjesFS'
+               if config.campaign() == Campaign.MC20a
+               else 'HLT_xAOD__JetContainer_a4tcemsubjesISFS')
         InputJetContainer_SplitJet = 'HLT_xAOD__JetContainer_SplitJet'
         InputJetContainer_GSCJet = 'HLT_xAOD__JetContainer_GSCJet'
 
-
-        emulationTool.JM_a4tcemsubjes_CNT = makeJetManagerTool(config, InputJetContainer_a4tcemsubjesJet)
-        emulationTool.JM_Split_CNT = makeJetManagerTool(config, InputJetContainer_SplitJet)
+        emulationTool.JM_a4tcemsubjes_CNT \
+            = makeJetManagerTool(config, InputJetContainer_a4tcemsubjesJet)
+        emulationTool.JM_Split_CNT \
+            = makeJetManagerTool(config, InputJetContainer_SplitJet)
         emulationTool.JM_GSC_CNT = makeJetManagerTool(config, InputJetContainer_GSCJet)
 
         working_points = {
-                "mv2c2040": 0.75,
-                "mv2c2050": 0.50,
-                "mv2c2060": -0.0224729,
-                "mv2c2070": -0.509032,
-                "mv2c2077": -0.764668,
-                "mv2c2085": -0.938441,
-                }
+            "mv2c2040": 0.75,
+            "mv2c2050": 0.50,
+            "mv2c2060": -0.0224729,
+            "mv2c2070": -0.509032,
+            "mv2c2077": -0.764668,
+            "mv2c2085": -0.938441,
+        }
         working_points.update({
             "mv2c1040": 0.978,
             "mv2c1050": 0.948,
@@ -91,15 +98,13 @@ def makeEmulationTool(config, toBeEmulatedTriggers):
             "mv2c1070": 0.580,
             "mv2c1077": 0.162,
             "mv2c1085": -0.494
-            })
+        })
 
         emulationTool.EmulatedChainDefinitions = chainDefinitions
 
         emulationTool.WorkingPoints = working_points
 
     return emulationTool
-
-
 
 
 class FTagJetTrigMatchingBlock(ConfigBlock):
@@ -160,7 +165,6 @@ class FTagJetTrigMatchingBlock(ConfigBlock):
                 # Helper function to implement to provide cut for given trigger
                 # Only used for Run 2
                 if config.geometry() is LHCPeriod.Run2:
-                    #alg.btagThreshold = getBTagThreshold(chain)
                     alg.TrigBtagEmulationTool = f"{emulationTool.getType()}/{emulationTool.getName()}"
 
                 alg.matchingDecoration = 'ftag_jetTrigMatching_' + chain_out + '_%SYS%'

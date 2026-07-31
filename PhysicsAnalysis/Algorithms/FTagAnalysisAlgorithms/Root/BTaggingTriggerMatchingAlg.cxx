@@ -39,8 +39,8 @@ namespace CP
     ANA_CHECK (m_bTagMatchingDecoration.initialize (m_systematicsList, m_jetHandle));
     ANA_CHECK (m_systematicsList.initialize());
     if (!m_useRun3TriggerEDM.value()) {
-      ANA_MSG_INFO("Using Run-2 trigger EDM for b-tagging trigger matching");
-      ANA_CHECK(m_emulationTool.retrieve());
+        ANA_MSG_INFO("Using Run-2 trigger EDM for b-tagging trigger matching");
+        ANA_CHECK(m_emulationTool.retrieve());
     } else {
         ANA_MSG_INFO("Using Run-3 trigger EDM for b-tagging trigger matching");
         m_ftagRun3TriggerDecorAccessors.clear();
@@ -56,16 +56,16 @@ namespace CP
 
 
   StatusCode BTaggingTriggerMatchingAlg ::
-  execute ()
+  execute (const EventContext& ctx)
   {
     for (const auto& sys : m_systematicsList.systematicsVector())
     {
       const xAOD::JetContainer *jets = nullptr;
-      ANA_CHECK (m_jetHandle.retrieve (jets, sys));
+      ANA_CHECK (m_jetHandle.retrieve (jets, sys, ctx));
 
       if(m_useRun3TriggerEDM){
         std::map<const xAOD::Jet*, const xAOD::Jet*> matchedOfflineOnlineJets;
-        SG::ReadHandle<xAOD::JetContainer> hlt_bjets(m_bjetInput);
+        SG::ReadHandle<xAOD::JetContainer> hlt_bjets(m_bjetInput, ctx);
 
         for (const xAOD::Jet* jet : *jets) {
           if (m_preselection.getBool(*jet, sys)) {

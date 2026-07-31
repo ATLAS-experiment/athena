@@ -46,7 +46,6 @@ namespace CP
         ToolHandle<Trig::ITrigBtagEmulationTool> m_emulationTool {this, "TrigBtagEmulationTool", "Trig::TrigBtagEmulationTool/TrigBtagEmulationTool", "trigger emulation for Run 2"};
         #endif
 
-        
         Gaudi::Property<std::string> m_trigger {this, "trigger", "",
         "the trigger path to consider"};
         Gaudi::Property<bool> m_useRun3TriggerEDM {this, "useRun3TriggerEDM", true,
