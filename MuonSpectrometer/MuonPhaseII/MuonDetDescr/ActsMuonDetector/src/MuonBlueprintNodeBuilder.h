@@ -95,9 +95,11 @@ private:
   /** @brief Flag to control if we use run4 geometry or not */
   Gaudi::Property<bool> m_isRun4{this, "run4Layout", false};
   /** @brief Flag to assign active material on the chambers */
-  Gaudi::Property<bool> m_assignActiveMaterial{this, "AssignActiveMaterial", false};
+  Gaudi::Property<bool> m_assignActiveMaterial{this, "AssignActiveMaterial", true};
   /** @brief Flag to construct the passive material surfaces */
   Gaudi::Property<bool> m_buildPassiveVolumes{this, "BuildPassiveVolumes", false};
+  /** @brief Assign empty material slabs for the passive  surfaces */
+  Gaudi::Property<bool> m_assignEmptyMaterial{this, "AssignEmptyPassiveMaterial", false};
   /** @brief Number of bins in phi direction on the BI cylinder surface */
   Gaudi::Property<std::size_t> m_nPhiBinsBI{this, "nPhiBinsBI", 16};
   /** @brief Number of bins in Z direction on the BI cylinder surface */

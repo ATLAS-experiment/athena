@@ -71,15 +71,15 @@ def createMuonConfigFlags():
 
     mcf.addFlag("Muon.trackGeometryMaterialMap", "")
     # 1. Digitization
-    mcf.addFlag("Muon.doFastMMDigitization", False)  ### The digitization flag is only relevant if usePhaseIIGeoSetup is activated
+    mcf.addFlag("Muon.doFastMMDigitization", False) ### The digitization flag is only relevant if usePhaseIIGeoSetup is activated
     mcf.addFlag("Muon.doFastsTGCDigitization",True) ### The digitization flag is only relevant if usePhaseIIGeoSetup is activated
-
+    mcf.addFlag("Muon.doFastRpcDigitization",True)  ### The digitization flag is only relevant if usePhaseIIGeoSetup is activated
     ### Setup the Phase II truth matching algorithms
     mcf.addFlag("Muon.setupTruthAlgorithms", lambda prevFlags: prevFlags.Muon.usePhaseIIGeoSetup and \
                                                                prevFlags.Input.isMC and \
                                                                not prevFlags.Trigger.doHLT)
 
-    mcf.addFlag("Muon.doFastRpcDigitization",True) ### The digitization flag is only relevant if usePhaseIIGeoSetup is activated
+
     
     # 2. Reco MuonRecFlags 
 
@@ -91,6 +91,12 @@ def createMuonConfigFlags():
                             prevFlags.Tracking.recoChain[0] in [TrackingComponent.ActsChain , TrackingComponent.ActsLegacyChain ]) 
     except ImportError:
         mcf.addFlag("Muon.scheduleActsReco", False)
+
+    try:
+        from ActsConfig.ActsConfigFlags import TrackFitterType
+        mcf.addFlag("Muon.TrackFitterType", TrackFitterType.GlobalChiSquareFitter)
+    except ImportError:
+        mcf.addFlag("Muon.TrackFitterType", "None")
 
     #### Include pile-up muons from the background as truth muons and 
     #### try to match the segments to them

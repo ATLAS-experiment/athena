@@ -63,6 +63,11 @@ if __name__=="__main__":
     flags.Trigger.Muon.useNewRegionSelector = False
     flags.Muon.scheduleActsReco = True
     flags.Muon.includePileUpTruth = True
+    
+    from ActsConfig.ActsConfigFlags import TrackFitterType
+    if False: flags.Muon.TrackFitterType = TrackFitterType.KalmanFitter
+    if False: flags.Muon.trackGeometryMaterialMap = MuonPhaseIITestDefaults.TRKGEO_MATERIALMAP
+
     flags, cfg = setupGeoR4TestCfg(args,flags)
 
     cfg.getService("MessageSvc").setVerbose= []

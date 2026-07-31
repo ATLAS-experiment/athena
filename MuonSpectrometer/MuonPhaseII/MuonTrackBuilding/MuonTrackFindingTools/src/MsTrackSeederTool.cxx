@@ -80,6 +80,7 @@ namespace MuonR4{
             mfContext.get<const AtlasFieldCacheCondObj*>()->getInitializedCache(magField);
 
             const xAOD::MuonSegment* refSeg{nullptr};
+            Acts::BoundMatrix cov{Acts::BoundMatrix::Zero()};
             for (const xAOD::MuonSegment* segment : seed.segments()) {    
                 /** Ususally we would like to take the first segment with a sufficient amount of phi hits 
                  *  to set the initial position and direction of the track fit. However in some cases,
@@ -87,12 +88,19 @@ namespace MuonR4{
                  *  all BW and OW hits in the first iteration. Therefore if the first segment is a NSW segment, we first try 
                  *  to use a non-NSW segments with enough phi hits. If we don't find any segment with enough phi hits 
                  *  we will use the NSW segment as reference as long as it passes the seeding quality criteria.  */
-                if (!isNswSegment(*segment) &&  
+                if (!refSeg && !isNswSegment(*segment) &&  
                     m_segSelector->passSeedingQuality(ctx, *segment)) {
                     refSeg = segment;
                     ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<" - Set reference segment to "<<::print(*segment));
-                    break;
                 }
+                Acts::BoundTrackParameters boundPars = MuonR4::SegmentFit::boundSegmentPars(tgContext, *m_detMgr, *segment);
+                if (!boundPars.covariance()) {
+                    continue;
+                }
+                for (int i =0 ; i < cov.cols(); ++i) {
+                    cov(i,i) += (*boundPars.covariance())(i,i);
+                }
+
             }
             //if we did not find a reference segment let's try the NSW one before we give up on the track
             if(!refSeg){
@@ -235,12 +243,13 @@ namespace MuonR4{
                 ATH_MSG_WARNING(__func__<<"() "<<__LINE__<<" Cannot create valid start parameters from seed "<<seed<<".");
                 return Acts::Result<Acts::BoundTrackParameters>::failure(std::make_error_code(std::errc::invalid_argument));
             }
-            /* Calcul*/
+            /** Calculate the initial q / p estimator */
             auto fourPos = ActsTrk::convertPosToActs(*pIsect, (*pIsect).mag() / Gaudi::Units::c_light);
             const double qOverP = 1./ ActsTrk::energyToActs(estimateQtimesP(tgContext, seed, magField));
+
+            cov (Acts::eBoundQOverP, Acts::eBoundQOverP) = Acts::square(0.8 * qOverP);
             return Acts::BoundTrackParameters::create(tgContext, targetSurf, 
-                                                      fourPos, seedDir, qOverP,
-                                                      Acts::BoundMatrix::Identity(), 
+                                                      fourPos, seedDir, qOverP, cov, 
                                                       Acts::ParticleHypothesis::muon());
     }
     Amg::Vector3D MsTrackSeederTool::segPosOntoPhiPlane(const Acts::GeometryContext& tgContext,

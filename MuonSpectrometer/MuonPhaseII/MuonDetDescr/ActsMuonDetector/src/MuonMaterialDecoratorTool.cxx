@@ -20,7 +20,11 @@ namespace MuonGMR4 {
     MuonMaterialDecoratorTool::~MuonMaterialDecoratorTool() = default;
     
     void MuonMaterialDecoratorTool::visitSurface(Acts::Surface& surface){
-         m_matDecorator->decorate(surface);
+        bool hasMat = surface.hasMaterial(); 
+        m_matDecorator->decorate(surface);
+        if (hasMat != surface.hasMaterial()) {
+            ATH_MSG_DEBUG(__func__<<"() "<<__LINE__<<" Decorated "<<surface.geometryId()<<" with material");
+        }
     }
 
     StatusCode MuonMaterialDecoratorTool::initialize(){
@@ -35,6 +39,4 @@ namespace MuonGMR4 {
         m_matDecorator.reset();
         return StatusCode::SUCCESS;
     }
-
-
 }
