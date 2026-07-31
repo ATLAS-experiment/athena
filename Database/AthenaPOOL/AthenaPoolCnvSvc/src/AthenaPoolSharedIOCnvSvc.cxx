@@ -22,7 +22,6 @@
 #include "PersistentDataModel/Token.h"
 #include "PersistentDataModel/TokenAddress.h"
 #include "PersistentDataModel/DataHeader.h"
-#include "PersistencySvc/IFileCatalog.h"
 
 #include "StorageSvc/DbReflex.h"
 #include "StorageSvc/DbTypeInfo.h"
@@ -838,10 +837,8 @@ StatusCode AthenaPoolSharedIOCnvSvc::readData() {
 
 //________________________________________________________________________________
 StatusCode AthenaPoolSharedIOCnvSvc::commitCatalog() {
-   pool::IFileCatalog* catalog ATLAS_THREAD_SAFE =  // This is on the SharedWriter, after mother process finishes events
-	   const_cast<pool::IFileCatalog*>(getPoolSvc()->catalog());
-   catalog->commit();
-   catalog->start();
+   getPoolSvc()->commitCatalog();
+   getPoolSvc()->startCatalog();
    return(StatusCode::SUCCESS);
 }
 
