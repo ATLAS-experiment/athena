@@ -16,5 +16,5 @@ atlas_install_scripts(
 # Tests:
 atlas_add_test( test_make_hlt_rep
    SCRIPT ${CMAKE_CURRENT_SOURCE_DIR}/share/make_hlt_rep.py
-   POST_EXEC_SCRIPT nopost.sh
+   POST_EXEC_SCRIPT noerror.sh
 )
