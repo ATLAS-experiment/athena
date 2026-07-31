@@ -277,6 +277,7 @@ StatusCode LArR4ElecCalibCalculator::stop() {
       }
     }
     chai::Database db = chai::Database(m_crestDBStr);
+    auto gt=db.createGlobalTag("GlobalTestTag", "test", "MC");
 
     // Pedestals
     {
@@ -288,7 +289,7 @@ StatusCode LArR4ElecCalibCalculator::stop() {
                              }));
 
       auto tag = db.createTag("LARElecCalibPedestal-R4-00", "Pedestal of FEB 2", spec, chaiMD);
-       
+      gt->addTag("/LAR/ElecCalibMC/Pedestal","LARElecCalibPedestal-R4-00");                       
 
       chai::Container container = tag->buildContainer();
       for (size_t g = 0; g < 2; ++g) {
@@ -307,7 +308,8 @@ StatusCode LArR4ElecCalibCalculator::stop() {
                                  {1, "MEDGain"},
                              }));
 
-      auto tag = db.createTag("LARElecCalibRamp-R4-00", "Electronic gain of FEB 2", spec, chaiMD);
+      auto tag = db.createTag("LARElecCalibMCRamp-R4-00", "Electronic gain of FEB 2", spec, chaiMD);
+      gt->addTag("/LAR/ElecCalibMC/Ramp", "LARElecCalibMCRamp-R4-00");
 
       chai::Container container = tag->buildContainer();
       container[0].push(std::move(vecToBlobData(rampsHG)));
@@ -329,7 +331,9 @@ StatusCode LArR4ElecCalibCalculator::stop() {
                                  {1, "MEDGain"},
                              }));
 
-      auto tag = db.createTag("LARElecCalibNoise-R4-00", "Noise of FEB 2 (in ADC counts)", spec, chaiMD);
+      auto tag = db.createTag("LARElecCalibMCNoise-R4-00", "Noise of FEB 2 (in ADC counts)", spec, chaiMD);
+      gt->addTag("/LAR/ElecCalibMC/Noise","LARElecCalibMCNoise-R4-00");
+
       chai::Container container = tag->buildContainer();
 
       container[0].push(std::move(vecToBlobData(noiseHG)));
