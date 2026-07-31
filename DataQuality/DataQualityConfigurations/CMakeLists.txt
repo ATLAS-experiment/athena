@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( DataQualityConfigurations )
@@ -58,18 +58,18 @@ foreach( hanfile collisions_run collisions_minutes10
 
    # add a test
    # temporarily disable until we fix the syntax checker
-   # atlas_add_test( ${hanfile}_syntax SCRIPT scripts/han-config-check.sh ${configOutputFile} PROPERTIES TIMEOUT 300 POST_EXEC_SCRIPT nopost.sh )
-   atlas_add_test( ${hanfile}_topempty SCRIPT test/check_no_top_level_assessments.sh ${outputFile} POST_EXEC_SCRIPT nopost.sh )
+   # atlas_add_test( ${hanfile}_syntax SCRIPT scripts/han-config-check.sh ${configOutputFile} PROPERTIES TIMEOUT 300 POST_EXEC_SCRIPT noerror.sh )
+   atlas_add_test( ${hanfile}_topempty SCRIPT test/check_no_top_level_assessments.sh ${outputFile} POST_EXEC_SCRIPT noerror.sh )
    if ( NOT "${CMAKE_BUILD_TYPE}" STREQUAL "Debug" )
-      atlas_add_test( ${hanfile}_lark SCRIPT han_lark_tester.py ${configOutputFile} PROPERTIES TIMEOUT 300 POST_EXEC_SCRIPT nopost.sh )
-      atlas_add_test( ${hanfile}_isbig SCRIPT test/check_file_isbig.sh ${configOutputFile} 100 POST_EXEC_SCRIPT nopost.sh )
+      atlas_add_test( ${hanfile}_lark SCRIPT han_lark_tester.py ${configOutputFile} PROPERTIES TIMEOUT 300 POST_EXEC_SCRIPT noerror.sh )
+      atlas_add_test( ${hanfile}_isbig SCRIPT test/check_file_isbig.sh ${configOutputFile} 100 POST_EXEC_SCRIPT noerror.sh )
    endif()
    atlas_add_test( ${hanfile}_nocrash
       SOURCES test/check_valid_config.cxx
       INCLUDE_DIRS ${TDAQ-COMMON_INCLUDE_DIRS}
       LINK_LIBRARIES CxxUtils DataQualityInterfaces
       ENVIRONMENT "HANCONFIGFILE=${outputFile};HISTFILE=${CMAKE_CURRENT_SOURCE_DIR}/../DataQualityInterfaces/share/Data.root;HISTFILEPATH=;OUTFILE=/dev/null"
-      POST_EXEC_SCRIPT nopost.sh
+      POST_EXEC_SCRIPT noerror.sh
       PROPERTIES TIMEOUT 300
    )
 
