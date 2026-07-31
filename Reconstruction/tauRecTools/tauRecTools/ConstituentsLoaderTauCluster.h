@@ -105,17 +105,12 @@ namespace FlavorTagInference {
             {"CENTER_LAMBDA",             TauClusterVars::CENTER_LAMBDA},
             {"et",                        TauClusterVars::et},
             // Extension - Variables for eVeto
-            {"TauJetsAuxDyn.cls_et_log",                TauClusterVars::et_log},
-            {"TauJetsAuxDyn.cls_e",                     TauClusterVars::e},
-            {"TauJetsAuxDyn.cls_dEta",                  TauClusterVars::dEta},
-            {"TauJetsAuxDyn.cls_dPhi",                  TauClusterVars::dPhi},
-            {"TauJetsAuxDyn.cls_SECOND_R",              TauClusterVars::SECOND_R},
-            {"TauJetsAuxDyn.cls_SECOND_LAMBDA",         TauClusterVars::SECOND_LAMBDA},
-            {"TauJetsAuxDyn.cls_CENTER_LAMBDA",         TauClusterVars::CENTER_LAMBDA},
-            {"TauJetsAuxDyn.cls_CENTER_MAG",            TauClusterVars::CENTER_MAG},
-            {"TauJetsAuxDyn.cls_EM_PROBABILITY",        TauClusterVars::EM_PROBABILITY},
-            {"TauJetsAuxDyn.cls_FIRST_ENG_DENS",        TauClusterVars::FIRST_ENG_DENS},
-            {"TauJetsAuxDyn.cls_eta",                   TauClusterVars::Eta}
+            {"et_log",                TauClusterVars::et_log},
+            {"e",                     TauClusterVars::e},
+            {"CENTER_MAG",            TauClusterVars::CENTER_MAG},
+            {"EM_PROBABILITY",        TauClusterVars::EM_PROBABILITY},
+            {"FIRST_ENG_DENS",        TauClusterVars::FIRST_ENG_DENS},
+            {"eta",                   TauClusterVars::Eta}
         };
     };
 }

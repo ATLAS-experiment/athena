@@ -189,16 +189,9 @@ namespace FlavorTagInference {
             {"eProbabilityHT",                  TauTrackVars::eProbabilityHT},
             {"eProbabilityHT_noTRT",            TauTrackVars::eProbabilityHT_noTRT},
             // Extension - Variables for GNTau-eVeto 
-            {"TauJetsAuxDyn.trk_pt_log",                          TauTrackVars::pt_log},
-            {"TauJetsAuxDyn.trk_dEta",                            TauTrackVars::dEta},
-            {"TauJetsAuxDyn.trk_dPhi",                            TauTrackVars::dPhi},
-            {"TauJetsAuxDyn.trk_nInnermostPixelHits",             TauTrackVars::nInnermostPixelHits},
-            {"TauJetsAuxDyn.trk_nPixelHits",                      TauTrackVars::nPixelHits},
-            {"TauJetsAuxDyn.trk_nSCTHits",                        TauTrackVars::nSCTHits},
-            {"TauJetsAuxDyn.trk_d0TJVA",                          TauTrackVars::d0TJVA},
-            {"TauJetsAuxDyn.trk_eProbabilityNN",                  TauTrackVars::eProbabilityNN},
-            {"TauJetsAuxDyn.trk_nTRTHits",                        TauTrackVars::numberOfTRTHighThresholdHits},
-            {"TauJetsAuxDyn.trk_nTRTHighThresholdHits",           TauTrackVars::numberOfTRTHighThresholdHits}
+            {"eProbabilityNN",                  TauTrackVars::eProbabilityNN},
+            {"nTRTHits",                        TauTrackVars::numberOfTRTHits},
+            {"nTRTHighThresholdHits",           TauTrackVars::numberOfTRTHighThresholdHits}
         };
     };
 }

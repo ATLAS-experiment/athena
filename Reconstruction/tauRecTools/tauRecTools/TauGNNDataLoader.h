@@ -108,14 +108,12 @@ class TauGNNDataLoader : public FlavorTagInference::SaltModelEDMLoaderBase, publ
             {"ptJetSeed",                 TauScalarVars::ptJetSeed},
             {"etaJetSeed",                TauScalarVars::etaJetSeed},
             // Extension - Variables for GNTau-eVeto
-            {"TauJetsAuxDyn.pt_tau_log",                 TauScalarVars::pt_tau_log},
-            {"TauJetsAuxDyn.ABS_ETA_LEAD_TRACK",         TauScalarVars::absleadTrackEta},
-            {"TauJetsAuxDyn.etHotShotWinOverPtLeadTrk",  TauScalarVars::etHotShotWinOverPtLeadTrk},
-            {"TauJetsAuxDyn.etOverPtLeadTrk",            TauScalarVars::etOverPtLeadTrk},
-            {"TauJetsAuxDyn.PSSFraction",                TauScalarVars::PSFrac},
-            {"TauJetsAuxDyn.ClustersMeanFirstEngDens",   TauScalarVars::ClustersMeanFirstEngDens},
-            {"TauJetsAuxDyn.ClustersMeanPresamplerFrac", TauScalarVars::ClustersMeanPresamplerFrac},
-            {"TauJetsAuxDyn.EMPOverTrkSysP",             TauScalarVars::EMPOverTrkSysP},
-            {"TauJetsAuxDyn.TauChargedTrk_eProbNN",      TauScalarVars::TauChargedTrk_eProbNN}
+            {"pt_tau_log",                 TauScalarVars::pt_tau_log},
+            {"ABS_ETA_LEAD_TRACK",         TauScalarVars::absleadTrackEta},
+            {"etHotShotWinOverPtLeadTrk",  TauScalarVars::etHotShotWinOverPtLeadTrk},
+            {"PSSFraction",                TauScalarVars::PSFrac},
+            {"ClustersMeanFirstEngDens",   TauScalarVars::ClustersMeanFirstEngDens},
+            {"ClustersMeanPresamplerFrac", TauScalarVars::ClustersMeanPresamplerFrac},
+            {"TauChargedTrk_eProbNN",      TauScalarVars::TauChargedTrk_eProbNN}
         };
 };
