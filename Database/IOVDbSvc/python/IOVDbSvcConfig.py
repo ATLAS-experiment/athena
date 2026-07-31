@@ -114,9 +114,12 @@ def addFolderList(flags, listOfFolderInfoTuple, extensible=False, db=None, modif
     This allows the possibility of later adding a new IOV using IOVSvc::setRange."""
     loadFolders = set()
     folders = []
-    sqliteFolders=getSqliteContent(flags.IOVDb.SqliteInput,
-                                   flags.IOVDb.SqliteFolders,
-                                   flags.IOVDb.DatabaseInstance)
+    if flags.IOVDb.UseCREST:
+        sqliteFolders=getCrestDirContent(flags)
+    else:
+        sqliteFolders=getSqliteContent(flags.IOVDb.SqliteInput,
+                                       flags.IOVDb.SqliteFolders,
+                                       flags.IOVDb.DatabaseInstance)
 
     for (fs, detDb, className) in listOfFolderInfoTuple:
         fse= _extractFolder(fs)
@@ -125,7 +128,7 @@ def addFolderList(flags, listOfFolderInfoTuple, extensible=False, db=None, modif
             loadFolders.add((className, fse))
 
         if fse in sqliteFolders:
-            msg.warning(f'Reading folder {fs} from sqlite, bypassing production database')
+            msg.warning(f'Reading folder {fs} from local storage, bypassing production database')
             fs+=sqliteFolders[fse]
         elif detDb is not None and fs.find('<db>') == -1:
 
@@ -276,7 +279,7 @@ def _extractFolder(folderString):
 
 @cache #Fill only once
 def getSqliteContent(sqliteInput,takeFolders,databaseInstance):
-    if sqliteInput == "": return []
+    if sqliteInput == "": return dict()
     sqliteFolders=dict()
     if isinstance(takeFolders, str):
         takeFolders=[takeFolders,]
@@ -308,6 +311,117 @@ def getSqliteContent(sqliteInput,takeFolders,databaseInstance):
     for v in sqliteFolders.items():
         msg.info("\t"+str(v))
     return sqliteFolders
+
+
+
+@AccumulatorCache #Fill only once
+def getCrestDirContent(flags):
+    """The CREST version of getSqliteContent. 
+    Signficantly more complicated because CREST has no folder (only tags)
+    If there is a global tag table defined in the local crest directly, 
+    we'll try to use it. 
+    Otherwise, open the production DB and guess the tag based on the first part of 
+    the folder name. Works only if the tag-naming convention is respected:
+    Folder /LAR/ElecCalib/Ramps becomes LARElecCalibRamps-suffix 
+    """
+
+    crestDir=flags.IOVDb.SqliteInput
+    if crestDir == "": return dict()
+    requestedTags=flags.IOVDb.SqliteFolders
+    localCrestFolders=dict()
+
+    if len(crestDir.split(":"))==1:
+        crestDir="crest_fs:"+crestDir
+
+    missedTags=set(requestedTags) #copy of the tags        
+
+    import chai
+    try:
+        localdb = chai.Database(crestDir)
+    except Exception as e:
+        msg.error("Failed to connect to crest directoy %s",crestDir)
+        raise e
+    
+    #see if there is a global-tag defined in the local CREST dir:
+    localGTs=[]
+    localGT=None
+    try:
+        localGTs=localdb.find_global_tags()
+    except RuntimeError:
+        pass
+
+    if len(localGTs)==1:
+        localGT=localGTs[0]
+        msg.info("Found exactly one global tag in local crest directory: [%s] Try to use it.",localGT)
+    elif len(localGTs)>1:
+        if flags.IOVDb.GlobalTag in localGTs:
+            localGT=flags.IOVDb.GlobalTag
+            msg.info("Global tag %s also defined in local crest directory. Try to use it.",flags.IOVDb.GlobalTag)
+    else:
+        msg.warning("More than one global tag found in crest directory [%s], none matches the global conditions tag %s",
+                    crestDir,flags.IOVDb.GlobalTag)
+    if localGT:
+        gt=localdb.get_global_tag(localGT)
+        resolvedTags= gt.resolve_all_tags()
+        for gt2ft in resolvedTags.items():
+            f=gt2ft[0][0]
+            lt=gt2ft[1]
+            if len(requestedTags)>0 and lt not in requestedTags: continue
+            localCrestFolders[f]="<db>"+crestDir+"</db><ctag>"+lt+"</ctag>"
+            missedTags.discard(lt)
+    else: 
+        #No local tag hierachy defined. Try to make guesses based on tag hierary in the production db:
+        msg.warning("No (usable) global tag found in local crest directory %s. Open production db, try to guess folder-tag relation")
+        localtags=set(localdb.find_tags())
+    
+        try:
+            proddb=chai.Database("crest:"+flags.IOVDb.CrestServer+"/api-v6.0")
+        except Exception as e:
+            msg.error("Failed to connect to crest server %s",flags.IOVDb.CrestServer)
+            raise e
+    
+        gt=proddb.get_global_tag(flags.IOVDb.GlobalTag)
+
+        resolvedTags=gt.resolve_all_tags()
+        folderstubToFolderMap={}
+        tbl=str.maketrans(".","-")
+        for gt2ft in resolvedTags.items():
+            f=gt2ft[0][0]
+            ft=gt2ft[1]
+            if ft.startswith("UPGRADE_"): ft=ft[8:] #No idea why we prepend this string ...
+            folderstub="".join(f.split("/")).lower()
+            tagstub=ft.translate(tbl).split("-")[0].lower()
+            if (tagstub != folderstub):
+                msg.warning("Folder-tag %s of folder %s in the production DB does not follow tag naming convention",ft, f)
+                
+            folderstubToFolderMap[folderstub]=f
+  
+        for lt in localtags:
+            if len(requestedTags)>0 and lt not in requestedTags: continue
+            tagstub=lt.translate(tbl).split("-")[0].lower()
+            if tagstub in folderstubToFolderMap:
+                f=folderstubToFolderMap[tagstub]
+                localCrestFolders[f]="<db>"+crestDir+"</db><ctag>"+lt+"</ctag>"
+                missedTags.discard(lt) 
+            else:
+                msg.warning("Cannot guess the folder of the tag %s in the local CREST directory %s",lt,crestDir)
+                msg.warning("Ignoring this tag")
+                    
+
+    msg.info("The following folders/tags are read from local crest directory:")
+    for v in localCrestFolders.items():
+        msg.info("\t"+str(v))
+    if len(missedTags):
+        msg.error("The following local Crest tags have been explicitly requested via the flag IOVSvc.sqliteFolder but not found in the local crest directory %s",(crestDir))
+        for mt in missedTags:
+            msg.error("\t%s",mt)
+    
+    return localCrestFolders
+
+
+
+
+
 
 
 #post-exec-style helper method to remove a folder from IOVDbSvc.Folders and CondInputLoader.Load
