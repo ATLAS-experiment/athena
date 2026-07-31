@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( dqm_algorithms )
@@ -21,6 +21,10 @@ atlas_add_library( dqm_algorithms
                    PRIVATE_INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
                    LINK_LIBRARIES ${Boost_LIBRARIES} ${TDAQ-COMMON_LIBRARIES} ${COOL_LIBRARIES} ${ONNXRUNTIME_LIBRARIES} CxxUtils
                    PRIVATE_LINK_LIBRARIES ${ROOT_LIBRARIES} PathResolver )
+if( CMAKE_CXX_COMPILER_ID STREQUAL "GNU" AND CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL 16 )
+   # Work around gcc bug https://gcc.gnu.org/bugzilla/show_bug.cgi?id=122197
+   set_target_properties( dqm_algorithms PROPERTIES COMPILE_FLAGS " --param max-devirt-targets=1 " )
+endif()
 
 atlas_add_library( dqm_tools
                    tools/DumpConfig.cxx
