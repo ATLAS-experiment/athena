@@ -144,6 +144,12 @@ void MuonCreatorAlg::createMuon(const EventContext& ctx,
                                       seg->index(), ctx);
             }
         }
+        /// We know that every STACO or MuidCo muon needs to have a MS track
+        /// Manually add MuidSA for these cases
+        if (tag->author() == xAOD::Muon::Author::STACO ||
+            tag->author() == xAOD::Muon::Author::MuidCo) {
+            newMuon->addAllAuthor(xAOD::Muon::Author::MuidSA);
+        }
         newMuon->addAllAuthor(tag->author());
         tag->copyParameters(*newMuon);
         p4Set = true;

@@ -149,6 +149,12 @@ def MuidSaTagMakerAlgCfg(flags, name="MuonMuidTagSaAlg", **kwargs):
     return result
 
 
+def MuonCombinedStacoAlgCfg(flags, name="MuonCombinedStacoAlgR4", **kwargs ):
+    result = ComponentAccumulator()
+    the_alg = CompFactory.MuonCombinedR4.CombinedStacoAlg(name, **kwargs)
+    result.addEventAlgo(the_alg, primary = True)
+    return result
+
 def MuonInDetTrackSelectionAlgCfg(flags, name="MuonCombinedInDetCandidateAlgR4", **kwargs):
     result = ComponentAccumulator()
     if not flags.Acts.TrackingGeometry.UseBlueprint:
