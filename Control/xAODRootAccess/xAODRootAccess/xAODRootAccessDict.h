@@ -1,9 +1,17 @@
 // Dear emacs, this is -*- c++ -*-
 //
-//  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+//  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 //
 #ifndef XAODROOTACCESS_XAODROOTACCESSDICT_H
 #define XAODROOTACCESS_XAODROOTACCESSDICT_H
+
+#ifdef _POSIX_C_SOURCE
+#undef _POSIX_C_SOURCE
+#endif
+#ifdef _XOPEN_SOURCE
+#undef _XOPEN_SOURCE
+#endif
+#include <Python.h>
 
 // Local includude(s):
 #include "xAODRootAccess/TEvent.h"
