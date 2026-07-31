@@ -100,6 +100,7 @@ StatusCode NswSegmentFinderAlg::initialize() {
     fitCfg.visionTool = m_visionTool.get();
     fitCfg.calcAlongStrip = false;
     fitCfg.idHelperSvc = m_idHelperSvc.get();
+    fitCfg.recoveryPull = m_minPullThreshold;
     fitCfg.parsToUse = {ParamDefs::x0, ParamDefs::y0, ParamDefs::theta, ParamDefs::phi};
     
     m_lineFitter = std::make_unique<SegmentFit::SegmentLineFitter>(name(), std::move(fitCfg));
@@ -1001,8 +1002,10 @@ StatusCode NswSegmentFinderAlg::execute(const EventContext &ctx) const {
                     bool hasTruth{false};
                     if(hit->type()!=xAOD::UncalibMeasType::Other){
                         hasTruth = (getTruthMatchedHit(*hit->spacePoint()->primaryMeasurement()) !=nullptr);
+                        std::string type = hit->fitState() != CalibratedSpacePoint::State::Valid ? "outlier" : "valid";
                         
                         sstr<<" *** Hit "<<m_idHelperSvc->toString(hit->spacePoint()->identify())<<", "
+                                        << type << ", "
                                         << Amg::toString(hit->spacePoint()->localPosition())<<", dir: "
                                         <<Amg::toString(hit->spacePoint()->sensorDirection())<<", has truth matched: "<<hasTruth<<std::endl;
                     }    
@@ -1029,8 +1032,9 @@ StatusCode NswSegmentFinderAlg::execute(const EventContext &ctx) const {
                     bool hasTruth{false};
                     if(hit->type()!=xAOD::UncalibMeasType::Other){
                         hasTruth =  getTruthMatchedHit(*hit->spacePoint()->primaryMeasurement()) !=nullptr;
-                    
+                        std::string type = hit->fitState() != CalibratedSpacePoint::State::Valid ? "outlier" : "valid";
                         sstr<<" *** Hit "<<m_idHelperSvc->toString(hit->spacePoint()->identify())<<", "
+                        << type << ", "
                                     << Amg::toString(hit->spacePoint()->localPosition())<<", dir: "
                                     <<Amg::toString(hit->spacePoint()->sensorDirection())<<", has truth matched: "<<hasTruth<<std::endl;
                     }

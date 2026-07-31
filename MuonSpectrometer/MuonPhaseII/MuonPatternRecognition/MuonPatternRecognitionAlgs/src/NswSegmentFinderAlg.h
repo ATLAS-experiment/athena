@@ -291,7 +291,7 @@ class NswSegmentFinderAlg : public AthReentrantAlgorithm {
         DoubleProperty m_windowTheta {this, "thetaWindow", 2.5 * Gaudi::Units::deg};
         
         //apply a cut threshold in the pulls during the hit extension
-        DoubleProperty m_minPullThreshold{this, "maxPull", 5.};
+        DoubleProperty m_minPullThreshold{this, "maxPull", 10.};
         
         //minimum number of hits required to form a seed after extension
         UnsignedIntegerProperty m_minSeedHits{this, "minSeedHits", 6};
