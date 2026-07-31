@@ -2,7 +2,7 @@
   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "DerivationFrameworkEGamma/EGPhotonBDTToolWrapper.h"
+#include "DerivationFrameworkEGamma/EGPhotonBDTToolDecorator.h"
 #include "StoreGate/ReadHandle.h"
 #include "StoreGate/WriteDecorHandle.h"
 #include "PATCore/AcceptData.h"
@@ -12,9 +12,9 @@
 namespace DerivationFramework {
 
 StatusCode
-EGPhotonBDTToolWrapper::initialize()
+EGPhotonBDTToolDecorator::initialize()
 {
-  ATH_CHECK(m_selectorTool.retrieve());
+  ATH_CHECK(m_observableTool.retrieve());
 
   if (!(m_fudgeMCTool.name().empty())) {
     ATH_CHECK(m_fudgeMCTool.retrieve());
@@ -23,24 +23,20 @@ EGPhotonBDTToolWrapper::initialize()
   }
 
   ATH_CHECK(m_ContainerName.initialize());
-  ATH_CHECK(m_decoratorPass.initialize());
-  ATH_CHECK(m_decoratorIsEM.initialize());
+  ATH_CHECK(m_decoratorScore.initialize());
 
   return StatusCode::SUCCESS;
 }
 
 StatusCode
-EGPhotonBDTToolWrapper::addBranches(const EventContext& ctx) const
+EGPhotonBDTToolDecorator::addBranches(const EventContext& ctx) const
 {
   // retrieve container
   SG::ReadHandle<xAOD::EgammaContainer> particles{ m_ContainerName, ctx };
 
   // Decorators
-  SG::WriteDecorHandle<xAOD::EgammaContainer, char> decoratorPass{
-    m_decoratorPass, ctx
-  };
-  SG::WriteDecorHandle<xAOD::EgammaContainer, unsigned int> decoratorIsEM{
-    m_decoratorIsEM, ctx
+  SG::WriteDecorHandle<xAOD::EgammaContainer, float> decoratorScore{
+    m_decoratorScore, ctx
   };
 
   // If we're applying corrections, the correction tools will give us
@@ -95,19 +91,10 @@ EGPhotonBDTToolWrapper::addBranches(const EventContext& ctx) const
     const xAOD::Egamma* pCopy = pCopies[ipar];
     if (!pCopy) pCopy = par;
 
-    // compute the output of the selector
-    asg::AcceptData theAccept(m_selectorTool->accept(ctx, pCopy));
-    // compute the is EM word
-    unsigned int isEM = 0;
-    ATH_CHECK(m_selectorTool->execute(ctx, pCopy, isEM));
+    // compute the BDT score
+    const float score = m_observableTool->evaluate(pCopy);
     
-    // decorate the original object
-    if (m_cut.empty()) {
-      decoratorPass(*par) = static_cast<bool>(theAccept) ? 1 : 0;  
-    } else {
-      decoratorPass(*par) = theAccept.getCutResult(m_cut) ? 1 : 0;
-    }
-    decoratorIsEM(*par) = isEM;
+    decoratorScore(*par) = score;
   }
 
   return StatusCode::SUCCESS;

@@ -33,19 +33,15 @@ def AsgPhotonBDTSelectorCfg(
         flags, name="AsgPhotonBDTSelector", useNFs=False, **kwargs):
     acc = ComponentAccumulator()
 
-    if "BDTTool" not in kwargs:
-        bdtCalc = acc.popToolsAndMerge(PhotonBDTCalculatorCfg(flags, useNFs=useNFs))
-        acc.addPublicTool(bdtCalc)
-        kwargs.setdefault("BDTTool", bdtCalc)
-
     kwargs.setdefault("ReapplyWPIfNoShowerShapes", False)
 
     suffix = "_NFs" if useNFs else ""
     kwargs.setdefault("WorkingPoint", "TightBDTPhoton_" +
                       ("Run3" if flags.GeoModel.Run >= LHCPeriod.Run3 else "Run2") +
                       suffix)
-    kwargs.setdefault("ScoreDecoration", "BDTScore" + suffix)
     kwargs.setdefault("IsEMDecoration", "BDTIsEM" + suffix)
+    kwargs.setdefault("ContainerName", "Photons")
+    kwargs.setdefault("ScoreDecoration", "BDTScore" + suffix)
 
     acc.setPrivateTools(
         CompFactory.PhotonIDBDT.AsgPhotonBDTSelector(name + suffix, **kwargs))

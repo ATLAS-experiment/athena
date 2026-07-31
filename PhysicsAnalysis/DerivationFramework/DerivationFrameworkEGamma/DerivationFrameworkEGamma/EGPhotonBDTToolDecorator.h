@@ -2,8 +2,8 @@
   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef DERIVATIONFRAMEWORK_EGSPHOTONBDTTOOLWRAPPER_H
-#define DERIVATIONFRAMEWORK_EGSPHOTONBDTTOOLWRAPPER_H
+#ifndef DERIVATIONFRAMEWORK_EGSPHOTONBDTTOOLDECORATOR_H
+#define DERIVATIONFRAMEWORK_EGSPHOTONBDTTOOLDECORATOR_H
 
 #include "DerivationFrameworkInterfaces/IAugmentationTool.h"
 //
@@ -12,7 +12,6 @@
 //
 #include "DerivationFrameworkInterfaces/IAugmentationTool.h"
 #include "AthenaBaseComps/AthAlgTool.h"
-#include "EgammaAnalysisInterfaces/IAsgEGammaIsEMSelector.h"
 #include "EgammaAnalysisInterfaces/IPhotonObservableTool.h"
 #include "EgammaAnalysisInterfaces/IElectronPhotonShowerShapeFudgeTool.h"
 #include "GaudiKernel/ToolHandle.h"
@@ -22,7 +21,7 @@
 
 namespace DerivationFramework {
 
-  class EGPhotonBDTToolWrapper : public extends<AthAlgTool, IAugmentationTool>
+  class EGPhotonBDTToolDecorator : public extends<AthAlgTool, IAugmentationTool>
   {
   public:
 
@@ -32,21 +31,17 @@ namespace DerivationFramework {
     virtual StatusCode addBranches(const EventContext& ctx) const override final;
 
   private:
-    // selector tool
-    ToolHandle<IAsgEGammaIsEMSelector> m_selectorTool{this, "PhotonBDTSelectionTool", "", "Selector tool",};
+    // photon observable tool (for calculating the BDT score)
+    ToolHandle<IPhotonObservableTool> m_observableTool{this, "PhotonObservableTool", "", "Observable tool",};
     // shower shape correction tool
     ToolHandle<IElectronPhotonShowerShapeFudgeTool> m_fudgeMCTool{ this, "EGammaFudgeMCTool", "", "Fudging tool" };
     // photon container name
     SG::ReadHandleKey<xAOD::EgammaContainer> m_ContainerName{ this, "ContainerName", "", "Input" };
 
     // Write decoration handle keys
-    // these are not really configuarable
-    SG::WriteDecorHandleKey<xAOD::EgammaContainer> m_decoratorPass{ this,
-      "decoratorPass", m_ContainerName, "", "" };
-    SG::WriteDecorHandleKey<xAOD::EgammaContainer> m_decoratorIsEM{ this,
-      "decoratorIsEM", m_ContainerName, "", "" };
-    Gaudi::Property<std::string> m_cut{ this, "CutType", "", "cut type" };
+    SG::WriteDecorHandleKey<xAOD::EgammaContainer> m_decoratorScore{ this,
+      "decoratorScore", m_ContainerName, "", "" };
   };
 }
 
-#endif // DERIVATIONFRAMEWORK_EGPHOTONBDTTOOLWRAPPER_H
+#endif // DERIVATIONFRAMEWORK_EGPHOTONBDTTOOLDECORATOR_H
