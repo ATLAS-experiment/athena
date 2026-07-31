@@ -1033,6 +1033,7 @@ def TrackRecoConfigTest(flags=None):
         flags.IOVDb.GlobalTag = defaultConditionsTags.RUN3_MC
         flags.Exec.MaxEvents = 1
 
+        flags.fillFromArgs()
         flags.lock()
 
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg
