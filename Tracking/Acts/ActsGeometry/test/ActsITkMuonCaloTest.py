@@ -17,8 +17,8 @@ from AthenaConfiguration.AllConfigFlags import initConfigFlags
 flags = initConfigFlags()
 
 from AthenaConfiguration.TestDefaults import defaultTestFiles
-
-from MuonGeoModelTestR4.testGeoModel import configureDefaultTagsCfg, MuonPhaseIITestDefaults
+from MuonConfig.MuonConfigUtils import configureDefaultTags
+from MuonGeoModelTestR4.testGeoModel import MuonPhaseIITestDefaults
 flags.GeoModel.SQLiteDBFullPath = MuonPhaseIITestDefaults.GEODB_R4
 
 flags.GeoModel.SQLiteDB = True
@@ -44,7 +44,7 @@ flags.Exec.MaxEvents = 10
 flags.Acts.TrackingGeometry.UseBlueprint = args.gen3
 
 
-configureDefaultTagsCfg(flags)
+configureDefaultTags(flags)
 
 flags.lock()
 flags.dump()
