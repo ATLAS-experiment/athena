@@ -5,10 +5,12 @@
 #include "../StandaloneMuonTagAlg.h"
 #include "../InDetTrackSelectionAlg.h"
 #include "../SegmentTaggingAlg.h"
+#include "../CombinedStacoAlg.h"
 #include "../BeamSpotPreparatorAlg.h"
 
 DECLARE_COMPONENT(MuonCombinedR4::MuonCreatorAlg)
 DECLARE_COMPONENT(MuonCombinedR4::StandaloneMuonTagAlg)
 DECLARE_COMPONENT(MuonCombinedR4::InDetTrackSelectionAlg)
 DECLARE_COMPONENT(MuonCombinedR4::SegmentTaggingAlg)
+DECLARE_COMPONENT(MuonCombinedR4::CombinedStacoAlg)
 DECLARE_COMPONENT(MuonCombinedR4::BeamSpotPreparatorAlg)
