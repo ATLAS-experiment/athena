@@ -274,13 +274,13 @@ namespace GlobalSim {
       IdentifierHash hashId=m_calocell_id->calo_cell_hash(CellID);
       IdentifierHash hashIdMax=hashId;
       //Find the initial 17x3 eta/phi window
-      ATH_CHECK(findWindow(hashId, etaCheck, cells, window));
+      ATH_CHECK(findWindow(hashId, cells, window));
       //Find the maxima in the window (only once!)
       ATH_CHECK(findMaxima(hashIdMax, window));
       /*Find the new 17x3 eta/phi window around this maxima
         Don't need to if the max is the seed already */
       if(hashIdMax != hashId){
-	ATH_CHECK(findWindow(hashIdMax, etaCheck, cells, window));
+	ATH_CHECK(findWindow(hashIdMax, cells, window));
       }
       
       //Rediscover the maximum energy cell
@@ -401,7 +401,6 @@ namespace GlobalSim {
   // Function to draw a window around a seed cell starting from the hashID of the seed cell
   // and a container of all known GlobalLArCells. Returns the window.
   StatusCode Egamma1_OnlineMapNbhood::findWindow(IdentifierHash hashId,
-						 float eta,
 						 const GlobalSim::GlobalLArCellContainer& cells,
 						 std::vector<std::vector<std::shared_ptr<const GlobalLArCell>>>& window) const {
 
@@ -417,8 +416,6 @@ namespace GlobalSim {
     hashIdNext = hashIdPrev = hashId;
     //Position of the cell in each 17 long eta row. Defined by position in loop.
     int shift = 0;
-    //Check if we have hit the edge of the detector.
-    float etaMax = eta;
 
     ATH_MSG_DEBUG("Seed Hash: " << hashId);
     //Start loop to fill the central row of the 17x3 eta/phi window.
@@ -433,8 +430,6 @@ namespace GlobalSim {
 	  //Fill the central neighbourhood position.
 	  window[1][8] = cell;
 	  ATH_MSG_DEBUG("Found the middle cell " << cell->getID() << " at eta " << cell->eta() << " phi " << cell->phi());
-	  //Start defining where we are in eta.
-	  etaMax = cell->eta();
 	} else {
 	  //We didn't find the cell in the hash map. Put a dummy in the window.
 	  ATH_MSG_DEBUG("Putting in a dummy middle cell with hashId " << hashId);
@@ -442,8 +437,11 @@ namespace GlobalSim {
 	  //Potential issue if you cannot find the cell... but this cell would be the last in eta?
 	}
       } else {
+        neighbourList.clear();
+        if (hashIdNext != hashIdDummy)
+	  m_larem_id->get_neighbours(hashIdNext,LArNeighbours::nextInEta,neighbourList);
 	//If we are not at the edge, and were not previously at the edge. Then...
-	if(std::abs(etaMax) < 2.47 && hashIdNext != hashIdDummy){
+	if(!neighbourList.empty()){
 	  //Use the previous hashIDNext to look for the next cell in eta
 	  m_larem_id->get_neighbours(hashIdNext,LArNeighbours::nextInEta,neighbourList);
 	  ATH_MSG_DEBUG("Next in eta " << neighbourList[0] << " HashId " << hashId);
@@ -456,8 +454,6 @@ namespace GlobalSim {
 	  //If the hash map contained the next cell.
 	  if(cellNext != nullptr){
 	    ATH_MSG_DEBUG("Found a cell " << cellNext->getID() << " at eta " << cellNext->eta() << " phi " << cellNext->phi());
-	    //update the eta position
-	    etaMax = cellNext->eta();
 	    //Put the found cell in the window
 	    window[1][shift] = cellNext;
 	  } else {

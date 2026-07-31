@@ -153,7 +153,6 @@ namespace GlobalSim {
     /** @brief Function to produce a window around an input seed cell */
     StatusCode
     findWindow(IdentifierHash,
-	       float,
 	       const GlobalSim::GlobalLArCellContainer&,
 	       std::vector<std::vector<std::shared_ptr<const GlobalSim::GlobalLArCell>> >&) const;    
 
