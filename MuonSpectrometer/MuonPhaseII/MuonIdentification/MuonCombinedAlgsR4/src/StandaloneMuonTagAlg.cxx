@@ -10,6 +10,7 @@
 
 #include "ActsCalibrators/xAODUncalibMeasSurfAcc.h"
 #include "ActsCalibrators/xAODUncalibMeasCalibrator.h"
+#include "StoreGate/WriteDecorHandle.h"
 namespace MuonCombinedR4{
     StatusCode StandaloneMuonTagAlg::initialize(){
         ATH_CHECK(m_msTrackKey.initialize());
@@ -20,6 +21,7 @@ namespace MuonCombinedR4{
         ATH_CHECK(m_combinedTagKey.initialize(m_extrapolateToIP && !m_combinedTagKey.empty()));
         ATH_CHECK(m_trackPartAtIpKey.initialize(m_extrapolateToIP));
         ATH_CHECK(m_trackAtIpKey.initialize(m_refitWithBS));
+        ATH_CHECK(m_trackAtIpActsLinkKey.initialize(m_refitWithBS));
 
 
         ATH_CHECK(m_trackFitTool.retrieve(EnableTool{m_refitWithBS}));
@@ -114,12 +116,15 @@ namespace MuonCombinedR4{
                                                                  std::move(ctrackStateBackend));
   
             SG::WriteHandle writeHandle{m_trackAtIpKey, ctx};
-            ATH_CHECK(writeHandle.record(std::move(ctc))); 
+            ATH_CHECK(writeHandle.record(std::move(ctc)));
+            SG::WriteDecorHandle<xAOD::TrackParticleContainer,
+                                ElementLink<ActsTrk::TrackContainer>> dec_trackLink{m_trackAtIpActsLinkKey, ctx};
             for (std::size_t trk = 0 ; trk < dataShip.msTracksAtIP->size(); ++trk) {
                 const ActsTrk::TrackContainer::ConstTrackProxy convMe = writeHandle->getTrack(trk);
                 xAOD::TrackParticle* convTo = dataShip.msTracksAtIP->at(trk);
                 ATH_CHECK(m_cnvTool->convert(*convTo, ctx, convMe, convMe.referenceSurface()));
                 m_summaryTool->copySummary(m_summaryTool->makeSummary(ctx, convMe), *convTo);
+                dec_trackLink(*convTo) = ElementLink<ActsTrk::TrackContainer>(*writeHandle, convMe.index(), ctx);
             }
         }
         return StatusCode::SUCCESS;

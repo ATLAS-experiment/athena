@@ -9,6 +9,7 @@
 
 #include "StoreGate/ReadHandleKey.h"
 #include "StoreGate/WriteHandleKey.h"
+#include "StoreGate/WriteDecorHandleKey.h" 
 
 #include "MuonRecToolInterfacesR4/ITrackSummaryTool.h"
 
@@ -82,8 +83,10 @@ namespace MuonCombinedR4{
             /** @brief Key to store the extrapolated Acts track container */
             SG::WriteHandleKey<xAOD::TrackParticleContainer> m_trackPartAtIpKey{this, "TrackPartAtIpKey", 
                                                                                 "MsTrksAtIpTrackParticles"};
-
-             /** @brief Key to the output track container */
+            /** @brief Element link to the produced extrapolated Acts track */
+            SG::WriteDecorHandleKey<xAOD::TrackParticleContainer> m_trackAtIpActsLinkKey{this, "TrkAtIpLinkToActsKey", 
+                                                                                          m_trackPartAtIpKey, "actsTrack"};
+            /** @brief Key to the output track container */
             SG::WriteHandleKey<ActsTrk::TrackContainer> m_trackAtIpKey{this, "TrackAtIpKey", "MsTrksAtIp"};
             /** @brief Handle to the muon summary tool */
             ToolHandle<MuonR4::ITrackSummaryTool> m_summaryTool{this, "TrackSummaryTool" , ""};
