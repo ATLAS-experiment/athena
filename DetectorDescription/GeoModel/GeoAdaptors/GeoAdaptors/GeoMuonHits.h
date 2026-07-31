@@ -95,10 +95,12 @@ class GeoRPCHit : public GeoMuonHitBase
   const RPCSimHit &data() const { return *m_hit;}
   
   // Is this hit OK?
-  operator bool () const { return true; }
+  operator bool () const { return m_goodHit; }
 
  private:
-  const RPCSimHit* m_hit;
+  const RPCSimHit* m_hit{nullptr};
+  bool m_goodHit{true};
+  Identifier m_id{};
 };
 
 
