@@ -1,5 +1,5 @@
 #
-#  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 #
 
 '''
@@ -181,5 +181,5 @@ def run(flags):
             ('xAOD::ElectronAuxContainer#HLT_egamma_Electrons_GSFAux.',            'BS ESD AODFULL ElectronDSTest ElectronDSPEBTest', 'Egamma'),
         ]
     flags.lock()
-    acc = runHLT.runHLTCfg(flags, checkMT=False)  # athenaHLT is always MT-mode
+    acc = runHLT.runHLTCfg(flags, checkMT=False)  # athenaEF is always MT-mode
     return acc
