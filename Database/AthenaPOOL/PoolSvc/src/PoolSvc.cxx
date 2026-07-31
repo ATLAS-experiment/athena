@@ -380,8 +380,16 @@ void PoolSvc::setShareMode(bool shareCat) {
    m_shareCat = shareCat;
 }
 //__________________________________________________________________________
-const pool::IFileCatalog* PoolSvc::catalog() const {
-   return(m_catalog);
+void PoolSvc::startCatalog() {
+   if (m_catalog != nullptr) {
+      m_catalog->start();
+   }
+}
+//__________________________________________________________________________
+void PoolSvc::commitCatalog() {
+   if (m_catalog != nullptr) {
+      m_catalog->commit();
+   }
 }
 //__________________________________________________________________________
 void PoolSvc::lookupBestPfn(const std::string& token, std::string& pfn, std::string& type) const {

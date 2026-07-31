@@ -26,7 +26,7 @@ atlas_add_component( IOVDbSvc
    ${Boost_INCLUDE_DIRS} ${CrestApi_INCLUDE_DIRS} CxxUtils
    LINK_LIBRARIES ${ROOT_LIBRARIES} ${CORAL_LIBRARIES} ${COOL_LIBRARIES}
    ${Boost_LIBRARIES} nlohmann_json::nlohmann_json GaudiKernel
-   AthenaBaseComps AthenaKernel StoreGateLib PersistencySvc AthenaPoolUtilities
+   AthenaBaseComps AthenaKernel StoreGateLib AthenaPoolUtilities
    CoraCool IOVDbDataModel EventInfoUtils GeoModelInterfaces
    IOVDbMetaDataToolsLib EventInfoMgtLib PoolSvcLib IOVDbSvcLib 
    CxxUtils DBLock SGTools CrestApi::CrestApiLib )

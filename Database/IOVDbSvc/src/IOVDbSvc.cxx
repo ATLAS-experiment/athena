@@ -24,7 +24,6 @@
 #include "DBLock/DBLock.h"
 #include "EventInfoUtils/EventIDFromStore.h"
 #include "IOVDbDataModel/IOVMetaDataContainer.h"
-#include "PersistencySvc/IFileCatalog.h"
 #include "StoreGate/StoreClearedIncident.h"
 
 #include <algorithm>
@@ -669,11 +668,8 @@ StatusCode IOVDbSvc::signalBeginRun(const IOVTime& beginRunTime,
   // this is before first event of each run
   ATH_MSG_DEBUG( "In online mode will recheck ... " );
   ATH_MSG_DEBUG( "First reload PoolCataloge ... " );
-  
-  pool::IFileCatalog* catalog ATLAS_THREAD_SAFE =  // we are not within the event loop yet
-    const_cast<pool::IFileCatalog*>(m_h_poolSvc->catalog());
-  catalog->commit();
-  catalog->start(); 
+  m_h_poolSvc->startCatalog();
+  m_h_poolSvc->commitCatalog();
   static const std::string preLoadProxyStr{"preLoadProxy"};
   for (const auto & pThisConnection : m_connections){
     // only access connections which are actually in use - avoids waking up
