@@ -109,7 +109,8 @@ if __name__ == "__main__":
     flags = initConfigFlags()
     if args.localgeo:
         flags.ITk.Geometry.AllLocal = True
-    from MuonGeoModelTestR4.testGeoModel import MuonPhaseIITestDefaults, configureDefaultTagsCfg
+    from MuonConfig.MuonConfigUtils import configureDefaultTags
+    from MuonGeoModelTestR4.testGeoModel import MuonPhaseIITestDefaults
     flags.Input.Files = MuonPhaseIITestDefaults.EVGEN_PG
     flags.Input.isMC=True
     flags.GeoModel.AtlasVersion = args.geometrytag
@@ -138,7 +139,7 @@ if __name__ == "__main__":
          # hack to set Run4 for running on muon dead material geometry
          from AthenaConfiguration.Enums import LHCPeriod
          flags.GeoModel.Run = LHCPeriod.Run4
-         configureDefaultTagsCfg(flags)
+         configureDefaultTags(flags)
     else:
         defaultDetectors = ['ITkPixel', 'ITkStrip']
         detectors = args.detectors if 'detectors' in args and args.detectors else defaultDetectors

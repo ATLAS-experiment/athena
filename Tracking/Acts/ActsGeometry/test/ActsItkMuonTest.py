@@ -36,12 +36,12 @@ flags.Concurrency.NumConcurrentEvents = 64
 flags.Exec.MaxEvents = 10
 
 flags.Acts.TrackingGeometry.UseBlueprint = args.gen3
-
-from MuonGeoModelTestR4.testGeoModel import configureDefaultTagsCfg, MuonPhaseIITestDefaults
+from MuonConfig.MuonConfigUtils import configureDefaultTags
+from MuonGeoModelTestR4.testGeoModel import  MuonPhaseIITestDefaults
 flags.GeoModel.SQLiteDBFullPath = MuonPhaseIITestDefaults.GEODB_R4
 
 flags.GeoModel.SQLiteDB = True
-configureDefaultTagsCfg(flags)
+configureDefaultTags(flags)
 
 flags.lock()
 flags.dump()

@@ -182,27 +182,7 @@ def NswGeoPlottingAlgCfg(flags, name="NswGeoPlotting", **kwargs):
     result.addEventAlgo(the_alg, primary = True)
     return result
 
-def configureDefaultTagsCfg(flags):    
-    from AthenaCommon.Logging import logging
-    log = logging.getLogger('GeometryConfiguration')
 
-    if not flags.GeoModel.SQLiteDB:
-        raise ValueError("Default tag configuration only works for SQLite")
-    ### For dummy purposes configure the R2 geometry tag such that the job does not crash
-    from AthenaConfiguration.TestDefaults import defaultGeometryTags
-    flags.GeoModel.AtlasVersion = defaultGeometryTags.RUN2    
-    from AthenaConfiguration.Enums import LHCPeriod
-    if flags.GeoModel.Run == LHCPeriod.Run3:   
-        flags.GeoModel.AtlasVersion = defaultGeometryTags.RUN3
-    elif flags.GeoModel.Run == LHCPeriod.Run4:
-          flags.GeoModel.AtlasVersion = defaultGeometryTags.RUN4
-    else:
-        raise ValueError(f"Invalid run period {flags.GeoModel.Run}")
-    from MuonConfig.MuonConfigUtils import configureCondTag
-    configureCondTag(flags)
-
-    log.info(f"Setup {flags.GeoModel.AtlasVersion} geometry loading {flags.GeoModel.SQLiteDBFullPath}")
-    log.info(f"Use conditions tag {flags.IOVDb.GlobalTag}")
     
 
 def setupGeoR4TestCfg(args,  flags = None):
@@ -257,7 +237,8 @@ def setupGeoR4TestCfg(args,  flags = None):
         flags.GeoModel.SQLiteDBFullPath = args.geoModelFile
 
     flags.GeoModel.SQLiteDB = True
-    configureDefaultTagsCfg(flags)
+    from MuonConfig.MuonConfigUtils import configureDefaultTags
+    configureDefaultTags(flags)
 
     if args.passiveMaterialMaps:        
         flags.Muon.trackGeometryMaterialMap = args.passiveMaterialMaps

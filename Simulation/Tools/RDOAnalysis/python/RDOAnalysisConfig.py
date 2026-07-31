@@ -495,8 +495,8 @@ if __name__ == "__main__":
     if len (args.geoModelFile) > 0:
         flags.GeoModel.SQLiteDB = True
         flags.GeoModel.SQLiteDBFullPath = args.geoModelFile
-        from MuonGeoModelTestR4.testGeoModel import configureDefaultTagsCfg
-        configureDefaultTagsCfg(flags)
+        from MuonConfig.MuonConfigUtils import configureDefaultTags
+        configureDefaultTags(flags)
     else:
         from MuonConfig.MuonConfigUtils import configureCondTag
         configureCondTag(flags)
