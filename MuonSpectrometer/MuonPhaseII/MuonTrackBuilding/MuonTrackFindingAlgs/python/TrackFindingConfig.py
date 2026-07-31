@@ -19,21 +19,24 @@ def MSExtrapolatorCfg(flags, name="MsExtrapolationTool", **kwargs):
 
 def MSTrackFitterCfg(flags, name="MSTrackFitTool", **kwargs):
     result = ComponentAccumulator()
-    from ActsConfig.ActsConfigFlags import TrackFitterType
     from ActsConfig.ActsTrackFittingConfig import ActsFitterCfg
     from MuonSpacePointCalibrator.CalibrationConfig import MuonSpacePointCalibratorCfg
-    kwargs.setdefault("fitterKind", TrackFitterType.GlobalChiSquareFitter)
+    from ActsConfig.ActsConfigFlags import TrackFitterType
+    kwargs.setdefault("fitterKind", flags.Muon.TrackFitterType)
     kwargs.setdefault("OutlierChi2Cut", 200000)
-    kwargs.setdefault("IncludeScattering", flags.Muon.trackGeometryPassiveMaterial)
-    kwargs.setdefault("IncludeELoss",  flags.Muon.trackGeometryPassiveMaterial)
-    
-    kwargs.setdefault("MaxPropagationStep", 1000000)
-    kwargs.setdefault("MaxSurfacesPerNavStep", 10000000)
-    kwargs.setdefault("DoFreeToBoundCorrection", True)
-    kwargs.setdefault("MaxIterations", 100)
-    
+    kwargs.setdefault("MuonCalibrationTool", result.popToolsAndMerge(MuonSpacePointCalibratorCfg(flags)))
+   
+    if kwargs["fitterKind"] == TrackFitterType.GlobalChiSquareFitter:
+        kwargs.setdefault("IncludeScattering", flags.Muon.trackGeometryPassiveMaterial)
+        kwargs.setdefault("IncludeELoss",  flags.Muon.trackGeometryPassiveMaterial)
+        kwargs.setdefault("MaxPropagationStep", 1000000)
+        kwargs.setdefault("MaxSurfacesPerNavStep", 10000000)
+        kwargs.setdefault("DoFreeToBoundCorrection", True)
+        kwargs.setdefault("MaxIterations", 30)
+    elif kwargs["fitterKind"] == TrackFitterType.KalmanFitter:
+        kwargs.setdefault("UseDirectNavigation", False)
+   
 
-    kwargs.setdefault("MuonCalibrationTool",result.popToolsAndMerge(MuonSpacePointCalibratorCfg(flags)))
     fitTool = result.popToolsAndMerge(ActsFitterCfg(flags, name=name, **kwargs))
     result.setPrivateTools(fitTool)
     return result

@@ -594,8 +594,11 @@ MuonBlueprintNodeBuilder::getPassiveMaterialSurfaces(
         }
         auto surface = Acts::Surface::makeShared<Acts::CylinderSurface>(trf, 
                              std::make_shared<Acts::CylinderBounds>(rMin - margin, halfZ));
-        const auto [nBins1, nBins2] = getMaterialBins(testCh->chamberIndex());
-        surface->assignSurfaceMaterial(preparePassiveMaterial(surface->bounds(), nBins1, nBins2));
+        
+        if (m_assignEmptyMaterial) {
+          const auto [nBins1, nBins2] = getMaterialBins(testCh->chamberIndex());
+          surface->assignSurfaceMaterial(preparePassiveMaterial(surface->bounds(), nBins1, nBins2));
+        }
         surfaces.push_back(surface);
         break;
     } default :
