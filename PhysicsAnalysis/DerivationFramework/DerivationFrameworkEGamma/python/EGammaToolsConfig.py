@@ -51,6 +51,17 @@ def EGElectronLikelihoodToolWrapperCfg(flags, name, **kwargs):
     acc.setPrivateTools(CompFactory.DerivationFramework.EGElectronLikelihoodToolWrapper(name, **kwargs))
     return acc
 
+# Photon BDT decrotation tool
+def EGPhotonBDTToolDecoratorCfg(flags, name, **kwargs):
+    """Configure the E-gamma selection tool decorator"""
+    acc = ComponentAccumulator()
+    sgName = kwargs.pop("StoreGateEntryName", "")
+    if not sgName:
+        raise AttributeError("StoreGateEntryName not set")
+    kwargs.setdefault("decoratorScore", sgName + "Score")
+    acc.setPrivateTools(CompFactory.DerivationFramework.EGPhotonBDTToolDecorator(name, **kwargs))
+    return acc
+
 # Photon BDT selection tool wrapper
 def EGPhotonBDTToolWrapperCfg(flags, name, **kwargs):
     """Configure the E-gamma selection tool wrapper"""
@@ -63,7 +74,6 @@ def EGPhotonBDTToolWrapperCfg(flags, name, **kwargs):
         raise AttributeError("WorkingPointName not set")
     kwargs.setdefault("decoratorPass", sgName+wpName)
     kwargs.setdefault("decoratorIsEM", sgName+wpName + "IsEMValue")
-    kwargs.setdefault("decoratorScore", sgName + "Score")
     acc.setPrivateTools(CompFactory.DerivationFramework.EGPhotonBDTToolWrapper(name, **kwargs))
     return acc
 

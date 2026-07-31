@@ -352,8 +352,10 @@ def EGammaCommonCfg(flags):
         AsgPhotonBDTSelectorCfg(
             flags,
             name="PhotonBDTSelectorTight",
+            ScoreDecoration="DFCommonPhotonsBDTScore",
             WorkingPoint=photonIDBDTWP,
             useNFs=False,
+            SuppressInputDependence=True
         )
     )
     PhotonBDTCalculatorNF = acc.popToolsAndMerge(
@@ -367,8 +369,10 @@ def EGammaCommonCfg(flags):
         AsgPhotonBDTSelectorCfg(
             flags,
             name="PhotonBDTSelectorTightNF",
+            ScoreDecoration="DFCommonPhotonsNFBDTScore",
             WorkingPoint=photonIDBDTWP+"_NFs",
             useNFs=True,
+            SuppressInputDependence=True
         )
     )
     # ====================================================================
@@ -432,6 +436,7 @@ def EGammaCommonCfg(flags):
     from DerivationFrameworkEGamma.EGammaToolsConfig import (
         EGElectronLikelihoodToolWrapperCfg,
         EGPhotonBDTToolWrapperCfg,
+        EGPhotonBDTToolDecoratorCfg
     )
 
     # Note: LH selectors don't need fudging since the LH is tuned to data
@@ -699,12 +704,23 @@ def EGammaCommonCfg(flags):
     # decorate photons with the output of BDT tight
     # on full-sim MC, fudge the shower shapes before computing the ID
     # (but the original shower shapes are not overridden)
+    PhotonBDTDecorator = acc.addPublicTool(acc.popToolsAndMerge(
+        EGPhotonBDTToolDecoratorCfg(
+            flags,
+            name="PhotonBDTDecorator",
+            PhotonObservableTool=PhotonBDTCalculator,
+            EGammaFudgeMCTool=(PhotonVariableCorrectionTool if isFullSim else None),
+            StoreGateEntryName="DFCommonPhotonsBDT",
+            ContainerName="Photons",
+        )
+    ))
+
+    
     PhotonPassBDTTight = acc.addPublicTool(acc.popToolsAndMerge(
         EGPhotonBDTToolWrapperCfg(
             flags,
             name="PhotonPassBDTTight",
             PhotonBDTSelectionTool=PhotonBDTSelectorTight,
-            PhotonObservableTool=PhotonBDTCalculator,
             EGammaFudgeMCTool=(PhotonVariableCorrectionTool if isFullSim else None),
             CutType="",
             StoreGateEntryName="DFCommonPhotonsBDT",
@@ -731,12 +747,22 @@ def EGammaCommonCfg(flags):
     # decorate photons with the output of BDT tight
     # on full-sim MC, normalizing flows-based correction before computing the ID
     # (but the original shower shapes are not overridden)
+    PhotonBDTDecoratorNF = acc.addPublicTool(acc.popToolsAndMerge(
+        EGPhotonBDTToolDecoratorCfg(
+            flags,
+            name="PhotonBDTDecoratorNF",
+            PhotonObservableTool=PhotonBDTCalculatorNF,
+            EGammaFudgeMCTool=(PhotonVariableNFCorrectionTool if (isMC and isRun2orRun3) else None),
+            StoreGateEntryName="DFCommonPhotonsNFBDT",
+            ContainerName="Photons",
+        )
+    ))
+
     PhotonPassBDTTightNF = acc.addPublicTool(acc.popToolsAndMerge(
         EGPhotonBDTToolWrapperCfg(
             flags,
             name="PhotonPassBDTTightNF",
             PhotonBDTSelectionTool=PhotonBDTSelectorTightNF,
-            PhotonObservableTool=PhotonBDTCalculatorNF,
             EGammaFudgeMCTool=(PhotonVariableNFCorrectionTool if (isMC and isRun2orRun3) else None),
             CutType="",
             StoreGateEntryName="DFCommonPhotonsNFBDT",
@@ -791,7 +817,9 @@ def EGammaCommonCfg(flags):
         PhotonPassIsEMMedium,
         PhotonPassIsEMTight,
         PhotonPassIsEMTightNF,
+        PhotonBDTDecorator,
         PhotonPassBDTTight,
+        PhotonBDTDecoratorNF,
         PhotonPassBDTTightNF,
         PhotonPassCleaning,
         ElectronAmbiguity,
