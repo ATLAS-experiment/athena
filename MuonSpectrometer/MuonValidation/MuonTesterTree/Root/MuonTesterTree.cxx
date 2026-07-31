@@ -6,12 +6,14 @@ Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 #include <AthenaBaseComps/AthMsgStreamMacros.h>
 #include <GaudiKernel/ConcurrencyFlags.h>
 
+
+#include <ranges>
 namespace {
     // Erase all objects from the branch vector
     void Remove(std::vector<MuonVal::IMuonTesterBranch*>& vec, std::function<bool(const MuonVal::IMuonTesterBranch*)> remove_func) {
         // Could use std::erase_if with C++20...
-        std::vector<MuonVal::IMuonTesterBranch*>::iterator itr = std::remove_if(vec.begin(), vec.end(), std::move(remove_func));
-        vec.erase (itr, vec.end());
+        auto [begin, end] = std::ranges::remove_if(vec, std::move(remove_func));
+        vec.erase(begin, end);
     }
 
 }  // namespace
@@ -175,6 +177,15 @@ StatusCode MuonTesterTree::init(const ServiceHandle<ITHistSvc> & hist_svc) {
     return StatusCode::SUCCESS;
 }
 
+void MuonTesterTree::setFileStream(const std::string& new_stream) {
+    if (isCommonTree() || initialized()) {
+        ATH_MSG_WARNING("Cannot  change file stream");
+        return;
+    }
+    ATH_MSG_DEBUG("Update stream "<<m_stream<<" to "<<new_stream);
+    m_stream = new_stream;
+
+}
 StatusCode MuonTesterTree::write() {
     if (!initialized() || !m_tree || m_written) { return StatusCode::SUCCESS; }
     if (!m_hist_svc->deReg(tree()).isSuccess()) {

@@ -35,6 +35,27 @@ def configureCondTag(flags):
     else:
         raise ValueError(f"Invalid run period {flags.GeoModel.Run}")
 
+
+def prepareInput(flags, inputTokens : list) :
+    flags.Input.Files = []
+    ### Assemble all files in a directory or all files not having the suffix txt conf. 
+    ### The latter are interpreted as file lists
+    from os import path, listdir
+    for fileArg in inputTokens:
+        if path.isdir(fileArg):
+            flags.Input.Files += [ "{dir}/{file}".format(dir=fileArg, file=y) for y in listdir(fileArg) ]
+        else:
+            if fileArg[fileArg.rfind(".")+1 :]not in ["txt", "conf"]:
+                    flags.Input.Files+=[fileArg]
+            else:
+                with open(fileArg) as inStream:
+                   #Check if the input is a string of comma separated files, and if it is, split it into a list
+                   if isinstance(inStream, str) and "," in inStream:
+                       flags.Input.Files += inStream.split(",")
+                   else:
+                      flags.Input.Files+=[ line.strip() for line in inStream if line[0]!='#'] 
+
+
 def SetupMuonStandaloneConfigFlags():
     """
     Setup flags necessary for Muon standalone.

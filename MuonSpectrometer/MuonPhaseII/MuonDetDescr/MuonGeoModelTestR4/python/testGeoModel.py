@@ -214,24 +214,12 @@ def setupGeoR4TestCfg(args,  flags = None):
     flags.Concurrency.NumConcurrentEvents = args.threads
     flags.Exec.MaxEvents = args.nEvents
     flags.Exec.SkipEvents = args.skipEvents
-    from os import path, system, listdir
-    flags.Input.Files = []
+
     ### Assemble all files in a directory or all files not having the suffix txt conf. 
     ### The latter are interpreted as file lists
-    for fileArg in args.inputFile:
-        if path.isdir(fileArg):
-            flags.Input.Files += [ "{dir}/{file}".format(dir=fileArg, file=y) for y in listdir(fileArg) ]
-        else:
-            if fileArg[fileArg.rfind(".")+1 :]not in ["txt", "conf"]:
-                    flags.Input.Files+=[fileArg]
-            else:
-                with open(fileArg) as inStream:
-                   #Check if the input is a string of comma separated files, and if it is, split it into a list
-                   if isinstance(inStream, str) and "," in inStream:
-                       flags.Input.Files += inStream.split(",")
-                   else:
-                      flags.Input.Files+=[ line.strip() for line in inStream if line[0]!='#'] 
-
+    from MuonConfig.MuonConfigUtils import prepareInput
+    prepareInput(flags, args.inputFile)
+    
     flags.Exec.FPE= 500
     flags.Exec.EventPrintoutInterval = 500
     
@@ -246,6 +234,7 @@ def setupGeoR4TestCfg(args,  flags = None):
     elif args.defaultGeoFile == "ITkR3MS":
         flags.GeoModel.SQLiteDBFullPath = MuonPhaseIITestDefaults.GEODB_ITk_R3MS
     elif args.geoModelFile.startswith("root://"):
+        from os import system, path
         if not path.exists("Geometry/{geoTag}.db".format(geoTag=args.geoTag)):
             print ("Copy geometry file from EOS {source}".format(source = args.geoModelFile))
             system("mkdir Geometry/")
