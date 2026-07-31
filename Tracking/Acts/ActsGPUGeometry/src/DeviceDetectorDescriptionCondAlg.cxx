@@ -36,15 +36,10 @@ StatusCode DeviceDetectorDescriptionCondAlg::initialize()
     ATH_CHECK(m_writeDeviceCondKey.initialize());
     ATH_CHECK(m_stripPropertiesKey.initialize());
    
-
     ATH_CHECK(m_stripLorentzAngleTool.retrieve());
     ATH_CHECK(m_pixelLorentzAngleTool.retrieve());
 
-
-    ATH_CHECK(m_writeHostCondKey.initialize());
-    ATH_CHECK(m_writeDeviceCondKey.initialize());
-
-    int nPix = 0, nStrip = 0, nPixel = 0, nRect1 = 0, nTrap1 = 0, nAnnu1 = 0, nnonbar = 0, nbar = 0;
+    int nPix = 0, nStrip = 0, nRect = 0, nTrap = 0, nAnnu = 0, nEC = 0, nBar = 0;
 
     // ---- 1. Get ACTS Tracking Geometry, populate Athena<->ACTS maps and fill module design (segmentation) information ----
     // all of these aare static upon construction through the run
@@ -69,51 +64,102 @@ StatusCode DeviceDetectorDescriptionCondAlg::initialize()
             // recomputed per-IOV in execute(), so no Lorentz-tool call
             // happens here.
 
+            thismod.isAnnulus = false;
+            thismod.pixel = false;
+            thismod.equidistant_binning = true;
+
             if (detElem->isPixel()) {
-                ++nPix; ++nPixel;
+                ++nPix;
                 athenaID = detElem->identify();
                 const auto* p_design = static_cast<const InDetDD::PixelModuleDesign*>(&detElem->design());
-                auto boundsType = detElem->bounds().type();
+                
                 thismod.pixel = true;
-                thismod.side = 2;
-                int index = 0;
+                thismod.side = 2; // for pixel
+
+                std::vector<traccc::scalar> row_centres;
+                std::vector<traccc::scalar> column_centres;
+
+                // pixels with cross design 
+                // the middle four rows and columns are double pitch
                 if ((m_pixelID->barrel_ec(athenaID) == 0 && m_pixelID->layer_disk(athenaID) > 0) ||
                     (m_pixelID->barrel_ec(athenaID) != 0 && m_pixelID->layer_disk(athenaID) > 1)) {
-                    index = 4;
+
+                    thismod.equidistant_binning = false;
+
+                    for(int row = 0; row < p_design->rows(); row++){
+
+                        std::array<InDetDD::PixelDiodeTree::CellIndexType, 2>
+                            diode_idx = InDetDD::PixelDiodeTree::makeCellIndex(
+                                row, 0);
+                        InDetDD::PixelDiodeTree::DiodeProxyWithPosition si_param(
+                            p_design->diodeProxyFromIdxCachePosition(diode_idx));
+
+                        (row_centres).push_back(si_param.position()[0]-0.5*si_param.width()[0]);
+                        if(row == p_design->rows()-1){
+                            (row_centres).push_back(si_param.position()[0]+0.5*si_param.width()[0]);
+                        }
+
+                        float leading_edge  = si_param.position()[0] - 0.5f*si_param.width()[0];
+                        float trailing_edge = si_param.position()[0] + 0.5f*si_param.width()[0];
+                        float midpoint = (leading_edge + trailing_edge) / 2.f;
+                        if(std::abs(midpoint - si_param.position()[0]) > 1e-6f){
+                            ATH_MSG_ERROR("Row " << row << " edge midpoint " << midpoint
+                                        << " != geometry centre " << si_param.position()[0]
+                                        << " (diff=" << midpoint - si_param.position()[0] << ")");
+                        }
+
+                    }
+                    for(int col = 0; col < p_design->columns(); col++){
+
+                        std::array<InDetDD::PixelDiodeTree::CellIndexType, 2>
+                            diode_idx = InDetDD::PixelDiodeTree::makeCellIndex(
+                                0, col);
+                        InDetDD::PixelDiodeTree::DiodeProxyWithPosition si_param(
+                            p_design->diodeProxyFromIdxCachePosition(diode_idx));
+
+                        (column_centres).push_back(si_param.position()[1]-0.5*si_param.width()[1]);
+                        if(col == p_design->columns()-1){
+                            (column_centres).push_back(si_param.position()[1]+0.5*si_param.width()[1]);
+                        }
+
+                        float leading_edge  = si_param.position()[1] - 0.5f*si_param.width()[1];
+                        float trailing_edge = si_param.position()[1] + 0.5f*si_param.width()[1];
+                        float midpoint = (leading_edge + trailing_edge) / 2.f;
+                        if(std::abs(midpoint - si_param.position()[1]) > 1e-6f){
+                            ATH_MSG_ERROR("Column " << col << " edge midpoint " << midpoint
+                                        << " != geometry centre " << si_param.position()[1]
+                                        << " (diff=" << midpoint - si_param.position()[1] << ")");
+                        }
+
+                    }
+
                 }
-                if (boundsType == Trk::SurfaceBounds::Rectangle) {
-                    thismod.module_width = p_design->width();
-                    thismod.module_length = p_design->length();
-                    thismod.rows = p_design->rows() + index;
-                    thismod.columns = p_design->columns() + index;
-                }
-                if (boundsType == Trk::SurfaceBounds::Trapezoid) {
-                    thismod.module_width = p_design->width();
-                    thismod.module_length = p_design->length();
-                    thismod.rows = p_design->rows();
-                    thismod.columns = p_design->columns();
-                }
-                if (boundsType == Trk::SurfaceBounds::Annulus) {
-                    thismod.module_width = p_design->width();
-                    thismod.module_length = p_design->length();
-                    thismod.rows = p_design->rows();
-                    thismod.columns = p_design->columns();
-                }
+
+                thismod.row_centres = row_centres;
+                thismod.column_centres = column_centres;
+
+                thismod.module_width = p_design->width();
+                thismod.module_length = p_design->length();
+                thismod.rows = p_design->rows();
+                thismod.columns = p_design->columns();
+               
             } else {
                 ++nStrip;
                 const Identifier moduleID = m_stripID->module_id(detElem->identify());
                 const IdentifierHash moduleHash = m_stripID->wafer_hash(moduleID);
                 const int side = m_stripID->side(detElem->identify());
                 athenaID = m_stripID->wafer_id(moduleHash + side);
+
                 thismod.pixel = false;
                 thismod.side = side;
+                
 
                 if (m_stripID->barrel_ec(athenaID) == 0) {
-                    ++nbar;
+                    ++nBar;
                     const auto* s_design = static_cast<const InDetDD::SCT_BarrelModuleSideDesign*>(&detElem->design());
                     auto boundsType = detElem->bounds().type();
                     if (boundsType == Trk::SurfaceBounds::Rectangle) {
-                        ++nRect1;
+                        ++nRect;
                         thismod.module_width = s_design->width();
                         thismod.module_length = s_design->length();
                         thismod.rows = s_design->cells();
@@ -122,16 +168,17 @@ StatusCode DeviceDetectorDescriptionCondAlg::initialize()
                         thismod.module_width = s_design->width();
                         thismod.module_length = s_design->length();
                         thismod.rows = s_design->cells();
+                        nTrap++;
                     }
                     if (boundsType == Trk::SurfaceBounds::Annulus) {
-                        ++nAnnu1;
+                        ++nAnnu;
                         thismod.isAnnulus = true;
                         thismod.module_width = s_design->width();
                         thismod.module_length = s_design->length();
                         thismod.rows = s_design->cells();
                     }
                 } else {
-                    ++nnonbar;
+                    ++nEC;
                     const auto* annulus_design = static_cast<const InDetDD::StripStereoAnnulusDesign*>(&detElem->design());
                     const InDetDD::SiCellId annulus_cell = detElem->cellIdFromIdentifier(athenaID);
                     const double pitch_row = annulus_design->phiPitchPhi(annulus_cell);
@@ -151,8 +198,9 @@ StatusCode DeviceDetectorDescriptionCondAlg::initialize()
         });
     }
 
-    ATH_MSG_INFO(nPixel << " Atlas Pixel modules found.");
-    ATH_MSG_INFO(nStrip << " Atlas Strip modules found.");
+    ATH_MSG_INFO(nPix << " Atlas Pixel modules found.");
+    ATH_MSG_INFO(nStrip << " Atlas Strip modules found, " << nBar << " in barrel and " << nEC << " in the endcap");
+    ATH_MSG_INFO("Out od those " << nRect << " are rectangular, " << nTrap << " are trapezoid and " << nAnnu << " are annulus.");
     ATH_MSG_INFO("Wrote segmentation info for " << m_atlasModuleInfo.size() << " modules");
 
     // ---- 2. Get Detray Tracking Geometry and populate Detray<->ACTS map ----
@@ -210,9 +258,19 @@ StatusCode DeviceDetectorDescriptionCondAlg::initialize()
             auto modIt = m_atlasModuleInfo.find(detrayIt->second);
             if (modIt != m_atlasModuleInfo.end()) {
                 const moduleInfo& thismod = modIt->second;
+
                 const int nBinsX = thismod.pixel ? thismod.columns : thismod.rows;
                 const int nBinsY = thismod.pixel ? thismod.rows : 1;
-                designKey key{thismod.pixel, thismod.isAnnulus, nBinsX, nBinsY,
+
+                auto edgesX = makeEquidistantEdges(0.5f * thismod.module_width, nBinsX);
+                auto edgesY = makeEquidistantEdges(0.5f * thismod.module_length, nBinsY);
+
+                if(!thismod.equidistant_binning){
+                    edgesX = thismod.row_centres;
+                    edgesY = thismod.column_centres;
+                }
+                
+                designKey key{thismod.pixel, thismod.isAnnulus, edgesX, edgesY,
                               std::abs(thismod.module_width), thismod.module_length};
                 auto it = designLookup.find(key);
                 if (it == designLookup.end()) {
@@ -224,9 +282,6 @@ StatusCode DeviceDetectorDescriptionCondAlg::initialize()
                 }
                 entry.athenaId = detrayIt->second;
                 entry.hasAthenaModule = true;
-                // no need to populate this until traccc implements neighbours
-                // for strp modules
-                // m_athenaToCondIndex[detrayIt->second] = condIndex;
             }
         }
         m_staticCondEntries[condIndex] = entry;
@@ -238,28 +293,31 @@ StatusCode DeviceDetectorDescriptionCondAlg::initialize()
     hostDesign->resize(designLookup.size());
     for (const auto& [key, id] : designLookup) {
         hostDesign->design_id()[id] = static_cast<int>(id);
-        const auto edgesX = makeEquidistantEdges(0.5f * key.width, key.nBinsX);
-        hostDesign->bin_edges_x()[id].assign(edgesX.begin(), edgesX.end());
-        const auto edgesY = makeEquidistantEdges(0.5f * key.length, key.nBinsY);
-        hostDesign->bin_edges_y()[id].assign(edgesY.begin(), edgesY.end());
+        
+        if(!key.isAnnulus){
+            hostDesign->bin_edges_x()[id].assign(key.edgesX.begin(), key.edgesX.end());
+            hostDesign->bin_edges_y()[id].assign(key.edgesY.begin(), key.edgesY.end());
+            std::array<detray::dindex_type<traccc::default_algebra>, 2u>{0u, 1u};
+        }else{
+            hostDesign->bin_edges_y()[id].assign(key.edgesX.begin(), key.edgesX.end());
+            hostDesign->bin_edges_x()[id].assign(key.edgesY.begin(), key.edgesY.end());
+            std::array<detray::dindex_type<traccc::default_algebra>, 2u>{1u, 0u};
+        }
+        
         hostDesign->dimensions()[id] = key.pixel ? 2 : 1;
-        hostDesign->subspace()[id] =
-            key.isAnnulus
-                ? std::array<detray::dindex_type<traccc::default_algebra>, 2u>{0u, 1u}
-                : std::array<detray::dindex_type<traccc::default_algebra>, 2u>{1u, 0u};
     }
 
-    std::vector<unsigned int> m_designSizes(hostDesign->size());
+    std::vector<unsigned int> designSizes(hostDesign->size());
     for (std::size_t i = 0; i < hostDesign->size(); ++i) {
         auto thisDesign = hostDesign->at(i);
-        m_designSizes[i] = std::max(
+        designSizes[i] = std::max(
             static_cast<unsigned int>(thisDesign.bin_edges_x().size()),
             static_cast<unsigned int>(thisDesign.bin_edges_y().size()));
     }
 
     auto initCopy = m_copy->copy(EventContext{});
     auto deviceDesign = std::make_unique<traccc::detector_design_description::buffer>(
-        m_designSizes, m_MRs->mainMR(), m_MRs->hostMR(),
+        designSizes, m_MRs->mainMR(), m_MRs->hostMR(),
         vecmem::data::buffer_type::resizable);
     (*initCopy).setup(*deviceDesign)->wait();
     (*initCopy)(vecmem::get_data(*hostDesign), *deviceDesign)->wait();
@@ -330,9 +388,6 @@ StatusCode DeviceDetectorDescriptionCondAlg::execute(const EventContext& ctx) co
                 // if(isAnnulus){
                 //     shiftX = m_stripLorentzAngleTool->getLorentzShift(moduleHash + side, ctx);
                 //     shiftY = 0.f;
-                // } else {
-                //     shiftY = m_stripLorentzAngleTool->getLorentzShift(moduleHash + side, ctx);
-                //     shiftX = 0.f;
                 // }    
             }
         }
@@ -340,44 +395,6 @@ StatusCode DeviceDetectorDescriptionCondAlg::execute(const EventContext& ctx) co
         hostCond->measurement_translation()[condIndex] =
             traccc::vector2{static_cast<traccc::scalar>(shiftX), static_cast<traccc::scalar>(shiftY)};
     }
-
-    // ---- 6. Fill neighbour / backside indices for strip modules ----
-    // This is not implemented yet on the traccc side (backside_id()/
-    // neighbours() columns), left here for when that support lands, since
-    // it will greatly help with strip space point formation.
-    // for (const auto& [athenaId, condIndex] : m_athenaToCondIndex) {
-    //     auto modIt = m_atlasModuleInfo.find(athenaId);
-    //     if (modIt == m_atlasModuleInfo.end() || modIt->second.pixel) continue;
-
-    //     // neighbours is only for front-side hashes, matching the usage in
-    //     // StripSpacePointFormationTool
-    //     if (modIt->second.side != 0) continue;
-
-    //     const std::vector<IdentifierHash>* others =
-    //         properties->neighbours(m_stripID->wafer_hash(athenaId));
-    //     if (others == nullptr || others->empty()) continue;
-
-    //     // Element 0 in `others` is always the opposite/stereo (backside)
-    //     // module, per the ordering used in
-    //     // StripSpacePointFormationTool::produceSpacePoints
-    //     // (neigbourIndices = {ThisOne, Opposite, EtaMinus, EtaPlus,
-    //     // PhiMinus, PhiPlus}).
-    //     const Identifier backsideId = m_stripID->wafer_id(others->at(0));
-    //     auto backIt = m_athenaToCondIndex.find(backsideId);
-    //     if (backIt != m_athenaToCondIndex.end()) {
-    //         hostCond->backside_id()[condIndex] =
-    //             static_cast<unsigned int>(backIt->second);
-    //     }
-
-    //     auto& nbrs = hostCond->neighbours()[condIndex];
-    //     for (std::size_t i = 1; i < others->size(); ++i) {
-    //         const Identifier neighbourId = m_stripID->wafer_id(others->at(i));
-    //         auto nbrIt = m_athenaToCondIndex.find(neighbourId);
-    //         if (nbrIt != m_athenaToCondIndex.end()) {
-    //             nbrs.push_back(static_cast<unsigned int>(nbrIt->second));
-    //         }
-    //     }
-    // }
 
     auto copy = m_copy->copy(ctx);
     auto deviceCond = std::make_unique<traccc::detector_conditions_description::buffer>(

@@ -10,6 +10,8 @@
 #include "ActsGPUEvent/TracccDetectorConditionsDescription.h"
 #include "ActsGPUEvent/TracccDetectorDesignDescription.h"
 
+#include <Gaudi/Accumulators.h>
+
 namespace ActsTrk {
 
 /**
@@ -36,6 +38,7 @@ public:
 
     virtual StatusCode initialize() override;
     virtual StatusCode execute(const EventContext& ctx) const override;
+    virtual StatusCode finalize() override;
 
 private:
     StatusCode validateDetectorDescription(
@@ -43,6 +46,13 @@ private:
         const traccc::detector_conditions_description::host& refCond,
         const traccc::detector_design_description::host& candDesign,
         const traccc::detector_conditions_description::host& candCond) const;
+    
+    // counts for validation
+    mutable Gaudi::Accumulators::Counter<> m_nChecked;
+    mutable Gaudi::Accumulators::Counter<> m_nMissingInCandidate;
+    mutable Gaudi::Accumulators::Counter<> m_nDesignMismatch;
+    mutable Gaudi::Accumulators::Counter<> m_nIdMismatch;
+    mutable Gaudi::Accumulators::Counter<> m_nShiftMismatch;    
 
     // ---- candidate (production) design + conditions ----
     Gaudi::Property<std::string> m_monDesignObjectName{
