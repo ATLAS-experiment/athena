@@ -77,13 +77,20 @@ def FwdElectronIsolationSteeringDerivCfg(flags, name = 'FwdElectronIsolationStee
     isoCor   = [ [ isoPar.coreCone, isoPar.pileupCorrection ]]
     isoExCor = [ [ ] ]
     kwargs['CaloTopoIsolationTool'] = acc.popToolsAndMerge(EGammaCaloIsolationToolCfg(flags))
-
+    
+    
     if flags.Detector.EnableITk :
         from IsolationAlgs.IsoToolsConfig import ElectronTrackIsolationToolCfg
         isoType.append([ isoPar.ptcone30, isoPar.ptcone20 ])
         isoCor.append([ isoPar.coreTrackPtr ])
         isoExCor.append([])
-        kwargs['TrackIsolationTool'] = acc.popToolsAndMerge(ElectronTrackIsolationToolCfg(flags))
+        if flags.Reco.EnableHGTDExtension:
+            extraInputs = []
+            extraInputs += [("xAOD::TrackParticleContainer","StoreGateSvc+GSFTrackParticles.time")]
+            kwargs.setdefault("ExtraInputs", extraInputs)
+            kwargs['TrackIsolationTool'] = acc.popToolsAndMerge(ElectronTrackIsolationToolCfg(flags,DoForwardIsoTiming=True))
+        else:
+            kwargs['TrackIsolationTool'] = acc.popToolsAndMerge(ElectronTrackIsolationToolCfg(flags))
         
     kwargs['FwdElIsoTypes'] = isoType
     kwargs['FwdElCorTypes'] = isoCor

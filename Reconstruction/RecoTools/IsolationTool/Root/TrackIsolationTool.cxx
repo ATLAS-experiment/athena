@@ -18,6 +18,7 @@
 #include "xAODPrimitives/IsolationHelpers.h"
 #include "xAODPrimitives/IsolationCorrectionHelper.h"
 #include "xAODMuon/Muon.h"
+#include "xAODEgamma/Electron.h"
 #include <iomanip>
 
 namespace xAOD {
@@ -97,6 +98,15 @@ namespace xAOD {
                         muon->phi()<<" q: "<<muon->charge()<<" primaryAuthor: "<<muon->author()<< " allAuthors: "<<muon->allAuthors());
       } else return tp;
     }
+    else if( particle.type() == xAOD::Type::ObjectType::Electron )
+      {
+	const Electron* electron = static_cast<const xAOD::Electron*>(&particle);
+	if (electron->author(xAOD::EgammaParameters::AuthorFwdElectron) && m_DoTimingSel)
+	  {
+	    const xAOD::TrackParticle* tp = electron->trackParticle();
+	    return tp;
+	  }
+      }
     return &particle;
   }
 
@@ -263,6 +273,37 @@ namespace xAOD {
     // check dr2
     float dr2 = deta*deta + dphi*dphi;
 
+    float dT_Sig=0;
+    //CheckTiming for ForwardElectron case
+    if(m_DoTimingSel &&  input.particle->type() == xAOD::Type::ObjectType::TrackParticle)
+      {
+	std::cout<<"Doing the timing selection "<<std::endl;
+	const xAOD::TrackParticle* tp = static_cast<const xAOD::TrackParticle*>(input.particle);
+	std::cout<<" before valid time"<<std::endl;
+	static const SG::AuxElement::Accessor<uint8_t> accValid("hasValidTime");
+	std::cout<<" after valid time"<<std::endl;
+	if (accValid.isAvailable(*tp) && accValid.isAvailable(tp2))
+	  {
+	    std::cout<<" after valid time2 "<<std::endl;
+	    if (accValid(*tp) && accValid(tp2))
+	      {
+		std::cout<<" In valid time2 "<<std::endl;
+		std::cout<<tp->time()<<std::endl;//<<" "<<tp->timeResolution()
+		std::cout<<tp2.time()<<" "<<tp2.timeResolution()<<std::endl;
+		dT_Sig = abs(tp->time() - tp2.time()) / sqrt( pow(tp2.timeResolution(),2));//pow(1/(sqrt(abs(tp->time()))),2) + find out how to get the resolution
+		std::cout<<"Doing the timing selection dT is "<<dT_Sig <<std::endl;
+		 }
+	    else
+	      {
+		ATH_MSG_DEBUG("No valid time for the track while doing track->time()" );
+		dT_Sig=0;
+	      }
+	  }
+      }
+    if( dT_Sig > m_maxTime) return;
+
+
+    //
     // check cone if using cone based overlap removal
     if(input.corrections.trackbitset.test(static_cast<unsigned int>(Iso::coreTrackCone))
        && dr2 < m_overlapCone2 ) {
