@@ -203,7 +203,7 @@ class FTagJetSFBlock(ConfigBlock):
                 if self.bTagCalibTriggerFile is not None :
                     bTagCalibTriggerFile = self.bTagCalibTriggerFile
                 else:
-                    bTagCalibTriggerFile = getRecommendedBTagTrigCalib(config.geometry())
+                    bTagCalibTriggerFile = getRecommendedBTagTrigCalib(config.geometry(), config.campaign())
 
                 bTagOnlineTagger, bTagOnlineWP = getBTagOnlineTaggerWP(chain, log)
                 if self.bTagOnlineTagger:
