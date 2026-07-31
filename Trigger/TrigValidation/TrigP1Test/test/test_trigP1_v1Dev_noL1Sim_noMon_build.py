@@ -1,7 +1,7 @@
 #!/usr/bin/env python
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
-# art-description: athenaHLT test of the Dev_pp_run3_v1 menu without monitoring (ATR-24655)
+# art-description: athenaEF test of the Dev_pp_run3_v1 menu without monitoring (ATR-24655)
 # art-type: build
 # art-include: main/Athena/x86_64-el9-gcc15-opt
 # art-include: 24.0/Athena
@@ -11,7 +11,7 @@ import json
 
 # 1) Dump JSON configuration
 ex1 = ExecStep.ExecStep('dumpConfig')
-ex1.type = 'athenaHLT'
+ex1.type = 'athenaEF'
 ex1.job_options = 'TriggerJobOpts.runHLT'
 ex1.input = 'data'
 ex1.flags = ['Trigger.triggerMenuSetup="Dev_pp_run3_v1"',
@@ -37,7 +37,7 @@ noMon = PyStep.PyStep(fix_json)
 
 # 3) Run from new JSON file
 ex2 = ExecStep.ExecStep()
-ex2.type = 'athenaHLT'
+ex2.type = 'athenaEF'
 ex2.use_pickle = True   # do not check existence of job options
 ex2.job_options = 'HLTJobOptions.json'
 ex2.input = 'data'
