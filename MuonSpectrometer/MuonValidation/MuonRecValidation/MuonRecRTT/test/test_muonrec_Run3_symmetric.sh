@@ -24,10 +24,9 @@ conditions=$(python -c "from AthenaConfiguration.TestDefaults import defaultCond
 
 Reco_tf.py --inputRDOFile /cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonRecRTT/Run3/RDO/RDO_DiMuon_Endcap_R3LatestLayout_sym_v1.root \
            --autoConfiguration everything \
-           --preExec "flags.Detector.GeometryMM = True;flags.Detector.EnableMM = True" \
            --imf False \
            --postInclude MuonPRDTest.HitValAlgReco.HitValAlgRecoCfg \
-           --conditionsTag $conditions \
+           --conditionsTag ${conditions} \
            --outputESDFile OUT_ESD.root
 exit_code=$?
 echo  "art-result: ${exit_code} Reco_tf.py"

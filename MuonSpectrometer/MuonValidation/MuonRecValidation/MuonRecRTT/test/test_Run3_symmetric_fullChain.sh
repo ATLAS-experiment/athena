@@ -31,11 +31,10 @@
 # the postInclude adds a validation algorithm which writes out an ntuple for sim hit validation
 # (without the postInclude, a standard simulation job would run)
 
-        #   --preInclude "EVNTtoHITS:SimulationJobOptions/preInclude.G4Optimizations.py,SimulationJobOptions/preInclude.BeamPipeKill.py,SimulationJobOptions/preInclude.FrozenShowersFCalOnly.py" \
-        # Probably need to change pre-include when swapping to newer MC file
 
-cond_tag="default:OFLCOND-MC21-SDR-RUN3-11"
-geo_version="default:ATLAS-R3S-2021-03-02-01"
+cond_tag=$(python -c "from AthenaConfiguration.TestDefaults import defaultConditionsTags; print(defaultConditionsTags.RUN3_DATA22)")
+
+geo_version=$(python -c "from AthenaConfiguration.TestDefaults import defaultGeometryTags; print(defaultGeometryTags.RUN3)")
 
 Sim_tf.py --CA True \
           --athenaopts="all:--threads=1" \
