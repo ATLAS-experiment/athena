@@ -21,7 +21,6 @@ ex.input = 'ttbar_pu200_Run4'
 ex.threads = 1
 ex.args = '--outputRDO_TRIGFile=RDO_TRIG.pool.root'
 ex.args += ' --steering "doRDO_TRIG"'
-ex.args += ' --CA "all:True"'
 ex.args += ' --preInclude "all:Campaigns.MC23PhaseIIPileUp200"'
 ex.args += f' --preExec "all:{preExec};"'
 ex.args += f' --conditionsTag "default:{defaultConditionsTags.RUN4_MC}"'

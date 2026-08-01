@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 #
 # art-description: Test of the RDOtoRDOTrigger transform with threads=1
 # art-type: build
@@ -25,8 +25,6 @@ ex.threads = 1
 ex.args = '--outputRDO_TRIGFile=RDO_TRIG.pool.root'
 ex.args += ' --preExec="all:{:s};"'.format(preExec)
 ex.args += ' --preInclude "all:Campaigns.MC23e"'
-ex.args += ' --CA "all:True"'
-# temporary conditions override, until the MC23c RDO is replaced with a MC23e RDO
 ex.args += ' --conditionsTag "' + conditions + '"'
 
 test = Test.Test()

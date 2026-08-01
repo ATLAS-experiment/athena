@@ -27,7 +27,6 @@ rdotrig_ref.threads = 1
 rdotrig_ref.max_events = nevents
 rdotrig_ref.args = '--outputRDO_TRIGFile=RDO_TRIG.ref.pool.root'
 rdotrig_ref.args += ' --preInclude "all:Campaigns.MC23e"'
-rdotrig_ref.args += ' --CA "all:True"'
 rdotrig_ref.args += f' --conditionsTag \'{defaultConditionsTags.RUN3_MC}\''
 rdotrig_ref.flags = [
    'Trigger.triggerMenuSetup=\'Dev_pp_run3_v1_TriggerValidation_prescale\'',
