@@ -152,7 +152,7 @@ def run(flags):
    # addFolders requires at least an empty sqlite file
    Path('beampos.db').touch()
 
-   # These folders are filled in Testing/condStopStart.trans
+   # These folders are filled in setup()
    cfg.merge( addFolders(flags, '/Indet/Onl/Beampos <key>/Indet/Beampos</key>',
                          detDb='beampos.db',
                          tag='IndetBeamposOnl-HLT-UPD1-001-00',
