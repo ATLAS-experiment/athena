@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 #
 # art-description: Test running HITS->RDO in main/24.0, then RDO->RDO_TRIG in 21.0, then RDO_TRIG->AOD in main/24.0, then AOD->DAOD with multiprocess in main
 # art-type: build
@@ -38,6 +38,7 @@ rdo2rdotrig.args += ' --triggerConfig="MCRECO:MC_pp_v7_BulkMCProd_mc_prescale"'
 rdo2rdotrig.args += ' --imf="all:True"'
 rdo2rdotrig.args += ' --conditionsTag="RDOtoRDOTrigger:OFLCOND-MC16-SDR-RUN2-08-02"'
 rdo2rdotrig.args += ' --preInclude "all:Campaigns/MC20e.py"'
+rdo2rdotrig.args += ' --CA False'
 
 # RDO_TRIG -> AOD step in main/23.0
 rdotrig2aod = ExecStep.ExecStep('RDOTriggertoAOD')
@@ -51,7 +52,6 @@ rdotrig2aod.args += ' --postExec="all:from OutputStreamAthenaPool.OutputStreamCo
 rdotrig2aod.args += f' --conditionsTag="all:{defaultConditionsTags.RUN2_MC}"'
 rdotrig2aod.args += ' --preInclude "all:Campaigns.MC20e"'
 rdotrig2aod.args += ' --steering "doRDO_TRIG"'
-rdotrig2aod.args += ' --CA "all:True"'
 
 # AOD -> DAOD step in main
 aod2daod = ExecStep.ExecStep('AODtoDAOD')

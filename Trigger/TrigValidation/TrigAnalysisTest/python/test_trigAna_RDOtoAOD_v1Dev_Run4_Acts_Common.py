@@ -26,7 +26,6 @@ def prepare_acts_rdo2aod(pipeline : str):
     rdo2aod.threads = 8
     rdo2aod.max_events = 100
     rdo2aod.args = '--outputAODFile=AOD.pool.root --steering "doRDO_TRIG"'
-    rdo2aod.args += ' --CA "all:True"'
     rdo2aod.args += ' --perfmon fullmonmt'
     rdo2aod.args += f' --preExec "all:{preExec};"'
     rdo2aod.args += ' --preInclude "all:Campaigns.MC23PhaseIIPileUp200" "RAWtoALL:ActsConfig.ActsCIFlags.actsProductionFlags"'
