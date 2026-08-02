@@ -39,8 +39,8 @@ namespace ActsTrk {
         /** @brief Build the Itk Blueprint Node
          *  @param gctx Geometry context
          *  @param child The child node which is added to the itk node.*/
-        std::shared_ptr<Acts::Experimental::BlueprintNode> buildBlueprintNode(const Acts::GeometryContext& gctx,
-                                      std::shared_ptr<Acts::Experimental::BlueprintNode>&& childNode) override;
+        std::shared_ptr<Acts::BlueprintNode> buildBlueprintNode(const Acts::GeometryContext& gctx,
+                                      std::shared_ptr<Acts::BlueprintNode>&& childNode) override;
 
     private:
 
@@ -71,7 +71,7 @@ namespace ActsTrk {
         ** It creates a new CylinderContainerBlueprintNode in the container node, then creates a new Acts::TrackingVolume with the appropriate dimensions.
         ** Finally it adds the Acts::CylinderSurface to that Acts::TrackingVolume, then adds the tracking volume to the container node.
         */
-        void addCylindricalTrackingVolumeToCaloNode(Acts::Experimental::CylinderContainerBlueprintNode& containerNode, const std::string& volumeName,const std::vector<std::shared_ptr<Acts::Surface>>& surfaces, int layerIndex,  const bool& isDisc) const;
+        void addCylindricalTrackingVolumeToCaloNode(Acts::CylinderContainerBlueprintNode& containerNode, const std::string& volumeName,const std::vector<std::shared_ptr<Acts::Surface>>& surfaces, int layerIndex,  const bool& isDisc) const;
 
         void generateDiscSurfaces(caloSampleSurfaceMap_t& caloSampleSurfaceMap, caloSampleDDEElementsMap_t& caloSampleDDEElementsMap) const;
 

@@ -29,8 +29,8 @@ class IBlueprintNodeBuilder : virtual public IAlgTool {
     DeclareInterfaceID(IBlueprintNodeBuilder, 1, 0);
 
 
-    virtual std::shared_ptr<Acts::Experimental::BlueprintNode> buildBlueprintNode(const Acts::GeometryContext& gctx, 
-                                                                  std::shared_ptr<Acts::Experimental::BlueprintNode>&& childNode) = 0;
+    virtual std::shared_ptr<Acts::BlueprintNode> buildBlueprintNode(const Acts::GeometryContext& gctx, 
+                                                                  std::shared_ptr<Acts::BlueprintNode>&& childNode) = 0;
 
   
 };

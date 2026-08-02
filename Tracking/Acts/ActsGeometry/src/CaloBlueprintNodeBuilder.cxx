@@ -29,7 +29,6 @@
 #include "CaloIdentifier/CaloCell_ID.h"
 
 using namespace Acts;
-using namespace Acts::Experimental;
 using namespace Acts::UnitLiterals;
 using AttachmentStrategy = Acts::VolumeAttachmentStrategy;
 using ResizeStrategy = Acts::VolumeResizeStrategy;
@@ -494,7 +493,7 @@ std::shared_ptr<Acts::DiscSurface> ActsTrk::CaloBlueprintNodeBuilder::generateDi
 void ActsTrk::CaloBlueprintNodeBuilder::addCylindricalTrackingVolumeToCaloNode(CylinderContainerBlueprintNode& containerNode, const std::string& volumeName,const std::vector<std::shared_ptr<Acts::Surface>>& surfaces, int layerIndex, const bool& isDisc) const{
 
   // Construct the container node with geometry identifier and layer, and add the surfaces to the layer.
-  Acts::Experimental::GeometryIdentifierBlueprintNode& geoIdNode = containerNode.withGeometryIdentifier();
+  Acts::GeometryIdentifierBlueprintNode& geoIdNode = containerNode.withGeometryIdentifier();
   geoIdNode.setAllVolumeIdsTo(s_caloBarrelId +
   layerIndex);
 

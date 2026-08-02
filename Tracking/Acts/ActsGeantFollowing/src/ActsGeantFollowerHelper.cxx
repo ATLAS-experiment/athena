@@ -259,7 +259,12 @@ void ActsGeantFollowerHelper::trackParticle(const G4ThreeVector& pos,
   }
   float X0Acts = actsSteps->second.materialInX0;
 
-  int volID = trackingGeometry->lowestTrackingVolume(tgContext, actsParameters->position(tgContext))->geometryId().volume();
+  auto lowestVolume = trackingGeometry->resolveLowestTrackingVolume(tgContext, actsParameters->position(tgContext));
+  if(not lowestVolume.ok() or *lowestVolume == nullptr){
+    ATH_MSG_ERROR("Could not resolve the lowest tracking volume, skip the current step");
+    return;
+  }
+  int volID = (*lowestVolume)->geometryId().volume();
 
   // fill the geant information and the trk information
   m_treeData->m_g4_pt[m_treeData->m_g4_steps]      =  mom.mag()/std::cosh(mom.eta());

@@ -170,17 +170,17 @@ StatusCode TrackingGeometrySvc::initialize() {
                std::back_inserter(ptrBuilders),
                [](ToolHandle<ActsTrk::IBlueprintNodeBuilder>& b) { return b.get(); });
 
-    auto logger = makeActsAthenaLogger(this, std::string("Blueprint"), std::string("ActsTGSvc"));
+    auto logger = makeActsAthenaLogger(this, name());
     
-    Acts::Experimental::Blueprint::Config cfg;
+    Acts::Blueprint::Config cfg;
     cfg.envelope[AxisZ] = {20_mm, 20_mm};
     cfg.envelope[AxisR] = {0_mm, 20_mm};
 
-    auto blueprint = std::make_unique<Acts::Experimental::Blueprint>(cfg);
+    auto blueprint = std::make_unique<Acts::Blueprint>(cfg);
 
     auto& root = blueprint->addCylinderContainer("Detector", AxisZ);
     //The starting top node 
-    std::shared_ptr<Acts::Experimental::BlueprintNode> currentTop{nullptr};
+    std::shared_ptr<Acts::BlueprintNode> currentTop{nullptr};
 
     for (auto& builder : ptrBuilders) {
       currentTop = builder->buildBlueprintNode(getNominalContext().context(), std::move(currentTop));
@@ -189,7 +189,7 @@ StatusCode TrackingGeometrySvc::initialize() {
 
     root.addChild(std::move(currentTop));
     
-    Acts::Experimental::BlueprintOptions blueprintOptions;
+    Acts::BlueprintOptions blueprintOptions;
     blueprintOptions.keepGoingOnMaterialMergeFailure = m_keepGoingOnMaterialMergeFailure;
     std::unique_ptr<Acts::TrackingGeometry> trackingGeometry = blueprint->construct(
       blueprintOptions, getNominalContext().context(), *logger->clone(std::nullopt, Acts::Logging::DEBUG));

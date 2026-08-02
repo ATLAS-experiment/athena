@@ -68,20 +68,20 @@ StatusCode HgtdBlueprintNodeBuilder::initialize() {
   return StatusCode::SUCCESS;
 }
 
-std::shared_ptr<Acts::Experimental::BlueprintNode>
+std::shared_ptr<Acts::BlueprintNode>
 HgtdBlueprintNodeBuilder::buildBlueprintNode(
     const Acts::GeometryContext& gctx,
-    std::shared_ptr<Acts::Experimental::BlueprintNode>&& child) {
+    std::shared_ptr<Acts::BlueprintNode>&& child) {
 
   ExtentEnvelope envelope = ExtentEnvelope{{
       .z = {20_mm, 20_mm},
       .r = {0_mm, 20_mm},
   }};
-  auto itkHgtdPad = std::make_shared<Acts::Experimental::PadBlueprintNode>(
+  auto itkHgtdPad = std::make_shared<Acts::PadBlueprintNode>(
       "itkHgtdPad", envelope);
 
   auto itkHgtdNode =
-      std::make_shared<Acts::Experimental::CylinderContainerBlueprintNode>(
+      std::make_shared<Acts::CylinderContainerBlueprintNode>(
           "itkHgtd", AxisZ);
 
   if (child) {
@@ -95,7 +95,7 @@ HgtdBlueprintNodeBuilder::buildBlueprintNode(
 
 void HgtdBlueprintNodeBuilder::buildHgtdBlueprintNode(
     const Acts::GeometryContext& /*gctx*/,
-    Acts::Experimental::BlueprintNode& node) {
+    Acts::BlueprintNode& node) {
   if (not m_hgtdMgr) {
     ATH_MSG_ERROR("HGTD manager not available");
     throw std::runtime_error("HGTD manager not available");
@@ -178,7 +178,7 @@ void HgtdBlueprintNodeBuilder::buildHgtdBlueprintNode(
 }
 
 void HgtdBlueprintNodeBuilder::addHgtdLayers(
-    Acts::Experimental::BlueprintNode& parent, int bec, int index,
+    Acts::BlueprintNode& parent, int bec, int index,
     const std::string& name,
     std::vector<std::shared_ptr<Acts::Surface>>& surfaces) {
   using enum Acts::SurfaceArrayNavigationPolicy::LayerType;

@@ -47,10 +47,7 @@ class ILayerBuilder;
 
 class GeometryIdentifier;
 class BinnedSurfaceMaterial;
-
-namespace Experimental {
 class BlueprintNode;
-}
 
 }
 

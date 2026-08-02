@@ -281,7 +281,7 @@ namespace ActsTrk {
 		  }
 		  
 		  const auto& [unbiasedParameters, unbiasedCovariance] =
-		    evaluateUnbiased ? Acts::calculateUnbiasedParametersCovariance(state) : std::make_pair(state.parameters(), state.covariance());
+		    evaluateUnbiased ? Acts::calculateUnbiasedParametersCovariance(Acts::AnyConstTrackStateProxy{state}) : std::make_pair(state.parameters(), state.covariance());
 		  
 		  measurementLocX = calibratedParameters[Acts::eBoundLoc0];
 		  measurementLocCovX = calibratedCovariance(Acts::eBoundLoc0, Acts::eBoundLoc0);
