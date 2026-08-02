@@ -43,7 +43,7 @@ namespace {
 
   //Helper function to configure a material node with the correct Faces of the chambers' tracking volumes
   void configureMaterialFaces(
-    Acts::Experimental::MaterialDesignatorBlueprintNode& node,
+    Acts::MaterialDesignatorBlueprintNode& node,
     const Acts::VolumeBounds& bounds,
     std::shared_ptr<const Acts::ISurfaceMaterial> material){
 
@@ -93,7 +93,7 @@ namespace ActsTrk {
   }
 
 
-std::shared_ptr<Acts::Experimental::BlueprintNode> MuonBlueprintNodeBuilder::buildBlueprintNode(const Acts::GeometryContext& gctx, std::shared_ptr<Acts::Experimental::BlueprintNode>&& childNode) {
+std::shared_ptr<Acts::BlueprintNode> MuonBlueprintNodeBuilder::buildBlueprintNode(const Acts::GeometryContext& gctx, std::shared_ptr<Acts::BlueprintNode>&& childNode) {
 
 EnvelopeSet_t elements;
 EnvelopeSet_t barrelStations, endcapOuterAStations, endcapOuterCStations, 
@@ -139,7 +139,7 @@ std::visit([&](auto& elems) {
 }, elements);
 
   // Top level node for the Muon system
-auto muonNode = std::make_shared<Acts::Experimental::CylinderContainerBlueprintNode>("MuonNode", Acts::AxisDirection::AxisZ);
+auto muonNode = std::make_shared<Acts::CylinderContainerBlueprintNode>("MuonNode", Acts::AxisDirection::AxisZ);
 
 Acts::VolumeBoundFactory boundsFactory{};
 using namespace ActsTrk::detail::GeoVolIds;
@@ -164,7 +164,7 @@ return muonNode;
 
 }
 
-std::shared_ptr<Acts::Experimental::StaticBlueprintNode>
+std::shared_ptr<Acts::StaticBlueprintNode>
 MuonBlueprintNodeBuilder::buildMuonNode(const Acts::GeometryContext& gctx, 
                                         const EnvelopeSet_t& elements, 
                                         const std::string& name, 
@@ -274,7 +274,7 @@ MuonBlueprintNodeBuilder::buildMuonNode(const Acts::GeometryContext& gctx,
       volume->addSurface(surf);
     });
 
-    auto muonNode = std::make_shared<Acts::Experimental::StaticBlueprintNode>(std::move(volume));
+    auto muonNode = std::make_shared<Acts::StaticBlueprintNode>(std::move(volume));
     ATH_MSG_DEBUG("There are " << nodes.size() << " nodes");
     //loop through the nodes-material pairs to add the nodes to the muon node and assign the material to the faces 
     std::ranges::for_each(nodes, [&muonNode](auto& nodeVariant){
@@ -289,10 +289,10 @@ MuonBlueprintNodeBuilder::buildMuonNode(const Acts::GeometryContext& gctx,
 std::variant<MuonBlueprintNodeBuilder::staticNodePtr, MuonBlueprintNodeBuilder::materialNodePtr>
 MuonBlueprintNodeBuilder::buildChamberNode(const blueprintNodePtr& chamberVolumeNode) const{
     if (m_assignActiveMaterial) {
-        auto materialNode = std::dynamic_pointer_cast<Acts::Experimental::MaterialDesignatorBlueprintNode>(chamberVolumeNode);  
+        auto materialNode = std::dynamic_pointer_cast<Acts::MaterialDesignatorBlueprintNode>(chamberVolumeNode);  
         return materialNode;
     }
-    auto staticNode = std::dynamic_pointer_cast<Acts::Experimental::StaticBlueprintNode>(chamberVolumeNode);
+    auto staticNode = std::dynamic_pointer_cast<Acts::StaticBlueprintNode>(chamberVolumeNode);
     return staticNode;   
 }
 
@@ -303,9 +303,9 @@ MuonBlueprintNodeBuilder::buildChamberNode(const T& element,
                                           const std::vector<blueprintNodePtr>& innerStructure) const{
   //copy of the volume bounds
   const Acts::VolumeBounds& bounds = vol->volumeBounds();
-  staticNodePtr staticNode = std::make_shared<Acts::Experimental::StaticBlueprintNode>(std::move(vol));
+  staticNodePtr staticNode = std::make_shared<Acts::StaticBlueprintNode>(std::move(vol));
   for (auto& childNode : innerStructure) {
-      auto node = std::dynamic_pointer_cast<Acts::Experimental::StaticBlueprintNode>(childNode);
+      auto node = std::dynamic_pointer_cast<Acts::StaticBlueprintNode>(childNode);
       if (node) {
           staticNode->addChild(std::move(node));
       } 
@@ -313,7 +313,7 @@ MuonBlueprintNodeBuilder::buildChamberNode(const T& element,
   if(!m_assignActiveMaterial){
     return staticNode;
   }
-  auto materialNode = std::make_shared<Acts::Experimental::MaterialDesignatorBlueprintNode>(element->identString() + "_MaterialNode");
+  auto materialNode = std::make_shared<Acts::MaterialDesignatorBlueprintNode>(element->identString() + "_MaterialNode");
   configureMaterialFaces(*materialNode, bounds, getActiveMaterial(*element));
   materialNode->addChild(staticNode);
   return materialNode;
@@ -350,7 +350,7 @@ MuonBlueprintNodeBuilder::BluePrintSurfPairs_t
 
           //initialize a nullptr material node which will be filled in the case of single MDT readout elements 
           //and used to assign the material to the volume and add the static node as child of the material node
-          std::shared_ptr<Acts::Experimental::MaterialDesignatorBlueprintNode> mdtMaterialNode;
+          std::shared_ptr<Acts::MaterialDesignatorBlueprintNode> mdtMaterialNode;
 
           //special treatment of BIS78 MDT multilayer
           //use different shape because of clashes with EIL chambers 
@@ -413,7 +413,7 @@ MuonBlueprintNodeBuilder::BluePrintSurfPairs_t
                               -parameters.halfHeight,
                               parameters.halfHeight,
                               static_cast<std::size_t>(std::lround(2 * parameters.halfHeight / parameters.tubePitch))}, 1u}};
-          Acts::Experimental::MultiWireVolumeBuilder mdtBuilder{mwCfg};
+          Acts::MultiWireVolumeBuilder mdtBuilder{mwCfg};
           std::unique_ptr<Acts::TrackingVolume> mdtVolume = mdtBuilder.buildVolume();
 
           mdtVolume->assignGeometryId(chId.withExtra(mdtId++));
@@ -421,14 +421,14 @@ MuonBlueprintNodeBuilder::BluePrintSurfPairs_t
           // check if this is a single mdt (single multilayer) chamber so we assign the material directly to the multilayer
           if(element.readoutEles().size() == 1 && m_assignActiveMaterial){
 
-            mdtMaterialNode = std::make_shared<Acts::Experimental::MaterialDesignatorBlueprintNode>(element.identString() + "_MaterialNode");
+            mdtMaterialNode = std::make_shared<Acts::MaterialDesignatorBlueprintNode>(element.identString() + "_MaterialNode");
             configureMaterialFaces(*mdtMaterialNode, mdtVolume->volumeBounds(), getActiveMaterial(element));
-            auto staticNode = std::make_shared<Acts::Experimental::StaticBlueprintNode>(std::move(mdtVolume));
+            auto staticNode = std::make_shared<Acts::StaticBlueprintNode>(std::move(mdtVolume));
             mdtMaterialNode->addChild(std::move(staticNode));
             readoutVolumes.push_back(std::move(mdtMaterialNode));
             break;
           }
-          auto mdtNode = std::make_shared<Acts::Experimental::StaticBlueprintNode>(std::move(mdtVolume));
+          auto mdtNode = std::make_shared<Acts::StaticBlueprintNode>(std::move(mdtVolume));
           mdtNode->setNavigationPolicyFactory(mdtBuilder.createNavigationPolicyFactory());
           readoutVolumes.push_back(std::move(mdtNode));
  

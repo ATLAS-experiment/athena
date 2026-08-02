@@ -112,7 +112,7 @@ std::vector<LayerData> mergeLayers(const Acts::GeometryContext& gctx,
 }
 
 void addStripBarrelLayer(
-    Acts::Experimental::BlueprintNode& parent, std::size_t ilayer,
+    Acts::BlueprintNode& parent, std::size_t ilayer,
     const std::vector<std::shared_ptr<Acts::Surface>>& surfaces) {
   using enum Acts::SurfaceArrayNavigationPolicy::LayerType;
   using enum Acts::CylinderVolumeBounds::Face;
@@ -154,7 +154,7 @@ void addStripBarrelLayer(
 }
 
 void addStripEndcapLayer(
-    Acts::Experimental::BlueprintNode& parent, const std::string& name,
+    Acts::BlueprintNode& parent, const std::string& name,
     const std::vector<std::shared_ptr<Acts::Surface>>& surfaces) {
   using enum Acts::SurfaceArrayNavigationPolicy::LayerType;
   using enum Acts::CylinderVolumeBounds::Face;
@@ -199,13 +199,13 @@ StatusCode ItkBlueprintNodeBuilder::initialize() {
   return StatusCode::SUCCESS;
 }
 
-std::shared_ptr<Acts::Experimental::BlueprintNode>
+std::shared_ptr<Acts::BlueprintNode>
 ItkBlueprintNodeBuilder::buildBlueprintNode(
     const Acts::GeometryContext& gctx,
-    std::shared_ptr<Acts::Experimental::BlueprintNode>&& childNode) {
+    std::shared_ptr<Acts::BlueprintNode>&& childNode) {
 
   auto itkNode =
-      std::make_shared<Acts::Experimental::CylinderContainerBlueprintNode>(
+      std::make_shared<Acts::CylinderContainerBlueprintNode>(
           "itkNode", AxisZ);
   itkNode->setAttachmentStrategy(AttachmentStrategy::Gap);
   itkNode->setResizeStrategy(ResizeStrategy::Gap);
@@ -240,7 +240,7 @@ ItkBlueprintNodeBuilder::buildBlueprintNode(
 
 void ItkBlueprintNodeBuilder::buildItkPixelBlueprintNode(
     const Acts::GeometryContext& gctx,
-    Acts::Experimental::BlueprintNode& node) {
+    Acts::BlueprintNode& node) {
 
   // Get ITkPixel parameters from detector manager
   if (!m_itkPixelMgr) {
@@ -569,7 +569,7 @@ void ItkBlueprintNodeBuilder::buildItkPixelBlueprintNode(
       for (size_t idx = 0; idx < diskGroups.size(); ++idx) {
         auto [disk1, disk2] = diskGroups[idx];
 
-        Acts::Experimental::MaterialDesignatorBlueprintNode* material = nullptr;
+        Acts::MaterialDesignatorBlueprintNode* material = nullptr;
         if (idx < (diskGroups.size() - 1)) {
           material = &ec_outer.addMaterial(
               "OuterPixel_" + s + "EC_" + std::to_string(idx) + "_Material",
@@ -638,7 +638,7 @@ void ItkBlueprintNodeBuilder::buildItkPixelBlueprintNode(
 
 void ItkBlueprintNodeBuilder::buildItkStripBlueprintNode(
     const Acts::GeometryContext& gctx,
-    Acts::Experimental::BlueprintNode& node) {
+    Acts::BlueprintNode& node) {
 
   // Get ITkStrip parameters from detector manager
   if (!m_itkStripMgr) {

@@ -24,11 +24,8 @@ namespace MuonGMR4 {
 
 namespace Acts {
   class GeometryContext;
-  namespace Experimental {
-    class StaticBlueprintNode;
-    class MaterialDesignatorBlueprintNode;
-    
-}
+  class StaticBlueprintNode;
+  class MaterialDesignatorBlueprintNode;
 
 }  // namespace Acts
 
@@ -42,11 +39,11 @@ namespace ActsTrk {
 class MuonBlueprintNodeBuilder : public extends<AthAlgTool, IBlueprintNodeBuilder> {
 public:
   /** @brief Abrivation of the blueprint node ptr base class */
-  using blueprintNodePtr = std::shared_ptr<Acts::Experimental::BlueprintNode>;
+  using blueprintNodePtr = std::shared_ptr<Acts::BlueprintNode>;
   /** @brief Abrivation of the blue print node pointer */
-  using staticNodePtr = std::shared_ptr<Acts::Experimental::StaticBlueprintNode>;
+  using staticNodePtr = std::shared_ptr<Acts::StaticBlueprintNode>;
   /** @brief Abrivation of the material node pointer */
-  using materialNodePtr = std::shared_ptr<Acts::Experimental::MaterialDesignatorBlueprintNode>;
+  using materialNodePtr = std::shared_ptr<Acts::MaterialDesignatorBlueprintNode>;
   /** @brief Abrivation of the surface pointer*/
   using surfacePtr = std::shared_ptr<Acts::Surface>;
   /** @brief Abrivate the vector pair of blue print nodes and associated active surfaces */
@@ -82,8 +79,8 @@ public:
   /** @brief Build the Muon Blueprint Node
     *  @param gctx Geometry context
     *  @param childNode The blueprint node as child of this node (for Muon System it should be Calo or Itk).*/
-  std::shared_ptr<Acts::Experimental::BlueprintNode> buildBlueprintNode(const Acts::GeometryContext& gctx,
-                                              std::shared_ptr<Acts::Experimental::BlueprintNode>&& childNode) override;
+  std::shared_ptr<Acts::BlueprintNode> buildBlueprintNode(const Acts::GeometryContext& gctx,
+                                              std::shared_ptr<Acts::BlueprintNode>&& childNode) override;
                                 
 private:
   /** @brief the Detector manager */

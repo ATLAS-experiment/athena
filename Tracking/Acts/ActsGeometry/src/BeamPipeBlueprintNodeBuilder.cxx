@@ -46,10 +46,10 @@ StatusCode BeamPipeBlueprintNodeBuilder::initialize() {
   return StatusCode::SUCCESS;
 }
 
-std::shared_ptr<Acts::Experimental::BlueprintNode>
+std::shared_ptr<Acts::BlueprintNode>
 BeamPipeBlueprintNodeBuilder::buildBlueprintNode(
     const Acts::GeometryContext& /*gctx*/,
-    std::shared_ptr<Acts::Experimental::BlueprintNode>&& child) {
+    std::shared_ptr<Acts::BlueprintNode>&& child) {
 
   // Beam pipe is the innermost element and has no child to wrap
   if (child) {
@@ -127,7 +127,7 @@ BeamPipeBlueprintNodeBuilder::buildBlueprintNode(
   //     cylinder)
   //           └── StaticVolume "BeamPipe"           (the actual cylinder)
   auto beamPipeNode =
-      std::make_shared<Acts::Experimental::GeometryIdentifierBlueprintNode>();
+      std::make_shared<Acts::GeometryIdentifierBlueprintNode>();
   beamPipeNode->setAllVolumeIdsTo(s_beamPipeVolumeId).incrementLayerIds(1);
 
   auto& beamPipeContainer =

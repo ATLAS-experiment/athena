@@ -40,7 +40,9 @@ namespace {
                 cluster.eta() : cluster.etaBE(2);
      
     }
-    inline std::array<float, 2> pack(const float eta, const float phi) {
+    /** @brief Pack eta & phi into the point type expected by the Acts multi axis,
+     *         which is a std::array<double, DIM> */
+    inline std::array<double, 2> pack(const double eta, const double phi) {
         return std::array{eta, phi};
     }
 }
@@ -158,8 +160,10 @@ namespace ActsTrk{
         
         const Acts::GeometryContext tgContext = m_ctxProvider.getGeometryContext(ctx);
         /** Prepare the clusters to match */
-        const SortedCluster_t coneClusters = selectAndSort(*caloClusters, detMgr);   
-  
+        const SortedCluster_t coneClusters = selectAndSort(*caloClusters, detMgr);
+        /** The binning of the cluster grid, used to look up the bins of interest */
+        const auto& clusterAxes = coneClusters.multiAxis();
+
         SG::WriteHandle writeHandle{m_caloExtensionKey, ctx};
         ATH_CHECK(writeHandle.record(std::make_unique<CaloExtensionContainer>()));
         
@@ -179,11 +183,12 @@ namespace ActsTrk{
             }
             // Loop over the neighbour bins corresponding to the track eta, phi
             // and match the clusters in that bin to the track
-            for (const auto binIdx : coneClusters.neighborHoodIndices(
-                                        coneClusters.localBinsFromPosition(pack(track->eta(), track->phi())))){
+            const auto trackPos = pack(track->eta(), track->phi());
+            for (const auto binIdx : clusterAxes.getNeighborHoodIndices(
+                                        clusterAxes.getLocalBinsFromPoint(trackPos))){
                 ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<"() - Try to match "<<coneClusters.at(binIdx).size()<<
                              " clusters from bin "<<binIdx<<". Central bin "
-                <<coneClusters.globalBinFromPosition(pack(track->eta(), track->phi())));
+                <<clusterAxes.getGlobalBinFromPoint(trackPos));
                 matchClusters(tgContext, coneClusters.at(binIdx), *extension);
             }
 
