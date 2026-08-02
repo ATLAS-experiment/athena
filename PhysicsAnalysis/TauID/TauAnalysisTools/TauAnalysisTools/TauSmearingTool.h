@@ -71,6 +71,7 @@ private:
   Gaudi::Property<bool> m_bMVATESQualityCheck{this, "MVATESQualityCheck", true};
   Gaudi::Property<bool> m_bApplyInsituCorrection{this, "ApplyInsituCorrection", true};
   Gaudi::Property<bool> m_useFastSim{this, "useFastSim", false}; 
+  Gaudi::Property<bool> m_useGNTau{this, "useGNTau",  false};
 
 }; // class TauSmearingTool
 
