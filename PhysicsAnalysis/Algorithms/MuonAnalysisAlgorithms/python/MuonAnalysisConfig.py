@@ -279,8 +279,8 @@ class MuonWorkingPointSelectionConfig (ConfigBlock) :
         elif self.quality == 'LowPt' :
             quality = 5
         elif self.quality == 'NoID':
-          # no muon quality requirement; quality selection is skipped
-          quality = None
+            # no muon quality requirement; quality selection is skipped
+            quality = None
         else :
             raise ValueError ("invalid muon quality: \"" + self.quality +
                               "\", allowed values are Tight, Medium, Loose, " +
