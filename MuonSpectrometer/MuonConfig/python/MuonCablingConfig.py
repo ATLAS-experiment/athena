@@ -60,25 +60,33 @@ def RPCLegacyCablingConfigCfg(flags):
 
     return acc
 
-
 def TGCCablingConfigCfg(flags, name="TgcCablingCondAlg", **kwargs):
     acc = ComponentAccumulator()
     if not flags.Detector.GeometryTGC: return acc
 
     from AthenaConfiguration.Enums import LHCPeriod
-    kwargs.setdefault("isRun4", flags.GeoModel.Run > LHCPeriod.Run3)
-    kwargs.setdefault("databaseASDtoPPdiff", 'ASD2PP_diff_12_OFL.db' if flags.Input.isMC else 'ASD2PP_diff_12_ONL.db')
+    isRun4 = flags.GeoModel.Run > LHCPeriod.Run3
+
+    if isRun4:
+        cablingPath = kwargs.pop("CablingPath", "/eos/atlas/atlascerngroupdisk/asg-calib/dev/MuonTGC_Cabling")
+        jsonFile = kwargs.pop("JSONFile", "R4_MuonTGC_Cabling_OFLtoONL_v1.json")
+    kwargs.setdefault("isRun4", isRun4)
+    kwargs.setdefault("databaseASDtoPPdiff", "ASD2PP_diff_12_OFL.db" if flags.Input.isMC else "ASD2PP_diff_12_ONL.db")
     the_alg = CompFactory.Muon.TgcCablingCondAlg(name, **kwargs)
-    acc.addCondAlgo(the_alg, primary = True)
-    if flags.GeoModel.Run > LHCPeriod.Run3:
-        from IOVDbSvc.IOVDbSvcConfig import addFolders
-        dbName = "TGC_OFL" if flags.Input.isMC else "TGC"
-        cablingFolder = "/TGC/CABLING/MAP_SCHEMA"
-        acc.merge(addFolders(flags, [cablingFolder], detDb=dbName, className="CondAttrListCollection"))
-        tgcCablingAlg = CompFactory.Muon.TgcCablingAlg("TgcCablingAlg", ReadKey=cablingFolder)
+    acc.addCondAlgo(the_alg, primary=True)
+    if isRun4:
+        import os
+        currentCalibPaths = os.environ.get("CALIBPATH", "").split(os.pathsep)
+        if cablingPath not in currentCalibPaths:
+            os.environ["CALIBPATH"] = os.pathsep.join([cablingPath] + [path for path in currentCalibPaths if path])
+        from PathResolver import PathResolver
+        jsonPath = PathResolver.FindCalibFile(jsonFile)
+        if not jsonPath:
+            raise RuntimeError(f"Failed to resolve Run-4 TGC cabling JSON: {jsonFile}. CALIBPATH={cablingPath}")
+        print(f"TGCCablingConfigCfg: resolved Run-4 TGC cabling JSON: {jsonPath}")
+        tgcCablingAlg = CompFactory.MuonR4.TgcCablingAlg("TgcCablingAlg", JSONFile=jsonPath)
         acc.addCondAlgo(tgcCablingAlg)
     return acc
-
 # This should be checked by experts since I just wrote it based on 
 # athena/MuonSpectrometer/MuonCnv/MuonCnvExample/python/MuonCablingConfig.py
 def MDTCablingConfigCfg(flags, name = "MuonMDT_CablingAlg", **kwargs):

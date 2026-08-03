@@ -13,6 +13,7 @@ atlas_add_component(
     StoreGateLib
     MuonCablingDataR4
     MuonIdHelpersLib
+    PathResolver
 )
 
 atlas_install_python_modules(

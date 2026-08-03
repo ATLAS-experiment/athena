@@ -6,10 +6,8 @@
 #define MUONCABLINGDATA_TgcCablingAlg_H
 
 #include "AthenaBaseComps/AthCondAlgorithm.h"
-#include "StoreGate/ReadCondHandleKey.h"
 #include "StoreGate/WriteCondHandleKey.h"
 
-#include "AthenaPoolUtilities/CondAttrListCollection.h"
 #include "MuonCablingDataR4/TgcCablingMap.h"
 #include "MuonIdHelpers/IMuonIdHelperSvc.h"
 
@@ -47,14 +45,14 @@ private:
         "TGC cabling map condition object"
     };
 
-    SG::ReadCondHandleKey<CondAttrListCollection> m_readKeyMap{
+    Gaudi::Property<std::string> m_jsonFile{
         this,
-        "ReadKey",
-        "/TGC/CABLING/MAP_SCHEMA",
-        "TGC cabling payload folder"
+        "JSONFile",
+        "",
+        "Run-4 TGC cabling JSON file resolved through PathResolver"
     };
 };
 
-}  // namespace Muon
+}  // namespace MuonR4
 
 #endif

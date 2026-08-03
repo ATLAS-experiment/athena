@@ -1,25 +1,26 @@
 #include "TgcCablingAlg.h"
 
-#include "AthenaPoolUtilities/AthenaAttributeList.h"
-#include "AthenaPoolUtilities/CondAttrListCollection.h"
-#include "CoralBase/Attribute.h"
+#include <fstream>
+
 #include "AthenaKernel/IOVInfiniteRange.h"
 #include "MuonCablingDataR4/TgcCablingMap.h"
+#include "PathResolver/PathResolver.h"
 
 namespace MuonR4 {
-
-
 
 StatusCode TgcCablingAlg::initialize() {
     ATH_MSG_DEBUG("initialize " << name());
 
     ATH_CHECK(m_writeKey.initialize());
-    ATH_CHECK(m_readKeyMap.initialize());
     ATH_CHECK(m_idHelperSvc.retrieve());
+
+    if (m_jsonFile.value().empty()) {
+        ATH_MSG_FATAL("JSONFile property is empty");
+        return StatusCode::FAILURE;
+    }
 
     return StatusCode::SUCCESS;
 }
-
 
 StatusCode TgcCablingAlg::execute(const EventContext& ctx) const {
     ATH_MSG_VERBOSE("TgcCablingAlg::execute()");
@@ -33,29 +34,40 @@ StatusCode TgcCablingAlg::execute(const EventContext& ctx) const {
     }
 
     writeCablingHandle.addDependency(
-    EventIDRange(IOVInfiniteRange::infiniteRunLB()));
+        EventIDRange(IOVInfiniteRange::infiniteRunLB()));
 
-    ATH_MSG_INFO("Load the TGC cabling");
+    ATH_MSG_INFO("Load the Run-4 TGC cabling");
 
-    auto writeCdo = std::make_unique<TgcCablingMap>(m_idHelperSvc.get());
-    SG::ReadCondHandle<CondAttrListCollection> coolHandle{m_readKeyMap, ctx};
+    const std::string resolvedFile =
+        PathResolverFindCalibFile(m_jsonFile.value());
 
-    if (!coolHandle.isValid()) {
-        ATH_MSG_FATAL("Failed to load TGC cabling map from COOL "
-                      << m_readKeyMap.fullKey());
+    if (resolvedFile.empty()) {
+        ATH_MSG_FATAL("Failed to resolve TGC cabling JSON file: "
+                      << m_jsonFile.value());
         return StatusCode::FAILURE;
     }
 
-    writeCablingHandle.addDependency(coolHandle);
+    ATH_MSG_INFO("Resolved TGC cabling JSON file: " << resolvedFile);
 
-    for (const auto& itr : **coolHandle) {
-        const coral::AttributeList& atr = itr.second;
-        const std::string* payloadStr =
-            static_cast<const std::string*>(atr["data"].addressOfData());
-        const nlohmann::json payload = nlohmann::json::parse(*payloadStr);
-
-        ATH_CHECK(parsePayload(*writeCdo, payload));
+    std::ifstream jsonStream(resolvedFile);
+    if (!jsonStream.is_open()) {
+        ATH_MSG_FATAL("Failed to open TGC cabling JSON file: "
+                      << resolvedFile);
+        return StatusCode::FAILURE;
     }
+
+    nlohmann::json payload;
+    try {
+        jsonStream >> payload;
+    } catch (const nlohmann::json::exception& err) {
+        ATH_MSG_FATAL("Failed to parse TGC cabling JSON file "
+                      << resolvedFile << ": " << err.what());
+        return StatusCode::FAILURE;
+    }
+
+    auto writeCdo = std::make_unique<TgcCablingMap>(m_idHelperSvc.get());
+
+    ATH_CHECK(parsePayload(*writeCdo, payload));
 
     if (!writeCdo->finalize(msgStream())) {
         return StatusCode::FAILURE;
@@ -65,9 +77,9 @@ StatusCode TgcCablingAlg::execute(const EventContext& ctx) const {
     return StatusCode::SUCCESS;
 }
 
-
 StatusCode TgcCablingAlg::findSLID(const nlohmann::json& stationBlock,
-                                  int stationEta, int stationPhi,
+                                  int stationEta,
+                                  int stationPhi,
                                   int16_t& slid) const {
     if (!stationBlock.contains("slid")) {
         ATH_MSG_FATAL("key 'slid' not found in station block");
@@ -133,7 +145,6 @@ StatusCode TgcCablingAlg::findSLID(const nlohmann::json& stationBlock,
     return StatusCode::FAILURE;
 }
 
-
 StatusCode TgcCablingAlg::parsePayload(TgcCablingMap& cablingMap,
                                        const nlohmann::json& payload) const {
     if (!payload.contains("CablingData")) {
@@ -168,11 +179,14 @@ StatusCode TgcCablingAlg::parsePayload(TgcCablingMap& cablingMap,
 
         const int stationNameIndex =
             m_idHelperSvc->tgcIdHelper().stationNameIndex(stationName);
+
         if (stationNameIndex < 0) {
             ATH_MSG_FATAL("Unknown TGC station name: " << stationName);
             return StatusCode::FAILURE;
         }
-        const nlohmann::json& cellAddressMap = stationBlock.at("CellAddressMap");
+
+        const nlohmann::json& cellAddressMap =
+            stationBlock.at("CellAddressMap");
 
         if (!cellAddressMap.is_array()) {
             ATH_MSG_FATAL("'CellAddressMap' is not an array");
@@ -207,16 +221,19 @@ StatusCode TgcCablingAlg::parsePayload(TgcCablingMap& cablingMap,
                 static_cast<int8_t>(cablPayload.at("GasGap").get<int>());
             entry.isStrip =
                 static_cast<int8_t>(cablPayload.at("isStrip").get<int>());
-            entry.ASDstartChannel =
-                static_cast<int16_t>(cablPayload.at("ASDstartChannel").get<int>());
+            entry.ASDstartChannel = static_cast<int16_t>(
+                cablPayload.at("ASDstartChannel").get<int>());
             entry.reversed = cablPayload.at("reversed").get<bool>();
 
-            ATH_CHECK(findSLID(stationBlock, entry.stationEta,
-                               entry.stationPhi, entry.SLID));
+            ATH_CHECK(findSLID(stationBlock,
+                               entry.stationEta,
+                               entry.stationPhi,
+                               entry.SLID));
 
             if (entry.isStrip == 0) {
                 if (!cablPayload.contains("channelRangeInASD")) {
-                    ATH_MSG_FATAL("Wire entry is missing 'channelRangeInASD'");
+                    ATH_MSG_FATAL(
+                        "Wire entry is missing 'channelRangeInASD'");
                     return StatusCode::FAILURE;
                 }
 
@@ -224,7 +241,8 @@ StatusCode TgcCablingAlg::parsePayload(TgcCablingMap& cablingMap,
                     cablPayload.at("channelRangeInASD");
 
                 if (!range.is_array() || range.size() != 2) {
-                    ATH_MSG_FATAL("'channelRangeInASD' must have two entries");
+                    ATH_MSG_FATAL(
+                        "'channelRangeInASD' must have two entries");
                     return StatusCode::FAILURE;
                 }
 
