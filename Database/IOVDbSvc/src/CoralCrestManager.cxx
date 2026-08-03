@@ -41,7 +41,8 @@ namespace{
       {"String128M", cool::StorageType::String128M},
       {"Blob64k", cool::StorageType::Blob64k},
       {"Blob16M", cool::StorageType::Blob16M},
-      {"Blob128M", cool::StorageType::Blob128M}
+      {"Blob128M", cool::StorageType::Blob128M},
+      {"Blob", cool::StorageType::Blob128M}
     };
     
     const std::string colonDelimiter{" : "};
