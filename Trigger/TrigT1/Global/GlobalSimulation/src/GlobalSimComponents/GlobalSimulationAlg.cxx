@@ -61,9 +61,6 @@ namespace GlobalSim {
   StatusCode GlobalSimulationAlg::execute(const EventContext& ctx) const {
     ATH_MSG_DEBUG("Executing ...");
 
-    if (m_enableDumps) {
-      ATH_MSG_INFO ("Dumping StoreGate\n" << evtStore()->dump());
-    }
 
     using TIPWord = std::bitset<ITIPWriterAlgTool::s_nbits_TIP>;
 

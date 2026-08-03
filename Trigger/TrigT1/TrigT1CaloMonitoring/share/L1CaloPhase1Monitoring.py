@@ -50,6 +50,7 @@ flags.Output.HISTFileName = os.getenv("L1CALO_ATHENA_JOB_NAME","") + "monitoring
 flags.DQ.useTrigger = False # don't do TrigDecisionTool in MonitorCfg helper methods
 flags.Trigger.L1.doCaloInputs = partition.isValid() # flag for saying if inputs should be decoded or not
 flags.Trigger.enableL1CaloPhase1 = True # used by this script to turn on/off the simulation
+flags.Trigger.enableL1MuonPhase1 = False # used by this script to turn on/off the l1 muon simulation
 # flags for rerunning simulation - on by default only in online environment
 flags.Trigger.L1.doCalo = partition.isValid()
 flags.Trigger.L1.doeFex = partition.isValid()
@@ -120,7 +121,12 @@ parser.add_argument('--dbOverrides',default=None,nargs="+",type=str,help="specif
 parser.add_argument('--postConfig',default=[],nargs="+",type=str,help="specify component properties to apply at the end of the config. Can also specify in the flags section if start with 'cfg.' Use '--postHelp' option to explore the configurables and their properties")
 parser.add_argument('--postInclude',default=[],nargs="+",type=str,help="specify python files to call before configuration completes")
 parser.add_argument('--postHelp',default=None,nargs="*",help="Displays configurables and their properties")
-args,unknown_args = flags.fillFromArgs(parser=parser,return_unknown=True)
+
+# divide args up into preHelp and postHelp ... will call fillFromArgs with just the help a second time after flag setting is done
+sys.argv = ["--help" if x=="-h" else x for x in sys.argv]
+preHelpArgs = sys.argv[0:sys.argv.index("--help")] if "--help" in sys.argv else sys.argv
+postHelpArgs = sys.argv[sys.argv.index("--help"):] if "--help" in sys.argv else []
+args,unknown_args = flags.fillFromArgs(parser=parser,return_unknown=True,listOfArgs=preHelpArgs[1:])
 # check for files in unknown_args list ... will assume are plugins
 # this is copied from Include.py ... seems if I try import it, I get CA behaviour blockage
 try:
@@ -223,6 +229,7 @@ if not flags.Common.isOnline and len(flags.Input.Files)==0:
     # this test file is used for generating the han config file
     flags.Input.Files = ["/eos/atlas/atlascerngroupdisk/det-l1calo/OfflineSoftware/TestFiles/data24_13p6TeV/data24_13p6TeV.00477048.physics_Main.daq.RAW._lb0821._SFO-20._0001.data"]
   else:
+    if len(postHelpArgs): flags.fillFromArgs(listOfArgs=postHelpArgs)
     log.fatal("Running in offline mode but no input files provided. Please specify with: --filesInput <file>")
     from AthenaConfiguration.TestDefaults import defaultTestFiles
     log.fatal("You can specify one of the default test files:" + ",".join([f for f in dir(defaultTestFiles) if f[0].isupper()]))
@@ -305,6 +312,8 @@ log.setLevel(logging.INFO)
 
 
 
+
+if len(postHelpArgs): flags.fillFromArgs(listOfArgs=postHelpArgs)
 
 flags.lock()
 if flags.Exec.MaxEvents == 0: flags.dump(evaluate=True)
@@ -430,7 +439,7 @@ if flags.Trigger.enableL1CaloPhase1:
   # note to self ... could look into input key remapping to avoid conflict with sim from input:
   #   from SGComps.AddressRemappingConfig import InputRenameCfg
   #   acc.merge(InputRenameCfg('xAOD::TriggerTowerContainer', 'xAODTriggerTowers_rerun', 'xAODTriggerTowers'))
-  cfg.merge(L1CaloFEXSimCfg(flags,outputSuffix="_ReSim" if flags.Input.Format == Format.POOL else ""),sequenceName="L1Sim")
+  cfg.merge(L1CaloFEXSimCfg(flags,outputSuffix="_ReSim" if flags.Input.Format == Format.POOL and flags.Input.ProcessingTags != ['StreamRDO'] else ""),sequenceName="L1Sim")
   # scheduling simulation of topo
   if flags.Trigger.L1.doTopo:
     from L1TopoSimulation.L1TopoSimulationConfig import L1TopoSimulationCfg
@@ -470,6 +479,11 @@ if flags.Trigger.enableL1CaloPhase1:
   #
   # cfg.getEventAlgo("L1_eFexEmulatedTowers").LArBadChannelKey = "LArMaskedSC"
 
+if flags.Trigger.enableL1MuonPhase1:
+  # run L1 Muon simulation
+  cfg.addSequence(CompFactory.AthSequencer("L1MuonSim",StopOverride=True),parentName="AthAlgSeq")
+  from TriggerJobOpts.Lvl1MuonSimulationConfig import Lvl1MuonSimulationCfg
+  cfg.merge(Lvl1MuonSimulationCfg(flags), sequenceName='L1MuonSim')
 
 
 if flags.DQ.doMonitoring:
@@ -726,7 +740,24 @@ if flags.Trigger.L1.doeFex and (args.evtNumber is not None):
 from AthenaCommon.Include import include
 from AthenaCommon.Configurable import ConfigurableCABehavior
 with ConfigurableCABehavior():
-  for inc in args.postInclude: include(inc)
+  for inc in args.postInclude:
+    try:
+      topLog.setLevel(logging.INFO) # take back to info level before doing postInclude
+      include(inc)
+      topLog.setLevel(logging.WARNING)
+    except Exception as e:
+      import traceback
+      print(f"Exception from {inc}")
+      tb = e.__traceback__
+
+      # Skip frames until we reach a particular file
+      while tb is not None:
+        if tb.tb_frame.f_code.co_filename.endswith(inc):
+          break
+        tb = tb.tb_next
+
+      traceback.print_exception(type(e), e, tb)
+      exit(1)
 
 for conf in args.postConfig:
   compName,propNameAndVal=conf.split(".",1)
