@@ -1438,11 +1438,31 @@ class athenaExecutor(scriptExecutor):
 
     ## @brief Check if running with CA
     def _isCAEnabled(self):
-        # CA is now enabled by default unless explicitly disabled
-        if 'CA' in self.conf.argdict and (self.conf.argdict['CA'] is False or self.conf.argdict['CA'].returnMyValue(name=self.name, substep=self.substep) is False):
-            return False
+        # CA is now enabled by default, except for Gen_tf.py
+        if self._name != 'generate' and self._name != 'afterburn':
+            if 'CA' in self.conf.argdict and (self.conf.argdict['CA'] is False or self.conf.argdict['CA'].returnMyValue(name=self.name, substep=self.substep) is False):
+                return False
+            else:
+                return True
+        # the old logic is kept for Gen_tf.py, to be dropped once migrated to CA
         else:
-            return True
+            # CA not present
+            if 'CA' not in self.conf.argdict:
+                # If there is no legacy skeleton, then we are running with CA
+                if not self._skeleton:
+                    return True
+                else:
+                    return False
+
+            # CA present but None, all substeps running with CA
+            if self.conf.argdict['CA'] is None:
+                return True
+
+            # CA enabled for a substep, running with CA
+            if self.conf.argdict['CA'].returnMyValue(name=self.name, substep=self.substep) is True:
+                return True
+
+            return False
 
     ## @brief Prepare the correct command line to be used to invoke athena
     def _prepAthenaCommandLine(self):
