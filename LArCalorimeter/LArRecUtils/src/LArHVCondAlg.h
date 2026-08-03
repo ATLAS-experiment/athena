@@ -1,6 +1,6 @@
 //Dear emacs, this is -*-c++-*-
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -83,12 +83,16 @@ private:
   SG::ReadCondHandleKey<ILArHVScaleCorr> m_onlineHVScaleCorrKey{this, "keyOnlineHVCorr", "LArHVScaleCorr",
                                                                 "Input key for HVScaleCorr from conditions database (used online)"};
 
-  SG::WriteCondHandleKey<LArHVCorr> m_outputHVScaleCorrKey{this, "keyOutputCorr", "LArHVScaleCorrRecomputed","Output key for LArHVScaleCorr"};
+  SG::WriteCondHandleKey<LArHVCorr> m_outputHVScaleResidCorrKey{this, "keyOutputResidualCorr", "LArHVScaleCorrRecomputed",
+                                                                "Output key for LArHVScaleCorr container, only including corrections not already applied online; "
+                                                                "most clients need only this."};
+  SG::WriteCondHandleKey<LArHVCorr> m_outputHVScaleFullCorrKey{this, "keyOutputFullCorr", "",
+                                                               "Output key for additional LArHVScaleCorr container, ignoring online corrections; "
+                                                               "not written by default."};
 
   //Other properties:
   Gaudi::Property<bool> m_doHV{this,"doHV",true,"create HV Scale Correction"};
   Gaudi::Property<bool> m_doRProp{this,"doR",true,"Use R values with current to improve HV"};
-  Gaudi::Property<bool> m_undoOnlineHVCorr{this,"UndoOnlineHVCorr",true,"Undo the HVCorr done online"};
   Gaudi::Property<bool> m_useCurrentEMB{this,"UseCurrentsInHVEM",false,"Use currents in EMB as well"};
   Gaudi::Property<bool> m_useCurrentFCAL1{this,"UseCurrentsInHVFCAL1",false,"Use currents in FCAL1 as well"};
   Gaudi::Property<bool> m_useCurrentOthers{this,"UseCurrentsInHVOthers", false, "Use currents in other partitions as well"};
@@ -147,7 +151,8 @@ private:
   StatusCode makeAffectedRegionInfo (const EventContext& ctx,
                                      voltagePerLine_t& voltagePerLine) const;
 
-  using addDepFcn_t = std::function<const EventIDRange& (SG::ReadCondHandle<CondAttrListCollection>& h)>;
+  using addDepFcn_t = std::function<void(SG::ReadCondHandle<CondAttrListCollection>& dep,
+                                         const char* debugDescr)>;
   StatusCode getVoltagePerLine (const EventContext& ctx,
                                 voltagePerLine_t& voltagePerLine,
                                 const addDepFcn_t& addDep) const;

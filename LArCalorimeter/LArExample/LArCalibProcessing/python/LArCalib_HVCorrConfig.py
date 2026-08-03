@@ -1,23 +1,16 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.MainServicesConfig import MainEvgenServicesCfg
 
-def HVCorrConfig(flags,outputName="hvcorr",runOut=0, lbOut=0, voltages=[], currents=[], isHI=False, hipatch=1.0):
+def HVCorrConfig(flags, outputName="hvcorr", runOut=0, lbOut=0, isHI=False, hipatch=1.4, **hvscaleprops):
 
     from LArGeoAlgsNV.LArGMConfig import LArGMCfg
     result=LArGMCfg(flags)
     
-    #Use the standard LArHVScaleCfg and adjust properties afterwards as needed 
     from LArCalibUtils.LArHVScaleConfig import LArHVScaleCfg
-
-    result.merge(LArHVScaleCfg(flags))
-    alg = result.getCondAlgo("LArHVCondAlg")
-    alg.UndoOnlineHVCorr=False
-    alg.keyOutputCorr="NewLArHVScaleCorr"
-    alg.fixCurrent = currents
-    alg.fixHV = voltages
+    result.merge(LArHVScaleCfg(flags, keyOutputFullCorr="NewLArHVScaleCorr", **hvscaleprops))
 
     from LArCabling.LArCablingConfig import LArOnOffIdMappingSCCfg
     result.merge(LArOnOffIdMappingSCCfg(flags))
@@ -35,10 +28,8 @@ def HVCorrConfig(flags,outputName="hvcorr",runOut=0, lbOut=0, voltages=[], curre
 
     #Ntuple writing ... 
     from LArCalibTools.LArCalib_HVScale2NtupleConfig import LArHVScaleCorr2NtupleCfg
-    result.merge(LArHVScaleCorr2NtupleCfg(flags,rootfile=outputName+'_ntuple.root',addSC=True))
-    result.getEventAlgo("LArHVScaleCorr2Ntuple").ContainerKey="NewLArHVScaleCorr" 
-    result.getEventAlgo("LArSCHVScaleCorr2Ntuple").ContainerKey="NewSCLArHVScaleCorr" 
-    result.getEventAlgo("LArSCHVScaleCorr2Ntuple").NtuplePath="/NTUPLES/FILE1/HVSCALESC"
+    result.merge(LArHVScaleCorr2NtupleCfg(flags, rootfile=outputName+'_ntuple.root',
+                                          hvcorr="NewLArHVScaleCorr", hvcorrSC="NewSCLArHVScaleCorr"))
 
     #sqlite writing ... 
     from RegistrationServices.OutputConditionsAlgConfig import OutputConditionsAlgCfg
@@ -58,18 +49,19 @@ def HVCorrConfig(flags,outputName="hvcorr",runOut=0, lbOut=0, voltages=[], curre
                                                      OverrideNames = ["HVScaleCorr"],
                                                      OverrideTypes = ["Blob16M"],
                                                  ))
-
-    result.getService("IOVDbSvc").DBInstance=""
     return result
 
 
+def addHVCorrToSCHVCorrParserArgs(parser):
+    # also used in CaloNoiseConfig.py
+    parser.add_argument('--isHI', dest='hi', default=False, help='is for HI ?', action='store_true')
+    parser.add_argument('--patchHI', dest='patchhi', type=float, default=1.4, help="Patching value for HI")
+
+
 if __name__=="__main__":
-    import itertools
-    import re
-    import sys
-    from time import time,strptime
-    from calendar import timegm
     import argparse
+    from time import time
+    from LArCalibUtils.LArHVScaleConfig import addHvScaleParserArgs, buildHvScaleProps
     parser= argparse.ArgumentParser(description="Recalculate HV corrections based on DCS values")
     parser.add_argument('datestamp',help="time specification like 2007-05-25:14:01:00")
     parser.add_argument('Run',type=int, nargs='?', default=0,help="IOV start (run-number)")
@@ -77,35 +69,17 @@ if __name__=="__main__":
     parser.add_argument('-g', '--globaltag', type=str, help="Global conditions Tag ")
     parser.add_argument('-o', '--output',type=str,default="hvcorr",help="name stub for root and sqlite output files")
     parser.add_argument('-l','--olevel',type=int, default=3,help="OutputLevel")
-    parser.add_argument('-V','--voltage',type=str, default=[], action='append', nargs=1,
-                        help="use -V \"<ID> <HV>\" to set the voltage for this line instead of reading it from DCS")
-    parser.add_argument('-I','--current',type=str, default=[], action='append', nargs=1,
-                        help="use -I \"<ID> <current>\" to set the current for this line instead of reading it from DCS")
     parser.add_argument('-s', '--sqlite',type=str,default="",help="name of sqlite file to be used instead of COOL")
-    parser.add_argument('--isHI', dest='hi', default=False, help='is for HI ?', action='store_true')
-
-    parser.add_argument('--patchHI',dest='patchhi',type=float, default=1.4,help="Ptching value for HI")
-                        
+    addHvScaleParserArgs(parser)
+    addHVCorrToSCHVCorrParserArgs(parser)
     args = parser.parse_args()
-    try:
-        ts=strptime(args.datestamp+'/UTC','%Y-%m-%d:%H:%M:%S/%Z')
-        TimeStamp=int(timegm(ts))
-        TimeStamp_ns=TimeStamp*1000000000
-    except ValueError as e:
-        print("ERROR in time specification, use e.g. 2007-05-25:14:01:00")
-        print(e)
-        sys.exit(-1)
-
-    from LArCalibProcessing.TimeStampToRunLumi import TimeStampToRunLumi
-    
-    rlb=TimeStampToRunLumi(TimeStamp_ns)
-    if rlb is None:
-        rlb=[0xFFFFFFF-1,0]
-        print("WARNING: Failed to convert time",TimeStamp_ns,"into a run/lumi number. Using 'infinite' run-number",rlb[0])
-
-    
-    print("---> Working on run",rlb[0],"LB",rlb[1],"Timestamp:",TimeStamp)
-    timediff=int(time()-TimeStamp)
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
+    from LArCalibProcessing.TimeStampToRunLumi import fillInputFlags
+    ConfigFlags = initConfigFlags()
+    fillInputFlags(ConfigFlags, args.datestamp + "/UTC", infiniteRun=0xFFFFFFF-1)
+    print(f"---> Working on run {ConfigFlags.Input.RunNumbers[0]} LB {ConfigFlags.Input.LumiBlockNumbers[0]} "
+          f"Timestamp: {ConfigFlags.Input.TimeStamps[0]}")
+    timediff=int(time()-ConfigFlags.Input.TimeStamps[0])
     if timediff<0:
         print("ERROR: Timestamp in the future???")
     else:
@@ -113,26 +87,11 @@ if __name__=="__main__":
         (hours,seconds)=divmod(remainder,60*60)
         print ("---> Timestamp is %i days %i hours and %i minutes ago" % (days,hours,int(seconds/60)))
     pass
-     
     print("Output IOV will be from run %i lumiblock %i to INF" % (args.Run,args.LB))
-    args.voltage = list(itertools.chain.from_iterable(args.voltage))
-    args.current = list(itertools.chain.from_iterable(args.current))
-    for x in args.voltage + args.current:
-        if re.match(r"\d+\s+\d+\.?\d*", x) is None:
-            print("ERROR: invalid voltage/current specification, should be of the form \"<line ID> <HV>\"")
-            sys.exit(-1)
     outputName=args.output
-
     from AthenaConfiguration.TestDefaults import defaultGeometryTags
-    from AthenaConfiguration.AllConfigFlags import initConfigFlags
-    ConfigFlags=initConfigFlags()
-                        
     if args.globaltag:
         ConfigFlags.IOVDb.GlobalTag=args.globaltag
-
-    ConfigFlags.Input.RunNumbers=[rlb[0]]
-    ConfigFlags.Input.LumiBlockNumbers=[rlb[1]]
-    ConfigFlags.Input.TimeStamps=[TimeStamp]
     ConfigFlags.Input.Files=[]
     ConfigFlags.IOVDb.DatabaseInstance="CONDBR2"
     ConfigFlags.IOVDb.DBConnection="sqlite://;schema="+outputName+".db;dbname=CONDBR2"
@@ -142,11 +101,12 @@ if __name__=="__main__":
     ConfigFlags.GeoModel.AtlasVersion=defaultGeometryTags.RUN3
     ConfigFlags.Exec.OutputLevel=args.olevel
     ConfigFlags.lock()
+    hvsp=buildHvScaleProps(args)
+    hvsp["keyOutputResidualCorr"]=""  # tentativelydon't produce these (only full corr.) to save resources
     cfg=MainEvgenServicesCfg(ConfigFlags)
     #First LB not set by McEventSelectorCfg, set it here:
     cfg.getService("EventSelector").FirstLB=ConfigFlags.Input.LumiBlockNumbers[0]
     cfg.merge(HVCorrConfig(ConfigFlags, outputName, runOut=args.Run, lbOut=args.LB,
-                           voltages=args.voltage, currents=args.current,isHI=args.hi,hipatch=args.patchhi))
-    
+                           isHI=args.hi, hipatch=args.patchhi, **hvsp))  
     print("Start running...")
     cfg.run(1)

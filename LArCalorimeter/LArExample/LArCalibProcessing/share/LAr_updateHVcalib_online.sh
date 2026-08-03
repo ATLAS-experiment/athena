@@ -25,7 +25,7 @@ time=$1
 run=$2
 lb=$3
 shift 3
-# the next arguments are forwarded directly to LArCalib_HVCorrConfig
+# the next arguments are forwarded directly to LArCalib_HVCorrConfig and/or CaloScaleNoiseConfig.py
 
 summaryFile=noise_summary.txt
 
@@ -213,7 +213,7 @@ echo "Skipped Running athena to compute L1Calo corrections"
 
 echo " "
 echo "Running athena to rescale noise values from current UPD1 noise database"
-python -m CaloCondPhysAlgs.CaloScaleNoiseConfig $time -t $globalTag  > noise.log 2>&1
+python -m CaloCondPhysAlgs.CaloScaleNoiseConfig $time -t $globalTag "$@"  > noise.log 2>&1
 if [ $? -ne 0 ];  then
       echo "Athena reported an error ! Please check noise.log!"
       exit    
@@ -303,5 +303,5 @@ echo "  (0) export COOL_FLASK=https://cool-proxy-app.cern.ch"
 echo "  (1) /afs/cern.ch/user/a/atlcond/utilsproxy/AtlCoolMerge.py --online HVScaleCorr.db  CONDBR2 ATONR_COOL  ATLAS_COOLONL_LAR_W  <password>"
 echo "  (2) /afs/cern.ch/user/a/atlcond/utilsproxy/AtlCoolMerge.py --online caloSqlite_UPD1_online.db  CONDBR2 ATONR_COOL ATLAS_COOLONL_CALO_W <password>"
 echo "  (3) /afs/cern.ch/user/a/atlcond/utilsproxy/AtlCoolMerge.py --flask larnoisesqlite.db CONDBR2 ATONR_COOLOFL_GPN ATLAS_COOLOFL_LAR_W <password>"
-
-
+echo " "
+echo "This script is being deprecated, consider using LAr_updateHVCalib instead"
