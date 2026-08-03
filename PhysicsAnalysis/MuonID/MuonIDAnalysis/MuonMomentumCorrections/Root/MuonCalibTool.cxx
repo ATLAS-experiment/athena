@@ -8,8 +8,19 @@
 #include "xAODCore/ShallowCopy.h"
 
 // Local include(s):
+#include <bit>
 #include <cmath>
-#include "TRandom3.h"
+#include <cstdint>
+#include <random>
+
+// Random123 is a vendored, header-only third-party library (see the
+// Random123 package's README.atlas).  Wrap its includes in diagnostic
+// pragmas so its code style does not break the ATLAS warning-free build.
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wold-style-cast"
+#include <Random123/philox.h>
+#include <Random123/conventional/Engine.hpp>
+#pragma GCC diagnostic pop
 
 #include "MuonMomentumCorrections/MuonCalibTool.h"
 
@@ -525,22 +536,35 @@ namespace CP
     void MuonCalibTool::initializeRandNumbers(MCP::MuonObj& muonObj, columnar::EventInfoId evtInfo) const
     {
         auto& acc = *m_acc;
-        // Random number generation for smearing
-        TRandom3 loc_random3;
         // Get Event Number, Retrieve the event information:
         unsigned long long eventNumber = 0;
         if(m_expertMode_EvtNumber.value()!=0) eventNumber=m_expertMode_EvtNumber.value();
         else eventNumber = evtInfo(acc.eventNumberAcc);
-        // Construct a seed for the random number generator:
-        const UInt_t seed = 1 + std::abs(muonObj.CB.phi) * 1E6 + std::abs(muonObj.CB.eta) * 1E3 + eventNumber;
-        loc_random3.SetSeed(seed);
+        // Random number generation for smearing.  Seed the generator the same
+        // way Philox4x32EngineRNGTestTool does: the per-tool seed base forms the
+        // Philox key (its "stream selector"), and the object's eta/phi (as their
+        // raw 32-bit float bit patterns) plus the 64-bit event number fill the
+        // 4x32 (128-bit) counter (an exact fit), letting the counter-based
+        // bijection mix the components itself.  Counter-based reseeding is
+        // essentially free.
+        using Philox4x32Engine = r123::Engine<r123::Philox4x32>;
+        const r123::Philox4x32::key_type key = {{
+            static_cast<std::uint32_t>(m_seedBase.value()),
+            static_cast<std::uint32_t>(m_seedBase.value() >> 32)}};
+        const r123::Philox4x32::ctr_type ctr = {{
+            std::bit_cast<std::uint32_t>(static_cast<float>(muonObj.CB.phi)),
+            std::bit_cast<std::uint32_t>(static_cast<float>(muonObj.CB.eta)),
+            static_cast<std::uint32_t>(eventNumber),
+            static_cast<std::uint32_t>(static_cast<std::uint64_t>(eventNumber) >> 32)}};
+        Philox4x32Engine loc_random3(key);
+        loc_random3.setcounter(ctr, 0u);
 
-        muonObj.rnd_g0 = loc_random3.Gaus(0, 1);
-        muonObj.rnd_g1 = loc_random3.Gaus(0, 1);
-        muonObj.rnd_g2 = loc_random3.Gaus(0, 1);
-        muonObj.rnd_g3 = loc_random3.Gaus(0, 1);
-        muonObj.rnd_g4 = loc_random3.Gaus(0, 1);
-        muonObj.rnd_g_highPt = loc_random3.Gaus(0, 1);
+        muonObj.rnd_g0 = std::normal_distribution<double>{0, 1}(loc_random3);
+        muonObj.rnd_g1 = std::normal_distribution<double>{0, 1}(loc_random3);
+        muonObj.rnd_g2 = std::normal_distribution<double>{0, 1}(loc_random3);
+        muonObj.rnd_g3 = std::normal_distribution<double>{0, 1}(loc_random3);
+        muonObj.rnd_g4 = std::normal_distribution<double>{0, 1}(loc_random3);
+        muonObj.rnd_g_highPt = std::normal_distribution<double>{0, 1}(loc_random3);
 
 
     }
