@@ -55,9 +55,6 @@ private:
                      CLHEP::HepRandomEngine *rndEngine,
                      DeadTimeMap &deadTimes) const;
 
-  /** @brief Roll the time over threshold for each signal digit */
-  static double timeOverThreshold(CLHEP::HepRandomEngine *rndmEngine);
-
   using DigiCache = OutDigitCache_t<RpcDigitCollection>;
   SG::WriteHandleKey<RpcDigitContainer> m_writeKey{this, "OutputObjectName",
                                                    "RPC_DIGITS"};
@@ -87,11 +84,11 @@ private:
 
   // Methods for new BIRPC digitization
   //
-  /** @brief Returns BI cluster strip molteplicity.
+  /** @brief Returns cluster strip molteplicity.
    *  @param id: Reference to the chamber identifier
    *  @param rndmEngin: Random engine used for probabilities */
-  int determineClusterSizeBI(const Identifier &id,
-                             CLHEP::HepRandomEngine *rndmEngine) const;
+  int determineClusterSize(const Identifier &id,
+                             CLHEP::HepRandomEngine *rndmEngine, bool isBIRPC) const;
 
   /** @brief Returns the charge (fC) after the amplification in gas
    *  @param simHit: Reference to the sim hit to digitize

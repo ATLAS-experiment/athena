@@ -44,6 +44,7 @@ StatusCode RpcDigiTool::finalize() {
     // RPC signal emulation.
     constexpr std::array<double, 3> coeffs{19.9587, 0.10081, -0.00017};
     using namespace Acts::detail;
+
     return polynomialSum(aCharge, coeffs); 
   }
   double RpcDigiTool::getTOA(const double aCharge, const double aDistance) const {
@@ -53,7 +54,8 @@ StatusCode RpcDigiTool::finalize() {
     constexpr std::array<double, 3> distCoeffs{0., 5.00311, 0.00006};
     constexpr std::array<double, 3> chargeCoeffs{2.02843, -0.00641, 0.00001};
     using namespace Acts::detail;
-    return polynomialSum(aDistance, distCoeffs) +
+
+    return polynomialSum(aDistance/1000., distCoeffs) +  // In this parameterization the distance is in m while athena standard is mm
            polynomialSum(aCharge, chargeCoeffs);
   }
 
@@ -110,34 +112,33 @@ RpcDigiTool::digitize(const EventContext &ctx, const TimedHits &hitsToDigit,
                                 idHelper.module_hash_max()));
   return StatusCode::SUCCESS;
 }
-bool RpcDigiTool::digitizeHit(const TimedHit &hit, const bool measuresPhi,
+bool RpcDigiTool::digitizeHit(const TimedHit &simHit, const bool measuresPhi,
                               const Muon::DigitEffiData *effiMap,
                               RpcDigitCollection &outContainer,
                               CLHEP::HepRandomEngine *rndEngine,
                               DeadTimeMap &deadTimes) const {
 
-  ++(m_allHits[measuresPhi]);
+  ++(m_allHits[measuresPhi]); // Count all hits separately for eta and phi ([0] and [1], respectively) 
 
-  const Identifier gasGapId = hit->identify();
+  const Identifier gasGapId = simHit->identify();
   const MuonGMR4::RpcReadoutElement *reEle =
       m_detMgr->getRpcReadoutElement(gasGapId);
 
   const RpcIdHelper &idHelper{m_idHelperSvc->rpcIdHelper()};
 
   bool isValid{false};
+
   const Identifier layerId = idHelper.channelID(
       gasGapId, idHelper.doubletZ(gasGapId), idHelper.doubletPhi(gasGapId),
       idHelper.gasGap(gasGapId), measuresPhi, 1, isValid);
-
+  const IdentifierHash layHash = reEle->layerHash(gasGapId);
+  
   const MuonGMR4::StripLayerPtr &layerDesign =
       reEle->sensorLayout(reEle->layerHash(layerId));
 
   const MuonGMR4::StripDesign &design{layerDesign->design(measuresPhi)};
 
-  const double uncert = design.stripPitch() / std::sqrt(12.);
-  Amg::Vector3D locHitPos{xAOD::toEigen(hit->localPosition())};
-  locHitPos[measuresPhi] = CLHEP::RandGaussZiggurat::shoot(
-      rndEngine, locHitPos[measuresPhi], uncert);
+  Amg::Vector3D locHitPos{xAOD::toEigen(simHit->localPosition())};
 
   const Amg::Vector2D locPos2D = layerDesign->to2D(locHitPos, measuresPhi);
   if (!design.insideTrapezoid(locPos2D)) {
@@ -156,43 +157,86 @@ bool RpcDigiTool::digitizeHit(const TimedHit &hit, const bool measuresPhi,
                            << design);
     return false;
   }
+  
+  // Check whether the digit is actually efficient
+  const bool effiSignal =
+      !effiMap || effiMap->getEfficiency(gasGapId) >=
+                        CLHEP::RandFlat::shoot(rndEngine, 0., 1.);
+  if (!effiSignal) return false;
 
-  const Identifier digitId{idHelper.channelID(
-      gasGapId, idHelper.doubletZ(gasGapId), idHelper.doubletPhi(gasGapId),
-      idHelper.gasGap(gasGapId), measuresPhi, strip, isValid)};
+  // Calculate distance from readout
+  const double DistanceToEdge =
+      reEle->distanceToEdge(layHash, locHitPos, EdgeSide::readOut); // mm
+  
+  // Calculate charge deposited
+  const double TotalChargeOnStrip =
+      calculateChargeOnStrip(simHit, rndEngine, 2.0);  // 2 mm gap for BM/BO chambers
+  ATH_MSG_VERBOSE(" total charge (fC): " << TotalChargeOnStrip);
 
-  if (!isValid) {
-    ATH_MSG_WARNING("Invalid hit identifier obtained for "
-                    << m_idHelperSvc->toStringGasGap(gasGapId)
-                    << ",  eta strip " << strip << " & hit "
-                    << Amg::toString(locHitPos, 2) << " /// " << design);
-    return false;
+  // Calculate cluster size (number of strips)
+  int clusterSize = determineClusterSize(gasGapId, rndEngine, false);
+  ATH_MSG_VERBOSE(" cluster size: " << clusterSize);
+
+  // Get min and max strips
+  int minStrip{strip}, maxStrip{strip}; // case strip number is 1
+  if (clusterSize > 1) {
+    int halfCluster = clusterSize / 2; // half cluster size (int)
+    minStrip = strip - halfCluster;    // min strip number
+    if (clusterSize % 2 == 0) { // if clusterSize is even, we have to randomly
+                                // assign one strip on left or right side
+      int side = Acts::copySign(1,CLHEP::RandFlat::shoot(rndEngine, 0., 1.) + 0.5);
+      minStrip += side; // if side==1 move the min strip to right
+    }
+    maxStrip = minStrip + clusterSize - 1;
+    // Check design strip boundaries
+    minStrip = std::max(minStrip, design.firstStripNumber());
+    maxStrip = std::min(design.firstStripNumber() + design.numStrips() - 1, maxStrip);
   }
-  /// Final check whether the digit is actually efficient
-  if (effiMap && effiMap->getEfficiency(digitId) <
-                     CLHEP::RandFlat::shoot(rndEngine, 0., 1.)) {
-    ATH_MSG_VERBOSE("Hit is marked as inefficient");
-    return false;
+
+  // Recalculate cluster size with minStrip and maxStrip
+  clusterSize = (maxStrip - minStrip) + 1;
+ 
+  // Divide charge on N strips
+  const std::vector<double> StripCharges =
+      divideChargeOnStrips(TotalChargeOnStrip, clusterSize, rndEngine);
+
+  // Digitize each strip
+  bool hasAcceptedStrip=false;
+  for (int aStrip = minStrip; aStrip <= maxStrip; aStrip++) {
+
+    bool isValid{false};
+    const Identifier digitId{idHelper.channelID(
+        gasGapId, idHelper.doubletZ(gasGapId), idHelper.doubletPhi(gasGapId),
+        idHelper.gasGap(gasGapId), measuresPhi, aStrip, isValid)};
+
+    // Check digitID is valid
+    if (!isValid) {
+      ATH_MSG_WARNING("Failed to create a valid strip "
+                      << m_idHelperSvc->toStringGasGap(gasGapId)
+                      << ", strip: " << aStrip);
+      return false;
+    }
+    // Check is not dead time
+    if (!passDeadTime(digitId, hitTime(simHit), m_deadTime, deadTimes)) {
+      ATH_MSG_VERBOSE("Reject hit due to dead map constraint");
+      return false;
+    }
+
+    outContainer.push_back(std::make_unique<RpcDigit>(
+        digitId,
+        hitTime(simHit) + getTOA(StripCharges[aStrip-minStrip], DistanceToEdge),
+        getTOT(StripCharges[aStrip-minStrip])));
+
+    ATH_MSG_VERBOSE("Digitize hit "
+                    << m_idHelperSvc->toString(digitId)
+                    << " located at: " << Amg::toString(locHitPos) );
+    ++(m_acceptedHits[measuresPhi]); // Count accepted hits for eta ([0]) or phi ([1])
+    hasAcceptedStrip=true;
   }
-  if (!passDeadTime(digitId, hitTime(hit), m_deadTime, deadTimes)) {
-    ATH_MSG_VERBOSE("Reject hit due to dead map constraint");
-    return false;
-  }
-  /// Correct for the signal propagation time
-  const double signalTime =
-      hitTime(hit) + reEle->distanceToEdge(reEle->measurementHash(digitId),
-                                           locHitPos, EdgeSide::readOut) /
-                         m_propagationVelocity;
-  const double digitTime = CLHEP::RandGaussZiggurat::shoot(
-      rndEngine, signalTime, m_stripTimeResolution);
-  ATH_MSG_VERBOSE("Created new digit " << m_idHelperSvc->toString(digitId)
-                                       << ", @ " << Amg::toString(locPos2D)
-                                       << ", recorded time: " << digitTime);
-  outContainer.push_back(std::make_unique<RpcDigit>(
-      digitId, digitTime, timeOverThreshold(rndEngine)));
-  ++(m_acceptedHits[measuresPhi]);
-  return true;
+
+  return hasAcceptedStrip;
 }
+
 
 bool RpcDigiTool::digitizeHitBI(const TimedHit &simHit,
                                 const Muon::DigitEffiData *effiMap,
@@ -200,11 +244,11 @@ bool RpcDigiTool::digitizeHitBI(const TimedHit &simHit,
                                 CLHEP::HepRandomEngine *rndEngine,
                                 DeadTimeMap &deadTimes) const {
 
-  ++(m_allHits[false]);
+  ++(m_allHits[false]); // Count all hits for eta ([0]) since there are no phi strips in BI chambers 
   const Identifier gasGapId = simHit->identify();
   const MuonGMR4::RpcReadoutElement *reEle =
       m_detMgr->getRpcReadoutElement(gasGapId);
-  const Amg::Vector3D locPos = xAOD::toEigen(simHit->localPosition());
+  const Amg::Vector3D locHitPos = xAOD::toEigen(simHit->localPosition());
   const MuonGMR4::StripDesign &design{*reEle->getParameters().etaDesign};
   const RpcIdHelper &idHelper{m_idHelperSvc->rpcIdHelper()};
 
@@ -215,7 +259,7 @@ bool RpcDigiTool::digitizeHitBI(const TimedHit &simHit,
   ATH_MSG_VERBOSE("RpcDigiTool::digitizeHitBI design: "<< design);
  
   // Check the correctness of the local hit position
-  const Amg::Vector2D locHitPosition{locPos.x(), locPos.y()};
+  const Amg::Vector2D locHitPosition{locHitPos.x(), locHitPos.y()};
   if (!design.insideTrapezoid(locHitPosition)) {
     ATH_MSG_VERBOSE("The hit " << Amg::toString(locHitPosition)
                                << " is outside of the trapezoid bounds for "
@@ -226,17 +270,18 @@ bool RpcDigiTool::digitizeHitBI(const TimedHit &simHit,
   // Calculate distance to strip edges (mm)
   const IdentifierHash layHash = reEle->layerHash(gasGapId);
   const double DistanceToReadOut =
-      reEle->distanceToEdge(layHash, locPos, EdgeSide::readOut); // mm
+      reEle->distanceToEdge(layHash, locHitPos, EdgeSide::readOut); // mm
   const double DistanceToHV =
-      reEle->distanceToEdge(layHash, locPos, EdgeSide::highVoltage); // mm
+      reEle->distanceToEdge(layHash, locHitPos, EdgeSide::highVoltage); // mm
 
   // Calculate charge deposited
   const double TotalChargeOnStrip =
-      calculateChargeOnStrip(simHit, rndEngine, reEle->gasGapPitch());
+      calculateChargeOnStrip(simHit, rndEngine, 1.0);  // 1 mm gap for BI chambers
+//mn      calculateChargeOnStrip(simHit, rndEngine, reEle->thickness());
   ATH_MSG_VERBOSE(" total charge (fC): " << TotalChargeOnStrip);
 
   // Calculate cluster size (number of strips)
-  int clusterSize = determineClusterSizeBI(gasGapId, rndEngine);
+  int clusterSize = determineClusterSize(gasGapId, rndEngine, true);
   ATH_MSG_VERBOSE(" cluster size: " << clusterSize);
 
   // Get corresponding strip number and apply checks
@@ -249,6 +294,15 @@ bool RpcDigiTool::digitizeHitBI(const TimedHit &simHit,
                            << design);
     return false;
   }
+
+  // Check whether the digit is actually efficient
+  const bool effiSignal1 =
+      !effiMap || effiMap->getEfficiency(gasGapId) >=
+                      CLHEP::RandFlat::shoot(rndEngine, 0., 1.);
+  const bool effiSignal2 =
+      !effiMap || effiMap->getEfficiency(gasGapId) >=
+                      CLHEP::RandFlat::shoot(rndEngine, 0., 1.);
+  if (!effiSignal1 && !effiSignal2) return false;
 
   // Get min and max strips
   int minStrip{strip}, maxStrip{strip}; // case strip number is 1
@@ -274,6 +328,7 @@ bool RpcDigiTool::digitizeHitBI(const TimedHit &simHit,
       divideChargeOnStrips(TotalChargeOnStrip, clusterSize, rndEngine);
  
   // Digitize each strip
+  bool hasAcceptedStrip=false;
   for (int aStrip = minStrip; aStrip <= maxStrip; aStrip++) {
     bool isValid{false};
     const Identifier digitId{idHelper.channelID(
@@ -292,59 +347,31 @@ bool RpcDigiTool::digitizeHitBI(const TimedHit &simHit,
       ATH_MSG_VERBOSE("Reject hit due to dead map constraint");
       return false;
     }
-    // Check whether the digit is actually efficient
-    const bool effiSignal1 =
-        !effiMap || effiMap->getEfficiency(gasGapId) >=
-                        CLHEP::RandFlat::shoot(rndEngine, 0., 1.);
-    const bool effiSignal2 =
-        !effiMap || effiMap->getEfficiency(gasGapId) >=
-                        CLHEP::RandFlat::shoot(rndEngine, 0., 1.);
+
     if (effiSignal1) {
       outContainer.push_back(std::make_unique<RpcDigit>(
           digitId,
-          hitTime(simHit) + getTOA(StripCharges[aStrip], DistanceToHV / 1000.),
-          getTOT(StripCharges[aStrip])));
+          hitTime(simHit) + getTOA(StripCharges[aStrip-minStrip], DistanceToHV),
+          getTOT(StripCharges[aStrip-minStrip])));
     }
     if (effiSignal2) {
       outContainer.push_back(std::make_unique<RpcDigit>(
           digitId,
           hitTime(simHit) +
-              getTOA(StripCharges[aStrip], DistanceToReadOut / 1000.),
-          getTOT(StripCharges[aStrip]), true));
+              getTOA(StripCharges[aStrip-minStrip], DistanceToReadOut),
+          getTOT(StripCharges[aStrip-minStrip]), true));
     }
     if (effiSignal1 || effiSignal2) {
       ATH_MSG_VERBOSE("Digitize hit "
                       << m_idHelperSvc->toString(digitId)
-                      << " located at: " << Amg::toString(locPos)
+                      << " located at: " << Amg::toString(locHitPos)
                       << ", SDO: " << Amg::toString(locHitPosition));
-      ++(m_acceptedHits[false]);
-      return true;
+      ++(m_acceptedHits[false]); // Count accepted hits for eta ([0]) since there are no phi strips in BI chambers 
+      hasAcceptedStrip=true;
     }
   }
 
-  return false;
-}
-
-double RpcDigiTool::timeOverThreshold(CLHEP::HepRandomEngine *rndmEngine) {
-  // mn Time-over-threshold modeled as a narrow and a wide gaussian
-  // mn based on the fit documented in
-  // https://its.cern.ch/jira/browse/ATLASRECTS-7820
-  constexpr double tot_mean_narrow = 16.;
-  constexpr double tot_sigma_narrow = 2.;
-  constexpr double tot_mean_wide = 15.;
-  constexpr double tot_sigma_wide = 4.5;
-
-  double thetot = 0.;
-
-  if (CLHEP::RandFlat::shoot(rndmEngine) < 0.75) {
-    thetot = CLHEP::RandGaussZiggurat::shoot(rndmEngine, tot_mean_narrow,
-                                             tot_sigma_narrow);
-  } else {
-    thetot = CLHEP::RandGaussZiggurat::shoot(rndmEngine, tot_mean_wide,
-                                             tot_sigma_wide);
-  }
-
-  return std::max(thetot, 0.);
+  return hasAcceptedStrip;
 }
 
 std::vector<double>
@@ -399,6 +426,7 @@ RpcDigiTool::divideChargeOnStrips(double totalCharge, int n_strips,
     break;
   }
   }
+  
   return charges;
 }
 
@@ -410,10 +438,10 @@ double RpcDigiTool::calculateChargeOnStrip(const TimedHit &simHit,
   constexpr double W_VALUE_EV = 30.0; // Unit: [eV/pair]
 
   // RPC BI gas gap thickness
-  const double GAP_THICKNESS_M = gasGapSize; // Unit: [m] (2 mm for Phase-II BI RPCs))
+  const double GAP_THICKNESS_MM = gasGapSize; // Unit: [mm] (1 mm for Phase-II BI RPCs, 2 mm for BM/BO RPCs))
 
   // Townsend coefficient for gas mixture and operational voltage
-  constexpr double ALPHA_PER_M = 5500.0 / Gaudi::Units::m; // Unit: [1/m]
+  constexpr double ALPHA_PER_MM = 5.5; // Unit: [1/mm]
 
   // Energy deposited by Geant4
   const double energy_deposit_ev = simHit->energyDeposit() / Gaudi::Units::eV;
@@ -422,27 +450,27 @@ double RpcDigiTool::calculateChargeOnStrip(const TimedHit &simHit,
   const double N0 = energy_deposit_ev / W_VALUE_EV;
 
   // Primary ionization poistion inside gas gap
-  const double z_hit_m =
-      CLHEP::RandFlat::shoot(rndmEngine, 0.0, GAP_THICKNESS_M); // Unit: [m]
+  const double z_hit_mm =
+      CLHEP::RandFlat::shoot(rndmEngine, 0.0, GAP_THICKNESS_MM); // Unit: [mm]
 
   // Distance to anode
-  const double z_drift_m = std::abs(GAP_THICKNESS_M - z_hit_m); // Unit: [m]
+  const double z_drift_mm = std::abs(GAP_THICKNESS_MM - z_hit_mm); // Unit: [mm]
 
   // Avalanche gain
-  const double gas_gain = std::exp(ALPHA_PER_M * z_drift_m);
+  const double gas_gain = std::exp(ALPHA_PER_MM * z_drift_mm);
 
   // Total charge
   const double total_charge_c = N0 * gas_gain * Gaudi::Units::e_SI; // Unit: [C]
 
-  ATH_MSG_DEBUG(__func__<<"() - "<<__LINE__<<" GAP_THICKNESS_M: "<<GAP_THICKNESS_M<<
-      ", "<<energy_deposit_ev<<", z_hit_m: "<<z_hit_m<<", N0: "<<N0<<", z_drift_m: "<<z_drift_m
+  ATH_MSG_DEBUG(__func__<<"() - "<<__LINE__<<" GAP_THICKNESS_MM: "<<GAP_THICKNESS_MM<<
+      ", "<<energy_deposit_ev<<", z_hit_mm: "<<z_hit_mm<<", N0: "<<N0<<", z_drift_mm: "<<z_drift_mm
     <<", gas_gain: "<<gas_gain<< "---> Charge on strip (fC): " << total_charge_c * 1e15);
 
   return total_charge_c * 1e15; // charge in fC
 }
 
-int RpcDigiTool::determineClusterSizeBI(
-    const Identifier &idGasGap, CLHEP::HepRandomEngine *rndmEngine) const {
+int RpcDigiTool::determineClusterSize(
+    const Identifier &idGasGap, CLHEP::HepRandomEngine *rndmEngine, bool isBIRPC) const {
 
   const RpcIdHelper &id_helper{m_idHelperSvc->rpcIdHelper()};
 
@@ -450,11 +478,10 @@ int RpcDigiTool::determineClusterSizeBI(
 
   ATH_MSG_DEBUG("Digit Id = " << id_helper.show_to_string(idGasGap));
 
-  // These cluster size probabilities were taken from preliminary
-  // results from the BI RPC Upgrade work in 2025 at BB5.
-  // They could be updated if new results for BI RPCs become available.
-  static constexpr std::array<double, 4> ClusterSizeProbabilities{0.642, 0.316,
-                                                                  0.032, 0.010};
+  // These cluster size probabilities were taken from the legacy RPC code.
+  // MuonSpectrometer/MuonConfig/python/RPC_DigitizationConfig.py
+  static constexpr std::array<double, 4> ClusterSizeProbabilities{0.610, 0.260,
+                                                                  0.083, 0.047};
   // Compile-time calculation of the cumulative array
   // Used empty capture list [] since variables are static constexpr
   static constexpr std::array<double, 4> cumulative = []() {
@@ -466,16 +493,40 @@ int RpcDigiTool::determineClusterSizeBI(
     return acumulative;
   }();
 
+  // These cluster size probabilities were taken from preliminary
+  // results from the BI RPC Upgrade work in 2025 at BB5.
+  // They could be updated if new results for BI RPCs become available.
+  static constexpr std::array<double, 4> ClusterSizeProbabilitiesBI{0.642, 0.316,
+                                                                  0.032, 0.010};
+  // Compile-time calculation of the cumulative array
+  // Used empty capture list [] since variables are static constexpr
+  static constexpr std::array<double, 4> cumulativeBI = []() {
+    std::array<double, 4> acumulative{};
+    acumulative[0] = ClusterSizeProbabilitiesBI[0];
+    for (size_t i = 1; i < ClusterSizeProbabilitiesBI.size(); ++i) {
+      acumulative[i] = acumulative[i - 1] + ClusterSizeProbabilitiesBI[i];
+    }
+    return acumulative;
+  }();
+
+  std::array<double, 4> theCumulative{};
+  if (isBIRPC) {
+    theCumulative=cumulativeBI;
+  } else {
+    theCumulative=cumulative;
+  }
+  
   float rndmCS = CLHEP::RandFlat::shoot(rndmEngine, 1.);
 
-  unsigned ClusterSize{0};
-  while (ClusterSize < ClusterSizeProbabilities.size() &&
-         rndmCS > cumulative[ClusterSize])
+  unsigned ClusterSize{1};
+  while (ClusterSize < theCumulative.size() &&
+         rndmCS > theCumulative[ClusterSize-1])
     ++ClusterSize;
 
-  if (ClusterSize >= ClusterSizeProbabilities.size())
-    ClusterSize = ClusterSizeProbabilities.size() - 1;
-  return ClusterSize + 1;
+  if (ClusterSize > theCumulative.size())
+    ClusterSize = theCumulative.size();
+  return ClusterSize;
 }
+
 
 } // namespace MuonR4
