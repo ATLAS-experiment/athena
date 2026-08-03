@@ -7,6 +7,7 @@ atlas_subdir( AthenaServices )
 find_package( Boost COMPONENTS thread serialization )
 find_package( bmpi3 REQUIRED )
 find_package( CLHEP )
+find_package( Eigen )
 find_package( Python COMPONENTS Development )
 find_package( ROOT COMPONENTS Core )
 find_package( TBB )
@@ -19,9 +20,9 @@ atlas_add_component( AthenaServices
    src/*.h src/*.cxx src/components/*.cxx
    INCLUDE_DIRS ${Boost_INCLUDE_DIRS} ${Python_INCLUDE_DIRS}
    ${CLHEP_INCLUDE_DIRS} ${ROOT_INCLUDE_DIRS} ${TBB_INCLUDE_DIRS} ${UUID_INCLUDE_DIRS} ${YAMPL_INCLUDE_DIRS}
-   ${VALGRIND_INCLUDE_DIRS}
+   ${VALGRIND_INCLUDE_DIRS} ${EIGEN_INCLUDE_DIRS}
    LINK_LIBRARIES ${Boost_LIBRARIES} ${Python_LIBRARIES} ${ROOT_LIBRARIES} ${TBB_LIBRARIES} ${UUID_LIBRARIES}
-   ${YAMPL_LIBRARIES} bmpi3::bmpi3 ${CLHEP_LIBRARIES}
+   ${YAMPL_LIBRARIES} bmpi3::bmpi3 ${CLHEP_LIBRARIES} ${EIGEN_LIBRARIES}
    AthenaBaseComps AthenaKernel RootUtilsPyROOT CxxUtils SQLiteDBSvcLib
    AthContainers AthContainersInterfaces DataModelRoot SGTools SGCoreLib
    StoreGateLib PersistentDataModel EventInfo xAODCore

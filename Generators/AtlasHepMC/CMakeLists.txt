@@ -9,8 +9,7 @@ find_package( hepmc3 COMPONENTS HepMC3 HepMC3search )
 
 # Component(s) in the package.
 atlas_add_library( AtlasHepMCLib
-   AtlasHepMC/*.h
-   INTERFACE
+   Root/*.cxx
    PUBLIC_HEADERS AtlasHepMC
    INCLUDE_DIRS  ${HEPMC3_INCLUDE_DIRS}
    LINK_LIBRARIES ${HEPMC3_HepMC3_LIBRARY}  )

@@ -8,8 +8,6 @@
 // package includes
 #include "ISF_Geant4Event/ISFG4Helper.h"
 
-// Atlas G4 Helpers
-#include "MCTruth/AtlasG4EventUserInfo.h"
 #include "MCTruth/TrackHelper.h"
 #include "MCTruth/TrackInformation.h"
 #include "MCTruth/PrimaryParticleInformation.h"
@@ -27,17 +25,26 @@
 #include "G4VProcess.hh"
 
 #include "G4TrackStatus.hh"
-#include "G4ProcessType.hh"
-#include "G4EmProcessSubType.hh"
 #include "G4DynamicParticle.hh"
 #include "G4PrimaryParticle.hh"
 
-#include "G4EventManager.hh"
-#include "G4Event.hh"
-
-// ISF includes
-#include "ISF_Event/ISFParticle.h"
 #include <limits>
+
+namespace {
+  HepMC::GenParticlePtr primaryGenParticle(const G4Track* track)
+  {
+    if (HepMC::GenParticlePtr primary = TrackHelper(track).GetPrimaryGenParticle()) {
+      return primary;
+    }
+
+    const G4DynamicParticle* dynamicParticle = track ? track->GetDynamicParticle() : nullptr;
+    G4PrimaryParticle* primaryParticle = dynamicParticle ? dynamicParticle->GetPrimaryParticle() : nullptr;
+    auto* primaryPartInfo = primaryParticle ?
+      dynamic_cast<PrimaryParticleInformation*>(primaryParticle->GetUserInformation()) : nullptr;
+    return primaryPartInfo ? primaryPartInfo->GetHepMCParticle() : nullptr;
+  }
+}
+
 /*
   Comments:
   what about parent particle surviving (e.g. bremstrahlung)
@@ -50,8 +57,6 @@
   - retrieves information from a G4Step (via StepHelper)
   Simulation/G4Sim/MCTruth/MCTruth/TruthStrategy.h
   - common base for different truth strategies
-  Simulation/G4Sim/MCTruth/src/AtlasG4EventUserInfo.cxx
-  - stores HepMCevent in G4
   Simulation/G4Sim/MCTruth/src/TrackInformation.cxx
   Simulation/G4Sim/MCTruth/src/TrackHelper.cxx
   - store/manage barcode
@@ -59,15 +64,11 @@
 
 
 iGeant4::Geant4TruthIncident::Geant4TruthIncident( const G4Step *step,
-                                               const ISF::ISFParticle& baseISP,
-                                               AtlasDetDescr::AtlasRegion geoID,
-                                               AtlasG4EventUserInfo *atlasG4EvtUserInfo) :
+                                               AtlasDetDescr::AtlasRegion geoID) :
   ITruthIncident(geoID, step->GetSecondaryInCurrentStep()->size()), // switch to G4Step::GetNumberOfSecondariesInCurrentStep() once we're using G4 10.2 or later
   m_positionSet(false),
   m_position(),
-  m_step(step),
-  m_baseISP(baseISP),
-  m_atlasG4EvtUserInfo(atlasG4EvtUserInfo)
+  m_step(step)
 {
   // prepare children:
   prepareChildren();
@@ -132,7 +133,9 @@ int iGeant4::Geant4TruthIncident::parentStatus()  {
 }
 
 HepMC::GenParticlePtr iGeant4::Geant4TruthIncident::parentParticle() {
-  return m_atlasG4EvtUserInfo->GetCurrentGenParticle();
+  TrackHelper tHelper(m_step->GetTrack());
+  TrackInformation *tInfo = tHelper.GetTrackInformation();
+  return tInfo ? tInfo->GetCurrentGenParticle() : nullptr;
 }
 
 bool iGeant4::Geant4TruthIncident::parentSurvivesIncident() const { 
@@ -161,15 +164,11 @@ HepMC::GenParticlePtr iGeant4::Geant4TruthIncident::parentParticleAfterIncident(
     // from G4DynamicParticle (which should be equivalent to postStep)
     m_parentParticleAfterIncident = convert(track, newBarcode, false);
     
-    m_atlasG4EvtUserInfo->SetCurrentGenParticle( m_parentParticleAfterIncident );
-    
     // store (new) hepmc particle in track's UserInformation
     TrackHelper       tHelper(track);
     TrackInformation *tInfo = tHelper.GetTrackInformation();
     if (tInfo) {
-      // do NOT update the TrackInformation for regenerated particles!
-      // (most recent truth info is kept in AtlasG4EventUserInfo)
-      //tInfo->SetCurrentGenParticle( m_parentParticleAfterIncident );
+      tInfo->SetCurrentGenParticle( m_parentParticleAfterIncident );
       int regenerationNr = tInfo->GetRegenerationNr();
       regenerationNr++;
       tInfo->SetRegenerationNr(regenerationNr);
@@ -244,6 +243,10 @@ HepMC::GenParticlePtr iGeant4::Geant4TruthIncident::childParticle(unsigned short
     thisChildTrack->SetUserInformation( trackInfo );
   }
 
+  if (HepMC::GenParticlePtr primary = primaryGenParticle(m_step->GetTrack())) {
+    trackInfo->SetPrimaryGenParticle(primary);
+  }
+  trackInfo->SetGenerationZeroGenParticle(hepParticle);
   trackInfo->SetCurrentGenParticle(hepParticle);
   trackInfo->SetClassification(TrackInformation::RegisteredSecondary);
   trackInfo->SetRegenerationNr(0);
@@ -277,7 +280,9 @@ HepMC::GenParticlePtr iGeant4::Geant4TruthIncident::convert(const G4Track *track
   const int pdgCode = track->GetDefinition()->GetPDGEncoding();
   const HepMC::FourVector fourMomentum( mom.x(), mom.y(), mom.z(), energy);
 
-  const HepMC::GenParticlePtr parent = m_atlasG4EvtUserInfo->GetCurrentGenParticle();
+  TrackHelper tHelper(m_step->GetTrack());
+  TrackInformation* trackInfo = tHelper.GetTrackInformation();
+  const HepMC::GenParticlePtr parent = trackInfo ? trackInfo->GetCurrentGenParticle() : nullptr;
   int status = (secondary) ? 1 + HepMC::SIM_STATUS_THRESHOLD : parent->status() + HepMC::SIM_STATUS_INCREMENT;
   // Treat child particles of pre-defined decays differently
   if (this->interactionClassification() == ISF::QS_PREDEF_VTX) {

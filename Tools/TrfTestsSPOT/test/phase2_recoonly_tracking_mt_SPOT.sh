@@ -18,8 +18,8 @@ Reco_tf.py \
       --autoConfiguration 'everything' \
       --conditionsTag "default:${conditions}" \
       --postInclude 'all:PyJobTransforms.UseFrontier' \
-      --preInclude 'all:Campaigns.PhaseIIPileUp200' \
-      --steering 'doRDO_TRIG' 'doRAWtoALL' \
+      --preInclude 'all:Campaigns.MC23PhaseIIPileUp200' \
+      --steering 'doRDO_TRIG' \
       --preExec 'all:flags.Tracking.doITkFastTracking=False' \
       --postExec 'all:cfg.getService("AlgResourcePool").CountAlgorithmInstanceMisses = True' \
       --inputRDOFile ${RDOFile} \

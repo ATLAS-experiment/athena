@@ -56,6 +56,15 @@ class MuonPhaseIITestDefaults:
         "root://eosatlas.cern.ch:1094//eos/atlas/atlaslocalgroupdisk/dq2/rucio/group/det-muon/ee/b4/group.det-muon.48959425.EXT0._000023.RDO.pool.root",
         "root://eosatlas.cern.ch:1094//eos/atlas/atlaslocalgroupdisk/dq2/rucio/group/det-muon/75/c9/group.det-muon.48959425.EXT0._000027.RDO.pool.root",
         ]
+    ### First files taken from (https://gitlab.cern.ch/atlas-nextgen/work-package-2.5/SampleProduction/-/blob/master/FileLists/RDO_MU200/R4/999992.PG_DiMuon_Pt10to100.txt?ref_type=heads)
+    RDO_R4_MU200=[
+        "root://eosatlas.cern.ch:1094//eos/atlas/atlasgroupdisk/det-muon/dq2/rucio/group/det-muon/d7/62/group.det-muon.49358671.EXT0._000001.RDO.pool.root",
+        "root://eosatlas.cern.ch:1094//eos/atlas/atlasgroupdisk/det-muon/dq2/rucio/group/det-muon/e7/ea/group.det-muon.49358671.EXT0._000002.RDO.pool.root",
+        "root://eosatlas.cern.ch:1094//eos/atlas/atlasgroupdisk/det-muon/dq2/rucio/group/det-muon/5a/98/group.det-muon.49358671.EXT0._000003.RDO.pool.root",
+        "root://eosatlas.cern.ch:1094//eos/atlas/atlasgroupdisk/det-muon/dq2/rucio/group/det-muon/95/f7/group.det-muon.49358671.EXT0._000004.RDO.pool.root",
+        "root://eosatlas.cern.ch:1094//eos/atlas/atlasgroupdisk/det-muon/dq2/rucio/group/det-muon/44/f3/group.det-muon.49358671.EXT0._000005.RDO.pool.root",
+        "root://eosatlas.cern.ch:1094//eos/atlas/atlasgroupdisk/det-muon/dq2/rucio/group/det-muon/56/a6/group.det-muon.49358671.EXT0._000006.RDO.pool.root"
+    ]
     ###
     ###     Layout files
     ###
@@ -75,6 +84,9 @@ class MuonPhaseIITestDefaults:
     GEODB_ITk_R3MS = "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonGeomRTT/GeoDB/ATLAS-P2-RUN4-01-00-00_R3MS.db"
     #### Only the passive material
     GEODB_TOROID = "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonGeomRTT/GeoDB/MUON_TOROID.db"
+
+    ### Tracking geometry material map
+    TRKGEO_MATERIALMAP = "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonGeomRTT/material-maps.root"
 
 def SetupArgParser():
     from argparse import ArgumentParser
@@ -170,27 +182,7 @@ def NswGeoPlottingAlgCfg(flags, name="NswGeoPlotting", **kwargs):
     result.addEventAlgo(the_alg, primary = True)
     return result
 
-def configureDefaultTagsCfg(flags):    
-    from AthenaCommon.Logging import logging
-    log = logging.getLogger('GeometryConfiguration')
 
-    if not flags.GeoModel.SQLiteDB:
-        raise ValueError("Default tag configuration only works for SQLite")
-    ### For dummy purposes configure the R2 geometry tag such that the job does not crash
-    from AthenaConfiguration.TestDefaults import defaultGeometryTags
-    flags.GeoModel.AtlasVersion = defaultGeometryTags.RUN2    
-    from AthenaConfiguration.Enums import LHCPeriod
-    if flags.GeoModel.Run == LHCPeriod.Run3:   
-        flags.GeoModel.AtlasVersion = defaultGeometryTags.RUN3
-    elif flags.GeoModel.Run == LHCPeriod.Run4:
-          flags.GeoModel.AtlasVersion = defaultGeometryTags.RUN4
-    else:
-        raise ValueError(f"Invalid run period {flags.GeoModel.Run}")
-    from MuonConfig.MuonConfigUtils import configureCondTag
-    configureCondTag(flags)
-
-    log.info(f"Setup {flags.GeoModel.AtlasVersion} geometry loading {flags.GeoModel.SQLiteDBFullPath}")
-    log.info(f"Use conditions tag {flags.IOVDb.GlobalTag}")
     
 
 def setupGeoR4TestCfg(args,  flags = None):
@@ -202,24 +194,12 @@ def setupGeoR4TestCfg(args,  flags = None):
     flags.Concurrency.NumConcurrentEvents = args.threads
     flags.Exec.MaxEvents = args.nEvents
     flags.Exec.SkipEvents = args.skipEvents
-    from os import path, system, listdir
-    flags.Input.Files = []
+
     ### Assemble all files in a directory or all files not having the suffix txt conf. 
     ### The latter are interpreted as file lists
-    for fileArg in args.inputFile:
-        if path.isdir(fileArg):
-            flags.Input.Files += [ "{dir}/{file}".format(dir=fileArg, file=y) for y in listdir(fileArg) ]
-        else:
-            if fileArg[fileArg.rfind(".")+1 :]not in ["txt", "conf"]:
-                    flags.Input.Files+=[fileArg]
-            else:
-                with open(fileArg) as inStream:
-                   #Check if the input is a string of comma separated files, and if it is, split it into a list
-                   if isinstance(inStream, str) and "," in inStream:
-                       flags.Input.Files += inStream.split(",")
-                   else:
-                      flags.Input.Files+=[ line.strip() for line in inStream if line[0]!='#'] 
-
+    from MuonConfig.MuonConfigUtils import prepareInput
+    prepareInput(flags, args.inputFile)
+    
     flags.Exec.FPE= 500
     flags.Exec.EventPrintoutInterval = 500
     
@@ -234,6 +214,7 @@ def setupGeoR4TestCfg(args,  flags = None):
     elif args.defaultGeoFile == "ITkR3MS":
         flags.GeoModel.SQLiteDBFullPath = MuonPhaseIITestDefaults.GEODB_ITk_R3MS
     elif args.geoModelFile.startswith("root://"):
+        from os import system, path
         if not path.exists("Geometry/{geoTag}.db".format(geoTag=args.geoTag)):
             print ("Copy geometry file from EOS {source}".format(source = args.geoModelFile))
             system("mkdir Geometry/")
@@ -245,7 +226,8 @@ def setupGeoR4TestCfg(args,  flags = None):
         flags.GeoModel.SQLiteDBFullPath = args.geoModelFile
 
     flags.GeoModel.SQLiteDB = True
-    configureDefaultTagsCfg(flags)
+    from MuonConfig.MuonConfigUtils import configureDefaultTags
+    configureDefaultTags(flags)
 
     if args.passiveMaterialMaps:        
         flags.Muon.trackGeometryMaterialMap = args.passiveMaterialMaps

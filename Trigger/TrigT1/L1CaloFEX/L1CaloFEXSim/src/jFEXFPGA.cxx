@@ -69,7 +69,6 @@ void jFEXFPGA::reset() {
     m_LRJet_tobwords.clear();
     m_sumET_tobwords.clear();
     m_Met_tobwords.clear();
-    m_map_Etvalues_FPGA.clear();
     m_map_EM_Etvalues_FPGA.clear();
     m_map_HAD_Etvalues_FPGA.clear();
     m_FwdEl_tobwords.clear();
@@ -113,7 +112,7 @@ StatusCode jFEXFPGA::execute(jFEXOutputCollection* inputOutputCollection, const 
     //Getting the values
     m_map_HAD_Etvalues_FPGA = m_jFEXPileupAndNoiseTool->Get_HAD_Et_values();
     m_map_EM_Etvalues_FPGA  = m_jFEXPileupAndNoiseTool->Get_EM_Et_values();
-    m_map_Etvalues_FPGA     = m_jFEXPileupAndNoiseTool->GetEt_values();
+    std::unordered_map<int,std::vector<int> > map_Etvalues_FPGA = m_jFEXPileupAndNoiseTool->GetEt_values();
     std::vector<int> pileup_ID;
     std::vector<int> pileup_HAD_jet;
     std::vector<int> pileup_EM_jet;
@@ -126,10 +125,10 @@ StatusCode jFEXFPGA::execute(jFEXOutputCollection* inputOutputCollection, const 
         pileup_ID.push_back(key);
         pileup_HAD_jet.push_back(val[0]);
         pileup_EM_jet.push_back(m_map_EM_Etvalues_FPGA[key][0]);
-        pileup_Total_jet.push_back(m_map_Etvalues_FPGA[key][0]);
+        pileup_Total_jet.push_back(map_Etvalues_FPGA[key][0]);
         pileup_HAD_met.push_back(val[1]);
         pileup_EM_met.push_back(m_map_EM_Etvalues_FPGA[key][1]);
-        pileup_Total_met.push_back(m_map_Etvalues_FPGA[key][1]);
+        pileup_Total_met.push_back(map_Etvalues_FPGA[key][1]);
     }    
     
     //saving pileup information
@@ -155,8 +154,8 @@ StatusCode jFEXFPGA::execute(jFEXOutputCollection* inputOutputCollection, const 
         ATH_CHECK( m_jFEXmetAlgoTool->safetyTest());
         ATH_CHECK( m_jFEXmetAlgoTool->reset());
         
-        m_jFEXsumETAlgoTool->setFPGAEnergy(m_map_Etvalues_FPGA);
-        m_jFEXmetAlgoTool->setFPGAEnergy(m_map_Etvalues_FPGA);
+        m_jFEXsumETAlgoTool->setFPGAEnergy(map_Etvalues_FPGA);
+        m_jFEXmetAlgoTool->setFPGAEnergy(map_Etvalues_FPGA);
         
         unsigned int bin_pos = thr_jTE.etaBoundary_fw(m_jfex_string[m_jfexid]);
         
@@ -238,9 +237,9 @@ StatusCode jFEXFPGA::execute(jFEXOutputCollection* inputOutputCollection, const 
     
     //Central region algorithms
     if(m_jfexid > 0 && m_jfexid < 5) {
-        m_jFEXSmallRJetAlgoTool->setFPGAEnergy(m_map_Etvalues_FPGA);
-        if(!m_jFEXLargeRJetAlgoTool.empty()) m_jFEXLargeRJetAlgoTool->setFPGAEnergy(m_map_Etvalues_FPGA);
-        m_jFEXtauAlgoTool->setFPGAEnergy(m_map_Etvalues_FPGA);
+        m_jFEXSmallRJetAlgoTool->setFPGAEnergy(map_Etvalues_FPGA);
+        if(!m_jFEXLargeRJetAlgoTool.empty()) m_jFEXLargeRJetAlgoTool->setFPGAEnergy(map_Etvalues_FPGA);
+        m_jFEXtauAlgoTool->setFPGAEnergy(map_Etvalues_FPGA);
         
         for(int mphi = 8; mphi < FEXAlgoSpaceDefs::jFEX_algoSpace_height-8; mphi++) {
             for(int meta = 8; meta < FEXAlgoSpaceDefs::jFEX_thin_algoSpace_width-8; meta++) {
@@ -355,25 +354,24 @@ StatusCode jFEXFPGA::execute(jFEXOutputCollection* inputOutputCollection, const 
         
         //**********Forward Jets***********************
         ATH_CHECK(m_jFEXForwardJetsAlgoTool->safetyTest());
-        ATH_CHECK(m_jFEXForwardJetsAlgoTool->reset());
-        m_jFEXForwardJetsAlgoTool->setFPGAEnergy(m_map_Etvalues_FPGA);
+        m_jFEXForwardJetsAlgoTool->setFPGAEnergy(map_Etvalues_FPGA);
         m_jFEXForwardJetsAlgoTool->setup(m_jTowersIDs_Wide,m_jfexid);
 
-        m_FCALJets =  m_jFEXForwardJetsAlgoTool->calculateJetETs(srJet_seedThresholdMeV);
-        for(std::unordered_map<int, jFEXForwardJetsInfo>::iterator it = m_FCALJets.begin(); it!=(m_FCALJets.end()); ++it) {
+        std::unordered_map<int, jFEXForwardJetsInfo> FCALJets =  m_jFEXForwardJetsAlgoTool->calculateJetETs(srJet_seedThresholdMeV);
+        for(std::unordered_map<int, jFEXForwardJetsInfo>::iterator it = FCALJets.begin(); it!=FCALJets.end(); ++it) {
 
             uint32_t TTID = it->first;
             jFEXForwardJetsInfo FCALJets = it->second;
 
             int iphi = FCALJets.getCentreLocalTTPhi();
             int ieta = FCALJets.getCentreLocalTTEta();
-            m_SRJetET = FCALJets.getSeedET() + FCALJets.getFirstEnergyRingET();
-            m_LRJetET = m_SRJetET + FCALJets.getSecondEnergyRingET();
+            int SRJetET = FCALJets.getSeedET() + FCALJets.getFirstEnergyRingET();
+            int LRJetET = SRJetET + FCALJets.getSecondEnergyRingET();
             int seedET = FCALJets.getSeedET();
             
             bool SRJ_sat = FCALJets.getSRjetSat();
             
-            uint32_t SRFCAL_Jet_tobword = m_IjFEXFormTOBsTool->formSRJetTOB(m_jfexid, iphi, ieta, m_SRJetET, SRJ_sat, thr_jJ.resolutionMeV(), thr_jJ.ptMinToTopoMeV(m_jfex_string[m_jfexid]), jetCalibrationParameters);
+            uint32_t SRFCAL_Jet_tobword = m_IjFEXFormTOBsTool->formSRJetTOB(m_jfexid, iphi, ieta, SRJetET, SRJ_sat, thr_jJ.resolutionMeV(), thr_jJ.ptMinToTopoMeV(m_jfex_string[m_jfexid]), jetCalibrationParameters);
             
             std::unique_ptr<jFEXTOB> jJ_tob = std::make_unique<jFEXTOB>(); 
             jJ_tob->initialize(m_id,m_jfexid,SRFCAL_Jet_tobword,thr_jJ.resolutionMeV(),TTID,seedET);   
@@ -384,7 +382,7 @@ StatusCode jFEXFPGA::execute(jFEXOutputCollection* inputOutputCollection, const 
             
             if(std::fabs(FCALJets.getCentreTTEta())<2.51 && !m_jFEXLargeRJetAlgoTool.empty()){
                 bool LRJ_sat = FCALJets.getLRjetSat();
-                uint32_t LRFCAL_Jet_tobword = m_IjFEXFormTOBsTool->formLRJetTOB(m_jfexid, iphi, ieta, m_LRJetET, LRJ_sat, thr_jLJ.resolutionMeV(),thr_jLJ.ptMinToTopoMeV(m_jfex_string[m_jfexid]));
+                uint32_t LRFCAL_Jet_tobword = m_IjFEXFormTOBsTool->formLRJetTOB(m_jfexid, iphi, ieta, LRJetET, LRJ_sat, thr_jLJ.resolutionMeV(),thr_jLJ.ptMinToTopoMeV(m_jfex_string[m_jfexid]));
 
                 std::unique_ptr<jFEXTOB> jLJ_tob = std::make_unique<jFEXTOB>(); 
                 jLJ_tob->initialize(m_id,m_jfexid,LRFCAL_Jet_tobword,thr_jLJ.resolutionMeV(),TTID);              
@@ -394,10 +392,9 @@ StatusCode jFEXFPGA::execute(jFEXOutputCollection* inputOutputCollection, const 
         }
         //********** Forward Electrons ***********************
         ATH_CHECK(m_jFEXForwardElecAlgoTool->safetyTest());
-        ATH_CHECK(m_jFEXForwardElecAlgoTool->reset());
         m_jFEXForwardElecAlgoTool->setFPGAEnergy(m_map_EM_Etvalues_FPGA,m_map_HAD_Etvalues_FPGA);        
         m_jFEXForwardElecAlgoTool->setup(m_jTowersIDs_Wide,m_jfexid,m_id);
-        m_ForwardElecs = m_jFEXForwardElecAlgoTool->calculateEDM();
+        std::unordered_map<uint, jFEXForwardElecInfo> ForwardElecs = m_jFEXForwardElecAlgoTool->calculateEDM();
 
         /// Retrieve the L1 menu configuration 
 	SG::ReadHandle<TrigConf::L1Menu> l1Menu (m_l1MenuKey/*, ctx*/);
@@ -410,7 +407,7 @@ StatusCode jFEXFPGA::execute(jFEXOutputCollection* inputOutputCollection, const 
 	std::vector<int> Chad1;
 	std::vector<int> Chad2;
 
-	for(std::unordered_map<uint, jFEXForwardElecInfo>::iterator itel = m_ForwardElecs.begin(); itel!=(m_ForwardElecs.end()); ++itel) {
+	for(std::unordered_map<uint, jFEXForwardElecInfo>::iterator itel = ForwardElecs.begin(); itel!=ForwardElecs.end(); ++itel) {
 	  uint32_t TTID = itel->first;
 	  jFEXForwardElecInfo elCluster = itel->second;
 	  uint meta = elCluster.getCoreIeta();//check whether this is the one used by the Trigger conf
@@ -467,7 +464,7 @@ StatusCode jFEXFPGA::execute(jFEXOutputCollection* inputOutputCollection, const 
         }
         ATH_MSG_DEBUG("============================ jFEXtauAlgo ============================");
         ATH_CHECK( m_jFEXtauAlgoTool->safetyTest());
-        m_jFEXtauAlgoTool->setFPGAEnergy(m_map_Etvalues_FPGA);
+        m_jFEXtauAlgoTool->setFPGAEnergy(map_Etvalues_FPGA);
         for(int mphi = 8; mphi < 24; mphi++) {
             for(int meta = 8; meta < max_meta; meta++) {
 
@@ -497,12 +494,14 @@ void jFEXFPGA::SetTowersAndCells_SG(int tmp_jTowersIDs_subset[][FEXAlgoSpaceDefs
   
   std::copy(&tmp_jTowersIDs_subset[0][0], &tmp_jTowersIDs_subset[0][0]+(rows*cols),&m_jTowersIDs_Wide[0][0]);
 
-  ATH_MSG_DEBUG("\n==== jFEXFPGA ========= FPGA (" << m_id << ") [on jFEX " << m_jfexid << "] IS RESPONSIBLE FOR jTOWERS :");
+  if (msgLvl(MSG::DEBUG)) {
+    ATH_MSG_DEBUG("\n==== jFEXFPGA ========= FPGA (" << m_id << ") [on jFEX " << m_jfexid << "] IS RESPONSIBLE FOR jTOWERS :");
 
-  for (int thisRow=rows-1; thisRow>=0; thisRow--){
-    for (int thisCol=0; thisCol<cols; thisCol++){
-      if(thisCol != cols-1){ ATH_MSG_DEBUG("|  " << m_jTowersIDs_Wide[thisRow][thisCol] << "  "); }
-      else { ATH_MSG_DEBUG("|  " << m_jTowersIDs_Wide[thisRow][thisCol] << "  |"); }
+    for (int thisRow=rows-1; thisRow>=0; thisRow--){
+      for (int thisCol=0; thisCol<cols; thisCol++){
+	if(thisCol != cols-1){ ATH_MSG_DEBUG("|  " << m_jTowersIDs_Wide[thisRow][thisCol] << "  "); }
+	else { ATH_MSG_DEBUG("|  " << m_jTowersIDs_Wide[thisRow][thisCol] << "  |"); }
+      }
     }
   }
   
@@ -515,18 +514,20 @@ void jFEXFPGA::SetTowersAndCells_SG(int tmp_jTowersIDs_subset[][FEXAlgoSpaceDefs
 
     std::copy(&tmp_jTowersIDs_subset[0][0], &tmp_jTowersIDs_subset[0][0]+(rows*cols),&m_jTowersIDs_Thin[0][0]);
 
-    //this prints out the jTower IDs that each FPGA is responsible for
-    ATH_MSG_DEBUG("\n==== jFEXFPGA ========= FPGA (" << m_id << ") [on jFEX " << m_jfexid << "] IS RESPONSIBLE FOR jTOWERS :");
-
-    for (int thisRow=rows-1; thisRow>=0; thisRow--) {
+    if (msgLvl(MSG::DEBUG)) {
+      //this prints out the jTower IDs that each FPGA is responsible for
+      ATH_MSG_DEBUG("\n==== jFEXFPGA ========= FPGA (" << m_id << ") [on jFEX " << m_jfexid << "] IS RESPONSIBLE FOR jTOWERS :");
+      
+      for (int thisRow=rows-1; thisRow>=0; thisRow--) {
         for (int thisCol=0; thisCol<cols; thisCol++) {
-            if(thisCol != cols-1) {
-                ATH_MSG_DEBUG("|  " << m_jTowersIDs_Thin[thisRow][thisCol] << "  ");
-            }
-            else {
-                ATH_MSG_DEBUG("|  " << m_jTowersIDs_Thin[thisRow][thisCol] << "  |");
-            }
+	  if(thisCol != cols-1) {
+	    ATH_MSG_DEBUG("|  " << m_jTowersIDs_Thin[thisRow][thisCol] << "  ");
+	  }
+	  else {
+	    ATH_MSG_DEBUG("|  " << m_jTowersIDs_Thin[thisRow][thisCol] << "  |");
+	  }
         }
+      }
     }
 
 }
@@ -611,10 +612,10 @@ std::vector<std::unique_ptr<jFEXTOB>> jFEXFPGA::getMetTOBs() {
 
 
 //Returns the Electromagnetic energy for Jet Algos (NOT MET/SumET)
-int jFEXFPGA::getTTowerET_EM(unsigned int TTID) {
+int jFEXFPGA::getTTowerET_EM(unsigned int TTID) const {
     
     if(m_map_EM_Etvalues_FPGA.find(TTID) != m_map_EM_Etvalues_FPGA.end()){
-        return m_map_EM_Etvalues_FPGA[TTID][0];
+      return m_map_EM_Etvalues_FPGA.at(TTID)[0];
     }
     
     ATH_MSG_DEBUG("In jFEXFPGA::getTTowerET_EM, TTower ID not found in map: " << TTID );
@@ -623,10 +624,10 @@ int jFEXFPGA::getTTowerET_EM(unsigned int TTID) {
 
 
 //Returns the Hadronic energy for Jet Algos (NOT MET/SumET)
-int jFEXFPGA::getTTowerET_HAD(unsigned int TTID) {
+int jFEXFPGA::getTTowerET_HAD(unsigned int TTID) const {
     
     if(m_map_HAD_Etvalues_FPGA.find(TTID) != m_map_HAD_Etvalues_FPGA.end()){
-        return m_map_HAD_Etvalues_FPGA[TTID][0];
+      return m_map_HAD_Etvalues_FPGA.at(TTID)[0];
     }
     
     ATH_MSG_DEBUG("In jFEXFPGA::getTTowerET_HAD, TTower ID not found in map: " << TTID );
@@ -635,18 +636,18 @@ int jFEXFPGA::getTTowerET_HAD(unsigned int TTID) {
 
 
 //Returns the Total TT energy for Jet Algos (NOT MET/SumET)
-int jFEXFPGA::getTTowerET(unsigned int TTID) {
+int jFEXFPGA::getTTowerET(unsigned int TTID) const {
 
     return getTTowerET_EM(TTID)+getTTowerET_HAD(TTID);
 }
 
 
 //Returns the Total TT energy for MET/SumÉT Algos
-int jFEXFPGA::getTTowerET_forMET(unsigned int TTID) {
+int jFEXFPGA::getTTowerET_forMET(unsigned int TTID) const {
 
     int tmp_EM = 0;
     if(m_map_EM_Etvalues_FPGA.find(TTID) != m_map_EM_Etvalues_FPGA.end()){
-        tmp_EM = m_map_EM_Etvalues_FPGA[TTID][1];
+      tmp_EM = m_map_EM_Etvalues_FPGA.at(TTID)[1];
     }
     else{
         ATH_MSG_DEBUG("In jFEXFPGA::getTTowerET_forMET (EM energy), TTower ID not found in map: " << TTID );
@@ -656,7 +657,7 @@ int jFEXFPGA::getTTowerET_forMET(unsigned int TTID) {
 
     int tmp_HAD = 0;
     if(m_map_HAD_Etvalues_FPGA.find(TTID) != m_map_HAD_Etvalues_FPGA.end()){
-        tmp_HAD = m_map_HAD_Etvalues_FPGA[TTID][1];
+      tmp_HAD = m_map_HAD_Etvalues_FPGA.at(TTID)[1];
     }
     else{
         ATH_MSG_DEBUG("In jFEXFPGA::getTTowerET_forMET (HAD energy), TTower ID not found in map: " << TTID );

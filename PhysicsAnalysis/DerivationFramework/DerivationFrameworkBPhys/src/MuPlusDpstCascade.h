@@ -16,7 +16,6 @@
 #include <vector>
 #include "xAODEventInfo/EventInfo.h"
 #include "InDetTrackSelectionTool/InDetTrackSelectionTool.h"
-#include "GaudiKernel/IPartPropSvc.h"
 // dummy EventContext for AnalysisBase
 #include "AsgTools/CurrentContext.h"
 
@@ -79,7 +78,6 @@ namespace DerivationFramework {
         PublicToolHandle < Trk::V0Tools >                      m_V0Tools;
         PublicToolHandle < DerivationFramework::CascadeTools > m_CascadeTools;
         std::unique_ptr<InDet::InDetTrackSelectionTool> m_trackSelectionTools;
-        ServiceHandle<IPartPropSvc> m_partPropSvc{this, "PartPropSvc", "PartPropSvc"};
 
         bool        m_refitPV;
         std::string m_refPVContainerName;

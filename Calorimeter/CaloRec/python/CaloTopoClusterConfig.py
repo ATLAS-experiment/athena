@@ -317,7 +317,7 @@ def getTopoCalibMoments(flags):
                                                        ,"TileCalibHitDeadMaterial"]
     return TopoCalibMoments
 
-def CaloTopoClusterToolCfg(flags, cellsname):
+def CaloTopoClusterToolCfg(flags, cellsname, cellthresholds=(4,2,0)):
     result=ComponentAccumulator()
     # maker tools
     TopoMaker = CompFactory.CaloTopoClusterMaker("TopoMaker")
@@ -339,9 +339,9 @@ def CaloTopoClusterToolCfg(flags, cellsname):
     TopoMaker.NeighborOption = "super3D"
     TopoMaker.RestrictHECIWandFCalNeighbors  = False
     TopoMaker.RestrictPSNeighbors  = True
-    TopoMaker.CellThresholdOnEorAbsEinSigma     =    0.0
-    TopoMaker.NeighborThresholdOnEorAbsEinSigma =    2.0
-    TopoMaker.SeedThresholdOnEorAbsEinSigma     =    4.0
+    TopoMaker.CellThresholdOnEorAbsEinSigma     =    cellthresholds[2]
+    TopoMaker.NeighborThresholdOnEorAbsEinSigma =    cellthresholds[1]
+    TopoMaker.SeedThresholdOnEorAbsEinSigma     =    cellthresholds[0]
 
     #timing
     TopoMaker.SeedCutsInT = flags.Calo.TopoCluster.doTimeCut
@@ -405,7 +405,13 @@ def CaloTopoClusterSplitterToolCfg(flags):
     result.setPrivateTools(TopoSplitter)
     return result
 
-def CaloTopoClusterCfg(flags, cellsname="AllCalo", clustersname=None, clustersnapname="CaloTopoClusters"):
+def CaloTopoClusterCfg(
+        flags,
+        cellsname="AllCalo",
+        clustersname=None,
+        clustersnapname="CaloTopoClusters",
+        cellthresholds=(4,2,0)
+    ):
     """
     Configures topo clustering
 
@@ -435,7 +441,7 @@ def CaloTopoClusterCfg(flags, cellsname="AllCalo", clustersname=None, clustersna
 
     result.merge(TileGMCfg(flags))
 
-    TopoMaker = result.popToolsAndMerge( CaloTopoClusterToolCfg(flags, cellsname=cellsname))
+    TopoMaker = result.popToolsAndMerge( CaloTopoClusterToolCfg(flags, cellsname=cellsname, cellthresholds=cellthresholds))
     TopoSplitter = result.popToolsAndMerge( CaloTopoClusterSplitterToolCfg(flags) )
     #
     # the following options are not set, since these are the default

@@ -2,6 +2,11 @@
   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
+#if __GNUC__ >= 16
+// Suppress false-positive warning seen with gcc16.
+# pragma GCC diagnostic ignored "-Wmaybe-uninitialized"
+#endif
+
 #include "StoreGate/ReadDecorHandle.h"
 
 #include "LArRecEvent/LArEventBitInfo.h"
@@ -116,9 +121,6 @@ std::vector<const xAOD::TauJet*> TrigTauMonitorBaseAlgorithm::getOfflineTausAll(
         // Consider only offline taus outside of the crack region
         if(std::abs(tau->eta()) > 1.37 && std::abs(tau->eta()) < 1.52) continue;
 
-        // Consider only offline taus which pass RNN medium WP
-        if(!tau->isTau(xAOD::TauJetParameters::JetRNNSigMedium)) continue;
-
         // Consider only offline taus which pass thinning
         static const SG::ConstAccessor<char> passThinningAcc("passThinning");
         if(!passThinningAcc.withDefault(*tau, true)) continue;
@@ -162,38 +164,6 @@ std::vector<const xAOD::eFexTauRoI*> TrigTauMonitorBaseAlgorithm::getL1eTAUs(con
         }
         
         for(const xAOD::eFexTauRoI* roi : *rois) {
-            // Check that the RoI passed the threshold selection
-            if(thresholdPatterns(*roi) & m_L1_Phase1_threshold_patterns.value().at(l1_item)) roi_vec.push_back(roi);
-        }
-    }
-
-    return roi_vec;
-}
-
-
-std::vector<const xAOD::jFexTauRoI*> TrigTauMonitorBaseAlgorithm::getL1jTAUs(const EventContext& ctx, const std::string& l1_item) const
-{
-    std::vector<const xAOD::jFexTauRoI*> roi_vec;
-
-    SG::ReadHandle<xAOD::jFexTauRoIContainer> rois(m_phase1l1jTauRoIKey, ctx);
-    if(!rois.isValid()) {
-        ATH_MSG_WARNING("Failed to retrieve the L1_jTauRoi container");
-        return roi_vec;
-    }
-
-    if(m_L1_select_by_et_only) {
-        for(const xAOD::jFexTauRoI* roi : *rois) {
-            // Select by RoI ET value only
-            if(roi->et() > m_L1_Phase1_thresholds.value().at(l1_item)) roi_vec.push_back(roi);
-        }
-    } else {
-        SG::ReadDecorHandle<xAOD::jFexTauRoIContainer, uint64_t> thresholdPatterns(m_phase1l1jTauRoIThresholdPatternsKey, ctx);
-        if(!thresholdPatterns.isValid()) {
-            ATH_MSG_WARNING("Failed to create thresholdPatterns property accessor for the L1_jTauRoi container");
-            return roi_vec;
-        }
-        
-        for(const xAOD::jFexTauRoI* roi : *rois) {
             // Check that the RoI passed the threshold selection
             if(thresholdPatterns(*roi) & m_L1_Phase1_threshold_patterns.value().at(l1_item)) roi_vec.push_back(roi);
         }

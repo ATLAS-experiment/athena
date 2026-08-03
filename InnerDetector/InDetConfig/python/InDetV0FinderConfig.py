@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -77,8 +77,6 @@ def InDetV0FinderToolCfg(flags, name="InDetV0FinderTool", **kwargs):
                                useThetaCnst        = True,
                                InputParticleMasses = [0.511,0.511])))
 
-    from AthenaServices.PartPropSvcConfig import PartPropSvcCfg
-    kwargs.setdefault("PartPropSvc", acc.getPrimaryAndMerge(PartPropSvcCfg(flags)))
     acc.setPrivateTools(CompFactory.InDet.InDetV0FinderTool(name, **kwargs))
     return acc
 
@@ -106,9 +104,6 @@ def V0MainDecoratorCfg(flags, name="V0Decorator", **kwargs):
         kwargs.setdefault("V0Tools",  acc.popToolsAndMerge(
             V0ToolsCfg(flags, name+"_V0Tools")))
 
-    if "masses" not in kwargs or kwargs("masses") == 1:
-        from AthenaServices.PartPropSvcConfig import PartPropSvcCfg
-        kwargs.setdefault("PartPropSvc", acc.getPrimaryAndMerge(PartPropSvcCfg(flags)))
     acc.setPrivateTools(CompFactory.InDet.V0MainDecorator(name, **kwargs))
     return acc
 

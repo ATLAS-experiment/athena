@@ -53,6 +53,8 @@ def RDOtoBS_Steering(flags):
     else:
         # Pixel
         if flags.Detector.EnablePixel:
+            from PixelReadoutGeometry.PixelReadoutGeometryConfig import PixelReadoutManagerCfg
+            acc.merge (PixelReadoutManagerCfg(flags))
             from InDetConfig.InDetPrepRawDataFormationConfig import PixelClusterizationCfg
             from PixelConditionsAlgorithms.PixelConditionsConfig import PixelCablingCondAlgCfg, PixelHitDiscCnfgAlgCfg
             acc.merge(PixelCablingCondAlgCfg(flags))
@@ -62,6 +64,8 @@ def RDOtoBS_Steering(flags):
 
         # SCT
         if flags.Detector.EnableSCT:
+            from SCT_RawDataByteStreamCnv.testSCTEncodeNewConf import SCTRawContByteStreamToolProviderToolCfg
+            acc.merge(SCTRawContByteStreamToolProviderToolCfg(flags))
             from InDetConfig.InDetPrepRawDataFormationConfig import SCTClusterizationCfg
             acc.merge(SCTClusterizationCfg(flags))
             itemList += ["SCT_RDO_Container#*"]

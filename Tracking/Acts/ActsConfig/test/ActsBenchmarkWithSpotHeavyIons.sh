@@ -11,12 +11,10 @@ export TRF_ECHO=1;
 ATHENA_CORE_NUMBER=${NTHREADS} Reco_tf.py \
   --maxEvents  ${NEVENTS} \
   --perfmon 'fullmonmt' \
-  --preExec "from Campaigns import PhaseIINoPileUp; \
-             PhaseIINoPileUp(flags); \
-	     flags.Acts.doAnalysis=False; \
+  --preExec "flags.Acts.doAnalysis=False; \
 	     flags.Detector.EnableHGTD=False;" \
   --postExec "cfg.getService(\"AlgResourcePool\").CountAlgorithmInstanceMisses=True;" \
-  --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude,ActsConfig.ActsCIFlags.actsHeavyIonFlags" \
+  --preInclude "Campaigns.MC23PhaseIINoPileUp,InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude,ActsConfig.ActsCIFlags.actsHeavyIonFlags" \
   --conditionsTag ${conditions_tag} \
   --geometryVersion 'all:ATLAS-P2-RUN4-03-00-01' \
   --postInclude 'all:PyJobTransforms.UseFrontier' \

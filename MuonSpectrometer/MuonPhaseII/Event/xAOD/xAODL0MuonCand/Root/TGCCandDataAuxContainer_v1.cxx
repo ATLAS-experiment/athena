@@ -26,6 +26,7 @@ namespace xAOD {
       PRD_AUXVARIABLE(deltaPhi);
       PRD_AUXVARIABLE(deltaTheta);
       PRD_AUXVARIABLE(nswSegment);
+      PRD_AUXVARIABLE(tcId);
 
     }
 }

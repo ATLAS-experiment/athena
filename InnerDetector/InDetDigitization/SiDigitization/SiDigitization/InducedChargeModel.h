@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef SIDIGITIZATION_INDUCEDCHARGEDMODEL_H
@@ -49,16 +49,16 @@ class InducedChargeModel : public AthMessaging {
   enum InducedStrips {StartStrip=-2, EndStrip=+2, Offset=-StartStrip, NStrips=EndStrip+Offset+1};
 
   struct SCT_InducedChargeModelData {
-    float m_VD; // full depletion voltage [Volt] negative for type-P
-    float m_VB; // applied bias voltage [Volt]
-    float m_T; // temperature
-    float m_depletion_depth;
-    const InDetDD::SolidStateDetectorElementBase* m_element;
-    Amg::Vector3D m_magneticField;
-    EFieldModel m_EFieldModel;
-    CLHEP::HepRandomEngine* m_rndmEngine;
-    std::array<std::array<double, NDepthPoints>, NEFieldPoints> m_ExValue;
-    std::array<std::array<double, NDepthPoints>, NEFieldPoints> m_EyValue;
+    float m_VD{}; // full depletion voltage [Volt] negative for type-P
+    float m_VB{}; // applied bias voltage [Volt]
+    float m_T{}; // temperature
+    float m_depletion_depth{};
+    const InDetDD::SolidStateDetectorElementBase* m_element{};
+    Amg::Vector3D m_magneticField{};
+    EFieldModel m_EFieldModel{};
+    CLHEP::HepRandomEngine* m_rndmEngine{};
+    std::array<std::array<double, NDepthPoints>, NEFieldPoints> m_ExValue{};
+    std::array<std::array<double, NDepthPoints>, NEFieldPoints> m_EyValue{};
 
     SCT_InducedChargeModelData(const float vdepl,
                                const float vbias,
@@ -66,7 +66,7 @@ class InducedChargeModel : public AthMessaging {
                                const Amg::Vector3D& magneticField, // in kTesla
                                const float bulk_depth,
                                const EFieldModel model,
-                               const ToolHandle<ISiliconConditionsTool> siConditionsTool,
+                               const ToolHandle<ISiliconConditionsTool> & siConditionsTool,
                                CLHEP::HepRandomEngine* rndmEngine,
                                const EventContext& ctx) :
       m_VD (vdepl), // full depletion voltage [Volt] negative for type-P
@@ -162,9 +162,9 @@ class InducedChargeModel : public AthMessaging {
   // In sensor depth directions (for both potential and Electric field):
   //  114 divisions (115 points) with 2.5 nm intervals for 285 um.
 
-  std::vector<std::array<std::array<double, NDepthPoints>, NRamoPoints>> m_PotentialValue;
-  std::vector<std::array<std::array<double, NDepthPoints>, NEFieldPoints>> m_ExValue;
-  std::vector<std::array<std::array<double, NDepthPoints>, NEFieldPoints>> m_EyValue;
+  std::vector<std::array<std::array<double, NDepthPoints>, NRamoPoints>> m_PotentialValue{};
+  std::vector<std::array<std::array<double, NDepthPoints>, NEFieldPoints>> m_ExValue{};
+  std::vector<std::array<std::array<double, NDepthPoints>, NEFieldPoints>> m_EyValue{};
 
   // Cache of SCT_InducedChargeModelData for each wafer.
   // Assuming wafer parameters do not change during a job.

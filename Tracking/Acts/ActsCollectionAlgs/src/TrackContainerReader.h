@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ACTSCOLLECTIONALGS_TRACKCONTAINERREADER_H
@@ -10,8 +10,9 @@
 #include "GaudiKernel/EventContext.h"
 
 #include "ActsEvent/TrackContainerHandlesHelper.h"
-#include "ActsGeometryInterfaces/ITrackingGeometryTool.h"
+#include "ActsGeometryInterfaces/ITrackingGeometrySvc.h"
 #include "ActsEvent/TrackContainer.h"
+#include "ActsEvent/ContextUtility.h"
 
 // STL includes
 #include <string>
@@ -29,9 +30,12 @@ public:
   virtual StatusCode initialize() override final;
   virtual StatusCode execute(const EventContext& context) const override final;
 private:
-  PublicToolHandle<ActsTrk::ITrackingGeometryTool> m_trackingGeometryTool{this, "TrackingGeometryTool", "ActsTrackingGeometryTool"};
+  ServiceHandle<ActsTrk::ITrackingGeometrySvc> m_trackingGeometrySvc{this, "TrackingGeometrySvc", "ActsTrackingGeometrySvc"};
   ActsTrk::ConstTrackContainerHandlesHelper m_tracksBackendHandlesHelper{this};
   SG::WriteHandleKey<ActsTrk::TrackContainer> m_tracksKey{this, "TrackContainer", "TrackContainer"};
+  /** @brief Context provider for geometry, magnetic field and calibration contexts */
+  ActsTrk::ContextUtility m_ctxProvider{this};
+
 };
 }
 #endif // ACTSCOLLECTIONALGS_TRACKCONTAINERREADER_H

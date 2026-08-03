@@ -22,18 +22,19 @@
 #include "AthenaKernel/errorcheck.h"
 #include <algorithm>
 #include <utility>
+#include <numbers>
 
 #include "CLHEP/Units/SystemOfUnits.h"
 #include "CLHEP/Units/PhysicalConstants.h"
 
 using xAOD::CaloCluster;
 using CLHEP::GeV;
-using CLHEP::pi;
-using CLHEP::twopi;
+using std::numbers::pi;
 
 namespace {
-const double deta = 0.2;
-const double dphi = twopi / 64. + pi / 64.; // ~ 0.15 rad
+inline constexpr double twopi = 2*pi;
+inline constexpr double deta = 0.2;
+inline constexpr double dphi = twopi / 64. + pi / 64.; // ~ 0.15 rad
 } // anonymous namespace
 
 

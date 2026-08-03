@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -36,6 +36,11 @@ def RunPRDConversion():
     cfg.merge(PoolReadCfg(flags))
     from MuonConfig.MuonGeometryConfig import MuonGeoModelCfg 
     cfg.merge( MuonGeoModelCfg(flags) )
+
+    # Needed for TPCnv
+    from TrkEventCnvTools.TrkEventCnvToolsConfig import (
+        TrkEventCnvSuperToolCfg)
+    cfg.merge(TrkEventCnvSuperToolCfg(flags))
 
     # Now setup the convertor
     acc = PRDxAODConvertorAlgCfg(

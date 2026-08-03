@@ -769,7 +769,7 @@ void SiTrkAlignDBTool::updateAsL2(const Trk::AlignModule * module, const Amg::Tr
     ATH_MSG_DEBUG("TESTING retrieved key: "<<key);
     std::vector<std::string>::const_iterator ix = find(level_mods.begin(),level_mods.end(),key); // check whether it is unique
     if (ix==level_mods.end()) {
-      level_mods.push_back(key);
+      level_mods.push_back(std::move(key));
       
       ATH_MSG_DEBUG("-----------------------------------------------------");
       

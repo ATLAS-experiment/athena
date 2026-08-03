@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 /*
  */
@@ -19,6 +19,8 @@
 #include <vector>
 #include <cassert>
 #include <iostream>
+#include <array>
+#include <bit>
 
 
 typedef void hashfn_t (const void*, int, uint32_t, void*);
@@ -40,17 +42,12 @@ uint32_t verificationTest (HASHTYP hash (const void*, int, HASHTYP))
     key[i] = i;
     hashes[i] = hash (key, i, 256-i);
   }
-
-  union {
-    HASHTYP val;
-    uint8_t bytes[sizeof(HASHTYP)];
-  } fin;
-  fin.val = hash (hashes, sizeof(hashes), 0);
-
-  uint32_t verification = (fin.bytes[0] << 0) |
-                          (fin.bytes[1] << 8) |
-                          (fin.bytes[2] << 16) |
-                          (fin.bytes[3] << 24);
+  const HASHTYP fin = hash (hashes, sizeof(hashes), 0);
+  const auto bytes = std::bit_cast<std::array<uint8_t, sizeof(HASHTYP)> > (fin);
+  uint32_t verification = (static_cast<uint32_t>(bytes[0]) << 0) |
+                        (static_cast<uint32_t>(bytes[1]) << 8) |
+                        (static_cast<uint32_t>(bytes[2]) << 16) |
+                        (static_cast<uint32_t>(bytes[3]) << 24);
   return verification;
 }
 

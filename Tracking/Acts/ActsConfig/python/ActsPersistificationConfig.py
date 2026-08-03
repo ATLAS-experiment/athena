@@ -45,13 +45,19 @@ def PersistifySpacePoints(flags,
                           pixelSpacePointCollections: list[str] = None,
                           stripSpacePointCollections: list[str] = None) -> ComponentAccumulator:
     toAOD = []
+    aux_container_type = "xAOD::SpacePointAuxContainer"
+    if flags.Acts.EDM.SlimContent:
+        aux_container_type = "xAOD::AuxContainerBase!"
+
     if pixelSpacePointCollections is not None:
         pixel_spacepoint_shortlist = ['-measurements',
                                       '-pixelSpacePointLink']
+        if flags.Acts.EDM.SlimContent:
+            pixel_spacepoint_shortlist = ['globalPosition']
         pixel_spacepoint_variables = '.'.join(pixel_spacepoint_shortlist)
         for pixelSpacePointCollection in pixelSpacePointCollections:
             toAOD += [f'xAOD::SpacePointContainer#{pixelSpacePointCollection}',
-                      f"xAOD::SpacePointAuxContainer#{pixelSpacePointCollection}Aux.{pixel_spacepoint_variables}"]
+                      f"{aux_container_type}#{pixelSpacePointCollection}Aux.{pixel_spacepoint_variables}"]
 
     if stripSpacePointCollections is not None:
         strip_spacepoint_shortlist = ['topHalfStripLength', 
@@ -61,10 +67,12 @@ def PersistifySpacePoints(flags,
                                       'stripCenterDistance',
                                       'topStripCenter',
                                       'measurementLink']
+        if flags.Acts.EDM.SlimContent:
+            strip_spacepoint_shortlist = ['globalPosition']
         strip_spacepoint_variables = '.'.join(strip_spacepoint_shortlist)
         for stripSpacePointCollection in stripSpacePointCollections:
             toAOD += [f'xAOD::SpacePointContainer#{stripSpacePointCollection}',
-                      f"xAOD::SpacePointAuxContainer#{stripSpacePointCollection}Aux.{strip_spacepoint_variables}"]
+                      f"{aux_container_type}#{stripSpacePointCollection}Aux.{strip_spacepoint_variables}"]
             
     acc = ComponentAccumulator()
     if len(toAOD) == 0:
@@ -113,13 +121,32 @@ def PersistifyTrackParticles(flags,
         trackparticles_shortlist = ['-clusterAssociation',
                                     '-TTVA_AMVFVertices_forReco',
                                     '-AssoClustersUFO',
-                                    '-TTVA_AMVFWeights_forReco']
+                                    '-TTVA_AMVFWeights_forReco',
+                                    '-trackParameterCovarianceMatrices',
+                                    '-caloExtensionLink',
+                                     '-parameterX', '-parameterY', '-parameterZ',
+                                     '-parameterPX', '-parameterPY', '-parameterPZ',
+                                     '-parameterPosition']
+
         # exclude TTVA decorations
         trackparticles_shortlist += ['-TTVA_AMVFVertices',
                                      '-TTVA_AMVFWeights']
         # acts track link
         if not flags.Acts.EDM.PersistifyTracks:
-            trackparticles_shortlist.append('-actsTrack')
+            trackparticles_shortlist += ['-actsTrack',
+                                         '-hgtdTrackLink']
+
+        if not flags.Tracking.writeExtendedHGTDInfo:
+            trackparticles_shortlist += ['-HGTD_cluster_merged',
+                                         '-HGTD_cluster_raw_time',
+                                         '-HGTD_cluster_shadowed',
+                                         '-HGTD_cluster_time',
+                                         '-HGTD_cluster_truth_class',
+                                         '-HGTD_extrap_x',
+                                         '-HGTD_extrap_y',
+                                         '-HGTD_primary_expected',
+                                         '-HGTD_summaryinfo',
+                                         '-HGTD_times_of_compatible_hits']
 
         trackparticles_variables = ".".join(trackparticles_shortlist)        
         # remove track decorations used internally by FTAG software

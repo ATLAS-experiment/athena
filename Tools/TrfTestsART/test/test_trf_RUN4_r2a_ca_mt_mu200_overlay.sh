@@ -17,7 +17,7 @@ conditions=$(python -c "from AthenaConfiguration.TestDefaults import defaultCond
 Reco_tf.py \
   --conditionsTag "${conditions}" \
   --steering "doOverlay" "doRAWtoALL" \
-  --preInclude "all:Campaigns.PhaseIIPileUp200" \
+  --preInclude "all:Campaigns.MC23PhaseIIPileUp200" \
   --postInclude "all:PyJobTransforms.UseFrontier.py" \
   --inputHITSFile "${HSHitsFile}" \
   --inputRDO_BKGFile "$RDOFile" \

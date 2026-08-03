@@ -17,8 +17,7 @@
 #include "MuonTesterTree/ThreeVectorBranch.h"
 #include "MuonTesterTree/IdentifierBranch.h"
 
-#include "ActsGeometry/ActsTrackingGeometrySvc.h"
-#include "ActsGeometryInterfaces/ITrackingGeometryTool.h"
+#include "ActsGeometryInterfaces/ITrackingGeometrySvc.h"
 #include "ActsGeometryInterfaces/IExtrapolationTool.h"
 #include "ActsGeometry/ATLASMagneticFieldWrapper.h"
 
@@ -53,7 +52,7 @@ namespace ActsTrk {
 
         ServiceHandle<IAthRNGSvc> m_rndmGenSvc{this, "AthRNGSvc", "AthRNGSvc"};
 
-        PublicToolHandle<ActsTrk::ITrackingGeometryTool> m_trackingGeometryTool{this, "TrackingGeometryTool", "ActsTrackingGeometryTool"};
+        ServiceHandle<ActsTrk::ITrackingGeometrySvc> m_trackingGeometrySvc{this, "TrackingGeometrySvc", "ActsTrackingGeometrySvc"};
 
         SG::ReadCondHandleKey<MuonGM::MuonDetectorManager> m_detMgrKey{this, "MuonManagerKey",
           "MuonDetectorManager", "MuonManager ReadKey for IOV Range intersection"};

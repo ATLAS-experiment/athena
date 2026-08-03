@@ -99,10 +99,14 @@ def SimHitToTruthPartAlgCfg(flags, useSDO = False):
 
 def TruthHitSummaryAlgCfg(flags, name="MuonTruthHitSummaryAlg", **kwargs):
     result = ComponentAccumulator()
-    from MuonTrackFindingAlgs.TrackFindingConfig import TrackSummaryToolCfg
+    from MuonTrackFindingAlgs.TrackFindingConfig import TrackSummaryToolCfg, TrackSummaryLockCfg
     kwargs.setdefault("SummaryTool", result.popToolsAndMerge(TrackSummaryToolCfg(flags,  
                                                                 fillHoles=False, fillOutliers=False, 
                                                                 recomputeSegment =False)))
+    ### Schedule 
+    kwargs.setdefault("ExtraOutputs", [('xAOD::TruthParticleContainer', 'MuonTruthParticles.truthHitSummary')])
+    result.merge(TrackSummaryLockCfg(flags, inContainer="MuonTruthParticles", fillHoles = False, 
+                                            fillOutliers = False, ExtraInputs = kwargs["ExtraOutputs"]))
     the_alg = CompFactory.MuonR4.TruthHitSummaryAlg(name, **kwargs)
     result.addEventAlgo(the_alg, primary = True)
     return result
@@ -128,8 +132,6 @@ def TruthSegmentToTruthPartAssocCfg(flags, name="MuonTruthSegmentToTruthAssocAlg
     kwargs.setdefault("SimHitIds", hitDecors)
     from ActsConfig.ActsGeometryConfig import ActsExtrapolationToolCfg
     kwargs.setdefault("ExtrapolationTool", result.popToolsAndMerge(ActsExtrapolationToolCfg(flags, MaxSteps=100000)))
-    from ActsConfig.ActsGeometryConfig import ActsTrackingGeometryToolCfg
-    kwargs.setdefault("TrackingGeometryTool", result.getPrimaryAndMerge(ActsTrackingGeometryToolCfg(flags)))
     kwargs.setdefault("includePileUpObjs", flags.Muon.includePileUpTruth)
     the_alg = CompFactory.MuonR4.TruthSegToTruthPartAssocAlg(name, **kwargs)
     result.addEventAlgo(the_alg, primary = True)

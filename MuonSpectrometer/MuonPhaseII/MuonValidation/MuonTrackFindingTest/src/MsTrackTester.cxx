@@ -27,7 +27,7 @@ namespace {
     constexpr double toDeg(const double rad) {
         return rad / 1._degree;
     }
-    using Location = MsTrackSeeder::Location;
+    using Location = MsTrackSeed::Location;
  
 }
 
@@ -35,7 +35,7 @@ namespace MuonValR4 {
     std::optional<MsTrackSeed> MsTrackTester::makeSeedFromTruth(const ActsTrk::GeometryContext& gctx,
                                                                 const xAOD::TruthParticle& truthMuon) const {
         std::vector<const xAOD::MuonSegment*> matchedSegs = MuonR4::getTruthSegments(truthMuon);
-        if (matchedSegs.empty()) {
+        if (matchedSegs.empty() || toLayerIndex(matchedSegs.front()->chamberIndex()) == toLayerIndex(matchedSegs.back()->chamberIndex())) {
             return std::nullopt;
         }
         ExpandedSector sector{matchedSegs[0]->position().phi()};
@@ -64,13 +64,13 @@ namespace MuonValR4 {
               ? endcapSeed : barrelSeed;
     }
 
-    std::pair<double, double> MsTrackTester::calcSeedLength(const ActsTrk::GeometryContext& gctx, 
+    std::pair<double, double> MsTrackTester::calcSeedLength(const ActsTrk::GeometryContext& gctx,
                                                             const MuonR4::MsTrackSeed& seed) const {
         double maxL{-1.*Gaudi::Units::km}, minL{1.*Gaudi::Units::km},
                maxTheta{-181.}, minTheta{181};
         for (const xAOD::MuonSegment* seg : seed.segments()) {
-            const Amg::Vector2D projPos{m_seeder->expressOnCylinder(gctx, *seg, seed.location(), seed.sector())};
-            if (!m_seeder->withinBounds(projPos, seed.location())) {
+            const Amg::Vector2D projPos{m_seedingTool->expressOnCylinder(gctx.context(),*seg, seed.location(), seed.sector())};
+            if (!m_seedingTool->withinBounds(projPos, seed.location())) {
                 continue;
             }
             const double projected = projPos[seed.location()==Location::Barrel];
@@ -90,9 +90,8 @@ namespace MuonValR4 {
         ATH_CHECK(m_msTrkSeedKey.initialize());
         ATH_CHECK(m_recoSegmentKey.initialize());
 
-        ATH_CHECK(m_segSelector.retrieve());
         ATH_CHECK(m_summaryTool.retrieve());
-
+        ATH_CHECK(m_seedingTool.retrieve());
         ATH_CHECK(m_geoCtxKey.initialize());
         ATH_CHECK(m_fieldCacheKey.initialize());
 
@@ -102,12 +101,6 @@ namespace MuonValR4 {
 
         ATH_CHECK(detStore()->retrieve(m_detMgr));
 
-        MsTrackSeeder::Config seederCfg{};
-        seederCfg.detMgr = m_detMgr;
-        seederCfg.seedHalfLength = 2.*Gaudi::Units::m;
-        seederCfg.endcapDiscRadius = 40.*Gaudi::Units::m;
-        m_seeder = std::make_unique<MuonR4::MsTrackSeeder>(name(), std::move(seederCfg));
-
         int evOpts{0};
 
         m_recoSegs = std::make_unique<SegmentVariables>(m_tree, m_recoSegmentKey.key(), "Segments", msgLevel());
@@ -115,12 +108,12 @@ namespace MuonValR4 {
             "Segments_passSeedQual",[this](const SG::AuxElement* aux){
             const auto* seg = static_cast<const xAOD::MuonSegment*>(aux);
             return m_segSelector->passSeedingQuality(Gaudi::Hive::currentContext(),
-                                                     *MuonR4::detailedSegment(*seg)); }));
+                                                     *seg); }));
         m_recoSegs->addVariable(std::make_unique<MuonVal::GenericAuxDecorationBranch<unsigned short>>(m_tree, 
                                 "Segments_passTrackQual",[this](const SG::AuxElement* aux){
             const auto* seg = static_cast<const xAOD::MuonSegment*>(aux);
             return m_segSelector->passTrackQuality(Gaudi::Hive::currentContext(),
-                                                   *MuonR4::detailedSegment(*seg)); 
+                                                   *seg); 
         }));
 
 
@@ -155,16 +148,14 @@ namespace MuonValR4 {
                 }));
             for (auto loc : {Location::Barrel, Location::Endcap}) {
                 m_truthSegs->addVariable(std::make_unique<MuonVal::GenericAuxDecorationBranch<unsigned short>>(m_tree,
-                    std::format("TruthSegments_has{}Proj", loc), [loc, this](const SG::AuxElement* aux){
+                    std::format("TruthSegments_has{}Proj", loc), [loc, this](const SG::AuxElement* aux) -> unsigned short {
+                    
                     const auto* seg = static_cast<const xAOD::MuonSegment*>(aux);
-                    const ActsTrk::GeometryContext* gctx{nullptr};
-                    SG::get(gctx, m_geoCtxKey, Gaudi::Hive::currentContext()).ignore();
+                    const ActsTrk::GeometryContext* gctx{};
+                    (void) SG::get(gctx, m_geoCtxKey, Gaudi::Hive::currentContext()).isSuccess();
                     ExpandedSector sector{seg->position().phi()};
-                    const Amg::Vector2D projPos{m_seeder->expressOnCylinder(*gctx, *seg, loc, sector)};
-                    if (m_seeder->withinBounds(projPos, loc)) {
-                        return 1;
-                    }
-                    return 0;
+                    const Amg::Vector2D projPos{m_seedingTool->expressOnCylinder(gctx->context(), *seg, loc, sector)};
+                    return m_seedingTool->withinBounds(projPos, loc);
                 }));
             }
 
@@ -190,20 +181,6 @@ namespace MuonValR4 {
                 std::format("{:}_nTruthSegments", m_truthTrks->name()), [&] (const xAOD::TruthParticle& p) -> unsigned short {
                     return getTruthSegments(p).size();
                 }));
-            /// Calculate the two station momentum
-            m_truthTrks->addVariable(
-                std::make_unique<GenericPartDecorBranch<xAOD::TruthParticle, float>>(m_tree, 
-                std::format("{:}_qTimesPalpha", m_truthTrks->name()), [&] (const xAOD::TruthParticle& p) -> float {
-                    const auto truthSegs = getTruthSegments(p);
-                    if (truthSegs.size() < 2) {
-                        return 0.f;
-                    }
-                    const AtlasFieldCacheCondObj* magCache{nullptr};
-                    (void) SG::get(magCache, m_fieldCacheKey, Gaudi::Hive::currentContext()).isSuccess();
-
-                    return toDeg(m_seeder->estimateTwoStationP(*truthSegs.front(), *truthSegs.back(),
-                                                                *magCache)) ;          
-                }));
             /// Calculate the truth seed length
             auto cone = std::make_shared<VectorBranch<float>>(m_tree,
                                         std::format("{}_seedThetaCone", m_truthTrks->name()));
@@ -215,12 +192,13 @@ namespace MuonValR4 {
             m_truthTrks->addVariable(
                 std::make_unique<GenericPartDecorBranch<xAOD::TruthParticle, float>>(m_tree, 
                 std::format("{:}_seedLength", m_truthTrks->name()), [cone, qTimesP, this] (const xAOD::TruthParticle& p) -> float {
-                    const ActsTrk::GeometryContext* gctx{nullptr};
+                    const ActsTrk::GeometryContext* gctx{};
                     const AtlasFieldCacheCondObj* magCache{nullptr};
                     const EventContext& ctx{Gaudi::Hive::currentContext()};
-                    (void) SG::get(magCache, m_fieldCacheKey, ctx).isSuccess();
                     (void) SG::get(gctx, m_geoCtxKey, ctx).isSuccess();
-
+                    (void) SG::get(magCache, m_fieldCacheKey, ctx).isSuccess();
+                    MagField::AtlasFieldCache magField{};
+                    magCache->getInitializedCache(magField);
                     auto truthSeed = makeSeedFromTruth(*gctx, p);
                     if (!truthSeed) {
                         cone->push_back(-1);
@@ -229,7 +207,7 @@ namespace MuonValR4 {
                     }
                     auto [length, theta] = calcSeedLength(*gctx, *truthSeed);
                     cone->push_back(theta);
-                    qTimesP->push_back(m_seeder->estimateQtimesP(*gctx, *magCache, *truthSeed) / Gaudi::Units::GeV);
+                    qTimesP->push_back(m_seedingTool->estimateQtimesP(gctx->context(), *truthSeed, magField) / Gaudi::Units::GeV);
 
                     return length;
                 }));            
@@ -247,14 +225,16 @@ namespace MuonValR4 {
         static const std::vector<std::string> trackSummaries{
                  // Inner
                 "innerSmallHits", "innerLargeHits", "innerSmallHoles", "innerLargeHoles",
+                "innerClosePrecisionHits",
                 // Middle
                 "middleSmallHits", "middleLargeHits", "middleSmallHoles",
-                "middleLargeHoles",
+                "middleLargeHoles", "middleClosePrecisionHits",
                 // Outer
                 "outerSmallHits", "outerLargeHits", "outerSmallHoles", "outerLargeHoles",
+                "outerClosePrecisionHits",
                 // Extended
                 "extendedSmallHits", "extendedLargeHits", "extendedSmallHoles",
-                "extendedLargeHoles",
+                "extendedLargeHoles", "extendedClosePrecisionHits",
                 "innerTriggerEtaHits", "innerTriggerPhiHits", 
                 "middleTriggerEtaHits", "middleTriggerPhiHits",
                 "outerTriggerEtaHits", "outerTriggerPhiHits", 
@@ -281,6 +261,35 @@ namespace MuonValR4 {
         m_seedSummary = std::make_shared<TrackSummaryModule>(m_tree, "MsTrkSeed", m_summaryTool.get());
         m_muonTrks = std::make_shared<IParticleFourMomBranch>(m_tree, "ActsMuons");
         m_muonTrks->addVariable(std::make_unique<TrackChi2Branch>(*m_muonTrks));
+        m_muonTrks->addVariable(std::make_unique<TrackFitIterBranch>(*m_muonTrks));
+
+        using TrkType = xAOD::Muon::TrackParticleType;
+        auto dumpTrack = [&](const std::string& trkName,
+                                  TrkType type) {
+            auto trkColl = std::make_shared<IParticleFourMomBranch>(m_tree, std::format("Acts{:}", trkName));
+            trkColl->addVariable(std::make_unique<TrackChi2Branch>(*trkColl));
+            trkColl->addVariable(std::make_unique<TrackFitIterBranch>(*trkColl));
+            trkColl->addVariable(std::make_unique<MaterialRecorderBranch>(*trkColl));
+            trkColl->addVariable(std::make_unique<EnergyLossBranch>(*trkColl));
+            
+            trkColl->addVariable<float>("d0");
+            trkColl->addVariable<float>("z0");
+            for (const auto& summary : trackSummaries) {
+                trkColl->addVariable<uint8_t>(-1, summary); 
+            }
+            m_muonTrks->addVariable(std::make_unique<MuonVal::LinkerBranch>(*m_muonTrks, trkColl, 
+                                    [type](const xAOD::IParticle* muonP) -> const xAOD::IParticle* {
+                                        const auto* muon = dynamic_cast<const xAOD::Muon*>(muonP);
+                                        if (!muon) {
+                                            return nullptr;
+                                        }
+                                        return muon->trackParticle(type);
+                                    }, trkName));
+        };
+
+        dumpTrack("MsTrk", TrkType::MuonSpectrometerTrackParticle);
+        dumpTrack("MeTrk", TrkType::ExtrapolatedMuonSpectrometerTrackParticle);
+        
         m_muonTrks->addVariable<uint16_t>("allAuthors");
         m_muonTrks->addVariable<uint16_t>("author");
         /// Link the reconstructed segments to the muon
@@ -289,7 +298,7 @@ namespace MuonValR4 {
                     std::format("{:}_segmentLinks", m_muonTrks->name()), [&] (const xAOD::Muon& p){
                     std::vector<unsigned short> idx{};
                     for (unsigned seg = 0 ; seg < p.nMuonSegments(); ++seg) {
-                            idx.push_back(m_recoSegs->push_back(*p.muonSegment(seg)));
+                        idx.push_back(m_recoSegs->push_back(*p.muonSegment(seg)));
                     }
                     return idx;
                 }));
@@ -386,11 +395,6 @@ namespace MuonValR4 {
         const xAOD::MuonSegmentContainer* truthSegs{nullptr};
         ATH_CHECK(SG::get(truthSegs, m_truthSegmentKey, ctx));
 
-        const ActsTrk::GeometryContext* gctx{nullptr};
-        ATH_CHECK(SG::get(gctx, m_geoCtxKey, ctx));
-
-        const AtlasFieldCacheCondObj* magCache{nullptr};
-        ATH_CHECK(SG::get(magCache, m_fieldCacheKey, ctx));
 
         for (const xAOD::MuonSegment* seg : *truthSegs) {
             ATH_MSG_VERBOSE("Dump truth segment "<<printID(*seg)<<" @"<<
@@ -434,9 +438,12 @@ namespace MuonValR4 {
         const ActsTrk::GeometryContext* gctx{nullptr};
         ATH_CHECK(SG::get(gctx, m_geoCtxKey, ctx));
 
+
         const AtlasFieldCacheCondObj* magCache{nullptr};
         ATH_CHECK(SG::get(magCache, m_fieldCacheKey, ctx));
 
+        MagField::AtlasFieldCache magField{};
+        magCache->getInitializedCache(magField);
         std::unordered_map<const xAOD::TruthParticle*, 
                            std::vector<unsigned>> truthToSeedMatchCounter{};
 
@@ -450,6 +457,14 @@ namespace MuonValR4 {
             m_seedType+= Acts::toUnderlying(seed.location());
             m_seedSector += seed.sector().sector();
             m_seedSummary->push_back(ctx, seed);
+
+            auto startPars = m_seedingTool->estimateStartParameters(ctx, seed);
+            if (startPars.ok()) {
+                m_seedDir += (*startPars).direction();
+            } else {
+                m_seedDir += Amg::Vector3D::UnitZ();
+            }
+            // m_seedDir
             ATH_MSG_VERBOSE(" Dump new seed: "<<seed);
             for (const xAOD::MuonSegment* seg : seed.segments()){
                 m_seedRecoSegMatch[seedIdx].push_back(m_recoSegs->push_back(*seg));
@@ -465,7 +480,8 @@ namespace MuonValR4 {
             const auto[seedLength, theta] = calcSeedLength(*gctx, seed);
             m_seedLength+= seedLength;
             m_seedThetaCone+=theta;
-            m_seedQP += m_seeder->estimateQtimesP(*gctx, *magCache, seed) / Gaudi::Units::GeV; 
+            m_seedQP += m_seedingTool->estimateQtimesP(gctx->context(), seed, magField) / Gaudi::Units::GeV; 
+            m_seedGood += startPars.ok();
         }
         /** Link the truth muons to the seeds */
         for (auto& [truthMuon, matches] : truthToSeedMatchCounter) {

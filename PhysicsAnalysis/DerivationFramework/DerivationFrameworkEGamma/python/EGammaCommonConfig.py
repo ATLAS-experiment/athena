@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # ********************************************************************
 # EGammaCommonConfig.py
@@ -69,8 +69,9 @@ def EGammaCommonCfg(flags):
         acc.addPublicTool(PhotonVariableCorrectionTool)
         
         if isRun2orRun3:
+            nFoldsNF = flags.Egamma.NFoldsNF if flags.hasFlag('Egamma.NFoldsNF') else None
             PhotonVariableNFCorrectionTool = acc.popToolsAndMerge(
-                ElectronPhotonVariableNFCorrectionToolCfg(flags, forceFold=0)
+                ElectronPhotonVariableNFCorrectionToolCfg(flags, nFolds=nFoldsNF)
             )
             acc.addPublicTool(PhotonVariableNFCorrectionTool)
 
@@ -351,8 +352,10 @@ def EGammaCommonCfg(flags):
         AsgPhotonBDTSelectorCfg(
             flags,
             name="PhotonBDTSelectorTight",
-            workingPoint=photonIDBDTWP,
+            ScoreDecoration="DFCommonPhotonsBDTScore",
+            WorkingPoint=photonIDBDTWP,
             useNFs=False,
+            SuppressInputDependence=True
         )
     )
     PhotonBDTCalculatorNF = acc.popToolsAndMerge(
@@ -366,8 +369,10 @@ def EGammaCommonCfg(flags):
         AsgPhotonBDTSelectorCfg(
             flags,
             name="PhotonBDTSelectorTightNF",
-            workingPoint=photonIDBDTWP+"_NFs",
+            ScoreDecoration="DFCommonPhotonsNFBDTScore",
+            WorkingPoint=photonIDBDTWP+"_NFs",
             useNFs=True,
+            SuppressInputDependence=True
         )
     )
     # ====================================================================
@@ -431,6 +436,7 @@ def EGammaCommonCfg(flags):
     from DerivationFrameworkEGamma.EGammaToolsConfig import (
         EGElectronLikelihoodToolWrapperCfg,
         EGPhotonBDTToolWrapperCfg,
+        EGPhotonBDTToolDecoratorCfg
     )
 
     # Note: LH selectors don't need fudging since the LH is tuned to data
@@ -698,12 +704,23 @@ def EGammaCommonCfg(flags):
     # decorate photons with the output of BDT tight
     # on full-sim MC, fudge the shower shapes before computing the ID
     # (but the original shower shapes are not overridden)
+    PhotonBDTDecorator = acc.addPublicTool(acc.popToolsAndMerge(
+        EGPhotonBDTToolDecoratorCfg(
+            flags,
+            name="PhotonBDTDecorator",
+            PhotonObservableTool=PhotonBDTCalculator,
+            EGammaFudgeMCTool=(PhotonVariableCorrectionTool if isFullSim else None),
+            StoreGateEntryName="DFCommonPhotonsBDT",
+            ContainerName="Photons",
+        )
+    ))
+
+    
     PhotonPassBDTTight = acc.addPublicTool(acc.popToolsAndMerge(
         EGPhotonBDTToolWrapperCfg(
             flags,
             name="PhotonPassBDTTight",
             PhotonBDTSelectionTool=PhotonBDTSelectorTight,
-            PhotonObservableTool=PhotonBDTCalculator,
             EGammaFudgeMCTool=(PhotonVariableCorrectionTool if isFullSim else None),
             CutType="",
             StoreGateEntryName="DFCommonPhotonsBDT",
@@ -730,12 +747,22 @@ def EGammaCommonCfg(flags):
     # decorate photons with the output of BDT tight
     # on full-sim MC, normalizing flows-based correction before computing the ID
     # (but the original shower shapes are not overridden)
+    PhotonBDTDecoratorNF = acc.addPublicTool(acc.popToolsAndMerge(
+        EGPhotonBDTToolDecoratorCfg(
+            flags,
+            name="PhotonBDTDecoratorNF",
+            PhotonObservableTool=PhotonBDTCalculatorNF,
+            EGammaFudgeMCTool=(PhotonVariableNFCorrectionTool if (isMC and isRun2orRun3) else None),
+            StoreGateEntryName="DFCommonPhotonsNFBDT",
+            ContainerName="Photons",
+        )
+    ))
+
     PhotonPassBDTTightNF = acc.addPublicTool(acc.popToolsAndMerge(
         EGPhotonBDTToolWrapperCfg(
             flags,
             name="PhotonPassBDTTightNF",
             PhotonBDTSelectionTool=PhotonBDTSelectorTightNF,
-            PhotonObservableTool=PhotonBDTCalculatorNF,
             EGammaFudgeMCTool=(PhotonVariableNFCorrectionTool if (isMC and isRun2orRun3) else None),
             CutType="",
             StoreGateEntryName="DFCommonPhotonsNFBDT",
@@ -790,7 +817,9 @@ def EGammaCommonCfg(flags):
         PhotonPassIsEMMedium,
         PhotonPassIsEMTight,
         PhotonPassIsEMTightNF,
+        PhotonBDTDecorator,
         PhotonPassBDTTight,
+        PhotonBDTDecoratorNF,
         PhotonPassBDTTightNF,
         PhotonPassCleaning,
         ElectronAmbiguity,
@@ -808,30 +837,29 @@ def EGammaCommonCfg(flags):
             ]
         )
 
-    if flags.Derivation.Egamma.addMissingCellInfo:
-        from DerivationFrameworkCalo.DerivationFrameworkCaloConfig import (
-            EgammaCoreCellRecoveryCfg,
-        )
+    from egammaAlgs.egammaAODFixesConfig import runAODFix
+    _, fixes = runAODFix(flags)
+    # the topoIso fix already provides the decorations that this tool creates
+    if not('egammatopoIsoFix' in fixes):
+        if flags.Derivation.Egamma.addMissingCellInfo:
+            from DerivationFrameworkCalo.DerivationFrameworkCaloConfig import (
+                EgammaCoreCellRecoveryCfg,
+            )
 
-        CoreCellRecoveryTool = acc.popToolsAndMerge(
-            EgammaCoreCellRecoveryCfg(flags)
-        )
-        acc.addPublicTool(CoreCellRecoveryTool)
-        EGAugmentationTools.append(CoreCellRecoveryTool)
+            CoreCellRecoveryTool = acc.popToolsAndMerge(
+                EgammaCoreCellRecoveryCfg(flags)
+            )
+            acc.addPublicTool(CoreCellRecoveryTool)
+            EGAugmentationTools.append(CoreCellRecoveryTool)
 
-    if flags.Derivation.Egamma.addMissingCellInfo:
-        # decorate electrons and photons with the transformer calibrated energy
-        # the transformer models are trained with missing cell info
-        # the calibration should only be applied when missing cells are included
-        # since hion do not include neither missing cell or transformer-based calibration
-        from DerivationFrameworkEGamma.EGammaToolsConfig import EGammaEnergyCalibrationWrapperCfg
-        TransformerEnergyCalibration = acc.addPublicTool(acc.popToolsAndMerge(
-            EGammaEnergyCalibrationWrapperCfg(
-                flags,
-                name="TransformerEnergyCalibration",
+    from DerivationFrameworkEGamma.EGammaToolsConfig import EGammaEnergyCalibrationWrapperCfg
+    TransformerEnergyCalibration = acc.addPublicTool(acc.popToolsAndMerge(
+        EGammaEnergyCalibrationWrapperCfg(
+            flags,
+            name="TransformerEnergyCalibration",
             )
         ))
-        EGAugmentationTools.append(TransformerEnergyCalibration)
+    EGAugmentationTools.append(TransformerEnergyCalibration)
 
     # ==================================================
     # Truth Related tools

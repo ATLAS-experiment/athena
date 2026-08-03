@@ -14,7 +14,7 @@
 #define JPSIFINDER_H
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "GaudiKernel/ToolHandle.h"
-#include "GaudiKernel/IPartPropSvc.h"
+#include "GeneratorModules/GenData.h"
 #include "xAODMuon/MuonContainer.h"
 #include "xAODMuon/Muon.h"
 #include "StoreGate/ReadHandleKeyArray.h"
@@ -23,6 +23,7 @@
 #include "TrkToolInterfaces/ITrackSelectorTool.h"
 #include "TrkVertexFitterInterfaces/IVertexFitter.h"
 #include "InDetConversionFinderTools/VertexPointEstimator.h"
+#include <memory>
 
 /////////////////////////////////////////////////////////////////////////////
 
@@ -93,7 +94,7 @@ namespace Analysis {
         PublicToolHandle < Trk::IVertexFitter > m_iVertexFitter{this, "TrkVertexFitterTool", "Trk::TrkVKalVrtFitter"};
         PublicToolHandle < Trk::ITrackSelectorTool > m_trkSelector{this, "TrackSelectorTool", "InDet::TrackSelectorTool"};
         PublicToolHandle < InDet::VertexPointEstimator > m_vertexEstimator{this, "VertexPointEstimator", "InDet::VertexPointEstimator"};
-        ServiceHandle<IPartPropSvc> m_partPropSvc{this, "PartPropSvc", "PartPropSvc"};
+        std::shared_ptr<GenData> m_gendata{nullptr};
         bool m_mcpCuts;
         bool m_doTagAndProbe;
         bool m_forceTagAndProbe;

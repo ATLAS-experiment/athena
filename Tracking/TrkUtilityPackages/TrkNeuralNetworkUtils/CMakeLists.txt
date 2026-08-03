@@ -10,7 +10,7 @@ find_package( ROOT COMPONENTS Matrix Core Tree MathCore Hist )
 atlas_add_root_dictionary( TrkNeuralNetworkUtilsLib
                            TrkNeuralNetworkUtilsLibDictSource
                            ROOT_HEADERS TrkNeuralNetworkUtils/TTrainedNetwork.h TrkNeuralNetworkUtils/LinkDef.h
-                           EXTERNAL_PACKAGES ROOT Boost )
+                           EXTERNAL_PACKAGES ROOT)
 
 atlas_add_library( TrkNeuralNetworkUtilsLib
                    src/*.cxx

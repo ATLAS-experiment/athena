@@ -122,6 +122,8 @@ namespace G4UA
           if(part) {
             // OK, we got back to HepMC
             std::unique_ptr<TrackInformation> ti = std::make_unique<TrackInformation>(part);
+            ti->SetPrimaryGenParticle(part);
+            ti->SetGenerationZeroGenParticle(part);
             ti->SetRegenerationNr(0);
             ti->SetClassification(TrackInformation::Primary);
             // regNr=0 and classify=Primary are default values anyway

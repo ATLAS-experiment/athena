@@ -8,11 +8,13 @@
 #include "MuonTesterTree/MuonTesterTreeDict.h"
 
 #include "StoreGate/ReadHandleKey.h"
+#include "StoreGate/ReadCondHandleKey.h"
 #include "StoreGate/ReadDecorHandleKeyArray.h"
 
-
-#include "MuonRecToolInterfacesR4/ISegmentSelectionTool.h"
 #include "MuonRecToolInterfacesR4/ITrackSummaryTool.h"
+#include "MuonRecToolInterfacesR4/ISegmentSelectionTool.h"
+#include "MuonRecToolInterfacesR4/ITrackSeedingDiagnosticsTool.h"
+#include "MagFieldConditions/AtlasFieldCacheCondObj.h"
 
 #include "ActsEvent/TrackContainer.h"
 #include "xAODTruth/TruthParticleContainer.h"
@@ -22,7 +24,6 @@
 #include "xAODMuon/MuonContainer.h"
 #include "MuonPRDTest/SegmentVariables.h"
 #include "MuonReadoutGeometryR4/MuonDetectorManager.h"
-#include "MuonTrackFindingTools/MsTrackSeeder.h"
 #include "MuonPRDTestR4/TrackSummaryModule.h"
 
 #include "MuonPatternEvent/MuonPatternContainer.h"
@@ -38,20 +39,20 @@ namespace MuonValR4{
           StatusCode finalize() override final;
       private:
         using Location = MuonR4::MsTrackSeed::Location;
-        using SectorProjector = MuonR4::MsTrackSeeder::SectorProjector;
+        using SectorProjector = MuonR4::ExpandedSector::SectorProjector;
         /** @brief Construct MS track seed from the truth associated segments. A nullopt is returned
-         *         if either no segment is matched to the particle or no valid seed could be constructed
-        *  @param gctx: Geometry context to project the segments onto the sector centers
-        *  @param truthMuon: Reference to the truth muon for which a seed should be constructed */
+          *        if either no segment is matched to the particle or no valid seed could be constructed
+          *  @param gctx: The geometry context to align the segment within ATLAS
+          *  @param truthMuon: Reference to the truth muon for which a seed should be constructed */
         std::optional<MuonR4::MsTrackSeed> makeSeedFromTruth(const ActsTrk::GeometryContext& gctx,
                                                              const xAOD::TruthParticle& truthMuon) const;
         /** @brief Calculate the length of the seed and the theta deflection angle
          *         The length is defined as the spread of the seed's segments in the
-        *         cylinder coordinate. The deflection angle is calculates as the spread
-        *         of the theta angles of the individual segments
-        *  @param gctx: Geometry context to retrieve the reference positions
-        *  @param seed: The seed with the contributing segments */
-        std::pair<double, double>  calcSeedLength(const ActsTrk::GeometryContext& gctx, 
+         *         cylinder coordinate. The deflection angle is calculates as the spread
+         *         of the theta angles of the individual segments
+         *  @param gctx: The geometry context to align the segment within ATLAS
+         *  @param seed: The seed with the contributing segments */
+        std::pair<double, double>  calcSeedLength(const ActsTrk::GeometryContext& gctx,
                                                   const MuonR4::MsTrackSeed& seed) const;
 
         /** @brief Dumps the legacy containers to the TTree */
@@ -90,21 +91,22 @@ namespace MuonValR4{
         SG::ReadHandleKey<MuonR4::MsTrackSeedContainer> m_msTrkSeedKey{this, "MsTrkSeedKey", "MsTrackSeeds"};
         /** @brief Dependency on the geometry alignment */
         ActsTrk::GeoContextReadKey_t m_geoCtxKey{this, "AlignmentKey", "ActsAlignment", "cond handle key"};
-        /** @brief Dependency on the magnetic field */
-        SG::ReadCondHandleKey<AtlasFieldCacheCondObj> m_fieldCacheKey{this, "MagFieldKey", "fieldCondObj", "Name of the Magnetic Field conditions object key"};
-        /** @brief Segment selection tool to pick the good quality segments */
-        ToolHandle<MuonR4::ISegmentSelectionTool> m_segSelector{this, "SegmentSelectionTool" , "" };
-        /** @brief Dependency on the R4 muon container */
+       /** @brief Dependency on the R4 muon container */
         MuonKey_t m_muonKey{this, "MuonKey", "MuonsR4"};
         /** @brief Hit summary tool */
         ToolHandle<MuonR4::ITrackSummaryTool> m_summaryTool{this, "SummaryTool" ,""};
+        /** @brief The track seeding tool to construct the seed candidates and to estimate the initial parameters */
+        ToolHandle<MuonR4::ITrackSeedingDiagnosticsTool> m_seedingTool{this, "SeedingTool", ""};
+        /** @brief Selection tool to quantify the segment candidate quality */
+        ToolHandle<MuonR4::ISegmentSelectionTool> m_segSelector{this, "SegmentSelectionTool" , "" };
         /** @brief Legacy track reconstruction chain */
         TrackKey_t m_legacyTrackKey{this,"LegacyTrackKey", "MuonSpectrometerTrackParticles"};
+        /** @brief Dependency on the magnetic field */
+        SG::ReadCondHandleKey<AtlasFieldCacheCondObj> m_fieldCacheKey{this, "MagFieldKey", "fieldCondObj", "Name of the Magnetic Field conditions object key"};
+
 
         /** @brief Legacy muons  */
         MuonKey_t m_legacyMuonKey{this,"LegacyMuonKey", "Muons"};
-
-        std::unique_ptr<MuonR4::MsTrackSeeder> m_seeder{};
         
         using ParticleBranchPtr_t = std::shared_ptr<MuonVal::IParticleFourMomBranch>;
         ParticleBranchPtr_t m_truthTrks{};
@@ -118,6 +120,8 @@ namespace MuonValR4{
 
         /** @brief Simple seed information */
         MuonVal::ThreeVectorBranch m_seedPos{m_tree, "MsTrkSeed_position"};
+        /** @brief Seed direction vector */
+        MuonVal::UnitThreeVectorBranch m_seedDir{m_tree, "MsTrkSeed_direction"};
         /** @brief Is the seed in the encap or in the barrel chambers */
         MuonVal::VectorBranch<char>& m_seedType{m_tree.newVector<char>("MsTrkSeed_type")};
         /** @brief Sector of the seed, even center, odd overlap regions, for details see:  */
@@ -126,6 +130,8 @@ namespace MuonValR4{
         MuonVal::VectorBranch<float>& m_seedLength{m_tree.newVector<float>("MsTrkSeed_length")};
         /** @brief Maximum angular difference between the segments part of the seed */
         MuonVal::VectorBranch<float>& m_seedThetaCone{m_tree.newVector<float>("MsTrkSeed_thetaCone")};
+        /** @brief Does the seeding tool construct valid parameters from the seed */
+        MuonVal::VectorBranch<char>& m_seedGood{m_tree.newVector<char>("MsTrkSeed_goodSeed")};
         /** @brief Estimated momentum times charge from the track seed */
         MuonVal::VectorBranch<float>& m_seedQP{m_tree.newVector<float>("MsTrkSeed_qTimesP")};
         /** @brief Link to the truth muon */

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //Dear emacs, this is -*-c++-*-
@@ -29,6 +29,7 @@ class LArFCAL_Base_ID;
 class MsgStream;
 class CaloDetDescrManager_Base;
 
+// Not reentrant --- derived classes fill tuples in execute().
 class LArCond2NtupleBaseEB : public AthAlgorithm {
 
  public:

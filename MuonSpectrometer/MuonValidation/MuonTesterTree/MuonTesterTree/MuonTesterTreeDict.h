@@ -21,7 +21,7 @@ Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 #include <MuonTesterTree/ScalarBranch.h>
 #include <MuonTesterTree/SetBranch.h>
 #include <MuonTesterTree/ThreeVectorBranch.h>
-#include <MuonTesterTree/TrackChi2Branch.h>
+#include <MuonTesterTree/TrackDetailBranches.h>
 #include <MuonTesterTree/TwoVectorBranch.h>
 #include <MuonTesterTree/VectorBranch.h>
 #endif

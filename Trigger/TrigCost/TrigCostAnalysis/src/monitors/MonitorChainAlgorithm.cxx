@@ -1,9 +1,10 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MonitorChainAlgorithm.h"
 #include "../counters/CounterAlgorithm.h"
+#include <cstdint>
 
 MonitorChainAlgorithm::MonitorChainAlgorithm(const std::string& name, const MonitoredRange* parent)
     : MonitorBase(name, parent) {
@@ -11,6 +12,9 @@ MonitorChainAlgorithm::MonitorChainAlgorithm(const std::string& name, const Moni
 
 StatusCode MonitorChainAlgorithm::newEvent(const CostData& data, const float weight) {
     const std::vector<TrigCompositeUtils::AlgToChainTool::ChainInfo>& seededChains = data.seededChains();
+    const std::string slotStr{"slot"};
+    const std::string algStr{"alg"};
+    const std::string ALGStr{"ALG"};
     for (size_t i = 0; i < seededChains.size(); ++i){
         // Find algorithms associated with chain name
         if (!data.chainToAlgMap().count(seededChains[i].name)) continue;
@@ -18,13 +22,13 @@ StatusCode MonitorChainAlgorithm::newEvent(const CostData& data, const float wei
         for (const size_t algIndex : data.chainToAlgMap().at(seededChains[i].name)){
             const xAOD::TrigComposite* alg = data.costCollection().at(algIndex);
 
-            const uint32_t slot = alg->getDetail<uint32_t>("slot");
+            const uint32_t slot = alg->getDetail<uint32_t>(slotStr);
             if (slot != data.onlineSlot()) {
                 continue; // When monitoring the master slot, this Monitor ignores algs running in different slots 
             }
             
-            const uint32_t nameHash = alg->getDetail<TrigConf::HLTHash>("alg");
-            const std::string algName = TrigConf::HLTUtils::hash2string(nameHash, "ALG");
+            const uint32_t nameHash = alg->getDetail<TrigConf::HLTHash>(algStr);
+            const std::string algName = TrigConf::HLTUtils::hash2string(nameHash, ALGStr);
 
             std::stringstream counterName;
             counterName << seededChains[i].name << "__" << algName;

@@ -127,7 +127,11 @@ eflowCellSubtractionFacilitator::subtractPartialRings(
   double targetRingEnergy,
   double eRings, eflowRecTrack& theTrack,
   bool addCPData) const
-{
+{ 
+  if (eRings == 0.)[[unlikely]]{
+    ATH_MSG_ERROR("eflowCellSubtractionFacilitator::subtractPartialRings: eRings is zero.");
+    return;
+  }
   for (CellIt itRing = beginRing; itRing != endRing; ++itRing) {
     /* Loop over Rings */
     for (const std::pair<const CaloCell*, int>& thisPair : itRing->second) {

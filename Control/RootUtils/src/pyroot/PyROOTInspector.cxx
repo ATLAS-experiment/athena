@@ -330,7 +330,8 @@ recurse_pyinspect(PyObject *pyobj,
     if( nelems > 0 ) {
       // only try iterating if there are elements
       if (clsname == "TileCellVec" ||
-          clsname == "vector<char>")
+          clsname == "vector<char>" ||
+          clsname == "vector<signed char>")
       {
         for (Py_ssize_t i = 0; i < nelems; ++i) {
           PyObject *pyidx = PyLong_FromLong(i);

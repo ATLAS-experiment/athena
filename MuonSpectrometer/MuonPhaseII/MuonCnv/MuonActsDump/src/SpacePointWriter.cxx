@@ -19,12 +19,12 @@
 namespace {
     constexpr float toFloat(const double x) {
 
-        if (Acts::abs(x) < Acts::s_epsilon) {
+        if (std::abs(x) < Acts::s_epsilon) {
             return 0.f;
         }
         constexpr double min = 3.*static_cast<double>(std::numeric_limits<float>::min());
         constexpr double max = static_cast<double>(std::numeric_limits<float>::max());
-        const double clampedX = std::copysign(std::clamp(Acts::abs(x), min, max), x);
+        const double clampedX = std::copysign(std::clamp(std::abs(x), min, max), x);
       return static_cast<float>(clampedX);
    }
 
@@ -33,7 +33,7 @@ namespace {
     StatusCode SpacePointWriter::initialize(){
        ATH_CHECK(m_tree.init(this));
        ATH_CHECK(m_spacePointKeys.initialize());
-       ATH_CHECK(m_trackingGeometryTool.retrieve());
+       ATH_CHECK(m_ctxProvider.initialize());
        ATH_MSG_DEBUG("Successfully initialized");
        return StatusCode::SUCCESS;
     }
@@ -41,14 +41,14 @@ namespace {
       unsigned bucketCounter{0u};
       m_eventId = ctx.eventID().event_number();
 
-      const Acts::GeometryContext tgContext = m_trackingGeometryTool->getGeometryContext(ctx).context();
+      const Acts::GeometryContext tgContext = m_ctxProvider.getGeometryContext(ctx);
 
       const MuonR4::SpacePointPerLayerSorter layerSorter{};
 
       for (const SG::ReadHandleKey<MuonR4::SpacePointContainer>& key : m_spacePointKeys) {
          const MuonR4::SpacePointContainer* container{nullptr};
          ATH_CHECK(SG::get(container,key, ctx));
-         for (const auto& bucket : *container) {
+         for (const MuonR4::SpacePointBucket* bucket : *container) {
             std::vector<std::uint32_t> layNumbers{};
             for (const auto& spacePoint : *bucket) {
                const std::uint32_t layNum = layerSorter.sectorLayerNum(*spacePoint);
@@ -67,7 +67,7 @@ namespace {
                m_driftR += toFloat(spacePoint->driftRadius());
                m_time += toFloat(spacePoint->time());
 
-               m_toMeasFrame += spacePoint->msSector()->surface().localToGlobalTransform(tgContext).inverse()*
+               m_toMeasFrame += spacePoint->msSector()->globalToLocalTransform(tgContext)*
                                 measSurface.localToGlobalTransform(tgContext);
                using namespace MuonR4::SegmentFit;
                m_covLoc0 += toFloat(spacePoint->covariance()[Acts::toUnderlying(AxisDefs::etaCov)]);

@@ -8,9 +8,14 @@ n_events=5
 
 export ATHENA_CORE_NUMBER=1
 Reco_tf.py \
-  --preExec "flags.Exec.FPE=-1;" "from Campaigns import PhaseIINoPileUp; PhaseIINoPileUp(flags);" \
-  --preInclude "all:InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude" "all:ActsConfig.ActsCIFlags.actsHeavyIonFlags" \
+  --preExec "flags.Exec.FPE=-1; \
+             flags.Scheduler.CheckDependencies=True; \
+             flags.Scheduler.ShowDataDeps=True; \
+             flags.Scheduler.ShowDataFlow=True; \
+             flags.Scheduler.ShowControlFlow = True;" \
+  --preInclude "Campaigns.MC23PhaseIINoPileUp,InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude,ActsConfig.ActsCIFlags.actsHeavyIonFlags" \
   --postInclude "all:PyJobTransforms.UseFrontier" \
+  --postExec "all:cfg.printConfig(withDetails=True, summariseProps=True);" \
   --conditionsTag ${conditions_tag} \
   --inputRDOFile ${input_rdo} \
   --outputAODFile AOD.pool.root \

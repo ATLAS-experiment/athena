@@ -6,21 +6,23 @@ The following is an example on how to dump the training / evaluation data to ACO
 
 - Clustering, space point formation and tracking still use the Athena legacy code so a converter (InDetToXAODSpacePointConversionCfg) from the InDet:: to xAOD:: EDM needs to be scheduled. Once the tracking chain will be moved from legacy to Acts based, all inputs will be in xAOD format and such conversion won't be necessary.
 
-- 'all:Campaigns.PhaseIIPileUp200' : this option only makes sense if we run from HITS files and it's ignored when running on RDO inputs.
+- 'all:Campaigns.MC23PhaseIIPileUp200' : this option only makes sense if we run from HITS files and it's ignored when running on RDO inputs.
 
 - The RDO input file is just an example.
 
 ```bash
 RDO_FILENAME=/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/PhaseIIUpgrade/RDO/ATLAS-P2-RUN4-03-00-00/mc21_14TeV.601229.PhPy8EG_A14_ttbar_hdamp258p75_SingleLep.recon.RDO.e8481_s4149_r14700/RDO.33629020._000047.pool.root.1
 
+conditionsTag=$(python -c "from AthenaConfiguration.TestDefaults import defaultConditionsTags; print(defaultConditionsTags.RUN4_MC)")
+
 Reco_tf.py \
-         --conditionsTag 'all:OFLCOND-MC21-SDR-RUN4-02' \
+         --conditionsTag 'all:${conditionsTag}' \
          --geometryVersion 'all:ATLAS-P2-RUN4-03-00-00' \
          --multithreaded 'True' \
          --steering 'doRAWtoALL' \
          --digiSteeringConf 'StandardInTimeOnlyTruth' \
          --postInclude 'all:PyJobTransforms.UseFrontier,InDetConfig.SiSpacePointFormationConfig.InDetToXAODSpacePointConversionCfg' \
-         --preInclude 'all:Campaigns.PhaseIIPileUp200' 'InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude'\
+         --preInclude 'all:Campaigns.MC23PhaseIIPileUp200' 'InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude'\
          --postExec 'from InDetGNNTracking.InDetGNNTrackingConfig import DumpObjectsCfg; cfg.merge(DumpObjectsCfg(flags))' \
          --inputRDOFile ${RDO_FILENAME} \
          --outputAODFile 'test.aod.gnnreader.debug.root'  \
@@ -41,14 +43,16 @@ function gnn_tracking() {
     # export ATHENA_CORE_NUMBER=6
     #--skipEvents 44
 
+    conditionsTag=$(python -c "from AthenaConfiguration.TestDefaults import defaultConditionsTags; print(defaultConditionsTags.RUN4_MC)")
+
     Reco_tf.py \
-        --conditionsTag 'all:OFLCOND-MC21-SDR-RUN4-02' \
+        --conditionsTag 'all:${conditionsTag}' \
         --geometryVersion 'all:ATLAS-P2-RUN4-03-00-00' \
         --multithreaded 'True' \
         --steering 'doRAWtoALL' \
         --digiSteeringConf 'StandardInTimeOnlyTruth' \
         --postInclude 'all:PyJobTransforms.UseFrontier' \
-        --preInclude 'all:Campaigns.PhaseIIPileUp200' 'InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude' 'InDetGNNTracking.InDetGNNTrackingFlags.gnnReaderValidation' \
+        --preInclude 'all:Campaigns.MC23PhaseIIPileUp200' 'InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude' 'InDetGNNTracking.InDetGNNTrackingFlags.gnnReaderValidation' \
         --preExec 'flags.Tracking.GNN.TrackReader.inputTracksDir = "gnntracks" \        
         --inputRDOFile ${RDO_FILENAME} \
         --outputAODFile 'test.aod.gnnreader.debug.root'  \

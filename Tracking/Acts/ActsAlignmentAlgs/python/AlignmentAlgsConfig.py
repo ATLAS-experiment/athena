@@ -112,7 +112,10 @@ def ActsGeometryContextAlgCfg(flags, name="GeometryContextAlg", **kwargs):
     
     from AthenaConfiguration.Enums import ProductionStep
     ### Pixel & Sct Readout geometry is not setup for simulation. Skip it
-    if flags.Common.ProductionStep  != ProductionStep.Simulation:
+    if flags.Common.ProductionStep not in [ProductionStep.Simulation,
+                                           ProductionStep.Digitization,
+                                           ProductionStep.Overlay ,
+                                           ProductionStep.PileUpPresampling]:
         result.merge(SctAlignCondAlgCfg(flags))
         result.merge(PixelAlignCondAlgCfg(flags))
         if flags.Detector.GeometryITkPixel: AlignmentStores += ["ActsITkPixelAlignmentStore"] 

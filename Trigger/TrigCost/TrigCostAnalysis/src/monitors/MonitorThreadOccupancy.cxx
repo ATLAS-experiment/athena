@@ -23,8 +23,9 @@ StatusCode MonitorThreadOccupancy::newEvent(const CostData& data, const float we
 
   // Check if we ran with EnableMultiSlot=true - in the master slot (online slot) there are algorithms executed on different slot
   bool isMultiSlot = false;
+  const std::string slotStr{"slot"};
   for (const xAOD::TrigComposite* tc : data.costCollection()) {
-    const uint32_t slot = tc->getDetail<uint32_t>("slot");
+    const uint32_t slot = tc->getDetail<uint32_t>(slotStr);
     if (slot != data.onlineSlot()){
       isMultiSlot = true;
       break;
@@ -35,10 +36,10 @@ StatusCode MonitorThreadOccupancy::newEvent(const CostData& data, const float we
     ATH_MSG_DEBUG("Saving data from multiple slots to master slot was not enabled - ThreadOccupancy Monitoring won't be executed");
     return StatusCode::SUCCESS; 
   }
-
+  const std::string threadStr{"thread"};
   for (const xAOD::TrigComposite* tc : data.costCollection()) {
-    const uint32_t threadID = tc->getDetail<uint32_t>("thread");
-    if (m_threadToCounterMap.count(threadID) == 0) {
+    const uint32_t threadID = tc->getDetail<uint32_t>(threadStr);
+    if (! m_threadToCounterMap.contains(threadID)) {
       std::stringstream threadIDStr;
       threadIDStr << "Thread_" << std::setfill('0') << std::setw(5) << threadID;
       m_threadToCounterMap[threadID] = threadIDStr.str();

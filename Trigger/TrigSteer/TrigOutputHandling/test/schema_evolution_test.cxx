@@ -1,6 +1,6 @@
 
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #include <iostream>
 
@@ -40,12 +40,12 @@ StatusCode tester( TriggerEDMSerialiserTool* ser) {
     // got trivial object to serialise, need to create addresses
     TriggerEDMSerialiserTool::Address interfaceAddress{
       "xAOD::TrigEMClusterContainer", "xAOD::TrigEMClusterContainer_v1",
-      1264979038/*clid*/, "HLT_one", {},
+      RootType::ByNameNoQuiet("xAOD::TrigEMClusterContainer_v1"), 1264979038/*clid*/, "HLT_one", {},
       TriggerEDMSerialiserTool::Address::Category::xAODInterface};
 
     TriggerEDMSerialiserTool::Address auxAddress{
       "xAOD::TrigEMClusterAuxContainer", "xAOD::TrigEMClusterAuxContainer_v1",
-      1111649561/*clid*/, "HLT_oneAux.", {},
+      RootType::ByNameNoQuiet("xAOD::TrigEMClusterAuxContainer_v1"), 1111649561/*clid*/, "HLT_oneAux.", {},
       TriggerEDMSerialiserTool::Address::Category::xAODAux};
      
     auto status = ser->serialiseContainer( (void*)em, interfaceAddress, serialisedData );

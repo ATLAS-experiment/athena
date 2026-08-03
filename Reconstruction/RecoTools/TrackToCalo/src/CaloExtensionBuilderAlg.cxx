@@ -32,6 +32,7 @@ Trk::CaloExtensionBuilderAlg::initialize()
   ATH_CHECK(m_particleCaloExtensionTool.retrieve());
   ATH_CHECK(m_ParticleCacheKey.initialize());
   ATH_CHECK(m_TrkPartContainerKey.initialize());
+  ATH_CHECK(m_trkLinkKey.initialize());
   return StatusCode::SUCCESS;
 }
 

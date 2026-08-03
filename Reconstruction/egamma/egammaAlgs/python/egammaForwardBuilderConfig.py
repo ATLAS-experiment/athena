@@ -21,10 +21,6 @@ def egammaForwardBuilderCfg(flags, name='egammaForwardElectron', **kwargs):
         kwargs["doTrackMatching"] = True
         kwargs["doCookieCutting"] = True
         if flags.Reco.EnableHGTDExtension:
-            extraInputs += [
-                ("xAOD::TrackParticleContainer",
-                 "StoreGateSvc+GSFTrackParticles.time")
-            ]
             if "forwardelectronNNselectors" not in kwargs:
                 LooseFwdElectronSelector_NN = AsgForwardElectronSelectorToolCfg(
                     flags,

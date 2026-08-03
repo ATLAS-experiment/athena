@@ -110,7 +110,7 @@ private:
     bool m_ppmIsRetSpare = false;
     CaloUserHeader m_caloUserHeader;
     SubBlockHeader m_subBlockHeader;
-    xAOD::TriggerTowerContainer* m_triggerTowers;
+    xAOD::TriggerTowerContainer* m_triggerTowers = nullptr;
     LutsMap m_ppLuts;
     FadcsMap m_ppFadcs;
     std::vector<uint32_t> m_ppBlock;

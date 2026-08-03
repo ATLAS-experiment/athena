@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonCreatorAlg.h"
@@ -61,10 +61,10 @@ StatusCode MuonCreatorAlg::initialize() {
     ATH_MSG_INFO("    *** CombinedTrackContainer:           " << m_combinedTrkCollectionName);
     ATH_MSG_INFO("    *** xAOD::CombinedTrackContainer:     " << m_combinedCollectionName);
 
-    ATH_MSG_INFO("    *** xAOD::ExtrpolatedTrackContainer:  " << m_extrapolatedCollectionName);
-    ATH_MSG_INFO("    *** ExtrpolatedTrackContainer:        " << m_extrapolatedTrkCollectionName);
+    ATH_MSG_INFO("    *** xAOD::ExtrapolatedTrackContainer: " << m_extrapolatedCollectionName);
+    ATH_MSG_INFO("    *** ExtrapolatedTrackContainer:       " << m_extrapolatedTrkCollectionName);
     ATH_MSG_INFO("    *** xAOD::MSOnlyTrackContainer:       " << m_msOnlyExtrapolatedCollectionName);
-    ATH_MSG_INFO("    *** ExtrpolatedTackContainer:         " << m_msOnlyExtrapolatedTrkCollectionName);
+    ATH_MSG_INFO("    *** ExtrapolatedTrackContainer:       " << m_msOnlyExtrapolatedTrkCollectionName);
 
     return StatusCode::SUCCESS;
 }

@@ -11,7 +11,7 @@ atlas_add_library( ActsInteropLib
    ActsInterop/*.h src/*.cxx
    PUBLIC_HEADERS ActsInterop
    LINK_LIBRARIES Acts::Core GaudiKernel AthenaBaseComps
-   PRIVATE_LINK_LIBRARIES InDetIdentifier InDetReadoutGeometry )
+   PRIVATE_LINK_LIBRARIES InDetIdentifier InDetReadoutGeometry HGTD_Identifier HGTD_ReadoutGeometry )
 
 # Unpack header from Acts target to use without linking
 if (Acts_FOUND)

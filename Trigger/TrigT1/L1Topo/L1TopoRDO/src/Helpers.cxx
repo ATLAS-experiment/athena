@@ -10,7 +10,6 @@
 #include <iomanip>
 #include <cmath>
 #include <cstdint>
-#include <boost/io/ios_state.hpp>
 #include "L1TopoRDO/L1TopoRDO.h"
 #include "L1TopoRDO/L1TopoRDOCollection.h"
 #include "L1TopoRDO/Helpers.h"
@@ -22,8 +21,6 @@
 
 // Print function
 std::ostream& operator<<(std::ostream& os, const L1TopoRDO& rdo) {
-  // save ostream state; destructor will restore state when it goes out of scope
-  boost::io::ios_all_saver ias(os); 
   os << "L1TopoRDO:\n";
   os << "     SourceID: " << L1Topo::formatHex8(rdo.getSourceID());
   if (rdo.isDAQModule()){

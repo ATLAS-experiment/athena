@@ -28,7 +28,6 @@
 
 #include "GaudiKernel/ToolHandle.h"
 #include "GaudiKernel/ITHistSvc.h"
-#include "GaudiKernel/IPartPropSvc.h"
 
 #include "CxxUtils/checker_macros.h"
 #include "CxxUtils/CachedPointer.h"

@@ -30,8 +30,7 @@
 #include "CLHEP/Units/SystemOfUnits.h"
 #include "CLHEP/Units/PhysicalConstants.h"
 
-// Particle data table
-#include "HepPDT/ParticleData.hh"
+#include "GeneratorModules/GenData.h"
 #include "TruthUtils/HepMCHelpers.h"
 #include "TruthUtils/ParticleConstants.h"
 
@@ -53,7 +52,6 @@ TRTProcessingOfStraw::TRTProcessingOfStraw(const TRTDigSettings* digset,
                                            TRTElectronicsProcessing * ep,
                                            TRTNoise * noise,
                                            TRTDigCondBase* digcond,
-                                           const HepPDT::ParticleDataTable* pdt,
                                            const TRT_ID* trt_id,
                                            ITRT_PAITool* paitoolAr,
                                            ITRT_PAITool* paitoolKr,
@@ -72,7 +70,7 @@ TRTProcessingOfStraw::TRTProcessingOfStraw(const TRTDigSettings* digset,
   m_pElectronicsProcessing(ep),
   m_pNoise(noise),
   m_pDigConditions(digcond),
-  m_pParticleTable(pdt),
+  m_genData(std::make_unique<GenData>()),
   m_alreadywarnedagainstpdg0(false),
   m_id_helper(trt_id)
 
@@ -404,30 +402,20 @@ void TRTProcessingOfStraw::ProcessStraw ( MagField::AtlasFieldCache& fieldCache,
       }
       else { // It's not a photon, monopole or Qball with charge > 10, so we proceed with regular ionization using the PAI model
 
-        // Lookup mass and charge from the PDG info in CLHEP HepPDT:
-        const HepPDT::ParticleData *particle(m_pParticleTable->particle(HepPDT::ParticleID(abs(particleEncoding))));
-        double particleCharge(0.);
+        double particleCharge = MC::charge(particleEncoding);
         double particleMass(0.);
 
-        if (particle) {
-          particleCharge = particle->charge();
-          particleMass = particle->mass().value();
-          // Override ParticleData charge value for Qballs and similar exotic multi-charged particles
-          if (MC::isGenericMultichargedParticle(particleEncoding)) {
-            particleCharge =MC::charge(particleEncoding);
-          }
+        const auto particleMassFromTable = m_genData->particleMass(abs(particleEncoding));
+        if (particleMassFromTable) {
+          particleMass = particleMassFromTable.value();
         }
         else {
           // TODO Should we handle charged Geantinos gracefully here?
           if (!MC::isNucleus(particleEncoding)) {
-            ATH_MSG_WARNING ( "Data for sim. particle with pdgcode "<<particleEncoding
-                              <<"  is not a nucleus and could not be retrieved from PartPropSvc. Assuming mass and charge as pion. Please investigate." );
-            particleCharge = 1.;
+            ATH_MSG_WARNING ( "Data for sim. particle with pdgcode "<<particleEncoding  <<"  is not a nucleus and could not be retrieved from GenData. Assuming mass of pion. Please investigate." );
             particleMass = ParticleConstants::chargedPionMassInMeV;
           }
           else {
-            particleCharge = MC::charge(particleEncoding);
-
             const int A(static_cast<int>(MC::baryonNumber(particleEncoding)));
             const int Z(static_cast<int>(std::abs(MC::numberOfProtons(particleEncoding))));
             static constexpr double Mp(ParticleConstants::protonMassInMeV);
@@ -436,7 +424,7 @@ void TRTProcessingOfStraw::ProcessStraw ( MagField::AtlasFieldCache& fieldCache,
 
             if (!alreadyPrintedPDGcodeWarning) {
               ATH_MSG_WARNING ( "Data for sim. particle with pdgcode "<<particleEncoding
-                                <<" could not be retrieved from PartPropSvc (unexpected ion)."
+                                <<" could not be retrieved from GenData (unexpected ion)."
                                 <<" Please Investigate the PDGTABLE.MeV file."
                                 <<" Calculating mass and charge from pdg code."
                                 <<" The result is: Charge = "<<particleCharge<<" Mass = "<<particleMass<<"MeV" );

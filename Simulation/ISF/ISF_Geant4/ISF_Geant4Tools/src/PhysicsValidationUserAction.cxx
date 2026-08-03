@@ -15,7 +15,6 @@
 
 //Athena includes
 #include "AtlasDetDescr/AtlasRegion.h"
-#include "MCTruth/AtlasG4EventUserInfo.h"
 #include "MCTruth/VTrackInformation.h"
 
 // Geant4 includes
@@ -23,9 +22,9 @@
 #include "G4DynamicParticle.hh"
 #include "G4TouchableHistory.hh"
 #include "G4Event.hh"
-#include "G4EventManager.hh"
 #include "G4Step.hh"
 #include "G4TransportationManager.hh"
+#include "G4VProcess.hh"
 
 //External includes
 #include "AtlasHepMC/GenVertex.h"
@@ -305,9 +304,7 @@ namespace G4UA{
 	if (process->GetProcessSubType()==2 ) m_ionloss+=eloss;
 	if (process->GetProcessSubType()==3 ) m_radloss+=eloss;
 	
-	AtlasG4EventUserInfo* atlasG4EvtUserInfo = static_cast<AtlasG4EventUserInfo*> (G4EventManager::GetEventManager()->GetConstCurrentEvent()->GetUserInformation());
-	VTrackInformation * trackInfo = static_cast<VTrackInformation*>(track->GetUserInformation());
-	::iGeant4::Geant4TruthIncident truth( aStep, *trackInfo->GetBaseISFParticle(), geoID, atlasG4EvtUserInfo);
+	::iGeant4::Geant4TruthIncident truth( aStep, geoID);
 	unsigned int nSec = truth.numberOfChildren();
 	if (nSec>0 || !trackIsAlive ) {      // save interaction info
 	  //std::cout <<"interaction:"<< process->GetProcessSubType() <<":"<<nSec<< std::endl;

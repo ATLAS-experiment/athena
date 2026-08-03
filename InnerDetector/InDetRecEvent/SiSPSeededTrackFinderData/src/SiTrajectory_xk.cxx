@@ -4,9 +4,8 @@
 
 #include "SiSPSeededTrackFinderData/SiTrajectory_xk.h"
 
+#include <format>
 #include <iostream>
-#include <iomanip>
-#include <boost/io/ios_state.hpp>
 
 ///////////////////////////////////////////////////////////////////
 // Set work information to trajectory
@@ -351,14 +350,12 @@ std::ostream& InDet::operator <<
 
 std::ostream& InDet::SiTrajectory_xk::dump( std::ostream& out ) const
 {
-  boost::io::ios_all_saver ias(out);
-  
   if (m_nElements <=0 ) {
-    out<<"Trajectory does not exist"<<std::endl; ias.restore();
+    out<<"Trajectory does not exist"<<std::endl;
     return out;
   }
   if (m_firstElement >= m_lastElement ) {
-    out<<"Trajectory is wrong"<<std::endl; ias.restore();
+    out<<"Trajectory is wrong"<<std::endl;
     return out;
   }
 
@@ -368,22 +365,18 @@ std::ostream& InDet::SiTrajectory_xk::dump( std::ostream& out ) const
      <<"                                                                      |"
      <<std::endl;
 
-  out<<"| Has"<<std::setw(3)<<m_nElements
-     <<" ("
-     <<std::setw(3)<<m_nActiveElements
-     <<")"
-     <<" elements and "
-     <<std::setw(2)<<m_nclusters+m_nclustersNoAdd<<" ("
-     <<std::setw(2)<<m_nclustersNoAdd<<") clusters and "
-     <<std::setw(2)<<m_ndf<<" weighted clusters and quality = "<<std::setw(12)<<std::setprecision(5)<<quality()
-     <<"         |"
-     <<std::endl;
-  out<<"| Has number of holes before, inside, after and gap= "
-     <<std::setw(2)<<m_nHolesBefore
-     <<std::setw(2)<<m_nholes
-     <<std::setw(2)<<m_nHolesAfter
-     <<std::setw(3)<<m_dholes<<"                                           |"
-     <<std::endl;
+    out << std::format("| Has{:>3} ({:>3}) elements and {:>2} ({:>2}) clusters and {:>2} weighted clusters and quality = {:>12.5g}         |\n",
+                m_nElements,
+                m_nActiveElements,
+                m_nclusters + m_nclustersNoAdd,
+                m_nclustersNoAdd,
+                m_ndf,
+                quality());
+    out << std::format("| Has number of holes before, inside, after and gap= {:>2}{:>2}{:>2}{:>3}                                           |\n",
+                m_nHolesBefore,
+                m_nholes,
+                m_nHolesAfter,
+                m_dholes);
   out<<"|                                                                                        F   B           |"
      <<std::endl;
 
@@ -413,7 +406,7 @@ std::ostream& InDet::SiTrajectory_xk::dump( std::ostream& out ) const
     int c = 0;
     if (m_elements[m].detstatus() > 0) c = m_elements[m].numberClusters();
 
-    out<<"|"<<std::setw(3)<<unsigned(i);
+    out << std::format("|{:>3}", static_cast<unsigned>(i));
 
     std::string S0="  ";
     if (m_firstElement == i) S0="=>";
@@ -424,18 +417,11 @@ std::ostream& InDet::SiTrajectory_xk::dump( std::ostream& out ) const
     if (m_elements[m].cluster     ()) S1="+";
     if (m_elements[m].clusterNoAdd()) S2="+";
 
-    out<<"|"
-       <<S0<<"|"
-       <<std::setw(1)<<DE
-       <<std::setw(2)<<DET        <<"|"
-       <<std::setw(5)<<c          <<"|"
-       <<S1<<"|"
-       <<S2<<"|";
+    out << std::format("|{}|{:>1}{:>2}|{:>5}|{}|{}|", S0, DE, DET, c, S1, S2);
 
     if (m_elements[m].status()) {
 
-      out<<std::setw(9)<<std::setprecision(3)<<m_elements[m].xi2F()<<"|";
-      out<<std::setw(9)<<std::setprecision(3)<<m_elements[m].xi2B()<<"|";
+      out << std::format("{:>9.3g}|{:>9.3g}|", m_elements[m].xi2F(), m_elements[m].xi2B());
 
       double ra = 0.;
       double pt = 0.;
@@ -498,21 +484,22 @@ std::ostream& InDet::SiTrajectory_xk::dump( std::ostream& out ) const
           tz = SM.cotTheta();
         }
       }
-      out<<std::setw( 9)<<std::setprecision(4)<<fa     <<"|";
-      out<<std::setw( 9)<<std::setprecision(4)<<ra     <<"|";
-      out<<std::setw(10)<<std::setprecision(4)<<pt*.001<<"|";
-      out<<std::setw( 9)<<std::setprecision(4)<<tz     <<"|";
-      out<<std::setw(1)<<unsigned(m_elements[m].noiseModel())<<"|";
-      out<<std::setw(2)<<m_elements[m].inside()<<"|";
-      out<<std::setw(2)<<unsigned(m_elements[m].nlinksF())<<"|";
-      out<<std::setw(2)<<unsigned(m_elements[m].nlinksB())<<"|";
-      out<<std::setw(1)<<unsigned(m_elements[m].status())<<"|";
-      out<<std::setw(1)<<unsigned(m_elements[m].difference())<<"|";
-      out<<std::setw(1)<<unsigned(m_elements[m].nholesF())<<"|";
-      out<<std::setw(1)<<unsigned(m_elements[m].dholesF())<<"|";
-      out<<std::setw(1)<<unsigned(m_elements[m].nholesB())<<"|";
-      out<<std::setw(1)<<unsigned(m_elements[m].dholesB())<<"|";
-      out<<std::setw(9)<<std::setprecision(4)<<m_elements[m].step()<<"|";
+      out << std::format("{:>9.4g}|{:>9.4g}|{:>10.4g}|{:>9.4g}|{:>1}|{:>2}|{:>2}|{:>2}|{:>1}|{:>1}|{:>1}|{:>1}|{:>1}|{:>1}|{:>9.4g}|",
+             fa,
+             ra,
+             pt*0.001,
+             tz,
+             static_cast<unsigned>(m_elements[m].noiseModel()),
+             m_elements[m].inside(),
+             static_cast<unsigned>(m_elements[m].nlinksF()),
+             static_cast<unsigned>(m_elements[m].nlinksB()),
+             static_cast<unsigned>(m_elements[m].status()),
+             static_cast<unsigned>(m_elements[m].difference()),
+             static_cast<unsigned>(m_elements[m].nholesF()),
+             static_cast<unsigned>(m_elements[m].dholesF()),
+             static_cast<unsigned>(m_elements[m].nholesB()),
+             static_cast<unsigned>(m_elements[m].dholesB()),
+             m_elements[m].step());
     }
     else                       {
       out<<"         |";
@@ -531,14 +518,12 @@ std::ostream& InDet::SiTrajectory_xk::dump( std::ostream& out ) const
       out<<" |";
       out<<" |";
       out<<" |";
-      out<<std::setw(9)<<std::setprecision(4)<<m_elements[m].step();
-      out<<"|";
+      out << std::format("{:>9.4g}|", m_elements[m].step());
     }
     out<<std::endl;
   }
   out<<"|---|--|---|-----|-|-|---------|---------|---------|---------|----------|---------|-|--|--|--|-|-|-|-|-|-|---------|"
      <<std::endl;
-  ias.restore();
   return out;
 }   
 
@@ -1069,7 +1054,9 @@ bool InDet::SiTrajectory_xk::globalPositionsToClusters
 
       pv[0]     = dx*Ax[0]+dy*Ax[1]+dz*Ax[2];
       pv[1]     = dx*Ay[0]+dy*Ay[1]+dz*Ay[2];
-
+      //setParametersWithCovariance detects whether su is 'owned' elsewhere
+      //the ownership patterns could be improved, though.
+      //coverity[MULTIPLE_INIT_SMART_PTRS]
       Tp.setParametersWithCovariance(su,pv,cv);
 
       if (!sct) m_elements[0].CloseClusterSeach(Tp, (*iter_boundaryLink), pib, pie);
@@ -1193,6 +1180,8 @@ bool InDet::SiTrajectory_xk::backwardExtension(int itmax, const EventContext& ct
   int                     TE    [100]         ;
   const InDet::SiCluster* CL    [100]         ;
   double                  XI2B  [100]         ;
+  //Local variable PUB uses 27200 bytes of stack space
+  //coverity[STACK_USE]
   Trk::PatternTrackParameters PUB[100]        ;
   Trk::PatternTrackParameters  PA             ;
  
@@ -1305,7 +1294,7 @@ bool InDet::SiTrajectory_xk::backwardExtension(int itmax, const EventContext& ct
 	      ndfbest += Ei.ndf();
 	      if (l<0) l=lbest;
             }
-            m_elementsMap[lbest] = m_elementsMap[i];
+            m_elementsMap.at(lbest) = m_elementsMap.at(i);
           }
    
         }
@@ -1315,7 +1304,7 @@ bool InDet::SiTrajectory_xk::backwardExtension(int itmax, const EventContext& ct
         if (dn!=0) {
 
           for (int i=L; i!= m_nElements; ++i) {
-            m_elementsMap[i-dn]=m_elementsMap[i];
+            m_elementsMap.at(i-dn)=m_elementsMap.at(i);
           }
 
           L            -=dn;
@@ -1754,7 +1743,7 @@ bool InDet::SiTrajectory_xk::forwardExtension(bool smoother,int itmax, const Eve
     if (index_currentElement < 0 ) break;
     /// if we are not in the last iteration, final preparation for iterating by making our new start 
     /// point skip the cluster used there so far. 
-    if (iteration!=itm && !m_elements[m_elementsMap[index_currentElement]].addNextClusterF()) break;
+    if (iteration!=itm && !m_elements.at(m_elementsMap.at(index_currentElement)).addNextClusterF()) break;
   }
 
   /// if reaching max iterations, reset iteration counter to the last iteration that was run 

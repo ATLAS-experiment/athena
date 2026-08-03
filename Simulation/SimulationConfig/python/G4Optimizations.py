@@ -51,6 +51,14 @@ def disablePhotonRussianRoulette(flags):
     flags.Sim.PRRWeight = False
 
 
+def enableMultipleStepsInMSCTransport(flags):
+    flags.Sim.MultipleStepsInMSCTransport = True
+
+
+def disableMultipleStepsInMSCTransport(flags):
+    flags.Sim.MultipleStepsInMSCTransport = False
+
+
 def enableNeutronRussianRoulette(flags):
     """Activate Neutron Russian Roulette: Fast simulation" killing low energy neutrons with some probability."""
     flags.Sim.NRRThreshold = 2.  # MeV
@@ -164,6 +172,7 @@ def disableG4Optimizations(flags):
     disableWoodcockTracking(flags)
     disableBeamPipeKill(flags)
     disableFrozenShowersFCalOnly(flags)
+    disableMultipleStepsInMSCTransport(flags)
 
 
 def WoodcockTrackingInEMEC(flags):

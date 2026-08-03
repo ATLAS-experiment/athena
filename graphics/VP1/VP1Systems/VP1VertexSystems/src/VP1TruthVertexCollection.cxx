@@ -55,9 +55,6 @@ QList<VP1StdCollection*> VP1TruthVertexCollection::createCollections(VertexSysCo
 //____________________________________________________________________
 class VP1TruthVertexCollection::Imp {
 public:
-  double mag(const HepMC::FourVector& v) const {
-    return std::sqrt( v.x()*v.x() + v.y()*v.y() + v.z()*v.z() );
-  }
   QString key;
   VP1TruthVertexCollection * theclass = nullptr;
   VertexSysController*controller = nullptr;
@@ -124,7 +121,7 @@ public:
       const HepMC::FourVector mom(px,py,pz,e);
       switch(q) {
       case VertexCommonFlags::ENERGY: return e;
-      case VertexCommonFlags::MOMENTUM: return m_d->mag(mom);
+      case VertexCommonFlags::MOMENTUM: return mom.length();
       case VertexCommonFlags::TRANSVERSE_MOM: return mom.perp();
       default: // VertexCommonFlags::MASS:
 	return mom.m();
@@ -289,7 +286,7 @@ QStringList VP1TruthVertexCollection::infoOnClicked(SoPath* pickedPath)
       QString name = VP1ParticleData::particleName(pdg,ok);
       if (!ok)
 	name = "<unknown>";
-      l << "--> In: "+name+" ("+str(pdg)+")  [ P = "+str(m_d->mag(PartIn->momentum())/Gaudi::Units::GeV)+" GeV ]";
+      l << "--> In: "+name+" ("+str(pdg)+")  [ P = "+str(PartIn->momentum().length()/Gaudi::Units::GeV)+" GeV ]";
     }
      for (const auto& PartOut: vtx->particles_out()) {
       const int pdg = PartOut->pdg_id();
@@ -297,7 +294,7 @@ QStringList VP1TruthVertexCollection::infoOnClicked(SoPath* pickedPath)
       QString name = VP1ParticleData::particleName(pdg,ok);
       if (!ok)
 	name = "<unknown>";
-      l << "--> Out: "+name+" ("+str(pdg)+")  [ P = "+str(m_d->mag(PartOut->momentum())/Gaudi::Units::GeV)+" GeV ]";
+      l << "--> Out: "+name+" ("+str(pdg)+")  [ P = "+str(PartOut->momentum().length()/Gaudi::Units::GeV)+" GeV ]";
     }
 
     if (m_d->controller->printVerboseInfoOnClick()) {

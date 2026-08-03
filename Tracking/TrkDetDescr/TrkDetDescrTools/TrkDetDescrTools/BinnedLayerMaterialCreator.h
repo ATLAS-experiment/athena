@@ -37,21 +37,13 @@ namespace Trk {
         /** Constructor */
         BinnedLayerMaterialCreator(const std::string&,const std::string&,const IInterface*);
 
-        /** Destructor */
-        ~BinnedLayerMaterialCreator();
-
-
         /** process the material properties */
         LayerMaterialProperties* createLayerMaterial(const LayerMaterialRecord& lmr) const;
         
         /** create layer material properties from layer material properties - simply clones */
         LayerMaterialProperties* convertLayerMaterial(const LayerMaterialProperties& lmr) const;
-        
-        
-    private:
-        double                  m_compressedMaterialThickness;
-    };
 
+    };
        
 }
 

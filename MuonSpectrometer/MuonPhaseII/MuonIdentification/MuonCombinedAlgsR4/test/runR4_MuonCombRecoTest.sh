@@ -19,9 +19,9 @@ Reco_tf.py \
     --geometrySQLiteFullPath "${GEOMODEL_DB_FILE}" \
     --geometryVersion "default:${ATLAS_GEO_TAG}" \
     --conditionsTag "default:${ATLAS_CONDDB_TAG}" \
-    --preInclude "all:ActsConfig.ActsCIFlags.actsWorkflowFlags" \
-    --preExec "all:flags.Scheduler.CheckDependencies=True;flags.Scheduler.ShowDataDeps=True;flags.Scheduler.ShowDataFlow=True;flags.Scheduler.ShowControlFlow = True;flags.Detector.EnablePLR=False;flags.Detector.EnableBCMPrime=False;flags.Acts.TrackingGeometry.UseBlueprint = True;" \
-    --postExec "default:flags.dump(evaluate=True);from MuonTrackFindingTest.MsTrackFindingTester import MsTrackTesterCfg;cfg.merge(MsTrackTesterCfg(flags));cfg.printConfig(withDetails=True, summariseProps=True);" \
+    --preInclude "all:ActsConfig.ActsCIFlags.actsProductionFlags" \
+    --preExec "all:flags.Common.MsgSuppression=False;flags.Scheduler.CheckDependencies=True;flags.Scheduler.ShowDataDeps=True;flags.Scheduler.ShowDataFlow=True;flags.Scheduler.ShowControlFlow = True;flags.Detector.EnablePLR=False;flags.Detector.EnableBCMPrime=False;flags.Acts.TrackingGeometry.UseBlueprint = True;" \
+    --postExec "default:flags.dump(evaluate=True);from MuonTrackFindingTest.MsTrackFindingTester import MsTrackTesterCfg;cfg.merge(MsTrackTesterCfg(flags));cfg.printConfig(withDetails=True, summariseProps=True);cfg.getService('MessageSvc').setFatal=['copyAuxStoreThinned']" \
     --postInclude 'all:PyJobTransforms.UseFrontier' \
     --outputESDFile myESD.pool.root \
     --outputAODFile myAOD.pool.root \

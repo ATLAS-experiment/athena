@@ -12,9 +12,10 @@ def MsTrackTesterCfg(flags, name = "MsTrackTester", scheduleLegacy = True,
     result.merge(setupHistSvcCfg(flags, outFile=outFile,
                                  outStream="MuonTrackTester"))
 
-    from MuonTrackFindingAlgs.TrackFindingConfig import SegmentSelectorCfg, TrackSummaryToolCfg
+    from MuonTrackFindingAlgs.TrackFindingConfig import SegmentSelectorCfg, TrackSummaryToolCfg, MsTrackSeedingToolCfg
     kwargs.setdefault("SegmentSelectionTool", result.popToolsAndMerge(SegmentSelectorCfg(flags)))
     kwargs.setdefault("SummaryTool", result.popToolsAndMerge(TrackSummaryToolCfg(flags)))
+    kwargs.setdefault("SeedingTool", result.popToolsAndMerge(MsTrackSeedingToolCfg(flags)))
     if not scheduleLegacy:
         kwargs.setdefault("LegacySegmentKey", "")
         kwargs.setdefault("LegacyTrackKey", "")
@@ -31,6 +32,9 @@ def MsTrackVisualizationToolCfg(flags, name = "VisualizationTool", **kwargs):
         kwargs.setdefault("TruthSegkey", "MuonSegments")
     from ActsConfig.ActsGeometryConfig import ActsExtrapolationToolCfg
     kwargs.setdefault("ExtrapolationTool", result.popToolsAndMerge(ActsExtrapolationToolCfg(flags, MaxSteps=10000)))
+    from MuonTrackFindingAlgs.TrackFindingConfig import MsTrackSeedingToolCfg
+    kwargs.setdefault("SeedingTool", result.popToolsAndMerge(MsTrackSeedingToolCfg(flags)))
+
     the_tool = CompFactory.MuonValR4.TrackVisualizationTool(name, **kwargs)
     result.setPrivateTools(the_tool)
     return result    
@@ -57,7 +61,13 @@ if __name__=="__main__":
     flags = initConfigFlags()
     flags.PerfMon.doFullMonMT = not args.noPerfMon
     flags.Trigger.Muon.useNewRegionSelector = False
+    flags.Muon.scheduleActsReco = True
     flags.Muon.includePileUpTruth = True
+    
+    from ActsConfig.ActsConfigFlags import TrackFitterType
+    if False: flags.Muon.TrackFitterType = TrackFitterType.KalmanFitter
+    if False: flags.Muon.trackGeometryMaterialMap = MuonPhaseIITestDefaults.TRKGEO_MATERIALMAP
+
     flags, cfg = setupGeoR4TestCfg(args,flags)
 
     cfg.getService("MessageSvc").setVerbose= []

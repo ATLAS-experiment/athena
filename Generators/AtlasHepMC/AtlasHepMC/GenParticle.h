@@ -24,7 +24,6 @@ inline GenParticlePtr newGenParticlePtr(const HepMC3::FourVector &mom = HepMC3::
 inline ConstGenParticlePtr newConstGenParticlePtr(const HepMC3::FourVector &mom = HepMC3::FourVector::ZERO_VECTOR(), int pid = 0, int status = 0) {
     return std::make_shared<const HepMC3::GenParticle>(mom, pid, status);
 }
-inline int barcode_or_id(const ConstGenParticlePtr& p) { return p->id(); }
 
 using HepMC3::GenParticle;
 }

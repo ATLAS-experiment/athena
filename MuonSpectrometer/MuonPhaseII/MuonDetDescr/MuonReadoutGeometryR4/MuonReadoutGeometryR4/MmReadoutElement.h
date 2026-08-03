@@ -118,7 +118,7 @@ class MmReadoutElement : public MuonReadoutElement {
     const StripLayer& stripLayer(const Identifier& measId) const;    
     const StripLayer& stripLayer(const IdentifierHash& measHash) const;    
  
-    friend ActsTrk::TransformCacheDetEle<MmReadoutElement>;
+    friend ActsTrk::ReadoutSurfacePositioning<MmReadoutElement>;
 
    private:
        
@@ -141,10 +141,10 @@ std::ostream& operator<<(std::ostream& ostr, const MmReadoutElement::parameterBo
 
 namespace ActsTrk{
     template <> Amg::Transform3D 
-        TransformCacheDetEle<MuonGMR4::MmReadoutElement>::fetchTransform(const DetectorAlignStore* store) const;
+        ReadoutSurfacePositioning<MuonGMR4::MmReadoutElement>::fetchTransform(const DetectorAlignStore* store) const;
     /** Identifier of the transform cache equivalent to the Identifier of the first strip inside the gasGap */
     template <> Identifier
-        TransformCacheDetEle<MuonGMR4::MmReadoutElement>::identify() const;
+        ReadoutSurfacePositioning<MuonGMR4::MmReadoutElement>::identify() const;
 }
 
 

@@ -38,7 +38,7 @@
 #include "GaudiKernel/MsgStream.h"
 #include "GaudiKernel/SystemOfUnits.h"
 
-#include "boost/io/ios_state.hpp"
+#include <format>
 #include <iostream>
 
 #include <assert.h>
@@ -3194,9 +3194,6 @@ void TileGeoSectionBuilder::computeCellDim(TileDetDescrManager*& manager,
 
 /* -------- DEBUG printouts -------------- */
         if (m_verbose) {
-          boost::io::ios_base_all_saver coutsave (std::cout);
-          std::cout << std::setiosflags(std::ios::fixed)
-                    << std::setw(9) << std::setprecision(2);
           std::cout << "\n **** Cell dimension computed for : ";
           std::cout << "(" << detector << ", "
                     << nSide << ", "
@@ -3204,19 +3201,21 @@ void TileGeoSectionBuilder::computeCellDim(TileDetDescrManager*& manager,
                     << nSample << ")\n";
           std::cout << " >> CellDim contains " << cellDim->getNRows() << " rows\n";
           for (unsigned int jj=0; jj<cellDim->getNRows(); jj++)
-            std::cout << cellDim->getRMin(jj) << " "
-                      << cellDim->getRMax(jj) << " "
-                      << cellDim->getZMin(jj) << " "
-                      << cellDim->getZMax(jj) << "\n";
-          std::cout << " >> Cell Volume is " << cellDim->getVolume()*(1./Gaudi::Units::cm3) << " cm^3\n";
+            std::cout << std::format("{:9.2f} {:9.2f} {:9.2f} {:9.2f}\n",
+                                     cellDim->getRMin(jj),
+                                     cellDim->getRMax(jj),
+                                     cellDim->getZMin(jj),
+                                     cellDim->getZMax(jj));
+          std::cout << std::format(" >> Cell Volume is {:9.2f} cm^3\n", cellDim->getVolume()*(1./Gaudi::Units::cm3));
 
           std::cout << " >> CellDimNeg contains " << cellDimNeg->getNRows() << " rows\n";
           for (unsigned int jj=0; jj<cellDimNeg->getNRows(); jj++)
-            std::cout << cellDimNeg->getRMin(jj) << " "
-                      << cellDimNeg->getRMax(jj) << " "
-                      << cellDimNeg->getZMin(jj) << " "
-                      << cellDimNeg->getZMax(jj) << "\n";
-          std::cout << " >> CellNeg Volume is " << cellDimNeg->getVolume()*(1./Gaudi::Units::cm3) << " cm^3\n";
+            std::cout << std::format("{:9.2f} {:9.2f} {:9.2f} {:9.2f}\n",
+                                     cellDimNeg->getRMin(jj),
+                                     cellDimNeg->getRMax(jj),
+                                     cellDimNeg->getZMin(jj),
+                                     cellDimNeg->getZMax(jj));
+          std::cout << std::format(" >> CellNeg Volume is {:9.2f} cm^3\n", cellDimNeg->getVolume()*(1./Gaudi::Units::cm3));
         }
 /* -------------------------------------------- */
       }
@@ -3407,10 +3406,18 @@ void TileGeoSectionBuilder::calculateR(int detector,
 
 /* -------- DEBUG printouts -------------- */
   if (m_verbose) {
-    boost::io::ios_base_all_saver coutsave (std::cout);
-    std::cout << std::setiosflags(std::ios::fixed) << std::setw(9) << std::setprecision(2);
-    std::cout << "Detector " << detector << " sample " << sample << " old r/dr " << oldrc   << " " << olddr << std::endl;
-    std::cout << "Detector " << detector << " sample " << sample << " new r/dr " << rcenter << " " << dr << " delta r/dr " << rcenter-oldrc << " " << dr-olddr << std::endl;
+    std::cout << std::format("Detector {} sample {} old r/dr {:9.2f} {:9.2f}\n",
+                             detector,
+                             sample,
+                             oldrc,
+                             olddr);
+    std::cout << std::format("Detector {} sample {} new r/dr {:9.2f} {:9.2f} delta r/dr {:9.2f} {:9.2f}\n",
+                             detector,
+                             sample,
+                             rcenter,
+                             dr,
+                             rcenter-oldrc,
+                             dr-olddr);
   }
 
   return;

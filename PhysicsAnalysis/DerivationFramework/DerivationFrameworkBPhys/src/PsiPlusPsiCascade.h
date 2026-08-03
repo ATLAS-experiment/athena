@@ -7,7 +7,6 @@
 
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "GaudiKernel/ToolHandle.h"
-#include "GaudiKernel/IPartPropSvc.h"
 #include "DerivationFrameworkInterfaces/IAugmentationTool.h"
 #include "JpsiUpsilonTools/PrimaryVertexRefitter.h"
 #include "xAODTracking/VertexContainer.h"
@@ -96,7 +95,6 @@ namespace DerivationFramework {
     PublicToolHandle < Analysis::PrimaryVertexRefitter >   m_pvRefitter;
     PublicToolHandle < Trk::V0Tools >                      m_V0Tools;
     PublicToolHandle < DerivationFramework::CascadeTools > m_CascadeTools;
-    ServiceHandle<IPartPropSvc> m_partPropSvc{this, "PartPropSvc", "PartPropSvc"};
 
     bool        m_refitPV;
     SG::WriteHandleKey<xAOD::VertexContainer> m_refPVContainerName;

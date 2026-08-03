@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -82,8 +82,8 @@ public:
   QList<AODHandleBase*> handlesList;
 
   //For iteration:
-  std::vector<MissingEtHandle*>::iterator itHandles;
-  std::vector<MissingEtHandle*>::iterator itHandlesEnd;
+  std::vector<MissingEtHandle*>::iterator itHandles{};
+  std::vector<MissingEtHandle*>::iterator itHandlesEnd{};
 
   // settings
   double scale = 1.; // the default scale of all jets

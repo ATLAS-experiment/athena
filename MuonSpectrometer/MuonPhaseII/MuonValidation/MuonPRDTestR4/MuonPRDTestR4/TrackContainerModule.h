@@ -1,36 +1,61 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef PRDTESTERR4_TRACKCONTAINERMODULE_H
 #define PRDTESTERR4_TRACKCONTAINERMODULE_H
 #include "MuonPRDTestR4/TesterModuleBase.h"
 #include "ActsEvent/TrackContainer.h"
+#include "ActsGeometryInterfaces/GeometryContext.h"
+
 namespace MuonValR4{
-
-    class TrackContainerModule: public TesterModuleBase {
+ /** @brief  Store the number of iterations of the global chi2 fitter
+  *          to arrive at the minimum */
+    class TrackFitIterBranch : public MuonVal::VectorBranch<std::uint16_t>,
+                               virtual public MuonVal::IParticleDecorationBranch {
         public:
-            TrackContainerModule(MuonTesterTree& tree,
-                                const std::string& inContainer,
-                                MSG::Level msgLvl = MSG::Level::INFO,
-                                const std::string& collName = "ActsMsTracks");
+            TrackFitIterBranch(IParticleFourMomBranch& parent);
 
-            bool declare_keys() override final;
+            using VectorBranch<std::uint16_t>::push_back;
+            virtual void push_back(const xAOD::IParticle* p) override;
+            virtual void push_back(const xAOD::IParticle& p) override;
+            virtual void operator+=(const xAOD::IParticle* p) override;
+            virtual void operator+=(const xAOD::IParticle& p) override;
 
-             bool fill(const EventContext& ctx) override final;
-        private:
-            SG::ReadHandleKey<ActsTrk::TrackContainer> m_key{};
-            std::string m_collName{"ActsMsTracks"};
-
-            MuonVal::VectorBranch<float>& m_trackPt{parent().newVector<float>(m_collName + "_pt")};
-            MuonVal::VectorBranch<float>& m_trackEta{parent().newVector<float>(m_collName + "_eta")};
-            MuonVal::VectorBranch<float>& m_trackPhi{parent().newVector<float>(m_collName + "_phi")};
-            MuonVal::VectorBranch<int>& m_trackQ{parent().newVector<int>(m_collName + "_q")};
-            MuonVal::VectorBranch<float>& m_trackChi2{parent().newVector<float>(m_collName + "_chi2")};
-            MuonVal::VectorBranch<unsigned>& m_trackNdoF{parent().newVector<unsigned>(m_collName + "_nDoF")};
-            MuonVal::VectorBranch<unsigned>& m_parentSeed{parent().newVector<unsigned>(m_collName + "_parentSeed")};
-            
     };
+    /** @brief Record the L0, X0 and the number of material states on
+     *         the track. */
+    class MaterialRecorderBranch : public MuonVal::VectorBranch<float>,
+                                   virtual public MuonVal::IParticleDecorationBranch {
+        public:
+            
+            MaterialRecorderBranch(MuonVal::IParticleFourMomBranch& parent);
+
+            using MuonVal::VectorBranch<float>::push_back;
+            virtual void push_back(const xAOD::IParticle* p) override;
+            virtual void push_back(const xAOD::IParticle& p) override;
+            virtual void operator+=(const xAOD::IParticle* p) override;
+            virtual void operator+=(const xAOD::IParticle& p) override;
+            virtual bool init() override final;
+
+        private:
+            ActsTrk::GeoContextReadKey_t m_geoCtxKey{"ActsAlignment"};
+            std::shared_ptr<MuonVal::VectorBranch<float>> m_thickX0{};
+            std::shared_ptr<MuonVal::VectorBranch<std::uint8_t>> m_nStates{};
+    };  
+    /** @brief Store the energy loss by comparing the first and last track
+     *         state momentum */
+    class EnergyLossBranch: public MuonVal::VectorBranch<float>,
+                            virtual public MuonVal::IParticleDecorationBranch {
+        public:
+            EnergyLossBranch(MuonVal::IParticleFourMomBranch& parent);
+
+            using MuonVal::VectorBranch<float>::push_back;
+            virtual void push_back(const xAOD::IParticle* p) override;
+            virtual void push_back(const xAOD::IParticle& p) override;
+            virtual void operator+=(const xAOD::IParticle* p) override;
+            virtual void operator+=(const xAOD::IParticle& p) override;  
+    };                
 }
 
 #endif

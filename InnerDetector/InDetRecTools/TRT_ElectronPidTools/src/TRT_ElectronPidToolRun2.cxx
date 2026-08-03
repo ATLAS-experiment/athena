@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -119,12 +119,10 @@ StatusCode InDet::TRT_ElectronPidToolRun2::finalize()
 
 // Kept for backward compatibility.
 // See TRT_ElectronPidTools-01-00-28 for the full (commented) code.
-std::vector<float> InDet::TRT_ElectronPidToolRun2::electronProbability_old(const Trk::Track& track)
+std::vector<float> InDet::TRT_ElectronPidToolRun2::electronProbability_old(const Trk::Track& /*track*/)
 {
   // Simply return values without calculation
   std::vector<float> PIDvalues = Trk::eProbabilityDefault;
-  const Trk::TrackParameters* perigee = track.perigeeParameters();
-  if (!perigee) { return PIDvalues; }
   return PIDvalues;
 }
 
@@ -145,6 +143,7 @@ InDet::TRT_ElectronPidToolRun2::electronProbability(
   // make sure some calibration is available
   if(HTcalc==nullptr) {
     ATH_MSG_WARNING ("  No Pid calibration from the DB.");
+    return {};
   }
 
   // Get the PID NN
@@ -155,6 +154,7 @@ InDet::TRT_ElectronPidToolRun2::electronProbability(
     // make sure some calibration is available
     if(PIDNN==nullptr) {
       ATH_MSG_WARNING ("  No PID NN available from the DB.");
+      return {};
     }
   }
 
@@ -495,6 +495,10 @@ InDet::TRT_ElectronPidToolRun2::electronProbability(
   std::map<std::string, std::map<std::string, std::vector<double>>> vectorInputs_NN = PIDNN->getVectorInputs();
 
   // Calculate the hit fraction
+  if (nTRThits == 0)[[unlikely]]{
+    ATH_MSG_ERROR("Number of TRT hits is zero");
+    return {};
+  }
   double fAr = static_cast<double>(nArhits) / nTRThits;
   double fHTMB = static_cast<double>(nTRThitsHTMB) / nTRThits;
   double PHF = static_cast<double>(nPrecHits) / nTRThits;

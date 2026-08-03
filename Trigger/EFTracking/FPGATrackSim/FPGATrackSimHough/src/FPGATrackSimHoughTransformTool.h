@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 #ifndef FPGATrackSimHOUGHTRANSFORMTOOL_H
 #define FPGATrackSimHOUGHTRANSFORMTOOL_H
@@ -130,9 +130,9 @@ class FPGATrackSimHoughTransformTool : public extends <AthAlgTool, IFPGATrackSim
  
         struct LUT
         {
-          int input_begin;
-          int input_end;
-          int layer;
+          int input_begin = 0;
+          int input_end = 0;
+          int layer = 0;
           std::vector<pos> output;
         };
         int m_bitlength = 16;

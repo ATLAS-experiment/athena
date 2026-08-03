@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef JETTAGINFOTPCNV_GBBNNTAGINFO_P1_H
@@ -24,9 +24,9 @@ namespace Analysis {
     TPObjRef m_BaseTagInfo;
 
     /// All of this data will be written out.
-    int m_nMatchingTracks;
-    float m_trkJetWidth;
-    float m_trkJetMaxDeltaR;
+    int m_nMatchingTracks = 0;
+    float m_trkJetWidth = 0;
+    float m_trkJetMaxDeltaR = 0;
 
   };
 }

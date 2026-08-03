@@ -21,11 +21,11 @@ atlas_add_library( ExpressionEvaluationLib
 atlas_add_test( ExpressionParser_test
                 SOURCES test/ExpressionParser_test.cxx
                 LINK_LIBRARIES AthenaKernel ExpressionEvaluationLib GaudiKernel StoreGateLib TestTools xAODMuon xAODTracking
-                POST_EXEC_SCRIPT nopost.sh
+                POST_EXEC_SCRIPT noerror.sh
                 PROPERTIES TIMEOUT 300
                 ENVIRONMENT "JOBOPTSEARCHPATH=${CMAKE_CURRENT_SOURCE_DIR}/share" )
 
 atlas_add_test( PointerCache_test
                 SOURCES test/PointerCache_test.cxx
-                POST_EXEC_SCRIPT nopost.sh
+                POST_EXEC_SCRIPT noerror.sh
                 PROPERTIES TIMEOUT 300 )

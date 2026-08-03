@@ -65,7 +65,7 @@ ActsCaloTrackingVolumeBuilder::trackingVolume(
   std::vector<Box*>                 prims;
   for (const auto& cell : cells) {
     boxStore.push_back(
-        std::make_unique<Box>(cell->boundingBox({0.1, 0.1, 0.1})));
+        std::make_unique<Box>(cell->boundingBox(gctx, {0.1, 0.1, 0.1})));
     prims.push_back(boxStore.back().get());
   }
 

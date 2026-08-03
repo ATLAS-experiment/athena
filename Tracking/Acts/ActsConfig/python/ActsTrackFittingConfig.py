@@ -5,8 +5,43 @@ from AthenaConfiguration.ComponentFactory import CompFactory
 from ActsConfig.ActsConfigFlags import TrackFitterType
 from ActsInterop import UnitConstants
 from typing import Optional
+
+def ActsToTrkFitterCfg(flags,
+                       name: str = "ActsToTrkFitterTool",
+                       fitterKind:  Optional[TrackFitterType] = None, 
+                       **kwargs) -> ComponentAccumulator:
+    
+    acc = ComponentAccumulator()
+
+    fitterKind = flags.Acts.trackFitterType  if fitterKind is None else fitterKind
+
+    from ActsAlignmentAlgs.AlignmentAlgsConfig import ActsGeometryContextAlgCfg
+    from ActsConfig.ActsGeometryConfig import ActsTrackingGeometrySvcCfg, ActsGeometryRealmConvToolCfg
+    acc.merge(ActsGeometryContextAlgCfg(flags))
+    acc.merge(ActsTrackingGeometrySvcCfg(flags))
+    kwargs.setdefault("GeometryRealmConvTool", acc.getPrimaryAndMerge(ActsGeometryRealmConvToolCfg(flags)))
+    if "ATLASConverterTool" not in kwargs:
+        from ActsConfig.ActsEventCnvConfig import ActsToTrkConverterToolCfg
+        kwargs.setdefault('ATLASConverterTool', acc.getPrimaryAndMerge(ActsToTrkConverterToolCfg(flags)))
+
+    if fitterKind is TrackFitterType.KalmanFitter:
+        kwargs.setdefault('SeedCovarianceScale', 100.0)
+    
+    if "ActsFitterTool" not in kwargs:
+        if fitterKind is TrackFitterType.KalmanFitter:
+            kwargs.setdefault("ActsFitterTool", acc.popToolsAndMerge(ActsFitterCfg(flags, 
+                                                                                   fitterKind=fitterKind, 
+                                                                                   UseDirectNavigation = False)))
+        else:
+            kwargs.setdefault("ActsFitterTool", acc.popToolsAndMerge(ActsFitterCfg(flags, 
+                                                                                   fitterKind=fitterKind)))
+
+    acc.setPrivateTools(CompFactory.ActsTrk.ActsToTrkFitterWrapTool(name, **kwargs))
+
+    return acc
+
 def ActsFitterCfg(flags,
-                  name: str = "ActsFitterTool",
+                  name: str = "ActsKalmanFitterTool",
                   fitterKind:  Optional[TrackFitterType] = None, 
                   **kwargs) -> ComponentAccumulator:
     acc = ComponentAccumulator()
@@ -24,17 +59,11 @@ def ActsFitterCfg(flags,
 
     # Make sure this is set correctly!
     #  /eos/project-a/acts/public/MaterialMaps/ATLAS/material-maps-Pixel-SCT.json
-    from ActsConfig.ActsGeometryConfig import ActsTrackingGeometryToolCfg, ActsGeometryRealmConvTool
-    kwargs.setdefault("TrackingGeometryTool", acc.getPrimaryAndMerge(ActsTrackingGeometryToolCfg(flags)))
-    kwargs.setdefault("GeometryRealmConvTool", acc.getPrimaryAndMerge(ActsGeometryRealmConvTool(flags)))
-
-    from ActsConfig.ActsGeometryConfig import ActsExtrapolationToolCfg
-    kwargs.setdefault("ExtrapolationTool", acc.popToolsAndMerge(ActsExtrapolationToolCfg(flags, MaxSteps=10000)))
-
-    if "ATLASConverterTool" not in kwargs:
-        from ActsConfig.ActsEventCnvConfig import ActsToTrkConverterToolCfg
-        kwargs.setdefault('ATLASConverterTool', acc.getPrimaryAndMerge(ActsToTrkConverterToolCfg(flags)))
-
+    from ActsAlignmentAlgs.AlignmentAlgsConfig import ActsGeometryContextAlgCfg
+    from ActsConfig.ActsGeometryConfig import ActsTrackingGeometrySvcCfg, ActsGeometryRealmConvToolCfg
+    acc.merge(ActsGeometryContextAlgCfg(flags))
+    acc.merge(ActsTrackingGeometrySvcCfg(flags))
+    kwargs.setdefault("GeometryRealmConvTool", acc.getPrimaryAndMerge(ActsGeometryRealmConvToolCfg(flags)))
 
     if fitterKind is TrackFitterType.KalmanFitter:
         kwargs.setdefault("ReverseFilteringPt", 1.0 * UnitConstants.GeV)
@@ -42,17 +71,6 @@ def ActsFitterCfg(flags,
     if fitterKind is TrackFitterType.KalmanFitter:    # This flag is by default set to KalmanFitter
         acc.setPrivateTools(CompFactory.ActsTrk.KalmanFitterTool(name, **kwargs))
     elif fitterKind is TrackFitterType.GaussianSumFitter:
-        if "SummaryTool" not in kwargs:
-            from TrkConfig.TrkTrackSummaryToolConfig import InDetTrackSummaryToolCfg
-            kwargs.setdefault('SummaryTool', acc.getPrimaryAndMerge(InDetTrackSummaryToolCfg(flags)))
-
-        if 'BoundaryCheckTool' not in kwargs:
-            if flags.Detector.GeometryITk:
-                from InDetConfig.InDetBoundaryCheckToolConfig import ITkBoundaryCheckToolCfg
-                kwargs.setdefault("BoundaryCheckTool", acc.popToolsAndMerge(ITkBoundaryCheckToolCfg(flags)))
-            else:
-                from InDetConfig.InDetBoundaryCheckToolConfig import InDetBoundaryCheckToolCfg
-                kwargs.setdefault("BoundaryCheckTool",acc.popToolsAndMerge(InDetBoundaryCheckToolCfg(flags)))
         name = name.replace("KalmanFitter", "GaussianSumFitter")
         acc.setPrivateTools(CompFactory.ActsTrk.GaussianSumFitterTool(name, **kwargs))
     elif fitterKind is TrackFitterType.GlobalChiSquareFitter:
@@ -62,12 +80,11 @@ def ActsFitterCfg(flags,
     return acc
 
 
-
 def ActsReFitterAlgCfg(flags,
                        name : str = "ActsReFitterAlg",
                        **kwargs) -> ComponentAccumulator:
     acc = ComponentAccumulator()
-    kwargs.setdefault("ActsFitter", acc.popToolsAndMerge(ActsFitterCfg(flags)))
+    kwargs.setdefault("ActsFitter", acc.popToolsAndMerge(ActsToTrkFitterCfg(flags)))
     kwargs.setdefault("TrackName", "ResolvedTracks")
     kwargs.setdefault("NewTrackName", "Refitted_Tracks")
     kwargs.setdefault("DoReFitFromPRD", flags.Acts.fitFromPRD)

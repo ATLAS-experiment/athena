@@ -25,7 +25,6 @@
 #include "VxJetVertex/VxVertexOnJetAxis.h"
 #include "VxJetVertex/VxClusteringTable.h"
 #include "VxSecVertex/VxJetFitterVertexInfo.h"
-#include <TMath.h>
 #include "TrkEventPrimitives/FitQuality.h"
 #include "VxVertex/VxTrackAtVertex.h"
 #include "VxVertex/RecVertex.h"
@@ -179,6 +178,7 @@ namespace InDet
 
     if (myJetCandidate == nullptr) {
       ATH_MSG_DEBUG( "JetFitter multi stage fit returned 0" );
+      delete myTwoTrackVerticesInJet;
       return nullptr;
     }
     else {

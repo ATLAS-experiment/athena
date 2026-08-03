@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #include "SpacePointCalibrator.h"
 
@@ -31,6 +31,14 @@
 namespace {
     constexpr double c_inv = 1./ Gaudi::Units::c_light;
     static const SG::Decorator<int> dec_trackSign{"segmentFitDriftSign"};
+
+    /** @brief Helper utility to craete the bound track parameters from the track state proxy */
+    inline Acts::BoundTrackParameters makeBoundPars(const ActsTrk::MutableTrackContainer::TrackStateProxy& state) {
+        return Acts::BoundTrackParameters{state.referenceSurface().getSharedPtr(), 
+                                          state.parameters(), state.covariance(), 
+                                          Acts::ParticleHypothesis::muon()};
+       
+    }
 }
 
 namespace MuonR4{
@@ -126,7 +134,7 @@ namespace MuonR4{
                     auto* dc = static_cast<const xAOD::MdtDriftCircle*>(spacePoint->primaryMeasurement());
                     MdtCalibInput calibInput{*dc, *gctx};
                     calibInput.setTrackDirection(locToGlob.linear() * dirInChamb,
-                                                 Acts::abs(dirInChamb.phi() - 90._degree) > 1.e-7 );
+                                                 std::abs(dirInChamb.phi() - 90._degree) > 1.e-7 );
                     calibInput.setTimeOfFlight(timeOfArrival);
                     calibInput.setClosestApproach(std::move(closestApproach));
                     ATH_MSG_VERBOSE("Parse hit calibration "<<m_idHelperSvc->toString(dc->identify())<<", "<<calibInput);
@@ -430,9 +438,7 @@ namespace MuonR4{
             if(primMeas->channelType() == sTgcIdHelper::sTgcChannelTypes::Strip) {
                 const auto* primStripMeas = static_cast<const xAOD::sTgcStripCluster*>(primMeas);
                 /** Construct bound track parameters to fetch the global track position */
-                const Acts::BoundTrackParameters trackPars{state.referenceSurface().getSharedPtr(), 
-                                                           state.parameters(), state.covariance(), 
-                                                           Acts::ParticleHypothesis::muon()};
+                const Acts::BoundTrackParameters trackPars{makeBoundPars(state)};
                 std::pair<double, double> calibPosCov{calibratesTGC(ctx, gctx, *primStripMeas, cmbPos[1] , 
                                                                     trackPars.position(gctx.context()), 
                                                                     trackPars.direction())};
@@ -452,16 +458,16 @@ namespace MuonR4{
                                                    ActsTrk::MutableTrackContainer::TrackStateProxy trackState) const {
      
         /** Construct bound track parameters to fetch the global track position */
-        const Acts::BoundTrackParameters trackPars{trackState.referenceSurface().getSharedPtr(), 
-                                                   trackState.parameters(), trackState.covariance(), 
-                                                   Acts::ParticleHypothesis::muon()};
+        const Acts::BoundTrackParameters trackPars{makeBoundPars(trackState)};
         
 
         const auto* muonMeas = ActsTrk::detail::xAODUncalibMeasCalibrator::unpack(link);
         const ActsTrk::GeometryContext* gctx = geoctx.get<const ActsTrk::GeometryContext*>();
         const EventContext* ctx = cctx.get<const EventContext*>();
         ATH_MSG_VERBOSE("Calibrate measurement "<<m_idHelperSvc->toString(xAOD::identify(muonMeas))
-                     <<" @ surface "<<trackState.referenceSurface().geometryId());
+                        <<", smoothened: "<<trackState.hasSmoothed()<<", filtered: "<<trackState.hasFiltered()
+                        <<", predicted: "<<trackState.hasPredicted()
+                     <<" @\n"<<trackPars);
         /// Only the combined muonstrip has zero dimensions
         if (muonMeas->numDimensions() == 0u) {
             calibrateCombinedPrd(*ctx, *gctx, static_cast<const xAOD::CombinedMuonStrip*>(muonMeas),

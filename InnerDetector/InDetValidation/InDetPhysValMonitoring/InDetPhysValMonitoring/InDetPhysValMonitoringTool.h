@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef INDETPHYSVALMONITORING_INDETPHYSVALMONITORINGTOOL_H
@@ -84,7 +84,7 @@ private:
     static void fillCutFlow(const asg::AcceptData& accept, std::vector<std::string> & names, std::vector<int> & cutFlow);
     // Get truth particles into a vector, possibly using the pileup from the event
     const std::vector<const xAOD::TruthParticle *> getTruthParticles(const EventContext& ctx) const;
-    std::pair<const std::vector<const xAOD::TruthVertex*>, const std::vector<const xAOD::TruthVertex*>> getTruthVertices(const EventContext& ctx) const;
+    std::pair<std::vector<const xAOD::TruthVertex*>, std::vector<const xAOD::TruthVertex*>> getTruthVertices(const EventContext& ctx) const;
     
     /// Generate an Rtt config struct based on the user-passed properties
     InDetRttPlotConfig getFilledPlotConfig() const;  

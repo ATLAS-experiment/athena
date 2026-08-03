@@ -38,16 +38,6 @@ def ActsMeasurementToTrackParticleDecorationAlgCfg(flags,
     acc = ComponentAccumulator()
     kwargs.setdefault("TrackParticleKey", "InDetTrackParticles")
 
-    # TODO:: The tracking geometry tool is not strictly necessary
-    # but can provide extra information on surfaces if needed in the future
-    
-    if 'TrackingGeometryTool' not in kwargs:
-        from ActsConfig.ActsGeometryConfig import ActsTrackingGeometryToolCfg
-        kwargs.setdefault(
-            "TrackingGeometryTool",
-            acc.getPrimaryAndMerge(ActsTrackingGeometryToolCfg(flags)),
-        )
-    
     acc.addEventAlgo(CompFactory.ActsTrk.MeasurementToTrackParticleDecorationAlg(name, **kwargs))
     return acc
 

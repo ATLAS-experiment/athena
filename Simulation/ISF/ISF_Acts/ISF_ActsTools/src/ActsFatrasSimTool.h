@@ -41,16 +41,18 @@
 #include "Acts/Definitions/ParticleData.hpp"
 #include "ActsFatras/EventData/GenerationProcess.hpp"
 #include "ActsFatras/Kernel/InteractionList.hpp"
-#include "ActsFatras/Kernel/SingleParticleSimulation.hpp"
-#include "ActsFatras/Kernel/SingleParticleSimulationResult.hpp"
 #include "ActsFatras/Kernel/MultiParticleSimulation.hpp"
+#include "ActsFatras/Kernel/SingleParticleSimulationResult.hpp"
+#include "ActsFatras/Kernel/detail/SimulationActor.hpp"
 #include "ActsFatras/Physics/Decay/NoDecay.hpp"
 #include "ActsFatras/Physics/StandardInteractions.hpp"
 #include "ActsFatras/Physics/ElectroMagnetic/PhotonConversion.hpp"
 #include "ActsFatras/Selectors/SurfaceSelectors.hpp"
 // Tracking
-#include "ActsGeometryInterfaces/ITrackingGeometryTool.h"
+#include "ActsGeometryInterfaces/ITrackingGeometrySvc.h"
 #include "ActsGeometry/ATLASMagneticFieldWrapper.h"
+#include "ActsEvent/ContextUtility.h"
+
 
 #include <algorithm>
 #include <cassert>
@@ -249,11 +251,10 @@ class ActsFatrasSimTool : public BaseSimulatorTool {
     return StatusCode::SUCCESS; };
   virtual ISF::SimulationFlavor simFlavor() const override{
     return ISF::Fatras; };
-
-  virtual Acts::MagneticFieldContext getMagneticFieldContext(
-    const EventContext&) const;
-
  private:
+  /** @brief Context provider for geometry, magnetic field and calibration contexts */
+  ActsTrk::ContextUtility m_ctxProvider{this};
+
   // For sihit creation
   SiHitCollection m_pixelSiHits;
   SiHitCollection m_sctSiHits;
@@ -287,12 +288,8 @@ class ActsFatrasSimTool : public BaseSimulatorTool {
   PublicToolHandle<ActsTrk::IExtrapolationTool> m_extrapolationTool{this, "ExtrapolationTool", "ActsExtrapolationTool"};
 
   // Tracking geometry
-  PublicToolHandle<ActsTrk::ITrackingGeometryTool> m_trackingGeometryTool{
-      this, "TrackingGeometryTool", "ActsTrackingGeometryTool"};
+  ServiceHandle<ActsTrk::ITrackingGeometrySvc> m_trackingGeometrySvc{this, "TrackingGeometrySvc", "ActsTrackingGeometrySvc"};
   std::shared_ptr<const Acts::TrackingGeometry> m_trackingGeometry;
-
-  // Magnetic field
-  SG::ReadCondHandleKey<AtlasFieldCacheCondObj> m_fieldCacheCondObjInputKey {this, "AtlasFieldCacheCondObj", "fieldCondObj", "Name of the Magnetic Field conditions object key"};
 
   // Logging
   std::shared_ptr<const Acts::Logger> m_logger{nullptr};
@@ -315,13 +312,13 @@ class ActsFatrasSimTool : public BaseSimulatorTool {
   Gaudi::Property<bool> m_includeGgradient{this, "IncludeGgradient", true, "Boolean flag for inclusion of d(dEds)d(q/p) into energy loss"};
   Gaudi::Property<double> m_momentumCutOff{this, "MomentumCutOff", 0., "Cut-off value for the momentum in SI units"};
   // Propergator option
-  Gaudi::Property<double> m_maxStep{this, "MaxSteps", 1000,
+  Gaudi::Property<double> m_maxStep{this, "MaxSteps", 2000,
        "Max number of steps"};
   Gaudi::Property<double> m_maxRungeKuttaStepTrials{this, "MaxRungeKuttaStepTrials", 10000,
        "Maximum number of Runge-Kutta steps for the stepper step call"};
   Gaudi::Property<double> m_maxStepSize{this, "MaxStepSize", 3.0,
       "Max step size (converted to Acts::UnitConstants::m)"};
-  Gaudi::Property<double> m_pathLimit{this, "PathLimit", 100.0,
+  Gaudi::Property<double> m_pathLimit{this, "PathLimit", 3000.0,
       "Track path limit (converted to Acts::UnitConstants::cm)"};
   Gaudi::Property<bool> m_loopProtection{this, "LoopProtection", true,
       "Loop protection, it adapts the pathLimit"};

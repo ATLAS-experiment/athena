@@ -6,7 +6,6 @@
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaCommon.Logging import logging
-from AthenaCommon.Constants import INFO
 from ISF_Algorithms.CollectionMergerConfig import CollectionMergerCfg
 
 def ActsFatrasWriteHandlerCfg(flags, name="ActsFatrasWriteHandler", **kwargs):
@@ -74,13 +73,6 @@ def ActsFatrasSimToolCfg(flags, name="ISF_ActsFatrasSimTool", **kwargs):
 
     from ActsConfig.ActsGeometryConfig import ActsExtrapolationToolCfg
     kwargs.setdefault("ExtrapolationTool", acc.popToolsAndMerge(ActsExtrapolationToolCfg(flags)))
-
-    tgSvc = acc.getService("ActsTrackingGeometrySvc")
-    tgSvc.OutputLevel = INFO
-    if flags.Detector.EnableITk:
-      tgSvc.printGeometry = False
-      tgSvc.UseBlueprint = True
-      tgSvc.BuildSubDetectors = ["Calo", "ITkPixel","ITkStrip","HGTD"]
 
     kwargs.setdefault("ActsFatrasWriteHandler", acc.popToolsAndMerge(ActsFatrasWriteHandlerCfg(flags)))
     writtenContainers =[]

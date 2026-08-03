@@ -272,12 +272,12 @@ private:
  * This is used for the case when we need to manipulate an aux data vector
  * present in an input data file but we have neither a proper template
  * instantiation for the factory (because the variable was never explicitly
- * referenced), nor can we find a dictionary entry for the factory.j
+ * referenced), nor can we find a dictionary entry for the factory.
  *
  * This implementation works by relying entirely on the root
  * dictionary information.
  *
- * We may either be dealing directly with an STL vector class, or with
+ * We may either be dealing directly with an STL vector class, or with one
  * embedded in another class (as for PackedContainer).  Here, @a vecClass
  * is the class of the STL vector and @a objClass is the overall object
  * class.  In the case of a direct STL vector, these are identical.
@@ -288,7 +288,7 @@ class RootAuxVectorFactory
 public:
   /**
    * @brief Constructor.
-   * @param vecClass The @c TClass for the vector object.
+   * @param objClass The @c TClass for the object.
    */
   RootAuxVectorFactory (TClass* objClass);
 

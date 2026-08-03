@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef EGAMMAMVACALIB_EGAMMAMVAFUNCTIONS
@@ -19,6 +19,7 @@
 #include <functional>
 #include <string>
 #include <unordered_map>
+#include <array>
 #include <cmath>
 #include <memory>
 #include <stdexcept>

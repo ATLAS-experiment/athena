@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -42,9 +42,6 @@ namespace Trk {
         /** Constructor */
         LayerMaterialAnalyser(const std::string&,const std::string&,const IInterface*);
 
-        /** Destructor */
-        ~LayerMaterialAnalyser();
-
         /** AlgTool initialize method */
         StatusCode initialize();
 
@@ -69,32 +66,36 @@ namespace Trk {
                            const MaterialPropertiesMatrix& lmr,
                            const std::vector< std::vector< unsigned int > >* bCounter = 0) const;
 
-        std::string m_layerMaterialName;
+        TTree* m_validationTree = nullptr;            //!< The validation tree
+        Gaudi::Property<std::string> m_validationTreeName
+          {this, "ValidationTreeName", "LayerMaterialAnalyser",
+           "validation tree name - to be accessed by this from root"};
+        Gaudi::Property<std::string> m_validationTreeDescription
+          {this, "ValidationTreeDescription", "LayerMaterialAnalyser information",
+           "validation tree description - second argument in TTree"};
+        Gaudi::Property<std::string> m_validationTreeFolder
+          {this, "ValidationTreeFolder", "/val/LayerMaterialAnalyser",
+           "stream/folder to for the TTree to be written out"};
 
-        TTree*                m_validationTree;            //!< The validation tree
-        std::string           m_validationTreeName;        //!< validation tree name - to be accessed by this from root
-        std::string           m_validationTreeDescription; //!< validation tree description - second argument in TTree
-        std::string           m_validationTreeFolder;      //!< stream/folder to for the TTree to be written out
-
-        mutable int                 m_layerIndex;                //!< the layer index given by the TrackingGeometry
-        mutable int                 m_layerType;                 //!< the type of the layer 1 - cylinder, 2 - disk
-        std::vector<float>* m_layerTranslation;       //!< center of the transform
-        std::vector<float>* m_layerRotation;          //!< orientation of the layer
-        mutable float               m_layerDimension0;           //!< dimension 0 : cylinder r, disk r_min
-        mutable float               m_layerDimension1;           //!< dimension 1 : cylinder z, disk r_max
-        mutable int                 m_layerBins;                 //!< total number of bins - loc0 * loc 1
-        mutable int                 m_layerBins0;                //!< total number of bins - loc 0
-        mutable int                 m_layerBins1;                //!< total number of bins - loc 0
-        std::vector<int>*   m_bin0;        //!< bin 0
-        std::vector<int>*   m_bin1;        //!< bin 1
-        std::vector<float>* m_thickness;   //!< gathered thickness from material mapping/material properties
-        std::vector<float>* m_X0;          //!< gathered X0 from material mapping/material properties
-        std::vector<float>* m_L0;          //!< gathered L0 from material mapping/material properties
-        std::vector<float>* m_A;           //!< gathered A from material mapping/material properties
-        std::vector<float>* m_Z;           //!< gathered Z from material mapping/material properties
-        std::vector<float>* m_Rho;         //!< gathered rho from material mapping/material properties
-        std::vector<int>*   m_elements;    //!< gathered number of elements from material mapping/material properties
-        std::vector<int>*   m_binCounter;  //!< how often was this bin hit / used
+        mutable int                 m_layerIndex = 0;                //!< the layer index given by the TrackingGeometry
+        mutable int                 m_layerType = 0;                 //!< the type of the layer 1 - cylinder, 2 - disk
+        std::vector<float>* m_layerTranslation = nullptr;       //!< center of the transform
+        std::vector<float>* m_layerRotation = nullptr;          //!< orientation of the layer
+        mutable float               m_layerDimension0 = 0.;           //!< dimension 0 : cylinder r, disk r_min
+        mutable float               m_layerDimension1 = 0.;           //!< dimension 1 : cylinder z, disk r_max
+        mutable int                 m_layerBins = 0;                 //!< total number of bins - loc0 * loc 1
+        mutable int                 m_layerBins0 = 0;                //!< total number of bins - loc 0
+        mutable int                 m_layerBins1 = 0;                //!< total number of bins - loc 0
+        std::vector<int>*   m_bin0 = nullptr;        //!< bin 0
+        std::vector<int>*   m_bin1 = nullptr;        //!< bin 1
+        std::vector<float>* m_thickness = nullptr;   //!< gathered thickness from material mapping/material properties
+        std::vector<float>* m_X0 = nullptr;          //!< gathered X0 from material mapping/material properties
+        std::vector<float>* m_L0 = nullptr;          //!< gathered L0 from material mapping/material properties
+        std::vector<float>* m_A = nullptr;           //!< gathered A from material mapping/material properties
+        std::vector<float>* m_Z = nullptr;           //!< gathered Z from material mapping/material properties
+        std::vector<float>* m_Rho = nullptr;         //!< gathered rho from material mapping/material properties
+        std::vector<int>*   m_elements = nullptr;    //!< gathered number of elements from material mapping/material properties
+        std::vector<int>*   m_binCounter = nullptr;  //!< how often was this bin hit / used
 
     };
 

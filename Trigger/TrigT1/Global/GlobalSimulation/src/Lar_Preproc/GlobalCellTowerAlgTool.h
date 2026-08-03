@@ -17,6 +17,8 @@
 #include "../IO/CommonTOBContainer.h"
 #include "../IO/GlobalLArCellContainer.h"
 
+#include "../Utilities/IDataCollector.h"
+
 #include "StoreGate/ReadHandleKey.h"
 #include "StoreGate/WriteHandleKey.h"
 
@@ -41,7 +43,8 @@ namespace GlobalSim {
     virtual StatusCode initialize() override;
 
     /** @brief Main functional block running for each event */
-    virtual StatusCode run(const EventContext& ctx) const override;
+    virtual StatusCode run(const std::unique_ptr<IDataCollector>&,
+			   const EventContext& ctx) const override;
 
     /** @brief Overriding toString function from base class */
     virtual std::string toString() const override;

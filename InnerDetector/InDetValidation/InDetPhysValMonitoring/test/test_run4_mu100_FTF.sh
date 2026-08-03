@@ -39,7 +39,7 @@ run "Simulation" \
     --conditionsTag "default:${conditions}" \
     --simulator 'FullG4MT' \
     --postInclude 'default:PyJobTransforms.UseFrontier' \
-    --preInclude 'EVNTtoHITS:Campaigns.PhaseIISimulation' \
+    --preInclude 'EVNTtoHITS:Campaigns.MC23PhaseIISimulation' \
     --geometryVersion "default:${geometry}" \
     --inputEVNTFile ${ArtInFile} \
     --outputHITSFile HITS.root \
@@ -56,7 +56,7 @@ run "Digitization"\
     --jobNumber 568 \
     --maxEvents -1 \
     --outputRDOFile RDO.root \
-    --preInclude 'HITtoRDO:Campaigns.PhaseIINoPileUp' \
+    --preInclude 'HITtoRDO:Campaigns.MC23PhaseIINoPileUp' \
     --postInclude 'PyJobTransforms.UseFrontier' \
     --detectors ITkPixel ITkStrip HGTD
 

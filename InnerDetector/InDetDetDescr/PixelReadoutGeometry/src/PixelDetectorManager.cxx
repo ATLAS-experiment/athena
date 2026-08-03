@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #include "PixelReadoutGeometry/PixelDetectorManager.h"
 
@@ -375,7 +375,7 @@ namespace InDetDD {
     throw std::runtime_error("Unable to apply Inner Detector alignments.");
   }
   // loop over all the AlignableTransform objects in the collection
-  std::string IBLalignfolder = alignfolder;
+  std::string IBLalignfolder = std::move(alignfolder);
   IBLalignfolder.append("/PIXB1");// "/Indet/Align/PIXB1"
   for (const auto *pat : *container)
   {

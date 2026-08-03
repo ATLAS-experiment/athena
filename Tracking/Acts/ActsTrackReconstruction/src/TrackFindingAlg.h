@@ -98,7 +98,7 @@ namespace ActsTrk
     // Handle Keys
     // Seed collections. These 2 vectors must match element for element.
     SG::ReadHandleKeyArray<ActsTrk::SeedContainer> m_seedContainerKeys{this, "SeedContainerKeys", {}, "Seed containers"};
-    SG::ReadCondHandleKeyArray<InDetDD::SiDetectorElementCollection> m_detEleCollKeys{this, "DetectorElementsKeys", {}, "Keys of input SiDetectorElementCollection"};
+
     // Measurement collections. These 2 vectors must match element for element.
     SG::ReadHandleKeyArray<xAOD::UncalibratedMeasurementContainer> m_uncalibratedMeasurementContainerKeys{this, "UncalibratedMeasurementContainerKeys", {}, "input cluster collections"};
     SG::ReadCondHandleKey<ActsTrk::ActsVolumeIdToDetectorElementCollectionMap> m_volumeIdToDetectorElementCollMapKey
@@ -172,7 +172,6 @@ namespace ActsTrk
                detail::SharedHitCounter &sharedHits,
                detail::DuplicateSeedDetector &duplicateSeedDetector,
                const ActsTrk::SeedContainer &seeds,
-               const InDetDD::SiDetectorElementCollection& detElements,
                detail::RecoTrackContainer &actsTracksContainer,
                std::size_t seedCollectionIndex,
                const char *seedType,

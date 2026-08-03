@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // ForceLoadCondObj.cxx
@@ -10,16 +10,7 @@
 #include "LArCalibTools/ForceLoadCondObj.h"
 
 
-ForceLoadCondObj::ForceLoadCondObj(const std::string& name, 
-					 ISvcLocator* pSvcLocator) :
-  AthAlgorithm(name, pSvcLocator),
-  p_clidsvc ( "ClassIDSvc",    name )
-{
-  declareProperty("ObjectList",m_objectList,"list of 'object#key'");
-}
-
-ForceLoadCondObj::~ForceLoadCondObj() 
-= default;
+ForceLoadCondObj::~ForceLoadCondObj() = default;
 
 StatusCode ForceLoadCondObj::initialize() {
   ATH_MSG_DEBUG ("in initialize()" );
@@ -27,12 +18,7 @@ StatusCode ForceLoadCondObj::initialize() {
   return StatusCode::SUCCESS;
 }
 
-StatusCode ForceLoadCondObj::finalize() {
- 
-  return StatusCode::SUCCESS;
-}
-
-StatusCode ForceLoadCondObj::execute(const EventContext& /*ctx*/) {
+StatusCode ForceLoadCondObj::execute(const EventContext&) const {
   //Loop through objects
   for (unsigned int iobj=0;iobj<m_objectList.size();++iobj) {
     // if object name contains a '#', it represents a specific typename#key

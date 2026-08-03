@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef JETTAGINFOTPCNV_TRACKCOUNTINGINFO_P1_H
@@ -21,11 +21,11 @@ namespace Analysis {
     TPObjRef m_baseTagInfo;
 
     /// All of this data will be written out.
-    int m_ntrk;           
-    float m_d0sig_2nd;    
-    float m_d0sig_abs_2nd;
-    float m_d0sig_3rd;    
-    float m_d0sig_abs_3rd;
+    int m_ntrk = 0;
+    float m_d0sig_2nd = 0;
+    float m_d0sig_abs_2nd = 0;
+    float m_d0sig_3rd = 0;
+    float m_d0sig_abs_3rd = 0;
   
   }; // End class
   

@@ -460,7 +460,7 @@ AsgForwardElectronSelectorTool::getOperatingPointName() const
 // ============================================================================
 // getEtaBin
 // ============================================================================
-int AsgForwardElectronSelectorTool::getEtaBin(double absEta) const
+int AsgForwardElectronSelectorTool::getEtaBin(double absEta) 
 {
   // Convention: x1 < |eta| <= x2
   if (absEta > 2.5 && absEta <= 2.7) return 0;
@@ -472,7 +472,7 @@ int AsgForwardElectronSelectorTool::getEtaBin(double absEta) const
 // ============================================================================
 // getPtBin
 // ============================================================================
-int AsgForwardElectronSelectorTool::getPtBin(double calibPt) const
+int AsgForwardElectronSelectorTool::getPtBin(double calibPt) 
 {
   constexpr int nBins = 12;
   for (int i = 0; i < nBins; ++i) {

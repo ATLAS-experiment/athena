@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -143,6 +143,7 @@ void filter (char* buf)
 }
 
 
+ATH_NOINLINE
 void dumptrace (FILE* fp)
 {
   fseek (fp, 0, SEEK_SET);
@@ -318,6 +319,7 @@ void fromhere()
 #include <signal.h>
 
 
+ATH_NOINLINE
 std::string accumtrace (FILE* fp)
 {
   std::string s;

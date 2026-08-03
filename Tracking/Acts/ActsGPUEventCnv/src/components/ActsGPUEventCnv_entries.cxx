@@ -3,7 +3,11 @@
 */
 
 #include "../RDOtoTracccCellConverterAlg.h"
+#include "../PhaseIIRDOtoTracccCellConverterAlg.h"
+#include "../TracccCellValidationAlg.h"
 #include "../TracccMeasurementConverterAlg.h"
 
 DECLARE_COMPONENT( ActsTrk::RDOtoTracccCellConverterAlg )
+DECLARE_COMPONENT( ActsTrk::PhaseIIRDOtoTracccCellConverterAlg )
+DECLARE_COMPONENT( ActsTrk::TracccCellValidationAlg )
 DECLARE_COMPONENT( ActsTrk::TracccMeasurementConverterAlg )

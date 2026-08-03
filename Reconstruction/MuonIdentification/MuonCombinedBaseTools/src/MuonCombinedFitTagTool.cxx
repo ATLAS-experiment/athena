@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //////////////////////////////////////////////////////////////////////////////
@@ -34,12 +34,6 @@ namespace {
 
 }
 namespace MuonCombined {
-
-    MuonCombinedFitTagTool::MuonCombinedFitTagTool(const std::string& type, const std::string& name, const IInterface* parent) :
-        AthAlgTool(type, name, parent) {
-        declareInterface<IMuonCombinedTagTool>(this);
-    }
-
     StatusCode MuonCombinedFitTagTool::initialize() {
         ATH_MSG_INFO("Initializing MuonCombinedFitTagTool");
 

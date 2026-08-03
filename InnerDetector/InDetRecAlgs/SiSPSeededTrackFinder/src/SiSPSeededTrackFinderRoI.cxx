@@ -227,7 +227,8 @@ StatusCode InDet::SiSPSeededTrackFinderRoI::execute(const EventContext& ctx) con
     else m_seedsmaker->find3Sp(ctx, seedEventData, VZ);
     if(m_doRandomSpot) m_seedsmaker->find3Sp(ctx, seedEventData, VZ, RandZBoundary);
   }
-
+  //Local variable trackEventData uses 814592 bytes of stack space
+  //coverity[STACK_USE]
   InDet::ExtendedSiTrackMakerEventData_xk trackEventData(m_prdToTrackMap);
   m_trackmaker->newEvent(ctx, trackEventData, PIX, SCT);
 

@@ -77,8 +77,8 @@ def overlayTestFlags(flags, args):
             flags.Input.Files = defaultTestFiles.RDO_BKG_RUN4
             flags.Input.SecondaryFiles = defaultTestFiles.HITS_RUN4
             flags.IOVDb.GlobalTag = defaultConditionsTags.RUN4_MC
-            from Campaigns import PhaseIIPileUp200
-            PhaseIIPileUp200(flags)
+            from Campaigns import MC23PhaseIIPileUp200
+            MC23PhaseIIPileUp200(flags)
         else:
             raise ValueError("Run not supported")
         flags.Input.MCChannelNumber = GetFileMD(flags.Input.SecondaryFiles, allowEmpty=False).get("mc_channel_number", 0)

@@ -46,7 +46,7 @@ class OutputAnalysisConfig (ConfigBlock):
         self.addOption ('nonContainers', [], type=list,
             info="a list of container names that are not actual containers but should be treated as non-containers.")
         self.addOption ('treeName', 'analysis', type=str,
-            info="name of the output TTree to save.")
+            info="name of the output TTree (or RNTuple) to save.")
         self.addOption ('streamName', 'ANALYSIS', type=str,
             info="name of the output stream to save the tree in.")
         self.addOption ('metTermName', 'Final', type=str,
@@ -76,7 +76,7 @@ class OutputAnalysisConfig (ConfigBlock):
             "These could however be used to simplify downstream workflows, as in Easyjet. "
             "The default is True.")
         self.addOption ('outputFormat', 'TTree', type=str,
-            info="The output format. The default is 'TTree'.")
+            info="The output format, `TTree` or `RNTuple`.")
         self.addOption ('defaultBasketSize', None, type=int,
             info="default basket size for all branches in the output tree. "
             "If not set (the default), no basket size is configured and ROOT's "
@@ -185,10 +185,7 @@ class OutputAnalysisConfig (ConfigBlock):
             outputDict = config.getOutputVars (containerName)
             for outputName in outputDict :
                 outputConfig = copy.deepcopy (outputDict[outputName])
-                if containerName != outputConfig.origContainerName or config.checkOutputContainer(containerName):
-                    outputConfig.outputContainerName = containerName + '_%SYS%'
-                else:
-                    outputConfig.outputContainerName = config.readName(containerName)
+                outputConfig.outputContainerName = config.readName(containerName)
                 outputConfig.prefix = prefix
                 # if the container is a MET container with all terms, we
                 # also need to write out the name of each MET term

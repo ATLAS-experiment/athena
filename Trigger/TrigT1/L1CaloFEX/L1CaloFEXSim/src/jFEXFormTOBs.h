@@ -32,21 +32,21 @@ class jFEXFormTOBs : public AthAlgTool, virtual public IjFEXFormTOBs {
         /** standard Athena-Algorithm method */
         virtual StatusCode initialize() override;
         /** Destructor */
-        virtual ~jFEXFormTOBs();
+        virtual ~jFEXFormTOBs() = default;
 
-        virtual uint32_t formTauTOB  (int, int, int, int, int, bool, int, int) override;
-        virtual uint32_t formSRJetTOB(int, int, int, int, bool, int, int, const std::pair<unsigned int, const std::vector<int>&>&) override;
-        virtual uint32_t formLRJetTOB(int, int, int, int, bool, int, int) override;
-        virtual uint32_t formSumETTOB(std::tuple<int,bool>&, std::tuple<int,bool>&, int ) override;
-        virtual uint32_t formMetTOB  (int, int, bool, int ) override;
+        virtual uint32_t formTauTOB  (int, int, int, int, int, bool, int, int) const override;
+        virtual uint32_t formSRJetTOB(int, int, int, int, bool, int, int, const std::pair<unsigned int, const std::vector<int>&>&) const override;
+        virtual uint32_t formLRJetTOB(int, int, int, int, bool, int, int) const override;
+        virtual uint32_t formSumETTOB(std::tuple<int,bool>&, std::tuple<int,bool>&, int ) const override;
+        virtual uint32_t formMetTOB  (int, int, bool, int ) const override;
 
         /** Internal data */
     private:
 
 	Gaudi::Property<bool> m_isMC {this, "IsMC", false, "For MC, always access the DB"};
 
-        int Get_calibrated_SRj_ET(int, int, const std::vector<int>& );
-        int Get_eta_calibrated_SRj_ET(int, int, unsigned int, int,  const std::vector<int>& );
+        int Get_calibrated_SRj_ET(int, int, const std::vector<int>& ) const;
+        int Get_eta_calibrated_SRj_ET(int, int, unsigned int, int,  const std::vector<int>& ) const;
         
         
         UnsignedIntegerProperty m_jetEtaCalibrationBeginTimestamp {this, "JetEtaCalibrationBeginTimestamp", 1704063600 /*2024-01-01, 00:00*/, "Earliest timestamp from which jet calibrations are binned in eta instead of ET"};

@@ -10,9 +10,6 @@
 #include "TrkLinks/LinkToXAODTrackParticle.h"
 #include "xAODTracking/TrackParticleContainer.h"
 
-// PACKAGE
-#include "ActsGeometry/ActsTrackingGeometrySvc.h"
-#include "ActsGeometry/ActsTrackingGeometryTool.h"
 
 // ACTS
 #include "Acts/Propagator/Navigator.hpp"
@@ -39,11 +36,6 @@ namespace
   };
   } //anonymous namespace
 
-ActsTrk::IterativePriVtxFinderTool::IterativePriVtxFinderTool(const std::string& type,
-                                                              const std::string& name,
-                                                              const IInterface* parent)
-  : base_class(type, name, parent)
-{}
 
 StatusCode
 ActsTrk::IterativePriVtxFinderTool::initialize()
@@ -56,11 +48,10 @@ ActsTrk::IterativePriVtxFinderTool::initialize()
   m_logger = makeActsAthenaLogger(this, "Acts");
   
   ATH_MSG_INFO("Initializing ACTS Iterative Vertex Finder tool");
-  ATH_CHECK( m_trackingGeometryTool.retrieve() );
+  ATH_CHECK(m_ctxProvider.initialize());
+  ATH_CHECK( m_trackingGeometrySvc.retrieve() );
   std::shared_ptr<const Acts::TrackingGeometry> trackingGeometry
-    = m_trackingGeometryTool->trackingGeometry();
-
-  ATH_CHECK( m_extrapolationTool.retrieve() );
+    = m_trackingGeometrySvc->trackingGeometry();
 
   Acts::Navigator navigator( Acts::Navigator::Config{ trackingGeometry },
 			     logger().cloneWithSuffix("Navigator"));
@@ -239,10 +230,8 @@ ActsTrk::IterativePriVtxFinderTool::findVertex(const EventContext& ctx,
     Acts::Surface::makeShared<Acts::PerigeeSurface>((trackVector[0])->parameters()->associatedSurface().transform());
 
   // Get the magnetic field context
-  Acts::MagneticFieldContext magFieldContext = m_extrapolationTool->getMagneticFieldContext(ctx);
-
-  const auto& geoContext
-    = m_trackingGeometryTool->getGeometryContext(ctx).context();
+  const Acts::MagneticFieldContext magFieldContext = m_ctxProvider.getMagneticFieldContext(ctx);
+  const Acts::GeometryContext geoContext = m_ctxProvider.getGeometryContext(ctx);
   
   // Convert tracks to Acts::BoundParameters
   std::vector<TrackWrapper> allTracks;

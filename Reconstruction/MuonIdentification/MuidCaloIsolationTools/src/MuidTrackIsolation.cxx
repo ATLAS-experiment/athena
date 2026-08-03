@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //////////////////////////////////////////////////////////////////////////////
@@ -25,13 +25,6 @@
 #include "TrkTrack/TrackCollection.h"
 namespace Rec {
 
-    MuidTrackIsolation::MuidTrackIsolation(const std::string& type, const std::string& name, const IInterface* parent) :
-        AthAlgTool(type, name, parent), m_etaSafetyFactor(0.1) {
-        declareInterface<IMuidTrackIsolation>(this);
-    }
-
-    //<<<<<< PUBLIC MEMBER FUNCTION DEFINITIONS                             >>>>>>
-
     StatusCode MuidTrackIsolation::initialize() {
         ATH_MSG_INFO("MuidTrackIsolation::initialize()");
 
@@ -41,16 +34,14 @@ namespace Rec {
         // create the calo barrel surfaces (cylinder) and 2 endcap discs)
         double radius = 2.0 * Gaudi::Units::meter;
         double halfLength = 4.0 * Gaudi::Units::meter;
-        Amg::Transform3D transform;
-        transform.setIdentity();
+        Amg::Transform3D transform{Amg::Transform3D::Identity()};
         m_caloCylinder = std::make_unique<Trk::CylinderSurface>(transform, radius, halfLength);
 
         // the corresponding max barrel cotTheta
         m_barrelCotTheta = halfLength / radius;
 
         // and the forward/backward endcap disks
-        Amg::Transform3D discRotation;
-        discRotation.setIdentity();
+        Amg::Transform3D discRotation{Amg::Transform3D::Identity()};
         Amg::Vector3D forwardDiscPosition(0., 0., halfLength);
         auto transform1 = std::make_unique<Amg::Transform3D>(discRotation * forwardDiscPosition);
         m_caloForwardDisc = std::make_unique<Trk::DiscSurface>(*transform1, 0., radius);
@@ -59,7 +50,7 @@ namespace Rec {
         m_caloBackwardDisc = std::make_unique<Trk::DiscSurface>(*transform2, 0., radius);
 
         ATH_CHECK(m_inDetTracksLocation.initialize());
-
+        ATH_CHECK(m_trackLinkKey.initialize());
         return StatusCode::SUCCESS;
     }
     std::pair<int, double> MuidTrackIsolation::trackIsolation(const EventContext& ctx, double eta, double phi) const {
@@ -73,22 +64,16 @@ namespace Rec {
         std::pair<int, double> isolation{0, 0.};
 
         // retrieve track collection
-        SG::ReadHandle<TrackCollection> inDetTracks(m_inDetTracksLocation, ctx);
-        if (!inDetTracks.isPresent()) {
-            ATH_MSG_DEBUG(" no ID Track container at location  " << m_inDetTracksLocation.key());
-            return isolation;
+        const xAOD::TrackParticleContainer* inDetTracks{};
+        if (!SG::get(inDetTracks, m_inDetTracksLocation, ctx).isSuccess()) {
+            return std::make_pair(0, 0.);
         }
-
-        if (!inDetTracks.isValid()) {
-            ATH_MSG_WARNING(" ID Track container " << m_inDetTracksLocation.key() << " not valid!");
-            return isolation;
-        }
-
+      
         // evaluate isolation according to configuration
         if (m_trackExtrapolation) {
-            isolation = trackExtrapolated(inDetTracks.cptr(), eta, phi);
+            isolation = trackExtrapolated(inDetTracks, eta, phi);
         } else {
-            isolation = trackVertex(inDetTracks.cptr(), eta, phi);
+            isolation = trackVertex(inDetTracks, eta, phi);
         }
 
         // debug result
@@ -98,13 +83,14 @@ namespace Rec {
         return isolation;
     }
 
-    std::pair<int, double> MuidTrackIsolation::trackVertex(const TrackCollection* inDetTracks, double eta, double phi) const {
+    std::pair<int, double> MuidTrackIsolation::trackVertex(const xAOD::TrackParticleContainer* inDetTracks, double eta, double phi) const {
         // set initial state
         double sumP = 0.;
         int numberTracks = 0;
 
         // choose tracks in cone
-        for (const Trk::Track* id : *inDetTracks) {
+        for (const xAOD::TrackParticle* idTrack : *inDetTracks) {
+            const Trk::Track* id = idTrack->track();
             const Trk::Perigee& perigee = *id->perigeeParameters();
             if (id->info().trackProperties(Trk::TrackInfo::StraightTrack) || perigee.pT() < m_minPt) continue;
 
@@ -132,13 +118,15 @@ namespace Rec {
         return std::make_pair(numberTracks, sumP);
     }
 
-    std::pair<int, double> MuidTrackIsolation::trackExtrapolated(const TrackCollection* inDetTracks, double eta, double phi) const {
+    std::pair<int, double> MuidTrackIsolation::trackExtrapolated(const xAOD::TrackParticleContainer* inDetTracks, double eta, double phi) const {
         // set initial state
         double sumP = 0.;
         int numberTracks = 0;
 
         // extrapolate close in eta tracks to calorimeter surface
-        for (const Trk::Track* id : *inDetTracks) {
+        for (const xAOD::TrackParticle* idTrack : *inDetTracks) {
+
+            const Trk::Track* id = idTrack->track();
             const Trk::Perigee& perigee = *id->perigeeParameters();
             if (id->info().trackProperties(Trk::TrackInfo::StraightTrack) || perigee.pT() < m_minPt) continue;
 

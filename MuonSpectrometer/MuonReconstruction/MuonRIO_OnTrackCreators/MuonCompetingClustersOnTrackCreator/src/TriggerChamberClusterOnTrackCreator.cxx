@@ -28,15 +28,16 @@ StatusCode TriggerChamberClusterOnTrackCreator::initialize() {
 
 std::unique_ptr<CompetingMuonClustersOnTrack>
 TriggerChamberClusterOnTrackCreator::createBroadCluster(
-    const std::list<const Trk::PrepRawData*>& prds, const double) const {
-    ATH_MSG_VERBOSE("enter createBroadCluster: number of prds " << prds.size());
+    const std::list<const Trk::PrepRawData*>& prdList, const double) const {
+    ATH_MSG_VERBOSE("enter createBroadCluster: number of prds " << prdList.size());
 
     // make some PRD consistency checks
-    if (prds.empty()) {
+    if (prdList.empty()) {
         ATH_MSG_WARNING("fails: empty PRD list ");
         return nullptr;
     }
-    const Trk::TrkDetElementBase* detectorElement = (*prds.front()).detectorElement();
+    std::vector<const Trk::PrepRawData*> prds{prdList.begin(), prdList.end()};
+    const Trk::TrkDetElementBase* detectorElement = prds.front()->detectorElement();
     Identifier channelId = (*prds.front()).identify();
     const bool isRpc = m_idHelperSvc->isRpc(channelId);
     const bool isTgc = m_idHelperSvc->isTgc(channelId);
@@ -139,7 +140,7 @@ void TriggerChamberClusterOnTrackCreator::applyClusterConsistency(
 
 std::vector<std::unique_ptr<const Muon::MuonClusterOnTrack>>
 TriggerChamberClusterOnTrackCreator::createPrdRots(
-    const std::list<const Trk::PrepRawData*>& prds) const {
+    std::vector<const Trk::PrepRawData*>& prds) const {
     // create clusterRot for each PRD
     std::vector<std::unique_ptr<const Muon::MuonClusterOnTrack>> rots{};
     if (prds.empty()) {
@@ -167,13 +168,21 @@ TriggerChamberClusterOnTrackCreator::createPrdRots(
         }
         rots.push_back(std::move(cluster));
     }
+    if (rots.size() != prds.size()) {
+        auto [begin, end] = std::ranges::remove_if(prds, [&](const Trk::PrepRawData* prd){
+            return std::ranges::none_of(rots, [prd](const std::unique_ptr<const Muon::MuonClusterOnTrack>& rot){
+                return rot->identify() == prd->identify();
+            });
+        });
+        prds.erase(begin, end);
+    }
     return rots;
 }
 
 void TriggerChamberClusterOnTrackCreator::makeClustersBySurface(
     std::list<int>& limitingChannels,
     std::vector<std::unique_ptr<const Muon::MuonClusterOnTrack>>& limitingRots,
-    const std::list<const Trk::PrepRawData*>& prds,
+    const std::vector<const Trk::PrepRawData*>& prds,
     const std::vector<std::unique_ptr<const Muon::MuonClusterOnTrack>>& rots) const {
     if (prds.empty()) {
         ATH_MSG_WARNING("makeClustersBySurface- empty PRD list ");
@@ -181,7 +190,7 @@ void TriggerChamberClusterOnTrackCreator::makeClustersBySurface(
     }
     std::unordered_set<const Trk::PrepRawData*> usedPrd;
     std::vector<std::unique_ptr<const Muon::MuonClusterOnTrack>>::const_iterator r = rots.begin();
-    for (std::list<const Trk::PrepRawData*>::const_iterator p = prds.begin();
+    for (std::vector<const Trk::PrepRawData*>::const_iterator p = prds.begin();
          p != prds.end(); ++p, ++r) {
 
         const Trk::PrepRawData* prd{*p};
@@ -202,7 +211,7 @@ void TriggerChamberClusterOnTrackCreator::makeClustersBySurface(
         int channelMax = channel;
         int channelMin = channel;
         const Muon::MuonClusterOnTrack *rotMax{r->get()}, *rotMin{r->get()};
-        std::list<const Trk::PrepRawData*>::const_iterator q = p;
+        std::vector<const Trk::PrepRawData*>::const_iterator q = p;
         std::vector<std::unique_ptr<const Muon::MuonClusterOnTrack>>::const_iterator s = r;
         for (++q, ++s; q != prds.end(); ++q, ++s) {
             const Identifier channelId1 = (**q).identify();

@@ -141,12 +141,18 @@ StatusCode CommonSmearingTool::initialize()
 //______________________________________________________________________________
 CP::CorrectionCode CommonSmearingTool::applyCorrection( xAOD::TauJet& xTau ) const
 {
-  // optional consistency check between calo-only pt ("ptTauEnergyScale") and MVA pt ("ptFinalCalib" i.e. "pt", MVA TES is the default calibration)
-  // not recommended until validated in R22: MVA TES always has better resolution than calo-only TES for true taus
-  // in practice this check mostly discards muons faking taus with large track momentum but little energy deposit in the calorimeter:
-  // when enforcing calo-only pt, the muon will likely fail the tau pt cut applied by TauSelectionTool
+  // consistency check between calo-only pt ("ptTauEnergyScale") and MVA pt ("ptFinalCalib", the default calibration)
+  // MVA TES always has better resolution than calo-only TES for true taus
+  // this check helpsts mostly to discard muons faking taus with large track momentum but little energy deposit in the calorimeter:
 
-  if (m_bMVATESQualityCheck) {
+  // check if decorations were already added to the first passed tau
+  if(!m_bIsTESCompatibilityCheckAvailable.isValid()) { 	
+    static const SG::ConstAccessor<char> caccTESCompatibility("TESCompatibility");
+    m_bIsTESCompatibilityCheckAvailable.set (caccTESCompatibility.isAvailable(xTau));
+  }
+
+  if (m_bMVATESQualityCheck && (!(*m_bIsTESCompatibilityCheckAvailable.ptr()))){
+    // if decoration is not available on derivations, calculate it on the fly	  
     bool compatibility = true;
     static const SG::ConstAccessor<float> accPtTauEnergyScale ("ptTauEnergyScale");
     if(accPtTauEnergyScale.isAvailable(xTau)) {

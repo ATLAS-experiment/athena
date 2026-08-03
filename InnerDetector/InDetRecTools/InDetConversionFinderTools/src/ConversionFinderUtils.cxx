@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /***************************************************************************
@@ -185,9 +185,9 @@ namespace InDet {
             0., 0., iv[2], iv[3], iv[4], std::move(em))
           .release();
 
-      Trk::VxTrackAtVertex trkV(vtxTrack.trackQuality().chiSquared(),
+      
+      tmpVTAV.emplace_back(vtxTrack.trackQuality().chiSquared(),
                                 tmpMeasPer);
-      tmpVTAV.push_back(trkV);
     }//end of loop over VxTracksAtVertex
 
     if(tmpVTAV.size()!=2) return nullptr;

@@ -367,7 +367,10 @@ void TRTTimeCorrection::calculateSignalDists_EndCap(unsigned int iWheel,
                                                                            iWheel,//wheelIndex,
                                                                            0,//strawLayerIndex,
                                                                            0));//phiIndex
-
+  if (!ec_element)[[unlikely]]{
+    ATH_MSG_ERROR("ec_element is nullptr.");
+    return;
+  }
   direct_dist  = 0.5*ec_element->strawLength() + m_lengthDeadRegion;
   reflect_dist = 1.5*ec_element->strawLength() + 3*m_lengthDeadRegion;
 }

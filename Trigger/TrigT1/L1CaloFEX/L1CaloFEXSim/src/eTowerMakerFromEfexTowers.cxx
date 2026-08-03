@@ -223,13 +223,9 @@ StatusCode eTowerMakerFromEfexTowers::initialize()
     }
 
 
-
     // STEP 3 - Write the completed eTowerContainer into StoreGate (move the local copy in memory)
   SG::WriteHandle<LVL1::eTowerContainer> eTowerContainerSG(m_eTowerContainerSGKey, ctx);
   ATH_CHECK(eTowerContainerSG.record(std::move(/*my_eTowerContainerRaw*/local_eTowerContainerRaw)));
-
-  // STEP 4 - Close and clean the event
-  m_eTowerBuilderTool->reset();
 
   return StatusCode::SUCCESS;
 }

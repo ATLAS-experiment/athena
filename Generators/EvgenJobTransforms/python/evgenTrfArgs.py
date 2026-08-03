@@ -139,10 +139,13 @@ def addStdEvgenArgs(parser):
                         help = 'ignore Blacklist - allows to run a test in a blacklisted release',
                         type=trfArgClasses.argFactory(trfArgClasses.argBool, runarg=True),
                         default=trfArgClasses.argBool('False'))
+
+    parser.add_argument('--avoidExtracting', '--avoidExtracting', group='Evgen',
+                        help = 'Use compressed (.gz) LHE file in the shower without unzipping it first.',
+                        type=trfArgClasses.argFactory(trfArgClasses.argBool, runarg=True),
+                        default=trfArgClasses.argBool('True'))
  
     parser.add_argument('--allowOldFilter', '--allowOldFilter', group='Evgen',
                         help = 'useOldFilter - allows to use old (not xAOD based) filters',
                         type=trfArgClasses.argFactory(trfArgClasses.argBool, runarg=True),
                         default=trfArgClasses.argBool('False'))
-
-

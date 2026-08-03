@@ -23,6 +23,7 @@ flags.IOVDb.GlobalTag = defaultConditionsTags.RUN4_MC
 flags.GeoModel.Align.Dynamic = False
 flags.Input.Files = ['/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/SimCoreTests/valid1.410000.PowhegPythiaEvtGen_P2012_ttbar_hdamp172p5_nonallhad.evgen.EVNT.e4993.EVNT.08166201._000012.pool.root.1']
 
+flags.Detector.GeometryHGTD = False
 flags.Detector.GeometryITkPixel = True
 flags.Detector.GeometryITkStrip = True
 flags.Detector.GeometryBpipe = True
@@ -35,12 +36,12 @@ flags.Concurrency.NumConcurrentEvents = 64
 flags.Exec.MaxEvents = 10
 
 flags.Acts.TrackingGeometry.UseBlueprint = args.gen3
-
-from MuonGeoModelTestR4.testGeoModel import configureDefaultTagsCfg, MuonPhaseIITestDefaults
+from MuonConfig.MuonConfigUtils import configureDefaultTags
+from MuonGeoModelTestR4.testGeoModel import  MuonPhaseIITestDefaults
 flags.GeoModel.SQLiteDBFullPath = MuonPhaseIITestDefaults.GEODB_R4
 
 flags.GeoModel.SQLiteDB = True
-configureDefaultTagsCfg(flags)
+configureDefaultTags(flags)
 
 flags.lock()
 flags.dump()

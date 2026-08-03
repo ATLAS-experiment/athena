@@ -59,7 +59,7 @@ def getMultiplicityLabels(flags,topoModule):
         bit_id = topo_trigline['startbit']
         topo_trigline_labels[bit_id] = topo_trigline_name
         if ( topo_trigline_labels[bit_id].find("SPARE") >= 0):
-            topo_trigline_labels[bit_id] = "-- Unassigned Item --"
+            topo_trigline_labels[bit_id] = "__Unassigned_Item__"
 
     return topo_trigline_labels
 
@@ -387,7 +387,7 @@ def configureHistograms(alg, flags, doHwMonCtp, doHwMon, doComp, doMultComp):
                                     xmin=0, xmax=len(rod_errors_labels))
         fpga_errors_labels = ["CT", "sm", "pe", "lm", "hm", "pt"]
         fpga_indexes = ["topo1fpga1", "topo1fpga0", "topo2fpga1", "topo2fpga0", "topo3fpga1", "topo3fpga0"]
-        alg.MonTool.defineHistogram('FPGA_Errors, FPGA_Labels; FPGA_Errors', path='EXPERT', type='TH2I',
+        alg.MonTool.defineHistogram('FPGA_Errors,FPGA_Labels;FPGA_Errors', path='EXPERT', type='TH2I',
                                     title='Counts of FPGA errors',xbins=len(fpga_errors_labels),ybins=len(fpga_indexes),
                                     xlabels=fpga_errors_labels,
                                     ylabels=fpga_indexes,

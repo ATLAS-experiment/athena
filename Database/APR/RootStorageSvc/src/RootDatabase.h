@@ -12,11 +12,16 @@
 #define POOL_ROOTSTORAGESVC_ROOTDBASE_H 1
 
 // Framework include files
+#include "AthenaKernel/SlotSpecificObj.h"
 #include "GaudiKernel/SmartIF.h"
 #include "StorageSvc/IDbDatabase.h"
 #include "StorageSvc/DbDatabase.h"
 #include "StorageSvc/DbPrint.h"
 
+// ROOT include files
+#include "ROOT/RNTupleReader.hxx"
+
+#include <optional>
 #include <set>
 #include <map>
 #include <mutex>
@@ -24,7 +29,6 @@
 
 // Forward declarations
 class StatusCode;
-namespace ROOT { class RNTupleReader; }
 
 class TFile;
 class TTree;
@@ -128,6 +132,9 @@ namespace pool  {
 
     using indexLookup_t = std::unordered_map<uint64_t, uint64_t>;
     std::map<void*, indexLookup_t>                                         m_ntupleIndexMap;
+
+    // RootDatabase currently holds an optional slot-specific active entry token for the main event data container
+    std::optional<SG::SlotSpecificObj<std::unique_ptr<ROOT::RNTupleReader::RActiveEntryToken>>> m_activeEntryTokenPtr;
 
   public:
     /// Standard Constructor

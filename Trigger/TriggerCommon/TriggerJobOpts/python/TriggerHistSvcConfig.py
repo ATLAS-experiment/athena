@@ -26,6 +26,8 @@ def TriggerHistSvcConfig(flags):
     elif flags.Trigger.Online.useOnlineWebdaqHistSvc:
         log.info("Configuring online Webdaq HistSvc")
         histSvc = CompFactory.WebdaqHistSvc("THistSvc") 
+        log.info("Configuring WebdaqInfoSvc for IS publication")
+        acc.addService( CompFactory.WebdaqInfoSvc("WebdaqInfoSvc"), create=True )
     else:
         log.info("Configuring offline THistSvc")
         output = []

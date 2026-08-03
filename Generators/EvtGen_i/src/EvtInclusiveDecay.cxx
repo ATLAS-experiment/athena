@@ -38,10 +38,8 @@
 #include "GaudiKernel/MsgStream.h"
 #include "GaudiKernel/ISvcLocator.h"
 #include "GaudiKernel/DataSvc.h"
-#include "GaudiKernel/IPartPropSvc.h"
 #include "StoreGate/StoreGateSvc.h"
 #include "GeneratorObjects/McEventCollection.h"
-#include "HepPID/ParticleName.hh"
 
 #include "AthenaKernel/RNGWrapper.h"
 #include "CLHEP/Random/RandFlat.h"
@@ -317,13 +315,12 @@ StatusCode EvtInclusiveDecay::finalize() {
     ATH_MSG_INFO("The following particles were checked and didn't have any decay channels:");
     if (msgLvl(MSG::INFO)) {
       std::cout << std::endl;
-      std::cout << " Particle code    Name from HepPDT        # Occurences" << std::endl;
-      std::cout << "------------------------------------------------------"  << std::endl;
+      std::cout << " Particle code        # Occurences" << std::endl;
+      std::cout << "----------------------------------"  << std::endl;
       for (std::map<int,long>::iterator p = m_noDecayChannels.begin(); p!=m_noDecayChannels.end(); ++p) {
         int id = p->first;
         int count = p->second;
         std::cout << std::setw(14) << id
-                  << std::setw(20) << HepPID::particleName(id)
                   << std::setw(20) << count
                   << std::endl;
       }
@@ -695,7 +692,6 @@ std::string EvtInclusiveDecay::pdgName(HepMC::ConstGenParticlePtr p, bool status
   }
   if (p){
     buf << p->pdg_id();
-    buf << "/" << HepPID::particleName(p->pdg_id());
     if (statusHighlighting) {
       buf << "\033[0m";   // revert color attributes
     }

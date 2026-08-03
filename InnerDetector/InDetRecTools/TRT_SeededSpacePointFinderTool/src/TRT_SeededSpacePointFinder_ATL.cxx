@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -471,6 +471,7 @@ MsgStream& InDet::TRT_SeededSpacePointFinder_ATL::dumpEvent( MsgStream& out, InD
   out<<"-------|-------|-------|-------|-------|-------|"
      <<"\n";
   out<<endmsg;
+  //coverity[STREAM_FORMAT_STATE:FALSE]
   out.precision(prec);
   return out;
 }

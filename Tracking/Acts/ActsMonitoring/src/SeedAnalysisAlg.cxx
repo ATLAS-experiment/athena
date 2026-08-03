@@ -35,7 +35,7 @@ namespace ActsTrk {
     ATH_CHECK( m_EventInfoKey.initialize() );
 
     ATH_CHECK( m_paramEstimationTool.retrieve(EnableTool{!m_prdTruth.empty()}) );
-    ATH_CHECK( m_trackingGeometryTool.retrieve(EnableTool{!m_prdTruth.empty()}) );
+    ATH_CHECK( m_trackingGeometrySvc.retrieve() );
     ATH_CHECK( m_geometryConvTool.retrieve(EnableTool{!m_prdTruth.empty()}) );
  
     ATH_MSG_DEBUG("Monitoring settings ...");
@@ -227,7 +227,7 @@ namespace ActsTrk {
     ATH_CHECK( fieldCondObj != nullptr );
 
     Acts::MagneticFieldContext magFieldContext(fieldCondObj);
-    auto geo_context = m_trackingGeometryTool->getNominalGeometryContext();
+    auto geo_context = m_trackingGeometrySvc->getNominalContext();
 
 
     // utilities

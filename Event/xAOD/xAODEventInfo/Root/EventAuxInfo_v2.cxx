@@ -4,6 +4,7 @@
 
 // Local include(s):
 #include "xAODEventInfo/versions/EventAuxInfo_v2.h"
+#include "xAODEventInfo/EventInfoLockHelper.h"
 
 namespace xAOD {
 
@@ -170,6 +171,8 @@ namespace xAOD {
 
    void EventAuxInfo_v2::toTransient(  )
    {
+    EventInfoLockHelper helper;
+    if (helper.evalUnlockFunc(runNumber,lumiBlock,eventNumber)) return;
      /// List of all detector flag aux IDs.
      static const std::vector<SG::auxid_t> flagIds (m_decorFlags.begin(),
                                                     m_decorFlags.end());

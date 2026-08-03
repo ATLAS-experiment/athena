@@ -179,7 +179,7 @@ double AsgForwardElectronCalibrationTool::calibrate(const EventContext& /*ctx*/,
 // ============================================================================
 // getEtaBin
 // ============================================================================
-int AsgForwardElectronCalibrationTool::getEtaBin(double absEta) const
+int AsgForwardElectronCalibrationTool::getEtaBin(double absEta) 
 {
   // Convention: x1 < |eta| <= x2
   if (absEta > 2.5 && absEta <= 2.7) return 0;
@@ -293,7 +293,7 @@ bool AsgForwardElectronCalibrationTool::getInputs(const xAOD::Electron* eg,
 // Helpers
 // ============================================================================
 
-double AsgForwardElectronCalibrationTool::softplus(double x) const
+double AsgForwardElectronCalibrationTool::softplus(double x) 
 {
   // Avoids overflow for large x
   return (x > 20.) ? x : std::log1p(std::exp(x));

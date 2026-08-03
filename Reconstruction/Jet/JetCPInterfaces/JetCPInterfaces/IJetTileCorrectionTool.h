@@ -1,7 +1,7 @@
 // Dear emacs, this is -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef JETTILECORRECTION_IJETTILECORRECTIONTOOL_H
@@ -29,10 +29,10 @@ namespace JTC{
   enum class TYPE : unsigned int {User, DB};
 
   struct Hole{
-    double eta1;
-    double eta2;
-    double phi1;
-    double phi2;
+    double eta1 = 0;
+    double eta2 = 0;
+    double phi1 = 0;
+    double phi2 = 0;
     std::pair<int,int> iov;
   };
 

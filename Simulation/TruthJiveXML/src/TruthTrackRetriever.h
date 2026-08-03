@@ -6,7 +6,6 @@
 #define JIVEXML_TRUTHTRACKRETRIEVER_H
 
 #include "JiveXML/IDataRetriever.h"
-#include "GaudiKernel/IPartPropSvc.h"
 
 #include "AthenaBaseComps/AthAlgTool.h"
 

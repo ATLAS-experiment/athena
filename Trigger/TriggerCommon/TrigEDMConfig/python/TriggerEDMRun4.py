@@ -70,11 +70,41 @@ TriggerHLTListRun4 = [
     
 # L1 Calo inputs, note we are giving extended EDM targets
     ("CaloCellContainer#SCell",                                'ESD AODFULL', 'L1'),
+    # Placeholder output collections from GlobalSimulation
+    ('std::vector<float>#eFEXeta', 'ESD AODFULL', 'L1'),
+    ('std::vector<float>#eFEXphi', 'ESD AODFULL', 'L1'),
+    ('std::vector<float>#FailedeFEXeta', 'ESD AODFULL', 'L1'),
+    ('std::vector<float>#FailedeFEXphi', 'ESD AODFULL', 'L1'),
+    ('std::vector<float>#eGamma1BDT', 'ESD AODFULL', 'L1'),
 
     # Particle Flow Objects, for assessing performance with ITk (and perhaps HGTD)
     ('xAOD::FlowElementContainer#HLT_ftfChargedParticleFlowObjects', 'BS ESD', 'Jet'),
     ('xAOD::FlowElementAuxContainer#HLT_ftfChargedParticleFlowObjectsAux.'+'.'.join(cPFOVarsToKeep), 'BS ESD', 'Jet'),
     ('xAOD::FlowElementContainer#HLT_ftfNeutralParticleFlowObjects', 'BS ESD', 'Jet'),
     ('xAOD::FlowElementAuxContainer#HLT_ftfNeutralParticleFlowObjectsAux.'+'.'.join(nPFOVarsToKeep), 'BS ESD', 'Jet'),
+
+# New EDM for Run 4 muons
+    # EF Fast Reco muons (SA)
+    ('xAOD::MuonContainer#HLT_FastMuonsInfo',                                        'BS ESD AODFULL AODSLIM', 'Muon', [InViews('L2MuFastRecoPhIIViews')]),
+    ('xAOD::MuonAuxContainer#HLT_FastMuonsInfoAux.',                                 'BS ESD AODFULL AODSLIM', 'Muon'),
+
+    # EF Precise Reco muons (SA)
+    ('xAOD::TrackParticleContainer#HLT_MSMuons_RoIPhII',               'BS ESD AODFULL', 'Muon', [InViews('EFMuMSReco_RoIPhIIViews')]),
+    ('xAOD::TrackParticleAuxContainer#HLT_MSMuons_RoIPhIIAux.',        'BS ESD AODFULL', 'Muon'),
+
+    ('xAOD::TrackParticleContainer#HLT_MSMuons_RoIPhII_newFast',       'BS ESD AODFULL', 'Muon', [InViews('EFMuMSReco_RoIPhII_newFastViews')]),
+    ('xAOD::TrackParticleAuxContainer#HLT_MSMuons_RoIPhII_newFastAux.','BS ESD AODFULL', 'Muon'),
+
+    ('xAOD::TrackParticleContainer#HLT_MSMuons_RoIPhII_mlbkt',         'BS ESD AODFULL', 'Muon', [InViews('EFMuMSReco_RoIPhII_mlbktViews')]),
+    ('xAOD::TrackParticleAuxContainer#HLT_MSMuons_RoIPhII_mlbktAux.',  'BS ESD AODFULL', 'Muon'),
+
+    ('xAOD::TrackParticleContainer#HLT_MSMuons_FSPhII',                'BS ESD AODFULL', 'Muon', [InViews('EFMuMSReco_FSPhIIViews')]),
+    ('xAOD::TrackParticleAuxContainer#HLT_MSMuons_FSPhIIAux.',         'BS ESD AODFULL', 'Muon'),
+
+    ('xAOD::TrackParticleContainer#HLT_MSMuons_FSPhII_newFast',        'BS ESD AODFULL', 'Muon', [InViews('EFMuMSReco_FSPhII_newFastViews')]),
+    ('xAOD::TrackParticleAuxContainer#HLT_MSMuons_FSPhII_newFastAux.', 'BS ESD AODFULL', 'Muon'),
+
+    ('xAOD::TrackParticleContainer#HLT_MSMuons_FSPhII_mlbkt',          'BS ESD AODFULL', 'Muon', [InViews('EFMuMSReco_FSPhII_mlbktViews')]),
+    ('xAOD::TrackParticleAuxContainer#HLT_MSMuons_FSPhII_mlbktAux.',   'BS ESD AODFULL', 'Muon'),
 
 ]

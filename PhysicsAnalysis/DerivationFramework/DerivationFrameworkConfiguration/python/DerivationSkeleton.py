@@ -91,6 +91,12 @@ def fromRunArgs(runArgs):
             flags.addFlag(f'Output.doWrite{runArg.removeprefix("output").removesuffix("File")}', True)
             flags.Output.doWriteDAOD = True
 
+    # Number of folds to use for the egamma Normalizing Flow shower shape correction tool ElectronPhotonVariableNFCorrectionTool
+    if hasattr(runArgs, 'n_folds_NF'):
+        logDerivation.info('Will use %d folds for the e/gamma NF shower shape correction tool', runArgs.n_folds_NF)
+        flags.addFlag('Egamma.NFoldsNF', runArgs.n_folds_NF)
+
+
     # Fix campaign metadata
     from Campaigns.Utils import Campaign, campaign_runs
     if flags.Input.isMC and flags.Input.MCCampaign is Campaign.Unknown:

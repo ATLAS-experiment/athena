@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration.
  *
  * @file HGTD_IterativeExtensionTool.h
  *
@@ -189,10 +189,10 @@ private:
       "The hypothesis of the track's particle type"};
 
   IntegerProperty m_phitol_ITk{
-      this, "ToleranceLevelITk", 3,
+      this, "ToleranceLevelPhiITk", 3,
       "The tolerance level in phi for an extrapolation to be a hole on track in ITk"};
   IntegerProperty m_etatol_ITk{
-      this, "ToleranceLevelITk", 3,
+      this, "ToleranceLevelEtaITk", 3,
       "The tolerance level in eta for an extrapolation to be a hole on track in ITk"};
 };
 

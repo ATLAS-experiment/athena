@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonCombinedInDetCandidateAlg.h"
@@ -11,8 +11,8 @@
 #include "AthContainers/ConstAccessor.h"
 
 using namespace MuonCombined;
-MuonCombinedInDetCandidateAlg::MuonCombinedInDetCandidateAlg(const std::string& name, ISvcLocator* pSvcLocator) :
-    AthReentrantAlgorithm(name, pSvcLocator) {}
+
+
 
 StatusCode MuonCombinedInDetCandidateAlg::initialize() {
     ATH_CHECK(m_trackSelector.retrieve(DisableTool{m_trackSelector.empty()}));
@@ -23,6 +23,13 @@ StatusCode MuonCombinedInDetCandidateAlg::initialize() {
     ATH_CHECK(m_caloFwdExtensionLocation.initialize(m_doSiliconForwardMuons && !m_caloFwdExtensionLocation.empty()));
     ATH_CHECK(m_candidateCollectionName.initialize());
     ATH_CHECK(m_forwardTrackSelector.retrieve(DisableTool{!m_doSiliconForwardMuons}));
+    for (const auto& key : m_indetTrackParticleLocation) {
+        m_trkLinkKey.emplace_back(key, "trackLink");
+    }
+    if (!m_indetForwardTrackParticleLocation.empty()) {
+        m_trkLinkKey.emplace_back(m_indetForwardTrackParticleLocation, "trackLink");
+    }
+    ATH_CHECK(m_trkLinkKey.initialize(m_waitForTrackLink));
     ATH_MSG_INFO("Successfully initialized using the following configuration --  SAF: "
                  << (m_doSiliconForwardMuons ? "si" : "no") << ", "
                  << "MS extension bulk: " << (m_extendBulk ? "si" : "no")
@@ -34,48 +41,26 @@ StatusCode MuonCombinedInDetCandidateAlg::initialize() {
 StatusCode MuonCombinedInDetCandidateAlg::execute(const EventContext& ctx) const {
     InDetCandidateCache output_cache{};
     unsigned int counter{0};
-    for (SG::ReadHandle<xAOD::TrackParticleContainer>& readHandle : m_indetTrackParticleLocation.makeHandles(ctx)) {
-        if (!readHandle.isValid()) {
-            ATH_MSG_FATAL("Failed to retrieve " << readHandle.key());
-            return StatusCode::FAILURE;
-        }
-        output_cache.inDetContainer = readHandle.cptr();
+    for (const SG::ReadHandleKey<xAOD::TrackParticleContainer>& key : m_indetTrackParticleLocation) {
+        ATH_CHECK(SG::get(output_cache.inDetContainer, key, ctx));
         output_cache.trackSelector = !m_trackSelector.empty() ? m_trackSelector.get() : nullptr;
         if (counter < m_caloExtensionLocation.size()) {
-            SG::ReadHandle<CaloExtensionCollection> caloExtension{m_caloExtensionLocation[counter], ctx};
-            if (!caloExtension.isValid()) {
-                ATH_MSG_FATAL("Failed to retrieve " << m_caloExtensionLocation[counter].fullKey());
-                return StatusCode::FAILURE;
-            }
-            output_cache.extensionContainer = caloExtension.cptr();
-        } else
+            ATH_CHECK(SG::get(output_cache.extensionContainer, m_caloExtensionLocation[counter], ctx));
+        } else {
             output_cache.extensionContainer = nullptr;
+        }
         ++counter;
         ATH_CHECK(create(ctx, output_cache));
     }
     if (m_doSiliconForwardMuons) {
-        SG::ReadHandle<xAOD::TrackParticleContainer> readHandle{m_indetForwardTrackParticleLocation, ctx};
-        if (!readHandle.isValid()) {
-            ATH_MSG_FATAL("Failed to retrieve " << readHandle.key());
-            return StatusCode::FAILURE;
-        }
-        if (!m_caloFwdExtensionLocation.empty()) {
-            SG::ReadHandle<CaloExtensionCollection> caloExtension{m_caloFwdExtensionLocation, ctx};
-            if (!caloExtension.isValid()) {
-                ATH_MSG_FATAL("Failed to retrieve " << m_caloFwdExtensionLocation.fullKey());
-                return StatusCode::FAILURE;
-            }
-            output_cache.extensionContainer = caloExtension.cptr();
-        } else
-            output_cache.extensionContainer = nullptr;
-
-        output_cache.inDetContainer = readHandle.cptr();
+        ATH_CHECK(SG::get(output_cache.inDetContainer, m_indetForwardTrackParticleLocation, ctx));
+        ATH_CHECK(SG::get(output_cache.extensionContainer, m_caloFwdExtensionLocation, ctx));
         output_cache.trackSelector = !m_forwardTrackSelector.empty() ? m_forwardTrackSelector.get() : nullptr;
         output_cache.flagAsSAF = true;
         ATH_CHECK(create(ctx, output_cache));
     }
 
-    SG::WriteHandle<InDetCandidateCollection> indetCandidateCollection(m_candidateCollectionName, ctx);
+    SG::WriteHandle indetCandidateCollection(m_candidateCollectionName, ctx);
     ATH_CHECK(indetCandidateCollection.record(std::move(output_cache.outputContainer)));
 
     return StatusCode::SUCCESS;
@@ -146,7 +131,7 @@ void MuonCombinedInDetCandidateAlg::printTrackParticleInfo(const xAOD::TrackPart
                        << getCount(*tp, xAOD::numberOfSCTHits) << " TRT " << getCount(*tp, xAOD::numberOfTRTHits));
 }
 
-int MuonCombinedInDetCandidateAlg::getCount(const xAOD::TrackParticle& tp, xAOD::SummaryType type) const {
+int MuonCombinedInDetCandidateAlg::getCount(const xAOD::TrackParticle& tp, const xAOD::SummaryType type) {
     uint8_t val{0};
     if (!tp.summaryValue(val, type)) return 0;
     return static_cast<int>(val);

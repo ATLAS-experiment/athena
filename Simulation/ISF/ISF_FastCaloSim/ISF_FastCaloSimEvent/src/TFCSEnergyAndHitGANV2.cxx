@@ -6,8 +6,7 @@
 
 #include "CLHEP/Random/RandFlat.h"
 #include "CLHEP/Random/RandGauss.h"
-#include "HepPDT/ParticleData.hh"
-#include "HepPDT/ParticleDataTable.hh"
+#include "TruthUtils/HepMCHelpers.h"
 #include "TruthUtils/ParticleConstants.h"
 #include "ISF_FastCaloSimEvent/TFCSCenterPositionCalculation.h"
 #include "ISF_FastCaloSimEvent/TFCSExtrapolationState.h"
@@ -17,6 +16,8 @@
 #include "TF1.h"
 #include "TFile.h"
 #include "TH2D.h"
+
+#include "CxxUtils/hexdump.h"
 
 #if defined(__FastCaloSimStandAlone__)
 #include "CLHEP/Random/TRandomEngine.h"
@@ -124,7 +125,7 @@ bool TFCSEnergyAndHitGANV2::fillEnergy(
   }
 
   const int pdgId = truth->pdgid();
-  const float charge = HepPDT::ParticleID(pdgId).charge();
+  const float charge = MC::charge(pdgId);
 
   float Einit;
   const float Ekin = truth->Ekin();
@@ -170,12 +171,25 @@ bool TFCSEnergyAndHitGANV2::fillEnergy(
   for (const auto &[layer, h] : binsInLayers) {
     // attempt to debug intermittent ci issues described in
     // https://its.cern.ch/jira/browse/ATLASSIM-7031
-    if (h.IsZombie() || h.IsOnHeap() || dynamic_cast<const TH2D*>(&h) == nullptr) {
-      ATH_MSG_ERROR("Histogram for layer " << layer << " is broken; " <<
-                    "zombie: " << h.IsZombie() <<
-                    "on heap: " << h.IsOnHeap() <<
-                    "dynamic type: " << typeid(h).name());
-      ATH_MSG_INFO("See ATLASSIM-7031.");
+    if (*reinterpret_cast<void*const*>(&h) == nullptr || h.IsZombie() || h.IsOnHeap() || dynamic_cast<const TH2D*>(&h) == nullptr) {
+      ATH_MSG_ERROR("Histogram for layer " << layer << " at " << &h <<
+                    " is broken; " <<
+                    "See ATLASSIM-7031.");
+
+      std::ostringstream ss;
+      ss << "Node dump:\n";
+      CxxUtils::safeHexdump (ss, (reinterpret_cast<const char*>(&h)) - 8*sizeof(void*), 4096);
+      ss << "Map head:\n";
+      CxxUtils::safeHexdump (ss, &binsInLayers, sizeof(binsInLayers));
+      ATH_MSG_INFO(ss.str());
+      ss.str("");
+      ss << "First node:\n";
+      auto it = binsInLayers.begin();
+      CxxUtils::safeHexdump (ss, (reinterpret_cast<const char*>(&*it)) - 8*sizeof(void*), 4096);
+      ATH_MSG_INFO(ss.str());
+      ATH_MSG_INFO("zombie: " << h.IsZombie() <<
+                   " on heap: " << h.IsOnHeap());
+      ATH_MSG_INFO(" dynamic type: " << typeid(h).name());
 
       ATH_MSG_INFO("Got truth state: ");
       truth->Print();

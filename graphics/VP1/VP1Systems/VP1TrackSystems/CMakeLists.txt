@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( VP1TrackSystems )
@@ -30,6 +30,11 @@ atlas_add_library( VP1TrackSystems VP1TrackSystems/*.h src/*.cxx
                           TrkDetElementBase TrkExInterfaces TrkFitterInterfaces TrkMaterialOnTrack TrkMeasurementBase 
                           TrkPrepRawData TrkPseudoMeasurementOnTrack TrkRIO_OnTrack TrkSegment TrkTrack TrkTrackSummary
                           TrkVolumes VP1GuideLineSystems VP1HEPVis VP1PRDSystems )
+
+if( CMAKE_CXX_COMPILER_ID STREQUAL "GNU" AND CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL 16 )
+  # Work around gcc bug https://gcc.gnu.org/bugzilla/show_bug.cgi?id=122197
+  set_target_properties( VP1TrackSystems PROPERTIES COMPILE_FLAGS " --param max-devirt-targets=1 " )
+endif()
 
 # Enable Qt support for cppcheck:
 if( CMAKE_CXX_CPPCHECK )

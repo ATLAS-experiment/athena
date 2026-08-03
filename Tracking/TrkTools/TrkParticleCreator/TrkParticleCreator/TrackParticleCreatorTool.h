@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /***************************************************************************
@@ -331,6 +331,10 @@ private:
   SG::ReadCondHandleKey<InDet::BeamSpotData> m_beamSpotKey { this, "BeamSpotKey", "BeamSpotData", "SG key for beam spot" };
   SG::ReadHandleKey<Trk::ClusterSplitProbabilityContainer> m_clusterSplitProbContainer{ this, "ClusterSplitProbabilityName", "", "" };
   SG::ReadHandleKey<Trk::PRDtoTrackMap> m_assoMapContainer{ this, "AssociationMapName", ""};
+
+  static constexpr int s_expertLevel = 200;
+  Gaudi::Property<int> m_itkDecorationLevel
+     {this, "ITkDecorationLevel", 1, ">=200 split counts for inclined and flat barrel." };
 
   const Trk::ClusterSplitProbabilityContainer::ProbabilityInfo& getClusterSplittingProbability(const InDet::PixelCluster* pix) const;
 

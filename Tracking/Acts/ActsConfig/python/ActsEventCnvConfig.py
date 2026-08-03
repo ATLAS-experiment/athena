@@ -6,14 +6,15 @@ from AthenaConfiguration.ComponentFactory import CompFactory
 def ActsToTrkConverterToolCfg(flags,
                               name: str = "ActsToTrkConverterTool",
                               setupMuon = False,
+                              setupITk = True,
                               **kwargs) -> ComponentAccumulator:
     acc = ComponentAccumulator()
 
-    from ActsConfig.ActsGeometryConfig import ActsTrackingGeometryToolCfg, ActsGeometryRealmConvTool
-    kwargs.setdefault("TrackingGeometryTool", acc.getPrimaryAndMerge(ActsTrackingGeometryToolCfg(flags)))
-    kwargs.setdefault("GeometryRealmConvTool", acc.getPrimaryAndMerge(ActsGeometryRealmConvTool(flags)))
+    from ActsConfig.ActsGeometryConfig import ActsGeometryRealmConvToolCfg
+    kwargs.setdefault("GeometryRealmConvTool", acc.getPrimaryAndMerge(ActsGeometryRealmConvToolCfg(flags)))
 
     setupMuon = setupMuon and flags.Muon.usePhaseIIGeoSetup
+    setupITk = setupITk and (flags.Detector.GeometryITk or flags.Detector.GeometryID)
     if not setupMuon or not flags.Detector.EnableMDT:
         kwargs.setdefault("MdtKey", "")
     if not setupMuon or not flags.Detector.EnableRPC:
@@ -24,6 +25,9 @@ def ActsToTrkConverterToolCfg(flags,
         kwargs.setdefault("MmKey", "")
     if not setupMuon or not flags.Detector.EnablesTGC:
         kwargs.setdefault("sTgcKey", "")
+    if not setupITk:
+        kwargs.setdefault("PixelKey", "")
+        kwargs.setdefault("SctKey", "")
     from MuonConfig.MuonGeometryConfig import MuonIdHelperSvcCfg
     kwargs.setdefault("MuonIdHelperSvc", acc.getPrimaryAndMerge(MuonIdHelperSvcCfg(flags)) if setupMuon else "")
 
@@ -36,9 +40,13 @@ def ActsToTrkConverterToolCfg(flags,
         from MuonConfig.MuonRIO_OnTrackCreatorToolConfig import TriggerChamberClusterOnTrackCreatorCfg
         kwargs.setdefault("CompetingRotCreator", acc.getPrimaryAndMerge(TriggerChamberClusterOnTrackCreatorCfg(flags)))
 
-    from TrkConfig.TrkRIO_OnTrackCreatorConfig import CombinedRotCreatorCfg, InDetRotCreatorCfg
-    if setupMuon:
+    from TrkConfig.TrkRIO_OnTrackCreatorConfig import CombinedRotCreatorCfg, InDetRotCreatorCfg, MuonRotCreatorCfg
+    if setupMuon and setupITk:
         rotCreatorTool = acc.getPrimaryAndMerge(CombinedRotCreatorCfg(flags))
+        rotCreatorTool.ToolMuonCluster.RestrictWarnings = True
+        kwargs.setdefault('RotCreatorTool', rotCreatorTool)
+    elif setupMuon:
+        rotCreatorTool = acc.getPrimaryAndMerge(MuonRotCreatorCfg(flags))
         rotCreatorTool.ToolMuonCluster.RestrictWarnings = True
         kwargs.setdefault('RotCreatorTool', rotCreatorTool)
     else:
@@ -56,7 +64,7 @@ def TrkToActsConvertorAlgCfg(flags,
     if 'ATLASConverterTool' not in kwargs:
         kwargs.setdefault("ATLASConverterTool", acc.popToolsAndMerge(ActsToTrkConverterToolCfg(flags)))
 
-    acc.addEventAlgo(CompFactory.ActsTrk.TrkToActsConvertorAlg(name, **kwargs))
+    acc.addEventAlgo(CompFactory.ActsTrk.TrkToActsConvertorAlg(name, **kwargs), primary = True)
     return acc
 
 def ActsToTrkConvertorAlgCfg(flags,
@@ -79,6 +87,82 @@ def ActsToTrkConvertorAlgCfg(flags,
                                                                TracksLocation = TracksLocation, 
                                                                ACTSTracksLocation = ACTSTracksLocation,
                                                                ATLASConverterTool = ATLASConverterTool))
+    return acc
+
+
+def xAODtoTrkConverterAlgCfg(flags, name ="xAODToTrkConversionAlg", 
+                             setupMuon = False, setupITk = True, **kwargs):
+    result = ComponentAccumulator()
+    if setupITk:
+        if flags.Tracking.ITkMainPass.doAthenaToActsCluster:
+            return result
+        from InDetConfig.InDetPrepRawDataFormationConfig import ITkXAODToInDetClusterConversionCfg
+        result.merge(ITkXAODToInDetClusterConversionCfg(flags))
+    if 'ATLASConverterTool' not in kwargs:
+        kwargs.setdefault("ATLASConverterTool", result.popToolsAndMerge(ActsToTrkConverterToolCfg(flags, setupMuon = setupMuon ,setupITk = setupITk)))
+
+    result.addEventAlgo(CompFactory.ActsTrk.xAODtoTrkConverterAlg(name, **kwargs), primary = True)
+    return result
+
+def ActsToXAODTrackConverterAlgCfg(flags,
+                                   name: str = "ActsToXAODTrackConverterAlg",
+                                   **kwargs) -> ComponentAccumulator:
+    acc = ComponentAccumulator()
+
+    kwargs.setdefault('InputActsTracksLocation', '')
+    kwargs.setdefault('OutputActsTracksLocation', '')
+
+    acc.addEventAlgo(CompFactory.ActsTrk.ActsToXAODTrackConverterAlg(name, **kwargs), primary = True)    
+    return acc
+
+def ActsTrackToTrackParticleCnvToolCfg(flags,
+                                       name: str = "ActsTrackToTrackParticleCnvTool",
+                                       **kwargs) -> ComponentAccumulator:
+    acc = ComponentAccumulator()
+
+    # To produce AtlasFieldCacheCondObj
+    from MagFieldServices.MagFieldServicesConfig import (
+        AtlasFieldCacheCondAlgCfg)
+    acc.merge(AtlasFieldCacheCondAlgCfg(flags))
+
+    kwargs.setdefault('FirstAndLastParameterOnly',True)
+    kwargs.setdefault('ComputeExpectedLayerPattern',True)
+
+
+    from ActsConfig.ActsGeometryConfig import ActsExtrapolationToolCfg
+    kwargs.setdefault('ExtrapolationTool', acc.popToolsAndMerge(ActsExtrapolationToolCfg(flags)) )
+    acc.setPrivateTools(CompFactory.ActsTrk.TrackToTrackParticleCnvTool(name, **kwargs))
+    return acc
+
+def ActsTrackToTrackParticleCnvAlgCfg(flags,
+                                      name: str = "ActsTrackToTrackParticleCnvAlg",
+                                      **kwargs) -> ComponentAccumulator:
+    acc = ComponentAccumulator()
+
+    # Beam Spot Cond is a requirement
+    from BeamSpotConditions.BeamSpotConditionsConfig import BeamSpotCondAlgCfg
+    acc.merge(BeamSpotCondAlgCfg(flags))
+
+    # Configure TrackToTrackParticleConvTool
+    tool_kwargs = {}
+    if "ExtrapolationTool" in kwargs:
+        tool_kwargs["ExtrapolationTool"] = kwargs.pop("ExtrapolationTool")
+    if "FirstAndLastParameterOnly" in kwargs:
+        tool_kwargs["FirstAndLastParameterOnly"] = kwargs.pop("FirstAndLastParameterOnly")
+    if "ComputeExpectedLayerPattern" in kwargs:
+        tool_kwargs["ComputeExpectedLayerPattern"] = kwargs.pop("ComputeExpectedLayerPattern")
+    if "MuonSummaryTool" in kwargs:
+        tool_kwargs["MuonSummaryTool"] = kwargs.pop("MuonSummaryTool")
+    if 'TrackToTrackParticleCnvTool' not in kwargs:
+        kwargs['TrackToTrackParticleCnvTool'] = acc.popToolsAndMerge(
+            ActsTrackToTrackParticleCnvToolCfg(flags, **tool_kwargs))
+
+    kwargs.setdefault('BeamSpotKey', 'BeamSpotData')
+    kwargs.setdefault("PerigeeExpression", flags.Tracking.perigeeExpression)
+    kwargs.setdefault('VertexContainerKey', 'PrimaryVertices')
+
+    acc.addEventAlgo(CompFactory.ActsTrk.TrackToTrackParticleCnvAlg(name, **kwargs), primary = True)
+
     return acc
 
 def RunTrackConversion(flags, track_collections = [], outputfile='dump.json', setupMuon = False):

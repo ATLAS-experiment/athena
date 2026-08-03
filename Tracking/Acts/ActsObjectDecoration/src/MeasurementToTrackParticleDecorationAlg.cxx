@@ -23,10 +23,6 @@ using namespace Acts::UnitLiterals;
 
 namespace ActsTrk {
 
-    MeasurementToTrackParticleDecorationAlg::MeasurementToTrackParticleDecorationAlg(const std::string &name,
-										     ISvcLocator *pSvcLocator) :
-      AthReentrantAlgorithm(name,pSvcLocator)
-    {}
 
     StatusCode MeasurementToTrackParticleDecorationAlg::initialize()
     {
@@ -56,16 +52,15 @@ namespace ActsTrk {
         ATH_CHECK(m_measurementLocCovYkey.initialize());
         ATH_CHECK(m_trackParameterLocCovYkey.initialize());
 
-	ATH_CHECK(m_trackingGeometryTool.retrieve());
-	
-        return StatusCode::SUCCESS;
+		ATH_CHECK(m_ctxProvider.initialize());
+		return StatusCode::SUCCESS;
     }
 
   StatusCode MeasurementToTrackParticleDecorationAlg::execute(const EventContext& ctx) const
     {
         ATH_MSG_DEBUG("Executing " << name() << " ...");
 
-	auto tgContext = m_trackingGeometryTool->getGeometryContext(ctx).context();
+	auto tgContext = m_ctxProvider.getGeometryContext(ctx);
 
 	SG::WriteDecorHandle<xAOD::TrackParticleContainer, std::vector<int>> measurementRegionHandle(m_measurementRegionKey, ctx);
 	SG::WriteDecorHandle<xAOD::TrackParticleContainer, std::vector<int>> measurementDetectorHandle(m_measurementDetectorKey, ctx);
@@ -197,7 +192,7 @@ namespace ActsTrk {
 		
 		// Check the location of the state
 		if (state.hasReferenceSurface() and state.referenceSurface().isSensitive()) {
-		    const ActsDetectorElement * detectorElement = dynamic_cast<const ActsDetectorElement *>(state.referenceSurface().surfacePlacement());
+		    const auto* detectorElement = getActsDetectorElement(state.referenceSurface());
 		    if (!detectorElement) {
 		      ATH_MSG_WARNING("--- TrackState reference surface returned an invalid associated detector element");
 		      continue;
@@ -286,7 +281,7 @@ namespace ActsTrk {
 		  }
 		  
 		  const auto& [unbiasedParameters, unbiasedCovariance] =
-		    evaluateUnbiased ? Acts::calculateUnbiasedParametersCovariance(state) : std::make_pair(state.parameters(), state.covariance());
+		    evaluateUnbiased ? Acts::calculateUnbiasedParametersCovariance(Acts::AnyConstTrackStateProxy{state}) : std::make_pair(state.parameters(), state.covariance());
 		  
 		  measurementLocX = calibratedParameters[Acts::eBoundLoc0];
 		  measurementLocCovX = calibratedCovariance(Acts::eBoundLoc0, Acts::eBoundLoc0);
@@ -375,7 +370,12 @@ namespace ActsTrk {
     }
   
   float MeasurementToTrackParticleDecorationAlg::getChi2Contribution(const typename ActsTrk::TrackStateBackend::ConstTrackStateProxy &state) const {
-    
+
+    // Seed tracks (TSOS mask = None) have no predicted parameters — return 0
+    if (state.getMask() == Acts::TrackStatePropMask::None) {
+      return 0.f;
+    }
+
     auto pred  = state.predicted();
     auto predC = state.predictedCovariance();
 

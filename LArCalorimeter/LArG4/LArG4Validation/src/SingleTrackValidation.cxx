@@ -68,7 +68,6 @@ public:
   Clockwork() {}
   ~Clockwork() {}
 
-  IPartPropSvc*      partPropSvc{nullptr};
   ITHistSvc*         histSvc{nullptr};
   const CaloCell_ID* cellId{nullptr};
   NTuple::Tuple* nt = nullptr;
@@ -158,8 +157,6 @@ StatusCode SingleTrackValidation::initialize() {
   // to obtain charge & type & other properties of the primary particle and  //
   // other particles that may turn up in the debris.                         //
   //                                                                         //
-  ATH_CHECK(m_ppSvc.retrieve());
-  m_c->partPropSvc = m_ppSvc.get();
   ATH_CHECK(m_histSvc.retrieve());
   m_c->histSvc = m_histSvc.get();
   ATH_CHECK(detStore()->retrieve(m_c->cellId, "CaloCell_ID"));

@@ -218,7 +218,7 @@ class TextConfig(ConfigFactory):
             if blockName not in self._order[self.ROOTNAME]:
                 if not blockName:
                     blockName = list(self._config[blockName].keys())[0]
-                raise ValueError(f"Unkown block {blockName} in yaml file")
+                raise ValueError(f"Unknown block {blockName} in yaml file")
 
         # configure blocks
         configSeq = ConfigSequence()

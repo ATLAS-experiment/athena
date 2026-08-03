@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -18,30 +18,11 @@
 #include "TrkGeometry/HomogeneousLayerMaterial.h"
 
 // constructor
-Trk::InputLayerMaterialProvider::InputLayerMaterialProvider(const std::string& t, const std::string& n, const IInterface* p)
-: AthAlgTool(t,n,p),
-   m_constantMaterialToAllLayers(true),
-   m_constantThicknessInX0(0.02),
-   m_constantThicknessInL0(0.06),
-   m_constantAverageA(14.),
-   m_constantAverageZ(7.),
-   m_constantAverageRho(0.00233)
-
+Trk::InputLayerMaterialProvider::InputLayerMaterialProvider(const std::string& t, const std::string& n, const IInterface* p) : AthAlgTool(t,n,p)
 {
     declareInterface<Trk::IGeometryProcessor>(this);
-
-    declareProperty("AssignConstantMaterial",   m_constantMaterialToAllLayers);
-    declareProperty("ConstantMaterialInX0",     m_constantThicknessInX0);
-    declareProperty("ConstantMaterialInL0",     m_constantThicknessInL0);
-    declareProperty("ConstantMaterialA",        m_constantAverageA);
-    declareProperty("ConstantMaterialZ",        m_constantAverageZ);
-    declareProperty("ConstantMaterialRho",      m_constantAverageRho);
-
 }
 
-// destructor
-Trk::InputLayerMaterialProvider::~InputLayerMaterialProvider()
-= default;
 
 StatusCode Trk::InputLayerMaterialProvider::initialize() {
 

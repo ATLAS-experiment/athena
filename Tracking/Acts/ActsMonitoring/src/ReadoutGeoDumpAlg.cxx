@@ -5,12 +5,13 @@
 
 
 #include "Acts/Geometry/TrackingGeometry.hpp"
-#include  "ActsGeometryInterfaces/IDetectorElement.h"
+#include  "ActsGeometryInterfaces/ISurfacePlacement.h"
 namespace ActsTrk {
 
     StatusCode ReadoutGeoDumpAlg::initialize() {
         ATH_CHECK(m_tree.init(this));
-        ATH_CHECK(m_trackingGeoTool.retrieve());
+        ATH_CHECK(m_ctxProvider.initialize());
+        ATH_CHECK(m_trackingGeometrySvc.retrieve());
         for (const auto type : m_detTypes){
             try{
                 m_selTypes.insert(static_cast<DetectorType>(type));
@@ -31,16 +32,16 @@ namespace ActsTrk {
             return StatusCode::SUCCESS;
         }
 
-        const GeometryContext& gctx{m_trackingGeoTool->getGeometryContext(ctx)};
+        const Acts::GeometryContext tgContext{m_ctxProvider.getGeometryContext(ctx)};
 
-        const auto trackingGeo = m_trackingGeoTool->trackingGeometry();
+        const auto trackingGeo = m_trackingGeometrySvc->trackingGeometry();
         
         trackingGeo->visitSurfaces([&](const Acts::Surface* surface){
             // We only want alignable surfaces
-            if (!surface->isAlignable()) {
+            if (!surface->isAlignable() || !surface->isSensitive()) {
                 return;
             }
-            const auto* detEl = dynamic_cast<const IDetectorElement*>(surface->surfacePlacement());
+            const auto* detEl = dynamic_cast<const ISurfacePlacement*>(surface->surfacePlacement());
             // Somehow it's not a known detector element
             if (!detEl) {
                 return;
@@ -50,7 +51,7 @@ namespace ActsTrk {
                 return;
             }
             //
-            m_readoutTransform = surface->localToGlobalTransform(gctx.context());
+            m_readoutTransform = surface->localToGlobalTransform(tgContext);
             m_identifier = detEl->identify().get_compact();
             m_detType = Acts::toUnderlying(detEl->detectorType());
             const auto& bounds = surface->bounds();

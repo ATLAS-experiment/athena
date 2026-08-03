@@ -7,45 +7,41 @@
 
 // ATHENA 
 #include "AthenaBaseComps/AthAlgTool.h"
-#include "GaudiKernel/ToolHandle.h"
-#include "TrkFitterInterfaces/ITrackFitter.h"
-#include "TrkToolInterfaces/IExtendedTrackSummaryTool.h"
-#include "TrkToolInterfaces/IBoundaryCheckTool.h"
+
 #include "TrkToolInterfaces/IRIO_OnTrackCreator.h"
 // ACTS
 #include "Acts/EventData/VectorMultiTrajectory.hpp"
 #include "Acts/Geometry/GeometryContext.hpp"
-#include "Acts/Utilities/Result.hpp"
 #include "Acts/TrackFitting/GaussianSumFitter.hpp"
 #include "Acts/Propagator/Propagator.hpp"
 #include "Acts/Propagator/MultiEigenStepperLoop.hpp"
 #include "Acts/Propagator/Navigator.hpp"
-#include "Acts/TrackFitting/BetheHeitlerApprox.hpp"
 #include "Acts/TrackFitting/GsfOptions.hpp"
 #include "Acts/Utilities/Logger.hpp"
 
 // PACKAGE
 #include "ActsEvent/TrackContainer.h"
-#include "ActsGeometryInterfaces/IExtrapolationTool.h"
-#include "ActsGeometryInterfaces/ITrackingGeometryTool.h"
+
+#include "ActsEvent/TrackParametersContainer.h"
+#include "ActsEvent/ContextUtility.h"
+
+
+#include "ActsGeometryInterfaces/ITrackingGeometrySvc.h"
 #include "ActsGeometryInterfaces/IGeometryRealmConvTool.h"
-#include "ActsToolInterfaces/ITrackConverterTool.h"
 #include "ActsToolInterfaces/IFitterTool.h"
 #include "src/detail/FitterHelperFunctions.h"
 
 #include "ActsCalibrators/TrkMeasurementCalibrator.h"
 #include "ActsCalibrators/TrkMeasSurfaceAccessor.h"
-
-// STL
-#include <string>
-#include <memory>
-
-
+#include "ActsCalibrators/TrkPrepRawDataCalibrator.h"
+#include "ActsCalibrators/TrkPrepRawDataSurfaceAcc.h"
+#include "src/detail/OnTrackCalibrator.h"
+#include "src/detail/RefittingCalibrator.h"
 
 namespace ActsTrk {
 
 class GaussianSumFitterTool
-  : public extends<AthAlgTool, Trk::ITrackFitter, ActsTrk::IFitterTool> {
+  : public extends<AthAlgTool, ActsTrk::IFitterTool> {
 public:
   
   using base_class::base_class;
@@ -53,53 +49,6 @@ public:
 
   // standard Athena methods
   virtual StatusCode initialize() override;
-
-  //! refit a track
-  virtual std::unique_ptr<Trk::Track> fit(
-    const EventContext& ctx,
-    const Trk::Track&,
-    const Trk::RunOutlierRemoval runOutlier = false,
-    const Trk::ParticleHypothesis matEffects = Trk::nonInteracting) const override;
-
-  //! fit a set of PrepRawData objects
-  virtual std::unique_ptr<Trk::Track> fit(
-    const EventContext& ctx,
-    const Trk::PrepRawDataSet&,
-    const Trk::TrackParameters&,
-    const Trk::RunOutlierRemoval runOutlier = false,
-    const Trk::ParticleHypothesis matEffects = Trk::nonInteracting) const override;
-
-  //! fit a set of MeasurementBase objects
-  virtual std::unique_ptr<Trk::Track> fit(
-    const EventContext& ctx,
-    const Trk::MeasurementSet&,
-    const Trk::TrackParameters&,
-    const Trk::RunOutlierRemoval runOutlier = false,
-    const Trk::ParticleHypothesis matEffects = Trk::nonInteracting) const override;
-
-  //! extend a track fit including a new set of PrepRawData objects
-  virtual std::unique_ptr<Trk::Track> fit(
-    const EventContext& ctx,
-    const Trk::Track&,
-    const Trk::PrepRawDataSet&,
-    const Trk::RunOutlierRemoval runOutlier = false,
-    const Trk::ParticleHypothesis matEffects = Trk::nonInteracting) const override;
-
-  //! extend a track fit including a new set of MeasurementBase objects
-  virtual std::unique_ptr<Trk::Track> fit(
-    const EventContext& ctx,
-    const Trk::Track&,
-    const Trk::MeasurementSet&,
-    const Trk::RunOutlierRemoval runOutlier = false,
-    const Trk::ParticleHypothesis matEffects = Trk::nonInteracting) const override;
-
-  //! combined track fit
-  virtual std::unique_ptr<Trk::Track> fit(
-    const EventContext& ctx,
-    const Trk::Track& intrk1,
-    const Trk::Track& intrk2,
-    const Trk::RunOutlierRemoval runOutlier = false,
-    const Trk::ParticleHypothesis matEffects = Trk::nonInteracting) const override;
 
   //! Acts seed fit
   virtual
@@ -126,43 +75,39 @@ public:
     ActsTrk::MutableTrackContainer& trackContainer,
     const Acts::PerigeeSurface& pSurface) const override;
 
+  //! fit a set of source links
+  virtual std::unique_ptr<MutableTrackContainer> fit(
+      const std::vector<Acts::SourceLink>& sourceLinks,
+      const Acts::BoundTrackParameters& initialParams,
+      const Acts::GeometryContext& tgContext,
+      const Acts::MagneticFieldContext& mfContext,
+      const Acts::CalibrationContext& calContext,
+      const Acts::Surface* targetSurface =
+          nullptr  // optional target surface - defaults to perigee in global
+                   // origin
+  ) const override;
+
   ///////////////////////////////////////////////////////////////////
   // Private methods:
   ///////////////////////////////////////////////////////////////////
 private:
-  Acts::GsfOptions<ActsTrk::MutableTrackStateBackend> prepareOptions(const Acts::GeometryContext& tgContext,
-                      const Acts::MagneticFieldContext& mfContext,
-                      const Acts::CalibrationContext& calContext,
-                      const Acts::PerigeeSurface& surface) const;
-  
-  std::unique_ptr<Trk::Track> performFit(const EventContext& ctx,
-           const Acts::GsfOptions<ActsTrk::MutableTrackStateBackend>& gsfOptions,
-           const std::vector<Acts::SourceLink>& trackSourceLinks,
-           const Acts::BoundTrackParameters& initialParams) const;
-
-  std::unique_ptr<Trk::Track> performDirectFit(const EventContext& ctx,
-                 const Acts::GsfOptions<ActsTrk::MutableTrackStateBackend>& gsfOptions,
-                 const std::vector<Acts::SourceLink>& trackSourceLinks,
-                 const Acts::BoundTrackParameters& initialParams,
-                 const std::vector<const Acts::Surface*>& surfaces) const;
-
-  const Acts::GsfExtensions<ActsTrk::MutableTrackStateBackend>& getExtensions() const;
-
+  using FitterOptions_t = Acts::GsfOptions<ActsTrk::MutableTrackStateBackend>;
+  FitterOptions_t configureFit(const Acts::GeometryContext& tgContext,
+                               const Acts::MagneticFieldContext& mfContext,
+                               const Acts::CalibrationContext& calContext,
+                               const Acts::PerigeeSurface& surface,
+                               detail::SourceLinkType slType) const;
   /// Private access to the logger
   const Acts::Logger& logger() const;
 
  private:
   /** @brief Abrivate the track state proxy */
   using TrackState_t = MutableTrackStateBackend::TrackStateProxy;
-  ToolHandle<IExtrapolationTool> m_extrapolationTool{this, "ExtrapolationTool", ""};
-  PublicToolHandle<ITrackingGeometryTool> m_trackingGeometryTool{this, "TrackingGeometryTool", ""};
+ ServiceHandle<ActsTrk::ITrackingGeometrySvc> m_trackingGeometrySvc{this, "TrackingGeometrySvc", "ActsTrackingGeometrySvc"};
   PublicToolHandle<IGeometryRealmConvTool> m_geometryConvTool{this, "GeometryRealmConvTool", ""};
-  ToolHandle<ITrackConverterTool> m_ATLASConverterTool{this, "ATLASConverterTool", ""};
-  ToolHandle<Trk::IExtendedTrackSummaryTool> m_trkSummaryTool {this, "SummaryTool", "", "ToolHandle for track summary tool"};
-  ToolHandle<Trk::IBoundaryCheckTool> m_boundaryCheckTool {this, 
-                                                           "BoundaryCheckTool", 
-                                                           "",
-                                                           "Boundary checking tool for detector sensitivities"};
+  /** @brief Utility to fetch the geometry, magnetic field and calibration context in the event */
+  ContextUtility m_ctxProvider{this};
+
   ToolHandle<Trk::IRIO_OnTrackCreator> m_ROTcreator{this, "RotCreatorTool", ""};
   // the settable job options
   Gaudi::Property< double > m_option_outlierChi2Cut {this, "OutlierChi2Cut", 12.5, 
@@ -176,9 +121,6 @@ private:
   Gaudi::Property<bool> m_useDirectNavigation{this, "UseDirectNavigation", false,
                 "GSF with direct navigation when refitting measurements"};
 
-  Gaudi::Property<bool> m_refitOnly{this, "RefitOnly", false,
-            "Do refit only. Track summary will not be added"};
-
   Gaudi::Property< double > m_weightCutOff {this, "WeightCutOff", 1.e-4,
               "component weight cut off"};
 
@@ -187,20 +129,34 @@ private:
 
   Acts::ComponentMergeMethod m_componentMergeMethod;
 
+  /** @brief Calibrator for the Trk::MeasurementBase track states (legacy EDM) */
+  detail::TrkMeasurementCalibrator m_trkCalibrator {};
+  /** @brief Calibrator for the Trk::PrepRawData track states (legacy EDM) */
+  detail::TrkPrepRawDataCalibrator m_prdCalibrator{};
+  /** @brief Calibrator of the uncalibrated measurements */
+  using xAODUnCalibrator_t = detail::OnTrackCalibrator<MutableTrackStateBackend> ;
+  xAODUnCalibrator_t m_uncalibMeasCalibrator{};
+  std::unique_ptr<detail::RefittingCalibrator> m_refitCalibrator{nullptr};
+
   /// Type erased track fitter function.
   using Fitter = Acts::GaussianSumFitter< Acts::Propagator<Acts::MultiEigenStepperLoop<>, Acts::Navigator>,
                                                         ActsTrk::MutableTrackStateBackend >;
-
-  std::unique_ptr<ActsTrk::detail::TrkMeasurementCalibrator> m_calibrator {nullptr};
   std::unique_ptr<Fitter> m_fitter {nullptr};
 
   using DirectFitter = Acts::GaussianSumFitter< Acts::Propagator<Acts::MultiEigenStepperLoop<>, Acts::DirectNavigator>,
             ActsTrk::MutableTrackStateBackend >;
   std::unique_ptr<DirectFitter> m_directFitter {nullptr};
 
+  using FitterExtension_t = Acts::GsfExtensions<ActsTrk::MutableTrackStateBackend>;
+  static constexpr unsigned s_nExtensions = static_cast<unsigned>(detail::SourceLinkType::nTypes);
+  std::array<FitterExtension_t, s_nExtensions>  m_gsfExtensions{};
 
-  detail::TrkMeasSurfaceAccessor m_surfaceAccessor{};
-  Acts::GsfExtensions<ActsTrk::MutableTrackStateBackend> m_gsfExtensions;
+  /** @brief Accessor to fetch surfaces from the Trk::MeasurementBase track states (legacy EDM) */
+  detail::TrkMeasSurfaceAccessor m_trkSurfAcc{};
+  /** @brief Surface accessor for the Trk::PrepRawData track states (legacy EDM) */
+  detail::TrkPrepRawDataSurfaceAcc m_prdSurfAcc{};
+  /** @brief Accessor to fetch surfaces from the xAOD::UncalibratedMeasurements (Phase-II EDM) */
+  detail::xAODUncalibMeasSurfAcc m_unalibMeasSurfAcc{};
 
   ActsTrk::detail::FitterHelperFunctions::ATLASOutlierFinder m_outlierFinder{0};
 

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file  CaloClusterCorrectionCommon.cxx
@@ -573,13 +573,13 @@ void docalc (int i,
 float
 CaloClusterCorrectionCommon::energy_interpolation (float energy,
 						   const TableBuilder& builder,
-						   const CaloRec::Array<1>&
-                                                     energies,
+						   const CaloRec::Array<1>& energies,
 						   int energy_degree)
   
 {
   // Calculate the correction for each energy.
   unsigned int n_energies = energies.size();
+  if (n_energies == 0) return 0.;
   unsigned int shape[] = {n_energies, 2};
   CaloRec::WritableArrayData<2> corrtab (shape);
 

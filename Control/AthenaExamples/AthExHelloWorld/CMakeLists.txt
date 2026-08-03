@@ -29,4 +29,5 @@ atlas_add_test( AthExHelloWorldMT_1
 atlas_add_test( AthExHelloWorldMT_2
                 SCRIPT athena.py --threads=2 AthExHelloWorld/HelloWorldConfig.py
                 PROPERTIES PASS_REGULAR_EXPRESSION "AvalancheSchedulerSvc.*events in flight: 2"
-                POST_EXEC_SCRIPT nopost.sh ) # no ref comparison due to MT ordering of output
+                LOG_IGNORE_PATTERN "An ERROR message|A FATAL error message"
+                POST_EXEC_SCRIPT noerror.sh ) # no ref comparison due to MT ordering of output

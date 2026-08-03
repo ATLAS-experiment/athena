@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // contact: jmaurer@cern.ch
@@ -157,7 +157,9 @@ class ImportData : public asg::AsgMessaging {
   void setNonMixed3LType(TrigDef& def, TriggerType flavourFlag);
 
   TrigGlobalEfficiencyCorrectionTool* m_parent;
+  // cppcheck-suppress uninitMemberVarNoCtor; false positive
   std::map<std::size_t, std::string>& m_dictionary;
+  // cppcheck-suppress uninitMemberVarNoCtor; false positive
   std::hash<std::string>& m_hasher;
 
   std::map<std::size_t, TrigDef> m_triggerDefs;

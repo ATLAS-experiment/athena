@@ -252,7 +252,6 @@ void test2()
 
   // Instantiate a new compressor and check against the result
   const CxxUtils::FloatCompressor fc( nmantissa );
-  CxxUtils::FloatCompressor::floatint_t uni;
   uint32_t result{0};
 
   // Helper to print int in binary w/ a nicer format
@@ -270,17 +269,17 @@ void test2()
     // Testing float
 
     // Print the original value
-    uni.fvalue = fptr[i];
-    std::cout << "Original value    " << std::dec << std::setw( 15 ) << uni.fvalue
-              << " (binary : " << intToBinStr(uni.ivalue) << ")" << std::endl;
+    float fvalue = fptr[i];
+    std::cout << "Original value    " << std::dec << std::setw( 15 ) << fvalue
+              << " (binary : " << intToBinStr(std::bit_cast<uint32_t>(fvalue)) << ")" << std::endl;
     // Print the compressed value
-    uni.fvalue = rfptr[i];
-    std::cout << "Compressed value  " << std::dec << std::setw( 15 ) << uni.fvalue
-              << " (binary : " << intToBinStr(uni.ivalue) << ")" << std::endl;
-    result = uni.ivalue;
+    fvalue = rfptr[i];
+    std::cout << "Compressed value  " << std::dec << std::setw( 15 ) << fvalue
+              << " (binary : " << intToBinStr(std::bit_cast<uint32_t>(fvalue)) << ")" << std::endl;
+    result = std::bit_cast<uint32_t>(fvalue);
     // Check against by-hand compression
-    uni.fvalue = fc.reduceFloatPrecision( fptr[i] );
-    assert( result == uni.ivalue );
+    fvalue = fc.reduceFloatPrecision( fptr[i] );
+    assert( result == std::bit_cast<uint32_t>(fvalue) );
 
     // Testing std::vector<float>
 
@@ -291,17 +290,17 @@ void test2()
 
     for(int j = 0; j < 2; j++) {
       // Print the original value
-      uni.fvalue = invec->at(j);
-      std::cout << "Original value at [" << j << "]    " << std::dec << std::setw( 8 ) << uni.fvalue
-                << " (binary : " << intToBinStr(uni.ivalue) << ")" << std::endl;
+      fvalue = invec->at(j);
+      std::cout << "Original value at [" << j << "]    " << std::dec << std::setw( 8 ) << fvalue
+                << " (binary : " << intToBinStr(std::bit_cast<uint32_t>(fvalue)) << ")" << std::endl;
       // Print the compressed value
-      uni.fvalue = outvec->at(j);
-      std::cout << "Compressed value at [" << j << "]  " << std::dec << std::setw( 8 ) << uni.fvalue
-                << " (binary : " << intToBinStr(uni.ivalue) << ")" << std::endl;
-      result = uni.ivalue;
+      fvalue = outvec->at(j);
+      std::cout << "Compressed value at [" << j << "]  " << std::dec << std::setw( 8 ) << fvalue
+                << " (binary : " << intToBinStr(std::bit_cast<uint32_t>(fvalue)) << ")" << std::endl;
+      result = std::bit_cast<uint32_t>(fvalue);
       // Check against by-hand compression
-      uni.fvalue = fc.reduceFloatPrecision( invec->at(j) );
-      assert( result == uni.ivalue );
+      fvalue = fc.reduceFloatPrecision( invec->at(j) );
+      assert( result == std::bit_cast<uint32_t>(fvalue) );
     }
 
     std::cout << std::endl;

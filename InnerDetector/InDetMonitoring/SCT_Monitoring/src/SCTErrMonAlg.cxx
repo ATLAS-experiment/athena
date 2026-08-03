@@ -106,6 +106,7 @@ StatusCode SCTErrMonAlg::fillHistograms(const EventContext& ctx) const {
     int moduleOut{0};
     SCT_ID::const_id_iterator waferIterator{m_pSCTHelper->wafer_begin()};
     SCT_ID::const_id_iterator waferEnd{m_pSCTHelper->wafer_end()};
+    const std::string errMonName{"SCTErrMonitor"};
     for (; waferIterator not_eq waferEnd; ++waferIterator) {
       Identifier waferId{*waferIterator};
       int layer{m_pSCTHelper->layer_disk(waferId)};
@@ -125,13 +126,13 @@ StatusCode SCTErrMonAlg::fillHistograms(const EventContext& ctx) const {
           auto mEtaAcc{Monitored::Scalar<int>("eta_out", eta)};
           auto mPhiAcc{Monitored::Scalar<int>("phi_out", phi)};
           auto mOutAcc{Monitored::Scalar<int>(std::string("modulemap")+subDetNameShort[reg].Data()+std::to_string(layer)+"_"+std::to_string(side), IN)};
-          fill("SCTErrMonitor", mEtaAcc, mPhiAcc, mOutAcc);
+          fill(errMonName, mEtaAcc, mPhiAcc, mOutAcc);
         }
       }
     }
     auto moduleOutBinAcc{Monitored::Scalar<int>("moduleOutBin", 0)};
     auto moduleOutAcc{Monitored::Scalar<int>("moduleOut", moduleOut)};
-    fill("SCTErrMonitor", moduleOutBinAcc, moduleOutAcc);
+    fill(errMonName, moduleOutBinAcc, moduleOutAcc);
   }
 
   return StatusCode::SUCCESS;
@@ -241,7 +242,8 @@ SCTErrMonAlg::fillByteStreamErrors(const EventContext& ctx) const {
     auto nBSErrorsAcc{Monitored::Scalar<int>("n_"+SCT_ByteStreamErrors::ErrorTypeDescription[errType], nBSErrors)};
     fill("SCTErrMonitor", lumiBlockAcc, nBSErrorsAcc);
   }
-
+  //Total stack use for this function is 1'623'676 bytes.
+  //coverity[STACK_USE]
   categoryErrorMap_t categoryErrorMap;
   std::array<int, N_REGIONS_INC_GENERAL> nMaskedLinks{};
   nMaskedLinks.fill(0);
@@ -296,7 +298,7 @@ SCTErrMonAlg::fillByteStreamErrors(const EventContext& ctx) const {
     }
   }
   
-
+  //coverity[DEADCODE]
    bool doCoverage = false;
   {
     std::lock_guard<std::mutex> lock(m_mutex);
@@ -473,7 +475,7 @@ SCTErrMonAlg::fillByteStreamErrorsHelper(const std::set<IdentifierHash>& errors,
   b_category[CategoryErrors::ABCDERROR_INVALID] = (err_type == SCT_ByteStreamErrors::ABCDError_Invalid);
   b_category[CategoryErrors::RODSIMULATEDDATA] = (err_type == SCT_ByteStreamErrors::RODSimulatedData);
   
-  std::vector<int> numErrorsPerLumi[N_REGIONS];
+  std::array<std::vector<int>,N_REGIONS>  numErrorsPerLumi;
   if (m_doPerLumiErrors) {
     for (int reg{0}; reg<N_REGIONS; reg++) {
       const int nLayers{n_layers[reg]*2};
@@ -513,7 +515,7 @@ SCTErrMonAlg::fillByteStreamErrorsHelper(const std::set<IdentifierHash>& errors,
       }
     }
 
-    if (m_doPerLumiErrors) numErrorsPerLumi[regionIndex][layer]++;
+    if (m_doPerLumiErrors) numErrorsPerLumi.at(regionIndex)[layer]++;
 
     for (int errCate{0}; errCate < CategoryErrors::N_ERRCATEGORY; ++errCate) {
       if (b_category[errCate] and regionIndex!=GENERAL_INDEX) {

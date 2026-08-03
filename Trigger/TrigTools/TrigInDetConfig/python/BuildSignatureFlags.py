@@ -35,11 +35,8 @@ def defaultTrigTrackingFlags(flags : AthConfigFlags):
   flags.addFlag("etaHalfWidth",         0.1)
   flags.addFlag("phiHalfWidth",         0.1)
   flags.addFlag("zedHalfWidth",        -999)    # don't set this parameter unless it is >= 0)
-  flags.addFlag("doFullScan",           False)
-  flags.addFlag("monPS",                1)
-  flags.addFlag("monPtMin",             1*Units.GeV)
   flags.addFlag("doTRT",                True)
-  flags.addFlag("keepTrackParameters",  False) # Keep track parameters in conversion to TrackParticles
+  #flags.addFlag("keepTrackParameters",  False) # TODO Keep track parameters in conversion to TrackParticles 
   flags.addFlag("UsePixelSpacePoints",  True)
   flags.addFlag("TrackInitialD0Max",    20.0)
   flags.addFlag("TrackZ0Max",           300.0)
@@ -49,14 +46,12 @@ def defaultTrigTrackingFlags(flags : AthConfigFlags):
   flags.addFlag("roi",                  "")
   flags.addFlag("LRT_D0Min",            2.0)
   flags.addFlag("LRT_HardPtMin",        1.0*Units.GeV)
-  flags.addFlag("doRecord",             True)
   flags.addFlag("vertex",               "")
   flags.addFlag("adaptiveVertex",       False)
   flags.addFlag("addSingleTrackVertices", False)
   flags.addFlag("TracksMaxZinterval",   1*Units.mm) 
   flags.addFlag("minNSiHits_vtx",       10)        #from vtxCuts
   flags.addFlag("vertex_jet",           "")
-  flags.addFlag("adaptiveVertex_jet",   False)
   flags.addFlag("dodEdxTrk",            False)
   flags.addFlag("doHitDV",              False)
   flags.addFlag("doDisappearingTrk",    False)
@@ -80,7 +75,6 @@ def defaultTrigTrackingFlags(flags : AthConfigFlags):
   flags.doBremRecoverySi = False                    #fix2023 setTrue for electron once validated
 
   flags.addFlag("refitROT", True) 
-  flags.addFlag("trtExtensionType", "xf") 
   flags.addFlag("doTruth",  False)  
   flags.addFlag("perigeeExpression","BeamLine")   #always use beamline regardless of Reco.EnableHI
   flags.addFlag("SuperRoI",  False)               #TBD - move to bphys/menu
@@ -195,11 +189,9 @@ def signatureTrigTrackingFlags(mode : str) -> AthConfigFlags:
     "bjet"          : bjet,
     
     "fullScan"      : fullScan,
-    "FS"            : fullScan,
     "jetSuper"      : jetSuper,
 
     "beamSpot"      : beamSpot,
-    "BeamSpot"      : beamSpot,
     "beamSpotFS"    : beamSpotFS,
                 
     "cosmics"      : cosmics,
@@ -310,7 +302,6 @@ def electron(flags: AthConfigFlags, instanceName: str, recoMode: str) -> AthConf
   flags.doSeedRedundancyCheck = True
   if recoMode=="InDet":
     flags.doTRT             = True
-  flags.keepTrackParameters = True
   flags.electronPID         = True
   return flags
 
@@ -325,7 +316,6 @@ def muon(flags: AthConfigFlags, instanceName: str, recoMode: str) -> AthConfigFl
   flags.doResMon            = True
   flags.DoPhiFiltering      = False
   flags.doSeedRedundancyCheck = True
-  flags.monPtMin            = 12*Units.GeV
   return flags
   
 @signatureActions
@@ -436,7 +426,6 @@ def jetSuper(flags: AthConfigFlags, instanceName: str, recoMode: str) -> AthConf
   flags.roi          = "HLT_Roi_JetSuper"
   flags.etaHalfWidth = 0.3
   flags.phiHalfWidth = 0.3
-  flags.doFullScan   = True
   flags.minPT  = processEtaDepSettings(flags.minPT,[1.*Units.GeV])
 
   #-----
@@ -457,7 +446,6 @@ def minBias(flags: AthConfigFlags, instanceName: str, recoMode: str) -> AthConfi
   flags.name       = "minBias"
   flags.suffix     = "MinBias"
   flags.roi        = "HLT_Roi_MinBias"
-  flags.doFullScan = True
   flags.minPT      = processEtaDepSettings(flags.minPT,[0.1*Units.GeV])
 
   flags.doTRT           = False
@@ -482,7 +470,6 @@ def minBiasPixel(flags: AthConfigFlags, instanceName: str, recoMode: str) -> Ath
   flags.name       = "minBiasPixel"
   flags.suffix     = "MinBiasPixel"
   flags.roi        = "HLT_Roi_MinBias"
-  flags.doFullScan = True
   flags.minPT      = processEtaDepSettings(flags.minPT,[0.1*Units.GeV])
 
 
@@ -497,7 +484,6 @@ def minBiasPixel(flags: AthConfigFlags, instanceName: str, recoMode: str) -> Ath
   if recoMode=="InDet":
     flags.useSCT           = False
     flags.useSCTSeeding    = False
-    flags.useTRT           = False
 
     flags.roadWidth        = 12.0
     flags.Xi2max           = 15
@@ -530,7 +516,6 @@ def beamSpot(flags: AthConfigFlags, instanceName: str, recoMode: str) -> AthConf
   flags.name     = "beamSpot"
   flags.suffix   = "BeamSpot"
   flags.roi      = "HLT_Roi_FS"
-  flags.doFullScan      = True
   flags.doZFinder       = True
   flags.DoubletDR_Max   = 200
   flags.SeedRadBinWidth = 10
@@ -538,7 +523,6 @@ def beamSpot(flags: AthConfigFlags, instanceName: str, recoMode: str) -> AthConf
   flags.phiHalfWidth    = math.pi
   flags.doTRT           = False
   flags.doSeedRedundancyCheck = True
-  flags.doRecord        = False
   return flags
 
 
@@ -555,8 +539,6 @@ def fullScan(flags: AthConfigFlags, instanceName: str, recoMode: str) -> AthConf
   # flags.addSingleTrackVertices = True
   # flags.TracksMaxZinterval = 3
   flags.vertex_jet          = "HLT_IDVertex_FS"
-  flags.adaptiveVertex_jet  = True
-  flags.doFullScan      = True
   flags.etaHalfWidth    = 3.
   flags.phiHalfWidth    = math.pi
   flags.doTRT           = False
@@ -580,7 +562,6 @@ def beamSpotFS(flags: AthConfigFlags, instanceName: str, recoMode: str) -> AthCo
   flags.name     = "fullScan"
   flags.suffix   = "FS"
   flags.roi      = "HLT_Roi_FS"
-  flags.doFullScan      = True
   flags.etaHalfWidth    = 3.
   flags.phiHalfWidth    = math.pi
   flags.doTRT           = False
@@ -589,7 +570,6 @@ def beamSpotFS(flags: AthConfigFlags, instanceName: str, recoMode: str) -> AthCo
   flags.TripletDoPPS    = False
   flags.nClustersMin    = 8
   flags.UseTrigSeedML   = 4
-  flags.doRecord        = False
   return flags
 
 
@@ -605,7 +585,6 @@ def cosmics(flags: AthConfigFlags, instanceName: str, recoMode: str) -> AthConfi
   flags.TrackInitialD0Max   = 1000.
   flags.TrackZ0Max          = 1000.
   flags.doTRT           = False      
-  flags.doFullScan      = True
   flags.etaHalfWidth    = 3
   flags.phiHalfWidth    = math.pi
 
@@ -682,7 +661,6 @@ def electronLRT(flags: AthConfigFlags, instanceName: str, recoMode: str) -> AthC
   flags.TrackInitialD0Max   = 300.
   flags.TrackZ0Max          = 500.
   flags.zedHalfWidth        = 225.
-  flags.keepTrackParameters = True
   flags.doSeedRedundancyCheck = True
   flags.nClustersMin        = 8
   flags.isLRT               = True
@@ -784,7 +762,6 @@ def fullScanLRT(flags: AthConfigFlags, instanceName: str, recoMode: str) -> AthC
   flags.name     = "fullScanLRT"
   flags.suffix   = "FSLRT"
   flags.roi      = "HLT_Roi_FS"
-  flags.doFullScan      = True
   flags.etaHalfWidth    = 3.
   flags.phiHalfWidth    = math.pi
   flags.doTRT           = False
@@ -813,7 +790,6 @@ def DJetLRT(flags: AthConfigFlags, instanceName: str, recoMode: str) -> AthConfi
   flags.name     = "DJetLRT"
   flags.suffix   = "DJLRT"
   flags.roi      = "HLT_Roi_DJ"
-  flags.doFullScan      = False
   flags.etaHalfWidth    = 0.4
   flags.phiHalfWidth    = 0.4
   flags.zedHalfWidth    = 225.
@@ -843,7 +819,6 @@ def DVtxLRT(flags: AthConfigFlags, instanceName: str, recoMode: str) -> AthConfi
   flags.name     = "DVtxLRT"
   flags.suffix   = "DVLRT"
   flags.roi      = "HLT_Roi_DV"
-  flags.doFullScan      = False
   flags.etaHalfWidth    = 0.35
   flags.phiHalfWidth    = 0.35
   flags.doTRT           = False
@@ -906,12 +881,12 @@ def collToRecordable(flags,name):
   record = True
   if firstStage:
     if signature in ["tauHitsHitZ","minBias","minBiasPixel","bjetLRT",
-                     "beamSpot","BeamSpot"]:
+                     "beamSpot"]:
       record = False
   else:
     if signature in ["tauHitsHitZ","tauCore","tauCoreHitZ","tauIso","tauIsoHitZ","tauIsoBDT",
-                     "jet","fullScan","FS","jetSuper","bhh",
-                     "beamSpot", "BeamSpot","beamSpotFS",
+                     "jet","fullScan","jetSuper","bhh",
+                     "beamSpot","beamSpotFS",
                      "bjetLRT","DJetLRT","DVtxLRT"]:
       record = False
 

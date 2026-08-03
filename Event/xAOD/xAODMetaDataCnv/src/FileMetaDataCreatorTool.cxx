@@ -65,6 +65,7 @@ void
       if (inc.type() == "EndInputFile") {
         // Lock the tool while we work on the FileMetaData
         std::lock_guard lock(m_toolMutex);
+        m_hasInputFile = true;
         if (!updateFromNonEvent().isSuccess())
           ATH_MSG_DEBUG("Failed to fill FileMetaData with non-event info");
       }
@@ -209,6 +210,11 @@ StatusCode
       // Sanity check
       if (!(m_info && m_aux)) {
         ATH_MSG_DEBUG("No xAOD::FileMetaData object to fill");
+        return StatusCode::SUCCESS;
+      }
+
+      if (m_hasInputFile && m_tagInfoMgr->getInputTags().empty()) {
+        ATH_MSG_DEBUG("Deferring non-event fill due to eventless-input");
         return StatusCode::SUCCESS;
       }
 

@@ -105,7 +105,7 @@ StatusCode MakerAlg::finalize()
 /**
  * @brief Standard Gaudi @c execute method.
  */
-StatusCode MakerAlg::execute(const EventContext& /*ctx*/)
+StatusCode MakerAlg::execute(const EventContext& ctx)
 {
   if (!m_booked) {
     m_booked = true;
@@ -126,7 +126,7 @@ StatusCode MakerAlg::execute(const EventContext& /*ctx*/)
   }
 
   // Only write out "accepted" events:
-  if( ! isEventAccepted() ) return StatusCode::SUCCESS;
+  if( ! isEventAccepted(ctx) ) return StatusCode::SUCCESS;
 
   CHECK( m_d3pd->clear() );
 

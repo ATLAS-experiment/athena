@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArCalibTools/LArCompleteToFlat.h"
@@ -40,18 +40,8 @@
 ////////////////
 LArCompleteToFlat::LArCompleteToFlat( const std::string& name, 
 			  ISvcLocator* pSvcLocator ) : 
-  ::AthAlgorithm( name, pSvcLocator ),
-  m_hashMax(0),
-  m_onlineID(nullptr),
-  m_isSC(false)
+  ::AthReentrantAlgorithm( name, pSvcLocator )
 {
-  declareProperty("isSC",m_isSC);
-  declareProperty("uA2MeVInput",m_uA2MeVInput);//="LAruA2MeV");
-  declareProperty("DAC2uAVInput",m_DAC2uAInput);//="LArDAC2uA");
-  declareProperty("HVScaleCorrInput",m_HVScaleCorrInput);//="LArHVScaleCorr");
-  declareProperty("PedestalInput",m_PedestalInput);//="Pedestal");
-  declareProperty("RampInput",m_RampInput);//="LArRamp");
-  declareProperty("MphysOverMcalInput",m_MphysOverMcalInput);//="LArMphysOverMcal");
   declareProperty("OFCInput",m_OFCInput);//="LArOFC");
   declareProperty("OFCCaliInput",m_OFCCaliInput);//="LArOFC");
   declareProperty("ShapeInput",m_ShapeInput);//="LArShape");
@@ -67,8 +57,7 @@ LArCompleteToFlat::LArCompleteToFlat( const std::string& name,
 
 // Destructor
 ///////////////
-LArCompleteToFlat::~LArCompleteToFlat()
-= default;
+LArCompleteToFlat::~LArCompleteToFlat() = default;
 
 // Athena Algorithm's Hooks
 ////////////////////////////

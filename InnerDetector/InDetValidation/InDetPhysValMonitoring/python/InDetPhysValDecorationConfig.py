@@ -58,6 +58,8 @@ def InDetPhysHitDecoratorAlgCfg(
         kwargs.setdefault("ResidualPullCalculator", acc.addPublicTool(
             acc.popToolsAndMerge(ResidualPullCalculatorCfg(flags))))
 
+    kwargs.setdefault("useTRT", flags.Detector.EnableTRT)
+
     acc.addEventAlgo(CompFactory.InDetPhysHitDecoratorAlg(name, **kwargs))
     return acc
 

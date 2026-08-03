@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TILERAWCHNOISECALIBALG_H
@@ -79,7 +79,7 @@ class TileRawChNoiseCalibAlg: public AthAlgorithm {
                      RCtype rctype); // raw chans variables is done here
     void StoreRunInfo(const TileDQstatus* dqStatus); // called only at the first event. General variables
 
-    void fillCell(TileRawChannelUnit::UNIT RChUnit, const TileRawChannel * rch);
+    void fillCell(TileRawChannelUnit::UNIT RChUnit, const TileRawChannel * rch, const EventContext& ctx);
     void fillCellHist(); //fill HGHG and LGLG histograms
     void finalCell(); //fills the cell variables of the ntuple
     static void doFit(TH1F* h, float* gp, bool invert = true); //double gaussian fit

@@ -4,6 +4,7 @@ import os
 
 from AthenaConfiguration.AthConfigFlags import AthConfigFlags
 from AthenaConfiguration.Enums import FlagEnum, Format, LHCPeriod
+from Campaigns.Utils import getDataYear
 from AthenaCommon.Logging import logging
 
 log=logging.getLogger('TriggerConfigFlags')
@@ -64,9 +65,10 @@ def createTriggerFlags(doTriggerRecoFlags):
     flags.addFlag('Trigger.enableL1TopoBWSimulation', True,
                   help='enable bitwise L1Topo simulation')
 
+    # by default, enable Legacy L1Calo decoding only for offline data reconstruction until 2024
     flags.addFlag('Trigger.enableL1CaloLegacy', lambda prevFlags:
-                  not (not prevFlags.Input.isMC and prevFlags.Trigger.doHLT), #Disable when we're running the trigger on data, keep when doing offline simulation
-                  help='enable Run-2 L1Calo simulation and/or decoding')
+                  len(prevFlags.Input.Files) > 0 and prevFlags.Input.Format is Format.BS and prevFlags.Reco.EnableTrigger and getDataYear(prevFlags)<2024,
+                  help='enable Legacy L1Calo simulation and/or decoding')
 
     # L0MuonSim category (for Run-4+) : needs Trigger.enableL0Muon=True
     flags.addFlag('Trigger.L0MuonSim.doEmulation',

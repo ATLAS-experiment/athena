@@ -22,11 +22,11 @@
 #include "PersistentDataModel/Token.h"
 #include "PersistentDataModel/TokenAddress.h"
 #include "PersistentDataModel/DataHeader.h"
-#include "PersistencySvc/IFileCatalog.h"
 
 #include "StorageSvc/DbReflex.h"
+#include "StorageSvc/DbTypeInfo.h"
 
-#include "AuxDiscoverySvc.h"
+#include "RootAuxDynIO/IRootAuxDynIO.h"
 
 #include <algorithm>
 #include <iomanip>
@@ -36,13 +36,23 @@
 //______________________________________________________________________________
 // Initialize the service.
 StatusCode AthenaPoolSharedIOCnvSvc::initialize() {
+   if (!m_inputStreamingTool.empty() || !m_outputStreamingTool.empty()) {
+      // Retrieve AthenaSerializeSvc
+      ATH_CHECK(m_serializeSvc.retrieve());
+      m_auxDynTool = Gaudi::PluginService::Factory< RootAuxDynIO::IFactoryTool*() >::create("RootAuxDynIO::FactoryTool");
+      if (!m_auxDynTool) {
+          return StatusCode::FAILURE;
+      }
+   }
    // Retrieve InputStreamingTool (if configured)
    if (!m_inputStreamingTool.empty()) {
       ATH_CHECK(m_inputStreamingTool.retrieve());
+      m_auxInput = m_auxDynTool->getAuxDynShare(m_serializeSvc.get(), m_inputStreamingTool.get());
    }
    // Retrieve OutputStreamingTool (if configured)
    if (!m_outputStreamingTool.empty()) {
       ATH_CHECK(m_outputStreamingTool.retrieve());
+      m_auxOutput = m_auxDynTool->getAuxDynShare(m_serializeSvc.get(), m_outputStreamingTool.get());
       if (m_makeStreamingToolClient.value() == -1) {
         // Initialize AthenaRootSharedWriter
         ServiceHandle<IService> arswsvc("AthenaRootSharedWriterSvc", this->name());
@@ -50,10 +60,6 @@ StatusCode AthenaPoolSharedIOCnvSvc::initialize() {
       }
       // Put PoolSvc into share mode to avoid duplicating catalog.
       getPoolSvc()->setShareMode(true);
-   }
-   if (!m_inputStreamingTool.empty() || !m_outputStreamingTool.empty()) {
-      // Retrieve AthenaSerializeSvc
-      ATH_CHECK(m_serializeSvc.retrieve());
    }
    ServiceHandle<IIncidentSvc> incSvc("IncidentSvc", name());
    long int pri = 1000;
@@ -488,11 +494,13 @@ Token* AthenaPoolSharedIOCnvSvc::registerForWrite(Placement* placement, const vo
          m_outputStreamingTool->putObject(nullptr, 0).ignore();
          return(nullptr);
       }
-      AuxDiscoverySvc auxDiscover;
-      if (!auxDiscover.sendStore(m_serializeSvc.get(), m_outputStreamingTool.get(), obj, pool::DbReflex::guid(classDesc), placement->containerName()).isSuccess()) {
-         ATH_MSG_ERROR("Could not share dynamic aux store for: " << placementStr);
-         m_outputStreamingTool->putObject(nullptr, 0).ignore();
-         return(nullptr);
+      const pool::DbTypeInfo* info = pool::DbTypeInfo::create(pool::DbReflex::guid(classDesc));
+      if (info != nullptr) {
+         if (m_auxDynTool->hasAuxStore(placement->containerName(), info->clazz().Class() ) && !m_auxOutput->sendStore(info->clazz().Class(), obj, pool::DbReflex::guid(classDesc).toString(), placement->containerName()).isSuccess()) {
+            ATH_MSG_ERROR("Could not share dynamic aux store for: " << placementStr);
+            m_outputStreamingTool->putObject(nullptr, 0).ignore();
+            return(nullptr);
+         }
       }
       if (!m_outputStreamingTool->putObject(nullptr, 0).isSuccess()) {
          ATH_MSG_ERROR("Failed to put Data for " << placementStr);
@@ -557,7 +565,6 @@ void AthenaPoolSharedIOCnvSvc::setObjPtr(void*& obj, const Token* token) {
          std::size_t nbytes = 0;
          StatusCode sc = m_outputStreamingTool->getObject(&buffer, nbytes, num);
          while (sc.isRecoverable()) {
-            //usleep(100);
             sc = m_outputStreamingTool->getObject(&buffer, nbytes, num);
          }
          if (!sc.isSuccess()) {
@@ -577,10 +584,27 @@ void AthenaPoolSharedIOCnvSvc::setObjPtr(void*& obj, const Token* token) {
                RootType cltype(RootType::ByNameNoQuiet(className));
                obj = m_serializeSvc->deserialize(buffer, nbytes, cltype); buffer = nullptr;
             }
-            AuxDiscoverySvc auxDiscover;
-            if (!auxDiscover.receiveStore(m_serializeSvc.get(), m_outputStreamingTool.get(), obj, num).isSuccess()) {
-               ATH_MSG_ERROR("Failed to get Dynamic Aux Store for " << token->toString());
-               obj = nullptr;
+            buffer = nullptr;
+            nbytes = 0;
+            sc = m_outputStreamingTool->getObject(&buffer, nbytes, num);
+            while (sc.isRecoverable() && nbytes > 0) {
+               sc = m_outputStreamingTool->getObject(&buffer, nbytes, num);
+            }
+            if (sc.isSuccess() && nbytes > 0) { // Found dynamic attributes
+               Guid classId;
+               classId.fromString(static_cast<const char*>(buffer));
+               if (m_outputStreamingTool->getObject(&buffer, nbytes, num).isSuccess() && nbytes > 0) {
+                  const std::string contName = std::string(static_cast<const char*>(buffer));
+                  if (classId != Guid::null()) {
+                     const pool::DbTypeInfo* info = pool::DbTypeInfo::create(classId);
+                     if (info != nullptr) {
+                        if (m_auxDynTool->hasAuxStore(contName, info->clazz().Class() ) && !m_auxOutput->receiveStore(info->clazz().Class(), obj, num).isSuccess()) {
+                           ATH_MSG_ERROR("Failed to get Dynamic Aux Store for " << token->toString());
+                           obj = nullptr;
+                        }
+                     }
+                  }
+               }
             }
          }
       }
@@ -608,10 +632,27 @@ void AthenaPoolSharedIOCnvSvc::setObjPtr(void*& obj, const Token* token) {
             obj = nullptr;
          } else {
             obj = m_serializeSvc->deserialize(buffer, nbytes, token->classID()); buffer = nullptr;
-            AuxDiscoverySvc auxDiscover;
-            if (!auxDiscover.receiveStore(m_serializeSvc.get(), m_inputStreamingTool.get(), obj).isSuccess()) {
-               ATH_MSG_ERROR("Failed to get Dynamic Aux Store for " << token->toString());
-               obj = nullptr;
+            buffer = nullptr;
+            nbytes = 0;
+            sc = m_inputStreamingTool->getObject(&buffer, nbytes);
+            while (sc.isRecoverable() && nbytes > 0) {
+               sc = m_inputStreamingTool->getObject(&buffer, nbytes);
+            }
+            if (sc.isSuccess() && nbytes > 0) { // Found dynamic attributes
+               Guid classId;
+               classId.fromString(static_cast<const char*>(buffer));
+               if (m_inputStreamingTool->getObject(&buffer, nbytes).isSuccess() && nbytes > 0) {
+                  const std::string contName = std::string(static_cast<const char*>(buffer));
+                  if (classId != Guid::null()) {
+                     const pool::DbTypeInfo* info = pool::DbTypeInfo::create(classId);
+                     if (info != nullptr) {
+                        if (!m_auxInput->receiveStore(info->clazz().Class(), obj).isSuccess()) {
+                           ATH_MSG_ERROR("Failed to get Dynamic Aux Store for " << token->toString());
+                           obj = nullptr;
+                        }
+                     }
+                  }
+               }
             }
          }
       }
@@ -761,10 +802,12 @@ StatusCode AthenaPoolSharedIOCnvSvc::readData() {
          ATH_MSG_ERROR("Could not share object for: " << token.toString());
          return(StatusCode::FAILURE);
       }
-      AuxDiscoverySvc auxDiscover;
-      if (!auxDiscover.sendStore(m_serializeSvc.get(), m_inputStreamingTool.get(), instance, token.classID(), token.contID(), num).isSuccess()) {
-         ATH_MSG_ERROR("Could not share dynamic aux store for: " << token.toString());
-         return(StatusCode::FAILURE);
+      const pool::DbTypeInfo* info = pool::DbTypeInfo::create(token.classID());
+      if (info != nullptr) {
+         if (m_auxDynTool->hasAuxStore(token.contID(), info->clazz().Class() ) && !m_auxInput->sendStore(info->clazz().Class(), instance, token.classID().toString(), token.contID(), num).isSuccess()) {
+            ATH_MSG_ERROR("Could not share dynamic aux store for: " << token.toString());
+            return(StatusCode::FAILURE);
+         }
       }
       cltype.Destruct(instance); instance = nullptr;
       if (!m_inputStreamingTool->putObject(nullptr, 0, num).isSuccess()) {
@@ -794,10 +837,8 @@ StatusCode AthenaPoolSharedIOCnvSvc::readData() {
 
 //________________________________________________________________________________
 StatusCode AthenaPoolSharedIOCnvSvc::commitCatalog() {
-   pool::IFileCatalog* catalog ATLAS_THREAD_SAFE =  // This is on the SharedWriter, after mother process finishes events
-	   const_cast<pool::IFileCatalog*>(getPoolSvc()->catalog());
-   catalog->commit();
-   catalog->start();
+   getPoolSvc()->commitCatalog();
+   getPoolSvc()->startCatalog();
    return(StatusCode::SUCCESS);
 }
 
@@ -830,4 +871,7 @@ void AthenaPoolSharedIOCnvSvc::handle(const Incident& incident) {
 //______________________________________________________________________________
 AthenaPoolSharedIOCnvSvc::AthenaPoolSharedIOCnvSvc(const std::string& name, ISvcLocator* pSvcLocator) :
 	base_class(name, pSvcLocator) {
+}
+//______________________________________________________________________________
+AthenaPoolSharedIOCnvSvc::~AthenaPoolSharedIOCnvSvc() {
 }

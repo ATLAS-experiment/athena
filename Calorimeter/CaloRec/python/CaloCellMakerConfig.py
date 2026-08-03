@@ -9,7 +9,7 @@ from LArCellRec.LArCellBuilderConfig import LArCellBuilderCfg,LArCellCorrectorCf
 from TileRecUtils.TileCellBuilderConfig import TileCellBuilderCfg
 from CaloCellCorrection.CaloCellCorrectionConfig import CaloCellPedestalCorrCfg, CaloCellNeighborsAverageCorrCfg, CaloCellTimeCorrCfg, CaloEnergyRescalerCfg
 
-def CaloCellMakerCfg(flags):
+def CaloCellMakerCfg(flags, addToOutputStream=True):
     result=ComponentAccumulator()
    
     from LArGeoAlgsNV.LArGMConfig import LArGMCfg
@@ -64,9 +64,10 @@ def CaloCellMakerCfg(flags):
         outputContainers += ["TileCellContainer#MBTSContainer"]
     if flags.GeoModel.Run is LHCPeriod.Run2:
         outputContainers += ["TileCellContainer#E4prContainer"]
-    from OutputStreamAthenaPool.OutputStreamConfig import addToESD, addToAOD
-    result.merge(addToESD(flags, outputContainers))
-    result.merge(addToAOD(flags, outputContainers))
+    if addToOutputStream:
+        from OutputStreamAthenaPool.OutputStreamConfig import addToESD, addToAOD
+        result.merge(addToESD(flags, outputContainers))
+        result.merge(addToAOD(flags, outputContainers))
 
     # Add a SuperCell container creation, if asked by flags
     if flags.LAr.DT.storeET_ID or flags.LAr.DT.storeET_additional:

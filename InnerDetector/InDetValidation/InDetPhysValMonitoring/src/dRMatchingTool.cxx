@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "dRMatchingTool.h"
@@ -318,11 +318,11 @@ dRMatchingTool::sortedMatch(const U* p,
   // Add subsets according to specified cut values.
   std::vector< std::vector< const V* > > subsets;
   if (m_pTResMax > 0) {
-    subsets.push_back(subset_pt);
+    subsets.push_back(std::move(subset_pt));
   }
   if (m_dRmax > 0) {
-    subsets.push_back(subset_eta);
-    subsets.push_back(subset_phi);
+    subsets.push_back(std::move(subset_eta));
+    subsets.push_back(std::move(subset_phi));
   }
 
   // Compute successive intersections between base set and subset.
@@ -341,7 +341,7 @@ dRMatchingTool::sortedMatch(const U* p,
       return false;
     }
 
-    set = intersection;
+    set = std::move(intersection);
   }
 
   // If only pT-matching, we're done.

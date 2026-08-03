@@ -149,7 +149,7 @@ GeoVPhysVol* GeoPixelDisk::Build( ) {
 
     if(m_sqliteReader) {
       psd.Build();
-      std::string key="ModuleEC_"+ std::to_string(phiId)+"_"+std::to_string(m_gmt_mgr->GetLD())+"_"+std::to_string(m_gmt_mgr->Phi())+"_"+std::to_string(m_gmt_mgr->Eta());
+      std::string key="ModuleEC_"+std::to_string(brl_ec)+"_"+std::to_string(phiId)+"_"+std::to_string(m_gmt_mgr->GetLD())+"_"+std::to_string(m_gmt_mgr->Phi());
       Identifier id = theSensor.getID();
       m_DDmgr->addAlignableTransform(0,id,(*m_mapAX)[key],(*m_mapFPV)[key]);
       continue;

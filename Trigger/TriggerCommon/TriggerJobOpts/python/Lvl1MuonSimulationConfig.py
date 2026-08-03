@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -252,7 +252,7 @@ def MuonRdo2DigitConfig(flags):
 
     from MuonConfig.MuonByteStreamCnvTestConfig import RpcRdoToRpcDigitCfg, TgcRdoToTgcDigitCfg, STGC_RdoToDigitCfg, MM_RdoToDigitCfg
 
-    acc.merge(RpcRdoToRpcDigitCfg(flags, RpcDigitContainer = "RPC_DIGITS_L1", RpcRdoContainer = RPCRdoName ))
+    acc.merge(RpcRdoToRpcDigitCfg(flags, RpcDigitContainer = "RPC_DIGITS_L1", RpcRdoContainer = RPCRdoName, DecodeLegacyRDO=not flags.Muon.enableNRPC, DecodeNrpcRDO=flags.Muon.enableNRPC))
     acc.merge(TgcRdoToTgcDigitCfg(flags, TgcDigitContainer = "TGC_DIGITS_L1", TgcRdoContainer = TGCRdoName ))
     if flags.Detector.GeometrysTGC:
         acc.merge(STGC_RdoToDigitCfg(flags, sTgcRdoContainer = sTGCRdoName, sTgcDigitContainer = "sTGC_DIGITS_L1"))

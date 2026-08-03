@@ -1,6 +1,6 @@
 # Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 
-from AthenaCommon import Logging
+from ... import Logging
 from ...decorators import timed
 from ...utility import FileParser
 from ..generators import multicore_untimed, singlecore_untimed

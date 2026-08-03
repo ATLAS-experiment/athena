@@ -9,30 +9,30 @@ find_package( VDT )
 find_package( Lhapdf )
 
 atlas_add_library( AsgAnalysisAlgorithmsLib
-   AsgAnalysisAlgorithms/*.h AsgAnalysisAlgorithms/*.icc Root/*.cxx
-   PUBLIC_HEADERS AsgAnalysisAlgorithms
-   PRIVATE_INCLUDE_DIRS ${ROOT_INCLUDE_DIRS} ${LHAPDF_INCLUDE_DIRS}
-   LINK_LIBRARIES AthContainers AthContainersInterfaces AsgTools AsgMessagingLib AsgServicesLib CxxUtils xAODBase
-     xAODEventInfo xAODCutFlow SelectionHelpersLib SystematicsHandlesLib PATCoreLib
-     AnaAlgorithmLib AsgAnalysisInterfaces AssociationUtilsLib GammaORToolsLib
-     EventBookkeeperToolsLib InDetTrackSystematicsToolsLib IsolationSelectionLib PMGAnalysisInterfacesLib FakeBkgToolsLib xAODMissingET
-   PRIVATE_LINK_LIBRARIES ${ROOT_LIBRARIES} PATInterfaces xAODCore xAODMetaData xAODJet xAODMuon xAODTau xAODEgamma 
-     xAODTracking xAODTruth xAODRootAccess RootCoreUtils TruthUtils ${LHAPDF_LIBRARIES})
+  AsgAnalysisAlgorithms/*.h AsgAnalysisAlgorithms/*.icc Root/*.cxx
+  PUBLIC_HEADERS AsgAnalysisAlgorithms
+  PRIVATE_INCLUDE_DIRS ${ROOT_INCLUDE_DIRS} ${LHAPDF_INCLUDE_DIRS}
+  LINK_LIBRARIES AthContainers AthContainersInterfaces AsgTools AsgMessagingLib AsgServicesLib CxxUtils xAODBase
+  xAODEventInfo xAODCutFlow SelectionHelpersLib SystematicsHandlesLib PATCoreLib
+  AnaAlgorithmLib AsgAnalysisInterfaces AssociationUtilsLib GammaORToolsLib
+  EventBookkeeperToolsLib InDetTrackSystematicsToolsLib IsolationSelectionLib PMGAnalysisInterfacesLib FakeBkgToolsLib xAODMissingET
+  PRIVATE_LINK_LIBRARIES ${ROOT_LIBRARIES} PATInterfaces xAODCore xAODMetaData xAODJet xAODMuon xAODTau xAODEgamma
+  xAODTracking xAODTruth xAODRootAccess RootCoreUtils TruthUtils ${LHAPDF_LIBRARIES})
 
 
 if( XAOD_STANDALONE )
-   target_link_libraries( AsgAnalysisAlgorithmsLib PUBLIC EventLoop )
+  target_link_libraries( AsgAnalysisAlgorithmsLib PUBLIC EventLoop )
 endif()
 
 atlas_add_dictionary( AsgAnalysisAlgorithmsDict
-   AsgAnalysisAlgorithms/AsgAnalysisAlgorithmsDict.h
-   AsgAnalysisAlgorithms/selection.xml
-   LINK_LIBRARIES AsgAnalysisAlgorithmsLib )
+  AsgAnalysisAlgorithms/AsgAnalysisAlgorithmsDict.h
+  AsgAnalysisAlgorithms/selection.xml
+  LINK_LIBRARIES AsgAnalysisAlgorithmsLib )
 
 atlas_add_component( AsgAnalysisAlgorithms
-   src/components/*.cxx
-   INCLUDE_DIRS  ${LHAPDF_INCLUDE_DIRS} ${VDT_INCLUDE_DIRS}
-   LINK_LIBRARIES AsgAnalysisAlgorithmsLib ${LHAPDF_LIBRARIES} ${ROOT_LIBRARIES} )
+  src/components/*.cxx
+  INCLUDE_DIRS  ${LHAPDF_INCLUDE_DIRS} ${VDT_INCLUDE_DIRS}
+  LINK_LIBRARIES AsgAnalysisAlgorithmsLib ${LHAPDF_LIBRARIES} ${ROOT_LIBRARIES} )
 
 atlas_install_data( data/* )
 atlas_install_python_modules( python/*.py )
@@ -46,7 +46,7 @@ if (NOT COLUMNAR_ANALYSIS)
     SOURCES test/gt_BootstrapGenerator.cxx
     INCLUDE_DIRS ${GTEST_INCLUDE_DIRS}
     LINK_LIBRARIES ${GTEST_LIBRARIES} AsgTestingLib AsgAnalysisAlgorithmsLib CxxUtils
-    POST_EXEC_SCRIPT nopost.sh )
+    POST_EXEC_SCRIPT noerror.sh )
 
 
   if( NOT XAOD_STANDALONE )
@@ -55,11 +55,11 @@ if (NOT COLUMNAR_ANALYSIS)
 
     atlas_add_test( PMGTruthWeightsAlg
       SCRIPT testPMGTruthWeightsAlg.py --max-events 10
-      POST_EXEC_SCRIPT nopost.sh )
+      POST_EXEC_SCRIPT noerror.sh )
 
     atlas_add_test( PileupReweightingAlg
       SCRIPT testPileupReweightingAlgConfig.py --max-events 10
-      POST_EXEC_SCRIPT nopost.sh )
+      POST_EXEC_SCRIPT noerror.sh )
 
   endif()
 
@@ -67,7 +67,7 @@ if (NOT COLUMNAR_ANALYSIS)
   # in the output file
   atlas_add_test( TestFullTermsOutput
     SCRIPT CPRun.py --input-list $ASG_TEST_FILE_RUN3_MC --text-config AsgAnalysisAlgorithms/test_full_terms_output.yaml -e 150
-    POST_EXEC_SCRIPT nopost.sh
+    POST_EXEC_SCRIPT noerror.sh
     PRIVATE_WORKING_DIRECTORY
     PROPERTIES TIMEOUT 400
   )
@@ -76,18 +76,17 @@ if (NOT COLUMNAR_ANALYSIS)
   # in the output file
   atlas_add_test( TestEventShapeOutput
     SCRIPT CPRun.py --input-list $ASG_TEST_FILE_RUN3_MC --text-config AsgAnalysisAlgorithms/test_event_shape_output.yaml -e 150
-    POST_EXEC_SCRIPT nopost.sh
+    POST_EXEC_SCRIPT noerror.sh
     PRIVATE_WORKING_DIRECTORY
     PROPERTIES TIMEOUT 400
   )
 
-  atlas_install_scripts(share/testOutputContent.py)
+  atlas_install_scripts(share/testOutputContent.py test/AsgAnalysisAlgorithms_TestSingleOR.sh test/AsgAnalysisAlgorithms_TestSingleORNoEnforce.sh test/AsgAnalysisAlgorithms_TestMultipleORs.sh)
   # a test job that runs the "standard" OR configuration: exactly one OR where the OR decisions are propagated to all other selections
   # and no OR branches are created in the output
   atlas_add_test( TestSingleOR
-    PRE_EXEC_SCRIPT "CPRun.py --input-list $ASG_TEST_FILE_RUN3_MC --text-config AsgAnalysisAlgorithms/test_single_OR.yaml -e 150 -o output_singleOR.root"
-    SCRIPT testOutputContent.py --input_file output_singleOR.root --tree_name analysis --forbidden-branches el_select_passesOR_NOSYS jet_select_passesOR_NOSYS mu_select_passesOR_NOSYS ph_select_passesOR_NOSYS tau_select_passesOR_NOSYS
-    POST_EXEC_SCRIPT nopost.sh
+    SCRIPT AsgAnalysisAlgorithms_TestSingleOR.sh
+    POST_EXEC_SCRIPT noerror.sh
     PRIVATE_WORKING_DIRECTORY
     PROPERTIES TIMEOUT 400
   )
@@ -95,9 +94,8 @@ if (NOT COLUMNAR_ANALYSIS)
   # a test job that runs the "standard" OR configuration but does not enforce it everywhere: exactly one OR where the OR decisions are a dedicated selection
   # and OR branches are created in the output
   atlas_add_test( TestSingleORNoEnforce
-    PRE_EXEC_SCRIPT "CPRun.py --input-list $ASG_TEST_FILE_RUN3_MC --text-config AsgAnalysisAlgorithms/test_single_OR_noEnforce.yaml -e 150 -o output_singleOR_noEnforce.root"
-    SCRIPT testOutputContent.py --input_file output_singleOR_noEnforce.root --tree_name analysis --branches el_select_passesOR_NOSYS jet_select_passesOR_NOSYS mu_select_passesOR_NOSYS ph_select_passesOR_NOSYS tau_select_passesOR_NOSYS
-    POST_EXEC_SCRIPT nopost.sh
+    SCRIPT AsgAnalysisAlgorithms_TestSingleORNoEnforce.sh
+    POST_EXEC_SCRIPT noerror.sh
     PRIVATE_WORKING_DIRECTORY
     PROPERTIES TIMEOUT 400
   )
@@ -105,9 +103,8 @@ if (NOT COLUMNAR_ANALYSIS)
   # a test job that includes multiple ORs and checks if the associated
   # branches are created in the output
   atlas_add_test( TestMultipleORs
-    PRE_EXEC_SCRIPT "CPRun.py --input-list $ASG_TEST_FILE_RUN3_MC --text-config AsgAnalysisAlgorithms/test_multiple_ORs.yaml -e 150 -o output_multipleORs.root"
-    SCRIPT testOutputContent.py --input_file output_multipleORs.root --tree_name analysis --branches el_select_passesOR_postJvt_NOSYS el_select_passesOR_preJvt_NOSYS jet_select_passesOR_postJvt_NOSYS jet_select_passesOR_preJvt_NOSYS mu_select_passesOR_postJvt_NOSYS mu_select_passesOR_preJvt_NOSYS ph_select_passesOR_postJvt_NOSYS ph_select_passesOR_preJvt_NOSYS tau_select_passesOR_postJvt_NOSYS tau_select_passesOR_preJvt_NOSYS
-    POST_EXEC_SCRIPT nopost.sh
+    SCRIPT AsgAnalysisAlgorithms_TestMultipleORs.sh
+    POST_EXEC_SCRIPT noerror.sh
     PRIVATE_WORKING_DIRECTORY
     PROPERTIES TIMEOUT 400
   )

@@ -101,3 +101,15 @@ CP::CorrectionCode MissingMassTool::apply(const xAOD::EventInfo& ei,
 
   return CP::CorrectionCode::Ok;
 }
+
+CP::CorrectionCode MissingMassTool::doCollinearApprox(
+		const xAOD::IParticle* part1,
+    const xAOD::IParticle* part2,
+    const xAOD::MissingET* met,
+    const bool kMMCsynchronize, 
+    double &mass, double &xp1, double &xp2)
+{
+  m_MMC->MassCollinear(part1,part2,met,kMMCsynchronize,mass,xp1,xp2);
+	return CP::CorrectionCode::Ok;
+}
+

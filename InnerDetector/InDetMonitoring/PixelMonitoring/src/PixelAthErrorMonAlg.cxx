@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
  */
 /**
  * @file PixelAthErrorMonAlg.cxx
@@ -36,7 +36,7 @@ StatusCode PixelAthErrorMonAlg::fillHistograms(const EventContext& ctx) const {
   using namespace Monitored;
 
   int lb = GetEventInfo(ctx)->lumiBlock();
-  auto errorGroup = getGroup("Error");
+  const auto & errorGroup = getGroup("Error");
 
   ATH_MSG_DEBUG("Filling Error Monitoring Histograms");
 
@@ -167,8 +167,8 @@ StatusCode PixelAthErrorMonAlg::fillHistograms(const EventContext& ctx) const {
       is_fei4 = false;
     }
     // flagging/counting categorized errors per module.
-    bool has_err_cat[ErrorCategory::COUNT][nFEIBL2D] = {{false}};
-    int nerrors_cat_rodmod[ErrorCategoryRODMOD::COUNT][nFEIBL2D] = {{0}};
+    std::array<std::array<bool, nFEIBL2D>, ErrorCategory::COUNT> has_err_cat{};
+    int nerrors_cat_rodmod[ErrorCategoryRODMOD::COUNT][nFEIBL2D]{};
 
     // count number of words w/ MCC/FE flags per module
     unsigned int num_femcc_errwords = 0;
@@ -304,7 +304,7 @@ StatusCode PixelAthErrorMonAlg::fillHistograms(const EventContext& ctx) const {
       if (pixID.is_valid()) {
         for (int i = 0; i < ErrorCategoryRODMOD::COUNT; i++) {
           if (nerrors_cat_rodmod[i][iFE]) {
-            if (getErrorCategory(i + 1) != 99) has_err_cat[getErrorCategory(i + 1)][iFE] = true;
+            if (getErrorCategory(i + 1) != 99) has_err_cat.at(getErrorCategory(i + 1))[iFE] = true;
 	    if (pixlayer == PixLayers::kIBL) num_errormodules_per_cat_rodmod[i][iblsublayer]++;
             else num_errormodules_per_cat_rodmod[i][pixlayer]++;
             if (!m_doOnline) {

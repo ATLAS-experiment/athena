@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //***************************************************************************
@@ -38,7 +38,7 @@ Interface definition for jFEXFPGA
 
     virtual void reset() = 0;
 
-    virtual int ID() = 0;
+    virtual int ID() const = 0;
     
     virtual std::vector <std::unique_ptr<jFEXTOB>> getSmallRJetTOBs() = 0;
 
@@ -57,10 +57,10 @@ Interface definition for jFEXFPGA
     virtual void SetTowersAndCells_SG(int [][FEXAlgoSpaceDefs::jFEX_wide_algoSpace_width]) = 0;
     virtual void SetTowersAndCells_SG(int [][FEXAlgoSpaceDefs::jFEX_thin_algoSpace_width]) = 0;
 
-    virtual int getTTowerET_EM     (unsigned int TTID ) =0; 
-    virtual int getTTowerET_HAD    (unsigned int TTID ) =0; 
-    virtual int getTTowerET        (unsigned int TTID ) =0; 
-    virtual int getTTowerET_forMET (unsigned int TTID ) =0; 
+    virtual int getTTowerET_EM     (unsigned int TTID ) const =0; 
+    virtual int getTTowerET_HAD    (unsigned int TTID ) const =0; 
+    virtual int getTTowerET        (unsigned int TTID ) const =0; 
+    virtual int getTTowerET_forMET (unsigned int TTID ) const =0; 
 
 
   private:

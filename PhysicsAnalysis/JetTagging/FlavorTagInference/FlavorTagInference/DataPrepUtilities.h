@@ -37,7 +37,7 @@ namespace FlavorTagInference {
   struct FTagInputConfig
   {
     std::string name;
-    EDMType type;
+    EDMType type {};
     std::string default_flag;
   };
 

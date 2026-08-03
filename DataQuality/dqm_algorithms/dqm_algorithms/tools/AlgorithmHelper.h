@@ -22,11 +22,6 @@
 #include <TH1.h>
 #include <TObject.h>
 #include <TClass.h>
-#include <boost/thread/once.hpp>
-#include <boost/thread/mutex.hpp>
-#include <boost/thread/locks.hpp>
-#include <boost/thread.hpp>
-#include <boost/utility.hpp>
 #include <iostream>
 
 class TF1;

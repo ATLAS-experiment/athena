@@ -3,9 +3,6 @@
 # Declare the package name:
 atlas_subdir( ActsTruth )
 
-# for pdg_id -> name
-find_package( HepPDT )
-
 # External dependencies:
 find_package( Acts COMPONENTS Core )
 
@@ -20,7 +17,6 @@ atlas_add_component( ActsTruth
                      src/*.h src/*.cxx
                      src/components/*.cxx
 		     INCLUDE_DIRS
-                     PRIVATE_INCLUDE_DIRS ${HEPPDT_INCLUDE_DIRS}
                      LINK_LIBRARIES
                        ActsEventLib
 		       ActsTruthLib
@@ -31,6 +27,7 @@ atlas_add_component( ActsTruth
 		       CxxUtils
 		       GaudiKernel
 		       GeneratorObjects
+		       GeneratorModulesLib
 		       Identifier
 		       InDetSimData
 		       MCTruthClassifierLib
@@ -40,5 +37,4 @@ atlas_add_component( ActsTruth
 		       xAODMeasurementBase
 		       xAODTruth
                        TruthUtils
-                       PRIVATE_LINK_LIBRARIES
-                       ${HEPPDT_LIBRARIES} )
+               )

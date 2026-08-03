@@ -1,7 +1,7 @@
 // Dear emacs, this is -*- C++ -*-
 
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ATHENAROOTCOMPS_ROOTNTUPLEOUTPUTSTREAM_H
@@ -41,7 +41,6 @@ namespace Athena {
    * @brief algorithm that marks for write data objects in SG
    * 
    * @author binet@cern.ch
-   * $Id: RootNtupleOutputStream.h 500674 2012-05-14 21:36:37Z gemmeren $
    */
 class RootNtupleOutputStream 
   : virtual public IIncidentListener,
@@ -117,7 +116,7 @@ public:
   virtual StatusCode execute(const EventContext& ctx) override;
   //@}
   /// Stream the data
-  virtual StatusCode write();
+  virtual StatusCode write(const EventContext& ctx);
 
 private:
   /// Clear list of selected objects

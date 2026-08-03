@@ -15,13 +15,17 @@ Reco_tf.py \
     --conditionsTag ${conditions_tag} \
     --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude" \
     --preExec "flags.Exec.FPE=-1; \
-    	       flags.Tracking.doStoreTrackSeeds=True; \
-    	       flags.Tracking.doStoreSiSPSeededTracks=True; \
-    	       flags.Tracking.writeExtendedSi_PRDInfo=True; \
-    	       flags.Tracking.doStoreTrackSeeds=True;" \
+               flags.Tracking.doStoreTrackSeeds=True; \
+               flags.Tracking.doStoreSiSPSeededTracks=True; \
+               flags.Tracking.writeExtendedSi_PRDInfo=True; \
+               flags.Tracking.doStoreTrackSeeds=True; \
+               flags.Scheduler.CheckDependencies=True; \
+               flags.Scheduler.ShowDataDeps=True; \
+               flags.Scheduler.ShowDataFlow=True; \
+               flags.Scheduler.ShowControlFlow = True;" \
     --postExec "from OutputStreamAthenaPool.OutputStreamConfig import addToAOD; \
-    	        toAOD = ['xAOD::TrackParticleContainer#SiSPSeedSegments*', 'xAOD::TrackParticleAuxContainer#SiSPSeedSegments*']; \
-    	        cfg.merge(addToAOD(flags, toAOD));" \
+                toAOD = ['xAOD::TrackParticleContainer#SiSPSeedSegments*', 'xAOD::TrackParticleAuxContainer#SiSPSeedSegments*']; \
+                cfg.merge(addToAOD(flags, toAOD));" \
     --maxEvents ${n_events} \
     --multithreaded
 
@@ -35,16 +39,20 @@ Reco_tf.py \
     --inputRDOFile  ${input_rdo} \
     --outputAODFile AOD.acts.pool.root \
     --outputESDFile ESD.acts.pool.root \
-    --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude,ActsConfig.ActsCIFlags.actsWorkflowFlags" \
+    --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude,ActsConfig.ActsCIFlags.actsProductionFlags" \
     --preExec "flags.Exec.FPE=-1; \
-    	       flags.Tracking.doStoreTrackSeeds=True; \
-    	       flags.Tracking.doStoreSiSPSeededTracks=True; \
-    	       flags.Tracking.ITkActsPass.storeTrackSeeds=True; \
-    	       flags.Tracking.ITkActsPass.storeSiSPSeededTracks=True; \
-    	       flags.Tracking.writeExtendedSi_PRDInfo=True;" \
+               flags.Tracking.doStoreTrackSeeds=True; \
+               flags.Tracking.doStoreSiSPSeededTracks=True; \
+               flags.Tracking.ITkActsPass.storeTrackSeeds=True; \
+               flags.Tracking.ITkActsPass.storeSiSPSeededTracks=True; \
+               flags.Scheduler.CheckDependencies=True; \
+               flags.Scheduler.ShowDataDeps=True; \
+               flags.Scheduler.ShowDataFlow=True; \
+               flags.Scheduler.ShowControlFlow = True; \
+               flags.Tracking.writeExtendedSi_PRDInfo=True;" \
     --postExec "from OutputStreamAthenaPool.OutputStreamConfig import addToAOD; \
-    	        toAOD = ['xAOD::TrackParticleContainer#SiSPSeedSegments*', 'xAOD::TrackParticleAuxContainer#SiSPSeedSegments*']; \
-    	        cfg.merge(addToAOD(flags, toAOD));" \
+                toAOD = ['xAOD::TrackParticleContainer#SiSPSeedSegments*', 'xAOD::TrackParticleAuxContainer#SiSPSeedSegments*']; \
+                cfg.merge(addToAOD(flags, toAOD));" \
     --conditionsTag ${conditions_tag} \
     --maxEvents ${n_events} \
     --multithreaded
@@ -61,12 +69,16 @@ Reco_tf.py \
     --outputESDFile ESD.acts.ckf.pool.root \
     --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude,ActsConfig.ActsCIFlags.actsValidateTracksFlags" \
     --preExec 'flags.Exec.FPE=-2; \
-    	       flags.Tracking.writeExtendedSi_PRDInfo=True; \
-    	       flags.Tracking.doStoreSiSPSeededTracks=True; \
-    	       flags.Tracking.ITkActsValidateTracksPass.storeSiSPSeededTracks=True;' \
+               flags.Tracking.writeExtendedSi_PRDInfo=True; \
+               flags.Tracking.doStoreSiSPSeededTracks=True; \
+               flags.Scheduler.CheckDependencies=True; \
+               flags.Scheduler.ShowDataDeps=True; \
+               flags.Scheduler.ShowDataFlow=True; \
+               flags.Scheduler.ShowControlFlow = True; \
+               flags.Tracking.ITkActsValidateTracksPass.storeSiSPSeededTracks=True;' \
     --postExec "from OutputStreamAthenaPool.OutputStreamConfig import addToAOD; \
-    	        toAOD = ['xAOD::TrackParticleContainer#SiSPSeedSegments*', 'xAOD::TrackParticleAuxContainer#SiSPSeedSegments*']; \
-    	        cfg.merge(addToAOD(flags, toAOD));" \
+                toAOD = ['xAOD::TrackParticleContainer#SiSPSeedSegments*', 'xAOD::TrackParticleAuxContainer#SiSPSeedSegments*']; \
+                cfg.merge(addToAOD(flags, toAOD));" \
     --conditionsTag ${conditions_tag} \
     --maxEvents ${n_events} \
     --multithreaded

@@ -223,20 +223,20 @@ namespace GlobalSim {
 
     //Setup variables
     Identifier CellID;
-    float eta = roi->eta();
-    float phi = roi->phi();
+    float etaCheck = roi->eta();
+    float phiCheck = roi->phi();
     bool found = false;
     int strip = 0;
 
     //Tower position to find strip granularity
     int iEta = roi->iEta();
     int iPhi = roi->iPhi();
-    ATH_MSG_DEBUG("Where is this RoI? eta: " << eta << " phi: " << phi << " iEta" << iEta << " iPhi " << iPhi);
+    ATH_MSG_DEBUG("Where is this RoI? eta: " << etaCheck << " phi: " << phiCheck << " iEta" << iEta << " iPhi " << iPhi);
     //There are 1 strips per 0.025 supercell at the edge.
     //Shouldn't need to shift these?
     if(iEta == -25 || iEta == 24) {
       //Just use the eta/phi as is, becasue there is only one strip here.
-      found = findSeedCell(eta, phi, cells, CellID);
+      found = findSeedCell(etaCheck, phiCheck, cells, CellID);
     }
     //There are 4 strips per 0.025 in these towers
     else if((iEta > -25 && iEta <= -21) || (iEta < 24 && iEta >= 20)){
@@ -252,12 +252,12 @@ namespace GlobalSim {
       strip = 8;
     } else {
       //We shouldn't get here, but just in case...
-      ATH_MSG_WARNING("Where are we? eta " << eta << " phi " << phi);
+      ATH_MSG_WARNING("Where are we? eta " << etaCheck << " phi " << phiCheck);
     }
     //
     if(strip != 0){
       //Send the number of strips information along with the eta/phi supercell.
-      found = findHalfStrips(strip, eta, phi, cells, CellID);
+      found = findHalfStrips(strip, etaCheck, phiCheck, cells, CellID);
     }
 
     //If we successfully found the seed cell, then continue.
@@ -416,8 +416,6 @@ namespace GlobalSim {
     hashIdNext = hashIdPrev = hashId;
     //Position of the cell in each 17 long eta row. Defined by position in loop.
     int shift = 0;
-    //Check if we have hit the edge of the detector.
-    float etaMax = 0;
 
     ATH_MSG_DEBUG("Seed Hash: " << hashId);
     //Start loop to fill the central row of the 17x3 eta/phi window.
@@ -432,8 +430,6 @@ namespace GlobalSim {
 	  //Fill the central neighbourhood position.
 	  window[1][8] = cell;
 	  ATH_MSG_DEBUG("Found the middle cell " << cell->getID() << " at eta " << cell->eta() << " phi " << cell->phi());
-	  //Start defining where we are in eta.
-	  etaMax = cell->eta();
 	} else {
 	  //We didn't find the cell in the hash map. Put a dummy in the window.
 	  ATH_MSG_DEBUG("Putting in a dummy middle cell with hashId " << hashId);
@@ -441,8 +437,11 @@ namespace GlobalSim {
 	  //Potential issue if you cannot find the cell... but this cell would be the last in eta?
 	}
       } else {
+        neighbourList.clear();
+        if (hashIdNext != hashIdDummy)
+	  m_larem_id->get_neighbours(hashIdNext,LArNeighbours::nextInEta,neighbourList);
 	//If we are not at the edge, and were not previously at the edge. Then...
-	if(std::abs(etaMax) < 2.475 && hashIdNext != hashIdDummy){
+	if(!neighbourList.empty()){
 	  //Use the previous hashIDNext to look for the next cell in eta
 	  m_larem_id->get_neighbours(hashIdNext,LArNeighbours::nextInEta,neighbourList);
 	  ATH_MSG_DEBUG("Next in eta " << neighbourList[0] << " HashId " << hashId);
@@ -455,8 +454,6 @@ namespace GlobalSim {
 	  //If the hash map contained the next cell.
 	  if(cellNext != nullptr){
 	    ATH_MSG_DEBUG("Found a cell " << cellNext->getID() << " at eta " << cellNext->eta() << " phi " << cellNext->phi());
-	    //update the eta position
-	    etaMax = cellNext->eta();
 	    //Put the found cell in the window
 	    window[1][shift] = cellNext;
 	  } else {

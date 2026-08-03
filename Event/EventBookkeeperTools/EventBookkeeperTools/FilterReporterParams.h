@@ -91,9 +91,19 @@ public:
   const std::string& key() const { return m_filterKey; }
 
 
+  /// \brief manually set the key name
+public:
+  void setKey(const std::string& key) { m_filterKey = key; }
+
+
   /// \brief retrieve the key description
 public:
   const std::string& description() const { return m_filterDescription; }
+
+
+  /// \brief manually set the key description
+public:
+  void setDescription(const std::string& description) { m_filterDescription = description; }
 
 
 /// \brief retrieve the event info read handle key

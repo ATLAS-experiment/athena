@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file CxxUtils/phihelper.h
@@ -10,8 +10,9 @@
 #ifndef CXXUTILS_PHIHELPER_H
 #define CXXUTILS_PHIHELPER_H
 
+#include <numbers>
+#include <concepts>
 #include <cmath>
-#include <type_traits>
 
 namespace CxxUtils {
 
@@ -19,29 +20,44 @@ namespace CxxUtils {
    * Wrap angle in radians to [-pi, pi]
    *
    * Odd positive (negative) multiples of pi map to (-)pi.
+   * (May not always be true for the long double case.)
+   *
+   * If phi is too large (larger than the largest integer that can be
+   * represented exactly as a T), this may fail to produce a value
+   * in the specified range.
    */
-  template <typename T>
-  inline T wrapToPi(T phi)
+  template <std::floating_point T>
+  inline constexpr T wrapToPi(T phi)
   {
-    static_assert(std::is_floating_point<T>::value);
+    constexpr T TWOPI = 2*std::numbers::pi_v<T>;
+    constexpr T INV2PI = std::numbers::inv_pi_v<T>/2;
+    T x = phi * INV2PI;
 
-    constexpr auto PI = static_cast<T>(M_PI);
-    // For large values this is faster:
-    if (phi < -100 || phi > 100) {
-      return std::remainder(phi, 2 * PI);
+    // Round x to the nearest integer.
+    // https://stackoverflow.com/questions/17035464/a-fast-method-to-round-a-double-to-a-32-bit-int-explained
+    static_assert (std::numeric_limits<T>::digits <= sizeof (long int) * CHAR_BIT);
+    constexpr T TOINT = 0x1.8p0 * (1ul<<(std::numeric_limits<T>::digits-1));
+    T ix = (x + TOINT) - TOINT;
+
+    // Above gives banker's rounding; that is, halves round to even integers.
+    // However, to get the cases of phi=Npi right, we want halves to round
+    // towards zero.  Fix up the rounding in that case.  Is there a
+    // better way of doing this?
+    T diff = ix - x;
+    if (std::abs(diff) == 0.5) {
+      if (ix > 0) --ix;
+      else if (ix < 0) ++ix;
     }
-    while (phi > PI) phi -= 2 * PI;
-    while (phi < -PI) phi += 2 * PI;
-    return phi;
+
+    return phi - TWOPI*ix;
   }
 
   /**
    * Return difference phiA - phiB in range [-pi, pi]
    */
-  template <typename T>
-  inline T deltaPhi(T phiA, T phiB)
+  template <std::floating_point T>
+  inline constexpr T deltaPhi(T phiA, T phiB)
   {
-    static_assert(std::is_floating_point<T>::value);
     return wrapToPi(phiA - phiB);
   }
 
@@ -56,10 +72,9 @@ namespace CxxUtils {
    *
    * The returned value is within the range [-pi, pi].
    */
-  template <typename T>
-  inline T phiMean(T phiA, T phiB)
+  template <std::floating_point T>
+  inline constexpr T phiMean(T phiA, T phiB)
   {
-    static_assert(std::is_floating_point<T>::value);
     const T diff = wrapToPi(phiA - phiB);
     return wrapToPi(phiB + 0.5 * diff);
   }
@@ -73,12 +88,11 @@ namespace CxxUtils {
    *
    * The returned value is within the range [-pi, pi].
    */
-  template <typename T>
-  inline T phiBisect(T phiA, T phiB)
+  template <std::floating_point T>
+  inline constexpr T phiBisect(T phiA, T phiB)
   {
-    static_assert(std::is_floating_point<T>::value);
     T phi = 0.5 * (phiA + phiB);
-    if (phiA > phiB) phi += M_PI;
+    if (phiA > phiB) phi += std::numbers::pi;
     return wrapToPi(phi);
   }
 

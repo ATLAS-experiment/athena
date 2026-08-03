@@ -177,7 +177,7 @@ PixelClusterOnTrackTool::correctDefault
     return nullptr;
   } else {
     const InDetDD::PixelModuleDesign *design =
-      dynamic_cast<const InDetDD::PixelModuleDesign *>(&element->design());
+      static_cast<const InDetDD::PixelModuleDesign *>(&element->design());
 
     // get candidate track angle in module local frame
     const Amg::Vector3D& my_track = trackPar.momentum();

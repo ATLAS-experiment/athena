@@ -1,4 +1,4 @@
-// IJSSMLTool.h
+// Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 #ifndef IJSSMLTool_H
 #define IJSSMLTool_H
@@ -39,7 +39,7 @@ namespace AthONNX {
 
     virtual std::vector<float> retrieveConstituentsScoreMultiClass(const std::vector<std::vector<float>>& constituents, const std::vector<std::vector<std::vector<float>>>& interactions, const std::vector<std::vector<float>>& mask) const = 0;
 
-    virtual StatusCode SetScaler(std::map<std::string, std::vector<double>> scaler) = 0;
+    virtual StatusCode SetScaler(const std::map<std::string, std::vector<double>> & scaler) = 0;
 
   };
 

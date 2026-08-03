@@ -15,6 +15,8 @@
 // GlobalSim Algs.
 
 namespace GlobalSim {
+  class IDataCollector;
+  
   class IGlobalSimAlgTool : virtual public ::IAlgTool {
 
   public:
@@ -22,7 +24,8 @@ namespace GlobalSim {
     DeclareInterfaceID(IGlobalSimAlgTool, 1, 0);
     virtual ~IGlobalSimAlgTool() = default;
 
-    virtual StatusCode run(const EventContext& ctx) const = 0;
+    virtual StatusCode run(const std::unique_ptr<IDataCollector>&,
+			   const EventContext& ctx) const = 0;
     virtual std::string toString() const = 0;
   };
   

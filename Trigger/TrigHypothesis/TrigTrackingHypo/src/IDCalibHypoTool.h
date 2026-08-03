@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef TRIGLONGLIVEDPARTICLESHYPO_IDCALIBHYPOTOOL_H
 #define TRIGLONGLIVEDPARTICLESHYPO_IDCALIBHYPOTOOL_H
@@ -26,9 +26,9 @@ public:
    virtual StatusCode initialize() override;
    
    struct IDCalibHypoInfo {
-      TrigCompositeUtils::Decision*  decision;
-      const xAOD::TrackParticle*     track; 
-      const xAOD::TrackParticleContainer* trackContainer;
+      TrigCompositeUtils::Decision*  decision = nullptr;
+      const xAOD::TrackParticle*     track = nullptr;
+      const xAOD::TrackParticleContainer* trackContainer = nullptr;
       const TrigCompositeUtils::DecisionIDContainer previousDecisionsIDs;
    };
    

@@ -17,12 +17,12 @@ atlas_add_test( gt_ColumnarToolWrapper
   SOURCES test/gt_ColumnarToolWrapper.cxx
   INCLUDE_DIRS ${GTEST_INCLUDE_DIRS}
   LINK_LIBRARIES ${GTEST_LIBRARIES} ColumnarToolWrapperLib ColumnarCoreLib AsgTestingLib
-  POST_EXEC_SCRIPT nopost.sh )
+  POST_EXEC_SCRIPT noerror.sh )
 
 if (COLUMNAR_ANALYSIS)
   atlas_add_test( gt_RunColumnarTool
     SOURCES test/gt_RunColumnarTool.cxx
     INCLUDE_DIRS ${GTEST_INCLUDE_DIRS}
     LINK_LIBRARIES ${GTEST_LIBRARIES} ColumnarToolWrapperLib ColumnarCoreLib AsgTestingLib
-    POST_EXEC_SCRIPT nopost.sh )
+    POST_EXEC_SCRIPT noerror.sh )
 endif()

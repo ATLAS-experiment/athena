@@ -22,8 +22,6 @@
 #include "GaudiKernel/SystemOfUnits.h"
 #include "string"
 #include <algorithm>
-#include "boost/algorithm/string.hpp"
-#include <boost/tokenizer.hpp>
 #include <typeinfo>
 #include "TrigSteeringEvent/Chain.h"
 #include "TrigDecisionTool/ChainGroup.h"
@@ -38,7 +36,6 @@
 //**********************************************************************
 using namespace Trig;
 using namespace xAOD;
-using namespace boost;
 #include <vector>
 #include <string>
 #include <iostream>
@@ -585,8 +582,9 @@ bool TrigEgammaMonitorTagAndProbeAlgorithmZeeg::matchDiElectronTrigger(const xAO
 
 
 
-bool TrigEgammaMonitorTagAndProbeAlgorithmZeeg::isTagElectron( const ToolHandle<GenericMonitoringTool>& monGroup, 
-                                               const xAOD::Electron *el) const 
+bool TrigEgammaMonitorTagAndProbeAlgorithmZeeg::isTagElectron(const EventContext& ctx,
+                                                              const ToolHandle<GenericMonitoringTool>& monGroup,
+                                                              const xAOD::Electron *el) const
 {
     fillLabel(monGroup, "TagCutCounter", "Electrons");
 
@@ -683,7 +681,7 @@ bool TrigEgammaMonitorTagAndProbeAlgorithmZeeg::isTagElectron( const ToolHandle<
     ATH_MSG_INFO("Matching Tag Electron FC");
     bool tagMatched=false;
     for (const std::string& tag : m_tagTrigList) {
-        if (match()->isPassed(el,tag)){
+        if (match()->isPassed(ctx, el,tag)){
             	tagMatched=true;
         }
 

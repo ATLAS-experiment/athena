@@ -782,15 +782,12 @@ std::pair<double, double> JSSTaggerBase::getSF( const xAOD::Jet& jet, const std:
   double SF = 1.0;
   double eff = 1.0;
 
-  if ( m_weightHistograms.count(truthLabelStr.c_str()) ) {
-
-    int pt_mPt_bin = (m_weightHistograms.find(truthLabelStr.c_str())->second)->FindBin(jet.pt()*0.001, logmOverPt);
-    SF = (m_weightHistograms.find(truthLabelStr.c_str())->second)->GetBinContent(pt_mPt_bin);
-
-    if ( !m_efficiencyHistogramName.empty() ) {
-      eff = (m_efficiencyHistograms.find(truthLabelStr.c_str())->second)->GetBinContent(pt_mPt_bin);
+  if ( auto it1 = m_weightHistograms.find(truthLabelStr.c_str()); it1 != m_weightHistograms.end()  ) {
+    int pt_mPt_bin = (it1->second)->FindBin(jet.pt()*0.001, logmOverPt);
+    SF = (it1->second)->GetBinContent(pt_mPt_bin);
+    if ( auto it2 = m_efficiencyHistograms.find(truthLabelStr.c_str()); it2 != m_efficiencyHistograms.end()) {
+      eff = (it2->second)->GetBinContent(pt_mPt_bin);
     }
-
   }
   else {
     // set the efficiency for "Other" category to be the signal efficiency
@@ -803,8 +800,12 @@ std::pair<double, double> JSSTaggerBase::getSF( const xAOD::Jet& jet, const std:
       signal_truthLabel="t";
     }
     if ( !signal_truthLabel.empty() && !m_efficiencyHistogramName.empty() ){
-      int pt_mPt_bin = (m_weightHistograms.find(signal_truthLabel.c_str())->second)->FindBin(jet.pt()*0.001, logmOverPt);
-      eff = (m_efficiencyHistograms.find(signal_truthLabel.c_str())->second)->GetBinContent(pt_mPt_bin);
+      if (auto pw = m_weightHistograms.find(signal_truthLabel.c_str());pw != m_weightHistograms.end()){
+        int pt_mPt_bin = (pw->second)->FindBin(jet.pt()*0.001, logmOverPt);
+        if (auto pe = m_efficiencyHistograms.find(signal_truthLabel.c_str());pe != m_efficiencyHistograms.end()){
+          eff = (pe->second)->GetBinContent(pt_mPt_bin);
+        }
+      }
     }
 
     return std::make_pair( 1.0, eff );

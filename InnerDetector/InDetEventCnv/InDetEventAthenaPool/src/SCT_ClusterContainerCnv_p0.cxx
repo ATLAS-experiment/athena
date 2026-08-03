@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "SCT_ClusterContainerCnv_p0.h"
@@ -15,12 +15,8 @@
 // Gaudi
 #include "GaudiKernel/Bootstrap.h"
 #include "GaudiKernel/ISvcLocator.h"
-#include "GaudiKernel/MsgStream.h"
 #include "GaudiKernel/Service.h"
-#include "GaudiKernel/StatusCode.h"
 
-#include <iostream>
-#include <sstream>
 #include <string>
 
 //================================================================
@@ -48,7 +44,7 @@ StatusCode SCT_ClusterContainerCnv_p0::initialize(MsgStream& log ) {
 
 InDet::SCT_ClusterContainer* SCT_ClusterContainerCnv_p0::createTransient(SCT_ClusterContainer_p0* persObj, MsgStream& log) {
 
-  std::unique_ptr<InDet::SCT_ClusterContainer> trans(std::make_unique<InDet::SCT_ClusterContainer>(m_sctId->wafer_hash_max()) );
+  auto trans = std::make_unique<InDet::SCT_ClusterContainer>(m_sctId->wafer_hash_max());
   //  MSG_DEBUG(log,"Read PRD vector, size " << persObj->size());
 
   SG::ReadCondHandle<InDetDD::SiDetectorElementCollection> sctDetEleHandle(m_SCTDetEleCollKey);
@@ -62,7 +58,6 @@ InDet::SCT_ClusterContainer* SCT_ClusterContainerCnv_p0::createTransient(SCT_Clu
     // Add detElem to each drift circle
     IdentifierHash collHash = dcColl->identifyHash();
     const InDetDD::SiDetectorElement * de = elements->getDetectorElement(collHash);
-    //      MSG_DEBUG(log,"Set SCT_Cluster detector element to "<< de);
 
     InDet::SCT_ClusterCollection::iterator itColl   = dcColl->begin();
     InDet::SCT_ClusterCollection::iterator lastColl = dcColl->end();
@@ -70,9 +65,8 @@ InDet::SCT_ClusterContainer* SCT_ClusterContainerCnv_p0::createTransient(SCT_Clu
       (*itColl)->m_detEl = de;
     }
 
-    StatusCode sc= trans ? trans->addCollection(dcColl, collHash): StatusCode::FAILURE;
+    StatusCode sc= trans->addCollection(dcColl, collHash);
     if (sc.isSuccess()){
-      //         MSG_VERBOSE("SCT_ClusterContainer successfully added to Container !");
     } else {
       log << MSG::ERROR << "Failed to add SCT_ClusterContainer to container" << endmsg;
       return nullptr;

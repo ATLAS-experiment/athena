@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #undef NDEBUG
@@ -63,7 +63,6 @@ int main() {
   assert( trackStateBackend.size() == nStates );
 
   ActsTrk::detail::MeasurementCalibratorBase calibrator;
-  using Backend_t = Acts::VectorMultiTrajectory;
   using ProjectorType = ActsTrk::detail::MeasurementCalibratorBase::ProjectorType;
   using TrackState_t = Acts::MultiTrajectory<Acts::VectorMultiTrajectory>::TrackStateProxy;
   /// Check 1 dimensional track state  

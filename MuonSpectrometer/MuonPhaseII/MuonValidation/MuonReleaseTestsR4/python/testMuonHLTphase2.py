@@ -30,12 +30,13 @@ if __name__ == "__main__":
                              "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/TriggerTest/valid1.601229.PhPy8EG_A14_ttbar_hdamp258p75_SingleLep.recon.RDO.e8514_e8528_s4159_s4114_r14799_tid34171421_00/RDO.34171421._000016.pool.root.1"]
 
     # Set phase2 geometry 
-    from MuonGeoModelTestR4.testGeoModel import MuonPhaseIITestDefaults, configureDefaultTagsCfg
+    from MuonConfig.MuonConfigUtils import configureDefaultTags
+    from MuonGeoModelTestR4.testGeoModel import MuonPhaseIITestDefaults
     flags.GeoModel.SQLiteDB = True
     flags.GeoModel.SQLiteDBFullPath = MuonPhaseIITestDefaults.GEODB_R4 if args.defaultGeoFile == "RUN4" else MuonPhaseIITestDefaults.GEODB_R3
 
     # Set default geometry tag and default condition tag
-    configureDefaultTagsCfg(flags)
+    configureDefaultTags(flags)
 
     # Schedule Phase2 muon reconstruction chain
     flags.Trigger.Offline.SA.Muon.scheduleActsReco=True

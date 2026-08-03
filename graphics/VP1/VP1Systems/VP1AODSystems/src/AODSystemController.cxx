@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 ////////////////////////////////////////////////////////////////
@@ -29,7 +29,6 @@
 #ifndef BUILDVP1LIGHT
     #include "VP1Utils/VP1ToolAccessHelper.h"
     #include "VP1Utils/VP1JobConfigInfo.h"
-    #include "VP1Utils/VP1ParticleData.h"
 #endif
 #include "VP1Base/VP1QtUtils.h"
 #include "VP1Base/IVP1System.h"
@@ -67,8 +66,8 @@ public:
   // Ui::AODSysSettingsCutsForm ui_cuts;
   Ui::AODObjectBrowser ui_objBrowser;
   
-  QTreeWidget* objBrowserWidget;
-  AODSysCommonData * common;
+  QTreeWidget* objBrowserWidget = nullptr;
+  AODSysCommonData * common = nullptr;
 };
 
 const QString AODSystemController::Imp::noneAvailString = QString("None available");

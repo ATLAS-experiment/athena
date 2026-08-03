@@ -9,6 +9,8 @@
 #include <string>
 
 #include "GaudiKernel/ToolHandle.h"
+#include "StoreGate/ReadHandleKey.h"
+#include "StoreGate/ReadDecorHandle.h"
 
 // FrameWork includes
 #include "AsgTools/PropertyWrapper.h"
@@ -41,7 +43,6 @@ public:
 
 private: 
   // properties
-  Gaudi::Property<std::string> m_TauJetContainerName{this, "TauContainerName", "TauJets"};
   Gaudi::Property<bool> m_isMC{this, "isMC", false};
 
   // Tool used for truth-matching
@@ -49,6 +50,14 @@ private:
   // Tool used to select "primitive" and "nominal" taus
   ToolHandle<TauAnalysisTools::ITauSelectionTool> m_primTauSel{this, "PrimitiveTauSelectionTool", "TauAnalysisTools::TauSelectionTool/PrimitiveTauSelectionTool"};
   ToolHandle<TauAnalysisTools::ITauSelectionTool> m_nomiTauSel{this, "NominalTauSelectionTool", "TauAnalysisTools::TauSelectionTool/NominalTauSelectionTool"};
+
+  //container name
+  SG::ReadHandleKey<xAOD::TauJetContainer> m_tauContainerKey { this, "TauContainerName", "TauJets", "Input tau container key" };
+  SG::ReadHandleKey<xAOD::TruthParticleContainer> m_truthTauContainerKey { this, "TruthTauContainerName", "TruthTaus", "Input truth tau container key" }; 
+
+  // decoration name
+  SG::ReadDecorHandleKey<xAOD::TauJetContainer> m_IsTruthMatchedKey{this, "IsTruthMatchedDecorKey", "IsTruthMatched", "IsTruthMatched decoration key"};
+  SG::ReadDecorHandleKey<xAOD::TruthParticleContainer> m_IsHadronicTauKey{this, "IsHadronicTauDecorKey", "IsHadronicTau", "IsHadronicTau decoration key"};  
 
   //Histograms
   // general tau all prongs plots

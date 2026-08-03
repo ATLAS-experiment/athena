@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //////////////////////////////////////////////////////////////////
@@ -19,9 +19,11 @@
 // TrkGeometry
 #include "TrkGeometry/TrackingGeometry.h"
 
+#include "TrkDetDescrInterfaces/IMaterialMapper.h"
+
+
 namespace Trk {
 
-    class IMaterialMapper;
     class TrackingVolume;
     class Surface;
 
@@ -54,8 +56,9 @@ namespace Trk {
       public:
 
         /** Standard Athena-Algorithm Constructor */
-        MaterialValidation(const std::string& name, ISvcLocator* pSvcLocator);
-        /** Default Destructor */
+        using AthAlgorithm::AthAlgorithm;
+
+        /** Destructor */
         ~MaterialValidation();
 
         /** standard Athena-Algorithm method */
@@ -91,18 +94,17 @@ namespace Trk {
         SG::ReadCondHandleKey<TrackingGeometry>   m_trackingGeometryReadKey
            {this, "TrackingGeometryReadKey", "", "Key of the TrackingGeometry conditions data."};
         
-        /** Mapper and Inspector */                          
-        ToolHandle<IMaterialMapper>                          m_materialMapper;            //!< Pointer to an IMaterialMapper algTool
-        int                                                  m_maxMaterialValidationEvents;  //!< limit the number of validation records to avoid 2G files
-        
+      /** Mapper and Inspector */
+      ToolHandle<IMaterialMapper> m_materialMapper
+	{this, "MaterialMapper", "Trk::MaterialMapper/MappingMaterialMapper"};
 
-        Rndm::Numbers*                                       m_flatDist;                   //!< Random generator for flat distribution
-        double                                               m_etaMin;                     //!< eta boundary
-        double                                               m_etaMax;                     //!< eta boundary
-        bool                                                 m_runNativeNavigation;        //!< validate the native TG navigation
-        
-        double                                               m_accTinX0;                   //!< accumulated t in X0
-        
+      Rndm::Numbers* m_flatDist = nullptr;  //!< Random generator for flat distribution
+      Gaudi::Property<double> m_etaMin{this, "MinEta", -3.}; //!< eta boundary
+      Gaudi::Property<double> m_etaMax{this, "MaxEta", 3.}; //!< eta boundary
+      Gaudi::Property<bool> m_runNativeNavigation{this, "NativeNavigation", true}; //!< validate the native TG navigation
+
+      double m_accTinX0 = 0.; //!< accumulated t in X0
+
     };
     
     inline const Trk::TrackingGeometry& Trk::MaterialValidation::trackingGeometry() const {

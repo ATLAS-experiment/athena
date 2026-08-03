@@ -142,7 +142,7 @@ namespace ActsTrk {
       m_eta_barrel->Fill(globalPosition.eta(), beamSpotWeight);
       m_perp_barrel->Fill(globalPosition.perp(), beamSpotWeight);
       
-      m_total_charge_barrel->Fill( xAOD::xAODInDetMeasurement::Utilities::computeTotalCharge(*cluster), beamSpotWeight);
+      m_total_charge_barrel->Fill(cluster->totalCharge(), beamSpotWeight);
       m_total_tot_barrel->Fill( xAOD::xAODInDetMeasurement::Utilities::computeTotalToT(*cluster), beamSpotWeight);
 
       m_omega_x_barrel->Fill(omegax, beamSpotWeight);
@@ -188,7 +188,7 @@ namespace ActsTrk {
       m_eta_endcap->Fill(globalPosition.eta(), beamSpotWeight);
       m_perp_endcap->Fill(globalPosition.perp(), beamSpotWeight);
 
-      m_total_charge_endcap->Fill( xAOD::xAODInDetMeasurement::Utilities::computeTotalCharge(*cluster), beamSpotWeight);
+      m_total_charge_endcap->Fill(cluster->totalCharge(), beamSpotWeight);
       m_total_tot_endcap->Fill( xAOD::xAODInDetMeasurement::Utilities::computeTotalToT(*cluster), beamSpotWeight);
 
       m_omega_x_endcap->Fill(omegax, beamSpotWeight);

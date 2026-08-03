@@ -188,6 +188,7 @@ def createTrackingConfigFlags():
     icf.addFlag("Tracking.writeExtendedSi_PRDInfo", False)
     icf.addFlag("Tracking.writeExtendedTRT_PRDInfo", False)
     icf.addFlag("Tracking.PRDInfo.KeepOnlyOnTrackMeasurements", False)
+    icf.addFlag("Tracking.writeExtendedHGTDInfo", False)
     
     # Only keep entries in xAOD TrackMeasurementValidation + TrackStateValidation containers for tracks passing user cut
     # Indicate detector technology from which clusters should be thinned
@@ -627,7 +628,7 @@ def createTrackingConfigFlags():
                           createActsValidateAmbiguityResolutionTrackingPassFlags, prefix=True)
     icf.addFlagsCategory ("Tracking.ITkActsHeavyIonPass",
                           createActsHeavyIonTrackingPassFlags, prefix=True)
-    
+
     # Acts F100 validation pass
     icf.addFlagsCategory ("Tracking.ITkActsValidateF100Pass",
                           createEFValidateF100TrackingPassFlags, prefix=True)
@@ -645,7 +646,9 @@ def createTrackingConfigFlags():
     icf.addFlagsCategory ("Tracking.ITkFPGAPass",
                           createFPGATrackingPassFlags, prefix=True)    
 
-
+    # ACTS Derivation flags
+    icf.addFlag("Tracking.StoreSlimmedDataPreparation", False)
+    
     ####################################################################
 
     # Vertexing flags

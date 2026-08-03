@@ -1,5 +1,5 @@
 /*
-Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef TRIGT2DJTRIG_DISP_HYPOTOOL_H
 #define TRIGT2DJTRIG_DISP_HYPOTOOL_H
@@ -27,12 +27,12 @@ public:
     virtual StatusCode initialize() override;
 
     struct Info {
-      TrigCompositeUtils::Decision* decision;
+      TrigCompositeUtils::Decision* decision = nullptr;
       const TrigCompositeUtils::DecisionIDContainer previousDecisionIDs;
-      const xAOD::Jet* jet;
-      const xAOD::TrackParticleContainer* lrt_tracks;
-      const xAOD::Vertex* primary_vertex;
-      const xAOD::TrigComposite* counts;
+      const xAOD::Jet* jet = nullptr;
+      const xAOD::TrackParticleContainer* lrt_tracks = nullptr;
+      const xAOD::Vertex* primary_vertex = nullptr;
+      const xAOD::TrigComposite* counts = nullptr;
       DisplacedJetBeamspotInfo& beamspot;
     };
 

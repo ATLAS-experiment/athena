@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 import unittest
 
@@ -36,6 +36,7 @@ class TestTransformUtils(unittest.TestCase):
         cfg.addEventAlgo(CompFactory.HelloAlg(MyInt=123))
         processPostExec(runArgs, flags, cfg)
         self.assertEqual(cfg.getEventAlgo('HelloAlg').MyInt, 1)
+        cfg.wasMerged()
 
     def test_postExecPlainCapitalised(self):
         runArgs = RunArguments()
@@ -46,6 +47,7 @@ class TestTransformUtils(unittest.TestCase):
         cfg.addEventAlgo(CompFactory.HelloAlg(MyInt=123))
         processPostExec(runArgs, flags, cfg)
         self.assertEqual(cfg.getEventAlgo('HelloAlg').MyInt, 1)
+        cfg.wasMerged()
 
     def test_prePostExecCombined(self):
         runArgs = RunArguments()
@@ -59,6 +61,7 @@ class TestTransformUtils(unittest.TestCase):
         cfg.addEventAlgo(CompFactory.HelloAlg(MyInt=123))
         processPostExec(runArgs, flags, cfg)
         self.assertEqual(cfg.getEventAlgo('HelloAlg').MyInt, 5)
+        cfg.wasMerged()
 
 
 if __name__ == '__main__':

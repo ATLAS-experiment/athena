@@ -7,6 +7,7 @@
 
 #include "xAODMuon/MuonContainer.h"
 #include "xAODMuon/MuonAuxContainer.h"
+#include "xAODMuon/MuonAuxContainerR4.h"
 #include "xAODMuon/MuonSegmentContainer.h"
 #include "xAODMuon/MuonSegmentAuxContainer.h"
 #include "xAODMuon/SlowMuonContainer.h"

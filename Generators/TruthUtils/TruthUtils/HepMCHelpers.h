@@ -18,19 +18,14 @@
 
 namespace MC
 {
- template <class VTX>
- auto particles_in (const VTX* p) { return p->particles_in(); }
- template <class VTX>
- auto particles_in (const std::shared_ptr<VTX>& p) { return p->particles_in(); }
-
  namespace Pythia8
  {
    /// @brief  To be understood
-  template <class T> inline bool isConditionA(const T& p)  { return p->status() == 62 || p->status() == 52 || p->status() == 21 || p->status() == 22;}
+  template <class T> inline bool isConditionA(const T& p) { return p->status() == 62 || p->status() == 52 || p->status() == 21 || p->status() == 22;}
 
-  template <class T> inline bool isConditionB(const T& p)  { return p->status() == 23;}
+  template <class T> inline bool isConditionB(const T& p) { return p->status() == 23;}
 
-  template <class T> inline bool isConditionC(const T& p)  { return p->status() > 30 && p->status() < 40;}
+  template <class T> inline bool isConditionC(const T& p) { return p->status() > 30 && p->status() < 40;}
  }
 
 #include "AtlasPID.h"
@@ -39,21 +34,21 @@ namespace MC
   template <class T> inline bool isInteracting(const T& p) { return isStrongInteracting<T>(p) || isEMInteracting<T>(p) || isGeantino<T>(p); }
 
   /// @brief Identify if the particle with given PDG ID would produce ID tracks but not shower in the detector if stable
-  template <class T> inline  bool isChargedNonShowering(const T& p) { return (isMuon<T>(p) || isSUSY<T>(p)); }
+  template <class T> inline bool isChargedNonShowering(const T& p) { return (isMuon<T>(p) || isSUSY<T>(p)); }
 
   /// @brief Identify if the particle is beam particle
-  template <class T> inline bool isBeam(const T& p)  { return HepMC::status(p)%HepMC::SIM_STATUS_THRESHOLD == 4;}
+  template <class T> inline bool isBeam(const T& p) { return HepMC::status(p)%HepMC::SIM_STATUS_THRESHOLD == 4;}
 
   /// @brief Identify if the particle decayed
-  template <class T> inline bool isDecayed(const T& p)  { return HepMC::status(p)%HepMC::SIM_STATUS_THRESHOLD == 2;}
+  template <class T> inline bool isDecayed(const T& p) { return HepMC::status(p)%HepMC::SIM_STATUS_THRESHOLD == 2;}
 
   /// @brief Identify if the particle is stable, i.e. has not decayed
-  template <class T> inline bool isStable(const T& p)   { return HepMC::status(p)%HepMC::SIM_STATUS_THRESHOLD == 1;}
+  template <class T> inline bool isStable(const T& p) { return HepMC::status(p)%HepMC::SIM_STATUS_THRESHOLD == 1;}
 
   /// @brief Identify if the particle is final state particle
-  template <class T> inline bool isFinalState(const T& p)   { return HepMC::status(p)%HepMC::SIM_STATUS_THRESHOLD == 1 && !p->end_vertex();}
+  template <class T> inline bool isFinalState(const T& p) { return HepMC::status(p)%HepMC::SIM_STATUS_THRESHOLD == 1 && !p->end_vertex();}
 
-  /// @brief Identify if the particle is physical, i.e. is stable or decayed 
+  /// @brief Identify if the particle is physical, i.e. is stable or decayed
   template <class T> inline bool isPhysical(const T& p) { return isStable<T>(p) || isDecayed<T>(p); }
 
   /// @brief Determine if the particle is stable at the generator (not det-sim) level,
@@ -66,7 +61,7 @@ namespace MC
   template <class T> inline bool isSimInteracting(const T& p) { return isGenStable<T>(p) && isInteracting<T>(p);}
 
   /// @brief Identify if particle is satble or decayed in simulation. + a pathological case of decayed particle w/o end vertex.
-  /// The decayed particles w/o end vertex might occur in case of simulation of long lived particles in Geant stripped off the decay products. 
+  /// The decayed particles w/o end vertex might occur in case of simulation of long lived particles in Geant stripped off the decay products.
   /// I.e. those particles should be re-decayed later.
   template <class T> inline bool isStableOrSimDecayed(const T& p) {
     const auto vertex = p->end_vertex();
@@ -87,7 +82,7 @@ namespace MC
   }
 
   /// @brief Function to get a mother of particle. MCTruthClassifier legacy.
-  /** This can be used for HepMC3::GenVertexPtr, HepMC3::ConstGenVertexPtr or xAOD::TruthVertex* */  
+  /** This can be used for HepMC3::GenVertexPtr, HepMC3::ConstGenVertexPtr or xAOD::TruthVertex* */
   template <class T> T findMother(T thePart) {
     auto partOriVert = thePart->production_vertex();
     if (!partOriVert) return nullptr;
@@ -102,7 +97,7 @@ namespace MC
     size_t itr = 0;
     do {
       if (itr != 0) partOriVert = MothOriVert;
-      for ( const auto& p : particles_in(partOriVert) ) {
+      for ( const auto& p : partOriVert->particles_in() ) {
         theMoth = p;
         if (!theMoth) continue;
         MotherPDG = theMoth->pdg_id();
@@ -119,8 +114,8 @@ namespace MC
   }
 
   /// @brief Function to find a particle in container
-  /** This can be used for HepMC3::GenVertexPtr, HepMC3::ConstGenVertexPtr or xAOD::TruthVertex* */  
-  template <class C, class T>  T findMatching(C TruthContainer, T p) {
+  /** This can be used for HepMC3::GenVertexPtr, HepMC3::ConstGenVertexPtr or xAOD::TruthVertex* */
+  template <class C, class T> T findMatching(C TruthContainer, T p) {
     T ptrPart = nullptr;
     if (!p) return ptrPart;
     if constexpr (std::is_pointer_v<C> || HepMC::is_smart_ptr_v<C>){ //C is ptr
@@ -159,7 +154,7 @@ namespace MC
     auto endVtx = thePart->end_vertex();
     if (!endVtx) return;
     for (const auto& theDaughter: endVtx->particles_out()) {
-      if (!theDaughter) continue;  
+      if (!theDaughter) continue;
       if (isStable(theDaughter) && !HepMC::is_simulation_particle(theDaughter)) {
          allstabledescendants.insert(theDaughter);
       }
@@ -170,8 +165,8 @@ namespace MC
   /// @brief Function to classify the vertex as hard scattering vertex.
   /// AV: This is MCtruthClassifier legacy. Note that this function willnot capture some cases of the HardScattering vertices.
   /// The function should be improved in the future.
-  /** This can be used for HepMC3::GenVertexPtr, HepMC3::ConstGenVertexPtr or xAOD::TruthVertex* */  
-  template <class T>  bool isHardScatteringVertex(T pVert) {
+  /** This can be used for HepMC3::GenVertexPtr, HepMC3::ConstGenVertexPtr or xAOD::TruthVertex* */
+  template <class T> bool isHardScatteringVertex(T pVert) {
     if (pVert == nullptr) return false;
     T pV = pVert;
     int numOfPartIn(0);
@@ -196,14 +191,13 @@ namespace MC
   /// @brief Function to classify the particle.
   /// AV: This is MCtruthClassifier legacy.
   /// The function should be improved in the future.
-  /** This can be used for HepMC3::GenVertexPtr, HepMC3::ConstGenVertexPtr or xAOD::TruthVertex* */  
-    template <class T, class U>
-    bool isFromHadron(T p, U hadron, bool &fromTau, bool &fromBSM) {
+  /** This can be used for HepMC3::GenVertexPtr, HepMC3::ConstGenVertexPtr or xAOD::TruthVertex* */
+    template <class T, class U> bool isFromHadron(T p, U hadron, bool &fromTau, bool &fromBSM) {
     if (isHadron(p)&&!isBeam(p))  return true; // trivial case
     auto vtx = p->production_vertex();
     if (!vtx)  return false;
     bool fromHad = false;
-    for ( const auto& parent : particles_in(vtx) ) {
+    for ( const auto& parent : vtx->particles_in() ) {
       if (!parent) continue;
       // should this really go into parton-level territory?
       // probably depends where BSM particles are being decayed
@@ -220,8 +214,8 @@ namespace MC
   }
 
   /// @brief Function to find the end vertex of a particle.
-  /// This algorithm allows for 1->1 decays. 
-  /** This can be used for HepMC3::GenVertexPtr, HepMC3::ConstGenVertexPtr or xAOD::TruthVertex*  and particle counterparts*/  
+  /// This algorithm allows for 1->1 decays.
+  /** This can be used for HepMC3::GenVertexPtr, HepMC3::ConstGenVertexPtr or xAOD::TruthVertex*  and particle counterparts*/
   template <class T> auto findSimulatedEndVertex(T thePart) -> decltype(thePart->end_vertex()) {
      decltype(thePart->end_vertex()) EndVert = thePart->end_vertex();
      decltype(thePart->end_vertex()) pVert(nullptr);
@@ -249,7 +243,7 @@ namespace MC
   }
 
   /// @brief Function to find the stable particle descendants of the given vertex..
-  /** This can be used for HepMC3::GenVertexPtr, HepMC3::ConstGenVertexPtr or xAOD::TruthVertex*  and particle counterparts*/  
+  /** This can be used for HepMC3::GenVertexPtr, HepMC3::ConstGenVertexPtr or xAOD::TruthVertex*  and particle counterparts*/
   template <class V> auto findFinalStateParticles(V theVert) -> decltype(theVert->particles_out()) {
     if (!theVert) return {};
     decltype(theVert->particles_out()) finalStatePart;

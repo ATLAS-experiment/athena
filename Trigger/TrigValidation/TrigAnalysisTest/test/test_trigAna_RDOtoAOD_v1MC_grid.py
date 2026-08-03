@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 #
 # art-description: Test of transform RDO->RDO_TRIG->AOD->DAOD with threads=8, MC_pp_run3_v1 and AODSLIM
 # art-type: grid
@@ -40,7 +40,6 @@ rdo2aod.max_events = 800
 rdo2aod.threads = 8
 rdo2aod.concurrent_events = 8
 rdo2aod.args = '--outputAODFile=AOD.pool.root --steering "doRDO_TRIG"'
-rdo2aod.args += ' --CA "all:True"'
 rdo2aod.args += ' --preExec="all:{:s};"'.format(preExec)
 rdo2aod.args += ' --preInclude "all:Campaigns.MC23e"'
 rdo2aod.args += ' --conditionsTag "default:' + conditions + '"'
@@ -52,7 +51,8 @@ aod2daod.forks = 8
 aod2daod.explicit_input = True
 aod2daod.args = '--inputAODFile=AOD.pool.root --outputDAODFile=DAOD.pool.root --formats=PHYS'
 aod2daod.args += ' --sharedWriter=True --athenaMPMergeTargetSize "DAOD_*:0"'
-aod2daod.args += ' --asetup="all:Athena,main,latest"'
+# not needed for tests running in main
+#aod2daod.args += ' --asetup="all:Athena,main,latest"'
 
 test = Test.Test()
 test.art_type = 'grid'

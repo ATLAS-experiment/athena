@@ -14,7 +14,7 @@
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "L1CaloFEXToolInterfaces/IgFEXJwoJAlgo.h" //also has gTowersType typedef
 #include "L1CaloFEXCond/gFEXDBCondData.h"
-
+#include "TrigConfData/L1Menu.h"
 
 #include <vector>
 #include <memory>
@@ -35,13 +35,8 @@ namespace LVL1 {
     /** standard Athena-Algorithm method */
     virtual StatusCode initialize() override;
 
-
-    virtual void setAlgoConstant(int aFPGA_A, int bFPGA_A,
-                                 int aFPGA_B, int bFPGA_B,
-                                 int aFPGA_C, int bFPGA_C,
-                                 int gXE_seedThrA, int gXE_seedThrB, int gXE_seedThrC) override;
-
-    virtual std::vector<std::unique_ptr<gFEXJwoJTOB>> jwojAlgo(const gTowersType& Atwr, int pucA_JWJ,
+    virtual std::vector<std::unique_ptr<gFEXJwoJTOB>> jwojAlgo(const EventContext& ctx,
+							       const gTowersType& Atwr, int pucA_JWJ,
                                                                const gTowersType& Btwr, int pucB_JWJ,
                                                                const gTowersType& Ctwr, int pucC_JWJ,
                                                                std::array<int32_t, 4> & outTOB) const override;
@@ -49,19 +44,11 @@ namespace LVL1 {
 
 
   private:
+
     SG::ReadCondHandleKey<gFEXDBCondData> m_DBToolKey{this, "DBToolKey", "gFEXDBParams", "Database tool key"};
 
-    float m_aFPGA_A{};
-    float m_bFPGA_A{};
-    float m_aFPGA_B{};
-    float m_bFPGA_B{};
-    float m_aFPGA_C{};
-    float m_bFPGA_C{};
-    float m_gBlockthresholdA{};
-    float m_gBlockthresholdB{};
-    float m_gBlockthresholdC{};
-    std::string m_fwVersion;
- 
+    SG::ReadHandleKey<TrigConf::L1Menu> m_l1MenuKey{this, "L1TriggerMenu", "DetectorStore+L1TriggerMenu","Name of the L1Menu object to read configuration from"};
+
 
     void gBlockAB(const gTowersType & twrs, gTowersType & gBlkSum, gTowersType & hasSeed, int seedThreshold) const;
 

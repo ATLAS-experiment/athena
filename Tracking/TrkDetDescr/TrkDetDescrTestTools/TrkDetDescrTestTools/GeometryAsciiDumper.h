@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -39,10 +39,7 @@ namespace Trk {
       public:
 
         /** Constructor */
-        GeometryAsciiDumper(const std::string&,const std::string&,const IInterface*);
-
-        /** Destructor */
-        virtual ~GeometryAsciiDumper();
+        using RecursiveGeometryProcessor::RecursiveGeometryProcessor;
 
         /** AlgTool initialize method */
         StatusCode initialize();
@@ -62,8 +59,9 @@ namespace Trk {
         StatusCode processNode(const Surface&, size_t level=0) const;
 
         mutable std::ofstream       m_outputFile;
-        std::string                 m_outputFileName;  //!< where the tree is written to  
-        int                         m_outputPrecision;
+        Gaudi::Property<std::string> m_outputFileName
+          {this, "OutputFileName", "TrackingGeometryAscii.txt"};
+        Gaudi::Property<int> m_outputPrecision{this, "OutputPrecision", 6};
 
     };
 }

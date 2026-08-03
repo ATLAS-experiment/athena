@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( TrigCommon )
@@ -9,11 +9,12 @@ atlas_install_scripts( bin/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
 
 # Aliases:
 atlas_add_alias( athenaHLT "athenaHLT.py" )
+atlas_add_alias( athenaEF "athenaEF.py" )
 
 # Tests:
 atlas_add_test( test_AthHLT
    SCRIPT python ${CMAKE_CURRENT_SOURCE_DIR}/python/AthHLT.py
-   POST_EXEC_SCRIPT nopost.sh
+   POST_EXEC_SCRIPT noerror.sh
    PROPERTIES TIMEOUT 300 )
 
 atlas_add_test( athenaHLT_jo_noopts

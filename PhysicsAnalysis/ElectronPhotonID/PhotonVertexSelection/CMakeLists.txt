@@ -43,5 +43,5 @@ if( NOT XAOD_ANALYSIS )
    atlas_add_test( PhotonVertexSelection_test
       SCRIPT test/testPhotonVertexSelection.py
       PROPERTIES TIMEOUT 300
-      POST_EXEC_SCRIPT nopost.sh )
+      POST_EXEC_SCRIPT noerror.sh )
 endif()

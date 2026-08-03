@@ -87,7 +87,7 @@ check 'h1u16/storage/values[3]' u16 1  hists.h5
 # --- merge checks ---
 # Copy the file and merge both copies; values double for additive types.
 cp hists.h5 hists2.h5
-hdf5-merge --overwrite hists.h5 hists2.h5 -o merged.h5
+hdf5-merge --overwrite hists.h5 hists2.h5 -o merged.h5 > merge1.log
 
 # double storage: 1 fill per file → 2 after merge
 check 'h3d/storage/values[0,1,2]'     f64 2     merged.h5
@@ -117,7 +117,7 @@ check 'h1u16/storage/values[2]' u16 2  merged.h5
 check 'h1u16/storage/values[3]' u16 2  merged.h5
 
 # merge merged.h5 (2x) with the original (1x) → values triple
-hdf5-merge --overwrite merged.h5 hists.h5 -o triple.h5
+hdf5-merge --overwrite merged.h5 hists.h5 -o triple.h5 > merge2.log
 check 'h1i/storage/values[1]' i64 3 triple.h5
 
 # self-test: verify that check detects wrong inputs

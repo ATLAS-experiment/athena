@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( SUSYTools )
@@ -100,7 +100,7 @@ endif()
 atlas_add_test( SUSYCrossSection_test
   SOURCES  test/SUSYCrossSection_test.cxx
   LINK_LIBRARIES SUSYToolsLib
-  POST_EXEC_SCRIPT nopost.sh
+  POST_EXEC_SCRIPT noerror.sh
 )
 
 # Install files from the package:

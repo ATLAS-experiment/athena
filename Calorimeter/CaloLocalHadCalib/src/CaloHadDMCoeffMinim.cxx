@@ -23,7 +23,6 @@
 #include "CaloLocalHadCalib/CaloLocalHadCoeffHelper.h"
 #include "CaloLocalHadCalib/GetLCDefs.h"
 #include "CaloLocalHadCalib/GetLCSinglePionsPerf.h"
-#include "boost/io/ios_state.hpp"
 #include <cmath>
 #include <format>
 #include <iostream>
@@ -387,12 +386,14 @@ CaloLocalHadCoeff * CaloHadDMCoeffMinim::process(CaloHadDMCoeffData *myData, Cal
     m_minimPars = p.second;
     CaloLocalHadCoeff::LocalHadCoeff pars;
     pars.resize(m_minimPars.size(),0.0);
-    boost::io::ios_base_all_saver coutsave (std::cout);
-    std::cout << std::fixed << std::setprecision(3) << iBin << " ";
+    std::cout << std::format("{:.3f} ", static_cast<double>(iBin));
     for(unsigned int i_par = 0; i_par<m_minimPars.size(); i_par++){
       pars[i_par] = m_minimPars[i_par].value;
       if(m_minimPars[i_par].fixIt == 1) continue;
-      std::cout << std::fixed << std::setprecision(3) << "(" << m_minimPars[i_par].name << " " << m_minimPars[i_par].value << " " << m_minimPars[i_par].error << ") ";
+      std::cout << std::format("({} {:.3f} {:.3f}) ",
+                               m_minimPars[i_par].name,
+                               m_minimPars[i_par].value,
+                               m_minimPars[i_par].error);
     }
     std::cout << std::endl;
 

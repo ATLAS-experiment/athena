@@ -4,7 +4,9 @@
 
 #include "TrigEgammaMonitorBaseAlgorithm.h"
 
-
+#include <ranges>
+#include <string_view>
+#include <vector>
 
 TrigEgammaMonitorBaseAlgorithm::TrigEgammaMonitorBaseAlgorithm( const std::string& name, ISvcLocator* pSvcLocator )
   : AthMonitorAlgorithm(name,pSvcLocator),
@@ -178,7 +180,7 @@ bool TrigEgammaMonitorBaseAlgorithm::isPrescaled(const std::string& trigger) con
 
 
 
-asg::AcceptData TrigEgammaMonitorBaseAlgorithm::setAccept( const TrigCompositeUtils::Decision *dec, const TrigInfo& info, const bool onlyHLT) const {
+asg::AcceptData TrigEgammaMonitorBaseAlgorithm::setAccept(const EventContext& ctx, const TrigCompositeUtils::Decision *dec, const TrigInfo& info, const bool onlyHLT) const {
     
     ATH_MSG_DEBUG("setAccept");
 
@@ -197,11 +199,11 @@ asg::AcceptData TrigEgammaMonitorBaseAlgorithm::setAccept( const TrigCompositeUt
         auto trigger = info.trigger;
         if (!onlyHLT){
             // Step 1
-            passedL1Calo = match()->ancestorPassed<TrigRoiDescriptorCollection>( dec , trigger , "initialRois", condition);
+            passedL1Calo = match()->ancestorPassed<TrigRoiDescriptorCollection>(ctx, dec , trigger , "initialRois", condition);
 
             if( passedL1Calo ){ // HLT item get full decision
                 // Step 2
-                passedL2Calo = match()->ancestorPassed<xAOD::TrigEMClusterContainer>(dec, trigger, match()->key("FastCalo"), condition);  
+                passedL2Calo = match()->ancestorPassed<xAOD::TrigEMClusterContainer>(ctx, dec, trigger, match()->key("FastCalo"), condition);
             
                 if(passedL2Calo){
 
@@ -209,9 +211,9 @@ asg::AcceptData TrigEgammaMonitorBaseAlgorithm::setAccept( const TrigCompositeUt
                     if(info.signature == "Electron" or info.signature == "e"){
                         std::string key = match()->key("FastElectrons");
                         if(info.lrt)  key = match()->key("FastElectrons_LRT");
-                        passedL2 = match()->ancestorPassed<xAOD::TrigElectronContainer>(dec, trigger, key, condition);
+                        passedL2 = match()->ancestorPassed<xAOD::TrigElectronContainer>(ctx, dec, trigger, key, condition);
                     }else if(info.signature == "Photon" or info.signature == "g"){
-                        passedL2 = match()->ancestorPassed<xAOD::TrigPhotonContainer>(dec, trigger, match()->key("FastPhotons"), condition);
+                        passedL2 = match()->ancestorPassed<xAOD::TrigPhotonContainer>(ctx, dec, trigger, match()->key("FastPhotons"), condition);
                     }
 
                     if(passedL2){
@@ -222,7 +224,7 @@ asg::AcceptData TrigEgammaMonitorBaseAlgorithm::setAccept( const TrigCompositeUt
                         if(info.lrt) key = match()->key("PrecisionCalo_LRT");
                         if(info.ion) key = match()->key("PrecisionCalo_HI");
 
-                        passedEFCalo = match()->ancestorPassed<xAOD::CaloClusterContainer>(dec, trigger, key, condition);
+                        passedEFCalo = match()->ancestorPassed<xAOD::CaloClusterContainer>(ctx, dec, trigger, key, condition);
 
                         if(passedEFCalo){
 
@@ -237,14 +239,14 @@ asg::AcceptData TrigEgammaMonitorBaseAlgorithm::setAccept( const TrigCompositeUt
                                     std::string key = match()->key("Electrons_GSF");
                                     if(info.lrt)  key = match()->key("Electrons_LRT");
                                     if(info.nogsf)  key = match()->key("Electrons");
-                                    passedEF = match()->ancestorPassed<xAOD::ElectronContainer>(dec, trigger, key, condition);
+                                    passedEF = match()->ancestorPassed<xAOD::ElectronContainer>(ctx, dec, trigger, key, condition);
                                 }
     
                             }else if(info.signature == "Photon" or info.signature == "g"){
                                 if (info.etcut){
                                     passedEF = true; // since we dont run the precisePhoton step
                                 }else{
-                                    passedEF = match()->ancestorPassed<xAOD::PhotonContainer>(dec, trigger, match()->key("Photons"), condition);
+                                    passedEF = match()->ancestorPassed<xAOD::PhotonContainer>(ctx, dec, trigger, match()->key("Photons"), condition);
                                 }
                             }
                         } // EFCalo
@@ -261,14 +263,14 @@ asg::AcceptData TrigEgammaMonitorBaseAlgorithm::setAccept( const TrigCompositeUt
                     std::string key = match()->key("Electrons_GSF");
                     if(info.lrt)  key = match()->key("Electrons_LRT");
                     if(info.nogsf)  key = match()->key("Electrons");
-                    passedEF = match()->ancestorPassed<xAOD::ElectronContainer>(dec, trigger, key, condition);
+                    passedEF = match()->ancestorPassed<xAOD::ElectronContainer>(ctx, dec, trigger, key, condition);
                 }
 
             }else if(info.signature == "Photon" or info.signature == "g"){
                 if (info.etcut){
                     passedEF = true; // since we dont run the precisePhoton step
                 }else{
-                    passedEF = match()->ancestorPassed<xAOD::PhotonContainer>(dec, trigger, match()->key("Photons"), condition);
+                    passedEF = match()->ancestorPassed<xAOD::PhotonContainer>(ctx, dec, trigger, match()->key("Photons"), condition);
                 }
             }
         }
@@ -674,18 +676,16 @@ void TrigEgammaMonitorBaseAlgorithm::setTrigInfo(const std::string& trigger){
     std::string signature = "";
     float threshold = 0;
     // HLT_e/gXX_(pidname/etcut/idperf)_*_L1EMXX to e/gXX_(pidname/etcut/idperf)_*_L1EMXX
-    if(boost::contains(hltinfo,"HLT")) hltinfo.erase(0,4);
-    
-
+    if(hltinfo.contains("HLT")) hltinfo.erase(0,4);
     std::vector<std::string> parts;
-    boost::split(parts,hltinfo,boost::is_any_of("_"));
+    for (auto&& part : hltinfo | std::views::split('_')) parts.emplace_back(part.begin(), part.end());
     std::string pidname;
 
     // e/gXX_(pidname/etcut/idperf)_*_L1EMXX
-    if(boost::contains(parts.at(0),"e")) {
+    if(parts.at(0).contains("e")) {
         signature = "Electron";
         pidname = m_defaultProbePidElectron;
-    }else if(boost::contains(parts.at(0),"g")) {
+    }else if(parts.at(0).contains("g")) {
         signature = "Photon";
         pidname = m_defaultProbePidPhoton;
     }else {
@@ -711,12 +711,12 @@ void TrigEgammaMonitorBaseAlgorithm::setTrigInfo(const std::string& trigger){
 
 
     // extra information
-    nogsf   = boost::contains(trigger,"nogsf");
-    lrt     = boost::contains(trigger,"lrt");
-    ion     = boost::contains(trigger,"ion");
+    nogsf   = trigger.contains("nogsf");
+    lrt     = trigger.contains("lrt");
+    ion     = trigger.contains("ion");
 
     for(auto& iso : isoNames){
-        if(boost::contains(trigger, iso)){
+        if(trigger.contains(iso)){
             isolation=iso; isolated=true; break;
         }
     }
@@ -728,7 +728,7 @@ void TrigEgammaMonitorBaseAlgorithm::setTrigInfo(const std::string& trigger){
 
     // L1EMXX
     std::string l1seed = getL1Item(trigger);
-    l1legacy = !boost::contains(l1seed, "eEM");
+    l1legacy = !l1seed.contains("eEM");
 
 
     ATH_MSG_DEBUG("=================== Chain Parser =======================");
@@ -854,7 +854,7 @@ void TrigEgammaMonitorBaseAlgorithm::setTrigInfoR3(const std::string& trigger){
     bool l1legacy=true;
     // L1EMXX
     std::string l1seed = getL1Item(trigger);
-    l1legacy = !boost::contains(l1seed, "eEM");
+    l1legacy = !l1seed.contains("eEM");
 
 
     std::vector<std::string> isoNames = {"ivarloose","ivarmedium","ivartight","icaloloose","icalomedium","icalotight"};
@@ -869,24 +869,22 @@ void TrigEgammaMonitorBaseAlgorithm::setTrigInfoR3(const std::string& trigger){
     std::string isolation="";
 
     // extra information
-    nogsf   = boost::contains(trigger,"nogsf");
-    lrt     = boost::contains(trigger,"lrt");
-    ion     = boost::contains(trigger,"ion");
+    nogsf   = trigger.contains("nogsf");
+    lrt     = trigger.contains("lrt");
+    ion     = trigger.contains("ion");
 
     for(auto& iso : isoNames){
-        if(boost::contains(trigger, iso)){
+        if(trigger.contains(iso)){
             isolation=iso; isolated=true; break;
         }
     }
-
     std::vector<std::string> parts;
-    boost::split(parts, trigger, boost::is_any_of("_"));
-
-    if(boost::contains(trigger, "idperf")){
+    for (auto&& part : trigger | std::views::split('_')) parts.emplace_back(part.begin(), part.end());
+    if(trigger.contains("idperf")){
         ATH_MSG_DEBUG("This is idperf");
         idperf=true;
     }
-    else if(boost::contains(trigger, "etcut")){
+    else if(trigger.contains("etcut")){
         ATH_MSG_DEBUG("This is etcut");
         etcut=true;
     }
@@ -922,22 +920,10 @@ void TrigEgammaMonitorBaseAlgorithm::setTrigInfoR3(const std::string& trigger){
 }
 
 
-
-
-
-
-
-
-
-
-
 // For Run-3, all triggers must have the L1 seed in name (last part)
 std::string TrigEgammaMonitorBaseAlgorithm::getL1Item(const std::string& trigger) const{
-    std::vector<std::string> parts;
-    boost::split(parts,trigger,boost::is_any_of("_"));
-    // L1EMXX
-    std::string l1seed = parts.back();
-    return l1seed;
+  const auto pos = trigger.rfind('_');
+  return pos == std::string::npos ? trigger : trigger.substr(pos + 1);
 }
 
 

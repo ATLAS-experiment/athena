@@ -54,7 +54,7 @@ StatusCode ForwardElectronToolsTestAlg::execute(const EventContext& ctx) const
 	    fwd_electrons.push_back(el);
 	  }
     }
-    if (fwd_electrons.size() == 0) return StatusCode::SUCCESS;
+    if (fwd_electrons.empty()) return StatusCode::SUCCESS;
 
     for (const xAOD::Electron* el : fwd_electrons) {
         const xAOD::CaloCluster* cluster = el->caloCluster();

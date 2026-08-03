@@ -16,19 +16,20 @@ namespace MuonR4 {
     class SegmentSelectionTool : public extends <AthAlgTool, ISegmentSelectionTool> {
         public:
             using base_class::base_class;
-            using HitSummary = Segment::HitSummary;
 
             virtual StatusCode initialize() override final;
-
+            /** @copydoc ISegmentSelectionTool::passSeedingQuality */
             virtual bool passSeedingQuality(const EventContext& ctx,
-                                            const Segment& segment) const override final;
+                                            const xAOD::MuonSegment& segment) const override final;
 
+            /** @copydoc ISegmentSelectionTool::passTrackQuality */
             virtual bool passTrackQuality(const EventContext& ctx,
-                                          const Segment& segment) const override final;
+                                          const xAOD::MuonSegment& segment) const override final;
 
+            /** @copydoc ISegmentSelectionTool::compatibleForTrack */
             virtual bool compatibleForTrack(const EventContext& ctx,
-                                            const Segment& segA,
-                                            const Segment& segB) const override final;
+                                            const xAOD::MuonSegment& segA,
+                                            const xAOD::MuonSegment& segB) const override final;
         private:
             /** @brief IdHelperSvc to decode the Identifiers */
             ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{this, "IdHelperSvc",  "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
@@ -54,8 +55,6 @@ namespace MuonR4 {
             Gaudi::Property<unsigned> m_nTgcPhiSeedHitCutEI{this, "minTgcPhiSeedHitsEI", 1};
             /** @brief Minimum number of Tgc phi hits in EM to consider the segment for seeding */
             Gaudi::Property<unsigned> m_nTgcPhiSeedHitCutEM{this, "minTgcPhiSeedHitsEM", 2};
-
-            const Muon::MuonSectorMapping m_sectorMap{};
     };
 }
 #endif

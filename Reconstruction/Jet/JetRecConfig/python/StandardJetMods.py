@@ -83,7 +83,6 @@ try:
         # Response variables
         Response = JetModifier("JetResponseTool","response",
                              JetContainer=_jetname,
-                             prereqs= ["input:EventDensity"],
                              createfn=JetResponseToolConfig.getJetResponseTool,
                              ),
     )
@@ -218,7 +217,7 @@ try:
         JetPtAssociation = JetModifier("JetPtAssociationTool", "jetPtAssociation",
                                        filterfn=isMC,
                                        createfn=JetMomentToolsConfig.getJetPtAssociationTool,
-                                       prereqs=["ghost:Truth"],
+                                       prereqs=["ghost:Truth","input:AntiKt4TruthJets"],
                                        JetContainer = _jetname
                                        ),
 
@@ -242,6 +241,14 @@ try:
                                    IsolationCalculations = ["IsoFixedCone:5:Pt", ],
                                    RhoKey = "",
                                    ),
+
+        jetisoHLT = JetModifier("JetIsolationTool","isoHLT",
+                             JetContainer=_jetname,
+                             InputConstitContainer = _constitContainername,
+                             IsolationCalculations = ["IsoFixedCone:5:Pt",   "IsoFixedCone:5:PtPUsub",],
+                             RhoKey = lambda jetdef, specs : "HLT_Kt4"+jetdef.inputdef.label+"EventShape" ,
+                             prereqs= ["input:HLT_EventDensity"],
+                             ),
     )
 
 except ModuleNotFoundError:

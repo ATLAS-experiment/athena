@@ -15,7 +15,6 @@ StatusCode
 EGPhotonBDTToolWrapper::initialize()
 {
   ATH_CHECK(m_selectorTool.retrieve());
-  ATH_CHECK(m_observableTool.retrieve());
 
   if (!(m_fudgeMCTool.name().empty())) {
     ATH_CHECK(m_fudgeMCTool.retrieve());
@@ -26,7 +25,6 @@ EGPhotonBDTToolWrapper::initialize()
   ATH_CHECK(m_ContainerName.initialize());
   ATH_CHECK(m_decoratorPass.initialize());
   ATH_CHECK(m_decoratorIsEM.initialize());
-  ATH_CHECK(m_decoratorScore.initialize());
 
   return StatusCode::SUCCESS;
 }
@@ -43,9 +41,6 @@ EGPhotonBDTToolWrapper::addBranches(const EventContext& ctx) const
   };
   SG::WriteDecorHandle<xAOD::EgammaContainer, unsigned int> decoratorIsEM{
     m_decoratorIsEM, ctx
-  };
-  SG::WriteDecorHandle<xAOD::EgammaContainer, float> decoratorScore{
-    m_decoratorScore, ctx
   };
 
   // If we're applying corrections, the correction tools will give us
@@ -105,8 +100,6 @@ EGPhotonBDTToolWrapper::addBranches(const EventContext& ctx) const
     // compute the is EM word
     unsigned int isEM = 0;
     ATH_CHECK(m_selectorTool->execute(ctx, pCopy, isEM));
-    // compute the BDT score
-    const float score = m_observableTool->evaluate(pCopy);
     
     // decorate the original object
     if (m_cut.empty()) {
@@ -115,7 +108,6 @@ EGPhotonBDTToolWrapper::addBranches(const EventContext& ctx) const
       decoratorPass(*par) = theAccept.getCutResult(m_cut) ? 1 : 0;
     }
     decoratorIsEM(*par) = isEM;
-    decoratorScore(*par) = score;
   }
 
   return StatusCode::SUCCESS;

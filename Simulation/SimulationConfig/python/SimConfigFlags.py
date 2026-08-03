@@ -149,6 +149,7 @@ def createSimConfigFlags():
     scf.addFlag("Sim.NRRWeight", False)
     scf.addFlag("Sim.PRRThreshold", False)
     scf.addFlag("Sim.PRRWeight", False)
+    scf.addFlag("Sim.MultipleStepsInMSCTransport", False)
     scf.addFlag("Sim.OptionalUserActionList", [])
 
     # G4FieldConfig

@@ -18,7 +18,6 @@
 #include "D3PDMakerUtils/BlockFillerTool.h"
 #include "xAODTruth/TruthParticle.h"
 #include "GaudiKernel/ServiceHandle.h"
-#include "GaudiKernel/IPartPropSvc.h"
 
 namespace D3PD {
 
@@ -62,9 +61,6 @@ public:
 private:
   /// Property: Name for pdgId variable.
   std::string m_PDGIDVariable;
-
-  /// Property: Particle property service.
-  ServiceHandle<IPartPropSvc> m_ppsvc;
 
   /// Variable: Status code for the particle.
   int* m_status;

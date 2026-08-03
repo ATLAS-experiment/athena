@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /** 
@@ -37,10 +37,6 @@
 GetDetectorLocalFrames::GetDetectorLocalFrames(std::string const&  name, ISvcLocator* pSvcLocator) :
   AthAlgorithm(name, pSvcLocator),
   m_outputFileName("IDLocalFrames.txt"),  
-  
-  /** Pixel Variables */
-
-  /** SCT variables */  
 
   /** TRT variables */    
   m_trt_barrel_ec(0),
@@ -219,11 +215,9 @@ void GetDetectorLocalFrames::writeTRTFrames(){
   return;
 }
 
-void GetDetectorLocalFrames::writeVector(const std::string& name, const Amg::Vector3D& vector){
+void GetDetectorLocalFrames::writeVector(std::string_view name, const Amg::Vector3D& vector){
   if (msgLvl(MSG::VERBOSE)) msg(MSG::VERBOSE) << "In writeVector()" << endmsg;
-  
-  m_outputFile << name << " " << vector.x() << " " << vector.y() << "  " << vector.z() << std::endl;
-  
+  m_outputFile << name << " " << vector.x() << " " << vector.y() << "  " << vector.z() << "\n";
   if (msgLvl(MSG::VERBOSE)) msg(MSG::VERBOSE) << "Leaving writeVector()" << endmsg;
   return;
 }

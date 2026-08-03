@@ -1,47 +1,45 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef LAROFCBIN_PHYSCALITDIFFFROMSTDNTUPLE_H
 #define LAROFCBIN_PHYSCALITDIFFFROMSTDNTUPLE_H
 
-#include "AthenaBaseComps/AthAlgorithm.h"
+#include "AthenaBaseComps/AthReentrantAlgorithm.h"
 
 #include <vector>
 #include <string>
 
 
-class LArOFCBin_PhysCaliTdiffFromStdNtuple : public AthAlgorithm
+class LArOFCBin_PhysCaliTdiffFromStdNtuple : public AthReentrantAlgorithm
 {
  public:
-  LArOFCBin_PhysCaliTdiffFromStdNtuple(const std::string & name, ISvcLocator * pSvcLocator);
+  using AthReentrantAlgorithm::AthReentrantAlgorithm;
 
-  ~LArOFCBin_PhysCaliTdiffFromStdNtuple();
+  virtual ~LArOFCBin_PhysCaliTdiffFromStdNtuple();
 
   //standard algorithm methods
   /// implements IAlgorithm::initialize() 
-  StatusCode initialize() ; 
+  virtual StatusCode initialize() override;
 
   /// implements IAlgorithm::execute()  : Does nothing
-  StatusCode execute(const EventContext&) {return StatusCode::SUCCESS;}
+  virtual StatusCode execute(const EventContext&) const override {return StatusCode::SUCCESS;}
 
-  /// IAlgorithm::finalize() : Where the action takes place...
-  StatusCode finalize(){return StatusCode::SUCCESS;}
-  StatusCode stop();
+  virtual StatusCode stop() override;
  
  private:
   /// list of input ntuple file names 
-  std::vector<std::string> m_root_file_names;
+  StringArrayProperty m_root_file_names { this, "FileNames", {} };
   /// ntuple name
-  std::string m_ntuple_name;
+  StringProperty m_ntuple_name { this, "NtupleName", "PARAMS" };
   /// key of the OFCBin collection in Storegate
-  std::string m_store_key_ofcbin;
-  bool m_fillofc;
+  StringProperty m_store_key_ofcbin { this, "StoreKey_OFC", "LArOFC" };
+  BooleanProperty m_fillofc { this, "Store_OFC", false };
   /// key of the PhysCaliTdiff collection in Storegate
-  std::string m_store_key_tdiff;
-  bool m_filltdiff;
+  StringProperty m_store_key_tdiff { this, "StoreKey_Tdiff", "LArPhysCaliTdiff" };
+  BooleanProperty m_filltdiff { this, "Store_Tdiff", false };
   /// Grouping type.  Default is Feedthrough.
-  std::string m_groupingType;
+  StringProperty m_groupingType { this, "GroupingType", "FeedThrough" };
 };
 
 #endif

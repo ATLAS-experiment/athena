@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -40,10 +40,7 @@ namespace Trk {
      
       public:
         /** Constructor */
-        LayerMaterialProvider(const std::string&,const std::string&,const IInterface*);
-
-        /** Destructor */
-        virtual ~LayerMaterialProvider();
+        using base_class::base_class;
 
         virtual StatusCode initialize() override;
 
@@ -77,7 +74,9 @@ namespace Trk {
           { this, "LayerMaterialMapKey", "/GLOBAL/TrackingGeo/LayerMaterialV2",
             "COOL folder for material map" };
 
-        std::string m_layerMaterialMapName;
+        Gaudi::Property<std::string> m_layerMaterialMapName
+	  {this, "LayerMaterialMapName", "",
+	   "If LayerMaterialMapKey is not set, then fall back to retrieving this from the detector store."};
     };
 
 } // end of namespace

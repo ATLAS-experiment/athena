@@ -1,12 +1,12 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef LARSHAPEFROMSTDNTUPLE_H
 #define LARSHAPEFROMSTDNTUPLE_H
 
 #include "LArRawConditions/LArMCSym.h"
-#include "AthenaBaseComps/AthAlgorithm.h"
+#include "AthenaBaseComps/AthReentrantAlgorithm.h"
 #include "StoreGate/ReadCondHandleKey.h"
 
 #include <vector>
@@ -19,40 +19,35 @@ LArPhysWaveContainer containing the corresponding PhysWave.
 Version for standard Ntuple, produced by LArCalibTools algos....
  */
 
-class LArShapeFromStdNtuple : public AthAlgorithm
+class LArShapeFromStdNtuple : public AthReentrantAlgorithm
 {
  public:
-  LArShapeFromStdNtuple(const std::string & name, ISvcLocator * pSvcLocator);
+  using AthReentrantAlgorithm::AthReentrantAlgorithm;
 
   virtual ~LArShapeFromStdNtuple();
 
   //standard algorithm methods
-  /// implements IAlgorithm::initialize() 
   virtual StatusCode initialize() override;
-
-  /// implements IAlgorithm::execute()  : Does nothing
-  virtual StatusCode execute(const EventContext&) override {return StatusCode::SUCCESS;}
-
-  virtual StatusCode finalize() override {return StatusCode::SUCCESS;}
+  virtual StatusCode execute(const EventContext&) const override {return StatusCode::SUCCESS;}
   virtual StatusCode stop() override;
  
  private:
   /// the first  m_skipPoints points of the waveform in the ntuple are skipped
-  unsigned int m_skipPoints;
+  UnsignedIntegerProperty m_skipPoints { this, "SkipPoints", 0 };
   /// make a Shape with the first m_prefixPoints as zeros
-  unsigned int m_prefixPoints;
+  UnsignedIntegerProperty m_prefixPoints { this, "PrefixPoints", 0 };
   /// list of input ntuple file names 
-  std::vector<std::string> m_root_file_names;
+  StringArrayProperty m_root_file_names { this, "FileNames", {} };
   /// ntuple name
-  std::string m_ntuple_name;
+  StringProperty m_ntuple_name { this, "NtupleName", "SHAPE" };
   /// key of the LArShape collection in Storegate
-  std::string m_store_key;
+  StringProperty m_store_key { this, "StoreKey", "FromStdNtuple" };
   /// Grouping type.  
-  std::string m_groupingType;
+  StringProperty m_groupingType { this, "GroupingType", "ExtendedSubDetector" };
   /// Shape type
-  bool m_isComplete;
+  BooleanProperty m_isComplete { this, "isComplete", false };
 
-  bool m_done;
+  bool m_done = false;
 
   SG::ReadCondHandleKey<LArMCSym> m_mcSymKey
   {this, "MCSymKey", "LArMCSym", "SG Key of LArMCSym object"};

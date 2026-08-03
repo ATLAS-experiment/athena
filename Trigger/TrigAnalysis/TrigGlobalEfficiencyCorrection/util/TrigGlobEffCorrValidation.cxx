@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // contact: jmaurer@cern.ch
@@ -276,7 +276,7 @@ int main(int argc, char* argv[])
 		.setLeptonPDF(1, 1, {30e3f})
 		.setUnavailable("e24_lhmedium_L1EM20VH_OR_e60_lhmedium_OR_e120_lhloose")
 		.setEfficiency("mu20_iloose_L1MU15_OR_mu50", 0.60)
-		.setExpectedEfficiency(0.806800, 1e-6)
+		.setExpectedEfficiency(0.798000, 1e-6)
 	));
 	
 	ANA_CHECK(run_test(Config("1L (2 flavours, 1-4 leptons)")

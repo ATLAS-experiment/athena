@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArGeoWeightsFill.h"
@@ -15,20 +15,8 @@
 #include "CoralBase/AttributeListSpecification.h"
 #include "CoolKernel/StorageType.h"
 
-LArGeoWeightsFill::LArGeoWeightsFill(const std::string& name, ISvcLocator* pSvcLocator) :
-  AthAlgorithm(name,pSvcLocator),
-  m_onlineID(0),
-  m_ttService("CaloTriggerTowerService")
-{
-  declareProperty("Key",m_key="GeoWeights");
-  declareProperty("Dump",m_dump=false);
-  declareProperty("OutFile",m_outFileName="out.txt");
-  //declareProperty("InFile",m_inFileName="");
 
-  declareProperty("Fill",m_fill=true);
-}
-
-LArGeoWeightsFill::~LArGeoWeightsFill() {}
+LArGeoWeightsFill::~LArGeoWeightsFill() = default;
 
 
 StatusCode LArGeoWeightsFill::initialize() {
@@ -143,7 +131,7 @@ StatusCode LArGeoWeightsFill::stop() {
     std::ostream *out = &(std::cout); 
     std::ofstream outfile;
     if (m_outFileName.size()) {
-      outfile.open(m_outFileName.c_str(),std::ios::out);
+      outfile.open(m_outFileName,std::ios::out);
       if (outfile.is_open()) {
 	ATH_MSG_INFO ( "Writing to file " << m_outFileName );
 	out = &outfile;

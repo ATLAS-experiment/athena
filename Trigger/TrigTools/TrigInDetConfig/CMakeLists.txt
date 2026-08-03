@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( TrigInDetConfig )
@@ -10,12 +10,12 @@ atlas_install_joboptions( share/*.py)
 # Tests in the package:
 atlas_add_test( trigInDetFastTrackingCfg
    SCRIPT python -m TrigInDetConfig.TrigInDetConfig
-   POST_EXEC_SCRIPT nopost.sh )
+   POST_EXEC_SCRIPT noerror.sh )
 
 atlas_add_test( TrigTrackingPassFlags
    SCRIPT python -m unittest -v TrigInDetConfig.TrigTrackingPassFlags
-   POST_EXEC_SCRIPT nopost.sh )
+   POST_EXEC_SCRIPT noerror.sh )
 
 atlas_add_test( BuildSignatureFlags
    SCRIPT python -m unittest -v TrigInDetConfig.BuildSignatureFlags
-   POST_EXEC_SCRIPT nopost.sh )
+   POST_EXEC_SCRIPT noerror.sh )

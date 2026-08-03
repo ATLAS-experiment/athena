@@ -27,6 +27,7 @@
 #include "CLHEP/Units/SystemOfUnits.h"
 #include "StoreGate/StoreGateSvc.h"
 #include "TruthUtils/MagicNumbers.h"
+#include "AtlasHepMC/GenParticle.h"
 
 #include "TileEscapedEnergyProcessing.h"
 #include "TileGeoG4DMLookupBuilder.h"
@@ -57,8 +58,7 @@
 #include "G4ios.hh"
 #include "G4EventManager.hh"
 #include "MCTruth/AtlasG4EventUserInfo.h"
-
-#include "MCTruth/VTrackInformation.h"
+#include "MCTruth/TrackHelper.h"
 
 //CONSTRUCTOR
 TileGeoG4CalibSD::TileGeoG4CalibSD(const G4String& name, const std::vector<std::string>& outputCollectionNames, ITileCalculator* tileCalculator,
@@ -376,9 +376,11 @@ G4bool TileGeoG4CalibSD::ProcessHits(G4Step* step, G4TouchableHistory* /*ROhist*
   int primary_barcode{HepMC::UNDEFINED_ID};
   int primary_id{HepMC::UNDEFINED_ID};
   if (m_doCalibHitParticleID) {
-    if (m_atlasG4EvtUserInfo && m_atlasG4EvtUserInfo->GetCurrentPrimaryGenParticle()) {
-      primary_barcode = HepMC::barcode(m_atlasG4EvtUserInfo->GetCurrentPrimaryGenParticle()); // FIXME Barcode-based
-      primary_id = HepMC::uniqueID(m_atlasG4EvtUserInfo->GetCurrentPrimaryGenParticle());
+    HepMC::ConstGenParticlePtr primary =
+      TrackHelper(m_aStep ? m_aStep->GetTrack() : nullptr).GetPrimaryGenParticle();
+    if (primary) {
+      primary_barcode = HepMC::barcode(primary); // FIXME Barcode-based
+      primary_id = HepMC::uniqueID(primary);
     }
     else throw std::runtime_error("CalibrationSensitiveDetector: Unable to retrieve barcode!");
   }
@@ -495,4 +497,3 @@ void TileGeoG4CalibSD::EndOfEvent(G4HCofThisEvent*) {
 #endif
 
 }
-

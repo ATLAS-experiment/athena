@@ -254,7 +254,7 @@ public:
   bool m_inTestMode { false };
    
 private:
-  void modifyEventContext(EventContext& ctx, const EventID& eID, bool consume_modifier_stream);
+  void modifyEventContext(EventContext& ctx, const EventID& eID, bool consume_modifier_stream, long evtModIdx);
 
   ServiceHandle<Athena::IConditionsCleanerSvc> m_conditionsCleaner;
   

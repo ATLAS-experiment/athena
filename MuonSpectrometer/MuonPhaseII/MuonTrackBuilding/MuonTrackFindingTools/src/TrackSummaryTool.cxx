@@ -5,7 +5,7 @@
 
 #include "ActsCalibrators/xAODUncalibMeasCalibrator.h"
 #include "ActsGeometryInterfaces/IDetectorElement.h"
-#include "ActsGeoUtils/SurfaceCache.h"
+#include "ActsGeometryInterfaces/ISurfacePlacement.h"
 
 #include "xAODMuon/versions/MuonTrackSummaryAccessors_v1.h"
 #include "MuonTrackEvent/TrackingHelpers.h"
@@ -34,7 +34,7 @@ namespace MuonR4 {
                                            const MuonGMR4::MuonReadoutElement* reEle,
                                            HitSummary& summary) const {
         if (!reEle) {
-            ATH_MSG_WARNING(__func__<<"() "<<__LINE__<<" No readout element associated "
+            ATH_MSG_WARNING(__func__<<"() "<<__LINE__<<" - No readout element associated "
                             <<m_idHelperSvc->toString(gasGapId));
             return;
         }
@@ -106,6 +106,9 @@ namespace MuonR4 {
                 }
                 if (state.hasUncalibratedSourceLink()) {
                     const auto* uncalib = dynamic_cast<const xAOD::MuonMeasurement*>(xAODUncalibMeasCalibrator::unpack(state.getUncalibratedSourceLink()));
+                    if (!uncalib) {
+                        return;
+                    }
                     // for the combined sTgc space point we have to fill the primary and secondary measuremment seperately to resolve the strip/pad/wire combinations
                     if(uncalib->numDimensions() == 0) {
                         const auto* combinedMeas = dynamic_cast<const xAOD::CombinedMuonStrip*>(uncalib);
@@ -121,13 +124,13 @@ namespace MuonR4 {
                     if (!surf.isSensitive() || !surf.isAlignable()) {
                         return;
                     }
-                    const auto* detEl = dynamic_cast<const ActsTrk::SurfaceCache*>(surf.surfacePlacement());
-                    if (!detEl) {
+                    const auto* detEl = dynamic_cast<const ActsTrk::ISurfacePlacement*>(surf.surfacePlacement());
+                    if (!detEl || !MuonGMR4::isMuon(detEl->detectorType())) {
                         return;
                     }
                     incrementSummary(detEl->identify(), status, 1, summary);
                     complementaryHole(detEl->identify(), 
-                        dynamic_cast<const MuonGMR4::MuonReadoutElement*>(detEl->transformCache()->parent()), 
+                        dynamic_cast<const MuonGMR4::MuonReadoutElement*>(detEl->detectorElement()), 
                         summary);
                 }
         });
@@ -204,15 +207,24 @@ namespace MuonR4 {
     }
 
     HitSummary TrackSummaryTool::makeSummary(const EventContext& /*ctx*/,
-                                             const std::vector<const xAOD::MuonSegment*> & segments) const {
+                                             std::span<const xAOD::MuonSegment* const> segments) const {
         HitSummary summary{};
         for (const xAOD::MuonSegment* seg : segments) {
             const LayerIndex lay = toLayerIndex(seg->chamberIndex());
             const bool small = isSmall(seg->chamberIndex());
             if (!m_reDoSegments) {
-                summary.value(Cat_t::Precision, Stat_t::OnTrack, lay, small) = seg->nPrecisionHits();
+                summary.value(Cat_t::Precision,  Stat_t::OnTrack, lay, small) = seg->nPrecisionHits();
                 summary.value(Cat_t::TriggerEta, Stat_t::OnTrack, lay, small) = seg->nTrigEtaLayers();
                 summary.value(Cat_t::TriggerPhi, Stat_t::OnTrack, lay, small) = seg->nPhiLayers();
+
+                summary.value(Cat_t::Precision,  Stat_t::Outlier, lay, small) = seg->nPrecisionOutliers();
+                summary.value(Cat_t::TriggerEta, Stat_t::Outlier, lay, small) = seg->nTriggerEtaOutliers();
+                summary.value(Cat_t::TriggerPhi, Stat_t::Outlier, lay, small) = seg->nTriggerPhiOutliers();
+
+                summary.value(Cat_t::Precision,  Stat_t::Hole, lay, small) = seg->nPrecisionHoles();
+                summary.value(Cat_t::TriggerEta, Stat_t::Hole, lay, small) = seg->nTriggerEtaHoles();
+                summary.value(Cat_t::TriggerPhi, Stat_t::Hole, lay, small) = seg->nTriggerPhiHoles();
+
             } else {
                 const std::size_t nHits = nMeasurements(*seg);
                 for (std::size_t hit = 0; hit < nHits; ++hit) {

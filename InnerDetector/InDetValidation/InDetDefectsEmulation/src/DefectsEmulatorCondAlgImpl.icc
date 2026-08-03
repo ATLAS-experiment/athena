@@ -1,17 +1,11 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
-#include "DefectsEmulatorCondAlgImpl.h"
 
 #include "Identifier/Identifier.h"
 #include "AthenaKernel/RNGWrapper.h"
 
 #include "StoreGate/WriteHandle.h"
-#include <ranges>
-#include <type_traits>
-#include <array>
-#include <span>
-#include <algorithm>
 
 
 #include "CLHEP/Random/RandFlat.h"
@@ -20,7 +14,6 @@
 #include "ConnectedModulesUtil.h"
 #include "EmulatedDefectsBuilder.h"
 
-#include <cstdlib>
 #include "nlohmann/json.hpp"
 
 #include "TVirtualRWMutex.h"
@@ -28,6 +21,14 @@
 #include "ROOT/RNTupleReader.hxx"
 #include "ROOT/RNTupleModel.hxx"
 #include "TFile.h"
+
+#include <cstdlib>
+#include <ranges>
+#include <type_traits>
+#include <array>
+#include <span>
+#include <algorithm>
+
 
 namespace {
 

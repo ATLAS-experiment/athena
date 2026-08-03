@@ -334,7 +334,7 @@ bool PFUnifiedSubtractionOnlyTool::canAnnihilate(double expectedEnergy, double s
 void PFUnifiedSubtractionOnlyTool::addSubtractedCells(eflowCaloObject& thisEflowCaloObject, const std::vector<std::pair<xAOD::CaloCluster *, bool> >& clusterList) const{
 
   unsigned int numTracks = thisEflowCaloObject.nTracks();
-
+  const std::string allCaloStr{"AllCalo"};
   for (unsigned int iTrack = 0; iTrack < numTracks; ++iTrack){
     eflowRecTrack* thisTrack = thisEflowCaloObject.efRecTrack(iTrack);
     for (const auto& thisPair : clusterList){
@@ -342,7 +342,7 @@ void PFUnifiedSubtractionOnlyTool::addSubtractedCells(eflowCaloObject& thisEflow
       const CaloClusterCellLink* theCellLink = thisCluster->getCellLinks();
       CaloClusterCellLink::const_iterator theCell = theCellLink->begin();
       CaloClusterCellLink::const_iterator lastCell = theCellLink->end();
-      for (; theCell != lastCell; ++theCell) thisTrack->addSubtractedCaloCell(ElementLink<CaloCellContainer>("AllCalo",theCell.index()),theCell.weight()/numTracks);
+      for (; theCell != lastCell; ++theCell) thisTrack->addSubtractedCaloCell(ElementLink<CaloCellContainer>(allCaloStr,theCell.index()),theCell.weight()/numTracks);
     }
   }
 }

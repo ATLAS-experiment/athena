@@ -64,10 +64,7 @@ ReWriteData                                         DEBUG data dependencies:
   + INPUT IGNORED  ( 'ExampleHitContainer' , '' ) 
   + OUTPUT IGNORED  ( 'ExampleTrackContainer' , '' ) 
 StreamStream1                                       DEBUG In initialize
-StreamStream1                                       DEBUG In initialize 
-StreamStream1                                       DEBUG Found IDecisionSvc.
 DecisionSvc                                          INFO Inserting stream: StreamStream1 with no Algs
-StreamStream1                                       DEBUG End initialize 
 StreamStream1                                       DEBUG Found StoreGateSvc/StoreGateSvc store.
 StreamStream1                                       DEBUG Found StoreGateSvc/MetaDataStore store.
 AthDictLoaderSvc                                     INFO in initialize...

@@ -45,13 +45,30 @@ namespace MuonR4{
             template <class PrdType> 
                 const PrdType* fetchPrd(const Identifier& prdId,
                                         const Muon::MuonPrepDataContainerT<PrdType>* prdContainer) const;
+            /** @brief Fetches a MuonPrepData object from the ElementLink that is decorated to the 
+             *         xAOD::MuonMeasurement object.
+             *  @param meas: The measurement of interest
+             *  @param accName: Name of the accessor under which the link decoration may be found  */
+            template <class PrdType>
+                    const PrdType* fetchPrd(const xAOD::MuonMeasurement& meas,
+                                            const std::string& accName) const;
 
             using RotVec = std::vector<std::unique_ptr<Trk::RIO_OnTrack>>;
+            /** @brief Convert the calibrated space point of interest to a Trk::Measurement
+             *  @param segment: The segment to which the space point belongs. The segment's 
+             *                  parameters are used to calibrate the ROT
+             * @param spacePoint: Measurement of interest to convert
+             * @param prdContainer: Pointer to the Trk::PrepRawData container from which the converted
+             *                      Trk::PrepRawData is taken
+             * @param convMeasVec: Mutable refernce to the measurement vector to which the converted measurements
+             *                     are appended to.
+             * @param accName: Optionally name of the accesor indicating the direct element link xAOD -> Trk */
             template <class PrdType>
                 StatusCode convertMeasurement(const MuonR4::Segment& segment,
                                               const CalibratedSpacePoint& spacePoint,
                                               const Muon::MuonPrepDataContainerT<PrdType>* prdContainer,
-                                              RotVec& convMeasVec) const;
+                                              RotVec& convMeasVec,
+                                              const std::string& accName ="") const;
 
             ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{this, "MuonIdHelperSvc", 
                                                                 "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};

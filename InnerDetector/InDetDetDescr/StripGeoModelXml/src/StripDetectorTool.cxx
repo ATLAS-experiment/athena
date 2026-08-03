@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #include "StripDetectorTool.h"
 #include "StripGmxInterface.h"
@@ -119,16 +119,16 @@ void StripDetectorTool::doNumerology(InDetDD::SCT_DetectorManager * manager)
   bool barrelDone = false;
   for (int b = -1; b <= 1; ++b) {
     if (m_waferTree.count(b)) {
-      msg(MSG::INFO) << "  Found barrel with index " << b << std::endl;
+      msg(MSG::DEBUG) << "  Found barrel with index " << b << std::endl;
       n.addBarrel(b);
       if (!barrelDone) {
         n.setNumLayers(m_waferTree[b].nLayers());
-        msg(MSG::INFO) << "    Number of barrel layers = " << n.numLayers() << std::endl;
+        msg(MSG::DEBUG) << "    Number of barrel layers = " << n.numLayers() << std::endl;
         for (LayerDisk::iterator l = m_waferTree[b].begin(); l != m_waferTree[b].end(); ++l) {
           n.setNumEtaModulesForLayer(l->first, l->second.nEtaModules());
           // All staves within a layer are assumed identical, so we can just look at the first eta
           n.setNumPhiModulesForLayer(l->first, l->second.begin()->second.nPhiModules());
-          msg(MSG::INFO) << "    layer = " << l->first << " has " << n.numEtaModulesForLayer(l->first)
+          msg(MSG::DEBUG) << "    layer = " << l->first << " has " << n.numEtaModulesForLayer(l->first)
                         << " etaModules each with " <<  n.numPhiModulesForLayer(l->first) << " phi modules" << std::endl;
         }
         barrelDone = true;
@@ -140,17 +140,17 @@ void StripDetectorTool::doNumerology(InDetDD::SCT_DetectorManager * manager)
   bool endcapDone = false;
   for (int ec = -2; ec <= 2; ec += 4) {
     if (m_waferTree.count(ec)) {
-      msg(MSG::INFO) << "  Found endcap with index " << ec << std::endl;
+      msg(MSG::DEBUG) << "  Found endcap with index " << ec << std::endl;
       n.addEndcap(ec);
       if (!endcapDone) {
         n.setNumDisks(m_waferTree[ec].nLayers());
-        msg(MSG::INFO) << "    Number of endcap wheels = " << n.numDisks() << std::endl;
+        msg(MSG::DEBUG) << "    Number of endcap wheels = " << n.numDisks() << std::endl;
         for (LayerDisk::iterator l = m_waferTree[ec].begin(); l != m_waferTree[ec].end(); ++l) {
           n.setNumRingsForDisk(l->first, l->second.nEtaModules());
-          msg(MSG::INFO) << "    Wheel " << l->first << " has " << n.numRingsForDisk(l->first) << " rings" << std::endl;
+          msg(MSG::DEBUG) << "    Wheel " << l->first << " has " << n.numRingsForDisk(l->first) << " rings" << std::endl;
           for (EtaModule::iterator eta = l->second.begin(); eta != l->second.end(); ++eta) {
             n.setNumPhiModulesForDiskRing(l->first, eta->first, eta->second.nPhiModules());
-            msg(MSG::INFO) << "      Ring " << eta->first << " has "
+            msg(MSG::DEBUG) << "      Ring " << eta->first << " has "
                            << n.numPhiModulesForDiskRing(l->first, eta->first) << " phi modules" << std::endl;
           }
         }
@@ -174,7 +174,7 @@ void StripDetectorTool::doNumerology(InDetDD::SCT_DetectorManager * manager)
     }
   }
   ATH_MSG_INFO("Total number of wafers added is " << totalWafers);
-  const SCT_ID *sctIdHelper = dynamic_cast<const SCT_ID *> (m_commonItems->getIdHelper());
+  const SCT_ID *sctIdHelper = static_cast<const SCT_ID *> (m_commonItems->getIdHelper());
   ATH_MSG_INFO("Total number of wafer identifiers is " << sctIdHelper->wafer_hash_max());
   //
   // Used in digitization to create one vector big enough to hold all strips, whichever detector is in consideration.
@@ -188,7 +188,7 @@ void StripDetectorTool::doNumerology(InDetDD::SCT_DetectorManager * manager)
   ATH_MSG_INFO("Max. phi cells is " << n.maxNumPhiCells());
   ATH_MSG_INFO("Max. no. strips is " << n.maxNumStrips());
 
-  manager->numerology() = n;
+  manager->numerology() = std::move(n);
 
   ATH_MSG_INFO("End of numerology\n");
 

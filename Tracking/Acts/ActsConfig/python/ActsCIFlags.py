@@ -1,13 +1,16 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 # Flags used in CI tests
 
 from TrkConfig.TrkConfigFlags import TrackingComponent
 from AthenaConfiguration.Enums import LHCPeriod
 
+
 def actsProductionFlags(flags) -> None:
     """flags for ACTS reconstruction to be used for production jobs"""
     # Reco chain to ACTS flavour
     flags.Tracking.recoChain = [TrackingComponent.ActsChain]
+    # Save Trk::Track link for combined muon reconstruction
+    flags.Acts.doxAODToTrkConversion = True
     # Track reconstruction algorithms
     flags.Acts.doAmbiguityResolution = False
     flags.Tracking.doITkFastTracking = True
@@ -16,12 +19,10 @@ def actsProductionFlags(flags) -> None:
     # - seeding strategy set by the user: default is GridTriplet
     flags.Tracking.doPixelDigitalClustering = lambda pcf: pcf.GeoModel.Run >= LHCPeriod.Run4    
     # e-gamma components
-    flags.Egamma.doTracking = True
     flags.Acts.GsfRefitActs = True
     flags.Acts.GsfDirectNavigation = True
     # HGTD components
-    flags.HGTD.doActs = True    
-    
+    flags.HGTD.doActs = True
 
 def actsLegacyWorkflowFlags(flags) -> None:
     """flags for Reco_tf with CA used in CI tests: add Acts (legacy like) workflow to reco sequence"""
@@ -30,16 +31,6 @@ def actsLegacyWorkflowFlags(flags) -> None:
     flags.Acts.GsfDirectNavigation=True
     flags.Tracking.recoChain = [TrackingComponent.ActsLegacyChain]
     flags.Tracking.doPixelDigitalClustering = lambda pcf: pcf.GeoModel.Run >= LHCPeriod.Run4
-
-def actsWorkflowFlags(flags) -> None:
-    """flags for Reco_tf with CA used in unit test: schedule a pure ACTS workflow to reco sequence"""
-    flags.Reco.EnableHGTDExtension = False
-    flags.Acts.GsfRefitActs = True
-    flags.Acts.GsfDirectNavigation=True
-    flags.Acts.doAmbiguityResolution = False
-    flags.Tracking.doITkFastTracking = True
-    flags.Tracking.doPixelDigitalClustering = lambda pcf: pcf.GeoModel.Run >= LHCPeriod.Run4
-    flags.Tracking.recoChain = [TrackingComponent.ActsChain]
 
 def actsInnerDetectorWorkflowFlags(flags) -> None:
     """flags for Reco_tf with CA used in unit test: schedule a pure ACTS workflow to reco sequence, with Inner Detector settings"""
@@ -107,11 +98,11 @@ def actsGSFEgammaFlags(flags) -> None:
     flags.Tracking.doITkConversion = False
     flags.Acts.GsfRefitActs = True
     flags.Acts.GsfDirectNavigation = True
-    
+
 def actsValidateF100Flags(flags) -> None:
-    actsWorkflowFlags(flags)
+    actsProductionFlags(flags)
     flags.Tracking.recoChain = [TrackingComponent.ActsValidateF100]
-    
+
 def actsValidateF150Flags(flags) -> None:
     actsValidateF100Flags(flags)
     flags.Tracking.recoChain = [TrackingComponent.ActsValidateF150]

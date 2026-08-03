@@ -4,7 +4,7 @@ import glob
 import os
 import shutil
 import subprocess
-from AthenaCommon import Logging
+from ... import Logging
 from ...decorators import timed
 from ...utility import LHE, ProcessManager, SingleProcessThread
 

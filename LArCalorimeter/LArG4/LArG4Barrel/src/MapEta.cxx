@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MapEta.h"
@@ -7,6 +7,7 @@
 // For reading the data files in Athena.
 #ifndef LARG4_STAND_ALONE
 #include "PathResolver/PathResolver.h"
+#include "CxxUtils/trapping_fp.h"
 #endif
 
 #include <iostream>
@@ -64,6 +65,11 @@ void MapEta::Initialize(int isampling)
   std::ifstream in(fileLocation);
   if (in)
     {
+#ifndef LARG4_STAND_ALONE
+      // Tell clang to optimize assuming that FP operations may trap.
+      CXXUTILS_TRAPPING_FP;
+#endif
+
       in>>m_nx>>m_xmin>>m_xmax>>m_ny>>m_ymin>>m_ymax;
       if(m_nx>0 && m_ny>0 && m_nx<10000 && m_ny<10000){//coverity issue. This is a tainted variable protection, 10000 can be changed if required.
         m_deltax=(m_xmax-m_xmin)/((float) m_nx);

@@ -16,8 +16,7 @@
 #include "MuonIdHelpers/IMuonIdHelperSvc.h"
 #include "MuonReadoutGeometryR4/MuonDetectorManager.h"
 #include "ActsGeometryInterfaces/IExtrapolationTool.h"
-#include "ActsGeometryInterfaces/ITrackingGeometryTool.h"
-
+#include "ActsEvent/ContextUtility.h"
 
 namespace MuonR4{
     /** @brief The TruthSegToTruthPartAssocAlg associates the TruthSegments with the primary TruthParticle
@@ -76,8 +75,8 @@ namespace MuonR4{
             /** @brief Cut on the delta phi between the bkg segment and the extrapolated parameters */
             Gaudi::Property<double> m_pileUpObjExtpDphiCut{this,"BkgMatchingExtpPhi", 5.*Gaudi::Units::deg};
              
-            /** @brief Tracking geometry tool */
-            PublicToolHandle<ActsTrk::ITrackingGeometryTool> m_trackingGeometryTool{this, "TrackingGeometryTool", ""};
+            /** @brief Context provider for geometry, magnetic field and calibration contexts */
+            ActsTrk::ContextUtility m_ctxProvider{this};
             /** @brief Track extrapolation tool */
             ToolHandle<ActsTrk::IExtrapolationTool> m_extrapolationTool{this, "ExtrapolationTool" ,"" };
             /** @brief Pointer to the muon detector manager */

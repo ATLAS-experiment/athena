@@ -6,6 +6,8 @@
 #include "xAODEventInfo/versions/EventAuxInfo_v3.h"
 #include "AthContainers/AuxStoreInternal.h" // for SG::getAuxIDs
 
+#include "xAODEventInfo/EventInfoLockHelper.h"
+
 namespace xAOD {
 
    EventAuxInfo_v3::EventAuxInfo_v3()
@@ -164,6 +166,9 @@ namespace xAOD {
 
    void EventAuxInfo_v3::toTransient(  )
    {
+     EventInfoLockHelper helper;
+     if (helper.evalUnlockFunc(runNumber,lumiBlock,eventNumber)) return;
+    
      /// List of all detector flag aux IDs.
      static const std::vector<SG::auxid_t> flagIds (m_decorFlags.begin(),
                                                     m_decorFlags.end());

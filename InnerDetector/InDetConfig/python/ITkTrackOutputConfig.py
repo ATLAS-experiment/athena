@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from InDetConfig.InDetTrackOutputConfig import FTAG_AUXDATA
@@ -16,6 +16,10 @@ def ITkTrackRecoOutputCfg(flags, extensions_list=None):
                        '.-TTVA_AMVFWeights_forReco')
     # remove track decorations used internally by FTAG software
     excludedAuxData += '.-'.join([''] + FTAG_AUXDATA)
+    excludedAuxData += ('.-trackParameterCovarianceMatrices'
+                        '.-parameterX.-parameterY.-parameterZ'
+                        '.-parameterPX.-parameterPY.-parameterPZ'
+                        '.-parameterPosition')
 
     # exclude TTVA decorations
     excludedAuxData += '.-TTVA_AMVFVertices.-TTVA_AMVFWeights'
@@ -28,6 +32,9 @@ def ITkTrackRecoOutputCfg(flags, extensions_list=None):
 
     if not flags.Tracking.writeExtendedSi_PRDInfo:
         excludedAuxData += '.-msosLink'
+
+    if not flags.Tracking.writeExtendedHGTDInfo:
+        excludedAuxData += '.-HGTD_cluster_merged.-HGTD_cluster_raw_time.-HGTD_cluster_shadowed.-HGTD_cluster_time.-HGTD_cluster_truth_class.-HGTD_extrap_x.-HGTD_extrap_y.-HGTD_primary_expected.-HGTD_summaryinfo.-HGTD_times_of_compatible_hits'
 
     # Save PRD
     toESD += [

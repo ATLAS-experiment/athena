@@ -3,7 +3,7 @@
 */
 
 #include "munkres.h"
-#include "boost/io/ios_state.hpp"
+#include <format>
 
 munkres::munkres(matrix_type costs):
   m_costmatrix(costs),
@@ -273,16 +273,15 @@ void munkres::step_six(){
 }
 
 void munkres::printmatrix(const matrix_type& m){
-  boost::io::ios_all_saver ias(std::cout);
-  std::cout << std::setw(5) << std::setprecision(3) << "cov|";
+  std::cout << std::format("{:>5}", "cov|");
   for(int col=0;col<m_dim;++col){
-    std::cout << std::setw(7) << std::setprecision(3) << (m_colIsCovered[col] ? "+|" : "|");
+    std::cout << std::format("{:>7}", (m_colIsCovered[col] ? "+|" : "|"));
   } std::cout << std::endl;
 
   for(int row=0;row<m_dim;++row){
-    std::cout << std::setw(5) << std::setprecision(3) << (m_rowIsCovered[row] ? "+ |" : "|");
+    std::cout << std::format("{:>5}", (m_rowIsCovered[row] ? "+ |" : "|"));
     for(int col=0;col<m_dim;++col){
-      std::cout << std::setw(5) << std::setprecision(3) << m[row][col];
+      std::cout << std::format("{:>5.3g}", m[row][col]);
       if(m_maskmatrix[row][col] == kPrime)  std::cout << "'";
       if(m_maskmatrix[row][col] == kStar)   std::cout << "*";
       else                                  std::cout << " ";

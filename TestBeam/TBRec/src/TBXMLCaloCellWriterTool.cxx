@@ -22,10 +22,9 @@
 #include "CaloEvent/CaloCell.h"
 #include "CaloEvent/CaloCellContainer.h"
 
-#include "boost/io/ios_state.hpp"
-
 #include <iostream>
 #include <fstream>
+#include <format>
 #include <iomanip>
 
 #include <vector>
@@ -254,15 +253,15 @@ TBXMLCaloCellWriterTool::writeEvent(std::ostream& outStream,
 		  outStream << "     ";
 		}
 	      theIndex -= (int)baseIndex;
-              boost::io::ios_base_all_saver streamsave (outStream);
-	      outStream 
-		<< std::setw(10) << std::setfill(' ') << theIndex << " "
-		<< std::setw(3)  << std::setfill(' ') << subIndex << " "
-		<< std::setw(3)  << std::setfill(' ') << lyrIndex << " "
-		<< std::setw(3)  << std::setfill(' ') << regIndex << " "
-		<< std::setw(3)  << std::setfill(' ') << etaIndex << " "
-		<< std::setw(3)  << std::setfill(' ') << phiIndex << " "
-		<< std::setw(10) << std::setprecision(5) << theEnergy;
+	      //coverity[RW.CONSTEVAL_CALL_NONCONSTANT:FALSE]
+        outStream << std::format("{:>10} {:>3} {:>3} {:>3} {:>3} {:>3} {:>10.5g}",
+                                     theIndex.value(),
+                                     subIndex,
+                                     lyrIndex,
+                                     regIndex,
+                                     etaIndex,
+                                     phiIndex,
+                                     theEnergy);
 	      theCtr++;
 	      if ( (isTerminated = ( theCtr % m_nCols )) == 0 )
 		{

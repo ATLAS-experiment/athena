@@ -17,7 +17,6 @@
 #include "MuidInterfaces/IMuonMatchQuality.h"
 #include "MuidInterfaces/IMuonTrackQuery.h"
 #include "MuonCombinedToolInterfaces/IMuonCombinedTagTool.h"
-#include "MuonCombinedToolInterfaces/IMuonCombinedTool.h"
 #include "MuonCombinedToolInterfaces/IMuonMomentumBalanceSignificance.h"
 #include "MuonIdHelpers/IMuonIdHelperSvc.h"
 #include "MuonRecHelperTools/MuonEDMPrinterTool.h"
@@ -33,9 +32,9 @@ namespace MuonCombined {
     class CombinedFitTag;
     class InDetCandidateToTagMap;
 
-    class MuonCombinedFitTagTool : public AthAlgTool, virtual public IMuonCombinedTagTool {
+    class MuonCombinedFitTagTool : public extends<AthAlgTool, IMuonCombinedTagTool> {
     public:
-        MuonCombinedFitTagTool(const std::string& type, const std::string& name, const IInterface* parent);
+        using base_class::base_class;
         virtual ~MuonCombinedFitTagTool() = default;
 
         virtual StatusCode initialize() override;

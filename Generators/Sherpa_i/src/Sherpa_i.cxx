@@ -210,7 +210,6 @@ StatusCode Sherpa_i::fillEvt(HepMC::GenEvent* event) {
       if (name  == "WeightNormalisation") continue;
       if (name  == "NTrials") continue;
       if (name  == "Weight") continue;
-      if (name  == "NTrials") continue;
       if (std::abs(event->weight(name)) > m_variation_weight_cap*std::abs(nominal)) {
         ATH_MSG_INFO("Capping variation" << name << " = " << event->weight(name)/nominal << "*nominal");
         event->weight(name) *= m_variation_weight_cap*std::abs(nominal)/std::abs(event->weight(name));

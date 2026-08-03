@@ -18,6 +18,7 @@ atlas_add_library( ActsGeantFollowing
                      Acts::Core
                      ActsGeometryInterfacesLib
                      ActsGeometryLib
+                     ActsEventLib
                      ActsInteropLib
                      EventPrimitives
                      GeoPrimitives

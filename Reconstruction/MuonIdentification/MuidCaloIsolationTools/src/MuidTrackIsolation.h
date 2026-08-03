@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //////////////////////////////////////////////////////////////////////////////
@@ -15,11 +15,15 @@
 #define MUIDCALOISOLATIONTOOLS_MUIDTRACKISOLATION_H
 
 #include "AthenaBaseComps/AthAlgTool.h"
-#include "GaudiKernel/ToolHandle.h"
+
 #include "MuidInterfaces/IMuidTrackIsolation.h"
+
 #include "StoreGate/ReadHandleKey.h"
+#include "StoreGate/ReadDecorHandleKey.h"
+
+#include "xAODTracking/TrackParticleContainer.h"
 #include "TrkExInterfaces/IIntersector.h"
-#include "TrkTrack/TrackCollection.h"
+
 
 namespace Trk {
     class Surface;
@@ -27,10 +31,10 @@ namespace Trk {
 
 namespace Rec {
 
-    class MuidTrackIsolation : public AthAlgTool, virtual public IMuidTrackIsolation {
+    class MuidTrackIsolation : public extends<AthAlgTool, IMuidTrackIsolation> {
     public:
-        MuidTrackIsolation(const std::string& type, const std::string& name, const IInterface* parent);
-        virtual ~MuidTrackIsolation(void) = default;  // destructor
+        using base_class::base_class;
+        virtual ~MuidTrackIsolation() = default;  // destructor
 
         StatusCode initialize() override;
 
@@ -41,18 +45,20 @@ namespace Rec {
 
     private:
         // isolation without extrapolation to calo
-        std::pair<int, double> trackVertex(const TrackCollection* indetTracks, double eta, double phi) const;
+        std::pair<int, double> trackVertex(const xAOD::TrackParticleContainer* indetTracks, double eta, double phi) const;
 
         // isolation performing extrapolation to calo
-        std::pair<int, double> trackExtrapolated(const TrackCollection* indetTracks, double eta, double phi) const;
+        std::pair<int, double> trackExtrapolated(const xAOD::TrackParticleContainer* indetTracks, double eta, double phi) const;
 
         double m_barrelCotTheta{};
         std::unique_ptr<const Trk::Surface> m_caloBackwardDisc;
         std::unique_ptr<const Trk::Surface> m_caloCylinder;
         std::unique_ptr<const Trk::Surface> m_caloForwardDisc;
-        double m_etaSafetyFactor;
-        SG::ReadHandleKey<TrackCollection> m_inDetTracksLocation{this, "InDetTracksLocation", "Tracks", "ID tracks"};
-        // FIXME: mutable
+        double m_etaSafetyFactor{0.1};
+        SG::ReadHandleKey<xAOD::TrackParticleContainer> m_inDetTracksLocation{this, "InDetTracksLocation", "InDetTrackParticles", "ID tracks"};
+       
+        SG::ReadDecorHandleKey<xAOD::TrackParticleContainer> m_trackLinkKey{this, "TrackLinkKey", m_inDetTracksLocation, "trackLink"};
+        
         ToolHandle<Trk::IIntersector> m_intersector{this, "RungeKuttaIntersector", "Trk::RungeKuttaIntersector/RungeKuttaIntersector"};
         Gaudi::Property<double> m_minPt{this, "MinPt", 1.0 * Gaudi::Units::GeV};
         Gaudi::Property<double> m_trackCone{this, "TrackCone", 0.2};

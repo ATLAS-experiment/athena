@@ -8,8 +8,16 @@ atlas_subdir( MuonActsDump )
 atlas_add_component( MuonActsDump
                      src/*.cxx
                      src/components/*.cxx
-                     LINK_LIBRARIES  AthenaBaseComps GeoPrimitives MuonIdHelpersLib  
+                     LINK_LIBRARIES  AthenaBaseComps GeoPrimitives MuonIdHelpersLib  ActsEventLib
                                      xAODMuonSimHit StoreGateLib MuonTruthHelpers MuonPRDTestLib
                                      MuonPatternEvent MuonSpacePoint xAODMuon MuonTesterTreeLib)
                                      
 atlas_install_python_modules( python/*.py)
+
+
+
+atlas_add_test( testActsDump
+                SCRIPT python -m MuonActsDump.SpacePointDump --nEvents 1
+                PROPERTIES TIMEOUT 600
+                PRIVATE_WORKING_DIRECTORY
+                POST_EXEC_SCRIPT noerror.sh)

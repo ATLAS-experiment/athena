@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 namespace InDet {
 template <RobustTrackingGeometryBuilderImpl::ToolType type,
@@ -128,7 +128,7 @@ RobustTrackingGeometryBuilderImpl::trackingGeometryImpl(
     } else
       ATH_MSG_DEBUG("          No cylindrical layers processed.");
 
-    providedCylinderLayers.push_back(cylinderVolumeLayers);
+    providedCylinderLayers.push_back(std::move(cylinderVolumeLayers));
     // if after parsing of cylinder layers the maximal extend of cylinders is
     // bigger than the minmal of discs reset the disc min extend (tiple will be
     // swallowed)!
@@ -209,8 +209,8 @@ RobustTrackingGeometryBuilderImpl::trackingGeometryImpl(
       ATH_MSG_DEBUG("          No disk-like layers processed.");
 
     // fill the layers into the double-vector
-    providedDiscLayersNeg.push_back(discVolumeLayersNeg);
-    providedDiscLayersPos.push_back(discVolumeLayersPos);
+    providedDiscLayersNeg.push_back(std::move(discVolumeLayersNeg));
+    providedDiscLayersPos.push_back(std::move(discVolumeLayersPos));
 
     if (msgLvl(MSG::VERBOSE)) {
       // summary after this step

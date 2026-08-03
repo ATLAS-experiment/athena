@@ -16,6 +16,7 @@
 #define GENERATORFILTERSXAODBSIGNALFILTER_H
 
 #include "GeneratorModules/GenFilter.h"
+#include "GeneratorModules/GenData.h"
 
 #include "xAODTruth/TruthParticle.h"
 #include "xAODTruth/TruthParticleContainer.h"
@@ -105,6 +106,7 @@ private:
 
   // Print child (for debug)
   void PrintChild(const xAOD::TruthParticle* child, const std::string& treeIDStr, const bool fromFinalB) const;
+  std::shared_ptr<GenData> m_gendata{nullptr};
 
 };
 

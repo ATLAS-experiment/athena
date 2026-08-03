@@ -23,25 +23,6 @@ Trk::RecursiveGeometryProcessor::RecursiveGeometryProcessor(const std::string& t
     declareInterface<Trk::IGeometryProcessor>(this);
 }
 
-// destructor
-Trk::RecursiveGeometryProcessor::~RecursiveGeometryProcessor()
-= default;
-
-
-// the interface method initialize
-StatusCode Trk::RecursiveGeometryProcessor::initialize()
-{
-    ATH_MSG_INFO( "initialize()" );
-    return StatusCode::SUCCESS;
-}
-
-// the interface method finalize
-StatusCode Trk::RecursiveGeometryProcessor::finalize()
-{
-    ATH_MSG_INFO( "finalize() successful" );
-    return StatusCode::SUCCESS;
-}
-
 // Processor Action to work on TrackingGeometry
 StatusCode Trk::RecursiveGeometryProcessor::process(Trk::TrackingGeometry& tgeo) const {
 

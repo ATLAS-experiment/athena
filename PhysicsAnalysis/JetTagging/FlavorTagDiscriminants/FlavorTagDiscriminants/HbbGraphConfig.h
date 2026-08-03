@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // Note: please don't include any ROOT in here (i.e. xAOD::Jet or
@@ -23,7 +23,7 @@ namespace FlavorTagDiscriminants {
   {
     std::set<std::string> subjet;
     std::set<std::string> fatjet;
-    int n_subjets;
+    int n_subjets = 0;
     std::map<std::string, std::map<std::string,double>> defaults;
   };
   HbbGraphConfig getHbbGraphConfig(const lwt::GraphConfig& cfg);

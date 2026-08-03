@@ -1015,6 +1015,7 @@ InDet::SiTrajectoryElement_xk::trackSimpleStateOnSurface
   pat.set(Trk::TrackStateOnSurface::Scatterer);
 
   Trk::LocalParameters locp = Trk::LocalParameters(cl->localPosition());
+  //coverity[NULL_FIELD:FALSE]
   Amg::MatrixX cv = cl->localCovariance();
 
   Trk::FitQualityOnSurface fq{};

@@ -7,10 +7,7 @@
 
 // ATHENA
 #include "AthenaBaseComps/AthAlgTool.h"
-#include "GaudiKernel/IInterface.h"
-#include "GaudiKernel/ServiceHandle.h"
-#include "Gaudi/Property.h"
-#include "GaudiKernel/EventContext.h"
+
 #include "BeamSpotConditionsData/BeamSpotData.h"
 #include "TrkTrackLink/ITrackLink.h"
 #include "InDetTrackSelectionTool/IInDetTrackSelectionTool.h"
@@ -24,7 +21,7 @@
 #include "ActsInterop/Logger.h"
 
 // PACKAGE
-#include "ActsGeometryInterfaces/ITrackingGeometryTool.h"
+#include "ActsGeometryInterfaces/ITrackingGeometrySvc.h"
 #include "ActsGeometryInterfaces/IExtrapolationTool.h"
 #include "ActsGeometryInterfaces/GeometryContext.h"
 #include "ActsGeometry/ATLASMagneticFieldWrapper.h"
@@ -45,6 +42,7 @@
 #include "Acts/Vertexing/ImpactPointEstimator.hpp"
 #include "Acts/Utilities/Logger.hpp"
 
+#include "ActsEvent/ContextUtility.h"
 
 #include <cmath>
 #include <optional>
@@ -85,9 +83,7 @@ namespace ActsTrk {
     /**
      * Constructor
      */
-    IterativePriVtxFinderTool(const std::string& type,
-                              const std::string& name,
-                              const IInterface* parent);
+    using base_class::base_class;
 
     virtual std::pair<xAOD::VertexContainer*, xAOD::VertexAuxContainer*>
        findVertex(const EventContext& ctx, const TrackCollection* trackTES) const override;
@@ -96,8 +92,9 @@ namespace ActsTrk {
        findVertex(const EventContext& ctx, const xAOD::TrackParticleContainer* trackParticles) const override;
 
   private:
-
-     /// logging instance
+    /** @brief Auxiliary class to access the magnetic field, geometry and calibration context */
+    ContextUtility m_ctxProvider{this};
+    /// logging instance
     std::unique_ptr<const Acts::Logger> m_logger {nullptr};
     const Acts::Logger &logger() const { return *m_logger; }
 
@@ -106,13 +103,6 @@ namespace ActsTrk {
 
     Trk::Perigee* actsBoundToTrkPerigee(
     const Acts::BoundTrackParameters& bound, const Acts::Vector3& surfCenter) const;
-
-    virtual
-    const ActsTrk::ITrackingGeometryTool*
-    trackingGeometryTool() const
-    {
-      return m_trackingGeometryTool.get();
-    }
 
     using Propagator = Acts::Propagator<Acts::EigenStepper<>, Acts::Navigator>;
     using TrackLinearizer = Acts::HelicalTrackLinearizer;
@@ -128,8 +118,8 @@ namespace ActsTrk {
     // optional because of late initializatio
     std::optional<TrackLinearizer> m_linearizer = std::nullopt;
 
-    PublicToolHandle<ITrackingGeometryTool> m_trackingGeometryTool{this, "TrackingGeometryTool", "", "ActsTrackingGeometryTool"};
-    ToolHandle<IExtrapolationTool> m_extrapolationTool{this, "ExtrapolationTool", "", "ActsExtrapolationTool"};
+
+    ServiceHandle<ActsTrk::ITrackingGeometrySvc> m_trackingGeometrySvc{this, "TrackingGeometrySvc", "ActsTrackingGeometrySvc"};
     ToolHandle<InDet::IInDetTrackSelectionTool> m_trkFilter{this, "TrackSelector", "", "InDetTrackSelectionTool"};
     SG::ReadCondHandleKey<InDet::BeamSpotData> m_beamSpotKey {this, "BeamSpotKey", "BeamSpotData", "SG key for beam spot"};
 

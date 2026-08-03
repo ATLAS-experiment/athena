@@ -41,8 +41,8 @@ void RefittingCalibrator::calibrate(const Acts::GeometryContext& gctx,
 //                      RefittingSurfaceAccesor
 //##########################################################################
 RefittingSurfaceAccesor::RefittingSurfaceAccesor(const IGeometryRealmConvTool* trkConvTool,
-                                                 const ITrackingGeometryTool* trackGeoTool):
-      m_xAODAcc{trackGeoTool}, m_prdAcc{trkConvTool}, m_rotAcc{trkConvTool} {}
+                                                 const ITrackingGeometrySvc* trackGeoSvc):
+      m_xAODAcc{trackGeoSvc}, m_prdAcc{trkConvTool}, m_rotAcc{trkConvTool} {}
 
 const Acts::Surface* RefittingSurfaceAccesor::operator()(const Acts::SourceLink& sourceLink) const {
       switch (MeasurementCalibratorBase::getType(sourceLink)) {

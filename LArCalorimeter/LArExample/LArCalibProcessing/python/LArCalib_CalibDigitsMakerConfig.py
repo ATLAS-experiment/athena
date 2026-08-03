@@ -2,6 +2,7 @@
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
+from AthenaCommon.Logging import logging
 import sys
 
 def patternToVars( Pattern):
@@ -9,32 +10,33 @@ def patternToVars( Pattern):
     lines = [line for line in f.readlines() if line.strip()]
 
     f.close()
+    log = logging.getLogger('patternToVars')
     for i in range(len(lines)):
         lines[i] = (lines[i]).rstrip().split(' ')
     if len(lines[0]) != 1: 
-        print('ERROR: The format of input pattern.dat is unknown.')
+        log.error('1: The format of input pattern.dat is unknown.')
         sys.exit(-1)
     if int(lines[0][0]) != len(lines[1]): 
-        print('ERROR: The format of input pattern.dat is unknown.')
+        log.error('2: The format of input pattern.dat is unknown.')
         sys.exit(-1)
     if len(lines[2]) != 1: 
-        print('ERROR: The format of input pattern.dat is unknown.')
+        log.error('3: The format of input pattern.dat is unknown.')
         sys.exit(-1)
     if int(lines[2][0]) != len(lines[3]): 
-        print('ERROR: The format of input pattern.dat is unknown.')
+        log.error('4: The format of input pattern.dat is unknown.')
         sys.exit(-1)
     if len(lines[4]) != 1:
-        print('ERROR: The format of input pattern.dat is unknown.')
+        log.error('5: The format of input pattern.dat is unknown.')
         sys.exit(-1) 
     if int(lines[4][0]) != len(lines) - 5: 
-        print('ERROR: The format of input pattern.dat is unknown.')
+        log.error('6: The format of input pattern.dat is unknown.')
         sys.exit(-1) 
     DACs = list(map(int, lines[1]))
     Delays = list(map(int, lines[3]))
     ptrns = [ item for sublist in lines[5:] for item in sublist ]
     Pattern = []
     for i in range(0,len(ptrns)): 
-        print(ptrns[i])
+        log.info(ptrns[i])
         Pattern += [int(ptrns[i],16)]
     return DACs, Delays, Pattern
 
@@ -79,7 +81,8 @@ def LArCalibDigitsMakerCfg(flags,DigitsKey="",ntrigg=100,notrun=False):
     DACs,Delays,Patterns=patternToVars(flags.LArCalib.Input.paramsFile)
     nPatterns=len(Patterns)
     
-    print('CalibDigitsMakerConfig: ',DACs,' ',Delays,' ',Patterns)
+    log = logging.getLogger('LArCalibDigitsMakerCfg ')
+    log.info(DACs,' ',Delays,' ',Patterns)
     result.addEventAlgo(CompFactory.LArCalibDigitMaker("LArCalibDigitMaker", KeyList = [DigitsKey],
                                                        NTrigger = ntrigg, DAC = [DACs,DACs,DACs,DACs,DACs],
                                                        Delay = Delays, Pattern = [Patterns,Patterns,Patterns,Patterns,Patterns], 

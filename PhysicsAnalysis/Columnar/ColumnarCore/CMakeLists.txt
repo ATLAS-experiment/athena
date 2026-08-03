@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 #
 # @author Nils Krumnack
 
@@ -44,6 +44,6 @@ if ("${COLUMNAR_DEFAULT_ACCESS_MODE}" EQUAL 2)
     SOURCES test/gt_AccessorsArray.cxx
     INCLUDE_DIRS ${GTEST_INCLUDE_DIRS}
     LINK_LIBRARIES ${GTEST_LIBRARIES} ColumnarCoreLib ColumnarEventInfoLib AsgTestingLib
-    POST_EXEC_SCRIPT nopost.sh )
+    POST_EXEC_SCRIPT noerror.sh )
 
 endif()

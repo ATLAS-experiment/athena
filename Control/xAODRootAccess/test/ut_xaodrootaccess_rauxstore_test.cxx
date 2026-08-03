@@ -71,7 +71,7 @@ StatusCode test_linked() {
   SG::auxid_t auxid2 =
       r.getAuxID<float>("ltest2", "", SG::AuxVarFlags::None, auxid1);
 
-  xAOD::RAuxStore s("fooAux:");
+  xAOD::RAuxStore s(Gaudi::Hive::currentContext(), "fooAux:");
 
   int* vp1 = reinterpret_cast<int*>(s.getData(auxid1, 10, 10));
   float* vp2 = reinterpret_cast<float*>(s.getData(auxid2, 3, 3));
@@ -126,7 +126,7 @@ StatusCode test_linked() {
     assert(vi != nullptr);
   }
 
-  xAOD::RAuxStore s2("fooAux:");
+  xAOD::RAuxStore s2(Gaudi::Hive::currentContext(), "fooAux:");
 
   (void)s2.getData(auxid2, 6, 6);
   (void)s2.getData(auxid1, 4, 4);
@@ -179,7 +179,7 @@ StatusCode test_insertmove() {
   SG::auxid_t mtyp1 =
       SG::AuxTypeRegistry::instance().getAuxID<MoveTest>("moveTest");
 
-  xAOD::RAuxStore s1("fooAux:");
+  xAOD::RAuxStore s1(Gaudi::Hive::currentContext(), "fooAux:");
 
   s1.resize(5);
 
@@ -296,7 +296,7 @@ StatusCode test_insertmove() {
 
 StatusCode test_copyIDs()
 {
-  xAOD::RAuxStore s("fooAux:");
+  xAOD::RAuxStore s(Gaudi::Hive::currentContext(), "fooAux:");
 
   SG::AuxTypeRegistry& r = SG::AuxTypeRegistry::instance();
   SG::auxid_t i1 = r.getAuxID<int> ("i1");
@@ -355,7 +355,7 @@ StatusCode test_toTransient()
   SG::auxid_t auxid1 = r.getAuxID<int> ("itest1");
   SG::auxid_t auxid2 = r.getAuxID<TTest> ("ttest1");
 
-  xAOD::RAuxStore s( "fooAux." );
+  xAOD::RAuxStore s(Gaudi::Hive::currentContext(), "fooAux:");
 
   int* vp1 = reinterpret_cast<int*> (s.getData (auxid1, 3, 3));
   TTest* vp2 = reinterpret_cast<TTest*> (s.getData (auxid2, 3, 3));
@@ -396,7 +396,7 @@ int main() {
   inputNtuple->PrintInfo();
 
   // Create the store and tell it to load entry 0
-  xAOD::RAuxStore store("PrefixAux:");
+  xAOD::RAuxStore store(Gaudi::Hive::currentContext(), "PrefixAux:");
   store.lock();
 
   // Connect it to the test RNTuple:

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MonitoredRange.h"
@@ -8,6 +8,8 @@
 #include "TH1F.h"
 #include "TH2F.h"
 #include "TProfile.h"
+#include <stdexcept>
+#include <format>
 
 CounterBase::CounterBase(const std::string& name, const MonitorBase* parent) 
   : m_name(name), m_parent(parent) {
@@ -176,19 +178,19 @@ void CounterBase::regHistogram(const std::string& name,
 }
 
 bool CounterBase::variableExists(const std::string& name) const {
-  return (m_variables.count(name) == 1);
+  return m_variables.contains(name);
 }
 
-Variable& CounterBase::getVariable(const std::string& name) {
+Variable& CounterBase::getVariable(std::string_view name) {
   auto it = m_variables.find(name);
   if (it == m_variables.end()) {
-    throw std::runtime_error( "CounterBase::getVariable: No varialbe with name " + name );
+    throw std::runtime_error( std::format("CounterBase::getVariable: No variable with name {}", name) );
   }
   return (it->second);
 }
 
 
-StatusCode CounterBase::fill(const std::string& name, float value, float weight) {
+StatusCode CounterBase::fill(std::string_view name, float value, float weight) {
   auto it = m_variables.find(name);
   if (it == m_variables.end()) {
     return StatusCode::FAILURE;
@@ -197,7 +199,7 @@ StatusCode CounterBase::fill(const std::string& name, float value, float weight)
   return StatusCode::SUCCESS;
 }
 
-StatusCode CounterBase::fill(const std::string& name,  float xvalue, float yvalue, float weight) {
+StatusCode CounterBase::fill(std::string_view name,  float xvalue, float yvalue, float weight) {
   auto it = m_variables.find(name);
   if (it == m_variables.end()) {
     return StatusCode::FAILURE;
@@ -217,7 +219,7 @@ StatusCode CounterBase::setDenominator(const std::string& name, float value) {
 }
 
 
-StatusCode CounterBase::increment(const std::string& name, float weight) {
+StatusCode CounterBase::increment(std::string_view name, float weight) {
   return fill(name, 1.0, weight);
 }
 

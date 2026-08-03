@@ -16,14 +16,11 @@
 #include "GaudiKernel/ServiceHandle.h"
 #include "GaudiKernel/ToolHandle.h"
 
-namespace HepPDT {
-  class ParticleDataTable;
-}
 #include "AtlasHepMC/GenEvent_fwd.h"
 #include "AtlasHepMC/GenParticle_fwd.h"
 #include "TruthUtils/MagicNumbers.h"
+#include "GeneratorModules/GenData.h"
 
-class IPartPropSvc;
 class McEventCollection;
 namespace ISFTesting {
   class InputConverter_test;
@@ -115,8 +112,7 @@ namespace ISF {
     ISF::ISFParticle* convertParticle(const HepMC::GenParticlePtr& genPartPtr) const;
 
     /** ParticlePropertyService and ParticleDataTable */
-    ServiceHandle<IPartPropSvc>           m_particlePropSvc;          //!< particle properties svc to retrieve PDT
-    const HepPDT::ParticleDataTable      *m_particleDataTable;        //!< PDT used to look up particle masses
+    std::shared_ptr<GenData> m_gendata{nullptr};
 
     bool                                  m_useGeneratedParticleMass; //!< use GenParticle::generated_mass() in simulation
 

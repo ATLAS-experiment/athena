@@ -161,7 +161,7 @@ public:
 	bool eraseJustAfterRefresh{};
 	IVP1ChannelWidget* postponedUncreateAndDeleteCW{};
 
-	CruiseMode cruisemode;
+	CruiseMode cruisemode{};
 	QTimer * cruisetimer{};
 	bool allVisibleRefreshed() const;
 	bool allSoonVisibleRefreshed() const;

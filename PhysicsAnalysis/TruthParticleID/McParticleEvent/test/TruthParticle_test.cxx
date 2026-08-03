@@ -113,7 +113,7 @@ class TruthParticleTest
 {
 public:
 
-  HepMC::GenEvent * m_evt;
+  HepMC::GenEvent * m_evt = nullptr;
   HepMC::GenVertexPtr m_vtx;
   HepMC::GenParticlePtr m_top;
   HepMC::GenParticlePtr m_w;
@@ -121,15 +121,15 @@ public:
   HepMC::GenParticlePtr m_g1;
   HepMC::GenParticlePtr m_g2;
 
-  unsigned int m_nPartsIn;
-  unsigned int m_nPartsOut;
+  unsigned int m_nPartsIn = 0;
+  unsigned int m_nPartsOut = 0;
 
-  unsigned int m_nCones;
-  EtIsol_t m_etIsols;
+  unsigned int m_nCones = 0;
+  EtIsol_t m_etIsols{};
 
-  double            m_epsilon;
+  double            m_epsilon = 0;
 
-  TruthParticleContainer * m_mc;
+  TruthParticleContainer * m_mc = nullptr;
 };
 
 TruthParticleTest* makeTestData()

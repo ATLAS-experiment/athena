@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TILEMONITORING_TILEJETMONITORALGORITHM
@@ -41,7 +41,7 @@ class TileJetMonitorAlgorithm : public AthMonitorAlgorithm {
 
   private:
 
-    StatusCode fillTimeHistograms(const xAOD::Jet& jet, uint32_t lumiBlock, std::set<Identifier>& usedCells) const;
+  StatusCode fillTimeHistograms(const xAOD::Jet& jet, uint32_t lumiBlock, std::set<Identifier>& usedCells, const EventContext& ctx) const;
     unsigned int findIndex(const int gain, const float energy) const;
     bool isGoodChannel(int part, int module, int channel, uint32_t bad, unsigned int qbit, Identifier id) const;
     bool passesJvt(const xAOD::Jet& jet) const;

@@ -40,12 +40,10 @@ def ActsInDetTrackStatePrinterToolCfg(flags,
                                                 pixel=['PixelSpacePoints'],
                                                 strip=['SCT_SpacePoints', 'OverlapSpacePoints']))
 
-    if 'TrackingGeometryTool' not in kwargs:
-        from ActsConfig.ActsGeometryConfig import ActsTrackingGeometryToolCfg
-        kwargs.setdefault(
-            "TrackingGeometryTool",
-            acc.getPrimaryAndMerge(ActsTrackingGeometryToolCfg(flags)),
-        )
+    from ActsAlignmentAlgs.AlignmentAlgsConfig import ActsGeometryContextAlgCfg
+    from ActsConfig.ActsGeometryConfig import ActsTrackingGeometrySvcCfg
+    acc.merge(ActsGeometryContextAlgCfg(flags))
+    acc.merge(ActsTrackingGeometrySvcCfg(flags))
 
     acc.setPrivateTools(CompFactory.ActsTrk.TrackStatePrinterTool(name, **kwargs))
     return acc
@@ -154,20 +152,12 @@ def ActsInDetMainTrackFindingAlgCfg(flags,
         kwargs.setdefault("ptMinMeasurements", seedOrder(flags, pixel=[3], strip=[6]))
         kwargs.setdefault("absEtaMaxMeasurements", seedOrder(flags, pixel=[3], strip=[999999]))
 
-    from ActsConfig.ActsGeometryConfig import ActsTrackingGeometryToolCfg, ActsGeometryRealmConvTool
-    kwargs.setdefault("TrackingGeometryTool", acc.getPrimaryAndMerge(ActsTrackingGeometryToolCfg(flags)))
-    kwargs.setdefault("GeometryRealmConvTool", acc.getPrimaryAndMerge(ActsGeometryRealmConvTool(flags)))
+    from ActsConfig.ActsGeometryConfig import ActsGeometryRealmConvToolCfg
+    kwargs.setdefault("GeometryRealmConvTool", acc.getPrimaryAndMerge(ActsGeometryRealmConvToolCfg(flags)))
 
     if 'TrackParamsEstimationTool' not in kwargs:
         from ActsConfig.ActsTrackParamsEstimationConfig import ActsTrackParamsEstimationToolCfg
         kwargs.setdefault('TrackParamsEstimationTool', acc.popToolsAndMerge(ActsTrackParamsEstimationToolCfg(flags)))
-        
-    if 'ExtrapolationTool' not in kwargs:
-        from ActsConfig.ActsGeometryConfig import ActsExtrapolationToolCfg
-        kwargs.setdefault(
-            "ExtrapolationTool",
-            acc.popToolsAndMerge(ActsExtrapolationToolCfg(flags, MaxSteps=10000)),
-        )
         
     if flags.Acts.doPrintTrackStates and 'TrackStatePrinter' not in kwargs:
         kwargs.setdefault(
@@ -304,7 +294,7 @@ def ActsInDetTrackFindingCfg(flags,
     # Persistification
     if flags.Acts.EDM.PersistifyTracks:
         trackColl = kwargs['ACTSTracksLocation']
-        from ActsConfig.ActsTrackFindingConfig import ActsToXAODTrackConverterAlgCfg
+        from ActsConfig.ActsEventCnvConfig import ActsToXAODTrackConverterAlgCfg
         acc.merge(ActsToXAODTrackConverterAlgCfg(flags,
                                                  name = f'{trackColl}ToXAODConverterAlg',
                                                  InputActsTracksLocation = trackColl,
@@ -403,7 +393,7 @@ def ActsInDetAmbiguityResolutionCfg(flags,
     # Persistification
     if flags.Acts.EDM.PersistifyTracks:
         trackColl = kwargs['ResolvedTracksLocation']
-        from ActsConfig.ActsTrackFindingConfig import ActsToXAODTrackConverterAlgCfg
+        from ActsConfig.ActsEventCnvConfig import ActsToXAODTrackConverterAlgCfg
         acc.merge(ActsToXAODTrackConverterAlgCfg(flags,
                                                  name = f'{trackColl}ToXAODConverterAlg',
                                                  InputActsTracksLocation = trackColl,

@@ -1,10 +1,10 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "InDetTrackSelectorTool/InDetIsoTrackSelectorTool.h"
 #include "TrkToolInterfaces/ITrackSelectorTool.h"
-// forward declares
+
 #include "TrkExInterfaces/IExtrapolator.h"
 #include "TrkTrack/Track.h"
 #include "TrkParticleBase/TrackParticleBase.h"
@@ -92,12 +92,12 @@ bool InDet::InDetIsoTrackSelectorTool::decision(const Trk::AtaStraightLine& atl,
   const Trk::StraightLineSurface& alSurface = atl.associatedSurface();
   // no surface: bail out
   // get the track to the BeamLine Parameters ( given by AtaStrainghtLine)
-  const Trk::TrackParameters* trackAtBL = m_extrapolator->extrapolate(
+  std::unique_ptr<Trk::TrackParameters> trackAtBL = m_extrapolator->extrapolate(
     Gaudi::Hive::currentContext(),
     trackPars,
     alSurface,
     Trk::anyDirection,
-    false).release();
+    false);
   // no parameterisation : bail out
   if (!trackAtBL) return false;
   // d0,z0 wrt BL for reference and track
@@ -151,8 +151,6 @@ bool InDet::InDetIsoTrackSelectorTool::decision(const Trk::AtaStraightLine& atl,
         ATH_MSG_VERBOSE("TrackParameters " << ( passed  ? "passed" : "did not pass" ) << " z0*sin(theta) significance cut wrt BL :  "
 			<<  z0sig2 << " (cut is : | " << m_z0Significance2 << " | ).");
   }
-  // memory cleanup
-  delete trackAtBL;
   return passed;
 }
 

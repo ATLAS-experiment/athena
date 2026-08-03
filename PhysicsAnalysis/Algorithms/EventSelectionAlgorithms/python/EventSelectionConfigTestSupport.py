@@ -64,9 +64,15 @@ def run(cuts, *, dataType=DataType.FullSim, containers=None,
     for opt, val in options.items():
         block.setOptionValue(opt, val)
     seq.append(block)
-    seq.fullConfigure(config)
+
     if isAthena:
-        return config.CA.getEventAlgos()
+        try:
+            seq.fullConfigure(config)
+            return config.CA.getEventAlgos()
+        finally:
+            config.CA.wasMerged()
+
+    seq.fullConfigure(config)
     return list(algSeq)
 
 
@@ -91,7 +97,9 @@ def run_merger(region_names, *, dataType=DataType.FullSim, noFilter=False):
     seq.append(merger)
     seq.fullConfigure(config)
     if isAthena:
-        return config.CA.getEventAlgos()
+        algs = config.CA.getEventAlgos()
+        config.CA.wasMerged()
+        return algs
     return list(algSeq)
 
 

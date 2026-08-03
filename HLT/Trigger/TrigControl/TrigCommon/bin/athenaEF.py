@@ -143,6 +143,8 @@ class RunParams:
          sor_time=args.sor_time,
          solenoid_current=getattr(args, 'solenoid_current', None),
          toroids_current=getattr(args, 'toroids_current', None),
+         beam_type=getattr(args, 'beam_type', None),
+         beam_energy=getattr(args, 'beam_energy', None),
          conditions_run=getattr(args, 'conditions_run', None),
          T0_project_tag=getattr(args, 'T0_project_tag', ''),
          stream=getattr(args, 'stream', ''),
@@ -527,7 +529,7 @@ class ConfigRunner:
    """
    def __init__(self, job_options_type, job_options_path, run_params=None,
                 properties=None, db_server=None, smk=None,
-                num_threads=1, num_slots=1, ef_files=None):
+                num_threads=1, num_slots=1, ef_overrides=None):
       """
       Args:
          job_options_type: "FILE" or "DB"
@@ -538,7 +540,7 @@ class ConfigRunner:
          smk: Super Master Key (for store() in DB mode)
          num_threads: Number of threads for AvalancheSchedulerSvc.ThreadPoolSize
          num_slots: Number of event slots for EventDataSvc.NSlots
-         ef_files: List of input files for EFInterfaceSvc
+         ef_overrides: EFInterfaceSvc properties overriding the DB/JSON configuration
       """
       self.job_options_type = job_options_type
       self.job_options_path = job_options_path
@@ -548,19 +550,19 @@ class ConfigRunner:
       self.smk = smk              # For store() in DB mode
       self.num_threads = num_threads
       self.num_slots = num_slots
-      self.ef_files = ef_files or []  # Input files for EFInterfaceSvc
+      self.ef_overrides = ef_overrides or {}  # CLI overrides for EFInterfaceSvc
       self._app = None
    
    @classmethod
    def from_json(cls, json_file, run_params=None, properties=None,
-                 num_threads=1, num_slots=1, ef_files=None):
+                 num_threads=1, num_slots=1, ef_overrides=None):
       """Create runner for JSON file (TYPE=FILE)"""
       return cls("FILE", os.path.abspath(json_file), run_params, properties,
-                 num_threads=num_threads, num_slots=num_slots, ef_files=ef_files)
+                 num_threads=num_threads, num_slots=num_slots, ef_overrides=ef_overrides)
    
    @classmethod
    def from_database(cls, db_server, smk, l1psk=None, hltpsk=None, run_params=None,
-                     num_threads=1, num_slots=1, ef_files=None):
+                     num_threads=1, num_slots=1, ef_overrides=None):
       """Create runner for database (TYPE=DB)"""
       # Build the DB connection string: server=X;smkey=Y;lvl1key=Z;hltkey=W
       db_path = f"server={db_server};smkey={smk}"
@@ -569,7 +571,7 @@ class ConfigRunner:
       if hltpsk is not None:
          db_path += f";hltkey={hltpsk}"
       return cls("DB", db_path, run_params, db_server=db_server, smk=smk,
-                 num_threads=num_threads, num_slots=num_slots, ef_files=ef_files)
+                 num_threads=num_threads, num_slots=num_slots, ef_overrides=ef_overrides)
       
    def run(self, maxEvents=None):
       """
@@ -618,28 +620,17 @@ class ConfigRunner:
       # All property overrides below use iProperty and must be done after configure()
       # but before initialize() - this is the same pattern as PSC (Psc.cxx)
       from GaudiPython.Bindings import iProperty
-      
-      # Override EFInterfaceSvc.NumEvents if user specified it (overrides DB value)
-      if maxEvents is not None:
-         log.info("Setting EFInterfaceSvc.NumEvents=%d (overriding DB value)", maxEvents)
-         iProperty("EFInterfaceSvc").NumEvents = maxEvents
-      
+
       # Set threading configuration
       log.info("Setting threading: ThreadPoolSize=%d, NSlots=%d", self.num_threads, self.num_slots)
       iProperty("AvalancheSchedulerSvc").ThreadPoolSize = self.num_threads
       iProperty("EventDataSvc").NSlots = self.num_slots
       
-      # Set input files and metadata for EFInterfaceSvc (overrides what's in DB/JSON config)
-      if self.ef_files:
-         log.info("Setting EFInterfaceSvc.Files = %s", self.ef_files)
-         iProperty("EFInterfaceSvc").Files = self.ef_files
-         iProperty("EFInterfaceSvc").T0ProjectTag = self.run_params.get('T0_project_tag', '')
-         iProperty("EFInterfaceSvc").BeamType = self.run_params.get('beam_type', 0)
-         iProperty("EFInterfaceSvc").BeamEnergy = self.run_params.get('beam_energy', 0)
-         iProperty("EFInterfaceSvc").TriggerType = self.run_params.get('trigger_type', 0)
-         iProperty("EFInterfaceSvc").Stream = self.run_params.get('stream', '')
-         iProperty("EFInterfaceSvc").Lumiblock = self.run_params.get('lumiblock', 0)
-         iProperty("EFInterfaceSvc").DetMask = self.run_params.get('detector_mask', '')
+      # Override EFInterfaceSvc properties explicitly given on the command line.
+      ef_svc = iProperty("EFInterfaceSvc")
+      for prop, value in self.ef_overrides.items():
+         log.info("Overriding EFInterfaceSvc.%s = %s (from command line)", prop, value)
+         setattr(ef_svc, prop, value)
       
       # If HLT PSK is set on command line, read it from DB instead of COOL (ATR-25974)
       # This is the same logic as TrigPSCPythonDbSetup.py
@@ -677,6 +668,9 @@ class ConfigRunner:
          sor_time = self.run_params['sor_time']
          solenoid_current = self.run_params['solenoid_current']
          toroids_current = self.run_params['toroids_current']
+         beam_type = self.run_params['beam_type']
+         beam_energy = self.run_params['beam_energy']
+         lb_number = self.run_params['lb_number']
          
          log.info("Calling prepareForStart with run=%d, det_mask=0x%s, sor_time=%s",
                   run_number, det_mask, sor_time)
@@ -685,6 +679,9 @@ class ConfigRunner:
             run_number=run_number,
             det_mask=det_mask,
             sor_time=sor_time,
+            lb_number=lb_number,
+            beam_type=beam_type,
+            beam_energy=beam_energy,
             solenoid_current=solenoid_current,
             toroids_current=toroids_current
          )
@@ -757,7 +754,7 @@ class ConfigRunner:
       return sc
 
 
-def load_from_json(json_file, run_params=None, num_threads=1, num_slots=1, ef_files=None):
+def load_from_json(json_file, run_params=None, num_threads=1, num_slots=1, ef_overrides=None):
    """
    Load configuration from a Gaudi joboptions JSON file.
    
@@ -774,11 +771,11 @@ def load_from_json(json_file, run_params=None, num_threads=1, num_slots=1, ef_fi
    return ConfigRunner.from_json(json_file, run_params, properties,
                                   num_threads=num_threads,
                                   num_slots=num_slots,
-                                  ef_files=ef_files)
+                                  ef_overrides=ef_overrides)
 
 
 def load_from_database(db_server, smk, l1psk=None, hltpsk=None, run_params=None,
-                       num_threads=1, num_slots=1, ef_files=None):
+                       num_threads=1, num_slots=1, ef_overrides=None):
    """
    Load configuration from trigger database using the Super Master Key (SMK).
    
@@ -789,7 +786,7 @@ def load_from_database(db_server, smk, l1psk=None, hltpsk=None, run_params=None,
    return ConfigRunner.from_database(db_server, smk, l1psk, hltpsk, run_params,
                                       num_threads=num_threads,
                                       num_slots=num_slots,
-                                      ef_files=ef_files)
+                                      ef_overrides=ef_overrides)
 
 
 ##
@@ -802,6 +799,7 @@ def arg_sor_time(s) -> str:
    elif s.isdigit():   return dt.fromtimestamp(float(s)/1e9).strftime(fmt)
    else:               return s
 
+
 def arg_detector_mask(s):
    """Convert detector mask to format expected by eformat"""
    if s=='all':
@@ -810,12 +808,6 @@ def arg_detector_mask(s):
    dmask = dmask.lower().replace('0x', '').replace('l', '')  # remove markers
    return '0' * (32 - len(dmask)) + dmask                    # (pad with 0s)
 
-def arg_log_level(s):
-   """Argument handler for log levels"""
-   lvls = s.split(',')
-   if len(lvls)==1: lvls.append('ERROR')
-   return lvls
-
 
 def check_args(parser, args):
    """Consistency check of command line arguments (same as athenaHLT.py)"""
@@ -823,12 +815,15 @@ def check_args(parser, args):
    if not args.jobOptions and not args.use_database:
       parser.error("No job options file specified")
 
-   if (not args.file and not args.dump_config_exit and args.efdf_interface_library == 'TrigDFEmulator'):
+   if (not args.file and not args.dump_config_exit
+       and (args.efdf_interface_library or 'TrigDFEmulator') == 'TrigDFEmulator'):
       parser.error("--file is required unless using --dump-config-exit or online efdf-interface-library")
 
    if args.use_crest and not args.use_database:
       parser.error("--use-crest requires --use-database")
 
+   if args.oh_monitoring and args.online_environment:
+      parser.error("--oh-monitoring (-M) and --online-environment are mutually exclusive.")
 
 def update_run_params(args, flags):
    """Update run parameters from IS, file, or conditions DB"""
@@ -864,6 +859,8 @@ def update_run_params(args, flags):
       # Update magnet currents from IS (run_params already has command-line overrides if provided)
       args.solenoid_current = run_params.solenoid_current
       args.toroids_current = run_params.toroids_current
+      args.beam_type = run_params.beam_type
+      args.beam_energy = run_params.beam_energy
 
    if (args.run_number is not None and args.lb_number is None) or (args.run_number is None and args.lb_number is not None):
       log.error("Both or neither of the options -R (--run-number) and -L (--lb-number) have to be specified")
@@ -992,6 +989,106 @@ def update_trigconf_keys(args, flags):
       log.info("Using trigger configuration keys from command line: SMK=%d, L1PSK=%d, HLTPSK=%d",
                args.smk, args.l1psk, args.hltpsk)
 
+# IS schema files, installed under <...>/share/schema (e.g. see TrigCaloHypo/CMakeLists.txt). 
+# Add an entry here for every new IS type
+IS_SCHEMA_FILES = ['schema/Larg.LArNoiseBurstCandidates.is.schema.xml']
+
+def find_is_schema_files():
+   """
+   Resolve IS_SCHEMA_FILES to absolute paths using DATAPATH.
+   rdb_server must be given the schema of every IS type we publish.
+   """
+   from AthenaCommon.Utils.unixtools import find_datafile
+
+   found = []
+   for fname in IS_SCHEMA_FILES:
+      path = find_datafile(fname)
+      if path:
+         found.append(os.path.abspath(path))
+      else:
+         log.error("IS schema file %s not found on DATAPATH: IS publication will fail with HTTP 400", fname)
+   return found
+
+
+def start_oh_infrastructure(args):
+   """Start a private TDAQ infrastructure (offline test of OH publication)."""
+   import shutil, socket, signal, subprocess, time
+
+   infra_script = shutil.which('athenaEF_tdaq_infra.py')
+   if infra_script is None:
+      log.error("athenaEF_tdaq_infra.py not found on PATH (required for -M)")
+      sys.exit(1)
+
+   partition = args.partition or 'athenaEF'
+   host = 'localhost'
+   # Get a free port for webis
+   s = socket.socket()
+   s.bind((host, 0))
+   port = s.getsockname()[1]
+   s.close()
+   oh_server = 'Histogramming'   # WebdaqHistSvc.OHServerName default
+   run_number = args.run_number if args.run_number is not None else 0
+
+   # Export variables for the -M case 
+   os.environ['TDAQ_PARTITION']   = partition
+   os.environ['TDAQ_WEBDAQ_BASE'] = f'http://{host}:{port}'
+   os.environ['TDAQ_OH_SERVER']   = oh_server
+
+   log.info("Starting private OH infrastructure: partition=%s, webdaq=%s, oh_server=%s",
+            partition, os.environ['TDAQ_WEBDAQ_BASE'], oh_server)
+
+   logfile = open('athenaEF_oh_infra.log', 'w')
+
+   # PR_SET_PDEATHSIG so the infrastructure is torn down (SIGTERM -> oh_cp +
+   # ipc_rm) if athenaEF dies unexpectedly, e.g. segfaults mid-run.
+   from ctypes import cdll
+   PR_SET_PDEATHSIG = 1
+   def _pdeathsig():
+      cdll['libc.so.6'].prctl(PR_SET_PDEATHSIG, signal.SIGTERM)
+
+   schemas = find_is_schema_files()
+   log.info("IS schema files: %s", ', '.join(schemas) or '(none)')
+
+   proc = subprocess.Popen(
+      [infra_script,
+       '--partition',   partition,
+       '--webdaq-port', str(port),
+       '--oh-server',   oh_server,
+       '--run-number',  str(run_number),
+       *(arg for f in schemas for arg in ('--schema', f))],
+      stdout=logfile, stderr=subprocess.STDOUT,
+      preexec_fn=_pdeathsig, close_fds=True)
+
+   # Wait for the readiness marker (or early failure / timeout)
+   timeout = 120
+   deadline = time.time() + timeout
+   while time.time() < deadline:
+      if proc.poll() is not None:
+         log.error("OH infrastructure exited early (code %s); see %s", proc.returncode, logfile.name)
+         sys.exit(1)
+      with open(logfile.name) as f:
+         if 'ATHENAEF_INFRA_READY' in f.read():
+            log.info("OH infrastructure is ready")
+            return proc
+      time.sleep(1)
+
+   log.error("OH infrastructure did not become ready within %d s; see %s", timeout, logfile.name)
+   proc.terminate()
+   sys.exit(1)
+
+
+def stop_oh_infrastructure(proc):
+   """Terminate the private TDAQ infrastructure (SIGTERM triggers oh_cp + ipc_rm)."""
+   if proc is None or proc.poll() is not None:
+      return
+   import signal
+   log.info("Stopping OH infrastructure")
+   proc.send_signal(signal.SIGTERM)
+   try:
+      proc.wait(timeout=60)
+   except Exception:
+      proc.kill()
+
 
 class MyHelp(argparse.Action):
    """Custom help to hide/show expert groups"""
@@ -1020,7 +1117,7 @@ def main():
    g.add_argument('jobOptions', nargs='?', help='job options: CA module (package.module:function), pickle file (.pkl), or JSON file (.json)')
    g.add_argument('--threads', metavar='N', type=int, default=1, help='number of threads')
    g.add_argument('--concurrent-events', metavar='N', type=int, help='number of concurrent events if different from --threads')
-   g.add_argument('--log-level', '-l', metavar='LVL', type=arg_log_level, default='INFO,ERROR', help='OutputLevel of athena,POOL')
+   g.add_argument('--log-level', '-l', metavar='LVL', default='INFO', help='OutputLevel of athena')
    g.add_argument('--precommand', '-c', metavar='CMD', action='append', default=[],
                   help='Python commands executed before job options')
    g.add_argument('--postcommand', '-C', metavar='CMD', action='append', default=[],
@@ -1031,11 +1128,14 @@ def main():
    g = parser.add_argument_group('Input/Output')
    g.add_argument('--file', '--filesInput', '-f', action='append', help='input RAW file')
    g.add_argument('--save-output', '-o', metavar='FILE', help='output file name')
-   g.add_argument('--number-of-events', '--evtMax', '-n', metavar='N', type=int, default=-1, help='processes N events (default: -1, means all)')
-   g.add_argument('--skip-events', '--skipEvents', '-k', metavar='N', type=int, default=0, help='skip N first events')
-   g.add_argument('--loop-files', action='store_true', help='loop over input files if no more events')
-   g.add_argument('--efdf-interface-library', metavar='LIB', default='TrigDFEmulator',
-                  help='name of the EFDF interface shared library to load')
+   g.add_argument('--number-of-events', '--evtMax', '-n', metavar='N', type=int, default=None,
+                  help='processes N events (default: from DB/config, -1 means all)')
+   g.add_argument('--skip-events', '--skipEvents', '-k', metavar='N', type=int, default=None,
+                  help='skip N first events')
+   g.add_argument('--loop-files', action=argparse.BooleanOptionalAction, default=None,
+                  help='loop over input files if no more events')
+   g.add_argument('--efdf-interface-library', metavar='LIB', default=None,
+                  help='name of the EFDF interface shared library to load (default: TrigDFEmulator)')
 
    ## Performance and debugging
    g = parser.add_argument_group('Performance and debugging')
@@ -1113,9 +1213,9 @@ def main():
    import ROOT
    ROOT.ROOT.EnableThreadSafety()
 
-   # set default OutputLevels and file inclusion
+   # set default Python OutputLevel and file inclusion
    import AthenaCommon.Logging
-   AthenaCommon.Logging.log.setLevel(getattr(logging, args.log_level[0]))
+   AthenaCommon.Logging.log.setLevel(getattr(logging, args.log_level))
    AthenaCommon.Logging.log.setFormat("%(asctime)s  Py:%(name)-31s %(levelname)7s %(message)s")
    if args.show_includes:
       from AthenaCommon.Include import include
@@ -1131,6 +1231,10 @@ def main():
    
    # Get flags with online defaults (same as athenaHLT)
    flags = defaultOnlineFlags()
+
+   # set MessageSvc OutputLevel
+   from AthenaCommon import Constants
+   flags.Exec.OutputLevel = getattr(Constants, args.log_level)
 
    # Enable WebdaqHistSvc for online histogram publishing if requested
    if args.oh_monitoring:
@@ -1177,11 +1281,11 @@ def main():
       flags.Input.ConditionsRunNumber = args.conditions_run
 
    # Set number of events
-   if args.number_of_events > 0:
+   if args.number_of_events is not None and args.number_of_events > 0:
       flags.Exec.MaxEvents = args.number_of_events
 
-   # Set skip events  
-   if args.skip_events > 0:
+   # Set skip events
+   if args.skip_events is not None and args.skip_events > 0:
       flags.Exec.SkipEvents = args.skip_events
 
    # NOTE: Do NOT set flags.Concurrency.NumThreads or NumConcurrentEvents here.
@@ -1193,22 +1297,45 @@ def main():
    # Configure EF ByteStream services (mandatory to run without HLTMPPU)
    # This provides the data flow interface that would normally come from HLTMPPU
    flags.Trigger.Online.useEFByteStreamSvc = True
-   ef = flags.Trigger.Online.EFInterface
+   # EFInterfaceSvc settings from the command line. 
+   # Only options explicitly given are collected, anything else keeps the value from the DB/jobOptions configuration
    ef_files = args.file if args.file else []
-   ef.Files          = ef_files
-   ef.OutputFileName = f"athenaEF_{args.save_output}" if args.save_output else ""
-   ef.LoopFiles    = args.loop_files
-   ef.NumEvents    = args.number_of_events
-   ef.SkipEvents   = args.skip_events
-   ef.RunNumber    = args.run_number
-   ef.T0ProjectTag = args.T0_project_tag
-   ef.BeamType     = args.beam_type
-   ef.BeamEnergy   = args.beam_energy
-   ef.TriggerType  = args.trigger_type
-   ef.Stream       = args.stream
-   ef.Lumiblock    = args.lumiblock
-   ef.DetMask      = args.file_detector_mask
-   ef.LibraryName  = args.efdf_interface_library
+   ef_overrides = {}
+   if ef_files:
+      ef_overrides['Files'] = ef_files
+      # Metadata read from the input file - always more accurate than DB values
+      ef_overrides.update({
+         'T0ProjectTag' : args.T0_project_tag,
+         'BeamType'     : args.beam_type,
+         'BeamEnergy'   : args.beam_energy,
+         'TriggerType'  : args.trigger_type,
+         'Stream'       : args.stream,
+         'Lumiblock'    : args.lumiblock,
+         'DetMask'      : args.file_detector_mask,
+      })
+   if args.run_number is not None:          # from -R, IS, or the input file
+      ef_overrides['RunNumber'] = args.run_number
+   if args.save_output is not None:
+      ef_overrides['OutputFileName'] = args.save_output
+   if args.loop_files is not None:
+      ef_overrides['LoopOverFiles'] = args.loop_files
+   if args.number_of_events is not None:
+      ef_overrides['NumEvents'] = args.number_of_events
+   if args.skip_events is not None:
+      ef_overrides['SkipEvents'] = args.skip_events
+   if args.efdf_interface_library is not None:
+      ef_overrides['EFDFInterfaceLibraryName'] = args.efdf_interface_library
+
+   # Apply to the flags for the CA-module path (getEFInterfaceSvc reads these)
+   _prop2flag = {'Files': 'Files', 'OutputFileName': 'OutputFileName',
+                 'LoopOverFiles': 'LoopFiles', 'NumEvents': 'NumEvents',
+                 'SkipEvents': 'SkipEvents', 'RunNumber': 'RunNumber',
+                 'T0ProjectTag': 'T0ProjectTag', 'BeamType': 'BeamType',
+                 'BeamEnergy': 'BeamEnergy', 'TriggerType': 'TriggerType',
+                 'Stream': 'Stream', 'Lumiblock': 'Lumiblock', 'DetMask': 'DetMask',
+                 'EFDFInterfaceLibraryName': 'LibraryName'}
+   for prop, value in ef_overrides.items():
+      setattr(flags.Trigger.Online.EFInterface, _prop2flag[prop], value)
 
    # Execute precommands
    if args.precommand:
@@ -1242,7 +1369,7 @@ def main():
       run_params = get_run_params(args).to_dict()
       acc = load_from_database(db_alias, args.smk, args.l1psk, args.hltpsk, run_params,
                                num_threads=args.threads, num_slots=args.concurrent_events,
-                               ef_files=ef_files)
+                               ef_overrides=ef_overrides)
       log.info("Configuration loaded from database")
 
    elif is_pickle:
@@ -1259,14 +1386,14 @@ def main():
       run_params = get_run_params(args).to_dict()
       acc = load_from_json(jobOptions, run_params,
                            num_threads=args.threads, num_slots=args.concurrent_events,
-                           ef_files=ef_files)
+                           ef_overrides=ef_overrides)
       log.info("Configuration loaded from JSON")
 
    else:
       # Load from CA module - follow the same pattern as athenaHLT/TrigPSCPythonCASetup:
       # 1. Build the full configuration with services
       # 2. Dump to JSON file
-      # 3. Use TrigConf::JobOptionsSvc to load from JSON
+      # 3. Use AthHLT.reload_from_json to re-exec and reload from JSON
       # This preserves the ability to use the same JobOptionsSvc as athenaHLT
       log.info("Loading CA configuration from: %s", jobOptions)
       
@@ -1314,17 +1441,12 @@ def main():
       if args.dump_config_exit:
          log.info("Configuration dumped to %s.json. Exiting...", fname)
          sys.exit(0)
+
+      # Re-exec from the JSON (same as athenaHLT TrigPSCPythonCASetup -> AthHLT.reload_from_json -> os.execvp). 
+      # This replaces the process image freeing up the configuration heap 
+      log.info("Configuration dumped to %s.json. Re-exec...", fname)
+      AthHLT.reload_from_json(f"{fname}.json", suppress_args=PscConfig.unparsedArguments + ['--dump-config'], jobOptions=args.jobOptions)
       
-      # Now load the JSON using JsonConfigRunner with TrigConf::JobOptionsSvc
-      log.info("Loading configuration from %s.json via TrigConf::JobOptionsSvc", fname)
-      # Get run parameters for prepareForStart
-      run_params = get_run_params(args).to_dict()
-      acc = load_from_json(f"{fname}.json", run_params,
-                           num_threads=args.threads, num_slots=args.concurrent_events,
-                           ef_files=ef_files)
-      
-      log.info("Configuration loaded with HLT online services")
-   
    # Execute postcommands
    if args.postcommand:
       log.info("Executing postcommand(s)")
@@ -1388,6 +1510,9 @@ def main():
    if not os.path.exists(worker_dir):
       log.info("Creating worker directory: %s", worker_dir)
       os.makedirs(worker_dir, exist_ok=True)
+
+   # Start the private TDAQ infrastructure for -M
+   oh_infra = start_oh_infrastructure(args) if args.oh_monitoring else None
    
    if args.interactive:
       log.info("Interactive mode - call acc.run() to execute")
@@ -1407,6 +1532,8 @@ def main():
       except Exception:
          traceback.print_exc()
          exitcode = ExitCodes.UNKNOWN_EXCEPTION
+      finally:
+         stop_oh_infrastructure(oh_infra)
 
       log.info('Leaving with code %d: "%s"', exitcode, ExitCodes.what(exitcode))
       sys.exit(exitcode)

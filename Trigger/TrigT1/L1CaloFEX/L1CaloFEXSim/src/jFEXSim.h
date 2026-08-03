@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //***************************************************************************
@@ -13,7 +13,6 @@
 #define jFEXSim_H
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "L1CaloFEXToolInterfaces/IjFEXSim.h"
-#include "AthenaKernel/CLASS_DEF.h"
 #include "L1CaloFEXSim/jTower.h"
 #include "jFEXFPGA.h"
 #include "L1CaloFEXSim/jFEXTOB.h"
@@ -48,7 +47,7 @@ namespace LVL1 {
 
     virtual void reset () override ;
 
-    virtual int ID() override {return m_id;}
+    virtual int ID() const override {return m_id;}
     
     virtual void SetTowersAndCells_SG(int tmp [FEXAlgoSpaceDefs::jFEX_algoSpace_height][FEXAlgoSpaceDefs::jFEX_wide_algoSpace_width]) override;
     virtual void SetTowersAndCells_SG(int tmp [FEXAlgoSpaceDefs::jFEX_algoSpace_height][FEXAlgoSpaceDefs::jFEX_thin_algoSpace_width]) override;
@@ -57,7 +56,7 @@ namespace LVL1 {
     virtual StatusCode ExecuteForwardCSide(int tmp [2*FEXAlgoSpaceDefs::jFEX_algoSpace_height][FEXAlgoSpaceDefs::jFEX_wide_algoSpace_width], jFEXOutputCollection* inputOutputCollection, const std::pair<unsigned int, const std::vector<int>&> & jetCalibrationParameters) override;
     virtual StatusCode ExecuteBarrel(int tmp [2*FEXAlgoSpaceDefs::jFEX_algoSpace_height][FEXAlgoSpaceDefs::jFEX_thin_algoSpace_width], jFEXOutputCollection* inputOutputCollection, const std::pair<unsigned int, const std::vector<int>&> & jetCalibrationParameters) override;
 
-    virtual std::vector<std::vector<std::vector<uint32_t>>> getFwdElTOBs() override;
+    virtual const std::vector<std::vector<std::vector<uint32_t>>>& getFwdElTOBs() const override;
 
     virtual std::vector< std::vector<std::unique_ptr<jFEXTOB>> > getTauTOBs() override;
     virtual std::vector< std::vector<std::unique_ptr<jFEXTOB>> > getSmallRJetTOBs() override;
@@ -74,8 +73,7 @@ namespace LVL1 {
     int m_jTowersIDs_Thin [FEXAlgoSpaceDefs::jFEX_algoSpace_height][FEXAlgoSpaceDefs::jFEX_thin_algoSpace_width]{};
 
     std::unordered_map<int,jTower> m_jTowersColl;
-    // FIXME: unused?
-    //CaloCellContainer m_sCellsCollection;
+
     std::vector<jFEXFPGA*> m_jFEXFPGACollection;
    
     std::vector<std::vector<std::vector<uint32_t>>> m_fwdEl_tobWords;

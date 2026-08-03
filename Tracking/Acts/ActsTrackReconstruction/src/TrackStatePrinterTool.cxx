@@ -92,8 +92,7 @@ namespace ActsTrk
   atlasSurfaceName(const Acts::Surface *measurement_surface)
   {
      if (measurement_surface) {
-        const ActsDetectorElement *
-           acts_detector_element = dynamic_cast<const ActsDetectorElement *>(measurement_surface->surfacePlacement());
+        const auto* acts_detector_element = getActsDetectorElement(measurement_surface);
         if (acts_detector_element) {
            const InDetDD::SiDetectorElement *detElem = dynamic_cast< const InDetDD::SiDetectorElement *>(acts_detector_element->upstreamDetectorElement());
            if (detElem) {
@@ -247,10 +246,8 @@ namespace ActsTrk
       auto glob = surface->localToGlobal(tgContext, loc, Acts::Vector3::Zero());
       printVec3(glob);
 
-      if (compareMeasurementTransforms)
-      {
-        const ActsDetectorElement *
-            acts_detector_element = dynamic_cast<const ActsDetectorElement *>(surface->surfacePlacement());
+      if (compareMeasurementTransforms) {
+        const auto* acts_detector_element = getActsDetectorElement(surface);
         if (acts_detector_element) {
            const InDetDD::SiDetectorElement *detElem = dynamic_cast< const InDetDD::SiDetectorElement *>(acts_detector_element->upstreamDetectorElement());
 
@@ -427,8 +424,9 @@ namespace ActsTrk
     ATH_MSG_DEBUG("   " << m_compareMeasurementTransforms);
     ATH_MSG_DEBUG("   " << m_printFilteredStates);
 
-    ATH_CHECK(m_trackingGeometryTool.retrieve());
-    m_surfAcc = detail::xAODUncalibMeasSurfAcc{m_trackingGeometryTool.get()};
+    ATH_CHECK(m_trackingGeometrySvc.retrieve());
+    ATH_CHECK(m_ctxProvider.initialize());
+    m_surfAcc = detail::xAODUncalibMeasSurfAcc{m_trackingGeometrySvc.get()};
     ATH_CHECK(m_spacePointKey.initialize());
 
     return StatusCode::SUCCESS;
@@ -478,7 +476,7 @@ namespace ActsTrk
                                            const std::vector<const xAOD::UncalibratedMeasurementContainer *> &clusterContainers,					  
                                            const std::vector<size_t> &offsets) const {
 
-    Acts::GeometryContext tgContext = m_trackingGeometryTool->getGeometryContext(ctx).context();
+    const Acts::GeometryContext tgContext = m_ctxProvider.getGeometryContext(ctx);
 
     auto measToSp = addSpacePoints(ctx, clusterContainers, offsets);
 

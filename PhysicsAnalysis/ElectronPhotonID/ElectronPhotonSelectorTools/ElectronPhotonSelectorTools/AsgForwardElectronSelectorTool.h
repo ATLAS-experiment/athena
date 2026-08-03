@@ -128,7 +128,7 @@ public:
         Bin 1: 2.7 < |eta| <= 3.2
         Bin 2: 3.2 < |eta| <= 4.0
       Returns -1 if out of range. */
-  int getEtaBin(double absEta) const;
+  static int getEtaBin(double absEta) ;
 
   /** Select the pT bin index, 
         Bin 0: 5 GeV <= pT < 15 GeV
@@ -144,7 +144,7 @@ public:
         Bin 10: 80 GeV <= pT < 150 GeV
         Bin 11: 150 GeV <= pT < 500 GeV
       Returns -1 if outside valid range. */
-  int getPtBin(double calibPt) const;
+  static int getPtBin(double calibPt) ;
 
   /** Get 25 input variables
       Applies LR decorrelation

@@ -859,8 +859,8 @@ void IDPerfMonEoverP::validationAction()
     }
     // then reset
     m_electronCounter = 0;
+    ATH_MSG_DEBUG( "validationAction() -- completed -- current number of entries " << m_validationTree->GetEntries() );
   }
-  ATH_MSG_DEBUG( "validationAction() -- completed -- current number of entries " << m_validationTree->GetEntries() );
 }
 
 

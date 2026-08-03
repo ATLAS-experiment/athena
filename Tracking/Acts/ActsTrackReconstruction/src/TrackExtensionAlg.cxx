@@ -60,8 +60,8 @@ namespace ActsTrk{
     ATH_CHECK(m_trackContainerKey.initialize());
     ATH_CHECK(m_tracksBackendHandlesHelper.initialize(
         ActsTrk::prefixFromTrackContainerName(m_trackContainerKey.key())));
-    ATH_CHECK(m_trackingGeometryTool.retrieve());
-    ATH_CHECK(m_extrapolationTool.retrieve());
+    ATH_CHECK(m_trackingGeometrySvc.retrieve());
+    ATH_CHECK(m_ctxProvider.initialize());
     ATH_CHECK(m_pixelCalibTool.retrieve(EnableTool{not m_pixelCalibTool.empty()}));
     ATH_CHECK(m_stripCalibTool.retrieve(EnableTool{not m_stripCalibTool.empty()}));
     ATH_CHECK(m_hgtdCalibTool.retrieve(EnableTool{not m_hgtdCalibTool.empty()}));
@@ -72,7 +72,7 @@ namespace ActsTrk{
     m_logger = makeActsAthenaLogger(this, name());
 
     auto magneticField = std::make_unique<ATLASMagneticFieldWrapper>();
-    std::shared_ptr<const Acts::TrackingGeometry> trackingGeometry = m_trackingGeometryTool->trackingGeometry();
+    std::shared_ptr<const Acts::TrackingGeometry> trackingGeometry = m_trackingGeometrySvc->trackingGeometry();
 
     detail::Stepper stepper(std::move(magneticField));
     detail::Navigator::Config cfg{trackingGeometry};
@@ -123,9 +123,8 @@ namespace ActsTrk{
     detail::RecoTrackContainer tracksContainerTemp(trackBackend, trackStateBackend);
 
     // Get Beam pos and make pSurface
-    SG::ReadCondHandle<InDet::BeamSpotData> beamSpotHandle = SG::makeHandle( m_beamSpotKey, context );
-    ATH_CHECK( beamSpotHandle.isValid() );
-    const InDet::BeamSpotData* beamSpotData = beamSpotHandle.cptr();
+    const InDet::BeamSpotData* beamSpotData{};
+    ATH_CHECK(SG::get(beamSpotData, m_beamSpotKey, context));
     
     // Beam Spot Position
     Acts::Vector3 beamPos( beamSpotData->beamPos().x() * Acts::UnitConstants::mm,
@@ -135,17 +134,17 @@ namespace ActsTrk{
     // Construct a perigee surface as the target surface
     std::shared_ptr<Acts::PerigeeSurface> perigeeSurface = Acts::Surface::makeShared<Acts::PerigeeSurface>(beamPos);
 
-    const Acts::GeometryContext tgContext = m_trackingGeometryTool->getGeometryContext(context).context();
-    const Acts::MagneticFieldContext mfContext = m_extrapolationTool->getMagneticFieldContext(context);
-    const Acts::CalibrationContext calContext{getCalibrationContext(context)};
+    const Acts::GeometryContext tgContext{m_ctxProvider.getGeometryContext(context)};
+    const Acts::MagneticFieldContext mfContext{m_ctxProvider.getMagneticFieldContext(context)};
+    const Acts::CalibrationContext calContext{m_ctxProvider.getCalibrationContext(context)};
    
-    detail::xAODUncalibMeasSurfAcc surfAcc{m_trackingGeometryTool.get()};
+    detail::xAODUncalibMeasSurfAcc surfAcc{m_trackingGeometrySvc.get()};
 
     SG::ReadHandle<xAOD::PixelClusterContainer> pixelClustersHandle = SG::makeHandle(m_pixelClusters, context);
     ATH_MSG_DEBUG("Measurements (pixels only) size: " << pixelClustersHandle->size());
     // potential TODO: filtering only certain layers
     detail::TrackFindingMeasurements measurements(1ul /* number of measurement containers*/);
-    measurements.addMeasurements(0, *pixelClustersHandle, *m_trackingGeometryTool->surfaceIdMap());
+    measurements.addMeasurements(0, *pixelClustersHandle, *m_trackingGeometrySvc->surfaceIdMap());
     std::optional<detail::MeasurementIndex> measurementIndex;
 
     if (m_trackStatePrinter.isSet()) {
@@ -176,7 +175,7 @@ namespace ActsTrk{
 
     auto calibrator = detail::OnTrackCalibrator<detail::RecoTrackStateContainer>(
        context,
-       m_trackingGeometryTool.get(),
+       m_trackingGeometrySvc.get(),
        m_pixelCalibTool,
        m_stripCalibTool,
        m_hgtdCalibTool);

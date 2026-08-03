@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 // ATHENA
 
@@ -192,11 +192,9 @@ void ActsHGTDLayerBuilder::buildEndcap(const Acts::GeometryContext &gctx,
     std::set<int> phiModuleByRing;
     // want to figure out bins in phi
     for (const auto &srf : pl.surfaces()) {
-      auto elm = dynamic_cast<const ActsDetectorElement *>(
-          srf->surfacePlacement());
+      const auto* elm = getActsDetectorElement(srf);
       if (elm) {
-        auto id = elm->identify();
-        phiModuleByRing.insert(m_cfg.idHelper->phi_module(id));
+        phiModuleByRing.insert(m_cfg.idHelper->phi_module(elm->identify()));
       }
     }
 

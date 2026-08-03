@@ -577,6 +577,12 @@ std::unique_ptr<AthenaInterprocess::ScheduledWork> SharedEvtQueueConsumer::exec_
 	}
 	m_chronoStatSvc->chronoStop("AthenaMP_seek");
       }
+      // Tell the event loop manager the absolute (skip-relative) input event
+      // index so run-dependent EventID modification uses the input position,
+      // not the per-worker counter. No-op for managers that don't implement it.
+      if (SmartIF<IEventSeek> evtModIdxMgr{m_evtProcessor.get()}) {
+        evtModIdxMgr->setNextEventModifierIndex(static_cast<long>(evtnum) - m_nSkipEvents);
+      }
       m_chronoStatSvc->chronoStart("AthenaMP_nextEvent");
       sc = m_evtProcessor->nextEvent(nEvt);
       nEventsProcessed += chunkSize;

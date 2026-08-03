@@ -20,7 +20,6 @@
 #include <string>
 
 class TH2;
-class TRandom3;
 class TFile;
 
 namespace InDet {
@@ -77,10 +76,8 @@ namespace InDet {
 
     ToolHandle< IInDetTrackTruthOriginTool > m_trackOriginTool{this, "trackOriginTool", "InDet::InDetTrackTruthOriginTool", "Tool to get the truth origin of a track"};
 
-    Gaudi::Property<int> m_seed{this, "Seed", 0, "Random seed"};
-    std::unique_ptr<TRandom3> m_rnd; //!
-    mutable std::mutex m_rndMutex; //!
-    
+    Gaudi::Property<int> m_seed{this, "Seed", 1,
+      "Seed offset mixed with per-track phi/eta hash for deterministic RNG"};
     Gaudi::Property<float> m_fFakeLoose{this, "fFakeLoose", -1.0, "Fake loose fraction"};
     Gaudi::Property<float> m_fFakeTight{this, "fFakeTight", -1.0, "Fake tight fraction"};
     Gaudi::Property<float> m_trkEffSystScale{this, "trkEffSystScale", 1.0, "Track efficiency systematic scale"};
@@ -95,6 +92,8 @@ namespace InDet {
     std::unique_ptr<TH2> m_trkEffHistTightPhysModel;
 
     std::unordered_map<std::string, TH2*> m_histMap;
+
+    mutable std::mutex m_sysLock;
 
     // allow the user to configure which calibration files to use if desired
     Gaudi::Property<std::string> m_calibFileNomEff{this, "calibFileNomEff", "", "Calibration file for nominal efficiency"};

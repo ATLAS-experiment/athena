@@ -49,7 +49,9 @@ namespace InDet {
     using link_type = std::vector< ElementLink<xAOD::UncalibratedMeasurementContainer> >;
     SG::ReadDecorHandle< xAOD::SpacePointContainer,
 			 link_type > elementLinksToClusters( m_linkDecoration, ctx );
-    ATH_CHECK(elementLinksToClusters.isAvailable());
+    if (not elementLinksToClusters.isAvailable()) {
+      ATH_MSG_DEBUG("Decoration missing: " << m_linkDecoration.key() << ". This may indicate file corruption or non standard processing upstream.");
+    }
     
     ATH_MSG_DEBUG("Adding decoration to space point collection: bare pointers to clusters");
     ATH_MSG_DEBUG("Decoration name: " << m_clusterDecoration.key());
@@ -59,7 +61,9 @@ namespace InDet {
 
     ATH_MSG_DEBUG("Retrieving Element Links to Clusters from the Space Points and attaching the bare pointers to the object");
     for (const xAOD::SpacePoint* sp : *spacePoints) {
-      const link_type& els = elementLinksToClusters(*sp);
+      const link_type els = elementLinksToClusters.isAvailable()
+	? elementLinksToClusters(*sp)
+	: link_type();
 
       std::vector< const xAOD::UncalibratedMeasurement* > meas;
       meas.reserve(els.size());

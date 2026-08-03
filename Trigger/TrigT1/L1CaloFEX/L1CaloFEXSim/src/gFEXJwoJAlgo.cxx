@@ -29,34 +29,20 @@ gFEXJwoJAlgo::gFEXJwoJAlgo(const std::string& type, const std::string& name, con
 StatusCode gFEXJwoJAlgo::initialize(){
 
   ATH_CHECK(m_DBToolKey.initialize());
+  ATH_CHECK(m_l1MenuKey.initialize());
 
   return StatusCode::SUCCESS;
-
 }
 
 
-void gFEXJwoJAlgo::setAlgoConstant(int aFPGA_A, int bFPGA_A,
-                                   int aFPGA_B, int bFPGA_B,
-                                   int aFPGA_C, int bFPGA_C,
-                                   int gXE_seedThrA, int gXE_seedThrB, int gXE_seedThrC) {
-  m_aFPGA_A = aFPGA_A;
-  m_bFPGA_A = bFPGA_A;
-  m_aFPGA_B = aFPGA_B;
-  m_bFPGA_B = bFPGA_B;
-  m_aFPGA_C = aFPGA_C;
-  m_bFPGA_C = bFPGA_C;
-  m_gBlockthresholdA = gXE_seedThrA;
-  m_gBlockthresholdB = gXE_seedThrB;
-  m_gBlockthresholdC = gXE_seedThrC;
-}
-
-std::vector<std::unique_ptr<gFEXJwoJTOB>> gFEXJwoJAlgo::jwojAlgo(const gTowersType& Atwr, int pucA_JWJ,
+std::vector<std::unique_ptr<gFEXJwoJTOB>> gFEXJwoJAlgo::jwojAlgo(const EventContext& ctx,
+								 const gTowersType& Atwr, int pucA_JWJ,
                                                                  const gTowersType& Btwr, int pucB_JWJ,
                                                                  const gTowersType& Ctwr, int pucC_JWJ,
                                                                  std::array<int32_t, 4> & outTOB) const {
 
 
-  SG::ReadCondHandle<gFEXDBCondData> myDBTool = SG::ReadCondHandle<gFEXDBCondData>(m_DBToolKey);
+  SG::ReadCondHandle<gFEXDBCondData> myDBTool = SG::ReadCondHandle<gFEXDBCondData>(m_DBToolKey, ctx);
   if (!myDBTool.isValid()) {
       ATH_MSG_ERROR("Could not retrieve DB tool " << m_DBToolKey);
       throw std::runtime_error("Could not retrieve DB tool");
@@ -67,6 +53,25 @@ std::vector<std::unique_ptr<gFEXJwoJTOB>> gFEXJwoJAlgo::jwojAlgo(const gTowersTy
   bool SumETfast = (major >= 1);
   bool metRho = (major >= 2);
 
+  // Retrieve the L1 menu configuration
+  SG::ReadHandle<TrigConf::L1Menu> l1Menu (m_l1MenuKey, ctx);
+  if (!l1Menu.isValid()) {
+      ATH_MSG_ERROR("Could not retrieve L1Menu " << m_l1MenuKey);
+      throw std::runtime_error("Could not retrieve L1Menu");
+  }
+
+  //Parameters related to gXE (MET objects, both JwoJ and alternative MET calculation)
+  const auto & thr_gXE = l1Menu->thrExtraInfo().gXE();
+   int gBlockthresholdA = thr_gXE.seedThr('A'); //defined in counts
+   int gBlockthresholdB = thr_gXE.seedThr('B'); //defined in counts
+   int gBlockthresholdC = thr_gXE.seedThr('C'); //defined in counts
+   int aFPGA_A = thr_gXE.JWOJ_param('A','a');// 1003
+   int bFPGA_A = thr_gXE.JWOJ_param('A','b');// 409
+   int aFPGA_B = thr_gXE.JWOJ_param('B','a');// 1003
+   int bFPGA_B = thr_gXE.JWOJ_param('B','b');// 409
+   int aFPGA_C = thr_gXE.JWOJ_param('C','a');// 1003
+   int bFPGA_C = thr_gXE.JWOJ_param('C','b');// 409
+  
   // find gBlocks
   gTowersType AgBlk;
   gTowersType Ascaled;
@@ -79,9 +84,9 @@ std::vector<std::unique_ptr<gFEXJwoJTOB>> gFEXJwoJAlgo::jwojAlgo(const gTowersTy
 
   gTowersType hasSeed;
 
-  gBlockAB(Atwr, AgBlk, hasSeed, m_gBlockthresholdA);
-  gBlockAB(Btwr, BgBlk, hasSeed, m_gBlockthresholdB);
-  gBlockAB(Ctwr, CgBlk, hasSeed, m_gBlockthresholdC);
+  gBlockAB(Atwr, AgBlk, hasSeed, gBlockthresholdA);
+  gBlockAB(Btwr, BgBlk, hasSeed, gBlockthresholdB);
+  gBlockAB(Ctwr, CgBlk, hasSeed, gBlockthresholdC);
 
 
   // switch to 10 bit number
@@ -153,24 +158,23 @@ std::vector<std::unique_ptr<gFEXJwoJTOB>> gFEXJwoJAlgo::jwojAlgo(const gTowersTy
   int total_sumEt = 0x0;
   int MET = 0x0; 
 
-
   // will need to hard code etFPGA ,a's and b's 
   int etBprime = 0;
 
-  if (metRho) metFPGA_rho(0, Ascaled, pucA_JWJ, AgBlk, m_gBlockthresholdA, m_aFPGA_A, m_bFPGA_A, A_MHT_x, A_MHT_y, A_MST_x, A_MST_y, A_MET_x, A_MET_y);
-  else metFPGA(0, Ascaled, AgBlk, m_gBlockthresholdA, m_aFPGA_A, m_bFPGA_A, A_MHT_x, A_MHT_y, A_MST_x, A_MST_y, A_MET_x, A_MET_y);
-  if (SumETfast) etFastFPGA(0, Ascaled, AgBlk, m_gBlockthresholdA, m_aFPGA_A, etBprime, A_eth, A_ets, A_etw);
-  else etFPGA(0, Ascaled, AgBlk, m_gBlockthresholdA, m_aFPGA_A, etBprime, A_eth, A_ets, A_etw);
+  if (metRho) metFPGA_rho(0, Ascaled, pucA_JWJ, AgBlk, gBlockthresholdA, aFPGA_A, bFPGA_A, A_MHT_x, A_MHT_y, A_MST_x, A_MST_y, A_MET_x, A_MET_y);
+  else metFPGA(0, Ascaled, AgBlk, gBlockthresholdA, aFPGA_A, bFPGA_A, A_MHT_x, A_MHT_y, A_MST_x, A_MST_y, A_MET_x, A_MET_y);
+  if (SumETfast) etFastFPGA(0, Ascaled, AgBlk, gBlockthresholdA, aFPGA_A, etBprime, A_eth, A_ets, A_etw);
+  else etFPGA(0, Ascaled, AgBlk, gBlockthresholdA, aFPGA_A, etBprime, A_eth, A_ets, A_etw);
 
-  if (metRho) metFPGA_rho(1, Bscaled, pucB_JWJ, BgBlk, m_gBlockthresholdB, m_aFPGA_B, m_bFPGA_B, B_MHT_x, B_MHT_y, B_MST_x, B_MST_y, B_MET_x, B_MET_y);
-  else metFPGA(1, Bscaled, BgBlk, m_gBlockthresholdB, m_aFPGA_B, m_bFPGA_B, B_MHT_x, B_MHT_y, B_MST_x, B_MST_y, B_MET_x, B_MET_y);
-  if (SumETfast) etFastFPGA(1, Bscaled, BgBlk, m_gBlockthresholdB, m_aFPGA_B, etBprime, B_eth, B_ets, B_etw);
-  else etFPGA(1, Bscaled, BgBlk, m_gBlockthresholdB, m_aFPGA_B, etBprime, B_eth, B_ets, B_etw);
+  if (metRho) metFPGA_rho(1, Bscaled, pucB_JWJ, BgBlk, gBlockthresholdB, aFPGA_B, bFPGA_B, B_MHT_x, B_MHT_y, B_MST_x, B_MST_y, B_MET_x, B_MET_y);
+  else metFPGA(1, Bscaled, BgBlk, gBlockthresholdB, aFPGA_B, bFPGA_B, B_MHT_x, B_MHT_y, B_MST_x, B_MST_y, B_MET_x, B_MET_y);
+  if (SumETfast) etFastFPGA(1, Bscaled, BgBlk, gBlockthresholdB, aFPGA_B, etBprime, B_eth, B_ets, B_etw);
+  else etFPGA(1, Bscaled, BgBlk, gBlockthresholdB, aFPGA_B, etBprime, B_eth, B_ets, B_etw);
 
-  if (metRho) metFPGA_rho(2, Cscaled, pucC_JWJ, CgBlk, m_gBlockthresholdC, m_aFPGA_C, m_bFPGA_C, C_MHT_x, C_MHT_y, C_MST_x, C_MST_y, C_MET_x, C_MET_y);
-  else metFPGA(2, Cscaled, CgBlk, m_gBlockthresholdC, m_aFPGA_C, m_bFPGA_C, C_MHT_x, C_MHT_y, C_MST_x, C_MST_y, C_MET_x, C_MET_y);
-  if (SumETfast) etFastFPGA(2, Cscaled, CgBlk, m_gBlockthresholdC, m_aFPGA_C, etBprime, C_eth, C_ets, C_etw);
-  else etFPGA(2, Cscaled, CgBlk, m_gBlockthresholdC, m_aFPGA_C, etBprime, C_eth, C_ets, C_etw);
+  if (metRho) metFPGA_rho(2, Cscaled, pucC_JWJ, CgBlk, gBlockthresholdC, aFPGA_C, bFPGA_C, C_MHT_x, C_MHT_y, C_MST_x, C_MST_y, C_MET_x, C_MET_y);
+  else metFPGA(2, Cscaled, CgBlk, gBlockthresholdC, aFPGA_C, bFPGA_C, C_MHT_x, C_MHT_y, C_MST_x, C_MST_y, C_MET_x, C_MET_y);
+  if (SumETfast) etFastFPGA(2, Cscaled, CgBlk, gBlockthresholdC, aFPGA_C, etBprime, C_eth, C_ets, C_etw);
+  else etFPGA(2, Cscaled, CgBlk, gBlockthresholdC, aFPGA_C, etBprime, C_eth, C_ets, C_etw);
 
   metTotal(A_MHT_x, A_MHT_y, B_MHT_x, B_MHT_y, C_MHT_x, C_MHT_y, MHT_x, MHT_y);
   metTotal(A_MST_x, A_MST_y, B_MST_x, B_MST_y, C_MST_x, C_MST_y, MST_x, MST_y);

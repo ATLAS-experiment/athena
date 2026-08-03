@@ -34,6 +34,11 @@ StatusCode PhysValDiTau::initialize()
     ATH_CHECK(m_truthTool.retrieve());
   }
 
+  ATH_CHECK(m_ditauContainerKey.initialize());
+
+  m_IsTruthHadronicKey = m_ditauContainerKey.key() + "." + m_IsTruthHadronicKey.key();  
+  ATH_CHECK( m_IsTruthHadronicKey.initialize());
+
   return StatusCode::SUCCESS;
 }
 
@@ -42,7 +47,7 @@ StatusCode PhysValDiTau::bookHistograms()
   ATH_MSG_INFO ("Booking hists " << name() << "...");
    
   // Physics validation plots are level 10
-  m_oDiTauValidationPlots.reset(new DiTauValidationPlots(0,"Tau/" + m_DiTauJetContainerName + "_", m_DiTauJetContainerName));
+  m_oDiTauValidationPlots.reset(new DiTauValidationPlots(0,"Tau/" + m_ditauContainerKey.key() + "_", m_ditauContainerKey.key()));
   m_oDiTauValidationPlots->setDetailLevel(100);
   m_oDiTauValidationPlots->initialize();
   std::vector<HistData> hists = m_oDiTauValidationPlots->retrieveBookedHistograms();
@@ -54,26 +59,24 @@ StatusCode PhysValDiTau::bookHistograms()
   return StatusCode::SUCCESS;      
 }
 
-StatusCode PhysValDiTau::fillHistograms(const EventContext& /*ctx*/)
+StatusCode PhysValDiTau::fillHistograms(const EventContext& ctx)
 {
   ATH_MSG_DEBUG ("Filling hists " << name() << "...");
 
   // Retrieve tau container
-  const xAOD::DiTauJetContainer* ditaus = nullptr;
-  if(evtStore()->contains<xAOD::DiTauJetContainer>(m_DiTauJetContainerName)){
-    ATH_CHECK( evtStore()->retrieve(ditaus, m_DiTauJetContainerName) ); 
-  } else {
-    ATH_MSG_INFO("Input collection " << m_DiTauJetContainerName << " not found. Skip the monitoring ..");
-    return StatusCode::SUCCESS;   
-  } 
-
+  SG::ReadHandle<xAOD::DiTauJetContainer> ditauJetsReadHandle(m_ditauContainerKey, ctx);
+    if (!ditauJetsReadHandle.isValid()) {
+    ATH_MSG_ERROR ("Could not retrieve DiTauJetContainer with key " << ditauJetsReadHandle.key());
+    return StatusCode::FAILURE;
+  }
+  const xAOD::DiTauJetContainer* ditaus = ditauJetsReadHandle.cptr();
 
   ATH_MSG_DEBUG("Number of ditaus: " << ditaus->size());
   
   // Retrieve event info and beamSpotWeight
-  const xAOD::EventInfo* eventInfo = nullptr;
-  ATH_CHECK( evtStore()->retrieve(eventInfo, "EventInfo") );
-  
+  SG::ReadHandle<xAOD::EventInfo> eventInfoReadHandle("EventInfo", ctx);
+  const xAOD::EventInfo* eventInfo = eventInfoReadHandle.cptr();
+
   float weight = eventInfo->beamSpotWeight();
 
   // Loop through recoonstructed tau container
@@ -94,8 +97,8 @@ StatusCode PhysValDiTau::fillHistograms(const EventContext& /*ctx*/)
     ATH_MSG_DEBUG("Trying to truth-match ditau");
     m_truthTool->getTruth(*ditau);
 
-    static const SG::ConstAccessor<char> IsTruthMatchedAcc("IsTruthHadronic");
-    if ( (bool)IsTruthMatchedAcc(*ditau) ) {
+    SG::ReadDecorHandle<xAOD::DiTauJetContainer,char> isTruthHadronic{m_IsTruthHadronicKey, ctx}; 
+    if ( (bool) isTruthHadronic(*ditau) ) {
        m_oDiTauValidationPlots->m_oNewCorePlotsTrue.fill(*ditau, weight);
        if(nominal){
           m_oDiTauValidationPlots->m_oNewCorePlotsNomTrue.fill(*ditau, weight);

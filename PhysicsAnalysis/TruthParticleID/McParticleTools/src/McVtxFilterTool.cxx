@@ -25,10 +25,6 @@
 #include "McVtxFilterTool.h"
 #include "copyBeamParticles.h"
 
-/////////////////////////////////////////////////////////////////// 
-/// Public methods: 
-/////////////////////////////////////////////////////////////////// 
-
 /// Constructors
 ////////////////
 McVtxFilterTool::McVtxFilterTool( const std::string& type, 
@@ -38,8 +34,7 @@ McVtxFilterTool::McVtxFilterTool( const std::string& type,
 {
   //
   // Property declaration
-  // 
-  //declareProperty( "Property", m_nProperty );
+  //
 
   declareProperty( "McEvents",
 		   m_mcEventsName = "TruthEvent",
@@ -155,10 +150,6 @@ StatusCode McVtxFilterTool::execute()
   return sc;
 }
 
-/////////////////////////////////////////////////////////////////// 
-/// Const methods: 
-///////////////////////////////////////////////////////////////////
-
 void McVtxFilterTool::displayOptions() const
 {
   msg(MSG::INFO)
@@ -197,10 +188,6 @@ bool McVtxFilterTool::isAccepted( const HepMC::ConstGenVertexPtr& vtx ) const
   return false;
 }
 
-/////////////////////////////////////////////////////////////////// 
-/// Non-const methods: 
-/////////////////////////////////////////////////////////////////// 
-
 void 
 McVtxFilterTool::filterMcEventCollection( const McEventCollection* mcColl,
 					  McEventCollection* filterColl )
@@ -222,7 +209,7 @@ McVtxFilterTool::filterMcEventCollection( const McEventCollection* mcColl,
   for ( const auto& itrPart: *evtSrc) {
     auto dcyVtx = itrPart->end_vertex();
     if ( !dcyVtx ) continue;
-    int vtxBC = HepMC::barcode_or_id(dcyVtx);
+    int vtxBC = HepMC::uniqueID(dcyVtx);
     if (bcToFullVtx.count(vtxBC)!=0) continue;
     ATH_MSG_VERBOSE("Doing vtx: " << dcyVtx);
 
@@ -248,7 +235,7 @@ McVtxFilterTool::filterMcEventCollection( const McEventCollection* mcColl,
     /// chance or because it was just meant to be)
     auto sigProcVtx = HepMC::signal_process_vertex(evtSrc);
     if ( sigProcVtx ) {
-      if ( bcToFullVtx.count(HepMC::barcode_or_id(sigProcVtx)) == 0) {
+      if ( bcToFullVtx.count(HepMC::uniqueID(sigProcVtx)) == 0) {
         addVertex( sigProcVtx, evt,VtxType::IsNotRootVertex, true );
       }//> signal process vertex has to be added
     } else {
@@ -262,11 +249,6 @@ McVtxFilterTool::filterMcEventCollection( const McEventCollection* mcColl,
 
   filterColl->push_back(evt);
 }
-
-
-/////////////////////////////////////////////////////////////////// 
-/// Const methods: 
-///////////////////////////////////////////////////////////////////
 
 void McVtxFilterTool::addVertex( const HepMC::ConstGenVertexPtr& srcVtx, 
 				 HepMC::GenEvent * evt,
@@ -383,10 +365,6 @@ bool McVtxFilterTool::keepParticle( const VtxType::Flag vtxType,
     return true;
   }
 }
-
-/////////////////////////////////////////////////////////////////// 
-// Non-const methods: 
-/////////////////////////////////////////////////////////////////// 
 
 void McVtxFilterTool::setupFilters( Gaudi::Details::PropertyBase& /*decayPatterns*/ )
 {

@@ -22,8 +22,6 @@
 #include "GaudiKernel/SystemOfUnits.h"
 #include "string"
 #include <algorithm>
-#include "boost/algorithm/string.hpp"
-#include <boost/tokenizer.hpp>
 #include "LArRecEvent/LArEventBitInfo.h"
 #include "StoreGate/ReadHandle.h"
 #include "AthContainers/Decorator.h"
@@ -32,7 +30,6 @@
 //**********************************************************************
 using namespace Trig;
 using namespace xAOD;
-using namespace boost;
 
 TrigEgammaMonitorTagAndProbeAlgorithm::TrigEgammaMonitorTagAndProbeAlgorithm( const std::string& name, ISvcLocator* pSvcLocator ):
   TrigEgammaMonitorAnalysisAlgorithm( name, pSvcLocator )
@@ -389,7 +386,7 @@ bool TrigEgammaMonitorTagAndProbeAlgorithm::isTagElectron(const EventContext& ct
     bool tagMatched=false;
     for(unsigned int ilist = 0; ilist != m_tagTrigList.size(); ilist++) {
         std::string tag = m_tagTrigList[ilist];
-        if( match()->isPassed(el,tag) )
+        if( match()->isPassed(ctx,el,tag) )
             tagMatched=true;
     }
     

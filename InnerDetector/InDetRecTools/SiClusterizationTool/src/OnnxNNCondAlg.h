@@ -35,19 +35,19 @@ private:
     "Output conditions key for ONNX NN collection"};
 
   Gaudi::Property<std::string> m_numberNetworkPath{
-    this, "NumberNetworkPath", "",
+    this, "NumberNetworkPath", "ITkPixelClusterization/nn-01-01-01/number.onnx",
     "Path to ONNX model for number network"};
 
   Gaudi::Property<std::string> m_posNetwork1Path{
-    this, "PositionNetwork1Path", "",
+    this, "PositionNetwork1Path", "ITkPixelClusterization/nn-01-01-01/pos1.onnx",
     "Path to ONNX model for 1-particle position network"};
 
   Gaudi::Property<std::string> m_posNetwork2Path{
-    this, "PositionNetwork2Path", "",
+    this, "PositionNetwork2Path", "ITkPixelClusterization/nn-01-01-01/pos2.onnx",
     "Path to ONNX model for 2-particle position network"};
 
   Gaudi::Property<std::string> m_posNetwork3Path{
-    this, "PositionNetwork3Path", "",
+    this, "PositionNetwork3Path", "ITkPixelClusterization/nn-01-01-01/pos3.onnx",
     "Path to ONNX model for 3-particle position network"};
 
 };

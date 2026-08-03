@@ -30,7 +30,8 @@ class AthFilterAlgorithm
   /////////////////////////////////////////////////////////////////// 
  public: 
 
-  /// Constructor with parameters: 
+  /// Constructor with parameters:
+  [[deprecated("Please use FilterReporter instead")]]
   AthFilterAlgorithm( const std::string& name, ISvcLocator* pSvcLocator );
 
   /// Destructor: 

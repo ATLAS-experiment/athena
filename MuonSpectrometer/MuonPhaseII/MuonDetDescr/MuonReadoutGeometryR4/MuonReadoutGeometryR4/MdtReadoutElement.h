@@ -26,7 +26,7 @@ class MdtReadoutElement : public MuonReadoutElement {
 
    public:
         /** @brief Allow the transform cache to call the protecd data members */
-        friend ActsTrk::TransformCacheDetEle<MdtReadoutElement>;
+        friend ActsTrk::ReadoutSurfacePositioning<MdtReadoutElement>;
         /** @brief Set of parameters to describe a MDT chamber */
         struct parameterBook {
             /** @brief  Vector defining the position of all tubes in each tube layer.
@@ -294,9 +294,9 @@ std::ostream& operator<<(std::ostream& ostr, const MdtReadoutElement::parameterB
 
 namespace ActsTrk{
     template <> Amg::Transform3D 
-        TransformCacheDetEle<MuonGMR4::MdtReadoutElement>::fetchTransform(const DetectorAlignStore* store) const;
+        ReadoutSurfacePositioning<MuonGMR4::MdtReadoutElement>::fetchTransform(const DetectorAlignStore* store) const;
     template <> Identifier
-        TransformCacheDetEle<MuonGMR4::MdtReadoutElement>::identify() const;
+        ReadoutSurfacePositioning<MuonGMR4::MdtReadoutElement>::identify() const;
 }
 
 #include <MuonReadoutGeometryR4/MdtReadoutElement.icc>

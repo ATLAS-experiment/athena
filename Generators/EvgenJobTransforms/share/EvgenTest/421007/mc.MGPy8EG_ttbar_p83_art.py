@@ -25,8 +25,9 @@ class Sample(EvgenConfig):
         settings = { 
                     'lhe_version':'3.0', 
                     'cut_decays':'F', 
-                    'pdlabel':"'nn23lo1'",
-                    'use_syst':"False"
+                    'pdlabel':'lhapdf',
+                    'lhaid':'247000',
+                    'use_syst':'False'
                     }
 
         # Run MG to prepare the LHE file for showering

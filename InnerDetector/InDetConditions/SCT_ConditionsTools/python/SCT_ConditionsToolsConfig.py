@@ -251,7 +251,7 @@ def SCT_LinkMaskingCfg(flags, name="SCT_LinkMasking", **kwargs):
     # Condition folders
     folder = "/purple/pants"
     # mycool.db is hard coded in Database/IOVDbSvc/python/IOVDbSvcConfig.py
-    dbConnection = "<dbConnection>sqlite://;schema=mycool.db;dbname=CONDBR2</dbConnection>"
+    dbConnection = "<db>sqlite://;schema=mycool.db;dbname=CONDBR2</db>"
     acc.merge(addFolders(flags, folderStrings=folder, className="CondAttrListCollection", db=dbConnection))
 
     # Condition algorithm

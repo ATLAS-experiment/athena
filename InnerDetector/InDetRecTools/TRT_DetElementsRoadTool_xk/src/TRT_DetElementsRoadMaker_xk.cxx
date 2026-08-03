@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -11,10 +11,7 @@
 // Version 1.0 21/04/2004 I.Gavrilenko
 ///////////////////////////////////////////////////////////////////
 
-#include <iostream>
-#include <iomanip>
 
-#include <utility>
 
 #include "GeoModelInterfaces/IGeoModelTool.h"
 
@@ -28,10 +25,13 @@
 #include "TrkSurfaces/PlaneSurface.h"
 
 #include "TRT_DetElementsRoadUtils_xk.h"
-
 #include "TRT_DetElementsRoadTool_xk/TRT_DetElementsRoadMaker_xk.h"
 #include "TRT_DetElementsRoadTool_xk/TRT_DetElementsComparison.h"
+
 #include <cmath>
+#include <iostream>
+#include <iomanip>
+#include <utility>
 
 
 ///////////////////////////////////////////////////////////////////
@@ -94,7 +94,8 @@ MsgStream& InDet::TRT_DetElementsRoadMaker_xk::dump( MsgStream& out ) const
 ///////////////////////////////////////////////////////////////////
 
 MsgStream& InDet::TRT_DetElementsRoadMaker_xk::dumpConditions( MsgStream& out ) const
-{
+{ 
+  auto precision = out.precision();
   int n = 62-m_proptool.type().size();
   std::string s1; for(int i=0; i<n; ++i) s1.append(" "); s1.append("|");
 
@@ -234,6 +235,7 @@ MsgStream& InDet::TRT_DetElementsRoadMaker_xk::dumpConditions( MsgStream& out ) 
     out<<"|------|-----------|------------|------------|------------|------|"
        <<std::endl;
  }
+  out.precision(precision);
   return out;
 }
 
@@ -249,6 +251,7 @@ MsgStream& InDet::TRT_DetElementsRoadMaker_xk::dumpEvent( MsgStream& out, int si
      <<"                             |"<<std::endl;
   out<<"|--------------------------------------------------------------------|"
      <<std::endl;
+  
   return out;
 }
 
@@ -567,7 +570,7 @@ Trk::CylinderBounds InDet::TRT_DetElementsRoadMaker_xk::getBound
   double cur  = zfield*Vp[4]/std::sin(Vp[3]);
 
   if( std::abs(cur)*bounds.r() < cor ) return bounds;
-
+  //coverity[DIVIDE_BY_ZERO:FALSE]
   double rad  = 1./cur;
   if(cor*std::abs(rad) > bounds.r()  ) return bounds;
 

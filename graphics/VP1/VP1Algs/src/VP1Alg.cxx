@@ -30,7 +30,7 @@ VP1Alg::VP1Alg(const std::string& name, ISvcLocator* svcLocator):
   m_vp1gui(0)
 {
 
-    
+  //
   /*  
   // This is Work In Progress
   // Those properties are needed in VP1 configurations, which 
@@ -81,7 +81,19 @@ VP1Alg::~VP1Alg()
 //____________________________________________________________________
 StatusCode VP1Alg::initialize()
 {
-  msg(MSG::INFO) << " in initialize() " << endmsg;
+  ATH_MSG_INFO("in initialize()... ");
+
+  if ( ! m_vp1Conf_emptyInput) {
+      ATH_MSG_INFO("Checking if we have access to the Extrapolator tool...");
+      ATH_CHECK(m_extrapolator.retrieve( DisableTool{m_extrapolator.empty()} ));
+      if (m_extrapolator.empty()) {
+          ATH_MSG_WARNING("No extrapolator found. Will not be able to extrapolate tracks.");
+      } else {
+          ATH_MSG_INFO("Extrapolator found. Will be able to extrapolate tracks.");
+      }
+  } else {
+      ATH_MSG_INFO("VP1 has been started with no input data files; so we don't need to retrieve the Extrapolator tool.");
+  }
 
   std::vector<std::string>::iterator it, itE = m_initialvp1files.end();
   for (it = m_initialvp1files.begin();it!=itE;++it) {

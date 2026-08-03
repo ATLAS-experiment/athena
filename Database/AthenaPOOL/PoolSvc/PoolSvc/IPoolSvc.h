@@ -20,10 +20,6 @@
 
 #include <string>
 
-// Forward declarations
-namespace pool {
-   class IFileCatalog;
-}
 namespace coral {
    class Context;
 }
@@ -83,8 +79,11 @@ public: // Non-static members
    /// @param shareCat [IN] bool to share the file catalog.
    virtual void setShareMode(bool shareCat) = 0;
 
-   /// @return the file catalog.
-   virtual const pool::IFileCatalog* catalog() const = 0;
+   /// @return void
+   virtual void startCatalog() = 0;
+
+   /// @return void
+   virtual void commitCatalog() = 0;
 
    /// @return void
    /// @param token [IN] filename/token string to be translated

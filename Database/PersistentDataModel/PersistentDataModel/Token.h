@@ -19,7 +19,7 @@
 /** @class Token
  *  @brief This class provides a token that identifies in a unique way objects on the persistent storage.
  **/
-class Token   {
+class Token final {
 public:
    // typedef std::pair<long long int, long long int> OID_t;
    struct OID_t : public std::pair<long long int, long long int> {
@@ -41,7 +41,7 @@ public:
    /// Allow move.
    explicit Token(Token&& source) noexcept;
    /// Standard destructor: release all allocated resources.
-   virtual ~Token();
+   ~Token();
    /// Operator < to allow ordering
    bool operator<(const Token& refToken) const { return less(refToken); }
    /// Operator > to allow ordering
@@ -54,9 +54,9 @@ public:
    /// Equality operator
    bool operator!=(const Token& refToken) const { return !equal(refToken); }
    /// Fast token comparison: operator less
-   virtual bool less(const Token& pTok) const;
+   bool less(const Token& pTok) const;
    /// Fast token comparison: operator equals
-   virtual bool equal(const Token& pTok) const;
+   bool equal(const Token& pTok) const;
    /// Release token: Decrease reference count and eventually delete.
    int release();
    /// Increase reference count
@@ -95,9 +95,9 @@ public:
    void setAuxString(std::string_view auxString) { m_auxString = auxString; }
 
    /// Retrieve the string representation of the token.
-   virtual const std::string toString() const;
+   const std::string toString() const;
    /// Retrieve token key
-   virtual const std::string key() const;
+   const std::string key() const;
    /// Build from the string representation of a token.
    Token& fromString(const std::string_view from);
    /// Set token information

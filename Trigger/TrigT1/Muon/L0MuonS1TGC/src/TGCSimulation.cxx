@@ -1,57 +1,64 @@
 /*
-   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
- 
+
 #include "TGCSimulation.h"
 
-#include "xAODTrigger/MuonRoIAuxContainer.h"
+#include "StoreGate/ReadHandle.h"
+#include "StoreGate/WriteHandle.h"
+#include "xAODL0MuonCand/TGCCandDataAuxContainer.h"
+#include "xAODMuonViews/FillContainer.h"
+
+#include <memory>
 
 namespace L0Muon {
 
 StatusCode TGCSimulation::initialize() {
-  ATH_MSG_DEBUG("Initializing " << name() << "...");
-
-  ATH_CHECK(m_keyTgcDigit.initialize());
-
-  /// container of output RoIs
-  ATH_CHECK(m_outputMuonRoIKey.initialize());
-
-  // TGC cabling service
-  ATH_CHECK(m_cablingKey.initialize());
-  /// retrieve the monitoring tool
+  ATH_CHECK(m_keyTgcRdo.initialize());
+  ATH_CHECK(m_outputKey.initialize());
+  ATH_CHECK(m_validationCandidateKey.initialize(!m_validationCandidateKey.empty()));
+  ATH_CHECK(m_validationSegmentKey.initialize(!m_validationSegmentKey.empty()));
+  ATH_CHECK(m_candidateBuilderTool.retrieve());
+  ATH_CHECK(m_innerCoincidenceTool.retrieve());
+  ATH_CHECK(m_trackSelectorTool.retrieve());
   if (!m_monTool.empty()) ATH_CHECK(m_monTool.retrieve());
-
   return StatusCode::SUCCESS;
 }
-
 
 StatusCode TGCSimulation::execute(const EventContext& ctx) const {
-  ATH_MSG_DEBUG ("Executing " << name() << "...");
+  const TgcRdoContainer* tgcRdoContainer{};
+  ATH_CHECK(SG::get(tgcRdoContainer, m_keyTgcRdo, ctx));
 
-  SG::ReadHandle  tgcDigitContainer(m_keyTgcDigit, ctx);
-  ATH_CHECK(tgcDigitContainer.isPresent());
-  ATH_MSG_DEBUG("Number of TGC Digits: " << tgcDigitContainer->size());
+  auto nTgcRdoCollections = Monitored::Scalar<unsigned int>(
+      "nTgcRdoCollections", tgcRdoContainer->size());
+  Monitored::Group(m_monTool, nTgcRdoCollections);
 
-  // monitor some quantities
-  auto nTgcDigits = Monitored::Scalar<unsigned int>("nTgcDigits", tgcDigitContainer->size());
-  Monitored::Group(m_monTool, nTgcDigits);
+  TgcL0CandidateContainer candidates;
+  std::unique_ptr<TgcL0SegmentContainer> validationSegments;
+  if (!m_validationSegmentKey.empty()) {
+    validationSegments = std::make_unique<TgcL0SegmentContainer>();
+  }
+  ATH_CHECK(m_candidateBuilderTool->build(
+      *tgcRdoContainer, candidates, validationSegments.get(), ctx));
+  if (validationSegments) {
+    SG::WriteHandle<TgcL0SegmentContainer> segmentHandle{
+        m_validationSegmentKey, ctx};
+    ATH_CHECK(segmentHandle.record(std::move(validationSegments)));
+  }
+  if (!m_validationCandidateKey.empty()) {
+    SG::WriteHandle<TgcL0CandidateContainer> validationCandidates{
+        m_validationCandidateKey, ctx};
+    ATH_CHECK(validationCandidates.record(
+        std::make_unique<TgcL0CandidateContainer>(candidates)));
+  }
+  ATH_CHECK(m_innerCoincidenceTool->apply(candidates, ctx));
 
-  
-    // output RoIs container
-  SG::WriteHandle roiCont(m_outputMuonRoIKey, ctx);
-  ATH_CHECK(roiCont.record(std::make_unique<xAOD::MuonRoIContainer>(), 
-                           std::make_unique<xAOD::MuonRoIAuxContainer>()));
-
-  xAOD::MuonRoI* roi = roiCont->push_back(std::make_unique<xAOD::MuonRoI>());
-  uint32_t roiword = 0x0;
-  float roi_eta = 0.0;
-  float roi_phi = 0.0;
-  std::string thrname = "L0_MUx";
-  float thrvalue = 0.0;
-  roi->initialize(roiword, roi_eta, roi_phi, thrname, thrvalue, 0x1);  // TODO: roiExtraWord is 1 for the time being.
-
-
+  xAOD::FillContainer<xAOD::TGCCandDataContainer,
+                      xAOD::TGCCandDataAuxContainer>
+      output{};
+  ATH_CHECK(m_trackSelectorTool->select(candidates, *output, ctx));
+  ATH_CHECK(output.record(m_outputKey, ctx));
   return StatusCode::SUCCESS;
 }
 
-}   // end of namespace
+}  // namespace L0Muon

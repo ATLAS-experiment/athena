@@ -6,11 +6,8 @@
 
 #include <iostream>
 
-#include "G4Event.hh"
 #include "G4EventManager.hh"
 
-#include "MCTruth/AtlasG4EventUserInfo.h"
-#include "MCTruth/PrimaryParticleInformation.h"
 #include "MCTruth/TrackHelper.h"
 #include "MCTruth/TrackInformation.h"
 #include "MCTruthBase/AtlasTrajectory.h"
@@ -39,18 +36,6 @@ namespace G4UA
 
     // Use the TrackHelper code to identify the kind of particle.
     TrackHelper trackHelper(track);
-
-    // Condition for storing the GenParticle in the AtlasG4EventUserInfo for later.
-    if (trackHelper.IsPrimary() || trackHelper.IsRegisteredSecondary())
-    {
-      HepMC::GenParticlePtr currentGenParticle = trackHelper.GetTrackInformation()->GetCurrentGenParticle();
-
-      // Assign the GenParticle to the AtlasG4EventUserInfo.
-      AtlasG4EventUserInfo* atlasG4EvtUserInfo = static_cast<AtlasG4EventUserInfo*>
-        (G4EventManager::GetEventManager()->GetConstCurrentEvent()->GetUserInformation());
-      if (trackHelper.IsPrimary()) atlasG4EvtUserInfo->SetCurrentPrimaryGenParticle(currentGenParticle);
-      atlasG4EvtUserInfo->SetCurrentGenParticle(std::move(currentGenParticle));
-    }
 
     // The G4Trajectory is currently attached to the TrackingManager. Therefore, only one Trajectory can
     // be handled at the time, so it must be disabled for parallel tracking on the GPU

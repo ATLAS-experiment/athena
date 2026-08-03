@@ -18,10 +18,8 @@
 #include "Acts/Utilities/MathHelpers.hpp"
 
 // ActsTrk
-#include "ActsCalibBase/CalibrationContext.h"
 #include "ActsCalibBase/MeasurementCalibratorBase.h"
 #include "ActsEvent/TrackContainer.h"
-#include "ActsGeometry/ATLASMagneticFieldWrapper.h"
 #include "ActsGeometry/SurfaceOfMeasurementUtil.h"
 #include "ActsGeometryInterfaces/GeometryContext.h"
 #include "ActsInterop/Logger.h"
@@ -86,9 +84,9 @@ StatusCode TrackFindingGNNAlg::initialize() {
   // Athena tools
   m_logger = makeActsAthenaLogger(this, "Acts GNN Algorithm");
   ACTS_DEBUG("TrackFindingGNNAlg::initialize() - begin");
-  ATH_CHECK(m_trackingGeometryTool.retrieve());
-  ATH_CHECK(m_extrapolationTool.retrieve());
+  ATH_CHECK(m_trackingGeometrySvc.retrieve());
   ATH_CHECK(m_trackContainerKey.initialize());
+  ATH_CHECK(m_ctxProvider.initialize());
   ATH_CHECK(m_xaodPixelSpacePointContainerKey.initialize());
   ATH_CHECK(m_xaodStripSpacePointContainerKey.initialize());
   ATH_CHECK(m_xaodStripSpacePointOverlapContainerKey.initialize());
@@ -98,10 +96,10 @@ StatusCode TrackFindingGNNAlg::initialize() {
   ATH_CHECK(m_fitterTool.retrieve());
 
   m_uncalibMeasSurfAccessor =
-      detail::xAODUncalibMeasSurfAcc{m_trackingGeometryTool.get()};
+      detail::xAODUncalibMeasSurfAcc{m_trackingGeometrySvc.get()};
   m_uncalibMeasCalibrator =
       detail::OnTrackCalibrator<ActsTrk::MutableTrackStateBackend>::
-          NoCalibration(m_trackingGeometryTool.get());
+          NoCalibration(m_trackingGeometrySvc.get());
 
   // ACTS tools
   ActsPlugins::ModuleMapCuda::Config gcCfg;
@@ -224,13 +222,11 @@ StatusCode TrackFindingGNNAlg::execute(const EventContext &ctx) const {
   std::optional<Athena::Chrono> timer;
   timer.emplace("GNN get spacepoint handles", m_chronoSvc.get());
 
-  Acts::GeometryContext gctx =
-      m_trackingGeometryTool->getGeometryContext(ctx).context();
-  Acts::MagneticFieldContext mctx =
-      m_extrapolationTool->getMagneticFieldContext(ctx);
-  Acts::CalibrationContext cctx = ActsTrk::getCalibrationContext(ctx);
+  const Acts::GeometryContext gctx = m_ctxProvider.getGeometryContext(ctx);
+  const Acts::MagneticFieldContext mctx = m_ctxProvider.getMagneticFieldContext(ctx);
+  const Acts::CalibrationContext cctx = m_ctxProvider.getCalibrationContext(ctx);
 
-  auto detElToGeoIdMap = m_trackingGeometryTool->surfaceIdMap();
+  auto detElToGeoIdMap = m_trackingGeometrySvc->surfaceIdMap();
 
   // Build features
   auto pixelSPHandle = SG::makeHandle(m_xaodPixelSpacePointContainerKey, ctx);
@@ -421,7 +417,7 @@ StatusCode TrackFindingGNNAlg::execute(const EventContext &ctx) const {
   auto retrieveSurface = [&](const ActsTrk::Seed& seed, bool useTopSp) -> const Acts::Surface& {
     const xAOD::SpacePoint* sp = useTopSp ? seed.sp().front() : seed.sp().back();
     auto geoId = ActsTrk::getSurfaceGeometryIdOfMeasurement(*detElToGeoIdMap, *sp->measurements().front());
-    const auto* surface = m_trackingGeometryTool->trackingGeometry()->findSurface(geoId);
+    const auto* surface = m_trackingGeometrySvc->trackingGeometry()->findSurface(geoId);
     if (!surface) {
       throw std::runtime_error("retrieveSurface: no Acts surface for GeometryIdentifier " + std::to_string(geoId.value()));
     }

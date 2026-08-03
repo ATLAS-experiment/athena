@@ -21,7 +21,7 @@ ListOfDefaultPositionalKeys=['--AMIConfig', '--AMITag', '--argJSON', '--asetup',
 '--dumpJSON', '--dumpPickle', '--ecmEnergy', '--env', '--eventAcceptanceEfficiency', 
 '--evgenJobOpts', '--execOnly', '--fileValidation', '--firstEvent', '--ignoreErrors', 
 '--ignoreFiles', '--ignorePatterns', '--imf', '--inputEVNT_PreFile', '--inputFileValidation', 
-'--inputGenConfFile', '--inputGeneratorFile', '--jobConfig', '--jobid', '--maxEvents', '--orphanKiller', '--outputEVNTFile', '--outputEVNT_PreFile', '--outputHEPMCFile', '--outputFileValidation', '--outputNTUP_TRUTHFile', '--outputTXTFile', '--parallelFileValidation', '--postExec', '--postInclude', '--preExec', '--preInclude', '--wprintEvts', '--randomSeed', '--reportName', '--reportType', '--rivetAnas', '--runNumber', '--showGraph', '--showPath', '--showSteps', '--skipEvents', '--skipFileValidation', '--skipInputFileValidation', '--skipOutputFileValidation', '--steering', '--taskid', '--tcmalloc', '--valgrind', '--valgrindbasicopts', '--valgrindextraopts', '--lheOnly', '--localPath', '--cleanOut', '--saveList']
+'--inputGenConfFile', '--inputGeneratorFile', '--jobConfig', '--jobid', '--maxEvents', '--orphanKiller', '--outputEVNTFile', '--outputEVNT_PreFile', '--outputHEPMCFile', '--outputFileValidation', '--outputNTUP_TRUTHFile', '--outputTXTFile', '--parallelFileValidation', '--postExec', '--postInclude', '--preExec', '--preInclude', '--wprintEvts', '--randomSeed', '--reportName', '--reportType', '--rivetAnas', '--runNumber', '--showGraph', '--showPath', '--showSteps', '--skipEvents', '--skipFileValidation', '--skipInputFileValidation', '--skipOutputFileValidation', '--steering', '--taskid', '--tcmalloc', '--valgrind', '--valgrindbasicopts', '--valgrindextraopts', '--lheOnly', '--localPath', '--cleanOut', '--saveList', '--avoidExtracting']
 
 class EvgenExecutor(athenaExecutor):
   "Specialised trf executor class for event generation jobs"
@@ -48,11 +48,17 @@ class EvgenExecutor(athenaExecutor):
                 zf.extractall()
                 zf.close()
             elif ".gz" in filename:
-                import gzip
-                with gzip.open(filename, 'rb') as f_in:
-                    lfilename=os.path.basename(filename)
-                    with open(lfilename[:-3], 'wb') as f_out:
-                        shutil.copyfileobj(f_in, f_out)
+                shouldExtract = True
+                if "avoidExtracting" in self._trf.argdict:
+                    shouldExtract = not self._trf.argdict["avoidExtracting"].value
+                if shouldExtract:
+                    import gzip
+                    with gzip.open(filename, 'rb') as f_in:
+                       lfilename=os.path.basename(filename)
+                       with open(lfilename[:-3], 'wb') as f_out:
+                           shutil.copyfileobj(f_in, f_out)
+                else:
+                    msg.info("Avoid extracting gz input generator file.")
         def get_immediate_subdirectories(a_dir):
             return [name for name in os.listdir(a_dir)
                     if os.path.isdir(os.path.join(a_dir, name))]
@@ -203,18 +209,18 @@ def getTransform():
     exeSet = set()
     msg.info("Transform arguments %s", sys.argv[1:])
     if "--outputEVNTFile" in str(sys.argv[1:]):
-       exeSet.add(EvgenExecutor(name="generate", skeleton="EvgenJobTransforms/skel.GENtoEVGEN.py", skeletonCA="EvgenJobTransforms.GENtoEVGEN_Skeleton", inData=["inNULL"], outData=["YODA", "EVNT", "EVNT_Pre", "TXT"]))
+       exeSet.add(EvgenExecutor(name="generate", skeleton="EvgenJobTransforms/skel.GENtoEVGEN.py", skeletonCA="EvgenJobTransforms.GEN_Skeleton", inData=["inNULL"], outData=["YODA", "EVNT", "EVNT_Pre", "TXT"]))
        msg.info("Output EVNT file")
     elif "--outputYODAFile" in str(sys.argv[1:]):
-       exeSet.add(EvgenExecutor(name="generate", skeleton="EvgenJobTransforms/skel.GENtoEVGEN.py", skeletonCA="EvgenJobTransforms.GENtoEVGEN_Skeleton", inData=["inNULL"], outData=["YODA", "TXT"]))
+       exeSet.add(EvgenExecutor(name="generate", skeleton="EvgenJobTransforms/skel.GENtoEVGEN.py", skeletonCA="EvgenJobTransforms.GEN_Skeleton", inData=["inNULL"], outData=["YODA", "TXT"]))
        msg.info("Output EVNT file")
     elif "--outputTXTFile" in str(sys.argv[1:]):
-       exeSet.add(EvgenExecutor(name="generate", skeleton="EvgenJobTransforms/skel.GENtoTXT.py", skeletonCA="EvgenJobTransforms.GENtoEVGEN_Skeleton", inData=["inNULL"], outData=["TXT"]))
+       exeSet.add(EvgenExecutor(name="generate", skeleton="EvgenJobTransforms/skel.GENtoTXT.py", skeletonCA="EvgenJobTransforms.GEN_Skeleton", inData=["inNULL"], outData=["TXT"]))
        msg.info("Output TXT file")
     elif "--outputHEPMCFile" not in str(sys.argv[1:]):
        msg.error("Output cannot be recognised")
 
-    exeSet.add(EvgenExecutor(name="afterburn", skeleton="EvgenJobTransforms/skel.ABtoEVGEN.py", skeletonCA="EvgenJobTransforms.GENtoEVGEN_Skeleton", inData=["EVNT_Pre"], outData=["EVNT"]))
+    exeSet.add(EvgenExecutor(name="afterburn", skeleton="EvgenJobTransforms/skel.ABtoEVGEN.py", skeletonCA="EvgenJobTransforms.GEN_Skeleton", inData=["EVNT_Pre"], outData=["EVNT"]))
     exeSet.add(athenaExecutor(name = "AODtoDPD", skeletonFile = "PATJobTransforms/skeleton.AODtoDPD_tf.py",
                               substep = "a2d", inData = ["EVNT"], outData = ["NTUP_TRUTH"], perfMonFile = "ntuple_AODtoDPD.pmon.gz"))
     exeSet.add(athenaExecutor(name = 'EVNTtoHEPMC', skeletonCA = 'EvgenJobTransforms.POOLtoHEPMC_Skeleton',

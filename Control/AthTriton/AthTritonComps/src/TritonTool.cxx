@@ -13,8 +13,10 @@
 
 // System include(s).
 #include <cassert>
+#include <chrono>
 #include <cstring>
 #include <string>
+#include <thread>
 #include <vector>
 
 /// Shorthand for the Triton client namespace
@@ -25,7 +27,9 @@ namespace tc = triton::client;
   do {                                              \
     const tc::Error err = EXP;                      \
     if (!err.IsOk()) {                              \
-      ATH_MSG_ERROR("Failed to execute: " << #EXP); \
+      ATH_MSG_ERROR("Failed to execute: " << #EXP   \
+                                        << ": "     \
+                                        << err);    \
       return StatusCode::FAILURE;                   \
     }                                               \
   } while (false)
@@ -42,6 +46,10 @@ struct TritonDType<float> {
 template <>
 struct TritonDType<int64_t> {
   static constexpr const char* value = "INT64";
+};
+template <>
+struct TritonDType<uint8_t> {
+  static constexpr const char* value = "UINT8";
 };
 
 struct TritonTool::Impl : public AthMessaging {
@@ -67,6 +75,113 @@ struct TritonTool::Impl : public AthMessaging {
     client = threadClient.get();
 
     return StatusCode::SUCCESS;
+  }
+
+  tc::Error checkServerHealth(tc::InferenceServerGrpcClient& client) const {
+
+    tc::Headers httpHeaders;
+    bool live = false;
+    tc::Error err =
+        client.IsServerLive(&live, httpHeaders, m_options->client_timeout_);
+    if (!err.IsOk()) {
+      return err;
+    }
+    if (!live) {
+      return tc::Error("Triton server is not live");
+    }
+
+    bool serverReady = false;
+    err = client.IsServerReady(&serverReady, httpHeaders,
+                               m_options->client_timeout_);
+    if (!err.IsOk()) {
+      return err;
+    }
+    if (!serverReady) {
+      return tc::Error("Triton server is not ready");
+    }
+
+    bool modelReady = false;
+    err = client.IsModelReady(&modelReady, m_options->model_name_,
+                              m_options->model_version_, httpHeaders,
+                              m_options->client_timeout_);
+    if (!err.IsOk()) {
+      return err;
+    }
+    if (!modelReady) {
+      return tc::Error("Triton model " + m_options->model_name_ + " is not ready");
+    }
+
+    return tc::Error::Success;
+  }
+
+  void waitBeforeRetry(const int retryDelayMs) const {
+    if (retryDelayMs > 0) {
+      std::this_thread::sleep_for(std::chrono::milliseconds(retryDelayMs));
+    }
+  }
+
+  StatusCode runInference(
+      tc::InferenceServerGrpcClient& client,
+      const std::vector<tc::InferInput*>& rawInputs,
+      const int maxRetries, const int retryDelayMs,
+      std::shared_ptr<tc::InferResult>& results) const {
+
+    tc::Headers httpHeaders;
+    grpc_compression_algorithm compressionAlgorithm =
+        grpc_compression_algorithm::GRPC_COMPRESS_NONE;
+
+    tc::Error err;
+    for (int attempt = 0; attempt <= maxRetries; ++attempt) {
+      if (m_parentAsyncAlg == nullptr) {
+        tc::InferResult* rawResultPtr = nullptr;
+        err = client.Infer(&rawResultPtr, *m_options, rawInputs, {},
+                            httpHeaders, compressionAlgorithm);
+        if (err.IsOk() && rawResultPtr != nullptr) {
+          results.reset(rawResultPtr);
+          err = results->RequestStatus();
+        } else if (err.IsOk()) {
+          err = tc::Error("Triton synchronous inference returned no result");
+        }
+      } else {
+        using Promise_t = boost::fibers::promise<tc::InferResult*>;
+        using Future_t = boost::fibers::future<tc::InferResult*>;
+        Promise_t promise{};
+        Future_t future = promise.get_future();
+        auto callback = [&promise](tc::InferResult* resultPtr) {
+          promise.set_value(resultPtr);
+        };
+        err = client.AsyncInfer(callback, *m_options, rawInputs, {},
+                                httpHeaders, compressionAlgorithm);
+        if (err.IsOk()) {
+          results.reset(future.get());
+          ATH_CHECK(m_parentAsyncAlg->restoreAfterSuspend());
+          if (results != nullptr) {
+            err = results->RequestStatus();
+          } else {
+            err = tc::Error("Triton asynchronous inference returned no "
+                            "result");
+          }
+        }
+      }
+
+      if (err.IsOk()) {
+        return StatusCode::SUCCESS;
+      }
+
+      if (attempt == maxRetries) {
+        ATH_MSG_ERROR("Triton inference failed after " << (attempt + 1)
+                                                       << " attempt(s): "
+                                                       << err);
+        return StatusCode::FAILURE;
+      }
+
+      ATH_MSG_WARNING("Triton inference attempt " << (attempt + 1)
+                                                  << " failed: " << err
+                                                  << "; retrying");
+      waitBeforeRetry(retryDelayMs);
+    }
+
+    return StatusCode::FAILURE;
   }
 
   template <typename T>
@@ -161,6 +276,13 @@ StatusCode TritonTool::initialize() {
   tc::InferenceServerGrpcClient* dummyClient = nullptr;
   ATH_CHECK(m_impl->getClient(dummyClient, m_url, m_port, m_useSSL));
 
+  // Check that the server is live and ready, and that the model is ready.
+  tc::Error err = m_impl->checkServerHealth(*dummyClient);
+  if (!err.IsOk()) {
+    ATH_MSG_ERROR("Failed to check server health: " << err);
+    return StatusCode::FAILURE;
+  }
+
   // Return gracefully.
   return StatusCode::SUCCESS;
 }
@@ -202,31 +324,14 @@ StatusCode AthInfer::TritonTool::inference(InputDataMap& inputData,
 
   // perform the inference.
   std::shared_ptr<tc::InferResult> results;
-  tc::Headers http_headers;
-  grpc_compression_algorithm compression_algorithm =
-      grpc_compression_algorithm::GRPC_COMPRESS_NONE;
-
-  if (m_impl->m_parentAsyncAlg == nullptr) {
-    tc::InferResult* rawResultPtr = nullptr;
-    TRITON_CHECK(client->Infer(&rawResultPtr, *(m_impl->m_options), rawInputs,
-                               {}, http_headers, compression_algorithm));
-    assert(rawResultPtr != nullptr);
-    results.reset(rawResultPtr);
-  } else {
-    // If m_impl->m_parentAsyncAlg is set, use asynchronous inference
-    using Promise_t = boost::fibers::promise<tc::InferResult*>;
-    using Future_t = boost::fibers::future<tc::InferResult*>;
-    Promise_t promise{};
-    Future_t future = promise.get_future();
-    auto callback = [&promise](tc::InferResult* resultPtr) {
-      assert(resultPtr != nullptr);
-      promise.set_value(resultPtr);
-    };
-    TRITON_CHECK(client->AsyncInfer(callback, *(m_impl->m_options), rawInputs,
-                                    {}, http_headers, compression_algorithm));
-    results.reset(future.get());
-    ATH_CHECK(m_impl->m_parentAsyncAlg->restoreAfterSuspend());
-  }
+  const int maxRetriesValue = m_maxRetries.value();
+  const int retryDelayMsValue = m_retryDelayMs.value();
+  const int maxRetries = maxRetriesValue < 0 ? 0 : maxRetriesValue;
+  const int retryDelayMs = retryDelayMsValue < 0 ? 0 : retryDelayMsValue;
+  ATH_CHECK(
+      m_impl->runInference(*client, rawInputs, maxRetries, retryDelayMs,
+                           results));
+  assert(results != nullptr);
 
   // Get the result of the inference.
   for (auto& [outputName, outputInfo] : outputData) {

@@ -16,7 +16,7 @@ atlas_add_component( MuonTrackFindingAlgs
                      LINK_LIBRARIES AthenaKernel StoreGateLib AthenaBaseComps GaudiKernel MuonReadoutGeometryR4 Acts::Core
                                      xAODTracking CxxUtils MuonSpacePoint ActsGeometryInterfacesLib MuonDetDescrUtils
                                      MuonPatternEvent MuonRecToolInterfacesR4 MuonTruthHelpers
-                                     MuonTrackEvent MuonTrackFindingToolsLib ActsToolInterfacesLib ActsCalibratorsLib 
+                                     MuonTrackEvent ActsToolInterfacesLib ActsCalibratorsLib 
                                      MuonVisualizationHelpersR4 MuonPatternHelpers ${ROOT_LIBRARIES})
 
 

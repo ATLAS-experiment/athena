@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef PIXEL_CLUSTER_CNV_P1_H
@@ -32,7 +32,7 @@ class PixelClusterCnv_p1
 		    MsgStream                &log );
 
 protected:        
-  SiClusterCnv_p1	    *m_siClusterCnv;
+  SiClusterCnv_p1	    *m_siClusterCnv{};
 };
 
 #endif // PIXEL_CLUSTER_CNV_P1_H

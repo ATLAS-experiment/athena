@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -30,44 +30,10 @@
 
 
 // constructor
-Trk::LayerMaterialAnalyser::LayerMaterialAnalyser(const std::string& t, const std::string& n, const IInterface* p)
-: AthAlgTool(t,n,p),
-  m_layerMaterialName("UnspecifiedLayerMaterialMap"),
-  m_validationTree(nullptr),
-  m_validationTreeName("LayerMaterialAnalyser"),
-  m_validationTreeDescription("LayerMaterialAnalyser information"),
-  m_validationTreeFolder("/val/LayerMaterialAnalyser"),
-  m_layerIndex(0),        
-  m_layerType(0),
-  m_layerTranslation(nullptr),
-  m_layerRotation(nullptr),
-  m_layerDimension0(0.),   
-  m_layerDimension1(0.),   
-  m_layerBins(0),         
-  m_layerBins0(0),         
-  m_layerBins1(0),
-  m_bin0(nullptr),
-  m_bin1(nullptr),
-  m_thickness(nullptr),
-  m_X0(nullptr),
-  m_L0(nullptr),
-  m_A(nullptr),
-  m_Z(nullptr),
-  m_Rho(nullptr),
-  m_elements(nullptr),
-  m_binCounter(nullptr)
+Trk::LayerMaterialAnalyser::LayerMaterialAnalyser(const std::string& t, const std::string& n, const IInterface* p) : AthAlgTool(t,n,p)
 {
     declareInterface<Trk::ILayerMaterialAnalyser>(this);
-    // give the map a name
-    declareProperty("LayerMaterialName",          m_layerMaterialName);
-    declareProperty("ValidationTreeName",         m_validationTreeName);
-    declareProperty("ValidationTreeDescription",  m_validationTreeDescription);
-    declareProperty("ValidationTreeFolder",       m_validationTreeFolder);
 }
-
-// destructor
-Trk::LayerMaterialAnalyser::~LayerMaterialAnalyser()
-= default;
 
 
 // initialize
@@ -90,7 +56,8 @@ StatusCode Trk::LayerMaterialAnalyser::initialize()
     // now register the Tree
 
     // ------------- validation section ------------------------------------------
-    m_validationTree = new TTree(m_validationTreeName.c_str(), m_validationTreeDescription.c_str());
+    m_validationTree = new TTree(m_validationTreeName.value().c_str(),
+				 m_validationTreeDescription.value().c_str());
 
     // position coordinates of the update
     m_validationTree->Branch("LayerIndex",            &m_layerIndex         );
@@ -120,7 +87,7 @@ StatusCode Trk::LayerMaterialAnalyser::initialize()
         delete m_validationTree; m_validationTree = nullptr;
         return StatusCode::SUCCESS;
     }
-    if ((tHistSvc->regTree(m_validationTreeFolder.c_str(), m_validationTree)).isFailure()) {
+    if ((tHistSvc->regTree(m_validationTreeFolder.value().c_str(), m_validationTree)).isFailure()) {
         ATH_MSG_ERROR("initialize() Could not register the validation Tree -> Switching ValidationMode Off !" );
         delete m_validationTree; m_validationTree = nullptr;
         return StatusCode::SUCCESS;

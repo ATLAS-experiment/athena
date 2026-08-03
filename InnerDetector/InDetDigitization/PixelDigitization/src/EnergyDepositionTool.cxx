@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
  */
 #include "EnergyDepositionTool.h"
 
@@ -110,7 +110,7 @@ StatusCode EnergyDepositionTool::initialize() {
       const std::string & fullFileName = PathResolverFindCalibFile(inputFileName);
       ATH_MSG_INFO("Bichsel Data File "<<fullFileName);
       BichselData iData = PixelDigitization::getBichselDataFromFile(fullFileName);
-      m_bichselData.push_back(iData);
+      m_bichselData.push_back(std::move(iData));
     }
     ATH_MSG_INFO("Finish Loading Data File");
   }

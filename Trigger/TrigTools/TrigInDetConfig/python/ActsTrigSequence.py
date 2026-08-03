@@ -47,13 +47,10 @@ class ActsTrigSequence(InnerTrackerTrigSequence):
         acc.merge(SGInputLoaderCfg(self.flags, Load=sgil_load))
 
     if self.flags.Acts.useCache:
-        ViewDataVerifier.DataObjects |= {( 'ActsTrk::Cache::Handles<xAOD::SpacePoint>::IDCBackend' , 'StoreGateSvc+ActsPixelSpacePointCache_Back' ),
-                                         ( 'ActsTrk::Cache::Handles<xAOD::PixelCluster>::IDCBackend' , 'StoreGateSvc+ActsPixelClusterCache_Back' ),
-                                         ( 'ActsTrk::Cache::Handles<xAOD::StripCluster>::IDCBackend' , 'StoreGateSvc+ActsStripClusterCache_Back' ),
-                                         ( 'ActsTrk::Cache::Handles<xAOD::PixelCluster>::IDC' , 'StoreGateSvc+ActsPixelClustersCache' ),
-                                         ( 'ActsTrk::Cache::Handles<xAOD::StripCluster>::IDC' , 'StoreGateSvc+ActsStripClustersCache' ),
-                                         ( 'ActsTrk::Cache::Handles<xAOD::SpacePoint>::IDC' , 'StoreGateSvc+ActsPixelSpacePointCache' )}
-
+      ViewDataVerifier.DataObjects |= {( 'ActsTrk::Cache::Handles<xAOD::SpacePoint>::IDCBackend' , 'StoreGateSvc+ActsPixelSpacePointCache_Back' ),
+                                       ( 'ActsTrk::Cache::Handles<xAOD::PixelCluster>::IDCBackend' , 'StoreGateSvc+ActsPixelClusterCache_Back' ),
+                                       ( 'ActsTrk::Cache::Handles<xAOD::StripCluster>::IDCBackend' , 'StoreGateSvc+ActsStripClusterCache_Back' ),
+                                       }
     ViewDataVerifier.DataObjects |= {
       ('InDet::SiDetectorElementStatus' ,   'StoreGateSvc+ITkPixelDetectorElementStatus' ),
       ('InDet::SiDetectorElementStatus' , 'StoreGateSvc+ITkStripDetectorElementStatus' ),
@@ -156,7 +153,8 @@ class ActsTrigSequence(InnerTrackerTrigSequence):
                                      InputSpacePoints=['ITkPixelSpacePoints_Cached'] if self.flags.Acts.useCache else ['ITkPixelSpacepoints_'+self.signature], 
                                      useFastTracking=True))
 
-    from ActsConfig.ActsTrackFindingConfig import ActsMainTrackFindingAlgCfg, ActsTrackToTrackParticleCnvAlgCfg
+    from ActsConfig.ActsTrackFindingConfig import ActsMainTrackFindingAlgCfg
+    from ActsConfig.ActsEventCnvConfig import ActsTrackToTrackParticleCnvAlgCfg
     measurements = ["ITkPixelClusters_Cached" if self.flags.Acts.useCache else "ITkPixelClusters_"+self.signature,
                     "ITkStripClusters_Cached" if self.flags.Acts.useCache else "ITkStripClusters_"+self.signature]
 
@@ -165,7 +163,6 @@ class ActsTrigSequence(InnerTrackerTrigSequence):
                                               ACTSTracksLocation=self.flags.Tracking.ActiveConfig.trkTracks_FTF,
                                               SeedLabels=["PPP"],
                                               SeedContainerKeys=["ActsPixelSeeds"],
-                                              DetectorElementsKeys=['ITkPixelDetectorElementCollection'],
                                               UncalibratedMeasurementContainerKeys=measurements)
      
     acc.merge(trackfinding)
@@ -193,7 +190,7 @@ class ActsTrigSequence(InnerTrackerTrigSequence):
   def xAODParticleCreation(self) -> ComponentAccumulator:
     acc = ComponentAccumulator()
 
-    from ActsConfig.ActsTrackFindingConfig import ActsTrackToTrackParticleCnvAlgCfg
+    from ActsConfig.ActsEventCnvConfig import ActsTrackToTrackParticleCnvAlgCfg
     acc.merge(ActsTrackToTrackParticleCnvAlgCfg(self.flags,
                                                 "ActsTrackParticleCreator_Ambi_"+self.signature, 
                                                 ACTSTracksLocation=[self.flags.Tracking.ActiveConfig.trkTracks_IDTrig], 

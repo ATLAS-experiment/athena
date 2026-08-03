@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TILEBYTESTREAM_TILERAWCHANNELCONTRAWEVENTTOOL_H
@@ -11,6 +11,7 @@
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "ByteStreamCnvSvcBase/FullEventAssembler.h"
 #include "StoreGate/ReadCondHandleKey.h"
+#include <vector>
 
 class TileHWID;
 class TileRawChannelContainer;
@@ -77,6 +78,10 @@ class TileRawChannelContByteStreamTool: public AthAlgTool {
 
     /** maximum number of channels in a drawer */
     int m_maxChannels;
+
+    std::vector<int> m_demoFragIDs;
+    std::vector<int> m_legacy2DemoChannelLB;
+    std::vector<int> m_legacy2DemoChannelEB;
 };
 
 #endif

@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration.
  *
  * @file HGTD_EventTPCnv/test/HGTD_ClusterContainerCnv_p1_test.cxx
  * @author Alexander Leopold <alexander.leopold@cern.ch>
@@ -87,7 +87,7 @@ std::unique_ptr<const HGTD_ClusterContainer> makeClusters(HGTD_ID* hgtd_idhelper
         // being very verbose about the dummy arguments for better control
         int endcap = 2;
         int layer = layer_i;
-        int phi_module = layer + i_clus;
+        int phi_module = layer + i_clus + 1;
         int eta_module = i_clus + 2;
         float locx = 1.3 * i_clus;
         float locy = locx;
@@ -188,7 +188,7 @@ BOOST_AUTO_TEST_CASE(HGTD_ClusterContainerCnv_p1_test) {
   hgtd_idhelper->set_do_checks(true);
 
   Identifier id = hgtd_idhelper->wafer_id(2, 1, 5, 10);
-  Identifier id2 = hgtd_idhelper->wafer_id(-2, 5, 1, 1);
+  Identifier id2 = hgtd_idhelper->wafer_id(-2, 1, 5, 1);
 
   IdentifierHash id_hash = hgtd_idhelper->wafer_hash(id);
   //

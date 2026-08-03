@@ -39,27 +39,26 @@
 
 
 // Trigger Information struct
-typedef struct _triginfo
-{
+struct TrigInfo{
     // L1 information
-    bool L1Legacy; 
+    bool L1Legacy{}; 
     std::string L1Threshold; //EM22VHI
     // HLT information
     std::string trigger; //Trigger Name
     std::string signature; //Electron or Photon
-    float etthr; // HLT Et threshold
+    float etthr{}; // HLT Et threshold
     // if trigger is etcut OR idperf, pidname should be default (usually lhloose)
     std::string pidname; // Offline loose, medium, tight, etc...
     // extra HLT information
-    bool idperf; // Performance chain
-    bool etcut; // Et cut only chain
-    bool nogsf; // GSF chain
-    bool lrt; // LRT chain
-    bool ion; // Heavy Ion chain
+    bool idperf{}; // Performance chain
+    bool etcut{}; // Et cut only chain
+    bool nogsf{}; // GSF chain
+    bool lrt{}; // LRT chain
+    bool ion{}; // Heavy Ion chain
 
     std::string isolation;
-    bool isolated;
-} TrigInfo;
+    bool isolated{};
+};
 
 
 class TrigEgammaMonitorBaseAlgorithm : public AthMonitorAlgorithm {
@@ -151,7 +150,7 @@ class TrigEgammaMonitorBaseAlgorithm : public AthMonitorAlgorithm {
 
 
     /*! Set the accept object for all trigger levels */
-    asg::AcceptData setAccept(const TrigCompositeUtils::Decision*, const TrigInfo&, const bool) const;
+    asg::AcceptData setAccept(const EventContext& ctx, const TrigCompositeUtils::Decision*, const TrigInfo&, const bool) const;
     /*! Get the trigger info parsed from the chain name (only single lepton triggers) */
     TrigInfo getTrigInfo(const std::string&) const;
     TrigInfo getTrigInfoR3(const std::string&) const;
@@ -312,7 +311,7 @@ namespace Gaudi
     // A typedef may save a lot of mistakes
     typedef std::vector<Dict_t> VecDict_t;
 
-    // Parse function... nothing special, but it must be done explicitely.
+    // Parse function... nothing special, but it must be done explicitly.
     StatusCode parse( VecDict_t & result, const std::string& input );
   }
 }

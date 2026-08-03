@@ -35,7 +35,9 @@ class CorePlots: public PlotBase {
     TH1* sublead_subjet_phi{};
     TH1* sublead_subjet_pt{};
     TH1* sublead_subjet_ntracks{};
-  
+
+    TH1* ditau_jet_vertex_fraction{}; 
+
   private:
     void initializePlots();
     std::string m_sDiTauJetContainerName;

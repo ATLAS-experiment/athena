@@ -7,6 +7,8 @@ evgenConfig.generators += ["Epos4"]
 include("Epos4_i/configFile.py")
 energy                = float(runArgs.ecmEnergy)                                        # center-of-mass energy
 number_of_events      = int(getattr(runArgs, "maxEvents", evgenConfig.nEventsPerJob))   # number of events
+list_noDecayParticles = "20 2130 -2130 1330 -1330 2330 -2330 3331 -3331 2230 -2230 1130 -1130"
+
 laproj = 82                                     # projectile atomic number 
 maproj = 208                                    # projectile mass number
 latarg = 82                                     # target atomic number
@@ -19,10 +21,7 @@ with open("Epos4.optns", "w") as f:
 
 include("Epos4_i/Epos4_Base_Fragment.py")
 
-if hasattr(fixSeq, "FixHepMC"):
-   fixSeq.remove(FixHepMC())
 
-if hasattr(testSeq, "TestHepMC"):
-   testSeq.remove(TestHepMC())
-
-
+#Disable energy and momentum test due to internal generator problem
+TestHepMC.EnergyImbalanceTest = False
+TestHepMC.MomImbalanceTest    = False

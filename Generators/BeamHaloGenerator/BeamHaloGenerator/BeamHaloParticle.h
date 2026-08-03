@@ -6,12 +6,11 @@
 #define BEAMHALOPARTICLE_H
 
 #include "AtlasHepMC/SimpleVector.h"
+#include <memory>
 
 class MarsParticle;
 class FlukaParticle;
-namespace HepPDT {
-  class ParticleDataTable;
-}
+class GenData;
 
 /** @class BeamHaloParticle
 
@@ -43,12 +42,12 @@ class BeamHaloParticle {
 
   /** A function to fill the data members from an input MarsParticle
       object. */
-  int fill(const HepPDT::ParticleDataTable *particleDataTable,
+  int fill(
 	   MarsParticle *marsParticle);
   
   /** A function to fill the data members from an input FlukaParticle
       object. */
-  int fill(const HepPDT::ParticleDataTable *particleDataTable,
+  int fill(
 	   FlukaParticle *flukaParticle);
   
   /** A function to print the contents of this particle. */
@@ -89,6 +88,9 @@ class BeamHaloParticle {
 
   /** Position of the particle at the primary interaction point (x,y,z,y). */
   HepMC::FourVector m_positionAtPrimary;
+
+  /** A shared pointer to the GenData helper object. */
+  std::shared_ptr<GenData> m_gendata;
 };
 
 #endif

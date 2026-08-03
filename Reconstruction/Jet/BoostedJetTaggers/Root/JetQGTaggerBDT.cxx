@@ -10,6 +10,7 @@
 
 #include "xAODTracking/VertexContainer.h"
 #include "xAODTracking/TrackParticle.h"
+#include <cmath>
 
 namespace CP {
 
@@ -356,8 +357,9 @@ namespace CP {
     if(nTracksFromGhostTracks == 0){
       if(expectedNTracks == 0)
         return true;
-      return abs(expectedNTracks-nTracksFromGhostTracks) < 3;
-    }else if(expectedNTracks/nTracksFromGhostTracks < 0.5 && abs(expectedNTracks-nTracksFromGhostTracks) > 5){
+      return std::abs(expectedNTracks-nTracksFromGhostTracks) < 3;
+      //beware of integer division
+    }else if(expectedNTracks/double(nTracksFromGhostTracks) < 0.5 && std::abs(expectedNTracks-nTracksFromGhostTracks) > 5){
       return false;
     }
     return true;

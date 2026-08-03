@@ -25,7 +25,7 @@ def ITkActsTrackRecoCfg(flags) -> ComponentAccumulator:
     primaryVertices = "PrimaryVertices"
 
     # Reconstruction
-    from InDetConfig.ITkActsHelpers import isPrimaryPass
+    from InDetConfig.ITkActsHelpers import isPrimaryPass, primaryPassUsesDevice
     for currentFlags in scheduledTrackingPasses:
         # Printing configuration
         print(f"---- Preparing scheduling of algorithms for tracking pass: {currentFlags.Tracking.ActiveConfig.extension}")
@@ -33,17 +33,23 @@ def ITkActsTrackRecoCfg(flags) -> ComponentAccumulator:
         from TrkConfig.TrackingPassFlags import printActiveConfig
         printActiveConfig(currentFlags)
 
-        # Data Preparation
-        # This includes Region-of-Interest creation, Cluster and Space Point formation
-        from InDetConfig.ITkActsDataPreparationConfig import ITkActsDataPreparationCfg
-        acc.merge(ITkActsDataPreparationCfg(currentFlags,
-                                            previousExtension = previousExtension))
-        
-        # Track Reconstruction        
-        # This includes Seeding, Track Finding (CKF) and Ambiguity Resolution
-        from InDetConfig.ITkActsPatternRecognitionConfig import ITkActsTrackReconstructionCfg
-        acc.merge(ITkActsTrackReconstructionCfg(currentFlags,
+        if isPrimaryPass(currentFlags) and primaryPassUsesDevice(currentFlags):
+            print("Configuring track reconstruction on device")
+            from InDetConfig.ITkActsDeviceTrackRecoConfig import ITkActsDeviceTrackRecoCfg
+            acc.merge(ITkActsDeviceTrackRecoCfg(currentFlags,
+                                                       previousExtension = previousExtension))
+        else:
+            # Data Preparation
+            # This includes Region-of-Interest creation, Cluster and Space Point formation
+            from InDetConfig.ITkActsDataPreparationConfig import ITkActsDataPreparationCfg
+            acc.merge(ITkActsDataPreparationCfg(currentFlags,
                                                 previousExtension = previousExtension))
+
+            # Track Reconstruction
+            # This includes Seeding, Track Finding (CKF) and Ambiguity Resolution
+            from InDetConfig.ITkActsPatternRecognitionConfig import ITkActsTrackReconstructionCfg
+            acc.merge(ITkActsTrackReconstructionCfg(currentFlags,
+                                                    previousExtension = previousExtension))
 
         # Update variables
         previousExtension = currentFlags.Tracking.ActiveConfig.extension
@@ -167,7 +173,9 @@ def ITkActsTrackRecoCfg(flags) -> ComponentAccumulator:
                 # on the presence of the ambiguity resolution algorithm
                 # but the track particle collection remains the same
                 # name: InDet{currentFlags.Tracking.ActiveConfig.extension}TrackParticles
-                TrackParticleCollectionForMsos = f'InDet{currentFlags.Tracking.ActiveConfig.extension}TrackParticles'
+                # (unless the pass overrides it via storedTrackParticlesExtension)
+                from InDetConfig.ITkActsHelpers import separateTrackParticleContainerName
+                TrackParticleCollectionForMsos = separateTrackParticleContainerName(currentFlags)
                 acc.merge(ActsTrackStateOnSurfaceDecoratorAlgCfg(currentFlags,
                                                                  name=f"{TrackParticleCollectionForMsos}StateOnSurfaceDecoratorAlg",
                                                                  TrackParticles=TrackParticleCollectionForMsos,

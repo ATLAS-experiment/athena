@@ -73,7 +73,7 @@ acc.getService("IOVDbSvc").FoldersToMetaData = [ "/IOVDbTest/*" ]
 for f, db in (("/Simulation/Parameters", "sqlite://;schema=SimParams.db;dbname=SIMPARAM"),
               ("/Digitization/Parameters", "sqlite://;schema=DigitParams.db;dbname=DIGPARAM")):
 
-    acc.merge( addFolders(flags, f, modifiers=f"<dbConnection>{db}</dbConnection>") )
+    acc.merge( addFolders(flags, f, modifiers=f"<db>{db}</db>") )
     acc.getService("IOVDbSvc").FoldersToMetaData.append(f)
 
 

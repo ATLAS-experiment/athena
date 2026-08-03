@@ -501,6 +501,7 @@ namespace TrigCompositeUtils {
    * @deprecated Use the version taking an EventContext as first argument.
    */
   template<typename T>
+  [[deprecated("pass EventContext as first argument")]]
   LinkInfo<T>
   findLink(const Decision* start,
     const std::string& linkName,
@@ -533,6 +534,7 @@ namespace TrigCompositeUtils {
    * @deprecated Use the version taking an EventContext as first argument.
    */
   template<typename T>
+  [[deprecated("pass EventContext as first argument")]]
   void
   findLinks(const Decision* start,
     const std::string& linkName,
@@ -564,6 +566,7 @@ namespace TrigCompositeUtils {
    * @deprecated Use the version taking an EventContext as first argument.
    */
   template<typename T>
+  [[deprecated("pass EventContext as first argument")]]
   std::vector<LinkInfo<T>>
   findLinks(const Decision* start,
     const std::string& linkName,

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //////////////////////////////////////////////////////////////////
@@ -16,7 +16,6 @@
 #include "GeoPrimitives/GeoPrimitives.h"
 #include "StoreGate/ReadHandleKey.h"
 #include "TString.h"
-#include "TrkGeometry/MaterialStepCollection.h"
 #include <fstream>
 #include <iostream>
 #include <map>
@@ -28,6 +27,9 @@
 // TrkExtrapolation
 #include "TrkExInterfaces/IExtrapolationEngine.h"
 // TrkGeometry
+#include "TrkGeometry/ElementTable.h"
+#include "TrkGeometry/LayerMaterialRecord.h"
+#include "TrkGeometry/MaterialStepCollection.h"
 #include "TrkGeometry/TrackingGeometry.h"
 
 #ifdef TRKDETDESCR_MEMUSAGE
@@ -52,13 +54,11 @@ namespace Trk {
 class Layer;
 class TrackingVolume;
 class SurfaceMaterialRecord;
-class LayerMaterialRecord;
 class LayerMaterialMap;
 class Material;
 class MaterialProperties;
 class BinnedLayerMaterial;
 class CompressedLayerMaterial;
-class ElementTable;
 
 /** @class MaterialMapping
 
@@ -74,10 +74,7 @@ class MaterialMapping : public AthAlgorithm
 
 public:
   /** Standard Athena-Algorithm Constructor */
-  MaterialMapping(const std::string& name, ISvcLocator* pSvcLocator);
-
-  /** Default Destructor */
-  ~MaterialMapping();
+  using AthAlgorithm::AthAlgorithm;
 
   /** standard Athena-Algorithm method */
   StatusCode initialize();
@@ -111,60 +108,48 @@ private:
 
   const TrackingGeometry& trackingGeometry() const;
 
-  bool
-    m_checkForEmptyHits; //!< use extrapoaltion engine to check for empty hits
+  Gaudi::Property <bool> m_checkForEmptyHits{
+    this, "CheckForEmptyHits", true,
+    "use extrapoaltion engine to check for empty hits"};
   ToolHandle<IExtrapolationEngine> m_extrapolationEngine{
-    this,
-    "ExtrapolationEngine",
-    "",
-    "Extrapolation Engine"
-  };
+    this, "ExtrapolationEngine", "", "Extrapolation Engine"};
 
-  std::string m_mappingVolumeName;
-  const Trk::TrackingVolume* m_mappingVolume;
+  Gaudi::Property<std::string> m_mappingVolumeName{
+    this, "MappingVolumeName", "Atlas"};
+  const Trk::TrackingVolume* m_mappingVolume = nullptr;
 
   /** output / input steering */
-  SG::ReadHandleKey<MaterialStepCollection> m_inputMaterialStepCollection;
+  SG::ReadHandleKey<MaterialStepCollection> m_inputMaterialStepCollection{
+    this, "InputMaterialStepCollection", "MaterialStepRecords"};
   std::string m_outputLayerMaterialSetName;
 
   /** general steering */
-  double m_etaCutOff;
-  int m_etaSide; //!< needed for debugging: -1 negative | 0 all | 1 positive
-  bool m_useLayerThickness; //!< use the actual layer thickness
-  int m_associationType;
+  Gaudi::Property<double> m_etaCutOff{this, "EtaCutOff", 6.0};
+  Gaudi::Property<int> m_etaSide{this, "EtaSide", 0}; //!< needed for debugging: -1 negative | 0 all | 1 positive
+  Gaudi::Property<double> m_useLayerThickness{
+    this, "UseActualLayerThicknesss", false,
+    "use the actual layer thickness"};
+  Gaudi::Property<int> m_associationType{this, "MaterialAssociationType", 1};
 
   ToolHandle<ILayerMaterialAnalyser> m_layerMaterialRecordAnalyser{
-    this,
-    "LayerMaterialRecordAnalyser",
-    "",
-    "Layer material analyser for the layer material record"
-  };
+    this, "LayerMaterialRecordAnalyser", "",
+    "Layer material analyser for the layer material record"};
   ToolHandleArray<ILayerMaterialAnalyser> m_layerMaterialAnalysers{
-    this,
-    "LayerMaterialAnalysers",
-    {},
-    "Layer material analysers per creator (if wanted)"
-  };
+    this, "LayerMaterialAnalysers", {},
+    "Layer material analysers per creator (if wanted)"};
   ToolHandleArray<ILayerMaterialCreator> m_layerMaterialCreators{
-    this,
-    "LayerMaterialCreators",
-    {},
-    "Layer material creators"
-  };
+    this, "LayerMaterialCreators", {}, "Layer material creators"};
 
   /** Mapper and Inspector */
-  bool m_mapMaterial;
-  ToolHandle<IMaterialMapper> m_materialMapper{ this,
-                                                "MaterialMapper",
-                                                "",
-                                                "IMaterialMapper algTool" };
-  bool m_mapComposition;           //!< map the composition of the material
-  double m_minCompositionFraction; //!< minimal fraction to be accounted for the
-                                   //!< composition recording
+  Gaudi::Property<bool> m_mapMaterial{this, "MapMaterial", true};
+  ToolHandle<IMaterialMapper> m_materialMapper{
+    this, "MaterialMapper", "", "IMaterialMapper algTool" };
+  Gaudi::Property<bool> m_mapComposition{this, "MapComposition", false,
+    "map the composition of the material"};
 
-  Trk::ElementTable* m_elementTable; //!< the accumulated element table
-  SG::ReadHandleKey<Trk::ElementTable>
-    m_inputEventElementTable; //!< input event table
+  Trk::ElementTable* m_elementTable = nullptr; //!< the accumulated element table
+  SG::ReadHandleKey<Trk::ElementTable> m_inputEventElementTable{
+    this, "InputElementTable", "ElementTable", "input event table"};
 
   // the material maps ordered with layer keys
   std::map<const Layer*, LayerMaterialRecord>
@@ -172,15 +157,13 @@ private:
   std::map<const Layer*, bool>
     m_layersRecordedPerEvent;      //!< these are the layers hit per event - for
                                    //!< empty hit scaling
-  double m_accumulatedMaterialXX0; //!< the accumulated material information
-  double m_accumulatedRhoS;
+  double m_accumulatedMaterialXX0 = 0.; //!< the accumulated material information
+  double m_accumulatedRhoS = 0.;
 
   // statistics for steps
-  size_t m_mapped;
-  size_t m_unmapped;
-  size_t m_skippedOutside;
-
-  int m_layerMaterialScreenOutput;
+  size_t m_mapped = 0;
+  size_t m_unmapped = 0;
+  size_t m_skippedOutside = 0;
 
   void throwFailedToGetTrackingGeometry() const;
   const TrackingGeometry* retrieveTrackingGeometry(
@@ -203,7 +186,7 @@ private:
   };
 
 #ifdef TRKDETDESCR_MEMUSAGE
-  MemoryLogger m_memoryLogger; //!< in case the memory is logged
+  MemoryLogger m_memoryLogger{}; //!< in case the memory is logged
 #endif
 };
 

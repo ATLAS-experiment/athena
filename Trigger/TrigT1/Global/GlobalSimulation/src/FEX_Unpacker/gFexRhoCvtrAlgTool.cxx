@@ -20,7 +20,10 @@ namespace GlobalSim {
   }
 
   StatusCode
-  gFexRhoCvtrAlgTool::run(const EventContext& ctx) const {
+  gFexRhoCvtrAlgTool::run(const std::unique_ptr<IDataCollector>& dc,
+			  const EventContext& ctx) const {
+
+    if (dc){dc->collect(*this, "start");}
 
     SG::ReadHandle<xAOD::gFexJetRoIContainer> inContainer(m_gFexJetRoIKey, ctx);
     CHECK(inContainer.isValid());
@@ -50,6 +53,8 @@ namespace GlobalSim {
     auto h_write =  SG::WriteHandle<OutContainer>(m_gFexRhoTOBContainerKey,
 						  ctx);
     CHECK(h_write.record(std::move(outContainer)));
+
+    if (dc){dc->collect(*this, "end");}
 
     return StatusCode::SUCCESS;
   }

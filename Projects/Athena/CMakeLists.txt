@@ -30,9 +30,9 @@ if( LCG_NIGHTLY )
     set( TDAQ_VERSION "99-00-00" CACHE STRING
        "The version of tdaq to use for the build" )
 else()
-    set( TDAQ-COMMON_VERSION "13-00-00" CACHE STRING
+    set( TDAQ-COMMON_VERSION "14-00-00" CACHE STRING
        "The version of tdaq-common to use for the build" )
-    set( TDAQ_VERSION "13-00-00" CACHE STRING
+    set( TDAQ_VERSION "14-00-00" CACHE STRING
        "The version of tdaq to use for the build" )
 endif()
 

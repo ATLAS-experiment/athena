@@ -75,7 +75,7 @@ namespace CP
 
     /// \brief input streams that we can run the CutBookkeepers against
   private:
-    std::vector<std::string> m_allowed_streams{"StreamAOD", "StreamEVGEN", "StreamEVNT"};
+    std::vector<std::string> m_allowed_streams{"StreamRDO", "StreamAOD", "StreamEVGEN", "StreamEVNT"};
 
     /// \brief weights map
   private:

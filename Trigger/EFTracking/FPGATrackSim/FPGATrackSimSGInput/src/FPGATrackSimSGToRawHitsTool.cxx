@@ -33,7 +33,6 @@
 
 #include "InDetRIO_OnTrack/SiClusterOnTrack.h"
 
-#include "GaudiKernel/IPartPropSvc.h"
 #include "FPGATrackSimSGToRawHitsTool.h"
 
 #include <bitset>

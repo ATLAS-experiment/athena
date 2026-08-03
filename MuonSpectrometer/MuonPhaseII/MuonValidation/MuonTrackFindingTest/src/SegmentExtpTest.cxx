@@ -21,7 +21,7 @@
 #include "MuonTrackEvent/TrackingHelpers.h"
 #include "GaudiKernel/PhysicalConstants.h"
 #include "MuonPatternEvent/SegmentFitterEventData.h"
-
+#include "ActsGeometryInterfaces/ISurfacePlacement.h"
 #include "Acts/Visualization/ObjVisualization3D.hpp"
 #include "Acts/Visualization/GeometryView3D.hpp"
 #include "MuonVisualizationHelpersR4/ObjVisualizationHelpers.h"
@@ -57,7 +57,7 @@ namespace MuonValR4{
 
         auto extrapolate = [&](const Acts::BoundTrackParameters& start,
                                const MuonR4::SpacePoint& sp) {
-            const Amg::Transform3D& trf = sp.msSector()->localToGlobalTransform(*gctx);
+            const Amg::Transform3D& trf = sp.msSector()->localToGlobalTransform(tgContext);
             const Acts::Surface& target = xAOD::muonSurface(sp.primaryMeasurement());
             const Amg::Vector3D n = target.normal(tgContext, 
                                                   Amg::Vector3D::Zero(), 
@@ -71,7 +71,7 @@ namespace MuonValR4{
                                                             start.direction(), n,
                                                              n.dot(target.center(tgContext)));
 
-            const auto* detEl = static_cast<const ActsTrk::IDetectorElementBase*>(target.surfacePlacement());
+            const auto* detEl = static_cast<const ActsTrk::ISurfacePlacement*>(target.surfacePlacement());
             ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<" - Propagate "<<Amg::toString(start.position(tgContext))<<" + "
                   <<Amg::toString(start.direction())<<" onto surface: "<<target.toString(tgContext)
                   <<"\n, "<<m_idHelperSvc->toString(detEl->identify())
@@ -104,14 +104,14 @@ namespace MuonValR4{
             const MuonGMR4::SpectrometerSector* sector = m_detMgr->getSectorEnvelope(segment->chamberIndex(), 
                                                                                      segment->sector(), 
                                                                                      segment->etaIndex());
-            auto startPars = boundSegmentPars(*gctx, *detSeg);
+            auto startPars = boundSegmentPars(tgContext, *detSeg);
 
             Acts::ObjVisualization3D visualHelper{};
             if (m_drawEvent) {
                 /// Draw the reference segment as a red line
-                drawSegmentLine(*gctx, *segment, visualHelper,
+                drawSegmentLine(tgContext, *segment, visualHelper,
                                 Acts::ViewConfig{.color = {220, 0, 0}});
-                drawSegmentMeasurements(*gctx, *segment, visualHelper, Acts::s_viewSurface);
+                drawSegmentMeasurements(tgContext, *segment, visualHelper, Acts::s_viewSurface);
             }
             
             if (msgLvl(MSG::VERBOSE)) {
@@ -184,7 +184,7 @@ namespace MuonValR4{
                 }
                 if (m_drawEvent) {
                     /// Draw the true intersection from the extrapolator as blue lines
-                    drawBoundParameters(*gctx, *extpPars, visualHelper,
+                    drawBoundParameters(tgContext, *extpPars, visualHelper,
                                         Acts::ViewConfig{.color = {0, 0, 220}}, 6._cm); 
                 }
                 chiSqObj.reset();
@@ -272,7 +272,7 @@ namespace MuonValR4{
 
                     /// Ensure that the fast chi2 term and the segment chi2 term
                     /// match with each other
-                    if (Acts::abs(segChi2 - fastChi2Term) > 1.e-3) {
+                    if (std::abs(segChi2 - fastChi2Term) > 1.e-3) {
                         ATH_MSG_ERROR(__func__<<"() "<<__LINE__<<" - The fast & full chi2 calculations from ACTS don't match for "
                             <<(*meas)<<" - full: "<<segChi2<<", fast: "<<fastChi2Term);
                         retCode = StatusCode::FAILURE;

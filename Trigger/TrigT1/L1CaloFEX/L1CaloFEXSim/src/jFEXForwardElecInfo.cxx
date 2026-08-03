@@ -27,15 +27,15 @@ void LVL1::jFEXForwardElecInfo::setup(int *cval, uint reso){
 }
 
 
-uint LVL1::jFEXForwardElecInfo::getCoreTTID(){
+uint LVL1::jFEXForwardElecInfo::getCoreTTID() const {
   return m_coreTTID;
 }
 
-uint LVL1::jFEXForwardElecInfo::getCoreIeta(){
+uint LVL1::jFEXForwardElecInfo::getCoreIeta() const {
   return m_ieta;
 }
 
-uint LVL1::jFEXForwardElecInfo::getCoreIphi(){
+uint LVL1::jFEXForwardElecInfo::getCoreIphi() const {
   return m_iphi;
 }
 
@@ -44,11 +44,11 @@ void   LVL1::jFEXForwardElecInfo::setCoreTTfEta(float fEta){
 }
 
 
-float  LVL1::jFEXForwardElecInfo::getCoreTTfEta(){
+float  LVL1::jFEXForwardElecInfo::getCoreTTfEta() const {
   return m_coreTTfEta;
 }
 
-uint  LVL1::jFEXForwardElecInfo::getCoreTTiEta(){
+uint  LVL1::jFEXForwardElecInfo::getCoreTTiEta() const {
   return m_ieta;
 }
 
@@ -56,7 +56,7 @@ void   LVL1::jFEXForwardElecInfo::setCoreTTfPhi(float fPhi){
   m_coreTTfPhi = fPhi;
 }
 
-float  LVL1::jFEXForwardElecInfo::getCoreTTfPhi(){
+float  LVL1::jFEXForwardElecInfo::getCoreTTfPhi() const {
   return m_coreTTfPhi;
 }
 
@@ -64,7 +64,7 @@ void   LVL1::jFEXForwardElecInfo::setCoreTTEtEM(int ET_EM ){
    m_coreTTEtEM  = ET_EM;
 }
 
-int   LVL1::jFEXForwardElecInfo::getCoreTTEtEM(){
+int   LVL1::jFEXForwardElecInfo::getCoreTTEtEM() const {
   return m_coreTTEtEM;
 }
 
@@ -72,7 +72,7 @@ void   LVL1::jFEXForwardElecInfo::setCoreTTSatEM(bool sat ){
    m_coreTTsatEM  = sat;
 }
 
-bool   LVL1::jFEXForwardElecInfo::getCoreTTSatEM(){
+bool   LVL1::jFEXForwardElecInfo::getCoreTTSatEM() const {
   return m_coreTTsatEM;
 }
 
@@ -80,7 +80,7 @@ void   LVL1::jFEXForwardElecInfo::setNextTTID(uint TTID ){
   m_nextTTID = TTID;
 }
 
-uint   LVL1::jFEXForwardElecInfo::getNextTTID(){
+uint   LVL1::jFEXForwardElecInfo::getNextTTID() const {
   return m_nextTTID;
 }
 
@@ -88,7 +88,7 @@ void   LVL1::jFEXForwardElecInfo::setNextTTEtEM(int nextEt){
   m_nextTTEtEM = nextEt;
 }
 
-int   LVL1::jFEXForwardElecInfo::getNextTTEtEM(){
+int   LVL1::jFEXForwardElecInfo::getNextTTEtEM() const {
   return m_nextTTEtEM;
 }
 
@@ -96,7 +96,7 @@ void   LVL1::jFEXForwardElecInfo::setNextTTSatEM(bool sat){
   m_nextTTsatEM = sat;
 }
 
-bool   LVL1::jFEXForwardElecInfo::getNextTTSatEM(){
+bool   LVL1::jFEXForwardElecInfo::getNextTTSatEM() const {
   return m_nextTTsatEM;
 }
 
@@ -108,7 +108,7 @@ void   LVL1::jFEXForwardElecInfo::addTTEtEMiso(int iso_ET){
   m_TTEtEMiso  += iso_ET;
 }
 
-int   LVL1::jFEXForwardElecInfo::getTTEtEMiso(){
+int   LVL1::jFEXForwardElecInfo::getTTEtEMiso() const {
   return m_TTEtEMiso;
 }
 
@@ -117,11 +117,11 @@ void   LVL1::jFEXForwardElecInfo::calcTTClusEtEM(){
   m_TTClusSatEM = m_coreTTsatEM || m_nextTTsatEM;
 }
 
-int   LVL1::jFEXForwardElecInfo::getTTClusEtEM(){
+int   LVL1::jFEXForwardElecInfo::getTTClusEtEM() const {
   return m_TTClusEtEM ;
 }
 
-bool  LVL1::jFEXForwardElecInfo::getTTClusSatEM(){
+bool  LVL1::jFEXForwardElecInfo::getTTClusSatEM() const {
   return m_TTClusSatEM ;
 }
 
@@ -133,7 +133,7 @@ void   LVL1::jFEXForwardElecInfo::addTTEtHad1(int ET_HAD){
   m_TTEtHad1 += ET_HAD;
 }
 
-int   LVL1::jFEXForwardElecInfo::getTTEtHad1(){
+int   LVL1::jFEXForwardElecInfo::getTTEtHad1() const {
   return m_TTEtHad1;
 }
 
@@ -141,35 +141,35 @@ void   LVL1::jFEXForwardElecInfo::setTTEtHad2(int ET_HAD){
   m_TTEtHad2 = ET_HAD;
 }
 
-int   LVL1::jFEXForwardElecInfo::getTTEtHad2(){
+int   LVL1::jFEXForwardElecInfo::getTTEtHad2() const {
   return m_TTEtHad2;
 }
 
-uint   LVL1::jFEXForwardElecInfo::getEtEMiso(){
+uint   LVL1::jFEXForwardElecInfo::getEtEMiso() const {
   return m_EtEMiso;
 }
 
-uint   LVL1::jFEXForwardElecInfo::getEtHad2(){
+uint   LVL1::jFEXForwardElecInfo::getEtHad2() const {
   return m_EtHad2; 
 }   
 
-uint   LVL1::jFEXForwardElecInfo::getEtHad1(){
+uint   LVL1::jFEXForwardElecInfo::getEtHad1() const {
   return m_EtHad1;
 } 
 
-uint   LVL1::jFEXForwardElecInfo::getEt(){
+uint   LVL1::jFEXForwardElecInfo::getEt() const {
   return m_et ;
 }
 
-int    LVL1::jFEXForwardElecInfo::getGlobalEta(){
+int    LVL1::jFEXForwardElecInfo::getGlobalEta() const {
   return m_eta;
 }
 
-uint   LVL1::jFEXForwardElecInfo::getGlobalPhi(){
+uint   LVL1::jFEXForwardElecInfo::getGlobalPhi() const {
   return m_phi;
 }
 
-uint32_t LVL1::jFEXForwardElecInfo::getTobWord(){
+uint32_t LVL1::jFEXForwardElecInfo::getTobWord() const {
   return m_tob;
 }
 
@@ -177,7 +177,7 @@ void LVL1::jFEXForwardElecInfo::includeTTinSearchWindow(uint TT_ID){
   m_TTsInSearchWindow.push_back(TT_ID);
 }
 
-const std::vector<uint>& LVL1::jFEXForwardElecInfo::getTTinSearchWindow(){
+const std::vector<uint>& LVL1::jFEXForwardElecInfo::getTTinSearchWindow() const {
   return m_TTsInSearchWindow;
 }
 

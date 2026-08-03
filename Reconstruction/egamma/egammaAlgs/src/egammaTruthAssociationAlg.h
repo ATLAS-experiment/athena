@@ -59,8 +59,8 @@ public:
 private:
   struct MCTruthInfo_t
   {
-    MCTruthPartClassifier::ParticleType first;
-    MCTruthPartClassifier::ParticleOrigin second;
+    MCTruthPartClassifier::ParticleType first{};
+    MCTruthPartClassifier::ParticleOrigin second{};
     const xAOD::TruthParticle* genPart{};
   };
 

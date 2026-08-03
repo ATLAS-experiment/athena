@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 //Author: Lianyou Shan <lianyou.shan@cern.ch>
 // -*- c++ -*-
@@ -57,7 +57,7 @@ class D0minCut : public virtual SecVtxTrackCut {
   class FuncSummaryValueCut : public virtual SecVtxTrackCut {
   public:
     FuncSummaryValueCut( InDetSecVtxTrackSelectionTool*, const std::array<xAOD::SummaryType,N>&&);
-    void setFunction(std::function<bool(const std::array<uint8_t,N>&)> func) {m_func = func;}
+    void setFunction(std::function<bool(const std::array<uint8_t,N>&)> func) {m_func = std::move(func);}
     virtual StatusCode initialize();
     virtual bool result() const;
   private:

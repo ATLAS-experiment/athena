@@ -21,7 +21,7 @@ const int MS = 2;
 struct Var
 {
   const char* name{};
-  xAOD::SummaryType type;
+  xAOD::SummaryType type{};
   int which{};
 };
 const Var  vars[] =

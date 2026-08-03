@@ -30,7 +30,7 @@ Overlay_tf.py \
 --inputRDO_BKGFile ${RDO_BKG_File} \
 --maxEvents ${events} \
 --outputRDOFile ${OverlayOutFile} \
---preInclude 'HITtoRDO:Campaigns.PhaseIIPileUp200' \
+--preInclude 'HITtoRDO:Campaigns.MC23PhaseIIPileUp200' \
 --postInclude 'PyJobTransforms.UseFrontier' \
 --skipEvents 0
 

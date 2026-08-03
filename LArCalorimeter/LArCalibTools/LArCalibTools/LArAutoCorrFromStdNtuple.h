@@ -1,12 +1,12 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef LARAUTOCORRFROMSTDNTUPLE_H
 #define LARAUTOCORRFROMSTDNTUPLE_H
 
 #include "LArRawConditions/LArMCSym.h"
-#include "AthenaBaseComps/AthAlgorithm.h"
+#include "AthenaBaseComps/AthReentrantAlgorithm.h"
 #include "LArCabling/LArOnOffIdMapping.h"
 #include "StoreGate/ReadCondHandleKey.h"
 
@@ -21,10 +21,10 @@ With hardcoded numbers for sFcal
  */
 
 
-class LArAutoCorrFromStdNtuple : public AthAlgorithm
+class LArAutoCorrFromStdNtuple : public AthReentrantAlgorithm
 {
- public:
-  LArAutoCorrFromStdNtuple(const std::string & name, ISvcLocator * pSvcLocator);
+public:
+  using AthReentrantAlgorithm::AthReentrantAlgorithm;
 
   virtual ~LArAutoCorrFromStdNtuple();
 
@@ -33,25 +33,24 @@ class LArAutoCorrFromStdNtuple : public AthAlgorithm
   virtual StatusCode initialize() override;
 
   /// implements IAlgorithm::execute()  : Does nothing
-  virtual StatusCode execute(const EventContext&) override {return StatusCode::SUCCESS;}
+  virtual StatusCode execute(const EventContext&) const override {return StatusCode::SUCCESS;}
 
-  virtual StatusCode finalize() override {return StatusCode::SUCCESS;}
   virtual StatusCode stop() override;
  
  private:
-  int m_nsamples;
+  IntegerProperty m_nsamples { this, "Nsamples", 7 };
   /// list of input ntuple file names 
-  std::vector<std::string> m_root_file_names;
+  StringArrayProperty m_root_file_names { this, "FileNames", {} };
   /// ntuple name
-  std::string m_ntuple_name;
+  StringProperty m_ntuple_name { this, "NtupleName", "AUTOCORR" };
   /// key of the LArAutoCorr collection in Storegate
-  std::string m_store_key;
+  StringProperty m_store_key { this, "StoreKey", "FromStdNtuple" };
   /// Grouping type.  
-  std::string m_groupingType;
+  StringProperty m_groupingType { this, "GroupingType", "ExtendedSubDetector" };
   ///  type
-  bool m_isComplete;
+  BooleanProperty m_isComplete { this, "isComplete", false };
   /// drop FCAL and change to sFCal
-  bool m_sFcal;
+  BooleanProperty m_sFcal { this, "doSFcal", false };
 
    SG::ReadCondHandleKey<LArMCSym> m_mcSymKey
    {this, "MCSymKey", "LArMCSym", "SG Key of LArMCSym object"};

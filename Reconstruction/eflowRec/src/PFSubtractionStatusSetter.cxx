@@ -78,7 +78,10 @@ PFSubtractionStatusSetter::markAllTracksAnnihStatus(
   
   auto accumulateTrackEnergy = [](float sum, std::pair<eflowTrackClusterLink*, std::pair<float,float> > thisPair){ return sum + thisPair.first->getTrack()->getTrack()->e();};
   float totalTrackE = std::accumulate(matchedTrackList.begin(),matchedTrackList.end(),0.0,accumulateTrackEnergy);
-
+  if (totalTrackE == 0.){
+    ATH_MSG_ERROR("PFSubtractionStatusSetter::markAllTracksAnnihStatus: totalTrackE is zero.");
+    return;
+  }
   unsigned int counter = 0;
   for (const auto & thisTrackClusterLinkPair : matchedTrackList){
     ATH_MSG_DEBUG("Track with e and eta " << thisTrackClusterLinkPair.first->getTrack()->getTrack()->e() << " and " << thisTrackClusterLinkPair.first->getTrack()->getTrack()->eta());

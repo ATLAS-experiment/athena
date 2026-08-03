@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TForwardElectronLikelihoodTool.h"
@@ -325,6 +325,7 @@ Root::TForwardElectronLikelihoodTool::evaluateLikelihood(
   double ip) const
 {
   std::vector<double> vec;
+  vec.reserve(s_fnVariables);
   for (unsigned int var = 0; var < s_fnVariables; var++) {
     vec.push_back(varVector[var]);
   }
@@ -428,7 +429,7 @@ Root::TForwardElectronLikelihoodTool::TransformLikelihoodOutput(double ps,
 
 // Gets the IP bin
 unsigned int
-Root::TForwardElectronLikelihoodTool::getIpBin(double ip) 
+Root::TForwardElectronLikelihoodTool::getIpBin(double ip)
 {
   for (unsigned int ipBin = 0; ipBin < IP_FBINS; ++ipBin) {
     if (ip < fIpBounds[ipBin + 1])
@@ -439,7 +440,7 @@ Root::TForwardElectronLikelihoodTool::getIpBin(double ip)
 
 // Gets the Eta bin  given the eta . Binning uses uper bound
 unsigned int
-Root::TForwardElectronLikelihoodTool::getLikelihoodEtaBin(double eta) 
+Root::TForwardElectronLikelihoodTool::getLikelihoodEtaBin(double eta)
 {
   const unsigned int nEtaBins = s_fnEtaBins;
   const double etaBins[nEtaBins] = { 2.6, 2.7,  2.8,  2.9, 3.0,
@@ -452,7 +453,7 @@ Root::TForwardElectronLikelihoodTool::getLikelihoodEtaBin(double eta)
 }
 // Gets the histogram Et bin given the et (MeV). Binning uses upper bound
 unsigned int
-Root::TForwardElectronLikelihoodTool::getLikelihoodEtHistBin(double eT) 
+Root::TForwardElectronLikelihoodTool::getLikelihoodEtHistBin(double eT)
 {
   const double GeV = 1000;
   const unsigned int nEtBins = s_fnDiscEtBins;
@@ -474,7 +475,7 @@ Root::TForwardElectronLikelihoodTool::getBinName(
   int etbin,
   int etabin,
   int ipbin,
-  const std::string& iptype) 
+  const std::string& iptype)
 {
   double eta_bounds[s_fnEtaBins] = { 2.5, 2.6, 2.7,  2.8,  2.9,
                                      3.0, 3.1, 3.16, 3.35, 3.6 };

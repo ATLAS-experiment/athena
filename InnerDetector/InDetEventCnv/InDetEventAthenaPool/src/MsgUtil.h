@@ -1,9 +1,10 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef INDETEVENTATHENAPOOL_MSGFIX
 #define INDETEVENTATHENAPOOL_MSGFIX
+#include "GaudiKernel/MsgStream.h"
 
 //Defines similar to ATH_MSG_DEBUG and ATH_MSG_VERBOSE which accepts the MsgStream as an argument: 
 #ifdef MSG_DEBUG

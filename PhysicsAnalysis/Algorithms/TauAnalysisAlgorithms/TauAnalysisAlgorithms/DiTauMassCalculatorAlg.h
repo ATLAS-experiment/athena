@@ -40,6 +40,7 @@ namespace CP {
     // configurable properties
     Gaudi::Property<bool> m_doMAXW        {this, "doMAXW", false, "save information about the reconstruction with the maximum-weight estimator"};
     Gaudi::Property<bool> m_doMLNU3P      {this, "doMLNU3P", false, "save information about the reconstruction with the best-fit neutrino kinematics"};
+    Gaudi::Property<bool> m_doCollinearApprox {this, "doCollinearApprox", false, "save additional information (mass, x0, x1) from collinear approximation calculation"};
 
     // the MMC tool
     ToolHandle<DiTauMassTools::MissingMassTool> m_mmc {this, "mmcTool", "DiTauMassTools::MissingMassTool", "the Missing Mass Calculator tool"};
@@ -81,6 +82,11 @@ namespace CP {
     SysWriteDecorHandle<PtEtaPhiMVector> m_maxw_nu2_4vect_decor    {this, "maxw_nu2_4vect", "mmc_maxw_nu2_4vect_%SYS%", "Four-momentum of the subleading pt neutrino estimated by the MMC MaxW method"};
     SysWriteDecorHandle<PtEtaPhiMVector> m_maxw_tau1_4vect_decor   {this, "maxw_tau1_4vect", "mmc_maxw_tau1_4vect_%SYS%", "Four-momentum of the leading lepton estimated by the MMC MaxW method"};
     SysWriteDecorHandle<PtEtaPhiMVector> m_maxw_tau2_4vect_decor   {this, "maxw_tau2_4vect", "mmc_maxw_tau2_4vect_%SYS%", "Four-momentum of the subleading lepton estimated by the MMC MaxW method"};
+
+    // collinear approximation quantities
+    SysWriteDecorHandle<double>         m_coll_approx_mass_decor   {this, "coll_approx_mass",  "coll_approx_mass_%SYS%", "Mass of the resonance estimated using the Collinear Approximation"};
+    SysWriteDecorHandle<double>         m_coll_approx_x0_decor     {this, "coll_approx_x0", "coll_approx_x0_%SYS%", "x0 energy fraction estimated using the Collinear Approximation"};       
+    SysWriteDecorHandle<double>         m_coll_approx_x1_decor     {this, "coll_approx_x1", "coll_approx_x1_%SYS%", "x1 energy fraction estimated using the Collinear Approximation"};  
 
   };
 

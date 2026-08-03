@@ -24,14 +24,13 @@ def MuonsCommonCfg(flags, suff=""):
     DFCommonMuonToolWrapperTools = []
 
     ### IDHits
-    # turn of the momentum correction which is not needed for IDHits cut and Preselection
-    from MuonSelectorTools.MuonSelectorToolsConfig import MuonSelectionToolCfg
+    # turn of the momentum correction which is not needed for IDHits cut and Preselection -> this is off by default in the noncalib version of the tool, also the disabledCutsPt
+    from MuonSelectorTools.MuonSelectorToolsConfig import MuonLoosenedNonCalibratedSelectionToolCfg
 
-    DFCommonMuonsSelector = acc.popToolsAndMerge(MuonSelectionToolCfg(flags,
+    DFCommonMuonsSelector = acc.popToolsAndMerge(MuonLoosenedNonCalibratedSelectionToolCfg(flags,
                                                                       name            = "DFCommonMuonsSelector",
                                                                       MaxEta          = 3.,
-                                                                      MuQuality       = 3,
-                                                                      TurnOffMomCorr  = True))
+                                                                      MuQuality       = 3))
     acc.addPublicTool(DFCommonMuonsSelector)
     DFCommonMuonToolWrapperIDCuts = acc.getPrimaryAndMerge(AsgSelectionToolWrapperCfg(
         flags,

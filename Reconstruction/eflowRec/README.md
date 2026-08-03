@@ -18,6 +18,8 @@ Below you can find details of the reconstruction algorithms for particle flow. T
 
 To further understand what eflowRec does one could start with the python configuration code, [PFCfg in PFRun3Config.py](https://gitlab.cern.ch/atlas/athena/-/blob/main/Reconstruction/eflowRec/python/PFRun3Config.py#L59), which specifies which algorithms are run
 
+Required reference data is loaded from the cvmfs mirror of /eos/atlas/atlascerngroupdisk/asg-calib/eflowRec/PFCellEOverPTool/ by the PFCellEOverPTool, which is used by the PFSubtractionTool.
+
 Here is a quick overview of the algorithms, though as noted in the overview a lot more details can be found in the [doxygen](https://atlas-sw-doxygen.web.cern.ch/atlas-sw-doxygen/atlas_22.0.X-DOX/docs/html/dir_16e5ef933818970a3aca1a7c61395a43.html):
 
 - [PFLeptonSelector](https://gitlab.cern.ch/atlas/athena/-/blob/main/Reconstruction/eflowRec/eflowRec/PFLeptonSelector.h) - selects electrons and muons for later usage.

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // Dear emacs, this is -*-c++-*-
@@ -253,6 +253,7 @@ AsgElectronIsEMSelector::getOperatingPointName() const
   if (m_rootTool->m_isEMMask == egammaPID::ElectronTightPP) {
     return "Tight";
   }
+  // cppcheck-suppress identicalConditionAfterEarlyExit; same as ElectronLoosePP
   if (m_rootTool->m_isEMMask == egammaPID::ElectronLoose1) {
     return "Loose1";
   }
@@ -262,9 +263,11 @@ AsgElectronIsEMSelector::getOperatingPointName() const
   if (m_rootTool->m_isEMMask == egammaPID::ElectronTight1) {
     return "Tight1";
   }
+  // cppcheck-suppress identicalConditionAfterEarlyExit; same as ElectronLoosePP
   if (m_rootTool->m_isEMMask == egammaPID::ElectronLooseHLT) {
     return "LooseHLT";
   }
+  // cppcheck-suppress identicalConditionAfterEarlyExit; same as ElectronMediumPP
   if (m_rootTool->m_isEMMask == egammaPID::ElectronMediumHLT) {
     return "MediumHLT";
   }

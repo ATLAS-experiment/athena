@@ -22,8 +22,8 @@ parser.add_argument("-V", "--verboseAccumulators", default=False,
 parser.add_argument("-S", "--verboseStoreGate", default=False,
                     action="store_true",
                     help="Dump the StoreGate(s) each event iteration")
-parser.add_argument("--geometrytag",default="ATLAS-P2-RUN4-04-00-00", type=str,
-                    help="The geometry tag to use")
+parser.add_argument("--geometrytag",default="", type=str,
+                    help="The geometry tag to use. If not specified, the default RUN4 tag will be used.")
 args = parser.parse_args()
 
 # Some info about the job
@@ -43,15 +43,25 @@ flags = initConfigFlags()
 flags.Input.isMC             = True
 flags.Input.Files = []
 
+from AthenaConfiguration.TestDefaults import defaultGeometryTags
+flags.GeoModel.AtlasVersion = args.geometrytag if args.geometrytag else defaultGeometryTags.RUN4
+
 if args.localgeo:
   flags.ITk.Geometry.AllLocal = True
 
-flags.GeoModel.AtlasVersion = args.geometrytag
+flags.Acts.TrackingGeometry.UseBlueprint = True
+flags.Acts.TrackingGeometry.KeepGoingOnMaterialMergeFailure = True
 
-from AthenaConfiguration.DetectorConfigFlags import setupDetectorsFromList
-detectors = args.detectors if 'detectors' in args and args.detectors else ['ITkPixel', 'ITkStrip', 'HGTD']
-detectors.append('Bpipe')  # always run with beam pipe
-setupDetectorsFromList(flags, detectors, toggle_geometry=True)
+if args.detectors:
+    from AthenaConfiguration.DetectorConfigFlags import setupDetectorsFromList
+    detectors = args.detectors
+    detectors.append('Bpipe')  # always run with beam pipe
+    setupDetectorsFromList(flags, detectors, toggle_geometry=True)
+else:
+    flags.Detector.GeometryBpipe = True
+    flags.Detector.GeometryHGTD = True
+    flags.Detector.GeometryITkPixel = True
+    flags.Detector.GeometryITkStrip = False
 
 flags.IOVDb.GlobalTag = "OFLCOND-SIM-00-00-00"
 flags.GeoModel.Align.Dynamic = False

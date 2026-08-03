@@ -1,6 +1,11 @@
 /*
   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
+
+// Tell clang not to allow spurious FPEs.
+#include "CxxUtils/trapping_fp.h"
+CXXUTILS_TRAPPING_FP;
+
 #include "PixelClusteringTool.h"
 
 #include <xAODInDetMeasurement/PixelCluster.h>
@@ -8,6 +13,7 @@
 #include <xAODInDetMeasurement/PixelClusterAuxContainer.h>
 #include <InDetPrepRawData/SiWidth.h>
 #include <TrkSurfaces/Surface.h>
+#include <xAODInDetMeasurement/Utilities.h>
 
 #include "details/PixelRDOCollectionAdapter.h"
 
@@ -183,7 +189,6 @@ PixelClusteringToolImpl<T_RDOContainer>::makeCluster(size_t icluster,
                                                  const double lorentzShift,
                                                  xAOD::PixelCluster::ClusterVars& clusterVars) const
 { 
-
   Amg::Vector2D pos_acc(0,0);
   float tot_acc = 0.f;
 
@@ -207,10 +212,11 @@ PixelClusteringToolImpl<T_RDOContainer>::makeCluster(size_t icluster,
   Identifier module_id = element.identify();
   std::optional<Identifier::value_type> first_rdo_id;
   int cluster_lvl1min = std::numeric_limits<int>::max();
-
+  float totalCharge = 0.f;
+  
   using CellProxy = InPlaceClusterization::CellProxy<const typename IClusteringToolType::CellContainer>;
   for (CellProxy cellProxy : cluster) {
-
+    
     //Construct the identifier class
 
     // We temporary comment this since it is not used
@@ -274,6 +280,7 @@ PixelClusteringToolImpl<T_RDOContainer>::makeCluster(size_t icluster,
     }
     clusterVars.rdoList.setValue(n_rdos,rdo_id.get_compact());
     clusterVars.totList.setValue(n_rdos,tot);
+    totalCharge += charge;
     ++n_rdos;
     
     const InDetDD::PixelDiodeTree::CellIndexType &row = diode_idx[0];
@@ -308,7 +315,7 @@ PixelClusteringToolImpl<T_RDOContainer>::makeCluster(size_t icluster,
       tot_acc += 1;
     }
     
-  }
+  } // loop on cluster's cells
   assert(n_rdos>0); // clusters must not be empty
   if (tot_acc > 0)
     pos_acc /= tot_acc;
@@ -360,6 +367,7 @@ PixelClusteringToolImpl<T_RDOContainer>::makeCluster(size_t icluster,
   xAOD::VectorMap<3>(clusterVars.globalPosition[icluster].data()) = globalPos.cast<float>();
   clusterVars.totList.updateEndIndex(icluster,n_rdos);
   clusterVars.chargeList.updateEndIndex(icluster, (calibData ? n_rdos : 0u));
+  clusterVars.totalCharge[icluster] = totalCharge;
   clusterVars.lvl1a[icluster] = cluster_lvl1min;
   clusterVars.channelsInPhi[icluster] = rowWidth;
   clusterVars.channelsInEta[icluster] = colWidth;

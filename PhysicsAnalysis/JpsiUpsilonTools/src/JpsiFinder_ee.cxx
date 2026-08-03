@@ -18,14 +18,13 @@
 #include "TrkVKalVrtFitter/TrkVKalVrtFitter.h"
 #include "InDetConversionFinderTools/VertexPointEstimator.h"
 #include "TrkToolInterfaces/ITrackSelectorTool.h"
-#include "GaudiKernel/IPartPropSvc.h"
 #include "AthLinks/ElementLink.h"
-#include "HepPDT/ParticleDataTable.hh"
 #include "xAODTracking/Vertex.h"
 #include "xAODTracking/VertexContainer.h"
 #include "xAODTracking/TrackParticle.h"
 #include "FourMomUtils/xAODP4Helpers.h"
 #include "TruthUtils/HepMCHelpers.h"
+#include "TruthUtils/ParticleConstants.h"
 namespace Analysis {
 
     StatusCode JpsiFinder_ee::initialize() {
@@ -46,15 +45,13 @@ namespace Analysis {
 
         // Get the vertex point estimator tool from ToolSvc
         ATH_CHECK(m_vertexEstimator.retrieve());
+        m_gendata = std::make_shared<GenData>();
 
 
         if (m_diElectrons) {
-          // Get the Particle Properties Service
-          ATH_CHECK(m_partPropSvc.retrieve());
-          auto particleDataTable = m_partPropSvc->PDT();
-          const HepPDT::ParticleData* pd_el = particleDataTable->particle(MC::ELECTRON);
-          m_trk1M = pd_el->mass();
-          m_trk2M = pd_el->mass();
+          const double elMass = m_gendata->particleMass(MC::ELECTRON).value_or(ParticleConstants::electronMassInMeV);
+          m_trk1M = elMass;
+          m_trk2M = elMass;
         }
 
         if (m_doTagAndProbe) ATH_MSG_WARNING("You have requested tag and probe mode. Duplicate mu+trk pairs WILL be allowed, charge ordering WILL NOT be done. Tag track will be first in each candidate");

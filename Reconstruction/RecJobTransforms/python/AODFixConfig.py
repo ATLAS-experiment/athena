@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from EventInfoMgt.TagInfoMgrConfig import TagInfoMgrCfg
@@ -13,6 +13,8 @@ def AODFixCfg(flags):
     nAODFixes=0
     msg=logging.getLogger("AODFixCfg")
     aodFixesDone=flags.Input.AODFixesDone
+    if len(aodFixesDone):
+        msg.info("Already done fixes = %s",aodFixesDone)
 
     if isinstance(aodFixesDone,str):
         aodFixesDone=aodFixesDone.split()
@@ -23,17 +25,20 @@ def AODFixCfg(flags):
     result=ComponentAccumulator()
 
     # #Add list of known AOD Fixes here:
-    from RecJobTransforms.AODFixEGAmbiguityLinksConfig import AODFixEGAmbiguityLinksCfg
-    listOfFixes=[AODFixEGAmbiguityLinksCfg,]
+    from egammaAlgs.egammaAODFixesConfig import egammaAODFixesCfg
+    from LArCellRec.EventInfoClearAlgConfig import EventVetoCearAlgCfg
+    listOfFixes=[egammaAODFixesCfg,EventVetoCearAlgCfg]
 
     for aodFix in listOfFixes:
         aodFixName=aodFix.__name__ 
         if aodFixName in _doneAODFixes:
             msg.warning("AODFix %s already applied, not applying again",aodFixName)
-        
-        ca=aodFix(flags)
+            continue
+
         #The method is supposed to verify if the AOD-fix must be applied for the input data,
         #typically based on flags.Input.Release. If yes, returns a ComponentAccumulator, otherwise None
+        ca=aodFix(flags)
+        aodFixName=aodFix.__name__
         if ca is not None:
             msg.info("Applying AOD fix %s",aodFixName)
             result.merge(ca)

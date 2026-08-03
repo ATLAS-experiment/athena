@@ -14,7 +14,7 @@
  
 #include "AthenaBaseComps/AthAlgorithm.h"
 
-#include "../GlobalSimComponents/ITIPwriterAlgTool.h"
+#include "../GlobalSimComponents/ITIPWriterAlgTool.h"
 #include "../IO/eEmTOB.h" 
 
 #include <string>

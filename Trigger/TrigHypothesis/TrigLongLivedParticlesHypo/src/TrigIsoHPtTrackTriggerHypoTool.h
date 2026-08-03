@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef TRIGLONGLIVEDPARTICLESHYPO_TRIGISOHPTTRACKTRIGGERHYPOTOOL_H
 #define TRIGLONGLIVEDPARTICLESHYPO_TRIGISOHPTTRACKTRIGGERHYPOTOOL_H 1
@@ -33,9 +33,9 @@ class TrigIsoHPtTrackTriggerHypoTool : virtual public ::AthAlgTool
 
 
   struct TrackInfo {
-    TrigCompositeUtils::Decision* decision;
-    const xAOD::TrackParticle_v1* track;
-    const xAOD::TrackParticleContainer* AllTracks;
+    TrigCompositeUtils::Decision* decision = nullptr;
+    const xAOD::TrackParticle_v1* track = nullptr;
+    const xAOD::TrackParticleContainer* AllTracks = nullptr;
     const TrigCompositeUtils::DecisionIDContainer previousDecisionsIDs;
   };
 

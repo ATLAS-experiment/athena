@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "BeamPipeDetectorTool.h"
@@ -66,7 +66,7 @@ StatusCode BeamPipeDetectorTool::create()
     }
     else {
       BeamPipeDetectorFactory theBeamPipeFactory(detStore().operator->(),accessSvc.operator->());
-      theBeamPipeFactory.setTagNode(atlasVersion,versionNode,m_mode);
+      theBeamPipeFactory.setTagNode(std::move(atlasVersion),std::move(versionNode),m_mode);
       theBeamPipeFactory.create(world);
       
       m_manager = theBeamPipeFactory.getDetectorManager();

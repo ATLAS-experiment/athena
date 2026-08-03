@@ -144,7 +144,7 @@ namespace ActsTrk {
 
     ATH_MSG_VERBOSE("Spacepoints successfully added to node storage");
 
-    Acts::SeedContainer2 seeds;
+    Acts::SeedContainer seeds;
     m_finder->createSeeds(nodeStorage, m_are_pixels, m_internalRoi.value(), *m_filter, options, seeds);
 
     // add seeds to the output container
@@ -152,7 +152,7 @@ namespace ActsTrk {
     for (auto seed : seeds) {
       seedContainer.push_back(
         seed.asConst(),
-        [&](const Acts::SpacePointIndex2 spIndex) {
+        [&](const Acts::SpacePointIndex spIndex) {
           return tmpSpacePoints[spIndex];
         });
     }

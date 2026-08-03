@@ -10,7 +10,6 @@
 #include "TrkVKalVrtFitter/VxCascadeInfo.h"
 #include <boost/container/static_vector.hpp>
 #include "JpsiUpsilonTools/PrimaryVertexRefitter.h"
-#include "HepPDT/ParticleDataTable.hh"
 #include <limits>
 #include <iostream>
 
@@ -488,8 +487,4 @@ bool DerivationFramework::BPhysPVCascadeTools::LinkVertices(SG::AuxElement::Deco
    return true;
 }
 
-double DerivationFramework::BPhysPVCascadeTools::getParticleMass(const HepPDT::ParticleDataTable* pdt, int pdgcode){
-    auto ptr = pdt->particle( pdgcode );
-    return ptr ? ptr->mass() : 0.;
-}
 

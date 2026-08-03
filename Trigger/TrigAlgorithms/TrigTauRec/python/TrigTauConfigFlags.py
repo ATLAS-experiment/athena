@@ -110,12 +110,6 @@ def createTrigTauConfigFlags():
         # Target efficiencies (0P, 1P, MP) for each WP
         'Loose': (0.86, 0.98, 0.93), 
         'Medium': (0.62, 0.96, 0.91), 
-
-        'LooseVar1': (0.88, 0.97, 0.92), 
-        'MediumVar1': (0.64, 0.95, 0.90), 
-
-        'LooseVar2': (0.87, 0.98, 0.94), 
-        'MediumVar2': (0.63, 0.96, 0.92), 
     })
 
 

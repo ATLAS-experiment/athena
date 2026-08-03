@@ -22,7 +22,6 @@
 
 // MCTruth includes
 #include "MCTruth/TrackHelper.h"
-#include "MCTruth/AtlasG4EventUserInfo.h"
 #include "MCTruth/TrackInformation.h"
 #include "MCTruth/VTrackInformation.h"
 
@@ -164,7 +163,8 @@ namespace G4UA {
         //               " and is returned to ISF.");
 
         const ISF::ISFParticle*    parent = curISP;
-        HepMC::GenParticlePtr currentGenParticle = m_atlasG4EvtUserInfo->GetCurrentGenParticle();
+        auto* trackInfo = ::iGeant4::ISFG4Helper::getISFTrackInfo(*aTrack);
+        HepMC::GenParticlePtr currentGenParticle = trackInfo ? trackInfo->GetCurrentGenParticle() : nullptr;
         this->returnParticleToISF(aTrack, parent, currentGenParticle, nextGeoID); // TODO CHECK THIS LOGIC
       }
 
@@ -234,7 +234,7 @@ namespace G4UA {
       }
 
       HepMC::GenParticlePtr         primaryGenParticle = trackInfo->GetPrimaryGenParticle();
-      HepMC::GenParticlePtr  generationZeroGenParticle = trackInfo->GetCurrentGenParticle(); // TODO CHECK THIS LOGIC
+      HepMC::GenParticlePtr  generationZeroGenParticle = trackInfo->GetGenerationZeroGenParticle();
 
       ISF::TruthBinding* tBinding = new ISF::TruthBinding(currentGenParticle, primaryGenParticle, generationZeroGenParticle);
 

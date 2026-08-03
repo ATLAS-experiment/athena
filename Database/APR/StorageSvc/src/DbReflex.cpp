@@ -12,6 +12,8 @@
 #include "StorageSvc/DbTransform.h"
 #include "StorageSvc/DbPrint.h"
 
+#include "CxxUtils/MD5.h"
+
 #include "TInterpreter.h"
 
 #include <cstring>
@@ -36,8 +38,6 @@ constexpr std::pair<Guid, const char*> GuidToClname[] = {
 
 using namespace pool;
 using namespace std;
-
-void genMD5(const string& s, void* code);
 
 typedef map<Guid,TypeH> GuidMap;
 static GuidMap& guid_mapping()  {
@@ -94,8 +94,10 @@ Guid DbReflex::guid(const TypeH& type)
      }
      else  {
         Guid id;
+        const string& s = fullTypeName(type);
         // fill GUID with 16byte MD5 binary checksum digest of the typename
-        genMD5(fullTypeName(type), &id);
+        MD5 checkSum((unsigned char*)s.c_str(), s.length());
+        checkSum.raw_digest((unsigned char*)&id);
         guid_mapping()[id] = type;
         type_mapping()[type] = id;
         return id;

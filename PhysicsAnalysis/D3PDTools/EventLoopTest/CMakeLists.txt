@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # The name of the package:
 atlas_subdir( EventLoopTest )
@@ -55,7 +55,8 @@ function( _add_gtest cxx_name )
       INCLUDE_DIRS ${GMOCK_INCLUDE_DIRS}
       LINK_LIBRARIES ${GMOCK_LIBRARIES} RootCoreUtils AsgTools AsgTestingLib
       SampleHandler EventLoopTestLib xAODRootAccess ${EXTRA_LIBS} ${EXTRA_ARGS}
-      POST_EXEC_SCRIPT nopost.sh)
+      LOG_IGNORE_PATTERN "memory leak was detected|Failed to call|while performing manager|on submission directory|doManagerStep|Entry to read is not set|Failed to load current entry"
+      POST_EXEC_SCRIPT noerror.sh)
    set_tests_properties (EventLoopTest_${test_name}_ctest PROPERTIES LABELS "EventLoopTest;EventLoop;SampleHandler;AnaAlgorithm" )
 endfunction( _add_gtest )
 

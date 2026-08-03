@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 #
 # art-description: Test running HITS->RDO in main/24.0, then RDO->RDO_TRIG in 21.0-mc16d, then RDO_TRIG->AOD in main/24.0, then AOD->DAOD with multiprocess in main
 # art-type: build
@@ -38,6 +38,7 @@ rdo2rdotrig.args += ' --triggerConfig="MCRECO:MC_pp_v7_tight_mc_prescale"'
 rdo2rdotrig.args += ' --imf="all:True"'
 rdo2rdotrig.args += ' --conditionsTag="RDOtoRDOTrigger:OFLCOND-MC16-SDR-RUN2-08-02"'
 rdo2rdotrig.args += ' --preInclude "all:Campaigns/MC20d.py"'
+rdo2rdotrig.args += ' --CA False'
 rdo2rdotrig.timeout = 5400 # default = 3600 s
 
 # RDO_TRIG -> AOD step in main/24.0
@@ -52,7 +53,6 @@ rdotrig2aod.args += ' --postExec="all:from OutputStreamAthenaPool.OutputStreamCo
 rdotrig2aod.args += f' --conditionsTag="all:{defaultConditionsTags.RUN2_MC}"'
 rdotrig2aod.args += ' --preInclude "all:Campaigns.MC20d"'
 rdotrig2aod.args += ' --steering "doRDO_TRIG"'
-rdotrig2aod.args += ' --CA "all:True"'
 
 # AOD -> DAOD step in main
 aod2daod = ExecStep.ExecStep('AODtoDAOD')
@@ -64,7 +64,8 @@ aod2daod.args = '--inputAODFile=AOD.pool.root'
 aod2daod.args += ' --outputDAODFile=DAOD.pool.root'
 aod2daod.args += ' --formats=PHYS'
 aod2daod.args += ' --sharedWriter=True --athenaMPMergeTargetSize "DAOD_*:0"'
-aod2daod.args += ' --asetup="all:Athena,main,latest"'
+# not needed for tests running in main
+#aod2daod.args += ' --asetup="all:Athena,main,latest"'
 
 # Define the test with the above steps
 test = Test.Test()

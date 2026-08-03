@@ -7,6 +7,7 @@
 #include <limits>
 #include "ActsGeometry/ActsDetectorElement.h"
 #include <PixelReadoutGeometry/PixelModuleDesign.h>
+#include "AthenaBaseComps/AthMsgStreamMacros.h"
 #include "InDetReadoutGeometry/SiDetectorElement.h"
 #include "InDetMeasurementUtilities/Helpers.h"
 
@@ -24,7 +25,6 @@ StatusCode AnalogueClusteringToolImpl<calib_data_t, traj_t>::initialize()
     ATH_MSG_DEBUG(AthAlgTool::name() << " successfully initialized");
     
     ATH_MSG_DEBUG( this->calibrateAfterMeasurementSelection() );
-    ATH_MSG_DEBUG( m_useWeightedPos );
     ATH_MSG_DEBUG( m_correctCovariance );
     ATH_MSG_DEBUG( m_calibratedCovarianceLowerBound );
     ATH_MSG_DEBUG( m_errorStrategy );
@@ -39,18 +39,10 @@ AnalogueClusteringCalibrator<calib_data_t, traj_t>::getCentroid(
     const xAOD::PixelCluster& cluster,
     const InDetDD::SiDetectorElement& element) const
 {
-  // Different behaviours if pixel uncalibrated cluster use digital or
-  // charge-weighted local position
-  if (not m_options.m_useWeightedPos) {
-    // We return the cluster local position here
-    // computed from the clustering tool
-    // Eventually we will have a NN for the on-track calibration instead this instead
-    const auto& localPos = cluster.template localPosition<2>();
-    return std::make_pair(localPos(0, 0),
-                          localPos(1, 0));
-  }
-
-  // if weighted position, we need to compute the centroid
+  // Reproduce the base position of the legacy ITk::PixelClusterOnTrackTool,
+  // i.e. the geometric 4-corner bounding-box centroid plus the Lorentz shift. This
+  // is the reference the getDelta charge-interpolation constants are calibrated
+  // against, so the analogue correction must be applied on top of it.
   SG::ConstAccessor<SG::JaggedVecElt<Identifier::value_type> >::element_type
      rdos = cluster.rdoList();
     
@@ -169,13 +161,19 @@ AnalogueClusteringCalibrator<calib_data_t, traj_t>::getCorrectedPosition(
         std::pair<float, float> centroid = getCentroid(ctx, cluster, element);
         IdentifierHash idHash = element.identifyHash();
 
-        double local_eta = computeEta(tan_angleEta);
+        // getDelta expects the pseudo-rapidity built from the polar angle
+        // measured with respect to the module *plane* (theta = pi/2 - angleFromNormal),
+        // exactly as the legacy ITk::PixelClusterOnTrackTool does. tan_angleEta is
+        // the tangent of the incidence angle with respect to the module *normal*, so
+        // the polar-angle tangent is its cotangent: tan(pi/2 - b) = 1/tan(b).
+        // (For all quadrants of boweta the legacy thetaloc satisfies tan(thetaloc) = cot(boweta).)
+        const double local_eta = tan_angleEta != 0.f ? computeEta(1.0 / tan_angleEta) : 0.0;
         std::pair<double, double> delta =
           errorData.getDelta(idHash,
                              nrows,
                              atan(tan_anglePhi),
                              ncols,
-                             local_eta); // @TODO why local eta and not the slope i.e. tan_angleEta ?
+                             local_eta);
         
         if (nrows > 1)
           posX = centroid.first + delta.first * (omX - 0.5);
@@ -256,10 +254,9 @@ AnalogueClusteringCalibrator<calib_data_t, traj_t>::calibrate(
     const xAOD::PixelCluster& cluster,
     const InDetDD::SiDetectorElement& detElement,
     const std::pair<float, float>& tan_incidence_angles) const
-{
+{  
     typename BASE::Pos pos = cluster.template localPosition<2>();
     typename BASE::Cov cov = cluster.template localCovariance<2>();
-
     assert(!cluster.rdoList().empty());
 
     const error_data_t *errorData = getErrorData();

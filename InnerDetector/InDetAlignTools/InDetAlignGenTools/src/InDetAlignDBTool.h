@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef INDETALIGNGENTOOLS_ALIGNDBTOOL_H
@@ -30,8 +30,7 @@
 //   tweakTrans - tweak (add to existing transform) the transformation for
 //              a particular module, identified by a given Identifier
 
-#include <vector>
-#include <string>
+
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "GaudiKernel/ServiceHandle.h" 
 #include "InDetAlignGenTools/IInDetAlignDBTool.h"
@@ -39,6 +38,8 @@
 #include "CxxUtils/checker_macros.h"
 #include "AthenaKernel/IAthenaOutputStreamTool.h"
 #include "GaudiKernel/ToolHandle.h"
+#include <vector>
+#include <string>
 
 class PixelID;
 class SCT_ID;

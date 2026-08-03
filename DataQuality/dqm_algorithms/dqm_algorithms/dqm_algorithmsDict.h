@@ -21,6 +21,7 @@
 #include "dqm_algorithms/AFP_SiTEfficiency.h"
 #include "dqm_algorithms/AFP_Sync_check.h"
 #include "dqm_algorithms/All_Bins_Filled.h"
+#include "dqm_algorithms/AutoencoderExampleAlgorithm.h"
 #include "dqm_algorithms/AveragePrint.h"
 #include "dqm_algorithms/BasicGraphCheck.h"
 #include "dqm_algorithms/BasicHistoCheck.h"

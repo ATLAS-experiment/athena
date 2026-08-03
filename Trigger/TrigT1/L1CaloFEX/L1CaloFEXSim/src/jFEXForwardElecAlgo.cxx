@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 //***************************************************************************
 //		jFEXForwardElecAlgo - Algorithm for Forward Electron Algorithm in jFEX
@@ -10,17 +10,17 @@
 //     email                : sjolin@cern.ch
 //***************************************************************************
 
-#include <iostream>
-#include <vector>
-#include <stdio.h>
-#include <math.h>
-#include <fstream>
 #include "jFEXForwardElecAlgo.h"
 #include "L1CaloFEXSim/jFEXForwardElecTOB.h"
 #include "L1CaloFEXSim/jFEXForwardElecInfo.h"
 #include "L1CaloFEXSim/jTower.h"
 #include "L1CaloFEXSim/jTowerContainer.h"
 #include "PathResolver/PathResolver.h"
+
+#include <iostream>
+#include <vector>
+#include <math.h>
+#include <fstream>
 
 namespace LVL1 {
 
@@ -55,9 +55,6 @@ namespace LVL1 {
     return StatusCode::SUCCESS;
   }
 
-  StatusCode LVL1::jFEXForwardElecAlgo::reset() {
-    return StatusCode::SUCCESS;
-  }
     
   void LVL1::jFEXForwardElecAlgo::setup(int inputTable[FEXAlgoSpaceDefs::jFEX_algoSpace_height][FEXAlgoSpaceDefs::jFEX_wide_algoSpace_width], int jfex, int fpga) {
     std::copy(&inputTable[0][0], &inputTable[0][0] + (FEXAlgoSpaceDefs::jFEX_algoSpace_height*FEXAlgoSpaceDefs::jFEX_wide_algoSpace_width), &m_jFEXalgoTowerID[0][0]);

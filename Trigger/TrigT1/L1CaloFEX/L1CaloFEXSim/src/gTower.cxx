@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 //***************************************************************************
 //    gTower - Defines all properties and methods for the gFEX towers
@@ -17,8 +17,7 @@ namespace LVL1 {
   // default constructors
   gTower::gTower()
   {
-    this->clear_scIDs();
-    this->clearET();
+    m_et_float_perlayer.assign(2, 0.0);
   }
 
   /** constructs a tower and sets the coordinates and identifier */
@@ -28,8 +27,7 @@ namespace LVL1 {
     m_tower_id(id_modifier + iphi + (nphi * ieta)),
     m_posneg(posneg)
   {
-    this->clear_scIDs();
-    this->clearET();
+    m_et_float_perlayer.assign(2, 0.0);
     getEtaPhi(m_eta_float, m_phi_float, iEta(), iPhi());
   }
 
@@ -289,8 +287,8 @@ namespace LVL1 {
 
   void gTower::getEtaPhi ( float &Eta, float &Phi, int iEta, int iPhi) const{
     
-    float s_centralPhiWidth = (2*M_PI)/32; //In central region, gFex has 32 bins in phi
-    float s_forwardPhiWidth = (2*M_PI)/16; //In forward region, gFex has 16 bins in phi (before rearranging bins)
+    constexpr float s_centralPhiWidth = (2*M_PI)/32; //In central region, gFex has 32 bins in phi
+    constexpr float s_forwardPhiWidth = (2*M_PI)/16; //In forward region, gFex has 16 bins in phi (before rearranging bins)
 
     constexpr std::array<float, 40> s_EtaCenter = { -4.5, -3.8, -3.38, -3.18, -3.15, -3, 
                                                   -2.8, -2.6, -2.35, -2.1, -1.9, -1.7, -1.5, -1.3, -1.1, -0.9,  

@@ -83,14 +83,18 @@ def FPGATrackSimMapMakerCfg(flags):
         alg.InputTool = acc.getPrimaryAndMerge(FPGATrackSimReadInputCfg(flags))
         alg.SGInputTool = ""
     else:
-        from ActsConfig.ActsGeometryConfig import ActsTrackingGeometryToolCfg
-        acc.getPrimaryAndMerge(ActsTrackingGeometryToolCfg(flags))
         alg.InputTool = ""
         from FPGATrackSimSGInput.FPGATrackSimSGInputConfig import FPGATrackSimSGInputToolCfg
         alg.SGInputTool = acc.getPrimaryAndMerge(FPGATrackSimSGInputToolCfg(flags))
         alg.SGInputTool.ReadOfflineClusters=False
         alg.SGInputTool.ReadOfflineTracks=False
-    
+
+    from ActsAlignmentAlgs.AlignmentAlgsConfig import ActsGeometryContextAlgCfg
+    from ActsConfig.ActsGeometryConfig import ActsTrackingGeometrySvcCfg
+
+    acc.merge(ActsTrackingGeometrySvcCfg(flags))
+    acc.merge(ActsGeometryContextAlgCfg(flags))
+   
     acc.addEventAlgo(alg)
     return acc
 
@@ -112,8 +116,8 @@ if __name__ == "__main__":
     flags.fillFromArgs()
 
     
-    from ActsConfig.ActsCIFlags import actsWorkflowFlags
-    actsWorkflowFlags(flags)
+    from ActsConfig.ActsCIFlags import actsProductionFlags
+    actsProductionFlags(flags)
 
     flags.lock()
     flags = flags.cloneAndReplace("Tracking.ActiveConfig", "Tracking.ITkActsPass")

@@ -62,11 +62,8 @@ MetaDataSvc                                         DEBUG Adding public ToolHand
 AthenaPoolAddressProviderSvc                        DEBUG Cannot retrieve DataHeader from DetectorStore.
 EventInfoCnvAlg.EventInfoCnvTool                     INFO Beam spot information not available
 EventInfoCnvAlg.EventInfoCnvTool                     INFO Will not fill beam spot information into xAOD::EventInfo
-StreamCopy                                          DEBUG In initialize
 StreamCopy                                          DEBUG In initialize 
-StreamCopy                                          DEBUG Found IDecisionSvc.
 DecisionSvc                                          INFO Inserting stream: StreamCopy with no Algs
-StreamCopy                                          DEBUG End initialize 
 StreamCopy                                          DEBUG Found StoreGateSvc/StoreGateSvc store.
 StreamCopy                                          DEBUG Found StoreGateSvc/MetaDataStore store.
 AthDictLoaderSvc                                     INFO in initialize...

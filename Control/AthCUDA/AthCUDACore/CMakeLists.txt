@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # Set the name of the package.
 atlas_subdir( AthCUDACore )
@@ -26,9 +26,9 @@ atlas_add_library( AthCUDACoreLib
 atlas_add_test( Memory
    SOURCES test/test_Memory.cu
    LINK_LIBRARIES AthCUDACoreLib
-   POST_EXEC_SCRIPT nopost.sh )
+   POST_EXEC_SCRIPT noerror.sh )
 
 atlas_add_test( Info
    SOURCES test/test_Info.cxx
    LINK_LIBRARIES AthCUDACoreLib
-   POST_EXEC_SCRIPT nopost.sh )
+   POST_EXEC_SCRIPT noerror.sh )

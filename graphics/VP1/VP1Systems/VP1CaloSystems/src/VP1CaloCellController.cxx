@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #define VP1IMPVARNAME m_d
@@ -65,7 +65,7 @@ public:
 	bool last_showDigits = false;
 	bool last_showVolumeOutLines = false;
 	bool last_energyModeEt = false;
-	VP1CC_GlobalCuts last_globalCuts;
+	VP1CC_GlobalCuts last_globalCuts{};
 
 	// Map of gui object structures by selection type (simple/expert modes)
 	VP1CCSelectionType2GuiMap sel2GuiSimple;

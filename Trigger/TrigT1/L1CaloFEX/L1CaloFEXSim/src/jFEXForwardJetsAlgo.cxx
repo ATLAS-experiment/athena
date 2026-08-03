@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration  
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration  
 */
 //***************************************************************************  
 //		jFEXForwardJetsAlgo - Algorithm for forward Jets in jFEX
@@ -7,17 +7,10 @@
 //     begin                : 07 06 2021
 //     email                : Sergi.Rodriguez@cern.ch
 //***************************************************************************  
-#include <iostream>
-#include <vector>
-#include <string>
-#include <map>
-#include "jFEXForwardJetsAlgo.h"
-#include "L1CaloFEXSim/jTower.h"
-#include "L1CaloFEXSim/jTowerContainer.h"
-#include "L1CaloFEXSim/jFEXForwardJetsInfo.h"
-#include "L1CaloFEXSim/FEXAlgoSpaceDefs.h"
-#include "PathResolver/PathResolver.h"
 
+#include "jFEXForwardJetsAlgo.h"
+#include "PathResolver/PathResolver.h"
+#include <iostream>
 #include <fstream>
 
 namespace LVL1{
@@ -58,10 +51,6 @@ StatusCode LVL1::jFEXForwardJetsAlgo::safetyTest() {
         return StatusCode::FAILURE;
     }
 
-    return StatusCode::SUCCESS;
-}
-
-StatusCode LVL1::jFEXForwardJetsAlgo::reset() {
     return StatusCode::SUCCESS;
 }
 

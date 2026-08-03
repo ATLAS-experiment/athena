@@ -26,6 +26,7 @@
 namespace pool {
    class IContainer;
    class IDatabase;
+   class IFileCatalog;
    class ISession;
 }
 
@@ -95,9 +96,13 @@ public: // Non-static members
    virtual
    void setShareMode(bool shareCat) override;
 
-   /// @return the file catalog.
+   /// @return void
    virtual
-   const pool::IFileCatalog* catalog() const override;
+   void startCatalog() override;
+
+   /// @return void
+   virtual
+   void commitCatalog() override;
 
    /// @return void
    /// @param token [IN] filename/token string to be translated

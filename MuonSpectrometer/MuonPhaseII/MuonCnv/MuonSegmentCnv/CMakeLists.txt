@@ -9,6 +9,7 @@ atlas_add_component( MuonSegmentCnv
                      src/components/*.cxx                  
                      LINK_LIBRARIES GaudiKernel AthenaBaseComps StoreGateLib MuonPatternEvent MuonPrepRawData xAODMuon ActsEventLib
                                     MuonRecToolInterfaces MuonIdHelpersLib TrkSegment TrkExInterfaces MuonSegment xAODMuonPrepData
-                                    MuonCompetingRIOsOnTrack TrkSurfaces MuonRecHelperToolsLib MuonReadoutGeometryR4)
+                                    MuonCompetingRIOsOnTrack TrkSurfaces MuonRecHelperToolsLib MuonReadoutGeometryR4 MuonTrackEvent
+                                    xAODMuonViews)
 
 atlas_install_python_modules( python/*.py)

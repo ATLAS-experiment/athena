@@ -11,6 +11,7 @@
 
 #include <limits>
 #include <cstdint>
+#include <algorithm>
 
 PixelDigitizationTool::PixelDigitizationTool(const std::string& type,
                                              const std::string& name,
@@ -305,19 +306,14 @@ void PixelDigitizationTool::addSDO(SiChargedDiodeCollection* collection, EventDa
         real_particle_hit = trkLink.isValid();
       }
       // check if this track number has been already used.
-      std::vector<InDetSimData::Deposit>::reverse_iterator theDeposit = deposits.rend();  //dummy value
-      std::vector<InDetSimData::Deposit>::reverse_iterator depositsR_end = deposits.rend();
-      std::vector<InDetSimData::Deposit>::reverse_iterator i_Deposit = deposits.rbegin();
-      for (; i_Deposit != depositsR_end; ++i_Deposit) {
-        if ((*i_Deposit).first == trkLink) {
-          theDeposit = i_Deposit;
-          break;
-        }
-      }
-
+      const auto theDeposit = std::find_if( deposits.rbegin(), deposits.rend(),
+        [&trkLink](const InDetSimData::Deposit& deposit) {
+          return deposit.first == trkLink;
+      });
       // if the charge has already hit the Diode add it to the deposit
-      if (theDeposit != depositsR_end) (*theDeposit).second += i_ListOfCharges->charge();
-      else { // create a new deposit
+      if (theDeposit != deposits.rend()) {
+        theDeposit->second += i_ListOfCharges->charge();
+      } else { // create a new deposit
         deposits.emplace_back(trkLink, i_ListOfCharges->charge());
       }
     }

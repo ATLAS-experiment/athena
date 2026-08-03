@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //////////////////////////////////////////////////////////////////
@@ -17,9 +17,11 @@
 //Eigen
 #include "GeoPrimitives/GeoPrimitives.h"
 
+#include "TrkDetDescrInterfaces/ILayerMaterialManipulator.h"
+
+
 namespace Trk {
 
-    class ILayerMaterialManipulator;
     class LayerMaterialMap;
     
 
@@ -37,10 +39,7 @@ namespace Trk {
       public:
 
         /** Standard Athena-Algorithm Constructor */
-        MaterialManipulation(const std::string& name, ISvcLocator* pSvcLocator);
-        
-        /** Default Destructor */
-        ~MaterialManipulation();
+        using AthAlgorithm::AthAlgorithm;
 
         /** standard Athena-Algorithm method */
         virtual StatusCode          initialize() override;
@@ -51,16 +50,19 @@ namespace Trk {
         /** standard Athena-Algorithm method */
         virtual StatusCode          finalize() override;
 
-      private:
+    private:
                  
-         //!< input material properties
-         std::string                           m_inputLayerMaterialMapName;
-         const LayerMaterialMap*               m_inputLayerMaterialMap;
+      //!< input material properties
+      Gaudi::Property<std::string> m_inputLayerMaterialMapName
+        {this, "LayerMaterialMapNameInput", "/GLOBAL/TrackingGeo/Input"};
+      const LayerMaterialMap* m_inputLayerMaterialMap = nullptr;
 
-         //!< output material properties
-         std::string                           m_outputLayerMaterialMapName;
+      //!< output material properties
+      Gaudi::Property<std::string> m_outputLayerMaterialMapName
+	{this, "LayerMaterialMapNameOutput", "/GLOBAL/TrackingGeo/Output"};
 
-         ToolHandle<ILayerMaterialManipulator> m_layerMaterialManipulator;
+      ToolHandle<ILayerMaterialManipulator> m_layerMaterialManipulator
+	{this, "LayerMaterialManipulator", ""};
 
     };
 }

@@ -10,9 +10,6 @@
 #include "TrkLinks/LinkToXAODTrackParticle.h"
 #include "xAODTracking/TrackParticleContainer.h"
 
-// PACKAGE
-#include "ActsGeometry/ActsTrackingGeometrySvc.h"
-#include "ActsGeometry/ActsTrackingGeometryTool.h"
 
 // ACTS
 #include "Acts/Propagator/Navigator.hpp"
@@ -45,12 +42,6 @@ namespace
   };
 } //anonymous namespace
 
-ActsTrk::AdaptiveMultiPriVtxFinderTool::AdaptiveMultiPriVtxFinderTool(const std::string& type,
-                                                                      const std::string& name,
-                                                                      const IInterface* parent)
-  : base_class(type, name, parent)
-{}
-
 StatusCode
 ActsTrk::AdaptiveMultiPriVtxFinderTool::initialize()
 {
@@ -59,12 +50,11 @@ ActsTrk::AdaptiveMultiPriVtxFinderTool::initialize()
     ATH_CHECK(m_beamSpotKey.initialize());
     ATH_CHECK(m_trkFilter.retrieve());
 
+    ATH_CHECK(m_ctxProvider.initialize());
     ATH_MSG_INFO("Initializing ACTS AMVF tool");
-    ATH_CHECK( m_trackingGeometryTool.retrieve() );
+    ATH_CHECK( m_trackingGeometrySvc.retrieve() );
     std::shared_ptr<const Acts::TrackingGeometry> trackingGeometry
-    = m_trackingGeometryTool->trackingGeometry();
-
-    ATH_CHECK( m_extrapolationTool.retrieve() );
+    = m_trackingGeometrySvc->trackingGeometry();
 
     // Logger
     m_logger = makeActsAthenaLogger(this, "Acts");
@@ -269,15 +259,17 @@ ActsTrk::AdaptiveMultiPriVtxFinderTool::findVertex(const EventContext& ctx,
 {
     using namespace Acts::UnitLiterals; // !!!
     
-    SG::ReadCondHandle<InDet::BeamSpotData> beamSpotHandle { m_beamSpotKey, ctx};
+    const InDet::BeamSpotData* beamSpotHandle{};
+    if (!SG::get(beamSpotHandle, m_beamSpotKey, ctx).isSuccess()) {
+      return {};
+    }
     const Acts::Vector3& beamSpotPos = beamSpotHandle->beamVtx().position();
     Acts::Vertex beamSpotConstraintVtx(beamSpotPos);
     beamSpotConstraintVtx.setCovariance(beamSpotHandle->beamVtx().covariancePosition());
 
     // Get the magnetic field context
-    Acts::MagneticFieldContext magFieldContext = m_extrapolationTool->getMagneticFieldContext(ctx);
-
-    const auto& geoContext = m_trackingGeometryTool->getGeometryContext(ctx).context();
+    const Acts::MagneticFieldContext magFieldContext = m_ctxProvider.getMagneticFieldContext(ctx);
+    const Acts::GeometryContext geoContext = m_ctxProvider.getGeometryContext(ctx);
 
     // The output vertex containers
     xAOD::VertexContainer* theVertexContainer = new xAOD::VertexContainer;

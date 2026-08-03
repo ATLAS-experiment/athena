@@ -56,14 +56,14 @@ int test1() {
 
    for( Long64_t ientry = 0; ientry < 10; ++ientry ) {
 
-     if(ientry==0) 
-       myTool->cacheDSID(true); // cache DSID to speed up look-up
-
      if( event.getEntry(ientry) < 0 ){
        ANA_MSG_ERROR("Failed to read event " << ientry);
        return -1;
      } 
      
+     if(ientry==0)
+       myTool->cacheDSID(true); // cache DSID to speed up look-up
+
      unsigned int njets = myTool->getNtruthJets();
      myTool->setNjets(njets);
 

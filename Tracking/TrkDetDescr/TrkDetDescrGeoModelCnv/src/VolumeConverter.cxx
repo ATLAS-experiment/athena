@@ -1,6 +1,10 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
+
+// Tell clang not to allow spurious FPEs.
+#include "CxxUtils/trapping_fp.h"
+CXXUTILS_TRAPPING_FP;
 
 #include "TrkDetDescrGeoModelCnv/VolumeConverter.h"
 

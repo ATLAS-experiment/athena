@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 #
 # art-description: Test of the RDOtoRDOTrigger transform with Dev menu
 # art-type: grid
@@ -42,7 +42,6 @@ ex.concurrent_events = 8
 ex.args = '--outputRDO_TRIGFile=RDO_TRIG.pool.root'
 ex.args += ' --preExec="all:{:s};"'.format(preExec)
 ex.args += ' --preInclude "all:Campaigns.MC23e"'
-ex.args += ' --CA "all:True"'
 ex.args += ' --conditionsTag "default:' + conditions + '"'
 
 test = Test.Test()

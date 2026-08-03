@@ -92,8 +92,9 @@ StatusCode RPCHitAnalysis::execute(const EventContext& ctx) {
       //RPCSimHitCollection::const_iterator i_hit;
       //for(auto i_hit : *rpc_container){
       GeoRPCHit ghit(*i_hit);
-      if (!ghit) continue;
-      
+      if (!ghit) {
+        continue;
+      }
       Amg::Vector3D p = ghit.getGlobalPosition();
       m_h_hits_x->Fill(p.x());
       m_h_hits_y->Fill(p.y());

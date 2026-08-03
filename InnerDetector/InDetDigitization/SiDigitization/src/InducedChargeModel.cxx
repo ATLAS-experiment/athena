@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //-----------------------------------------------
@@ -295,7 +295,7 @@ double InducedChargeModel::induced(const SCT_InducedChargeModelData& data,
   int ix1 = ix + 1;
   int iy1 = iy + 1;
   double P = m_PotentialValue[data.m_EFieldModel][ix ][iy ] *(1.-fx)*(1.-fy)
-           + m_PotentialValue[data.m_EFieldModel][ix1][iy ] *    fx *(1.-fy)
+           + m_PotentialValue[data.m_EFieldModel].at(ix1)[iy ] *    fx *(1.-fy)
            + m_PotentialValue[data.m_EFieldModel][ix ][iy1] *(1.-fx)*    fy
            + m_PotentialValue[data.m_EFieldModel][ix1][iy1] *     fx*    fy;
 

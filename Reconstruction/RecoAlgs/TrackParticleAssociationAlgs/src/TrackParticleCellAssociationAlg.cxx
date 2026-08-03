@@ -1,21 +1,13 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrackParticleCellAssociationAlg.h"
 
 
-#include "RecoToolInterfaces/IParticleCaloCellAssociationTool.h"
 #include "TrackToCalo/CrossedCaloCellHelper.h"
 #include "CaloUtils/CaloClusterStoreHelper.h"
 
-TrackParticleCellAssociationAlg::TrackParticleCellAssociationAlg(const std::string& name, ISvcLocator* pSvcLocator):
-  AthReentrantAlgorithm(name,pSvcLocator),
-  m_caloCellAssociationTool("Rec::ParticleCaloCellAssociationTool/ParticleCaloCellAssociationTool", this) {
-
-  declareProperty("ParticleCaloCellAssociationTool",m_caloCellAssociationTool);
-  declareProperty("PtCut", m_ptCut = 10000. );
-}
 
 TrackParticleCellAssociationAlg::~TrackParticleCellAssociationAlg() = default;
 
@@ -27,6 +19,7 @@ StatusCode TrackParticleCellAssociationAlg::initialize()
   ATH_CHECK(m_clusterContainerName.initialize());
   ATH_CHECK(m_associationContainerName.initialize());
   ATH_CHECK(m_clusterCellLinkName.initialize());
+  ATH_CHECK(m_trkLinkKey.initialize());
   return StatusCode::SUCCESS;
 }
 

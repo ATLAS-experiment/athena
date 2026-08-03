@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 #
 # Steering script for IDPVM ART Run 4 configuration, ITK only recontruction, acts activated
 
@@ -52,7 +52,7 @@ run Sim_tf.py \
     --simulator 'FullG4MT' \
     --preExec "default:flags.Output.HISTFileName='${dcubemon_sim}';" \
     --postInclude 'default:PyJobTransforms.UseFrontier' 'HitAnalysis.PostIncludes.ITkHitAnalysis'\
-    --preInclude 'EVNTtoHITS:Campaigns.PhaseIISimulation' \
+    --preInclude 'EVNTtoHITS:Campaigns.MC23PhaseIISimulation' \
     --geometryVersion "default:${geometry}" \
     --inputEVNTFile ${ArtInFile} \
     --outputHITSFile $hits \
@@ -90,7 +90,7 @@ if [ $sim_tf_exit_code -eq 0 ]  ;then
     --jobNumber 568 \
     --maxEvents -1 \
     --outputRDOFile $rdo \
-    --preInclude 'HITtoRDO:Campaigns.PhaseIINoPileUp' \
+    --preInclude 'HITtoRDO:Campaigns.MC23PhaseIINoPileUp' \
     --postInclude 'PyJobTransforms.UseFrontier'
  echo "art-result: $? digi"
 

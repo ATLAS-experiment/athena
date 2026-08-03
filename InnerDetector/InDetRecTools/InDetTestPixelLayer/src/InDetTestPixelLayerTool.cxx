@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "AthenaBaseComps/AthAlgTool.h"
@@ -709,6 +709,8 @@ InDet::InDetTestPixelLayerTool::getFracGood(
       VALIDATE_STATUS_ARRAY(!m_pixelDetElStatus.empty(),
                             pixelDetElStatus->isChipGood(id_hash, feValue),
                             m_pixelCondSummaryTool->isGood(centreId, context));
+      //pixelDetElStatus ptr was already checked at ~line 613                  
+      //coverity[FORWARD_NULL:FALSE]
       bool is_chip_good((!m_pixelDetElStatus.empty() &&
                          pixelDetElStatus->isChipGood(id_hash, feValue)) ||
                         (m_pixelDetElStatus.empty() && m_pixelCondSummaryTool->isGood(centreId, context, ctx)));

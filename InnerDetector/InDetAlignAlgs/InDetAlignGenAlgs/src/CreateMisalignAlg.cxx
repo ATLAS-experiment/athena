@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //////////////////////////////////////////////////////////////////////////
@@ -38,6 +38,10 @@
 #include "CreateMisalignAlg.h"
 #include "GeoPrimitives/CLHEPtoEigenConverter.h"
 #include "AthenaBaseComps/AthCheckMacros.h"
+//
+// Write output into ROOT Trees
+#include "TTree.h"
+//
 #include <cmath>
 #include <tuple> //for tuple decomposition and std::ignore
 #include <sstream>
@@ -1088,7 +1092,10 @@ namespace InDetAlignment
 			m_AlignResults_beta = beta;
 			m_AlignResults_gamma = gamma;
 			
-
+      if (!SiModule) [[unlikely]]{
+        ATH_MSG_ERROR("SiModule * is nullptr");
+        return StatusCode::FAILURE;
+      }
                         HepGeom::Transform3D LocalaGlobal = HepGeom::Transform3D();
                         LocalaGlobal = Amg::EigenTransformToCLHEP(SiModule->moduleTransform());
                         HepGeom::Point3D<double> alignedPosLocal(m_AlignResults_x,m_AlignResults_y,m_AlignResults_z);

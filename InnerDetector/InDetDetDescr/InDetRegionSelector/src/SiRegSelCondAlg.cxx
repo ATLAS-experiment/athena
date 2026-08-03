@@ -8,7 +8,7 @@
  **   @date   Sun 22 Sep 2019 10:21:50 BST
  **
  **
- **   Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+ **   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
  **/
 
 
@@ -26,6 +26,7 @@
 
 #include "IRegionSelector/IRegSelLUTCondData.h"
 #include "RegSelLUT/RegSelSiLUT.h"
+#include <cmath>
 
 
 SiRegSelCondAlg::SiRegSelCondAlg(const std::string& name, ISvcLocator* pSvcLocator):
@@ -179,7 +180,7 @@ StatusCode SiRegSelCondAlg::execute(const EventContext& ctx)  const
 	  // but it must not be filtered out by the DBM-specific barrel_ec cut.
 	  if ( m_managerName != "PLR" && std::fabs(barrelEC)>3 ) continue;
 	  layerDisk = pixelId->layer_disk(element->identify());
-	  if(m_useCabling) robId=(*pixCabling)->find_entry_offrob(element->identify());
+	  if(m_useCabling && pixCabling) robId=(*pixCabling)->find_entry_offrob(element->identify());
 	  else robId = 0;
 	}
 	else { 
@@ -194,7 +195,7 @@ StatusCode SiRegSelCondAlg::execute(const EventContext& ctx)  const
 	  layerDisk = sctId->layer_disk(element->identify());
 	  // Avoid use of SCT_CablingTool. Instead of
 	  // robId=m_sctCablingTool->getRobIdFromOfflineId(element->identify());
-	  if(m_useCabling) robId = ((*sctCabling)->getOnlineIdFromHash(element->identifyHash())).rod();
+	  if(m_useCabling && sctCabling) robId = ((*sctCabling)->getOnlineIdFromHash(element->identifyHash())).rod();
 	  else robId = 0;
 	}
 	else { 

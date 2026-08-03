@@ -39,6 +39,8 @@ class MuonMomentumCalibrationConfig (ConfigBlock):
             info="only for testing purposes, turn on to ignore NSW hits and "
             "fix a crash with older derivations (p-tag <p5834).")
         self.addOption ('calibMode', 'correctData_CB', type=str, info='calibration mode of the `MuonCalibTool` needed to turn on the sagitta bias corrections and to select the muon track calibration type (CB or ID+MS), see https://atlas-mcp.docs.cern.ch/guidelines/muonmomentumcorrections/index.html#cpmuoncalibtool-tool.')
+        self.addOption ('useZeroPixMuons', False, type=bool, info='if True, a second `MuonCalibTool` instance with calibMode=correctData_MSonly is scheduled and applied only to ZeroPixelHit muons.')
+        self.addOption ('zeroPixMuonType', None, type=int, info='muonType value used for the ZeroPix calibration tool. If left as None, the default xAOD::Muon::MuonType::ZeroPixelHit is used.')
         self.addOption ('decorateTruth', False, type=bool,
             info="decorate truth particle information on the reconstructed one.")
         self.addOption ('writeColumnarToolVariables', False, type=bool,
@@ -124,6 +126,18 @@ class MuonMomentumCalibrationConfig (ConfigBlock):
             alg.calibrationAndSmearingTool.ExcludeNSWFromPrecisionLayers = True
         else:
             alg.calibrationAndSmearingTool.ExcludeNSWFromPrecisionLayers = self.excludeNSWFromPrecisionLayers and (config.geometry() >= LHCPeriod.Run3)
+
+        # Optionally set up a second calibration tool applied only to ZPH muons
+        # The calibMode is set to 'correctData_MSonly'.
+        if self.useZeroPixMuons:
+            config.addPrivateTool( 'calibrationAndSmearingTool_ZeroPix',
+                            'CP::MuonCalibTool' )
+            alg.calibrationAndSmearingTool_ZeroPix.IsRun3Geo = config.geometry() >= LHCPeriod.Run3
+            alg.calibrationAndSmearingTool_ZeroPix.calibMode = 5 # correctData_MSonly
+            alg.calibrationAndSmearingTool_ZeroPix.ExcludeNSWFromPrecisionLayers = alg.calibrationAndSmearingTool.ExcludeNSWFromPrecisionLayers
+            if self.zeroPixMuonType is not None:
+                alg.zeroPixMuonType = self.zeroPixMuonType
+
         alg.muons = config.readName (self.containerName)
         alg.muonsOut = config.copyName (self.containerName)
         alg.preselection = config.getPreselection (self.containerName, '')
@@ -551,6 +565,8 @@ class MuonTriggerAnalysisSFBlock (ConfigBlock):
                 2022: 410000,
                 2023: 450000,
                 2024: 470000,
+                2025: 495000,
+                2026: 516000,
             }
 
             triggerConfigs = {}

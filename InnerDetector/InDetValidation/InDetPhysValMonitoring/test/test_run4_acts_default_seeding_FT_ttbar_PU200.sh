@@ -46,9 +46,8 @@ run "Reconstruction" \
     --inputRDOFile ${input_rdo} \
     --outputAODFile AOD.pool.root \
     --conditionsTag "default:${conditionsTag}" \
-    --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude,ActsConfig.ActsCIFlags.actsWorkflowFlags" \
-    --preExec "flags.Tracking.doTruth=False; \
-               flags.DQ.useTrigger=False; \
+    --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude,ActsConfig.ActsCIFlags.actsProductionFlags" \
+    --preExec "flags.DQ.useTrigger=False; \
 	       flags.Acts.doAnalysis=True; \
                flags.Output.HISTFileName=\"ActsMonitoringOutput.root\";" \
     --perfmon fullmonmt \

@@ -50,6 +50,18 @@ using namespace ActsTrk;
 
 constexpr double length_unit = 1_mm;
 
+const ActsDetectorElement* getActsDetectorElement(const Acts::Surface& surf) {
+    if (!surf.isAlignable()) {
+        return nullptr;
+    }
+    const auto* placement = dynamic_cast<const ISurfacePlacement*>(surf.surfacePlacement());
+    if(!placement) {
+        return nullptr;
+    }
+    return dynamic_cast<const ActsDetectorElement*>(placement->detectorElement());
+}
+
+
 ActsDetectorElement::ActsDetectorElement(const InDetDD::SiDetectorElement &detElem) :
   GeoVDetectorElement{detElem.getMaterialGeom()},
   m_idHash(detElem.identifyHash()),
@@ -70,11 +82,11 @@ ActsDetectorElement::ActsDetectorElement(const InDetDD::SiDetectorElement &detEl
     double hlX = design.width() / 2. * length_unit;
     double hlY = design.length() / 2. * length_unit;
 
-    auto rectangleBounds = std::make_shared<const Acts::RectangleBounds>(hlX, hlY);
+    auto rectangleBounds = std::make_shared<Acts::RectangleBounds>(hlX, hlY);
 
     m_bounds = rectangleBounds;
-    m_surface = Acts::Surface::makeShared<Acts::PlaneSurface>(rectangleBounds, *this);
-    m_surface->assignThickness(thickness());
+    m_surfHolder = ActsTrk::SurfacePlacement::makeShared<Acts::PlaneSurface>(m_trfCache, std::move(rectangleBounds));
+    m_surfHolder->surface().assignThickness(thickness());
 
   } else if (boundsType == Trk::SurfaceBounds::Trapezoid) {
 
@@ -84,13 +96,12 @@ ActsDetectorElement::ActsDetectorElement(const InDetDD::SiDetectorElement &detEl
     double maxHlX = design.maxWidth() / 2. * length_unit;
     double hlY = design.length() / 2. * length_unit;
 
-    auto trapezoidBounds =
-        std::make_shared<const Acts::TrapezoidBounds>(minHlX, maxHlX, hlY);
+    auto trapezoidBounds = std::make_shared<Acts::TrapezoidBounds>(minHlX, maxHlX, hlY);
 
     m_bounds = trapezoidBounds;
 
-    m_surface = Acts::Surface::makeShared<Acts::PlaneSurface>(trapezoidBounds, *this);
-    m_surface->assignThickness(thickness());
+    m_surfHolder = ActsTrk::SurfacePlacement::makeShared<Acts::PlaneSurface>(m_trfCache, std::move(trapezoidBounds));
+    m_surfHolder->surface().assignThickness(thickness());
 
 
   } else if (boundsType == Trk::SurfaceBounds::Annulus) {
@@ -117,12 +128,13 @@ ActsDetectorElement::ActsDetectorElement(const InDetDD::SiDetectorElement &detEl
     Amg::Vector2D originStripXYRotated(R * (1 - std::cos(phiS)),
                                        R * std::sin(-phiS));
 
-    auto annulusBounds = std::make_shared<Acts::AnnulusBounds>(
-        minR, maxR, phiMin, phiMax, originStripXYRotated, phiAvg);
+    auto annulusBounds = std::make_shared<Acts::AnnulusBounds>(minR, maxR, 
+                                                               phiMin, phiMax, 
+                                                               originStripXYRotated, phiAvg);
     m_bounds = annulusBounds;
 
-    m_surface = Acts::Surface::makeShared<Acts::DiscSurface>(annulusBounds, *this);
-    m_surface->assignThickness(thickness());
+    m_surfHolder = ActsTrk::SurfacePlacement::makeShared<Acts::DiscSurface>(m_trfCache, std::move(annulusBounds));
+    m_surfHolder->surface().assignThickness(thickness());
 
   } else {
     std::cout << boundsType << std::endl;
@@ -160,12 +172,11 @@ ActsDetectorElement::ActsDetectorElement(const Acts::Transform3 &trf,
     }
   }
 
-  auto lineBounds =
-      std::make_shared<const Acts::LineBounds>(innerTubeRadius, length);
+  auto lineBounds = std::make_shared<Acts::LineBounds>(innerTubeRadius, length);
   m_bounds = lineBounds;
 
-  m_surface = Acts::Surface::makeShared<Acts::StrawSurface>(lineBounds, *this);
-  m_surface->assignThickness(thickness());
+  m_surfHolder = ActsTrk::SurfacePlacement::makeShared<Acts::StrawSurface>(m_trfCache, std::move(lineBounds));
+  m_surfHolder->surface().assignThickness(thickness());
 }
 
 ActsDetectorElement::ActsDetectorElement(const InDetDD::HGTD_DetectorElement &detElem, const Identifier &id) :
@@ -185,13 +196,12 @@ ActsDetectorElement::ActsDetectorElement(const InDetDD::HGTD_DetectorElement &de
     double hlX = design.width() / 2. * length_unit;
     double hlY = design.length() / 2. * length_unit;
 
-    auto rectangleBounds =
-        std::make_shared<const Acts::RectangleBounds>(hlX, hlY);
+    auto rectangleBounds = std::make_shared<Acts::RectangleBounds>(hlX, hlY);
 
     m_bounds = rectangleBounds;
 
-    m_surface = Acts::Surface::makeShared<Acts::PlaneSurface>(rectangleBounds, *this);
-    m_surface->assignThickness(thickness());
+    m_surfHolder = ActsTrk::SurfacePlacement::makeShared<Acts::PlaneSurface>(m_trfCache, std::move(rectangleBounds));
+    m_surfHolder->surface().assignThickness(thickness());
         
   } else {
     throw std::domain_error(
@@ -227,7 +237,7 @@ Amg::Transform3D ActsDetectorElement::localToGlobal(const ActsTrk::DetectorAlign
               // is center and symmetric
               const double phiShift = M_PI_2 - static_cast<const InDetDD::StripStereoAnnulusDesign&>(design).stereo();
 
-              const Amg::Vector2D origin2D = static_cast<const Acts::AnnulusBounds&>(m_surface->bounds()).moduleOrigin();
+              const Amg::Vector2D origin2D = static_cast<const Acts::AnnulusBounds&>(surface().bounds()).moduleOrigin();
               const Amg::Translation3D transl{origin2D.x(), origin2D.y(), 0};
               const Amg::Transform3D originTrf{transl * Amg::getRotateZ3D(-phiShift)};
               extraTransform = extraTransform * originTrf.inverse();
@@ -242,17 +252,23 @@ Amg::Transform3D ActsDetectorElement::localToGlobal(const ActsTrk::DetectorAlign
 
 }
 IdentityHelper ActsDetectorElement::identityHelper() const {
-  if (detectorType() == DetectorType::Pixel || detectorType() == DetectorType::Sct) {
-        return IdentityHelper(static_cast<const InDetDD::SiDetectorElement *>(m_detElement));
-  } else {
-    throw std::domain_error("Cannot get IdentityHelper for TRT element");
+  if (detectorType() == DetectorType::Pixel || detectorType() == DetectorType::Sct ||
+      detectorType() == DetectorType::Hgtd) {
+        return IdentityHelper(static_cast<const InDetDD::SolidStateDetectorElementBase  *>(m_detElement));
+  } else  {
+    throw std::domain_error(std::format("Cannot get IdentityHelper for {:} element" ,detectorType()));
   }
 }
 
-const Acts::Transform3 &ActsDetectorElement::localToGlobalTransform(const Acts::GeometryContext &anygctx) const {
+
+
+const Acts::Transform3& ActsDetectorElement::localToGlobalTransform(const ActsTrk::GeometryContext& gctx) const {
+    return m_trfCache.getTransform(gctx);
+}
+const Acts::Transform3& ActsDetectorElement::localToGlobalTransform(const Acts::GeometryContext &anygctx) const {
     return m_trfCache.getTransform(anygctx);
 }
-const Acts::Transform3 &ActsDetectorElement::localToGlobalTransform(const ActsTrk::DetectorAlignStore* store) const {
+const Acts::Transform3& ActsDetectorElement::localToGlobalTransform(const ActsTrk::DetectorAlignStore* store) const {
     return m_trfCache.getTransform(store);
 }
 
@@ -265,20 +281,20 @@ const Acts::Transform3 & ActsDetectorElement::getDefaultTransform() const {
 }
 
 const Acts::Surface &ActsDetectorElement::surface() const {
-  return (*m_surface);
+  return m_surfHolder->surface();
 }
 
 Acts::Surface &ActsDetectorElement::surface() {
-  return (*m_surface);
+  return m_surfHolder->surface();
 }
 
 const Trk::Surface &ActsDetectorElement::atlasSurface() const {
   if (const auto *detElem =
-          dynamic_cast<const InDetDD::SiDetectorElement *>(m_detElement);
+          dynamic_cast<const InDetDD::SolidStateDetectorElementBase*>(m_detElement);
       detElem != nullptr) {
     return detElem->surface();
   } else {
-    throw std::domain_error("Cannot get surface for TRT element");
+    throw std::domain_error(std::format("Cannot get surface for {:} element" , detectorType()));
   }
 }
 

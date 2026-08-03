@@ -107,9 +107,9 @@ std::vector<uint32_t>
   // compression happens here
   const eformat::write::node_t* top = newEvent.bind();
   auto finalSize = newEvent.size_word();
-  auto finalEvent = std::make_unique<uint32_t[]>(finalSize);
+  std::vector<uint32_t> result(finalSize, 0);
   ERS_DEBUG(4, finalSize << " words will be copied to final event");
-  auto res = eformat::write::copy(*top, finalEvent.get(), finalSize);
+  auto res = eformat::write::copy(*top, result.data(), finalSize);
   if (res != finalSize) {
     std::string errMsg("ERROR, event serialization failed - ");
     errMsg += std::string("Serialized event size: ") + std::to_string(finalSize);
@@ -118,7 +118,6 @@ std::vector<uint32_t>
     ers::warning(issue);
     throw issue;
   }
-  std::vector<uint32_t> result;
-  result.assign(finalEvent.get(), finalEvent.get() + finalSize);
+  
   return result;
 }

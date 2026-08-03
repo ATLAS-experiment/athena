@@ -1,11 +1,11 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef LARPHYSWAVEFROMSTDNTUPLE_H
 #define LARPHYSWAVEFROMSTDNTUPLE_H
 
-#include "AthenaBaseComps/AthAlgorithm.h"
+#include "AthenaBaseComps/AthReentrantAlgorithm.h"
 
 #include <vector>
 #include <string>
@@ -18,18 +18,16 @@ Version for standard Ntuple, produced by LArCalibTools algos....
  */
 
 
-class LArPhysWaveFromStdNtuple : public AthAlgorithm
+class LArPhysWaveFromStdNtuple : public AthReentrantAlgorithm
 {
  public:
-  LArPhysWaveFromStdNtuple(const std::string & name, ISvcLocator * pSvcLocator);
+  using AthReentrantAlgorithm::AthReentrantAlgorithm;
 
-  ~LArPhysWaveFromStdNtuple();
+  virtual ~LArPhysWaveFromStdNtuple();
 
   //standard algorithm methods
-  StatusCode initialize() {return StatusCode::SUCCESS;}
-  StatusCode execute(const EventContext&) {return StatusCode::SUCCESS;}
-  StatusCode finalize(){return StatusCode::SUCCESS;}
-  StatusCode stop();
+  virtual StatusCode execute(const EventContext&) const override {return StatusCode::SUCCESS;}
+  virtual StatusCode stop() override;
  
  private:
   /// the first  m_skipPoints points of the waveform in the ntuple are skipped

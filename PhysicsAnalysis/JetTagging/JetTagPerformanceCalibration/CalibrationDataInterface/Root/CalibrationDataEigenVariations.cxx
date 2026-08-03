@@ -28,7 +28,7 @@
 #include "TROOT.h"
 #include "TFile.h"
 
-#include <memory.h>
+#include <memory>
 
 using Analysis::CalibrationDataEigenVariations;
 using Analysis::CalibrationDataGlobalEigenVariations;
@@ -1123,7 +1123,7 @@ CalibrationDataEigenVariations::EigenVectorRecomposition(const std::string& labe
   if (! m_initialized) initialize();
 
   std::vector<TH1*> originSF_hvec;
-  std::vector<TH1*> eigenSF_hvec;
+  std::vector<std::unique_ptr<TH1>> eigenSF_hvec;
 
   // Retrieving information for calculation
   std::vector<string>fullUncList = m_cnt->listUncertainties();
@@ -1206,9 +1206,11 @@ CalibrationDataEigenVariations::EigenVectorRecomposition(const std::string& labe
        std::cerr<<"EigenVectorRecomposition: Error on retrieving eigenvector "<<i<<std::endl;
       return false;
     }
-    //Need uncertainty value so subtract central calibration here.
-    up->Add(nom, -1);
-    eigenSF_hvec.push_back(up);
+    // Clone first: up is owned by m_eigen, so subtracting nom in place would corrupt the cache.
+    std::unique_ptr<TH1> pure(static_cast<TH1*>(up->Clone()));
+    pure->SetDirectory(nullptr);
+    pure->Add(nom, -1);
+    eigenSF_hvec.push_back(std::move(pure));
   }
   TMatrixD matEigen(nEigen, nbins);
 
@@ -1224,6 +1226,8 @@ CalibrationDataEigenVariations::EigenVectorRecomposition(const std::string& labe
 	  col++;
 	}
   }
+
+  eigenSF_hvec.clear();
 
   // Sanity check:
   TMatrixD matEigenOriginal = matEigen;

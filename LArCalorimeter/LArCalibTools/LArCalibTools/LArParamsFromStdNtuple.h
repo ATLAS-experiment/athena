@@ -1,11 +1,11 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef LARPARAMSFROMSTDNTUPLE_H
 #define LARPARAMSFROMSTDNTUPLE_H
 
-#include "AthenaBaseComps/AthAlgorithm.h"
+#include "AthenaBaseComps/AthReentrantAlgorithm.h"
 
 #include <vector>
 #include <string>
@@ -18,35 +18,32 @@ Version for standard Ntuple, produced by LArCalibTools algos....
  */
 
 
-class LArParamsFromStdNtuple : public AthAlgorithm
+class LArParamsFromStdNtuple : public AthReentrantAlgorithm
 {
  public:
-  LArParamsFromStdNtuple(const std::string & name, ISvcLocator * pSvcLocator);
+  using AthReentrantAlgorithm::AthReentrantAlgorithm;
 
-  ~LArParamsFromStdNtuple();
+  virtual ~LArParamsFromStdNtuple();
 
   //standard algorithm methods
-  /// implements IAlgorithm::initialize() 
-  StatusCode initialize() ; 
 
   /// implements IAlgorithm::execute()  : Does nothing
-  StatusCode execute(const EventContext&) {return StatusCode::SUCCESS;}
+  virtual StatusCode execute(const EventContext&) const override {return StatusCode::SUCCESS;}
 
-  /// IAlgorithm::finalize() : Where the action takes place...
-  StatusCode finalize(){return StatusCode::SUCCESS;}
-  StatusCode stop();
+  /// IAlgorithm::stop() : Where the action takes place...
+  virtual StatusCode stop() override;
  
  private:
   /// list of input ntuple file names 
-  std::vector<std::string> m_root_file_names;
+  StringArrayProperty m_root_file_names { this, "FileNames", {} };
   /// ntuple name
-  std::string m_ntuple_name;
+  StringProperty m_ntuple_name { this, "NtupleName", "PARAMS" };
   /// key of the CaliPulseParams collection in Storegate
-  std::string m_store_key_cali;
+  StringProperty m_store_key_cali { this, "StoreKey_Cali", "FromStdNtuple" };
   /// key of the DetCellParams collection in Storegate
-  std::string m_store_key_det;
+  StringProperty m_store_key_det { this, "StoreKey_Det", "FromStdNtuple" };
   /// Grouping type.  Default is Feedthrough.
-  std::string m_groupingType;
+  StringProperty m_groupingType { this, "GroupingType", "FeedThrough" };
 };
 
 #endif
