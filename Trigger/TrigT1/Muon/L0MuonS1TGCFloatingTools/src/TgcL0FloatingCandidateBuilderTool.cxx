@@ -5,13 +5,11 @@
 #include "TgcL0FloatingCandidateBuilderTool.h"
 
 #include "StoreGate/ReadCondHandle.h"
-#include "StoreGate/ReadHandle.h"
 #include "TgcL0FloatingData.h"
 #include "TgcL0RdoDecoder.h"
 #include "TgcL0OverlapClassification.h"
 #include "TgcL0SegmentReconstruction.h"
 #include "TgcL0StationCoincidence.h"
-#include "TgcL0TruthValidation.h"
 
 #include <sstream>
 #include <utility>
@@ -55,17 +53,18 @@ StatusCode TgcL0FloatingCandidateBuilderTool::initialize() {
   ATH_CHECK(m_idHelperSvc.retrieve());
   ATH_CHECK(m_cablingKey.initialize());
   ATH_CHECK(m_detectorManagerKey.initialize());
-  ATH_CHECK(m_truthEventKey.initialize(m_enableTruthValidation));
-  if (m_enableTruthValidation) {
-    ATH_CHECK(m_truthExtrapolator.retrieve());
-  }
   return StatusCode::SUCCESS;
 }
 
 StatusCode TgcL0FloatingCandidateBuilderTool::build(
     const TgcRdoContainer& rdos, TgcL0CandidateContainer& candidates,
     const EventContext& ctx) const {
-  candidates.clear();
+  return build(rdos, candidates, nullptr, ctx);
+}
+
+StatusCode TgcL0FloatingCandidateBuilderTool::build(
+    const TgcRdoContainer& rdos, TgcL0CandidateContainer& candidates,
+    TgcL0SegmentContainer* segments, const EventContext& ctx) const {
 
   const Muon::TgcCablingMap* cabling{};
   ATH_CHECK(SG::get(cabling, m_cablingKey, ctx));
@@ -103,7 +102,7 @@ StatusCode TgcL0FloatingCandidateBuilderTool::build(
   const TgcL0Floating::SegmentReconstruction segmentReconstruction{
       std::move(segmentConfig)};
   ATH_CHECK(segmentReconstruction.build(coincidences, candidates,
-                                        segmentStatistics));
+                                        segmentStatistics, segments));
 
   TgcL0Floating::OverlapClassificationStatistics overlapStatistics;
   const TgcL0Floating::OverlapClassification overlapClassification;
@@ -264,37 +263,7 @@ StatusCode TgcL0FloatingCandidateBuilderTool::build(
                   << ", inChamberOverlap=" << candidate.inChamberOverlap);
   }
 
-  if (m_enableTruthValidation) {
-    SG::ReadHandle<McEventCollection> truthEvents{m_truthEventKey, ctx};
-    if (!truthEvents.isValid()) {
-      ATH_MSG_ERROR("Failed to retrieve " << m_truthEventKey.fullKey());
-      return StatusCode::FAILURE;
-    }
-    TgcL0Floating::TruthValidationConfig truthConfig;
-    truthConfig.maxMeanDeltaR = m_truthMatchMaxMeanDeltaR.value();
-    const TgcL0Floating::TruthValidation truthValidation{truthConfig};
-    TgcL0Floating::TruthValidationSummary truthSummary;
-    ATH_CHECK(truthValidation.validate(*truthEvents, *m_truthExtrapolator,
-                                       candidates, ctx, truthSummary));
-    ATH_MSG_DEBUG("Truth validation: selectedMuons="
-                  << truthSummary.nSelectedTruthMuons
-                  << ", nominalPlanesExtrapolated="
-                  << truthSummary.nFullyExtrapolatedTruthMuons
-                  << ", matchedMuons="
-                  << truthSummary.nTruthMuonsWithMatchedCandidate
-                  << ", unmatchedCandidates="
-                  << truthSummary.nUnmatchedCandidates);
-    ATH_MSG_DEBUG(
-        "Nearest truth-matched candidate masks "
-        "[M1M2M3,M1M2,M1M3,M2M3,M1,M2,M3]: ["
-        << truthSummary.nNearestMatchedByPositionMask[0x7U] << ","
-        << truthSummary.nNearestMatchedByPositionMask[0x3U] << ","
-        << truthSummary.nNearestMatchedByPositionMask[0x5U] << ","
-        << truthSummary.nNearestMatchedByPositionMask[0x6U] << ","
-        << truthSummary.nNearestMatchedByPositionMask[0x1U] << ","
-        << truthSummary.nNearestMatchedByPositionMask[0x2U] << ","
-        << truthSummary.nNearestMatchedByPositionMask[0x4U] << "]");
-  }
+
 
   return StatusCode::SUCCESS;
 }

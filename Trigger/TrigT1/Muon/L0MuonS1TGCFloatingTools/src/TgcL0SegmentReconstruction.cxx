@@ -25,6 +25,9 @@ using Config = L0Muon::TgcL0Floating::SegmentReconstructionConfig;
 using Statistics = L0Muon::TgcL0Floating::SegmentStatistics;
 using Station = L0Muon::TgcL0Floating::Station;
 using GroupKey = L0Muon::TgcL0Floating::HitGroupKey;
+using OutputSegment = L0Muon::TgcL0Segment;
+using OutputSegments = L0Muon::TgcL0SegmentContainer;
+using Projection = L0Muon::TgcL0SegmentProjection;
 
 constexpr std::uint8_t stationBit(const Station station) {
   if (station == Station::M1) return 0x1U;
@@ -76,6 +79,30 @@ struct ProjectionSegment {
   float consistency{0.F};
   std::uint16_t pivotChannel{0};
 };
+
+
+void appendValidationSegments(const GroupKey& groupKey,
+                              const std::vector<ProjectionSegment>& segments,
+                              OutputSegments& output) {
+  output.reserve(output.size() + segments.size());
+  for (const ProjectionSegment& segment : segments) {
+    OutputSegment value;
+    value.subdetectorId = groupKey.subDetectorId;
+    value.triggerSector = groupKey.triggerSector;
+    value.bcTag = groupKey.bcTag;
+    value.projection = segment.isStrip ? Projection::Strip : Projection::Wire;
+    value.stationMask = segment.stationMask;
+    value.summedQuality = segment.summedQuality;
+    value.nStations = segment.nStations;
+    value.eta = segment.eta;
+    value.phi = segment.phi;
+    value.residual = segment.residual;
+    value.outputResidual = segment.outputResidual;
+    value.consistency = segment.consistency;
+    value.pivotChannel = segment.pivotChannel;
+    output.emplace_back(value);
+  }
+}
 
 const Coincidence* projectionPivot(const ProjectionSegment& segment) {
   if (segment.points[2] != nullptr) return segment.points[2];
@@ -511,9 +538,11 @@ SegmentReconstruction::SegmentReconstruction(SegmentReconstructionConfig config)
 StatusCode SegmentReconstruction::build(
     const StationCoincidenceContainer& coincidences,
     TgcL0CandidateContainer& candidates,
-    SegmentStatistics& statistics) const {
+    SegmentStatistics& statistics,
+    TgcL0SegmentContainer* validationSegments) const {
   candidates.clear();
   statistics = SegmentStatistics{};
+  if (validationSegments != nullptr) validationSegments->clear();
 
   using Projections =
       std::array<std::array<std::vector<const Coincidence*>, 3>, 2>;
@@ -533,6 +562,10 @@ StatusCode SegmentReconstruction::build(
         buildProjectionSegments(projections[1], true, m_config, statistics);
     statistics.nWireSegments += wireSegments.size();
     statistics.nStripSegments += stripSegments.size();
+    if (validationSegments != nullptr) {
+      appendValidationSegments(groupKey, wireSegments, *validationSegments);
+      appendValidationSegments(groupKey, stripSegments, *validationSegments);
+    }
 
     std::vector<CandidatePair> pairs;
     pairs.reserve(wireSegments.size() * stripSegments.size());
