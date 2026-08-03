@@ -565,6 +565,8 @@ class MuonTriggerAnalysisSFBlock (ConfigBlock):
                 2022: 410000,
                 2023: 450000,
                 2024: 470000,
+                2025: 495000,
+                2026: 516000,
             }
 
             triggerConfigs = {}
