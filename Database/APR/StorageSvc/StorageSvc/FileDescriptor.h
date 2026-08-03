@@ -61,9 +61,9 @@ namespace pool    {
     /// Generate new FID from the filename
     void initFromFilename(const std::string& filename) {
       m_PFN = filename;
-      MD5 checkSum((unsigned char*)filename.c_str(), filename.size());
+      MD5 checkSum(filename);
         uuid_t checkSumUuid;
-        checkSum.raw_digest((unsigned char*)(&checkSumUuid));
+        checkSum.raw_digest(checkSumUuid);
         char text[37];
         uuid_unparse_upper(checkSumUuid, text);
         m_FID = text;

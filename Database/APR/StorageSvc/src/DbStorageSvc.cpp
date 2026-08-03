@@ -183,7 +183,7 @@ StatusCode DbStorageSvc::allocate( FileDescriptor&       fDesc,
 
    if( shape && object ) {
       void* handle = fDesc.dbc()->handle();
-      DbDatabase dbH((DbDatabaseHNC)handle);
+      DbDatabase dbH(static_cast<DbDatabaseHNC>(handle));
       DbContainer cntH(dbH.type());
       sc = cntH.open( dbH, 
                       refCont,
@@ -205,7 +205,7 @@ StatusCode DbStorageSvc::allocate( FileDescriptor&       fDesc,
       }
    }
    ATH_MSG_ERROR( "Cannot allocate persistent object." << endmsg
-       << " Shape Handle :" << (const void*)shape  << endmsg
+       << " Shape Handle :" << static_cast<const void*>(shape)  << endmsg
        << " FID=" << fDesc.FID() << endmsg
        << " Cnt=" << refCont );
    return sc;
