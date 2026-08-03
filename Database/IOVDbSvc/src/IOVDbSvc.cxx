@@ -923,6 +923,10 @@ StatusCode IOVDbSvc::setupFolders() {
     Crest::Logger::setLogLevel(cLevel);	  
     m_cresttagmap.clear();
     m_cresttagmap = CoralCrestManager::getGlobalTagMap(m_par_crestServer,m_par_globalTag);
+    if (m_cresttagmap.empty()) {
+      ATH_MSG_FATAL("Got empty tag-map. GlobalTag "<< m_par_globalTag.value() << " does not exist.");
+      return StatusCode::FAILURE;
+    }
   }
   
   //1. Loop through folders
