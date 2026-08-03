@@ -31,7 +31,7 @@ namespace LVL1 {
     virtual StatusCode initialize() override;
 
     /** Destructor */
-    virtual ~jFEXSmallRJetAlgo();
+    virtual ~jFEXSmallRJetAlgo() = default;
 
     virtual StatusCode safetyTest() override;
     virtual void setup(int inputTable[7][7], int inputTableDisplaced[7][7]) override;

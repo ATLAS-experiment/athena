@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // Stolen shamelessly from CaloCellContainer.h and modified as required
@@ -21,11 +21,7 @@
 #include "AthContainers/DataVector.h"
 #include "AthenaKernel/CLASS_DEF.h"
 #include "L1CaloFEXSim/eTower.h"
-
-#include "Identifier/IdentifierHash.h"
-#include "CxxUtils/PackedArray.h"
-#include "CxxUtils/CachedValue.h"
-#include "AthLinks/tools/findInContainer.h"
+#include "GaudiKernel/MsgStream.h"
 
 #include <unordered_map>
 
@@ -84,4 +80,3 @@ CLASS_DEF( LVL1::eTowerContainer , 1143075806 , 1 )
 SG_BASE(LVL1::eTowerContainer, DataVector<LVL1::eTower> );
 
 #endif
-

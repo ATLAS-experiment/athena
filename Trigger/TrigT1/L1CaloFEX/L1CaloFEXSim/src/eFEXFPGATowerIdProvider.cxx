@@ -167,7 +167,7 @@ StatusCode LVL1::eFEXFPGATowerIdProvider::rankTowerinFPGA(int FPGAindex)
       return StatusCode::FAILURE;
     }
     std::sort(rankingmap.begin(), rankingmap.end(),
-      [](std::pair<int, int> a, std::pair<int, int> b) {
+      [](const std::pair<int, int>& a, const std::pair<int, int>& b) {
         // tower around eta == 0 has the same eta.
         if (a.first == b.first) {
           return (a.second < b.second);

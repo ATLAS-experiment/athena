@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //***************************************************************************
@@ -13,7 +13,6 @@
 #define IjTowerBuilder_H
 
 #include "GaudiKernel/IAlgTool.h"
-#include "CaloEvent/CaloCellContainer.h"
 #include "L1CaloFEXSim/jTower.h"
 #include "L1CaloFEXSim/jTowerContainer.h"
 
@@ -33,7 +32,7 @@ Interface definition for jTowerBuilder
 
     virtual void init(std::unique_ptr<jTowerContainer> & jTowerContainer) const = 0;
     virtual void execute(std::unique_ptr<jTowerContainer> & jTowerContainer) const = 0;
-    virtual void reset() const = 0;
+
     virtual StatusCode AssignPileupAndNoiseValues (std::unique_ptr<jTowerContainer> & jTowerContainerRaw) const = 0;
 
 

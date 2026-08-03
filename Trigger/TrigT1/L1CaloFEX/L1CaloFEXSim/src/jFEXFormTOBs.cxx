@@ -22,9 +22,6 @@ jFEXFormTOBs::jFEXFormTOBs(const std::string& type, const std::string& name, con
     declareInterface<IjFEXFormTOBs>(this);
 }
 
-/** Desctructor */
-jFEXFormTOBs::~jFEXFormTOBs() {}
-
 StatusCode jFEXFormTOBs::initialize()
 {
     return StatusCode::SUCCESS;
@@ -314,9 +311,6 @@ uint32_t jFEXFormTOBs::formMetTOB(int METX, int METY, bool sat, int Resolution )
     ATH_MSG_DEBUG("tobword MET with Res, MET_Y, MET_X, Sat: " << std::bitset<32>(tobWord) );
 
     return tobWord;
-
 }
-
-
 
 } // end of namespace bracket

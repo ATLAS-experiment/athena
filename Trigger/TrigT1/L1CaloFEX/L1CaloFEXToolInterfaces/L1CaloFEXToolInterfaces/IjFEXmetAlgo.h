@@ -29,8 +29,8 @@ class IjFEXmetAlgo : virtual public IAlgTool {
         
         virtual void buildBarrelmet()  =0;
         virtual void buildFWDmet()  =0;
-        virtual int GetMetXComponent()  =0;
-        virtual int GetMetYComponent()  =0;
+        virtual int GetMetXComponent() const =0;
+        virtual int GetMetYComponent() const =0;
         virtual int getTTowerET(unsigned int TTID ) =0; 
         virtual void setFPGAEnergy(std::unordered_map<int,std::vector<int> > et_map)   =0;
         virtual bool getjXESat() const =0; 

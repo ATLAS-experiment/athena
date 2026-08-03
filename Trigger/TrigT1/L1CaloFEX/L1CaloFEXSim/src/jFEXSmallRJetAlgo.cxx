@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration  
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration  
 */
 //***************************************************************************  
 //		jFEXSmallRJetAlgo - Algorithm for small R jet Algorithm in jFEX
@@ -21,10 +21,6 @@ LVL1::jFEXSmallRJetAlgo::jFEXSmallRJetAlgo(const std::string& type, const std::s
   declareInterface<IjFEXSmallRJetAlgo>(this);
   }
 
-/** Destructor */
-LVL1::jFEXSmallRJetAlgo::~jFEXSmallRJetAlgo()
-{
-}
 StatusCode LVL1::jFEXSmallRJetAlgo::initialize()
 {
    ATH_CHECK(m_jTowerContainerKey.initialize());

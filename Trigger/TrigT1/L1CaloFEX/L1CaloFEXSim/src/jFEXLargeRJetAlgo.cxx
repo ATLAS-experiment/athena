@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 //***************************************************************************
 //              jFEXSmallRJetAlgo - Algorithm for small R jet Algorithm in jFEX
@@ -8,10 +8,7 @@
 //     email                : varsiha.sothilingam@cern.ch
 //***************************************************************************
 
-#include <vector>
 #include "jFEXLargeRJetAlgo.h"
-#include "L1CaloFEXSim/jTower.h"
-#include "L1CaloFEXSim/jTowerContainer.h"
 
 namespace LVL1{
 
@@ -21,16 +18,12 @@ LVL1::jFEXLargeRJetAlgo::jFEXLargeRJetAlgo(const std::string& type, const std::s
   declareInterface<IjFEXLargeRJetAlgo>(this);
   }
 
-/** Destructor */
-LVL1::jFEXLargeRJetAlgo::~jFEXLargeRJetAlgo()
-{
-}
+
 StatusCode LVL1::jFEXLargeRJetAlgo::initialize()
 {
    ATH_CHECK(m_jTowerContainerKey.initialize());
 
    return StatusCode::SUCCESS;
-
 }
 
 StatusCode LVL1::jFEXLargeRJetAlgo::safetyTest() {
@@ -78,13 +71,13 @@ unsigned int LVL1::jFEXLargeRJetAlgo::getLargeClusterET(unsigned int smallCluste
 
 
 //Gets the ET for the TT. This ET is EM + HAD
-int LVL1::jFEXLargeRJetAlgo::getTTowerET(unsigned int TTID ) {
+int LVL1::jFEXLargeRJetAlgo::getTTowerET(unsigned int TTID ) const {
     if(TTID == 0) {
         return 0;
     } 
     
     if(m_map_Etvalues.find(TTID) != m_map_Etvalues.end()) {
-        return m_map_Etvalues[TTID][0];
+      return m_map_Etvalues.at(TTID)[0];
     }
     
     //we shouldn't arrive here

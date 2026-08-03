@@ -354,7 +354,6 @@ StatusCode jFEXFPGA::execute(jFEXOutputCollection* inputOutputCollection, const 
         
         //**********Forward Jets***********************
         ATH_CHECK(m_jFEXForwardJetsAlgoTool->safetyTest());
-        ATH_CHECK(m_jFEXForwardJetsAlgoTool->reset());
         m_jFEXForwardJetsAlgoTool->setFPGAEnergy(map_Etvalues_FPGA);
         m_jFEXForwardJetsAlgoTool->setup(m_jTowersIDs_Wide,m_jfexid);
 
@@ -393,7 +392,6 @@ StatusCode jFEXFPGA::execute(jFEXOutputCollection* inputOutputCollection, const 
         }
         //********** Forward Electrons ***********************
         ATH_CHECK(m_jFEXForwardElecAlgoTool->safetyTest());
-        ATH_CHECK(m_jFEXForwardElecAlgoTool->reset());
         m_jFEXForwardElecAlgoTool->setFPGAEnergy(m_map_EM_Etvalues_FPGA,m_map_HAD_Etvalues_FPGA);        
         m_jFEXForwardElecAlgoTool->setup(m_jTowersIDs_Wide,m_jfexid,m_id);
         std::unordered_map<uint, jFEXForwardElecInfo> ForwardElecs = m_jFEXForwardElecAlgoTool->calculateEDM();

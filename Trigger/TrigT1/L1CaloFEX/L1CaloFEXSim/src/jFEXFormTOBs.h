@@ -32,7 +32,7 @@ class jFEXFormTOBs : public AthAlgTool, virtual public IjFEXFormTOBs {
         /** standard Athena-Algorithm method */
         virtual StatusCode initialize() override;
         /** Destructor */
-        virtual ~jFEXFormTOBs();
+        virtual ~jFEXFormTOBs() = default;
 
         virtual uint32_t formTauTOB  (int, int, int, int, int, bool, int, int) const override;
         virtual uint32_t formSRJetTOB(int, int, int, int, bool, int, int, const std::pair<unsigned int, const std::vector<int>&>&) const override;
