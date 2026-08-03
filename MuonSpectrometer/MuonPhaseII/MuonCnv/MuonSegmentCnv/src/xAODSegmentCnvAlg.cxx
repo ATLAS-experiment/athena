@@ -21,6 +21,7 @@
 #include "Acts/Surfaces/StrawSurface.hpp"
 #include "Acts/Surfaces/LineBounds.hpp"
 #include "Acts/Geometry/TrackingGeometry.hpp"
+#include "Acts/Surfaces/PlaneSurface.hpp"
 
 #include "ActsInterop/UnitConverters.h"
 
@@ -346,10 +347,32 @@ namespace MuonR4{
         /// Calculate the segment start parameters
         if (m_estimateHoles) {
             const Acts::GeometryContext tgContext = m_ctxProvider.getGeometryContext(ctx);
+            std::shared_ptr<const Acts::Surface> startSurfPtr = startSurface->getSharedPtr();
             auto atSurface = startSurface->intersect(tgContext, segment.position(), segment.direction(),
                                                       Acts::BoundaryTolerance::Infinite()).closest();
-        
-            auto startPars = Acts::BoundTrackParameters::create(tgContext, startSurface->getSharedPtr(),
+            
+            const auto locPos = startSurface->globalToLocal(tgContext, atSurface.position(), segment.direction());
+            if (!locPos.ok()) {
+                ATH_MSG_WARNING(__func__<<"() "<<__LINE__<<" - Intersection "<<Amg::toString(atSurface.position())
+                    <<" is not on surface "<<startSurface->geometryId());
+                return;
+            }
+            if (!startSurface->insideBounds(*locPos)) {
+                const auto* volume = highestAlignable(trackingGeo->highestTrackingVolume()->
+                                                      lowestTrackingVolume(tgContext, atSurface.position()));
+                ATH_MSG_DEBUG(__func__<<"() "<<__LINE__<<" - Intersection "<<Amg::toString(atSurface.position())
+                    <<" is outside surfaace: "<<startSurface->geometryId()<<", "<<startSurface->bounds()<<". "
+                    <<" Switch to volume "<<volume->geometryId()<<", bounds: "<<volume->volumeBounds());
+
+                if (volume->isAlignable()) {
+                    startSurfPtr = MuonGMR4::bottomBoundary(*volume)->getSharedPtr();
+                    atSurface = startSurfPtr->intersect(tgContext, segment.position(), segment.direction(),
+                                                        Acts::BoundaryTolerance::Infinite()).closest();
+                } else {
+                    startSurfPtr = Acts::Surface::makeShared<Acts::PlaneSurface>(startSurfPtr->localToGlobalTransform(tgContext));
+                }            
+            }
+            auto startPars = Acts::BoundTrackParameters::create(tgContext, startSurfPtr,
                                                                 ActsTrk::convertPosToActs(atSurface.position()),
                                                                 segment.direction(), 1./ 5._TeV, std::nullopt,
                                                                 Acts::ParticleHypothesis::muon());
