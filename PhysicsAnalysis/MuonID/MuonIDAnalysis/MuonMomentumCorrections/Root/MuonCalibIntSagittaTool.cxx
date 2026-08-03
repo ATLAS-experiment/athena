@@ -8,7 +8,6 @@
 #include "FourMomUtils/xAODP4Helpers.h"
 // Local include(s):
 #include <cmath>
-#include "TRandom3.h"
 
 #include "MuonMomentumCorrections/MuonCalibTool.h"
 #include "MuonMomentumCorrections/MuonCalibIntSagittaTool.h"

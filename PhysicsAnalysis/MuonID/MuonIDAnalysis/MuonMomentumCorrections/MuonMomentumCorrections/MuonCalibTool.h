@@ -30,6 +30,8 @@
 #include "MuonMomentumCorrections/MuonObj.h"
 #include "MuonMomentumCorrections/IMuonCalibIntTool.h"
 
+#include <cstdint>
+
 
 namespace CP {
 
@@ -100,6 +102,7 @@ namespace CP {
         Gaudi::Property<int> m_expertMode_RunNumber{this, "expertMode_RunNumber", 0, "Expert only option. Overwrites RunNumber"};
         Gaudi::Property<unsigned long long> m_expertMode_EvtNumber{this, "expertMode_EvtNumber", 0, "Expert only option. Overwrites EventNumber"};
         Gaudi::Property<bool> m_useRndRun{this, "useRandomRunNumber", false, "To use the random run number for deciding which calibration to apply"};
+        Gaudi::Property<std::uint64_t> m_seedBase{this, "seedBase", 42, "extra seed component to incorporate into the random seed"};
 
         Gaudi::Property<int> m_calibMode{this, "calibMode", -1, "Calib mode"};
 

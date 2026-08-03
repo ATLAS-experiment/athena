@@ -16,7 +16,7 @@ atlas_add_library( MuonMomentumCorrectionsLib
    INCLUDE_DIRS  ${ROOT_INCLUDE_DIRS}
    LINK_LIBRARIES  ${ROOT_LIBRARIES} AsgTools ColumnarMuonLib MuonAnalysisInterfacesLib FourMomUtils ColumnarCoreLib ColumnarTrackingLib ColumnarEventInfoLib ColumnarVariantLib
    PATInterfaces AsgDataHandlesLib AsgMessagingLib
-   PRIVATE_LINK_LIBRARIES xAODEventInfo PathResolver )
+   PRIVATE_LINK_LIBRARIES Random123 xAODEventInfo PathResolver )
 
 if( NOT XAOD_STANDALONE )
    atlas_add_component( MuonMomentumCorrections

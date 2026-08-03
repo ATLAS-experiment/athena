@@ -8,8 +8,23 @@
 #include "xAODCore/ShallowCopy.h"
 
 // Local include(s):
+#include <bit>
 #include <cmath>
-#include "TRandom3.h"
+#include <cstdint>
+#include <string_view>
+
+// Random123 is a vendored, header-only third-party library (see the
+// Random123 package's README.atlas).  Wrap its includes in diagnostic
+// pragmas so its code style does not break the ATLAS warning-free build.
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wold-style-cast"
+#include <Random123/philox.h>
+#include <Random123/uniform.hpp>
+#pragma GCC diagnostic pop
+
+#include <CxxUtils/XXH.h>
+
+#include <TMath.h>
 
 #include "MuonMomentumCorrections/MuonCalibTool.h"
 
@@ -525,22 +540,59 @@ namespace CP
     void MuonCalibTool::initializeRandNumbers(MCP::MuonObj& muonObj, columnar::EventInfoId evtInfo) const
     {
         auto& acc = *m_acc;
-        // Random number generation for smearing
-        TRandom3 loc_random3;
         // Get Event Number, Retrieve the event information:
         unsigned long long eventNumber = 0;
         if(m_expertMode_EvtNumber.value()!=0) eventNumber=m_expertMode_EvtNumber.value();
         else eventNumber = evtInfo(acc.eventNumberAcc);
-        // Construct a seed for the random number generator:
-        const UInt_t seed = 1 + std::abs(muonObj.CB.phi) * 1E6 + std::abs(muonObj.CB.eta) * 1E3 + eventNumber;
-        loc_random3.SetSeed(seed);
 
-        muonObj.rnd_g0 = loc_random3.Gaus(0, 1);
-        muonObj.rnd_g1 = loc_random3.Gaus(0, 1);
-        muonObj.rnd_g2 = loc_random3.Gaus(0, 1);
-        muonObj.rnd_g3 = loc_random3.Gaus(0, 1);
-        muonObj.rnd_g4 = loc_random3.Gaus(0, 1);
-        muonObj.rnd_g_highPt = loc_random3.Gaus(0, 1);
+        // Random number generation for smearing.  Seed the generator the same
+        // way Philox4x32HashRNGTestTool does: the muon eta/phi (as their raw
+        // 32-bit float bit patterns) plus the 64-bit event number fill the 4x32
+        // (128-bit) counter (an exact fit), letting the counter-based bijection
+        // mix the components itself, and a per-output key selects an independent
+        // keyed-hash stream.  Because several random numbers are drawn per
+        // object, the seed base is combined with a distinct per-draw constant
+        // (the hash of the output name) to give each draw its own key.  The raw
+        // Philox 4x32 bijection is then evaluated once per output (no stateful
+        // engine, no iteration), and its first output word is mapped to a
+        // uniform in the open interval (0,1) via u01fixedpt (so the inverse CDF
+        // never hits +-infinity) and then to a Gaussian via the inverse normal
+        // CDF.
+        const std::uint64_t evt = eventNumber;
+        const r123::Philox4x32::ctr_type ctr = {{
+            std::bit_cast<std::uint32_t>(static_cast<float>(muonObj.CB.phi)),
+            std::bit_cast<std::uint32_t>(static_cast<float>(muonObj.CB.eta)),
+            static_cast<std::uint32_t>(evt),
+            static_cast<std::uint32_t>(evt >> 32)}};
+
+        // XXH3 gives a stable, cross-platform-reproducible hash of each output
+        // name, computed once, that (combined with the seed base) forms the
+        // per-draw Philox key.
+        static const std::uint64_t hash_g0 = xxh3::hash64(std::string_view("rnd_g0"));
+        static const std::uint64_t hash_g1 = xxh3::hash64(std::string_view("rnd_g1"));
+        static const std::uint64_t hash_g2 = xxh3::hash64(std::string_view("rnd_g2"));
+        static const std::uint64_t hash_g3 = xxh3::hash64(std::string_view("rnd_g3"));
+        static const std::uint64_t hash_g4 = xxh3::hash64(std::string_view("rnd_g4"));
+        static const std::uint64_t hash_gHighPt = xxh3::hash64(std::string_view("rnd_g_highPt"));
+
+        r123::Philox4x32 philox;
+        const std::uint64_t seedBase = m_seedBase.value();
+        auto draw = [&] (std::uint64_t nameHash) -> double {
+            const std::uint64_t k = seedBase ^ nameHash;
+            const r123::Philox4x32::key_type key = {{
+                static_cast<std::uint32_t>(k),
+                static_cast<std::uint32_t>(k >> 32)}};
+            const r123::Philox4x32::ctr_type out = philox(ctr, key);
+            const double u = r123::u01fixedpt<double, std::uint32_t>(out[0]);
+            return TMath::NormQuantile(u);
+        };
+
+        muonObj.rnd_g0 = draw(hash_g0);
+        muonObj.rnd_g1 = draw(hash_g1);
+        muonObj.rnd_g2 = draw(hash_g2);
+        muonObj.rnd_g3 = draw(hash_g3);
+        muonObj.rnd_g4 = draw(hash_g4);
+        muonObj.rnd_g_highPt = draw(hash_gHighPt);
 
 
     }
