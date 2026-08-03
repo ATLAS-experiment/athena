@@ -6,15 +6,13 @@
 #ifndef ETOWERBUILDER_H
 #define ETOWERBUILDER_H
 
-// STL
-#include <string>
-
 // Athena/Gaudi
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "L1CaloFEXToolInterfaces/IeTowerBuilder.h"
-#include "CaloEvent/CaloCellContainer.h"
 #include "L1CaloFEXSim/eTower.h"
 #include "L1CaloFEXSim/eTowerContainer.h"
+
+#include <string>
 
 class CaloIdManager;
 
@@ -28,7 +26,6 @@ class eTowerBuilder: public AthAlgTool, virtual public IeTowerBuilder {
 
   virtual void init(std::unique_ptr<eTowerContainer> & eTowerContainerRaw) const override;
   virtual void execute(std::unique_ptr<eTowerContainer> & eTowerContainerRaw) const override;
-  virtual void reset() const override;
 
  private:
 

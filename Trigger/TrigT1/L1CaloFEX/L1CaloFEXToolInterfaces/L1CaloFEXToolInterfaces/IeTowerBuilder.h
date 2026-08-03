@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //***************************************************************************
@@ -13,7 +13,6 @@
 #define IeTowerBuilder_H
 
 #include "GaudiKernel/IAlgTool.h"
-#include "CaloEvent/CaloCellContainer.h"
 #include "L1CaloFEXSim/eTower.h"
 #include "L1CaloFEXSim/eTowerContainer.h"
 
@@ -38,8 +37,6 @@ Interface definition for eTowerBuilder
     
     virtual void init(std::unique_ptr<eTowerContainer> & eTowerContainer) const = 0;
     virtual void execute(std::unique_ptr<eTowerContainer> & eTowerContainer) const = 0;
-    virtual void reset() const = 0;
-
 
   private:
 

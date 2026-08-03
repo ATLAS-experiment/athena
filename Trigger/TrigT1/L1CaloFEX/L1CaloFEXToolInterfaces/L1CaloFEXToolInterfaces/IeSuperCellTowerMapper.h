@@ -33,8 +33,6 @@ Interface definition for eSuperCellTowerMapper
     virtual StatusCode AssignSuperCellsToTowers(std::unique_ptr<eTowerContainer> & my_eTowerContainerRaw) const = 0;
     virtual StatusCode AssignTriggerTowerMapper(std::unique_ptr<eTowerContainer> & my_eTowerContainerRaw) const = 0;
     
-    virtual void reset() const = 0;
-    
     virtual int FindAndConnectTower(std::unique_ptr<eTowerContainer> & my_eTowerContainerRaw,CaloSampling::CaloSample sample,const int region, int layer, const int pos_neg, const int eta_index, const int phi_index, Identifier ID, float et, int prov, bool doPrint) const = 0;
     virtual void ConnectSuperCellToTower(std::unique_ptr<eTowerContainer> & my_eTowerContainerRaw, int iETower, Identifier ID, int iCell, float et, int layer, bool doenergysplit) const = 0;
     virtual int FindTowerIDForSuperCell(int towereta, int towerphi) const = 0;

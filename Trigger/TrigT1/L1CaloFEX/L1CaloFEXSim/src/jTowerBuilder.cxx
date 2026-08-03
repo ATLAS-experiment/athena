@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+    Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -35,11 +35,6 @@ void jTowerBuilder::init(std::unique_ptr<jTowerContainer> & jTowerContainerRaw) 
     
     jTowerContainerRaw->clearContainerMap();
     jTowerContainerRaw->fillContainerMap();
-
-}
-
-
-void jTowerBuilder::reset() const {
 
 }
 

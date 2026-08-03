@@ -1,5 +1,5 @@
 /*
- Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+ Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 //***************************************************************************
 //             Interface for jFEXForwardElecAlgo - Algorithm for Forward Electron Algorithm in jFEX
@@ -25,7 +25,6 @@ class IjFEXForwardElecAlgo : virtual public IAlgTool {
     public:
         static const InterfaceID& interfaceID ( ) ;
         virtual StatusCode safetyTest() = 0;
-        virtual StatusCode reset() =0;
 	virtual void setup(int inputTable[FEXAlgoSpaceDefs::jFEX_algoSpace_height][FEXAlgoSpaceDefs::jFEX_wide_algoSpace_width], int, int ) =0;
 
 	//virtual std::array<float,4> getEtaPhiEt(uint) =0;                                                                                    

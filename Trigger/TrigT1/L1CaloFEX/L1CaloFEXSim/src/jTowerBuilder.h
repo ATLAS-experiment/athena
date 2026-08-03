@@ -1,13 +1,10 @@
 /*
-    Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+    Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 
 #ifndef JTOWERBUILDER_H
 #define JTOWERBUILDER_H
-
-// STL
-#include <string>
 
 // Athena/Gaudi
 #include "AthenaBaseComps/AthAlgTool.h"
@@ -16,6 +13,8 @@
 #include "L1CaloFEXSim/jTowerContainer.h"
 #include "L1CaloFEXCond/jFEXDBCondData.h"
 #include "StoreGate/ReadCondHandleKey.h"
+
+#include <string>
 
 namespace LVL1 {
 
@@ -28,7 +27,7 @@ class jTowerBuilder: public AthAlgTool, virtual public IjTowerBuilder {
 
         virtual void init(std::unique_ptr<jTowerContainer> & jTowerContainerRaw) const override ;
         virtual void execute(std::unique_ptr<jTowerContainer> & jTowerContainerRaw) const override ;
-        virtual void reset() const override ;
+
         virtual StatusCode AssignPileupAndNoiseValues (std::unique_ptr<jTowerContainer> & jTowerContainerRaw) const override;
 
 

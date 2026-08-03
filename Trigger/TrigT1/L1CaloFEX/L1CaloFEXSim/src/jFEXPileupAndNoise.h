@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration  
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration  
 */
 //***************************************************************************  
 //		jFEXPileupAndNoise - Algorithm for Pileup and Noise in jFEX
@@ -20,6 +20,7 @@
 #include "L1CaloFEXCond/jFEXDBCondData.h"
 #include "StoreGate/ReadCondHandleKey.h"
 #include "StoreGate/ReadCondHandle.h"
+#include <vector>
 
 namespace LVL1 {
 
@@ -37,7 +38,7 @@ namespace LVL1 {
     virtual void setup(int FPGA[FEXAlgoSpaceDefs::jFEX_algoSpace_height][FEXAlgoSpaceDefs::jFEX_thin_algoSpace_width]) override;
     virtual void setup(int FPGA[FEXAlgoSpaceDefs::jFEX_algoSpace_height][FEXAlgoSpaceDefs::jFEX_wide_algoSpace_width]) override;    
     
-    virtual std::unordered_map<int,std::vector<int> > GetEt_values() override;
+    virtual std::unordered_map<int,std::vector<int> > GetEt_values() const override;
     virtual std::unordered_map<int,std::vector<int> > Get_EM_Et_values() override;
     virtual std::unordered_map<int,std::vector<int> > Get_HAD_Et_values() override;
     
@@ -91,17 +92,17 @@ protected:
         void reset_conters();
         void SubtractPileup();
         void ApplyNoiseCuts(std::unordered_map<int,std::vector<int> > & map_Etvalues, int layer);
-        int  rhoDivLUT(int ntowers);
+        int  rhoDivLUT(int ntowers) const;
 
         // SG information
-        int getTTowerEta     (const LVL1::jTower *tmpTower ); 
-        int getTTowerET      (const LVL1::jTower *tmpTower ); 
-        int getET_EM         (const LVL1::jTower *tmpTower ); 
-        int getET_HAD        (const LVL1::jTower *tmpTower ); 
-        int getTTArea_EM     (const LVL1::jTower *tmpTower ); 
-        int getTTArea_HAD    (const LVL1::jTower *tmpTower ); 
-        int getTTAreaINV_EM  (const LVL1::jTower *tmpTower ); 
-        int getTTAreaINV_HAD (const LVL1::jTower *tmpTower ); 
+        int getTTowerEta     (const LVL1::jTower *tmpTower ) const;
+        int getTTowerET      (const LVL1::jTower *tmpTower ) const;
+        int getET_EM         (const LVL1::jTower *tmpTower ) const;
+        int getET_HAD        (const LVL1::jTower *tmpTower ) const;
+        int getTTArea_EM     (const LVL1::jTower *tmpTower ) const;
+        int getTTArea_HAD    (const LVL1::jTower *tmpTower ) const;
+        int getTTAreaINV_EM  (const LVL1::jTower *tmpTower ) const;
+        int getTTAreaINV_HAD (const LVL1::jTower *tmpTower ) const;
         
         std::unordered_map<int,std::vector<int> > m_map_Etvalues_EM;
         std::unordered_map<int,std::vector<int> > m_map_Etvalues_HAD;

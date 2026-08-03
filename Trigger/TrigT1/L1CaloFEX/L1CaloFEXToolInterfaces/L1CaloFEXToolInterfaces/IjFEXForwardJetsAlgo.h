@@ -1,5 +1,5 @@
 /*
- Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+ Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 //***************************************************************************
 //             Interface for jFEXForwardJetsAlgo - Algorithm for forward Jets in jFEX
@@ -25,7 +25,6 @@ namespace LVL1{
     public:
       static const InterfaceID& interfaceID ( ) ;
       virtual StatusCode safetyTest() = 0;
-      virtual StatusCode reset() =0;
       
       virtual void setup(int inputTable[FEXAlgoSpaceDefs::jFEX_algoSpace_height][FEXAlgoSpaceDefs::jFEX_wide_algoSpace_width], int)  = 0;    
 
