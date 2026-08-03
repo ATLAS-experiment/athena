@@ -78,6 +78,7 @@ class CorePlots: public PlotBase {
     TH1* m_PFOEngRelDiff{};
 
     TH1* m_TVz{};
+    TH1* m_TauJetVtxFraction{};
 
   private:
     void initializePlots();
