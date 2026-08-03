@@ -214,7 +214,6 @@ private:
 #endif
 
 #ifndef GENERATIONBASE
-  double fracParticleInJet(const xAOD::TruthParticle*, const xAOD::Jet*, bool DR, bool nparts) const;
   void findJetConstituents(const xAOD::Jet*, std::set<const xAOD::TruthParticle*>& constituents, bool DR) const;
 #endif
 
