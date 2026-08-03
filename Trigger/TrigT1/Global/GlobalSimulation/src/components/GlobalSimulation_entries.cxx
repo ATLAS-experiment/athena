@@ -30,6 +30,7 @@
 #include "../PU1/PU1SuppTestBench.h"
 #include "../PU1/PU1SuppAlgTool.h"
 
+#include "../GraphSvc.h"
 
 DECLARE_COMPONENT(GlobalSim::GlobalSimulationAlg)
 
@@ -58,3 +59,5 @@ DECLARE_COMPONENT(GlobalSim::GlobalCellTowerAlgTool)
 
 DECLARE_COMPONENT(GlobalSim::PU1SuppTestBenchAlg)
 DECLARE_COMPONENT(GlobalSim::PU1SuppAlgTool)
+
+DECLARE_COMPONENT(GlobalSim::GraphSvc)
