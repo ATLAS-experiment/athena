@@ -67,7 +67,7 @@ StatusCode ITkPixelCsvWaferIdAlg::execute(const EventContext& ctx) const {
         const auto phi = m_pixIdHelper->phi_module(id);
         const auto eta = m_pixIdHelper->eta_module(id);
 
-        std::bitset<32> sID = sourceID( parseSPChain(row.spChain), row.flx_card_device, dma_buffer_vec[i]);
+        std::bitset<32> sID = sourceID( parseSPChain(row.spChain), row.md, row.fe, row.flx_card_device, dma_buffer_vec[i]);
 
         std::string x = waferId_str.substr(0, waferId_str.length() - 2 );
         std::stringstream ss;
@@ -463,71 +463,73 @@ int ITkPixelCsvWaferIdAlg::feID(const std::vector<std::string>& spchain, int fe)
     
 }
 
-std::bitset<32> ITkPixelCsvWaferIdAlg::onlineId(const std::vector<std::string>& spchain, const std::string& mod, int fe) const {
-    // onlineID = chipID (4b) chipID ON/OFF (1b) RD53C (1b)
+
+std::bitset<32> ITkPixelCsvWaferIdAlg::onlineId(const std::vector<std::string>& spchain, const std::string& mod, int fe, bool legacy) const {
+    // onlineID = chipID (4b) chipID ON/OFF (1b) RD53C/BCID (1b)
     std::bitset<32> febits(0);
     int ld = layer_disk(spchain);
     int fe_id = feID(spchain, fe);
     int b_ec = barrel_ec(spchain);
     int etamod = eta_module(spchain, mod, fe);
+
     //these bits encode the merging scheme of modules
     if( b_ec == 0 ){ // barrel
         if(ld == 1 || ld ==2 ){ //L1, L2 flat, 4 to 2 merging
             if(fe_id < 2){
-                febits = std::bitset<32>(0x30000000);
+                febits = legacy ? std::bitset<32>(0x30000000) : std::bitset<32>(0x10000000) ;
             }
             else{
-                febits = std::bitset<32>(0xC0000000);
+                febits = legacy ? std::bitset<32>(0xC0000000) :  std::bitset<32>(0x20000000) ;
             }
         }
         if(ld == 3 || ld == 4 ){ //L3, L4 flat, 4 to 1 merging
-            febits = std::bitset<32>(0xF0000000);
+            febits = legacy ? std::bitset<32>(0xF0000000) : std::bitset<32>(0x30000000) ;
         }
     }
     else{
         if(ld == 3){ // Barrel ring L2
             if(fe_id < 2){
-                febits = std::bitset<32>(0x30000000);
+                febits = legacy ? std::bitset<32>(0x30000000) : std::bitset<32>(0x10000000) ;
             }
             else{
-                febits = std::bitset<32>(0xC0000000);
+                febits = legacy ? std::bitset<32>(0xC0000000) : std::bitset<32>(0x20000000) ;
             }
         }
         if(ld == 5 || ld ==7){ // Barrel rings L3, L4
-            febits = std::bitset<32>(0xF0000000);
+            febits = legacy ? std::bitset<32>(0xF0000000) : std::bitset<32>(0x30000000) ;
         }
         if(ld == 4 && etamod < 5){ // first half of EC L2
             if(fe_id < 2){
-                febits = std::bitset<32>(0x30000000);
+                febits = legacy ? std::bitset<32>(0x30000000) : std::bitset<32>(0x10000000) ;
             }
             else{
-                febits = std::bitset<32>(0xC0000000);
+                febits = legacy ? std::bitset<32>(0xC0000000) : std::bitset<32>(0x20000000) ;
             }
         }
         if(ld == 6){ // EC L3
             if(fe_id < 2){
-                febits = std::bitset<32>(0x30000000);
+                febits = legacy ? std::bitset<32>(0x30000000) : std::bitset<32>(0x10000000) ;
             }
             else{
-                febits = std::bitset<32>(0xC0000000);
+                febits = legacy ? std::bitset<32>(0xC0000000) : std::bitset<32>(0x20000000) ;
             }
         }
         if(ld == 8 && etamod < 7){ // EC L4, 1-7
-            febits = std::bitset<32>(0xF0000000);
+            febits = legacy ? std::bitset<32>(0xF0000000) : std::bitset<32>(0x30000000) ;
         }
         if(ld == 8 && etamod >= 7){ // EC L4, 8-9
             if(fe_id < 2){
-                febits = std::bitset<32>(0x30000000);
+                febits = legacy ? std::bitset<32>(0x30000000) : std::bitset<32>(0x10000000) ;
             }
             else{
-                febits = std::bitset<32>(0xC0000000);
+                febits = legacy ? std::bitset<32>(0xC0000000) : std::bitset<32>(0x20000000) ;
             }
         }
     }
-    //add the chip ID ON/OFF (1b) and RD53c (1b) bits
+    //add the chip ID ON/OFF (1b) and RD53c or BCID (1b) bits
     febits |= std::bitset<32>("00001100000000000000000000000000");
 
-    bitcheck(febits, 26, 31, "DetResID: Online ID");
+    bitcheck(febits, 26, 29, "DetResID: Online ID");
 
     return febits;
 }
@@ -591,14 +593,15 @@ std::vector<int> ITkPixelCsvWaferIdAlg::DmaBuffer() const {
 }
 
 
-std::bitset<32> ITkPixelCsvWaferIdAlg::sourceID(const std::vector<std::string>& spchain, const std::string& flx, const unsigned int dma) const {
+std::bitset<32> ITkPixelCsvWaferIdAlg::sourceID(const std::vector<std::string>& spchain, const std::string& mod, int fe, const std::string& flx, const unsigned int dma) const {
     // ((subdetector ID) << 16) |((FELIX card ID) << 8) | ((FELIX device ID) << 7) | ((DMA buffer number) << 5)
 
     int b_ec = barrel_ec(spchain);
     int ld = layer_disk(spchain);
+    int etamod = eta_module(spchain, mod, fe);
 
     std::bitset<32> b(0);
-    std::bitset<32> subdet = subDetID(b_ec, ld); 
+    std::bitset<32> subdet = subDetID(b_ec, ld, etamod); 
     subdet <<= 16 ; //shift left by 16 bits
     
     bitcheck(subdet, 16, 23, "SourceID : SubDetectorID " );
@@ -610,16 +613,16 @@ std::bitset<32> ITkPixelCsvWaferIdAlg::sourceID(const std::vector<std::string>& 
     bitcheck(flx_host, 8, 15, "SourceID : FELIX host " );
 
     std::bitset<32> flxCard = std::bitset<32>(hostIndex.second);
-    flxCard <<= 7; //shift left by 7 bits
-    bitcheck(flxCard, 7, 7, "SourceID : FELIX card " );
+    flxCard <<= 5; //shift left by 5 bits
+    bitcheck(flxCard, 5, 5, "SourceID : FELIX card " );
 
     std::bitset<32> flxDev = std::bitset<32>(std::stoi(flx_card_device[1]) - 1 );
-    flxDev <<= 6; //shift left by 6 bits
-    bitcheck(flxDev, 6, 6, "SourceID : card device " ); 
+    flxDev <<= 4; //shift left by 6 bits
+    bitcheck(flxDev, 4, 4, "SourceID : card device " ); 
 
     std::bitset<32> dma_b = std::bitset<32>(dma);
-    dma_b <<= 4; //shift left by 4 bits
-    bitcheck(dma_b, 4, 5, "SourceID : DMA buffer index " ); 
+    //dma_b <<= 4; //shift left by 4 bits
+    bitcheck(dma_b, 0, 1, "SourceID : DMA buffer index " ); 
 
     b = subdet | flx_host | flxCard | flxDev | dma_b;
     return b;
@@ -645,20 +648,62 @@ std::vector<std::string> ITkPixelCsvWaferIdAlg::splitFLX_card_device(const std::
 }
 
 
-std::bitset<32> ITkPixelCsvWaferIdAlg::subDetID(int barrel_endcap, int layer_disk) const {
+std::bitset<32> ITkPixelCsvWaferIdAlg::subDetID(int barrel_endcap, int layer_disk, int eta) const {
     if(barrel_endcap == 0){
         if(layer_disk < 2){
-            return std::bitset<32>(0x16);
+            if(eta > 0 ){
+                return std::bitset<32>(0x90); // Inner barrel A
+            }
+            else{
+                return std::bitset<32>(0x91);  // Inner barrel C
+            }
         }
         else{
-            return std::bitset<32>(0x17);
+            if(eta > 0){
+                return std::bitset<32>(0x92); // Outer Barrel A
+            }
+            else{
+                return std::bitset<32>(0x93); // Outer Barrel C
+            }
         }
     }
     else if(barrel_endcap == 2){
-        return std::bitset<32>(0x18);
+        if(layer_disk == 0 || (layer_disk == 2 && eta < 15)){
+            return std::bitset<32>(0x90); // Inner barrel A
+        }
+        else if(layer_disk == 3 || layer_disk == 5 || layer_disk == 7){
+            return std::bitset<32>(0x92); // Outer barrel A
+        }
+        else if(layer_disk == 1 || (layer_disk == 2 || eta >=15 ) ){
+            return std::bitset<32>(0x94); // Inner end-cap A
+        }
+        else if(layer_disk == 4 || layer_disk == 6 || layer_disk == 8){
+            return std::bitset<32>(0x96); // Outer end-cap A
+        }
+        else{
+            ATH_MSG_ERROR("Wrong barrel_endcap / layer_disk / eta_mod values ");
+            ATH_MSG_ERROR("return subDetectorID =0 " );
+            return std::bitset<32>(0);
+        }
     }
     else if(barrel_endcap == -2){
-        return std::bitset<32>(0x19);
+        if(layer_disk == 0 || (layer_disk == 2 && eta < 15)){
+            return std::bitset<32>(0x91); // Inner barrel C
+        }
+        else if(layer_disk == 3 || layer_disk == 5 || layer_disk == 7){
+            return std::bitset<32>(0x93); // Outer barrel C
+        }
+        else if(layer_disk == 1 || (layer_disk == 2 || eta >=15 ) ){
+            return std::bitset<32>(0x95); // Inner end-cap C
+        }
+        else if(layer_disk == 4 || layer_disk == 6 || layer_disk == 8){
+            return std::bitset<32>(0x97); // Outer end-cap C
+        }
+        else{
+            ATH_MSG_ERROR("Wrong barrel_endcap / layer_disk / eta_mod values ");
+            ATH_MSG_ERROR("return subDetectorID =0 " );
+            return std::bitset<32>(0);
+        }
     }
     else{
         ATH_MSG_ERROR("Wrong barrel_endcap value: " << barrel_endcap);
@@ -669,7 +714,7 @@ std::bitset<32> ITkPixelCsvWaferIdAlg::subDetID(int barrel_endcap, int layer_dis
 }
 
 
-const StatusCode ITkPixelCsvWaferIdAlg::sanityCheck(std::string s) const {
+const StatusCode ITkPixelCsvWaferIdAlg::sanityCheck(std::string s, bool legacy) const {
 
     std::ifstream fcheck(s);
     if (!fcheck.good()) {
@@ -742,19 +787,35 @@ const StatusCode ITkPixelCsvWaferIdAlg::sanityCheck(std::string s) const {
                 ATH_MSG_WARNING("Sanity check of file " << s << "  :   Bad number of fibers, line: " << j );
                 ATH_MSG_WARNING("Nfiber = " << rowVec[j].fiber);
             }
-
-            if( (rowVec[j].detResId & std::bitset<32>(0xf0000000)) == std::bitset<32>(0xf0000000) ){
-                fiber_links_map[rowVec[j].fiber] += 0.25;
-            }
-            else if( (rowVec[j].detResId & std::bitset<32>(0xf0000000)) == std::bitset<32>(0xc0000000) ||
-                (rowVec[j].detResId & std::bitset<32>(0xf0000000)) == std::bitset<32>(0x30000000)) {
-                fiber_links_map[rowVec[j].fiber] += 0.5;
-            }
-            else if( (rowVec[j].detResId & std::bitset<32>(0xf0000000)) == std::bitset<32>(0x00000000)) {
-                fiber_links_map[rowVec[j].fiber] += 1;
+            if(legacy){
+                if( (rowVec[j].detResId & std::bitset<32>(0xf0000000)) == std::bitset<32>(0xf0000000) ){
+                    fiber_links_map[rowVec[j].fiber] += 0.25;
+                }
+                else if( (rowVec[j].detResId & std::bitset<32>(0xf0000000)) == std::bitset<32>(0xc0000000) ||
+                    (rowVec[j].detResId & std::bitset<32>(0xf0000000)) == std::bitset<32>(0x30000000)) {
+                    fiber_links_map[rowVec[j].fiber] += 0.5;
+                }
+                else if( (rowVec[j].detResId & std::bitset<32>(0xf0000000)) == std::bitset<32>(0x00000000)) {
+                    fiber_links_map[rowVec[j].fiber] += 1;
+                }
+                else{
+                    ATH_MSG_WARNING("Sanity check of file " << s << "  :   Bad Chip ID value in DetResID, line: " << j );
+                }
             }
             else{
-                ATH_MSG_WARNING("Sanity check of file " << s << "  :   Bad Chip ID value in DetResID, line: " << j );
+                if( (rowVec[j].detResId & std::bitset<32>(0xf0000000)) == std::bitset<32>(0x30000000) ){
+                    fiber_links_map[rowVec[j].fiber] += 0.25;
+                }
+                else if( (rowVec[j].detResId & std::bitset<32>(0xf0000000)) == std::bitset<32>(0x20000000) ||
+                    (rowVec[j].detResId & std::bitset<32>(0xf0000000)) == std::bitset<32>(0x10000000)) {
+                    fiber_links_map[rowVec[j].fiber] += 0.5;
+                }
+                else if( (rowVec[j].detResId & std::bitset<32>(0xf0000000)) == std::bitset<32>(0x00000000)) {
+                    fiber_links_map[rowVec[j].fiber] += 1;
+                }
+                else{
+                    ATH_MSG_WARNING("Sanity check of file " << s << "  :   Bad Chip ID value in DetResID, line: " << j );
+                }
             }
         }
 

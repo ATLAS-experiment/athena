@@ -56,21 +56,21 @@ public:
 
 
     std::tuple<Identifier,int,std::bitset<32>> waferId(const CsvRow& row) const;
-    std::bitset<32> onlineId(const std::vector<std::string>& spchain, const std::string& mod, int fe) const;
+    std::bitset<32> onlineId(const std::vector<std::string>& spchain, const std::string& mod, int fe, bool legacy = false) const;
 
 private:
     static std::string trim(const std::string& input);
     static std::vector<std::string> splitCsvLine(const std::string& line);
     static std::vector<std::string> parseSPChain(const std::string& spChain);
-    const StatusCode sanityCheck(std::string s) const;
+    const StatusCode sanityCheck(std::string s, bool legacy = false) const;
     void bitcheck(std::bitset<32> b, uint32_t lsb_lim, uint32_t msb_lim , const std::string& s = "") const;
     std::pair<unsigned int, unsigned int> flxHost(unsigned int card) const ;
 
 
     std::vector<int> DmaBuffer() const;
-    std::bitset<32> sourceID(const std::vector<std::string>& spchain, const std::string& flx, const unsigned int dma) const;
+    std::bitset<32> sourceID(const std::vector<std::string>& spchain, const std::string& mod, int fe, const std::string& flx, const unsigned int dma) const;
     std::vector<std::string>  splitFLX_card_device(const std::string& s) const;
-    std::bitset<32>  subDetID(int barrel_endcap, int layer_disk) const;
+    std::bitset<32>  subDetID(int barrel_endcap, int layer_disk, int eta) const;
 
 
     // Helper functions implemented in the .cxx file
