@@ -111,7 +111,7 @@ namespace MuonR4 {
                     }
                     // for the combined sTgc space point we have to fill the primary and secondary measuremment seperately to resolve the strip/pad/wire combinations
                     if(uncalib->numDimensions() == 0) {
-                        const auto* combinedMeas = dynamic_cast<const xAOD::CombinedMuonStrip*>(uncalib);
+                        const auto* combinedMeas = static_cast<const xAOD::CombinedMuonStrip*>(uncalib);
                         incrementSummary(combinedMeas->primaryStrip()->identify(), status, combinedMeas->primaryStrip()->numDimensions(), summary);
                         incrementSummary(combinedMeas->secondaryStrip()->identify(), status, combinedMeas->secondaryStrip()->numDimensions(), summary);
                     } else {

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef MUONTESTER_AUXELEMENTBRANCH_IXX
 #define MUONTESTER_AUXELEMENTBRANCH_IXX
@@ -27,11 +27,11 @@ template <class T> void AuxElementBranch<T>::push_back(const SG::AuxElement& p) 
     }
 }
 template <class T>
-AuxElementBranch<T>::AuxElementBranch(TTree* t, const std::string& var_name, const std::string& acc) :
-    VectorBranch<T>(t, var_name), m_acc(acc.empty() ? var_name : acc) {}
+AuxElementBranch<T>::AuxElementBranch(TTree* t, const std::string& var_name, std::string_view acc) :
+    VectorBranch<T>(t, var_name), m_acc(acc.empty() ? var_name : std::string{acc}) {}
 template <class T>
-AuxElementBranch<T>::AuxElementBranch(MuonTesterTree& t, const std::string& var_name, const std::string& acc) :
-    VectorBranch<T>(t.tree(), var_name), m_acc(acc.empty() ? var_name : acc) {}
+AuxElementBranch<T>::AuxElementBranch(MuonTesterTree& t, const std::string& var_name, std::string_view acc) :
+    VectorBranch<T>(t.tree(), var_name), m_acc(acc.empty() ? var_name : std::string{acc}) {}
 
 //########################################################################################
 //                      GenericAuxDecorationBranch

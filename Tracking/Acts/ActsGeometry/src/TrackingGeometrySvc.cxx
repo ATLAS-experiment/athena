@@ -1272,8 +1272,12 @@ std::unique_ptr<ActsTrk::DetectorElementToActsGeometryIdMap>
             return;
         }
 
-        auto insert_id = [&detector_element_to_geoid, &surface, &counter](const xAOD::UncalibMeasType type,
-                                                                          const IdentifierHash& hash) {
+        auto insert_id = [&detector_element_to_geoid, &surface, &counter](const xAOD::UncalibMeasType type) {
+            auto * possibleElement = getActsDetectorElement(surface);
+            if (!possibleElement){
+              return;
+            } 
+            auto hash = possibleElement->identifyHash();
             detector_element_to_geoid->insert(std::make_pair(makeDetectorElementKey(type, hash),
                                                              DetectorElementToActsGeometryIdMap::makeValue(surface->geometryId())));
             ++counter.n_detector_elements;
@@ -1281,16 +1285,13 @@ std::unique_ptr<ActsTrk::DetectorElementToActsGeometryIdMap>
         switch(placement->detectorType()) {
             using enum DetectorType;
             case Pixel:
-                insert_id(xAOD::UncalibMeasType::PixelClusterType,
-                          getActsDetectorElement(surface)->identifyHash());
+                insert_id(xAOD::UncalibMeasType::PixelClusterType);
                 break;
             case Sct:
-                insert_id(xAOD::UncalibMeasType::StripClusterType,
-                          getActsDetectorElement(surface)->identifyHash());
+                insert_id(xAOD::UncalibMeasType::StripClusterType);
                 break;
             case Hgtd:
-                insert_id(xAOD::UncalibMeasType::HGTDClusterType, 
-                         getActsDetectorElement(surface)->identifyHash());
+                insert_id(xAOD::UncalibMeasType::HGTDClusterType);
                 break;
             case Trt: {
                 break;
