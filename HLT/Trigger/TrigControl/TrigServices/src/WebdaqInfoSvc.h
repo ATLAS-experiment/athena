@@ -56,6 +56,7 @@ public:
   virtual ~WebdaqInfoSvc() noexcept override {}
 
   virtual StatusCode initialize ATLAS_NOT_THREAD_SAFE () override;
+  virtual StatusCode configure() override { return StatusCode::SUCCESS; }
   virtual StatusCode stop() override;
   virtual StatusCode finalize() override;
   virtual void handle(const Incident& incident) override;
