@@ -303,28 +303,5 @@ void MCTruthClassifier::findJetConstituents(const xAOD::Jet* jet,
     }
   }
 }
-double MCTruthClassifier::fracParticleInJet(const xAOD::TruthParticle* thePart, const xAOD::Jet* jet, bool DR, bool nparts) const
-{
-  std::set<const xAOD::TruthParticle*> constituents;
-  std::set<const xAOD::TruthParticle*> daughters;
-  std::set<const xAOD::TruthParticle*> intersect;
-
-  findJetConstituents(jet, constituents, DR);
-  MC::findParticleStableDescendants(thePart, daughters);
-  if (daughters.empty()) daughters.insert(thePart);
-  // Get the intersection of constituents and daughters
-  std::set_intersection(constituents.begin(),
-                        constituents.end(),
-                        daughters.begin(),
-                        daughters.end(),
-                        std::inserter(intersect, intersect.begin()));
-
-  if (nparts) return 1.0*intersect.size() / daughters.size();
-  double frac = 0;
-  double tot = 0;
-  for (const auto *daughter : daughters) { tot += daughter->pt();}
-  for (const auto *particle : intersect) { frac += particle->pt();}
-  return frac/tot;
-}
 
 #endif
