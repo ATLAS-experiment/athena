@@ -51,7 +51,7 @@ namespace ActsTrk {
         ** and adding each DDE to the vector corresponding to its sampling in the map
         */
         void fillMaps(std::map<caloRegion, caloSampleSurfaceMap_t>& caloRegionSampleSurfaceMap,
-                      std::map<caloRegion, caloSampleDDEElementsMap_t>& caloRegionSampleDDEElementsMap) const;
+                      std::map<caloRegion, caloSampleDDEElementsMap_t>& caloRegionSampleDDEElementsMap, std::map<std::string, double>& caloDimensions) const;
 
         /** generateCylinderSurfaces generates cylindrical surfaces for each calo sampling.
         ** It does this for cylindrical layers by scanning in Z, for each Z finding the average radius of the cells in a phi ring
@@ -91,7 +91,10 @@ namespace ActsTrk {
           {"HEC1",CaloCell_ID::HEC1},
           {"HEC2",CaloCell_ID::HEC2}, 
           {"HEC3",CaloCell_ID::HEC3}, 
-          {"TileGap3",CaloCell_ID::TileGap3}};
+          {"TileGap3",CaloCell_ID::TileGap3},
+          {"FCAL0",CaloCell_ID::FCAL0},
+          {"FCAL1",CaloCell_ID::FCAL1},
+          {"FCAL2",CaloCell_ID::FCAL2}};
 
         std::vector<std::pair<std::string, CaloCell_ID::CaloSample>> m_caloCylinderSymmetricSampleList{ 
           { "PreSamplerB", CaloCell_ID::PreSamplerB}, 
