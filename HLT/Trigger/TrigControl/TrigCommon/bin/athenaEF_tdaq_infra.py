@@ -15,7 +15,11 @@
 #   ipc_server            initial partition
 #   ipc_server -p <part>  job partition
 #   is_server             DF, RunParams and the OH server
+#   rdb_server            ISRepository, only if --schema is given
 #   webproxy              Used by WebdaqHistSvc on webdaq-port
+#
+# IS publication (WebdaqInfoSvc) needs rdb_server serving the ISRepository (needed by webproxy to resolve the object type).
+# OH publication does not need it, so no --schema means no rdb_server.
 #
 # NB: webproxy MUST be used, NOT webis_server: webproxy deserialises OH POSTs as
 # binary TBufferFile (matching webdaq::oh::put), while webis_server expects
@@ -64,6 +68,9 @@ def parse_args():
                         help='name of the OH IS server (TDAQ_OH_SERVER)')
     parser.add_argument('--run-number', metavar='N', type=int, required=True,
                         help='run number, used to name the output file')
+    parser.add_argument('--schema', metavar='FILE', action='append', default=[],
+                        help='IS schema file (absolute path) to load into the ISRepository, '
+                             'repeatable. If none is given rdb_server is not started')
     parser.add_argument('--log-dir', metavar='DIR', default='.',
                         help='directory for infrastructure log files (default: cwd)')
     parser.add_argument('--tdaq-release', metavar='REL', default=DEFAULT_TDAQ_RELEASE,
@@ -162,8 +169,27 @@ class Infrastructure:
         for server in ['DF', 'RunParams', self.args.oh_server]:
             self._launch(f'is_{server}', ['is_server', '-p', partition, '-n', server])
 
+        self.start_rdb()
         self.start_webproxy()
         self.ready = True
+
+    def start_rdb(self):
+        """Start rdb_server serving the IS type schema"""
+        if not self.args.schema:
+            log.info('No --schema given, not starting rdb_server '
+                     '(IS publication will be rejected with HTTP 400)')
+            return
+
+        missing = [f for f in self.args.schema if not os.path.exists(f)]
+        if missing:
+            log.error('IS schema file(s) not found: %s', ', '.join(missing))
+            self.stop()
+            sys.exit(1)
+
+        log.info('Starting rdb_server with IS schema: %s', ', '.join(self.args.schema))
+        self._launch('rdb', ['rdb_server', '-p', self.args.partition,
+                             '-d', 'ISRepository', '-s',
+                             '-D'] + self.args.schema)
 
     def start_webproxy(self):
         """Start the webproxy REST server""" 

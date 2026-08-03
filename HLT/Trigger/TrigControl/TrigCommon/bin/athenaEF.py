@@ -989,6 +989,27 @@ def update_trigconf_keys(args, flags):
       log.info("Using trigger configuration keys from command line: SMK=%d, L1PSK=%d, HLTPSK=%d",
                args.smk, args.l1psk, args.hltpsk)
 
+# IS schema files, installed under <...>/share/schema (e.g. see TrigCaloHypo/CMakeLists.txt). 
+# Add an entry here for every new IS type
+IS_SCHEMA_FILES = ['schema/Larg.LArNoiseBurstCandidates.is.schema.xml']
+
+def find_is_schema_files():
+   """
+   Resolve IS_SCHEMA_FILES to absolute paths using DATAPATH.
+   rdb_server must be given the schema of every IS type we publish.
+   """
+   from AthenaCommon.Utils.unixtools import find_datafile
+
+   found = []
+   for fname in IS_SCHEMA_FILES:
+      path = find_datafile(fname)
+      if path:
+         found.append(os.path.abspath(path))
+      else:
+         log.error("IS schema file %s not found on DATAPATH: IS publication will fail with HTTP 400", fname)
+   return found
+
+
 def start_oh_infrastructure(args):
    """Start a private TDAQ infrastructure (offline test of OH publication)."""
    import shutil, socket, signal, subprocess, time
@@ -1025,12 +1046,16 @@ def start_oh_infrastructure(args):
    def _pdeathsig():
       cdll['libc.so.6'].prctl(PR_SET_PDEATHSIG, signal.SIGTERM)
 
+   schemas = find_is_schema_files()
+   log.info("IS schema files: %s", ', '.join(schemas) or '(none)')
+
    proc = subprocess.Popen(
       [infra_script,
        '--partition',   partition,
        '--webdaq-port', str(port),
        '--oh-server',   oh_server,
-       '--run-number',  str(run_number)],
+       '--run-number',  str(run_number),
+       *(arg for f in schemas for arg in ('--schema', f))],
       stdout=logfile, stderr=subprocess.STDOUT,
       preexec_fn=_pdeathsig, close_fds=True)
 

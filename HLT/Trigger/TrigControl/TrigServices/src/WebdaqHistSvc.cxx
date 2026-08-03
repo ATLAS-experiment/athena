@@ -637,7 +637,7 @@ void WebdaqHistSvc::monitoringTask(const std::string& appName, unsigned int numS
         int slot_sleep_time = slotSleepDuration.total_milliseconds() - (slot_end_time-slot_start_time).total_milliseconds();
         if (slot_sleep_time > 0) {
           ATH_MSG_DEBUG("Sleeping for " << slot_sleep_time << " seconds before publishing the next batch");
-          conditionedSleep(std::chrono::milliseconds(slot_sleep_time), m_stopFlag);
+          TrigServices::conditionedSleep(std::chrono::milliseconds(slot_sleep_time), m_stopFlag);
         }
       }
       ++BatchCounter;
@@ -658,7 +658,7 @@ void WebdaqHistSvc::monitoringTask(const std::string& appName, unsigned int numS
     const boost::posix_time::time_duration next_cycle(boost::posix_time::milliseconds(interval_ms - (nowMs % interval_ms)));
     ATH_MSG_DEBUG("epoch " << epoch <<", interval_ms" << interval_ms << ", now_ms " << nowMs
                   << "sleeping for " << next_cycle.total_milliseconds() << " milliseconds till the next cycle");
-    conditionedSleep(std::chrono::milliseconds(next_cycle.total_milliseconds()), m_stopFlag);
+    TrigServices::conditionedSleep(std::chrono::milliseconds(next_cycle.total_milliseconds()), m_stopFlag);
   }
   ATH_MSG_INFO("Monitoring task stopped");
 }
@@ -676,21 +676,5 @@ void WebdaqHistSvc::syncPublish(long int interval_ms, const boost::posix_time::p
   //Do not sync if we are below 50 ms
   if (sync.total_milliseconds() > 50){
     std::this_thread::sleep_for(std::chrono::milliseconds(sync.total_milliseconds()));
-  } 
-}
-
-void WebdaqHistSvc::conditionedSleep(std::chrono::milliseconds duration, const std::atomic<bool>& stopFlag) const {
-  const auto start = std::chrono::steady_clock::now();
-  while (true) {
-    if (stopFlag.load()) {
-      return;
-    }
-    const auto elapsed = std::chrono::steady_clock::now() - start;
-    if (elapsed >= duration) {
-      break;
-    }
-    const auto remaining = duration - std::chrono::duration_cast<std::chrono::milliseconds>(elapsed);
-    std::this_thread::sleep_for(std::min(std::chrono::milliseconds(500), remaining));
   }
 }
-

@@ -23,14 +23,7 @@ class TTree;
 #include <mutex>
 
 #include <boost/regex.hpp>
-
-// Helper to mark unsupported interfaces
-#define NOSUPPORT(lvl, what) \
-  do {                                                                  \
-    ATH_MSG_LVL(MSG::lvl, what << "is not supported by this implementation"); \
-    return {};                                                          \
-  } while (0)
-
+#include "TrigServicesUtils.h"
 
 /**
  * HLT online histogram service

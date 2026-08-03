@@ -11,6 +11,8 @@
 #include "AthenaBaseComps/AthService.h"
 #include "CxxUtils/checker_macros.h"
 
+#include "TrigServicesUtils.h"
+
 class TObject;
 class TH1;
 class TH2;
@@ -28,14 +30,6 @@ class TTree;
 #include <boost/regex.hpp>
 #include <boost/date_time/posix_time/posix_time_types.hpp>
 #include <tbb/concurrent_hash_map.h>
-
-// Helper to mark unsupported interfaces
-#define NOSUPPORT(lvl, what) \
-  do {                                                                  \
-    ATH_MSG_LVL(MSG::lvl, what << "is not supported by this implementation"); \
-    return {};                                                          \
-  } while (0)
-
 
 /**
  * HLT online histogram service
@@ -150,8 +144,6 @@ private:
   void publishAll(const boost::regex& nameSelect) const;
   /// Sync the publication to a multiple of the interval
   void syncPublish(long int, const boost::posix_time::ptime&) const;
-  /// Sleep for a duration or until the stop flag is set
-  void conditionedSleep(std::chrono::milliseconds, const std::atomic<bool>&) const;
   /// Publication thread
   std::thread m_thread;
   std::thread m_threadFast;
