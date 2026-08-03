@@ -1767,6 +1767,7 @@ StatusCode TrigEDMChecker::dumpxAODElectronContainer() {
   //
   static const SG::AuxElement::Accessor< float > accLH("LHValue");
   static const SG::AuxElement::Accessor< float > accLHCalo("LHCaloValue");
+  static const SG::AuxElement::Accessor<ElementLink<xAOD::CaloClusterContainer> > orig ("originalCaloCluster");
   for (const auto eg : *elCont){
       //REGTEST printout
       if (eg) {
@@ -1840,7 +1841,6 @@ StatusCode TrigEDMChecker::dumpxAODElectronContainer() {
           ATH_MSG_INFO(" REGTEST: problems with egamma cluster pointer" );
       }
       ATH_MSG_INFO("REGTEST: Check the original (uncalibrated)");
-      static const SG::AuxElement::Accessor<ElementLink<xAOD::CaloClusterContainer> > orig ("originalCaloCluster");
       if (!orig.isAvailable(*eg->caloCluster()) || !orig(*eg->caloCluster()).isValid()){
           ATH_MSG_INFO("Problem with original cluster link");
       }
@@ -1919,7 +1919,8 @@ StatusCode TrigEDMChecker::dumpxAODPhotonContainer() {
   unsigned int isEMbit=0;
   //DEBUG output for xAOD::PhotonContainer
   ATH_MSG_INFO(" REGTEST: xAOD Reconstruction variables: ");
-  //                //Cluster and ShowerShape info
+  //Cluster and ShowerShape info
+  static const SG::AuxElement::Accessor<ElementLink<xAOD::CaloClusterContainer> > orig ("originalCaloCluster");
   for (const auto eg : *phCont){
       //REGTEST printout
       if (eg) {
@@ -1951,7 +1952,6 @@ StatusCode TrigEDMChecker::dumpxAODPhotonContainer() {
           ATH_MSG_INFO(" REGTEST: problems with egamma cluster pointer" );
       }
       ATH_MSG_INFO("REGTEST: Check the original (uncalibrated)");
-      static const SG::AuxElement::Accessor<ElementLink<xAOD::CaloClusterContainer> > orig ("originalCaloCluster");
       if (!orig.isAvailable(*eg->caloCluster()) || !orig(*eg->caloCluster()).isValid()){
           ATH_MSG_INFO("Problem with original cluster link");
       }

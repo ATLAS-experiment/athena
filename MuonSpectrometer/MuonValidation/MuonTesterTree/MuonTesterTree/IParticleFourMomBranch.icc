@@ -8,19 +8,19 @@
 namespace MuonVal {
     template <typename T>
         bool IParticleFourMomBranch::addVariable(const std::string& var,
-                                                 const std::string& acc) {
+                                                 std::string_view acc) {
             if (getBranch<T>(var)) {
                 ATH_MSG_WARNING("The variable "<<var<<" has already been added.");
                 return true;
             }
             return addVariable(std::make_shared<ParticleVariableBranch<T>>(this->tree(), 
                                                                         name() + "_" + var, 
-                                                                        acc.empty() ? var : acc));
+                                                                        acc.empty() ? var : std::string{acc}));
         }
     template <typename T>
         bool IParticleFourMomBranch::addVariable(T def_value, 
                                                 const std::string& var,
-                                                const std::string& acc) {
+                                                std::string_view acc) {
             if (!addVariable<T>(var, acc)) {
                 return false;
             }

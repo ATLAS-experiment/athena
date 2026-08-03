@@ -1,10 +1,12 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef MUONTESTER_AUXELEMENTBRANCH_H
 #define MUONTESTER_AUXELEMENTBRANCH_H
 
 #include <MuonTesterTree/VectorBranch.h>
+#include <string_view>
+
 namespace MuonVal {
 template <class T> class AuxElementBranch : public VectorBranch<T>, virtual public IAuxElementDecorationBranch {
 public:
@@ -19,8 +21,8 @@ public:
     using VectorBranch<T>::getDefault;
     using VectorBranch<T>::hasDefault;
 
-    AuxElementBranch(TTree* t, const std::string& var_name, const std::string& acc = "");
-    AuxElementBranch(MuonTesterTree& t, const std::string& var_name, const std::string& acc = "");
+    AuxElementBranch(TTree* t, const std::string& var_name, std::string_view acc = "");
+    AuxElementBranch(MuonTesterTree& t, const std::string& var_name, std::string_view acc = "");
 
     virtual ~AuxElementBranch() = default;
 

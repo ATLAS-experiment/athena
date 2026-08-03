@@ -1,5 +1,5 @@
 /*
-Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef MUONTESTER_MUONVECTORBRANCH_H
 #define MUONTESTER_MUONVECTORBRANCH_H

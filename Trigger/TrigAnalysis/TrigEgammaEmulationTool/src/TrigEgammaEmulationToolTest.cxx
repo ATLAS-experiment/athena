@@ -105,7 +105,7 @@ StatusCode TrigEgammaEmulationToolTest::fillHistograms( const EventContext &ctx 
       ATH_MSG_DEBUG( "EFTrack : " << accept.getCutResult(4) << " / " << emu_accept.getCutResult(4));
       ATH_MSG_DEBUG( "HLT     : " << accept.getCutResult(5) << " / " << emu_accept.getCutResult(5));
 
-      auto monGroup = getGroup( trigger );
+      const auto& monGroup = getGroup( trigger );
 
       
       // Fill trigger decision tool steps

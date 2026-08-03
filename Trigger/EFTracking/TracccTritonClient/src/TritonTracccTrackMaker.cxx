@@ -526,7 +526,7 @@ StatusCode TritonTracccTrackMaker::convertInDetToXaodCluster(
     const auto& ToTs = indetCluster.totList();
     const auto& charges = indetCluster.chargeList();
     const auto& width = indetCluster.width();
-
+    //coverity[UNINIT]
     xaodCluster.setMeasurement<2>(idHash, localPosition, localCovariance);
     xaodCluster.setIdentifier(indetCluster.identify().get_compact());
     xaodCluster.setRDOlist(RDOs);
@@ -578,7 +578,7 @@ StatusCode TritonTracccTrackMaker::convertInDetToXaodCluster(
 
     const auto& RDOs = indetCluster.rdoList();
     const auto& width = indetCluster.width();
-
+    //coverity[UNINIT]
     xaodCluster.setMeasurement<1>(idHash, localPosition, localCovariance);
     xaodCluster.setIdentifier(indetCluster.identify().get_compact());
     xaodCluster.setRDOlist(RDOs);
@@ -637,7 +637,7 @@ std::optional<Acts::BoundTrackParameters>
 {
     using namespace Acts::UnitLiterals;
     std::shared_ptr<const Acts::Surface> actsSurface;
-    Acts::BoundVector params;
+    Acts::BoundVector params{};
 
     Identifier const atlas_ID(static_cast<Identifier::value_type>(state.athena_id[0]));
 
@@ -656,7 +656,7 @@ std::optional<Acts::BoundTrackParameters>
     Acts::BoundMatrix const cov = buildBoundCovariance(state);
 
     Acts::ParticleHypothesis hypothesis{Acts::ParticleHypothesis::pion()};
-
+    
     return Acts::BoundTrackParameters(actsSurface, params, cov, hypothesis);
 }
 

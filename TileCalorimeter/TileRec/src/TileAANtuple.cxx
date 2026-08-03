@@ -1531,6 +1531,7 @@ TileAANtuple::initNTuple(const EventContext& ctx) {
  */
 void TileAANtuple::fillCellMap(TTree* ntuplePtr, const EventContext& ctx) {
   
+  //coverity[STACK_USE]
   float eta[4][64][48];
   float phi[4][64][48];
   short tower[4][64][48];
@@ -1589,6 +1590,7 @@ void TileAANtuple::fillCellMap(TTree* ntuplePtr, const EventContext& ctx) {
   }
   
   const MbtsDetDescrManager* mbtsMgr = nullptr; //!< Pointer to MbtsDetDescrManager
+  //coverity[STACK_USE]
   if ( detStore()->retrieve(mbtsMgr).isFailure() ) {
     ATH_MSG_WARNING( "Unable to retrieve MbtsDetDescrManager from DetectorStore" );
     mbtsMgr = nullptr;
