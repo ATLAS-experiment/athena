@@ -309,27 +309,27 @@ class MuonWorkingPointSelectionConfig (ConfigBlock) :
             config.addSelection (self.containerName, self.selectionName, alg.selectionDecoration, preselection=self.addSelectionToPreselection)
 
         # Setup the muon quality selection
-        if self.quality != 'NoID': # If NoID, skip quality selection tool
-          alg = config.createAlgorithm( 'CP::MuonSelectionAlgV2',
-                                 'MuonSelectionAlg' )
-          config.addPrivateTool( 'selectionTool', 'CP::MuonSelectionTool' )
-          alg.selectionTool.MuQuality = quality
-          alg.selectionTool.IsRun3Geo = config.geometry() >= LHCPeriod.Run3
-          alg.selectionTool.UseLRT = self.useLRT
-          if config.geometry() is LHCPeriod.Run4:
-              log.warning("Disabling NSW hits for Run4 geometry")
-              alg.selectionTool.ExcludeNSWFromPrecisionLayers = True
-          else:
-              alg.selectionTool.ExcludeNSWFromPrecisionLayers = self.excludeNSWFromPrecisionLayers and (config.geometry() >= LHCPeriod.Run3)
-          alg.selectionDecoration = 'good_muon' + postfix + ',as_char'
-          alg.badMuonVetoDecoration = 'is_bad' + postfix + ',as_char'
-          alg.muons = config.readName (self.containerName)
-          alg.preselection = config.getPreselection (self.containerName, self.selectionName)
-          config.addSelection (self.containerName, self.selectionName,
-                               alg.selectionDecoration,
-                               preselection=self.addSelectionToPreselection)
-          if self.quality == 'HighPt':
-              config.addOutputVar (self.containerName, 'is_bad' + postfix, 'is_bad' + postfix)
+        if quality is not None: 
+            alg = config.createAlgorithm( 'CP::MuonSelectionAlgV2',
+                                   'MuonSelectionAlg' )
+            config.addPrivateTool( 'selectionTool', 'CP::MuonSelectionTool' )
+            alg.selectionTool.MuQuality = quality
+            alg.selectionTool.IsRun3Geo = config.geometry() >= LHCPeriod.Run3
+            alg.selectionTool.UseLRT = self.useLRT
+            if config.geometry() is LHCPeriod.Run4:
+                log.warning("Disabling NSW hits for Run4 geometry")
+                alg.selectionTool.ExcludeNSWFromPrecisionLayers = True
+            else:
+                alg.selectionTool.ExcludeNSWFromPrecisionLayers = self.excludeNSWFromPrecisionLayers and (config.geometry() >= LHCPeriod.Run3)
+            alg.selectionDecoration = 'good_muon' + postfix + ',as_char'
+            alg.badMuonVetoDecoration = 'is_bad' + postfix + ',as_char'
+            alg.muons = config.readName (self.containerName)
+            alg.preselection = config.getPreselection (self.containerName, self.selectionName)
+            config.addSelection (self.containerName, self.selectionName,
+                                 alg.selectionDecoration,
+                                 preselection=self.addSelectionToPreselection)
+            if self.quality == 'HighPt':
+                config.addOutputVar (self.containerName, 'is_bad' + postfix, 'is_bad' + postfix)
 
         # Set up the isolation calculation algorithm:
         if self.isolation != 'NonIso' :
@@ -408,7 +408,7 @@ class MuonWorkingPointEfficiencyConfig (ConfigBlock) :
 
         sfList = []
         # Set up the reco/ID efficiency scale factor calculation algorithm:
-        if config.dataType() is not DataType.Data and self.quality != 'NoID' and not self.noEffSF:
+        if config.dataType() is not DataType.Data and quality is not None and not self.noEffSF:
             alg = config.createAlgorithm( 'CP::MuonEfficiencyScaleFactorAlg',
                                    'MuonEfficiencyScaleFactorAlgReco' )
             config.addPrivateTool( 'efficiencyScaleFactorTool',
