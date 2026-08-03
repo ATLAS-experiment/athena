@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "GaudiKernel/ISvcLocator.h"
@@ -128,7 +128,7 @@ AtRanluxGenSvc::initialize()
   //for (VStrings::const_iterator i = m_streams_seeds.begin(); i != m_streams_seeds.end(); ++i) {
   for (const auto& i : m_streams_seeds) {
     string stream; 
-    uint32_t seed1, seed2, offset(0);
+    uint32_t seed1{}, seed2{}, offset{};
     //parse the stream property string
     short ll(m_defaultLuxLevel); // temp copy so we don't overwrite default
     if (interpretSeeds(i, stream, seed1, seed2, ll, offset)) {
