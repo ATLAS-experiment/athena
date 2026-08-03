@@ -635,6 +635,10 @@ class TauTriggerAnalysisSFBlock (ConfigBlock):
             if config.campaign() is Campaign.MC23e:
                 log.warning("Tau trigger scale factors are not available yet for MC23e")
                 return
+            # Temporary skip for MC23g until SFs are available
+            if config.campaign() is Campaign.MC23g:
+                log.warning("Tau trigger scale factors are not available yet for MC23g")
+                return
 
             triggers = trigger_set(config, self.triggerChainsPerYear,
                                    self.includeAllYearsPerRun)
