@@ -683,7 +683,7 @@ class CPGridRun:
             else:
                 return [','.join(files)], [path.stem.replace("+", "")]
 
-        return files, [None]
+        return files, [None] * len(files)
 
     def printDelayedErrorCollection(self):
         if self._errorCollector:
