@@ -79,10 +79,7 @@ if __name__ == "__main__":
     )
 
     candidateBuilderTool = acc.popToolsAndMerge(
-        TgcL0FloatingCandidateBuilderToolCfg(
-            flags,
-            EnableTruthValidation=True,
-        )
+        TgcL0FloatingCandidateBuilderToolCfg(flags)
     )
     acc.merge(
         L0MuonTGCSimCfg(

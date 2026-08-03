@@ -11,22 +11,6 @@ def TgcL0FloatingCandidateBuilderToolCfg(
 
     result.merge(TGCCablingConfigCfg(flags))
 
-    if kwargs.get("EnableTruthValidation", False):
-        from TrackingGeometryCondAlg.AtlasTrackingGeometryCondAlgConfig import (
-            TrackingGeometryCondAlgCfg,
-        )
-        from TrkConfig.AtlasExtrapolatorConfig import AtlasExtrapolatorCfg
-
-        result.merge(TrackingGeometryCondAlgCfg(flags))
-        extrapolator = result.popToolsAndMerge(AtlasExtrapolatorCfg(flags))
-        # Truth extrapolation is diagnostic only.  Keep its verbose internal
-        # messages out of the candidate-builder DEBUG log while preserving
-        # warnings and errors.
-        from AthenaCommon.Constants import WARNING
-
-        extrapolator.OutputLevel = WARNING
-        kwargs.setdefault("TrackExtrapolator", extrapolator)
-
     result.setPrivateTools(
         CompFactory.L0Muon.TgcL0FloatingCandidateBuilderTool(name, **kwargs)
     )

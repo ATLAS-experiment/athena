@@ -12,6 +12,8 @@ namespace L0Muon {
 class TgcL0BitwiseCandidateBuilderTool final
     : public extends<AthAlgTool, ITgcL0CandidateBuilderTool> {
  public:
+  using ITgcL0CandidateBuilderTool::build;
+
   using base_class::base_class;
 
   /// \copydoc ITgcL0CandidateBuilderTool::build

@@ -9,9 +9,6 @@
 #include "MuonIdHelpers/IMuonIdHelperSvc.h"
 #include "MuonTGC_Cabling/TgcCablingMap.h"
 #include "MuonReadoutGeometry/MuonDetectorManager.h"
-#include "GeneratorObjects/McEventCollection.h"
-#include "StoreGate/ReadHandleKey.h"
-#include "TrkExInterfaces/IExtrapolator.h"
 #include "StoreGate/ReadCondHandleKey.h"
 
 #include <vector>
@@ -30,6 +27,12 @@ class TgcL0FloatingCandidateBuilderTool final
                    TgcL0CandidateContainer& candidates,
                    const EventContext& ctx) const override;
 
+  /// \copydoc ITgcL0CandidateBuilderTool::build
+  StatusCode build(const TgcRdoContainer& rdos,
+                   TgcL0CandidateContainer& candidates,
+                   TgcL0SegmentContainer* segments,
+                   const EventContext& ctx) const override;
+
  private:
   ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{
       this, "MuonIdHelperSvc", "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
@@ -37,18 +40,6 @@ class TgcL0FloatingCandidateBuilderTool final
       this, "CablingKey", "MuonTgc_CablingMap"};
   SG::ReadCondHandleKey<MuonGM::MuonDetectorManager> m_detectorManagerKey{
       this, "DetectorManagerKey", "MuonDetectorManager"};
-
-  Gaudi::Property<bool> m_enableTruthValidation{
-      this, "EnableTruthValidation", false,
-      "Enable station-extrapolated truth diagnostics"};
-  SG::ReadHandleKey<McEventCollection> m_truthEventKey{
-      this, "TruthEventKey", "TruthEvent", "Input truth-event collection"};
-  ToolHandle<Trk::IExtrapolator> m_truthExtrapolator{
-      this, "TrackExtrapolator", "",
-      "Extrapolator used only by truth validation"};
-  Gaudi::Property<float> m_truthMatchMaxMeanDeltaR{
-      this, "TruthMatchMaxMeanDeltaR", 0.08F,
-      "Maximum station-averaged deltaR for a diagnostic truth match"};
 
   Gaudi::Property<float> m_maxPivotWireStripDeltaEta{
       this, "MaxPivotWireStripDeltaEta", -1.F,

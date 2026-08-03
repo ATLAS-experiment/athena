@@ -4,6 +4,8 @@
 #ifndef L0MUONS1TGCINTERFACES_TGCL0CANDIDATE_H
 #define L0MUONS1TGCINTERFACES_TGCL0CANDIDATE_H
 
+#include "AthenaKernel/CLASS_DEF.h"
+
 #include <cstdint>
 #include <vector>
 
@@ -101,5 +103,7 @@ struct TgcL0Candidate {
 using TgcL0CandidateContainer = std::vector<TgcL0Candidate>;
 
 }  // namespace L0Muon
+
+CLASS_DEF(L0Muon::TgcL0CandidateContainer, 1316895010, 1)
 
 #endif

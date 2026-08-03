@@ -6,6 +6,7 @@
 
 #include "GaudiKernel/StatusCode.h"
 #include "L0MuonS1TGCToolInterfaces/TgcL0Candidate.h"
+#include "L0MuonS1TGCToolInterfaces/TgcL0Segment.h"
 #include "TgcL0FloatingData.h"
 
 #include <cstddef>
@@ -66,7 +67,8 @@ class SegmentReconstruction {
 
   StatusCode build(const StationCoincidenceContainer& coincidences,
                    TgcL0CandidateContainer& candidates,
-                   SegmentStatistics& statistics) const;
+                   SegmentStatistics& statistics,
+                   TgcL0SegmentContainer* validationSegments = nullptr) const;
 
  private:
   SegmentReconstructionConfig m_config{};
