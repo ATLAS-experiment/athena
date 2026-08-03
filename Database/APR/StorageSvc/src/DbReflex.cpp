@@ -94,10 +94,9 @@ Guid DbReflex::guid(const TypeH& type)
      }
      else  {
         Guid id;
-        const string& s = fullTypeName(type);
         // fill GUID with 16byte MD5 binary checksum digest of the typename
-        MD5 checkSum((unsigned char*)s.c_str(), s.length());
-        checkSum.raw_digest((unsigned char*)&id);
+        MD5 checkSum(fullTypeName(type));
+        checkSum.raw_digest(reinterpret_cast<unsigned char*>(&id));
         guid_mapping()[id] = type;
         type_mapping()[type] = id;
         return id;

@@ -44,10 +44,8 @@ static const Guid s_localDb("00000000-0000-0000-0000-000000000000");
 
 /// Produce the token keys only on demand for export
 void makeKey(const Token* tok, Guid& guid)  {
-   const std::string& s = tok->key();
-   MD5 checkSum((unsigned char*)s.c_str(), s.length());
-   void* id = (void*)(&guid);
-   checkSum.raw_digest((unsigned char*)(id));
+   MD5 checkSum(tok->key());
+   checkSum.raw_digest(reinterpret_cast<unsigned char*>(&guid));
 }
 
 // Standard Constructor
