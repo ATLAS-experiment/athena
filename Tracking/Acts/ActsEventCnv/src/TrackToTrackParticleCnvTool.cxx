@@ -58,9 +58,9 @@ namespace {
    }
 
    template <int nRowsMax, int nMatSize>
-   inline void lowerTriangleToVectorScaleLastRow(const Acts::SquareMatrix<nMatSize>& covMatrix,
-                                                 std::vector<float>& vec,
-                                                 const double last_element_scale) {
+   inline void lowerTriangleToVectorScaleQOverP(const Acts::SquareMatrix<nMatSize>& covMatrix,
+                                                std::vector<float>& vec,
+                                                const double qOverPScale) {
       vec.clear();
       static_assert(nRowsMax > 0);
       static_assert(nMatSize > 0);
@@ -68,9 +68,10 @@ namespace {
       vec.reserve(Acts::sumUpToN(nRows));
       for (int i = 0; i < nRows; ++i) {
          for (int j = 0; j <= i; ++j) {
-            const double covVal = covMatrix(i,j) * 
-               ( i == Acts::eBoundQOverP || j == Acts::eBoundQOverP ? 
-                              last_element_scale : 1.);
+            // scale once per q/p index, i.e. the (q/p, q/p) variance is scaled twice
+            const double covVal = covMatrix(i,j) *
+               (i == Acts::eBoundQOverP ? qOverPScale : 1.) *
+               (j == Acts::eBoundQOverP ? qOverPScale : 1.);
             vec.emplace_back(toFloat(covVal));
          }
       }
@@ -153,7 +154,7 @@ namespace ActsTrk {
       }
 
       if (perigeeParam.covariance().has_value()) {
-         lowerTriangleToVectorScaleLastRow<5>(perigeeParam.covariance().value(), tmp_cov_vector, 1_MeV);
+         lowerTriangleToVectorScaleQOverP<5>(perigeeParam.covariance().value(), tmp_cov_vector, 1_MeV);
          track_particle.setDefiningParametersCovMatrixVec(tmp_cov_vector);
          if (m_hgtdDecorationLevel>0) {
             static const SG::Accessor<float> perigeeTimeResolution("timeResolution");
