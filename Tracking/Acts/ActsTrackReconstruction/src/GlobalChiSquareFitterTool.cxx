@@ -56,8 +56,7 @@ StatusCode GlobalChiSquareFitterTool::initialize() {
   Gx2FitterExtension_t extensionTemplate{};
   extensionTemplate.outlierFinder.connect<&detail::FitterHelperFunctions::ATLASOutlierFinder::operator()
                                             <MutableTrackStateBackend>>(&m_outlierFinder);
-  extensionTemplate.updater.connect<&detail::FitterHelperFunctions::gainMatrixUpdate<MutableTrackStateBackend>>();
-
+ 
   /// Configure the fit extensions for Trk::MeasuremenBase pass through fits.
   {
     m_trkMeasCalibrator = detail::TrkMeasurementCalibrator{};
