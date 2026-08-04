@@ -30,6 +30,19 @@ public:
         std::string flx_card_device;
         unsigned int fiber = 0;
     };
+    struct FelixCsvRow {
+        std::string host;
+        unsigned int card1 = 999;
+        unsigned int card2 = 999;
+    };
+    struct OutputCsvRow {
+        std::bitset<32> detResId;
+        std::bitset<32> tdetResId;
+        std::string card_dev;
+        unsigned int fiber;
+        unsigned int dma;
+        std::bitset<32> sourceId;
+    };
 
     ITkPixelCsvWaferIdAlg(const std::string& name, ISvcLocator* pSvcLocator);
     virtual ~ITkPixelCsvWaferIdAlg() = default;
@@ -40,17 +53,24 @@ public:
     const std::vector<CsvRow>& rows() const { return m_rows; }
 
     StatusCode loadCsv();
+
+
     std::tuple<Identifier,int,std::bitset<32>> waferId(const CsvRow& row) const;
-    std::bitset<32> onlineId(const std::vector<std::string>& spchain, const std::string& mod, int fe) const;
+    std::bitset<32> onlineId(const std::vector<std::string>& spchain, const std::string& mod, int fe, bool legacy = false) const;
 
 private:
     static std::string trim(const std::string& input);
     static std::vector<std::string> splitCsvLine(const std::string& line);
     static std::vector<std::string> parseSPChain(const std::string& spChain);
+    const StatusCode sanityCheck(std::string s, bool legacy = false) const;
+    void bitcheck(std::bitset<32> b, uint32_t lsb_lim, uint32_t msb_lim , const std::string& s = "") const;
+    std::pair<unsigned int, unsigned int> flxHost(unsigned int card) const ;
+
+
     std::vector<int> DmaBuffer() const;
-    std::bitset<32> sourceID(const std::vector<std::string>& spchain, const std::string& flx, const unsigned int dma) const;
+    std::bitset<32> sourceID(const std::vector<std::string>& spchain, const std::string& mod, int fe, const std::string& flx, const unsigned int dma) const;
     std::vector<std::string>  splitFLX_card_device(const std::string& s) const;
-    std::bitset<32>  subDetID(int barrel_endcap, int layer_disk) const;
+    std::bitset<32>  subDetID(int barrel_endcap, int layer_disk, int eta) const;
 
 
     // Helper functions implemented in the .cxx file
@@ -64,6 +84,10 @@ private:
                                            "CsvFile",
                                            "AT2-IP-ES-0016_v1.41_INCOMPLETE-ModuleA_slim.csv",
                                            "CSV file containing SP chain, Module and FE columns"};
+    Gaudi::Property<std::string> m_FelixCardFile{this,
+                                           "FelixCardFile",
+                                           "FELIXRackAllocation_20260709_slim.csv",
+                                           "CSV file containing SP chain, Module and FE columns"};
     Gaudi::Property<std::string> m_outputFile{this,
                                               "OutputFile",
                                               "ITkPixelWaferIds.txt",
@@ -71,6 +95,7 @@ private:
 
     const PixelID* m_pixIdHelper = nullptr;
     std::vector<CsvRow> m_rows;
+    std::vector<FelixCsvRow> m_felix_rows;
 
     mutable std::atomic<bool> m_done{false};
 };
