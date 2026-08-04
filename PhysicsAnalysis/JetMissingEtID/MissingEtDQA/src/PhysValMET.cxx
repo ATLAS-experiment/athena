@@ -46,8 +46,7 @@
 using namespace xAOD;
 
 //Setup namespace
-namespace MissingEtDQA 
-{
+namespace MissingEtDQA {
 
   /////////////////////////////////////////////////////////////////// 
   // Public methods: 
@@ -116,7 +115,7 @@ namespace MissingEtDQA
     m_names["RefEle"] = "Electron term";
     m_names["RefGamma"] = "Photon term";
     m_names["RefTau"] = "Tau term";
-    m_names["Muons"] = "Muon term";
+    m_names["RefMuons"] = "Muon term";
     m_names["RefJet"] = "Jet term";
     m_names["SoftClus"] = "Cluster-based soft term";
     m_names["PVSoftTrk"] = "Track-based soft term (PV-matched)";
@@ -136,7 +135,7 @@ namespace MissingEtDQA
     m_terms.emplace_back("RefEle");
     m_terms.emplace_back("RefGamma");
     m_terms.emplace_back("RefTau");
-    m_terms.emplace_back("Muons");
+    m_terms.emplace_back("RefMuons");
     m_terms.emplace_back("RefJet");
     m_terms.emplace_back("SoftClus");
     m_terms.emplace_back("PVSoftTrk");
@@ -144,6 +143,7 @@ namespace MissingEtDQA
     m_terms.emplace_back("FinalClus");
 
     ATH_MSG_INFO("Retrieving tools...");
+
     //retrieve tools
     ATH_CHECK( m_metmakerTopo.retrieve() ); 
     ATH_CHECK( m_metmakerPFlow.retrieve() );
@@ -153,6 +153,7 @@ namespace MissingEtDQA
     ATH_CHECK( m_tauSelTool.retrieve() );
     ATH_CHECK( m_jvtToolEM.retrieve() );
     ATH_CHECK( m_jvtToolPFlow.retrieve() );
+
     //Clearing vector
     m_MET.clear();
     m_MET_x.clear();
@@ -181,10 +182,9 @@ namespace MissingEtDQA
   //Book histograms
   StatusCode PhysValMET::bookHistograms()
   { 
+
     ATH_MSG_INFO ("Booking hists " << name() << "...");
       
-    // Physics validation plots are level 10
-
     //define hist info
     int nbinp = 100;
     int nbinpxy = 100;
@@ -196,12 +196,11 @@ namespace MissingEtDQA
     double lowET = 0.;
     double suET = 2500.;
 
-    if (m_detailLevel >= 10) 
-    {
+    // Physics validation plots are level 10
+    if (m_detailLevel >= 10) {
 
       //loop through jet types
-      for (const auto& jet_type : m_types)
-      {
+      for (const auto& jet_type : m_types){
         //define variables
         std::string name_met;
         std::string name_sub;
@@ -213,29 +212,29 @@ namespace MissingEtDQA
         corrClus_names.emplace_back("RefEle");
         corrClus_names.emplace_back("RefGamma");
         corrClus_names.emplace_back("RefTau");
-        corrClus_names.emplace_back("Muons");
+        corrClus_names.emplace_back("RefMuons");
         corrClus_names.emplace_back("RefJet");
         corrClus_names.emplace_back("SoftClus");
         
         corrTrk_names.emplace_back("RefEle");
         corrTrk_names.emplace_back("RefGamma");
         corrTrk_names.emplace_back("RefTau");
-        corrTrk_names.emplace_back("Muons");
+        corrTrk_names.emplace_back("RefMuons");
         corrTrk_names.emplace_back("RefJet");
         corrTrk_names.emplace_back("PVSoftTrk");
 
         sum_names.emplace_back("RefEle");
         sum_names.emplace_back("RefGamma");
         sum_names.emplace_back("RefTau");
-        sum_names.emplace_back("Muons");
+        sum_names.emplace_back("RefMuons");
         sum_names.emplace_back("RefJet");
 
         //Create and Register histograms for and Rebuilt
         std::vector <std::string> met_type = {"MET_Rebuilt_"};
         ATH_MSG_INFO("****STARTING****");
+
         //loop for rebuilt
-        for (const auto& type : met_type)
-        {
+        for (const auto& type : met_type){
           //define variables 
           name_met = type + jet_type;
           m_dir_met.clear();
@@ -259,9 +258,11 @@ namespace MissingEtDQA
           std::vector<TH1D*> v_MET_Kine_eta;
           std::vector<TH1D*> v_MET_Kine_phi;
           std::vector<TH1D*> v_MET_multi;
+
           //Create histograms
-          for(const auto& term : m_terms) 
-          {
+
+          //Setup Term histograms
+          for(const auto& term : m_terms){
             v_MET.push_back( new  TH1D((name_met + "_" + term).c_str(), (name_met + " " + m_names[term] + "; E_{T}^{miss} [GeV]; Entries / 5 GeV").c_str(), nbinp, 0., suptmi) );
             v_MET_x.push_back( new  TH1D((name_met + "_" + term +"_x").c_str(), (name_met + " " + m_names[term] + " x; E_{x}^{miss} [GeV]; Entries / 5 GeV").c_str(), nbinpxy, -suptmixy, suptmixy) );
             v_MET_y.push_back( new  TH1D((name_met + "_" + term + "_y").c_str(), (name_met + " " + m_names[term] + " y; E_{y}^{miss} [GeV]; Entries / 5 GeV").c_str(), nbinpxy, -suptmixy, suptmixy) );
@@ -276,9 +277,8 @@ namespace MissingEtDQA
           m_MET_phi[name_met] = v_MET_phi;
           m_MET_sum[name_met] = v_MET_sum;
 
-          //Register histograms
-          for(std::vector<TH1D*>::size_type i = 0; i < v_MET.size(); ++i) 
-          {
+          //Register Term histograms
+          for(std::vector<TH1D*>::size_type i = 0; i < v_MET.size(); ++i) {
             ATH_CHECK(regHist(m_MET[name_met].at(i),m_dir_met[i],all));
             ATH_CHECK(regHist(m_MET_x[name_met].at(i),m_dir_met[i],all));
             ATH_CHECK(regHist(m_MET_y[name_met].at(i),m_dir_met[i],all));
@@ -286,20 +286,19 @@ namespace MissingEtDQA
             ATH_CHECK(regHist(m_MET_sum[name_met].at(i),m_dir_met[i],all));
           }
  
-          //Create cumulative hists
+          //Setup cumulative hists
           name_sub = name_met + "/Cumulative";
           v_MET_Cumu.push_back( new  TH1D((name_met + "_Cumulative_FinalClus").c_str(), (name_met + " CST MET cumulative; E_{T}^{miss} [GeV]; Entries / 5 GeV").c_str(), nbinp, 0., suptmi) );
           v_MET_Cumu.push_back( new  TH1D((name_met + "_Cumulative_FinalTrk").c_str(), (name_met + " TST MET cumulative; E_{T}^{miss} [GeV]; Entries / 5 GeV").c_str(), nbinp, 0., suptmi) );
         
           m_MET_Cumu[name_met] = v_MET_Cumu;
         
-          //Regiser cumulative hists
-          for(std::vector<TH1D*>::size_type i = 0; i < v_MET_Cumu.size(); ++i) 
-          {
+          //Register cumulative hists
+          for(std::vector<TH1D*>::size_type i = 0; i < v_MET_Cumu.size(); ++i) {
             ATH_CHECK(regHist(m_MET_Cumu[name_met].at(i),"MET/" + name_sub + "/",all));
           }
 
-          //create Residual histograms        
+          //Setup Residual histograms        
           name_sub = name_met + "/Residuals";
           v_MET_Resolution.push_back(  new TH1D((name_met + "_Resolution_FinalClus_x").c_str(), ("x-Residual of CST MET in " + name_met + "; #Delta(E_{T,CST}^{miss}, E_{T,truth}^{miss})_{x} [GeV]; Entries / 5 GeV").c_str(), nbinpxy, -suptmixy, suptmixy) );
           v_MET_Resolution.push_back(  new TH1D((name_met + "_Resolution_FinalClus_y").c_str(), ("y-Residual of CST MET in " + name_met + "; #Delta(E_{T,CST}^{miss}, E_{T,truth}^{miss})_{y} [GeV]; Entries / 5 GeV").c_str(), nbinpxy, -suptmixy, suptmixy) );
@@ -309,12 +308,11 @@ namespace MissingEtDQA
           m_MET_Resolution[name_met] = v_MET_Resolution;
         
           //register Residual histograms
-          for(std::vector<TH1D*>::size_type i = 0; i < v_MET_Resolution.size(); ++i) 
-          {
+          for(std::vector<TH1D*>::size_type i = 0; i < v_MET_Resolution.size(); ++i){
             ATH_CHECK(regHist(m_MET_Resolution[name_met].at(i),"MET/" + name_sub + "/",all));
           }
  
-          //create Significance hists        
+          //Setup Significance hists        
           name_sub = name_met + "/Significance";
           v_MET_Significance.push_back(  new TH1D((name_met + "_Significance_FinalClus").c_str(), ("MET / sqrt(sumet) for " + name_met + " CST; MET/#sqrt{SET} [#sqrt{GeV}]; Entries / 0.25 #sqrt{GeV}").c_str(), nbinp, 0., 25.) );
           v_MET_Significance.push_back(  new TH1D((name_met + "_Significance_FinalTrk").c_str(), ("MET / sqrt(sumet) for " + name_met + " TST; MET/#sqrt{SET} [#sqrt{GeV}]; Entries / 0.25 #sqrt{GeV}").c_str(), nbinp, 0., 25.) );
@@ -322,12 +320,11 @@ namespace MissingEtDQA
           m_MET_Significance[name_met] = v_MET_Significance;
         
           //Register Significance hists
-          for(std::vector<TH1D*>::size_type i = 0; i < v_MET_Significance.size(); ++i) 
-          {
+          for(std::vector<TH1D*>::size_type i = 0; i < v_MET_Significance.size(); ++i) {
             ATH_CHECK(regHist(m_MET_Significance[name_met].at(i),"MET/" + name_sub + "/",all));
           }
  
-          //Create dPhi hists        
+          //Setup dPhi hists        
           name_sub = name_met + "/dPhi";
           v_MET_dPhi.push_back(  new TH1D((name_met + "_dPhi_leadJetMET_FinalClus").c_str(), ("MET deltaPhi vs leading jet for " + name_met + " CST; #Delta#Phi(leadJet, MET); Entries / 0.05").c_str(), nbinphi, 0., binphi) );
           v_MET_dPhi.push_back(  new TH1D((name_met + "_dPhi_subleadJetMET_FinalClus").c_str(), ("MET deltaPhi vs subleading jet for " + name_met + " CST; #Delta#Phi(subleadJet, MET); Entries / 0.05").c_str(), nbinphi, 0., binphi) );
@@ -339,24 +336,21 @@ namespace MissingEtDQA
           m_MET_dPhi[name_met] = v_MET_dPhi;
         
           //Register dPhi hists
-          for(std::vector<TH1D*>::size_type i = 0; i < v_MET_dPhi.size(); ++i) 
-          {
+          for(std::vector<TH1D*>::size_type i = 0; i < v_MET_dPhi.size(); ++i) {
             ATH_CHECK(regHist(m_MET_dPhi[name_met].at(i),"MET/" + name_sub + "/",all));
           }
          
-          //Create Correlation hists
+          //Setup Correlation hists
           name_sub = name_met + "/Correlations";
 
           v_MET_CorrFinalClus.reserve(corrClus_names.size());
 
-          for(const auto& it : corrClus_names) 
-          {
+          for(const auto& it : corrClus_names) {
             v_MET_CorrFinalClus.push_back( new  TH2D((name_met + "_" + it + "_FinalClus").c_str(), (name_met + " " + m_names[it] + " vs. CST MET; E_{T," + it + "}^{miss} [GeV]; E_{T,CST}^{miss} [GeV]; Entries").c_str(), nbinp, 0., suptmi, nbinp, 0., suptmi) );
           }
           v_MET_CorrFinalTrk.reserve(corrTrk_names.size());
 
-          for(const auto& it : corrTrk_names) 
-          {
+          for(const auto& it : corrTrk_names) {
             v_MET_CorrFinalTrk.push_back( new  TH2D((name_met + "_" + it + "_FinalTrk").c_str(), (name_met + " " + m_names[it] + " vs. TST MET; E_{T," + it + "}^{miss} [GeV]; E_{T,TST}^{miss} [GeV]; Entries").c_str(), nbinp, 0., suptmi, nbinp, 0., suptmi) );
           }
 
@@ -364,20 +358,17 @@ namespace MissingEtDQA
           m_MET_CorrFinalTrk[name_met] = v_MET_CorrFinalTrk;
 
           //Register Correlation hists
-          for(std::vector<TH2D*>::size_type i = 0; i < v_MET_CorrFinalTrk.size(); ++i) 
-          {
+          for(std::vector<TH2D*>::size_type i = 0; i < v_MET_CorrFinalTrk.size(); ++i) {
             ATH_CHECK(regHist(m_MET_CorrFinalTrk[name_met].at(i),"MET/" + name_sub + "/",all));
           }
-          for(std::vector<TH2D*>::size_type i = 0; i < v_MET_CorrFinalClus.size(); ++i) 
-          {
+          for(std::vector<TH2D*>::size_type i = 0; i < v_MET_CorrFinalClus.size(); ++i) {
             ATH_CHECK(regHist(m_MET_CorrFinalClus[name_met].at(i),"MET/" + name_sub + "/",all));
           }
 
           m_dir_met.clear();
          
-          //Create Diff histograms
-          for(const auto& it : sum_names) 
-          {
+          //Setup Diff histograms
+          for(const auto& it : sum_names) {
             v_MET_Diff.push_back( new  TH1D((name_met + "_Diff_" + it).c_str(), ("MET_Diff " + m_names[it] + " in " + name_met +"; #Sigma p_{T}^{Val} - #Sigma p_{T}^{No Val} [GeV]; Entries / 4 GeV").c_str(), nbinpxy, -200, 200));
             v_MET_Diff_x.push_back( new  TH1D((name_met + "_Diff_" + it +"_x").c_str(), ("MET_Diff x " + m_names[it] + " in " + name_met +"; #Sigma p_{x}^{Val} - #Sigma p_{x}^{No Val} [GeV]; Entries / 4 GeV").c_str(), nbinpxy, -200, 200) );
             v_MET_Diff_y.push_back( new  TH1D((name_met + "_Diff_" + it +"_y").c_str(), ("MET_Diff y " + m_names[it] + " in " + name_met +"; #Sigma p_{y}^{Val} - #Sigma p_{y}^{No Val} [GeV]; Entries / 4 GeV").c_str(), nbinpxy, -200, 200) );
@@ -393,8 +384,7 @@ namespace MissingEtDQA
           m_MET_Diff_sum[name_met] = v_MET_Diff_sum;
         
           //Register Diff histograms
-          for(std::vector<TH1D*>::size_type i = 0; i < v_MET_Diff.size(); ++i) 
-          {
+          for(std::vector<TH1D*>::size_type i = 0; i < v_MET_Diff.size(); ++i) {
             ATH_CHECK(regHist(m_MET_Diff[name_met].at(i),m_dir_met[i],all));
             ATH_CHECK(regHist(m_MET_Diff_x[name_met].at(i),m_dir_met[i],all));
             ATH_CHECK(regHist(m_MET_Diff_y[name_met].at(i),m_dir_met[i],all));
@@ -402,42 +392,38 @@ namespace MissingEtDQA
             ATH_CHECK(regHist(m_MET_Diff_sum[name_met].at(i),m_dir_met[i],all));
           }
           m_dir_met.clear();
-        //Kin histos
-          for(const auto& it : sum_names)
-          {
-            v_MET_Kine_pt.push_back( new  TH1D((name_met + "_Kine_" + it+"_pt").c_str(), ("MET_Kine pt" + m_names[it] + " in " + name_met +"; p_{T} [GeV]; Entries / 3 GeV").c_str(), nbinpxy, 0, 300));
+
+          //Setup Kin histos
+          for(const auto& it : sum_names){
+            v_MET_Kine_pt.push_back( new  TH1D((name_met + "_Kine_" + it+"_pt").c_str(), ("MET_Kine pt " + m_names[it] + " in " + name_met +"; p_{T} [GeV]; Entries / 3 GeV").c_str(), nbinpxy, 0, 300));
             v_MET_Kine_eta.push_back( new  TH1D((name_met + "_Kine_" + it +"_eta").c_str(), ("MET_Kine eta " + m_names[it] + " in " + name_met +"; #eta ; Entries / 0.1").c_str(), 100, -5, 5) );
             v_MET_Kine_phi.push_back( new  TH1D((name_met + "_Kine_" + it +"_phi").c_str(), ("MET_Kine phi " + m_names[it] + " in " + name_met +"; #Phi ; Entries / 0.1").c_str(), nbinphi, -binphi, binphi) );
             v_MET_multi.push_back( new  TH1D((name_met + "_multi_" + it).c_str(), ("MET_multi " + m_names[it] + " in " + name_met +"; Multiplicity; Entries").c_str(), 20,-0.5,20.5) );
-            m_dir_met.push_back("MET/" + name_met + "/Kinematics/" + it + "/");                                      }
-            m_MET_Kine_pt[name_met] = v_MET_Kine_pt;
-            m_MET_Kine_eta[name_met] = v_MET_Kine_eta;
-            m_MET_Kine_phi[name_met] = v_MET_Kine_phi;
-            m_MET_multi[name_met] = v_MET_multi;
+            m_dir_met.push_back("MET/" + name_met + "/Kinematics/" + it + "/");                                      
+          }
+          m_MET_Kine_pt[name_met] = v_MET_Kine_pt;
+          m_MET_Kine_eta[name_met] = v_MET_Kine_eta;
+          m_MET_Kine_phi[name_met] = v_MET_Kine_phi;
+          m_MET_multi[name_met] = v_MET_multi;
 
-          //Register Diff histograms
-          for(std::vector<TH1D*>::size_type i = 0; i < v_MET_Kine_pt.size(); ++i)
-          {
+          //Register Kin histograms
+          for(std::vector<TH1D*>::size_type i = 0; i < v_MET_Kine_pt.size(); ++i){
             ATH_CHECK(regHist(m_MET_Kine_pt[name_met].at(i),m_dir_met[i],all));
             ATH_CHECK(regHist(m_MET_Kine_eta[name_met].at(i),m_dir_met[i],all));
             ATH_CHECK(regHist(m_MET_Kine_phi[name_met].at(i),m_dir_met[i],all));
             ATH_CHECK(regHist(m_MET_multi[name_met].at(i),m_dir_met[i],all));
           }
-
         // End of loop
         }
       }  
-      //-------------------------------------------------------------------------------------
-      // Now MET_Track (only built if METRef is too)
-        
-      //-------------------------------------------------------------------------------------
+      
       //Now MET_Calo
   
       //variables
       std::string name_met = "MET_Calo";
       std::string dir = "MET/" + name_met + "/";
 
-      //Create an register Calo hists
+      //Create and register Calo hists
       ATH_CHECK(regHist(m_MET_Calo = new  TH1D("Calo", (name_met + " " + m_names["Calo"] + "; E_{T}^{miss} [GeV]; Entries / 5 GeV").c_str(), nbinp, 0., suptmi), dir, all));
       ATH_CHECK(regHist(m_MET_Calo_x = new  TH1D("Calo_x", (name_met + " " + m_names["Calo"] + " x; E_{x}^{miss} [GeV]; Entries / 5 GeV").c_str(), nbinpxy, -suptmixy, suptmixy), dir, all));
       ATH_CHECK(regHist(m_MET_Calo_y = new  TH1D("Calo_y", (name_met + " " + m_names["Calo"] + " y; E_{y}^{miss} [GeV]; Entries / 5 GeV").c_str(), nbinpxy, -suptmixy, suptmixy), dir, all));
@@ -449,11 +435,10 @@ namespace MissingEtDQA
   }
 
   //Fill Histograms
-  StatusCode PhysValMET::fillHistograms(const EventContext& /*ctx*/)
-  {
+  StatusCode PhysValMET::fillHistograms(const EventContext& /*ctx*/){
     ATH_MSG_DEBUG ("Filling hists " << name() << "...");
 
-    //Beamspot weight
+    
     const xAOD::EventInfo* eventInfo(nullptr);
     ATH_CHECK(evtStore()->retrieve(eventInfo, "EventInfo"));
 
@@ -461,154 +446,109 @@ namespace MissingEtDQA
 
     //Retrieve MET Truth
     const xAOD::MissingETContainer* met_Truth = nullptr;
-    if(m_doTruth) 
-    {
+    if(m_doTruth) {
       ATH_CHECK( evtStore()->retrieve(met_Truth,"MET_Truth") );
-      if (!met_Truth) 
-      {
+      if (!met_Truth) {
         ATH_MSG_ERROR ( "Failed to retrieve MET_Truth. Exiting." );
         return StatusCode::FAILURE;
       }
     }
-     ATH_MSG_INFO("Physics objects");
-    //Physics Objects
-    //Muons
+
+    ATH_MSG_INFO("Physics objects");
+
+    //Set up Physics Objects
+
+    //Muons 
     const xAOD::MuonContainer* muons = nullptr;
     ATH_CHECK( evtStore()->retrieve(muons,m_muonColl) );
-    if (!muons) 
-    {
+    if (!muons) {
       ATH_MSG_ERROR ( "Failed to retrieve Muon container. Exiting." );
       return StatusCode::FAILURE;
     }
-    ConstDataVector<MuonContainer> metMuons(SG::VIEW_ELEMENTS);
-    for(const auto mu : *muons) 
-    {
-      if(Accept(mu)) 
-      {
-        metMuons.push_back(mu);
+    ConstDataVector<MuonContainer> BasicSelectionMuons(SG::VIEW_ELEMENTS);
+    for(const auto mu : *muons) {
+      if(Accept(mu)) {
+        BasicSelectionMuons.push_back(mu);
       }
     }
 
     //Electrons
     const xAOD::ElectronContainer* electrons = nullptr;
     ATH_CHECK( evtStore()->retrieve(electrons,m_eleColl) );
-    if (!electrons) 
-    {
+    if (!electrons) {
       ATH_MSG_ERROR ( "Failed to retrieve Electron container. Exiting." );
       return StatusCode::FAILURE;
     }
-   ConstDataVector<ElectronContainer> metElectrons(SG::VIEW_ELEMENTS);
-   for(const auto el : *electrons) 
-   {
-     if(Accept(el)) 
-     {
-       metElectrons.push_back(el);
+   ConstDataVector<ElectronContainer> BasicSelectionElectrons(SG::VIEW_ELEMENTS);
+   for(const auto el : *electrons) {
+     if(Accept(el)) {
+       BasicSelectionElectrons.push_back(el);
      }
    }
 
     //Photons
     const xAOD::PhotonContainer* photons = nullptr;
     ATH_CHECK( evtStore()->retrieve(photons,m_gammaColl) );
-    if (!electrons)
-    {
+    if (!electrons){
       ATH_MSG_ERROR ( "Failed to retrieve Photon container. Exiting." );
       return StatusCode::FAILURE;
     }
-    ConstDataVector<PhotonContainer> metPhotons(SG::VIEW_ELEMENTS);
-    for(const auto ph : *photons) 
-    {
-      if(Accept(ph)) 
-      {
-        metPhotons.push_back(ph);
+    ConstDataVector<PhotonContainer> BasicSelectionPhotons(SG::VIEW_ELEMENTS);
+    for(const auto ph : *photons) {
+      if(Accept(ph)) {
+        BasicSelectionPhotons.push_back(ph);
       }
     }
 
-    //Tau Jets
+    //Tau
     const TauJetContainer* taus = nullptr;
     ATH_CHECK( evtStore()->retrieve(taus, m_tauColl) );
-    if(!taus) 
-    {
+    if(!taus) {
       ATH_MSG_ERROR("Failed to retrieve TauJet container: " << m_tauColl);
       return StatusCode::SUCCESS;
     }
-    ConstDataVector<TauJetContainer> metTaus(SG::VIEW_ELEMENTS);
-    for(const auto tau : *taus) 
-    {
-      if(Accept(tau)) 
-      {
-        metTaus.push_back(tau);
+    ConstDataVector<TauJetContainer> BasicSelectionTaus(SG::VIEW_ELEMENTS);
+    for(const auto tau : *taus) {
+      if(Accept(tau)) {
+        BasicSelectionTaus.push_back(tau);
       }
     }
-//////////Overlap removal///////
-    // Overlap removal
 
-     ATH_MSG_INFO("JVT and OR for jets");
-    //JVT and OR on jets
-    for (const auto& jet_type : m_types)
-    {
-      ToolHandle<IJetUpdateJvt>* jvtTool(nullptr);
-      //Get jvt cut and tool
-      if (jet_type == "AntiKt4EMPFlow") //EMPFlow
-      {
-        jvtTool = &m_jvtToolPFlow;
-      }
-      else if (jet_type == "AntiKt4EMTopo") //EMTopo
-      {
-        jvtTool = &m_jvtToolEM;
-      }
-    
-      if(jvtTool == nullptr)
-      {
-        ATH_MSG_ERROR("Unrecognized jet container: " << jet_type << "Jets");
-        return StatusCode::FAILURE;
-      }
-
-      // Retrieve Jets
+    //Jets
+    for (const auto& jet_type : m_types){
       std::string name_jet = jet_type + "Jets";
       const xAOD::JetContainer* jets = nullptr;
       ATH_CHECK( evtStore()->retrieve(jets,name_jet) );
-      if (!jets) 
-      {
+      if (!jets) {
         ATH_MSG_ERROR ( "Failed to retrieve Jet container: " << name_jet << ". Exiting." );
         return StatusCode::FAILURE;
       }
-      SG::Decorator<float> NewJvtDec("NewJvt");
-      for(auto jet : *jets) //for Jets assing JVT decoration
-      {
-        float newjvt = (*jvtTool)->updateJvt(*jet); 
-        NewJvtDec(*jet) = newjvt;
+      ConstDataVector<JetContainer> BasicSelectionJets(SG::VIEW_ELEMENTS);
+      for(const auto jet : *jets){ //for jets assign jets
+        BasicSelectionJets.push_back(jet);
       }
-      ConstDataVector<JetContainer> metJets(SG::VIEW_ELEMENTS);
-      for(const auto jet : *jets) //for jets assign jets
-      { 
-        metJets.push_back(jet);
-      }
-
 
       //Prepare Rebuilding MET
       ATH_MSG_INFO( "  Rebuilding MET_" << jet_type );
-      MissingETContainer* met_Reb = new MissingETContainer(); //Define MET Container
-      if( evtStore()->record(met_Reb,("MET_Rebuilt_"+jet_type).c_str()).isFailure() ) 
-      {
+      MissingETContainer* met = new MissingETContainer(); //Define MET Container
+      if( evtStore()->record(met,("MET_Rebuilt_"+jet_type).c_str()).isFailure() ) {
         ATH_MSG_WARNING("Unable to record MissingETContainer: MET_Rebuilt_" << jet_type);
         return StatusCode::FAILURE;
       }
-      MissingETAuxContainer* met_RebAux = new MissingETAuxContainer(); //Define MET Aux container
-      if( evtStore()->record(met_RebAux,("MET_Rebuilt_"+jet_type+"Aux").c_str()).isFailure() ) 
-      {
+      MissingETAuxContainer* met_Aux = new MissingETAuxContainer(); //Define MET Aux container
+      if( evtStore()->record(met_Aux,("MET_Rebuilt_"+jet_type+"Aux").c_str()).isFailure() ) {
         ATH_MSG_WARNING("Unable to record MissingETAuxContainer: MET_Rebuilt_" << jet_type);
         return StatusCode::FAILURE;
       }
 
-      met_Reb->setStore(met_RebAux); //MET Reb container
+      met->setStore(met_Aux); //MET Reb container for METMaker
 
-      //define map and core name
+      //define map and core name for METMaker
       m_mapname = "METAssoc_"+jet_type;
       m_corename = "MET_Core_"+jet_type;
       const MissingETAssociationMap* metMap = nullptr;
       //check is can retrieve Map and Container
-      if( evtStore()->retrieve(metMap, m_mapname).isFailure() ) 
-      {
+      if( evtStore()->retrieve(metMap, m_mapname).isFailure() ) {
         ATH_MSG_WARNING("Unable to retrieve MissingETAssociationMap: " << m_mapname);
         return StatusCode::SUCCESS;
       }
@@ -629,210 +569,170 @@ namespace MissingEtDQA
 
       auto m_metmaker2 = m_metmaker;
 
-      //See if we ca build terms
+      //See if we can build terms. This will also add the particles into METMaker
       // Electrons
-      if( (*m_metmaker)->rebuildMET("RefEle", xAOD::Type::Electron, met_Reb, metElectrons.asDataVector(), metHelper).isFailure() ) 
-      {
+      if( (*m_metmaker)->rebuildMET("RefEle", xAOD::Type::Electron, met, BasicSelectionElectrons.asDataVector(), metHelper).isFailure() ) {
         ATH_MSG_WARNING("Failed to build electron term.");
       }
       // Photons
-      if( (*m_metmaker)->rebuildMET("RefGamma", xAOD::Type::Photon, met_Reb, metPhotons.asDataVector(), metHelper).isFailure() ) 
-      {
+      if( (*m_metmaker)->rebuildMET("RefGamma", xAOD::Type::Photon, met, BasicSelectionPhotons.asDataVector(), metHelper).isFailure() ) {
         ATH_MSG_WARNING("Failed to build photon term.");
       }
       // Taus
-      if( (*m_metmaker)->rebuildMET("RefTau", xAOD::Type::Tau, met_Reb,metTaus.asDataVector(),metHelper).isFailure() )
-      {
+      if( (*m_metmaker)->rebuildMET("RefTau", xAOD::Type::Tau, met,BasicSelectionTaus.asDataVector(),metHelper).isFailure() ) {
         ATH_MSG_WARNING("Failed to build tau term.");
       }
       // Muons
-      if( (*m_metmaker)->rebuildMET("Muons", xAOD::Type::Muon, met_Reb, metMuons.asDataVector(), metHelper).isFailure() ) 
-      {
+      if( (*m_metmaker)->rebuildMET("RefMuons", xAOD::Type::Muon, met, BasicSelectionMuons.asDataVector(), metHelper).isFailure() ) {
         ATH_MSG_WARNING("Failed to build muon term.");
       }
       // Jets
-      if( (*m_metmaker)->rebuildJetMET("RefJet", "SoftClus", "PVSoftTrk", met_Reb, jets, coreMet, metHelper, true).isFailure() ) 
-      {
+      if( (*m_metmaker)->rebuildJetMET("RefJet", "SoftClus", "PVSoftTrk", met, jets, coreMet, metHelper, true).isFailure() ) {
         ATH_MSG_WARNING("Failed to build jet and soft terms.");
       }
+
+      // Setting up other values
       MissingETBase::Types::bitmask_t trksource = static_cast<MissingETBase::Types::bitmask_t>(MissingETBase::Source::Signal::Track);
-      if((*met_Reb)["PVSoftTrk"]) trksource = (*met_Reb)["PVSoftTrk"]->source();
-      if( met::buildMETSum("FinalTrk", met_Reb, trksource).isFailure() )
-      {
+      if((*met)["PVSoftTrk"]) trksource = (*met)["PVSoftTrk"]->source();
+      if( met::buildMETSum("FinalTrk", met, trksource).isFailure() ) {/i/
         ATH_MSG_WARNING("Building MET FinalTrk sum failed.");
       }
       MissingETBase::Types::bitmask_t clsource;
       if (jet_type == "AntiKt4EMTopo") clsource = static_cast<MissingETBase::Types::bitmask_t>(MissingETBase::Source::Signal::EMTopo);
       else clsource = static_cast<MissingETBase::Types::bitmask_t>(MissingETBase::Source::Signal::UnknownSignal);
       std::cout<<"___SoftClus___"<<std::endl;
-      if((*met_Reb)["SoftClus"]) clsource = (*met_Reb)["SoftClus"]->source();
-      if( met::buildMETSum("FinalClus", met_Reb, clsource).isFailure() )
+      if((*met)["SoftClus"]) clsource = (*met)["SoftClus"]->source();
+      if( met::buildMETSum("FinalClus", met, clsource).isFailure() )
       {
         ATH_MSG_WARNING("Building MET FinalClus sum failed.");
       }
       ///////
-      //Testing Particles
-      //doing METMaker particles
       std::string str_ele = "RefEle";
       std::string str_gam = "RefGamma";
       std::string str_tau = "RefTau";
-      std::string str_mu = "Muons";
+      std::string str_mu = "RefMuons";
       std::string str_jet = "RefJet";
-      // This will be the output MET.
 
-      // If the specific object interfaces are needed
-      std::vector<const xAOD::Electron*> el_elems = met::getMETElements<xAOD::Electron>(*(*met_Reb)[str_ele]);
-      std::vector<const xAOD::Photon*> ph_elems = met::getMETElements<xAOD::Photon>(*(*met_Reb)[str_gam]);
-      std::vector<const xAOD::TauJet*> ta_elems = met::getMETElements<xAOD::TauJet>(*(*met_Reb)[str_tau]);
-      std::vector<const xAOD::Muon*> mu_elems = met::getMETElements<xAOD::Muon>(*(*met_Reb)[str_mu]);
-      std::vector<const xAOD::Jet*> jet_elems = met::getMETElements<xAOD::Jet>(*(*met_Reb)[str_jet]);
+      // Get elements with OR and JVT applied
+      std::vector<const xAOD::Electron*> el_elems = met::getMETElements<xAOD::Electron>(*(*met)[str_ele]);
+      std::vector<const xAOD::Photon*> ph_elems = met::getMETElements<xAOD::Photon>(*(*met)[str_gam]);
+      std::vector<const xAOD::TauJet*> ta_elems = met::getMETElements<xAOD::TauJet>(*(*met)[str_tau]);
+      std::vector<const xAOD::Muon*> mu_elems = met::getMETElements<xAOD::Muon>(*(*met)[str_mu]);
+      std::vector<const xAOD::Jet*> jet_elems = met::getMETElements<xAOD::Jet>(*(*met)[str_jet]);
 
-      //Jets for Diff
-      auto met = std::make_unique<xAOD::MissingETContainer>();
-      auto aux = std::make_unique<xAOD::MissingETAuxContainer>();
-      met->setStore(aux.get());
-
-      (*m_metmaker2)->rebuildJetMET("RefJet", "SoftClus", "PVSoftTrk", met.get(), jets, coreMet, metHelper, true);
-      std::vector<const xAOD::Jet*> only_jet_elems = met::getMETElements<xAOD::Jet>(*(*met)[str_jet]);
+      //Getting jets with JVT and OR without other particles applied. This is used for Jet Diff histos
+      auto met_jetonly = std::make_unique<xAOD::MissingETContainer>();
+      auto aux_jetonly = std::make_unique<xAOD::MissingETAuxContainer>();
+      met_jetonly->setStore(aux.get());
+      (*m_metmaker2)->rebuildJetMET("RefJet", "SoftClus", "PVSoftTrk", met_jetonly.get(), jets, coreMet, metHelper, true);
+      std::vector<const xAOD::Jet*> only_jet_elems = met::getMETElements<xAOD::Jet>(*(*met_jetonly)[str_jet]);
 
       //Sum up the pT's of the objects
+      bool has_muon = 0, has_electron = 0, has_photon = 0, has_tau = 0, has_jet = 0;
 
+      //Getting tlv, sum, and checking is has particle in event for Diff histos
       //electron
       TLorentzVector el_tlv;
       double sum_el = 0;
-      for(const auto p : metElectrons)
-      {
+      for(const auto p : BasicSelectionElectrons){
         el_tlv += p->p4();
         sum_el += p->pt();
+        has_electron = 1;
       }
-
       //muon
       TLorentzVector mu_tlv;
       double sum_mu = 0;
-      for(const auto p : metMuons)
-      {
+      for(const auto p : BasicSelectionMuons){
         mu_tlv += p->p4();
         sum_mu += p->pt();
+        has_muon = 1;
       }
-
       //Tau
       TLorentzVector tau_tlv;
       double sum_tau = 0;
-      for(const auto p : metTaus)
-      {
+      for(const auto p : BasicSelectionTaus){
         tau_tlv += p->p4();
         sum_tau += p->pt();
+        has_tau = 1;
       }
-
       //photon
       TLorentzVector photon_tlv;
       double sum_photon = 0;
-      for(const auto p : metPhotons)
-      {
+      for(const auto p : BasicSelectionPhotons){
         photon_tlv += p->p4();
         sum_photon += p->pt();
+        has_photon = 1;
       }
 
-      //Setup is_particle flags
-      bool is_muon = 0;
-      bool is_electron = 0;
-      bool is_photon = 0;
-      bool is_tau = 0;
-      bool is_jet = 0;
-
-      for(const auto p : el_elems){
-        is_electron = 1;
-      }
-      for(const auto p : ph_elems){
-        is_photon = 1;
-      }
-      for(const auto p : ta_elems){
-        is_tau = 1;
-      }
-      for(const auto p : mu_elems){
-        is_muon = 1;
-      }
-      for(const auto p : jet_elems){
-        is_jet = 1;
-      }
+      //Start filling histograms
 
       std::cout<<"___Fill MET Reb___"<<std::endl;
-      // Fill MET_Reb hists
-      for(const auto it : *met_Reb) 
-      {
+      // Fill MET_Reb Term histograms
+      for(const auto it : *met) {
         std::string name = it->name();
         std::cout<< name <<std::endl;
-        if(name == "RefEle")
-        {
-          (m_MET["MET_Rebuilt_"+jet_type]).at(0)->Fill((*met_Reb)[name.c_str()]->met()/1000., weight);
-          (m_MET_x["MET_Rebuilt_"+jet_type]).at(0)->Fill((*met_Reb)[name.c_str()]->mpx()/1000., weight);
-          (m_MET_y["MET_Rebuilt_"+jet_type]).at(0)->Fill((*met_Reb)[name.c_str()]->mpy()/1000., weight);
-          (m_MET_phi["MET_Rebuilt_"+jet_type]).at(0)->Fill((*met_Reb)[name.c_str()]->phi(), weight);
-          (m_MET_sum["MET_Rebuilt_"+jet_type]).at(0)->Fill((*met_Reb)[name.c_str()]->sumet()/1000., weight);
+        if(name == "RefEle"){
+          (m_MET["MET_Rebuilt_"+jet_type]).at(0)->Fill((*met)[name.c_str()]->met()/1000., weight);
+          (m_MET_x["MET_Rebuilt_"+jet_type]).at(0)->Fill((*met)[name.c_str()]->mpx()/1000., weight);
+          (m_MET_y["MET_Rebuilt_"+jet_type]).at(0)->Fill((*met)[name.c_str()]->mpy()/1000., weight);
+          (m_MET_phi["MET_Rebuilt_"+jet_type]).at(0)->Fill((*met)[name.c_str()]->phi(), weight);
+          (m_MET_sum["MET_Rebuilt_"+jet_type]).at(0)->Fill((*met)[name.c_str()]->sumet()/1000., weight);
         }
-        if(name == "RefGamma")
-        {
-          (m_MET["MET_Rebuilt_"+jet_type]).at(1)->Fill((*met_Reb)[name.c_str()]->met()/1000., weight);
-          (m_MET_x["MET_Rebuilt_"+jet_type]).at(1)->Fill((*met_Reb)[name.c_str()]->mpx()/1000., weight);
-          (m_MET_y["MET_Rebuilt_"+jet_type]).at(1)->Fill((*met_Reb)[name.c_str()]->mpy()/1000., weight);
-          (m_MET_phi["MET_Rebuilt_"+jet_type]).at(1)->Fill((*met_Reb)[name.c_str()]->phi(), weight);
-          (m_MET_sum["MET_Rebuilt_"+jet_type]).at(1)->Fill((*met_Reb)[name.c_str()]->sumet()/1000., weight);
+        if(name == "RefGamma"){
+          (m_MET["MET_Rebuilt_"+jet_type]).at(1)->Fill((*met)[name.c_str()]->met()/1000., weight);
+          (m_MET_x["MET_Rebuilt_"+jet_type]).at(1)->Fill((*met)[name.c_str()]->mpx()/1000., weight);
+          (m_MET_y["MET_Rebuilt_"+jet_type]).at(1)->Fill((*met)[name.c_str()]->mpy()/1000., weight);
+          (m_MET_phi["MET_Rebuilt_"+jet_type]).at(1)->Fill((*met)[name.c_str()]->phi(), weight);
+          (m_MET_sum["MET_Rebuilt_"+jet_type]).at(1)->Fill((*met)[name.c_str()]->sumet()/1000., weight);
         }
-        if(name == "RefTau")
-        {
-          (m_MET["MET_Rebuilt_"+jet_type]).at(2)->Fill((*met_Reb)[name.c_str()]->met()/1000., weight);
-          (m_MET_x["MET_Rebuilt_"+jet_type]).at(2)->Fill((*met_Reb)[name.c_str()]->mpx()/1000., weight);
-          (m_MET_y["MET_Rebuilt_"+jet_type]).at(2)->Fill((*met_Reb)[name.c_str()]->mpy()/1000., weight);
-          (m_MET_phi["MET_Rebuilt_"+jet_type]).at(2)->Fill((*met_Reb)[name.c_str()]->phi(), weight);
-          (m_MET_sum["MET_Rebuilt_"+jet_type]).at(2)->Fill((*met_Reb)[name.c_str()]->sumet()/1000., weight);
+        if(name == "RefTau"){
+          (m_MET["MET_Rebuilt_"+jet_type]).at(2)->Fill((*met)[name.c_str()]->met()/1000., weight);
+          (m_MET_x["MET_Rebuilt_"+jet_type]).at(2)->Fill((*met)[name.c_str()]->mpx()/1000., weight);
+          (m_MET_y["MET_Rebuilt_"+jet_type]).at(2)->Fill((*met)[name.c_str()]->mpy()/1000., weight);
+          (m_MET_phi["MET_Rebuilt_"+jet_type]).at(2)->Fill((*met)[name.c_str()]->phi(), weight);
+          (m_MET_sum["MET_Rebuilt_"+jet_type]).at(2)->Fill((*met)[name.c_str()]->sumet()/1000., weight);
         }
-        if(name == "Muons")
-        {
-          (m_MET["MET_Rebuilt_"+jet_type]).at(3)->Fill((*met_Reb)[name.c_str()]->met()/1000., weight);
-          (m_MET_x["MET_Rebuilt_"+jet_type]).at(3)->Fill((*met_Reb)[name.c_str()]->mpx()/1000., weight);
-          (m_MET_y["MET_Rebuilt_"+jet_type]).at(3)->Fill((*met_Reb)[name.c_str()]->mpy()/1000., weight);
-          (m_MET_phi["MET_Rebuilt_"+jet_type]).at(3)->Fill((*met_Reb)[name.c_str()]->phi(), weight);
-          (m_MET_sum["MET_Rebuilt_"+jet_type]).at(3)->Fill((*met_Reb)[name.c_str()]->sumet()/1000., weight);
+        if(name == "RefMuons"){
+          (m_MET["MET_Rebuilt_"+jet_type]).at(3)->Fill((*met)[name.c_str()]->met()/1000., weight);
+          (m_MET_x["MET_Rebuilt_"+jet_type]).at(3)->Fill((*met)[name.c_str()]->mpx()/1000., weight);
+          (m_MET_y["MET_Rebuilt_"+jet_type]).at(3)->Fill((*met)[name.c_str()]->mpy()/1000., weight);
+          (m_MET_phi["MET_Rebuilt_"+jet_type]).at(3)->Fill((*met)[name.c_str()]->phi(), weight);
+          (m_MET_sum["MET_Rebuilt_"+jet_type]).at(3)->Fill((*met)[name.c_str()]->sumet()/1000., weight);
         }
-        if(name == "RefJet")
-        {
-          (m_MET["MET_Rebuilt_"+jet_type]).at(4)->Fill((*met_Reb)[name.c_str()]->met()/1000., weight);
-          (m_MET_x["MET_Rebuilt_"+jet_type]).at(4)->Fill((*met_Reb)[name.c_str()]->mpx()/1000., weight);
-          (m_MET_y["MET_Rebuilt_"+jet_type]).at(4)->Fill((*met_Reb)[name.c_str()]->mpy()/1000., weight);
-          (m_MET_phi["MET_Rebuilt_"+jet_type]).at(4)->Fill((*met_Reb)[name.c_str()]->phi(), weight);
-          (m_MET_sum["MET_Rebuilt_"+jet_type]).at(4)->Fill((*met_Reb)[name.c_str()]->sumet()/1000., weight);
+        if(name == "RefJet"){
+          (m_MET["MET_Rebuilt_"+jet_type]).at(4)->Fill((*met)[name.c_str()]->met()/1000., weight);
+          (m_MET_x["MET_Rebuilt_"+jet_type]).at(4)->Fill((*met)[name.c_str()]->mpx()/1000., weight);
+          (m_MET_y["MET_Rebuilt_"+jet_type]).at(4)->Fill((*met)[name.c_str()]->mpy()/1000., weight);
+          (m_MET_phi["MET_Rebuilt_"+jet_type]).at(4)->Fill((*met)[name.c_str()]->phi(), weight);
+          (m_MET_sum["MET_Rebuilt_"+jet_type]).at(4)->Fill((*met)[name.c_str()]->sumet()/1000., weight);
         }
-        if(name == "SoftClus")
-        {
-          (m_MET["MET_Rebuilt_"+jet_type]).at(5)->Fill((*met_Reb)[name.c_str()]->met()/1000., weight);
-          (m_MET_x["MET_Rebuilt_"+jet_type]).at(5)->Fill((*met_Reb)[name.c_str()]->mpx()/1000., weight);
-          (m_MET_y["MET_Rebuilt_"+jet_type]).at(5)->Fill((*met_Reb)[name.c_str()]->mpy()/1000., weight);
-          (m_MET_phi["MET_Rebuilt_"+jet_type]).at(5)->Fill((*met_Reb)[name.c_str()]->phi(), weight);
-          (m_MET_sum["MET_Rebuilt_"+jet_type]).at(5)->Fill((*met_Reb)[name.c_str()]->sumet()/1000., weight);
+        if(name == "SoftClus"){
+          (m_MET["MET_Rebuilt_"+jet_type]).at(5)->Fill((*met)[name.c_str()]->met()/1000., weight);
+          (m_MET_x["MET_Rebuilt_"+jet_type]).at(5)->Fill((*met)[name.c_str()]->mpx()/1000., weight);
+          (m_MET_y["MET_Rebuilt_"+jet_type]).at(5)->Fill((*met)[name.c_str()]->mpy()/1000., weight);
+          (m_MET_phi["MET_Rebuilt_"+jet_type]).at(5)->Fill((*met)[name.c_str()]->phi(), weight);
+          (m_MET_sum["MET_Rebuilt_"+jet_type]).at(5)->Fill((*met)[name.c_str()]->sumet()/1000., weight);
         }
-        if(name == "PVSoftTrk")
-        {
-          (m_MET["MET_Rebuilt_"+jet_type]).at(6)->Fill((*met_Reb)[name.c_str()]->met()/1000., weight);
-          (m_MET_x["MET_Rebuilt_"+jet_type]).at(6)->Fill((*met_Reb)[name.c_str()]->mpx()/1000., weight);
-          (m_MET_y["MET_Rebuilt_"+jet_type]).at(6)->Fill((*met_Reb)[name.c_str()]->mpy()/1000., weight);
-          (m_MET_phi["MET_Rebuilt_"+jet_type]).at(6)->Fill((*met_Reb)[name.c_str()]->phi(), weight);
-          (m_MET_sum["MET_Rebuilt_"+jet_type]).at(6)->Fill((*met_Reb)[name.c_str()]->sumet()/1000., weight);
+        if(name == "PVSoftTrk"){
+          (m_MET["MET_Rebuilt_"+jet_type]).at(6)->Fill((*met)[name.c_str()]->met()/1000., weight);
+          (m_MET_x["MET_Rebuilt_"+jet_type]).at(6)->Fill((*met)[name.c_str()]->mpx()/1000., weight);
+          (m_MET_y["MET_Rebuilt_"+jet_type]).at(6)->Fill((*met)[name.c_str()]->mpy()/1000., weight);
+          (m_MET_phi["MET_Rebuilt_"+jet_type]).at(6)->Fill((*met)[name.c_str()]->phi(), weight);
+          (m_MET_sum["MET_Rebuilt_"+jet_type]).at(6)->Fill((*met)[name.c_str()]->sumet()/1000., weight);
         }
-        if(name == "FinalTrk")
-        {
-          (m_MET["MET_Rebuilt_"+jet_type]).at(7)->Fill((*met_Reb)[name.c_str()]->met()/1000., weight);
-          (m_MET_x["MET_Rebuilt_"+jet_type]).at(7)->Fill((*met_Reb)[name.c_str()]->mpx()/1000., weight);
-          (m_MET_y["MET_Rebuilt_"+jet_type]).at(7)->Fill((*met_Reb)[name.c_str()]->mpy()/1000., weight);
-          (m_MET_phi["MET_Rebuilt_"+jet_type]).at(7)->Fill((*met_Reb)[name.c_str()]->phi(), weight);
-          (m_MET_sum["MET_Rebuilt_"+jet_type]).at(7)->Fill((*met_Reb)[name.c_str()]->sumet()/1000., weight);
+        if(name == "FinalTrk"){
+          (m_MET["MET_Rebuilt_"+jet_type]).at(7)->Fill((*met)[name.c_str()]->met()/1000., weight);
+          (m_MET_x["MET_Rebuilt_"+jet_type]).at(7)->Fill((*met)[name.c_str()]->mpx()/1000., weight);
+          (m_MET_y["MET_Rebuilt_"+jet_type]).at(7)->Fill((*met)[name.c_str()]->mpy()/1000., weight);
+          (m_MET_phi["MET_Rebuilt_"+jet_type]).at(7)->Fill((*met)[name.c_str()]->phi(), weight);
+          (m_MET_sum["MET_Rebuilt_"+jet_type]).at(7)->Fill((*met)[name.c_str()]->sumet()/1000., weight);
         }
-        if(name == "FinalClus")
-        {
-          (m_MET["MET_Rebuilt_"+jet_type]).at(8)->Fill((*met_Reb)[name.c_str()]->met()/1000., weight);
-          (m_MET_x["MET_Rebuilt_"+jet_type]).at(8)->Fill((*met_Reb)[name.c_str()]->mpx()/1000., weight);
-          (m_MET_y["MET_Rebuilt_"+jet_type]).at(8)->Fill((*met_Reb)[name.c_str()]->mpy()/1000., weight);
-          (m_MET_phi["MET_Rebuilt_"+jet_type]).at(8)->Fill((*met_Reb)[name.c_str()]->phi(), weight);
-          (m_MET_sum["MET_Rebuilt_"+jet_type]).at(8)->Fill((*met_Reb)[name.c_str()]->sumet()/1000., weight);
+        if(name == "FinalClus"){
+          (m_MET["MET_Rebuilt_"+jet_type]).at(8)->Fill((*met)[name.c_str()]->met()/1000., weight);
+          (m_MET_x["MET_Rebuilt_"+jet_type]).at(8)->Fill((*met)[name.c_str()]->mpx()/1000., weight);
+          (m_MET_y["MET_Rebuilt_"+jet_type]).at(8)->Fill((*met)[name.c_str()]->mpy()/1000., weight);
+          (m_MET_phi["MET_Rebuilt_"+jet_type]).at(8)->Fill((*met)[name.c_str()]->phi(), weight);
+          (m_MET_sum["MET_Rebuilt_"+jet_type]).at(8)->Fill((*met)[name.c_str()]->sumet()/1000., weight);
         }
       }
 
@@ -843,37 +743,32 @@ namespace MissingEtDQA
       double leadPt = 0., subleadPt = 0., leadPhi = 0., subleadPhi = 0.;
 
       //for Jets find leading and subleading jet
-      for (auto jet_itr = jets->begin(); jet_itr != jets->end(); ++jet_itr) 
-      {
-        if ((*jet_itr)->pt() > leadPt) 
-        {
+      for (auto jet_itr = jets->begin(); jet_itr != jets->end(); ++jet_itr) {
+        if ((*jet_itr)->pt() > leadPt) {
           subleadPt = leadPt;
           subleadPhi = leadPhi;
           leadPt = (*jet_itr)->pt();
           leadPhi = (*jet_itr)->phi();
         }
-        else if ((*jet_itr)->pt() > subleadPt) 
-        {
+        else if ((*jet_itr)->pt() > subleadPt) {
           subleadPt = (*jet_itr)->pt();
           subleadPhi = (*jet_itr)->phi();
         }
       }
 
       //Fill dPhi for Met Reb
-      (m_MET_dPhi["MET_Rebuilt_"+jet_type]).at(0)->Fill( -remainder( leadPhi - (*met_Reb)["FinalClus"]->phi(), 2*M_PI ), weight );
-      (m_MET_dPhi["MET_Rebuilt_"+jet_type]).at(1)->Fill( -remainder( subleadPhi - (*met_Reb)["FinalClus"]->phi(), 2*M_PI ), weight );
-      (m_MET_dPhi["MET_Rebuilt_"+jet_type]).at(3)->Fill( -remainder( leadPhi - (*met_Reb)["FinalTrk"]->phi(), 2*M_PI ), weight );
-      (m_MET_dPhi["MET_Rebuilt_"+jet_type]).at(4)->Fill( -remainder( subleadPhi - (*met_Reb)["FinalTrk"]->phi(), 2*M_PI ), weight );
+      (m_MET_dPhi["MET_Rebuilt_"+jet_type]).at(0)->Fill( -remainder( leadPhi - (*met)["FinalClus"]->phi(), 2*M_PI ), weight );
+      (m_MET_dPhi["MET_Rebuilt_"+jet_type]).at(1)->Fill( -remainder( subleadPhi - (*met)["FinalClus"]->phi(), 2*M_PI ), weight );
+      (m_MET_dPhi["MET_Rebuilt_"+jet_type]).at(3)->Fill( -remainder( leadPhi - (*met)["FinalTrk"]->phi(), 2*M_PI ), weight );
+      (m_MET_dPhi["MET_Rebuilt_"+jet_type]).at(4)->Fill( -remainder( subleadPhi - (*met)["FinalTrk"]->phi(), 2*M_PI ), weight );
   
       leadPt = 0.; leadPhi = 0.;
 
       xAOD::MuonContainer::const_iterator muon_itr = muons->begin();
       xAOD::MuonContainer::const_iterator muon_end = muons->end();
 
-      for( ; muon_itr != muon_end; ++muon_itr ) 
-      {
-        if((*muon_itr)->pt() > leadPt) 
-        {
+      for( ; muon_itr != muon_end; ++muon_itr ) {
+        if((*muon_itr)->pt() > leadPt) {
           leadPt = (*muon_itr)->pt();
           leadPhi = (*muon_itr)->phi();
         }
@@ -882,235 +777,187 @@ namespace MissingEtDQA
       xAOD::ElectronContainer::const_iterator electron_itr = electrons->begin();
       xAOD::ElectronContainer::const_iterator electron_end = electrons->end();
 
-      for( ; electron_itr != electron_end; ++electron_itr ) 
-      {
-        if((*electron_itr)->pt() > leadPt) 
-        {
+      for( ; electron_itr != electron_end; ++electron_itr ) {
+        if((*electron_itr)->pt() > leadPt) {
           leadPt = (*electron_itr)->pt();
           leadPhi = (*electron_itr)->phi();
         }
       }
 
       //Fill dPhi for MET Rebuilt Final Clus and Final trk
-      (m_MET_dPhi["MET_Rebuilt_"+jet_type]).at(2)->Fill( -remainder( leadPhi - (*met_Reb)["FinalClus"]->phi(), 2*M_PI ), weight );
-      (m_MET_dPhi["MET_Rebuilt_"+jet_type]).at(5)->Fill( -remainder( leadPhi - (*met_Reb)["FinalTrk"]->phi(), 2*M_PI ), weight );
+      (m_MET_dPhi["MET_Rebuilt_"+jet_type]).at(2)->Fill( -remainder( leadPhi - (*met)["FinalClus"]->phi(), 2*M_PI ), weight );
+      (m_MET_dPhi["MET_Rebuilt_"+jet_type]).at(5)->Fill( -remainder( leadPhi - (*met)["FinalTrk"]->phi(), 2*M_PI ), weight );
 
-      //Rebuilt
-
-      for(const auto it : *met_Reb) 
-      {
+      //Fill Correlation Histos
+      for(const auto it : *met) {
         std::string name = it->name();
-        if(name == "RefEle")
-        {
-          (m_MET_CorrFinalTrk["MET_Rebuilt_"+jet_type]).at(0)->Fill((*met_Reb)[name.c_str()]->met()/1000.,(*met_Reb)["FinalTrk"]->met()/1000., weight);
-          (m_MET_CorrFinalClus["MET_Rebuilt_"+jet_type]).at(0)->Fill((*met_Reb)[name.c_str()]->met()/1000.,(*met_Reb)["FinalClus"]->met()/1000., weight);
+        if(name == "RefEle"){
+          (m_MET_CorrFinalTrk["MET_Rebuilt_"+jet_type]).at(0)->Fill((*met)[name.c_str()]->met()/1000.,(*met)["FinalTrk"]->met()/1000., weight);
+          (m_MET_CorrFinalClus["MET_Rebuilt_"+jet_type]).at(0)->Fill((*met)[name.c_str()]->met()/1000.,(*met)["FinalClus"]->met()/1000., weight);
         }
-        if(name == "RefGamma")
-        {
-          (m_MET_CorrFinalTrk["MET_Rebuilt_"+jet_type]).at(1)->Fill((*met_Reb)[name.c_str()]->met()/1000.,(*met_Reb)["FinalTrk"]->met()/1000., weight);
-          (m_MET_CorrFinalClus["MET_Rebuilt_"+jet_type]).at(1)->Fill((*met_Reb)[name.c_str()]->met()/1000.,(*met_Reb)["FinalClus"]->met()/1000., weight);
+        if(name == "RefGamma"){
+          (m_MET_CorrFinalTrk["MET_Rebuilt_"+jet_type]).at(1)->Fill((*met)[name.c_str()]->met()/1000.,(*met)["FinalTrk"]->met()/1000., weight);
+          (m_MET_CorrFinalClus["MET_Rebuilt_"+jet_type]).at(1)->Fill((*met)[name.c_str()]->met()/1000.,(*met)["FinalClus"]->met()/1000., weight);
         }
-        if(name == "RefTau")
-        {
-          (m_MET_CorrFinalTrk["MET_Rebuilt_"+jet_type]).at(2)->Fill((*met_Reb)[name.c_str()]->met()/1000.,(*met_Reb)["FinalTrk"]->met()/1000., weight);
-          (m_MET_CorrFinalClus["MET_Rebuilt_"+jet_type]).at(2)->Fill((*met_Reb)[name.c_str()]->met()/1000.,(*met_Reb)["FinalClus"]->met()/1000., weight);
+        if(name == "RefTau"){
+          (m_MET_CorrFinalTrk["MET_Rebuilt_"+jet_type]).at(2)->Fill((*met)[name.c_str()]->met()/1000.,(*met)["FinalTrk"]->met()/1000., weight);
+          (m_MET_CorrFinalClus["MET_Rebuilt_"+jet_type]).at(2)->Fill((*met)[name.c_str()]->met()/1000.,(*met)["FinalClus"]->met()/1000., weight);
         }
-        if(name == "Muons")
-        {
-          (m_MET_CorrFinalTrk["MET_Rebuilt_"+jet_type]).at(3)->Fill((*met_Reb)[name.c_str()]->met()/1000.,(*met_Reb)["FinalTrk"]->met()/1000., weight);
-          (m_MET_CorrFinalClus["MET_Rebuilt_"+jet_type]).at(3)->Fill((*met_Reb)[name.c_str()]->met()/1000.,(*met_Reb)["FinalClus"]->met()/1000., weight);
+        if(name == "RefMuons"){
+          (m_MET_CorrFinalTrk["MET_Rebuilt_"+jet_type]).at(3)->Fill((*met)[name.c_str()]->met()/1000.,(*met)["FinalTrk"]->met()/1000., weight);
+          (m_MET_CorrFinalClus["MET_Rebuilt_"+jet_type]).at(3)->Fill((*met)[name.c_str()]->met()/1000.,(*met)["FinalClus"]->met()/1000., weight);
         }
-        if(name == "RefJet")
-        {
-          (m_MET_CorrFinalTrk["MET_Rebuilt_"+jet_type]).at(4)->Fill((*met_Reb)[name.c_str()]->met()/1000.,(*met_Reb)["FinalTrk"]->met()/1000., weight);
-          (m_MET_CorrFinalClus["MET_Rebuilt_"+jet_type]).at(4)->Fill((*met_Reb)[name.c_str()]->met()/1000.,(*met_Reb)["FinalClus"]->met()/1000., weight);
+        if(name == "RefJet"){
+          (m_MET_CorrFinalTrk["MET_Rebuilt_"+jet_type]).at(4)->Fill((*met)[name.c_str()]->met()/1000.,(*met)["FinalTrk"]->met()/1000., weight);
+          (m_MET_CorrFinalClus["MET_Rebuilt_"+jet_type]).at(4)->Fill((*met)[name.c_str()]->met()/1000.,(*met)["FinalClus"]->met()/1000., weight);
         }
-        if(name == "PVSoftTrk")
-        {
-          (m_MET_CorrFinalTrk["MET_Rebuilt_"+jet_type]).at(5)->Fill((*met_Reb)[name.c_str()]->met()/1000.,(*met_Reb)["FinalTrk"]->met()/1000., weight);
+        if(name == "PVSoftTrk"){
+          (m_MET_CorrFinalTrk["MET_Rebuilt_"+jet_type]).at(5)->Fill((*met)[name.c_str()]->met()/1000.,(*met)["FinalTrk"]->met()/1000., weight);
         }
-        if(name == "SoftClus")
-        {
-          (m_MET_CorrFinalClus["MET_Rebuilt_"+jet_type]).at(5)->Fill((*met_Reb)[name.c_str()]->met()/1000.,(*met_Reb)["FinalClus"]->met()/1000., weight);
+        if(name == "SoftClus"){
+          (m_MET_CorrFinalClus["MET_Rebuilt_"+jet_type]).at(5)->Fill((*met)[name.c_str()]->met()/1000.,(*met)["FinalClus"]->met()/1000., weight);
         }
       }
 
-      // Fill Resolution
-      if(m_doTruth)
-      {
+      // Fill Resolution histos
+      if(m_doTruth){
         ATH_MSG_INFO( "  Resolution:" );
         //Fill Rebuilt plots
-        (m_MET_Resolution["MET_Rebuilt_"+jet_type]).at(0)->Fill(((*met_Reb)["FinalClus"]->mpx()-(*met_Truth)["NonInt"]->mpx())/1000., weight);
-        (m_MET_Resolution["MET_Rebuilt_"+jet_type]).at(1)->Fill(((*met_Reb)["FinalClus"]->mpy()-(*met_Truth)["NonInt"]->mpy())/1000., weight);
-        (m_MET_Resolution["MET_Rebuilt_"+jet_type]).at(2)->Fill(((*met_Reb)["FinalTrk"]->mpx()-(*met_Truth)["NonInt"]->mpx())/1000., weight);
-        (m_MET_Resolution["MET_Rebuilt_"+jet_type]).at(3)->Fill(((*met_Reb)["FinalTrk"]->mpy()-(*met_Truth)["NonInt"]->mpy())/1000., weight);
+        (m_MET_Resolution["MET_Rebuilt_"+jet_type]).at(0)->Fill(((*met)["FinalClus"]->mpx()-(*met_Truth)["NonInt"]->mpx())/1000., weight);
+        (m_MET_Resolution["MET_Rebuilt_"+jet_type]).at(1)->Fill(((*met)["FinalClus"]->mpy()-(*met_Truth)["NonInt"]->mpy())/1000., weight);
+        (m_MET_Resolution["MET_Rebuilt_"+jet_type]).at(2)->Fill(((*met)["FinalTrk"]->mpx()-(*met_Truth)["NonInt"]->mpx())/1000., weight);
+        (m_MET_Resolution["MET_Rebuilt_"+jet_type]).at(3)->Fill(((*met)["FinalTrk"]->mpy()-(*met_Truth)["NonInt"]->mpy())/1000., weight);
       }
 
-      //Fill MET significance
-      //fill Reb
-      if( (*met_Reb)["FinalClus"]->sumet() != 0) (m_MET_Significance["MET_Rebuilt_"+jet_type]).at(0)->Fill((*met_Reb)["FinalClus"]->met()/sqrt((*met_Reb)["FinalClus"]->sumet()*1000.), weight);
-      if( (*met_Reb)["FinalTrk"]->sumet() != 0) (m_MET_Significance["MET_Rebuilt_"+jet_type]).at(1)->Fill((*met_Reb)["FinalTrk"]->met()/sqrt((*met_Reb)["FinalTrk"]->sumet()*1000.), weight);
+      //Fill significance
+      if( (*met)["FinalClus"]->sumet() != 0) (m_MET_Significance["MET_Rebuilt_"+jet_type]).at(0)->Fill((*met)["FinalClus"]->met()/sqrt((*met)["FinalClus"]->sumet()*1000.), weight);
+      if( (*met)["FinalTrk"]->sumet() != 0) (m_MET_Significance["MET_Rebuilt_"+jet_type]).at(1)->Fill((*met)["FinalTrk"]->met()/sqrt((*met)["FinalTrk"]->sumet()*1000.), weight);
 
       TLorentzVector target_tlv;
 
-      // For rebuilt MET add only jets with pT>20e3 and JVT cut
-      TLorentzVector jetReb_tlv;
-      double sum_jetReb = 0;
-      for(const auto jet : only_jet_elems) 
-
-      {
-        jetReb_tlv += jet->p4();
-        sum_jetReb += jet->pt();
+      // Collecting using Jets with JVT and OR without other elements
+      TLorentzVector jet_tlv;
+      double sum_jet = 0;
+      for(const auto jet : only_jet_elems) {
+        jet_tlv += jet->p4();
+        sum_jet += jet->pt();
+        has_jet = 1;
       }
 
-      for(const auto it : *met_Reb) 
-      {
-        //Fill MET Dif for Reb
-        if(it->name() == "RefEle")
-        {
-          if(is_electron or (it->sumet() > 0))
-          {
-            target_tlv.SetPxPyPzE(-it->mpx(), -it->mpy(), 0, it->met());
-            (m_MET_Diff["MET_Rebuilt_"+jet_type]).at(0)->Fill((target_tlv.Pt() - el_tlv.Pt())/1000., weight);
-            (m_MET_Diff_x["MET_Rebuilt_"+jet_type]).at(0)->Fill((target_tlv.Px() - el_tlv.Px())/1000., weight);
-            (m_MET_Diff_y["MET_Rebuilt_"+jet_type]).at(0)->Fill((target_tlv.Py() - el_tlv.Py())/1000., weight);
-            (m_MET_Diff_phi["MET_Rebuilt_"+jet_type]).at(0)->Fill(el_tlv.DeltaPhi(target_tlv), weight);
-            (m_MET_Diff_sum["MET_Rebuilt_"+jet_type]).at(0)->Fill((it->sumet() - sum_el)/1000., weight);
-          }
+      //Fill MET Diff histos
+      for(const auto it : *met) {
+        if(it->name() == "RefEle" && (has_electron or (it->sumet() > 0))){
+          target_tlv.SetPxPyPzE(-it->mpx(), -it->mpy(), 0, it->met());
+          (m_MET_Diff["MET_Rebuilt_"+jet_type]).at(0)->Fill((target_tlv.Pt() - el_tlv.Pt())/1000., weight);
+          (m_MET_Diff_x["MET_Rebuilt_"+jet_type]).at(0)->Fill((target_tlv.Px() - el_tlv.Px())/1000., weight);
+          (m_MET_Diff_y["MET_Rebuilt_"+jet_type]).at(0)->Fill((target_tlv.Py() - el_tlv.Py())/1000., weight);
+          (m_MET_Diff_phi["MET_Rebuilt_"+jet_type]).at(0)->Fill(el_tlv.DeltaPhi(target_tlv), weight);
+          (m_MET_Diff_sum["MET_Rebuilt_"+jet_type]).at(0)->Fill((it->sumet() - sum_el)/1000., weight);
         }
-        if(it->name() == "RefGamma")
-        {
-          if(is_photon or (it->sumet() > 0))
-          {
-            target_tlv.SetPxPyPzE(-it->mpx(), -it->mpy(), 0, it->met());
-            (m_MET_Diff["MET_Rebuilt_"+jet_type]).at(1)->Fill((target_tlv.Pt() - photon_tlv.Pt())/1000., weight);
-            (m_MET_Diff_x["MET_Rebuilt_"+jet_type]).at(1)->Fill((target_tlv.Px() - photon_tlv.Px())/1000., weight);
-            (m_MET_Diff_y["MET_Rebuilt_"+jet_type]).at(1)->Fill((target_tlv.Py() - photon_tlv.Py())/1000., weight);
-            (m_MET_Diff_phi["MET_Rebuilt_"+jet_type]).at(1)->Fill(photon_tlv.DeltaPhi(target_tlv), weight);
-            (m_MET_Diff_sum["MET_Rebuilt_"+jet_type]).at(1)->Fill((it->sumet() - sum_photon)/1000., weight);
-          }
+        if(it->name() == "RefGamma" && (has_photon or (it->sumet() > 0))){
+          target_tlv.SetPxPyPzE(-it->mpx(), -it->mpy(), 0, it->met());
+          (m_MET_Diff["MET_Rebuilt_"+jet_type]).at(1)->Fill((target_tlv.Pt() - photon_tlv.Pt())/1000., weight);
+          (m_MET_Diff_x["MET_Rebuilt_"+jet_type]).at(1)->Fill((target_tlv.Px() - photon_tlv.Px())/1000., weight);
+          (m_MET_Diff_y["MET_Rebuilt_"+jet_type]).at(1)->Fill((target_tlv.Py() - photon_tlv.Py())/1000., weight);
+          (m_MET_Diff_phi["MET_Rebuilt_"+jet_type]).at(1)->Fill(photon_tlv.DeltaPhi(target_tlv), weight);
+          (m_MET_Diff_sum["MET_Rebuilt_"+jet_type]).at(1)->Fill((it->sumet() - sum_photon)/1000., weight);
         }
-        if(it->name() == "RefTau")
-        {
-          if(is_tau or (it->sumet() > 0))
-          {
-            target_tlv.SetPxPyPzE(-it->mpx(), -it->mpy(), 0, it->met());
-            (m_MET_Diff["MET_Rebuilt_"+jet_type]).at(2)->Fill((target_tlv.Pt() - tau_tlv.Pt())/1000., weight);
-            (m_MET_Diff_x["MET_Rebuilt_"+jet_type]).at(2)->Fill((target_tlv.Px() - tau_tlv.Px())/1000., weight);
-            (m_MET_Diff_y["MET_Rebuilt_"+jet_type]).at(2)->Fill((target_tlv.Py() - tau_tlv.Py())/1000., weight);
-            (m_MET_Diff_phi["MET_Rebuilt_"+jet_type]).at(2)->Fill(tau_tlv.DeltaPhi(target_tlv), weight);
-            (m_MET_Diff_sum["MET_Rebuilt_"+jet_type]).at(2)->Fill((it->sumet() - sum_tau)/1000., weight);
-          }
+        if(it->name() == "RefTau" && (has_tau or (it->sumet() > 0))){
+          target_tlv.SetPxPyPzE(-it->mpx(), -it->mpy(), 0, it->met());
+          (m_MET_Diff["MET_Rebuilt_"+jet_type]).at(2)->Fill((target_tlv.Pt() - tau_tlv.Pt())/1000., weight);
+          (m_MET_Diff_x["MET_Rebuilt_"+jet_type]).at(2)->Fill((target_tlv.Px() - tau_tlv.Px())/1000., weight);
+          (m_MET_Diff_y["MET_Rebuilt_"+jet_type]).at(2)->Fill((target_tlv.Py() - tau_tlv.Py())/1000., weight);
+          (m_MET_Diff_phi["MET_Rebuilt_"+jet_type]).at(2)->Fill(tau_tlv.DeltaPhi(target_tlv), weight);
+          (m_MET_Diff_sum["MET_Rebuilt_"+jet_type]).at(2)->Fill((it->sumet() - sum_tau)/1000., weight);
         }
-        if(it->name() == "Muons")
-        {
-          if(is_muon or (it->sumet() > 0))
-          {
-            target_tlv.SetPxPyPzE(-it->mpx(), -it->mpy(), 0, it->met());
-            (m_MET_Diff["MET_Rebuilt_"+jet_type]).at(3)->Fill((target_tlv.Pt() - mu_tlv.Pt())/1000., weight);
-            (m_MET_Diff_x["MET_Rebuilt_"+jet_type]).at(3)->Fill((target_tlv.Px() - mu_tlv.Px())/1000., weight);
-            (m_MET_Diff_y["MET_Rebuilt_"+jet_type]).at(3)->Fill((target_tlv.Py() - mu_tlv.Py())/1000., weight);
-            (m_MET_Diff_phi["MET_Rebuilt_"+jet_type]).at(3)->Fill(mu_tlv.DeltaPhi(target_tlv), weight);
-            (m_MET_Diff_sum["MET_Rebuilt_"+jet_type]).at(3)->Fill((it->sumet() - sum_mu)/1000., weight);
-          }
+        if(it->name() == "RefMuons" && (has_muon or (it->sumet() > 0))){
+          target_tlv.SetPxPyPzE(-it->mpx(), -it->mpy(), 0, it->met());
+          (m_MET_Diff["MET_Rebuilt_"+jet_type]).at(3)->Fill((target_tlv.Pt() - mu_tlv.Pt())/1000., weight);
+          (m_MET_Diff_x["MET_Rebuilt_"+jet_type]).at(3)->Fill((target_tlv.Px() - mu_tlv.Px())/1000., weight);
+          (m_MET_Diff_y["MET_Rebuilt_"+jet_type]).at(3)->Fill((target_tlv.Py() - mu_tlv.Py())/1000., weight);
+          (m_MET_Diff_phi["MET_Rebuilt_"+jet_type]).at(3)->Fill(mu_tlv.DeltaPhi(target_tlv), weight);
+          (m_MET_Diff_sum["MET_Rebuilt_"+jet_type]).at(3)->Fill((it->sumet() - sum_mu)/1000., weight);
         }
-        if(it->name() == "RefJet")
-        {
-          if(is_jet or (it->sumet() > 0))
-          {
-            target_tlv.SetPxPyPzE(-it->mpx(), -it->mpy(), 0, it->met());
-            (m_MET_Diff["MET_Rebuilt_"+jet_type]).at(4)->Fill((target_tlv.Pt() - jetReb_tlv.Pt())/1000., weight);
-            (m_MET_Diff_x["MET_Rebuilt_"+jet_type]).at(4)->Fill((target_tlv.Px() - jetReb_tlv.Px())/1000., weight);
-            (m_MET_Diff_y["MET_Rebuilt_"+jet_type]).at(4)->Fill((target_tlv.Py() - jetReb_tlv.Py())/1000., weight);
-            (m_MET_Diff_phi["MET_Rebuilt_"+jet_type]).at(4)->Fill(jetReb_tlv.DeltaPhi(target_tlv), weight);
-            (m_MET_Diff_sum["MET_Rebuilt_"+jet_type]).at(4)->Fill((it->sumet() - sum_jetReb)/1000., weight);
-          }
+        if(it->name() == "RefJet" && (has_jet or (it->sumet() > 0))){
+          target_tlv.SetPxPyPzE(-it->mpx(), -it->mpy(), 0, it->met());
+          (m_MET_Diff["MET_Rebuilt_"+jet_type]).at(4)->Fill((target_tlv.Pt() - jet_tlv.Pt())/1000., weight);
+          (m_MET_Diff_x["MET_Rebuilt_"+jet_type]).at(4)->Fill((target_tlv.Px() - jet_tlv.Px())/1000., weight);
+          (m_MET_Diff_y["MET_Rebuilt_"+jet_type]).at(4)->Fill((target_tlv.Py() - jet_tlv.Py())/1000., weight);
+          (m_MET_Diff_phi["MET_Rebuilt_"+jet_type]).at(4)->Fill(jet_tlv.DeltaPhi(target_tlv), weight);
+          (m_MET_Diff_sum["MET_Rebuilt_"+jet_type]).at(4)->Fill((it->sumet() - sum_jet)/1000., weight);
         }
       }
 
-      float n_jet = 0.0, n_el = 0.0, n_mu = 0.0 , n_ta = 0.0, n_ph = 0.0;
+      //Fill Kin Histos
       for(const auto p : el_elems){
-          n_el ++;
           (m_MET_Kine_pt["MET_Rebuilt_"+jet_type]).at(0)->Fill((p->pt())/1000., weight);
           (m_MET_Kine_eta["MET_Rebuilt_"+jet_type]).at(0)->Fill(p->eta(), weight);
           (m_MET_Kine_phi["MET_Rebuilt_"+jet_type]).at(0)->Fill(p->phi(), weight);
       }
       for(const auto p : ph_elems){
-          n_ph ++;
           (m_MET_Kine_pt["MET_Rebuilt_"+jet_type]).at(1)->Fill((p->pt())/1000., weight);
           (m_MET_Kine_eta["MET_Rebuilt_"+jet_type]).at(1)->Fill(p->eta(), weight);
           (m_MET_Kine_phi["MET_Rebuilt_"+jet_type]).at(1)->Fill(p->phi(), weight);
       }
       for(const auto p : ta_elems){
-          n_ta ++;
           (m_MET_Kine_pt["MET_Rebuilt_"+jet_type]).at(2)->Fill((p->pt())/1000., weight);
           (m_MET_Kine_eta["MET_Rebuilt_"+jet_type]).at(2)->Fill(p->eta(), weight);
           (m_MET_Kine_phi["MET_Rebuilt_"+jet_type]).at(2)->Fill(p->phi(), weight);
       }
       for(const auto p : mu_elems){
-          n_mu ++;
           (m_MET_Kine_pt["MET_Rebuilt_"+jet_type]).at(3)->Fill((p->pt())/1000., weight);
           (m_MET_Kine_eta["MET_Rebuilt_"+jet_type]).at(3)->Fill(p->eta(), weight);
           (m_MET_Kine_phi["MET_Rebuilt_"+jet_type]).at(3)->Fill(p->phi(), weight);
       }
       for(const auto p : jet_elems){
-          n_jet ++;
           (m_MET_Kine_pt["MET_Rebuilt_"+jet_type]).at(4)->Fill((p->pt())/1000., weight);
           (m_MET_Kine_eta["MET_Rebuilt_"+jet_type]).at(4)->Fill(p->eta(), weight);
           (m_MET_Kine_phi["MET_Rebuilt_"+jet_type]).at(4)->Fill(p->phi(), weight);
       }
-
-      (m_MET_multi["MET_Rebuilt_"+jet_type]).at(0)->Fill(n_el, weight);
-      (m_MET_multi["MET_Rebuilt_"+jet_type]).at(1)->Fill(n_ph, weight);
-      (m_MET_multi["MET_Rebuilt_"+jet_type]).at(2)->Fill(n_ta, weight);
-      (m_MET_multi["MET_Rebuilt_"+jet_type]).at(3)->Fill(n_mu, weight);
-      (m_MET_multi["MET_Rebuilt_"+jet_type]).at(4)->Fill(n_ph, weight);
+      //Fill Multiplicity Histos
+      (m_MET_multi["MET_Rebuilt_"+jet_type]).at(0)->Fill(el_elems.size(), weight);
+      (m_MET_multi["MET_Rebuilt_"+jet_type]).at(1)->Fill(ph_elems.size(), weight);
+      (m_MET_multi["MET_Rebuilt_"+jet_type]).at(2)->Fill(ta_elems.size(), weight);
+      (m_MET_multi["MET_Rebuilt_"+jet_type]).at(3)->Fill(mu_elems.size(), weight);
+      (m_MET_multi["MET_Rebuilt_"+jet_type]).at(4)->Fill(jet_elems.size(), weight);
 
 
       //EMTopo
-      if(jet_type == "AntiKt4EMTopo") 
-      {
+      if(jet_type == "AntiKt4EMTopo") {
         //Calo MET
         //const xAOD::JetContainer* emptyjets = 0;
         ConstDataVector<JetContainer> metJetsEmpty(SG::VIEW_ELEMENTS);
         MissingETContainer* met_Calo = new MissingETContainer();
-        if( evtStore()->record(met_Calo,("MET_Calo"+jet_type).c_str()).isFailure() ) 
-        {
+        if( evtStore()->record(met_Calo,("MET_Calo"+jet_type).c_str()).isFailure() ) {
           ATH_MSG_WARNING("Unable to record MissingETContainer: MET_Calo_" << jet_type);
           return StatusCode::FAILURE;
         }
         MissingETAuxContainer* met_CaloAux = new MissingETAuxContainer();
-        if( evtStore()->record(met_CaloAux,("MET_Calo"+jet_type+"Aux").c_str()).isFailure() ) 
-        {
+        if( evtStore()->record(met_CaloAux,("MET_Calo"+jet_type+"Aux").c_str()).isFailure() ) {
           ATH_MSG_WARNING("Unable to record MissingETAuxContainer: MET_Calo" << jet_type);
           return StatusCode::FAILURE;
         }
         met_Calo->setStore(met_CaloAux);
         MissingETAssociationHelper metHelper(metMap);
-        if( (*m_metmaker)->rebuildJetMET("RefJet", "SoftClus", "PVSoftTrk", met_Calo, metJetsEmpty.asDataVector(), coreMet, metHelper, true).isFailure() ) 
-        {
+        if( (*m_metmaker)->rebuildJetMET("RefJet", "SoftClus", "PVSoftTrk", met_Calo, metJetsEmpty.asDataVector(), coreMet, metHelper, true).isFailure() ) {
           ATH_MSG_WARNING("Failed to build jet and soft terms.");
         }
         
         if((*met_Calo)["SoftClus"]) clsource = (*met_Calo)["SoftClus"]->source();
-        if( met::buildMETSum("FinalClus", met_Calo, clsource).isFailure() ) 
-        {
+        if( met::buildMETSum("FinalClus", met_Calo, clsource).isFailure() ) {
           ATH_MSG_WARNING("Building MET FinalClus sum failed.");
         }
         
-        //fills MET calo
+        //fills MET calo histos
         m_MET_Calo->Fill((*met_Calo)["FinalClus"]->met()/1000., weight);
         m_MET_Calo_x->Fill((*met_Calo)["FinalClus"]->mpx()/1000., weight);
         m_MET_Calo_y->Fill((*met_Calo)["FinalClus"]->mpy()/1000., weight);
         m_MET_Calo_phi->Fill((*met_Calo)["FinalClus"]->phi(), weight);
         m_MET_Calo_sum->Fill((*met_Calo)["FinalClus"]->sumet()/1000., weight);
-
       }
-
     }
 
    return StatusCode::SUCCESS;
-   //return StatusCode::FAILURE;
   }
   
   // Proc Hists
@@ -1119,11 +966,9 @@ namespace MissingEtDQA
     ATH_MSG_INFO ("Finalising hists " << name() << "...");
   
     //loop over jet types
-    for (const auto& jet_type : m_types)
-    {
-      for(std::vector<TH1D*>::size_type i = 0; i < (m_MET["MET_Rebuilt_"+jet_type]).size(); ++i) 
-      {
-        //Reb hists get Sum w2
+    for (const auto& jet_type : m_types){
+      for(std::vector<TH1D*>::size_type i = 0; i < (m_MET["MET_Rebuilt_"+jet_type]).size(); ++i) {
+        //Term hists
         (m_MET["MET_Rebuilt_"+jet_type]).at(i)->Sumw2();
         (m_MET_x["MET_Rebuilt_"+jet_type]).at(i)->Sumw2();
         (m_MET_y["MET_Rebuilt_"+jet_type]).at(i)->Sumw2();
@@ -1131,8 +976,8 @@ namespace MissingEtDQA
         (m_MET_sum["MET_Rebuilt_"+jet_type]).at(i)->Sumw2();
       }
   
-      for(std::vector<TH1D*>::size_type i = 0; i < (m_MET_Diff["MET_Rebuilt_"+jet_type]).size(); ++i) 
-      {
+      for(std::vector<TH1D*>::size_type i = 0; i < (m_MET_Diff["MET_Rebuilt_"+jet_type]).size(); ++i) {
+        //Diff hists
         (m_MET_Diff["MET_Rebuilt_"+jet_type]).at(i)->Sumw2();
         (m_MET_Diff_x["MET_Rebuilt_"+jet_type]).at(i)->Sumw2();
         (m_MET_Diff_y["MET_Rebuilt_"+jet_type]).at(i)->Sumw2();
@@ -1140,40 +985,34 @@ namespace MissingEtDQA
         (m_MET_Diff_sum["MET_Rebuilt_"+jet_type]).at(i)->Sumw2();
       }
 
-      for(std::vector<TH2D*>::size_type i = 0; i < (m_MET_CorrFinalTrk["MET_Rebuilt_"+jet_type]).size(); ++i) 
-      {
+      for(std::vector<TH2D*>::size_type i = 0; i < (m_MET_CorrFinalTrk["MET_Rebuilt_"+jet_type]).size(); ++i) {
         //Get for CorFinalTrk
         (m_MET_CorrFinalTrk["MET_Rebuilt_"+jet_type]).at(i)->Sumw2();
       }
   
-      for(std::vector<TH2D*>::size_type i = 0; i < (m_MET_CorrFinalClus["MET_Rebuilt_"+jet_type]).size(); ++i) 
-      {
+      for(std::vector<TH2D*>::size_type i = 0; i < (m_MET_CorrFinalClus["MET_Rebuilt_"+jet_type]).size(); ++i) {
         //get for CorrFinalClus
         (m_MET_CorrFinalClus["MET_Rebuilt_"+jet_type]).at(i)->Sumw2();
       }
   
-      for(std::vector<TH1D*>::size_type i = 0; i < (m_MET_Significance["MET_Rebuilt_"+jet_type]).size(); ++i) 
-      {
+      for(std::vector<TH1D*>::size_type i = 0; i < (m_MET_Significance["MET_Rebuilt_"+jet_type]).size(); ++i) {
         //For Significance
         (m_MET_Significance["MET_Rebuilt_"+jet_type]).at(i)->Sumw2();
       }
   
-      for(std::vector<TH1D*>::size_type i = 0; i < (m_MET_Resolution["MET_Rebuilt_"+jet_type]).size(); ++i) 
-      { 
+      for(std::vector<TH1D*>::size_type i = 0; i < (m_MET_Resolution["MET_Rebuilt_"+jet_type]).size(); ++i) { 
         //for Resolution
       	(m_MET_Resolution["MET_Rebuilt_"+jet_type]).at(i)->Sumw2();
       }
   
-      for(std::vector<TH1D*>::size_type i = 0; i < (m_MET_dPhi["MET_Reference_"+jet_type]).size(); ++i) 
-      {
+      for(std::vector<TH1D*>::size_type i = 0; i < (m_MET_dPhi["MET_Reference_"+jet_type]).size(); ++i) {
         //for dPhi
         (m_MET_dPhi["MET_Rebuilt_"+jet_type]).at(i)->Sumw2();
       }
   
       int nBins = (m_MET["MET_Rebuilt_"+jet_type]).at(7)->GetNbinsX();
-      for(int i=1;i<=nBins;i++)
-      {
-        //For MET add errors for Cumu
+      for(int i=1;i<=nBins;i++){
+        //For MET Cumu
         double err;
         (m_MET_Cumu["MET_Rebuilt_"+jet_type]).at(0)->SetBinContent(i, (m_MET["MET_Rebuilt_"+jet_type]).at(8)->IntegralAndError(i,nBins+1,err));
         (m_MET_Cumu["MET_Rebuilt_"+jet_type]).at(0)->SetBinError(i, err);
@@ -1181,8 +1020,7 @@ namespace MissingEtDQA
         (m_MET_Cumu["MET_Rebuilt_"+jet_type]).at(1)->SetBinError(i, err);
       }
       //For MET Cumu
-      for(std::vector<TH1D*>::size_type i = 0; i < (m_MET_Cumu["MET_Reference_"+jet_type]).size(); ++i) 
-      {
+      for(std::vector<TH1D*>::size_type i = 0; i < (m_MET_Cumu["MET_Reference_"+jet_type]).size(); ++i) {
         m_MET_Cumu["MET_Rebuilt_"+jet_type].at(i)->Scale(1./(m_MET_Cumu["MET_Rebuilt_"+jet_type]).at(i)->GetBinContent(1));
       }
   
@@ -1227,12 +1065,6 @@ namespace MissingEtDQA
   //Tau selection
   bool PhysValMET::Accept(const xAOD::TauJet* tau)
   { return static_cast<bool> (m_tauSelTool->accept( *tau )); }
-  //Jet selection
-  bool PhysValMET::Accept(const xAOD::Jet* jet, double JvtCut, ToolHandle<IJetUpdateJvt>* jvtTool)
-  {
-    if( jet->pt()<20e3 || jvtTool == nullptr) return false;
-    return (fabs(jet->eta()) > 2.4 || jet->pt() > 60e3 || (*jvtTool)->updateJvt(*jet) > JvtCut);
-  }
 
   /////////////////////////////////////////////////////////////////// 
   // Protected methods: 
@@ -1245,7 +1077,6 @@ namespace MissingEtDQA
   /////////////////////////////////////////////////////////////////// 
   // Non-const methods: 
   /////////////////////////////////////////////////////////////////// 
-
 
 }
 

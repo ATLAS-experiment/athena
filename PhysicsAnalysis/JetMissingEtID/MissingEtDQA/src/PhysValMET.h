@@ -134,6 +134,10 @@ class PhysValMET
   std::map<std::string,std::vector<TH1D*> > m_MET_dPhi;
   std::map<std::string,std::vector<TH2D*> > m_MET_CorrFinalTrk;
   std::map<std::string,std::vector<TH2D*> > m_MET_CorrFinalClus;
+  std::map<std::string,std::vector<TH1D*> > m_MET_Kine_pt;
+  std::map<std::string,std::vector<TH1D*> > m_MET_Kine_eta;
+  std::map<std::string,std::vector<TH1D*> > m_MET_Kine_phi;
+  std::map<std::string,std::vector<TH1D*> > m_MET_multi;
 
   std::vector<std::string> m_dir_met;
 
