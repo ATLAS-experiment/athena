@@ -852,7 +852,7 @@ StatusCode SCT_FastDigitizationTool::digitize(const EventContext& ctx,
               // create a custom cluster
                 potentialClusterUniq = std::make_unique<InDet::SCT_Cluster>(
                     potentialClusterId, lcorrectedPosition,
-                    std::vector<Identifier>(potentialClusterRDOList), siWidth, hitSiDetElement,
+                    std::move(potentialClusterRDOList), siWidth, hitSiDetElement,
                     Amg::MatrixX(mat));
             }
 

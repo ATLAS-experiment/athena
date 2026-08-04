@@ -707,7 +707,7 @@ StatusCode PixelRodDecoder::fillCollection( const ROBFragment *robFrag, IPixelRD
                         continue;
                       }
                       if (not m_checkDuplicatedPixel or thisRdoIsUnique(pixelId, foundPixels)) {
-                        coll->push_back(new RDO(pixelId, IBLtot[1], mBCID, mLVL1ID, mLVL1A));
+                        if (coll) coll->push_back(new RDO(pixelId, IBLtot[1], mBCID, mLVL1ID, mLVL1A));
                       } 
                       else {
                         m_numDuplicatedPixels++;
