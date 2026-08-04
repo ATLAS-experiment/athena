@@ -385,8 +385,7 @@ bool FourMuonEvent::EventSelectionNew(ZTYPE eType)
       if (vtxListX.size()>0) vertexstatus = true;
       // check that the muons are not split into too many vertices
       if (vtxListX.size() >= m_numberOfFullPassMuons - 1) vertexstatus = false;
-      // allow no muon without vertex
-      if (noVertexCountMuon > 0) vertexstatus = false;
+      // noVertexCountMuon is zero here
       if (m_doDebug || true) {
 	std::cout << " * FourMuonEvent::EventSelection(" << eType <<") * vertices ID of the muons = " << std::endl
 		  << "                   mu- 1 " << m_muon_vtx[0] << "  pt: " << m_pxMUTrack[0]->pt() << std::endl
@@ -400,8 +399,7 @@ bool FourMuonEvent::EventSelectionNew(ZTYPE eType)
     if ( m_workAsFourElectrons ) { // till here we have the electrons vertices list
       m_nVertex = vtxListX.size(); 
       if (vtxListX.size()>0) vertexstatus = true;
-      // check that the electrons are not split into too many vertices
-      if (vtxListX.size() >= m_numberOfFullPassElectrons - 1) vertexstatus = false;
+      // vertexstatus value is overwritten before use if it is set here
       
 	std::cout << " * FourMuonEvent::EventSelection(" << eType <<") * vertices ID of the electrons = " 
 		  << "\n                   el- 1 " << m_elec_vtx[0] << "  pt: " << m_pxELTrack[0]->pt() << std::endl
@@ -562,22 +560,22 @@ bool FourMuonEvent::EventSelection(ZTYPE eType)
     std::cout << "                                                            trailing muon pt: " << theTrailingPt << std::endl; 
   }
   
- 
+ const auto invariantMass  = m_fInvariantMass.at(eType);
   // Invariant mass window
-  if ( m_fInvariantMass[eType]  < m_MassWindowLow  ) {
+  if ( invariantMass  < m_MassWindowLow  ) {
     if(m_doDebug) {
-      std::cout <<" * FourMuonEvent::EventSelection * Failing mass window low cut:  reco m= " << m_fInvariantMass[eType] << " > " <<  m_MassWindowLow << std::endl;
+      std::cout <<" * FourMuonEvent::EventSelection * Failing mass window low cut:  reco m= " << invariantMass << " > " <<  m_MassWindowLow << std::endl;
     }
     return false;
   }
-  if ( m_fInvariantMass[eType]  > m_MassWindowHigh ) {
+  if ( invariantMass  > m_MassWindowHigh ) {
     if(m_doDebug) {
-      std::cout <<" * FourMuonEvent * Failing mass window high cut:  reco m= " << m_fInvariantMass[eType] << " > " <<  m_MassWindowHigh << std::endl;
+      std::cout <<" * FourMuonEvent * Failing mass window high cut:  reco m= " << invariantMass << " > " <<  m_MassWindowHigh << std::endl;
     }
     return false;
   }
   if(m_doDebug){
-    std::cout <<" * FourMuonEvent::EventSelection * Event passed the mass window: " << m_fInvariantMass[eType] << std::endl;
+    std::cout <<" * FourMuonEvent::EventSelection * Event passed the mass window: " << invariantMass << std::endl;
   }
   
   if(m_doDebug) {
@@ -1187,53 +1185,9 @@ void FourMuonEvent::OrderMuonList()
 bool FourMuonEvent::CheckMuonVertices ()
 {
   (*m_msgStream) << MSG::DEBUG << " * FourMuonsEvents::CheckMuonVertices * -- START --" << endmsg; 
-
-  bool goodvertices = false; 
-  goodvertices = true; // R22 set true by default. Needs to be revisited
-  int nverticesfound = 0; 
   
-  // loop on mu-, and for each mu-, loop on mu+ and check at least one mu+ and mu- come from the same vertex
-  // mu- indices are 0 or 1
-  for (unsigned int imuneg = 0; imuneg <= 1; imuneg++) {
-    if (m_pxMUTrack[imuneg] != nullptr) {
-      /* R21 SALVA --> vertex is not available in R22 --> A FIX IS NEEDED */
-      /*
-      if (m_pxMUTrack[imuneg]->vertex()) {
-	
-	if (m_doDebug) std::cout << "     mu-(" << imuneg <<")->vertex()->v= (" << m_pxMUTrack[imuneg]->vertex()->x()
-				 << ", " << m_pxMUTrack[imuneg]->vertex()->y()
-				 << ", " << m_pxMUTrack[imuneg]->vertex()->z()
-				 << ") " << std::endl;
-	
-	for (unsigned int imupos = 2; imupos <= 3; imupos++) { // mu+ indices are 2 and 3
-	  if (m_pxMUTrack[imupos] != nullptr) {
-	    if (m_pxMUTrack[imupos]->vertex()) {
-	      if (m_doDebug) std::cout << "     mu+(" << imupos <<")->vertex()->v= (" << m_pxMUTrack[imupos]->vertex()->x()
-				       << ", " << m_pxMUTrack[imupos]->vertex()->y()
-				       << ", " << m_pxMUTrack[imupos]->vertex()->z()
-				       << ") " << std::endl;
-	      
-	      float delta_x = fabs( m_pxMUTrack[imuneg]->vertex()->x() - m_pxMUTrack[imupos]->vertex()->x());
-	      float delta_y = fabs( m_pxMUTrack[imuneg]->vertex()->y() - m_pxMUTrack[imupos]->vertex()->y());
-	      float delta_z = fabs( m_pxMUTrack[imuneg]->vertex()->z() - m_pxMUTrack[imupos]->vertex()->z());
+  if (m_doDebug) std::cout << " -- FourMuonEvent::CheckMuonVertices -- WARNING -- MUONS DO NOT COME FROM SAME VERTEX \n" ; 
 
-	      if (delta_x < m_deltaXYcut && delta_y < m_deltaXYcut && delta_z < m_Z0GapCut) {
-		nverticesfound++;
-		if (m_doDebug) std::cout << "     MUON-BINGO !!! mu+mu- pair in same vertex !!! mu-[" << imuneg 
-					 << "]  mu+[" << imupos<< "]   count: " << nverticesfound << std::endl;
-	      } // vertex is the same
-	    } // mu+ has vertex
-	  } // mu+ exists
-	} // loop on mu+
-      } // mu- has vertex
-      */
-    } // mu- exists
-  } // loop on mu- 
-
-  if (nverticesfound >= 1) goodvertices = true;
-  
-  if (nverticesfound == 0) if (m_doDebug) std::cout << " -- FourMuonEvent::CheckMuonVertices -- WARNING -- MUONS DO NOT COME FROM SAME VERTEX " << std::endl; 
-
-  (*m_msgStream) << MSG::DEBUG << " * FourMuonsEvents::CheckMuonVertices * -- COMPLETED -- status: " << goodvertices << endmsg; 
-  return goodvertices;
+  (*m_msgStream) << MSG::DEBUG << " * FourMuonsEvents::CheckMuonVertices * -- COMPLETED -- status: " << true << endmsg; 
+  return true;
 }

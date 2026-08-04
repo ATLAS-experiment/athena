@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "SCTTracksMonAlg.h"
@@ -68,7 +68,7 @@ StatusCode SCTTracksMonAlg::initialize(){
 StatusCode SCTTracksMonAlg::fillHistograms(const EventContext& ctx) const{
 
 ATH_MSG_DEBUG("SCTTracksMonAlg::fillHistograms()");
-
+  const std::string histoName{"SCTTracksMonitor"};
   const bool doThisSubsystem[N_REGIONS] = {
     m_doNegativeEndcap, true, m_doPositiveEndcap
   };
@@ -111,7 +111,7 @@ ATH_MSG_DEBUG("SCTTracksMonAlg::fillHistograms()");
     goodTrks_N++;
     if (track->fitQuality()->numberDoF() > 0.) { // Fill Track Chi2/ndf histogram
         auto trk_chi2Acc{Monitored::Scalar<float>("trk_chi2", track->fitQuality()->chiSquared() / track->fitQuality()->numberDoF())};
-        fill("SCTTracksMonitor", trk_chi2Acc);
+        fill(histoName, trk_chi2Acc);
     }
     if (track->perigeeParameters() == nullptr) {
       continue;
@@ -120,27 +120,27 @@ ATH_MSG_DEBUG("SCTTracksMonAlg::fillHistograms()");
     double trackPerigeeEta{-log(tan(0.5 * trackPerigeeTheta))};
     auto tracksPerRegionAcc{Monitored::Scalar<float>("tracksPerRegion", etaRegion(trackPerigeeEta))};
 
-    fill("SCTTracksMonitor", tracksPerRegionAcc);
+    fill(histoName, tracksPerRegionAcc);
 
     auto trk_etaAcc{Monitored::Scalar<float>("trk_eta", trackPerigeeEta)};
-    fill("SCTTracksMonitor", trk_etaAcc);
+    fill(histoName, trk_etaAcc);
 
     if (track->perigeeParameters()->parameters()[Trk::qOverP] != 0.) {
         auto trk_ptAcc{Monitored::Scalar<float>("trk_pt", std::abs(1. / (track->perigeeParameters()->parameters()[Trk::qOverP] * 1000.)))};
-        fill("SCTTracksMonitor", trk_ptAcc);
+        fill(histoName, trk_ptAcc);
     }
     auto trk_d0Acc{Monitored::Scalar<float>("trk_d0", track->perigeeParameters()->parameters()[Trk::d0])};
-    fill("SCTTracksMonitor", trk_d0Acc);
+    fill(histoName, trk_d0Acc);
     auto trk_z0Acc{Monitored::Scalar<float>("trk_z0", track->perigeeParameters()->parameters()[Trk::z0])};
-    fill("SCTTracksMonitor", trk_z0Acc);
+    fill(histoName, trk_z0Acc);
     auto trk_phiAcc{Monitored::Scalar<float>("trk_phi", track->perigeeParameters()->parameters()[Trk::phi])};
-    fill("SCTTracksMonitor", trk_phiAcc);
+    fill(histoName, trk_phiAcc);
 
     if (m_doTrigger) {
       for (int trig{0}; trig < N_TRIGGER_TYPES; ++trig) {
         if (hasTriggerFired(trig, firedTriggers)) {
             auto trackTriggerAcc{Monitored::Scalar<int>("trackTriggers", trig)};
-            fill("SCTTracksMonitor", trackTriggerAcc);
+            fill(histoName, trackTriggerAcc);
         }
       }
     }
@@ -209,10 +209,10 @@ ATH_MSG_DEBUG("SCTTracksMonAlg::fillHistograms()");
                   double local_pull{residualPull->pull()[Trk::locX]};
                   if (doThisDetector) {
                     auto residualAcc{Monitored::Scalar<float>("total"+m_regionNames[bec2Index(bec)]+"Residual", local_residual)};
-                    fill("SCTTracksMonitor", residualAcc);
+                    fill(histoName, residualAcc);
 
                     auto pullAcc{Monitored::Scalar<float>("total"+m_regionNames[bec2Index(bec)]+"Pull", local_pull)};
-                    fill("SCTTracksMonitor", pullAcc);
+                    fill(histoName, pullAcc);
 
                   }
                 }
@@ -226,18 +226,18 @@ ATH_MSG_DEBUG("SCTTracksMonAlg::fillHistograms()");
       } // if (tsos->type(Trk::TrackStateOnSurface::Measurement))
     }// end of loop on TrackStatesonSurface (they can be SiClusters, TRTHits,..)
     auto local_hitsAcc{Monitored::Scalar<float>("trk_sct_hits", static_cast<float>(local_scthits))};
-    fill("SCTTracksMonitor", local_hitsAcc);
+    fill(histoName, local_hitsAcc);
 
     // We now know whether this particular track had hits in the barrel or endcaps- update the profile histogram
     for (unsigned int region{0}; region < N_REGIONS; ++region) {
         auto regionAcc{Monitored::Scalar<int>("region", static_cast<int>(region))};
         auto hitsAcc{Monitored::Scalar<float>("hitsRegion", static_cast<float>(hasHits[region]))};
-        fill("SCTTracksMonitor", regionAcc,hitsAcc);
+        fill(histoName, regionAcc,hitsAcc);
       // barrel, Eca, Ecb)
     }
   } // end of loop on tracks
   auto goodTrks_NAcc{Monitored::Scalar<int>("trk_N", goodTrks_N)};
-  fill("SCTTracksMonitor", goodTrks_NAcc);
+  fill(histoName, goodTrks_NAcc);
   return StatusCode::SUCCESS;
 }
 

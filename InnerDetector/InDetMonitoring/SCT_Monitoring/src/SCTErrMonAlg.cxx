@@ -231,7 +231,7 @@ SCTErrMonAlg::fillByteStreamErrors(const EventContext& ctx) const {
     ATH_MSG_WARNING("Could not retrieve event info!");
     return StatusCode::SUCCESS;
   }
-
+  const std::string histoName{"SCTErrMonitor"};
   //--- Fill 1D histograms (vs LumiBlock) for each BS
   for (int errType{0}; errType < SCT_ByteStreamErrors::NUM_ERROR_TYPES; ++errType) {
     int nBSErrors{0};
@@ -240,7 +240,7 @@ SCTErrMonAlg::fillByteStreamErrors(const EventContext& ctx) const {
     /// Fill /SCT/GENERAL/Conf/SCT_*VsLbs ///
     auto lumiBlockAcc{Monitored::Scalar<int>("lumiBlock", pEvent->lumiBlock())};
     auto nBSErrorsAcc{Monitored::Scalar<int>("n_"+SCT_ByteStreamErrors::ErrorTypeDescription[errType], nBSErrors)};
-    fill("SCTErrMonitor", lumiBlockAcc, nBSErrorsAcc);
+    fill(histoName, lumiBlockAcc, nBSErrorsAcc);
   }
   //Total stack use for this function is 1'623'676 bytes.
   //coverity[STACK_USE]
@@ -261,7 +261,7 @@ SCTErrMonAlg::fillByteStreamErrors(const EventContext& ctx) const {
     auto lumiBlockAcc{Monitored::Scalar<int>("lumiBlock", pEvent->lumiBlock())};
     auto nCategoryErrorsAcc{Monitored::Scalar<int>("n_"+CategoryErrorsNames[errCate],
                                                    categoryErrorMap.count(errCate))};
-    fill("SCTErrMonitor", lumiBlockAcc, nCategoryErrorsAcc);
+    fill(histoName, lumiBlockAcc, nCategoryErrorsAcc);
 
     for (int iReg{0}; iReg<N_REGIONS; iReg++) {
       const int maxLayer{iReg==BARREL_INDEX ? N_BARRELSx2 : N_ENDCAPSx2};
@@ -288,11 +288,11 @@ SCTErrMonAlg::fillByteStreamErrors(const EventContext& ctx) const {
         auto phiAcc{Monitored::Collection("phi", vPhi)};
         auto hasErrorAcc{Monitored::Collection("hasError_"+CategoryErrorsNames[errCate]+"_"+subDetNameShort[iReg].Data()+"_"+std::to_string(iLay/2)+"_"+std::to_string(iLay%2),
                                                vHasError)};
-        fill("SCTErrMonitor", etaAcc, phiAcc, hasErrorAcc);
+        fill(histoName, etaAcc, phiAcc, hasErrorAcc);
 
         if (m_doOnline and CategoryErrorsNames[errCate] == "Errors"){
             auto hasErrorRecentAcc{Monitored::Collection("hasError_"+CategoryErrorsNames[errCate]+"_recent_"+subDetNameShort[iReg].Data()+"_"+std::to_string(iLay/2)+"_"+std::to_string(iLay%2),vHasError)};
-            fill("SCTErrMonitor", etaAcc, phiAcc, hasErrorRecentAcc);
+            fill(histoName, etaAcc, phiAcc, hasErrorRecentAcc);
         }
       }
     }

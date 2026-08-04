@@ -241,7 +241,7 @@ StatusCode SCTHitEffMonAlg::failCut(bool value, const std::string & name) const 
 
 StatusCode SCTHitEffMonAlg::fillHistograms(const EventContext& ctx) const {
   ATH_MSG_VERBOSE("SCTHitEffMonTool::fillHistograms()");
-
+  const std::string histoName{"SCTHitEffMonitor"};
   const std::map<Identifier, unsigned int>* badChips{nullptr};
   if (m_vetoBadChips) {
     badChips = m_configConditions->badChips(ctx);
@@ -449,7 +449,7 @@ StatusCode SCTHitEffMonAlg::fillHistograms(const EventContext& ctx) const {
         if (m_pixelId->is_pixel(surfaceID)) {
           pixelNHoles++;
         } else if (m_sctId->is_sct(surfaceID)) {
-          sctNHolesPerRegion[waferIndex]++;
+          sctNHolesPerRegion.at(waferIndex)++;
         }
       }
 
@@ -725,7 +725,7 @@ StatusCode SCTHitEffMonAlg::fillHistograms(const EventContext& ctx) const {
 
       //fill the histograms
       fill(regionNames[isub].data(), effAcc, ineffAcc, ietaAcc, iphiAcc, layerAcc, lumiAcc, isFirstBCIDAcc);
-      fill("SCTHitEffMonitor", effAcc, lumiAcc, isubAcc, sideHashAcc, isFirstBCIDAcc);
+      fill(histoName, effAcc, lumiAcc, isubAcc, sideHashAcc, isFirstBCIDAcc);
 
       if (testOffline) {
         ATH_MSG_INFO("Filling " << detIndex << ", " << side << " eta " << ieta << " phi " << iphi);
