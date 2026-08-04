@@ -314,7 +314,7 @@ public:
         vecmem::host_memory_resource* host_mr,
         vecmem::cuda::device_memory_resource* device_mr,
         int deviceID = 0,
-        const std::string& geoDir = "/geoDir") :
+        const std::string& geoDir = "/eos/project/a/atlas-eftracking/GPU/ITk_data/ATLAS-P2-RUN4-03-00-01/") :
             m_device_id(deviceID), 
             m_geoDir(geoDir),
             logger(traccc::getDefaultLogger("TracccG200Standalone", traccc::Logging::Level::INFO)),

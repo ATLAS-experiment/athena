@@ -25,7 +25,7 @@ def plot_histogram(data, name, xlabel, bins=50, xlims=None, logy=False):
         plt.xlim(xlims)
     if logy:
         plt.yscale('log')
-    plt.savefig(f"plots/{name.replace(" ", "_")}.png")
+    plt.savefig(f"{name.replace(' ', '_')}.png")
 
 def main():
     try:
@@ -62,7 +62,7 @@ def main():
 
     # Send inference request synchronously
     result = triton_client.infer(
-        model_name="traccc-gpu",
+        model_name="traccc_g200",
         inputs=inputs,
         outputs=outputs
     )
@@ -189,7 +189,7 @@ if __name__ == "__main__":
         "--filename",
         type=str,
         required=False,
-        default="event000000000-cells.csv",
+        default="/event/event000000000-cells.csv",
         help="Input file name. Default is event000000000-cells.csv",
     )
     parser.add_argument(
