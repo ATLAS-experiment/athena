@@ -338,19 +338,19 @@ StatusCode InDetSecVtxTruthMatchTool::matchVertices( std::vector<const xAOD::Ver
           //add split links; first between first one found and newest one
           ElementLink<xAOD::VertexContainer> splitLink_ij;
           splitLink_ij.setElement( recoVerticesToMatch[j] ); 
-          splitLink_ij.setStorableObject( *dynamic_cast<const xAOD::VertexContainer*>(recoVerticesToMatch[j]->container()));
+          splitLink_ij.setStorableObject( *static_cast<const xAOD::VertexContainer*>(recoVerticesToMatch[j]->container()));
           splitPartnerDecor( *recoVerticesToMatch[i] ).emplace_back(splitLink_ij);
 
           ElementLink<xAOD::VertexContainer> splitLink_ji;
           splitLink_ji.setElement( recoVerticesToMatch[i] ); 
-          splitLink_ji.setStorableObject( *dynamic_cast<const xAOD::VertexContainer*>(recoVerticesToMatch[i]->container()));
+          splitLink_ji.setStorableObject( *static_cast<const xAOD::VertexContainer*>(recoVerticesToMatch[i]->container()));
           splitPartnerDecor( *recoVerticesToMatch[j] ).emplace_back(splitLink_ji);
 
           //then between any others we found along the way
           for ( auto k : foundSplits ) { //k is a size_t in the vector of splits
             ElementLink<xAOD::VertexContainer> splitLink_kj;
             splitLink_kj.setElement( recoVerticesToMatch[j] ); 
-            splitLink_kj.setStorableObject( *dynamic_cast<const xAOD::VertexContainer*>(recoVerticesToMatch[j]->container()));
+            splitLink_kj.setStorableObject( *static_cast<const xAOD::VertexContainer*>(recoVerticesToMatch[j]->container()));
             splitPartnerDecor( *recoVerticesToMatch[k] ).emplace_back(splitLink_kj);
 
             ElementLink<xAOD::VertexContainer> splitLink_jk;
