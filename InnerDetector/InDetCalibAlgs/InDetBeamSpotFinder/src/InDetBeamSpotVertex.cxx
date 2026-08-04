@@ -1038,6 +1038,7 @@ void BeamSpot::myFCN_LLsolver( Int_t &, Double_t *, Double_t &f, Double_t *par, 
   f = 0;
   
   using Vertices = std::vector<BeamSpot::VrtHolder>;
+  std::lock_guard<std::mutex> lock(BeamSpot::mutex);
   Vertices::const_iterator vit = BeamSpot::vertexData->begin();
   
   double temp =0;

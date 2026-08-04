@@ -282,7 +282,7 @@ Trk::Track* RefitTracksAndVertex::fitSCTOnlyTrack(const Trk::Track* track) {
     }
   }
 
-  if( (int)setSCT.size() <  m_selNHitSCTMin )
+  if( std::ssize(setSCT) <  m_selNHitSCTMin )
     return nullptr;
 
   ATH_MSG_DEBUG("RefitTracksAndVertex() : Found " << setSCT.size()  << " SCT measurm's!" ) ;
@@ -303,6 +303,7 @@ Trk::Track* RefitTracksAndVertex::fitSCTOnlyTrack(const Trk::Track* track) {
       return nullptr ;
     }
     ATH_MSG_DEBUG( "RefitTracksAndVertex() : pmFromSi " << *pmFromSi) ;
+    //coverity[UNINIT]
     Trk::MeasurementSet setSCT = addPM( setSCT, pmFromSi ) ;
   }
 
