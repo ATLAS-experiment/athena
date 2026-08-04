@@ -408,7 +408,7 @@ class MuonWorkingPointEfficiencyConfig (ConfigBlock) :
 
         sfList = []
         # Set up the reco/ID efficiency scale factor calculation algorithm:
-        if config.dataType() is not DataType.Data and quality is not None and not self.noEffSF:
+        if config.dataType() is not DataType.Data and self.quality != 'NoID' and not self.noEffSF:
             alg = config.createAlgorithm( 'CP::MuonEfficiencyScaleFactorAlg',
                                    'MuonEfficiencyScaleFactorAlgReco' )
             config.addPrivateTool( 'efficiencyScaleFactorTool',
