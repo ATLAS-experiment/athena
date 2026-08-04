@@ -106,6 +106,16 @@ namespace ActsTrk{
         );
 
 
+    // Organize measurement in layers for more efficient primary search
+    std::vector<int> measurement_layer_map[4];
+
+    for(auto uncalibMeas: *uncalibratedMeasurementContainer) {
+      const Acts::Surface* surface = m_surfAcc.get(uncalibMeas);
+      Acts::GeometryIdentifier geoID = surface->geometryId();
+      std::size_t layerIndex = getHGTDLayerIndex(geoID);
+      measurement_layer_map[layerIndex].push_back(uncalibMeas->index());
+    }  
+    
     SG::ReadHandle<ActsTrk::TrackContainer> tracksContainer = SG::makeHandle( m_trackContainerKey, ctx);
     if (!tracksContainer.isValid()) {
       ATH_MSG_ERROR("No tracks for key " << m_trackContainerKey.key() );
@@ -154,7 +164,7 @@ namespace ActsTrk{
       
 
       ATH_CHECK(isPrimaryExpected(truthParticle,
-        *uncalibratedMeasurementContainer,
+        measurement_layer_map,
         measurement_to_truth_association_maps[Acts::toUnderlying(xAOD::UncalibMeasType::HGTDClusterType)],
         data.primaryExistsVec));
 
@@ -238,28 +248,35 @@ namespace ActsTrk{
   
   StatusCode HGTDTruthTrackDecorationAlg::isPrimaryExpected(
     const xAOD::TruthParticle* truthParticle,
-    const xAOD::UncalibratedMeasurementContainer measurementContainer,
+    std::vector<int> measurement_layer_map[4],
     const ActsTrk::MeasurementToTruthParticleAssociation* association_map,
     std::vector<char> &isPrimaryExistsVec) const{
 
     isPrimaryExistsVec = {false, false, false, false};
-  
-    for(auto uncalibMeas: measurementContainer) {
 
-      auto measurementTruthParticles = association_map->at(uncalibMeas->index());
-      const Acts::Surface* surface = m_surfAcc.get(uncalibMeas);
-      Acts::GeometryIdentifier geoID = surface->geometryId();
-      std::size_t layerIndex = getHGTDLayerIndex(geoID);
-      if(measurementTruthParticles.size() > 0){
-        for(auto measTruthParticle : measurementTruthParticles){
-          if ( truthParticle->index() == measTruthParticle->index()){
-            isPrimaryExistsVec[layerIndex] = true;
-            ATH_MSG_DEBUG("         \\__HIT Exepected at " << layerIndex);
+    for(std::size_t layerIndex = 0; layerIndex < 4; layerIndex++){
+
+      // Loop over measurements of this layer to find hits that match the track
+      for(auto measurement :measurement_layer_map[layerIndex]){
+        
+        auto measurementTruthParticles = association_map->at(measurement);
+        
+        // A hit can have more than one truth particle associated with it
+        if(measurementTruthParticles.size() > 0){
+          for(auto measTruthParticle : measurementTruthParticles){
+            
+            // If truth particle from track matches the one from the hit,
+            // a primary hit is expected for this layer
+            if(truthParticle->index() == measTruthParticle->index()){
+              isPrimaryExistsVec[layerIndex] = true;
+              ATH_MSG_DEBUG("         \\__HIT Exepected at " << layerIndex);
+            }
           }
         }
+        // If a match was already found, go to next layer
+        if(isPrimaryExistsVec[layerIndex] == true) break;
       }
     }
-  
     return StatusCode::SUCCESS; 
   }
 
