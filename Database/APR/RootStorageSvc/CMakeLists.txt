@@ -4,7 +4,6 @@
 atlas_subdir( RootStorageSvc )
 
 # External dependencies:
-#find_package( ROOT COMPONENTS Core RIO TreePlayer Tree MathCore Hist pthread ROOTNTuple)
 find_package( ROOT COMPONENTS Core pthread RIO Tree ROOTNTuple )
 find_package( VDT )
 
@@ -21,7 +20,7 @@ atlas_add_component( RootStorageSvc
 atlas_add_test( branchContIdx_test
    SOURCES test/branchContIdx_test.cxx
    INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
-   LINK_LIBRARIES ${ROOT_LIBRARIES} AthenaKernel PersistencySvc StorageSvc
+   LINK_LIBRARIES ${ROOT_LIBRARIES} AthenaKernel StorageSvc
    LOG_IGNORE_PATTERN "Token for .*"
 )
 

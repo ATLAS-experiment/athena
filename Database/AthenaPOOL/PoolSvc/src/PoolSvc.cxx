@@ -389,7 +389,7 @@ void PoolSvc::lookupBestPfn(const std::string& token, std::string& pfn, std::str
    if (token.compare(0, 4, "PFN:") == 0) {
       m_catalog->lookupFileByPFN(token.substr(4), dbID, type); // PFN -> FID
    } else if (token.compare(0, 4, "LFN:") == 0) {
-      m_catalog->lookupFileByLFN(token.substr(4), dbID); // LFN -> FID
+      dbID = m_catalog->lookupLFN(token.substr(4)); // LFN -> FID
    } else if (token.compare(0, 4, "FID:") == 0) {
       dbID = token.substr(4);
    } else if (token.size() > Guid::stringSize()) { // full token

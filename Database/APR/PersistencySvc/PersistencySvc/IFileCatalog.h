@@ -33,17 +33,9 @@ namespace pool {
      const std::string& connectInfo() const { return m_fc->connectInfo(); }
        
      /// redirect to init() for Gaudi FC
-     void start() { init(); }
-     /// Parse the DOM tree of the XML catalog
-     void init() { m_fc->init(); }
+     void start() { m_fc->init(); }
      /// Save catalog to file
      void commit() { m_fc->commit(); }
-     /// Save catalog to file
-     void rollback() { m_fc->rollback(); }
-     /// Check if the catalog is read-only
-     bool readOnly() const { return m_fc->readOnly(); }
-     /// Check if the catalog should be updated
-     bool dirty() const  { return m_fc->dirty(); }
 
      /// Get all FIDs 
      void getFIDs( Strings& fids ) const { m_fc->getFID(fids); }
@@ -67,14 +59,10 @@ namespace pool {
      std::string lookupPFN( const std::string& pfn ) const { return m_fc->lookupPFN(pfn); }
 
      /// Lookup file identified by logical file name
-     void lookupFileByLFN( const std::string& lfn, std::string& fid ) const { fid = lookupLFN(lfn); }
      std::string lookupLFN( const std::string& lfn ) const { return m_fc->lookupLFN(lfn); }
 
      /// Delete FileID Node from the catalog
      void deleteFID( const std::string& FileID ) { m_fc->deleteFID(FileID); }
-
-     /// Delete PFN from the catalog (delete entire FID entry if it was the last PFN)
-     void deletePFN( const std::string& pfn ) { m_fc->deletePFN(pfn); }
 
      /// Register PFN, assign new FID if not given
      void registerPFN( const std::string& pfn, const std::string& ftype, std::string& fid );
@@ -98,16 +86,10 @@ namespace pool {
      /// Remove catalog identified by name from the existing ones. * or '' removes all
      void removeCatalog( const std::string& connect )  { m_mgr->removeCatalog(connect); }
      
-     /// Access catalog container
-     Catalogs& catalogs() { return m_mgr->catalogs(); }
-     /// Access catalog container (CONST)
-     const Catalogs& catalogs() const  { return m_mgr->catalogs(); }
-     
   protected:
      SmartIF<Gaudi::IFileCatalogMgr>    m_mgr;
      SmartIF<Gaudi::IFileCatalog>       m_fc;
    };
-
 }
 
 #endif
