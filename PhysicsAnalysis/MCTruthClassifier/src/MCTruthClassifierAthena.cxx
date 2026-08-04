@@ -97,9 +97,10 @@ const xAOD::TruthParticle* MCTruthClassifier::egammaClusMatch(const xAOD::CaloCl
     // exclude charged particles with pT<1 GeV
     if (q != 0 && pt < m_pTChargePartCut) continue;
     if (q == 0 && pt < m_pTNeutralPartCut) continue;
-
+    float deltaPhi = std::abs(std::remainder(phiClus - thePart->phi(), 2*std::numbers::pi));
+    float deteta = std::abs(etaClus - thePart->eta());
     // eleptical cone  for extrapolations m_partExtrConePhi X m_partExtrConeEta
-    if (!isFwrdEle && m_ROICone && std::hypot( detPhi(phiClus, thePart->phi())/m_partExtrConePhi, detEta(etaClus, thePart->eta())/m_partExtrConeEta) > 1.0) {
+    if (!isFwrdEle && m_ROICone && std::hypot( deltaPhi/m_partExtrConePhi, deteta/m_partExtrConeEta) > 1.0) {
       continue;
     }
     // Also check if the clus and true have different sign , i they need both to be <0 or >0
@@ -177,7 +178,9 @@ const xAOD::TruthParticle* MCTruthClassifier::egammaClusMatch(const xAOD::CaloCl
     // exclude neutrino
     if (std::abs(iParticlePDG) == 12 || std::abs(iParticlePDG) == 14 || std::abs(iParticlePDG) == 16) continue;
     if (thePart->decayVtx() != nullptr) continue;
-    if (std::hypot( detPhi(phiClus, thePart->phi())/m_partExtrConePhi, detEta(etaClus, thePart->eta())/m_partExtrConeEta ) > 1.0) continue;
+    const double dPhi = std::abs(std::remainder(phiClus - thePart->phi(), 2*std::numbers::pi));
+    const double dEta = std::abs(etaClus - thePart->eta());
+    if (std::hypot( dPhi/m_partExtrConePhi, dEta/m_partExtrConeEta ) > 1.0) continue;
 
     double pt = thePart->pt() / Athena::Units::GeV;
     double q = thePart->charge();
@@ -287,8 +290,8 @@ bool MCTruthClassifier::genPartToCalo(const EventContext& ctx,
   double etaCalo = extension[0].second->position().eta();
   double phiCalo = extension[0].second->position().phi();
 
-  double dPhi = detPhi(phiCalo, phiClus);
-  double dEta = detEta(etaCalo, etaClus);
+  const double dPhi = std::abs(std::remainder(phiCalo - phiClus, 2*std::numbers::pi));
+  const double dEta = std::abs(etaCalo - etaClus);
   dRmatch = std::hypot(dPhi, dEta);
 
   if ((!isFwrdEle && dRmatch > m_phtdRtoTrCut) || (isFwrdEle && dRmatch > m_fwrdEledRtoTrCut)) return false;

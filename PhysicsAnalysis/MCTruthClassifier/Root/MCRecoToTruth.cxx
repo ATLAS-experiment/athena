@@ -256,8 +256,8 @@ MCTruthClassifier::getGenPart(const xAOD::TrackParticle* trk, MCTruthPartClassif
 
   uint8_t NumOfSiHits = NumOfSCTHits + NumOfPixHits;
 
-  float deltaPhi = detPhi(theGenParticle->phi(), trk->phi());
-  float deteta = detEta(theGenParticle->eta(), trk->eta());
+  float deltaPhi = std::abs(std::remainder(theGenParticle->phi() - trk->phi(), 2*std::numbers::pi));
+  float deteta = std::abs(theGenParticle->eta() - trk->eta());
   float deltaRMatch = std::hypot(deltaPhi, deteta);
   if ((NumOfSiHits > m_NumOfSiHitsCut && deltaRMatch > m_deltaRMatchCut) ||
       (NumOfSiHits <= m_NumOfSiHitsCut && deltaPhi > m_deltaPhiMatchCut)) theGenParticle = nullptr;
