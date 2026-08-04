@@ -786,7 +786,7 @@ void TRTGeometryManagerTool::buildL2Endcaps()
 
                ATH_MSG_DEBUG("Ring : "<<iRing);
                // create the AlignModule
-               mod.reset(new Trk::AlignModule(this));
+               mod= std::make_unique<Trk::AlignModule>(this);
                mod->setIdHash(getNextIDHash());
                // Identifier for a ring is the Identifier for the first Straw layer in that ring
                // one ring has 4 straw layers
@@ -817,6 +817,7 @@ void TRTGeometryManagerTool::buildL2Endcaps()
                   mod->addDetElement(Trk::AlignModule::TRT,element,transform);
 
                   // and fill the corresponding map
+                  //coverity[WRAPPER_ESCAPE]
                   (*trtIdHashMap)[element->identifyHash()] = mod.get();
                }
                else

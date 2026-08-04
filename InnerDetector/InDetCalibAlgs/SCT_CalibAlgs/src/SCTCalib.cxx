@@ -49,58 +49,59 @@
 using namespace SCT_CalibAlgs;
 
 namespace {
-enum Bec {ENDCAP_C = -2, BARREL = 0, ENDCAP_A = 2};
-// String names for the detector parts
-const std::string shortNames[] = {"EndCapC", "Barrel", "EndCapA"};
+  const std::string_view lineFeed{"\n"};
+  enum Bec {ENDCAP_C = -2, BARREL = 0, ENDCAP_A = 2};
+  // String names for the detector parts
+  const std::string shortNames[] = {"EndCapC", "Barrel", "EndCapA"};
 
-bool areConsecutiveIntervals(const std::pair<int, int>& i1, const std::pair<int, int>& i2, const int withinLimits) {
-   return i1.second <= (i2.first + withinLimits);
-}
-const std::string xmlHeader{"<?xml version=\"1.0\" encoding=\"UTF-8\"?>"};
-const std::string linefeed{"\n"};
-std::string
-associateStylesheet(const std::string& stylesheetName) {
+  bool areConsecutiveIntervals(const std::pair<int, int>& i1, const std::pair<int, int>& i2, const int withinLimits) {
+     return i1.second <= (i2.first + withinLimits);
+  }
+  const std::string xmlHeader{"<?xml version=\"1.0\" encoding=\"UTF-8\"?>"};
+  const std::string linefeed{"\n"};
+  std::string
+  associateStylesheet(const std::string& stylesheetName) {
    return std::string("<?xml-stylesheet type=\"text/xsl\" href=\"")+stylesheetName+"\"?>";
-}
+  }
 
-template <class T>
-std::string
-xmlPartData(const Bec bec, const int layer, const int eta, const std::string& dataName, const T data) {
-   std::ostringstream os;
-   const std::string thisPart{shortNames[bec2Index(bec)]};
-   os << "    <parts>" << std::endl
-      << "    " << xmlValue("part", thisPart) << std::endl
-      << "    " << xmlValue("layer", layer) << std::endl
-      << "    ";
-   std::string barrelEtaXml{xmlValue("eta", "all")};
-   std::string endcapEtaXml{xmlValue("eta", eta)};
-   if (bec==BARREL) os << barrelEtaXml;
-   else             os << endcapEtaXml;
-   os << std::endl
-      << "    " << xmlValue(dataName, data) << std::endl
-      << "    </parts>" << std::endl;
-   return os.str();
-}
-
-template <class T>
-std::string
-xmlModuleData(const Bec bec, const int layer, const int side, const int phi, const int eta, const std::string& dataName, const T data, const std::string& serial, const std::string& listOfErrors) {
-   std::ostringstream os;
-   os << "    <module>" << std::endl
-      << "    " << xmlValue("SN", serial) << std::endl;
-
-   if (bec==ENDCAP_C) os << "    " << xmlValue("barrel_endcap", "-2") << std::endl;
-   else if (bec==BARREL) os << "    " << xmlValue("barrel_endcap", "0") << std::endl;
-   else if (bec==ENDCAP_A) os << "    " << xmlValue("barrel_endcap", "2") << std::endl;
-   os << "    " << xmlValue("layer", layer) << std::endl
-      << "    " << xmlValue("side", side) << std::endl
-      << "    " << xmlValue("eta", eta) << std::endl
-      << "    " << xmlValue("phi", phi) << std::endl
-      << "    " << xmlValue(dataName, data) << std::endl;
-   os << listOfErrors;
-   os << "    </module>" << std::endl;
-   return os.str();
-}
+  template <class T>
+  std::string
+  xmlPartData(const Bec bec, const int layer, const int eta, const std::string& dataName, const T data) {
+     std::ostringstream os;
+     const std::string thisPart{shortNames[bec2Index(bec)]};
+     os << "    <parts>" << lineFeed
+        << "    " << xmlValue("part", thisPart) << lineFeed
+        << "    " << xmlValue("layer", layer) << lineFeed
+        << "    ";
+     std::string barrelEtaXml{xmlValue("eta", "all")};
+     std::string endcapEtaXml{xmlValue("eta", eta)};
+     if (bec==BARREL) os << barrelEtaXml;
+     else             os << endcapEtaXml;
+     os << lineFeed
+        << "    " << xmlValue(dataName, data) << lineFeed
+        << "    </parts>" << lineFeed;
+     return os.str();
+  }
+  
+  template <class T>
+  std::string
+  xmlModuleData(const Bec bec, const int layer, const int side, const int phi, const int eta, std::string_view dataName, const T data, std::string_view serial, std::string_view listOfErrors) {
+     std::ostringstream os;
+     os << "    <module>\n" 
+        << "    " << xmlValue("SN", serial) << lineFeed;
+  
+     if (bec==ENDCAP_C) os << "    " << xmlValue("barrel_endcap", "-2") << lineFeed;
+     else if (bec==BARREL) os << "    " << xmlValue("barrel_endcap", "0") << lineFeed;
+     else if (bec==ENDCAP_A) os << "    " << xmlValue("barrel_endcap", "2") << lineFeed;
+     os << "    " << xmlValue("layer", layer) << lineFeed
+        << "    " << xmlValue("side", side) << lineFeed
+        << "    " << xmlValue("eta", eta) << lineFeed
+        << "    " << xmlValue("phi", phi) << lineFeed
+        << "    " << xmlValue(dataName, data) << lineFeed;
+     os << listOfErrors;
+     os << "    </module>" << lineFeed;
+     return os.str();
+  }
 
 
 }
@@ -785,7 +786,7 @@ StatusCode SCTCalib::getDeadStrip ATLAS_NOT_THREAD_SAFE () { // Thread unsafe SC
             }
 
             if (!(defectStrip.empty()) or !(defectChip.empty())) {
-               if (addToSummaryStr(summaryList, waferId, "DEAD", defectStrip.c_str(), defectChip.c_str()).isFailure()) {
+               if (addToSummaryStr(summaryList, waferId, "DEAD", defectStrip, defectChip).isFailure()) {
                   ATH_MSG_ERROR("Could not add dead strips to the summary");
                   return StatusCode::FAILURE;
                }
@@ -895,7 +896,7 @@ StatusCode SCTCalib::getDeadStrip ATLAS_NOT_THREAD_SAFE () { // Thread unsafe SC
                n_deadLink++;
             }
             if (!(defectStrip.empty()) or !(defectChip.empty())) {
-               if (addToSummaryStr(summaryList, waferId, "DEAD", defectStrip.c_str(), defectChip.c_str()).isFailure()) {
+               if (addToSummaryStr(summaryList, waferId, "DEAD", defectStrip, defectChip).isFailure()) {
                   ATH_MSG_ERROR("Could not add dead strips to the summary");
                   return StatusCode::FAILURE;
                }
@@ -973,7 +974,7 @@ StatusCode SCTCalib::getDeadStrip ATLAS_NOT_THREAD_SAFE () { // Thread unsafe SC
                }
 
                if (!(defectStrip.empty()) or !(defectChip.empty())) {
-                  if (addToSummaryStr(summaryList, waferId, "DEAD", defectStrip.c_str(), defectChip.c_str()).isFailure()) {
+                  if (addToSummaryStr(summaryList, waferId, "DEAD", defectStrip, defectChip).isFailure()) {
                      ATH_MSG_ERROR("Could not add dead strips to the summary");
                      return StatusCode::FAILURE;
                   }
@@ -1214,7 +1215,7 @@ StatusCode SCTCalib::getNoiseOccupancy ATLAS_NOT_THREAD_SAFE () // Thread unsafe
             << "since=\""   << m_iovStart.re_time()   << "\" "
             << "until=\""   << m_iovStop.re_time()    << "\" "
             << "tag=\""     << m_tagID4NoiseOccupancy << "\" "
-            << "version=\"" << "multi\">" << std::endl;
+            << "version=\"" << "multi\">" << lineFeed;
    outFile << osHeader.str();
 
    //--- EndcapC
@@ -1230,7 +1231,7 @@ StatusCode SCTCalib::getNoiseOccupancy ATLAS_NOT_THREAD_SAFE () // Thread unsafe
                meanNO_ECC[iDisk][iEta]+=occupancy;
                IdentifierHash waferHash{m_pSCTHelper->wafer_hash(waferId)};
                SCT_SerialNumber sn{m_CablingTool->getSerialNumberFromHash(waferHash)};
-               outFile << xmlChannelNoiseOccDataString(waferId, occupancy, sn) << std::endl;
+               outFile << xmlChannelNoiseOccDataString(waferId, occupancy, sn) << lineFeed;
                //--- DB output
                if (m_writeToCool) {
                   if (m_pCalibWriteTool->createListNO(waferId, m_pSCTHelper, 10000, occupancy).isFailure()) {
@@ -1256,7 +1257,7 @@ StatusCode SCTCalib::getNoiseOccupancy ATLAS_NOT_THREAD_SAFE () // Thread unsafe
                meanNO_Barrel[iLayer]+=occupancy;
                IdentifierHash waferHash{m_pSCTHelper->wafer_hash(waferId)};
                SCT_SerialNumber sn{m_CablingTool->getSerialNumberFromHash(waferHash)};
-               outFile << xmlChannelNoiseOccDataString(waferId, occupancy, sn) << std::endl;
+               outFile << xmlChannelNoiseOccDataString(waferId, occupancy, sn) << lineFeed;
                //--- DB output
                if (m_writeToCool) {
                   if (m_pCalibWriteTool->createListNO(waferId, m_pSCTHelper, 10000, occupancy).isFailure()) {
@@ -1281,7 +1282,7 @@ StatusCode SCTCalib::getNoiseOccupancy ATLAS_NOT_THREAD_SAFE () // Thread unsafe
                meanNO_ECA[iDisk][iEta]+=occupancy;
                IdentifierHash waferHash{m_pSCTHelper->wafer_hash(waferId)};
                SCT_SerialNumber sn{m_CablingTool->getSerialNumberFromHash(waferHash)};
-               outFile << xmlChannelNoiseOccDataString(waferId, occupancy, sn) << std::endl;
+               outFile << xmlChannelNoiseOccDataString(waferId, occupancy, sn) << lineFeed;
                //--- DB output
                if (m_writeToCool) {
                   if (m_pCalibWriteTool->createListNO(waferId, m_pSCTHelper, 10000, occupancy).isFailure()) {
@@ -1295,7 +1296,7 @@ StatusCode SCTCalib::getNoiseOccupancy ATLAS_NOT_THREAD_SAFE () // Thread unsafe
    }
 
    //--- Tail of XML outputs
-   outFile << "</channels>" << std::endl;
+   outFile << "</channels>" << lineFeed;
 
    //--- Summary XML output
    const static std::string meanNoStr{"meanNO"};
@@ -1536,14 +1537,14 @@ StatusCode SCTCalib::getEfficiency ATLAS_NOT_THREAD_SAFE () { // Thread unsafe S
    }
 
    std::string xslName{"EfficiencyInfo.xsl"};
-   outFile << xmlHeader << linefeed << associateStylesheet(xslName) << linefeed << "<run>" << std::endl;
+   outFile << xmlHeader << linefeed << associateStylesheet(xslName) << linefeed << "<run>" << lineFeed;
    outFile << xmlValue("RunNumber", m_runNumber.value()) << linefeed
            << xmlValue("StartTime", m_utcBegin) << linefeed
            << xmlValue("EndTime", m_utcEnd) << linefeed
            << xmlValue("Duration", m_calibEvtInfoTool->duration()) << linefeed
            << xmlValue("LB", m_LBRange) << linefeed
            << xmlValue("Events", m_numberOfEvents) << linefeed
-           << "  <modules>" << std::endl;
+           << "  <modules>" << lineFeed;
 
    const char* outputEfficiencyFileNameChip{m_efficiencyChipFile.value().c_str()};
    std::ofstream outFileChip{outputEfficiencyFileNameChip, std::ios::out};
@@ -1554,14 +1555,14 @@ StatusCode SCTCalib::getEfficiency ATLAS_NOT_THREAD_SAFE () { // Thread unsafe S
 
    if (m_efficiencyDoChips) {
       std::string xslNameChip{"EfficiencyChipInfo.xsl"};
-      outFileChip << xmlHeader << linefeed << associateStylesheet(xslNameChip) << linefeed << "<run>" << std::endl;
+      outFileChip << xmlHeader << linefeed << associateStylesheet(xslNameChip) << linefeed << "<run>" << lineFeed;
       outFileChip << xmlValue("RunNumber", m_runNumber.value()) << linefeed
                   << xmlValue("StartTime", m_utcBegin) << linefeed
                   << xmlValue("EndTime", m_utcEnd) << linefeed
                   << xmlValue("Duration", m_calibEvtInfoTool->duration()) << linefeed
                   << xmlValue("LB", m_LBRange) << linefeed
                   << xmlValue("Events", m_numberOfEvents) << linefeed
-                  << "  <chips>" << std::endl;
+                  << "  <chips>" << lineFeed;
    }
 
    //--- Endcaps
@@ -1606,7 +1607,7 @@ StatusCode SCTCalib::getEfficiency ATLAS_NOT_THREAD_SAFE () { // Thread unsafe S
                   //--- For Efficiency _not_ averaged over modules
                   IdentifierHash waferHash{m_pSCTHelper->wafer_hash(waferId)};
                   SCT_SerialNumber sn{m_CablingTool->getSerialNumberFromHash(waferHash)};
-                  outFile << xmlChannelEfficiencyDataString(waferId, effToXML, sn, iSide) << std::endl;
+                  outFile << xmlChannelEfficiencyDataString(waferId, effToXML, sn, iSide) << lineFeed;
 
                   //--- Loop over chips
                   if (m_efficiencyDoChips) {
@@ -1634,7 +1635,7 @@ StatusCode SCTCalib::getEfficiency ATLAS_NOT_THREAD_SAFE () { // Thread unsafe S
                         TProfile2D* profChip_tmp_bcid1 = (TProfile2D*) m_inputHist->Get( effchipmapname_bcid1.c_str() );
                         global_bin_bcid1 = profChip_tmp_bcid1->GetBin( iEta+1, iPhi+1 );
                         eff_bcid1 = (float)profChip_tmp_bcid1->GetBinContent( global_bin_bcid1 );
-                        outFileChip << xmlChannelEfficiencyDataStringChip(waferId, effToXML, eff_bcid1, sn, iSide, iChip) << std::endl;
+                        outFileChip << xmlChannelEfficiencyDataStringChip(waferId, effToXML, eff_bcid1, sn, iSide, iChip) << lineFeed;
                      }
                   }
 
@@ -1683,7 +1684,7 @@ StatusCode SCTCalib::getEfficiency ATLAS_NOT_THREAD_SAFE () { // Thread unsafe S
                //--- For Efficiency _not_ averaged over modules
                IdentifierHash waferHash{m_pSCTHelper->wafer_hash(waferId)};
                SCT_SerialNumber sn{m_CablingTool->getSerialNumberFromHash(waferHash)};
-               outFile << xmlChannelEfficiencyDataString(waferId, effToXML, sn, iSide) << std::endl;
+               outFile << xmlChannelEfficiencyDataString(waferId, effToXML, sn, iSide) << lineFeed;
 
                //--- Loop over chips
                if (m_efficiencyDoChips) {
@@ -1705,7 +1706,7 @@ StatusCode SCTCalib::getEfficiency ATLAS_NOT_THREAD_SAFE () { // Thread unsafe S
                      int global_bin_bcid1 = profChip_tmp_bcid1->GetBin( iEta+1, iPhi+1 );
                      float eff_bcid1 = (float)profChip_tmp_bcid1->GetBinContent( global_bin_bcid1 );
 
-                     outFileChip << xmlChannelEfficiencyDataStringChip(waferId, effToXML, eff_bcid1, sn, iSide, iChip) << std::endl;
+                     outFileChip << xmlChannelEfficiencyDataStringChip(waferId, effToXML, eff_bcid1, sn, iSide, iChip) << lineFeed;
                   }
                }
 
@@ -2080,7 +2081,7 @@ StatusCode SCTCalib::getBSErrors ATLAS_NOT_THREAD_SAFE () { // Thread unsafe SCT
                   std::ostringstream errList;
                   for (int errCount{0}; errCount < numberOfErrorTypes; errCount++) {
                      int type{errorValues[errCount]}; //
-                     errList << "    " << xmlValue(ErrMap[type], nErrs_ECC_module[i][k][j][l][type]) << std::endl;
+                     errList << "    " << xmlValue(ErrMap[type], nErrs_ECC_module[i][k][j][l][type]) << lineFeed;
                   }
 
                   moduleList << xmlModuleData(ENDCAP_C, i, k, j, l, "nErrors", nErrLink_ECC_module[i][k][j][l], serial, errList.str());
@@ -2101,7 +2102,7 @@ StatusCode SCTCalib::getBSErrors ATLAS_NOT_THREAD_SAFE () { // Thread unsafe SCT
                std::ostringstream errList;
                for (int errCount{0}; errCount < numberOfErrorTypes; errCount++) {
                   int type{errorValues[errCount]}; //
-                  errList << "    " << xmlValue(ErrMap[type], nErrs_Barrel_module[i][j][k][l][type]) << std::endl;
+                  errList << "    " << xmlValue(ErrMap[type], nErrs_Barrel_module[i][j][k][l][type]) << lineFeed;
                }
 
                moduleList << xmlModuleData(BARREL, i, j, k, l, "nErrors", nErrLink_Barrel_module[i][j][k][l], serial, errList.str());
@@ -2120,7 +2121,7 @@ StatusCode SCTCalib::getBSErrors ATLAS_NOT_THREAD_SAFE () { // Thread unsafe SCT
                   std::ostringstream errList;
                   for (int errCount{0}; errCount < numberOfErrorTypes; errCount++) {
                      int type{errorValues[errCount]}; //
-                     errList << "    " << xmlValue(ErrMap[type], nErrs_ECA_module[i][k][j][l][type]) << std::endl;
+                     errList << "    " << xmlValue(ErrMap[type], nErrs_ECA_module[i][k][j][l][type]) << lineFeed;
                   }
 
                   moduleList << xmlModuleData(ENDCAP_A, i, k, j, l, "nErrors", nErrLink_ECA_module[i][k][j][l], serial, errList.str());
@@ -2215,7 +2216,7 @@ StatusCode SCTCalib::getLorentzAngle ATLAS_NOT_THREAD_SAFE () { // Thread unsafe
 
    //--- Header for XML outputs
    std::ostringstream osHeader;
-   osHeader << "<folder>" << std::endl;
+   osHeader << "<folder>" << lineFeed;
    outFile << osHeader.str();
 
    fitFile = new TFile("FittingDebugFile.root", "RECREATE");
@@ -2372,7 +2373,7 @@ StatusCode SCTCalib::getLorentzAngle ATLAS_NOT_THREAD_SAFE () { // Thread unsafe
                     << "    <payloadType name=\"err_minClusterWidth\">" << Err_MCW_BarrelSide[iLayer][iSide][iModule]      << "</payloadType>" << linefeed
                     << "  </payloadDescription>" << linefeed
                     << "  <channel id=\"" << ch << "\" name=\"" << iLayer << "_" << iSide << " \" />" << linefeed
-                    << "</folderDefinition>" << std::endl;
+                    << "</folderDefinition>" << lineFeed;
 
             ch++;
 
@@ -2389,7 +2390,7 @@ StatusCode SCTCalib::getLorentzAngle ATLAS_NOT_THREAD_SAFE () { // Thread unsafe
    }
 
    //--- Tail of XML outputs
-   outFile << "</folder>" << std::endl;
+   outFile << "</folder>" << lineFeed;
 
    //--- Summary XML output
    std::ostringstream summaryList;
@@ -2421,7 +2422,7 @@ StatusCode SCTCalib::getLorentzAngle ATLAS_NOT_THREAD_SAFE () { // Thread unsafe
       std::string xslName{found->second.second};
       file.open(filename.c_str(), std::ios::out);
       if (!file.good()) return StatusCode::FAILURE;
-      file << xmlHeader << linefeed << associateStylesheet(xslName) << linefeed << "<run>" << std::endl;
+      file << xmlHeader << linefeed << associateStylesheet(xslName) << linefeed << "<run>" << lineFeed;
    } else {
       ATH_MSG_ERROR(" argument \"type\" needs to be  LorentzAngle.");
       return StatusCode::FAILURE;
@@ -2434,7 +2435,7 @@ StatusCode SCTCalib::getLorentzAngle ATLAS_NOT_THREAD_SAFE () { // Thread unsafe
         << xmlValue("LB", m_LBRange) << linefeed
         << xmlValue("Events", m_numberOfEvents) << linefeed
         << xmlValue("Flag", std::move(DBUploadFlag)) << linefeed
-        << "  <data>" << std::endl;
+        << "  <data>" << lineFeed;
 
    if (wrapUpXML4Summary(m_outLASummary, "LorentzAngle", summaryList).isFailure()) {
       ATH_MSG_ERROR("Problem in closing LorentzAngle file");
@@ -2455,12 +2456,12 @@ StatusCode SCTCalib::getLorentzAngle ATLAS_NOT_THREAD_SAFE () { // Thread unsafe
 ///////////////////////////////////////////////////////////////////////////////////
 // Functions to handle XML File for COOL
 ///////////////////////////////////////////////////////////////////////////////////
-StatusCode SCTCalib::openXML4DB(std::ofstream& file, const char* type, const char* tag, const IOVTime& start, const IOVTime& end) const {
-   if (!strcmp(type, "DeadStrip")) {
+StatusCode SCTCalib::openXML4DB(std::ofstream& file, std::string_view type, std::string_view tag, const IOVTime& start, const IOVTime& end) const {
+   if (type == "DeadStrip") {
       file.open(m_deadStripsFile.value().c_str(), std::ios::out);
       if (!file.good()) return StatusCode::FAILURE;
       file << "<channels server=\"ATLAS_COOLPROD\" schema=\"ATLAS_COOLOFL_SCT\" dbname=\"MONP200\" folder=\"SCT/Derived/DeadStrips\" ";
-   } else if (!strcmp(type, "DeadChip")) {
+   } else if (type == "DeadChip") {
       file.open(m_deadChipsFile.value().c_str(), std::ios::out);
       if (!file.good()) return StatusCode::FAILURE;
       file << "<channels server=\"ATLAS_COOLPROD\" schema=\"ATLAS_COOLOFL_SCT\" dbname=\"MONP200\" folder=\"SCT/Derived/DeadChips\" ";
@@ -2477,7 +2478,7 @@ StatusCode SCTCalib::openXML4DB(std::ofstream& file, const char* type, const cha
 
 
 StatusCode SCTCalib::closeXML4DB(std::ofstream& file) const {
-   file << "</channels>" << std::endl;
+   file << "</channels>" << lineFeed;
    if (file.is_open()) {
       file.close();
       return StatusCode::SUCCESS;
@@ -2501,7 +2502,7 @@ StatusCode SCTCalib::addToXML4DB(std::ofstream& file, const Identifier& waferId,
         << xmlValue("DefectType", DefectType) << linefeed
         << xmlValue("Threshold", Threshold) << linefeed
         << xmlValue("DefectList", std::move(Defect4DB)) << linefeed
-        << xmlCloseChannel() << std::endl;
+        << xmlCloseChannel() << lineFeed;
 
    return StatusCode::SUCCESS;
 }
@@ -2510,8 +2511,8 @@ StatusCode SCTCalib::addToXML4DB(std::ofstream& file, const Identifier& waferId,
 ///////////////////////////////////////////////////////////////////////////////////
 // Functions to handle XML File for Summary
 ///////////////////////////////////////////////////////////////////////////////////
-StatusCode SCTCalib::openXML4DeadSummary(std::ofstream& file, const char* type, int n_Module, int n_Link, int n_Chip, int n_Strip) const {
-   if (!strcmp(type, "DEAD")) {
+StatusCode SCTCalib::openXML4DeadSummary(std::ofstream& file, std::string_view type, int n_Module, int n_Link, int n_Chip, int n_Strip) const {
+   if (type == "DEAD") {
       file.open(m_deadSummaryFile.value().c_str(), std::ios::out);
       if (!file.good()) return StatusCode::FAILURE;
       file << xmlHeader << linefeed << associateStylesheet("DeadInfo.xsl") << linefeed
@@ -2557,15 +2558,15 @@ StatusCode SCTCalib::openXML4DeadSummary(std::ofstream& file, const char* type, 
         << xmlValue("FlagReason", osFlagReason.str())                  << linefeed
         << xmlValue("FlagEnable", std::move(strFlagEnable))                       << linefeed
         << xmlValue("CheckList",  osCheckList.str())                   << linefeed
-        << "  <modules>"                                               << std::endl;
+        << "  <modules>"                                               << lineFeed;
 
    return StatusCode::SUCCESS;
 }
 
 
-StatusCode SCTCalib::openXML4MonSummary(std::ofstream& file, const char* type) const {
+StatusCode SCTCalib::openXML4MonSummary(std::ofstream& file, std::string_view type) const {
    using TwoStrings = std::pair<std::string, std::string>;
-   using Names = std::map<std::string, TwoStrings>;
+   using Names = std::map<std::string, TwoStrings, std::less<>>;
    Names nameAssociation;
    nameAssociation["NoiseOccupancy"] = TwoStrings(m_noiseOccupancySummaryFile, "NoiseOccupancyInfo.xsl");
    nameAssociation["RawOccupancy"] = TwoStrings(m_rawOccupancySummaryFile, "RawOccupancyInfo.xsl");
@@ -2579,7 +2580,7 @@ StatusCode SCTCalib::openXML4MonSummary(std::ofstream& file, const char* type) c
       //
       file.open(filename.c_str(), std::ios::out);
       if (!file.good()) return StatusCode::FAILURE;
-      file << xmlHeader << linefeed << associateStylesheet(xslName) << linefeed << "<run>" << std::endl;
+      file << xmlHeader << linefeed << associateStylesheet(xslName) << linefeed << "<run>" << lineFeed;
    } else {
       ATH_MSG_ERROR("in openXML4MonSummary : argument \"type\" needs to be (NoiseOccupancy, RawOccupancy, Efficiency, BSErrors).");
       return StatusCode::FAILURE;
@@ -2590,19 +2591,19 @@ StatusCode SCTCalib::openXML4MonSummary(std::ofstream& file, const char* type) c
         << xmlValue("Duration", m_calibEvtInfoTool->duration()) << linefeed
         << xmlValue("LB", m_LBRange) << linefeed
         << xmlValue("Events", m_numberOfEvents) << linefeed
-        << "  <data>" << std::endl;
+        << "  <data>" << lineFeed;
    return StatusCode::SUCCESS;
 }
 
 
-StatusCode SCTCalib::wrapUpXML4Summary(std::ofstream& file, const char* type, std::ostringstream& list) const {
+StatusCode SCTCalib::wrapUpXML4Summary(std::ofstream& file, std::string_view type, std::ostringstream& list) const {
    file << list.str();
-   if (!strcmp(type, "DEAD")) {
-      file << "  </modules>" << std::endl;
-   } else if (!strcmp(type, "NoiseOccupancy") or !strcmp(type, "RawOccupancy") or !strcmp(type, "Efficiency") or !strcmp(type, "BSErrors") or !strcmp(type, "LorentzAngle")) {
-      file << "  </data>" << std::endl;
+   if (type == "DEAD") {
+      file << "  </modules>" << lineFeed;
+   } else if ((type == "NoiseOccupancy") or (type == "RawOccupancy") or (type == "Efficiency") or (type == "BSErrors") or (type == "LorentzAngle")) {
+      file << "  </data>" << lineFeed;
    }
-   file << "</run>" << std::endl;
+   file << "</run>" << lineFeed;
 
    if (file.is_open()) {
       file.close();
@@ -2613,7 +2614,7 @@ StatusCode SCTCalib::wrapUpXML4Summary(std::ofstream& file, const char* type, st
 }
 
 
-StatusCode SCTCalib::addToSummaryStr(std::ostringstream& list, const Identifier& waferId, const char* type, const char* stripId, const char* chipId) const {
+StatusCode SCTCalib::addToSummaryStr(std::ostringstream& list, const Identifier& waferId, std::string_view type, std::string_view stripId, std::string_view chipId) const {
    //--- Remove first&end spaces in DefectList
    const std::string tmpstrip{stripId};
    const std::string tmpchip{chipId};
@@ -2652,7 +2653,7 @@ StatusCode SCTCalib::addToSummaryStr(std::ostringstream& list, const Identifier&
       XmlStreamer v{"value", "name", "ChipID", list};
       list << stripList;
    }
-   if (!strcmp(type, "DEAD")) {
+   if (type == "DEAD") {
       XmlStreamer v{"value", "name", "StripIDOnline", list};
       list << stripList;
    } else {
@@ -2667,14 +2668,14 @@ StatusCode SCTCalib::addToSummaryStr(std::ostringstream& list, const Identifier&
 std::string
 SCTCalib::xmlChannelNoiseOccDataString(const Identifier& waferId, const float occupancy, const SCT_SerialNumber& serial) const {
    std::ostringstream os;
-   os << xmlOpenChannel(waferId.get_identifier32().get_compact(), m_iovStart.re_time(), m_iovStop.re_time()) << std::endl
-      << "  " << xmlValue("SN", serial.str()) << std::endl
-      << "  " << xmlValue("SampleSize", "10000") << std::endl
-      << "  " << xmlValue("barrel_endcap", m_pSCTHelper->barrel_ec(waferId)) << std::endl
+   os << xmlOpenChannel(waferId.get_identifier32().get_compact(), m_iovStart.re_time(), m_iovStop.re_time()) << lineFeed
+      << "  " << xmlValue("SN", serial.str()) << lineFeed
+      << "  " << xmlValue("SampleSize", "10000") << lineFeed
+      << "  " << xmlValue("barrel_endcap", m_pSCTHelper->barrel_ec(waferId)) << lineFeed
       << "  " << xmlValue("Layer", m_pSCTHelper->layer_disk(waferId)) << linefeed
-      << "  " << xmlValue("Eta", m_pSCTHelper->eta_module(waferId)) << std::endl
-      << "  " << xmlValue("Phi", m_pSCTHelper->phi_module(waferId)) << std::endl
-      << "  " << xmlValue("NoiseOccupancy", occupancy) << std::endl
+      << "  " << xmlValue("Eta", m_pSCTHelper->eta_module(waferId)) << lineFeed
+      << "  " << xmlValue("Phi", m_pSCTHelper->phi_module(waferId)) << lineFeed
+      << "  " << xmlValue("NoiseOccupancy", occupancy) << lineFeed
       << "  " << xmlCloseChannel();
    return os.str();
 }
@@ -2683,14 +2684,14 @@ SCTCalib::xmlChannelNoiseOccDataString(const Identifier& waferId, const float oc
 std::string
 SCTCalib::xmlChannelEfficiencyDataString(const Identifier& waferId, const float efficiency, const SCT_SerialNumber& serial, const int side) const {
    std::ostringstream os;
-   os << "   <module>" << std::endl
-      << "  " << xmlValue("SN", serial.str()) << std::endl
-      << "  " << xmlValue("SampleSize", "10000") << std::endl
-      << "  " << xmlValue("barrel_endcap", m_pSCTHelper->barrel_ec(waferId)) << std::endl
+   os << "   <module>" << lineFeed
+      << "  " << xmlValue("SN", serial.str()) << lineFeed
+      << "  " << xmlValue("SampleSize", "10000") << lineFeed
+      << "  " << xmlValue("barrel_endcap", m_pSCTHelper->barrel_ec(waferId)) << lineFeed
       << "  " << xmlValue("Layer", m_pSCTHelper->layer_disk(waferId)) << linefeed
-      << "  " << xmlValue("Eta", m_pSCTHelper->eta_module(waferId)) << std::endl
-      << "  " << xmlValue("Phi", m_pSCTHelper->phi_module(waferId)) << std::endl
-      << "  " << xmlValue("Efficiency", efficiency) << std::endl
+      << "  " << xmlValue("Eta", m_pSCTHelper->eta_module(waferId)) << lineFeed
+      << "  " << xmlValue("Phi", m_pSCTHelper->phi_module(waferId)) << lineFeed
+      << "  " << xmlValue("Efficiency", efficiency) << lineFeed
       << "  " << xmlValue("Side",  side )<<std::endl
       << "   </module>";
    return os.str();
@@ -2700,17 +2701,17 @@ SCTCalib::xmlChannelEfficiencyDataString(const Identifier& waferId, const float 
 std::string
 SCTCalib::xmlChannelEfficiencyDataStringChip(const Identifier& waferId, const float efficiency, const float efficiency_bcid, const SCT_SerialNumber& serial, const int side, const int chip) const {
    std::ostringstream os;
-   os << "   <chip>" << std::endl
-      << "  " << xmlValue("SN", serial.str()) << std::endl
-      << "  " << xmlValue("SampleSize", "10000") << std::endl
-      << "  " << xmlValue("barrel_endcap", m_pSCTHelper->barrel_ec(waferId)) << std::endl
+   os << "   <chip>" << lineFeed
+      << "  " << xmlValue("SN", serial.str()) << lineFeed
+      << "  " << xmlValue("SampleSize", "10000") << lineFeed
+      << "  " << xmlValue("barrel_endcap", m_pSCTHelper->barrel_ec(waferId)) << lineFeed
       << "  " << xmlValue("Layer", m_pSCTHelper->layer_disk(waferId)) << linefeed
-      << "  " << xmlValue("Eta", m_pSCTHelper->eta_module(waferId)) << std::endl
-      << "  " << xmlValue("Phi", m_pSCTHelper->phi_module(waferId)) << std::endl
+      << "  " << xmlValue("Eta", m_pSCTHelper->eta_module(waferId)) << lineFeed
+      << "  " << xmlValue("Phi", m_pSCTHelper->phi_module(waferId)) << lineFeed
       << "  " << xmlValue("Side",  side )<<std::endl
       << "  " << xmlValue("Chip",  chip )<<std::endl
-      << "  " << xmlValue("Efficiency", efficiency) << std::endl
-      << "  " << xmlValue("Efficiency_bcid", efficiency_bcid) << std::endl
+      << "  " << xmlValue("Efficiency", efficiency) << lineFeed
+      << "  " << xmlValue("Efficiency_bcid", efficiency_bcid) << lineFeed
       << "   </chip>";
    return os.str();
 }
@@ -2923,7 +2924,7 @@ SCTCalib::noisyStripsToXml(const std::map<Identifier, std::set<Identifier>>& mod
                       << "    <value name=\"DefectType\">"   << "NOISY"                           << "</value>" << linefeed
                       << "    <value name=\"Threshold\">"    << noisyStripThr                     << "</value>" << linefeed
                       << "    <value name=\"DefectList\">"   << normalizeList(std::move(defectStrips))       << "</value>" << linefeed
-                      << "  </channel>"                                                                         << std::endl;
+                      << "  </channel>"                                                                         << lineFeed;
       }
    }
    //--- Write out the contents
@@ -2931,9 +2932,9 @@ SCTCalib::noisyStripsToXml(const std::map<Identifier, std::set<Identifier>>& mod
            << "since=\""   << m_iovStart.re_time() << "\" "
            << "until=\""   << m_iovStop.re_time()  << "\" "
            << "tag=\""     << m_tagID4NoisyStrips  << "\" "
-           << "version=\"" << "multi\">"           << std::endl
+           << "version=\"" << "multi\">"           << lineFeed
            << osModuleList.str()
-           << "</channels>" << std::endl;
+           << "</channels>" << lineFeed;
 
    return StatusCode::SUCCESS;
 }
@@ -3048,7 +3049,7 @@ StatusCode SCTCalib::noisyStripsToSummaryXml(const std::map<Identifier, std::set
                              << "      <value name=\"ChipID\">"         << chipId                           << "</value>" << linefeed
                              << "      <value name=\"LB\">"             << normalizeList(defectLB.first)    << "</value>" << linefeed
                              << "      <value name=\"LBFraction\">"     << defectLB.second                  << "</value>" << linefeed
-                             << "    </chip>"                                                                             << std::endl;
+                             << "    </chip>"                                                                             << lineFeed;
                }
             }
          }
@@ -3068,7 +3069,7 @@ StatusCode SCTCalib::noisyStripsToSummaryXml(const std::map<Identifier, std::set
                          << "      <value name=\"StripOfflineAll\">" << normalizeList(defectStripsAll)    << "</value>" << linefeed
                          << "      <value name=\"StripOfflineNew\">" << normalizeList(defectStripsNew)    << "</value>" << linefeed
                          << "      <value name=\"StripOfflineRef\">" << normalizeList(defectStripsRef)    << "</value>" << linefeed
-                         << "    </module>"                                                                             << std::endl;
+                         << "    </module>"                                                                             << lineFeed;
          }
          ATH_MSG_DEBUG("noisyStripsToSummaryXml: After Difference between All & Ref");
       }
@@ -3153,7 +3154,7 @@ StatusCode SCTCalib::noisyStripsToSummaryXml(const std::map<Identifier, std::set
            << "  <modules>"                                                                            << linefeed
            << osModuleList.str()
            << "  </modules>"                                                                           << linefeed
-           << "</run>"                                                                                 << std::endl;
+           << "</run>"                                                                                 << lineFeed;
 
    ATH_MSG_DEBUG("noisyStripsToSummaryXml: before return");
 
