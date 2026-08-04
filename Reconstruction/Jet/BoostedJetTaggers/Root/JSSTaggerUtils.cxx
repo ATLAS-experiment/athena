@@ -635,6 +635,10 @@ StatusCode JSSTaggerUtils::ReadScaler(){
 
     auto Image = std::make_unique<TH2D>("Image_" + TagImage, "Image_" + TagImage, 
 			   m_nbins_eta, m_min_eta, m_max_eta, m_nbins_phi, m_min_phi, m_max_phi);
+    if (constituents.empty()){
+      ATH_MSG_DEBUG("Empty constituents list for jet with pt = " << jet->pt() << " and eta = " << jet->eta());
+      return *Image;
+    }
     if (SumPT == 0.)[[unlikely]]{
       throw std::runtime_error("SumPT is zero in JSSTaggerUtils::MakeJetImage");
     }
