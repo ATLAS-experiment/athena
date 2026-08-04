@@ -1728,7 +1728,7 @@ StatusCode TRTMonitoringRun3RAW_Alg::fillTRTEfficiency(const EventContext& ctx,
     float track_phi = 0;
     float track_d0  = 0;
     float track_z0  = 0;
-
+    const std::string histoName{"TRTEfficiencyHistograms"};
     for (auto track = combTrackCollection.begin(); track != combTrackCollection.end(); ++track) {
         // Online: use all tracks, offline: use only every xth track, skip the rest
         if (m_environment != Environment_t::online && (itrack % m_every_xth_track) != 0) continue;
@@ -1792,7 +1792,7 @@ StatusCode TRTMonitoringRun3RAW_Alg::fillTRTEfficiency(const EventContext& ctx,
         }
 
         ATH_MSG_DEBUG("This track passed preselection.");
-
+        
         for (auto it = track_states->begin(); it != track_states->end(); it++) {
             if ( !((*it)->type(Trk::TrackStateOnSurface::Measurement)) ) continue;
 
@@ -1868,32 +1868,32 @@ StatusCode TRTMonitoringRun3RAW_Alg::fillTRTEfficiency(const EventContext& ctx,
                 if (iside == 0) {
                     EfficiencyS = thisStrawNumber;
                     EfficiencyS_passed = 1.0;
-                    fill("TRTEfficiencyHistograms"+std::to_string(ibe)+std::to_string(phi_module), EfficiencyS_passed, EfficiencyS);
+                    fill(histoName+std::to_string(ibe)+std::to_string(phi_module), EfficiencyS_passed, EfficiencyS);
                     EfficiencyC = chip;
                     EfficiencyC_passed = 1.0;
-                    fill("TRTEfficiencyHistograms"+std::to_string(ibe)+std::to_string(phi_module), EfficiencyC_passed, EfficiencyC);
+                    fill(histoName+std::to_string(ibe)+std::to_string(phi_module), EfficiencyC_passed, EfficiencyC);
                 } else if (iside == 1) {
                     EfficiencyS = thisStrawNumber;
                     EfficiencyS_passed = 1.0;
-                    fill("TRTEfficiencyHistograms"+std::to_string(ibe)+std::to_string(phi_module + 32), EfficiencyS_passed, EfficiencyS);
+                    fill(histoName+std::to_string(ibe)+std::to_string(phi_module + 32), EfficiencyS_passed, EfficiencyS);
                     EfficiencyC = chip;
                     EfficiencyC_passed = 1.0;
-                    fill("TRTEfficiencyHistograms"+std::to_string(ibe)+std::to_string(phi_module + 32), EfficiencyC_passed, EfficiencyC);
+                    fill(histoName+std::to_string(ibe)+std::to_string(phi_module + 32), EfficiencyC_passed, EfficiencyC);
                 }
             }
 
             Efficiency_eta_passed = track_eta;
             Efficiency_eta = 1.0;
-            fill("TRTEfficiencyHistograms", Efficiency_eta_passed, Efficiency_eta);
+            fill(histoName, Efficiency_eta_passed, Efficiency_eta);
             Efficiency_phi_passed = track_phi;
             Efficiency_phi = 1.0;
-            fill("TRTEfficiencyHistograms", Efficiency_phi_passed, Efficiency_phi);
+            fill(histoName, Efficiency_phi_passed, Efficiency_phi);
             Efficiency_pt_passed = track_pt*invGeV;
             Efficiency_pt = 1.0;
-            fill("TRTEfficiencyHistograms", Efficiency_pt_passed, Efficiency_pt);
+            fill(histoName, Efficiency_pt_passed, Efficiency_pt);
             Efficiency_z0_passed = track_z0;
             Efficiency_z0 = 1.0;
-            fill("TRTEfficiencyHistograms", Efficiency_z0_passed, Efficiency_z0);
+            fill(histoName, Efficiency_z0_passed, Efficiency_z0);
         }
 
 
@@ -1931,11 +1931,11 @@ StatusCode TRTMonitoringRun3RAW_Alg::fillTRTEfficiency(const EventContext& ctx,
                         if (isArgonStraw) {
                             EfficiencyBarrel_locR_Ar = locR;
                             EfficiencyBarrel_locR_Ar_passed = 0.0;
-                            fill("TRTEfficiencyHistograms", EfficiencyBarrel_locR_Ar_passed, EfficiencyBarrel_locR_Ar);
+                            fill(histoName, EfficiencyBarrel_locR_Ar_passed, EfficiencyBarrel_locR_Ar);
                         } else {
                             EfficiencyBarrel_locR = locR;
                             EfficiencyBarrel_locR_passed = 0.0;
-                            fill("TRTEfficiencyHistograms", EfficiencyBarrel_locR_passed, EfficiencyBarrel_locR);
+                            fill(histoName, EfficiencyBarrel_locR_passed, EfficiencyBarrel_locR);
                         }
                     } else if (ibe == 1) {
                         if (isArgonStraw) {
@@ -1982,31 +1982,31 @@ StatusCode TRTMonitoringRun3RAW_Alg::fillTRTEfficiency(const EventContext& ctx,
                         if (iside == 0) {
                             EfficiencyS = thisStrawNumber;
                             EfficiencyS_passed = 0.0;
-                            fill("TRTEfficiencyHistograms"+std::to_string(ibe)+std::to_string(phi_module), EfficiencyS_passed, EfficiencyS);
+                            fill(histoName+std::to_string(ibe)+std::to_string(phi_module), EfficiencyS_passed, EfficiencyS);
                             EfficiencyC = chip;
                             EfficiencyC_passed = 0.0;
-                            fill("TRTEfficiencyHistograms"+std::to_string(ibe)+std::to_string(phi_module), EfficiencyC_passed, EfficiencyC);
+                            fill(histoName+std::to_string(ibe)+std::to_string(phi_module), EfficiencyC_passed, EfficiencyC);
                         } else if (iside == 1) {
                             EfficiencyS = thisStrawNumber;
                             EfficiencyS_passed = 0.0;
-                            fill("TRTEfficiencyHistograms"+std::to_string(ibe)+std::to_string(phi_module + 32), EfficiencyS_passed, EfficiencyS);
+                            fill(histoName+std::to_string(ibe)+std::to_string(phi_module + 32), EfficiencyS_passed, EfficiencyS);
                             EfficiencyC = chip;
                             EfficiencyC_passed = 0.0;
-                            fill("TRTEfficiencyHistograms"+std::to_string(ibe)+std::to_string(phi_module + 32), EfficiencyC_passed, EfficiencyC);
+                            fill(histoName+std::to_string(ibe)+std::to_string(phi_module + 32), EfficiencyC_passed, EfficiencyC);
                         }
                     }
                     Efficiency_eta_passed = track_eta;
                     Efficiency_eta = 0.0;
-                    fill("TRTEfficiencyHistograms", Efficiency_eta_passed, Efficiency_eta);
+                    fill(histoName, Efficiency_eta_passed, Efficiency_eta);
                     Efficiency_phi_passed = track_phi;
                     Efficiency_phi = 0.0;
-                    fill("TRTEfficiencyHistograms", Efficiency_phi_passed, Efficiency_phi);
+                    fill(histoName, Efficiency_phi_passed, Efficiency_phi);
                     Efficiency_pt_passed = track_pt*invGeV;
                     Efficiency_pt = 0.0;
-                    fill("TRTEfficiencyHistograms", Efficiency_pt_passed, Efficiency_pt);
+                    fill(histoName, Efficiency_pt_passed, Efficiency_pt);
                     Efficiency_z0_passed = track_z0;
                     Efficiency_z0 = 0.0;
-                    fill("TRTEfficiencyHistograms", Efficiency_z0_passed, Efficiency_z0);
+                    fill(histoName, Efficiency_z0_passed, Efficiency_z0);
                 }
             }
         }

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef _InDetAccessor_H_
 #define _InDetAccessor_H_
@@ -209,6 +209,7 @@ namespace InDetAccessor {
    template <>
    inline float getEProbabilityHT(const TrkTrackHelper &, const asg::AsgMessaging &) {
       throw std::runtime_error("eProbabilityHT only available in xAOD::TrackParticle not for Trk::Track.");
+      //coverity[UNREACHABLE]
       return 0.f;
    }
 #endif

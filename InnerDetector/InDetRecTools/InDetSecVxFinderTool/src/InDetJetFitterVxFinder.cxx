@@ -152,7 +152,7 @@ namespace InDet
 	  Trk::VxTrackAtVertex* newVxTrack=new Trk::VxTrackAtVertex(linkTT);
 	  temp_vector_tracksAtVertex.push_back(newVxTrack);
 	  setOfTracks->push_back(std::move(newVxTrack));
-	  setOfVertices.push_back(new Trk::VxVertexOnJetAxis(temp_vector_tracksAtVertex));
+	  setOfVertices.push_back(new Trk::VxVertexOnJetAxis(std::move(temp_vector_tracksAtVertex)));
 	}
         if (msgLvl(MSG::VERBOSE)) msg() << " new overall number of tracks to fit : " << setOfVertices.size() << endmsg;
 	myJetCandidate->setVerticesOnJetAxis(setOfVertices);

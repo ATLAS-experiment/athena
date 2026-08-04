@@ -181,11 +181,11 @@ StatusCode InDet::InDetTrackSelectionTool::setupCuts(std::map< std::string, std:
    // track parameter cuts
   if (m_minPt > 0.) {
      if constexpr(VERBOSE>0) ATH_MSG_INFO( "  Minimum Pt: " << m_minPt << " MeV" );
-     trackCuts["Pt"].push_back( [minPt = m_minPt](Trk_Helper helper, const asg::AsgMessaging &msgHelper) -> bool { return helper.pt(msgHelper) >= minPt; } );
+     trackCuts["Pt"].push_back( [minPt = m_minPt.value()](Trk_Helper helper, const asg::AsgMessaging &msgHelper) -> bool { return helper.pt(msgHelper) >= minPt; } );
   }
   if (maxDoubleIsSet(m_maxAbsEta)) {
      if constexpr(VERBOSE>0) ATH_MSG_INFO( "  Maximum |Eta|: " << m_maxAbsEta );
-     trackCuts["Eta"].push_back( [maxAbsEta = m_maxAbsEta](Trk_Helper helper, const asg::AsgMessaging &msgHelper) { return std::abs(helper.eta(msgHelper)) <= maxAbsEta; } );
+     trackCuts["Eta"].push_back( [maxAbsEta = m_maxAbsEta.value()](Trk_Helper helper, const asg::AsgMessaging &msgHelper) { return std::abs(helper.eta(msgHelper)) <= maxAbsEta; } );
   }
   if (m_minP > 0.) {
      if constexpr(VERBOSE>0) ATH_MSG_INFO( "  Minimum P: " << m_minP << " MeV" );
@@ -193,11 +193,11 @@ StatusCode InDet::InDetTrackSelectionTool::setupCuts(std::map< std::string, std:
   }
   if (maxDoubleIsSet(m_maxD0)) {
     if constexpr(VERBOSE>0) ATH_MSG_INFO( "  Maximum d0: " << m_maxD0 << " mm" );
-    trackCuts["D0"].push_back( [maxD0 = m_maxD0](Trk_Helper helper, const asg::AsgMessaging &msgHelper) { return std::abs(helper.d0(msgHelper)) <= maxD0; } );
+    trackCuts["D0"].push_back( [maxD0 = m_maxD0.value()](Trk_Helper helper, const asg::AsgMessaging &msgHelper) { return std::abs(helper.d0(msgHelper)) <= maxD0; } );
   }
   if (maxDoubleIsSet(m_maxZ0)) {
     if constexpr(VERBOSE>0) ATH_MSG_INFO( "  Maximum z0: " << m_maxZ0 << " mm");
-    trackCuts["Z0"].push_back( [maxZ0 = m_maxZ0](Trk_Helper helper, const asg::AsgMessaging &msgHelper) { return std::abs(helper.z0(msgHelper)) <= maxZ0; } );
+    trackCuts["Z0"].push_back( [maxZ0 = m_maxZ0.value()](Trk_Helper helper, const asg::AsgMessaging &msgHelper) { return std::abs(helper.z0(msgHelper)) <= maxZ0; } );
   }
   if (maxDoubleIsSet(m_maxZ0SinTheta)) {
     if constexpr(VERBOSE>0) ATH_MSG_INFO( "  Maximum z0*sin(theta): " << m_maxZ0SinTheta << " mm" );
@@ -462,7 +462,7 @@ StatusCode InDet::InDetTrackSelectionTool::setupCuts(std::map< std::string, std:
     if constexpr(VERBOSE>0) ATH_MSG_INFO( "  Minimum modified Si hits in bottom half = "
                                  << m_minNSiHitsModBottom );
     trackCuts["SiHits"].push_back([minNSiHitsModTop    = m_minNSiHitsModTop.value(),
-                                   minNSiHitsModBottom = m_minNSiHitsModBottom](Trk_Helper helper, const asg::AsgMessaging &msgHelper) {
+                                   minNSiHitsModBottom = m_minNSiHitsModBottom.value()](Trk_Helper helper, const asg::AsgMessaging &msgHelper) {
        auto [top,bottom] = getSiHitsTopBottom(helper, msgHelper);
        return top  >= minNSiHitsModTop && bottom >= minNSiHitsModBottom;
     });
