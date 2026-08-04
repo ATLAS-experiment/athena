@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // RootSvc.h
@@ -21,6 +21,10 @@
 
 // fwk includes
 #include "GaudiKernel/ServiceHandle.h"
+#include "GaudiKernel/SmartIF.h"
+#include "GaudiUtils/IFileCatalog.h"
+#include "GaudiUtils/IFileCatalogMgr.h"
+
 #include "AthenaBaseComps/AthService.h"
 #include "PersistentDataModel/Guid.h"
 
@@ -29,7 +33,6 @@
 // fwd declares
 class IDictLoaderSvc;
 class Placement;
-namespace pool { class IFileCatalog; }
 namespace Athena { class RootConnection; }
 
 namespace Athena {
@@ -89,7 +92,8 @@ private:
   RootSvc& operator=(const RootSvc&); //< not implemented
 
 private:
-  pool::IFileCatalog* m_catalog;
+  SmartIF<Gaudi::IFileCatalogMgr> m_gCatalogMgr;
+  SmartIF<Gaudi::IFileCatalog> m_gCatalog;
 
   typedef std::map<Guid, Athena::RootConnection*> ConnMap_t;
   /// Map of file name keys and connection values.

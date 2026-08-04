@@ -13,9 +13,6 @@
 #include "RootSvc.h"
 #include "RootConnection.h"
 
-// POOL/APR includes for Catalog
-#include "PersistencySvc/IFileCatalog.h"
-
 // fwk includes
 #include "AthenaKernel/IDictLoaderSvc.h"
 
@@ -26,7 +23,8 @@ namespace Athena {
 
 RootSvc::RootSvc(const std::string& name, ISvcLocator* pSvcLocator) :
 	base_class(name, pSvcLocator),
-	m_catalog(0),
+	m_gCatalogMgr(Gaudi::svcLocator()->service<Gaudi::IFileCatalogMgr>( "Gaudi::MultiFileCatalog" )),
+	m_gCatalog(m_gCatalogMgr),
 	m_conns(),
 	m_wconn(0),
 	m_dictSvc("AthDictLoaderSvc", name) {
@@ -45,10 +43,10 @@ StatusCode RootSvc::initialize() {
     ATH_MSG_FATAL("Cannot initialize ConversionSvc base class.");
     return StatusCode::FAILURE;
   }
-  m_catalog = new pool::IFileCatalog;
   try {
-    m_catalog->setWriteCatalog("xmlcatalog_file:RootFileCatalog.xml"); // FIXME: Make config
-    m_catalog->start();
+    m_gCatalogMgr->addCatalog("xmlcatalog_file:RootFileCatalog.xml");
+    m_gCatalogMgr->setWriteCatalog(m_gCatalogMgr->findCatalog("file:RootFileCatalog.xml", true));
+    m_gCatalog->init();
   } catch (std::exception& e) {
     ATH_MSG_FATAL ("Set up Catalog - caught exception: " << e.what());
     return StatusCode::FAILURE;
@@ -63,10 +61,7 @@ StatusCode RootSvc::finalize() {
       ATH_MSG_WARNING("Cannot disconnect file = " << itr->first.toString());
     }
   }
-  if (m_catalog != 0) {
-    m_catalog->commit();
-    delete m_catalog; m_catalog = 0;
-  }
+  m_gCatalog->commit();
   return ::AthService::finalize();
 }
 
@@ -113,25 +108,24 @@ void RootSvc::destructObject(const RootType& /*type*/, void* /*pObj*/) const {
 StatusCode RootSvc::open(const std::string& fname, const std::string& /*mode*/) {
 // Catalog to get fid...
   Guid fid = Guid::null();
-  if (m_catalog != 0) {
-    std::string fidString, ftype;
-    m_catalog->lookupFileByPFN(fname, fidString, ftype);
-    if( fidString.empty() ) {
-       m_catalog->registerPFN(fname, "ROOT_All", fidString);
-    }
-    fid.fromString(fidString);
+  std::string fidString;
+  fidString = m_gCatalog->lookupPFN(fname);
+  if( fidString.empty() ) {
+     fidString = m_gCatalog->createFID();
+     m_gCatalog->registerPFN(fidString, fname, "ROOT_All");
   }
+  fid.fromString(fidString);
   Athena::RootConnection* conn = 0;
   ConnMap_t::const_iterator fitr = m_conns.find(fid);
   if (fitr == m_conns.end()) {
-    conn = new Athena::RootConnection(this, fname);
-    m_conns.insert(std::make_pair(fid, conn));
+     conn = new Athena::RootConnection(this, fname);
+     m_conns.insert(std::make_pair(fid, conn));
   } else {
-    conn = fitr->second;
+     conn = fitr->second;
   }
   if (conn == 0) {
-    ATH_MSG_ERROR("Cannot get RootConnection for file " << fid.toString());
-    return StatusCode::FAILURE;
+     ATH_MSG_ERROR("Cannot get RootConnection for file " << fid.toString());
+     return StatusCode::FAILURE;
   }
   return StatusCode::SUCCESS;
 }
@@ -188,14 +182,13 @@ StatusCode RootSvc::disconnect(const std::string& fname) {
 Athena::RootConnection* RootSvc::connection(const std::string& fname) {
 // Catalog to get fid...
   Guid fid = Guid::null();
-  if (m_catalog != 0) {
-     std::string fidString, ftype;
-     m_catalog->lookupFileByPFN(fname, fidString, ftype);
-     if( fidString.empty() ) {
-        m_catalog->registerPFN(fname, "ROOT_All", fidString);
-     }
-     fid.fromString(fidString);
+  std::string fidString;
+  fidString = m_gCatalog->lookupPFN(fname);
+  if( fidString.empty() ) {
+     fidString = m_gCatalog->createFID();
+     m_gCatalog->registerPFN(fidString, fname, "ROOT_All");
   }
+  fid.fromString(fidString);
   Athena::RootConnection* conn = 0;
   ConnMap_t::const_iterator fitr = m_conns.find(fid);
   if (fitr != m_conns.end()) {
