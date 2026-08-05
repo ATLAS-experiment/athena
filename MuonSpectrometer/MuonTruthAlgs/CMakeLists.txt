@@ -20,7 +20,7 @@ atlas_add_component( MuonTruthAlgs
                      src/components/*.cxx
                      INCLUDE_DIRS 
                      LINK_LIBRARIES MuonTruthAlgsLib AtlasHepMCLib Identifier AthLinks AthContainers AtlasDetDescr EventPrimitives xAODMuon 
-                                    xAODTracking xAODTruth GeneratorObjects MuonReadoutGeometry MuonCombinedEvent 
+                                    xAODTracking xAODTruth GeneratorObjects MuonReadoutGeometry MuonCombinedEvent xAODMuonViews
                                     FourMomUtils MuonCompetingRIOsOnTrack MuonPattern MuonRIO_OnTrack MuonSegment MuonRecHelperToolsLib 
                                     MCTruthClassifierLib Particle ParticleTruth TrkDetElementBase TrkGeometry TrkSurfaces 
                                     TrkCompetingRIOsOnTrack TrkEventUtils TrkMeasurementBase TrkParameters TrkPrepRawData 

@@ -13,13 +13,14 @@
 #define MUONTRUTHALGS_TruthTrackRecordsAlg_H
 
 #include "AthenaBaseComps/AthReentrantAlgorithm.h"
-#include "MuonTruthAlgs/DecorUtils.h"
+
 #include "StoreGate/ReadHandleKey.h"
 #include "StoreGate/WriteDecorHandleKey.h"
 #include "StoreGate/WriteDecorHandleKeyArray.h"
 #include "TrkExInterfaces/IExtrapolator.h"
 #include "xAODTruth/TruthParticleContainer.h"
 #include "TrackRecord/TrackRecordCollection.h"
+#include "xAODMuonViews/ContainerDecorator.h"
 
 namespace Muon {
 
@@ -42,9 +43,10 @@ namespace Muon {
         *          representing if the extrapolation has been successful.
         *          We can decouple declaration and population of this object because vectors can be initialized empty.        
         */
-        using WriteDecorArray_f = DecorHandlePtrVec_t<xAOD::TruthParticleContainer, float>;
-        using WriteDecorArray_b = DecorHandlePtrVec_t<xAOD::TruthParticleContainer, char>;
-        using WriteDecorArray_fvec = DecorHandlePtrVec_t<xAOD::TruthParticleContainer, std::vector<float>>;
+        template <typename dType> using  DecorHandlePtrVec_t = std::vector<xAOD::ContainerDecorator<xAOD::TruthParticleContainer, dType>>;
+        using WriteDecorArray_f = DecorHandlePtrVec_t<float>;
+        using WriteDecorArray_b = DecorHandlePtrVec_t<char>;
+        using WriteDecorArray_fvec = DecorHandlePtrVec_t<std::vector<float>>;
         
         struct SummaryDecors{
             WriteDecorArray_f xDecor{};

@@ -223,27 +223,27 @@ namespace Muon {
         ntrigEtaLayers += (ntrigEtaHitsPerChamberLayer[toInt(PhiIndex::CSC)] > 2);
         ntrigEtaLayers += (ntrigEtaHitsPerChamberLayer[toInt(PhiIndex::STGC1)] + ntrigEtaHitsPerChamberLayer[toInt(PhiIndex::STGC2)] > 3);
         // copy hit counts onto TruthParticle
-        (*myDecors.nprecLayersDecor)(truthParticle) = nprecLayers;
-        (*myDecors.nphiLayersDecor)(truthParticle) = nphiLayers;
-        (*myDecors.ntrigEtaLayersDecor)(truthParticle) = ntrigEtaLayers;
-        (*myDecors.innerSmallHitsDecor)(truthParticle) = innerSmallHits;
-        (*myDecors.innerLargeHitsDecor)(truthParticle) = innerLargeHits;
-        (*myDecors.middleSmallHitsDecor)(truthParticle) = middleSmallHits;
-        (*myDecors.middleLargeHitsDecor)(truthParticle) = middleLargeHits;
-        (*myDecors.outerSmallHitsDecor)(truthParticle) = outerSmallHits;
-        (*myDecors.outerLargeHitsDecor)(truthParticle) = outerLargeHits;
-        (*myDecors.extendedSmallHitsDecor)(truthParticle) = extendedSmallHits;
-        (*myDecors.extendedLargeHitsDecor)(truthParticle) = extendedLargeHits;
+        myDecors.nprecLayersDecor(truthParticle) = nprecLayers;
+        myDecors.nphiLayersDecor(truthParticle) = nphiLayers;
+        myDecors.ntrigEtaLayersDecor(truthParticle) = ntrigEtaLayers;
+        myDecors.innerSmallHitsDecor(truthParticle) = innerSmallHits;
+        myDecors.innerLargeHitsDecor(truthParticle) = innerLargeHits;
+        myDecors.middleSmallHitsDecor(truthParticle) = middleSmallHits;
+        myDecors.middleLargeHitsDecor(truthParticle) = middleLargeHits;
+        myDecors.outerSmallHitsDecor(truthParticle) = outerSmallHits;
+        myDecors.outerLargeHitsDecor(truthParticle) = outerLargeHits;
+        myDecors.extendedSmallHitsDecor(truthParticle) = extendedSmallHits;
+        myDecors.extendedLargeHitsDecor(truthParticle) = extendedLargeHits;
 
-        (*myDecors.phiLayer1HitsDecor)(truthParticle) = phiLayer1Hits;
-        (*myDecors.phiLayer2HitsDecor)(truthParticle) = phiLayer2Hits;
-        (*myDecors.phiLayer3HitsDecor)(truthParticle) = phiLayer3Hits;
-        (*myDecors.phiLayer4HitsDecor)(truthParticle) = phiLayer4Hits;
+        myDecors.phiLayer1HitsDecor(truthParticle) = phiLayer1Hits;
+        myDecors.phiLayer2HitsDecor(truthParticle) = phiLayer2Hits;
+        myDecors.phiLayer3HitsDecor(truthParticle) = phiLayer3Hits;
+        myDecors.phiLayer4HitsDecor(truthParticle) = phiLayer4Hits;
 
-        (*myDecors.etaLayer1HitsDecor)(truthParticle) = etaLayer1Hits;
-        (*myDecors.etaLayer2HitsDecor)(truthParticle) = etaLayer2Hits;
-        (*myDecors.etaLayer3HitsDecor)(truthParticle) = etaLayer3Hits;
-        (*myDecors.etaLayer4HitsDecor)(truthParticle) = etaLayer4Hits;
+        myDecors.etaLayer1HitsDecor(truthParticle) = etaLayer1Hits;
+        myDecors.etaLayer2HitsDecor(truthParticle) = etaLayer2Hits;
+        myDecors.etaLayer3HitsDecor(truthParticle) = etaLayer3Hits;
+        myDecors.etaLayer4HitsDecor(truthParticle) = etaLayer4Hits;
 
 
         if (msgLvl(MSG::DEBUG)) {
@@ -316,20 +316,21 @@ namespace Muon {
                     mmTruthHits.push_back(id.get_compact());
             }
         }
-        auto attatchHits = [&truthParticle](const WriteDecor_llvec& dec,
+        auto attatchHits = [&truthParticle](WriteDecor_llvec& dec,
                                             std::vector<unsigned long long>& hits) {
             if (dec) {
-                (*dec)(truthParticle) = std::move(hits);
+                dec(truthParticle) = std::move(hits);
             }
         };
+        ATH_MSG_VERBOSE("Added " << mdtTruthHits.size() << " mdt truth hits, " << cscTruthHits.size() << " csc truth hits, "
+                        << rpcTruthHits.size() << " rpc truth hits, and " << tgcTruthHits.size() << " tgc truth hits");
         attatchHits(myDecors.truthMdtHitsDecor, mdtTruthHits);
         attatchHits(myDecors.truthTgcHitsDecor, tgcTruthHits);
         attatchHits(myDecors.truthRpcHitsDecor, rpcTruthHits);
         attatchHits(myDecors.truthCscHitsDecor, cscTruthHits);
         attatchHits(myDecors.truthStgcHitsDecor, stgcTruthHits);
         attatchHits(myDecors.truthMMHitsDecor, mmTruthHits);
-        ATH_MSG_VERBOSE("Added " << mdtTruthHits.size() << " mdt truth hits, " << cscTruthHits.size() << " csc truth hits, "
-                                << rpcTruthHits.size() << " rpc truth hits, and " << tgcTruthHits.size() << " tgc truth hits");
+
     return StatusCode::SUCCESS;
     }
 }  // namespace Muon
