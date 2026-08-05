@@ -8,6 +8,13 @@
 #include "GaudiKernel/DataHandleHolderVisitor.h"
 
 #include <fstream>
+#include <regex>
+#include <functional>
+#include <string>
+#include <string_view>
+#include <set>
+#include <list>
+#include <map>
 
 namespace GlobalSim {
 
@@ -29,8 +36,8 @@ namespace GlobalSim {
             }
             if(auto seq = dynamic_cast<Gaudi::Sequence*>( alg )) {
                 auto subalgs = seq->subAlgorithms();
-                for(auto alg : *subalgs) {
-                    func(alg,thealgs,isAdding);
+                for(auto thisAlg : *subalgs) {
+                    func(thisAlg,thealgs,isAdding);
                 }
             }
         };
@@ -53,7 +60,7 @@ namespace GlobalSim {
             Gaudi::Algorithm* algoPtr = dynamic_cast<Gaudi::Algorithm*>( ialgoPtr );
             if ( !algoPtr ) continue;
             DataObjIDColl algoOutputs;
-            for ( auto id : algoPtr->outputDataObjs() ) {
+            for ( const auto & id : algoPtr->outputDataObjs() ) {
                 globalOutp.insert( id );
                 algoOutputs.insert( id );
             }
@@ -75,8 +82,8 @@ namespace GlobalSim {
                 algoName = ialgoPtr->type() + "/" + algoName;
             }
 
-            algosInputDependenciesMap[algoName] = algoDependencies;
-            algosOutputDependenciesMap[algoName] = algoOutputs;
+            algosInputDependenciesMap[algoName] = std::move(algoDependencies);
+            algosOutputDependenciesMap[algoName] = std::move(algoOutputs);
 
         }
 
@@ -135,7 +142,7 @@ namespace GlobalSim {
         for ( const auto& [algName, ideps] : algosInputDependenciesMap ) {
             std::string algIndex = "Alg_" + std::to_string( algoIndex );
             addNode( algIndex, algName, "box" );
-            keyToName[algName] = algIndex;
+            keyToName[algName] = std::move(algIndex);
             algoIndex++;
         }
         // now go through deps and create link from every producer to every consumer
