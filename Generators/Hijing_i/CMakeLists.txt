@@ -12,7 +12,7 @@ atlas_disable_as_needed()
 
 # Component(s) in the package:
 atlas_add_library( Hijing_iLib
-   Hijing_i/*.h src/*.cxx src/Hijing_modified/*.f
+   Hijing_i/*.h src/*.cxx 
    PUBLIC_HEADERS Hijing_i
    INCLUDE_DIRS ${HIJING_INCLUDE_DIRS} ${CLHEP_INCLUDE_DIRS}
    DEFINITIONS ${CLHEP_DEFINITIONS}
