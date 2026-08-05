@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // FPEAuditor.cxx
@@ -54,8 +54,6 @@ namespace FPEAudit {
 ///////////////////////////////////////////////////////////////////
 // Public methods:
 ///////////////////////////////////////////////////////////////////
-
-thread_local FPEAuditor::FpeStack_t FPEAuditor::s_fpe_stack;
 
 // Constructors
 ////////////////
@@ -277,10 +275,6 @@ FPEAuditor::report_fpe(const std::string& step,
 void
 FPEAuditor::add_fpe_node()
 {
-  // get current list of FPE flags so far
-  int raised = fetestexcept(FE_OVERFLOW | FE_INVALID | FE_DIVBYZERO);
-  s_fpe_stack.push_back(std::make_pair(raised, 0));
-
   // clear FPE status word
   feclearexcept(FE_ALL_EXCEPT);
 
@@ -298,19 +292,6 @@ FPEAuditor::add_fpe_node()
 void
 FPEAuditor::pop_fpe_node()
 {
-  if (s_fpe_stack.empty()) {
-    ATH_MSG_ERROR("inconsistent fpe-stack !");
-    throw std::runtime_error("inconsistent fpe-stack");
-  }
-
-  // restore fpe stack info
-  int raised = s_fpe_stack.back().first;
-  s_fpe_stack.pop_back();
-
-  // consolidate
-  if (!s_fpe_stack.empty()) {
-    s_fpe_stack.back().second |= raised;
-  }
   if ( FPEAudit::s_handlerInstalled && !FPEAudit::s_handlerDisabled) {
     FPEAudit::unmask_fpe();
   }
