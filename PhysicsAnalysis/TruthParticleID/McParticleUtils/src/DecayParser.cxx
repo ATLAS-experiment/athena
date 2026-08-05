@@ -8,26 +8,48 @@
 // Author: S.Binet<binet@cern.ch>
 /////////////////////////////////////////////////////////////////// 
 
-// Python includes
-#include "Python.h"
-#include "RootUtils/PyGetString.h"
-
 // STL includes
+#include <algorithm>
+#include <cctype>
 #include <iostream>
-#include <list>
+#include <ranges>
 #include <stdexcept>
 #include <sstream>
+#include <string_view>
 
 // McParticleUtils includes
 #include "McParticleUtils/DecayParser.h"
 
-
-
 namespace {
-  PyObject *fetch_py_parse_fct();
-  bool py_to_cpp (PyObject* candidates,
-		  std::vector<McUtils::Strings>& parsed);
+
+std::vector<McUtils::Strings> process_block(std::string_view cmd)
+{
+  std::vector<McUtils::Strings> result;
+  if (cmd.empty()) {
+    return result;
+  }
+
+  std::vector<std::string> slots;
+  for (auto const& token : cmd | std::views::split('+')) {
+    slots.emplace_back(token.begin(), token.end());
+  }
+
+  result.reserve(slots.size());
+  for (auto const& slot : slots) {
+    McUtils::Strings candidates;
+    for (auto const& token : slot | std::views::split('|')) {
+      candidates.emplace_back(token.begin(), token.end());
+    }
+    std::ranges::sort(candidates);
+    auto [first, last] = std::ranges::unique(candidates);
+    candidates.erase(first, last);
+    result.emplace_back(std::move(candidates));
+  }
+
+  return result;
 }
+
+} // anonymous namespace
 
 /////////////////////////////////////////////////////////////////// 
 /// Public methods: 
@@ -37,11 +59,9 @@ namespace {
 ////////////////
 
 DecayParser::DecayParser( const std::string& cmd ) :
-  m_parseFct (0),
   m_parents  ( ),
   m_children ( )
 {
-  m_parseFct = ::fetch_py_parse_fct();
   parse(cmd);
 }
 
@@ -50,7 +70,6 @@ DecayParser::DecayParser( const std::string& cmd ) :
 ///////////////
 DecayParser::~DecayParser() 
 {
-  Py_XDECREF (m_parseFct);
 }
 
 /////////////////////////////////////////////////////////////////// 
@@ -83,100 +102,43 @@ void DecayParser::parse( const std::string& inputCmd )
     return;
   }
 
+  std::string cmd;
+  cmd.reserve(inputCmd.size());
+  for (unsigned char c : inputCmd) {
+    if (!std::isspace(c)) {
+      cmd.push_back(c);
+    }
+  }
+  if (cmd.empty()) {
+    return;
+  }
+
   // Reset the parents and children lists
   m_parents.clear();
   m_children.clear();
 
-
-
-  // real parsing takes place now.
-  PyObject *res = PyObject_CallFunction (m_parseFct,
-					 (char*)"s",
-					 inputCmd.c_str());
-  if (!res) {
-    Py_XDECREF (res);
-    std::string error = "problem while parsing command [" + inputCmd +"]";
-    throw std::runtime_error (error);
-  }
-  
-  if (!PyTuple_Check (res)) {
-    Py_DECREF (res);
-    std::string error = "expected a python tuple";
-    throw std::runtime_error (error);
-  }
-
-  if (PyTuple_GET_SIZE (res) != 3) {
-    Py_DECREF (res);
-    std::string error = "expected a python tuple of size 3";
-    throw std::runtime_error (error);
-  }
-
-  PyObject *sc = PyTuple_GET_ITEM (res, 0);
-  Py_XINCREF (sc);
-  if (!sc || !PyLong_Check (sc)) {
-    Py_XDECREF (sc);
-    Py_DECREF  (res);
-    std::string error = "corrupted return code";
-    throw std::runtime_error (error);
-  }
-
-  Py_ssize_t status = PyLong_AsSsize_t (sc);
-  if (status != 0) {
-    Py_DECREF (sc);
-    Py_DECREF (res);
-    std::string error = "failed to parse command ["+inputCmd+"]";
-    throw std::runtime_error (error);
-  }
-  Py_DECREF (sc);
-
-  PyObject *parents = PyTuple_GET_ITEM (res, 1);
-  Py_XINCREF (parents);
-  if (!parents) {
-    //coverity[COPY_PASTE_ERROR]
-    Py_DECREF (res);
-    std::string error = "corrupted parents' list";
-    throw std::runtime_error (error);
-  }
-
-  PyObject *children= PyTuple_GET_ITEM (res, 2);
-  Py_XINCREF (children);
-  if (!children) {
-    Py_DECREF (parents);
-    Py_DECREF (res);
-    std::string error = "corrupted children' list";
-    throw std::runtime_error (error);
-  }
-  Py_DECREF (res);
-
-  if (parents==Py_None && children==Py_None) {
-    // special case of a single arrow without any parent nor child :
-    // this decay pattern will select every single vertex
-    Py_DECREF (parents);
-    Py_DECREF (children);
+  if (cmd == "->") {
     return;
   }
-  
-  if (!py_to_cpp (parents, m_parents)) {
-    Py_DECREF (parents);
-    Py_DECREF (children);
-    std::string error = "could not translate parents' list";
-    throw std::runtime_error (error);
+
+  const std::size_t arrowPos = cmd.find("->");
+  if (arrowPos == std::string::npos) {
+    std::string error = "missing '->' in command [" + inputCmd + "]";
+    throw std::runtime_error(error);
   }
 
-  if (!py_to_cpp (children, m_children)) {
-    Py_DECREF (parents);
-    Py_DECREF (children);
-    std::string error = "could not translate children' list";
-    throw std::runtime_error (error);
+  if (cmd.find("->", arrowPos + 2) != std::string::npos) {
+    std::string error = "multiple '->' separators in command [" + inputCmd + "]";
+    throw std::runtime_error(error);
   }
 
-  return;
+  const std::string_view cmdView{cmd};
+  const auto parentsBlock  = cmdView.substr(0, arrowPos);
+  const auto childrenBlock = cmdView.substr(arrowPos + 2);
+
+  m_parents  = process_block(parentsBlock);
+  m_children = process_block(childrenBlock);
 }
-
-
-/////////////////////////////////////////////////////////////////// 
-/// Protected methods: 
-/////////////////////////////////////////////////////////////////// 
 
 
 void 
@@ -207,7 +169,6 @@ DecayParser::printMcUtilsStrings( const std::vector<McUtils::Strings>& list ) co
 /////////////////////////////////////////////////////////////////// 
 // Operators: 
 ///////////////////////////////////////////////////////////////////
-// cppcheck-suppress operatorEqVarError; m_parseFct deliberately not copied. 
 DecayParser & DecayParser::operator=(const DecayParser& rhs )
 {
   if ( this != &rhs ) {
@@ -216,89 +177,3 @@ DecayParser & DecayParser::operator=(const DecayParser& rhs )
   }
   return *this;
 }
-
-namespace {
-
-PyObject*
-fetch_py_parse_fct()
-{
-  // need to ensure the python interpreter has been initialized...
-  if (!Py_IsInitialized()) {
-    Py_Initialize();
-  }
-
-  const std::string n = "McParticleUtils.DecayParser";
-  PyObject *module = PyImport_ImportModule (const_cast<char*>(n.c_str()));
-  if (!module || !PyModule_Check (module)) {
-    Py_XDECREF (module);
-    std::string error = "could not import module ["+n+"]";
-    throw std::runtime_error (error);
-  }
-
-  const std::string fct_name = "py_parse";
-  PyObject *fct = PyDict_GetItemString (PyModule_GetDict (module),
-					const_cast<char*>(fct_name.c_str()));
-  // borrowed ref.
-  Py_XINCREF (fct);
-  // don't need the module anymore
-  Py_DECREF (module);
-
-  if (!fct || !PyFunction_Check (fct)) {
-    std::string error = "could not get '"+fct_name+"' from module ["+n+"] or not a function";
-    throw std::runtime_error (error);
-  }
-
-  return fct;
-}
-
-bool 
-py_to_cpp (PyObject* candidates,
-	   std::vector<McUtils::Strings>& parsed)
-{
-  bool all_good = true;
-  if (candidates==Py_None) {
-    // nothing to do
-    return true;
-  }
-
-  if (!PySequence_Check (candidates)) {
-    return false;
-  }
-  Py_ssize_t isz = PySequence_Size (candidates);
-  if (isz==-1) {
-    return false;
-  }
-  parsed.resize (isz);
-
-  for (Py_ssize_t i = 0; i!=isz; ++i) {
-    PyObject *cand = PySequence_GetItem(candidates, i);
-    if (!cand) {
-      return false;
-    }
-    if (!PySequence_Check (cand)) {
-      Py_DECREF (cand);
-      return false;
-    }
-    Py_ssize_t jsz = PySequence_Size (cand);
-    if (jsz==-1) {
-      Py_DECREF (cand);
-      return false;
-    }
-
-    parsed[i].resize(jsz);
-
-    for (Py_ssize_t j = 0; j!=jsz; ++j) {
-      PyObject *pdgid = PySequence_GetItem(cand, j);
-      if (!pdgid) {
-	Py_DECREF (cand);
-	return false;
-      }
-
-      parsed[i][j] = RootUtils::PyGetString (pdgid).first;
-    }
-
-    Py_DECREF (cand);
-  }
-  return all_good;
-}
-} //> anon-namespace
