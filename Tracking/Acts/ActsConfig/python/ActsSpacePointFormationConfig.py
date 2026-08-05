@@ -314,6 +314,12 @@ def ActsSpacePointFormationCfg(flags,
         kwargs.setdefault('runReconstruction', flags.Acts.useCache)
         kwargs.setdefault('runPreparation', True)
 
+    # super special configuration (TEMP)
+    if flags.Acts.makeGlobalDataPreparation:
+        kwargs['runCacheCreation'] = False
+        kwargs['runReconstruction'] = False
+        kwargs['runPreparation'] = True
+        
     # Overlap Space Points may not be required
     processOverlapSpacePoints = processStrips
     if flags.Tracking.ActiveConfig.extension in ['ActsConversion']:

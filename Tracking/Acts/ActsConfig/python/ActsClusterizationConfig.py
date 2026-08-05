@@ -498,6 +498,12 @@ def ActsClusterizationCfg(flags,
         kwargs.setdefault('runCacheCreation', False)
         kwargs.setdefault('runReconstruction', flags.Acts.useCache)
         kwargs.setdefault('runPreparation', True)
+
+    # Super custom configuration here (TEMP)
+    if flags.Acts.makeGlobalDataPreparation:
+        kwargs['runCacheCreation'] = False
+        kwargs['runReconstruction'] = False
+        kwargs['runPreparation'] = True
         
     # Name of the RoI to be used
     roisName = f'{flags.Tracking.ActiveConfig.extension}RegionOfInterest'
