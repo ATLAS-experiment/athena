@@ -137,6 +137,10 @@ RunToTimestampDict = {
     313000: 1553000000, # MC16 PbPb (2018)
     330000: 1625000000, # MC21 pp (13.6 TeV Run 3 initial CP samples)
     340000: 1640000000, # MC21 pp (RUN-4)
+    350000: 1625100000, # MC21 pp (RUN-4; mu = 0)
+    350060: 1625110000, # MC21 pp (RUN-4; mu = 60)
+    350140: 1625120000, # MC21 pp (RUN-4; mu = 140)
+    350200: 1625130000, # MC21 pp (RUN-4; mu = 200)
     410000: 1650000000, # MC21/23a pp (13.6 TeV Run 3 2022)
     420000: 1655000000, # MC21/23a pp (2022 low mu "Minbias" run)
     425000: 1660000000, # MC21/23a 2022 Reserved
@@ -146,5 +150,6 @@ RunToTimestampDict = {
     488000: 1730070000, # MC23 for 2024 5.36 TeV pp reference run
     488600: 1730804400, # MC23 for 2024 heavy ion run
     495000: 1747346400, # MC23g 2025
-    500700: 1751148000  # MC23 for 2025 pO runs
+    500700: 1751148000, # MC23 for 2025 pO runs
+    510000: 1763227800, # MC23 for 2025 heavy ion (PbPb) run
 }
