@@ -116,7 +116,7 @@ namespace InDet {
           auto simDataIter = pixSdoColl->find(rdoIter);
           if (simDataIter != pixSdoColl->end()){
             // get the SimData and count the individual contributions
-            auto simData = (simDataIter->second);
+            const auto & simData = (simDataIter->second);
             for( const auto& deposit : simData.getdeposits() ){
               //If deposit exists
               if (!deposit.first){ATH_MSG_DEBUG("No deposits found"); continue;}
