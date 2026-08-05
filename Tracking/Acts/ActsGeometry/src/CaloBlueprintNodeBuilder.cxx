@@ -448,7 +448,10 @@ void ActsTrk::CaloBlueprintNodeBuilder::generateDiscSurfaces(caloSampleSurfaceMa
             fcalZSum += theDDE->z();
             cellCount++;
           }
-    
+          if (cellCount == 0)[[unlikely]]{
+            ATH_MSG_WARNING("cellCount is zero in CaloBlueprintNodeBuilder::generateDiscSurfaces");
+            continue;
+          }
           double fcalZ = fcalZSum / cellCount;
           caloSampleSurfaceMap[currentSample].push_back(generateDiscSurface(fcalZ,fcalRMax, fcalRMin));
           //now continue to the next sampling

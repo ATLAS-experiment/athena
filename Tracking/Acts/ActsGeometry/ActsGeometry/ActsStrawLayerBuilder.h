@@ -14,7 +14,8 @@
 // ACTS
 #include "Acts/Geometry/ILayerBuilder.hpp"
 #include "Acts/Utilities/Logger.hpp"
-#include "Acts/Geometry/GeometryContext.hpp"
+
+#include <memory>
 
 class TRT_ID;
 
@@ -28,6 +29,7 @@ class ActsDetectorElement;
 namespace Acts {
 class Surface;
 class LayerCreator;
+class GeometryContext;
 }
 
 /// @class ActsStrawLayerBuilder
