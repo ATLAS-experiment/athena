@@ -4,9 +4,11 @@
 #ifndef XAODMUONVIEWS_CONTAINERDECORATOR_H
 #define XAODMUONVIEWS_CONTAINERDECORATOR_H
 #include "StoreGate/WriteDecorHandleKey.h"
+#include "StoreGate/WriteDecorHandleKeyArray.h"
 #include "StoreGate/WriteDecorHandle.h"
 #include "AthContainers/AuxElement.h"
 #include "xAODMuonViews/FillContainer.h"
+#include <unordered_set>
 
 namespace xAOD{
     /** @brief Auxiliary class to instantiate WriteDecorHandles.The handles can be created in 
@@ -63,6 +65,7 @@ namespace xAOD{
                 if (ATH_UNLIKELY(!m_decorHandle)) {
                     THROW_EXCEPTION("No decorator has been defined. Please use initialize() beforhand");
                 }
+                m_seenAux.insert(&auxElem);
                 return (*m_decorHandle)(auxElem);
             }
             /** @brief Returns whether the handle is instantiated  */
@@ -79,17 +82,35 @@ namespace xAOD{
                 if (!m_decorHandle){
                     return;
                 } 
-                if(!m_decorHandle->isPresent() ||
-                    (*m_decorHandle)->empty() || m_decorHandle->isAvailable()) {
+                if(!m_decorHandle->isPresent() ) {
                     return;
                 }
-                for (std::size_t i = 0 ; i < (*m_decorHandle)->size(); ++i){
-                    (*m_decorHandle)(i) = m_defValue;
+                for (const SG::AuxElement* auxElem : **m_decorHandle) {
+                    if (m_seenAux.insert(auxElem).second) {
+                        (*m_decorHandle)(*auxElem) = m_defValue;
+                    }
                 }
             }
             std::unique_ptr<Handle_t> m_decorHandle{};
+            std::unordered_set<const SG::AuxElement*> m_seenAux{};
             dType m_defValue{};
     };
+    /** @brief Factory method for a vector of ContainerDecorators instantiated from a 
+      *         WriteDecorHandleKeyArray
+      * @param keyArray: The reference to the WriteDecorHandleKeyArray from which the particular
+      *                  keys are taken
+      * @param ctx: The current event context to instantiate each ContainerDecorator
+      * @param defValue: The default value that shall be decorated to each element */
+    template<detail::PrimaryContainerConcept Cont_t, typename dType>
+    std::vector<ContainerDecorator<Cont_t, dType>> createDecorators(const SG::WriteDecorHandleKeyArray<Cont_t>& keyArray,
+                                                                    const EventContext& ctx,
+                                                                    dType defValue = {}) {
+        std::vector<ContainerDecorator<Cont_t, dType>> retMe{};
+        for (const SG::WriteDecorHandleKey<Cont_t>& key : keyArray) {
+            retMe.emplace_back(key, ctx, defValue);
+        }
+        return retMe;
+    }
 }
 
 #endif
