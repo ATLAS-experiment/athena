@@ -96,12 +96,13 @@ class ExtractExpertMonitoring(CheckSteps.InputDependentStep):
         super(ExtractExpertMonitoring, self).__init__(name)
         self.input_file = None
         self.path_prefix = None
+        self.required = True
         self.executable = 'rootcp'
         self.args = '--recreate -r'
         self.output_stream = Step.Step.OutputStream.STDOUT_ONLY
 
     def configure(self, test):
-        self.args += ' {:s}:{:s}/*Histogramming/*/EXPERT/* expert-monitoring.root'.format(self.input_file, self.path_prefix or '')
+        self.args += ' {:s}:{:s}/*Histogramming/EXPERT/* expert-monitoring.root'.format(self.input_file, self.path_prefix or '')
         super(ExtractExpertMonitoring, self).configure(test)
 
 
