@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "InDetReadoutGeometry/SiDetectorElement.h"
@@ -247,7 +247,7 @@ namespace ActsTrk {
 
     mon_nCachedIdHashes = nCachedIdHashes;
 
-    if(m_processOverlapForStrip){
+    if(m_processOverlapForStrip && overlapSpacePoints){
       nReceivedSPsStripOverlap = overlapSpacePoints->size();
     }else{
       nReceivedSPsStripOverlap = 0; //avoid undefined value

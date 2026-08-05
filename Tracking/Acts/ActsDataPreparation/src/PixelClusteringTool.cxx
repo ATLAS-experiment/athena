@@ -34,7 +34,7 @@ namespace {
       assert( std::in_range<T1>(a) );
       return static_cast<T1>(a);
    }
-
+   
    inline bool isFEI3(const InDetDD::PixelModuleDesign& design) {
       return  design.getReadoutTechnology() == InDetDD::PixelReadoutTechnology::FEI3;
    }
@@ -122,15 +122,15 @@ PixelClusteringToolImpl<T_RDOContainer>::countCellsImpl(const T_RDOContainer& rd
                                                         const std::vector<IdentifierHash> &listOfIds,
                                                         const InDetDD::SiDetectorElementCollection &detector_elements) const {
    auto getNHits =[](const ActsTrk::RDOContainerTraits<T_RDOContainer>::PerModuleRDOs &RDOs,
-                     const InDetDD::SiDetectorElementCollection &detector_elements,
+                     const InDetDD::SiDetectorElementCollection &elements,
 		     const PixelID* pixelID)
       -> unsigned int
    {
       unsigned int n_hits = RDOs.size();
       if constexpr(GANGED) {
-         assert(detector_elements.at(RDOs.identifyHash()));
-         assert(dynamic_cast<const InDetDD::PixelModuleDesign *>(&detector_elements.at(RDOs.identifyHash())->design()) != nullptr);
-         const InDetDD::PixelModuleDesign &design = static_cast<const InDetDD::PixelModuleDesign &>(detector_elements.at(RDOs.identifyHash())->design());
+         assert(elements.at(RDOs.identifyHash()));
+         assert(dynamic_cast<const InDetDD::PixelModuleDesign *>(&elements.at(RDOs.identifyHash())->design()) != nullptr);
+         const InDetDD::PixelModuleDesign &design = static_cast<const InDetDD::PixelModuleDesign &>(elements.at(RDOs.identifyHash())->design());
          if (isFEI3(design)) {
             for(RDOAdapter<T_RDOContainer> rdo : RDOs) {
                if (rdo.isGanged(design, *pixelID)) {
@@ -191,11 +191,14 @@ PixelClusteringToolImpl<T_RDOContainer>::makeCluster(size_t icluster,
 { 
   Amg::Vector2D pos_acc(0,0);
   float tot_acc = 0.f;
-
-  InDetDD::PixelDiodeTree::CellIndexType rowmax = std::numeric_limits<InDetDD::PixelDiodeTree::CellIndexType>::min();
-  InDetDD::PixelDiodeTree::CellIndexType colmax = std::numeric_limits<InDetDD::PixelDiodeTree::CellIndexType>::min();
-  InDetDD::PixelDiodeTree::CellIndexType rowmin = std::numeric_limits<InDetDD::PixelDiodeTree::CellIndexType>::max();
-  InDetDD::PixelDiodeTree::CellIndexType colmin = std::numeric_limits<InDetDD::PixelDiodeTree::CellIndexType>::max();
+  //to start, set max to the min possible int and min to the max possible int
+  static constexpr InDetDD::PixelDiodeTree::CellIndexType defaultMax = std::numeric_limits<InDetDD::PixelDiodeTree::CellIndexType>::min();
+  static constexpr InDetDD::PixelDiodeTree::CellIndexType defaultMin = std::numeric_limits<InDetDD::PixelDiodeTree::CellIndexType>::max();
+  //
+  InDetDD::PixelDiodeTree::CellIndexType rowmax = defaultMax;
+  InDetDD::PixelDiodeTree::CellIndexType colmax = defaultMax;
+  InDetDD::PixelDiodeTree::CellIndexType rowmin = defaultMin;
+  InDetDD::PixelDiodeTree::CellIndexType colmin = defaultMin;
   InDetDD::PixelDiodeTree::DiodeProxyWithPosition colmin_diode{};
   InDetDD::PixelDiodeTree::DiodeProxyWithPosition colmax_diode{};
   InDetDD::PixelDiodeTree::DiodeProxyWithPosition rowmin_diode{};
@@ -319,10 +322,13 @@ PixelClusteringToolImpl<T_RDOContainer>::makeCluster(size_t icluster,
   assert(n_rdos>0); // clusters must not be empty
   if (tot_acc > 0)
     pos_acc /= tot_acc;
-
   
-  const int colWidth = colmax - colmin + 1;
-  const int rowWidth = rowmax - rowmin + 1;
+  const long long diffCol = colmax - colmin + 1;
+  const long long diffRow = rowmax - rowmin + 1;
+  assert(std::in_range<int>(diffCol));
+  assert(std::in_range<int>(diffRow));
+  const int colWidth = static_cast<int>(diffCol);
+  const int rowWidth = static_cast<int>(diffRow);
 
   double etaWidth = colmax_diode.xEtaMax() - colmin_diode.xEtaMin(); // design.widthFromColumnRange(colmin, colmax);
   double phiWidth = rowmax_diode.xPhiMax() - rowmin_diode.xPhiMin(); // design.widthFromColumnRange(colmin, colmax);

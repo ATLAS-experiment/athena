@@ -272,7 +272,7 @@ namespace ActsTrk{
                 (*cov)(4, i) = (*cov)(4, i) / 1_MeV;
             }
         }
-        return Acts::BoundTrackParameters{actsSurface, params, std::move(cov), 
+        return Acts::BoundTrackParameters{std::move(actsSurface), params, std::move(cov), 
                                           ParticleHypothesis::convert(hypothesis)};
     }
     std::unique_ptr<Trk::TrackParameters> 
