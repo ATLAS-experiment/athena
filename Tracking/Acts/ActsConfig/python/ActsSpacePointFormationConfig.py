@@ -318,7 +318,7 @@ def ActsSpacePointFormationCfg(flags,
     if flags.Acts.makeGlobalDataPreparation:
         kwargs['runCacheCreation'] = False
         kwargs['runReconstruction'] = False
-        kwargs['runPreparation'] = True
+        kwargs['runPreparation'] = not isPrimaryPass(flags)
         
     # Overlap Space Points may not be required
     processOverlapSpacePoints = processStrips

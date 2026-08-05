@@ -7,7 +7,9 @@ def ITkActsGlobalDataPrepartionCfg(flags) -> ComponentAccumulator:
 
     # FS RoI
     from ActsConfig.ActsRegionsOfInterestConfig import ActsMainRegionsOfInterestCreatorAlgCfg
-    acc.merge(ActsMainRegionsOfInterestCreatorAlgCfg(flags))
+    acc.merge(ActsMainRegionsOfInterestCreatorAlgCfg(flags,
+                                                     name="GlobalRegionsOfInterestCreatorAlg",
+                                                     RoIs="GlobalRegionOfInterest"))
 
     # Clustering
     from ActsConfig.ActsClusterizationConfig import ActsMainClusterizationCfg
@@ -15,6 +17,7 @@ def ITkActsGlobalDataPrepartionCfg(flags) -> ComponentAccumulator:
     #kwargs_clusters['PixelClusterizationAlg.name'] = "GlobalPixelClusterizationAlg"
     #kwargs_clusters['StripClusterizationAlg.name'] =  "GlobalStripClusterizationAlg"
     acc.merge(ActsMainClusterizationCfg(flags,
+                                        RoIs="GlobalRegionOfInterest",
                                         runCacheCreation=False,
                                         runReconstruction=True,
                                         runPreparation=False,
@@ -35,6 +38,7 @@ def ITkActsGlobalDataPrepartionCfg(flags) -> ComponentAccumulator:
     #kwargs_space_points['StripSpacePointFormationAlg.name'] = "GlobalStripSpacePointFormationAlg"
     from ActsConfig.ActsSpacePointFormationConfig import ActsMainSpacePointFormationCfg
     acc.merge(ActsMainSpacePointFormationCfg(flags,
+                                             RoIs="GlobalRegionOfInterest",
                                              processStrips=processStrips,
                                              runCacheCreation=False,
                                              runReconstruction=True,

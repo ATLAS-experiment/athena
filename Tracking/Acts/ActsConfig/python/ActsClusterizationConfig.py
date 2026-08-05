@@ -503,7 +503,7 @@ def ActsClusterizationCfg(flags,
     if flags.Acts.makeGlobalDataPreparation:
         kwargs['runCacheCreation'] = False
         kwargs['runReconstruction'] = False
-        kwargs['runPreparation'] = True
+        kwargs['runPreparation'] = not isPrimaryPass(flags)
         
     # Name of the RoI to be used
     roisName = f'{flags.Tracking.ActiveConfig.extension}RegionOfInterest'
