@@ -46,7 +46,7 @@ StatusCode WriteTrackingGeometry::execute(const EventContext& ctx)  {
   
   Config_t cfg = Config_t::defaultConfig();
 
-  Acts::TrackingGeometryJsonConverter converter{cfg,  makeActsAthenaLogger(this, name())};
+  Acts::TrackingGeometryJsonConverter converter{std::move(cfg),  makeActsAthenaLogger(this, name())};
 
 
   nlohmann::json trackGeo = converter.toJson(tgContext, *m_trackingGeometrySvc->trackingGeometry());

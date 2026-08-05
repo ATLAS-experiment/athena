@@ -292,26 +292,27 @@ void ActsGeantFollowerHelper::trackParticle(const G4ThreeVector& pos,
   m_treeData->m_trk_lx[m_treeData->m_g4_steps]     = trkParameters ? trkParameters->parameters()[Trk::locX] : 0.;
   m_treeData->m_trk_ly[m_treeData->m_g4_steps]     = trkParameters ? trkParameters->parameters()[Trk::locY] : 0.;
   // Incremental extrapolation, the extrapolation correspond to one step
-  if(m_extrapolateIncrementally || m_treeData->m_g4_steps == 0){
-    float tATLAS = (trkParameters->position() - m_parameterCache->position()).norm();
-    m_tX0CacheATLAS                                  += X0ATLAS;
-    m_treeData->m_trk_tX0[m_treeData->m_g4_steps]     = X0ATLAS;
-    m_treeData->m_trk_accX0[m_treeData->m_g4_steps]   = m_tX0CacheATLAS;
-    m_treeData->m_trk_t[m_treeData->m_g4_steps]       = tATLAS;
-    m_treeData->m_trk_X0[m_treeData->m_g4_steps]      = tATLAS/X0ATLAS;
+  if (trkParameters){
+    if(m_extrapolateIncrementally || m_treeData->m_g4_steps == 0){
+      float tATLAS = (trkParameters->position() - m_parameterCache->position()).norm();
+      m_tX0CacheATLAS                                  += X0ATLAS;
+      m_treeData->m_trk_tX0[m_treeData->m_g4_steps]     = X0ATLAS;
+      m_treeData->m_trk_accX0[m_treeData->m_g4_steps]   = m_tX0CacheATLAS;
+      m_treeData->m_trk_t[m_treeData->m_g4_steps]       = tATLAS;
+      m_treeData->m_trk_X0[m_treeData->m_g4_steps]      = tATLAS/X0ATLAS;
+    }
+    // Extrapolation perform from the start, step varaible need to be computed by comparing to the last extrapolation.
+    else{
+      Amg::Vector3D previousPos(m_treeData->m_trk_x[m_treeData->m_g4_steps-1],
+                                m_treeData->m_trk_y[m_treeData->m_g4_steps-1],
+                                m_treeData->m_trk_z[m_treeData->m_g4_steps-1]);
+      float tATLAS = (trkParameters->position() - previousPos).norm();
+      m_treeData->m_trk_tX0[m_treeData->m_g4_steps]     = X0ATLAS - m_treeData->m_trk_accX0[m_treeData->m_g4_steps-1]   ;
+      m_treeData->m_trk_accX0[m_treeData->m_g4_steps]   = X0ATLAS;
+      m_treeData->m_trk_t[m_treeData->m_g4_steps]       = tATLAS;
+      m_treeData->m_trk_X0[m_treeData->m_g4_steps]      = tATLAS/m_treeData->m_trk_tX0[m_treeData->m_g4_steps];
+    }
   }
-  // Extrapolation perform from the start, step varaible need to be computed by comparing to the last extrapolation.
-  else{
-    Amg::Vector3D previousPos(m_treeData->m_trk_x[m_treeData->m_g4_steps-1],
-                              m_treeData->m_trk_y[m_treeData->m_g4_steps-1],
-                              m_treeData->m_trk_z[m_treeData->m_g4_steps-1]);
-    float tATLAS = (trkParameters->position() - previousPos).norm();
-    m_treeData->m_trk_tX0[m_treeData->m_g4_steps]     = X0ATLAS - m_treeData->m_trk_accX0[m_treeData->m_g4_steps-1]   ;
-    m_treeData->m_trk_accX0[m_treeData->m_g4_steps]   = X0ATLAS;
-    m_treeData->m_trk_t[m_treeData->m_g4_steps]       = tATLAS;
-    m_treeData->m_trk_X0[m_treeData->m_g4_steps]      = tATLAS/m_treeData->m_trk_tX0[m_treeData->m_g4_steps];
-  }
-
   m_treeData->m_acts_status[m_treeData->m_g4_steps] = actsParameters.ok() ? 1 : 0;
   m_treeData->m_acts_volumeID[m_treeData->m_g4_steps] = actsParameters.ok() ? volID : 0;
   m_treeData->m_acts_pt[m_treeData->m_g4_steps]      = actsParameters.ok() ? actsParameters->transverseMomentum()*1000     : 0.;

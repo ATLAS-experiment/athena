@@ -13,6 +13,8 @@
 // ACTS
 #include "Acts/Definitions/Algebra.hpp"
 #include "Acts/Definitions/Units.hpp"
+#include "Acts/Utilities/AxisDefinitions.hpp"
+#include "Acts/Geometry/GeometryContext.hpp"
 #include "Acts/Geometry/ApproachDescriptor.hpp"
 #include "Acts/Geometry/GenericApproachDescriptor.hpp"
 #include "Acts/Geometry/GeometryContext.hpp"
@@ -32,6 +34,7 @@
 #include <iterator>
 #include <unordered_map>
 #include <fstream>
+#include <iostream>
 
 using Acts::Surface;
 using Acts::Transform3;
@@ -243,8 +246,8 @@ void ActsLayerBuilder::buildBarrel(const Acts::GeometryContext &gctx,
     // count the number of relevant modules in each direction
     auto phiEqual = [this](const Acts::Surface &a,
                            const Acts::Surface &b) {
-      Acts::GeometryContext gctx = Acts::GeometryContext::dangerouslyDefaultConstruct(); // unused in matcher
-      return m_cfg.surfaceMatcher(gctx, AxisPhi, &a, &b);
+      Acts::GeometryContext context = Acts::GeometryContext::dangerouslyDefaultConstruct(); // unused in matcher
+      return m_cfg.surfaceMatcher(context, AxisPhi, &a, &b);
     };
 
     auto zEqual = [this](const Acts::Surface &a,
@@ -443,7 +446,7 @@ void ActsLayerBuilder::buildEndcap(const Acts::GeometryContext &gctx,
                     << (type < 0 ? "NEGATIVE" : "POSITIVE")
                     << " ENDCAP layers remain after merging");
   } else {
-    mergedProtoLayers = protoLayers;
+    mergedProtoLayers = std::move(protoLayers);
   }
 
   if (m_cfg.objDebugOutput) {

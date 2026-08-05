@@ -301,10 +301,10 @@ void ItkBlueprintNodeBuilder::buildItkPixelBlueprintNode(
         });
 
     auto& brl_mat =
-        barrelGeoId.addMaterial("InnerPixel_Material", [&](auto& mat) {
-          mat.configureFace(NegativeDisc, {AxisR, Bound, 10},
+        barrelGeoId.addMaterial("InnerPixel_Material", [&](auto& material) {
+          material.configureFace(NegativeDisc, {AxisR, Bound, 10},
                             {AxisPhi, Closed, 10});
-          mat.configureFace(PositiveDisc, {AxisR, Bound, 10},
+          material.configureFace(PositiveDisc, {AxisR, Bound, 10},
                             {AxisPhi, Closed, 10});
         });
     auto& barrel = brl_mat.addCylinderContainer("InnerPixel_Brl", AxisR);
@@ -684,10 +684,10 @@ void ItkBlueprintNodeBuilder::buildItkStripBlueprintNode(
     stripContainer.withGeometryIdentifier([this, &elements](auto& geoId) {
       geoId.setAllVolumeIdsTo(s_stripVolumeId).incrementLayerIds(1);
 
-      auto& brl_mat = geoId.addMaterial("Strip_Brl_Material", [&](auto& mat) {
-        mat.configureFace(NegativeDisc, {AxisR, Bound, 10},
+      auto& brl_mat = geoId.addMaterial("Strip_Brl_Material", [&](auto& material) {
+        material.configureFace(NegativeDisc, {AxisR, Bound, 10},
                           {AxisPhi, Closed, 10});
-        mat.configureFace(PositiveDisc, {AxisR, Bound, 10},
+        material.configureFace(PositiveDisc, {AxisR, Bound, 10},
                           {AxisPhi, Closed, 10});
       });
       brl_mat.addCylinderContainer(
