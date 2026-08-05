@@ -14,4 +14,4 @@ atlas_install_runtime( Testing/*.conf )
 atlas_add_test( TrigValSteeringUT
                 SCRIPT trigvalsteering-unit-tester.py ${CMAKE_CURRENT_SOURCE_DIR}/test
                 PROPERTIES TIMEOUT 300
-                POST_EXEC_SCRIPT nopost.sh )
+                POST_EXEC_SCRIPT noerror.sh )
