@@ -27,4 +27,4 @@ atlas_add_test( gt_ColumnarToolTests
   SOURCES test/gt_ColumnarToolTests.cxx
   INCLUDE_DIRS ${GTEST_INCLUDE_DIRS}
   LINK_LIBRARIES ${GTEST_LIBRARIES} ColumnarTestFixturesLib ColumnarHelperToolsLib
-  POST_EXEC_SCRIPT nopost.sh )
+  POST_EXEC_SCRIPT noerror.sh )
