@@ -52,6 +52,7 @@ def IOVDbSvcCfg(flags, **kwargs):
     # Select CREST backend if needed
     if flags.IOVDb.UseCREST:
         kwargs.setdefault('Source', 'CREST')
+        checkGlobalTag(flags.IOVDb.DBConnection,flags.IOVDb.GlobalTag)
 
     result.addService(CompFactory.IOVDbSvc(**kwargs), primary=True)
 
@@ -442,6 +443,38 @@ def blockFolder(ca,folder):
         condInputLoader=ca.getCondAlgo("CondInputLoader")
         condInputLoader.Load=set([x for x in condInputLoader.Load if x[1].find(folder)==-1])
         return
+
+
+@cache
+def checkGlobalTag(connStr,currGlobalTag):
+    fail=False
+    if connStr.startswith("http"):
+       connStr1="crest:"+connStr
+    else: #Assume local file
+        connStr1="crest_fs:"+connStr 
+    import chai
+    try:
+        db=chai.Database(connStr1)
+        allGlobalTags=set(db.find_global_tags())
+    except chai._chai.NotFoundError as e:
+        msg.error(str(e))
+        msg.error(f"Could not load data from crest URL {connStr}")
+        fail=True
+    except chai._chai.BackendError as e:
+        msg.error(str(e))
+        msg.error(f"Could not load data from crest URL {connStr}")
+        fail=True
+
+    if fail: raise ConfigurationError()
+
+    if currGlobalTag not in allGlobalTags:
+        from difflib import get_close_matches
+        m1=get_close_matches(currGlobalTag,allGlobalTags,1)
+        msg.error(f"Global tag {currGlobalTag} does not exist"+(f". Did you mean '{m1[0]}'?" if m1 else "")) 
+        raise ConfigurationError() 
+    del db
+    return None
+
 
 
 
