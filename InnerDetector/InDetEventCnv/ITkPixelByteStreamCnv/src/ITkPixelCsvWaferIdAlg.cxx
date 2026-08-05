@@ -11,7 +11,6 @@ Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 #include <fstream>
 #include <sstream>
-#include <stdexcept>
 #include <limits>
 #include <bit>
 
@@ -355,7 +354,7 @@ int ITkPixelCsvWaferIdAlg::phi_module(const std::vector<std::string>& spchain, c
                  (spchain.at(5) == "SP2" || spchain.at(5) == "SP4")) {
             // barrel vertical large combined rings (quad modules), disk 2
             std::string sp_str(1, spchain.at(5)[2]); // SP=2 and SP=4 alternate in phi
-             if(sp_str == "2"){
+            if(sp_str == "2"){
                 return 2 * (stoi(mod) - 1 ) ; // probably wrong offset, TODO need to revisit
             }
             else if(sp_str == "4"){
@@ -454,7 +453,7 @@ int ITkPixelCsvWaferIdAlg::eta_module(const std::vector<std::string>& spchain, c
 int ITkPixelCsvWaferIdAlg::feID(const std::vector<std::string>& spchain, int fe) const {
     int b_ec = barrel_ec(spchain);
     int ld = layer_disk(spchain);
-    if(ld ==0 || (ld == 1 && fabs(b_ec) == 2 ) ){ //triplets
+    if(ld ==0 || (ld == 1 && std::abs(b_ec) == 2 ) ){ //triplets
         return 0;
     }
     else{ // quads
