@@ -231,12 +231,21 @@ class Infrastructure:
                          '-n', '.*', '-o', '.*', '-O',
                          '-r', str(self.args.run_number), '-f', fname])
 
+    def dump_is_content(self):
+        fname = f'r{self.args.run_number:010d}_{self.args.partition}_DF.txt'
+        log.info('Writing content of DF IS server to %s', fname)
+        with open(fname, "w") as f:
+            subprocess.call(['is_ls', '-p', self.args.partition, '-n', 'DF',
+                             '-R', '.*', '-TNv'],
+                            stdout=f, stderr=subprocess.STDOUT, text=True)
+
     def stop(self):
         if not self.processes:
             return
 
         if self.ready:   # Nothing was ever published if we did not fully start
             self.copy_histograms()
+            self.dump_is_content()
 
         log.info('Finalizing OH monitoring infrastructure')
         for part in [self.args.partition, 'initial']:
