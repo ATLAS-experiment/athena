@@ -594,7 +594,7 @@ namespace MissingEtDQA {
       // Setting up other values
       MissingETBase::Types::bitmask_t trksource = static_cast<MissingETBase::Types::bitmask_t>(MissingETBase::Source::Signal::Track);
       if((*met)["PVSoftTrk"]) trksource = (*met)["PVSoftTrk"]->source();
-      if( met::buildMETSum("FinalTrk", met, trksource).isFailure() ) {/i/
+      if( met::buildMETSum("FinalTrk", met, trksource).isFailure() ) {
         ATH_MSG_WARNING("Building MET FinalTrk sum failed.");
       }
       MissingETBase::Types::bitmask_t clsource;
@@ -623,7 +623,7 @@ namespace MissingEtDQA {
       //Getting jets with JVT and OR without other particles applied. This is used for Jet Diff histos
       auto met_jetonly = std::make_unique<xAOD::MissingETContainer>();
       auto aux_jetonly = std::make_unique<xAOD::MissingETAuxContainer>();
-      met_jetonly->setStore(aux.get());
+      met_jetonly->setStore(aux_jetonly.get());
       (*m_metmaker2)->rebuildJetMET("RefJet", "SoftClus", "PVSoftTrk", met_jetonly.get(), jets, coreMet, metHelper, true);
       std::vector<const xAOD::Jet*> only_jet_elems = met::getMETElements<xAOD::Jet>(*(*met_jetonly)[str_jet]);
 
