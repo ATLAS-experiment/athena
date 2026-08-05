@@ -11,9 +11,7 @@
 
 
 #include "SqliteRecord.h"
-#include "boost/io/ios_state.hpp"
 #include <iostream>
-#include <iomanip>
 #include <stdexcept>
 #include <sstream>
 #include <format>
@@ -109,7 +107,6 @@ void SqliteRecord::addValue(std::string_view  field, SqliteInp value)
 
 void SqliteRecord::dump() const
 {
-  boost::io::ios_all_saver saver (std::cout);
   bool first{true};
   for(const auto& [colName,colType] : *m_def) {
     if(first) {
@@ -134,7 +131,7 @@ void SqliteRecord::dump() const
 	      std::cout << "NULL";
       }
       else {
-	      std::cout << std::setprecision(10) << std::get<float>(recIt->second) << "]";
+	      std::cout << std::format("{:.10g}]", std::get<float>(recIt->second));
       }
       break;
     case SQLITEINP_DOUBLE:
@@ -143,7 +140,7 @@ void SqliteRecord::dump() const
 	      std::cout << "NULL";
       }
       else {
-	      std::cout << std::setprecision(10) << std::get<double>(recIt->second) << "]";
+	      std::cout << std::format("{:.10g}]", std::get<double>(recIt->second));
       }
       break;
     case SQLITEINP_STRING:
