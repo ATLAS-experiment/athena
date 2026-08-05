@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -891,7 +891,7 @@ void InDet::SiSpacePointsSeedMaker_Trigger::fillLists(EventData& data) const
         data.rfzv_Sorted[n].push_back(*r);
         if (!data.rfzv_map[n]++) data.rfzv_index[data.nrfzv++] = n;
       }
-      data.r_Sorted[i].erase(r++);
+      r = data.r_Sorted[i].erase(r);
     }
     data.r_map[i] = 0;
   }

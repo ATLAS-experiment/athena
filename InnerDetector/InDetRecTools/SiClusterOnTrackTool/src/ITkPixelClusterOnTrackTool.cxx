@@ -426,7 +426,7 @@ PixelClusterOnTrackTool::correctNN
       << " y: " << finalposition[1] << " +/- "
       <<std::sqrt(finalerrormatrix(1, 1)) );
 
-  Amg::MatrixX cov = finalerrormatrix;
+  Amg::MatrixX cov = std::move(finalerrormatrix);
   // create new copy of error matrix
   if (!m_pixelErrorScalingKey.key().empty()) {
     SG::ReadCondHandle<RIO_OnTrackErrorScaling> error_scaling( m_pixelErrorScalingKey, ctx );

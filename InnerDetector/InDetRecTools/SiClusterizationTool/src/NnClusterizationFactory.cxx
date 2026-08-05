@@ -475,9 +475,8 @@ namespace InDet {
       const std::size_t nPositions{static_cast<std::size_t>(numberSubClusters*2)};
       assert(  nPositions <= position1P.size() );
       //reserve space before copy, to avoid reallocation
-      std::vector<double> inputDataNew;
-      inputDataNew.reserve( inputDataNew.size() + nPositions);
-      inputDataNew.insert(inputDataNew.end(), inputData.begin(), inputData.end());
+      std::vector<double> inputDataNew(inputData);
+      inputDataNew.reserve( inputData.size() + nPositions);
       inputDataNew.insert(inputDataNew.end(), position1P.begin(), position1P.begin() + nPositions);
       
       // get error network id for the given cluster multiplicity then
