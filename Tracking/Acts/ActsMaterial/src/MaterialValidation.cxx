@@ -38,7 +38,7 @@ StatusCode ActsTrk::MaterialValidation::initialize()
 
     // The material intersection assigner
     Acts::IntersectionMaterialAssigner::Config assingerConfig;
-    assingerConfig.surfaces = materialSurfaces;
+    assingerConfig.surfaces = std::move(materialSurfaces);
     auto materialAssigner = std::make_shared<Acts::IntersectionMaterialAssigner>(assingerConfig,
                                                                                  makeActsAthenaLogger(this, "MaterialAssigner"));
 

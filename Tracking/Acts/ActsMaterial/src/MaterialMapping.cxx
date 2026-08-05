@@ -48,7 +48,7 @@ StatusCode ActsTrk::MaterialMapping::initialize()
 
     // The binned surface material accumulator
     Acts::BinnedSurfaceMaterialAccumulator::Config accumulatorConfig;
-    accumulatorConfig.materialSurfaces = materialSurfaces;
+    accumulatorConfig.materialSurfaces = std::move(materialSurfaces);
     auto materialAccumulator = std::make_shared<Acts::BinnedSurfaceMaterialAccumulator>(accumulatorConfig,
                                                                                         makeActsAthenaLogger(this, "MaterialAccumulator"));
 

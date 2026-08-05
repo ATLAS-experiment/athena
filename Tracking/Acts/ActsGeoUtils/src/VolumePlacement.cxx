@@ -38,7 +38,7 @@ namespace ActsTrk{
     //#################################################################################
     VolumePlacement::VolumePlacement(const DetectorType detType,
                                      const AlignableNode_t parentNode,
-                                     std::optional<Amg::Transform3D> addShift):
+                                     const std::optional<Amg::Transform3D> & addShift):
         m_parent{parentNode},
         m_locToGlobCache{std::make_unique<VolumeGeoPositioning>(VolumeGeoPositioning::CacheFlags::volumeLocToGlob, detType, this)},
         m_globToLocCache{std::make_unique<VolumeGeoPositioning>(VolumeGeoPositioning::CacheFlags::volumeGlobToLoc, detType, this)} {
@@ -53,7 +53,7 @@ namespace ActsTrk{
         m_children.push_back(std::move(child));
     }
     VolumePlacement::VolumePlacement(const IDetectorElement& parentElement,
-                                     std::optional<Amg::Transform3D> addShift):
+                                     const std::optional<Amg::Transform3D> & addShift):
         m_parent{&parentElement},
         m_globToLocCache{std::make_unique<VolumeGeoPositioning>(VolumeGeoPositioning::CacheFlags::volumeGlobToLoc, 
                                                                 parentElement.detectorType(), this)} {
@@ -67,7 +67,7 @@ namespace ActsTrk{
     }
 
     VolumePlacement::VolumePlacement(const VolumePlacement& parentPlacement,
-                                     std::optional<Amg::Transform3D> addShift):
+                                     const std::optional<Amg::Transform3D> & addShift):
         m_parent{&parentPlacement}{
         if (!addShift) {
             return;
