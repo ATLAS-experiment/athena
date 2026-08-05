@@ -309,9 +309,9 @@ void sTgcRawDataMonAlg::fillsTgcClusterFromTrackHistograms(const xAOD::TrackPart
   fill("stripCharge_" + side + std::to_string(sector) + "_quad_" + quadLabel, stripClusterChargesPerSideQuadMon);
 
 
-	auto stripClusterSectorSidedMon = Monitored::Scalar<int>("stripTrackSectorSided_layer_" + std::to_string(layer), sectorsTotal);
+	auto stripClusterSectorSidedMon = Monitored::Scalar<int>("stripTrackSectorSided_in_" + quadLabel + "_layer_" + std::to_string(layer), sectorsTotal);
 	auto stripClusterTimesMon       = Monitored::Scalar<float>("stripTrackTiming_layer_" + std::to_string(layer), stripClusterTimes);
-	auto stripClusterSizeMon        = Monitored::Scalar<unsigned int>("stripTrackClusterSize_layer_" + std::to_string(layer), csize);
+	auto stripClusterSizeMon        = Monitored::Scalar<unsigned int>("stripTrackClusterSize_in_" + quadLabel + "_layer_" + std::to_string(layer), csize);
 	fill("sTgcTiming", stripClusterSectorSidedMon, stripClusterTimesMon);
 	fill("padTriggerExpert", stripClusterSectorSidedMon, stripClusterSizeMon);
 
@@ -331,8 +331,8 @@ void sTgcRawDataMonAlg::fillsTgcClusterFromTrackHistograms(const xAOD::TrackPart
 
 	if (resPull) {
 	  float residual = resPull -> residual()[Trk::locX];
-	  auto residualMon  = Monitored::Scalar<float>("residual_" + side + "_quad_" + std::to_string(std::abs(stEta)) + "_sector_" + std::to_string(sector) + "_layer_" + std::to_string(layer), residual);
-	  fill("sTgcResiduals_" + side + std::to_string(sector) + "_quad_" + std::to_string(std::abs(stEta)), residualMon);
+	  auto residualMon  = Monitored::Scalar<float>("residual_" + side + "_quad_" + quadLabel + "_sector_" + std::to_string(sector) + "_layer_" + std::to_string(layer), residual);
+	  fill("sTgcResiduals_" + side + std::to_string(sector) + "_quad_" + quadLabel, residualMon);
 	}        
       }
 
