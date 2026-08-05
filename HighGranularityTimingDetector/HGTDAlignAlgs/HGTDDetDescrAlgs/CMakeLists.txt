@@ -27,6 +27,7 @@ atlas_add_component( HGTDDetDescrAlgs
 
                      HGTD_Identifier
                      HGTD_ReadoutGeometry
+                     GeoModelUtilities
 )
 
 # Install scripts

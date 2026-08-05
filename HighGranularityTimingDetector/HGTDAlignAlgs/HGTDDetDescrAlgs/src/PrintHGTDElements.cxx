@@ -107,8 +107,8 @@ StatusCode PrintHGTDElements::execute(const EventContext& ctx)
 
     const auto* elements = handle.retrieve();
 
-    ATH_MSG_ERROR("DetectorElementCollection pointer = " << elements);
-    ATH_MSG_ERROR("First element pointer = " << (*elements)[0]);
+    ATH_MSG_DEBUG("DetectorElementCollection pointer = " << elements);
+    ATH_MSG_DEGUG("First element pointer = " << (*elements)[0]);
 
     if (!handle.isValid() || elements == nullptr) {
 
