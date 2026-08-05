@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -124,10 +124,9 @@ std::vector< IDTPM::roiCollection_t > IDTPM::RoiSelectionTool::getRoisTnP(
 
   /// TODO - add TnP selection
   //std::vector< roiCollection_t > selectedRois =
-  //    m_TnPselectionTool( selectedRoisTag, selectedRoisProbe, tracks );
-  std::vector< roiCollection_t > selectedRois = selectedRoisProbe;
+  // m_TnPselectionTool( selectedRoisTag, selectedRoisProbe, tracks );
 
-  return selectedRois;
+  return selectedRoisProbe;
 }
 
 
