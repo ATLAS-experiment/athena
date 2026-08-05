@@ -60,6 +60,7 @@ StatusCode HGTD_DetectorElementCondAlg::execute(const EventContext& ctx) const
   // ____________ Get Read Cond Object ____________
   SG::ReadCondHandle<GeoAlignmentStore> readHandle{m_readKey, ctx};
   const GeoAlignmentStore* readCdo{*readHandle};
+  ATH_MSG_INFO("GeoAlignmentStore ptr = " << readCdo);
 
   if (readCdo == nullptr) {
     ATH_MSG_FATAL("Null pointer to the read conditions object of " << m_readKey.key());
@@ -82,6 +83,22 @@ StatusCode HGTD_DetectorElementCondAlg::execute(const EventContext& ctx) const
                                                oldEl->GeoVDetectorElement::getMaterialGeom(),
                                                oldEl->getCommonItems(),
                                                readCdo);
+    
+    if (oldEl->identifyHash().value() < 5) {
+      ATH_MSG_INFO("NEW element just created hash="
+                  << oldEl->identifyHash());
+
+      ATH_MSG_INFO("center = "
+                  << (*newEl)->center().x() << " "
+                  << (*newEl)->center().y() << " "
+                  << (*newEl)->center().z());
+
+      ATH_MSG_INFO("transform = "
+                  << (*newEl)->transform().translation().x() << " "
+                  << (*newEl)->transform().translation().y() << " "
+                  << (*newEl)->transform().translation().z());
+    }
+
     oldToNewMap[oldEl] = *newEl;
     ++newEl;
   }
@@ -104,11 +121,30 @@ StatusCode HGTD_DetectorElementCondAlg::execute(const EventContext& ctx) const
   // Apply alignment using readCdo passed to HGTD_DetectorElement
   for (InDetDD::HGTD_DetectorElement* newEl: *writeCdo) {
     newEl->updateCache();
+    if (newEl->identifyHash().value() < 5) {
+      ATH_MSG_INFO("AFTER updateCache hash="
+                  << newEl->identifyHash());
+
+      ATH_MSG_INFO("center = "
+                  << newEl->center().x() << " "
+                  << newEl->center().y() << " "
+                  << newEl->center().z());
+
+      ATH_MSG_INFO("transform = "
+                  << newEl->transform().translation().x() << " "
+                  << newEl->transform().translation().y() << " "
+                  << newEl->transform().translation().z());
+    }
   }
 
   // Record WriteCondHandle
   const std::size_t size{writeCdo->size()};
+  
+  ATH_MSG_ERROR("Recording collection pointer = " << writeCdo.get());
+  ATH_MSG_ERROR("First element pointer = " << (*writeCdo)[0]);
+
   if (writeHandle.record(std::move(writeCdo)).isFailure()) {
+
     ATH_MSG_FATAL("Could not record " << writeHandle.key()
                   << " with EventRange " << writeHandle.getRange()
                   << " into Conditions Store");

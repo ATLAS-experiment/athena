@@ -16,6 +16,9 @@
 #include "StoreGate/WriteCondHandleKey.h"
 #include "GeoModelUtilities/GeoAlignmentStore.h"
 
+#include "StoreGate/ReadCondHandleKey.h"
+#include "DetDescrConditions/AlignableTransformContainer.h"
+
 class HGTD_DetectorManager;
 
 class HGTDAlignCondAlg : public AthCondAlgorithm {
@@ -34,6 +37,14 @@ private:
       this, "DetManagerName", "HGTD", "Name of the DetectorManager to retrieve"};
 
   const HGTD_DetectorManager* m_detManager{nullptr};
+
+  SG::ReadCondHandleKey<AlignableTransformContainer> m_readKey{
+      this,
+      "ReadKey",
+      "/HGTD/Align",
+      "HGTD alignment folder"
+  };
+
 };
 
 #endif

@@ -10,6 +10,7 @@ def HGTDAlignCondAlgCfg(flags, name="HGTDAlignCondAlg", **kwargs):
     """Return a ComponentAccumulator with configured HGTDAlignCondAlg for HGTD"""
     acc = ComponentAccumulator()
     kwargs.setdefault("DetManagerName", "HGTD")
+    kwargs.setdefault("ReadKey", flags.HGTD.Geometry.alignmentFolder)
     kwargs.setdefault("WriteKey", "HGTDAlignmentStore")
     acc.addCondAlgo(CompFactory.HGTDAlignCondAlg(name, **kwargs))
     return acc
