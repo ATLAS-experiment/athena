@@ -148,6 +148,6 @@ def readSimulationParameters(flags):
 def writeSimulationParameters(flags):
     """Write digitization parameters metadata"""
     from IOVDbSvc.IOVDbSvcConfig import IOVDbSvcCfg, addFolders
-    acc = IOVDbSvcCfg(flags, FoldersToMetaData=[folderName])
+    acc = IOVDbSvcCfg(flags, FoldersToMetaData=(folderName,))
     acc.merge(addFolders(flags, folderName, detDb="SimParams.db", db="SIMPARAM"))
     return acc
