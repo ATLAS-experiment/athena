@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef MuonTPExtrapolationAlg_H
 #define MuonTPExtrapolationAlg_H
@@ -14,7 +14,7 @@
 namespace DerivationFramework{
 class MuonTPExtrapolationAlg : public AthReentrantAlgorithm {
 public:
-    MuonTPExtrapolationAlg(const std::string& name, ISvcLocator* pSvcLocator);
+    using AthReentrantAlgorithm::AthReentrantAlgorithm;
     virtual ~MuonTPExtrapolationAlg() = default;
 
     virtual StatusCode initialize() override;

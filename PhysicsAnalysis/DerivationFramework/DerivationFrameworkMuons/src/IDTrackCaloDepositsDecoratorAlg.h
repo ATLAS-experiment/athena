@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef IDTRACKCALODEPOSITSDECORATORALG_H_
 #define IDTRACKCALODEPOSITSDECORATORALG_H_
@@ -22,7 +22,7 @@ namespace DerivationFramework {
 
 class IDTrackCaloDepositsDecoratorAlg : public AthReentrantAlgorithm {
 public:
-    IDTrackCaloDepositsDecoratorAlg(const std::string& name, ISvcLocator* pSvcLocator);
+    using AthReentrantAlgorithm::AthReentrantAlgorithm;
 
     virtual ~IDTrackCaloDepositsDecoratorAlg() = default;
     StatusCode initialize() override;

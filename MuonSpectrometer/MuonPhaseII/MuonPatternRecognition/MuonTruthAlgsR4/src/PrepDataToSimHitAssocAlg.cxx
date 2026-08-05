@@ -15,6 +15,7 @@
 #include "xAODMuonPrepData/MdtDriftCircle.h"
 
 #include "xAODMuonViews/ChamberViewer.h"
+#include "xAODMuonViews/ContainerDecorator.h"
 
 #include "Acts/Utilities/Helpers.hpp"
 #include <span>
@@ -95,14 +96,11 @@ namespace MuonR4{
 
         xAOD::ChamberViewer prdViewer{*measurements};
         xAOD::ChamberViewer simHitViewer{*simHits, m_idHelperSvc.get(), xAOD::ChamberView::Mode::DetElement};
-        SG::WriteDecorHandle<xAOD::MuonMeasurementContainer, LinkType> decorHandle{m_decorKey, ctx};
+        xAOD::ContainerDecorator decorHandle{m_decorKey, ctx, LinkType{}};
         /** Loop over the measurements */
         do {
             const Identifier chambId = prdViewer.at(0)->identify();
             const IdentifierHash viewHash = m_idHelperSvc->detElementHash(chambId);
-            /** Setup a default empty link */
-            decorHandle(*prdViewer.at(0)) = LinkType{};
-
             ///
             if ((simHitViewer.size() == 0 || m_idHelperSvc->detElementHash(simHitViewer.at(0)->identify()) > viewHash)  && 
                  !simHitViewer.loadView(chambId)) {

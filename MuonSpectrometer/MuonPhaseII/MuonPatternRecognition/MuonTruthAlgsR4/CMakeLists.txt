@@ -11,7 +11,7 @@ atlas_add_component( MuonTruthAlgsR4
                      LINK_LIBRARIES  xAODMuonSimHit AthenaBaseComps GaudiKernel xAODMuon MuonIdHelpersLib
                                      MuonReadoutGeometryR4 xAODMuonPrepData MuonPatternEvent xAODMuonViews
                                      MuonTruthHelpers MuonRecHelperToolsLib TruthUtils 
-                                     MdtCalibData MuonCondData DerivationFrameworkMuonsLib
+                                     MdtCalibData MuonCondData
                                      MuonRecToolInterfacesR4 MuonTrackEvent)
 
 # Install files from the package:

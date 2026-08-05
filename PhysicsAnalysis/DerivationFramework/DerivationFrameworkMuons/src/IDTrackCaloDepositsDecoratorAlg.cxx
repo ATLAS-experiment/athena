@@ -1,20 +1,18 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "IDTrackCaloDepositsDecoratorAlg.h"
-#include "DerivationFrameworkMuons/Utils.h"
 #include "CaloEvent/CaloCellContainer.h"
 #include "muonEvent/DepositInCalo.h"
 #include "xAODMuon/Muon.h"
 #include "xAODTracking/TrackParticle.h"
 #include "StoreGate/ReadDecorHandle.h"
 #include "StoreGate/WriteDecorHandle.h"
+#include "xAODMuonViews/ContainerDecorator.h"
 
 namespace DerivationFramework {
-IDTrackCaloDepositsDecoratorAlg::IDTrackCaloDepositsDecoratorAlg(const std::string& n, ISvcLocator* p):
-    AthReentrantAlgorithm(n, p) {
- }
+
 
 StatusCode IDTrackCaloDepositsDecoratorAlg::initialize() {
     ATH_CHECK(m_trkDepositInCalo.retrieve());
@@ -32,16 +30,14 @@ StatusCode IDTrackCaloDepositsDecoratorAlg::initialize() {
 
 StatusCode IDTrackCaloDepositsDecoratorAlg::execute(const EventContext& ctx) const {
     
-    SG::ReadHandle<xAOD::IParticleContainer> tracks{m_partKey, ctx};
-    if (!tracks.isPresent()) {
-        ATH_MSG_FATAL("Failed to retrieve "<< m_partKey.fullKey());
-         return StatusCode::FAILURE;
-    }
-    auto dec_deposit = makeHandle<std::vector<float>>(ctx, m_depositKey);
-    auto dec_eloss = makeHandle<std::vector<float>>(ctx, m_elossKey);
-    auto dec_type = makeHandle<std::vector<uint16_t>>(ctx, m_typeKey);
+    const xAOD::IParticleContainer* tracks{};
+    ATH_CHECK(SG::get(tracks, m_partKey, ctx));
+
+    xAOD::ContainerDecorator<xAOD::IParticleContainer, std::vector<float>>  dec_deposit {m_depositKey, ctx};
+    xAOD::ContainerDecorator<xAOD::IParticleContainer, std::vector<float>>  dec_eloss {m_elossKey, ctx};
+    xAOD::ContainerDecorator<xAOD::IParticleContainer, std::vector<uint16_t>>  dec_type {m_typeKey, ctx};
     
-    using SelDecorator = SG::ReadDecorHandle<xAOD::IParticleContainer, bool>;
+    using SelDecorator = SG::ReadDecorHandle<xAOD::IParticleContainer, std::uint8_t>;
     
     std::vector<SelDecorator> selDecors;
     for (const SG::ReadDecorHandleKey<xAOD::IParticleContainer>& key: m_trkSelKeys) {
