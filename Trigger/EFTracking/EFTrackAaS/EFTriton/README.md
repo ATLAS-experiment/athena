@@ -4,6 +4,9 @@ Welcome to the EF Tracking implementation of traccc as-a-Service with NVIDIA Tri
 
 This repository runs traccc as-a-Service. This uses a custom backend, with a wrapper for GPU pipeline information, to launch the Triton server. This Triton server is launched with a model algorithm to transfer information between the client and the GPU. Currently, the model is built for the G200 pipeline, with more models to be included at a later date.
 
+This repository finds its basis in the original traccc-aaS code outside of Athena, found at https://github.com/milescb/traccc-aaS from Miles Cochran-Branson's branch.
+
+
 ---
 
 ## 0. Pre-prerequisites and Setting Up Docker Image
