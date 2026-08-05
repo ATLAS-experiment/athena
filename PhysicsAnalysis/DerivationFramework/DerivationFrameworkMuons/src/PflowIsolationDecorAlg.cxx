@@ -1,16 +1,15 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #include "PflowIsolationDecorAlg.h"
-#include "DerivationFrameworkMuons/Utils.h"
 
-#include <StoreGate/ReadHandle.h>
-#include <StoreGate/WriteDecorHandle.h>
+#include "StoreGate/ReadHandle.h"
+#include "xAODMuonViews/ContainerDecorator.h"
 
+
+#include <format>
 //**********************************************************************
 namespace DerivationFramework {
-PflowIsolationDecorAlg::PflowIsolationDecorAlg(const std::string& name, ISvcLocator* pSvcLocator) :
-    AthReentrantAlgorithm(name, pSvcLocator) {}
 //**********************************************************************
 
 StatusCode PflowIsolationDecorAlg::initialize() {
@@ -21,11 +20,13 @@ StatusCode PflowIsolationDecorAlg::initialize() {
     // isolation types to run. The ptcones each also imply the respective ptvarcone.
 
     ATH_CHECK(m_trk_key.initialize());
-    for (const std::string& decor : m_trkSel_Decors) m_trkSel_keys.emplace_back(m_trk_key, decor);
+    for (const std::string& decor : m_trkSel_Decors) {
+        m_trkSel_keys.emplace_back(m_trk_key, decor);
+    }
     ATH_CHECK(m_trkSel_keys.initialize());
-    m_neflowCone20_key = std::string{"neflowisol20"} + (m_customName.empty() ? "" : "_") + m_customName;
-    m_neflowCone30_key = std::string{"neflowisol30"} + (m_customName.empty() ? "" : "_") + m_customName;
-    m_neflowCone40_key = std::string{"neflowisol40"} + (m_customName.empty() ? "" : "_") + m_customName;
+    m_neflowCone20_key = std::format("neflowisol20{:}{:}", m_customName.empty() ? "" : "_", m_customName.value());
+    m_neflowCone30_key = std::format("neflowisol30{:}{:}", m_customName.empty() ? "" : "_", m_customName.value());
+    m_neflowCone40_key = std::format("neflowisol40{:}{:}", m_customName.empty() ? "" : "_", m_customName.value());
     ATH_CHECK(m_neflowCone20_key.initialize());
     ATH_CHECK(m_neflowCone30_key.initialize());
     ATH_CHECK(m_neflowCone40_key.initialize());
@@ -37,23 +38,21 @@ StatusCode PflowIsolationDecorAlg::initialize() {
 //**********************************************************************
 
 StatusCode PflowIsolationDecorAlg::execute(const EventContext& ctx) const {
-    SG::ReadHandle<xAOD::TrackParticleContainer> tracks{m_trk_key, ctx};
-    if (!tracks.isValid()) {
-        ATH_MSG_FATAL("Failed to retrieve track collection " << m_trk_key.fullKey());
-        return StatusCode::FAILURE;
-    }
+    
+    const xAOD::TrackParticleContainer* tracks{};
+    ATH_CHECK(SG::get(tracks,m_trk_key, ctx));
     
 
-    using FloatDecor = SG::WriteDecorHandle<xAOD::TrackParticleContainer, float>;
-    using SelDecorator = SG::ReadDecorHandle<xAOD::TrackParticleContainer, bool>;
+    using FloatDecor = xAOD::ContainerDecorator<xAOD::TrackParticleContainer, float>;
+    using SelDecorator = SG::ReadDecorHandle<xAOD::TrackParticleContainer, std::uint8_t>;
     
     std::vector<SelDecorator> selDecors;
     for (const SG::ReadDecorHandleKey<xAOD::TrackParticleContainer>& key : m_trkSel_keys){
         selDecors.emplace_back(key, ctx);
     }
-    FloatDecor neflowCone40_dec{makeHandle<float>(ctx,m_neflowCone40_key, -Gaudi::Units::GeV)};
-    FloatDecor neflowCone30_dec{makeHandle<float>(ctx,m_neflowCone30_key, -Gaudi::Units::GeV)};
-    FloatDecor neflowCone20_dec{makeHandle<float>(ctx,m_neflowCone20_key, -Gaudi::Units::GeV)};
+    FloatDecor neflowCone40_dec{m_neflowCone40_key, ctx, -Gaudi::Units::GeV};
+    FloatDecor neflowCone30_dec{m_neflowCone30_key, ctx, -Gaudi::Units::GeV};
+    FloatDecor neflowCone20_dec{m_neflowCone20_key, ctx, -Gaudi::Units::GeV};
     
 
     for (const xAOD::TrackParticle* trk : *tracks) {

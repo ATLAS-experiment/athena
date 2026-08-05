@@ -1,24 +1,24 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef TRACKISOLATIONDECORALG_H_
 #define TRACKISOLATIONDECORALG_H_
 
-#include <AthenaBaseComps/AthReentrantAlgorithm.h>
-#include <StoreGate/ReadHandleKey.h>
-#include <StoreGate/WriteDecorHandleKey.h>
-#include <StoreGate/ReadDecorHandleKeyArray.h>
-#include <xAODPrimitives/IsolationType.h>
-#include <xAODTracking/VertexContainer.h>
+#include "AthenaBaseComps/AthReentrantAlgorithm.h"
+#include "StoreGate/ReadHandleKey.h"
+#include "StoreGate/WriteDecorHandleKey.h"
+#include "StoreGate/ReadDecorHandleKeyArray.h"
+#include "xAODPrimitives/IsolationType.h"
+#include "xAODTracking/VertexContainer.h"
 
-#include <RecoToolInterfaces/ITrackIsolationTool.h>
-#include <RecoToolInterfaces/IsolationCommon.h>
+#include "RecoToolInterfaces/ITrackIsolationTool.h"
+#include "RecoToolInterfaces/IsolationCommon.h"
 
 namespace DerivationFramework {
 class TrackIsolationDecorAlg : public AthReentrantAlgorithm {
 public:
     /// Constructor with parameters:
-    TrackIsolationDecorAlg(const std::string& name, ISvcLocator* pSvcLocator);
+    using AthReentrantAlgorithm::AthReentrantAlgorithm;
 
     /// Destructor:
     ~TrackIsolationDecorAlg();

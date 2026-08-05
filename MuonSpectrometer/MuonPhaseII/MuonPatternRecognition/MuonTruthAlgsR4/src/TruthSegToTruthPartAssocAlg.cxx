@@ -13,6 +13,7 @@
 #include "xAODTruth/TruthVertex.h"
 #include "ActsInterop/UnitConverters.h"
 #include "Acts/Surfaces/PlaneSurface.hpp"
+#include "xAODMuonViews/ContainerDecorator.h"
 
 #include <unordered_set>
 
@@ -63,7 +64,7 @@ namespace MuonR4{
         using IdDecorHandle_t = SG::ReadDecorHandle<xAOD::TruthParticleContainer, std::vector<unsigned long long>>;
         using SegLink_t = ElementLink<xAOD::MuonSegmentContainer>;
         using SegLinkVec_t = std::vector<SegLink_t>;
-        SG::WriteDecorHandle<xAOD::TruthParticleContainer, SegLinkVec_t> segLinkDecor{m_segLinkKey ,ctx};
+        xAOD::ContainerDecorator segLinkDecor{m_segLinkKey ,ctx, SegLinkVec_t{}};
 
         /// Initialize the Identifier decorators
         std::vector<IdDecorHandle_t> idDecorHandles{};
@@ -288,8 +289,8 @@ namespace MuonR4{
                         <<m_pileUpObjExtpDxCut<<", "<<m_pileUpObjExtpDyCut<<", "<<m_pileUpObjExtpDthetaCut<<", "<<m_pileUpObjExtpDphiCut);
                     continue;
                 }
-                truthPartDecor(*bkgSeg) = TruthPartLink_t{truthSegDecor.cptr(), bkgMuon->index()};
-                truthSegDecor(*bkgMuon).emplace_back(truthPartDecor.cptr(), bkgSeg->index());
+                truthPartDecor(*bkgSeg) = TruthPartLink_t{truthSegDecor.container(), bkgMuon->index()};
+                truthSegDecor(*bkgMuon).emplace_back(truthPartDecor.container(), bkgSeg->index());
                 segmentMatched[sIdx] = true;
             }
         }
