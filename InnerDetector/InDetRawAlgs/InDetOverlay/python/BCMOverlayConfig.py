@@ -66,8 +66,11 @@ def BCMTruthOverlayCfg(flags, name="BCMSDOOverlay", **kwargs):
     """Return a ComponentAccumulator for the BCM SDO overlay algorithm"""
     acc = ComponentAccumulator()
 
-    # We do not need background BCM SDOs
-    kwargs.setdefault("BkgInputKey", "")
+    # We do not need background BCM SDOs for data overlay
+    if flags.Overlay.DataOverlay:
+        kwargs.setdefault("BkgInputKey", "")
+    else:
+        kwargs.setdefault("BkgInputKey", flags.Overlay.BkgPrefix + "BCM_SDO_Map")
 
     kwargs.setdefault("SignalInputKey",
                       flags.Overlay.SigPrefix + "BCM_SDO_Map")
