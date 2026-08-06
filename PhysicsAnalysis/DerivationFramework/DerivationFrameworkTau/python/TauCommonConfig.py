@@ -39,6 +39,26 @@ def AddTauAugmentationCfg(flags, wp="GNTauVeryLoose", **kwargs):
     acc.addEventAlgo(CommonAugmentation(f"Tau{wp}AugmentationKernel", AugmentationTools = TauAugmentationTools))
     return acc
 
+def AddTauMassDecoratorCfg(flags, **kwargs):
+    """Decorate/overwrite the tau visible mass"""
+
+    kwargs.setdefault("TauContainerName", "TauJets")
+    kwargs.setdefault("prefix",           kwargs['TauContainerName'])
+
+    acc = ComponentAccumulator()
+
+    #Rename existing decorations in input file, such that we can create new ones.
+    from SGComps.AddressRemappingConfig import InputRenameCfg
+    acc.merge(InputRenameCfg("xAOD::TauJetContainer", kwargs['TauContainerName'], "old_"+kwargs['TauContainerName']))
+    acc.merge(InputRenameCfg("xAOD::TauJetAuxContainer", kwargs['TauContainerName']+"Aux.", "old_"+kwargs['TauContainerName']+"Aux."))
+
+    acc.addEventAlgo(CompFactory.DerivationFramework.TauMassDecorator(name               = kwargs['TauContainerName']+"_MassDecorator",
+                                                                      TauOutputName      = kwargs['TauContainerName'],
+                                                                      TauInputName       = "old_"+kwargs['TauContainerName']))
+
+    return acc
+
+
 def AddTauIDDecorationCfg(flags, **kwargs):
     """Decorate tau ID scores and working points"""
 
@@ -211,7 +231,7 @@ def AddMuonRemovalTauAODReRecoAlgCfg(flags, **kwargs):
         tools_after = []
         tools_after.append( acc.popToolsAndMerge(tauTools.TauVertexedClusterDecoratorCfg(flags)) )
         tools_after.append( acc.popToolsAndMerge(tauTools.TauTrackRNNClassifierCfg(flags)) )
-        tools_after.append( acc.popToolsAndMerge(tauTools.EnergyCalibrationLCCfg(flags)) )
+        tools_after.append( acc.popToolsAndMerge(tauTools.EnergyCalibrationLCCfg(flags,force_zero_mass=True)) )
         tools_after.append( acc.popToolsAndMerge(tauTools.TauCommonCalcVarsCfg(flags)) )
         tools_after.append( acc.popToolsAndMerge(tauTools.TauSubstructureCfg(flags)) )
         tools_after.append( acc.popToolsAndMerge(tauTools.Pi0ClusterCreatorCfg(flags)) )

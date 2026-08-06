@@ -47,7 +47,8 @@ class TauCalibrateLC : public TauRecToolBase {
 
     Gaudi::Property<std::string> m_calibrationFile{this, "calibrationFile", ""};
     Gaudi::Property<bool> m_doVertexCorrection{this, "VertexCorrection", true};
-  
+    Gaudi::Property<bool> m_doForceZeroMass{this, "ForceZeroMass", false}; 
+
     SG::ReadHandleKey<xAOD::VertexContainer> m_vertexInputContainer {this,
         "Key_vertexInputContainer",
         "PrimaryVertices",

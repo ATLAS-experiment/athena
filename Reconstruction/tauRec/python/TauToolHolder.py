@@ -191,13 +191,14 @@ def TauTrackRNNClassifierCfg(flags):
 
 ########################################################################
 # Tau energy calibration
-def EnergyCalibrationLCCfg(flags):
+def EnergyCalibrationLCCfg(flags, force_zero_mass=False):
     result = ComponentAccumulator()
     _name = flags.Tau.ActiveConfig.prefix +'EnergyCalibrationLC'
 
     TauCalibrateLC = CompFactory.getComp("TauCalibrateLC")
     TauCalibrateLC = TauCalibrateLC(name = _name,
                                     calibrationFile = flags.Tau.CalibrateLCConfig,
+                                    ForceZeroMass = force_zero_mass, 
                                     Key_vertexInputContainer = flags.Tau.ActiveConfig.VertexCollection)
             
     result.setPrivateTools(TauCalibrateLC)
