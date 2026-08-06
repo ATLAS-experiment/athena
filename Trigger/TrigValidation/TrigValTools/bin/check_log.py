@@ -22,6 +22,7 @@ regexMap['error/fatal'] = [
     r'^Core dump',
     r'tcmalloc\: allocation failed',
     r'athenaHLT.py\: error',
+    r'athenaEF.py\: error',
     r'HLTMPPU.*Child Issue',
     r'HLTMPPU.*Configuration Issue',
     r'There was a crash',

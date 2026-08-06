@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 #
 
 '''
@@ -16,8 +16,8 @@ from TrigValTools.TrigValSteering.Input import is_input_defined, get_input
 class ExecStep(Step):
     '''
     Step executing the main job of a Trigger ART test. This can be either
-    athena or athenaHLT or a transform. There can be several ExecSteps in
-    one Test
+    athena or athenaHLT/EF or a transform. There can be several ExecSteps in
+    one Test.
     '''
 
     def __init__(self, name=None):
@@ -192,7 +192,7 @@ class ExecStep(Step):
             self.log.debug('Disabling perfmon because forks=%d > 1', self.forks)
             self.perfmon = False
         # Disable perfmon for transforms (Reco_tf enables it itself, Trig_reco_tf would need special handling
-        # depending on whether it runs athena or athenaHLT)
+        # depending on whether it runs athena or athenaHLT/EF)
         if self.type.endswith('_tf') and self.perfmon:
             self.log.debug('Disabling perfmon for the transform step type %s', self.type)
             self.perfmon = False
