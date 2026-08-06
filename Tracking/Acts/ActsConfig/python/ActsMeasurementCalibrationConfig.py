@@ -22,12 +22,6 @@ def ActsAnalogueClusteringToolCfg(flags,
     kwargs.setdefault("errorStrategy", PixelErrorStrategy.PITCH.value if flags.Acts.Clusters.UsePixelBroadErrors
                       else PixelErrorStrategy.CALIBRATED.value)
 
-    # For default configuration we set a lower cap on the calibrated covariance
-    # For FT we have inflated chi2 instead
-    # This applies to all tracking passes, main and secondaries alike
-    if not flags.Tracking.doITkFastTracking:
-        kwargs.setdefault("CalibratedCovarianceLowerBound", 0.75)
-
     if 'PixelLorentzAngleTool' not in kwargs:
         from SiLorentzAngleTool.ITkPixelLorentzAngleConfig import ITkPixelLorentzAngleToolCfg
         kwargs.setdefault("PixelLorentzAngleTool", acc.popToolsAndMerge(ITkPixelLorentzAngleToolCfg(flags)))
