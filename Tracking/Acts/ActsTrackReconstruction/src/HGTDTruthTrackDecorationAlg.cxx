@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration.
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration.
 */
 
 #include "src/HGTDTruthTrackDecorationAlg.h"
@@ -238,7 +238,7 @@ namespace ActsTrk{
   
   StatusCode HGTDTruthTrackDecorationAlg::isPrimaryExpected(
     const xAOD::TruthParticle* truthParticle,
-    const xAOD::UncalibratedMeasurementContainer measurementContainer,
+    const xAOD::UncalibratedMeasurementContainer & measurementContainer,
     const ActsTrk::MeasurementToTruthParticleAssociation* association_map,
     std::vector<char> &isPrimaryExistsVec) const{
 

@@ -160,7 +160,7 @@ StatusCode TrackFindingGNNAlg::initialize() {
           tbCfg, m_logger->cloneWithSuffix("GraphSeg"));
 
   m_gnnPipeline = std::make_unique<ActsPlugins::GnnPipeline>(
-      gc, std::vector{gnn}, tb, m_logger->cloneWithSuffix("Pipeline"));
+      gc, std::vector{std::move(gnn)}, tb, m_logger->cloneWithSuffix("Pipeline"));
 
   // Limit the total number of instances on the GPU to avoid out of memory
   m_gpuInstanceCount.emplace(m_maxGpuInstances.value());

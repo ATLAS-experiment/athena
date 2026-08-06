@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "SeedAnalysisAlg.h"
@@ -227,7 +227,7 @@ namespace ActsTrk {
     ATH_CHECK( fieldCondObj != nullptr );
 
     Acts::MagneticFieldContext magFieldContext(fieldCondObj);
-    auto geo_context = m_trackingGeometrySvc->getNominalContext();
+    const auto & geo_context = m_trackingGeometrySvc->getNominalContext();
 
 
     // utilities
@@ -263,7 +263,7 @@ namespace ActsTrk {
 
       if ( not optTrackParams.has_value() ) continue;
 
-      const auto param = optTrackParams.value();
+      const auto & param = optTrackParams.value();
       estimated_pt.push_back( param.transverseMomentum() );
       estimated_eta.push_back( -std::log( std::tan(0.5 * param.parameters()[Acts::eBoundTheta]) ) );
 

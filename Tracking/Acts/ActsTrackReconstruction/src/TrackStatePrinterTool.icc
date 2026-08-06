@@ -9,7 +9,7 @@
 // ACTS CORE
 #include "Acts/Geometry/TrackingGeometry.hpp"
 #include "Acts/EventData/BoundTrackParameters.hpp"
-
+#include "Acts/Utilities/detail/OstreamStateGuard.hpp"
 // Other
 #include <iostream>
 #include <sstream>
@@ -64,6 +64,7 @@ namespace ActsTrk
                                           track.parameters(),
                                           track.covariance(),
                                           track.particleHypothesis());
+    Acts::detail::OstreamStateGuard s(std::cout);
     std::cout << std::setw(5) << lastMeasurementIndex << ' '
               << std::left
               << std::setw(4) << "parm" << ' '
@@ -77,7 +78,7 @@ namespace ActsTrk
               << "#out=" << track.nOutliers()
               << ", #sh=" << track.nSharedHits()
               << (rejected ? " - REJECTED" : "")
-              << std::right << std::defaultfloat << std::setprecision(-1) << '\n';
+              << std::right <<  '\n';
 
     for (auto i = states.size(); i > 0;)
     {

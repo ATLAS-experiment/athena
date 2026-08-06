@@ -144,7 +144,7 @@ private:
     const DetectorContextHolder& detContext,
     const detail::TrackFindingMeasurements &measurements,
     const detail::MeasurementIndex& measurementIndex,
-    const Acts::BoundTrackParameters lastMeasurementStateParameters,
+    const Acts::BoundTrackParameters & lastMeasurementStateParameters,
     detail::RecoTrackContainer &tracksContainerTemp,
     detail::RecoTrackContainer &actsTracksContainer,
     EventStats& event_stat,
