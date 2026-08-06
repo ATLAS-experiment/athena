@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 from AthenaCommon.SystemOfUnits import GeV
 from AthenaMonitoringKernel.GenericMonitoringTool import GenericMonitoringTool
@@ -20,35 +20,19 @@ def createTrigEgammaPrecisionPhotonCaloIsoHypoAlg(name, sequenceOut, sequenceIn)
 class TrigEgammaPrecisionPhotonCaloIsoHypoToolConfig:
 
 
-  #Below are the configuration of the calorimeter isolation selections
-  # The dictionary key is the working point (icaloloose, icalo medium and icalotight
-  # the value is an array of three components where first component refers to a cut related to topoetcone20/pt, the second to topoetcone30/pt and third to topoetcone40/pt
-  # __caloIsolationCut is the cut on the variable topoetcone[x]/pt
-  # __caloEtconeCut is the cut on etcone[x]/pt Not used. But kept for backward compatibility
-  # __caloIsolationOffset is the offset applied to that cut
-  # so the selection is:
-  # 
-  
-  __caloIsolationCut = {
-                          None          : [None, None, None],
-                          'icaloloose'  : [0.1  , 999., 999. ],
-                          'icalomedium' : [0.075, 999., 999. ],
-                          'icalotight'  : [999. , 999., 0.03 ]
-                        }
+  # Below are the configuration of the calorimeter isolation selections
+  # The dictionary key is the working point (icaloloose, icalomedium and icalotight)
+  # The value is another dictionary specifying the corresponding cone sizes, pT shifts and isolation WPs.
+  #
+  # The isolation WPs have been updated for Run 4 as a result of ATR-31489.
+  # They correspond to efficiency of tight offline photons from H->yy with various isolation requirements.
 
-  __caloEtconeCut = {
-                          None          : [None, None, None],
-                          'icaloloose'  : [999., 999., 999.],
-                          'icalomedium' : [999., 999., 999.],
-                          'icalotight'  : [999., 999., 999.]
-                        }
-
-  __caloIsolationOffset = {
-                          None         : [None, None, None],
-                          'icaloloose' : [0.,0.,0.],
-                          'icalomedium': [0.,0.,0],
-                          'icalotight' : [0.,0.,2.45*GeV]
-                          }
+  __caloIsolationWPs = {
+      None          : { 'cone_size' : None, 'offset' : None,     'wp' : None  },
+      'icaloloose'  : { 'cone_size' :   20, 'offset' : 0.,       'wp' : 0.067 }, # 95% eff in offline photons with loose isolation
+      'icalomedium' : { 'cone_size' :   20, 'offset' : 0.,       'wp' : 0.053 }, # 90% eff in offline photons with loose isolation
+      'icalotight'  : { 'cone_size' :   40, 'offset' : 2.45*GeV, 'wp' : 0.063 }, # 95% eff in offline photons with tight isolation
+  }
 
 
   def __init__(self, name, monGroups, cpart, tool=None):
@@ -83,10 +67,9 @@ class TrigEgammaPrecisionPhotonCaloIsoHypoToolConfig:
     if self.isoInfo() == 'noiso':
         self.tool().AcceptAll = True
         return
-    self.tool().RelTopoEtConeCut = self.__caloIsolationCut[self.isoInfo()]
-    self.tool().RelEtConeCut = self.__caloEtconeCut[self.isoInfo()]
-    self.tool().Offset = self.__caloIsolationOffset[self.isoInfo()]
- 
+    self.tool().RelTopoEtConeCut = self.__caloIsolationWPs[self.isoInfo()]['wp']
+    self.tool().Offset = self.__caloIsolationWPs[self.isoInfo()]['offset']
+    self.tool().TopoEtConeSize = self.__caloIsolationWPs[self.isoInfo()]['cone_size']
 
 
 
@@ -96,13 +79,14 @@ class TrigEgammaPrecisionPhotonCaloIsoHypoToolConfig:
   def compile(self, flags):
 
     if self.isoInfo() != 'noiso':
-        if self.isoInfo() not in self.__caloIsolationCut.keys():
+        if self.isoInfo() not in self.__caloIsolationWPs.keys():
             self.__log.error('Isolation cut %s not defined!', self.isoInfo())
             
-        self.__log.debug('Configuring Isolation cut %s for [topoetcone20/et, topoetcone30/et, topoetcone40/et]', self.isoInfo())
+        self.__log.debug('Configuring Isolation cut %s for topoetcone%d/et',
+                         self.isoInfo(), self.__caloIsolationWPs[self.isoInfo()]['cone_size'])
         self.__log.debug('         with values = %s and offsets = %s', 
-                         str(self.__caloIsolationCut[self.isoInfo()]), 
-                         str(self.__caloIsolationOffset[self.isoInfo()]))
+                         str(self.__caloIsolationWPs[self.isoInfo()]['wp']),
+                         str(self.__caloIsolationWPs[self.isoInfo()]['offset']))
     else:
         self.__log.debug('Configuring Isolation to AcceptAll (not applying any cut)')
     self.isoCut()
@@ -137,7 +121,7 @@ class TrigEgammaPrecisionPhotonCaloIsoHypoToolConfig:
     if flags.Trigger.doValidationMonitoring:
       monTool.defineHistogram('etcone20',type='TH1F',path='EXPERT',title= "PrecisionPhotonCaloIso Hypo etcone20; etcone20;", xbins=50, xmin=0, xmax=5.0)
       monTool.defineHistogram('topoetcone20',type='TH1F',path='EXPERT',title= "PrecisionPhotonCaloIso Hypo; topoetcone20;", xbins=50, xmin=-10, xmax=10)
-      monTool.defineHistogram('reletcone20',type='TH1F',path='EXPERT',title= "PrecisionPhotonCaloIso Hypo etcone20/et; etcone20/et;", xbins=50, xmin=-0.5, xmax=0.5)
+      monTool.defineHistogram('relEtCone20',type='TH1F',path='EXPERT',title= "PrecisionPhotonCaloIso Hypo etcone20/et; etcone20/et;", xbins=50, xmin=-0.5, xmax=0.5)
       monTool.defineHistogram('reltopoetcone20',type='TH1F',path='EXPERT',title= "PrecisionPhotonCaloIso Hypo; topoetcone20/pt;", xbins=50, xmin=-0.5, xmax=0.5)
 
     self.tool().MonTool = monTool

@@ -3,6 +3,7 @@
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 from TriggerMenuMT.HLT.Egamma.TrigEgammaKeys import getTrigEgammaKeys
+from TriggerMenuMT.HLT.CommonSequences.FullScanDefs import em_clusters
 #logging
 from AthenaCommon.Logging import logging
 log = logging.getLogger(__name__)
@@ -12,7 +13,7 @@ def precisionPhotonCaloIsoVDVCfg(flags, name, InViewRoIs, ion=False):
     TrigEgammaKeys = getTrigEgammaKeys(flags, ion=ion)
     caloClusters = TrigEgammaKeys.precisionPhotonCaloClusterContainer
     dataObjects = [( 'xAOD::CaloClusterContainer' , 'StoreGateSvc+%s' % caloClusters ),
-                   ( 'xAOD::CaloClusterContainer' , 'StoreGateSvc+%s' % TrigEgammaKeys.precisionTopoClusterContainer), # this is for the calo isolation tool
+                   ( 'xAOD::CaloClusterContainer' , 'StoreGateSvc+%s' % em_clusters), # this is for the calo isolation tool
                    ( 'xAOD::PhotonContainer' , 'StoreGateSvc+%s' % TrigEgammaKeys.precisionPhotonContainer), # This is the Photon input container with non-isolated photons
                    ( 'CaloCellContainer' , 'StoreGateSvc+CaloCells' ),
                    ( 'CaloCellContainer' , 'StoreGateSvc+CaloCellsFS' ),
