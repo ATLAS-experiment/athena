@@ -248,6 +248,10 @@ def _createDefaultSubFlagsCaloRecGPU():
     flags.addFlag('xtalk3Eratio', lambda prevFlags: prevFlags.Calo.TopoCluster.xtalk3Eratio)
     flags.addFlag('xtalkEtaEratio', lambda prevFlags: prevFlags.Calo.TopoCluster.xtalkEtaEratio)
     flags.addFlag('xtalk2DEratio', lambda prevFlags: prevFlags.Calo.TopoCluster.xtalk2DEratio)
+
+    flags.addFlag('applyClusterTimingCut', lambda prevFlags: prevFlags.Calo.TopoCluster.applyClusterTimingCut)
+    flags.addFlag('clusterTimingCutLower', lambda prevFlags: prevFlags.Calo.TopoCluster.clusterTimingCutLower)
+    flags.addFlag('clusterTimingCutUpper', lambda prevFlags: prevFlags.Calo.TopoCluster.clusterTimingCutUpper)
     
     flags.addFlag('doTopoClusterLocalCalib', lambda prevFlags: prevFlags.Calo.TopoCluster.doTopoClusterLocalCalib)
     flags.addFlag('doCalibHitMoments', lambda prevFlags: prevFlags.Calo.TopoCluster.doCalibHitMoments)

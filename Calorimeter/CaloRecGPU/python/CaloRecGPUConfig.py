@@ -538,6 +538,10 @@ def GPUCaloTopoClusterCfg(flags, instantiateForTrigger, cellsname,
 
     if clustersname == "CaloTopoClusters" and doLCCalib:
         raise RuntimeError("Inconsistent arguments: clustersname must not be 'CaloTopoClusters' if doTopoClusterLocalCalib is True")
+
+    clustersname_final = clustersname
+    if flags.CaloRecGPU.ActiveConfig.applyClusterTimingCut:
+        clustersname = f"{clustersname}BeforeTimingCut"
     
     result = ComponentAccumulator()
     
@@ -649,7 +653,11 @@ def GPUCaloTopoClusterCfg(flags, instantiateForTrigger, cellsname,
     
     result.addEventAlgo(HybridClusterProcessor, primary=addAsPrimary)
 
-    if instantiateForTrigger or clustersname in flags.CaloRecGPU.ActiveConfig.skipWriteList:
+    if flags.CaloRecGPU.ActiveConfig.applyClusterTimingCut:
+        from CaloRec.CaloTopoClusterConfig import CaloClusterTimingFilterCfg
+        result.merge(CaloClusterTimingFilterCfg(flags, name = f"{clustersname}Filter", InputClusters = clustersname, OutputClusters = clustersname_final))
+
+    if instantiateForTrigger or clustersname_final in flags.CaloRecGPU.ActiveConfig.skipWriteList:
         # don't add these clusters to ESD and AOD
         return result
     
@@ -705,11 +713,11 @@ def GPUCaloTopoClusterCfg(flags, instantiateForTrigger, cellsname,
 
 
     from OutputStreamAthenaPool.OutputStreamConfig import addToAOD, addToESD
-    toESD = [f"xAOD::CaloClusterContainer#{clustersname}",
-             f"xAOD::CaloClusterAuxContainer#{clustersname}Aux.",
-             f"CaloClusterCellLinkContainer#{clustersname}_links"]
-    toAOD = [f"xAOD::CaloClusterContainer#{clustersname}",
-             f"CaloClusterCellLinkContainer#{clustersname}_links"]
+    toESD = [f"xAOD::CaloClusterContainer#{clustersname_final}",
+             f"xAOD::CaloClusterAuxContainer#{clustersname_final}Aux.",
+             f"CaloClusterCellLinkContainer#{clustersname_final}_links"]
+    toAOD = [f"xAOD::CaloClusterContainer#{clustersname_final}",
+             f"CaloClusterCellLinkContainer#{clustersname_final}_links"]
 
     AODMoments.append("CellLink") #Add data-link to cell-link container
     if flags.CaloRecGPU.ActiveConfig.addCalibrationHitDecoration: #Add calib hit deco if requried 
@@ -718,7 +726,7 @@ def GPUCaloTopoClusterCfg(flags, instantiateForTrigger, cellsname,
     if flags.CaloRecGPU.ActiveConfig.addCPData:
         AODMoments += ["ClusterWidthEta","ClusterWidthPhi"]
 
-    auxItems = f"xAOD::CaloClusterAuxContainer#{clustersname}Aux."
+    auxItems = f"xAOD::CaloClusterAuxContainer#{clustersname_final}Aux."
     auxItems+= ".".join(AODMoments)    
 
     toAOD.append(auxItems)
