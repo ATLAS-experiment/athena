@@ -16,6 +16,7 @@
 #include "FlavorTagDiscriminants/FTagGhostLeptonAssociationAlg.h"
 #include "FlavorTagDiscriminants/HitDecoratorAlg.h"
 #include "FlavorTagDiscriminants/JetHitAssociationAlg.h"
+#include "FlavorTagDiscriminants/TruthPVzRelativeToBeamspotAlg.h"
 #include "FlavorTagDiscriminants/JetLeptonDecayLabelAlg.h"
 #include "FlavorTagDiscriminants/CaloChargedFlowDecoratorAlg.h"
 #include "FlavorTagDiscriminants/JetCalibrationDecoratorAlg.h"
@@ -44,6 +45,7 @@ DECLARE_COMPONENT(FlavorTagDiscriminants::FTagGhostElectronAssociationAlg)
 DECLARE_COMPONENT(FlavorTagDiscriminants::FTagGhostMuonAssociationAlg)
 DECLARE_COMPONENT(FlavorTagDiscriminants::HitDecoratorAlg)
 DECLARE_COMPONENT(FlavorTagDiscriminants::JetHitAssociationAlg)
+DECLARE_COMPONENT(FlavorTagDiscriminants::TruthPVzRelativeToBeamspotAlg)
 DECLARE_COMPONENT(FlavorTagDiscriminants::JetLeptonDecayLabelAlg)
 DECLARE_COMPONENT(FlavorTagDiscriminants::CaloChargedFlowDecoratorAlg)
 DECLARE_COMPONENT(FlavorTagDiscriminants::JetCalibrationDecoratorAlg)

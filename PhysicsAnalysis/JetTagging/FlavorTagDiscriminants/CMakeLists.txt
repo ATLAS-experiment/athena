@@ -75,6 +75,7 @@ if (NOT XAOD_STANDALONE)
     src/PoorMansIpAugmenterAlg.cxx
     src/HitDecoratorAlg.cxx
     src/JetHitAssociationAlg.cxx
+    src/TruthPVzRelativeToBeamspotAlg.cxx
     src/TruthDecoratorHelpers.cxx
     src/TrackLeptonDecoratorAlg.cxx
     src/TruthParticleDecoratorAlg.cxx

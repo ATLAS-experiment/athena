@@ -252,7 +252,6 @@ def trigTauRecMergedCaloHitsCfg(
             jetContainer='HLT_TrigTauRecMerged_CaloMVAOnly',
             hitContainer='PixelClusters',
             hitAssociation=hits_decoration,
-            useWedgeSelection=True,
             dphiHitToJet=flags.Tracking.ActiveConfig.phiHalfWidth,
             detaHitToJet=flags.Tracking.ActiveConfig.etaHalfWidth,
             dzHitToVertex=180, # Upper bound, still ok if the RoI is smaller
