@@ -8,8 +8,7 @@
 #include <GaudiKernel/IIncidentSvc.h>
 
 #include <boost/core/typeinfo.hpp>
-#include <range/v3/to_container.hpp>
-#include <range/v3/view.hpp>
+#include <ranges>
 #include <string>
 
 #include "AthenaKernel/IEvtIdModifierSvc.h"
@@ -17,7 +16,6 @@
 #include "PersistentDataModel/AthenaAttributeList.h"
 
 using namespace std::literals;
-namespace rv = ranges::views;
 
 namespace {
 template <typename propType, typename T>
@@ -94,9 +92,8 @@ StatusCode SkipEventIdxSvc::initialize() {
                    << lst.size() / 6 << " entries.");
       std::string config_str{};
       auto config_str_iter = std::back_inserter(config_str);
-      modifier_evts =
-          lst | rv::chunk(6) |
-          rv::for_each([&config_str_iter](const auto& rec) {
+      modifier_evts.clear();
+      for (const auto rec : lst | std::views::chunk(6)) {
             const int mod_bitset = rec[5];
             const bool mod_run_num = mod_bitset & 1;
             const bool mod_evt_num = mod_bitset & (1 << 1);
@@ -113,12 +110,13 @@ StatusCode SkipEventIdxSvc::initialize() {
                            runNum, mod_run_num ? 'Y' : 'N', lbNum,
                            mod_lb_num ? 'Y' : 'N', evtNum,
                            mod_evt_num ? 'Y' : 'N', numEvts);
-            return ranges::yield_from(
-                rv::repeat_n(EvtId{static_cast<uint32_t>(runNum),
-                                   static_cast<uint32_t>(lbNum), evtNum},
-                             numEvts));
-          }) |
-          ranges::to<std::vector<EvtId>>;
+        const EvtId evt{static_cast<uint32_t>(runNum),
+                        static_cast<uint32_t>(lbNum), evtNum};
+        for ([[maybe_unused]] const std::uint64_t _ :
+             std::views::iota(std::uint64_t{0}, numEvts)) {
+          modifier_evts.push_back(evt);
+        }
+      }
       ATH_MSG_DEBUG(config_str);
     } catch (const std::bad_cast&) {
       ATH_MSG_ERROR("Wrong type for property of EvtIdModifierSvc.");

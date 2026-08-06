@@ -9,7 +9,7 @@
 #include <unistd.h>
 
 #include <boost/core/demangle.hpp>
-#include <range/v3/all.hpp>
+#include <ranges>
 
 #include <chrono>
 #include <format>
@@ -30,8 +30,7 @@
 #include "PersistentDataModel/AthenaAttributeList.h"
 
 using SubEvent = xAOD::EventInfo::SubEvent;
-namespace rv = ranges::views;
-// namespace ra = ranges::actions;
+namespace rv = std::views;
 
 inline std::string CLIDToString(const CLID& clid) {
   return boost::core::demangle(CLIDRegistry::CLIDToTypeinfo(clid)->name());
@@ -261,19 +260,11 @@ StatusCode PileUpMTAlg::execute(const EventContext& ctx) {
                    "HS ID: {}\n",
                    ctx.evt(), evtID.run_number(), evtID.lumi_block(),
                    evtID.event_number(), m_lowptMBSvc->get_hs_id(ctx));
-    auto bunch_pattern =
-        rv::closed_iota(m_earliestDeltaBC.value(), m_latestDeltaBC.value()) |
-        rv::transform(
-            [this](int bc) { return int(m_beamInt->normFactor(bc)); }) |
-#if RANGE_V3_VERSION >= 1200
-        rv::chunk_by(std::equal_to{}) |
-#else
-        rv::group_by(std::equal_to{}) |
-#endif
-        rv::transform([](const auto& rng) {
-          return std::format("{}{}", rng.size(), rng[0] == 0 ? 'E' : 'F');
-        }) |
-        ranges::to<std::vector<std::string>>;
+    auto bunch_pattern = (rv::iota(m_earliestDeltaBC.value(), m_latestDeltaBC.value() + 1)
+          | rv::transform([this](int bc) { return int(m_beamInt->normFactor(bc));})
+          | rv::chunk_by(std::equal_to{})
+          | rv::transform([](auto&& chunk) { return std::format("{}{}", std::ranges::distance(chunk), *chunk.begin() == 0 ? 'E' : 'F');}))
+          | std::ranges::to<std::vector<std::string>>();
     // Manual join using std::ostringstream as std::format does not support ranges
     std::string joined_pattern;
     for (size_t i = 0; i < bunch_pattern.size(); ++i) {

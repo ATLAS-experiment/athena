@@ -11,10 +11,10 @@
 #include <chrono>
 #include <cmath>
 #include <format>
+#include <iterator>
+#include <numeric>
 #include <random>
-#include <range/v3/algorithm/stable_sort.hpp>
-#include <range/v3/to_container.hpp>
-#include <range/v3/view.hpp>
+#include <ranges>
 #include <thread>
 
 #include "AthenaKernel/IAddressProvider.h"
@@ -23,7 +23,7 @@
 #include "SGTools/CurrentEventStore.h"
 #include "StoreGate/ActiveStoreSvc.h"
 
-namespace rv = ranges::views;
+namespace rv = std::views;
 
 inline std::string CLIDToString(const CLID& clid) {
   return boost::core::demangle(CLIDRegistry::CLIDToTypeinfo(clid)->name());
@@ -121,7 +121,7 @@ StatusCode BatchedMinbiasSvc::initialize() {
                                 ISkipEventIdxSvc::EvtIter begin,
                                 ISkipEventIdxSvc::EvtIter end) -> StatusCode {
     using namespace std::chrono_literals;
-    auto evts = ranges::make_subrange(begin, end);
+    auto evts = std::ranges::subrange(begin, end);
     ATH_MSG_INFO("Skipping " << end - begin << " HS events.");
     auto batches_all =
         evts | rv::transform([this](const ISkipEventIdxSvc::EvtId& evt) {
@@ -241,9 +241,9 @@ std::size_t BatchedMinbiasSvc::calcMBRequired(std::int64_t hs_id,
               good && num_mb_by_bunch[idx] > 0;  // filter out unfilled bunches
           return good;
         }) |
-        ranges::to<std::vector>;
+        std::ranges::to<std::vector<std::size_t>>();
     // sort by distance from central bunch
-    ranges::stable_sort(indices, std::greater{},
+    std::ranges::stable_sort(indices, std::greater{},
                         [center_bunch](std::size_t idx) {
                           return std::size_t(std::abs(int(idx) - center_bunch));
                         });
@@ -263,9 +263,12 @@ std::size_t BatchedMinbiasSvc::calcMBRequired(std::int64_t hs_id,
                              << mbBatchSize << ". Restricting to "
                              << mbBatchSize << " events!");
   }
-  index_array = rv::ints(0, int(mbBatchSize)) | rv::sample(num_mb, prng) |
-                ranges::to<std::vector<std::uint64_t>>;
-  ranges::shuffle(index_array, prng);
+  auto all_indices =
+      rv::iota(std::uint64_t{0}, mbBatchSize) | std::ranges::to<std::vector<std::uint64_t>>();
+  index_array.clear();
+  index_array.reserve(num_mb);
+  std::sample(all_indices.begin(), all_indices.end(), std::back_inserter(index_array), static_cast<std::size_t>(num_mb), prng);
+  std::ranges::shuffle(index_array, prng);
   ATH_MSG_DEBUG("HS ID " << hs_id << " uses " << num_mb << " events");
   // Disabled until C++ 23 range formatting can be used
   // if (m_HSBatchSize <= 1) {
