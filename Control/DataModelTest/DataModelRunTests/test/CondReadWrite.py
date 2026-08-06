@@ -110,7 +110,7 @@ iovdbsvc = cfg.getService ('IOVDbSvc')
 if args.condDB.startswith('crest'):
     iovdbsvc.Source='CREST'
     iovdbsvc.GlobalTag='TEST-HLT-CREST'
-    iovdbsvc.crestServer=cond_src
+    iovdbsvc.dbConnection=cond_src
 
 iovdbsvc.CacheAlign = 0  # VERY IMPORTANT to get unique queries for folder updates (see Savannah #81092)
 iovdbsvc.CacheRun = 0
