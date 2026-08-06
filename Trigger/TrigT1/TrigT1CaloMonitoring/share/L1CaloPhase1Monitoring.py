@@ -147,44 +147,7 @@ args.postConfig += [x[4:] for x in unknown_args if x.startswith("cfg.")]
 if any([not x.startswith("cfg.") for x in unknown_args]):
   raise KeyError("Unknown flags: " + " ".join([x for x in unknown_args if not x.startswith("cfg.")]))
 
-if len(args.postInclude):
-  # call setup methods if any exist in the postIncludes
-  from AthenaCommon.Configurable import ConfigurableCABehavior
-  with ConfigurableCABehavior():
-    from AthenaCommon.Utils.unixtools import FindFile
-    import ast
-
-    def load_function(file_path, function_name):
-      with open(file_path, "r", encoding="utf-8") as f:
-        source = f.read()
-      tree = ast.parse(source, filename=file_path)
-      for node in tree.body:
-        if isinstance(node, ast.FunctionDef) and node.name == function_name:
-          # Create a module containing only this function
-          mod = ast.Module(body=[node], type_ignores=[])
-          # Compile it
-          code = compile(mod, filename=file_path, mode="exec")
-          namespace = {}
-          # Execute only the function definition
-          exec(code, namespace)
-          return namespace[function_name]
-    for fn in args.postInclude:
-      name = FindFile( os.path.expanduser( os.path.expandvars( fn ) ), optionsPath, os.R_OK )
-      if not name:
-        name = FindFile( os.path.basename( fn ), optionsPath, os.R_OK )
-        if not name: raise RuntimeError( 'plugin file %s can not be found' % fn )
-      func = load_function(name,"setup")
-      if func:
-        func(flags)
-
-if not any([flags.Trigger.L1.doCalo,flags.Trigger.L1.doCaloInputs,flags.Trigger.L1.doeFex,flags.Trigger.L1.dojFex,flags.Trigger.L1.dogFex,flags.Trigger.L1.doTopo,flags.DQ.useTrigger]):
-  log.info("No steering flags specified, turning on all phase 1 systems (trex,efex,jfex,gfex,topo)")
-  flags.Trigger.L1.doCaloInputs = True # flag for saying if inputs should be decoded or not
-  flags.Trigger.L1.doCalo = True
-  flags.Trigger.L1.doeFex = True
-  flags.Trigger.L1.dojFex = True
-  flags.Trigger.L1.dogFex = True
-  flags.Trigger.L1.doTopo = True
+# before doing any postInclude interactions, do the file setup...
 
 # check input files
 if len(flags.Input.Files)>0:
@@ -217,11 +180,6 @@ if args.runNumber is not None:
     flags.Input.Files += glob(tryStr)
   log.info(" ".join(("Found",str(len(flags.Input.Files)),"files")))
 
-customMenuFile = ""
-if type(flags.Trigger.triggerConfig)==str and flags.Trigger.triggerConfig.startswith("FILE:"):
-  customMenuFile = flags.Trigger.triggerConfig.split(":",1)[-1]
-  flags.Trigger.triggerConfig="FILE"
-
 standalone = False
 # require at least 1 input file if running offline, unless running config-generating mode ....
 if not flags.Common.isOnline and len(flags.Input.Files)==0:
@@ -252,6 +210,54 @@ elif flags.Common.isOnline:
     import time
     log.info("Waiting 2 minutes for LATOME to get their databases in order")
     time.sleep(120)
+
+
+if len(args.postInclude):
+  # call setup methods if any exist in the postIncludes
+  from AthenaCommon.Configurable import ConfigurableCABehavior
+  with ConfigurableCABehavior():
+    from AthenaCommon.Utils.unixtools import FindFile
+    import ast
+
+    def load_function(file_path, function_name):
+      with open(file_path, "r", encoding="utf-8") as f:
+        source = f.read()
+      tree = ast.parse(source, filename=file_path)
+      for node in tree.body:
+        if isinstance(node, ast.FunctionDef) and node.name == function_name:
+          # Create a module containing only this function
+          mod = ast.Module(body=[node], type_ignores=[])
+          # Compile it
+          code = compile(mod, filename=file_path, mode="exec")
+          namespace = {}
+          # Execute only the function definition
+          exec(code, namespace)
+          return namespace[function_name]
+    for fn in args.postInclude:
+      name = FindFile( os.path.expanduser( os.path.expandvars( fn ) ), optionsPath, os.R_OK )
+      if not name:
+        name = FindFile( os.path.basename( fn ), optionsPath, os.R_OK )
+        if not name: raise RuntimeError( 'plugin file %s can not be found' % fn )
+      func = load_function(name,"setup")
+      if func:
+        func(flags)
+
+if len(args.postInclude)==0 and not any([flags.Trigger.L1.doCalo,flags.Trigger.L1.doCaloInputs,flags.Trigger.L1.doeFex,flags.Trigger.L1.dojFex,flags.Trigger.L1.dogFex,flags.Trigger.L1.doTopo,flags.DQ.useTrigger]):
+  log.info("No steering flags specified and no postInclude, turning on all phase 1 systems (trex,efex,jfex,gfex,topo)")
+  flags.Trigger.L1.doCaloInputs = True # flag for saying if inputs should be decoded or not
+  flags.Trigger.L1.doCalo = True
+  flags.Trigger.L1.doeFex = True
+  flags.Trigger.L1.dojFex = True
+  flags.Trigger.L1.dogFex = True
+  flags.Trigger.L1.doTopo = True
+
+
+customMenuFile = ""
+if type(flags.Trigger.triggerConfig)==str and flags.Trigger.triggerConfig.startswith("FILE:"):
+  customMenuFile = flags.Trigger.triggerConfig.split(":",1)[-1]
+  flags.Trigger.triggerConfig="FILE"
+
+
 
 # if running on an input file, change the DQ environment, which will allow debug tree creation from monitoring algs
 if len(flags.Input.Files)>0:
@@ -319,7 +325,7 @@ flags.lock()
 if flags.Exec.MaxEvents == 0: flags.dump(evaluate=True)
 
 # if nothing enabled, exit out here
-if not any([flags.Trigger.L1.doCaloInputs,flags.Trigger.L1.doCalo,flags.Trigger.L1.doeFex,flags.Trigger.L1.dojFex,flags.Trigger.L1.dogFex,flags.Trigger.L1.doTopo]):
+if len(args.postInclude)==0 and not any([flags.Trigger.L1.doCaloInputs,flags.Trigger.L1.doCalo,flags.Trigger.L1.doeFex,flags.Trigger.L1.dojFex,flags.Trigger.L1.dogFex,flags.Trigger.L1.doTopo]):
   log.fatal("You did not set any flags to specify what to run. ")
   log.fatal("Please set at least one of the flags in Trigger.L1.(doCaloInputs, doCalo, doeFex, dojFex, dogFex, doTopo) ")
   log.fatal("or use '--all' option to turn on everything (but that is slow)")

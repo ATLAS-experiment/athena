@@ -30,7 +30,7 @@ namespace GlobalSim {
 
     private:
         StringProperty m_fileName{this,"FileName","graph.dot","Output file"};
-        StringProperty m_topSequence{this,"SequenceNameFilter","GlobalSim","Regex of sequence names to include"};
+        StringProperty m_topSequence{this,"SequenceNameFilter","AthAlgSeq","Regex of sequence names to include"};
 
         ServiceHandle<IAlgResourcePool> m_algResourcePool{this,"AlgResourcePool","AlgResourcePool",
                                                           "Algorithm resource pool service."};
