@@ -1,12 +1,11 @@
 #!/bin/env python
 
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 import sys
 
 from PyCool import cool
-sys.path.append('/afs/cern.ch/user/a/atlcond/utils22')
-from CondUtilsLib.AtlCoolBKLib import resolveAlias
+
 
 
 def _resolveTagFaster(folder,tag):
@@ -23,10 +22,34 @@ def _resolveTagFaster(folder,tag):
     return folder.resolveTag(tag)
 
 
-def getCurrentFolderTag(dbname,folderName,ES=False):
-    currentTag,nextTag=None,None
+def getFolderTag(dbname: str, folderNames: str|list|tuple, globalTags: str|list|tuple):
+    dbSvc = cool.DatabaseSvcFactory.databaseService() 
+    db = dbSvc.openDatabase(dbname)
+    if isinstance(folderNames, str): folderNames = [folderNames]
+    if isinstance(globalTags, str): globalTags = [globalTags]
+    tags = []
+    for fn in folderNames:
+        f = db.getFolder(fn)
+        tags.append([])
+        for gt in globalTags:
+            try:
+                tags[-1].append(_resolveTagFaster(f, gt))
+            except Exception:
+                print(f"Warning: could not resolve {gt} for folder {fn} in db {dbname}")
+                tags[-1].append(None)
+    db.closeDatabase()
+    def _unnest_singles(x): return (x if isinstance(x, str) or x is None
+                                      else _unnest_singles(x[0]) if len(x)==1 
+                                      else tuple(_unnest_singles(y) for y in x))
+    return _unnest_singles(tags)
 
+
+def getCurrentFolderTag(dbname, folderName, ES=False, verbose=True):
+    currentTag,nextTag=None,None
     #1. Get current and next global tags using resolver class in ~atlcond
+    utils='/afs/cern.ch/user/a/atlcond/utils22'
+    if utils not in sys.path: sys.path.append(utils)
+    from CondUtilsLib.AtlCoolBKLib import resolveAlias
     resolver=resolveAlias()
     if(ES):
        currentGlobal=resolver.getCurrentES().replace("*","ST")
@@ -34,39 +57,15 @@ def getCurrentFolderTag(dbname,folderName,ES=False):
     else:   
        currentGlobal=resolver.getCurrent().replace("*","ST")
        nextGlobal=resolver.getNext().replace("*","ST")
-
-    print('currentGlobal: ',currentGlobal)
+    if verbose: print('currentGlobal: ',currentGlobal)
     #2. Open the DB to resolve this gobal tag for the given folder
-    dbSvc = cool.DatabaseSvcFactory.databaseService() 
-    db = dbSvc.openDatabase(dbname)
-    f=db.getFolder(folderName)
-    try:
-        currentTag=_resolveTagFaster(f,currentGlobal)
-    except Exception:
-        print('Warning: could not resolve ',currentGlobal,' in db: ',dbname)
-        if "DBR2" in dbname:
-           print('resolving for the global CONDBR2-BLKPA-2022-10')
-           tmpGlobal='CONDBR2-BLKPA-2022-10'
-        else:
-           print('resolving for the global COMCOND-BLKPA-RUN1-06')
-           tmpGlobal='COMCOND-BLKPA-RUN1-06'
-
-        try:
-           currentTag=_resolveTagFaster(f,tmpGlobal)
-        except Exception:
-           print('Also not working, giving up')
-           pass
-        pass
-
-    if len(nextGlobal)>2:
-        # NEXT exists, try to resolve it
-        try:
-            nextTag=_resolveTagFaster(f,nextGlobal)
-        except Exception:
-            pass
-        pass
-    
-    db.closeDatabase()
+    currentTag, nextTag = getFolderTag(dbname, folderName, (currentGlobal, nextGlobal))
+    if currentTag is None:
+        tmpGlobal="CONDBR2-BLKPA-2022-10" if "DBR2" in dbname else "COMCOND-BLKPA-RUN1-06"
+        if verbose: print(f"resolving for the global {tmpGlobal}")
+        currentTag = getFolderTag(dbname, folderName, tmpGlobal)
+        if currentTag is None:
+            if verbose: print('Also not working, giving up')
     return (currentTag,nextTag)
 
 
