@@ -8,7 +8,7 @@ import os
 import coral
 import json
 import pandas as pd
-from statistics import mean,median
+from statistics import median
 from coldpie import cool
 import hashlib
 from itertools import chain
@@ -84,7 +84,7 @@ for dbName in args.db:
             if folderName not in summaries: summaries[folderName] = {}
             try:
                 ftag = folder.resolveTag(globalTag) if globalTag!="sqlite" else ""
-            except:
+            except BaseException:
                 ftag = None
             if ftag is not None:
                 print(folder.fullPath(),":",ftag)
