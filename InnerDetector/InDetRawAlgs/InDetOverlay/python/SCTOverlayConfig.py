@@ -92,8 +92,11 @@ def SCTTruthOverlayCfg(flags, name="SCTSDOOverlay", **kwargs):
     """Return a ComponentAccumulator for the SCT SDO overlay algorithm"""
     acc = ComponentAccumulator()
 
-    # We do not need background SCT SDOs
-    kwargs.setdefault("BkgInputKey", "")
+    # We do not need background SCT SDOs for data overlay
+    if flags.Overlay.DataOverlay:
+        kwargs.setdefault("BkgInputKey", "")
+    else:
+        kwargs.setdefault("BkgInputKey", flags.Overlay.BkgPrefix + "SCT_SDO_Map")
 
     kwargs.setdefault("SignalInputKey",
                       flags.Overlay.SigPrefix + "SCT_SDO_Map")
