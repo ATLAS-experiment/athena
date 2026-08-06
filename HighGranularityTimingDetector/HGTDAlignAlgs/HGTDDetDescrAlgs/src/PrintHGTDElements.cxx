@@ -108,7 +108,9 @@ StatusCode PrintHGTDElements::execute(const EventContext& ctx)
     const auto* elements = handle.retrieve();
 
     ATH_MSG_DEBUG("DetectorElementCollection pointer = " << elements);
-    ATH_MSG_DEGUG("First element pointer = " << (*elements)[0]);
+    //ATH_MSG_DEBUG("First element pointer = " << (*elements)[0]);
+    ATH_MSG_DEBUG("DetectorElementCollection pointer = "
+                << static_cast<const void*>(elements));
 
     if (!handle.isValid() || elements == nullptr) {
 
@@ -202,7 +204,8 @@ StatusCode PrintHGTDElements::execute(const EventContext& ctx)
                         << geoNominal.translation().z() << ")");
             }
 
-        const Amg::Transform3D& tr = element->moduleTransform();
+        //const Amg::Transform3D& tr = element->moduleTransform();
+        const Amg::Transform3D& tr = element->transform();
         const Amg::Vector3D& T = tr.translation();
         const Amg::RotationMatrix3D& R = tr.rotation();
 
