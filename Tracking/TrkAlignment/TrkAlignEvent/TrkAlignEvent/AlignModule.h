@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRKALIGNEVENT_ALIGNMODULE_H
@@ -15,6 +15,7 @@
 
 #include <vector>
 #include <string>
+#include <string_view>
 
 /**
    @file AlignModule.h
@@ -68,7 +69,7 @@ namespace Trk {
     /** constructor creates MsgStream with output level of parent tool and AlignModule for name.  Transform is global to align frame transform */
     AlignModule(const AlgTool* algtool, 
                 const Amg::Transform3D& globalToAlignXform=Amg::Transform3D::Identity(),
-                const std::string& name="");
+                std::string_view name="");
 
     AlignModule() = delete; // don't allow constructor without IMessageSvc
     

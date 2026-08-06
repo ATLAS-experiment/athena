@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "AthenaBaseComps/AthAlgTool.h"
@@ -22,7 +22,7 @@ namespace Trk {
   //________________________________________________________________________
   AlignModule::AlignModule(const AlgTool* algtool, 
                            const Amg::Transform3D& transform,
-                           const std::string& name)
+                           std::string_view name)
     : AthMessaging("AlignModule")
     , m_detelements(AlignModule::NDetectorTypes,(DetElementCollection*)nullptr)
     , m_detIdentifiers(AlignModule::NDetectorTypes,(IdentifierCollection*)nullptr)

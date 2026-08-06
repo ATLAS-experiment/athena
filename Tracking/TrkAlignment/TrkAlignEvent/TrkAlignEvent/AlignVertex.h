@@ -1,24 +1,21 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRKALIGNEVENT_ALIGNVERTEX_H
 #define TRKALIGNEVENT_ALIGNVERTEX_H
 
-#include "GaudiKernel/MsgStream.h"
+
 #include "AthenaBaseComps/AthAlgTool.h"
 
 #include "TrkTrack/Track.h"
-#include "VxVertex/VxCandidate.h"
 #include "xAODTracking/Vertex.h"
 #include "TrkAlignEvent/AlignTrack.h"
 
-#include "TrkEventPrimitives/ParticleHypothesis.h"
-
 #include "AthContainers/DataVector.h"
 #include <vector>
-#include <fstream>
 
+class MsgStream;
 /**
    @file AlignVertex.h
    @class AlignVertex
@@ -32,8 +29,6 @@
 
 namespace Trk {
 
-  typedef std::vector<AlignTrack**> AlignTrackCollection;
-  typedef std::vector<AlignTrack**>::const_iterator AlignTrackIt;
   typedef std::pair<const AlignModule*, std::vector<Amg::VectorX> > AlignModuleVertexDerivatives;
   
   class AlignVertex {
@@ -52,8 +47,9 @@ namespace Trk {
     /** default constructor  */
     AlignVertex();
 
-    /** constructor takes the original vertex candidate */
+    /** constructor takes the original vertex candidate  but doesn't own it*/
     AlignVertex(const xAOD::Vertex* originalVertex);
+   
     
     /** copy constructor **/
     AlignVertex( const AlignVertex & rhs);
@@ -64,15 +60,6 @@ namespace Trk {
     /** destructor */
     ~AlignVertex();
 
-
-    /** returns collection of alignTracks */
-    const AlignTrackCollection* alignTrackCollection() const;
-
-    /** retrieve iterator pointer to first element in collection */
-    AlignTrackCollection::const_iterator firstATrack() const;
-
-    /** returns iterator pointer to last element in collection */
-    AlignTrackCollection::const_iterator lastATrack() const;
 
     /** retrieve pointer to original vertex and its position*/
     const xAOD::Vertex * originalVertex() const { return  m_original; }
@@ -95,7 +82,6 @@ namespace Trk {
     const std::vector<AlignModuleVertexDerivatives>* derivatives() const { return m_derivatives; }
     void setDerivatives(std::vector<AlignModuleVertexDerivatives>* vec) { m_derivatives=vec; }
     void addDerivatives(std::vector<AlignModuleVertexDerivatives>* vec);
-
 
     /** dump align vertex information */
     void dump(MsgStream& msg) ;
@@ -132,7 +118,6 @@ namespace Trk {
     const xAOD::Vertex*    m_original;
     Amg::Vector3D*         m_originalPosition;
 
-    AlignTrackCollection   m_alignTracks;
 
     Amg::Vector3D*         m_position;
     AmgSymMatrix(3) *      m_covariance;

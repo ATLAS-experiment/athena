@@ -1,10 +1,10 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // Original Author: Anthony Morley  (15Jan2007)
 // MKU (15Jan2007)
-// PBdR (17Apr2007) interface ~identcal to AlSymMat
+// PBdR (17Apr2007) interface ~identical to AlSymMat
 
 #include "GaudiKernel/StatusCode.h"
 #include "EventPrimitives/EventPrimitives.h"
@@ -531,13 +531,14 @@ void AlSpaMat::RemoveDoF(int index, int nelem)
 int AlSpaMat::RemoveCollsRows(std::vector<int> indices)
 {
   int n = indices.size();
+  if (n>m_size) [[unlikely]]{
+    throw std::invalid_argument( "AlSpaMat::RemoveCollsRows: Vector of indices larger than matrix size." );
+  }
+  
   if (n==0) {
     return m_size;
   }
-  if (n>m_size) {
-    throw std::invalid_argument( "AlSpaMat::RemoveCollsRows: Vector of indices larger than matrix size." );
-    return m_size;
-  }
+  
 
   // first sort the list of indices descending
   // maybe not the fastest way to do that but it works
@@ -696,6 +697,8 @@ StatusCode AlSpaMat::Write(const std::string &filename, bool binary,
     melem = p.second;
     elem(p.first, ii, jj);   i=ii;  j=jj;     // just a type conversion
     if(binary) {
+      //horrible, but deliberate, pointer as array
+      //coverity[ARRAY_VS_SINGLETON]
       outmat.write(charAddress((i)), sizeof (i));
       outmat.write(charAddress((j)), sizeof (j));
       outmat.write(charAddress((melem)), sizeof (melem));
