@@ -922,7 +922,7 @@ StatusCode IOVDbSvc::setupFolders() {
     Crest::LogLevel cLevel = static_cast<Crest::LogLevel>(mLevel);
     Crest::Logger::setLogLevel(cLevel);	  
     m_cresttagmap.clear();
-    m_cresttagmap = CoralCrestManager::getGlobalTagMap(m_par_crestServer,m_par_globalTag);
+    m_cresttagmap = CoralCrestManager::getGlobalTagMap(m_par_defaultConnection,m_par_globalTag);
     if (m_cresttagmap.empty()) {
       ATH_MSG_FATAL("Got empty tag-map. GlobalTag "<< m_par_globalTag.value() << " does not exist.");
       return StatusCode::FAILURE;
@@ -1042,7 +1042,7 @@ StatusCode IOVDbSvc::setupFolders() {
     
     auto folder=std::make_unique<IOVDbFolder>(conn,folderdata,msg(),&(*m_h_clidSvc), &(*m_h_metaDataTool),
                                               m_par_checklock, m_outputToFile, m_par_source,
-                                              m_par_crestServer, crestTag, m_crestCoolToFile);
+                                              m_par_defaultConnection, crestTag, m_crestCoolToFile);
     const std::string& key=folder->key();
     if (m_foldermap.find(key)==m_foldermap.end()) {  //This check is too weak. For POOL-based folders, the SG key is in the folder description (not known at this point).
       m_foldermap[key]=std::move(folder);

@@ -31,7 +31,6 @@ def IOVDbSvcCfg(flags, **kwargs):
 
     kwargs.setdefault('OnlineMode', flags.Common.isOnline)
     kwargs.setdefault('dbConnection', flags.IOVDb.DBConnection)
-    kwargs.setdefault('crestServer', flags.IOVDb.CrestServer)
     # setup knowledge of dbinstance in IOVDbSvc, for global tag x-check
     kwargs.setdefault('DBInstance', flags.IOVDb.DatabaseInstance)
 
@@ -375,7 +374,7 @@ def getCrestDirContent(flags):
         localtags=set(localdb.find_tags())
     
         try:
-            proddb=chai.Database("crest:"+flags.IOVDb.CrestServer+"/api-v6.0")
+            proddb=chai.Database("crest:"+flags.IOVDb.DBConnection)
         except Exception as e:
             msg.error("Failed to connect to crest server %s",flags.IOVDb.CrestServer)
             raise e
