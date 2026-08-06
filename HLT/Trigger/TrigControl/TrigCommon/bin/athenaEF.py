@@ -1226,11 +1226,13 @@ def main():
       args.concurrent_events = args.threads
 
    # Update args and set athena flags
+   from AthenaConfiguration.AllConfigFlags import initConfigFlags
    from TrigPSC import PscConfig
-   from TrigPSC.PscDefaultFlags import defaultOnlineFlags
+   from TrigServices.TriggerUnixStandardSetup import setDefaultOnlineFlags
    
-   # Get flags with online defaults (same as athenaHLT)
-   flags = defaultOnlineFlags()
+   # Create flags with online defaults
+   flags = initConfigFlags()
+   setDefaultOnlineFlags(flags)
 
    # set MessageSvc OutputLevel
    from AthenaCommon import Constants

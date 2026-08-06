@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -212,8 +212,11 @@ def TrigServicesCfg(flags):
 
 
 if __name__=="__main__":
-   from TrigPSC.PscDefaultFlags import defaultOnlineFlags
-   flags = defaultOnlineFlags()
+   from AthenaConfiguration.AllConfigFlags import initConfigFlags
+   from TrigServices.TriggerUnixStandardSetup import setDefaultOnlineFlags
+
+   flags = initConfigFlags()
+   setDefaultOnlineFlags(flags)
    flags.lock()
 
    cfg = ComponentAccumulator()
