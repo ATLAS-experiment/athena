@@ -313,7 +313,8 @@ class ATLAS_NOT_THREAD_SAFE ZDCFitExpFermiVariableTausInduct : public ZDCFitWrap
 protected:
   bool m_fixTau1{false};
   bool m_fixTau2{false};
-
+  bool m_fixDelta{false};
+  
   float m_tau1{0};
   float m_tau2{0};
 
@@ -336,6 +337,12 @@ public:
   virtual void DoInitialize(float initialAmp, float initialT0, float ampMin, float ampMax) override;
   virtual void SetT0FitLimits(float tMin, float tMax) override;
 
+  void FixDelta(float value)
+  {
+    m_fixDelta = true;
+    ZDCFitWrapper::GetWrapperTF1()->FixParameter(9, value);
+  }
+  
   virtual float GetAmplitude() const override {
     if (finalized()) return m_funcMax;
     return GetWrapperTF1()->Eval(getInductFuncTimeMax(GetWrapperTF1()));
