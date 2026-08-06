@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "src/IterativePriVtxFinderTool.h"
@@ -53,7 +53,7 @@ ActsTrk::IterativePriVtxFinderTool::initialize()
   std::shared_ptr<const Acts::TrackingGeometry> trackingGeometry
     = m_trackingGeometrySvc->trackingGeometry();
 
-  Acts::Navigator navigator( Acts::Navigator::Config{ trackingGeometry },
+  Acts::Navigator navigator( Acts::Navigator::Config{ std::move(trackingGeometry) },
 			     logger().cloneWithSuffix("Navigator"));
 
   m_bField = std::make_shared<ATLASMagneticFieldWrapper>();
@@ -97,7 +97,7 @@ ActsTrk::IterativePriVtxFinderTool::initialize()
   // Iterative Vertex Finder setup
   VertexFinder::Config finderConfig(std::move(fitter), 
                                     std::move(seedFinder), 
-                                    ipEst);
+                                    std::move(ipEst));
   finderConfig.significanceCutSeeding = m_significanceCutSeeding;
   finderConfig.maximumChi2cutForSeeding = m_maximumChi2cutForSeeding;
   finderConfig.maxVertices = m_maxVertices;
@@ -332,7 +332,7 @@ for(const auto& trk : allTracks){
       trkAtVtx.setTrackQuality(Trk::FitQuality(trk.chi2Track, trk.ndf));
       trkAtVtx.setVtxCompatibility(trk.vertexCompatibility);
       trkAtVtx.setWeight(trk.trackWeight);
-      trkAtVtxVec->push_back(trkAtVtx);
+      trkAtVtxVec->push_back(std::move(trkAtVtx));
 
       const Trk::LinkToXAODTrackParticle* linkToXAODTP =
         dynamic_cast<const Trk::LinkToXAODTrackParticle*>(originalParams->trackLink());
