@@ -4,6 +4,7 @@
 
 #include "src/TrackStatePrinterTool.h"
 
+
 // Athena
 #include "TrkParameters/TrackParameters.h"
 #include "InDetReadoutGeometry/SiDetectorElement.h"
@@ -19,6 +20,7 @@
 #include "Acts/Surfaces/SurfaceBounds.hpp"
 #include "Acts/Surfaces/DiscSurface.hpp"
 #include "Acts/EventData/TransformationHelpers.hpp"
+#include "Acts/Utilities/detail/OstreamStateGuard.hpp"
 
 // PACKAGE
 #include "ActsGeometry/ActsDetectorElement.h"
@@ -31,6 +33,8 @@
 #include <vector>
 #include <iostream>
 #include <sstream>
+
+using Acts::detail::OstreamStateGuard;
 
 namespace ActsTrk
 {
@@ -116,6 +120,7 @@ namespace ActsTrk
 
   static void printHeader(int type, bool extra = false)
   {
+    OstreamStateGuard s(std::cout);
     std::cout << std::left
               << std::setw(5) << "Index" << ' '
               << std::setw(4) << "Type" << ' '
@@ -176,12 +181,13 @@ namespace ActsTrk
   static void
   printVec3(const Acts::Vector3 &p)
   {
+    OstreamStateGuard s(std::cout);
     std::cout << std::fixed << ' '
               << std::setw(9) << std::setprecision(3) << p.head<2>().norm() << ' '
 	      << std::setw(9) << std::setprecision(3) << p[2] << ' '
               << std::setw(9) << std::setprecision(3) << std::atan2(p[1], p[0]) / Acts::UnitConstants::degree << ' '
-              << std::setw(9) << std::setprecision(5) << std::atanh(p[2] / p.norm())
-              << std::defaultfloat << std::setprecision(-1);
+              << std::setw(9) << std::setprecision(5) << std::atanh(p[2] / p.norm());
+              
   }
 
   static void
@@ -200,12 +206,13 @@ namespace ActsTrk
   static void
   printVec2(const Acts::Vector2 &p, const char *estimated = nullptr)
   {
+    OstreamStateGuard s(std::cout);
     const char e0 = estimated ? estimated[0] : ' ';
     const char *e1 = estimated ? estimated + 1 : "";
     std::cout << std::fixed << ' '
               << std::setw(10) << std::setprecision(4) << p[0] << e0
-              << std::setw(10) << std::setprecision(4) << p[1] << e1
-              << std::defaultfloat << std::setprecision(-1);
+              << std::setw(10) << std::setprecision(4) << p[1] << e1;
+              
   }
 
   static void

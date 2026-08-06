@@ -373,7 +373,7 @@ bool HGTDTrackExtensionAlg::findExtension(
   const DetectorContextHolder& detContext,
   const detail::TrackFindingMeasurements &measurements,
   const detail::MeasurementIndex& measurementIndex,
-  const Acts::BoundTrackParameters initialParameters,
+  const Acts::BoundTrackParameters & initialParameters,
   detail::RecoTrackContainer &tracksContainerTemp,
   detail::RecoTrackContainer &actsTracksContainer,
   EventStats &event_stat,

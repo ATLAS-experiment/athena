@@ -87,11 +87,11 @@ namespace ActsTrk {
     auto trackingGeometry = m_trackingGeometrySvc->trackingGeometry();
 
     detail::Stepper stepper(std::move(magneticField));
-    detail::Navigator::Config config{trackingGeometry};
+    detail::Navigator::Config config{std::move(trackingGeometry)};
     config.resolvePassive = false;
     config.resolveMaterial = true;
     config.resolveSensitive = true;
-    detail::Navigator navigator(config, logger().cloneWithSuffix("Navigator"));
+    detail::Navigator navigator(std::move(config), logger().cloneWithSuffix("Navigator"));
     detail::Propagator propagator(std::move(stepper), std::move(navigator), logger().cloneWithSuffix("Prop"));
 
     // Using the CKF propagator as extrapolator
