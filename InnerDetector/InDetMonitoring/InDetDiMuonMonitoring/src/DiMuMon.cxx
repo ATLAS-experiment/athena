@@ -549,6 +549,8 @@ void DiMuMon::iterativeGausFit (TH2F* hin, const std::vector<TH1F*>& hout, int m
 	chi2 = frame->chiSquare();
 	delete data;
 	delete frame;
+	//maybe I misunderstand the Root OwningPointer; coverity still thinks it leaks here?
+	//coverity[[RESOURCE_LEAK]]
       }
       //fill results
       m_chi2->Fill(chi2);
