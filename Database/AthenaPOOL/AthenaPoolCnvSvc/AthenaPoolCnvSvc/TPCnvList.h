@@ -65,7 +65,7 @@ public:
 
 private:
   /// List of TP converter instances, wrapped by @c TPCnvElt.
-  list_t m_list;
+  list_t m_list{};
 };
 
 

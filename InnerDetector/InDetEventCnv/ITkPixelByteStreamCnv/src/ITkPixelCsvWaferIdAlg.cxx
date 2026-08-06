@@ -713,7 +713,7 @@ std::bitset<32> ITkPixelCsvWaferIdAlg::subDetID(int barrel_endcap, int layer_dis
 }
 
 
-const StatusCode ITkPixelCsvWaferIdAlg::sanityCheck(std::string s, bool legacy) const {
+const StatusCode ITkPixelCsvWaferIdAlg::sanityCheck(const std::string & s, bool legacy) const {
 
     std::ifstream fcheck(s);
     if (!fcheck.good()) {
@@ -857,7 +857,7 @@ const StatusCode ITkPixelCsvWaferIdAlg::sanityCheck(std::string s, bool legacy) 
 
 
 
-void ITkPixelCsvWaferIdAlg::bitcheck(std::bitset<32> b, uint32_t lsb_lim, uint32_t msb_lim , const std::string& s) const {
+void ITkPixelCsvWaferIdAlg::bitcheck(std::bitset<32> b, uint32_t lsb_lim, uint32_t msb_lim , std::string_view s) const {
 
     uint32_t x = static_cast<uint32_t> (b.to_ulong());
     if(x!=0){
