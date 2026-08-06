@@ -120,9 +120,9 @@ unset(XAOD_ACCESS_LIB)
 set(FTAG_INPUT_RUN3_DAOD /cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/ASG/DAOD_PHYS/p6491/mc23_13p6TeV.601229.PhPy8EG_A14_ttbar_hdamp258p75_SingleLep.deriv.DAOD_PHYS.e8514_e8528_s4162_s4114_r15540_r15516_p6491/DAOD_PHYS.41633384._000880.pool.root.1)
 set(FTAG_INPUT_RUN2_DAOD /cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/ASG/DAOD_PHYS/p6490/mc20_13TeV.410470.PhPy8EG_A14_ttbar_hdamp258p75_nonallhad.deriv.DAOD_PHYS.e6337_s3681_r13167_r13146_p6490/DAOD_PHYS.41651753._000001.pool.root.1)
 set(FTAG_LATEST_CDI_RUN2_PCBT xAODBTaggingEfficiency/13TeV/MC20_2025-06-17_GN2v01_v4.root)
-set(FTAG_LATEST_CDI_RUN2_PCFT xAODBTaggingEfficiency/13TeV/MC20_2025-06-17_GN2v01_v4.root)
+set(FTAG_LATEST_CDI_RUN2_PCFT dev/xAODBTaggingEfficiency/13TeV/MC20_2026-08-04_GN3EPCLV01_GN3PflowMuonsV00_GN2v01_v1_noSF.root)
 set(FTAG_LATEST_CDI_RUN3_PCBT xAODBTaggingEfficiency/13p6TeV/MC23_2026_05_13_GN2v01_v0.root)
-set(FTAG_LATEST_CDI_RUN3_PCFT xAODBTaggingEfficiency/13p6TeV/MC23_2026_05_13_GN2v01_v0.root)
+set(FTAG_LATEST_CDI_RUN3_PCFT dev/xAODBTaggingEfficiency/13p6TeV/MC23_2026-08-04_GN3EPCLV01_GN3PflowMuonsV00_GN2v01_v1_noSF.root)
 set(FTAG_XBB_LATEST_JSON xAODBTaggingEfficiency/13And13p6TeV/MC20And23_2025-03-17_GN2Xv01-noSF_v1.json)
 
 # Test for Athena, AthAnalysis and AnalysisBase
