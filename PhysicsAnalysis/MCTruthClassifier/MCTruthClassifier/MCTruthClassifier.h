@@ -74,7 +74,6 @@ public:
     declareProperty("partExtrConeEta", m_partExtrConeEta = 0.2);
     declareProperty("phtClasConePhi", m_phtClasConePhi = 0.05);
     declareProperty("phtClasConeEta", m_phtClasConeEta = 0.025);
-    declareProperty("useCaching", m_useCaching = true);
     declareProperty("phtdRtoTrCut", m_phtdRtoTrCut = 0.1);
     declareProperty("fwrdEledRtoTrCut", m_fwrdEledRtoTrCut = 0.15);
     declareProperty("ROICone", m_ROICone = false);
@@ -190,11 +189,6 @@ private:
                      double& dRmatch,
                      bool& isNarrowCone,
                      const CaloDetDescrManager& caloDDMgr) const;
-
-#endif
-
-#ifndef GENERATIONBASE
-  void findJetConstituents(const xAOD::Jet*, std::set<const xAOD::TruthParticle*>& constituents, bool DR) const;
 #endif
 
   /* Data members*/
@@ -212,7 +206,6 @@ private:
   float m_FwdElectronTruthExtrEtaWindowCut;
   float m_partExtrConeEta;
   float m_partExtrConePhi;
-  bool m_useCaching;
   float m_phtClasConePhi;
   float m_phtClasConeEta;
   float m_phtdRtoTrCut;

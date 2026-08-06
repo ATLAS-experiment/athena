@@ -138,7 +138,34 @@ MCTruthClassifier::particleTruthClassifier(const xAOD::Jet* jet, bool DR, MCTrut
   if (!jet) return std::make_pair(parttype, partorig);
   allJetMothers.clear();
   constituents.clear();
-  findJetConstituents(jet, constituents, DR);
+  if (DR) {
+    // use a DR matching scheme (default)
+    // retrieve collection and get a pointer
+    SG::ReadHandle<xAOD::TruthParticleContainer> truthParticleContainerReadHandle(m_truthParticleContainerKey);
+
+    if (!truthParticleContainerReadHandle.isValid()) {
+      ATH_MSG_WARNING(" Invalid ReadHandle for xAOD::TruthParticleContainer with key: " << truthParticleContainerReadHandle.key());
+     
+    } else {
+    ATH_MSG_DEBUG("xAODTruthParticleContainer with key  " << truthParticleContainerReadHandle.key() << " has valid ReadHandle ");
+    // find the matching truth particles
+    for (const auto *const thePart : *truthParticleContainerReadHandle) {
+      // match truth particles to the jet
+      if (MC::isStable(thePart) && thePart->p4().DeltaR(jet->p4()) < m_jetPartDRMatch) {
+        constituents.insert(thePart);
+      }
+    }
+   }
+  }
+  else {
+    xAOD::JetConstituentVector vec = jet->getConstituents();
+    for (const auto *particle0 : vec) {
+      const xAOD::TruthParticle* thePart = dynamic_cast<const xAOD::TruthParticle*>(particle0->rawConstituent());
+      if (MC::isStable(thePart)) {
+        constituents.insert(thePart);
+      }
+    }
+  }
   // AV: Jet type is the type of hadron with "heaviest" flavour among the jet constituents.
   // AV: No hadrons in the jet -- the flavour is unknown.
   // AV: The algorithm will fail on 4/5 quark hadrons and probably on nonBSM hadrons. To be fixed.
@@ -269,39 +296,6 @@ MCTruthClassifier::getGenPart(const xAOD::TrackParticle* trk, MCTruthPartClassif
   }
   ATH_MSG_DEBUG("getGenPart  succeeded ");
   return (theGenParticle);
-}
-
-void MCTruthClassifier::findJetConstituents(const xAOD::Jet* jet,
-                                       std::set<const xAOD::TruthParticle*>& constituents,
-                                       bool DR) const
-{
-  if (DR) {
-    // use a DR matching scheme (default)
-    // retrieve collection and get a pointer
-    SG::ReadHandle<xAOD::TruthParticleContainer> truthParticleContainerReadHandle(m_truthParticleContainerKey);
-
-    if (!truthParticleContainerReadHandle.isValid()) {
-      ATH_MSG_WARNING(" Invalid ReadHandle for xAOD::TruthParticleContainer with key: " << truthParticleContainerReadHandle.key());
-      return;
-    }
-    ATH_MSG_DEBUG("xAODTruthParticleContainer with key  " << truthParticleContainerReadHandle.key() << " has valid ReadHandle ");
-    // find the matching truth particles
-    for (const auto *const thePart : *truthParticleContainerReadHandle) {
-      // match truth particles to the jet
-      if (MC::isStable(thePart) && thePart->p4().DeltaR(jet->p4()) < m_jetPartDRMatch) {
-        constituents.insert(thePart);
-      }
-    }
-  }
-  else {
-    xAOD::JetConstituentVector vec = jet->getConstituents();
-    for (const auto *particle0 : vec) {
-      const xAOD::TruthParticle* thePart = dynamic_cast<const xAOD::TruthParticle*>(particle0->rawConstituent());
-      if (MC::isStable(thePart)) {
-        constituents.insert(thePart);
-      }
-    }
-  }
 }
 
 #endif
