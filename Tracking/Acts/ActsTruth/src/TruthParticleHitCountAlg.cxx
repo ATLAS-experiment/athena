@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TruthParticleHitCountAlg.h"
@@ -132,6 +132,7 @@ namespace ActsTrk
              const xAOD::TruthParticle *mother_particle = m_elasticDecayUtil.getMother(*truth_particle, m_maxEnergyLoss.value());
              if (mother_particle) {
                 assert(measurement_type_i < (*truth_particle_hit_counts)[mother_particle].size());
+                //coverity[INTEGER_OVERFLOW]
                 ++(*truth_particle_hit_counts)[mother_particle][measurement_type_i];
              }
           }
