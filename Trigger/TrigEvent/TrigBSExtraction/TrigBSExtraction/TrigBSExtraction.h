@@ -13,7 +13,6 @@
 #include "StoreGate/WriteHandleKeyArray.h"
 
 #include "TrigNavigation/Navigation.h"
-#include "TrigBSExtraction/ITrigBStoxAODTool.h"
 #include "TrigSteeringEvent/HLTResult.h"
 
 
@@ -37,21 +36,17 @@ private:
    @param  navTool   navigation tool
    @param  key       does the job for EF or L2
    @param  equalize  flattens the EDM if true
-   @param  xAODCnv   do xAOD conversion of Run-1 EF containers
    */
   StatusCode repackFeaturesToSG (const EventContext& ctx,
                                  HLT::Navigation& navTool,
                                  const SG::ReadHandleKey<HLT::HLTResult>& key,
                                  SG::WriteHandleKey<HLT::HLTResult>& keyOut,
-                                 bool equalize, bool xAODConv);
+                                 bool equalize);
 
   ToolHandle<HLT::Navigation> m_navToolL2{this, "NavigationForL2", "HLT::Navigation/NavigationForL2",
                                           "Navigation tool for Run-1 L2 result"};
   ToolHandle<HLT::Navigation> m_navTool{this, "Navigation", "HLT::Navigation/Navigation",
                                         "Navigation tool for EF/HLT result"};
-
-  ToolHandle<ITrigBStoxAODTool> m_xAODTool{this, "BStoxAOD", "",
-                                           "Optional xAOD converter tool for Run-1 EF AOD containers"};
 
   SG::ReadHandleKey<HLT::HLTResult> m_l2ResultKeyIn{
     this, "L2ResultKeyIn", "", "Input key for L2 result (Run-1)"};

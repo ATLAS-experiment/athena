@@ -23,10 +23,6 @@ StatusCode TrigBSExtraction::initialize() {
 
   ATH_CHECK( m_navTool.retrieve() );
 
-  // xAOD converter tool (for Run-1 data)
-  if ( !m_xAODTool.empty() ) ATH_CHECK( m_xAODTool.retrieve() );
-  else m_xAODTool.disable();
-
   // Initialize handle keys
   ATH_CHECK( m_l2ResultKeyIn.initialize(SG::AllowEmpty) );
   ATH_CHECK( m_l2ResultKeyOut.initialize(SG::AllowEmpty) );
@@ -57,19 +53,19 @@ StatusCode TrigBSExtraction::execute(const EventContext& ctx) {
 
   const bool isRun1 = m_navToolL2.isEnabled();
   if ( isRun1 ) {
-    if ( repackFeaturesToSG(ctx, *m_navToolL2, m_l2ResultKeyIn, m_l2ResultKeyOut, false, false).isFailure() )
-      ATH_MSG_WARNING( "failed unpacking features from BS to SG for: " << m_l2ResultKeyIn  );
+    ATH_MSG_ERROR("Unpacking of Run-1 bytestream is no longer supported");
+    return StatusCode::FAILURE;
   }
   
   if ( !m_hltResultKeyIn.empty() ) {
     // unpack, merge with L2 result and do xAOD conversion
     // xAOD conversion is only done for HLTResult_EF in Run-1
-    if ( repackFeaturesToSG(ctx, *m_navTool, m_hltResultKeyIn, m_hltResultKeyOut, isRun1, isRun1).isFailure() )
+    if ( repackFeaturesToSG(ctx, *m_navTool, m_hltResultKeyIn, m_hltResultKeyOut, isRun1).isFailure() )
       ATH_MSG_WARNING( "failed unpacking features from BS to SG for: " << m_hltResultKeyIn  );
   }
 
   for (size_t i = 0; i<m_dataScoutingKeysIn.size(); i++ ) {
-    if ( repackFeaturesToSG(ctx, *m_navTool, m_dataScoutingKeysIn[i], m_dataScoutingKeysOut[i], false, false).isFailure() )
+    if ( repackFeaturesToSG(ctx, *m_navTool, m_dataScoutingKeysIn[i], m_dataScoutingKeysOut[i], false).isFailure() )
       ATH_MSG_WARNING( "failed unpacking features from BS to SG for: " << m_dataScoutingKeysIn[i] );
   }
 
@@ -84,8 +80,7 @@ StatusCode TrigBSExtraction::repackFeaturesToSG (const EventContext& ctx,
                                                  HLT::Navigation& navTool,
                                                  const SG::ReadHandleKey<HLT::HLTResult>& key,
                                                  SG::WriteHandleKey<HLT::HLTResult>& keyOut,
-                                                 bool equalize,
-                                                 bool xAODCnv) {
+                                                 bool equalize) {
 
   ATH_MSG_DEBUG( "Trying to deserialize content of " << key );
   auto cresult = SG::makeHandle(key, ctx);
@@ -111,20 +106,6 @@ StatusCode TrigBSExtraction::repackFeaturesToSG (const EventContext& ctx,
   }
 
   navTool.prepare();
-
-  // optional xAOD conversion for Run-1 AOD containers
-  if ( xAODCnv && m_xAODTool.isEnabled() ) {
-
-    ATH_CHECK( m_xAODTool->convert(ctx, &navTool) );
-
-    // after AOD TrigPassBitsCollection was converted to xAOD::TrigPassBitsContainer,
-    // let's fill new xAOD::TrigPassBits objects with the proper pointers to
-    // converted xAOD containers
-    ATH_CHECK( m_xAODTool->setTrigPassBits(&navTool) );
-
-    // this will redirect all Features to the xAOD converters
-    ATH_CHECK( m_xAODTool->rewireNavigation(&navTool) );
-  }
 
   // Create a copy of HLTResult and pack navigation back into it
   auto result = std::make_unique<HLT::HLTResult>(*cresult);

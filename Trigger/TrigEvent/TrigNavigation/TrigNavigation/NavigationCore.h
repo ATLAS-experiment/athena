@@ -36,7 +36,6 @@
 
 class StringSerializer;
 
-class TrigBStoxAODTool;
 class TrigNavigationThinningSvc;
 
 namespace HLT {
@@ -96,7 +95,6 @@ namespace HLT {
   class NavigationCore : public HLT::TrigNavStructure {
     friend class ::TrigNavigationThinningSvc;
     friend struct HLT::TrigNavTools::SlimmingHelper;
-    friend class ::TrigBStoxAODTool;
   public:
     /**
      * @brief constructor with parent AlgTool for printing
