@@ -48,7 +48,7 @@ from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 
 from AthenaCommon.Logging import logging
 logger = logging.getLogger(__name__)
-from AthenaCommon.Constants import DEBUG
+from AthenaCommon import Constants
 
 from GlobalSimulation.Digraph import Digraph
 from  GlobalSimulation.graphAlgs import Topological
@@ -94,7 +94,7 @@ def GlobalSimulationAlgCfg(flags,
                            dump=False,
                            fn=None,
                            algName='GlobalSimTestAlg',
-                           OutputLevel=DEBUG):
+                           OutputLevel=Constants.INFO):
 
     logger.setLevel(OutputLevel)
     cfg = ComponentAccumulator()
@@ -375,9 +375,6 @@ def GlobalSimulationAlgCfg(flags,
     alg.OutputLevel = OutputLevel
     alg.enableDumps = dump
 
-    
-    from TrigCaloRec.TrigCaloRecConfig import hltCaloCellSeedlessMakerCfg
-    cfg.merge(hltCaloCellSeedlessMakerCfg(flags, roisKey=''))
 
     cfg.addEventAlgo(alg)
     return cfg

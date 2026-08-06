@@ -92,8 +92,10 @@ namespace GlobalSim {
         std::ofstream stream{ m_fileName, std::ofstream::out };
         stream << "digraph datadeps {\n  rankdir=\"LR\";\n"; // left-to-right graph
 
-        auto addNode = [&](std::string_view id, std::string_view name, std::string_view shape="box" ) {
-            stream << "  " << id << " [label=\"" << name << "\";shape=" << shape << "];\n"; // adds a node
+        auto addNode = [&](std::string_view id, std::string_view name, std::string_view shape="box", std::string_view textcol="" ) {
+            stream << "  " << id << " [label=\"" << name << "\"";
+            if(!textcol.empty()) stream << ", fontcolor=\"" << textcol << "\"";
+            stream << ";shape=" << shape << "];\n"; // adds a node
         };
         auto addEdge = [&](std::string_view srcId, std::string_view tgtId, std::string_view label ) {
             stream << "  " << srcId << " -> " << tgtId << " [label=\"" << label << "\"];\n"; // adds an edge
@@ -105,9 +107,13 @@ namespace GlobalSim {
         // key is dep name, value is pair of sets, first are "producers" of dep, second a "consumers" of dep
         // if has no producer, is a global input. if has no consumer, is a global output.
 
+        std::map<std::string,std::string> inputTypes;
+
         for ( const auto& [algName, ideps] : algosInputDependenciesMap ) {
             for (const auto &dep: ideps) {
                 deps[dep.key()].second.insert(algName); // alg is a consumer
+                // store classes of inputs
+                inputTypes[dep.key()] = dep.className();
             }
         }
         for ( const auto& [algName, odeps] : algosOutputDependenciesMap ) {
@@ -124,14 +130,14 @@ namespace GlobalSim {
             auto& [producers,consumers] = pcs;
             if(producers.empty()) {
                 std::string algIndex = "Input_" + std::to_string( algoIndex );
-                addNode( algIndex, dep, "plaintext" );
+                addNode( algIndex, inputTypes[dep]+"/"+dep.substr(dep.find("+")+1), "plaintext", (dep.find("ConditionStore")==0) ? "blue" : "" );
                 keyToName[dep] = algIndex;
                 algoIndex++;
                 producers.insert(dep); // its a self-producer
                 inputs += algIndex + "; ";
             } else if(consumers.empty()) {
                 std::string algIndex = "Output_" + std::to_string( algoIndex );
-                addNode( algIndex, dep, "plaintext" );
+                addNode( algIndex, dep.substr(dep.find("+")+1), "plaintext" );
                 keyToName[dep] = algIndex;
                 algoIndex++;
                 consumers.insert(dep); // its a self-consumer
@@ -150,7 +156,7 @@ namespace GlobalSim {
             auto& [producers,consumers] = pcs;
             for(auto& producer : producers) {
                 for(auto& consumer: consumers) {
-                    addEdge(keyToName.at(producer),keyToName.at(consumer),dep!=producer && dep!=consumer ? dep : " ");
+                    addEdge(keyToName.at(producer),keyToName.at(consumer),dep!=producer && dep!=consumer ? (inputTypes[dep]+"/"+dep.substr(dep.find("+")+1)) : " ");
                 }
             }
         }
@@ -170,6 +176,9 @@ namespace GlobalSim {
     }
 
     StatusCode GraphSvc::finalize() {
+
+        ATH_MSG_INFO("To view graph run: dot -Teps " << m_fileName.value() << " -o graph.eps; gv graph.eps &");
+
         return StatusCode::SUCCESS;
 
     }
