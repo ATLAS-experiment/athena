@@ -37,7 +37,6 @@ if (NOT XAOD_STANDALONE)
       xAODPFlow
       xAODTracking
       xAODTruth
-      MCTruthClassifierLib
       TruthUtils
       ${ROOT_LIBRARIES}
   )

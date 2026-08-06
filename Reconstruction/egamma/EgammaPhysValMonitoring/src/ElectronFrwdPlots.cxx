@@ -4,7 +4,7 @@
 
 #include "ElectronFrwdPlots.h"
 #include "ElectronValidationPlots.h"
-#include "MCTruthClassifier/MCTruthClassifierDefs.h"
+#include "TruthUtils/TruthClasses.h"
 
 namespace Egamma{
 

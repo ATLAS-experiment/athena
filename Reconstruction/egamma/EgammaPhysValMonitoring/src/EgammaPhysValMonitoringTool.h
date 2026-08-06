@@ -17,6 +17,8 @@
 #include "GaudiKernel/ToolHandle.h"
 #include "Gaudi/Property.h"
 
+#include "MCTruthClassifier/IMCTruthClassifier.h"
+
 // Local includes
 #include "AthenaMonitoring/ManagedMonitorToolBase.h"
 

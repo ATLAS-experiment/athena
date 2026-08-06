@@ -41,7 +41,7 @@
 #include "xAODCore/tools/ReadStats.h"
 
 // Truth classification
-#include "MCTruthClassifier/MCTruthClassifierDefs.h"
+#include "TruthUtils/TruthClasses.h"
 
 /// Example of how to run the MuonSelectorTools package to obtain information from muons
 int main(int argc, char* argv[]) {

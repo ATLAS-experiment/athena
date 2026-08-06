@@ -4,7 +4,7 @@
 
 #include <set>
 
-#include <MCTruthClassifier/MCTruthClassifierDefs.h>
+#include "TruthUtils/TruthClasses.h"
 #include <xAODTruth/TruthParticle.h>
 #include <xAODTruth/xAODTruthHelpers.h>
 #include <FourMomUtils/xAODP4Helpers.h>

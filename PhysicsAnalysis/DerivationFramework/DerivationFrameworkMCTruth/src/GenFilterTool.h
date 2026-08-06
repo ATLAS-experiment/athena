@@ -25,7 +25,7 @@
 #include "StoreGate/ReadDecorHandleKey.h"
 #include "StoreGate/WriteDecorHandleKeyArray.h"
 // Defs for the particle origin
-#include "MCTruthClassifier/MCTruthClassifierDefs.h"
+#include "TruthUtils/TruthClasses.h"
 
 class IMCTruthClassifier;
 
