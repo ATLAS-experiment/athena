@@ -21,7 +21,7 @@ atlas_add_library( SUSYToolsLib
    LINK_LIBRARIES AsgTools PATCoreLib xAODCore xAODEgamma xAODEventInfo
    xAODJet xAODMissingET xAODMuon xAODTau xAODTracking xAODTruth
    AssociationUtilsLib BoostedJetTaggersLib GoodRunsListsLib PATInterfaces TrigDecisionToolLib
-   MCTruthClassifierLib JetJvtEfficiencyLib JetSubStructureUtils
+   JetJvtEfficiencyLib JetSubStructureUtils
    ParticleJetToolsLib PMGAnalysisInterfacesLib AnaAlgorithmLib
    MuonAnalysisInterfacesLib EgammaAnalysisInterfacesLib
    PRIVATE_LINK_LIBRARIES ${ROOT_LIBRARIES}
@@ -36,6 +36,7 @@ atlas_add_library( SUSYToolsLib
    PileupReweightingLib PathResolver TauAnalysisToolsLib
    TriggerAnalysisInterfaces
    TrigGlobalEfficiencyCorrectionLib TriggerMatchingToolLib TrigConfInterfaces TrigConfxAODLib
+   TruthUtils
    xAODTrigMissingET xAODMetaData xAODCutFlow ${extra_libs} )
 
 if( NOT XAOD_STANDALONE )

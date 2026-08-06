@@ -14,7 +14,6 @@
 #include "KinematicsPlots.h"
 #include "xAODEgamma/Electron.h"
 #include "xAODTruth/TruthParticle.h"
-#include "MCTruthClassifier/IMCTruthClassifier.h"
 
 class LRTElectronValidationPlots:public PlotBase {
   public:

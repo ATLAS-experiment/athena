@@ -26,7 +26,7 @@
 #include "xAODTruth/TruthVertex.h"
 #include "xAODEgamma/EgammaTruthxAODHelpers.h"
 
-#include "MCTruthClassifier/MCTruthClassifierDefs.h"
+#include "TruthUtils/TruthClasses.h"
 
 #include <vector>
 

@@ -12,7 +12,7 @@
 
 #include "AsgTools/CurrentContext.h"
 #include "AsgTools/IAsgTool.h"
-#include "MCTruthClassifier/MCTruthClassifierDefs.h"
+#include "TruthUtils/TruthClasses.h"
 #include "xAODTruth/TruthParticle.h"
 #include "xAODTruth/TruthVertex.h"
 #include "TruthUtils/TruthClassifiers.h"

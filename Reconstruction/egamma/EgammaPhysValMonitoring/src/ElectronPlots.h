@@ -14,7 +14,6 @@
 #include "IsolationPlots.h"
 #include "TrackPlots.h"
 #include "TrkValHistUtils/EfficiencyPlots.h"
-#include "MCTruthClassifier/IMCTruthClassifier.h"
 
 #include "xAODEgamma/Electron.h"
 #include "xAODTruth/TruthParticle.h"

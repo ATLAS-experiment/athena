@@ -16,6 +16,7 @@
 #include <cstddef>
 #include <memory>
 #include "StoreGate/ReadDecorHandle.h"
+using namespace MCTruthPartClassifier;
 namespace {
 
     // Only reject muons from light quark deays
