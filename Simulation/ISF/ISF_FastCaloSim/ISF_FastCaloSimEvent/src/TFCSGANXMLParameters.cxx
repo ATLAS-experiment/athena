@@ -12,6 +12,8 @@
 #include "XMLCoreParser/XMLCoreParser.h"
 #include "XMLCoreParser/XMLCoreNode.h"
 
+#include "CxxUtils/hexdump.h"
+
 TFCSGANXMLParameters::TFCSGANXMLParameters() = default;
 
 TFCSGANXMLParameters::~TFCSGANXMLParameters() = default;
@@ -129,5 +131,36 @@ void TFCSGANXMLParameters::Print() const {
       ATH_MSG(INFO) << x->GetBinUpEdge(ix) << ",";
     }
     ATH_MSG(INFO) << END_MSG(INFO);
+  }
+}
+
+
+void TFCSGANXMLParameters::checkHists()
+{
+  for (auto &[layer, h] : m_binning) {
+    if (*reinterpret_cast<void*const*>(&h) == nullptr || h.IsZombie() || h.IsOnHeap() || dynamic_cast<const TH2D*>(&h) == nullptr) {
+      ATH_MSG_ERROR("Histogram for layer " << layer << " at " << &h <<
+                    " is broken after read; " <<
+                    "report this on ATLASSIM-7031 with a full log file.");
+
+      std::ostringstream ss;
+      ss << "Node dump:\n";
+      CxxUtils::safeHexdump (ss, (reinterpret_cast<const char*>(&h)) - 8*sizeof(void*), 4096);
+      ss << "Map head:\n";
+      CxxUtils::safeHexdump (ss, &m_binning, sizeof(m_binning));
+      ATH_MSG_INFO(ss.str());
+      ss.str("");
+      ss << "First node:\n";
+      auto it = m_binning.begin();
+      CxxUtils::safeHexdump (ss, (reinterpret_cast<const char*>(&*it)) - 8*sizeof(void*), 4096);
+      ATH_MSG_INFO(ss.str());
+      ATH_MSG_INFO("zombie: " << h.IsZombie() <<
+                   " on heap: " << h.IsOnHeap());
+      ATH_MSG_INFO(" dynamic type: " << typeid(h).name());
+    }
+
+    // Make good and sure that nobody thinks that they own this histogram
+    // as a dynamic allocation.
+    h.SetDirectory (nullptr);
   }
 }

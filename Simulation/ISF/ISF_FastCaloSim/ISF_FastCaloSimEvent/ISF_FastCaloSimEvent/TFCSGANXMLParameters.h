@@ -34,6 +34,8 @@ class TFCSGANXMLParameters : public ISF_FCS::MLogging {
   bool IsSymmetrisedAlpha() const { return m_symmetrisedAlpha; };
   const std::string& GetInputFolder() const { return m_fastCaloGANInputFolderName; };
 
+  void checkHists();
+
  private:
   bool m_symmetrisedAlpha{};
   Binning m_binning;

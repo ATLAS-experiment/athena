@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "ISF_FastCaloSimEvent/TFCSParametrizationChain.h"
@@ -194,52 +194,52 @@ void TFCSParametrizationChain::Print(Option_t *option) const {
   }
 }
 
-void TFCSParametrizationChain::Streamer(TBuffer &R__b) {
+void TFCSParametrizationChain::Streamer(TBuffer &R_b) {
   // Stream an object of class TFCSParametrizationChain.
 
-  UInt_t R__s, R__c;
+  UInt_t R_s, R_c;
   TDirectory *dir = nullptr;
 
-  if (R__b.IsReading()) {
-    Version_t R__v = R__b.ReadVersion(&R__s, &R__c);
-    if (R__v == 1) {
-      R__b.SetBufferOffset(R__s);
-      R__b.ReadClassBuffer(TFCSParametrizationChain::Class(), this);
+  if (R_b.IsReading()) {
+    Version_t R_v = R_b.ReadVersion(&R_s, &R_c);
+    if (R_v == 1) {
+      R_b.SetBufferOffset(R_s);
+      R_b.ReadClassBuffer(TFCSParametrizationChain::Class(), this);
     } else {
-      TFCSParametrization::Streamer(R__b);
+      TFCSParametrization::Streamer(R_b);
 
-      TObject *parent = R__b.GetParent();
-      if (R__b.GetParent()) {
+      TObject *parent = R_b.GetParent();
+      if (R_b.GetParent()) {
         if (parent->InheritsFrom(TDirectory::Class())) {
           dir = static_cast<TDirectory *>(parent);
         }
       }
 
-      TFCSParametrizationChain::Chain_t &R__stl = m_chain;
-      R__stl.clear();
-      TClass *R__tcl1 = TFCSParametrizationBase::Class();
-      if (R__tcl1 == nullptr) {
+      TFCSParametrizationChain::Chain_t &R_stl = m_chain;
+      R_stl.clear();
+      TClass *R_tcl1 = TFCSParametrizationBase::Class();
+      if (R_tcl1 == nullptr) {
         Error("m_chain streamer",
               "Missing the TClass object for class TFCSParametrizationBase *!");
         return;
       }
-      int R__i, R__n;
-      R__b >> R__n;
-      R__stl.reserve(R__n);
-      for (R__i = 0; R__i < R__n; R__i++) {
-        std::unique_ptr<TFCSParametrizationBase> R__t;
-        R__t.reset((TFCSParametrizationBase *)R__b.ReadObjectAny(R__tcl1));
-        if (R__t != nullptr) {
-          if (R__t->InheritsFrom(TFCSParametrizationPlaceholder::Class())) {
-            std::unique_ptr<TFCSParametrizationBase> new_R__t = nullptr;
+      int R_i, R_n;
+      R_b >> R_n;
+      R_stl.reserve(R_n);
+      for (R_i = 0; R_i < R_n; R_i++) {
+        std::unique_ptr<TFCSParametrizationBase> R_t;
+        R_t.reset((TFCSParametrizationBase *)R_b.ReadObjectAny(R_tcl1));
+        if (R_t != nullptr) {
+          if (R_t->InheritsFrom(TFCSParametrizationPlaceholder::Class())) {
+            std::unique_ptr<TFCSParametrizationBase> new_R_t = nullptr;
 
             if (dir) {
-              new_R__t.reset(
-                  (TFCSParametrizationBase *)dir->Get(R__t->GetName()));
+              new_R_t.reset(
+                  (TFCSParametrizationBase *)dir->Get(R_t->GetName()));
             }
 
-            if (new_R__t) {
-              R__t = std::move(new_R__t);
+            if (new_R_t) {
+              R_t = std::move(new_R_t);
             } else {
               Error("TFCSParametrizationChain::Streamer",
                     "Found placeholder object in the parametrization chain, "
@@ -247,41 +247,42 @@ void TFCSParametrizationChain::Streamer(TBuffer &R__b) {
             }
           }
         }
-        R__stl.emplace_back(R__t.release());
+        R_t->checkHists();
+        R_stl.emplace_back(R_t.release());
       }
 
-      R__b.CheckByteCount(R__s, R__c, TFCSParametrizationChain::IsA());
+      R_b.CheckByteCount(R_s, R_c, TFCSParametrizationChain::IsA());
     }
   } else {
-    R__c = R__b.WriteVersion(TFCSParametrizationChain::IsA(), kTRUE);
-    TFCSParametrization::Streamer(R__b);
+    R_c = R_b.WriteVersion(TFCSParametrizationChain::IsA(), kTRUE);
+    TFCSParametrization::Streamer(R_b);
 
     if (SplitChainObjects()) {
-      TObject *parent = R__b.GetParent();
-      if (R__b.GetParent()) {
+      TObject *parent = R_b.GetParent();
+      if (R_b.GetParent()) {
         if (parent->InheritsFrom(TDirectory::Class())) {
           dir = static_cast<TDirectory *>(parent);
         }
       }
     }
 
-    TFCSParametrizationChain::Chain_t &R__stl = m_chain;
-    int R__n = int(R__stl.size());
-    R__b << R__n;
-    if (R__n) {
-      TFCSParametrizationChain::Chain_t::iterator R__k;
-      for (R__k = R__stl.begin(); R__k != R__stl.end(); ++R__k) {
-        TFCSParametrizationBase *R__t = *R__k;  // Ownership stays with m_chain
-        if (dir && R__t != nullptr) { 
-          dir->WriteTObject(R__t);
-          TFCSParametrizationPlaceholder tmp( R__t->GetName(), TString("Placeholder for: ") + R__t->GetTitle());
-          R__b.WriteObject( &tmp, false ); // tell R__b object with same address are actually different
+    TFCSParametrizationChain::Chain_t &R_stl = m_chain;
+    int R_n = int(R_stl.size());
+    R_b << R_n;
+    if (R_n) {
+      TFCSParametrizationChain::Chain_t::iterator R_k;
+      for (R_k = R_stl.begin(); R_k != R_stl.end(); ++R_k) {
+        TFCSParametrizationBase *R_t = *R_k;  // Ownership stays with m_chain
+        if (dir && R_t != nullptr) {
+          dir->WriteTObject(R_t);
+          TFCSParametrizationPlaceholder tmp( R_t->GetName(), TString("Placeholder for: ") + R_t->GetTitle());
+          R_b.WriteObject( &tmp, false ); // tell R_b object with same address are actually different
         } else {
-          R__b.WriteObject( R__t );
+          R_b.WriteObject( R_t );
         }
       }
     }
-    R__b.SetByteCount(R__c, kTRUE);
+    R_b.SetByteCount(R_c, kTRUE);
   }
 }
 

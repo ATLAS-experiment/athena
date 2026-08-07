@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ISF_FASTCALOSIMEVENT_TFCSParametrizationBase_h
@@ -148,6 +148,10 @@ public:
   // will not compile by default
   void Copy2GPU(); // copy all the paramterization files to GPU
 #endif
+
+  // Called immediately after being read to check the integrity
+  // of histograms.  See ATLASSIM-7031.
+  virtual void checkHists() {}
 
 protected:
   static constexpr double init_Ekin_nominal = 0;    //! Do not persistify!
