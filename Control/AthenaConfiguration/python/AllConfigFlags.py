@@ -367,7 +367,7 @@ def initConfigFlags():
                 return False
         
         acf.addFlag("IOVDb.UseCREST", __useCrest, help='Use CREST for conditions access')
-        acf.addFlag("IOVDb.CrestServer", lambda prevFlags : os.environ.get('CREST_SERVER') if prevFlags.IOVDb.UseCREST and os.environ.get('CREST_SERVER') else "https://crest.cern.ch",help="CREST server URL") # FIXME could this be merged with IOVDb.DBConnection?
+        acf.addFlag("IOVDb.CrestServer", lambda prevFlags: os.getenv('CREST_SERVER','crest.cern.ch'),help="CREST server URL")
         acf.addFlag("IOVDb.CrestAPI","api-v6.0",help="CREST API version")
         
         #For HLT-jobs, the ring-size should be 0 (eg no cleaning at all since there are no IOV-updates during the job)
