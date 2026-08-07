@@ -43,8 +43,15 @@ def HGTD_TruthOverlayCfg(flags, name="HGTD_SDOOverlay", **kwargs):
     """Return a ComponentAccumulator for the HGTD SDO overlay algorithm"""
     acc = ComponentAccumulator()
 
-    # We do not need background HGTD SDOs
-    kwargs.setdefault("BkgInputKey", "")
+    # We do not need background HGTD SDOs for data overlay
+    if not flags.Input.isMC:
+        kwargs.setdefault("BkgInputKey", "")
+    else:
+        kwargs.setdefault("BkgInputKey", f"{flags.Overlay.BkgPrefix}HGTD_SDO_Map")
+
+    if kwargs["BkgInputKey"]:
+        from SGComps.SGInputLoaderConfig import SGInputLoaderCfg
+        acc.merge(SGInputLoaderCfg(flags, [f'InDetSimDataCollection#{kwargs["BkgInputKey"]}']))
 
     kwargs.setdefault("SignalInputKey", f"{flags.Overlay.SigPrefix}HGTD_SDO_Map")
     kwargs.setdefault("OutputKey", "HGTD_SDO_Map")

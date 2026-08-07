@@ -54,8 +54,15 @@ def ITkPixelTruthOverlayCfg(flags, name="ITkPixelSDOOverlay", **kwargs):
     """Return a ComponentAccumulator for the ITk Pixel SDO overlay algorithm"""
     acc = ComponentAccumulator()
 
-    # We do not need background Pixel SDOs
-    kwargs.setdefault("BkgInputKey", "")
+    # We do not need background Pixel SDOs for data overlay
+    if not flags.Input.isMC:
+        kwargs.setdefault("BkgInputKey", "")
+    else:
+        kwargs.setdefault("BkgInputKey", f"{flags.Overlay.BkgPrefix}ITkPixelSDO_Map")
+
+    if kwargs["BkgInputKey"]:
+        from SGComps.SGInputLoaderConfig import SGInputLoaderCfg
+        acc.merge(SGInputLoaderCfg(flags, [f'InDetSimDataCollection#{kwargs["BkgInputKey"]}']))
 
     kwargs.setdefault("SignalInputKey", f"{flags.Overlay.SigPrefix}ITkPixelSDO_Map")
     kwargs.setdefault("OutputKey", "ITkPixelSDO_Map")
