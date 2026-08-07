@@ -83,6 +83,6 @@ std::ostream& operator<<(std::ostream& ostr,
 }  
 #include "AthenaKernel/CLASS_DEF.h"
 #include "AthenaKernel/CondCont.h"
-CLASS_DEF(MuonR4::TgcCablingMap, 52396898, 1);
-CONDCONT_DEF(MuonR4::TgcCablingMap, 150802588);
+CLASS_DEF(MuonR4::TgcCablingMap, 200454606, 1);
+CONDCONT_DEF(MuonR4::TgcCablingMap, 176178564);
 #endif
