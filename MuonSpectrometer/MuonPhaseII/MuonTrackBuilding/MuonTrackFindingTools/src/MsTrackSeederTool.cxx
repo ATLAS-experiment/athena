@@ -19,6 +19,7 @@
 #include "xAODMuonPrepData/UtilFunctions.h"
 #include "MuonSpacePoint/SpacePointHelpers.h"
 #include "FourMomUtils/P4Helpers.h"
+#include "CxxUtils/trapping_fp.h"
 #include "GaudiKernel/PhysicalConstants.h"
 
 namespace {
@@ -33,6 +34,8 @@ namespace {
         return std::abs(PtimesQ1 - PtimesQ2) / denom;
     };
     float reducedChi2(const xAOD::MuonSegment& seg) {
+        // Tell clang to optimize assuming that FP operations may trap.
+        CXXUTILS_TRAPPING_FP;
         return seg.chiSquared() / std::max(1.f, seg.numberDoF());
     }
     std::string print(const xAOD::MuonSegment& seg) {
