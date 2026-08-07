@@ -389,6 +389,31 @@ namespace MuonR4::SegmentFit{
                     return std::sqrt(chi2a) < m_cfg.recoveryPull;
                 }
             }
+
+           /*
+            * Prefer a two-coordinate RPC/TGC space point over a phi-only
+            * RPC/TGC space point, provided that the two-coordinate point
+            * is compatible with the recovery-pull requirement.
+            */
+            if (a->type() == xAOD::UncalibMeasType::RpcStripType ||
+                a->type() == xAOD::UncalibMeasType::TgcStripType) {
+
+                const bool aEtaPhi = a->measuresEta() && a->measuresPhi();
+                const bool bEtaPhi = b->measuresEta() && b->measuresPhi();
+
+                const bool aPhiOnly = !a->measuresEta() && a->measuresPhi();
+                const bool bPhiOnly = !b->measuresEta() && b->measuresPhi();
+
+                if (aPhiOnly && bEtaPhi) {
+                    // Keep the 1D point first only when the 2D point
+                    // is outside the recovery-pull requirement.
+                    return std::sqrt(chi2b) > m_cfg.recoveryPull;
+                } else if (aEtaPhi && bPhiOnly) {
+                    // Put the 2D point first when it is compatible.
+                    return std::sqrt(chi2a) < m_cfg.recoveryPull;
+                }
+            }
+
             return chi2a < chi2b;
         });
 

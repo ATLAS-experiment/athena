@@ -34,6 +34,10 @@ namespace MuonR4{
                 std::uint8_t precision{0};
                 std::uint8_t triggerPhi{0};
                 std::uint8_t triggerEta{0};
+                /** @brief stream the counter to ostream */
+                inline friend std::ostream& operator<<(std::ostream& ostr, const Counter& c) {
+                   return ostr<<std::format("nPrecision: {:}, nTriggerPhi: {:}, nTriggerEta: {:}", c.precision, c.triggerPhi, c.triggerEta);
+                }
             };
             /** @brief Decorate the prd links onto the output muon segment. Eta & phi measurements are absorbed converted
              *         into a CombinedMuonStrip which is a source link linke object carrying a link to both prds. In this way,

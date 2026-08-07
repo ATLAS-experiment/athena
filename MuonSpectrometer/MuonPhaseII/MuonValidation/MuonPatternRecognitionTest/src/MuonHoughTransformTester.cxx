@@ -565,12 +565,10 @@ namespace MuonValR4 {
                 return std::count_if(detailSeg->measurements().begin(),
                                      detailSeg->measurements().end(), lambda);
             };
-            const unsigned nAuxilliary = hitCounter([](const auto& m){
-                 return m->type() == xAOD::UncalibMeasType::Other;
-            });        
+
             m_out_segment_nPrecHits +=  segment->nPrecisionHits();
-            m_out_segment_nTrigEtaHits += segment->nTrigEtaLayers() - nAuxilliary;
-            m_out_segment_nTrigPhiHits += segment->nPhiLayers() - nAuxilliary;
+            m_out_segment_nTrigEtaHits += segment->nTrigEtaLayers();
+            m_out_segment_nTrigPhiHits += segment->nPhiLayers();
             
             m_out_segment_nPrecOutliers += segment->nPrecisionOutliers();
             m_out_segment_nTrigEtaOutliers += segment->nTriggerEtaOutliers();
