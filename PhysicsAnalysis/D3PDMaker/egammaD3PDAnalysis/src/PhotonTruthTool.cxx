@@ -59,9 +59,7 @@ StatusCode PhotonTruthTool::initialize()
 const xAOD::TruthParticle*
 PhotonTruthTool::toTruthParticle (const xAOD::Photon& g) const
 {
-  MCTruthPartClassifier::Info info;
-  m_classifier->particleTruthClassifier (&g, &info);
-  return info.genPart;
+  return std::get<2>(m_classifier->particleTruthClassifier_full(&g));
 }
 
 

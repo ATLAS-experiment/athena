@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef MCTRUTHCLASSIFIER_IMCTRUTHCLASSIFIER_H
 #define MCTRUTHCLASSIFIER_IMCTRUTHCLASSIFIER_H
@@ -20,6 +20,7 @@
 #include <memory>
 #include <unordered_map>
 #include <vector>
+#include <optional>
 
 #ifndef GENERATIONBASE
 #include "xAODCaloEvent/CaloClusterFwd.h"
@@ -39,7 +40,10 @@ class HepMcParticleLink;
 #include "RecoToolInterfaces/IParticleCaloExtensionTool.h"
 #endif
 
-namespace MCTruthPartClassifier {
+class IMCTruthClassifier : virtual public asg::IAsgTool
+{
+  ASG_TOOL_INTERFACE(IMCTruthClassifier)
+protected:
   // Additional information that can be returned by the classifier.
   // Originally, these were all held in member variables in the classifier,
   // but that prevents the classifier methods from being made const.
@@ -85,12 +89,6 @@ namespace MCTruthPartClassifier {
     std::vector<MCTruthPartClassifier::ParticleOrigin> cnvPhotPartOrig;
 #endif
   };
-
-}
-
-class IMCTruthClassifier : virtual public asg::IAsgTool
-{
-  ASG_TOOL_INTERFACE(IMCTruthClassifier)
 public:
   /** Virtual destructor */
   virtual ~IMCTruthClassifier() = default;
@@ -100,46 +98,74 @@ public:
   // Method for Track to Truth association
   virtual const xAOD::TruthParticle* getGenPart(
       const xAOD::TrackParticle*,
-      MCTruthPartClassifier::Info* info = nullptr) const = 0;
+      IMCTruthClassifier::Info* info = nullptr) const = 0;
 #ifndef XAOD_ANALYSIS
   // Method for egamma clusters to Truth Particle association
   virtual const xAOD::TruthParticle* egammaClusMatch(
       const xAOD::CaloCluster*, bool,
-      MCTruthPartClassifier::Info* info = nullptr) const = 0;
+      IMCTruthClassifier::Info* info = nullptr) const = 0;
 #endif
 #endif
 
 // Methods for Truth Particle classification
+protected:
   virtual std::pair<MCTruthPartClassifier::ParticleType, MCTruthPartClassifier::ParticleOrigin>
-  particleTruthClassifier(const xAOD::TruthParticle*, MCTruthPartClassifier::Info* info = nullptr) const = 0;
+  particleTruthClassifier(const xAOD::TruthParticle*, IMCTruthClassifier::Info* info) const = 0;
 
 #ifndef XAOD_ANALYSIS /*These can not run in Analysis Base*/
   virtual std::pair<MCTruthPartClassifier::ParticleType, MCTruthPartClassifier::ParticleOrigin>
-  particleHepMCTruthClassifier(const HepMcParticleLink& theLink,MCTruthPartClassifier::Info* info = nullptr) const = 0;
+  particleHepMCTruthClassifier(const HepMcParticleLink& theLink, IMCTruthClassifier::Info* info) const = 0;
+public:
+  std::pair<MCTruthPartClassifier::ParticleType, MCTruthPartClassifier::ParticleOrigin> 
+  particleHepMCTruthClassifier(const HepMcParticleLink& theLink)  const {return particleHepMCTruthClassifier(theLink, nullptr); }
 #endif
+protected:
 
 #ifndef GENERATIONBASE
   // Methods for Reco Particle classification
   // Rely on the Reco to Truth association and then the Truth classification
   virtual std::pair<MCTruthPartClassifier::ParticleType, MCTruthPartClassifier::ParticleOrigin>
-  particleTruthClassifier(const xAOD::TrackParticle*, MCTruthPartClassifier::Info* info = nullptr) const = 0;
+  particleTruthClassifier(const xAOD::TrackParticle*, IMCTruthClassifier::Info* info) const = 0;
 
   virtual std::pair<MCTruthPartClassifier::ParticleType, MCTruthPartClassifier::ParticleOrigin>
-  particleTruthClassifier(const xAOD::Electron*, MCTruthPartClassifier::Info* info = nullptr) const = 0;
+  particleTruthClassifier(const xAOD::Electron*, IMCTruthClassifier::Info* info) const = 0;
 
   virtual std::pair<MCTruthPartClassifier::ParticleType, MCTruthPartClassifier::ParticleOrigin>
-  particleTruthClassifier(const xAOD::Photon*, MCTruthPartClassifier::Info* info = nullptr) const = 0;
+  particleTruthClassifier(const xAOD::Photon*, IMCTruthClassifier::Info* info) const = 0;
 
   virtual std::pair<MCTruthPartClassifier::ParticleType, MCTruthPartClassifier::ParticleOrigin>
-  particleTruthClassifier(const xAOD::Muon*, MCTruthPartClassifier::Info* info = nullptr) const = 0;
+  particleTruthClassifier(const xAOD::Muon*, IMCTruthClassifier::Info* info) const = 0;
 
   virtual std::pair<MCTruthPartClassifier::ParticleType, MCTruthPartClassifier::ParticleOrigin>
-  particleTruthClassifier(const xAOD::CaloCluster*, MCTruthPartClassifier::Info* info = nullptr) const = 0;
+  particleTruthClassifier(const xAOD::CaloCluster*, IMCTruthClassifier::Info* info) const = 0;
 
   virtual std::pair<MCTruthPartClassifier::ParticleType, MCTruthPartClassifier::ParticleOrigin>
-  particleTruthClassifier(const xAOD::Jet*, bool DR, MCTruthPartClassifier::Info* info = nullptr) const = 0;
+  particleTruthClassifier(const xAOD::Jet*, bool DR, IMCTruthClassifier::Info* info) const = 0;
 
+public:
+  std::pair<MCTruthPartClassifier::ParticleType, MCTruthPartClassifier::ParticleOrigin> 
+  particleTruthClassifier(const xAOD::Jet* p, bool DR)  const {return particleTruthClassifier(p, DR, nullptr); }
 #endif
+public:
+  /// Returns more info than the particleTruthClassifier 
+  template <typename T> std::tuple<MCTruthPartClassifier::ParticleType, 
+                                   MCTruthPartClassifier::ParticleOrigin,
+                                   const xAOD::TruthParticle*, 
+                                   MCTruthPartClassifier::ParticleOutCome> 
+  particleTruthClassifier_full(const T* p, std::optional<std::reference_wrapper<const EventContext>> ctx = std::nullopt)  const {
+    IMCTruthClassifier::Info info = ctx ? IMCTruthClassifier::Info(ctx->get()) : IMCTruthClassifier::Info();
+    auto classification = particleTruthClassifier(p, &info);
+    return {classification.first,classification.second,info.genPart,info.particleOutCome};
+  }
+
+  template <typename T> std::pair<MCTruthPartClassifier::ParticleType, MCTruthPartClassifier::ParticleOrigin>  
+  particleTruthClassifier(const T* p, std::optional<std::reference_wrapper<const EventContext>> ctx = std::nullopt) const 
+  {
+	  if (!ctx) return particleTruthClassifier(p, nullptr);
+	  IMCTruthClassifier::Info info(ctx->get());
+	  return particleTruthClassifier(p, &info);
+  }
+
 };
 
 #endif // MCTRUTHCLASSIFIER_IMCTRUTHCLASSIFIER_H
