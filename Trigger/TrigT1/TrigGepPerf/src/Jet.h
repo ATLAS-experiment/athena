@@ -11,7 +11,12 @@ namespace Gep{
   struct Jet
   {
    
-    TLorentzVector vec;    
+    TLorentzVector vec;
+    // Raw eta/phi as delivered by the seed source, before the TLorentzVector
+    // (SetPtEtaPhiM) round-trip. JetTaggerLRJ digitizes these to match the
+    // emulation, which reads the same values as written (float) to the ntuple.
+    double etaInput {0};
+    double phiInput {0};
     std::vector<int> constituentsIndices;
     int nConstituents {0};
     float radius {0};
