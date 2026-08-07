@@ -174,7 +174,7 @@ bool TFCSEnergyAndHitGANV2::fillEnergy(
     if (*reinterpret_cast<void*const*>(&h) == nullptr || h.IsZombie() || h.IsOnHeap() || dynamic_cast<const TH2D*>(&h) == nullptr) {
       ATH_MSG_ERROR("Histogram for layer " << layer << " at " << &h <<
                     " is broken; " <<
-                    "See ATLASSIM-7031.");
+                    "report this on ATLASSIM-7031 with a full log file.");
 
       std::ostringstream ss;
       ss << "Node dump:\n";
@@ -745,4 +745,10 @@ int TFCSEnergyAndHitGANV2::GetAlphaBinsForRBin(const TAxis *x, int ix,
                                    << x->GetBinUpEdge(ix) << ")");
   }
   return binsInAlphaInRBin;
+}
+
+
+void TFCSEnergyAndHitGANV2::checkHists()
+{
+  m_param.checkHists();
 }
