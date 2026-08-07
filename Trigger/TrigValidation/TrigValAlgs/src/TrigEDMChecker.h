@@ -16,20 +16,11 @@
 #include "TrigCompositeUtils/TrigCompositeUtils.h"
 #include "TrigDecisionTool/TrigDecisionTool.h"
 #include "TrigNavigation/Navigation.h"
-#include "xAODTrigger/TrigCompositeContainer.h"
 #include "xAODTracking/TrackParticleContainer.h"
+#include "xAODTrigger/TrigCompositeContainer.h"
 #include "xAODTrigger/TrigNavigation.h"
 
 #include <string>
-
-// forward declarations of muon track classes used in TrigMuonEFInfo
-class TrigMuonEFTrack;
-class TrigMuonEFCbTrack;
-
-// fwd declare muon printing tool
-namespace Rec {
-  class IMuonPrintingTool;
-}
 
 class TrigEDMChecker : public AthAnalysisAlgorithm  {
 
@@ -50,13 +41,7 @@ class TrigEDMChecker : public AthAnalysisAlgorithm  {
    bool m_doDumpTrigPassBits;
    StatusCode dumpTrigPassBits();
    bool m_doDumpLVL1_ROI;
-  StatusCode dumpLVL1_ROI();
-
-   bool m_doDumpTrackParticleContainer;
-   StatusCode dumpTrackParticleContainer();
-
-   bool m_doDumpTrigMissingET;
-   StatusCode dumpTrigMissingET ATLAS_NOT_THREAD_SAFE();
+   StatusCode dumpLVL1_ROI();
 
    bool m_doDumpxAODTrigMissingET;
    StatusCode dumpxAODTrigMissingET();
@@ -70,60 +55,14 @@ class TrigEDMChecker : public AthAnalysisAlgorithm  {
    bool m_doDumpTrigEFBphysContainer;
    StatusCode dumpTrigEFBphysContainer();
 
-   bool m_doDumpTrigEFBjetContainer;
-   StatusCode dumpTrigEFBjetContainer ATLAS_NOT_THREAD_SAFE();
-
-   bool m_doDumpTrigL2BjetContainer;
-   StatusCode dumpTrigL2BjetContainer ATLAS_NOT_THREAD_SAFE();
-
-   bool m_doDumpTrigTauClusterContainer;
-   StatusCode dumpTrigTauClusterContainer ATLAS_NOT_THREAD_SAFE();
-
-   bool m_doDumpTrigEMCluster;
-   StatusCode dumpTrigEMCluster ATLAS_NOT_THREAD_SAFE();
-
-   bool m_doDumpTrigEMClusterContainer;
-   StatusCode dumpTrigEMClusterContainer ATLAS_NOT_THREAD_SAFE();
-
-
    bool m_doDumpxAODTrigEMCluster;
    StatusCode dumpxAODTrigEMCluster ATLAS_NOT_THREAD_SAFE();
 
    bool m_doDumpxAODTrigEMClusterContainer;
    StatusCode dumpxAODTrigEMClusterContainer ATLAS_NOT_THREAD_SAFE();
 
-   bool m_doDumpCombinedMuonFeature;
-   StatusCode dumpCombinedMuonFeature ATLAS_NOT_THREAD_SAFE();
-   StatusCode dumpCombinedMuonFeatureContainer ATLAS_NOT_THREAD_SAFE();
-
-   bool m_doDumpMuonFeature;
-   StatusCode dumpMuonFeature ATLAS_NOT_THREAD_SAFE();
-
-   bool m_doDumpTileMuFeature;
-   StatusCode dumpTileMuFeatureContainer ATLAS_NOT_THREAD_SAFE();
-
-   bool m_doDumpTileTrackMuFeature;
-   StatusCode dumpTileTrackMuFeatureContainer ATLAS_NOT_THREAD_SAFE();
-
-   bool m_doDumpTrigPhotonContainer;
-   StatusCode dumpTrigPhotonContainer ATLAS_NOT_THREAD_SAFE();
-
-   bool m_doDumpTrigMuonEFContainer;
-   StatusCode dumpTrigMuonEFContainer ATLAS_NOT_THREAD_SAFE();
-
-   bool m_doDumpTrigMuonEFInfoContainer;
-   StatusCode dumpTrigMuonEFInfoContainer ATLAS_NOT_THREAD_SAFE();
-   void printMuonTrk(const TrigMuonEFTrack* muonTrack);
-   void printMuonTrk(const TrigMuonEFCbTrack* muonTrack);
-
    bool m_doDumpxAODMuonContainer;
    StatusCode dumpxAODMuonContainer();
-
-   bool m_doDumpTrigMuonEFIsolationContainer;
-   StatusCode dumpTrigMuonEFIsolationContainer ATLAS_NOT_THREAD_SAFE();
-
-   bool m_doDumpTrigElectronContainer;
-   StatusCode dumpTrigElectronContainer ATLAS_NOT_THREAD_SAFE();
 
    bool m_doDumpxAODTrigElectronContainer;
    StatusCode dumpxAODTrigElectronContainer();
@@ -137,24 +76,9 @@ class TrigEDMChecker : public AthAnalysisAlgorithm  {
    bool m_doDumpxAODPhotonContainer;
    StatusCode dumpxAODPhotonContainer();
    
-   bool m_doDumpTrigTauContainer;
-   StatusCode dumpTrigTauContainer ATLAS_NOT_THREAD_SAFE();
-
-   bool m_doDumpTrigTauTracksInfo;
-   StatusCode dumpTrigTauTracksInfo ATLAS_NOT_THREAD_SAFE();
-
-   bool m_doDumpHLTResult;
-   StatusCode dumpHLTResult();
-
-   bool m_doDumpTrigVertexCollection;
-   StatusCode dumpTrigVertexCollection ATLAS_NOT_THREAD_SAFE();
-
    bool m_doDumpxAODTauJetContainer;
    StatusCode dumpxAODTauJetContainer ATLAS_NOT_THREAD_SAFE();
  
-   bool m_doDumpTauJetContainer;
-   StatusCode dumpTauJetContainer ATLAS_NOT_THREAD_SAFE ();
-
    bool m_doDumpxAODTrackParticle;
    StatusCode dumpxAODTrackParticle();
 
@@ -218,8 +142,6 @@ class TrigEDMChecker : public AthAnalysisAlgorithm  {
    ToolHandle< HLT::Navigation > m_navigationTool{ this, "NavigationTool", "HLT::Navigation/Navigation", "" };
    PublicToolHandle< Trig::TrigDecisionTool > m_trigDec{ this, "TriggerDecisionTool", "Trig::TrigDecisionTool/TrigDecisionTool", ""};
 
-   int m_trackWarningNum{0};
-   int m_vertexWarningNum{0};
 };
 
 #endif // TRIG_EDM_CHECKER_H
