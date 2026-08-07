@@ -203,12 +203,13 @@ class MetAnalysisConfig (ConfigBlock):
                 self.jetCalibSequence = 'JetArea_Residual_EtaJES_GSC_Smear'
 
             # Standard e/gamma calibration. Must be kept in agreement with ElectronAnalysisConfig.py
-            if self.egammaESModel == "":
-                self.egammaESModel = (
-                    config.getContainerMeta(self.electrons.split(".")[0], 'ESModel', failOnMiss=True))
-            if self.egammaDecorrelationModel == "":
-                self.egammaDecorrelationModel = (
-                    config.getContainerMeta(self.electrons.split(".")[0], 'decorrelationModel', failOnMiss=True))
+            if self.electrons != "" :
+                if self.egammaESModel == "":
+                    self.egammaESModel = (
+                        config.getContainerMeta(self.electrons.split(".")[0], 'ESModel', failOnMiss=True))
+                if self.egammaDecorrelationModel == "":
+                    self.egammaDecorrelationModel = (
+                        config.getContainerMeta(self.electrons.split(".")[0], 'decorrelationModel', failOnMiss=True))
 
             alg.significanceTool.SoftTermParam = 0
             if self.softTermResolution > 0:
