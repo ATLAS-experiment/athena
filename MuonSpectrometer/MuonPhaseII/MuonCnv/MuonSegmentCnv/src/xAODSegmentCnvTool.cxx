@@ -252,15 +252,30 @@ namespace MuonR4{
 
         ATH_MSG_DEBUG(__func__<<"() "<<__LINE__<<" - Loop over "<<nMeas<<" measurements.");
         for (std::size_t m = 0 ; m < nMeas; ++m) {
+            const xAOD::UncalibratedMeasurement* meas = getMeasurement(segment, m);
+            // Skip auxiliary constraints from summary, such as the beam spot (technically this should not happen because the beam spot is not considered as measurement here, but just in case )
+            if (meas->type() == xAOD::UncalibMeasType::Other) {
+                ATH_MSG_VERBOSE(__func__ << "() " << __LINE__
+                                << " - Skip auxiliary measurement in segment summary");
+                continue;
+            }
+
             const bool isOutlier = isOutlierMeasurement(segment, m);
             Counter& increment = {isOutlier ? outliers: hits};
-            const xAOD::UncalibratedMeasurement* meas = getMeasurement(segment, m);
-            ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<" - Evaluate measurement "<<m_idHelperSvc->toString(xAOD::identify(meas))
-                    <<", outlier: "<<isOutlier);
+
             increment.precision  += xAOD::isPrecisionHit(meas);
             const auto* muonMeas = dynamic_cast<const xAOD::MuonMeasurement*>(meas);
-            increment.triggerPhi += (!muonMeas|| muonMeas->measuresPhi());
-            increment.triggerEta += (!muonMeas|| !muonMeas->measuresPhi()) && !xAOD::isPrecisionHit(meas);
+
+            increment.triggerPhi += (muonMeas->measuresPhi()  ||
+                                    //RPC BI / MDT twin or sTGC strip + pad hits
+                                    muonMeas->numDimensions() == 2);
+            increment.triggerEta += !xAOD::isPrecisionHit(muonMeas) && ( 
+                                        // 0D for combined strip + X measurements
+                                        (muonMeas->numDimensions() == 0 ) || 
+                                        // 1D strip/wire/pad (RPC,TGC, sTGC) cases
+                                        (muonMeas->numDimensions() == 1 && !muonMeas->measuresPhi() ) || 
+                                        //RPC BI for which measuresPhi = 0 as the phi is extracted from time information
+                                        (muonMeas->numDimensions() == 2));
             // Count measurement holes of the trigger hits
             if (!isOutlier && meas->numDimensions() == 1) {
                 if (meas->type() == xAOD::UncalibMeasType::RpcStripType) {
@@ -322,6 +337,7 @@ namespace MuonR4{
                 ATH_MSG_WARNING(__func__<<"() "<<__LINE__<<" - Start parameters not defined.");
             }
         }
+        ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<" Updated summary: "<<hits);
         segment.setNHits(hits.precision, hits.triggerPhi, hits.triggerEta);
         segment.setNOutliers(outliers.precision, outliers.triggerPhi, outliers.triggerEta);
         segment.setNHoles(holes.precision, holes.triggerPhi, holes.triggerEta);
