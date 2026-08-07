@@ -7,7 +7,7 @@ atlas_subdir( TrigTopoEvent )
 atlas_add_library( TrigTopoEvent
                    src/*.cxx
                    PUBLIC_HEADERS TrigTopoEvent
-                   LINK_LIBRARIES AthContainers AthenaKernel GaudiKernel TrigMuonEvent TrigParticle egammaEvent tauEvent
+                   LINK_LIBRARIES AthContainers AthenaKernel GaudiKernel TrigMuonEvent TrigParticle egammaEvent 
                    PRIVATE_LINK_LIBRARIES CxxUtils EventPrimitives TrigNavigationLib )
 
 atlas_add_sercnv_library( TrigTopoEventSerCnv

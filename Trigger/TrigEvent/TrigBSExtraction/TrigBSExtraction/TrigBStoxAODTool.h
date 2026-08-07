@@ -13,8 +13,6 @@
 
 // conversion tool includes
 
-#include "xAODTauCnv/ITauJetCnvTool.h"
-
 #include "xAODTrigMuonCnv/ICombinedMuonFeatureContainerCnvTool.h"
 #include "xAODTrigMuonCnv/IIsoMuonFeatureContainerCnvTool.h"
 #include "xAODTrigMuonCnv/ITrigMuonEFInfoToMuonCnvTool.h"
@@ -85,8 +83,6 @@ public:
 
   std::vector<std::pair<CLID,std::string> > m_clid_labels;
   std::vector<std::pair<CLID,std::string> > m_clid_newLabels; //Run-2 labels are not always the same as in Run 1
-
-  ToolHandle<xAODMaker::ITauJetCnvTool> m_tauJetTool;
 
   // xAODTrigMuonCnv
   ToolHandle<xAODMaker::ICombinedMuonFeatureContainerCnvTool> m_combMuonTool;

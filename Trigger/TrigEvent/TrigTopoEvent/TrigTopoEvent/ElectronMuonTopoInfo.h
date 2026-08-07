@@ -31,15 +31,6 @@
 #include "TrigMuonEvent/CombinedMuonFeature.h"
 #include "egammaEvent/egammaContainer.h"
 
-#include "tauEvent/TauJetContainer.h"
-#include "tauEvent/TauJet.h"
-#include "tauEvent/TauDetailsContainer.h"
-#include "tauEvent/TauCommonDetails.h"
-#include "tauEvent/TauCommonExtraDetails.h"
-#include "tauEvent/TauPID.h"
-
-
-
 /**
  * \class ElectronMuonTopoInfo
  * \brief ElectronMuonTopoInfo is a class for storing information about combuned electron-muon object. It stores angular distance, 
@@ -113,20 +104,6 @@ class ElectronMuonTopoInfo  {
 
   double invariantMass(double Pt1, double  eta1, double phi1,  double m1,
 		       double Pt2, double  eta2, double phi2,  double m2) const ;
-
-  // overloading for EF tau tau combinations
-  double deltaR(const Analysis::TauJet* tau1, const Analysis::TauJet* tau2);
-  double deltaPhi(const Analysis::TauJet* tau1, const Analysis::TauJet* tau2);
-  double invariantMass(const Analysis::TauJet* tau1, const Analysis::TauJet* tau2);
-  // overloading for EF tau e combinations
-  double deltaR(const Analysis::TauJet* tau1, const egamma* electron1);
-  double deltaPhi(const Analysis::TauJet* tau1, const egamma* electron1);
-  double invariantMass(const Analysis::TauJet* tau1, const egamma* electron1);
-  // overloading for EF tau mu combinations
-  double deltaR(const Analysis::TauJet* tau1, const Trk::Perigee* muon1);
-  double deltaPhi(const Analysis::TauJet* tau1, const Trk::Perigee* muon1);
-  double invariantMass(const Analysis::TauJet* tau1, const Trk::Perigee* muon1);
-  
 
   private:
   /** Identifier of the RoI. */

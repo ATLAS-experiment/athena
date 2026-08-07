@@ -19,7 +19,6 @@
 #include "TrigCaloEvent/TrigT2JetContainer.h"
 #include "TrigParticle/TrigTau.h"
 #include "TrigParticle/TrigTauContainer.h"
-#include "tauEvent/TauJetContainer.h"
 #include "JetEvent/JetCollection.h"
 #include "egammaEvent/egammaContainer.h"
 #include "egammaEvent/Electron.h"
@@ -33,13 +32,11 @@
   m1->matchToObject<Analysis::Electron,type>((type*)0, dvElectron); \
   m1->matchToObject<Analysis::Photon,type>((type*)0, dvPhoton); \
   m1->matchToObject<Analysis::Muon,type>((type*)0, dvMuon); \
-  m1->matchToObject<Analysis::TauJet,type>((type*)0, dvTau); \
   m1->matchToObject<Jet,type>((type*)0, dvJet); \
   m1->matchToObject<INavigable4Momentum,type>((type*)0, dvNavigable); \
   m1->matchToObjects<Analysis::Electron,type>((type*)0, dvElectron); \
   m1->matchToObjects<Analysis::Photon,type>((type*)0, dvPhoton); \
   m1->matchToObjects<Analysis::Muon,type>((type*)0, dvMuon); \
-  m1->matchToObjects<Analysis::TauJet,type>((type*)0, dvTau); \
   m1->matchToObjects<Jet,type>((type*)0, dvJet); \
   m1->matchToObjects<INavigable4Momentum,type>((type*)0, dvNavigable); \
 }
@@ -62,13 +59,11 @@ void nevercalled_TrigObjectMatchingARA(TrigMatchTool* m1) {
   DataVector<Analysis::Electron> dvElectron;
   DataVector<Analysis::Photon> dvPhoton;
   DataVector<Analysis::Muon> dvMuon;
-  DataVector<Analysis::TauJet> dvTau;
   DataVector<Jet> dvJet;
 
   FORCEOBJECTMATCH(Analysis::Electron);
   FORCEOBJECTMATCH(Analysis::Photon);
   FORCEOBJECTMATCH(Analysis::Muon);
-  FORCEOBJECTMATCH(Analysis::TauJet);
   FORCEOBJECTMATCH(Jet);
 
   FORCETRIGGERMATCH(TrigMatch::TrigMuonL1);
@@ -86,7 +81,6 @@ void nevercalled_TrigObjectMatchingARA(TrigMatchTool* m1) {
   FORCETRIGGERMATCH(TrigMatch::TrigJetEF);
   FORCETRIGGERMATCH(TrigMatch::TrigTauL1);
   FORCETRIGGERMATCH(TrigMatch::TrigTauL2);
-  FORCETRIGGERMATCH(TrigMatch::TrigTauEF);
 
 }
 

@@ -83,7 +83,6 @@
 #include "TrkTrack/TrackCollection.h"
 #include "Particle/TrackParticleContainer.h"
 
-#include "tauEvent/TauJetContainer.h"
 #include "xAODTau/TauJetContainer.h"
 
 #include "xAODEgamma/PhotonContainer.h"
@@ -363,7 +362,6 @@ namespace BStoXAODHelper{
   
 TrigBStoxAODTool::TrigBStoxAODTool(const std::string& type, const std::string& name, const IInterface* parent)
   : AthAlgTool(type,name,parent),
-    m_tauJetTool(      "xAODMaker::TauJetCnvTool/TauJetCnvTool",this),
     m_combMuonTool(    "xAODMaker::CombinedMuonFeatureContainerCnvTool/CombinedMuonFeatureContainerCnvTool",this),
     m_isoMuonTool(     "xAODMaker::IsoMuonFeatureContainerCnvTool/IsoMuonFeatureContainerCnvTool",this),
     m_trigMuonTool(    "TrigMuonEFInfoToMuonCnvTool/TrigMuonEFInfoToMuonCnvTool",this),
@@ -387,7 +385,6 @@ TrigBStoxAODTool::TrigBStoxAODTool(const std::string& type, const std::string& n
   declareProperty("ContainersToConvert",m_containersToConvert);
   declareProperty("NewContainers",   m_newContainers);
 
-  declareProperty("tauJetTool", m_tauJetTool);
   declareProperty("combMuonTool", m_combMuonTool);
   declareProperty("isoMuonTool", m_isoMuonTool);
   declareProperty("trigMuonTool", m_trigMuonTool);
@@ -513,13 +510,6 @@ StatusCode TrigBStoxAODTool::initialize(){
 		    (ClassID_traits<TrackCollection>::ID(),
 		     new BStoXAODHelper::DefaultHelper<
 		     TrackCollection,xAOD::TrackParticleContainer,xAODMaker::ITrackCollectionCnvTool,true>(m_trackCollectionTool)) );
-  
-  
-  m_helpers.insert( std::pair<CLID,BStoXAODHelper::DefaultHelper<
-		    Analysis::TauJetContainer,xAOD::TauJetContainer,xAODMaker::ITauJetCnvTool>* >
-		    (ClassID_traits<Analysis::TauJetContainer>::ID(),
-		     new BStoXAODHelper::DefaultHelper<
-		     Analysis::TauJetContainer,xAOD::TauJetContainer,xAODMaker::ITauJetCnvTool>(m_tauJetTool)) );
 
   m_helpers.insert( std::pair<CLID,BStoXAODHelper::DefaultHelper<
 		    CaloClusterContainer,xAOD::CaloClusterContainer,xAODMaker::ICaloClusterCnvTool>* >
