@@ -43,6 +43,9 @@ class OutputAnalysisConfig (ConfigBlock):
         self.addOption ('containersOnlyForDSIDs', {}, type=dict,
             info="specify which DSIDs are allowed to produce a given container. "
             "This works like `onlyForDSIDs`: pass a list of DSIDs or regexps.")
+        self.addOption ('varsOnlyForDSIDs', {}, type=dict,
+            info="specify which DSIDs are allowed to produce a given variable. "
+            "Pass a dictionary with the variable definition as key and a list of DSIDs/regexps as value.")
         self.addOption ('nonContainers', [], type=list,
             info="a list of container names that are not actual containers but should be treated as non-containers.")
         self.addOption ('treeName', 'analysis', type=str,
@@ -114,6 +117,7 @@ class OutputAnalysisConfig (ConfigBlock):
         self.containers = dict(self.containers)
         self.vars = set(self.vars)
         self.varsOnlyForMC = set(self.varsOnlyForMC)
+        self.varsOnlyForDSIDs = dict(self.varsOnlyForDSIDs)
         self.metVars = set(self.metVars)
         self.truthMetVars = set(self.truthMetVars)
 
@@ -170,6 +174,24 @@ class OutputAnalysisConfig (ConfigBlock):
                                 log.info("Skipping truth MET branch definition '%s' for excluded container %s...", var, var_container)
                         # remove the container from the list at the end
                         self.containers.pop (container)
+            # Filter individual variables depending on DSIDs
+            if self.varsOnlyForDSIDs:
+                for var_pattern, dsid_filters in self.varsOnlyForDSIDs.items():
+                    if not filter_dsids(dsid_filters, config):
+                        # Remove matching variables from user-defined vars collections
+                        for var in set(self.vars):
+                            if var_pattern in var:
+                                self.vars.remove(var)
+                                log.info("Skipping branch definition '%s' due to variable-level DSID filtering...", var)
+                        for var in set(self.metVars):
+                            if var_pattern in var:
+                                self.metVars.remove(var)
+                                log.info("Skipping MET branch definition '%s' due to variable-level DSID filtering...", var)
+                        for var in set(self.truthMetVars):
+                            if var_pattern in var:
+                                self.truthMetVars.remove(var)
+                                log.info("Skipping truth MET branch definition '%s' due to variable-level DSID filtering...", var)
+
 
         for prefix, container in self.containers.items():
             origName = config.getOutputContainerOrigin(container)
