@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -30,7 +30,7 @@ def TriggerRecoCfgData(flags):
     TrigBSExtraction -> TrigDecisionMaker -> DecisionConv to xAOD -> NavigationConv to xAOD
 
     Run 1 data:
-    as for Run 2 + Run 1 EDM to xAOD conversion
+    not supported anymore
     """
     log.debug("TriggerRecoCfgData: Preparing the trigger handling of reconstruction of data")
     acc = ComponentAccumulator()
@@ -52,14 +52,17 @@ def TriggerRecoCfgData(flags):
             from TrigNavSlimmingMT.TrigNavSlimmingMTConfig import TrigNavSlimmingMTCfg
             acc.merge(TrigNavSlimmingMTCfg(flags))
 
-    # Run 1+2
-    elif flags.Trigger.EDMVersion in [1, 2]:
-        acc.merge( Run1Run2BSExtractionCfg(flags) )
+    # Run 2
+    elif flags.Trigger.EDMVersion == 2:
+        acc.merge( Run2BSExtractionCfg(flags) )
 
         from TrigDecisionMaker.TrigDecisionMakerConfig import Run1Run2DecisionMakerCfg
         acc.merge (Run1Run2DecisionMakerCfg(flags) )
 
         acc.merge(Run2Run1NavigationSlimmingCfg(flags))
+    # Run 1
+    elif flags.Trigger.EDMVersion == 1:
+        raise RuntimeError("Run-1 trigger reconstruction is no longer supported")
     else:
         raise RuntimeError("Invalid EDMVersion=%s " % flags.Trigger.EDMVersion)
 
@@ -100,7 +103,6 @@ def TriggerRecoCfgMC(flags):
  
     Run 1 MC:
     No current workflows are able to run the Run 1 trigger MC simulation. Unsupported.
-    Work would be needed here to do the xAOD conversion (see Run1xAODConversionCfg for how this is done for data)
     """
 
     # Check for currently unsupported operational modes, these may be supported in the future if needed
@@ -245,7 +247,7 @@ def Run2Run1NavigationSlimmingCfg(flags):
     return acc
 
 
-def Run1Run2BSExtractionCfg( flags ):
+def Run2BSExtractionCfg( flags ):
     """Configures Trigger data from BS extraction """
     from SGComps.AddressRemappingConfig import InputRenameCfg
 
@@ -257,10 +259,6 @@ def Run1Run2BSExtractionCfg( flags ):
     extr.ExtraOutputs.add(("TrigBSExtractionOutput", "StoreGateSvc+TrigBSExtractionOutput"))
 
     if flags.Trigger.decodeHLT:
-        # Run-1: add xAOD conversion tool
-        if flags.Trigger.EDMVersion == 1 and flags.Trigger.doxAODConversion:
-            extr.BStoxAOD = acc.popToolsAndMerge( Run1xAODConversionCfg(flags) )
-
         serialiserTool = CompFactory.TrigTSerializer()
         acc.addPublicTool(serialiserTool)
         extr.NavigationForL2 = CompFactory.HLT.Navigation("NavigationForL2", 
@@ -320,46 +318,6 @@ def Run1Run2BSExtractionCfg( flags ):
 
     return acc
 
-def Run1xAODConversionCfg(flags):
-    """Convert Run 1 EDM collections to xAOD classes"""
-    acc = ComponentAccumulator()
-
-    log.info("Will configure Run 1 trigger EDM to xAOD conversion")
-    from TrigEDMConfig.TriggerEDM import getEFRun1BSList,getEFRun2EquivalentList,getL2Run1BSList,getL2Run2EquivalentList
-
-    from TrkConfig.TrkParticleCreatorConfig import TrackParticleCreatorToolCfg
-    partCreatorTool = acc.popToolsAndMerge(TrackParticleCreatorToolCfg(flags,
-                                                                       PixelToTPIDTool=None
-                                                                       )
-                                          )
-    acc.addPublicTool(partCreatorTool)
-
-    from xAODTrackingCnv.xAODTrackingCnvConfig import TrackCollectionCnvToolCfg,RecTrackParticleContainerCnvToolCfg
-    trackCollCnvTool = acc.popToolsAndMerge(TrackCollectionCnvToolCfg(flags,
-                                                                      name="TrackCollectionCnvTool",
-                                                                      TrackParticleCreator= partCreatorTool
-                                                                      )
-                                            )
-
-    recPartCnvTool = acc.popToolsAndMerge(RecTrackParticleContainerCnvToolCfg(flags,
-                                                                              name="RecParticleCnv",
-                                                                              TrackParticleCreator=partCreatorTool
-                                                                              )
-                                          )
-    
-    bstoxaodTool = CompFactory.TrigBStoxAODTool("BStoxAOD", 
-                                                ContainersToConvert = getL2Run1BSList() + getEFRun1BSList(), 
-                                                NewContainers = getL2Run2EquivalentList() + getEFRun2EquivalentList(),
-                                                TrackCollectionCnvTool = trackCollCnvTool,
-                                                TrackParticleContainerCnvTool = recPartCnvTool
-                                                )
-    acc.setPrivateTools(bstoxaodTool)
-
-    # write the xAOD (Run-2) classes to the output
-    acc.merge(addToESD(flags, edmDictToList(getTriggerEDMList(flags, key=flags.Trigger.ESDEDMSet, runVersion=2))))
-    acc.merge(addToAOD(flags, edmDictToList(getTriggerEDMList(flags, key=flags.Trigger.AODEDMSet, runVersion=2))))
-
-    return acc
 
 def Run3TriggerBSUnpackingCfg(flags):
     """Configures conversions BS -> HLTResultMT -> Collections """
@@ -447,6 +405,7 @@ def Run3TriggerBSUnpackingCfg(flags):
 if __name__ == '__main__':
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
+    import sys
 
     flags = initConfigFlags()
     args = flags.fillFromArgs()
@@ -457,7 +416,8 @@ if __name__ == '__main__':
         flags.Exec.MaxEvents = 5
         log.info('Checking setup for EDMVersion %d with default input files', flags.Trigger.EDMVersion)
         if flags.Trigger.EDMVersion==1:
-            flags.Input.Files = defaultTestFiles.RAW_RUN1
+            log.error('Run-1 reconstruction is no longer supported')
+            sys.exit(1)
         elif flags.Trigger.EDMVersion==2:
             flags.Input.Files = defaultTestFiles.RAW_RUN2
         elif flags.Trigger.EDMVersion==3:
@@ -473,5 +433,4 @@ if __name__ == '__main__':
     if log.getEffectiveLevel() <= logging.DEBUG:
         acc.printConfig(withDetails=True)
 
-    import sys
     sys.exit(acc.run().isFailure())
