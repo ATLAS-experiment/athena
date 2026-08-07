@@ -117,41 +117,47 @@ public:
 #endif
     return StatusCode::SUCCESS;
   }
+
+using IMCTruthClassifier::particleTruthClassifier;
+  
+protected:
   virtual std::pair<MCTruthPartClassifier::ParticleType, MCTruthPartClassifier::ParticleOrigin>
-  particleTruthClassifier(const xAOD::TruthParticle*,MCTruthPartClassifier::Info* info = nullptr) const override final;
+  particleTruthClassifier(const xAOD::TruthParticle*,IMCTruthClassifier::Info* info) const override final;
 
 #ifndef XAOD_ANALYSIS /*These can not run in Analysis Base*/
   virtual std::pair<MCTruthPartClassifier::ParticleType, MCTruthPartClassifier::ParticleOrigin>
-  particleHepMCTruthClassifier(const HepMcParticleLink& theLink,MCTruthPartClassifier::Info* info = nullptr) const override final;
+  particleHepMCTruthClassifier(const HepMcParticleLink& theLink,IMCTruthClassifier::Info* info) const override final;
 
 #endif
 
+public:
 #ifndef GENERATIONBASE /*These can not run in Generation only release*/
   //Main method for Track to Truth association
-  virtual const xAOD::TruthParticle* getGenPart(const xAOD::TrackParticle*, MCTruthPartClassifier::Info* info = nullptr) const override final;
+  virtual const xAOD::TruthParticle* getGenPart(const xAOD::TrackParticle*, IMCTruthClassifier::Info* info = nullptr) const override final;
 
 #ifndef XAOD_ANALYSIS
   //Main method for egamma clusters to Truth Particle association
-  virtual const xAOD::TruthParticle* egammaClusMatch(const xAOD::CaloCluster*,bool,MCTruthPartClassifier::Info* info) const override final;
+  virtual const xAOD::TruthParticle* egammaClusMatch(const xAOD::CaloCluster*,bool,IMCTruthClassifier::Info* info) const override final;
 #endif
 
+protected:
   virtual std::pair<MCTruthPartClassifier::ParticleType, MCTruthPartClassifier::ParticleOrigin>
-  particleTruthClassifier(const xAOD::TrackParticle*,MCTruthPartClassifier::Info* info = nullptr) const override final;
+  particleTruthClassifier(const xAOD::TrackParticle*,IMCTruthClassifier::Info* info) const override final;
 
   virtual std::pair<MCTruthPartClassifier::ParticleType, MCTruthPartClassifier::ParticleOrigin>
-  particleTruthClassifier(const xAOD::Electron*,MCTruthPartClassifier::Info* info = nullptr) const override final;
+  particleTruthClassifier(const xAOD::Electron*,IMCTruthClassifier::Info* info) const override final;
 
   virtual std::pair<MCTruthPartClassifier::ParticleType, MCTruthPartClassifier::ParticleOrigin>
-  particleTruthClassifier(const xAOD::Photon*,MCTruthPartClassifier::Info* info = nullptr) const override final;
+  particleTruthClassifier(const xAOD::Photon*,IMCTruthClassifier::Info* info) const override final;
 
   virtual std::pair<MCTruthPartClassifier::ParticleType, MCTruthPartClassifier::ParticleOrigin>
-  particleTruthClassifier(const xAOD::Muon*,MCTruthPartClassifier::Info* info = nullptr) const override final;
+  particleTruthClassifier(const xAOD::Muon*,IMCTruthClassifier::Info* info) const override final;
 
   virtual std::pair<MCTruthPartClassifier::ParticleType, MCTruthPartClassifier::ParticleOrigin>
-  particleTruthClassifier(const xAOD::CaloCluster*,MCTruthPartClassifier::Info* info = nullptr) const override final;
+  particleTruthClassifier(const xAOD::CaloCluster*,IMCTruthClassifier::Info* info) const override final;
 
   virtual std::pair<MCTruthPartClassifier::ParticleType, MCTruthPartClassifier::ParticleOrigin>
-  particleTruthClassifier(const xAOD::Jet*, bool DR, MCTruthPartClassifier::Info* info = nullptr) const override final;
+  particleTruthClassifier(const xAOD::Jet*, bool DR, IMCTruthClassifier::Info* info) const override final;
 #endif
 
 private:
@@ -159,27 +165,27 @@ private:
   MCTruthPartClassifier::ParticleOrigin defOrigOfElectron(const xAOD::TruthParticleContainer& xTruthParticleContainer,
                                                           const xAOD::TruthParticle*,
                                                           bool& isPrompt,
-                                                          MCTruthPartClassifier::Info& info) const;
+                                                          IMCTruthClassifier::Info& info) const;
 
   MCTruthPartClassifier::ParticleOrigin defOrigOfMuon(const xAOD::TruthParticleContainer& xTruthParticleContainer,
                                                       const xAOD::TruthParticle*,
                                                       bool& isPrompt,
-                                                      MCTruthPartClassifier::Info& info) const;
+                                                      IMCTruthClassifier::Info& info) const;
 
   MCTruthPartClassifier::ParticleOrigin defOrigOfTau(const xAOD::TruthParticleContainer& xTruthParticleContainer,
                                                      const xAOD::TruthParticle*,
                                                      int motherPDG,
-                                                     MCTruthPartClassifier::Info& info) const;
+                                                     IMCTruthClassifier::Info& info) const;
 
   MCTruthPartClassifier::ParticleOrigin defOrigOfPhoton(const xAOD::TruthParticleContainer& xTruthParticleContainer,
                                                         const xAOD::TruthParticle*,
                                                         bool& isPrompt,
-                                                        MCTruthPartClassifier::Info& info) const;
+                                                        IMCTruthClassifier::Info& info) const;
 
   MCTruthPartClassifier::ParticleOrigin defOrigOfNeutrino(const xAOD::TruthParticleContainer& xTruthParticleContainer,
                                                           const xAOD::TruthParticle*,
                                                           bool& isPrompt,
-                                                          MCTruthPartClassifier::Info& info) const;
+                                                          IMCTruthClassifier::Info& info) const;
 
 #if !defined(XAOD_ANALYSIS) && !defined(GENERATIONBASE)
   bool genPartToCalo(const EventContext& ctx,
