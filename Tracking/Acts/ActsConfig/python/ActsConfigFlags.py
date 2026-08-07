@@ -59,12 +59,28 @@ class TrackFitterType(FlagEnum):
 #   measurements for extending tracks (AnalogueClustering)
 # - or only apply the AnalogueClustering to selected measurements
 #   (AnalogueClusteringAfterSelection)
-# - or perform AnalogueClustering with NN corrections
+# - or add NN corrections, again either on the selected measurements
+#   (NNClustering) or on all candidates (NNClusteringBeforeSelection)
 class PixelCalibrationStrategy(FlagEnum):
     Uncalibrated = "Uncalibrated"
     AnalogueClustering = "AnalogueClustering"
     AnalogueClusteringAfterSelection = "AnalogueClusteringAfterSelection"
     NNClustering = "NNClustering"
+    NNClusteringBeforeSelection = "NNClusteringBeforeSelection"
+
+    def usesCalibration(self):
+        """whether a calibrator is needed at all"""
+        return self is not PixelCalibrationStrategy.Uncalibrated
+
+    def usesNN(self):
+        """whether NN corrections are applied on top"""
+        return self in (PixelCalibrationStrategy.NNClustering,
+                        PixelCalibrationStrategy.NNClusteringBeforeSelection)
+
+    def calibrateAfterSelection(self):
+        """whether only the selected measurements are calibrated"""
+        return self in (PixelCalibrationStrategy.AnalogueClusteringAfterSelection,
+                        PixelCalibrationStrategy.NNClustering)
 
 # Flag for strip calibration strategy during track finding
 # - use cluster as is (Uncalibrated)
@@ -75,7 +91,16 @@ class StripCalibrationStrategy(FlagEnum):
     Uncalibrated = "Uncalibrated"
     DigitalCalibration = "DigitalCalibration"
     DigitalCalibrationAfterSelection = "DigitalCalibrationAfterSelection"
-    
+
+    def usesCalibration(self):
+        """whether a calibrator is needed at all"""
+        return self is not StripCalibrationStrategy.Uncalibrated
+
+    def calibrateAfterSelection(self):
+        """whether only the selected measurements are calibrated"""
+        return self is StripCalibrationStrategy.DigitalCalibrationAfterSelection
+
+
 def createActsConfigFlags():
     actscf = AthConfigFlags()
     
@@ -163,7 +188,7 @@ def createActsConfigFlags():
                                                             pcf.Acts.PixelCalibrationStrategy is PixelCalibrationStrategy.AnalogueClusteringAfterSelection)) # forceTrackOnSeed does not seem to work with GBTS seeds and analogue cluster calibration
     actscf.addFlag('Acts.PixelNNCalibrationModelsFolder', 'ITkPixelClusterization/nn-01-01-01/') # location of models for pixel ONNX files, extpected content of the foder are: number.onnx, pos1.onnx, pos2.onnx, pos3.onnx
                                                                        # the files are located in /cvmfs/atlas.cern.ch/repo/sw/database/GroupData/
-                                                                       # this flag is used only if PixelCalibrationStrategy is PixelNN
+                                                                       # this flag is used only if PixelCalibrationStrategy is one of the NN strategies
         
     # Ambiguity resolution    
     actscf.addFlag('Acts.doAmbiguityResolution', True)

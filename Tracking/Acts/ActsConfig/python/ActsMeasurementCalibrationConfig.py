@@ -18,6 +18,7 @@ def ActsAnalogueClusteringToolCfg(flags,
     from ActsConfig.ActsConfigFlags import PixelErrorStrategy
 
     kwargs.setdefault("PerformCovarianceCalibration", flags.Acts.OnTrackCalibration.performCovarianceCalibration)
+    kwargs.setdefault("CalibrateAfterMeasurementSelection", flags.Acts.PixelCalibrationStrategy.calibrateAfterSelection())
     kwargs.setdefault("PixelOfflineCalibData", "ITkPixelOfflineCalibData")
     kwargs.setdefault("errorStrategy", PixelErrorStrategy.PITCH.value if flags.Acts.Clusters.UsePixelBroadErrors
                       else PixelErrorStrategy.CALIBRATED.value)
@@ -33,9 +34,8 @@ def ActsAnalogueClusteringToolCfg(flags,
         kwargs.setdefault("PixelLorentzAngleTool", acc.popToolsAndMerge(ITkPixelLorentzAngleToolCfg(flags)))
 
 
-    from ActsConfig.ActsConfigFlags import PixelCalibrationStrategy
     ClusteringToolType = None
-    if flags.Acts.PixelCalibrationStrategy is  PixelCalibrationStrategy.NNClustering:
+    if flags.Acts.PixelCalibrationStrategy.usesNN():
         ClusteringToolType = CompFactory.ActsTrk.ITkNNClusterCalibratorTool
         kwargs.setdefault("minClusterChargeForNN", 15000.0)
         from InDetConfig.SiClusterizationToolConfig import OnnxNNCondAlgCfg
@@ -63,6 +63,7 @@ def ActsStripCalibrationToolCfg(flags,
     from ActsConfig.ActsConfigFlags import StripClusteringErrorMode,StripErrorStrategy
 
     kwargs.setdefault("PerformCovarianceCalibration", True)
+    kwargs.setdefault("CalibrateAfterMeasurementSelection", flags.Acts.StripCalibrationStrategy.calibrateAfterSelection())
     kwargs.setdefault("errorStrategy", StripErrorStrategy.PITCH.value if flags.Acts.Clusters.StripClusteringErrorMode == StripClusteringErrorMode.WIDTH
                       else StripErrorStrategy.CLUSTERING.value)
 

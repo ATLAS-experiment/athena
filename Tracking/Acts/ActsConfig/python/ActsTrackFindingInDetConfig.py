@@ -178,34 +178,24 @@ def ActsInDetMainTrackFindingAlgCfg(flags,
     if 'PixelCalibrator' not in kwargs:
         from AthenaConfiguration.Enums import BeamType
 
-        if flags.Beam.Type is not BeamType.Cosmics:
-            from ActsConfig.ActsConfigFlags import PixelCalibrationStrategy
+        if flags.Beam.Type is not BeamType.Cosmics and flags.Acts.PixelCalibrationStrategy.usesCalibration():
             from ActsConfig.ActsMeasurementCalibrationConfig import ActsAnalogueClusteringToolCfg
-            
-            if flags.Acts.PixelCalibrationStrategy in (PixelCalibrationStrategy.AnalogueClustering,
-                                                       PixelCalibrationStrategy.AnalogueClusteringAfterSelection,
-                                                       PixelCalibrationStrategy.NNClustering):
 
-                kwargs.setdefault(
-                    'PixelCalibrator',
-                    acc.popToolsAndMerge(ActsAnalogueClusteringToolCfg(flags,
-                                                                       CalibrateAfterMeasurementSelection = flags.Acts.PixelCalibrationStrategy is PixelCalibrationStrategy.AnalogueClusteringAfterSelection))
-                )
+            kwargs.setdefault(
+                'PixelCalibrator',
+                acc.popToolsAndMerge(ActsAnalogueClusteringToolCfg(flags))
+            )
     # !!! Calibrator is not used for Inner Detector yet
     if 'StripCalibrator' not in kwargs:
         from AthenaConfiguration.Enums import BeamType
-        if flags.Beam.Type is not BeamType.Cosmics:
+
+        if flags.Beam.Type is not BeamType.Cosmics and flags.Acts.StripCalibrationStrategy.usesCalibration():
             from ActsConfig.ActsMeasurementCalibrationConfig import ActsStripCalibrationToolCfg
-            from ActsConfig.ActsConfigFlags import StripCalibrationStrategy
 
-            if flags.Acts.StripCalibrationStrategy in (StripCalibrationStrategy.DigitalCalibration,
-                                                       StripCalibrationStrategy.DigitalCalibrationAfterSelection) :
-
-                kwargs.setdefault(
-                    'StripCalibrator',
-                    acc.popToolsAndMerge(ActsStripCalibrationToolCfg(flags,
-                                                                     CalibrateAfterMeasurementSelection = flags.Acts.StripCalibrationStrategy is StripCalibrationStrategy.DigitalCalibrationAfterSelection))
-                )
+            kwargs.setdefault(
+                'StripCalibrator',
+                acc.popToolsAndMerge(ActsStripCalibrationToolCfg(flags))
+            )
 
     if flags.Acts.doMonitoring and 'MonTool' not in kwargs:
         from ActsConfig.ActsMonitoringConfig import ActsTrackFindingMonitoringToolCfg
