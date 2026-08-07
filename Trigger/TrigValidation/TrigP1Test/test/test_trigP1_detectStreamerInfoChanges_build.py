@@ -4,7 +4,6 @@
 # art-description: Detect TStreamerInfo changes of classes in the given build
 # art-type: build
 # art-include: main/Athena/x86_64-el9-gcc14-opt
-# art-include: 24.0/Athena
 # Skipping art-output which has no effect for build tests.
 #
 # The test performs the following:
