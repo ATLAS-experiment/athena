@@ -141,6 +141,20 @@ def buildPFlowSel_noLeptons(parentjetdef,spec):
                                               NeutralPFlowOutputContainer = "GlobalNeutralParticleFlowObjects_noLeptons"
                                              )
 
+#Same as buildPFlowSel but with charged and neutrals linked to muons included.
+def buildPFlowSel_inclMuons(parentjetdef,spec):
+    return  CompFactory.JetPFlowSelectionAlg( "pflowselalg_inclMuons",
+                                              muonIDToInclude = "Loose",
+                                              excludeChargedMuonFE=False,
+                                              includeChargedMuonFE=True,
+                                              includeNeutralMuonFE=True,
+                                              ChargedPFlowInputContainer  = "JetETMissChargedParticleFlowObjects",
+                                              NeutralPFlowInputContainer  = "JetETMissNeutralParticleFlowObjects",
+                                              ChargedPFlowOutputContainer = "GlobalChargedParticleFlowObjects_inclMuons",
+                                              NeutralPFlowOutputContainer = "GlobalNeutralParticleFlowObjects_inclMuons"
+                                            )
+
+
 ########################################################################
 
 def buildEventShapeAlg(jetOrConstitdef, inputspec, voronoiRf = 0.9, radius = 0.4, suffix = None ):
