@@ -667,7 +667,10 @@ StatusCode RootDatabase::setOption(const DbOption& opt)  {
        }
        else if ( !strcasecmp(n+5,"MAX_VIRTUAL_SIZE") )  {
           ATH_MSG_DEBUG("Request virtual tree size");
-          if ( !m_file ) return FAILURE;
+          if (!m_file) {
+             ATH_MSG_DEBUG("Could not find tree " << opt.option() << ", no TREE_MAX_VIRTUAL_SIZE will be set");
+             return SUCCESS;
+          }
           ATH_MSG_DEBUG("File name " << name());
 
           int virtMaxSize = 0;
@@ -690,7 +693,10 @@ StatusCode RootDatabase::setOption(const DbOption& opt)  {
        }
        else if ( !strcasecmp(n+5,"CACHE") )  {
            ATH_MSG_DEBUG("Request tree cache");
-           if( !m_file ) return FAILURE;
+           if (!m_file) {
+               ATH_MSG_DEBUG("Could not find tree " << m_treeNameWithCache << ", no TREE_CACHE will be set");
+               return SUCCESS;
+           }
            ATH_MSG_DEBUG("File name " << name());
 
            int cacheSize = 0;
