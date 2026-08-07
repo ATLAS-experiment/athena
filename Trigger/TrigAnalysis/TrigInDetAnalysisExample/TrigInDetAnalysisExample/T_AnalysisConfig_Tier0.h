@@ -68,9 +68,6 @@
 
 #include "egammaEvent/ElectronContainer.h"
 
-#include "tauEvent/TauJetContainer.h"
-
-
 #include "TrigSteeringEvent/HLTResult.h"
 #include "TrigDecisionTool/ExpertMethods.h"
 

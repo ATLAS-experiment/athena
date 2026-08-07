@@ -49,7 +49,6 @@ namespace TrigMatch {
   // taus
   typedef EmTau_ROI             TrigTauL1;
   typedef TrigTau               TrigTauL2;
-  typedef Analysis::TauJet      TrigTauEF;
 
 }
 

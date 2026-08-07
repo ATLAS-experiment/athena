@@ -7,7 +7,7 @@ atlas_subdir( TrigObjectMatching )
 atlas_add_library( TrigObjectMatchingLib
                    src/*.cxx
                    PUBLIC_HEADERS TrigObjectMatching
-                   LINK_LIBRARIES AnalysisTriggerEvent AthContainers AthenaBaseComps AthenaKernel CxxUtils EventKernel GaudiKernel JetEvent TrigCaloEvent TrigDecisionToolLib TrigMuonEvent TrigParticle TrigSteeringEvent egammaEvent muonEvent tauEvent
+                   LINK_LIBRARIES AnalysisTriggerEvent AthContainers AthenaBaseComps AthenaKernel CxxUtils EventKernel GaudiKernel JetEvent TrigCaloEvent TrigDecisionToolLib TrigMuonEvent TrigParticle TrigSteeringEvent egammaEvent muonEvent
                    )
 
 atlas_add_component( TrigObjectMatching

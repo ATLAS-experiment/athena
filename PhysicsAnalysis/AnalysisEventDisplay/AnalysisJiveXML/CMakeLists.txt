@@ -11,5 +11,5 @@ atlas_add_component( AnalysisJiveXML
                      src/*.cxx
                      src/components/*.cxx
                      INCLUDE_DIRS ${CLHEP_INCLUDE_DIRS}
-                     LINK_LIBRARIES ${CLHEP_LIBRARIES} AthContainers AthLinks AthenaBaseComps CaloEvent CaloGeoHelpers CompositeParticleEvent GaudiKernel JetEvent JiveXMLLib McParticleEvent Particle TrigCaloEvent TrkEventPrimitives egammaEvent muonEvent tauEvent )
+                     LINK_LIBRARIES ${CLHEP_LIBRARIES} AthContainers AthLinks AthenaBaseComps CaloEvent CaloGeoHelpers CompositeParticleEvent GaudiKernel JetEvent JiveXMLLib McParticleEvent Particle TrigCaloEvent TrkEventPrimitives egammaEvent muonEvent )
 

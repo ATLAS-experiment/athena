@@ -27,9 +27,6 @@ The AlgTools, all inheriting from JiveXML::DataRetriever, are the following:
    - JiveXML::MuonRetriever : m_storeGate->retrieve(MuonContainer*, m_sgKey). Property:
       - StoreGateKey : ( default "StacoMuonCollection" ) the StoreGate location of the MuonContainer.
 
-   - JiveXML::TauJetRetriever : m_storeGate->retrieve(Analysis::TauJetContainer, m_sgKey). Property:
-      - StoreGateKey : ( default "TauJetCollection" ) the StoreGate location of the Analysis::TauJetContainer. 
-
    - JiveXML::ElectronRetriever : m_storeGate->retrieve(ElectronContainer*, m_sgKey). Property:
       - StoreGateKey : ( default "ElectronAODCollection" ) the StoreGate location of the ElectronContainer.
 

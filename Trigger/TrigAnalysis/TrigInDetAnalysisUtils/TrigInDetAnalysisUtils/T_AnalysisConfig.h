@@ -44,7 +44,6 @@
 #else
 #include "muonEvent/MuonContainer.h"
 #include "egammaEvent/ElectronContainer.h"
-#include "tauEvent/TauJetContainer.h"
 #endif
 
 class MsgSvc;
@@ -848,18 +847,10 @@ unsigned processTaus( TrigTrackSelector& selectorRef,
 		      const unsigned selection=0,
 		      int            requireNtracks=0,
 		      double         EtCutOffline=0,
-#                     ifdef XAODTRACKING_TRACKPARTICLE_H
 		      const std::string& containerName = "TauJets"
-#                     else
-		      const std::string& containerName = "TauRecContainer"
-#                     endif
 			   ) {
 
-# ifdef XAODTRACKING_TRACKPARTICLE_H
   typedef xAOD::TauJetContainer     Container;
-# else
-  typedef Analysis::TauJetContainer Container;
-# endif
 
   selectorRef.clear();
 
@@ -886,9 +877,6 @@ unsigned processTaus( TrigTrackSelector& selectorRef,
 
   for ( ; tau!=tau_end ; ++tau ) {
 
-#   ifdef XAODTRACKING_TRACKPARTICLE_H
-    //      unsigned N = (*tau)->nTracks();
-
 #   ifndef XAODTAU_VERSIONS_TAUJET_V3_H
     int N = (*tau)->nTracks();
     // std::cout << "SUTT no tau detail " << N << "\t3prong: " << doThreeProng << std::endl;
@@ -898,17 +886,8 @@ unsigned processTaus( TrigTrackSelector& selectorRef,
     // std::cout << "SUTT tau detail: N " << N << "\t3prong: " << doThreeProng << std::endl;
 #   endif
 
-#   else
-    unsigned N = (*tau)->numTrack();
-#   endif
-
-
     bool good_tau = false;
-#   ifdef XAODTRACKING_TRACKPARTICLE_H
     good_tau = TIDA::isGoodOffline( *(*tau), selection, requireNtracks, EtCutOffline );
-#   else
-    good_tau = TIDA::isGoodOffline( *(*tau), requireNtracks, EtCutOffline );
-#   endif
 
     //   std::cout << "SUTT tau ntracks: " << N << "\tgoodtau: " << good_tau << "\tpt: " << (*tau)->p4().Et() << "\t3prong: " << doThreeProng << std::endl;
 

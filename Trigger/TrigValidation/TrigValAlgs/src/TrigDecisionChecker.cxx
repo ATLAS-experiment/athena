@@ -25,11 +25,6 @@
 // include these tau navigation check
 #include "TrigParticle/TrigTau.h"
 //#include "TrigCaloEvent/TrigTauCluster.h"
-#include "tauEvent/TauJet.h"
-#include "tauEvent/TauJetContainer.h"
-#include "tauEvent/TauDetailsContainer.h"
-#include "tauEvent/Tau1P3PDetails.h"
-#include "tauEvent/TauRecDetails.h"
 
 #include "xAODTau/TauJetContainer.h"
 #include "xAODTrigBphys/TrigBphysContainer.h"

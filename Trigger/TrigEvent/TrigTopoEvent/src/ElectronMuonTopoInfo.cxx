@@ -310,41 +310,6 @@ double ElectronMuonTopoInfo::deltaPhi(const egamma* electron1,
   
   return distEmu;
 }
-//EF tau tau 
-double ElectronMuonTopoInfo::deltaPhi(const Analysis::TauJet* tau1, 
-				      const Analysis::TauJet* tau2) {
-  double dPhi = tau1->phi()-tau2->phi();
-  if (dPhi < -M_PI) dPhi += 2*M_PI;
-  if (dPhi > M_PI) dPhi -= 2*M_PI;
-  double distEmu = fabs(dPhi);
-  
-  return distEmu;
-}
-
-//EF tau e 
-double ElectronMuonTopoInfo::deltaPhi(const Analysis::TauJet* tau1, 
-				      const egamma* electron1) {
-  double dPhi = tau1->phi()-electron1->trackParticle()->phi();
-  if (dPhi < -M_PI) dPhi += 2*M_PI;
-  if (dPhi > M_PI) dPhi -= 2*M_PI;
-  double distEmu = fabs(dPhi);
-  
-  return distEmu;
-}
-
-//EF tau mu
-double ElectronMuonTopoInfo::deltaPhi(const Analysis::TauJet* tau1, 
-				      const Trk::Perigee* muon1) {
-  float mu_phi = muon1->parameters()[Trk::phi];
-
-  double dPhi = tau1->phi()-mu_phi;
-  if (dPhi < -M_PI) dPhi += 2*M_PI;
-  if (dPhi > M_PI) dPhi -= 2*M_PI;
-  double distEmu = fabs(dPhi);
-  
-  return distEmu;
-}
-
 
 //EF
 double ElectronMuonTopoInfo::deltaR(const egamma* electron1, 
@@ -359,45 +324,6 @@ double ElectronMuonTopoInfo::deltaR(const egamma* electron1,
   
   return distEmu;
 }
-
-//EF tautau
-double ElectronMuonTopoInfo::deltaR( const Analysis::TauJet* tau1, 
-				     const Analysis::TauJet* tau2) {
-  double dPhi = tau1->phi()-tau2->phi();
-  if (dPhi < -M_PI) dPhi += 2*M_PI;
-  if (dPhi > M_PI) dPhi -= 2*M_PI;
-  double dEta = tau1->eta() - tau2->eta();
-  double distEmu = sqrt(dPhi*dPhi+dEta*dEta);
-  
-  return distEmu;
-}
-
-//EF tau e
-double ElectronMuonTopoInfo::deltaR( const Analysis::TauJet* tau1, 
-				     const egamma* electron1) {
-  double dPhi = tau1->phi()-electron1->trackParticle()->phi();
-  if (dPhi < -M_PI) dPhi += 2*M_PI;
-  if (dPhi > M_PI) dPhi -= 2*M_PI;
-  double dEta = tau1->eta() - electron1->trackParticle()->eta();
-  double distEmu = sqrt(dPhi*dPhi+dEta*dEta);
-  
-  return distEmu;
-}
-
-//EF tau mu
-double ElectronMuonTopoInfo::deltaR( const Analysis::TauJet* tau1, 
-				     const Trk::Perigee* muon1) {
-  float mu_phi =muon1->parameters()[Trk::phi];
-
-  double dPhi = tau1->phi()-mu_phi;
-  if (dPhi < -M_PI) dPhi += 2*M_PI;
-  if (dPhi > M_PI) dPhi -= 2*M_PI;
-  double dEta = tau1->eta() - muon1->eta();
-  double distEmu = sqrt(dPhi*dPhi+dEta*dEta);
-  
-  return distEmu;
-}
-
 
 // L2
 double ElectronMuonTopoInfo::invariantMass(const TrigElectron* electron1, 
@@ -463,57 +389,6 @@ double ElectronMuonTopoInfo::invariantMass( const TrigTau* tau1,
   
   double phi1   = tau1->phi();
   double phi2   = muon1->IDTrack()->param()->phi0();
-
-  return invariantMass(Pt1, eta1, phi1, ParticleConstants::tauMassInMeV, Pt2, eta2, phi2, ParticleConstants::muonMassInMeV);//tau mass used
-}
-
-// EF tautau
-double ElectronMuonTopoInfo::invariantMass( const Analysis::TauJet* tau1, 
-					    const Analysis::TauJet* tau2) {
-  // get parameters: not electron pT no longer signed
-  double eta1   = tau1->eta();
-  double eta2   = tau2->eta();
-  
-  
-  double Pt1    = tau1->pt() ; // IMPORTANT: pt() is the 4-momentum base class method and 
-  double Pt2    = tau2->pt();  // it returns the cluster pT; the track pT is given by Pt()
-  
-  double phi1   = tau1->phi();
-  double phi2   = tau2->phi();
-
-  return invariantMass(Pt1, eta1, phi1, ParticleConstants::tauMassInMeV, Pt2, eta2, phi2, ParticleConstants::tauMassInMeV);//tau mass used
-}
-
-
-// EF tautau
-double ElectronMuonTopoInfo::invariantMass( const Analysis::TauJet* tau1, 
-					    const egamma* electron1) {
-  // get parameters: not electron pT no longer signed
-  double eta1   = tau1->eta();
-  double eta2   = electron1->trackParticle()->eta();
-
-  
-  double Pt1    = tau1->pt() ; // IMPORTANT: pt() is the 4-momentum base class method and 
-  double Pt2    = electron1->cluster()->e()/cosh(electron1->trackParticle()->eta()) ; //
-
-  double phi1   = tau1->phi();
-  double phi2   = electron1->trackParticle()->phi();
-
-  return invariantMass(Pt1, eta1, phi1, ParticleConstants::tauMassInMeV, Pt2, eta2, phi2, ParticleConstants::electronMassInMeV);//tau mass used
-}
-// EF tautau
-double ElectronMuonTopoInfo::invariantMass( const Analysis::TauJet* tau1, 
-					    const Trk::Perigee* muon1) {
-  // get parameters: not electron pT no longer signed
-  double eta1   = tau1->eta();
-  double eta2   = muon1->eta();
-
-  
-  double Pt1    = tau1->pt() ; // IMPORTANT: pt() is the 4-momentum base class method and 
-  double Pt2    = muon1->pT() ; //
-
-  double phi1   = tau1->phi();
-  double phi2 = muon1->parameters()[Trk::phi];
 
   return invariantMass(Pt1, eta1, phi1, ParticleConstants::tauMassInMeV, Pt2, eta2, phi2, ParticleConstants::muonMassInMeV);//tau mass used
 }

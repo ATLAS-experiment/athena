@@ -63,8 +63,6 @@ HLT_BEGIN_TYPE_REGISTRATION
   HLT_REGISTER_TYPE(class Jet, class  JetCollection,class JetCollection )
   HLT_REGISTER_TYPE(class egamma, class  egammaContainer,class egammaContainer)
   HLT_REGISTER_TYPE(class egDetail, class egDetailContainer, class egDetailContainer )
-  HLT_REGISTER_TYPE(Analysis::TauDetails, Analysis::TauDetailsContainer,  Analysis :: TauDetailsContainer )
-  HLT_REGISTER_TYPE(Analysis::TauJet, Analysis::TauJetContainer, Analysis::TauJetContainer )
 
   // xAOD
   //  HLT_REGISTER_TYPE(xAOD::Egamma, xAOD::EgammaContainer, xAOD::EgammaContainer, xAOD::EgammaAuxContainer)  

@@ -47,8 +47,6 @@
 
 #include "egammaEvent/ElectronContainer.h"
 
-#include "tauEvent/TauJetContainer.h"
-
 //#include "JetEvent/JetCollection.h"
 
 #include "TrigSteeringEvent/HLTResult.h"
