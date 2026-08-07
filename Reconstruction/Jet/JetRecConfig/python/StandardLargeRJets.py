@@ -133,6 +133,16 @@ AntiKt10UFOCSSK_noLeptons = JetDefinition("AntiKt",1.0,cst.UFOCSSK_noLeptons,
                                           ghostarea = 0.,                                          
                                           )
 
+#Same as AntiKt10UFOCSSK but with charged and neutrals linked to muons included.
+AntiKt10UFOCSSK_inclMuons = JetDefinition("AntiKt",1.0,cst.UFOCSSK_inclMuons,
+                                            ghostdefs = standardghosts+flavourghosts+["AntiKtVR30Rmax4Rmin02PV0TrackJets"],
+                                            modifiers = ("Sort", "Filter:50000","TrackMoments","JetGhostLabel","PartonTruthLabel"),
+                                            standardRecoMode = True,
+                                            ghostarea = 0.,
+                                            )
+
+
+
 AntiKt10UFOCSSKSoftDrop = JetSoftDrop(AntiKt10UFOCSSK,
                                       #A filter of 1 GeV is applied before the calibration to remove jets with zero constituents after the soft drop alg is applied
                                       modifiers = ("Filter:1000","Calib:SoftDrop:mc","Filter:100000","JetGhostLabel")+standardrecomods+substrmods+ufo_softdrop_mods+truthlabels_SD+ufo_dnn_moments,
@@ -161,6 +171,14 @@ AntiKt10UFOCSSKSoftDrop_noLeptons = JetSoftDrop(AntiKt10UFOCSSK_noLeptons,
                                                 modifiers = ("Filter:1000","Calib:SoftDrop:mc","Filter:100000","Sort","JetGhostLabel")+standardrecomods+substrmods+ufo_softdrop_mods+truthlabels_SD+ufo_dnn_moments,
                                                 Beta = 1., ZCut= 0.1,
                                                 )
+
+#Same as AntiKt10UFOCSSK but with charged and neutrals linked to muons included.
+AntiKt10UFOCSSKSoftDrop_inclMuons = JetSoftDrop(AntiKt10UFOCSSK_inclMuons,
+                                                  #A filter of 1 GeV is applied before the calibration to remove jets with zero constituents after the soft drop alg is applied
+                                                  modifiers = ("Filter:1000","Calib:SoftDrop:mc","Filter:100000","Sort","JetGhostLabel")+standardrecomods+substrmods+ufo_softdrop_mods+truthlabels_SD+ufo_dnn_moments,
+                                                  Beta = 1., ZCut= 0.1,
+                                                  ) 
+
 
 AntiKt10UFOCSSKSoftDrop_trigger = JetSoftDrop(AntiKt10UFOCSSK,
                                               #A filter of 1 GeV is applied before the calibration to remove jets with zero constituents after the soft drop alg is applied

@@ -123,6 +123,13 @@ AntiKt4EMPFlow_noLeptons = JetDefinition("AntiKt",0.4,cst.GPFlow_noLeptons,
                                     lock = True
 )
 
+#Same as AntiKt4EMPFlow but with charged and neutrals linked to muons included.
+AntiKt4EMPFlow_inclMuons = JetDefinition("AntiKt",0.4,cst.GPFlow_inclMuons,
+                                    ghostdefs = standardghosts+flavourghosts,
+                                    modifiers = calibmods+truthmods+standardmods+("Filter_calibThreshold:10000","JetGhostLabel","LArHVCorr","jetiso"),
+                                    lock = True
+)
+
 AntiKt4EMPFlow_tauSeedEleRM = JetDefinition("AntiKt",0.4,cst.GPFlow_tauSeedEleRM,
                                     ghostdefs = standardghosts+flavourghosts,
                                     modifiers = calibmods+truthmods+standardmods+("Filter_calibThreshold:10000","JetGhostLabel","LArHVCorr","jetiso"),

@@ -195,6 +195,12 @@ _stdInputList = [
                      prereqs = ["input:JetETMissParticleFlowObjects", ],
                      ),
 
+    #Same as GlobalParticleFlowObjects but with charged and neutrals linked to muons included.
+    JetInputExternal("GlobalParticleFlowObjects_inclMuons", xAODType.FlowElement,
+                     algoBuilder = inputcfg.buildPFlowSel_inclMuons,
+                     prereqs = ["input:JetETMissParticleFlowObjects", ],
+                    ),
+
     JetInputExternal("GlobalParticleFlowObjects_tauSeedEleRM", xAODType.FlowElement,
                      algoBuilder = inputcfg.buildPFlowSel_tauSeedEleRM,
                      prereqs = ["input:JetETMissParticleFlowObjects", ],
@@ -367,6 +373,15 @@ _stdInputList = [
                      algoBuilder = lambda jdef,_ : tcccfg.runUFOReconstruction(jdef._cflags, stdConstitDic['GPFlowCSSK_noLeptons'])
                      ),
     
+    #Same as UFOCSSK but with charged and neutrals linked to muons included.
+    JetInputExternal("UFOCSSK_inclMuons", xAODType.FlowElement,
+                     prereqs =lambda parentjdef :  [] if (isAnalysisRelease() or 'UFOCSSK_inclMuons' in parentjdef._cflags.Input.Collections ) else ['input:GPFlowCSSK_inclMuons'],
+                     filterfn =  lambda flag : ( (not isAnalysisRelease() or 'UFOCSSK_inclMuons' in flag.Input.Collections),  "Can't build UFO in Analysis projects and not UFOCSSK in input") ,
+                     algoBuilder = lambda jdef,_ : tcccfg.runUFOReconstruction(jdef._cflags, stdConstitDic['GPFlowCSSK_inclMuons'])
+                     ),
+
+
+
     JetInputExternal("UFO", xAODType.FlowElement,
                      prereqs = ['input:GPFlow'],
                      algoBuilder = lambda jdef,_ : tcccfg.runUFOReconstruction(jdef._cflags, stdConstitDic['GPFlow'])
@@ -458,6 +473,10 @@ _stdSeqList = [
     JetInputConstitSeq("GPFlow_noLeptons", xAODType.FlowElement,["CorrectPFO", "CHS"] , 'GlobalParticleFlowObjects_noLeptons', 'CHSGParticleFlowObjects_noLeptons',
                        label='EMPFlow_noLeptons'),
 
+    #Same as GPFlow but with charged and neutrals linked to muons included.
+    JetInputConstitSeq("GPFlow_inclMuons", xAODType.FlowElement,["CorrectPFO", "CHS"] , 'GlobalParticleFlowObjects_inclMuons', 'CHSGParticleFlowObjects_inclMuons',
+                       label='EMPFlow_inclMuons'),
+
     #GPFlow with tau seed electrons removed
     JetInputConstitSeq("GPFlow_tauSeedEleRM", xAODType.FlowElement,["CorrectPFO", "CHS"] , 'GlobalParticleFlowObjects_tauSeedEleRM', 'CHSGParticleFlowObjects_tauSeedEleRM',
                         label='EMPFlow_tauSeedEleRM'),
@@ -483,6 +502,11 @@ _stdSeqList = [
     JetInputConstitSeq("GPFlowCSSK_noLeptons", xAODType.FlowElement,["CorrectPFO",  "CS","SK", "CHS"] ,
                        'GlobalParticleFlowObjects_noLeptons', 'CSSKGParticleFlowObjects_noLeptons', jetinputtype="EMPFlow", label='EMPFlowCSSK_noLeptons'),
 
+    #Same as GPFlowCSSK but with charged and neutrals linked to muons included.
+    JetInputConstitSeq("GPFlowCSSK_inclMuons", xAODType.FlowElement,["CorrectPFO",  "CS","SK", "CHS"] ,
+                       'GlobalParticleFlowObjects_inclMuons', 'CSSKGParticleFlowObjects_inclMuons', jetinputtype="EMPFlow", label='EMPFlowCSSK_inclMuons'),
+
+
     JetInputConstit("UFOCSSK", xAODType.FlowElement, "UFOCSSK" ),
 
     JetInputConstit("UFOCSSK_noElectrons", xAODType.FlowElement, "UFOCSSK_noElectrons" ),
@@ -491,6 +515,9 @@ _stdSeqList = [
 
     JetInputConstit("UFOCSSK_noLeptons", xAODType.FlowElement, "UFOCSSK_noLeptons" ),
     
+    #Same as UFOCSSK but with charged and neutrals linked to muons included.
+    JetInputConstit("UFOCSSK_inclMuons", xAODType.FlowElement, "UFOCSSK_inclMuons" ),
+
     JetInputConstit("UFO", xAODType.FlowElement, "UFO" ),
     
     # *****************************
