@@ -369,7 +369,7 @@ public:
     double constant = theTF1->GetParameter(4);
 
     if (amp > 1e-6) return constant / amp;
-    else return 1;
+    else return -1;
   }
 
   virtual double operator()(const double *x, const double *p)  override{
@@ -947,7 +947,7 @@ public:
   {
     const TF1* theTF1 = ZDCFitWrapper::GetWrapperTF1();
     double amp = theTF1->GetParameter(0);
-    if (amp <= 0) return -1;
+    if (amp < 1e-6) return -1;
 
     double maxTime = GetTime();
     
@@ -1088,7 +1088,7 @@ public:
     double maxTime = GetTime();
 
     double amp = theTF1->GetParameter(0);
-    if (amp <= 0) return -1;
+    if (amp < 1e-6) return -1;
     
     double preAmp = theTF1->GetParameter(2);
     double preT0 = theTF1->GetParameter(3);
