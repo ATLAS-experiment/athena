@@ -79,7 +79,7 @@ public:
 
   static const std::string& pythia_stream();
   static std::string xmlpath();
-  
+
 protected:
 
   bool useRndmGenSvc() const { return m_useRndmGenSvc; }
@@ -121,7 +121,7 @@ private:
   std::vector<std::string> m_userParams;
   std::vector<std::string> m_userModes;
 
-  enum PDGID {PROTON=2212, ANTIPROTON=-2212, LEAD=1000822080, OXYGEN=1000080160, HELIUM= 1000020040, NEUTRON=2112, ANTINEUTRON=-2112, MUON=13, ANTIMUON=-13, ELECTRON=11, POSITRON=-11, INVALID=0};
+  enum PDGID {PROTON=2212, ANTIPROTON=-2212, LEAD=1000822080, INDIUM=1000491150, KRYPTON=1000360840, CALCIUM=1000200400, ARGON=1000180400, MAGNESIUM=1000120240, NEON=1000100200, OXYGEN=1000080160, BORON=1000050110, HELIUM= 1000020040, NEUTRON=2112, ANTINEUTRON=-2112, MUON=13, ANTIMUON=-13, ELECTRON=11, POSITRON=-11, INVALID=0};
 
   DoubleProperty m_collisionEnergy{this, "CollisionEnergy", 14000.0};
 
