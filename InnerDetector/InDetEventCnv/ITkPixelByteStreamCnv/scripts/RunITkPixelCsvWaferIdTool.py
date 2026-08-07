@@ -78,13 +78,21 @@ print("  Note: the algorithm execution writes one front end per line to the outp
 print("  32-bit waferID+feID, 32-bit waferID+feID, FELIX Card Name, Uplink Pin, DMA buffer, SourceID")
 
 print("  Converting csv to json....")
+
+print("JSON retaining:  32-bit waferID+feID, 32-bit waferID+feID, SourceID")
 if os.path.isfile(args.output_file+".json"):
     print(f"File {args.output_file}.json exists, will overwrite it")
 
-f = open(args.output_file+".json", "w")
-with open(args.output_file, newline='') as csvfile:
-    f.write(json.dumps([dict(r) for r in csv.DictReader(csvfile)]))
-f.close()
+with open(args.output_file+".json", "w") as f, open(args.output_file, newline='') as csvfile:
+    reader = csv.DictReader(csvfile)
+    fieldnames = reader.fieldnames or []
+    desired_names = ["DetectorResourceID", "True DetectorResourceID", "SourceID"]
+    selected_names = [name for name in desired_names if name in fieldnames]
+    if not selected_names:
+        selected_indices = [0, 1, 5]
+        selected_names = [fieldnames[i] for i in selected_indices if i < len(fieldnames)]
+    rows = [{name: row[name] for name in selected_names} for row in reader]
+    f.write(json.dumps(rows))
 
 
 print("  Done !!")
