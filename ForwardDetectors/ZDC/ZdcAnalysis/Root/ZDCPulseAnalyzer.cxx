@@ -1496,8 +1496,6 @@ bool ZDCPulseAnalyzer::AnalyzeData(size_t nSamples, size_t preSampleIdx,
       if ((sampleSig > 5 && sampleSig > 0.02*m_minDeriv2ndSig) || sampleSig > 0.5*m_minDeriv2ndSig) {
 	m_preExpTail = true;
 
-	// std::cout << "Found preExpTail at sample " << isample << ", sampleSig = " << sampleSig
-	// 	  << ", m_minDeriv2ndSig = " << m_minDeriv2ndSig << std::endl;
 	if (sampleSig > m_preExpSig) m_preExpSig = sampleSig;
       }
     }
