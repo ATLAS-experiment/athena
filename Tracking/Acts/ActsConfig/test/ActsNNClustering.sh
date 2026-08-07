@@ -1,6 +1,9 @@
 #!/usr/bin/bash
 # Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
+# NN pixel cluster calibration applied to the measurements selected by the CKF
+# (NNClustering == calibrate after measurement selection)
+
 # ttbar mu=200 input
 input_rdo=$(python -c "from AthenaConfiguration.TestDefaults import defaultTestFiles; print(defaultTestFiles.RDO_RUN4[0])")
 conditions_tag=$(python -c "from AthenaConfiguration.TestDefaults import defaultConditionsTags; print(defaultConditionsTags.RUN4_MC)")
