@@ -1,29 +1,19 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
-#include "MuonCalibStreamCnv/EventInfoCalibRawDataProvider.h"
 
-#include <time.h>
-#include <iostream>
-#include <memory>
+#include "MuonCalibStreamCnv/EventInfoCalibRawDataProvider.h"
 
 #include "AthenaBaseComps/AthCheckMacros.h"
 #include "AthenaBaseComps/AthMsgStreamMacros.h"
-// #include "EventInfo/EventID.h"
-// #include "EventInfo/EventInfo.h"
-// #include "EventInfo/EventType.h"
+#include "MuCalDecode/CalibEvent.h"
+#include "MuonCalibStreamCnvSvc/IMuonCalibStreamDataProviderSvc.h"
 #include "xAODEventInfo/EventInfo.h"
 #include "xAODEventInfo/EventAuxInfo.h"
-#include "GaudiKernel/DataObject.h"
-#include "GaudiKernel/IRegistry.h"
+
 #include "GaudiKernel/StatusCode.h"
-#include "MuCalDecode/CalibEvent.h"
-//#include "MuonCalibStreamCnvSvc/MuonCalibStreamAddress.h"
-//#include "MuonCalibStreamCnvSvc/MuonCalibStreamCnvSvc.h"
-#include "MuonCalibStreamCnvSvc/IMuonCalibStreamDataProviderSvc.h"
-//#include "MuonCalibStreamCnvSvc/MuonCalibRunLumiBlockCoolSvc.h"
-#include "MuonCalibStreamCnvSvc/MuonCalibStreamInputSvc.h"
-//#include "AthenaKernel/StorableConversions.h"
+
+#include <memory>
 
 // Instantiation of a static factory class used by clients to create
 // instances of this service
