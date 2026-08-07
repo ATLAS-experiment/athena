@@ -265,7 +265,7 @@ void ZDCFitExpFermiVariableTausInduct::DoInitialize(float initialAmp, float init
   theTF1->SetParameter(1, initialT0);
   theTF1->SetParameter(6, 0.25);
   theTF1->SetParameter(7, 0.1);
-  theTF1->SetParameter(9, 0.);
+  if (!m_fixDelta) theTF1->SetParameter(9, 0.);
 
   if (!m_fixTau1) theTF1->SetParameter(2, m_tau1);
   if (!m_fixTau2) theTF1->SetParameter(3, m_tau2);
