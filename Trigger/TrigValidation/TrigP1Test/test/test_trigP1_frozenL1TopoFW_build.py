@@ -4,7 +4,6 @@
 # art-description: Frozen L1Topo Firmware test -- generates the L1 menu and then checks for changes implying L1Topo FW changes
 # art-type: build
 # art-include: main/Athena/x86_64-el9-gcc14-opt
-# art-include: 24.0/Athena
 
 from TrigValTools.TrigValSteering import Test, ExecStep, CheckSteps
 

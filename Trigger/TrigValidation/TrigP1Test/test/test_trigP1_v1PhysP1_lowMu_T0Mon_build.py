@@ -4,7 +4,6 @@
 # art-description: Test of P1+Tier0 workflow, runs athenaHLT with PhysicsP1_pp_lowMu_run3_v1 menu followed by offline reco and monitoring
 # art-type: build
 # art-include: main/Athena/x86_64-el9-gcc14-opt
-# art-include: 24.0/Athena
 
 from TrigValTools.TrigValSteering import Test, ExecStep, CheckSteps
 from TrigValTools.TrigValSteering.Common import find_file
