@@ -15,7 +15,11 @@
 #include "./BasicGepClusterMaker.h"
 
 #include "CaloDetDescr/CaloDetDescrManager.h"
+#include "CaloGeoHelpers/CaloSampling.h"
 #include "xAODCaloEvent/CaloClusterAuxContainer.h"
+
+#include <cmath>
+#include <vector>
 
 GepClusteringAlg::GepClusteringAlg( const std::string& name, ISvcLocator* pSvcLocator ) : 
 AthReentrantAlgorithm( name, pSvcLocator ){
@@ -104,6 +108,32 @@ StatusCode GepClusteringAlg::execute(const EventContext& ctx) const {
     ptr->setEta(gepclus.vec.Eta());
     ptr->setPhi(gepclus.vec.Phi());
     ptr->setTime(gepclus.time);
+
+    // Below are modifications to add per layer energy for clusters: 
+    // Accumulate per-sampling (layer) transverse energy from the cluster's cells
+    // and store it on the cluster as energy (E = Et * cosh(eta)), mirroring
+    // GepCellTowerAlg. The cluster itself carries only cell links, so downstream
+    // PU-suppressed copies (EtaSK / SK) -- which drop the cell links -- would
+    // otherwise have no way to expose per-layer Et. Storing it here lets them
+    // recover it via eSample(); dividing back by cosh(eta) reproduces the same
+    // cell-Et sum used for the un-suppressed clusters.
+    const double clusEta = gepclus.vec.Eta();
+    std::vector<float> layerEnergies(static_cast<int>(CaloSampling::Unknown), 0.f);
+    for (auto cell_id : gepclus.cell_id) {
+      const auto& cell = pCellMap->at(cell_id);
+      if (cell.sampling < static_cast<unsigned int>(CaloSampling::Unknown))
+        layerEnergies[cell.sampling] += cell.et;
+    }
+    uint32_t samplingPattern = 0;
+    for (int i = 0; i < static_cast<int>(CaloSampling::Unknown); ++i)
+      if (layerEnergies[i] != 0) samplingPattern |= (0x1U << i);
+    ptr->clearSamplingData();
+    ptr->setSamplingPattern(samplingPattern);
+    for (int i = 0; i < static_cast<int>(CaloSampling::Unknown); ++i) {
+      if (layerEnergies[i] != 0)
+        ptr->setEnergy(static_cast<CaloSampling::CaloSample>(i),
+                       layerEnergies[i] * std::cosh(clusEta));
+    }
 
     CaloClusterCellLink *cccl = new CaloClusterCellLink();
 

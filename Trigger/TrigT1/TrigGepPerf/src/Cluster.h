@@ -34,7 +34,13 @@ namespace Gep{
     float time {0};
     TLorentzVector vec;
     std::vector<unsigned int> cell_id;
-    
+
+    // Raw eta/phi as delivered by the source, before the TLorentzVector
+    // JetTaggerLRJ digitizes these to match the emulation, which
+    // reads the same values as written (float) to the ntuple.
+    double etaInput {0};
+    double phiInput {0};
+
   };
 }
 
