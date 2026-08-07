@@ -139,8 +139,14 @@ static const int  RH_NU_TAU = 9900016;
 static const int  WBOSON_LRSM = 9900024;
 
 static const int LEAD = 1000822080;
-static const int OXYGEN = 1000080160;
+static const int INDIUM = 1000491150;
+static const int KRYPTON = 1000360840;
+static const int CALCIUM = 1000200400;
+static const int ARGON = 1000180400;
+static const int MAGNESIUM = 1000120240;
 static const int NEON = 1000100200;
+static const int OXYGEN = 1000080160;
+static const int BORON = 1000050110;
 static const int HELIUM =  1000020040;
 
 /// PDG rule 8:
