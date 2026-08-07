@@ -26,21 +26,21 @@ public:
     struct CsvRow {
         std::string spChain;
         std::string md;
-        int fe = -1;
+        int fe{-1};
         std::string flx_card_device;
-        unsigned int fiber = 0;
+        unsigned int fiber{};
     };
     struct FelixCsvRow {
         std::string host;
-        unsigned int card1 = 999;
-        unsigned int card2 = 999;
+        unsigned int card1{999};
+        unsigned int card2{999};
     };
     struct OutputCsvRow {
         std::bitset<32> detResId;
         std::bitset<32> tdetResId;
         std::string card_dev;
-        unsigned int fiber;
-        unsigned int dma;
+        unsigned int fiber{};
+        unsigned int dma{};
         std::bitset<32> sourceId;
     };
 
@@ -93,7 +93,7 @@ private:
                                               "ITkPixelWaferIds.txt",
                                               "Output text file for one 32-bit waferID per line"};
 
-    const PixelID* m_pixIdHelper = nullptr;
+    const PixelID* m_pixIdHelper{nullptr};
     std::vector<CsvRow> m_rows;
     std::vector<FelixCsvRow> m_felix_rows;
 
