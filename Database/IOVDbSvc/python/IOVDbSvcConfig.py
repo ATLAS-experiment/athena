@@ -68,7 +68,7 @@ def IOVDbSvcCfg(flags, **kwargs):
     result.addService(CompFactory.CondSvc())
     result.addService(CompFactory.ProxyProviderSvc(ProviderNames=['IOVDbSvc']))
 
-    if not flags.Input.isMC:
+    if not flags.Input.isMC and not flags.IOVDb.UseCREST:
         result.merge(DBReplicaSvcCfg(flags, vetoDBRelease=True))
 
     # Get TagInfoMgr
