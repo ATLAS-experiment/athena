@@ -54,7 +54,7 @@ set_target_properties( HwShower PROPERTIES IMPORTED_LOCATION ${HERWIG3_LCGROOT}/
 set( POWHEG_BB4L_LIBRARY ${COMPILEBOX_LCGROOT}/POWHEG-BOX-RES/b_bbar_4l_modified/lib64/libpowhegSOforHerwig.so)
 set( POWHEG_BB4L_INCLUDE ${COMPILEBOX_LCGROOT}/POWHEG-BOX-RES/b_bbar_4l_modified/include)
 
-if( EXISTS "${POWHEG_BB4L_LIBRARY}" )
+if(EXISTS "${POWHEG_BB4L_LIBRARY}" AND EXISTS "${POWHEG_BB4L_INCLUDE}")
   add_library( powhegSOforHerwig SHARED IMPORTED )
   set_target_properties( powhegSOforHerwig PROPERTIES IMPORTED_LOCATION  ${POWHEG_BB4L_LIBRARY} )
 
