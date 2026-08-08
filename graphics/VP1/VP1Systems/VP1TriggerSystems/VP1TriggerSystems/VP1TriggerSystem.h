@@ -24,7 +24,6 @@
 
 //Trigger includes
 #include "TrigDecisionTool/TrigDecisionTool.h"
-#include "TrigObjectMatching/TrigMatchTool.h"
 #include "AnalysisTriggerEvent/LVL1_ROI.h"
 #include "AnalysisTriggerEvent/Muon_ROI.h"
 #include "TrigMuonEvent/MuonFeature.h"
@@ -61,8 +60,7 @@ namespace VP1Trig {
     
     //Tool Handles
     ToolHandle<Trig::TrigDecisionTool> m_trigDec;
-    ToolHandle<TrigMatchTool> m_trigMatch;
-    
+
     //Trigger data vectors
     std::vector<VP1Trig::VP1TriggerHandleEF> m_handleEF;
     std::vector<VP1Trig::VP1TriggerHandleL2> m_handleL2;

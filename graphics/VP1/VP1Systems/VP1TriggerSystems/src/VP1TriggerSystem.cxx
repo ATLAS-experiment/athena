@@ -53,8 +53,8 @@
 //_____________________________________________________________________________________________
 VP1Trig::VP1TriggerSystem::VP1TriggerSystem()
   : Logger("VP1TriggerSystem"),
-    m_trigDec("Trig::TrigDecisionTool/TrigDecisionTool"),
-    m_trigMatch("TrigMatchTool/TrigMatchTool") {log_verbose("constructor");}
+    m_trigDec("Trig::TrigDecisionTool/TrigDecisionTool")
+    {log_verbose("constructor");}
 
 
 //Trigger System Destructor
@@ -86,12 +86,7 @@ bool VP1Trig::VP1TriggerSystem::loadTriggerHandles(StoreGateSvc* storeGate, cons
       log_fatal("Could not retrieve TrigDecisionTool!");
       return false; //ref: daqstatus
     }
-    //Try to retrieve the TrigMatchTool
-    if(m_trigMatch.retrieve().isFailure()) {
-      log_fatal("Could not retrieve TrigMatchTool!");
-      return false; //ref: daqstatus
-    }
-    
+
     //Loading entire ChainGroup information via TrigDecisionTool
     const Trig::ChainGroup* allChains = m_trigDec->getChainGroup(".*"); //all triggers
     if(!allChains) {
