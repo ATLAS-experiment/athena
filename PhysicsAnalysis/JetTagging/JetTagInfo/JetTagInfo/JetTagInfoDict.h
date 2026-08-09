@@ -14,8 +14,6 @@
 #include "JetTagInfo/LifetimeInfo.h"
 #include "JetTagInfo/SETrackInfo.h"
 #include "JetTagInfo/SoftElectronInfo.h"
-#include "JetTagInfo/SMTrackInfo.h"
-#include "JetTagInfo/SoftMuonInfo.h"
 #include "JetTagInfo/IPTrackInfo.h"
 #include "JetTagInfo/IPInfoBase.h"
 #include "JetTagInfo/IPInfoPlus.h"
