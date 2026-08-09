@@ -13,4 +13,4 @@ atlas_add_library( xAODMuonCnvLib
 atlas_add_component( xAODMuonCnv
                      src/*.cxx
                      src/components/*.cxx
-                     LINK_LIBRARIES xAODMuonCnvLib AthenaBaseComps AthenaKernel xAODPrimitives muonEvent Particle xAODTruth)
+                     LINK_LIBRARIES xAODMuonCnvLib AthenaBaseComps AthenaKernel xAODPrimitivesParticle xAODTruth)
