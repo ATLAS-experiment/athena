@@ -63,7 +63,7 @@ StatusCode OverlapRemovalGenUseAlg::initialize()
   m_tauKey.declareOutput(m_selectionLabel);
   ATH_CHECK(m_jetKey.initialize());
   ATH_CHECK(m_electronKey.initialize());
-  ATH_CHECK(m_muonKey.initialize());
+  ATH_CHECK(m_muonKey.initialize(m_muonKey.empty()));
   ATH_CHECK(m_vtxKey.initialize());
   ATH_CHECK(m_photonKey.initialize(m_photonKey.empty()));
   ATH_CHECK(m_tauKey.initialize(m_tauKey.empty()));
@@ -85,12 +85,16 @@ StatusCode OverlapRemovalGenUseAlg::execute()
     }
     applySelection(*electrons);
     // Muons
-    SG::ReadHandle<xAOD::MuonContainer> muons{m_muonKey, ctx};
-    if (!muons.isValid()) {
-      ATH_MSG_FATAL("Failed to retrieve muon container "<<m_muonKey.key());
-      return StatusCode::FAILURE;
+    const xAOD::MuonContainer* muons{nullptr};
+    if (!m_muonKey.empty()) {
+      SG::ReadHandle<xAOD::MuonContainer> readHandle{m_muonKey, ctx};
+      if (!readHandle.isValid()) {
+        ATH_MSG_FATAL("Failed to retrieve muon container "<<m_muonKey.key());
+        return StatusCode::FAILURE;
+      }
+      muons = readHandle.cptr();
+      applySelection(*muons);
     }
-    applySelection(*muons);
     // Jets
     SG::ReadHandle<xAOD::JetContainer> jets{m_jetKey, ctx};
     if (!jets.isValid()) {
@@ -135,13 +139,13 @@ StatusCode OverlapRemovalGenUseAlg::execute()
 
     if(checkVtx) {
         // Apply the overlap removal
-        ATH_CHECK( m_orTool->removeOverlaps(electrons.cptr(), muons.cptr(), jets.cptr(), taus, photons) );}
+        ATH_CHECK( m_orTool->removeOverlaps(electrons.cptr(), muons, jets.cptr(), taus, photons) );}
     else{
         // Reset all decorations to failing
         ATH_MSG_DEBUG("No primary vertices found, cannot do overlap removal! Will return all fails.");
         setDefaultDecorations(*jets);
         setDefaultDecorations(*electrons);
-        setDefaultDecorations(*muons);
+        if(muons)     setDefaultDecorations(*muons);
         if(taus)      setDefaultDecorations(*taus);
         if(photons)   setDefaultDecorations(*photons);
     }
@@ -155,7 +159,7 @@ StatusCode OverlapRemovalGenUseAlg::execute()
 #endif
     if(msglvl >= MSG::VERBOSE){
         printObjects(*electrons, "ele");
-        printObjects(*muons, "muo");
+        if(muons) printObjects(*muons, "muo");
         printObjects(*jets, "jet");
         if(taus) printObjects(*taus, "tau");
         if(photons) printObjects(*photons, "pho");
