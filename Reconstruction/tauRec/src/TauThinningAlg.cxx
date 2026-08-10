@@ -104,7 +104,7 @@ StatusCode TauThinningAlg::execute (const EventContext& ctx) const
       tauTracks.keep(track->index());
     }
 
-    // keep tau cluster cell links and cells within 0.2 of the tau axis
+    // keep tau cluster cell links and cells within a certain dR of the tau axis
     TLorentzVector tauAxis = tauRecTools::getTauAxis(*tau, m_doVertexCorrection);
     const xAOD::Vertex* tauVertex = tau->vertex();
 
@@ -118,7 +118,7 @@ StatusCode TauThinningAlg::execute (const EventContext& ctx) const
         clusterP4 = vertexedCluster.p4();
       }
 
-      if (clusterP4.DeltaR(tauAxis) > 0.2) continue;
+      if (clusterP4.DeltaR(tauAxis) > m_DrTauClusters) continue;
 
       const CaloClusterCellLink* cellLinks = cluster->getCellLinks();
       if (!cellLinks) {
@@ -151,13 +151,19 @@ StatusCode TauThinningAlg::execute (const EventContext& ctx) const
 
     // keep neutral PFOs, pi0 clusters, cell links and cells
     for(size_t i=0; i<tau->nNeutralPFOs(); i++) {
+
+      // pi0 clusters
+      const xAOD::CaloCluster* cluster = tau->neutralPFO(i)->cluster(0);
+
+      // check if neutral should be kept 
+      if(cluster->p4().DeltaR(tau->p4()) > m_DrTauNeutrals) continue;	     
+
       // neutral PFOs
       neutralPFOs.keep(tau->neutralPFO(i)->index());
 
       // pi0 clusters
-      const xAOD::CaloCluster* cluster = tau->neutralPFO(i)->cluster(0);
       pi0clusters.keep(cluster->index());
-  
+
       // pi0 cell links
       const CaloClusterCellLink* cellLinks = cluster->getCellLinks();
       CaloClusterCellLinkContainer::const_iterator cellLinks_it = std::find(pi0CellLinks->begin(), pi0CellLinks->end(), cellLinks);
