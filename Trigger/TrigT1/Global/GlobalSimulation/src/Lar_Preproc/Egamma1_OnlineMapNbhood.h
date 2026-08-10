@@ -75,28 +75,28 @@ namespace GlobalSim {
     m_eFEXetaKey {
       this,
       "eFEXetaKey",
-      "eFEXeta"};
+      "L1_eFEXeta"};
 
     /** @brief WriteHandle Key for the eFexRoI's phi (for valid windows, for DEBUG) */
     SG::WriteHandleKey<std::vector<float>>
     m_eFEXphiKey {
       this,
       "eFEXphiKey",
-      "eFEXphi"};
+      "L1_eFEXphi"};
 
     /** @brief WriteHandle Key for the eFexRoI's eta (for invalid windows, for DEBUG) */
     SG::WriteHandleKey<std::vector<float>>
     m_FailedeFEXetaKey {
       this,
       "FailedeFEXetaKey",
-      "FailedeFEXeta"};
+      "L1_FailedeFEXeta"};
 
     /** @brief WriteHandle Key for the eFexRoI's phi (for invalid windows, for DEBUG) */
     SG::WriteHandleKey<std::vector<float>>
     m_FailedeFEXphiKey {
       this,
       "FailedeFEXphiKey",
-      "FailedeFEXphi"};
+      "L1_FailedeFEXphi"};
 
     /** @brief WriteHandle Key for the resulting TOBs */
     SG::WriteHandleKey<IOBitwise::eEmNbhoodTOBContainer>
