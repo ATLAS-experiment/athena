@@ -13,7 +13,6 @@
 #include "MuonReadoutGeometry/MuonStation.h"
 #include "MuonReadoutGeometry/MMReadoutElement.h"
 #include "MuonDQAUtils/MuonChamberNameConverter.h"
-#include "MuonDQAUtils/MuonChambersRange.h"
 #include "MuonCalibIdentifier/MuonFixedId.h"
 
 #include "MMRawDataMonAlg.h"
