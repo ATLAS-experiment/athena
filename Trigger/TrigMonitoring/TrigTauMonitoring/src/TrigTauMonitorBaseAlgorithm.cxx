@@ -263,6 +263,14 @@ std::vector<const xAOD::TauJet*> TrigTauMonitorBaseAlgorithm::classifyTausAll(co
 {
     std::vector<const xAOD::TauJet*> tau_vec;
 
+    // Protection since GNTau is not run for taus below 13 GeV
+    float upd_threshold = threshold;
+    if(tau_id == TauID::GNTau){
+      if( upd_threshold < 13){
+         upd_threshold = 13;
+      }
+    } 
+
     SG::ReadDecorHandle<xAOD::TauJetContainer, char> tauid_medium{m_offlineGNTauDecorKey, ctx};
     if(!tauid_medium.isValid()) {
       ATH_MSG_WARNING("Cannot retrieve " << tauid_medium.key());
@@ -270,7 +278,7 @@ std::vector<const xAOD::TauJet*> TrigTauMonitorBaseAlgorithm::classifyTausAll(co
     }
 
     for(const xAOD::TauJet* tau : taus) {
-        if(tau->pt() < threshold*Gaudi::Units::GeV) continue;
+        if(tau->pt() < upd_threshold*Gaudi::Units::GeV) continue;
 
         // Consider only offline taus which pass medium ID WP
         if(tau_id == TauID::RNN) {
