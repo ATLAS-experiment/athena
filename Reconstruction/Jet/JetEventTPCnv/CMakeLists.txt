@@ -8,7 +8,7 @@ atlas_add_library( JetEventTPCnv
                    src/*.cxx
                    PUBLIC_HEADERS JetEventTPCnv
                    LINK_LIBRARIES AthenaPoolCnvSvcLib AthenaPoolUtilities DataModelAthenaPoolLib EventCommonTPCnv JetEvent ParticleEventTPCnv
-                   PRIVATE_LINK_LIBRARIES AthAllocators AthenaKernel MuonIDEvent VxVertex egammaEvent )
+                   PRIVATE_LINK_LIBRARIES AthAllocators AthenaKernel VxVertex egammaEvent )
 
 atlas_add_tpcnv_library( JetEventTPCnvFactories
                          src/factories/*.cxx

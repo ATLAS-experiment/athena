@@ -7,7 +7,7 @@ atlas_subdir( JetTagInfoTPCnv )
 atlas_add_library( JetTagInfoTPCnv
                    src/*.cxx
                    PUBLIC_HEADERS JetTagInfoTPCnv
-                   LINK_LIBRARIES AthenaPoolUtilities CxxUtils EventPrimitives JetTagEvent JetTagInfo MuonIDEvent JetEvent JetEventTPCnv Particle egammaEvent VxVertex TrkEventTPCnv DataModelAthenaPoolLib AthenaPoolCnvSvcLib
+                   LINK_LIBRARIES AthenaPoolUtilities CxxUtils EventPrimitives JetTagEvent JetTagInfo JetEvent JetEventTPCnv Particle egammaEvent VxVertex TrkEventTPCnv DataModelAthenaPoolLib AthenaPoolCnvSvcLib
                    PRIVATE_LINK_LIBRARIES GaudiKernel )
 
 atlas_add_dictionary( JetTagInfoTPCnvDict
@@ -30,7 +30,7 @@ foreach( test AtlfInfoCnv_p1 BaseTagInfoCnv_p1 ElectronAssociationCnv_p1
               IPTrackInfoCnv_p1 ISvxAssociationCnv_p1 JetFitterTagInfoCnv_p1
               JetProbInfoBaseCnv_p1 LifetimeInfoCnv_p1
               MSVVtxInfoCnv_p1 MSVVtxInfoCnv_p2 MultiSVInfoPlusCnv_p1
-              MuonAssociationCnv_p1 PhotonAssociationCnv_p1
+              PhotonAssociationCnv_p1
               SecVtxInfoCnv_p1 SETrackInfoCnv_p1 SLTrueInfoCnv_p1
               SMTrackInfoCnv_p1 SoftElectronInfoCnv_p1
               SoftLeptonTruthInfoCnv_p1 SoftMuonInfoCnv_p1
