@@ -277,22 +277,15 @@ namespace xAOD {
     //CheckTiming for ForwardElectron case
     if(m_DoTimingSel &&  input.particle->type() == xAOD::Type::ObjectType::TrackParticle)
       {
-	std::cout<<"Doing the timing selection "<<std::endl;
 	const xAOD::TrackParticle* tp = static_cast<const xAOD::TrackParticle*>(input.particle);
-	std::cout<<" before valid time"<<std::endl;
 	static const SG::AuxElement::Accessor<uint8_t> accValid("hasValidTime");
-	std::cout<<" after valid time"<<std::endl;
-	if (accValid.isAvailable(*tp) && accValid.isAvailable(tp2))
+	static const SG::AuxElement::Accessor<float> accValidRes("timeResolution");
+	if (accValid.isAvailable(*tp) && accValidRes.isAvailable(*tp) && accValid.isAvailable(tp2) && accValidRes.isAvailable(tp2))
 	  {
-	    std::cout<<" after valid time2 "<<std::endl;
-	    if (accValid(*tp) && accValid(tp2))
+	    if (accValid(*tp) && accValid(tp2) && accValidRes(*tp) && accValidRes(tp2) )
 	      {
-		std::cout<<" In valid time2 "<<std::endl;
-		std::cout<<tp->time()<<std::endl;//<<" "<<tp->timeResolution()
-		std::cout<<tp2.time()<<" "<<tp2.timeResolution()<<std::endl;
-		dT_Sig = abs(tp->time() - tp2.time()) / sqrt( pow(tp2.timeResolution(),2));//pow(1/(sqrt(abs(tp->time()))),2) + find out how to get the resolution
-		std::cout<<"Doing the timing selection dT is "<<dT_Sig <<std::endl;
-		 }
+		dT_Sig = abs(tp->time() - tp2.time()) / sqrt( pow(tp2.timeResolution(),2)+pow(tp->timeResolution(),2));// + find out how to get the resolution
+	      }
 	    else
 	      {
 		ATH_MSG_DEBUG("No valid time for the track while doing track->time()" );
