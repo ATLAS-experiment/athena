@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /** R.Goncalo - 21/10/2007 - add tests for TrigDecisionTool:
@@ -7,70 +7,42 @@
 
 #include "TrigDecisionChecker.h"
 
-// EDM
+#include "TrigConfHLTData/HLTTriggerElement.h"
+#include "TrigSteeringEvent/Lvl1Item.h"
 #include "TrigSteeringEvent/TrigRoiDescriptor.h"
 #include "TrigSteeringEvent/TrigRoiDescriptorCollection.h"
 
-#include "TrigParticle/TrigTauContainer.h"
-#include "TrigCaloEvent/TrigTauClusterContainer.h"
-#include "TrigInDetEvent/TrigTauTracksInfoCollection.h"
-
-#include "TrigSteeringEvent/Lvl1Item.h"
-
-// Muon includes
-#include "xAODMuon/MuonContainer.h"
-#include "xAODTrigMuon/L2CombinedMuonContainer.h"
-#include "xAODTrigMuon/L2StandAloneMuonContainer.h"
-
-// include these tau navigation check
-#include "TrigParticle/TrigTau.h"
-//#include "TrigCaloEvent/TrigTauCluster.h"
-
-#include "xAODTau/TauJetContainer.h"
-#include "xAODTrigBphys/TrigBphysContainer.h"
+#include "xAODBTagging/BTagVertex.h"
+#include "xAODBTagging/BTagVertexContainer.h"
+#include "xAODBTagging/BTagging.h"
+#include "xAODBTagging/BTaggingContainer.h"
 #include "xAODEgamma/ElectronContainer.h"
 #include "xAODEgamma/PhotonContainer.h"
-#include "xAODJet/JetContainer.h"
-#include "xAODTrigMissingET/TrigMissingETContainer.h"
-#include "xAODTrigger/TrigPassBits.h"
-
-// bjet includes
-#include "xAODTracking/VertexContainer.h"
-#include "xAODTracking/Vertex.h"
-#include "xAODBTagging/BTaggingContainer.h"
-#include "xAODBTagging/BTagging.h"
-#include "xAODBTagging/BTagVertexContainer.h"
-#include "xAODBTagging/BTagVertex.h"
-
-#include "TrigParticle/TrigEFBjetContainer.h"
-#include "Particle/TrackParticleContainer.h"
-#include "TrigInDetEvent/TrigVertexCollection.h"
-#include "VxSecVertex/VxSecVertexInfo.h"
-#include "VxSecVertex/VxSecVKalVertexInfo.h"
-
-#include "TrigConfHLTData/HLTTriggerElement.h"
-
-#include "CxxUtils/crc64.h"
-
 #include "xAODEventInfo/EventInfo.h"
-
+#include "xAODJet/JetContainer.h"
+#include "xAODMuon/MuonContainer.h"
+#include "xAODTau/TauJetContainer.h"
+#include "xAODTracking/Vertex.h"
+#include "xAODTracking/VertexContainer.h"
+#include "xAODTrigBphys/TrigBphysContainer.h"
 #include "xAODTrigMinBias/TrigSpacePointCounts.h"
 #include "xAODTrigMinBias/TrigT2MbtsBits.h"
-#include "xAODTrigMinBias/TrigVertexCounts.h"
 #include "xAODTrigMinBias/TrigTrackCounts.h"
+#include "xAODTrigMinBias/TrigVertexCounts.h"
+#include "xAODTrigMissingET/TrigMissingETContainer.h"
+#include "xAODTrigMuon/L2CombinedMuonContainer.h"
+#include "xAODTrigMuon/L2StandAloneMuonContainer.h"
+#include "xAODTrigger/TrigPassBits.h"
 
-
-#include <cmath>
 #include <algorithm>
 #include <iostream>
 #include <iomanip>
+
 
 TrigDecisionChecker::TrigDecisionChecker(const std::string &name, ISvcLocator *pSvcLocator)
 : AthAlgorithm(name, pSvcLocator),
   m_first_event(true)
 {
-    
-
 }
 
 
