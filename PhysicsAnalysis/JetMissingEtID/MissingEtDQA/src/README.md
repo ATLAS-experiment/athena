@@ -1,5 +1,4 @@
-
-#PhysVal MET athena code
+# PhysVal MET athena code
 
 This code was written by Daniel Buescher <daniel.buescher@cern.ch> & Philipp Mogg <philipp.mogg@cern.ch> in 2022. The current version was modified by Owen Darragh Aug 2026. Contact owendarragh@cmail.carleton.ca if you have questions.
 
