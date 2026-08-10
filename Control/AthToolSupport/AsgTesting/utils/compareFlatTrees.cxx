@@ -184,8 +184,7 @@ int main ATLAS_NOT_THREAD_SAFE(int argc, char *argv[])
   }
 
   // Set binning
-  int nBins{128};
-  size_t nBinsU = static_cast<size_t>(nBins);
+  const int nBins{128};
 
   // Loop over the required columns and plot them for each sample along with the ratio
   // Write resulting plots to a pdf file
@@ -217,8 +216,16 @@ int main ATLAS_NOT_THREAD_SAFE(int argc, char *argv[])
     const char* colNameCh = colName.c_str();
 
     // Initial histogram range
+    int nBinsForColumn = nBins;
     double min = std::min(mapMinValuesRefr[colName].GetValue(), mapMinValuesTest[colName].GetValue());
-    double max = std::max(mapMaxValuesRefr[colName].GetValue(), mapMaxValuesTest[colName].GetValue()) * 1.02;
+    double max = std::max(mapMaxValuesRefr[colName].GetValue(), mapMaxValuesTest[colName].GetValue());
+    if (min == max) {
+      min -= 0.5;
+      max += 0.5;
+      nBinsForColumn = 1;
+    } else {
+      max *= 1.02;
+    }
     if (std::isinf(min) || std::isinf(max))
     {
       std::cout << "  skipping " << colName << " ..." << std::endl;
@@ -233,9 +240,14 @@ int main ATLAS_NOT_THREAD_SAFE(int argc, char *argv[])
       min = 0.0;
     }
 
+    if (verbose)
+    {
+      std::cout << "   " << colName << " type: " << dataFrameRefr.GetColumnType(colName) << " min: " << min << " max: " << max << " nbins: " << nBinsForColumn << std::endl;
+    }
+
     // Initial histograms
-    mapHistRefr.emplace(colName, dataFrameRefr.Histo1D({colNameCh, colNameCh, nBins, min, max}, colNameCh));
-    mapHistTest.emplace(colName, dataFrameTest.Histo1D({colNameCh, colNameCh, nBins, min, max}, colNameCh));
+    mapHistRefr.emplace(colName, dataFrameRefr.Histo1D({colNameCh, colNameCh, nBinsForColumn, min, max}, colNameCh));
+    mapHistTest.emplace(colName, dataFrameTest.Histo1D({colNameCh, colNameCh, nBinsForColumn, min, max}, colNameCh));
   }
   auto stop = std::chrono::high_resolution_clock::now();
   auto duration = std::chrono::duration_cast<std::chrono::seconds>(stop - start);
@@ -257,8 +269,16 @@ int main ATLAS_NOT_THREAD_SAFE(int argc, char *argv[])
       auto &histTest = mapHistTest[colName];
 
       // Initial histogram range
+      int nBinsForColumn = nBins;
       double min = std::min(mapMinValuesRefr[colName].GetValue(), mapMinValuesTest[colName].GetValue());
-      double max = std::max(mapMaxValuesRefr[colName].GetValue(), mapMaxValuesTest[colName].GetValue()) * 1.02;
+      double max = std::max(mapMaxValuesRefr[colName].GetValue(), mapMaxValuesTest[colName].GetValue());
+      if (min == max) {
+        min -= 0.5;
+        max += 0.5;
+        nBinsForColumn = 1;
+      } else {
+        max *= 1.02;
+      }
       if (max > 250e3 && min > 0.0)
       {
         min = 0.0;
@@ -277,9 +297,9 @@ int main ATLAS_NOT_THREAD_SAFE(int argc, char *argv[])
                     << "   Range tuning... iteration number " << rangeItrCntr << std::endl;
         }
         double entriesFirstBin = histRefr.GetPtr()->GetBinContent(1);
-        double entriesLastBin = histRefr.GetPtr()->GetBinContent(nBins);
+        double entriesLastBin = histRefr.GetPtr()->GetBinContent(nBinsForColumn);
         double entriesOtherBins{};
-        for (size_t i{2}; i < nBinsU; ++i)
+        for (size_t i{2}; i < static_cast<size_t>(nBinsForColumn); ++i)
         {
           entriesOtherBins += histRefr.GetPtr()->GetBinContent(i);
         }
@@ -300,15 +320,23 @@ int main ATLAS_NOT_THREAD_SAFE(int argc, char *argv[])
           }
           if (!firstBinOK)
           {
-            max = (max - min) / static_cast<double>(nBins);
-            histRefr = dataFrameRefr.Histo1D({colNameCh, colNameCh, nBins, min, max}, colNameCh);
-            histTest = dataFrameTest.Histo1D({colNameCh, colNameCh, nBins, min, max}, colNameCh);
+            max = (max - min) / static_cast<double>(nBinsForColumn);
+            if (verbose)
+            {
+              std::cout << "   " << colName << " min: " << min << " max: " << max << " nbins: " << nBinsForColumn << std::endl;
+            }
+            histRefr = dataFrameRefr.Histo1D({colNameCh, colNameCh, nBinsForColumn, min, max}, colNameCh);
+            histTest = dataFrameTest.Histo1D({colNameCh, colNameCh, nBinsForColumn, min, max}, colNameCh);
           }
           if (!lastBinOK)
           {
-            min = max * (1.0f - (1.0f / static_cast<double>(nBins)));
-            histRefr = dataFrameRefr.Histo1D({colNameCh, colNameCh, nBins, min, max}, colNameCh);
-            histTest = dataFrameTest.Histo1D({colNameCh, colNameCh, nBins, min, max}, colNameCh);
+            min = max * (1.0f - (1.0f / static_cast<double>(nBinsForColumn)));
+            if (verbose)
+            {
+              std::cout << "   " << colName << " min: " << min << " max: " << max << " nbins: " << nBinsForColumn << std::endl;
+            }
+            histRefr = dataFrameRefr.Histo1D({colNameCh, colNameCh, nBinsForColumn, min, max}, colNameCh);
+            histTest = dataFrameTest.Histo1D({colNameCh, colNameCh, nBinsForColumn, min, max}, colNameCh);
           }
         }
       }
