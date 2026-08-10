@@ -46,7 +46,7 @@ parser.add_argument(
 
 parser.add_argument(
     "--geometryfile",
-    default="/afs/cern.ch/work/f/fbendebb/HGTD-Alignement/atlas-hgtd-geomodelxml/HGTD_Detector/HGTD.gmx",
+    required=False,
     help="Path to the HGTD GMX geometry file",
 )
 
@@ -84,6 +84,8 @@ flags.HGTD.Geometry.isAlignable = True
 flags.HGTD.Geometry.useGeoModelXml = True
 
 if args.localgeo:
+    if not args.geometryfile:
+        parser.error("--geometryfile must be specified when using --localgeo")
     flags.HGTD.Geometry.isLocal = True
     flags.HGTD.Geometry.Filename = args.geometryfile
 
@@ -154,10 +156,11 @@ acc.merge(HGTD_DetectorElementCondAlgCfg(flags))
 # Print algorithm
 # ------------------------------------------------------------
 from AthenaConfiguration.ComponentFactory import CompFactory
-
 alg = CompFactory.PrintHGTDElements()
 
-alg.OutputLevel = 2
+from AthenaCommon.Constants import DEBUG
+alg.OutputLevel = DEBUG
+
 alg.OutputFile = "HGTDGeometry.dat"
 
 acc.addEventAlgo(alg)

@@ -7,8 +7,6 @@
 
 #include "AthenaBaseComps/AthAlgorithm.h"
 
-#include "StoreGate/ReadCondHandleKey.h"
-
 #include "HGTD_ReadoutGeometry/HGTD_DetectorElementCollection.h"
 #include "HGTD_Identifier/HGTD_ID.h"
 

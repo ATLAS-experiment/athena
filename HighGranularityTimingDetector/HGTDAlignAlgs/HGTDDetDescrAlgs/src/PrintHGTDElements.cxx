@@ -22,9 +22,9 @@ PrintHGTDElements(const std::string& name,
 
 StatusCode PrintHGTDElements::initialize()
 {
-    ATH_MSG_INFO("========================================");
-    ATH_MSG_INFO("PrintHGTDElements initialize()");
-    ATH_MSG_INFO("========================================");
+    ATH_MSG_DEBUG("========================================");
+    ATH_MSG_DEBUG("PrintHGTDElements initialize()");
+    ATH_MSG_DEBUG("========================================");
 
     //------------------------------------------------------------
     // Initialize ReadCondHandle
@@ -53,33 +53,32 @@ StatusCode PrintHGTDElements::initialize()
     // Header
     //------------------------------------------------------------
     m_outfile
-        << "# hash "
-        << "endcap "
-        << "layer "
-        << "phi_module "
-        << "eta_module "
+        << "# hash"     << ' '
+        << "endcap"     << ' '
+        << "layer"      << ' '
+        << "phi_module" << ' '
+        << "eta_module" << ' '
 
-        << "center_x "
-        << "center_y "
-        << "center_z"
+        << "center_x"   << ' '
+        << "center_y"   << ' '
+        << "center_z"   << ' '
 
-        << "Tx "
-        << "Ty "
-        << "Tz "
+        << "Tx"         << ' '
+        << "Ty"         << ' '
+        << "Tz"         << ' '
 
-        << "R00 "
-        << "R01 "
-        << "R02 "
+        << "R00"        << ' '
+        << "R01"        << ' '
+        << "R02"        << ' '
 
-        << "R10 "
-        << "R11 "
-        << "R12 "
+        << "R10"        << ' '
+        << "R11"        << ' '
+        << "R12"        << ' '
 
-        << "R20 "
-        << "R21 "
+        << "R20"        << ' '
+        << "R21"        << ' '
         << "R22"
-
-        << std::endl;
+        << '\n';
 
     ATH_MSG_INFO("Output file = "
                  << m_outputFile.value());
@@ -109,8 +108,6 @@ StatusCode PrintHGTDElements::execute(const EventContext& ctx)
 
     ATH_MSG_DEBUG("DetectorElementCollection pointer = " << elements);
     //ATH_MSG_DEBUG("First element pointer = " << (*elements)[0]);
-    ATH_MSG_DEBUG("DetectorElementCollection pointer = "
-                << static_cast<const void*>(elements));
 
     if (!handle.isValid() || elements == nullptr) {
 
@@ -119,7 +116,7 @@ StatusCode PrintHGTDElements::execute(const EventContext& ctx)
         return StatusCode::FAILURE;
     }
 
-    ATH_MSG_INFO("Number of detector elements = "
+    ATH_MSG_DEBUG("Number of detector elements = "
                  << elements->size());
 
     unsigned int nModules = 0;
