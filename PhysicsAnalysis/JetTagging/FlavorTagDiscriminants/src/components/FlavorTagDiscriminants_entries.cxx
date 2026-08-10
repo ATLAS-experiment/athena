@@ -19,6 +19,7 @@
 #include "FlavorTagDiscriminants/JetHitAssociationAlg.h"
 #include "FlavorTagDiscriminants/HitsSelectorAlg.h"
 #include "FlavorTagDiscriminants/TruthPVzRelativeToBeamspotAlg.h"
+#include "FlavorTagDiscriminants/NegLogSigma2DecoratorAlg.h"
 #include "FlavorTagDiscriminants/JetLeptonDecayLabelAlg.h"
 #include "FlavorTagDiscriminants/CaloChargedFlowDecoratorAlg.h"
 #include "FlavorTagDiscriminants/TruthTauDecoratorAlg.h"
@@ -49,6 +50,7 @@ DECLARE_COMPONENT(FlavorTagDiscriminants::CleanHitDecoratorAlg)
 DECLARE_COMPONENT(FlavorTagDiscriminants::JetHitAssociationAlg)
 DECLARE_COMPONENT(FlavorTagDiscriminants::HitsSelectorAlg)
 DECLARE_COMPONENT(FlavorTagDiscriminants::TruthPVzRelativeToBeamspotAlg)
+DECLARE_COMPONENT(FlavorTagDiscriminants::NegLogSigma2DecoratorAlg)
 DECLARE_COMPONENT(FlavorTagDiscriminants::JetLeptonDecayLabelAlg)
 DECLARE_COMPONENT(FlavorTagDiscriminants::CaloChargedFlowDecoratorAlg)
 DECLARE_COMPONENT(FlavorTagDiscriminants::TruthTauDecoratorAlg)
