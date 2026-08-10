@@ -175,7 +175,8 @@ def JETM4Cfg(flags):
                                         "MuonSegments",
                                         "Kt4EMTopoOriginEventShape","Kt4EMPFlowEventShape","Kt4EMPFlowNeutEventShape"]
 
-    JETM4SlimmingHelper.ExtraVariables = ["TauJets.truthJetLink.truthParticleLink.IsTruthMatched"]
+    if flags.Input.isMC:
+        JETM4SlimmingHelper.ExtraVariables = ["TauJets.truthJetLink.truthParticleLink.IsTruthMatched"]
 
     # Low-level variables
     from DerivationFrameworkJetEtMiss.CommonJETMXContent import ClusterVariables, FlowElementVariables
