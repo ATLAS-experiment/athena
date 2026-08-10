@@ -205,6 +205,7 @@ def CPAlgorithmsCfg(flags):
     subConfig = factory.makeConfig ('TauJets')
     subConfig.setOptionValue ('.containerName', 'AnalysisTauJets')
     subConfig.setOptionValue ('.addGlobalFELinksDep', True)
+    subConfig.setOptionValue ('.rerunTruthMatching', False)
     configSeq += subConfig
     subConfig = factory.makeConfig ('TauJets.WorkingPoint')
     subConfig.setOptionValue ('.containerName', 'AnalysisTauJets')
