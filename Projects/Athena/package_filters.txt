@@ -17,9 +17,6 @@
 #- HLT/.*
 #- Trigger/TrigValidation/TrigP1Test
 
-# Temporary compilation issues for some VP1 packages
-- graphics/VP1/VP1Systems/VP1TriggerDecisionSystems
-- graphics/VP1/VP1Plugins/VP1TriggerDecisionPlugin
 + graphics/VP1/.*
 
 
