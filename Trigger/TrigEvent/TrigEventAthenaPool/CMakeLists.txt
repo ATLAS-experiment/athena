@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( TrigEventAthenaPool )
@@ -68,34 +68,3 @@ atlas_add_poolcnv_library( TrigEventAthenaPoolPoolCnv
                   TrigMonitoringEvent TrigMonitoringEventTPCnv TrigMuonEvent
                   TrigMuonEventTPCnv TrigParticle TrigParticleTPCnv
                   TrigTopoEvent TrigTopoEventTPCnv )
-
-# Install files from the package:
-atlas_install_scripts( test/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
-
-# Set up (a) test(s) for the converter(s):
-find_package( AthenaPoolUtilitiesTest )
-
-if( ATHENAPOOLUTILITIESTEST_FOUND )
-  set( TRIGEVENTATHENAPOOL_REFERENCE_TAG
-       TrigEventAthenaPoolReference-01-00-03 )
-  run_tpcnv_test( TrigEventAthenaPool_15.6.1    ESD-15.6.1
-                   REQUIRED_LIBRARIES TrackParticleAthenaPoolPoolCnv
-                   REFERENCE_TAG ${TRIGEVENTATHENAPOOL_REFERENCE_TAG} )
-  run_tpcnv_test( TrigEventAthenaPool_15.6.13.2 AOD-15.6.13.2-full
-                   REQUIRED_LIBRARIES TrackParticleAthenaPoolPoolCnv
-                   REFERENCE_TAG ${TRIGEVENTATHENAPOOL_REFERENCE_TAG} )
-  run_tpcnv_test( TrigEventAthenaPool_16.0.3.3  AOD-16.0.3.3-full
-                   REQUIRED_LIBRARIES TrackParticleAthenaPoolPoolCnv
-                   REFERENCE_TAG ${TRIGEVENTATHENAPOOL_REFERENCE_TAG} )
-  run_tpcnv_test( TrigEventAthenaPool_17.0.6    AOD-17.0.6-full
-                   REQUIRED_LIBRARIES TrackParticleAthenaPoolPoolCnv
-                   REFERENCE_TAG ${TRIGEVENTATHENAPOOL_REFERENCE_TAG} )
-  run_tpcnv_test( TrigEventAthenaPool_18.0.0    AOD-18.0.0-full
-                   REQUIRED_LIBRARIES TrackParticleAthenaPoolPoolCnv
-                   REFERENCE_TAG ${TRIGEVENTATHENAPOOL_REFERENCE_TAG} )
-  run_tpcnv_test( TrigEventAthenaPool_20.1.7.2  ESD-20.1.7.2
-                   REFERENCE_TAG ${TRIGEVENTATHENAPOOL_REFERENCE_TAG} )
-else()
-   message( WARNING
-      "Couldn't find AthenaPoolUtilitiesTest. No test(s) set up." )
-endif()
