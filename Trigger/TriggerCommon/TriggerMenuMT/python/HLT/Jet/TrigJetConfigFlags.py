@@ -18,6 +18,12 @@ def createTrigJetConfigFlags():
     flags.addFlag("Trigger.Jet.doVRJets", False,
                   help='enable the addition of the VR track jet reconstruction sequence')
 
+    flags.addFlag("Trigger.Jet.doHitZ", False,
+                  help='enable the hit-based per-jet z regression in the jet super-ROI step (ITk only)')
+
+    flags.addFlag("Trigger.Jet.hitZNetwork", "",
+                  help='ONNX file for the hit-based per-jet z regression, resolved by PathResolver')
+
     # chooses calibration config file for HLT small-R jets
     # mapping in: Reconstruction/Jet/JetCalibTools/python/JetCalibToolsConfig.py
     # All calib keys for HLT jets have to start with "Trig" otherwise the JetCalibTool config fails!
