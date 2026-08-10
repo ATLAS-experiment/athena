@@ -71,11 +71,11 @@ TriggerHLTListRun4 = [
 # L1 Calo inputs, note we are giving extended EDM targets
     ("CaloCellContainer#SCell",                                'ESD AODFULL', 'L1'),
     # Placeholder output collections from GlobalSimulation
-    ('std::vector<float>#eFEXeta', 'ESD AODFULL', 'L1'),
-    ('std::vector<float>#eFEXphi', 'ESD AODFULL', 'L1'),
-    ('std::vector<float>#FailedeFEXeta', 'ESD AODFULL', 'L1'),
-    ('std::vector<float>#FailedeFEXphi', 'ESD AODFULL', 'L1'),
-    ('std::vector<float>#eGamma1BDT', 'ESD AODFULL', 'L1'),
+    ('std::vector<float>#L1_eFEXeta', 'ESD AODFULL', 'L1'),
+    ('std::vector<float>#L1_eFEXphi', 'ESD AODFULL', 'L1'),
+    ('std::vector<float>#L1_FailedeFEXeta', 'ESD AODFULL', 'L1'),
+    ('std::vector<float>#L1_FailedeFEXphi', 'ESD AODFULL', 'L1'),
+    ('std::vector<float>#L1_eGamma1BDT', 'ESD AODFULL', 'L1'),
 
     # Particle Flow Objects, for assessing performance with ITk (and perhaps HGTD)
     ('xAOD::FlowElementContainer#HLT_ftfChargedParticleFlowObjects', 'BS ESD', 'Jet'),
