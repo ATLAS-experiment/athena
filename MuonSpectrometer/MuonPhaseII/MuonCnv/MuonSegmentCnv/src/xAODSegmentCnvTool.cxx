@@ -12,14 +12,7 @@
 #include "Acts/Surfaces/StrawSurface.hpp"
 #include "ActsGeoUtils/SurfacePlacement.h"
 #include "Acts/Geometry/TrackingGeometry.hpp"
-
-namespace {
-    /** @brief Returns the last parent volume that is alignable */
-    const Acts::TrackingVolume* highestAlignable(const Acts::TrackingVolume* volume){
-        return !volume || !volume->motherVolume() || !volume->motherVolume()->isAlignable()
-            ? volume : highestAlignable(volume->motherVolume());
-    }
-}
+#include "Acts/Surfaces/PlaneSurface.hpp"
 
 namespace MuonR4{
 
@@ -313,7 +306,7 @@ namespace MuonR4{
             crossedSurfaces.insert( muonMeas->type() != xAOD::UncalibMeasType::MdtDriftCircleType ? 
                                     m_idHelperSvc->gasGapId(muonMeas->identify()) :
                                     muonMeas->identify());
-            const auto* volume = highestAlignable(trackingGeo->findVolume(volumeId(surface)));
+            const auto* volume = MuonGMR4::highestAlignable(trackingGeo->findVolume(volumeId(surface)));
             assert(volume != nullptr);
             if (!startSurface) {
                 startSurface = MuonGMR4::bottomBoundary(*volume);
@@ -324,10 +317,32 @@ namespace MuonR4{
         /// Calculate the segment start parameters
         if (m_estimateHoles) {
             const Acts::GeometryContext tgContext = m_ctxProvider.getGeometryContext(ctx);
+            std::shared_ptr<const Acts::Surface> startSurfPtr = startSurface->getSharedPtr();
             auto atSurface = startSurface->intersect(tgContext, segment.position(), segment.direction(),
                                                       Acts::BoundaryTolerance::Infinite()).closest();
-        
-            auto startPars = Acts::BoundTrackParameters::create(tgContext, startSurface->getSharedPtr(),
+
+            const auto locPos = startSurface->globalToLocal(tgContext, atSurface.position(), segment.direction());
+            if (!locPos.ok()) {
+                ATH_MSG_WARNING(__func__<<"() "<<__LINE__<<" - Intersection "<<Amg::toString(atSurface.position())
+                    <<" is not on surface "<<startSurface->geometryId());
+                return;
+            }
+            if (!startSurface->insideBounds(*locPos)) {
+                const auto* volume = MuonGMR4::highestAlignable(trackingGeo->highestTrackingVolume()->
+                                                      lowestTrackingVolume(tgContext, atSurface.position()));
+                ATH_MSG_DEBUG(__func__<<"() "<<__LINE__<<" - Intersection "<<Amg::toString(atSurface.position())
+                    <<" is outside surface: "<<startSurface->geometryId()<<", "<<startSurface->bounds()<<". "
+                    <<" Switch to volume "<<volume->geometryId()<<", bounds: "<<volume->volumeBounds());
+
+                if (volume->isAlignable()) {
+                    startSurfPtr = MuonGMR4::bottomBoundary(*volume)->getSharedPtr();
+                    atSurface = startSurfPtr->intersect(tgContext, segment.position(), segment.direction(),
+                                                        Acts::BoundaryTolerance::Infinite()).closest();
+                } else {
+                    startSurfPtr = Acts::Surface::makeShared<Acts::PlaneSurface>(startSurfPtr->localToGlobalTransform(tgContext));
+                }
+            }
+            auto startPars = Acts::BoundTrackParameters::create(tgContext, startSurfPtr,
                                                                 ActsTrk::convertPosToActs(atSurface.position()),
                                                                 segment.direction(), 1./ 5._TeV, std::nullopt,
                                                                 Acts::ParticleHypothesis::muon());
@@ -337,10 +352,10 @@ namespace MuonR4{
                 ATH_MSG_WARNING(__func__<<"() "<<__LINE__<<" - Start parameters not defined.");
             }
         }
-        ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<" Updated summary: "<<hits);
         segment.setNHits(hits.precision, hits.triggerPhi, hits.triggerEta);
         segment.setNOutliers(outliers.precision, outliers.triggerPhi, outliers.triggerEta);
         segment.setNHoles(holes.precision, holes.triggerPhi, holes.triggerEta);
+        ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<" Updated summary: "<<hits);
     }
     void xAODSegmentCnvTool::findHoles(const EventContext& ctx,
                                       const Acts::BoundTrackParameters& startPars,

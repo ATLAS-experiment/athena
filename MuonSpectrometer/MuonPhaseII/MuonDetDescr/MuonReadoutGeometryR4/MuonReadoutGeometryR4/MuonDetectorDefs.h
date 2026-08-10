@@ -62,6 +62,9 @@ namespace MuonGMR4 {
      *  @param volume: Reference to the tracking volume from which the surface is retrieved */
     const Acts::Surface* topBoundary(const Acts::TrackingVolume& volume);
 
+    /** @brief Returns the highest parent volume that is alignable
+     *  @param volume: Pointer to the volume of interest */
+    const Acts::TrackingVolume* highestAlignable(const Acts::TrackingVolume* volume);
 }  // namespace MuonGMR4
 
 #ifndef SIMULATIONBASE

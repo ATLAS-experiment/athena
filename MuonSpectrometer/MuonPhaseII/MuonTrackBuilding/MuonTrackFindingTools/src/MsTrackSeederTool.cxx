@@ -96,7 +96,7 @@ namespace MuonR4{
                     refSeg = segment;
                     ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<" - Set reference segment to "<<::print(*segment));
                 }
-                Acts::BoundTrackParameters boundPars = MuonR4::SegmentFit::boundSegmentPars(tgContext, *m_detMgr, *segment);
+                Acts::BoundTrackParameters boundPars = SegmentFit::boundSegmentPars(tgContext, *m_detMgr, *segment);
                 if (!boundPars.covariance()) {
                     continue;
                 }
@@ -134,15 +134,12 @@ namespace MuonR4{
             const Acts::GeometryIdentifier volId = volumeId(firstSurf);
       
             // Find the first measurement
-            const Acts::TrackingVolume* volume{m_trackingGeometrySvc->trackingGeometry()->findVolume(volId)};
+            const Acts::TrackingVolume* volume{MuonGMR4::highestAlignable(m_trackingGeometrySvc->trackingGeometry()->findVolume(volId))};
                        
             if (!volume) {
                 ATH_MSG_WARNING(__func__<<"() "<<__LINE__
                                 <<" - Failed to find tracking volume for seed measurement "<<volId);
                 return Acts::Result<Acts::BoundTrackParameters>::failure(std::make_error_code(std::errc::invalid_argument));
-            }
-            if (volume->motherVolume() && volume->motherVolume()->isAlignable()) {
-                volume = volume->motherVolume();
             }
             ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__
                             <<" - Bounding volume "<<volume->volumeName()
@@ -162,7 +159,15 @@ namespace MuonR4{
                                     <<", bounds: "<<volume->volumeBounds()<<", "
                                     <<SegmentFit::localSegmentPars(*frontSegment));
                 }
-
+                /** Update the local seed direction */
+                {
+                    const Amg::Transform3D& toLoc{volume->globalToLocalTransform(tgContext)};
+                    const Amg::Vector3D locSeedDir = toLoc.linear() * seedDir;
+                    const Amg::Vector3D frontSeedDir = toLoc.linear() * frontSegment->direction();
+                    seedDir = volume->localToGlobalTransform(tgContext).linear() *
+                              Acts::makeDirectionFromAxisTangents(houghTanAlpha(locSeedDir), 
+                                                                  houghTanBeta(frontSeedDir));
+                }
                 /** Extrapolate the seed segment onto the inner plane. We want to take the precision 
                     intercept from the inner segment and the non-precision intercept from the extrapolated
                     segment */
