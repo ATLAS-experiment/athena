@@ -239,7 +239,12 @@ def makeITkDefectsParams( quad_cc_defect_prob,
                           module_defect_prob=0.,
                           cornerDefectProb=0.,
                           noiseProbability=None,
-                          noiseShape=[]) :
+                          noiseShape=[],
+                          quad_cc_defect_prob_endcap=None,
+                          quad_fractions_endcap=None,
+                          circuit_cc_defect_prob_endcap=None,
+                          circuit_fractions_endcap=None,
+                          circuit_cc_defect_prob_l0=None) :
     """
     Create different defects for quads and single chip modules, where the corresponding modules are selected by
     the number of offline columns
@@ -259,8 +264,37 @@ def makeITkDefectsParams( quad_cc_defect_prob,
     # sensors suffers such defects (currently not taken into account
     corner_defect_n_defect_corners=poissonFractions(cc_defect_prob=15e-2, max_n=4)
 
-    return combineModuleDefects([
-            moduleDefect(bec=[-2,2],layer=[0,99], phi_range=[-99,99],eta_range=[-99,99], # select all modules
+
+
+    # if there are no CC defects for quads or single ship modules do not set fractions for the number CC defects.
+    eff_quad_fractions=[1.,0.] if quad_cc_defect_prob == 0 else quad_fractions
+    eff_circuit_fractions=[1.,0.] if quad_cc_defect_prob == 0 else circuit_fractions
+
+    # if there is no special l0 CC defect probability use the general CC defect probability
+    circuit_cc_defect_prob_l0=circuit_cc_defect_prob_l0 if circuit_cc_defect_prob_l0 is not None else circuit_cc_defect_prob
+
+    eff_circuit_fractions_l0=[1.,0.] if circuit_cc_defect_prob_l0 <= 0. else circuit_fractions
+
+    import logging
+    local_logger = logging.getLogger('PixelDefectsEmulatorPostInclude')
+
+    local_logger.debug('quad_cc_defect_prob_endcap=', quad_cc_defect_prob_endcap)
+    local_logger.debug('quad_fractions_endcap=',quad_fractions_endcap)
+    local_logger.debug('quad_cc_defect_prob=', quad_cc_defect_prob)
+    local_logger.debug('quad_fractions=',quad_fractions)
+    local_logger.debug('circuit_cc_defect_prob_endcap=',circuit_cc_defect_prob_endcap)
+    local_logger.debug('circuit_cc_defect_prob=',circuit_cc_defect_prob)
+    local_logger.debug('circuit_cc_defect_prob_l0=',circuit_cc_defect_prob_l0)
+    local_logger.debug('circuit_fractions_endcap=',circuit_fractions_endcap)
+    local_logger.debug('circuit_fractions',circuit_fractions)
+    local_logger.debug('eff. circuit_fractions=',eff_circuit_fractions)
+    local_logger.debug('eff. quad_fractions=',eff_quad_fractions)
+
+    # barrel defects
+    bec_selection=[0,0]
+    bec_selection_circuit=[0,0]
+    all_defects=[
+            moduleDefect(bec=bec_selection,layer=[0,99], phi_range=[-99,99],eta_range=[-99,99], # select all modules
                          columns_or_strips=[800,800], # but only quads
                          side_range=[0,0],     # there is only a single side
                          all_rows=False,       # there is no connection between modules
@@ -269,13 +303,13 @@ def makeITkDefectsParams( quad_cc_defect_prob,
                                       quad_cc_defect_prob, # probability of a module to have at least one core-column defect
                                       0.       # probability of a module to have at least one defect circuit
                                       ],
-                         fractionsOfNDefects=[[1.], quad_fractions,[1.]], # dummy fractions for cell and circuit defects
+                         fractionsOfNDefects=[[1.], eff_quad_fractions,[1.]], # dummy fractions for cell and circuit defects
                          noiseProbability=noiseProbability,
                          noiseShape=noiseShape,
                          cornerDefectParam=[], # need empty lists here
                          cornerDefectNCornerFractions=[] # and here, otherwise resulting property will be non-conform,
                          ),
-            moduleDefect(bec=[-2,2],layer=[0,1], phi_range=[-99,99],eta_range=[-99,99], # select all modules
+            moduleDefect(bec=bec_selection_circuit,layer=[0,1], phi_range=[-99,99],eta_range=[-99,99], # select all modules
                          columns_or_strips=[384,384], # but only ring triplet modules
                          side_range=[0,0],     # there is only a single side
                          all_rows=False,       # there is no connection between modules
@@ -284,28 +318,144 @@ def makeITkDefectsParams( quad_cc_defect_prob,
                                       circuit_cc_defect_prob,    # probability of a module to have at least one core-column defect
                                       0.       # probability of a module to have at least one defect circuit
                                       ],
-                         fractionsOfNDefects=[[1.], circuit_fractions,[1.]], # dummy fractions for cell and circuit defects
+                         fractionsOfNDefects=[[1.], eff_circuit_fractions,[1.]], # dummy fractions for cell and circuit defects
                          noiseProbability=noiseProbability,
                          noiseShape=noiseShape,
                          cornerDefectParam=corner_defects,
                          cornerDefectNCornerFractions=corner_defect_n_defect_corners,
                          ),
-            moduleDefect(bec=[-2,2],layer=[0,1], phi_range=[-99,99],eta_range=[-99,99], # select all modules
+            moduleDefect(bec=bec_selection_circuit,layer=[0,1], phi_range=[-99,99],eta_range=[-99,99], # select all modules
                          columns_or_strips=[200,200], # but only barrel triplet modules
                          side_range=[0,0],     # there is only a single side
                          all_rows=False,       # there is no connection between modules
                          probability=[module_defect_prob,      # probability of a module to be defect
                                       pixel_defect_prob,    # probability of a pixel to be defect
-                                      circuit_cc_defect_prob,    # probability of a module to have at least one core-column defect
+                                      circuit_cc_defect_prob_l0,    # probability of a module to have at least one core-column defect
                                       0.       # probability of a module to have at least one defect circuit
                                     ],
-                         fractionsOfNDefects=[[1.],circuit_fractions,[1.]], # dummy fractions for cell and circuit defects
+                         fractionsOfNDefects=[[1.],eff_circuit_fractions_l0,[1.]], # dummy fractions for cell and circuit defects
                          noiseProbability=noiseProbability,
                          noiseShape=noiseShape,
                          cornerDefectParam=corner_defects,
                          cornerDefectNCornerFractions=corner_defect_n_defect_corners,
                          )
-        ])
+        ]
+
+    quad_cc_defect_prob_endcap = quad_cc_defect_prob_endcap if quad_cc_defect_prob_endcap is not None else quad_cc_defect_prob
+    # everything but barrel, the preceeding patterns will match the barrel
+    quad_fractions_endcap=quad_fractions_endcap if quad_fractions_endcap is not None else quad_fractions
+    local_logger.debug('eff. quad_fractions_endcap=',quad_fractions_endcap)
+
+    # endcap quad defects
+    all_defects+=[
+        moduleDefect(bec=[-2,-1], layer=[0,99], phi_range=[-99,99],eta_range=[-99,99], # select all modules
+                     columns_or_strips=[800,800], # but only quads
+                     side_range=[0,0],     # there is only a single side
+                     all_rows=False,       # there is no connection between modules
+                     probability=[module_defect_prob,      # probability of a module to be defect
+                                  pixel_defect_prob,    # probability of a pixel to be defect
+                                  quad_cc_defect_prob_endcap, # probability of a module to have at least one core-column defect
+                                  0.       # probability of a module to have at least one defect circuit
+                                  ],
+                     fractionsOfNDefects=[[1.], quad_fractions_endcap,[1.]], # dummy fractions for cell and circuit defects
+                     noiseProbability=noiseProbability,
+                     noiseShape=noiseShape,
+                     cornerDefectParam=[], # need empty lists here
+                     cornerDefectNCornerFractions=[] # and here, otherwise resulting property will be non-conform,
+                     ),
+    moduleDefect(bec=[1,2], layer=[0,99], phi_range=[-99,99],eta_range=[-99,99], # select all modules
+                     columns_or_strips=[800,800], # but only quads
+                     side_range=[0,0],     # there is only a single side
+                     all_rows=False,       # there is no connection between modules
+                     probability=[module_defect_prob,      # probability of a module to be defect
+                                  pixel_defect_prob,    # probability of a pixel to be defect
+                                  quad_cc_defect_prob_endcap, # probability of a module to have at least one core-column defect
+                                  0.       # probability of a module to have at least one defect circuit
+                                  ],
+                     fractionsOfNDefects=[[1.], quad_fractions_endcap,[1.]], # dummy fractions for cell and circuit defects
+                     noiseProbability=noiseProbability,
+                     noiseShape=noiseShape,
+                     cornerDefectParam=[], # need empty lists here
+                     cornerDefectNCornerFractions=[] # and here, otherwise resulting property will be non-conform,
+                     )]
+
+    circuit_cc_defect_prob_endcap = circuit_cc_defect_prob_endcap if circuit_cc_defect_prob_endcap is not None else circuit_cc_defect_prob
+    circuit_fractions_endcap=circuit_fractions_endcap if circuit_fractions_endcap is not None else circuit_fractions
+    circuit_cc_defect_prob_endcap_l0=circuit_cc_defect_prob_endcap
+    if circuit_cc_defect_prob_l0 is not None :
+        circuit_cc_defect_prob_endcap_l0=circuit_cc_defect_prob_l0
+    eff_circuit_fractions_endcap_l0=[1.,0.] if circuit_cc_defect_prob_endcap_l0 <= 0. else circuit_fractions_endcap
+    if circuit_cc_defect_prob_l0 is not None :
+        eff_circuit_fractions_endcap_l0=[1.,0.] if circuit_cc_defect_prob_endcap_l0 <= 0. else eff_circuit_fractions_l0
+
+    local_logger.debug('eff. circuit_fractions_endcap=',circuit_fractions_endcap)
+    local_logger.debug('eff. circuit_fractions_endcap_l0=',eff_circuit_fractions_endcap_l0)
+
+    # endcap defects for single chip modules
+    all_defects+=[
+        moduleDefect(bec=[-2,-1], layer=[0,1], phi_range=[-99,99],eta_range=[-99,99], # select all modules
+                     columns_or_strips=[384,384], # but only ring triplet modules
+                     side_range=[0,0],     # there is only a single side
+                     all_rows=False,       # there is no connection between modules
+                     probability=[module_defect_prob,      # probability of a module to be defect
+                                  pixel_defect_prob,    # probability of a pixel to be defect
+                                  circuit_cc_defect_prob_endcap_l0,    # probability of a module to have at least one core-column defect
+                                  0.       # probability of a module to have at least one defect circuit
+                                  ],
+                     fractionsOfNDefects=[[1.], eff_circuit_fractions_endcap_l0,[1.]], # dummy fractions for cell and circuit defects
+                     noiseProbability=noiseProbability,
+                     noiseShape=noiseShape,
+                     cornerDefectParam=corner_defects,
+                     cornerDefectNCornerFractions=corner_defect_n_defect_corners,
+                     ),
+        moduleDefect(bec=[-2,-1], layer=[0,1], phi_range=[-99,99],eta_range=[-99,99], # select all modules
+                     columns_or_strips=[200,200], # but only barrel triplet modules
+                     side_range=[0,0],     # there is only a single side
+                     all_rows=False,       # there is no connection between modules
+                     probability=[module_defect_prob,      # probability of a module to be defect
+                                  pixel_defect_prob,    # probability of a pixel to be defect
+                                  circuit_cc_defect_prob_l0,    # probability of a module to have at least one core-column defect
+                                  0.       # probability of a module to have at least one defect circuit
+                                ],
+                     fractionsOfNDefects=[[1.],eff_circuit_fractions_l0,[1.]], # dummy fractions for cell and circuit defects
+                     noiseProbability=noiseProbability,
+                     noiseShape=noiseShape,
+                     cornerDefectParam=corner_defects,
+                     cornerDefectNCornerFractions=corner_defect_n_defect_corners,
+                     ),
+        moduleDefect(bec=[1,2], layer=[0,1], phi_range=[-99,99],eta_range=[-99,99], # select all modules
+                     columns_or_strips=[384,384], # but only ring triplet modules
+                     side_range=[0,0],     # there is only a single side
+                     all_rows=False,       # there is no connection between modules
+                     probability=[module_defect_prob,      # probability of a module to be defect
+                                  pixel_defect_prob,    # probability of a pixel to be defect
+                                  circuit_cc_defect_prob_endcap_l0,    # probability of a module to have at least one core-column defect
+                                  0.       # probability of a module to have at least one defect circuit
+                                  ],
+                     fractionsOfNDefects=[[1.], eff_circuit_fractions_endcap_l0,[1.]], # dummy fractions for cell and circuit defects
+                     noiseProbability=noiseProbability,
+                     noiseShape=noiseShape,
+                     cornerDefectParam=corner_defects,
+                     cornerDefectNCornerFractions=corner_defect_n_defect_corners,
+                     ),
+        moduleDefect(bec=[1,2], layer=[0,1], phi_range=[-99,99],eta_range=[-99,99], # select all modules
+                     columns_or_strips=[200,200], # but only barrel triplet modules
+                     side_range=[0,0],     # there is only a single side
+                     all_rows=False,       # there is no connection between modules
+                     probability=[module_defect_prob,      # probability of a module to be defect
+                                  pixel_defect_prob,    # probability of a pixel to be defect
+                                  circuit_cc_defect_prob_l0,    # probability of a module to have at least one core-column defect
+                                  0.       # probability of a module to have at least one defect circuit
+                                ],
+                     fractionsOfNDefects=[[1.],eff_circuit_fractions_l0,[1.]], # dummy fractions for cell and circuit defects
+                     noiseProbability=noiseProbability,
+                     noiseShape=noiseShape,
+                     cornerDefectParam=corner_defects,
+                     cornerDefectNCornerFractions=corner_defect_n_defect_corners,
+                     )
+    ]
+    local_logger.debug("ALLDefects : ", all_defects)
+    return combineModuleDefects(all_defects)
 
 def makeITkPixelNoise(noiseProb=0.) :
     """
@@ -341,23 +491,34 @@ def emulateITkPixelDefectsOneCC(flags,
                                 DefectsInputFiles=[],
                                 DefectsOutputFile=None,
                                 PropagateDefectsToStatus=True,
-                                HistogramFileName=None) :
+                                HistogramFileName=None,
+                                FrontEndCCDefectProbBarrel=None,
+                                FrontEndCCDefectProbEndcap=None,
+                                FrontEndCCDefectProbBarrelL0=None
+                                ) :
     """
     Create exactly one core column defect per module where the probability is given
     by module_prob, and create single pixel defects according to pixel_defect_prob
     """
+    FrontEndCCDefectProbBarrel=FrontEndCCDefectProbBarrel if FrontEndCCDefectProbBarrel is not None else FrontEndCCDefectProb
     noiseProbabilitySingle,noiseShapeSingle = makeITkPixelNoise(NoiseProb)
     fractions=fractionsForExactlyNCoreColumnDefects(NumberOfCCDefects)
     ModulePatterns, DefectProbabilities, NDefectFractionsPerPattern, NoiseProbability, NoiseShape,cornerDefectParam,cornerDefectFractions = makeITkDefectsParams(
-        quad_cc_defect_prob=quadProb(FrontEndCCDefectProb),
+        quad_cc_defect_prob=quadProb(FrontEndCCDefectProbBarrel),
         quad_fractions=fractions,    # same fractions for quads and other modules
-        circuit_cc_defect_prob=FrontEndCCDefectProb,
+        circuit_cc_defect_prob=FrontEndCCDefectProbBarrel,
         circuit_fractions=fractions,
         pixel_defect_prob=PixelDefectProb,
         module_defect_prob=ModuleDefectProb,
         cornerDefectProb=CornerDefectProb,
         noiseProbability=noiseProbabilitySingle,
-        noiseShape=noiseShapeSingle)
+        noiseShape=noiseShapeSingle,
+        quad_cc_defect_prob_endcap=None if FrontEndCCDefectProbEndcap is None else quadProb(FrontEndCCDefectProbEndcap),
+        quad_fractions_endcap=None,
+        circuit_cc_defect_prob_endcap=FrontEndCCDefectProbEndcap,
+        circuit_fractions_endcap=None,
+        circuit_cc_defect_prob_l0=FrontEndCCDefectProbBarrelL0
+    )
 
     return emulateITkPixelDefects(flags,
                                   cfg,
@@ -388,24 +549,34 @@ def emulateITkPixelDefectsPoisson(flags,
                                   DefectsInputFiles=[],
                                   DefectsOutputFile=None,
                                   PropagateDefectsToStatus=True,
-                                  HistogramFileName=None) :
+                                  HistogramFileName=None,
+                                  FrontEndCCDefectProbBarrel=None,
+                                  FrontEndCCDefectProbEndcap=None,
+                                  FrontEndCCDefectProbBarrelL0=None) :
     """
     Create Poisson distributed  core column defects per module where the probability for at least one
     core column defect is given by front_end_cc_defect_prob for single chip modules and larger for
     quads, respectively. Single pixel defects are controlled by pixel_defect_prob
     """
+    FrontEndCCDefectProbBarrel=FrontEndCCDefectProbBarrel if FrontEndCCDefectProbBarrel is not None else FrontEndCCDefectProb
     noiseProbabilitySingle,noiseShapeSingle = makeITkPixelNoise(NoiseProb)
     quad_prob=quadProb(FrontEndCCDefectProb)
     ModulePatterns, DefectProbabilities, NDefectFractionsPerPattern, NoiseProbability, NoiseShape,cornerDefectParam,cornerDefectFractions = makeITkDefectsParams(
-        quad_cc_defect_prob=quad_prob,
+        quad_cc_defect_prob=quadProb(FrontEndCCDefectProbBarrel),
         quad_fractions=poissonFractions(quad_prob),
-        circuit_cc_defect_prob=FrontEndCCDefectProb,
+        circuit_cc_defect_prob=FrontEndCCDefectProbBarrel,
         circuit_fractions=poissonFractions(FrontEndCCDefectProb),
         pixel_defect_prob=PixelDefectProb,
         module_defect_prob=ModuleDefectProb,
         cornerDefectProb=CornerDefectProb,
         noiseProbability=noiseProbabilitySingle,
-        noiseShape=noiseShapeSingle)
+        noiseShape=noiseShapeSingle,
+        quad_cc_defect_prob_endcap=None if FrontEndCCDefectProbEndcap is None else quadProb(FrontEndCCDefectProbEndcap),
+        quad_fractions_endcap=None,
+        circuit_cc_defect_prob_endcap=FrontEndCCDefectProbEndcap,
+        circuit_fractions_endcap=None,
+        circuit_cc_defect_prob_l0=FrontEndCCDefectProbBarrelL0
+    )
 
     return emulateITkPixelDefects(flags,
                                   cfg,
@@ -435,7 +606,10 @@ def emulateITkPixelDefectsDefault(flags,
                                   DefectsInputFiles=[],
                                   DefectsOutputFile=None,
                                   PropagateDefectsToStatus=True,
-                                  HistogramFileName=None) :
+                                  HistogramFileName=None,
+                                  FrontEndCCDefectProbBarrel=None,
+                                  FrontEndCCDefectProbEndcap=None,
+                                  FrontEndCCDefectProbBarrelL0=None) :
     """
     Enables all defects according to the current expectation.
     """
@@ -449,4 +623,7 @@ def emulateITkPixelDefectsDefault(flags,
                                   DefectsInputFiles=DefectsInputFiles,
                                   DefectsOutputFile=DefectsOutputFile,
                                   PropagateDefectsToStatus=PropagateDefectsToStatus,
-                                  HistogramFileName=HistogramFileName)
+                                  HistogramFileName=HistogramFileName,
+                                  FrontEndCCDefectProbBarrel=FrontEndCCDefectProbBarrel,
+                                  FrontEndCCDefectProbEndcap=FrontEndCCDefectProbEndcap,
+                                  FrontEndCCDefectProbBarrelL0=FrontEndCCDefectProbBarrelL0)
