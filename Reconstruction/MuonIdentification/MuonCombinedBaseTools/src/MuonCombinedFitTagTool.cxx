@@ -42,7 +42,6 @@ namespace MuonCombined {
         if (!m_outwardsBuilder.empty()) ATH_CHECK(m_outwardsBuilder.retrieve());
         ATH_CHECK(m_trackQuery.retrieve());
         ATH_CHECK(m_momentumBalanceTool.retrieve());
-        if (!m_muonRecovery.empty()) ATH_CHECK(m_muonRecovery.retrieve());
         ATH_CHECK(m_matchQuality.retrieve());
         ATH_CHECK(m_trackScoringTool.retrieve());
         /// handle to the magnetic field cache
@@ -125,41 +124,6 @@ namespace MuonCombined {
                 bestTag.swap(currentTag);
                 bestCombTrack.swap(combinedTrack);
                 bestMETrack.swap(METrack);
-            }
-        }
-        /// try recovery
-        if (!bestCandidate && !m_muonRecovery.empty()) {
-            for (const InDetProbMatch& cand_prob : sortedInDetCandidates) {
-                const Trk::Track* id_track = cand_prob.second->indetTrackParticle().track();
-                combinedTrack = m_muonRecovery->recoverableMatch(*id_track, muonCandidate.muonSpectrometerTrack(), ctx);
-                if (combinedTrack && combinedTrackQualityCheck(ctx, *combinedTrack, *id_track)) {
-                    combinedTrack->info().addPatternReco(id_track->info());
-                    combinedTrack->info().addPatternReco(muonCandidate.muonSpectrometerTrack().info());
-                    combinedTrack->info().setParticleHypothesis(Trk::muon);
-                    combinedTrack->info().setPatternRecognitionInfo(Trk::TrackInfo::MuidCombined);
-                    // calculate track score
-                    Trk::TrackScore score = m_trackScoringTool->score(*combinedTrack);
-
-                    // add fit info into tag object
-                    currentTag = std::make_unique<CombinedFitTag>(xAOD::Muon::Author::MuidCo, muonCandidate, score);
-
-                    if (msgLevel() >= MSG::DEBUG) {
-                        dumpCaloEloss(ctx, combinedTrack.get(), "Recovery Combined Track ");
-                        dumpCaloEloss(ctx, muonCandidate.extrapolatedTrack(), "Recovery Extrapolated Track ");
-                    }
-
-                    // re-fit standalone track (if needed) and store output into tag object
-                    METrack = evaluateMatchProperties(ctx, combinedTrack.get(), *currentTag, cand_prob.second->indetTrackParticle());
-
-                    // select the best combined track
-                    if (!bestCandidate || bestMatchChooser(*cand_prob.second, *currentTag, *combinedTrack, METrack.get(), *bestCandidate,
-                                                           *bestTag, *bestCombTrack, bestMETrack.get())) {
-                        bestCandidate = cand_prob.second;
-                        bestTag.swap(currentTag);
-                        bestCombTrack.swap(combinedTrack);
-                        bestMETrack.swap(METrack);
-                    }
-                }
             }
         }
 

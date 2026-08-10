@@ -14,7 +14,6 @@
 #include "TrigMuonEvent/TrigMuonClusterFeatureContainer.h"
 #include "MuonSegment/MuonSegmentCombinationCollection.h"
 #include "MuonPattern/MuonPatternCombinationCollection.h"
-#include "MuidEvent/MuidTrackContainer.h"
 #include "TrigMuonEvent/CachingFeatureCollection.h"
 
 #include "TrigNavigation/TypeRegistration.h"
