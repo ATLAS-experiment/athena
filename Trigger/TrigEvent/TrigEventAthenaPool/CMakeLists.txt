@@ -24,8 +24,7 @@ atlas_add_poolcnv_library( TrigEventAthenaPoolPoolCnv
          TrigInDetEvent/TrigTrackCountsCollection.h
          TrigInDetEvent/TrigVertexCounts.h
          TrigInDetEvent/TrigVertexCountsCollection.h
-         TrigCombinedEvent/TrigComposite.h
-         TrigCombinedEvent/TrigCompositeContainer.h TrigMuonEvent/MuonFeature.h
+         TrigMuonEvent/MuonFeature.h
          TrigMuonEvent/MuonFeatureContainer.h TrigMuonEvent/MuonFeatureDetails.h
          TrigMuonEvent/MuonFeatureDetailsContainer.h
          TrigMuonEvent/CombinedMuonFeature.h
@@ -62,7 +61,7 @@ atlas_add_poolcnv_library( TrigEventAthenaPoolPoolCnv
    TYPES_WITH_NAMESPACE TrigDec::TrigDecision
    LINK_LIBRARIES AthenaPoolUtilities GaudiKernel AthenaPoolCnvSvcLib
                   RootConversions TrigCaloEvent
-                  TrigCaloEventTPCnv TrigCombinedEvent TrigCombinedEventTPCnv
+                  TrigCaloEventTPCnv
                   TrigDecisionEvent TrigDecisionEventTPCnv TrigInDetEvent
                   TrigInDetEventTPCnv TrigMissingEtEvent TrigMissingEtEventTPCnv
                   TrigMonitoringEvent TrigMonitoringEventTPCnv TrigMuonEvent
