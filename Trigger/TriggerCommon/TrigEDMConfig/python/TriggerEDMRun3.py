@@ -101,6 +101,8 @@ def getJetCopyVars(suffix):
         JetCopyVars += [f'fastGNTau20240216_p{flavour}' for disc in discriminants for flavour in ['tau','u']]
         JetCopyVars += [f'fastUHT120250605_p{x}' for x in ["tau" , "u" , "c" , "b"]]
         JetCopyVars += ['dipz20231122_z','dipz20231122_negLogSigma2']
+        # only present when Trigger.Jet.doHitZ is set, which this list cannot see
+        JetCopyVars += ['HitZ_z0','HitZ_z0_sigma','HitZ_negLogSigma2']
         JetCopyVars += ['TracksForMinimalJetTag']
 
     TLAJetVarsToKeep = [

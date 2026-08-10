@@ -356,6 +356,13 @@ JetChainParts = {
        'preselZ142XX5c20',
        'preselZ134XX5c20',
        'preselZ124XX5c20',
+       #HitZ preselection. Provisional working points, to be replaced once the
+       #scan over the hit-based likelihood has been done
+       'preselHZ138XX4c25',
+       'preselHZ120XX4c25',
+       'preselHZ84XX4c25',
+       'preselHZ120MAXMULT5cXX4c25',
+       'preselHZ120XX2c25XX2c25bgtwo95',
        'preselVETOMULT11a10',
        'preselVETOMULT11a15'
      ],

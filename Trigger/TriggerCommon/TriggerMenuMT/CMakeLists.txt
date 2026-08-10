@@ -51,6 +51,10 @@ atlas_add_test( EventBuildingSequences
                 SCRIPT python -m TriggerMenuMT.HLT.CommonSequences.EventBuildingSequences
                 POST_EXEC_SCRIPT noerror.sh )
 
+atlas_add_test( JetPresel
+                SCRIPT python -m TriggerMenuMT.HLT.Jet.JetPreselTest
+                POST_EXEC_SCRIPT noerror.sh )
+
 atlas_add_test( checkMenuPrimaries SCRIPT scripts/checkMenuPrimaries.py 
                 POST_EXEC_SCRIPT "check_log.py --errors --config checklogTriggerTest.conf checkMenuPrimaries.log" )
 

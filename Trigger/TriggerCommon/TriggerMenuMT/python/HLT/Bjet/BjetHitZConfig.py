@@ -29,9 +29,13 @@ DETA_HIT_TO_JET = 0.1
 DZ_HIT_TO_VERTEX = 180
 
 # Map the MDN output names onto the (z, sigma) pair the menu side expects
+Z_DECOR = 'HitZ_z0'
+SIGMA_DECOR = 'HitZ_z0_sigma'
+NEG_LOG_SIGMA2_DECOR = 'HitZ_negLogSigma2'
+
 OUTPUT_REMAP = {
-    'HitZmdn_TruthJetPVz': 'HitZ_z0',
-    'HitZmdn_TruthJetPVz_stddev': 'HitZ_z0_sigma',
+    'HitZmdn_TruthJetPVz': Z_DECOR,
+    'HitZmdn_TruthJetPVz_stddev': SIGMA_DECOR,
 }
 
 
@@ -125,6 +129,14 @@ def hitZInferenceCfg(flags, inputJets, inputTracks, nnFile, remap=None):
                 variableRemapping=OUTPUT_REMAP if remap is None else remap,
                 defaultZeroTracks=True,
             ),
+        ))
+    # the hypo condition recovers the variance as exp(-negLogSigma2)
+    ca.addEventAlgo(
+        CompFactory.FlavorTagDiscriminants.NegLogSigma2DecoratorAlg(
+            name='HitZNegLogSigma2Alg',
+            jetContainer=inputJets,
+            sigmaDecor=SIGMA_DECOR,
+            negLogSigma2Decor=NEG_LOG_SIGMA2_DECOR,
         ))
     return ca
 
