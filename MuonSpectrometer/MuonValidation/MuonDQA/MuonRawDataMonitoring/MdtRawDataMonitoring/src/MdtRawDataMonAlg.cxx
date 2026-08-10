@@ -24,7 +24,6 @@
 #include "MdtHistCoder.h"
 #include "MuonCalibIdentifier/MuonFixedId.h"
 #include "MuonDQAUtils/MuonChamberNameConverter.h"
-#include "MuonDQAUtils/MuonChambersRange.h"
 #include "MuonDQAUtils/MuonDQAHistMap.h"
 #include "MuonIdHelpers/MdtIdHelper.h"
 #include "MuonRIO_OnTrack/MdtDriftCircleOnTrack.h"

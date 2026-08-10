@@ -20,7 +20,6 @@
 #include "GeoPrimitives/GeoPrimitivesHelpers.h"
 
 #include "TrkRIO_OnTrack/RIO_OnTrack.h"
-#include "muonEvent/MuonContainer.h"
 
 #include <inttypes.h>
 
