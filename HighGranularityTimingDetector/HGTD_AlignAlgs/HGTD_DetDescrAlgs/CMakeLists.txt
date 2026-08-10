@@ -1,13 +1,13 @@
 # Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name
-atlas_subdir( HGTDDetDescrAlgs )
+atlas_subdir( HGTD_DetDescrAlgs )
 
 # External dependencies
 find_package( CLHEP )
 
 # Component(s)
-atlas_add_component( HGTDDetDescrAlgs
+atlas_add_component( HGTD_DetDescrAlgs
                      src/*.cxx
                      src/components/*.cxx
 

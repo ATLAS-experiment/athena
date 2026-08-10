@@ -2,8 +2,8 @@
   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef HGTDDETDESCRALGS_PRINTHGTDELEMENTS_H
-#define HGTDDETDESCRALGS_PRINTHGTDELEMENTS_H
+#ifndef HGTD_DETDESCRALGS_PRINTHGTDELEMENTS_H
+#define HGTD_DETDESCRALGS_PRINTHGTDELEMENTS_H
 
 #include "AthenaBaseComps/AthAlgorithm.h"
 

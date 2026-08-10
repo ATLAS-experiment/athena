@@ -2,7 +2,7 @@
   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "HGTDDetDescrAlgs/PrintHGTDElements.h"
+#include "HGTD_DetDescrAlgs/PrintHGTDElements.h"
 #include "AthenaKernel/IOVInfiniteRange.h"
 #include "StoreGate/ReadCondHandle.h"
 #include "Identifier/Identifier.h"
