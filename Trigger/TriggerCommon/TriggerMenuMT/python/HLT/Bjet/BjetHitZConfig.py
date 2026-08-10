@@ -22,6 +22,18 @@ STRIP_HITS = 'StripClusters'
 # does not honour variableRemapping, so it is not free to choose
 HIT_ASSOCIATION = 'hitsAssociatedWithJet'
 
+# The wedge and the hit budget have to match what the network was trained with
+MAX_HITS = 700
+DPHI_HIT_TO_JET = 0.1
+DETA_HIT_TO_JET = 0.1
+DZ_HIT_TO_VERTEX = 180
+
+# Map the MDN output names onto the (z, sigma) pair the menu side expects
+OUTPUT_REMAP = {
+    'HitZmdn_TruthJetPVz': 'HitZ_z0',
+    'HitZmdn_TruthJetPVz_stddev': 'HitZ_z0_sigma',
+}
+
 
 def hitClusterCnvCfg(flags):
     """xAOD converters for the in-view Si clusters the fast tracking produced."""
@@ -47,8 +59,9 @@ def hitClusterCnvCfg(flags):
     return ca
 
 
-def hitAssociationCfg(flags, inputJets, maxHits=200,
-                      dphi=0.1, deta=0.1, dz=180):
+def hitAssociationCfg(flags, inputJets, maxHits=MAX_HITS,
+                      dphi=DPHI_HIT_TO_JET, deta=DETA_HIT_TO_JET,
+                      dz=DZ_HIT_TO_VERTEX):
     """Clean, decorate and associate the Pixel and Strip hits to the jets."""
     ca = ComponentAccumulator()
 
@@ -109,7 +122,7 @@ def hitZInferenceCfg(flags, inputJets, inputTracks, nnFile, remap=None):
             decorator=CompFactory.FlavorTagInference.GNNTool(
                 name='HitZGNNTool',
                 nnFile=nnFile,
-                variableRemapping=remap or {},
+                variableRemapping=OUTPUT_REMAP if remap is None else remap,
                 defaultZeroTracks=True,
             ),
         ))
