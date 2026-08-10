@@ -52,8 +52,6 @@ atlas_add_poolcnv_library( TrigEventAthenaPoolPoolCnv
          TrigCaloEvent/RingerRingsContainer.h TrigCaloEvent/TrigRNNOutput.h
          TrigCaloEvent/TrigRNNOutputContainer.h TrigCaloEvent/TrigCaloCluster.h
          TrigCaloEvent/TrigCaloClusterContainer.h
-         TrigTopoEvent/ElectronMuonTopoInfo.h
-         TrigTopoEvent/ElectronMuonTopoInfoContainer.h
          TrigMonitoringEvent/TrigMonEvent.h
          TrigMonitoringEvent/TrigMonEventCollection.h
          TrigMonitoringEvent/TrigMonConfig.h
@@ -65,5 +63,5 @@ atlas_add_poolcnv_library( TrigEventAthenaPoolPoolCnv
                   TrigDecisionEvent TrigDecisionEventTPCnv TrigInDetEvent
                   TrigInDetEventTPCnv
                   TrigMonitoringEvent TrigMonitoringEventTPCnv TrigMuonEvent
-                  TrigMuonEventTPCnv TrigParticle TrigParticleTPCnv
-                  TrigTopoEvent TrigTopoEventTPCnv )
+                  TrigMuonEventTPCnv TrigParticle TrigParticleTPCnv )
+
