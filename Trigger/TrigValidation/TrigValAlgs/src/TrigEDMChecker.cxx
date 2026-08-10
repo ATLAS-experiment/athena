@@ -8,7 +8,6 @@
 
 #include "AthViews/ViewHelper.h"
 #include "AthViews/View.h"
-#include "CxxUtils/checker_macros.h"
 
 #include "TrigConfHLTUtils/HLTUtils.h"
 #include "TrigNavStructure/TriggerElement.h"
@@ -68,43 +67,6 @@
 #include <queue>
 
 
-TrigEDMChecker::TrigEDMChecker(const std::string& name, ISvcLocator* pSvcLocator)
-  : AthAnalysisAlgorithm(name, pSvcLocator),
-    m_clidSvc( "ClassIDSvc", name )
-{
-  /** switches to control the analysis through job options */
-
-  declareProperty("doDumpAll", m_doDumpAll = true);
-  declareProperty("doDumpTrigPassBits", m_doDumpTrigPassBits = false);
-  declareProperty("doDumpLVL1_ROI", m_doDumpLVL1_ROI = false);
-  declareProperty("doDumpxAODTrigMissingET", m_doDumpxAODTrigMissingET = false);
-  declareProperty("doDumpTrigL2BphysContainer", m_doDumpTrigL2BphysContainer = false);
-  declareProperty("doDumpTrigEFBphysContainer", m_doDumpTrigEFBphysContainer = false);
-  declareProperty("doDumpxAODJetContainer", m_doDumpxAODJetContainer = false);
-  declareProperty("doDumpxAODMuonContainer", m_doDumpxAODMuonContainer = false);
-  declareProperty("doDumpxAODTrigElectronContainer", m_doDumpxAODTrigElectronContainer = false);
-  declareProperty("doDumpxAODTrigPhotonContainer", m_doDumpxAODTrigPhotonContainer = false);
-  declareProperty("doDumpxAODElectronContainer", m_doDumpxAODElectronContainer = false);
-  declareProperty("doDumpxAODPhotonContainer", m_doDumpxAODPhotonContainer = false);
-  declareProperty("doDumpxAODTrigEMCluster", m_doDumpxAODTrigEMCluster = false);
-  declareProperty("doDumpxAODTrigEMClusterContainer", m_doDumpxAODTrigEMClusterContainer = false);
-  declareProperty("doDumpxAODTrackParticle", m_doDumpxAODTrackParticle = false);
-  declareProperty("doDumpxAODVertex", m_doDumpxAODVertex = false);
-  declareProperty("doDumpxAODTauJetContainer", m_doDumpxAODTauJetContainer = false);
-  declareProperty("doDumpxAODTrigMinBias", m_doDumpxAODTrigMinBias = false);
-  declareProperty("doDumpStoreGate", m_doDumpStoreGate = false );
-  declareProperty("doDumpAllTrigComposite", m_doDumpAllTrigComposite = false );
-  declareProperty("dumpTrigCompositeContainers", m_dumpTrigCompositeContainers, "List of TC to dump" );
-  declareProperty("doDumpTrigCompsiteNavigation", m_doDumpTrigCompsiteNavigation = false );
-  declareProperty("doDumpNavigation", m_doDumpNavigation = false );
-  declareProperty("doTDTCheck", m_doTDTCheck = false );
-  declareProperty( "ClassIDSvc", m_clidSvc, "Service providing CLID info" );
-}
-
-
-
-TrigEDMChecker::~TrigEDMChecker() {}
-
 StatusCode TrigEDMChecker::initialize() {
 
   ATH_CHECK( m_navigationHandleKey.initialize() );
@@ -156,23 +118,7 @@ StatusCode TrigEDMChecker::initialize() {
 
 StatusCode TrigEDMChecker::execute(const EventContext& ctx) {
 
-  /* fwinkl, Mar 20222:
-     Some attempt was made to make the code pass the thread-checker. Methods that
-     are clearly not thread-safe (e.g. use of DataHandle) are marked as such. Calling
-     these methods from within execute would still trigger a thread-checker warning.
-     Since this algorithm is only ever used for validation and in single-threaded athena,
-     we suppress these warnings by the following assignment. This has the advantage
-     (as opposed to disabling the checking for the entire file) that new code is still
-     being checked and will hopefully be written in a thread-safe manner, i.e. using
-     ReadHandleKeys. If someone is very eager they could migrate all uses of DataHandles...
-  */
-  StatusCode sc ATLAS_THREAD_SAFE = do_execute(ctx);
-  return sc;
-}
-
-StatusCode TrigEDMChecker::do_execute ATLAS_NOT_THREAD_SAFE(const EventContext& ctx) {
-
-  ATH_MSG_INFO( " ==========START of event===========" );
+    ATH_MSG_INFO( " ==========START of event===========" );
 
 	if(m_doDumpAll || m_doDumpLVL1_ROI ){
 		StatusCode sc = dumpLVL1_ROI();
@@ -1606,7 +1552,7 @@ StatusCode TrigEDMChecker::dumpxAODJetContainer() {
 
 //////////////////////////////////////////////////////////////////////////////////
 
-StatusCode TrigEDMChecker::dumpxAODTrigEMCluster ATLAS_NOT_THREAD_SAFE() {
+StatusCode TrigEDMChecker::dumpxAODTrigEMCluster() {
 
   ATH_MSG_DEBUG("in dumpxAODTrigEMCluster()");
 
@@ -1650,7 +1596,7 @@ StatusCode TrigEDMChecker::dumpxAODTrigEMCluster ATLAS_NOT_THREAD_SAFE() {
 
 //////////////////////////////////////////////////////////////////////////////////
 
-StatusCode TrigEDMChecker::dumpxAODTrigEMClusterContainer ATLAS_NOT_THREAD_SAFE() {
+StatusCode TrigEDMChecker::dumpxAODTrigEMClusterContainer() {
 
   ATH_MSG_DEBUG("in dumpxAODTrigEMClusterContainer()");
 
@@ -1697,7 +1643,7 @@ StatusCode TrigEDMChecker::dumpxAODTrigEMClusterContainer ATLAS_NOT_THREAD_SAFE(
 }
 
 /////////////////////////////////////////////////
-StatusCode TrigEDMChecker::dumpxAODTauJetContainer ATLAS_NOT_THREAD_SAFE() {
+StatusCode TrigEDMChecker::dumpxAODTauJetContainer() {
 
   ATH_MSG_DEBUG("In dumpxAODTauJetContainer");
   ATH_MSG_INFO( "REGTEST ==========START of xAOD::TauJetContainer DUMP===========" );
@@ -2105,7 +2051,7 @@ StatusCode TrigEDMChecker::dumpTrigComposite() {
   if (m_doDumpAllTrigComposite) {
     m_dumpTrigCompositeContainers.clear();
     const CLID TrigCompositeCLID = static_cast<CLID>( ClassID_traits< xAOD::TrigCompositeContainer >::ID() );
-    evtStore()->keys(TrigCompositeCLID, m_dumpTrigCompositeContainers);
+    evtStore()->keys(TrigCompositeCLID, m_dumpTrigCompositeContainers.value());
     std::string typeNameTC;
     ATH_CHECK(m_clidSvc->getTypeNameOfID(TrigCompositeCLID, typeNameTC));
     ATH_MSG_DEBUG("dumpTrigComposite got " <<  m_dumpTrigCompositeContainers.size() << " keys for " << typeNameTC);
