@@ -24,7 +24,6 @@
     <field name="m_trackAssociationCnv" transient="true"/>
     <field name="m_electronAssociationCnv" transient="true"/>
     <field name="m_photonAssociationCnv" transient="true"/>
-    <field name="m_muonAssociationCnv" transient="true"/>
     <field name="m_svxAssociationCnv" transient="true"/>
     <field name="m_trkNavCnv" transient="true"/>
     <field name="m_eleNavCnv" transient="true"/>
@@ -63,7 +62,6 @@
     <field name="m_trackAssociationCnv" transient="true"/>
     <field name="m_electronAssociationCnv" transient="true"/>
     <field name="m_photonAssociationCnv" transient="true"/>
-    <field name="m_muonAssociationCnv" transient="true"/>
     <field name="m_svxAssociationCnv" transient="true"/>
     <field name="m_trkNavCnv" transient="true"/>
     <field name="m_eleNavCnv" transient="true"/>
@@ -104,7 +102,6 @@
     <field name="m_trackAssociationCnv" transient="true"/>
     <field name="m_electronAssociationCnv" transient="true"/>
     <field name="m_photonAssociationCnv" transient="true"/>
-    <field name="m_muonAssociationCnv" transient="true"/>
     <field name="m_svxAssociationCnv" transient="true"/>
     <field name="m_trkNavCnv" transient="true"/>
     <field name="m_eleNavCnv" transient="true"/>

@@ -18,9 +18,6 @@
 
 #include "egammaEvent/ElectronConstituent.h"
 #include "egammaEvent/ElectronAssociation.h"
-#include "MuonIDEvent/MuonConstituent.h"
-#include "MuonIDEvent/MuonAssociation.h"
-
 
 // EventCommonTPCnv includes
 #include "EventCommonTPCnv/P4ImplPxPyPzECnv_p1.h"
