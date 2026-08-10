@@ -11,15 +11,6 @@
 # Ignore the Projects directory:
 - Projects/.*
 
-# Remove most HLT packages
-# We currently build the HLT as part of Athena. Uncomment the following three lines to revert:
-#+ HLT/Trigger/TrigTransforms/TrigTransform
-#- HLT/.*
-#- Trigger/TrigValidation/TrigP1Test
-
-+ graphics/VP1/.*
-
-
 # Some analysis packages that are not part of Athena
 - Control/AthLinksSA
 - PhysicsAnalysis/Algorithms/StandaloneAnalysisAlgorithms
