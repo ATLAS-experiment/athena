@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 ##
 #
@@ -3690,20 +3690,6 @@ def dump_TrigTrackCounts_nolist (t, f):
     return
 
 
-def dump_TrigTau (t, f):
-    dump_Fourvec (t, f)
-    fprint (f, t.roiId(), t.Zvtx(), t.err_Zvtx(), t.etCalibCluster(),
-            t.simpleEtFlow(), t.nMatchedTracks())
-    fprint (f, '\n   ', tonone(t.tauCluster()),
-            tonone(t.trackCollection()),
-            tonone(t.tracksInfo()))
-    return
-@nolist
-def dump_TrigTau_nolist (t, f):
-    dump_TrigTau (t, f)
-    return
-
-
 def dump_TrigCaloCluster (c, f):
     fprint (f, c.rawEnergy(), c.rawEt(), c.rawEta(), c.rawPhi(), c.RoIword(),
             c.nCells(), c.quality())
@@ -3724,90 +3710,11 @@ def dump_TrigEMCluster_nolist (c, f):
     return
 
 
-def dump_TrigElectron (p, f):
-    dump_Fourvec (p, f)
-    fprint (f, p.isValid(), p.roiId())
-    fprint (f, '\n   ', p.trackAlgo(), p.trackIndx(), p.charge(),
-            p.Zvtx())
-    fprint (f, '\n   ', p.err_Pt(), p.err_eta(), p.err_phi(), p.err_Zvtx())
-    fprint (f, '\n   ', p.trkClusDeta(), p.trkClusDphi(), p.EtOverPt())
-    return
-
-
-def dump_TrigPhoton (p, f):
-    dump_Fourvec (p, f)
-    fprint (f, p.isValid(), p.roiId())
-    fprint (f, '\n   ', p.Et(), p.HadEt(), p.energyRatio(), p.rCore(),
-            p.dPhi(), p.dEta())
-    fprint (f, '\n   ')
-    if p.cluster():
-        dump_TrigEMCluster (p.cluster(), f)
-    return
-
-
 @nolist
 def dump_TrigInDetTrackCollection (t, f):
     fprintln (f, ' ROI ', t.RoI_ID())
     t2 = [PyTrigInDetTrack(tt) for tt in t]
     dump_list (t2, f, dump_TrigInDetTrack)
-    return
-
-
-def dump_TrigEFBjet (j, f):
-    dump_Fourvec (j, f)
-    fprint (f, j.isValid(), j.roiId())
-    fprint (f, '\n   ', j.prmVtx(), j.xComb(), j.xIP1D(), j.xIP2D(),
-            j.xIP3D(), j.xCHI2(), j.xSV(), j.xMVtx(), j.xEVtx(), j.xNVtx())
-    fprint (f, '\n   ', tonone(j.TrackCollection()),
-            tonone(j.PrmVertexCollection()),
-            tonone(j.SecVertexCollection()))
-    return
-
-
-def dump_TrigEFBphys (j, f):
-    fprint (f, j.roiId(), j.particleType(), j.eta(), j.phi(),
-            j.mass(), j.fitmass(), j.fitchi2(), j.fitndof(),
-            j.fitx(), j.fity(), j.fitz())
-    if j.pSecondDecay():
-        fprint (f, '\n     second:')
-        dump_TrigEFBphys (j.pSecondDecay(), f)
-    vec = j.trackVector()
-    for i in range(len(vec)):
-        t = vec[i]
-        fprint (f, '\n     tv:')
-        if t.isValid():
-            fprint (f, t.dataID(), t.index())
-        else:
-            fprint (f, '(invalid)')
-    return
-
-
-def dump_TrigL2Bjet (j, f):
-    dump_Fourvec (j, f)
-    fprint (f, j.isValid(), j.roiId())
-    fprint (f, '\n   ', j.prmVtx(), j.xComb(), j.xIP1D(), j.xIP2D(),
-            j.xIP3D(), j.xCHI2(), j.xSV(), j.xMVtx(), j.xEVtx(), j.xNVtx())
-    fprint (f, '\n   ',
-            tonone(j.TrackCollection()),
-            tonone(j.PrmVertexCollection()),
-            tonone(j.SecVertexCollection()))
-    return
-
-
-def dump_TrigL2Bphys (j, f):
-    fprint (f, j.roiId(), j.particleType(), j.eta(), j.phi(),
-            j.mass(), j.fitmass(), j.fitchi2(), j.fitndof(),
-            j.fitx(), j.fity(), j.fitz())
-    if j.pSecondDecay():
-        fprint (f, '\n     second:')
-        dump_TrigL2Bphys (j.pSecondDecay(), f)
-    # ??? Straightforward iteration fails if jets are also dumped,
-    #     for 15.2.0 samples.  Why?
-    #for t in j.trackVector():
-    tv = j.trackVector()
-    for i in range(tv.size()):
-        t = tv[i]
-        fprint (f, '\n     tv:', t.dataID(), t.index())
     return
 
 
@@ -5752,15 +5659,8 @@ dumpspecs = [
     ["DataVector<TrigVertex>",               dump_TrigVertex],
     ["TrigVertexCollection",                 dump_TrigVertex],
     ["TrigTrackCounts",                      dump_TrigTrackCounts_nolist],
-    ["TrigTau",                              dump_TrigTau_nolist],
-    ["DataVector<TrigElectron>",             dump_TrigElectron],
-    ["DataVector<TrigPhoton>",               dump_TrigPhoton],
     ["TrigEMCluster",                        dump_TrigEMCluster_nolist],
     ["TrigInDetTrackCollection",             dump_TrigInDetTrackCollection],
-    ["DataVector<TrigEFBjet>",               dump_TrigEFBjet],
-    ["DataVector<TrigEFBphys>",              dump_TrigEFBphys],
-    ["DataVector<TrigL2Bjet>",               dump_TrigL2Bjet],
-    ["DataVector<TrigL2Bphys>",              dump_TrigL2Bphys],
     ["TrigCaloClusterContainer",             dump_TrigCaloCluster],
     ["TrigTauClusterDetailsContainer",       dump_TrigTauClusterDetails],
     ["TrigMissingET",                        dump_TrigMissingET_nolist],
@@ -5792,17 +5692,10 @@ dumpspecs = [
     ['AtlasHitsVector<TGCSimHit>',           dump_TGCSimHit],
     ["CombinedMuonFeatureContainer",         dump_CombinedMuonFeature],
     ["MuonFeatureContainer",                 dump_MuonFeature],
-    ["TrigEFBjetContainer",                  dump_TrigEFBjet],
-    ["TrigEFBphysContainer",                 dump_TrigEFBphys],
     ["TrigEMClusterContainer",               dump_TrigEMCluster],
-    ["TrigElectronContainer",                dump_TrigElectron],
-    ["TrigL2BjetContainer",                  dump_TrigL2Bjet],
-    ["TrigL2BphysContainer",                 dump_TrigL2Bphys],
     ["TrigMissingETContainer",               dump_TrigMissingET],
-    ["TrigPhotonContainer",                  dump_TrigPhoton],
     ["TrigT2JetContainer",                   dump_TrigT2Jet],
     ["TrigTauClusterContainer",              dump_TrigTauCluster],
-    ["TrigTauContainer",                     dump_TrigTau],
     ["TrigTauTracksInfoCollection",          dump_TrigTauTracksInfo],
     ["TrigSpacePointCountsCollection",       dump_TrigSpacePointCounts],
     ["TrigTrackCountsCollection",            dump_TrigTrackCounts],
