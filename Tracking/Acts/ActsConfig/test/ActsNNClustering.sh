@@ -15,8 +15,7 @@ Reco_tf.py \
   --preExec 'flags.Exec.FPE=-1; \
              from ActsConfig.ActsConfigFlags import PixelCalibrationStrategy; \
              flags.Acts.PixelCalibrationStrategy=PixelCalibrationStrategy.NNClustering; \
-             flags.Acts.Clusters.RetrieveChargeInformation=True; \
-             flags.HGTD.doActs=False' \
+             flags.Acts.Clusters.RetrieveChargeInformation=True' \
   --conditionsTag ${conditions_tag} \
   --inputRDOFile ${input_rdo} \
   --outputAODFile test.AOD.pool.root  \
