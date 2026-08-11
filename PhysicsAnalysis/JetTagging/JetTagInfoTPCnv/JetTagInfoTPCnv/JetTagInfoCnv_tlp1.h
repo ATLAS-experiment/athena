@@ -43,6 +43,7 @@
 #include "JetTagInfoTPCnv/TrackAssociationCnv_p1.h"
 #include "JetTagInfoTPCnv/ElectronAssociationCnv_p1.h"
 #include "JetTagInfoTPCnv/PhotonAssociationCnv_p1.h"
+#include "JetTagInfoTPCnv/MuonAssociationCnv_p1.h"
 #include "JetTagInfoTPCnv/ISvxAssociationCnv_p1.h"
 
 #include "TrkEventTPCnv/VxVertex/RecVertexCnv_p1.h"
@@ -91,6 +92,7 @@ namespace Analysis {
     TrackAssociationCnv_p1 m_trackAssociationCnv;
     ElectronAssociationCnv_p1 m_electronAssociationCnv;
     PhotonAssociationCnv_p1 m_photonAssociationCnv;
+    MuonAssociationCnv_p1 m_muonAssociationCnv;
     ISvxAssociationCnv_p1 m_svxAssociationCnv;
     NavigableCnv_p1<Navigable<Rec::TrackParticleContainer,double>,float> m_trkNavCnv;
     NavigableCnv_p1<Navigable<ElectronContainer,double>,float> m_eleNavCnv;
