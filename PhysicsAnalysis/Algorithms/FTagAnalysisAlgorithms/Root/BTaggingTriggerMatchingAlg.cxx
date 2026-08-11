@@ -43,11 +43,18 @@ namespace CP
         ANA_CHECK(m_emulationTool.retrieve());
     } else {
         ANA_MSG_INFO("Using Run-3 trigger EDM for b-tagging trigger matching");
+
+#ifndef XAOD_STANDALONE
+        ANA_MSG_DEBUG("Disabling unused emulation tool");
+        ATH_CHECK(m_emulationTool.retrieve( DisableTool{true} ));
+#endif
+
         m_ftagRun3TriggerDecorAccessors.clear();
         m_ftagRun3TriggerDecorAccessors.reserve(m_ftagRun3TriggerDecoNames.value().size());
         for (const auto& decoName : m_ftagRun3TriggerDecoNames.value()) {
             m_ftagRun3TriggerDecorAccessors.emplace_back(decoName);
         }
+
     }
 
     return StatusCode::SUCCESS;
