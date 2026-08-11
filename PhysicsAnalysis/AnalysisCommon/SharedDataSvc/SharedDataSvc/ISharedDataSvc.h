@@ -11,6 +11,7 @@
 #include <AsgMessaging/StatusCode.h>
 #include <AsgServices/IAsgService.h>
 #include <functional>
+#include <memory>
 
 namespace asg
 {
@@ -58,11 +59,11 @@ namespace asg
     DeclareInterfaceID (CP::ISharedDataSvc, 1, 0);
 
     /// @brief get/make the given shared data
-    template<typename T,typename Func>
-    StatusCode get_make_shared (const std::string& name, std::shared_ptr<const T>& data, const Func& generator) const;
+    template<typename T,typename Function>
+    StatusCode get_make_shared (const std::string& name, std::shared_ptr<const T>& data, Function&& generator) const;
 
     /// @brief the type-erased version of @ref get_make_shared
-    virtual StatusCode get_make_shared_void (const std::string& name, const std::type_info& type, std::shared_ptr<const void>& data, std::function<StatusCode (std::shared_ptr<const void>&)>& generator) const = 0;
+    virtual StatusCode get_make_shared_void (const std::string& name, const std::type_info& type, std::shared_ptr<const void>& data, const std::function<StatusCode (std::shared_ptr<const void>&)>& generator) const = 0;
   };
 
 
@@ -70,13 +71,13 @@ namespace asg
   /// Inline/Template Methods
   /// =======================
 
-  template<typename T,typename Func>
-  StatusCode ISharedDataSvc::get_make_shared (const std::string& name, std::shared_ptr<const T>& data, const Func& generator) const
+  template<typename T,typename Function>
+  StatusCode ISharedDataSvc::get_make_shared (const std::string& name, std::shared_ptr<const T>& data, Function&& generator) const
   {
     std::shared_ptr<const void> void_data;
     if (get_make_shared_void (name, typeid(T), void_data, [&generator](std::shared_ptr<const void>& cache_data) {
       std::shared_ptr<const T> typed_data;
-      if (generator(typed_data).isFailure())
+      if (StatusCode sc = generator(typed_data); sc.isFailure())
         return StatusCode::FAILURE;
       cache_data = typed_data;
       return StatusCode::SUCCESS;

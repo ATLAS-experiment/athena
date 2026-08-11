@@ -14,3 +14,13 @@ atlas_add_library( SharedDataSvcLib
 atlas_add_component( SharedDataSvc
    src/*.h src/*.cxx src/components/*.cxx
    LINK_LIBRARIES SharedDataSvcLib )
+
+if( XAOD_STANDALONE )
+   # Note that this uses `nopost.sh`, as it checks failure modes, and
+   # `noerror.sh` would falsely indicate failure based on errors in the
+   # output mode.
+   atlas_add_test( gt_SharedDataSvc
+      SOURCES test/gt_SharedDataSvc.cxx
+      LINK_LIBRARIES AsgTestingLib SharedDataSvcLib
+      POST_EXEC_SCRIPT nopost.sh )
+endif()

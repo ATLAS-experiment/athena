@@ -20,7 +20,7 @@
 namespace asg
 {
   StatusCode SharedDataSvc ::
-  get_make_shared_void (const std::string& name, const std::type_info& type, std::shared_ptr<const void>& data, std::function<StatusCode (std::shared_ptr<const void>&)>& generator) const
+  get_make_shared_void (const std::string& name, const std::type_info& type, std::shared_ptr<const void>& data, const std::function<StatusCode (std::shared_ptr<const void>&)>& generator) const
   {
     std::scoped_lock lock (m_mutex);
     auto it = m_data.find(name);
@@ -38,6 +38,11 @@ namespace asg
     if (generator(data).isFailure())
     {
       ANA_MSG_ERROR ("failed to generate shared data " << name);
+      return StatusCode::FAILURE;
+    }
+    if (data == nullptr)
+    {
+      ANA_MSG_ERROR ("generated shared data " << name << " is nullptr");
       return StatusCode::FAILURE;
     }
     m_data[name] = std::pair<const std::type_info*,std::weak_ptr<const void>> (&type, data);

@@ -26,7 +26,7 @@ namespace asg
   public:
     using extends::extends;  // base class constructor
 
-    virtual StatusCode get_make_shared_void (const std::string& name, const std::type_info& type, std::shared_ptr<const void>& data, std::function<StatusCode (std::shared_ptr<const void>&)>& generator) const override;
+    virtual StatusCode get_make_shared_void (const std::string& name, const std::type_info& type, std::shared_ptr<const void>& data, const std::function<StatusCode (std::shared_ptr<const void>&)>& generator) const override;
 
 
     /// Private Members
