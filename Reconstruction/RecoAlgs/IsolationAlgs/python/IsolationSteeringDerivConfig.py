@@ -73,8 +73,8 @@ def FwdElectronIsolationSteeringDerivCfg(flags, name = 'FwdElectronIsolationStee
     
     from xAODPrimitives.xAODIso import xAODIso as isoPar
     from IsolationAlgs.IsoToolsConfig import EGammaCaloIsolationToolCfg
-    isoType  = [ [ isoPar.topoetcone20, isoPar.topoetcone30, isoPar.topoetcone40 ]]
-    isoCor   = [ [ isoPar.coreCone, isoPar.pileupCorrection ]]
+    isoType  = [ [ isoPar.topoetcone20, isoPar.topoetcone30, isoPar.topoetcone40 ] ]
+    isoCor   = [ [ isoPar.coreCone, isoPar.pileupCorrection ] ]
     isoExCor = [ [ ] ]
     kwargs['CaloTopoIsolationTool'] = acc.popToolsAndMerge(EGammaCaloIsolationToolCfg(flags))
     
