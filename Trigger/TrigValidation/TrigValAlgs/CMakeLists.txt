@@ -7,7 +7,7 @@ atlas_subdir( TrigValAlgs )
 atlas_add_component( TrigValAlgs
                      src/*.cxx
                      src/components/*.cxx
-                     LINK_LIBRARIES AthAnalysisBaseCompsLib AthViews AthenaBaseComps CxxUtils GaudiKernel MuonCombinedToolInterfaces StoreGateLib TrigCompositeUtilsLib TrigConfData TrigConfHLTData TrigConfHLTUtilsLib TrigDecisionToolLib TrigNavStructure TrigNavigationLib TrigRoiConversionLib TrigSteeringEvent TrigT1Interfaces xAODBTagging xAODCore xAODEgamma xAODJet xAODMuon xAODTau xAODTracking xAODTrigBphys xAODTrigCalo xAODTrigEgamma xAODTrigMinBias xAODTrigMissingET xAODTrigMuon xAODTrigger xAODEventInfo )
+                     LINK_LIBRARIES AthAnalysisBaseCompsLib AthViews AthenaBaseComps GaudiKernel MuonCombinedToolInterfaces StoreGateLib TrigCompositeUtilsLib TrigConfData TrigConfHLTData TrigConfHLTUtilsLib TrigDecisionToolLib TrigNavStructure TrigRoiConversionLib TrigSteeringEvent TrigT1Interfaces xAODBTagging xAODCore xAODEgamma xAODJet xAODMuon xAODTau xAODTracking xAODTrigBphys xAODTrigCalo xAODTrigEgamma xAODTrigMinBias xAODTrigMissingET xAODTrigMuon xAODTrigger xAODEventInfo )
 
 # Install files from the package:
 atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
