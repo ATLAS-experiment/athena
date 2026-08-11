@@ -16,7 +16,7 @@ from BTagging.JetSecVtxFindingAlgConfig import JetSecVtxFindingAlgCfg
 from BTagging.JetSecVertexingAlgConfig import JetSecVertexingAlgCfg
 from FlavorTagDiscriminants.FTagElectronAssociationConfig import FTagElectronAssociationCfg
 from FlavorTagDiscriminants.FTagMuonAssociationConfig import FTagMuonAssociationCfg
-from FlavorTagDiscriminants.JetCalibrationDecoratorConfig import JetCalibrationDecoratorCfg
+from JetCalibTools.JetCalibrationDecoratorConfig import JetCalibrationDecoratorCfg
 from JetTagDerivationUtils.CopyJetParentInfoConfig import (
     CopyJetParentInfoCfg
 )
