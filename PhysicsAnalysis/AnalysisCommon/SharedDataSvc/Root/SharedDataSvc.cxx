@@ -20,7 +20,7 @@
 namespace asg
 {
   StatusCode SharedDataSvc ::
-  get_make_shared_void (const std::string& name, const std::type_info& type, std::shared_ptr<const void>& data, const std::function<StatusCode (std::shared_ptr<const void>&)>& generator) const
+  getMakeSharedVoid (const std::string& name, const std::type_info& type, std::shared_ptr<const void>& data, const std::function<StatusCode (std::shared_ptr<const void>&)>& generator) const
   {
     std::scoped_lock lock (m_mutex);
     auto it = m_data.find(name);
