@@ -1,0 +1,12 @@
+/*
+  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+*/
+
+/// @author Nils Krumnack
+
+#include <SharedDataSvc/SharedDataSvc.h>
+
+// Project include(s).
+#include "AsgTools/AsgComponentFactories.h"
+
+DECLARE_COMPONENT (asg::SharedDataSvc)
