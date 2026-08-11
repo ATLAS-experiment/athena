@@ -735,13 +735,13 @@ bool InDetV0FinderTool::pointAtVertex(const xAOD::Vertex* v0, const xAOD::Vertex
   float cos = m_V0Tools->cosTheta(v0,PV);
   float v0a0xy = m_V0Tools->a0xy(v0,PV);
   float v0a0z = m_V0Tools->a0z(v0,PV);
-  if (v0lxyError == 0.){
-    throw std::runtime_error("v0lxyError is zero in division.");
-  }
   if (m_useBDT){
     float prob = m_V0Tools->vertexProbability(v0);
     float nLogProb = 999999;
     if (prob>0) nLogProb = -1*log10f(prob); //bdt model uses the log, not the raw value
+    if (v0lxyError == 0.){
+      throw std::runtime_error("v0lxyError is zero in division.");
+    }
     std::vector<float> bdt_vars = {
                                     nLogProb,
                                     std::abs(v0a0xy),
