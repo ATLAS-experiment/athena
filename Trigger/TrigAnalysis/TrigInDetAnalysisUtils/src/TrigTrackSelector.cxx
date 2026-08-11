@@ -113,7 +113,7 @@ const xAOD::TruthParticle* TrigTrackSelector::fromAncestor( const std::vector<in
 
 
 
-bool TrigTrackSelector::selectTrack( const TrigInDetTrack* track, const TrigInDetTrackTruthMap* truthMap ) {     
+bool TrigTrackSelector::selectTrack( const TrigInDetTrack* track ) {     
     // do the track extraction stuff here....
     if ( track ) { 
 
@@ -155,15 +155,6 @@ bool TrigTrackSelector::selectTrack( const TrigInDetTrack* track, const TrigInDe
 	bool truth = false;
 	int match_uniqueID = HepMC::INVALID_PARTICLE_ID;
 	
-	if ( truthMap ) { 
-	  const TrigInDetTrackTruth* trackTruth = truthMap->truth(track);
-	  if (trackTruth!=0 && trackTruth->nrMatches() > 0) {
-	    match_uniqueID = HepMC::uniqueID(trackTruth->bestSiMatch());
-	    truth = true;
-	  }
-	}
-	
-	
 	TIDA::Track* t = new TIDA::Track(  eta,  phi,  z0,  d0,  pT, chi2, dof, 
 								     deta, dphi, dz0, dd0, dpT, 
 								     nBlayerHits, nPixelHits, nSctHits, nSiHits, 
@@ -184,13 +175,13 @@ bool TrigTrackSelector::selectTrack( const TrigInDetTrack* track, const TrigInDe
 }
 
 
-// extract all the tracks from a TrigInDetTrack collection and associated TruthMap and convert them
-void TrigTrackSelector::selectTracks( const TrigInDetTrackCollection* trigtracks, const TrigInDetTrackTruthMap* truthMap ) {     
+// extract all the tracks from a TrigInDetTrack collection and convert them
+void TrigTrackSelector::selectTracks( const TrigInDetTrackCollection* trigtracks ) {
     // do the track extraction stuff here....
     TrigInDetTrackCollection::const_iterator  trackitr = trigtracks->begin();
     TrigInDetTrackCollection::const_iterator  trackend = trigtracks->end();
     while ( trackitr!=trackend ) { 
-      selectTrack( *trackitr, truthMap );
+      selectTrack( *trackitr );
       ++trackitr;
     }
 }

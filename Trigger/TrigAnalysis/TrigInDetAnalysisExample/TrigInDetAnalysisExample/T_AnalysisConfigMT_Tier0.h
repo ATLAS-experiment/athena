@@ -431,23 +431,8 @@ protected:
     if(m_provider->msg().level() <= MSG::VERBOSE)
       m_provider->msg(MSG::VERBOSE) << "MC Truth flag " << m_mcTruth << endmsg;
 
-    const TrigInDetTrackTruthMap* truthMap = 0;
-
-    if ( m_mcTruth ) {
-      if(m_provider->msg().level() <= MSG::VERBOSE ) m_provider->msg(MSG::VERBOSE) << "getting Truth" << endmsg;
-
-      if ( this->template retrieve(truthMap, "TrigInDetTrackTruthMap").isFailure()) {
-        if(m_provider->msg().level() <= MSG::VERBOSE)
-          m_provider->msg(MSG::VERBOSE) << "TrigInDetTrackTruthMap not found" << endmsg;
-        m_hasTruthMap = false;
-      }
-      else {
-        if(m_provider->msg().level() <= MSG::VERBOSE)
-          m_provider->msg(MSG::VERBOSE) << "TrigInDetTrackTruthMap found" << endmsg;
-        m_hasTruthMap = true;
-      }
-    }
-    
+    if ( m_mcTruth && m_provider->msg().level() <= MSG::VERBOSE ) m_provider->msg(MSG::VERBOSE) << "getting Truth" << endmsg;
+       
 
     /// get the offline vertices into our structure
 

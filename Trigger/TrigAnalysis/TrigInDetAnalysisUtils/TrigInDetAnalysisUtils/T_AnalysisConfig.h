@@ -34,7 +34,6 @@
 #include "TrigInDetAnalysisUtils/TrigTrackSelector.h"
 #include "TrigInDetAnalysisUtils/OfflineObjectSelection.h"
 #include "TrigInDetAnalysis/TrackTrigObject.h"
-#include "TrigInDetTruthEvent/TrigInDetTrackTruthMap.h"
 
 #ifdef XAODTRACKING_TRACKPARTICLE_H
 #include "xAODMuon/MuonContainer.h"
@@ -484,7 +483,6 @@ protected:
 
   template<class Collection>
   bool selectTracks( TrigTrackSelector* selector, Trig::FeatureContainer::combination_const_iterator citr,  const std::string& key="" ) {
-
     //    std::cout << "try " << key << "\t" << m_provider->evtStore()->template transientContains<Collection>(key) << std::endl;
 
     std::string key_collection = key;
@@ -516,10 +514,8 @@ protected:
 
 
   /// NB: because we want to use this for the L2Star chains, we have to use this method, *not* the above
-  ///     method without the TruthMap argument - if we don't want/have the TruthMap, just set the pointer
-  ///     to 0 - there should be abetter way to do this, but shan't worry about it now.
   template<class Collection>
-  bool selectTracks( TrigTrackSelector* selector, Trig::FeatureContainer::combination_const_iterator citr, const TrigInDetTrackTruthMap* truthmap, const std::string& key="", unsigned index=0 ) {
+  bool selectTracks( TrigTrackSelector* selector, Trig::FeatureContainer::combination_const_iterator citr, const std::string& key, unsigned index ) {
 
     //    std::cout << "try " << key << "\t" << m_provider->evtStore()->template transientContains<Collection>(key) << std::endl;
 
@@ -533,7 +529,7 @@ protected:
       //   maybe a bit dodgy, if we really do have multiple objects returned, but that should only be for
       //   multiple object triggers - then probably none of this would work anyhow
       for ( unsigned ifeat=0 ; ifeat<trackcollections.size() ; ifeat++ ) {
-	//	std::cout << "selectTracks() ifeat=" << ifeat << "\tkey " << key << "\t(truthmap)" << std::endl;
+
 	Trig::Feature<Collection> trackfeature = trackcollections.at(ifeat);
 
 	/// get the correspondiong TE
@@ -554,7 +550,7 @@ protected:
 	  if ( index!=iv ) continue;
 	  /// useful for debug
 	  // m_provider->msg(MSG::DEBUG) << "TDT TrackFeature->size() " << collectionVector[iv]->size() << " (" << key << ")" << endmsg;
-	  selector->selectTracks( collectionVector[iv], truthmap );
+	  selector->selectTracks( collectionVector[iv] );
 	  break;
 	}
       }

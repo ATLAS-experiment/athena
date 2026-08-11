@@ -274,16 +274,10 @@ void AnalysisConfigMT_Ntuple::loop() {
 	selectorTruth.clear();
 
 	m_provider->msg(MSG::DEBUG) << "MC Truth flag " << m_mcTruth << endmsg; 
-	const TrigInDetTrackTruthMap* truthMap = 0;
 
 	if ( m_mcTruth) { 
 		m_provider->msg(MSG::DEBUG) << "getting Truth" << endmsg; 
-		if ( retrieve(truthMap, "TrigInDetTrackTruthMap").isFailure()) {
-		        m_hasTruthMap = false;
-		}
-		else {
-		        m_hasTruthMap = true;
-		}
+
 		if (m_provider->evtStore()->contains<TruthParticleContainer>("INav4MomTruthEvent")) {
 			//ESD
 			selectTracks<TruthParticleContainer>( &selectorTruth, "INav4MomTruthEvent" );

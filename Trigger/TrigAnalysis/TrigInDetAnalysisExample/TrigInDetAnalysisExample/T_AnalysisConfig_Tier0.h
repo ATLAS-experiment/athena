@@ -424,22 +424,7 @@ protected:
     if(m_provider->msg().level() <= MSG::VERBOSE)
       m_provider->msg(MSG::VERBOSE) << "MC Truth flag " << m_mcTruth << endmsg;
 
-    const TrigInDetTrackTruthMap* truthMap = 0;
-
-    if ( m_mcTruth ) {
-      if(m_provider->msg().level() <= MSG::VERBOSE ) m_provider->msg(MSG::VERBOSE) << "getting Truth" << endmsg;
-
-      if ( this->template retrieve(truthMap, "TrigInDetTrackTruthMap").isFailure()) {
-        if(m_provider->msg().level() <= MSG::VERBOSE)
-          m_provider->msg(MSG::VERBOSE) << "TrigInDetTrackTruthMap not found" << endmsg;
-        m_hasTruthMap = false;
-      }
-      else {
-        if(m_provider->msg().level() <= MSG::VERBOSE)
-          m_provider->msg(MSG::VERBOSE) << "TrigInDetTrackTruthMap found" << endmsg;
-        m_hasTruthMap = true;
-      }
-    }
+    if ( m_mcTruth && m_provider->msg().level() <= MSG::VERBOSE ) m_provider->msg(MSG::VERBOSE) << "getting Truth" << endmsg;
     
 
     /// get the offline vertices into our structure
@@ -766,7 +751,7 @@ protected:
 	    if ( this->template selectTracks<Rec::TrackParticleContainer>( m_selectorTest, c, key ) );
 #         endif
 	    else if ( this->template selectTracks<TrackCollection>( m_selectorTest, c, key ) );
-	    else if ( this->template selectTracks<TrigInDetTrackCollection>( m_selectorTest, c, truthMap, key, key_index ) );
+	    else if ( this->template selectTracks<TrigInDetTrackCollection>( m_selectorTest, c, key, key_index ) );
 	    else { 
 	      //m_provider->msg(MSG::WARNING) << "No track collection " << key << " found"  << endmsg;
 	    }
@@ -774,7 +759,7 @@ protected:
 	  else {
 	    /// L2 track EDM
 	    if ( chainName.find("L2_")!=std::string::npos ) {
-	      if      ( this->template selectTracks<TrigInDetTrackCollection>( m_selectorTest, c, truthMap, key, key_index ) );
+	      if      ( this->template selectTracks<TrigInDetTrackCollection>( m_selectorTest, c, key, key_index ) );
 	      else if ( this->template selectTracks<Rec::TrackParticleContainer>( m_selectorTest, c, key ) );
 	      else if ( this->template selectTracks<TrackCollection>( m_selectorTest, c, key ) );
 #           ifdef XAODTRACKING_TRACKPARTICLE_H
