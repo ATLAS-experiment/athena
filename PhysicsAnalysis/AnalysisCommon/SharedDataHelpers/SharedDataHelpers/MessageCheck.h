@@ -10,7 +10,6 @@
 #define SHARED_DATA_HELPERS_MESSAGE_CHECK_H
 
 #include <AsgMessaging/MessageCheck.h>
-#include <exception>
 
 namespace asg
 {

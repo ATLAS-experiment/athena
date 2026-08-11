@@ -19,6 +19,10 @@
 #include <TH2.h>
 #include <TH3.h>
 
+#include <atomic>
+#include <thread>
+#include <vector>
+
 //
 // method implementations
 //
@@ -27,7 +31,7 @@ namespace asg
 {
   using namespace msgSharedDataHelpers;
 
-  TEST (SharedDataSvcTest, basic)
+  TEST (SharedDataHelpersTest, basic)
   {
     std::shared_ptr<const std::string> data1, data2;
     std::shared_ptr<const unsigned> data3;
@@ -51,7 +55,7 @@ namespace asg
     ASSERT_EQ (*data1, "hello");
   }
 
-  TEST (SharedDataSvcTest, TFile)
+  TEST (SharedDataHelpersTest, TFile)
   {
     {
       std::unique_ptr<TFile> testFile {TFile::Open ("test.root", "RECREATE")};

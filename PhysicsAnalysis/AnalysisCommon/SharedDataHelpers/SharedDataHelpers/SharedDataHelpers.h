@@ -11,6 +11,7 @@
 #include <AsgMessaging/StatusCode.h>
 #include <functional>
 #include <memory>
+#include <string>
 #include <typeinfo>
 
 namespace asg
@@ -50,7 +51,7 @@ namespace asg
   /// The way it works is that each piece of data to be shared is
   /// assigned a unique name, and if the data already exists it gets
   /// immediately returned as a `std::shared_ptr`. If it isn't already
-  /// known the service calls a provided generator function to read it.
+  /// known this calls a provided generator function to read it.
   ///
   /// The assumption is that the caller will then cache the
   /// `std::shared_ptr` for as long as they need them, not try to
@@ -62,11 +63,18 @@ namespace asg
   /// The basic usage would look something like this:
   /// ```
   /// std::shared_ptr<const TH2> my_data;
-  /// ASSERT_SUCCESS (getMakeSharedData ("my_data", my_data, [] (std::shared_ptr<const TH2>& ptr) {
+  /// ANA_CHECK (getMakeSharedData ("MyPackage/my_data", my_data, [] (std::shared_ptr<const TH2>& ptr) {
   ///   ptr = ... // read the data from a file or generate it in some other way
   ///   return StatusCode::SUCCESS;
   /// }));
   /// ```
+  ///
+  /// @warning The names are required to be globally unique and
+  /// different calls passing in the same name should produce identical
+  /// generated objects. They also should also always use the same type
+  /// (even after the object has gone out of scope). Both are normally
+  /// trivially fulfilled if each name is used only in one place and for
+  /// a single generator.
 
   template<typename T,typename Function>
     requires requires (Function func, std::shared_ptr<const T>& ptr) { { func(ptr) } -> std::convertible_to<StatusCode>; }

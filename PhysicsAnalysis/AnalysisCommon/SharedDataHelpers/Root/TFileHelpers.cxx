@@ -14,6 +14,7 @@
 #include <SharedDataHelpers/MessageCheck.h>
 #include <SharedDataHelpers/SharedDataHelpers.h>
 
+#include <TEfficiency.h>
 #include <TFile.h>
 #include <TH1.h>
 
@@ -32,11 +33,19 @@ namespace asg
       using namespace msgSharedDataHelpers;
 
       std::shared_ptr<const TObject> object;
-      if (getMakeSharedData (fileName + "/" + name, object, [&file, &fileName, &name, &type, &castSetter] (std::shared_ptr<const TObject>& data)
+      // Technically, if you name your files and/or your objects really
+      // weird you may encounter a name clash here, but as long as your
+      // file name ends with ".root" and your object name does not
+      // contain ".root" you ought to be ok.
+      if (getMakeSharedData (fileName + "//" + name, object, [&file, &fileName, &name, &type, &castSetter] (std::shared_ptr<const TObject>& data)
       {
+        // restore gDirectory on exit, TFile::Open changes it
+        TDirectory::TContext directoryContext;
         if (!file)
         {
           file.reset (TFile::Open (fileName.c_str (), "READ"));
+          if (file && file->IsZombie())
+            file.reset ();
           if (!file)
           {
             ANA_MSG_ERROR ("failed to open file " << fileName);
@@ -59,14 +68,24 @@ namespace asg
           }
           split = split2 + 1;
         }
-        std::shared_ptr<TObject> mydata {dir->Get (name.substr(split).c_str ())};
-        if (!mydata)
+        TObject *rawdata = dir->Get (name.substr(split).c_str ());
+        if (!rawdata)
         {
           ANA_MSG_ERROR ("failed to read " << name << " from file " << fileName);
           return StatusCode::FAILURE;
         }
+        // objects that stay owned by the file cannot outlive it, and
+        // must not be wrapped in a shared_ptr (double delete)
+        if (rawdata->InheritsFrom ("TTree") || dynamic_cast<TDirectory*>(rawdata))
+        {
+          ANA_MSG_ERROR ("object " << name << " in file " << fileName << " is of unsupported type " << rawdata->ClassName());
+          return StatusCode::FAILURE;
+        }
+        std::shared_ptr<TObject> mydata {rawdata};
         if (auto hist = dynamic_cast<TH1*>(mydata.get()))
           hist->SetDirectory(nullptr);
+        else if (auto eff = dynamic_cast<TEfficiency*>(mydata.get()))
+          eff->SetDirectory(nullptr);
         data = mydata;
         return StatusCode::SUCCESS;
       }).isFailure())

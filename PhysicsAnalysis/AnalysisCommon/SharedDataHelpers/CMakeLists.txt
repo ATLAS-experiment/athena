@@ -5,14 +5,15 @@
 
 atlas_subdir( SharedDataHelpers )
 
+find_package( Boost )
 find_package( ROOT COMPONENTS Core Hist RIO )
 
 atlas_add_library( SharedDataHelpersLib
    SharedDataHelpers/*.h SharedDataHelpers/*.icc Root/*.cxx
    PUBLIC_HEADERS SharedDataHelpers
    INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
-   LINK_LIBRARIES AsgMessagingLib CxxUtils ${ROOT_LIBRARIES}
-   PRIVATE_LINK_LIBRARIES )
+   PRIVATE_INCLUDE_DIRS ${Boost_INCLUDE_DIRS}
+   LINK_LIBRARIES AsgMessagingLib CxxUtils ${ROOT_LIBRARIES} )
 
 # Note that this uses `nopost.sh`, as it checks failure modes, and
 # `noerror.sh` would falsely indicate failure based on errors in the

@@ -13,6 +13,8 @@
 
 #include <SharedDataHelpers/MessageCheck.h>
 
+#include <CxxUtils/checker_macros.h>
+
 #include <boost/core/demangle.hpp>
 
 #include <mutex>
@@ -30,7 +32,7 @@ namespace asg
     {
       using namespace msgSharedDataHelpers;
 
-      static std::mutex s_mutex ATLAS_THREAD_SAFE;
+      static std::recursive_mutex s_mutex ATLAS_THREAD_SAFE;
       static std::unordered_map<std::string,std::pair<const std::type_info*,std::weak_ptr<const void>>> s_data ATLAS_THREAD_SAFE;
 
       std::scoped_lock lock (s_mutex);
