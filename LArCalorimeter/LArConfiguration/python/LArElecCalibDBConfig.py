@@ -28,6 +28,7 @@ LArRampCondAlg             =  CompFactory.getComp("LArFlatConditionsAlg<LArRampF
 LArMphysOverMcalCondAlg    =  CompFactory.getComp("LArFlatConditionsAlg<LArMphysOverMcalFlat>")
 LArOFCCondAlg              =  CompFactory.getComp("LArFlatConditionsAlg<LArOFCFlat>")
 LArShapeCondAlg            =  CompFactory.getComp("LArFlatConditionsAlg<LArShapeFlat>")
+LArNoiseCondAlg            =  CompFactory.getComp("LArFlatConditionsAlg<LArNoiseFlat>")
 
 LArHVScaleCorrSCCondFlatAlg  =  CompFactory.getComp("LArFlatConditionsAlg<LArHVScaleCorrSC>")
 LArDAC2uASCCondAlg           =  CompFactory.getComp("LArFlatConditionsAlg<LArDAC2uASC>")
@@ -45,13 +46,20 @@ LArOFCSCCondAlg              =  CompFactory.getComp("LArFlatConditionsAlg<LArOFC
 
 
 def LArElecCalibDBCfg(flags,condObjs):
+    from AthenaConfiguration.Enums import LHCPeriod
     
     #Check MC case
     if flags.Input.isMC:
-        return LArElecCalibDBMCCfg(flags,condObjs)
+          #Global tags earlier than COND-MC21-SDR-RUN4-06 are copies of COOL and contain the legacy conditions format 
+          if flags.GeoModel.Run is LHCPeriod.Run4 and flags.IOVDb.UseCREST and flags.IOVDb.GlobalTag not in ('COND-MC21-SDR-RUN4-05', 'COND-MC21-SDR-RUN4-CHAI-06', 
+                                                                                                             'CREST-BLKPA-2025-04', 'CREST-DCS-01', 'CREST-HLTP-2024-02', 
+                                                                                                             'CREST-HLTP-2025-01', 'CREST-HLTP-202500', 'CREST-HLTP-2026-01', 
+                                                                                                             'CREST-HLTP-2026-02', 'CREST-HLTP-TEST', 'CREST-MC21-SDR-RUN4-03', 
+                                                                                                             'MY-GT-01', 'TEST'):
+              return  LArElecCalibDBMCRun4Cfg(flags,condObjs)
+          else: #Run 1/2/3 case
+              return LArElecCalibDBMCCfg(flags,condObjs)
     
-    from AthenaConfiguration.Enums import LHCPeriod
-
     #Check run 1 case:    
     if flags.GeoModel.Run < LHCPeriod.Run2 :
         return LArElecCalibDBRun1Cfg(flags,condObjs)
@@ -198,6 +206,47 @@ def LArElecCalibDBRun1Cfg(flags,condObjs):
             result.addCondAlgo(calg(ReadKey=obj,WriteKey=obj+"Sym"))
     result.merge(addFolderList(flags,folderlist))
                      
+    return result
+
+
+def LArElecCalibDBMCRun4Cfg(flags,folders):                               
+    _larCondDBFoldersMC = {
+                           "Ramp":("CondAttrListCollection","/LAR/ElecCalibMC/Ramp","LArRamp", LArRampCondAlg ),
+                           "AutoCorr":("LArAutoCorrMC","/LAR/ElecCalibMC/AutoCorr","LArAutoCorr", LArAutoCorrSymAlg),
+                           "DAC2uA":("LArDAC2uAMC","/LAR/ElecCalibMC/DAC2uA","LArDAC2uA",LArDAC2uASymAlg),
+                           "Pedestal":("CondAttrListCollection","/LAR/ElecCalibMC/Pedestal","LArPedestal",LArPedestalCondAlg),
+                           "Noise":("CondAttrListCollection","/LAR/ElecCalibMC/Noise","LArNoise",LArNoiseCondAlg),
+                           "fSampl":("LArfSamplMC","/LAR/ElecCalibMC/fSampl","LArfSampl",LArfSamplSymAlg),
+                           "uA2MeV":("LAruA2MeVMC","/LAR/ElecCalibMC/uA2MeV","LAruA2MeV", LAruA2MeVSymAlg),
+                           "MinBias":("LArMinBiasMC","/LAR/ElecCalibMC/MinBias","LArMinBias",LArMinBiasSymAlg),
+                           "Shape":("LArShape32MC","/LAR/ElecCalibMC/Shape","LArShape",LArShapeSymAlg),
+                           "MinBiasAvc":("LArMinBiasAverageMC","/LAR/ElecCalibMC/MinBiasAverage","LArMinBiasAverage",LArMinBiasAverageSymAlg),
+                           "MphysOverMcal":("LArMphysOverMcalMC","/LAR/ElecCalibMC/MphysOverMcal","LArMphysOverMcal",LArMPhysOverMcalSymAlg),
+                           "HVScaleCorr" : ("LArHVScaleCorrComplete", '/LAR/ElecCalibMC/HVScaleCorr',"LArHVScaleCorr",None)
+                       }
+
+    result=ComponentAccumulator()
+    #Add cabling
+    from LArCabling.LArCablingConfig import LArOnOffIdMappingCfg
+    result.merge(LArOnOffIdMappingCfg(flags))
+    LArMCSymCondAlg=CompFactory.LArMCSymCondAlg
+    result.addCondAlgo(LArMCSymCondAlg(ReadKey="LArOnOffIdMap"))
+    folderlist=[]
+    for folder in folders:
+        try:
+            classname,fldr,key,calg=_larCondDBFoldersMC[folder]
+        except KeyError:
+            raise ConfigurationError("No conditions data %s found for Monte Carlo" % folder)
+
+        folderlist+=[(fldr,"LAR_OFL",classname),] #The name LAR_OFL is ignored in the CREST-case (Run 4)
+        if calg is not None:
+            if (classname=="CondAttrListCollection"): #flat storage
+                writeKey= (key if folder == "Pedestal" else key+"Sym")
+                result.addCondAlgo(calg(ReadKey=fldr,WriteKey=writeKey))
+            else: #symmetric storage
+                result.addCondAlgo(calg(ReadKey=key,WriteKey=key+"Sym"))
+
+    result.merge(addFolderList(flags,folderlist,db="OFLP200"))
     return result
 
 
