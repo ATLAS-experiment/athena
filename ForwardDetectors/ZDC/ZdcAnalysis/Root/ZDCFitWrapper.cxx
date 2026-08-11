@@ -241,7 +241,10 @@ ZDCFitExpFermiVariableTausInduct::ZDCFitExpFermiVariableTausInduct(const std::st
   //  theTF1->SetParLimits(8, 1, 6);
   theTF1->FixParameter(8, 5.5);
   theTF1->FixParameter(5, 16);
-  theTF1->SetParLimits(9, 0, 0.05);
+  //  theTF1->SetParLimits(9, 0, 0.05);
+
+  
+  FixDelta(0.015);
   
   if (m_fixTau1) theTF1->FixParameter(2, m_tau1);
   else theTF1->SetParLimits(2, 0.5, 3);
@@ -262,9 +265,8 @@ void ZDCFitExpFermiVariableTausInduct::DoInitialize(float initialAmp, float init
   if (t0 > GetT0Max()) t0 = GetT0Max()/1.1;
   theTF1->SetParameter(1, t0);
 
-  theTF1->SetParameter(1, initialT0);
   theTF1->SetParameter(6, 0.25);
-  theTF1->SetParameter(7, 0.1);
+  theTF1->SetParameter(7, 0.8);
   if (!m_fixDelta) theTF1->SetParameter(9, 0.);
 
   if (!m_fixTau1) theTF1->SetParameter(2, m_tau1);
@@ -296,9 +298,20 @@ void ZDCFitExpFermiVariableTausInduct::SetT0FitLimits(float t0Min, float t0Max)
 
 void ZDCFitExpFermiVariableTausInduct::ConstrainFit()
 {
+  std::shared_ptr<TF1> theTF1 = ZDCFitWrapper::GetWrapperTF1();
+  theTF1->FixParameter(6, 0.25);
+  theTF1->FixParameter(4, 0);
+  // theTF1->FixParameter(7, 0.1);
 }
+
 void ZDCFitExpFermiVariableTausInduct::UnconstrainFit()
 {
+  std::shared_ptr<TF1> theTF1 = ZDCFitWrapper::GetWrapperTF1();
+  theTF1->ReleaseParameter(6);
+  theTF1->ReleaseParameter(4);
+  theTF1->SetParLimits(6, 0, 2);
+  theTF1->SetParLimits(4, -50, 50);
+
 }
 
 ZDCFitExpFermiFixedTaus::ZDCFitExpFermiFixedTaus(const std::string& tag, float tmin, float tmax, float tau1, float tau2) :

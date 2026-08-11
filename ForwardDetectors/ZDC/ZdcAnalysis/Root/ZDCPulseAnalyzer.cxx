@@ -426,8 +426,8 @@ void ZDCPulseAnalyzer::reset(bool repass)
   }
 
   
-  m_defaultT0Max = m_deltaTSample * (m_peak2ndDerivMinSample + m_peak2ndDerivMinTolerance + 0.5);
-  m_defaultT0Min = m_deltaTSample * (m_peak2ndDerivMinSample - m_peak2ndDerivMinTolerance - 0.5);
+  m_defaultT0Max = m_deltaTSample * (m_peak2ndDerivMinSample + m_peak2ndDerivMinTolerance + 1.5);
+  m_defaultT0Min = m_deltaTSample * (m_peak2ndDerivMinSample - m_peak2ndDerivMinTolerance - 1.5);
 
   if (m_initializedFits) {
     m_defaultFitWrapper ->SetT0Range(m_defaultT0Min, m_defaultT0Max);
@@ -1001,12 +1001,12 @@ bool ZDCPulseAnalyzer::ScanAndSubtractSamples()
       m_ADCSamplesHGSub[isample] *= fadcCorrHG;
       m_ADCSamplesLGSub[isample] *= fadcCorrLG;
 
-      if (doDump) {
-	std::ostringstream dumpString;
-	dumpString << "After FADC correction, sample " << isample << ", HG ADC = " << m_ADCSamplesHGSub[isample]
-		   << ", LG ADC = " << m_ADCSamplesLGSub[isample] << std::endl;
-	(*m_msgFunc_p)(ZDCMsg::Verbose, dumpString.str().c_str());
-      }
+      // if (doDump) {
+      // 	std::ostringstream dumpString;
+      // 	dumpString << "After FADC correction, sample " << isample << ", HG ADC = " << m_ADCSamplesHGSub[isample]
+      // 		   << ", LG ADC = " << m_ADCSamplesLGSub[isample] << std::endl;
+      // 	(*m_msgFunc_p)(ZDCMsg::Verbose, dumpString.str().c_str());
+      // }
     }
 
     if (ADCHG > m_maxADCHG) {
@@ -1179,7 +1179,7 @@ bool ZDCPulseAnalyzer::DoAnalysis(bool repass)
       (float chisq, float amp, unsigned int fitNDoF, float& ratio)->bool
     {
       if (amp < 1e-6) return true;
-      ratio = chisq /(scale* (std::pow(amp/1000 + offset, power)));
+      ratio = chisq /(offset + scale* (std::pow(amp/1000, power)));
       if (chisq/fitNDoF > 2 && ratio > cut) return false;
       else return true;
     };
@@ -1226,7 +1226,7 @@ bool ZDCPulseAnalyzer::DoAnalysis(bool repass)
       (float chisq, float amp, unsigned int fitNDoF, float& ratio)->bool
     {
       if (amp < 1e-6) return true;
-      ratio = chisq /(scale*(std::pow(amp/1000 + offset, power)));
+      ratio = chisq /(offset + scale*(std::pow(amp/1000, power)));
       if (chisq/float(fitNDoF) > 2 && ratio > cut) return false;
       else return true;
     };
@@ -1736,8 +1736,8 @@ void ZDCPulseAnalyzer::DoFit(bool refitLG)
   }
   
   if (m_adjTimeRangeEvent) {
-    m_fitTMin = std::max(m_fitTMin, m_deltaTSample * m_minSampleEvt - m_deltaTSample / 2);
-    m_fitTMax = std::min(m_fitTMax, m_deltaTSample * m_maxSampleEvt + m_deltaTSample / 2);
+    m_fitTMin = std::max(m_fitTMin, m_deltaTSample * m_minSampleEvt - m_deltaTSample);
+    m_fitTMax = std::min(m_fitTMax, m_deltaTSample * m_maxSampleEvt + m_deltaTSample);
 
     float fitTReference = m_deltaTSample * m_usedPresampIdx;
 
