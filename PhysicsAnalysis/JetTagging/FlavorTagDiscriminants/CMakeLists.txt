@@ -88,7 +88,6 @@ if (NOT XAOD_STANDALONE)
     src/FTagGhostLeptonAssociationAlg.cxx
     src/JetLeptonDecayLabelAlg.cxx
     src/CaloChargedFlowDecoratorAlg.cxx
-    src/JetCalibrationDecoratorAlg.cxx
     src/TruthTauDecoratorAlg.cxx
     ${athena_only_algs}
     src/components/FlavorTagDiscriminants_entries.cxx

@@ -14,6 +14,10 @@
 #include "JetCalibTools/BJetCorrectionTool.h"
 #include "JetCalibTools/JetResponseTool.h"
 
+#ifndef XAOD_STANDALONE
+#include "CalibratedJetCopyAlg.h"
+#include "JetCalibrationDecoratorAlg.h"
+#endif
 
 // Project include(s).
 #include "AsgTools/AsgComponentFactories.h"
@@ -33,3 +37,8 @@ DECLARE_COMPONENT( MuonInJetCorrectionTool )
 DECLARE_COMPONENT( BJetCorrectionTool )
 DECLARE_COMPONENT( Pileup1DResidualCalibStep )
 DECLARE_COMPONENT( JetResponseTool )
+
+#ifndef XAOD_STANDALONE
+DECLARE_COMPONENT( CalibratedJetCopyAlg )
+DECLARE_COMPONENT( JetCalibrationDecoratorAlg )
+#endif
