@@ -60,6 +60,7 @@ namespace asg
 
     /// @brief get/make the given shared data
     template<typename T,typename Function>
+      requires requires (Function func, std::shared_ptr<const T>& ptr) { { func(ptr) } -> std::convertible_to<StatusCode>; }
     StatusCode get_make_shared (const std::string& name, std::shared_ptr<const T>& data, Function&& generator) const;
 
     /// @brief the type-erased version of @ref get_make_shared
@@ -72,6 +73,7 @@ namespace asg
   /// =======================
 
   template<typename T,typename Function>
+    requires requires (Function func, std::shared_ptr<const T>& ptr) { { func(ptr) } -> std::convertible_to<StatusCode>; }
   StatusCode ISharedDataSvc::get_make_shared (const std::string& name, std::shared_ptr<const T>& data, Function&& generator) const
   {
     std::shared_ptr<const void> void_data;
