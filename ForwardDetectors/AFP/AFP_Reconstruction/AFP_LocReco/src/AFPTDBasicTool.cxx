@@ -122,12 +122,15 @@ StatusCode AFPTDBasicTool::reconstructTracks(std::unique_ptr<xAOD::AFPToFTrackCo
           TrSat++;
         }
       }
-    if (weight == 0.){
-      ATH_MSG_ERROR("weight is zero in time average calculation");
-      return StatusCode::FAILURE;
-    }
+    
     // time average
-    if( TrSize!=TrSat) TrTime /= weight;
+    if( TrSize!=TrSat) {
+      if (weight == 0.){
+        ATH_MSG_ERROR("weight is zero in time average calculation");
+        return StatusCode::FAILURE;
+      }
+      TrTime /= weight;
+    }
     
     ATH_MSG_DEBUG("Track reconstruction complete: stationID = " + std::to_string(m_stationID) + ", train time = " + std::to_string(TrTime) + ", train size = " + std::to_string(TrSize));
     reconstructedTracks.emplace_back(m_stationID,k,TrTime, TrSize, TrSat);
