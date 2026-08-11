@@ -116,6 +116,8 @@ ZDCDataAnalyzer::ZDCDataAnalyzer(ZDCMsg::MessageFunctionPtr msgFunc_p, const JSO
     JSON sideConfig = m_dataAnalyzerConfig->getChannelConfig(side, 0);
     JSON modEnable = sideConfig["moduleEnabled"];
     JSON delayedOrder = sideConfig["delayedOrder"];
+    JSON iterativeCalibCorr = sideConfig["iterativeCalibCorr"];
+      
     if (!modEnable.is_null()) {
       if (modEnable.size() != 4) {
 	(*m_msgFunc_p)(ZDCMsg::Fatal, "Error parsing ZDCDataAnalyzer JSON config, incorrect size of moduleEnabled");
@@ -127,7 +129,7 @@ ZDCDataAnalyzer::ZDCDataAnalyzer(ZDCMsg::MessageFunctionPtr msgFunc_p, const JSO
       }
     }
     if (!delayedOrder.is_null()) {
-    if (delayedOrder.size() != 4) {
+      if (delayedOrder.size() != 4) {
 	(*m_msgFunc_p)(ZDCMsg::Fatal, "Error parsing ZDCDataAnalyzer JSON config, incorrect size of delayedOrder");
 	return;
       }
@@ -136,6 +138,35 @@ ZDCDataAnalyzer::ZDCDataAnalyzer(ZDCMsg::MessageFunctionPtr msgFunc_p, const JSO
 	  m_delayedOrder[side][module] = delayedOrder[module];
       }
     }
+
+  
+    // Check for JSON entries for iterative NL correction
+    if (!iterativeCalibCorr.is_null()) {
+
+
+  for (const auto & modIterCalibCorr : iterativeCalibCorr) {
+	if (modIterCalibCorr.size() != 3) {
+	  (*m_msgFunc_p)(ZDCMsg::Fatal, "Error parsing ZDCDataAnalyzer JSON config, incorrect size of iterativeCalibCorr entry " +  modIterCalibCorr.dump());
+	  return;
+	}
+
+	unsigned int module = modIterCalibCorr[0];
+	float refFrac = modIterCalibCorr[1];
+  JSON coeffArray = modIterCalibCorr[2];
+
+	std::vector<float> polyCoeff;
+	for (auto elem : coeffArray) {
+	  polyCoeff.push_back(elem);
+	}
+
+	(*m_msgFunc_p)(ZDCMsg::Debug, "Iterative correction using module " + std::to_string(module) + " with reference energy fraction " + std::to_string(refFrac) + " and polynomial with " + std::to_string(polyCoeff.size()) + " terms");
+
+	
+	m_iterCalibCorr[side].push_back(std::make_tuple(module, refFrac, polyCoeff));
+      }
+    }	
+
+  m_haveIterCalibCorr= true;
   }
 
   for (size_t side : {0, 1}) {
@@ -842,62 +873,60 @@ bool ZDCDataAnalyzer::FinishEvent()
   return true;
 }
 
+
 void ZDCDataAnalyzer::DoNLcalibModuleSum()
 {
-  if (!m_haveNLcalib) return;
-  
-  for (int iside:{0,1})
-    {
-      // If the module mask is empty for this side, there's nothing to do
-      //
-      if ((m_moduleMask>>(4*iside)&0xf) == 0) continue;
-      
-      if (m_calibModuleSum[iside]>0.)
-	{
-	  float fEM = m_calibAmplitude[iside][0] / m_calibModuleSum[iside];
-	  float fHad1 = m_calibAmplitude[iside][1] / m_calibModuleSum[iside];
-	  float fHad2 = m_calibAmplitude[iside][2] / m_calibModuleSum[iside];
-	  
-	  float EMCorrFact = 0;
-	  
-	  for (size_t i=0;i<m_NLcalibFactors[iside][0].size()-1;i++)
-	    {	  
-	      EMCorrFact += std::pow(fEM - m_NLcalibFactors[iside][0][0],i)*m_NLcalibFactors[iside][0][i+1];
-	    }
-	  
-	  float Had1CorrFact = 0;
-	  for (size_t i=0;i<m_NLcalibFactors[iside][1].size()-1;i++)
-	    {
-	      Had1CorrFact += std::pow(fHad1 - m_NLcalibFactors[iside][1][0],i)*m_NLcalibFactors[iside][1][i+1];
-	    }
-	  
-	  float Had2CorrFact = 0;
-	  for (size_t i=0;i<m_NLcalibFactors[iside][2].size()-1;i++)
-	    {
-	      Had2CorrFact += std::pow(fHad2 - m_NLcalibFactors[iside][2][0],i)*m_NLcalibFactors[iside][2][i+1];
-	    }
+  if (!m_haveIterCalibCorr) return;
 
-	  const std::string &dbgmsg = std::format("ZDCDataAnalyzer: {} {} {} {}\n",m_calibModuleSum[iside], EMCorrFact, Had1CorrFact, Had2CorrFact);
-	  (*m_msgFunc_p)(ZDCMsg::Debug, dbgmsg);
-	  if ((EMCorrFact == 0.) or (Had1CorrFact == 0.) or (Had2CorrFact == 0.))[[unlikely]]{
-	    (*m_msgFunc_p)(ZDCMsg::Error,"ZDCDataAnalyzer::DoNLcalibModuleSum:  Denominator is zero");
-	    return;
+  
+  //loop over both sides; first index in m_iterCalibcorr
+  for (int iside:{0,1}){
+
+    // If the module mask is empty for this side, there's nothing to do
+    if ((m_moduleMask>>(4*iside)&0xf) == 0) continue;
+      
+    if (m_calibModuleSum[iside]>0.){ //it's theoretically possible that: one or more modules fired → module mask is nonzero → mask check passes
+                                    //but their calibrated amplitudes are so small they sum to essentially zero
+
+      //use uncorrected energy first and update in each iteration of the loop over module tuples
+      float totalmoduleE= m_calibModuleSum[iside];
+
+      //loop over module tuples
+      for (auto modtuple : m_iterCalibCorr[iside]){
+        //get and unpack tuple
+        unsigned int modnum = std::get<0>(modtuple);
+        float ftyp = std::get<1>(modtuple);
+        std::vector<float>  polyCoeffs = std::get<2>(modtuple);
+
+        //calculate energy fraction using current total energy
+        float f= m_calibAmplitude[iside][modnum]/totalmoduleE;
+
+        //calculate energy correction
+        float CorrFact = 0;
+        for (size_t i=0;i<polyCoeffs.size(); i++){	  
+	          CorrFact += std::pow(f -ftyp,i)*polyCoeffs[i];
+	        }
+        
+        //check that CorrFact !=0 so we don't divide by 0 [[unlikely]
+         if (CorrFact == 0.){
+           (*m_msgFunc_p)(ZDCMsg::Error,"ZDCDataAnalyzer::DoNLcalibModuleSum:  Denominator is zero");
+           return;
+         }
+
+        //apply energy correction
+        totalmoduleE= totalmoduleE/CorrFact;
+      }
+	  
+      //m_calibModuleSum[iside] = totalmoduleE;
+	    m_NLcalibModuleSum[iside] = totalmoduleE;
+	    m_NLcalibModuleSumErrSq[iside] = 0.; // no error for now
 	  }
-	  
-	  float ECorrEM = m_calibModuleSum[iside]/EMCorrFact;
-	  float ECorrEMHad1 = ECorrEM/Had1CorrFact;
-	  float ECorrEMHad1Had2 = ECorrEMHad1/Had2CorrFact;
-	  
-	  
-	  m_NLcalibModuleSum[iside] = ECorrEMHad1Had2;
-	  m_NLcalibModuleSumErrSq[iside] = 0.; // no error for now
-	}
-      else
-	{
-	  (*m_msgFunc_p)(ZDCMsg::Info,"SUM = 0!!");
-	  m_NLcalibModuleSum[iside] = 0.;
-	  m_NLcalibModuleSumErrSq[iside] = 0.; // no error for now
-	}
-    }
+
+    else{
+	    (*m_msgFunc_p)(ZDCMsg::Info,"SUM = 0!!");
+	    m_NLcalibModuleSum[iside] = 0.;
+	    m_NLcalibModuleSumErrSq[iside] = 0.; // no error for now
+	  }
+  }
 
 }
