@@ -43,6 +43,7 @@ namespace Analysis {
     addTPConverter (&m_trackAssociationCnv);
     addTPConverter (&m_electronAssociationCnv);
     addTPConverter (&m_photonAssociationCnv);
+    addTPConverter (&m_muonAssociationCnv);
     addTPConverter (&m_svxAssociationCnv);
     addTPConverter (&m_trkNavCnv);
     addTPConverter (&m_eleNavCnv);
@@ -91,6 +92,7 @@ namespace Analysis {
     m_trackAssociationCnv.setPStorage(&storage->m_navAssociationCommon);
     m_electronAssociationCnv.setPStorage(&storage->m_navAssociationCommon);
     m_photonAssociationCnv.setPStorage(&storage->m_navAssociationCommon);
+    m_muonAssociationCnv.setPStorage(&storage->m_navAssociationCommon);
     m_svxAssociationCnv.setPStorage(&storage->m_navSvxAssociation);
     m_trkNavCnv.setPStorage(&storage->m_navigable);
     m_eleNavCnv.setPStorage(&storage->m_navigable);
