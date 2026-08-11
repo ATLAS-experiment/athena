@@ -12,16 +12,15 @@ geometry=$(python -c "from AthenaConfiguration.TestDefaults import defaultGeomet
 Reco_tf.py \
 --inputRDOFile ${RDOFile} \
 --outputBSFile created.BS \
---preExec "ConfigFlags.Detector.EnableITkStrip=False" \
+--preExec "flags.Detector.EnableITkStrip=False" \
 --maxEvents=${events}
 
 Reco_tf.py \
---detectors ITkPixel \
 --inputBSFile created.BS \
 --outputAODFile AOD.ttbar.fromBS.pool.root \
 --conditionsTag ${conditions} \
 --geometryVersion ${geometry} \
---preExec "ConfigFlags.Tracking.doTruth=False;ConfigFlags.Tracking.doITkFastTracking=True;ConfigFlags.Reco.PostProcessing.GeantTruthThinning=False"
+--preExec "flags.Tracking.doTruth=False;flags.Tracking.doITkFastTracking=True;flags.Reco.PostProcessing.GeantTruthThinning=False;flags.Reco.EnableHGTDExtension=False"
 rc1=$?
 echo "art-result: ${rc1} Reco_tf_rdo_to_bs_to_aod"
 
