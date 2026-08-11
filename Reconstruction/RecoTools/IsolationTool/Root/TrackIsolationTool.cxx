@@ -295,8 +295,6 @@ namespace xAOD {
       }
     if( dT_Sig > m_maxTime) return;
 
-
-    //
     // check cone if using cone based overlap removal
     if(input.corrections.trackbitset.test(static_cast<unsigned int>(Iso::coreTrackCone))
        && dr2 < m_overlapCone2 ) {
