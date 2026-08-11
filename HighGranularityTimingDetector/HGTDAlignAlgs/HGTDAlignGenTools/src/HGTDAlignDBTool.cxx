@@ -396,11 +396,12 @@ StatusCode HGTDAlignDBTool::outputObjs()
         ATH_MSG_DEBUG("Proxy = " << proxy);
         ATH_MSG_DEBUG("Proxy name = " << proxy->name());
         ATH_MSG_DEBUG("Proxy CLID = " << proxy->clID());
-        ATH_MSG_DEBUG("Proxy address = " << proxy->address());
+	const auto* address = proxy->address();
+        ATH_MSG_DEBUG("Proxy address = " << address);
 
-        if (proxy->address()) {
-            ATH_MSG_DEBUG("Storage type = " << proxy->address()->svcType());
-            ATH_MSG_DEBUG("Address class = " << typeid(*proxy->address()).name());
+        if (address) {
+            ATH_MSG_DEBUG("Storage type = " << address->svcType());
+            ATH_MSG_DEBUG("Address class = " << typeid(*address).name());
         }
     }
 
