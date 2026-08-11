@@ -3,6 +3,7 @@
 Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 """
 # utilities
+from AthenaCommon.Logging import logging
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.Enums import BeamType, LHCPeriod, ProductionStep
@@ -21,10 +22,14 @@ from LArROD.LArRawChannelBuilderAlgConfig import LArRawChannelBuilderAlgCfg
 from LArROD.LArDigitThinnerConfig import LArDigitThinnerCfg
 from LArROD.LArNNChannelBuilder import LArNNRawChannelBuilderCfg
 from LArROD.LArOFFCChannelBuilder import LArOFFCRawChannelBuilderCfg
+
+from LArROD.LArRODBCIDCorrAlgConfig import LArRODBCIDCorrAlgCfg
+
 from DigitizationConfig.TruthDigitizationOutputConfig import TruthDigitizationOutputCfg
 # for Trigger Tower
 from CaloConditions.CaloConditionsConfig import CaloTriggerTowerCfg
 from SGComps.AddressRemappingConfig import InputOverwriteCfg
+
 
 # Enum of CaloGains
 from ROOT.CaloGain import CaloGain
@@ -246,6 +251,17 @@ def LArDigitizationBasicCfg(flags, **kwargs):
     acc.merge(PileUpToolsCfg(flags, **kwargs))
 
     acc.merge(LArHitEMapToDigitAlgCfg(flags))
+
+    if flags.LAr.ROD.ApplyRODBCIDCorr:
+        mlog = logging.getLogger('LArDigitizationBasicCfg')
+        mlog.info('LAr.ROD.ApplyRODBCIDCorr is set: scheduling LArRODBCIDCorrAlg '
+                  'to subtract the BCID-dependent pile-up offset from the digits')
+        if (flags.hasFlag('Calo.Cell.doPileupOffsetBCIDCorr')
+                and flags.Calo.Cell.doPileupOffsetBCIDCorr):
+            mlog.warning('Calo.Cell.doPileupOffsetBCIDCorr is also enabled: the '
+                         'pile-up offset will be subtracted twice')
+        acc.merge(LArRODBCIDCorrAlgCfg(flags))
+
     if flags.LAr.ROD.NNRawChannelBuilding:
         acc.merge(LArNNRawChannelBuilderCfg(flags))
     elif flags.LAr.ROD.OFFCRawChannelBuilding:
