@@ -233,7 +233,7 @@ namespace Rivet {
       Particles Ws;
       if ( prodMode==HTXS::TTH || prodMode==HTXS::TH ){
         // loop over particles produced in hard-scatter vertex
-        for ( auto ptcl : Rivet::HepMCUtils::particles(std::move(HSvtx),Relatives::CHILDREN) ) {
+        for ( auto ptcl : Rivet::HepMCUtils::particles(HSvtx,Relatives::CHILDREN) ) {
           if ( !PID::isTop(ptcl->pdg_id()) ) continue;
           Particle top = getLastInstance(Particle(std::move(ptcl)));
           if ( top.genParticle()->end_vertex() )
