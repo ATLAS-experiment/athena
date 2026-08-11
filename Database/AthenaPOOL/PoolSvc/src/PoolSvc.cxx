@@ -39,8 +39,6 @@
 #include "RelationalAccess/IDatabaseServiceSet.h"
 #include "RelationalAccess/IDatabaseServiceDescription.h"
 
-#include "DBReplicaSvc/IDBReplicaSvc.h"
-
 #include <cstdlib>
 #include <cstring>
 #include <algorithm>
@@ -113,16 +111,6 @@ StatusCode PoolSvc::initialize() {
    coral::IWebCacheControl& webCache = conSvcH.webCacheControl();
    webCache.setCompressionLevel(m_frontierComp);
    ATH_MSG_INFO("Frontier compression level set to " << webCache.compressionLevel());
-   if (m_sortReplicas) {
-      // set replica sorter - get service
-      ServiceHandle<IDBReplicaSvc> replicasvc("DBReplicaSvc", name());
-      if (replicasvc.retrieve().isSuccess()) {
-         csConfig.setReplicaSortingAlgorithm(*replicasvc);
-         ATH_MSG_INFO("Successfully setup replica sorting algorithm");
-      } else {
-         ATH_MSG_WARNING("Cannot setup replica sorting algorithm");
-      }
-   }
    MSG::Level athLvl = msg().level();
    ATH_MSG_DEBUG("OutputLevel is " << (int)athLvl);
    pool::DbPrintLvl::setLevel(athLvl);

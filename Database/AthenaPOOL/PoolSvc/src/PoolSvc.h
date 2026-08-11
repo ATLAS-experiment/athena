@@ -261,8 +261,6 @@ private: // properties
    /// Frontier proprties, compression level and list of schemas to be refreshed: default = 5
    Gaudi::Property<int> m_frontierComp{this,"FrontierCompression",5};
    Gaudi::Property<std::vector<std::string>> m_frontierRefresh{this,"FrontierRefreshSchema",{}};
-   /// Use DBReplicaSvc to sort database connections, default = true.
-   Gaudi::Property<bool> m_sortReplicas{this,"SortReplicas",true};
 
 private: // internal helper functions
    // delete all Persistency Services, Catalog, Mutexes and Indexes
