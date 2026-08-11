@@ -12,6 +12,7 @@ Py:ComponentAccumulator    INFO Athena job with pid 3252799
 CoreDumpSvc                                          INFO Handling signals: 11(Segmentation fault) 7(Bus error) 4(Illegal instruction) 14(Alarm clock) 
 ClassIDSvc                                           INFO getRegistryEntries: read 20279 CLIDRegistry entries for module ALL
 IOVDbSvc                                             INFO Only 5 POOL conditions files will be open at once
+IOVDbSvc                                             INFO IOVDbSvc configured to use a COOL database
 IOVDbSvc                                             INFO Cache alignment will be done in 3 slices
 IOVDbSvc                                             INFO Global tag: OFLCOND-MC16-SDR-RUN2-09 set from joboptions
 IOVDbFolder                                          INFO Read from meta data only for folder /TagInfo

@@ -50,18 +50,27 @@ namespace IOVDbNamespace {
 
 class IOVDbFolder : public AthMessaging {
 public:
+
+  enum class source_t {
+    COOLDB=0,
+    CRESTDB,
+   };
+
+
   IOVDbFolder(IOVDbConn* conn, const IOVDbParser& folderprop, MsgStream& msg,
               IClassIDSvc* clidsvc, IIOVDbMetaDataTool* metadatatool,
               const bool checklock, const bool outputToFile=false,
-              const std::string & source="COOL_DATABASE",
+              const source_t source=source_t::COOLDB,
               const std::string & crestServer="",const std::string & crestTag="",const bool crestCoolToFile=false);
   ~IOVDbFolder();
-  
+ 
+   
+
 
   // access methods to various internal information
   const std::string& folderName() const;
   const std::string& key() const;
-  const std::string& source() const;
+  const source_t& source() const;
 
   IOVDbConn* conn();
   bool multiVersion() const;
@@ -320,7 +329,7 @@ private:
   IOVDbNamespace::IovStore m_iovs;
   const bool m_outputToFile{false};
   const bool m_crestCoolToFile{false};
-  std::string m_source;
+  source_t m_source;
   std::string m_crestServer;
   std::string m_crestTag;
 
@@ -329,7 +338,7 @@ private:
 
 inline const std::string& IOVDbFolder::folderName() const {return m_foldername;}
 inline const std::string& IOVDbFolder::key() const { return m_key;}
-inline const std::string& IOVDbFolder::source() const { return m_source; }
+inline const IOVDbFolder::source_t& IOVDbFolder::source() const { return m_source; }
 
 inline IOVDbConn* IOVDbFolder::conn() { return m_conn;}
 
