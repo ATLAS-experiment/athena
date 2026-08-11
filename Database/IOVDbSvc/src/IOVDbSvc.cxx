@@ -33,6 +33,10 @@
 
 #include "CrestApi/CrestLogger.h"
 
+#include "RelationalAccess/ConnectionService.h"
+#include "RelationalAccess/IConnectionServiceConfiguration.h"
+#include "DBReplicaSvc/IDBReplicaSvc.h"
+
 namespace {
 
 // Wrap a cool IDatabase with a DBLock.
@@ -210,6 +214,19 @@ StatusCode IOVDbSvc::initialize() {
   if (m_outputToFile)    ATH_MSG_INFO("Db dump to file activated");
   if (m_crestCoolToFile) ATH_MSG_INFO("Crest or Cool dump to file activated");
 
+
+  if (m_par_source == "COOL_DATABASE") {
+    coral::ConnectionService conSvcH;
+    coral::IConnectionServiceConfiguration& csConfig = conSvcH.configuration();
+    ServiceHandle<IDBReplicaSvc> replicasvc("DBReplicaSvc", name());
+    if (replicasvc.retrieve().isSuccess()) {
+      csConfig.setReplicaSortingAlgorithm(*replicasvc);
+        ATH_MSG_DEBUG("Successfully setup replica sorting algorithm");
+      } 
+    else {
+        ATH_MSG_WARNING("Cannot setup replica sorting algorithm");
+    }
+  }
   ATH_MSG_INFO( "Service IOVDbSvc initialised successfully" );
 
   ATH_CHECK( checkConfigConsistency() );
