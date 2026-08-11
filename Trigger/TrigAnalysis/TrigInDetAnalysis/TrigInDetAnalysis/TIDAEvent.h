@@ -21,7 +21,6 @@
 
 #include "TrigInDetAnalysis/TIDAChain.h"
 #include "TrigInDetAnalysis/TIDAVertex.h"
-//#include "TrigInDetTruthEvent/TrigInDetTrackTruthMap.h"
 
 
 #include "TObject.h"
@@ -78,10 +77,6 @@ public:
   
   const TIDA::Chain* chain( const std::string& s ) const;
 
-  //void setTruthMap(TrigInDetTrackTruthMap truthmap) {
-  //	m_truthmap = truthmap;
-  //}
-  
   /// clear the event
   void clear() { m_chains.clear(); m_vertices.clear(); } 
  
