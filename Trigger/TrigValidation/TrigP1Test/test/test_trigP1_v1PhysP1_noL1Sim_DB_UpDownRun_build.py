@@ -1,7 +1,7 @@
 #!/usr/bin/env python
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
-# art-description: Trigger athenaHLT test of DB upload (inlcuding duplicate), download and running.
+# art-description: Trigger athenaEF test of DB upload (inlcuding duplicate), download and running.
 # art-type: build
 # art-include: main/Athena/x86_64-el9-gcc15-opt
 # art-include: 24.0/Athena
@@ -11,7 +11,7 @@ from TrigValTools.TrigValSteering import Test, ExecStep, CheckSteps
 
 # Step 1 - create json files
 genJSON = ExecStep.ExecStep("GenJSON")
-genJSON.type = 'athenaHLT'
+genJSON.type = 'athenaEF'
 genJSON.job_options = 'TriggerJobOpts.runHLT'
 genJSON.input = 'data'
 genJSON.flags = ['Trigger.triggerMenuSetup="PhysicsP1_pp_run3_v1_HLTReprocessing_prescale"','Trigger.L1.errorOnMissingTOB=False']
@@ -142,6 +142,7 @@ runDB.args += ' --DBl1pskey=`source filesForUpload/exportMenuKeys.sh && echo ${L
 runDB.args += ' --DBhltpskey=`source filesForUpload/exportMenuKeys.sh && echo ${HLTPSK}`'
 runDB.args += ' --prodSysBSRDO True'
 runDB.args += ' --outputHIST_HLTMONFile=hltmon.root'
+runDB.args += ' --trigExe=athenaEF.py'
 # potential other outputs not created currently
 # runDB.args += ' --outputBSFile=RAW.pool.root'
 # runDB.args += ' --outputDRAW_TRIGCOSTFile=TRIGCOST.pool.root'
