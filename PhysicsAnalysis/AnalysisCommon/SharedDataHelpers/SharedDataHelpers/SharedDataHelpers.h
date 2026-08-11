@@ -5,19 +5,25 @@
 /// @author Nils Krumnack
 
 
-#ifndef SHARED_DATA_SVC_I_SHARED_DATA_SVC_H
-#define SHARED_DATA_SVC_I_SHARED_DATA_SVC_H
+#ifndef SHARED_DATA_HELPERS_SHARED_DATA_HELPERS_H
+#define SHARED_DATA_HELPERS_SHARED_DATA_HELPERS_H
 
 #include <AsgMessaging/StatusCode.h>
-#include <AsgServices/IAsgService.h>
 #include <functional>
 #include <memory>
+#include <typeinfo>
 
 namespace asg
 {
-  /// @brief the interface for the shared data service
+  namespace detail
+  {
+    /// @brief the type-erased version of @ref getMakeShared
+    StatusCode getMakeSharedDataVoid (const std::string& name, const std::type_info& type, std::shared_ptr<const void>& data, const std::function<StatusCode (std::shared_ptr<const void>&)>& generator);
+  }
+
+  /// @brief a helper for sharing calibration data between different components
   ///
-  /// This service is meant to allow different CP Tool instances (as
+  /// This function is meant to allow different CP Tool instances (as
   /// well as other components) to share calibration data between them.
   /// The basic use case is that the tools generally read their
   /// calibration data from a file (usually as a `TH2` or similar), and
@@ -33,7 +39,7 @@ namespace asg
   /// - Make a custom service to share the data for that specific tool:
   ///   This works fine and can add extra value, but it can also be
   ///   complete overkill if all you want is share the same `TH2`
-  ///   object.
+  ///   object you read straight from a file.
   /// - Make the tool public: This is the traditional pre-AthenaMT
   ///   approach. The main issue is that it only works if the tools have
   ///   no declared data dependencies, which they are encouraged to have
@@ -51,33 +57,23 @@ namespace asg
   /// re-read it on every use. That's no change from present practice,
   /// in which you also wouldn't reread calibration data each time a
   /// tool is called.
-
-  class ISharedDataSvc : virtual public asg::IAsgService
-  {
-  public:
-
-    DeclareInterfaceID (CP::ISharedDataSvc, 1, 0);
-
-    /// @brief get/make the given shared data
-    template<typename T,typename Function>
-      requires requires (Function func, std::shared_ptr<const T>& ptr) { { func(ptr) } -> std::convertible_to<StatusCode>; }
-    StatusCode getMakeShared (const std::string& name, std::shared_ptr<const T>& data, Function&& generator) const;
-
-    /// @brief the type-erased version of @ref getMakeShared
-    virtual StatusCode getMakeSharedVoid (const std::string& name, const std::type_info& type, std::shared_ptr<const void>& data, const std::function<StatusCode (std::shared_ptr<const void>&)>& generator) const = 0;
-  };
-
-
-
-  /// Inline/Template Methods
-  /// =======================
+  ///
+  ///
+  /// The basic usage would look something like this:
+  /// ```
+  /// std::shared_ptr<const TH2> my_data;
+  /// ASSERT_SUCCESS (getMakeSharedData ("my_data", my_data, [] (std::shared_ptr<const TH2>& ptr) {
+  ///   ptr = ... // read the data from a file or generate it in some other way
+  ///   return StatusCode::SUCCESS;
+  /// }));
+  /// ```
 
   template<typename T,typename Function>
     requires requires (Function func, std::shared_ptr<const T>& ptr) { { func(ptr) } -> std::convertible_to<StatusCode>; }
-  StatusCode ISharedDataSvc::getMakeShared (const std::string& name, std::shared_ptr<const T>& data, Function&& generator) const
+  StatusCode getMakeSharedData (const std::string& name, std::shared_ptr<const T>& data, Function&& generator)
   {
     std::shared_ptr<const void> void_data;
-    if (getMakeSharedVoid (name, typeid(T), void_data, [&generator](std::shared_ptr<const void>& cache_data) {
+    if (detail::getMakeSharedDataVoid (name, typeid(T), void_data, [&generator](std::shared_ptr<const void>& cache_data) {
       std::shared_ptr<const T> typed_data;
       if (StatusCode sc = generator(typed_data); sc.isFailure())
         return StatusCode::FAILURE;

@@ -9,9 +9,10 @@
 // includes
 //
 
-#include <SharedDataSvc/TFileHelpers.h>
+#include <SharedDataHelpers/TFileHelpers.h>
 
-#include <AsgMessaging/MessageCheck.h>
+#include <SharedDataHelpers/MessageCheck.h>
+#include <SharedDataHelpers/SharedDataHelpers.h>
 
 #include <TFile.h>
 #include <TH1.h>
@@ -26,12 +27,12 @@ namespace asg
 {
   namespace detail
   {
-    StatusCode readTObjectFromTFile (const ISharedDataSvc& svc, std::shared_ptr<TFile>& file, const std::string& fileName, const std::string& name, const std::type_info& type, const std::function<bool (const std::shared_ptr<const TObject>&)>& castSetter)
+    StatusCode readTObjectFromTFile (std::shared_ptr<TFile>& file, const std::string& fileName, const std::string& name, const std::type_info& type, const std::function<bool (const std::shared_ptr<const TObject>&)>& castSetter)
     {
-      using namespace asg::msgUserCode;
+      using namespace msgSharedDataHelpers;
 
       std::shared_ptr<const TObject> object;
-      if (svc.getMakeShared (fileName + "/" + name, object, [&file, &fileName, &name, &type, &castSetter] (std::shared_ptr<const TObject>& data)
+      if (getMakeSharedData (fileName + "/" + name, object, [&file, &fileName, &name, &type, &castSetter] (std::shared_ptr<const TObject>& data)
       {
         if (!file)
         {
