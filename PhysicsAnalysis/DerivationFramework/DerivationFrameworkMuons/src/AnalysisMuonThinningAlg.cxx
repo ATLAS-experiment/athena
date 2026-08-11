@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "AnalysisMuonThinningAlg.h"
@@ -12,8 +12,8 @@ namespace {
     using KeepMap = std::map<const xAOD::TrackParticleContainer*, std::vector<bool>>;
     using KeepPair = std::pair<const xAOD::TrackParticleContainer*, std::vector<bool>>;
 
-    using MuonPassDecor = SG::ReadDecorHandle<xAOD::MuonContainer, bool>;
-    using TrackPassDecor = SG::ReadDecorHandle<xAOD::TrackParticleContainer, bool>;
+    using MuonPassDecor = SG::ReadDecorHandle<xAOD::MuonContainer, std::uint8_t>;
+    using TrackPassDecor = SG::ReadDecorHandle<xAOD::TrackParticleContainer, std::uint8_t>;
 
     constexpr double MeVtoGeV = 1./ Gaudi::Units::GeV;
 }  // namespace
