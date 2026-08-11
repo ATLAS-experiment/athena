@@ -6,6 +6,7 @@ atlas_subdir( TrigCommon )
 # Install files from the package:
 atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
 atlas_install_scripts( bin/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
+atlas_install_scripts( bin/asetup_wrapper )
 
 # Aliases:
 atlas_add_alias( athenaHLT "athenaHLT.py" )
