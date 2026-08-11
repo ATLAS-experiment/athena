@@ -34,7 +34,7 @@ StatusCode TrackTimeDefAndQualityAlg::initialize() {
   ATH_CHECK(m_layerHasExtensionKey.initialize());
   ATH_CHECK(m_holesHGTDKey.initialize(!m_doActs)); //HGTD_holes not produced in ActsHGTDTrackExtensionAlg for now so make it optional
   ATH_CHECK(m_layerClusterTimeKey.initialize());
-  ATH_CHECK(m_layerClusterTruthClassKey.initialize());
+  ATH_CHECK(m_layerClusterTruthClassKey.initialize(m_doTruth)); //Only initialize if truth information is available
   ATH_CHECK(m_time_dec_key.initialize());
   ATH_CHECK(m_time_res_dec_key.initialize());
   ATH_CHECK(m_hasValidTime_dec_key.initialize());
@@ -68,11 +68,7 @@ StatusCode TrackTimeDefAndQualityAlg::execute(const EventContext& ctx) const {
       layerHasExtensionHandle(m_layerHasExtensionKey, ctx);
   ATH_CHECK(layerHasExtensionHandle.isValid());
 
-  SG::ReadDecorHandle<xAOD::TrackParticleContainer, std::vector<int>>
-      layerClusterTruthClassHandle(m_layerClusterTruthClassKey, ctx);
-  ATH_CHECK(layerClusterTruthClassHandle.isValid());
-
-  static const std::vector<char> s_no_holes(4, false);
+  static const std::vector<char> s_no_holes(s_hgtd_layers, false);
   std::optional<SG::ReadDecorHandle<xAOD::TrackParticleContainer, std::vector<char>>>
       holesHGTDHandle;
   if (!m_doActs) {
@@ -80,12 +76,20 @@ StatusCode TrackTimeDefAndQualityAlg::execute(const EventContext& ctx) const {
     ATH_CHECK(holesHGTDHandle->isValid());
   }
 
+  static const std::vector<int> s_no_truth(s_hgtd_layers, 0);
+  std::optional<SG::ReadDecorHandle<xAOD::TrackParticleContainer, std::vector<int>>>
+      layerClusterTruthClass;
+  if (m_doTruth) {
+    layerClusterTruthClass.emplace(m_layerClusterTruthClassKey, ctx);
+    ATH_CHECK(layerClusterTruthClass->isValid());
+  }
+
   for (const auto* track_ptkl : *track_particles) {
     // runs the time consistency checks
     // if no hits are found in HGTD, returns a default time
     const std::vector<float>& times = layerClusterTimeHandle(*track_ptkl);
     const std::vector<char>& has_clusters = layerHasExtensionHandle(*track_ptkl);
-    const std::vector<int>& hit_classification = layerClusterTruthClassHandle(*track_ptkl);
+    const std::vector<int>& hit_classification = m_doTruth ? (*layerClusterTruthClass)(*track_ptkl) : s_no_truth;
     const std::vector<char>& holes_HGTD = m_doActs ? s_no_holes : (*holesHGTDHandle)(*track_ptkl);
 
     CleaningResult res = runTimeConsistencyCuts(times,

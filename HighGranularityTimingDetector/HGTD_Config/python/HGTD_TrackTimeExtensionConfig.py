@@ -57,6 +57,7 @@ def TrackTimeDefAndQualityAlgCfg(flags, name = "TrackTimeDefAndQualityAlg", **kw
     """Schedules an extension algorithm from ITk to HGTD """
     acc = ComponentAccumulator()
 
+    kwargs.setdefault('doTruth', flags.Tracking.doTruth)
     kwargs.setdefault('doActs', flags.HGTD.doActs)
     if flags.HGTD.doActs:
         kwargs.setdefault('ExtraInputs',
