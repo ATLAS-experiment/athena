@@ -2,6 +2,12 @@
 #include "InferenceUtils.h"
 #include "MuonInferenceInterfaces/GraphData.h"
 #include "xAODMuon/MuonSegment.h"
+#include "MuonPatternEvent/Segment.h"
+#include "MuonPatternEvent/SegmentSeed.h"
+#include "MuonSpacePoint/SpacePointContainer.h"
+#include "MuonSpacePoint/SpacePointPerLayerSorter.h"
+#include "MuonTrackEvent/TrackingHelpers.h"
+#include "Acts/Utilities/Helpers.hpp"
 #include "CxxUtils/checker_macros.h"
 #include "GaudiKernel/SystemOfUnits.h"
 #include <nlohmann/json.hpp>
@@ -24,8 +30,20 @@ SegmentGroupKey segmentGroupKey(const xAOD::MuonSegment& seg) {
   return {seg.sector(), static_cast<int>(seg.chamberIndex()), seg.etaIndex()};
 }
 
-int segmentLayerCount(const xAOD::MuonSegment& seg) {
-  return seg.nPrecisionHits() + seg.nPhiLayers() + seg.nTrigEtaLayers();
+/// Number of unique layers among the space points of a bucket: the quantity
+/// SegmentDumperAlg::countLayersInBucket writes to the bucket_layers branch
+/// the edge models are trained on.
+int layersInBucket(const MuonR4::SpacePointBucket& bucket) {
+  MuonR4::SpacePointPerLayerSorter sorter{};
+  std::vector<unsigned int> uniqueLayers;
+  uniqueLayers.reserve(bucket.size());
+  for (const MuonR4::SpacePointBucket::value_type& sp : bucket) {
+    const unsigned int layNum = sorter.sectorLayerNum(*sp);
+    if (!Acts::rangeContainsValue(uniqueLayers, layNum)) {
+      uniqueLayers.push_back(layNum);
+    }
+  }
+  return static_cast<int>(uniqueLayers.size());
 }
 
 /// Compute the minimum angular distance between sectors in a circular modulo space.
@@ -221,7 +239,7 @@ StatusCode SegmentEdgeClassifierTool::buildGraph(const EventContext&, const xAOD
     Amg::Vector3D d = seg->direction();
 
     const int chamberIdx = static_cast<int>(seg->chamberIndex());
-    const int layers = segmentLayerCount(*seg);
+    const int layers = layersInBucket(*MuonR4::detailedSegment(*seg)->parent()->parentBucket());
     const int sec = seg->sector();
     const auto multIt = segmentMultiplicity.find(segmentGroupKey(*seg));
     const int nSeg = (multIt != segmentMultiplicity.end()) ? multIt->second : 1;
@@ -250,12 +268,6 @@ StatusCode SegmentEdgeClassifierTool::buildGraph(const EventContext&, const xAOD
     return StatusCode::SUCCESS;
   }
 
-  std::unordered_map<int, std::vector<std::size_t>> nodesBySector;
-  nodesBySector.reserve(graph.nNodes);
-  for (std::size_t i = 0; i < graph.nNodes; ++i) {
-    nodesBySector[bucket[i].sector].push_back(i);
-  }
-
   auto normalizeSector = [&](int s) {
     // m_sectorModulo > 0: wrap sector to [0, modulo); <=0: disable wrapping
     if (m_sectorModulo.value() > 0) {
@@ -264,6 +276,17 @@ StatusCode SegmentEdgeClassifierTool::buildGraph(const EventContext&, const xAOD
     }
     return s;
   };
+
+  // The lookup key must use the same wrapping as the target sectors below:
+  // ATLAS sectors are 1-based (1..16), so a raw key of 16 can never match a
+  // wrapped target of 0, which silently dropped every edge into sector 16.
+  // The per-pair sectorDistance check below enforces the true circular
+  // distance on the raw sector numbers.
+  std::unordered_map<int, std::vector<std::size_t>> nodesBySector;
+  nodesBySector.reserve(graph.nNodes);
+  for (std::size_t i = 0; i < graph.nNodes; ++i) {
+    nodesBySector[normalizeSector(bucket[i].sector)].push_back(i);
+  }
 
   const std::size_t maxEdges = graph.nNodes * (graph.nNodes - 1);
   graph.edgeIndex.reserve(2 * maxEdges);
