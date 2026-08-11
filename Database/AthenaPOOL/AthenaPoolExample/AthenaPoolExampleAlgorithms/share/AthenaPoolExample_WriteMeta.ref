@@ -29,6 +29,7 @@ ApplicationMgr                                       INFO Application Manager St
 EventPersistencySvc                                  INFO Added successfully Conversion service McCnvSvc
 AthenaEventLoopMgr                                   INFO   ===>>>  start of run 1    <<<===
 IOVDbSvc                                             INFO Only 5 POOL conditions files will be open at once
+IOVDbSvc                                             INFO IOVDbSvc configured to use a COOL database
 IOVDbSvc                                             INFO Setting run/LB/time from EventSelector override in initialize
 IOVDbSvc                                             INFO ../time set to [1,1 : 0]
 IOVDbSvc                                             INFO Initialised with 1 connections and 0 folders

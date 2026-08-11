@@ -251,6 +251,9 @@ private:
   };
   IOVDbSvc_state                 m_state{INITIALIZATION};
 
+  IOVDbFolder::source_t m_source=IOVDbFolder::source_t::COOLDB;
+
+
   // IOVTime to be set during initialation or begin run
   IOVTime                        m_iovTime{};
 

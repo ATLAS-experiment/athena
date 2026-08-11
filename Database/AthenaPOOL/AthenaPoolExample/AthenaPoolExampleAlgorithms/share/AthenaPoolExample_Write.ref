@@ -13,6 +13,7 @@ PoolSvc                                             DEBUG POOL ReadCatalog is ap
 PoolSvc                                             DEBUG POOL ReadCatalog is apcfile:poolcond/PoolCat_oflcond.xml
 PoolSvc                                             DEBUG POOL ReadCatalog is apcfile:poolcond/PoolCat_comcond.xml
 IOVDbSvc                                             INFO Only 5 POOL conditions files will be open at once
+IOVDbSvc                                             INFO IOVDbSvc configured to use a COOL database
 IOVDbFolder                                          INFO Read from meta data only for folder /TagInfo
 IOVDbSvc                                             INFO Initialised with 1 connections and 1 folders
 IOVDbSvc                                             INFO Service IOVDbSvc initialised successfully
