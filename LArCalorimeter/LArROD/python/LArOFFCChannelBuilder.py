@@ -1,4 +1,5 @@
 # Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
+from AthenaCommon.Logging import logging
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.Enums import LHCPeriod, ProductionStep
 from LArRecUtils.LArADC2MeVCondAlgConfig import LArADC2MeVCondAlgCfg
@@ -48,12 +49,19 @@ def LArOFFCRawChannelBuilderCfg(flags, name="LArOFFCRawChannelBuilder", **kwargs
                 addFolders(flags, fld, dbInstance, className=obj, db=dbString)
             )
 
-        if flags.Common.ProductionStep is ProductionStep.PileUpPresampling:
+        if flags.LAr.ROD.ApplyRODBCIDCorr:
+            # Read the digits produced by LArRODBCIDCorrAlg instead of the raw ones
+            mlog = logging.getLogger("LArOFFCRawChannelBuilderCfg")
+            mlog.info("LAr.ROD.ApplyRODBCIDCorr is set: reading pile-up "
+                      "corrected digits LArDigitContainer_PileupCorrected")
+            kwargs.setdefault("LArDigitKey", "LArDigitContainer_PileupCorrected")
+        elif flags.Common.ProductionStep is ProductionStep.PileUpPresampling:
             kwargs.setdefault(
                 "LArDigitKey", flags.Overlay.BkgPrefix + "LArDigitContainer_MC"
             )
         else:
             kwargs.setdefault("LArDigitKey", "LArDigitContainer_MC")
+
     else:
         acc.merge(LArElecCalibDBCfg(flags, ("OFC", "Shape", "Pedestal")))
         if flags.Overlay.DataOverlay:

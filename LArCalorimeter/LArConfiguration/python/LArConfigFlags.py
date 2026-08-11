@@ -69,6 +69,10 @@ def createLArConfigFlags():
     lcf.addFlag("LAr.ROD.OFFCQ3Cut", 2500)
     lcf.addFlag("LAr.ROD.OFFCFilterThreshold", 2.0)
 
+    # Perform a minbias correct to the LArDigit energies before building the raw channels 
+    # (SHOULD TURN OFF ConfigFlags.Calo.Cell.doPileupOffsetBCIDCorr to not double count)
+    lcf.addFlag("LAr.ROD.ApplyRODBCIDCorr", False)
+
     # default LArRawSC container 
     lcf.addFlag("LAr.LATOME.DTInfoForL1","SC_ET_ID")
     # storing SC CaloCellContainer with bcid'ed energies
