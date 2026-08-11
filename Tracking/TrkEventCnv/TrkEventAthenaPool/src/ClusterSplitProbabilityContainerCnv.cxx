@@ -26,7 +26,11 @@ ClusterSplitProbabilityContainer_PERS * ClusterSplitProbabilityContainerCnv::cre
 Trk::ClusterSplitProbabilityContainer *ClusterSplitProbabilityContainerCnv::createTransient(const Token* token)
 {
     MsgStream log(msgSvc(), s_name );
+<<<<<<< HEAD
     static const Guid p1_guid( "33129502-20BC-44F9-ACFF-62E5C3670D46" );
+=======
+    static const pool::Guid p1_guid( "33129502-20BC-44F9-ACFF-62E5C3670D46" );
+>>>>>>> 397770f5fcb (Revert "remove TrkEventAthenaPool package")
 
     Trk::ClusterSplitProbabilityContainer *p_collection = nullptr;
     if( compareClassGuid(token,  p1_guid )){
