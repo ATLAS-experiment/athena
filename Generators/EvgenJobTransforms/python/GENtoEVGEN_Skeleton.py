@@ -373,6 +373,9 @@ def fromRunArgs(runArgs):
         "mc_channel_number": str(flags.Generator.DSID),
     }
     if hasattr(sample, "process"): metadata.update({"evgenProcess": sample.process})
+    if hasattr(sample, "tune"): metadata.update({"evgenTune": sample.tune})
+    if hasattr(sample, "hadronizationModel"): metadata.update({"hadronizationModel": sample.hadronizationModel})
+    if hasattr(sample, "partonShowerModel"): metadata.update({"partonShowerModel": sample.partonShowerModel})
     if hasattr(sample, "specialConfig"): metadata.update({"specialConfiguration": sample.specialConfig})
     if hasattr(sample, "hardPDF"): metadata.update({"hardPDF": sample.hardPDF})
     if hasattr(sample, "softPDF"): metadata.update({"softPDF": sample.softPDF})

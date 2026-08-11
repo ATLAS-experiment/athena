@@ -558,6 +558,14 @@ namespace xAODMaker {
                   m_metaFields.evgenTune = al["evgenTune"].data<std::string>();
                 }
 
+                if (al.exists("hadronizationModel")){
+                  m_metaFields.hadronizationModel = al["hadronizationModel"].data<std::string>();
+                }
+
+                if (al.exists("partonShowerModel")){
+                  m_metaFields.partonShowerModel = al["partonShowerModel"].data<std::string>();
+                }
+
                 if (al.exists("hardPDF")){
                   m_metaFields.hardPDF = al["hardPDF"].data<std::string>();
                 }
@@ -685,6 +693,12 @@ namespace xAODMaker {
         }
         if(!metaFields.evgenTune.empty()) {
           md->setEvgenTune(metaFields.evgenTune);
+        }
+        if(!metaFields.hadronizationModel.empty()) {
+          md->setHadronizationModel(metaFields.hadronizationModel);
+        }
+        if(!metaFields.partonShowerModel.empty()) {
+          md->setPartonShowerModel(metaFields.partonShowerModel);
         }
         if(!metaFields.hardPDF.empty()) {
           md->setHardPDF(metaFields.hardPDF);

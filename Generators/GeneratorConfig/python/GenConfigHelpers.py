@@ -13,7 +13,7 @@ LHEFGenerators = ["Lhef", # generic name: prefer to use the names below
                   "VBFNLO", "FPMC", "ProtosLHEF",
                   "BCVEGPY", "STRINGS", "Phantom", "Pepper"]
 
-# "Main" generators which typically model QCD showers, hadronisation, decays, etc.
+# "Main" generators which typically model QCD showers, hadronization, decays, etc.
 # Herwig family
 MainGenerators = ["Herwig7"]
 # Pythia family
@@ -50,6 +50,16 @@ NoTuneGenerators = ["ParticleGun", "CosmicGenerator", "BeamHaloGenerator", "HepM
 # Generators whose unstable particles without end vertex have to be purged
 # n.b. "Pythia8-Angantyr" is not a 'real' name, the real name would be just 'Pythia8'
 PurgeNoEndVtxGenerators = ["Pythia8-Angantyr", "Herwig7", "Hijing"]
+
+# List of known parton showers
+KnownPartonShowerModels = [""] # default is empty string
+# Sherpa parton shower
+KnownPartonShowerModels += ["SherpaCSShower"]
+
+# List of known hadronization models
+KnownHadronizationModels = [""]
+# Sherpa models
+KnownHadronizationModels += ["SherpaAhadic", "SherpaPythia8"]
 
 def gen_require_steering(gennames):
     """Return a boolean of whether this set of generators requires the steering command line flag"""

@@ -477,6 +477,8 @@ svcMgr.TagInfoMgr.ExtraTagValuePairs.update({"lhefGenerator": '+'.join( filter( 
 svcMgr.TagInfoMgr.ExtraTagValuePairs.update({"generators": '+'.join(gennamesvers)})
 svcMgr.TagInfoMgr.ExtraTagValuePairs.update({"evgenProcess": evgenConfig.process})
 svcMgr.TagInfoMgr.ExtraTagValuePairs.update({"evgenTune": evgenConfig.tune})
+svcMgr.TagInfoMgr.ExtraTagValuePairs.update({"hadronizationModel": evgenConfig.hadronizationModel})
+svcMgr.TagInfoMgr.ExtraTagValuePairs.update({"partonShowerModel": evgenConfig.partonShowerModel})
 if hasattr( evgenConfig, "hardPDF" ) : svcMgr.TagInfoMgr.ExtraTagValuePairs.update({"hardPDF": evgenConfig.hardPDF})
 if hasattr( evgenConfig, "softPDF" ) : svcMgr.TagInfoMgr.ExtraTagValuePairs.update({"softPDF": evgenConfig.softPDF})
 if hasattr( runArgs, "randomSeed") :  svcMgr.TagInfoMgr.ExtraTagValuePairs.update({"randomSeed": str(runArgs.randomSeed)})
@@ -857,6 +859,10 @@ if _checkattr("process"):
     print ("MetaData: %s = %s" % ("physicsProcess", evgenConfig.process))
 if _checkattr("tune"):
     print ("MetaData: %s = %s" % ("generatorTune", evgenConfig.tune))
+if _checkattr("hadronizationModel"):
+    print ("MetaData: %s = %s" % ("hadronizationModel", evgenConfig.hadronizationModel))
+if _checkattr("partonShowerModel"):
+    print ("MetaData: %s = %s" % ("partonShowerModel", evgenConfig.partonShowerModel))
 if _checkattr("hardPDF"):
     print ("MetaData: %s = %s" % ("hardPDF", evgenConfig.hardPDF))
 if _checkattr("softPDF"):

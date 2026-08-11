@@ -44,6 +44,8 @@ namespace xAOD {
     std::vector < std::string > generators; //!< Generators for this dataset
     std::vector < std::string > evgenProcess; //!< Physics process in this dataset
     std::vector < std::string > evgenTune; //!< Hadronization and UE tune used for this dataset
+    std::vector < std::string > hadronizationModel; //!< Hadronization model used for this dataset
+    std::vector < std::string > partonShowerModel; //!< Parton shower used for this dataset
     std::vector < std::string > hardPDF; //!< PDF used for the hard process
     std::vector < std::string > softPDF; //!< PDF used for the tune / shower / hadronization
 
