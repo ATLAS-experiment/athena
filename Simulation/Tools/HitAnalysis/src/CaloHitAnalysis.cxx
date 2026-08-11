@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // Base class
@@ -229,7 +229,7 @@ StatusCode CaloHitAnalysis::execute(const EventContext& ctx) {
           for (int t=0; t<(i_hit).size(); ++t) tot_e += (i_hit).energy(t);
           for (int t=0; t<(i_hit).size(); ++t) tot_time += (i_hit).time(t);
           m_h_cell_e->Fill(tot_e);
-          m_h_cell_log_e->Fill(std::log10(tot_e));
+          m_h_cell_log_e->Fill(tot_e > 0. ? std::log10(tot_e) : -9999.);
           m_h_cell_eta->Fill(ddElement->eta());
           m_h_cell_phi->Fill(ddElement->phi()) ;
           m_h_cell_radius->Fill(ddElement->r());
@@ -251,7 +251,7 @@ StatusCode CaloHitAnalysis::execute(const EventContext& ctx) {
           m_cell_eta->push_back(ddElement->eta());
           m_cell_phi->push_back(ddElement->phi());
           m_cell_e->push_back(tot_e);
-          m_cell_log_e->push_back(std::log10(tot_e));
+          m_cell_log_e->push_back(tot_e > 0. ? std::log10(tot_e) : -9999.);
           m_cell_x->push_back(ddElement->x());
           m_cell_y->push_back(ddElement->y());
           m_cell_z->push_back(ddElement->z());
@@ -283,7 +283,7 @@ StatusCode CaloHitAnalysis::execute(const EventContext& ctx) {
           double z = hitElement->z();
 
           m_h_cell_e->Fill( energy );
-          m_h_cell_log_e->Fill( std::log10(energy) );
+          m_h_cell_log_e->Fill( energy > 0. ? std::log10(energy) : -9999. );
           m_h_cell_eta->Fill( eta );
           m_h_cell_phi->Fill( phi );
           m_h_cell_radius->Fill( radius );
@@ -304,7 +304,7 @@ StatusCode CaloHitAnalysis::execute(const EventContext& ctx) {
           m_cell_eta->push_back(eta);
           m_cell_phi->push_back(phi);
           m_cell_e->push_back(energy);
-          m_cell_log_e->push_back(std::log10(energy));
+          m_cell_log_e->push_back(energy > 0. ? std::log10(energy) : -9999.);
           m_cell_x->push_back(x);
           m_cell_y->push_back(y);
           m_cell_z->push_back(z);
