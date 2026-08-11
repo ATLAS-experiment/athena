@@ -2,6 +2,7 @@
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
+from AthenaConfiguration.Enums import LHCPeriod
 
 def LArADC2MeVCondAlgCfg(flags):
     from LArCabling.LArCablingConfig import LArOnOffIdMappingCfg 
@@ -14,6 +15,8 @@ def LArADC2MeVCondAlgCfg(flags):
 
     theADC2MeVCondAlg=CompFactory.LArADC2MeVCondAlg(LArADC2MeVKey = 'LArADC2MeV')
     
+    theADC2MeVCondAlg.NGains= 2 if flags.GeoModel.Run==LHCPeriod.Run4 and flags.IOVDb.UseCREST else 3
+
     if flags.Input.isMC:
         requiredConditions=["Ramp","DAC2uA","uA2MeV","MphysOverMcal","HVScaleCorr"]
         theADC2MeVCondAlg.LAruA2MeVKey="LAruA2MeVSym"
