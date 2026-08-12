@@ -74,7 +74,9 @@ if (NOT XAOD_STANDALONE)
   atlas_add_component( FlavorTagDiscriminantsLib
     src/PoorMansIpAugmenterAlg.cxx
     src/HitDecoratorAlg.cxx
+    src/CleanHitDecoratorAlg.cxx
     src/JetHitAssociationAlg.cxx
+    src/HitsSelectorAlg.cxx
     src/TruthPVzRelativeToBeamspotAlg.cxx
     src/TruthDecoratorHelpers.cxx
     src/TrackLeptonDecoratorAlg.cxx

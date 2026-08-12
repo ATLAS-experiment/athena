@@ -256,7 +256,6 @@ def trigTauRecMergedCaloHitsCfg(
             detaHitToJet=flags.Tracking.ActiveConfig.etaHalfWidth,
             dzHitToVertex=180, # Upper bound, still ok if the RoI is smaller
             maxHits=max_hits,
-            removeBadIDPixelHits=False, # TODO: Test difference if enabled
         ))
     else:
         hits_decoration = '' # Disabled

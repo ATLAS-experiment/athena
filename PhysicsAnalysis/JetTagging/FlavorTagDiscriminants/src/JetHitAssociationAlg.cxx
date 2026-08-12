@@ -95,7 +95,6 @@ namespace FlavorTagDiscriminants {
     hits.reserve(hitsHandle->size());
     for(const xAOD::TrackMeasurementValidation* hit : *hitsHandle) {
       const int hit_bec = bec(*hit);
-      if(m_removeBadIDPixelHits && !isGoodIDPixelHit(hit)) continue;
       if(hit_bec == 0 && !m_includeBarrel) continue;
       if(hit_bec != 0 && !m_includeEndcap) continue;
 
@@ -175,22 +174,6 @@ namespace FlavorTagDiscriminants {
     }
 
     return ret;
-  }
-
-
-  bool JetHitAssociationAlg::isGoodIDPixelHit(const xAOD::TrackMeasurementValidation* hit) const {
-    if(!hit) return false;
-
-    static const SG::AuxElement::ConstAccessor<char> isFake("isFake");
-    if(isFake(*hit)) return false;
-
-    static const SG::AuxElement::ConstAccessor<int> hasBSError("hasBSError");
-    if(hasBSError(*hit)) return false;
-
-    static const SG::AuxElement::ConstAccessor<char> DCSState("DCSState");
-    if(DCSState(*hit)) return false;
-    
-    return true;
   }
 
 }
