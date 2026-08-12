@@ -89,7 +89,7 @@ def MC23HeavyIons2023NoPileUp(flags):
     flags.Digitization.PixelPlanarRadiationDamageSimulationType = PixelRadiationDamageSimulationType.RamoPotential
 
     from HIRecConfig.HIModeFlags import HImode
-    HImode(flags) # TO CHECK is it an issue if this is set for RDOtoRDOTrigger?
+    HImode(flags) 
     flags.Reco.EnableZDC = False # TO CHECK is this actually needed? I think it should be False by default
 
     #all
@@ -120,7 +120,7 @@ def MC23HeavyIons2023(flags):
     flags.Digitization.PU.NumberOfCavern = 1 # We are using the Cavern Background input for the Hijing HITS-level events
 
     from HIRecConfig.HIModeFlags import HImode
-    HImode(flags) # TO CHECK is it an issue if this is set for RDOtoRDOTrigger?
+    HImode(flags) 
     flags.Reco.EnableZDC = False # TO CHECK is this actually needed? I think it should be False by default
 
     #all
@@ -172,10 +172,14 @@ def MC23ppReferenceRun2024(flags): # FIXME This configuration is a placeholder
     """MC23 flags for the 2024 5.36 TeV pp reference run"""
     flags.Input.MCCampaign = Campaign.MC23e
 
+    # The beam number of collisions flag is used in algorithm configuration. Setting it to zero 
+    # assumes we want to keep the configuration of reconstruction algorithms aligned with that 
+    # used for the HI reconstruction (i.e. no pileup)
     flags.Beam.NumberOfCollisions = 0.
-
+    flags.Input.ConditionsRunNumber = 488000     # better to set it explicitly 
+    # Again, using the no-pileup configuration (see the comment three lines above)
     from LArConfiguration.LArConfigRun3 import LArConfigRun3NoPileUp
-    LArConfigRun3NoPileUp(flags) # TO CHECK is this actually what we want c.f. LArConfigRun3PileUp
+    LArConfigRun3NoPileUp(flags) 
 
     # radiation damage
     from SimulationConfig.SimEnums import PixelRadiationDamageSimulationType
@@ -193,7 +197,7 @@ def MC23ppReferenceRun2024(flags): # FIXME This configuration is a placeholder
     flags.Digitization.PU.ProfileConfig = 'RunDependentSimData.PileUpProfile_run488000_MC23e_SingleBeamspot'
 
     from HIRecConfig.HIModeFlags import HIPmode
-    HIPmode(flags) # TO CHECK is it an issue if this is set for RDOtoRDOTrigger?
+    HIPmode(flags) 
     flags.Reco.EnableZDC = False # TO CHECK is this actually needed? I think it should be False by default
 
     #all
@@ -217,7 +221,7 @@ def MC23HeavyIons2024NoPileUp(flags): # FIXME This configuration is a placeholde
     flags.Digitization.PixelPlanarRadiationDamageSimulationType = PixelRadiationDamageSimulationType.RamoPotential
 
     from HIRecConfig.HIModeFlags import HImode
-    HImode(flags) # TO CHECK is it an issue if this is set for RDOtoRDOTrigger?
+    HImode(flags) 
     flags.Reco.EnableZDC = False # TO CHECK is this actually needed? I think it should be False by default
 
     #all
@@ -248,7 +252,7 @@ def MC23HeavyIons2024(flags): # FIXME This configuration is a placeholder
     flags.Digitization.PU.NumberOfCavern = 1 # We are using the Cavern Background input for the Hijing HITS-level events
 
     from HIRecConfig.HIModeFlags import HImode
-    HImode(flags) # TO CHECK is it an issue if this is set for RDOtoRDOTrigger?
+    HImode(flags) 
     flags.Reco.EnableZDC = False # TO CHECK is this actually needed? I think it should be False by default
 
     #all
@@ -286,6 +290,116 @@ def MC23HeavyIons2025OO(flags):
     #all
     flags.Trigger.AODEDMSet = 'AODFULL'
     flags.Trigger.triggerMenuSetup = 'Dev_pp_lowMu_run3_v1_TriggerValidation_prescale'
+
+
+def MC23HeavyIons2025NoPileUp(flags): 
+    """MC23 flags for the 2025 Heavy Ions run (without pile-up)"""
+    flags.Input.MCCampaign = Campaign.MC23g
+
+    flags.Beam.BunchSpacing = 50
+    flags.Beam.NumberOfCollisions = 0.
+    flags.Input.ConditionsRunNumber = 510000
+
+    from LArConfiguration.LArConfigRun3 import LArConfigRun3NoPileUp
+    LArConfigRun3NoPileUp(flags)
+
+    # radiation damage
+    from SimulationConfig.SimEnums import PixelRadiationDamageSimulationType
+    flags.Digitization.PixelPlanarRadiationDamageSimulationType = PixelRadiationDamageSimulationType.RamoPotential
+
+    from HIRecConfig.HIModeFlags import HImode
+    HImode(flags) 
+    flags.Reco.EnableZDC = False # TO CHECK is this actually needed? I think it should be False by default
+
+    #all
+    flags.Trigger.AODEDMSet = 'AODFULL'
+    flags.Trigger.triggerMenuSetup = 'Dev_HI_run3_v1_TriggerValidation_prescale'
+
+
+def MC23HeavyIons2025(flags): 
+    """MC23 flags for the 2025 Heavy Ions run"""
+    flags.Input.MCCampaign = Campaign.MC23g
+
+    flags.Beam.NumberOfCollisions = 0.
+    flags.Input.ConditionsRunNumber = 510000
+
+    from LArConfiguration.LArConfigRun3 import LArConfigRun3NoPileUp
+    LArConfigRun3NoPileUp(flags) # TO CHECK is this actually what we want c.f. LArConfigRun3PileUp
+
+    # radiation damage
+    from SimulationConfig.SimEnums import PixelRadiationDamageSimulationType
+    flags.Digitization.PixelPlanarRadiationDamageSimulationType = PixelRadiationDamageSimulationType.RamoPotential
+
+    # pile-up
+    flags.Digitization.PileUp = True
+    flags.Digitization.DoXingByXingPileUp = True
+    flags.Digitization.PU.BunchStructureConfig = 'RunDependentSimData.BunchStructureHeavyIon2022'  # is this suitable for all Run3 PbPb runs ?
+    flags.Digitization.PU.InitialBunchCrossing = 0
+    flags.Digitization.PU.FinalBunchCrossing = 0
+    flags.Digitization.PU.NumberOfCavern = 1 # We are using the Cavern Background input for the Hijing HITS-level events
+
+    from HIRecConfig.HIModeFlags import HImode
+    HImode(flags) 
+    flags.Reco.EnableZDC = False # TO CHECK is this actually needed? I think it should be False by default
+
+    #all
+    flags.Trigger.AODEDMSet = 'AODFULL'
+    flags.Trigger.triggerMenuSetup = 'Dev_HI_run3_v1_TriggerValidation_prescale'
+
+
+def MC23HeavyIons2026NoPileUp(flags): 
+    """MC23 flags for the 2026 Heavy Ions run (without pile-up)"""
+    flags.Input.MCCampaign = Campaign.MC23g
+
+    flags.Beam.BunchSpacing = 50
+    flags.Beam.NumberOfCollisions = 0.
+    flags.Input.ConditionsRunNumber = 520900
+
+    from LArConfiguration.LArConfigRun3 import LArConfigRun3NoPileUp
+    LArConfigRun3NoPileUp(flags)
+
+    # radiation damage
+    from SimulationConfig.SimEnums import PixelRadiationDamageSimulationType
+    flags.Digitization.PixelPlanarRadiationDamageSimulationType = PixelRadiationDamageSimulationType.RamoPotential
+
+    from HIRecConfig.HIModeFlags import HImode
+    HImode(flags) 
+    flags.Reco.EnableZDC = False # TO CHECK is this actually needed? I think it should be False by default
+
+    #all
+    flags.Trigger.AODEDMSet = 'AODFULL'
+    flags.Trigger.triggerMenuSetup = 'Dev_HI_run3_v1_TriggerValidation_prescale'
+
+
+def MC23HeavyIons2026(flags): 
+    """MC23 flags for the 2026 Heavy Ions run"""
+    flags.Input.MCCampaign = Campaign.MC23g
+
+    flags.Beam.NumberOfCollisions = 0.
+    flags.Input.ConditionsRunNumber = 520900
+
+    from LArConfiguration.LArConfigRun3 import LArConfigRun3NoPileUp
+    LArConfigRun3NoPileUp(flags) # TO CHECK is this actually what we want c.f. LArConfigRun3PileUp
+
+    # radiation damage
+    from SimulationConfig.SimEnums import PixelRadiationDamageSimulationType
+    flags.Digitization.PixelPlanarRadiationDamageSimulationType = PixelRadiationDamageSimulationType.RamoPotential
+
+    # pile-up
+    flags.Digitization.PileUp = True
+    flags.Digitization.DoXingByXingPileUp = True
+    flags.Digitization.PU.BunchStructureConfig = 'RunDependentSimData.BunchStructureHeavyIon2022'  # is this suitable for all Run3 PbPb runs ?
+    flags.Digitization.PU.InitialBunchCrossing = 0
+    flags.Digitization.PU.FinalBunchCrossing = 0
+    flags.Digitization.PU.NumberOfCavern = 1 # We are using the Cavern Background input for the Hijing HITS-level events
+
+    from HIRecConfig.HIModeFlags import HImode
+    HImode(flags) 
+    flags.Reco.EnableZDC = False # TO CHECK is this actually needed? I think it should be False by default
+
+    #all
+    flags.Trigger.AODEDMSet = 'AODFULL'
+    flags.Trigger.triggerMenuSetup = 'Dev_HI_run3_v1_TriggerValidation_prescale'
 
 
 def MC23aSingleBeamspot(flags):
