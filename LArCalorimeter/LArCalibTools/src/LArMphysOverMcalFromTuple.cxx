@@ -72,9 +72,6 @@ StatusCode LArMphysOverMcalFromTuple::stop()
 
   // store 
   ATH_CHECK( detStore()->record(container,m_store_key) );
-  // Symlink LArMphysOverMcalComplete to ILArMphysOverMcal for further use
-  ILArMphysOverMcal *larMphysOverMcal = nullptr;
-  ATH_CHECK( detStore()->symLink(container,larMphysOverMcal) );
 
   ATH_MSG_INFO ( "LArMphysOverMcalyFromTuple stopped!" );
   

@@ -119,28 +119,6 @@ class LArReadParamsFromFile : public AthReentrantAlgorithm
     complete->set(chid, data[0]) ;
     return StatusCode::SUCCESS ;
   } ;
-  
-  //StatusCode set(LArCaliPulseParamsVsCalib* calib, HWIdentifier chid, int /*gain*/, std::vector<float> data) {
-  //  calib->set(chid, data[0], data[1], data[2], data[3], (short)data[4]) ;
-  //  return StatusCode::SUCCESS ;
-  //`} ;
-
-  // define symLink for all classes
-  //--------------------------------
-
-  StatusCode do_symLink ATLAS_ARGUMENT_NOT_CONST_THREAD_SAFE (const LArCaliPulseParamsComplete* data) { return detStore()->symLink(data,static_cast<const ILArCaliPulseParams*>(data)); } ;
-  StatusCode do_symLink ATLAS_ARGUMENT_NOT_CONST_THREAD_SAFE (const LArDetCellParamsComplete* data)   { return detStore()->symLink(data,static_cast<const ILArDetCellParams*>(data)); } ;
-  StatusCode do_symLink ATLAS_ARGUMENT_NOT_CONST_THREAD_SAFE (const LArPhysCaliTdiffComplete* data)   { return detStore()->symLink(data,static_cast<const ILArPhysCaliTdiff*>(data)); } ;
-  StatusCode do_symLink ATLAS_ARGUMENT_NOT_CONST_THREAD_SAFE (const LArTdriftComplete* data)          { return detStore()->symLink(data,static_cast<const ILArTdrift*>(data)); } ;
-  StatusCode do_symLink ATLAS_ARGUMENT_NOT_CONST_THREAD_SAFE (const LArMphysOverMcalComplete* data)   { return detStore()->symLink(data,static_cast<const ILArMphysOverMcal*>(data)); } ;
-  StatusCode do_symLink ATLAS_ARGUMENT_NOT_CONST_THREAD_SAFE (const LArRinjComplete* data)            { return detStore()->symLink(data,static_cast<const ILArRinj*>(data)); } ;
-  StatusCode do_symLink ATLAS_ARGUMENT_NOT_CONST_THREAD_SAFE (const LArTshaperComplete* data)         { return detStore()->symLink(data,static_cast<const ILArTshaper*>(data)); } ;
-  StatusCode do_symLink ATLAS_ARGUMENT_NOT_CONST_THREAD_SAFE (const LArEMEC_CphiComplete* data)       { return detStore()->symLink(data,static_cast<const ILArEMEC_Cphi*>(data)); } ;
-  StatusCode do_symLink ATLAS_ARGUMENT_NOT_CONST_THREAD_SAFE (const LArEMEC_HValphaComplete* data)    { return detStore()->symLink(data,static_cast<const ILArEMEC_HValpha*>(data)); } ;
-  StatusCode do_symLink ATLAS_ARGUMENT_NOT_CONST_THREAD_SAFE (const LArEMEC_HVbetaComplete* data)     { return detStore()->symLink(data,static_cast<const ILArEMEC_HVbeta*>(data)); } ;
-  StatusCode do_symLink ATLAS_ARGUMENT_NOT_CONST_THREAD_SAFE (const LArCableLengthComplete* data)     { return detStore()->symLink(data,static_cast<const ILArCableLength*>(data)); } ;
-  StatusCode do_symLink ATLAS_ARGUMENT_NOT_CONST_THREAD_SAFE (const LArCableAttenuationComplete* data){ return detStore()->symLink(data,static_cast<const ILArCableAttenuation*>(data)); } ;
-
 };
 
 #include "LArCalibTools/LArReadParamsFromFile.icc"
