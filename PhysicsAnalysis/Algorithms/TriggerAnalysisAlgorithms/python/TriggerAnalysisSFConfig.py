@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 from typing import Iterable, Union
 
 from AnalysisAlgorithmsConfig.ConfigBlock import ConfigBlock
@@ -142,6 +142,9 @@ class TriggerAnalysisSFBlock(ConfigBlock):
             info="a unique identifier for the trigger matching decorations. Only "
             "useful when defining multiple setups.")
 
+    def instanceName(self):
+        return self.postfix
+
     def makeTriggerGlobalEffCorrAlg(
         self,
         config: ConfigAccumulator,
@@ -149,7 +152,7 @@ class TriggerAnalysisSFBlock(ConfigBlock):
         noSF: bool,
         triggerSuffix: str = ''
     ) -> None:
-        alg = config.createAlgorithm( 'CP::TrigGlobalEfficiencyAlg', 'TrigGlobalSFAlg' + triggerSuffix + self.postfix)
+        alg = config.createAlgorithm("CP::TrigGlobalEfficiencyAlg", "TrigGlobalSFAlg" + triggerSuffix)
         if config.geometry() is LHCPeriod.Run3:
             alg.triggers_2022 = [trig.replace("HLT_","").replace(" || ", "_OR_") for trig in get_year_data(self.triggerChainsPerYear, 2022)]
             alg.triggers_2023 = [trig.replace("HLT_","").replace(" || ", "_OR_") for trig in get_year_data(self.triggerChainsPerYear, 2023)]
@@ -238,7 +241,7 @@ class TriggerAnalysisSFBlock(ConfigBlock):
             and not any(trig_string in trig for trig in trig_chains_dummy):
             return
 
-        alg = config.createAlgorithm("CP::TrigMatchingAlg", f"TrigMatchingAlg_{trig_string}{self.postfix}")
+        alg = config.createAlgorithm("CP::TrigMatchingAlg", f"TrigMatchingAlg_{trig_string}")
         alg.matchingTool = f"{matchingTool.getType()}/{matchingTool.getName()}"
         alg.matchingDecoration = f"trigMatched{self.postfix}"
         alg.trigSingleMatchingList = [trig for trig in trig_chains if trig_string in trig]
@@ -248,7 +251,7 @@ class TriggerAnalysisSFBlock(ConfigBlock):
         for trig in list(alg.trigSingleMatchingList) + list(alg.trigSingleMatchingListDummy):
             trig = trig.replace(".", "p").replace("-", "_").replace(" ", "")
             if trig_string in trig:
-                config.addOutputVar(particles.split(".")[0], f"trigMatched_{self.postfix}{trig}", f"trigMatched_{self.postfix}{trig}", noSys=True, auxType='char')
+                config.addOutputVar(particles.split(".")[0], f"trigMatched{self.postfix}_{trig}", f"trigMatched{self.postfix}_{trig}", noSys=True, auxType="char")
 
     def makeTrigMatchingAlg(
         self,
