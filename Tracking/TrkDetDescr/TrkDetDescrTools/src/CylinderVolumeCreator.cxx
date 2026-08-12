@@ -115,8 +115,11 @@ Trk::CylinderVolumeCreator::createTrackingVolume(
                                   zMinRaw,zMaxRaw,
                                   btype).isFailure()) {
         ATH_MSG_WARNING( "[!] Problem with given dimensions - return 0 and delete provided objects" );
-        delete volBounds; delete transform;
-        delete cylinderBounds;
+        delete volBounds; 
+        delete transform;
+        if (volBounds != cylinderBounds) {
+          delete cylinderBounds;
+        }
         return tVolume;
     }
 

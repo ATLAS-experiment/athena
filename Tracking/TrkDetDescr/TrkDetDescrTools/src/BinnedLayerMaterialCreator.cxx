@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -67,7 +67,7 @@ Trk::LayerMaterialProperties* Trk::BinnedLayerMaterialCreator::convertLayerMater
                 materialVector.push_back(mProperties);
             }
             // now pus the vector into the matrix
-            materialMatrix.push_back(materialVector);
+            materialMatrix.push_back(std::move(materialVector));
         }
                 
         
