@@ -13,7 +13,6 @@ echo "*** Running ACTS reconstruction with extra args: "${extraArgs}
 export ATHENA_CORE_NUMBER=1
 Reco_tf.py \
     --preExec "flags.Exec.FPE=-1; \
-    	       flags.Tracking.doITkFastTracking=True; \
     	       flags.Acts.doAnalysis=True; \
 	       flags.Acts.doMonitoring=True; \
     	       flags.DQ.useTrigger=False; \
