@@ -2,6 +2,8 @@
 
 atlas_subdir( L0MuonS1TGCFloatingTools )
 
+find_package( Boost COMPONENTS unit_test_framework )
+
 atlas_add_component( L0MuonS1TGCFloatingTools
                      src/*.cxx
                      src/components/*.cxx
@@ -14,6 +16,21 @@ atlas_add_test( TgcL0FloatingPtLut_test
           src/TgcL0FloatingPtLut.cxx
   INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/src
   LINK_LIBRARIES CxxUtils
+  POST_EXEC_SCRIPT nopost.sh )
+
+atlas_add_test( TgcL0TrackSelector_test
+  SOURCES test/TgcL0TrackSelector_test.cxx
+          src/TgcL0TrackSelector.cxx
+  INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/src ${Boost_INCLUDE_DIRS}
+  LINK_LIBRARIES ${Boost_LIBRARIES} AthContainers
+                 L0MuonS1TGCToolInterfaces xAODL0MuonCand
+  POST_EXEC_SCRIPT nopost.sh )
+
+atlas_add_test( TgcL0InnerCoincidence_test
+  SOURCES test/TgcL0InnerCoincidence_test.cxx
+          src/TgcL0InnerCoincidence.cxx
+  INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/src ${Boost_INCLUDE_DIRS}
+  LINK_LIBRARIES ${Boost_LIBRARIES} L0MuonS1TGCToolInterfaces
   POST_EXEC_SCRIPT nopost.sh )
 
 atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
