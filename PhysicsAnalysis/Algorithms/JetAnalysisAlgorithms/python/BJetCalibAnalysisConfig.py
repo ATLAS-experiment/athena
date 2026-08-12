@@ -28,12 +28,21 @@ class BJetCalibAnalysisConfig (ConfigBlock) :
             info="the muon preselection.")
         self.addOption ('doPtCorr', True, type=bool,
             info=r"whether to run the b-jet $p_\mathrm{T}$ correction on top of the muon-in-jet one.")
+        self.addOption ('onlyDecorate', False, type=bool,
+            info="whether to only decorate jets with the updated 4-vector.")
+        self.addOption ('changeAngularComponents', False, type=bool,
+            info="whether to change the angular components of the jet 4-vector when applying the muon-in-jet correction."
+                 " This is not recommended, as it can cause unexpected downstream issues as eta/phi is usually not systematically varied.",
+            expertMode=True)
 
     def instanceName (self) :
         """Return the instance name for this block"""
         return self.containerName
 
     def makeAlgs(self, config):
+
+        if not self.onlyDecorate and self.changeAngularComponents and not config.noSystematics():
+            raise ValueError("BJetCalibAnalysisConfig: changeAngularComponents=True is not compatible with systematics. Please set changeAngularComponents=False or run without systematics.")
 
         # Set up kinematic selection for which ftag selection should be used downstream
         jetPreselection = config.getFullSelection(self.containerName, self.jetPreselection)
@@ -57,7 +66,10 @@ class BJetCalibAnalysisConfig (ConfigBlock) :
         alg.jetPreselection = jetPreselection
         alg.jetsOut = config.copyName(self.containerName)
 
+        alg.onlyDecorate = self.onlyDecorate
+
         config.addPrivateTool('muonInJetTool', 'MuonInJetCorrectionTool')
+        alg.muonInJetTool.changeAngularComponents = self.changeAngularComponents
         # Adjust dR matching for large-R jets
         if "AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets" in alg.jets:
             alg.muonInJetTool.doLargeR = True
@@ -66,5 +78,6 @@ class BJetCalibAnalysisConfig (ConfigBlock) :
             config.addPrivateTool('bJetTool', 'BJetCorrectionTool')
 
         # (re-)decorate jets with the updated energy
-        alg = config.createAlgorithm( 'CP::AsgEnergyDecoratorAlg', 'EnergyDecoratorBJetCalib' )
-        alg.particles = config.readName (self.containerName)
+        if not self.onlyDecorate:
+            alg = config.createAlgorithm( 'CP::AsgEnergyDecoratorAlg', 'EnergyDecoratorBJetCalib' )
+            alg.particles = config.readName (self.containerName)
