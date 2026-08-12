@@ -1070,7 +1070,6 @@ std::vector<int, std::allocator<int> >  LArCellsEmptyMonitoring::GetBadLBList(co
   std::map< std::pair<unsigned int, unsigned int>, unsigned int > eventLumiBlock;
   std::map< std::pair<std::string, unsigned int>, unsigned int > eventCells;
   int lb=0.;
-  double NSIG = nsigma;
 
   // Opening file:
   std::unique_ptr<LArSamples::Interface> tuple = Interface::open(inputfile);
@@ -1110,7 +1109,7 @@ std::vector<int, std::allocator<int> >  LArCellsEmptyMonitoring::GetBadLBList(co
 
 
       if (lumiBlock <= lbmax && lumiBlock >= lbmin ) { // use only LBs in range
-	if (data->energy() > sqrt((NSIG*data->noise())*(NSIG*data->noise())) && data->energy() != 0. && data->noise() != 0.){    // record only events with E>NSIG and real energy/noise values 
+	if (data->energy() > sqrt((nsigma*data->noise())*(nsigma*data->noise())) && data->energy() != 0. && data->noise() != 0.){    // record only events with E>nsigma and real energy/noise values 
 	  // cell-event mapping
 	  std::pair<unsigned int, unsigned int> ev(data->run(), data->event());
 	  std::pair<std::string, unsigned int> ev_cryo(GetCryostat(calo), data->event());
