@@ -26,7 +26,7 @@ ClusterMessage::DataDescr::DataDescr(DataDescr&& rhs) noexcept
   rhs.ptr = nullptr;
   rhs.len = 0;
   rhs.align = 0;
-  rhs.dest = 0;
+  rhs.dest = Destination::Host;
   rhs.allocating_memory_resource = nullptr;
 }
 ClusterMessage::DataDescr::DataDescr(
@@ -36,7 +36,7 @@ ClusterMessage::DataDescr::DataDescr(
                                   std::uint64_t(body[1]))),
       len((std::uint64_t(body[2]) << 32) + std::uint64_t(body[3])),
       align(std::uint64_t(1ULL << body[4])),
-      dest(std::uint32_t(body[5])),
+      dest(Destination(body[5])),
       evtNumber((std::uint64_t(body[6]) << 32) + std::uint64_t(body[7])),
       requestNumber((std::uint64_t(body[8]) << 32) + std::uint64_t(body[9])),
       allocating_memory_resource(allocating_memory_resource) {
@@ -72,7 +72,7 @@ ClusterMessage::DataDescr& ClusterMessage::DataDescr::operator=(
   rhs.ptr = nullptr;
   rhs.len = 0;
   rhs.align = 0;
-  rhs.dest = 0;
+  rhs.dest = Destination::Host;
   rhs.allocating_memory_resource = nullptr;
   rhs.evtNumber = 0;
   rhs.requestNumber = 0;
@@ -136,14 +136,14 @@ ClusterMessage::ClusterMessage() = default;
 
 ClusterMessage::ClusterMessage(
     const ClusterMessage::WireMsg& wire_msg,
-    const std::vector<std::pmr::memory_resource*>& memResMap) {
+    std::pmr::memory_resource* allocatingMemoryResource) {
   const auto& [header, body] = wire_msg;
   messageType = static_cast<ClusterMessageType>(header[0]);
   source = header[1];
   if (body.has_value()) {
     const auto& body_2 = *body;
     if (messageType == ClusterMessageType::Data) {
-      payload = DataDescr(body_2, memResMap.at(body_2[5]));
+      payload = DataDescr(body_2, allocatingMemoryResource);
     } else {
       WorkerStatus status{};
       status.status = StatusCode(body_2[0]);
@@ -211,4 +211,17 @@ ClusterMessage::WireMsg ClusterMessage::wire_msg() const {
   }
   WireMsg msg{header, std::nullopt};
   return msg;
+}
+
+bool ClusterMessage::has_body(const WireMsgHdr& header) {
+  switch (header[0]) {
+    // These three have a body sent as a separate MPI message
+    case int(ClusterMessageType::FinalWorkerStatus):
+    case int(ClusterMessageType::WorkerError):
+    case int(ClusterMessageType::Data):
+      return true;
+      break;
+    default:
+      return false;
+  }
 }

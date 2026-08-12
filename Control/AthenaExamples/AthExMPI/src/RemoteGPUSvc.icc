@@ -79,8 +79,8 @@ void RemoteGPUSvc::sendArg(ClientRequest& req, const T* arg) const {
   ClusterMessage::DataDescr desc(arg);
   desc.dest = req.rpcFunction->arguments()[req.argsSent].argType ==
                       RPCArgEntry::ArgType::HostPtr
-                  ? 0
-                  : GPUDestID;
+                  ? Destination::Host
+                  : Destination::Device;
   desc.evtNumber = req.eventNumber;
   desc.requestNumber = req.id();
   m_clusterSvc->sendMessage(

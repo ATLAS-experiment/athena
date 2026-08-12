@@ -23,7 +23,7 @@ if __name__ == "__main__":
 
     flags = initConfigFlags()
     flags.Exec.MPI = False
-    flags.Exec.MaxEvents = 10
+    flags.Exec.MaxEvents = 100
     flags.Concurrency.NumThreads = 1
     flags.Concurrency.NumConcurrentEvents = 1
     flags.Concurrency.NumOffloadThreads = 1

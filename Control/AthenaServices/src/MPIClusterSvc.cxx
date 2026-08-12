@@ -174,23 +174,22 @@ void MPIClusterSvc::sendMessage(int destRank, ClusterMessage message,
   const auto& [header, body] = message.wire_msg();
   comm.send_n(header.begin(), header.size(), destRank, 0);
   if (body.has_value()) {
-    comm.send_n(body->begin(), body->size(), destRank, header[2]);
+    const int tag = int(header[2]);
+    comm.send_n(body->begin(), body->size(), destRank, tag);
     if (message.messageType == ClusterMessageType::Data) {
-      const ClusterMessage::WireMsgBody& bdy = *body;
-      // Decode the body to figure out what to send
-      char* ptr = reinterpret_cast<char*>((std::uint64_t(bdy[0]) << 32) +
-                                          std::uint64_t(bdy[1]));
-      std::size_t len = (std::uint64_t(bdy[2]) << 32) + std::uint64_t(bdy[3]);
-
+      const auto& data = std::get<ClusterMessage::DataDescr>(message.payload);
       // Offset the tag by 16384 to minimize chance of conflict
       // (max tag in MPI spec is 32767)
       constexpr int tag_offset = 16384;
-      comm.send_n(ptr, len, destRank, header[2] + tag_offset);
+      comm.send_n(static_cast<char*>(data.ptr), data.len, destRank,
+                  tag + tag_offset);
     }
   }
 }
 
-ClusterMessage MPIClusterSvc::waitReceiveMessage(ClusterComm communicator) {
+ClusterMessage MPIClusterSvc::waitReceiveMessage(
+    ClusterComm communicator,
+    const MemoryResourceRegistry* memoryResourceRegistry) {
   // Same offset as line 114
   constexpr int tag_offset = 16384;
   constexpr std::uint64_t last32 = 0xFFFFFFFF;
@@ -201,17 +200,16 @@ ClusterMessage MPIClusterSvc::waitReceiveMessage(ClusterComm communicator) {
   ClusterMessage::WireMsg msg{};
   auto&& [head, body] = msg;
   comm.receive_n(head.begin(), head.size());
+  std::pmr::memory_resource* memoryResource = std::pmr::new_delete_resource();
   // Only time we need to figure out ourselves whether there's a body
-  if (head[0] == int(ClusterMessageType::FinalWorkerStatus) ||
-      head[0] == int(ClusterMessageType::WorkerError) ||
-      head[0] == int(ClusterMessageType::Data)) {
+  if (ClusterMessage::has_body(head)) {
     body = ClusterMessage::WireMsgBody{};
     comm.receive_n(body->begin(), body->size(), head[1], head[2]);
     if (head[0] == int(ClusterMessageType::Data)) {
       ClusterMessage::WireMsgBody& bdy = *body;
       // Decode the body to figure out what to recieve
       std::size_t len = (std::uint64_t(bdy[2]) << 32) + std::uint64_t(bdy[3]);
-      // Codex pointed out (impossible modulo corruption) point that bdy[4] >=
+      // Codex pointed out (impossible barring corruption) point that bdy[4] >=
       // 64 is a problem
       if (bdy[4] >= 64) {
         throw std::runtime_error("Received invalid alignment > 2^64");
@@ -227,18 +225,28 @@ ClusterMessage MPIClusterSvc::waitReceiveMessage(ClusterComm communicator) {
                         "alignment for length {}!",
                         align, len));
       }
-      auto dest = std::uint32_t(bdy[5]);
+      auto dest = Destination(bdy[5]);
 
-      if (dest >= m_destIDMemResMap.size()) {
+      if (memoryResourceRegistry == nullptr) {
+        if (dest != Destination::Host) {
+          ATH_MSG_WARNING("Ignoring destination " << int(dest)
+                                                  << " because no memory "
+                                                     "resource registry was "
+                                                     "provided");
+        }
+        dest = Destination::Host;
+        bdy[5] = 0;
+      } else if (int(dest) >= memoryResourceRegistry->size()) {
         ATH_MSG_ERROR(
             "Received message for destination "
-            << dest
+            << int(dest)
             << " which is not valid for this rank. Assuming CPU memory.");
-        dest = 0;
-        bdy[5] = 0;  // So later decode works
+        dest = Destination::Host;
+        bdy[5] = std::uint32_t(dest);  // So later decode works
+      } else {
+        memoryResource = memoryResourceRegistry->at(std::uint32_t(dest));
       }
-      char* ptr =
-          static_cast<char*>(m_destIDMemResMap[dest]->allocate(len, align));
+      char* ptr = static_cast<char*>(memoryResource->allocate(len, align));
       comm.receive_n(ptr, len, head[1], head[2] + tag_offset);
 
       // update the pointer in the WireMsgBody
@@ -246,7 +254,7 @@ ClusterMessage MPIClusterSvc::waitReceiveMessage(ClusterComm communicator) {
       bdy[1] = int(std::uint64_t(ptr) & last32);
     }
   }
-  ClusterMessage message(msg, m_destIDMemResMap);
+  ClusterMessage message(msg, memoryResource);
   ATH_MSG_DEBUG("Rank {} received message from {}", rank(), message.source);
   return message;
 }
@@ -269,10 +277,4 @@ void MPIClusterSvc::log_completeEvent(int eventIdx, std::int64_t run_number,
     ATH_MSG_WARNING("MPI SQLite log service is not setup!");
   }
   m_mpiLog_completeEvent.run(eventIdx, run_number, event_number, status);
-}
-
-unsigned int MPIClusterSvc::registerMemoryResource(
-    std::pmr::memory_resource* res) {
-  m_destIDMemResMap.push_back(res);
-  return m_destIDMemResMap.size() - 1;
 }

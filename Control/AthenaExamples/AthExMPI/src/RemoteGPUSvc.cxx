@@ -95,6 +95,16 @@ bool RemoteGPUSvc::isServer() const {
   return m_clusterSvc->rank() == ServerRank;
 }
 
+std::optional<unsigned int> RemoteGPUSvc::registerDevice(
+    std::pmr::memory_resource* deviceMemoryResource) {
+  if (!m_registrationPermitted) {
+    ATH_MSG_ERROR("Device registration may only occur during initialization");
+    return std::nullopt;
+  }
+  m_memoryResources.push_back(deviceMemoryResource);
+  return m_memoryResources.size() - 1;
+}
+
 StatusCode RemoteGPUSvc::runClient() {
   using namespace std::chrono_literals;
   ATH_MSG_INFO("Remote GPU client thread is running on MPI rank "
@@ -147,8 +157,8 @@ StatusCode RemoteGPUSvc::runServer() {
   std::set<int> finishedWorkers;
   const std::size_t numWorkers = m_clusterSvc->numRanks() - 1;
   while (finishedWorkers.size() < numWorkers) {
-    ClusterMessage message =
-        m_clusterSvc->waitReceiveMessage(ClusterComm::EventData);
+    ClusterMessage message = m_clusterSvc->waitReceiveMessage(
+        ClusterComm::EventData, &m_memoryResources);
 
     if (message.messageType == ClusterMessageType::EventsDone) {
       finishedWorkers.insert(message.source);
@@ -199,7 +209,8 @@ StatusCode RemoteGPUSvc::runServer() {
                   const auto& argDef = request->rpcFunction->returnVals()[i];
                   ClusterMessage::DataDescr desc(result[i], argDef.len,
                                                  argDef.align);
-                  desc.dest = 0;  // Returned results always go to CPU
+                  desc.dest =
+                      Destination::Host;  // Returned results always go to CPU
                   desc.evtNumber = request->eventNumber;
                   desc.requestNumber = id.request;
                   ClusterMessage msg(ClusterMessageType::Data, std::move(desc));
@@ -228,7 +239,7 @@ StatusCode RemoteGPUSvc::runServer() {
 void RemoteGPUSvc::startRequest(const ClientRequest& req) const {
   std::size_t name_hash = xxh3::hash64(req.rpcFunction->name());
   ClusterMessage::DataDescr desc(&name_hash);
-  desc.dest = 0;  // name always goes to CPU
+  desc.dest = Destination::Host;  // name always goes to CPU
   desc.evtNumber = req.eventNumber;
   desc.requestNumber = req.id();
   m_clusterSvc->sendMessage(

@@ -23,8 +23,15 @@ enum class ClusterMessageType {
   WorkerError,
   EmergencyStop,
   Data,
+
   EMPTY
 };
+
+/** @class Destination
+ *  @brief An enum class denoting whether the data is heading to host or device
+ * memory
+ */
+enum class Destination : std::uint8_t { Host = 0, Device, EMPTY };
 
 /** @class ClusterMessage
  *  @brief A class describing a message sent between nodes in a cluster
@@ -55,8 +62,7 @@ struct ClusterMessage {
     void* ptr = nullptr;
     std::size_t len = 0;
     std::size_t align = 0;
-    unsigned int dest =
-        0;  // An ID that will communicate which device we're sending to.
+    Destination dest = Destination::Host;
     // 0 will always mean CPU memory, but other numbers might depend on the
     // destination rank
 
@@ -87,6 +93,7 @@ struct ClusterMessage {
     DataDescr& operator=(DataDescr&& rhs) noexcept;
 
     void* release();
+
     ~DataDescr();
   };
 
@@ -108,9 +115,12 @@ struct ClusterMessage {
   ClusterMessage(ClusterMessageType mType, DataDescr&& payload);
 
   ClusterMessage(const WireMsg&,
-                 const std::vector<std::pmr::memory_resource*>&);
+                 std::pmr::memory_resource* allocatingMemoryResource =
+                     std::pmr::new_delete_resource());
 
   [[nodiscard]] WireMsg wire_msg() const;
+
+  static bool has_body(const WireMsgHdr& header);
 };
 
 #include "ClusterMessage.icc"

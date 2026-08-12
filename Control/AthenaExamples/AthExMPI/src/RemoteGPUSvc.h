@@ -12,6 +12,7 @@
 #include "AthenaKernel/ClusterMessage.h"
 #include "AthenaKernel/IMPIClusterSvc.h"
 #include "CxxUtils/XXH.h"
+#include "CxxUtils/checker_macros.h"
 
 // Gaudi include(s)
 #include "GaudiKernel/EventContext.h"
@@ -28,13 +29,13 @@
 #include <atomic>
 #include <cstddef>
 #include <memory>
+#include <optional>
 #include <string>
 #include <thread>
 
 namespace RemoteCall {
 
 const std::size_t ServerRank = 0;  // For now server is always rank 0
-const unsigned int GPUDestID = 1;  // For now, GPU is always device 1
 
 struct ServerRequestID {
   std::size_t rank;
@@ -69,6 +70,10 @@ class RemoteGPUSvc : public AthService {
 
   /// Return whether this service instance runs the rank-zero server.
   bool isServer() const;
+
+  /// Register a device and its memory resource.
+  std::optional<unsigned int> registerDevice(
+      std::pmr::memory_resource* deviceMemoryResource);
 
   /// Register an RPC function
   /// Clients must still have the callable built and available,
@@ -142,12 +147,16 @@ class RemoteGPUSvc : public AthService {
   ServiceHandle<IMPIClusterSvc> m_clusterSvc{
       this, "MPIClusterSvc", "MPIClusterSvc", "MPI cluster service"};
 
+  /// Destination memory resources used when receiving RPC data.
+  MemoryResourceRegistry m_memoryResources{std::pmr::new_delete_resource()};
+
   /// Background communication thread.
   std::jthread m_thread;
 
   /// Requests waiting for completion on a client
+  // Thread safe because this is a concurrent map
   mutable tbb::concurrent_hash_map<std::size_t, std::unique_ptr<ClientRequest>>
-      m_clientRequests;
+      m_clientRequests ATLAS_THREAD_SAFE;
 
   /// Requests waiting for completion on server. Here the key is both rank and
   /// request id.
