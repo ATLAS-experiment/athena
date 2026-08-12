@@ -35,7 +35,7 @@
 
 #include "TrigDecisionTool/FeatureCollectStandalone.h"
 
-#include "boost/container_hash/hash_fwd.hpp"
+#include "CxxUtils/hash_utils.h"
 
 class HltNaviChecker;
 
@@ -194,7 +194,7 @@ namespace std {
   struct hash<Trig::Combination>
   {
     std::size_t operator()(const Trig::Combination& comb) const {
-      return boost::hash_range(comb.tes().begin(), comb.tes().end());
+      return CxxUtils::hash_range(comb.tes().begin(), comb.tes().end());
     }
   };
 }

@@ -11,13 +11,13 @@
 
 #include <SampleHandler/DiskWriterXRD.h>
 
+#include <CxxUtils/hash_utils.h>
 #include <RootCoreUtils/Assert.h>
 #include <RootCoreUtils/ShellExec.h>
 #include <RootCoreUtils/ThrowMsg.h>
 #include <TFile.h>
 #include <TSystem.h>
 #include <format>
-#include <boost/functional/hash.hpp>
 #include <chrono>
 #include <iostream>
 #include <random>
@@ -47,7 +47,7 @@ namespace SH
 
     const char *tmpdir = getenv ("TMPDIR");
     std::size_t hash {0};
-    boost::hash_combine (hash, std::hash<pid_t>() (getpid()));
+    CxxUtils::hash_combine (hash, std::hash<pid_t>() (getpid()));
     std::size_t tries = 0;
     while (m_file == nullptr || !m_file->IsOpen())
     {
@@ -55,7 +55,7 @@ namespace SH
         throw std::runtime_error ("infinite loop trying to create tempory file for DiskWriterXRD");
 
       auto time = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
-      boost::hash_combine (hash, std::hash<decltype(time)>() (time));
+      CxxUtils::hash_combine (hash, std::hash<decltype(time)>() (time));
       std::size_t hash16 {hash};
       while (hash16 > 0xffff)
         hash16 = (hash16&0xffff) ^ (hash16 >> 16);

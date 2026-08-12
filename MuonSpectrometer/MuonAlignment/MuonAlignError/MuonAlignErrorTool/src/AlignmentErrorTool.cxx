@@ -9,7 +9,7 @@
 
 #include "AlignmentErrorTool.h"
 
-#include <boost/functional/hash.hpp>
+#include "CxxUtils/hash_utils.h"
 #include <fstream>
 #include <sstream>
 #include <unordered_map>
@@ -269,7 +269,7 @@ void AlignmentErrorTool::makeAlignmentDeviations(const Trk::Track& track, std::v
         if (translation >= 0.001 * Gaudi::Units::mm) {
             std::size_t hitshash = 0;
             for (const auto *it : iDev.hits) {
-                boost::hash_combine(hitshash, (it->identify()).get_compact());
+                CxxUtils::hash_combine(hitshash, (it->identify()).get_compact());
             }
             deviations.push_back(
                 new AlignmentTranslationDeviation(sumU.cross(sumV), translation * Gaudi::Units::mm, iDev.hits));
@@ -284,7 +284,7 @@ void AlignmentErrorTool::makeAlignmentDeviations(const Trk::Track& track, std::v
         if (rotation >= 0.000001 * Gaudi::Units::rad) {
             std::size_t hitshash = 0;
             for (const auto *it : iDev.hits) {
-                boost::hash_combine(hitshash, (it->identify()).get_compact());
+                CxxUtils::hash_combine(hitshash, (it->identify()).get_compact());
             }
             deviations.push_back(new AlignmentRotationDeviation(sumP, sumV, rotation * Gaudi::Units::rad, iDev.hits));
             deviations.back()->setHashOfHits(hitshash);
