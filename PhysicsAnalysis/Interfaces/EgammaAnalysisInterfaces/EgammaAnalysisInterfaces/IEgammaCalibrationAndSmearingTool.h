@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -34,7 +34,7 @@ namespace CP {
     
     virtual StatusCode initialize() = 0;
     
-    //Apply the correction on a modifyable egamma object (xAOD::Electron or xAOD::Photon)
+    //Apply the correction on a modifiable egamma object (xAOD::Electron or xAOD::Photon)
     virtual CP::CorrectionCode applyCorrection(xAOD::Egamma &) const = 0;
     
     //Create a corrected copy from a constant egamma object
