@@ -133,6 +133,7 @@ StatusCode
 IsolationBuilder::execute(const EventContext& ctx) const
 {
   ATH_MSG_DEBUG("Executing " << name() << "...");
+
   // For etcone, needs the cells
 
   const CaloCellContainer* cellColl = nullptr;
@@ -146,6 +147,7 @@ IsolationBuilder::execute(const EventContext& ctx) const
     cellColl = cellcoll.cptr();
   }
   // Compute isolations
+
   if (m_elCaloIso.size()) {
     ATH_MSG_DEBUG("About to execute Electron calo iso");
     ATH_CHECK(executeCaloIso(m_elCaloIso, cellColl));
@@ -283,7 +285,6 @@ IsolationBuilder::initializeIso(
 {
 
   std::string prefix = containerName + ".";
-
   
   for (size_t flavor = 0; flavor < isoInts.size(); flavor++) {
     // iterate over the flavor (cell, topo, eflow, track
@@ -296,8 +297,6 @@ IsolationBuilder::initializeIso(
     // std::vector<SG::AuxElement::Decorator<float>*> Deco;
     xAOD::Iso::IsolationFlavour isoFlav = xAOD::Iso::numIsolationFlavours;
     xAOD::Iso::IsolationFlavour oldIsoFlav = xAOD::Iso::numIsolationFlavours;
-
-
 
     for (size_t type = 0; type < isoInts[flavor].size(); type++) {
       // iterate over the cone sizes for a given flavor.
@@ -340,7 +339,6 @@ IsolationBuilder::initializeIso(
       }
     }
 
-
     // check that there were isolations configured
     if (isoFlav == xAOD::Iso::numIsolationFlavours) {
       ATH_MSG_WARNING("The configuration was malformed: an empty inner vector "
@@ -355,14 +353,11 @@ IsolationBuilder::initializeIso(
     // and finally add it to the IsoMap.
     ///////////////////////////////
 
-
     if (isoFlav == xAOD::Iso::etcone || isoFlav == xAOD::Iso::topoetcone ||
         isoFlav == xAOD::Iso::neflowisol) {
-
       
       // let's initialize the decos
       ATH_MSG_DEBUG("Initializing cisoH.isoDeco");
-
       ATH_CHECK(cisoH.isoDeco.initialize());
 
       ATH_CHECK(addCaloIsoCorrections(
@@ -415,8 +410,7 @@ IsolationBuilder::addCaloIsoCorrections(
   bool corrsAreExtra,
   const std::string& prefix,
   const std::string& customConfig)
-{
-  
+{  
   if (!corrsAreExtra) {
     std::string bitsetName =
       prefix + xAOD::Iso::toString(isoFlav) + "CorrBitset";
@@ -430,8 +424,7 @@ IsolationBuilder::addCaloIsoCorrections(
   }
 
   for (size_t corrType = 0; corrType < corInts[flavor].size(); corrType++) {
-    // iterate over the calo isolation corrections
-    
+    // iterate over the calo isolation corrections   
     const auto cor = static_cast<unsigned int>(corInts[flavor][corrType]);
     if (!corrsAreExtra)
       cisoH.CorrList.calobitset.set(cor);
@@ -475,7 +468,6 @@ IsolationBuilder::addCaloIsoCorrections(
       ATH_CHECK(vec.initialize());
     }
   }
-
   return StatusCode::SUCCESS;
 }
 
@@ -530,7 +522,6 @@ IsolationBuilder::executeCaloIso(
     caloIsoMap,
   const CaloCellContainer* cellColl) const
 {
-
   for (const auto& pr : caloIsoMap) {
 
     const xAOD::Iso::IsolationFlavour flav = pr.first;

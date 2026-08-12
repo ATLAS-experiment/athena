@@ -53,7 +53,6 @@ def IsolationSteeringDerivCfg(flags, name = 'IsolationSteeringDeriv', inType = '
     kwargs['FwdElCorTypes'] = isoCor
     kwargs['FwdElCorTypesExtra'] = isoExCor
 
-    
     kwargs['name'] = suff+'PFlowIsolationBuilder'
     
     acc.addEventAlgo(CompFactory.IsolationBuilder(**kwargs))

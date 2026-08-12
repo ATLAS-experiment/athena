@@ -125,7 +125,6 @@ namespace xAOD {
 
     Gaudi::Property<float> m_maxTime{this, "IsoTimeRemoval", 2.5};
 
-    
     float m_overlapCone2 = 0.0F; /// overlap cone size squared
 
     /// The maximum eta range to consider something a core track
@@ -154,8 +153,7 @@ namespace xAOD {
     /** retrieve pvx if not given */
     const Vertex* retrieveIDBestPrimaryVertex(const VertexContainer* vtxC) const;
 
-    Gaudi::Property<bool> m_DoTimingSel{this, "DoForwardIsoTiming",false,"Apply the timing selection on the track Isolation"};
-    
+    Gaudi::Property<bool> m_DoTimingSel{this, "DoForwardIsoTiming",false,"Apply the timing selection on the track Isolation"};    
   };
 
 }	// end of namespace
