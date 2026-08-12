@@ -33,10 +33,14 @@ def NewVrtSecInclusiveAlgLLPCfg(flags, algname="NVSI", AugmentingVersionString="
 def NewVrtSecInclusiveAlgTightCfg(flags, algname="NVSI_Alg_Tight", **kwargs):
   
    acc = ComponentAccumulator()
+
+   augString = kwargs.pop("AugmentingVersionString", "_SoftBTight")
+
    from NewVrtSecInclusiveTool.NewVrtSecInclusiveConfig import SoftBFinderToolCfg
-   kwargs.setdefault("BVertexTool", acc.popToolsAndMerge(SoftBFinderToolCfg(flags,FillHist=False, IniV2T_v2tBDTCut=-0.3,FinV2T_v2tBDTCut=0.8,IniV2T_cosSVPVCut=0.4,FinV2T_cosSVPVCut=0.4,AugmentingVersionString='_SoftBTight')))
+   kwargs.setdefault("BVertexTool", acc.popToolsAndMerge(SoftBFinderToolCfg(flags,FillHist=False, IniV2T_v2tBDTCut=-0.3,FinV2T_v2tBDTCut=0.8,IniV2T_cosSVPVCut=0.4,FinV2T_cosSVPVCut=0.4,AugmentingVersionString=augString)))
    kwargs.setdefault("OutputLevel", INFO)
    kwargs.setdefault("BVertexContainerName","NVSI_SecVrt_Tight")
+   kwargs.setdefault("TrackParticleContainer","InDetTrackParticles")
 
    NVSI_Alg = CompFactory.Rec.NewVrtSecInclusiveAlg(algname, **kwargs)
    acc.addEventAlgo(NVSI_Alg)

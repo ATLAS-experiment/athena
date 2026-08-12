@@ -15,6 +15,7 @@ questions. Contact details can be found in the main FTAG docs: https://ftag.docs
 | `FTAG4` | PHYS-like derivation with a one-lepton skim | Uses `PHYS` content and applies a single-lepton calibration-style event selection. |
 | `FTAG5` | PHYS-like derivation with a dilepton skim | Uses `PHYS` content and applies a two-lepton calibration-style event selection. |
 | `FTAGPU` | FTAG derivation focused on by-vertex jet content and pile-up related studies | Includes `AntiKt4EMPFlowByVertexJets`, related thinning, and FTAG augmentations for this jet view. |
+| `FTAGSSV` | PHYS-like derivation for the soft b-tagging calibration | Uses `PHYS` content plus the NVSI_SecVrt_Tight* secondary-vertex containers rebuilt under each tracking systematic variation. |
 | `FTAGXBB` | Skimmed derivation for Xbb calibration | Requires at least one large-`R` UFO soft-drop jet and adds Xbb-oriented large-`R` discriminant content. |
 
 ## Shared modules
