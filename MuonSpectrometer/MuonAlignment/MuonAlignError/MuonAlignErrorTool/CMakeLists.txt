@@ -12,7 +12,7 @@ atlas_add_component( MuonAlignErrorTool
                      src/tests/*.cxx
                      src/components/*.cxx
                      INCLUDE_DIRS ${Boost_INCLUDE_DIRS} ${ROOT_INCLUDE_DIRS}
-                     LINK_LIBRARIES ${Boost_LIBRARIES} ${ROOT_LIBRARIES} AthenaBaseComps GeoPrimitives GaudiKernel MuonAlignErrorBase 
+                     LINK_LIBRARIES ${Boost_LIBRARIES} ${ROOT_LIBRARIES} AthenaBaseComps CxxUtils GeoPrimitives GaudiKernel MuonAlignErrorBase 
                                     MuonCalibITools MuonAlignmentData MuonIdHelpersLib TrkToolInterfaces StoreGateLib PathResolver 
                                     TrkCompetingRIOsOnTrack TrkPrepRawData TrkRIO_OnTrack TrkTrack )
 

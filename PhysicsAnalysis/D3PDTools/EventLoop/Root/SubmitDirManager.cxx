@@ -13,6 +13,7 @@
 #include <EventLoop/SubmitDirManager.h>
 
 #include <AsgMessaging/StatusCode.h>
+#include <CxxUtils/hash_utils.h>
 #include <EventLoop/Job.h>
 #include <EventLoop/ManagerData.h>
 #include <EventLoop/ManagerOrder.h>
@@ -20,7 +21,6 @@
 #include <RootCoreUtils/Assert.h>
 #include <TSystem.h>
 #include <format>
-#include <boost/functional/hash.hpp>
 #include <fcntl.h>
 #include <regex>
 #include <sys/stat.h>
@@ -184,8 +184,8 @@ namespace EL
                           uniqueDateFormat.c_str(), &tvSplit);
 
                 // make a hash value and reduce it to 16 bits
-                boost::hash_combine (hash, std::hash<pid_t>() (getpid()));
-                boost::hash_combine (hash, std::hash<suseconds_t>() (tv.tv_usec));
+                CxxUtils::hash_combine (hash, std::hash<pid_t>() (getpid()));
+                CxxUtils::hash_combine (hash, std::hash<suseconds_t>() (tv.tv_usec));
                 std::size_t hash16 {hash};
                 while (hash16 > 0xffff)
                   hash16 = (hash16&0xffff) ^ (hash16 >> 16);

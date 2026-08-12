@@ -12,7 +12,7 @@ atlas_add_component( FPGATrackSimBankGen
    src/*.cxx
    src/components/*.cxx
    INCLUDE_DIRS ${Boost_INCLUDE_DIRS} ${ROOT_INCLUDE_DIRS}
-   LINK_LIBRARIES ${Boost_LIBRARIES} ${ROOT_LIBRARIES} FPGATrackSimAlgorithmsLib )
+   LINK_LIBRARIES ${Boost_LIBRARIES} ${ROOT_LIBRARIES} CxxUtils FPGATrackSimAlgorithmsLib )
 
 # Install files from the package:
 atlas_install_python_modules( python/*.py )
