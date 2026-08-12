@@ -6,7 +6,7 @@ from CLIDComps.clidGenerator import clidGenerator
 log = logging.getLogger('testEDM')
 
 from TrigEDMConfig.TriggerEDM import (TriggerL2List, TriggerEFList, TriggerResultsList, TriggerResultsRun1List,
-                        TriggerLvl1List, TriggerIDTruth, TriggerHLTList, _addExtraCollectionsToEDMList, isCLIDDefined)
+                        TriggerLvl1List, TriggerHLTList, _addExtraCollectionsToEDMList, isCLIDDefined)
 from TrigEDMConfig.TriggerEDMRun2 import EDMDetails
 from TrigEDMConfig.TriggerEDMDefs import InViews, allowTruncation
 from TrigEDMConfig import TriggerEDMRun1
@@ -16,7 +16,7 @@ def main():
   serializable_names = []
   serializable_names_no_label = []
   cgen = clidGenerator("", False)
-  TriggerList = TriggerL2List + TriggerEFList + TriggerResultsList + TriggerResultsRun1List + TriggerLvl1List + TriggerIDTruth + TriggerHLTList
+  TriggerList = TriggerL2List + TriggerEFList + TriggerResultsList + TriggerResultsRun1List + TriggerLvl1List + TriggerHLTList
   TriggerList += TriggerEDMRun1.TriggerL2List + TriggerEDMRun1.TriggerEFList + TriggerEDMRun1.TriggerResultsRun1List
   for TriggerSerializable in TriggerList:
     #print TriggerSerializable 

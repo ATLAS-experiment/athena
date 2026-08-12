@@ -8,7 +8,7 @@
 # ***********************************************************************************
 
 from TrigEDMConfig.TriggerEDMRun1 import TriggerL2List,TriggerEFList,TriggerResultsRun1List
-from TrigEDMConfig.TriggerEDMRun2 import TriggerResultsList,TriggerLvl1List,TriggerIDTruth,TriggerHLTList,EDMDetails,EDMLibraries,TriggerL2EvolutionList,TriggerEFEvolutionList
+from TrigEDMConfig.TriggerEDMRun2 import TriggerResultsList,TriggerLvl1List,TriggerHLTList,EDMDetails,EDMLibraries,TriggerL2EvolutionList,TriggerEFEvolutionList
 from TrigEDMConfig.TriggerEDMRun3 import TriggerHLTListRun3,varToRemoveFromAODSLIM,EDMDetailsRun3,getSafeEDMInsertPosition,getRun3LowMuEDM
 from TrigEDMConfig.TriggerEDMRun4 import TriggerHLTListRun4
 from TrigEDMConfig.TriggerEDMDefs import allowTruncation
@@ -409,7 +409,7 @@ def getCategory(s):
         s12 = "HLT_"+s12
 
     TriggerListRun1 = TriggerL2List + TriggerEFList + TriggerResultsRun1List
-    TriggerListRun2 = TriggerResultsList + TriggerLvl1List + TriggerIDTruth + TriggerHLTList
+    TriggerListRun2 = TriggerResultsList + TriggerLvl1List + TriggerHLTList
     TriggerListRun3 = getRawTriggerEDMList(flags=None, runVersion=3)
 
     category = ''
@@ -494,12 +494,6 @@ def _getTriggerRun1Run2ObjList(destination, lst):
                 toadd[colltype] = [k]
     return _InsertContainerNameForHLT(toadd)
 
-
-def getTrigIDTruthList(dst):
-    """
-    Gives back the Python dictionary  with the truth trigger content of ESD/AOD (dst) which can be inserted in OKS.
-    """
-    return _getTriggerRun1Run2ObjList(dst,[TriggerIDTruth])
 
 def getLvl1ESDList():
     """
