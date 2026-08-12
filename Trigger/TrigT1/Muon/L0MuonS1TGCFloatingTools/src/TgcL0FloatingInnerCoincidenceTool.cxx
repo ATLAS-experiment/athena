@@ -4,11 +4,15 @@
 
 #include "TgcL0FloatingInnerCoincidenceTool.h"
 
+#include "TgcL0InnerCoincidence.h"
+
 namespace L0Muon {
 
-StatusCode TgcL0FloatingInnerCoincidenceTool::apply(TgcL0CandidateContainer& candidates, const EventContext& ctx) const {
-  (void)candidates;
+StatusCode TgcL0FloatingInnerCoincidenceTool::apply(
+    TgcL0CandidateContainer &candidates, const EventContext &ctx) const {
   (void)ctx;
+  const TgcL0Floating::InnerCoincidence innerCoincidence;
+  innerCoincidence.apply(candidates);
   return StatusCode::SUCCESS;
 }
 
