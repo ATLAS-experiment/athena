@@ -86,6 +86,15 @@ class FPGATrackSimTrack {
     return m_hit_ptrs;
   }
 
+  // Inverse of persistifyHits(): rebuild the transient m_hit_ptrs from the persistent m_hits.
+  void rebuildHitPtrs() {
+    if (!m_hit_ptrs.empty() || m_hits.empty()) return;
+    m_hit_ptrs.reserve(m_hits.size());
+    for (const auto& hit : m_hits) {
+      m_hit_ptrs.push_back(std::make_shared<const FPGATrackSimHit>(hit));
+    }
+  }
+
   // Copy hits for persistency and update pointers to internal storage
   void persistifyHits() {
     if (m_hit_ptrs.empty()) return;
