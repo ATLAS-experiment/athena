@@ -91,9 +91,6 @@ namespace FlavorTagDiscriminants {
       Gaudi::Property<int> m_maxHits {
         this, "maxHits", 200, "Maximum number of total hits; 0 to keep all"};
 
-      Gaudi::Property<bool> m_removeBadIDPixelHits{
-        this, "removeBadIDPixelHits", false, "Flag for removing bad ID Pixel hits (only valid if running over the ID PixelClusters collection)"};
-
 
       struct Hit {
         const xAOD::TrackMeasurementValidation* original_hit;
@@ -108,8 +105,6 @@ namespace FlavorTagDiscriminants {
       getJetHits(const xAOD::IParticle* jet,
                     const std::vector<Hit>& hits,
                     double zed) const;
-
-      bool isGoodIDPixelHit(const xAOD::TrackMeasurementValidation* hit) const;
   };
 
 }
