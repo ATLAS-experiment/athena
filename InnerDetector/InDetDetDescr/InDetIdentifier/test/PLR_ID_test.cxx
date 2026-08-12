@@ -20,7 +20,6 @@
 
 #include <boost/test/unit_test.hpp>
 
-#include <boost/test/tools/output_test_stream.hpp>
 #include <iostream>
 #include <algorithm>
 

@@ -4,7 +4,6 @@
 #define BOOST_TEST_MAIN
 #define BOOST_TEST_MODULE TEST_Identifier
 #include <boost/test/unit_test.hpp>
-#include <boost/test/tools/output_test_stream.hpp>
 namespace utf = boost::unit_test;
 
 #include "Identifier/IdentifierHash.h"
