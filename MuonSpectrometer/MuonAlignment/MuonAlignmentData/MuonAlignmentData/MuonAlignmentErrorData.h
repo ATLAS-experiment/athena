@@ -11,7 +11,7 @@
 #ifndef MUONALIGNMENTERRORDATA_H
 #define MUONALIGNMENTERRORDATA_H
 
-#include <boost/regex.hpp>
+#include <regex>
 #include <vector>
 #include <unordered_map>
 #include <Identifier/Identifier.h>
@@ -23,8 +23,8 @@ class MuonAlignmentErrorData {
 
 public:
     struct MuonAlignmentErrorRule {
-        boost::regex stationName {""};
-        boost::regex multilayer {""};
+        std::regex stationName {""};
+        std::regex multilayer {""};
         double translation {0.0};
         double rotation {0.0};
     };
