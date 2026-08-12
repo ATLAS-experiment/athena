@@ -79,7 +79,8 @@ namespace InDet{
     std::vector<typename T_ModuleHelper::KEY_TYPE> sorted_keys;
     for(const InDetRawDataCollection<T_RDORawData>* collection : *origRdoContainer ) {
        const IdentifierHash idHash = collection->identifyHash();
-       T_ModuleHelper module_helper( emulatedDefects->getDetectorElement(idHash).design() );
+       const auto &det_ele=emulatedDefects->getDetectorElement(idHash);
+       T_ModuleHelper module_helper( det_ele.design() );
        std::unique_ptr<InDetRawDataCollection<T_RDORawData> >
           clone = std::make_unique<InDetRawDataCollection<T_RDORawData> >(idHash);
        clone->setIdentifier(collection->identify());
@@ -143,6 +144,14 @@ namespace InDet{
                 if (m_histogrammingEnabled && h2_rejected_hits) {
                    std::lock_guard<std::mutex> lock(m_histMutex);
                    h2_rejected_hits->Fill(col_idx, row_idx);
+                   if (m_posHist[kZR]) {
+                      InDetDD::SiCellId si_cell_id = det_ele.cellIdFromIdentifier(rdoID);
+                      auto local_pos =  det_ele.design().localPositionOfCell(si_cell_id);
+                      Amg::Vector3D global_pos(det_ele.globalPosition(Amg::Vector3D{local_pos.xPhi(),local_pos.xEta(),0.}));
+                      double r=std::sqrt(std::pow(global_pos(0,0),2)+ std::pow(global_pos(1,0),2));
+                      m_posHist[kZR]->Fill(global_pos(2,0),r);
+                      m_posHist[kXY]->Fill(global_pos(0,0),global_pos(1,0));
+                   }
                 }
                 ++rejected_per_mod;
              }
@@ -219,13 +228,13 @@ namespace InDet{
        n_new += clone->size();
        rdoOutContainer->addCollection( clone.release(), idHash).ignore();
     }
+    ATH_MSG_DEBUG("rejected  " << n_rejected << ", copied " << n_new << " RDOs"
+                 << " noise " << n_added_noise_hits << " (+" << n_defect_noise_hits << ")"
+                 << " split hits: " << n_split_rdos);
     m_rejectedRDOs += n_rejected;
     m_totalRDOs += n_new;
     m_totalNoise += n_added_noise_hits;
     m_splitRDOs += n_split_rdos;
-    ATH_MSG_DEBUG("rejected  " << m_rejectedRDOs << ", copied " << m_totalRDOs << " RDOs"
-                 << " noise " << n_added_noise_hits << " (+" << n_defect_noise_hits << ")"
-                 << " split hits: " << n_split_rdos);
 
     return StatusCode::SUCCESS;
   }

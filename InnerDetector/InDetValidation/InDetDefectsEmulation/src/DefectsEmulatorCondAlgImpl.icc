@@ -28,6 +28,7 @@
 #include <array>
 #include <span>
 #include <algorithm>
+#include <optional>
 
 
 namespace {
@@ -788,6 +789,37 @@ namespace InDet{
           n_defects_total+=module_defects.size();
        }
     }
+
+    {
+       // count defects
+       std::size_t det_ele_sz = detEleColl->size();
+       std::size_t module_defects=0ul;
+       std::size_t single_defects=0ul;
+       for (unsigned int module_i=0u; module_i < det_ele_sz; ++module_i) {
+          if (defects->isModuleDefect(module_i)) {
+             ++module_defects;
+          }
+          else {
+             std::optional<typename T_EmulatedDefects::KEY_TYPE> last;
+             for (auto key : defects->at(module_i)) {
+                if (T_ModuleHelper::isRangeKey(key) && last.has_value()) {
+                   auto base_key = T_ModuleHelper::makeBaseKey(key);
+                   auto last_base_key = T_ModuleHelper::makeBaseKey(*last);
+                   // may overestimate the number of single defects since it will not respect row and or column
+                   // limits
+                   single_defects += std::max(base_key,last_base_key) - std::min(base_key,last_base_key) + 1;
+                }
+                else {
+                   ++single_defects;
+                }
+                last=key;
+             }
+          }
+       }
+       ATH_MSG_INFO("Total module defects: " << module_defects <<
+                    " , total single defects including ranges (ranges may exagerate defect count): " << single_defects);
+    }
+
     m_modulesWithoutDefectParameters += module_without_matching_pattern;
     if (!m_outputFile.value().empty()) {
        if (hasExtensions(m_outputFile.value(),".json")) {
