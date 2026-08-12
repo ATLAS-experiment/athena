@@ -156,7 +156,7 @@ StatusCode TauThinningAlg::execute (const EventContext& ctx) const
       const xAOD::CaloCluster* cluster = tau->neutralPFO(i)->cluster(0);
 
       // check if neutral should be kept 
-      if(cluster->p4().DeltaR(tau->p4()) > m_DrTauNeutrals) continue;	     
+      if(cluster->p4().DeltaR(tauAxis) > m_DrTauNeutrals) continue;	     
 
       // neutral PFOs
       neutralPFOs.keep(tau->neutralPFO(i)->index());
