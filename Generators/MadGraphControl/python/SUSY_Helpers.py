@@ -143,8 +143,9 @@ def SUSY_process(process: str = '') -> str:
             full_proc+=helpful_SUSY_definitions()
         for l in process.split('\n'):
             if 'import model' not in l:
-                full_proc += l+'\n'
-        full_proc+="""
+                full_proc += l.strip()+'\n'
+        if '\noutput ' not in full_proc:
+            full_proc+="""
 # Output processes to MadEvent directory
 output -f
 """
@@ -152,7 +153,9 @@ output -f
         full_proc = "import model MSSM_SLHA2\n"+helpful_SUSY_definitions()+"""
 # Specify process(es) to run
 
-"""+process+"""
+"""+'\n'.join([x.strip() for x in process.split('\n')])
+        if '\noutput ' not in full_proc:
+            full_proc += """
 # Output processes to MadEvent directory
 output -f
 """

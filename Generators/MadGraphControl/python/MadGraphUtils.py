@@ -1617,7 +1617,9 @@ def modify_param_card(param_card_input=None,param_card_backup=None,process_dir=M
     global my_MGC_instance # noqa: F824
     #update the paramCardDict that is a part of the MGC class
     my_MGC_instance.paramCard.modify_paramCardDict(params = params)
-    
+    # If they asked for a copy, give them a copy
+    if output_location is not None:
+        my_MGC_instance.paramCard.write_paramCard(output_location)
 
 
 def get_cluster_type():
