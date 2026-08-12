@@ -1033,10 +1033,6 @@ TriggerLvl1List=[
     ]
 
 
-TriggerIDTruth= [
-    ('TrigInDetTrackTruthMap#TrigInDetTrackTruthMap', 'ESD AODFULL AODSLIM', 'Tracking') # changed from Unknown to Tracking (ATR-18320)
-    ]
-
 
 TriggerRoiList = [
     "xAOD::RoiDescriptorStore#HLT_xAOD__RoiDescriptorStore_secondaryRoI_L2" , "xAOD::RoiDescriptorStoreAuxInfo#HLT_xAOD__RoiDescriptorStore_secondaryRoI_L2Aux.", 
@@ -1375,7 +1371,6 @@ EDMDetails["LVL1::CMMRoI"]                        = {'persistent':"",           
 EDMDetails["CTP_RDO"]                             = {'persistent':"",               'typealias':'' }
 EDMDetails["MuCTPI_RDO"]                          = {'persistent':"",               'typealias':'' }
 EDMDetails["ROIB::RoIBResult"]                    = {'persistent':"",               'typealias':'' }
-EDMDetails["TrigInDetTrackTruthMap"]              = {'persistent':"",               'typealias':'' }
 
 #xAOD details. 
 

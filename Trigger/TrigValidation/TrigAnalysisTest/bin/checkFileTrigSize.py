@@ -926,8 +926,6 @@ class checkFileTrigSize:
             'TrigInDetTrackCollection_tlp1_HLT_TRTxK',
             'TrigInDetTrackCollection_tlp2_HLT_TRTxK',
             'TrigInDetTrackCollection_tlp3_HLT_TRTxK',
-            'TrigInDetTrackTruthMap_tlp1_TrigInDetTrackTruthMap',
-            'TrigInDetTrackTruthMap_tlp2_TrigInDetTrackTruthMap',
             'Trk::TrackCollection_tlp3_HLT_InDetTrigTrackSlimmer_FullScan_EFID',
             'Rec::TrackParticleContainer_tlp1_HLT_InDetTrigParticleCreationTRTOnly_FullScan_EFID',
             'CaloClusterContainer_p6_HLT',
