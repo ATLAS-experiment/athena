@@ -41,7 +41,7 @@ run () {
 
 export ATHENA_CORE_NUMBER=4
 
-# Run with Athena legacy Fast Tracking
+# Run with Athena legacy LRT
 run "Reconstruction-athena" \
     Reco_tf.py \
     --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingRecoPreInclude" \
@@ -80,8 +80,7 @@ fi
 run "Reconstruction-acts" \
     Reco_tf.py \
     --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingRecoPreInclude,ActsConfig.ActsCIFlags.actsProductionFlags" \
-    --preExec "flags.Tracking.writeExtendedSi_PRDInfo=True; \
-    	       flags.Acts.doLargeRadius=True;" \
+    --preExec "flags.Tracking.writeExtendedSi_PRDInfo=True;" \
     --conditionsTag "default:${conditionsTag}" \
     --inputRDOFile ${rdo} \
     --outputAODFile AOD.acts.root \
