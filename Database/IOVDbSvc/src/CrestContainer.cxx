@@ -99,6 +99,7 @@ void Crest::CrestContainer::addRecord(const std::string&name, int number, ...)
     case TypeId::Double:
       m_row[name] = va_arg(ap, double);
       break;
+    case TypeId::String:
     case TypeId::String255:
     case TypeId::String4k:
     case TypeId::String64k:
@@ -469,6 +470,7 @@ void Crest::CrestContainer::parseOldFormat(const std::string& colName, const Typ
 	case TypeId::String64k:
 	case TypeId::String16M:
 	case TypeId::String128M:
+  case TypeId::String:
 	  {
 	    m_row[colName]=thisVal.get<std::string>();
 	    break;
@@ -543,6 +545,7 @@ void Crest::CrestContainer::parseData(const nlohmann::json & values){
             case TypeId::String64k:
             case TypeId::String16M:
             case TypeId::String128M:
+            case TypeId::String:
               m_row[colName] = values[i].get<std::string>();
               break;
             case TypeId::Blob128M:

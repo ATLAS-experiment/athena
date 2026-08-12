@@ -39,6 +39,7 @@ namespace{
       {"String64k", cool::StorageType::String64k},
       {"String16M", cool::StorageType::String16M},
       {"String128M", cool::StorageType::String128M},
+      {"String",cool::StorageType::String128M},
       {"Blob64k", cool::StorageType::Blob64k},
       {"Blob16M", cool::StorageType::Blob16M},
       {"Blob128M", cool::StorageType::Blob128M},

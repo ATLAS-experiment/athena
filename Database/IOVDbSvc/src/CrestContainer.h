@@ -22,7 +22,7 @@ namespace Crest {
   enum class TypeId {
     Bool, UChar, Int16, UInt16,
     Int32, UInt32, UInt63, Int64,
-    Float, Double, String255, String4k,
+    Float, Double, String, String255, String4k,
     String64k, String16M, String128M, Blob64k, Blob16M, Blob128M, Blob, TypeIdCount
   };
   const static std::map<TypeId, std::string> s_typeToString = { 
@@ -36,6 +36,7 @@ namespace Crest {
     { TypeId::Int64, "Int64" },
     { TypeId::Float, "Float" },
     { TypeId::Double, "Double" },
+    {TypeId::String, "String"},
     { TypeId::String255, "String255" },
     { TypeId::String4k, "String4k" },
     { TypeId::String64k, "String64k" },
