@@ -368,9 +368,6 @@ atlas_add_citest( ACTS_Propagation_ITk_Muon_Gen3
 
 atlas_add_citest( ACTS_Propagation_ID
    SCRIPT ActsExtrapolationAlgTest.py )
-
- atlas_add_citest( ACTS_Production
-   SCRIPT ActsProduction.sh )
  
 atlas_add_citest( ACTS_Workflow
    SCRIPT ActsWorkflow.sh )
@@ -378,8 +375,8 @@ atlas_add_citest( ACTS_Workflow
 atlas_add_citest( ACTS_Workflow_Legacy
    SCRIPT ActsWorkflowLegacy.sh )
 
-atlas_add_citest( ACTS_Workflow_Cached_Legacy
-   SCRIPT ActsWorkflowCachedLegacy.sh )
+atlas_add_citest( ACTS_Workflow_Cached
+   SCRIPT ActsWorkflowCached.sh )
  
 atlas_add_citest( ACTS_Workflow_HeavyIons
    SCRIPT ActsWorkflowHeavyIons.sh )
@@ -428,13 +425,9 @@ atlas_add_citest( ACTS_ActsPersistifySeeds
 
 atlas_add_citest( ACTS_ActsDumpGeometryIdentifiers
    SCRIPT ActsDumpGeometryIdentifiers.sh )
- 
-atlas_add_citest( ACTS_ActsBenchmarkLegacyWithSpot
-   SCRIPT ActsBenchmarkLegacyWithSpot.sh 8 100
-   PROPERTIES PROCESSOR 8 )
 
-atlas_add_citest( ACTS_ActsBenchmarkLegacyWithSpot_Cached
-   SCRIPT ActsBenchmarkLegacyWithSpotCached.sh 8 100
+atlas_add_citest( ACTS_ActsBenchmarkWithSpot_Cached
+   SCRIPT ActsBenchmarkWithSpotCached.sh 8 100
    PROPERTIES PROCESSOR 8 )
 
 atlas_add_citest( ACTS_ActsBenchmarkTrackingWithSpot
@@ -454,15 +447,6 @@ atlas_add_citest( ACTS_ActsAnalogueClustering
 
 atlas_add_citest( ACTS_ActsNNClustering
   SCRIPT ActsNNClustering.sh )
-   
-atlas_add_citest( ACTS_CheckObjectCounts_Workflow_Legacy
-  SCRIPT CheckCountTest.sh ActsCheckObjectCountsLegacy )
-
-atlas_add_citest( ACTS_CheckObjectCounts_WorkflowCached_Legacy
-  SCRIPT CheckCountTest.sh ActsCheckObjectCountsCachedLegacy )
-
-atlas_add_citest( ACTS_CheckObjectCounts_WorkflowHgtd_Legacy
-  SCRIPT CheckCountTest.sh ActsCheckObjectCountsHgtdLegacy )
 
 atlas_add_citest( ACTS_CheckObjectCounts_Workflow
   SCRIPT CheckCountTest.sh ActsCheckObjectCounts )
