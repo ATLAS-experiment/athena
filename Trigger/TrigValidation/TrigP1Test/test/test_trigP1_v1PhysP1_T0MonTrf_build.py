@@ -16,7 +16,6 @@ triggermenu = 'PhysicsP1_pp_run3_v1_HLTReprocessing_prescale'
 # HLT BS_RDO->RAW
 hlt = ExecStep.ExecStep('BSRDOtoRAW')
 hlt.type = 'Trig_reco_tf'
-hlt.forks = 1
 hlt.threads = 4
 hlt.concurrent_events = 4
 hlt.input = 'data'
@@ -28,6 +27,7 @@ hlt.args += ' --outputHIST_HLTMONFile=hltmon.root'
 hlt.args += ' --outputDRAW_TRIGCOSTFile=TRIGCOST.pool.root'
 hlt.args += ' --outputNTUP_TRIGCOSTFile=cost.ntup.root'
 hlt.args += ' --runNumber 500306'  # RunNumber is set by Panda, but ignored by Trf to avoid changes from !48070
+hlt.args += ' --trigExe=athenaEF.py'
 
 #====================================================================================================
 # Tier-0 reco step (BS->AOD)
