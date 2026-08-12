@@ -22,9 +22,7 @@
 #include "xAODTruth/xAODTruthHelpers.h"
 #include <EgammaAnalysisHelpers/PhotonHelpers.h>
 
-#include "MCTruthClassifier/IMCTruthClassifier.h"
 #include "TruthUtils/TruthClasses.h"
-#include "MCTruthClassifier/MCTruthClassifier.h"
 
 #include "StoreGate/ReadHandle.h"
 #include "AthContainers/ConstAccessor.h"
