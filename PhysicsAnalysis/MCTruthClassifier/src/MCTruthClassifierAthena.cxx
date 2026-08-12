@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #if !defined(XAOD_ANALYSIS) && !defined(GENERATIONBASE) // Can only be used in Athena
@@ -85,6 +85,7 @@ const xAOD::TruthParticle* MCTruthClassifier::egammaClusMatch(const xAOD::CaloCl
   }
 
   for (const auto* const thePart : tps) {
+    if (!thePart)[[unlikely]] continue;
     // loop over the stable particle
     if (!MC::isStable(thePart)) continue;
     // excluding G4 particle
@@ -93,7 +94,7 @@ const xAOD::TruthParticle* MCTruthClassifier::egammaClusMatch(const xAOD::CaloCl
     // excluding neutrino
     if (std::abs(iParticlePDG) == 12 || std::abs(iParticlePDG) == 14 || std::abs(iParticlePDG) == 16) continue;
     double pt = thePart->pt() / Athena::Units::GeV;
-    double q = thePart?thePart->charge():0.0;
+    double q = thePart->charge();
     // exclude charged particles with pT<1 GeV
     if (q != 0 && pt < m_pTChargePartCut) continue;
     if (q == 0 && pt < m_pTNeutralPartCut) continue;

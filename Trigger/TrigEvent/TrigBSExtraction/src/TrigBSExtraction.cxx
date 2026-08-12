@@ -68,8 +68,6 @@ StatusCode TrigBSExtraction::execute(const EventContext& ctx) {
     if ( repackFeaturesToSG(ctx, *m_navTool, m_dataScoutingKeysIn[i], m_dataScoutingKeysOut[i], false).isFailure() )
       ATH_MSG_WARNING( "failed unpacking features from BS to SG for: " << m_dataScoutingKeysIn[i] );
   }
-
-  if ( isRun1 ) m_navToolL2->reset();
   m_navTool->reset();
 
   return StatusCode::SUCCESS;
