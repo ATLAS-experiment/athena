@@ -74,7 +74,7 @@ Trk::LayerMaterialProperties* Trk::CompoundLayerMaterialCreator::convertLayerMat
                 materialVector.push_back(mProperties);
             }
             // now pus the vector into the matrix
-            materialMatrix.push_back(materialVector);
+            materialMatrix.push_back(std::move(materialVector));
         }
 
         // create the material
@@ -165,7 +165,7 @@ Trk::LayerMaterialProperties* Trk::CompoundLayerMaterialCreator::createCompoundL
     lStore.valueBinMatrix = binMatrix;
     aStore.valueBinMatrix = binMatrix;
     zStore.valueBinMatrix = binMatrix;
-    rStore.valueBinMatrix = binMatrix;
+    rStore.valueBinMatrix = std::move(binMatrix);
 
     ATH_MSG_VERBOSE( "Material stores prepared, now preparing composition matrix." );
 

@@ -115,10 +115,11 @@ const Trk::Surface* Trk::RandomSurfaceBuilder::surface() const
      
      // create the surface
      switch (sType) {
-         // create a cone surface - cone does not exist for old EDM as Measured
+         /* create a cone surface - cone does not exist for old EDM as Measured
          case 0 :  {   
              surface = new Trk::ConeSurface(*transform, m_flatDist->shoot()*0.7*M_PI); 
          } break;
+         */
          case 1 : {   
              surface = new Trk::CylinderSurface(*transform, 50.+m_worldDimensions[0]*m_flatDist->shoot(), m_worldDimensions[2]);
          } break;
