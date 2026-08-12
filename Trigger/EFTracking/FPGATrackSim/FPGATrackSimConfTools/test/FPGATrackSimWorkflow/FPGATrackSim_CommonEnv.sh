@@ -37,7 +37,7 @@ ONNX_INPUT_VOL="NN/2ndStage/${NN_2ND}/NNPathfinderVol_4Hits_V011"
 
 # GNN
 GNN_METRIC_LEARNING="GNN/v0.12/graph_construction-MetricLearning-FPGATrackSim.onnx"
-GNN_MODULE_MAP="GNN/v0.14/FPGATrackSim_DoubletModuleMap_final" # Tolerance of 0.5 in MM
+GNN_MODULE_MAP="GNN/v0.15/FPGATrackSim_DoubletModuleMap_final" # Tolerance of 0.5 in MM, fixed eta-flip issue
 GNN_ONNX_MODEL="GNN/v0.13/edge_classifier-InteractionGNN2-FPGATrackSim_24layer_4iter_weightPt"
 
 # set default values
