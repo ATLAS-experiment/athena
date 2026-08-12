@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 #====================================================================
 # TRIG8.py
 # This defines DAOD_TRIG8, a DAOD format for Run 3.
@@ -311,8 +311,7 @@ def TRIG8Cfg(flags):
                             "TrigRoiDescriptorCollection#HLT_Roi_Bjet",
                             "TrigRoiDescriptorCollection#HLT_Roi_FS",
                             "TrigRoiDescriptorCollection#HLT_Roi_JetSuper",
-                            "TrigRoiDescriptorCollection#HLT_Roi_DJ",
-                            "TrigInDetTrackTruthMap#TrigInDetTrackTruthMap" ]
+                            "TrigRoiDescriptorCollection#HLT_Roi_DJ" ]
 
     TRIG8SlimmingHelper.ExtraVariables += [ 
                         "Electrons.Tight.Medium.Loose.LHTight.LHMedium.LHLoose",
