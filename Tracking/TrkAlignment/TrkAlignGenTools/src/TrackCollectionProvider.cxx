@@ -63,8 +63,9 @@ namespace Trk {
       }
       return StatusCode::SUCCESS;
     }
-    ATH_MSG_DEBUG("found "<<originalTracks->size()<<" tracks");
-
+    if (originalTracks){
+      ATH_MSG_DEBUG("found "<<originalTracks->size()<<" tracks");
+    }
     // if we're here it means that the track collection m_inputCol exists in the file
     // (it can be empty) so we change the error cutoff to process the whole file
     if(m_maxRetrievalErrors>=0)
