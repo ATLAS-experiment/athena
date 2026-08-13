@@ -51,7 +51,7 @@ StatusCode ITkPixelCsvWaferIdAlg::execute(const EventContext& ctx) const {
         ATH_MSG_FATAL("Could not open wafer ID output file: " << m_outputFile.value());
         return StatusCode::FAILURE;
     }
-    output << "DetectorResourceID,True DetectorResourceID,FELIX Card Name,Uplink Pin,DMA buffer,SourceID\n";
+    output << "DetectorResourceID,TrueDetectorResourceID,FELIX Card Name,Uplink Pin,DMA buffer,SourceID\n";
 
     std::vector<int> dma_buffer_vec = DmaBuffer();
 
@@ -375,7 +375,17 @@ int ITkPixelCsvWaferIdAlg::phi_module(const std::vector<std::string>& spchain, c
             return phi;
         }
         else if(ld == 1){  //end-cap intermediate rings, inner system, disk 1 - triplets: one module per FE /!\ 0-17
-            return 6 * (stoi(mod) - 1 ) + 2 * (fe - 1); // probably wrong offset, TODO need to revisit
+            std::string sp_str(1, spchain.at(5)[2]); // SP=2 and SP=4 alternate in phi
+            if(sp_str == "1"){
+                return 6 * (stoi(mod) - 1 ) + 2 * (fe - 1) ; // probably wrong offset, TODO need to revisit
+            }
+            else if(sp_str == "2"){
+                return 6 * (stoi(mod) - 1 ) + 2 * (fe - 1) + 1; // probably wrong offset, TODO need to revisit
+            }
+            else{
+                ATH_MSG_WARNING("Bad input for phi_module,return -9999 ");
+                return -9999;
+            }
         }
         else if(ld == 2){  // end-cap rings, inner system, layer 2 // 0-19
             std::string sp_str(1, spchain.at(5)[2]); // SP=1 and SP=2 alternate in phi

@@ -86,7 +86,7 @@ if os.path.isfile(args.output_file+".json"):
 with open(args.output_file+".json", "w") as f, open(args.output_file, newline='') as csvfile:
     reader = csv.DictReader(csvfile)
     fieldnames = reader.fieldnames or []
-    desired_names = ["DetectorResourceID", "True DetectorResourceID", "SourceID"]
+    desired_names = ["DetectorResourceID", "TrueDetectorResourceID", "SourceID"]
     selected_names = [name for name in desired_names if name in fieldnames]
     if not selected_names:
         selected_indices = [0, 1, 5]
