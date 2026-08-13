@@ -3,9 +3,7 @@
 */
 
 #include "MCTruthBase/AtlasTrajectory.h"
-#include "MCTruthBase/TruthStrategyManager.h"
 #include "MCTruth/TruthController.h"
-#include "MCTruth/TrackHelper.h"
 #include "SimHelpers/TrackVisualizationHelper.h"
 
 // Visualization stuff
@@ -23,24 +21,6 @@ AtlasTrajectory::AtlasTrajectory(const G4Track* track, int subDetVolLevel)
 
 void AtlasTrajectory::AppendStep(const G4Step* aStep)
 {
-  // only use truth service if there are new any secondaries
-  const int numSecondaries = aStep->GetSecondaryInCurrentStep()->size();
-  // This method not available until G4 10.2
-  //const int numSecondaries = aStep->GetNumberOfSecondariesInCurrentStep();
-
-  if (numSecondaries) {
-      // OK, there was an interation. look at the track, if it
-      // is not a secondary (i.e. we have a connected tree) we
-      // apply the MC truth machinery...
-      TrackHelper tHelper(aStep->GetTrack());
-      if (!tHelper.IsSecondary())
-        {
-          const TruthStrategyManager& sManager =
-            TruthStrategyManager::GetStrategyManager();
-          sManager.CreateTruthIncident(aStep, m_subDetVolLevel);
-        }
-    }
-
   // Call the base class
   G4Trajectory::AppendStep(aStep);
 }

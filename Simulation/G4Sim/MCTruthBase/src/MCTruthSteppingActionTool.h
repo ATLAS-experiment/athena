@@ -51,6 +51,12 @@ namespace G4UA
       /// Map of volume name to output collection name
       std::map<std::string, std::string> m_volumeCollectionMap;
 
+      /// The saving level for secondaries
+      int m_secondarySavingLevel;
+
+      /// The level in the G4 volume hierarchy at which we find the sub-detector
+      int m_subDetVolLevel;
+
   }; // class MCTruthSteppingActionTool
 
 } // namespace G4UA

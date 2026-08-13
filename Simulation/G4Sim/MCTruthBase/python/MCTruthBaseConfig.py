@@ -38,6 +38,12 @@ def MCTruthSteppingActionToolCfg(flags, name='G4UA::MCTruthSteppingActionTool', 
     """Retrieve the MCTruthSteppingActionTool"""
     result = ComponentAccumulator()
     kwargs.setdefault("VolumeCollectionMap", getEnvelopeMap(flags))
+    kwargs.setdefault("SecondarySavingLevel", 2)
+
+    subDetLevel = 1
+    if "ATLAS" in flags.GeoModel.AtlasVersion and flags.Detector.GeometryCavern:
+        subDetLevel = 2
+    kwargs.setdefault("SubDetVolumeLevel", subDetLevel)
 
     result.setPrivateTools( CompFactory.G4UA.MCTruthSteppingActionTool(name, **kwargs) )
     return result
