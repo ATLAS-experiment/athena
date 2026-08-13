@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 """
 Transate arbitrary root file into a han config file
@@ -33,6 +33,32 @@ norefalgorithm = DQAlgorithm(id='GatherData',
 
 # Edit this to change thresholds
 thresh = make_thresholds('Chi2_per_NDF', 1.0, 1.50, 'Chi2Thresholds')
+
+
+def check_png_support():
+    """Return whether ROOT can load the library used to create PNG files."""
+    print('====> Checking ROOT PNG support')
+    print('ROOT version: %s' % ROOT.gROOT.GetVersion())
+
+    asimage = ROOT.gSystem.DynamicPathName('libASImage', True)
+    if asimage:
+        print('ROOT image library: %s' % asimage)
+
+    load_status = ROOT.gSystem.Load('libASImage')
+    if load_status < 0:
+        print('ERROR: ROOT cannot load libASImage; PNG output is unavailable.')
+        print('       Check the loader diagnostics above for a missing runtime')
+        print('       dependency (for example, "libgif.so.7 => not found" from')
+        print('       "ldd $(root-config --libdir)/libASImage.so").')
+        return False
+
+    if not ROOT.TImage.Create():
+        print('ERROR: ROOT loaded libASImage, but could not create a TImage.')
+        print('       PNG output is unavailable in this environment.')
+        return False
+
+    print('ROOT PNG support: OK')
+    return True
 
 
 def recurse(rdir, dqregion, ignorepath, modelrefs=[], displaystring='Draw=PE', displaystring2D='Draw=COLZ', regex=None, startpath=None, hists=None, manglefunc=None):
@@ -215,6 +241,8 @@ def process(infname, confname, options, refs=None):
 def super_process(fname, options):
     import shutil, os, sys, contextlib
     import ROOT
+    if not options.hanonly and not check_png_support():
+        return False
     han_is_found = (ROOT.gSystem.Load('libDataQualityInterfaces') != 1)
     if not han_is_found:
         print('ERROR: unable to load offline DQMF; unable to proceed')
@@ -319,6 +347,8 @@ if __name__=="__main__":
                       help='Filename to save han output to (will not save if not set)')
     parser.add_option('--hanonly', action='store_true',
                       help='Only save han output file, do not write HTML/PNG')
+    parser.add_option('--check-png-support', action='store_true',
+                      help='Check whether ROOT can create PNG output and exit; no input file is required')
     parser.add_option('--normalize', default=False, action='store_true',
                       help='Normalize reference histograms for display')
     parser.add_option('--title', default='Summary',
@@ -359,6 +389,9 @@ if __name__=="__main__":
                       help='AMI tag to add as metadata')
 
     options, args = parser.parse_args()
+
+    if options.check_png_support:
+        sys.exit(0 if check_png_support() else 1)
     
     if not 1 == len(args):
         parser.print_help()
