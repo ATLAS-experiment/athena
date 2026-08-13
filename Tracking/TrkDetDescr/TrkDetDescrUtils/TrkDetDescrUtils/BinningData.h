@@ -360,6 +360,9 @@ private:
   /** Linear search in vector - superior in O(10) searches: arbitraty 2*/
   static size_t searchInVectorWithBoundary(float value, const BinningData& bData)
   {
+    if (bData.boundaries.empty())[[unlikely]]{
+      throw std::runtime_error("searchInVectorWithBoundary: boundaries vector is empty.");
+    }
     if (bData.binvalue == binPhi)
       while (value < bData.boundaries[0])
         value += 2 * M_PI;
