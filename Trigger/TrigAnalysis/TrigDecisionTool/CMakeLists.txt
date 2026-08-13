@@ -43,7 +43,7 @@ else()
          INCLUDE_DIRS ${Boost_INCLUDE_DIRS}
          PRIVATE_INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
          LINK_LIBRARIES ${COMMON_LIBRARIES} EventInfo GaudiKernel StoreGateLib
-         AnalysisTriggerEvent TrigMuonEvent TrigSteeringEvent TrigNavigationLib TrigDecisionEvent
+         AnalysisTriggerEvent TrigSteeringEvent TrigNavigationLib TrigDecisionEvent
          PRIVATE_LINK_LIBRARIES ${ROOT_LIBRARIES_NOPYTHON} AthenaBaseComps
          TrigSteeringEvent AthenaKernel TrigConfData)
    endif()
@@ -57,15 +57,6 @@ atlas_add_dictionary( TrigDecisionToolDict
    TrigDecisionTool/TrigDecisionToolDict.h
    TrigDecisionTool/selection.xml
    LINK_LIBRARIES TrigDecisionToolLib ${ROOT_LIBRARIES} )
-
-if( NOT XAOD_STANDALONE AND NOT XAOD_ANALYSIS )
-   atlas_add_test( Templates_test
-      SOURCES test/Templates_test.cxx
-      LINK_LIBRARIES TrigNavigationLib AthenaKernel GaudiKernel AthContainers
-      AnalysisTriggerEvent TrigSteeringEvent TrigMuonEvent
-      TrigDecisionToolLib
-      POST_EXEC_SCRIPT noerror.sh )
-endif()
 
 if (NOT XAOD_ANALYSIS )
    atlas_add_test( Run2TrigDecisionToolOnRAW_test
