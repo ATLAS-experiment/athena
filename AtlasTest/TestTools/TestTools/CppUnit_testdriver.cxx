@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <cppunit/extensions/TestFactoryRegistry.h> 
@@ -47,6 +47,6 @@ int main( int /*argc*/, char **/* argv */)
    if (!wasSuccessful) return 1;
 
    // Uncomment the next line if you want to integrate CppUnit with Oval
-   //  std::cout <<"[OVAL] Cppunit-result ="<<!wasSuccessful<<"\n" ;
+   //  std::println ("[OVAL] Cppunit-result ={}", !wasSuccessful);
      return 0;
  }

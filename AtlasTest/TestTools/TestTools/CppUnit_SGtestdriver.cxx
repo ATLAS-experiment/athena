@@ -28,6 +28,7 @@
 #include <cstdio>
 #include <fstream>
 #include <list>
+#include <print>
 
 // Framework includes
 #ifndef NOGAUDI
@@ -62,14 +63,14 @@ bool setupStoreGate()
      }
    catch(std::string fn)
      {
-       //       std::cout << "File " << filename_in[i] << "not found" << " FileName " << std::endl;
+       //       std::println ("File {} not found", filename_in[i]);
      }
 
    inFile[i].close();
 
    } // for (int i<0 
 
-  //  std::cout << "FileFFFF " <<FileName<< std::endl;
+  //  std::println ("FileFFFF {}",<FileName);
 
   // Build job options file if CppUnit_jobOptions.txt is unavailable
 
@@ -97,7 +98,7 @@ bool setupStoreGate()
     for ( std::list<std::string>::const_iterator iopt=opts.begin();
           iopt!=opts.end(); ++iopt ) 
     {
-      jobopt << *iopt << std::endl;
+      std::println (jobopt, "{}", *iopt);
     }
   }
   jobopt.close();
@@ -108,7 +109,7 @@ bool setupStoreGate()
     /// Get StoreGateSvc
     m_svcLoc = 0;
     if (!Athena_test::initGaudi(fileName, m_svcLoc)) {
-      std::cerr << "This test can not be run" << std::endl;
+      std::println (std::cerr, "This test can not be run");
       return false;
     }  
     CPPUNIT_ASSERT( 0 != m_svcLoc);
@@ -122,14 +123,13 @@ bool setupStoreGate()
     
     if ( false == sc || 0 == m_storeGate ) {
       std::string error = "No valid pointer to StoreGateSvc !!";
-      std::cerr << error << std::endl;
-      //throw std::runtime_error(error);
+      std::println (std::cerr,  "No valid pointer to StoreGateSvc !!");
       return false;
     } else {
       return true;
     }
   } catch ( std::exception& e ) {
-    std::cerr << "Catched : " << e.what() << std::endl;
+    std::println (std::cerr, "Caught : {}", e.what());
     return false;
   }
 }
@@ -142,7 +142,7 @@ int main( int /*argc*/, char **/* argv */)
  {
    /// Load the StoreGateSvc
    if ( false == setupStoreGate() ) {
-     std::cerr << "Could not setup StoreGateSvc !!\n";
+     std::println (std::cerr, "Could not setup StoreGateSvc !!");
      return 1;
    }
 
@@ -173,7 +173,7 @@ int main( int /*argc*/, char **/* argv */)
    if (!wasSuccessful) return 1;
 
    // Uncomment the next line if you want to integrate CppUnit with Oval
-   //  std::cout <<"[OVAL] Cppunit-result ="<<!wasSuccessful<<"\n" ;
+   //  std::println ("[OVAL] Cppunit-result ={}", !wasSuccessful);
 
    return 0;
  }

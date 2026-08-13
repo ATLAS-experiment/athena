@@ -1,7 +1,7 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -116,7 +116,7 @@ Leakcheck::~Leakcheck()
   if (!m_allocs.empty()) {
     std::cerr << "Leaks!\n";
     for (void* p : m_allocs)
-      std::cerr << "  " << p << "\n";
+      std::println (std::cerr, "  {}", p);
     assert (m_allocs.empty());
   }
 }
