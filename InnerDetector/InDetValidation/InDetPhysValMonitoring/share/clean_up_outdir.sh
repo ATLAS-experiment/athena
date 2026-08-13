@@ -11,7 +11,7 @@ Architecture="${AtlasProject}_PLATFORM"
 testName="${ArtJobName%.sh}"
 # echo /eos/atlas/atlascerngroupdisk/data-art/grid-output/$AtlasBuildBranch/$AtlasProject/${!Architecture}/$AtlasBuildStamp/InDetPhysValMonitoring/$testName
 
-! ([[ ${!Architecture} == "x86_64-el9-gcc14-opt" ]] && [[ $AtlasBuildBranch == "main" ]])  && rmOutput=true || rmOutput=false   #Placeholder
+! ([[ ${!Architecture} == "x86_64-el9-gcc15-opt" ]] && [[ $AtlasBuildBranch == "main" ]])  && rmOutput=true || rmOutput=false   #Placeholder
 
 skip_files=(
   "physval.ntuple.root"
