@@ -1,0 +1,205 @@
+{
+    "filetype": "l1menu",
+    "name": "L0GlobalTestMenu_run4_v1",
+    "run": 4,
+    "items": {
+        "L1_eEM5L": {
+            "thresholds": ["eEM5L"]
+        },
+        "L1_eEMBDT5L": {
+            "thresholds": ["eEMBDT5L"]
+        },
+        "L1_G1J0": {
+            "thresholds": ["G1J0"]
+        },
+        "L1_G1J500": {
+            "thresholds": ["G1J500"]
+        },
+        "L1_G1J1000": {
+            "thresholds": ["G1J1000"]
+        },
+        "L1_G1J1500": {
+            "thresholds": ["G1J1500"]
+        },
+        "L1_G1J2000": {
+            "thresholds": ["G1J2000"]
+        },
+        "L1_G1J2500": {
+            "thresholds": ["G1J2500"]
+        }
+    },
+    "hypotheses": {
+        "eEM": {
+            "type": "eEM",
+            "input": {
+                "eEmTOBContainer": "eEmTOBs"
+            },
+            "thresholds": {
+                "eEM5L": {
+                    "et_low": "5",
+                    "workingPoint": "Loose"
+                }
+            },
+            "workingPoints": {
+                "Loose": {
+                        "rhad": "1",
+                        "rhad_p": ">=",
+                        "reta": "1",
+                        "reta_p": ">=",
+                        "rwstot": "1",
+                        "rwstot_p": ">="
+                    }
+            }
+        },
+        "eEMBDT": {
+            "type": "eEMBDT",
+            "input": {
+                "eEmEg1BDTTOBContainer": "eEmEg1BDTTOBContainer"
+            },
+            "thresholds": {
+                "eEMBDT5L": {
+                    "et_low": "5",
+                    "workingPoint": "BDTLoose"
+                }
+            },
+            "workingPoints": {
+                "BDTLoose": {
+                        "value": "128",
+                        "compOp": ">="
+                    }
+            }
+        },
+        "G1J": {
+            "type": "G1Jet",
+            "input": {
+                "GlobalJet1Jets": "GlobalJet1Jets"
+            },
+            "thresholds": {
+                "G1J0": {
+                    "et_low": "0"
+                },
+                "G1J500": {
+                    "et_low": "500"
+                },
+                "G1J1000": {
+                    "et_low": "1000"
+                },
+                "G1J1500": {
+                    "et_low": "1500"
+                },
+                "G1J2000": {
+                    "et_low": "2000"
+                },
+                "G1J2500": {
+                    "et_low": "2500"
+                }
+            }
+        },
+        "MJJ500-G1J": {
+            "type": "MJJ",
+            "input": {
+                "GlobalJet1Jets": "SortSelect-G1J"
+            },
+            "thresholds": {
+                "MJJ500-G1J": {
+                    "invm_low": "500"
+                }
+            }
+        },
+        "SortSelect-G1J": {
+            "type": "CommonSortSelect",
+            "input": {
+                "GlobalJet1Jets": "GlobalJet1Jets"
+            },
+            "output": {
+                "GlobalJet1Jets": "SortSelect-G1J"
+            }
+        }
+    },
+    "algorithms": {
+        "GlobalCellTowerAlgTool/Tower_Builder" : {
+            "input": "GlobalLArCells",
+            "output": "GlobalCellTowers"
+        },
+        "Egamma1BDTAlgTool/Egamma1BDT": {
+            "input": {
+                "LArNeighborhoodTOBContainer": "stripNeighborhoodTOBContainer"
+            },
+            "output": "eEmEg1BDTTOBContainer"
+        },
+        "Egamma1_OnlineMapNbhoodAlg" : {
+            "input": "GlobalLArCells",
+            "output": {
+                "LArNeighborhoodTOBContainer": "stripNeighborhoodTOBContainer"
+            }
+        },
+        "GlobalJet1AlgTool/Jet1": {
+            "input": "GlobalCellTowers",
+            "output": "GlobalJet1Jets"
+        },
+        "eFexCvtrAlgTool" : {
+            "input": {"eFexEMRoI": "L1_eEMRoI"},
+            "output": {"eEmTOBContainer": "eEmTOBs"}
+        },
+        "gFexRhoCvtrAlgTool": {
+            "input": {"gFexJetRoI": "L1_gFexRhoRoI"},
+            "output": {"gFexRhoTOBContainer": "gFexRhoTOBs"}
+        }
+    },
+    "boards": {
+        "L0Global": {
+            "type": "GLOBAL",
+            "connectors": [
+                "L0Global"
+            ]
+        }
+    },
+    "connectors": {
+        "L0Global": {
+            "type": "optical",
+            "triggerlines": [
+                {
+                    "name": "eEM5L",
+                    "startbit": 0,
+                    "nbits": 3
+                },
+                {
+                    "name": "eEMBDT5L",
+                    "startbit": 3,
+                    "nbits": 3
+                },
+                {
+                    "name": "G1J0",
+                    "startbit": 6,
+                    "nbits": 3
+                },
+                {
+                    "name": "G1J500",
+                    "startbit": 9,
+                    "nbits": 3
+                },
+                {
+                    "name": "G1J1000",
+                    "startbit": 12,
+                    "nbits": 3
+                },
+                {
+                    "name": "G1J1500",
+                    "startbit": 15,
+                    "nbits": 3
+                },
+                {
+                    "name": "G1J2000",
+                    "startbit": 18,
+                    "nbits": 3
+                },
+                {
+                    "name": "G1J2500",
+                    "startbit": 21,
+                    "nbits": 3
+                }
+            ]
+        }
+    }
+}
+

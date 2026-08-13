@@ -1,0 +1,228 @@
+{
+    "filetype": "l1menu",
+    "name": "L0GlobalTestMenu_run4_v1",
+    "run": 4,
+    "items": {
+        "L1_eEMBDT5L": {
+            "thresholds": ["eEMBDT5L"]
+        },
+        "L1_eEMBDT5VL": {
+            "thresholds": ["eEMBDT5VL"]
+        },
+        "L1_eEMBeeDeeTee5L_eEMBeeDeeTee5VL": {
+            "thresholds": ["eEMBeeDeeTee5L","eEMBeeDeeTee5VL"],
+            "logic": "eEMBeeDeeTee5L & eEMBeeDeeTee5VL"
+        },
+        "L1_G1J2500": {
+            "thresholds": ["G1J2500"]
+        },
+        "L1_G1J3500": {
+            "thresholds": ["G1J3500"]
+        },
+        "L1_eEM5": {
+            "thresholds": ["eEM5"]
+        }
+    },
+    "hypotheses": {
+        "eEMEg1": {
+            "type": "eEMEg1",
+            "input": {
+                "eEmTOBContainer": "eEMTOBs"
+            },
+            "thresholds": {
+                "eEM5": {
+                    "et_low": "5",
+                    "workingPoint": "EtCut"
+                }
+            },
+            "workingPoints": {
+                "EtCut": {
+                    "rhad": "0",
+                    "rhad_op": ">=",
+                    "reta": "0",
+                    "reta_op": ">=",
+                    "wstot": "0",
+                    "wstot_op": ">="
+                }
+            }
+        },
+        "eEMBDT": {
+            "type": "eEMBDT",
+            "input": {
+                "eEmEg1BDTTOBContainer": "eEmEg1BDTTOBContainer"
+            },
+            "thresholds": {
+                "eEMBDT5L": {
+                    "et_low": "5",
+                    "workingPoint": "BDTLoose"
+                },
+                "eEMBDT5VL": {
+                    "et_low": "5",
+                    "workingPoint": "BDTVeryLoose"
+                }
+            },
+            "workingPoints": {
+                "BDTLoose": {
+                        "value": "128",
+                        "compOp": ">="
+                },
+                "BDTVeryLoose": {
+                        "value": "0",
+                        "compOp": ">="
+                }
+            }
+        },
+        "eEMBeeDeeTee": {
+            "type": "eEMBeeDeeTee",
+            "input": {
+                "eEmEg1BDTTOBContainer": "eEmEg2BDTTOBContainer"
+            },
+            "thresholds": {
+                "eEMBeeDeeTee5L": {
+                    "et_low": "5",
+                    "workingPoint": "BeeDeeTeeLoose"
+                },
+                "eEMBeeDeeTee5VL": {
+                    "et_low": "5",
+                    "workingPoint": "BeeDeeTeeVeryLoose"
+                }
+            },
+            "workingPoints": {
+                "BeeDeeTeeLoose": {
+                        "value": "128",
+                        "compOp": ">="
+                    },
+                "BeeDeeTeeVeryLoose": {
+                        "value": "0",
+                        "compOp": ">="
+                    }
+            }
+        },
+        "G1J": {
+            "type": "G1Jet",
+            "input": {
+                "GlobalJet1Jets": "GlobalJet1Jets"
+            },
+            "thresholds": {
+                "G1J2500": {
+                    "et_low": "2500"
+                },
+                "G1J3500": {
+                    "et_low": "3500"
+                }
+            }
+        },
+        "MJJ500-G1J": {
+            "type": "MJJ",
+            "input": {
+                "GlobalJet1Jets": "SortSelect-G1J"
+            },
+            "thresholds": {
+                "MJJ500-G1J": {
+                    "invm_low": "500"
+                }
+            }
+        },
+        "SortSelect-G1J": {
+            "type": "CommonSortSelect",
+            "input": {
+                "GlobalJet1Jets": "GlobalJet1Jets"
+            },
+            "output": {
+                "GlobalJet1Jets": "SortSelect-G1J"
+            }
+        }
+    },
+    "algorithms": {
+        "GlobalCellTowerAlgTool/Tower_Builder" : {
+            "input": "GlobalLArCells",
+            "output": "GlobalCellTowers"
+        },
+        "Egamma1BDTAlgTool/Egamma1BDT": {
+            "input": {
+                "LArNeighborhoodTOBContainer": "stripNeighborhoodTOBContainer"
+            },
+            "output": "eEmEg1BDTTOBContainer",
+            "parameters": {
+                "BDTScoreKey": "eGamma1BDT"
+            }
+        },
+        "Egamma1BDTAlgTool/Egamma2BDT": {
+            "input": {
+                "LArNeighborhoodTOBContainer": "stripNeighborhoodTOBContainer"
+            },
+            "output": {"eEmEg1BDTTOBContainer": "eEmEg2BDTTOBContainer"},
+            "parameters": {
+                "BDTScoreKey": "eGamma2BDT"
+            }
+        },
+        "Egamma1_OnlineMapNbhoodAlg" : {
+            "input": {
+                "GlobalLArCells": "GlobalLArCells",
+                "eFexRoIAlgTool/roiAlgTool.eFexEMRoI": "L1_eEMRoI"
+            },
+            "output": {
+                "LArNeighborhoodTOBContainer": "stripNeighborhoodTOBContainer"
+            }
+        },
+        "GlobalJet1AlgTool/Jet1": {
+            "input": "GlobalCellTowers",
+            "output": "GlobalJet1Jets"
+        },
+        "eFexCvtrAlgTool/eFexCvtr": {
+            "input": {"eFexEMRoI": "L1_eEMRoI"},
+            "output": {"eEmTOBContainer": "eEMTOBs"}
+        }
+    },
+    "boards": {
+        "L0Global": {
+            "type": "GLOBAL",
+            "connectors": [
+                "L0Global"
+            ]
+        }
+    },
+    "connectors": {
+        "L0Global": {
+            "type": "optical",
+            "triggerlines": [
+                {
+                    "name": "eEMBDT5L",
+                    "startbit": 0,
+                    "nbits": 3
+                },
+                {
+                    "name": "eEMBDT5VL",
+                    "startbit": 3,
+                    "nbits": 3
+                },
+                {
+                    "name": "G1J2500",
+                    "startbit": 6,
+                    "nbits": 3
+                },
+                {
+                    "name": "G1J3500",
+                    "startbit": 9,
+                    "nbits": 3
+                },
+                {
+                    "name": "eEMBeeDeeTee5L",
+                    "startbit": 12,
+                    "nbits": 2
+                },
+                {
+                    "name": "eEMBeeDeeTee5VL",
+                    "startbit": 14,
+                    "nbits": 2
+                },
+                {
+                    "name": "eEM5",
+                    "startbit": 16,
+                    "nbits": 3
+                }
+            ]
+        }
+    }
+}
+

@@ -1,0 +1,246 @@
+{
+    "filetype": "l1menu",
+    "name": "L0GlobalTestMenu_run4_v1",
+    "run": 4,
+    "items": {
+    },
+    "hypotheses": {
+    },
+    "algorithms": {
+        "CaloRec.CaloTopoClusterConfig.CaloTopoClusterCfg": {
+            "input": "AllCalo",
+            "output": "CaloCalTopoClusters"
+        },
+        "CaloRec.CaloTopoClusterConfig.CaloTopoClusterCfg/Topoclusters422": {
+            "input": "AllCalo",
+            "output": "CaloCalTopoClusters422",
+            "parameters": {
+                "clustersname": "CaloCalTopoClusters422",
+                "clusterssnapname": "CaloTopoClusters422Snap",
+                "cellthresholds": [4,2,2]
+            }
+        },
+        "TrigGepPerf.GepCellsHandlerAlgConfig.GepCellsHandlerAlgCfg": {
+            "input": "AllCalo",
+            "output": "GEPCells",
+            "parameters": {
+                "name": "GepCellsHandlerAlg",
+                "outputGepCellsKey": "GEPCells",
+                "GEPEnergyEncodingScheme": "6-40-4",
+                "HardwareStyleEnergyEncoding": true,
+                "TruncationOfOverflowingFEBs": true,
+                "NoiseThreshold": 2.0,
+                "WriteAllCells": false,
+                "CleanOutputCells": false
+            }
+        },
+        "TrigGepPerf.GepCellsHandlerAlgConfig.GepCellsHandlerAlgCfg/GepCellsHandler_AllClean": {
+            "input": "AllCalo",
+            "output": "GEPCells_AllClean",
+            "parameters": {
+                "name": "GepCellsHandler_AllClean",
+                "outputGepCellsKey": "GEPCells_AllClean",
+                "GEPEnergyEncodingScheme": "6-40-4",
+                "HardwareStyleEnergyEncoding": true,
+                "TruncationOfOverflowingFEBs": true,
+                "NoiseThreshold": 2.0,
+                "WriteAllCells": true,
+                "CleanOutputCells": true
+            }
+        },
+        "TrigGepPerf.GepCellsHandlerAlgConfig.GepCellsHandlerAlgCfg/OfflineCellsHandler": {
+            "input": "AllCalo",
+            "output": "OfflineCells",
+            "parameters": {
+                "name": "OfflineCellsHandler",
+                "outputGepCellsKey": "OfflineCells",
+                "HardwareStyleEnergyEncoding": false,
+                "TruncationOfOverflowingFEBs": false,
+                "NoiseThreshold": 2.0,
+                "WriteAllCells": true
+            }
+        },
+        "TrigGepPerf.GepEratioAlgConfig.GepEMEratioAlgCfg": {
+            "input": ["GEPCells_AllClean", "L1_eEMRoI"],
+            "output": "Eratio",
+            "parameters": {
+                "name": "GepEratioAlg_L1eEMRoI",
+                "SeedsKey": "L1_eEMRoI",
+                "caloCellsMapKey": "GEPCells_AllClean",
+                "outputEratioDecorKey": "Eratio",
+                "etaWindowHalfSize": 8,
+                "phiWindowHalfSize": 1
+            }
+        },
+        "TrigGepPerf.GepCellTowerAlgConfig.GepCellTowerAlgCfg": {
+            "input": "GEPCells",
+            "output": "GEPCellsTower",
+            "parameters": {
+                "name": "GEPCellsTowerAlg",
+                "gepCellMapKey": "GEPCells",
+                "outputCellTowerKey": "GEPCellsTower"
+            }
+        },
+        "TrigGepPerf.GepCellTowerAlgConfig.GepCellTowerAlgCfg/OfflineCellsTower": {
+            "input": "OfflineCells",
+            "output": "OfflineCellsTower",
+            "parameters": {
+                "name": "OfflineCellsTowerAlg",
+                "gepCellMapKey": "OfflineCells",
+                "outputCellTowerKey": "OfflineCellsTower"
+            }
+        },
+        "TrigGepPerf.GepClusteringAlgConfig.GepClusteringAlgCfg/GEPBasic": {
+            "input": "GEPCells",
+            "output": "GEPBasicClusters",
+            "parameters": {
+                "name": "GEPBasicClusteringAlg",
+                "TopoClAlg": "GEPBasic",
+                "gepCellMapKey": "GEPCells",
+                "outputCaloClustersKey": "GEPBasicClusters"
+            }
+        },
+        "TrigGepPerf.GepTowersAlgConfig.GepTowersAlgCfg/GEPBasicTopoTower": {
+            "input": ["GEPCells", "GEPBasicClusters"],
+            "output": "GEPBasicClustersTopoTower",
+            "parameters": {
+                "name": "GepTopoTowerAlg",
+                "TowerAlg": "TopoTower",
+                "caloClustersKey": "GEPBasicClusters",
+                "outputCaloClustersKey": "GEPBasicClustersTopoTower",
+                "gepCellMapKey": "GEPCells"
+            }
+        },
+        "TrigGepPerf.GepTowersAlgConfig.GepTowersAlgCfg/GEPBasicTCTower": {
+            "input": ["GEPCells", "GEPBasicClusters"],
+            "output": "GEPBasicClustersTCTower",
+            "parameters": {
+                "name": "GepTCTowerAlg",
+                "TowerAlg": "TCTower",
+                "caloClustersKey": "GEPBasicClusters",
+                "outputCaloClustersKey": "GEPBasicClustersTCTower",
+                "gepCellMapKey": "GEPCells"
+            }
+        },
+        "TrigGepPerf.GepEtaSoftKillerAlgConfig.GepEtaSoftKillerAlgCfg": {
+            "input": "GEPBasicClusters",
+            "output": "GEPBasicClustersEtaSK",
+            "parameters": {
+                    "name": "GepEtaSKBasicAlg",
+                    "inputClustersKey": "GEPBasicClusters",
+                    "outputClustersKey": "GEPBasicClustersEtaSK"
+            }
+        },
+        "TrigGepPerf.GepMETAlgConfig.GepMETAlgCfg/GepMETBasicClusters": {
+            "input": "GEPBasicClusters",
+            "output": "GEPMETBasicClusters",
+            "parameters": {
+                "name": "GEPMETBasicClusters",
+                "caloClustersKey": "GEPBasicClusters",
+                "outputMETKey": "GEPMETBasicClusters"
+            }
+        },
+        "TrigGepPerf.GepMETAlgConfig.GepMETAlgCfg/GepMETEtaSKClusters": {
+            "input": "GEPBasicClustersEtaSK",
+            "output": "GEPMETEtaSKClusters",
+            "parameters": {
+                "name": "GepMETEtaSKClusters",
+                "caloClustersKey": "GEPBasicClustersEtaSK",
+                "outputMETKey": "GEPMETEtaSKClusters"
+            }
+        },
+        "TrigGepPerf.GepMETAlgConfig.GepMETAlgCfg/GepMETCellsTower": {
+            "input": "GEPCellsTower",
+            "output": "GEPMETCellsTower",
+            "parameters": {
+                "name": "GepMETCellsTower",
+                "caloClustersKey": "GEPCellsTower",
+                "outputMETKey": "GEPMETCellsTower"
+            }
+        },
+        "TrigGepPerf.GepMETAlgConfig.GepMETAlgCfg/GepMETTopoTower": {
+            "input": "GEPBasicClustersTopoTower",
+            "output": "GEPMETTopoTower",
+            "parameters": {
+                "name": "GepMETTopoTower",
+                "caloClustersKey": "GEPBasicClustersTopoTower",
+                "outputMETKey": "GEPMETTopoTower"
+            }
+        },
+        "TrigGepPerf.GepMETAlgConfig.GepMETAlgCfg/GepMETTCTower": {
+            "input": "GEPBasicClustersTCTower",
+            "output": "GEPMETTCTower",
+            "parameters": {
+                "name": "GepMETTCTower",
+                "caloClustersKey": "GEPBasicClustersTCTower",
+                "outputMETKey": "GEPMETTCTower"
+            }
+        },
+        "TrigGepPerf.GepJetAlgConfig.GepJetAlgCfg/GepConeBasicClustersJetAlg": {
+            "input": ["GEPBasicClusters", "L1_jFexSRJetRoI_ReSim"],
+            "output": "ConeBasicClustersJets",
+            "parameters": {
+                    "name": "GepConeBasicClustersJetAlg",
+                    "jetAlgName": "Cone",
+                    "caloClustersKey": "GEPBasicClusters",
+                    "outputJetsKey": "ConeBasicClustersJets"
+            }
+        },
+        "TrigGepPerf.GepJetAlgConfig.GepJetAlgCfg/GepModAntikTBasicClustersJetAlg": {
+            "input": ["GEPBasicClusters", "L1_jFexSRJetRoI_ReSim"],
+            "output": "ModAntikTBasicClustersJets",
+            "parameters": {
+                    "name": "GepModAntikTBasicClustersJetAlg",
+                    "jetAlgName": "ModAntikT",
+                    "caloClustersKey": "GEPBasicClusters",
+                    "outputJetsKey": "ModAntikTBasicClustersJets"
+            }
+        },
+        "TrigGepPerf.GepJetAlgConfig.GepJetAlgCfg/GepWTAConeBasicClustersJetAlg": {
+            "input": ["GEPBasicClusters", "L1_jFexSRJetRoI_ReSim"],
+            "output": "WTAConeBasicClustersJets",
+            "parameters": {
+                    "name": "GepWTAConeBasicClustersJetAlg",
+                    "jetAlgName": "WTACone",
+                    "caloClustersKey": "GEPBasicClusters",
+                    "outputJetsKey": "WTAConeBasicClustersJets"
+            }
+        },
+        "TrigGepPerf.GepJetAlgConfig.GepJetAlgCfg/GepWTAConeEtaSKClustersJetAlg": {
+            "input": ["GEPBasicClustersEtaSK", "L1_jFexSRJetRoI_ReSim"],
+            "output": "WTAConeEtaSKClustersJets",
+            "parameters": {
+                    "name": "GepWTAConeEtaSKClustersJetAlg",
+                    "jetAlgName": "WTACone",
+                    "caloClustersKey": "GEPBasicClustersEtaSK",
+                    "outputJetsKey": "WTAConeEtaSKClustersJets"
+            }
+        },
+        "TrigGepPerf.GepJetAlgConfig.GepJetAlgCfg/GepWTAConeCellTowerJetAlg": {
+            "input": ["GEPCellsTower", "L1_jFexSRJetRoI_ReSim"],
+            "output": "WTAConeCellTowerJets",
+            "parameters": {
+                    "name": "GepWTAConeCellTowerJetAlg",
+                    "jetAlgName": "WTACone",
+                    "caloClustersKey": "GEPCellsTower",
+                    "outputJetsKey": "WTAConeCellTowerJets"
+            }
+        }
+    },
+    "boards": {
+        "L0Global": {
+            "type": "GLOBAL",
+            "connectors": [
+                "L0Global"
+            ]
+        }
+    },
+    "connectors": {
+        "L0Global": {
+            "type": "optical",
+            "triggerlines": [
+            ]
+        }
+    }
+}
+

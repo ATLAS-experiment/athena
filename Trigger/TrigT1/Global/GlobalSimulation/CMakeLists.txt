@@ -44,7 +44,7 @@ add_definitions(-DBITWISE_SIMULATION) # For JET1(WTAConeJet), need extra definit
 # Install files from the package:
 atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
 atlas_install_data( data/* )
-atlas_install_data( share/*.xml )
+atlas_install_data( share/*.xml share/*.json )
 
 atlas_install_joboptions( share/plugin_*.py )
 
@@ -64,3 +64,8 @@ atlas_add_test( AllChains
         PRIVATE_WORKING_DIRECTORY
         POST_EXEC_SCRIPT noerror.sh )
 
+atlas_add_test( JsonConfig
+        SCRIPT "l1calo-ath-mon --evtMax 10 --postInclude GlobalSimulation/plugin_GlobalSimFromJson.py --filesInput RAW_RUN3_DATA24 -- Trigger.L1.doeFex=True Trigger.L1.dogFex=True IOVDb.GlobalTag='CONDBR2-BLKPA-2024-05'"
+        PROPERTIES TIMEOUT 600
+        PRIVATE_WORKING_DIRECTORY
+        POST_EXEC_SCRIPT noerror.sh )

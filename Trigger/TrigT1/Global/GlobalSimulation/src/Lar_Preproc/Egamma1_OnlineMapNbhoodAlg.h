@@ -32,10 +32,10 @@ class LArEM_ID;
 
 namespace GlobalSim {
 
-  class Egamma1_OnlineMapNbhood: public AthReentrantAlgorithm {
+  class Egamma1_OnlineMapNbhoodAlg: public AthReentrantAlgorithm {
   public:
     
-    Egamma1_OnlineMapNbhood(const std::string& name, ISvcLocator* pSvcLocator);
+    Egamma1_OnlineMapNbhoodAlg(const std::string& name, ISvcLocator* pSvcLocator);
 
     /** @brief initialize function running before the first event */
     virtual StatusCode  initialize() override;
@@ -102,7 +102,7 @@ namespace GlobalSim {
     SG::WriteHandleKey<IOBitwise::eEmNbhoodTOBContainer>
     m_neighKey {
       this,
-      "stripNeighborhoodTOBKey",
+      "LArNeighborhoodTOBContainerKey",
       "stripNeighborhoodTOBContainer",
       "location to write strip neighborhoods of EFex RoIs, with the associated TOBs"};
 
