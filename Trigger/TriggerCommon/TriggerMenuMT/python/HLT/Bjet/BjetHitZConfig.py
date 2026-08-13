@@ -57,7 +57,8 @@ def hitClusterCnvCfg(flags):
     ca.merge(ITkStripPrepDataToxAODCfg(
         flags,
         SiClusterContainer='ITkTrigStripClusters',
-        OutputClusterContainer=STRIP_HITS,
+        # SCT_PrepDataToxAOD spells its xAOD output differently to the pixel one
+        SctxAodContainer=STRIP_HITS,
         UseTruthInfo=False,
     ))
     return ca
@@ -104,9 +105,12 @@ def hitAssociationCfg(flags, inputJets, maxHits=MAX_HITS,
         CompFactory.FlavorTagDiscriminants.HitsSelectorAlg(
             name='HitZHitsSelector',
             jetContainer=inputJets,
-            PixelAssociation=f'{inputJets}.{HIT_ASSOCIATION}Pixel',
-            SCTAssociation=f'{inputJets}.{HIT_ASSOCIATION}SCT',
-            hitAssociation=f'{inputJets}.{HIT_ASSOCIATION}',
+            # declared against jetContainer as parent, so no container prefix
+            PixelAssociation=f'{HIT_ASSOCIATION}Pixel',
+            SCTAssociation=f'{HIT_ASSOCIATION}SCT',
+            hitAssociation=HIT_ASSOCIATION,
+            pixelHitContainer=PIXEL_HITS,
+            SCTHitContainer=STRIP_HITS,
             maxHits=maxHits,
         ))
     return ca
