@@ -488,4 +488,3 @@ StatusCode JetCleaningTool::readHotCells()
     // Done
     return StatusCode::SUCCESS;
 }
-#test

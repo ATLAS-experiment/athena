@@ -139,6 +139,28 @@ int EventCleaningTool::keepJet(const xAOD::Jet& jet) const
 	return m_jetCleaningTool->keep(jet);
 }
 
+bool EventCleaningTool::passHSTPFilter(const xAOD::JetContainer* jets, const xAOD::JetContainer* puJets, const double jetThreshold) const
+{
+  // Assume unsorted jetContainer, find leading jet
+  // In the rare case of no HS truth jets in the event, assume it is close to the jetThreshold (default 5000 MeV)
+  double maxHsJetPt = jetThreshold; 
+
+  for (const auto thisJet : *jets){
+    if (thisJet->pt() > maxHsJetPt){
+      maxHsJetPt = thisJet->pt();
+    }
+  }
+
+  // Reject the event if any PU jet has a larger pT.
+  // Assume unsorted jetContainer, compare if leading jet 
+  for (const auto thisPUJet : *puJets){ 
+    if (thisPUJet->pt() > maxHsJetPt){
+      return false;
+    }
+  } 
+
+  return true;
+}
 }//ECUtils
 
 

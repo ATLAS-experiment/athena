@@ -16,7 +16,7 @@ atlas_add_library( JetSelectorToolsLib
 if( NOT XAOD_STANDALONE )
    atlas_add_component( JetSelectorTools
       src/*.h src/*.cxx src/components/*.cxx
-      LINK_LIBRARIES AsgTools AthenaBaseComps GaudiKernel JetSelectorToolsLib xAODBase xAODEventInfo )
+      LINK_LIBRARIES AsgTools AthenaBaseComps GaudiKernel JetSelectorToolsLib xAODBase xAODEventInfo DerivationFrameworkInterfaces)
 endif()
 
 atlas_add_dictionary( JetSelectorToolsDict
@@ -32,5 +32,14 @@ if( XAOD_STANDALONE )
       LINK_LIBRARIES ${ROOT_LIBRARIES} xAODJet JetSelectorToolsLib )
 endif()
 
+message(STATUS "XAOD_STANDALONE = ${XAOD_STANDALONE}")
+
+atlas_add_executable(
+  Test_HSTP
+  util/Test_HSTP.cxx
+  INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
+  LINK_LIBRARIES ${ROOT_LIBRARIES} xAODRootAccess xAODEventInfo xAODJet JetSelectorToolsLib ROOT::Core ROOT::RIO AsgTools PMGAnalysisInterfacesLib PathResolver )
+
+    
 # Install files from the package:
 atlas_install_python_modules( python/*.py )
