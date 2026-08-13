@@ -22,6 +22,10 @@ STRIP_HITS = 'StripClusters'
 # does not honour variableRemapping, so it is not free to choose
 HIT_ASSOCIATION = 'hitsAssociatedWithJet'
 
+# PixelPrepDataToxAOD writes these through the AUXDATA macro rather than a
+# WriteDecorHandleKey, so the scheduler cannot see them without a nudge
+PIXEL_GOODNESS_DECORS = ['isFake', 'hasBSError', 'DCSState']
+
 # The wedge and the hit budget have to match what the network was trained with
 MAX_HITS = 700
 DPHI_HIT_TO_JET = 0.1
@@ -65,7 +69,19 @@ def hitClusterCnvCfg(flags):
         SctxAodContainer=STRIP_HITS,
         UseTruthInfo=False,
     ))
+
+    ca.getEventAlgo('ITkPixelPrepDataToxAOD').ExtraOutputs = [
+        ('xAOD::TrackMeasurementValidationContainer',
+         f'StoreGateSvc+{PIXEL_HITS}.{decor}')
+        for decor in PIXEL_GOODNESS_DECORS
+    ]
     return ca
+
+
+def hitAssociationDataObjID(inputJets):
+    """The merged association, as the scheduler has to be told to see it."""
+    return ('xAOD::BaseContainer',
+            f'StoreGateSvc+{inputJets}.{HIT_ASSOCIATION}')
 
 
 def hitAssociationCfg(flags, inputJets, maxHits=MAX_HITS,
@@ -119,6 +135,9 @@ def hitAssociationCfg(flags, inputJets, maxHits=MAX_HITS,
             pixelHitContainer=PIXEL_HITS,
             SCTHitContainer=STRIP_HITS,
             maxHits=maxHits,
+            # HitsLoader reads this back through a bare ConstAccessor, so the
+            # scheduler needs the edge to the tagger drawn by hand
+            ExtraOutputs=[hitAssociationDataObjID(inputJets)],
         ))
     return ca
 
@@ -126,6 +145,17 @@ def hitAssociationCfg(flags, inputJets, maxHits=MAX_HITS,
 def hitZInferenceCfg(flags, inputJets, inputTracks, nnFile, remap=None):
     """Run the HitZ regression, mirroring the dl2_configs entries next door."""
     ca = ComponentAccumulator()
+
+    # GNNTool builds its own CPU session unless it is given a sharing service;
+    # the service is the only place the execution provider can be chosen
+    nnSvc = CompFactory.FlavorTagInference.NNSharingOnnxSvc(
+        'HitZNNSharingOnnxSvc',
+        executionProvider=flags.Trigger.Jet.hitZExecutionProvider,
+        deviceId=flags.Trigger.Jet.hitZDeviceId,
+        useTF32=flags.Trigger.Jet.hitZUseTF32,
+    )
+    ca.addService(nnSvc)
+
     ca.addEventAlgo(
         CompFactory.FlavorTagInference.JetTagDecoratorAlg(
             name='HitZJetTagAlg',
@@ -139,7 +169,9 @@ def hitZInferenceCfg(flags, inputJets, inputTracks, nnFile, remap=None):
                 nnFile=nnFile,
                 variableRemapping=OUTPUT_REMAP if remap is None else remap,
                 defaultZeroTracks=True,
+                nnSharingService=nnSvc,
             ),
+            ExtraInputs=[hitAssociationDataObjID(inputJets)],
         ))
     # the hypo condition recovers the variance as exp(-negLogSigma2)
     ca.addEventAlgo(
