@@ -9,7 +9,7 @@ atlas_add_component( L0MuonS1TGCFloatingTools
                      src/components/*.cxx
                      LINK_LIBRARIES AthenaBaseComps CxxUtils L0MuonS1TGCToolInterfaces
                                     FourMomUtils MuonIdHelpersLib MuonReadoutGeometry
-                                    MuonRDO MuonTGC_CablingLib StoreGateLib )
+                                    MuonRDO MuonTGC_CablingLib PathResolver StoreGateLib )
 
 atlas_add_test( TgcL0FloatingPtLut_test
   SOURCES test/TgcL0FloatingPtLut_test.cxx
