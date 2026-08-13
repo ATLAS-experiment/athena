@@ -6,6 +6,7 @@
 #include "MCTruth/AtlasG4EventUserInfo.h"
 #include "MCTruth/TrackHelper.h"
 #include "MCTruth/TrackInformation.h"
+#include "MCTruthBase/TruthStrategyManager.h"
 
 #include "G4Event.hh"
 #include "G4Step.hh"
@@ -23,9 +24,13 @@ namespace G4UA
   //---------------------------------------------------------------------------
   MCTruthSteppingAction::
   MCTruthSteppingAction(const VolumeCollectionMap_t& volCollMap,
+                        int secondarySavingLevel,
+                        int subDetVolLevel,
                         IMessageSvc* msgSvc, MSG::Level level)
     : AthMessaging(msgSvc, "MCTruthSteppingAction"),
       m_isInitialized(false),
+      m_secondarySavingLevel(secondarySavingLevel),
+      m_subDetVolLevel(subDetVolLevel),
       m_volumeCollectionMap(volCollMap)
   {
     msg().setLevel(level);
@@ -89,10 +94,24 @@ namespace G4UA
   //---------------------------------------------------------------------------
   void MCTruthSteppingAction::UserSteppingAction(const G4Step* aStep)
   {
+    TrackHelper trackHelper(aStep->GetTrack());
+    const std::vector<const G4Track*>* secondaries = aStep->GetSecondaryInCurrentStep();
+
+    // info must be propagated to secondaries before MC truth incident can be created
     propagatePrimaryInfoToSecondaries(aStep);
 
+    // A saved primary is reclassified, but its old trajectory stayed active.
+    const bool processTruth =
+      trackHelper.IsPrimary() || trackHelper.IsRegeneratedPrimary() ||
+      (trackHelper.IsRegisteredSecondary() && m_secondarySavingLevel > 1);
+
+    if (secondaries && !secondaries->empty() && processTruth) {
+      const TruthStrategyManager& sManager =
+        TruthStrategyManager::GetStrategyManager();
+      sManager.CreateTruthIncident(aStep, m_subDetVolLevel);
+    }
+
     if (m_recordingEnvelopes.size() == 0) return;
-    TrackHelper trackHelper(aStep->GetTrack());
     if (trackHelper.IsSecondary()) return;
 
     G4StepPoint* preStep = aStep->GetPreStepPoint();
