@@ -55,7 +55,7 @@ a_llong 50
 a_ullong 60
 a_float 123.500
 a_double 223.500
-a_bool 1
+a_bool true
 a_intvec [1, -2, 3]
 a_uintvec [1, 2, 3]
 a_shortvec [4, 5, 6]
@@ -68,7 +68,7 @@ a_llongvec [16, 17, 18]
 a_ullongvec [19, 20, 21]
 a_floatvec [1.100, 1.200, 1.300]
 a_doublevec [2.100, 2.200, 2.300]
-a_boolvec [1, 0, 1]
+a_boolvec [true, false, true]
 a_a <??? A>
 test4
 ... print elt 1 from  store
