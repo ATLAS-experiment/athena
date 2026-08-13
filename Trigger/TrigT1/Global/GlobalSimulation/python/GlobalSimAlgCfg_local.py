@@ -74,7 +74,7 @@ from collections import defaultdict
 read_handles = {
     'eFexCvtrAlgTool': {'in0': 'eFexEMRoIKey'},
     'gFexRhoCvtrAlgTool': {'in0': 'gFexJetRoIKey'},
-    'Egamma1BDTAlgTool': {'in0': 'LArNeighborhoodTOBContainerReadKey'},
+    'Egamma1BDTAlgTool': {'in0': 'LArNeighborhoodTOBContainerKey'},
     'GlobalCellTowerAlgTool': {'in0': 'GlobalLArCellsKey'},
     'GlobalJet1AlgTool': {'in0': 'GlobalCellTowersKey'},
     'eEmMultAlgTool': {'in0': 'eEmTOBs'},
@@ -83,8 +83,8 @@ read_handles = {
     }
 
 write_handles = {
-    'eFexCvtrAlgTool': 'eEmTOBs',
-    'gFexRhoCvtrAlgTool': 'gFexRhoTOBs',
+    'eFexCvtrAlgTool': 'eEmTOBContainerKey',
+    'gFexRhoCvtrAlgTool': 'gFexRhoTOBContainerKey',
     'Egamma1BDTAlgTool': 'eEmEg1BDTTOBContainerKey',
     'GlobalCellTowerAlgTool': 'GlobalCellTowersKey',
     'GlobalJet1AlgTool': 'GlobalJet1JetsKey',

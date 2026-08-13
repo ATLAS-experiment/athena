@@ -7,7 +7,7 @@
   eFex RoIs.
 */
 
-#include "Egamma1_OnlineMapNbhood.h"
+#include "Egamma1_OnlineMapNbhoodAlg.h"
 #include "../IO/LArStripNeighborhoodDumper.h"
 #include "../IO/eEmNbhoodTOB.h"
 
@@ -26,7 +26,7 @@
 
 namespace GlobalSim {
 
-  Egamma1_OnlineMapNbhood::Egamma1_OnlineMapNbhood(const std::string& name, ISvcLocator* pSvcLocator ) : 
+  Egamma1_OnlineMapNbhoodAlg::Egamma1_OnlineMapNbhoodAlg(const std::string& name, ISvcLocator* pSvcLocator ) : 
     AthReentrantAlgorithm(name, pSvcLocator){
   }
   
@@ -36,7 +36,7 @@ namespace GlobalSim {
   constexpr int maxIdentifierHash = 187650;
 
   //Before all events, setup the required variables and tools.
-  StatusCode Egamma1_OnlineMapNbhood::initialize() {
+  StatusCode Egamma1_OnlineMapNbhoodAlg::initialize() {
     ATH_MSG_DEBUG ("Initializing " << name());
 
     //Input keys
@@ -67,7 +67,7 @@ namespace GlobalSim {
 
   // For each event, read in the event info,  GlobalLArCell and eFeXRoI containers.
   // Ask producers to create windows around each incoming RoI in the event.
-  StatusCode Egamma1_OnlineMapNbhood::execute(const EventContext& ctx) const {
+  StatusCode Egamma1_OnlineMapNbhoodAlg::execute(const EventContext& ctx) const {
     
     ATH_MSG_DEBUG ("Executing");
 
@@ -159,7 +159,7 @@ namespace GlobalSim {
   //There are cases where the window finding can fail (no seed cell found). The
   //success or failure of the algorithm is recorded here for debug purposes.
   StatusCode
-  Egamma1_OnlineMapNbhood::findNeighborhoods_OnlineMap(const std::vector<const xAOD::eFexEMRoI*>& rois,
+  Egamma1_OnlineMapNbhoodAlg::findNeighborhoods_OnlineMap(const std::vector<const xAOD::eFexEMRoI*>& rois,
 						       const GlobalSim::GlobalLArCellContainer& cells,
 						       std::vector<bool>& successes,
 						       IOBitwise::eEmNbhoodTOBContainer& neighborhoodTOBs) const{
@@ -210,7 +210,7 @@ namespace GlobalSim {
   // This maximum energy cell is then used to repeat the first window finding step to find
   // the final neighbourhood for this eFeXRoI, and an eEmNbhoodTOB is added to the list.
   StatusCode
-  Egamma1_OnlineMapNbhood::findNeighborhood_OnlineMap(const xAOD::eFexEMRoI* roi,
+  Egamma1_OnlineMapNbhoodAlg::findNeighborhood_OnlineMap(const xAOD::eFexEMRoI* roi,
 						      const GlobalSim::GlobalLArCellContainer& cells,
 						      bool& success,
 						      IOBitwise::eEmNbhoodTOBContainer& neighborhoodTOBs) const {
@@ -342,7 +342,7 @@ namespace GlobalSim {
 
   // Function to step through midpoints of the LAr strips, depending on how many strips
   // there are in the current tower.
-  bool Egamma1_OnlineMapNbhood::findHalfStrips(int strip,
+  bool Egamma1_OnlineMapNbhoodAlg::findHalfStrips(int strip,
 					      float eta,
 					      float phi,
 					      const GlobalSim::GlobalLArCellContainer& cells,
@@ -383,7 +383,7 @@ namespace GlobalSim {
   // Loops over the input strips in layer 1 and asks if the input eta/phi position is within
   // their physical location (i.e. centre +- half width in eta/phi).
   // Once found it returns the CellID of the located cell for future retrieval.
-  bool Egamma1_OnlineMapNbhood::findSeedCell(float eta, float phi,
+  bool Egamma1_OnlineMapNbhoodAlg::findSeedCell(float eta, float phi,
 					     const GlobalSim::GlobalLArCellContainer& cells,
 					     Identifier& CellID) const {
 
@@ -400,7 +400,7 @@ namespace GlobalSim {
 
   // Function to draw a window around a seed cell starting from the hashID of the seed cell
   // and a container of all known GlobalLArCells. Returns the window.
-  StatusCode Egamma1_OnlineMapNbhood::findWindow(IdentifierHash hashId,
+  StatusCode Egamma1_OnlineMapNbhoodAlg::findWindow(IdentifierHash hashId,
 						 const GlobalSim::GlobalLArCellContainer& cells,
 						 std::vector<std::vector<std::shared_ptr<const GlobalLArCell>>>& window) const {
 
@@ -555,14 +555,14 @@ namespace GlobalSim {
   }
   // Function to find the maximum energy cell within a neighbourhood.
   // Return its hashID to be used to seed another neighbourhood window.
-  StatusCode Egamma1_OnlineMapNbhood::findMaxima(IdentifierHash& hashId,
+  StatusCode Egamma1_OnlineMapNbhoodAlg::findMaxima(IdentifierHash& hashId,
 						 std::vector<std::vector<std::shared_ptr<const GlobalLArCell>>>& window) const {
 
     //Vector to hold each row's maximum
     std::vector<std::shared_ptr<const GlobalLArCell>> maxima;
     //Loop over the rows and find each maximum energy cell.
     for(uint row = 0;row < window.size();row++){
-      auto max_cell = Egamma1_OnlineMapNbhood::findMax(window[row]);
+      auto max_cell = Egamma1_OnlineMapNbhoodAlg::findMax(window[row]);
       maxima.push_back(max_cell);
       ATH_MSG_DEBUG("Found a max cell " << max_cell->getID() << " et " << max_cell->getEnergy() << " eta " << max_cell->eta() << " phi " << max_cell->phi()); 
     }
@@ -574,7 +574,7 @@ namespace GlobalSim {
       return StatusCode::SUCCESS;
     } else {
       //Otherwise just take the maximum cell.
-      auto maximum_cell = Egamma1_OnlineMapNbhood::findMax(maxima);
+      auto maximum_cell = Egamma1_OnlineMapNbhoodAlg::findMax(maxima);
       ATH_MSG_DEBUG("Found the max cell " << maximum_cell->getID() << " et " << maximum_cell->getEnergy() << " eta " << maximum_cell->eta() << " phi " << maximum_cell->phi()); 
       hashId = m_calocell_id->calo_cell_hash(static_cast<Identifier>(maximum_cell->getID()));
       return StatusCode::SUCCESS;
@@ -582,7 +582,7 @@ namespace GlobalSim {
   } 
 
   //Function to find the maximum energy cell in a vector of GlobalLArCells.
-  std::shared_ptr<const GlobalLArCell> Egamma1_OnlineMapNbhood::findMax(std::vector<std::shared_ptr<const GlobalLArCell>>& row) const {
+  std::shared_ptr<const GlobalLArCell> Egamma1_OnlineMapNbhoodAlg::findMax(std::vector<std::shared_ptr<const GlobalLArCell>>& row) const {
     auto it = std::max_element(std::begin(row),
                                std::end(row),
                                [](const auto& l,const auto& r) {
