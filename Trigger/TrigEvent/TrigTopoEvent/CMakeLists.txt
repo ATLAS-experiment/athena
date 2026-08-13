@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( TrigTopoEvent )
@@ -7,12 +7,12 @@ atlas_subdir( TrigTopoEvent )
 atlas_add_library( TrigTopoEvent
                    src/*.cxx
                    PUBLIC_HEADERS TrigTopoEvent
-                   LINK_LIBRARIES AthContainers AthenaKernel GaudiKernel TrigMuonEvent TrigParticle egammaEvent 
-                   PRIVATE_LINK_LIBRARIES CxxUtils EventPrimitives TrigNavigationLib )
+                   LINK_LIBRARIES AthContainers AthenaKernel GaudiKernel
+                   PRIVATE_LINK_LIBRARIES TrigNavigationLib )
 
 atlas_add_sercnv_library( TrigTopoEventSerCnv
                           FILES TrigTopoEvent/ElectronMuonTopoInfo.h TrigTopoEvent/ElectronMuonTopoInfoContainer.h
-                          LINK_LIBRARIES TrigTopoEvent )
+                          LINK_LIBRARIES TrigTopoEvent TrigSerializeCnvSvcLib )
 
 atlas_add_dictionary( TrigTopoEventDict
                       TrigTopoEvent/TrigTopoEventDict.h

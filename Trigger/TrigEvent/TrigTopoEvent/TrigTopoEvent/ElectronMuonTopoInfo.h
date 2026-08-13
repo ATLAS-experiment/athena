@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /**************************************************************************
@@ -25,11 +25,7 @@
 #include <cmath> 
 // general athena stuff
 #include "GaudiKernel/MsgStream.h"
-
-#include "TrigParticle/TrigElectron.h"
-#include "TrigParticle/TrigTau.h"
-#include "TrigMuonEvent/CombinedMuonFeature.h"
-#include "egammaEvent/egammaContainer.h"
+#include "AthenaKernel/CLASS_DEF.h"
 
 /**
  * \class ElectronMuonTopoInfo
@@ -67,43 +63,6 @@ class ElectronMuonTopoInfo  {
   void  SetElecValid(bool ElecValid);
   void  SetOppositeCharge(bool OppositeCharge); 
   void 	SetVertexState(unsigned short vextexState);
-  
-  /** other methods */
-  
-  
-  
-  enum Vertex {  Common, NotCommon, Unapplicable }; //!< Vertex states
-  Vertex commonVertex(const TrigElectron* electron1, const CombinedMuonFeature* muon1); //!< checking Vertex compatibility @ L2
-  bool opositeCharge(const TrigElectron* electron1, const CombinedMuonFeature* muon1); //!< Opposite charge @ L2
-
-  double invariantMass(const TrigElectron* electron1, const CombinedMuonFeature* muon1); //!< Invariant mass calculation @ L2
-  double deltaPhi(const TrigElectron* electron1, const CombinedMuonFeature* muon1); //!< Delta phi @ L2
-  double deltaR(const TrigElectron* electron1, const CombinedMuonFeature* muon1); //!< Delta R @ L2
-
-  //overloading for L2 tau tau combinations
-  double invariantMass(const TrigTau* tau1, const TrigTau* tau2); //!< Invariant mass calculation @ L2
-  double deltaPhi(const TrigTau* tau1, const TrigTau* tau2); //!< Delta phi @ L2
-  double deltaR(const TrigTau* tau1, const TrigTau* tau2); //!< Delta R @ L2
-  //overloading for L2 tau e combinations
-  double invariantMass(const TrigTau* tau1, const TrigElectron* electron1); //!< Invariant mass calculation @ L2
-  double deltaPhi(const TrigTau* tau1, const TrigElectron* electron1); //!< Delta phi @ L2
-  double deltaR(const TrigTau* tau1, const TrigElectron* electron1); //!< Delta R @ L2
-  //overloading for L2 tau mu combinations
-  double invariantMass(const TrigTau* tau1, const CombinedMuonFeature* muon1); //!< Invariant mass calculation @ L2
-  double deltaPhi(const TrigTau* tau1, const CombinedMuonFeature* muon1); //!< Delta phi @ L2
-  double deltaR(const TrigTau* tau1, const CombinedMuonFeature* muon1); //!< Delta R @ L2
-
-
-  // overloading for EF
-  Vertex commonVertex(const Trk::Perigee* perigeeEL, const Trk::Perigee* perigeeMU, double& pull, bool debug = false);
-
-  bool opositeCharge(const egamma* electron1, const Trk::Perigee* muon1);
-  double invariantMass(const egamma* electron1, const Trk::Perigee* muon1);
-  double deltaR(const egamma* electron1, const Trk::Perigee* muon1);
-  double deltaPhi(const egamma* electron1, const Trk::Perigee* muon1);
-
-  double invariantMass(double Pt1, double  eta1, double phi1,  double m1,
-		       double Pt2, double  eta2, double phi2,  double m2) const ;
 
   private:
   /** Identifier of the RoI. */
