@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //-----------------------------------------------------------------------------
@@ -78,7 +78,7 @@ TrackCollection_PERS * TrackCollectionCnv::createPersistentWithKey( TrackCollect
                                                                     const std::string& key)
 {
     std::string logname = "TrackCollectionCnv";
-    MsgStream log (m_msgSvc, logname );
+    MsgStream log (m_msgSvc, std::move(logname) );
 
     return m_TPConverter.createPersistentWithKey ( transCont, key, log );
 }

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //-----------------------------------------------------------------------------
@@ -64,7 +64,7 @@ SegmentCollection_PERS *
 SegmentCollectionCnv::createPersistent( Trk::SegmentCollection *transCont)
 {   
     std::string logname = "SegmentCollectionCnv";
-    MsgStream log (m_msgSvc, logname );
+    MsgStream log (m_msgSvc, std::move(logname) );
     return m_TPConverterForPER.createPersistent( transCont, log );
 }
 
