@@ -15,6 +15,7 @@
 #include <memory>
 #include <cmath> //for std::sqrt
 #include <functional>
+#include <cmath> //for std::sqrt
 
 #include "CxxUtils/checker_macros.h"
 
@@ -51,6 +52,12 @@ private:
   std::array<std::array<std::unique_ptr<TSpline>, 4>, 2> m_LBDepEcalibSplines{};
   std::array<std::array<std::unique_ptr<TSpline>, 4>, 2> m_T0HGOffsetSplines{};
   std::array<std::array<std::unique_ptr<TSpline>, 4>, 2> m_T0LGOffsetSplines{};
+
+  bool m_haveIterCalibCorr{false};
+  //
+  //  Each element contains a module, a reference fraction, and then polynomial coefficients
+  //
+  std::array<std::vector<std::tuple<unsigned int, float, std::vector<float>>>, 2> m_iterCalibCorr;
 
   // Transient data that is updated each LB or each event
   //
@@ -137,6 +144,7 @@ public:
   float GetModuleSumErr(size_t side) const {return std::sqrt(m_moduleSumErrSq.at(side));}
   float GetSideBkgdFrac(size_t side) const {return m_moduleSumBkgdFrac.at(side);}
   
+  //
   float GetCalibModuleSum(size_t side) const {return m_calibModuleSum.at(side);}
   float GetCalibModuleSumErr(size_t side) const {return std::sqrt(m_calibModuleSumErrSq.at(side));}
   float GetSideCalibBkgdFrac(size_t side) const {return m_calibModSumBkgdFrac.at(side);}
