@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /*****************************************************************************
@@ -21,6 +21,7 @@
 #include "GaudiKernel/System.h"
 
 #include <fstream>
+#include <print>
 #include <unistd.h>
 #include <exception>
 #include <string_view>
@@ -140,7 +141,7 @@ StatusCode AthenaSummarySvc::initialize() {
 
   vector<string>::const_iterator itr;
   for (itr=m_extraInc.value().begin(); itr != m_extraInc.value().end(); ++itr) {
-    ATH_MSG_DEBUG("Tracking incident \"" << *itr << "\"");
+    ATH_MSG_DEBUG("Tracking incident \"{}\"", *itr);
     addListener(*itr);
   }
 
@@ -156,8 +157,8 @@ StatusCode AthenaSummarySvc::initialize() {
         if (ip->setProperty(m_keywords).isFailure()) {
           ATH_MSG_ERROR("could not set keywords property of LoggedMessageSvc");
         } else {
-          ATH_MSG_INFO("Scanning log for keyword \"" << m_keywords
-                       << "\". CAVEAT EMPTOR - THIS IS VERY SLOW!!");
+          ATH_MSG_INFO("Scanning log for keyword \"{}\". CAVEAT EMPTOR - THIS IS VERY SLOW!!",
+                       m_keywords);
         }
       } else {
         ATH_MSG_ERROR("could not dcast LoggedMessageSvc to IProperty");
@@ -215,13 +216,13 @@ StatusCode AthenaSummarySvc::finalize() {
 void
 AthenaSummarySvc::addListener( const std::string& inc ) {
 
-  ATH_MSG_DEBUG("now listening to incident " << inc);
+  ATH_MSG_DEBUG("now listening to incident {}", inc);
 
   if (m_extraIncidents.find( inc ) == m_extraIncidents.end()) {
     p_incSvc->addListener( this, inc, 100, true);
     m_extraIncidents[inc] = map<string,int>();
   } else {
-    ATH_MSG_INFO("already listening to Incident " << inc);
+    ATH_MSG_INFO("already listening to Incident {}", inc);
   }
 
 }
@@ -231,7 +232,7 @@ AthenaSummarySvc::addListener( const std::string& inc ) {
 void 
 AthenaSummarySvc::addSummary(const std::string& dict, const std::string& info) {
 
-  ATH_MSG_DEBUG("adding extra info: " << dict << "/" << info);
+  ATH_MSG_DEBUG("adding extra info: {}/{}", dict, info);
 
   m_extraInfo.push_back( make_pair(dict,info) );
 
@@ -252,8 +253,7 @@ AthenaSummarySvc::newHandler() {
   delete[] s_block; s_block = nullptr;
   
   // print onto std::cerr rather than MsgStream, as it's more innocuous
-  std::cerr << "AthenaSummarySvc     FATAL out of memory: saving summary ..."
-            << std::endl;
+  std::println (std::cerr, "AthenaSummarySvc     FATAL out of memory: saving summary ...");
 
   SmartIF<IAthenaSummarySvc> ipa(Gaudi::svcLocator()->service("AthenaSummarySvc"));
 
@@ -266,8 +266,7 @@ AthenaSummarySvc::newHandler() {
     ipa->setStatus(99);
     ipa->createSummary().ignore();
   } else {
-    std::cerr << "AthenaSummarySvc    ERROR unable to get hold of myself and print summary"
-	      << std::endl;
+    std::println (std::cerr, "AthenaSummarySvc    ERROR unable to get hold of myself and print summary");
   }
 
     
@@ -283,14 +282,15 @@ AthenaSummarySvc::newHandler() {
 void 
 AthenaSummarySvc::handle(const Incident &inc) {
 
-  ATH_MSG_DEBUG("handle incident: " << inc.type() << " " << inc.source());
+  ATH_MSG_DEBUG("handle incident: {} {}", inc.type(), inc.source());
 
   string fileName;
 
   const FileIncident *fi = dynamic_cast<const FileIncident*>( &inc );
   if (fi != nullptr) {
     // FIXME!!! waiting on AthenaPoolKernel-00-00-07
-    ATH_MSG_INFO(" -> file incident: " << fi->fileName() << " [GUID: " << fi->fileGuid() << "]");
+    ATH_MSG_INFO(" -> file incident: {} [GUID: {}]",
+                 fi->fileName(), fi->fileGuid());
     fileName = fi->fileName();
   } else {
     fileName = inc.source();
@@ -338,11 +338,12 @@ AthenaSummarySvc::createSummary() {
   std::ofstream ofs;
   ofs.open(m_summaryFile.value().c_str());
   if (!ofs) {
-    ATH_MSG_ERROR("Unable to open output file \"" << m_summaryFile.value() << "\"");
+    ATH_MSG_ERROR("Unable to open output file \"{}\"",
+                  m_summaryFile.value());
     return StatusCode::FAILURE;
   }
 
-  ATH_MSG_DEBUG("Writing to \"" << m_summaryFile.value() << "\"");
+  ATH_MSG_DEBUG("Writing to \"{}\"", m_summaryFile.value());
 
   if (m_summaryFormat.value() == "ascii" || m_summaryFormat.value() == "both") {
     createASCII(ofs);
@@ -368,33 +369,33 @@ AthenaSummarySvc::createASCII( std::ofstream& ofs ) {
 
   list<string>::const_iterator itr;
   
-  ofs << "Files read: " << m_inputFilesRead.size() << '\n';
+  std::println (ofs, "Files read: {}", m_inputFilesRead.size());
   for (itr=m_inputFilesRead.begin(); itr != m_inputFilesRead.end(); ++itr) {
-    ofs << "  " << *itr << '\n';
+    std::println (ofs, "  {}", *itr);
   }
   
-  ofs << "Files written: " << m_outputFiles.size() << '\n';
+  std::println (ofs, "Files written: {}", m_outputFiles.size());
   for (itr=m_outputFiles.begin(); itr != m_outputFiles.end(); ++itr) {
-    ofs << "  " << *itr << '\n';
+    std::println (ofs, "  {}", *itr);
   }
   
-  ofs << "File Write Error: " << m_outputFilesError.size() << '\n';
+  std::println (ofs, "File Write Error: {}", m_outputFilesError.size());
   for (itr=m_outputFilesError.begin(); itr != m_outputFilesError.end(); ++itr) {
-    ofs << "  " << *itr << '\n';
+    std::println (ofs, "  {}", *itr);
   }
   
-  ofs << "Events Read:    " << m_eventsRead << '\n';
-  ofs << "Events Written: " << m_eventsWritten << '\n';
-  ofs << "Events Skipped: " << m_eventsSkipped << '\n';
+  std::println (ofs, "Events Read:    {}", m_eventsRead);
+  std::println (ofs, "Events Written: {}", m_eventsWritten);
+  std::println (ofs, "Events Skipped: {}", m_eventsSkipped);
 
-  ofs << "Runs: " << m_runs << '\n';
+  std::println (ofs, "Runs: {}", m_runs);
   
 
-  ofs << "Message Count: " << '\n';
-  ofs << " FATAL:   " << msgSvc()->messageCount( MSG::FATAL ) << '\n';
-  ofs << " ERROR:   " << msgSvc()->messageCount( MSG::ERROR ) << '\n';
-  ofs << " WARNING: " << msgSvc()->messageCount( MSG::WARNING ) << '\n';
-  ofs << " INFO:    " << msgSvc()->messageCount( MSG::INFO ) << '\n';
+  std::println (ofs, "Message Count: ");
+  std::println (ofs, " FATAL:   {}", msgSvc()->messageCount( MSG::FATAL ));
+  std::println (ofs, " ERROR:   {}", msgSvc()->messageCount( MSG::ERROR ));
+  std::println (ofs, " WARNING: {}", msgSvc()->messageCount( MSG::WARNING ));
+  std::println (ofs, " INFO:    {}", msgSvc()->messageCount( MSG::INFO ));
 
   if (p_logMsg != nullptr) {
 
@@ -410,59 +411,56 @@ AthenaSummarySvc::createASCII( std::ofstream& ofs ) {
       
 	
 
-    ofs << "Message Log: " << '\n';
+    std::println (ofs, "Message Log: ");
     vector<pair<string,string> > msgs;
     vector<pair<string,string> >::const_iterator mitr;
     for (unsigned int l=thresh.value(); l < MSG::ALWAYS; l++) {
-      ofs << "  " << levelNames[l];
+      std::print (ofs, "  {}", levelNames[l]);
       msgs = p_logMsg->getMessages( MSG::Level(l) );
-      ofs << "  " << msgs.size() << '\n';
+      std::println (ofs, "  {}", msgs.size());
       for (mitr=msgs.begin(); mitr != msgs.end(); ++mitr) {
-	ofs << "      " << mitr->first << " : " << mitr->second << '\n';
+        std::println (ofs, "      {} : {}", mitr->first, mitr->second);
       }
     }
 
-    ofs << "Keyword tracked messages: " << '\n';
+    std::println (ofs, "Keyword tracked messages: ");
     for (const auto& msg : p_logMsg->getKeyMessages()) {
-      ofs << "  " << levelNames[msg.level]
-	  << "  " << msg.source
-	  << "  " << msg.message
-	  << '\n';
+      std::println (ofs, "  {}  {}  {}",
+                    levelNames[msg.level], msg.source, msg.message);
     }
     
   }
 
   if (m_extraInfo.size() > 0) {
-    ofs << "Extra Summary Info:" << '\n';
+    std::println (ofs, "Extra Summary Info:");
     vector<pair<string,string> >::const_iterator itr (m_extraInfo.begin() );
     for (; itr != m_extraInfo.end(); ++itr) {
-      ofs << " " << itr->first << " : " << itr->second << '\n';
+      std::println (ofs, "      {} : {}", itr->first, itr->second);
     }
   }
   
   if (m_extraIncidents.size() > 0) {
-    ofs << "Extra Incident Counts:" << '\n';
+    std::println (ofs, "Extra Incident Counts:");
     map<string, map<string,int> >::const_iterator itr(m_extraIncidents.begin());
     for (; itr != m_extraIncidents.end(); ++itr) {
-      ofs << " " << itr->first;
+      std::print (ofs, " {}", itr->first);
       if (itr->second.begin() == itr->second.end()) {
-	ofs << " : 0" << '\n';
+        std::println (ofs, " : 0");
       } else {
 	for (map<string,int>::const_iterator it=itr->second.begin();
 	     it != itr->second.end(); ++it) {
-	  ofs << " ::  " << it->first << ":" << it->second;
+          std::print (ofs, " ::  {}: {}", it->first, it->second);
 	}
-	ofs << '\n';
+        std::println (ofs);
       }
     }
   }
 
   if (s_badalloc) {
-    ofs << "std::bad_alloc caught: out of memory condition detected" 
-	<< '\n';
+    std::println (ofs, "std::bad_alloc caught: out of memory condition detected");
   }
 
-  ofs << "Exit Status: " << m_status << '\n';
+  std::println (ofs, "Exit Status: {}", m_status);
 
 
 }
@@ -587,6 +585,5 @@ AthenaSummarySvc::createDict( std::ofstream& ofd) {
   p.add("exit",m_status);
   p.add("bad_alloc",s_badalloc);
 
-  ofd <<  p.dump() << endl;
-
+  std::println (ofd, "{}", p.dump());
 }

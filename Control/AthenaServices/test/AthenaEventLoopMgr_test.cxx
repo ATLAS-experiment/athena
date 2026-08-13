@@ -28,8 +28,8 @@
 #include "GaudiKernel/Service.h"
 #include "GaudiKernel/Converter.h"
 #include "GaudiKernel/ConversionSvc.h"
-#include <iostream>
 #include <cassert>
+#include <print>
 
 
 //********************************************************************
@@ -60,12 +60,12 @@ public:
   virtual const CLID&          clID       () const override;
   virtual long                 svcType    () const override;
   virtual IRegistry*           registry   () const override
-  { std::cout << "registry\n"; std::abort(); }
+  { std::println ("registry"); std::abort(); }
   virtual void                 setRegistry(IRegistry* /*r*/) override
-  { std::cout << "setRegistry\n"; std::abort(); }
+  { std::println ("setRegistry"); std::abort(); }
   virtual const std::string*   par        () const override;
   virtual const unsigned long* ipar       () const override
-  { std::cout << "ipar\n"; std::abort(); }
+  { std::println ("ipar"); std::abort(); }
 
   DataObject* m_object;
   CLID m_clid;
@@ -142,7 +142,7 @@ public:
   TestContext();
   virtual ~TestContext() override;
   virtual void* identifier() const override
-  { std::cout << "identifier\n"; std::abort(); }
+  { std::println ("identifier"); std::abort(); }
 
   EventInfo m_ei;
   SG::DataBucket<EventInfo> m_object;
@@ -175,19 +175,19 @@ public:
   virtual StatusCode createContext(Context*& c) const override;
   virtual StatusCode next(Context& c) const override;
   virtual StatusCode next(Context& /*c*/,int /*jump*/) const override
-  { std::cout << "next2\n"; std::abort(); }
+  { std::println ("next2"); std::abort(); }
   virtual StatusCode previous(Context& /*c*/) const override
-  { std::cout << "previous1\n"; std::abort(); }
+  { std::println ("previous1"); std::abort(); }
   virtual StatusCode previous(Context& /*c*/,int /*jump*/) const override
-  { std::cout << "previous2\n"; std::abort(); }
+  { std::println ("previous2"); std::abort(); }
   virtual StatusCode last(Context& /*refContext*/) const override
-  { std::cout << "last\n"; std::abort(); }
+  { std::println ("last"); std::abort(); }
   virtual StatusCode rewind(Context& /*c*/) const override
-  { std::cout << "rewind\n"; std::abort(); }
+  { std::println ("rewind"); std::abort(); }
   virtual StatusCode createAddress(const Context& /*c*/,IOpaqueAddress*& /*iop*/) const override;
   virtual StatusCode releaseContext(Context*& c) const override;
   virtual StatusCode resetCriteria(const std::string& /*cr*/,Context& /*c*/)const override
-  { std::cout << "resetCriteria\n"; std::abort(); }
+  { std::println ("resetCriteria"); std::abort(); }
 };
 
 
@@ -222,7 +222,7 @@ StatusCode TestEvtSelector::next(Context& c) const
   EventID::number_type run = ctx.m_ei.event_ID()->run_number();
   *ctx.m_ei.event_ID() = EventID (run, ++ctx.m_event_num);
   
-  std::cout << "TestEvtSelector::next(Context&)\n";
+  std::println ("TestEvtSelector::next(Context&)");
   return StatusCode::SUCCESS;
 }
 
@@ -271,18 +271,17 @@ public:
     : AthAlgorithm(name, pSvcLocator) {}
 
   virtual StatusCode initialize() override
-  { std::cout << "TestAlgorithm::initialize\n"; return StatusCode::SUCCESS; }
+  { std::println ("TestAlgorithm::initialize"); return StatusCode::SUCCESS; }
   virtual StatusCode finalize() override
-  { std::cout << "TestAlgorithm::finalize\n"; return StatusCode::SUCCESS; }
+  { std::println ("TestAlgorithm::finalize"); return StatusCode::SUCCESS; }
   virtual StatusCode execute(const EventContext& ctx) override;
 };
 
 
 StatusCode TestAlgorithm::execute(const EventContext& ctx)
 {
-  std::cout << "TestAlgorithm::execute "
-            << ctx.eventID().event_number() << " "
-            << ctx.evt() << "\n";
+  std::println ("TestAlgorithm::execute {} {}",
+                ctx.eventID().event_number(), ctx.evt());
   return StatusCode::SUCCESS;
 }
 
@@ -307,12 +306,12 @@ void testit (IService* mgr)
   ICollectionSize* isize = dynamic_cast<ICollectionSize*> (mgr);
   if (!isize) std::abort();
   int sz = isize->size();
-  std::cout << "size: " <<  sz << "\n";
+  std::println ("size: {}",  sz);
 
   IEventSeek* iseek = dynamic_cast<IEventSeek*> (mgr);
   if (!iseek) std::abort();
   StatusCode sc = iseek->seek (1);
-  std::cout << "seek: " << sc.isSuccess() << "\n";
+  std::println ("seek: {}", sc.isSuccess());
 
   assert (iep->nextEvent(5));
 }
@@ -320,7 +319,7 @@ void testit (IService* mgr)
 
 void test1 (ISvcLocator* svcloc)
 {
-  std::cout << "test1\n";
+  std::println ("test1");
 
   SmartIF<IService> mgr{svcloc->service ("AthenaEventLoopMgr/AthenaEventLoopMgr1")};
   if (!mgr) std::abort();
@@ -331,7 +330,7 @@ void test1 (ISvcLocator* svcloc)
 
 void test2 (ISvcLocator* svcloc)
 {
-  std::cout << "test2\n";
+  std::println ("test2");
 
   SmartIF<IService> mgr{svcloc->service ("AthenaEventLoopMgr/AthenaEventLoopMgr2")};
   if (!mgr) std::abort();
@@ -345,7 +344,7 @@ int main()
   errorcheck::ReportMessage::hideErrorLocus();
   ISvcLocator* svcloc = nullptr;
   if (!Athena_test::initGaudi("AthenaServices/AthenaEventLoopMgr_test.txt", svcloc)) {
-    std::cerr << "This test can not be run" << std::endl;
+    println (std::cerr, "This test can not be run");
     return 0;
   }  
   assert(svcloc);

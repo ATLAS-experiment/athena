@@ -81,10 +81,10 @@ StatusCode AthenaOutputStream::initialize() {
 
    // Set up the SG services
    ATH_CHECK( m_dataStore.retrieve() );
-   ATH_MSG_DEBUG(std::format("Found {} store.", m_dataStore.typeAndName()));
+   ATH_MSG_DEBUG("Found {} store.", m_dataStore.typeAndName());
    if (!m_metadataItemList.value().empty()) {
       ATH_CHECK( m_metadataStore.retrieve() );
-      ATH_MSG_DEBUG(std::format("Found {} store.", m_metadataStore.typeAndName()));
+      ATH_MSG_DEBUG("Found {} store.", m_metadataStore.typeAndName());
    }
 
    // Set up various services
@@ -99,7 +99,7 @@ StatusCode AthenaOutputStream::initialize() {
 
    ATH_CHECK( m_helperTools.retrieve() );
    ATH_MSG_INFO("Found " << m_helperTools);
-   ATH_MSG_INFO(std::format("Data output: {}", m_outputName.toString()));
+   ATH_MSG_INFO("Data output: {}", m_outputName.toString());
 
    for (auto& tool : m_helperTools) {
      ATH_CHECK( tool->postInitialize() );
@@ -172,35 +172,35 @@ StatusCode AthenaOutputStream::initialize() {
    // Check compression settings and print some information about the configuration
    // Both should be between [5, 23] and high compression should be < low compression
    if(m_compressionBitsHigh < 5u || m_compressionBitsHigh > 23u) {
-     ATH_MSG_INFO(std::format("Float compression mantissa bits for high compression "
-                              "({}) is outside the allowed range of [5, 23].",
-                              m_compressionBitsHigh.toString()));
+     ATH_MSG_INFO("Float compression mantissa bits for high compression "
+                  "({}) is outside the allowed range of [5, 23].",
+                  m_compressionBitsHigh.toString());
      ATH_MSG_INFO("Setting it to the appropriate limit.");
      m_compressionBitsHigh = m_compressionBitsHigh < 5u ? 5 : 23;
    }
    if(m_compressionBitsLow < 5u || m_compressionBitsLow > 23u) {
-     ATH_MSG_INFO(std::format("Float compression mantissa bits for low compression "
-                              "({}) is outside the allowed range of [5, 23].",
-                              m_compressionBitsLow.toString()));
+     ATH_MSG_INFO("Float compression mantissa bits for low compression "
+                  "({}) is outside the allowed range of [5, 23].",
+                  m_compressionBitsLow.toString());
      ATH_MSG_INFO("Setting it to the appropriate limit.");
      m_compressionBitsLow = m_compressionBitsLow < 5u ? 5 : 23;
    }
    if(m_compressionBitsLow <= m_compressionBitsHigh) {
-     ATH_MSG_ERROR(std::format("Float compression mantissa bits for low compression "
-                               "({}) is lower than or equal to high compression "
-                               "({})! Please check the configuration! ",
-                               m_compressionBitsLow.toString(),
-                               m_compressionBitsHigh.toString()));
+     ATH_MSG_ERROR("Float compression mantissa bits for low compression "
+                   "({}) is lower than or equal to high compression "
+                   "({})! Please check the configuration! ",
+                   m_compressionBitsLow.toString(),
+                   m_compressionBitsHigh.toString());
      return StatusCode::FAILURE;
    }
    if(m_compressionListHigh.value().empty() && m_compressionListLow.value().empty()) {
      ATH_MSG_VERBOSE("Both high and low float compression lists are empty. Float compression will NOT be applied.");
    } else {
      ATH_MSG_INFO("Either high or low (or both) float compression lists are defined. Float compression will be applied.");
-     ATH_MSG_INFO(std::format("High compression will use {} mantissa bits, and "
-                              "low compression will use {} mantissa bits.",
-                              m_compressionBitsHigh.toString(),
-                              m_compressionBitsLow.toString()));
+     ATH_MSG_INFO("High compression will use {} mantissa bits, and "
+                  "low compression will use {} mantissa bits.",
+                  m_compressionBitsHigh.toString(),
+                  m_compressionBitsLow.toString());
    }
 
    // Setup stream name
@@ -222,7 +222,7 @@ StatusCode AthenaOutputStream::initialize() {
 // Handle incidents
 void AthenaOutputStream::handle(const Incident& inc)
 {
-   ATH_MSG_DEBUG(std::format("handle() incident type: {}", inc.type()));
+   ATH_MSG_DEBUG("handle() incident type: {}", inc.type());
    // mutex shared with write() which is called from writeMetaData
    std::unique_lock<mutex_t>  lock(m_mutex);
 
@@ -261,24 +261,24 @@ void AthenaOutputStream::handle(const Incident& inc)
          // build the new range filename for this slot
          const std::string newRangeFN = m_outSeqSvc->buildSequenceFileName(inc.context(), m_outputName );
          if( !rangeFN.empty() and rangeFN != newRangeFN ) {
-            ATH_MSG_INFO(std::format("Slot range change: '{}' -> '{}'", rangeFN, newRangeFN));
-            ATH_MSG_DEBUG(std::format("There are {} slots in use",m_slotRangeMap.size()));
+            ATH_MSG_INFO("Slot range change: '{}' -> '{}'", rangeFN, newRangeFN);
+            ATH_MSG_DEBUG("There are {} slots in use",m_slotRangeMap.size());
             for(const auto & range : m_slotRangeMap ) {
-               ATH_MSG_DEBUG(std::format("Slot: {}  FN={}", range.first, range.second));
+               ATH_MSG_DEBUG("Slot: {}  FN={}", range.first, range.second);
             }
             if( count_events_in_range(rangeFN) == 1 ) {
                finalizeRange( inc.context(), rangeFN );
             }
          }
-         ATH_MSG_INFO(std::format("slot {} processing event in range: {}", slot, newRangeFN));
+         ATH_MSG_INFO("slot {} processing event in range: {}", slot, newRangeFN);
          m_slotRangeMap[ slot ] = newRangeFN;
          // remember the RangeID for this slot so we can write metadata *after* a range change
          m_rangeIDforRangeFN[ newRangeFN ] = m_outSeqSvc->currentRangeID(inc.context());
       }
       else if( inc.type() == IncidentType::EndProcessing ) {
-         ATH_MSG_DEBUG(std::format("There are {} slots in use", m_slotRangeMap.size()));
+         ATH_MSG_DEBUG("There are {} slots in use", m_slotRangeMap.size());
          for( const auto& range : m_slotRangeMap ) {
-            ATH_MSG_DEBUG(std::format("Slot: {}  FN={}", range.first, range.second));
+            ATH_MSG_DEBUG("Slot: {}  FN={}", range.first, range.second);
          }
          if( m_slotRangeMap.size() > 1 ) {
             // if there are multiple slots, we can detect if the range ended with this event
@@ -291,20 +291,20 @@ void AthenaOutputStream::handle(const Incident& inc)
          }
       }
    }
-   ATH_MSG_DEBUG(std::format("Leaving incident handler for {}", inc.type()));
+   ATH_MSG_DEBUG("Leaving incident handler for {}", inc.type());
 }
 
 // Note - this method works in any slot - MetaCont uses the filenames to find objects
 void AthenaOutputStream::finalizeRange( const EventContext& ctx, const std::string & rangeFN )
 {
-   ATH_MSG_DEBUG(std::format("Writing MetaData to {}", rangeFN));
+   ATH_MSG_DEBUG("Writing MetaData to {}", rangeFN);
    // MN: not calling StopMetaData Incident here but directly writeMetaData() - OK for Sim, check others
    // metadata tools like CutFlowSvc are not able to handle this yet
    const std::string rememberID = m_outSeqSvc->setRangeID( ctx, m_rangeIDforRangeFN[ rangeFN ] );
    writeMetaData( ctx, rangeFN );
    m_outSeqSvc->setRangeID( ctx, rememberID );
 
-   ATH_MSG_INFO(std::format("Finished writing Event Sequence to {}", rangeFN));
+   ATH_MSG_INFO("Finished writing Event Sequence to {}", rangeFN);
    auto strm_iter = m_streamerMap.find( rangeFN );
    strm_iter->second->finalizeOutput().ignore();
    strm_iter->second->finalize().ignore();
@@ -339,7 +339,7 @@ void AthenaOutputStream::writeMetaData(const EventContext& ctx, const std::strin
    FileIncident incident(name(), "WriteDataHeaderForms", DHFWriteIncidentfileName);
    m_incidentSvc->fireIncident(incident);
 
-   ATH_MSG_DEBUG("metadataItemList: " << m_metadataItemList.value() );
+   ATH_MSG_DEBUG("metadataItemList: {}", m_metadataItemList.value() );
    if (!m_metadataItemList.value().empty()) {
       m_currentStore = &m_metadataStore;
       StatusCode status = streamer->connectServices(m_metadataStore.typeAndName(), m_persName, false);
@@ -370,7 +370,7 @@ void AthenaOutputStream::writeMetaData(const EventContext& ctx, const std::strin
       if ((pAsIProp->setProperty(m_itemList)).isFailure()) {
          throw GaudiException("Folder property [itemList] not found", name(), StatusCode::FAILURE);
       }
-      ATH_MSG_DEBUG(std::format("Metadata items written: {}", m_metadataItemList.value().size()));
+      ATH_MSG_DEBUG("Metadata items written: {}", m_metadataItemList.value().size());
    }
 }
 
@@ -449,7 +449,7 @@ StatusCode AthenaOutputStream::write(const EventContext& ctx) {
 
    // Handle Event Ranges
    if( m_outSeqSvc->inUse() and m_outSeqSvc->inConcurrentEventsMode() ) {
-      ATH_MSG_DEBUG(std::format("Writing event sequence to {}", outputFN));
+      ATH_MSG_DEBUG("Writing event sequence to {}", outputFN);
       streamer = m_streamerMap[ outputFN ].get();
       if( !streamer ) {
          // new range, needs a new streamer tool
@@ -467,7 +467,7 @@ StatusCode AthenaOutputStream::write(const EventContext& ctx) {
          }
          if( !streamer or streamer->initialize().isFailure()
              or streamer->connectServices(m_dataStore.typeAndName(), m_persName, m_extendProvenanceRecord).isFailure() ) {
-            ATH_MSG_FATAL(std::format("Unable to initialize OutputStreamTool for {}", outputFN));
+            ATH_MSG_FATAL("Unable to initialize OutputStreamTool for {}", outputFN);
             return StatusCode::FAILURE;
          }
          m_streamerMap[ outputFN ].reset( streamer );
@@ -499,7 +499,7 @@ StatusCode AthenaOutputStream::write(const EventContext& ctx) {
       ATH_MSG_FATAL("Could not connectOutput");
       return StatusCode::FAILURE;
    }
-   ATH_MSG_DEBUG(std::format("connectOutput done for {}", outputFN));
+   ATH_MSG_DEBUG("connectOutput done for {}", outputFN);
    StatusCode currentStatus = streamer->streamObjects(objects, connectStr);
    // Do final check of streaming
    if (!currentStatus.isSuccess()) {
@@ -579,10 +579,10 @@ StatusCode AthenaOutputStream::addItemObjects(const EventContext& ctx,
       item_key = item.key();
    }
    CLID item_id = item.id();
-   ATH_MSG_DEBUG(std::format("addItemObjects({},\"{}\") called", item_id, item_key));
-   ATH_MSG_DEBUG(std::format("           Key:{}", item_key));
+   ATH_MSG_DEBUG("addItemObjects({},\"{}\") called", item_id, item_key);
+   ATH_MSG_DEBUG("           Key:{}", item_key);
    if( aux_attr.size() ) {
-      ATH_MSG_DEBUG(std::format("      Aux Attr:{}", aux_attr));
+      ATH_MSG_DEBUG("      Aux Attr:{}", aux_attr);
    }
 
    // Here we build the list of attributes for the lossy float compression
@@ -594,10 +594,10 @@ StatusCode AthenaOutputStream::addItemObjects(const EventContext& ctx,
 
    // Print some debugging information regarding the lossy float compression configuration
    for( const auto& it : comp_attr_map ) {
-     ATH_MSG_DEBUG(std::format("     Comp Attr {} with {} mantissa bits.", it.second.size(), it.first));
+     ATH_MSG_DEBUG("     Comp Attr {} with {} mantissa bits.", it.second.size(), it.first);
      if ( it.second.size() > 0 ) {
        for( const auto& attr : it.second ) {
-          ATH_MSG_DEBUG(std::format("       >> {}", attr));
+          ATH_MSG_DEBUG("       >> {}", attr);
        }
      }
    }
@@ -639,8 +639,8 @@ StatusCode AthenaOutputStream::addItemObjects(const EventContext& ctx,
             // xAOD::CutBookkeeperAuxContainer#IncompleteCutBookkeepers*Aux.
             // Here we look for those few cases...
             keyMatch = simpleMatch(item_key, proxyName);
-            ATH_MSG_DEBUG(std::format("Result of checking {} against {} to see if it matches is {}",
-                                      proxyName, item_key, keyMatch));
+            ATH_MSG_DEBUG("Result of checking {} against {} to see if it matches is {}",
+                          proxyName, item_key, keyMatch);
          }
 
          // Now check if this item is marked for another output stream, if so we reject it
@@ -648,7 +648,7 @@ StatusCode AthenaOutputStream::addItemObjects(const EventContext& ctx,
          bool xkeyMatch = false;
          if( (!stream.empty() and stream != m_outputName) || SG::isTransientKey(proxyName) ) {
             // reject keys that are marked for a different output stream
-            ATH_MSG_DEBUG(std::format("Rejecting key: {} in output: {}", itemProxy->name(), m_outputName.toString()));
+            ATH_MSG_DEBUG("Rejecting key: {} in output: {}", itemProxy->name(), m_outputName.toString());
             xkeyMatch = true;
          }
 
@@ -656,7 +656,7 @@ StatusCode AthenaOutputStream::addItemObjects(const EventContext& ctx,
          if (keyMatch && !xkeyMatch) {
             if (m_forceRead && itemProxy->isValid()) {
                if (nullptr == itemProxy->accessData()) {
-                  ATH_MSG_ERROR(std::format(" Could not get data object for id {},\"{}\"", remapped_item_id, proxyName));
+                  ATH_MSG_ERROR(" Could not get data object for id {},\"{}\"", remapped_item_id, proxyName);
                }
             }
             if (nullptr != itemProxy->object()) {
@@ -676,8 +676,8 @@ StatusCode AthenaOutputStream::addItemObjects(const EventContext& ctx,
                         m_ownedObjects.push_back( std::move(altbucket) );
                         m_altObjects.push_back( itemProxy->object() ); // only for duplicate prevention
                      } else {
-                        ATH_MSG_ERROR(std::format("Failed to retrieve object from MetaCont with key={}, for EventRangeID={}",
-                                      item_key, m_outSeqSvc->currentRangeID(ctx)));
+                        ATH_MSG_ERROR("Failed to retrieve object from MetaCont with key={}, for EventRangeID={}",
+                                      item_key, m_outSeqSvc->currentRangeID(ctx));
                         return StatusCode::FAILURE;
                      }
                   } else if (item.exact()) {
@@ -701,7 +701,7 @@ StatusCode AthenaOutputStream::addItemObjects(const EventContext& ctx,
                  }
                  else
                    m_objects.push_back(itemProxy->object());
-                 ATH_MSG_DEBUG(std::format(" Added object {},\"{}\"", item_id, proxyName));
+                 ATH_MSG_DEBUG(" Added object {},\"{}\"", item_id, proxyName);
                }
 
                /// Handle variable selections.
@@ -714,7 +714,7 @@ StatusCode AthenaOutputStream::addItemObjects(const EventContext& ctx,
                   try {
                     SG::fromStorable( itemProxy->object(), auxstore, true );
                   } catch( const std::exception& ) {
-                    ATH_MSG_DEBUG(std::format("Error in casting object with CLID {} to SG::IConstAuxStore*", itemProxy->clID()));
+                    ATH_MSG_DEBUG("Error in casting object with CLID {} to SG::IConstAuxStore*", itemProxy->clID());
                     auxstore = nullptr;
                   }
 
@@ -738,9 +738,9 @@ StatusCode AthenaOutputStream::addItemObjects(const EventContext& ctx,
                     for( const auto& it : compression.getCompressedAuxIDs( allVars ) ) {
                       if( it.second.size() > 0 ) { // insert only if the set is non-empty
                         compInfo[ key ][ it.first ] = it.second;
-                        ATH_MSG_DEBUG(std::format("Container {} has {} variables that'll be "
+                        ATH_MSG_DEBUG("Container {} has {} variables that'll be "
                                       "lossy float compressed with {} mantissa bits",
-                                      key, it.second.size(), it.first));
+                                      key, it.second.size(), it.first);
                       }
                     } // End of loop over variables to be lossy float compressed
                   } // End of lossy float compression logic
@@ -754,14 +754,14 @@ StatusCode AthenaOutputStream::addItemObjects(const EventContext& ctx,
          }
       } // proxy loop
       if (!added && !removed) {
-         ATH_MSG_DEBUG(std::format(" No object matching {},\"{}\" found", item_id, item_key));
+         ATH_MSG_DEBUG(" No object matching {},\"{}\" found", item_id, item_key);
       } else if (removed) {
-         ATH_MSG_DEBUG(std::format(" Object being excluded based on property setting {},\"{}\". Skipping",
-                                   item_id, item_key));
+         ATH_MSG_DEBUG(" Object being excluded based on property setting {},\"{}\". Skipping",
+                       item_id, item_key);
       }
    } else {
-      ATH_MSG_DEBUG(std::format(" Failed to receive proxy iterators from StoreGate for {},\"{}\". Skipping",
-                                item_id, item_key));
+      ATH_MSG_DEBUG(" Failed to receive proxy iterators from StoreGate for {},\"{}\". Skipping",
+                    item_id, item_key);
    }
    return StatusCode::SUCCESS;
 }

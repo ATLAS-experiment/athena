@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -24,6 +24,7 @@
 #include <mach/mach_init.h>
 #include <unistd.h>
 #endif
+#include <print>
 
 // Package includes
 #include "CoreDumpSvc.h"
@@ -59,8 +60,8 @@ namespace {
    void ExitOnInt( int sig, siginfo_t*, void* ) {
       if ( sig == SIGINT ) {
       // called on user ^C
-	 std::cout << std::endl;
-         std::cerr << "Athena           CRITICAL stopped by user interrupt\n";
+         std::println();
+         std::println (std::cerr,  "Athena           CRITICAL stopped by user interrupt");
 	 raise(SIGKILL);
       }
    }
@@ -125,13 +126,13 @@ namespace CoreDumpSvcHandler
 
     if ( sig == SIGALRM) {
       if (dumpCoreFile) {
-        log() << "Received SIGALRM. Aborting job..." << std::endl;
+        std::println (log(), "Received SIGALRM. Aborting job...");
         // Restore default abort handler that should create a core file
         Athena::Signal::revert (SIGABRT);
         std::abort();
       }
       else {
-        log() << "Received SIGALRM. Terminating job..." << std::endl;
+        std::println (log(), "Received SIGALRM. Terminating job...");
         _exit(97);   // exit without raising any further signals
       }
     }
@@ -182,18 +183,20 @@ namespace CoreDumpSvcHandler
     }
 
     if (gSystem && stackTrace) {
-      log() << horizLine << "Producing stack trace (can be slow, check gdb process)...\n"
-            << horizLine << std::flush;
+      std::print (log(), "{}Producing stack trace (can be slow, check gdb process)...\n{}",
+                  horizLine, horizLine);
+      log().flush();
       gSystem->StackTrace();
-      log() << std::endl;
+      std::println (log());
     }
 
     if (callOldHandler) {
       // Call previous signal handler
       // Need to distinguish between the two different types
       const struct sigaction& oact = oldSigHandler[sig];
-      log() << horizLine << "Invoking previous signal handler (can be slow, check gdb process)...\n"
-            << horizLine << std::flush;
+      std::print (log(), "{}Invoking previous signal handler (can be slow, check gdb process)...\n{}",
+                  horizLine, horizLine);
+      log().flush();
       if ( oact.sa_flags & SA_SIGINFO ) {
         oact.sa_sigaction(sig, info, extra);
       }
@@ -201,7 +204,7 @@ namespace CoreDumpSvcHandler
         oact.sa_handler(sig);
       }
       else {
-        log() << "Could not invoke previous signal handler" << std::endl;
+        std::println (log(), "Could not invoke previous signal handler");
       }
     }
 
@@ -218,7 +221,7 @@ namespace CoreDumpSvcHandler
       }
 
       if (dumpCoreFile) {
-        log() << "Aborting job... " << std::endl;
+        std::println (log(), "Aborting job... ");
         // Restore default abort handler that should create a core file
         Athena::Signal::revert (SIGABRT);
         std::abort();
@@ -273,8 +276,10 @@ void CoreDumpSvc::propertyHandler(Gaudi::Details::PropertyBase& p)
       CoreDumpSvcHandler::ostr = &std::cerr;
     }
     else {
-      ATH_MSG_WARNING("'" << val << "' not valid for " << m_coreDumpStream.name()
-                      << ": " << m_coreDumpStream.documentation());
+      ATH_MSG_WARNING("'{}' not valid for {}: {}",
+                      val,
+                      m_coreDumpStream.name(),
+                      m_coreDumpStream.documentation());
     }
   } else if ( p.name() == m_fatalHandlerFlags.name() ) {
     if (m_fatalHandlerFlags.fromString(p.toString()).isSuccess()) {
@@ -282,7 +287,7 @@ void CoreDumpSvc::propertyHandler(Gaudi::Details::PropertyBase& p)
 	Athena::Signal::handleFatal(nullptr, IOFD_INVALID, nullptr, nullptr, m_fatalHandlerFlags);
       }
     } else {
-      ATH_MSG_INFO("could not convert [" << p.toString() << "] to integer");
+      ATH_MSG_INFO("could not convert [{}] to integer", p.toString());
     }
   }
   else if (p.name() ==  m_killOnSigInt.name()) {
@@ -293,7 +298,7 @@ void CoreDumpSvc::propertyHandler(Gaudi::Details::PropertyBase& p)
       }
     }
     else {
-      ATH_MSG_WARNING("Could not convert [" << p.toString() << "] to bool");
+      ATH_MSG_WARNING("Could not convert [{}] to bool", p.toString());
     }
   }
 
@@ -305,7 +310,7 @@ void CoreDumpSvc::propertyHandler(Gaudi::Details::PropertyBase& p)
 StatusCode CoreDumpSvc::initialize()
 {
   if (m_fatalHandlerFlags != 0) {
-      ATH_MSG_INFO("install f-a-t-a-l handler... (flag = " << m_fatalHandlerFlags.value() << ")");
+      ATH_MSG_INFO("install f-a-t-a-l handler... (flag = {})", m_fatalHandlerFlags.value());
       Athena::Signal::handleFatal(nullptr, IOFD_INVALID, nullptr, nullptr, m_fatalHandlerFlags);
   }
 
@@ -345,7 +350,7 @@ StatusCode CoreDumpSvc::start()
 
 StatusCode CoreDumpSvc::finalize()
 {
-  ATH_MSG_DEBUG ("Finalizing " << name());
+  ATH_MSG_DEBUG ("Finalizing {}", name());
 
   if ( uninstallSignalHandler().isFailure() ) {
     ATH_MSG_WARNING ("Could not uninstall signal handlers");
@@ -379,10 +384,10 @@ void CoreDumpSvc::setCoreDumpInfo( const EventContext& ctx, const std::string& n
 void CoreDumpSvc::print ATLAS_NOT_THREAD_SAFE ()
 {
   // Print a FATAL message but don't use the MsgStream anymore once we crashed
-  CoreDumpSvcHandler::log() << name() << "   FATAL Caught fatal signal. Printing details to "
-                            << m_coreDumpStream.value()
-                            << (m_dumpCoreFile ? ". Will try to produce a core dump file on exit." : ".")
-                            << std::endl;
+  std::println (CoreDumpSvcHandler::log(),
+                "{}   FATAL Caught fatal signal. Printing details to {}{}",
+                name(), m_coreDumpStream.value(),
+                (m_dumpCoreFile ? ". Will try to produce a core dump file on exit." : "."));
 
   CoreDumpSvcHandler::log() << dump() << std::flush;
 }
@@ -395,41 +400,36 @@ std::string CoreDumpSvc::dump() const
   std::ostringstream os;
   char buf[26];
   const time_t now = time(nullptr);
+
+#define PR(FMT, ...) std::println(os, FMT __VA_OPT__(,) __VA_ARGS__)
   
-  os << "-------------------------------------------------------------------------------------" << "\n";
-  os << "Core dump from " << name() << " on " << System::hostName()
-     << " at " << ctime_r(&now, buf) /*<< "\n"*/; // ctime adds "\n"
-  os << "\n";
+  PR("-------------------------------------------------------------------------------------");
+  std::print (os, "Core dump from {} on {} at {}",
+              name(), System::hostName(), ctime_r(&now, buf)); // ctime adds "\n"`
+  PR("");
 
   // Print additional information if available
   if (m_siginfo) {
     int signo = m_siginfo->si_signo;  // shorthand
     
-    os << "Caught signal " << signo
-       << "(" << strsignal(signo) << "). Details: "
-       << "\n";   
+    PR ("Caught signal {}({}). Details: ", signo, strsignal(signo));
 
-    os << "  errno = " << m_siginfo->si_errno
-       << ", code = " << m_siginfo->si_code
-       << " (" << Athena::Signal::describe(signo, m_siginfo->si_code) << ")"
-       << "\n";
+    PR ("  errno = {}, code = {} ({})",
+        m_siginfo->si_errno, m_siginfo->si_code, Athena::Signal::describe(signo, m_siginfo->si_code));
     
-    os << "  pid   = " << m_siginfo->si_pid
-       << ", uid = " << m_siginfo->si_uid
-       << "\n";
-    
+    PR ("  pid   = {}, uid = {}", m_siginfo->si_pid, m_siginfo->si_uid);
 #ifndef __APPLE__
     // These are set if the POSIX signal sender passed them.
-    os << "  value = (" << m_siginfo->si_int << ", "
-       << std::hex << m_siginfo->si_ptr << ")" << std::dec << "\n";
+    PR ("  value = ({}, {})", m_siginfo->si_int, m_siginfo->si_ptr);
 #endif
 
     // memory usage informations
     athena_statm s = read_athena_statm();
     
     const long pagesz = sysconf(_SC_PAGESIZE);
-    os << "  vmem = " << s.vm_pages*pagesz/1024./1024.  << " MB\n"
-       << "  rss  = " << s.rss_pages*pagesz/1024./1024. << " MB\n";
+    PR ("  vmem = {} MB\n"
+        "  rss  = {} MB",
+        s.vm_pages*pagesz/1024./1024., s.rss_pages*pagesz/1024./1024.);
 
 #ifndef __APPLE__
     // more memory usage informations (system wide stuff)
@@ -440,23 +440,28 @@ std::string CoreDumpSvc::dump() const
       if ( 0 == sysinfo(&sys) ) {
         // all sizes are reported in sys.mem_unit bytes
         const float mem_units = sys.mem_unit/(1024.*1024.);
-        os << "  total-ram = " << sys.totalram * mem_units << " MB\n"
-           << "  free-ram  = " << sys.freeram  * mem_units << " MB\n"
-           << "  buffer-ram= " << sys.bufferram* mem_units << " MB\n"
-           << "  total-swap= " << sys.totalswap* mem_units << " MB\n"
-           << "  free-swap = " << sys.freeswap * mem_units << " MB\n";
+        PR ("  total-ram = {} MB\n"
+            "  free-ram  = {} MB\n"
+            "  buffer-ram= {} MB\n"
+            "  total-swap= {} MB\n"
+            "  free-swap = {} MB",
+            sys.totalram * mem_units,
+            sys.freeram  * mem_units,
+            sys.bufferram* mem_units,
+            sys.totalswap* mem_units,
+            sys.freeswap * mem_units);
       }
     }
 #endif
 
     // This is the interesting address for memory faults.
     if (signo == SIGILL || signo == SIGFPE || signo == SIGSEGV || signo == SIGBUS)
-      os << "  addr  = " << std::hex << m_siginfo->si_addr << std::dec << "\n";
-    
-    os << "\n";
+      PR ("  addr  = {}", m_siginfo->si_addr);
+
+    PR ("");
   }
   
-  os << "Event counter: " << m_eventCounter << "\n";  
+  PR ( "Event counter: {}", m_eventCounter.load());
 
   SmartIF<IAlgManager> algMgr{serviceLocator()->as<IAlgManager>()};
   SmartIF<IAlgContextSvc> algContextSvc;
@@ -498,42 +503,49 @@ std::string CoreDumpSvc::dump() const
     }
 
     if (currentAlg.empty()) currentAlg = "<NONE>";
-    os << "Slot " << std::setw(3) << t << " : Current algorithm = " << currentAlg << std::endl;
+    PR ( "Slot {:3} : Current algorithm = {}", t, currentAlg);
         
     // System core dump
     auto &sys = m_sysCoreDumps.at(t);
     if (!sys.LastInc.empty()) {
-      os << "         : Last Incident = " << sys.LastInc << std::endl
-         << "         : Event ID      = " << sys.EvId << std::endl;
+      PR ("         : Last Incident = {}\n"
+          "         : Event ID      = {}",
+          sys.LastInc, sys.EvId);
     }
     
     // User core dump
     auto &usr = m_usrCoreDumps.at(t);
     if (!usr.empty()) {
       for (auto &s : usr) {
-        os << "         : (usr) " << s.first << " = " << s.second << std::endl;
+        PR ("         : (usr) {} = {}", s.first, s.second);
       }
     }
   }
 
   if (algContextSvc) {
-    os << "Algorithm stack: ";
-    if ( algContextSvc->algorithms().empty() ) os << "<EMPTY>" << "\n";
+    std::print (os, "Algorithm stack: ");
+    if ( algContextSvc->algorithms().empty() )
+      PR ("<EMPTY>");
     else {
-      os << "\n";
+      PR ("");
       for (auto alg : algContextSvc->algorithms()) {
-        if (alg) os << "   " << alg->name() << "\n";
+        if (alg) PR ("   {}", alg->name());
       }
     }
   }
 
-  os << horizLine;
-  os << "| AtlasBaseDir : " << std::setw(66) << getenv("AtlasBaseDir")  << " |\n";
-  os << "| AtlasVersion : " << std::setw(66) << getenv("AtlasVersion")  << " |\n";
-  os << "| BINARY_TAG   : " << std::setw(66) << getenv("BINARY_TAG")    << " |\n";
-  os << horizLine;
-  os << " Note: to see line numbers in below stacktrace you might consider running following :\n";
-  os << "  atlasAddress2Line --file <logfile>\n";
+  PR ("{}"
+      "| AtlasBaseDir : {:66} |\n"
+      "| AtlasVersion : {:66} |\n"
+      "| BINARY_TAG   : {:66} |\n"
+      "{}"
+      " Note: to see line numbers in below stacktrace you might consider running following :\n"
+      "  atlasAddress2Line --file <logfile>",
+      horizLine,
+      getenv("AtlasBaseDir"),
+      getenv("AtlasVersion"),
+      getenv("BINARY_TAG"),
+      horizLine);
 
   SmartIF<IAthenaSummarySvc> iass{service("AthenaSummarySvc", /*createIf*/false)};
   if (iass) {
@@ -541,6 +553,7 @@ std::string CoreDumpSvc::dump() const
     iass->setStatus(1);
     iass->createSummary().ignore();
   }
+#undef PR
   
   return os.str();
 }
@@ -591,11 +604,11 @@ StatusCode CoreDumpSvc::installSignalHandler ATLAS_NOT_THREAD_SAFE ()
   for (auto sig : m_signals) {
 #ifndef __APPLE__
     if (sig<1 || sig>SIGRTMAX) {
-      ATH_MSG_WARNING ("Invalid signal number " << sig << ". Ignoring.");
+      ATH_MSG_WARNING ("Invalid signal number {}. Ignoring.", sig);
       continue;
     }
 #endif
-    oss << sig << "(" << strsignal(sig) << ") ";
+    std::print (oss, "{}({}) ", sig, strsignal(sig));
 
     // Set up an alternate stack for this thread.
     setAltStack();
@@ -608,12 +621,12 @@ StatusCode CoreDumpSvc::installSignalHandler ATLAS_NOT_THREAD_SAFE ()
     sigact.sa_flags = SA_SIGINFO + SA_ONSTACK;
     int ret = sigaction(sig, &sigact, &(CoreDumpSvcHandler::oldSigHandler[sig]));
     if ( ret!=0 ) {
-      ATH_MSG_ERROR ("Error on installing handler for signal " << sig
-                     << ": " << strerror(errno));
+      ATH_MSG_ERROR ("Error on installing handler for signal {}: {}",
+                     sig, strerror(errno));
       return StatusCode::FAILURE;
     }
   }
-  ATH_MSG_INFO ("Handling signals: " << oss.str());
+  ATH_MSG_INFO ("Handling signals: {}", oss.str());
   
   return StatusCode::SUCCESS;
 }
@@ -631,8 +644,8 @@ StatusCode CoreDumpSvc::uninstallSignalHandler ATLAS_NOT_THREAD_SAFE ()
     int ret = sigaction(kv.first, &(kv.second), nullptr);
     if ( ret!=0 ) {
       sc = StatusCode::FAILURE;
-      ATH_MSG_WARNING("Error on uninstalling handler for signal " << kv.first
-                      << ": " << strerror(errno));
+      ATH_MSG_WARNING("Error on uninstalling handler for signal {}: {}",
+                      kv.first, strerror(errno));
     }
   }
   return sc;

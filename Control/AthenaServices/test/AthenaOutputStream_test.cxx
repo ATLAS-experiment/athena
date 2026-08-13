@@ -12,6 +12,7 @@
 
 #include <cassert>
 #include <iostream>
+#include <print>
 #include <vector>
 #include "TestTools/initGaudi.h"
 #include "FooBar.h"
@@ -32,9 +33,6 @@
 #include "../src/CompressionInfo.h"
 #include "TInterpreter.h"
 
-using std::cerr;
-using std::cout;
-using std::endl;
 using std::vector;
 using namespace Athena_test;
 
@@ -42,10 +40,10 @@ int main() {
   CxxUtils::ubsan_suppress ([]() { TInterpreter::Instance(); });
   errorcheck::ReportMessage::hideErrorLocus();
   const std::string appName = "AthenaOutputStream_test";
-  cout << "*** " << appName << " starts ***" <<endl;
+  std::println ("*** {} starts ***", appName);
   ISvcLocator* pSvcLoc(nullptr);
   if (!initGaudi("AthenaServices/AthenaOutputStream_test.txt", pSvcLoc)) {
-    cerr << "This test can not be run" << endl;
+    std::println (std::cerr, "This test can not be run");
     return 0;
   }  
   assert(pSvcLoc);
@@ -122,7 +120,7 @@ int main() {
     DataBucketBase* dbb = dynamic_cast<DataBucketBase*> (obj);
     if (!dbb) std::abort();
     const SG::DataProxy* proxy = pStore->proxy (dbb->object());
-    std::cout << appName << " " << dbb->clID() << " " << proxy->name() << "\n";
+    std::println ( "{} {} {}", appName, dbb->clID(), proxy->name());
   }
 
   const SG::SelectionVetoes* selvetoes = nullptr;
@@ -150,6 +148,6 @@ int main() {
 
 
   //all done
-  cout << "*** " << appName << " OK ***" <<endl;
+  std::print ("*** {} OK ***", appName);
   return 0;
 }

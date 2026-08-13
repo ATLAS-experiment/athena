@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file  AthenaServices/test/RCUSvc_test.cxx
@@ -20,6 +20,7 @@
 #include "GaudiKernel/IHiveWhiteBoard.h"
 #include <shared_mutex>
 #include <iostream>
+#include <print>
 #include <cassert>
 
 
@@ -105,7 +106,7 @@ private:
 
 void test1 (IRCUSvc& svc)
 {
-  std::cout << "test1\n";
+  std::println ("test1");
   std::unique_ptr<RCUObject<Payload> > rcuo = svc.newrcu<Payload> (10);
   {
     RCURead<Payload> r (*rcuo);
@@ -226,7 +227,7 @@ void ThreadedTest::testThread::operator()()
 
 void test2 (IRCUSvc& svc)
 {
-  std::cout << "test2\n";
+  std::println ("test2");
   Payload::dolog = false;
   assert (Payload::ninstance == 0);
   {
@@ -244,14 +245,14 @@ int main()
   errorcheck::ReportMessage::hideErrorLocus();
   ISvcLocator* svcloc = 0;
   if (!Athena_test::initGaudi("AthenaServices/RCUSvc_test.txt", svcloc)) {
-    std::cerr << "This test can not be run" << std::endl;
+    std::println (std::cerr, "This test can not be run");
     return 1;
   }  
   assert(svcloc);
 
   ServiceHandle<IRCUSvc> svc ("Athena::RCUSvc", "test");
   if (svc.retrieve().isFailure()) {
-    std::cerr << "Can't retrieve service." << std::endl;
+    std::println (std::cerr, "Can't retrieve service.");
     return 1;
   }
 
