@@ -1,14 +1,10 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //////////////////////////////////////////////////////////////////
 // RectangularSegmentation.cxx, ATLAS Detector software
 ///////////////////////////////////////////////////////////////////
-
-// Trk includes
-#include <memory>
-
 
 
 #include "TrkDigEvent/RectangularSegmentation.h"
@@ -33,7 +29,7 @@ Trk::RectangularSegmentation::RectangularSegmentation(std::shared_ptr<const Trk:
         if (m_binUtility)
             (*m_binUtility) += yBinUtility;
         else
-            m_binUtility = new Trk::BinUtility(yBinUtility);
+            m_binUtility = new Trk::BinUtility(std::move(yBinUtility));
     }
 }
 
@@ -78,7 +74,7 @@ Trk::RectangularSegmentation::RectangularSegmentation(std::shared_ptr<const Trk:
       if (m_binUtility)
 	(*m_binUtility) += yBinUtility;
       else
-	m_binUtility = new Trk::BinUtility(yBinUtility);
+	m_binUtility = new Trk::BinUtility(std::move(yBinUtility));
 
        boundaries.clear();
     }
@@ -116,13 +112,13 @@ void Trk::RectangularSegmentation::createSegmenationSurfaces(std::vector< std::s
     readoutPlaneTransform.translation()     = Amg::Vector3D(0.,0.,readoutDirection*halfThickness);
     // no lorentz angle and everything is straight-forward
     if (lorentzAngle == 0.){
-        counterPlaneBounds = moduleBounds;
+        counterPlaneBounds = std::move(moduleBounds);
         counterPlaneTransform.translation()     = Amg::Vector3D(0.,0.,-readoutDirection*halfThickness);
     } else {
         // lorentz reduced Bounds
         double lorentzReducedHalfX = m_activeBounds->halflengthX() - std::abs(lorentzPlaneShiftX);
         std::shared_ptr<Trk::SurfaceBounds> lorentzReducedBounds(std::make_shared<Trk::RectangleBounds>(lorentzReducedHalfX,m_activeBounds->halflengthY()));
-        counterPlaneBounds  = lorentzReducedBounds;
+        counterPlaneBounds  = std::move(lorentzReducedBounds);
         // now we shift the counter plane in position - this depends on lorentz angle
         double counterPlaneShift = -readoutDirection*lorentzPlaneShiftX;
         counterPlaneTransform.translation() = Amg::Vector3D(counterPlaneShift,0.,-readoutDirection*halfThickness);
