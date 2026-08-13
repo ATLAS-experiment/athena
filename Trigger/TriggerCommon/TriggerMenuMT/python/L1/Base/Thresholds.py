@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 import re
 from copy import deepcopy
@@ -59,7 +59,10 @@ class MenuThresholdsCollection( object ):
 
 
     def typeWideThresholdConfig(self, ttype):
-        return getTypeWideThresholdConfig(ttype, self.flags.Trigger.L1.Menu.doHeavyIonTobThresholds, self.flags.Trigger.L1.Menu.doeFexBDTTau)
+        return getTypeWideThresholdConfig(ttype=ttype, \
+            do_HI_tob_thresholds=self.flags.Trigger.L1.Menu.doHeavyIonTobThresholds, \
+            do_eFex_BDT_Tau=self.flags.Trigger.L1.Menu.doeFexBDTTau, \
+            collisions=self.flags.Beam.NumberOfCollisions)
 
     def json(self):
         confObj = {}
