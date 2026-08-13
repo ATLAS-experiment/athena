@@ -97,6 +97,9 @@ StatusCode MPIClusterSvc::initialize() {
 }
 
 StatusCode MPIClusterSvc::finalize() {
+  m_datacom = mpi3::communicator{};  // Ensure this is disconnected before
+                                     // shutting down MPI
+  m_env.reset(nullptr);
   if (m_mpiLog.empty()) {
     return StatusCode::SUCCESS;
   }
