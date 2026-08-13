@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrkTrack/Track.h"
@@ -24,6 +24,7 @@
 #include "TrkAlgebraUtils/AlSymMat.h"
 
 #include <string>
+#include <memory>
 
 namespace Trk {
 
@@ -298,7 +299,7 @@ namespace Trk {
     if( amendC ) {
       // test with AlSymMat:
       // build AlSymMat instance from 
-      AlSymMat*     CA = new AlSymMat(Csize);
+      auto CA = std::make_unique<AlSymMat>(Csize);
 
       // take a copy of C:
       for( int ii=0; ii<Csize; ++ii ) {
@@ -361,8 +362,6 @@ namespace Trk {
 
       }
 
-      //garbage collection:
-      delete CA;
     }
 
 
@@ -599,11 +598,11 @@ namespace Trk {
       }
 
       // derivatives to be stored on the AlignTSOS
-      std::vector<Amg::VectorX> * atsosDerivs = nullptr;
-      std::vector<Amg::VectorX> * atsosDerVtx = nullptr;
+      std::unique_ptr<std::vector<Amg::VectorX>> atsosDerivs;
+      std::unique_ptr<std::vector<Amg::VectorX>>atsosDerVtx;
       if (m_storeDerivatives) {
-        atsosDerivs = new std::vector<Amg::VectorX>(nResDim,Amg::VectorX(nAlignPar));
-        atsosDerVtx = new std::vector<Amg::VectorX>(nResDim,Amg::VectorX(3));
+        atsosDerivs = std::make_unique<std::vector<Amg::VectorX>>(nResDim,Amg::VectorX(nAlignPar));
+        atsosDerVtx = std::make_unique<std::vector<Amg::VectorX>>(nResDim,Amg::VectorX(3));
         ATH_MSG_DEBUG("nResDim = "<<nResDim<<"       vector size is    "<<atsosDerivs->size());
         ATH_MSG_DEBUG("nAlignPar = "<<nAlignPar<<"   CLHEP::HepVector size is "<<atsosDerivs->at(0).rows());
       }
@@ -612,7 +611,9 @@ namespace Trk {
       // defined. In this frame the trkdistance is the x-coordinate.    
       
       const TrackParameters * mtp  = alignTSOS->trackParameters();
-      if (!mtp || !(mtp->covariance()) ) continue;
+      if (!mtp || !(mtp->covariance()) ){
+        continue;
+      } 
       Amg::RotationMatrix3D localToGlobalRotation =    mtp->measurementFrame();
        
 
@@ -804,8 +805,8 @@ namespace Trk {
         imeas++;
       }
 
-      alignTSOS->setDerivatives(atsosDerivs);
-      alignTSOS->setDerivativesVtx(atsosDerVtx);
+      alignTSOS->setDerivatives(atsosDerivs.release());//alignTSOS takes ownership
+      alignTSOS->setDerivativesVtx(atsosDerVtx.release());//alignTSOS DOES NOT take ownership: leak?
     }
     ATH_MSG_DEBUG("returning derivatives");
     return derivatives;

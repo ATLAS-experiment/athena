@@ -661,7 +661,7 @@ namespace Trk {
 
       // check modIndexMaps to make sure they are the same
       if (ivec==0)
-        modIndexMap = newModIndexMap;
+        modIndexMap = std::move(newModIndexMap);
       else if (modIndexMap!=newModIndexMap) {
         msg(MSG::FATAL)<<"module index maps don't agree!"<<endmsg;
         return false;
@@ -669,7 +669,7 @@ namespace Trk {
       if (ivec>0)
         *m_bigvector += newVector;
       else
-        *m_bigvector  = newVector;
+        *m_bigvector  = std::move(newVector);
     }
 
     m_scale = totalscale;
@@ -847,7 +847,7 @@ namespace Trk {
    
     struct rusage myusage{};
     int itworked =  getrusage(RUSAGE_SELF,&myusage);
-    if(itworked)//note: rusage returns zero if it succeeds!
+    if(itworked == 0)//note: rusage returns zero if it succeeds!
 		  ATH_MSG_DEBUG("ItWorked");
 
     long intialMemUse = myusage.ru_maxrss;
@@ -861,8 +861,9 @@ namespace Trk {
       ATH_MSG_DEBUG("Reading File number " << ifile << ",  " << m_inputTFiles[ifile]);
       
       itworked =  getrusage(RUSAGE_SELF,&myusage);
-      ATH_MSG_DEBUG("Memory usage [MB], total " << myusage.ru_maxrss/1024 << ", increase  " << (myusage.ru_maxrss-intialMemUse)/1024);
-       
+      if (itworked ==0){
+        ATH_MSG_DEBUG("Memory usage [MB], total " << myusage.ru_maxrss/1024 << ", increase  " << (myusage.ru_maxrss-intialMemUse)/1024);
+      }
       TFile* myFile = TFile::Open(m_inputTFiles[ifile].c_str()); 
       
       if ( myFile->IsZombie() || !(myFile->IsOpen()) ) {
@@ -961,7 +962,7 @@ namespace Trk {
       
       // check modIndexMaps to make sure they are the same
       if (ifile == 0){
-        DoFMap = newDoFMap;
+        DoFMap = std::move(newDoFMap);
       } else if (DoFMap!=newDoFMap) {
         msg(MSG::FATAL) << "module dofs don't agree!" << endmsg;
         return false;
