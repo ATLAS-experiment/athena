@@ -29,10 +29,10 @@ PlaneSurface::createUniqueParameters(double l1,
                                      double phi,
                                      double theta,
                                      double qop,
-                                     std::optional<AmgSymMatrix(DIM)> cov) const
+                                     const std::optional<AmgSymMatrix(DIM)> & cov) const
 {
   return std::make_unique<ParametersT<DIM, T, PlaneSurface>>(
-    l1, l2, phi, theta, qop, *this, std::move(cov));
+    l1, l2, phi, theta, qop, *this, cov);
 }
 
 /** Use the Surface as a ParametersBase constructor, from global parameters */
@@ -41,10 +41,10 @@ std::unique_ptr<ParametersT<DIM, T, PlaneSurface>>
 PlaneSurface::createUniqueParameters(const Amg::Vector3D& position,
                                      const Amg::Vector3D& momentum,
                                      double charge,
-                                     std::optional<AmgSymMatrix(DIM)> cov) const
+                                     const std::optional<AmgSymMatrix(DIM)> & cov) const
 {
   return std::make_unique<ParametersT<DIM, T, PlaneSurface>>(
-    position, momentum, charge, *this, std::move(cov));
+    position, momentum, charge, *this, cov);
 }
 
 /** Return properly formatted class name for screen output */

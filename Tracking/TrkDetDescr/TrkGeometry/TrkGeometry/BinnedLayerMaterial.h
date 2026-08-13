@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -14,9 +14,10 @@
 #include "TrkGeometry/MaterialProperties.h"
 #include "GeoPrimitives/GeoPrimitives.h"
 #include "TrkDetDescrUtils/BinUtility.h"
-//Gaudi
-#include "GaudiKernel/MsgStream.h"
 
+#include <iosfwd>
+//Gaudi
+class MsgStream;
 class BinnedLayerMaterialCnv_p1;
 
 namespace Trk {
@@ -52,7 +53,7 @@ namespace Trk {
                           const MaterialPropertiesVector& fullProperties,
                           double splitFactor=0.);
 
-      /**Explizit constructor with only full MaterialProperties, 
+      /**Explicit constructor with only full MaterialProperties, 
          and split factors:
           - 1. : oppositePre
           - 0. : alongPre
@@ -76,6 +77,7 @@ namespace Trk {
       
       /** Assignment operator */
       BinnedLayerMaterial& operator=(const BinnedLayerMaterial& lmp);
+      BinnedLayerMaterial& operator=(BinnedLayerMaterial&& lmp) noexcept;
 
       /** Scale operator */
       virtual BinnedLayerMaterial& operator*=(double scale) override;
@@ -104,7 +106,7 @@ namespace Trk {
     private:
       friend class ::BinnedLayerMaterialCnv_p1;
 
-      BinUtility*       m_binUtility; //!< the helper for the bin finding
+      BinUtility*       m_binUtility{}; //!< the helper for the bin finding
  
       /** The five different MaterialProperties */
       MaterialPropertiesMatrix m_fullMaterial;

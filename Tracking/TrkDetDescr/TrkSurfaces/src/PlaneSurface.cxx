@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -149,10 +149,10 @@ Trk::PlaneSurface::createUniqueTrackParameters(
   double phi,
   double theta,
   double qop,
-  std::optional<AmgSymMatrix(5)> cov) const
+  const std::optional<AmgSymMatrix(5)> & cov) const
 {
   return std::make_unique<ParametersT<5, Charged, PlaneSurface>>(
-    l1, l2, phi, theta, qop, *this, std::move(cov));
+    l1, l2, phi, theta, qop, *this, cov);
 }
 /** Use the Surface as a ParametersBase constructor, from global parameters -
  * charged*/
@@ -161,10 +161,10 @@ Trk::PlaneSurface::createUniqueTrackParameters(
   const Amg::Vector3D& position,
   const Amg::Vector3D& momentum,
   double charge,
-  std::optional<AmgSymMatrix(5)> cov) const
+  const std::optional<AmgSymMatrix(5)> & cov) const
 {
   return std::make_unique<ParametersT<5, Charged, PlaneSurface>>(
-    position, momentum, charge, *this, std::move(cov));
+    position, momentum, charge, *this, cov);
 }
 
 /** Use the Surface as a ParametersBase constructor, from local parameters -
@@ -176,10 +176,10 @@ Trk::PlaneSurface::createUniqueNeutralParameters(
   double phi,
   double theta,
   double oop,
-  std::optional<AmgSymMatrix(5)> cov) const
+  const std::optional<AmgSymMatrix(5)> & cov) const
 {
   return std::make_unique<ParametersT<5, Neutral, PlaneSurface>>(
-    l1, l2, phi, theta, oop, *this, std::move(cov));
+    l1, l2, phi, theta, oop, *this, cov);
 }
 
 /** Use the Surface as a ParametersBase constructor, from global parameters -
@@ -189,10 +189,10 @@ Trk::PlaneSurface::createUniqueNeutralParameters(
   const Amg::Vector3D& position,
   const Amg::Vector3D& momentum,
   double charge,
-  std::optional<AmgSymMatrix(5)> cov) const
+  const std::optional<AmgSymMatrix(5)> & cov) const
 {
   return std::make_unique<ParametersT<5, Neutral, PlaneSurface>>(
-    position, momentum, charge, *this, std::move(cov));
+    position, momentum, charge, *this, cov);
 }
 
 // Avoid out-of-line Eigen calls
