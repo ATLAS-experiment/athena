@@ -10,7 +10,10 @@
 #include "MuonTGC_Cabling/TgcCablingMap.h"
 #include "MuonReadoutGeometry/MuonDetectorManager.h"
 #include "StoreGate/ReadCondHandleKey.h"
+#include "TgcL0FloatingPtLut.h"
 
+#include <memory>
+#include <string>
 #include <vector>
 
 namespace L0Muon {
@@ -54,6 +57,14 @@ class TgcL0FloatingCandidateBuilderTool final
   Gaudi::Property<unsigned int> m_maxCandidatesPerLocalBin{
       this, "MaxCandidatesPerLocalBin", 8U,
       "Maximum candidates retained per old Floating local eta-phi-pivot bin"};
+
+  Gaudi::Property<std::string> m_ptCalibrationFile{
+      this, "PtCalibrationFile",
+      "L0MuonS1TGC/Floating/eta18_phi8_poormag0p10_v1/"
+      "TgcL0PtCalibration.txt",
+      "ASCII Floating-pT calibration path relative to the GroupData "
+      "development directory"};
+  std::unique_ptr<const TgcL0FloatingPtLut> m_ptLut{};
 };
 
 }  // namespace L0Muon
