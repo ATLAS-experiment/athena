@@ -133,6 +133,9 @@ def configureAndRunMadGraph(flags):
               '1000035','1000037','35','36','37']: # Note that gravitino is non-standard
         masses[p]=decoupled_mass
     decays = {}
+    rhlog.info( "AAAAAAAA")
+    rhlog.info( flags.dump())
+    rhlog.info( "AAAAAAAA")
 
     # Useful definitions
     squarks = []
@@ -346,7 +349,7 @@ def configureAndRunMadGraph(flags):
 
     # Build the param card, aka SLHA file
     from MadGraphControl.MadGraphUtils import modify_param_card
-    modify_param_card(param_card_input='param_card.dat', params={'MASS': masses,'DECAY':decays}, output_location='SLHA_INPUT.DAT')
+    modify_param_card(param_card_input='PROC*/Cards/param_card.dat', params={'MASS': masses,'DECAY':decays}, output_location='SLHA_INPUT.DAT')
 
     # Now if the user didn't ask to keep it, get rid of the directory
     if not keepMadGraphOutput:
