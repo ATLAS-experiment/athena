@@ -12,6 +12,7 @@
 #include "ParticleJetTools/CopyTruthJetParticles.h"
 #include "ParticleJetTools/ParticleJetDeltaRLabelTool.h"
 #include "ParticleJetTools/ParticleJetGhostLabelTool.h"
+#include "ParticleJetTools/JetIRCSafeLabelTool.h"
 #include "ParticleJetTools/JetParticleAssociation.h"
 #include "ParticleJetTools/JetParticleCenterOfMassAssociation.h"
 #include "ParticleJetTools/JetParticleShrinkingConeAssociation.h"
@@ -22,3 +23,4 @@
 #include "ParticleJetTools/JetPartonTruthLabel.h"
 
 #endif
+

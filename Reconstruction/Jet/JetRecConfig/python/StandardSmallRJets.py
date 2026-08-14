@@ -55,7 +55,7 @@ standardmods_ufo = (
 
 clustermods      = ("ECPSFrac","ClusterMoments",) 
 truthmods        = ("PartonTruthLabel","JetDeltaRLabel:5000", "JetGhostLabel")
-pflowmods        = ()
+pflowmods        = ("JetIRCSafeLabel",)
 
 substrmods = ("nsubjettiness","ecorr")
 
@@ -87,52 +87,52 @@ AntiKt4PV0Track = JetDefinition("AntiKt", 0.4, cst.PV0Track,
 
 AntiKt4EMPFlow = JetDefinition("AntiKt",0.4,cst.GPFlow,
                                ghostdefs = standardghosts+flavourghosts,
-                               modifiers = calibmods+truthmods+standardmods+("Filter_calibThreshold:10000","JetGhostLabel","JetDeltaRInitialLabel:5000","JetGhostInitialLabel","JetQuarkChargeLabel","LArHVCorr","jetiso"),
+                               modifiers = calibmods+truthmods+standardmods+pflowmods+("Filter_calibThreshold:10000","JetGhostLabel","JetDeltaRInitialLabel:5000","JetGhostInitialLabel","JetQuarkChargeLabel","LArHVCorr","jetiso"),
                                lock = True
 )
 
 # The following jet collection will be scheduled in derivation production (instead of AntiKt4EMPFlow which is used e.g. at Tier-0)
 AntiKt4EMPFlow_deriv = AntiKt4EMPFlow.clone(
     ghostdefs = AntiKt4EMPFlow.ghostdefs+["UnAssocMuonSegment"],
-    modifiers = AntiKt4EMPFlow.modifiers+("JetPtAssociation","fJVT","NNJVT","CaloEnergiesClus","JetPileupLabel","qgtransformer")+truthlabels
+    modifiers = AntiKt4EMPFlow.modifiers+("JetPtAssociation","fJVT","NNJVT","CaloEnergiesClus","JetPileupLabel","qgtransformer")+truthlabels+pflowmods
 )
 
 AntiKt4EMPFlowML = JetDefinition("AntiKt",0.4,cst.GPFlowML,
                                infix = "ML",
                                ghostdefs = standardghosts+flavourghosts,
-                               modifiers = calibmods+truthmods+standardmods+("Filter_calibThreshold:1","JetGhostLabel","JetDeltaRInitialLabel:5000","JetGhostInitialLabel","JetQuarkChargeLabel","LArHVCorr","jetiso"),
+                               modifiers = calibmods+truthmods+standardmods+pflowmods+("Filter_calibThreshold:1","JetGhostLabel","JetDeltaRInitialLabel:5000","JetGhostInitialLabel","JetQuarkChargeLabel","LArHVCorr","jetiso"),
                                lock = True
 )
 
 
 AntiKt4EMPFlow_noElectrons = JetDefinition("AntiKt",0.4,cst.GPFlow_noElectrons,
                                     ghostdefs = standardghosts+flavourghosts,
-                                    modifiers = calibmods+truthmods+standardmods+("Filter_calibThreshold:10000","JetGhostLabel","LArHVCorr","jetiso"),
+                                    modifiers = calibmods+truthmods+standardmods+pflowmods+("Filter_calibThreshold:10000","JetGhostLabel","LArHVCorr","jetiso"),
                                     lock = True
 )
 
 AntiKt4EMPFlow_noMuons = JetDefinition("AntiKt",0.4,cst.GPFlow_noMuons,
                                     ghostdefs = standardghosts+flavourghosts,
-                                    modifiers = calibmods+truthmods+standardmods+("Filter_calibThreshold:10000","JetGhostLabel","LArHVCorr","jetiso"),
+                                    modifiers = calibmods+truthmods+standardmods+pflowmods+("Filter_calibThreshold:10000","JetGhostLabel","LArHVCorr","jetiso"),
                                     lock = True
 )
 
 AntiKt4EMPFlow_noLeptons = JetDefinition("AntiKt",0.4,cst.GPFlow_noLeptons,
                                     ghostdefs = standardghosts+flavourghosts,
-                                    modifiers = calibmods+truthmods+standardmods+("Filter_calibThreshold:10000","JetGhostLabel","LArHVCorr","jetiso"),
+                                    modifiers = calibmods+truthmods+standardmods+pflowmods+("Filter_calibThreshold:10000","JetGhostLabel","LArHVCorr","jetiso"),
                                     lock = True
 )
 
 #Same as AntiKt4EMPFlow but with charged and neutrals linked to muons included.
 AntiKt4EMPFlow_inclMuons = JetDefinition("AntiKt",0.4,cst.GPFlow_inclMuons,
                                     ghostdefs = standardghosts+flavourghosts,
-                                    modifiers = calibmods+truthmods+standardmods+("Filter_calibThreshold:10000","JetGhostLabel","LArHVCorr","jetiso"),
+                                    modifiers = calibmods+truthmods+standardmods+pflowmods+("Filter_calibThreshold:10000","JetGhostLabel","LArHVCorr","jetiso"),
                                     lock = True
 )
 
 AntiKt4EMPFlow_tauSeedEleRM = JetDefinition("AntiKt",0.4,cst.GPFlow_tauSeedEleRM,
                                     ghostdefs = standardghosts+flavourghosts,
-                                    modifiers = calibmods+truthmods+standardmods+("Filter_calibThreshold:10000","JetGhostLabel","LArHVCorr","jetiso"),
+                                    modifiers = calibmods+truthmods+standardmods+pflowmods+("Filter_calibThreshold:10000","JetGhostLabel","LArHVCorr","jetiso"),
                                     lock = True
 )
 
@@ -196,14 +196,14 @@ AntiKt4EMPFlowCSSKNoPtCut = JetDefinition("AntiKt",0.4,cst.GPFlowCSSK,
 AntiKt4EMPFlowNoPtCut = JetDefinition("AntiKt",0.4,cst.GPFlow,
                                       infix = "NoPtCut",
                                       ghostdefs = standardghosts+flavourghosts,
-                                      modifiers = calibmods_lowCut+("Filter:1",)+truthmods+standardmods+("JetPtAssociation","CaloEnergiesClus","jetiso"),
+                                      modifiers = calibmods_lowCut+("Filter:1",)+truthmods+standardmods+pflowmods+("JetPtAssociation","CaloEnergiesClus","jetiso"),
                                       ptmin = 1,
                                       lock = True
 )
 
 AntiKt4EMPFlowByVertex = JetDefinition("AntiKt", 0.4, cst.GPFlowByVtx,
                                         ghostdefs = standardghosts+flavourghosts,
-                                        modifiers = calibmods_lowCut+("Filter:1",)+truthmods+standardmods+substrmods+("JetPtAssociation","CaloEnergiesClus"),
+                                        modifiers = calibmods_lowCut+("Filter:1",)+truthmods+standardmods+substrmods+pflowmods+("JetPtAssociation","CaloEnergiesClus"),
                                         ptmin = 7000,
                                         lock = True,
                                         byVertex = True
@@ -236,7 +236,7 @@ AntiKt4UFOCSSKLowPt = JetDefinition("AntiKt",0.4,cst.UFOCSSK,
 AntiKt4EMPFlowLowPt = JetDefinition("AntiKt",0.4,cst.GPFlow,
                                     infix = "LowPt",
                                     ghostdefs = standardghosts+flavourghosts,
-                                    modifiers = calibmods_lowCut+("Filter:2000",)+truthmods+standardmods+("JetPtAssociation","jetiso",),
+                                    modifiers = calibmods_lowCut+("Filter:2000",)+truthmods+standardmods+pflowmods+("JetPtAssociation","jetiso",),
                                     ptmin = 2000,
                                     lock = True
 )

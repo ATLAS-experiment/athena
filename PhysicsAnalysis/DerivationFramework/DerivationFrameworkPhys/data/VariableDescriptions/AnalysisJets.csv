@@ -36,3 +36,8 @@ LineNumber,VariableName,Type,Description
 35,DFCommonJets_jetClean_LooseBad,vector<char>,Loose working point for identifying "bad" jets from non-collision backgrounds
 36,DFCommonJets_jetClean_TightBad,vector<char>,Tight working point for identifying "bad" jets from non-collision backgrounds
 37,QGTransformer_ConstScore,vector<float>,Quark-gluon tagging score
+38,IRCSafeLabelIFN,vector<int>,"IRC safe heavy flavour label derived with Interleaved Flavour Neutralisation (Caola, Grabarczyk, Hutt, Salam, Scyboz, Thaler), used by flavour tagging and standard model groups"
+39,IRCSafeLabelCMP,vector<int>,"IRC safe heavy flavour label derived with flavour-anti-kt (Czakon, Mitov, Poncelet), used by flavour tagging and standard model groups"
+40,IRCSafeLabelGHS,vector<int>,"IRC safe heavy flavour label derived with flavour dressing (Gauld, Huss, Stagnitto), used by flavour tagging and standard model groups"
+41,IRCSafeLabelSDF,vector<int>,"IRC safe heavy flavour label derived with soft drop flavour (Simone Caletti, Andrew J. Larkoski, Simone Marzani, Daniel Reichelt), used by flavour tagging and standard model groups"
+42,IRCSafeLabelAKT,vector<int>,"IRC UNsafe but useful heavy flavour label derived with anti-kt with net flavour recombination - useful in understanding the flavour creation mechanisms, see 2506.13449 for details, used by flavour tagging and standard model groups"
