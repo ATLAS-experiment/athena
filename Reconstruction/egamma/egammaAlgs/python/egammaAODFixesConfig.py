@@ -69,7 +69,7 @@ def doFixTime(flags,relNum = None):
       releaseInRange(flags,"Athena-24.0.0","Athena-24.0.200",relNum) or \
       releaseInRange(flags,"Athena-25.0.0","Athena-25.0.200",relNum)
 
-def runAODFix(flags, correctCluster = True, checkRelWithAMI = True):
+def runAODFix(flags, correctCluster = True, checkRelWithAMI = False):
 
     msg=logging.getLogger("GetDecisionToRunAODFix")
 
