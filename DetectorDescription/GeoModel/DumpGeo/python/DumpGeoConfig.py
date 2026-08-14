@@ -319,6 +319,25 @@ if __name__=="__main__":
         flags.GeoModel.AtlasVersion = args.detDescr
         _logger.verbose("+ ... Done")
 
+    # ZDC geometry is stored only in dedicated geometry tags. Warn rather than
+    # silently replacing the user's selected tag, since the choice between the
+    # available ZDC layouts is significant.
+    if flags.Detector.GeometryZDC:
+        known_zdc_tags = {
+            defaultGeometryTags.RUN2_ZDC,
+            defaultGeometryTags.RUN3_ZDC23,
+            defaultGeometryTags.RUN3_ZDC24,
+        }
+        if flags.GeoModel.AtlasVersion not in known_zdc_tags:
+            _logger.warning(
+                "ZDC geometry was enabled with geometry tag '%s', which may "
+                "not contain a ZDC GeoDB payload. Consider using "
+                "--detDescr=%s or --detDescr=%s for Run 3.",
+                flags.GeoModel.AtlasVersion,
+                defaultGeometryTags.RUN3_ZDC23,
+                defaultGeometryTags.RUN3_ZDC24,
+            )
+
     # finalize setting flags: lock them.
     flags.lock()
 
@@ -358,4 +377,3 @@ if __name__=="__main__":
     # +++ Configure DumpGeo and run
     cfg.merge(DumpGeoCfg(flags))
     cfg.run()
-
