@@ -162,6 +162,19 @@ def defaultITkActsTrigTrackingFlags() -> AthConfigFlags:
     
   return flags
 
+def actsLRTTrigTrackingFlags(flags: AthConfigFlags) -> None:
+  """Apply the Acts-specific steering and cuts needed by trigger LRT."""
+  flags.isLargeD0 = True
+  flags.autoReverseSearch = True
+  flags.etaBins = [-1.0, 2.7]
+  flags.minPT = [1.0 * Units.GeV]
+  flags.minPTSeed = 1.0 * Units.GeV
+  flags.maxPrimaryImpactSeed = 300.0 * Units.mm
+  flags.maxZImpactSeed = 500.0 * Units.mm
+  flags.minPixel = [0]
+  flags.Xi2max = [25.0]
+  flags.Xi2maxNoAdd = [50.0]
+
 def defaultModeTrigTrackingFlags(flags: AthConfigFlags) -> AthConfigFlags:
   return flags
 
@@ -254,6 +267,17 @@ def signatureActions(func):
     recoMode = args[2]
     derivedFromSignatureFlags(flagsSig,recoMode)  #invoke code dependant on signature flags
     return flagsSig
+  return invokeSteps
+
+
+def lrtSignatureActions(func):
+  """Set common LRT flags before applying per-signature overrides."""
+  @signatureActions
+  def invokeSteps(flags: AthConfigFlags, instanceName: str, recoMode: str):
+    flags.isLRT = True
+    if recoMode == "Acts":
+      actsLRTTrigTrackingFlags(flags)
+    return func(flags, instanceName, recoMode)
   return invokeSteps
 
 
@@ -647,7 +671,7 @@ def bhh(flags: AthConfigFlags, instanceName: str, recoMode: str) -> AthConfigFla
   flags.SuperRoI = True
   return flags
 
-@signatureActions
+@lrtSignatureActions
 def electronLRT(flags: AthConfigFlags, instanceName: str, recoMode: str) -> AthConfigFlags:
 
   flags.input_name = instanceName
@@ -663,7 +687,6 @@ def electronLRT(flags: AthConfigFlags, instanceName: str, recoMode: str) -> AthC
   flags.zedHalfWidth        = 225.
   flags.doSeedRedundancyCheck = True
   flags.nClustersMin        = 8
-  flags.isLRT               = True
   #pt config
   flags.maxPrimaryImpact    = tsetter(flags.maxPrimaryImpact, 300.*Units.mm)
   flags.maxEMImpact         = tsetter(flags.maxEMImpact, 300.*Units.mm)
@@ -672,7 +695,7 @@ def electronLRT(flags: AthConfigFlags, instanceName: str, recoMode: str) -> AthC
   return flags
 
 
-@signatureActions
+@lrtSignatureActions
 def muonLRT(flags: AthConfigFlags, instanceName: str, recoMode: str) -> AthConfigFlags:
 
   flags.input_name = instanceName
@@ -688,7 +711,6 @@ def muonLRT(flags: AthConfigFlags, instanceName: str, recoMode: str) -> AthConfi
   flags.zedHalfWidth        = 225.
   flags.doSeedRedundancyCheck = True
   flags.nClustersMin        = 8
-  flags.isLRT               = True
   flags.doResMon            = True
   flags.DoPhiFiltering      = False
   #pt config
@@ -701,7 +723,7 @@ def muonLRT(flags: AthConfigFlags, instanceName: str, recoMode: str) -> AthConfi
 
 
 
-@signatureActions
+@lrtSignatureActions
 def tauLRT(flags: AthConfigFlags, instanceName: str, recoMode: str) -> AthConfigFlags:
 
   flags.input_name = instanceName
@@ -719,7 +741,6 @@ def tauLRT(flags: AthConfigFlags, instanceName: str, recoMode: str) -> AthConfig
   flags.TrackInitialD0Max   = 300.
   flags.TrackZ0Max          = 500.
   flags.nClustersMin        = 8
-  flags.isLRT               = True
   #pt config
   flags.maxPrimaryImpact    = tsetter(flags.maxPrimaryImpact, 300.*Units.mm)
   flags.maxEMImpact         = tsetter(flags.maxEMImpact, 300.*Units.mm)
@@ -731,7 +752,7 @@ def tauLRT(flags: AthConfigFlags, instanceName: str, recoMode: str) -> AthConfig
   return flags
 
 
-@signatureActions
+@lrtSignatureActions
 def bjetLRT(flags: AthConfigFlags, instanceName: str, recoMode: str) -> AthConfigFlags:
 
   flags.input_name = instanceName
@@ -745,7 +766,6 @@ def bjetLRT(flags: AthConfigFlags, instanceName: str, recoMode: str) -> AthConfi
   flags.TrackInitialD0Max   = 300.
   flags.TrackZ0Max          = 500.
   flags.nClustersMin        = 8
-  flags.isLRT               = True
   #pt config
   flags.maxPrimaryImpact    = tsetter(flags.maxPrimaryImpact, 300.*Units.mm)
   flags.maxEMImpact         = tsetter(flags.maxEMImpact, 300.*Units.mm)
@@ -755,7 +775,7 @@ def bjetLRT(flags: AthConfigFlags, instanceName: str, recoMode: str) -> AthConfi
   return flags
 
 
-@signatureActions
+@lrtSignatureActions
 def fullScanLRT(flags: AthConfigFlags, instanceName: str, recoMode: str) -> AthConfigFlags:
 
   flags.input_name = instanceName
@@ -773,7 +793,6 @@ def fullScanLRT(flags: AthConfigFlags, instanceName: str, recoMode: str) -> AthC
   flags.Triplet_D0_PPS_Max    = 300.
   flags.DoubletDR_Max         = 200
   flags.nClustersMin          = 8
-  flags.isLRT                 = True
   #pt config
   flags.maxPrimaryImpact      = tsetter(flags.maxPrimaryImpact, 300.*Units.mm)
   flags.maxEMImpact           = tsetter(flags.maxEMImpact, 300.*Units.mm)
@@ -783,7 +802,7 @@ def fullScanLRT(flags: AthConfigFlags, instanceName: str, recoMode: str) -> AthC
   return flags
 
 
-@signatureActions
+@lrtSignatureActions
 def DJetLRT(flags: AthConfigFlags, instanceName: str, recoMode: str) -> AthConfigFlags:
 
   flags.input_name = instanceName
@@ -802,7 +821,6 @@ def DJetLRT(flags: AthConfigFlags, instanceName: str, recoMode: str) -> AthConfi
   flags.Triplet_D0_PPS_Max    = 300.
   flags.DoubletDR_Max         = 200
   flags.nClustersMin          = 8
-  flags.isLRT                 = True
   #pt config
   flags.maxPrimaryImpact      = tsetter(flags.maxPrimaryImpact, 300.*Units.mm)
   flags.maxEMImpact           = tsetter(flags.maxEMImpact, 300.*Units.mm)
@@ -812,7 +830,7 @@ def DJetLRT(flags: AthConfigFlags, instanceName: str, recoMode: str) -> AthConfi
   return flags
 
 
-@signatureActions
+@lrtSignatureActions
 def DVtxLRT(flags: AthConfigFlags, instanceName: str, recoMode: str) -> AthConfigFlags:
 
   flags.input_name = instanceName
@@ -830,7 +848,6 @@ def DVtxLRT(flags: AthConfigFlags, instanceName: str, recoMode: str) -> AthConfi
   flags.Triplet_D0_PPS_Max    = 300.
   flags.DoubletDR_Max         = 200
   flags.nClustersMin          = 8
-  flags.isLRT                 = True
   #pt config
   flags.maxPrimaryImpact      = tsetter(flags.maxPrimaryImpact, 300.*Units.mm)
   flags.maxEMImpact           = tsetter(flags.maxEMImpact, 300.*Units.mm)
