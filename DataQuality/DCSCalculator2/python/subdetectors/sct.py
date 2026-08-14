@@ -1,7 +1,6 @@
 # Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
 
-from pkg_resources import resource_string
-
+from importlib.resources import files
 from ..lib import (DCSC_DefectTranslate_Subdetector, DCSC_Variable, GoodIOV,
                    OUT_OF_CONFIG, DCSC_Variable_With_Mapping)
 
@@ -88,8 +87,8 @@ class SCT(DCSC_DefectTranslate_Subdetector):
         #    kwargs['keep_dcsofl'] = True
         super(SCT, self).__init__(*args, **kwargs)
 
-        sct_sn_to_cool_ids = resource_string("DCSCalculator2.subdetectors.data", 
-                                             "sct_module_ids.dat").decode()
+        sct_sn_to_cool_ids = \
+            files("DCSCalculator2.subdetectors.data").joinpath("sct_module_ids.dat").read_bytes().decode()
         sct_sn_to_cool_ids = sct_sn_to_cool_ids.strip().split("\n")
         sn_mapping = dict(map(int, l.split()) for l in sct_sn_to_cool_ids if l)
         self.set_input_mapping("/SCT/DAQ/Configuration/Module", sn_mapping)
