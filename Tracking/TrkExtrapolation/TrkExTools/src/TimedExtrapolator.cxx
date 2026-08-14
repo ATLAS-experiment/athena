@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -1052,12 +1052,12 @@ Trk::TimedExtrapolator::overlapSearch(Trk::TimedExtrapolator::Cache &cache,
 
   const EventContext& ctx = Gaudi::Hive::currentContext();
   // indicate destination layer
-  bool isDestinationLayer = false;
+  static constexpr bool isDestinationLayer = false;
   // start and end surface for on-layer navigation
   //  -> take the start surface if ther parameter surface is owned by detector element
   const Trk::Surface *startSurface = ((parm.associatedSurface()).associatedDetectorElement() && startingLayer) ?
                                      &parm.associatedSurface() : nullptr;
-  const Trk::Surface *endSurface = nullptr;
+  const Trk::Surface * const endSurface = nullptr;
   // - the best detSurface to start from is the one associated to the detector element
   const Trk::Surface *detSurface = (parsOnLayer.associatedSurface()).associatedDetectorElement() ?
                                    &parsOnLayer.associatedSurface() : nullptr;
@@ -1105,10 +1105,9 @@ Trk::TimedExtrapolator::overlapSearch(Trk::TimedExtrapolator::Cache &cache,
       !isDestinationLayer) {
     ATH_MSG_VERBOSE("  [o] First intersection with Detector surface: " << *detParameters);
     // for the later use in the overlapSearch
-    surfaceHit = detParameters && detSurface ? detSurface->isOnSurface(detParameters->position()) : 0; // ,bcheck) -
-                                                                                                       // creates
-                                                                                                       // problems on
-                                                                                                       // start layer;
+    //detParameters && detSurface  are non-null here
+    surfaceHit = detSurface->isOnSurface(detParameters->position());
+                                                                                                                                                                                                                                                                                                   
     // check also for start/endSurface on this level
 
     surfaceHit = (surfaceHit && startSurface) ?
@@ -1428,6 +1427,8 @@ Trk::TimedExtrapolator::transportToVolumeWithPathLimit(
   }
 
   // current frame volume known-retrieve geoID
+  if (!cache.m_currentStatic)[[unlikely]] return returnParameters;
+  //
   nextGeoID = cache.m_currentStatic->geometrySignature();
 
   // resolve active Calo volumes if hit info required
@@ -1864,6 +1865,7 @@ Trk::TimedExtrapolator::transportToVolumeWithPathLimit(
 
         if (nextPar && process == 121) {
           ATH_MSG_DEBUG(" [!] WARNING: failed hadronic interaction, killing the input particle anyway");
+          delete nextPar;
           return returnParameters;
         }
 

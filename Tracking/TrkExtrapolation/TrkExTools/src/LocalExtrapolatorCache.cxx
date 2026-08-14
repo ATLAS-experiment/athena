@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
  */
 #include "TrkSurfaces/Surface.h"
 #include "TrkExUtils/ExtrapolationCache.h"
@@ -88,13 +88,15 @@ namespace Trk{
     if (elossPointerOverwritten()) {
       result = elossPointerErrorMsg();
     } else {
-      result = txt + " X0 " +std::to_string(m_extrapolationCache->x0tot())  + " Eloss deltaE "
+      if (m_extrapolationCache and m_extrapolationCache->eloss()){
+        result = txt + " X0 " +std::to_string(m_extrapolationCache->x0tot())  + " Eloss deltaE "
                       + std::to_string(m_extrapolationCache->eloss()->deltaE()) + " Eloss sigma "
                       +  std::to_string(m_extrapolationCache->eloss()->sigmaDeltaE()) + " meanIoni "
                       + std::to_string(m_extrapolationCache->eloss()->meanIoni()) + " sigmaIoni "
                       + std::to_string(m_extrapolationCache->eloss()->sigmaIoni()) + " meanRad "
                       + std::to_string(m_extrapolationCache->eloss()->meanRad()) + " sigmaRad "
                       + std::to_string(m_extrapolationCache->eloss()->sigmaRad());
+      }
     }
     return result;
   }
@@ -102,15 +104,17 @@ namespace Trk{
 
   bool
   Cache::elossPointerOverwritten() const{
-    return (m_cacheEloss != nullptr && m_cacheEloss != m_extrapolationCache->eloss());
+    return (m_cacheEloss && m_extrapolationCache && m_cacheEloss != m_extrapolationCache->eloss());
   }
 
   std::string
   Cache::elossPointerErrorMsg(int lineNumber) const{
   std::string result;
   if (lineNumber !=0) result = "Line " + std::to_string(lineNumber)+": ";
-  result += " PROBLEM Eloss cache pointer overwritten " + std::to_string(reinterpret_cast<std::uintptr_t>(m_cacheEloss))
+  if (m_extrapolationCache){
+    result += " PROBLEM Eloss cache pointer overwritten " + std::to_string(reinterpret_cast<std::uintptr_t>(m_cacheEloss))
                         + " from extrapolationCache " + std::to_string(reinterpret_cast<std::uintptr_t>(m_extrapolationCache->eloss()));
+  }
   return result;
   }
 
