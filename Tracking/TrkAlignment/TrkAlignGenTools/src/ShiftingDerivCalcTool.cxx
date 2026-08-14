@@ -151,9 +151,9 @@ namespace Trk {
     double shiftsize = shiftSize(*alignParIt);
     if (ishift>0) shiftsize*=-1.;
     m_alignModuleTool->shiftModule(*moduleIt,alignTrack,(**alignParIt).paramType(),shiftsize);
-    refittedTrack = std::move(m_fitter->fit(ctx,
+    refittedTrack = m_fitter->fit(ctx,
                                   *trackForRefit,m_runOutlierRemoval,
-                                  m_particleHypothesis));
+                                  m_particleHypothesis);
     m_alignModuleTool->restoreModule(*moduleIt);
     if (!refittedTrack) {
       msg(MSG::WARNING) << "track refit failed!"<<endmsg;
