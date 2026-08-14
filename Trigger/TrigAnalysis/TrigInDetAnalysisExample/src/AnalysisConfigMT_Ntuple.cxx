@@ -454,9 +454,6 @@ void AnalysisConfigMT_Ntuple::loop() {
 	  else if (m_provider->evtStore()->contains<xAOD::TrackParticleContainer>(collection_test)) {
 	    found = selectTracks<xAOD::TrackParticleContainer>( &selectorTest, collectionname );
 	  }
-	  else if (m_provider->evtStore()->contains<TrigInDetTrackCollection>(collection_test)) {
-	    found = selectTracks<TrigInDetTrackCollection>( &selectorTest, collectionname );
-	  }
 	  else if (m_provider->evtStore()->contains<TrackCollection>(collection_test)) {
 	    found = selectTracks<TrackCollection>( &selectorTest, collectionname );
 	  }
