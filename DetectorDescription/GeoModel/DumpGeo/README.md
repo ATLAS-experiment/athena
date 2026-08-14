@@ -3,6 +3,7 @@
  * [Intro](#intro) 
  * [Setup](#build)
  * [Run](#run)
+ * [Unit tests](#unit-tests)
  * [Documentation](#documentation)
 
 ## Intro
@@ -147,9 +148,47 @@ $ python -m DumpGeo.DumpGeoConfig —help
 ```
 
 
+## Unit tests
+
+The unit tests in `python/DumpGeoConfig_test.py` provide a regression baseline
+for the `DumpGeoCfg` ComponentAccumulator configuration. They exercise the
+configuration without running an Athena event loop or creating a geometry
+SQLite file.
+
+The tests cover:
+
+* the default `GeoModel.DumpGeo` flags;
+* automatic and custom output file names;
+* DetectorManager filtering and the corresponding automatic file name;
+* the `ShowTreetopContent` property;
+* explicit algorithm properties supplied through keyword arguments;
+* removal of an existing output file when `ForceOverwrite` is enabled; and
+* the configurable algorithm name.
+
+Two tests are marked with `unittest.expectedFailure` to document known
+behaviour: DetectorManager filtering is currently lost when a custom output
+file name is used, and `DumpGeoCfg` currently ignores its `name` argument.
+These expected failures keep the current regression baseline passing. When
+the corresponding behaviour is fixed, remove the decorator so that each test
+becomes a regular regression test.
+
+After building the `DumpGeo` package and setting up the resulting Athena
+runtime environment, run the tests directly with:
+
+```sh
+python -m unittest -v DumpGeo.DumpGeoConfig_test
+```
+
+The tests are also registered with CTest and can be run from the build
+directory with:
+
+```sh
+ctest -R DumpGeoConfig --output-on-failure
+```
+
+
 ## Documentation
 
 You can get more information about the GeoModel tree and the content of the output SQLite file on the GeoModel documentation website: https://cern.ch/geomodel
 
  
-
