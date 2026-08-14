@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( StgcRawDataMonitoring )
@@ -6,7 +6,7 @@ atlas_subdir( StgcRawDataMonitoring )
 # Component(s) in the package:
 atlas_add_component( StgcRawDataMonitoring
    StgcRawDataMonitoring/*.h src/*.cxx src/components/*.cxx
-   LINK_LIBRARIES AthenaMonitoringLib MuonIdHelpersLib MuonPrepRawData StoreGateLib MuonRIO_OnTrack TrkToolInterfaces TrkParameters MuonRDO MuonNSWCommonDecode FourMomUtils MuonDetDescrUtils) 
+   LINK_LIBRARIES AthenaMonitoringLib FourMomUtils MuonDetDescrUtils MuonIdHelpersLib MuonNSWCommonDecode MuonPrepRawData MuonRDO MuonRIO_OnTrack MuonReadoutGeometry StoreGateLib TrkParameters TrkToolInterfaces xAODMuon xAODTracking )
 
 # Install files from the package:
 atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
