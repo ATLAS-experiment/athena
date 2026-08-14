@@ -182,7 +182,7 @@ Trk::Extrapolator::initialize()
   const unsigned int validmeuts = m_updaters.size();
   std::vector<std::string> fullPropagatorNames(m_propagators.size());
   std::vector<std::string> fullUpdatorNames(m_updaters.size());
-  auto extractNameFromTool = [](const auto& toolHndl) { return toolHndl->name(); };
+  auto extractNameFromTool = [](const auto& toolHndl)-> const std::string & { return toolHndl->name(); };
   std::transform(
     m_propagators.begin(), m_propagators.end(), fullPropagatorNames.begin(), extractNameFromTool);
   std::transform(
@@ -492,7 +492,7 @@ Trk::Extrapolator::extrapolateM(const EventContext& ctx,
   Trk::CacheOwnedPtr<Trk::TrackParameters> parameterAtDestination =
       extrapolateImpl(ctx, cache, clonedInput, sf, dir, bcheck, particle,
                       Trk::addNoise, extrapolationCache);
-  if (parameterAtDestination) {
+  if (parameterAtDestination and cache.m_matstates) {
     ATH_MSG_VERBOSE("  [+] Adding the destination surface to the TSOS vector in extrapolateM() ");
     cache.m_matstates->push_back(new TrackStateOnSurface(
         nullptr, cache.m_ownedPtrs.move(parameterAtDestination), nullptr));
@@ -4178,7 +4178,7 @@ Trk::Extrapolator::extrapolateToVolumeWithPathLimit(const EventContext& ctx,
   }
 
   // update if new static volume
-  if (updateStatic) { // retrieve boundaries
+  if (updateStatic and cache.m_currentStatic) { // retrieve boundaries
     cache.retrieveBoundaries();
     //
     cache.m_detachedVols.clear();

@@ -1,16 +1,17 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
 // MaterialEffectsEngine.cxx, (c) ATLAS Detector software
 ///////////////////////////////////////////////////////////////////
 
-// STL
-#include <sstream>
+
 // Trk include
 #include "TrkExEngine/MaterialEffectsEngine.h"
 #include "TrkGeometry/Layer.h"
+// STL
+#include <sstream>
 
 // constructor
 Trk::MaterialEffectsEngine::MaterialEffectsEngine(const std::string& t, const std::string& n, const IInterface* p)
@@ -194,6 +195,9 @@ Trk::TrackParameters* Trk::MaterialEffectsEngine::updateTrackParameters(Trk::Tra
             EX_MSG_VERBOSE(eCell.navigationStep, "layer",  layer->layerIndex().value(), "material update on initial parameters, creating new ones.");
             // create new parameters
             const Trk::Surface& tSurface = parameters.associatedSurface();
+            if (!uCovariance){
+              return &parameters; //just return original
+            }
             Trk::TrackParameters* tParameters = tSurface.createUniqueTrackParameters(uParameters[Trk::loc1],
                                                                                      uParameters[Trk::loc2],
                                                                                      uParameters[Trk::phi],
