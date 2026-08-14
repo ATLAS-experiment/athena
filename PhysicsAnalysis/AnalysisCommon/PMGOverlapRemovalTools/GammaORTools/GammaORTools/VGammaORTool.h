@@ -8,7 +8,7 @@
 #include <vector>
 #include <map>
 #include <string>
-#include "MCTruthClassifier/MCTruthClassifier.h"
+#include "MCTruthClassifier/IMCTruthClassifier.h"
 #include <xAODTruth/TruthParticleContainer.h>
 #include <xAODTruth/TruthParticle.h>
 #include "AsgTools/AsgTool.h"
@@ -147,7 +147,7 @@ private:
   float frixioneFunc(float dR, float dR0, float exponent, float epsilon) const;
 
   // MCTruthClassifier
-  asg::AnaToolHandle<MCTruthClassifier> m_truthClassifier;
+  asg::AnaToolHandle<IMCTruthClassifier> m_truthClassifier;
 
   // CONFIGURATION =================================================
 
