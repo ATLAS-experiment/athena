@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "AthenaTrackingAction.h"
@@ -19,10 +19,9 @@ namespace G4UA
   // Constructor
   //---------------------------------------------------------------------------
   AthenaTrackingAction::AthenaTrackingAction(MSG::Level lvl,
-                                             int secondarySavingLevel, int subDetVolLevel)
+                                             int secondarySavingLevel)
     : AthMessaging("AthenaTrackingAction")
     , m_secondarySavingLevel(secondarySavingLevel)
-    , m_subDetVolLevel(subDetVolLevel)
   {
     setLevel(lvl);
   }
@@ -49,7 +48,7 @@ namespace G4UA
       ATH_MSG_DEBUG("Preparing an AtlasTrajectory for saving truth");
 
       // Create a new AtlasTrajectory for this particle
-      AtlasTrajectory* trajectory = new AtlasTrajectory(track, m_subDetVolLevel);
+      AtlasTrajectory* trajectory = new AtlasTrajectory(track);
 
       // Assign the trajectory to the tracking manager.
       // TODO: consider caching the tracking manager once to reduce overhead.
