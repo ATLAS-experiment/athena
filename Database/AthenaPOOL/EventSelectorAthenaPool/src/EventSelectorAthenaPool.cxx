@@ -35,7 +35,7 @@
 #include "CollectionSvc/CollectionRowBuffer.h"
 #include "StorageSvc/DbType.h"
 
-#include <boost/tokenizer.hpp>
+#include <CxxUtils/StringUtils.h>
 #include <algorithm>
 #include <format>
 #include <vector>
@@ -89,10 +89,9 @@ StatusCode EventSelectorAthenaPool::initialize() {
 		      << "[ \"<collectionName>\" ] (list of collections)");
       return StatusCode::FAILURE;
    }
-   boost::char_separator<char> sep_coma(","), sep_hyph("-");
-   boost::tokenizer  ranges(m_skipEventRangesProp.value(), sep_coma);
+   auto ranges = CxxUtils::tokenize(m_skipEventRangesProp.value(), ',');
    for( const std::string& r: ranges ) {
-      boost::tokenizer  fromto(r, sep_hyph);
+      auto fromto = CxxUtils::tokenize(r, '-');
       auto from_iter = fromto.begin();
       long from = std::stol(*from_iter);
       long to = from;

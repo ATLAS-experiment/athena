@@ -19,8 +19,7 @@
 #include "TrigConfL1Data/PIT.h"
 #include "TrigConfL1Data/TIP.h"
 #include "TrigConfL1Data/L1DataDef.h"
-
-#include "boost/algorithm/string.hpp"
+#include <CxxUtils/StringUtils.h>
 
 #include <iostream>
 #include <sstream>
@@ -152,8 +151,7 @@ TrigConf::MenuLoader::loadItems(TrigConf::Menu& menu) {
             const short TAP = 0x2;
             const short TAV = 0x4;
             
-            vector<string> monLfHf;
-            boost::split(monLfHf, mon, boost::is_any_of(":|"));
+            vector<string> monLfHf = CxxUtils::tokenize(mon, ":|");
             //copy(monLfHf.begin(),monLfHf.end(), ostream_iterator<string>(cout,"\n") );
             
             if(monLfHf.size()==4 && monLfHf[0]=="LF" && monLfHf[2]=="HF" && monLfHf[1].size()==3 && monLfHf[3].size()==3) {
@@ -456,7 +454,7 @@ TrigConf::MenuLoader::loadPIT(TrigConf::Menu& menu) {
 
       string slotString = tt->cableCtpin();
       uint16_t slot = 0;
-      if( boost::iequals( slotString, "CTPCORE" ) ) {
+      if( slotString == "CTPCORE" ) {
          slot = 10;
       } else {
          slot = slotString[4]-'0'; // "SLOT7" -> (uint)7
