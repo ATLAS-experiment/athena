@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //-----------------------------------------------------------------------------
@@ -131,7 +131,7 @@ MultiComponentStateOnSurfaceCnv_p1::persToTrans(
   ITPConverter* dummy =
     topConverter()->converterForType(typeid(Trk::TrackStateOnSurface));
   if (!m_trackStateOnSurfaceCnv){
-    m_trackStateOnSurfaceCnv = dynamic_cast<TrackStateOnSurfaceCnv_p3*>(dummy);
+    m_trackStateOnSurfaceCnv = static_cast<TrackStateOnSurfaceCnv_p3*>(dummy);
   }
   m_trackStateOnSurfaceCnv->persToTrans(persObj, transObj, log);
 }
@@ -144,7 +144,7 @@ MultiComponentStateOnSurfaceCnv_p1::transToPers(
   ITPConverter* dummy =
     topConverter()->converterForType(typeid(Trk::TrackStateOnSurface));
   if (!m_trackStateOnSurfaceCnv){
-    m_trackStateOnSurfaceCnv = dynamic_cast<TrackStateOnSurfaceCnv_p3*>(dummy);
+    m_trackStateOnSurfaceCnv = static_cast<TrackStateOnSurfaceCnv_p3*>(dummy);
   }
   m_trackStateOnSurfaceCnv->transToPers(transObj, persObj, log);
 }
