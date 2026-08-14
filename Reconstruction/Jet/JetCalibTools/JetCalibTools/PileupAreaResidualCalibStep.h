@@ -68,6 +68,7 @@ class PileupAreaResidualCalibStep   : public asg::AsgTool,
   /// In and out scales
   Gaudi::Property<std::string> m_jetInScale {this, "InScale", "JetConstitScaleMomentum", "Starting jet scale" };
   Gaudi::Property<std::string> m_jetOutScale {this, "OutScale", "JetPileupScaleMomentum", "Ending jet scale" };
+  Gaudi::Property<std::string> m_jetAreaOutScale {this, "OutScaleJetArea", "JetRhoAreaScaleMomentum", "Intermediate jet scale"};
 
 };
 
