@@ -3,6 +3,7 @@
 */
 
 #include "FlavorTagInference/NNSharingOnnxSvc.h"
+#include "FlavorTagInference/SaltModel.h"
 #include "PathResolver/PathResolver.h"
 
 namespace FlavorTagInference {
@@ -21,8 +22,13 @@ namespace FlavorTagInference {
       return nn;
     }
     std::shared_ptr<const GNN> nn;
-    ATH_MSG_INFO("building " << nn_name << " from onnx file");
-    nn = std::make_shared<const GNN>(nn_name, opts);
+    ATH_MSG_INFO("building " << nn_name << " from onnx file on the "
+                 << m_executionProvider.value() << " execution provider");
+    SaltModelOptions salt_opts {
+      m_executionProvider.value(), m_deviceId.value(), m_useTF32.value()};
+    ISaltModelPtr salt = std::make_shared<const SaltModel>(
+      PathResolverFindCalibFile(nn_name), salt_opts);
+    nn = std::make_shared<const GNN>(salt, opts);
     m_base_gnns[nn_name] = nn;
     m_gnns[key] = nn;
     return nn;
