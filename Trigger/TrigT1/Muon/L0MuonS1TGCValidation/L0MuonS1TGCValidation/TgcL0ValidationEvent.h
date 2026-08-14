@@ -97,6 +97,9 @@ struct TgcL0ValidationCandidateBlock {
   std::vector<float> phi;
   std::vector<float> deltaTheta;
   std::vector<float> deltaPhi;
+  std::vector<float> pt;
+  std::vector<std::uint8_t> threshold;
+  std::vector<std::int8_t> charge;
   std::vector<int> truthIndex;
 };
 

@@ -123,6 +123,9 @@ inline TgcL0ValidationCheckResult checkTgcL0ValidationEvent(
   TGC_CHECK_CANDIDATE_SIZE(phi);
   TGC_CHECK_CANDIDATE_SIZE(deltaTheta);
   TGC_CHECK_CANDIDATE_SIZE(deltaPhi);
+  TGC_CHECK_CANDIDATE_SIZE(pt);
+  TGC_CHECK_CANDIDATE_SIZE(threshold);
+  TGC_CHECK_CANDIDATE_SIZE(charge);
   TGC_CHECK_CANDIDATE_SIZE(truthIndex);
 #undef TGC_CHECK_CANDIDATE_SIZE
 

@@ -127,6 +127,10 @@ class TgcL0RootOutputAlg final : public AthHistogramAlgorithm {
   TGCL0_VECTOR_BRANCH(float, m_candidatePhi, "candidatePhi");
   TGCL0_VECTOR_BRANCH(float, m_candidateDeltaTheta, "candidateDeltaTheta");
   TGCL0_VECTOR_BRANCH(float, m_candidateDeltaPhi, "candidateDeltaPhi");
+  TGCL0_VECTOR_BRANCH(float, m_candidatePt, "candidatePt");
+  TGCL0_VECTOR_BRANCH(std::uint8_t, m_candidateThreshold,
+                      "candidateThreshold");
+  TGCL0_VECTOR_BRANCH(std::int8_t, m_candidateCharge, "candidateCharge");
   TGCL0_VECTOR_BRANCH(int, m_candidateTruthIndex, "candidateTruthIndex");
 
 #undef TGCL0_VECTOR_BRANCH

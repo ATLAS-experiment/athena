@@ -276,6 +276,10 @@ StatusCode TgcL0TruthValidationAlg::execute(const EventContext& ctx) const {
     output->candidates.phi.emplace_back(candidate.phi);
     output->candidates.deltaTheta.emplace_back(candidate.deltaTheta);
     output->candidates.deltaPhi.emplace_back(candidate.deltaPhi);
+    output->candidates.pt.emplace_back(candidate.preInnerCoincidencePt);
+    output->candidates.threshold.emplace_back(
+        candidate.preInnerCoincidenceThreshold);
+    output->candidates.charge.emplace_back(candidate.charge);
     output->candidates.truthIndex.emplace_back(-1);
   }
 
