@@ -66,7 +66,7 @@ You can describe via a std::string the decay pattern you are looking for.
 <i>Eg:</i> you just have to say "23->-11 + 11" to create a pattern which can then be used to filter for vertices where such a decay occurs.
 
   - FilterRange: it implements the range (ie: [min, max]) the filters will use to take their filtering decisions.
-Internally it uses the Boost class interval but maybe one could use a SEAL class (FML/RangeSet or FML/Bound).
+Internally it stores the lower and upper bounds of the range.
 
   - PhiFilterRange: it implements the range (ie: [min, max]) the filters will use to take their filtering decisions. 
 It is a specialisation of FilterRange for the phi angles. It enforces the ATLAS policy for phi angles : \f$ \phi \in [-\pi,\pi[ \f$
