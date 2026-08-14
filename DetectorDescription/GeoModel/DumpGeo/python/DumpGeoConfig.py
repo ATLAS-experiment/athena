@@ -121,7 +121,7 @@ def getATLASVersion():
         return os.environ["AtlasBaseVersion"]
     return "Unknown"
 
-def DumpGeoCfg(flags, name="DumpGeoCA", **kwargs):
+def DumpGeoCfg(flags, name="DumpGeoAlg", **kwargs):
     result = ComponentAccumulator()
 
     _logger.info("We're using these 'GeoModel.DumpGeo' configuration flags:")
@@ -199,7 +199,7 @@ def DumpGeoCfg(flags, name="DumpGeoCA", **kwargs):
             sys.exit()
 
     # Schedule the DumpGeo Athena Algorithm
-    the_alg = CompFactory.DumpGeo(name="DumpGeoAlg", **kwargs)
+    the_alg = CompFactory.DumpGeo(name=name, **kwargs)
     result.addEventAlgo(the_alg, primary=True)
     return result
 

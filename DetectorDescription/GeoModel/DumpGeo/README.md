@@ -165,11 +165,7 @@ The tests cover:
 * removal of an existing output file when `ForceOverwrite` is enabled; and
 * the configurable algorithm name.
 
-One test is marked with `unittest.expectedFailure` to document known
-behaviour: `DumpGeoCfg` currently ignores its `name` argument. This expected
-failure keeps the current regression baseline passing. When the corresponding
-behaviour is fixed, remove the decorator so that the test becomes a regular
-regression test.
+All tests are regular regression tests and are expected to pass.
 
 After building the `DumpGeo` package and setting up the resulting Athena
 runtime environment, run the tests directly with:

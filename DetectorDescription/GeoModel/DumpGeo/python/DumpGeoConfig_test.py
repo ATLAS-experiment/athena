@@ -108,9 +108,8 @@ class DumpGeoConfigTest(unittest.TestCase):
 
         self.assertEqual(algorithm.UserFilterDetManager, ["Pixel", "Tile"])
 
-    @unittest.expectedFailure
     def test_algorithm_name(self):
-        """Document that DumpGeoCfg currently ignores its name argument."""
+        """DumpGeoCfg passes its name argument to the algorithm."""
         algorithm = self._algorithm(self._flags(), name="RequestedDumpGeo")
 
         self.assertEqual(algorithm.name, "RequestedDumpGeo")
