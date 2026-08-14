@@ -47,7 +47,7 @@ namespace FlavorTagDiscriminants {
 
       struct SortedHit {
         HitLink link;
-        float dphi;
+        float dphi{};
       };
 
       // Jet input
