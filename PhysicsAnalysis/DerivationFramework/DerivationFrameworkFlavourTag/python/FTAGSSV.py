@@ -85,34 +85,35 @@ def FTAGSSVExtraContentCfg(
         track_systematics = _get_NVSI_track_systematics_list()
 
         # verify that tracking systematics tool works -> track systematics tool can not be scheduled for MC campaigns without existing tracking systematics recommendations
+        track_sys_accs = []
         try:
-            TrackSystematicsAlgCfg(
-                flags,
-                name="FTAGSSVTrackingSystematicsAvailabilityCheck",
-                InputTrackContainer=track_collection,
-                OutputTrackContainer="FTAGSSV_TrackingSystematicsCheck",
-            )
-            tracking_systematics_available = True
+            for suffix in track_systematics:
+                varied_track_container = f"{track_collection}{suffix}"
+                # build list of tuples of (suffix, varied track container name, TrackSystematicsAlg to be run)
+                track_sys_accs.append(
+                    (
+                        suffix,
+                        varied_track_container,
+                        TrackSystematicsAlgCfg(
+                            flags,
+                            name=f"InDetTrackSystematicsAlg{suffix}",
+                            InputTrackContainer=track_collection,
+                            OutputTrackContainer=varied_track_container,
+                        ),
+                    )
+                )
+        # the tracking systematics tool can not be configured -> skip the tracking systematics
         except ValueError as err:
-            tracking_systematics_available = False
             logFTAGSSV.info(
                 "Skipping FTAGSSV NVSI tracking systematics: %s",
                 err,
             )
-
-        if tracking_systematics_available:
-            for suffix in track_systematics:
-                varied_track_container = f"{track_collection}{suffix}"
-
-                # apply the tracking systematics
-                acc.merge(
-                    TrackSystematicsAlgCfg(
-                        flags,
-                        name=f"InDetTrackSystematicsAlg{suffix}",
-                        InputTrackContainer=track_collection,
-                        OutputTrackContainer=varied_track_container,
-                    )
-                )
+        # the tracking systematics tool can be configured -> proceed as planned
+        else:
+            #retrieve the tuples
+            for suffix, varied_track_container, track_sys_acc in track_sys_accs:
+                # apply the tracking systematics              
+                acc.merge(track_sys_acc)
                 # run the NewVrtSecInclusive with the varied input tracks
                 acc.merge(
                     NewVrtSecInclusiveAlgTightCfg(
