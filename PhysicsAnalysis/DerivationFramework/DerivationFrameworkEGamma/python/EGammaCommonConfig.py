@@ -852,14 +852,15 @@ def EGammaCommonCfg(flags):
             acc.addPublicTool(CoreCellRecoveryTool)
             EGAugmentationTools.append(CoreCellRecoveryTool)
 
-    from DerivationFrameworkEGamma.EGammaToolsConfig import EGammaEnergyCalibrationWrapperCfg
-    TransformerEnergyCalibration = acc.addPublicTool(acc.popToolsAndMerge(
-        EGammaEnergyCalibrationWrapperCfg(
-            flags,
-            name="TransformerEnergyCalibration",
+    if flags.Derivation.Egamma.addMissingCellInfo:
+        from DerivationFrameworkEGamma.EGammaToolsConfig import EGammaEnergyCalibrationWrapperCfg
+        TransformerEnergyCalibration = acc.addPublicTool(acc.popToolsAndMerge(
+            EGammaEnergyCalibrationWrapperCfg(
+                flags,
+                name="TransformerEnergyCalibration",
             )
         ))
-    EGAugmentationTools.append(TransformerEnergyCalibration)
+        EGAugmentationTools.append(TransformerEnergyCalibration)
 
     # ==================================================
     # Truth Related tools

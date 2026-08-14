@@ -112,6 +112,8 @@ def runAODFix(flags, correctCluster = True, checkRelWithAMI = True):
             name += ' egammatopoIsoFix'
             if correctCluster:
                 name += ' egClusterL2_3Fix'
+        else:
+            doFix = doAmbiguityFix
 
     return doFix, name
 
@@ -123,8 +125,12 @@ def egammaAODFixesCfg(flags, correctCluster = True):
     msg.info('Decision for egamma AOD fix = %s',doFix)
     if not doFix:
         return None
-    else:
-        msg.info('Will apply fixes = %s',name)
+    else: 
+        if name!='':
+            msg.info('Will apply fixes = %s',name)
+        else:
+            msg.info('Range is ok but there are no fix to apply')
+            return None
 
     # I do this because there are in fact two AOD fixes here:
     # one for ambiguity links, one for timing issue (topoetcone + cluster fixes)
