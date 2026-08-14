@@ -178,8 +178,6 @@ protected:
   using T_AnalysisConfig<T>::m_associator;
   using T_AnalysisConfig<T>::m_filters;
 
-  // using  T_AnalysisConfig<T>::selectTracks<TrigInDetTrackCollection>;
-
   // using T_AnalysisConfig<T>::selectTracks;
 
   virtual void loop() {
@@ -751,7 +749,6 @@ protected:
 	    if ( this->template selectTracks<Rec::TrackParticleContainer>( m_selectorTest, c, key ) );
 #         endif
 	    else if ( this->template selectTracks<TrackCollection>( m_selectorTest, c, key ) );
-	    else if ( this->template selectTracks<TrigInDetTrackCollection>( m_selectorTest, c, key, key_index ) );
 	    else { 
 	      //m_provider->msg(MSG::WARNING) << "No track collection " << key << " found"  << endmsg;
 	    }
@@ -759,8 +756,7 @@ protected:
 	  else {
 	    /// L2 track EDM
 	    if ( chainName.find("L2_")!=std::string::npos ) {
-	      if      ( this->template selectTracks<TrigInDetTrackCollection>( m_selectorTest, c, key, key_index ) );
-	      else if ( this->template selectTracks<Rec::TrackParticleContainer>( m_selectorTest, c, key ) );
+	      if      ( this->template selectTracks<Rec::TrackParticleContainer>( m_selectorTest, c, key ) );
 	      else if ( this->template selectTracks<TrackCollection>( m_selectorTest, c, key ) );
 #           ifdef XAODTRACKING_TRACKPARTICLE_H
 	      else if ( this->template selectTracks<xAOD::TrackParticleContainer>( m_selectorTest, c, key ) ) testbeamspot = this->template getBeamspot<xAOD::TrackParticleContainer>( c, key );
