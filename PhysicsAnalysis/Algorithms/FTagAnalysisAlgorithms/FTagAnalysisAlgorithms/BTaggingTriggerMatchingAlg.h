@@ -39,12 +39,11 @@ namespace CP
         #ifndef XAOD_STANDALONE
         // For AthAnalysis and Athena, PublicToolHandle exist
         PublicToolHandle<Trig::TrigDecisionTool> m_trigDecTool{this, "TrigDecisionTool", "Trig::TrigDecisionTool/TrigDecisionTool", "trigger decision tool"};
-        PublicToolHandle<Trig::ITrigBtagEmulationTool> m_emulationTool {this, "TrigBtagEmulationTool", "Trig::TrigBtagEmulationTool/TrigBtagEmulationTool", "trigger emulation for Run 2"};
         #else
         // For AnalysisBase use ToolHandle as PublicToolHandle is not available
         ToolHandle<Trig::TrigDecisionTool> m_trigDecTool{this, "TrigDecisionTool", "Trig::TrigDecisionTool/TrigDecisionTool", "trigger decision tool"};
-        ToolHandle<Trig::ITrigBtagEmulationTool> m_emulationTool {this, "TrigBtagEmulationTool", "Trig::TrigBtagEmulationTool/TrigBtagEmulationTool", "trigger emulation for Run 2"};
         #endif
+        ToolHandle<Trig::ITrigBtagEmulationTool> m_emulationTool {this, "trigEmulationTool", "", "trigger emulation for Run 2"};
 
         Gaudi::Property<std::string> m_trigger {this, "trigger", "",
         "the trigger path to consider"};
