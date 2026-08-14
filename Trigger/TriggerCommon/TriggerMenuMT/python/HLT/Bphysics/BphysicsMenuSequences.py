@@ -12,7 +12,7 @@ from TrigEDMConfig.TriggerEDM import recordable
 @AccumulatorCache
 def bmumuxSequenceGenCfg(flags):
 
-    RoIToolCreator = CompFactory.ViewCreatorMuonSuperROITool if flags.Trigger.InDetTracking.bmumux.SuperRoI else CompFactory.ViewCreatorCentredOnIParticleROITool
+    RoIToolCreator = CompFactory.ViewCreatorMuonSuperROITool
 
     roiToolOptions = {
         'RoIEtaWidth' : flags.Trigger.InDetTracking.bmumux.etaHalfWidth,

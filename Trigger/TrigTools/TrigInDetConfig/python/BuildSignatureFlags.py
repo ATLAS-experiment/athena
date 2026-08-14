@@ -83,7 +83,6 @@ def defaultTrigTrackingFlags(flags : AthConfigFlags):
   flags.addFlag("trtExtensionType", "xf") 
   flags.addFlag("doTruth",  False)  
   flags.addFlag("perigeeExpression","BeamLine")   #always use beamline regardless of Reco.EnableHI
-  flags.addFlag("SuperRoI",  False)               #TBD - move to bphys/menu
   
   flags.addFlag("trkTracks_FTF",   "")
   flags.addFlag("trkTracks_IDTrig","")
@@ -646,7 +645,6 @@ def bmumux(flags: AthConfigFlags, instanceName: str, recoMode: str) -> AthConfig
   flags.phiHalfWidth        = 0.75
   flags.zedHalfWidth        = 50.
   flags.doSeedRedundancyCheck = True
-  flags.SuperRoI = True
   return flags
 
 @signatureActions
@@ -664,7 +662,6 @@ def bhh(flags: AthConfigFlags, instanceName: str, recoMode: str) -> AthConfigFla
   flags.minPT               = processEtaDepSettings(flags.minPT,[2*Units.GeV])
 
   flags.doSeedRedundancyCheck = True
-  flags.SuperRoI = True
   return flags
 
 @signatureActions
