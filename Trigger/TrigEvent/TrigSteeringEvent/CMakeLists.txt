@@ -78,6 +78,8 @@ else()
       LINK_LIBRARIES xAODTrigger TrigSerializeCnvSvcLib )
 endif()
 
+atlas_generate_cliddb( TrigSteeringEvent )
+
 # Test(s) in the package:
 atlas_add_test( Enums_test
    SOURCES test/Enums_test.cxx
