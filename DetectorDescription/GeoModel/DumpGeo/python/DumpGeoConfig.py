@@ -376,4 +376,5 @@ if __name__=="__main__":
     
     # +++ Configure DumpGeo and run
     cfg.merge(DumpGeoCfg(flags))
-    cfg.run()
+    status = cfg.run()
+    sys.exit(not status.isSuccess())
