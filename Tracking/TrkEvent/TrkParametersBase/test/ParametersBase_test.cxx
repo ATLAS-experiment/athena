@@ -57,19 +57,20 @@ namespace Trk{
 class ChargedParametersStub final : public Trk::ParametersBase<DIM,T>{
 public:
   //access base class Constructors
+  //coverity[PASS_BY_VALUE]
   ChargedParametersStub(const AmgVector(DIM)& parameters,
     std::optional<AmgSymMatrix(DIM)> covariance, const T chargeDef):
     Trk::ParametersBase<DIM,T>(parameters, std::move(covariance),chargeDef){
     this->m_position = Amg::Vector3D(1, 1, 1);
     this->m_momentum = Amg::Vector3D(3, 4, 5);
   }
-
+  //coverity[PASS_BY_VALUE]
   explicit ChargedParametersStub(std::optional<AmgSymMatrix(DIM)> covariance):
     ParametersBase(std::move(covariance)){
       this->m_position = Amg::Vector3D(1, 1, 1);
       this->m_momentum = Amg::Vector3D(3, 4, 5);
   }
-
+  //coverity[PASS_BY_VALUE]
   explicit ChargedParametersStub(const AmgVector(DIM) & parameters,
     std::optional<AmgSymMatrix(DIM)> covariance = std::nullopt):
     ParametersBase(parameters,std::move(covariance)){
