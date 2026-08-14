@@ -4,7 +4,7 @@
 atlas_subdir( TrigConfBase )
 
 # External dependencies:
-find_package( Boost COMPONENTS regex thread )
+find_package( Boost COMPONENTS thread )
 
 # Component(s) in the package:
 atlas_add_library( TrigConfBase
