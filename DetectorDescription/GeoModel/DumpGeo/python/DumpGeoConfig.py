@@ -140,6 +140,17 @@ def DumpGeoCfg(flags, name="DumpGeoCA", **kwargs):
     if flags.GeoModel.DumpGeo.ShowTreetopContent:
         kwargs.setdefault("ShowTreetopContent", True)
 
+    # Configure DetectorManager filtering independently of the output file
+    # name. In particular, a user-defined file name must not disable the
+    # filter passed to the C++ algorithm.
+    filterDetManagers = flags.GeoModel.DumpGeo.FilterDetManagers
+    if filterDetManagers:
+        _logger.info(
+            "+++ Filtering on these GeoModel 'Detector Managers': '%s'",
+            filterDetManagers,
+        )
+        kwargs.setdefault("UserFilterDetManager", filterDetManagers)
+
     # Set the name of the output '.db' file.
     # Pick the custom name if the user set it;
     # otherwise, build it from the geometry tag
@@ -151,7 +162,6 @@ def DumpGeoCfg(flags, name="DumpGeoCA", **kwargs):
         # Handle the user's inputs and create a file name 
         # for the output SQLite, accordingly
         outFileName = "geometry"
-        filterDetManagers = []
         # - Put Geometry TAG into the file name
         # NOTE: at this point, the user-defined Geo TAG args.detDescr, 
         #       if set, has already replaced the default TAG in 'flags';
@@ -160,15 +170,7 @@ def DumpGeoCfg(flags, name="DumpGeoCA", **kwargs):
         _logger.info("+++ Dumping this Detector Description geometry TAG: '%s'", geoTAG)
         outFileName = outFileName + "-" + geoTAG
         
-        if flags.GeoModel.DumpGeo.FilterDetManagers:
-            
-            _logger.info("+++ Filtering on these GeoModel 'Detector Managers': '%s'", flags.GeoModel.DumpGeo.FilterDetManagers)
-
-            filterDetManagers = flags.GeoModel.DumpGeo.FilterDetManagers
-            
-            # Set the filter variable that is used in the C++ code
-            kwargs.setdefault("UserFilterDetManager", filterDetManagers)
-            
+        if filterDetManagers:
             # - Put the filtered Detector Managers' names into the file name, 
             #   if the user asked to filter on them
             outFileName = outFileName + "-" + "-".join(filterDetManagers)

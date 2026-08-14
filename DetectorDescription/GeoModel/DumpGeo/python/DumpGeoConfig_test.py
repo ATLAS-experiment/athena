@@ -97,9 +97,8 @@ class DumpGeoConfigTest(unittest.TestCase):
         self.addCleanup(accumulator.wasMerged)
         remove.assert_called_once_with("existing.db")
 
-    @unittest.expectedFailure
     def test_custom_filename_and_filter(self):
-        """Document that a custom filename currently drops the filter."""
+        """A custom filename must not disable DetectorManager filtering."""
         algorithm = self._algorithm(
             self._flags(
                 output_file="filtered.db",
