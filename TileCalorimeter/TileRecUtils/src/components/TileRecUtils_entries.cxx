@@ -28,6 +28,7 @@
 #include "../TileDQstatusTool.h"
 #include "../TileDQstatusAlg.h"
 #include "../TileRawChannelCorrectionAlg.h"
+#include "../TileRawChannelNNMaker.h"
 
 DECLARE_COMPONENT( TileRawChannelBuilderFlatFilter )
 DECLARE_COMPONENT( TileRawChannelBuilderFitFilter )
@@ -59,3 +60,4 @@ DECLARE_COMPONENT( TileRawChannelBuilderTest )
 DECLARE_COMPONENT( TileDQstatusTool )
 DECLARE_COMPONENT( TileDQstatusAlg )
 DECLARE_COMPONENT( TileRawChannelCorrectionAlg )
+DECLARE_COMPONENT( TileRawChannelNNMaker )
