@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 ######################
 ##
 ## Contact: Dongliang Zhang <dongliang.zhang@cern.ch>
@@ -16,10 +16,7 @@ import pyAMI.client
 import pyAMI.atlas.api as AtlasAPI
 from subprocess import call
 
-client = pyAMI.client.Client(
-  'atlas'
-  #'atlas-replica'
-)
+client = pyAMI.client.Client('atlas')
 AtlasAPI.init()
 
 
