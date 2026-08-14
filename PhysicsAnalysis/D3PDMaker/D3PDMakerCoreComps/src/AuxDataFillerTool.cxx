@@ -15,8 +15,8 @@
 #include "AthContainers/AuxElement.h"
 #include "AthContainers/AuxTypeRegistry.h"
 #include "AthenaKernel/errorcheck.h"
+#include <CxxUtils/StringUtils.h>
 #include "boost/algorithm/string/trim.hpp"
-#include "boost/algorithm/string/split.hpp"
 #include "TROOT.h"
 
 
@@ -212,8 +212,7 @@ StatusCode AuxDataFillerTool::parseVars()
       label.erase (0, ipos+1);
     }
 
-    std::vector<std::string> labels;
-    boost::algorithm::split (labels, label, boost::algorithm::is_any_of(","));
+    std::vector<std::string> labels = CxxUtils::tokenize(label, ',');
     std::vector<std::string> label_classes;
     for (std::string& l : labels) {
       std::string label_class;

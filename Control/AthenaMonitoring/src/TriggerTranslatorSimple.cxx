@@ -3,8 +3,7 @@
 */
 
 #include "TriggerTranslatorSimple.h"
-#include "boost/algorithm/string/split.hpp"
-#include "boost/algorithm/string/classification.hpp"
+#include <CxxUtils/StringUtils.h>
 
 TriggerTranslatorToolSimple::TriggerTranslatorToolSimple(const std::string& type,
 					     const std::string& name,
@@ -22,8 +21,7 @@ StatusCode TriggerTranslatorToolSimple::initialize() {
   //m_trigmap[""] = junk;
   for(const auto& item : m_trigmap_property) {
     ATH_MSG_DEBUG( "Key " << item.first << " Value " << item.second );
-    std::vector<std::string> triggers;
-    boost::split(triggers, item.second, boost::is_any_of(","));
+    std::vector<std::string> triggers = CxxUtils::tokenize(item.second, ",");
     m_trigmap[item.first] = std::move(triggers);
   }
   return StatusCode::SUCCESS;

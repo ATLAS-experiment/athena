@@ -7,8 +7,8 @@
 #include "TrigConfL1Data/L1DataDef.h"
 #include "TrigConfL1Data/TriggerItemNode.h"
 #include "TrigConfL1Data/TriggerThreshold.h"
+#include <CxxUtils/StringUtils.h>
 #include <boost/algorithm/string/trim.hpp>
-#include "boost/algorithm/string.hpp"
 #include <iostream>
 #include <sstream>
 #include <cassert>
@@ -25,8 +25,7 @@ using namespace TrigConf;
 
 std::vector<std::string>
 TrigConf::split(const std::string& line, const std::string& del) {
-   std::vector<std::string> res;
-   boost::split(res, line, boost::is_any_of(del));
+   std::vector<std::string> res = CxxUtils::tokenize(line, del);
    return res;
 }
 

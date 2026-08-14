@@ -6,7 +6,7 @@
 #include <iostream>
 #include <iterator>
 #include <boost/algorithm/string/trim.hpp>
-#include <boost/algorithm/string/split.hpp>
+#include <CxxUtils/StringUtils.h>
 
 #include "GaudiKernel/IIncidentSvc.h"
 #include "GaudiKernel/Incident.h"
@@ -332,8 +332,7 @@ ClassIDSvc::processCLIDDB(const std::string& fileName)
   std::string line;
   // Format: CLID;typeName[;typeInfoName]
   while (allOK && std::getline(ifile, line)) {
-    std::vector<std::string> columns;
-    boost::split(columns, line, boost::is_any_of(";"));
+    std::vector<std::string> columns = CxxUtils::tokenize(line, ';');
     long id(-1);
     if (columns.size()>=2) {
       boost::trim(columns[0]);
