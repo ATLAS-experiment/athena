@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "AthenaTrackingActionTool.h"
@@ -15,12 +15,9 @@ namespace G4UA
                            const IInterface* parent)
     : UserActionToolBase<AthenaTrackingAction>(type, name, parent)
     , m_secondarySavingLevel(2)
-    , m_subDetVolLevel(1)
   {
     declareProperty("SecondarySavingLevel", m_secondarySavingLevel,
       "Three valid options: 1 - Primaries; 2 - StoredSecondaries(default); 3 - All");
-    declareProperty("SubDetVolumeLevel", m_subDetVolLevel,
-      "The level in the G4 volume hierarchy at which can we find the sub-detector name");
   }
 
   //---------------------------------------------------------------------------
@@ -41,7 +38,7 @@ namespace G4UA
     ATH_MSG_DEBUG("Constructing an AthenaTrackingAction");
     // Create and configure the action plugin.
     auto action = std::make_unique<AthenaTrackingAction>(
-        msg().level(), m_secondarySavingLevel, m_subDetVolLevel );
+        msg().level(), m_secondarySavingLevel );
     actionLists.trackingActions.push_back( action.get() );
     return action;
   }

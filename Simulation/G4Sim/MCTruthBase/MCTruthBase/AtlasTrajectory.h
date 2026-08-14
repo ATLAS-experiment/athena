@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MCTruthBase_AtlasTrajectory_H
@@ -17,7 +17,7 @@ class AtlasTrajectory : public G4Trajectory
 public:
 
   /// Constructor
-  AtlasTrajectory(const G4Track* aTrack, int subDetVolLevel);
+  AtlasTrajectory(const G4Track* aTrack);
 
   /// Overriden from G4 in order to do vertex analysis
   void AppendStep(const G4Step* aStep);
@@ -31,9 +31,6 @@ public:
 private:
 
   using G4Trajectory::DrawTrajectory;
-
-  /// The level in the G4 volume hierarchy at which can we find the sub-detector name
-  int m_subDetVolLevel;
 
 };
 

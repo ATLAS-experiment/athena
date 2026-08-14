@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef G4AtlasAlg_AthenaTrackingAction_H
@@ -21,7 +21,7 @@ namespace G4UA
     public:
 
       /// Constructor
-      AthenaTrackingAction(MSG::Level lvl, int secondarySavingLevel, int subDetVolLevel);
+      AthenaTrackingAction(MSG::Level lvl, int secondarySavingLevel);
 
       /// @brief Called before tracking a new particle.
       ///
@@ -39,8 +39,6 @@ namespace G4UA
 
       /// The saving level for secondaries.
       int m_secondarySavingLevel;
-      /// The level in the G4 volume hierarchy at which can we find the sub-detector name
-      int m_subDetVolLevel;
 
   }; // class AthenaTrackingAction
 

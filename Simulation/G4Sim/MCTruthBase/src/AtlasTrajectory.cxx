@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MCTruthBase/AtlasTrajectory.h"
@@ -14,8 +14,8 @@
 #include "G4Colour.hh"
 
 
-AtlasTrajectory::AtlasTrajectory(const G4Track* track, int subDetVolLevel)
-  : G4Trajectory(track), m_subDetVolLevel(subDetVolLevel)
+AtlasTrajectory::AtlasTrajectory(const G4Track* track)
+  : G4Trajectory(track)
 {}
 
 
