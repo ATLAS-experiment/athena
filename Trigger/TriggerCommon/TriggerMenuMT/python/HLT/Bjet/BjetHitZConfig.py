@@ -28,6 +28,10 @@ DPHI_HIT_TO_JET = 0.1
 DETA_HIT_TO_JET = 0.1
 DZ_HIT_TO_VERTEX = 180
 
+# HitZ runs before the menu's JetViewAlg, so it applies its own acceptance
+MIN_JET_PT = 20e3
+MAX_ABS_JET_ETA = 4.0
+
 # Map the MDN output names onto the (z, sigma) pair the menu side expects
 Z_DECOR = 'HitZ_z0'
 SIGMA_DECOR = 'HitZ_z0_sigma'
@@ -66,7 +70,8 @@ def hitClusterCnvCfg(flags):
 
 def hitAssociationCfg(flags, inputJets, maxHits=MAX_HITS,
                       dphi=DPHI_HIT_TO_JET, deta=DETA_HIT_TO_JET,
-                      dz=DZ_HIT_TO_VERTEX):
+                      dz=DZ_HIT_TO_VERTEX, minJetPt=MIN_JET_PT,
+                      maxAbsJetEta=MAX_ABS_JET_ETA):
     """Clean, decorate and associate the Pixel and Strip hits to the jets."""
     ca = ComponentAccumulator()
 
@@ -97,6 +102,8 @@ def hitAssociationCfg(flags, inputJets, maxHits=MAX_HITS,
                 dphiHitToJet=dphi,
                 detaHitToJet=deta,
                 dzHitToVertex=dz,
+                minJetPt=minJetPt,
+                maxAbsJetEta=maxAbsJetEta,
                 # truncation happens downstream, on the merged collection
                 maxHits=0,
             ))
