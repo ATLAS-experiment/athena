@@ -23,10 +23,6 @@ public:
     virtual StatusCode initialize() override;
     virtual StatusCode fillHistograms( const EventContext& ctx ) const override;
 private:
-    std::vector<int> m_abGroups1;
-    std::vector<std::vector<int>> m_abGroups2;
-    std::map<std::string,int> m_cGroups1;
-    std::map<std::string,std::map<std::string,int>> m_cGroups2;
 
     SG::ReadHandleKey<xAOD::TauJetContainer> m_TauContainerKey {this, "TauRecContainer", "TauJets"};
     SG::ReadHandleKey<xAOD::TauTrackContainer> m_TauTrackContainer{ this, "TauTrackContainer", "TauTracks"};
