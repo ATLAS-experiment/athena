@@ -6,6 +6,7 @@ atlas_subdir( AthenaMonitoring )
 # External dependencies:
 find_package( CORAL COMPONENTS CoralBase CoralKernel RelationalAccess )
 find_package( ROOT COMPONENTS Core Hist MathCore )
+find_package( Boost )
 
 # Component(s) in the package:
 atlas_add_library(
@@ -16,38 +17,36 @@ atlas_add_library(
     INCLUDE_DIRS
         ${ROOT_INCLUDE_DIRS}
     PRIVATE_INCLUDE_DIRS
+        ${Boost_INCLUDE_DIRS}
         ${CORAL_INCLUDE_DIRS}
     LINK_LIBRARIES
         ${ROOT_LIBRARIES}
         AthenaBaseComps
         AthenaMonitoringKernelLib
+        AthenaPoolUtilities
         GaudiKernel
         LumiBlockData
-        TrigAnalysisInterfaces
+        PersistentDataModel
+        StoreGateLib
         TrigDecisionInterface
         TrigDecisionToolLib
+        xAODEventInfo
     PRIVATE_LINK_LIBRARIES
+        ${Boost_LIBRARIES}
         ${CORAL_LIBRARIES}
         AthenaKernel
         CxxUtils
-        StoreGateLib
-        AthenaPoolUtilities
-        MuonAlignmentData
         InDetReadoutGeometry
-        MuonAlignmentData
         TRT_ReadoutGeometry
-        PersistentDataModel
 )
 
 atlas_add_component(
     AthenaMonitoring
     src/components/*.cxx
-    INCLUDE_DIRS
-        ${CORAL_INCLUDE_DIRS}
     LINK_LIBRARIES
         AthenaMonitoringLib
-        AthenaKernel
-        MuonAlignmentData
+        InDetReadoutGeometry
+        TRT_ReadoutGeometry
 )
 
 # Install files from the package:
