@@ -3,7 +3,7 @@
 from argparse import ArgumentParser
 from os import listdir, makedirs
 from os.path import dirname, exists, join as pjoin
-from pkg_resources import resource_filename
+from importlib.resources import files
 from shutil import copy2
 from textwrap import dedent
 
@@ -45,7 +45,7 @@ heading_names, heading_titles = zip(*headings)
 content_string = "".join("<td>{{d.{0}}}</td>".format(x)
                          for x in heading_names if x)
 
-class Defect(object):
+class Defect:
     """
     A defect instance. Forms a row in the table.
     """
@@ -110,7 +110,7 @@ def build_table(**kwargs):
     """
     Build the HTML content
     """
-    path = resource_filename("DQDefects.data", "table.html")
+    path = files("DQDefects.data").joinpath("table.html")
     with open(path) as fd:
         template = MarkupTemplate(fd, path)
      
