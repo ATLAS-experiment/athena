@@ -12,7 +12,8 @@
 
 namespace FlavorTagInference {
 
-  SaltModel::SaltModel(const std::string& path_to_onnx)
+  SaltModel::SaltModel(const std::string& path_to_onnx,
+                       const SaltModelOptions& opts)
     //load the onnx model to memory using the path m_path_to_onnx
     : m_env (std::make_unique<Ort::Env>(ORT_LOGGING_LEVEL_FATAL, ""))
   {
@@ -33,6 +34,22 @@ namespace FlavorTagInference {
     // and also https://its.cern.ch/jira/browse/AFT-818
     //
     session_options.DisableCpuMemArena();
+
+    // the V2 provider options are used because use_tf32 has no field in the
+    // V1 struct and can only be set through the string interface.
+    if (opts.execution_provider == "CUDA") {
+      Ort::CUDAProviderOptions cuda_options;
+      cuda_options.Update({
+        {"device_id", std::to_string(opts.device_id)},
+        // tensor cores otherwise round fp32 matmuls to a 10 bit mantissa,
+        // which is enough to change the decisions some networks make
+        {"use_tf32", opts.use_tf32 ? "1" : "0"},
+      });
+      session_options.AppendExecutionProvider_CUDA_V2(*cuda_options);
+    } else if (opts.execution_provider != "CPU") {
+      throw std::runtime_error(
+        "unknown execution provider '" + opts.execution_provider + "'");
+    }
 
     // declare an allocator with default options
     Ort::AllocatorWithDefaultOptions allocator;

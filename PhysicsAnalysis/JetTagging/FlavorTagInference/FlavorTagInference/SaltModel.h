@@ -13,6 +13,7 @@
 #include <onnxruntime_cxx_api.h>
 
 #include "FlavorTagInference/ISaltModel.h"
+#include "FlavorTagInference/SaltModelOptions.h"
 
 namespace FlavorTagInference {
 
@@ -23,7 +24,8 @@ namespace FlavorTagInference {
   class SaltModel final : public ISaltModel
   {
     public:
-      SaltModel(const std::string& path_to_onnx);
+      SaltModel(const std::string& path_to_onnx,
+                const SaltModelOptions& opts = {});
 
       virtual InferenceOutput runInference(InputMap& gnn_inputs) const override;
 
