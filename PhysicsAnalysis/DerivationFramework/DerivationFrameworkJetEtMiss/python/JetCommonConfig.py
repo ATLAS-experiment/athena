@@ -98,6 +98,35 @@ def AddJvtDecorationAlgCfg(ConfigFlags, algName = "JvtPassDecorAlg", jetContaine
     acc.addEventAlgo(CompFactory.JetDecorationAlg(algName, **kwargs), primary = True)
     return acc
 
+
+def DecorateHSTP(ConfigFlags):
+    """Configure the HSTP skimming tool for JZ samples."""
+
+    from AthenaConfiguration.AutoConfigFlags import GetFileMD
+    from PathResolver import PathResolver
+
+    dsid         = GetFileMD(ConfigFlags.Input.Files).get("mc_channel_number", 0)
+    mc_campaign  = str(ConfigFlags.Input.MCCampaign)
+    mc_number    = mc_campaign.split("MC", 1)[1]
+    mc_number    = mc_number.rstrip("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
+    pmgxsec_file = PathResolver.FindCalibFile(f"dev/PMGTools/PMGxsecDB_mc{mc_number}.txt")
+    sample_name  = None
+
+    with open(pmgxsec_file) as xsec_file:
+        for line in xsec_file:
+            fields = line.split()
+            if fields and fields[0] == str(dsid):
+                sample_name = fields[1]
+                break
+
+    if sample_name is None:
+        return False
+
+    is_jz_sample = any( f"JZ{i}" in sample_name for i in range(10) )
+
+    return is_jz_sample
+
+
 def AddEventCleanFlagsCfg(ConfigFlags, workingPoints = ['Loose', 'Tight', 'LooseLLP']):
     """Add event cleaning flags"""
 
@@ -148,7 +177,11 @@ def AddEventCleanFlagsCfg(ConfigFlags, workingPoints = ['Loose', 'Tight', 'Loose
     supportedWPs = ['Loose', 'Tight', 'LooseLLP', 'VeryLooseLLP', 'SuperLooseLLP', 'HSTP']
     prefix = "DFCommonJets_"
     evt_lvl_suppWPs_PFlow = ['LooseBad', 'TightBad']
-    # workingPoints.append('HSTP')
+
+    # Add support for passHSTPFilter event flag
+    if DecorateHSTP(ConfigFlags):
+        workingPoints.append('HSTP')
+
     for wp in workingPoints:
         if wp not in supportedWPs:
             continue
@@ -168,11 +201,6 @@ def AddEventCleanFlagsCfg(ConfigFlags, workingPoints = ['Loose', 'Tight', 'Loose
         doEvent_EMTopo=False
         if 'Loose' in cleaningLevel: 
             doEvent_EMTopo=True
-
-        # if 'HSTP' in wp: 
-        #     doHSTP=True
-        # else:
-        #     doHSTP=False
 
         ## for EMTopo (Legacy), also support for LLPs
         if doEvent_EMTopo:
@@ -218,26 +246,25 @@ def AddEventCleanFlagsCfg(ConfigFlags, workingPoints = ['Loose', 'Tight', 'Loose
                                                              doEvent=True) # for PFlow we use Loose and Tight
             acc.addEventAlgo(eventCleanAlg)
 
-## add HSTP as one of the worknig points, then call it 
-        # if doHSTP:
-        #     # jetCleaningTool = acc.popToolsAndMerge(JetCleaningToolCfg(
-        #     #         ConfigFlags, 'JetCleaningTool_'+cleaningLevel,
-        #     #         'AntiKt4EMPFlowJets', cleaningLevel, False))
-        #     # acc.addPublicTool(jetCleaningTool)
+        ## for passHSTPFilter
+        if 'HSTP' in wp:
+            # We are forced to instatiate a jetcleaning tool to make an eventcleaning tool. This does not get used.
+            jetCleaningTool = acc.popToolsAndMerge(JetCleaningToolCfg(
+                    ConfigFlags, 'JetCleaningTool_'+cleaningLevel,
+                    'AntiKt4EMPFlowJets', cleaningLevel, False))
+            acc.addPublicTool(jetCleaningTool)
     
-        #     ecTool = acc.popToolsAndMerge(EventCleaningToolCfg(ConfigFlags,'EventCleaningTool_' + wp, cleaningLevel))
-        #     ecTool.JetContainer = "AntiKt4EMPFlowJets"
-        #     ecTool.DoDecorations = False
-        #     acc.addPublicTool(ecTool)
+            ecTool = acc.popToolsAndMerge(EventCleaningToolCfg(ConfigFlags,'EventCleaningTool_' + wp, cleaningLevel))
+            ecTool.JetContainer    = "AntiKt4EMPFlowJets"  # Must provide a JetContainer name.  The HSTP is a truth level only filter and wont use this.
+            ecTool.JetCleaningTool = jetCleaningTool
+            ecTool.DoDecorations   = False
+            acc.addPublicTool(ecTool)
 
-        #     eventCleanAlg = CompFactory.EventCleaningTestAlg('EventCleaningTestAlg_'+wp,
-        #                                                      EventCleaningTool=ecTool,
-        #                                                      doEvent=False,
-        #                                                      doHSTPFiltering=True)
-        #     acc.addEventAlgo(eventCleanAlg) 
-# then, i need to modify EventCleaningTestAlg to now perform the HSTP cleaning itself and decorate the output
-# but in donig this, do i have to add the Decoratino itself?
-# But how would i add the auto skip to the file? 
+            eventCleanAlg = CompFactory.EventCleaningTestAlg('EventCleaningTestAlg_'+wp,
+                                                             EventCleaningTool=ecTool,
+                                                             doEvent=False, 
+                                                             doHSTPFiltering=True)
+            acc.addEventAlgo(eventCleanAlg) 
 
     return acc
 

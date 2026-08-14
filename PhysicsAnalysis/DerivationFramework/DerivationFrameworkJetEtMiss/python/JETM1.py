@@ -36,42 +36,6 @@ def JETM1SkimmingToolCfg(flags):
 
     return(acc)
 
-#HSTP Config
-def HSTPSkimmingToolCfg(flags):
-    """Configure the HSTP skimming tool for JZ samples."""
-    acc = ComponentAccumulator()
-
-    from AthenaConfiguration.AutoConfigFlags import GetFileMD
-    from PathResolver import PathResolver
-
-    dsid         = GetFileMD(flags.Input.Files).get("mc_channel_number", 0)
-    mc_campaign  = str(flags.Input.MCCampaign)
-    mc_number    = mc_campaign.split("MC", 1)[1]
-    mc_number    = mc_number.rstrip("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
-    pmgxsec_file = PathResolver.FindCalibFile(f"dev/PMGTools/PMGxsecDB_mc{mc_number}.txt")
-    sample_name  = None
-
-    with open(pmgxsec_file) as xsec_file:
-        for line in xsec_file:
-            fields = line.split()
-            if fields and fields[0] == str(dsid):
-                sample_name = fields[1]
-                break
-
-    if sample_name is None:
-        return acc
-
-    is_jz_sample = any( f"JZ{i}" in sample_name for i in range(10) )
-    
-    if not is_jz_sample:
-        return acc
-
-    HSTPSkimmingTool = CompFactory.HSTPSkimmingTool( 
-      name="HSTPSkimmingTool", 
-      doHSTPFiltering=True,
-    )
-
-    return acc
 
 # Main algorithm config
 def JETM1KernelCfg(flags, name='JETM1Kernel', **kwargs):
@@ -81,9 +45,6 @@ def JETM1KernelCfg(flags, name='JETM1Kernel', **kwargs):
     # Skimming
     if not flags.Input.isMC:
         skimmingTool = acc.getPrimaryAndMerge(JETM1SkimmingToolCfg(flags))
-
-    if flags.Input.isMC:
-        skimmingTool = acc.getPrimaryAndMerge(HSTPSkimmingToolCfg(flags))
 
     # Common augmentations
     from DerivationFrameworkPhys.PhysCommonConfig import PhysCommonAugmentationsCfg
@@ -145,7 +106,7 @@ def JETM1KernelCfg(flags, name='JETM1Kernel', **kwargs):
     DerivationKernel = CompFactory.DerivationFramework.DerivationKernel
     acc.addEventAlgo(DerivationKernel(name, 
                                       ThinningTools = thinningTools,
-                                      SkimmingTools = [skimmingTool]))       
+                                      SkimmingTools = [skimmingTool] if not flags.Input.isMC else []))       
 
     
     # Extra jet content:
