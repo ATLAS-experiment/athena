@@ -8,6 +8,7 @@
   <class name="CopyFlavorLabelTruthParticles" />  
   <class name="CopyTruthJetParticles" />  
   <class name="ParticleJetDeltaRLabelTool" />  
+  <class name="JetIRCSafeLabelTool" />
   <class name="JetParticleAssociationAlg" />  
   <class name="JetParticleAssociation" />  
   <class name="JetParticleShrinkingConeAssociation" />  

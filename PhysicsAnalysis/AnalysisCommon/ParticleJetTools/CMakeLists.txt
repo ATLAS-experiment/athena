@@ -4,16 +4,30 @@
 atlas_subdir( ParticleJetTools )
 
 find_package( ROOT )
+find_package( FastJet )
+find_package( FastJetContrib COMPONENTS 
+    FlavInfo 
+    IFNPlugin 
+    CMPPlugin 
+    GHSAlgo 
+    SDFPlugin 
+    RecursiveTools 
+)
 
 # Component(s) in the package:
 if( XAOD_STANDALONE )
    atlas_add_library( ParticleJetToolsLib
       ParticleJetTools/*.h Root/*.cxx
       PUBLIC_HEADERS ParticleJetTools
-      LINK_LIBRARIES AsgTools EventPrimitives xAODJet xAODTracking xAODTruth
-      JetInterface MCTruthClassifierLib JetRecLib AsgDataHandlesLib
-       
-      PRIVATE_LINK_LIBRARIES AthContainers CxxUtils TruthUtils 
+      LINK_LIBRARIES 
+          AsgTools EventPrimitives xAODJet xAODTracking xAODTruth
+          JetInterface MCTruthClassifierLib JetRecLib AsgDataHandlesLib
+          ${FASTJETCONTRIB_LIBRARIES}
+          ${FASTJET_LIBRARIES}
+      INCLUDE_DIRS
+          ${FASTJETCONTRIB_INCLUDE_DIRS}
+          ${FASTJET_INCLUDE_DIRS}
+      PRIVATE_LINK_LIBRARIES AthContainers CxxUtils TruthUtils
       )
 elseif( GENERATIONBASE )
    # AthGeneration excludes the InDetTrackSystematicsTools package, so the
@@ -26,19 +40,30 @@ elseif( GENERATIONBASE )
    atlas_add_library( ParticleJetToolsLib
       ParticleJetTools/*.h Root/*.cxx ${_src_files}
       PUBLIC_HEADERS ParticleJetTools
-      LINK_LIBRARIES AsgDataHandlesLib AsgTools AthContainers AthenaBaseComps EventPrimitives
-      GaudiKernel JetInterface JetRecLib MCTruthClassifierLib
-      xAODBase xAODEventInfo xAODJet xAODTruth
+      LINK_LIBRARIES 
+          AsgDataHandlesLib AsgTools AthContainers AthenaBaseComps EventPrimitives
+          JetInterface JetRecLib MCTruthClassifierLib
+          xAODBase xAODEventInfo xAODJet xAODTruth
+          ${FASTJETCONTRIB_LIBRARIES}
+          ${FASTJET_LIBRARIES}
+      INCLUDE_DIRS
+          ${FASTJETCONTRIB_INCLUDE_DIRS}
+          ${FASTJET_INCLUDE_DIRS}
       PRIVATE_LINK_LIBRARIES ${ROOT_LIBRARIES} AsgMessagingLib AthAnalysisBaseCompsLib CxxUtils TruthUtils xAODTracking )
-
 else()
    atlas_add_library( ParticleJetToolsLib
       ParticleJetTools/*.h Root/*.cxx src/*.cxx
       PUBLIC_HEADERS ParticleJetTools
-      LINK_LIBRARIES AsgDataHandlesLib AsgTools AthContainers AthenaBaseComps EventPrimitives
-      GaudiKernel JetInterface JetRecLib MCTruthClassifierLib
-      xAODBase xAODEventInfo xAODJet xAODTruth
-      TruthClassificationLib InDetTrackSystematicsToolsLib
+      LINK_LIBRARIES 
+          AsgDataHandlesLib AsgTools AthContainers AthenaBaseComps EventPrimitives
+          JetInterface JetRecLib MCTruthClassifierLib
+          xAODBase xAODEventInfo xAODJet xAODTruth
+          TruthClassificationLib InDetTrackSystematicsToolsLib
+          ${FASTJETCONTRIB_LIBRARIES}
+          ${FASTJET_LIBRARIES}
+      INCLUDE_DIRS
+          ${FASTJETCONTRIB_INCLUDE_DIRS}
+          ${FASTJET_INCLUDE_DIRS}
       PRIVATE_LINK_LIBRARIES ${ROOT_LIBRARIES} AsgMessagingLib AthAnalysisBaseCompsLib CxxUtils TruthUtils xAODTracking )
 endif()
 

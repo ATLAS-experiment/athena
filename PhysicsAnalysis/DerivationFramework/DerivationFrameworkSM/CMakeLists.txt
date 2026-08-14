@@ -11,7 +11,7 @@ find_package( ROOT COMPONENTS Core MathCore )
 atlas_add_component( DerivationFrameworkSM
    DerivationFrameworkSM/*.h src/*.cxx src/components/*.cxx
    INCLUDE_DIRS ${CLHEP_INCLUDE_DIRS}  ${ROOT_INCLUDE_DIRS}
-   LINK_LIBRARIES ${CLHEP_LIBRARIES} ${ROOT_LIBRARIES}
+   LINK_LIBRARIES ${CLHEP_LIBRARIES} ${ROOT_LIBRARIES} 
    DerivationFrameworkInterfaces GaudiKernel StoreGateLib xAODTracking TrigDecisionToolLib)
 
 # Install files from the package:
