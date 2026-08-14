@@ -1,12 +1,11 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
 // CETmaterial.cxx, (c) ATLAS Detector software
 ///////////////////////////////////////////////////////////////////
 
-#include <fstream>
 
 // Tracking
 #include "TrkExAlgs/CETmaterial.h"
@@ -19,6 +18,7 @@
 #include "TrkVolumes/CylinderVolumeBounds.h"
 #include "EventPrimitives/EventPrimitivesHelpers.h"
 
+#include <fstream>
 //================ Constructor =================================================
 
 Trk::CETmaterial::CETmaterial(const std::string& name, ISvcLocator* pSvcLocator)
@@ -110,13 +110,12 @@ StatusCode Trk::CETmaterial::execute(const EventContext& ctx)
         m_msentry = m_trackingGeometry->trackingVolume("Calo::Containers::Calorimeter");
       }
       if (m_msentry) {
-        const Trk::TrackParameters* msEntry =
-          m_extrapolator->extrapolateToVolume(
+        auto msEntry = m_extrapolator->extrapolateToVolume(
             ctx,
             *currPar,
             *m_msentry,
             Trk::alongMomentum,
-            static_cast<Trk::ParticleHypothesis>(m_particleType.value())).release();
+            static_cast<Trk::ParticleHypothesis>(m_particleType.value()));
         if (msEntry) {
           printMat(
             theta,
@@ -140,7 +139,7 @@ StatusCode Trk::CETmaterial::execute(const EventContext& ctx)
 	      }
 	    }
 
-            currPar = (mmsentry->back()) ?  mmsentry->back()->trackParameters() : msEntry;
+            currPar = (mmsentry->back()) ?  mmsentry->back()->trackParameters() : msEntry.release();
 
             const std::vector<const Trk::TrackStateOnSurface*>* peri = m_extrapolator->extrapolateM(ctx,
                                                                                                     *currPar,
@@ -153,7 +152,6 @@ StatusCode Trk::CETmaterial::execute(const EventContext& ctx)
               ATH_MSG_DEBUG ("trPar vector size:" << peri->size() );
             } else {
               ATH_MSG_ERROR ("Perigee pointer is null in CETmaterial.cxx");
-              delete msEntry;
               return StatusCode::FAILURE;
             }
 	    for (const auto& entry : *peri) {
@@ -180,15 +178,16 @@ StatusCode Trk::CETmaterial::execute(const EventContext& ctx)
             } else {
               ATH_MSG_ERROR( "extrapolation to perigee failed for input parameters: " << msEntry->parameters() );
             }
-            delete peri;
-            delete msEntry;
+            delete peri; 
+            peri = nullptr;
           } else {
             ATH_MSG_ERROR( "extrapolation to MSentry failed for input parameters: " << currPar->parameters() );
             printMat(theta,phi,0.);
           }
         }
       }
-      delete currPar;
+      delete currPar; 
+      currPar = nullptr;
       continue;
     }
     if (m_checkStepWise) {
@@ -216,6 +215,7 @@ StatusCode Trk::CETmaterial::execute(const EventContext& ctx)
                                                     false,
                                                     static_cast<Trk::ParticleHypothesis>(m_particleType.value()));
           delete precPar;
+          precPar = nullptr;
           // collect material
           if (nextPrec) {
             for (const auto *i : *nextPrec) {
@@ -322,10 +322,12 @@ StatusCode Trk::CETmaterial::execute(const EventContext& ctx)
             ATH_MSG_ERROR( "extrapolation to perigee failed for input parameters: " << destParameters->back()->trackParameters()->parameters() );
           }
           delete peri;
+          peri = nullptr;
         }
       }
 
       delete destParameters;
+      destParameters = nullptr;
     }
   }
 
