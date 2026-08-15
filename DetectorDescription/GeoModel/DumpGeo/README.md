@@ -37,15 +37,45 @@ After having set Athena, at the prompt, run the command:
 python -m DumpGeo.DumpGeoConfig
 ```
 
-this will dump the default geometry tag (the Run3 default tag `ATLAS-R3S-2021-03-02-00`, at the time of writing) into a local file named `geometry-ATLAS-R3S-2021-03-02-00.db`. The fine names reflects the geometry tag that has been dumped.
+This uses the geometry tag from input metadata when available. If no tag is
+available from the command line or metadata, DumpGeo uses the default Run-3
+tag. The output filename reflects the geometry tag that was dumped; for
+example, `geometry-ATLAS-R3S-2021-03-02-00.db`.
 
-Optionally, you can specify which geometry tag to be dumped by using the `-detDescr` option; for example:
+Optionally, you can specify which geometry tag to dump by using the
+`--detDescr` option; for example:
 
 ```sh
-python -m DumpGeo.DumpGeoConfig --detdescr=ATLAS-R2-2016-01-00-01
+python -m DumpGeo.DumpGeoConfig --detDescr=ATLAS-R2-2016-01-00-01
 ```
 
-After issueing the command, a file named `geometry-ATLAS-R2-2016-01-00-01.db` will be created in the run folder.
+After issuing the command, a file named `geometry-ATLAS-R2-2016-01-00-01.db` will be created in the run folder.
+
+The geometry tag is selected with the following precedence:
+
+1. an explicit `--detDescr=TAG` argument;
+2. an explicit generic `GeoModel.AtlasVersion=TAG` flag;
+3. the geometry tag stored in the input-file metadata; and
+4. the default Run-3 tag when none of the above provides a tag.
+
+These commands can be used to check each explicit configuration path and its
+precedence:
+
+```sh
+# Use the dedicated DumpGeo convenience alias.
+python -m DumpGeo.DumpGeoConfig \
+    --detDescr=ATLAS-R3S-2021-03-03-00
+
+# Use the equivalent generic Athena flag syntax.
+python -m DumpGeo.DumpGeoConfig \
+    GeoModel.AtlasVersion=ATLAS-R3S-2021-03-03-00
+
+# If both forms are supplied, the dedicated --detDescr alias takes precedence.
+# This command therefore uses ATLAS-R3S-2021-03-03-00.
+python -m DumpGeo.DumpGeoConfig \
+    --detDescr=ATLAS-R3S-2021-03-03-00 \
+    GeoModel.AtlasVersion=ATLAS-R2-2016-01-00-01
+```
 
 
 ### Run it as an Athena jobOption
@@ -170,6 +200,7 @@ The tests cover:
 * removal of an existing output file when `ForceOverwrite` is enabled;
 * rejection of an existing output file when overwrite is disabled;
 * non-destructive output-file preflight when overwrite is enabled;
+* geometry-tag precedence and its use in automatic output filenames;
 * ZDC warning selection for enabled, disabled, and known-tag configurations; and
 * the configurable algorithm name.
 

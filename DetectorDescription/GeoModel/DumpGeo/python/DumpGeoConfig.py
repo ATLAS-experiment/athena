@@ -138,6 +138,15 @@ def dumpGeoOutputFileName(flags):
     return output_file + ".db"
 
 
+def resolveDumpGeoGeometryTag(det_descr, configured_tag, fallback_tag):
+    """Resolve the geometry tag using the DumpGeo command-line precedence."""
+    if det_descr:
+        return det_descr
+    if configured_tag:
+        return configured_tag
+    return fallback_tag
+
+
 def validateDumpGeoOutputFile(output_file, force_overwrite):
     """Reject an existing output file unless overwrite is enabled."""
     if os.path.exists(output_file) and not force_overwrite:
@@ -281,8 +290,16 @@ if __name__=="__main__":
     parser = flags.getArgumentParser(description="Dump the detector geometry to a GeoModel-based SQLite '.db' file.")
     parser.prog = 'dump-geo'
     # here we extend the parser with CLI options specific to DumpGeo
-    parser.add_argument("--detDescr", default=defaultGeometryTags.RUN3,
-                        help="The ATLAS geometry tag you want to dump (a convenience alias for the Athena flag 'GeoModel.AtlasVersion=TAG')", metavar="TAG")
+    parser.add_argument(
+        "--detDescr",
+        default=None,
+        help=(
+            "Override the ATLAS geometry tag. This is a convenience alias "
+            "for 'GeoModel.AtlasVersion=TAG'. If omitted, the generic flag "
+            "or input-file metadata is used."
+        ),
+        metavar="TAG",
+    )
     parser.add_argument("--outFilename", default="",
                         help="Here you can set a custom name for the output '.db' file. It will replace the name that is built with the geometry tag and the list of fileterd Detector Managers, if any.", metavar="FILENAME")
     # parser.add_argument("--filterTreeTops", help="Only output the GeoModel Tree Tops specified in the FILTER list; input is a comma-separated list")
@@ -318,19 +335,40 @@ if __name__=="__main__":
     if args.forceOverwrite:
         flags.GeoModel.DumpGeo.ForceOverwrite = True
 
-    # Assign the command-line geometry tag before any metadata lookup, so the
-    # final automatic output file name is available for an early preflight.
+    # A custom filename is already final and can be checked without resolving
+    # the geometry tag, which may otherwise require a metadata lookup.
+    if flags.GeoModel.DumpGeo.OutputFileName:
+        validateDumpGeoOutputFile(
+            flags.GeoModel.DumpGeo.OutputFileName,
+            flags.GeoModel.DumpGeo.ForceOverwrite,
+        )
+
+    # Resolve the geometry tag with this precedence: an explicit --detDescr,
+    # the generic GeoModel.AtlasVersion flag (including its metadata-derived
+    # value), then the standalone Run-3 fallback. Avoid evaluating the generic
+    # flag when --detDescr was supplied, since doing so may trigger an
+    # unnecessary metadata lookup.
+    configured_geometry_tag = None
+    if not args.detDescr:
+        configured_geometry_tag = flags.GeoModel.AtlasVersion
+    geometry_tag = resolveDumpGeoGeometryTag(
+        args.detDescr,
+        configured_geometry_tag,
+        defaultGeometryTags.RUN3,
+    )
     if args.detDescr:
         _logger.verbose(
             "+ About to set this detector description tag: '%s'",
             args.detDescr,
         )
-        flags.GeoModel.AtlasVersion = args.detDescr
-        _logger.verbose("+ ... Done")
+    flags.GeoModel.AtlasVersion = geometry_tag
+    _logger.verbose("+ Using detector description tag: '%s'", geometry_tag)
 
-    # Fail fast before metadata inspection and geometry configuration. This
-    # check deliberately does not delete an existing file when force overwrite
-    # is enabled; deletion remains in DumpGeoCfg after configuration succeeds.
+    # Fail as soon as the final geometry tag is known and before detector or
+    # geometry configuration. Resolving a metadata-derived tag necessarily
+    # performs the metadata lookup first. This check deliberately does not
+    # delete an existing file when force overwrite is enabled; deletion remains
+    # in DumpGeoCfg after configuration succeeds.
     validateDumpGeoOutputFile(
         dumpGeoOutputFileName(flags),
         flags.GeoModel.DumpGeo.ForceOverwrite,

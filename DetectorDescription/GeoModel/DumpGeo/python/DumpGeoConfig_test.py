@@ -12,6 +12,7 @@ from DumpGeo.DumpGeoConfig import (
     DumpGeoCfg,
     dumpGeoOutputFileName,
     logZDCGeometryWarning,
+    resolveDumpGeoGeometryTag,
     validateDumpGeoOutputFile,
     zdcGeometryWarning,
 )
@@ -138,6 +139,55 @@ class DumpGeoConfigTest(unittest.TestCase):
         self.assertEqual(
             dumpGeoOutputFileName(flags),
             "geometry-ATLAS-UNIT-TEST-00-00-00-Pixel-Tile.db",
+        )
+
+    def test_detdescr_overrides_generic_geometry_flag(self):
+        self.assertEqual(
+            resolveDumpGeoGeometryTag(
+                "ALIAS-TAG",
+                "GENERIC-TAG",
+                "FALLBACK-TAG",
+            ),
+            "ALIAS-TAG",
+        )
+
+    def test_generic_geometry_flag_is_preserved_without_detdescr(self):
+        self.assertEqual(
+            resolveDumpGeoGeometryTag(
+                None,
+                "GENERIC-TAG",
+                "FALLBACK-TAG",
+            ),
+            "GENERIC-TAG",
+        )
+
+    def test_metadata_geometry_tag_is_used_without_override(self):
+        self.assertEqual(
+            resolveDumpGeoGeometryTag(
+                None,
+                "METADATA-TAG",
+                "FALLBACK-TAG",
+            ),
+            "METADATA-TAG",
+        )
+
+    def test_geometry_fallback_is_used_when_no_tag_is_available(self):
+        self.assertEqual(
+            resolveDumpGeoGeometryTag(None, None, "FALLBACK-TAG"),
+            "FALLBACK-TAG",
+        )
+
+    def test_resolved_geometry_tag_is_used_in_output_filename(self):
+        geometry_tag = resolveDumpGeoGeometryTag(
+            None,
+            "METADATA-TAG",
+            "FALLBACK-TAG",
+        )
+        flags = self._flags(atlas_version=geometry_tag)
+
+        self.assertEqual(
+            dumpGeoOutputFileName(flags),
+            "geometry-METADATA-TAG.db",
         )
 
     def test_zdc_warning_for_unknown_geometry_tag(self):
