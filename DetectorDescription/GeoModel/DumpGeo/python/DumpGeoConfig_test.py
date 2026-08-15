@@ -107,7 +107,7 @@ class DumpGeoConfigTest(unittest.TestCase):
             with self.assertRaisesRegex(ConfigurationError, "from-kwargs.db"):
                 DumpGeoCfg(flags, OutSQLiteFileName="from-kwargs.db")
 
-    def test_force_overwrite_removes_explicit_output_filename(self):
+    def test_force_overwrite_configures_explicit_output_filename(self):
         flags = self._flags(
             output_file="from-flags.db",
             force_overwrite=True,
@@ -126,9 +126,12 @@ class DumpGeoConfigTest(unittest.TestCase):
             )
 
         self.addCleanup(accumulator.wasMerged)
-        remove.assert_called_once_with("from-kwargs.db")
+        algorithm = accumulator.getPrimary()
+        self.assertEqual(algorithm.OutSQLiteFileName, "from-kwargs.db")
+        self.assertTrue(algorithm.ForceOverwrite)
+        remove.assert_not_called()
 
-    def test_force_overwrite_removes_existing_file(self):
+    def test_force_overwrite_does_not_delete_during_configuration(self):
         flags = self._flags(
             output_file="existing.db",
             force_overwrite=True,
@@ -141,7 +144,24 @@ class DumpGeoConfigTest(unittest.TestCase):
             accumulator = DumpGeoCfg(flags)
 
         self.addCleanup(accumulator.wasMerged)
-        remove.assert_called_once_with("existing.db")
+        self.assertTrue(accumulator.getPrimary().ForceOverwrite)
+        remove.assert_not_called()
+
+    def test_explicit_force_overwrite_property_is_authoritative(self):
+        flags = self._flags(
+            output_file="existing.db",
+            force_overwrite=False,
+        )
+
+        with (
+            patch("DumpGeo.DumpGeoConfig.os.path.exists", return_value=True),
+            patch("DumpGeo.DumpGeoConfig.os.remove") as remove,
+        ):
+            accumulator = DumpGeoCfg(flags, ForceOverwrite=True)
+
+        self.addCleanup(accumulator.wasMerged)
+        self.assertTrue(accumulator.getPrimary().ForceOverwrite)
+        remove.assert_not_called()
 
     def test_existing_file_without_force_raises(self):
         flags = self._flags(output_file="existing.db")

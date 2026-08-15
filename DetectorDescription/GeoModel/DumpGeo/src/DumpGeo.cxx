@@ -31,9 +31,11 @@
 
 // C++ includes
 #include <cstdlib>  //For setenv
+#include <filesystem>
 #include <iomanip>
 #include <iostream>
 #include <stdexcept>
+#include <system_error>
 #include <vector>
 
 // Units
@@ -253,6 +255,23 @@ StatusCode DumpGeo::initialize() {
                          "DumpGeo", StatusCode::FAILURE);
   }
   ATH_MSG_INFO("Output file name: " << m_outFileName);
+
+  // Delay destructive overwrite handling until the algorithm is actually
+  // initialized, immediately before opening the output database. Use one
+  // removal attempt without a preceding existence check: a missing file is
+  // harmless, while any real filesystem error must stop the job.
+  if (m_forceOverwrite) {
+    std::error_code error;
+    const bool removed = std::filesystem::remove(m_outFileName.value(), error);
+    if (error) {
+      ATH_MSG_FATAL("Could not remove existing output file '"
+                    << m_outFileName << "': " << error.message());
+      return StatusCode::FAILURE;
+    }
+    if (removed) {
+      ATH_MSG_INFO("Removed existing output file '" << m_outFileName << "'.");
+    }
+  }
 
   // open the DB connection
   GMDBManager db(m_outFileName);

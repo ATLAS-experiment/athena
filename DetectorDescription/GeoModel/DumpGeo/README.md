@@ -101,6 +101,12 @@ You can force to overwrite the output file with the `--forceOverwrite` or `-f` C
 python -m DumpGeo.DumpGeoConfig -f
 ```
 
+Overwrite handling is non-destructive during Python configuration. When force
+overwrite is enabled, the C++ algorithm makes one removal attempt during its
+`initialize()` method, immediately before opening the output database. A
+missing file is harmless; any other filesystem error causes initialization to
+fail instead of continuing with a stale database.
+
 ### Filter DetectorManagers
 
 The CLI option `--filterDetManagers` lets you filter over DetectorManagers.
@@ -198,7 +204,7 @@ The tests cover:
 * the `ShowTreetopContent` property;
 * explicit algorithm properties supplied through keyword arguments, including
   authoritative output-file validation and overwrite handling;
-* removal of an existing output file when `ForceOverwrite` is enabled;
+* propagation of `ForceOverwrite` without deleting files during configuration;
 * rejection of an existing output file when overwrite is disabled;
 * non-destructive output-file preflight when overwrite is enabled;
 * geometry-tag precedence and its use in automatic output filenames;

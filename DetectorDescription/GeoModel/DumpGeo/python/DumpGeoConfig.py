@@ -233,24 +233,19 @@ def DumpGeoCfg(flags, name="DumpGeoAlg", **kwargs):
     # flag-derived filename through kwargs, so validation and deletion must use
     # the same path that the C++ algorithm will write.
     outFileName = kwargs["OutSQLiteFileName"]
-
-    # Check if the output SQLite file exists already, 
-    # and overwrite it if the user asked to do so; 
-    # otherwise, throw an error.
-    validateDumpGeoOutputFile(
-        outFileName,
+    kwargs.setdefault(
+        "ForceOverwrite",
         flags.GeoModel.DumpGeo.ForceOverwrite,
     )
-    if os.path.exists(outFileName):
-        if flags.GeoModel.DumpGeo.ForceOverwrite:
-            print("+ DumpGeo -- NOTE -- You chose to overwrite an existing geometry dump file with the same name, if present.")
-            # os.environ["DUMPGEOFORCEOVERWRITE"] = "1" # save to an env var, for later use in GeoModelStandalone/GeoExporter
-            # Check if the file exists before attempting to delete it   
-            if os.path.exists(outFileName):
-                os.remove(outFileName)
-                _logger.verbose(f"The file {outFileName} has been deleted.")
-            else:
-                _logger.verbose(f"The file {outFileName} does not exist. So, it was not needed to 'force-delete' it. Continuing...")
+    forceOverwrite = kwargs["ForceOverwrite"]
+
+    # Reject an existing file unless overwrite is enabled. Destructive removal
+    # is deliberately deferred to DumpGeo::initialize(), immediately before
+    # the C++ algorithm opens the output database.
+    validateDumpGeoOutputFile(
+        outFileName,
+        forceOverwrite,
+    )
 
     # Schedule the DumpGeo Athena Algorithm
     result = ComponentAccumulator()
