@@ -21,6 +21,7 @@
 #include <Acts/Navigation/TryAllNavigationPolicy.hpp>
 #include <Acts/Surfaces/SurfaceArray.hpp>
 #include <Acts/Utilities/AxisDefinitions.hpp>
+#include <Acts/Utilities/AxisSpec.hpp>
 #include <cstddef>
 #include <format>
 #include <ranges>
@@ -40,7 +41,6 @@ namespace {
 
 using enum Acts::CylinderVolumeBounds::Face;
 using enum Acts::AxisDirection;
-using enum Acts::AxisBoundaryType;
 using enum Acts::SurfaceArrayNavigationPolicy::LayerType;
 using AttachmentStrategy = Acts::VolumeAttachmentStrategy;
 using ResizeStrategy = Acts::VolumeResizeStrategy;
@@ -117,7 +117,6 @@ void addStripBarrelLayer(
   using enum Acts::SurfaceArrayNavigationPolicy::LayerType;
   using enum Acts::CylinderVolumeBounds::Face;
   using enum Acts::AxisDirection;
-  using enum Acts::AxisBoundaryType;
 
   auto addLayer = [ilayer, &surfaces](auto& node) {
     node.addLayer("Strip_Brl_" + std::to_string(ilayer), [&](auto& layer) {
@@ -143,12 +142,15 @@ void addStripBarrelLayer(
   parent.addMaterial("Strip_Brl_" + std::to_string(ilayer) + "_Material",
                      [&addLayer, &ilayer](auto& lmat) {
                        if (ilayer < 3) {
-                         lmat.configureFace(OuterCylinder,
-                                            {AxisRPhi, Closed, 20},
-                                            {AxisZ, Bound, 20});
+                         lmat.configureFace(
+                             OuterCylinder,
+                             AxisSpec::DeferredEquidistant(20, AxisRPhi),
+                             AxisSpec::DeferredEquidistant(20, AxisZ));
                        }
-                       lmat.configureFace(InnerCylinder, {AxisRPhi, Closed, 20},
-                                          {AxisZ, Bound, 20});
+                       lmat.configureFace(
+                           InnerCylinder,
+                           AxisSpec::DeferredEquidistant(20, AxisRPhi),
+                           AxisSpec::DeferredEquidistant(20, AxisZ));
                        addLayer(lmat);
                      });
 }
@@ -159,11 +161,12 @@ void addStripEndcapLayer(
   using enum Acts::SurfaceArrayNavigationPolicy::LayerType;
   using enum Acts::CylinderVolumeBounds::Face;
   using enum Acts::AxisDirection;
-  using enum Acts::AxisBoundaryType;
 
   parent.addMaterial(name + "_Material", [&](auto& mat) {
-    mat.configureFace(PositiveDisc, {AxisR, Bound, 20}, {AxisPhi, Closed, 40});
-    mat.configureFace(NegativeDisc, {AxisR, Bound, 20}, {AxisPhi, Closed, 40});
+    mat.configureFace(PositiveDisc, AxisSpec::DeferredEquidistant(20, AxisR),
+                      AxisSpec::DeferredEquidistant(40, AxisPhi));
+    mat.configureFace(NegativeDisc, AxisSpec::DeferredEquidistant(20, AxisR),
+                      AxisSpec::DeferredEquidistant(40, AxisPhi));
 
     mat.addLayer(name, [&surfaces](auto& layer) {
       layer.setNavigationPolicyFactory(
@@ -216,8 +219,12 @@ ItkBlueprintNodeBuilder::buildBlueprintNode(
 
   itk.addMaterial("ItkNodeMain_Material", [&](auto& mat) {
       if (m_buildStrip) {
-        mat.configureFace(NegativeDisc, {AxisR, Bound, 20}, {AxisPhi, Closed, 40});
-        mat.configureFace(PositiveDisc, {AxisR, Bound, 20}, {AxisPhi, Closed, 40});
+        mat.configureFace(NegativeDisc,
+                          AxisSpec::DeferredEquidistant(20, AxisR),
+                          AxisSpec::DeferredEquidistant(40, AxisPhi));
+        mat.configureFace(PositiveDisc,
+                          AxisSpec::DeferredEquidistant(20, AxisR),
+                          AxisSpec::DeferredEquidistant(40, AxisPhi));
       }
 
     auto& innerContainer = mat.addCylinderContainer("ITkInnerContainer", AxisR);
@@ -276,10 +283,12 @@ void ItkBlueprintNodeBuilder::buildItkPixelBlueprintNode(
   innerPixel.setResizeStrategy(ResizeStrategy::Gap);
 
   innerPixel.addMaterial("InnerPixelMaterial", [&](auto& mat) {
-    mat.configureFace(OuterCylinder, {AxisRPhi, Closed, 20},
-                      {AxisZ, Bound, 20});
-    mat.configureFace(InnerCylinder, {AxisRPhi, Closed, 20},
-                      {AxisZ, Bound, 20});
+    mat.configureFace(OuterCylinder,
+                      AxisSpec::DeferredEquidistant(20, AxisRPhi),
+                      AxisSpec::DeferredEquidistant(20, AxisZ));
+    mat.configureFace(InnerCylinder,
+                      AxisSpec::DeferredEquidistant(20, AxisRPhi),
+                      AxisSpec::DeferredEquidistant(20, AxisZ));
 
     auto& innerPixelContainer = mat.addCylinderContainer("InnerPixel", AxisZ);
 
@@ -302,10 +311,12 @@ void ItkBlueprintNodeBuilder::buildItkPixelBlueprintNode(
 
     auto& brl_mat =
         barrelGeoId.addMaterial("InnerPixel_Material", [&](auto& material) {
-          material.configureFace(NegativeDisc, {AxisR, Bound, 10},
-                            {AxisPhi, Closed, 10});
-          material.configureFace(PositiveDisc, {AxisR, Bound, 10},
-                            {AxisPhi, Closed, 10});
+          material.configureFace(NegativeDisc,
+                                 AxisSpec::DeferredEquidistant(10, AxisR),
+                                 AxisSpec::DeferredEquidistant(10, AxisPhi));
+          material.configureFace(PositiveDisc,
+                                 AxisSpec::DeferredEquidistant(10, AxisR),
+                                 AxisSpec::DeferredEquidistant(10, AxisPhi));
         });
     auto& barrel = brl_mat.addCylinderContainer("InnerPixel_Brl", AxisR);
 
@@ -336,8 +347,9 @@ void ItkBlueprintNodeBuilder::buildItkPixelBlueprintNode(
 
       barrel.addMaterial(
           std::format("InnerPixel_Brl_{}_Material", ilayer), [&](auto& lmat) {
-            lmat.configureFace(OuterCylinder, {AxisRPhi, Closed, 40},
-                               {AxisZ, Bound, 20});
+            lmat.configureFace(OuterCylinder,
+                               AxisSpec::DeferredEquidistant(40, AxisRPhi),
+                               AxisSpec::DeferredEquidistant(20, AxisZ));
 
             auto& layer =
                 lmat.addLayer(std::format("InnerPixel_Brl_{}", ilayer));
@@ -451,10 +463,12 @@ void ItkBlueprintNodeBuilder::buildItkPixelBlueprintNode(
                         << " at z = " << pl.protoLayer.medium(AxisZ));
         ATH_MSG_VERBOSE("Adding material for layer " << layerName);
         ec.addMaterial(layerName + "_Material", [&](auto& lmat) {
-          lmat.configureFace(NegativeDisc, {AxisR, Bound, 10},
-                             {AxisPhi, Closed, 40});
-          lmat.configureFace(PositiveDisc, {AxisR, Bound, 10},
-                             {AxisPhi, Closed, 40});
+          lmat.configureFace(NegativeDisc,
+                             AxisSpec::DeferredEquidistant(10, AxisR),
+                             AxisSpec::DeferredEquidistant(40, AxisPhi));
+          lmat.configureFace(PositiveDisc,
+                             AxisSpec::DeferredEquidistant(10, AxisR),
+                             AxisSpec::DeferredEquidistant(40, AxisPhi));
           addLayer(lmat);
         });
       }
@@ -467,8 +481,12 @@ void ItkBlueprintNodeBuilder::buildItkPixelBlueprintNode(
   outerPixel.setResizeStrategy(ResizeStrategy::Gap);
 
   outerPixel.addMaterial("OuterPixelMaterial", [&](auto& opmat) {
-    opmat.configureFace(OuterCylinder, {AxisRPhi, Bound, 20}, {AxisZ, Bound, 20});
-    opmat.configureFace(InnerCylinder, {AxisRPhi, Bound, 20}, {AxisZ, Bound, 20});
+    opmat.configureFace(OuterCylinder,
+                        AxisSpec::DeferredEquidistant(20, AxisRPhi),
+                        AxisSpec::DeferredEquidistant(20, AxisZ));
+    opmat.configureFace(InnerCylinder,
+                        AxisSpec::DeferredEquidistant(20, AxisRPhi),
+                        AxisSpec::DeferredEquidistant(20, AxisZ));
 
     auto& outerPixelContainer = opmat.addCylinderContainer("OuterPixel", AxisZ);
 
@@ -477,10 +495,12 @@ void ItkBlueprintNodeBuilder::buildItkPixelBlueprintNode(
 
     auto& brl_mat =
         barrelGeoId.addMaterial("OuterPixel_Material", [&](auto& bmat) {
-          bmat.configureFace(NegativeDisc, {AxisR, Bound, 10},
-                            {AxisPhi, Closed, 10});
-          bmat.configureFace(PositiveDisc, {AxisR, Bound, 10},
-                            {AxisPhi, Closed, 10});
+          bmat.configureFace(NegativeDisc,
+                             AxisSpec::DeferredEquidistant(10, AxisR),
+                             AxisSpec::DeferredEquidistant(10, AxisPhi));
+          bmat.configureFace(PositiveDisc,
+                             AxisSpec::DeferredEquidistant(10, AxisR),
+                             AxisSpec::DeferredEquidistant(10, AxisPhi));
         });
     auto& barrel = brl_mat.addCylinderContainer("OuterPixel_Brl", AxisR);
 
@@ -511,8 +531,9 @@ void ItkBlueprintNodeBuilder::buildItkPixelBlueprintNode(
 
       barrel.addMaterial(
           std::format("OuterPixel_Brl_{}_Material", ilayer), [&](auto& lmat) {
-            lmat.configureFace(OuterCylinder, {AxisRPhi, Closed, 40},
-                               {AxisZ, Bound, 20});
+            lmat.configureFace(OuterCylinder,
+                               AxisSpec::DeferredEquidistant(40, AxisRPhi),
+                               AxisSpec::DeferredEquidistant(20, AxisZ));
 
             auto& layer =
                 lmat.addLayer("OuterPixel_Brl_" + std::to_string(ilayer));
@@ -574,8 +595,9 @@ void ItkBlueprintNodeBuilder::buildItkPixelBlueprintNode(
           material = &ec_outer.addMaterial(
               "OuterPixel_" + s + "EC_" + std::to_string(idx) + "_Material",
               [&](auto& mat) {
-                mat.configureFace(OuterCylinder, {AxisRPhi, Closed, 20},
-                                  {AxisZ, Bound, 20});
+                mat.configureFace(OuterCylinder,
+                                  AxisSpec::DeferredEquidistant(20, AxisRPhi),
+                                  AxisSpec::DeferredEquidistant(20, AxisZ));
               });
         }
 
@@ -624,10 +646,12 @@ void ItkBlueprintNodeBuilder::buildItkPixelBlueprintNode(
                            "_" + std::to_string(i);
 
           ec_stack.addMaterial(layerName + "_Material", [&](auto& mat) {
-            mat.configureFace(PositiveDisc, {AxisR, Bound, 10},
-                              {AxisPhi, Closed, 40});
-            mat.configureFace(NegativeDisc, {AxisR, Bound, 10},
-                              {AxisPhi, Closed, 40});
+            mat.configureFace(PositiveDisc,
+                              AxisSpec::DeferredEquidistant(10, AxisR),
+                              AxisSpec::DeferredEquidistant(40, AxisPhi));
+            mat.configureFace(NegativeDisc,
+                              AxisSpec::DeferredEquidistant(10, AxisR),
+                              AxisSpec::DeferredEquidistant(40, AxisPhi));
             addEndcapLayer(mat, layerName, surfaces);
           });
         }
@@ -673,10 +697,12 @@ void ItkBlueprintNodeBuilder::buildItkStripBlueprintNode(
   strip.setResizeStrategy(ResizeStrategy::Gap);
 
   strip.addMaterial("StripMaterial", [&](auto& mat) {
-    mat.configureFace(OuterCylinder, {AxisRPhi, Closed, 20},
-                      {AxisZ, Bound, 20});
-    mat.configureFace(InnerCylinder, {AxisRPhi, Closed, 20},
-                      {AxisZ, Bound, 20});
+    mat.configureFace(OuterCylinder,
+                      AxisSpec::DeferredEquidistant(20, AxisRPhi),
+                      AxisSpec::DeferredEquidistant(20, AxisZ));
+    mat.configureFace(InnerCylinder,
+                      AxisSpec::DeferredEquidistant(20, AxisRPhi),
+                      AxisSpec::DeferredEquidistant(20, AxisZ));
 
     auto& stripContainer = mat.addCylinderContainer("Strip", AxisZ);
 
@@ -684,12 +710,15 @@ void ItkBlueprintNodeBuilder::buildItkStripBlueprintNode(
     stripContainer.withGeometryIdentifier([this, &elements](auto& geoId) {
       geoId.setAllVolumeIdsTo(s_stripVolumeId).incrementLayerIds(1);
 
-      auto& brl_mat = geoId.addMaterial("Strip_Brl_Material", [&](auto& material) {
-        material.configureFace(NegativeDisc, {AxisR, Bound, 10},
-                          {AxisPhi, Closed, 10});
-        material.configureFace(PositiveDisc, {AxisR, Bound, 10},
-                          {AxisPhi, Closed, 10});
-      });
+      auto& brl_mat =
+          geoId.addMaterial("Strip_Brl_Material", [&](auto& material) {
+            material.configureFace(NegativeDisc,
+                                   AxisSpec::DeferredEquidistant(10, AxisR),
+                                   AxisSpec::DeferredEquidistant(10, AxisPhi));
+            material.configureFace(PositiveDisc,
+                                   AxisSpec::DeferredEquidistant(10, AxisR),
+                                   AxisSpec::DeferredEquidistant(10, AxisPhi));
+          });
       brl_mat.addCylinderContainer(
           "Strip_Brl", AxisR, [this, &elements](auto& barrel) {
             barrel.setAttachmentStrategy(AttachmentStrategy::Gap);
