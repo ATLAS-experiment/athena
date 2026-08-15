@@ -126,6 +126,11 @@ In that way, we get meaningful, comprehensive checkboxes when visualizing the ou
 
 You can use all the common Athena flags to steer the dump mechanism. 
 
+When ZDC geometry is enabled with a geometry tag that is not one of the known
+ZDC tags, DumpGeo prints a warning before configuration. In standalone mode,
+the warning is repeated after the Athena run so that it remains visible after
+the geometry initialization messages.
+
 With the new CA configuration, you can use the `--help` option to get the list of all available options. 
 
 ```bash
@@ -164,7 +169,8 @@ The tests cover:
 * explicit algorithm properties supplied through keyword arguments;
 * removal of an existing output file when `ForceOverwrite` is enabled;
 * rejection of an existing output file when overwrite is disabled;
-* non-destructive output-file preflight when overwrite is enabled; and
+* non-destructive output-file preflight when overwrite is enabled;
+* ZDC warning selection for enabled, disabled, and known-tag configurations; and
 * the configurable algorithm name.
 
 All tests are regular regression tests and are expected to pass.

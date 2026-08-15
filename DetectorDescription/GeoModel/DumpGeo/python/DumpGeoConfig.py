@@ -149,6 +149,38 @@ def validateDumpGeoOutputFile(output_file, force_overwrite):
         )
 
 
+def zdcGeometryWarning(flags, default_geometry_tags):
+    """Return logger arguments for an incompatible ZDC geometry tag."""
+    if not flags.Detector.GeometryZDC:
+        return None
+
+    known_zdc_tags = {
+        default_geometry_tags.RUN2_ZDC,
+        default_geometry_tags.RUN3_ZDC23,
+        default_geometry_tags.RUN3_ZDC24,
+    }
+    if flags.GeoModel.AtlasVersion in known_zdc_tags:
+        return None
+
+    return (
+        "ZDC geometry was enabled with geometry tag '%s', which may "
+        "not contain a ZDC GeoDB payload. Consider using "
+        "--detDescr=%s or --detDescr=%s for Run 3.",
+        flags.GeoModel.AtlasVersion,
+        default_geometry_tags.RUN3_ZDC23,
+        default_geometry_tags.RUN3_ZDC24,
+    )
+
+
+def logZDCGeometryWarning(warning, repeated=False):
+    """Log a ZDC geometry warning, optionally as an end-of-run reminder."""
+    if not warning:
+        return
+    if repeated:
+        _logger.warning("Repeating the earlier ZDC geometry warning:")
+    _logger.warning(*warning)
+
+
 def DumpGeoCfg(flags, name="DumpGeoAlg", **kwargs):
     _logger.info("We're using these 'GeoModel.DumpGeo' configuration flags:")
     flags.dump("GeoModel.DumpGeo")
@@ -356,21 +388,8 @@ if __name__=="__main__":
     # ZDC geometry is stored only in dedicated geometry tags. Warn rather than
     # silently replacing the user's selected tag, since the choice between the
     # available ZDC layouts is significant.
-    if flags.Detector.GeometryZDC:
-        known_zdc_tags = {
-            defaultGeometryTags.RUN2_ZDC,
-            defaultGeometryTags.RUN3_ZDC23,
-            defaultGeometryTags.RUN3_ZDC24,
-        }
-        if flags.GeoModel.AtlasVersion not in known_zdc_tags:
-            _logger.warning(
-                "ZDC geometry was enabled with geometry tag '%s', which may "
-                "not contain a ZDC GeoDB payload. Consider using "
-                "--detDescr=%s or --detDescr=%s for Run 3.",
-                flags.GeoModel.AtlasVersion,
-                defaultGeometryTags.RUN3_ZDC23,
-                defaultGeometryTags.RUN3_ZDC24,
-            )
+    zdc_warning = zdcGeometryWarning(flags, defaultGeometryTags)
+    logZDCGeometryWarning(zdc_warning)
 
     # finalize setting flags: lock them.
     flags.lock()
@@ -411,4 +430,7 @@ if __name__=="__main__":
     # +++ Configure DumpGeo and run
     cfg.merge(DumpGeoCfg(flags))
     status = cfg.run()
+
+    logZDCGeometryWarning(zdc_warning, repeated=True)
+
     sys.exit(not status.isSuccess())
