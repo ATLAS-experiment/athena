@@ -567,15 +567,6 @@ protected:
       if ( m_chainNames[ichain].passed() ) decisiontype = _decisiontype;
       else                                 decisiontype = TrigDefs::alsoDeactivateTEs;
 
-      //      if ( decisiontype==TrigDefs::requireDecision ) std::cout << "\tSUTT TrigDefs::requireDecision " << decisiontype << std::endl;
-      //      if ( decisiontype==TrigDefs::Physics )         std::cout << "\tSUTT TrigDefs::Physics "         << decisiontype << std::endl;
-
-
-      /// and the index of the collection (if any)
-      const std::string& key_index_string = m_chainNames[ichain].extra();
-      unsigned key_index = 0;
-      if ( key_index_string!="" ) key_index = std::atoi( key_index_string.c_str() );
-
       if ( chainname!="" && m_provider->msg().level() <= MSG::VERBOSE ) {
 
         m_provider->msg(MSG::VERBOSE) << "status for chain " << chainname
