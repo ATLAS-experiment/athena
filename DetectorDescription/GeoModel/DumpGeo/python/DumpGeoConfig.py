@@ -219,7 +219,7 @@ def DumpGeoCfg(flags, name="DumpGeoAlg", **kwargs):
         kwargs.setdefault("UserFilterDetManager", filterDetManagers)
 
     # Set the name of the output '.db' file.
-    outFileName = dumpGeoOutputFileName(flags)
+    configuredOutFileName = dumpGeoOutputFileName(flags)
     if not flags.GeoModel.DumpGeo.OutputFileName:
         _logger.info(
             "+++ Dumping this Detector Description geometry TAG: '%s'",
@@ -227,7 +227,12 @@ def DumpGeoCfg(flags, name="DumpGeoAlg", **kwargs):
         )
 
     # Set the output file name variable in the C++ code
-    kwargs.setdefault("OutSQLiteFileName", outFileName)
+    kwargs.setdefault("OutSQLiteFileName", configuredOutFileName)
+
+    # The final algorithm property is authoritative. A caller can override the
+    # flag-derived filename through kwargs, so validation and deletion must use
+    # the same path that the C++ algorithm will write.
+    outFileName = kwargs["OutSQLiteFileName"]
 
     # Check if the output SQLite file exists already, 
     # and overwrite it if the user asked to do so; 

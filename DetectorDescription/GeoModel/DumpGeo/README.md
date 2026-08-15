@@ -196,7 +196,8 @@ The tests cover:
 * automatic and custom output file names;
 * DetectorManager filtering and the corresponding automatic file name;
 * the `ShowTreetopContent` property;
-* explicit algorithm properties supplied through keyword arguments;
+* explicit algorithm properties supplied through keyword arguments, including
+  authoritative output-file validation and overwrite handling;
 * removal of an existing output file when `ForceOverwrite` is enabled;
 * rejection of an existing output file when overwrite is disabled;
 * non-destructive output-file preflight when overwrite is enabled;

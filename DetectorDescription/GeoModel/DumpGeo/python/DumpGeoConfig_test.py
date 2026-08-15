@@ -97,6 +97,37 @@ class DumpGeoConfigTest(unittest.TestCase):
         self.assertFalse(algorithm.ShowTreetopContent)
         self.assertEqual(algorithm.OutSQLiteFileName, "from-kwargs.db")
 
+    def test_explicit_output_filename_is_validated(self):
+        flags = self._flags(output_file="from-flags.db")
+
+        with patch(
+            "DumpGeo.DumpGeoConfig.os.path.exists",
+            side_effect=lambda path: path == "from-kwargs.db",
+        ):
+            with self.assertRaisesRegex(ConfigurationError, "from-kwargs.db"):
+                DumpGeoCfg(flags, OutSQLiteFileName="from-kwargs.db")
+
+    def test_force_overwrite_removes_explicit_output_filename(self):
+        flags = self._flags(
+            output_file="from-flags.db",
+            force_overwrite=True,
+        )
+
+        with (
+            patch(
+                "DumpGeo.DumpGeoConfig.os.path.exists",
+                side_effect=lambda path: path == "from-kwargs.db",
+            ),
+            patch("DumpGeo.DumpGeoConfig.os.remove") as remove,
+        ):
+            accumulator = DumpGeoCfg(
+                flags,
+                OutSQLiteFileName="from-kwargs.db",
+            )
+
+        self.addCleanup(accumulator.wasMerged)
+        remove.assert_called_once_with("from-kwargs.db")
+
     def test_force_overwrite_removes_existing_file(self):
         flags = self._flags(
             output_file="existing.db",
