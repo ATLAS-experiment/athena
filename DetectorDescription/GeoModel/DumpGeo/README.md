@@ -162,7 +162,9 @@ The tests cover:
 * DetectorManager filtering and the corresponding automatic file name;
 * the `ShowTreetopContent` property;
 * explicit algorithm properties supplied through keyword arguments;
-* removal of an existing output file when `ForceOverwrite` is enabled; and
+* removal of an existing output file when `ForceOverwrite` is enabled;
+* rejection of an existing output file when overwrite is disabled;
+* non-destructive output-file preflight when overwrite is enabled; and
 * the configurable algorithm name.
 
 All tests are regular regression tests and are expected to pass.

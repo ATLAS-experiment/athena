@@ -15,7 +15,10 @@
 import os, sys
 
 # Set the CA environment
-from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
+from AthenaConfiguration.ComponentAccumulator import (
+    ComponentAccumulator,
+    ConfigurationError,
+)
 from AthenaConfiguration.ComponentFactory import CompFactory
 
 # Set the Athena Logger
@@ -121,9 +124,32 @@ def getATLASVersion():
         return os.environ["AtlasBaseVersion"]
     return "Unknown"
 
-def DumpGeoCfg(flags, name="DumpGeoAlg", **kwargs):
-    result = ComponentAccumulator()
 
+def dumpGeoOutputFileName(flags):
+    """Return the configured DumpGeo SQLite output file name."""
+    if flags.GeoModel.DumpGeo.OutputFileName:
+        return flags.GeoModel.DumpGeo.OutputFileName
+
+    output_file = f"geometry-{flags.GeoModel.AtlasVersion}"
+    filter_det_managers = flags.GeoModel.DumpGeo.FilterDetManagers
+    if filter_det_managers:
+        output_file += "-" + "-".join(filter_det_managers)
+
+    return output_file + ".db"
+
+
+def validateDumpGeoOutputFile(output_file, force_overwrite):
+    """Reject an existing output file unless overwrite is enabled."""
+    if os.path.exists(output_file) and not force_overwrite:
+        raise ConfigurationError(
+            f"DumpGeo output file '{output_file}' already exists. "
+            "Move or remove it, or enable "
+            "'GeoModel.DumpGeo.ForceOverwrite' "
+            "(or use the '-f' option from the command line)."
+        )
+
+
+def DumpGeoCfg(flags, name="DumpGeoAlg", **kwargs):
     _logger.info("We're using these 'GeoModel.DumpGeo' configuration flags:")
     flags.dump("GeoModel.DumpGeo")
 
@@ -152,31 +178,12 @@ def DumpGeoCfg(flags, name="DumpGeoAlg", **kwargs):
         kwargs.setdefault("UserFilterDetManager", filterDetManagers)
 
     # Set the name of the output '.db' file.
-    # Pick the custom name if the user set it;
-    # otherwise, build it from the geometry tag
-    # and the filtered Detector Managers (if any).
-    outFileName = ""
-    if flags.GeoModel.DumpGeo.OutputFileName:
-        outFileName = flags.GeoModel.DumpGeo.OutputFileName
-    else:
-        # Handle the user's inputs and create a file name 
-        # for the output SQLite, accordingly
-        outFileName = "geometry"
-        # - Put Geometry TAG into the file name
-        # NOTE: at this point, the user-defined Geo TAG args.detDescr, 
-        #       if set, has already replaced the default TAG in 'flags';
-        #       so, we can use the latter, directy.
-        geoTAG = flags.GeoModel.AtlasVersion
-        _logger.info("+++ Dumping this Detector Description geometry TAG: '%s'", geoTAG)
-        outFileName = outFileName + "-" + geoTAG
-        
-        if filterDetManagers:
-            # - Put the filtered Detector Managers' names into the file name, 
-            #   if the user asked to filter on them
-            outFileName = outFileName + "-" + "-".join(filterDetManagers)
-
-        # - Add the final extension to the name of the output SQLite file 
-        outFileName = outFileName + ".db"
+    outFileName = dumpGeoOutputFileName(flags)
+    if not flags.GeoModel.DumpGeo.OutputFileName:
+        _logger.info(
+            "+++ Dumping this Detector Description geometry TAG: '%s'",
+            flags.GeoModel.AtlasVersion,
+        )
 
     # Set the output file name variable in the C++ code
     kwargs.setdefault("OutSQLiteFileName", outFileName)
@@ -184,6 +191,10 @@ def DumpGeoCfg(flags, name="DumpGeoAlg", **kwargs):
     # Check if the output SQLite file exists already, 
     # and overwrite it if the user asked to do so; 
     # otherwise, throw an error.
+    validateDumpGeoOutputFile(
+        outFileName,
+        flags.GeoModel.DumpGeo.ForceOverwrite,
+    )
     if os.path.exists(outFileName):
         if flags.GeoModel.DumpGeo.ForceOverwrite:
             print("+ DumpGeo -- NOTE -- You chose to overwrite an existing geometry dump file with the same name, if present.")
@@ -194,11 +205,9 @@ def DumpGeoCfg(flags, name="DumpGeoAlg", **kwargs):
                 _logger.verbose(f"The file {outFileName} has been deleted.")
             else:
                 _logger.verbose(f"The file {outFileName} does not exist. So, it was not needed to 'force-delete' it. Continuing...")
-        else:
-            _logger.error(f"+++ DumpGeo -- ERROR!! The ouput file '{outFileName}' exists already!\nPlease move or remove it, or use the 'force' option: '-f' or '--forceOverWrite'.\n\n")
-            sys.exit()
 
     # Schedule the DumpGeo Athena Algorithm
+    result = ComponentAccumulator()
     the_alg = CompFactory.DumpGeo(name=name, **kwargs)
     result.addEventAlgo(the_alg, primary=True)
     return result
@@ -266,11 +275,34 @@ if __name__=="__main__":
     # from the geometry tag and the filtered volumes
     if args.outFilename:
         flags.GeoModel.DumpGeo.OutputFileName = args.outFilename
+    if args.filterDetManagers:
+        flags.GeoModel.DumpGeo.FilterDetManagers = [
+            manager.strip()
+            for manager in args.filterDetManagers.split(",")
+            if manager.strip()
+        ]
     if args.showTreetopContent:
         flags.GeoModel.DumpGeo.ShowTreetopContent = True
     if args.forceOverwrite:
         flags.GeoModel.DumpGeo.ForceOverwrite = True
 
+    # Assign the command-line geometry tag before any metadata lookup, so the
+    # final automatic output file name is available for an early preflight.
+    if args.detDescr:
+        _logger.verbose(
+            "+ About to set this detector description tag: '%s'",
+            args.detDescr,
+        )
+        flags.GeoModel.AtlasVersion = args.detDescr
+        _logger.verbose("+ ... Done")
+
+    # Fail fast before metadata inspection and geometry configuration. This
+    # check deliberately does not delete an existing file when force overwrite
+    # is enabled; deletion remains in DumpGeoCfg after configuration succeeds.
+    validateDumpGeoOutputFile(
+        dumpGeoOutputFileName(flags),
+        flags.GeoModel.DumpGeo.ForceOverwrite,
+    )
 
     # +++ Set the empty input
     _logger.verbose("+ About to set flags related to the input")

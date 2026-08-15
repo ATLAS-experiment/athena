@@ -6,8 +6,13 @@ import unittest
 from unittest.mock import patch
 
 from AthenaConfiguration.AthConfigFlags import AthConfigFlags
+from AthenaConfiguration.ComponentAccumulator import ConfigurationError
 
-from DumpGeo.DumpGeoConfig import DumpGeoCfg
+from DumpGeo.DumpGeoConfig import (
+    DumpGeoCfg,
+    dumpGeoOutputFileName,
+    validateDumpGeoOutputFile,
+)
 from DumpGeo.DumpGeoConfigFlags import createDumpGeoConfigFlags
 
 
@@ -96,6 +101,35 @@ class DumpGeoConfigTest(unittest.TestCase):
 
         self.addCleanup(accumulator.wasMerged)
         remove.assert_called_once_with("existing.db")
+
+    def test_existing_file_without_force_raises(self):
+        flags = self._flags(output_file="existing.db")
+
+        with (
+            patch("DumpGeo.DumpGeoConfig.os.path.exists", return_value=True),
+            patch("DumpGeo.DumpGeoConfig.os.remove") as remove,
+        ):
+            with self.assertRaisesRegex(ConfigurationError, "existing.db"):
+                DumpGeoCfg(flags)
+
+        remove.assert_not_called()
+
+    def test_force_overwrite_preflight_does_not_remove_existing_file(self):
+        with (
+            patch("DumpGeo.DumpGeoConfig.os.path.exists", return_value=True),
+            patch("DumpGeo.DumpGeoConfig.os.remove") as remove,
+        ):
+            validateDumpGeoOutputFile("existing.db", force_overwrite=True)
+
+        remove.assert_not_called()
+
+    def test_output_filename_helper(self):
+        flags = self._flags(filters=["Pixel", "Tile"])
+
+        self.assertEqual(
+            dumpGeoOutputFileName(flags),
+            "geometry-ATLAS-UNIT-TEST-00-00-00-Pixel-Tile.db",
+        )
 
     def test_custom_filename_and_filter(self):
         """A custom filename must not disable DetectorManager filtering."""
