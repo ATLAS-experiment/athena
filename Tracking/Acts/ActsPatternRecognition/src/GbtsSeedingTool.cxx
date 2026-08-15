@@ -95,13 +95,8 @@ namespace ActsTrk {
     }
 
 
-    // create node storage manually
-    std::vector<std::vector<Acts::Experimental::GbtsNode>> nodeStorage{};
-    nodeStorage.resize(m_are_pixels.size());
-    //reasonable size for reservation
-    for (auto& v : nodeStorage) {
-      v.reserve(10000); 
-    }
+    // create the node storage and fill it from the xAOD space points
+    Acts::Experimental::GbtsNodeStorage nodeStorage = m_finder->makeNodeStorage(m_are_pixels);
 
     // add spacepoints to node storage
     for(std::size_t idx = 0; idx < tmpSpacePoints.size(); ++idx){
@@ -110,42 +105,40 @@ namespace ActsTrk {
       const std::vector<xAOD::DetectorIDHashType>& elementlist = sp->elementIdList();
 
       const bool isPixel(elementlist.size() == 1);
-      
+
 	    const short layer = (isPixel ? m_pix_h2l : m_sct_h2l)->operator[](static_cast<int>(elementlist[0]));
 
-      Acts::Experimental::GbtsNode& node = nodeStorage[layer].emplace_back(layer);
-      if (m_finderCfg.beamSpotCorrection) {
-        const float new_x = static_cast<float>(sp->x() - beamSpotPos[0]);
-        const float new_y = static_cast<float>(sp->y() - beamSpotPos[1]);
-        node.x = new_x;
-        node.y = new_y;
-        node.z = static_cast<float>(sp->z());
-        node.r = std::hypot(new_x, new_y);
-        node.phi = std::atan2(new_y, new_x);
-        node.idx = idx;
-      } else {
-        const float new_x = static_cast<float>(sp->x());
-        const float new_y = static_cast<float>(sp->y());
-        node.x = static_cast<float>(sp->x());
-        node.y = static_cast<float>(sp->y());
-        node.z = static_cast<float>(sp->z());
-        node.r = std::hypot(new_x, new_y);
-        node.phi = std::atan2(sp->y(), sp->x());
-        node.idx = idx;
-      }
-
+      float clusterWidth = 0.0f;
+      float localPositionY = 0.0f;
       if (m_finderCfg.useMl && isPixel) {
         assert(dynamic_cast<const xAOD::PixelCluster*>(sp->measurements().front())!=nullptr);
         const xAOD::PixelCluster* pCL = static_cast<const xAOD::PixelCluster*>(sp->measurements().front());
-        node.pcw = pCL->widthInEta();
-        node.locPosY = pCL->localPosition<2>().y();
+        clusterWidth = pCL->widthInEta();
+        localPositionY = pCL->localPosition<2>().y();
+      }
+
+      if (m_finderCfg.beamSpotCorrection) {
+        const float new_x = static_cast<float>(sp->x() - beamSpotPos[0]);
+        const float new_y = static_cast<float>(sp->y() - beamSpotPos[1]);
+        nodeStorage.insert(static_cast<Acts::SpacePointIndex>(idx), new_x, new_y, static_cast<float>(sp->z()),
+          std::hypot(new_x, new_y), std::atan2(new_y, new_x),
+          static_cast<std::uint32_t>(layer), clusterWidth, localPositionY);
+      } else {
+        const float new_x = static_cast<float>(sp->x());
+        const float new_y = static_cast<float>(sp->y());
+        nodeStorage.insert(static_cast<Acts::SpacePointIndex>(idx), new_x, new_y, static_cast<float>(sp->z()),
+          std::hypot(new_x, new_y), static_cast<float>(std::atan2(sp->y(), sp->x())),
+          static_cast<std::uint32_t>(layer), clusterWidth, localPositionY);
       }
     }
+
+    // order the nodes and build the derived per-node data
+    nodeStorage.finalize();
 
     ATH_MSG_VERBOSE("Spacepoints successfully added to node storage");
 
     Acts::SeedContainer seeds;
-    m_finder->createSeeds(nodeStorage, m_are_pixels, m_internalRoi.value(), *m_filter, options, seeds);
+    m_finder->createSeeds(nodeStorage, m_internalRoi.value(), *m_filter, options, seeds);
 
     // add seeds to the output container
     seedContainer.reserve(seedContainer.size() + seeds.size(), 7.0f);
