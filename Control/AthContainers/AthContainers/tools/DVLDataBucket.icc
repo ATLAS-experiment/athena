@@ -1,7 +1,7 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file  AthContainers/tools/DVLDataBucket.icc
@@ -15,7 +15,6 @@
 
 #include "AthContainers/exceptions.h"
 #include "AthenaKernel/IRegisterTransient.h"
-#include "CxxUtils/AthUnlikelyMacros.h"
 
 
 namespace SG {
@@ -147,7 +146,7 @@ DVLDataBucket<T>::cast (CLID clid, IRegisterTransient* irt /*= 0*/,
 {
   // Test for trivial conversion.
   // FIXME: Assumes we can reinterpret_cast between DV* and ViewVector<DV>*.
-  if (ATH_LIKELY (clid == m_clid) || clid == DataBucket<T>::classID())
+  if ((clid == m_clid) || clid == DataBucket<T>::classID()) [[likely]]
     return this->ptr();
 
   // Try looking for a true base conversion,
@@ -209,7 +208,7 @@ DVLDataBucket<T>::cast (const std::type_info& tinfo,
 {
   // Test for trivial conversion.
   // FIXME: Assumes we can reinterpret_cast between DV* and ViewVector<DV>*.
-  if (ATH_LIKELY (&tinfo == m_ti) || tinfo == DataBucket<T>::tinfo())
+  if ((&tinfo == m_ti) || tinfo == DataBucket<T>::tinfo()) [[likely]]
     return this->ptr();
 
   // Try looking for a true base conversion,
