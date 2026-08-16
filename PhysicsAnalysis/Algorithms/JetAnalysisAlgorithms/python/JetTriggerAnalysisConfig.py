@@ -123,7 +123,7 @@ class JetTriggerMatchingBlock (ConfigBlock):
             if config.geometry() is LHCPeriod.Run2 and self.runHLTMatching:
 
                 alg.useEmulationTool = True
-                configure_emulationTool(alg, config, [chain], decisionTool)
+                configure_emulationTool(alg, config, [chain])
 
             if self.runL1Matching:
                 alg.L1Et = "match_" + chain_out + "_L1et_%SYS%"
