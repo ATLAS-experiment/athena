@@ -12,7 +12,6 @@
 #include "../ViewCreatorPreviousROITool.h"
 #include "../ViewCreatorNamedROITool.h"
 #include "../ViewCreatorFSROITool.h"
-#include "../ViewCreatorExtraPrefetchROITool.h"
 #include "../ViewCreatorFetchFromViewROITool.h"
 #include "../ViewCreatorCentredOnIParticleROITool.h"
 #include "../ViewCreatorCentredOnClusterROITool.h"
@@ -46,7 +45,6 @@ DECLARE_COMPONENT( ViewCreatorInitialROITool )
 DECLARE_COMPONENT( ViewCreatorPreviousROITool )
 DECLARE_COMPONENT( ViewCreatorNamedROITool )
 DECLARE_COMPONENT( ViewCreatorFSROITool )
-DECLARE_COMPONENT( ViewCreatorExtraPrefetchROITool )
 DECLARE_COMPONENT( ViewCreatorFetchFromViewROITool )
 DECLARE_COMPONENT( ViewCreatorCentredOnIParticleROITool )
 DECLARE_COMPONENT( ViewCreatorCentredOnClusterROITool )
