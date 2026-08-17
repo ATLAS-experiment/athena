@@ -5,7 +5,7 @@
 #include "PathResolver/PathResolver.h"
 #include "xAODBTaggingEfficiency/BTaggingToolUtil.h"
 #include "xAODBTaggingEfficiency/BTaggingEfficiencyJsonTool.h"
-#include <fstream>
+#include <fstream> 
 
 BTaggingEfficiencyJsonTool::BTaggingEfficiencyJsonTool ( const std::string &name ) :
   asg::AsgTool ( name )
@@ -57,6 +57,15 @@ StatusCode BTaggingEfficiencyJsonTool::initialize()
     }
   }
 
+  // Get mass decorator if specified
+  if (meta.contains("Mass")) {
+    std::string massDecoratorName = meta["Mass"].get<std::string>();
+    if (massDecoratorName != "default") {
+      m_massAcc = std::make_unique<SG::AuxElement::ConstAccessor<float>>(massDecoratorName);
+      ATH_MSG_INFO("Using decorated mass '" << massDecoratorName << "' for Efficiency SF.");
+    }
+  }
+
   if (meta.contains("PT")) {
     std::string ptDecoratorName = meta["PT"].get<std::string>();
     if (ptDecoratorName != "default") {
@@ -66,16 +75,45 @@ StatusCode BTaggingEfficiencyJsonTool::initialize()
   }
   // preload pt bins, systematics and SFs for each category
   auto& json_config_OP = m_json_config[m_outputName][m_jetAuthor][m_OP];
-  for (auto& label : meta["labelMapping"].items()) {
+  for (const auto& label : meta["labelMapping"].items()) {
     std::string labelString = label.key();;
 
-    for (const auto& pt : json_config_OP[labelString]["pt"]) {
-      m_ptMap[labelString].push_back(BTaggingToolUtil::getExtendedFloat(pt));
+    if (json_config_OP[labelString].contains("data_mc")) {
+      for (const auto& pt : json_config_OP[labelString]["data_mc"]["pt"]) {
+        m_sfPtMap[labelString].push_back(BTaggingToolUtil::getExtendedFloat(pt));
+      }
+
+      m_sfMap[labelString] = json_config_OP[labelString]["data_mc"]["nominal"].get<std::vector<float>>();
+      for (auto& [systematicName, values] : json_config_OP[labelString]["data_mc"]["systematics"].items()){
+        m_sfSysMap[labelString][systematicName] = values.get<std::vector<float>>();
+      }
+    } else {
+      ATH_MSG_INFO("No calibration on jet with truthLabel: " << labelString << ".");
     }
 
-    m_sfMap[labelString] = json_config_OP[labelString]["nominal"].get<std::vector<float>>();
-    for (auto& [systematicName, values] : json_config_OP[labelString]["systematics"].items()){
-      m_sysMap[labelString][systematicName] = values.get<std::vector<float>>();
+    if (json_config_OP[labelString].contains("mc_mc")) {
+      if (json_config_OP[labelString].at("mc_mc").contains("reference") && json_config_OP[labelString].at("mc_mc").contains("corrections")) {
+        m_mcReference[labelString] = json_config_OP[labelString]["mc_mc"]["reference"];
+        for (auto& mc_gen : json_config_OP[labelString]["mc_mc"]["corrections"].items()) {
+
+          const std::string& mcGenName = mc_gen.key();
+
+          for (const auto& pt : json_config_OP[labelString]["mc_mc"]["corrections"][mcGenName]["pt"]) {
+            m_corrPtMap[labelString][mcGenName].push_back(BTaggingToolUtil::getExtendedFloat(pt));
+          }
+          
+          for (const auto& mass : json_config_OP[labelString]["mc_mc"]["corrections"][mcGenName]["mass"]) {
+            m_corrMassMap[labelString][mcGenName].push_back(BTaggingToolUtil::getExtendedFloat(mass));
+          }
+          
+          m_corrMap[labelString][mcGenName] = json_config_OP[labelString]["mc_mc"]["corrections"][mcGenName]["nominal"].get<std::vector<std::vector<float>>>();
+          
+        }
+      } else {
+        ATH_MSG_WARNING("mc-to-mc corrections incomplete for jet with truthLabel: " << labelString << ".");
+      }
+    } else{
+      ATH_MSG_INFO("No mc-to-mc corrections on jet with truthLabel: " << labelString << ".");
     }
   }
   
@@ -111,7 +149,7 @@ CP::CorrectionCode BTaggingEfficiencyJsonTool::getScaleFactor( const xAOD::Jet& 
     return CP::CorrectionCode::OutOfValidityRange;
   }
 
-  const auto& pts = m_ptMap.at(labelString);
+  const auto& pts = m_sfPtMap.at(labelString);
   size_t bin_index = pts.size();
   for (size_t i = 1; i < pts.size(); i++) {
     if (getJetPt(jet)/1000. < pts[i]) {
@@ -136,15 +174,117 @@ CP::CorrectionCode BTaggingEfficiencyJsonTool::getScaleFactor( const xAOD::Jet& 
   return CP::CorrectionCode::Ok;
 }
 
+CP::CorrectionCode BTaggingEfficiencyJsonTool::getMcCorr( const xAOD::Jet& jet, const std::string& mc_gen_ref, const std::string& mc_gen_target, float& corr ) const 
+{
+  if (! m_initialised) {
+    throw std::runtime_error("BTaggingEfficiencyJsonTool has not been initialised.");
+  }
+
+  corr = 0.0;
+
+  if (mc_gen_ref == mc_gen_target) {
+      corr = 1.0;
+      return CP::CorrectionCode::Ok;
+  }  
+
+  SG::AuxElement::ConstAccessor<int> truthLabelAccessor( m_truthlabel );
+  int truthLabel = truthLabelAccessor( jet );
+  std::string labelString;
+  auto it = m_labelMap.find(truthLabel);
+  if (it != m_labelMap.end()) {
+    labelString = it->second;
+  } else {
+    ATH_MSG_WARNING("No mc-to-mc corrections on jet with truthLabel: " << truthLabel << ". Returning mc-to-mc correction of 0.");
+    return CP::CorrectionCode::OutOfValidityRange;
+  }
+
+  if ( m_corrMap.empty() ) {
+    ATH_MSG_WARNING("No mc-to-mc corrections on jet with truthLabel: " << truthLabel << ". Returning mc-to-mc correction of 0.");
+    return CP::CorrectionCode::OutOfValidityRange;    
+  }
+  if ( !m_corrMap.contains(labelString) || !m_mcReference.contains(labelString) ) {
+    ATH_MSG_WARNING("No mc-to-mc corrections on jet with truthLabel: " << truthLabel << ". Returning mc-to-mc correction of 0.");
+    return CP::CorrectionCode::OutOfValidityRange;    
+  }
+
+  if ( !m_corrMap.at(labelString).contains(mc_gen_ref) && !m_mcReference.at(labelString).contains(mc_gen_ref) ) {
+    ATH_MSG_WARNING("No mc-to-mc corrections available for mc generator: " << mc_gen_ref << ". Returning mc-to-mc correction of 0.");
+    return CP::CorrectionCode::OutOfValidityRange;    
+  } else if ( !m_corrMap.at(labelString).contains(mc_gen_target) && !m_mcReference.at(labelString).contains(mc_gen_target)) {
+    ATH_MSG_WARNING("No mc-to-mc corrections available for mc generator: " << mc_gen_target << ". Returning mc-to-mc correction of 0.");
+    return CP::CorrectionCode::OutOfValidityRange;    
+  }
+
+  float corr_target = getMcBin(jet, labelString, mc_gen_target) ;
+  float corr_ref = getMcBin(jet, labelString, mc_gen_ref) ;
+
+  if (corr_ref == 0.0) {
+    ATH_MSG_WARNING("Reference MC correction is zero for generator: " << mc_gen_ref << ". Cannot calculate mc-to-mc correction.");
+    corr = 0.0;
+    return CP::CorrectionCode::OutOfValidityRange;
+  }
+
+  corr = corr_target / corr_ref;
+
+  return CP::CorrectionCode::Ok;
+}
+
+float BTaggingEfficiencyJsonTool::getMcBin( const xAOD::Jet& jet, const std::string& labelString, const std::string& mc_gen ) const
+{
+  float corr_gen; 
+  if ( mc_gen == m_mcReference.at(labelString) ) {
+    corr_gen = 1.0;
+  } else {
+    const auto& pts = m_corrPtMap.at(labelString).at(mc_gen);
+    size_t pt_bin_index = pts.size();
+    for (size_t i = 1; i < pts.size(); i++) {
+      if (getJetPt(jet)/1000. < pts[i]) {
+        pt_bin_index = i-1;
+        break;
+      }
+    }
+    const auto& masses = m_corrMassMap.at(labelString).at(mc_gen);
+    size_t mass_bin_index = masses.size();
+    for (size_t i = 1; i < masses.size(); i++) {
+      if (getJetMass(jet)/1000. < masses[i]) {
+        mass_bin_index = i-1;
+        break;
+      }
+    }
+
+    const auto& Corrections_gen = m_corrMap.at(labelString).at(mc_gen);
+    if ( pt_bin_index >= Corrections_gen.size() ) {
+      ATH_MSG_WARNING("No mc-to-mc corrections for jet with pt: " << getJetPt(jet)/1000. << ". Returning correction of 0.");
+      return CP::CorrectionCode::OutOfValidityRange; 
+    } else if (mass_bin_index >= Corrections_gen[pt_bin_index].size() ) {
+      ATH_MSG_WARNING("No mc-to-mc corrections for jet with mass: " << getJetMass(jet)/1000. << ". Returning correction of 0.");
+      return CP::CorrectionCode::OutOfValidityRange;      
+    }
+    corr_gen = Corrections_gen[pt_bin_index][mass_bin_index] ;  
+  }
+  
+  return corr_gen;
+}
+
 float BTaggingEfficiencyJsonTool::getSFSys( const std::string& labelString, size_t bin_index ) const
 {
   float result = 0.0;
-  const auto& systematics = m_sysMap.at(labelString);
+  const auto& systematics = m_sfSysMap.at(labelString);
   for (auto& [systematicName, values] : systematics){
     float sys_value = values.at(bin_index);
     result += sys_value*sys_value;
   }
   return std::sqrt(result);
+}
+
+float BTaggingEfficiencyJsonTool::getJetMass(const xAOD::Jet& jet) const
+{
+    if (!m_massAcc) return jet.m();
+    if (!m_massAcc->isAvailable(jet)) {
+        ATH_MSG_ERROR("Decorated mass '" << SG::AuxTypeRegistry::instance().getName( m_massAcc->auxid() ) << "' not available on jet. Cannot proceed.");
+        throw std::runtime_error("Decorated mass not available on jet.");
+    }
+    return (*m_massAcc)(jet);
 }
 
 float BTaggingEfficiencyJsonTool::getJetPt( const xAOD::Jet& jet ) const

@@ -24,6 +24,7 @@ class BTaggingEfficiencyJsonTool: public asg::AsgTool,
   StatusCode initialize() override;
 
   virtual CP::CorrectionCode getScaleFactor( const xAOD::Jet& jet, float& scalefactor, const CP::SystematicSet& sys) const override;
+  virtual CP::CorrectionCode getMcCorr( const xAOD::Jet& jet, const std::string& mc_gen_ref, const std::string& mc_gen_target, float& scalefactor) const override;
 
   // systematic stuff
   virtual CP::SystematicSet affectingSystematics() const override;
@@ -43,9 +44,19 @@ class BTaggingEfficiencyJsonTool: public asg::AsgTool,
   std::string m_truthlabel;
   json m_json_config;
   std::map<int, std::string> m_labelMap;
-  std::map<std::string, std::vector<float>> m_ptMap;
+  
+  // SF maps
   std::map<std::string, std::vector<float>> m_sfMap;
-  std::map<std::string, std::map<std::string, std::vector<float>>> m_sysMap;
+  std::map<std::string, std::vector<float>> m_sfPtMap;
+  std::map<std::string, std::map<std::string, std::vector<float>>> m_sfSysMap;
+  
+  // mc-to-mc correction maps
+  std::map<std::string, std::map<std::string, std::vector<std::vector<float>>>> m_corrMap;
+  std::map<std::string, std::string> m_mcReference;
+  std::map<std::string, std::map<std::string, std::vector<float>>> m_corrPtMap;
+  std::map<std::string, std::map<std::string, std::vector<float>>> m_corrMassMap;
+
+  std::unique_ptr<SG::AuxElement::ConstAccessor<float>> m_massAcc;
   std::unique_ptr<SG::AuxElement::ConstAccessor<float>> m_ptAcc;
 
   struct sysData {
@@ -55,7 +66,9 @@ class BTaggingEfficiencyJsonTool: public asg::AsgTool,
   const sysData* m_currentSys{nullptr};
   StatusCode calcSystematicVariation(const CP::SystematicSet& systConfig, sysData& mySys ) const;
   float getSFSys ( const std::string& label, size_t bin_index) const;
+  float getMcBin( const xAOD::Jet& jet, const std::string& labelString, const std::string& mc_gen ) const;
   float getJetPt( const xAOD::Jet& jet ) const;
+  float getJetMass( const xAOD::Jet& jet ) const;
 };
 
 #endif
