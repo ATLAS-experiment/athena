@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # art-description: Check that the menu and job configuration don't depend on input file
 # art-type: build
@@ -29,9 +29,9 @@ def diff_step(refdir, testdir, filename):
 def gen_config(input_name):
     dirname = input_name or 'nofile'
 
-    # athenaHLT step to generate the job configuration
+    # athenaEF step to generate the job configuration
     ex = ExecStep.ExecStep(dirname)
-    ex.type = 'athenaHLT'
+    ex.type = 'athenaEF'
     ex.job_options = 'TriggerJobOpts.runHLT'
     ex.input = input_name
     ex.flags = [f'Trigger.triggerMenuSetup={_menu_name}']
@@ -39,7 +39,7 @@ def gen_config(input_name):
     ex.perfmon = False  # Cannot use PerfMon with -M
     ex.fpe_auditor = False  # Don't want FPEAuditor in SMK for P1
 
-    # Execute the athenaHLT step in a subdirectory
+    # Execute the athenaEF step in a subdirectory
     ex.cmd_prefix = f'(mkdir -p {dirname} && pushd {dirname} && '
     ex.cmd_suffix = ' && popd)'
 
