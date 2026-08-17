@@ -62,16 +62,16 @@ StatusCode TgcL0FloatingCandidateBuilderTool::initialize() {
     ATH_MSG_ERROR("Could not resolve the GroupData development directory");
     return StatusCode::FAILURE;
   }
-  const std::string calibrationPath =
+  const std::string ptCalibrationPath =
       calibrationDirectory + "/" + m_ptCalibrationFile.value();
   std::string error;
-  m_ptLut = TgcL0FloatingPtLut::loadAscii(calibrationPath, error);
+  m_ptLut = TgcL0FloatingPtLut::loadAscii(ptCalibrationPath, error);
   if (!m_ptLut) {
     ATH_MSG_ERROR("Failed to load Floating-pT calibration: " << error);
     return StatusCode::FAILURE;
   }
   ATH_MSG_INFO("Loaded Floating-pT calibration "
-               << m_ptLut->version() << " from " << calibrationPath
+               << m_ptLut->version() << " from " << ptCalibrationPath
                << " (eta bins=" << m_ptLut->etaBins()
                << ", folded-phi bins=" << m_ptLut->phiBinsPerFold()
                << ", knots=" << m_ptLut->knotCount()
@@ -79,6 +79,31 @@ StatusCode TgcL0FloatingCandidateBuilderTool::initialize() {
                << (m_ptLut->isDevelopmentPayload() ? "development"
                                                     : "production")
                << ")");
+
+  const std::string goodMagMapPath =
+      calibrationDirectory + "/" + m_goodMagMapFile.value();
+  error.clear();
+  m_goodMagMap = TgcL0GoodMagMap::loadAscii(goodMagMapPath, error);
+  if (!m_goodMagMap) {
+    ATH_MSG_ERROR("Failed to load GoodMag map: " << error);
+    return StatusCode::FAILURE;
+  }
+  if (m_goodMagMap->version() != m_ptLut->version() ||
+      m_goodMagMap->etaBins() != m_ptLut->etaBins() ||
+      m_goodMagMap->phiBinsPerFold() != m_ptLut->phiBinsPerFold()) {
+    ATH_MSG_ERROR("Incompatible Floating-pT and GoodMag payloads: pT="
+                  << m_ptLut->version() << " (" << m_ptLut->etaBins() << "x"
+                  << m_ptLut->phiBinsPerFold() << "), GoodMag="
+                  << m_goodMagMap->version() << " ("
+                  << m_goodMagMap->etaBins() << "x"
+                  << m_goodMagMap->phiBinsPerFold() << ")");
+    return StatusCode::FAILURE;
+  }
+  ATH_MSG_INFO("Loaded GoodMag map "
+               << m_goodMagMap->version() << " from " << goodMagMapPath
+               << " (eta bins=" << m_goodMagMap->etaBins()
+               << ", folded-phi bins=" << m_goodMagMap->phiBinsPerFold()
+               << ", poor bins=" << m_goodMagMap->poorBinCount() << ")");
   return StatusCode::SUCCESS;
 }
 
@@ -138,6 +163,10 @@ StatusCode TgcL0FloatingCandidateBuilderTool::build(
   for (TgcL0Candidate& candidate : candidates) {
     const TgcL0FloatingPtEvaluation evaluation =
         m_ptLut->evaluate(candidate.eta, candidate.phi, candidate.deltaTheta);
+    if (evaluation.modelValid) {
+      candidate.goodMagneticField =
+          m_goodMagMap->isGood(evaluation.etaBin, evaluation.phiFoldBin);
+    }
     if (!evaluation.ptEstimateValid) continue;
     candidate.preInnerCoincidencePt = evaluation.ptEstimateGeV;
     candidate.preInnerCoincidenceThreshold = evaluation.thresholdCode;
@@ -287,6 +316,8 @@ StatusCode TgcL0FloatingCandidateBuilderTool::build(
                   << static_cast<unsigned int>(
                          candidate.preInnerCoincidenceThreshold)
                   << ", charge=" << static_cast<int>(candidate.charge)
+                  << ", goodMagneticField="
+                  << candidate.goodMagneticField
                   << ", wireQuality="
                   << static_cast<unsigned int>(candidate.wireQuality)
                   << ", wireQualities=("
