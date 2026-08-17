@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "PFOHistUtils/PFOClusterMomentPlots.h"
@@ -92,17 +92,17 @@ namespace PFO {
      float moment_SECOND_LAMBDA = -1.0;
 
      //as opposed to PFO which uses specific functions to grab the cluster moments, the auxdata is used
-     static const SG::AuxElement::ConstAccessor<float>acc_FE_moment_SECOND_R("SECOND_R");
-     static const SG::AuxElement::ConstAccessor<float>acc_FE_moment_CENTER_LAMBDA("CENTER_LAMBDA");
-     static const SG::AuxElement::ConstAccessor<float>acc_FE_moment_ISOLATION("ISOLATION");
-     static const SG::AuxElement::ConstAccessor<float>acc_FE_moment_ENG_BAD_CELLS("ENG_BAD_CELLS");
-     static const SG::AuxElement::ConstAccessor<float>acc_FE_moment_N_BAD_CELLS("N_BAD_CELLS");
-     static const SG::AuxElement::ConstAccessor<float>acc_FE_moment_BADLARQ_FRAC("BADLARQ_FRAC");
-     static const SG::AuxElement::ConstAccessor<float>acc_FE_moment_ENG_POS("ENG_POS");
-     static const SG::AuxElement::ConstAccessor<float>acc_FE_moment_AVG_LAR_Q("AVG_LAR_Q");
-     static const SG::AuxElement::ConstAccessor<float>acc_FE_moment_AVG_TILE_Q("AVG_TILE_Q");
-     static const SG::AuxElement::ConstAccessor<float>acc_FE_moment_EM_PROBABILITY("EM_PROBABILITY");
-     static const SG::AuxElement::ConstAccessor<float>acc_FE_moment_SECOND_LAMBDA("SECOND_LAMBDA");
+     static const SG::ConstAccessor<float>acc_FE_moment_SECOND_R("SECOND_R");
+     static const SG::ConstAccessor<float>acc_FE_moment_CENTER_LAMBDA("CENTER_LAMBDA");
+     static const SG::ConstAccessor<float>acc_FE_moment_ISOLATION("ISOLATION");
+     static const SG::ConstAccessor<float>acc_FE_moment_ENG_BAD_CELLS("ENG_BAD_CELLS");
+     static const SG::ConstAccessor<float>acc_FE_moment_N_BAD_CELLS("N_BAD_CELLS");
+     static const SG::ConstAccessor<float>acc_FE_moment_BADLARQ_FRAC("BADLARQ_FRAC");
+     static const SG::ConstAccessor<float>acc_FE_moment_ENG_POS("ENG_POS");
+     static const SG::ConstAccessor<float>acc_FE_moment_AVG_LAR_Q("AVG_LAR_Q");
+     static const SG::ConstAccessor<float>acc_FE_moment_AVG_TILE_Q("AVG_TILE_Q");
+     static const SG::ConstAccessor<float>acc_FE_moment_EM_PROBABILITY("EM_PROBABILITY");
+     static const SG::ConstAccessor<float>acc_FE_moment_SECOND_LAMBDA("SECOND_LAMBDA");
      
      //use accessors to retrieve the auxvars
      if(acc_FE_moment_SECOND_R.isAvailable(FE))
@@ -151,7 +151,7 @@ namespace PFO {
      m_FE_EM_PROBABILITY->Fill(moment_EM_PROBABILITY,eventInfo.beamSpotWeight());
      m_FE_SECOND_LAMBDA->Fill(moment_SECOND_LAMBDA,eventInfo.beamSpotWeight());
 
-     if (fabs(FE_eta) < 1.5){
+     if (std::abs(FE_eta) < 1.5){
        m_FE_SECOND_R_etaBinA->Fill(moment_SECOND_R,eventInfo.beamSpotWeight());
        m_FE_CENTER_LAMBDA_etaBinA->Fill(moment_CENTER_LAMBDA,eventInfo.beamSpotWeight());
        m_FE_ISOLATION_etaBinA->Fill(moment_ISOLATION,eventInfo.beamSpotWeight());
@@ -164,7 +164,7 @@ namespace PFO {
        m_FE_EM_PROBABILITY_etaBinA->Fill(moment_EM_PROBABILITY,eventInfo.beamSpotWeight());
        m_FE_SECOND_LAMBDA_etaBinA->Fill(moment_SECOND_LAMBDA,eventInfo.beamSpotWeight());
      }//|eta| < 1.5
-     else if (fabs(FE_eta) < 2.5){
+     else if (std::abs(FE_eta) < 2.5){
        m_FE_SECOND_R_etaBinB->Fill(moment_SECOND_R,eventInfo.beamSpotWeight());
        m_FE_CENTER_LAMBDA_etaBinB->Fill(moment_CENTER_LAMBDA,eventInfo.beamSpotWeight());
        m_FE_ISOLATION_etaBinB->Fill(moment_ISOLATION,eventInfo.beamSpotWeight());
@@ -177,7 +177,7 @@ namespace PFO {
        m_FE_EM_PROBABILITY_etaBinB->Fill(moment_EM_PROBABILITY,eventInfo.beamSpotWeight());
        m_FE_SECOND_LAMBDA_etaBinB->Fill(moment_SECOND_LAMBDA,eventInfo.beamSpotWeight());
      }
-     else if (fabs(FE_eta) < 3.2){
+     else if (std::abs(FE_eta) < 3.2){
        m_FE_SECOND_R_etaBinC->Fill(moment_SECOND_R,eventInfo.beamSpotWeight());
        m_FE_CENTER_LAMBDA_etaBinC->Fill(moment_CENTER_LAMBDA,eventInfo.beamSpotWeight());
        m_FE_ISOLATION_etaBinC->Fill(moment_ISOLATION,eventInfo.beamSpotWeight());

@@ -1,8 +1,9 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "PFOHistUtils/PFOPlots.h"
+#include "AthenaKernel/Units.h"
 
 namespace PFO {
 
@@ -31,19 +32,19 @@ namespace PFO {
   }
 
   void PFOPlots::fill(const xAOD::FlowElement& FE, const xAOD::EventInfo& eventInfo){
-    m_FE_pt->Fill(FE.pt()/1000.0,eventInfo.beamSpotWeight());
+    m_FE_pt->Fill(FE.pt()/Athena::Units::GeV,eventInfo.beamSpotWeight());
     m_FE_eta->Fill(FE.eta(),eventInfo.beamSpotWeight());
     m_FE_phi->Fill(FE.phi(),eventInfo.beamSpotWeight());
-    m_FE_m->Fill(FE.m()/1000.0,eventInfo.beamSpotWeight());
+    m_FE_m->Fill(FE.m()/Athena::Units::GeV,eventInfo.beamSpotWeight());
     m_FE_charge->Fill(FE.charge(),eventInfo.beamSpotWeight());
 
-    if (FE.pt()/1000.0 <= 5) m_FE_pt_low->Fill(FE.pt()/1000.0,eventInfo.beamSpotWeight());
-    else if (20 >= FE.pt()/1000.0 && FE.pt()/1000.0 > 4) m_FE_pt_middle->Fill(FE.pt()/1000.0,eventInfo.beamSpotWeight());
-    else m_FE_pt_high->Fill(FE.pt()/1000.0,eventInfo.beamSpotWeight());
+    if (FE.pt()/Athena::Units::GeV <= 5) m_FE_pt_low->Fill(FE.pt()/Athena::Units::GeV,eventInfo.beamSpotWeight());
+    else if (20 >= FE.pt()/Athena::Units::GeV && FE.pt()/Athena::Units::GeV > 4) m_FE_pt_middle->Fill(FE.pt()/Athena::Units::GeV,eventInfo.beamSpotWeight());
+    else m_FE_pt_high->Fill(FE.pt()/Athena::Units::GeV,eventInfo.beamSpotWeight());
 
-    if (fabs(FE.eta()) < 1)  m_FE_pt_etaBinA->Fill(FE.pt()/1000.0,eventInfo.beamSpotWeight());
-    else if (fabs(FE.eta()) < 2) m_FE_pt_etaBinB->Fill(FE.pt()/1000.0,eventInfo.beamSpotWeight());
-    else m_FE_pt_etaBinC->Fill(FE.pt()/1000.0,eventInfo.beamSpotWeight());
+    if (std::abs(FE.eta()) < 1)  m_FE_pt_etaBinA->Fill(FE.pt()/Athena::Units::GeV,eventInfo.beamSpotWeight());
+    else if (std::abs(FE.eta()) < 2) m_FE_pt_etaBinB->Fill(FE.pt()/Athena::Units::GeV,eventInfo.beamSpotWeight());
+    else m_FE_pt_etaBinC->Fill(FE.pt()/Athena::Units::GeV,eventInfo.beamSpotWeight());
     // additional debug plot: Eta given FlowElem energy>0
     if (FE.e()>0){
       m_FE_eta_posE->Fill(FE.eta(),eventInfo.beamSpotWeight());
