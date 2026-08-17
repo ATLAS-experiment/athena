@@ -1,6 +1,6 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 /*
- * Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration.
  */
 /**
  * @file AthContainers/PackedLinkConstAccessor.h
@@ -25,9 +25,9 @@
 #include "AthContainers/tools/PackedLinkConversions.h"
 #include "AthLinks/ElementLink.h"
 #include "AthLinks/DataLink.h"
-#include "CxxUtils/range_with_at.h"
 #include "CxxUtils/range_with_conv.h"
 #include <iterator>
+#include <ranges>
 
 
 class IProxyDict;
@@ -88,9 +88,8 @@ public:
 
 
   /// Transform a span over @c PackedLink to a span over @c ElementLink.
-  using const_span =
-    CxxUtils::transform_view_with_at<const_PackedLink_span,
-                                     ConstConverter_t>;
+  using const_span = std::ranges::transform_view<const_PackedLink_span,
+                                                 ConstConverter_t>;
 
 
   /// Type the user sees.
@@ -277,9 +276,8 @@ public:
 
   /// Transform a span over vector of @c PackedLink to a
   /// span over span over @c ElementLink.
-  using const_span =
-    CxxUtils::transform_view_with_at<const_PackedLinkVector_span,
-                                     ConstVectorTransform_t>;
+  using const_span = std::ranges::transform_view<const_PackedLinkVector_span,
+                                                 ConstVectorTransform_t>;
 
 
   /// Type the user sees.
