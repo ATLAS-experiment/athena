@@ -1,8 +1,6 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
-/*
- */
 /**
  * @file TileRecUtils/src/TileLaserObjectDumper.cxx
  * @author scott snyder <snyder@bnl.gov>
@@ -13,7 +11,6 @@
 
 #include "TileLaserObjectDumper.h"
 #include "StoreGate/ReadHandle.h"
-#include "CxxUtils/StrFormat.h"
 #include <fstream>
 
 
@@ -45,11 +42,11 @@ StatusCode TileLaserObjectDumper::initialize()
  */
 StatusCode TileLaserObjectDumper::execute (const EventContext& ctx) const
 {
-  std::string fname = CxxUtils::strformat ("%s%s_%08u_%08lu.dump",
-                                           m_prefix.value().c_str(),
-                                           m_contKey.key().c_str(),
-                                           ctx.eventID().run_number(),
-                                           ctx.eventID().event_number());
+  std::string fname = std::format ("{}{}_{:08}_{:08}.dump",
+                                   m_prefix.value().c_str(),
+                                   m_contKey.key().c_str(),
+                                   ctx.eventID().run_number(),
+                                   ctx.eventID().event_number());
   std::ofstream fout (fname);
   if (!fout) {
     ATH_MSG_ERROR ("Cannot open dump file: " << fname);
