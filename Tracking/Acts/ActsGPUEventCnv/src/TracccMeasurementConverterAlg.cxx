@@ -33,7 +33,7 @@ StatusCode TracccMeasurementConverterAlg::initialize()
      ATH_CHECK(m_outputMeasToStripClKey.initialize());
     ATH_CHECK(m_outputStripKey.initialize());
 
-    ATH_CHECK(detStore()->retrieve(m_pixelID, m_idHelperName) );
+    ATH_CHECK(detStore()->retrieve(m_pixelID, "PixelID") );
     ATH_CHECK(detStore()->retrieve(m_stripID,       "SCT_ID"));
     ATH_CHECK(detStore()->retrieve(m_pixelManager, "ITkPixel"));
     ATH_CHECK(detStore()->retrieve(m_stripManager, "ITkStrip"));
