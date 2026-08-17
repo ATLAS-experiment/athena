@@ -1,7 +1,7 @@
 #!/usr/bin/env python
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
-# art-description: athenaHLT test of timeout handling
+# art-description: athenaEF test of timeout handling
 # art-type: build
 # art-include: main/Athena/x86_64-el9-gcc15-opt
 # art-include: 24.0/Athena
@@ -14,7 +14,7 @@ from TrigP1Test.TrigP1TestSteps import TrigBSDumpGrepStep
 output_name_base = 'output.test_trigP1_timeout'
 
 ex = ExecStep.ExecStep()
-ex.type = 'athenaHLT'
+ex.type = 'athenaEF'
 ex.job_options = 'TrigP1Test.Timeout.run'
 ex.input = 'data'
 ex.max_events = 20
