@@ -1144,7 +1144,6 @@ def main():
    g.add_argument('--stdcmalloc', action='store_true', help='use stdcmalloc')
    g.add_argument('--stdcmath', action='store_true', help='use stdcmath library')
    g.add_argument('--imf', action='store_true', default=True, help='use Intel math library')
-   g.add_argument('--show-includes', '-s', action='store_true', help='show printout of included files')
 
    ## Conditions
    g = parser.add_argument_group('Conditions')
@@ -1217,9 +1216,6 @@ def main():
    import AthenaCommon.Logging
    AthenaCommon.Logging.log.setLevel(getattr(logging, args.log_level))
    AthenaCommon.Logging.log.setFormat("%(asctime)s  Py:%(name)-31s %(levelname)7s %(message)s")
-   if args.show_includes:
-      from AthenaCommon.Include import include
-      include.setShowIncludes( True )
 
    # consistency checks for arguments
    if not args.concurrent_events:
