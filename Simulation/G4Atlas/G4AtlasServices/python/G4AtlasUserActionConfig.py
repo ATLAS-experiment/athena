@@ -8,8 +8,8 @@ from CaloG4Sim.CaloG4SimConfig import CalibrationDefaultProcessingToolCfg
 from SimulationConfig.SimEnums import CalibrationRun, CavernBackground, SimulationFlavour
 from G4CosmicFilter.G4CosmicFilterConfig import CosmicFilterToolCfg, StoppedParticleFilterToolCfg
 from G4UserActions.G4UserActionsConfig import (
-    AthenaStackingActionToolCfg, AthenaTrackingActionToolCfg,
-    G4SimTimerToolCfg, G4TrackCounterToolCfg, HitWrapperToolCfg,
+    AthenaStackingActionToolCfg, G4SimTimerToolCfg,
+    G4TrackCounterToolCfg, HitWrapperToolCfg,
     LooperKillerToolCfg, StoppedParticleActionToolCfg
 )
 from G4RunManagement.G4RunManagementUAConfig import SyncPrimaryGeneratorActionToolCfg, SyncRunActionToolCfg, SyncEventActionToolCfg
@@ -120,8 +120,7 @@ def getDefaultActions(flags):
 
     # Some truth handling actions (and timing)
     if not flags.Sim.ISFRun:
-        actions += [result.popToolsAndMerge(AthenaTrackingActionToolCfg(flags)),
-                    result.popToolsAndMerge(MCTruthSteppingActionToolCfg(flags)),
+        actions += [result.popToolsAndMerge(MCTruthSteppingActionToolCfg(flags)),
                     result.popToolsAndMerge(G4SimTimerToolCfg(flags))]
     # Track counter
     actions += [result.popToolsAndMerge(G4TrackCounterToolCfg(flags))]
