@@ -192,27 +192,24 @@ class TrigGlobalEfficiencyCorrectionTool
   SG::AuxElement::ConstAccessor<unsigned int> m_runNumberDecorator;  //!
   std::unique_ptr<TrigGlobEffCorr::Calculator> m_calculator;         //!
 
-  template <typename Key>
-  using flat_set = std::flat_set<Key>;
-
   /// Internal methods (I) -- initialization of the tool
   bool loadHierarchies();
   template <class CPTool>
   bool enumerateTools(TrigGlobEffCorr::ImportData& data,
                       ToolHandleArray<CPTool>& suppliedTools,
                       std::map<ToolKey, std::size_t>& toolIndex,
-                      flat_set<std::size_t>& collectedTags);
-  flat_set<ToolKey> parseListOfLegs(TrigGlobEffCorr::ImportData& data,
-                                    const std::string& inputList,
-                                    bool& success);
+                      std::flat_set<std::size_t>& collectedTags);
+  std::flat_set<ToolKey> parseListOfLegs(TrigGlobEffCorr::ImportData& data,
+                                         const std::string& inputList,
+                                         bool& success);
   bool parseTagString(const std::string& tagstring,
-                      flat_set<std::size_t>& tags);
+                      std::flat_set<std::size_t>& tags);
   bool loadTriggerCombination(TrigGlobEffCorr::ImportData& data,
                               bool useDefaultElectronTools,
                               bool useDefaultPhotonTools);
-  bool loadTagDecorators(const flat_set<std::size_t>& collectedElectronTags,
-                         const flat_set<std::size_t>& collectedMuonTags,
-                         const flat_set<std::size_t>& collectedPhotonTags);
+  bool loadTagDecorators(const std::flat_set<std::size_t>& collectedElectronTags,
+                         const std::flat_set<std::size_t>& collectedMuonTags,
+                         const std::flat_set<std::size_t>& collectedPhotonTags);
   bool loadListOfLegsPerTag();
   bool processDeprecatedProperties();
 
@@ -224,15 +221,15 @@ class TrigGlobalEfficiencyCorrectionTool
   unsigned long getCachedTriggerLegsRanking(
       const TrigGlobEffCorr::Lepton& lepton, ListOfLegs... legs);
   std::size_t getLoosestLegAboveThreshold(const TrigGlobEffCorr::Lepton& lepton,
-                                          const flat_set<std::size_t>& legs,
+                                          const std::flat_set<std::size_t>& legs,
                                           bool& success);
   std::size_t getLoosestLeg(const TrigGlobEffCorr::Lepton& lepton,
                             std::size_t leg1, std::size_t leg2, bool& success);
   std::pair<std::size_t, std::size_t> getTwoLoosestLegs(
-      const TrigGlobEffCorr::Lepton& lepton, const flat_set<std::size_t>& legs,
+      const TrigGlobEffCorr::Lepton& lepton, const std::flat_set<std::size_t>& legs,
       bool& success);
   std::vector<std::size_t> getSortedLegs(const TrigGlobEffCorr::Lepton& lepton,
-                                         const flat_set<std::size_t>& legs,
+                                         const std::flat_set<std::size_t>& legs,
                                          bool& success);
   template <class Container>
   CachedRanking rankTriggerLegs(float pt, const Container& legs);
@@ -284,17 +281,17 @@ class TrigGlobalEfficiencyCorrectionTool
                                                         std::size_t index) {
     return *m_suppliedPhotonEfficiencyTools[index];
   }
-  std::size_t getCombinedHash(const flat_set<std::size_t>& legs);
+  std::size_t getCombinedHash(const std::flat_set<std::size_t>& legs);
   std::size_t getCombinedHash(std::size_t leg1, std::size_t leg2);
-  static inline constexpr const flat_set<std::size_t>& forwardLegs(
-      const flat_set<std::size_t>& legs);
+  static inline constexpr const std::flat_set<std::size_t>& forwardLegs(
+      const std::flat_set<std::size_t>& legs);
   static inline constexpr std::array<std::size_t, 2> forwardLegs(
       std::size_t leg1, std::size_t leg2);
 
   /// Internal methods (III) -- misc. helpers
   inline bool checkAndRecord(CP::CorrectionCode&& cc);
-  flat_set<std::size_t> listNonOrderedCSValues(const std::string& s,
-                                               bool& success);
+  std::flat_set<std::size_t> listNonOrderedCSValues(const std::string& s,
+                                                    bool& success);
 
   friend class TrigGlobEffCorr::ImportData;
   friend class TrigGlobEffCorr::CheckConfig;

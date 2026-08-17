@@ -14,8 +14,6 @@
 #include "TrigGlobalEfficiencyCorrection/ImportData.h"
 #include "xAODBase/ObjectType.h"
 #include <flat_set>
-template <typename Key>
-using flat_set = std::flat_set<Key>;
 
 namespace TrigGlobEffCorr {
 
@@ -278,7 +276,7 @@ class Trigger {
   }
 
   template <typename Trig1L>
-  auto hiddenBy(const flat_set<Trig1L>& trigs) const ->
+  auto hiddenBy(const std::flat_set<Trig1L>& trigs) const ->
       typename std::enable_if<Trig1L::is1L(), bool>::type {
     static_assert(Trig1L::is1L(),
                   "this function is not meaningful for this type of trigger, "
@@ -318,25 +316,25 @@ class Trigger {
   CastType2 side2() const { return side<CastType2::object()>(); }
 
   template <typename Trig1L>
-  auto addTo(const flat_set<Trig1L>& trigs1L) const
+  auto addTo(const std::flat_set<Trig1L>& trigs1L) const
       -> std::enable_if_t<Trig1L::is1L() &&
                               nDistinctLegs(Trig1L::object()) == 1,
-                          flat_set<Trig1L>> {
+                          std::flat_set<Trig1L>> {
     static_assert(mixed(),
                   "this function is not meaningful for this type of trigger, "
                   "hence should not be used.");
-    flat_set<Trig1L> trigs(trigs1L);
+    std::flat_set<Trig1L> trigs(trigs1L);
     trigs.insert(side<Trig1L>());
     return trigs;
   }
 
   template <typename Trig1L>
-  static auto anonymize(const flat_set<Trig1L>& triggers)
+  static auto anonymize(const std::flat_set<Trig1L>& triggers)
       -> std::enable_if_t<is1L() && tt == Trig1L::type(),
-                          const flat_set<std::size_t>&> {
+                          const std::flat_set<std::size_t>&> {
     static_assert(sizeof(Trig1L) == sizeof(std::size_t),
                   "invalid cast if the key sizes differ");
-    return reinterpret_cast<const flat_set<std::size_t>&>(triggers);
+    return reinterpret_cast<const std::flat_set<std::size_t>&>(triggers);
   }
 
   template <bool = true>
