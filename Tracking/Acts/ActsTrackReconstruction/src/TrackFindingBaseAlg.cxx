@@ -216,6 +216,7 @@ namespace ActsTrk {
     // Set the CombinatorialKalmanFilter options
     TrackFinderOptions options(detContext.geometry, detContext.magField, detContext.calib,
                                trackFinder().ckfExtensions, plainOptions, pSurface);
+    options.recordMaterialStates = m_recordMaterialStates;
 
     std::unique_ptr<ActsTrk::IMeasurementSelector> measurementSelector = setMeasurementSelector(ctx, measurements, options);
 
@@ -227,6 +228,7 @@ namespace ActsTrk {
                                      options.extensions, plainSecondOptions, pSurface);
     secondOptions.targetSurface = pSurface;
     secondOptions.skipPrePropagationUpdate = true;
+    secondOptions.recordMaterialStates = m_recordMaterialStates;
 
     return {std::move(options), std::move(secondOptions), std::move(measurementSelector)};
   };
