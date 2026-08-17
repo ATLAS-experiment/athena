@@ -3,19 +3,11 @@
 import os
 
 from AthenaConfiguration.AthConfigFlags import AthConfigFlags
-from AthenaConfiguration.Enums import FlagEnum, Format, LHCPeriod
+from AthenaConfiguration.Enums import Format, LHCPeriod
 from Campaigns.Utils import getDataYear
 from AthenaCommon.Logging import logging
 
 log=logging.getLogger('TriggerConfigFlags')
-
-class ROBPrefetching(FlagEnum):
-    # Enable mapping step InputMaker outputs as ROBPrefetchingAlg inputs
-    StepRoI = 'StepRoI'
-    # Enable mapping chains' first step to pre-HLT prefetching rules based on initial RoIs
-    InitialRoI = 'InitialRoI'
-    # Enable using larger RoI in TauCore step to speculatively prefetch ROBs for the subsequent TauIso step (ATR-26419)
-    TauCoreLargeRoI = 'TauCoreLargeRoI'
 
 
 def trigGlobalTag(flags):
@@ -149,10 +141,6 @@ def createTriggerFlags(doTriggerRecoFlags):
     flags.addFlag('Trigger.doRuntimeNaviVal', False,
                   help=('Check validity of each Decision objects in the entire decision tree (CPU expensive). '
                         'Also enable per-step decision printouts.'))
-
-    flags.addFlag('Trigger.ROBPrefetchingOptions',
-                  [ROBPrefetching.InitialRoI, ROBPrefetching.StepRoI, ROBPrefetching.TauCoreLargeRoI],
-                  help='select ROB prefetching types, empty list disables prefetching')
 
     def EDMVersion(flags):
         """Determine Trigger EDM version based on the input file."""

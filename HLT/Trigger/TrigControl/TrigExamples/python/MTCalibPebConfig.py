@@ -117,7 +117,6 @@ def set_flags(flags, options=default_options):
     flags.Trigger.Online.isPartition = True
     flags.Trigger.triggerMenuSetup = 'Dev_pp_run3_v1'
     flags.Trigger.forceEnableAllChains = True
-    flags.Trigger.ROBPrefetchingOptions = [] # workaround for ATR-26307
     # Disable signature-specific detector configuration parts
     flags.Trigger.doID = False
     flags.Trigger.doCalo = False
