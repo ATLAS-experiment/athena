@@ -182,13 +182,13 @@ StatusCode DeviceDetectorDescriptionCondAlg::initialize()
                     const auto* annulus_design = static_cast<const InDetDD::StripStereoAnnulusDesign*>(&detElem->design());
                     const InDetDD::SiCellId annulus_cell = detElem->cellIdFromIdentifier(athenaID);
                     const double pitch_row = annulus_design->phiPitchPhi(annulus_cell);
-                    const int nStrips0 = annulus_design->diodesInRow(0.);
-                    const double max_phi = nStrips0 * pitch_row;
+                    const int nDiodes = annulus_design->diodesInRow(0.);
+                    const double max_phi = nDiodes * pitch_row;
                     thismod.module_width = -max_phi;
                     // this could be the halfway point in radius, number is arbitrary
                     // const double radius = annulus_design->centreR();
                     thismod.module_length = 0.2; //radius;
-                    thismod.rows = nStrips0;
+                    thismod.rows = nDiodes;
                     thismod.isAnnulus = true;
                 }
             }
@@ -225,7 +225,7 @@ StatusCode DeviceDetectorDescriptionCondAlg::initialize()
             m_athenaToDetrayMap[athena_id] = detray_id;
             found_detray++;
         } else {
-            ATH_MSG_VERBOSE("we did not save key " << acts_geom_id);
+            ATH_MSG_VERBOSE("ACTS surface with key " << acts_geom_id << " was not traslated to detray geometry.");
             missing_detray++;
             if (surface.is_sensitive()) continue;
             ATH_MSG_VERBOSE("found this passive surface in detray: " << acts_geom_id);
@@ -236,7 +236,7 @@ StatusCode DeviceDetectorDescriptionCondAlg::initialize()
     ATH_MSG_INFO("Traccc detector has " << found_detray << " surfaces matching ACTS and " << missing_detray << " additional sufaces, out of which " << missing_detray_passives << " are passive.");
 
     // ---- 3. Deduplicate the designs ----
-    // there are only a hanful of unique module designs, only store unique values
+    // there are only a handful of unique module designs, only store unique values
     std::map<designKey, unsigned int> designLookup;
     unsigned int nextDesignId = 0;
 
@@ -284,6 +284,8 @@ StatusCode DeviceDetectorDescriptionCondAlg::initialize()
                 entry.athenaId = detrayIt->second;
                 entry.hasAthenaModule = true;
             }
+        }else{
+            ATH_MSG_ERROR("Could not find matching Athena module for detray surface with geometryId " << detray_id);
         }
         m_staticCondEntries[condIndex] = entry;
     }
