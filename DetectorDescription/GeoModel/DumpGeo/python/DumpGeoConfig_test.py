@@ -49,7 +49,9 @@ class DumpGeoConfigTest(unittest.TestCase):
         return accumulator.getPrimary()
 
     def test_default_flags(self):
-        flags = self._flags()
+        flags = AthConfigFlags()
+        createDumpGeoConfigFlags(flags)
+        flags.lock()
 
         self.assertEqual(flags.GeoModel.DumpGeo.OutputFileName, "")
         self.assertEqual(flags.GeoModel.DumpGeo.FilterDetManagers, [])
