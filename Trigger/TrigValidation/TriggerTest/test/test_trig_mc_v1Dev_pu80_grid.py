@@ -4,7 +4,6 @@
 # art-description: Trigger RDO->RDO_TRIG athena test of the Dev_pp_run3_v1 menu with pileup80 ttbar sample
 # art-type: grid
 # art-include: main/Athena/x86_64-el9-gcc14-opt
-# art-include: 24.0/Athena
 # art-architecture: '#x86_64-intel'
 # art-input: valid1.601229.PhPy8EG_A14_ttbar_hdamp258p75_SingleLep.recon.RDO.e8514_e8528_s4154_s4114_r14839_tid34183111_00
 # art-input-nfiles: 2
