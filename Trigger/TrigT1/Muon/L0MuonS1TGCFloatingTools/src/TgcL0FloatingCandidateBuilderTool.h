@@ -11,6 +11,7 @@
 #include "MuonReadoutGeometry/MuonDetectorManager.h"
 #include "StoreGate/ReadCondHandleKey.h"
 #include "TgcL0FloatingPtLut.h"
+#include "TgcL0GoodMagMap.h"
 
 #include <memory>
 #include <string>
@@ -65,6 +66,14 @@ class TgcL0FloatingCandidateBuilderTool final
       "ASCII Floating-pT calibration path relative to the GroupData "
       "development directory"};
   std::unique_ptr<const TgcL0FloatingPtLut> m_ptLut{};
+
+  Gaudi::Property<std::string> m_goodMagMapFile{
+      this, "GoodMagMapFile",
+      "L0MuonS1TGC/Floating/eta18_phi8_poormag0p10_v1/"
+      "TgcL0PoorMagneticFieldMap.txt",
+      "ASCII GoodMag map path relative to the GroupData development "
+      "directory"};
+  std::unique_ptr<const TgcL0GoodMagMap> m_goodMagMap{};
 };
 
 }  // namespace L0Muon
