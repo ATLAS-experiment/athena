@@ -10,7 +10,6 @@ from AthenaCommon.CFElements import parOR, seqAND, findAlgorithmByPredicate
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 from DecisionHandling.DecisionHandlingConfig import ComboHypoCfg
-from TriggerJobOpts.TriggerConfigFlags import ROBPrefetching
 
 from collections.abc import MutableSequence
 import functools
@@ -362,13 +361,6 @@ class MenuSequence:
         self._hypo.addOutput( CFNaming.hypoAlgOutName(hypoAlg.name) )
         self._hypo.setPreviousDecision( input_maker_output )
         self._hypoToolConf = HypoToolConf( HypoToolGen )
-
-        # Connect InputMaker output to ROBPrefetchingAlg(s) if there is any
-        if ROBPrefetching.StepRoI in flags.Trigger.ROBPrefetchingOptions:
-            for child in sequence.Members:
-                if ( isinstance(child, CompFactory.ROBPrefetchingAlg) and
-                     input_maker_output not in child.ROBPrefetchingInputDecisions ):
-                    child.ROBPrefetchingInputDecisions.append(input_maker_output)
 
         log.debug("connecting InputMaker and HypoAlg, adding: InputMaker::%s.output=%s",
                   self.maker.Alg.name, input_maker_output)
@@ -797,7 +789,6 @@ class InViewRecoCA(ComponentAccumulator):
                 self.viewMakerAlg.InputCachedViews = viewMaker.InputMakerOutputDecisions
                 updateHandle(viewMakerArgs['RoITool'], roiTool, "RoisWriteHandleKey")
                 if hasattr(viewMakerArgs['RoITool'], "RoiCreator"):
-                    updateHandle(viewMakerArgs['RoITool'], roiTool, "ExtraPrefetchRoIsKey")
                     updateHandle(viewMakerArgs['RoITool'].RoiCreator, roiTool.RoiCreator, "RoisWriteHandleKey")
 
                 self.viewMakerAlg.RoITool = roiTool
@@ -827,7 +818,6 @@ class InViewRecoCA(ComponentAccumulator):
             if isProbe:
                 updateHandle(args['RoITool'], roiTool, "RoisWriteHandleKey")
                 if hasattr(args['RoITool'], "RoiCreator"):
-                    updateHandle(args['RoITool'], roiTool, "ExtraPrefetchRoIsKey")
                     updateHandle(args['RoITool'].RoiCreator, roiTool.RoiCreator, "RoisWriteHandleKey")
         self.viewsSeq = parOR( self.viewMakerAlg.ViewNodeName )
         self.addSequence( self.viewsSeq )
@@ -860,15 +850,13 @@ class SelectionCA(ComponentAccumulator):
         super( SelectionCA, self ).wasMerged()
         self.hypoAcc.wasMerged()
 
-    def mergeReco(self, recoCA, robPrefetchCA=None, upSequenceCA=None):        
+    def mergeReco(self, recoCA, upSequenceCA=None):
         ''' upSequenceCA is the user CA to run before the recoCA'''
         ca=ComponentAccumulator()
         ca.addSequence(self.stepViewSequence)
         if upSequenceCA:
             ca.merge(upSequenceCA, sequenceName=self.stepViewSequence.name)
         ca.addEventAlgo(recoCA.inputMaker(), sequenceName=self.stepViewSequence.name)
-        if robPrefetchCA:
-            ca.merge(robPrefetchCA, self.stepViewSequence.name)
         ca.merge(recoCA, sequenceName=self.stepViewSequence.name)
         self.merge(ca)        
         

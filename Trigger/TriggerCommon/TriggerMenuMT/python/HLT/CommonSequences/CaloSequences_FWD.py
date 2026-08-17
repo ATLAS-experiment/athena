@@ -1,5 +1,5 @@
 #
-#  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 #
 
 from TriggerMenuMT.HLT.Config.MenuComponents import MenuSequence, SelectionCA, InViewRecoCA
@@ -23,7 +23,6 @@ def fastCalo_FWDSequenceGenCfg(flags,name,doRinger=True, is_probe_leg=False):
    """
 
    from TrigT2CaloCommon.CaloDef import fastCaloVDVCfg
-   from TrigGenericAlgs.TrigGenericAlgsConfig import ROBPrefetchingAlgCfg_Calo
    from TrigT2CaloCommon.CaloDef import fastCaloRecoSequenceCfg
    nameselAcc = "fastCaloFWDSequence"
    output = "HLT_FastCaloEMClusters_FWD"
@@ -32,9 +31,8 @@ def fastCalo_FWDSequenceGenCfg(flags,name,doRinger=True, is_probe_leg=False):
    InViewRoIs="FSJETMETCaloRoI"
    reco = InViewRecoCA("EMCaloFWD",InViewRoIs=InViewRoIs,isProbe=is_probe_leg)
    reco.mergeReco(fastCaloVDVCfg(flags,InViewRoIs=InViewRoIs))
-   robPrefetchAlg = ROBPrefetchingAlgCfg_Calo( flags, nameSuffix=InViewRoIs+'_probe' if is_probe_leg else InViewRoIs)
    reco.mergeReco(fastCaloRecoSequenceCfg(flags, inputEDM=InViewRoIs,doForward=True,ClustersName=output))
-   selAcc.mergeReco(reco, robPrefetchCA=robPrefetchAlg)
+   selAcc.mergeReco(reco)
 
    # hypo
    from TrigEgammaForwardHypo.TrigEgammaForwardFastCaloHypoTool import TrigEgammaForwardFastCaloHypoToolFromDict

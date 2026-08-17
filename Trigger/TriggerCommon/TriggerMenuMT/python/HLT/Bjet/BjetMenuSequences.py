@@ -1,4 +1,4 @@
-#  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 from TrigEDMConfig.TriggerEDM import recordable
 
@@ -55,11 +55,8 @@ def getBJetSequenceGenCfg(flags, jc_name=None):
     bJetBtagSequence.mergeReco(secondStageAlgs)
     bJetBtagSequence.mergeReco(flavourTaggingAlgs)
 
-    from TrigGenericAlgs.TrigGenericAlgsConfig import ROBPrefetchingAlgCfg_Si
-    robPrefetch = ROBPrefetchingAlgCfg_Si(flags, nameSuffix=InputMakerAlg.name)
-
     BjetAthSequence = SelectionCA( f"BjetAthSequence_{jc_name}_step2", )
-    BjetAthSequence.mergeReco(bJetBtagSequence, robPrefetchCA=robPrefetch)
+    BjetAthSequence.mergeReco(bJetBtagSequence)
 
     from TrigBjetHypo.TrigBjetMonitoringConfig import TrigBjetOnlineMonitoring
     hypo = CompFactory.TrigBjetBtagHypoAlg(

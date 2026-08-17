@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 from typing import Optional
 import importlib, re, string
@@ -623,13 +623,6 @@ def generateMenuMT(flags):
     # The HLTMenu json file is produced here.
     log.info("Making the HLT configuration tree")
     menuAcc, CFseq_list = makeHLTTree(flags, finalListOfChainConfigs)
-
-    # Configure ChainFilters for ROBPrefetching
-    from TriggerJobOpts.TriggerConfigFlags import ROBPrefetching
-    if ROBPrefetching.InitialRoI in flags.Trigger.ROBPrefetchingOptions:
-        from TrigGenericAlgs.TrigGenericAlgsConfig import prefetchingInitialRoIConfig
-        menuAcc.merge(prefetchingInitialRoIConfig(flags, CFseq_list), 'HLTBeginSeq')
-
 
     # Post-generation checks:
     log.info("Checking the L1HLTConsistency...")
