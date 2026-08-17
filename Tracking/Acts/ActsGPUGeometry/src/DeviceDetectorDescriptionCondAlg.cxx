@@ -152,7 +152,7 @@ StatusCode DeviceDetectorDescriptionCondAlg::initialize()
 
                 thismod.pixel = false;
                 thismod.side = side;
-                
+                thismod.columns = 1; // for strip
 
                 if (m_stripID->barrel_ec(athenaID) == 0) {
                     ++nBar;
@@ -182,11 +182,12 @@ StatusCode DeviceDetectorDescriptionCondAlg::initialize()
                     const auto* annulus_design = static_cast<const InDetDD::StripStereoAnnulusDesign*>(&detElem->design());
                     const InDetDD::SiCellId annulus_cell = detElem->cellIdFromIdentifier(athenaID);
                     const double pitch_row = annulus_design->phiPitchPhi(annulus_cell);
-                    const double radius = annulus_design->centreR();
                     const int nStrips0 = annulus_design->diodesInRow(0.);
                     const double max_phi = nStrips0 * pitch_row;
                     thismod.module_width = -max_phi;
-                    thismod.module_length = radius;
+                    // this could be the halfway point in radius, number is arbitrary
+                    // const double radius = annulus_design->centreR();
+                    thismod.module_length = 0.2; //radius;
                     thismod.rows = nStrips0;
                     thismod.isAnnulus = true;
                 }
@@ -259,8 +260,8 @@ StatusCode DeviceDetectorDescriptionCondAlg::initialize()
             if (modIt != m_atlasModuleInfo.end()) {
                 const moduleInfo& thismod = modIt->second;
 
-                const int nBinsX = thismod.pixel ? thismod.columns : thismod.rows;
-                const int nBinsY = thismod.pixel ? thismod.rows : 1;
+                const int nBinsX = thismod.rows;
+                const int nBinsY = thismod.pixel ? thismod.columns : 1;
 
                 auto edgesX = makeEquidistantEdges(0.5f * thismod.module_width, nBinsX);
                 auto edgesY = makeEquidistantEdges(0.5f * thismod.module_length, nBinsY);
@@ -293,18 +294,21 @@ StatusCode DeviceDetectorDescriptionCondAlg::initialize()
     hostDesign->resize(designLookup.size());
     for (const auto& [key, id] : designLookup) {
         hostDesign->design_id()[id] = static_cast<int>(id);
-        
+
+        hostDesign->dimensions()[id] = key.pixel ? 2 : 1;
+    
+
         if(!key.isAnnulus){
             hostDesign->bin_edges_x()[id].assign(key.edgesX.begin(), key.edgesX.end());
             hostDesign->bin_edges_y()[id].assign(key.edgesY.begin(), key.edgesY.end());
-            std::array<detray::dindex_type<traccc::default_algebra>, 2u>{0u, 1u};
+            hostDesign->subspace()[id] = std::array<detray::dindex_type<traccc::default_algebra>, 2u>{0u, 1u};
         }else{
             hostDesign->bin_edges_y()[id].assign(key.edgesX.begin(), key.edgesX.end());
             hostDesign->bin_edges_x()[id].assign(key.edgesY.begin(), key.edgesY.end());
-            std::array<detray::dindex_type<traccc::default_algebra>, 2u>{1u, 0u};
+            hostDesign->subspace()[id] = std::array<detray::dindex_type<traccc::default_algebra>, 2u>{1u, 0u};
         }
         
-        hostDesign->dimensions()[id] = key.pixel ? 2 : 1;
+        
     }
 
     std::vector<unsigned int> designSizes(hostDesign->size());
@@ -376,19 +380,14 @@ StatusCode DeviceDetectorDescriptionCondAlg::execute(const EventContext& ctx) co
 
             if (isPixel) {
                 const IdentifierHash pixelHash = m_pixelID->wafer_hash(entry.athenaId);
-                shiftY = m_pixelLorentzAngleTool->getLorentzShift(pixelHash, ctx);
-                shiftX = 0.f;
+                shiftX = m_pixelLorentzAngleTool->getLorentzShift(pixelHash, ctx);
+                shiftY = 0.f;
             } else {
                 const IdentifierHash moduleHash = m_stripID->wafer_hash(
                     m_stripID->module_id(entry.athenaId));
                 const int side = m_stripID->side(entry.athenaId);
-                const bool isAnnulus = (modIt != m_atlasModuleInfo.end()) && modIt->second.isAnnulus;
-                shiftY = m_stripLorentzAngleTool->getLorentzShift(moduleHash + side, ctx);
-                shiftX = 0.f;
-                // if(isAnnulus){
-                //     shiftX = m_stripLorentzAngleTool->getLorentzShift(moduleHash + side, ctx);
-                //     shiftY = 0.f;
-                // }    
+                shiftX = m_stripLorentzAngleTool->getLorentzShift(moduleHash + side, ctx);
+                shiftY = 0.f;   
             }
         }
 
