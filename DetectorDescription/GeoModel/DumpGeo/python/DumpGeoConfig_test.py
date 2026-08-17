@@ -202,24 +202,14 @@ class DumpGeoConfigTest(unittest.TestCase):
             "ALIAS-TAG",
         )
 
-    def test_generic_geometry_flag_is_preserved_without_detdescr(self):
+    def test_geometry_tag_is_preserved_without_detdescr(self):
         self.assertEqual(
             resolveDumpGeoGeometryTag(
                 None,
-                "GENERIC-TAG",
+                "GEOMETRY-TAG",
                 "FALLBACK-TAG",
             ),
-            "GENERIC-TAG",
-        )
-
-    def test_metadata_geometry_tag_is_used_without_override(self):
-        self.assertEqual(
-            resolveDumpGeoGeometryTag(
-                None,
-                "METADATA-TAG",
-                "FALLBACK-TAG",
-            ),
-            "METADATA-TAG",
+            "GEOMETRY-TAG",
         )
 
     def test_geometry_fallback_is_used_when_no_tag_is_available(self):
