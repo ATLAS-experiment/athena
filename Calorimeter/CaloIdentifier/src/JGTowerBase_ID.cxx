@@ -8,7 +8,6 @@
 #include "IdDict/IdDictRegion.h"
 #include "IdDict/IdDictMgr.h"
 #include "AtlasDetDescr/AtlasDetectorID.h"
-#include "CxxUtils/StrFormat.h"
 #include "Identifier/IdentifierHash.h"
 #include "Identifier/RangeIterator.h"
 #include <algorithm>
@@ -18,8 +17,6 @@
 #include <iostream>
 #include <set>
 #include <string>
-
-using CxxUtils::strformat;
 
 
 JGTowerBase_ID::JGTowerBase_ID(const std::string& name,

@@ -8,7 +8,6 @@
 #include "IdDict/IdDictField.h"
 #include "IdDict/IdDictMgr.h"
 #include "IdDict/IdDictRegion.h"
-#include "CxxUtils/StrFormat.h"
 #include "Identifier/IdentifierHash.h"
 #include "Identifier/RangeIterator.h"
 #include <algorithm>
@@ -18,9 +17,6 @@
 #include <iostream>
 #include <set>
 #include <string>
-
-
-using CxxUtils::strformat;
 
 
 CaloLVL1_ID::CaloLVL1_ID() :
