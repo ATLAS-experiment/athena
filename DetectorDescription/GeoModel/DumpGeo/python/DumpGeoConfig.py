@@ -64,7 +64,7 @@ def configureGeometry(flags, cfg):
         from TileGeoModel.TileGMConfig import TileGMCfg
         #flags.Tile.forceFullGeometry = True
         cfg.merge(TileGMCfg(flags))
-        # We must set the "FULL" geometry explicitely, otherwise the "RECO" version will be used by default,
+        # We must set the "FULL" geometry explicitly, otherwise the "RECO" version will be used by default,
         # which is almost 'empty' (just the first level of child volumes is created for the "RECO" geo).
         cfg.getService("GeoModelSvc").DetectorTools["TileDetectorTool"].GeometryConfig="FULL"
     # TODO: do we need to set this separately?
@@ -191,8 +191,11 @@ def logZDCGeometryWarning(warning, repeated=False):
 
 
 def DumpGeoCfg(flags, name="DumpGeoAlg", **kwargs):
-    _logger.info("We're using these 'GeoModel.DumpGeo' configuration flags:")
-    flags.dump("GeoModel.DumpGeo")
+    if _logger.isEnabledFor(logging.DEBUG):
+        _logger.debug(
+            "Dumping the 'GeoModel.DumpGeo' configuration flags:"
+        )
+        flags.dump("GeoModel.DumpGeo")
 
     # Debug messages
     _logger.debug("kwargs: %s", kwargs)
@@ -301,7 +304,7 @@ if __name__=="__main__":
         metavar="TAG",
     )
     parser.add_argument("--outFilename", default="",
-                        help="Here you can set a custom name for the output '.db' file. It will replace the name that is built with the geometry tag and the list of fileterd Detector Managers, if any.", metavar="FILENAME")
+                        help="Here you can set a custom name for the output '.db' file. It will replace the name that is built with the geometry tag and the list of filtered Detector Managers, if any.", metavar="FILENAME")
     # parser.add_argument("--filterTreeTops", help="Only output the GeoModel Tree Tops specified in the FILTER list; input is a comma-separated list")
     parser.add_argument("--filterDetManagers", help="Only output the GeoModel Detector Managers specified in the FILTER list; input is a comma-separated list")
     parser.add_argument("-f", "--forceOverwrite",
@@ -313,10 +316,6 @@ if __name__=="__main__":
     from AthenaConfiguration.TestDefaults import defaultTestFiles
     parser.set_defaults(filesInput=f"{defaultTestFiles.EVNT[0]}")
     args = flags.fillFromArgs(parser=parser)
-
-    if args.help:
-        # No point doing more here, since we just want to print the help.
-        sys.exit()
 
     # +++ Get CLI parameters and set the corresponding configuration flags
     # Get the user's custom file name, if set;

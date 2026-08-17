@@ -58,6 +58,36 @@ class DumpGeoConfigTest(unittest.TestCase):
         self.assertFalse(flags.GeoModel.DumpGeo.ForceOverwrite)
         self.assertFalse(flags.GeoModel.DumpGeo.ShowTreetopContent)
 
+    def test_configuration_does_not_dump_flags_at_info_level(self):
+        flags = self._flags()
+
+        with (
+            patch.object(AthConfigFlags, "dump") as dump,
+            patch(
+                "DumpGeo.DumpGeoConfig._logger.isEnabledFor",
+                return_value=False,
+            ),
+        ):
+            accumulator = DumpGeoCfg(flags)
+
+        self.addCleanup(accumulator.wasMerged)
+        dump.assert_not_called()
+
+    def test_configuration_dumps_flags_at_debug_level(self):
+        flags = self._flags()
+
+        with (
+            patch.object(AthConfigFlags, "dump") as dump,
+            patch(
+                "DumpGeo.DumpGeoConfig._logger.isEnabledFor",
+                return_value=True,
+            ),
+        ):
+            accumulator = DumpGeoCfg(flags)
+
+        self.addCleanup(accumulator.wasMerged)
+        dump.assert_called_once_with("GeoModel.DumpGeo")
+
     def test_automatic_output_filename(self):
         algorithm = self._algorithm(self._flags())
 

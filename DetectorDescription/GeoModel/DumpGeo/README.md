@@ -207,6 +207,7 @@ The tests cover:
 * propagation of `ForceOverwrite` without deleting files during configuration;
 * rejection of an existing output file when overwrite is disabled;
 * non-destructive output-file preflight when overwrite is enabled;
+* suppression of configuration-flag dumps below the debug logging level;
 * geometry-tag precedence and its use in automatic output filenames;
 * ZDC warning selection for enabled, disabled, and known-tag configurations; and
 * the configurable algorithm name.
