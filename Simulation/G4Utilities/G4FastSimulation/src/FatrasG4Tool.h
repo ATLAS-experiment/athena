@@ -21,6 +21,10 @@ protected:
    will be owned by the tool.  Must be implemented in all concrete
    base classes. */
   virtual G4VFastSimulationModel* makeFastSimModel() override final;  
+
+  private:
+  // Flag to enable FatrasG4 photon conversion normalizing flow
+  Gaudi::Property<bool> m_flowConversion{this, "flowConversion", false, "Flag to enable normalizing flow conversion."};
  
 };
 
