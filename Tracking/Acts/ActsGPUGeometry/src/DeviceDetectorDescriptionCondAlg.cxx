@@ -42,7 +42,7 @@ StatusCode DeviceDetectorDescriptionCondAlg::initialize()
     int nPix = 0, nStrip = 0, nRect = 0, nTrap = 0, nAnnu = 0, nEC = 0, nBar = 0;
 
     // ---- 1. Get ACTS Tracking Geometry, populate Athena<->ACTS maps and fill module design (segmentation) information ----
-    // all of these aare static upon construction through the run
+    // all of these are static upon construction through the run
     if (!m_trackingGeometrySvc.empty()) {
         ATH_CHECK(m_trackingGeometrySvc.retrieve());
         m_trackingGeometry = m_trackingGeometrySvc->trackingGeometry();
@@ -361,10 +361,10 @@ StatusCode DeviceDetectorDescriptionCondAlg::execute(const EventContext& ctx) co
     writeDeviceHandle.addDependency(stripPropertiesHandle);
 
     // ---- 5. Write detector conditions object ----
-    // This object basically stores any information that we neer per-module
+    // This object basically stores any information that we need per-module
     // like: detray id, acts id, index to module design, lorentz shift etc.
     // since lorentz shift is conditional, we need a valid event context
-    // all the static info (like the id maps) have been pre-filled, here we just populate anything that might be conditions depenedant
+    // all the static info (like the id maps) have been pre-filled, here we just populate anything that might be conditions dependant
 
     for (std::size_t condIndex = 0; condIndex < m_staticCondEntries.size(); ++condIndex) {
         const auto& entry = m_staticCondEntries[condIndex];
