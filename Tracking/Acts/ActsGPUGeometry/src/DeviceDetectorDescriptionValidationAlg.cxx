@@ -52,7 +52,7 @@ StatusCode DeviceDetectorDescriptionValidationAlg::execute(const EventContext& c
 StatusCode DeviceDetectorDescriptionValidationAlg::finalize()
 {
 
-     ATH_MSG_DEBUG("Finalizing detector description validation alg");
+    ATH_MSG_DEBUG("Finalizing detector description validation alg");
     ATH_MSG_INFO("Checked " << m_nChecked << " shared surfaces ("
                  << m_nMissingInCandidate << " missing in candidate), "
                  << m_nIdMismatch << " ACTS Id mismatches, "
@@ -148,7 +148,7 @@ StatusCode DeviceDetectorDescriptionValidationAlg::validateDetectorDescription(
 
             designOk = false;
             
-            ATH_MSG_DEBUG("Design mismatch at geometry_id " << geomIdValue
+            ATH_MSG_DEBUG("Design mismatch at geometry_id (dim) " << geomIdValue 
                             << ": ref design edges x size=" << refDesignEntry.bin_edges_x().size()
                             << " cand design edges x size=" << candDesignEntry.bin_edges_x().size());
         }else{
@@ -157,7 +157,7 @@ StatusCode DeviceDetectorDescriptionValidationAlg::validateDetectorDescription(
 
                 designOk = false;
 
-                ATH_MSG_DEBUG("Design mismatch at geometry_id " << geomIdValue);
+                ATH_MSG_DEBUG("Design mismatch at geometry_id " << geomIdValue );
 
                 for(size_t b = 0; b < refDesignEntry.bin_edges_x().size(); b++){
                     if(refDesignEntry.bin_edges_x().at(b) != candDesignEntry.bin_edges_x().at(b)){
@@ -173,7 +173,7 @@ StatusCode DeviceDetectorDescriptionValidationAlg::validateDetectorDescription(
 
             designOk = false;
             
-            ATH_MSG_DEBUG("Design mismatch at geometry_id " << geomIdValue
+            ATH_MSG_DEBUG("Design mismatch at geometry_id " << geomIdValue 
                             << ": ref design edges y size=" << refDesignEntry.bin_edges_y().size()
                             << " cand design edges y size=" << candDesignEntry.bin_edges_y().size());
         }else{
