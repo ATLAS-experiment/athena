@@ -40,7 +40,7 @@ class TileDetectorTool final : public GeoModelTool
 
   bool m_not_locked;
   bool m_useNewFactory;
-  std::string m_geometryConfig; // FULL, SIMU, RECO
+  std::string m_geometryConfig; // FULL, SIMU, RECO --- A note: It's set to FULL by default in the constructor, and it seems that SIMU is never used in Athena code; also, the code that calls the TileAtlasFactory only checks if it's FULL or not:  m_geometryConfig=='FULL' (RMB)
   TileDetDescrManager* m_manager;
 };
 

@@ -30,6 +30,8 @@ def createGeoModelConfigFlags(analysis=False):
                 period = LHCPeriod.Run2
             elif prevFlags.GeoModel.AtlasVersion.startswith("ATLAS-R3"):
                 period = LHCPeriod.Run3
+            elif prevFlags.GeoModel.AtlasVersion.startswith("ATLAS-P2-RUN4"):
+                period = LHCPeriod.Run4
             else:
                 raise ValueError(f'Can not deduce LHC Run period from "{prevFlags.GeoModel.AtlasVersion}", please set "flags.GeoModel.Run" manually.')
 
@@ -94,5 +96,9 @@ def createGeoModelConfigFlags(analysis=False):
     gcf.addFlag('GeoModel.SQLiteDBFullPath','', help='Override default location of the SQLite Geometry DB')
 
     gcf.addFlag('GeoModel.IgnoreTagDifference',False, help='Ignore geometry tag difference between the configured value and the value read from the input file metadata')
+
+    # Add the DumpGeo config flags
+    from DumpGeo.DumpGeoConfigFlags import createDumpGeoConfigFlags
+    gcf = createDumpGeoConfigFlags(gcf)
 
     return gcf
