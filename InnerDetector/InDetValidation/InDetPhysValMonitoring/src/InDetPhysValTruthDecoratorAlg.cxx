@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -164,8 +164,10 @@ InDetPhysValTruthDecoratorAlg::execute(const EventContext &ctx) const {
      for (const xAOD::TruthParticle *truth_particle : *ptruth) {
         decorateTruth(*truth_particle, float_decor, beamPos, tp_clustercount);
      }
-     if (!decorateTruthTime(float_decor)) {
-        return StatusCode::FAILURE;
+     if (m_decoTime) {
+       if (!decorateTruthTime(float_decor)) {
+	 return StatusCode::FAILURE;
+	}
      }
   }
 

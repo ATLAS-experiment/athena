@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef INDETPHYSVALMONITORING_INDETPHYSVALTRUTHDECORATORTOOL_H
@@ -68,6 +68,8 @@ private:
 
   Gaudi::Property<std::string> m_prefix
     {this, "Prefix", "", "Decoration prefix to avoid clashes."};
+
+  Gaudi::Property<bool> m_decoTime{this, "decorateTime", false};
   
   ///TruthPixelClusterContainer and TruthSCTClusterContainer needed for truth silicon hit cut
   SG::ReadHandleKey<xAOD::TrackMeasurementValidationContainer> m_truthPixelClusterName
