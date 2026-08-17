@@ -21,7 +21,6 @@
 #include "TileDetDescr/TileDetDescrManager.h"
 #include "TileDetDescr/TileDddbManager.h"
 #include "TileDetDescr/TileCellDim.h"    //added by Sergey
-#include "CxxUtils/StrFormat.h"
 
 #include "G4ios.hh"
 
@@ -30,7 +29,7 @@ namespace {
 
   std::string makeCellName (const std::string& prefix, int i)
   {
-    return prefix + CxxUtils::strformat ("%i", i);
+    return prefix + std::to_string(i);
   }
 
 
