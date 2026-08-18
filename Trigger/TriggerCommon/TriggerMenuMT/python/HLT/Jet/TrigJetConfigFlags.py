@@ -21,10 +21,8 @@ def createTrigJetConfigFlags():
     flags.addFlag("Trigger.Jet.doHitZ", False,
                   help='enable the hit-based per-jet z regression in the jet super-ROI step (ITk only)')
 
-    # FIXME development path: replace with a BTagging/ calibration-area file,
-    # this must not be merged
     flags.addFlag("Trigger.Jet.hitZNetwork",
-                  "/home/users/r/reisch/FTAG/hit-based-btagging/MDNv01/MDNv01e86.onnx",
+                  "dev/BTagging/20260813trig/HitZV01/antikt4emtopo/network.onnx",
                   help='ONNX file for the hit-based per-jet z regression, resolved by PathResolver')
 
     # chooses calibration config file for HLT small-R jets

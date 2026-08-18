@@ -38,8 +38,8 @@ SIGMA_DECOR = 'HitZ_z0_sigma'
 NEG_LOG_SIGMA2_DECOR = 'HitZ_negLogSigma2'
 
 OUTPUT_REMAP = {
-    'HitZmdn_TruthJetPVz': Z_DECOR,
-    'HitZmdn_TruthJetPVz_stddev': SIGMA_DECOR,
+    'HitZV01_TruthJetPVz': Z_DECOR,
+    'HitZV01_TruthJetPVz_stddev': SIGMA_DECOR,
 }
 
 

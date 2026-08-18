@@ -28,7 +28,7 @@ def setupMenu():
     chains['Egamma'] += []
     chains['Tau'] += []
     # Hit-based per-jet z regression (HitZ) preselection. Working points from a
-    # likelihood scan on the MDNv01e86 outputs; larger number = looser cut.
+    # likelihood scan on the HitZV01 outputs; larger number = looser cut.
     # The preselection-only chains measure efficiency and rate, the last one
     # replaces the calorimeter preselection of an existing multi-b chain.
     chains['Jet'] += [
