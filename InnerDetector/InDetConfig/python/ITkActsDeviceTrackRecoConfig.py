@@ -95,6 +95,15 @@ def ITkActsDeviceTrackRecoCfg(flags, *, previousExtension=None):
             from ActsConfig.ActsSpacePointFormationConfig import ActsSpacePointFormationCfg
             acc.merge(ActsSpacePointFormationCfg(flags, previousActsExtension=previousExtension))
 
+            # Truth (as configured in ITkActsDataPreparationCfg)
+            # this truth must only be done if you do PRD and SpacePointformation
+            # If you only do the latter (== running on ESD) then the needed input (simdata)
+            # is not in ESD but the resulting truth (clustertruth) is already there ...
+            if flags.Tracking.doTruth:
+                from ActsConfig.ActsTruthConfig import ActsTruthAssociationAlgCfg, ActsTruthParticleHitCountAlgCfg
+                acc.merge(ActsTruthAssociationAlgCfg(flags))
+                acc.merge(ActsTruthParticleHitCountAlgCfg(flags))
+
         from ActsConfig.ActsSeedingConfig import ActsSeedingCfg
         acc.merge(ActsSeedingCfg(flags))
         seedsLocation = DataLocation.HOST

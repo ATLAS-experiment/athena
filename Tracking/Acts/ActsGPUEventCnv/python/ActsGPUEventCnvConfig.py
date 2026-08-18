@@ -83,13 +83,4 @@ def TracccMeasurementConverterAlgCfg(flags,
     kwargs.setdefault("ConvertClustersWithCells", False)
     acc.addEventAlgo(
         CompFactory.ActsTrk.TracccMeasurementConverterAlg(name, **kwargs))
-    
-    # Truth (as configured in ITkActsDataPreparationCfg)
-    # this truth must only be done if you do PRD and SpacePointformation
-    # If you only do the latter (== running on ESD) then the needed input (simdata)
-    # is not in ESD but the resulting truth (clustertruth) is already there ...
-    if flags.Tracking.doTruth:
-        from ActsConfig.ActsTruthConfig import ActsTruthAssociationAlgCfg, ActsTruthParticleHitCountAlgCfg
-        acc.merge(ActsTruthAssociationAlgCfg(flags))
-        acc.merge(ActsTruthParticleHitCountAlgCfg(flags))
     return acc
