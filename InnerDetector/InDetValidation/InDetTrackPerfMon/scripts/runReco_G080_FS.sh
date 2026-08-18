@@ -64,6 +64,7 @@ run Reco_tf.py --CA \
                flags.Acts.doLargeRadius=False; \
                flags.Acts.Device.doClusterization=True; \
                flags.Tracking.doPixelDigitalClustering=True; \
+               flags.Tracking.ITkActsPass.storeTrackSeeds=True; \
                from ActsConfig.ActsConfigFlags import SeedingStrategy; \
                flags.Acts.SeedingStrategy=SeedingStrategy.Gbts;' \
     --steering 'doRAWtoALL' \
