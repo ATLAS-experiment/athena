@@ -3,6 +3,7 @@
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.AccumulatorCache import AccumulatorCache
+from AthenaConfiguration.Enums import LHCPeriod
 from RecJobTransforms.AODFixHelper import releaseInRange
 from AthenaCommon.Logging import logging
 
@@ -76,7 +77,10 @@ def runAODFix(flags, correctCluster = True, checkRelWithAMI = False):
     ALToFix = flags.Input.AODFixesDone.find('AmbiguityLinks') < 0
     TimeToFix = flags.Input.AODFixesDone.find('egammatopoIsoFix') < 0
 
-    doFix_meta = doFixTime(flags) and TimeToFix
+    if flags.GeoModel.Run >= LHCPeriod.Run3:
+        doFix_meta = doFixTime(flags) and TimeToFix
+    else:
+        doFix_meta=False
     doAmbiguityFix_meta = releaseInRange(flags,"Athena-24.0.0","Athena-24.0.83") and ALToFix
 
     doFix = doFix_meta
