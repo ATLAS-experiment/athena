@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////////////////////
@@ -1776,8 +1776,7 @@ Trk::RungeKuttaUtils::jacobianTransformCurvilinearToLocal(
     }
   }
 
-  Jac[0] = Jac[3] = 1.;
-  Jac[1] = Jac[2] = 0.;
+  //this line is unreachable
 }
 
 /////////////////////////////////////////////////////////////////////////////////
