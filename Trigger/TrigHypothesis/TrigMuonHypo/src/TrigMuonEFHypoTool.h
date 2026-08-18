@@ -45,6 +45,8 @@ class TrigMuonEFHypoTool: public ::AthAlgTool {
 
   HLT::Identifier m_decisionId;
   // Properties:
+  Gaudi::Property< bool > m_isPhII {
+    this, "IsPhII", false, "Whether it's phase-2 software" };
   Gaudi::Property< bool > m_isFastReco {
     this, "IsFastReco", false, "Whether it's fast reconstruction" };
   Gaudi::Property< bool > m_nscan {

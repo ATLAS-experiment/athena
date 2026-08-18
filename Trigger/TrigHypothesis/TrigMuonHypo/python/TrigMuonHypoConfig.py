@@ -798,6 +798,8 @@ def TrigMuonEFMSonlyHypoToolFromDict( flags, chainDict ) :
 
     kwargs.setdefault("ConeSize", conesize)
     kwargs.setdefault("NarrowScan", narrowscan)
+    kwargs.setdefault("IsPhII", flags.Trigger.Offline.SA.Muon.scheduleActsReco and 
+                                flags.Trigger.Offline.SA.Muon.usePhaseIIGeoSetup)
     
     return TrigMuonEFHypoToolCfg( chainDict['chainName'], thresholds, doSA=True, **kwargs )
 
