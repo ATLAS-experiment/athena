@@ -15,7 +15,7 @@
 class TH1;
 class TObject;
 
-#ifndef ROOTCORE
+#ifndef XAOD_STANDALONE
 #error only include this header in AnalysisBase
 #endif
 

@@ -23,10 +23,8 @@
 
 namespace EL
 {
-  AnaAlgorithmConfig :: 
-  AnaAlgorithmConfig ()
-  {
-  }
+  AnaAlgorithmConfig ::
+  AnaAlgorithmConfig () = default;
 
 
 

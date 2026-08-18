@@ -16,7 +16,7 @@ except ImportError:
     from AnaAlgorithm.AnaAlgorithmConfig import AnaAlgorithmConfig, indentBy
     from AnaAlgorithm.PythonConfig import PythonConfig
 
-    class AlgSequence( object ):
+    class AlgSequence:
         """Standalone algorithm sequence
 
         This is a light-weight emulation of Athena's AthSequencer class,
@@ -66,8 +66,6 @@ except ImportError:
             """
             for alg in self:
                 alg.addSelfToJob (job)
-                pass
-            pass
 
         def __getitem__( self, index ):
             """Return one algorithm/sequence from the sequence by index
@@ -94,15 +92,20 @@ except ImportError:
                       sequence
             """
 
+            # Short-circuit internal/dunder attribute lookups, which must never
+            # be answered from the sequence contents (and would otherwise
+            # recurse if '_algsAndSequences' itself is missing):
+            if name.startswith( '_' ):
+                raise AttributeError( name )
+
             # Look up the algorithm by name:
             for algOrSeq in self._algsAndSequences:
                 if algOrSeq.name() == name:
                     return algOrSeq
-                pass
 
             # If no algorithm with this name was found, that's a problem:
-            raise AttributeError( 'Algorithm/sequence with name "%s" was not ' \
-                                      'found' % name )
+            raise AttributeError( f'Algorithm/sequence with name "{name}" was '
+                                  'not found' )
 
         def __delattr__( self, name ):
             """Remove one algorithm/sequence from this sequence, by name
@@ -121,12 +124,11 @@ except ImportError:
                     # If we found it, remove it:
                     self._algsAndSequences.remove( algOrSeq )
                     return
-                pass
 
             # If no algorithm/sequence with this name was found, that's a
             # problem:
-            raise AttributeError( 'Algorithm/sequence with name "%s" was not ' \
-                                      'found' % name )
+            raise AttributeError( f'Algorithm/sequence with name "{name}" was '
+                                  'not found' )
 
         def __iter__( self ):
             """Create an iterator over all the algorithms of this sequence
@@ -150,26 +152,22 @@ except ImportError:
             """
 
             # Check that the received object is of the right type:
-            if not isinstance( algOrSeq, AnaAlgorithmConfig ) and \
-               not isinstance( algOrSeq, PythonConfig ) and \
-               not isinstance( algOrSeq, AlgSequence ):
-                raise TypeError( 'The received object is not of type ' \
+            if not isinstance( algOrSeq, ( AnaAlgorithmConfig, PythonConfig,
+                                           AlgSequence ) ):
+                raise TypeError( 'The received object is not of type '
                                  'AnaAlgorithmConfig or PythonConfig or AlgSequence' )
-                pass
 
             # Now check if an equivalent algorithm/sequence is already in the
             # list. As that's also an error.
             if algOrSeq in self:
-                raise RuntimeError( 'Algorithm/sequence %s is already in ' \
-                                    'this sequence' % algOrSeq.name() )
-                pass
+                raise RuntimeError( f'Algorithm/sequence {algOrSeq.name()} is '
+                                    'already in this sequence' )
 
             # Add the algorithm/sequence to the internal list:
-            if not index:
+            if index is None:
                 self._algsAndSequences.append( algOrSeq )
             else:
                 self._algsAndSequences.insert( index, algOrSeq )
-                pass
 
             # Return the modified object:
             return self
@@ -192,17 +190,6 @@ except ImportError:
             # need to be made smarter at one point.
             return ( self.name() == other.name() )
 
-        def __ne__( self, other ):
-            """Check for an inequality with another object
-
-            This is just defined to make the '!=' operator of Python behave
-            consistently with the '==' operator for such objects.
-
-            Keyword arguments:
-              other -- The object to compare this one against
-            """
-            return not self.__eq__( other )
-
         def __str__( self ):
             """Print the algorithm sequence in a user-friendly way
 
@@ -210,14 +197,11 @@ except ImportError:
             algorithm in the sequence.
             """
 
-            result = AnaAlgorithmConfig._printHeader( 'AlgSequence/%s' %
-                                                      self.name() )
+            result = AnaAlgorithmConfig._printHeader( f'AlgSequence/{self.name()}' )
             result += '\n'
             for algOrSeq in self._algsAndSequences:
-                result += '| %s\n' % indentBy( str( algOrSeq ), '| ' )
-                pass
-            result += AnaAlgorithmConfig._printFooter( 'AlgSequence/%s' %
-                                                       self.name() )
+                result += f"| {indentBy( str( algOrSeq ), '| ' )}\n"
+            result += AnaAlgorithmConfig._printFooter( f'AlgSequence/{self.name()}' )
             return result
 
         def __len__( self ):
@@ -229,9 +213,7 @@ except ImportError:
 
             return len( self._algsAndSequences )
 
-        pass
-
-    class AlgSequenceIterator( object ):
+    class AlgSequenceIterator:
         """Iterator over a standalone algorithm sequence
 
         This custom class is needed to implement a "recursive iteration", which
@@ -288,7 +270,6 @@ except ImportError:
                     self._index += 1
                     self._iterator = None
                     return self.__next__()
-                pass
 
             # If we are not iterating over a sub-sequence at the moment, let's
             # just take the next element of our sequence.
@@ -304,8 +285,6 @@ except ImportError:
             # index, and simply return the algorithm.
             self._index += 1
             return element
-
-        pass
 
     #
     # Unit tests for the code
@@ -333,7 +312,6 @@ except ImportError:
             self.assertEqual( self.seq[ 1 ].name(), 'Algorithm2' )
             with self.assertRaises( IndexError ):
                 self.seq[ 2 ]
-                pass
             return
 
         ## Test 'by name' lookup operations on the algorithm sequence
@@ -342,7 +320,6 @@ except ImportError:
             self.assertEqual( self.seq.Algorithm2.type(), 'AlgType2' )
             with self.assertRaises( AttributeError ):
                 self.seq.Algorithm3.type()
-                pass
             return
 
         ## Test the ability to iterate over the algorithms in the sequence
@@ -360,14 +337,21 @@ except ImportError:
             self.assertEqual( self.seq[ 2 ].name(), 'Algorithm2' )
             return
 
+        ## Test the insertion of one algorithm at the front of the sequence
+        def test_insertAlgAtFront( self ):
+            self.seq.insert( 0, AnaAlgorithmConfig( 'AlgType3/Algorithm3' ) )
+            self.assertEqual( len( self.seq ), 3 )
+            self.assertEqual( self.seq[ 0 ].name(), 'Algorithm3' )
+            self.assertEqual( self.seq[ 1 ].name(), 'Algorithm1' )
+            self.assertEqual( self.seq[ 2 ].name(), 'Algorithm2' )
+            return
+
         ## Test the deletion of an algorithm
         def test_deleteAlg( self ):
             del self.seq.Algorithm1
             self.assertEqual( len( self.seq ), 1 )
             self.assertEqual( self.seq[ 0 ].name(), 'Algorithm2' )
             return
-
-        pass
 
     ## Test case for a sequence with algorithms and sub-sequences
     class TestAlgSequenceWithAlgsAndSeqs( unittest.TestCase ):
@@ -405,7 +389,6 @@ except ImportError:
             self.assertEqual( self.seq[ 2 ].name(), 'JetSequence' )
             with self.assertRaises( IndexError ):
                 self.seq[ 4 ]
-                pass
             return
 
         ## Test 'by name' lookup operations on the algorithm sequence
@@ -418,7 +401,6 @@ except ImportError:
                               'JetDecoratorAlg' )
             with self.assertRaises( AttributeError ):
                 self.seq.MuonSequence.InvalidAlg.type()
-                pass
             return
 
         ## Test the ability to iterate over the algorithms in the sequence
@@ -430,7 +412,3 @@ except ImportError:
                                           'JetHistogramming',
                                           'PostProcessing' ] )
             return
-
-        pass
-
-    pass

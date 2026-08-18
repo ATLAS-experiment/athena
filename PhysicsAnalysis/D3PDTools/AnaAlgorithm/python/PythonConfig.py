@@ -48,7 +48,7 @@ class PythonConfig( ROOT.EL.PythonConfigBase ):
 
         # Call the base class's constructor. Use the default constructor instead
         # of the one receiving the type and name, to avoid ROOT-10872.
-        super( PythonConfig, self ).__init__()
+        super().__init__()
         self.setTypeAndName( typeAndName )
 
         # Initialise the properties of the algorihm:
@@ -58,9 +58,6 @@ class PythonConfig( ROOT.EL.PythonConfigBase ):
         for key, value in kwargs.items():
             self.setPropertyFromString( key, stringPropValue( value ) )
             self._props[ key ] = copy.deepcopy( value )
-            pass
-
-        pass
 
     def getName( self ):
         """Get the instance name of the algorithm
@@ -87,7 +84,6 @@ class PythonConfig( ROOT.EL.PythonConfigBase ):
           job      -- The job object to add ourself to
         """
         job.algsAdd( self )
-        pass
 
     def __getattr__( self, name ):
         """Get a previously set property value from the configuration
@@ -100,10 +96,15 @@ class PythonConfig( ROOT.EL.PythonConfigBase ):
           name -- The name of the property
         """
 
+        # Short-circuit internal/dunder attribute lookups, which are never
+        # properties (and would otherwise recurse if '_props' is missing):
+        if name.startswith( '_' ):
+            raise AttributeError( name )
+
         # Fail if the property was not (yet) set:
-        if not name in self._props:
-            raise AttributeError( 'Property \'%s\' was not set on \'%s/%s\'' %
-                                  ( name, self.type(), self.name() ) )
+        if name not in self._props:
+            raise AttributeError( f"Property '{name}' was not set on "
+                                  f"'{self.type()}/{self.name()}'" )
 
         # Return the property value:
         return self._props[ name ]
@@ -126,13 +127,11 @@ class PythonConfig( ROOT.EL.PythonConfigBase ):
 
         # Private variables should be set directly:
         if key[ 0 ] == '_':
-            return super( PythonConfig, self ).__setattr__( key, value )
+            return super().__setattr__( key, value )
 
         # Set the property, and remember its value:
-        super( PythonConfig,
-               self ).setPropertyFromString( key, stringPropValue( value ) )
+        super().setPropertyFromString( key, stringPropValue( value ) )
         self._props[ key ] = copy.deepcopy( value )
-        pass
 
     def __eq__( self, other ):
         """Check for equality with another object
@@ -149,14 +148,6 @@ class PythonConfig( ROOT.EL.PythonConfigBase ):
         return ( ( self.type() == other.type() ) and
                  ( self.name() == other.name() ) )
 
-    def __ne__( self, other ):
-        """Check for an inequality with another object
-
-        This is just defined to make the '!=' operator of Python behave
-        consistently with the '==' operator for such objects.
-        """
-        return not self.__eq__( other )
-
     def __str__( self ):
         """Print the algorithm configuration in a user friendly way
 
@@ -164,17 +155,15 @@ class PythonConfig( ROOT.EL.PythonConfigBase ):
         the user to get a nice printout of their job configuration.
         """
 
-        name = 'PythonConfig %s/%s/%s' % ( self.componentType(),self.type(), self.name() )
+        name = f'PythonConfig {self.componentType()}/{self.type()}/{self.name()}'
         result = PythonConfig._printHeader( name )
         result += '\n'
         for key, value in sorted( self._props.items() ):
             if isinstance( value, str ):
-                printedValue = "'%s'" % value
+                printedValue = f"'{value}'"
             else:
                 printedValue = value
-                pass
-            result += "|- %s: %s\n" % ( key, indentBy( printedValue, "| " ) )
-            pass
+            result += f"|- {key}: {indentBy( printedValue, '| ' )}\n"
         result += PythonConfig._printFooter( name )
         return result
 
@@ -205,12 +194,10 @@ class PythonConfig( ROOT.EL.PythonConfigBase ):
         component = self
         for tname in toolNames[ 0 : -1 ]:
             component = getattr( component, tname )
-            pass
 
         # Check that the component doesn't have such a (tool) property yet.
         if hasattr( component, toolNames[ -1 ] ):
-            raise RuntimeError( "Tool with name '%s' already exists" % name )
-            pass
+            raise RuntimeError( f"Tool with name '{name}' already exists" )
 
         # Now set up a smart object as a property on that component.
         component._props[ toolNames[ -1 ] ] = PrivateToolConfig( self, name,
@@ -218,8 +205,6 @@ class PythonConfig( ROOT.EL.PythonConfigBase ):
 
         # Finally, tell the C++ code what to do.
         self.createPrivateTool( name, type ).ignore()
-
-        pass
 
     def addPrivateToolInArray( self, name, type ):
         """Create a private tool in an array for the algorithm
@@ -248,7 +233,6 @@ class PythonConfig( ROOT.EL.PythonConfigBase ):
         component = self
         for tname in toolNames[ 0 : -1 ]:
             component = getattr( component, tname )
-            pass
 
         # Finally, tell the C++ code what to do.
         actualName = self.createPrivateToolInArray( name, type )
@@ -277,7 +261,7 @@ class PythonConfig( ROOT.EL.PythonConfigBase ):
         preLength = PythonConfig.printHeaderPre
         postLength = PythonConfig.printHeaderWidth - 3 - preLength - \
             len( title )
-        return '/%s %s %s' % ( preLength * '*', title, postLength * '*' )
+        return f"/{preLength * '*'} {title} {postLength * '*'}"
 
     @staticmethod
     def _printFooter( title ):
@@ -294,13 +278,10 @@ class PythonConfig( ROOT.EL.PythonConfigBase ):
         preLength = PythonConfig.printHeaderPre
         postLength = PythonConfig.printHeaderWidth - 12 - preLength - \
             len( title )
-        return '\\%s (End of %s) %s' % ( preLength * '-', title,
-                                         postLength * '-' )
-
-    pass
+        return f"\\{preLength * '-'} (End of {title}) {postLength * '-'}"
 
 
-class PrivateToolConfig( object ):
+class PrivateToolConfig:
     """Standalone Private Tool Configuration
 
     This class is used to mimic the behaviour of Athena tool configurable
@@ -317,8 +298,6 @@ class PrivateToolConfig( object ):
         self._type = type
         self._props = {}
 
-        pass
-
     def __getattr__( self, name ):
         """Get a previously set property value from the configuration
 
@@ -330,11 +309,16 @@ class PrivateToolConfig( object ):
           name -- The name of the property
         """
 
+        # Short-circuit internal/dunder attribute lookups, which are never
+        # properties (and would otherwise recurse if '_props' is missing):
+        if name.startswith( '_' ):
+            raise AttributeError( name )
+
         # Fail if the property was not (yet) set:
-        if not name in self._props:
-            raise AttributeError( 'Property "%s" was not set on "%s/%s.%s"' %
-                                  ( name, self._algorithm.type(),
-                                    self._algorithm.name(), self._prefix ) )
+        if name not in self._props:
+            raise AttributeError(
+                f'Property "{name}" was not set on '
+                f'"{self._algorithm.type()}/{self._algorithm.name()}.{self._prefix}"' )
 
         # Return the property value:
         return self._props[ name ]
@@ -357,7 +341,7 @@ class PrivateToolConfig( object ):
 
         # Private variables should be set directly:
         if key[ 0 ] == '_':
-            return super( PrivateToolConfig, self ).__setattr__( key, value )
+            return super().__setattr__( key, value )
 
         # Construct the full name, used in the C++ code:
         fullName = self._prefix + "." + key
@@ -366,7 +350,6 @@ class PrivateToolConfig( object ):
         self._algorithm.setPropertyFromString( fullName,
                                                stringPropValue( value ) )
         self._props[ key ] = copy.deepcopy( value )
-        pass
 
     def __str__( self ):
         """Print the private tool configuration in a user friendly way
@@ -375,22 +358,18 @@ class PrivateToolConfig( object ):
         the user to get a nice printout of their job configuration.
         """
 
-        name = 'Private Tool %s/%s' % ( self._type, self._prefix )
+        name = f'Private Tool {self._type}/{self._prefix}'
         result = ' \n'
         result += PythonConfig._printHeader( name )
         result += '\n'
         for key, value in sorted( self._props.items() ):
             if isinstance( value, str ):
-                printedValue = "'%s'" % value
+                printedValue = f"'{value}'"
             else:
                 printedValue = value
-                pass
-            result += "|- %s: %s\n" % ( key, indentBy( printedValue, "| " ) )
-            pass
+            result += f"|- {key}: {indentBy( printedValue, '| ' )}\n"
         result += PythonConfig._printFooter( name )
         return result
-
-    pass
 
 
 def stringPropValue( value ):
@@ -399,7 +378,6 @@ def stringPropValue( value ):
     stringValue = str( value )
     if isinstance( value, bool ):
         stringValue = str( int( value ) )
-        pass
     return stringValue
 
 
@@ -411,9 +389,7 @@ def indentBy( propValue, indent ):
     for stringLine in stringValue.split( '\n' ):
         if len( result ):
             result += "\n" + indent
-            pass
         result += stringLine
-        pass
     return result
 
 
@@ -433,7 +409,6 @@ class TestAlgTypeAndName( unittest.TestCase ):
         config2 = PythonConfig( "NS::SomeType" )
         self.assertEqual( config2.type(), "NS::SomeType" )
         self.assertEqual( config2.name(), "NS::SomeType" )
-        pass
 
     ## Test that specifying the type and name separately in the same string
     #  works as expected.
@@ -444,7 +419,6 @@ class TestAlgTypeAndName( unittest.TestCase ):
         config2 = PythonConfig( "NS::SomeType/Instance" )
         self.assertEqual( config2.type(), "NS::SomeType" )
         self.assertEqual( config2.name(), "Instance" )
-        pass
 
 ## Test case for the algorithm property handling
 class TestAlgProperties( unittest.TestCase ):
@@ -452,7 +426,6 @@ class TestAlgProperties( unittest.TestCase ):
     ## Common setup for the tests
     def setUp( self ):
         self.config = PythonConfig( "Type/Name" )
-        pass
 
     ## Test that properties that got set, can be read back
     def test_propaccess( self ):
@@ -462,14 +435,11 @@ class TestAlgProperties( unittest.TestCase ):
         self.assertEqual( self.config.Prop2, [ "Value2" ] )
         self.assertNotEqual( self.config.Prop1, "Foo" )
         self.assertNotEqual( self.config.Prop2, "Value2" )
-        pass
 
     ## Test that an unset property can't be accessed
     def test_nonexistentprop( self ):
         with self.assertRaises( AttributeError ):
             value = self.config.Prop3
-            pass
-        pass
 
 ## Test case for using private tools
 class TestAlgPrivateTool( unittest.TestCase ):
@@ -477,7 +447,6 @@ class TestAlgPrivateTool( unittest.TestCase ):
     ## Set up the main algorithm object to test
     def setUp( self ):
         self.config = PythonConfig( "AlgType/AlgName" )
-        pass
 
     ## Test setting up and using one private tool
     def test_privatetool( self ):
@@ -486,7 +455,6 @@ class TestAlgPrivateTool( unittest.TestCase ):
         self.config.Tool1.Prop2 = [ 1, 2, 3 ]
         self.assertEqual( self.config.Tool1.Prop1, "Value1" )
         self.assertEqual( self.config.Tool1.Prop2, [ 1, 2, 3 ] )
-        pass
 
     ## Test setting up and using one private tool
     def test_privatetoolarray( self ):
@@ -495,7 +463,6 @@ class TestAlgPrivateTool( unittest.TestCase ):
         tool.Prop2 = [ 1, 2, 3 ]
         self.assertEqual( tool.Prop1, "Value1" )
         self.assertEqual( tool.Prop2, [ 1, 2, 3 ] )
-        pass
 
     ## Test setting up and using a private tool of a private tool
     def test_privatetoolofprivatetool( self ):
@@ -505,23 +472,17 @@ class TestAlgPrivateTool( unittest.TestCase ):
         self.config.Tool1.Tool2.Prop4 = [ "Bar" ]
         self.assertEqual( self.config.Tool1.Tool2.Prop3, "Foo" )
         self.assertEqual( self.config.Tool1.Tool2.Prop4, [ "Bar" ] )
-        pass
 
     ## Test that unset properties on the tools can't be used
     def test_nonexistentprop( self ):
         self.config.addPrivateTool( "Tool1", "ToolType1" )
         with self.assertRaises( AttributeError ):
             value = self.config.Tool1.BadProp
-            pass
         self.config.addPrivateTool( "Tool1.Tool2", "ToolType2" )
         with self.assertRaises( AttributeError ):
             value = self.config.Tool1.Tool2.BadProp
-            pass
-        pass
 
     ## Test that private tools can't be set up on not-yet-declared tools
     def test_nonexistenttool( self ):
         with self.assertRaises( AttributeError ):
             self.config.addPrivateTool( "BadTool.Tool4", "BadToolType" )
-            pass
-        pass
