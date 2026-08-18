@@ -102,6 +102,7 @@ void TgcL0RootOutputAlg::copyToBranches(
   m_candidatePt = input.candidates.pt;
   m_candidateThreshold = input.candidates.threshold;
   m_candidateCharge = input.candidates.charge;
+  m_candidateGoodMagneticField = input.candidates.goodMagneticField;
   m_candidateTruthIndex = input.candidates.truthIndex;
 }
 

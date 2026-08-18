@@ -131,6 +131,8 @@ class TgcL0RootOutputAlg final : public AthHistogramAlgorithm {
   TGCL0_VECTOR_BRANCH(std::uint8_t, m_candidateThreshold,
                       "candidateThreshold");
   TGCL0_VECTOR_BRANCH(std::int8_t, m_candidateCharge, "candidateCharge");
+  TGCL0_VECTOR_BRANCH(std::uint8_t, m_candidateGoodMagneticField,
+                      "candidateGoodMagneticField");
   TGCL0_VECTOR_BRANCH(int, m_candidateTruthIndex, "candidateTruthIndex");
 
 #undef TGCL0_VECTOR_BRANCH

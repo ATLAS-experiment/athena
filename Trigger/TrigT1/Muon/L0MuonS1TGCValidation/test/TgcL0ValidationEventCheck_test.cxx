@@ -74,6 +74,7 @@ TgcL0ValidationEvent makeValidEvent() {
   event.candidates.pt = {25.F};
   event.candidates.threshold = {6U};
   event.candidates.charge = {-1};
+  event.candidates.goodMagneticField = {1U};
   event.candidates.truthIndex = {0};
 
   return event;
@@ -178,6 +179,13 @@ int main() {
     success &= expectInvalid(event,
                              "Candidate block size mismatch for pt",
                              "candidate-size mismatch");
+  }
+  {
+    auto event = makeValidEvent();
+    event.candidates.goodMagneticField[0] = 2U;
+    success &= expectInvalid(event,
+                             "Candidate GoodMag flag is not binary",
+                             "invalid GoodMag flag");
   }
   {
     auto event = makeValidEvent();

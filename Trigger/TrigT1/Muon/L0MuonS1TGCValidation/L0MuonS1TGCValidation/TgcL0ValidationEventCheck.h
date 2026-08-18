@@ -126,6 +126,7 @@ inline TgcL0ValidationCheckResult checkTgcL0ValidationEvent(
   TGC_CHECK_CANDIDATE_SIZE(pt);
   TGC_CHECK_CANDIDATE_SIZE(threshold);
   TGC_CHECK_CANDIDATE_SIZE(charge);
+  TGC_CHECK_CANDIDATE_SIZE(goodMagneticField);
   TGC_CHECK_CANDIDATE_SIZE(truthIndex);
 #undef TGC_CHECK_CANDIDATE_SIZE
 
@@ -158,7 +159,11 @@ inline TgcL0ValidationCheckResult checkTgcL0ValidationEvent(
     }
   }
 
-  for (const int truth : event.candidates.truthIndex) {
+  for (std::size_t candidate = 0U; candidate < nCandidates; ++candidate) {
+    if (event.candidates.goodMagneticField[candidate] > 1U) {
+      return invalid("Candidate GoodMag flag is not binary");
+    }
+    const int truth = event.candidates.truthIndex[candidate];
     if (truth >= 0 && static_cast<std::size_t>(truth) >= nTruth) {
       return invalid("Candidate truth index is out of range");
     }
