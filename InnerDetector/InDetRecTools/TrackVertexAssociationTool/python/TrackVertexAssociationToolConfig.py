@@ -59,8 +59,13 @@ def CVF_TTVAToolCfg(flags, name="CVF_TTVATool", **kwargs):
  
 
 def GNNHS_TTVAToolCfg(flags, name="TrackVertexAssociationTool_GNNHS", **kwargs):
+    # The import should be done here as TrkConfig is not part of AthAnalysis
+    from TrkConfig.VertexFindingFlags import VertexSortingSetup
+
     kwargs.setdefault("WorkingPoint", "Prompt_MaxWeight")
-    kwargs.setdefault("VertexContName", "PrimaryVertices_initial")
+    kwargs.setdefault("VertexContName", "PrimaryVertices_initial"
+                      if flags.Tracking.PriVertex.sortingSetup is VertexSortingSetup.GNNSorting else
+                      "PrimaryVertices")
     kwargs.setdefault("AMVFVerticesDeco", "TTVA_AMVFVertices_forGNN")
     kwargs.setdefault("AMVFWeightsDeco", "TTVA_AMVFWeights_forGNN")
     return TTVAToolCfg(flags, name, **kwargs)
