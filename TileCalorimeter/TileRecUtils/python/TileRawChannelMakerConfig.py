@@ -82,6 +82,11 @@ def TileRawChannelMakerCfg(flags, **kwargs):
         mlog.info(" adding now TileRawChannelBuilderOpt2Filter with name %s to the algorithm: %s",
                   tileRawChannelBuilderOptATLAS.name, name)
 
+    if flags.Tile.doTileNN:
+        from TileRecUtils.TileRawChannelNNMakerConfig import TileRawChannelNNMakerCfg
+        acc.merge( TileRawChannelNNMakerCfg(flags) )
+        mlog.info(" adding now TileRawChannelNNMaker as a separate algorithm alongside: %s", name)
+
     kwargs.setdefault('TileRawChannelBuilder', tileRawChannelBuilder)
 
     if flags.Common.isOverlay and flags.Concurrency.NumThreads > 0:
@@ -183,6 +188,7 @@ if __name__ == "__main__":
     flags.Tile.doWiener = True
     flags.Tile.doOpt2 = True
     flags.Tile.doOptATLAS = True
+    flags.Tile.doTileNN = True
     flags.Tile.correctTimeJumps = True
     flags.Tile.NoiseFilter = 1
     flags.Output.ESDFileName = "myESD.pool.root"
