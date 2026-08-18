@@ -240,7 +240,9 @@ if len(args.postInclude):
         if not name: raise RuntimeError( 'plugin file %s can not be found' % fn )
       func = load_function(name,"setup")
       if func:
+        topLog.setLevel(logging.INFO) # take back to info level before doing postInclude setup
         func(flags)
+        topLog.setLevel(logging.WARNING)
 
 if len(args.postInclude)==0 and not any([flags.Trigger.L1.doCalo,flags.Trigger.L1.doCaloInputs,flags.Trigger.L1.doeFex,flags.Trigger.L1.dojFex,flags.Trigger.L1.dogFex,flags.Trigger.L1.doTopo,flags.DQ.useTrigger]):
   log.info("No steering flags specified and no postInclude, turning on all phase 1 systems (trex,efex,jfex,gfex,topo)")
@@ -359,7 +361,7 @@ elif flags.Input.Format == Format.POOL:
   log.info(f"Running Offline on {len(flags.Input.Files)} POOL files: {flags.Input.Files[0]} ...")
   from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
   cfg.merge(PoolReadCfg(flags))
-else:
+elif len(flags.Input.Files)>0:
   log.info(f"Running Offline on {len(flags.Input.Files)} bytestream files: {flags.Input.Files[0]} ...")
   #from ByteStreamCnvSvc.ByteStreamConfig import ByteStreamReadCfg
   #TODO: Figure out why the above line causes CA conflict @ P1 if try to run on a RAW file there
@@ -396,7 +398,9 @@ if flags.Trigger.triggerConfig=="FILE":
     log.fatal(f"L1Menu file does not exist: {menuFilename}")
     exit(1)
   createL1PrescalesFileFromMenu(flags)
-cfg.merge(L1ConfigSvcCfg(flags))
+
+# Add L1 Config unless in inputless offline mode
+if not (not flags.Common.isOnline and len(flags.Input.Files)==0): cfg.merge(L1ConfigSvcCfg(flags))
 
 # -------- CHANGES GO BELOW ------------
 # setup the L1Calo software we want to monitor
@@ -627,7 +631,8 @@ if type(args.dbOverrides)==list:
 
 
 # configure output AOD if requested
-if flags.Output.AODFileName != "":
+# don't set this up if running in inputless mode (which some plugins use for unusual input jobs like text files)
+if flags.Output.AODFileName != "" and len(flags.Input.Files)>0:
   def addEDM(edmType, edmName):
     if edmName.endswith("Sim") and flags.Input.Format == Format.POOL: edmName = edmName.replace("Sim","_ReSim")
     auxType = edmType.replace('Container','AuxContainer')
