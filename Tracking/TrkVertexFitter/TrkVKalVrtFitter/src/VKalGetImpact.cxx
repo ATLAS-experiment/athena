@@ -25,6 +25,8 @@ namespace Trk{
                                          std::vector<double>& Impact,
                                          std::vector<double>& ImpactError) const
   {
+    //Local variable state uses 49312 bytes of stack space
+    //coverity[STACK_USE]
     State state;
     initState (ctx, state);
     return VKalGetImpact (InpPerigee, Vertex, Charge, Impact, ImpactError, state);
@@ -84,6 +86,8 @@ namespace Trk{
                                          const xAOD::TrackParticle* InpTrk,const Amg::Vector3D& Vertex,const long int Charge,
                                          std::vector<double>& Impact, std::vector<double>& ImpactError) const
   {
+    //Local variable state uses 49312 bytes of stack space
+    //coverity[STACK_USE]
     State state;
     initState (ctx, state);
     return VKalGetImpact (InpTrk, Vertex, Charge, Impact, ImpactError, state);

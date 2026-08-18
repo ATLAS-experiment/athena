@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // Header include
@@ -18,7 +18,8 @@
 
 //-------------------------------------------------
 // Other stuff
-#include<iostream>
+#include <iostream>
+#include <stdexcept>
 
 namespace Trk {
 
@@ -206,7 +207,10 @@ void TrkVKalVrtFitter::makeSimpleCascade(std::vector< std::vector<int> > & vrtDe
        for(it=0; it<(int)vrt.trkInVrt.size(); it++) vrtDef[vCounter].push_back(vrt.trkInVrt[it]);       //copy real tracks
        for(ip=0; ip<(int)vrt.inPointingV.size(); ip++) {
           //int indInFull=vrt.inPointingV[ip];                                 // pointing vertex in full list  WRONG!!!
-          int indInFull=indexInV(vrt.inPointingV[ip], cstate);                         // pointing vertex in full list
+          int indInFull = indexInV(vrt.inPointingV[ip], cstate);                         // pointing vertex in full list
+          if (indInFull < 0)[[unlikely]]{
+            throw std::runtime_error("TrkVKalVrtFitter::makeSimpleCascade: index into vector is negative.");
+          }
           int indInSimple=cstate.m_cascadeVList[indInFull].indexInSimpleCascade;      // its index in simple structure
 	  if(indInSimple<0) continue;                            // merged out vertex. Will be added as tracks
           cascadeDef[vCounter].push_back(indInSimple);
@@ -329,7 +333,11 @@ VxCascadeInfo * TrkVKalVrtFitter::fitCascade(IVKalState& istate,
     for (const PartialMassConstraint& c : cstate.m_partMassCnstForCascade) {
       //int index=c.VRT;                // vertex position in simple structure
       int index=getSimpleVIndex(c.VRT, cstate);  // vertex position in simple structure
-      IERR = findPositions(c.trkInVrt,    vertexDefinition[index],  indexT);  if(IERR)break;
+      if (index < 0)[[unlikely]]{
+        throw std::runtime_error("TrkVKalVrtFitter::fitCascade: index into vector is negative.");
+      }
+      IERR = findPositions(c.trkInVrt,    vertexDefinition[index],  indexT);  
+      if(IERR)break;
       tmpInd.clear();
       for (int idx : c.pseudoInVrt)
         tmpInd.push_back( getSimpleVIndex(idx, cstate) );

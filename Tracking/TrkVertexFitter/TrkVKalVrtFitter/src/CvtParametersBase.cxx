@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // Convert TrackParameters and NeutralParameters to internal VKalVrt parameters
@@ -12,7 +12,6 @@
 // Other stuff
 //----
 #include  "TrkParameters/TrackParameters.h"
-#include <iostream>
 
 namespace Trk {
 
@@ -127,7 +126,10 @@ namespace Trk {
          // Global position of reference point
          perGlobalVrt =  mPer->associatedSurface().center();
          // VK no good covariance matrix!
-         if( !convertAmg5SymMtx(mPer->covariance(), CovVertTrk) ) return StatusCode::FAILURE;
+         if( !convertAmg5SymMtx(mPer->covariance(), CovVertTrk) ){
+           delete trkparN;
+           return StatusCode::FAILURE;
+         } 
          delete trkparN;
        }
 
@@ -267,8 +269,12 @@ namespace Trk {
       // Global position of reference point
       perGlobalVrt = mPerN->associatedSurface().center();
       // VK no good covariance matrix!
-      if( !convertAmg5SymMtx(mPerN->covariance(), CovVertTrk) ) return StatusCode::FAILURE;
+      if( !convertAmg5SymMtx(mPerN->covariance(), CovVertTrk) ) {
+        delete mPerN;
+        return StatusCode::FAILURE;
+      }
       delete neuparN;
+      
 
       state.m_refFrameX = state.m_refFrameY = state.m_refFrameZ = 0.;
       // restore ATLAS frame for safety
