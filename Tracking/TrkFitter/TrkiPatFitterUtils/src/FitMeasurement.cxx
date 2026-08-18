@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /***************************************************************************
@@ -788,7 +788,7 @@ FitMeasurement::FitMeasurement(const TrackParameters& perigee)
     parameters(3) = sinPhi;
     parameters(4) = cotTheta;
     parameters(5) = ptInv0;
-    m_perigee = Amg::VectorX(parameters);
+    m_perigee = Amg::VectorX(std::move(parameters));
 
     // weight = inverse covariance
     AmgSymMatrix(5) covariance(*perigee.covariance());

@@ -170,7 +170,7 @@ bool MeasurementProcessor::calculateDerivatives(void) {
     if (!extrapolateToMeasurements(DeltaTheta0)) {
       return false;
     }
-    m_vertexIntersect = intersection;
+    m_vertexIntersect = std::move(intersection);
   }
 
   // loop over measurements to compute derivatives:
