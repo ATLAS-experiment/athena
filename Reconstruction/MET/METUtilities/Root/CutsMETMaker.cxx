@@ -105,7 +105,8 @@ StatusCode CutsMETMaker::accept(const xAOD::TauJet* tau)
 
   if(tau->pt()<20e3 || fabs(tau->eta())>2.5) return StatusCode::FAILURE;
   // need to accommodate more than one of these?
-  if(!tau->isTau( xAOD::TauJetParameters::IsTauFlag(xAOD::TauJetParameters::JetRNNSigMedium) )) return StatusCode::FAILURE;
+  static const SG::ConstAccessor<char> accGNTauMedium("GNTauM_v0prune");
+  if(!(static_cast<bool>(accGNTauMedium(*tau)))) return StatusCode::FAILURE;
   if(tau->isTau( xAOD::TauJetParameters::IsTauFlag(xAOD::TauJetParameters::EleRNNMedium) )) return StatusCode::FAILURE;
   if(tau->isTau( xAOD::TauJetParameters::IsTauFlag(xAOD::TauJetParameters::MuonVeto) )) return StatusCode::FAILURE;
 
