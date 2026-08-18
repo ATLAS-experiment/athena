@@ -220,16 +220,13 @@ def fastFlavourTaggingCfg( flags, inputJets, inputVertex, inputTracks, isPFlow=F
             "json": CompFactory.FlavorTagDiscriminants.DL2Tool,
             "onnx": CompFactory.FlavorTagInference.GNNTool
         }
-        if not doXbbtagLargeRJet:
-            tag_flags = {pass_flag}
-        else:
-            tag_flags = {}
+        tag_flags = {pass_flag} if not doXbbtagLargeRJet else {}
 
         if nnAlgoext == 'onnx':
             defaults = _triggerDefaultsFromPath(nnFile)
             extra = dict(
                 defaultOutputValues=defaults,
-                defaultZeroTracks=(True if defaults else False),
+                defaultZeroTracks=(bool(defaults)),
             )
         else:
             extra = {}

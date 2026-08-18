@@ -955,10 +955,7 @@ def muEFIsoAlgSequenceCfg(flags, doMSiso=False, is_probe_leg=False):
     selAccIso = SelectionCA('EFMuIso'+name, isProbe=is_probe_leg)
     
     viewName="EFMuIsoReco"+name
-    if doMSiso:
-        roisWriteHandleKey = "Roi_MuonIsoMS"
-    else:
-        roisWriteHandleKey = recordable("HLT_Roi_MuonIso")
+    roisWriteHandleKey = 'Roi_MuonIsoMS' if doMSiso else recordable('HLT_Roi_MuonIso')
 
     roiTool         = CompFactory.ViewCreatorCentredOnIParticleROITool(RoisWriteHandleKey = roisWriteHandleKey, 
                                                                        RoIEtaWidth=flags.Trigger.InDetTracking.muonIso.etaHalfWidth,

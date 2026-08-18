@@ -336,7 +336,7 @@ def createTriggerFlags(doTriggerRecoFlags):
                   help='enable bytestream writing of trigger information')
 
     flags.addFlag('Trigger.doTransientByteStream', lambda prevFlags:
-                  True if prevFlags.Input.Format is Format.POOL and prevFlags.Trigger.doCalo else False,
+                  bool(prevFlags.Input.Format is Format.POOL and prevFlags.Trigger.doCalo),
                   help='create transient BS (for running on MC RDO with clients that require BS inputs)')
 
     flags.addFlag('Trigger.AODEDMSet', lambda flags: 'AODSLIM' if flags.Input.isMC else 'AODFULL',
@@ -389,7 +389,7 @@ def createTriggerFlags(doTriggerRecoFlags):
             return 'DB'
         elif flags.Input.Format is Format.BS:
             from glob import glob
-            hasLocal = True if (glob("HLTMenu*.json") and glob("L1Menu*.json") and glob("HLTPrescales*.json") and glob("L1Prescales*.json") and glob("HLTMonitoring*.json") and glob("BunchGroupSet*.json")) else False
+            hasLocal = bool(glob('HLTMenu*.json') and glob('L1Menu*.json') and glob('HLTPrescales*.json') and glob('L1Prescales*.json') and glob('HLTMonitoring*.json') and glob('BunchGroupSet*.json'))
             if flags.Trigger.doHLT:
                 # When running the Run 3 trigger on data, data the default config source is from the JSON created by compiling the menu in the job config phase
                 _log.debug("Autoconfigured default value for running the trigger on data: 'FILE'")
@@ -413,7 +413,7 @@ def createTriggerFlags(doTriggerRecoFlags):
             md = GetFileMD(flags.Input.Files)
             # Note: the following comprehension will detect both Run 2 and Run 3 in-file metadata formats.
             # As of 2023, the Run 2 metadata format is still in production use for Run 2 MC AODs, DAODs produced with the Release 21 Run 2 trigger.
-            hasTrigMeta = ("metadata_items" in md and any(('TriggerMenu' in key) for key in md["metadata_items"].keys()))
+            hasTrigMeta = ("metadata_items" in md and any(('TriggerMenu' in key) for key in md["metadata_items"]))
             if hasTrigMeta:
                 # When running over a file which already has metadata content (RDO_TRIG, ESD, AOD, DAOD), then read this from within the file's meta store
                 _log.debug("Autoconfigured default value to read trigger configuration data from the input file: 'INFILE'")
