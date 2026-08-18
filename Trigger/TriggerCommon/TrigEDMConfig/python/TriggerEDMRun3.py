@@ -1275,9 +1275,8 @@ def persistent( transient ):
 
     Uses list defined above. If absent assumes v1
     """
-    if transient in EDMDetailsRun3:
-        if 'persistent' in EDMDetailsRun3[transient]:
-            return EDMDetailsRun3[transient]['persistent']
+    if transient in EDMDetailsRun3 and 'persistent' in EDMDetailsRun3[transient]:
+        return EDMDetailsRun3[transient]['persistent']
     return transient
 
 
@@ -1286,7 +1285,7 @@ def tpMap():
     List
     """
     l = {}
-    for tr in EDMDetailsRun3.keys():
+    for tr in EDMDetailsRun3:
         if "xAOD" in tr:
             continue
         l[tr] = persistent(tr)

@@ -116,7 +116,7 @@ def main(args=None):
     from os.path import expandvars, expanduser
     args.inputFiles = [expandvars(expanduser(fn)) for fn in args.inputFiles.split(',')]
 
-    log.info(f"input files: {",".join(repr(fn) for fn in args.inputFiles)}")
+    log.info(f"input files: {','.join(repr(fn) for fn in args.inputFiles)}")
     log.info(f"output file: {args.outputFile!r}")
     log.info(f"prefix: {args.prefix!r}")
 

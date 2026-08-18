@@ -813,7 +813,7 @@ def testEDMList(edm_list, error_on_edmdetails = True):
 
     #check for duplicates:
     #check that no two EDM entries match after stripping out characters afer '.'
-    if not len(set(serializable_names_no_properties)) == len(serializable_names_no_properties):
+    if len(set(serializable_names_no_properties)) != len(serializable_names_no_properties):
         log.error("Duplicates in EDM list! Duplicates found:")
         import collections.abc
         for item, count in collections.Counter(serializable_names_no_properties).items():
@@ -822,7 +822,7 @@ def testEDMList(edm_list, error_on_edmdetails = True):
         return_code = 1
 
     #check EDMDetails
-    for EDMDetail in EDMDetailsRun3.keys():
+    for EDMDetail in EDMDetailsRun3:
         if EDMDetail not in serializable_names_no_label:
             msg = "EDMDetail for " + EDMDetail + " does not correspond to any name in TriggerList"
             if error_on_edmdetails:

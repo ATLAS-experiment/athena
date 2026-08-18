@@ -248,7 +248,7 @@ def signatureTrigTrackingFlags(mode : str) -> AthConfigFlags:
     def run(self):
       return self.fun(self.flags,self.sig,self.mode)
     
-  for i in signatureSet.keys():
+  for i in signatureSet:
     trackingflags = deepcopy(defaults())
     a = categoryGeneratorWrapper(signatureSet[i],trackingflags,i,mode)
     signatureCategory = "{}.{}".format(category,i)
@@ -290,10 +290,7 @@ def tsetter(var, value):
     var = value
   else:
     basic = (bool, str, int, float, type(None))
-    if isinstance(var,basic):
-      var = value
-    else:
-      var = [value]
+    var = value if isinstance(var, basic) else [value]
 
   return var
 
@@ -573,7 +570,7 @@ def fullScan(flags: AthConfigFlags, instanceName: str, recoMode: str) -> AthConf
   flags.UseTrigSeedML   = 4
   flags.dodEdxTrk         = True
   flags.doHitDV           = True
-  flags.doDisappearingTrk = True if recoMode=="InDet" else False
+  flags.doDisappearingTrk = recoMode=="InDet"
   flags.roadWidth =         5.
   return flags
 
@@ -891,7 +888,7 @@ def collToRecordable(flags,name):
   #       and not setting parameters using tests on the signature name
   ret = name
   signature = flags.input_name
-  firstStage = True if "FTF" in name else False
+  firstStage = "FTF" in name
   record = True
   if firstStage:
     if signature in ["tauHitsHitZ","minBias","minBiasPixel","bjetLRT",
