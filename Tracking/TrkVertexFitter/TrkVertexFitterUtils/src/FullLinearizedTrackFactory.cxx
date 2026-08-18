@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /*********************************************************************
@@ -17,7 +17,7 @@
 #include "TrkSurfaces/PerigeeSurface.h"
 #include "TrkEventPrimitives/ParamDefs.h"
 #include "TrkExUtils/MaterialUpdateMode.h"
-#include <TMath.h>
+#include <numbers>
 
 namespace Trk
 {
@@ -93,7 +93,10 @@ namespace Trk
       delete parsAtVertex;
       parsAtVertex=trackPars->clone();
     }
-
+    if (!parsAtVertex)[[unlikely]]{
+      ATH_MSG_ERROR("parsAtVertex is nullptr.");
+      return nullptr;
+    }
     // positions
     AmgVector(5) param = parsAtVertex->parameters();
     Amg::Vector3D expPoint = parsAtVertex->position();
@@ -117,7 +120,10 @@ namespace Trk
 
     SG::ReadCondHandle<AtlasFieldCacheCondObj> readHandle{m_fieldCacheCondObjInputKey, Gaudi::Hive::currentContext()};
     const AtlasFieldCacheCondObj* fieldCondObj{*readHandle};
-
+    if (!fieldCondObj)[[unlikely]]{
+      ATH_MSG_ERROR("fieldCondObj is nullptr");
+      return nullptr;
+    }
     MagField::AtlasFieldCache fieldCache;
     fieldCondObj->getInitializedCache (fieldCache);
 
@@ -149,7 +155,7 @@ namespace Trk
     double phiAtEp;
     int sgnY = (Y<0)? -1:1;
     int sgnX = (X<0)? -1:1;
-    double pi = TMath::Pi();//acos(-1.);
+    static constexpr double pi = std::numbers::pi_v<double>;
 
     if(fabs(X)>fabs(Y)) phiAtEp = sgn_h*sgnX* acos(-sgn_h * Y / S);
     else

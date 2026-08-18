@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -71,15 +71,7 @@ namespace Trk{
   
     double sumptPV = 0;
     
-    /*
-    for(std::vector<Trk::VxTrackAtVertex*>::const_iterator track = 
-	  (*primaryVertexContainer)[index]->vxTrackAtVertex()->begin();
-	track != (*primaryVertexContainer)[index]->vxTrackAtVertex()->end(); ++track){
-      
-      sumptPV += (*track)->initialPerigee()->momentum().perp();
-    }
-    */
-
+    
     // TODO: perhaps calculate sumptPV using VxTracksAtVertex in xAOD::Vertex? -David S.
     for(unsigned int i = 0; i < (*primaryVertexContainer)[index]->nTrackParticles(); ++i){
 
@@ -92,19 +84,16 @@ namespace Trk{
       
       if( i != index &&
 	  (*primaryVertexContainer)[i]->vertexType() != xAOD::VxType::NoVtx ){
-        /*
-	for(std::vector<Trk::VxTrackAtVertex*>::const_iterator track = 
-	      (*primaryVertexContainer)[i]->vxTrackAtVertex()->begin();
-	    track != (*primaryVertexContainer)[i]->vxTrackAtVertex()->end(); ++track){
-	
-	  sumpt += (*track)->initialPerigee()->momentum().perp();
-	}
-	*/
+        
 
         // TODO: perhaps calculate sumptPV using VxTracksAtVertex in xAOD::Vertex? -David S.
         for(unsigned int itrk = 0; itrk < (*primaryVertexContainer)[i]->nTrackParticles(); ++itrk){
 
           sumpt += (*primaryVertexContainer)[i]->trackParticle(itrk)->perigeeParameters().momentum().perp();
+        }
+        if ((sumpt + sumptPV) == 0.)[[unlikely]]{
+          ATH_MSG_ERROR("isCompatible: Divisor 'sumpt + sumptPV' is zero.");
+          return false;
         }
 	double vxReach = 
 	  std::abs((*primaryVertexContainer)[i]->position().z()

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /*********************************************************************
@@ -90,9 +90,9 @@ namespace Trk
     }
     
     //  now find the mode separately for the distributions in x, y and z
-    return Amg::Vector3D(m_mode1dfinder->getMode(allx),
-			 m_mode1dfinder->getMode(ally),
-			 m_mode1dfinder->getMode(allz));
+    return Amg::Vector3D(m_mode1dfinder->getMode(std::move(allx)),
+			 m_mode1dfinder->getMode(std::move(ally)),
+			 m_mode1dfinder->getMode(std::move(allz)));
   }
 
 
