@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /*********************************************************************
@@ -171,7 +171,10 @@ StatusCode Trk2dDistanceSeeder::finalize()
   {
     SG::ReadCondHandle<AtlasFieldCacheCondObj> readHandle{m_fieldCacheCondObjInputKey, Gaudi::Hive::currentContext()};
     const AtlasFieldCacheCondObj* fieldCondObj{*readHandle};
-
+    if (!fieldCondObj)[[unlikely]]{
+      ATH_MSG_ERROR("GetSeed: fieldCondObj is nullptr.");
+      return {};
+    }
     MagField::AtlasFieldCache fieldCache;
     fieldCondObj->getInitializedCache (fieldCache);
 

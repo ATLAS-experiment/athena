@@ -472,13 +472,14 @@ int Mode3dFromFsmw1dFinder::doModeSearch( VeVecIndices * idxs,
       std::vector< std::pair< int,int> > idx_tmp = getFsmw1dMode( spltposi, expectMax ) ;
       if ( !idx_tmp.empty() )
       {
-        idxs->push_back( idx_tmp )  ;
+        idxs->push_back( std::move(idx_tmp) )  ;
         spltgot ++ ;
         ATH_MSG_DEBUG(" Doing 1dMode Search : " << got );
       } 
       if ( spltgot == lastgot ) break ; // failed search without mode found
       lastgot = spltgot ;
       if ( lastgot > 0 ) break ;  // only one mode is expected in each search
+      //coverity[DEADCODE]
     } while ( spltgot < expectMax ) ;
     got += lastgot ;
   }
@@ -556,7 +557,7 @@ Mode3dFromFsmw1dFinder::CheckCorrelation( [[maybe_unused]] Mode3dFromFsmw1dInfo&
     if ( hit ) 
     {
       supp.insert( supp.end(), ax.begin(), ax.end() ) ;
-      corre.push_back( supp ) ;
+      corre.push_back( std::move(supp) ) ;
     }
 
   }
@@ -905,7 +906,10 @@ Mode3dFromFsmw1dFinder::Mode2Seed( Mode3dFromFsmw1dInfo& info,
       seedZ0 += posi->first.z()*wght ;
       totwght += wght ;
     }
-
+    if (totwght == 0.)[[unlikely]]{
+      ATH_MSG_ERROR("Mode2Seed: Divisor 'totwght' is zero.");
+      return {};
+    }
     // one will use the correlated crossings where largest weights reside.
     if ( totwght > maxWght ) 
     {
