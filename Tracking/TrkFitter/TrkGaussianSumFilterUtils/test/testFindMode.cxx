@@ -1,6 +1,6 @@
 
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // since we are testing an "internal" /implementation method of the .cxx
@@ -58,7 +58,7 @@ main()
   const std::array<VecOfComponents, 5> mixture = {
     vec0, vec1, vec2, vec3, vec4
   };
-
+  //cppcheck-suppress throwInEntryPoint
   const std::array<double, 10> result = evaluateMode(mixture);
   for (const double i : result) {
     std::cout << i << '\n';

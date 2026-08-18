@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
  */
 
 //////////////////////////////////////////////////////////////////
@@ -1062,14 +1062,16 @@ Trk::DistributedKalmanFilter::fit(
 
   if (!readHandle.isValid()) {
     std::stringstream msg;
-    msg << "Failed to retrieve magmnetic field conditions data "
+    msg << "Failed to retrieve magnetic field conditions data; readHandle is invalid "
         << m_fieldCacheCondObjInputKey.key() << ".";
     throw std::runtime_error(msg.str());
   }
   const AtlasFieldCacheCondObj* fieldCondObj {
     *readHandle
   };
-
+  if (!fieldCondObj) [[unlikely]]{
+    throw std::runtime_error("Failed to retrieve magnetic field conditions data; fieldCondObj is null ");
+  }
   MagField::AtlasFieldCache fieldCache;
   fieldCondObj->getInitializedCache(fieldCache);
 
@@ -1156,6 +1158,7 @@ Trk::DistributedKalmanFilter::fit(
     fittedTrack = nullptr;
   }
   delete pInitState;
+  delete pP;
   return std::unique_ptr<Trk::Track>(fittedTrack);
 }
 
