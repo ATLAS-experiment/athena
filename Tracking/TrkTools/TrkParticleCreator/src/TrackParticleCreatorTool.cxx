@@ -788,7 +788,12 @@ TrackParticleCreatorTool::setParameters(const EventContext& ctx,
 
   SG::ReadCondHandle<AtlasFieldCacheCondObj> readHandle{ m_fieldCacheCondObjInputKey, ctx };
   const AtlasFieldCacheCondObj* fieldCondObj{ *readHandle };
+  if (!fieldCondObj)[[unlikely]]{
+    ATH_MSG_ERROR("fieldCondObj is nullptr in TrackParticleCreatorTool::setParameters");
+    return;
+  }
   MagField::AtlasFieldCache fieldCache;
+  //cppcheck-suppress nullPointerRedundantCheck
   fieldCondObj->getInitializedCache(fieldCache);
 
   for (const auto* param : parameters) {
@@ -1012,7 +1017,7 @@ TrackParticleCreatorTool::addDetailedHitInformation(const Trk::TrackStates* trac
     if(!m_pixelID->is_pixel(id)) continue;
 
     Trk::DetectorRegion region;
-    const InDetDD::SiDetectorElement* detEl = dynamic_cast<const InDetDD::SiDetectorElement*>(rot->detectorElement());
+    const InDetDD::SiDetectorElement* detEl = static_cast<const InDetDD::SiDetectorElement*>(rot->detectorElement());
     InDetDD::DetectorType type = detEl->design().type();
     if(type==InDetDD::PixelInclined)  region = Trk::pixelBarrelInclined;
     else if(type==InDetDD::PixelBarrel) region = Trk::pixelBarrelFlat;
