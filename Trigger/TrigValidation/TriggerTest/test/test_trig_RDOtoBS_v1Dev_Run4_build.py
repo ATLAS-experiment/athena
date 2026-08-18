@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # art-description: athena test using simulated BS from RDOtoBS
 # art-type: build
@@ -7,7 +7,7 @@
 # Skipping art-output which has no effect for build tests.
 
 from TrigValTools.TrigValSteering import Test, ExecStep, PyStep, CheckSteps
-from AthenaConfiguration.TestDefaults import defaultConditionsTags, defaultGeometryTags
+from AthenaConfiguration.TestDefaults import defaultConditionsTags
 import os
 from contextlib import suppress
 
@@ -27,6 +27,10 @@ rdo2bs.args += ' --outputBSFile=created.BS'
 rdo2bs.args += ' --preExec="flags.Detector.EnableITkStrip=False"'
 
 # BSRDO -> RAW step
+# geotag should match the ttbar_pu200_Run4 input file
+# https://gitlab.cern.ch/atlas/athena/-/blob/main/Trigger/TrigValidation/TrigValTools/share/TrigValInputs.json#L115
+geotag = 'ATLAS-P2-RUN4-04-00-00'
+
 ex = ExecStep.ExecStep('BSRDOtoRAW')
 ex.type = 'athena'
 ex.job_options = 'TriggerJobOpts/runHLT.py'
@@ -35,7 +39,7 @@ ex.input = ''
 ex.args += '--filesInput created.BS'
 ex.flags = ['Trigger.triggerMenuSetup="Dev_pp_run4_v1"', 'Trigger.doLVL1=True', 'Trigger.EDMVersion=4',
             'Trigger.enabledSignatures=[]', f'IOVDb.GlobalTag="{defaultConditionsTags.RUN4_MC}"',
-            f'GeoModel.AtlasVersion="{defaultGeometryTags.RUN4}"', 'GeoModel.Align.Dynamic=False',
+            f'GeoModel.AtlasVersion="{geotag}"', 'GeoModel.Align.Dynamic=False',
             'Input.isMC=True',
             'Trigger.L1.doGlobal=False',
             'Trigger.L1.dogFex=False',
