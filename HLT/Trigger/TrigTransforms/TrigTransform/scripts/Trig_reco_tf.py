@@ -136,7 +136,7 @@ def addTriggerArgs(parser):
 
     # trigger executable
     parser.add_argument('--trigExe', type=trfArgClasses.argFactory(trfArgClasses.argString, runarg=True),
-                        default=trfArgClasses.argString("athenaHLT.py"),
+                        default=trfArgClasses.argString("athenaEF.py"),
                         help='Executable to run in the trigger step', group='Trigger')
 
     # For prodsys to make sure uses inputBS_RDOFile rather than inputBSFile when running the b2r step
