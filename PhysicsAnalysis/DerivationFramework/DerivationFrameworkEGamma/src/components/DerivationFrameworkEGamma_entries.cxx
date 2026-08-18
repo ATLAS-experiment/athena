@@ -12,6 +12,7 @@
 #include "DerivationFrameworkEGamma/EGammaEnergyCalibrationWrapper.h"
 #include "DerivationFrameworkEGamma/EGPhotonBDTToolWrapper.h"
 #include "DerivationFrameworkEGamma/EGPhotonBDTToolDecorator.h"
+#include "DerivationFrameworkEGamma/EGammaFudgeAlgorithm.h"
 
 using namespace DerivationFramework;
 DECLARE_COMPONENT( PhotonsDirectionTool )
@@ -28,3 +29,4 @@ DECLARE_COMPONENT( EGammaGSFCalo )
 DECLARE_COMPONENT( EGammaEnergyCalibrationWrapper )
 DECLARE_COMPONENT( EGPhotonBDTToolWrapper )
 DECLARE_COMPONENT( EGPhotonBDTToolDecorator )
+DECLARE_COMPONENT( EGammaFudgeAlgorithm )
