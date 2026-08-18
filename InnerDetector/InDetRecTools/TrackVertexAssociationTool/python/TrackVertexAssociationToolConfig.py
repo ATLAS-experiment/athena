@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -21,6 +21,8 @@ def TTVAToolCfg(flags, name, addDecoAlg=True, VertexContName="PrimaryVertices", 
     acc = ComponentAccumulator()
 
     kwargs.setdefault("TrackContName", "InDetTrackParticles")
+    kwargs.setdefault("AMVFVerticesDeco", "TTVA_AMVFVertices_forReco")
+    kwargs.setdefault("AMVFWeightsDeco",  "TTVA_AMVFWeights_forReco")
 
     acc.setPrivateTools(getTTVAToolForReco(name, **kwargs))
 
@@ -28,7 +30,8 @@ def TTVAToolCfg(flags, name, addDecoAlg=True, VertexContName="PrimaryVertices", 
         from InDetUsedInFitTrackDecoratorTool.UsedInVertexFitTrackDecoratorConfig import (
             UsedInVertexFitTrackDecoratorCfg)
         acc.merge(UsedInVertexFitTrackDecoratorCfg(
-            flags, kwargs["TrackContName"], VertexContName))
+            flags, trackCont=kwargs["TrackContName"], vtxCont=VertexContName,
+            vertexDeco=kwargs["AMVFVerticesDeco"], weightDeco=kwargs["AMVFWeightsDeco"]))
 
     return acc
 
@@ -58,4 +61,6 @@ def CVF_TTVAToolCfg(flags, name="CVF_TTVATool", **kwargs):
 def GNNHS_TTVAToolCfg(flags, name="TrackVertexAssociationTool_GNNHS", **kwargs):
     kwargs.setdefault("WorkingPoint", "Prompt_MaxWeight")
     kwargs.setdefault("VertexContName", "PrimaryVertices_initial")
+    kwargs.setdefault("AMVFVerticesDeco", "TTVA_AMVFVertices_forGNN")
+    kwargs.setdefault("AMVFWeightsDeco", "TTVA_AMVFWeights_forGNN")
     return TTVAToolCfg(flags, name, **kwargs)
