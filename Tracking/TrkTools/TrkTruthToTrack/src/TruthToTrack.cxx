@@ -1,12 +1,11 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #define TRUTHTOTRACK_IMP
 #include "TrkTruthToTrack/TruthToTrack.h"
 
-#include <cmath>
-#include <memory>
+
 
 #include "AtlasHepMC/GenParticle.h"
 #include "AtlasHepMC/GenVertex.h"
@@ -18,6 +17,8 @@
 
 #include "TrkExInterfaces/IExtrapolator.h"
 
+#include <cmath>
+#include <memory>
 
 //================================================================
 Trk::TruthToTrack::TruthToTrack(const std::string& type, const std::string& name, const IInterface* parent)
@@ -101,7 +102,7 @@ const Trk::TrackParameters* Trk::TruthToTrack::makePerigeeParameters(HepMC::Cons
 
   if(part && part->production_vertex() && m_extrapolator) {
 
-    std::unique_ptr<const Trk::TrackParameters> productionVertexTrackParams( makeProdVertexParameters(part) );
+    std::unique_ptr<const Trk::TrackParameters> productionVertexTrackParams( makeProdVertexParameters(std::move(part)) );
     if(productionVertexTrackParams) {
 
       // Extrapolate the TrackParameters object to the perigee. Direct extrapolation,

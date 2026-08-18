@@ -331,7 +331,7 @@ Trk::SimpleAmbiguityProcessorTool::dumpStat(MsgStream &out) const {
     return fullname.substr(slashPosition, stringLength);
   };
   // @TODO restore ios
-  std::streamsize ss = std::cout.precision();
+  std::streamsize ss = out.precision();
   out << "Output from ";
   out << parseFileName(__FILE__);
   out << "::";
