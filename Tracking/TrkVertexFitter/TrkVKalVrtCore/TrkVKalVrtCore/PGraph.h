@@ -14,6 +14,7 @@ namespace Trk {
     long int m_lvset, m_lwset, m_choice;
 
 public:
+    //coverity[UNINIT_CTOR]
     PGraph() { }  // cppcheck-suppress uninitMemberVar; prevent zeroing of large arrays.
 
     int pgraphm_(long int *weit, long int edges, long int nodes, long int *set, long int *nptr, long int nth) noexcept;

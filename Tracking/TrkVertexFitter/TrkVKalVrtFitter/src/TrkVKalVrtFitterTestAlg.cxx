@@ -323,10 +323,10 @@ void setRefittedPerigee (xAOD::Vertex& v, unsigned i,
   if (vec.size() <= i) vec.resize(i+1);
 
   AmgSymMatrix(5) cov = cov5();
-  for (int i=0; i < 5; i++) {
+  for (int ii=0; i < 5; ii++) {
     for (int j=0; j < 5; j++) {
-      unsigned ipos = i*5 + j;
-      (cov)(i,j) = ipos < c.size() ? c[ipos] : 0;
+      unsigned ipos = ii*5 + j;
+      (cov)(ii,j) = ipos < c.size() ? c[ipos] : 0;
     }
   }
 
@@ -586,7 +586,10 @@ StatusCode TrkVKalVrtFitterTestAlg::test4(const EventContext& ctx) const
 {
   const Trk::IVertexCascadeFitter* fitter =
     dynamic_cast<const Trk::IVertexCascadeFitter*> (m_fitter.get());
-
+    if (!fitter)[[unlikely]]{
+      ATH_MSG_ERROR("TrkVKalVrtFitterTestAlg::test4: 'fitter' is nullptr");
+      return StatusCode::FAILURE;
+    }
   xAODTPUVec_t tracks1 = makexAODTP (makePerigees2());
 
   std::unique_ptr<IVKalState> state (fitter->makeState(ctx));
