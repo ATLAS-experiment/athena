@@ -280,6 +280,8 @@ StatusCode TgcL0TruthValidationAlg::execute(const EventContext& ctx) const {
     output->candidates.threshold.emplace_back(
         candidate.preInnerCoincidenceThreshold);
     output->candidates.charge.emplace_back(candidate.charge);
+    output->candidates.goodMagneticField.emplace_back(
+        candidate.goodMagneticField ? 1U : 0U);
     output->candidates.truthIndex.emplace_back(-1);
   }
 
