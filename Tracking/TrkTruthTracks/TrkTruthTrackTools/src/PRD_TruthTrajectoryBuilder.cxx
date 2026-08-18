@@ -112,7 +112,7 @@ std::map<HepMC::ConstGenParticlePtr, Trk::PRD_TruthTrajectory > Trk::PRD_TruthTr
                     // register the GenParticle only once
                     newPrdTruthTrajectory.genParticle = curGenP;
                     // fill into map
-                    gpPrdTruthTrajectories[curGenP] = newPrdTruthTrajectory;
+                    gpPrdTruthTrajectories[curGenP] = std::move(newPrdTruthTrajectory);
                     ndofTotal = ndof;
                 } else {
                     // this PRD_TruthTrajectory already exists
