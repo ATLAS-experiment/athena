@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 #
 
 from ..Config.MenuComponents import MenuSequence, SelectionCA, InViewRecoCA, InEventRecoCA
@@ -73,10 +73,7 @@ def muFastAlgSequenceCfg(flags, suffix="", useNewFast=False, is_probe_leg=False)
 
         recoSA.mergeReco(acc)
 
-    from TrigGenericAlgs.TrigGenericAlgsConfig import ROBPrefetchingAlgCfg_Muon
-    robPrefetch = ROBPrefetchingAlgCfg_Muon(flags, nameSuffix=viewName+'_probe' if is_probe_leg else viewName)
-
-    selAccSA.mergeReco(recoSA, robPrefetchCA=robPrefetch)
+    selAccSA.mergeReco(recoSA)
 
     return (selAccSA, sequenceOut)
 
@@ -100,10 +97,7 @@ def muFastCalibAlgSequenceCfg(flags, is_probe_leg=False):
     sequenceOut = muNames.L2SAName+"Calib"
     recoSA.mergeReco(muFastRecoSeq)
 
-
-    from TrigGenericAlgs.TrigGenericAlgsConfig import ROBPrefetchingAlgCfg_Muon
-    robPrefetchAlg = ROBPrefetchingAlgCfg_Muon(flags, nameSuffix=viewName+'_probe' if is_probe_leg else viewName)
-    selAccSA.mergeReco(recoSA, robPrefetchCA=robPrefetchAlg)
+    selAccSA.mergeReco(recoSA)
 
     return (selAccSA, sequenceOut)
 
@@ -263,10 +257,7 @@ def muCombAlgSequenceCfg(flags, selCAName="", is_probe_leg=False, trackingMode =
     acc.merge(muFastRecoSequenceCfg(muonflags, viewName+"RoIs", doFullScanID=isCosmic(flags) , InsideOutMode=True), sequenceName=seql2iocb.name)
     recoCB.mergeReco(acc)
 
-
-    from TrigGenericAlgs.TrigGenericAlgsConfig import ROBPrefetchingAlgCfg_Si
-    robPrefetchAlg = ROBPrefetchingAlgCfg_Si(flags, nameSuffix=viewName+'_probe' if is_probe_leg else viewName)
-    selAccCB.mergeReco(recoCB, robPrefetchCA=robPrefetchAlg)
+    selAccCB.mergeReco(recoCB)
 
     return (selAccCB, sequenceOut)
 
@@ -336,11 +327,7 @@ def muCombLRTAlgSequenceCfg(flags, is_probe_leg=False):
 
     recol2cb.mergeReco(muonIDFastTrackingSequenceCfg(flags, viewName+"RoIs" , "muonLRT", extraLoads, doLRT=True ))
 
-
-    from TrigGenericAlgs.TrigGenericAlgsConfig import ROBPrefetchingAlgCfg_Si
-    robPrefetchAlg = ROBPrefetchingAlgCfg_Si(flags, nameSuffix=viewName+'_probe' if is_probe_leg else viewName)
-    selAcc.mergeReco(recol2cb, robPrefetchAlg)
-
+    selAcc.mergeReco(recol2cb)
 
     return (selAcc, sequenceOut)
 
@@ -449,9 +436,7 @@ def muEFSAAlgSequenceCfg(flags, suffix="", is_probe_leg=False, useBucketFilter=F
                                                                           useBucketFilter=useBucketFilter)
     recoMS.mergeReco(muEFSARecoSequenceAcc)
 
-    from TrigGenericAlgs.TrigGenericAlgsConfig import ROBPrefetchingAlgCfg_Muon
-    prefetch=ROBPrefetchingAlgCfg_Muon(flags, nameSuffix=viewName+'_probe' if is_probe_leg else viewName)
-    selAccMS.mergeReco(recoMS, robPrefetchCA=prefetch, upSequenceCA=truthAlgs)
+    selAccMS.mergeReco(recoMS, upSequenceCA=truthAlgs)
 
     return (selAccMS, sequenceOut)
 
@@ -931,10 +916,7 @@ def efLateMuAlgSequenceCfg(flags, is_probe_leg=False):
     recoLateMu.mergeReco(muEFInsideOutRecoSequenceCfg(muonflagsCB, recoLateMu.name+"RoIs", "LateMu", ''))
     sequenceOut = muNames.EFCBInOutName+'_Late'
 
-
-    from TrigGenericAlgs.TrigGenericAlgsConfig import ROBPrefetchingAlgCfg_Muon
-    robPrefetchAlg = ROBPrefetchingAlgCfg_Muon(flags, nameSuffix=viewName)
-    selAcc.mergeReco(recoLateMu, robPrefetchCA = robPrefetchAlg)
+    selAcc.mergeReco(recoLateMu)
 
     return (selAcc, sequenceOut)
 
@@ -987,11 +969,7 @@ def muEFIsoAlgSequenceCfg(flags, doMSiso=False, is_probe_leg=False):
     sequenceOut = muNames.EFIsoMuonName+name
     recoIso.mergeReco(efmuisoRecoSequenceCfg( flags, viewName+"RoIs", "IsoViewMuons"+name, doMSiso ))
 
-
-    from TrigGenericAlgs.TrigGenericAlgsConfig import ROBPrefetchingAlgCfg_Si
-    robPrefetchAlg = ROBPrefetchingAlgCfg_Si(flags, nameSuffix=viewName+'_probe' if is_probe_leg else viewName)
-
-    selAccIso.mergeReco(recoIso, robPrefetchCA = robPrefetchAlg)
+    selAccIso.mergeReco(recoIso)
 
     return (selAccIso, sequenceOut)
 

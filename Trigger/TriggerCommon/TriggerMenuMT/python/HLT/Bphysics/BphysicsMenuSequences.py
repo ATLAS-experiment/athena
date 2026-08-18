@@ -32,9 +32,7 @@ def bmumuxSequenceGenCfg(flags):
     reco.mergeReco(bmumuxRecoSequenceCfg(flags, reco.inputMaker().InViewRoIs, reco.inputMaker().InViewMuons))
 
     selAcc = SelectionCA('bmumuxSequence')
-
-    from TrigGenericAlgs.TrigGenericAlgsConfig import ROBPrefetchingAlgCfg_Si
-    selAcc.mergeReco(reco, robPrefetchCA=ROBPrefetchingAlgCfg_Si(flags, nameSuffix=reco.name))
+    selAcc.mergeReco(reco)
 
     hypoAlg = CompFactory.TrigBphysStreamerHypo('BmumuxStreamerHypoAlg')
     selAcc.addHypoAlgo(hypoAlg)
@@ -65,9 +63,7 @@ def bhhSequenceGenCfg(flags):
     reco.mergeReco(bhhRecoSequenceCfg(flags, reco.inputMaker().InViewRoIs))
 
     selAcc = SelectionCA('bhhSequence')
-
-    from TrigGenericAlgs.TrigGenericAlgsConfig import ROBPrefetchingAlgCfg_Si
-    selAcc.mergeReco(reco, robPrefetchCA=ROBPrefetchingAlgCfg_Si(flags, nameSuffix=reco.name))
+    selAcc.mergeReco(reco)
 
     hypoAlg = CompFactory.TrigBphysStreamerHypo('BhhStreamerHypoAlg')
     selAcc.addHypoAlgo(hypoAlg)
