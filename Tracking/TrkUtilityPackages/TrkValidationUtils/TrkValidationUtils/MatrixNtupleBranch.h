@@ -1,16 +1,16 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRK_MATRIXNTUPLEBRANCH_H
 #define TRK_MATRIXNTUPLEBRANCH_H
 
-#include <string>
-class TTree;
+
 
 #include "EventPrimitives/EventPrimitives.h"
 #include "CLHEP/Geometry/Transform3D.h"
-
+#include <string_view>
+class TTree;
 namespace Trk {
 
   /**
@@ -33,10 +33,10 @@ namespace Trk {
   struct MatrixNtupleBranch {
 
     /** initialize class for writing */
-    bool initForWrite(TTree& tree, const std::string& varname, int ncol, int nrow, const std::string& prefix = ""  );
+    bool initForWrite(TTree& tree, std::string_view varname, int ncol, int nrow, std::string_view prefix = ""  );
 
     /** initialize class for reading */
-    bool initForRead(TTree& tree, const std::string& varname, int ncol, int nrow, const std::string& prefix = "" );
+    bool initForRead(TTree& tree, std::string_view varname, int ncol, int nrow, std::string_view prefix = "" );
     
     /** fill a vector */
     bool fill( const Amg::MatrixX& matrix );
