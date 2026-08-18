@@ -1319,16 +1319,8 @@ def main():
    if args.efdf_interface_library is not None:
       ef_overrides['EFDFInterfaceLibraryName'] = args.efdf_interface_library
 
-   # Apply to the flags for the CA-module path (getEFInterfaceSvc reads these)
-   _prop2flag = {'Files': 'Files', 'OutputFileName': 'OutputFileName',
-                 'LoopOverFiles': 'LoopFiles', 'NumEvents': 'NumEvents',
-                 'SkipEvents': 'SkipEvents', 'RunNumber': 'RunNumber',
-                 'T0ProjectTag': 'T0ProjectTag', 'BeamType': 'BeamType',
-                 'BeamEnergy': 'BeamEnergy', 'TriggerType': 'TriggerType',
-                 'Stream': 'Stream', 'Lumiblock': 'Lumiblock', 'DetMask': 'DetMask',
-                 'EFDFInterfaceLibraryName': 'LibraryName'}
-   for prop, value in ef_overrides.items():
-      setattr(flags.Trigger.Online.EFInterface, _prop2flag[prop], value)
+   # NB: Do NOT set flags.Trigger.Online.EFInterface.* here
+   # ef_overrides is applied to the service at runtime via iProperty in ConfigRunner.run()
 
    # Execute precommands
    if args.precommand:
