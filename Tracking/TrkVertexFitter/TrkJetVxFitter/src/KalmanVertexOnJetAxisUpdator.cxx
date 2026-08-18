@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrkJetVxFitter/KalmanVertexOnJetAxisUpdator.h"
@@ -203,7 +203,7 @@ namespace Trk{
       if (old_residual_cov.determinant() == 0. ) {
         ATH_MSG_WARNING ("The old_residual matrix inversion failed");
         ATH_MSG_WARNING ("same vertex as before is returned");
-        return Trk::RecVertexPositions(myPosition);
+        return Trk::RecVertexPositions(std::move(myPosition));
       }
 
       AmgSymMatrix(5) old_residual_cov_inv = old_residual_cov.inverse().eval();
@@ -557,7 +557,7 @@ namespace Trk{
     
     ATH_MSG_DEBUG ("The transform matrix xyzphitheta is: " << transform);
     
-    Amg::Vector3D posOnJetAxis;
+    Amg::Vector3D posOnJetAxis{};
     posOnJetAxis(0) = xv+dist*cos(phi)*sin(theta);
     posOnJetAxis(1) = yv+dist*sin(phi)*sin(theta);
     posOnJetAxis(2) = zv+dist*cos(theta);
@@ -626,7 +626,7 @@ namespace Trk{
     finalWeight.block(5,5,D.rows(),D.rows()) = 
         D+(D*((B.transpose()*(E*B))*D.transpose()));
 
-    new_vrt_weight = finalWeight;
+    new_vrt_weight = std::move(finalWeight);
 
     if (new_vrt_weight.determinant()<=0) {
       ATH_MSG_DEBUG("smartInvert() new_vrt_weight FINAL det. is: " << new_vrt_weight.determinant());

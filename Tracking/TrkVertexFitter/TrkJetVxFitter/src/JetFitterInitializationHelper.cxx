@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /***************************************************************************
@@ -30,7 +30,6 @@
 #include "TrkVertexFitterInterfaces/IVertexLinearizedTrackFactory.h"
 #include "TrkTrack/Track.h"
 #include "CxxUtils/sincos.h"
-//#include "TrkVertexFitterUtils/FullLinearizedTrackFactory.h"
 
 namespace Trk
 {
@@ -136,7 +135,7 @@ namespace Trk
       Trk::VxTrackAtVertex* newVxTrack=new Trk::VxTrackAtVertex((*vectorOfLinkIter)->clone());
       temp_vector_tracksAtVertex.push_back(newVxTrack);
       setOfTracks->push_back(newVxTrack);
-      setOfVertices.push_back(new Trk::VxVertexOnJetAxis(temp_vector_tracksAtVertex));
+      setOfVertices.push_back(new Trk::VxVertexOnJetAxis(std::move(temp_vector_tracksAtVertex)));
     }
     myJetCandidate->setVerticesOnJetAxis(setOfVertices);
     return initializeJetClusters(myJetCandidate,primaryVertex,jetdirection,linearizationjetdirection);
@@ -241,7 +240,7 @@ namespace Trk
       linPosition[Trk::jet_phi]=linearizationjetdirection->phi();
       linVertexPositions=VertexPositions(linPosition);
     } else {
-      linVertexPositions=startRecVertexPositions;  
+      linVertexPositions = std::move(startRecVertexPositions);  
     }
 
     myJetCandidate->setLinearizationVertexPositions(linVertexPositions);
