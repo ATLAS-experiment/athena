@@ -1,20 +1,19 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrkValidationUtils/TransformNtupleBranch.h"
 
 #include <TTree.h>
-#include <iostream>
 
 namespace Trk {
 
-  void TransformNtupleBranch::initForWrite(TTree& tree, const std::string& prefix ){    
+  void TransformNtupleBranch::initForWrite(TTree& tree, std::string_view prefix ){    
     m_rotation.initForWrite(tree,"rot",3,3,prefix);
     m_translation.initForWrite(tree,"trans",3,prefix);
   }
 
-  void TransformNtupleBranch::initForRead(TTree& tree, const std::string& prefix ) { 
+  void TransformNtupleBranch::initForRead(TTree& tree, std::string_view prefix ) { 
     m_rotation.initForRead(tree,"rot",3,3,prefix);
     m_translation.initForRead(tree,"trans",3,prefix);
   }
