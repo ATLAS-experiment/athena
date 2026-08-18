@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////
@@ -46,6 +46,9 @@ class ATLAS_NOT_THREAD_SAFE DumpGeo: public AthAlgorithm
   Gaudi::Property<std::string> m_atlasRelease{this, "AtlasRelease", "", "The current, in use Atlas release"}; 
   Gaudi::Property<std::string> m_detDescrTag{this, "AtlasVersion", "", "The current, in use Atlas Detector Description Geometry TAG"}; 
   Gaudi::Property<std::string> m_outFileName{this, "OutSQLiteFileName", "", "The name of the output SQLite file"}; 
+  Gaudi::Property<bool> m_forceOverwrite{
+      this, "ForceOverwrite", false,
+      "Remove an existing output SQLite file immediately before writing"};
   Gaudi::Property<std::vector<std::string>> m_user_filterDetManagersList
                                           { this, "UserFilterDetManager", {}, "Doc", "OrderedSet<T>"};
   Gaudi::Property<bool> m_showTreetopContent{this, "ShowTreetopContent", false, "Show the content of the Treetops; by default, only the list of Treetops is shown."}; 
