@@ -3,9 +3,7 @@
 #
 # Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 #
-# athenaEF.py - A modified version of athenaHLT.py that runs the HLT configuration
-# directly without using HLTMPPy/HLTMPPU. It creates the configuration like
-# athenaHLT but executes it like athena.py does.
+# athenaEF.py - executable to run the EF online and offline.
 #
 """date"
 
@@ -523,9 +521,8 @@ class ConfigRunner:
    """
    Runner class that executes Gaudi configuration from JSON file or database.
    Uses TrigConf::JobOptionsSvc with TYPE="FILE" or TYPE="DB" to load configuration.
-   Same approach used by PSC (Psc.cxx) - it sets JobOptionsType and
-   JobOptionsPath on the ApplicationMgr, and TrigConf::JobOptionsSvc handles both
-   FILE and DB modes transparently.
+   It sets JobOptionsType and JobOptionsPath on the ApplicationMgr, and TrigConf::JobOptionsSvc
+   handles both FILE and DB modes transparently.
    """
    def __init__(self, job_options_type, job_options_path, run_params=None,
                 properties=None, db_server=None, smk=None,
@@ -575,7 +572,6 @@ class ConfigRunner:
       
    def run(self, maxEvents=None):
       """
-      This follows the same pattern as PSC (Psc.cxx):
       1. Create ApplicationMgr via BootstrapHelper
       2. Set JobOptionsSvcType, JobOptionsType, JobOptionsPath
       3. configure() -> initialize() -> prepareForStart() -> start() ->
@@ -601,7 +597,7 @@ class ConfigRunner:
                log.debug("Setting ApplicationMgr.%s = %s", k, v)
                app.setProperty(k, str(v) if not isinstance(v, str) else v)
       
-      # Set JobOptionsSvc properties like PSC does in Psc.cxx
+      # Set JobOptionsSvc properties
       log.info("Configuring TrigConf::JobOptionsSvc with TYPE=%s, PATH=%s",
                self.job_options_type, self.job_options_path)
       app.setProperty("JobOptionsSvcType", "TrigConf::JobOptionsSvc")
@@ -618,7 +614,7 @@ class ConfigRunner:
          app.setProperty('EvtMax', str(maxEvents))
       
       # All property overrides below use iProperty and must be done after configure()
-      # but before initialize() - this is the same pattern as PSC (Psc.cxx)
+      # but before initialize().
       from GaudiPython.Bindings import iProperty
 
       # Set threading configuration
@@ -632,8 +628,7 @@ class ConfigRunner:
          log.info("Overriding EFInterfaceSvc.%s = %s (from command line)", prop, value)
          setattr(ef_svc, prop, value)
       
-      # If HLT PSK is set on command line, read it from DB instead of COOL (ATR-25974)
-      # This is the same logic as TrigPSCPythonDbSetup.py
+      # If HLT PSK is set on command line, read it from DB instead of COOL (ATR-25974).
       from TrigPSC import PscConfig
       if PscConfig.forcePSK:
          log.info("PscConfig.forcePSK is set - configuring HLTPrescaleCondAlg to read from DB instead of COOL")
@@ -661,7 +656,7 @@ class ConfigRunner:
          log.error("Cannot proceed without TrigServicesHelper - required for HLTEventLoopMgr lifecycle")
          raise RuntimeError("TrigServicesHelper not available") from e
       
-      # Call prepareForStart to set up ByteStreamMetadata (like PSC does)
+      # Call prepareForStart to set up ByteStreamMetadata
       try:
          run_number = self.run_params['run_number']
          det_mask = self.run_params['detector_mask']
@@ -714,7 +709,7 @@ class ConfigRunner:
          traceback.print_exc()
          raise
       
-      # hltUpdateAfterFork initializes the scheduler (like PSC does after fork)
+      # hltUpdateAfterFork initializes the scheduler
       # worker_id=1 for single-worker, non-forked mode
       try:
          log.info("Calling hltUpdateAfterFork to initialize scheduler (worker_id=1)")
@@ -780,7 +775,7 @@ def load_from_database(db_server, smk, l1psk=None, hltpsk=None, run_params=None,
    Load configuration from trigger database using the Super Master Key (SMK).
    
    Returns a ConfigRunner that uses TrigConf::JobOptionsSvc with TYPE="DB"
-   to load configuration directly from the database, same as athenaHLT.
+   to load configuration directly from the database.
    """
    log.info("Loading job options from database %s with SMK %d", db_server, smk)
    return ConfigRunner.from_database(db_server, smk, l1psk, hltpsk, run_params,
@@ -810,7 +805,7 @@ def arg_detector_mask(s):
 
 
 def check_args(parser, args):
-   """Consistency check of command line arguments (same as athenaHLT.py)"""
+   """Consistency check of command line arguments"""
 
    if not args.jobOptions and not args.use_database:
       parser.error("No job options file specified")
@@ -1144,7 +1139,6 @@ def main():
    g.add_argument('--stdcmalloc', action='store_true', help='use stdcmalloc')
    g.add_argument('--stdcmath', action='store_true', help='use stdcmath library')
    g.add_argument('--imf', action='store_true', default=True, help='use Intel math library')
-   g.add_argument('--show-includes', '-s', action='store_true', help='show printout of included files')
 
    ## Conditions
    g = parser.add_argument_group('Conditions')
@@ -1217,9 +1211,6 @@ def main():
    import AthenaCommon.Logging
    AthenaCommon.Logging.log.setLevel(getattr(logging, args.log_level))
    AthenaCommon.Logging.log.setFormat("%(asctime)s  Py:%(name)-31s %(levelname)7s %(message)s")
-   if args.show_includes:
-      from AthenaCommon.Include import include
-      include.setShowIncludes( True )
 
    # consistency checks for arguments
    if not args.concurrent_events:
@@ -1243,7 +1234,7 @@ def main():
       flags.Trigger.Online.useOnlineWebdaqHistSvc = True
       log.info("Enabled WebdaqHistSvc for online histogram publishing")
 
-   # CREST configuration (same as athenaHLT)
+   # CREST configuration
    log.info("Using CREST for trigger configuration: %s", args.use_crest)
    if args.use_crest:
       flags.Trigger.useCrest = True
@@ -1272,8 +1263,8 @@ def main():
    PscConfig.exitAfterDump = args.dump_config_exit
 
    # NOTE: Do NOT set flags.Input.Files here!
-   # Like athenaHLT, we keep Input.Files=[] during configuration to ensure the
-   # configuration is portable and doesn't depend on specific input file metadata.
+   # We keep Input.Files=[] during configuration to ensure the configuration
+   # is portable and doesn't depend on specific input file metadata.
    # Input files are passed to EFInterface for runtime use only.
 
    # Set conditions run number override (for test partitions with fake run numbers)
@@ -1358,7 +1349,7 @@ def main():
 
    if is_database:
       # Load configuration from trigger database
-      # Handle CREST vs standard DB access (same as athenaHLT)
+      # Handle CREST vs standard DB access
       if args.use_crest:
          crestconn = TriggerCrestUtil.getCrestConnection(args.db_server)
          db_alias = f"{args.crest_server}/{crestconn}"
@@ -1392,14 +1383,13 @@ def main():
       log.info("Configuration loaded from JSON")
 
    else:
-      # Load from CA module - follow the same pattern as athenaHLT/TrigPSCPythonCASetup:
+      # Load from CA module:
       # 1. Build the full configuration with services
       # 2. Dump to JSON file
       # 3. Use AthHLT.reload_from_json to re-exec and reload from JSON
-      # This preserves the ability to use the same JobOptionsSvc as athenaHLT
       log.info("Loading CA configuration from: %s", jobOptions)
       
-      # Clone and lock flags for services configuration (as done in TrigPSCPythonCASetup)
+      # Clone and lock flags for services configuration
       from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
       from AthenaConfiguration.MainServicesConfig import addMainSequences
       from TrigServices.TriggerUnixStandardSetup import commonServicesCfg
@@ -1408,7 +1398,7 @@ def main():
       locked_flags = flags.clone()
       locked_flags.lock()
       
-      # Create base CA with framework services (like TrigPSCPythonCASetup)
+      # Create base CA with framework services
       cfg = ComponentAccumulator(CompFactory.AthSequencer("AthMasterSeq", Sequential=True))
       cfg.setAppProperty('ExtSvcCreates', False)
       cfg.setAppProperty("MessageSvcType", "TrigMessageSvc")
@@ -1418,11 +1408,11 @@ def main():
       addMainSequences(locked_flags, cfg)
       cfg.merge(commonServicesCfg(locked_flags))
       
-      # Now merge user CA config (with unlocked flags, as in TrigPSCPythonCASetup)
+      # Now merge user CA config (with unlocked flags)
       cfg_func = AthHLT.getCACfg(jobOptions)
       cfg.merge(cfg_func(flags))
       
-      # Execute postcommands before dumping (like TrigPSCPythonCASetup)
+      # Execute postcommands before dumping
       if args.postcommand:
          log.info("Executing postcommand(s)")
          for cmd in args.postcommand:
@@ -1430,7 +1420,7 @@ def main():
             exec(cmd, globals(), {'flags': flags, 'cfg': cfg})
          args.postcommand = []  # Clear so we don't run them again later
       
-      # Dump configuration to JSON (like TrigPSCPythonCASetup)
+      # Dump configuration to JSON
       fname = "HLTJobOptions"
       log.info("Dumping configuration to %s.pkl and %s.json", fname, fname)
       with open(f"{fname}.pkl", "wb") as f:
@@ -1444,8 +1434,7 @@ def main():
          log.info("Configuration dumped to %s.json. Exiting...", fname)
          sys.exit(0)
 
-      # Re-exec from the JSON (same as athenaHLT TrigPSCPythonCASetup -> AthHLT.reload_from_json -> os.execvp). 
-      # This replaces the process image freeing up the configuration heap 
+      # Re-exec from the JSON. Replaces the process image freeing up the configuration heap.
       log.info("Configuration dumped to %s.json. Re-exec...", fname)
       AthHLT.reload_from_json(f"{fname}.json", suppress_args=PscConfig.unparsedArguments + ['--dump-config'], jobOptions=args.jobOptions)
       
