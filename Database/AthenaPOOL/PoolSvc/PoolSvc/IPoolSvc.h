@@ -13,9 +13,6 @@
 #include "GaudiKernel/IService.h"
 #include "GaudiKernel/IFileMgr.h"
 
-#include "CollectionSvc/ICollection.h"
-#include "StorageSvc/DbType.h"
-
 #include "DataModelRoot/RootType.h"
 
 #include <string>
@@ -23,6 +20,11 @@
 namespace coral {
    class Context;
 }
+namespace pool {
+   class DbType;
+   class ICollection;
+}
+
 class Placement;
 class Token;
 
@@ -103,7 +105,7 @@ public: // Non-static members
    /// @param contextId [IN] id for PoolSvc persistency service to use for input.
    virtual pool::ICollection* createCollection(const std::string& connection,
 	   const std::string& collectionName,
-	   const pool::DbType& collectionType = pool::POOL_StorageType.type(),
+	   const pool::DbType& collectionType,
 	   unsigned int contextId = IPoolSvc::kInputStream) const = 0;
 
    /// @return a shared Token ptr for a container entry.

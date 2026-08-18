@@ -50,7 +50,7 @@ public:
    StatusCode isValid() const;
 
    /// @return ICollectionCursor over all entries
-   pool::ICollectionCursor& selectAll();
+   std::unique_ptr<pool::ICollectionCursor> selectAll();
 
 private: // data
    std::string m_collectionType;
@@ -58,7 +58,6 @@ private: // data
    unsigned int m_contextId;
    const IPoolSvc* m_poolSvc;
    pool::ICollection* m_poolCollection;
-   std::unique_ptr<pool::ICollectionCursor> m_collectionCursor;
 
 private: // hide copy and assignment
    PoolCollectionConverter(const PoolCollectionConverter& rhs);

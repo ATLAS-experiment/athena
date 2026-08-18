@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /** @file CondProxyProvider.cxx
@@ -75,7 +75,7 @@ StatusCode CondProxyProvider::preLoadAddresses(StoreID::type storeID,
      return StatusCode::FAILURE;
    }
    // Create DataHeader iterators
-   pool::ICollectionCursor* headerIterator = &poolCollectionConverter->selectAll();
+   std::unique_ptr<pool::ICollectionCursor> headerIterator = poolCollectionConverter->selectAll();
 
    for (int verNumber = 0; verNumber < 100; verNumber++) {
       if (!headerIterator->next()) {
@@ -89,7 +89,7 @@ StatusCode CondProxyProvider::preLoadAddresses(StoreID::type storeID,
                return StatusCode::FAILURE;
             }
             // Get DataHeader iterator
-            headerIterator = &poolCollectionConverter->selectAll();
+            headerIterator = poolCollectionConverter->selectAll();
             if (!headerIterator->next()) {
                return StatusCode::FAILURE;
             }
