@@ -14,7 +14,6 @@
 // Pool
 #include "CollectionSvc/ICollection.h"
 #include "CollectionSvc/ICollectionCursor.h"
-#include "CollectionSvc/CollectionDescription.h"
 #include "StorageSvc/DbType.h"
 
 // Gaudi
@@ -68,20 +67,16 @@ StatusCode PoolCollectionConverter::disconnectDb() {
    if (m_poolCollection == nullptr) {
       return StatusCode::SUCCESS;
    }
-   if (m_poolCollection->description().type() == pool::POOL_StorageType.type()) {
-      return m_poolSvc->disconnectDb(m_inputCollection);
-   }
-   return StatusCode::SUCCESS;
+   return m_poolSvc->disconnectDb(m_inputCollection);
 }
 //______________________________________________________________________________
 StatusCode PoolCollectionConverter::isValid() const {
    return m_poolCollection != nullptr ? StatusCode::SUCCESS : StatusCode::FAILURE;
 }
 //______________________________________________________________________________
-pool::ICollectionCursor& PoolCollectionConverter::selectAll() {
+std::unique_ptr<pool::ICollectionCursor> PoolCollectionConverter::selectAll() {
    if (m_poolCollection == nullptr)[[unlikely]] {
      throw std::runtime_error("PoolCollectionConverter::selectAll: m_poolCollection is nullptr.");
    }
-   m_collectionCursor = m_poolCollection->cursor();
-   return *m_collectionCursor;
+   return m_poolCollection->cursor();
 }

@@ -224,7 +224,7 @@ StatusCode EventSelectorAthenaPool::reinit() const {
    }
    // Get DataHeader iterator
    try {
-      m_headerIterator = &m_poolCollectionConverter->selectAll();
+      m_headerIterator = m_poolCollectionConverter->selectAll();
    } catch (std::exception &e) {
       ATH_MSG_FATAL("Cannot open implicit collection - check data/software version.");
       ATH_MSG_ERROR(e.what());
@@ -238,7 +238,7 @@ StatusCode EventSelectorAthenaPool::reinit() const {
       ++m_inputCollectionsIterator;
       m_poolCollectionConverter = getCollectionCnv();
       if (m_poolCollectionConverter) {
-         m_headerIterator = &m_poolCollectionConverter->selectAll();
+         m_headerIterator = m_poolCollectionConverter->selectAll();
       } else {
          break;
       }
@@ -250,7 +250,7 @@ StatusCode EventSelectorAthenaPool::reinit() const {
       if (!m_poolCollectionConverter) {
          return StatusCode::SUCCESS;
       }
-      m_headerIterator = &m_poolCollectionConverter->selectAll();
+      m_headerIterator = m_poolCollectionConverter->selectAll();
       while (m_headerIterator == nullptr || m_headerIterator->next() == 0) { // empty collection
          if (m_poolCollectionConverter) {
             m_poolCollectionConverter->disconnectDb().ignore();
@@ -259,7 +259,7 @@ StatusCode EventSelectorAthenaPool::reinit() const {
          ++m_inputCollectionsIterator;
          m_poolCollectionConverter = getCollectionCnv();
          if (m_poolCollectionConverter) {
-            m_headerIterator = &m_poolCollectionConverter->selectAll();
+            m_headerIterator = m_poolCollectionConverter->selectAll();
          } else {
             break;
          }
@@ -298,7 +298,7 @@ StatusCode EventSelectorAthenaPool::start() {
          --m_inputCollectionsIterator; //leave iterator in state of last input file
       }
    } else {
-      m_headerIterator = &m_poolCollectionConverter->selectAll();
+      m_headerIterator = m_poolCollectionConverter->selectAll();
    }
    m_evtCount = 0;
    delete m_endIter;
@@ -452,7 +452,7 @@ StatusCode EventSelectorAthenaPool::nextHandleFileTransition(IEvtSelector::Conte
                return StatusCode::FAILURE;
             }
             // Get DataHeader iterator
-            m_headerIterator = &m_poolCollectionConverter->selectAll();
+            m_headerIterator = m_poolCollectionConverter->selectAll();
 
             // Return RECOVERABLE to mark we should still continue
             return StatusCode::RECOVERABLE;
@@ -639,7 +639,7 @@ StatusCode EventSelectorAthenaPool::seek(Context& /*ctxt*/, int evtNum) const {
             return StatusCode::FAILURE;
          }
          // Create DataHeader iterators
-         m_headerIterator = &m_poolCollectionConverter->selectAll();
+         m_headerIterator = m_poolCollectionConverter->selectAll();
          EventContextAthenaPool* beginIter = new EventContextAthenaPool(this);
          m_evtCount = m_firstEvt[m_curCollection];
          next(*beginIter).ignore();
@@ -681,7 +681,7 @@ int EventSelectorAthenaPool::findEvent(int evtNum) const {
          }
          int collection_size = 0;
          if (pcc.isValid()) {
-            pool::ICollectionCursor* hi = &pcc.selectAll();
+            std::unique_ptr<pool::ICollectionCursor> hi = pcc.selectAll();
             collection_size = hi->size();
          }
          if (i > 0) {
