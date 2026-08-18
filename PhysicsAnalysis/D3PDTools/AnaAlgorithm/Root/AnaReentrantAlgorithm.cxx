@@ -39,12 +39,6 @@ namespace EL
 
 
 
-  AnaReentrantAlgorithm ::
-  ~AnaReentrantAlgorithm () noexcept
-  {}
-
-
-
 #ifdef XAOD_STANDALONE
   bool AnaReentrantAlgorithm ::
   filterPassed() const

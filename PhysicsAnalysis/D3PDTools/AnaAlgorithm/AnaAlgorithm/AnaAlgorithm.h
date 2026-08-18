@@ -31,6 +31,7 @@ class TH2;
 class TH3;
 class TEfficiency;
 class TTree;
+class EventContext;
 class ISvcLocator;
 
 namespace EL
@@ -93,7 +94,7 @@ namespace EL
     /// \par Guarantee
     ///   no-fail
   public:
-    virtual ~AnaAlgorithm() noexcept;
+    virtual ~AnaAlgorithm() noexcept = default;
 
 
 
@@ -103,12 +104,12 @@ namespace EL
 
 #ifdef XAOD_STANDALONE
     /// Type of the metadata store pointer in standalone mode
-    typedef asg::SgEventMeta* MetaStorePtr_t;
-    typedef const asg::SgEventMeta* ConstMetaStorePtr_t;
+    using MetaStorePtr_t = asg::SgEventMeta*;
+    using ConstMetaStorePtr_t = const asg::SgEventMeta*;
 #else
-    /// Type of the metadata store pointer in standalone mode
-    typedef ServiceHandle< StoreGateSvc >& MetaStorePtr_t;
-    typedef const ServiceHandle< StoreGateSvc >& ConstMetaStorePtr_t;
+    /// Type of the metadata store pointer in Athena
+    using MetaStorePtr_t = ServiceHandle< StoreGateSvc >&;
+    using ConstMetaStorePtr_t = const ServiceHandle< StoreGateSvc >&;
 #endif // XAOD_STANDALONE
 
     ///@{
@@ -319,7 +320,7 @@ namespace EL
     /// \brief execute this algorithm
     ///
     /// \deprecated Prefer method with EventContext.
-    /// \warn Override only one of the two execute methods.
+    /// \warning Override only one of the two execute methods.
     ///
     /// This gets called once on every event and is where the bulk of
     /// the processing ought to be happening.
@@ -328,7 +329,7 @@ namespace EL
 
     /// \brief execute this algorithm
     ///
-    /// \warn Override only one of the two execute methods.
+    /// \warning Override only one of the two execute methods.
     ///
     /// This gets called once on every event and is where the bulk of
     /// the processing ought to be happening.
@@ -359,20 +360,20 @@ namespace EL
     /// tools instead.  However, there are enough people asking for it
     /// that I decided to implement it anyways.
     ///
-    /// \warn To use this you have to call \ref requestFileExecute
+    /// \warning To use this you have to call \ref requestFileExecute
     /// to use this.
     ///
-    /// \warn The user should not expect this to be called at any
+    /// \warning The user should not expect this to be called at any
     /// particular point in execution.  If a file is split between
     /// multiple jobs this will be called in only one of these jobs,
     /// and not the others.  It usually gets called before the first
     /// event in a file, but that is **not** guaranteed and relying on
     /// this is a bug.
     ///
-    /// \warn The execution order of \ref beginInputFile and \ref
+    /// \warning The execution order of \ref beginInputFile and \ref
     /// fileExecute is currently unspecified.
     ///
-    /// \warn fileExecute does not work with sub-file splitting in
+    /// \warning fileExecute does not work with sub-file splitting in
     /// Athena, i.e. processing half the events of a file in one job
     /// the other half in another job.  this should not *normally*
     /// happen, unless you do crazy things like run AthenaMP or
@@ -387,10 +388,10 @@ namespace EL
     /// tools instead.  However, there are enough people asking for it
     /// that I decided to implement it anyways.
     ///
-    /// \warn To use this you have to call \ref requestBeginInputFile
+    /// \warning To use this you have to call \ref requestBeginInputFile
     /// to use this.
     ///
-    /// \warn If a file is split across multiple jobs this will be
+    /// \warning If a file is split across multiple jobs this will be
     /// called more than once.  This only happens for specific batch
     /// drivers and/or if it is explicitly configured by the user.
     /// With PROOF it could even happen multiple times within the same
@@ -401,7 +402,7 @@ namespace EL
     /// take a look at \ref fileExecute if you want something that is
     /// guaranteed to be executed exactly once per input file.
     ///
-    /// \warn The execution order of \ref beginInputFile and \ref
+    /// \warning The execution order of \ref beginInputFile and \ref
     /// fileExecute is currently unspecified.
   protected:
     virtual ::StatusCode beginInputFile ();
@@ -412,10 +413,10 @@ namespace EL
     /// tools instead.  However, there are enough people asking for it
     /// that I decided to implement it anyways.
     ///
-    /// \warn To use this you have to call \ref requestEndInputFile
+    /// \warning To use this you have to call \ref requestEndInputFile
     /// to use this.
     ///
-    /// \warn If a file is split across multiple jobs this will be
+    /// \warning If a file is split across multiple jobs this will be
     /// called more than once.  This only happens for specific batch
     /// drivers and/or if it is explicitly configured by the user.
     /// With PROOF it could even happen multiple times within the same
@@ -426,7 +427,7 @@ namespace EL
     /// take a look at \ref fileExecute if you want something that is
     /// guaranteed to be executed exactly once per input file.
     ///
-    /// \warn The execution order of \ref endInputFile and \ref
+    /// \warning The execution order of \ref endInputFile and \ref
     /// fileExecute is currently unspecified.
   protected:
     virtual ::StatusCode endInputFile ();
@@ -557,10 +558,10 @@ namespace EL
 
 #ifdef XAOD_STANDALONE
     /// Type of the metadata store variable in standalone mode
-    typedef asg::SgEventMeta MetaStore_t;
+    using MetaStore_t = asg::SgEventMeta;
 #else
     /// Type of the metadata store variable in Athena
-    typedef ServiceHandle< StoreGateSvc > MetaStore_t;
+    using MetaStore_t = ServiceHandle< StoreGateSvc >;
 #endif // XAOD_STANDALONE
 
     /// \brief Object accessing the input metadata store
