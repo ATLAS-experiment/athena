@@ -37,9 +37,14 @@ public:
       needs to happen. */
   virtual void SetPhysicsList() = 0 ;
 
-  /** Set the options to be used by the physics lists.  Things like EM physics
-      options and binning, neutron cuts, etc. */
+  /** Set all physics options with the ordering expected by legacy run managers. */
   virtual void SetPhysicsOptions() = 0 ;
+
+  /** Set global physics-list options before run-manager initialization. */
+  virtual void SetPhysicsListOptions() = 0 ;
+
+  /** Set options requiring processes to have already been constructed. */
+  virtual void SetPhysicsProcessOptions() = 0 ;
 
 };
 #endif // G4ATLASINTERFACES_IPHYSICSLISTSVC_H

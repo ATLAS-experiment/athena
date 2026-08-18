@@ -34,8 +34,15 @@ public:
   virtual G4VUserPhysicsList* GetPhysicsList() override;
   virtual void SetPhysicsList() override;
   virtual void SetPhysicsOptions() override;
+  virtual void SetPhysicsListOptions() override;
+  virtual void SetPhysicsProcessOptions() override;
 
 private:
+
+  void SetDefaultCut();
+  void SetEMParameters();
+  void SetAntiNeutronOptions();
+  void SetNeutronKillerOptions();
 
   /// This command prints a message about a G4Command depending on its returnCode
   void CommandLog(int returnCode, const std::string& commandString) const;

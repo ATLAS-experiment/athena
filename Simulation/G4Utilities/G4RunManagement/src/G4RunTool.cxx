@@ -170,6 +170,10 @@ void G4RunTool::Geant4main() {
   // The actual physics list object must be created in the same thread as the run manager
   runManager->SetUserInitialization(m_physicsListSvc->GetPhysicsList());
 
+  // Set global physics-list options as soon as the list has been created and
+  // before any pre-initialization UI commands are applied.
+  m_physicsListSvc->SetPhysicsListOptions();
+
   runManager->SetUserInitialization(std::make_unique<G4AtlasActionInitialization>(m_userActionSvc.get()).release());
 
   // G4 user interface commands
@@ -206,7 +210,9 @@ void G4RunTool::Geant4main() {
   // Initialize run
   runManager->Initialize();
 
-  m_physicsListSvc->SetPhysicsOptions();
+  // Process-specific UI commands require the processes to exist first. They
+  // are forwarded to the workers with the command stack at the next BeamOn.
+  m_physicsListSvc->SetPhysicsProcessOptions();
 
   ATH_MSG_INFO("Initializing " << m_physicsInitializationTools.size() << " physics initialization tools");
   for(auto& physicsTool : m_physicsInitializationTools) {
