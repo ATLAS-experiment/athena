@@ -5,7 +5,6 @@
 #include <fstream>
 #include <iostream>
 #include <iterator>
-#include <boost/algorithm/string/trim.hpp>
 #include <CxxUtils/StringUtils.h>
 
 #include "GaudiKernel/IIncidentSvc.h"
@@ -335,7 +334,7 @@ ClassIDSvc::processCLIDDB(const std::string& fileName)
     std::vector<std::string> columns = CxxUtils::tokenize(line, ';');
     long id(-1);
     if (columns.size()>=2) {
-      boost::trim(columns[0]);
+      columns[0] = CxxUtils::trimWhiteSpaces(columns[0]);
       try {
         id = std::stol(columns[0]);
       } catch (const std::logic_error& e) {
@@ -400,7 +399,7 @@ ClassIDSvc::uncheckedSetTypePackageForID(const CLID& id,
 {
   // process "raw" typeName
   std::string procName(typeName);
-  boost::trim(procName);
+  procName = CxxUtils::trimWhiteSpaces(procName);
 
   if (procName.empty()) {
     ATH_MSG_ERROR( "Empty type name for CLID " << id );
@@ -414,7 +413,7 @@ ClassIDSvc::uncheckedSetTypePackageForID(const CLID& id,
   }
   else {
     procTiName = typeInfoName;
-    boost::trim(procTiName);
+    procTiName = CxxUtils::trimWhiteSpaces(procTiName);
   }
 
   // insert into CLID map

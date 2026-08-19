@@ -8,7 +8,6 @@
 #include "TrigConfL1Data/TriggerItemNode.h"
 #include "TrigConfL1Data/TriggerThreshold.h"
 #include <CxxUtils/StringUtils.h>
-#include <boost/algorithm/string/trim.hpp>
 #include <iostream>
 #include <sstream>
 #include <cassert>
@@ -32,7 +31,7 @@ TrigConf::split(const std::string& line, const std::string& del) {
 // helper method: removing all spaces at beginning and end of a string
 void
 TrigConf::strip(std::string& str) {
-  boost::algorithm::trim(str);
+   str = CxxUtils::trimWhiteSpaces(str);
 }
 
 // helper method: replace tabs by single space

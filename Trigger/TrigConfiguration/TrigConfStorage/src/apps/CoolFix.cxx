@@ -32,7 +32,6 @@
 #include "TrigConfHLTData/HLTPrescaleSet.h"
 
 #include "boost/lexical_cast.hpp"
-#include "boost/algorithm/string.hpp"
 
 #include "TrigConfCoolWriter.h"
 
