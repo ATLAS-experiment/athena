@@ -47,7 +47,7 @@ namespace met {
   typedef ElementLink<xAOD::IParticleContainer> obj_link_t;
 
   class ColumnarMETMaker
-  : public asg::AsgTool, public columnar::ColumnarTool<>,
+  : public asg::AsgTool, public columnar::ColumnarTool<CMode>,
   virtual public IMETMaker
 
   {

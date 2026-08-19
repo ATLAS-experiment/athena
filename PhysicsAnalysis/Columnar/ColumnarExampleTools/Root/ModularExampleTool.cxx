@@ -80,8 +80,8 @@ namespace columnar
 
 
   ModularExampleTool::SubtoolEta ::
-  SubtoolEta (ColumnarTool<> *val_parent, float val_cutValue)
-    : ColumnarTool<> (val_parent), m_cutValue (val_cutValue)
+  SubtoolEta (ColumnarTool<CMode> *val_parent, float val_cutValue)
+    : ColumnarTool<CMode> (val_parent), m_cutValue (val_cutValue)
   {}
 
 

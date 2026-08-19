@@ -19,7 +19,7 @@ namespace ORUtils
   /// @brief Interface for a class which checks for a match between IParticles.
   /// @author Steve Farrell <Steven.Farrell@cern.ch>
   ///
-  class IParticleAssociator : public columnar::ColumnarTool<>
+  class IParticleAssociator : public columnar::ColumnarTool<CMode>
   {
     public:
       /// Virtual destructor

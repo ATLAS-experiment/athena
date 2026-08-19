@@ -24,7 +24,7 @@ namespace columnar
 
   class OptionalColumnExampleTool final
     : public asg::AsgTool,
-      public ColumnarTool<>
+      public ColumnarTool<CMode>
   {
   public:
 

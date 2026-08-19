@@ -43,7 +43,7 @@ namespace columnar
 
   class ColumnarLinkTool final
     : public asg::AsgTool,
-      public ColumnarTool<>
+      public ColumnarTool<CMode>
   {
   public:
 

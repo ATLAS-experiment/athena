@@ -34,7 +34,7 @@
 namespace CP {
 
     //Interface class to retrieve the Muon dependent systematics
-    class IKinematicSystHandler : public columnar::ColumnarTool<> {
+    class IKinematicSystHandler : public columnar::ColumnarTool<CMode> {
         public:
             /// Add an additional uncertainty to the muon depending on its kinematics.
             virtual CorrectionCode GetKineDependent(columnar::MuonId mu, float& Eff) const = 0;

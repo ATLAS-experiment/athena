@@ -18,7 +18,7 @@ namespace columnar
   /// handles, etc. should inherit from this class.  It contains whatever is
   /// needed to register the data handles, etc.
 
-  template<typename CM = ColumnarModeDefault> class ColumnarTool;
+  template<ColumnarMode CM> class ColumnarTool;
 }
 
 #include "ColumnarToolArray.icc"

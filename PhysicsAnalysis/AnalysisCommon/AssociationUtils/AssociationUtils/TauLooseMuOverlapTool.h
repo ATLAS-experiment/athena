@@ -79,7 +79,7 @@ namespace ORUtils
       float m_minTauPtMuComb;
 
       /// Columnar accessors
-      struct Accessors final : columnar::ColumnarTool<>
+      struct Accessors final : columnar::ColumnarTool<CMode>
       {
         columnar::Particle1Accessor<float> m_tauPtAcc {*this, "pt"};
         columnar::Particle2Accessor<float> m_muPtAcc {*this, "pt"};

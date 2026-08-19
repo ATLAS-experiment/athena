@@ -42,7 +42,7 @@ class AsgPhotonEfficiencyCorrectionTool
   : virtual public IAsgPhotonEfficiencyCorrectionTool,
     virtual public CP::ISystematicsTool,
             public asg::AsgTool,
-            public columnar::ColumnarTool<>
+            public columnar::ColumnarTool<CMode>
 {
   ASG_TOOL_CLASS3(AsgPhotonEfficiencyCorrectionTool, IAsgPhotonEfficiencyCorrectionTool, CP::ISystematicsTool, CP::IReentrantSystematicsTool )
 
@@ -155,9 +155,9 @@ private:
   // root dictionaries that can't handle them.  these dictionaries are
   // used by some users to instantiate the tools (instead of using the
   // factory mechanism).
-  struct Accessors : public columnar::ColumnarTool<>
+  struct Accessors : public columnar::ColumnarTool<CMode>
   {
-    Accessors(AsgPhotonEfficiencyCorrectionTool& tool) : columnar::ColumnarTool<>(&tool) {}
+    Accessors(AsgPhotonEfficiencyCorrectionTool& tool) : columnar::ColumnarTool<CMode>(&tool) {}
 
     columnar::EventInfoAccessor<columnar::ObjectColumn> eventInfoAcc {*this, "EventInfo", {.addMTDependency=true}};
     columnar::EgammaAccessor<columnar::ObjectColumn> photonsAcc {*this, "Photons"};

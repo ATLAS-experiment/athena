@@ -25,7 +25,7 @@ namespace columnar
 
   class ConfigurableColumnExampleTool final
     : public asg::AsgTool,
-      public ColumnarTool<>
+      public ColumnarTool<CMode>
   {
   public:
     

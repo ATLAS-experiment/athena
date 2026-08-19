@@ -28,7 +28,7 @@ namespace columnar
   ///
   /// Some things to note:
   /// * Besides inheriting from `AsgTool`, the tool also inherits from
-  ///   `ColumnarTool<>`.  The later contains all the accounting needed
+  ///   `ColumnarTool<CMode>`.  The later contains all the accounting needed
   ///   for columnar accessors.  Please note that `ColumnarTool` is a
   ///   template (with a default argument), so you need to be sure not
   ///   to forget the `<>` when inheriting from it.
@@ -41,7 +41,7 @@ namespace columnar
 
   class SimpleSelectorExampleTool final
     : public asg::AsgTool,
-      public ColumnarTool<>
+      public ColumnarTool<CMode>
   {
   public:
 

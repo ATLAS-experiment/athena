@@ -85,7 +85,7 @@ namespace ORUtils
       /// @{
 
       /// Columnar accessors
-      struct Accessors final : columnar::ColumnarTool<>
+      struct Accessors final : columnar::ColumnarTool<CMode>
       {
         /// BJet helper
         columnar::Particle1Accessor<char> m_bJetAcc;

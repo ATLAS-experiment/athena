@@ -41,7 +41,7 @@ class TH2F;
 class AsgElectronEfficiencyCorrectionTool final
   : virtual public IAsgElectronEfficiencyCorrectionTool
   , public asg::AsgMetadataTool
-  , public columnar::ColumnarTool<>
+  , public columnar::ColumnarTool<CMode>
 {
   ASG_TOOL_CLASS(AsgElectronEfficiencyCorrectionTool,
                  IAsgElectronEfficiencyCorrectionTool)
@@ -233,9 +233,9 @@ private:
 
 public:
 
-  struct Accessors : public columnar::ColumnarTool<>
+  struct Accessors : public columnar::ColumnarTool<CMode>
   {
-    Accessors(AsgElectronEfficiencyCorrectionTool& tool) : columnar::ColumnarTool<>(&tool) {}
+    Accessors(AsgElectronEfficiencyCorrectionTool& tool) : columnar::ColumnarTool<CMode>(&tool) {}
 
     columnar::EventInfoAccessor<columnar::ObjectColumn> m_eventInfo {*this, "EventInfo", {.addMTDependency=true}};
     columnar::EventInfoAccessor<uint32_t> randomrunnumber;

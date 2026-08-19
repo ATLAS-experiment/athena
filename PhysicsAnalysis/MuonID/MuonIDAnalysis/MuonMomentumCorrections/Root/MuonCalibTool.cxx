@@ -81,7 +81,7 @@ namespace CP
 		ATH_CHECK(m_MuonSelectionTool.setProperty("ExcludeNSWFromPrecisionLayers", m_excludeNSWFromPrecisionLayers.value()));
             }
             ATH_CHECK(m_MuonSelectionTool.retrieve());
-            if (auto *selectionTool = dynamic_cast<columnar::ColumnarTool<>*>(m_MuonSelectionTool.get()))
+            if (auto *selectionTool = dynamic_cast<columnar::ColumnarTool<CMode>*>(m_MuonSelectionTool.get()))
                 addSubtool (*selectionTool);
         }
 

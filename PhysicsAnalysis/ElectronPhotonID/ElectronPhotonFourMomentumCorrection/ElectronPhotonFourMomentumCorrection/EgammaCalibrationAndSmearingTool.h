@@ -182,7 +182,7 @@ namespace CP {
 
 class EgammaCalibrationAndSmearingTool
     : virtual public IEgammaCalibrationAndSmearingTool,
-      public asg::AsgMetadataTool, public columnar::ColumnarTool<> {
+      public asg::AsgMetadataTool, public columnar::ColumnarTool<CMode> {
   // Create a proper constructor for Athena
   ASG_TOOL_CLASS3(EgammaCalibrationAndSmearingTool,
                   IEgammaCalibrationAndSmearingTool, CP::ISystematicsTool,
@@ -451,9 +451,9 @@ class EgammaCalibrationAndSmearingTool
 public:
   Gaudi::Property<bool> m_onlyElectrons {this, "onlyElectrons", false, "the tool will only be applied to electrons"};
   Gaudi::Property<bool> m_onlyPhotons {this, "onlyPhotons", false, "the tool will only be applied to photons"};
-  struct Accessors : public columnar::ColumnarTool<>
+  struct Accessors : public columnar::ColumnarTool<CMode>
   {
-    Accessors(columnar::ColumnarTool<>& tool) : columnar::ColumnarTool<>(&tool) {}
+    Accessors(columnar::ColumnarTool<CMode>& tool) : columnar::ColumnarTool<CMode>(&tool) {}
 
     columnar::MutableEgammaAccessor<columnar::ObjectColumn> m_egammaHandle {*this, "EGamma"};
     columnar::MomentumAccessors<columnar::EgammaDef> momAcc;

@@ -26,7 +26,7 @@
 #include <map>
 #include <unordered_map>
 namespace CP {
-    class MuonEfficiencyScaleFactors: virtual public CP::IMuonEfficiencyScaleFactors, public asg::AsgTool, public columnar::ColumnarTool<>{
+    class MuonEfficiencyScaleFactors: virtual public CP::IMuonEfficiencyScaleFactors, public asg::AsgTool, public columnar::ColumnarTool<CMode>{
 
         public:
             MuonEfficiencyScaleFactors(const std::string& name);

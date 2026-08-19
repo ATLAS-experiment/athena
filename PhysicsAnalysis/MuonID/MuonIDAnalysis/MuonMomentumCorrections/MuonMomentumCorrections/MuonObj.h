@@ -34,8 +34,8 @@ namespace
 namespace MCP {
 
     /// Accessors for the MuonCalibTool
-    struct MuonCalibToolAccessors : public columnar::ColumnarTool<> {
-        MuonCalibToolAccessors(columnar::ColumnarTool<>& base) : columnar::ColumnarTool<>(&base) {}
+    struct MuonCalibToolAccessors : public columnar::ColumnarTool<CMode> {
+        MuonCalibToolAccessors(columnar::ColumnarTool<CMode>& base) : columnar::ColumnarTool<CMode>(&base) {}
         columnar::EventInfoAccessor<columnar::ObjectColumn> m_eventInfoCol {*this, "EventInfo", {.addMTDependency=true}};
         columnar::MuonAccessor<columnar::ObjectColumn> m_muons {*this, "Muons"};
         columnar::Track0Accessor<columnar::ObjectColumn> m_tracksID {*this, "InDetTrackParticles"};

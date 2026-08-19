@@ -34,7 +34,7 @@
 namespace CP {
 
     class MuonCalibTool : public virtual IMuonCalibrationAndSmearingTool,
-                                           public asg::AsgTool, public columnar::ColumnarTool<> {
+                                           public asg::AsgTool, public columnar::ColumnarTool<CMode> {
         // Create a proper constructor for Athena
         ASG_TOOL_CLASS3(MuonCalibTool, CP::IMuonCalibrationAndSmearingTool, CP::ISystematicsTool,
                         CP::IReentrantSystematicsTool)

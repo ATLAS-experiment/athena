@@ -37,7 +37,7 @@ namespace CP {
     
     class SystematicSet;
     class MuonEfficiencyScaleFactors;
-    class EfficiencyScaleFactor : public columnar::ColumnarTool<> {
+    class EfficiencyScaleFactor : public columnar::ColumnarTool<CMode> {
 
             /// @class EfficiencyScaleFactor
             /// @brief Utility class to manage scale factor histograms
@@ -148,7 +148,7 @@ namespace CP {
            
             /// Read SF histrograms from a given input file.
             bool ReadFromFile(const std::string &file, const std::string& time_unit);
-            std::unique_ptr<HistHandler> ReadHistFromFile(columnar::ColumnarTool<>* parent, const std::string& name, TFile* f, const std::string& time_unit);
+            std::unique_ptr<HistHandler> ReadHistFromFile(columnar::ColumnarTool<CMode>* parent, const std::string& name, TFile* f, const std::string& time_unit);
             
             // use some maps for easy histo loading / arithmetics by name
             
@@ -160,7 +160,7 @@ namespace CP {
 
             
             // package a TH1 in a HistHandler
-            std::unique_ptr<HistHandler> package_histo(columnar::ColumnarTool<>* parent, TH1* h);
+            std::unique_ptr<HistHandler> package_histo(columnar::ColumnarTool<CMode>* parent, TH1* h);
 
             
             // replica generation

@@ -28,7 +28,7 @@ namespace columnar
 
   class MomentumAccessorExampleTool final
     : public asg::AsgTool,
-      public ColumnarTool<>
+      public ColumnarTool<CMode>
   {
   public:
 

@@ -16,7 +16,7 @@
 #include <TFile.h>
 namespace CP {
 
-    struct MuonEfficiencyScaleFactors::Accessors : public columnar::ColumnarTool<>
+    struct MuonEfficiencyScaleFactors::Accessors : public columnar::ColumnarTool<CMode>
     {
         columnar::EventInfoAccessor<columnar::ObjectColumn> eventInfoCol {*this, "EventInfo"};
         columnar::EventInfoHelpers::EventTypeAccessor<> eventTypeAcc {*this};

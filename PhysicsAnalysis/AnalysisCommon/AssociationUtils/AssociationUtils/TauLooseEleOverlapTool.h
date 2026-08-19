@@ -89,7 +89,7 @@ namespace ORUtils
       //
 
       /// Columnar accessors
-      struct Accessors final : columnar::ColumnarTool<>
+      struct Accessors final : columnar::ColumnarTool<CMode>
       {
         columnar::Particle2Accessor<char> m_eleIDAcc;
         columnar::Particle2Accessor<char> m_altEleIDAcc;

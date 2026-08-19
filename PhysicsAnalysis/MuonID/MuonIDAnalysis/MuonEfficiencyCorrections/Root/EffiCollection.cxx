@@ -512,7 +512,7 @@ namespace CP {
         if (m_SF.empty()) return "UNKNOWN SYST";
         return (*m_SF.begin())->sysname(false);
     }
-    void CollectionContainer::addSubtoolsTo (columnar::ColumnarTool<>& parentTool){
+    void CollectionContainer::addSubtoolsTo (columnar::ColumnarTool<CMode>& parentTool){
         for (auto& SF : m_SF)
             parentTool.addSubtool(*SF);
     }

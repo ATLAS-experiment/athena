@@ -128,7 +128,7 @@ namespace ORUtils
       /// @{
 
       /// Columnar accessors
-      struct Accessors final : columnar::ColumnarTool<>
+      struct Accessors final : columnar::ColumnarTool<CMode>
       {
         columnar::EventInfoAccessor<std::uint64_t> m_eventNumberAcc {*this, "eventNumber"};
         columnar::Particle2Accessor<int> m_categoryAcc;

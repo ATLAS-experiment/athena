@@ -17,7 +17,7 @@ namespace CP {
     //###########################################################################################################
     //                                                   AxisHandlerProvider
     //###########################################################################################################
-    std::unique_ptr<AxisHandler> AxisHandlerProvider::GetAxisHandler(columnar::ColumnarTool<> * parent, const TAxis * axisptr) {
+    std::unique_ptr<AxisHandler> AxisHandlerProvider::GetAxisHandler(columnar::ColumnarTool<CMode> * parent, const TAxis * axisptr) {
         if (axisptr != nullptr) {
             std::string axis = axisptr->GetTitle();
             axis = EraseWhiteSpaces(axis);
@@ -77,7 +77,7 @@ namespace CP {
     
     std::string dRJetAxisHandler::s_close_jet_decor = "dRJet";
     bool dRJetAxisHandler::s_use_2D_sf = false;
-    dRJetAxisHandler::dRJetAxisHandler(columnar::ColumnarTool<> * parent):
+    dRJetAxisHandler::dRJetAxisHandler(columnar::ColumnarTool<CMode> * parent):
             AxisHandler(parent),
             m_use_2D_sf(s_use_2D_sf),
             m_acc(*this,s_close_jet_decor){}
@@ -119,7 +119,7 @@ namespace CP {
     //###########################################################################################################
     //                                                   HistHandler
     //###########################################################################################################
-    HistHandler::HistHandler(columnar::ColumnarTool<>* /*parent*/, TH1* Hist) :
+    HistHandler::HistHandler(columnar::ColumnarTool<CMode>* /*parent*/, TH1* Hist) :
                 m_H(clone(Hist)) {       
 
     }
@@ -150,7 +150,7 @@ namespace CP {
     //###########################################################################################################
     //                                                   HistHandler_TH1
     //###########################################################################################################
-    HistHandler_TH1::HistHandler_TH1(columnar::ColumnarTool<>* parent, TH1* h) :
+    HistHandler_TH1::HistHandler_TH1(columnar::ColumnarTool<CMode>* parent, TH1* h) :
                 HistHandler(parent, h),
                 m_x_handler(h == nullptr ? 0 : AxisHandlerProvider::GetAxisHandler(parent, h->GetXaxis())) {
     }
@@ -184,7 +184,7 @@ namespace CP {
     //###########################################################################################################
     //                                                   HistHandler_TH2
     //###########################################################################################################
-    HistHandler_TH2::HistHandler_TH2(columnar::ColumnarTool<>* parent, TH1*  h) :
+    HistHandler_TH2::HistHandler_TH2(columnar::ColumnarTool<CMode>* parent, TH1*  h) :
                 HistHandler(parent, h),
                 m_x_handler(h == nullptr ? 0 : AxisHandlerProvider::GetAxisHandler(parent, h->GetXaxis())),
                 m_y_handler(h == nullptr ? 0 : AxisHandlerProvider::GetAxisHandler(parent, h->GetYaxis())) {
@@ -233,7 +233,7 @@ namespace CP {
     //                                                   HistHandler_TH3
     //###########################################################################################################
 
-    HistHandler_TH3::HistHandler_TH3(columnar::ColumnarTool<>* parent, TH1* h) :
+    HistHandler_TH3::HistHandler_TH3(columnar::ColumnarTool<CMode>* parent, TH1* h) :
                 HistHandler(parent,h),
                 m_x_handler(GetHist() == nullptr ? 0 : AxisHandlerProvider::GetAxisHandler(parent, h->GetXaxis())),
                 m_y_handler(GetHist() == nullptr ? 0 : AxisHandlerProvider::GetAxisHandler(parent, h->GetYaxis())),
@@ -294,7 +294,7 @@ namespace CP {
     //                                                   HistHandler_TH2Poly
     //###########################################################################################################
 
-    HistHandler_TH2Poly::HistHandler_TH2Poly(columnar::ColumnarTool<>* parent, TH2Poly * h) :
+    HistHandler_TH2Poly::HistHandler_TH2Poly(columnar::ColumnarTool<CMode>* parent, TH2Poly * h) :
                 HistHandler(parent, h),
                 m_h(h),
                 m_x_handler(GetHist() == nullptr ? 0 : AxisHandlerProvider::GetAxisHandler(parent, h->GetXaxis())),

@@ -26,7 +26,7 @@ namespace columnar
 
   class VectorExampleTool final
     : public asg::AsgTool,
-      public ColumnarTool<>
+      public ColumnarTool<CMode>
   {
   public:
 

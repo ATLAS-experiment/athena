@@ -44,7 +44,7 @@ class TauEfficiencyCorrectionsTool;
 class CommonEfficiencyTool
   : public virtual ITauEfficiencyCorrectionsTool
   , public asg::AsgTool
-  , public columnar::ColumnarTool<>	
+  , public columnar::ColumnarTool<CMode>	
 {
   /// Create a proper constructor for Athena
   ASG_TOOL_CLASS( CommonEfficiencyTool, TauAnalysisTools::ITauEfficiencyCorrectionsTool )
@@ -163,9 +163,9 @@ protected:
 
 public:
 
-  struct Accessors : public columnar::ColumnarTool<>
+  struct Accessors : public columnar::ColumnarTool<CMode>
   {
-    Accessors(CommonEfficiencyTool& tool) : columnar::ColumnarTool<>(&tool) {}
+    Accessors(CommonEfficiencyTool& tool) : columnar::ColumnarTool<CMode>(&tool) {}
 
     columnar::EventInfoAccessor<columnar::ObjectColumn> m_eventInfo {*this, "EventInfo", {.addMTDependency=true}};
     columnar::EventInfoAccessor<uint32_t> randomrunnumber;

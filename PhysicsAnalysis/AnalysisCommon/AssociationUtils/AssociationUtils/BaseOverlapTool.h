@@ -40,7 +40,7 @@ namespace ORUtils
   ///
   /// @author Steve Farrell <Steven.Farrell@cern.ch>
   ///
-  class BaseOverlapTool : public asg::AsgTool, public columnar::ColumnarTool<>, virtual public IOverlapTool
+  class BaseOverlapTool : public asg::AsgTool, public columnar::ColumnarTool<CMode>, virtual public IOverlapTool
   {
 
       /// Create proper constructor for Athena
@@ -116,7 +116,7 @@ namespace ORUtils
       /// @name Utilities
       /// @{
 
-      struct BaseAccessors final : columnar::ColumnarTool<>
+      struct BaseAccessors final : columnar::ColumnarTool<CMode>
       {
         columnar::Particle1Accessor<columnar::ObjectColumn> m_particles1Acc {*this, ""};
         columnar::Particle2Accessor<columnar::ObjectColumn> m_particles2Acc {*this, ""};

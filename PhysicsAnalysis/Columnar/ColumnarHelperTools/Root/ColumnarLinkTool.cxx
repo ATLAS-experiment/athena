@@ -36,7 +36,7 @@ namespace columnar
 
     /// @brief register a single column via the low-level
     /// `ColumnAccessorDataArray` mechanism
-    void registerColumn (ColumnarTool<>& tool,
+    void registerColumn (ColumnarTool<CMode>& tool,
                          ColumnarLinkTool::ColumnSlot& slot,
                          const std::string& name,
                          const std::type_info* type,

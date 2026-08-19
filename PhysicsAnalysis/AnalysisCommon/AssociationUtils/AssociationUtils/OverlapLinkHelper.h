@@ -38,7 +38,7 @@ namespace ORUtils
   /// @author Steve Farrell <Steven.Farrell@cern.ch>
   ///
   template<columnar::ContainerIdConcept CI>
-  class OverlapLinkHelper : public columnar::ColumnarTool<>
+  class OverlapLinkHelper : public columnar::ColumnarTool<CMode>
   {
 
     public:

@@ -31,7 +31,7 @@ namespace CP {
     /// whether it's a calo-tag muon, belongs to the high-eta region or has low-pt. 
     /// There exists one instance of the EffiCollection foreach systematic variation and nominal. Scale-factor maps which are not affected by 
     /// a systematic, especially in the case of common vs. low-pt, are taken from the Nominal maps.
-    class EffiCollection final : public columnar::ColumnarTool<> {
+    class EffiCollection final : public columnar::ColumnarTool<CMode> {
         public:
             explicit EffiCollection(MuonEfficiencyScaleFactors& ref_tool);
             ///Constructor with nominal as fallback..
@@ -202,7 +202,7 @@ namespace CP {
             unsigned int m_binOffSet;
 
         public:
-            void addSubtoolsTo (columnar::ColumnarTool<>& parentTool);
+            void addSubtoolsTo (columnar::ColumnarTool<CMode>& parentTool);
         
     };
 

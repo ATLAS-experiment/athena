@@ -254,7 +254,7 @@ namespace CP {
         }
         return true;
     }
-    std::unique_ptr<HistHandler> EfficiencyScaleFactor::ReadHistFromFile(columnar::ColumnarTool<>* parent, const std::string& name, TFile* f, const std::string& time_unit) {
+    std::unique_ptr<HistHandler> EfficiencyScaleFactor::ReadHistFromFile(columnar::ColumnarTool<CMode>* parent, const std::string& name, TFile* f, const std::string& time_unit) {
         
         TH1* hist_from_file =  nullptr;
         
@@ -269,7 +269,7 @@ namespace CP {
         }
         return package_histo(parent, hist_from_file);
     }
-    std::unique_ptr<HistHandler> EfficiencyScaleFactor::package_histo(columnar::ColumnarTool<>* parent, TH1* h) {
+    std::unique_ptr<HistHandler> EfficiencyScaleFactor::package_histo(columnar::ColumnarTool<CMode>* parent, TH1* h) {
         // make sure that the correct type of histo is used
         // Dynamic cast for TH2 Poly otherwise we can rely on the GetDimension() ,ethod
         if (!h) return std::unique_ptr<HistHandler>();

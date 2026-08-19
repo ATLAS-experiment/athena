@@ -33,7 +33,7 @@ namespace columnar
 
   class ModularExampleTool final
     : public asg::AsgTool,
-      public ColumnarTool<>
+      public ColumnarTool<CMode>
   {
   public:
 
@@ -77,7 +77,7 @@ namespace columnar
     ///
     /// This is a bit of a silly example, but many tools will have some
     /// subobjects that need accessors.
-    struct SubtoolPt : public ColumnarTool<>
+    struct SubtoolPt : public ColumnarTool<CMode>
     {
       SubtoolPt (float val_cutValue);
       bool select (ParticleId particle) const;
@@ -98,9 +98,9 @@ namespace columnar
     /// This class demonstrates taking the parent tool in the
     /// constructor, to avoid having to declare containers the parent
     /// tool already declared.
-    struct SubtoolEta : public ColumnarTool<>
+    struct SubtoolEta : public ColumnarTool<CMode>
     {
-      SubtoolEta (ColumnarTool<>* parent, float val_cutValue);
+      SubtoolEta (ColumnarTool<CMode>* parent, float val_cutValue);
       bool select (ParticleId particle) const;
 
       ParticleAccessor<float> etaAcc {*this, "eta"};

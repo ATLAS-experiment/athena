@@ -29,7 +29,7 @@ namespace ORUtils
   /// @author Steve Farrell <Steven.Farrell@cern.ch>
   ///
   template<columnar::ContainerIdConcept CI>
-  class OverlapDecorationHelper : public columnar::ColumnarTool<>
+  class OverlapDecorationHelper : public columnar::ColumnarTool<CMode>
   {
 
     public:

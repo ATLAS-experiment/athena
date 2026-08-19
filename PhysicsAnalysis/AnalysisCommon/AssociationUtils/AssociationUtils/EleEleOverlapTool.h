@@ -95,7 +95,7 @@ namespace ORUtils
 
       /// Columnar accessors
       using MyTrackDef = columnar::VariantContainerId<columnar::Track0Def,columnar::Track0Def>;
-      struct Accessors final : columnar::ColumnarTool<>
+      struct Accessors final : columnar::ColumnarTool<CMode>
       {
         columnar::ClusterAccessor<columnar::ObjectColumn> m_clusterContainerAcc;
         columnar::Track0Accessor<columnar::ObjectColumn> m_track0Acc;
