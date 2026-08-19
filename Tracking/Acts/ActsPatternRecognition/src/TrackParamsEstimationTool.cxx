@@ -104,6 +104,9 @@ Acts::FreeVector estimateTrackParamsFromSeed(
     ATH_MSG_DEBUG( "   " << m_bFieldMode );
     ATH_MSG_DEBUG( "   " << m_firstSp );
     ATH_MSG_DEBUG( "   " << m_stripCalibrationIterations );
+    ATH_MSG_DEBUG( "   " << m_refitSeeds );
+
+    ATH_CHECK(m_fitterTool.retrieve(EnableTool{m_refitSeeds}));
 
     m_logger = makeActsAthenaLogger(this, "Acts");
 
@@ -111,19 +114,27 @@ Acts::FreeVector estimateTrackParamsFromSeed(
 
     m_spacePointIndicesFun = spacePointIndicesFun();
 
+    if (m_refitSeeds) {
+      ATH_CHECK(m_trackingGeometrySvc.retrieve());
+      m_uncalibMeasSurfAcc = detail::xAODUncalibMeasSurfAcc {m_trackingGeometrySvc.get()};
+    }
+
     return StatusCode::SUCCESS;
   }
 
-  std::optional<Acts::BoundTrackParameters>
+  std::pair<std::optional<Acts::BoundTrackParameters>, TrackParamsEstimationTool::EstimationStatus>
   TrackParamsEstimationTool::estimateTrackParameters(
 						     const ActsTrk::Seed& seed,
-						     bool useTopSp,
+						     bool reverseSearch,
 						     const Acts::GeometryContext& geoContext,
 						     const Acts::MagneticFieldContext& magFieldContext,
+						     const Acts::CalibrationContext& calContext,
 						     std::function<const Acts::Surface&(const ActsTrk::Seed& seed, bool useTopSp)> retrieveSurface) const
   {
+    bool useTopSp = estimateFromTopSp(reverseSearch);
+
     const auto& sp_collection = seed.sp();
-    if ( sp_collection.size() < 3 ) return std::nullopt;
+    if ( sp_collection.size() < 3 ) return {std::nullopt, kNoSeedRefit};
     const xAOD::SpacePoint* bottom_sp = (useTopSp && m_bFieldMode != 2) ? sp_collection.back() : sp_collection.front();
 
     // Magnetic Field
@@ -141,26 +152,30 @@ Acts::FreeVector estimateTrackParamsFromSeed(
 
     return estimateTrackParameters(
 				   seed,
-				   useTopSp,
+				   reverseSearch,
 				   geoContext,
 				   magFieldContext,
+				   calContext,
 				   surface,
 				   bField);
   }
 
-  std::optional<Acts::BoundTrackParameters>
+  std::pair<std::optional<Acts::BoundTrackParameters>, TrackParamsEstimationTool::EstimationStatus>
   TrackParamsEstimationTool::estimateTrackParameters(
 						     const ActsTrk::Seed& seed,
-						     bool useTopSp,
+						     bool reverseSearch,
 						     const Acts::GeometryContext& geoContext,
 						     const Acts::MagneticFieldContext& magFieldContext,
+						     const Acts::CalibrationContext& calContext,
 						     const Acts::Surface& surface,
 						     const Acts::Vector3& bField) const 
   {
+    bool useTopSp = estimateFromTopSp(reverseSearch);
+
     // Get SPs
     const auto& sp_collection = seed.sp();
     const std::size_t nSp = sp_collection.size();
-    if (nSp < 3) return std::nullopt;
+    if (nSp < 3) return {std::nullopt, kNoSeedRefit};
 
     // Function to extract the values from sp_collection
     const auto sp_collection_extract = std::views::transform([&sp_collection, useTopSp](std::size_t i) {
@@ -206,18 +221,17 @@ Acts::FreeVector estimateTrackParamsFromSeed(
         m_extrapolator->propagateToSurface(curvilinearParams, surface, propOptions);
 
     if (!boundParamsResult.ok()) {
-      ATH_MSG_DEBUG("Extrapolation failed");
+      ATH_MSG_DEBUG("Extrapolation from " << seed.sp().size() << "-SP seed (" << (useTopSp ? "top" : "bottom") << " start) failed - "
+                    << (m_allowPropagatorFailure ? "use curvilinear parameters" : "skip seed"));
       if (m_allowPropagatorFailure) {
         // Fallback: use curvilinear parameters instead of failing
-        ATH_MSG_DEBUG("Using curvilinear parameters due to propagation failure");
         boundParams = curvilinearParams;
       } else {
-        return std::nullopt;
+        return {std::nullopt, kNoSeedRefit};
       }
     } else {
       boundParams = *boundParamsResult;
     }
-
 
     // Estimate covariance
     Acts::EstimateTrackParamCovarianceConfig covarianceEstimationConfig = {
@@ -231,7 +245,19 @@ Acts::FreeVector estimateTrackParamsFromSeed(
       boundParams->parameters(),
       false);
 
-    return boundParams;
+    if (!m_refitSeeds) {
+      ATH_MSG_DEBUG("estimateTrackParams from " << seed.sp().size() << "-SP seed (" << (useTopSp ? "top" : "bottom") << " start) succeeded");
+      return {boundParams, kNoSeedRefit};
+    }
+
+    auto refitResult = doRefit(seed, *boundParams, geoContext, magFieldContext, calContext, reverseSearch);
+    ATH_MSG_DEBUG("Refit " << seed.sp().size() << "-SP seed (" << (reverseSearch ? "top" : "bottom") << " start) " << (refitResult ? "succeeded" : "failed"));
+    if (refitResult) {
+      return {refitResult, kSeedRefitSuccess};
+    } else {
+      return {boundParams, kSeedRefitFailed};
+    }
+
   }
 
   // Function to return which 3 SPs of a seed to use
@@ -257,6 +283,67 @@ Acts::FreeVector estimateTrackParamsFromSeed(
         return {0, 1, 2};
       };
     }
+  };
+
+
+  // Refit track. Used if refitSeeds=True.
+  std::optional<Acts::BoundTrackParameters> TrackParamsEstimationTool::doRefit(
+      const ActsTrk::Seed &measurement,
+      const Acts::BoundTrackParameters &initialParameters,
+      const Acts::GeometryContext& geometry,
+      const Acts::MagneticFieldContext& magField,
+      const Acts::CalibrationContext& calib,
+      const bool paramsAtOutermostSurface) const {
+    // Perform KF before CKF
+    const Acts::Surface* targetSurface = nullptr;
+    // get the proper surface
+    if (not paramsAtOutermostSurface) {
+      // inner-most surface
+      targetSurface = m_uncalibMeasSurfAcc.get(measurement.sp().front()->measurements().front());
+    } else {
+      // outer-most surface
+      targetSurface = m_uncalibMeasSurfAcc.get(measurement.sp().back()->measurements().back());
+    }
+    if (not targetSurface) {
+      ATH_MSG_WARNING("Could not identify the target surface for fitting the provided seed");
+      return std::nullopt;
+    }
+    const auto fittedSeedCollection = m_fitterTool->fit(measurement, initialParameters,
+                                                        geometry, magField, calib,
+                                                        *targetSurface);
+    if (not fittedSeedCollection) {
+      ATH_MSG_VERBOSE("KF fit failure");
+      return std::nullopt;
+    }
+    if (fittedSeedCollection->size() != 1) {
+      ATH_MSG_WARNING("KF produced " << fittedSeedCollection->size() << " tracks but should produce 1!");
+      return std::nullopt;
+    }
+    const auto fittedSeed = fittedSeedCollection->getTrack(0);
+
+    // get the track state at the beginning of the track, where we started
+    std::optional<typename decltype(fittedSeed)::ConstTrackStateProxy> trackState {std::nullopt};
+    if (paramsAtOutermostSurface) {
+      trackState = fittedSeed.outermostTrackState();
+    } else {
+      trackState = fittedSeed.innermostTrackState();
+      if (!trackState) {
+        // if the track is not forward linked (fixed by #5666), then we need to search back to the innermost track state
+        for (auto st : fittedSeed.trackStatesReversed()) {
+          trackState = st;
+        }
+      }
+    }
+
+    if (!trackState) {
+      ATH_MSG_VERBOSE("Missing "
+                      << (paramsAtOutermostSurface ? "outermost" : "innermost")
+                      << " track state");
+      return std::nullopt;
+    }
+
+    // Return updated parameters
+    return fittedSeed.createParametersFromState(trackState.value());
   };
 
 }
