@@ -36,7 +36,7 @@ namespace TauAnalysisTools
   template<columnar::ContainerIdConcept CITau   = columnar::TauJetDef,
            columnar::ContainerIdConcept CITruth = columnar::TruthParticleDef,
            columnar::ContainerIdConcept CIJet   = columnar::JetDef,
-           typename CM = columnar::ColumnarModeDefault>
+           typename CM = CMode>
   class TruthParticleTypeAccessor final
   {
     columnar::ColumnAccessor<CITau,   columnar::OptObjectId<CITruth, CM>, CM> m_truthParticleLinkAcc;

@@ -59,7 +59,7 @@ namespace ORUtils
 
     // Check the particle types. First particle should be the muon,
     // and the second particle should be the jet.
-    if constexpr (columnar::ColumnarModeDefault::isXAOD)
+    if constexpr (CMode::isXAOD)
     {
       if(mu.getXAODObject().type() != xAOD::Type::Muon) {
         ATH_MSG_WARNING("First particle arg to objectsMatch is not a muon!");

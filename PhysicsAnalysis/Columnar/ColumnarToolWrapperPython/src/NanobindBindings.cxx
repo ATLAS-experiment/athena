@@ -195,7 +195,7 @@ void clear_printer() {
 NB_MODULE(python_tool_handle, module) {
     module.doc() = "Nanobind bindings for PythonToolHandle";
 
-    if (columnar::columnarAccessMode != 2)
+    if (!std::is_same_v<CMode,columnar::ColumnarModeArray>)
         throw nb::import_error("This module can only be used in columnar access mode. Try setting up a ColumnarAnalysis release instead.");
 
     module.attr("numberOfEventsName") = &columnar::eventRangeColumnName;

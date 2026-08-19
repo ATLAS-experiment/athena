@@ -201,7 +201,7 @@ namespace ORUtils
       return;
 
     auto tool = std::make_unique<DeltaROverlapTool> (makeUniqueName());
-    if (!columnar::ColumnarModeDefault::isXAOD)
+    if (!CMode::isXAOD)
     {
       ASSERT_SUCCESS (tool->setProperty ("ObjectType1", xAODType::ObjectType::Jet));
       ASSERT_SUCCESS (tool->setProperty ("ObjectType2", xAODType::ObjectType::Photon));
@@ -255,7 +255,7 @@ namespace ORUtils
       return;
 
     auto tool = std::make_unique<DeltaROverlapTool> (makeUniqueName());
-    if (!columnar::ColumnarModeDefault::isXAOD)
+    if (!CMode::isXAOD)
     {
       ASSERT_SUCCESS (tool->setProperty ("ObjectType1", xAODType::ObjectType::Jet));
       ASSERT_SUCCESS (tool->setProperty ("ObjectType2", xAODType::ObjectType::Electron));

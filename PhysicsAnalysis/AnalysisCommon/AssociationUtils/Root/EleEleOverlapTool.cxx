@@ -98,7 +98,7 @@ namespace ORUtils
                columnar::Particle2Range<CMode> cont2,
                columnar::EventContextId<CMode> /*eventContext*/) const
   {
-    if constexpr (columnar::ColumnarModeDefault::isXAOD)
+    if constexpr (CMode::isXAOD)
     {
       // I require that the two containers are the same so that I can
       // arbitrarily pick one of them to use.

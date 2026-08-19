@@ -56,7 +56,7 @@ namespace ORUtils
           // above call will have already checked that it is in the
           // right container
           if(isSurvivingObject(*linkParticle)){
-            if constexpr (columnar::ColumnarModeDefault::isXAOD) {
+            if constexpr (CMode::isXAOD) {
               ATH_MSG_DEBUG("  Found overlap " << p1.getXAODObject().type() <<
                           " pt " << p1.getXAODObject().pt()*invGeV);
             } else {

@@ -808,7 +808,7 @@ namespace met {
           auto mu_test = obj.tryGetVariant<columnar::MuonDef>().value();
           ATH_MSG_VERBOSE("Muon " << mu_test << " found in jet " << jet);
           if((m_doRemoveMuonJets || m_doSetMuonJetEMScale)) {
-            if constexpr (columnar::ColumnarModeDefault::isXAOD) {
+            if constexpr (CMode::isXAOD) {
               if(acc_originalObject.isAvailable(mu_test.getXAODObject())) mu_test = *static_cast<const xAOD::Muon*>(*acc_originalObject(mu_test.getXAODObject()));
             }
             if(helper.objSelected(mu_test)) { //
@@ -819,7 +819,7 @@ namespace met {
         } else if(m_doRemoveElecTrks && obj.isContainer<columnar::ElectronDef>()) {
           auto el_test = obj.tryGetVariant<columnar::ElectronDef>().value();
           ATH_MSG_VERBOSE("Electron " << el_test << " found in jet " << jet);
-          if constexpr (columnar::ColumnarModeDefault::isXAOD) {
+          if constexpr (CMode::isXAOD) {
             if(acc_originalObject.isAvailable(el_test.getXAODObject())) el_test = *static_cast<const xAOD::Electron*>(*acc_originalObject(el_test.getXAODObject()));
           }
           if(helper.objSelected(*assoc,el_test)){

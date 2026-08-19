@@ -33,7 +33,7 @@ namespace ORUtils
     if (m_objectType1.value() != 0 && m_objectType2.value() != 0) {
       ATH_CHECK (m_dRMatcher->setObjectTypes (static_cast<xAODType::ObjectType>(m_objectType1.value()),
                                               static_cast<xAODType::ObjectType>(m_objectType2.value())));
-    } else if (!columnar::ColumnarModeDefault::isXAOD) {
+    } else if (!CMode::isXAOD) {
       ATH_MSG_INFO("Object types not set, please set ObjectType1 and ObjectType2 properties");
     }
     addSubtool(*m_dRMatcher);

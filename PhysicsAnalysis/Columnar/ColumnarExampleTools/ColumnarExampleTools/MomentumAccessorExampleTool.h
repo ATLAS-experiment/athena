@@ -75,7 +75,7 @@ namespace columnar
     // this would be the basic way to do it. For now (24 Jul 25) I don't
     // think this is worth the effort, as the dynamic momentum accessors
     // seem to be working pretty well.
-    // Detail::FullMomentumAccessorsPtEtaPhiM<Detail::CoreMomentumAccessorsPtEtaPhiReadM<ParticleDef,ColumnarModeDefault>> momAcc {*this};
+    // Detail::FullMomentumAccessorsPtEtaPhiM<Detail::CoreMomentumAccessorsPtEtaPhiReadM<ParticleDef,CMode>> momAcc {*this};
 
 
     /// @brief the selection decorator for the particles

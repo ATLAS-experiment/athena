@@ -41,7 +41,7 @@ namespace columnar
   bool ColumnarMemoryTest ::
   checkMode ()
   {
-    return std::is_same_v<ColumnarModeDefault,ColumnarModeArray>;
+    return std::is_same_v<CMode,ColumnarModeArray>;
   }
 
 

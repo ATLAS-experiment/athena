@@ -567,7 +567,7 @@ TEST_F (ColumnarPhysLiteTest, METMaker_combined)
     return;
 
   // FIX ME: currently the combined test only works in xAOD mode
-  if (columnar::columnarAccessMode != 0)
+  if (!std::is_same_v<CMode,columnar::ColumnarModeXAOD>)
     return;
 
   // Create muon tool
