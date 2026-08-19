@@ -1,0 +1,31 @@
+{
+  "model_name": "PassThrough_largeRMCExtra",
+  "copy_vars": [
+    "GhostBHadronsFinalCount",
+    "GhostCHadronsFinalCount",
+    "FtagLargeRTruthLabel",
+    "R10TruthLabel_R22v1"
+  ],
+  "constituents": [
+    {
+      "node_name": "tracks_r22loose_sd0sort",
+      "input_key": "tracks",
+      "variables": [
+        {"input": "ftagTruthOriginLabel", "output": "ft1lR_trk_ftagTruthOriginLabel", "type": "int"},
+        {"input": "ftagTruthTypeLabel", "output": "ft1lR_trk_ftagTruthTypeLabel", "type": "int"},
+        {"input": "ftagTruthSourceLabel", "output": "ft1lR_trk_ftagTruthSourceLabel", "type": "int"},
+        {"input": "ftagTruthVertexIndex", "output": "ft1lR_trk_ftagTruthVertexIndex", "type": "int"}
+      ]
+    },
+    {
+      "node_name": "electrons_r22default",
+      "input_key": "electrons",
+      "variables": [
+        {"input": "ftagTruthOriginLabel", "output": "ft1lR_el_ftagTruthOriginLabel", "type": "int"},
+        {"input": "ftagTruthVertexIndex", "output": "ft1lR_el_ftagTruthVertexIndex", "type": "int"},
+        {"input": "ftagTruthTypeLabel", "output": "ft1lR_el_ftagTruthTypeLabel", "type": "int"},
+        {"input": "ftagTruthSourceLabel", "output": "ft1lR_el_ftagTruthSourceLabel", "type": "int"}
+      ]
+    }
+  ]
+}

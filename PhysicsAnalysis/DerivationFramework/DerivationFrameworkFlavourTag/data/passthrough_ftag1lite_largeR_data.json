@@ -10,10 +10,6 @@
     "bJR10v00Ext_mass",
     "bJR10v01_pt",
     "bJR10v01_mass",
-    "GhostBHadronsFinalCount",
-    "GhostCHadronsFinalCount",
-    "FtagLargeRTruthLabel",
-    "R10TruthLabel_R22v1",
     "GN3XPV01_phbb",
     "GN3XPV01_phcc",
     "GN3XPV01_phtautauhad",
@@ -100,11 +96,7 @@
         {"input": "numberOfSCTHits", "output": "ft1lR_trk_numberOfSCTHits", "type": "char"},
         {"input": "numberOfSCTSharedHits", "output": "ft1lR_trk_numberOfSCTSharedHits", "type": "char"},
         {"input": "leptonID", "output": "ft1lR_trk_leptonID", "type": "char"},
-        {"input": "muon_quality", "output": "ft1lR_trk_muon_quality", "type": "char"},
-        {"input": "ftagTruthOriginLabel", "output": "ft1lR_trk_ftagTruthOriginLabel", "type": "int"},
-        {"input": "ftagTruthTypeLabel", "output": "ft1lR_trk_ftagTruthTypeLabel", "type": "int"},
-        {"input": "ftagTruthSourceLabel", "output": "ft1lR_trk_ftagTruthSourceLabel", "type": "int"},
-        {"input": "ftagTruthVertexIndex", "output": "ft1lR_trk_ftagTruthVertexIndex", "type": "int"}
+        {"input": "muon_quality", "output": "ft1lR_trk_muon_quality", "type": "char"}
       ]
     },
     {
@@ -140,11 +132,7 @@
         {"input": "abs_eta", "output": "ft1lR_el_ftag_gsf_abs_eta_bf16", "cast": {"exp": 8, "man": 7}},
         {"input": "numberOfPixelHits", "output": "ft1lR_el_ftag_gsf_numberOfPixelHits_bf16", "cast": {"exp": 8, "man": 7}},
         {"input": "eProbabilityHT", "output": "ft1lR_el_ftag_gsf_eProbabilityHT_bf16", "cast": {"exp": 8, "man": 7}},
-        {"input": "qOverP", "output": "ft1lR_el_ftag_gsf_qOverP"},
-        {"input": "ftagTruthOriginLabel", "output": "ft1lR_el_ftagTruthOriginLabel", "type": "int"},
-        {"input": "ftagTruthVertexIndex", "output": "ft1lR_el_ftagTruthVertexIndex", "type": "int"},
-        {"input": "ftagTruthTypeLabel", "output": "ft1lR_el_ftagTruthTypeLabel", "type": "int"},
-        {"input": "ftagTruthSourceLabel", "output": "ft1lR_el_ftagTruthSourceLabel", "type": "int"}
+        {"input": "qOverP", "output": "ft1lR_el_ftag_gsf_qOverP"}
       ]
     },
     {
