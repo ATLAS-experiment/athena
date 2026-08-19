@@ -135,10 +135,10 @@ namespace CP
     {
         // Retrieve the event information:
         SG::ReadHandle<xAOD::EventInfo> evtInfo(m_eventInfo);
-        return applyCorrection(columnar::MuonId(mu), columnar::EventInfoId<CMode>(*evtInfo));
+        return applyCorrection(columnar::MuonId<CMode>(mu), columnar::EventInfoId<CMode>(*evtInfo));
     }
 
-    CorrectionCode MuonCalibTool::applyCorrection(columnar::MuonId mu, columnar::EventInfoId<CMode> evtInfo) const
+    CorrectionCode MuonCalibTool::applyCorrection(columnar::MuonId<CMode> mu, columnar::EventInfoId<CMode> evtInfo) const
     {
         auto& acc = *m_acc;
         ATH_MSG_VERBOSE("Muon Type = " << mu(acc.muonTypeAcc) << " ( 0: Combined, 1: StandAlone, 2: SegmentTagged, 3: CaloTagged, 4: SiliconAssociatedForwardMuon)");
@@ -335,10 +335,10 @@ namespace CP
     double MuonCalibTool::expectedResolution(const int &DetType, const xAOD::Muon &mu, const bool addMCCorrectionSmearing) const
     {
         SG::ReadHandle<xAOD::EventInfo> evtInfo(m_eventInfo);
-        return expectedResolution(DetType, columnar::MuonId(mu), columnar::EventInfoId<CMode>(*evtInfo), addMCCorrectionSmearing);
+        return expectedResolution(DetType, columnar::MuonId<CMode>(mu), columnar::EventInfoId<CMode>(*evtInfo), addMCCorrectionSmearing);
     }
 
-    double MuonCalibTool::expectedResolution(const int &DetType, columnar::MuonId mu, columnar::EventInfoId<CMode> evtInfo, const bool addMCCorrectionSmearing) const
+    double MuonCalibTool::expectedResolution(const int &DetType, columnar::MuonId<CMode> mu, columnar::EventInfoId<CMode> evtInfo, const bool addMCCorrectionSmearing) const
     {
         auto& acc = *m_acc;
         // Get information about data
@@ -412,7 +412,7 @@ namespace CP
     }
 
     // Internal tool function
-    MCP::MuonObj MuonCalibTool::convertToMuonObj(columnar::MuonId mu, columnar::EventInfoId<CMode> evtInfo) const
+    MCP::MuonObj MuonCalibTool::convertToMuonObj(columnar::MuonId<CMode> mu, columnar::EventInfoId<CMode> evtInfo) const
     {
         auto& acc = *m_acc;
         // Get information about data
@@ -641,9 +641,9 @@ namespace CP
     }
 
 
-    void MuonCalibTool::callSingleEvent (columnar::MuonRange muons, columnar::EventInfoId<CMode> event) const
+    void MuonCalibTool::callSingleEvent (columnar::MuonRange<CMode> muons, columnar::EventInfoId<CMode> event) const
     {
-        for (columnar::MuonId muon : muons)
+        for (columnar::MuonId<CMode> muon : muons)
         {
             switch (applyCorrection(muon, event).code())
             {

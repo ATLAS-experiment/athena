@@ -18,11 +18,11 @@ namespace columnar
     static constexpr std::string_view idName = "muon";
   };
 
-  using MuonRange = ObjectRange<MuonDef, ColumnarModeDefault>;
-  using MuonId = ObjectId<MuonDef, ColumnarModeDefault>;
-  using OptMuonId = OptObjectId<MuonDef, ColumnarModeDefault>;
-  template<typename CT,typename CM=ColumnarModeDefault> using MuonAccessor  = AccessorTemplate<MuonDef,CT,ColumnAccessMode::input,CM>;
-  template<typename CT,typename CM=ColumnarModeDefault> using MuonDecorator = AccessorTemplate<MuonDef,CT,ColumnAccessMode::output,CM>;
+  template<ColumnarMode CM> using MuonRange = ObjectRange<MuonDef,CM>;
+  template<ColumnarMode CM> using MuonId = ObjectId<MuonDef,CM>;
+  template<ColumnarMode CM> using OptMuonId = OptObjectId<MuonDef,CM>;
+  template<typename CT,ColumnarMode CM> using MuonAccessor  = AccessorTemplate<MuonDef,CT,ColumnAccessMode::input,CM>;
+  template<typename CT,ColumnarMode CM> using MuonDecorator = AccessorTemplate<MuonDef,CT,ColumnAccessMode::output,CM>;
 }
 
 #endif

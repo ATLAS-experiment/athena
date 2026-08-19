@@ -37,7 +37,7 @@ namespace CP {
     class IKinematicSystHandler : public columnar::ColumnarTool<CMode> {
         public:
             /// Add an additional uncertainty to the muon depending on its kinematics.
-            virtual CorrectionCode GetKineDependent(columnar::MuonId mu, float& Eff) const = 0;
+            virtual CorrectionCode GetKineDependent(columnar::MuonId<CMode> mu, float& Eff) const = 0;
             /// Set's the absolute scaling of the systematic. For daily puposes it's usually
             /// either 1 or -1 indicating if the instance is an upwards or downwards variation.
             virtual void SetSystematicWeight(float SystWeight) = 0;
@@ -47,17 +47,17 @@ namespace CP {
             virtual ~IKinematicSystHandler() =default;
             
             /// Typedef to prepare function pointers to the muon
-            typedef float (IKinematicSystHandler::*KinVariable)(columnar::MuonId mu) const;
+            typedef float (IKinematicSystHandler::*KinVariable)(columnar::MuonId<CMode> mu) const;
             KinVariable GetMuonVariableToUse(const std::string &name);
 
-            float Eta(columnar::MuonId mu) const;
-            float Pt(columnar::MuonId mu) const;
-            float PtGeV(columnar::MuonId mu) const;
-            float AbsEta(columnar::MuonId mu) const;
+            float Eta(columnar::MuonId<CMode> mu) const;
+            float Pt(columnar::MuonId<CMode> mu) const;
+            float PtGeV(columnar::MuonId<CMode> mu) const;
+            float AbsEta(columnar::MuonId<CMode> mu) const;
 
-            columnar::MuonAccessor<columnar::ObjectColumn> muonsHandle {*this, "Muons"};
-            columnar::MuonAccessor<float> ptAcc {*this, "pt"};
-            columnar::MuonAccessor<float> etaAcc {*this, "eta"};
+            columnar::MuonAccessor<columnar::ObjectColumn,CMode> muonsHandle {*this, "Muons"};
+            columnar::MuonAccessor<float,CMode> ptAcc {*this, "pt"};
+            columnar::MuonAccessor<float,CMode> etaAcc {*this, "eta"};
     };
     ///     Z->mumu reconstruction scale-factors are delivered in eta-phi maps integrating out any pt-dependence.
     ///     However, the scale-factors as a function of pt show a slight dependence on that variable. An extra binning
@@ -72,7 +72,7 @@ namespace CP {
     ///     is smaller than the total value of the latter itself.
     class PtKinematicSystHandler : public IKinematicSystHandler {
         public:
-             CorrectionCode GetKineDependent(columnar::MuonId mu, float& eff) const override;
+             CorrectionCode GetKineDependent(columnar::MuonId<CMode> mu, float& eff) const override;
             
             void SetSystematicWeight(float syst_weight) override;
             
@@ -91,7 +91,7 @@ namespace CP {
     
     class PrimodialPtSystematic: public IKinematicSystHandler {
         public:
-            CorrectionCode GetKineDependent(columnar::MuonId mu, float& Eff) const override;
+            CorrectionCode GetKineDependent(columnar::MuonId<CMode> mu, float& Eff) const override;
     
             void SetSystematicWeight(float SystWeight) override;
 
@@ -110,7 +110,7 @@ namespace CP {
             
             void SetSystematicWeight( float SystWeight) override;
             bool initialize() override;
-            CorrectionCode GetKineDependent(columnar::MuonId mu, float& Eff) const override;
+            CorrectionCode GetKineDependent(columnar::MuonId<CMode> mu, float& Eff) const override;
         private:
             std::unique_ptr<HistHandler> m_Handler;
             float m_SystWeight;
@@ -118,7 +118,7 @@ namespace CP {
 
     class BadMuonVetoSystHandler: public IKinematicSystHandler {
         public:
-             CorrectionCode GetKineDependent(columnar::MuonId mu, float& Eff) const override;
+             CorrectionCode GetKineDependent(columnar::MuonId<CMode> mu, float& Eff) const override;
              void SetSystematicWeight(float SystWeight)override;
 
             bool initialize() override;

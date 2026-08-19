@@ -295,9 +295,9 @@ namespace CP {
         return m_sf ? m_sf->isOverFlowBin(b) : true;
     }
     CorrectionCode EfficiencyScaleFactor::ScaleFactor(const xAOD::Muon& mu, float & SF) const {
-        return ScaleFactor (columnar::MuonId (mu), SF);
+        return ScaleFactor (columnar::MuonId<CMode> (mu), SF);
     }   
-    CorrectionCode EfficiencyScaleFactor::ScaleFactor(columnar::MuonId mu, float & SF) const {
+    CorrectionCode EfficiencyScaleFactor::ScaleFactor(columnar::MuonId<CMode> mu, float & SF) const {
         if (m_separateBinSyst && m_NominalFallBack) {
             int bin = -1;
             CorrectionCode cc = m_sf->FindBin(mu, bin);
@@ -345,9 +345,9 @@ namespace CP {
     }
 
     CorrectionCode EfficiencyScaleFactor::GetContentFromHist(const HistHandler* Hist, const xAOD::Muon& mu, float & Eff, bool add_kine_syst) const {
-        return GetContentFromHist (Hist, columnar::MuonId (mu), Eff, add_kine_syst);
+        return GetContentFromHist (Hist, columnar::MuonId<CMode> (mu), Eff, add_kine_syst);
     }
-    CorrectionCode EfficiencyScaleFactor::GetContentFromHist(const HistHandler* Hist, columnar::MuonId mu, float & Eff, bool add_kine_syst) const {
+    CorrectionCode EfficiencyScaleFactor::GetContentFromHist(const HistHandler* Hist, columnar::MuonId<CMode> mu, float & Eff, bool add_kine_syst) const {
         Eff = m_default_eff;
         if (!Hist) {
             if (m_warnsPrinted < m_warningLimit){

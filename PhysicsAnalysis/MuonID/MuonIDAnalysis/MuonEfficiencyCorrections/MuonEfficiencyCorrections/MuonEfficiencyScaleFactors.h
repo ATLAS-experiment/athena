@@ -40,7 +40,7 @@ namespace CP {
 
             /// Retrieve the Scale factor and decorate the muon
             virtual CorrectionCode getEfficiencyScaleFactor(const xAOD::Muon& mu, float& sf, const xAOD::EventInfo* info = 0) const override;
-            CorrectionCode getEfficiencyScaleFactor(columnar::MuonId mu, float& sf, columnar::EventInfoId<CMode> info) const;
+            CorrectionCode getEfficiencyScaleFactor(columnar::MuonId<CMode> mu, float& sf, columnar::EventInfoId<CMode> info) const;
             virtual CorrectionCode applyEfficiencyScaleFactor(const xAOD::Muon& mu, const xAOD::EventInfo* info = 0) const override;
             /// replica generation
             virtual CorrectionCode getEfficiencyScaleFactorReplicas(const xAOD::Muon& mu, std::vector<float> & sf_err, const xAOD::EventInfo* info = 0) const override;
@@ -218,7 +218,7 @@ namespace CP {
 
     public:
 
-            void callSingleEvent (columnar::MuonRange muons, columnar::EventInfoId<CMode> event) const;
+            void callSingleEvent (columnar::MuonRange<CMode> muons, columnar::EventInfoId<CMode> event) const;
             virtual void callEvents (columnar::EventContextRange<CMode> events) const override;
     };
 

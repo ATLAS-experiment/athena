@@ -35,7 +35,7 @@ namespace columnar
 
 
   void VariantExampleTool ::
-  callSingleEvent (ElectronRange<CMode> electrons, MuonRange muons) const
+  callSingleEvent (ElectronRange<CMode> electrons, MuonRange<CMode> muons) const
   {
     // First copy all the wanted particles into a vector of variant
     // objects. These then no longer care whether they are electrons or

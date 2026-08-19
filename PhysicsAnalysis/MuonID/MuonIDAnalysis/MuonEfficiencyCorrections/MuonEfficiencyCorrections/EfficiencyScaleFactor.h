@@ -101,7 +101,7 @@ namespace CP {
 
             /// scale factors...
             CorrectionCode ScaleFactor(const xAOD::Muon& mu, float & SF) const;
-            CorrectionCode ScaleFactor(columnar::MuonId mu, float & SF) const;
+            CorrectionCode ScaleFactor(columnar::MuonId<CMode> mu, float & SF) const;
             CorrectionCode ScaleFactorReplicas(const xAOD::Muon& mu, std::vector<float> & SF);
             
             /// or you can just decorate the scale-factor to the muon
@@ -154,7 +154,7 @@ namespace CP {
             
             /// read the content of the correct bin in one of my histos. MCefficiencies actually do  not need a pt-dependet systematic
             CorrectionCode GetContentFromHist(const HistHandler* Hist, const xAOD::Muon& mu, float & SF, bool add_kine_syst) const;
-            CorrectionCode GetContentFromHist(const HistHandler* Hist, columnar::MuonId mu, float & SF, bool add_kine_syst) const;
+            CorrectionCode GetContentFromHist(const HistHandler* Hist, columnar::MuonId<CMode> mu, float & SF, bool add_kine_syst) const;
             /// read a vector of replica contents in the correct bin in one of my histos
             CorrectionCode GetContentReplicasFromHist(EfficiencyScaleFactor::SFReplicaVec &replicas, const xAOD::Muon& mu, std::vector<float> & SF, bool add_kine_syst);
 
@@ -227,11 +227,11 @@ namespace CP {
 
         public:
 
-            columnar::MuonAccessor<columnar::ObjectColumn> m_muons {*this, "Muons"};
-            columnar::MuonAccessor<columnar::RetypeColumn<double,float>> ptAcc {*this, "pt"};
-            columnar::MuonAccessor<columnar::RetypeColumn<double,float>> etaAcc {*this, "eta"};
-            columnar::MuonAccessor<columnar::RetypeColumn<double,float>> phiAcc {*this, "phi"};
-            columnar::MuonAccessor<columnar::RetypeColumn<xAOD::Muon::MuonType,std::uint16_t>> muonTypeAcc {*this, "muonType"};
+            columnar::MuonAccessor<columnar::ObjectColumn,CMode> m_muons {*this, "Muons"};
+            columnar::MuonAccessor<columnar::RetypeColumn<double,float>,CMode> ptAcc {*this, "pt"};
+            columnar::MuonAccessor<columnar::RetypeColumn<double,float>,CMode> etaAcc {*this, "eta"};
+            columnar::MuonAccessor<columnar::RetypeColumn<double,float>,CMode> phiAcc {*this, "phi"};
+            columnar::MuonAccessor<columnar::RetypeColumn<xAOD::Muon::MuonType,std::uint16_t>,CMode> muonTypeAcc {*this, "muonType"};
     };
 } /* namespace CP */
 

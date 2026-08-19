@@ -284,7 +284,7 @@ namespace met {
     columnar::JetAccessor<columnar::ObjectColumn,CMode> m_jetsHandle {*this, "Jets"};
     columnar::ElectronAccessor<columnar::ObjectColumn,CMode> m_electronsHandle {*this, "Electrons"};
     columnar::PhotonAccessor<columnar::ObjectColumn,CMode> m_photonsHandle {*this, "Photons"};
-    columnar::MuonAccessor<columnar::ObjectColumn> m_muonsHandle {*this, "Muons"};
+    columnar::MuonAccessor<columnar::ObjectColumn,CMode> m_muonsHandle {*this, "Muons"};
 
     columnar::MutableMetAccessor<std::string> m_outputMetNameAcc {*this, "name"};
     columnar::MetHelpers::MapLookupAccessor<columnar::MutableMetDef> m_outputMetMapAcc {*this};

@@ -50,7 +50,7 @@ namespace columnar
     /// This is equivalent to a `ReadHandleKey` in the xAOD world.  It
     /// is used to access the particle range/container for a given
     /// event.
-    MuonAccessor<ObjectColumn> muonsHandle {*this, "AnalysisMuons"};
+    MuonAccessor<ObjectColumn,CMode> muonsHandle {*this, "AnalysisMuons"};
 
 
     /// @brief the object accessor for the linked track container
@@ -67,7 +67,7 @@ namespace columnar
     /// This accessor reads the link from one container to another.  In
     /// xAOD land this is done with `ElementLink`, while in columnar
     /// land this is just a simple integer index.
-    MuonAccessor<OptTrackId> trackLinkAcc {*this, "inDetTrackParticleLink"};
+    MuonAccessor<OptTrackId,CMode> trackLinkAcc {*this, "inDetTrackParticleLink"};
 
 
 
@@ -87,7 +87,7 @@ namespace columnar
     /// the option to return individual output values.  Instead it needs
     /// to provide an output value per object, which in the columnar
     /// world is done by filling a column.
-    MuonDecorator<char> selectionDec {*this, "selection"};
+    MuonDecorator<char,CMode> selectionDec {*this, "selection"};
   };
 }
 

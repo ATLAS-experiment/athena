@@ -39,7 +39,7 @@ namespace CP {
           
             /// return the correct SF type to provide, depending on eta and the author
             EfficiencyScaleFactor* retrieveSF(const xAOD::Muon & mu, unsigned int RunNumber) const;
-            EfficiencyScaleFactor* retrieveSF(columnar::MuonId mu, unsigned int RunNumber) const;
+            EfficiencyScaleFactor* retrieveSF(columnar::MuonId<CMode> mu, unsigned int RunNumber) const;
             enum CollectionType {
                 /// The five different scale-factor maps
                 Central = 1, 
@@ -106,8 +106,8 @@ namespace CP {
 
         private:
             CollectionContainer* FindContainer(unsigned int bin) const;
-            CollectionContainer* FindContainer(columnar::MuonId mu) const;
-            CollectionContainer* FindLRTContainer(columnar::MuonId mu) const;
+            CollectionContainer* FindContainer(columnar::MuonId<CMode> mu) const;
+            CollectionContainer* FindLRTContainer(columnar::MuonId<CMode> mu) const;
             
             const MuonEfficiencyScaleFactors& m_ref_tool;
             
@@ -128,11 +128,11 @@ namespace CP {
 
         public:
 
-            columnar::MuonAccessor<columnar::ObjectColumn> m_muons {*this, "Muons"};
-            columnar::MuonAccessor<columnar::RetypeColumn<double,float>> ptAcc {*this, "pt"};
-            columnar::MuonAccessor<columnar::RetypeColumn<double,float>> etaAcc {*this, "eta"};
-            columnar::MuonAccessor<columnar::RetypeColumn<xAOD::Muon::MuonType,std::uint16_t>> muonTypeAcc {*this, "muonType"};
-            columnar::MuonAccessor<char> isLRTmuon {*this, "isLRT", {.isOptional = true}};
+            columnar::MuonAccessor<columnar::ObjectColumn,CMode> m_muons {*this, "Muons"};
+            columnar::MuonAccessor<columnar::RetypeColumn<double,float>,CMode> ptAcc {*this, "pt"};
+            columnar::MuonAccessor<columnar::RetypeColumn<double,float>,CMode> etaAcc {*this, "eta"};
+            columnar::MuonAccessor<columnar::RetypeColumn<xAOD::Muon::MuonType,std::uint16_t>,CMode> muonTypeAcc {*this, "muonType"};
+            columnar::MuonAccessor<char,CMode> isLRTmuon {*this, "isLRT", {.isOptional = true}};
     };
     
     /// The collection container manages the time binning of a particular scale-factor map. For a given runNumber,

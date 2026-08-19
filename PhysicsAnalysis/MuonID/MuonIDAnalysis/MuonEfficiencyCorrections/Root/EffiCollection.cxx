@@ -204,7 +204,7 @@ namespace CP {
         return true;
     }
 
-    CollectionContainer* EffiCollection::FindContainer(columnar::MuonId mu) const {
+    CollectionContainer* EffiCollection::FindContainer(columnar::MuonId<CMode> mu) const {
         if (m_ref_tool.use_lrt()) {
             if (isLRTmuon.isAvailable(mu)) {
                 if (isLRTmuon(mu)) return FindLRTContainer(mu);
@@ -250,14 +250,14 @@ namespace CP {
         }
         return nullptr;
     }
-    CollectionContainer* EffiCollection::FindLRTContainer(columnar::MuonId mu) const {
+    CollectionContainer* EffiCollection::FindLRTContainer(columnar::MuonId<CMode> mu) const {
         if (ptAcc(mu) <  m_ref_tool.lowPtTransition()) return m_lrt_lowpt_central_eff.get();
         else return m_lrt_central_eff.get();
     }
     EfficiencyScaleFactor* EffiCollection::retrieveSF(const xAOD::Muon& mu, unsigned int RunNumber) const {
-        return retrieveSF (columnar::MuonId (mu), RunNumber);
+        return retrieveSF (columnar::MuonId<CMode> (mu), RunNumber);
     }
-    EfficiencyScaleFactor* EffiCollection::retrieveSF(columnar::MuonId mu, unsigned int RunNumber) const {
+    EfficiencyScaleFactor* EffiCollection::retrieveSF(columnar::MuonId<CMode> mu, unsigned int RunNumber) const {
         CollectionContainer* Cont = FindContainer(mu);
         if (Cont != nullptr) return Cont->retrieve(RunNumber);
         Warning("EffiCollection::retrieveSF()", "Invalid muon");

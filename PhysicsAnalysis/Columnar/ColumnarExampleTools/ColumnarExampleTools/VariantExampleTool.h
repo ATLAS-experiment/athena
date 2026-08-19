@@ -54,7 +54,7 @@ namespace columnar
 
     virtual StatusCode initialize () override;
 
-    void callSingleEvent (ElectronRange<CMode> electrons, MuonRange muons) const;
+    void callSingleEvent (ElectronRange<CMode> electrons, MuonRange<CMode> muons) const;
 
     virtual void callEvents (EventContextRange<CMode> events) const override;
 
@@ -64,7 +64,7 @@ namespace columnar
     /// This is equivalent to a `ReadHandleKey` in the xAOD world.  It
     /// is used to access the range/container for a given event.
     ElectronAccessor<ObjectColumn,CMode> electronsHandle {*this, "AnalysisElectrons"};
-    MuonAccessor<ObjectColumn> muonsHandle {*this, "AnalysisMuons"};
+    MuonAccessor<ObjectColumn,CMode> muonsHandle {*this, "AnalysisMuons"};
 
 
     /// @brief the variant definition we are using

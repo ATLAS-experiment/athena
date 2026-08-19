@@ -23,9 +23,9 @@ namespace CP {
         columnar::EventInfoAccessor<uint32_t,CMode> runNumberAcc {*this, "runNumber"};
         columnar::EventInfoAccessor<unsigned int,CMode> acc_rnd{*this, "RandomRunNumber"};
 
-        columnar::MuonAccessor<columnar::ObjectColumn> muons {*this, "Muons"};
-        columnar::MuonDecorator<float> sfDec {*this, "sfOut"};
-        columnar::MuonDecorator<char> validDec {*this, "validOut"};
+        columnar::MuonAccessor<columnar::ObjectColumn,CMode> muons {*this, "Muons"};
+        columnar::MuonDecorator<float,CMode> sfDec {*this, "sfOut"};
+        columnar::MuonDecorator<char,CMode> validDec {*this, "validOut"};
 
         using ColumnarTool::ColumnarTool;
     };
@@ -272,9 +272,9 @@ namespace CP {
                 return CorrectionCode::Error;
             }
         }
-        return getEfficiencyScaleFactor (columnar::MuonId (mu), sf, columnar::EventInfoId<CMode>(*info));
+        return getEfficiencyScaleFactor (columnar::MuonId<CMode> (mu), sf, columnar::EventInfoId<CMode>(*info));
     }
-    CorrectionCode MuonEfficiencyScaleFactors::getEfficiencyScaleFactor(columnar::MuonId mu, float& sf, columnar::EventInfoId<CMode> info) const {
+    CorrectionCode MuonEfficiencyScaleFactors::getEfficiencyScaleFactor(columnar::MuonId<CMode> mu, float& sf, columnar::EventInfoId<CMode> info) const {
         if (!m_init) {
             ATH_MSG_ERROR("The tool has not been initialized yet.");
             return CorrectionCode::Error;
@@ -683,10 +683,10 @@ namespace CP {
       return "unknown bin";
     }
 
-    void MuonEfficiencyScaleFactors::callSingleEvent (columnar::MuonRange muons, columnar::EventInfoId<CMode> event) const
+    void MuonEfficiencyScaleFactors::callSingleEvent (columnar::MuonRange<CMode> muons, columnar::EventInfoId<CMode> event) const
     {
         const auto& acc = *m_accessors;
-        for (columnar::MuonId muon : muons)
+        for (columnar::MuonId<CMode> muon : muons)
         {
             float sf = 0;
             switch (getEfficiencyScaleFactor(muon, sf, event).code())
