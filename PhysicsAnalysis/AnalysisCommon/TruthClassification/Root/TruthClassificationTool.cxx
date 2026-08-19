@@ -508,7 +508,8 @@ StatusCode TruthClassificationTool::classifyMuon(const xAOD::IParticle &muon,
       MCTruthPartClassifier::DiBoson,
       MCTruthPartClassifier::CCbarMeson, // PromptQuarkoniumDecay
       MCTruthPartClassifier::BBbarMeson,
-      MCTruthPartClassifier::HeavyBoson
+      MCTruthPartClassifier::HeavyBoson,
+      MCTruthPartClassifier::MultiBoson
   });
   if (type == MCTruthPartClassifier::IsoMuon && isInSet(origin, promptOrigin))
   {
