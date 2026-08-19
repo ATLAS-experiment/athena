@@ -117,17 +117,13 @@ void InDet::InDetUsedInFitTrackDecoratorTool::decorate(const EventContext& ctx) 
 {
   // Open our track container
   SG::ReadHandle<xAOD::TrackParticleContainer> trkCont(m_trkContKey, ctx);
-  if (!trkCont.isValid()) {
-    ATH_MSG_WARNING("Unable to retrieve xAOD::TrackParticleContainer, \"" << m_trkContKey.key() << "\", returning without applying decorations!");
-    return;
-  }
+  if (!trkCont.isValid())
+    ATH_MSG_FATAL("Unable to retrieve xAOD::TrackParticleContainer " << m_trkContKey.key());
 
   // Open our vertex container
   SG::ReadHandle<xAOD::VertexContainer> vtxCont(m_vtxContKey, ctx);
-  if (!vtxCont.isValid()) {
-    ATH_MSG_WARNING("Unable to retrieve xAOD::VertexContainer, \"" << m_vtxContKey.key() << "\", returning without applying decorations!");
-    return;
-  }
+  if (!vtxCont.isValid())
+    ATH_MSG_FATAL("Unable to retrieve xAOD::VertexContainer " << m_vtxContKey.key());
 
   // Perform the decoration
   decorate(trkCont.get(), vtxCont.get(), ctx);
