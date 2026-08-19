@@ -67,10 +67,6 @@
 
 #include "VxVertex/VxContainer.h"
 
-#include "muonEvent/MuonContainer.h"
-
-#include "egammaEvent/ElectronContainer.h"
-
 #include "TrigSteeringEvent/HLTResult.h"
 #include "TrigDecisionTool/ExpertMethods.h"
 
