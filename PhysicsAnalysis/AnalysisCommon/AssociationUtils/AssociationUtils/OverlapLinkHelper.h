@@ -66,9 +66,9 @@ namespace ORUtils
       using LTDef = columnar::VariantContainerId<columnar::Particle1Def,columnar::Particle1Def,columnar::Particle2Def>;
 
       /// Object link decorator
-      columnar::ColumnDecorator<CI,columnar::ObjectLink<LTDef>> m_linkDecorator;
+      columnar::ColumnDecorator<CI,columnar::ObjectLink<LTDef>,CMode> m_linkDecorator;
       /// Corresponding object link accessor (for reading only)
-      columnar::ColumnAccessor<CI,columnar::ObjectLink<LTDef>> m_linkAccessor;
+      columnar::ColumnAccessor<CI,columnar::ObjectLink<LTDef>,CMode> m_linkAccessor;
 
   }; // class OverlapLinkHelper
 

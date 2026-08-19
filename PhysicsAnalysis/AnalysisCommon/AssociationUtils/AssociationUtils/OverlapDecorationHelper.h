@@ -84,9 +84,9 @@ namespace ORUtils
       bool m_useInputLabel;
 
       /// Input label accessor
-      columnar::ColumnAccessor<CI,char> m_inputAccessor;
+      columnar::ColumnAccessor<CI,char,CMode> m_inputAccessor;
       /// Output decorator
-      columnar::ColumnDecorator<CI,char> m_outputDecorator;
+      columnar::ColumnDecorator<CI,char,CMode> m_outputDecorator;
 
       /// Output decoration logic
       bool m_outputPassValue;

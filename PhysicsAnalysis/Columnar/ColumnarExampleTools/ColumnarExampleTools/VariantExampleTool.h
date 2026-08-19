@@ -91,21 +91,21 @@ namespace columnar
     /// Note that not every accessor needs to be a "variant" accessor.
     /// You can also convert the "variant" object id to a "regular"
     /// object id and use it directly.
-    ColumnAccessor<MyVariantDef,float> ptAcc {*this, "pt"};
-    ColumnAccessor<MyVariantDef,float> etaAcc {*this, "eta"};
+    ColumnAccessor<MyVariantDef,float,CMode> ptAcc {*this, "pt"};
+    ColumnAccessor<MyVariantDef,float,CMode> etaAcc {*this, "eta"};
 
 
     /// @brief the pt-rank decorator for the variant container
     ///
     /// Just like accessors, we can have decorators for our variant
     /// container as well.
-    ColumnDecorator<MyVariantDef,std::uint16_t> ptRankDec {*this, "ptRank"};
+    ColumnDecorator<MyVariantDef,std::uint16_t,CMode> ptRankDec {*this, "ptRank"};
 
     /// @brief a eta-rank decorator just for electrons
     ///
     /// this is to show how you can have accessors/decorators for just
     /// one of the contained "variants".
-    ColumnDecorator<ElectronDef,std::uint16_t> etaRankSpecialDec {*this, "etaRank"};
+    ColumnDecorator<ElectronDef,std::uint16_t,CMode> etaRankSpecialDec {*this, "etaRank"};
   };
 }
 

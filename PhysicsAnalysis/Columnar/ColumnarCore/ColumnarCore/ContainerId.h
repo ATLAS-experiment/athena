@@ -205,7 +205,7 @@ namespace columnar
   template<ContainerIdConcept CI, typename CM = ColumnarModeDefault> class ObjectId;
   template<ContainerIdConcept CI, typename CM = ColumnarModeDefault> class OptObjectId;
   template<ContainerIdConcept CI, typename CM = ColumnarModeDefault> class ObjectLink;
-  template<ContainerIdConcept CI,typename CT,ColumnAccessMode CAM,typename CM = ColumnarModeDefault> class AccessorTemplate;
+  template<ContainerIdConcept CI,typename CT,ColumnAccessMode CAM,ColumnarMode CM> class AccessorTemplate;
 
 
   using EventContextRange = ObjectRange<EventContextDef>;

@@ -194,7 +194,7 @@ namespace columnar
   /// @par CT the column type
   /// @par CAM the column access mode
   /// @par CM the columnar mode
-  template<ContainerIdConcept CI,typename CT,ColumnAccessMode CAM,typename CM> class AccessorTemplate;
+  template<ContainerIdConcept CI,typename CT,ColumnAccessMode CAM,ColumnarMode CM> class AccessorTemplate;
 
 
   /// @brief a type wrapper to force @ref AccessorTemplate to treat the
@@ -271,9 +271,9 @@ namespace columnar
 
 
 
-  template<ContainerIdConcept CI,typename CT,typename CM=ColumnarModeDefault> using ColumnAccessor = AccessorTemplate<CI,CT,ColumnAccessMode::input,CM>;
-  template<ContainerIdConcept CI,typename CT,typename CM=ColumnarModeDefault> using ColumnDecorator = AccessorTemplate<CI,CT,ColumnAccessMode::output,CM>;
-  template<ContainerIdConcept CI,typename CT,typename CM=ColumnarModeDefault> using ColumnUpdater = AccessorTemplate<CI,CT,ColumnAccessMode::update,CM>;
+  template<ContainerIdConcept CI,typename CT,ColumnarMode CM> using ColumnAccessor = AccessorTemplate<CI,CT,ColumnAccessMode::input,CM>;
+  template<ContainerIdConcept CI,typename CT,ColumnarMode CM> using ColumnDecorator = AccessorTemplate<CI,CT,ColumnAccessMode::output,CM>;
+  template<ContainerIdConcept CI,typename CT,ColumnarMode CM> using ColumnUpdater = AccessorTemplate<CI,CT,ColumnAccessMode::update,CM>;
 }
 
 #include "ColumnAccessorXAOD.icc"
