@@ -135,10 +135,10 @@ namespace CP
     {
         // Retrieve the event information:
         SG::ReadHandle<xAOD::EventInfo> evtInfo(m_eventInfo);
-        return applyCorrection(columnar::MuonId(mu), columnar::EventInfoId(*evtInfo));
+        return applyCorrection(columnar::MuonId(mu), columnar::EventInfoId<CMode>(*evtInfo));
     }
 
-    CorrectionCode MuonCalibTool::applyCorrection(columnar::MuonId mu, columnar::EventInfoId evtInfo) const
+    CorrectionCode MuonCalibTool::applyCorrection(columnar::MuonId mu, columnar::EventInfoId<CMode> evtInfo) const
     {
         auto& acc = *m_acc;
         ATH_MSG_VERBOSE("Muon Type = " << mu(acc.muonTypeAcc) << " ( 0: Combined, 1: StandAlone, 2: SegmentTagged, 3: CaloTagged, 4: SiliconAssociatedForwardMuon)");
@@ -335,10 +335,10 @@ namespace CP
     double MuonCalibTool::expectedResolution(const int &DetType, const xAOD::Muon &mu, const bool addMCCorrectionSmearing) const
     {
         SG::ReadHandle<xAOD::EventInfo> evtInfo(m_eventInfo);
-        return expectedResolution(DetType, columnar::MuonId(mu), columnar::EventInfoId(*evtInfo), addMCCorrectionSmearing);
+        return expectedResolution(DetType, columnar::MuonId(mu), columnar::EventInfoId<CMode>(*evtInfo), addMCCorrectionSmearing);
     }
 
-    double MuonCalibTool::expectedResolution(const int &DetType, columnar::MuonId mu, columnar::EventInfoId evtInfo, const bool addMCCorrectionSmearing) const
+    double MuonCalibTool::expectedResolution(const int &DetType, columnar::MuonId mu, columnar::EventInfoId<CMode> evtInfo, const bool addMCCorrectionSmearing) const
     {
         auto& acc = *m_acc;
         // Get information about data
@@ -412,7 +412,7 @@ namespace CP
     }
 
     // Internal tool function
-    MCP::MuonObj MuonCalibTool::convertToMuonObj(columnar::MuonId mu, columnar::EventInfoId evtInfo) const
+    MCP::MuonObj MuonCalibTool::convertToMuonObj(columnar::MuonId mu, columnar::EventInfoId<CMode> evtInfo) const
     {
         auto& acc = *m_acc;
         // Get information about data
@@ -522,7 +522,7 @@ namespace CP
     }
 
 
-    void MuonCalibTool::initializeRandNumbers(MCP::MuonObj& muonObj, columnar::EventInfoId evtInfo) const
+    void MuonCalibTool::initializeRandNumbers(MCP::MuonObj& muonObj, columnar::EventInfoId<CMode> evtInfo) const
     {
         auto& acc = *m_acc;
         // Random number generation for smearing
@@ -545,7 +545,7 @@ namespace CP
 
     }
 
-    MCP::DataYear MuonCalibTool::getPeriod(bool isData, columnar::EventInfoId evtInfo) const 
+    MCP::DataYear MuonCalibTool::getPeriod(bool isData, columnar::EventInfoId<CMode> evtInfo) const
     {
         // I've copied the run number ranges from SUSYTools (Run2) - Haider
         // https://gitlab.cern.ch/atlas/athena/blob/21.2/PhysicsAnalysis/SUSYPhys/SUSYTools/Root/SUSYObjDef_xAOD.cxx#L2438
@@ -641,7 +641,7 @@ namespace CP
     }
 
 
-    void MuonCalibTool::callSingleEvent (columnar::MuonRange muons, columnar::EventInfoId event) const
+    void MuonCalibTool::callSingleEvent (columnar::MuonRange muons, columnar::EventInfoId<CMode> event) const
     {
         for (columnar::MuonId muon : muons)
         {

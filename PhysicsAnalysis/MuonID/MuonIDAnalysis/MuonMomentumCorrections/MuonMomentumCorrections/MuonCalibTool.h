@@ -55,7 +55,7 @@ namespace CP {
         // Interface methods that must be defined
         // Interface - Apply the correction on a modifyable object
         virtual CorrectionCode applyCorrection(xAOD::Muon& mu) const override;
-        CorrectionCode applyCorrection(columnar::MuonId mu, columnar::EventInfoId evtInfo) const;
+        CorrectionCode applyCorrection(columnar::MuonId mu, columnar::EventInfoId<CMode> evtInfo) const;
         // Interface - Create a corrected copy from a constant muon
         virtual CorrectionCode correctedCopy(const xAOD::Muon& input, xAOD::Muon*& output) const override;
         // Interface - Is the tool affected by a specific systematic?
@@ -70,7 +70,7 @@ namespace CP {
         virtual double expectedResolution(const std::string& DetType, const xAOD::Muon& mu, const bool addMCCorrectionSmearing) const override;
         // Interface - get the expected resolution of the muon
         virtual double expectedResolution(const int& DetType, const xAOD::Muon& mu, const bool addMCCorrectionSmearing) const override;
-        double expectedResolution(const int& DetType, columnar::MuonId mu, columnar::EventInfoId evtInfo, const bool addMCCorrectionSmearing) const;
+        double expectedResolution(const int& DetType, columnar::MuonId mu, columnar::EventInfoId<CMode> evtInfo, const bool addMCCorrectionSmearing) const;
         // Interface - Expert method to apply the MC correction on a modifyable trackParticle for ID- or MS-only corrections
         virtual CorrectionCode applyCorrectionTrkOnly(xAOD::TrackParticle& inTrk, const int DetType) const override;
 
@@ -128,13 +128,13 @@ namespace CP {
 
         // internal tool function
         // Converts xAOD object to an internal MuonObj for easier transfer of information
-        MCP::MuonObj convertToMuonObj(columnar::MuonId mu, columnar::EventInfoId evtInfo) const;
+        MCP::MuonObj convertToMuonObj(columnar::MuonId mu, columnar::EventInfoId<CMode> evtInfo) const;
         MCP::MuonObj convertToMuonObj(const xAOD::TrackParticle& inTrk, const int DetType) const;
         /// Decorate all information that's needed to ensure reproducibility of the smearing
-        void initializeRandNumbers(MCP::MuonObj& obj, columnar::EventInfoId evtInfo) const;
+        void initializeRandNumbers(MCP::MuonObj& obj, columnar::EventInfoId<CMode> evtInfo) const;
 
 
-        MCP::DataYear getPeriod(bool isData, columnar::EventInfoId evtInfo) const; 
+        MCP::DataYear getPeriod(bool isData, columnar::EventInfoId<CMode> evtInfo) const;
 
    private:
 
@@ -146,7 +146,7 @@ namespace CP {
 
         std::unique_ptr<MCP::MuonCalibToolAccessors> m_acc {std::make_unique<MCP::MuonCalibToolAccessors>(*this)};
 
-        void callSingleEvent (columnar::MuonRange muons, columnar::EventInfoId event) const;
+        void callSingleEvent (columnar::MuonRange muons, columnar::EventInfoId<CMode> event) const;
         void callEvents (columnar::EventContextRange<CMode> events) const override;
 
     };  // class MuonCalibTool

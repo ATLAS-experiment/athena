@@ -36,17 +36,17 @@ namespace MCP {
     /// Accessors for the MuonCalibTool
     struct MuonCalibToolAccessors : public columnar::ColumnarTool<CMode> {
         MuonCalibToolAccessors(columnar::ColumnarTool<CMode>& base) : columnar::ColumnarTool<CMode>(&base) {}
-        columnar::EventInfoAccessor<columnar::ObjectColumn> m_eventInfoCol {*this, "EventInfo", {.addMTDependency=true}};
+        columnar::EventInfoAccessor<columnar::ObjectColumn,CMode> m_eventInfoCol {*this, "EventInfo", {.addMTDependency=true}};
         columnar::MuonAccessor<columnar::ObjectColumn> m_muons {*this, "Muons"};
         columnar::Track0Accessor<columnar::ObjectColumn> m_tracksID {*this, "InDetTrackParticles"};
         columnar::Track1Accessor<columnar::ObjectColumn> m_tracksCB {*this, "CombinedMuonTrackParticles"};
         columnar::Track2Accessor<columnar::ObjectColumn> m_tracksME {*this, "ExtrapolatedMuonTrackParticles"};
         columnar::Track3Accessor<columnar::ObjectColumn> m_tracksFID {*this, "InDetForwardTrackParticles"};
 
-        columnar::EventInfoHelpers::EventTypeAccessor<> eventTypeAcc {*this};
-        columnar::EventInfoAccessor<uint32_t> runNumberAcc {*this, "runNumber"};
-        columnar::EventInfoAccessor<uint64_t> eventNumberAcc {*this, "eventNumber"};
-        columnar::EventInfoAccessor<unsigned int> acc_rnd{*this, "RandomRunNumber"};
+        columnar::EventInfoHelpers::EventTypeAccessor<CMode> eventTypeAcc {*this};
+        columnar::EventInfoAccessor<uint32_t,CMode> runNumberAcc {*this, "runNumber"};
+        columnar::EventInfoAccessor<uint64_t,CMode> eventNumberAcc {*this, "eventNumber"};
+        columnar::EventInfoAccessor<unsigned int,CMode> acc_rnd{*this, "RandomRunNumber"};
 
         columnar::MuonAccessor<columnar::RetypeColumn<double,float>> ptAcc {*this, "pt"};
         columnar::MuonDecorator<float> ptOutDec {*this, "ptOut", {.replacesColumn = "pt"}};

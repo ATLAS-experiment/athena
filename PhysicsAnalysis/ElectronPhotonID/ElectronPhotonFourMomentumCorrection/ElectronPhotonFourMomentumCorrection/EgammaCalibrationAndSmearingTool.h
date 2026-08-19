@@ -200,7 +200,7 @@ class EgammaCalibrationAndSmearingTool
                               // properties (true/false/automatic)
   typedef unsigned int RandomNumber;
   typedef std::function<int(const EgammaCalibrationAndSmearingTool&,
-                            columnar::EgammaId, columnar::EventInfoId)>
+                            columnar::EgammaId, columnar::EventInfoId<CMode>)>
       IdFunction;
   typedef std::function<bool(const EgammaCalibrationAndSmearingTool&, columnar::EgammaId)> EgammaPredicate;
 
@@ -211,7 +211,7 @@ class EgammaCalibrationAndSmearingTool
 
   // Apply the correction on a modifyable egamma object
   virtual CP::CorrectionCode applyCorrection(xAOD::Egamma&) const override;
-  CP::CorrectionCode applyCorrection(columnar::MutableEgammaId input, columnar::EventInfoId event_info) const;
+  CP::CorrectionCode applyCorrection(columnar::MutableEgammaId input, columnar::EventInfoId<CMode> event_info) const;
   void setPt(columnar::MutableEgammaId input, double energy) const;
 
   // Create a corrected copy from a constant egamma object
@@ -443,9 +443,9 @@ class EgammaCalibrationAndSmearingTool
   IdFunction m_set_seed_function;
 
   inline egEnergyCorr::Scale::Variation oldtool_scale_flag_this_event(
-      columnar::EgammaId p, columnar::EventInfoId event_info) const;
+      columnar::EgammaId p, columnar::EventInfoId<CMode> event_info) const;
   inline egEnergyCorr::Resolution::Variation oldtool_resolution_flag_this_event(
-      columnar::EgammaId p, columnar::EventInfoId event_info) const;
+      columnar::EgammaId p, columnar::EventInfoId<CMode> event_info) const;
 
   // columnar data handles
 public:
@@ -479,16 +479,16 @@ public:
     columnar::ClusterHelpers::EtaBEAccessor<CMode> clusterEtaBEAcc {*this};
     columnar::ClusterHelpers::EtaCaloAccessor<CMode> etaCaloAcc {*this};
     columnar::ClusterHelpers::PhiCaloAccessor<CMode> phiCaloAcc {*this};
-    columnar::EventInfoAccessor<columnar::ObjectColumn> m_eventHandle {*this, "EventInfo", {.addMTDependency=true}};
-    columnar::EventInfoHelpers::EventTypeAccessor<> eventTypeAcc {*this};
-    columnar::EventInfoAccessor<uint32_t> runNumberAcc {*this, "runNumber"};
-    columnar::EventInfoAccessor<uint64_t> eventNumberAcc {*this, "eventNumber"};
-    columnar::EventInfoAccessor<unsigned int> randomrunnumber_getter {*this, "RandomRunNumber"};
-    columnar::EventInfoAccessor<float> actIntPerXingAcc {*this, "actualInteractionsPerCrossing"};
+    columnar::EventInfoAccessor<columnar::ObjectColumn,CMode> m_eventHandle {*this, "EventInfo", {.addMTDependency=true}};
+    columnar::EventInfoHelpers::EventTypeAccessor<CMode> eventTypeAcc {*this};
+    columnar::EventInfoAccessor<uint32_t,CMode> runNumberAcc {*this, "runNumber"};
+    columnar::EventInfoAccessor<uint64_t,CMode> eventNumberAcc {*this, "eventNumber"};
+    columnar::EventInfoAccessor<unsigned int,CMode> randomrunnumber_getter {*this, "RandomRunNumber"};
+    columnar::EventInfoAccessor<float,CMode> actIntPerXingAcc {*this, "actualInteractionsPerCrossing"};
   };
   std::unique_ptr<Accessors> m_accessors;
 
-  void callSingleEvent (columnar::MutableEgammaRange egammas, columnar::EventInfoId event) const;
+  void callSingleEvent (columnar::MutableEgammaRange egammas, columnar::EventInfoId<CMode> event) const;
   void callEvents (columnar::EventContextRange<CMode> events) const override;
 };
 

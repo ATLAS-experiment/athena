@@ -752,7 +752,7 @@ CP::CorrectionCode CommonEfficiencyTool::getValueTF1(const TObject* oObject,
   return CP::CorrectionCode::Ok;
 }
 
-void CommonEfficiencyTool::callSingleEvent (columnar::TauJetRange taus, columnar::EventInfoId event) const
+void CommonEfficiencyTool::callSingleEvent (columnar::TauJetRange taus, columnar::EventInfoId<CMode> event) const
 {
 
   const Accessors& acc = *m_accessors;	

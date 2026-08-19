@@ -178,7 +178,7 @@ StatusCode AsgPhotonEfficiencyCorrectionTool::initialize()
 // =============================================================================
 // The main accept method: the actual cuts are applied here 
 // =============================================================================
-CP::CorrectionCode AsgPhotonEfficiencyCorrectionTool::calculate( columnar::EgammaId egam, columnar::EventInfoId eventInfo, Result& result ) const
+CP::CorrectionCode AsgPhotonEfficiencyCorrectionTool::calculate( columnar::EgammaId egam, columnar::EventInfoId<CMode> eventInfo, Result& result ) const
 {
   const auto& acc = *m_accessors;
 
@@ -303,10 +303,10 @@ CP::CorrectionCode AsgPhotonEfficiencyCorrectionTool::getEfficiencyScaleFactor(c
     return CP::CorrectionCode::Error;
   }
 
-  return getEfficiencyScaleFactor(columnar::EgammaId{inputObject}, columnar::EventInfoId{*eventInfo}, efficiencyScaleFactor);
+  return getEfficiencyScaleFactor(columnar::EgammaId{inputObject}, columnar::EventInfoId<CMode>{*eventInfo}, efficiencyScaleFactor);
 }
 
-CP::CorrectionCode AsgPhotonEfficiencyCorrectionTool::getEfficiencyScaleFactor(columnar::EgammaId inputObject, columnar::EventInfoId eventInfo, double& efficiencyScaleFactor) const{
+CP::CorrectionCode AsgPhotonEfficiencyCorrectionTool::getEfficiencyScaleFactor(columnar::EgammaId inputObject, columnar::EventInfoId<CMode> eventInfo, double& efficiencyScaleFactor) const{
   
   Result sfresult;
   CP::CorrectionCode status = calculate(inputObject, eventInfo, sfresult);
@@ -337,10 +337,10 @@ CP::CorrectionCode AsgPhotonEfficiencyCorrectionTool::getEfficiencyScaleFactorEr
     return CP::CorrectionCode::Error;
   }
 
-  return getEfficiencyScaleFactorError(columnar::EgammaId{inputObject}, columnar::EventInfoId{*eventInfo}, efficiencyScaleFactorError);
+  return getEfficiencyScaleFactorError(columnar::EgammaId{inputObject}, columnar::EventInfoId<CMode>{*eventInfo}, efficiencyScaleFactorError);
 }
 
-CP::CorrectionCode AsgPhotonEfficiencyCorrectionTool::getEfficiencyScaleFactorError(columnar::EgammaId inputObject, columnar::EventInfoId eventInfo, double& efficiencyScaleFactorError) const{   
+CP::CorrectionCode AsgPhotonEfficiencyCorrectionTool::getEfficiencyScaleFactorError(columnar::EgammaId inputObject, columnar::EventInfoId<CMode> eventInfo, double& efficiencyScaleFactorError) const{
 
   Result sfresult;
   CP::CorrectionCode status = calculate(inputObject, eventInfo, sfresult);
@@ -476,7 +476,7 @@ std::string AsgPhotonEfficiencyCorrectionTool::getFileName(const std::string& is
 
 }
 
-void AsgPhotonEfficiencyCorrectionTool::callSingleEvent (columnar::EgammaRange photons, columnar::EventInfoId event) const
+void AsgPhotonEfficiencyCorrectionTool::callSingleEvent (columnar::EgammaRange photons, columnar::EventInfoId<CMode> event) const
 {
   const Accessors& acc = *m_accessors;
   for (auto photon : photons)

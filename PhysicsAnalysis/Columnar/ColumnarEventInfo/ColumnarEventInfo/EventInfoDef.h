@@ -28,11 +28,11 @@ namespace columnar
     static constexpr bool perEventId = true;
   };
 
-  using EventInfoRange = ObjectRange<EventInfoDef, ColumnarModeDefault>;
-  using EventInfoId = ObjectId<EventInfoDef, ColumnarModeDefault>;
-  using OptEventInfoId = OptObjectId<EventInfoDef, ColumnarModeDefault>;
-  template<typename CT,typename CM=ColumnarModeDefault> using EventInfoAccessor  = AccessorTemplate<EventInfoDef,CT,ColumnAccessMode::input,CM>;
-  template<typename CT,typename CM=ColumnarModeDefault> using EventInfoDecorator = AccessorTemplate<EventInfoDef,CT,ColumnAccessMode::output,CM>;
+  template<ColumnarMode CM> using EventInfoRange = ObjectRange<EventInfoDef,CM>;
+  template<ColumnarMode CM> using EventInfoId = ObjectId<EventInfoDef,CM>;
+  template<ColumnarMode CM> using OptEventInfoId = OptObjectId<EventInfoDef,CM>;
+  template<typename CT,ColumnarMode CM> using EventInfoAccessor  = AccessorTemplate<EventInfoDef,CT,ColumnAccessMode::input,CM>;
+  template<typename CT,ColumnarMode CM> using EventInfoDecorator = AccessorTemplate<EventInfoDef,CT,ColumnAccessMode::output,CM>;
 }
 
 #endif

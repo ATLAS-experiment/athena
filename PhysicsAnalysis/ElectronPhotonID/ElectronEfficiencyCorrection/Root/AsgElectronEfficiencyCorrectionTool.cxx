@@ -340,14 +340,14 @@ AsgElectronEfficiencyCorrectionTool::getEfficiencyScaleFactor(
     ATH_MSG_ERROR("Could not retrieve EventInfo object!");
     return CP::CorrectionCode::Error;
   }
-  return getEfficiencyScaleFactor(columnar::ElectronId(inputObject), efficiencyScaleFactor, columnar::EventInfoId (*eventInfo));
+  return getEfficiencyScaleFactor(columnar::ElectronId(inputObject), efficiencyScaleFactor, columnar::EventInfoId<CMode> (*eventInfo));
 }
 
 CP::CorrectionCode
 AsgElectronEfficiencyCorrectionTool::getEfficiencyScaleFactor(
   columnar::ElectronId inputObject,
   double& efficiencyScaleFactor,
-  columnar::EventInfoId eventInfo) const
+  columnar::EventInfoId<CMode> eventInfo) const
 {
   const Accessors& acc = *m_accessors;
 
@@ -1001,7 +1001,7 @@ AsgElectronEfficiencyCorrectionTool::get_simType_from_metadata(
 
 
 
-void AsgElectronEfficiencyCorrectionTool::callSingleEvent (columnar::ElectronRange electrons, columnar::EventInfoId event) const
+void AsgElectronEfficiencyCorrectionTool::callSingleEvent (columnar::ElectronRange electrons, columnar::EventInfoId<CMode> event) const
 {
   const Accessors& acc = *m_accessors;
   for (columnar::ElectronId electron : electrons)

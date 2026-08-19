@@ -18,10 +18,10 @@ namespace CP {
 
     struct MuonEfficiencyScaleFactors::Accessors : public columnar::ColumnarTool<CMode>
     {
-        columnar::EventInfoAccessor<columnar::ObjectColumn> eventInfoCol {*this, "EventInfo"};
-        columnar::EventInfoHelpers::EventTypeAccessor<> eventTypeAcc {*this};
-        columnar::EventInfoAccessor<uint32_t> runNumberAcc {*this, "runNumber"};
-        columnar::EventInfoAccessor<unsigned int> acc_rnd{*this, "RandomRunNumber"};
+        columnar::EventInfoAccessor<columnar::ObjectColumn,CMode> eventInfoCol {*this, "EventInfo"};
+        columnar::EventInfoHelpers::EventTypeAccessor<CMode> eventTypeAcc {*this};
+        columnar::EventInfoAccessor<uint32_t,CMode> runNumberAcc {*this, "runNumber"};
+        columnar::EventInfoAccessor<unsigned int,CMode> acc_rnd{*this, "RandomRunNumber"};
 
         columnar::MuonAccessor<columnar::ObjectColumn> muons {*this, "Muons"};
         columnar::MuonDecorator<float> sfDec {*this, "sfOut"};
@@ -242,9 +242,9 @@ namespace CP {
                 return 999999;
             }
         }
-        return getRandomRunNumber (columnar::EventInfoId (*info));
+        return getRandomRunNumber (columnar::EventInfoId<CMode> (*info));
     }
-    unsigned int MuonEfficiencyScaleFactors::getRandomRunNumber(columnar::EventInfoId info) const {
+    unsigned int MuonEfficiencyScaleFactors::getRandomRunNumber(columnar::EventInfoId<CMode> info) const {
         const auto& acc = *m_accessors;
         if (!acc.eventTypeAcc(info,xAOD::EventInfo::IS_SIMULATION)) {
             ATH_MSG_DEBUG("The current event is a data event. Return runNumber instead.");
@@ -272,9 +272,9 @@ namespace CP {
                 return CorrectionCode::Error;
             }
         }
-        return getEfficiencyScaleFactor (columnar::MuonId (mu), sf, columnar::EventInfoId(*info));
+        return getEfficiencyScaleFactor (columnar::MuonId (mu), sf, columnar::EventInfoId<CMode>(*info));
     }
-    CorrectionCode MuonEfficiencyScaleFactors::getEfficiencyScaleFactor(columnar::MuonId mu, float& sf, columnar::EventInfoId info) const {
+    CorrectionCode MuonEfficiencyScaleFactors::getEfficiencyScaleFactor(columnar::MuonId mu, float& sf, columnar::EventInfoId<CMode> info) const {
         if (!m_init) {
             ATH_MSG_ERROR("The tool has not been initialized yet.");
             return CorrectionCode::Error;
@@ -683,7 +683,7 @@ namespace CP {
       return "unknown bin";
     }
 
-    void MuonEfficiencyScaleFactors::callSingleEvent (columnar::MuonRange muons, columnar::EventInfoId event) const
+    void MuonEfficiencyScaleFactors::callSingleEvent (columnar::MuonRange muons, columnar::EventInfoId<CMode> event) const
     {
         const auto& acc = *m_accessors;
         for (columnar::MuonId muon : muons)

@@ -167,8 +167,8 @@ public:
   {
     Accessors(CommonEfficiencyTool& tool) : columnar::ColumnarTool<CMode>(&tool) {}
 
-    columnar::EventInfoAccessor<columnar::ObjectColumn> m_eventInfo {*this, "EventInfo", {.addMTDependency=true}};
-    columnar::EventInfoAccessor<uint32_t> randomrunnumber;
+    columnar::EventInfoAccessor<columnar::ObjectColumn,CMode> m_eventInfo {*this, "EventInfo", {.addMTDependency=true}};
+    columnar::EventInfoAccessor<uint32_t,CMode> randomrunnumber;
 
     // Associated truth particles and jets. These are picked up by truth
     // links on the tau itself.
@@ -186,7 +186,7 @@ public:
   };
   std::unique_ptr<Accessors> m_accessors;
 
-  void callSingleEvent (columnar::TauJetRange taus, columnar::EventInfoId event) const;
+  void callSingleEvent (columnar::TauJetRange taus, columnar::EventInfoId<CMode> event) const;
   void callEvents (columnar::EventContextRange<CMode> events) const override;
 
 

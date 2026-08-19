@@ -83,7 +83,7 @@ public:
   CP::CorrectionCode getEfficiencyScaleFactor(
     columnar::ElectronId inputObject,
     double& efficiencyScaleFactor,
-    columnar::EventInfoId info) const;
+    columnar::EventInfoId<CMode> info) const;
   //
   virtual CP::CorrectionCode getEfficiencyScaleFactor(
     const double et,  /*in MeV*/
@@ -237,8 +237,8 @@ public:
   {
     Accessors(AsgElectronEfficiencyCorrectionTool& tool) : columnar::ColumnarTool<CMode>(&tool) {}
 
-    columnar::EventInfoAccessor<columnar::ObjectColumn> m_eventInfo {*this, "EventInfo", {.addMTDependency=true}};
-    columnar::EventInfoAccessor<uint32_t> randomrunnumber;
+    columnar::EventInfoAccessor<columnar::ObjectColumn,CMode> m_eventInfo {*this, "EventInfo", {.addMTDependency=true}};
+    columnar::EventInfoAccessor<uint32_t,CMode> randomrunnumber;
   
     columnar::ElectronAccessor<columnar::ObjectColumn> m_electrons {*this, "Electrons"};
     columnar::ElectronAccessor<float> m_eta{*this,"eta"};
@@ -255,7 +255,7 @@ public:
   };
   std::unique_ptr<Accessors> m_accessors;
 
-  void callSingleEvent (columnar::ElectronRange electrons, columnar::EventInfoId event) const;
+  void callSingleEvent (columnar::ElectronRange electrons, columnar::EventInfoId<CMode> event) const;
   void callEvents (columnar::EventContextRange<CMode> events) const override;
 
 }; // End: class definition

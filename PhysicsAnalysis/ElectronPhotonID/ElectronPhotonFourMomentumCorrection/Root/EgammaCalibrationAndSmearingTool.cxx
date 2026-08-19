@@ -299,7 +299,7 @@ EgammaCalibrationAndSmearingTool::EgammaCalibrationAndSmearingTool(
       m_currentResolutionVariation_data(egEnergyCorr::Resolution::None),
       m_set_seed_function([](const EgammaCalibrationAndSmearingTool& tool,
                              columnar::EgammaId egamma,
-                             columnar::EventInfoId ei) {
+                             columnar::EventInfoId<CMode> ei) {
         const Accessors& acc = *tool.m_accessors;
         // avoid 0 as result, see
         // https://root.cern.ch/root/html/TRandom3.html#TRandom3:SetSeed
@@ -1021,7 +1021,7 @@ double EgammaCalibrationAndSmearingTool::getEnergy(
 }
 
 CP::CorrectionCode EgammaCalibrationAndSmearingTool::applyCorrection(
-    columnar::MutableEgammaId input, columnar::EventInfoId event_info) const {
+    columnar::MutableEgammaId input, columnar::EventInfoId<CMode> event_info) const {
   const Accessors& acc = *m_accessors;
 
   // only used in simulation (for the smearing)
@@ -1293,7 +1293,7 @@ double EgammaCalibrationAndSmearingTool::getEnergy(
 
 egEnergyCorr::Scale::Variation
 EgammaCalibrationAndSmearingTool::oldtool_scale_flag_this_event(
-    columnar::EgammaId p, columnar::EventInfoId event_info) const {
+    columnar::EgammaId p, columnar::EventInfoId<CMode> event_info) const {
   const Accessors& acc = *m_accessors;
   if (!acc.eventTypeAcc (event_info, xAOD::EventInfo::IS_SIMULATION))
     return m_currentScaleVariation_data;
@@ -1305,7 +1305,7 @@ EgammaCalibrationAndSmearingTool::oldtool_scale_flag_this_event(
 
 egEnergyCorr::Resolution::Variation
 EgammaCalibrationAndSmearingTool::oldtool_resolution_flag_this_event(
-    columnar::EgammaId, columnar::EventInfoId event_info) const {
+    columnar::EgammaId, columnar::EventInfoId<CMode> event_info) const {
   const Accessors& acc = *m_accessors;
   return acc.eventTypeAcc (event_info, xAOD::EventInfo::IS_SIMULATION)
              ? m_currentResolutionVariation_MC
@@ -2592,7 +2592,7 @@ double EgammaCalibrationAndSmearingTool::correction_phi_unif(double eta,
 }
 
 void EgammaCalibrationAndSmearingTool ::
-callSingleEvent (columnar::MutableEgammaRange egammas, columnar::EventInfoId event) const
+callSingleEvent (columnar::MutableEgammaRange egammas, columnar::EventInfoId<CMode> event) const
 {
   for (auto egamma : egammas) {
     if (applyCorrection (egamma, event) != CP::CorrectionCode::Ok)

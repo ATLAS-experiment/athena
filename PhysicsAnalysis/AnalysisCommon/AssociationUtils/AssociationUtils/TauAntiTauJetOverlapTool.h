@@ -130,11 +130,11 @@ namespace ORUtils
       /// Columnar accessors
       struct Accessors final : columnar::ColumnarTool<CMode>
       {
-        columnar::EventInfoAccessor<std::uint64_t> m_eventNumberAcc {*this, "eventNumber"};
+        columnar::EventInfoAccessor<std::uint64_t,CMode> m_eventNumberAcc {*this, "eventNumber"};
         columnar::Particle2Accessor<int,CMode> m_categoryAcc;
 
         /// Columnar accessors
-        columnar::EventInfoAccessor<columnar::ObjectColumn> m_evtAcc;
+        columnar::EventInfoAccessor<columnar::ObjectColumn,CMode> m_evtAcc;
 
         /// BJet helper
         columnar::Particle1Accessor<char,CMode> m_bJetAcc;
