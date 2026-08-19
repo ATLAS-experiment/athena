@@ -81,7 +81,7 @@ public:
     const xAOD::Electron& inputObject,
     double& efficiencyScaleFactor) const override final;
   CP::CorrectionCode getEfficiencyScaleFactor(
-    columnar::ElectronId inputObject,
+    columnar::ElectronId<CMode> inputObject,
     double& efficiencyScaleFactor,
     columnar::EventInfoId<CMode> info) const;
   //
@@ -120,7 +120,7 @@ public:
   virtual int systUncorrVariationIndex(
     const xAOD::Electron& inputObject) const override final;
   int systUncorrVariationIndex(
-    columnar::ElectronId inputObject) const;
+    columnar::ElectronId<CMode> inputObject) const;
 
 private:
   StatusCode registerSystematics();
@@ -240,22 +240,22 @@ public:
     columnar::EventInfoAccessor<columnar::ObjectColumn,CMode> m_eventInfo {*this, "EventInfo", {.addMTDependency=true}};
     columnar::EventInfoAccessor<uint32_t,CMode> randomrunnumber;
   
-    columnar::ElectronAccessor<columnar::ObjectColumn> m_electrons {*this, "Electrons"};
-    columnar::ElectronAccessor<float> m_eta{*this,"eta"};
-    columnar::ElectronAccessor<float> m_pt{*this,"pt"};
-    columnar::ElectronAccessor<uint16_t> accAuthor{*this,"author"};
-    columnar::ElectronDecorator<float> m_sfDec{*this,"sfOut"};
-    columnar::ElectronDecorator<char> m_validDec{*this,"validOut"};
+    columnar::ElectronAccessor<columnar::ObjectColumn,CMode> m_electrons {*this, "Electrons"};
+    columnar::ElectronAccessor<float,CMode> m_eta{*this,"eta"};
+    columnar::ElectronAccessor<float,CMode> m_pt{*this,"pt"};
+    columnar::ElectronAccessor<uint16_t,CMode> accAuthor{*this,"author"};
+    columnar::ElectronDecorator<float,CMode> m_sfDec{*this,"sfOut"};
+    columnar::ElectronDecorator<char,CMode> m_validDec{*this,"validOut"};
   
     columnar::ClusterAccessor<columnar::ObjectColumn,CMode> m_clusterHandle {*this, "egammaClusters"};
-    columnar::ElectronAccessor<std::vector<columnar::OptClusterId<CMode>>> caloClusterAcc {*this, "caloClusterLinks"};
+    columnar::ElectronAccessor<std::vector<columnar::OptClusterId<CMode>>,CMode> caloClusterAcc {*this, "caloClusterLinks"};
     columnar::ClusterAccessor<float,CMode> clusterEAcc {*this, "calE"};
     columnar::ClusterAccessor<float,CMode> clusterEtaAcc {*this, "calEta"};
     columnar::ClusterHelpers::EtaBEAccessor<CMode> clusterEtaBEAcc {*this};
   };
   std::unique_ptr<Accessors> m_accessors;
 
-  void callSingleEvent (columnar::ElectronRange electrons, columnar::EventInfoId<CMode> event) const;
+  void callSingleEvent (columnar::ElectronRange<CMode> electrons, columnar::EventInfoId<CMode> event) const;
   void callEvents (columnar::EventContextRange<CMode> events) const override;
 
 }; // End: class definition

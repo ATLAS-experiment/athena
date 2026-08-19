@@ -31,29 +31,29 @@ namespace columnar
   };
   using MutableEgammaDef = MutableContainerId<EgammaDef>;
 
-  using ElectronRange = ObjectRange<ElectronDef, ColumnarModeDefault>;
-  using ElectronId = ObjectId<ElectronDef, ColumnarModeDefault>;
-  using OptElectronId = OptObjectId<ElectronDef, ColumnarModeDefault>;
-  template<typename CT,typename CM=ColumnarModeDefault> using ElectronAccessor  = AccessorTemplate<ElectronDef,CT,ColumnAccessMode::input,CM>;
-  template<typename CT,typename CM=ColumnarModeDefault> using ElectronDecorator = AccessorTemplate<ElectronDef,CT,ColumnAccessMode::output,CM>;
+  template<ColumnarMode CM> using ElectronRange = ObjectRange<ElectronDef,CM>;
+  template<ColumnarMode CM> using ElectronId = ObjectId<ElectronDef,CM>;
+  template<ColumnarMode CM> using OptElectronId = OptObjectId<ElectronDef,CM>;
+  template<typename CT, ColumnarMode CM> using ElectronAccessor  = AccessorTemplate<ElectronDef,CT,ColumnAccessMode::input,CM>;
+  template<typename CT, ColumnarMode CM> using ElectronDecorator = AccessorTemplate<ElectronDef,CT,ColumnAccessMode::output,CM>;
 
-  using PhotonRange = ObjectRange<PhotonDef, ColumnarModeDefault>;
-  using PhotonId = ObjectId<PhotonDef, ColumnarModeDefault>;
-  using OptPhotonId = OptObjectId<PhotonDef, ColumnarModeDefault>;
-  template<typename CT,typename CM=ColumnarModeDefault> using PhotonAccessor  = AccessorTemplate<PhotonDef,CT,ColumnAccessMode::input,CM>;
-  template<typename CT,typename CM=ColumnarModeDefault> using PhotonDecorator = AccessorTemplate<PhotonDef,CT,ColumnAccessMode::output,CM>;
+  template<ColumnarMode CM> using PhotonRange = ObjectRange<PhotonDef,CM>;
+  template<ColumnarMode CM> using PhotonId = ObjectId<PhotonDef,CM>;
+  template<ColumnarMode CM> using OptPhotonId = OptObjectId<PhotonDef,CM>;
+  template<typename CT, ColumnarMode CM> using PhotonAccessor  = AccessorTemplate<PhotonDef,CT,ColumnAccessMode::input,CM>;
+  template<typename CT, ColumnarMode CM> using PhotonDecorator = AccessorTemplate<PhotonDef,CT,ColumnAccessMode::output,CM>;
 
-  using EgammaRange = ObjectRange<EgammaDef, ColumnarModeDefault>;
-  using EgammaId = ObjectId<EgammaDef, ColumnarModeDefault>;
-  using OptEgammaId = OptObjectId<EgammaDef, ColumnarModeDefault>;
-  template<typename CT,typename CM=ColumnarModeDefault> using EgammaAccessor  = AccessorTemplate<EgammaDef,CT,ColumnAccessMode::input,CM>;
-  template<typename CT,typename CM=ColumnarModeDefault> using EgammaDecorator = AccessorTemplate<EgammaDef,CT,ColumnAccessMode::output,CM>;
+  template<ColumnarMode CM> using EgammaRange = ObjectRange<EgammaDef,CM>;
+  template<ColumnarMode CM> using EgammaId = ObjectId<EgammaDef,CM>;
+  template<ColumnarMode CM> using OptEgammaId = OptObjectId<EgammaDef,CM>;
+  template<typename CT, ColumnarMode CM> using EgammaAccessor  = AccessorTemplate<EgammaDef,CT,ColumnAccessMode::input,CM>;
+  template<typename CT, ColumnarMode CM> using EgammaDecorator = AccessorTemplate<EgammaDef,CT,ColumnAccessMode::output,CM>;
 
-  using MutableEgammaRange = ObjectRange<MutableEgammaDef, ColumnarModeDefault>;
-  using MutableEgammaId = ObjectId<MutableEgammaDef, ColumnarModeDefault>;
-  using OptMutableEgammaId = OptObjectId<MutableEgammaDef, ColumnarModeDefault>;
-  template<typename CT,typename CM=ColumnarModeDefault> using MutableEgammaAccessor  = AccessorTemplate<MutableEgammaDef,CT,ColumnAccessMode::input,CM>;
-  template<typename CT,typename CM=ColumnarModeDefault> using MutableEgammaDecorator = AccessorTemplate<MutableEgammaDef,CT,ColumnAccessMode::output,CM>;
+  template<ColumnarMode CM> using MutableEgammaRange = ObjectRange<MutableEgammaDef,CM>;
+  template<ColumnarMode CM> using MutableEgammaId = ObjectId<MutableEgammaDef,CM>;
+  template<ColumnarMode CM> using OptMutableEgammaId = OptObjectId<MutableEgammaDef,CM>;
+  template<typename CT, ColumnarMode CM> using MutableEgammaAccessor  = AccessorTemplate<MutableEgammaDef,CT,ColumnAccessMode::input,CM>;
+  template<typename CT, ColumnarMode CM> using MutableEgammaDecorator = AccessorTemplate<MutableEgammaDef,CT,ColumnAccessMode::output,CM>;
 }
 
 #endif

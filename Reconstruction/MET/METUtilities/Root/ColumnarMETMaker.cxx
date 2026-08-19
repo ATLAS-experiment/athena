@@ -787,7 +787,7 @@ namespace met {
       float total_eloss(0);
       MissingETBase::Types::bitmask_t muons_selflags(0);
       std::vector<columnar::MuonId> muons_in_jet;
-      std::vector<columnar::ElectronId> electrons_in_jet;
+      std::vector<columnar::ElectronId<CMode>> electrons_in_jet;
       bool passJetForEl=false;
       if(m_useGhostMuons) { // for backwards-compatibility
         if(!acc_ghostMuons.isAvailable(jet.getXAODObject())){

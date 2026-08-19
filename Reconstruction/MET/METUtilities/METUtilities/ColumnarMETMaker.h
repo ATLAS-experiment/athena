@@ -282,8 +282,8 @@ namespace met {
     columnar::ColumnAccessor<columnar::MetAssociationDef,columnar::ObjectColumn,CMode> m_metAssocHandle {*this, "MetAssoc", {.addMTDependency=true}};
     columnar::ParticleAccessor<columnar::ObjectColumn,CMode> m_particlesHandle {*this, "Particles"};
     columnar::JetAccessor<columnar::ObjectColumn> m_jetsHandle {*this, "Jets"};
-    columnar::ElectronAccessor<columnar::ObjectColumn> m_electronsHandle {*this, "Electrons"};
-    columnar::PhotonAccessor<columnar::ObjectColumn> m_photonsHandle {*this, "Photons"};
+    columnar::ElectronAccessor<columnar::ObjectColumn,CMode> m_electronsHandle {*this, "Electrons"};
+    columnar::PhotonAccessor<columnar::ObjectColumn,CMode> m_photonsHandle {*this, "Photons"};
     columnar::MuonAccessor<columnar::ObjectColumn> m_muonsHandle {*this, "Muons"};
 
     columnar::MutableMetAccessor<std::string> m_outputMetNameAcc {*this, "name"};
@@ -320,7 +320,7 @@ namespace met {
     columnar::MetHelpers::ObjectWeightDecorator<columnar::MutableMetDef,columnar::JetDef> m_jetOutputMetWeightDecRegular {*this, "", true};
     columnar::MetHelpers::ObjectWeightDecorator<columnar::MutableMetDef,columnar::JetDef> m_jetOutputMetWeightDecSoft {*this, "Soft", false};
 
-    columnar::ElectronAccessor<columnar::RetypeColumn<double,float>> m_electronPtAcc {*this, "pt"};
+    columnar::ElectronAccessor<columnar::RetypeColumn<double,float>,CMode> m_electronPtAcc {*this, "pt"};
 
     Gaudi::Property<unsigned> m_columnarOperation {this, "columnarOperation", 0};
     Gaudi::Property<std::string> m_columnarTermName {this, "columnarTermName", ""};
