@@ -8,9 +8,14 @@
 #include "G4VFastSimulationModel.hh"
 #include "FatrasG4Tool.h"
 #include "FatrasG4PhotonConversion.h"
+#include "FatrasG4ConversionFlowInference.h"
 #include "Randomize.hh"
 
+#include "CLHEP/Units/SystemOfUnits.h"
+
 #include <limits>
+#include <memory>
+#include <string>
 
 class G4FieldTrack;
 class G4SafetyHelper;
@@ -23,6 +28,7 @@ public:
   FatrasG4(const std::string& name,
            G4Region* region,
            bool doFlowConversion,
+           const std::string& flowConversionModelPath,
            FatrasG4Tool* FatrasG4Tool);
 
   ~FatrasG4() = default;
@@ -35,6 +41,11 @@ public:
   G4bool ModelTrigger(const G4FastTrack &) override final;
 
 private:
+  /** Locate the normalizing flow photon conversion ONNX model with the
+  PathResolver and open a session on it. On any failure this warns and clears
+  m_doFlowConversion, so that the ACTS fast model is used instead. **/
+  void initializeFlowModel(const std::string& flowConversionModelPath);
+
   /** Photon conversion trigger following the Geant4 Bethe-Heitler conversion
   process. Used together with the normalizing flow, which is trained on Geant4.
   Sets and returns m_doConversion. **/
@@ -53,12 +64,33 @@ private:
   Returns infinity if the process cannot be found. **/
   double g4ConversionMeanFreePath(const G4Track& track);
 
+  /** Atomic number of the element this photon converts on, chosen by the same
+  cross-section-weighted element selector G4VEmProcess uses. Returns 0 if the
+  conversion process could not be resolved. **/
+  double selectTargetZ(const G4Track& track);
+
+  /** Samples the normalizing flow for this photon and hands the resulting
+  electron positron pair to the fast step, killing the photon. **/
+  void runFlowConversion(const G4FastTrack& fastTrack, G4FastStep& fastStep);
+
+  // Energy region the fast models are used for. Checked in IsApplicable, on
+  // the track Geant4 is currently tracking.
+  static constexpr double s_minEnergy = 1.*CLHEP::GeV;
+  static constexpr double s_maxEnergy = 100.*CLHEP::GeV;
+
   // Photon conversion model
   FatrasG4PhotonConversion m_photonConversion;
   // RNG engine
   CLHEP::HepRandomEngine& m_generator;
-  // Boolean flag to enable the normalizing flow photon conversion
+  // Boolean flag to enable the normalizing flow photon conversion. Cleared by
+  // initializeFlowModel if the model cannot be loaded, which falls the model
+  // back to the ACTS photon conversion.
   bool m_doFlowConversion;
+
+  // Normalizing flow photon conversion model. One set of sessions per Geant4
+  // worker thread: makeFastSimModel, and hence this class, is constructed once
+  // per worker during detector construction.
+  std::unique_ptr<FatrasG4ConversionFlowInference> m_conversionFlow;
 
   // Set by the conversion triggers when the photon converts in the current
   // step, so that DoIt knows what it has been called for

@@ -25,7 +25,9 @@ protected:
   private:
   // Flag to enable FatrasG4 photon conversion normalizing flow
   Gaudi::Property<bool> m_flowConversion{this, "flowConversion", false, "Flag to enable normalizing flow conversion."};
- 
+  // Calibration-area-relative path of the normalizing flow photon conversion ONNX model
+  Gaudi::Property<std::string> m_flowConversionModelPath{this, "flowConversionModelPath", "", "Calibration-area-relative path of the normalizing flow photon conversion ONNX model."};
+
 };
 
 #endif //G4FASTSIMULATION_FATRASG4TOOL_H

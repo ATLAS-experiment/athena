@@ -27,6 +27,8 @@
 #include "G4ProcessManager.hh"
 #include "G4ProcessVector.hh"
 #include "G4VEmProcess.hh"
+#include "G4EventManager.hh"
+#include "G4TrackingManager.hh"
 
 #include <cmath>
 #include <limits>
@@ -37,6 +39,24 @@
 // G4 sensitive detector includes
 #include "G4SDManager.hh"
 
+// PathResolver
+#include "PathResolver/PathResolver.h"
+
+// Geant4 classes used by the normalizing flow conversion
+#include "G4VEmModel.hh"
+#include "G4Element.hh"
+#include "G4MaterialCutsCouple.hh"
+
+// CLHEP units and constants
+#include "CLHEP/Units/SystemOfUnits.h"
+#include "CLHEP/Units/PhysicalConstants.h"
+
+#include <algorithm>
+#include <cfloat>
+#include <filesystem>
+#include <numbers>
+#include <stdexcept>
+
 #define FATRASG4_DEBUG
 #define FATRASG4DOIT_DEBUG
 
@@ -44,6 +64,7 @@
 FatrasG4::FatrasG4(const std::string& name,
                          G4Region* region,
                          bool doFlowConversion,
+                         const std::string& flowConversionModelPath,
                          FatrasG4Tool * /*FatrasG4Tool*/)
 
 : G4VFastSimulationModel(name, region),
@@ -51,17 +72,74 @@ FatrasG4::FatrasG4(const std::string& name,
   m_generator(*G4Random::getTheEngine()),
   m_doFlowConversion(doFlowConversion)
 {
+  // The model is only needed by the normalizing flow conversion, so it is not
+  // loaded when the ACTS fast model is used
+  if (m_doFlowConversion) initializeFlowModel(flowConversionModelPath);
 }
 
+void FatrasG4::initializeFlowModel(const std::string& flowConversionModelPath)
+{
+  // An absolute path is taken as given, deliberately without asking the
+  // PathResolver: it logs an ERROR for absolute names, and the job transforms
+  // treat any ERROR in the log as fatal, so a perfectly good local model would
+  // otherwise fail the job. Anything else is a calibration-area-relative name
+  // and is looked up along CALIBPATH.
+  std::string resolvedModelPath;
+  if (std::filesystem::path(flowConversionModelPath).is_absolute()) {
+    if (std::filesystem::is_regular_file(flowConversionModelPath)) {
+      resolvedModelPath = flowConversionModelPath;
+    }
+  }
+  else {
+    resolvedModelPath = PathResolverFindCalibFile(flowConversionModelPath);
+  }
 
+  if (resolvedModelPath.empty()) {
+    const std::string message = "Normalizing flow photon conversion model '"
+                              + flowConversionModelPath
+                              + "' not found - falling back to the ACTS photon conversion.";
+    G4Exception("FatrasG4::initializeFlowModel", "FatrasG4NoFlowModel", JustWarning, message.c_str());
+    m_doFlowConversion = false;
+    return;
+  }
 
+  try {
+    m_conversionFlow = std::make_unique<FatrasG4ConversionFlowInference>(resolvedModelPath);
+  }
+  catch (const std::exception& e) {
+    // Ort::Exception derives from std::exception, so this covers a missing or
+    // malformed graph as well as a bad constants file
+    const std::string message = "Could not load the normalizing flow photon conversion model from '"
+                              + resolvedModelPath + "': " + e.what()
+                              + " - falling back to the ACTS photon conversion.";
+    G4Exception("FatrasG4::initializeFlowModel", "FatrasG4BadFlowModel", JustWarning, message.c_str());
+    m_conversionFlow.reset();
+    m_doFlowConversion = false;
+    return;
+  }
+
+  #ifdef FATRASG4_DEBUG
+    G4cout<<"[FatrasG4::initializeFlowModel] Loaded conversion flow from "
+          <<resolvedModelPath<<G4endl;
+  #endif
+}
 
 G4bool FatrasG4::IsApplicable(const G4ParticleDefinition& particleType)
 {
   // Check whether we can simulate the particle with FatrasG4
   bool isPhoton   = &particleType == G4Gamma::GammaDefinition();
 
-  // FatrasG4 is applicable if it is photon, electron, positron or any hadron
+  // Check particle energy
+  // for FatrasG4 we use the fast models for 1-100GeV
+  // IsApplicable is handed a particle type without a track, so the energy is
+  // taken from the track Geant4 is currently tracking: that is the very track
+  // this call is about, as Geant4 calls IsApplicable at each of its steps.
+  const G4TrackingManager * trackingManager = G4EventManager::GetEventManager() -> GetTrackingManager();
+  const G4Track * currentTrack = trackingManager ? trackingManager -> GetTrack() : nullptr;
+  const auto particleEnergy = currentTrack ? currentTrack -> GetTotalEnergy() : 0.;
+  if (particleEnergy < s_minEnergy || particleEnergy > s_maxEnergy) return false;
+
+  // FatrasG4 is applicable if it is photon (for now)
   bool isApplicable = isPhoton;
 
   #ifdef FATRASG4_DEBUG
@@ -76,6 +154,12 @@ G4bool FatrasG4::IsApplicable(const G4ParticleDefinition& particleType)
 
 G4bool FatrasG4::ModelTrigger(const G4FastTrack& fastTrack)
 {
+  // No conversion until one of the triggers below fires
+  m_doConversion = false;
+
+  // The particle type is not checked here: Geant4 only attaches this model to
+  // the particles accepted by IsApplicable, so every track seen here is a
+  // photon.
 
   #ifdef FATRASG4_DEBUG
     G4cout<<"[FatrasG4::ModelTrigger] Got particle with "                                                      <<"\n"
@@ -90,21 +174,6 @@ G4bool FatrasG4::ModelTrigger(const G4FastTrack& fastTrack)
                                     <<" phi=" <<fastTrack.GetPrimaryTrack() -> GetMomentum().phi()                <<"\n"
                                     <<G4endl;
   #endif
-  
-  // No conversion until one of the triggers below fires
-  m_doConversion = false;
-
-  const G4Track * G4PrimaryTrack = fastTrack.GetPrimaryTrack();
-  const G4ParticleDefinition * G4Particle = G4PrimaryTrack -> GetDefinition();
-
-  // Check particle type
-  bool isPhoton = G4Particle == G4Gamma::Definition();
-  if (!isPhoton) return false;
-
-  // Check particle energy
-  // for FatrasG4 we use the fast models for 1-100GeV
-  const auto particleEnergy = G4PrimaryTrack -> GetTotalEnergy();
-  if (particleEnergy < 1*CLHEP::GeV || particleEnergy > 100*CLHEP::GeV) return false;
 
   // Decide whether the photon converts in this step. The normalizing flow is
   // trained on Geant4, so it has to be handed the photons Geant4 itself would
@@ -235,6 +304,98 @@ double FatrasG4::g4ConversionMeanFreePath(const G4Track& track)
   return m_g4ConversionProcess -> MeanFreePath(track);
 }
 
+double FatrasG4::selectTargetZ(const G4Track& track)
+{
+  // The flow is conditioned on the atomic number of the element the photon
+  // converts on, so this has to be the cross-section-weighted choice rather
+  // than, say, an atom-count average: pair production goes roughly as Z^2, and
+  // the inner detector is full of composites. Reusing the conversion process
+  // already resolved for the mean free path gets exactly the element selectors
+  // the physics list built, with no second model to initialise.
+  g4ConversionMeanFreePath(track);
+  if (!m_g4ConversionProcess) return 0.;
+
+  const G4MaterialCutsCouple * couple = track.GetMaterialCutsCouple();
+  if (!couple) return 0.;
+
+  // SelectModelForMaterial is the public form of SelectModel: same model
+  // manager lookup, it just leaves the process's current couple alone, which
+  // does not matter here because SelectRandomAtom is handed the couple anyway.
+  const double energy = track.GetKineticEnergy();
+  G4VEmModel * model = m_g4ConversionProcess -> SelectModelForMaterial(energy, couple -> GetIndex());
+  if (!model) return 0.;
+
+  const G4Element * element =
+      model -> SelectRandomAtom(couple, track.GetDefinition(), energy, 0., DBL_MAX);
+
+  return element ? element -> GetZ() : 0.;
+}
+
+void FatrasG4::runFlowConversion(const G4FastTrack& fastTrack, G4FastStep& fastStep)
+{
+  const G4Track * track = fastTrack.GetPrimaryTrack();
+  const double eGamma = track -> GetTotalEnergy();
+  const double targetZ = selectTargetZ(*track);
+
+  // The one call this is all for: one graph run gives the pair kinematics
+  const FatrasG4ConversionFlowSample sampled =
+      m_conversionFlow -> sample(eGamma / CLHEP::MeV, targetZ, m_generator);
+
+  // The flow gives kinetic energies and the leading lepton's polar angle only.
+  // The sub-leading one is placed coplanar and opposite so that transverse
+  // momentum balances, and the azimuth is uniform.
+  const G4ThreeVector gammaDirection = track -> GetMomentumDirection().unit();
+  const G4ThreeVector xAxis = gammaDirection.orthogonal().unit();
+  const G4ThreeVector yAxis = gammaDirection.cross(xAxis);
+  auto direction = [&](double theta, double phi) {
+    return std::sin(theta) * std::cos(phi) * xAxis +
+           std::sin(theta) * std::sin(phi) * yAxis +
+           std::cos(theta) * gammaDirection;
+  };
+  auto momentum = [](double kineticEnergy) {
+    return std::sqrt(kineticEnergy * (kineticEnergy + 2. * CLHEP::electron_mass_c2));
+  };
+
+  const double eLead = sampled.eLead * CLHEP::MeV;
+  const double eSub = sampled.eSub * CLHEP::MeV;
+
+  const double phiLead = 2. * std::numbers::pi * m_generator.flat();
+  const double pLead = momentum(eLead);
+  const double pSub = momentum(eSub);
+  const double sinSub =
+      std::clamp((pSub > 0.) ? pLead * std::sin(sampled.thetaLead) / pSub : 0., -1., 1.);
+
+  const G4ThreeVector dirLead = direction(sampled.thetaLead, phiLead);
+  const G4ThreeVector dirSub = direction(std::asin(sinSub), phiLead + std::numbers::pi);
+
+  // The pair is sorted by energy, not by charge, so the label is drawn here.
+  const bool leadIsElectron = m_generator.flat() < 0.5;
+  const double eElectron = leadIsElectron ? eLead : eSub;
+  const double ePositron = leadIsElectron ? eSub : eLead;
+  const G4ThreeVector& dirElectron = leadIsElectron ? dirLead : dirSub;
+  const G4ThreeVector& dirPositron = leadIsElectron ? dirSub : dirLead;
+
+  const G4ThreeVector vertex = track -> GetPosition();
+  const double time = track -> GetGlobalTime();
+
+  fastStep.SetNumberOfSecondaryTracks(2);
+  fastStep.CreateSecondaryTrack(G4DynamicParticle(G4Electron::Definition(), dirElectron, eElectron),
+                                vertex, time, false);
+  fastStep.CreateSecondaryTrack(G4DynamicParticle(G4Positron::Definition(), dirPositron, ePositron),
+                                vertex, time, false);
+
+  // The photon is replaced by its pair
+  fastStep.KillPrimaryTrack();
+  fastStep.ProposePrimaryTrackPathLength(0.0);
+
+  #ifdef FATRASG4DOIT_DEBUG
+    G4cout << "[FatrasG4::runFlowConversion] E=" << eGamma << " MeV on Z=" << targetZ
+           << (sampled.isTriplet ? " (triplet)" : " (nuclear)")
+           << ": e-=" << eElectron << " e+=" << ePositron
+           << " theta=" << sampled.thetaLead << " recoil=" << sampled.eRecoil << G4endl;
+  #endif
+}
+
 void FatrasG4::DoIt(const G4FastTrack& fastTrack, G4FastStep& fastStep)
 {
     
@@ -255,19 +416,16 @@ void FatrasG4::DoIt(const G4FastTrack& fastTrack, G4FastStep& fastStep)
   // unless one of the conversion triggers has fired
   if (!m_doConversion) return;
 
-  // Consume the flag and force the next ModelTrigger call to treat the photon
-  // as a new one. Without this a photon that is not killed below would trigger
-  // again at every following step, each time with a zero length step, and the
-  // track would never advance.
+  // Start photon conversion modelling
   m_doConversion = false;
   m_photonID = -999;
 
+  // Run normalizing flow model
   if (m_doFlowConversion) {
-    // Normalizing flow conversion, not implemented yet: the photon is handed
-    // back to Geant4 untouched
     #ifdef FATRASG4DOIT_DEBUG
-      G4cout << "[FatrasG4::DoIt] Flow conversion triggered, but the model is not implemented yet." << G4endl;
+      G4cout << "[FatrasG4::DoIt] Running the normalizing flow photon conversion." << G4endl;
     #endif
+    runFlowConversion(fastTrack, fastStep);
     return;
   }
 

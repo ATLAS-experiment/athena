@@ -24,6 +24,14 @@ def FatrasG4Cfg(flags, **kwargs):
     kwargs.setdefault("RegionName", "InDet")
     # Use the normalizing flow photon conversion instead of the ACTS fast model
     kwargs.setdefault("flowConversion", True)
+    # Normalizing flow photon conversion model: the single ONNX graph written by
+    # the gammaConversion study's export_flow_onnx.py. An absolute path is used
+    # as given; anything else is looked up along CALIBPATH.
+    # DEVELOPMENT DEFAULT - this points at a private working copy. It has to
+    # become a calibration-area-relative name, e.g.
+    # "FatrasG4/PhotonConversionFlow/conversion_flow_v00.onnx", once the model
+    # has been uploaded to GroupData.
+    kwargs.setdefault("flowConversionModelPath", "/home/s2612909/onnx/conversion_flow.onnx")
     result.setPrivateTools(CompFactory.FatrasG4Tool(name="FatrasG4", **kwargs))
     return result
 

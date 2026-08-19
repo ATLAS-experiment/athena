@@ -11,14 +11,22 @@ find_package( Geant4 )
 
 # Possible extra dependencies:
 set( extra_lib )
+set( extra_inc )
 if( NOT SIMULATIONBASE )
-   set( extra_lib ISF_FastCaloSimInterfaces ISF_FastCaloSimParametrizationLib TruthUtils
-                  StoreGateLib InDetSimEvent )
+   # onnxruntime is only needed by FatrasG4, which is an Athena-only source
+   find_package( onnxruntime )
+   set( extra_lib ISF_FastCaloSimInterfaces 
+                  ISF_FastCaloSimParametrizationLib TruthUtils 
+                  StoreGateLib InDetSimEvent    # for ActsFatrasG4 (StoreGate/WriteHandleKeyArray)
+                  PathResolver CxxUtils ${ONNXRUNTIME_LIBRARIES}
+       )
+   set( extra_inc ${ONNXRUNTIME_INCLUDE_DIRS} )
 endif()
 # FastCaloSim G4VFastSimulationModel should only be used in Athena builds
 set ( extra_src )
 if( NOT SIMULATIONBASE )
-	set( extra_src src/FastCaloSim.cxx src/FastCaloSimTool.cxx src/FatrasG4.cxx src/FatrasG4Tool.cxx src/AFatrasG4.cxx src/AFatrasG4Tool.cxx  src/FatrasG4PhotonConversion.cxx )
+	set( extra_src src/FastCaloSim.cxx src/FastCaloSimTool.cxx src/FatrasG4.cxx src/FatrasG4Tool.cxx src/AFatrasG4.cxx src/AFatrasG4Tool.cxx  src/FatrasG4PhotonConversion.cxx
+	               src/FatrasG4ConversionFlowInference.cxx )
 endif()
 
 # Component(s) in the package:
@@ -27,7 +35,7 @@ atlas_add_library( G4FastSimulation
                    src/components/*.cxx
                    OBJECT
                    NO_PUBLIC_HEADERS
-                   PRIVATE_INCLUDE_DIRS ${GEANT4_INCLUDE_DIRS} ${XERCESC_INCLUDE_DIRS} ${CLHEP_INCLUDE_DIRS}
+                   PRIVATE_INCLUDE_DIRS ${GEANT4_INCLUDE_DIRS} ${XERCESC_INCLUDE_DIRS} ${CLHEP_INCLUDE_DIRS} ${extra_inc}
                    PRIVATE_LINK_LIBRARIES ${GEANT4_LIBRARIES} ${XERCESC_LIBRARIES} ${CLHEP_LIBRARIES} GaudiKernel G4AtlasToolsLib HitManagement ${extra_lib}
                 )
 
