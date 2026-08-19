@@ -15,6 +15,7 @@
 #include "AthenaKernel/RNGWrapper.h"
 #include "CLHEP/Random/RandomEngine.h"
 #include <CLHEP/Random/Randomize.h>
+#include <GaudiKernel/StatusCode.h>
 
 #include "StoreGate/WriteHandle.h"
 
@@ -387,7 +388,11 @@ StatusCode LArHitEMapToDigitAlg::MakeDigit(
      }
   }
   else {
-    ATH_MSG_WARNING(" No ramp found for this random cell " << m_larem_id->show_to_string(cellId) << " for gain " << rndmEvtDigit->gain());
+    ATH_MSG_ERROR(" No ramp found for this random cell " << m_larem_id->show_to_string(cellId) << " for gain " << rndmEvtDigit->gain());
+    if (adc2MeVs->nGains()<=(int)rndmEvtDigit->gain()) {
+      ATH_MSG_ERROR("Found ramp for only " << adc2MeVs->nGains() << " gains. Are you trying to overlay of Run 3 random with run 4 signal?");
+    }
+    return  StatusCode::FAILURE;
   }
  }
 
