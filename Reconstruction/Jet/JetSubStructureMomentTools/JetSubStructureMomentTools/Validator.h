@@ -1,19 +1,17 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef jetsubstructuremomenttools_validator_header
 #define jetsubstructuremomenttools_validator_header
 
-#include "xAODCaloEvent/CaloCluster.h"
-#include "xAODJet/Jet.h"
-#include "xAODJet/JetContainer.h"
 
 #include "GaudiKernel/ITHistSvc.h"
 #include "AsgTools/AsgTool.h"
 #include "JetInterface/IJetExecuteTool.h"
 
-class TH1;
+#include <vector>
+#include <string>
 
 class Validator :
   virtual public IJetExecuteTool,

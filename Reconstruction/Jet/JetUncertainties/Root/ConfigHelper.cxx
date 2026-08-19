@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -308,6 +308,10 @@ void ConfigHelper::setComponentJetDefSuffix(const std::string& suffix)
 
 void ConfigHelper::setComponentJetDefSuffix(const TString& suffix)
 {
+    if (!m_cInfo)[[unlikely]] {
+      ATH_MSG_WARNING("ConfigHelper::setComponentJetDefSuffix: 'm_cInfo' is nullptr.");
+      return;
+    }
     if (m_cInfo->uncNames.empty() && m_cInfo->subComps.empty())
         m_cInfo->uncNames.push_back(m_cInfo->name+"_"+suffix);
     else if (!m_cInfo->uncNames.empty())
