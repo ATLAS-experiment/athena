@@ -20,7 +20,7 @@ namespace columnar
 
   using DiTauJetRange = ObjectRange<DiTauJetDef, ColumnarModeDefault>;
   using DiTauJetId = ObjectId<DiTauJetDef, ColumnarModeDefault>;
-  using OptDiTauJetId = OptObjectId<DiTauJetDef>;
+  using OptDiTauJetId = OptObjectId<DiTauJetDef, ColumnarModeDefault>;
   template<typename CT,typename CM=ColumnarModeDefault> using DiTauJetAccessor  = AccessorTemplate<DiTauJetDef,CT,ColumnAccessMode::input,CM>;
   template<typename CT,typename CM=ColumnarModeDefault> using DiTauJetDecorator = AccessorTemplate<DiTauJetDef,CT,ColumnAccessMode::output,CM>;
 }

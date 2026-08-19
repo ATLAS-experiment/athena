@@ -203,8 +203,8 @@ namespace columnar
   // provide specific aliases for different container ids.
   template<ContainerIdConcept CI, ColumnarMode CM> class ObjectRange;
   template<ContainerIdConcept CI, ColumnarMode CM> class ObjectId;
-  template<ContainerIdConcept CI, typename CM = ColumnarModeDefault> class OptObjectId;
-  template<ContainerIdConcept CI, typename CM = ColumnarModeDefault> class ObjectLink;
+  template<ContainerIdConcept CI, ColumnarMode CM> class OptObjectId;
+  template<ContainerIdConcept CI, ColumnarMode CM> class ObjectLink;
   template<ContainerIdConcept CI,typename CT,ColumnAccessMode CAM,ColumnarMode CM> class AccessorTemplate;
 
 

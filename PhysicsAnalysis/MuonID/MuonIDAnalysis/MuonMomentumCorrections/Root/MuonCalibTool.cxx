@@ -475,9 +475,9 @@ namespace CP
             }
 
             // Use the constructor where the eta/phi are overwritten to keep it inma line with current recommendations. To be changed in the future
-            auto CB = MCP::TrackCalibObj(acc, columnar::OptObjectId<columnar::MuonTrackDef>(CB_track), MCP::TrackType::CB, charge, Primary_eta, Primary_phi, year, isData);
-            auto ID = MCP::TrackCalibObj(acc, columnar::OptObjectId<columnar::MuonTrackDef>(ID_track), MCP::TrackType::ID, charge, Primary_eta, Primary_phi, year, isData);
-            auto ME = MCP::TrackCalibObj(acc, columnar::OptObjectId<columnar::MuonTrackDef>(ME_track), MCP::TrackType::ME, charge, Primary_eta, Primary_phi, year, isData);
+            auto CB = MCP::TrackCalibObj(acc, columnar::OptObjectId<columnar::MuonTrackDef,CMode>(CB_track), MCP::TrackType::CB, charge, Primary_eta, Primary_phi, year, isData);
+            auto ID = MCP::TrackCalibObj(acc, columnar::OptObjectId<columnar::MuonTrackDef,CMode>(ID_track), MCP::TrackType::ID, charge, Primary_eta, Primary_phi, year, isData);
+            auto ME = MCP::TrackCalibObj(acc, columnar::OptObjectId<columnar::MuonTrackDef,CMode>(ME_track), MCP::TrackType::ME, charge, Primary_eta, Primary_phi, year, isData);
 
             MCP::MuonObj muonObj{CB,ID,ME};
             initializeRandNumbers(muonObj, evtInfo);

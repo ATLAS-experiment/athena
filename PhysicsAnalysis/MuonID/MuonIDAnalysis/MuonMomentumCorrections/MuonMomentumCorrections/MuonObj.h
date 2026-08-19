@@ -61,7 +61,7 @@ namespace MCP {
         columnar::MuonDecorator<float> dec_idCharge{*this, "InnerDetectorCharge"};
         columnar::MuonDecorator<float> dec_meCharge{*this, "MuonSpectrometerCharge"};
         columnar::MuonAccessor<columnar::OptTrack1Id> combinedTrackParticleLinkAcc{*this, "combinedTrackParticleLink"};
-        columnar::MuonAccessor<columnar::ObjectLink<columnar::MuonTrackDef>> inDetTrackParticleLinkAcc{*this, "inDetTrackParticleLink"};
+        columnar::MuonAccessor<columnar::ObjectLink<columnar::MuonTrackDef,CMode>> inDetTrackParticleLinkAcc{*this, "inDetTrackParticleLink"};
         columnar::MuonAccessor<columnar::OptTrack2Id> extrapolatedMuonSpectrometerTrackParticleLinkAcc{*this, "extrapolatedMuonSpectrometerTrackParticleLink"};
 
         columnar::TrackHelpers::ChargeAccessor<columnar::MuonTrackDef> trkChargeAcc {*this};
@@ -73,7 +73,7 @@ namespace MCP {
    /// Basic object to cache all relevant information from the track
    struct TrackCalibObj{
         TrackCalibObj() = default;
-        TrackCalibObj(const MuonCalibToolAccessors& acc, columnar::OptObjectId<columnar::MuonTrackDef> track, TrackType t, int charge,
+        TrackCalibObj(const MuonCalibToolAccessors& acc, columnar::OptObjectId<columnar::MuonTrackDef,CMode> track, TrackType t, int charge,
                       DataYear year, bool isData)
             : type{t},
               is_valid{track.has_value()},
@@ -92,7 +92,7 @@ namespace MCP {
                              ? acc.trkDefiningParametersCovAcc(track.value())
                              : AmgSymMatrix(5)::Zero()} {}
 
-        TrackCalibObj(const MuonCalibToolAccessors& acc, columnar::OptObjectId<columnar::MuonTrackDef> track, TrackType t, int charge,
+        TrackCalibObj(const MuonCalibToolAccessors& acc, columnar::OptObjectId<columnar::MuonTrackDef,CMode> track, TrackType t, int charge,
                       double eta, double phi, DataYear year, bool isData)
             : type{t},
               is_valid{track.has_value()},

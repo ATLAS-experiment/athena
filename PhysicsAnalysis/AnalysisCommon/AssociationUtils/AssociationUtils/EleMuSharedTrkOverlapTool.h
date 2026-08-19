@@ -102,14 +102,14 @@ namespace ORUtils
         columnar::Track1Accessor<columnar::ObjectColumn> m_track1Acc {*this, "InDetForwardTrackParticles"};
         columnar::Track2Accessor<columnar::ObjectColumn> m_track2Acc {*this, "GSFTrackParticles"};
         columnar::Particle1Accessor<std::vector<columnar::OptTrack2Id>> m_eleTrackAcc {*this, "trackParticleLinks"};
-        columnar::Particle2Accessor<columnar::ObjectLink<MyTrackDef>> m_muonTrkAcc {*this, "inDetTrackParticleLink"};
+        columnar::Particle2Accessor<columnar::ObjectLink<MyTrackDef,CMode>> m_muonTrkAcc {*this, "inDetTrackParticleLink"};
         columnar::Particle2Accessor<columnar::RetypeColumn<xAOD::Muon::MuonType,std::uint16_t>> m_muonTypeAcc {*this, "muonType"};
-        columnar::Track2Accessor<columnar::ObjectLink<MyTrackDef>> m_gsfOriginalTrackAcc {*this, "originalTrackParticle"};
+        columnar::Track2Accessor<columnar::ObjectLink<MyTrackDef,CMode>> m_gsfOriginalTrackAcc {*this, "originalTrackParticle"};
         using ColumnarTool::ColumnarTool;
       };
       std::unique_ptr<Accessors> m_accessors {std::make_unique<Accessors> (this)};
 
-      [[nodiscard]] columnar::ObjectLink<MyTrackDef> getOriginalTrackParticle(columnar::Particle1Id electron) const;
+      [[nodiscard]] columnar::ObjectLink<MyTrackDef,CMode> getOriginalTrackParticle(columnar::Particle1Id electron) const;
 
       /// Delta-R matcher
       std::unique_ptr<DeltaRMatcher> m_dRMatcher;

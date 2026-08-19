@@ -59,7 +59,7 @@ namespace ORUtils
       /// IDTrack type
       using MyTrackDef = columnar::VariantContainerId<columnar::Track0Def,columnar::Track0Def, columnar::Track1Def>;
 
-      columnar::Particle1Accessor<columnar::ObjectLink<MyTrackDef>> m_muonTrkAcc {*this, "inDetTrackParticleLink"};
+      columnar::Particle1Accessor<columnar::ObjectLink<MyTrackDef,CMode>> m_muonTrkAcc {*this, "inDetTrackParticleLink"};
 
       // Ghost track list accessor
       columnar::Particle2Accessor<std::vector<columnar::LinkCastColumn<MyTrackDef,xAOD::IParticleContainer>>> m_ghostAcc {*this, "GhostTrack"};

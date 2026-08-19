@@ -141,7 +141,7 @@ namespace ORUtils
     return StatusCode::SUCCESS;
   }
 
-  [[nodiscard]] columnar::ObjectLink<EleMuSharedTrkOverlapTool::MyTrackDef> EleMuSharedTrkOverlapTool::
+  [[nodiscard]] columnar::ObjectLink<EleMuSharedTrkOverlapTool::MyTrackDef,CMode> EleMuSharedTrkOverlapTool::
   getOriginalTrackParticle(columnar::Particle1Id electron) const
   {
     auto& acc = *m_accessors;

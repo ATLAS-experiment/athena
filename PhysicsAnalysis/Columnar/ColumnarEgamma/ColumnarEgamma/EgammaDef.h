@@ -33,25 +33,25 @@ namespace columnar
 
   using ElectronRange = ObjectRange<ElectronDef, ColumnarModeDefault>;
   using ElectronId = ObjectId<ElectronDef, ColumnarModeDefault>;
-  using OptElectronId = OptObjectId<ElectronDef>;
+  using OptElectronId = OptObjectId<ElectronDef, ColumnarModeDefault>;
   template<typename CT,typename CM=ColumnarModeDefault> using ElectronAccessor  = AccessorTemplate<ElectronDef,CT,ColumnAccessMode::input,CM>;
   template<typename CT,typename CM=ColumnarModeDefault> using ElectronDecorator = AccessorTemplate<ElectronDef,CT,ColumnAccessMode::output,CM>;
 
   using PhotonRange = ObjectRange<PhotonDef, ColumnarModeDefault>;
   using PhotonId = ObjectId<PhotonDef, ColumnarModeDefault>;
-  using OptPhotonId = OptObjectId<PhotonDef>;
+  using OptPhotonId = OptObjectId<PhotonDef, ColumnarModeDefault>;
   template<typename CT,typename CM=ColumnarModeDefault> using PhotonAccessor  = AccessorTemplate<PhotonDef,CT,ColumnAccessMode::input,CM>;
   template<typename CT,typename CM=ColumnarModeDefault> using PhotonDecorator = AccessorTemplate<PhotonDef,CT,ColumnAccessMode::output,CM>;
 
   using EgammaRange = ObjectRange<EgammaDef, ColumnarModeDefault>;
   using EgammaId = ObjectId<EgammaDef, ColumnarModeDefault>;
-  using OptEgammaId = OptObjectId<EgammaDef>;
+  using OptEgammaId = OptObjectId<EgammaDef, ColumnarModeDefault>;
   template<typename CT,typename CM=ColumnarModeDefault> using EgammaAccessor  = AccessorTemplate<EgammaDef,CT,ColumnAccessMode::input,CM>;
   template<typename CT,typename CM=ColumnarModeDefault> using EgammaDecorator = AccessorTemplate<EgammaDef,CT,ColumnAccessMode::output,CM>;
 
   using MutableEgammaRange = ObjectRange<MutableEgammaDef, ColumnarModeDefault>;
   using MutableEgammaId = ObjectId<MutableEgammaDef, ColumnarModeDefault>;
-  using OptMutableEgammaId = OptObjectId<MutableEgammaDef>;
+  using OptMutableEgammaId = OptObjectId<MutableEgammaDef, ColumnarModeDefault>;
   template<typename CT,typename CM=ColumnarModeDefault> using MutableEgammaAccessor  = AccessorTemplate<MutableEgammaDef,CT,ColumnAccessMode::input,CM>;
   template<typename CT,typename CM=ColumnarModeDefault> using MutableEgammaDecorator = AccessorTemplate<MutableEgammaDef,CT,ColumnAccessMode::output,CM>;
 }
