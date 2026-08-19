@@ -160,10 +160,10 @@ namespace ORUtils
       void setObjectFail(columnar::Particle2Id obj) const {
         m_decHelper2->setObjectFail (obj); }
       template<columnar::ContainerIdConcept CI>
-      StatusCode addObjectLink (columnar::Particle1Id p1, columnar::ObjectId<CI> p2) const {
+      StatusCode addObjectLink (columnar::Particle1Id p1, columnar::ObjectId<CI,CMode> p2) const {
         return m_objLinkHelper1->addObjectLink (p1, p2); }
       template<columnar::ContainerIdConcept CI>
-      StatusCode addObjectLink (columnar::Particle2Id p1, columnar::ObjectId<CI> p2) const {
+      StatusCode addObjectLink (columnar::Particle2Id p1, columnar::ObjectId<CI,CMode> p2) const {
         return m_objLinkHelper2->addObjectLink (p1, p2); }
 
       /// @}

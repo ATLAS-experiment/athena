@@ -19,7 +19,7 @@ namespace columnar
   };
 
   using TruthParticleRange = ObjectRange<TruthParticleDef, ColumnarModeDefault>;
-  using TruthParticleId = ObjectId<TruthParticleDef>;
+  using TruthParticleId = ObjectId<TruthParticleDef, ColumnarModeDefault>;
   using OptTruthParticleId = OptObjectId<TruthParticleDef>;
   template<typename CT,typename CM=ColumnarModeDefault> using TruthParticleAccessor  = AccessorTemplate<TruthParticleDef,CT,ColumnAccessMode::input,CM>;
   template<typename CT,typename CM=ColumnarModeDefault> using TruthParticleDecorator = AccessorTemplate<TruthParticleDef,CT,ColumnAccessMode::output,CM>;

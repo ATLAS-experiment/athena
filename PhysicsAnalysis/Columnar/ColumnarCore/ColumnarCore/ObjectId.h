@@ -16,7 +16,7 @@
 namespace columnar
 {
   /// @brief a class representing a single object (electron, muons, etc.)
-  template<ContainerIdConcept CI, typename CM> class ObjectId;
+  template<ContainerIdConcept CI, ColumnarMode CM> class ObjectId;
 
 
 

@@ -19,7 +19,7 @@ namespace columnar
   };
 
   using TauJetRange = ObjectRange<TauJetDef, ColumnarModeDefault>;
-  using TauJetId = ObjectId<TauJetDef>;
+  using TauJetId = ObjectId<TauJetDef, ColumnarModeDefault>;
   using OptTauJetId = OptObjectId<TauJetDef>;
   template<typename CT,typename CM=ColumnarModeDefault> using TauJetAccessor  = AccessorTemplate<TauJetDef,CT,ColumnAccessMode::input,CM>;
   template<typename CT,typename CM=ColumnarModeDefault> using TauJetDecorator = AccessorTemplate<TauJetDef,CT,ColumnAccessMode::output,CM>;

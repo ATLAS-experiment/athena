@@ -19,7 +19,7 @@ namespace columnar
   };
 
   using MuonRange = ObjectRange<MuonDef, ColumnarModeDefault>;
-  using MuonId = ObjectId<MuonDef>;
+  using MuonId = ObjectId<MuonDef, ColumnarModeDefault>;
   using OptMuonId = OptObjectId<MuonDef>;
   template<typename CT,typename CM=ColumnarModeDefault> using MuonAccessor  = AccessorTemplate<MuonDef,CT,ColumnAccessMode::input,CM>;
   template<typename CT,typename CM=ColumnarModeDefault> using MuonDecorator = AccessorTemplate<MuonDef,CT,ColumnAccessMode::output,CM>;

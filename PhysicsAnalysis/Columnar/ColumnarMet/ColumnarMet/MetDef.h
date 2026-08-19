@@ -44,31 +44,31 @@ namespace columnar
   };
 
   using MetRange = ObjectRange<MetDef, ColumnarModeDefault>;
-  using MetId = ObjectId<MetDef>;
+  using MetId = ObjectId<MetDef, ColumnarModeDefault>;
   using OptMetId = OptObjectId<MetDef>;
   template<typename CT,typename CM=ColumnarModeDefault> using MetAccessor  = AccessorTemplate<MetDef,CT,ColumnAccessMode::input,CM>;
   template<typename CT,typename CM=ColumnarModeDefault> using MetDecorator = AccessorTemplate<MetDef,CT,ColumnAccessMode::output,CM>;
 
   using Met0Range = ObjectRange<Met0Def, ColumnarModeDefault>;
-  using Met0Id = ObjectId<Met0Def>;
+  using Met0Id = ObjectId<Met0Def, ColumnarModeDefault>;
   using OptMet0Id = OptObjectId<Met0Def>;
   template<typename CT,typename CM=ColumnarModeDefault> using Met0Accessor  = AccessorTemplate<Met0Def,CT,ColumnAccessMode::input,CM>;
   template<typename CT,typename CM=ColumnarModeDefault> using Met0Decorator = AccessorTemplate<Met0Def,CT,ColumnAccessMode::output,CM>;
 
   using Met1Range = ObjectRange<Met1Def, ColumnarModeDefault>;
-  using Met1Id = ObjectId<Met1Def>;
+  using Met1Id = ObjectId<Met1Def, ColumnarModeDefault>;
   using OptMet1Id = OptObjectId<Met1Def>;
   template<typename CT,typename CM=ColumnarModeDefault> using Met1Accessor  = AccessorTemplate<Met1Def,CT,ColumnAccessMode::input,CM>;
   template<typename CT,typename CM=ColumnarModeDefault> using Met1Decorator = AccessorTemplate<Met1Def,CT,ColumnAccessMode::output,CM>;
 
   using MutableMetRange = ObjectRange<MutableMetDef, ColumnarModeDefault>;
-  using MutableMetId = ObjectId<MutableMetDef>;
+  using MutableMetId = ObjectId<MutableMetDef, ColumnarModeDefault>;
   using OptMutableMetId = OptObjectId<MutableMetDef>;
   template<typename CT,typename CM=ColumnarModeDefault> using MutableMetAccessor  = AccessorTemplate<MutableMetDef,CT,ColumnAccessMode::input,CM>;
   template<typename CT,typename CM=ColumnarModeDefault> using MutableMetDecorator = AccessorTemplate<MutableMetDef,CT,ColumnAccessMode::output,CM>;
 
   using MetAssociationRange = ObjectRange<MetAssociationDef, ColumnarModeDefault>;
-  using MetAssociationId = ObjectId<MetAssociationDef>;
+  using MetAssociationId = ObjectId<MetAssociationDef, ColumnarModeDefault>;
   using OptMetAssociationId = OptObjectId<MetAssociationDef>;
 }
 

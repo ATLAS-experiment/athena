@@ -54,7 +54,7 @@ namespace columnar
     // this that saves about 33% of total execution time, but for
     // purposes of demonstration and testing the current setup is
     // simpler.
-    std::vector<ObjectId<MyVariantDef>> variantParticles;
+    std::vector<ObjectId<MyVariantDef,CMode>> variantParticles;
     variantParticles.reserve (electrons.size() + muons.size());
     for (auto electron : electrons)
       variantParticles.push_back(electron);
@@ -112,7 +112,7 @@ namespace columnar
   void VariantExampleTool ::
   callEvents (EventContextRange events) const
   {
-    std::vector<ObjectId<MyVariantDef>> variantParticles;
+    std::vector<ObjectId<MyVariantDef,CMode>> variantParticles;
 
     // loop over all events and particles.  note that this is
     // deliberately looping by value, as the ID classes are very small

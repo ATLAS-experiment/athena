@@ -29,7 +29,7 @@ namespace columnar
   };
 
   using EventInfoRange = ObjectRange<EventInfoDef, ColumnarModeDefault>;
-  using EventInfoId = ObjectId<EventInfoDef>;
+  using EventInfoId = ObjectId<EventInfoDef, ColumnarModeDefault>;
   using OptEventInfoId = OptObjectId<EventInfoDef>;
   template<typename CT,typename CM=ColumnarModeDefault> using EventInfoAccessor  = AccessorTemplate<EventInfoDef,CT,ColumnAccessMode::input,CM>;
   template<typename CT,typename CM=ColumnarModeDefault> using EventInfoDecorator = AccessorTemplate<EventInfoDef,CT,ColumnAccessMode::output,CM>;

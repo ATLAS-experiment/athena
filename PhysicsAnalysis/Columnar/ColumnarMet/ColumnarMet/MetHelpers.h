@@ -58,11 +58,11 @@ namespace columnar
         return *result;
       }
 
-      ObjectId<CI> fillMET(ObjectRange<CI,CM> metMap, const std::string& metKey, const MissingETBase::Types::bitmask_t metSource) const {
+      ObjectId<CI,CM> fillMET(ObjectRange<CI,CM> metMap, const std::string& metKey, const MissingETBase::Types::bitmask_t metSource) const {
         xAOD::MissingET *metPtr = nullptr;
         if (met::fillMET(metPtr, &metMap.getXAODObject(), metKey, metSource).isFailure())
           throw std::runtime_error ("failed to fill MET term \"" + metKey + "\"");
-        return ObjectId<CI> (*metPtr);}
+        return ObjectId<CI,CM> (*metPtr);}
 
       StatusCode tryCreateIfMissing (ObjectRange<CI,CM> metMap, const std::string& metKey, const MissingETBase::Types::bitmask_t metSource) const
       {
@@ -124,7 +124,7 @@ namespace columnar
         return result.value();
       }
 
-      ObjectId<CI> fillMET(ObjectRange<CI,CM> metMap, const std::string& metKey, const MissingETBase::Types::bitmask_t metSource) const {
+      ObjectId<CI,CM> fillMET(ObjectRange<CI,CM> metMap, const std::string& metKey, const MissingETBase::Types::bitmask_t metSource) const {
         auto hash = std::hash<std::string>()(metKey);
         for (auto metObj : metMap)
         {

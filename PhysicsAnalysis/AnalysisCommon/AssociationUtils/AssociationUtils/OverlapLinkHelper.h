@@ -48,13 +48,13 @@ namespace ORUtils
 
       /// Decorate p1 with an overlap object link to p2
       template<columnar::ContainerIdConcept LT>
-      StatusCode addObjectLink(columnar::ObjectId<CI> p1,
-                               columnar::ObjectId<LT> p2) const;
+      StatusCode addObjectLink(columnar::ObjectId<CI,CMode> p1,
+                               columnar::ObjectId<LT,CMode> p2) const;
 
       /// @brief Retrieve an overlap-linked particle.
       /// Returns null if no ElementLink decoration exists.
       template<columnar::ContainerIdConcept LT>
-      columnar::OptObjectId<LT> getObjectLink(columnar::ObjectId<CI> p, columnar::ObjectRange<LT,CMode> container) const;
+      columnar::OptObjectId<LT> getObjectLink(columnar::ObjectId<CI,CMode> p, columnar::ObjectRange<LT,CMode> container) const;
 
     private:
 
@@ -86,7 +86,7 @@ namespace ORUtils
   //---------------------------------------------------------------------------
   template<columnar::ContainerIdConcept CI> template<columnar::ContainerIdConcept LT>
   StatusCode OverlapLinkHelper<CI>::addObjectLink
-  (columnar::ObjectId<CI> p1, columnar::ObjectId<LT> p2) const
+  (columnar::ObjectId<CI,CMode> p1, columnar::ObjectId<LT,CMode> p2) const
   {
     m_linkDecorator.set (p1, p2);
     return StatusCode::SUCCESS;
@@ -97,7 +97,7 @@ namespace ORUtils
   //---------------------------------------------------------------------------
   template<columnar::ContainerIdConcept CI> template<columnar::ContainerIdConcept LT>
   columnar::OptObjectId<LT> OverlapLinkHelper<CI>::getObjectLink
-  (columnar::ObjectId<CI> p, columnar::ObjectRange<LT,CMode> container) const
+  (columnar::ObjectId<CI,CMode> p, columnar::ObjectRange<LT,CMode> container) const
   {
     // Check if the decoration is present and valid
     if(!m_linkAccessor.isAvailable(p))

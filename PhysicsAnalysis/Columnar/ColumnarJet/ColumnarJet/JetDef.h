@@ -20,13 +20,13 @@ namespace columnar
   using MutableJetDef = MutableContainerId<JetDef>;
 
   using JetRange = ObjectRange<JetDef, ColumnarModeDefault>;
-  using JetId = ObjectId<JetDef>;
+  using JetId = ObjectId<JetDef, ColumnarModeDefault>;
   using OptJetId = OptObjectId<JetDef>;
   template<typename CT,typename CM=ColumnarModeDefault> using JetAccessor  = AccessorTemplate<JetDef,CT,ColumnAccessMode::input,CM>;
   template<typename CT,typename CM=ColumnarModeDefault> using JetDecorator = AccessorTemplate<JetDef,CT,ColumnAccessMode::output,CM>;
 
   using MutableJetRange = ObjectRange<MutableJetDef, ColumnarModeDefault>;
-  using MutableJetId = ObjectId<MutableJetDef>;
+  using MutableJetId = ObjectId<MutableJetDef, ColumnarModeDefault>;
   using OptMutableJetId = OptObjectId<MutableJetDef>;
   template<typename CT,typename CM=ColumnarModeDefault> using MutableJetAccessor  = AccessorTemplate<MutableJetDef,CT,ColumnAccessMode::input,CM>;
   template<typename CT,typename CM=ColumnarModeDefault> using MutableJetDecorator = AccessorTemplate<MutableJetDef,CT,ColumnAccessMode::output,CM>;

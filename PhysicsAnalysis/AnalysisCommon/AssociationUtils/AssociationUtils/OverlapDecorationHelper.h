@@ -46,25 +46,25 @@ namespace ORUtils
                               bool outputPassValue = false);
 
       /// Check if object is flagged as input for OR
-      bool isInputObject(columnar::ObjectId<CI> obj) const;
+      bool isInputObject(columnar::ObjectId<CI,CMode> obj) const;
 
       /// Check if an object has been rejected by decoration
-      bool isRejectedObject(columnar::ObjectId<CI> obj) const;
+      bool isRejectedObject(columnar::ObjectId<CI,CMode> obj) const;
 
       /// Check if object is surviving OR thus far
-      bool isSurvivingObject(columnar::ObjectId<CI> obj) const;
+      bool isSurvivingObject(columnar::ObjectId<CI,CMode> obj) const;
 
       /// Get the user priority score, which is currently the input decoration
-      char getObjectPriority(columnar::ObjectId<CI> obj) const;
+      char getObjectPriority(columnar::ObjectId<CI,CMode> obj) const;
 
       /// Set output decoration on object, pass or fail
-      void setOverlapDecoration(columnar::ObjectId<CI> obj, bool result) const;
+      void setOverlapDecoration(columnar::ObjectId<CI,CMode> obj, bool result) const;
 
       /// Shorthand way to set an object as passing overlap removal
-      void setObjectPass(columnar::ObjectId<CI> obj) const;
+      void setObjectPass(columnar::ObjectId<CI,CMode> obj) const;
 
       /// Shorthand way to set an object as failing overlap removal
-      void setObjectFail(columnar::ObjectId<CI> obj) const;
+      void setObjectFail(columnar::ObjectId<CI,CMode> obj) const;
 
       /// Check if output decoration has been applied to a container.
       /// Returns false if the container is empty.
@@ -114,7 +114,7 @@ namespace ORUtils
   //---------------------------------------------------------------------------
   template<columnar::ContainerIdConcept CI>
   bool OverlapDecorationHelper<CI>::isInputObject
-  (columnar::ObjectId<CI> obj) const
+  (columnar::ObjectId<CI,CMode> obj) const
   {
     // Input label is turned off if empty string
     if(!m_useInputLabel) return true;
@@ -126,7 +126,7 @@ namespace ORUtils
   //---------------------------------------------------------------------------
   template<columnar::ContainerIdConcept CI>
   bool OverlapDecorationHelper<CI>::isRejectedObject
-  (columnar::ObjectId<CI> obj) const
+  (columnar::ObjectId<CI,CMode> obj) const
   {
     // isRejected = isInput && (output == fail)
     return isInputObject(obj) && ( m_outputDecorator(obj) != m_outputPassValue );
@@ -136,7 +136,7 @@ namespace ORUtils
   //---------------------------------------------------------------------------
   template<columnar::ContainerIdConcept CI>
   bool OverlapDecorationHelper<CI>::isSurvivingObject
-  (columnar::ObjectId<CI> obj) const
+  (columnar::ObjectId<CI,CMode> obj) const
   {
     // isSurviving = isInput && (output == pass)
     return isInputObject(obj) && ( m_outputDecorator(obj) == m_outputPassValue );
@@ -146,7 +146,7 @@ namespace ORUtils
   //---------------------------------------------------------------------------
   template<columnar::ContainerIdConcept CI>
   char OverlapDecorationHelper<CI>::
-  getObjectPriority(columnar::ObjectId<CI> obj) const
+  getObjectPriority(columnar::ObjectId<CI,CMode> obj) const
   {
     // We current reuse the input decoration as the priority score
     return m_inputAccessor(obj);
@@ -157,19 +157,19 @@ namespace ORUtils
   //---------------------------------------------------------------------------
   template<columnar::ContainerIdConcept CI>
   void OverlapDecorationHelper<CI>::setOverlapDecoration
-  (columnar::ObjectId<CI> obj, bool result) const
+  (columnar::ObjectId<CI,CMode> obj, bool result) const
   {
     m_outputDecorator(obj) = result;
   }
   //---------------------------------------------------------------------------
   template<columnar::ContainerIdConcept CI>
-  void OverlapDecorationHelper<CI>::setObjectPass(columnar::ObjectId<CI> obj) const
+  void OverlapDecorationHelper<CI>::setObjectPass(columnar::ObjectId<CI,CMode> obj) const
   {
     setOverlapDecoration(obj, m_outputPassValue);
   }
   //---------------------------------------------------------------------------
   template<columnar::ContainerIdConcept CI>
-  void OverlapDecorationHelper<CI>::setObjectFail(columnar::ObjectId<CI> obj) const
+  void OverlapDecorationHelper<CI>::setObjectFail(columnar::ObjectId<CI,CMode> obj) const
   {
     setOverlapDecoration(obj, !m_outputPassValue);
   }

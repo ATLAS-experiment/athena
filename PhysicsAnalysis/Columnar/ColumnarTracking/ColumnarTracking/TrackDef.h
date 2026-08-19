@@ -40,7 +40,7 @@ namespace columnar
     static constexpr std::string_view idName = "vertex";
   };
 
-  using TrackId = ObjectId<TrackDef>;
+  using TrackId = ObjectId<TrackDef, ColumnarModeDefault>;
   using OptTrackId = OptObjectId<TrackDef>;
   template<typename CT,typename CM=ColumnarModeDefault> using TrackAccessor  = AccessorTemplate<TrackDef,CT,ColumnAccessMode::input,CM>;
   template<typename CT,typename CM=ColumnarModeDefault> using TrackDecorator = AccessorTemplate<TrackDef,CT,ColumnAccessMode::output,CM>;
@@ -61,7 +61,7 @@ namespace columnar
   template<typename CT,typename CM=ColumnarModeDefault> using Track3Accessor  = AccessorTemplate<Track3Def,CT,ColumnAccessMode::input,CM>;
   template<typename CT,typename CM=ColumnarModeDefault> using Track3Decorator = AccessorTemplate<Track3Def,CT,ColumnAccessMode::output,CM>;
 
-  using VertexId = ObjectId<VertexDef>;
+  using VertexId = ObjectId<VertexDef, ColumnarModeDefault>;
   using OptVertexId = OptObjectId<VertexDef>;
   template<typename CT,typename CM=ColumnarModeDefault> using VertexAccessor  = AccessorTemplate<VertexDef,CT,ColumnAccessMode::input,CM>;
   template<typename CT,typename CM=ColumnarModeDefault> using VertexDecorator = AccessorTemplate<VertexDef,CT,ColumnAccessMode::output,CM>;
