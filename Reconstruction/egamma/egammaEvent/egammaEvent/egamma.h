@@ -46,6 +46,7 @@ UPDATED:
 #include "egammaEvent/CaloRingsContainer.h"
 
 #include <any>
+#include <memory>
 
 class EMErrorDetail;
 class CaloCluster;
@@ -89,6 +90,7 @@ class egamma
   virtual ~egamma();
   egamma(const egamma &rhs, bool copyDetails=true, bool copyMinimal=false);
   egamma& operator=(const egamma& rhs);
+  egamma& operator=(egamma&& rhs) = default;
 
   /** @brief print method*/
   void print() const;
@@ -183,8 +185,7 @@ class egamma
   void setDetailElementLinkVector(const ElementLinkVector<egDetailContainer>& v); 
   void setDetailElementLinkVector(ElementLinkVector<egDetailContainer>&& v); 
 
-  /** @brief set particle ID */
-  void set_pid(egPID* );
+ 
   /** @brief set_egamma ID, for doubles
       and all possible weights as likelihood */
   bool set_egammaID(egammaPIDObs::PID id, double result);
@@ -304,7 +305,7 @@ class egamma
 
   unsigned int m_author;
 
-  egPID* m_egPID;
+  std::unique_ptr<egPID> m_egPID;
 
  protected:
 
