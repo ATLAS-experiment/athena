@@ -14,24 +14,14 @@
  */
 
 #include <JiveXMLServer/JiveXMLServer.h>
-
-//tdaq includes
-#include <ipc/core.h>
 #include <ers/ers.h>
 
 
 /**
  * Main routine
  */
-int main(int argc, char ** argv)
+int main()
 {
-  // Initialise IPC
-  try {
-     IPCCore::init(argc,argv);
-  } catch (daq::ipc::Exception & ex) {
-     ers::fatal( ex );
-  }
-
   //Say hello
   ERS_INFO("Starting JiveXML server");
   
