@@ -64,10 +64,10 @@ namespace MCP {
         columnar::MuonAccessor<columnar::ObjectLink<columnar::MuonTrackDef,CMode>,CMode> inDetTrackParticleLinkAcc{*this, "inDetTrackParticleLink"};
         columnar::MuonAccessor<columnar::OptTrack2Id<CMode>,CMode> extrapolatedMuonSpectrometerTrackParticleLinkAcc{*this, "extrapolatedMuonSpectrometerTrackParticleLink"};
 
-        columnar::TrackHelpers::ChargeAccessor<columnar::MuonTrackDef> trkChargeAcc {*this};
-        columnar::TrackHelpers::TrackMomentumAccessors<columnar::MuonTrackDef> trkMomentumAcc {*this};
-        columnar::TrackHelpers::DefiningParametersAccessor<columnar::MuonTrackDef> trkDefiningParametersAcc {*this};
-        columnar::TrackHelpers::DefiningParametersCovAccessor<columnar::MuonTrackDef> trkDefiningParametersCovAcc {*this};
+        columnar::TrackHelpers::ChargeAccessor<CMode, columnar::MuonTrackDef> trkChargeAcc {*this};
+        columnar::TrackHelpers::TrackMomentumAccessors<CMode, columnar::MuonTrackDef> trkMomentumAcc {*this};
+        columnar::TrackHelpers::DefiningParametersAccessor<CMode, columnar::MuonTrackDef> trkDefiningParametersAcc {*this};
+        columnar::TrackHelpers::DefiningParametersCovAccessor<CMode, columnar::MuonTrackDef> trkDefiningParametersCovAcc {*this};
     };
 
    /// Basic object to cache all relevant information from the track
