@@ -11,7 +11,7 @@ atlas_add_component( TrigVrtSecInclusive
                      src/*.cxx
                      src/components/*.cxx
                      INCLUDE_DIRS   ${ROOT_INCLUDE_DIRS}
-                     LINK_LIBRARIES ${ROOT_LIBRARIES} AthenaBaseComps AthenaMonitoringKernelLib xAODRootAccess GaudiKernel TrigInDetEvent TrigInDetToolInterfacesLib TrkEventPrimitives TrkParameters TrkTrack TrkVKalVrtFitterLib xAODTracking TrkLinks TrkTrackLink TrkParticleBase TrkVKalVrtCore InDetConversionFinderToolsLib PathResolver )
+                     LINK_LIBRARIES ${ROOT_LIBRARIES} AthenaBaseComps AthenaMonitoringKernelLib xAODRootAccess GaudiKernel TrigInDetToolInterfacesLib TrkEventPrimitives TrkParameters TrkTrack TrkVKalVrtFitterLib xAODTracking TrkLinks TrkTrackLink TrkParticleBase TrkVKalVrtCore InDetConversionFinderToolsLib PathResolver )
 
 # Install files from the package:
 atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
