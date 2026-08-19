@@ -11,6 +11,7 @@ atlas_add_component( ActsPatternRecognition
                      src/components/*.cxx
                      LINK_LIBRARIES
                Acts::Core
+               ActsCalibratorsLib
                ActsEventLib
                ActsGeometryInterfacesLib
                ActsInteropLib

@@ -219,15 +219,16 @@ class ActsTrigSequence(InnerTrackerTrigSequence):
     # LRT uses seed refit (for now)
     extra_tf_kwargs = {}
     if isLRT:
-      extra_tf_kwargs["refitSeeds"] = [True]
+      extra_tf_kwargs["refitSeeds"] = True
 
+    from ActsConfig.ActsTrackParamsEstimationConfig import ActsTrackParamsEstimationToolCfg
     trackfinding = ActsMainTrackFindingAlgCfg(self.flags,
                                               name="ActsTrackFindingAlg_"+self.signature,
                                               ACTSTracksLocation=self.flags.Tracking.ActiveConfig.trkTracks_FTF,
                                               SeedLabels=seed_labels,
                                               SeedContainerKeys=seed_keys,
                                               UncalibratedMeasurementContainerKeys=measurements,
-                                              **extra_tf_kwargs)
+                                              TrackParamsEstimationTool=[acc.popToolsAndMerge(ActsTrackParamsEstimationToolCfg(self.flags, **extra_tf_kwargs))])
     acc.merge(trackfinding)
     acc.merge(ActsTrackToTrackParticleCnvAlgCfg(self.flags,
                                                 name="ActsTrackParticleCreator_"+self.signature, 

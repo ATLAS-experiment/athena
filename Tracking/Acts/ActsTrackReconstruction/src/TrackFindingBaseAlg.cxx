@@ -78,7 +78,6 @@ namespace ActsTrk {
     ATH_CHECK(m_trackingGeometrySvc.retrieve());
     ATH_CHECK(m_ctxProvider.initialize());
     ATH_CHECK(m_trackStatePrinter.retrieve(EnableTool{not m_trackStatePrinter.empty()}));
-    ATH_CHECK(m_fitterTool.retrieve());
     ATH_CHECK(m_pixelCalibTool.retrieve(EnableTool{not m_pixelCalibTool.empty()}));
     ATH_CHECK(m_stripCalibTool.retrieve(EnableTool{not m_stripCalibTool.empty()}));
     ATH_CHECK(m_hgtdCalibTool.retrieve(EnableTool{not m_hgtdCalibTool.empty()}));
@@ -162,8 +161,6 @@ namespace ActsTrk {
     m_trackFinder = std::make_unique<CKF_pimpl>(std::move(ckfConfig));
 
     trackFinder().ckfExtensions.updater.connect<&ActsTrk::detail::FitterHelperFunctions::gainMatrixUpdate<detail::RecoTrackStateContainer>>();
-
-    m_unalibMeasSurfAcc = detail::xAODUncalibMeasSurfAcc {m_trackingGeometrySvc.get()};
 
     initStatTables();
 

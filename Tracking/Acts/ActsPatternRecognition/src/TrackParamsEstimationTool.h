@@ -5,10 +5,14 @@
 #ifndef ACTSTRACKRECONSTRUCTION_TRACKPARAMSESTIMATIONTOOL_H
 #define ACTSTRACKRECONSTRUCTION_TRACKPARAMSESTIMATIONTOOL_H
 
-// ATHENA
 #include "ActsToolInterfaces/ITrackParamsEstimationTool.h"
+
+// ATHENA
+#include "ActsGeometryInterfaces/ITrackingGeometrySvc.h"
+#include "ActsToolInterfaces/IFitterTool.h"
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "ActsInterop/Logger.h"
+#include "ActsCalibrators/xAODUncalibMeasSurfAcc.h"
 
 // ACTS
 #include "Acts/Propagator/Propagator.hpp"
@@ -27,29 +31,36 @@ namespace ActsTrk {
     virtual StatusCode initialize() override;
 
     virtual
-      std::optional<Acts::BoundTrackParameters>
+      std::pair<std::optional<Acts::BoundTrackParameters>, EstimationStatus>
       estimateTrackParameters(
 			      const ActsTrk::Seed& seed,
-			      bool useTopSp,
+			      bool reverseSearch,
 			      const Acts::GeometryContext& geoContext,
 			      const Acts::MagneticFieldContext& magFieldContext,
+			      const Acts::CalibrationContext& calContext,
 			      std::function<const Acts::Surface&(const ActsTrk::Seed& seed, bool useTopSp)> retrieveSurface) const override;
 
     virtual
-      std::optional<Acts::BoundTrackParameters>
+      std::pair<std::optional<Acts::BoundTrackParameters>, EstimationStatus>
       estimateTrackParameters(
 			      const ActsTrk::Seed& seed,
-			      bool useTopSp,
+			      bool reverseSearch,
 			      const Acts::GeometryContext& geoContext,
 			      const Acts::MagneticFieldContext& magFieldContext,
+			      const Acts::CalibrationContext& calContext,
 			      const Acts::Surface& surface,
 			      const Acts::Vector3& bField) const override;
 
     SpacePointIndicesFun_t spacePointIndicesFun() const override;
 
+    bool estimateFromTopSp(bool reverseSearch) const override { return reverseSearch && !m_refitSeeds; }
+
     // *********************************************************************
 
   private:
+    ToolHandle<ActsTrk::IFitterTool> m_fitterTool{this, "FitterTool", "", "Fitter Tool for Seeds"};
+    ServiceHandle<ActsTrk::ITrackingGeometrySvc> m_trackingGeometrySvc{this, "TrackingGeometrySvc", "ActsTrackingGeometrySvc"};
+
     // Properties
     Gaudi::Property< double > m_sigmaLoc0 {this, "sigmaLoc0", 1 * Acts::UnitConstants::mm,
         "Constant term of the loc0 resolution"};
@@ -77,6 +88,17 @@ namespace ActsTrk {
         "Use curvilinear parameters when propagation fails instead of returning null"};
     Gaudi::Property<std::size_t> m_stripCalibrationIterations{this, "stripCalibrationIterations", 1ul,
         "Number of strip calibration iterations"};
+    Gaudi::Property<bool> m_refitSeeds{this, "refitSeeds", false, "Run KalmanFitter on seeds"};
+
+    std::optional<Acts::BoundTrackParameters> doRefit(
+        const ActsTrk::Seed &measurement,
+        const Acts::BoundTrackParameters &initialParameters,
+        const Acts::GeometryContext& geometry,
+        const Acts::MagneticFieldContext& magField,
+        const Acts::CalibrationContext& calib,
+        const bool paramsAtOutermostSurface) const;
+
+    detail::xAODUncalibMeasSurfAcc m_uncalibMeasSurfAcc {};
 
     using Stepper = Acts::SympyStepper;
     using Navigator = Acts::VoidNavigator;
