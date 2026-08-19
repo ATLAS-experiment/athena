@@ -6,7 +6,6 @@ atlas_subdir( AthenaMonitoring )
 # External dependencies:
 find_package( CORAL COMPONENTS CoralBase CoralKernel RelationalAccess )
 find_package( ROOT COMPONENTS Core Hist MathCore )
-find_package( Boost )
 
 # Component(s) in the package:
 atlas_add_library(
@@ -17,7 +16,6 @@ atlas_add_library(
     INCLUDE_DIRS
         ${ROOT_INCLUDE_DIRS}
     PRIVATE_INCLUDE_DIRS
-        ${Boost_INCLUDE_DIRS}
         ${CORAL_INCLUDE_DIRS}
     LINK_LIBRARIES
         ${ROOT_LIBRARIES}
@@ -32,7 +30,6 @@ atlas_add_library(
         TrigDecisionToolLib
         xAODEventInfo
     PRIVATE_LINK_LIBRARIES
-        ${Boost_LIBRARIES}
         ${CORAL_LIBRARIES}
         AthenaKernel
         CxxUtils
