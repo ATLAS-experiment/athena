@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // Trigger includes
@@ -197,7 +197,7 @@ StatusCode MTCalibPebHypoTool::decide(const MTCalibPebHypoTool::Input& input) co
   }
 
   // ---------------------------------------------------------------------------
-  // Prefetch or retrieve ROBs
+  // Retrieve ROBs
   // ---------------------------------------------------------------------------
   for (const auto& [instr,robVec] : m_robAccessDict) {
     // Check for timeout
@@ -219,12 +219,7 @@ StatusCode MTCalibPebHypoTool::decide(const MTCalibPebHypoTool::Input& input) co
 
     // Execute the ROB requests
     using ReqType = ROBRequestInstruction::Type;
-    if (instr.type == ReqType::ADD || instr.type == ReqType::ADDGET) {
-      // Prefetch ROBs
-      ATH_MSG_DEBUG("Preloading ROBs: " << idsToString(robs));
-      m_robDataProviderSvc->addROBData(input.eventContext, robs, name()+"-ADD");
-    }
-    if (instr.type == ReqType::GET || instr.type == ReqType::ADDGET) {
+    if (instr.type == ReqType::GET) {
       // Retrieve ROBs
       ATH_MSG_DEBUG("Retrieving ROBs: " << idsToString(robs));
       // VROBFRAG is a typedef for std::vector<const eformat::ROBFragment<const uint32_t*>*>
@@ -247,12 +242,6 @@ StatusCode MTCalibPebHypoTool::decide(const MTCalibPebHypoTool::Input& input) co
           ATH_MSG_DEBUG("Data consistency check passed for ROB 0x" << std::hex << rob->rob_source_id() << std::dec);
         }
       }
-    }
-    if (instr.type == ReqType::COL) {
-      // Event building
-      ATH_MSG_DEBUG("Requesting full event ROBs");
-      int nrobs = m_robDataProviderSvc->collectCompleteEventData(input.eventContext, name()+"-COL");
-      ATH_MSG_DEBUG("Number of ROBs retrieved: " << nrobs);
     }
     if (instr.type == ReqType::INVALID) {
       ATH_MSG_ERROR("Invalid ROB request instruction " << instr.toString());
@@ -310,20 +299,11 @@ StatusCode MTCalibPebHypoTool::decide(const MTCalibPebHypoTool::Input& input) co
 
 // =============================================================================
 MTCalibPebHypoTool::ROBRequestInstruction::ROBRequestInstruction(std::string_view strv) {
-  // Work around a bug in clang 9.
-#if __clang_major__ == 9
-  std::string str (strv.begin(), strv.end());
-#else
-  const std::string_view& str = strv;
-#endif
-  if (str.find(":ADD:")!=std::string_view::npos) type = ROBRequestInstruction::ADD;
-  else if (str.find(":GET:")!=std::string_view::npos) type = ROBRequestInstruction::GET;
-  else if (str.find(":ADDGET:")!=std::string_view::npos) type = ROBRequestInstruction::ADDGET;
-  else if (str.find(":COL:")!=std::string_view::npos) type = ROBRequestInstruction::COL;
-  if (size_t pos=str.find(":RND"); pos!=std::string_view::npos) {
+  if (strv.find(":GET:")!=std::string_view::npos) type = ROBRequestInstruction::GET;
+  if (size_t pos=strv.find(":RND"); pos!=std::string_view::npos) {
     size_t firstDigit=pos+4;
-    size_t lastDigit=str.find_first_of(":",firstDigit);
-    size_t num = std::stoul(str.substr(firstDigit,lastDigit).data());
+    size_t lastDigit=strv.find_first_of(":",firstDigit);
+    size_t num = std::stoul(strv.substr(firstDigit,lastDigit).data());
     isRandom = true;
     nRandom = num;
   }
@@ -334,10 +314,7 @@ const std::string MTCalibPebHypoTool::ROBRequestInstruction::toString() const {
   std::string s;
   s += "type=";
   if (type==INVALID) s+="INVALID";
-  else if (type==ADD) s+="ADD";
   else if (type==GET) s+="GET";
-  else if (type==ADDGET) s+="ADDGET";
-  else if (type==COL) s+="COL";
   s += ", isRandom=";
   s += isRandom ? "true" : "false";
   s += ", nRandom=";
