@@ -147,10 +147,10 @@ StatusCode CommonEfficiencyTool::initialize()
 CP::CorrectionCode CommonEfficiencyTool::getEfficiencyScaleFactor(const xAOD::TauJet& xTau,
     double& dEfficiencyScaleFactor, unsigned int iRunNumber)
 {
-    return getEfficiencyScaleFactor(columnar::TauJetId(xTau), dEfficiencyScaleFactor, iRunNumber);
+    return getEfficiencyScaleFactor(columnar::TauJetId<CMode>(xTau), dEfficiencyScaleFactor, iRunNumber);
 }
 
-CP::CorrectionCode CommonEfficiencyTool::getEfficiencyScaleFactor(columnar::TauJetId tau, double& dEfficiencyScaleFactor,
+CP::CorrectionCode CommonEfficiencyTool::getEfficiencyScaleFactor(columnar::TauJetId<CMode> tau, double& dEfficiencyScaleFactor,
     unsigned int /*iRunNumber*/) const
 {
   const Accessors& acc = *m_accessors;
@@ -634,7 +634,7 @@ void CommonEfficiencyTool::generateSystematicSets()
 */
 //______________________________________________________________________________
 CP::CorrectionCode CommonEfficiencyTool::getValue(const std::string& sHistName,
-    columnar::TauJetId tau,
+    columnar::TauJetId<CMode> tau,
     double& dEfficiencyScaleFactor) const
 {
   
@@ -752,7 +752,7 @@ CP::CorrectionCode CommonEfficiencyTool::getValueTF1(const TObject* oObject,
   return CP::CorrectionCode::Ok;
 }
 
-void CommonEfficiencyTool::callSingleEvent (columnar::TauJetRange taus, columnar::EventInfoId<CMode> event) const
+void CommonEfficiencyTool::callSingleEvent (columnar::TauJetRange<CMode> taus, columnar::EventInfoId<CMode> event) const
 {
 
   const Accessors& acc = *m_accessors;	
@@ -765,7 +765,7 @@ void CommonEfficiencyTool::callSingleEvent (columnar::TauJetRange taus, columnar
   } 
   runNumber = acc.randomrunnumber(event);
 
-  for (columnar::TauJetId tau : taus)
+  for (columnar::TauJetId<CMode> tau : taus)
   {
     double sf = 0;
     switch (getEfficiencyScaleFactor(tau, sf, runNumber).code())

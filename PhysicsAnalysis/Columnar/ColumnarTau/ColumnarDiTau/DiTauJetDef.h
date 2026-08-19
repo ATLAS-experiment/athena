@@ -18,11 +18,11 @@ namespace columnar
     static constexpr std::string_view idName = "ditauJet";
   };
 
-  using DiTauJetRange = ObjectRange<DiTauJetDef, ColumnarModeDefault>;
-  using DiTauJetId = ObjectId<DiTauJetDef, ColumnarModeDefault>;
-  using OptDiTauJetId = OptObjectId<DiTauJetDef, ColumnarModeDefault>;
-  template<typename CT,typename CM=ColumnarModeDefault> using DiTauJetAccessor  = AccessorTemplate<DiTauJetDef,CT,ColumnAccessMode::input,CM>;
-  template<typename CT,typename CM=ColumnarModeDefault> using DiTauJetDecorator = AccessorTemplate<DiTauJetDef,CT,ColumnAccessMode::output,CM>;
+  template<ColumnarMode CM> using DiTauJetRange = ObjectRange<DiTauJetDef,CM>;
+  template<ColumnarMode CM> using DiTauJetId = ObjectId<DiTauJetDef,CM>;
+  template<ColumnarMode CM> using OptDiTauJetId = OptObjectId<DiTauJetDef,CM>;
+  template<typename CT,ColumnarMode CM> using DiTauJetAccessor  = AccessorTemplate<DiTauJetDef,CT,ColumnAccessMode::input,CM>;
+  template<typename CT,ColumnarMode CM> using DiTauJetDecorator = AccessorTemplate<DiTauJetDef,CT,ColumnAccessMode::output,CM>;
 }
 
 #endif

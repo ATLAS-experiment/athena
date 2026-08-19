@@ -63,7 +63,7 @@ public:
   virtual CP::CorrectionCode getEfficiencyScaleFactor(const xAOD::TauJet& tau, double& dEfficiencyScaleFactor, 
     unsigned int iRunNumber = 0 ) override;
 
-  CP::CorrectionCode getEfficiencyScaleFactor( columnar::TauJetId tau, double& dEfficiencyScaleFactor,
+  CP::CorrectionCode getEfficiencyScaleFactor( columnar::TauJetId<CMode> tau, double& dEfficiencyScaleFactor,
     unsigned int iRunNumber) const;
 
   virtual CP::CorrectionCode applyEfficiencyScaleFactor(const xAOD::TauJet& xTau, 
@@ -118,7 +118,7 @@ protected:
   void addHistogramToSFMap(TKey* kKey, const std::string& sKeyName);
 
   virtual CP::CorrectionCode getValue(const std::string& sHistName,
-                                      columnar::TauJetId tau,
+                                      columnar::TauJetId<CMode> tau,
                                       double& dEfficiencyScaleFactor) const;
 
   static CP::CorrectionCode getValueTH1(const TObject* oObject,
@@ -175,18 +175,18 @@ public:
     columnar::TruthParticleAccessor<columnar::ObjectColumn,CMode> m_truthParticles {*this, "TruthTaus"};
     columnar::JetAccessor<columnar::ObjectColumn,CMode> m_jets {*this, "AntiKt4TruthDressedWZJets"};
 
-    columnar::TauJetAccessor<columnar::ObjectColumn> m_taus {*this, "TauJets"};
-    //columnar::TauJetAccessor<int> m_nTracks{*this, "nChargedTracks", {.isOptional=true}}; to be used when 'nChargedTracks' will be in physlite
-    //columnar::TauJetAccessor<float> m_eta{*this,"eta"};
-    //columnar::TauJetAccessor<float> m_pt{*this,"pt"};
-    columnar::TauJetAccessor<int> m_decayMode{*this,"PanTau_DecayMode"};
+    columnar::TauJetAccessor<columnar::ObjectColumn,CMode> m_taus {*this, "TauJets"};
+    //columnar::TauJetAccessor<int,CMode> m_nTracks{*this, "nChargedTracks", {.isOptional=true}}; to be used when 'nChargedTracks' will be in physlite
+    //columnar::TauJetAccessor<float,CMode> m_eta{*this,"eta"};
+    //columnar::TauJetAccessor<float,CMode> m_pt{*this,"pt"};
+    columnar::TauJetAccessor<int,CMode> m_decayMode{*this,"PanTau_DecayMode"};
     TruthParticleTypeAccessor<> m_truthParticleType{*this};
-    columnar::TauJetDecorator<float> m_sfDec{*this,"sfOut"};
-    columnar::TauJetDecorator<char> m_validDec{*this,"validOut"};
+    columnar::TauJetDecorator<float,CMode> m_sfDec{*this,"sfOut"};
+    columnar::TauJetDecorator<char,CMode> m_validDec{*this,"validOut"};
   };
   std::unique_ptr<Accessors> m_accessors;
 
-  void callSingleEvent (columnar::TauJetRange taus, columnar::EventInfoId<CMode> event) const;
+  void callSingleEvent (columnar::TauJetRange<CMode> taus, columnar::EventInfoId<CMode> event) const;
   void callEvents (columnar::EventContextRange<CMode> events) const override;
 
 
