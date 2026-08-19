@@ -150,6 +150,7 @@ protected:
   Gaudi::Property<int> m_iEleIDLevel{this, "EleIDLevel", static_cast<int>(ELEIDNONE)};
   Gaudi::Property<bool> m_bUseTauSubstructure{this, "UseTauSubstructure", false};
   Gaudi::Property<bool> m_doTauTrig{this, "DoTauTrig", false};
+  Gaudi::Property<bool> m_applyToData{this, "ApplyToData", false}; // for experts only
 
   std::string m_sInputFileName;
   std::string m_sSFHistName;
