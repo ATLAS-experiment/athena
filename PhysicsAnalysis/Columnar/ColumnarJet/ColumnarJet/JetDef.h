@@ -19,18 +19,18 @@ namespace columnar
   };
   using MutableJetDef = MutableContainerId<JetDef>;
 
-  using JetRange = ObjectRange<JetDef, ColumnarModeDefault>;
-  using JetId = ObjectId<JetDef, ColumnarModeDefault>;
-  using OptJetId = OptObjectId<JetDef, ColumnarModeDefault>;
-  template<typename CT,typename CM=ColumnarModeDefault> using JetAccessor  = AccessorTemplate<JetDef,CT,ColumnAccessMode::input,CM>;
-  template<typename CT,typename CM=ColumnarModeDefault> using JetDecorator = AccessorTemplate<JetDef,CT,ColumnAccessMode::output,CM>;
+  template<ColumnarMode CM> using JetRange = ObjectRange<JetDef,CM>;
+  template<ColumnarMode CM> using JetId = ObjectId<JetDef,CM>;
+  template<ColumnarMode CM> using OptJetId = OptObjectId<JetDef,CM>;
+  template<typename CT,ColumnarMode CM> using JetAccessor  = AccessorTemplate<JetDef,CT,ColumnAccessMode::input,CM>;
+  template<typename CT,ColumnarMode CM> using JetDecorator = AccessorTemplate<JetDef,CT,ColumnAccessMode::output,CM>;
 
-  using MutableJetRange = ObjectRange<MutableJetDef, ColumnarModeDefault>;
-  using MutableJetId = ObjectId<MutableJetDef, ColumnarModeDefault>;
-  using OptMutableJetId = OptObjectId<MutableJetDef, ColumnarModeDefault>;
-  template<typename CT,typename CM=ColumnarModeDefault> using MutableJetAccessor  = AccessorTemplate<MutableJetDef,CT,ColumnAccessMode::input,CM>;
-  template<typename CT,typename CM=ColumnarModeDefault> using MutableJetDecorator = AccessorTemplate<MutableJetDef,CT,ColumnAccessMode::output,CM>;
-  template<typename CT,typename CM=ColumnarModeDefault> using MutableJetUpdater = AccessorTemplate<MutableJetDef,CT,ColumnAccessMode::update,CM>;
+  template<ColumnarMode CM> using MutableJetRange = ObjectRange<MutableJetDef,CM>;
+  template<ColumnarMode CM> using MutableJetId = ObjectId<MutableJetDef,CM>;
+  template<ColumnarMode CM> using OptMutableJetId = OptObjectId<MutableJetDef,CM>;
+  template<typename CT,ColumnarMode CM> using MutableJetAccessor  = AccessorTemplate<MutableJetDef,CT,ColumnAccessMode::input,CM>;
+  template<typename CT,ColumnarMode CM> using MutableJetDecorator = AccessorTemplate<MutableJetDef,CT,ColumnAccessMode::output,CM>;
+  template<typename CT,ColumnarMode CM> using MutableJetUpdater = AccessorTemplate<MutableJetDef,CT,ColumnAccessMode::update,CM>;
 }
 
 #endif

@@ -457,13 +457,13 @@ namespace met {
       return StatusCode::FAILURE;
     }
 
-    return rebuildJetMET(metJetKey,softKey,columnar::MutableMetRange(*metCont),columnar::JetRange(*jets),columnar::Met1Range(*metCoreCont),m_assocAcc(helper),doJetJVT);
+    return rebuildJetMET(metJetKey,softKey,columnar::MutableMetRange(*metCont),columnar::JetRange<CMode>(*jets),columnar::Met1Range(*metCoreCont),m_assocAcc(helper),doJetJVT);
   }
 
   StatusCode ColumnarMETMaker::rebuildJetMET(const std::string& metJetKey,
                                      const std::string& softKey,
                                      columnar::MutableMetRange metCont,
-                                     columnar::JetRange jets,
+                                     columnar::JetRange<CMode> jets,
                                      columnar::Met1Range metCoreCont,
                                      columnar::MetAssociationHelper<> helper,
                                      bool doJetJVT) const
@@ -515,13 +515,13 @@ namespace met {
       return StatusCode::FAILURE;
     }
 
-    return rebuildTrackMET(metJetKey,softKey,columnar::MutableMetRange(*metCont),columnar::JetRange(*jets),columnar::Met1Range(*metCoreCont),m_assocAcc(helper),doJetJVT);
+    return rebuildTrackMET(metJetKey,softKey,columnar::MutableMetRange(*metCont),columnar::JetRange<CMode>(*jets),columnar::Met1Range(*metCoreCont),m_assocAcc(helper),doJetJVT);
   }
 
   StatusCode ColumnarMETMaker::rebuildTrackMET(const std::string& metJetKey,
                                        const std::string& softKey,
                                        columnar::MutableMetRange metCont,
-                                       columnar::JetRange jets,
+                                       columnar::JetRange<CMode> jets,
                                        columnar::Met1Range metCoreCont,
                                        columnar::MetAssociationHelper<> helper,
                                        bool doJetJVT) const
@@ -564,14 +564,14 @@ namespace met {
       return StatusCode::FAILURE;
     }
 
-    return rebuildJetMET(metJetKey,softClusKey,softTrkKey,columnar::MutableMetRange(*metCont),columnar::JetRange(*jets),columnar::Met1Range(*metCoreCont),m_assocAcc(helper),doJetJVT);
+    return rebuildJetMET(metJetKey,softClusKey,softTrkKey,columnar::MutableMetRange(*metCont),columnar::JetRange<CMode>(*jets),columnar::Met1Range(*metCoreCont),m_assocAcc(helper),doJetJVT);
   }
 
   StatusCode ColumnarMETMaker::rebuildJetMET(const std::string& metJetKey,
                                      const std::string& softClusKey,
                                      const std::string& softTrkKey,
                                      columnar::MutableMetRange metCont,
-                                     columnar::JetRange jets,
+                                     columnar::JetRange<CMode> jets,
                                      columnar::Met1Range metCoreCont,
                                      columnar::MetAssociationHelper<> helper,
                                      bool doJetJVT) const
@@ -618,7 +618,7 @@ namespace met {
       return StatusCode::FAILURE;
     }
     columnar::MutableMetRange metCont (*static_cast<MissingETContainer*>(metJet->container()));
-    return rebuildJetMET(columnar::MutableMetId(*metJet), metCont, columnar::JetRange(*jets), m_assocAcc(helper),
+    return rebuildJetMET(columnar::MutableMetId(*metJet), metCont, columnar::JetRange<CMode>(*jets), m_assocAcc(helper),
                          columnar::OptMutableMetId(metSoftClus), columnar::OptMet1Id (coreSoftClus),
                          columnar::OptMutableMetId(metSoftTrk), columnar::OptMet1Id (coreSoftTrk),
                          doJetJVT, tracksForHardJets, softConst);
@@ -626,7 +626,7 @@ namespace met {
 
   StatusCode ColumnarMETMaker::rebuildJetMET(columnar::MutableMetId metJet,
                                      columnar::MutableMetRange metCont,
-                                     columnar::JetRange jets,
+                                     columnar::JetRange<CMode> jets,
                                      columnar::MetAssociationHelper<> helper,
                                      columnar::OptMutableMetId metSoftClus,
                                      columnar::OptMet1Id coreSoftClus,
@@ -1183,12 +1183,12 @@ namespace met {
     }
 
     columnar::MutableMetRange metCont (*static_cast<MissingETContainer*>(metJet->container()));
-    return rebuildJetMET(columnar::MutableMetId(*metJet),metCont,columnar::JetRange(*jets),m_assocAcc(helper),std::nullopt,nullptr,columnar::MutableMetId(*metSoftTrk),coreSoftTrk,doJetJVT,true);
+    return rebuildJetMET(columnar::MutableMetId(*metJet),metCont,columnar::JetRange<CMode>(*jets),m_assocAcc(helper),std::nullopt,nullptr,columnar::MutableMetId(*metSoftTrk),coreSoftTrk,doJetJVT,true);
   }
 
   StatusCode ColumnarMETMaker::rebuildTrackMET(columnar::MutableMetId metJet,
                                        columnar::MutableMetRange metCont,
-                                       columnar::JetRange jets,
+                                       columnar::JetRange<CMode> jets,
                                        columnar::MetAssociationHelper<> helper,
                                        columnar::MutableMetId metSoftTrk,
                                        columnar::Met1Id coreSoftTrk,

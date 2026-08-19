@@ -125,7 +125,7 @@ namespace met {
       const std::string& softClusKey,
       const std::string& softTrkKey,
       columnar::MutableMetRange metCont,
-      columnar::JetRange jets,
+      columnar::JetRange<CMode> jets,
       columnar::Met1Range metCoreCont,
       columnar::MetAssociationHelper<> helper,
       bool doJetJVT) const;
@@ -142,7 +142,7 @@ namespace met {
       const std::string& metJetKey,
       const std::string& metSoftKey,
       columnar::MutableMetRange metCont,
-      columnar::JetRange jets,
+      columnar::JetRange<CMode> jets,
       columnar::Met1Range metCoreCont,
       columnar::MetAssociationHelper<> helper,
       bool doJetJVT) const;
@@ -161,7 +161,7 @@ namespace met {
     StatusCode rebuildJetMET(
       columnar::MutableMetId metJet,
       columnar::MutableMetRange metCont,
-      columnar::JetRange jets,
+      columnar::JetRange<CMode> jets,
       columnar::MetAssociationHelper<> helper,
       columnar::OptMutableMetId metSoftClus,
       columnar::OptMet1Id coreSoftClus,
@@ -183,7 +183,7 @@ namespace met {
       const std::string& metJetKey,
       const std::string& softTrkKey,
       columnar::MutableMetRange metCont,
-      columnar::JetRange jets,
+      columnar::JetRange<CMode> jets,
       columnar::Met1Range metCoreCont,
       columnar::MetAssociationHelper<> helper,
       bool doJetJVT) const;
@@ -196,7 +196,7 @@ namespace met {
                                        bool doJetJVT) const override final;
     StatusCode rebuildTrackMET(columnar::MutableMetId metJet,
                                        columnar::MutableMetRange metCont,
-                                       columnar::JetRange jets,
+                                       columnar::JetRange<CMode> jets,
                                        columnar::MetAssociationHelper<> helper,
                                        columnar::MutableMetId metSoftTrk,
                                        columnar::Met1Id coreSoftTrk,
@@ -281,7 +281,7 @@ namespace met {
     columnar::Met1Accessor<columnar::ObjectColumn> m_inputMetHandle {*this, "METCore", {.addMTDependency=true}};
     columnar::ColumnAccessor<columnar::MetAssociationDef,columnar::ObjectColumn,CMode> m_metAssocHandle {*this, "MetAssoc", {.addMTDependency=true}};
     columnar::ParticleAccessor<columnar::ObjectColumn,CMode> m_particlesHandle {*this, "Particles"};
-    columnar::JetAccessor<columnar::ObjectColumn> m_jetsHandle {*this, "Jets"};
+    columnar::JetAccessor<columnar::ObjectColumn,CMode> m_jetsHandle {*this, "Jets"};
     columnar::ElectronAccessor<columnar::ObjectColumn,CMode> m_electronsHandle {*this, "Electrons"};
     columnar::PhotonAccessor<columnar::ObjectColumn,CMode> m_photonsHandle {*this, "Photons"};
     columnar::MuonAccessor<columnar::ObjectColumn> m_muonsHandle {*this, "Muons"};
@@ -306,16 +306,16 @@ namespace met {
     columnar::MetHelpers::ObjectWeightDecorator<> m_outputMetWeightDecRegular {*this, "", true};
 
     columnar::MetHelpers::InputMomentumAccessors<columnar::JetDef> m_jetMomAcc {*this};
-    columnar::JetAccessor<float> m_acc_emf {*this, "EMFrac"};
-    columnar::JetAccessor<float> m_acc_psf {*this, "PSFrac"};
-    columnar::JetAccessor<float> m_acc_width {*this, "Width"};
-    columnar::JetAccessor<std::vector<int>> m_acc_trkN {*this, "NumTrkPt500"};
-    columnar::JetAccessor<std::vector<float>> m_acc_trksumpt {*this, "SumPtTrkPt500"};
-    columnar::JetAccessor<std::vector<float>> m_acc_sampleE {*this, "EnergyPerSampling"};
+    columnar::JetAccessor<float,CMode> m_acc_emf {*this, "EMFrac"};
+    columnar::JetAccessor<float,CMode> m_acc_psf {*this, "PSFrac"};
+    columnar::JetAccessor<float,CMode> m_acc_width {*this, "Width"};
+    columnar::JetAccessor<std::vector<int>,CMode> m_acc_trkN {*this, "NumTrkPt500"};
+    columnar::JetAccessor<std::vector<float>,CMode> m_acc_trksumpt {*this, "SumPtTrkPt500"};
+    columnar::JetAccessor<std::vector<float>,CMode> m_acc_sampleE {*this, "EnergyPerSampling"};
         
     std::optional<columnar::MetHelpers::InputMomentumAccessors<columnar::JetDef>> m_jetConstitScaleMomAcc;
     std::optional<columnar::MetHelpers::InputMomentumAccessors<columnar::JetDef>> m_jetConstitScaleMomFixedAcc;
-    std::optional<columnar::JetAccessor<char>> m_acc_jetRejectionDec;
+    std::optional<columnar::JetAccessor<char,CMode>> m_acc_jetRejectionDec;
 
     columnar::MetHelpers::ObjectWeightDecorator<columnar::MutableMetDef,columnar::JetDef> m_jetOutputMetWeightDecRegular {*this, "", true};
     columnar::MetHelpers::ObjectWeightDecorator<columnar::MutableMetDef,columnar::JetDef> m_jetOutputMetWeightDecSoft {*this, "Soft", false};

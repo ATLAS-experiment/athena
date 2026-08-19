@@ -173,7 +173,7 @@ public:
     // Associated truth particles and jets. These are picked up by truth
     // links on the tau itself.
     columnar::TruthParticleAccessor<columnar::ObjectColumn,CMode> m_truthParticles {*this, "TruthTaus"};
-    columnar::JetAccessor<columnar::ObjectColumn> m_jets {*this, "AntiKt4TruthDressedWZJets"};
+    columnar::JetAccessor<columnar::ObjectColumn,CMode> m_jets {*this, "AntiKt4TruthDressedWZJets"};
 
     columnar::TauJetAccessor<columnar::ObjectColumn> m_taus {*this, "TauJets"};
     //columnar::TauJetAccessor<int> m_nTracks{*this, "nChargedTracks", {.isOptional=true}}; to be used when 'nChargedTracks' will be in physlite

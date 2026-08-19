@@ -311,7 +311,7 @@ namespace columnar
     [[nodiscard]] auto refJet(AssocId assoc) const {
       return this->jetLink(assoc); }
 
-    [[nodiscard]] bool containsPhysics(AssocId assoc,JetId pPhys) const {
+    [[nodiscard]] bool containsPhysics(AssocId assoc,JetId<CMode> pPhys) const {
       for(auto link : this->objectLinks(assoc)) {
         if(link == pPhys) {
           return true;
