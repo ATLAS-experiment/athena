@@ -323,7 +323,7 @@ void setRefittedPerigee (xAOD::Vertex& v, unsigned i,
   if (vec.size() <= i) vec.resize(i+1);
 
   AmgSymMatrix(5) cov = cov5();
-  for (int ii=0; i < 5; ii++) {
+  for (int ii=0; ii < 5; ii++) {
     for (int j=0; j < 5; j++) {
       unsigned ipos = ii*5 + j;
       (cov)(ii,j) = ipos < c.size() ? c[ipos] : 0;
