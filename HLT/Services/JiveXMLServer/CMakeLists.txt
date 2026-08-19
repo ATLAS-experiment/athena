@@ -4,7 +4,6 @@
 atlas_subdir( JiveXMLServer )
 
 # External dependencies:
-find_package( tdaq COMPONENTS ipc omniORB4 omnithread )
 find_package( tdaq-common COMPONENTS ers)
 
 # Component(s) in the package:
@@ -17,5 +16,5 @@ atlas_add_library( JiveXMLServer
 
 atlas_add_executable( jivexmlserver
                       bin/jivexmlserver.cxx
-                      INCLUDE_DIRS ${TDAQ-COMMON_INCLUDE_DIRS} ${TDAQ_INCLUDE_DIRS}
-                      LINK_LIBRARIES ${TDAQ-COMMON_LIBRARIES} ${TDAQ_LIBRARIES} JiveXMLServer )
+                      INCLUDE_DIRS ${TDAQ-COMMON_INCLUDE_DIRS}
+                      LINK_LIBRARIES ${TDAQ-COMMON_LIBRARIES} JiveXMLServer )
