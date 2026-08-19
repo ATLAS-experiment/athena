@@ -51,6 +51,9 @@ from TrigCommon import AthHLT
 from AthenaCommon.Logging import logging
 log = logging.getLogger('athenaEF')
 
+# Fraction of the hard timeout to be used for soft timeout. NB: athenaEF only enforces the soft
+# timeout: HltEventLoopMgr never acts on HardTimeout itself, it only uses it to compute the soft timeout
+SOFT_TIMEOUT_FRACTION = 0.95
 
 # =============================================================================
 # Run Parameters Configuration
@@ -526,7 +529,7 @@ class ConfigRunner:
    """
    def __init__(self, job_options_type, job_options_path, run_params=None,
                 properties=None, db_server=None, smk=None,
-                num_threads=1, num_slots=1, ef_overrides=None):
+                num_threads=1, num_slots=1, ef_overrides=None, elm_overrides=None):
       """
       Args:
          job_options_type: "FILE" or "DB"
@@ -538,6 +541,7 @@ class ConfigRunner:
          num_threads: Number of threads for AvalancheSchedulerSvc.ThreadPoolSize
          num_slots: Number of event slots for EventDataSvc.NSlots
          ef_overrides: EFInterfaceSvc properties overriding the DB/JSON configuration
+         elm_overrides: HltEventLoopMgr properties overriding the DB/JSON configuration
       """
       self.job_options_type = job_options_type
       self.job_options_path = job_options_path
@@ -548,18 +552,20 @@ class ConfigRunner:
       self.num_threads = num_threads
       self.num_slots = num_slots
       self.ef_overrides = ef_overrides or {}  # CLI overrides for EFInterfaceSvc
+      self.elm_overrides = elm_overrides or {}  # CLI overrides for HltEventLoopMgr
       self._app = None
    
    @classmethod
    def from_json(cls, json_file, run_params=None, properties=None,
-                 num_threads=1, num_slots=1, ef_overrides=None):
+                 num_threads=1, num_slots=1, ef_overrides=None, elm_overrides=None):
       """Create runner for JSON file (TYPE=FILE)"""
       return cls("FILE", os.path.abspath(json_file), run_params, properties,
-                 num_threads=num_threads, num_slots=num_slots, ef_overrides=ef_overrides)
+                 num_threads=num_threads, num_slots=num_slots, ef_overrides=ef_overrides,
+                 elm_overrides=elm_overrides)
    
    @classmethod
    def from_database(cls, db_server, smk, l1psk=None, hltpsk=None, run_params=None,
-                     num_threads=1, num_slots=1, ef_overrides=None):
+                     num_threads=1, num_slots=1, ef_overrides=None, elm_overrides=None):
       """Create runner for database (TYPE=DB)"""
       # Build the DB connection string: server=X;smkey=Y;lvl1key=Z;hltkey=W
       db_path = f"server={db_server};smkey={smk}"
@@ -568,7 +574,8 @@ class ConfigRunner:
       if hltpsk is not None:
          db_path += f";hltkey={hltpsk}"
       return cls("DB", db_path, run_params, db_server=db_server, smk=smk,
-                 num_threads=num_threads, num_slots=num_slots, ef_overrides=ef_overrides)
+                 num_threads=num_threads, num_slots=num_slots, ef_overrides=ef_overrides,
+                 elm_overrides=elm_overrides)
       
    def run(self, maxEvents=None):
       """
@@ -627,6 +634,12 @@ class ConfigRunner:
       for prop, value in self.ef_overrides.items():
          log.info("Overriding EFInterfaceSvc.%s = %s (from command line)", prop, value)
          setattr(ef_svc, prop, value)
+
+      # Override HltEventLoopMgr properties explicitly given on the command line.
+      elm_svc = iProperty("HltEventLoopMgr")
+      for prop, value in self.elm_overrides.items():
+         log.info("Overriding HltEventLoopMgr.%s = %s (from command line)", prop, value)
+         setattr(elm_svc, prop, value)
       
       # If HLT PSK is set on command line, read it from DB instead of COOL (ATR-25974).
       from TrigPSC import PscConfig
@@ -639,7 +652,7 @@ class ConfigRunner:
       conditions_run = self.run_params.get('conditions_run')
       if conditions_run is not None:
          log.info("Setting HltEventLoopMgr.forceRunNumber=%d for conditions lookup", conditions_run)
-         iProperty("HltEventLoopMgr").forceRunNumber = conditions_run
+         elm_svc.forceRunNumber = conditions_run
       
       # Initialize
       sc = app.initialize()
@@ -749,7 +762,7 @@ class ConfigRunner:
       return sc
 
 
-def load_from_json(json_file, run_params=None, num_threads=1, num_slots=1, ef_overrides=None):
+def load_from_json(json_file, run_params=None, num_threads=1, num_slots=1, ef_overrides=None, elm_overrides=None):
    """
    Load configuration from a Gaudi joboptions JSON file.
    
@@ -764,13 +777,12 @@ def load_from_json(json_file, run_params=None, num_threads=1, num_slots=1, ef_ov
    
    properties = jocat.get('properties', {})
    return ConfigRunner.from_json(json_file, run_params, properties,
-                                  num_threads=num_threads,
-                                  num_slots=num_slots,
-                                  ef_overrides=ef_overrides)
+                                  num_threads=num_threads, num_slots=num_slots,
+                                  ef_overrides=ef_overrides, elm_overrides=elm_overrides)
 
 
 def load_from_database(db_server, smk, l1psk=None, hltpsk=None, run_params=None,
-                       num_threads=1, num_slots=1, ef_overrides=None):
+                       num_threads=1, num_slots=1, ef_overrides=None, elm_overrides=None):
    """
    Load configuration from trigger database using the Super Master Key (SMK).
    
@@ -779,9 +791,8 @@ def load_from_database(db_server, smk, l1psk=None, hltpsk=None, run_params=None,
    """
    log.info("Loading job options from database %s with SMK %d", db_server, smk)
    return ConfigRunner.from_database(db_server, smk, l1psk, hltpsk, run_params,
-                                      num_threads=num_threads,
-                                      num_slots=num_slots,
-                                      ef_overrides=ef_overrides)
+                                      num_threads=num_threads, num_slots=num_slots,
+                                      ef_overrides=ef_overrides, elm_overrides=elm_overrides)
 
 
 ##
@@ -819,6 +830,9 @@ def check_args(parser, args):
 
    if args.oh_monitoring and args.online_environment:
       parser.error("--oh-monitoring (-M) and --online-environment are mutually exclusive.")
+
+   if args.timeout is not None and args.timeout <= 0:
+      parser.error("--timeout must be a positive number of milliseconds")
 
 def update_run_params(args, flags):
    """Update run parameters from IS, file, or conditions DB"""
@@ -1139,6 +1153,9 @@ def main():
    g.add_argument('--stdcmalloc', action='store_true', help='use stdcmalloc')
    g.add_argument('--stdcmath', action='store_true', help='use stdcmath library')
    g.add_argument('--imf', action='store_true', default=True, help='use Intel math library')
+   g.add_argument('--timeout', metavar='MSEC', type=int, default=None,
+                  help='event processing timeout (HardTimeout) in milliseconds. '
+                       f'NB: only the soft timeout ({SOFT_TIMEOUT_FRACTION*100:.0f}%% of it) is enforced')
 
    ## Conditions
    g = parser.add_argument_group('Conditions')
@@ -1322,6 +1339,13 @@ def main():
    # NB: Do NOT set flags.Trigger.Online.EFInterface.* here
    # ef_overrides is applied to the service at runtime via iProperty in ConfigRunner.run()
 
+   # HltEventLoopMgr settings from the command line.
+   # Same convention as ef_overrides: only options explicitly given override the DB/jobOptions.
+   elm_overrides = {}
+   if args.timeout is not None:
+      elm_overrides['HardTimeout'] = float(args.timeout)
+      elm_overrides['SoftTimeoutFraction'] = SOFT_TIMEOUT_FRACTION
+
    # Execute precommands
    if args.precommand:
       log.info("Executing precommand(s)")
@@ -1354,7 +1378,7 @@ def main():
       run_params = get_run_params(args).to_dict()
       acc = load_from_database(db_alias, args.smk, args.l1psk, args.hltpsk, run_params,
                                num_threads=args.threads, num_slots=args.concurrent_events,
-                               ef_overrides=ef_overrides)
+                               ef_overrides=ef_overrides, elm_overrides=elm_overrides)
       log.info("Configuration loaded from database")
 
    elif is_pickle:
@@ -1371,7 +1395,7 @@ def main():
       run_params = get_run_params(args).to_dict()
       acc = load_from_json(jobOptions, run_params,
                            num_threads=args.threads, num_slots=args.concurrent_events,
-                           ef_overrides=ef_overrides)
+                           ef_overrides=ef_overrides, elm_overrides=elm_overrides)
       log.info("Configuration loaded from JSON")
 
    else:
