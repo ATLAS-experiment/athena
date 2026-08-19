@@ -69,14 +69,14 @@ namespace ORUtils
       /// Check if output decoration has been applied to a container.
       /// Returns false if the container is empty.
       /// Output logic independent.
-      bool isDecorated(columnar::ObjectRange<CI> container) const;
+      bool isDecorated(columnar::ObjectRange<CI,CMode> container) const;
 
       /// Initialize decorations for a container to "pass".
       /// Note that the value written depends on the output pass-value.
-      void initializeDecorations(columnar::ObjectRange<CI> container) const;
+      void initializeDecorations(columnar::ObjectRange<CI,CMode> container) const;
 
       /// Helper method for setting all objects as passing
-      void resetDecorations(columnar::ObjectRange<CI> container) const;
+      void resetDecorations(columnar::ObjectRange<CI,CMode> container) const;
 
     private:
 
@@ -179,7 +179,7 @@ namespace ORUtils
   //---------------------------------------------------------------------------
   template<columnar::ContainerIdConcept CI>
   bool OverlapDecorationHelper<CI>::isDecorated
-  (columnar::ObjectRange<CI> container) const
+  (columnar::ObjectRange<CI,CMode> container) const
   {
     return container.size() > 0 &&
            m_outputDecorator.isAvailable(container[0]);
@@ -190,7 +190,7 @@ namespace ORUtils
   //---------------------------------------------------------------------------
   template<columnar::ContainerIdConcept CI>
   void OverlapDecorationHelper<CI>::initializeDecorations
-  (columnar::ObjectRange<CI> container) const
+  (columnar::ObjectRange<CI,CMode> container) const
   {
     if(!isDecorated(container))
       resetDecorations(container);
@@ -201,7 +201,7 @@ namespace ORUtils
   //---------------------------------------------------------------------------
   template<columnar::ContainerIdConcept CI>
   void OverlapDecorationHelper<CI>::resetDecorations
-  (columnar::ObjectRange<CI> container) const
+  (columnar::ObjectRange<CI,CMode> container) const
   {
     for(auto obj : container){
       // This isn't terrible intuitive, but in order to support both output

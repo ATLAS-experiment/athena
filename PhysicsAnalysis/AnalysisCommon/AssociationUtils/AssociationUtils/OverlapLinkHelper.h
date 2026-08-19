@@ -54,7 +54,7 @@ namespace ORUtils
       /// @brief Retrieve an overlap-linked particle.
       /// Returns null if no ElementLink decoration exists.
       template<columnar::ContainerIdConcept LT>
-      columnar::OptObjectId<LT> getObjectLink(columnar::ObjectId<CI> p, columnar::ObjectRange<LT> container) const;
+      columnar::OptObjectId<LT> getObjectLink(columnar::ObjectId<CI> p, columnar::ObjectRange<LT,CMode> container) const;
 
     private:
 
@@ -97,7 +97,7 @@ namespace ORUtils
   //---------------------------------------------------------------------------
   template<columnar::ContainerIdConcept CI> template<columnar::ContainerIdConcept LT>
   columnar::OptObjectId<LT> OverlapLinkHelper<CI>::getObjectLink
-  (columnar::ObjectId<CI> p, columnar::ObjectRange<LT> container) const
+  (columnar::ObjectId<CI> p, columnar::ObjectRange<LT,CMode> container) const
   {
     // Check if the decoration is present and valid
     if(!m_linkAccessor.isAvailable(p))

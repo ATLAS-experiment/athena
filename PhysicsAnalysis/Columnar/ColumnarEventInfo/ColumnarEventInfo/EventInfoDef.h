@@ -28,7 +28,7 @@ namespace columnar
     static constexpr bool perEventId = true;
   };
 
-  using EventInfoRange = ObjectRange<EventInfoDef>;
+  using EventInfoRange = ObjectRange<EventInfoDef, ColumnarModeDefault>;
   using EventInfoId = ObjectId<EventInfoDef>;
   using OptEventInfoId = OptObjectId<EventInfoDef>;
   template<typename CT,typename CM=ColumnarModeDefault> using EventInfoAccessor  = AccessorTemplate<EventInfoDef,CT,ColumnAccessMode::input,CM>;

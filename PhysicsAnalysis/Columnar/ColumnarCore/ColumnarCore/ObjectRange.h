@@ -16,7 +16,7 @@
 namespace columnar
 {
   /// @brief a class representing a continuous sequence of objects (a.k.a. a container)
-  template<ContainerIdConcept CI,typename CM> class ObjectRange;
+  template<ContainerIdConcept CI,ColumnarMode CM> class ObjectRange;
 
 
 
