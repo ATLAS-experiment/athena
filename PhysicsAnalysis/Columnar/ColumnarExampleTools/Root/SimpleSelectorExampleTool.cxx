@@ -35,9 +35,9 @@ namespace columnar
 
 
   void SimpleSelectorExampleTool ::
-  callSingleEvent (ParticleRange particles) const
+  callSingleEvent (ParticleRange<CMode> particles) const
   {
-    for (ParticleId particle : particles)
+    for (ParticleId<CMode> particle : particles)
     {
       selectionDec(particle) = ptAcc(particle) > m_ptCut.value();
     }

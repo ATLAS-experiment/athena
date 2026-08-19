@@ -49,7 +49,7 @@ namespace ORUtils
 
       /// Check for a match via ghost association or delta-R
       virtual bool objectsMatch
-      (columnar::Particle1Id mu, columnar::Particle2Id jet, bool swapArgs = false) const override;
+      (columnar::Particle1Id<CMode> mu, columnar::Particle2Id<CMode> jet, bool swapArgs = false) const override;
 
     private:
 
@@ -59,10 +59,10 @@ namespace ORUtils
       /// IDTrack type
       using MyTrackDef = columnar::VariantContainerId<columnar::Track0Def,columnar::Track0Def, columnar::Track1Def>;
 
-      columnar::Particle1Accessor<columnar::ObjectLink<MyTrackDef,CMode>> m_muonTrkAcc {*this, "inDetTrackParticleLink"};
+      columnar::Particle1Accessor<columnar::ObjectLink<MyTrackDef,CMode>,CMode> m_muonTrkAcc {*this, "inDetTrackParticleLink"};
 
       // Ghost track list accessor
-      columnar::Particle2Accessor<std::vector<columnar::LinkCastColumn<MyTrackDef,xAOD::IParticleContainer>>> m_ghostAcc {*this, "GhostTrack"};
+      columnar::Particle2Accessor<std::vector<columnar::LinkCastColumn<MyTrackDef,xAOD::IParticleContainer>>,CMode> m_ghostAcc {*this, "GhostTrack"};
 
   }; // class MuJetGhostDRMatcher
 

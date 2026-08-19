@@ -233,13 +233,13 @@ namespace met {
       return StatusCode::FAILURE;
     }
 
-    return rebuildMET(metKey,metType,columnar::MutableMetRange (*metCont),columnar::ParticleRange (*collection),m_assocAcc(helper),objScale);
+    return rebuildMET(metKey,metType,columnar::MutableMetRange (*metCont),columnar::ParticleRange<CMode> (*collection),m_assocAcc(helper),objScale);
   }
 
   StatusCode ColumnarMETMaker::rebuildMET(const std::string& metKey,
                                   xAOD::Type::ObjectType metType,
                                   columnar::MutableMetRange metCont,
-                                  columnar::ParticleRange collection,
+                                  columnar::ParticleRange<CMode> collection,
                                   columnar::MetAssociationHelper<> helper,
                                   MissingETBase::UsageHandler::Policy objScale) const
   {
@@ -294,11 +294,11 @@ namespace met {
       return StatusCode::FAILURE;
     }
 
-    return rebuildMET(columnar::MutableMetId(*met), columnar::ParticleRange(*collection), m_assocAcc(helper), objScale);
+    return rebuildMET(columnar::MutableMetId(*met), columnar::ParticleRange<CMode>(*collection), m_assocAcc(helper), objScale);
   }
 
   StatusCode ColumnarMETMaker::rebuildMET(columnar::MutableMetId met,
-                                  columnar::ParticleRange collection,
+                                  columnar::ParticleRange<CMode> collection,
                                   columnar::MetAssociationHelper<> helper,
                                   MissingETBase::UsageHandler::Policy objScale) const
   {
@@ -326,11 +326,11 @@ namespace met {
       return StatusCode::FAILURE;
     }
 
-    return rebuildMET(columnar::MutableMetId(*met),columnar::ParticleRange (*collection),m_assocAcc(helper),p,removeOverlap,objScale);
+    return rebuildMET(columnar::MutableMetId(*met),columnar::ParticleRange<CMode> (*collection),m_assocAcc(helper),p,removeOverlap,objScale);
   }
 
   StatusCode ColumnarMETMaker::rebuildMET(columnar::MutableMetId met,
-                                  columnar::ParticleRange collection,
+                                  columnar::ParticleRange<CMode> collection,
                                   columnar::MetAssociationHelper<> helper,
                                   MissingETBase::UsageHandler::Policy p,
                                   bool removeOverlap,
@@ -1210,10 +1210,10 @@ namespace met {
       return StatusCode::FAILURE;
     }
 
-    return markInvisible(columnar::ParticleRange(*collection),m_assocAcc(helper),columnar::MutableMetRange(*metCont));
+    return markInvisible(columnar::ParticleRange<CMode>(*collection),m_assocAcc(helper),columnar::MutableMetRange(*metCont));
   }
 
-  StatusCode ColumnarMETMaker::markInvisible(columnar::ParticleRange collection,
+  StatusCode ColumnarMETMaker::markInvisible(columnar::ParticleRange<CMode> collection,
                                      columnar::MetAssociationHelper<> helper,
                                      columnar::MutableMetRange metCont) const
   {

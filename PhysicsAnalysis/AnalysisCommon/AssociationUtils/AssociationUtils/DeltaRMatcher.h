@@ -41,7 +41,7 @@ namespace ORUtils
 
       /// Check if particles match in dR
       virtual bool objectsMatch
-      (columnar::Particle1Id p1, columnar::Particle2Id p2, bool swapArgs = false) const override;
+      (columnar::Particle1Id<CMode> p1, columnar::Particle2Id<CMode> p2, bool swapArgs = false) const override;
       using IParticleAssociator::objectsMatch;
 
     private:
@@ -84,7 +84,7 @@ namespace ORUtils
       /// @brief Check if particles match in dR.
       /// The dR cone is calculated as dR = c1 + (c2/p1.pt())
       virtual bool objectsMatch
-      (columnar::Particle1Id p1, columnar::Particle2Id p2, bool swapArgs = false) const override;
+      (columnar::Particle1Id<CMode> p1, columnar::Particle2Id<CMode> p2, bool swapArgs = false) const override;
 
     private:
 

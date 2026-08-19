@@ -86,8 +86,8 @@ namespace ORUtils
   // Identify overlaps
   //---------------------------------------------------------------------------
   StatusCode TauAntiTauJetOverlapTool::
-  findOverlaps(columnar::Particle1Range cont1,
-               columnar::Particle2Range cont2,
+  findOverlaps(columnar::Particle1Range<CMode> cont1,
+               columnar::Particle2Range<CMode> cont2,
                columnar::EventContextId<CMode> eventContext) const
   {
     // Check the container types
@@ -102,8 +102,8 @@ namespace ORUtils
   // Identify overlaps
   //---------------------------------------------------------------------------
   StatusCode TauAntiTauJetOverlapTool::
-  internalFindOverlaps(columnar::Particle1Range jets,
-                       columnar::Particle2Range taus,
+  internalFindOverlaps(columnar::Particle1Range<CMode> jets,
+                       columnar::Particle2Range<CMode> taus,
                        columnar::EventContextId<CMode> eventContext) const
   {
     ATH_MSG_DEBUG("Removing overlapping taus and jets");
@@ -203,7 +203,7 @@ namespace ORUtils
   //---------------------------------------------------------------------------
   // Identify a user-labeled b-jet
   //---------------------------------------------------------------------------
-  bool TauAntiTauJetOverlapTool::isBJet(columnar::Particle1Id jet) const
+  bool TauAntiTauJetOverlapTool::isBJet(columnar::Particle1Id<CMode> jet) const
   {
     if(!m_bJetLabel.empty() && m_accessors->m_bJetAcc(jet)) return true;
     return false;
@@ -212,7 +212,7 @@ namespace ORUtils
   //---------------------------------------------------------------------------
   // Identify a user-labeled IDed-tau
   //---------------------------------------------------------------------------
-  bool TauAntiTauJetOverlapTool::isSurvivingTau(columnar::Particle2Id tau) const
+  bool TauAntiTauJetOverlapTool::isSurvivingTau(columnar::Particle2Id<CMode> tau) const
   {
     if(m_tauDecHelper && m_tauDecHelper->isSurvivingObject(tau)) return true;
     return false;
@@ -221,7 +221,7 @@ namespace ORUtils
   //---------------------------------------------------------------------------
   // Identify a user-labeled anti-tau
   //---------------------------------------------------------------------------
-  bool TauAntiTauJetOverlapTool::isSurvivingAntiTau(columnar::Particle2Id tau) const
+  bool TauAntiTauJetOverlapTool::isSurvivingAntiTau(columnar::Particle2Id<CMode> tau) const
   {
     if(m_antiTauDecHelper && m_antiTauDecHelper->isSurvivingObject(tau))
       return true;

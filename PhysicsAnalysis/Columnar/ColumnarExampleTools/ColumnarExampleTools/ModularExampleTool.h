@@ -59,7 +59,7 @@ namespace columnar
     /// This is equivalent to a `ReadHandleKey` in the xAOD world.  It
     /// is used to access the particle range/container for a given
     /// event.
-    ParticleAccessor<ObjectColumn> particlesHandle {*this, "Particles"};
+    ParticleAccessor<ObjectColumn,CMode> particlesHandle {*this, "Particles"};
 
 
     /// @brief the selection decorator for the particles
@@ -70,7 +70,7 @@ namespace columnar
     /// the option to return individual output values.  Instead it needs
     /// to provide an output value per object, which in the columnar
     /// world is done by filling a column.
-    ParticleDecorator<char> selectionDec {*this, "selection"};
+    ParticleDecorator<char,CMode> selectionDec {*this, "selection"};
 
 
     /// @brief a simple subobject that does a selection on the pt
@@ -80,9 +80,9 @@ namespace columnar
     struct SubtoolPt : public ColumnarTool<CMode>
     {
       SubtoolPt (float val_cutValue);
-      bool select (ParticleId particle) const;
+      bool select (ParticleId<CMode> particle) const;
 
-      ParticleAccessor<float> ptAcc {*this, "pt"};
+      ParticleAccessor<float,CMode> ptAcc {*this, "pt"};
       float m_cutValue = 0;
     };
     std::unique_ptr<SubtoolPt> m_subtoolPt;
@@ -101,9 +101,9 @@ namespace columnar
     struct SubtoolEta : public ColumnarTool<CMode>
     {
       SubtoolEta (ColumnarTool<CMode>* parent, float val_cutValue);
-      bool select (ParticleId particle) const;
+      bool select (ParticleId<CMode> particle) const;
 
-      ParticleAccessor<float> etaAcc {*this, "eta"};
+      ParticleAccessor<float,CMode> etaAcc {*this, "eta"};
       float m_cutValue = 0;
     };
     std::unique_ptr<SubtoolEta> m_subtoolEta;

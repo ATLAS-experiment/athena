@@ -54,15 +54,15 @@ namespace ORUtils
       /// Next, electrons are flagged for removal if they overlap with the
       /// remaining jets in the outer dR cone.
       virtual StatusCode
-      findOverlaps(columnar::Particle1Range cont1,
-                   columnar::Particle2Range cont2,
+      findOverlaps(columnar::Particle1Range<CMode> cont1,
+                   columnar::Particle2Range<CMode> cont2,
                    columnar::EventContextId<CMode> eventContext) const override;
 
       /// @brief Identify overlapping electrons and jets.
       /// The above method calls this one.
       virtual StatusCode
-      internalFindOverlaps(columnar::Particle1Range electrons,
-                           columnar::Particle2Range jets) const;
+      internalFindOverlaps(columnar::Particle1Range<CMode> electrons,
+                           columnar::Particle2Range<CMode> jets) const;
 
     protected:
 
@@ -105,10 +105,10 @@ namespace ORUtils
       /// Columnar accessors
       struct Accessors final : columnar::ColumnarTool<CMode>
       {
-        columnar::Particle1Accessor<float> m_elePtAcc {*this, "pt"};
-        columnar::Particle2Accessor<float> m_jetPtAcc {*this, "pt"};
+        columnar::Particle1Accessor<float,CMode> m_elePtAcc {*this, "pt"};
+        columnar::Particle2Accessor<float,CMode> m_jetPtAcc {*this, "pt"};
         /// BJet helper
-        columnar::Particle2Accessor<char> m_bJetAcc;
+        columnar::Particle2Accessor<char,CMode> m_bJetAcc;
         using ColumnarTool::ColumnarTool;
       };
       std::unique_ptr<Accessors> m_accessors {std::make_unique<Accessors> (this)};

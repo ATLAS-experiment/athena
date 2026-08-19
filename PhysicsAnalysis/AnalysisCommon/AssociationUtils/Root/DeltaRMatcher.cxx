@@ -30,8 +30,8 @@ namespace ORUtils
   //---------------------------------------------------------------------------
   // Check if particles match in dR
   //---------------------------------------------------------------------------
-  bool DeltaRMatcher::objectsMatch(columnar::Particle1Id p1,
-                                   columnar::Particle2Id p2,
+  bool DeltaRMatcher::objectsMatch(columnar::Particle1Id<CMode> p1,
+                                   columnar::Particle2Id<CMode> p2,
                                    bool /*swapArgs*/) const
   {
     return columnar::isInDeltaR(m_momAcc1, p1, m_momAcc2, p2, m_dR, m_useRapidity);
@@ -56,8 +56,8 @@ namespace ORUtils
   //---------------------------------------------------------------------------
   // Check if particles match in sliding dR
   //---------------------------------------------------------------------------
-  bool SlidingDeltaRMatcher::objectsMatch(columnar::Particle1Id p1,
-                                          columnar::Particle2Id p2,
+  bool SlidingDeltaRMatcher::objectsMatch(columnar::Particle1Id<CMode> p1,
+                                          columnar::Particle2Id<CMode> p2,
                                           bool swapArgs) const
   {
     // Calculate the dR cone to match with

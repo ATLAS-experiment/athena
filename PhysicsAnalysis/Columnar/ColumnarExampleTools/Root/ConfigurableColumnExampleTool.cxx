@@ -53,7 +53,7 @@ namespace columnar
     // per-event things, e.g. retrieve `EventInfo`.
     for (columnar::EventContextId<CMode> event : events)
     {
-      for (columnar::ParticleId particle : particlesHandle(event))
+      for (columnar::ParticleId<CMode> particle : particlesHandle(event))
       {
         selectionDec(particle) = (ptAcc(particle) > m_ptCut.value());
       }

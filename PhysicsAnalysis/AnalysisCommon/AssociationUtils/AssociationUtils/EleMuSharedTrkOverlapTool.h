@@ -58,14 +58,14 @@ namespace ORUtils
       /// @brief Identify overlaps via shared ID track.
       /// Removes the electron from cont1
       virtual StatusCode
-      findOverlaps(columnar::Particle1Range cont1,
-                   columnar::Particle2Range cont2,
+      findOverlaps(columnar::Particle1Range<CMode> cont1,
+                   columnar::Particle2Range<CMode> cont2,
                    columnar::EventContextId<CMode> eventContext) const override;
 
       /// Alternate method taking actual container types
       StatusCode
-      internalFindOverlaps(columnar::Particle1Range electrons,
-                           columnar::Particle2Range muons) const;
+      internalFindOverlaps(columnar::Particle1Range<CMode> electrons,
+                           columnar::Particle2Range<CMode> muons) const;
 
     protected:
 
@@ -101,15 +101,15 @@ namespace ORUtils
         columnar::Track0Accessor<columnar::ObjectColumn> m_track0Acc {*this, "InDetTrackParticles"};
         columnar::Track1Accessor<columnar::ObjectColumn> m_track1Acc {*this, "InDetForwardTrackParticles"};
         columnar::Track2Accessor<columnar::ObjectColumn> m_track2Acc {*this, "GSFTrackParticles"};
-        columnar::Particle1Accessor<std::vector<columnar::OptTrack2Id>> m_eleTrackAcc {*this, "trackParticleLinks"};
-        columnar::Particle2Accessor<columnar::ObjectLink<MyTrackDef,CMode>> m_muonTrkAcc {*this, "inDetTrackParticleLink"};
-        columnar::Particle2Accessor<columnar::RetypeColumn<xAOD::Muon::MuonType,std::uint16_t>> m_muonTypeAcc {*this, "muonType"};
+        columnar::Particle1Accessor<std::vector<columnar::OptTrack2Id>,CMode> m_eleTrackAcc {*this, "trackParticleLinks"};
+        columnar::Particle2Accessor<columnar::ObjectLink<MyTrackDef,CMode>,CMode> m_muonTrkAcc {*this, "inDetTrackParticleLink"};
+        columnar::Particle2Accessor<columnar::RetypeColumn<xAOD::Muon::MuonType,std::uint16_t>,CMode> m_muonTypeAcc {*this, "muonType"};
         columnar::Track2Accessor<columnar::ObjectLink<MyTrackDef,CMode>> m_gsfOriginalTrackAcc {*this, "originalTrackParticle"};
         using ColumnarTool::ColumnarTool;
       };
       std::unique_ptr<Accessors> m_accessors {std::make_unique<Accessors> (this)};
 
-      [[nodiscard]] columnar::ObjectLink<MyTrackDef,CMode> getOriginalTrackParticle(columnar::Particle1Id electron) const;
+      [[nodiscard]] columnar::ObjectLink<MyTrackDef,CMode> getOriginalTrackParticle(columnar::Particle1Id<CMode> electron) const;
 
       /// Delta-R matcher
       std::unique_ptr<DeltaRMatcher> m_dRMatcher;

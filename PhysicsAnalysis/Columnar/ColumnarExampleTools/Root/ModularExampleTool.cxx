@@ -55,7 +55,7 @@ namespace columnar
     // per-event things, e.g. retrieve `EventInfo`.
     for (columnar::EventContextId<CMode> event : events)
     {
-      for (columnar::ParticleId particle : particlesHandle(event))
+      for (columnar::ParticleId<CMode> particle : particlesHandle(event))
       {
         selectionDec(particle) = m_subtoolPt->select (particle) && m_subtoolEta->select (particle);
       }
@@ -72,7 +72,7 @@ namespace columnar
 
 
   bool ModularExampleTool::SubtoolPt ::
-  select (ParticleId particle) const
+  select (ParticleId<CMode> particle) const
   {
     return ptAcc(particle) > m_cutValue;
   }
@@ -87,7 +87,7 @@ namespace columnar
 
 
   bool ModularExampleTool::SubtoolEta ::
-  select (ParticleId particle) const
+  select (ParticleId<CMode> particle) const
   {
     return std::abs(etaAcc(particle)) < m_cutValue;
   }

@@ -68,8 +68,8 @@ namespace ORUtils
 
 
   StatusCode DeltaROverlapTool::
-  findOverlaps(columnar::Particle1Range cont1,
-               columnar::Particle2Range cont2,
+  findOverlaps(columnar::Particle1Range<CMode> cont1,
+               columnar::Particle2Range<CMode> cont2,
                columnar::EventContextId<CMode> /*eventContext*/) const
   {
     ATH_MSG_DEBUG("Removing overlaps");

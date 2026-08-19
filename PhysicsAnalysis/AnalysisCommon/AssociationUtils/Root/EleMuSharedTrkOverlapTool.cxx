@@ -57,8 +57,8 @@ namespace ORUtils
   // Identify overlaps
   //---------------------------------------------------------------------------
   StatusCode EleMuSharedTrkOverlapTool::
-  findOverlaps(columnar::Particle1Range cont1,
-               columnar::Particle2Range cont2,
+  findOverlaps(columnar::Particle1Range<CMode> cont1,
+               columnar::Particle2Range<CMode> cont2,
                columnar::EventContextId<CMode> /*eventContext*/) const
   {
     // Check the container types
@@ -73,8 +73,8 @@ namespace ORUtils
   // Identify overlaps between electrons and muons
   //---------------------------------------------------------------------------
   StatusCode EleMuSharedTrkOverlapTool::
-  internalFindOverlaps(columnar::Particle1Range electrons,
-                       columnar::Particle2Range muons) const
+  internalFindOverlaps(columnar::Particle1Range<CMode> electrons,
+                       columnar::Particle2Range<CMode> muons) const
   {
     ATH_MSG_DEBUG("Removing overlapping electrons and muons");
     auto& acc = *m_accessors;
@@ -142,7 +142,7 @@ namespace ORUtils
   }
 
   [[nodiscard]] columnar::ObjectLink<EleMuSharedTrkOverlapTool::MyTrackDef,CMode> EleMuSharedTrkOverlapTool::
-  getOriginalTrackParticle(columnar::Particle1Id electron) const
+  getOriginalTrackParticle(columnar::Particle1Id<CMode> electron) const
   {
     auto& acc = *m_accessors;
     auto elGsfTrk = electron(acc.m_eleTrackAcc);

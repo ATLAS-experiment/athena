@@ -253,7 +253,7 @@ namespace columnar
       return overlapIndicesAcc(assoc); }
 
     [[nodiscard]] auto overlapIndices(AssocId assoc,const xAOD::IParticle* pPart) const {
-      return this->overlapIndices(assoc, ParticleId(*pPart)); }
+      return this->overlapIndices(assoc, ParticleId<CMode>(*pPart)); }
     [[nodiscard]] auto overlapIndices(AssocId assoc,PartId pPart) const {
       return this->overlapIndices(assoc, this->findIndex(assoc, pPart)); }
 
@@ -268,7 +268,7 @@ namespace columnar
       return objIdx < types.size() ? types[objIdx] : std::span<const unsigned char>(); }
 
     [[nodiscard]] std::size_t findIndex(AssocId assoc,const xAOD::IParticle* pPart) const {
-      return findIndex(assoc, ParticleId(*pPart));}
+      return findIndex(assoc, ParticleId<CMode>(*pPart));}
     template<ContainerIdConcept CI>
     [[nodiscard]] std::size_t findIndex(AssocId assoc,ObjectId<CI,CM> pPart) const {
       std::size_t idx = 0;

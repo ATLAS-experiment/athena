@@ -94,8 +94,8 @@ namespace ORUtils
   // Identify overlaps
   //---------------------------------------------------------------------------
   StatusCode EleEleOverlapTool::
-  findOverlaps(columnar::Particle1Range cont1,
-               columnar::Particle2Range cont2,
+  findOverlaps(columnar::Particle1Range<CMode> cont1,
+               columnar::Particle2Range<CMode> cont2,
                columnar::EventContextId<CMode> /*eventContext*/) const
   {
     if constexpr (columnar::ColumnarModeDefault::isXAOD)
@@ -119,7 +119,7 @@ namespace ORUtils
   // Identify overlaps
   //---------------------------------------------------------------------------
   StatusCode EleEleOverlapTool::
-  internalFindOverlaps(columnar::Particle1Range electrons) const
+  internalFindOverlaps(columnar::Particle1Range<CMode> electrons) const
   {
     ATH_MSG_DEBUG("Removing overlapping electrons");
 
@@ -157,7 +157,7 @@ namespace ORUtils
   // Apply the ele-ele matching criteria
   //---------------------------------------------------------------------------
   bool EleEleOverlapTool::
-  electronsMatch(columnar::Particle1Id el1, columnar::Particle1Id el2) const
+  electronsMatch(columnar::Particle1Id<CMode> el1, columnar::Particle1Id<CMode> el2) const
   {
     auto& acc = *m_accessors;
     // Look for a shared track
@@ -206,7 +206,7 @@ namespace ORUtils
   // This function assumes a matching criteria has already been applied.
   //---------------------------------------------------------------------------
   bool EleEleOverlapTool::
-  rejectFirst(columnar::Particle1Id el1, columnar::Particle1Id el2) const
+  rejectFirst(columnar::Particle1Id<CMode> el1, columnar::Particle1Id<CMode> el2) const
   {
     auto& acc = *m_accessors;
     // TODO: consider incorporating track-match information in the priority

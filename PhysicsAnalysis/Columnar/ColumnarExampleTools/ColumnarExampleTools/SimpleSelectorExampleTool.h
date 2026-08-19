@@ -52,7 +52,7 @@ namespace columnar
 
     virtual StatusCode initialize () override;
 
-    void callSingleEvent (ParticleRange particles) const;
+    void callSingleEvent (ParticleRange<CMode> particles) const;
 
     virtual void callEvents (EventContextRange<CMode> events) const override;
 
@@ -66,7 +66,7 @@ namespace columnar
     /// This is equivalent to a `ReadHandleKey` in the xAOD world.  It
     /// is used to access the particle range/container for a given
     /// event.
-    ParticleAccessor<ObjectColumn> particlesHandle {*this, "Particles"};
+    ParticleAccessor<ObjectColumn,CMode> particlesHandle {*this, "Particles"};
 
 
     /// @brief the pt accessor for the particle container
@@ -75,7 +75,7 @@ namespace columnar
     /// world.  The main difference is that it registers with the tool,
     /// as that is needed for column accessors.  Also, it is specific to
     /// the container, and can't be used with other containers.
-    ParticleAccessor<float> ptAcc {*this, "pt"};
+    ParticleAccessor<float,CMode> ptAcc {*this, "pt"};
 
 
     /// @brief the selection decorator for the particles
@@ -86,7 +86,7 @@ namespace columnar
     /// the option to return individual output values.  Instead it needs
     /// to provide an output value per object, which in the columnar
     /// world is done by filling a column.
-    ParticleDecorator<char> selectionDec {*this, "selection"};
+    ParticleDecorator<char,CMode> selectionDec {*this, "selection"};
   };
 }
 

@@ -103,8 +103,8 @@ namespace ORUtils
   // Identify overlaps
   //---------------------------------------------------------------------------
   StatusCode EleJetOverlapTool::
-  findOverlaps(columnar::Particle1Range cont1,
-               columnar::Particle2Range cont2,
+  findOverlaps(columnar::Particle1Range<CMode> cont1,
+               columnar::Particle2Range<CMode> cont2,
                columnar::EventContextId<CMode> /*eventContext*/) const
   {
     // Check the container types
@@ -119,8 +119,8 @@ namespace ORUtils
   // Identify overlaps
   //---------------------------------------------------------------------------
   StatusCode EleJetOverlapTool::
-  internalFindOverlaps(columnar::Particle1Range electrons,
-                       columnar::Particle2Range jets) const
+  internalFindOverlaps(columnar::Particle1Range<CMode> electrons,
+                       columnar::Particle2Range<CMode> jets) const
   {
     ATH_MSG_DEBUG("Removing overlapping electrons and jets");
     auto& acc = *m_accessors;

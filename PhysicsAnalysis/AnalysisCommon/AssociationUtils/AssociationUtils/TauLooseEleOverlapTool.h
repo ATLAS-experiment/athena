@@ -47,15 +47,15 @@ namespace ORUtils
       /// @brief Identify overlapping taus and loose electrons.
       /// TODO: add description of the method.
       virtual StatusCode
-      findOverlaps(columnar::Particle1Range cont1,
-                   columnar::Particle2Range cont2,
+      findOverlaps(columnar::Particle1Range<CMode> cont1,
+                   columnar::Particle2Range<CMode> cont2,
                    columnar::EventContextId<CMode> eventContext) const override;
 
       /// @brief Identify overlapping taus and loose electrons.
       /// See the documentation in the above method.
       virtual StatusCode
-      internalFindOverlaps(columnar::Particle1Range taus,
-                           columnar::Particle2Range electrons) const;
+      internalFindOverlaps(columnar::Particle1Range<CMode> taus,
+                           columnar::Particle2Range<CMode> electrons) const;
 
     protected:
 
@@ -64,7 +64,7 @@ namespace ORUtils
 
     protected:
 
-      StatusCode checkElectronID(columnar::Particle2Id electron, bool& pass) const;
+      StatusCode checkElectronID(columnar::Particle2Id<CMode> electron, bool& pass) const;
 
     private:
 
@@ -91,8 +91,8 @@ namespace ORUtils
       /// Columnar accessors
       struct Accessors final : columnar::ColumnarTool<CMode>
       {
-        columnar::Particle2Accessor<char> m_eleIDAcc;
-        columnar::Particle2Accessor<char> m_altEleIDAcc;
+        columnar::Particle2Accessor<char,CMode> m_eleIDAcc;
+        columnar::Particle2Accessor<char,CMode> m_altEleIDAcc;
         using ColumnarTool::ColumnarTool;
       };
       std::unique_ptr<Accessors> m_accessors {std::make_unique<Accessors> (this)};

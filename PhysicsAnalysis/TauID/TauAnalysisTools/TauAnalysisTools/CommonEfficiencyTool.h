@@ -172,7 +172,7 @@ public:
 
     // Associated truth particles and jets. These are picked up by truth
     // links on the tau itself.
-    columnar::TruthParticleAccessor<columnar::ObjectColumn> m_truthParticles {*this, "TruthTaus"};
+    columnar::TruthParticleAccessor<columnar::ObjectColumn,CMode> m_truthParticles {*this, "TruthTaus"};
     columnar::JetAccessor<columnar::ObjectColumn> m_jets {*this, "AntiKt4TruthDressedWZJets"};
 
     columnar::TauJetAccessor<columnar::ObjectColumn> m_taus {*this, "TauJets"};

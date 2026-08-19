@@ -379,7 +379,7 @@ namespace ORUtils
     // these dummy accessors are needed to make sure we have an offset
     // map for the track containers (that's a limitation in the test,
     // not in actual use)
-    columnar::Particle1Accessor<float> dummyEleAcc {*tool, "phi"};
+    columnar::Particle1Accessor<float,CMode> dummyEleAcc {*tool, "phi"};
     columnar::Track0Accessor<float> dummy0Acc {*tool, "phi"};
     columnar::Track1Accessor<float> dummy1Acc {*tool, "phi"};
     columnar::Track2Accessor<float> dummy2Acc {*tool, "phi"};

@@ -51,8 +51,8 @@ namespace ORUtils
   // Identify overlaps
   //---------------------------------------------------------------------------
   StatusCode TauLooseEleOverlapTool::
-  findOverlaps(columnar::Particle1Range cont1,
-               columnar::Particle2Range cont2,
+  findOverlaps(columnar::Particle1Range<CMode> cont1,
+               columnar::Particle2Range<CMode> cont2,
                columnar::EventContextId<CMode> /*eventContext*/) const
   {
     // Check the container types
@@ -67,8 +67,8 @@ namespace ORUtils
   // Identify overlaps
   //---------------------------------------------------------------------------
   StatusCode TauLooseEleOverlapTool::
-  internalFindOverlaps(columnar::Particle1Range taus,
-                       columnar::Particle2Range electrons) const
+  internalFindOverlaps(columnar::Particle1Range<CMode> taus,
+                       columnar::Particle2Range<CMode> electrons) const
   {
     ATH_MSG_DEBUG("Removing taus from loose electrons");
 
@@ -103,7 +103,7 @@ namespace ORUtils
   // Loose electron criteria
   //---------------------------------------------------------------------------
   StatusCode TauLooseEleOverlapTool::
-  checkElectronID(columnar::Particle2Id electron, bool& pass) const
+  checkElectronID(columnar::Particle2Id<CMode> electron, bool& pass) const
   {
     auto& acc = *m_accessors;
     // Try the configured ID string.

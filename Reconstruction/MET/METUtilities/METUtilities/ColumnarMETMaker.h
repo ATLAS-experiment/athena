@@ -81,7 +81,7 @@ namespace met {
       const std::string& metKey,
       xAOD::Type::ObjectType metType,
       columnar::MutableMetRange metCont,
-      columnar::ParticleRange collection,
+      columnar::ParticleRange<CMode> collection,
       columnar::MetAssociationHelper<> helper,
       MissingETBase::UsageHandler::Policy objScale) const;
     //
@@ -92,7 +92,7 @@ namespace met {
       MissingETBase::UsageHandler::Policy objScale) const override final;
     StatusCode rebuildMET(
       columnar::MutableMetId met,
-      columnar::ParticleRange collection,
+      columnar::ParticleRange<CMode> collection,
       columnar::MetAssociationHelper<> helper,
       MissingETBase::UsageHandler::Policy objScale) const;
     //
@@ -105,7 +105,7 @@ namespace met {
       MissingETBase::UsageHandler::Policy objScale) const override final;
     StatusCode rebuildMET(
       columnar::MutableMetId met,
-      columnar::ParticleRange collection,
+      columnar::ParticleRange<CMode> collection,
       columnar::MetAssociationHelper<> helper,
       MissingETBase::UsageHandler::Policy p,
       bool removeOverlap,
@@ -207,7 +207,7 @@ namespace met {
       xAOD::MissingETAssociationHelper& helper,
       xAOD::MissingETContainer* metCont) const override final;
     StatusCode markInvisible(
-      columnar::ParticleRange collection,
+      columnar::ParticleRange<CMode> collection,
       columnar::MetAssociationHelper<> helper,
       columnar::MutableMetRange metCont) const;
 
@@ -280,7 +280,7 @@ namespace met {
     columnar::MutableMetAccessor<columnar::ObjectColumn> m_outputMetHandle {*this, "OutputMET"};
     columnar::Met1Accessor<columnar::ObjectColumn> m_inputMetHandle {*this, "METCore", {.addMTDependency=true}};
     columnar::ColumnAccessor<columnar::MetAssociationDef,columnar::ObjectColumn,CMode> m_metAssocHandle {*this, "MetAssoc", {.addMTDependency=true}};
-    columnar::ParticleAccessor<columnar::ObjectColumn> m_particlesHandle {*this, "Particles"};
+    columnar::ParticleAccessor<columnar::ObjectColumn,CMode> m_particlesHandle {*this, "Particles"};
     columnar::JetAccessor<columnar::ObjectColumn> m_jetsHandle {*this, "Jets"};
     columnar::ElectronAccessor<columnar::ObjectColumn> m_electronsHandle {*this, "Electrons"};
     columnar::PhotonAccessor<columnar::ObjectColumn> m_photonsHandle {*this, "Photons"};
@@ -299,8 +299,8 @@ namespace met {
 
     columnar::MetHelpers::InputMomentumAccessors<> m_inputMomAcc {*this};
     Gaudi::Property<std::string> m_inputPreselectionName {this, "inputPreselection", ""};
-    std::optional<columnar::ParticleAccessor<char>> m_inputPreselectionAcc;
-    columnar::ParticleAccessor<columnar::RetypeColumn<xAOD::Muon::MuonType,std::uint16_t>> m_inputMuonTypeAcc {*this, "muonType", {.isOptional = true}};
+    std::optional<columnar::ParticleAccessor<char,CMode>> m_inputPreselectionAcc;
+    columnar::ParticleAccessor<columnar::RetypeColumn<xAOD::Muon::MuonType,std::uint16_t>,CMode> m_inputMuonTypeAcc {*this, "muonType", {.isOptional = true}};
     columnar::MetHelpers::ObjectTypeAccessor<columnar::ParticleDef,CMode> m_inputObjTypeAcc {*this, "objectType"};
 
     columnar::MetHelpers::ObjectWeightDecorator<> m_outputMetWeightDecRegular {*this, "", true};

@@ -35,7 +35,7 @@ namespace columnar
 
 
   void VectorExampleTool ::
-  callSingleEvent (ParticleRange particles) const
+  callSingleEvent (ParticleRange<CMode> particles) const
   {
     // loop over all particles.  note that this is deliberately looping
     // by value, as the ID classes are very small and can be copied
@@ -43,7 +43,7 @@ namespace columnar
     // all particles in the event range, but I chose to split it up into
     // two loops as most tools will need to do some per-event things,
     // e.g. retrieve `EventInfo`.
-    for (ParticleId particle : particles)
+    for (ParticleId<CMode> particle : particles)
     {
       // in pactical terms we should find the index of the primary
       // vertex, but for purposes of the example we just use the first

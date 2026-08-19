@@ -32,10 +32,10 @@ namespace ORUtils
                                    xAODType::ObjectType type2) = 0;
 
       /// Test association between two IParticles
-      virtual bool objectsMatch(columnar::Particle1Id p1,
-                                columnar::Particle2Id p2, bool swapArgs = false) const = 0;
-      bool objectsMatch(columnar::Particle2Id p2,
-                        columnar::Particle1Id p1) const
+      virtual bool objectsMatch(columnar::Particle1Id<CMode> p1,
+                                columnar::Particle2Id<CMode> p2, bool swapArgs = false) const = 0;
+      bool objectsMatch(columnar::Particle2Id<CMode> p2,
+                        columnar::Particle1Id<CMode> p1) const
       { return objectsMatch(p1, p2, true); }
   };
 

@@ -48,8 +48,8 @@ namespace ORUtils
   //---------------------------------------------------------------------------
   // Check for a match via ghost association or delta-R
   //---------------------------------------------------------------------------
-  bool MuJetGhostDRMatcher::objectsMatch(columnar::Particle1Id mu,
-                                         columnar::Particle2Id jet,
+  bool MuJetGhostDRMatcher::objectsMatch(columnar::Particle1Id<CMode> mu,
+                                         columnar::Particle2Id<CMode> jet,
                                          bool swapArgs) const
   {
     if (swapArgs) {
