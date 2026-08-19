@@ -97,14 +97,14 @@ namespace ORUtils
       using MyTrackDef = columnar::VariantContainerId<columnar::Track0Def,columnar::Track0Def>;
       struct Accessors final : columnar::ColumnarTool<CMode>
       {
-        columnar::ClusterAccessor<columnar::ObjectColumn> m_clusterContainerAcc;
+        columnar::ClusterAccessor<columnar::ObjectColumn,CMode> m_clusterContainerAcc;
         columnar::Track0Accessor<columnar::ObjectColumn> m_track0Acc;
         columnar::Particle1Accessor<float,CMode> m_ptAcc {*this, "pt"};
         columnar::Particle1Accessor<std::uint16_t,CMode> m_authorAcc {*this, "author"};
-        columnar::Particle1Accessor<std::vector<columnar::OptClusterId>,CMode> m_caloClusterAcc;
+        columnar::Particle1Accessor<std::vector<columnar::OptClusterId<CMode>>,CMode> m_caloClusterAcc;
         columnar::Particle1Accessor<std::vector<columnar::OptTrackId>,CMode> m_trackAcc;
-        std::optional<columnar::ClusterHelpers::EtaBEAccessor<>> m_etaBEAcc;
-        std::optional<columnar::ClusterHelpers::PhiBEAccessor<>> m_phiBEAcc;
+        std::optional<columnar::ClusterHelpers::EtaBEAccessor<CMode>> m_etaBEAcc;
+        std::optional<columnar::ClusterHelpers::PhiBEAccessor<CMode>> m_phiBEAcc;
         using ColumnarTool::ColumnarTool;
       };
       std::unique_ptr<Accessors> m_accessors {std::make_unique<Accessors> (this)};

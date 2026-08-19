@@ -247,11 +247,11 @@ public:
     columnar::ElectronDecorator<float> m_sfDec{*this,"sfOut"};
     columnar::ElectronDecorator<char> m_validDec{*this,"validOut"};
   
-    columnar::ClusterAccessor<columnar::ObjectColumn> m_clusterHandle {*this, "egammaClusters"};
-    columnar::ElectronAccessor<std::vector<columnar::OptClusterId>> caloClusterAcc {*this, "caloClusterLinks"};
-    columnar::ClusterAccessor<float> clusterEAcc {*this, "calE"};
-    columnar::ClusterAccessor<float> clusterEtaAcc {*this, "calEta"};
-    columnar::ClusterHelpers::EtaBEAccessor<> clusterEtaBEAcc {*this};
+    columnar::ClusterAccessor<columnar::ObjectColumn,CMode> m_clusterHandle {*this, "egammaClusters"};
+    columnar::ElectronAccessor<std::vector<columnar::OptClusterId<CMode>>> caloClusterAcc {*this, "caloClusterLinks"};
+    columnar::ClusterAccessor<float,CMode> clusterEAcc {*this, "calE"};
+    columnar::ClusterAccessor<float,CMode> clusterEtaAcc {*this, "calEta"};
+    columnar::ClusterHelpers::EtaBEAccessor<CMode> clusterEtaBEAcc {*this};
   };
   std::unique_ptr<Accessors> m_accessors;
 

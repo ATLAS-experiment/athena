@@ -161,7 +161,7 @@ private:
 
     columnar::EventInfoAccessor<columnar::ObjectColumn> eventInfoAcc {*this, "EventInfo", {.addMTDependency=true}};
     columnar::EgammaAccessor<columnar::ObjectColumn> photonsAcc {*this, "Photons"};
-    columnar::ClusterAccessor<columnar::ObjectColumn> clusterAcc {*this, "egammaClusters"};
+    columnar::ClusterAccessor<columnar::ObjectColumn,CMode> clusterAcc {*this, "egammaClusters"};
     columnar::VertexAccessor<columnar::ObjectColumn> verticesAcc {*this, "GSFConversionVertices"};
     columnar::TrackAccessor<columnar::ObjectColumn> tracksAcc {*this, "GSFTrackParticles"};
 
@@ -172,9 +172,9 @@ private:
     columnar::EgammaDecorator<float> sfDec{*this,"sfOut"};
     columnar::EgammaDecorator<char> validDec{*this,"validOut"};
   
-    columnar::EgammaAccessor<std::vector<columnar::OptClusterId>> caloClusterAcc {*this, "caloClusterLinks"};
-    columnar::ClusterAccessor<float> clusterEAcc {*this, "calE"};
-    columnar::ClusterHelpers::EtaBEAccessor<> clusterEtaBEAcc {*this};
+    columnar::EgammaAccessor<std::vector<columnar::OptClusterId<CMode>>> caloClusterAcc {*this, "caloClusterLinks"};
+    columnar::ClusterAccessor<float,CMode> clusterEAcc {*this, "calE"};
+    columnar::ClusterHelpers::EtaBEAccessor<CMode> clusterEtaBEAcc {*this};
   };
   std::unique_ptr<Accessors> m_accessors {std::make_unique<Accessors>(*this)};
 

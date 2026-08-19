@@ -100,7 +100,7 @@ inline float get_eta_calo(const xAOD::CaloCluster& cluster, int author,
 namespace columnar {
   namespace ClusterHelpers {
 
-    template<ContainerIdConcept CI = ClusterDef,typename CM=ColumnarModeDefault>
+    template<ColumnarMode CM, ContainerIdConcept CI = ClusterDef>
     class PhiCaloAccessor final
     {
       ColumnAccessor<CI,float,CM> m_phiCaloAcc;
@@ -115,7 +115,7 @@ namespace columnar {
           m_phicaloframeAcc (columnarTool, "PHICALOFRAME", {.isOptional = true})
       {}
   
-      float operator () (ClusterId cluster, int author, bool do_throw=false) const
+      float operator () (ObjectId<CI,CM> cluster, int author, bool do_throw=false) const
       {
         double phi_calo;
         if(author== xAOD::EgammaParameters::AuthorFwdElectron){
@@ -138,7 +138,7 @@ namespace columnar {
       }
     };
 
-    template<ContainerIdConcept CI = ClusterDef,typename CM=ColumnarModeDefault>
+    template<ColumnarMode CM, ContainerIdConcept CI = ClusterDef>
     class EtaCaloAccessor final
     {
       ColumnAccessor<CI,float,CM> m_etaCaloAcc;
@@ -153,7 +153,7 @@ namespace columnar {
           m_etacaloframeAcc (columnarTool, "ETACALOFRAME", {.isOptional = true})
       {}
 
-      float operator () (ClusterId cluster, int author, bool do_throw=false) const
+      float operator () (ObjectId<CI,CM> cluster, int author, bool do_throw=false) const
       {
         double eta_calo;
         if(author== xAOD::EgammaParameters::AuthorFwdElectron){
@@ -467,18 +467,18 @@ public:
     columnar::EgammaAccessor<uint16_t> authorAcc {*this, "author"};
     columnar::EgammaAccessor<std::vector<columnar::OptTrackId>> electronTrackAcc;
     columnar::EgammaAccessor<std::vector<columnar::OptVertexId>> photonVertexAcc;
-    columnar::ClusterAccessor<columnar::ObjectColumn> m_clusterHandle {*this, "egammaClusters"};
-    columnar::EgammaAccessor<std::vector<columnar::OptClusterId>> caloClusterAcc {*this, "caloClusterLinks"};
-    columnar::ClusterAccessor<double> Es0Acc {*this, "correctedcl_Es0", {.isOptional = true}};
-    columnar::ClusterAccessor<double> Es1Acc {*this, "correctedcl_Es1", {.isOptional = true}};
-    columnar::ClusterAccessor<double> Es2Acc {*this, "correctedcl_Es2", {.isOptional = true}};
-    columnar::ClusterAccessor<double> Es3Acc {*this, "correctedcl_Es3", {.isOptional = true}};
-    columnar::ClusterAccessor<columnar::RetypeColumn<double,float>> clusterEtaAcc {*this, "calEta"};
-    columnar::ClusterAccessor<columnar::RetypeColumn<double,float>> clusterPhiAcc {*this, "calPhi"};
-    columnar::ClusterHelpers::EnergyBEAccessor<> energyBEAcc {*this};
-    columnar::ClusterHelpers::EtaBEAccessor<> clusterEtaBEAcc {*this};
-    columnar::ClusterHelpers::EtaCaloAccessor<> etaCaloAcc {*this};
-    columnar::ClusterHelpers::PhiCaloAccessor<> phiCaloAcc {*this};
+    columnar::ClusterAccessor<columnar::ObjectColumn,CMode> m_clusterHandle {*this, "egammaClusters"};
+    columnar::EgammaAccessor<std::vector<columnar::OptClusterId<CMode>>> caloClusterAcc {*this, "caloClusterLinks"};
+    columnar::ClusterAccessor<double,CMode> Es0Acc {*this, "correctedcl_Es0", {.isOptional = true}};
+    columnar::ClusterAccessor<double,CMode> Es1Acc {*this, "correctedcl_Es1", {.isOptional = true}};
+    columnar::ClusterAccessor<double,CMode> Es2Acc {*this, "correctedcl_Es2", {.isOptional = true}};
+    columnar::ClusterAccessor<double,CMode> Es3Acc {*this, "correctedcl_Es3", {.isOptional = true}};
+    columnar::ClusterAccessor<columnar::RetypeColumn<double,float>,CMode> clusterEtaAcc {*this, "calEta"};
+    columnar::ClusterAccessor<columnar::RetypeColumn<double,float>,CMode> clusterPhiAcc {*this, "calPhi"};
+    columnar::ClusterHelpers::EnergyBEAccessor<CMode> energyBEAcc {*this};
+    columnar::ClusterHelpers::EtaBEAccessor<CMode> clusterEtaBEAcc {*this};
+    columnar::ClusterHelpers::EtaCaloAccessor<CMode> etaCaloAcc {*this};
+    columnar::ClusterHelpers::PhiCaloAccessor<CMode> phiCaloAcc {*this};
     columnar::EventInfoAccessor<columnar::ObjectColumn> m_eventHandle {*this, "EventInfo", {.addMTDependency=true}};
     columnar::EventInfoHelpers::EventTypeAccessor<> eventTypeAcc {*this};
     columnar::EventInfoAccessor<uint32_t> runNumberAcc {*this, "runNumber"};

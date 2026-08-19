@@ -20,10 +20,12 @@ namespace columnar
     static constexpr std::string_view idName = "cluster";
   };
 
-  using ClusterId = ObjectId<ClusterDef, ColumnarModeDefault>;
-  using OptClusterId = OptObjectId<ClusterDef, ColumnarModeDefault>;
-  template<typename CT,typename CM=ColumnarModeDefault> using ClusterAccessor  = AccessorTemplate<ClusterDef,CT,ColumnAccessMode::input,CM>;
-  template<typename CT,typename CM=ColumnarModeDefault> using ClusterDecorator = AccessorTemplate<ClusterDef,CT,ColumnAccessMode::output,CM>;
+  template<ColumnarMode CM>
+  using ClusterId = ObjectId<ClusterDef, CM>;
+  template<ColumnarMode CM>
+  using OptClusterId = OptObjectId<ClusterDef, CM>;
+  template<typename CT,ColumnarMode CM> using ClusterAccessor  = AccessorTemplate<ClusterDef,CT,ColumnAccessMode::input,CM>;
+  template<typename CT,ColumnarMode CM> using ClusterDecorator = AccessorTemplate<ClusterDef,CT,ColumnAccessMode::output,CM>;
 }
 
 #endif

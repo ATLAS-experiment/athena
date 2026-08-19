@@ -1027,7 +1027,7 @@ CP::CorrectionCode EgammaCalibrationAndSmearingTool::applyCorrection(
   // only used in simulation (for the smearing)
   RandomNumber seed = m_set_seed_function(*this, input, event_info);
 
-  columnar::ClusterId inputCluster = acc.caloClusterAcc (input)[0].value();
+  columnar::ClusterId<CMode> inputCluster = acc.caloClusterAcc (input)[0].value();
 
   if (m_layer_recalibration_tool && acc.authorAcc (input) !=
 	xAOD::EgammaParameters::AuthorFwdElectron) {
