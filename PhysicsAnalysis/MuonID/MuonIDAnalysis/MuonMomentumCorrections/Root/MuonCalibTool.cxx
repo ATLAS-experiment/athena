@@ -658,9 +658,9 @@ namespace CP
         }
     }
 
-    void MuonCalibTool::callEvents (columnar::EventContextRange events) const {
+    void MuonCalibTool::callEvents (columnar::EventContextRange<CMode> events) const {
         auto& acc = *m_acc;
-        for (columnar::EventContextId event : events)
+        for (columnar::EventContextId<CMode> event : events)
         {
             auto eventInfo = acc.m_eventInfoCol(event);
             callSingleEvent (acc.m_muons(event), eventInfo);

@@ -62,7 +62,7 @@ namespace ORUtils
     return StatusCode::SUCCESS;
   }
 
-  void BaseOverlapTool::callEvents (columnar::EventContextRange events) const
+  void BaseOverlapTool::callEvents (columnar::EventContextRange<CMode> events) const
   {
     auto& baseAcc = *m_baseAccessors;
     for (auto event : events)

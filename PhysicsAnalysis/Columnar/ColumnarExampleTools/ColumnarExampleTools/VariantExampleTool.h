@@ -56,7 +56,7 @@ namespace columnar
 
     void callSingleEvent (ElectronRange electrons, MuonRange muons) const;
 
-    virtual void callEvents (EventContextRange events) const override;
+    virtual void callEvents (EventContextRange<CMode> events) const override;
 
 
     /// @brief the object accessor for the underlying containers

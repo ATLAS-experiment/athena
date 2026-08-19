@@ -328,7 +328,7 @@ namespace met {
     Gaudi::Property<std::string> m_columnarJetKey {this, "columnarJetKey", ""};
     Gaudi::Property<std::string> m_columnarSoftClusKey {this, "columnarSoftClusKey", ""};
     Gaudi::Property<bool> m_columnarDoJetJVT {this, "columnarDoJetJVT", false};
-    void callEvents (columnar::EventContextRange events) const override;
+    void callEvents (columnar::EventContextRange<CMode> events) const override;
   };
 
 } //> end namespace met

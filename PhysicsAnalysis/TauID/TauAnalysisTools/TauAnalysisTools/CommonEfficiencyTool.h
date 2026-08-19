@@ -187,7 +187,7 @@ public:
   std::unique_ptr<Accessors> m_accessors;
 
   void callSingleEvent (columnar::TauJetRange taus, columnar::EventInfoId event) const;
-  void callEvents (columnar::EventContextRange events) const override;
+  void callEvents (columnar::EventContextRange<CMode> events) const override;
 
 
 };

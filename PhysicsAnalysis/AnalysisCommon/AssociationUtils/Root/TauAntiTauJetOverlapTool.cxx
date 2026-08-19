@@ -88,7 +88,7 @@ namespace ORUtils
   StatusCode TauAntiTauJetOverlapTool::
   findOverlaps(columnar::Particle1Range cont1,
                columnar::Particle2Range cont2,
-               columnar::EventContextId eventContext) const
+               columnar::EventContextId<CMode> eventContext) const
   {
     // Check the container types
     ATH_CHECK( checkForXAODContainer<xAOD::JetContainer>(cont1, "First container arg is not of type JetContainer!") );
@@ -104,7 +104,7 @@ namespace ORUtils
   StatusCode TauAntiTauJetOverlapTool::
   internalFindOverlaps(columnar::Particle1Range jets,
                        columnar::Particle2Range taus,
-                       columnar::EventContextId eventContext) const
+                       columnar::EventContextId<CMode> eventContext) const
   {
     ATH_MSG_DEBUG("Removing overlapping taus and jets");
     auto& acc = *m_accessors;

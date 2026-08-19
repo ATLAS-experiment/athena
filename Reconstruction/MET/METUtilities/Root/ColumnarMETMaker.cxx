@@ -1244,9 +1244,9 @@ namespace met {
 
 
 
-  void ColumnarMETMaker::callEvents (columnar::EventContextRange events) const
+  void ColumnarMETMaker::callEvents (columnar::EventContextRange<CMode> events) const
   {
-    for (columnar::EventContextId event : events)
+    for (columnar::EventContextId<CMode> event : events)
     {
       auto met = m_outputMetHandle (event);
       auto metcore = m_inputMetHandle (event);

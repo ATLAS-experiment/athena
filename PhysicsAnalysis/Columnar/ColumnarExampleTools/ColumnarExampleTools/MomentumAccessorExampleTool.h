@@ -41,7 +41,7 @@ namespace columnar
 
     void callSingleEvent (ParticleRange particles) const;
 
-    virtual void callEvents (EventContextRange events) const override;
+    virtual void callEvents (EventContextRange<CMode> events) const override;
 
 
     /// @brief the energy cut to apply

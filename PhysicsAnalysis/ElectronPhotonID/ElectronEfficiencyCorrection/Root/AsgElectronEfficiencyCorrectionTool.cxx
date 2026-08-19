@@ -1023,10 +1023,10 @@ void AsgElectronEfficiencyCorrectionTool::callSingleEvent (columnar::ElectronRan
   }
 }
 
-void AsgElectronEfficiencyCorrectionTool::callEvents (columnar::EventContextRange events) const
+void AsgElectronEfficiencyCorrectionTool::callEvents (columnar::EventContextRange<CMode> events) const
 {
   const Accessors& acc = *m_accessors;
-  for (columnar::EventContextId event : events)
+  for (columnar::EventContextId<CMode> event : events)
   {
     auto eventInfo = acc.m_eventInfo(event);
     callSingleEvent (acc.m_electrons(event), eventInfo);

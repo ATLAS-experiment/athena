@@ -182,7 +182,7 @@ private:
 public:
 
   void callSingleEvent (columnar::EgammaRange photons, columnar::EventInfoId event) const;
-  void callEvents (columnar::EventContextRange events) const override;
+  void callEvents (columnar::EventContextRange<CMode> events) const override;
 
 }; // End: class definition
 

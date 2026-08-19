@@ -85,7 +85,7 @@ namespace ORUtils
   StatusCode AltMuJetOverlapTool::
   findOverlaps(columnar::Particle1Range cont1,
                columnar::Particle2Range cont2,
-               columnar::EventContextId eventContext) const
+               columnar::EventContextId<CMode> eventContext) const
   {
     // Check the container types
     ATH_CHECK (checkForXAODContainer<xAOD::MuonContainer>(cont1, "First container arg is not of type MuonContainer!"));
@@ -101,7 +101,7 @@ namespace ORUtils
   StatusCode AltMuJetOverlapTool::
   internalFindOverlaps(columnar::Particle1Range muons,
                        columnar::Particle2Range jets,
-                       columnar::EventContextId eventContext) const
+                       columnar::EventContextId<CMode> eventContext) const
   {
     ATH_MSG_DEBUG("Removing overlapping muons and jets");
     auto& acc = *m_accessors;
@@ -148,7 +148,7 @@ namespace ORUtils
   //---------------------------------------------------------------------------
   // Retrieve the primary vertex
   //---------------------------------------------------------------------------
-  int AltMuJetOverlapTool::getPrimVtxIndex(columnar::EventContextId eventContext) const
+  int AltMuJetOverlapTool::getPrimVtxIndex(columnar::EventContextId<CMode> eventContext) const
   {
     auto& acc = *m_accessors;
     if (!acc.m_vtxContainerAcc.isAvailable(eventContext)) {
@@ -167,7 +167,7 @@ namespace ORUtils
   //---------------------------------------------------------------------------
   // Retrieve the primary vertex
   //---------------------------------------------------------------------------
-  int AltMuJetOverlapTool::getNumTracks(columnar::Particle2Id jet, columnar::EventContextId eventContext) const
+  int AltMuJetOverlapTool::getNumTracks(columnar::Particle2Id jet, columnar::EventContextId<CMode> eventContext) const
   {
     // Find the primary vertex
     auto& acc = *m_accessors;

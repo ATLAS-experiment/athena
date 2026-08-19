@@ -53,7 +53,7 @@ namespace ORUtils
       virtual StatusCode
       findOverlaps(columnar::Particle1Range cont1,
                    columnar::Particle2Range cont2,
-                   columnar::EventContextId eventContext) const override;
+                   columnar::EventContextId<CMode> eventContext) const override;
 
       /// @brief Identify overlapping taus and jets.
       /// The above method calls this one.

@@ -705,9 +705,9 @@ namespace CP {
         }
     }
 
-    void MuonEfficiencyScaleFactors::callEvents (columnar::EventContextRange events) const {
+    void MuonEfficiencyScaleFactors::callEvents (columnar::EventContextRange<CMode> events) const {
         const auto& acc = *m_accessors;
-        for (columnar::EventContextId event : events)
+        for (columnar::EventContextId<CMode> event : events)
         {
             auto eventInfo = acc.eventInfoCol(event);
             callSingleEvent (acc.muons(event), eventInfo);

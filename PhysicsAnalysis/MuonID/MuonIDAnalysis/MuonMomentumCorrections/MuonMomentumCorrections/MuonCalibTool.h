@@ -147,7 +147,7 @@ namespace CP {
         std::unique_ptr<MCP::MuonCalibToolAccessors> m_acc {std::make_unique<MCP::MuonCalibToolAccessors>(*this)};
 
         void callSingleEvent (columnar::MuonRange muons, columnar::EventInfoId event) const;
-        void callEvents (columnar::EventContextRange events) const override;
+        void callEvents (columnar::EventContextRange<CMode> events) const override;
 
     };  // class MuonCalibTool
 

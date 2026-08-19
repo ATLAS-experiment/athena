@@ -82,14 +82,14 @@ namespace ORUtils
       virtual StatusCode
       findOverlaps(columnar::Particle1Range cont1,
                    columnar::Particle2Range cont2,
-                   columnar::EventContextId eventContext) const override;
+                   columnar::EventContextId<CMode> eventContext) const override;
 
       /// @brief Identify overlapping muons and jets.
       /// The above method calls this one.
       virtual StatusCode
       internalFindOverlaps(columnar::Particle1Range muons,
                            columnar::Particle2Range jets,
-                           columnar::EventContextId eventContext) const;
+                           columnar::EventContextId<CMode> eventContext) const;
 
     protected:
 
@@ -99,7 +99,7 @@ namespace ORUtils
     protected:
 
       /// Retrieve the primary vertex used to count jet tracks
-      std::optional<std::size_t> getPrimVtxIdx(columnar::EventContextId eventContext) const;
+      std::optional<std::size_t> getPrimVtxIdx(columnar::EventContextId<CMode> eventContext) const;
 
       /// Get the number of tracks in a jet w.r.t. requested vertex
       int getNumTracks(columnar::Particle2Id jet, size_t vtxIdx) const;

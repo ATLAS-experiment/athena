@@ -219,7 +219,7 @@ namespace CP {
     public:
 
             void callSingleEvent (columnar::MuonRange muons, columnar::EventInfoId event) const;
-            virtual void callEvents (columnar::EventContextRange events) const override;
+            virtual void callEvents (columnar::EventContextRange<CMode> events) const override;
     };
 
 } /* namespace CP */

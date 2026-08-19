@@ -784,10 +784,10 @@ void CommonEfficiencyTool::callSingleEvent (columnar::TauJetRange taus, columnar
   }
 }
 
-void CommonEfficiencyTool::callEvents (columnar::EventContextRange events) const
+void CommonEfficiencyTool::callEvents (columnar::EventContextRange<CMode> events) const
 {
   const Accessors& acc = *m_accessors;
-  for (columnar::EventContextId event : events)
+  for (columnar::EventContextId<CMode> event : events)
   {
     auto eventInfo = acc.m_eventInfo(event);
     callSingleEvent (acc.m_taus(event), eventInfo);

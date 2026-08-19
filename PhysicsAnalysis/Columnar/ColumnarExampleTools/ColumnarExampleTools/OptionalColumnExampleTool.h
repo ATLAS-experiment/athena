@@ -35,7 +35,7 @@ namespace columnar
 
     virtual StatusCode initialize () override;
 
-    virtual void callEvents (EventContextRange events) const override;
+    virtual void callEvents (EventContextRange<CMode> events) const override;
 
 
     /// @brief the pt cut to apply

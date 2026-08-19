@@ -57,7 +57,7 @@ namespace ORUtils
       StatusCode initialize() override final;
 
       /// The callEvents() for columnar tools
-      virtual void callEvents (columnar::EventContextRange events) const override;
+      virtual void callEvents (columnar::EventContextRange<CMode> events) const override;
 
     protected:
 

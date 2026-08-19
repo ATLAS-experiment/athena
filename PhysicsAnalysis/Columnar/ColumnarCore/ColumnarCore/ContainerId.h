@@ -208,8 +208,10 @@ namespace columnar
   template<ContainerIdConcept CI,typename CT,ColumnAccessMode CAM,ColumnarMode CM> class AccessorTemplate;
 
 
-  using EventContextRange = ObjectRange<EventContextDef, ColumnarModeDefault>;
-  using EventContextId = ObjectId<EventContextDef, ColumnarModeDefault>;
+  template<ColumnarMode CM>
+  using EventContextRange = ObjectRange<EventContextDef,CM>;
+  template<ColumnarMode CM>
+  using EventContextId = ObjectId<EventContextDef,CM>;
 }
 
 #endif

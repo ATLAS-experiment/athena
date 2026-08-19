@@ -2601,7 +2601,7 @@ callSingleEvent (columnar::MutableEgammaRange egammas, columnar::EventInfoId eve
 }
 
 void EgammaCalibrationAndSmearingTool ::
-callEvents (columnar::EventContextRange events) const
+callEvents (columnar::EventContextRange<CMode> events) const
 {
   const Accessors& acc = *m_accessors;
   for (auto event : events) {

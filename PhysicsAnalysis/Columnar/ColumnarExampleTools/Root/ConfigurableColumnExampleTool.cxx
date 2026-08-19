@@ -43,7 +43,7 @@ namespace columnar
 
 
   void ConfigurableColumnExampleTool ::
-  callEvents (EventContextRange events) const
+  callEvents (EventContextRange<CMode> events) const
   {
     // loop over all events and particles.  note that this is
     // deliberately looping by value, as the ID classes are very small
@@ -51,7 +51,7 @@ namespace columnar
     // a single loop over all particles in the event range, but I chose
     // to split it up into two loops as most tools will need to do some
     // per-event things, e.g. retrieve `EventInfo`.
-    for (columnar::EventContextId event : events)
+    for (columnar::EventContextId<CMode> event : events)
     {
       for (columnar::ParticleId particle : particlesHandle(event))
       {

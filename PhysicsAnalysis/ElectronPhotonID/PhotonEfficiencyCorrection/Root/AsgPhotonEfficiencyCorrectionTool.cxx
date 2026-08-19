@@ -499,10 +499,10 @@ void AsgPhotonEfficiencyCorrectionTool::callSingleEvent (columnar::EgammaRange p
   }
 }
 
-void AsgPhotonEfficiencyCorrectionTool::callEvents (columnar::EventContextRange events) const
+void AsgPhotonEfficiencyCorrectionTool::callEvents (columnar::EventContextRange<CMode> events) const
 {
   const Accessors& acc = *m_accessors;
-  for (columnar::EventContextId event : events)
+  for (columnar::EventContextId<CMode> event : events)
   {
     auto eventInfo = acc.eventInfoAcc(event);
     callSingleEvent (acc.photonsAcc(event), eventInfo);

@@ -153,11 +153,11 @@ namespace columnar
 
 
   void ColumnarLinkTool ::
-  callEvents (EventContextRange events) const
+  callEvents (EventContextRange<CMode> events) const
   {
     using CM = ColumnarModeArray;
 
-    for (EventContextId event : events)
+    for (EventContextId<CMode> event : events)
     {
       void** dataArea = event.getDataArea();
       const std::size_t eventIdx = event.getIndex();

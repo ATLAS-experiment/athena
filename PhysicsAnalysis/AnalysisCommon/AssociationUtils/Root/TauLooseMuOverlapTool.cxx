@@ -56,7 +56,7 @@ namespace ORUtils
   StatusCode TauLooseMuOverlapTool::
   findOverlaps(columnar::Particle1Range cont1,
                columnar::Particle2Range cont2,
-               columnar::EventContextId /*eventContext*/) const
+               columnar::EventContextId<CMode> /*eventContext*/) const
   {
     // Check the container types
     ATH_CHECK( checkForXAODContainer<xAOD::TauJetContainer>(cont1, "First container arg is not of type TauJetContainer!") );
