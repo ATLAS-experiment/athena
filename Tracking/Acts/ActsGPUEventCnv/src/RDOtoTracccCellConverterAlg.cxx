@@ -15,6 +15,9 @@ StatusCode RDOtoTracccCellConverterAlg::initialize()
   ATH_CHECK(m_pixelRDOKey.initialize());
   ATH_CHECK(m_stripRDOKey.initialize());
 
+  ATH_MSG_DEBUG("Reading from Pixel RDO key: " << m_pixelRDOKey.key());
+  ATH_MSG_DEBUG("Reading from Strip RDO key: " << m_stripRDOKey.key());
+
   ATH_CHECK(detStore()->retrieve(m_pixelManager, m_pixelManagerKey));
   ATH_CHECK(detStore()->retrieve(m_stripManager, m_stripManagerKey));
 
@@ -49,6 +52,8 @@ StatusCode RDOtoTracccCellConverterAlg::execute(const EventContext& ctx) const
     }
   }
 
+  ATH_MSG_DEBUG("Found " << nPix << " Pixel RDOs and " << nStrip
+                << " Strip RDOs, total " << (nPix + nStrip) << " RDOs");
   size_type const nCells = nPix + nStrip;
 
   if (nCells == 0) {
