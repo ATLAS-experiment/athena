@@ -94,7 +94,7 @@ StatusCode TauEfficiencyCorrectionsTool::beginEvent()
     m_firstEvent = true;
       
   }
-  if (m_bIsData)
+  if (m_bIsData && !m_applyToData)
     return StatusCode::SUCCESS;
 
   const xAOD::EventInfo* xEventInfo = nullptr;
@@ -137,7 +137,7 @@ CP::CorrectionCode TauEfficiencyCorrectionsTool::getEfficiencyScaleFactor( const
 {
 	eff = 1.;
 
-	if (m_bIsData)
+	if (m_bIsData && !m_applyToData)
 		return CP::CorrectionCode::Ok;
 
 	ANA_CHECK_SET_TYPE (CP::CorrectionCode);
@@ -159,7 +159,7 @@ CP::CorrectionCode TauEfficiencyCorrectionsTool::getEfficiencyScaleFactor( const
 //______________________________________________________________________________
 CP::CorrectionCode TauEfficiencyCorrectionsTool::applyEfficiencyScaleFactor( const xAOD::TauJet& xTau, unsigned int /*iRunNumber*/)
 {
-	if (m_bIsData)
+	if (m_bIsData && !m_applyToData)
 		return CP::CorrectionCode::Ok;
 
 	ANA_CHECK_SET_TYPE (CP::CorrectionCode);
@@ -253,6 +253,7 @@ StatusCode TauEfficiencyCorrectionsTool::initializeTools_2025_prerec()
       ATH_CHECK(tTool->setProperty("VarName", m_sVarName));
       ATH_CHECK(tTool->setProperty("SkipTruthMatchCheck", m_bSkipTruthMatchCheck));
       ATH_CHECK(tTool->setProperty("WP", sJetIDWP));
+      ATH_CHECK(tTool->setProperty("ApplyToData", m_applyToData));
     }
     else if (iEfficiencyCorrectionType == SFRecoHadTau)
     {
@@ -264,6 +265,7 @@ StatusCode TauEfficiencyCorrectionsTool::initializeTools_2025_prerec()
       ATH_CHECK(tTool->setProperty("InputFilePath", m_sInputFilePathRecoHadTau));
       ATH_CHECK(tTool->setProperty("VarName", m_sVarName));
       ATH_CHECK(tTool->setProperty("SkipTruthMatchCheck", m_bSkipTruthMatchCheck));
+      ATH_CHECK(tTool->setProperty("ApplyToData", m_applyToData));
     }
     else if (iEfficiencyCorrectionType == SFEleIDHadTau)
     {
@@ -286,6 +288,7 @@ StatusCode TauEfficiencyCorrectionsTool::initializeTools_2025_prerec()
       ATH_CHECK(tTool->setProperty("SkipTruthMatchCheck", m_bSkipTruthMatchCheck));
       ATH_CHECK(tTool->setProperty("WP", ConvertEleIDToString(m_iEleIDLevel)));
       ATH_CHECK(tTool->setProperty("UseTauSubstructure", false));
+      ATH_CHECK(tTool->setProperty("ApplyToData", m_applyToData));
     }
     else if (iEfficiencyCorrectionType == SFEleIDElectron)
     {
@@ -343,6 +346,7 @@ StatusCode TauEfficiencyCorrectionsTool::initializeTools_2025_prerec()
       ATH_CHECK(tTool->setProperty("SkipTruthMatchCheck", m_bSkipTruthMatchCheck));
       ATH_CHECK(tTool->setProperty("WP", ConvertEleIDToString(m_iEleIDLevel)));
       ATH_CHECK(tTool->setProperty("UseTauSubstructure", false));
+      ATH_CHECK(tTool->setProperty("ApplyToData", m_applyToData));
 
     } else if (iEfficiencyCorrectionType == SFTriggerHadTau){
 
@@ -407,6 +411,7 @@ StatusCode TauEfficiencyCorrectionsTool::initializeTools_2025_prerec()
       ATH_CHECK(tTool->setProperty("SkipTruthMatchCheck", m_bSkipTruthMatchCheck));
       ATH_CHECK(tTool->setProperty("WP", ConvertTriggerIDToString(m_iJetIDLevel)));
       ATH_CHECK(tTool->setProperty("DoTauTrig", true));
+      ATH_CHECK(tTool->setProperty("ApplyToData", m_applyToData));
     }
     else {
       ATH_MSG_WARNING("unsupported EfficiencyCorrectionsType with enum " << iEfficiencyCorrectionType);
