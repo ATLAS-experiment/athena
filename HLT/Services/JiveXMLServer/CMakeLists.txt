@@ -11,11 +11,11 @@ find_package( tdaq-common COMPONENTS ers)
 atlas_add_library( JiveXMLServer
                    src/*.cxx
                    PUBLIC_HEADERS JiveXMLServer
-                   INCLUDE_DIRS ${TDAQ-COMMON_INCLUDE_DIRS} ${TDAQ_INCLUDE_DIRS}
-                   LINK_LIBRARIES ${TDAQ-COMMON_LIBRARIES} ${TDAQ_LIBRARIES} CxxUtils GaudiKernel JiveXMLLib )
+                   PRIVATE_INCLUDE_DIRS ${TDAQ-COMMON_INCLUDE_DIRS}
+                   PRIVATE_LINK_LIBRARIES ${TDAQ-COMMON_LIBRARIES}
+                   LINK_LIBRARIES CxxUtils GaudiKernel JiveXMLLib )
 
 atlas_add_executable( jivexmlserver
-                      bin/jivexmlserver.cc
+                      bin/jivexmlserver.cxx
                       INCLUDE_DIRS ${TDAQ-COMMON_INCLUDE_DIRS} ${TDAQ_INCLUDE_DIRS}
-                      LINK_LIBRARIES ${TDAQ-COMMON_LIBRARIES} ${TDAQ_LIBRARIES} GaudiKernel JiveXMLLib JiveXMLServer )
-
+                      LINK_LIBRARIES ${TDAQ-COMMON_LIBRARIES} ${TDAQ_LIBRARIES} JiveXMLServer )

@@ -14,6 +14,7 @@
 #include <JiveXML/ONCRPCServer.h>
 
 #include <signal.h>
+#include <ranges>
 
 //Define warning and error
 #define ERS_WARNING( message ) \
@@ -25,13 +26,6 @@
 { \
   ERS_REPORT_IMPL( ers::error, ers::Message, message, ); \
 }      
-
-namespace {
-  std::string fmterror(int code) {
-    char buf[256];
-    return std::string(strerror_r(code, buf, sizeof(buf)));
-  }
-}
 
 namespace JiveXML {
 
@@ -70,14 +64,6 @@ namespace JiveXML {
   StatusCode JiveXMLServer::StartServingThread(){
 
     ERS_DEBUG(MSG::VERBOSE,"StartServingThread()");
-
-    //Initialize access lock mechanism to ensure that the data map is never
-    //accessed by more than one thread at the same time. NULL means default
-    int retVal = pthread_mutex_init(&m_accessLock,NULL);
-    if (retVal != 0){
-       ERS_WARNING("Unable to initialize access lock while starting server: " << fmterror(retVal));
-       return StatusCode::FAILURE;
-    }
 
     //The arguments passed on to the server - create new object on the heap that
     //is persistent through the lifetime of the thread
@@ -160,13 +146,6 @@ namespace JiveXML {
     } else 
       ERS_WARNING("Server thread stopped unexpectedly");
 
-    //Destroy the access lock
-    int retVal = pthread_mutex_destroy(&m_accessLock);
-    if (retVal != 0){
-       ERS_WARNING("Unable to destroy access lock after stopping server: " << fmterror(retVal));
-       return StatusCode::FAILURE;
-    }
-
     return StatusCode::SUCCESS;
   }
 
@@ -227,51 +206,27 @@ namespace JiveXML {
     }
 
     //Make sure we are the only one accessing the data right now, by trying to
-    //obtain a lock. If the lock can not be obtained after a certain time, an
+    //obtain a lock. If the lock cannot be obtained after a certain time, an
     //error is reported
     
-    //Timeout of 30 second and 0 nanoseconds
-    struct timespec timeout = { 30, 0 };
-    //Try to obtain the lock
-    int retVal = pthread_mutex_timedlock(&m_accessLock, &timeout);
-    if ( retVal != 0 ){
-      ERS_ERROR("Unable to obtain access lock to update event: " << fmterror(retVal));
+    //Try to obtain the lock within 30 seconds
+    using namespace std::chrono_literals;
+    std::unique_lock lock(m_accessLock, 30s);
+
+    if ( !lock ){
+      ERS_ERROR("Unable to obtain access lock to update event");
       return StatusCode::FAILURE;
     }
 
-    //Using try/catch to ensure the mutex gets unlocked in any case
-    try {
+    //Using std::map::operator[] and std::map::insert() will create a new event
+    //if it did not exist, otherwise just replace the existing entry (making a
+    //copy of the std::string) but would not update the key which holds new
+    //event/run number. Therefore delete existing entry first.
 
-      //Using std::map::operator[] and std::map::insert() will create a new event
-      //if it did not exist, otherwise just replace the existing entry (making a
-      //copy of the std::string) but would not update the key which holds new
-      //event/run number. Therefore delete existing entry first.
+    m_eventStreamMap.erase(evtStreamID);
+    m_eventStreamMap.insert(EventStreamPair(evtStreamID,event));
 
-      //Delete old entry if there is one
-      EventStreamMap::iterator OldEvtItr = m_eventStreamMap.find(evtStreamID);
-      if (OldEvtItr != m_eventStreamMap.end()) 
-        m_eventStreamMap.erase(OldEvtItr);
-      
-      //Now add the new event
-      m_eventStreamMap.insert(EventStreamPair(evtStreamID,event));
-    
-    } catch ( const std::exception& e ) {
-      ERS_ERROR("Exception caught while updating event for stream "
-                << evtStreamID.StreamName() << ": " << e.what());
-      //Also release the lock in this case
-      pthread_mutex_unlock(&m_accessLock);
-      //before we return
-      return StatusCode::FAILURE;
-    }
-
-    //Finally release the lock again
-    retVal = pthread_mutex_unlock(&m_accessLock);
-    if ( retVal != 0 ){
-      ERS_ERROR("Unable to release access lock after updating event: " << fmterror(retVal));
-      return StatusCode::FAILURE;
-    }
-
-    ERS_DEBUG(MSG::DEBUG, "Updated stream " << evtStreamID.StreamName() 
+    ERS_DEBUG(MSG::DEBUG, "Updated stream " << evtStreamID.StreamName()
                << " with event Nr. " << evtStreamID.EventNumber() 
                << " from run Nr. " << evtStreamID.RunNumber());
 
@@ -294,35 +249,14 @@ namespace JiveXML {
    * Return an array with all the stream names
    */
   std::vector<std::string> JiveXMLServer::GetStreamNames() const {
-    
-    //Create a vector that can be returned
-    std::vector<std::string> StreamNames;
-    
+
     //Obtain an exclusive access lock
-    int retVal = pthread_mutex_lock(&m_accessLock);
-    if ( retVal != 0 ){
-      ERS_ERROR("Unable to obtain access lock to get stream names: " << fmterror(retVal));
-      return StreamNames;
-    }
+    std::scoped_lock lock(m_accessLock);
 
-    // Iterate over map to get entries
-    EventStreamMap::const_iterator MapItr = m_eventStreamMap.begin();
-    for ( ; MapItr != m_eventStreamMap.end(); ++MapItr){
-      
-      //Get the EventStreamID object
-      EventStreamID EvtStrID = (*MapItr).first;
-
-      //Add the name of this EventStreamID to the list of stream names
-      StreamNames.push_back(EvtStrID.StreamName());
-    }
-
-    //Release the lock
-    retVal = pthread_mutex_unlock(&m_accessLock);
-    if ( retVal != 0 )
-      ERS_ERROR("Unable to release access lock after getting stream names: " << fmterror(retVal));
-
-    //Return the list of names
-    return StreamNames;
+    return m_eventStreamMap
+      | std::views::keys
+      | std::views::transform(&EventStreamID::StreamName)
+      | std::ranges::to<std::vector>();
   }
 
   /**
@@ -331,30 +265,14 @@ namespace JiveXML {
   const EventStreamID JiveXMLServer::GetEventStreamID( const std::string& StreamName) const {
     
     //Obtain an exclusive access lock
-    int retVal = pthread_mutex_lock(&m_accessLock);
-    if ( retVal != 0 ){
-      ERS_ERROR("Unable to obtain access lock to get stream ID: " << fmterror(retVal));
-      return EventStreamID("");
-    }
+    std::scoped_lock lock(m_accessLock);
 
     // Search the entry in the map
-    EventStreamMap::const_iterator MapItr = m_eventStreamMap.find(EventStreamID(StreamName));
-
-    //Initialize with an invalid event stream identifier
-    EventStreamID streamID = EventStreamID("");
-
-    //If the element is found, get a copy of the found event stream identifier
-    if ( MapItr != m_eventStreamMap.end()){
-      streamID = EventStreamID((*MapItr).first);
+    if (auto MapItr = m_eventStreamMap.find(StreamName); MapItr != m_eventStreamMap.end()) {
+      return MapItr->first;
     }
 
-    //Release the lock
-    retVal = pthread_mutex_unlock(&m_accessLock);
-    if ( retVal != 0 )
-      ERS_ERROR("Unable to release access lock after getting stream ID: " << fmterror(retVal));
-
-    return streamID;
- 
+    return EventStreamID{""};
   }
 
   /**
@@ -363,30 +281,14 @@ namespace JiveXML {
   const std::string JiveXMLServer::GetEvent( const EventStreamID& evtStreamID ) const {
     
     //Obtain an exclusive access lock
-    int retVal = pthread_mutex_lock(&m_accessLock);
-    if ( retVal != 0 ){
-      ERS_ERROR("Unable to obtain access lock to get event: " << fmterror(retVal));
-      return std::string("");
-    }
-
+    std::scoped_lock lock(m_accessLock);
 
     // Search the entry in the map
-    EventStreamMap::const_iterator MapItr = m_eventStreamMap.find(evtStreamID);
-
-    //Initialize with an empty event stream
-    std::string event;
-
-    //If the element is found, get a copy of the found event string
-    if ( MapItr != m_eventStreamMap.end()){
-      event = std::string((*MapItr).second);
+    if (auto MapItr = m_eventStreamMap.find(evtStreamID); MapItr != m_eventStreamMap.end()) {
+      return MapItr->second;
     }
 
-    //Release the lock
-    retVal = pthread_mutex_unlock(&m_accessLock);
-    if ( retVal != 0 )
-      ERS_ERROR("Unable to release access lock after getting stream event: " << fmterror(retVal));
-
-    return event;
+    return {};
   }
 
   /** 
