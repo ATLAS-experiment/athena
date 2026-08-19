@@ -14,6 +14,7 @@
 #include <JiveXML/ONCRPCServer.h>
 
 #include <signal.h>
+#include <ranges>
 
 //Define warning and error
 #define ERS_WARNING( message ) \
@@ -217,26 +218,13 @@ namespace JiveXML {
       return StatusCode::FAILURE;
     }
 
-    try {
+    //Using std::map::operator[] and std::map::insert() will create a new event
+    //if it did not exist, otherwise just replace the existing entry (making a
+    //copy of the std::string) but would not update the key which holds new
+    //event/run number. Therefore delete existing entry first.
 
-      //Using std::map::operator[] and std::map::insert() will create a new event
-      //if it did not exist, otherwise just replace the existing entry (making a
-      //copy of the std::string) but would not update the key which holds new
-      //event/run number. Therefore delete existing entry first.
-
-      //Delete old entry if there is one
-      EventStreamMap::iterator OldEvtItr = m_eventStreamMap.find(evtStreamID);
-      if (OldEvtItr != m_eventStreamMap.end()) 
-        m_eventStreamMap.erase(OldEvtItr);
-      
-      //Now add the new event
-      m_eventStreamMap.insert(EventStreamPair(evtStreamID,event));
-    
-    } catch ( const std::exception& e ) {
-      ERS_ERROR("Exception caught while updating event for stream "
-                << evtStreamID.StreamName() << ": " << e.what());
-      return StatusCode::FAILURE;
-    }
+    m_eventStreamMap.erase(evtStreamID);
+    m_eventStreamMap.insert(EventStreamPair(evtStreamID,event));
 
     ERS_DEBUG(MSG::DEBUG, "Updated stream " << evtStreamID.StreamName()
                << " with event Nr. " << evtStreamID.EventNumber() 
@@ -261,26 +249,14 @@ namespace JiveXML {
    * Return an array with all the stream names
    */
   std::vector<std::string> JiveXMLServer::GetStreamNames() const {
-    
-    //Create a vector that can be returned
-    std::vector<std::string> StreamNames;
-    
+
     //Obtain an exclusive access lock
     std::scoped_lock lock(m_accessLock);
 
-    // Iterate over map to get entries
-    EventStreamMap::const_iterator MapItr = m_eventStreamMap.begin();
-    for ( ; MapItr != m_eventStreamMap.end(); ++MapItr){
-      
-      //Get the EventStreamID object
-      EventStreamID EvtStrID = (*MapItr).first;
-
-      //Add the name of this EventStreamID to the list of stream names
-      StreamNames.push_back(EvtStrID.StreamName());
-    }
-
-    //Return the list of names
-    return StreamNames;
+    return m_eventStreamMap
+      | std::views::keys
+      | std::views::transform(&EventStreamID::StreamName)
+      | std::ranges::to<std::vector>();
   }
 
   /**
@@ -292,17 +268,11 @@ namespace JiveXML {
     std::scoped_lock lock(m_accessLock);
 
     // Search the entry in the map
-    EventStreamMap::const_iterator MapItr = m_eventStreamMap.find(EventStreamID(StreamName));
-
-    //Initialize with an invalid event stream identifier
-    EventStreamID streamID = EventStreamID("");
-
-    //If the element is found, get a copy of the found event stream identifier
-    if ( MapItr != m_eventStreamMap.end()){
-      streamID = EventStreamID((*MapItr).first);
+    if (auto MapItr = m_eventStreamMap.find(StreamName); MapItr != m_eventStreamMap.end()) {
+      return MapItr->first;
     }
 
-    return streamID;
+    return EventStreamID{""};
   }
 
   /**
@@ -314,17 +284,11 @@ namespace JiveXML {
     std::scoped_lock lock(m_accessLock);
 
     // Search the entry in the map
-    EventStreamMap::const_iterator MapItr = m_eventStreamMap.find(evtStreamID);
-
-    //Initialize with an empty event stream
-    std::string event;
-
-    //If the element is found, get a copy of the found event string
-    if ( MapItr != m_eventStreamMap.end()){
-      event = std::string((*MapItr).second);
+    if (auto MapItr = m_eventStreamMap.find(evtStreamID); MapItr != m_eventStreamMap.end()) {
+      return MapItr->second;
     }
 
-    return event;
+    return {};
   }
 
   /** 
