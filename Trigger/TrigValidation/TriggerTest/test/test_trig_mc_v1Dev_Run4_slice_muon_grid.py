@@ -29,7 +29,7 @@ os.environ["PATHRESOLVER_DEVAREARESPONSE"] = "WARNING"
 from TriggerTest.MCExecStep import MCGridStep
 from TrigValTools.TrigValSteering import Test, CheckSteps
 from MuonGeoModelTestR4.testGeoModel import MuonPhaseIITestDefaults
-from AthenaConfiguration.TestDefaults import defaultGeometryTags, defaultConditionsTags
+from AthenaConfiguration.TestDefaults import defaultConditionsTags
 
 ex = MCGridStep(menu='Dev_pp_run4_v1', signatures=['Muon'], global_tag=defaultConditionsTags.RUN4_MC, mc_campaign='Campaigns.MC23PhaseIIPileUp200')
 
@@ -37,7 +37,6 @@ ex.input = f'{MuonPhaseIITestDefaults.RDO_R4[0]}'
 
 ex.flags+=[ 'GeoModel.SQLiteDB=True',
            f'GeoModel.SQLiteDBFullPath={MuonPhaseIITestDefaults.GEODB_R4}',
-           f'GeoModel.AtlasVersion={defaultGeometryTags.RUN4}',
             'Trigger.Offline.SA.Muon.scheduleActsReco=True',
             'ITk.doTruth=False',
             'Tracking.doTruth=False',
