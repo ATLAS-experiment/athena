@@ -375,17 +375,30 @@ if __name__=="__main__":
 
     # +++ Set the empty input
     _logger.verbose("+ About to set flags related to the input")
+
     # Empty input is not normal for Athena, so we will need to check 
     # this repeatedly below (the same as with VP1)
-    dumpgeo_empty_input = False  
+    dumpgeo_empty_input = False
+
     # This covers the use case where we launch DumpGeo
     # without input files; e.g., to check the detector description
     from AthenaConfiguration.AutoConfigFlags import GetFileMD
-    if ( len(flags.Input.Files) ==  0 or GetFileMD(flags.Input.Files).get("GeoAtlas", None) is None):
-        from Campaigns.Utils import Campaign
-        from AthenaConfiguration.TestDefaults import defaultConditionsTags, defaultGeometryTags
 
-        dumpgeo_empty_input = True
+    input_metadata = GetFileMD(flags.Input.Files)
+    input_geometry_tag = input_metadata.get("GeoAtlas", None)
+
+    # Treat both None and an empty string as a missing geometry tag.
+    dumpgeo_empty_input = (
+        len(flags.Input.Files) == 0 or not input_geometry_tag
+    )
+
+    if dumpgeo_empty_input:
+        from Campaigns.Utils import Campaign
+        from AthenaConfiguration.TestDefaults import (
+            defaultConditionsTags,
+            defaultGeometryTags
+        )
+
         # NB Must set e.g. ConfigFlags.Input.Runparse_args() Number and
         # ConfigFlags.Input.TimeStamp before calling the 
         # MainServicesCfg to avoid it attempting auto-configuration 
@@ -402,25 +415,23 @@ if __name__=="__main__":
         flags.IOVDb.GlobalTag = defaultConditionsTags.RUN3_MC
         flags.Input.isMC = True
         flags.Input.MCCampaign = Campaign.Unknown
-        flags.GeoModel.AtlasVersion = defaultGeometryTags.RUN3
-    _logger.verbose("+ ... Done")
-    _logger.verbose("+ empty input: '%s'" % dumpgeo_empty_input)
 
-    _logger.verbose("+ detDescr flag: '%s'" % args.detDescr)
+    _logger.verbose("+ ... Done")
+    _logger.verbose("+ empty input: '%s'", dumpgeo_empty_input)
 
 
     # +++ Set the detector geometry
     _logger.verbose("+ About to set the detector flags")
     # So we can now set up the geometry flags from the input
     from AthenaConfiguration.DetectorConfigFlags import setupDetectorFlags
-    setupDetectorFlags(flags, None, use_metadata=not dumpgeo_empty_input,
-                       toggle_geometry=True, keep_beampipe=True)
+    setupDetectorFlags(
+        flags,
+        None,
+        use_metadata=not dumpgeo_empty_input,
+        toggle_geometry=True,
+        keep_beampipe=True
+    )
     _logger.verbose("+ ... Done")
-
-    if args.detDescr:
-        _logger.verbose("+ About to set this detector description tag: '%s'" % args.detDescr)
-        flags.GeoModel.AtlasVersion = args.detDescr
-        _logger.verbose("+ ... Done")
 
     # ZDC geometry is stored only in dedicated geometry tags. Warn rather than
     # silently replacing the user's selected tag, since the choice between the
