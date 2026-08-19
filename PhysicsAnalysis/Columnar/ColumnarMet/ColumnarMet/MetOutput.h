@@ -28,10 +28,10 @@ namespace columnar
     /// up to the user to make sure that for each term a different
     /// weight vector gets passed in.
 
-    template<ContainerIdConcept CI_MET=MutableMetDef,ContainerIdConcept CI_OBJ=ParticleDef,typename CM=ColumnarModeDefault> class ObjectWeightDecorator;
+    template<ColumnarMode CM, ContainerIdConcept CI_MET=MutableMetDef,ContainerIdConcept CI_OBJ=ParticleDef> class ObjectWeightDecorator;
 
 
-    template<ContainerIdConcept CI_MET,ContainerIdConcept CI_OBJ> class ObjectWeightDecorator<CI_MET,CI_OBJ,ColumnarModeXAOD> final
+    template<ContainerIdConcept CI_MET,ContainerIdConcept CI_OBJ> class ObjectWeightDecorator<ColumnarModeXAOD,CI_MET,CI_OBJ> final
     {
       /// Common Public Members
       /// =====================
@@ -45,7 +45,7 @@ namespace columnar
     };
 
 
-    template<ContainerIdConcept CI_MET,ContainerIdConcept CI_OBJ> class ObjectWeightDecorator<CI_MET,CI_OBJ,ColumnarModeArray> final
+    template<ContainerIdConcept CI_MET,ContainerIdConcept CI_OBJ> class ObjectWeightDecorator<ColumnarModeArray,CI_MET,CI_OBJ> final
     {
       /// Common Public Members
       /// =====================
@@ -67,9 +67,9 @@ namespace columnar
     /// container and then does the "right thing" to record the object
     /// weight based on the columnar mode.
 
-    template<ContainerIdConcept CI_MET=MutableMetDef,ContainerIdConcept CI_OBJ=ParticleDef,typename CM=ColumnarModeDefault> class ObjectWeightHandle;
+    template<ColumnarMode CM, ContainerIdConcept CI_MET=MutableMetDef,ContainerIdConcept CI_OBJ=ParticleDef> class ObjectWeightHandle;
 
-    template<ContainerIdConcept CI_MET,ContainerIdConcept CI_OBJ> class ObjectWeightHandle<CI_MET,CI_OBJ,ColumnarModeXAOD> final
+    template<ContainerIdConcept CI_MET,ContainerIdConcept CI_OBJ> class ObjectWeightHandle<ColumnarModeXAOD,CI_MET,CI_OBJ> final
     {
       /// Common Public Members
       /// =====================
@@ -79,7 +79,7 @@ namespace columnar
 
       using iplink_t = MetHelperDefs::iplink_t;
 
-      ObjectWeightHandle (const asg::AsgTool& tool, const ObjectWeightDecorator<CI_MET,CI_OBJ,CM>& decorator, ObjectId<CI_MET,CM> met, const ObjectRange<CI_OBJ,CM>& container)
+      ObjectWeightHandle (const asg::AsgTool& tool, const ObjectWeightDecorator<CM,CI_MET,CI_OBJ>& decorator, ObjectId<CI_MET,CM> met, const ObjectRange<CI_OBJ,CM>& container)
       {
         using namespace MetHelperDefs;
 
@@ -145,7 +145,7 @@ namespace columnar
 
 
 
-    template<ContainerIdConcept CI_MET,ContainerIdConcept CI_OBJ> class ObjectWeightHandle<CI_MET,CI_OBJ,ColumnarModeArray> final
+    template<ContainerIdConcept CI_MET,ContainerIdConcept CI_OBJ> class ObjectWeightHandle<ColumnarModeArray,CI_MET,CI_OBJ> final
     {
       /// Common Public Members
       /// =====================
@@ -153,7 +153,7 @@ namespace columnar
 
       using CM = ColumnarModeArray;
 
-      ObjectWeightHandle (const asg::AsgTool& /*tool*/, const ObjectWeightDecorator<CI_MET,CI_OBJ,CM>& decorator, ObjectId<CI_MET,CM> /*met*/, const ObjectRange<CI_OBJ,CM>& container)
+      ObjectWeightHandle (const asg::AsgTool& /*tool*/, const ObjectWeightDecorator<CM,CI_MET,CI_OBJ>& decorator, ObjectId<CI_MET,CM> /*met*/, const ObjectRange<CI_OBJ,CM>& container)
       {
         if (!decorator.weightDec.isAvailable(container))
           throw std::runtime_error ("weights column not provided");

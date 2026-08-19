@@ -49,14 +49,14 @@ namespace columnar
     /// This is equivalent to a `ReadHandleKey` in the xAOD world.  It
     /// is used to access the met range/container for a given
     /// event.
-    MetAccessor<ObjectColumn> metAcc {*this, "Met"};
+    MetAccessor<ObjectColumn,CMode> metAcc {*this, "Met"};
 
 
     /// @brief a string column accessor
     ///
     /// There is essentially just a single string column in PHYSLITE, so
     /// I'm going with that.
-    MetAccessor<std::string> nameAcc {*this, "name"};
+    MetAccessor<std::string,CMode> nameAcc {*this, "name"};
 
 
     /// @brief the selection decorator for the met terms
@@ -67,7 +67,7 @@ namespace columnar
     /// the option to return individual output values.  Instead it needs
     /// to provide an output value per object, which in the columnar
     /// world is done by filling a column.
-    MetDecorator<char> selectionDec {*this, "selection"};
+    MetDecorator<char,CMode> selectionDec {*this, "selection"};
   };
 }
 

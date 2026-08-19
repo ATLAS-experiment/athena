@@ -233,14 +233,14 @@ namespace met {
       return StatusCode::FAILURE;
     }
 
-    return rebuildMET(metKey,metType,columnar::MutableMetRange (*metCont),columnar::ParticleRange<CMode> (*collection),m_assocAcc(helper),objScale);
+    return rebuildMET(metKey,metType,columnar::MutableMetRange<CMode> (*metCont),columnar::ParticleRange<CMode> (*collection),m_assocAcc(helper),objScale);
   }
 
   StatusCode ColumnarMETMaker::rebuildMET(const std::string& metKey,
                                   xAOD::Type::ObjectType metType,
-                                  columnar::MutableMetRange metCont,
+                                  columnar::MutableMetRange<CMode> metCont,
                                   columnar::ParticleRange<CMode> collection,
-                                  columnar::MetAssociationHelper<> helper,
+                                  columnar::MetAssociationHelper<CMode> helper,
                                   MissingETBase::UsageHandler::Policy objScale) const
   {
     MissingETBase::Types::bitmask_t metSource;
@@ -265,7 +265,7 @@ namespace met {
       return StatusCode::FAILURE;
     }
 
-    columnar::MutableMetId met = m_outputMetMapAcc.fillMET (metCont, metKey, metSource);
+    columnar::MutableMetId<CMode> met = m_outputMetMapAcc.fillMET (metCont, metKey, metSource);
 
     // If muon eloss corrections are required, create a new term to hold these if it doesn't already exist
     if(metType==xAOD::Type::Muon && (m_muEloss || m_doSetMuonJetEMScale)) {
@@ -294,12 +294,12 @@ namespace met {
       return StatusCode::FAILURE;
     }
 
-    return rebuildMET(columnar::MutableMetId(*met), columnar::ParticleRange<CMode>(*collection), m_assocAcc(helper), objScale);
+    return rebuildMET(columnar::MutableMetId<CMode>(*met), columnar::ParticleRange<CMode>(*collection), m_assocAcc(helper), objScale);
   }
 
-  StatusCode ColumnarMETMaker::rebuildMET(columnar::MutableMetId met,
+  StatusCode ColumnarMETMaker::rebuildMET(columnar::MutableMetId<CMode> met,
                                   columnar::ParticleRange<CMode> collection,
-                                  columnar::MetAssociationHelper<> helper,
+                                  columnar::MetAssociationHelper<CMode> helper,
                                   MissingETBase::UsageHandler::Policy objScale) const
   {
     MissingETBase::UsageHandler::Policy p = MissingETBase::UsageHandler::OnlyCluster;
@@ -326,12 +326,12 @@ namespace met {
       return StatusCode::FAILURE;
     }
 
-    return rebuildMET(columnar::MutableMetId(*met),columnar::ParticleRange<CMode> (*collection),m_assocAcc(helper),p,removeOverlap,objScale);
+    return rebuildMET(columnar::MutableMetId<CMode>(*met),columnar::ParticleRange<CMode> (*collection),m_assocAcc(helper),p,removeOverlap,objScale);
   }
 
-  StatusCode ColumnarMETMaker::rebuildMET(columnar::MutableMetId met,
+  StatusCode ColumnarMETMaker::rebuildMET(columnar::MutableMetId<CMode> met,
                                   columnar::ParticleRange<CMode> collection,
-                                  columnar::MetAssociationHelper<> helper,
+                                  columnar::MetAssociationHelper<CMode> helper,
                                   MissingETBase::UsageHandler::Policy p,
                                   bool removeOverlap,
                                   MissingETBase::UsageHandler::Policy objScale) const {
@@ -341,10 +341,10 @@ namespace met {
       return StatusCode::SUCCESS;
     }
     ATH_MSG_VERBOSE("Building MET term " << met(m_outputMetNameAcc));
-    columnar::MetHelpers::ObjectWeightHandle<> metWeights(*this,m_outputMetWeightDecRegular,met,collection);
+    columnar::MetHelpers::ObjectWeightHandle<CMode> metWeights(*this,m_outputMetWeightDecRegular,met,collection);
 
     if(collection.empty()) return StatusCode::SUCCESS;
-    columnar::MetHelpers::OriginalObjectHandle collectionOriginals(*this,collection);
+    columnar::MetHelpers::OriginalObjectHandle<columnar::ParticleDef,CMode> collectionOriginals(*this,collection);
 
     if(collectionOriginals.isShallowCopy() && collectionOriginals.originalInputs()) {
       ATH_MSG_WARNING("Shallow copy provided without \"originalObjectLinks\" decoration! "
@@ -457,25 +457,25 @@ namespace met {
       return StatusCode::FAILURE;
     }
 
-    return rebuildJetMET(metJetKey,softKey,columnar::MutableMetRange(*metCont),columnar::JetRange<CMode>(*jets),columnar::Met1Range(*metCoreCont),m_assocAcc(helper),doJetJVT);
+    return rebuildJetMET(metJetKey,softKey,columnar::MutableMetRange<CMode>(*metCont),columnar::JetRange<CMode>(*jets),columnar::Met1Range<CMode>(*metCoreCont),m_assocAcc(helper),doJetJVT);
   }
 
   StatusCode ColumnarMETMaker::rebuildJetMET(const std::string& metJetKey,
                                      const std::string& softKey,
-                                     columnar::MutableMetRange metCont,
+                                     columnar::MutableMetRange<CMode> metCont,
                                      columnar::JetRange<CMode> jets,
-                                     columnar::Met1Range metCoreCont,
-                                     columnar::MetAssociationHelper<> helper,
+                                     columnar::Met1Range<CMode> metCoreCont,
+                                     columnar::MetAssociationHelper<CMode> helper,
                                      bool doJetJVT) const
   {
     ATH_MSG_VERBOSE("Rebuild jet term: " << metJetKey << " and soft term: " << softKey);
 
-    columnar::MutableMetId metJet {m_outputMetMapAcc.fillMET (metCont, metJetKey, MissingETBase::Source::jet())};
+    columnar::MutableMetId<CMode> metJet {m_outputMetMapAcc.fillMET (metCont, metJetKey, MissingETBase::Source::jet())};
 
-    columnar::OptMet1Id coreSoftClus, coreSoftTrk;
-    columnar::OptMutableMetId metSoftClus, metSoftTrk;
+    columnar::OptMet1Id<CMode> coreSoftClus, coreSoftTrk;
+    columnar::OptMutableMetId<CMode> metSoftClus, metSoftTrk;
 
-    columnar::OptMet1Id coreSoft = m_inputMetMapAcc(metCoreCont,softKey+"Core");
+    columnar::OptMet1Id<CMode> coreSoft = m_inputMetMapAcc(metCoreCont,softKey+"Core");
     if(!coreSoft) {
       ATH_MSG_WARNING("Invalid soft term key supplied: " << softKey);
       return StatusCode::FAILURE;
@@ -515,29 +515,29 @@ namespace met {
       return StatusCode::FAILURE;
     }
 
-    return rebuildTrackMET(metJetKey,softKey,columnar::MutableMetRange(*metCont),columnar::JetRange<CMode>(*jets),columnar::Met1Range(*metCoreCont),m_assocAcc(helper),doJetJVT);
+    return rebuildTrackMET(metJetKey,softKey,columnar::MutableMetRange<CMode>(*metCont),columnar::JetRange<CMode>(*jets),columnar::Met1Range<CMode>(*metCoreCont),m_assocAcc(helper),doJetJVT);
   }
 
   StatusCode ColumnarMETMaker::rebuildTrackMET(const std::string& metJetKey,
                                        const std::string& softKey,
-                                       columnar::MutableMetRange metCont,
+                                       columnar::MutableMetRange<CMode> metCont,
                                        columnar::JetRange<CMode> jets,
-                                       columnar::Met1Range metCoreCont,
-                                       columnar::MetAssociationHelper<> helper,
+                                       columnar::Met1Range<CMode> metCoreCont,
+                                       columnar::MetAssociationHelper<CMode> helper,
                                        bool doJetJVT) const
   {
     ATH_MSG_VERBOSE("Rebuild jet term: " << metJetKey << " and soft term: " << softKey);
 
-    columnar::MutableMetId metJet {m_outputMetMapAcc.fillMET (metCont, metJetKey, MissingETBase::Source::jet() | MissingETBase::Source::track())};
+    columnar::MutableMetId<CMode> metJet {m_outputMetMapAcc.fillMET (metCont, metJetKey, MissingETBase::Source::jet() | MissingETBase::Source::track())};
 
-    columnar::OptMet1Id coreSoft = m_inputMetMapAcc(metCoreCont,softKey+"Core");
+    columnar::OptMet1Id<CMode> coreSoft = m_inputMetMapAcc(metCoreCont,softKey+"Core");
     if(!coreSoft) {
       ATH_MSG_WARNING("Invalid soft term key supplied: " << softKey);
       return StatusCode::FAILURE;
     }
     auto coreSoftTrk = coreSoft.value();
 
-    columnar::MutableMetId metSoftTrk {m_outputMetMapAcc.fillMET (metCont, softKey, coreSoftTrk(m_inputMetSourceAcc))};
+    columnar::MutableMetId<CMode> metSoftTrk {m_outputMetMapAcc.fillMET (metCont, softKey, coreSoftTrk(m_inputMetSourceAcc))};
 
     return rebuildTrackMET(metJet, metCont, jets, helper,
                            metSoftTrk,  coreSoftTrk,
@@ -564,21 +564,21 @@ namespace met {
       return StatusCode::FAILURE;
     }
 
-    return rebuildJetMET(metJetKey,softClusKey,softTrkKey,columnar::MutableMetRange(*metCont),columnar::JetRange<CMode>(*jets),columnar::Met1Range(*metCoreCont),m_assocAcc(helper),doJetJVT);
+    return rebuildJetMET(metJetKey,softClusKey,softTrkKey,columnar::MutableMetRange<CMode>(*metCont),columnar::JetRange<CMode>(*jets),columnar::Met1Range<CMode>(*metCoreCont),m_assocAcc(helper),doJetJVT);
   }
 
   StatusCode ColumnarMETMaker::rebuildJetMET(const std::string& metJetKey,
                                      const std::string& softClusKey,
                                      const std::string& softTrkKey,
-                                     columnar::MutableMetRange metCont,
+                                     columnar::MutableMetRange<CMode> metCont,
                                      columnar::JetRange<CMode> jets,
-                                     columnar::Met1Range metCoreCont,
-                                     columnar::MetAssociationHelper<> helper,
+                                     columnar::Met1Range<CMode> metCoreCont,
+                                     columnar::MetAssociationHelper<CMode> helper,
                                      bool doJetJVT) const
   {
 
     ATH_MSG_VERBOSE("Create Jet MET " << metJetKey);
-    columnar::MutableMetId metJet {m_outputMetMapAcc.fillMET (metCont, metJetKey, MissingETBase::Source::jet())};
+    columnar::MutableMetId<CMode> metJet {m_outputMetMapAcc.fillMET (metCont, metJetKey, MissingETBase::Source::jet())};
     ATH_MSG_VERBOSE("Create SoftClus MET " << softClusKey);
     auto coreSoftClus = m_inputMetMapAcc(metCoreCont,softClusKey+"Core");
     ATH_MSG_VERBOSE("Create SoftTrk MET " << softTrkKey);
@@ -591,9 +591,9 @@ namespace met {
       ATH_MSG_WARNING("Invalid track soft term key supplied: " << softTrkKey);
       return StatusCode::FAILURE;
     }
-    columnar::MutableMetId metSoftClus {m_outputMetMapAcc.fillMET (metCont, softClusKey, m_inputMetSourceAcc(coreSoftClus.value()))};
+    columnar::MutableMetId<CMode> metSoftClus {m_outputMetMapAcc.fillMET (metCont, softClusKey, m_inputMetSourceAcc(coreSoftClus.value()))};
 
-    columnar::MutableMetId metSoftTrk {m_outputMetMapAcc.fillMET (metCont, softTrkKey, m_inputMetSourceAcc(coreSoftTrk.value()))};
+    columnar::MutableMetId<CMode> metSoftTrk {m_outputMetMapAcc.fillMET (metCont, softTrkKey, m_inputMetSourceAcc(coreSoftTrk.value()))};
 
     return rebuildJetMET(metJet, metCont, jets, helper,
                          metSoftClus, coreSoftClus,
@@ -617,21 +617,21 @@ namespace met {
                       << "jet collection (" << jets << ").");
       return StatusCode::FAILURE;
     }
-    columnar::MutableMetRange metCont (*static_cast<MissingETContainer*>(metJet->container()));
-    return rebuildJetMET(columnar::MutableMetId(*metJet), metCont, columnar::JetRange<CMode>(*jets), m_assocAcc(helper),
-                         columnar::OptMutableMetId(metSoftClus), columnar::OptMet1Id (coreSoftClus),
-                         columnar::OptMutableMetId(metSoftTrk), columnar::OptMet1Id (coreSoftTrk),
+    columnar::MutableMetRange<CMode> metCont (*static_cast<MissingETContainer*>(metJet->container()));
+    return rebuildJetMET(columnar::MutableMetId<CMode>(*metJet), metCont, columnar::JetRange<CMode>(*jets), m_assocAcc(helper),
+                         columnar::OptMutableMetId<CMode>(metSoftClus), columnar::OptMet1Id<CMode> (coreSoftClus),
+                         columnar::OptMutableMetId<CMode>(metSoftTrk), columnar::OptMet1Id<CMode> (coreSoftTrk),
                          doJetJVT, tracksForHardJets, softConst);
   }
 
-  StatusCode ColumnarMETMaker::rebuildJetMET(columnar::MutableMetId metJet,
-                                     columnar::MutableMetRange metCont,
+  StatusCode ColumnarMETMaker::rebuildJetMET(columnar::MutableMetId<CMode> metJet,
+                                     columnar::MutableMetRange<CMode> metCont,
                                      columnar::JetRange<CMode> jets,
-                                     columnar::MetAssociationHelper<> helper,
-                                     columnar::OptMutableMetId metSoftClus,
-                                     columnar::OptMet1Id coreSoftClus,
-                                     columnar::OptMutableMetId metSoftTrk,
-                                     columnar::OptMet1Id coreSoftTrk,
+                                     columnar::MetAssociationHelper<CMode> helper,
+                                     columnar::OptMutableMetId<CMode> metSoftClus,
+                                     columnar::OptMet1Id<CMode> coreSoftClus,
+                                     columnar::OptMutableMetId<CMode> metSoftTrk,
+                                     columnar::OptMet1Id<CMode> coreSoftTrk,
                                      bool doJetJVT,
                                      bool tracksForHardJets,
                                      std::vector<const xAOD::IParticle*>* softConst) const {
@@ -657,7 +657,7 @@ namespace met {
       return StatusCode::SUCCESS;
     }
     static const SG::AuxElement::ConstAccessor<std::vector<ElementLink<IParticleContainer> > > acc_softConst("softConstituents");
-    std::optional<columnar::MetHelpers::ObjectWeightHandle<columnar::MutableMetDef,columnar::JetDef>> metSoftClusLinks;
+    std::optional<columnar::MetHelpers::ObjectWeightHandle<CMode,columnar::MutableMetDef,columnar::JetDef>> metSoftClusLinks;
     if(metSoftClus) {
       metSoftClusLinks.emplace(*this,m_jetOutputMetWeightDecSoft,metSoftClus.value(),jets);
       if(!coreSoftClus) {
@@ -679,7 +679,7 @@ namespace met {
         ATH_MSG_DEBUG(softConst->size() << " soft constituents from core term");
       }
     }
-    std::optional<columnar::MetHelpers::ObjectWeightHandle<columnar::MutableMetDef,columnar::JetDef>> metSoftTrkLinks;
+    std::optional<columnar::MetHelpers::ObjectWeightHandle<CMode,columnar::MutableMetDef,columnar::JetDef>> metSoftTrkLinks;
     if(metSoftTrk) {
       metSoftTrkLinks.emplace(*this,m_jetOutputMetWeightDecSoft,metSoftTrk.value(),jets);
       if(!coreSoftTrk) {
@@ -699,7 +699,7 @@ namespace met {
       }
     }
 
-    columnar::MetHelpers::ObjectWeightHandle<columnar::MutableMetDef,columnar::JetDef> metJetWeights(*this,m_jetOutputMetWeightDecRegular,metJet,jets);
+    columnar::MetHelpers::ObjectWeightHandle<CMode,columnar::MutableMetDef,columnar::JetDef> metJetWeights(*this,m_jetOutputMetWeightDecRegular,metJet,jets);
 
     // Get the hashed key of this jet, if we can. Though his only works if
     //   1. the container is an owning container, and not just a view;
@@ -708,7 +708,7 @@ namespace met {
     // code, and it should work in AnalysisBase, only the first one of these
     // is checked. Since the code can not work otherwise.
 
-    columnar::MetHelpers::OriginalObjectHandle<columnar::JetDef> jetsOriginals(*this,jets);
+    columnar::MetHelpers::OriginalObjectHandle<columnar::JetDef,CMode> jetsOriginals(*this,jets);
     for(auto jet : jets) {
       auto originalJet = jetsOriginals.getOriginal(jet);
       auto assoc = helper.getJetAssociation(originalJet);
@@ -774,7 +774,7 @@ namespace met {
       double opx = jpx - calvec.cpx();
       double opy = jpy - calvec.cpy();
 
-      columnar::OptMutableMetId met_muonEloss;
+      columnar::OptMutableMetId<CMode> met_muonEloss;
       if(m_muEloss || m_doSetMuonJetEMScale) {
         // Get a term to hold the Eloss corrections
         met_muonEloss = m_outputMetMapAcc.getRequired(metCont, "MuonEloss");
@@ -1182,16 +1182,16 @@ namespace met {
       return StatusCode::FAILURE;
     }
 
-    columnar::MutableMetRange metCont (*static_cast<MissingETContainer*>(metJet->container()));
-    return rebuildJetMET(columnar::MutableMetId(*metJet),metCont,columnar::JetRange<CMode>(*jets),m_assocAcc(helper),std::nullopt,nullptr,columnar::MutableMetId(*metSoftTrk),coreSoftTrk,doJetJVT,true);
+    columnar::MutableMetRange<CMode> metCont (*static_cast<MissingETContainer*>(metJet->container()));
+    return rebuildJetMET(columnar::MutableMetId<CMode>(*metJet),metCont,columnar::JetRange<CMode>(*jets),m_assocAcc(helper),std::nullopt,nullptr,columnar::MutableMetId<CMode>(*metSoftTrk),coreSoftTrk,doJetJVT,true);
   }
 
-  StatusCode ColumnarMETMaker::rebuildTrackMET(columnar::MutableMetId metJet,
-                                       columnar::MutableMetRange metCont,
+  StatusCode ColumnarMETMaker::rebuildTrackMET(columnar::MutableMetId<CMode> metJet,
+                                       columnar::MutableMetRange<CMode> metCont,
                                        columnar::JetRange<CMode> jets,
-                                       columnar::MetAssociationHelper<> helper,
-                                       columnar::MutableMetId metSoftTrk,
-                                       columnar::Met1Id coreSoftTrk,
+                                       columnar::MetAssociationHelper<CMode> helper,
+                                       columnar::MutableMetId<CMode> metSoftTrk,
+                                       columnar::Met1Id<CMode> coreSoftTrk,
                                        bool doJetJVT) const {
     return rebuildJetMET(metJet,metCont,jets,helper,std::nullopt,nullptr,metSoftTrk,coreSoftTrk,doJetJVT,true);
   }
@@ -1210,12 +1210,12 @@ namespace met {
       return StatusCode::FAILURE;
     }
 
-    return markInvisible(columnar::ParticleRange<CMode>(*collection),m_assocAcc(helper),columnar::MutableMetRange(*metCont));
+    return markInvisible(columnar::ParticleRange<CMode>(*collection),m_assocAcc(helper),columnar::MutableMetRange<CMode>(*metCont));
   }
 
   StatusCode ColumnarMETMaker::markInvisible(columnar::ParticleRange<CMode> collection,
-                                     columnar::MetAssociationHelper<> helper,
-                                     columnar::MutableMetRange metCont) const
+                                     columnar::MetAssociationHelper<CMode> helper,
+                                     columnar::MutableMetRange<CMode> metCont) const
   {
     columnar::MutableMetId met = m_outputMetMapAcc.fillMET (metCont, "Invisibles", invisSource);
     return rebuildMET(met,collection,helper,MissingETBase::UsageHandler::PhysicsObject);

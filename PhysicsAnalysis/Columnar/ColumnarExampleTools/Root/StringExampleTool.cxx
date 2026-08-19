@@ -45,7 +45,7 @@ namespace columnar
     // per-event things, e.g. retrieve `EventInfo`.
     for (columnar::EventContextId<CMode> event : events)
     {
-      for (MetId met : metAcc(event))
+      for (MetId<CMode> met : metAcc(event))
       {
         selectionDec(met) = nameAcc(met) == "Final";
       }
