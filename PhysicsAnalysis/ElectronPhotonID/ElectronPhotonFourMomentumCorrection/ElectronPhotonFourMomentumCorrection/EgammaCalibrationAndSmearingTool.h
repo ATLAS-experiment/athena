@@ -456,7 +456,7 @@ public:
     Accessors(columnar::ColumnarTool<CMode>& tool) : columnar::ColumnarTool<CMode>(&tool) {}
 
     columnar::MutableEgammaAccessor<columnar::ObjectColumn> m_egammaHandle {*this, "EGamma"};
-    columnar::MomentumAccessors<columnar::EgammaDef> momAcc;
+    columnar::MomentumAccessors<columnar::EgammaDef,CMode> momAcc;
     columnar::EgammaAccessor<columnar::RetypeColumn<double,float>> ptAcc {*this, "pt"};
     columnar::EgammaDecorator<float> ptOutDec {*this, "ptOut", {.replacesColumn = "pt"}};
     columnar::EgammaDecorator<float> decEmva;

@@ -301,7 +301,7 @@ namespace met {
     Gaudi::Property<std::string> m_inputPreselectionName {this, "inputPreselection", ""};
     std::optional<columnar::ParticleAccessor<char>> m_inputPreselectionAcc;
     columnar::ParticleAccessor<columnar::RetypeColumn<xAOD::Muon::MuonType,std::uint16_t>> m_inputMuonTypeAcc {*this, "muonType", {.isOptional = true}};
-    columnar::MetHelpers::ObjectTypeAccessor<columnar::ParticleDef> m_inputObjTypeAcc {*this, "objectType"};
+    columnar::MetHelpers::ObjectTypeAccessor<columnar::ParticleDef,CMode> m_inputObjTypeAcc {*this, "objectType"};
 
     columnar::MetHelpers::ObjectWeightDecorator<> m_outputMetWeightDecRegular {*this, "", true};
 

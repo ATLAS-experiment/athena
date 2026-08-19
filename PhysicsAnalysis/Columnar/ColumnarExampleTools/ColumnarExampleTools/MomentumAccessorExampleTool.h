@@ -61,7 +61,7 @@ namespace columnar
     /// This is an accessor that provides access to all the available
     /// momentum variables and can be reconfigured at configuration time
     /// to different momentum accessors.
-    MomentumAccessors<ParticleDef> momAcc;
+    MomentumAccessors<ParticleDef,CMode> momAcc;
 
     /// @brief the object type accessor for the particle container
     ///
@@ -69,7 +69,7 @@ namespace columnar
     /// column accessor, as it needs to be able to access the property
     /// type at configuration time (to set the correct momentum
     /// accessor).
-    ObjectTypeAccessor<ParticleDef> objectTypeAcc {*this, "ObjectType", "the object type of the particles"};
+    ObjectTypeAccessor<ParticleDef,CMode> objectTypeAcc {*this, "ObjectType", "the object type of the particles"};
 
     // If you want to use a statically configured momentum accessor,
     // this would be the basic way to do it. For now (24 Jul 25) I don't

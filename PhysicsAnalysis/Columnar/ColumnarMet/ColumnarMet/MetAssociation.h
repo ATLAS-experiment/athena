@@ -167,7 +167,7 @@ namespace columnar
     ColumnAccessor<MetAssociationDef,std::vector<std::vector<std::size_t>>,CM> overlapIndicesAcc;
     ColumnAccessor<MetAssociationDef,std::vector<std::vector<unsigned char>>,CM> overlapTypesAcc;
 
-    MetHelpers::ObjectTypeAccessor<ParticleDef> objectTypeAcc;
+    MetHelpers::ObjectTypeAccessor<ParticleDef,CMode> objectTypeAcc;
 
     ColumnUpdater<MetAssociationDef,bitmask_t,CM> useObjectFlagsAcc;
 
