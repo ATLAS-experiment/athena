@@ -149,8 +149,16 @@ CP::CorrectionCode BTaggingEfficiencyJsonTool::getScaleFactor( const xAOD::Jet& 
     return CP::CorrectionCode::OutOfValidityRange;
   }
 
+  if (!m_sfPtMap.contains(labelString)) {
+    ATH_MSG_WARNING("No calibration on jet with truthLabel: " << truthLabel << ". Returning scale factor of 0.");
+    return CP::CorrectionCode::OutOfValidityRange;
+  }
   const auto& pts = m_sfPtMap.at(labelString);
   size_t bin_index = pts.size();
+  if (getJetPt(jet)/1000. < pts[0]) {
+    ATH_MSG_WARNING("No calibration for jet with pt: " << getJetPt(jet)/1000. << ". Returning scale factor of 0.");
+    return CP::CorrectionCode::OutOfValidityRange;  
+  }
   for (size_t i = 1; i < pts.size(); i++) {
     if (getJetPt(jet)/1000. < pts[i]) {
       bin_index = i-1;
@@ -198,28 +206,24 @@ CP::CorrectionCode BTaggingEfficiencyJsonTool::getMcCorr( const xAOD::Jet& jet, 
     return CP::CorrectionCode::OutOfValidityRange;
   }
 
-  if ( m_corrMap.empty() ) {
-    ATH_MSG_WARNING("No mc-to-mc corrections on jet with truthLabel: " << truthLabel << ". Returning mc-to-mc correction of 0.");
-    return CP::CorrectionCode::OutOfValidityRange;    
-  }
   if ( !m_corrMap.contains(labelString) || !m_mcReference.contains(labelString) ) {
     ATH_MSG_WARNING("No mc-to-mc corrections on jet with truthLabel: " << truthLabel << ". Returning mc-to-mc correction of 0.");
     return CP::CorrectionCode::OutOfValidityRange;    
   }
 
-  if ( !m_corrMap.at(labelString).contains(mc_gen_ref) && !m_mcReference.at(labelString).contains(mc_gen_ref) ) {
+  if ( !m_corrMap.at(labelString).contains(mc_gen_ref) && mc_gen_ref != m_mcReference.at(labelString) ) {
     ATH_MSG_WARNING("No mc-to-mc corrections available for mc generator: " << mc_gen_ref << ". Returning mc-to-mc correction of 0.");
-    return CP::CorrectionCode::OutOfValidityRange;    
-  } else if ( !m_corrMap.at(labelString).contains(mc_gen_target) && !m_mcReference.at(labelString).contains(mc_gen_target)) {
+    return CP::CorrectionCode::OutOfValidityRange;
+  } else if ( !m_corrMap.at(labelString).contains(mc_gen_target) && mc_gen_target != m_mcReference.at(labelString) ) {
     ATH_MSG_WARNING("No mc-to-mc corrections available for mc generator: " << mc_gen_target << ". Returning mc-to-mc correction of 0.");
-    return CP::CorrectionCode::OutOfValidityRange;    
+    return CP::CorrectionCode::OutOfValidityRange;
   }
 
   float corr_target = getMcBin(jet, labelString, mc_gen_target) ;
   float corr_ref = getMcBin(jet, labelString, mc_gen_ref) ;
 
-  if (corr_ref == 0.0) {
-    ATH_MSG_WARNING("Reference MC correction is zero for generator: " << mc_gen_ref << ". Cannot calculate mc-to-mc correction.");
+  if (corr_target == 0.0 || corr_ref == 0.0) {
+    ATH_MSG_WARNING("MC correction is zero for generator " << mc_gen_ref << " or " << mc_gen_target << ". Cannot calculate mc-to-mc correction.");
     corr = 0.0;
     return CP::CorrectionCode::OutOfValidityRange;
   }
@@ -237,6 +241,10 @@ float BTaggingEfficiencyJsonTool::getMcBin( const xAOD::Jet& jet, const std::str
   } else {
     const auto& pts = m_corrPtMap.at(labelString).at(mc_gen);
     size_t pt_bin_index = pts.size();
+    if (getJetPt(jet)/1000. < pts[0]) {
+      ATH_MSG_WARNING("No mc-to-mc corrections for jet with pt: " << getJetPt(jet)/1000. << ". Returning correction of 0.");
+      return CP::CorrectionCode::OutOfValidityRange;  
+    }
     for (size_t i = 1; i < pts.size(); i++) {
       if (getJetPt(jet)/1000. < pts[i]) {
         pt_bin_index = i-1;
@@ -245,6 +253,10 @@ float BTaggingEfficiencyJsonTool::getMcBin( const xAOD::Jet& jet, const std::str
     }
     const auto& masses = m_corrMassMap.at(labelString).at(mc_gen);
     size_t mass_bin_index = masses.size();
+    if (getJetMass(jet)/1000. < masses[0]) {
+      ATH_MSG_WARNING("No mc-to-mc corrections for jet with mass: " << getJetMass(jet)/1000. << ". Returning correction of 0.");
+      return CP::CorrectionCode::OutOfValidityRange;  
+    }
     for (size_t i = 1; i < masses.size(); i++) {
       if (getJetMass(jet)/1000. < masses[i]) {
         mass_bin_index = i-1;
@@ -255,10 +267,10 @@ float BTaggingEfficiencyJsonTool::getMcBin( const xAOD::Jet& jet, const std::str
     const auto& Corrections_gen = m_corrMap.at(labelString).at(mc_gen);
     if ( pt_bin_index >= Corrections_gen.size() ) {
       ATH_MSG_WARNING("No mc-to-mc corrections for jet with pt: " << getJetPt(jet)/1000. << ". Returning correction of 0.");
-      return CP::CorrectionCode::OutOfValidityRange; 
+      return 0.0;
     } else if (mass_bin_index >= Corrections_gen[pt_bin_index].size() ) {
       ATH_MSG_WARNING("No mc-to-mc corrections for jet with mass: " << getJetMass(jet)/1000. << ". Returning correction of 0.");
-      return CP::CorrectionCode::OutOfValidityRange;      
+      return 0.0;     
     }
     corr_gen = Corrections_gen[pt_bin_index][mass_bin_index] ;  
   }

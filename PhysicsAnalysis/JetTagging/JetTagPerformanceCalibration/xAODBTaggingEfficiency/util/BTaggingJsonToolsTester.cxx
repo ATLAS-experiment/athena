@@ -70,6 +70,8 @@ int test1 ATLAS_NOT_THREAD_SAFE (int argc, char* argv[]) {
   std::string JsonConfigFile = argv[2];
   std::string OutputName = argv[3];
   std::string OperatingPoint = argv[4];
+  std::string mcReference = (argc > 5) ? argv[5] : "PowhegPythia";
+  std::string mcTarget    = (argc > 6) ? argv[6] : "PowhegHerwig";
   std::string JetCollection = "AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets";
 
   asg::StandaloneToolHandle<IBTaggingSelectionJsonTool> sel_tool("BTaggingSelectionJsonTool/BTagSelTest");
@@ -148,26 +150,24 @@ int test1 ATLAS_NOT_THREAD_SAFE (int argc, char* argv[]) {
             ANA_MSG_INFO("                   SF: " << sf);            
           }
         }
-      }
-      // MC-to-MC correction
-      float mcCorr = 0.0;
 
-      const std::string mcReference = "PowhegPythia";
-      const std::string mcTarget = "PowhegHerwig";
+        // MC-to-MC correction
+        float mcCorr = 0.0;
 
-      ANA_MSG_INFO("------------------------------------");
-      ANA_MSG_INFO("Testing getMcCorr()");
-      ANA_MSG_INFO("MC generator reference: " << mcReference);
-      ANA_MSG_INFO("MC generator target:    " << mcTarget);
+        ANA_MSG_INFO("------------------------------------");
+        ANA_MSG_INFO("Testing getMcCorr()");
+        ANA_MSG_INFO("MC generator reference: " << mcReference);
+        ANA_MSG_INFO("MC generator target:    " << mcTarget);
 
-      CP::CorrectionCode corrCode =
-          tool->getMcCorr(*jet, mcReference, mcTarget, mcCorr);
+        CP::CorrectionCode corrCode =
+            tool->getMcCorr(*jet, mcReference, mcTarget, mcCorr);
 
-      if (corrCode != CP::CorrectionCode::Ok) {
-        ANA_MSG_WARNING("getMcCorr() returned OutOfValidityRange");
-        ANA_MSG_INFO("Returned correction: " << mcCorr);
-      } else {
-        ANA_MSG_INFO("MC-to-MC correction: " << mcCorr);
+        if (corrCode != CP::CorrectionCode::Ok) {
+          ANA_MSG_WARNING("getMcCorr() returned OutOfValidityRange");
+          ANA_MSG_INFO("Returned correction: " << mcCorr);
+        } else {
+          ANA_MSG_INFO("MC-to-MC correction: " << mcCorr);
+        } 
       }   
     }
   }

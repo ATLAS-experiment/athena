@@ -24,7 +24,7 @@ class BTaggingEfficiencyJsonTool: public asg::AsgTool,
   StatusCode initialize() override;
 
   virtual CP::CorrectionCode getScaleFactor( const xAOD::Jet& jet, float& scalefactor, const CP::SystematicSet& sys) const override;
-  virtual CP::CorrectionCode getMcCorr( const xAOD::Jet& jet, const std::string& mc_gen_ref, const std::string& mc_gen_target, float& scalefactor) const override;
+  virtual CP::CorrectionCode getMcCorr( const xAOD::Jet& jet, const std::string& mc_gen_ref, const std::string& mc_gen_target, float& corr) const override;
 
   // systematic stuff
   virtual CP::SystematicSet affectingSystematics() const override;
