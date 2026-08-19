@@ -93,7 +93,6 @@ class RunParams:
                 run_type=None,
                 trigger_type=None,
                 recording_enabled=None,
-                conditions_run=None,
                 T0_project_tag='',
                 stream='',
                 lumiblock=0):
@@ -109,7 +108,6 @@ class RunParams:
       self.run_type = run_type if run_type is not None else self.DEFAULT_RUN_TYPE
       self.trigger_type = trigger_type if trigger_type is not None else self.DEFAULT_TRIGGER_TYPE
       self.recording_enabled = recording_enabled if recording_enabled is not None else self.DEFAULT_RECORDING_ENABLED
-      self.conditions_run = conditions_run  # Reference run for conditions lookup (None = use run_number)
       self.T0_project_tag = T0_project_tag
       self.stream = stream
       self.lumiblock = lumiblock
@@ -128,7 +126,6 @@ class RunParams:
          'run_type': self.run_type,
          'trigger_type': self.trigger_type,
          'recording_enabled': self.recording_enabled,
-         'conditions_run': self.conditions_run,
          'T0_project_tag': self.T0_project_tag,
          'stream': self.stream,
          'lumiblock': self.lumiblock,
@@ -146,7 +143,6 @@ class RunParams:
          toroids_current=getattr(args, 'toroids_current', None),
          beam_type=getattr(args, 'beam_type', None),
          beam_energy=getattr(args, 'beam_energy', None),
-         conditions_run=getattr(args, 'conditions_run', None),
          T0_project_tag=getattr(args, 'T0_project_tag', ''),
          stream=getattr(args, 'stream', ''),
          lumiblock=getattr(args, 'lumiblock', 0),
@@ -520,6 +516,63 @@ def get_run_params(args=None, from_is=False, partition=None, webdaq_base=None, s
       return RunParams()
 
 
+class RuntimeOverrides:
+   """
+   Changes applied to the configuration after ApplicationMgr::configure() and before initialize(). 
+   Built entirely in main() from the command line and applied once in ConfigRunner.run(), adding a new override is a single line.
+   NB: we bypass the ComponentAccumulator. They must not end up in the generated JobOptions.
+   """
+   def __init__(self):
+      self.service_types = {}    # service name -> type
+      self.create_services = []  # (name, type) to create 
+      self.drop_services = []    # service names to remove
+      self.properties = {}       # "Component.Property" -> value
+
+   def declare_type(self, name, type_):
+      """Schedule the service registered as 'name' to be of type 'type_'"""
+      self.service_types[name] = type_
+
+   def drop_service(self, name):
+      """Schedule the removal of a service already created by configure()"""
+      self.drop_services.append(name)
+
+   def create_service(self, name, type_=None):
+      """Schedule the creation of a service the configuration does not list"""
+      self.create_services.append((name, type_ or name))
+
+   def set(self, key, value):
+      """Schedule 'Component.Property' = value"""
+      self.properties[key] = value
+
+   def apply(self):
+      """Apply all overrides."""
+      from GaudiPython import InterfaceCast, gbl
+      from GaudiPython.Bindings import iProperty
+
+      if self.service_types or self.create_services or self.drop_services:
+         svcMgr = InterfaceCast(gbl.ISvcManager)(gbl.Gaudi.svcLocator())
+         for name, type_ in self.service_types.items():
+            log.info("Configuring %s under the name %s", type_, name)
+            svcMgr.declareSvcType(name, type_)
+         for name, type_ in self.create_services:
+            # For services not listed in the configuration. 
+            if svcMgr.addService(gbl.Gaudi.Utils.TypeNameString(f"{type_}/{name}")).isSuccess():
+               log.info("Created service %s/%s", type_, name)
+            else:
+               log.error("Failed to create service %s/%s", type_, name)
+         for name in self.drop_services:
+            # Services are instantiated by configure(), they have to be taken out before initialize(). 
+            if svcMgr.removeService(name).isSuccess():
+               log.info("Removed service %s", name)
+            else:
+               log.debug("Service %s not present, nothing to remove", name)
+
+      for key, value in self.properties.items():
+         component, _, prop = key.rpartition('.')
+         log.info("Overriding %s.%s = %s (from command line)", component, prop, value)
+         setattr(iProperty(component), prop, value)
+
+
 class ConfigRunner:
    """
    Runner class that executes Gaudi configuration from JSON file or database.
@@ -528,8 +581,7 @@ class ConfigRunner:
    handles both FILE and DB modes transparently.
    """
    def __init__(self, job_options_type, job_options_path, run_params=None,
-                properties=None, db_server=None, smk=None,
-                num_threads=1, num_slots=1, ef_overrides=None, elm_overrides=None):
+                properties=None, db_server=None, smk=None, overrides=None):
       """
       Args:
          job_options_type: "FILE" or "DB"
@@ -538,10 +590,7 @@ class ConfigRunner:
          properties: Pre-loaded properties dict (optional, for FILE mode)
          db_server: DB server alias (for store() in DB mode)
          smk: Super Master Key (for store() in DB mode)
-         num_threads: Number of threads for AvalancheSchedulerSvc.ThreadPoolSize
-         num_slots: Number of event slots for EventDataSvc.NSlots
-         ef_overrides: EFInterfaceSvc properties overriding the DB/JSON configuration
-         elm_overrides: HltEventLoopMgr properties overriding the DB/JSON configuration
+         overrides: RuntimeOverrides applied between configure() and initialize()
       """
       self.job_options_type = job_options_type
       self.job_options_path = job_options_path
@@ -549,23 +598,16 @@ class ConfigRunner:
       self.properties = properties
       self.db_server = db_server  # For store() in DB mode
       self.smk = smk              # For store() in DB mode
-      self.num_threads = num_threads
-      self.num_slots = num_slots
-      self.ef_overrides = ef_overrides or {}  # CLI overrides for EFInterfaceSvc
-      self.elm_overrides = elm_overrides or {}  # CLI overrides for HltEventLoopMgr
+      self.overrides = overrides or RuntimeOverrides()
       self._app = None
    
    @classmethod
-   def from_json(cls, json_file, run_params=None, properties=None,
-                 num_threads=1, num_slots=1, ef_overrides=None, elm_overrides=None):
+   def from_json(cls, json_file, run_params=None, properties=None, overrides=None):
       """Create runner for JSON file (TYPE=FILE)"""
-      return cls("FILE", os.path.abspath(json_file), run_params, properties,
-                 num_threads=num_threads, num_slots=num_slots, ef_overrides=ef_overrides,
-                 elm_overrides=elm_overrides)
+      return cls("FILE", os.path.abspath(json_file), run_params, properties, overrides=overrides)
    
    @classmethod
-   def from_database(cls, db_server, smk, l1psk=None, hltpsk=None, run_params=None,
-                     num_threads=1, num_slots=1, ef_overrides=None, elm_overrides=None):
+   def from_database(cls, db_server, smk, l1psk=None, hltpsk=None, run_params=None, overrides=None):
       """Create runner for database (TYPE=DB)"""
       # Build the DB connection string: server=X;smkey=Y;lvl1key=Z;hltkey=W
       db_path = f"server={db_server};smkey={smk}"
@@ -573,9 +615,7 @@ class ConfigRunner:
          db_path += f";lvl1key={l1psk}"
       if hltpsk is not None:
          db_path += f";hltkey={hltpsk}"
-      return cls("DB", db_path, run_params, db_server=db_server, smk=smk,
-                 num_threads=num_threads, num_slots=num_slots, ef_overrides=ef_overrides,
-                 elm_overrides=elm_overrides)
+      return cls("DB", db_path, run_params, db_server=db_server, smk=smk, overrides=overrides)
       
    def run(self, maxEvents=None):
       """
@@ -620,39 +660,17 @@ class ConfigRunner:
          log.info("Setting EvtMax=%d (overriding DB value)", maxEvents)
          app.setProperty('EvtMax', str(maxEvents))
       
-      # All property overrides below use iProperty and must be done after configure()
-      # but before initialize().
-      from GaudiPython.Bindings import iProperty
+      # Overrides must be applied after configure() but before initialize().
+      self.overrides.apply()
 
-      # Set threading configuration
-      log.info("Setting threading: ThreadPoolSize=%d, NSlots=%d", self.num_threads, self.num_slots)
-      iProperty("AvalancheSchedulerSvc").ThreadPoolSize = self.num_threads
-      iProperty("EventDataSvc").NSlots = self.num_slots
-      
-      # Override EFInterfaceSvc properties explicitly given on the command line.
-      ef_svc = iProperty("EFInterfaceSvc")
-      for prop, value in self.ef_overrides.items():
-         log.info("Overriding EFInterfaceSvc.%s = %s (from command line)", prop, value)
-         setattr(ef_svc, prop, value)
-
-      # Override HltEventLoopMgr properties explicitly given on the command line.
-      elm_svc = iProperty("HltEventLoopMgr")
-      for prop, value in self.elm_overrides.items():
-         log.info("Overriding HltEventLoopMgr.%s = %s (from command line)", prop, value)
-         setattr(elm_svc, prop, value)
-      
-      # If HLT PSK is set on command line, read it from DB instead of COOL (ATR-25974).
-      from TrigPSC import PscConfig
-      if PscConfig.forcePSK:
-         log.info("PscConfig.forcePSK is set - configuring HLTPrescaleCondAlg to read from DB instead of COOL")
-         iProperty("HLTPrescaleCondAlg").Source = "DB"
-      
-      # Set forceRunNumber on HltEventLoopMgr if conditions_run is specified
-      # This overrides the run number used for IOV lookup in conditions loading
-      conditions_run = self.run_params.get('conditions_run')
-      if conditions_run is not None:
-         log.info("Setting HltEventLoopMgr.forceRunNumber=%d for conditions lookup", conditions_run)
-         elm_svc.forceRunNumber = conditions_run
+      # THistSvc.Output cannot be scheduled in main(): setTHistSvcOutput() has to run
+      # against the service that configure() actually created.
+      if self.overrides.service_types.get('THistSvc') == 'THistSvc':
+         from GaudiPython.Bindings import iProperty
+         from TriggerJobOpts.TriggerHistSvcConfig import setTHistSvcOutput
+         output = []
+         setTHistSvcOutput(output)
+         iProperty("THistSvc").Output = output
       
       # Initialize
       sc = app.initialize()
@@ -762,7 +780,7 @@ class ConfigRunner:
       return sc
 
 
-def load_from_json(json_file, run_params=None, num_threads=1, num_slots=1, ef_overrides=None, elm_overrides=None):
+def load_from_json(json_file, run_params=None, overrides=None):
    """
    Load configuration from a Gaudi joboptions JSON file.
    
@@ -776,13 +794,10 @@ def load_from_json(json_file, run_params=None, num_threads=1, num_slots=1, ef_ov
       raise ValueError(f"Invalid JSON file type: {jocat.get('filetype')}, expected 'joboptions'")
    
    properties = jocat.get('properties', {})
-   return ConfigRunner.from_json(json_file, run_params, properties,
-                                  num_threads=num_threads, num_slots=num_slots,
-                                  ef_overrides=ef_overrides, elm_overrides=elm_overrides)
+   return ConfigRunner.from_json(json_file, run_params, properties, overrides=overrides)
 
 
-def load_from_database(db_server, smk, l1psk=None, hltpsk=None, run_params=None,
-                       num_threads=1, num_slots=1, ef_overrides=None, elm_overrides=None):
+def load_from_database(db_server, smk, l1psk=None, hltpsk=None, run_params=None, overrides=None):
    """
    Load configuration from trigger database using the Super Master Key (SMK).
    
@@ -790,10 +805,7 @@ def load_from_database(db_server, smk, l1psk=None, hltpsk=None, run_params=None,
    to load configuration directly from the database.
    """
    log.info("Loading job options from database %s with SMK %d", db_server, smk)
-   return ConfigRunner.from_database(db_server, smk, l1psk, hltpsk, run_params,
-                                      num_threads=num_threads, num_slots=num_slots,
-                                      ef_overrides=ef_overrides, elm_overrides=elm_overrides)
-
+   return ConfigRunner.from_database(db_server, smk, l1psk, hltpsk, run_params, overrides=overrides)
 
 ##
 ## The following arg_* methods are used as custom types in argparse
@@ -1307,44 +1319,59 @@ def main():
    # Configure EF ByteStream services (mandatory to run without HLTMPPU)
    # This provides the data flow interface that would normally come from HLTMPPU
    flags.Trigger.Online.useEFByteStreamSvc = True
-   # EFInterfaceSvc settings from the command line. 
-   # Only options explicitly given are collected, anything else keeps the value from the DB/jobOptions configuration
+
+   # Overrides applied to the configuration at runtime.
+   # Only options explicitly given on the command line are collected, anything else keeps its DB/jobOptions value.
+   # NB: Do NOT set the corresponding flags here, that would put them in the SMK.
+   overrides = RuntimeOverrides()
+
+   overrides.set('AvalancheSchedulerSvc.ThreadPoolSize', args.threads)
+   overrides.set('EventDataSvc.NSlots', args.concurrent_events)
+
    ef_files = args.file if args.file else []
-   ef_overrides = {}
    if ef_files:
-      ef_overrides['Files'] = ef_files
-      # Metadata read from the input file - always more accurate than DB values
-      ef_overrides.update({
-         'T0ProjectTag' : args.T0_project_tag,
-         'BeamType'     : args.beam_type,
-         'BeamEnergy'   : args.beam_energy,
-         'TriggerType'  : args.trigger_type,
-         'Stream'       : args.stream,
-         'Lumiblock'    : args.lumiblock,
-         'DetMask'      : args.file_detector_mask,
-      })
+      overrides.set('EFInterfaceSvc.Files', ef_files)
+      overrides.set('EFInterfaceSvc.T0ProjectTag', args.T0_project_tag)
+      overrides.set('EFInterfaceSvc.BeamType', args.beam_type)
+      overrides.set('EFInterfaceSvc.BeamEnergy', args.beam_energy)
+      overrides.set('EFInterfaceSvc.TriggerType', args.trigger_type)
+      overrides.set('EFInterfaceSvc.Stream', args.stream)
+      overrides.set('EFInterfaceSvc.Lumiblock', args.lumiblock)
+      overrides.set('EFInterfaceSvc.DetMask', args.file_detector_mask)
    if args.run_number is not None:          # from -R, IS, or the input file
-      ef_overrides['RunNumber'] = args.run_number
+      overrides.set('EFInterfaceSvc.RunNumber', args.run_number)
    if args.save_output is not None:
-      ef_overrides['OutputFileName'] = args.save_output
+      overrides.set('EFInterfaceSvc.OutputFileName', args.save_output)
    if args.loop_files is not None:
-      ef_overrides['LoopOverFiles'] = args.loop_files
+      overrides.set('EFInterfaceSvc.LoopOverFiles', args.loop_files)
    if args.number_of_events is not None:
-      ef_overrides['NumEvents'] = args.number_of_events
+      overrides.set('EFInterfaceSvc.NumEvents', args.number_of_events)
    if args.skip_events is not None:
-      ef_overrides['SkipEvents'] = args.skip_events
+      overrides.set('EFInterfaceSvc.SkipEvents', args.skip_events)
    if args.efdf_interface_library is not None:
-      ef_overrides['EFDFInterfaceLibraryName'] = args.efdf_interface_library
+      overrides.set('EFInterfaceSvc.EFDFInterfaceLibraryName', args.efdf_interface_library)
 
-   # NB: Do NOT set flags.Trigger.Online.EFInterface.* here
-   # ef_overrides is applied to the service at runtime via iProperty in ConfigRunner.run()
-
-   # HltEventLoopMgr settings from the command line.
-   # Same convention as ef_overrides: only options explicitly given override the DB/jobOptions.
-   elm_overrides = {}
    if args.timeout is not None:
-      elm_overrides['HardTimeout'] = float(args.timeout)
-      elm_overrides['SoftTimeoutFraction'] = SOFT_TIMEOUT_FRACTION
+      overrides.set('HltEventLoopMgr.HardTimeout', float(args.timeout))
+      overrides.set('HltEventLoopMgr.SoftTimeoutFraction', SOFT_TIMEOUT_FRACTION)
+   if args.conditions_run is not None:
+      # Run number used for the conditions IOV lookup 
+      overrides.set('HltEventLoopMgr.forceRunNumber', args.conditions_run)
+
+   # If HLT PSK is set on command line, read it from DB instead of COOL (ATR-25974).
+   if PscConfig.forcePSK:
+      overrides.set('HLTPrescaleCondAlg.Source', 'DB')
+
+   # Histogram service:  
+   # Offline the command line decides and overrides the SMK/JSON conf (offline behaviour never depends on the SMK). 
+   # Online (--online-environment) we leave the configuration exactly as it is.
+   if not args.online_environment:
+      if args.oh_monitoring:
+         overrides.declare_type('THistSvc', 'WebdaqHistSvc')
+         overrides.create_service('WebdaqInfoSvc')
+      else:
+         overrides.declare_type('THistSvc', 'THistSvc')
+         overrides.drop_service('WebdaqInfoSvc')
 
    # Execute precommands
    if args.precommand:
@@ -1376,9 +1403,7 @@ def main():
       
       # Get run parameters for prepareForStart
       run_params = get_run_params(args).to_dict()
-      acc = load_from_database(db_alias, args.smk, args.l1psk, args.hltpsk, run_params,
-                               num_threads=args.threads, num_slots=args.concurrent_events,
-                               ef_overrides=ef_overrides, elm_overrides=elm_overrides)
+      acc = load_from_database(db_alias, args.smk, args.l1psk, args.hltpsk, run_params, overrides=overrides)
       log.info("Configuration loaded from database")
 
    elif is_pickle:
@@ -1393,9 +1418,7 @@ def main():
       log.info("Loading configuration from JSON file: %s", jobOptions)
       # Get run parameters for prepareForStart
       run_params = get_run_params(args).to_dict()
-      acc = load_from_json(jobOptions, run_params,
-                           num_threads=args.threads, num_slots=args.concurrent_events,
-                           ef_overrides=ef_overrides, elm_overrides=elm_overrides)
+      acc = load_from_json(jobOptions, run_params, overrides=overrides)
       log.info("Configuration loaded from JSON")
 
    else:
