@@ -54,8 +54,6 @@ CLASS_DEF(JetMomentMap, 117927529, 1)
 
 class OrphanJetMomentMap : public JetMomentMap, public OrphanJetCounter {
 public:
-  friend class JetGlobalEventSetup;
-
   static OrphanJetMomentMap instance;
 };
 
