@@ -91,7 +91,7 @@ StatusCode MonitorFwdElectronAlgorithm::fillHistograms( const EventContext& ctx 
     u_int16_t mynp_endcap = 0;
     u_int16_t mynp_forward = 0;
 
-
+    const std::string monitoredStr{"MonitorFwdElectron"};
     for (const auto *const e_iter : *electrons) {
       // Check that the electron meets our requirements
       bool isGood;
@@ -156,13 +156,13 @@ StatusCode MonitorFwdElectronAlgorithm::fillHistograms( const EventContext& ctx 
           mynp_endcap++;
           et_endcap = myet ; eta_endcap = myeta ;
           phi_endcap = myphi ; time_endcap = mytime;
-          fill("MonitorFwdElectron",et_endcap,eta_endcap,phi_endcap,time_endcap,is_pt_gt_2_5gev_endcap,is_pt_gt_10gev_endcap);
+          fill(monitoredStr,et_endcap,eta_endcap,phi_endcap,time_endcap,is_pt_gt_2_5gev_endcap,is_pt_gt_10gev_endcap);
           break;
         case FORWARD :
           mynp_forward++;
           et_forward = myet ; eta_forward = myeta ;
           phi_forward = myphi ; time_forward = mytime;
-          fill("MonitorFwdElectron",et_forward,eta_forward,phi_forward,time_forward,is_pt_gt_2_5gev_forward,is_pt_gt_10gev_forward);
+          fill(monitoredStr,et_forward,eta_forward,phi_forward,time_forward,is_pt_gt_2_5gev_forward,is_pt_gt_10gev_forward);
           break;
         default :
           //ATH_MSG_WARNING("found an electron outside the |eta| > 2.47 acceptance");
@@ -172,7 +172,7 @@ StatusCode MonitorFwdElectronAlgorithm::fillHistograms( const EventContext& ctx 
       // Fill global histograms
 
       et = myet ; eta = myeta ; phi = myphi ;
-      fill("MonitorFwdElectron",et,eta,phi,time,lbNCandidates,
+      fill(monitoredStr,et,eta,phi,time,lbNCandidates,
       firstENGdens, fracMax, lateral, longitudinal, secondLambda,
       secondR, centerLambda, time,
       is_pt_gt_2_5gev, is_pt_gt_10gev);
@@ -181,8 +181,8 @@ StatusCode MonitorFwdElectronAlgorithm::fillHistograms( const EventContext& ctx 
     }
 
     np = mynp; np_endcap = mynp_endcap ; np_forward = mynp_forward ;
-    fill("MonitorFwdElectron",np,np_endcap);
-    fill("MonitorFwdElectron",np,np_forward);
+    fill(monitoredStr,np,np_endcap);
+    fill(monitoredStr,np,np_forward);
 
     return StatusCode::SUCCESS;
 }
