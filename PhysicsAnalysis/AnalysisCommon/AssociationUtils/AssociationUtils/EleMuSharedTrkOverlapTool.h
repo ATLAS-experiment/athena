@@ -98,13 +98,13 @@ namespace ORUtils
       /// Columnar accessors
       struct Accessors final : columnar::ColumnarTool<CMode>
       {
-        columnar::Track0Accessor<columnar::ObjectColumn> m_track0Acc {*this, "InDetTrackParticles"};
-        columnar::Track1Accessor<columnar::ObjectColumn> m_track1Acc {*this, "InDetForwardTrackParticles"};
-        columnar::Track2Accessor<columnar::ObjectColumn> m_track2Acc {*this, "GSFTrackParticles"};
-        columnar::Particle1Accessor<std::vector<columnar::OptTrack2Id>,CMode> m_eleTrackAcc {*this, "trackParticleLinks"};
+        columnar::Track0Accessor<columnar::ObjectColumn,CMode> m_track0Acc {*this, "InDetTrackParticles"};
+        columnar::Track1Accessor<columnar::ObjectColumn,CMode> m_track1Acc {*this, "InDetForwardTrackParticles"};
+        columnar::Track2Accessor<columnar::ObjectColumn,CMode> m_track2Acc {*this, "GSFTrackParticles"};
+        columnar::Particle1Accessor<std::vector<columnar::OptTrack2Id<CMode>>,CMode> m_eleTrackAcc {*this, "trackParticleLinks"};
         columnar::Particle2Accessor<columnar::ObjectLink<MyTrackDef,CMode>,CMode> m_muonTrkAcc {*this, "inDetTrackParticleLink"};
         columnar::Particle2Accessor<columnar::RetypeColumn<xAOD::Muon::MuonType,std::uint16_t>,CMode> m_muonTypeAcc {*this, "muonType"};
-        columnar::Track2Accessor<columnar::ObjectLink<MyTrackDef,CMode>> m_gsfOriginalTrackAcc {*this, "originalTrackParticle"};
+        columnar::Track2Accessor<columnar::ObjectLink<MyTrackDef,CMode>,CMode> m_gsfOriginalTrackAcc {*this, "originalTrackParticle"};
         using ColumnarTool::ColumnarTool;
       };
       std::unique_ptr<Accessors> m_accessors {std::make_unique<Accessors> (this)};

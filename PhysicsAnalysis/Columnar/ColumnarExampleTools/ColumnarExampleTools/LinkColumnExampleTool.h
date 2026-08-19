@@ -59,7 +59,7 @@ namespace columnar
     /// essentially we need to know what the linked container is, both
     /// for doing the link itself, and for declaring all the associated
     /// accessors.
-    TrackAccessor<ObjectColumn> trackHandle {*this, "InDetTrackParticles"};
+    TrackAccessor<ObjectColumn,CMode> trackHandle {*this, "InDetTrackParticles"};
 
 
     /// @brief the link accessor for the particles
@@ -67,7 +67,7 @@ namespace columnar
     /// This accessor reads the link from one container to another.  In
     /// xAOD land this is done with `ElementLink`, while in columnar
     /// land this is just a simple integer index.
-    MuonAccessor<OptTrackId,CMode> trackLinkAcc {*this, "inDetTrackParticleLink"};
+    MuonAccessor<OptTrackId<CMode>,CMode> trackLinkAcc {*this, "inDetTrackParticleLink"};
 
 
 
@@ -76,7 +76,7 @@ namespace columnar
     /// Tracks use their own way of representing momentum.  In an actual
     /// tool we'd use a custom momentum accessor for tracks, but here we
     /// just read the q/p and handle it directly.
-    TrackAccessor<float> trackQOverPAcc {*this, "qOverP"};
+    TrackAccessor<float,CMode> trackQOverPAcc {*this, "qOverP"};
 
 
     /// @brief the selection decorator for the particles

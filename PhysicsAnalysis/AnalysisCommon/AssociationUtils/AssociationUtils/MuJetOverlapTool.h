@@ -160,16 +160,16 @@ namespace ORUtils
       /// Columnar accessors
       struct Accessors final : columnar::ColumnarTool<CMode>
       {
-        columnar::Track0Accessor<columnar::ObjectColumn> m_track0Acc {*this, "InDetTrackParticles"};
-        columnar::Track1Accessor<columnar::ObjectColumn> m_track1Acc {*this, "InDetForwardTrackParticles"};
+        columnar::Track0Accessor<columnar::ObjectColumn,CMode> m_track0Acc {*this, "InDetTrackParticles"};
+        columnar::Track1Accessor<columnar::ObjectColumn,CMode> m_track1Acc {*this, "InDetForwardTrackParticles"};
         columnar::Particle1Accessor<float,CMode> m_muonPtAcc {*this, "pt"};
         columnar::Particle2Accessor<float,CMode> m_jetPtAcc {*this, "pt"};
         columnar::Particle2Accessor<int,CMode> m_jetNumTrkAcc;
         columnar::Particle2Accessor<std::vector<int>,CMode> m_jetNumTrkPt500Acc;
         columnar::Particle2Accessor<int,CMode> m_jetSumTrkPtAcc;
         columnar::Particle2Accessor<std::vector<float>,CMode> m_jetSumTrkPt500Acc;
-        columnar::VertexAccessor<columnar::ObjectColumn> m_vtxContainerAcc;
-        columnar::VertexAccessor<columnar::RetypeColumn<xAOD::VxType::VertexType,short>> m_vertexTypeAcc {*this, "vertexType"};
+        columnar::VertexAccessor<columnar::ObjectColumn,CMode> m_vtxContainerAcc;
+        columnar::VertexAccessor<columnar::RetypeColumn<xAOD::VxType::VertexType,short>,CMode> m_vertexTypeAcc {*this, "vertexType"};
         using ColumnarTool::ColumnarTool;
       };
       std::unique_ptr<Accessors> m_accessors {std::make_unique<Accessors> (this)};

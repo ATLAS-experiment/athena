@@ -98,11 +98,11 @@ namespace ORUtils
       struct Accessors final : columnar::ColumnarTool<CMode>
       {
         columnar::ClusterAccessor<columnar::ObjectColumn,CMode> m_clusterContainerAcc;
-        columnar::Track0Accessor<columnar::ObjectColumn> m_track0Acc;
+        columnar::Track0Accessor<columnar::ObjectColumn,CMode> m_track0Acc;
         columnar::Particle1Accessor<float,CMode> m_ptAcc {*this, "pt"};
         columnar::Particle1Accessor<std::uint16_t,CMode> m_authorAcc {*this, "author"};
         columnar::Particle1Accessor<std::vector<columnar::OptClusterId<CMode>>,CMode> m_caloClusterAcc;
-        columnar::Particle1Accessor<std::vector<columnar::OptTrackId>,CMode> m_trackAcc;
+        columnar::Particle1Accessor<std::vector<columnar::OptTrackId<CMode>>,CMode> m_trackAcc;
         std::optional<columnar::ClusterHelpers::EtaBEAccessor<CMode>> m_etaBEAcc;
         std::optional<columnar::ClusterHelpers::PhiBEAccessor<CMode>> m_phiBEAcc;
         using ColumnarTool::ColumnarTool;

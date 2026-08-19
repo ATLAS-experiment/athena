@@ -40,31 +40,31 @@ namespace columnar
     static constexpr std::string_view idName = "vertex";
   };
 
-  using TrackId = ObjectId<TrackDef, ColumnarModeDefault>;
-  using OptTrackId = OptObjectId<TrackDef, ColumnarModeDefault>;
-  template<typename CT,typename CM=ColumnarModeDefault> using TrackAccessor  = AccessorTemplate<TrackDef,CT,ColumnAccessMode::input,CM>;
-  template<typename CT,typename CM=ColumnarModeDefault> using TrackDecorator = AccessorTemplate<TrackDef,CT,ColumnAccessMode::output,CM>;
+  template<ColumnarMode CM> using TrackId = ObjectId<TrackDef,CM>;
+  template<ColumnarMode CM> using OptTrackId = OptObjectId<TrackDef,CM>;
+  template<typename CT,ColumnarMode CM> using TrackAccessor  = AccessorTemplate<TrackDef,CT,ColumnAccessMode::input,CM>;
+  template<typename CT,ColumnarMode CM> using TrackDecorator = AccessorTemplate<TrackDef,CT,ColumnAccessMode::output,CM>;
 
-  using OptTrack0Id = OptObjectId<Track0Def, ColumnarModeDefault>;
-  template<typename CT,typename CM=ColumnarModeDefault> using Track0Accessor  = AccessorTemplate<Track0Def,CT,ColumnAccessMode::input,CM>;
-  template<typename CT,typename CM=ColumnarModeDefault> using Track0Decorator = AccessorTemplate<Track0Def,CT,ColumnAccessMode::output,CM>;
+  template<ColumnarMode CM> using OptTrack0Id = OptObjectId<Track0Def,CM>;
+  template<typename CT,ColumnarMode CM> using Track0Accessor  = AccessorTemplate<Track0Def,CT,ColumnAccessMode::input,CM>;
+  template<typename CT,ColumnarMode CM> using Track0Decorator = AccessorTemplate<Track0Def,CT,ColumnAccessMode::output,CM>;
 
-  using OptTrack1Id = OptObjectId<Track1Def, ColumnarModeDefault>;
-  template<typename CT,typename CM=ColumnarModeDefault> using Track1Accessor  = AccessorTemplate<Track1Def,CT,ColumnAccessMode::input,CM>;
-  template<typename CT,typename CM=ColumnarModeDefault> using Track1Decorator = AccessorTemplate<Track1Def,CT,ColumnAccessMode::output,CM>;
+  template<ColumnarMode CM> using OptTrack1Id = OptObjectId<Track1Def,CM>;
+  template<typename CT,ColumnarMode CM> using Track1Accessor  = AccessorTemplate<Track1Def,CT,ColumnAccessMode::input,CM>;
+  template<typename CT,ColumnarMode CM> using Track1Decorator = AccessorTemplate<Track1Def,CT,ColumnAccessMode::output,CM>;
 
-  using OptTrack2Id = OptObjectId<Track2Def, ColumnarModeDefault>;
-  template<typename CT,typename CM=ColumnarModeDefault> using Track2Accessor  = AccessorTemplate<Track2Def,CT,ColumnAccessMode::input,CM>;
-  template<typename CT,typename CM=ColumnarModeDefault> using Track2Decorator = AccessorTemplate<Track2Def,CT,ColumnAccessMode::output,CM>;
+  template<ColumnarMode CM> using OptTrack2Id = OptObjectId<Track2Def,CM>;
+  template<typename CT,ColumnarMode CM> using Track2Accessor  = AccessorTemplate<Track2Def,CT,ColumnAccessMode::input,CM>;
+  template<typename CT,ColumnarMode CM> using Track2Decorator = AccessorTemplate<Track2Def,CT,ColumnAccessMode::output,CM>;
 
-  using OptTrack3Id = OptObjectId<Track3Def, ColumnarModeDefault>;
-  template<typename CT,typename CM=ColumnarModeDefault> using Track3Accessor  = AccessorTemplate<Track3Def,CT,ColumnAccessMode::input,CM>;
-  template<typename CT,typename CM=ColumnarModeDefault> using Track3Decorator = AccessorTemplate<Track3Def,CT,ColumnAccessMode::output,CM>;
+  template<ColumnarMode CM> using OptTrack3Id = OptObjectId<Track3Def,CM>;
+  template<typename CT,ColumnarMode CM> using Track3Accessor  = AccessorTemplate<Track3Def,CT,ColumnAccessMode::input,CM>;
+  template<typename CT,ColumnarMode CM> using Track3Decorator = AccessorTemplate<Track3Def,CT,ColumnAccessMode::output,CM>;
 
-  using VertexId = ObjectId<VertexDef, ColumnarModeDefault>;
-  using OptVertexId = OptObjectId<VertexDef, ColumnarModeDefault>;
-  template<typename CT,typename CM=ColumnarModeDefault> using VertexAccessor  = AccessorTemplate<VertexDef,CT,ColumnAccessMode::input,CM>;
-  template<typename CT,typename CM=ColumnarModeDefault> using VertexDecorator = AccessorTemplate<VertexDef,CT,ColumnAccessMode::output,CM>;
+  template<ColumnarMode CM> using VertexId = ObjectId<VertexDef,CM>;
+  template<ColumnarMode CM> using OptVertexId = OptObjectId<VertexDef,CM>;
+  template<typename CT,ColumnarMode CM> using VertexAccessor  = AccessorTemplate<VertexDef,CT,ColumnAccessMode::input,CM>;
+  template<typename CT,ColumnarMode CM> using VertexDecorator = AccessorTemplate<VertexDef,CT,ColumnAccessMode::output,CM>;
 }
 
 #endif

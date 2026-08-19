@@ -162,8 +162,8 @@ private:
     columnar::EventInfoAccessor<columnar::ObjectColumn,CMode> eventInfoAcc {*this, "EventInfo", {.addMTDependency=true}};
     columnar::EgammaAccessor<columnar::ObjectColumn,CMode> photonsAcc {*this, "Photons"};
     columnar::ClusterAccessor<columnar::ObjectColumn,CMode> clusterAcc {*this, "egammaClusters"};
-    columnar::VertexAccessor<columnar::ObjectColumn> verticesAcc {*this, "GSFConversionVertices"};
-    columnar::TrackAccessor<columnar::ObjectColumn> tracksAcc {*this, "GSFTrackParticles"};
+    columnar::VertexAccessor<columnar::ObjectColumn,CMode> verticesAcc {*this, "GSFConversionVertices"};
+    columnar::TrackAccessor<columnar::ObjectColumn,CMode> tracksAcc {*this, "GSFTrackParticles"};
 
     columnar::EventInfoAccessor<uint32_t,CMode> randomRunNumberAcc {*this, "RandomRunNumber"};
   

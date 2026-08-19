@@ -465,8 +465,8 @@ public:
     // test GNN
     columnar::EgammaAccessor<columnar::RetypeColumn<double,float>,CMode> gnn_energy_Acc;
     columnar::EgammaAccessor<uint16_t,CMode> authorAcc {*this, "author"};
-    columnar::EgammaAccessor<std::vector<columnar::OptTrackId>,CMode> electronTrackAcc;
-    columnar::EgammaAccessor<std::vector<columnar::OptVertexId>,CMode> photonVertexAcc;
+    columnar::EgammaAccessor<std::vector<columnar::OptTrackId<CMode>>,CMode> electronTrackAcc;
+    columnar::EgammaAccessor<std::vector<columnar::OptVertexId<CMode>>,CMode> photonVertexAcc;
     columnar::ClusterAccessor<columnar::ObjectColumn,CMode> m_clusterHandle {*this, "egammaClusters"};
     columnar::EgammaAccessor<std::vector<columnar::OptClusterId<CMode>>,CMode> caloClusterAcc {*this, "caloClusterLinks"};
     columnar::ClusterAccessor<double,CMode> Es0Acc {*this, "correctedcl_Es0", {.isOptional = true}};

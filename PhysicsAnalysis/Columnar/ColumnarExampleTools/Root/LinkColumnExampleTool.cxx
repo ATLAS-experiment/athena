@@ -48,10 +48,10 @@ namespace columnar
       for (auto muon : muonsHandle(event))
       {
         // retrieve the track linked to the muon
-        OptTrackId track = trackLinkAcc(muon);
+        OptTrackId<CMode> track = trackLinkAcc(muon);
 
-        // apply the selection, the OptTrackId tries to (mostly) behave
-        // like a std::optional<TrackId>, so we can use it in a similar
+        // apply the selection, the OptTrackId<CMode> tries to (mostly) behave
+        // like a std::optional<TrackId<CMode>>, so we can use it in a similar
         // way.  Here we first check if the track is valid, then do a
         // curvature selection on the track.
         selectionDec(muon) = track && std::abs(trackQOverPAcc(track.value())) < 1. / m_ptCut.value();

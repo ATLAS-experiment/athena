@@ -38,10 +38,10 @@ namespace MCP {
         MuonCalibToolAccessors(columnar::ColumnarTool<CMode>& base) : columnar::ColumnarTool<CMode>(&base) {}
         columnar::EventInfoAccessor<columnar::ObjectColumn,CMode> m_eventInfoCol {*this, "EventInfo", {.addMTDependency=true}};
         columnar::MuonAccessor<columnar::ObjectColumn,CMode> m_muons {*this, "Muons"};
-        columnar::Track0Accessor<columnar::ObjectColumn> m_tracksID {*this, "InDetTrackParticles"};
-        columnar::Track1Accessor<columnar::ObjectColumn> m_tracksCB {*this, "CombinedMuonTrackParticles"};
-        columnar::Track2Accessor<columnar::ObjectColumn> m_tracksME {*this, "ExtrapolatedMuonTrackParticles"};
-        columnar::Track3Accessor<columnar::ObjectColumn> m_tracksFID {*this, "InDetForwardTrackParticles"};
+        columnar::Track0Accessor<columnar::ObjectColumn,CMode> m_tracksID {*this, "InDetTrackParticles"};
+        columnar::Track1Accessor<columnar::ObjectColumn,CMode> m_tracksCB {*this, "CombinedMuonTrackParticles"};
+        columnar::Track2Accessor<columnar::ObjectColumn,CMode> m_tracksME {*this, "ExtrapolatedMuonTrackParticles"};
+        columnar::Track3Accessor<columnar::ObjectColumn,CMode> m_tracksFID {*this, "InDetForwardTrackParticles"};
 
         columnar::EventInfoHelpers::EventTypeAccessor<CMode> eventTypeAcc {*this};
         columnar::EventInfoAccessor<uint32_t,CMode> runNumberAcc {*this, "runNumber"};
@@ -60,9 +60,9 @@ namespace MCP {
         columnar::MuonDecorator<float,CMode> dec_mePt{*this, "MuonSpectrometerPt"};
         columnar::MuonDecorator<float,CMode> dec_idCharge{*this, "InnerDetectorCharge"};
         columnar::MuonDecorator<float,CMode> dec_meCharge{*this, "MuonSpectrometerCharge"};
-        columnar::MuonAccessor<columnar::OptTrack1Id,CMode> combinedTrackParticleLinkAcc{*this, "combinedTrackParticleLink"};
+        columnar::MuonAccessor<columnar::OptTrack1Id<CMode>,CMode> combinedTrackParticleLinkAcc{*this, "combinedTrackParticleLink"};
         columnar::MuonAccessor<columnar::ObjectLink<columnar::MuonTrackDef,CMode>,CMode> inDetTrackParticleLinkAcc{*this, "inDetTrackParticleLink"};
-        columnar::MuonAccessor<columnar::OptTrack2Id,CMode> extrapolatedMuonSpectrometerTrackParticleLinkAcc{*this, "extrapolatedMuonSpectrometerTrackParticleLink"};
+        columnar::MuonAccessor<columnar::OptTrack2Id<CMode>,CMode> extrapolatedMuonSpectrometerTrackParticleLinkAcc{*this, "extrapolatedMuonSpectrometerTrackParticleLink"};
 
         columnar::TrackHelpers::ChargeAccessor<columnar::MuonTrackDef> trkChargeAcc {*this};
         columnar::TrackHelpers::TrackMomentumAccessors<columnar::MuonTrackDef> trkMomentumAcc {*this};

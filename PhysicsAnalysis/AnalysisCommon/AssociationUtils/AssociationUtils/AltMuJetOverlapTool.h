@@ -124,10 +124,10 @@ namespace ORUtils
       /// Columnar accessors
       struct Accessors final : columnar::ColumnarTool<CMode>
       {
-        columnar::Track0Accessor<columnar::ObjectColumn> m_track0Acc {*this, "InDetTrackParticles"};
-        columnar::Track1Accessor<columnar::ObjectColumn> m_track1Acc {*this, "InDetForwardTrackParticles"};
-        columnar::VertexAccessor<columnar::ObjectColumn> m_vtxContainerAcc;
-        columnar::VertexAccessor<columnar::RetypeColumn<xAOD::VxType::VertexType,short>> m_vertexTypeAcc {*this, "vertexType"};
+        columnar::Track0Accessor<columnar::ObjectColumn,CMode> m_track0Acc {*this, "InDetTrackParticles"};
+        columnar::Track1Accessor<columnar::ObjectColumn,CMode> m_track1Acc {*this, "InDetForwardTrackParticles"};
+        columnar::VertexAccessor<columnar::ObjectColumn,CMode> m_vtxContainerAcc;
+        columnar::VertexAccessor<columnar::RetypeColumn<xAOD::VxType::VertexType,short>,CMode> m_vertexTypeAcc {*this, "vertexType"};
         columnar::Particle1Accessor<float,CMode> m_muonPtAcc {*this, "pt"};
         columnar::Particle2Accessor<float,CMode> m_jetPtAcc {*this, "pt"};
         columnar::Particle2Accessor< std::vector<int>,CMode > m_numTrkPt500Acc {*this, "NumTrkPt500"};
