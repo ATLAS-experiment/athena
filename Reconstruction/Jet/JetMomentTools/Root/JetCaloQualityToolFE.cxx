@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "JetMomentTools/JetCaloQualityToolFE.h"
@@ -10,8 +10,7 @@
 #include "xAODPFlow/FlowElement.h"
 #include "PFlowUtils/FEHelpers.h"
 
-#include <iostream>
-#include <iomanip>
+
 using namespace std;
 
 JetCaloQualityToolFE::JetCaloQualityToolFE(const std::string& name)
@@ -161,7 +160,7 @@ std::vector<const xAOD::CaloCluster*> JetCaloQualityToolFE::extractConstituents(
 	  
 	  if(fe->type() == xAOD::Type::FlowElement){
 	    const xAOD::FlowElement* pfo = dynamic_cast<const xAOD::FlowElement*>(fe);
-	    if(!pfo->otherObjects().empty() && pfo->otherObject(0) && pfo->otherObject(0)->type() == xAOD::Type::CaloCluster){
+	    if(pfo && !pfo->otherObjects().empty() && pfo->otherObject(0) && pfo->otherObject(0)->type() == xAOD::Type::CaloCluster){
 	      cluster = dynamic_cast<const xAOD::CaloCluster*> (pfo->otherObject(0));
 	    }
 	  }
