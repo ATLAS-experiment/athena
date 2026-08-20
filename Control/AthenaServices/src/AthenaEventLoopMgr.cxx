@@ -1128,6 +1128,8 @@ StatusCode AthenaEventLoopMgr::installEventContext(EventContext& ctx) {
         // Finally try to retrieve an xAOD::EventInfo object from the
         // input file and build a legacy EventInfo object from that.
 
+        const xAOD::EventInfo* xAODEvent = m_eventStore->tryConstRetrieve<xAOD::EventInfo>();
+
         if (xAODEvent == nullptr) {
           ATH_MSG_ERROR("Failed to get EventID from input. Tried old-style and xAOD::EventInfo");
           return StatusCode::FAILURE;
