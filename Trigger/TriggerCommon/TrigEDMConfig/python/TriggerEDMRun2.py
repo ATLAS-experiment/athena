@@ -1116,7 +1116,6 @@ TriggerL2EvolutionList = [
 ('TrigL2BphysContainer#HLT_L2DsPhiPiFexDs',                              'xAOD::TrigBphysContainer#HLT_L2DsPhiPiFexDs'),
 ('TrigL2BphysContainer#HLT_L2DsPhiPiFexPhi',                             'xAOD::TrigBphysContainer#HLT_L2DsPhiPiFexPhi'),
 ('TrigL2BphysContainer#HLT_L2JpsieeFex',                                 'xAOD::TrigBphysContainer#HLT_L2JpsieeFex'),
-#('TrigL2BphysContainer#HLT_TrigDiMuon',                                 ), # xAOD equivalent not found
 ('TrigL2BphysContainer#HLT_L2TrackMass',                                 'xAOD::TrigBphysContainer#HLT_L2TrackMass'),
 ('TrigL2BphysContainer#HLT_L2MultiMuFex',                                'xAOD::TrigBphysContainer#HLT_L2MultiMuFex')
 #('TrigInDetTrackCollection#HLT',                                         ), # xAOD equivalents for TrigInDetTrackCollections not found
