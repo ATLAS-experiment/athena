@@ -1,5 +1,5 @@
 #
-#  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 #
 
 from AthenaCommon.Logging import logging
@@ -20,10 +20,7 @@ def TriggerHistSvcConfig(flags):
 
     acc = ComponentAccumulator()
 
-    if flags.Trigger.Online.useOnlineTHistSvc:
-        log.info("Configuring online TrigMonTHistSvc")
-        histSvc = CompFactory.TrigMonTHistSvc("THistSvc")  # no outputs in online
-    elif flags.Trigger.Online.useOnlineWebdaqHistSvc:
+    if flags.Trigger.Online.useOnlineWebdaqHistSvc:
         log.info("Configuring online Webdaq HistSvc")
         histSvc = CompFactory.WebdaqHistSvc("THistSvc") 
         log.info("Configuring WebdaqInfoSvc for IS publication")

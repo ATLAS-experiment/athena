@@ -311,9 +311,6 @@ def createTriggerFlags(doTriggerRecoFlags):
     flags.addFlag('Trigger.Online.EFInterface.LibraryName', 'TrigDFEmulator',
                   help='Name of the EFDF interface shared library to load')
     
-    flags.addFlag('Trigger.Online.useOnlineTHistSvc', False,
-                  help='use online THistSvc')
-
     flags.addFlag('Trigger.Online.useOnlineWebdaqHistSvc', False,
                       help='use online Webdaq HistSvc')
 
