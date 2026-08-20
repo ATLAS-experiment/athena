@@ -243,7 +243,7 @@ float BTaggingEfficiencyJsonTool::getMcBin( const xAOD::Jet& jet, const std::str
     size_t pt_bin_index = pts.size();
     if (getJetPt(jet)/1000. < pts[0]) {
       ATH_MSG_WARNING("No mc-to-mc corrections for jet with pt: " << getJetPt(jet)/1000. << ". Returning correction of 0.");
-      return CP::CorrectionCode::OutOfValidityRange;  
+      return 0.0;  
     }
     for (size_t i = 1; i < pts.size(); i++) {
       if (getJetPt(jet)/1000. < pts[i]) {
@@ -255,7 +255,7 @@ float BTaggingEfficiencyJsonTool::getMcBin( const xAOD::Jet& jet, const std::str
     size_t mass_bin_index = masses.size();
     if (getJetMass(jet)/1000. < masses[0]) {
       ATH_MSG_WARNING("No mc-to-mc corrections for jet with mass: " << getJetMass(jet)/1000. << ". Returning correction of 0.");
-      return CP::CorrectionCode::OutOfValidityRange;  
+      return 0.0;  
     }
     for (size_t i = 1; i < masses.size(); i++) {
       if (getJetMass(jet)/1000. < masses[i]) {
