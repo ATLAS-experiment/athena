@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // JetDumper.cxx
@@ -46,9 +46,8 @@ JetDumper::JetDumper(const std::string& myname)
 //**********************************************************************
 
 template<>
-JetDumper::NameList get_moment_keys<Jet, float>(const Jet* pjet) {
+JetDumper::NameList get_moment_keys<Jet, float>(const Jet* /*pjet*/) {
   static const NameList empty;
-  if ( pjet == nullptr ) return empty;
   return empty;
 }
 
@@ -192,7 +191,7 @@ void JetDumper::get_moment(const xAOD::Jet* pjet, const std::string& name, std::
 
 void JetDumper::
 getAssociatedParticles(const xAOD::Jet* pobj, const std::string& name, APVector& val) const {
-  pobj->getAssociatedObjects(name, val);
+  bool ok [[maybe_unused]] = pobj->getAssociatedObjects(name, val);
 }
 
 //**********************************************************************
@@ -206,7 +205,7 @@ getAssociatedLinks(const xAOD::Jet* pobj, const std::string& name, APELVector& v
 
 void JetDumper::
 getAssociatedParticles(const xAOD::Jet* pobj, const std::string& name, MSVector& val) const {
-  pobj->getAssociatedObjects(name, val);
+  bool ok [[maybe_unused]] = pobj->getAssociatedObjects(name, val);
 }
 
 //**********************************************************************
