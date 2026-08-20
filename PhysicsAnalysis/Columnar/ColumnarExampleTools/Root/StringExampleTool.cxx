@@ -14,7 +14,7 @@
 // method implementations
 //
 
-namespace columnar
+namespace ADD_CMODE(columnar)
 {
   StringExampleTool ::
   StringExampleTool (const std::string& name)

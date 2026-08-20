@@ -14,7 +14,7 @@
 // method implementations
 //
 
-namespace columnar
+namespace ADD_CMODE(columnar)
 {
   ConfigurableColumnExampleTool ::
   ConfigurableColumnExampleTool (const std::string& name)

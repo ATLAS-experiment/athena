@@ -14,7 +14,7 @@
 // method implementations
 //
 
-namespace columnar
+namespace ADD_CMODE(columnar)
 {
   SimpleSelectorExampleTool ::
   SimpleSelectorExampleTool (const std::string& name)

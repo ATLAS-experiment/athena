@@ -17,7 +17,7 @@
 #include <ColumnarCore/StringColumn.h>
 #include <ColumnarModeDefault/ColumnarModeDefault.h>
 
-namespace columnar
+namespace ADD_CMODE(columnar)
 {
   /// @brief an example of a columnar tool that reads a vector column
   ///

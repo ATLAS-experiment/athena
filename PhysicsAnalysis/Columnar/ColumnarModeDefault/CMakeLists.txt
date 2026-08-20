@@ -15,10 +15,22 @@ if ( NOT "${COLUMNAR_DEFAULT_ACCESS_MODE}" IN_LIST valid_modes)
 endif ()
 message ("using columnar mode ${COLUMNAR_DEFAULT_ACCESS_MODE}")
 
-# Add the shared library:
+# Add the shared library for xAOD mode. By convention this doesn't have
+# a suffix, so that existing code does not need to change.
 atlas_add_library (ColumnarModeDefaultLib
   ColumnarModeDefault/*.h
   INTERFACE
   PUBLIC_HEADERS ColumnarModeDefault)
 
-target_compile_definitions (ColumnarModeDefaultLib INTERFACE -DCOLUMNAR_DEFAULT_ACCESS_MODE=${COLUMNAR_DEFAULT_ACCESS_MODE})
+target_compile_definitions (ColumnarModeDefaultLib INTERFACE -DCOLUMNAR_DEFAULT_ACCESS_MODE=${COLUMNAR_DEFAULT_ACCESS_MODE} -DCOLUMNAR_MODE_SUFFIX=)
+
+# Add the shared library for array mode. This has an `_array` suffix,
+# which is essentially arbitrary, but matches the name in the columnar
+# documentation. Libraries linking this should by convention use the
+# same postfix throughout.
+atlas_add_library (ColumnarModeDefaultLib_array
+  ColumnarModeDefault/*.h
+  INTERFACE
+  PUBLIC_HEADERS ColumnarModeDefault)
+
+target_compile_definitions (ColumnarModeDefaultLib_array INTERFACE -DCOLUMNAR_DEFAULT_ACCESS_MODE=2 -DCOLUMNAR_MODE_SUFFIX=_array)

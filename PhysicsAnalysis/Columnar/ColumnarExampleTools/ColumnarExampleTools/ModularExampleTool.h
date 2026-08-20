@@ -16,7 +16,7 @@
 #include <ColumnarCore/ParticleDef.h>
 #include <ColumnarModeDefault/ColumnarModeDefault.h>
 
-namespace columnar
+namespace ADD_CMODE(columnar)
 {
   /// @brief an example of a columnar tool with a modular structure
   ///

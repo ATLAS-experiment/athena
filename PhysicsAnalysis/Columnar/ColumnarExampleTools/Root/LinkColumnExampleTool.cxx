@@ -14,7 +14,7 @@
 // method implementations
 //
 
-namespace columnar
+namespace ADD_CMODE(columnar)
 {
   LinkColumnExampleTool ::
   LinkColumnExampleTool (const std::string& name)
