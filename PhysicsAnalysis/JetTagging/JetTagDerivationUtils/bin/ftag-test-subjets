@@ -1,0 +1,149 @@
+#!/usr/bin/env python3
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
+
+"""Minimal use case for the SubjetBuilderAlg and TruthTauDecoratorAlg
+
+Reclusters the ghost-associated constituents of a jet into small-R subjets, and
+decorates the same jets with their leading/subleading truth-tau kinematics.
+
+Needs a derivation providing a jet collection with its ghost associations
+intact, plus a TruthTaus container.
+"""
+
+_inputs_help = "with no inputs use ASG_TEST_FILE_MC"
+
+import sys
+import os
+from argparse import ArgumentParser
+from pathlib import Path
+
+from AthenaConfiguration.AllConfigFlags import initConfigFlags
+from AthenaConfiguration.MainServicesConfig import MainServicesCfg
+from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
+
+from JetTagDerivationUtils.SubjetBuilderConfig import SubjetBuilderCfg
+from JetTagDerivationUtils.TruthTauDecoratorConfig import TruthTauDecoratorCfg
+
+LARGE_R_JETS = 'AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets'
+TRUTH_TAUS = 'TruthTaus'
+STREAM = 'FTAGSUBJETS'
+
+
+def get_args():
+    parser = ArgumentParser(description=__doc__)
+    parser.add_argument('input_files', nargs='*', help=_inputs_help)
+    parser.add_argument('-j', '--jets', default=LARGE_R_JETS,
+                        help='jet collection to run on (default: %(default)s)')
+    parser.add_argument('-g', '--ghost-association', default='GhostTruth',
+                        help='constituents to recluster (default: %(default)s)')
+    parser.add_argument('-r', '--radius', type=float, default=0.2,
+                        help='subjet radius (default: %(default)s)')
+    parser.add_argument('-p', '--pt-min', type=float, default=5000,
+                        help='minimum subjet pT in MeV (default: %(default)s)')
+    parser.add_argument('-m', '--max-events', type=int)
+    parser.add_argument('-o', '--output', type=Path,
+                        help='write a POOL file with the new subjets '
+                             'and decorations')
+    parser.add_argument('--no-subjets', action='store_false', dest='do_subjets',
+                        help='skip the subjet builder')
+    parser.add_argument('--no-truth-taus', action='store_false',
+                        dest='do_truth_taus',
+                        help='skip the truth-tau decorator')
+    parser.add_argument('-i', '--event-print-interval', type=int, default=100,
+                        help='set output frequency')
+    return parser.parse_args()
+
+
+def check_inputs(flags, args):
+    """Check the containers we need are present, before the event loop.
+
+    Thinned ghost associations are not visible here, only at run time.
+    """
+    collections = set(flags.Input.Collections)
+
+    if args.jets not in collections:
+        available = sorted(c for c in collections if c.endswith('Jets'))
+        raise SystemExit(
+            f"ERROR: jet collection '{args.jets}' is not in the input.\n"
+            f"       jet collections in this file: {available or '(none)'}\n"
+            f"       Pass one of them with --jets.")
+
+    if args.do_truth_taus and TRUTH_TAUS not in collections:
+        raise SystemExit(
+            f"ERROR: no '{TRUTH_TAUS}' container in the input.\n"
+            f"       Pass --no-truth-taus to run only the subjet builder.")
+
+
+def output_cfg(flags, ca, args, jets, subjets):
+    from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
+    from xAODMetaDataCnv.InfileMetaDataConfig import SetupMetaDataForStreamCfg
+
+    jet_vars = []
+    if args.do_subjets:
+        jet_vars += [f'{subjets}Links', f'{subjets}Count']
+    if args.do_truth_taus:
+        jet_vars += ['nGhostTaus'] + [
+            f'truthtau_{slot}_{var}{tag}'
+            for slot in ['lead', 'sublead']
+            for var in ['pt', 'deta', 'dphi', 'm']
+            for tag in ['', '_vis']
+        ] + [
+            f'truthtau_{slot}_{var}'
+            for slot in ['lead', 'sublead']
+            for var in ['numCharged', 'charge', 'isHadronic']
+        ]
+    item_list = [f'xAOD::JetContainer#{jets}',
+                 f'xAOD::JetAuxContainer#{jets}Aux.' + '.'.join(jet_vars)]
+    if args.do_subjets:
+        item_list += [f'xAOD::JetContainer#{subjets}',
+                      f'xAOD::JetAuxContainer#{subjets}Aux.']
+    ca.merge(OutputStreamCfg(flags, STREAM, ItemList=item_list,
+                             disableEventTag=True))
+    # in-file metadata is needed for a readable xAOD
+    ca.merge(SetupMetaDataForStreamCfg(flags, STREAM))
+
+
+def run():
+    args = get_args()
+
+    flags = initConfigFlags()
+    flags.Input.Files = args.input_files or [os.environ['ASG_TEST_FILE_MC']]
+    flags.Exec.EventPrintoutInterval = args.event_print_interval
+    if args.max_events:
+        flags.Exec.MaxEvents = args.max_events
+    if args.output:
+        flags.addFlag(f'Output.{STREAM}FileName', str(args.output))
+    flags.lock()
+
+    check_inputs(flags, args)
+
+    ca = MainServicesCfg(flags)
+    ca.merge(PoolReadCfg(flags))
+
+    jets = args.jets
+    subjets = f'{jets}{args.ghost_association}Subjets'
+
+    if args.do_subjets:
+        ca.merge(
+            SubjetBuilderCfg(
+                flags,
+                target_jets=jets,
+                output_container=subjets,
+                ghost_association=args.ghost_association,
+                radius=args.radius,
+                pt_min=args.pt_min,
+            )
+        )
+    if args.do_truth_taus:
+        ca.merge(TruthTauDecoratorCfg(flags, target_jets=jets,
+                                      truth_taus=TRUTH_TAUS))
+
+    if args.output:
+        output_cfg(flags, ca, args, jets, subjets)
+
+    return ca.run()
+
+
+if __name__ == '__main__':
+    rc = run()
+    sys.exit(0 if rc.isSuccess() else 1)
