@@ -37,6 +37,7 @@
 #include <ColumnarCore/ObjectColumn.h>
 #include <ColumnarCore/VectorColumn.h>
 #include <ColumnarEgamma/EgammaHelpers.h>
+#include <ColumnarModeDefault/ColumnarModeDefault.h>
 
 class AsgPhotonEfficiencyCorrectionTool
   : virtual public IAsgPhotonEfficiencyCorrectionTool,

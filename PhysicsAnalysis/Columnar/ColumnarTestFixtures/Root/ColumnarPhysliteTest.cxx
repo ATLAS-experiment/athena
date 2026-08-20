@@ -17,6 +17,7 @@
 #include <ColumnarInterfaces/KnownSgKeys.h>
 #include <ColumnarInterfaces/ColumnInfo.h>
 #include <ColumnarInterfaces/IColumnarTool.h>
+#include <ColumnarModeDefault/ColumnarModeDefault.h>
 #include <ColumnarToolWrapper/ColumnarToolHelpers.h>
 #include <ColumnarTestFixtures/Benchmark.h>
 #include <ColumnarTestFixtures/Configuration.h>

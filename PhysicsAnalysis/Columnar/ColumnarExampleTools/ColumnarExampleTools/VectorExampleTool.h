@@ -15,6 +15,7 @@
 #include <ColumnarCore/ObjectColumn.h>
 #include <ColumnarCore/ParticleDef.h>
 #include <ColumnarCore/VectorColumn.h>
+#include <ColumnarModeDefault/ColumnarModeDefault.h>
 
 namespace columnar
 {

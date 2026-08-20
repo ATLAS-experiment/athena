@@ -19,6 +19,7 @@
 #include <ColumnarVariant/VariantAccessor.h>
 #include <ColumnarEgamma/EgammaDef.h>
 #include <ColumnarMuon/MuonDef.h>
+#include <ColumnarModeDefault/ColumnarModeDefault.h>
 
 namespace columnar
 {

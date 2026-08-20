@@ -14,7 +14,7 @@ set (extra_libs ${extra_libs} ColumnarInterfacesLib)
 atlas_add_library (ColumnarCoreLib
   ColumnarCore/*.h Root/*.cxx
   PUBLIC_HEADERS ColumnarCore
-  LINK_LIBRARIES ${extra_libs} SGCoreLib ColumnarModeDefaultLib
+  LINK_LIBRARIES ${extra_libs} SGCoreLib
   PRIVATE_LINK_LIBRARIES CxxUtils)
 
 if (XAOD_STANDALONE)

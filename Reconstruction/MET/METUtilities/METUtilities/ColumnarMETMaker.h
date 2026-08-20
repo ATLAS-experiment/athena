@@ -38,6 +38,7 @@
 #include <ColumnarMet/MetAssociation.h>
 #include <ColumnarMet/MetHelpers.h>
 #include <ColumnarMet/MetOutput.h>
+#include <ColumnarModeDefault/ColumnarModeDefault.h>
 
 // Forward declaration
 

@@ -13,6 +13,7 @@
 #include <ColumnarJet/JetDef.h>
 #include <ColumnarTau/TauJetDef.h>
 #include <ColumnarTruth/TruthParticleDef.h>
+#include <ColumnarModeDefault/ColumnarModeDefault.h>
 #include <TauAnalysisTools/Enums.h>
 #include <TruthUtils/HepMCHelpers.h>
 

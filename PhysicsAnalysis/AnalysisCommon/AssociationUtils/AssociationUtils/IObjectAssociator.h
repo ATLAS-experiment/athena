@@ -11,6 +11,7 @@
 // Columnar includes
 #include "ColumnarCore/ColumnarTool.h"
 #include "ColumnarCore/ParticleDef.h"
+#include "ColumnarModeDefault/ColumnarModeDefault.h"
 
 namespace ORUtils
 {

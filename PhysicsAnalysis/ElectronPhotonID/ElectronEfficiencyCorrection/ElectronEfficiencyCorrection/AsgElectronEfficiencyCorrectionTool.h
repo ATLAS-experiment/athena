@@ -37,6 +37,7 @@ class TH2F;
 #include <ColumnarCore/ObjectColumn.h>
 #include <ColumnarCore/VectorColumn.h>
 #include <ColumnarEgamma/EgammaDef.h>
+#include <ColumnarModeDefault/ColumnarModeDefault.h>
 
 class AsgElectronEfficiencyCorrectionTool final
   : virtual public IAsgElectronEfficiencyCorrectionTool

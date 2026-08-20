@@ -14,7 +14,7 @@ atlas_add_library( AssociationUtilsLib
    PUBLIC_HEADERS AssociationUtils
    PRIVATE_INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
    LINK_LIBRARIES AnaAlgorithmLib AsgMessagingLib AsgTools AthContainers AthLinks AsgDataHandlesLib
-   xAODBase ColumnarClusterLib ColumnarEventInfoLib ColumnarEgammaLib ColumnarJetLib ColumnarMuonLib ColumnarTauLib ColumnarTrackingLib ColumnarCoreLib ColumnarVariantLib xAODMissingET
+   xAODBase ColumnarClusterLib ColumnarEventInfoLib ColumnarEgammaLib ColumnarJetLib ColumnarMuonLib ColumnarTauLib ColumnarTrackingLib ColumnarCoreLib ColumnarVariantLib ColumnarModeDefaultLib xAODMissingET
    PRIVATE_LINK_LIBRARIES ${ROOT_LIBRARIES} FourMomUtils )
 
 atlas_add_dictionary( AssociationUtilsDict

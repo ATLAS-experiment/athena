@@ -10,7 +10,7 @@ find_package( GTest )
 atlas_add_library (ColumnarExampleToolsLib
   ColumnarExampleTools/*.h Root/*.cxx
   PUBLIC_HEADERS ColumnarExampleTools
-  LINK_LIBRARIES ColumnarCoreLib AsgTools ColumnarMetLib ColumnarMuonLib ColumnarTrackingLib)
+  LINK_LIBRARIES ColumnarCoreLib AsgTools ColumnarMetLib ColumnarMuonLib ColumnarTrackingLib ColumnarModeDefaultLib)
 
   atlas_add_component( ColumnarExampleTools
    src/components/*.cxx

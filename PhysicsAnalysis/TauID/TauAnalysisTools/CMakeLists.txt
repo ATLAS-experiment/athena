@@ -19,7 +19,7 @@ atlas_add_library( TauAnalysisToolsLib
                   xAODTruth TruthUtils PATCoreLib PATInterfaces tauRecToolsLib 
                   AsgAnalysisInterfaces
                   xAODCore xAODBTagging AthOnnxInterfaces AthOnnxUtilsLib ColumnarCoreLib ColumnarTauLib ColumnarEventInfoLib
-                  ColumnarTruthLib ColumnarJetLib TruthUtils
+                  ColumnarTruthLib ColumnarJetLib TruthUtils ColumnarModeDefaultLib
    PRIVATE_LINK_LIBRARIES AthLinks xAODEventInfo xAODMetaData PathResolver )
 
 if( NOT XAOD_STANDALONE )

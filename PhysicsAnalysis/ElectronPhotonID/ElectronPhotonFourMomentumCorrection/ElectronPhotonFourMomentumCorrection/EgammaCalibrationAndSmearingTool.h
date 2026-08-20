@@ -23,6 +23,7 @@
 #include "ColumnarCore/LinkColumn.h"
 #include "ColumnarCore/MomentumAccessors.h"
 #include "ColumnarCore/VectorColumn.h"
+#include "ColumnarModeDefault/ColumnarModeDefault.h"
 #include "ColumnarEgamma/EgammaHelpers.h"
 #include "ColumnarEventInfo/EventInfoHelpers.h"
 #include "ColumnarTracking/TrackDef.h"

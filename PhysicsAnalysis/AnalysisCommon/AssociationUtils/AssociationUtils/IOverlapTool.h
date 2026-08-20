@@ -15,6 +15,7 @@
 // Columnar includes
 #include "ColumnarCore/ObjectRange.h"
 #include "ColumnarCore/ParticleDef.h"
+#include "ColumnarModeDefault/ColumnarModeDefault.h"
 
 namespace ORUtils
 {

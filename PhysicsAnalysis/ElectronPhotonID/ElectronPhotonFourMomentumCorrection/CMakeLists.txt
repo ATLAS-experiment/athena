@@ -20,7 +20,7 @@ atlas_add_library( ElectronPhotonFourMomentumCorrectionLib
    INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
    LINK_LIBRARIES ${ROOT_LIBRARIES} AsgServicesLib AsgTools AsgTestingLib AsgMessagingLib ColumnarClusterLib ColumnarEgammaLib ColumnarCoreLib
    xAODEventInfo PATInterfaces EgammaAnalysisInterfacesLib egammaUtils PATCoreAcceptLib
-   xAODRootAccess ColumnarTrackingLib ColumnarEventInfoLib 
+   xAODRootAccess ColumnarTrackingLib ColumnarEventInfoLib ColumnarModeDefaultLib
    PRIVATE_LINK_LIBRARIES  AthLinks xAODMetaData egammaLayerRecalibTool
    PathResolver ${extra_libs} )
 

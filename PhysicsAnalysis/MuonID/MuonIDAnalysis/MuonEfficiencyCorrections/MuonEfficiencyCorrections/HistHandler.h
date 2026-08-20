@@ -24,6 +24,7 @@
 #include <ColumnarCore/ColumnarTool.h>
 #include <ColumnarMuon/MuonDef.h>
 #include <ColumnarCore/ObjectColumn.h>
+#include <ColumnarModeDefault/ColumnarModeDefault.h>
 
 // STL includes
 #include <string>

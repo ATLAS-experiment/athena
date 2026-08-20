@@ -16,6 +16,7 @@
 #include <ColumnarCore/LinkColumn.h>
 #include <ColumnarMuon/MuonDef.h>
 #include <ColumnarTracking/TrackDef.h>
+#include <ColumnarModeDefault/ColumnarModeDefault.h>
 
 namespace columnar
 {

@@ -167,7 +167,7 @@ namespace columnar
     ColumnAccessor<MetAssociationDef,std::vector<std::vector<std::size_t>>,CM> overlapIndicesAcc;
     ColumnAccessor<MetAssociationDef,std::vector<std::vector<unsigned char>>,CM> overlapTypesAcc;
 
-    MetHelpers::ObjectTypeAccessor<ParticleDef,CMode> objectTypeAcc;
+    MetHelpers::ObjectTypeAccessor<ParticleDef,CM> objectTypeAcc;
 
     ColumnUpdater<MetAssociationDef,bitmask_t,CM> useObjectFlagsAcc;
 
@@ -253,7 +253,7 @@ namespace columnar
       return overlapIndicesAcc(assoc); }
 
     [[nodiscard]] auto overlapIndices(AssocId assoc,const xAOD::IParticle* pPart) const {
-      return this->overlapIndices(assoc, ParticleId<CMode>(*pPart)); }
+      return this->overlapIndices(assoc, ParticleId<CM>(*pPart)); }
     [[nodiscard]] auto overlapIndices(AssocId assoc,PartId pPart) const {
       return this->overlapIndices(assoc, this->findIndex(assoc, pPart)); }
 
@@ -268,7 +268,7 @@ namespace columnar
       return objIdx < types.size() ? types[objIdx] : std::span<const unsigned char>(); }
 
     [[nodiscard]] std::size_t findIndex(AssocId assoc,const xAOD::IParticle* pPart) const {
-      return findIndex(assoc, ParticleId<CMode>(*pPart));}
+      return findIndex(assoc, ParticleId<CM>(*pPart));}
     template<ContainerIdConcept CI>
     [[nodiscard]] std::size_t findIndex(AssocId assoc,ObjectId<CI,CM> pPart) const {
       std::size_t idx = 0;
@@ -311,7 +311,7 @@ namespace columnar
     [[nodiscard]] auto refJet(AssocId assoc) const {
       return this->jetLink(assoc); }
 
-    [[nodiscard]] bool containsPhysics(AssocId assoc,JetId<CMode> pPhys) const {
+    [[nodiscard]] bool containsPhysics(AssocId assoc,JetId<CM> pPhys) const {
       for(auto link : this->objectLinks(assoc)) {
         if(link == pPhys) {
           return true;
@@ -320,7 +320,7 @@ namespace columnar
       return false;}
 
 
-    [[nodiscard]] OptAssocId getMiscAssociation(MetAssociationRange<CMode> map) const {
+    [[nodiscard]] OptAssocId getMiscAssociation(MetAssociationRange<CM> map) const {
       // I don't know if it matters, but in the original xAOD code the
       // iteration is done in reverse order, so I'm doing the same here
       // as well.

@@ -12,6 +12,7 @@
 #include <ColumnarTestFixtures/ColumnarMemoryTest.h>
 
 #include <ColumnarCore/ColumnarDef.h>
+#include <ColumnarModeDefault/ColumnarModeDefault.h>
 #include <ColumnarTestFixtures/ExpectationCompare.h>
 #include <ColumnarToolWrapper/ColumnarToolHelpers.h>
 #include <PATInterfaces/SystematicsUtil.h>

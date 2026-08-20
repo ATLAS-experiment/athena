@@ -15,6 +15,7 @@
 #include <ColumnarCore/ObjectColumn.h>
 #include <ColumnarMet/MetDef.h>
 #include <ColumnarCore/StringColumn.h>
+#include <ColumnarModeDefault/ColumnarModeDefault.h>
 
 namespace columnar
 {

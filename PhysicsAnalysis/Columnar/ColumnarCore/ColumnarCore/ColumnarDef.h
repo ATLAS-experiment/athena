@@ -5,7 +5,6 @@
 #ifndef COLUMNAR_CORE_COLUMNAR_DEF_H
 #define COLUMNAR_CORE_COLUMNAR_DEF_H
 
-#include <ColumnarModeDefault/ColumnarModeDefault.h>
 #include <cstdint>
 #include <stdexcept>
 

@@ -21,6 +21,7 @@
 #include "ColumnarVariant/VariantAccessor.h"
 #include "ColumnarVariant/VariantDef.h"
 #include "ColumnarVariant/VariantLinkColumn.h"
+#include "ColumnarModeDefault/ColumnarModeDefault.h"
 
 #include <optional>
 

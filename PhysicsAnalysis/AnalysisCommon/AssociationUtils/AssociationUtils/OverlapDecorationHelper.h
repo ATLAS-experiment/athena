@@ -12,6 +12,7 @@
 #include "ColumnarCore/ColumnAccessor.h"
 #include "ColumnarCore/ColumnarTool.h"
 #include "ColumnarCore/ObjectRange.h"
+#include "ColumnarModeDefault/ColumnarModeDefault.h"
 
 // Local includes
 #include "AssociationUtils/OverlapRemovalDefs.h"
