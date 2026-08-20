@@ -293,8 +293,6 @@ def createTriggerFlags(doTriggerRecoFlags):
     flags.addFlag('Trigger.Online.isPartition', lambda prevFlags: len(prevFlags.Trigger.Online.partitionName)>0,
                   help='check if job is running in a partition (i.e. partition name is not empty)')
 
-    flags.addFlag("Trigger.Online.useEFByteStreamSvc", False,
-                  help='use online EF ByteStream services')
     flags.addFlag('Trigger.Online.EFInterface.Files', [])
     flags.addFlag('Trigger.Online.EFInterface.OutputFileName', '')
     flags.addFlag('Trigger.Online.EFInterface.LoopFiles', False)

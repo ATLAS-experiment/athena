@@ -1316,10 +1316,6 @@ def main():
    # Enable PerfMon if requested
    flags.PerfMon.doFastMonMT = args.perfmon
 
-   # Configure EF ByteStream services (mandatory to run without HLTMPPU)
-   # This provides the data flow interface that would normally come from HLTMPPU
-   flags.Trigger.Online.useEFByteStreamSvc = True
-
    # Overrides applied to the configuration at runtime.
    # Only options explicitly given on the command line are collected, anything else keeps its DB/jobOptions value.
    # NB: Do NOT set the corresponding flags here, that would put them in the SMK.
