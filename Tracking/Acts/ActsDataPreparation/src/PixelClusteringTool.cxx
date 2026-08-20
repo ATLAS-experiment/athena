@@ -323,8 +323,8 @@ PixelClusteringToolImpl<T_RDOContainer>::makeCluster(size_t icluster,
   if (tot_acc > 0)
     pos_acc /= tot_acc;
   
-  const long long diffCol = colmax - colmin + 1;
-  const long long diffRow = rowmax - rowmin + 1;
+  const long long diffCol = static_cast<long long>(colmax) - static_cast<long long>(colmin) + 1LL;
+  const long long diffRow = static_cast<long long>(rowmax) - static_cast<long long>(rowmin) + 1LL;
   assert(std::in_range<int>(diffCol));
   assert(std::in_range<int>(diffRow));
   const int colWidth = static_cast<int>(diffCol);

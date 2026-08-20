@@ -281,7 +281,7 @@ const xAOD::Vertex* BeamspotVertexPreProcessor::findVertexCandidate(const Track*
     auto iVxTrackEnd    = thisPair.second.end();
     Trk::CompareTwoTracks thisCompare(track, "compareAddress");
 
-    auto findResult = std::find_if(iVxTrackBegin, iVxTrackEnd, thisCompare);
+    auto findResult = std::find_if(iVxTrackBegin, iVxTrackEnd, std::move(thisCompare));
 
     if(findResult != iVxTrackEnd){
       ATH_MSG_DEBUG("the found VxTrackAtVertex: "<<*findResult);
