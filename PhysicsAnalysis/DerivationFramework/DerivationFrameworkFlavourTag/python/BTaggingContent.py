@@ -156,8 +156,24 @@ def BTaggingStandardContent(flags: AthConfigFlags, jetcol: str) -> list[str]:
             ],
             flip_modes=["SimpleFlip"],
         )
+        btagging_aux += _get_small_r_discriminant_vars(
+            name="GN3V02",
+            extra_flavours=[
+                "tau",
+                "ud",
+                "g",
+                "s",
+                "bquark",
+                "antibquark",
+                "cquark",
+                "anticquark",
+                "other",
+            ],
+            flip_modes=["SimpleFlip"],
+        )
         btagging_aux += ["GN3PflowMuonsV00_ptFromTruthDressedWZJet"]
         btagging_aux += ["GN3EPCLV01_ptFromTruthDressedWZJet"]
+        btagging_aux += ["GN3V02_ptFromTruthDressedWZJet"]
 
     btag_content = _get_variable_list(collection=jetcol, aux_list=btagging_aux)
     return btag_content + jet_basic_content
