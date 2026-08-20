@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 from PyJobTransforms.TransformUtils import processPreExec, processPreInclude, processPostExec, processPostInclude
 from RecJobTransforms.RecoSteering import RecoSteering
@@ -150,13 +150,20 @@ def fromRunArgs(runArgs):
     from xAODMetaDataCnv.InfileMetaDataConfig import SetupMetaDataForStreamCfg
     cfg.merge(SetupMetaDataForStreamCfg(flags,'AOD', createMetadata=[MetadataCategory.CutFlowMetaData]))
 
-    # Write stream metadata into TagInfo
+    # Write some metadata into TagInfo
     from EventInfoMgt.TagInfoMgrConfig import TagInfoMgrCfg
     cfg.merge(TagInfoMgrCfg(flags,
                             tagValuePairs={
-                                "triggerStreamOfFile": ""
-                                if flags.Input.isMC
-                                else flags.Input.TriggerStream}))
+                                "beam_type": flags.Beam.Type.value,
+                                "beam_energy": str(int(flags.Beam.Energy)),
+                                "triggerStreamOfFile": "" if flags.Input.isMC else flags.Input.TriggerStream,
+                                "project_name": "IS_SIMULATION" if flags.Input.isMC else flags.Input.ProjectName,
+                            }))
+    if not flags.Input.isMC and flags.Input.DataYear > 0:
+        cfg.merge(TagInfoMgrCfg(flags,
+                                tagValuePairs={
+                                    "data_year": str(flags.Input.DataYear)
+                                }))
 
     # Post-include
     processPostInclude(runArgs, flags, cfg)
