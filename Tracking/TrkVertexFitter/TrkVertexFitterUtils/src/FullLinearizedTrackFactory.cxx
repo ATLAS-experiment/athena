@@ -122,6 +122,7 @@ namespace Trk
     const AtlasFieldCacheCondObj* fieldCondObj{*readHandle};
     if (!fieldCondObj)[[unlikely]]{
       ATH_MSG_ERROR("fieldCondObj is nullptr");
+      delete parsAtVertex;
       return nullptr;
     }
     MagField::AtlasFieldCache fieldCache;

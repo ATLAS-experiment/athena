@@ -36,10 +36,10 @@ EGSelectionToolWrapper::addBranches(const EventContext& ctx) const
   SG::ReadHandle<xAOD::EgammaContainer> particles;
   if(!m_fudgedContainerName.empty()){
     SG::ReadHandle<xAOD::EgammaContainer> fudged{ m_fudgedContainerName, ctx };
-    particles = fudged;
+    particles = std::move(fudged);
   } else {
     SG::ReadHandle<xAOD::EgammaContainer> egammas{ m_ContainerName, ctx };
-    particles = egammas;
+    particles = std::move(egammas);
   }
   
   // Decorators
