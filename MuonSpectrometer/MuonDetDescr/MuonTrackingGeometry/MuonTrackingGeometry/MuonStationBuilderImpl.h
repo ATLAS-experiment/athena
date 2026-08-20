@@ -41,7 +41,8 @@ namespace Muon {
 
 class MuonStationBuilderImpl : public AthAlgTool {
    public:
-    using GMInfo = std::pair<Amg::Transform3D, int>;
+    using GMInfo = std::tuple<Amg::Transform3D, Identifier>;
+
     virtual ~MuonStationBuilderImpl() = default;
     virtual StatusCode initialize() override;
 
@@ -50,8 +51,7 @@ class MuonStationBuilderImpl : public AthAlgTool {
                                                     bool blend = false) const;
 
    protected:
-    MuonStationBuilderImpl(const std::string&, const std::string&,
-                           const IInterface*);
+    using AthAlgTool::AthAlgTool;
 
     ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{
         this, "MuonIdHelperSvc", "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
@@ -60,33 +60,27 @@ class MuonStationBuilderImpl : public AthAlgTool {
     retrieveGMsensitive(const MuonGM::MuonDetectorManager* muonMgr) const;
 
     std::unique_ptr<Trk::DetachedTrackingVolume>
-    buildDetachedTrackingVolumeType(const MuonGM::MuonDetectorManager* muonMgr,
-                                    const GeoVPhysVol* gv, const GMInfo& info) const;
+    buildDetachedTrackingVolumeType(const GeoVPhysVol* gv, const GMInfo& info) const;
+
+
+    std::vector<const Trk::Surface*> fetchSurfaces(const Identifier& stationId,
+                                                   const MuonGM::MuonDetectorManager* detMgr) const;
 
     void glueComponents(Trk::DetachedTrackingVolume*) const;
-    void encloseLayers(const Trk::DetachedTrackingVolume*) const;
-    void identifyLayers(Trk::DetachedTrackingVolume*, Identifier, int, int,
-                        const MuonGM::MuonDetectorManager*) const;
+
     
-    void identifyNSWLayers(Trk::DetachedTrackingVolume& station, 
-                           const Identifier& id) const;
+    void identifyLayers(Trk::DetachedTrackingVolume&, 
+                        const Identifier&,
+                        const MuonGM::MuonDetectorManager*) const;
 
-    void identifyPrototype(Trk::TrackingVolume& station, int eta, int phi,
-                           const Amg::Transform3D& transf,
-                           const MuonGM::MuonDetectorManager* muonMgr) const;
+    void identifyLayers(Trk::TrackingVolume&, 
+                        const Identifier&,
+                        const MuonGM::MuonDetectorManager*) const;
 
-    Identifier resolveId(const std::string& vname, const GMInfo& gm_info, int& eta, int& phi,
-                         const MuonGM::MuonDetectorManager* muonMgr) const;
+
     void checkLayerId(std::string_view comment,
                       const MuonGM::MuonDetectorManager* muonMgr, Identifier id,
                       const Trk::Layer* lay) const;
-
-    void getNSWStationsForTranslation(
-        const GeoVPhysVol* pv, const std::string& name, const Amg::Transform3D&,
-        std::vector<
-            std::pair<std::pair<const GeoLogVol*, Trk::MaterialProperties*>,
-                      std::vector<Amg::Transform3D>>>& vols,
-        std::vector<std::string>& volNames) const;
 
     ToolHandle<Muon::MuonStationTypeBuilder> m_muonStationTypeBuilder{
         this, "StationTypeBuilder",
