@@ -379,9 +379,14 @@ private:
     // search
     std::vector<float>::const_iterator vIter = bData.boundaries.begin();
     size_t bin = 0;
-    for (; vIter != bData.boundaries.end(); ++vIter, ++bin)
-      if ((*vIter) > value)
+    for (; vIter != bData.boundaries.end(); ++vIter, ++bin){
+      if ((*vIter) > value){
         break;
+      }
+    }
+    //overflow (i.e. bin == 0) can only happen if the boundaries vector is empty, 
+    //which is already checked
+    //coverity[INTEGER_OVERFLOW]
     return (bin - 1);
   }
 

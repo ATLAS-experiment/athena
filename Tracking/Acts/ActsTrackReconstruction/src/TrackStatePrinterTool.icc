@@ -94,6 +94,7 @@ namespace ActsTrk
                                          bool useFiltered,
                                          bool newLine) const
   {
+    Acts::detail::OstreamStateGuard s(std::cout);
     if (!m_printFilteredStates && useFiltered)
       return false;
 

@@ -855,6 +855,7 @@ namespace Trk {
     for (int ifile = 0; ifile < (int)m_inputTFiles.size(); ifile++) {
       if (numberOfReadErrors > m_maxReadErrors){
         msg(MSG::FATAL) << " number of errors when reading the TFiles already exceed " << m_maxReadErrors << endmsg;
+        delete accumMatrix;
         return false;
       }
    
@@ -964,13 +965,17 @@ namespace Trk {
       if (ifile == 0){
         DoFMap = std::move(newDoFMap);
       } else if (DoFMap!=newDoFMap) {
+        delete newVector;
+        delete vector;
         msg(MSG::FATAL) << "module dofs don't agree!" << endmsg;
         return false;
       }
       
       if (ifile == 0){
-         modIndexMap = newModIndexMap;
+         modIndexMap = std::move(newModIndexMap);
       } else if (modIndexMap!=newModIndexMap) {
+         delete newVector;
+         delete vector;
          msg(MSG::FATAL) << "module index maps don't agree!" << endmsg;
          return false;
       }
@@ -1079,8 +1084,9 @@ namespace Trk {
       
       myFile->Close("R");
       delete myFile;
-
-      itworked =  getrusage(RUSAGE_SELF,&myusage);
+      //
+      //setting 'itworked' here would be overwritten before use
+      //
       ATH_MSG_DEBUG("Memory usage [MB], total " << myusage.ru_maxrss/1024 << ", increase  " << (myusage.ru_maxrss-intialMemUse)/1024);
 
     }

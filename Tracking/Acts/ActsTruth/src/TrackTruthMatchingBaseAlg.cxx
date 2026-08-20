@@ -465,8 +465,9 @@ namespace ActsTrk
              break;
           }
        }
+       const std::string labelStr{"pt"};
        for (std::size_t bin_i = 0; bin_i < statPtBins.size() + 2; ++bin_i) {
-          pt_labels.push_back(TableUtils::makeBinLabel("pt",statPtBins, bin_i, true, pt_precision));
+          pt_labels.push_back(TableUtils::makeBinLabel(labelStr,statPtBins, bin_i, true, pt_precision));
        }
        // statistics eta-bins
        {
