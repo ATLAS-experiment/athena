@@ -23,16 +23,8 @@ PFTrackClusterMatchingTool::PFTrackClusterMatchingTool(const std::string& type,
                                                        const std::string& name,
                                                        const IInterface* parent) :
     AthAlgTool(type, name, parent),
-    m_trackPositionType("EM2EtaPhi"),
-    m_clusterPositionType("GeomCenterEtaPhi"),
-    m_distanceType("EtaPhiSquareSignificance"),
-    m_matchCut(1.64*1.64),
     m_matcher(nullptr) {
   declareInterface<PFTrackClusterMatchingTool>(this);
-  declareProperty("TrackPositionType",m_trackPositionType);
-  declareProperty("ClusterPositionType",m_clusterPositionType);
-  declareProperty("DistanceType",m_distanceType);
-  declareProperty("MatchCut", m_matchCut);
 }
 
 StatusCode PFTrackClusterMatchingTool::initialize() {
