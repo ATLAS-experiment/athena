@@ -127,13 +127,14 @@ StatusCode PEBInfoWriterAlg::execute(const EventContext& eventContext) const {
 
   if(!m_superRoisWriteHandleKey.empty()){
     //write out a super RoI from selected RoIs
-    ElementLink<TrigRoiDescriptorCollection> roi;
+    TrigRoiDescriptor roi;
     for(auto input : toolInputs){
       ATH_CHECK(input.decision->getDetail("outputRoIs", roi));
-      if(roi.isValid()){
-	superRoI->push_back(new TrigRoiDescriptor(*(*roi)));
-	superRoI->manageConstituents(true);
-      }
+      if((*input.roiEL)->isFullscan()) continue; //skip MET legs
+      if((roi.etaPlus()-roi.etaMinus())==0) continue;
+      superRoI->push_back(new TrigRoiDescriptor(roi));
+      superRoI->manageConstituents(true);
+      
     }
     superRoisWriteHandle->push_back(superRoI.release());
   }
