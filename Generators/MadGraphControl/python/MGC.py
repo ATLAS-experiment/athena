@@ -858,7 +858,6 @@ class ParamCard:
                 for value in self.paramCardDict:
                     if block.strip().lower() == value.strip().lower():
                         name = value
-                        
                 for key in params[block]: #look at each key in the block sub-dictionary 
                     k = key.strip()
                     if k in self.paramCardDict[name]: # if the key is in the paramCardDict block then update it

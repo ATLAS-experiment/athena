@@ -133,9 +133,6 @@ def configureAndRunMadGraph(flags):
               '1000035','1000037','35','36','37']: # Note that gravitino is non-standard
         masses[p]=decoupled_mass
     decays = {}
-    rhlog.info( "AAAAAAAA")
-    rhlog.info( flags.dump())
-    rhlog.info( "AAAAAAAA")
 
     # Useful definitions
     squarks = []
