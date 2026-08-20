@@ -1,7 +1,7 @@
 //-*- C++ -*-
 
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////////
@@ -286,12 +286,11 @@ int JetInputElRemovalTool::fillSelectedClustersInJets(std::vector<const xAOD::El
       
       propEM=0;
       const xAOD::CaloCluster* cluster_itr= dynamic_cast<const xAOD::CaloCluster*> (jetcons_it->rawConstituent());
-      
+      if (!cluster_itr) continue;
       
       double EMB_Enegy=cluster_itr->eSample(CaloSampling::CaloSample::PreSamplerB)+cluster_itr->eSample(CaloSampling::CaloSample::EMB1)+cluster_itr->eSample(CaloSampling::CaloSample::EMB2)+cluster_itr->eSample(CaloSampling::CaloSample::EMB3);
       
       double EMEC_Energy=cluster_itr->eSample(CaloSampling::CaloSample::PreSamplerE)+cluster_itr->eSample(CaloSampling::CaloSample::EME1)+cluster_itr->eSample(CaloSampling::CaloSample::EME2)+cluster_itr->eSample(CaloSampling::CaloSample::EME3);
-      
       
       //Remove Clusters w/o energy
       if (cluster_itr->rawE()==0) {
