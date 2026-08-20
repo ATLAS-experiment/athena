@@ -7,7 +7,7 @@
 #include "xAODCore/AuxStoreAccessorMacros.h"
 
 namespace xAOD {
-AUXSTORE_PRIMITIVE_SETTER_AND_GETTER(ExampleElectron_v1, double, pt, setPt)
+AUXSTORE_PRIMITIVE_SETTER_AND_GETTER(ExampleElectron_v1, float, pt, setPt)
 AUXSTORE_PRIMITIVE_SETTER_AND_GETTER(ExampleElectron_v1, float, charge,
                                      setCharge)
 }  // namespace xAOD
