@@ -28,6 +28,7 @@
 #include <random>
 #include <sstream>
 #include <string>
+#include <unistd.h>
 
 // when the slot specific state is destroyed, we unsubscribe from
 // the sampler
@@ -163,97 +164,81 @@ const RawEvent* ByteStreamSamplingInputSvc::nextEvent() {
     std::unique_ptr<uint32_t[]> raw_data;
     size_t length = 0;
 
-    if (webdaq::emon::nextEvent(m_partition, state.m_subscription, raw_data,
-                                length, std::chrono::seconds(m_timeout))) {
+    if (!webdaq::emon::nextEvent(m_partition, state.m_subscription, raw_data,
+                                 length, std::chrono::seconds(m_timeout))) {
+      continue;
+    }
 
-      OFFLINE_FRAGMENTS_NAMESPACE::DataType* buf =
-          new OFFLINE_FRAGMENTS_NAMESPACE::DataType[length];
-      memcpy(buf, raw_data.get(),
-             length * sizeof(OFFLINE_FRAGMENTS_NAMESPACE::DataType));
+    OFFLINE_FRAGMENTS_NAMESPACE::DataType* buf =
+        new OFFLINE_FRAGMENTS_NAMESPACE::DataType[length];
+    memcpy(buf, raw_data.get(),
+           length * sizeof(OFFLINE_FRAGMENTS_NAMESPACE::DataType));
 
-      if (buf[0] == eformat::FULL_EVENT) {
+    if (buf[0] != eformat::FULL_EVENT) {
+      ATH_MSG_ERROR("nextEvent: Got invalid fragment of unknown type: 0x"
+                    << std::hex << buf[0] << std::dec);
+      delete[] buf;
+      continue;
+    }
 
-        // We got a full event
-        state.m_re = std::make_unique<RawEvent>(buf);
-        try {
-          state.m_re->check_tree();
-          ATH_MSG_INFO("nextEvent: Got valid fragment of size:" << length);
-        } catch (ers::Issue& ex) {
-
-          // log in any case
-          std::stringstream ss;
-          ss << ex;
-          ATH_MSG_ERROR("nextEvent: Invalid event fragment: " << ss.str());
-
-          if (!m_corrupted_events) {
-            delete[] buf;
-            state.m_re.reset();
-            continue;
-          }  // else fall through
-        }
-        m_robProvider->setNextEvent(Gaudi::Hive::currentContext(),
-                                    state.m_re.get());
-        m_robProvider->setEventStatus(Gaudi::Hive::currentContext(), 0);
-
-      } else {
-        // We got something we didn't expect.
-        ATH_MSG_ERROR("nextEvent: Got invalid fragment of unknown type: 0x"
-                      << std::hex << buf[0] << std::dec);
+    state.m_re = std::make_unique<RawEvent>(buf);
+    try {
+      state.m_re->check_tree();
+      ATH_MSG_INFO("nextEvent: Got valid fragment of size:" << length);
+    } catch (ers::Issue& ex) {
+      std::stringstream ss;
+      ss << ex;
+      ATH_MSG_ERROR("nextEvent: Invalid event fragment: " << ss.str());
+      if (!m_corrupted_events) {
         delete[] buf;
+        state.m_re.reset();
         continue;
       }
-      ++m_totalEventCounter;
     }
+    m_robProvider->setNextEvent(Gaudi::Hive::currentContext(),
+                                state.m_re.get());
+    m_robProvider->setEventStatus(Gaudi::Hive::currentContext(), 0);
 
-    // generate DataHeader
-    DataHeader* Dh = new DataHeader();
-
-    // Declare header primary
-    Dh->setStatus(DataHeader::Input);
-
-    // Now add ref to xAOD::EventInfo objects
-    CxxUtils::RefCountedPtr<ByteStreamAddress> iop(new ByteStreamAddress(
-        ClassID_traits<xAOD::EventInfo>::ID(), "EventInfo", ""));
-    StatusCode ioc = m_sgSvc->recordAddress("EventInfo", std::move(iop));
-    if (ioc.isSuccess()) {
-      const SG::DataProxy* ptmp = m_sgSvc->transientProxy(
-          ClassID_traits<xAOD::EventInfo>::ID(), "EventInfo");
-      if (ptmp != 0) {
-        DataHeaderElement DheEI(ptmp, nullptr, "EventInfo");
-        Dh->insert(DheEI);
-      }
-      // else ATH_MSG_ERROR("Failed to create xAOD::EventInfo proxy " << ptmp);
-    }
-
-    // Now add ref to xAOD::EventAuxInfo objects
-    CxxUtils::RefCountedPtr<ByteStreamAddress> iopaux(new ByteStreamAddress(
-        ClassID_traits<xAOD::EventAuxInfo>::ID(), "EventInfoAux.", ""));
-    StatusCode iocaux =
-        m_sgSvc->recordAddress("EventInfoAux.", std::move(iopaux));
-    if (iocaux.isSuccess()) {
-      const SG::DataProxy* ptmpaux = m_sgSvc->transientProxy(
-          ClassID_traits<xAOD::EventAuxInfo>::ID(), "EventInfoAux.");
-      if (ptmpaux != 0) {
-        DataHeaderElement DheEIAux(ptmpaux, nullptr, "EventInfoAux.");
-        Dh->insert(DheEIAux);
-      }
-      // else ATH_MSG_ERROR("Failed to create xAOD::EventAuxInfo proxy " <<
-      // ptmpaux);
-    }
-
-    // Record new data header.Boolean flags will allow it's deletion in case
-    // of skipped events.
-    StatusCode rec_sg = m_sgSvc->record<DataHeader>(Dh, "ByteStreamDataHeader",
-                                                    true, false, true);
-    if (rec_sg != StatusCode::SUCCESS) {
-      ATH_MSG_ERROR(
-          "Fail to record BS DataHeader in StoreGate. Skipping events?! "
-          << rec_sg);
-    }
-    return state.m_re.get();
+    ++m_totalEventCounter;
   }
 
-  return nullptr;
+  // generate DataHeader
+  DataHeader* Dh = new DataHeader();
+  Dh->setStatus(DataHeader::Input);
+
+  CxxUtils::RefCountedPtr<ByteStreamAddress> iop(new ByteStreamAddress(
+      ClassID_traits<xAOD::EventInfo>::ID(), "EventInfo", ""));
+  StatusCode ioc = m_sgSvc->recordAddress("EventInfo", std::move(iop));
+  if (ioc.isSuccess()) {
+    const SG::DataProxy* ptmp = m_sgSvc->transientProxy(
+        ClassID_traits<xAOD::EventInfo>::ID(), "EventInfo");
+    if (ptmp != 0) {
+      DataHeaderElement DheEI(ptmp, nullptr, "EventInfo");
+      Dh->insert(DheEI);
+    }
+  }
+
+  CxxUtils::RefCountedPtr<ByteStreamAddress> iopaux(new ByteStreamAddress(
+      ClassID_traits<xAOD::EventAuxInfo>::ID(), "EventInfoAux.", ""));
+  StatusCode iocaux =
+      m_sgSvc->recordAddress("EventInfoAux.", std::move(iopaux));
+  if (iocaux.isSuccess()) {
+    const SG::DataProxy* ptmpaux = m_sgSvc->transientProxy(
+        ClassID_traits<xAOD::EventAuxInfo>::ID(), "EventInfoAux.");
+    if (ptmpaux != 0) {
+      DataHeaderElement DheEIAux(ptmpaux, nullptr, "EventInfoAux.");
+      Dh->insert(DheEIAux);
+    }
+  }
+
+  StatusCode rec_sg = m_sgSvc->record<DataHeader>(Dh, "ByteStreamDataHeader",
+                                                  true, false, true);
+  if (rec_sg != StatusCode::SUCCESS) {
+    ATH_MSG_ERROR(
+        "Fail to record BS DataHeader in StoreGate. Skipping events?! "
+        << rec_sg);
+  }
+  return state.m_re.get();
 }
 
 // Get a pointer to the current event.
