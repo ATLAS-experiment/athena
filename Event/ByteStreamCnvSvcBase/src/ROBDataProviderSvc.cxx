@@ -76,6 +76,8 @@
 //      In Run 2 the module ID should be therefore not any more masked.
 //      The masking of the moduleID is switched on when a L2 result is found in the event or the
 //      event header contains L2 trigger info words. This means the data were produced with run 1 HLT system.
+//  Revision: Aug 2026
+//      Remove HLT-specific interfaces related to ROB requests and partial events.
 //
 //===================================================================
 
@@ -135,72 +137,9 @@ StatusCode ROBDataProviderSvc::initialize() {
 }
 
 
-/**
-    - in offline only check that given ROB ids are in the map, issue an
-      error if not
-*/
-
-void ROBDataProviderSvc::addROBData(const EventContext& context, const std::vector<uint32_t>& robIds, const std::string_view callerName) {
-    EventCache* cache = m_eventsCache.get( context );
-
-   // Copy missing ROB ids to vector with pthread allocator
-   ATH_MSG_DEBUG(" ---> Number of ROB Id s requested : " << robIds.size() << ", Caller Name = " << callerName);
-   // for offline running all requested ROBs should be found in cache
-   // if not issue error
-   for (uint32_t id : robIds) {
-      // mask off the module ID for L2 and EF result for Run 1 data
-      if ( (eformat::helper::SourceIdentifier(id).module_id() != 0) &&
-	   (eformat::helper::SourceIdentifier(id).subdetector_id() == eformat::TDAQ_LVL2) ) {
-	 id = eformat::helper::SourceIdentifier(eformat::helper::SourceIdentifier(id).subdetector_id(),0).code();
-	 // TB if it is inconsistent we should not continue like this?
-	 if ( !m_maskL2EFModuleID ) {
-	   ATH_MSG_ERROR("Inconsistent flag for masking L2/EF module IDs");
-	   m_maskL2EFModuleID=true;
-	 }
-      } else if ( (eformat::helper::SourceIdentifier(id).module_id() != 0) && 
-		  (eformat::helper::SourceIdentifier(id).subdetector_id() == eformat::TDAQ_EVENT_FILTER) &&
-		  ( m_maskL2EFModuleID ) ) {
-	 id = eformat::helper::SourceIdentifier(eformat::helper::SourceIdentifier(id).subdetector_id(),0).code();
-      }
-      ROBMAP& robmap( cache->robmap );
-      ROBMAP::iterator map_it = robmap.find(id) ;
-      if (map_it != robmap.end()) {
-         ATH_MSG_DEBUG(" ---> Found   ROB Id : 0x" << MSG::hex << (*map_it).second->source_id()
-	         << MSG::dec << " in cache");
-      } else {
-         ATH_MSG_DEBUG(" ---> ROB Id : 0x" << MSG::hex << id
-	         << MSG::dec << " not found in cache for running mode OFFLINE (method addROBData),");
-	 ATH_MSG_DEBUG("      Lvl1 id  = " << cache->currentLvl1ID);
-    }
-  }
-  return;
-}
-/** - this is the online method to add the LVL1/LVL2 result
-    - this version of ROBDataProviderSvc does not support it
-    - this version is for offline use only
-*/
-void ROBDataProviderSvc::setNextEvent(const EventContext& /*context*/, const std::vector<ROBF>& result) { 
-  // clear the old map
-  // TB honestly, why do any action if this is FATAL mistake
-  //  robmapClear( m_eventsCache.get(context)->robmap );
-
-   // This method should never be used by offline
-   ATH_MSG_FATAL(" +-----------------------------------------------------------------+ ");
-   ATH_MSG_FATAL(" | The method ROBDataProviderSvc::setNextEvent(const ROBF* result) | ");
-   ATH_MSG_FATAL(" |    is not implemented for this version of ROBDataProviderSvc    | ");
-   ATH_MSG_FATAL(" |      Use the version from the HLT repository if you need it.    | ");
-   ATH_MSG_FATAL(" +-----------------------------------------------------------------+ ");
-   ATH_MSG_FATAL(" ---> The " << result.size() << " ROB fragments in the call will not be used.");
-   return;
-}
-
-
-
-
 /** - add a new Raw event
     - rebuild the map
 */
-
 void ROBDataProviderSvc::setNextEvent( const EventContext& context, const RawEvent* re ) {
   EventCache* cache = m_eventsCache.get( context );
   
