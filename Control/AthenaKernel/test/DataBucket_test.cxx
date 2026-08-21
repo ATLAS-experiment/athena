@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #undef NDEBUG
@@ -12,6 +12,7 @@
 #include "CxxUtils/checker_macros.h"
 #include <atomic>
 #include <iostream>
+#include <print>
 #include <cassert>
 #include <map>
 
@@ -21,10 +22,10 @@ CLASS_DEF( std::vector<int> ,             22592129 , 1 )
 
 /*FIXME can get it from TestTools circ package dep */
 #define SGASSERTERROR( FALSEEXPR )   \
-    std::cerr << "Now we expect to see an error message:" << std::endl \
-              << "----Error Message Starts--->>" << std::endl; \
-    assert(!FALSEEXPR); \
-    std::cerr<< "<<---Error Message Ends-------" << std::endl
+    std::println ("Now we expect to see an error message:\n"            \
+                  "----Error Message Starts--->>");                     \
+    assert(!FALSEEXPR);                                                 \
+    std::println ("<<---Error Message Ends-------");
 
 
 #include "GaudiKernel/DataObject.h"
@@ -157,7 +158,7 @@ class XLock : public ILockable
 {
 public:
   XLock() : m_locked (false) {}
-  virtual void lock() override { m_locked = true; std::cout << "lock\n"; }
+  virtual void lock() override { m_locked = true; std::println ("lock"); }
   bool m_locked;
 };
 CLASS_DEF(XLock, 8114, 1)
@@ -178,7 +179,7 @@ public:
 // Test copying conversion.
 void test2()
 {
-  std::cout << "test2\n";
+  std::println ("test2");
   TestRegisterTransient trt;
 
   X1* x1 = new X1;
@@ -214,7 +215,7 @@ void test2()
 void test3()
 {
   using namespace SG;
-  std::cout << "test3\n";
+  std::println ("test3");
 
   X1* x1 = new X1;
   XLock* xlock = new XLock;
@@ -243,36 +244,37 @@ int main () {
   SG::DataBucket<int> intBucket(0);
   SG::DataBucket<const int*> pintBucket(0);
   SG::DataBucket<vector<int> > vintBucket(0);
-  std::cerr << "int has_classID " <<  intBucket.clID() << " version "
-            << ClassID_traits<int>::s_version << " and "
-            << (ClassID_traits<int>::s_isDataObject ? "does" : "does not")
-            << " inherit from DataObject" <<std::endl;
-  std::cerr << "const int* has_classID " <<  pintBucket.clID() <<std::endl;
+  int vers = ClassID_traits<int>::s_version;
+  std::println ("int has_classID {} version {} and {} inherit from DataObject",
+                intBucket.clID(),
+                vers,
+                (ClassID_traits<int>::s_isDataObject ? "does" : "does not"));
+  std::println ("const int* has_classID {}",  pintBucket.clID());
   assert(intBucket.clID() == pintBucket.clID());
   assert(intBucket.tinfo() == typeid(int));
 
-  std::cerr << "vector<int> has_classID " <<  vintBucket.clID() <<std::endl;
+  std::println ("vector<int> has_classID {}",  vintBucket.clID());
   SG::DataBucket<GaudiDataObj> gdobjBucket(0);
-  std::cerr << "GaudiDataObj has_classID " <<  gdobjBucket.clID() << " and "
-            << (ClassID_traits<GaudiDataObj>::s_isDataObject ? "does" : "does not")
-            << " inherit from DataObject" <<std::endl;
+  std::println ("GaudiDataObj has_classID {} and {} inherit from DataObject",
+                gdobjBucket.clID(),
+                (ClassID_traits<GaudiDataObj>::s_isDataObject ? "does" : "does not"));
   assert(gdobjBucket.clID() == ClassID_traits<GaudiDataObj>::ID());
   assert(ClassID_traits<GaudiDataObj>::s_isDataObject);
 
   SG::DataBucket<MyDataObj> dobjBucket(0);
-  std::cerr << "MyDataObj has_classID " <<  dobjBucket.clID() << " and "
-            << (ClassID_traits<MyDataObj>::s_isDataObject ? "does" : "does not")
-            << " inherit from DataObject" <<std::endl;
+  std::println ("MyDataObj has_classID {} and {} inherit from DataObject",
+                dobjBucket.clID(),
+                (ClassID_traits<MyDataObj>::s_isDataObject ? "does" : "does not"));
   assert(dobjBucket.clID() == ClassID_traits<MyDataObj>::ID());
   assert(!ClassID_traits<MyDataObj>::s_isDataObject);
 
   SG::DataBucket<AbstractDataObj> absdobjBucket(0);
-  std::cerr << "AbstractDataObj has_classID " <<  absdobjBucket.clID() <<std::endl;
+  std::println ("AbstractDataObj has_classID {}", absdobjBucket.clID());
   assert(absdobjBucket.clID() == ClassID_traits<AbstractDataObj>::ID());
   assert(ClassID_traits<AbstractDataObj>::s_isDataObject);
 
   SG::DataBucket<AbstractType> absBucket(0);
-  std::cerr << "AbstractType has_classID " <<  absBucket.clID() <<std::endl;
+  std::println ("AbstractType has_classID {}", absBucket.clID());
   assert(absBucket.clID() == ClassID_traits<AbstractType>::ID());
   assert(!ClassID_traits<AbstractType>::s_isDataObject);
 
@@ -280,7 +282,7 @@ int main () {
   assert("GaudiDataObj" == ClassID_traits<GaudiDataObj>::typeName());
   if("std::map<int,float>" !=
      ClassID_traits<map<int, float> >::typeName()) {
-    std::cerr << "error checking type name for map<int,float>: ClassID has it as " << ClassID_traits<map<int, float> >::typeName() <<std::endl;
+    std::println (std::cerr, "error checking type name for map<int,float>: ClassID has it as {}", ClassID_traits<map<int, float> >::typeName());
     assert(0);
   }
 
@@ -301,16 +303,16 @@ int main () {
   pRes = SG::Storable_cast<MyDataObj>(pBucket, VERBOSE);
   assert (0 != pRes);
 
-  std::cerr << "Now we expect to see an error message:" << std::endl
-	    << "----Error Message Starts--->>" << std::endl;
+  std::println ("Now we expect to see an error message:\n"
+               "----Error Message Starts--->>");
   pWrong = SG::Storable_cast<WrongType>(pBucket, VERBOSE);
   assert(0 == pWrong);
-  std::cerr<< "<<---Error Message Ends-------" << std::endl;
-  std::cerr << "Now we expect to see an error message:" << std::endl
-	    << "----Error Message Starts--->>" << std::endl;
+  std::println ("<<---Error Message Ends-------");
+  std::println ("Now we expect to see an error message:\n"
+                "----Error Message Starts--->>" );
   pWrong = SG::Storable_cast<WrongType>((DataObject*)0);
   assert(0 == pWrong);
-  std::cerr<< "<<---Error Message Ends-------" << std::endl;
+  std::println ("<<---Error Message Ends-------");
   delete pBucket;
 
   GaudiDataObj* pGDO = new GaudiDataObj(2);
@@ -429,7 +431,7 @@ int main () {
   test2();
   test3();
 
-  std::cerr << "*** DataBucket_test OK ***" <<std::endl;
+  std::println ("*** DataBucket_test OK ***");
   return 0;
 
 }

@@ -16,9 +16,8 @@
 #include <algorithm>
 #include <atomic>
 #include <cassert>
-#include <iostream>
+#include <print>
 
-using std::cout;
 struct AA
 {
   AA (int the_x=0): x(the_x) {}
@@ -108,7 +107,7 @@ SG_ADD_BASE(K, AA);
 
 int test1()
 {
-  std::cout << "test1\n";
+  std::println ("test1");
 
   typedef SG::BaseInfo<CC> CC_C;
   typedef SG::BaseInfo<R>  R_C;
@@ -319,7 +318,7 @@ SG_ADD_COPY_CONVERSION(K, KCopyConversion);
 // Test copying conversions.
 void test2()
 {
-  std::cout << "test2\n";
+  std::println ("test2");
   const SG::BaseInfoBase& bib = SG::BaseInfo<K>::baseinfo();
   std::vector<CLID> clids = bib.get_copy_conversions();
   std::vector<CLID> exp1{
@@ -353,7 +352,7 @@ CLASS_DEF (DTest, 1121, 1)
 
 void test_destroy()
 {
-  std::cout << "test_destroy\n";
+  std::println ("test_destroy");
 
   DTest* d = new DTest;
   assert (DTest::s_count == 1);

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file AthenaKernel/test/ILockableTool_test.cxx
@@ -11,32 +11,32 @@
 
 #undef NDEBUG
 #include "AthenaKernel/ILockableTool.h"
-#include <iostream>
+#include <print>
 #include <cassert>
 
 
 class TestTool : public ILockableTool
 {
 public:
-  virtual void lock_shared() const override { std::cout << "lock\n"; }
-  virtual void unlock_shared() const override  { std::cout << "unlock\n"; }
+  virtual void lock_shared() const override { std::println ("lock"); }
+  virtual void unlock_shared() const override  { std::println ("unlock"); }
 };
 
 
 void test1()
 {
-  std::cout << "test1\n";
+  std::println ("test1");
   TestTool tool;
   {
     Athena::ToolLock lock (tool);
   }
-  std::cout << "test1 exiting\n";
+  std::println ("test1 exiting");
 }
 
 
 int main()
 {
-  std::cout << "AthenaKernel/ILockableTool_test\n";
+  std::println ("AthenaKernel/ILockableTool_test");
   test1();
   return 0;
 }

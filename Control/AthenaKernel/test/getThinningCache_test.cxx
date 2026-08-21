@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file AthenaKernel/test/getThinningCache_test.cxx
@@ -17,13 +17,13 @@
 #include "GaudiKernel/EventContext.h"
 #include "GaudiKernel/ThreadLocalContext.h"
 #include <cassert>
-#include <iostream>
+#include <print>
 #include <stdexcept>
 
 
 void test1()
 {
-  std::cout << "test1\n";
+  std::println ("test1");
 
   EventContext ctx;
 
@@ -78,7 +78,7 @@ void test1()
 
 int main()
 {
-  std::cout << "AthenaKernel/getThinningCache_test\n";
+  std::println ("AthenaKernel/getThinningCache_test");
   test1();
   return 0;
 }

@@ -1,9 +1,6 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
-/*
- */
-// $Id$
 /**
  * @file AthenaKernel/test/RecyclableDataObject_test.cxx
  * @author scott snyder <snyder@bnl.gov>
@@ -16,7 +13,7 @@
 #include "AthenaKernel/RecyclableDataObject.h"
 #include "GaudiKernel/DataObject.h"
 #include <atomic>
-#include <iostream>
+#include <print>
 #include <cassert>
 
 
@@ -47,7 +44,7 @@ void MyDataObj::recycle()
 
 void test1()
 {
-  std::cout << "test1\n"; 
+  std::println ("test1");
   {
     Athena::RecyclableDataQueue<MyDataObj> queue;
 
@@ -80,7 +77,7 @@ void test1()
 
 int main()
 {
-  std::cout << "RecyclableDataObject_test\n";
+  std::println ("RecyclableDataObject_test");
   test1();
   return 0;
 }

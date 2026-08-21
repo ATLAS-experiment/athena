@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file  AthenaKernel/test/Bases_test.cxx
@@ -16,7 +16,7 @@
 #include <typeinfo>
 #include <string>
 #include <vector>
-#include <iostream>
+#include <print>
 #include <cassert>
 
 
@@ -97,7 +97,7 @@ public:
 
 void test1()
 {
-  std::cout << "test1\n";
+  std::println ("test1");
 
   std::vector<std::string> names;
 
@@ -158,15 +158,15 @@ bool derivesFrom (const std::type_info& ti)
 
 void test2()
 {
-  std::cout << "test2\n";
-  std::cout << derivesFrom<C> (typeid(A)) << "\n";
-  std::cout << derivesFrom<C> (typeid(D)) << "\n";
+  std::println ("test2");
+  std::println ("{}", derivesFrom<C> (typeid(A)));
+  std::println ("{}", derivesFrom<C> (typeid(D)));
 }
 
 
 int main()
 {
-  std::cout << "AthenaKernel/Bases_test\n";
+  std::println ("AthenaKernel/Bases_test");
   test1();
   test2();
   return 0;

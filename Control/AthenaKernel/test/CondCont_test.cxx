@@ -23,6 +23,7 @@
 #include <thread>
 #include <cassert>
 #include <iostream>
+#include <print>
 #include <atomic>
 
 
@@ -243,18 +244,23 @@ void fillit (CondCont<T>& cc_rl, CondCont<T>& cc_ts, std::vector<T*> & ptrs, con
   std::ostringstream ss3;
   cc_rl.list (ss3);
   std::ostringstream exp3;
-  exp3 << "id:  ( 'UNKNOWN_CLASS:cls' , 'key' )   proxy: 0 [2] entries\n"
-       << "{[10,l:15] - [10,l:20]} " << ptrs[0] << "\n"
-       << "{[20,l:17] - [2147483647,l:2147483647]} " << ptrs[1] << "\n";
-  //std::cout << "ss3: " << ss3.str() << "\nexp3: " << exp3.str() << "\n";
+  std::println (exp3,
+                "id:  ( 'UNKNOWN_CLASS:cls' , 'key' )   proxy: 0 [2] entries\n"
+                "{{[10,l:15] - [10,l:20]}} {}\n"
+                "{{[20,l:17] - [2147483647,l:2147483647]}} {}",
+                static_cast<void*>(ptrs[0]),
+                static_cast<void*>(ptrs[1]));
+  //std::println ("ss3: {}\nexp3: {}", ss3.str(), exp3.str());
   assert (ss3.str() == exp3.str());
 
   std::ostringstream ss4;
   cc_ts.list (ss4);
   std::ostringstream exp4;
-  exp4 << "id:  ( 'UNKNOWN_CLASS:cls' , 'key' )   proxy: 0 [1] entries\n"
-       << "{[t:123] - [t:456]} " << ptrs[2] << "\n";
-  //std::cout << "ss4: " << ss4.str() << "\nexp4: " << exp4.str() << "\n";
+  std::println (exp4,
+                "id:  ( 'UNKNOWN_CLASS:cls' , 'key' )   proxy: 0 [1] entries\n"
+                "{{[t:123] - [t:456]}} {}",
+                static_cast<void*>(ptrs[2]) );
+  //std::println ("ss4: {}\nexp4: ", ss4.str(), exp4.str());
   assert (ss4.str() == exp4.str());
 
   auto t4 = std::make_unique<T> (4);
@@ -326,7 +332,7 @@ std::string dump_cc (const CondCont<B>& cc)
 
 void test1 (TestRCUSvc& rcusvc)
 {
-  std::cout << "test1\n";
+  std::println ("test1");
 
   SG::DataProxy proxy;
   DataObjID id ("cls", "key");
@@ -435,7 +441,7 @@ void test1 (TestRCUSvc& rcusvc)
 
 void test2 (TestRCUSvc& rcusvc)
 {
-  std::cout << "test2\n";
+  std::println ("test2");
 
   SG::DataProxy proxy;
   DataObjID id ("cls", "key");
@@ -466,7 +472,7 @@ void test2 (TestRCUSvc& rcusvc)
 // Test an extensible container.
 void test3 (TestRCUSvc& rcusvc)
 {
-  std::cout << "test3\n";
+  std::println ("test3");
 
   DataObjID id ("cls", "key");
   CondCont<B> cc (rcusvc, id);
@@ -501,7 +507,7 @@ void test3 (TestRCUSvc& rcusvc)
 // Testing overlapping keys.
 void test4 (TestRCUSvc& rcusvc)
 {
-  std::cout << "test4\n";
+  std::println ("test4");
 
   SG::DataProxy proxy;
   DataObjID id ("cls", "key");
@@ -619,7 +625,7 @@ void test4 (TestRCUSvc& rcusvc)
 // Testing mixed keys.
 void test5 (TestRCUSvc& rcusvc)
 {
-  std::cout << "test5\n";
+  std::println ("test5");
   DataObjID id ("cls", "key");
   const EventContext ctx(0, 0);
 
@@ -669,14 +675,21 @@ void test5 (TestRCUSvc& rcusvc)
   std::ostringstream ss1;
   cc.list (ss1);
   std::ostringstream exp1;
-  exp1 << "id:  ( 'UNKNOWN_CLASS:cls' , 'key' )   proxy: 0 [3] run+lbn entries\n";
-  exp1 << "{[1,t:1,l:10] - [1,t:2,l:20]} " << bptrs[0] << "\n";
-  exp1 << "{[1,t:2,l:10] - [1,t:4.500000000,l:20]} " << bptrs[1] << "\n";
-  exp1 << "{[1,t:25,l:30] - [1,t:30,l:40]} " << bptrs[2] << "\n";
-  exp1 << "{[2,t:100,l:10] - [2,t:103.500000000,l:20]} " << bptrs[3] << "\n";
-  exp1 << "{[2,t:103.500000000,l:10] - [2,t:110,l:20]} " << bptrs[4] << "\n";
-  exp1 << "{[2,t:120,l:10] - [2,t:130,l:20]} " << bptrs[5] << "\n";
-  //std::cout << "ss1: " << ss1.str() << "\nexp1: " << exp1.str() << "\n";
+  std::println (exp1,
+                "id:  ( 'UNKNOWN_CLASS:cls' , 'key' )   proxy: 0 [3] run+lbn entries\n"
+                "{{[1,t:1,l:10] - [1,t:2,l:20]}} {}\n"
+                "{{[1,t:2,l:10] - [1,t:4.500000000,l:20]}} {}\n"
+                "{{[1,t:25,l:30] - [1,t:30,l:40]}} {}\n"
+                "{{[2,t:100,l:10] - [2,t:103.500000000,l:20]}} {}\n"
+                "{{[2,t:103.500000000,l:10] - [2,t:110,l:20]}} {}\n"
+                "{{[2,t:120,l:10] - [2,t:130,l:20]}} {}",
+                static_cast<void*>(bptrs[0]),
+                static_cast<void*>(bptrs[1]),
+                static_cast<void*>(bptrs[2]),
+                static_cast<void*>(bptrs[3]),
+                static_cast<void*>(bptrs[4]),
+                static_cast<void*>(bptrs[5]));
+  //std::println ("ss1: {}\nexp1: {}, ss1.str(), exp1.str());
   assert (ss1.str() == exp1.str());
   assert (cc.entries() == 6);
 
@@ -797,17 +810,27 @@ void test5 (TestRCUSvc& rcusvc)
   std::ostringstream ss2;
   cc.list (ss2);
   std::ostringstream exp2;
-  exp2 << "id:  ( 'UNKNOWN_CLASS:cls' , 'key' )   proxy: 0 [4] run+lbn entries\n";
-  exp2 << "{[1,t:1,l:10] - [1,t:2,l:20]} " << bptrs[0] << "\n";
-  exp2 << "{[1,t:2,l:10] - [1,t:4.500000000,l:20]} " << bptrs[1] << "\n";
-  exp2 << "{[1,t:25,l:30] - [1,t:30,l:40]} " << bptrs[2] << "\n";
-  exp2 << "{[2,t:100,l:10] - [2,t:103.500000000,l:20]} " << bptrs[3] << "\n";
-  exp2 << "{[2,t:103.500000000,l:10] - [2,t:110,l:20]} " << bptrs[4] << "\n";
-  exp2 << "{[2,t:120,l:10] - [2,t:130,l:20]} " << bptrs[5] << "\n";
-  exp2 << "{[2,t:130,l:10] - [2,t:135,l:20]} " << bptrs[7] << "\n";
-  exp2 << "{[20,t:120,l:10] - [20,t:130,l:40]} " << bptrs[8] << "\n";
+  std::println (exp2,
+                "id:  ( 'UNKNOWN_CLASS:cls' , 'key' )   proxy: 0 [4] run+lbn entries\n"
+                "{{[1,t:1,l:10] - [1,t:2,l:20]}} {}\n"
+                "{{[1,t:2,l:10] - [1,t:4.500000000,l:20]}} {}\n"
+                "{{[1,t:25,l:30] - [1,t:30,l:40]}} {}\n"
+                "{{[2,t:100,l:10] - [2,t:103.500000000,l:20]}} {}\n"
+                "{{[2,t:103.500000000,l:10] - [2,t:110,l:20]}} {}\n"
+                "{{[2,t:120,l:10] - [2,t:130,l:20]}} {}\n"
+                "{{[2,t:130,l:10] - [2,t:135,l:20]}} {}\n"
+                "{{[20,t:120,l:10] - [20,t:130,l:40]}} {}",
+                static_cast<void*>(bptrs[0]),
+                static_cast<void*>(bptrs[1]),
+                static_cast<void*>(bptrs[2]),
+                static_cast<void*>(bptrs[3]),
+                static_cast<void*>(bptrs[4]),
+                static_cast<void*>(bptrs[5]),
+                static_cast<void*>(bptrs[7]),
+                static_cast<void*>(bptrs[8]));
+
   if (ss2.str() != exp2.str()) {
-    std::cout << "ss2: " << ss2.str() << "\nexp2: " << exp2.str() << "\n";
+    std::println ("ss2: {}\nexp2: {}", ss2.str(), exp2.str());
     std::cout.flush();
     std::abort();
   }
@@ -826,14 +849,18 @@ void test5 (TestRCUSvc& rcusvc)
   std::ostringstream ss3;
   cc.list (ss3);
   std::ostringstream exp3;
-  exp3 << "id:  ( 'UNKNOWN_CLASS:cls' , 'key' )   proxy: 0 [4] run+lbn entries\n";
-  exp3 << "{[1,t:1,l:10] - [1,t:2,l:20]} " << bptrs[0] << "\n";
-  exp3 << "{[1,t:2,l:10] - [1,t:4.500000000,l:20]} " << bptrs[1] << "\n";
-  exp3 << "{[1,t:25,l:30] - [1,t:30,l:40]} " << bptrs[2] << "\n";
-  exp3 << "{[2,t:100,l:10] - [2,t:103.500000000,l:20]} (empty tsmap)\n";
-  exp3 << "{[20,t:120,l:10] - [20,t:130,l:40]} (empty tsmap)\n";
+  std::println (exp3,
+                "id:  ( 'UNKNOWN_CLASS:cls' , 'key' )   proxy: 0 [4] run+lbn entries\n"
+                "{{[1,t:1,l:10] - [1,t:2,l:20]}} {}\n"
+                "{{[1,t:2,l:10] - [1,t:4.500000000,l:20]}} {}\n"
+                "{{[1,t:25,l:30] - [1,t:30,l:40]}} {}\n"
+                "{{[2,t:100,l:10] - [2,t:103.500000000,l:20]}} (empty tsmap)\n"
+                "{{[20,t:120,l:10] - [20,t:130,l:40]}} (empty tsmap)",
+                static_cast<void*>(bptrs[0]),
+                static_cast<void*>(bptrs[1]),
+                static_cast<void*>(bptrs[2]));
   if (ss3.str() != exp3.str()) {
-    std::cout << "ss3: " << ss3.str() << "\nexp3: " << exp3.str() << "\n";
+    std::println ("ss3: {}\nexp3: ", ss3.str(), exp3.str());
     std::cout.flush();
     std::abort();
   }
@@ -847,7 +874,7 @@ void test5 (TestRCUSvc& rcusvc)
 // Testing mixed keys with derivation.
 void test6 (TestRCUSvc& rcusvc)
 {
-  std::cout << "test6\n";
+  std::println ("test6");
   SG::DataProxy proxy;
   DataObjID id ("cls", "key");
   const EventContext ctx(0,0);
@@ -922,7 +949,7 @@ void test6 (TestRCUSvc& rcusvc)
 // Testing dependency handling
 void test7 (TestRCUSvc& rcusvc)
 {
-  std::cout << "test7\n";
+  std::println ("test7");
   SG::DataProxy proxy;
   DataObjID id ("cls", "key");
   CondCont<B> cc1 (rcusvc, id, &proxy);
@@ -1146,7 +1173,7 @@ void testThread_iter (TestRCUSvc& rcusvc)
 
 void testThread (TestRCUSvc& rcusvc)
 {
-  std::cout << "testThread\n";
+  std::println ("testThread");
 
   for (int i=0; i < 10; i++) {
     testThread_iter (rcusvc);
@@ -1265,7 +1292,6 @@ void testThread_MixedIterator::operator()()
         {
           std::cerr << "testThread_MixedIterator: Bad payload! " <<
             obj->m_x << " r " << r << "\n";
-          std::cerr << "  rvec\n";
           for (const EventIDRange& rr : rvec) {
             std::cerr << "    " << rr << "\n";
           }
@@ -1368,7 +1394,7 @@ void testThreadMixed_iter (TestRCUSvc& rcusvc)
 
 void testThreadMixed (TestRCUSvc& rcusvc)
 {
-  std::cout << "testThreadMixed\n";
+  std::println ("testThreadMixed");
 
   for (int i=0; i < 10; i++) {
     testThreadMixed_iter (rcusvc);

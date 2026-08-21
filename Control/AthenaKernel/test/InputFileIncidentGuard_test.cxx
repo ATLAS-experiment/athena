@@ -28,6 +28,7 @@
 #include <algorithm>
 #include <cassert>
 #include <iostream>
+#include <print>
 #include <optional>
 #include <stdexcept>
 #include <string>
@@ -85,7 +86,7 @@ public:
 //  Test 1: Basic pairing — Begin on construction, End on destruction
 // ========================================================================
 void test_basic_pairing(IIncidentSvc& svc, RecordingListener& listener) {
-   std::cerr << "test_basic_pairing... ";
+   std::println ("test_basic_pairing... ");
    listener.clear();
    {
       auto guard = InputFileIncidentGuard::begin(svc, "Selector", "file1.pool", "guid-1");
@@ -98,14 +99,14 @@ void test_basic_pairing(IIncidentSvc& svc, RecordingListener& listener) {
    assert(listener.allPaired());
    assert(listener.log[0].fileGuid == "guid-1");
    assert(listener.log[1].fileGuid == "guid-1");
-   std::cerr << "OK\n";
+   std::println ("OK");
 }
 
 // ========================================================================
 //  Test 2: optional::reset() fires EndInputFile
 // ========================================================================
 void test_optional_reset(IIncidentSvc& svc, RecordingListener& listener) {
-   std::cerr << "test_optional_reset... ";
+   std::println ("test_optional_reset... ");
    listener.clear();
    std::optional<InputFileIncidentGuard> guard;
 
@@ -116,7 +117,7 @@ void test_optional_reset(IIncidentSvc& svc, RecordingListener& listener) {
    guard.reset();
    assert(listener.count(IncidentType::EndInputFile) == 1);
    assert(listener.allPaired());
-   std::cerr << "OK\n";
+   std::println ("OK");
 }
 
 // ========================================================================
@@ -133,7 +134,7 @@ void test_optional_reset(IIncidentSvc& svc, RecordingListener& listener) {
 //  reset-then-begin (see test 3b below).
 // ========================================================================
 void test_optional_reassign(IIncidentSvc& svc, RecordingListener& listener) {
-   std::cerr << "test_optional_reassign... ";
+   std::println ("test_optional_reassign... ");
    listener.clear();
    std::optional<InputFileIncidentGuard> guard;
 
@@ -159,7 +160,7 @@ void test_optional_reassign(IIncidentSvc& svc, RecordingListener& listener) {
    // Both files paired (2 Begin, 2 End)
    assert(listener.count(IncidentType::BeginInputFile) == 2);
    assert(listener.count(IncidentType::EndInputFile) == 2);
-   std::cerr << "OK\n";
+   std::println ("OK");
 }
 
 // ========================================================================
@@ -168,7 +169,7 @@ void test_optional_reassign(IIncidentSvc& svc, RecordingListener& listener) {
 //  (e.g. MetaDataSvc) need End before Begin.
 // ========================================================================
 void test_explicit_reset_then_begin(IIncidentSvc& svc, RecordingListener& listener) {
-   std::cerr << "test_explicit_reset_then_begin... ";
+   std::println ("test_explicit_reset_then_begin... ");
    listener.clear();
    std::optional<InputFileIncidentGuard> guard;
 
@@ -190,14 +191,14 @@ void test_explicit_reset_then_begin(IIncidentSvc& svc, RecordingListener& listen
    assert(listener.count(IncidentType::BeginInputFile) == 2);
    assert(listener.count(IncidentType::EndInputFile) == 2);
    assert(listener.allPaired());
-   std::cerr << "OK\n";
+   std::println ("OK");
 }
 
 // ========================================================================
 //  Test 3c: transition — same as 3b but in one call
 // ========================================================================
 void test_begin_replace(IIncidentSvc& svc, RecordingListener& listener) {
-   std::cerr << "test_begin_replace... ";
+   std::println ("test_begin_replace... ");
    listener.clear();
    std::optional<InputFileIncidentGuard> guard;
 
@@ -216,14 +217,14 @@ void test_begin_replace(IIncidentSvc& svc, RecordingListener& listener) {
 
    guard.reset();
    assert(listener.allPaired());
-   std::cerr << "OK\n";
+   std::println ("OK");
 }
 
 // ========================================================================
 //  Test 4: Move disarms the source — only the destination fires End
 // ========================================================================
 void test_move_disarms(IIncidentSvc& svc, RecordingListener& listener) {
-   std::cerr << "test_move_disarms... ";
+   std::println ("test_move_disarms... ");
    listener.clear();
    {
       auto guard1 = InputFileIncidentGuard::begin(svc, "Sel", "file.pool", "guid-M");
@@ -235,14 +236,14 @@ void test_move_disarms(IIncidentSvc& svc, RecordingListener& listener) {
    // Both destroyed, but only guard2 should have fired End
    assert(listener.count(IncidentType::EndInputFile) == 1);
    assert(listener.allPaired());
-   std::cerr << "OK\n";
+   std::println ("OK");
 }
 
 // ========================================================================
 //  Test 5: Exception safety — End fires even when exception is thrown
 // ========================================================================
 void test_exception_safety(IIncidentSvc& svc, RecordingListener& listener) {
-   std::cerr << "test_exception_safety... ";
+   std::println ("test_exception_safety... ");
    listener.clear();
    try {
       auto guard = InputFileIncidentGuard::begin(svc, "Sel", "file.pool", "guid-E");
@@ -254,14 +255,14 @@ void test_exception_safety(IIncidentSvc& svc, RecordingListener& listener) {
    // End must have fired during stack unwinding
    assert(listener.count(IncidentType::EndInputFile) == 1);
    assert(listener.allPaired());
-   std::cerr << "OK\n";
+   std::println ("OK");
 }
 
 // ========================================================================
 //  Test 5b: Custom endFileName (eventless files)
 // ========================================================================
 void test_custom_end_filename(IIncidentSvc& svc, RecordingListener& listener) {
-   std::cerr << "test_custom_end_filename... ";
+   std::println ("test_custom_end_filename... ");
    listener.clear();
    {
       auto guard = InputFileIncidentGuard::begin(svc, "Sel",
@@ -275,14 +276,14 @@ void test_custom_end_filename(IIncidentSvc& svc, RecordingListener& listener) {
    assert(listener.log[1].type == IncidentType::EndInputFile);
    assert(listener.log[1].fileName == "eventless:myfile.pool");
    assert(listener.allPaired());
-   std::cerr << "OK\n";
+   std::println ("OK");
 }
 
 // ========================================================================
 //  Test 5c: Custom incident types (e.g. MemFile)
 // ========================================================================
 void test_custom_incident_types(IIncidentSvc& svc, RecordingListener& listener) {
-   std::cerr << "test_custom_incident_types... ";
+   std::println ("test_custom_incident_types... ");
    listener.clear();
    {
       auto guard = InputFileIncidentGuard::begin(svc, "SharedIO",
@@ -297,14 +298,14 @@ void test_custom_incident_types(IIncidentSvc& svc, RecordingListener& listener) 
    assert(listener.log[1].type == "EndInputMemFile");
    assert(listener.log[1].fileName == "SHM[NUM=1]");
    assert(listener.allPaired());
-   std::cerr << "OK\n";
+   std::println ("OK");
 }
 
 // ========================================================================
 //  Test 6: Double reset is safe — resetting empty optional is a no-op
 // ========================================================================
 void test_double_reset_safe(IIncidentSvc& svc, RecordingListener& listener) {
-   std::cerr << "test_double_reset_safe... ";
+   std::println ("test_double_reset_safe... ");
    listener.clear();
    std::optional<InputFileIncidentGuard> guard;
 
@@ -315,14 +316,14 @@ void test_double_reset_safe(IIncidentSvc& svc, RecordingListener& listener) {
    guard.reset();  // should be a no-op
    assert(listener.count(IncidentType::EndInputFile) == 1);  // still 1
    assert(listener.allPaired());
-   std::cerr << "OK\n";
+   std::println ("OK");
 }
 
 // ========================================================================
 //  Test 7: Demonstrates the BUG — manual firing misses End on early return
 // ========================================================================
 void test_manual_firing_bug(IIncidentSvc& svc, RecordingListener& listener) {
-   std::cerr << "test_manual_firing_bug... ";
+   std::println ("test_manual_firing_bug... ");
    listener.clear();
 
    // Manual Begin/End firing: if we return early, End never fires.
@@ -348,14 +349,14 @@ void test_manual_firing_bug(IIncidentSvc& svc, RecordingListener& listener) {
    assert(listener.count(IncidentType::EndInputFile) == 0);  // BUG: unmatched
    assert(!listener.allPaired());
 
-   std::cerr << "OK (bug demonstrated)\n";
+   std::println ("OK (bug demonstrated)");
 }
 
 // ========================================================================
 //  Test 8: Guard FIXES the bug — End fires regardless of early return
 // ========================================================================
 void test_guard_fixes_bug(IIncidentSvc& svc, RecordingListener& listener) {
-   std::cerr << "test_guard_fixes_bug... ";
+   std::println ("test_guard_fixes_bug... ");
    listener.clear();
 
    // Same scenario as test 7, but using the guard.
@@ -381,17 +382,17 @@ void test_guard_fixes_bug(IIncidentSvc& svc, RecordingListener& listener) {
    assert(listener.count(IncidentType::EndInputFile) == 1);  // FIXED: End always fires
    assert(listener.allPaired());
 
-   std::cerr << "OK (bug fixed)\n";
+   std::println ("OK (bug fixed)");
 }
 
 
 // ========================================================================
 int main() {
-   std::cerr << "*** InputFileIncidentGuard_test BEGIN ***\n";
+  std::println ("*** InputFileIncidentGuard_test BEGIN ***");
 
    ISvcLocator* svcloc = nullptr;
    if (!Athena_test::initGaudi("", svcloc)) {
-      std::cerr << "This test cannot be run\n";
+      std::println (std::cerr, "This test cannot be run");
       return 1;
    }
 
@@ -418,6 +419,6 @@ int main() {
 
    incSvc->removeListener(&listener);
 
-   std::cerr << "*** InputFileIncidentGuard_test END — all passed ***\n";
+   std::println ("*** InputFileIncidentGuard_test END — all passed ***");
    return 0;
 }

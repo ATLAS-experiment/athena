@@ -20,6 +20,7 @@
 #include <string.h>
 #include <stdio.h>
 #include <unistd.h>
+#include <print>
 
 
 template <class NUM>
@@ -43,7 +44,7 @@ void testunits()
 
 void test1()
 {
-  std::cout << "test1\n";
+  std::println ("test1");
   testunits<float>();
   testunits<double>();
 }
@@ -51,7 +52,7 @@ void test1()
 
 void divcheck()
 {
-  std::cout << "divcheck\n";
+  std::println ("divcheck");
   bool fail = false;
   pid_t pid = getpid();
   char cmd[128];

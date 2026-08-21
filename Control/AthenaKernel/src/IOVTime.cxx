@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /*****************************************************************************
@@ -155,15 +155,15 @@ IOVTime::isValid() const noexcept {
 
 IOVTime::operator std::string () const {
   std::ostringstream os;
-  os << "[";
+  std::print (os, "[");
   if (isRunEvent()) {
-      os << (m_time>>32) << "," << ( m_time & 0xFFFFFFFF );
+    std::print (os, "{},{}", m_time>>32, m_time & 0xFFFFFFFF);
   }
   if (isTimestamp()) {
-     if (isRunEvent()) os << ":";
-     os << m_timestamp;
+     if (isRunEvent()) std::print (os, ":");
+     std::print (os, "{}", m_timestamp);
   }
-  os << "]";
+  std::print (os, "]");
   return os.str();
 }
 
@@ -194,8 +194,3 @@ std::ostream& operator << (std::ostream& os, const IOVTime& rhs) {
   return os;
 }
   
-// std::ostrstream& operator << (std::ostrstream& os, const IOVTime& rhs) {
-//   os << (int) rhs.m_time << ":  [" << (int) (rhs.m_time>>32) << "," 
-//      << (int) ( rhs.m_time & 0xFFFFFFFF ) << "]";
-//   return os;
-// }

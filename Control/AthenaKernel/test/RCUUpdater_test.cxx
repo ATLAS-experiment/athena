@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration.
  */
 /**
  * @file  AthenaKernel/test/RCUUpdater_test.cxx
@@ -12,7 +12,7 @@
 #include "AthenaKernel/RCUUpdater.h"
 #include <vector>
 #include <cassert>
-#include <iostream>
+#include <print>
 #include <algorithm>
 
 
@@ -55,7 +55,7 @@ public:
 
 void test1()
 {
-  std::cout << "test1\n";
+  std::println ("test1");
 
   Payload::vec_t vec;
   {

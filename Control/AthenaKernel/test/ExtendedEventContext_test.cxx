@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file AthenaKernel/test/ExtendedEventContext_test.cxx
@@ -13,7 +13,7 @@
 #include "AthenaKernel/ExtendedEventContext.h"
 #include "GaudiKernel/EventContext.h"
 #include <cassert>
-#include <iostream>
+#include <print>
 #include <stdexcept>
 #include <memory_resource>
 
@@ -40,7 +40,7 @@ public:
 
 void test1()
 {
-  std::cout << "test1\n";
+  std::println ("test1");
 
   TestMemResource tmr;
 
@@ -62,7 +62,7 @@ void test1()
 
 int main()
 {
-  std::cout << "AthenaKernel/ExtendedEventContext_test\n";
+  std::println ("AthenaKernel/ExtendedEventContext_test");
   test1();
   return 0;
 }

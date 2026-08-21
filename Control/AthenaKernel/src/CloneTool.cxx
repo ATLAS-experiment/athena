@@ -1,11 +1,12 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "AthenaKernel/CloneTool.h"
 
 #include <cassert>
 #include <vector>
+#include <print>
 
 #include "GaudiKernel/IToolSvc.h"
 #include "GaudiKernel/MsgStream.h"
@@ -24,8 +25,9 @@ namespace CloneTool {
     
     const AlgTool* pCloned(dynamic_cast<const AlgTool*>(&cloned));
     if (0 == pCloned) {
-      std::cerr << "CloneTool::FATAL: Could not dcast IAlgTool " 
-		<< cloned.name() << " to an AlgTool" << std::endl;
+      std::println (std::cerr,
+                    "CloneTool::FATAL: Could not dcast IAlgTool {} to an AlgTool",
+                    cloned.name());
       return StatusCode::FAILURE;
     }
 

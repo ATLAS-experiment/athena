@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ATHENAKERNEL_IOVTIME_H
@@ -12,15 +12,16 @@
  *  Hold time as a combination of run and event numbers
  *
  *  @author Charles Leggett
- *  $Id: IOVTime.h,v 1.8 2007-06-14 01:57:23 calaf Exp $
  *
  *
  *****************************************************************************/
 
+#include <compare>
 #include <iosfwd>
 #include <string>
 #include <stdint.h>
 #include <limits>
+#include <format>
 
 class MsgStream;
 class EventIDBase;
@@ -117,12 +118,8 @@ public:
   operator std::string() const;
   operator EventIDBase() const;
 
-  friend bool operator<(const IOVTime& lhs, const IOVTime& rhs) noexcept;
-  friend bool operator>(const IOVTime& lhs, const IOVTime& rhs) noexcept;
+  friend std::strong_ordering operator<=>(const IOVTime& lhs, const IOVTime& rhs) noexcept;
   friend bool operator==(const IOVTime& lhs, const IOVTime& rhs) noexcept;
-  friend bool operator!=(const IOVTime& lhs, const IOVTime& rhs) noexcept;
-  friend bool operator>=(const IOVTime& lhs, const IOVTime& rhs) noexcept;
-  friend bool operator<=(const IOVTime& lhs, const IOVTime& rhs) noexcept;
 
   friend std::ostream& operator<<(std::ostream& os, const IOVTime& rhs);
   friend MsgStream& operator<<(MsgStream& os, const IOVTime& rhs);
@@ -134,18 +131,31 @@ private:
   uint64_t m_timestamp;
 };
 
-inline bool operator<(const IOVTime& lhs, const IOVTime& rhs) noexcept {
-  if (lhs.isTimestamp() && rhs.isTimestamp()) {
-    return lhs.m_timestamp < rhs.m_timestamp;
-  } else {
-    return lhs.m_time < rhs.m_time;
+
+namespace std {
+
+/// A C++20-compatible formatter for IOVTime.
+template <>
+struct formatter<IOVTime>
+  : public formatter<string_view>
+{
+  template <class FmtContext>
+  FmtContext::iterator format (const IOVTime& io, FmtContext& ctx) const
+  {
+    return formatter<string_view>::format (static_cast<std::string>(io), ctx);
   }
-}
-inline bool operator>(const IOVTime& lhs, const IOVTime& rhs) noexcept {
+};
+
+} // namespace std
+
+
+inline
+std::strong_ordering
+operator<=>(const IOVTime& lhs, const IOVTime& rhs) noexcept {
   if (lhs.isTimestamp() && rhs.isTimestamp()) {
-    return lhs.m_timestamp > rhs.m_timestamp;
+    return lhs.m_timestamp <=> rhs.m_timestamp;
   } else {
-    return lhs.m_time > rhs.m_time;
+    return lhs.m_time <=> rhs.m_time;
   }
 }
 inline bool operator==(const IOVTime& lhs, const IOVTime& rhs) noexcept {
@@ -155,22 +165,6 @@ inline bool operator==(const IOVTime& lhs, const IOVTime& rhs) noexcept {
     return lhs.m_time == rhs.m_time;
   }
 }
-inline bool operator!=(const IOVTime& lhs, const IOVTime& rhs) noexcept {
-  return !(lhs == rhs) ;
-}
-inline bool operator>=(const IOVTime& lhs, const IOVTime& rhs) noexcept {
-  return !( lhs < rhs );
-}
-inline bool operator<=(const IOVTime& lhs, const IOVTime& rhs) noexcept {
-  return !( lhs > rhs );
-}
-
-// template < class STR >
-// inline STR& operator << (STR& os, const IOVTime& rhs) {
-//   os << rhs.m_time << ":  [" << (rhs.m_time>>32) << "," 
-//      << ( rhs.m_time & 0xFFFFFFFF ) << "]";
-//   return os;
-// }
 
 #endif
   
