@@ -101,7 +101,6 @@ protected:
 
    /// Filter out empty ROB fragments which are send by the ROS
    Gaudi::Property<bool> m_filterEmptyROB{this, "filterEmptyROB", false, "Filter out empty ROB fragments"};
-   bool m_maskL2EFModuleID = false;    
 
 private:
   static void robmapClear(ROBMAP& toclear);
