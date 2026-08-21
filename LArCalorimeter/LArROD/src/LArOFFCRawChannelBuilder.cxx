@@ -164,12 +164,12 @@ double LArOFFCRawChannelBuilder::computeOFFC(const std::vector<short>& samples,
     // maximum can only be recognised once the following sample is in.
     const int peak = i - 1;
     if (peak + q3Lags.front() >= 0) {
-      const double A = reco[peak];
+      const double A = reco.at(peak);
 
       // Local maximum + amplitude cut on the corrected waveform: a pulse
       // riding on the tail of one already subtracted need not be a local
       // maximum of the raw filter output at all.
-      if (A > m_filterThreshold && A > reco[peak - 1] && A > recoCurrent) {
+      if (A > m_filterThreshold && A > reco.at(peak - 1) && A > recoCurrent) {
 
         auto responseVal = [&](int lag) {
           const int k = lagZero + lag;
@@ -178,7 +178,7 @@ double LArOFFCRawChannelBuilder::computeOFFC(const std::vector<short>& samples,
         // reco[] is final for the peak and everything before it; the sample
         // being filtered is not stored yet, and no later lag can occur here.
         auto recoVal = [&](int lag) {
-          return lag <= 0 ? reco[peak + lag] : recoCurrent;
+          return lag <= 0 ? reco.at(peak + lag) : recoCurrent;
         };
 
         double Q3 = 0.0;
