@@ -2,10 +2,10 @@
   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef HGTDALIGNGENTOOLS_HGTDALIGNDBTOOL_H
-#define HGTDALIGNGENTOOLS_HGTDALIGNDBTOOL_H
+#ifndef HGTD_ALIGNGENTOOLS_HGTDALIGNDBTOOL_H
+#define HGTD_ALIGNGENTOOLS_HGTDALIGNDBTOOL_H
 
-// HGTDAlignDBTool.h
+// HGTD_AlignDBTool.h
 // AlgTool for creating and managing HGTD alignment payloads.
 // Unlike the legacy Inner Detector alignment framework, HGTD alignment
 // constants are represented directly at the detector-module level.
@@ -24,7 +24,7 @@
 #include "AthenaKernel/IAthenaOutputStreamTool.h"
 #include "GaudiKernel/ToolHandle.h"
 #include "CxxUtils/checker_macros.h"
-#include "HGTDAlignGenTools/IHGTDAlignDBTool.h"
+#include "HGTD_AlignGenTools/IHGTD_AlignDBTool.h"
 #include "HGTD_Identifier/HGTD_ID.h"
 #include "Identifier/IdentifierHash.h"
 
@@ -33,18 +33,18 @@ class AlignableTransform;
 class HGTD_DetectorManager;
 class HGTD_ID;
 
-class ATLAS_NOT_THREAD_SAFE HGTDAlignDBTool
+class ATLAS_NOT_THREAD_SAFE HGTD_AlignDBTool
   : public AthAlgTool,
-    virtual public IHGTDAlignDBTool
+    virtual public IHGTD_AlignDBTool
 {
 
 public:
 
-    HGTDAlignDBTool(const std::string& type,
+    HGTD_AlignDBTool(const std::string& type,
                     const std::string& name,
                     const IInterface* parent);
 
-    virtual ~HGTDAlignDBTool() = default;
+    virtual ~HGTD_AlignDBTool() = default;
 
     StatusCode initialize() override;
     StatusCode createDB() override;

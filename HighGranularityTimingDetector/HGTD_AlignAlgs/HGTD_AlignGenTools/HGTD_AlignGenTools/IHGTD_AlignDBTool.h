@@ -2,8 +2,8 @@
   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef HGTDALIGNGENTOOLS_IHGTDALIGNDBTOOL_H
-#define HGTDALIGNGENTOOLS_IHGTDALIGNDBTOOL_H
+#ifndef HGTD_ALIGNGENTOOLS_IHGTD_ALIGNDBTOOL_H
+#define HGTD_ALIGNGENTOOLS_IHGTD_ALIGNDBTOOL_H
 
 // Interface for the HGTD alignment database tool.
 // The interface provides utilities to create, modify, retrieve,
@@ -20,9 +20,9 @@
 class Identifier;
 
 static const InterfaceID
-IID_IHGTDAlignDBTool("IHGTDAlignDBTool",1,0);
+IID_IHGTD_AlignDBTool("IHGTD_AlignDBTool",1,0);
 
-class IHGTDAlignDBTool : virtual public IAlgTool {
+class IHGTD_AlignDBTool : virtual public IAlgTool {
 
 public:
     static const InterfaceID& interfaceID();
@@ -78,9 +78,9 @@ public:
 };
 
 inline const InterfaceID&
-IHGTDAlignDBTool::interfaceID()
+IHGTD_AlignDBTool::interfaceID()
 {
-    return IID_IHGTDAlignDBTool;
+    return IID_IHGTD_AlignDBTool;
 }
 
 #endif

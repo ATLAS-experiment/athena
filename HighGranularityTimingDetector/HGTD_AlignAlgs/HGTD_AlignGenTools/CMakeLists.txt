@@ -1,17 +1,17 @@
 # Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name
-atlas_subdir( HGTDAlignGenTools )
+atlas_subdir( HGTD_AlignGenTools )
 
 # External dependencies
 find_package( CLHEP )
 
 # Library
 atlas_add_library(
-    HGTDAlignGenToolsLib
-    HGTDAlignGenTools/*.h
+    HGTD_AlignGenToolsLib
+    HGTD_AlignGenTools/*.h
     INTERFACE
-    PUBLIC_HEADERS HGTDAlignGenTools
+    PUBLIC_HEADERS HGTD_AlignGenTools
     LINK_LIBRARIES
         AthenaBaseComps
         AthenaKernel
@@ -24,7 +24,7 @@ atlas_add_library(
 
 # Components
 atlas_add_component(
-    HGTDAlignGenTools
+    HGTD_AlignGenTools
     src/*.cxx
     src/components/*.cxx
 
@@ -49,7 +49,7 @@ atlas_add_component(
         DetDescrConditions
 
         HGTD_ReadoutGeometry
-        HGTDAlignGenToolsLib
+        HGTD_AlignGenToolsLib
 
         RegistrationServicesLib
 )

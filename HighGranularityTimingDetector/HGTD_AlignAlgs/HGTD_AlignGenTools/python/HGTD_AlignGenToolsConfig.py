@@ -3,7 +3,7 @@
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 
-def HGTDAlignDBToolCfg(flags, name="HGTDAlignDBTool", **kwargs):
+def HGTD_AlignDBToolCfg(flags, name="HGTD_AlignDBTool", **kwargs):
     """
     Configure the HGTD alignment database tool.
 
@@ -18,7 +18,7 @@ def HGTDAlignDBToolCfg(flags, name="HGTDAlignDBTool", **kwargs):
     kwargs.setdefault("DBRoot", "/HGTD/Align")
 
     acc.setPrivateTools(
-        CompFactory.HGTDAlignDBTool(name, **kwargs)
+        CompFactory.HGTD_AlignDBTool(name, **kwargs)
     )
 
     return acc
