@@ -57,7 +57,7 @@ StatusCode HGTD_AlignCondAlg::execute(const EventContext& ctx) const
           readCdo,
           writeCdo.get()));
 
-  ATH_MSG_INFO("Created GeoAlignmentStore at "
+  ATH_MSG_DEBUG("Created GeoAlignmentStore at "
               << writeCdo.get());
 
   const auto* coll = m_detManager->getDetectorElementCollection();
@@ -77,7 +77,7 @@ StatusCode HGTD_AlignCondAlg::execute(const EventContext& ctx) const
       return StatusCode::FAILURE;
   }
 
-  ATH_MSG_INFO("Recorded new CDO "
+  ATH_MSG_DEBUG("Recorded new CDO "
               << writeHandle.key()
               << " with range "
               << writeHandle.getRange());
