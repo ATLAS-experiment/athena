@@ -15,9 +15,8 @@
 #include "eformat/SourceIdentifier.h"
 
 #include <vector>
-#include <map>
 #include <memory>
-
+#include <unordered_map>
 
 /**
  * ROBDataProviderSvc provides access to individual ROB fragments.
@@ -67,22 +66,20 @@ private:
    /// method to filter ROBs with given Status code
    bool filterRobWithStatus(const ROBF* rob);
 
-   /// map for all the ROB fragments
-   using ROBMAP = std::map<uint32_t, std::unique_ptr<const ROBF>, std::less<uint32_t>>;
-
+   /// ROB fragment cache per slot
    struct EventCache {
       const RawEvent* event = nullptr;
       uint32_t eventStatus = 0;
       uint32_t currentLvl1ID = 0;
-      ROBMAP robmap;
+      std::unordered_map<uint32_t, std::unique_ptr<const ROBF>> robmap;
    };
    SG::SlotSpecificObj<EventCache> m_eventsCache;
 
    /// map of full ROB Source ids and status words to be ignored for the ROB map
-   std::map<uint32_t, std::vector<uint32_t>> m_filterRobMap;
+   std::unordered_map<uint32_t, std::vector<uint32_t>> m_filterRobMap;
 
    /// map of Sub Det Source ids and status words to be ignored for the ROB map
-   std::map<eformat::SubDetector, std::vector<uint32_t>> m_filterSubDetMap;
+   std::unordered_map<eformat::SubDetector, std::vector<uint32_t>> m_filterSubDetMap;
 
    // Properties
    Gaudi::Property<std::vector<std::pair<int, int>>> m_filterRobWithStatus{
