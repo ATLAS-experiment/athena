@@ -635,6 +635,8 @@ class ConfigRunner:
       bsh = BootstrapHelper()
       app = bsh.createApplicationMgr()
       self._app = app
+      #Set trigger defaults here, see ATR-32996
+      app.setProperty("MessageSvcType", "TrigMessageSvc")
       
       # For FILE mode, set ApplicationMgr properties from JSON before configure
       if self.job_options_type == "FILE" and self.properties:
