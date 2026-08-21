@@ -3,18 +3,18 @@
 */
 
 
-#include "HGTDAlignCondAlg.h"
+#include "HGTD_AlignCondAlg.h"
 
 #include "HGTD_ReadoutGeometry/HGTD_DetectorManager.h"
 #include "AthenaKernel/IOVInfiniteRange.h"
 
-HGTDAlignCondAlg::HGTDAlignCondAlg(const std::string& name,
+HGTD_AlignCondAlg::HGTD_AlignCondAlg(const std::string& name,
                                    ISvcLocator* pSvcLocator)
   : AthCondAlgorithm(name, pSvcLocator)
 {
 }
 
-StatusCode HGTDAlignCondAlg::initialize()
+StatusCode HGTD_AlignCondAlg::initialize()
 {
   ATH_MSG_DEBUG("initialize " << name());
 
@@ -26,7 +26,7 @@ StatusCode HGTDAlignCondAlg::initialize()
   return StatusCode::SUCCESS;
 }
 
-StatusCode HGTDAlignCondAlg::execute(const EventContext& ctx) const
+StatusCode HGTD_AlignCondAlg::execute(const EventContext& ctx) const
 {
   ATH_MSG_DEBUG("execute " << name());
 

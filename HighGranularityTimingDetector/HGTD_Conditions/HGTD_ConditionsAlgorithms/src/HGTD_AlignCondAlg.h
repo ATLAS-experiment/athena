@@ -3,7 +3,7 @@
 */
 
 /**
- * @file HGTD_ConditionsAlgorithms/HGTDAlignCondAlg.h
+ * @file HGTD_ConditionsAlgorithms/HGTD_AlignCondAlg.h
  * @author Fatima Bendebba
  * @date June, 2026
  * @brief Conditions algorithm producing the HGTD GeoAlignmentStore.
@@ -21,10 +21,10 @@
 
 class HGTD_DetectorManager;
 
-class HGTDAlignCondAlg : public AthCondAlgorithm {
+class HGTD_AlignCondAlg : public AthCondAlgorithm {
 public:
-  HGTDAlignCondAlg(const std::string& name, ISvcLocator* pSvcLocator);
-  virtual ~HGTDAlignCondAlg() override = default;
+  HGTD_AlignCondAlg(const std::string& name, ISvcLocator* pSvcLocator);
+  virtual ~HGTD_AlignCondAlg() override = default;
 
   virtual StatusCode initialize() override final;
   virtual StatusCode execute(const EventContext& ctx) const override final;
