@@ -14,8 +14,6 @@
 
 #include "PathResolver/PathResolver.h"
 
-#include "CoralKernel/Context.h"
-
 #include "PersistentDataModel/Placement.h"
 #include "PersistentDataModel/Token.h"
 
@@ -30,14 +28,6 @@
 
 #include "StorageSvc/DbType.h"
 #include "StorageSvc/DbPrint.h"
-
-#include "RelationalAccess/ConnectionService.h"
-#include "RelationalAccess/IConnectionServiceConfiguration.h"
-#include "RelationalAccess/IWebCacheControl.h"
-#include "RelationalAccess/IWebCacheInfo.h"
-#include "RelationalAccess/ILookupService.h"
-#include "RelationalAccess/IDatabaseServiceSet.h"
-#include "RelationalAccess/IDatabaseServiceDescription.h"
 
 #include <cstdlib>
 #include <cstring>
@@ -83,34 +73,7 @@ StatusCode PoolSvc::initialize() {
    if (!allGood) {
       return(StatusCode::FAILURE);
    }
-   m_context = &coral::Context::instance();
-   if (m_context == nullptr) {
-      ATH_MSG_FATAL("Failed to access CORAL Context");
-      return(StatusCode::FAILURE);
-   }
-   coral::ConnectionService conSvcH;
-   coral::IConnectionServiceConfiguration& csConfig = conSvcH.configuration();
-   csConfig.setConnectionRetrialPeriod(m_retrialPeriod);
-   csConfig.setConnectionRetrialTimeOut(m_retrialTimeOut);
-   if (m_connClean) {
-      csConfig.enablePoolAutomaticCleanUp();
-      csConfig.setConnectionTimeOut(m_timeOut);
-   } else {
-      csConfig.disablePoolAutomaticCleanUp();
-      csConfig.setConnectionTimeOut(0);
-   }
-   ATH_MSG_INFO("Set connectionsvc retry/timeout/IDLE timeout to "
-	   << m_retrialPeriod
-	   << "/"
-	   << m_retrialTimeOut
-	   << "/"
-	   << m_timeOut
-	   << " seconds with connection cleanup "
-	   << (csConfig.isPoolAutomaticCleanUpEnabled() ? "enabled" : "disabled"));
-   // set Frontier web cache compression level
-   coral::IWebCacheControl& webCache = conSvcH.webCacheControl();
-   webCache.setCompressionLevel(m_frontierComp);
-   ATH_MSG_INFO("Frontier compression level set to " << webCache.compressionLevel());
+ 
    MSG::Level athLvl = msg().level();
    ATH_MSG_DEBUG("OutputLevel is " << (int)athLvl);
    pool::DbPrintLvl::setLevel(athLvl);
@@ -355,15 +318,7 @@ unsigned int PoolSvc::getInputContextMapSize() const {
    std::lock_guard<CallMutex> lock(m_pool_mut);
    return(m_inputContextLabel.size());
 }
-//__________________________________________________________________________
-const coral::Context* PoolSvc::context() const {
-   return(m_context);
-}
-//__________________________________________________________________________
-void PoolSvc::loadComponent(const std::string& compName) {
-   m_context->loadComponent(compName);
-}
-//__________________________________________________________________________
+
 void PoolSvc::setShareMode(bool shareCat) {
    m_shareCat = shareCat;
 }
@@ -803,65 +758,7 @@ StatusCode PoolSvc::setAttribute(const std::string& optName,
    }
    return(StatusCode::SUCCESS);
 }
-//__________________________________________________________________________
-StatusCode PoolSvc::setFrontierCache(const std::string& conn) {
-   std::lock_guard<CallMutex> lock(m_pool_mut);
-   ATH_MSG_VERBOSE("setFrontierCache called for connection:" << conn);
-   // setup the Frontier cache information for the given logical or physical connection string
-   // first determine if the connection is logical (no ':')
-   std::vector<std::string> physcons;
-   if (conn.find(':') == std::string::npos) {
-      // if logical, have to lookup list of physical replicas, and consider each
-      // need the CORAL ILookupSvc interface which must be loaded if needed
-      const std::string lookSvcStr("CORAL/Services/XMLLookupService");
-      coral::IHandle<coral::ILookupService> lookSvcH = m_context->query<coral::ILookupService>();
-      if (!lookSvcH.isValid()) {
-         m_context->loadComponent(lookSvcStr);
-         lookSvcH = m_context->query<coral::ILookupService>();
-      }
-      if (!lookSvcH.isValid()) {
-         ATH_MSG_ERROR("Cannot locate " << lookSvcStr);
-         return(StatusCode::FAILURE);
-      }
-      coral::IDatabaseServiceSet* dbset = lookSvcH->lookup(conn, coral::ReadOnly);
-      if (dbset != nullptr) {
-         for (int irep = 0, nrep = dbset->numberOfReplicas(); irep < nrep; ++irep) {
-	    const std::string pcon = dbset->replica(irep).connectionString();
-	    if (pcon.compare(0, 9, "frontier:") == 0) {
-               physcons.push_back(std::move(pcon));
-            }
-         }
-         delete dbset; dbset = nullptr;
-      } else {
-         ATH_MSG_DEBUG("setFrontierCache: Could not find any replicas for " << conn);
-      }
-   } else if (conn.compare(0, 9, "frontier:") == 0) {
-      physcons.push_back(conn);
-   }
-   // check if any replicas will try and use frontier
-   if (physcons.size() == 0) {
-      return(StatusCode::SUCCESS);
-   }
-   coral::ConnectionService conSvcH;
-   // for each frontier replica, define the web cache info
-   // get the WebCacheControl interface via ConnectionSvc
-   // note ConnectionSvc should already be loaded by initialize
-   coral::IWebCacheControl& webCache = conSvcH.webCacheControl();
-   for (const auto& physcon : physcons) {
-      const auto& refreshList = m_frontierRefresh.value();
-      if (std::find(refreshList.begin(), refreshList.end(), physcon) == refreshList.end()
-          && std::find(refreshList.begin(), refreshList.end(), conn) == refreshList.end()) {
-         // set that a table DUMMYTABLE should be refreshed - indicates that everything
-         // else in the schema should not be
-         webCache.refreshTable(physcon, "DUMMYTABLE");
-      } else {
-         // set the schema to be refreshed
-         webCache.refreshSchemaInfo(physcon);
-      }
-      ATH_MSG_DEBUG("Cache flag for connection " << physcon << " set to " << webCache.webCacheInfo(physcon).isSchemaInfoCached());
-   }
-   return(StatusCode::SUCCESS);
-}
+
 //__________________________________________________________________________
 pool::IFileCatalog* PoolSvc::createCatalog() {
    pool::IFileCatalog* ctlg = new pool::IFileCatalog;
