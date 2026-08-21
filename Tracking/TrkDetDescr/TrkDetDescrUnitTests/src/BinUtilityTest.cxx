@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //////////////////////////////////////////////////////////////////
@@ -10,16 +10,6 @@
 #include "TrkDetDescrUnitTests/BinUtilityTest.h"
 #include "TrkDetDescrUtils/BinUtility.h"
 
-Trk::BinUtilityTest::BinUtilityTest(const std::string& name, ISvcLocator* pSvcLocator) :
- Trk::TrkDetDescrUnitTestBase(name, pSvcLocator),
- m_numberOfSegments(10),
- m_numberOfTestsPerSet(100000)
-{
-    declareProperty("NumberOfSegments",    m_numberOfSegments);
-    declareProperty("NumberOfTetsPerSet",  m_numberOfTestsPerSet);
-    
-    
-}
 
 StatusCode Trk::BinUtilityTest::runTest()
 {

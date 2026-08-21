@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -9,14 +9,6 @@
 //TrkDetDescrUnitTests
 #include "TrkDetDescrUnitTests/TrkDetDescrUnitTestBase.h"
 
-Trk::TrkDetDescrUnitTestBase::TrkDetDescrUnitTestBase(const std::string& name, ISvcLocator* pSvcLocator):
-    AthAlgorithm(name,pSvcLocator),
-    m_gaussDist(nullptr),
-    m_flatDist(nullptr),
-    m_numTests(100)
-{
-    declareProperty("NumberOfTestsPerEvent",   m_numTests);
-}
 
 Trk::TrkDetDescrUnitTestBase::~TrkDetDescrUnitTestBase()
 {

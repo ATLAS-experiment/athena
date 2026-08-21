@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //////////////////////////////////////////////////////////////////
@@ -21,44 +21,6 @@
 #include "GaudiKernel/ITHistSvc.h"
 
 
-Trk::MappingTest::MappingTest(const std::string& name, ISvcLocator* pSvcLocator) :
- Trk::TrkDetDescrUnitTestBase(name, pSvcLocator),
-   m_executed(false),
-   m_trackingGeometrySvc("TrackingGeometrySvc","AtlasTrackingGeometrySvc"),
-   m_trackingGeometry(nullptr),
-   m_trackingGeometryName("AtlasTrackingGeometry"),
-   m_etaCutOff(6.0),
-   m_mappingVolumeName("InDet::Detectors::Pixel::Barrel"), 
-   m_mappingTreeName("LayerMappingTest"),
-   m_mappingTreeDescription("Test Algorithm for Layer - 3D point association"),
-   m_mappingTree(nullptr),
-   m_mappingPositionX(0.),
-   m_mappingPositionY(0.),
-   m_mappingPositionZ(0.),
-   m_mappingPositionR(0.),
-   m_assignedPositionX(0.),
-   m_assignedPositionY(0.),
-   m_assignedPositionZ(0.),
-   m_assignedPositionR(0.),
-   m_assignedCorrection(0.),
-   m_assignedLayerIndex(0),
-   m_assignmentDistance(0.),
-   m_unmappedTree(nullptr),
-   m_unmappedPositionX(0.),
-   m_unmappedPositionY(0.),
-   m_unmappedPositionZ(0.),
-   m_unmappedPositionR(0.)
- {
-     // get the service handle for the TrackingGeometry
-     declareProperty("TrackingGeometrySvc"         , m_trackingGeometrySvc);
-     // Eta cut off
-     declareProperty("EtaCutOff"                   , m_etaCutOff);
-     declareProperty("HighestVolume"               , m_mappingVolumeName);
-     //
-     declareProperty("MappingTreeName"             , m_mappingTreeName);
-     declareProperty("MappingTreeDescription"      , m_mappingTreeDescription);
- }
-
 StatusCode Trk::MappingTest::initializeTest() 
 {
 
@@ -79,7 +41,8 @@ StatusCode Trk::MappingTest::bookTree()
     
     // ------------------------------> OUTPUT NTUPLE (geometry validation)
     
-    m_mappingTree = new TTree(m_mappingTreeName.c_str(), m_mappingTreeDescription.c_str());
+    m_mappingTree = new TTree(m_mappingTreeName.value().c_str(),
+			      m_mappingTreeDescription.value().c_str());
     // add the Branches
     m_mappingTree->Branch("ValPosX",  &m_mappingPositionX, "valpx/F");
     m_mappingTree->Branch("ValPosY",  &m_mappingPositionY, "valpy/F");
