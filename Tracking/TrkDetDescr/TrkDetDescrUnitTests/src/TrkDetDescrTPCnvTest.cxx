@@ -22,20 +22,6 @@
 #include <climits>
 #include <memory>
 
-Trk::TrkDetDescrTPCnvTest::TrkDetDescrTPCnvTest(const std::string& name, ISvcLocator* pSvcLocator) :
- Trk::TrkDetDescrUnitTestBase(name, pSvcLocator),
- m_writeMode(true),
- m_materialStepCollectionName("RandomMaterialSteps"),
- m_layerMaterialCollectionName("RandomLayerMaterialMap"),
- m_elementTableName("RandomElementTable")
-{
-
-    declareProperty("WriteMode",                    m_writeMode);
-    // collection names
-    declareProperty("MaterialStepCollection",       m_materialStepCollectionName);
-    declareProperty("LayerMaterialMap",             m_layerMaterialCollectionName);
-    declareProperty("ElementTable",                 m_elementTableName);
-}
 
 StatusCode Trk::TrkDetDescrTPCnvTest::runTest()
 {

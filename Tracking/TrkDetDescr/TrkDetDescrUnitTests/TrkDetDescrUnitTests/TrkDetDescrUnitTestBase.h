@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //////////////////////////////////////////////////////////////////
@@ -29,7 +29,7 @@ namespace Trk {
      public:
 
        /** Standard Athena-Algorithm Constructor */
-       TrkDetDescrUnitTestBase(const std::string& name, ISvcLocator* pSvcLocator);
+       using AthAlgorithm::AthAlgorithm;
 
        /** Default Destructor */
        virtual ~TrkDetDescrUnitTestBase();
@@ -54,11 +54,11 @@ namespace Trk {
 
     protected:
       /** Random Number setup */
-      Rndm::Numbers*            m_gaussDist;
-      Rndm::Numbers*            m_flatDist;      
+      Rndm::Numbers*            m_gaussDist = nullptr;
+      Rndm::Numbers*            m_flatDist = nullptr;
       
       /** number of tests */
-      size_t                    m_numTests; 
+      Gaudi::Property<size_t> m_numTests{this, "NumberOfTestsPerEvent", 100};
       
                              
    };

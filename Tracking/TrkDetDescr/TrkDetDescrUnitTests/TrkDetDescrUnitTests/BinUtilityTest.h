@@ -34,7 +34,7 @@ namespace Trk {
      public:
 
        /** Standard Athena-Algorithm Constructor */
-       BinUtilityTest(const std::string& name, ISvcLocator* pSvcLocator);
+       using Trk::TrkDetDescrUnitTestBase::TrkDetDescrUnitTestBase;
        
        /* specify the test here */
        StatusCode runTest();
@@ -70,8 +70,10 @@ namespace Trk {
               v.size() - 1);
         }
 
-        std::size_t     m_numberOfSegments{};   
-        std::size_t     m_numberOfTestsPerSet{};
+        Gaudi::Property<std::size_t> m_numberOfSegments
+	  {this, "NumberOfSegments", 10};
+        Gaudi::Property<std::size_t> m_numberOfTestsPerSet
+	  {this, "NumberOfTetsPerSet", 100000};
 
    };
 }
