@@ -120,12 +120,7 @@ namespace Trk {
 //
 //-------------------- Extrapolation itself
 //
-      const Trk::TrackParameters* endPer = nullptr;
-      if(trkID<0){
-            endPer = myExtrapWithMatUpdate( trkID, inpPar, &endPointG, state);
-      }else{
-            endPer = myExtrapWithMatUpdate( trkID, inpPar, &endPointG, state);
-      }
+      const Trk::TrackParameters* endPer = myExtrapWithMatUpdate( trkID, inpPar, &endPointG, state);
 //-----------------------------------
       if( endPer == nullptr ) {   // No extrapolation done!!!
         ParNew[0]=0.; ParNew[1]=0.;ParNew[2]=0.;ParNew[3]=0.;ParNew[4]=0.;
