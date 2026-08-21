@@ -13,7 +13,6 @@
 
 #include <RootCoreUtils/Assert.h>
 #include <RootCoreUtils/ShellExec.h>
-#include <RootCoreUtils/ThrowMsg.h>
 #include <RootCoreUtils/hadd.h>
 #include <EventLoop/DirectDriver.h>
 #include <EventLoop/Job.h>
@@ -27,6 +26,7 @@
 #include <TFile.h>
 #include <TObjString.h>
 #include <memory>
+#include <stdexcept>
 
 #include <iostream>
 
@@ -49,7 +49,7 @@ namespace EL
       {
 	std::unique_ptr<TFile> file (TFile::Open (fileName.c_str(), "READ"));
 	if (file == nullptr)
-	  RCU_THROW_MSG ("failed to open file: " + fileName);
+	  throw std::runtime_error ("failed to open file: " + fileName);
 	TTree *tree = dynamic_cast<TTree*>(file->Get (treeName.c_str()));
 	Long64_t nentries = 0;
 	if (tree != nullptr && (nentries = tree->GetEntries()) > 0)
@@ -59,7 +59,7 @@ namespace EL
 	  for (Long64_t entry = 0; entry < nentries; ++ entry)
 	  {
 	    if (branch->GetEntry(entry) <= 0)
-	      RCU_THROW_MSG ("failed to read entry from branch");
+	      throw std::runtime_error ("failed to read entry from branch " + branchName);
 	    result.push_back (var->Data());
 	  }
 	}

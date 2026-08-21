@@ -4,7 +4,7 @@
 
 #include <RootCoreUtils/Assert.h>
 #include <RootCoreUtils/StringUtil.h>
-#include <RootCoreUtils/Assert.h>
+#include <stdexcept>
 #include <string>
 #include <string_view>
 #include <regex>
@@ -14,7 +14,8 @@ namespace RCU
   std::string substitute(std::string_view str, std::string_view pattern,
                          std::string_view with)
   {
-    RCU_REQUIRE(!pattern.empty());
+    if (pattern.empty())
+      throw std::runtime_error ("substitute: pattern must not be empty");
 
     std::string result(str);
     std::string::size_type pos = 0;

@@ -5,7 +5,6 @@
 #include <AsgMessaging/MessageCheck.h>
 #include <EventLoop/Driver.h>
 #include <RootCoreUtils/ShellExec.h>
-#include <RootCoreUtils/ThrowMsg.h>
 #include <TSystem.h>
 #include <xAODRootAccess/Init.h>
 #include <fstream>

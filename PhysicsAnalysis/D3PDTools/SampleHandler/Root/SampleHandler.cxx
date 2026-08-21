@@ -13,12 +13,11 @@
 
 #include <iostream>
 #include <sstream>
+#include <stdexcept>
 #include <TFile.h>
 #include <TSystem.h>
 #include <RootCoreUtils/Assert.h>
-#include <RootCoreUtils/CheckRootVersion.h>
 #include <RootCoreUtils/StringUtil.h>
-#include <RootCoreUtils/ThrowMsg.h>
 #include <SampleHandler/DiskListLocal.h>
 #include <SampleHandler/MetaFields.h>
 #include <SampleHandler/MetaObject.h>
@@ -86,7 +85,6 @@ namespace SH
   SampleHandler ::
   SampleHandler ()
   {
-    RCU::check_root_version ();
     RCU_NEW_INVARIANT (this);
   }
 
@@ -139,7 +137,7 @@ namespace SH
     RCU_REQUIRE_SOFT (!sample->name().empty());
 
     if (!sample->name().empty() && m_named.find (sample->name()) != m_named.end())
-      RCU_THROW_MSG ("can't add sample of name " + sample->name() + "\na sample with that name already exists\nold sample:\n" + dbg (*m_named.find (sample->name())->second, 9999) + "\nnew sample:\n" + dbg (*sample, 9999));
+      throw std::runtime_error ("can't add sample of name " + sample->name() + "\na sample with that name already exists\nold sample:\n" + dbg (*m_named.find (sample->name())->second, 9999) + "\nnew sample:\n" + dbg (*sample, 9999));
 
     try
     {
@@ -198,7 +196,7 @@ namespace SH
     // invariant not used
     const Sample *sample = get (name);
     if (sample == 0)
-      RCU_THROW_MSG ("sample " + name + " not found in SampleHandler");
+      throw std::runtime_error ("sample " + name + " not found in SampleHandler");
     remove (sample);
   }
 
@@ -212,9 +210,9 @@ namespace SH
 
     auto nameIter = m_named.find (sample->name());
     if (nameIter == m_named.end())
-      RCU_THROW_MSG ("sample " + sample->name() + " not found in SampleHandler");
+      throw std::runtime_error ("sample " + sample->name() + " not found in SampleHandler");
     if (nameIter->second.get() != sample)
-      RCU_THROW_MSG ("different sample of name " + sample->name() + " found in SampleHandler");
+      throw std::runtime_error ("different sample of name " + sample->name() + " found in SampleHandler");
     std::erase_if (m_samples, [sample] (const std::shared_ptr<Sample>& p) { return p.get() == sample; });
     m_named.erase (nameIter);
   }
@@ -295,7 +293,7 @@ namespace SH
       for (std::vector<Sample*>::const_iterator sample = result.begin(),
 	     end = result.end(); sample != end; ++ sample)
 	message << " " << (*sample)->name();
-      RCU_THROW_MSG (message.str());
+      throw std::runtime_error (message.str());
     };
     if (result.empty())
       return 0;

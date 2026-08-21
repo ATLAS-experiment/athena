@@ -13,11 +13,12 @@
 #include <memory>
 #include <set>
 #include <sstream>
+#include <stdexcept>
 #include <utility>
 #include <TChain.h>
 #include <TFile.h>
 #include <RootCoreUtils/Assert.h>
-#include <RootCoreUtils/ThrowMsg.h>
+#include <SampleHandler/MessageCheck.h>
 #include <SampleHandler/Sample.h>
 #include <SampleHandler/SampleHandler.h>
 #include <CxxUtils/checker_macros.h>
@@ -78,8 +79,7 @@ namespace SH
 	if (branches->FindObject (name->c_str()) != 0)
 	  return *name;
       }
-      RCU_THROW_MSG ("failed to find branch of valid name");
-      return std::string (); // compiler dummy
+      throw std::runtime_error ("failed to find branch of valid name");
     }
 
 
@@ -91,9 +91,11 @@ namespace SH
     /// failures: i/o errors
     void printDuplicateEvents (TTree& tree, RunEventList& list)
     {
+      using namespace msgDuplicates;
+
       const Long64_t nentries = tree.GetEntries();
       if (nentries < 0)
-	RCU_THROW_MSG ("failed to read number of events from n-tuple");
+        throw std::runtime_error ("failed to read number of events from n-tuple");
       if (nentries == 0)
 	return;
 
@@ -113,18 +115,14 @@ namespace SH
 	   entry < nentries; ++ entry)
       {
 	if (tree.GetEntry (entry) < 0)
-	  RCU_THROW_MSG ("failed to read event");
+	  throw std::runtime_error ("failed to read event");
 	RunEvent runEvent (run, event);
 	if (list.find (runEvent) == list.end())
 	{
 	  list.insert (runEvent);
 	} else
 	{
-	  std::ostringstream message;
-	  message << "duplicate event run=" << run << " event=" << event
-		  << " file=" << tree.GetCurrentFile()->GetName();
-	  
-	  RCU_WARN_MSG (message.str());
+	  ANA_MSG_WARNING ("duplicate event run=" << run << " event=" << event << " file=" << tree.GetCurrentFile()->GetName());
 	}
       }
     }

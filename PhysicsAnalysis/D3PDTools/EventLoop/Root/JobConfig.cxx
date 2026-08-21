@@ -16,7 +16,8 @@
 #include <EventLoop/AlgorithmData.h>
 #include <EventLoop/MessageCheck.h>
 #include <RootCoreUtils/Assert.h>
-#include <RootCoreUtils/ThrowMsg.h>
+
+#include <stdexcept>
 
 //
 // method implementations
@@ -160,11 +161,11 @@ namespace EL
   {
     RCU_CHANGE_INVARIANT (this);
     if (m_algorithmCount != m_algorithms.size())
-      RCU_THROW_MSG ("algorithm count missmatch.  streaming error?");
+      throw std::runtime_error ("JobConfig::extractAlgorithms: algorithm count missmatch.  streaming error?");
     for (const auto& algorithm : m_algorithms)
     {
       if (algorithm == nullptr)
-        RCU_THROW_MSG ("algorithm null.  streaming error?");
+        throw std::runtime_error ("JobConfig::extractAlgorithms: algorithm null.  streaming error?");
     }
     m_algorithmCount = 0;
     std::vector<Detail::AlgorithmData> result;

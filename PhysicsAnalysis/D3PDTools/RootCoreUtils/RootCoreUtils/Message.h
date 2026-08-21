@@ -7,8 +7,6 @@
 #ifndef ROOT_CORE_UTILS__MESSAGE_H
 #define ROOT_CORE_UTILS__MESSAGE_H
 
-#include <RootCoreUtils/Global.h>
-
 #include <RootCoreUtils/MessageType.h>
 
 namespace RCU
@@ -20,8 +18,6 @@ namespace RCU
     //
 
     /// description: the location where the message was send
-  public:
-    const char *package;
   public:
     const char *file;
   public:

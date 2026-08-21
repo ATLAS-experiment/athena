@@ -21,7 +21,6 @@
 #include <RootCoreUtils/Assert.h>
 #include <RootCoreUtils/ShellExec.h>
 #include <RootCoreUtils/StringUtil.h>
-#include <RootCoreUtils/ThrowMsg.h>
 #include <RootCoreUtils/hadd.h>
 #include <SampleHandler/DiskOutputLocal.h>
 #include <SampleHandler/MetaFields.h>
@@ -34,6 +33,7 @@
 #include <fstream>
 #include <memory>
 #include <sstream>
+#include <stdexcept>
 
 //
 // method implementations
@@ -228,7 +228,7 @@ namespace EL
       {
         std::ostringstream msg;
         msg << "invalid number of files per worker: " << filesPerWorker;
-        RCU_THROW_MSG (msg.str());
+        throw std::runtime_error (msg.str());
       }
       double numJobs = ceil (sample.files.size() / filesPerWorker);
 
@@ -617,13 +617,13 @@ namespace EL
 
       // suppress the output from the command
       if (gSystem->Exec (cmd.str().c_str()) != 0){
-        RCU_THROW_MSG (("failed to execute: " + cmd.str()).c_str());
+        throw std::runtime_error ("failed to execute: " + cmd.str());
       }
 
       std::ostringstream mv_command;
       mv_command << "mv WorkDir_" << std::getenv("WorkDir_VERSION") << "_" << std::getenv("WorkDir_PLATFORM") << ".tar.gz " << tarballName;
       if (gSystem->Exec (mv_command.str().c_str()) != 0){
-        RCU_THROW_MSG (("failed to execute: " + mv_command.str()).c_str());
+        throw std::runtime_error ("failed to execute: " + mv_command.str());
       }
     }
 
@@ -700,7 +700,7 @@ namespace EL
         std::ostringstream cmd;
         cmd << "chmod +x " << fileName;
         if (gSystem->Exec (cmd.str().c_str()) != 0)
-          RCU_THROW_MSG (("failed to execute: " + cmd.str()).c_str());
+          throw std::runtime_error ("failed to execute: " + cmd.str());
       }
     }
   }
@@ -768,7 +768,7 @@ namespace EL
             std::ostringstream message;
             message << "subjob " << segment << "/" << mysegment.fullName
                     << " failed";
-            RCU_THROW_MSG (message.str());
+            throw std::runtime_error (message.str());
           }
           else if (data.batchJobSuccess.find(segment)==data.batchJobSuccess.end())
             complete = false, result = false;

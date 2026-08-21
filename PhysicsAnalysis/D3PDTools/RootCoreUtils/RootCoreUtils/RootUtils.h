@@ -11,8 +11,6 @@
 
 
 
-#include <RootCoreUtils/Global.h>
-
 class TDirectory;
 class TObject;
 

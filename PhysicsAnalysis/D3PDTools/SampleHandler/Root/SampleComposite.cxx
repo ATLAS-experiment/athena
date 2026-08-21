@@ -10,8 +10,8 @@
 
 #include <SampleHandler/SampleComposite.h>
 
+#include <stdexcept>
 #include <RootCoreUtils/Assert.h>
-#include <RootCoreUtils/ThrowMsg.h>
 #include <SampleHandler/SampleLocal.h>
 
 //
@@ -58,7 +58,7 @@ namespace SH
     RCU_CHANGE_INVARIANT (this);
     RCU_REQUIRE_SOFT (sample != nullptr);
     if (contains (sample->name()))
-      RCU_THROW_MSG ("trying to add sample " + sample->name() + " to sample " + name() + ", which already contains a sample " + sample->name());
+      throw std::runtime_error ("trying to add sample " + sample->name() + " to sample " + name() + ", which already contains a sample " + sample->name());
     m_samples.push_back (std::move (sample));
   }
 
@@ -68,8 +68,7 @@ namespace SH
   getNumFiles () const
   {
     RCU_READ_INVARIANT (this);
-    RCU_THROW_MSG ("Sample::numFiles not supported for SampleComposite");
-    return 0; // compiler dummy
+    throw std::runtime_error ("Sample::numFiles not supported for SampleComposite");
   }
 
 
@@ -78,8 +77,7 @@ namespace SH
   getFileName (const std::size_t /*index*/) const
   {
     RCU_READ_INVARIANT (this);
-    RCU_THROW_MSG ("Sample::fileName not supported for SampleComposite");
-    return ""; // compiler dummy
+    throw std::runtime_error ("Sample::fileName not supported for SampleComposite");
   }
 
 
@@ -105,8 +103,7 @@ namespace SH
   doMakeLocal () const
   {
     RCU_READ_INVARIANT (this);
-    RCU_THROW_MSG ("Sample::makeLocal not supported for SampleComposite");
-    return {}; // compiler dummy
+    throw std::runtime_error ("Sample::makeLocal not supported for SampleComposite");
   }
 
 

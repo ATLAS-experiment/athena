@@ -13,10 +13,10 @@
 
 #include <exception>
 #include <iostream>
+#include <stdexcept>
 #include <TFile.h>
 #include <TSystem.h>
 #include <RootCoreUtils/Assert.h>
-#include <RootCoreUtils/ThrowMsg.h>
 
 //
 // method implementations
@@ -96,7 +96,7 @@ namespace SH
     RCU_REQUIRE2_SOFT (m_file != 0, "file already closed");
 
     if (m_file->Write () < 0)
-      RCU_THROW_MSG ("failed to write to file: " + m_path);
+      throw std::runtime_error ("failed to write to file: " + m_path);
     m_file->Close ();
     delete m_file;
     m_file = 0;

@@ -14,7 +14,6 @@
 #include <EventLoop/OutputStream.h>
 #include <EventLoop/Worker.h>
 #include <RootCoreUtils/Assert.h>
-#include <RootCoreUtils/ThrowMsg.h>
 #include <TFile.h>
 #include <TH1.h>
 #include <TTree.h>
@@ -77,7 +76,10 @@ namespace EL
     RCU_ASSERT (wk()->tree() != 0);
     m_branch = wk()->tree()->GetBranch (m_name.c_str());
     if (m_branch == 0)
-      RCU_THROW_MSG ("failed to find branch " + m_name);
+    {
+      ATH_MSG_ERROR ("failed to find branch " << m_name);
+      return StatusCode::FAILURE;
+    }
     m_branch->SetAddress (&m_value);
     RCU_ASSERT_SOFT (firstFile == m_fileName.empty());
     m_fileName = wk()->inputFile()->GetName();
@@ -113,10 +115,16 @@ namespace EL
     RCU_ASSERT_SOFT (m_fileName == wk()->inputFile()->GetName());
 
     if (wk()->metaData()->castDouble ("jobOpt") != 42)
-      RCU_THROW_MSG ("failed to read meta-data from job options");
+    {
+      ATH_MSG_ERROR ("failed to read meta-data from job options");
+      return StatusCode::FAILURE;
+    }
 
     if (wk()->metaData()->castString ("mymeta") != "test")
-      RCU_THROW_MSG ("failed to read meta-data from worker");
+    {
+      ATH_MSG_ERROR ("failed to read meta-data from worker");
+      return StatusCode::FAILURE;
+    }
 
     wk()->addOutput (/*m_hist = */new TH1F (m_name.c_str(), m_name.c_str(),
 					50, 0, 50));

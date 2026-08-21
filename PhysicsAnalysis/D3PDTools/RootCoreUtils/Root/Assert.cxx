@@ -13,7 +13,7 @@
 #include <cstdlib>
 #include <string>
 #include <RootCoreUtils/Message.h>
-#include <RootCoreUtils/PrintMsg.h>
+#include <RootCoreUtils/MessageCheck.h>
 
 //
 // method implementations
@@ -61,7 +61,7 @@ namespace RCU
 
 
 
-    void fail (const char *package, const char *file, unsigned line,
+    void fail (const char *file, unsigned line,
 	       Type type, const char *error)
     {
       RCU_REQUIRE (file != 0);
@@ -70,7 +70,6 @@ namespace RCU
       RCU_REQUIRE (error != 0);
 
       Message msg;
-      msg.package = package;
       msg.file = file;
       msg.line = line;
       msg.type = typeAbort[type] ? MESSAGE_ABORT : MESSAGE_EXCEPTION;
@@ -106,14 +105,16 @@ namespace RCU
     bool testInvariantPrint (TestInvariantFunction function,
 			     const void *object)
     {
+      using namespace msgRootCoreUtils;
+
       try
       {
 	(*function) (object);
 	return false;
       } catch (std::exception& e)
       {
-	RCU_ERROR_MSG (e.what());
-	return true;
+        ANA_MSG_ERROR ("caught exception in invariant test: " << e.what());
+        return true;
       };
     }
   }

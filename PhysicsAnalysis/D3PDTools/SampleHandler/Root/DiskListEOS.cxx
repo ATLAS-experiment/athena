@@ -11,10 +11,10 @@
 #include <SampleHandler/DiskListEOS.h>
 
 #include <sstream>
+#include <stdexcept>
 #include <vector>
 #include <RootCoreUtils/Assert.h>
 #include <RootCoreUtils/ShellExec.h>
-#include <RootCoreUtils/ThrowMsg.h>
 
 #include <iostream>
 
@@ -80,10 +80,10 @@ namespace SH
       for (unsigned iter = 0, end = 9; iter != end; ++ iter)
       {
 	if (!(str >> fields[iter]))
-	  RCU_THROW_MSG ("failed to parse line: " + line);
+	  throw std::runtime_error ("failed to parse line: " + line);
       }
       if (fields[0].empty())
-	  RCU_THROW_MSG ("failed to parse line: " + line);
+        throw std::runtime_error ("failed to parse line: " + line);
       m_file = fields[8];
       return true;
     }

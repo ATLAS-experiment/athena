@@ -20,7 +20,8 @@
 #include <EventLoop/IWorker.h>
 #include <MultiDraw/Formula.h>
 #include <RootCoreUtils/Assert.h>
-#include <RootCoreUtils/ThrowMsg.h>
+
+#include <stdexcept>
 
 //
 // method implementations
@@ -60,7 +61,7 @@ namespace MD
     FormulaSvc *const svc
       = dynamic_cast<FormulaSvc*>(worker->getAlg (FormulaSvc::name));
     if (svc == 0)
-      RCU_THROW_MSG ("Job not configured for FormulaSvc support");
+      throw std::runtime_error ("Job not configured for FormulaSvc support");
     return svc;
   }
 

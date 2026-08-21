@@ -3,7 +3,6 @@
 */
 
 #include <EventLoop/OutputStream.h>
-#include <RootCoreUtils/ThrowMsg.h>
 #include <xAODRootAccess/Init.h>
 #include <AsgMessaging/MessageCheck.h>
 #include <TList.h>

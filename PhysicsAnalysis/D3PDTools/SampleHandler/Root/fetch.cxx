@@ -17,7 +17,7 @@
 #include <SampleHandler/MetaDataSample.h>
 #include <SampleHandler/MetaObject.h>
 #include <RootCoreUtils/Assert.h>
-#include <RootCoreUtils/PrintMsg.h>
+#include <SampleHandler/MessageCheck.h>
 #include <SampleHandler/MetaFields.h>
 #include <SampleHandler/Sample.h>
 #include <SampleHandler/SampleHandler.h>
@@ -64,6 +64,8 @@ namespace SH
 
   void fetchMetaData (SH::SampleHandler& sh, bool override)
   {
+    using namespace msgFetch;
+
     std::vector<SH::Sample*> samples;
     // typedef std::vector<SH::Sample*> SamplesIter;
     MetaDataQuery query;
@@ -77,12 +79,12 @@ namespace SH
     fetchMetaData (query);
 
     if (!query.messages.empty())
-      RCU_PRINT_MSG (query.messages);
+      ANA_MSG_INFO (query.messages);
     for (std::size_t iter = 0, end = query.samples.size(); iter != end; ++ iter)
     {
       if (query.samples[iter].unknown)
       {
-	RCU_WARN_MSG ("failed to find sample " + query.samples[iter].name);
+        ANA_MSG_WARNING ("failed to find sample " << query.samples[iter].name);
       } else
       {
 	RCU_ASSERT (iter != samples.size());

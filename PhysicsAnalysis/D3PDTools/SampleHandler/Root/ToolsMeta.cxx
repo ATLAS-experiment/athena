@@ -12,7 +12,6 @@
 #include <SampleHandler/ToolsMeta.h>
 
 #include <RootCoreUtils/Assert.h>
-#include <RootCoreUtils/ThrowMsg.h>
 #include <SampleHandler/MetaFields.h>
 #include <SampleHandler/MetaObject.h>
 #include <SampleHandler/SampleHandler.h>
@@ -20,6 +19,7 @@
 #include <TSystem.h>
 #include <fstream>
 #include <sstream>
+#include <stdexcept>
 
 //
 // method implementations
@@ -35,7 +35,7 @@ namespace SH
     std::string line;
 
     if (!file)
-      RCU_THROW_MSG ("failed to read file: " + inputFile);
+      throw std::runtime_error ("failed to read file: " + inputFile);
 
     while (std::getline (file, line))
     {
@@ -48,7 +48,7 @@ namespace SH
 
 	if (!(str >> DSID >> name >> crossSection >> kFactor >> filterEfficiency
 	      >> xsUncertainty))
-	  RCU_THROW_MSG ("failed to parse line: " + line);
+	  throw std::runtime_error ("readSusyMeta: failed to parse line: " + line);
 
 	std::string mydsid = "." + DSID + ".";
 	for (SampleHandler::iterator sample = sh.begin(),

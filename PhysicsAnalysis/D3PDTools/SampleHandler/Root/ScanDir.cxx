@@ -13,7 +13,6 @@
 
 #include <RootCoreUtils/Assert.h>
 #include <RootCoreUtils/StringUtil.h>
-#include <RootCoreUtils/ThrowMsg.h>
 #include <SampleHandler/DiskListEOS.h>
 #include <SampleHandler/DiskListLocal.h>
 #include <SampleHandler/MessageCheck.h>
@@ -22,6 +21,7 @@
 #include <SampleHandler/SampleLocal.h>
 #include <TString.h>
 #include <memory>
+#include <stdexcept>
 
 //
 // method implementations
@@ -277,7 +277,7 @@ namespace SH
 	  if (RCU::match_expr (m_samplePostfix, sampleName.substr (iter)))
 	  {
 	    if (iter == 0)
-	      RCU_THROW_MSG ("sample name matches entire postfix pattern: \"" + sampleName + "\"");
+	      throw std::runtime_error ("sample name matches entire postfix pattern: \"" + sampleName + "\"");
 	    sampleName.resize (iter);
 	    done = true;
 	  }

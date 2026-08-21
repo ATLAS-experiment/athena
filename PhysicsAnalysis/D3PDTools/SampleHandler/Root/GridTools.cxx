@@ -15,13 +15,13 @@
 #include <RootCoreUtils/Assert.h>
 #include <RootCoreUtils/ShellExec.h>
 #include <RootCoreUtils/StringUtil.h>
-#include <RootCoreUtils/ThrowMsg.h>
 #include <SampleHandler/MetaObject.h>
 #include <CxxUtils/checker_macros.h>
 #include <TSystem.h>
 #include <chrono>
 #include <fstream>
 #include <mutex>
+#include <stdexcept>
 
 namespace sh = RCU::Shell;
 
@@ -163,9 +163,9 @@ namespace SH
     {
       auto lines = readLineList (text, begin);
       if (lines.empty())
-        RCU_THROW_MSG ("failed to find line starting with: " + begin);
+        throw std::runtime_error ("failed to find line starting with: " + begin);
       if (lines.size() > 1)
-        RCU_THROW_MSG ("multiple lines starting with: " + begin);
+        throw std::runtime_error ("multiple lines starting with: " + begin);
       return lines.at(0);
     }
 
@@ -180,7 +180,7 @@ namespace SH
       std::istringstream str (line);
       unsigned result = 0;
       if (!(str >> result) || !str.eof())
-        RCU_THROW_MSG ("failed to convert " + line + " into an unsigned");
+        throw std::runtime_error ("failed to convert " + line + " into an unsigned");
       return result;
     }
 
@@ -246,7 +246,7 @@ namespace SH
     std::string output = sh::exec_read ("source $ATLAS_LOCAL_ROOT_BASE/user/atlasLocalSetup.sh -q && lsetup --force fax && echo " + separator + " && fax-get-gLFNs " + sh::quote (name));
     auto split = output.rfind (separator + "\n");
     if (split == std::string::npos)
-      RCU_THROW_MSG ("couldn't find separator in: " + output);
+      throw std::runtime_error ("couldn't find separator in: " + output);
 
     std::istringstream str (output.substr (split + separator.size() + 1));
     std::regex pattern (filter);
@@ -256,7 +256,7 @@ namespace SH
       if (!line.empty())
       {
 	if (!line.starts_with ("root:"))
-	  RCU_THROW_MSG ("couldn't parse line: " + line);
+	  throw std::runtime_error ("faxListFilesRegex: couldn't parse line: " + line);
 
 	std::string::size_type split1 = line.rfind (":");
 	std::string::size_type split2 = line.rfind ("/");
@@ -267,11 +267,11 @@ namespace SH
 	  if (RCU::match_expr (pattern, line.substr (split1+1)))
 	    result.push_back (line);
 	} else
-	  RCU_THROW_MSG ("couldn't parse line: " + line);
+	  throw std::runtime_error ("faxListFilesRegex: couldn't parse line: " + line);
       }
     }
     if (result.size() == 0)
-      RCU_WARN_MSG ("dataset " + name + " did not contain any files.  this is likely not right");
+      ANA_MSG_WARNING ("dataset " << name << " did not contain any files.  this is likely not right");
     return result;
   }
 
@@ -303,7 +303,7 @@ namespace SH
     std::string output = sh::exec_read (rucioSetupCommand() + " && echo " + separator + " && rucio list-file-replicas --pfns --protocols root " + selectOptions + " " + sh::quote (name));
     auto split = output.rfind (separator + "\n");
     if (split == std::string::npos)
-      RCU_THROW_MSG ("couldn't find separator in: " + output);
+      throw std::runtime_error ("couldn't find separator in: " + output);
     std::istringstream str (output.substr (split + separator.size() + 1));
 
     // this is used to avoid getting two copies of the same file.  we
@@ -331,7 +331,7 @@ namespace SH
 	  if (RCU::match_expr (pattern, filename))
 	    resultMap[filename] = line;
 	} else
-	  RCU_THROW_MSG ("couldn't parse line: " + line);
+	  throw std::runtime_error ("rucioDirectAccessRegex: couldn't parse line: " + line);
       }
     }
 
@@ -358,7 +358,7 @@ namespace SH
     std::string output = sh::exec_read (rucioSetupCommand() + " && echo " + separator + " && rucio list-dids " + sh::quote (dataset));
     auto split = output.rfind (separator + "\n");
     if (split == std::string::npos)
-      RCU_THROW_MSG ("couldn't find separator in: " + output);
+      throw std::runtime_error ("couldn't find separator in: " + output);
 
     std::istringstream str (output.substr (split + separator.size() + 1));
     std::regex pattern ("^\\| ([a-zA-Z0-9_.-]+):([a-zA-Z0-9_.-]+) +\\| ([a-zA-Z0-9_.-]+) +\\| *$");
@@ -396,7 +396,7 @@ namespace SH
     std::string output = sh::exec_read ( command );
     auto split = output.rfind (separator + "\n");
     if (split == std::string::npos)
-      RCU_THROW_MSG ("couldn't find separator in: " + output);
+      throw std::runtime_error ("couldn't find separator in: " + output);
 
     std::istringstream str (output.substr (split + separator.size() + 1));
     std::regex pattern ("^\\| +([^ ]+) +\\| +([^ ]+) +\\| +([^ ]+ [^ ]+) +\\| +([^ ]+) +\\| +([^: ]+): ([^ ]+) +\\| *$");
@@ -443,7 +443,7 @@ namespace SH
     std::string output = sh::exec_read (command);
     auto split = output.rfind (separator + "\n");
     if (split == std::string::npos)
-      RCU_THROW_MSG ("couldn't find separator in: " + output);
+      throw std::runtime_error ("couldn't find separator in: " + output);
 
     std::istringstream str (output.substr (split + separator.size() + 1));
     std::regex pattern ("^([^:]+): *(.+)$");
@@ -454,7 +454,7 @@ namespace SH
     {
       std::string name = meta->castString ("scope") + ":" + meta->castString ("name");
       if (result.find (name) != result.end())
-	RCU_THROW_MSG ("read " + name + " twice");
+        throw std::runtime_error ("rucioGetMetadata: read " + name + " twice");
       result[name] = std::move (meta);
     };
 
@@ -480,12 +480,12 @@ namespace SH
     for (auto& subresult : result)
     {
       if (datasets.find (subresult.first) == datasets.end())
-	RCU_THROW_MSG ("received result for dataset not requested: " + subresult.first);
+        throw std::runtime_error ("received result for dataset not requested: " + subresult.first);
     }
     for (auto& dataset : datasets)
     {
       if (result.find (dataset) == result.end())
-	RCU_THROW_MSG ("received no result for dataset: " + dataset);
+        throw std::runtime_error ("received no result for dataset: " + dataset);
     }
 
     return result;
@@ -505,7 +505,7 @@ namespace SH
     std::string output = sh::exec_read (command);
     auto split = output.rfind (separator + "\n");
     if (split == std::string::npos)
-      RCU_THROW_MSG ("couldn't find separator in: " + output);
+      throw std::runtime_error ("couldn't find separator in: " + output);
     output = output.substr (split + separator.size() + 1);
 
     RucioDownloadResult result;
