@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 """
-Run PrintHGTDElements
+Run HGTD_PrintElements
 
 Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 """
@@ -18,7 +18,7 @@ from AthenaConfiguration.DetectorConfigFlags import setupDetectorFlags
 # ------------------------------------------------------------
 # Arguments
 # ------------------------------------------------------------
-parser = ArgumentParser("RunPrintHGTDElements.py")
+parser = ArgumentParser("HGTD_RunPrintElements.py")
 
 parser.add_argument(
     "--geometrytag",
@@ -156,12 +156,12 @@ acc.merge(HGTD_DetectorElementCondAlgCfg(flags))
 # Print algorithm
 # ------------------------------------------------------------
 from AthenaConfiguration.ComponentFactory import CompFactory
-alg = CompFactory.PrintHGTDElements()
+alg = CompFactory.HGTD_PrintElements()
 
 from AthenaCommon.Constants import DEBUG
 alg.OutputLevel = DEBUG
 
-alg.OutputFile = "HGTDGeometry.dat"
+alg.OutputFile = "HGTD_Geometry.dat"
 
 acc.addEventAlgo(alg)
 

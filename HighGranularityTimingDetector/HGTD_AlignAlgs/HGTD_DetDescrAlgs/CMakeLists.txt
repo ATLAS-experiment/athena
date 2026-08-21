@@ -32,6 +32,6 @@ atlas_add_component( HGTD_DetDescrAlgs
 
 # Install scripts
 atlas_install_scripts(
-    tools/RunPrintHGTDElements.py
+    tools/HGTD_RunPrintElements.py
     POST_BUILD_CMD ${ATLAS_FLAKE8}
 )

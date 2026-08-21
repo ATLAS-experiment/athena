@@ -2,8 +2,8 @@
   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef HGTD_DETDESCRALGS_PRINTHGTDELEMENTS_H
-#define HGTD_DETDESCRALGS_PRINTHGTDELEMENTS_H
+#ifndef HGTD_DETDESCRALGS_HGTD_PRINTELEMENTS_H
+#define HGTD_DETDESCRALGS_HGTD_PRINTELEMENTS_H
 
 #include "AthenaBaseComps/AthAlgorithm.h"
 
@@ -15,11 +15,11 @@
 
 #include <fstream>
 
-class PrintHGTDElements : public AthAlgorithm
+class HGTD_PrintElements : public AthAlgorithm
 {
 public:
 
-  PrintHGTDElements(const std::string& name,
+  HGTD_PrintElements(const std::string& name,
                     ISvcLocator* pSvcLocator);
 
   virtual StatusCode initialize() override;

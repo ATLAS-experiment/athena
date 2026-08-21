@@ -2,7 +2,7 @@
   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "HGTD_DetDescrAlgs/PrintHGTDElements.h"
+#include "HGTD_DetDescrAlgs/HGTD_PrintElements.h"
 #include "AthenaKernel/IOVInfiniteRange.h"
 #include "StoreGate/ReadCondHandle.h"
 #include "Identifier/Identifier.h"
@@ -11,8 +11,8 @@
 
 ///////////////////////////////////////////////////////////////////
 
-PrintHGTDElements::
-PrintHGTDElements(const std::string& name,
+HGTD_PrintElements::
+HGTD_PrintElements(const std::string& name,
                   ISvcLocator* pSvcLocator)
   : AthAlgorithm(name, pSvcLocator)
 {
@@ -20,10 +20,10 @@ PrintHGTDElements(const std::string& name,
 
 ///////////////////////////////////////////////////////////////////
 
-StatusCode PrintHGTDElements::initialize()
+StatusCode HGTD_PrintElements::initialize()
 {
     ATH_MSG_DEBUG("========================================");
-    ATH_MSG_DEBUG("PrintHGTDElements initialize()");
+    ATH_MSG_DEBUG("HGTD_PrintElements initialize()");
     ATH_MSG_DEBUG("========================================");
 
     //------------------------------------------------------------
@@ -88,7 +88,7 @@ StatusCode PrintHGTDElements::initialize()
 
 ///////////////////////////////////////////////////////////////////
 
-StatusCode PrintHGTDElements::execute(const EventContext& ctx)
+StatusCode HGTD_PrintElements::execute(const EventContext& ctx)
 {
     //------------------------------------------------------------
     // Execute only once
@@ -106,8 +106,7 @@ StatusCode PrintHGTDElements::execute(const EventContext& ctx)
 
     const auto* elements = handle.retrieve();
 
-    ATH_MSG_DEBUG("DetectorElementCollection pointer = " << elements);
-    //ATH_MSG_DEBUG("First element pointer = " << (*elements)[0]);
+    ATH_MSG_DEBUG("First element pointer = " << (*elements)[0]);
 
     if (!handle.isValid() || elements == nullptr) {
 
@@ -201,8 +200,7 @@ StatusCode PrintHGTDElements::execute(const EventContext& ctx)
                         << geoNominal.translation().z() << ")");
             }
 
-        //const Amg::Transform3D& tr = element->moduleTransform();
-        const Amg::Transform3D& tr = element->transform();
+        const Amg::Transform3D& tr = element->moduleTransform();
         const Amg::Vector3D& T = tr.translation();
         const Amg::RotationMatrix3D& R = tr.rotation();
 
@@ -308,10 +306,10 @@ StatusCode PrintHGTDElements::execute(const EventContext& ctx)
 
 ///////////////////////////////////////////////////////////////////
 
-StatusCode PrintHGTDElements::finalize()
+StatusCode HGTD_PrintElements::finalize()
 {
     ATH_MSG_INFO("========================================");
-    ATH_MSG_INFO("PrintHGTDElements finalize()");
+    ATH_MSG_INFO("HGTD_PrintElements finalize()");
     ATH_MSG_INFO("========================================");
 
     if (m_outfile.is_open())
