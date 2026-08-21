@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TAUANALYSISTOOLS_TAUEFFICIENCYCORRECTIONSTOOL_H
@@ -111,8 +111,7 @@ private:
   Gaudi::Property<std::vector<int>> m_vecEfficiencyCorrectionTypes{this, "EfficiencyCorrectionTypes", {}};
 
   std::vector<int> m_vEfficiencyCorrectionTypes;
-  std::vector< asg::AnaToolHandle<ITauEfficiencyCorrectionsTool>* > m_vCommonEfficiencyTools;
-  std::vector< asg::AnaToolHandle<ITauEfficiencyCorrectionsTool>* > m_vTriggerEfficiencyTools;
+  asg::AnaToolHandle<ITauEfficiencyCorrectionsTool> m_tTool;
   std::string m_sInputFilePathDecayModeHadTau;
   std::string m_sVarName;
   bool m_bIsData;
