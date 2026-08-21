@@ -7,6 +7,7 @@ def PersistifyClusters(flags,
                        pixelClusterCollections: list[str] = None,
                        stripClusterCollections: list[str] = None,
                        hgtdClusterCollections: list[str] = None) -> ComponentAccumulator:
+    toESD = []
     toAOD = []
     if pixelClusterCollections is not None:
         pixel_cluster_shortlist = ['-pixelClusterLink',
@@ -32,10 +33,9 @@ def PersistifyClusters(flags,
                       f"xAOD::HGTDClusterAuxContainer#{hgtdClusterCollection}Aux.{hgtd_cluster_variables}"]
 
     acc = ComponentAccumulator()
-    if len(toAOD) == 0:
-        return acc
 
-    from OutputStreamAthenaPool.OutputStreamConfig import addToAOD    
+    from OutputStreamAthenaPool.OutputStreamConfig import addToESD, addToAOD
+    acc.merge(addToESD(flags, toESD + toAOD))
     acc.merge(addToAOD(flags, toAOD))
     return acc
 
@@ -44,6 +44,7 @@ def PersistifySpacePoints(flags,
                           *,
                           pixelSpacePointCollections: list[str] = None,
                           stripSpacePointCollections: list[str] = None) -> ComponentAccumulator:
+    toESD = []
     toAOD = []
     aux_container_type = "xAOD::SpacePointAuxContainer"
     if flags.Acts.EDM.SlimContent:
@@ -75,10 +76,9 @@ def PersistifySpacePoints(flags,
                       f"{aux_container_type}#{stripSpacePointCollection}Aux.{strip_spacepoint_variables}"]
             
     acc = ComponentAccumulator()
-    if len(toAOD) == 0:
-        return acc
 
-    from OutputStreamAthenaPool.OutputStreamConfig import addToAOD
+    from OutputStreamAthenaPool.OutputStreamConfig import addToESD, addToAOD
+    acc.merge(addToESD(flags, toESD + toAOD))
     acc.merge(addToAOD(flags, toAOD))
     return acc
 
@@ -86,6 +86,7 @@ def PersistifySpacePoints(flags,
 def PersistifyTracks(flags,
                      *,
                      extensions: list[str] = None) -> ComponentAccumulator:
+    toESD = []
     toAOD = []
     if extensions is not None:
         for prefix in extensions:
@@ -105,10 +106,9 @@ def PersistifyTracks(flags,
                       f"xAOD::TrackSurfaceAuxContainer#{prefix}TrackSurfacesAux."]
     
     acc = ComponentAccumulator()
-    if len(toAOD) == 0:
-        return acc
 
-    from OutputStreamAthenaPool.OutputStreamConfig import addToAOD
+    from OutputStreamAthenaPool.OutputStreamConfig import addToESD, addToAOD
+    acc.merge(addToESD(flags, toESD + toAOD))
     acc.merge(addToAOD(flags, toAOD))
     return acc
 
@@ -116,6 +116,7 @@ def PersistifyTracks(flags,
 def PersistifyTrackParticles(flags,
                              *,
                              trackParticleCollections: list[str] = None) -> ComponentAccumulator:
+    toESD = []
     toAOD = []
     if trackParticleCollections is not None:
         trackparticles_shortlist = ['-clusterAssociation',
@@ -163,9 +164,8 @@ def PersistifyTrackParticles(flags,
                       f"xAOD::TrackParticleAuxContainer#{trackParticleCollection}Aux." + trackparticles_variables]
     
     acc = ComponentAccumulator()
-    if len(toAOD) == 0:
-        return acc
 
-    from OutputStreamAthenaPool.OutputStreamConfig import addToAOD
+    from OutputStreamAthenaPool.OutputStreamConfig import addToESD, addToAOD
+    acc.merge(addToESD(flags, toESD + toAOD))
     acc.merge(addToAOD(flags, toAOD))
     return acc
