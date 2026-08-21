@@ -2,7 +2,7 @@
   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-// HGTDAlignDBTool.cxx
+// HGTD_AlignDBTool.cxx
 // AlgTool for creating and managing HGTD alignment payloads.
 // This is the first implementation of the HGTD alignment database tool.
 // The alignment constants are stored at detector-module level.
@@ -19,7 +19,7 @@
 // but the final payload stored in SQLite is represented at module level.
 // Fatima Bendebba, started 2026
 
-#include "HGTDAlignDBTool.h"
+#include "HGTD_AlignDBTool.h"
 
 #include "DetDescrConditions/AlignableTransform.h"
 #include "DetDescrConditions/AlignableTransformContainer.h"
@@ -31,22 +31,22 @@
 
 ///////////////////////////////////////////////////////////////////
 
-HGTDAlignDBTool::
-HGTDAlignDBTool(const std::string& type,
+HGTD_AlignDBTool::
+HGTD_AlignDBTool(const std::string& type,
                 const std::string& name,
                 const IInterface* parent)
   :
   AthAlgTool(type,name,parent)
 {
-    declareInterface<IHGTDAlignDBTool>(this);
+    declareInterface<IHGTD_AlignDBTool>(this);
 }
 
 ///////////////////////////////////////////////////////////////////
 
-StatusCode HGTDAlignDBTool::initialize()
+StatusCode HGTD_AlignDBTool::initialize()
 {
     ATH_MSG_DEBUG("========================================");
-    ATH_MSG_DEBUG("LOCAL HGTDAlignDBTool initialize()");
+    ATH_MSG_DEBUG("LOCAL HGTD_AlignDBTool initialize()");
     ATH_MSG_DEBUG("========================================");
 
     ATH_CHECK(detStore().retrieve());
@@ -63,7 +63,7 @@ StatusCode HGTDAlignDBTool::initialize()
 ///////////////////////////////////////////////////////////////////
 
 std::string
-HGTDAlignDBTool::moduleTag(const Identifier& id) const
+HGTD_AlignDBTool::moduleTag(const Identifier& id) const
 {
     IdentifierHash hash;
     IdContext waferContext = m_hgtdId->wafer_context();
@@ -81,7 +81,7 @@ HGTDAlignDBTool::moduleTag(const Identifier& id) const
 
 ///////////////////////////////////////////////////////////////////
 
-StatusCode HGTDAlignDBTool::createDB()
+StatusCode HGTD_AlignDBTool::createDB()
 {
     ATH_MSG_INFO("Creating HGTD alignment payload");
 
@@ -155,7 +155,7 @@ StatusCode HGTDAlignDBTool::createDB()
 ///////////////////////////////////////////////////////////////////
 
 AlignableTransform*
-HGTDAlignDBTool::getTransPtr(const Identifier& id) const
+HGTD_AlignDBTool::getTransPtr(const Identifier& id) const
 {
     const AlignableTransformContainer* container = nullptr;
 
@@ -176,7 +176,7 @@ HGTDAlignDBTool::getTransPtr(const Identifier& id) const
 ///////////////////////////////////////////////////////////////////
 
 const AlignableTransform*
-HGTDAlignDBTool::cgetTransPtr(const Identifier& id) const
+HGTD_AlignDBTool::cgetTransPtr(const Identifier& id) const
 {
     const AlignableTransformContainer* container = nullptr;
 
@@ -197,7 +197,7 @@ HGTDAlignDBTool::cgetTransPtr(const Identifier& id) const
 ///////////////////////////////////////////////////////////////////
 
 bool
-HGTDAlignDBTool::setTrans(const Identifier& id,
+HGTD_AlignDBTool::setTrans(const Identifier& id,
                           unsigned int level,
                           const Amg::Transform3D& trans) const
 {
@@ -221,7 +221,7 @@ HGTDAlignDBTool::setTrans(const Identifier& id,
 ///////////////////////////////////////////////////////////////////
 
 bool
-HGTDAlignDBTool::setTrans(
+HGTD_AlignDBTool::setTrans(
     const Identifier& id,
     unsigned int level,
     const Amg::Vector3D& translation,
@@ -252,7 +252,7 @@ HGTDAlignDBTool::setTrans(
 ///////////////////////////////////////////////////////////////////
 
 bool
-HGTDAlignDBTool::tweakTrans(const Identifier& id,
+HGTD_AlignDBTool::tweakTrans(const Identifier& id,
                             unsigned int level,
                             const Amg::Transform3D& trans) const
 {
@@ -274,7 +274,7 @@ HGTDAlignDBTool::tweakTrans(const Identifier& id,
 ///////////////////////////////////////////////////////////////////
 
 bool
-HGTDAlignDBTool::tweakTrans(
+HGTD_AlignDBTool::tweakTrans(
     const Identifier& id,
     unsigned int level,
     const Amg::Vector3D& translation,
@@ -305,7 +305,7 @@ HGTDAlignDBTool::tweakTrans(
 ///////////////////////////////////////////////////////////////////
 
 Amg::Transform3D
-HGTDAlignDBTool::getTrans(const Identifier& id,
+HGTD_AlignDBTool::getTrans(const Identifier& id,
                           unsigned int level) const
 {
     (void)level;
@@ -326,7 +326,7 @@ HGTDAlignDBTool::getTrans(const Identifier& id,
 
 ///////////////////////////////////////////////////////////////////
 
-StatusCode HGTDAlignDBTool::outputObjs()
+StatusCode HGTD_AlignDBTool::outputObjs()
 {
     ATH_MSG_INFO("Writing HGTD alignment payload");
 
@@ -411,7 +411,7 @@ StatusCode HGTDAlignDBTool::outputObjs()
 ///////////////////////////////////////////////////////////////////
 
 StatusCode
-HGTDAlignDBTool::fillDB(const std::string& tag,
+HGTD_AlignDBTool::fillDB(const std::string& tag,
                         unsigned int run1,
                         unsigned int event1,
                         unsigned int run2,
@@ -447,7 +447,7 @@ HGTDAlignDBTool::fillDB(const std::string& tag,
 
 ///////////////////////////////////////////////////////////////////
 
-void HGTDAlignDBTool::printDB() const
+void HGTD_AlignDBTool::printDB() const
 {
     const AlignableTransformContainer* container = nullptr;
 
@@ -483,7 +483,7 @@ void HGTDAlignDBTool::printDB() const
 
 ///////////////////////////////////////////////////////////////////
 
-void HGTDAlignDBTool::sortTrans() const
+void HGTD_AlignDBTool::sortTrans() const
 {
     const AlignableTransformContainer* container = nullptr;
 
