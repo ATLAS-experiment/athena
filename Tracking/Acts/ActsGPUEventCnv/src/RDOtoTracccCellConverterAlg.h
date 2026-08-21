@@ -39,11 +39,6 @@ public:
   virtual StatusCode finalize() override;
 
 private:
-  bool passTiming(const std::bitset<3>& timePattern) const;
-  int m_timeBinBits[3]{-1, -1, -1};
-  StatusCode decodeTimeBins();
-  StringProperty m_timeBinStr{this, "timeBins", ""};
-  
   RDOtoTracccCellConverterCommons m_common{*this};
 
   SG::ReadHandleKey<PixelRDO_Container> m_pixelRDOKey{

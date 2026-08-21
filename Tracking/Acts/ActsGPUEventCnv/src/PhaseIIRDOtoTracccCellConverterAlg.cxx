@@ -51,6 +51,10 @@ StatusCode PhaseIIRDOtoTracccCellConverterAlg::execute(const EventContext& ctx) 
   for (StripRawDataContainerProxy module_rdo_container_proxy : strip_rdo_container_collection_proxy) {
     if (!module_rdo_container_proxy.empty()) {
       for (StripRawDataProxy strip_rdo: module_rdo_container_proxy) {
+        if (!m_common.passTiming(strip_rdo.getTimeBin())) {
+            ATH_MSG_DEBUG("Strip failed timing check");
+            continue;
+        }
         nStrip += strip_rdo.getGroupSize();
       }
     }
@@ -125,6 +129,10 @@ StatusCode PhaseIIRDOtoTracccCellConverterAlg::execute(const EventContext& ctx) 
     }
 
     for (StripRawDataProxy strip_rdo: module_rdo_container_proxy) {
+      if (!m_common.passTiming(strip_rdo.getTimeBin())) {
+          ATH_MSG_DEBUG("Strip failed timing check");
+          continue;
+      }
 
       if (m_common.m_stripID->barrel_ec(module_id) == 0) {
         for (int i = 0; i < strip_rdo.getGroupSize(); ++i) {
