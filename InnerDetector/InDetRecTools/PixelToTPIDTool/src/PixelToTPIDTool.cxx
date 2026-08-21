@@ -29,7 +29,6 @@
 
 // Math functions:
 #include <cmath>
-
 #include "PathResolver/PathResolver.h"
 
 InDet::PixelToTPIDTool::PixelToTPIDTool(const std::string& t, const std::string& n, const IInterface*  p )
@@ -44,19 +43,15 @@ InDet::PixelToTPIDTool::PixelToTPIDTool(const std::string& t, const std::string&
 
   //conversion Factor
   //{.025,.023,.020}; //{Old Planars,IBL_3Ds,IBL_Planars} the sensors thickness will be take into account in dEdx calculation
-
   m_conversionfactor=energyPair/sidensity;
-
 }
 
 InDet::PixelToTPIDTool::~PixelToTPIDTool() = default;
 
-StatusCode InDet::PixelToTPIDTool::initialize() {
-
+StatusCode InDet::PixelToTPIDTool::initialize() { 
   ATH_CHECK(AthAlgTool::initialize());
 
   ATH_CHECK(detStore()->retrieve(m_pixelid,"PixelID"));
-
   if (m_IBLParameterSvc.retrieve().isFailure()) {
     ATH_MSG_FATAL("Could not retrieve IBLParameterSvc");
     return StatusCode::FAILURE;
@@ -65,6 +60,8 @@ StatusCode InDet::PixelToTPIDTool::initialize() {
   ATH_CHECK(m_moduleDataKey.initialize());
 
   ATH_CHECK(m_dedxKey.initialize());
+
+  ATH_CHECK(m_clusterSfKey.initialize());
 
   return StatusCode::SUCCESS;
 }
@@ -86,7 +83,6 @@ InDet::PixelToTPIDTool::dEdx(const EventContext& ctx,
                              int& nUsedHits,
                              int& nUsedIBLOverflowHits) const
 {
-
   unsigned int pixelhits = 0;
   nUsedHits=0;
   nUsedIBLOverflowHits=0;
@@ -129,15 +125,17 @@ InDet::PixelToTPIDTool::dEdx(const EventContext& ctx,
           int bec=m_pixelid->barrel_ec(pixclus->identify());
           int layer=m_pixelid->layer_disk(pixclus->identify());
           int eta_module=m_pixelid->eta_module(pixclus->identify());//check eta module to select thickness
-
-          float dotProd = (*tsosIter)->trackParameters()->momentum().dot(
-            (*tsosIter)->trackParameters()->associatedSurface().normal());
+          float dotProd = (*tsosIter)->trackParameters()->momentum().dot((*tsosIter)->trackParameters()->associatedSurface().normal());
           float cosalpha =
             fabs(dotProd / (*tsosIter)->trackParameters()->momentum().mag());
 
-          if (std::abs(cosalpha)<0.16) { continue; }
+          int phi_module = m_pixelid->phi_module(pixclus->identify());
+          Identifier idWafer = m_pixelid->wafer_id(bec,layer,phi_module,eta_module,true);
+          IdentifierHash idHash = m_pixelid->wafer_hash(idWafer); 
 
-          float charge=pixclus->prepRawData()->totalCharge()*cosalpha;
+          if (std::abs(cosalpha)<0.16) { continue; }
+          float scaleFactor = SG::ReadCondHandle<PixelClusterdEdxCondData>(m_clusterSfKey, ctx)->getScaleFactor(idHash);
+          float charge=pixclus->prepRawData()->totalCharge()*cosalpha*scaleFactor;
 
           //keep track if this is an ibl cluster with overflow
           int iblOverflow=0;
@@ -147,6 +145,7 @@ InDet::PixelToTPIDTool::dEdx(const EventContext& ctx,
             int overflowIBLToT =
               SG::ReadCondHandle<PixelChargeCalibCondData>(m_moduleDataKey, ctx)
                 ->getFEI4OverflowToT();
+
             const std::vector<int>& ToTs = pixclus->prepRawData()->totList();
 
             for (int pixToT : ToTs) {
@@ -164,7 +163,7 @@ InDet::PixelToTPIDTool::dEdx(const EventContext& ctx,
                 (fabs(locy) < 10. &&
                  (locx > -8.33 &&
                   locx < 8.3))) { // check if IBL 3D and good cluster selection
-              dEdxValue = charge * m_conversionfactor / IBL_3D_sensorthickness;
+              dEdxValue = charge * m_conversionfactor/IBL_3D_sensorthickness;
               dEdxMap.insert(std::pair<float, int>(dEdxValue, iblOverflow));
               pixelhits++;
               if (iblOverflow == 1) {
@@ -176,7 +175,7 @@ InDet::PixelToTPIDTool::dEdx(const EventContext& ctx,
                          locx < 8.3))) { // check if IBL planar and good cluster
                                          // selection
               dEdxValue =
-                charge * m_conversionfactor / IBL_PLANAR_sensorthickness;
+                charge * m_conversionfactor/ IBL_PLANAR_sensorthickness;
               dEdxMap.insert(std::pair<float, int>(dEdxValue, iblOverflow));
               pixelhits++;
               if (iblOverflow == 1) {

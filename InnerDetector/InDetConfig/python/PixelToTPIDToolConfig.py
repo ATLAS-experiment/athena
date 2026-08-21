@@ -3,8 +3,9 @@
 from AthenaConfiguration.ComponentFactory import CompFactory
 
 def PixelToTPIDToolCfg(flags, name = "PixelToTPIDTool", **kwargs):
-    from PixelConditionsAlgorithms.PixelConditionsConfig import PixeldEdxAlgCfg, PixelChargeCalibCondCfg   
+    from PixelConditionsAlgorithms.PixelConditionsConfig import PixeldEdxAlgCfg, PixelChargeCalibCondCfg, PixelClusterdEdxCondAlgCfg 
     acc = PixeldEdxAlgCfg(flags) # To produce PixeldEdxData CondHandle
     acc.merge(PixelChargeCalibCondCfg(flags))
+    acc.merge(PixelClusterdEdxCondAlgCfg(flags)) #Rebecca -- Attempt to produce PixelClusterdEdxCondData CondHandle
     acc.setPrivateTools(CompFactory.InDet.PixelToTPIDTool(name, **kwargs))
     return acc

@@ -70,6 +70,9 @@ def createInDetConfigFlags():
     icf.addFlag("InDet.PixelConfig.version", 'PixelConditionsAlgorithms/v1/')
     icf.addFlag("InDet.PixelConfig.UserInputFileName", '')
     icf.addFlag("InDet.doPixelFEcheckExpHits", True)
+    
+    #Flag to turn pixel cluster dEdx equalization on and off    
+    icf.addFlag("InDet.PixelConfig.clusterdEdxCalib", False) #Default is off 
 
     # Save SiHitCollections to RDO
     icf.addFlag("InDet.savePixelSiHits", lambda prevFlags:

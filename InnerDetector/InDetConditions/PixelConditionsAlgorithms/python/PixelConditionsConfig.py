@@ -434,6 +434,19 @@ def PostInclude_UsePixelModuleLevelMask(flags, cfg):
         cfg.merge(addOverride(flags, '/PIXEL/PixelModuleFeMask', 'PixelModuleFeMask-SIM-MC16-000-03'))
     return cfg
 
+def PixelClusterdEdxCondAlgCfg(flags, name="PixelClusterdEdxCondAlg", **kwargs):
+    """Return a ComponentAccumulator with configured PixelClusterdEdxCondAlg"""
+    acc = ComponentAccumulator()
+    acc.merge(PixelConfigCondAlgCfg(flags))
+    kwargs.setdefault("ConfigFlag", flags.InDet.PixelConfig.clusterdEdxCalib) #Default is false
+    if (flags.InDet.PixelConfig.clusterdEdxCalib):
+        kwargs.setdefault("ReadKey", "/PIXEL/dEdxCalibration")
+        acc.merge(addFolders(flags, "/PIXEL/dEdxCalibration",  className="CondAttrListCollection"))
+    else:
+        kwargs.setdefault("ReadKey", " ")
+    kwargs.setdefault("WriteKey","PixelClusterdEdxCondData")
+    acc.addCondAlgo(CompFactory.PixelClusterdEdxCondAlg(name, **kwargs))
+    return acc
 
 if __name__ == '__main__':
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg
