@@ -231,6 +231,9 @@ def FlavorTaggingCfg(
         else:
             args['remapping'].setdefault('BTagTrackToJetAssociator', 'GhostTrack')
 
+        if 'MC' in modset:
+            args['remapping'].setdefault('FTagMuons', 'FTagMuonsConeMatched')
+
         if any(tag in dirname for tag in ['/GN2v01/', '/GN2HL/']):
             args['tag_requirements'] = {'nonzeroTracks'}
         acc.merge(MultifoldGNNCfg(**args))
