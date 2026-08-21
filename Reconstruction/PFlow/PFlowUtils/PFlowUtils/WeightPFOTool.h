@@ -33,8 +33,11 @@ namespace CP {
     bool m_doEoverPweight;
     std::string m_theNeutralPFOScaleString;
 
-    void fillInterpolationWeight(const xAOD::FlowElement& cpfo, float& weight) const;
-    void fillDoubleCountingWeight(const xAOD::FlowElement& cpfo, float& weight) const;
+    float getSmoothingScaleFactorFromInterpolation(const xAOD::FlowElement& cpfo, const float& expectedEnergy) const;
+    float getDoubleCountingCorrection(const xAOD::FlowElement& cpfo, const float& expectedEnergy) const;
+    float calculateEMScaleCorrection(const xAOD::FlowElement& cpfo) const;
+    float calculateLCScaleCorrection(const xAOD::FlowElement& cpfo) const;
+    bool isInDenseEnvironment(const xAOD::FlowElement& cpfo) const;
 
   };
 
