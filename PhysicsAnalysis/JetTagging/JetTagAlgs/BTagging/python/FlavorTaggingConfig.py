@@ -29,6 +29,14 @@ _parent_collections = {
     'AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets': 'AntiKt10UFOCSSKJets'
 }
 
+# Poor man's impact parameter definitions a tagger can ask for, keyed by
+# the prefix its decorations are written under. The prefix names the
+# definition, so every variant needs its own entry here.
+_ip_definitions = {
+    'poormanIp_': False,
+    'poormanIpD0_': True,
+}
+
 
 def _resolve_tagger_name(dirname: str, networks: dict) -> str:
     """
@@ -212,10 +220,22 @@ def FlavorTaggingCfg(
              JetCollection=JetCollection,
              TrackCollection=trackCollection,
              nnFilePaths=networks['folds'],
-             remapping=networks.get('remapping', {}),
+             remapping=dict(networks.get('remapping', {})),
              electrons=('Electrons' if 'E' in modset else ''),
              muons=('Muons' if 'M' in modset else ''),
         )
+
+        # Taggers trained on the poor man's impact parameters read their
+        # IP inputs from a second set of decorations, written alongside
+        # the standard ones.
+        if ip_prefix := networks.get('ip_prefix'):
+            if ip_prefix not in _ip_definitions:
+                raise ValueError(
+                    f'unknown ip_prefix {ip_prefix!r}, expected one of '
+                    f'{sorted(_ip_definitions)}')
+            acc.merge(_fastCfg(flags, pv=pv_col, tc=trackCollection,
+                               pfx=ip_prefix))
+            args['remapping'].setdefault('btagIp_', ip_prefix)
 
         if foldHashName := networks.get('hash'):
             args['foldHashName'] = foldHashName
@@ -338,7 +358,8 @@ def _fastCfg(flags, pv, tc, pfx):
             name=name,
             trackContainer=tc,
             primaryVertexContainer=pv,
-            prefix=prefix
+            prefix=prefix,
+            d0_modification=_ip_definitions.get(prefix, False)
         )
     )
     return acc
