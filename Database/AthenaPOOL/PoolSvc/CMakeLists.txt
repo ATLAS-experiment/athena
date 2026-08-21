@@ -3,8 +3,6 @@
 # Declare the package name:
 atlas_subdir( PoolSvc )
 
-# External dependencies:
-find_package( CORAL COMPONENTS CoralBase CoralKernel RelationalAccess )
 
 atlas_add_library( PoolSvcLib
                    INTERFACE
@@ -14,5 +12,4 @@ atlas_add_library( PoolSvcLib
 # Component(s) in the package:
 atlas_add_component( PoolSvc
                      PoolSvc/*.h src/*.cxx src/components/*.cxx
-                     INCLUDE_DIRS ${CORAL_INCLUDE_DIRS}
-                     LINK_LIBRARIES ${CORAL_LIBRARIES} AthenaBaseComps CxxUtils DataModelRoot GaudiKernel PathResolver PersistentDataModel PoolSvcLib CollectionSvc PersistencySvc StorageSvc )
+                     LINK_LIBRARIES AthenaBaseComps CxxUtils DataModelRoot GaudiKernel PathResolver PersistentDataModel PoolSvcLib CollectionSvc PersistencySvc StorageSvc )

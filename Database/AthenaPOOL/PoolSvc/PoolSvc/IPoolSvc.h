@@ -70,13 +70,6 @@ public: // Non-static members
    /// @return size of the map of all labelled input contexts.
    virtual unsigned int getInputContextMapSize() const = 0;
 
-   /// @return the context.
-   virtual const coral::Context* context() const = 0;
-
-   /// @return void
-   /// @param compName [IN] string name of the component to be loaded.
-   virtual void loadComponent(const std::string& compName) = 0;
-
    /// @return void
    /// @param shareCat [IN] bool to share the file catalog.
    virtual void setShareMode(bool shareCat) = 0;
@@ -166,8 +159,6 @@ public: // Non-static members
 	   const std::string& contName = "",
 	   unsigned int contextId = IPoolSvc::kOutputStream) const = 0;
 
-   /// Setup Frontier cache for given logical or physical connection name
-   virtual StatusCode setFrontierCache(const std::string& conn) = 0;
 };
 
 #endif
