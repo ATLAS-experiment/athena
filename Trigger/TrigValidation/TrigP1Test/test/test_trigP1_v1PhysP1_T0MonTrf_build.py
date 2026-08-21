@@ -27,7 +27,6 @@ hlt.args += ' --outputHIST_HLTMONFile=hltmon.root'
 hlt.args += ' --outputDRAW_TRIGCOSTFile=TRIGCOST.pool.root'
 hlt.args += ' --outputNTUP_TRIGCOSTFile=cost.ntup.root'
 hlt.args += ' --runNumber 500306'  # RunNumber is set by Panda, but ignored by Trf to avoid changes from !48070
-hlt.args += ' --trigExe=athenaEF.py'
 
 #====================================================================================================
 # Tier-0 reco step (BS->AOD)
