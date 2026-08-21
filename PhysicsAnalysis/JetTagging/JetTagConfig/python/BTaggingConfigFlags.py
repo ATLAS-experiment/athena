@@ -220,6 +220,11 @@ def createBTaggingConfigFlags():
     # dicts. The dict has several keys:
     #  - folds: list of NNs to run
     #  - remapping (optional): any variable remapping
+    #  - ip_prefix (optional): for taggers trained on the poor man's
+    #    impact parameters, the decoration prefix they should be read
+    #    from. Schedules PoorMansIpAugmenterAlg with this prefix. See
+    #    _ip_definitions in FlavorTaggingConfig.py for the allowed
+    #    prefixes and the definition each one selects.
     btagcf.addFlag("BTagging.NNs", getNNs)
     btagcf.addFlag("BTagging.AK4TaggerName", lambda pcf: (
         "GN2HLv01" if pcf.GeoModel.Run>=LHCPeriod.Run4 else "GN2v01"))
