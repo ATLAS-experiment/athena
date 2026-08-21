@@ -36,6 +36,12 @@ atlas_add_executable( CDIReaderTester
                       src/CDIReaderTester.cxx
                       LINK_LIBRARIES ${ROOT_LIBRARIES} ${Boost_LIBRARIES} CxxUtils nlohmann_json::nlohmann_json CalibrationDataInterfaceLib)
 
+# Test that the combined SFGlobalEigen eigen-variations cover the expected bins:
+atlas_add_test( CalibrationDataGlobalEigenUnderflowAndLastBin_test
+                SOURCES test/CalibrationDataGlobalEigenUnderflowAndLastBin_test.cxx
+                LINK_LIBRARIES ${ROOT_LIBRARIES} CalibrationDataInterfaceLib PathResolver
+                POST_EXEC_SCRIPT noerror.sh )
+
 # Test that EigenVectorRecomposition() is side-effect free:
 atlas_add_test( CalibrationDataEigenRecomposition_test
                 SOURCES test/CalibrationDataEigenRecomposition_test.cxx
