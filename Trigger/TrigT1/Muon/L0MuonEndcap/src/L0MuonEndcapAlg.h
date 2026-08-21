@@ -17,9 +17,9 @@ namespace L0Muon {
 /**
  * @brief Initial data-flow boundary for the Phase-II endcap trigger.
  *
- * The algorithm consumes TGCCandData and records the TGC-side
- * SectorLogicCandData container sent towards MuCTPI.  Candidate combination
- * and output-word construction will be added in later merge requests.
+ * The algorithm converts TGCCandData into the TGC-side SectorLogicCandData
+ * container sent towards MuCTPI. Candidate combination and link identifiers
+ * will be added in later merge requests.
  */
 class L0MuonEndcapAlg final : public AthReentrantAlgorithm {
  public:

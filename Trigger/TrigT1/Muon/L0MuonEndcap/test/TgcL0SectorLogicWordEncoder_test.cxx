@@ -58,6 +58,13 @@ int main() {
       std::vector<std::uint32_t>{words.candWord, words.candExtraWord},
       0, 0U, 0U);
 
+  success &=
+      check(decoded->candWord() == words.candWord, "stored candidate word");
+  success &= check(decoded->candExtraWord() == words.candExtraWord,
+                   "stored candidate extra word");
+  success &= check(decoded->BCIDOffset() == 0, "current-BC offset");
+  success &= check(decoded->boardID() == 0U, "unset board ID");
+  success &= check(decoded->fiberID() == 0U, "unset fiber ID");
   success &= check(decoded->rawEta() == candidate->eta(), "eta code");
   success &= check(decoded->rawPhi() == candidate->phi(), "phi code");
   success &= check(decoded->pT() == candidate->pt(), "pT code");
