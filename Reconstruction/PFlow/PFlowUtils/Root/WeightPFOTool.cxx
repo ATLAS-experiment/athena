@@ -1,17 +1,16 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "PFlowUtils/WeightPFOTool.h"
 #include "xAODPFlow/FEHelpers.h"
 
+static constexpr float GeV = 1000.f;
+
 namespace CP {
 
   WeightPFOTool::WeightPFOTool(const std::string& name) : asg::AsgTool( name )
-  {
-    declareProperty("DoEoverPWeight", m_doEoverPweight=true);
-    declareProperty("NeutralPFOScale",m_theNeutralPFOScaleString="EM");
-  }
+  {}
 
   // Further details of the motivation for this procedure and explanations
   // of how it works can be found in section 4 of:
@@ -48,7 +47,7 @@ namespace CP {
 
     // Compute the weights internally
     weight = 0.;
-    if(cpfo.pt()>100e3) {
+    if(cpfo.pt()>100 * GeV) {
       ATH_MSG_WARNING("PFO with invalid pt " << cpfo.pt() << ", quitting.");
       return StatusCode::FAILURE;
     }
@@ -67,10 +66,10 @@ namespace CP {
         // This interpolates between the full track P and the expected calo E
         float EoverP = expectedEnergy/cpfo.e(); // divide once only
         if(m_doEoverPweight) {
-          if(cpfo.pt()<30e3) {        // take full track
+          if(cpfo.pt()<30*GeV) {        // take full track
             weight = 1.;
-          } else if(cpfo.pt()<60e3) { // linearly interpolate between 1 and E/P
-            float interpolf = (1.0 - (cpfo.pt()-30000)/30000);
+          } else if(cpfo.pt()<60*GeV) { // linearly interpolate between 1 and E/P
+            float interpolf = (1.0 - (cpfo.pt()-(30*GeV))/(30*GeV));
             weight = EoverP + interpolf * (1-EoverP);
           } else {                    // take the expected energy
             weight = EoverP;
@@ -87,7 +86,7 @@ namespace CP {
       }//EM Scale
       else if (CP::LC == theNeutralPFOScale){
         if(!isInDenseEnvironment){
-          if(cpfo.pt()<30e3 || cpfo.pt() >= 60e03) weight = 1;
+          if(cpfo.pt()<30*GeV || cpfo.pt() >= 60*GeV) weight = 1;
         }
       }
     }
@@ -115,12 +114,12 @@ namespace CP {
 
     // Compute the weights internally
     weight = 0.;
-    if(cpfo.pt()>100e3) {
+    if(cpfo.pt()>100*GeV) {
       ATH_MSG_WARNING("PFO with invalid pt " << cpfo.pt() << ", quitting.");
       return StatusCode::FAILURE;
     }
 
-    const static SG::AuxElement::ConstAccessor<int> accDenseEnv("IsInDenseEnvironment");
+    const static SG::ConstAccessor<int> accDenseEnv("IsInDenseEnvironment");
     int isInDenseEnvironment = accDenseEnv(cpfo);
 
     //EM case first
@@ -137,7 +136,7 @@ namespace CP {
     }//EM Scale
     else if (CP::LC == theNeutralPFOScale){
       if(!isInDenseEnvironment){
-        if(cpfo.pt()<30e3 || cpfo.pt() >= 60e03) weight = 1;
+        if(cpfo.pt()<30*GeV || cpfo.pt() >= 60*GeV) weight = 1;
       }
     }
         
@@ -151,14 +150,14 @@ namespace CP {
 
   void WeightPFOTool::fillInterpolationWeight(const xAOD::FlowElement& cpfo, float& weight) const{    
 
-    const static SG::AuxElement::ConstAccessor<float> accExpE("TracksExpectedEnergyDeposit");
+    const static SG::ConstAccessor<float> accExpE("TracksExpectedEnergyDeposit");
     float expectedEnergy = accExpE(cpfo);
 
     float EoverP = expectedEnergy/cpfo.e(); 
-    if(cpfo.pt()<30e3) {        // take full track
+    if(cpfo.pt()<30*GeV) {        // take full track
       weight = 1.;
-    } else if(cpfo.pt()<60e3) { // linearly interpolate between 1 and E/P
-      float interpolf = (1.0 - (cpfo.pt()-30000)/30000);
+    } else if(cpfo.pt()<60*GeV) { // linearly interpolate between 1 and E/P
+      float interpolf = (1.0 - (cpfo.pt()-(30*GeV))/(30*GeV));
       weight = EoverP + interpolf * (1-EoverP);
     } else {                    // take the expected energy
       weight = EoverP;
@@ -170,7 +169,7 @@ namespace CP {
 
   void WeightPFOTool::fillDoubleCountingWeight(const xAOD::FlowElement& cpfo, float& weight) const{
 
-    const static SG::AuxElement::ConstAccessor<float> accExpE("TracksExpectedEnergyDeposit");
+    const static SG::ConstAccessor<float> accExpE("TracksExpectedEnergyDeposit");
     float expectedEnergy = accExpE(cpfo);
 
     float EoverP = expectedEnergy/cpfo.e(); 
