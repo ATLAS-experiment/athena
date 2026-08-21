@@ -10,12 +10,9 @@ find_package( ROOT COMPONENTS Hist Tree RIO Core )
 atlas_add_library( RootCoreUtils
    RootCoreUtils/*.h Root/*.cxx
    PUBLIC_HEADERS RootCoreUtils
+   LINK_LIBRARIES AsgMessagingLib
    PRIVATE_INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
    PRIVATE_LINK_LIBRARIES ${ROOT_LIBRARIES} )
-
-# Application(s) in the package:
-atlas_add_executable( rcu_locate util/rcu_locate.cxx
-   LINK_LIBRARIES RootCoreUtils )
 
 atlas_add_test( ut_expression
    SOURCES test/ut_expression.cxx

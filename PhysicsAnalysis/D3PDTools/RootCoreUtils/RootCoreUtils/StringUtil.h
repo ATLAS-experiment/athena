@@ -6,11 +6,8 @@
 #ifndef ROOT_CORE_UTILS__STRING_UTIL_H
 #define ROOT_CORE_UTILS__STRING_UTIL_H
 
-#include <RootCoreUtils/Global.h>
 #include <regex>
 #include <string>
-
-class TString;
 
 namespace RCU
 {
@@ -33,8 +30,6 @@ namespace RCU
   ///   the given glob expression
   /// guarantee: strong
   /// failures: out of memory II
-  /// rationale: I am returning a TString instead of an std::string,
-  ///   so that this can be passed directly into regexp
   std::string glob_to_regexp(std::string_view glob);
 }
 

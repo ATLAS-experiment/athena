@@ -26,7 +26,6 @@
 #include <EventLoop/StatusCode.h>
 #include <RootCoreUtils/Assert.h>
 #include <RootCoreUtils/RootUtils.h>
-#include <RootCoreUtils/ThrowMsg.h>
 #include <RootUtils/WithRootErrorHandler.h>
 #include <SampleHandler/DiskOutput.h>
 #include <SampleHandler/DiskWriter.h>
@@ -43,6 +42,7 @@
 #include <TObjString.h>
 #include <fstream>
 #include <memory>
+#include <stdexcept>
 #include <exception>
 
 //
@@ -122,7 +122,7 @@ namespace EL
     RCU_READ_INVARIANT (this);
 
     TObject *result = m_histOutput->getOutputHist (name);
-    if (result == nullptr) RCU_THROW_MSG ("unknown output histogram: " + name);
+    if (result == nullptr) throw std::runtime_error ("unknown output histogram: " + name);
     return result;
   }
 
@@ -134,7 +134,7 @@ namespace EL
     RCU_READ_INVARIANT (this);
     TFile *result = getOutputFileNull (label);
     if (result == 0)
-      RCU_THROW_MSG ("no output dataset defined with label: " + label);
+      throw std::runtime_error ("no output dataset defined with label: " + label);
     return result;
   }
 
@@ -183,14 +183,12 @@ namespace EL
     auto outputIter = m_outputs.find (stream);
     if (outputIter == m_outputs.end())
     {
-      RCU_THROW_MSG ( "No output file with stream name \"" + stream
-                      + "\" found" );
+      throw std::runtime_error ("No output file with stream name \"" + stream + "\" found");
     }
 
     TTree *result = outputIter->second->getOutputTree( name );
     if( result == nullptr ) {
-      RCU_THROW_MSG ( "No tree with name \"" + name + "\" in stream \"" +
-                      stream + "\"" );
+      throw std::runtime_error ("No tree with name \"" + name + "\" in stream \"" + stream + "\"");
     }
     return result;
   }
@@ -269,7 +267,7 @@ namespace EL
     RCU_READ_INVARIANT (this);
 
     if (m_event == nullptr)
-      RCU_THROW_MSG ("Job not configured for xAOD support");
+      throw std::runtime_error ("Worker::xaodEvent: Job not configured for xAOD support");
     return m_event;
   }
 
@@ -281,7 +279,7 @@ namespace EL
     RCU_READ_INVARIANT (this);
 
     if (m_tstore == nullptr)
-      RCU_THROW_MSG ("Job not configured for xAOD support");
+      throw std::runtime_error ("Worker::xaodStore: Job not configured for xAOD support");
     return m_tstore;
   }
 

@@ -16,7 +16,6 @@
 #include <EventLoop/Job.h>
 #include <EventLoop/ManagerData.h>
 #include <EventLoop/MessageCheck.h>
-#include <RootCoreUtils/ThrowMsg.h>
 #include <TSystem.h>
 #include <sstream>
 
@@ -92,7 +91,10 @@ namespace EL
               << " run"<<iter<<".cmd";
 
           if (gSystem->Exec (cmd.str().c_str()) != 0)
-            RCU_THROW_MSG (("failed to execute: " + cmd.str()).c_str());
+          {
+            ANA_MSG_ERROR ("failed to execute: " << cmd.str());
+            return StatusCode::FAILURE;
+          }
         }    
         data.submitted = true;
       }

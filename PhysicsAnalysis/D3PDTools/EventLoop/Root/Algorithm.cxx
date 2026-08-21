@@ -13,11 +13,12 @@
 #include <EventLoop/StatusCode.h>
 #include <EventLoop/Worker.h>
 #include <RootCoreUtils/Assert.h>
-#include <RootCoreUtils/ThrowMsg.h>
 #include <TH1.h>
 
 #include <AsgMessaging/MsgLevel.h>
 #include <AsgMessaging/MsgStream.h>
+
+#include <stdexcept>
 
 //
 // method implementations
@@ -249,7 +250,7 @@ namespace EL
   {
     RCU_CHANGE_INVARIANT (this);
     if (setupJob (job) != StatusCode::SUCCESS)
-      RCU_THROW_MSG ("Algorithm::setupJob returned StatusCode::FAILURE");
+      throw std::runtime_error ("Algorithm::setupJob returned StatusCode::FAILURE");
   }
 
 

@@ -20,11 +20,10 @@
 #include <EventLoop/AsgToolWrapper.h>
 #include <EventLoop/OutputStream.h>
 #include <RootCoreUtils/Assert.h>
-#include <RootCoreUtils/CheckRootVersion.h>
-#include <RootCoreUtils/ThrowMsg.h>
 #include <SampleHandler/MetaFields.h>
 #include <SampleHandler/MetaNames.h>
 #include <sstream>
+#include <stdexcept>
 
 //
 // method implementations
@@ -147,8 +146,6 @@ namespace EL
   Job ::
   Job ()
   {
-    RCU::check_root_version ();
-
     RCU_NEW_INVARIANT (this);
   }
 
@@ -249,7 +246,7 @@ namespace EL
       {
         std::ostringstream message;
         message << "failed to rename algorithm " << val_algorithm->GetName() << " to " << myname;
-        RCU_THROW_MSG (message.str());
+        throw std::runtime_error (message.str());
       }
     }
 
@@ -310,7 +307,7 @@ namespace EL
     else if (config.componentType() == "AsgService")
       algsAdd (std::make_unique<AsgServiceWrapper> (asg::AsgServiceConfig (config)));
     else
-      RCU_THROW_MSG ("unknown component type: \"" + config.componentType() + "\"");
+      throw std::runtime_error ("unknown component type: \"" + config.componentType() + "\"");
   }
 
 

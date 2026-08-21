@@ -11,9 +11,9 @@
 #include <SampleHandler/DiskListLocal.h>
 
 #include <memory>
+#include <stdexcept>
 #include <TSystem.h>
 #include <RootCoreUtils/Assert.h>
-#include <RootCoreUtils/ThrowMsg.h>
 
 //
 // method implementations
@@ -69,7 +69,7 @@ namespace SH
     {
       m_dirp = gSystem->OpenDirectory (m_dir.c_str());
       if (!m_dirp)
-	RCU_THROW_MSG ("could not open directory " + m_dir);
+        throw std::runtime_error ("could not open directory " + m_dir);
     }
 
     const char *subresult = 0;

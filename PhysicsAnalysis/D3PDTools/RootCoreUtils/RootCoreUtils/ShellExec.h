@@ -7,8 +7,6 @@
 #ifndef ROOT_CORE_UTILS__SHELL_EXEC_H
 #define ROOT_CORE_UTILS__SHELL_EXEC_H
 
-#include <RootCoreUtils/Global.h>
-
 #include <string>
 
 namespace RCU

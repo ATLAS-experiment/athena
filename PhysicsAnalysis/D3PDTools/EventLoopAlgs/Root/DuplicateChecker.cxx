@@ -16,13 +16,13 @@
 #include <EventLoop/Job.h>
 #include <EventLoop/IWorker.h>
 #include <RootCoreUtils/Assert.h>
-#include <RootCoreUtils/ThrowMsg.h>
 #include <SampleHandler/MetaFields.h>
 #include <SampleHandler/MetaNames.h>
 #include <SampleHandler/Sample.h>
 #include <TChain.h>
 #include <TTree.h>
 #include <fstream>
+#include <stdexcept>
 #include <xAODEventInfo/EventInfo.h>
 #include <xAODRootAccess/Event.h>
 
@@ -114,7 +114,7 @@ namespace EL
 	number_type runNumber, eventNumber;
 	std::istringstream str (line);
 	if (!(str >> sampleName >> fileName >> entry >> runNumber >> eventNumber))
-	  RCU_THROW_MSG ("failed to parse line: " + line);
+	  throw std::runtime_error ("failed to parse line: " + line);
 	addKnownDuplicate (sampleName, fileName, entry, runNumber, eventNumber);
       }
     }
@@ -158,7 +158,7 @@ namespace EL
 	   entry < entries; ++ entry)
       {
 	if (tree->GetEntry (entry) < 0)
-	  RCU_THROW_MSG ("failed to read tree entry");
+	  throw std::runtime_error ("failed to read tree entry");
 	std::pair<number_type,number_type> id (runNumber, eventNumber);
 
 	if (known_list.find (id) == known_list.end())
@@ -312,7 +312,7 @@ namespace EL
   {
     const xAOD::EventInfo *info = nullptr;
     if (m_event->retrieve (info, m_eventInfoName).isFailure())
-      RCU_THROW_MSG ("didn't find event info");
+      throw std::runtime_error ("didn't find event info \"" + m_eventInfoName + "\"");
 
     m_runNumber = info->runNumber();
     m_eventNumber = info->eventNumber();

@@ -12,7 +12,6 @@
 
 #include <AsgMessaging/MessageCheck.h>
 #include <RootCoreUtils/Assert.h>
-#include <RootCoreUtils/ThrowMsg.h>
 #include <SampleHandler/GridTools.h>
 #include <errno.h>
 #include <unistd.h>
@@ -67,7 +66,10 @@ namespace EL
       file = str.str();
     }
     if (file.empty() || gSystem->AccessPathName (file.c_str()) != false)
-      RCU_THROW_MSG ("failed to find X509 proxy file: " + file);
+    {
+      ANA_MSG_ERROR ("failed to find X509 proxy file: " << file);
+      return StatusCode::FAILURE;
+    }
 
     {
       std::ifstream stream (file);
@@ -75,10 +77,13 @@ namespace EL
       while (stream.get (ch))
 	m_proxyData += ch;
       if (!stream.eof())
-	RCU_THROW_MSG ("error reading: " + file);
+      {
+        ANA_MSG_ERROR ("error reading X509 proxy file: " << file);
+        return StatusCode::FAILURE;
+      }
     }
 
-    return StatusCode::FAILURE;
+    return StatusCode::SUCCESS;
   }
 
 

@@ -16,7 +16,6 @@
 #include <EventLoop/Job.h>
 #include <EventLoop/ManagerData.h>
 #include <EventLoop/MessageCheck.h>
-#include <RootCoreUtils/ThrowMsg.h>
 #include <TSystem.h>
 #include <sstream>
 
@@ -62,7 +61,10 @@ namespace EL
     case Detail::ManagerStep::doResubmit:
       {
         if (data.resubmit)
-          RCU_THROW_MSG ("resubmission not supported for this driver");
+        {
+          ANA_MSG_ERROR ("resubmission not supported for the SoGE driver");
+          return StatusCode::FAILURE;
+        }
 
         assert (!data.batchJobIndices.empty());
         assert (data.batchJobIndices.back() + 1 == data.batchJobIndices.size());
@@ -73,7 +75,10 @@ namespace EL
             << data.options.castString (Job::optSubmitFlags)
             << " -t 1-" << (njob) << " run";
         if (gSystem->Exec (cmd.str().c_str()) != 0)
-          RCU_THROW_MSG (("failed to execute: " + cmd.str()).c_str());
+        {
+          ANA_MSG_ERROR ("failed to execute: " << cmd.str());
+          return StatusCode::FAILURE;
+        }
         data.submitted = true;
       }
       break;

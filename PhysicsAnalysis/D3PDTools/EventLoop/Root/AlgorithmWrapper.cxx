@@ -17,8 +17,10 @@
 #include <EventLoop/Algorithm.h>
 #include <EventLoop/IWorker.h>
 #include <RootCoreUtils/Assert.h>
-#include <RootCoreUtils/ThrowMsg.h>
 #include <xAODRootAccess/Event.h>
+
+#include <format>
+#include <stdexcept>
 
 //
 // method implementations
@@ -69,7 +71,7 @@ namespace EL
     std::unique_ptr<Algorithm> myalgorithm
       (dynamic_cast<Algorithm*>(m_algorithm->Clone ()));
     if (myalgorithm == nullptr)
-      RCU_THROW_MSG ("failed to clone algorithm " + std::string (m_algorithm->GetName()));
+      throw std::runtime_error (std::format ("failed to clone algorithm {}", m_algorithm->GetName()));
     return std::make_unique<AlgorithmWrapper> (std::move (myalgorithm));
   }
 
