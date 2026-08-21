@@ -103,8 +103,7 @@ namespace FlavorTagDiscriminants {
 
       // everything else is already decorated to the associated truth particle
       const auto truth = m_trackTruthOriginTool->getTruth(track);
-      // ATLASRECTS-8290: replace m_uid with HepMC::uniqueID
-      dec_uniqueID(*track) = truth ? m_uid(*truth) : HepMC::UNDEFINED_ID;
+      dec_uniqueID(*track) = truth ? HepMC::uniqueID(truth) : HepMC::UNDEFINED_ID;
       dec_parent_uniqueID(*track) = truth ? acc_parent_uniqueID(*truth) : HepMC::UNDEFINED_ID;
       dec_type_label(*track) = truth ? acc_type_label(*truth) : TruthDecoratorHelpers::TruthType::Label::NoTruth;
       dec_source_label(*track) = truth ? acc_source_label(*truth) : TruthDecoratorHelpers::TruthSource::Label::NoTruth;

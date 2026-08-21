@@ -50,7 +50,7 @@ namespace FlavorTagDiscriminants {
       this, "ftagTruthVertexIndex", m_TruthContainerKey, "ftagTruthVertexIndex",
         "ftagTruth vertex index of the truth particle"};
     SG::WriteDecorHandleKey< xAOD::TruthParticleContainer > m_dec_parent_uniqueID {
-      this, "ftagTruthParentBarcode", m_TruthContainerKey, "ftagTruthParentBarcode",
+      this, "ftagTruthParentUniqueID", m_TruthContainerKey, "ftagTruthParentUniqueID",
         "UniqueID of parent of linked truth particle"};
 
     // truth origin tool

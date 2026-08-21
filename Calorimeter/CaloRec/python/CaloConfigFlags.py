@@ -46,7 +46,7 @@ def createCaloConfigFlags():
     ccf.addFlag("Calo.TopoCluster.clusterTimingCutLower", -7.5)
     ccf.addFlag("Calo.TopoCluster.clusterTimingCutUpper", +7.5)
     ccf.addFlag("Calo.TopoCluster.writeExtendedClusterMoments", True)
-    ccf.addFlag("Calo.TopoCluster.CalibrationHitDecorationName","calclus_NLeadingTruthParticleBarcodeEnergyPairs")
+    ccf.addFlag("Calo.TopoCluster.CalibrationHitDecorationName","calclus_NLeadingTruthParticleUniqueIDEnergyPairs")
     ccf.addFlag("Calo.TopoCluster.addCalibrationHitDecoration",False)
     ccf.addFlag("Calo.TopoCluster.doCalibHitMoments",False)
     ccf.addFlag("Calo.TopoCluster.writeCalibHitClusterMoments",False)

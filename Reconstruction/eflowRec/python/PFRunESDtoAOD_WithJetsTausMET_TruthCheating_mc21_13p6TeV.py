@@ -38,7 +38,7 @@ if __name__=="__main__":
 
     from CaloCalibHitRec.CaloCalibHitDecoratorCfg import CaloCalibHitDecoratorCfg 
     #switch this to use uncalibrated topoclusters which eflowRec will use.
-    cfg.merge(CaloCalibHitDecoratorCfg(cfgFlags,name="CaloCalibHitDecoratorEMAlgorithm",CaloClusterWriteDecorHandleKey_NLeadingTruthParticles="CaloTopoClusters.calclus_NLeadingTruthParticleBarcodeEnergyPairs"))
+    cfg.merge(CaloCalibHitDecoratorCfg(cfgFlags,name="CaloCalibHitDecoratorEMAlgorithm",CaloClusterWriteDecorHandleKey_NLeadingTruthParticles="CaloTopoClusters.calclus_NLeadingTruthParticleUniqueIDEnergyPairs"))
 
     from PFlowUtils.configureRecoForPFlow import configureRecoForPFlowCfg
     cfg.merge(configureRecoForPFlowCfg(cfgFlags))
@@ -46,7 +46,7 @@ if __name__=="__main__":
     from PFlowUtils.PFlowCalibHitDecoratorCfg import PFlowCalibHitDecoratorCfg
     cfg.merge(PFlowCalibHitDecoratorCfg(cfgFlags)) #
 
-    cfg.getEventAlgo("PFlowCalibPFODecoratorAlgorithm").PFOWriteDecorHandleKey_NLeadingTruthParticles="GlobalNeutralParticleFlowObjects.calpfo_NLeadingTruthParticleBarcodeEnergyPairs"
+    cfg.getEventAlgo("PFlowCalibPFODecoratorAlgorithm").PFOWriteDecorHandleKey_NLeadingTruthParticles="GlobalNeutralParticleFlowObjects.calpfo_NLeadingTruthParticleUniqueIDEnergyPairs"
 
     from JetRecConfig.StandardSmallRJets import AntiKt4Truth
     from JetRecConfig.JetRecConfig import JetRecCfg

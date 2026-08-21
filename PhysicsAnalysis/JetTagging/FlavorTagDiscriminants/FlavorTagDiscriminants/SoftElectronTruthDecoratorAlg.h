@@ -53,7 +53,7 @@ namespace FlavorTagDiscriminants {
       this, "acc_ftagTruthVertexIndex", m_truthParticleContainerKey, "ftagTruthVertexIndex",
         "Accessor for the truth vertex index of the truth particle"};
     RDHK m_acc_parent_uniqueID {
-      this, "acc_ftagTruthParentBarcode", m_truthParticleContainerKey, "ftagTruthParentBarcode",
+      this, "acc_ftagTruthParentUniqueID", m_truthParticleContainerKey, "ftagTruthParentUniqueID",
         "Accessor for the truth parent uniqueID of the truth particle"};
 
     // Decorators for electrons
@@ -71,10 +71,10 @@ namespace FlavorTagDiscriminants {
       this, "dec_ftagTruthVertexIndex", m_ElectronContainerKey, "ftagTruthVertexIndex",
         "Truth vertex index of the electron"};
     WDHK m_dec_uniqueID {
-      this, "dec_ftagTruthBarcode", m_ElectronContainerKey, "ftagTruthBarcode",
+      this, "dec_ftagTruthUniqueID", m_ElectronContainerKey, "ftagTruthUniqueID",
         "UniqueID of linked truth particle"};
     WDHK m_dec_parent_uniqueID {
-      this, "dec_ftagTruthParentBarcode", m_ElectronContainerKey, "ftagTruthParentBarcode",
+      this, "dec_ftagTruthParentUniqueID", m_ElectronContainerKey, "ftagTruthParentUniqueID",
         "UniqueID of parent of linked truth particle"};
 
     // truth origin tool

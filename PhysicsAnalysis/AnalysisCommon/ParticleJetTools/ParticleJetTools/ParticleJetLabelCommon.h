@@ -150,7 +150,7 @@ namespace ParticleJetTools {
     tool.declareProperty("LabelPdgIdName", n->pdgId="", "Attribute for pdgID of labelling particle");
     tool.declareProperty("LabelPositionDPhiName", n->positionDPhi="", "Attribute for the position dPhi of the labeling particle ");
     tool.declareProperty("LabelPositionDEtaName", n->positionDEta="", "Attribute for the position dEta of the labeling particle ");
-    tool.declareProperty("LabelBarcodeName", n->uniqueID="", "Attribute for uniqueID of labeling particle");
+    tool.declareProperty("LabelUniqueIDName", n->uniqueID="", "Attribute for uniqueID of labeling particle");
     tool.declareProperty("ChildLxyName", n->childLxy="", "Attribute for the labeling particle child Lxy");
     tool.declareProperty("ChildPtName", n->childPt="", "Attribute for the labeling particle child Pt");
     tool.declareProperty("ChildPdgIdName", n->childPdgId="", "Attribute for the labeling particle child pdg ID");

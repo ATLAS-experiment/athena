@@ -618,7 +618,7 @@ def getConstitModAlg(parentjetdef, constitSeq, monTool=None):
         # https://gitlab.cern.ch/atlas/athena/-/blob/main/Reconstruction/eflowRec/eflowRec/PFMuonFlowElementAssoc.h       
 
         inChargedFEDecorKeys += ["cellCPData", "FE_ElectronLinks", "FE_PhotonLinks", "FE_MuonLinks"]
-        inNeutralFEDecorKeys += ["calpfo_NLeadingTruthParticleBarcodeEnergyPairs", "FE_ElectronLinks", "FE_PhotonLinks", "FE_MuonLinks"]
+        inNeutralFEDecorKeys += ["calpfo_NLeadingTruthParticleUniqueIDEnergyPairs", "FE_ElectronLinks", "FE_PhotonLinks", "FE_MuonLinks"]
 
     modseq = CompFactory.JetConstituentModSequence(seqname,
                                                    InputType=inputtype,

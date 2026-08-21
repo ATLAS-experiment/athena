@@ -101,8 +101,7 @@ namespace FlavorTagDiscriminants {
 
       // get parent hadron and decorate uniqueID
       auto truth_parent = TruthDecoratorHelpers::get_parent_hadron(truth_particle);
-      // ATLASRECTS-8290: replace m_uid with HepMC::uniqueID
-      dec_parent_uniqueID(*truth_particle) = truth_parent ? m_uid(*truth_parent) : HepMC::UNDEFINED_ID;
+      dec_parent_uniqueID(*truth_particle) = truth_parent ? HepMC::uniqueID(truth_parent) : HepMC::UNDEFINED_ID;
 
       // get truth origin and use it for exclusive origin and secondary origin
       int truth_origin = m_truthOriginTool->getTruthOrigin(truth_particle);

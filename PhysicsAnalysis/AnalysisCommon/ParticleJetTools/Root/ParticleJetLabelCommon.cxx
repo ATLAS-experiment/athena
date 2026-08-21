@@ -217,8 +217,7 @@ namespace ParticleJetTools {
       decs.positionDPhi(jet) = positionDPhi(labelling_particle, jet, origin);
       decs.positionDEta(jet) = positionDEta(labelling_particle, jet, origin);
       decs.uniqueID(jet) = labelling_particle ?
-        // ATLASRECTS-8290: this should be replaced with ->uid()
-        decs.acc_uid(*labelling_particle) : HepMC::INVALID_PARTICLE_ID;
+        HepMC::uniqueID(labelling_particle) : HepMC::INVALID_PARTICLE_ID;
       decs.childLxy(jet) = partLxy(child_particle, origin);
       decs.childPt(jet) = partPt(child_particle);
       decs.childPdgId(jet) = partPdgId(child_particle);
