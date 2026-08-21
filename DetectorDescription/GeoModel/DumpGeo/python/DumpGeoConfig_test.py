@@ -3,7 +3,7 @@
 """Unit tests for the DumpGeo ComponentAccumulator configuration."""
 
 import unittest
-from unittest.mock import call, patch
+from unittest.mock import patch
 
 from AthenaConfiguration.AthConfigFlags import AthConfigFlags
 from AthenaConfiguration.ComponentAccumulator import ConfigurationError
@@ -11,10 +11,9 @@ from AthenaConfiguration.ComponentAccumulator import ConfigurationError
 from DumpGeo.DumpGeoConfig import (
     DumpGeoCfg,
     dumpGeoOutputFileName,
-    logZDCGeometryWarning,
+    logZDCFailureReminder,
     resolveDumpGeoGeometryTag,
     validateDumpGeoOutputFile,
-    zdcGeometryWarning,
 )
 from DumpGeo.DumpGeoConfigFlags import createDumpGeoConfigFlags
 
@@ -22,18 +21,12 @@ from DumpGeo.DumpGeoConfigFlags import createDumpGeoConfigFlags
 class DumpGeoConfigTest(unittest.TestCase):
     """Characterization tests for DumpGeoCfg."""
 
-    class ZDCTags:
-        RUN2_ZDC = "ATLAS-R2-ZDC"
-        RUN3_ZDC23 = "ATLAS-R3-ZDC23"
-        RUN3_ZDC24 = "ATLAS-R3-ZDC24"
-
     @staticmethod
     def _flags(*, output_file="", filters=None, force_overwrite=False,
-               show_treetops=False, atlas_version="ATLAS-UNIT-TEST-00-00-00",
-               geometry_zdc=False):
+               show_treetops=False,
+               atlas_version="ATLAS-UNIT-TEST-00-00-00"):
         flags = AthConfigFlags()
         flags.addFlag("GeoModel.AtlasVersion", atlas_version)
-        flags.addFlag("Detector.GeometryZDC", geometry_zdc)
         createDumpGeoConfigFlags(flags)
         flags.GeoModel.DumpGeo.OutputFileName = output_file
         flags.GeoModel.DumpGeo.FilterDetManagers = filters or []
@@ -263,43 +256,19 @@ class DumpGeoConfigTest(unittest.TestCase):
             "geometry-METADATA-TAG.db",
         )
 
-    def test_zdc_warning_for_unknown_geometry_tag(self):
-        flags = self._flags(geometry_zdc=True)
+    def test_zdc_failure_reminder_is_logged(self):
+        with patch("DumpGeo.DumpGeoConfig._logger.error") as logger_error:
+            logZDCFailureReminder(zdc_enabled=True, run_succeeded=False)
 
-        warning = zdcGeometryWarning(flags, self.ZDCTags)
+        logger_error.assert_called_once()
+        self.assertIn("ZDC geometry was enabled", logger_error.call_args[0][0])
 
-        self.assertIsNotNone(warning)
-        rendered_warning = warning[0] % warning[1:]
-        self.assertIn("ATLAS-UNIT-TEST-00-00-00", rendered_warning)
-        self.assertIn("--detDescr=ATLAS-R3-ZDC23", rendered_warning)
-        self.assertIn("--detDescr=ATLAS-R3-ZDC24", rendered_warning)
+    def test_zdc_failure_reminder_is_suppressed_when_not_applicable(self):
+        with patch("DumpGeo.DumpGeoConfig._logger.error") as logger_error:
+            logZDCFailureReminder(zdc_enabled=False, run_succeeded=False)
+            logZDCFailureReminder(zdc_enabled=True, run_succeeded=True)
 
-    def test_no_zdc_warning_for_known_geometry_tag(self):
-        flags = self._flags(
-            atlas_version=self.ZDCTags.RUN3_ZDC23,
-            geometry_zdc=True,
-        )
-
-        self.assertIsNone(zdcGeometryWarning(flags, self.ZDCTags))
-
-    def test_no_zdc_warning_when_geometry_is_disabled(self):
-        flags = self._flags(geometry_zdc=False)
-
-        self.assertIsNone(zdcGeometryWarning(flags, self.ZDCTags))
-
-    def test_repeated_zdc_warning_is_logged_as_final_reminder(self):
-        warning = ("ZDC warning for tag '%s'", "ATLAS-TEST")
-
-        with patch("DumpGeo.DumpGeoConfig._logger.warning") as logger_warning:
-            logZDCGeometryWarning(warning, repeated=True)
-
-        self.assertEqual(
-            logger_warning.call_args_list,
-            [
-                call("Repeating the earlier ZDC geometry warning:"),
-                call(*warning),
-            ],
-        )
+        logger_error.assert_not_called()
 
     def test_custom_filename_and_filter(self):
         """A custom filename must not disable DetectorManager filtering."""

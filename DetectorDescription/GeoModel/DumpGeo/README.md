@@ -162,10 +162,10 @@ In that way, we get meaningful, comprehensive checkboxes when visualizing the ou
 
 You can use all the common Athena flags to steer the dump mechanism. 
 
-When ZDC geometry is enabled with a geometry tag that is not one of the known
-ZDC tags, DumpGeo prints a warning before configuration. In standalone mode,
-the warning is repeated after the Athena run so that it remains visible after
-the geometry initialization messages.
+ZDC geometry compatibility is validated by `ZDC_DetTool` while GeoModel is
+initialized. If geometry-service initialization fails before the DumpGeo
+algorithm can run, standalone DumpGeo prints a final reminder to inspect the
+preceding ZDC tool diagnostics.
 
 With the new CA configuration, you can use the `--help` option to get the list of all available options. 
 
@@ -209,7 +209,7 @@ The tests cover:
 * non-destructive output-file preflight when overwrite is enabled;
 * suppression of configuration-flag dumps below the debug logging level;
 * geometry-tag precedence and its use in automatic output filenames;
-* ZDC warning selection for enabled, disabled, and known-tag configurations; and
+* the final ZDC diagnostic reminder after a failed standalone run; and
 * the configurable algorithm name.
 
 All tests are regular regression tests and are expected to pass.
