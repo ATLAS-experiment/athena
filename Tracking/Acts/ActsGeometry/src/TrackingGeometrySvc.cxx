@@ -831,7 +831,7 @@ TrackingGeometrySvc::makeHGTDLayerBuilder(
   cfg.elementStore = m_elementStore;
   cfg.layerCreator = layerCreator;
   cfg.idHelper = m_HGTD_idHelper;
-  cfg.numberOfBinsFactor = m_numberOfBinsFactor;
+  cfg.numberOfBinsFactor = 1.0;
   return std::make_shared<const ActsHGTDLayerBuilder>(
       cfg, makeActsAthenaLogger(this, managerName + "GMSLayBldr", std::string("ActsTGSvc")));
 }
