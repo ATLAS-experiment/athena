@@ -66,6 +66,7 @@ def GNNHS_TTVAToolCfg(flags, name="TrackVertexAssociationTool_GNNHS", **kwargs):
     kwargs.setdefault("VertexContName", "PrimaryVertices_initial"
                       if flags.Tracking.PriVertex.sortingSetup is VertexSortingSetup.GNNSorting else
                       "PrimaryVertices")
+    kwargs.setdefault("HardScatterLinkDeco", "")
     kwargs.setdefault("AMVFVerticesDeco", "TTVA_AMVFVertices_forGNN")
     kwargs.setdefault("AMVFWeightsDeco", "TTVA_AMVFWeights_forGNN")
     return TTVAToolCfg(flags, name, **kwargs)
