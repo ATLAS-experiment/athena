@@ -15,8 +15,6 @@
 
 #include "TMath.h"
 
-#include "TrigInDetEvent/TrigInDetTrackCollection.h"
-
 #include "Particle/TrackParticle.h"
 #include "Particle/TrackParticleContainer.h"
 #include "muonEvent/MuonContainer.h"
@@ -51,61 +49,6 @@ class Converter {
   
   // clear tracks 
   void clear() {m_tracks.clear();} 
-
-  // Method converting TrigInDetTrack objects
-  void selectTracks(const TrigInDetTrackCollection* trigtracks) {
-    
-    TrigInDetTrackCollection::const_iterator  trackitr = trigtracks->begin();
-    TrigInDetTrackCollection::const_iterator  trackend = trigtracks->end();
-
-    while ( trackitr!=trackend ) { 
-
-	double eta    = (*trackitr)->param()->eta();
-	double phi    = (*trackitr)->param()->phi0();
-	double z0     = (*trackitr)->param()->z0(); 
-	double pT     = (*trackitr)->param()->pT(); 
-	double d0     = (*trackitr)->param()->a0();
-	//double theta  = 2*atan2(exp(-(*trackitr)->param()->eta()),1);
-
-	double deta    = (*trackitr)->param()->eeta();
-	double dphi    = (*trackitr)->param()->ephi0();
-	double dz0     = (*trackitr)->param()->ez0(); 
-	double dpT     = (*trackitr)->param()->epT(); 
-	double dd0     = (*trackitr)->param()->ea0();
-
-	int   algoid  = (*trackitr)->algorithmId(); 	      
-
-	int nBlayerHits = ((*trackitr)->HitPattern() & 0x1);
-	int nPixelHits  = 2*(*trackitr)->NPixelSpacePoints();  // NB: for comparison with offline 
-	int nSctHits    = 2*(*trackitr)->NSCT_SpacePoints();   //     a spacepoint is 2 "hits"
-	int nStrawHits  = (*trackitr)->NStrawHits();
-	int nTrHits     = (*trackitr)->NTRHits();
-	           
-	int nSiHits     = nPixelHits + nSctHits;
-	bool expectBL   = false;                               //not available with TrigInDetTrack
-
-	unsigned hitPattern = (*trackitr)->HitPattern();
-	unsigned multiPattern = 0;
-
-	double chi2    = (*trackitr)->chi2();
-	double dof     = 0;
-
-	// Shift d0 and z0 according to beam position
-	ipCorr(d0, z0, d0, z0, phi, eta, pT);
-	
-	// Create and save Track  
-	TIDA::Track* t = new TIDA::Track(eta,  phi,  z0,  d0,  pT, chi2, dof, 
-								   deta, dphi, dz0, dd0, dpT, 
-								   nBlayerHits, nPixelHits, nSctHits, nSiHits, 
-								   nStrawHits, nTrHits, hitPattern, multiPattern, 
-								   algoid,
-								   expectBL ) ; 
-
-	addTrack(t);
-	trackitr++; 
-    }
-  }
-
 
   // Method converting TrackParticle objects
   void selectTracks( const Rec::TrackParticleContainer* trigtracks ) { 

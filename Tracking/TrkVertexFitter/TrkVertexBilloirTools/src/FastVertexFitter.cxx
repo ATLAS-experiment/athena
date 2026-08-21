@@ -329,7 +329,7 @@ namespace Trk
 				break;
 			}
 		} // end of iteration
-		fittedVertex->vxTrackAtVertex() = tracksAtVertex;
+		fittedVertex->vxTrackAtVertex() = std::move(tracksAtVertex);
 		//ATH_MSG_VERBOSE("Final Vertex Fitted: " << fittedVxCandidate->recVertex()); // TODO: can no longer print vertex after converting to xAOD
 		return fittedVertex;
 	}

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // Root includes
@@ -410,7 +410,7 @@ template < class T, class P > StatusCode Trk::ExtrapolationEngineTest::fillStepI
           }
 
           if (not isHGTD) {
-            const InDetDD::SiDetectorElement* siElement = dynamic_cast<const InDetDD::SiDetectorElement*> (parameters->associatedSurface().associatedDetectorElement());
+            const InDetDD::SiDetectorElement* siElement = static_cast<const InDetDD::SiDetectorElement*> (parameters->associatedSurface().associatedDetectorElement());
             double phitol = 2.5; double etatol = 5.0;
             bool nearGap = siElement->nearBondGap(parameters->localPosition(), etatol);
             InDetDD::SiIntersect siIn = siElement->inDetector(parameters->localPosition(), phitol, etatol);

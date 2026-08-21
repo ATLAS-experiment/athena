@@ -14,5 +14,5 @@ atlas_add_library( TrigInDetAnalysisUtils
    LINK_LIBRARIES ${ROOT_LIBRARIES} GaudiKernel McParticleEvent Particle
    muonEvent egammaEvent xAODMuon xAODEgamma xAODTau xAODTruth xAODTracking
    TrkParameters TrkTrack TrkToolInterfaces TrkTrackSummary TrigDecisionToolLib
-   TrigInDetAnalysis TrigInDetEvent TrigSteeringEvent 
+   TrigInDetAnalysis TrigSteeringEvent 
    AtlasHepMCLib TruthUtils )

@@ -1,5 +1,5 @@
 #!/usr/bin/bash
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 NTHREADS=${1}
 NEVENTS=${2}
@@ -9,8 +9,13 @@ CONDTAG=$(python -c "from AthenaConfiguration.TestDefaults import defaultConditi
 GEOTAG=$(python -c "from AthenaConfiguration.TestDefaults import defaultGeometryTags; print(defaultGeometryTags.RUN3)")
 
 # Run the job
+source "$(dirname "${BASH_SOURCE[0]}")/spot_numa.sh"
+spot_numa_setup "${NTHREADS}"
+
 export TRF_ECHO=1;
+echo "${SPOT_NUMA_INFO}" > __log.txt
 ATHENA_CORE_NUMBER=${NTHREADS} \
+${SPOT_NUMA_PREFIX} \
 Reco_tf.py \
           --CA 'True' \
           --maxEvents ${NEVENTS} \
@@ -21,6 +26,6 @@ Reco_tf.py \
           --preExec 'flags.Reco.HIMode=HIMode.HI' \
           --postExec 'all:cfg.getService("AlgResourcePool").CountAlgorithmInstanceMisses = True' \
           --inputBSFile ${DATAFILE} \
-          --outputAODFile 'myAOD.pool.root' >  __log.txt 2>&1;
+          --outputAODFile 'myAOD.pool.root' >>  __log.txt 2>&1;
       
 echo $? > __exitcode;

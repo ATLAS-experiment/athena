@@ -38,11 +38,9 @@ def createComponent( typeName, instanceName, componentType ):
         # environment, so we need to use PythonConfig as the base class
         # for the user's class.
         from AnaAlgorithm.PythonConfig import PythonConfig
-        component = PythonConfig( '%s/%s' % ( typeName, instanceName ) )
+        component = PythonConfig( f'{typeName}/{instanceName}' )
         component.setComponentType( componentType )
         return component
-
-    pass
 
 
 def createAlgorithm( typeName, instanceName ):
@@ -64,7 +62,8 @@ def createReentrantAlgorithm( typeName, instanceName ):
 
     This function is used to create an algorithm "configurable" in a dual-use
     way, either returning an actual Athena configurable, or an appropriately
-    configured EL::AnaAlgorithmConfig instance.
+    configured PythonConfig instance (with component type
+    AnaReentrantAlgorithm).
 
     Keyword arguments:
       typeName     -- The C++ type name of the algorithm
@@ -126,7 +125,6 @@ def createService( typeName, serviceName, sequence=None ):
         service = createComponent( typeName, serviceName, 'AsgService' )
         if sequence is not None :
             sequence += service
-            pass
         return service
 
 
@@ -157,7 +155,6 @@ def addPrivateTool( alg, toolName, typeName ):
         component = alg
         for tname in toolNames[ 0 : -1 ]:
             component = getattr( component, tname )
-            pass
 
         # Now look up the Athena configurable describing this tool:
         toolClass = CompFactory.getComp(typeName)
@@ -171,9 +168,6 @@ def addPrivateTool( alg, toolName, typeName ):
         # let's rely on the standalone specific formalism for setting up the
         # private tool.
         alg.addPrivateTool( toolName, typeName )
-        pass
-
-    return
 
 
 def addPrivateToolInArray( alg, toolName, typeName ):
@@ -205,14 +199,16 @@ def addPrivateToolInArray( alg, toolName, typeName ):
         component = alg
         for tname in toolNames[ 0 : -1 ]:
             component = getattr( component, tname )
-            pass
 
         # Now look up the Athena configurable describing this tool:
         toolClass = CompFactory.getComp(typeName)
 
-        # Finally, set up the tool handle property:
-        getattr( component, toolNames[ -1 ] ).append (toolClass( toolNames[ -1 ] ) )
-        return getattr( component, toolNames[ -1 ] )
+        # Finally, set up the tool handle property, and return the tool that
+        # was just appended (not the whole tool-handle array), so that callers
+        # can configure it the same way they do in EventLoop.
+        theTool = toolClass( toolNames[ -1 ] )
+        getattr( component, toolNames[ -1 ] ).append( theTool )
+        return theTool
 
     else:
 
@@ -220,5 +216,3 @@ def addPrivateToolInArray( alg, toolName, typeName ):
         # let's rely on the standalone specific formalism for setting up the
         # private tool.
         return alg.addPrivateToolInArray( toolName, typeName )
-
-    return

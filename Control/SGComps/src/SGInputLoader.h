@@ -48,11 +48,17 @@ class SGInputLoader
   Gaudi::Property< bool > m_dump {this, "ShowEventDump", false, 
       "printout contents of EventStore at end of execute()"};
   
+  Gaudi::Property< bool > m_preLoad {this, "PreLoadData", false, 
+      "pre load EventStore data in execute()"};
+  
   Gaudi::Property<bool> m_failEvt{this, "FailIfNoProxy", true, 
       "execute returns FAILURE if a requested proxy is not found in store"};
       
   Gaudi::Property<bool> m_loadProxies{this, "LoadExtraProxies", true,
       "load the Proxies attributed to the SGInputLoader by the Scheduler"};
+
+  Gaudi::Property<std::string> m_dataHeaderKey{this, "DataHeaderKey", "EventSelector",
+      "StoreGate key of event entry object"};
 
   // other
   bool m_first{true};

@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // JetForwardPFlowJvtTool.cxx
@@ -213,7 +213,7 @@
           if (!orHandle(*fe)) continue;
         }
         if (fe->isCharged()) {
-          const xAOD::TrackParticle* track = dynamic_cast<const xAOD::TrackParticle*>(fe->chargedObject(0));
+          const xAOD::TrackParticle* track = static_cast<const xAOD::TrackParticle*>(fe->chargedObject(0));
 
           if (vx.index()==pv_index && std::abs((vx.z()-track->z0())*sin(track->theta()))>m_dzCut)
             continue;
@@ -311,8 +311,8 @@
       return pu_jets;
     }
 
-    pu_jets.jetCont = vertjets;
-    pu_jets.jetAuxCont = vertjetsAux;
+    pu_jets.jetCont = std::move(vertjets);
+    pu_jets.jetAuxCont = std::move(vertjetsAux);
     return pu_jets;
   }
 

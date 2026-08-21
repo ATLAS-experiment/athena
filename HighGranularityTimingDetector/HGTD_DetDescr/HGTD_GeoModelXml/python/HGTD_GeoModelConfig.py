@@ -8,6 +8,8 @@ def HGTD_GeoModelCfg(flags):
     from AthenaConfiguration.ComponentFactory import CompFactory
     hgtdDetectorTool = CompFactory.HGTD_GMX_DetectorTool()
     hgtdDetectorTool.DetectorName = "HGTD"
+    hgtdDetectorTool.Alignable = flags.HGTD.Geometry.isAlignable
+    hgtdDetectorTool.AlignmentFolderName = flags.HGTD.Geometry.alignmentFolder
     if flags.HGTD.Geometry.isLocal:
         hgtdDetectorTool.GmxFilename = flags.HGTD.Geometry.Filename
     if flags.HGTD.Geometry.ClobOutputName:

@@ -1,18 +1,18 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRK_TRANSFORMNTUPLEBRANCH_H
 #define TRK_TRANSFORMNTUPLEBRANCH_H
 
-#include <string>
-class TTree;
 
 #include "GeoPrimitives/GeoPrimitives.h"
 #include "TrkValidationUtils/MatrixNtupleBranch.h"
 #include "TrkValidationUtils/VectorNtupleBranch.h"
 #include "CLHEP/Geometry/Transform3D.h"
 #include "CLHEP/Geometry/Point3D.h"
+#include <string_view>
+class TTree;
 
 namespace Trk {
 
@@ -34,10 +34,10 @@ namespace Trk {
   struct TransformNtupleBranch {
 
     /** initialize class for writing */
-    void initForWrite(TTree& tree, const std::string& prefix = "" );
+    void initForWrite(TTree& tree, std::string_view prefix = "" );
 
     /** initialize class for reading */
-    void initForRead(TTree& tree, const std::string& prefix = "" );
+    void initForRead(TTree& tree, std::string_view prefix = "" );
     
     /** fill a transform */
     void fill( const Amg::Transform3D& transform );

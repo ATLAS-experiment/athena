@@ -440,8 +440,8 @@ StatusCode TrackFindingGNNAlg::execute(const EventContext &ctx) const {
     ActsTrk::Seed seed = seedContainer.push_back(
         ActsTrk::SpacePointRange(picked.data(), picked.size()), 0.f, 0.f);
 
-    auto initialParamsOpt = m_paramEstimationTool->estimateTrackParameters(
-        seed, /*useTopSp=*/true, gctx, mctx, retrieveSurface);
+    const auto& [initialParamsOpt, estimationStatus] = m_paramEstimationTool->estimateTrackParameters(
+        seed, /*useTopSp=*/true, gctx, mctx, cctx, retrieveSurface);
     if (!initialParamsOpt.has_value()) continue;
 
     boost::container::small_vector<const xAOD::SpacePoint*, 16> sortedSP;

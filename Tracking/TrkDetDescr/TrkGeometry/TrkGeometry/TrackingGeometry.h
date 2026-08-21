@@ -14,15 +14,16 @@
 // Trk
 #include "TrkDetDescrUtils/GeometrySignature.h"
 #include "TrkGeometry/TrackingVolume.h"
+// ATH_MSG macros
+#include "AthenaBaseComps/AthMsgStreamMacros.h"
 // CLASS DEF
 #include "AthenaKernel/CLASS_DEF.h"
 // STL
 #include <map>
-// ATH_MSG macros
-#include "AthenaBaseComps/AthMsgStreamMacros.h"
-//boost
 #include <ranges>
 #include <memory>
+#include <string_view>
+
 
 #include "CxxUtils/checker_macros.h"
 
@@ -180,7 +181,7 @@ public:
                               int lvl) const;
 
   static void dumpLayer(MsgStream& out,
-                        const std::string& head,
+                        std::string_view head,
                         const Layer* layer);
 
   /** The known world - and the beam */

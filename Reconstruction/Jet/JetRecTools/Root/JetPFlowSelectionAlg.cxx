@@ -300,6 +300,7 @@ StatusCode JetPFlowSelectionAlg::execute(const EventContext& ctx) const {
         //Add Standard data to these new FlowElements
         FEHelpers::FillNeutralFlowElements FEFiller;
         const xAOD::CaloCluster* castCluster_charged = dynamic_cast<const xAOD::CaloCluster*>(theCluster_charged);
+        if (!castCluster_charged) continue;
         FEFiller.addStandardMoments(*newFE,*castCluster_charged);        
         FEFiller.addStandardSamplingEnergies(*newFE,*castCluster_charged);    
 

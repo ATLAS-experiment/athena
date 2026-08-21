@@ -29,7 +29,7 @@ def main():
     if not isCLIDDefined(cgen, serializable_name_no_label):
       log.error("no CLID for " + serializable_name)
       return 1
-    if serializable_name_no_label not in EDMDetails.keys():
+    if serializable_name_no_label not in EDMDetails:
       log.error(serializable_name_no_label + " does not correspond to any name in EDMDetails")
 
     
@@ -50,7 +50,7 @@ def main():
     serializable_names_no_label.append(serializable_name_no_label)
 
   #check EDMDetails
-  for EDMDetail in EDMDetails.keys():
+  for EDMDetail in EDMDetails:
     if EDMDetail not in serializable_names_no_label:
       log.warning("EDMDetail for " + EDMDetail + " does not correspond to any name in TriggerList")
 

@@ -8,6 +8,7 @@
 #include "StoreGate/ReadHandleKey.h"
 #include "InDetRawData/PixelRDO_Container.h"
 #include "InDetRawData/SCT_RDO_Container.h"
+#include <InDetRawData/SCT_RDORawData.h>
 #include "PixelReadoutGeometry/PixelDetectorManager.h"
 #include "SCT_ReadoutGeometry/SCT_DetectorManager.h"
 #include "RDOtoTracccCellConverterCommons.h"
@@ -38,6 +39,11 @@ public:
   virtual StatusCode finalize() override;
 
 private:
+  bool passTiming(const std::bitset<3>& timePattern) const;
+  int m_timeBinBits[3]{-1, -1, -1};
+  StatusCode decodeTimeBins();
+  StringProperty m_timeBinStr{this, "timeBins", ""};
+  
   RDOtoTracccCellConverterCommons m_common{*this};
 
   SG::ReadHandleKey<PixelRDO_Container> m_pixelRDOKey{
@@ -51,6 +57,7 @@ private:
       this, "StripManager", "ITkStrip"};
   const InDetDD::PixelDetectorManager* m_pixelManager{nullptr};
   const InDetDD::SCT_DetectorManager*  m_stripManager{nullptr};
+
 };
 
 } // namespace ActsTrk

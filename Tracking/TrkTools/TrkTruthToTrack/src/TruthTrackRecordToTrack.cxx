@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrkTruthToTrack/TruthTrackRecordToTrack.h"
@@ -165,7 +165,7 @@ const Trk::TrackParameters* Trk::TruthTrackRecordToTrack::makePerigeeParameters(
 
     MsgStream log(msgSvc(), name());
 
-    std::unique_ptr<const Trk::TrackParameters> productionVertexTrackParams( makeProdVertexParameters(part) );
+    std::unique_ptr<const Trk::TrackParameters> productionVertexTrackParams( makeProdVertexParameters(std::move(part)) );
     if(productionVertexTrackParams) {
 
       // Extrapolate the TrackParameters object to the perigee. Direct extrapolation,

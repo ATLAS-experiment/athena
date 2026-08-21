@@ -18,7 +18,7 @@
 #include <cctype>
 #include <fstream>
 #include <sstream>
-#include <boost/algorithm/string/trim.hpp>
+#include <CxxUtils/StringUtils.h>
 
 namespace GlobalSim {
 
@@ -142,9 +142,7 @@ StatusCode PU1SuppTestBenchAlg::init_from_file() {
 
 /// Helper to trim leading and trailing whitespace from a string
 std::string PU1SuppTestBenchAlg::trim(const std::string& s) {
-  std::string result = s;
-  boost::algorithm::trim(result);
-  return result;
+  return std::string(CxxUtils::trimWhiteSpaces(s));
 }
 
 }  // namespace GlobalSim

@@ -169,7 +169,9 @@
       CWidth+=fabs(cl->pt()*atan(sqrt(secondR)/centermag)*cosh(cl->eta()));
       ptsum += cl->pt();
     }
-    CWidth /= ptsum;
+    if (ptsum != 0.)[[likely]]{
+      CWidth /= ptsum;
+    }
     return (CWidth + Width);
   }
 

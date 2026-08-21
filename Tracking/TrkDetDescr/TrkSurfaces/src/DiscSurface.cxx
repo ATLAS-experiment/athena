@@ -174,18 +174,18 @@ Trk::DiscSurface::operator==(const Trk::Surface& sf) const
 Trk::Surface::ChargedTrackParametersUniquePtr
 Trk::DiscSurface::createUniqueTrackParameters(
     double l1, double l2, double phi, double theta, double qop,
-    std::optional<AmgSymMatrix(5)> cov) const {
+    const std::optional<AmgSymMatrix(5)> & cov) const {
   return std::make_unique<ParametersT<5, Charged, DiscSurface>>(
-      l1, l2, phi, theta, qop, *this, std::move(cov));
+      l1, l2, phi, theta, qop, *this, cov);
 }
 /** Use the Surface as a ParametersBase constructor, from global parameters -
  * charged*/
 Trk::Surface::ChargedTrackParametersUniquePtr
 Trk::DiscSurface::createUniqueTrackParameters(
     const Amg::Vector3D& position, const Amg::Vector3D& momentum, double charge,
-    std::optional<AmgSymMatrix(5)> cov) const {
+    const std::optional<AmgSymMatrix(5)> & cov) const {
   return std::make_unique<ParametersT<5, Charged, DiscSurface>>(
-      position, momentum, charge, *this, std::move(cov));
+      position, momentum, charge, *this, cov);
 }
 
 /** Use the Surface as a ParametersBase constructor, from local parameters -
@@ -193,9 +193,9 @@ Trk::DiscSurface::createUniqueTrackParameters(
 Trk::Surface::NeutralTrackParametersUniquePtr
 Trk::DiscSurface::createUniqueNeutralParameters(
     double l1, double l2, double phi, double theta, double qop,
-    std::optional<AmgSymMatrix(5)> cov) const {
+    const std::optional<AmgSymMatrix(5)> & cov) const {
   return std::make_unique<ParametersT<5, Neutral, DiscSurface>>(
-      l1, l2, phi, theta, qop, *this, std::move(cov));
+      l1, l2, phi, theta, qop, *this, cov);
 }
 
 /** Use the Surface as a ParametersBase constructor, from global parameters -
@@ -203,9 +203,9 @@ Trk::DiscSurface::createUniqueNeutralParameters(
 Trk::Surface::NeutralTrackParametersUniquePtr
 Trk::DiscSurface::createUniqueNeutralParameters(
     const Amg::Vector3D& position, const Amg::Vector3D& momentum, double charge,
-    std::optional<AmgSymMatrix(5)> cov) const {
+    const std::optional<AmgSymMatrix(5)> & cov) const {
   return std::make_unique<ParametersT<5, Neutral, DiscSurface>>(
-      position, momentum, charge, *this, std::move(cov));
+      position, momentum, charge, *this, cov);
 }
 
 const Amg::Vector3D&

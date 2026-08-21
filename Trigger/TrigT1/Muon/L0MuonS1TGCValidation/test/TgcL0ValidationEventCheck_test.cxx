@@ -71,6 +71,10 @@ TgcL0ValidationEvent makeValidEvent() {
   event.candidates.phi = {0.25F};
   event.candidates.deltaTheta = {0.001F};
   event.candidates.deltaPhi = {0.002F};
+  event.candidates.pt = {25.F};
+  event.candidates.threshold = {6U};
+  event.candidates.charge = {-1};
+  event.candidates.goodMagneticField = {1U};
   event.candidates.truthIndex = {0};
 
   return event;
@@ -171,10 +175,17 @@ int main() {
   }
   {
     auto event = makeValidEvent();
-    event.candidates.deltaPhi.clear();
+    event.candidates.pt.clear();
     success &= expectInvalid(event,
-                             "Candidate block size mismatch for deltaPhi",
+                             "Candidate block size mismatch for pt",
                              "candidate-size mismatch");
+  }
+  {
+    auto event = makeValidEvent();
+    event.candidates.goodMagneticField[0] = 2U;
+    success &= expectInvalid(event,
+                             "Candidate GoodMag flag is not binary",
+                             "invalid GoodMag flag");
   }
   {
     auto event = makeValidEvent();

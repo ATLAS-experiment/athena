@@ -27,6 +27,9 @@ from NewVrtSecInclusiveTool.NewVrtSecInclusiveAlgConfig import (
 if TYPE_CHECKING:
     from AthenaConfiguration.AthConfigFlags import AthConfigFlags
 
+from AthenaCommon.Logging import logging
+logFTAGSSV = logging.getLogger('FTAGSSV')
+
 # helper to get tracking systematics
 def _get_NVSI_track_systematics_list() -> list[str]:
     """Return the list of track systematics to be considered for NVSI"""
@@ -81,48 +84,66 @@ def FTAGSSVExtraContentCfg(
         track_collection = "InDetTrackParticles"
         track_systematics = _get_NVSI_track_systematics_list()
 
-        for suffix in track_systematics:
-            varied_track_container = f"{track_collection}{suffix}"
-
-            # apply the tracking systematics
-            acc.merge(
-                TrackSystematicsAlgCfg(
-                    flags,
-                    name=f"InDetTrackSystematicsAlg{suffix}",
-                    InputTrackContainer=track_collection,
-                    OutputTrackContainer=varied_track_container,
+        # verify that tracking systematics tool works -> track systematics tool can not be scheduled for MC campaigns without existing tracking systematics recommendations
+        track_sys_accs = []
+        try:
+            for suffix in track_systematics:
+                varied_track_container = f"{track_collection}{suffix}"
+                # build list of tuples of (suffix, varied track container name, TrackSystematicsAlg to be run)
+                track_sys_accs.append(
+                    (
+                        suffix,
+                        varied_track_container,
+                        TrackSystematicsAlgCfg(
+                            flags,
+                            name=f"InDetTrackSystematicsAlg{suffix}",
+                            InputTrackContainer=track_collection,
+                            OutputTrackContainer=varied_track_container,
+                        ),
+                    )
                 )
+        # the tracking systematics tool can not be configured -> skip the tracking systematics
+        except ValueError as err:
+            logFTAGSSV.info(
+                "Skipping FTAGSSV NVSI tracking systematics: %s",
+                err,
             )
-            # run the NewVrtSecInclusive with the varied input tracks
-            acc.merge(
-                NewVrtSecInclusiveAlgTightCfg(
-                    flags,
-                    algname=f"NewVrtSecInclusive{suffix}",
-                    AugmentingVersionString=suffix,
-                    BVertexContainerName=f"NVSI_SecVrt_Tight{suffix}",
-                    TrackParticleContainer=varied_track_container,
+        # the tracking systematics tool can be configured -> proceed as planned
+        else:
+            #retrieve the tuples
+            for suffix, varied_track_container, track_sys_acc in track_sys_accs:
+                # apply the tracking systematics              
+                acc.merge(track_sys_acc)
+                # run the NewVrtSecInclusive with the varied input tracks
+                acc.merge(
+                    NewVrtSecInclusiveAlgTightCfg(
+                        flags,
+                        algname=f"NewVrtSecInclusive{suffix}",
+                        AugmentingVersionString=suffix,
+                        BVertexContainerName=f"NVSI_SecVrt_Tight{suffix}",
+                        TrackParticleContainer=varied_track_container,
+                    )
                 )
-            )
 
-        nvsi_containers = []
-        for suffix in track_systematics:
-            nvsi_containers.append(f"NVSI_SecVrt_Tight{suffix}")
+            nvsi_containers = []
+            for suffix in track_systematics:
+                nvsi_containers.append(f"NVSI_SecVrt_Tight{suffix}")
 
-        excl_vertex_aux_data = "-vxTrackAtVertex.-MvfFitInfo.-isInitialized.-VTAV.-trackParticleLinks.-trackWeights.-neutralParticleLinks.-neutralWeights"
-        # add NVSI_SecVrt_Tight tracking systematics to the slimming_helper
-        for container in nvsi_containers:
-            slimming_helper.AppendToDictionary.update({
-                container: "xAOD::VertexContainer",
-                container + "Aux": "xAOD::VertexAuxContainer",
-            })
+            excl_vertex_aux_data = "-vxTrackAtVertex.-MvfFitInfo.-isInitialized.-VTAV.-trackParticleLinks.-trackWeights.-neutralParticleLinks.-neutralWeights"
+            # add NVSI_SecVrt_Tight tracking systematics to the slimming_helper
+            for container in nvsi_containers:
+                slimming_helper.AppendToDictionary.update({
+                    container: "xAOD::VertexContainer",
+                    container + "Aux": "xAOD::VertexAuxContainer",
+                })
 
-            slimming_helper.StaticContent += [
-                f"xAOD::VertexContainer#{container}",
-                (
-                    f"xAOD::VertexAuxContainer#{container}Aux."
-                    f"{excl_vertex_aux_data}"
-                ),
-            ]
+                slimming_helper.StaticContent += [
+                    f"xAOD::VertexContainer#{container}",
+                    (
+                        f"xAOD::VertexAuxContainer#{container}Aux."
+                        f"{excl_vertex_aux_data}"
+                    ),
+                ]
 
     # Output stream additions
     item_list = slimming_helper.GetItemList()

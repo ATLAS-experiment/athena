@@ -314,6 +314,14 @@ stdJetModifiers.update(
                                  filterfn=isMC,
                                  createfn=ParticleJetToolsConfig.getJetPileupLabelTool,
                                  prereqs=["input:AntiKt4TruthDressedWZJets"]
+                                 ),
+    
+    JetIRCSafeLabel = JetModifier("JetIRCSafeLabelTool", "jetircsafelabeler",
+                                  filterfn=isMC,
+                                  createfn=ParticleJetToolsConfig.getJetIRCSafeLabelTool,
+                                  prereqs=["ghost:BHadronsFinal",
+                                           "ghost:CHadronsFinal",
+                                           "input:JetInputTruthParticles"]
                                  )
     )
 

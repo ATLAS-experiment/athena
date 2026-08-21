@@ -1,10 +1,9 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrkMaterialProviderTool.h"
 
-#include <algorithm>
 
 // Interfaces
 
@@ -25,6 +24,7 @@
 // For measured energy loss
 #include "CLHEP/Units/SystemOfUnits.h"
 #include "MuidEvent/CaloMeas.h"
+#include <algorithm>
 
 // #define DEBUGON //To activate printout for TSOS lists at various stages
 // for line-by-line debugging
@@ -501,7 +501,7 @@ void Trk::TrkMaterialProviderTool::getCaloMEOT(const Trk::Track& idTrack, const 
       newsa,
       std::move(neweloss),
       i->trackParameters()->associatedSurface());
-    calomeots.push_back(newmeot);
+    calomeots.push_back(std::move(newmeot));
     delete i;
   }
   delete caloTSOS;
@@ -1089,7 +1089,7 @@ void Trk::TrkMaterialProviderTool::updateVectorMS(Trk::TrackStates* inputTSOS,
                                                   double X0ScaleMS, double ElossScaleMS) const
 {
 
-  bool debug = false;
+  static constexpr bool debug = false;
 
 // Scale the X0 and Energy loss in the Muon Spectrometer
 

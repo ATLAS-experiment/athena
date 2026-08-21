@@ -19,11 +19,62 @@ def GPUClusterizationCfg(flags) -> ComponentAccumulator:
     # Service runs first — loads all device detector description data into detStore
     acc.merge(JSONDeviceDetectorDescriptionProviderSvcCfg(flags))
 
-    acc.merge(RDOtoTracccCellConverterAlgCfg(flags))
+    if flags.Acts.EDM.PhaseII :
+        print("Running PhaseII RDO to TracccCell conversion")
+        from ActsConfig.ActsPhaseIIRawDataEdmConfig import (
+            PhaseIIPixelRawDataContainerCfg,
+            PhaseIIStripRawDataContainerCfg,
+        )
+        acc.merge(PhaseIIPixelRawDataContainerCfg(flags))
+        acc.merge(PhaseIIStripRawDataContainerCfg(flags))
+        from ActsGPUEventCnv.ActsGPUEventCnvConfig import PhaseIIRDOtoTracccCellConverterAlgCfg
+        acc.merge(PhaseIIRDOtoTracccCellConverterAlgCfg(flags,
+            TracccCells = "TracccCellCollection",
+            OutputLevel = DEBUG
+        ))
+    else:
+        from ActsGPUEventCnv.ActsGPUEventCnvConfig import RDOtoTracccCellConverterAlgCfg
+        acc.merge(RDOtoTracccCellConverterAlgCfg(flags,
+            TracccCells = "TracccCellCollection",
+            OutputLevel = DEBUG
+        ))
 
-    acc.merge(DeviceClusterizationAlgCfg(flags))
+    acc.merge(DeviceClusterizationAlgCfg(flags,
+        InputTracccCells="TracccCellCollection",
+        OutputTracccMeasurements="TracccMeasurementCollection",
+        OutputTracccClusters="TracccClusterCollection",
+        RetrieveClusterCells=flags.Tracking.doTruth,
+        OutputLevel = DEBUG,
+            
+    ))
 
-    acc.merge(TracccMeasurementConverterAlgCfg(flags))
+    acc.merge(TracccMeasurementConverterAlgCfg(flags,
+        InputMeasurements="TracccMeasurementCollection",
+        InputClusters="TracccClusterCollection",
+        InputCells="TracccCellCollection",
+        ConvertClustersWithCells = flags.Tracking.doTruth,
+        OutputPixelClusters="ITkTracccPixelClusters",
+        OutputStripClusters="ITkTracccStripClusters",
+        OutputLevel = DEBUG
+    ))
+
+    from SiLorentzAngleTool.ITkPixelLorentzAngleConfig import ITkPixelLorentzAngleToolCfg
+    from SiLorentzAngleTool.ITkStripLorentzAngleConfig import ITkStripLorentzAngleToolCfg
+    from AthenaConfiguration.ComponentFactory import CompFactory
+    acc.addEventAlgo(CompFactory.ActsTrk.ActsClusterComparisonAlg(
+        "GPUTrackingValidationAlg",
+        checkSpacepoints=False,
+        monitoredSpacepointsKey="ITkTracccPixelSpacepoints",
+        referenceSpacepointsKey="ITkPixelSpacePoints",
+        monitoredPixelClustersKey="ITkTracccPixelClusters",
+        referencePixelClustersKey="ITkPixelClusters",
+        monitoredStripClustersKey="ITkTracccStripClusters",
+        referenceStripClustersKey="ITkStripClusters",
+        PixelLorentzAngleTool = acc.popToolsAndMerge(ITkPixelLorentzAngleToolCfg(flags)),
+        StripLorentzAngleTool = acc.popToolsAndMerge(ITkStripLorentzAngleToolCfg(flags)),
+        OutputLevel = DEBUG
+
+    ))
 
     return acc
 
@@ -32,9 +83,16 @@ if __name__ == "__main__":
     from AthenaConfiguration.TestDefaults import defaultTestFiles
 
     flags = initConfigFlags()
-
-    # ---- Input ----
+    
+    from AthenaConfiguration.TestDefaults import defaultTestFiles
     flags.Input.Files = defaultTestFiles.RDO_RUN4
+    flags.Exec.MaxEvents = 1
+
+    # Set the Main Pass
+    flags = flags.cloneAndReplace(
+        "Tracking.ActiveConfig",
+        "Tracking.ITkActsPass")
+    
     flags.Tracking.doPixelDigitalClustering = True
 
     flags.fillFromArgs()
@@ -54,6 +112,18 @@ if __name__ == "__main__":
     acc.merge(ITkPixelReadoutGeometryCfg(flags))
     from StripGeoModelXml.ITkStripGeoModelConfig import ITkStripReadoutGeometryCfg
     acc.merge(ITkStripReadoutGeometryCfg(flags))
+
+    # RoI creator
+    from ActsConfig.ActsRegionsOfInterestConfig import ActsMainRegionsOfInterestCreatorAlgCfg
+    acc.merge(ActsMainRegionsOfInterestCreatorAlgCfg(flags))
+
+    # Data Preparation - Clustering
+    from ActsConfig.ActsClusterizationConfig import ActsPixelClusterizationAlgCfg
+    acc.merge(ActsPixelClusterizationAlgCfg(flags,OutputLevel = DEBUG))
+
+    from ActsConfig.ActsClusterizationConfig import ActsStripClusterizationAlgCfg
+    acc.merge(ActsStripClusterizationAlgCfg(flags,OutputLevel = DEBUG))
+
 
     acc.merge(GPUClusterizationCfg(flags))
     acc.printConfig(withDetails=True, summariseProps=True)

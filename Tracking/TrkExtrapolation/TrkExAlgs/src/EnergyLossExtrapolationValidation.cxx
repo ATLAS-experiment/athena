@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -255,8 +255,8 @@ StatusCode Trk::EnergyLossExtrapolationValidation::execute(const EventContext& c
     // --------------- propagate to find an intersection ---------------------
 
     // fill the TrackParameters vector with extrapolation from startParameters to dummy cylinder surface
-    const Trk::TrackParameters* lastParameters = nullptr;
-    const Trk::TrackParameters* newParameters = nullptr;
+    std::unique_ptr<Trk::TrackParameters> lastParameters{};
+    std::unique_ptr<Trk::TrackParameters> newParameters{};
 
     if (!m_materialCollectionValidation) {
 
@@ -266,7 +266,7 @@ StatusCode Trk::EnergyLossExtrapolationValidation::execute(const EventContext& c
           *(m_theCylinders->at(0)),
           Trk::alongMomentum,
           true,
-          static_cast<Trk::ParticleHypothesis>(m_particleType.value())).release();
+          static_cast<Trk::ParticleHypothesis>(m_particleType.value()));
 
     } else { // material collection validation
 
@@ -284,7 +284,7 @@ StatusCode Trk::EnergyLossExtrapolationValidation::execute(const EventContext& c
         if (collectedMaterial && !collectedMaterial->empty()) {
             // get the last track state on surface & clone the destination parameters
             const Trk::TrackStateOnSurface* destinationState = collectedMaterial->back();
-            lastParameters = destinationState->trackParameters() ? destinationState->trackParameters()->clone() : nullptr;
+            lastParameters.reset(destinationState->trackParameters() ? destinationState->trackParameters()->clone() : nullptr);
             m_collectedLayerForward += collectedMaterial->size();
             // delete the layers / cleanup
             for (const auto* tsos : *collectedMaterial) {
@@ -310,7 +310,7 @@ StatusCode Trk::EnergyLossExtrapolationValidation::execute(const EventContext& c
         }
 
         // trying to extrapolate to cylinder barrel
-        newParameters = nullptr;
+        newParameters.reset();
         if (!m_materialCollectionValidation) {
 
             newParameters = m_extrapolator->extrapolate(
@@ -319,7 +319,7 @@ StatusCode Trk::EnergyLossExtrapolationValidation::execute(const EventContext& c
               *(m_theCylinders->at(lay)),
               Trk::alongMomentum,
               true,
-              static_cast<Trk::ParticleHypothesis>(m_particleType.value())).release();
+              static_cast<Trk::ParticleHypothesis>(m_particleType.value()));
 
         } else { // material collection validation
 
@@ -336,7 +336,7 @@ StatusCode Trk::EnergyLossExtrapolationValidation::execute(const EventContext& c
             if (collectedMaterial && !collectedMaterial->empty()){
                 // get the last track state on surface & clone the destination parameters
                 const Trk::TrackStateOnSurface* destinationState = collectedMaterial->back();
-                newParameters = destinationState->trackParameters() ? destinationState->trackParameters()->clone() : nullptr;
+                newParameters.reset(destinationState->trackParameters() ? destinationState->trackParameters()->clone() : nullptr);
                 if (m_onion)
                     m_collectedLayerForward += collectedMaterial->size();
                 else
@@ -362,7 +362,7 @@ StatusCode Trk::EnergyLossExtrapolationValidation::execute(const EventContext& c
                                         : *(m_theDiscs2->at(lay)),
                 Trk::alongMomentum,
                 true,
-                static_cast<Trk::ParticleHypothesis>(m_particleType.value())).release();
+                static_cast<Trk::ParticleHypothesis>(m_particleType.value()));
 
             } else { // material collection validation
 
@@ -379,7 +379,7 @@ StatusCode Trk::EnergyLossExtrapolationValidation::execute(const EventContext& c
                 if (collectedMaterial && !collectedMaterial->empty()){
                     // get the last track state on surface & clone the destination parameters
                     const Trk::TrackStateOnSurface* destinationState = collectedMaterial->back();
-                    newParameters = destinationState->trackParameters() ? destinationState->trackParameters()->clone() : nullptr;
+                    newParameters.reset(destinationState->trackParameters() ? destinationState->trackParameters()->clone() : nullptr);
                     if (m_onion)
                         m_collectedLayerForward += collectedMaterial->size();
                     else
@@ -434,8 +434,7 @@ StatusCode Trk::EnergyLossExtrapolationValidation::execute(const EventContext& c
           m_positionZ[m_entries]       = newPosition.z();
 
         }
-
-        lastParameters = newParameters;
+        lastParameters = std::move(newParameters);
 
     }
 
@@ -451,7 +450,7 @@ StatusCode Trk::EnergyLossExtrapolationValidation::execute(const EventContext& c
 
     // memory cleanup
     ATH_MSG_DEBUG( "execute() deleting DataVector parameters ... " );
-
+  
     return StatusCode::SUCCESS;
 }
 

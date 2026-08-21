@@ -488,7 +488,6 @@ class checkFileTrigSize:
             'TrigL2BphysContainer_tlp1_HLT_L2DsPhiPiFexDs',
             'TrigL2BphysContainer_tlp1_HLT_L2DsPhiPiFexPhi',
             'TrigL2BphysContainer_tlp1_HLT_L2JpsieeFex',
-            'TrigL2BphysContainer_tlp1_HLT_TrigDiMuon',
             'TrigL2BphysContainer_tlp1_HLT_L2TrackMass',
             'TrigL2BphysContainer_tlp2_HLT',
             'TrigL2BphysContainer_tlp2_HLT_L2BMuMuXFex',
@@ -499,7 +498,6 @@ class checkFileTrigSize:
             'TrigL2BphysContainer_tlp2_HLT_L2JpsieeFex',
             'TrigL2BphysContainer_tlp2_HLT_L2TrackMass',
             'TrigL2BphysContainer_tlp2_HLT_L2DiMuXFex',
-            'TrigL2BphysContainer_tlp2_HLT_TrigDiMuon',
             'Rec::TrackParticleContainer_tlp2_HLT_InDetTrigParticleCreation_Bphysics_EFID',
             # Only in ESDs
             'Trk::TrackCollection_tlp2_HLT_InDetTrigTrackSlimmer_Bphysics_EFID',

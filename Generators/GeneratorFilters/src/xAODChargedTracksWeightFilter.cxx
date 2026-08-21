@@ -6,6 +6,7 @@
 #include "TruthUtils/HepMCHelpers.h"
 #include "AthenaKernel/RNGWrapper.h"
 #include "CLHEP/Random/RandomEngine.h"
+#include "xAODTruth/TruthVertex.h"
 #include <algorithm>
 
 using Point = xAODChargedTracksWeightFilter::Spline::Point;
@@ -77,17 +78,34 @@ StatusCode xAODChargedTracksWeightFilter::filterEvent(const EventContext& ctx) {
     int nChargedTracks = 0;
     // Loop over all particles in the event
     for (const xAOD::TruthParticle* part : *xTruthParticleContainer) {
-            // We only care about stable particles
+            // We only care about stable charged particles
             if (!part->isGenStable()) continue;
 
             // Particle's charge
             int pID = part->pdgId();
             double pCharge = MC::charge(pID);
+	    if (pCharge==0) continue;
 
             // Count tracks in specified acceptance
             const double pT = part->pt();
             const double eta = part->eta();
-            if (pT >= m_Ptmin && std::abs(eta) <= m_EtaRange && pCharge != 0) {
+
+            ATH_MSG_DEBUG("Checking stable particle for exclusion: pdgId = " << pID <<
+                        " pt = " << pT << " eta = " << eta);
+
+            // Skip explicitly excluded particle types, and particles whose
+            // decay ancestry passes through an excluded particle (e.g. a
+            // stable pion from a decayed tau that is itself excluded)
+            if (isExcludedParticle(pID, pT)) {
+                ATH_MSG_DEBUG("  -> excluded directly: pdgId = " << pID << " pt = " << pT);
+                continue;
+            }
+            if (hasExcludedAncestor(part)) {
+                ATH_MSG_DEBUG("  -> excluded via ancestor: pdgId = " << pID << " pt = " << pT);
+                continue;
+            }
+
+            if (pT >= m_Ptmin && std::abs(eta) <= m_EtaRange) {
                 ATH_MSG_DEBUG("Found particle, " <<
                             " pT = " << pT <<
                             " eta = " << eta <<
@@ -153,6 +171,47 @@ StatusCode xAODChargedTracksWeightFilter::filterEvent(const EventContext& ctx) {
 
     setFilterPassed(false, ctx);
     return StatusCode::SUCCESS;
+}
+
+bool xAODChargedTracksWeightFilter::isExcludedParticle(int pdgId, double pt) const {
+
+    const auto & excluded = m_excludedPdgIdPtMin.value();
+    auto it = excluded.find(std::abs(pdgId));
+    if (it == excluded.end()) {
+        ATH_MSG_VERBOSE("    isExcludedParticle: pdgId = " << pdgId <<
+                    " not in ExcludedPdgIdPtMin map");
+        return false;
+    }
+    const bool excludedByPt = (pt >= it->second);
+    ATH_MSG_DEBUG("    isExcludedParticle: pdgId = " << pdgId <<
+                " pt = " << pt << " threshold = " << it->second <<
+                " -> " << (excludedByPt ? "EXCLUDED" : "kept (below threshold)"));
+    return excludedByPt;
+}
+
+bool xAODChargedTracksWeightFilter::hasExcludedAncestor(const xAOD::TruthParticle* part) const {
+
+    // Walk up the decay chain (not just the immediate parent) so that
+    // daughters produced via an intermediate resonance (e.g. tau -> rho ->
+    // pi pi) are still caught if the tau itself is excluded
+    ATH_MSG_DEBUG("  Walking ancestry for daughter pdgId = " << part->pdgId() <<
+                " pt = " << part->pt());
+    const xAOD::TruthVertex* prodVtx = part->prodVtx();
+    while (prodVtx && prodVtx->nIncomingParticles() > 0) {
+        const xAOD::TruthParticle* parent = prodVtx->incomingParticle(0);
+        if (!parent) break;
+        ATH_MSG_DEBUG("    ancestor: pdgId = " << parent->pdgId() <<
+                    " pt = " << parent->pt() <<
+                    " eta = " << parent->eta() <<
+                    " isGenStable = " << parent->isGenStable());
+        if (!parent->isGenStable() && isExcludedParticle(parent->pdgId(), parent->pt())) {
+            ATH_MSG_DEBUG("    -> ancestor pdgId = " << parent->pdgId() <<
+                        " pt = " << parent->pt() << " matches exclusion criteria");
+            return true;
+        }
+        prodVtx = parent->prodVtx();
+    }
+    return false;
 }
 
 double xAODChargedTracksWeightFilter::get_nch_weight(int nch) const {

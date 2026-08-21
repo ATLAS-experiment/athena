@@ -4,10 +4,9 @@
 
 if __name__ == "__main__":
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
-    from AthenaConfiguration.TestDefaults import defaultTestFiles, defaultConditionsTags, defaultGeometryTags
+    from AthenaConfiguration.TestDefaults import defaultTestFiles, defaultConditionsTags
     flags = initConfigFlags()
     flags.Input.isMC = True
-    flags.GeoModel.AtlasVersion = defaultGeometryTags.RUN4
     flags.IOVDb.GlobalTag = defaultConditionsTags.RUN4_MC
     flags.Input.Files = defaultTestFiles.RDO_RUN4
     flags.Detector.GeometryITkStrip = True

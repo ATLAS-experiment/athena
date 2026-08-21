@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////
@@ -103,10 +103,10 @@ Trk::PerigeeSurface::createUniqueTrackParameters(
   double phi,
   double theta,
   double qop,
-  std::optional<AmgSymMatrix(5)> cov) const
+  const std::optional<AmgSymMatrix(5)> & cov) const
 {
   return std::make_unique<ParametersT<5, Charged, PerigeeSurface>>(
-    l1, l2, phi, theta, qop, *this, std::move(cov));
+    l1, l2, phi, theta, qop, *this, cov);
 }
 /** Use the Surface as a ParametersBase constructor, from global parameters -
  * charged*/
@@ -115,10 +115,10 @@ Trk::PerigeeSurface::createUniqueTrackParameters(
   const Amg::Vector3D& position,
   const Amg::Vector3D& momentum,
   double charge,
-  std::optional<AmgSymMatrix(5)> cov) const
+  const std::optional<AmgSymMatrix(5)> & cov) const
 {
   return std::make_unique<ParametersT<5, Charged, PerigeeSurface>>(
-    position, momentum, charge, *this, std::move(cov));
+    position, momentum, charge, *this, cov);
 }
 
 /** Use the Surface as a ParametersBase constructor, from local parameters -
@@ -130,10 +130,10 @@ Trk::PerigeeSurface::createUniqueNeutralParameters(
   double phi,
   double theta,
   double qop,
-  std::optional<AmgSymMatrix(5)> cov) const
+  const std::optional<AmgSymMatrix(5)> & cov) const
 {
   return std::make_unique<ParametersT<5, Neutral, PerigeeSurface>>(
-    l1, l2, phi, theta, qop, *this, std::move(cov));
+    l1, l2, phi, theta, qop, *this, cov);
 }
 
 /** Use the Surface as a ParametersBase constructor, from global parameters -
@@ -143,10 +143,10 @@ Trk::PerigeeSurface::createUniqueNeutralParameters(
   const Amg::Vector3D& position,
   const Amg::Vector3D& momentum,
   double charge,
-  std::optional<AmgSymMatrix(5)> cov) const
+  const std::optional<AmgSymMatrix(5)> & cov) const
 {
   return std::make_unique<ParametersT<5, Neutral, PerigeeSurface>>(
-    position, momentum, charge, *this, std::move(cov));
+    position, momentum, charge, *this, cov);
 }
 
 // simple local to global - from LocalParameters /

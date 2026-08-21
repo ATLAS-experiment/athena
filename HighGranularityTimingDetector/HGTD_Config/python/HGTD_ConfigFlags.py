@@ -20,6 +20,9 @@ def createHGTD_ConfigFlags():
   hgtdcf.addFlag("HGTD.Geometry.isLocal", False)
   hgtdcf.addFlag("HGTD.Geometry.Filename", "HGTD.gmx")
   hgtdcf.addFlag("HGTD.Geometry.ClobOutputName", "")
+ 
+  hgtdcf.addFlag("HGTD.Geometry.isAlignable", False) 
+  hgtdcf.addFlag("HGTD.Geometry.alignmentFolder","/HGTD/Align")
 
   hgtdcf.addFlag("HGTD.trackingGeometry.passiveBarrelMatZbins", 100) # Number of z bins to be used for passive material layers
   hgtdcf.addFlag("HGTD.trackingGeometry.passiveBarrelMatPhiBins", 50) # Number of phi bins to be used for passive material layers

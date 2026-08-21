@@ -151,7 +151,7 @@ private: // internal member functions
 private: // data
    EventContextAthenaPool*         m_endIter{};
    mutable std::unique_ptr<PoolCollectionConverter> m_poolCollectionConverter ATLAS_THREAD_SAFE {};
-   mutable pool::ICollectionCursor* m_headerIterator ATLAS_THREAD_SAFE {};
+   mutable std::unique_ptr<pool::ICollectionCursor> m_headerIterator ATLAS_THREAD_SAFE {};
    mutable Guid m_guid ATLAS_THREAD_SAFE {};
    mutable std::map<SG::SourceID, int> m_activeEventsPerSource ATLAS_THREAD_SAFE;
    /// RAII guard: guarantees a matching EndInputFile for every BeginInputFile.

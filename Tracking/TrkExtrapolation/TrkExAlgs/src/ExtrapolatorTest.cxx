@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -65,7 +65,7 @@ StatusCode Trk::ExtrapolatorTest::initialize()
              surfaceTriplet.push_back(new Trk::DiscSurface(Amg::Transform3D(Amg::Translation3D(0.,0.,-(*halfZIter))),0.,*radiusIter));
 	     
 	     ATH_MSG_INFO("Creating surfaces: R " << *radiusIter << " Z " << *halfZIter);
-	     m_referenceSurfaceTriples.push_back(surfaceTriplet);
+	     m_referenceSurfaceTriples.push_back(std::move(surfaceTriplet));
 
 	     m_referenceSurfaceNegativeBoundary.push_back(atan2(*radiusIter,-(*halfZIter)));
 	     m_referenceSurfacePositiveBoundary.push_back(atan2(*radiusIter,(*halfZIter)));

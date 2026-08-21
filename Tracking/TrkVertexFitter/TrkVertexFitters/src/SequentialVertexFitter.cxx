@@ -201,7 +201,7 @@ namespace Trk{
     //converting the input perigee to the Vertex tracks
     std::vector<Trk::VxTrackAtVertex> tracks_to_fit = linearizeTracks(perigeeList, neutralPerigeeList, *returnVertex);
     std::vector<Trk::VxTrackAtVertex> fittedTracks(0);
-    returnVertex->vxTrackAtVertex() = fittedTracks;
+    returnVertex->vxTrackAtVertex() = std::move(fittedTracks);
 
     //the actual fitting loop
     Amg::Vector3D newPosition = returnVertex->position();
@@ -268,11 +268,8 @@ namespace Trk{
       return nullptr;
     }
     //smoothing and related
-    if(returnVertex !=nullptr){
-      if(m_doSmoothing)m_Smoother->smooth(*returnVertex);
-    } else {
-      ATH_MSG_INFO( "Sequential vertex fit fails:: zero pointer returned" );
-    }
+    if(m_doSmoothing)m_Smoother->smooth(*returnVertex);
+    
     //here the vertex is returned. It is foreseen that a vertex is _always_
     //returned (initial guess in worst case) unless there is a runtime crash
     return returnVertex;

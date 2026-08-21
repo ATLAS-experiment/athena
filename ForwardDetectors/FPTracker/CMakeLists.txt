@@ -16,7 +16,7 @@ atlas_add_library( FPTracker
                    src/*.cxx
                    PUBLIC_HEADERS FPTracker
                    INCLUDE_DIRS ${Boost_INCLUDE_DIRS}
-                   LINK_LIBRARIES ${Boost_LIBRARIES} )
+                   LINK_LIBRARIES ${Boost_LIBRARIES} CxxUtils )
 
 atlas_add_executable( fpTrackerMain
                       test/fpTrackerMain.cxx

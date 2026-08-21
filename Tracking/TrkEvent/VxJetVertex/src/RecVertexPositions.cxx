@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /***************************************************************************
@@ -14,10 +14,10 @@
  ***************************************************************************/
 
 #include "VxJetVertex/RecVertexPositions.h"
-//#include "TrkEventPrimitives/CovarianceMatrix.h" //!< include for the track class
-//#include "CLHEP/Vector/ThreeVector.h" //!< include for CLHEP::Hep3Vector
-//#include "VxJetVertex/VxVertexOnJetAxis.h"
-
+#include "GaudiKernel/MsgStream.h"
+#include <iostream>
+#include <sstream>
+#include <cmath>
 
 namespace Trk {
   
@@ -45,8 +45,6 @@ namespace Trk {
                 VertexPositions(pos), 
 		m_positionError(Amg::MatrixX()),
 		m_fitQuality(Trk::FitQuality(chi2,ndf)) { m_positionError.setZero();}
-
-  RecVertexPositions::RecVertexPositions(const RecVertexPositions& rhs) = default;
 
 
   const Amg::VectorX& RecVertexPositions::weightTimesPosition() {
@@ -79,76 +77,39 @@ namespace Trk {
     }
   }
 
-
-
-  RecVertexPositions &RecVertexPositions::operator= (const RecVertexPositions& rhs)
-  {
-    if (this!=&rhs)
-    {
-      // you need to call the base class assignment operator
-      VertexPositions::operator=(rhs);
-      m_positionError = rhs.m_positionError;
-      m_fitQuality = rhs.m_fitQuality;
-    }
-    return *this;
-  }
-
   MsgStream& RecVertexPositions::dump(MsgStream& sl) const {
-    sl << "Trk::RecVertexPositions: " << std::endl;
-    //VertexOnJetAxis::dump(sl);
- 
-    if (m_useWeightTimesPosition) {
-      sl << "Trk::VertexPositions weight times position: (" ;
-    } else {
-      sl << "Trk::VertexPositions position: (" ;
-    }
-    sl << "xv " << m_position(jet_xv) << "+/-" << sqrt(m_positionError(jet_xv,jet_xv)) << " , "
-       << "yv " << m_position(jet_yv) << "+/-" << sqrt(m_positionError(jet_yv,jet_yv)) <<", "
-       << "zv " << m_position(jet_zv) << "+/-" << sqrt(m_positionError(jet_zv,jet_zv)) <<", "
-       << "phi " << m_position(jet_phi) << "+/-" << sqrt(m_positionError(jet_phi,jet_phi)) <<", "
-       << "theta " << m_position(jet_theta) << "+/-" << sqrt(m_positionError(jet_theta,jet_theta)) << endmsg;
-    if (!m_useWeightTimesPosition) {
-      for (int i=5;i<m_position.rows();i++) {
-	sl << "dist" << i << " " << m_position(i) << "+/-" << sqrt(m_positionError(i,i))<<" , ";
-      }
-    } else {
-      for (int i=5;i<m_position.rows();i++) {
-	sl << "dist corrected" << i << " " << (m_positionError*m_position).eval()(i) << "+/-" << sqrt(m_positionError(i,i))<<" , ";
-      }
-    }
-    sl << endmsg;
-   
-   sl << m_positionError << std::endl;
-   sl << "  ndf: " << m_fitQuality.doubleNumberDoF() << "\t chi2: " << m_fitQuality.chiSquared() << endmsg;
-   return sl;
+    sl << "Trk::RecVertexPositions: \n";
+    std::ostringstream oss;
+    dump(oss);
+    sl << oss.str() << endmsg;
+    return sl;
   }
 
   std::ostream& RecVertexPositions::dump(std::ostream& sl) const {
-    //    sl << "Trk::RecVertexPositions: " << std::endl;
     if (m_useWeightTimesPosition) {
       sl << "Trk::VertexPositions weight times position: (" ;
     } else {
       sl << "Trk::VertexPositions position: (" ;
     }
-    sl << "xv " << m_position(jet_xv) << "+/-" <<sqrt(this->covariancePosition()(jet_xv,jet_xv)) << " , "
-       << "yv " << m_position(jet_yv) << "+/-" <<sqrt(this->covariancePosition()(jet_yv,jet_yv)) <<", "
-       << "zv " << m_position(jet_zv) << "+/-" <<sqrt(this->covariancePosition()(jet_zv,jet_zv)) <<", "
-       << "phi " << m_position(jet_phi) << "+/-"<<sqrt(this->covariancePosition()(jet_phi,jet_phi)) <<", "
-       << "theta " << m_position(jet_theta)<<"+/-"<<sqrt(this->covariancePosition()(jet_theta,jet_theta))
-       << std::endl;
+    sl << "xv " << m_position(jet_xv) << "+/-" <<std::sqrt(this->covariancePosition()(jet_xv,jet_xv)) << " , "
+       << "yv " << m_position(jet_yv) << "+/-" <<std::sqrt(this->covariancePosition()(jet_yv,jet_yv)) <<", "
+       << "zv " << m_position(jet_zv) << "+/-" <<std::sqrt(this->covariancePosition()(jet_zv,jet_zv)) <<", "
+       << "phi " << m_position(jet_phi) << "+/-"<<std::sqrt(this->covariancePosition()(jet_phi,jet_phi)) <<", "
+       << "theta " << m_position(jet_theta)<<"+/-"<<std::sqrt(this->covariancePosition()(jet_theta,jet_theta))
+       << "\n";
     if (!m_useWeightTimesPosition) {
       for (int i=5;i<m_position.rows();i++) {
-	sl << "dist" << i << " " << m_position(i) << "+/-" << sqrt(this->covariancePosition()(i,i))<<" , ";
+	sl << "dist" << i << " " << m_position(i) << "+/-" << std::sqrt(this->covariancePosition()(i,i))<<" , ";
       }
     } else {
       for (int i=5;i<m_position.rows();i++) {
-	sl << "dist corrected" << i << " " << (m_positionError*m_position).eval()(i) << "+/-" << sqrt(m_positionError(i,i))<<" , ";
+	sl << "dist corrected" << i << " " << (m_positionError*m_position).eval()(i) << "+/-" << std::sqrt(m_positionError(i,i))<<" , ";
       }
     }
-    sl << std::endl;
+    sl << "\n";
     
     VertexPositions::dump(sl);
-    sl << m_positionError << std::endl;
+    sl << m_positionError << "\n";
     sl << "  ndf: " << m_fitQuality.doubleNumberDoF() << "\t chi2: " << m_fitQuality.chiSquared() << std::endl;
     return sl;
   }

@@ -120,7 +120,10 @@ namespace Trk
   {
     SG::ReadCondHandle<AtlasFieldCacheCondObj> readHandle{m_fieldCacheCondObjInputKey, ctx};
     const AtlasFieldCacheCondObj* fieldCondObj{*readHandle};
-
+    if (!fieldCondObj)[[unlikely]]{
+      ATH_MSG_ERROR("fieldCondObj is nullptr");
+      return nullptr;
+    }
     MagField::AtlasFieldCache fieldCache;
     fieldCondObj->getInitializedCache (fieldCache);
 

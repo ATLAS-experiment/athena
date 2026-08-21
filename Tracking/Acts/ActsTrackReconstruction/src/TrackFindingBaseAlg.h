@@ -14,13 +14,11 @@
 #include "ActsGeometryInterfaces/IGeometryRealmConvTool.h"
 #include "ActsToolInterfaces/ITrackParamsEstimationTool.h"
 #include "src/TrackStatePrinterTool.h"
-#include "ActsCalibrators/xAODUncalibMeasSurfAcc.h"
 
 // ACTS
 #include "Acts/EventData/ProxyAccessor.hpp"
 
 // ActsTrk
-#include "ActsToolInterfaces/IFitterTool.h"
 #include "ActsToolInterfaces/IPixelOnTrackCalibratorTool.h"
 #include "ActsToolInterfaces/IStripOnTrackCalibratorTool.h"
 #include "ActsToolInterfaces/IHGTDOnTrackCalibratorTool.h"
@@ -80,14 +78,11 @@ namespace ActsTrk {
 
     std::unique_ptr<CKF_pimpl> m_trackFinder;
 
-    detail::xAODUncalibMeasSurfAcc m_unalibMeasSurfAcc {};
-
 
     // Tool Handles
     ToolHandle<GenericMonitoringTool> m_monTool{this, "MonTool", "", "Monitoring tool"};
-   ServiceHandle<ActsTrk::ITrackingGeometrySvc> m_trackingGeometrySvc{this, "TrackingGeometrySvc", "ActsTrackingGeometrySvc"};
+    ServiceHandle<ActsTrk::ITrackingGeometrySvc> m_trackingGeometrySvc{this, "TrackingGeometrySvc", "ActsTrackingGeometrySvc"};
     ToolHandle<ActsTrk::TrackStatePrinterTool> m_trackStatePrinter{this, "TrackStatePrinter", "", "optional track state printer"};
-    ToolHandle<ActsTrk::IFitterTool> m_fitterTool{this, "FitterTool", "", "Fitter Tool for Seeds"};
     ToolHandle<ActsTrk::IPixelOnTrackCalibratorTool<detail::RecoTrackStateContainer>> m_pixelCalibTool{this, "PixelCalibrator", "", "Opt. pixel measurement calibrator"};
     ToolHandle<ActsTrk::IStripOnTrackCalibratorTool<detail::RecoTrackStateContainer>> m_stripCalibTool{this, "StripCalibrator", "", "Opt. strip measurement calibrator"};
     ToolHandle<ActsTrk::IHGTDOnTrackCalibratorTool<detail::RecoTrackStateContainer>> m_hgtdCalibTool{this, "HGTDCalibrator", "", "Opt. HGTD measurement calibrator"};
@@ -109,6 +104,7 @@ namespace ActsTrk {
     Gaudi::Property<std::vector<std::size_t>> m_absEtaMaxMeasurements{this, "absEtaMaxMeasurements", {}, "if specified for the given seed collection, applies absEtaMax cut in branch stopper once absEtaMaxMeasurements have been encountered"};
     Gaudi::Property<bool> m_doBranchStopper{this, "doBranchStopper", true, "use branch stopper"};
     Gaudi::Property<bool> m_doTwoWay{this, "doTwoWay", true, "run CKF twice, first with forward propagation with smoothing, then with backward propagation"};
+    Gaudi::Property<bool> m_recordMaterialStates{this, "recordMaterialStates", false, "record track states on surfaces which have material but no measurement; keeping them off is faster, but they have to be on for the multi-component stepper and for anything downstream which needs the full track state sequence"};
     Gaudi::Property<bool> m_inflateCovarianceTwoWay{this, "inflateCovarianceTwoWay", false, "inflate covariance matrix at the beginning of two-way track finding"};
     Gaudi::Property<double> m_twoWayinflateCovarianceFactor{this, "twoWayinflateCovarianceFactor", 1.0, "factor to multiply the initial covariance matrix at the beginning of two-way track finding"};
     Gaudi::Property<double> m_branchStopperPtMinFactor{this, "branchStopperPtMinFactor", 1.0, "factor to multiply ptMin cut when used in the branch stopper"};
@@ -234,24 +230,6 @@ namespace ActsTrk {
      * @param eta track candidate eta value
      */
     const Acts::TrackSelector::Config &getCuts(double eta) const;
-
-    /**
-     * @brief Perform Kalman Filter fit and update given initialParameters
-     *
-     * @tparam MeasurementSource Type of measurement source: ActsTrk::Seed or (in future) ActsTrk::ProtoTrack
-     * @param measurement Measurement source for KF
-     * @param initialParameters Parameters to use in KF
-     * @param detContext Struct holding geometry, magnetic field and calibration contexts
-     * @param paramsAtOutermostSurface Flag for searching in reverse direction
-     *
-     * @return Unique pointer to updated parameters
-     */
-    template <class MeasurementSource>
-    std::variant<std::unique_ptr<Acts::BoundTrackParameters>, TrackFindingBaseAlg::EStat> doRefit(
-        const MeasurementSource &measurement,
-        const Acts::BoundTrackParameters &initialParameters,
-        const DetectorContextHolder &detContext,
-        const bool paramsAtOutermostSurface) const;
 
     using TrkProxy = detail::RecoTrackContainer::TrackProxy;
 

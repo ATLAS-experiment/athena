@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file TrkEventTPCnv/test/TrackCnv_p4_test.cxx
@@ -233,7 +233,7 @@ void test1 ATLAS_NOT_THREAD_SAFE ()
 
   Trk::PerigeeSurface psurf (Amg::Vector3D (50, 100, 150));
   Trk::LocalParameters parms1 (1.5, 2.5, 3.5, 4.5, 5.5);
-  Trk::PseudoMeasurementOnTrack pmeas (Trk::LocalParameters(parms1), Amg::MatrixX(cov), psurf);
+  Trk::PseudoMeasurementOnTrack pmeas (Trk::LocalParameters(std::move(parms1)), Amg::MatrixX(cov), psurf);
   Trk::Perigee perigee (100, 200, 1.5, 0.5, 1e-3, psurf, std::nullopt);
   Trk::FitQuality fq (10, 20);
   Trk::MaterialEffectsOnTrack me (12.5, psurf);

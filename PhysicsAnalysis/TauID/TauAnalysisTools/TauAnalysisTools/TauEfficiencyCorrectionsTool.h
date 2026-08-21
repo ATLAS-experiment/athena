@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TAUANALYSISTOOLS_TAUEFFICIENCYCORRECTIONSTOOL_H
@@ -107,11 +107,11 @@ private:
   Gaudi::Property<std::string> m_sCampaign{this, "Campaign", ""};
   Gaudi::Property<bool> m_useFastSim{this, "useFastSim", false};
   Gaudi::Property<bool> m_bSkipTruthMatchCheck{this, "SkipTruthMatchCheck", false};
+  Gaudi::Property<bool> m_applyToData{this, "ApplyToData", false}; // for experts only
   Gaudi::Property<std::vector<int>> m_vecEfficiencyCorrectionTypes{this, "EfficiencyCorrectionTypes", {}};
 
   std::vector<int> m_vEfficiencyCorrectionTypes;
-  std::vector< asg::AnaToolHandle<ITauEfficiencyCorrectionsTool>* > m_vCommonEfficiencyTools;
-  std::vector< asg::AnaToolHandle<ITauEfficiencyCorrectionsTool>* > m_vTriggerEfficiencyTools;
+  asg::AnaToolHandle<ITauEfficiencyCorrectionsTool> m_tTool;
   std::string m_sInputFilePathDecayModeHadTau;
   std::string m_sVarName;
   bool m_bIsData;

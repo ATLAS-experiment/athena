@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration.
  */
 /**
  * @file TrkVertexSeedFinderTools/src/VertexSeedFinderTestAlg.cxx
@@ -312,13 +312,13 @@ VertexSeedFinderTestAlg::makeMcEventCollection (const EventContext& ctx) const
 
     double vrand = etadist(rng);
     if (vrand < 0) {
-      HepMC::signal_process_vertex(evt1)->add_particle_out (p);
+      HepMC::signal_process_vertex(evt1)->add_particle_out (std::move(p));
     }
     else if (vrand < 3) {
-      HepMC::signal_process_vertex(evt2)->add_particle_out (p);
+      HepMC::signal_process_vertex(evt2)->add_particle_out (std::move(p));
     }
     else {
-      HepMC::signal_process_vertex(evt3)->add_particle_out (p);
+      HepMC::signal_process_vertex(evt3)->add_particle_out (std::move(p));
     }
   }
 

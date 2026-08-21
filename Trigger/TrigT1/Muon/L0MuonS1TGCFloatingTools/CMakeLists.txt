@@ -9,7 +9,7 @@ atlas_add_component( L0MuonS1TGCFloatingTools
                      src/components/*.cxx
                      LINK_LIBRARIES AthenaBaseComps CxxUtils L0MuonS1TGCToolInterfaces
                                     FourMomUtils MuonIdHelpersLib MuonReadoutGeometry
-                                    MuonRDO MuonTGC_CablingLib StoreGateLib )
+                                    MuonRDO MuonTGC_CablingLib PathResolver StoreGateLib )
 
 atlas_add_test( TgcL0FloatingPtLut_test
   SOURCES test/TgcL0FloatingPtLut_test.cxx
@@ -17,6 +17,13 @@ atlas_add_test( TgcL0FloatingPtLut_test
   INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/src
   LINK_LIBRARIES CxxUtils
   POST_EXEC_SCRIPT nopost.sh )
+
+atlas_add_test( TgcL0GoodMagMap_test
+  SOURCES test/TgcL0GoodMagMap_test.cxx
+          src/TgcL0GoodMagMap.cxx
+  INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/src
+  LINK_LIBRARIES CxxUtils
+  POST_EXEC_SCRIPT noerror.sh )
 
 atlas_add_test( TgcL0TrackSelector_test
   SOURCES test/TgcL0TrackSelector_test.cxx

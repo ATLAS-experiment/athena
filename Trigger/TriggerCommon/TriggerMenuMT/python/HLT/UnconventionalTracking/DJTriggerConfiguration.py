@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 from AthenaCommon.CFElements import seqAND
 from TriggerMenuMT.HLT.Config.MenuComponents import MenuSequence, SelectionCA, InEventRecoCA, InViewRecoCA
@@ -72,13 +72,10 @@ def DJDispFragment(flags):
 
     acc.merge(lrt_algs)
     
-    from TrigGenericAlgs.TrigGenericAlgsConfig import ROBPrefetchingAlgCfg_Si
-    robPrefetchAlg = ROBPrefetchingAlgCfg_Si(flags, nameSuffix=reco.name)
-
     reco.mergeReco(acc)
     
     selAcc = SelectionCA('UncTrkrecoSeqDJTrigDisp')
-    selAcc.mergeReco(reco, robPrefetchCA=robPrefetchAlg)
+    selAcc.mergeReco(reco)
     return selAcc
 
 def DJDispStepSequenceGenCfg(flags):

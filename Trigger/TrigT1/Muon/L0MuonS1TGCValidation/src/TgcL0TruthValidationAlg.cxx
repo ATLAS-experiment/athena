@@ -21,7 +21,6 @@
 #include <array>
 #include <cmath>
 #include <cstdint>
-#include <limits>
 #include <memory>
 #include <vector>
 
@@ -131,12 +130,6 @@ StatusCode TgcL0TruthValidationAlg::initialize() {
   }
   if (m_validationPlaneToleranceZ.value() < 0.0) {
     ATH_MSG_ERROR("ValidationPlaneToleranceZ must be non-negative");
-    return StatusCode::FAILURE;
-  }
-  if (m_requiredBcTag.value() < -1 ||
-      m_requiredBcTag.value() >
-          static_cast<int>(std::numeric_limits<std::uint16_t>::max())) {
-    ATH_MSG_ERROR("RequiredBcTag must be -1 or a uint16 value");
     return StatusCode::FAILURE;
   }
   return StatusCode::SUCCESS;
@@ -276,6 +269,12 @@ StatusCode TgcL0TruthValidationAlg::execute(const EventContext& ctx) const {
     output->candidates.phi.emplace_back(candidate.phi);
     output->candidates.deltaTheta.emplace_back(candidate.deltaTheta);
     output->candidates.deltaPhi.emplace_back(candidate.deltaPhi);
+    output->candidates.pt.emplace_back(candidate.preInnerCoincidencePt);
+    output->candidates.threshold.emplace_back(
+        candidate.preInnerCoincidenceThreshold);
+    output->candidates.charge.emplace_back(candidate.charge);
+    output->candidates.goodMagneticField.emplace_back(
+        candidate.goodMagneticField ? 1U : 0U);
     output->candidates.truthIndex.emplace_back(-1);
   }
 
@@ -287,8 +286,8 @@ StatusCode TgcL0TruthValidationAlg::execute(const EventContext& ctx) const {
     for (std::size_t candidate = 0U; candidate < candidates->size();
          ++candidate) {
       const TgcL0Candidate& inputCandidate = (*candidates)[candidate];
-      if (m_requiredBcTag.value() >= 0 &&
-          inputCandidate.bcTag != static_cast<std::uint16_t>(m_requiredBcTag.value())) {
+      if (m_requiredBcTagMask.value() != 0U &&
+          (inputCandidate.bcTag & m_requiredBcTagMask.value()) == 0U) {
         continue;
       }
       if (output->truth.eta[truth] * inputCandidate.eta < 0.F) continue;
@@ -359,9 +358,9 @@ StatusCode TgcL0TruthValidationAlg::execute(const EventContext& ctx) const {
       for (std::size_t segment = 0U;
            segment < output->segments.projection.size(); ++segment) {
         if (output->segments.projection[segment] != projectionValue) continue;
-        if (m_requiredBcTag.value() >= 0 &&
-            output->segments.bcTag[segment] !=
-                static_cast<std::uint16_t>(m_requiredBcTag.value())) {
+        if (m_requiredBcTagMask.value() != 0U &&
+            (output->segments.bcTag[segment] &
+             m_requiredBcTagMask.value()) == 0U) {
           continue;
         }
         if (output->truth.eta[truth] * output->segments.eta[segment] < 0.F) {

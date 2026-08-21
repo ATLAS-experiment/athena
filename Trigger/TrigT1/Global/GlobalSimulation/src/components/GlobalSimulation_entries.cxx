@@ -21,7 +21,7 @@
 
 #include "../Lar_Preproc/Egamma1_LArStrip_Fex.h"
 #include "../Lar_Preproc/Egamma1_LArStrip_Fex_RowAware.h"
-#include "../Lar_Preproc/Egamma1_OnlineMapNbhood.h"
+#include "../Lar_Preproc/Egamma1_OnlineMapNbhoodAlg.h"
 #include "../Lar_Preproc/EMBE1CellsFromCaloCells.h"
 #include "../Lar_Preproc/LArCellPreparationAlg.h"
 #include "../Lar_Preproc/LArCellMuxAlg.h"
@@ -51,7 +51,7 @@ DECLARE_COMPONENT(GlobalSim::GlobalJet1AlgTool)
 
 DECLARE_COMPONENT(GlobalSim::Egamma1_LArStrip_Fex)
 DECLARE_COMPONENT(GlobalSim::Egamma1_LArStrip_Fex_RowAware)
-DECLARE_COMPONENT(GlobalSim::Egamma1_OnlineMapNbhood)
+DECLARE_COMPONENT(GlobalSim::Egamma1_OnlineMapNbhoodAlg)
 DECLARE_COMPONENT(GlobalSim::EMBE1CellsFromCaloCells)
 DECLARE_COMPONENT(GlobalSim::LArCellPreparationAlg)
 DECLARE_COMPONENT(GlobalSim::LArCellMuxAlg)

@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
  */
 
 /***************************************************************************
@@ -290,7 +290,7 @@ void MaterialAllocator::addLeadingMaterial(
             indetMaterialF->push_back(*r);
           }
 
-          for (r = indetMaterialF->rbegin(); r != indetMaterialF->rend(); ++r) {
+          for (auto r = indetMaterialF->rbegin(); r != indetMaterialF->rend(); ++r) {
             // ignore trailing material
             if (!(**r).trackParameters() || !(**r).materialEffectsOnTrack() ||
                 intersection->direction().dot(
@@ -299,8 +299,7 @@ void MaterialAllocator::addLeadingMaterial(
 
             haveMaterial = true;
           }
-          indetMaterial = indetMaterialF;
-          indetMaterialF = nullptr;
+          indetMaterial = std::exchange(indetMaterialF, nullptr);
         }
       }
       delete indetMaterialR;
@@ -451,8 +450,9 @@ void MaterialAllocator::addLeadingMaterial(
     double leadingX0Integral = 0.;
     std::vector<Trk::FitMeasurement*>::reverse_iterator m =
         measurements.rbegin();
-    while (*m != leadingScatterer)
+    while (m != measurements.rend() && *m != leadingScatterer) {
       ++m;
+    }
     for (; m != measurements.rend(); ++m) {
       if (!(**m).isScatterer())
         continue;
@@ -462,7 +462,7 @@ void MaterialAllocator::addLeadingMaterial(
         continue;
 
       // set the scattering angle and X0Integral
-      leadingX0Integral += (**m).materialEffects()->thicknessInX0();
+      leadingX0Integral += materialEffects->thicknessInX0();
       const double logTerm = 1.0 + m_scatteringLogCoeff * std::log(leadingX0Integral);
       leadingScattering = leadingX0Integral * logTerm * logTerm;
       const double scatteringAngle =

@@ -252,8 +252,8 @@ void ActsLayerBuilder::buildBarrel(const Acts::GeometryContext &gctx,
 
     auto zEqual = [this](const Acts::Surface &a,
                          const Acts::Surface &b) {
-      Acts::GeometryContext gctx = Acts::GeometryContext::dangerouslyDefaultConstruct(); // unused in matcher
-      return m_cfg.surfaceMatcher(gctx, AxisZ, &a, &b);
+      Acts::GeometryContext thisContext = Acts::GeometryContext::dangerouslyDefaultConstruct(); // unused in matcher
+      return m_cfg.surfaceMatcher(thisContext, AxisZ, &a, &b);
     };
 
     // Work around issue with clang10 --- it doesn't allow

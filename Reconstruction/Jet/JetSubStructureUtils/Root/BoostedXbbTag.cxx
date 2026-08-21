@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "JetSubStructureUtils/BoostedXbbTag.h"
@@ -19,6 +19,8 @@
 #include <iostream>
 #include <sstream>
 #include <fstream>
+#include <set>
+#include <algorithm>
 
 #define APP_NAME "BoostedXbbTag"
 
@@ -432,7 +434,7 @@ int BoostedXbbTag::result(const xAOD::Jet& jet, const std::string& algorithm_nam
 
   // filter out the track jets we do not want (pT > 10 GeV and |eta| < 2.5 and at least 2 constituents)
   associated_trackJets.erase(
-    std::remove_if(associated_trackJets.begin(), associated_trackJets.end(),  [](const xAOD::Jet* jet) -> bool { return (jet->pt()/1.e3 < 10.0 || fabs(jet->eta()) > 2.5 || jet->numConstituents() < 2); }),
+    std::remove_if(associated_trackJets.begin(), associated_trackJets.end(),  [](const xAOD::Jet* thisJet) -> bool { return (thisJet->pt()/1.e3 < 10.0 || fabs(thisJet->eta()) > 2.5 || thisJet->numConstituents() < 2); }),
     associated_trackJets.end());
   if(associated_trackJets.size() < 2){
     if(m_working_point.find("single") == std::string::npos){
@@ -507,13 +509,14 @@ int BoostedXbbTag::result(const xAOD::Jet& jet, const std::string& algorithm_nam
     if(m_verbose) printf("<%s>: There are no muons that passed the kinematic preselection.\r\n", APP_NAME);
     //return -3;
   } else {
+    const std::string parameterStr{"SizeParameter"};
     for(int i = 0; i < num_trackJets_toLookAt; i++){
       auto& trackJet = associated_trackJets.at(i);
       // only match muon to b-tagged track jets
       if(m_isB(*trackJet) == 0) continue;
       // it's b-tagged, try to match it
       float maxDR(0.2);
-      trackJet->getAttribute("SizeParameter", maxDR);
+      trackJet->getAttribute(parameterStr, maxDR);
       const xAOD::Muon *closest_muon(nullptr);
       for(const auto *const muon: preselected_muons){
         float DR( trackJet->p4().DeltaR(muon->p4()) );
@@ -547,7 +550,7 @@ int BoostedXbbTag::result(const xAOD::Jet& jet, const std::string& algorithm_nam
   }
   // may not always be the corrected jet, but always contains what is used to cut against
   m_correctedJetDecor(jet) = corrected_jet;
-  m_matchedMuonsLink(jet) = matched_muons_links;
+  m_matchedMuonsLink(jet) = std::move(matched_muons_links);
 
   std::string buffer;
 

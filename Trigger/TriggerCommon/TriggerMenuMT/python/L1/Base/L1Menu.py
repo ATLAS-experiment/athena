@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 from .CTP import CTP
 from .Items import MenuItemsCollection
@@ -388,7 +388,10 @@ class L1Menu(object):
         # collect the ptMinToTopo values
         ptMin = {}
         for thrtype in ThrType.Run3Types():
-            ttconfig = getTypeWideThresholdConfig(thrtype, self.flags.Trigger.L1.Menu.doHeavyIonTobThresholds, self.flags.Trigger.L1.Menu.doeFexBDTTau)
+            ttconfig = getTypeWideThresholdConfig(ttype=thrtype, \
+                do_HI_tob_thresholds=self.flags.Trigger.L1.Menu.doHeavyIonTobThresholds, \
+                do_eFex_BDT_Tau=self.flags.Trigger.L1.Menu.doeFexBDTTau, \
+                collisions=self.flags.Beam.NumberOfCollisions)
             inputtype = thrtype.name
             if inputtype == 'cTAU':
                 inputtype = 'eTAU'

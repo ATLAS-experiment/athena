@@ -73,30 +73,50 @@ class Node:
             return value.get(flags)
         return value
 
+
     def __getattr__(self, name):
         """ will attempt a dynamic load from flags if need be """
         if name in self._children : return self._children[name]
         if self._root :
-            if name in self._root._children : return self._root._children[name]
-            return self._root._loadflags(name)
-        return self._loadflags(name)
+            if self._root._loadflags( f"{self.name()}.{name}" ) :
+                if name in self._children : return self._children[name]
 
-    def _loadflags(self, name):
-        """ load dynamic flags from flags if required"""
+            if name in self._root._children : return self._root._children[name]
+            if self._root._loadflags( name ) :
+                if name in self._root._children : return self._root._children[name]
+        else:
+            if self._loadflags( name ) :
+                if name in self._children : return self._children[name]
+                
+        raise AttributeError(f"no attribute {name}")
+
+
+    def _loadflags(self, name ) :
+        """ load dynamic flags - can only load flags on the root node """
+
+        if self._root : return self._root._loadflags( name )
+
         flags = self._flags
-        if flags is None or name not in flags._dynaflags  : raise AttributeError(f"no attribute {name}")
+        if flags is None : raise AttributeError(f"no attribute {name}")
         lockstate = self._lockstate
         object.__setattr__(self, "_lockstate", _UNLOCKED)
-        try: 
-            flags._loadDynaFlags(name)
-            for key, val in flags._flagdict.items() :
-                if key == name or key.startswith(name+".") : self.addFlag( key, val, flags )
-            if name in self._children : return self._children[name]
-            raise AttributeError(f"no attribute {name}")
+        try:
+            if name in flags._dynaflags : return self._addDynaFlags(name)
+            for key in flags._dynaflags :
+                if name in key : return self._addDynaFlags(key)
+            return False
         finally:
             # ensure the lock state is restored if something goes wrong ...
             if lockstate != _UNLOCKED : self.lock(lockstate)
 
+        
+    def _addDynaFlags(self, name) :
+        flags = self._flags
+        self._flags._loadDynaFlags(name)
+        for key, val in self._flags._flagdict.items() :
+            if key == name or key.startswith(name+".") : self._addFlagUnlock( key, val, flags )
+        return True
+        
     def _rootnode(self):
         if self._root : return self._root
         return self
@@ -113,15 +133,27 @@ class Node:
         """ add an attribute to this node """
         setattr(self, attr_name, value)
 
-    def addFlag(self, tag, value, flags=None):
+    def _addFlagImpl(self, tag, value, flags=None, unlock=False):
         """ addFlag method like that in the egregious flags """
         node = self
         if flags is not None and self._flags is None : node._flags = flags
         names = tag.split(".")
-        for name in names[:-1]: node = node.addNewNode(name, flags )
+        for name in names[:-1]:
+            node = node.addNewNode(name, flags )
+            if unlock : object.__setattr__( node, "_lockstate", _UNLOCKED )
         if flags is not None : node._flags = flags
+        if names[-1] in node.__dict__ : return False
         setattr(node, names[-1], value)
-       
+        return True
+
+    def addFlag(self, tag, value, flags=None):
+        if not self._addFlagImpl( tag, value, flags, False ):
+            raise  KeyError(f"node: {tag} already exists")
+
+    def _addFlagUnlock(self, tag, value, flags=None):
+        self._addFlagImpl( tag, value, flags, True )
+
+        
     def addNewNode(self, name, flags=None):
         """ add a new child node """
         self._fail_if_locked()

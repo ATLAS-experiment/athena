@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "PFOHistUtils/LeptonFELinkerPlots.h"
@@ -56,8 +56,8 @@ namespace PFO {
   
   void LeptonFELinkerPlots::fill(const xAOD::Photon& phot, const xAOD::EventInfo& eventInfo){
     int nMatched_FE=0;
-    SG::AuxElement::ConstAccessor<std::vector<ElementLink<xAOD::FlowElementContainer> > >acc_FE_phot_link_NFE("neutralFELinks");
-    SG::AuxElement::ConstAccessor<std::vector<ElementLink<xAOD::FlowElementContainer> > >acc_FE_phot_link_CFE("neutralFELinks");
+    SG::ConstAccessor<std::vector<ElementLink<xAOD::FlowElementContainer> > >acc_FE_phot_link_NFE("neutralFELinks");
+    SG::ConstAccessor<std::vector<ElementLink<xAOD::FlowElementContainer> > >acc_FE_phot_link_CFE("neutralFELinks");
     if(acc_FE_phot_link_NFE.isAvailable(phot) and m_doNeutralFE){
       nMatched_FE=(acc_FE_phot_link_NFE(phot)).size();
       m_photon_NMatchedNFE->Fill(nMatched_FE,eventInfo.beamSpotWeight());
@@ -69,8 +69,8 @@ namespace PFO {
   }
   void LeptonFELinkerPlots::fill(const xAOD::Electron& el, const xAOD::EventInfo& eventInfo){
     int nMatched_FE=0;
-    SG::AuxElement::ConstAccessor<std::vector<ElementLink<xAOD::FlowElementContainer> > >acc_FE_el_link_NFE("neutralFELinks");
-    SG::AuxElement::ConstAccessor<std::vector<ElementLink<xAOD::FlowElementContainer> > >acc_FE_el_link_CFE("chargedFELinks");
+    SG::ConstAccessor<std::vector<ElementLink<xAOD::FlowElementContainer> > >acc_FE_el_link_NFE("neutralFELinks");
+    SG::ConstAccessor<std::vector<ElementLink<xAOD::FlowElementContainer> > >acc_FE_el_link_CFE("chargedFELinks");
     
     if(acc_FE_el_link_NFE.isAvailable(el) and m_doNeutralFE){
       nMatched_FE=(acc_FE_el_link_NFE(el)).size();
@@ -84,8 +84,8 @@ namespace PFO {
  
   void LeptonFELinkerPlots::fill(const xAOD::Muon& mu, const xAOD::EventInfo& eventInfo){
     int nMatched_FE=0;
-    SG::AuxElement::ConstAccessor<std::vector<ElementLink<xAOD::FlowElementContainer> > >acc_FE_mu_link_NFE("neutralFELinks");
-    SG::AuxElement::ConstAccessor<std::vector<ElementLink<xAOD::FlowElementContainer> > >acc_FE_mu_link_CFE("chargedFELinks");
+    SG::ConstAccessor<std::vector<ElementLink<xAOD::FlowElementContainer> > >acc_FE_mu_link_NFE("neutralFELinks");
+    SG::ConstAccessor<std::vector<ElementLink<xAOD::FlowElementContainer> > >acc_FE_mu_link_CFE("chargedFELinks");
     if(acc_FE_mu_link_NFE.isAvailable(mu) and m_doNeutralFE){
       nMatched_FE=(acc_FE_mu_link_NFE(mu)).size();
       m_muon_NMatchedNFE->Fill(nMatched_FE,eventInfo.beamSpotWeight());    
@@ -98,8 +98,8 @@ namespace PFO {
  
   void LeptonFELinkerPlots::fill(const xAOD::TauJet& tau, const xAOD::EventInfo& eventInfo){
     int nMatched_FE=0;
-    SG::AuxElement::ConstAccessor<std::vector<ElementLink<xAOD::FlowElementContainer> > >acc_FE_tau_link_NFE("neutralFELinks");
-    SG::AuxElement::ConstAccessor<std::vector<ElementLink<xAOD::FlowElementContainer> > >acc_FE_tau_link_CFE("chargedFELinks");
+    SG::ConstAccessor<std::vector<ElementLink<xAOD::FlowElementContainer> > >acc_FE_tau_link_NFE("neutralFELinks");
+    SG::ConstAccessor<std::vector<ElementLink<xAOD::FlowElementContainer> > >acc_FE_tau_link_CFE("chargedFELinks");
     if(acc_FE_tau_link_NFE.isAvailable(tau) and m_doNeutralFE){
 
       nMatched_FE=(acc_FE_tau_link_NFE(tau)).size();

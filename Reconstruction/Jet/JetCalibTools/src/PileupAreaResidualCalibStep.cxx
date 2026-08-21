@@ -72,6 +72,7 @@ StatusCode PileupAreaResidualCalibStep::calibrate(xAOD::JetContainer& jetCont) c
 
   const xAOD::JetAttributeAccessor::AccessorWrapper<xAOD::JetFourMom_t> areaAcc("ActiveArea4vec");  
   const xAOD::JetAttributeAccessor::AccessorWrapper<xAOD::JetFourMom_t> outScaleMomAcc(m_jetOutScale);  
+  const xAOD::JetAttributeAccessor::AccessorWrapper<xAOD::JetFourMom_t> outAreaScaleMomAcc(m_jetAreaOutScale);
   const xAOD::JetAttributeAccessor::AccessorWrapper<xAOD::JetFourMom_t> startScaleMomAcc(m_jetInScale);  
 
   JetHelper::JetContext jc;
@@ -96,12 +97,21 @@ StatusCode PileupAreaResidualCalibStep::calibrate(xAOD::JetContainer& jetCont) c
     double pT_offset = pT_det; // pT difference before/after pileup corrections
     double pileup_SF = 1; // final calibration factor applied to the four vector
 
-    xAOD::JetFourMom_t calibP4;
+    xAOD::JetFourMom_t calibP4, rhoAreaP4;
     if(!m_doSequentialResidual){ // Default, both corrections are applied simultaneously
       offsetET = getResidualOffset(*jet, jc, mu, NPV, m_doMuOnly, m_doNPVOnly);
 
-      // Calculate the pT after jet areas and residual offset
-      pT_offset = m_doJetArea ? pT_det - rho*jetareaP4.pt() - offsetET : pT_det - offsetET;
+      if(m_doJetArea){
+	// Store the jet pT after rho*area correction
+	double pT_rhoArea = pT_det - rho*jetareaP4.pt();
+	rhoAreaP4 = jetStartP4*pT_rhoArea/pT_det;
+	outAreaScaleMomAcc.setAttribute(*jet, rhoAreaP4);
+	// Calculate the pT after jet areas and residual offset
+	pT_offset = pT_det - rho*jetareaP4.pt() - offsetET;
+      }
+      else{
+	pT_offset = pT_det - offsetET;
+      }
 
       // Set the jet pT to 10 MeV if the pT is negative after the jet area and residual offset corrections
       pileup_SF = pT_offset >= 0 ? pT_offset / pT_det : 10./pT_det;

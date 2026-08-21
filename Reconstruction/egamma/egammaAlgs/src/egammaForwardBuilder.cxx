@@ -302,8 +302,8 @@ StatusCode egammaForwardBuilder::execute(const EventContext& ctx) const
     if (m_fwdDNN) {	
       // Apply the Forward Electron selectors.
       for (size_t i = 0; i < m_forwardElectronNNSelectors.size(); ++i) {
-	const auto selector = m_forwardElectronNNSelectors[i];
-	const auto name = m_forwardElectronNNSelectorResultNames[i];
+	const auto & selector = m_forwardElectronNNSelectors[i];
+	const auto & name = m_forwardElectronNNSelectorResultNames[i];
 	
 	
 	// Save the bool result.
@@ -311,7 +311,7 @@ StatusCode egammaForwardBuilder::execute(const EventContext& ctx) const
 	el->setPassSelection(static_cast<bool>(accept), "DNN"+name);
       }
       std::string LikeliHoodName = "DNN_Score";
-      const auto selector = m_forwardElectronNNSelectors[0];
+      const auto & selector = m_forwardElectronNNSelectors[0];
       float val=selector->calculate(ctx,el);
       el->setLikelihoodValue(val,LikeliHoodName);
     }

@@ -135,10 +135,7 @@ class PhotonChainConfiguration(ChainConfigurationBase):
 
     def getPrecisionCaloPhoton(self, flags, is_probe_leg=False):
         do_ion = 'ion' in self.chainPart['extra']
-        if do_ion:
-            stepName = "PhotonPrecisionHICalo"
-        else:
-            stepName = "PhotonPrecisionCalo"
+        stepName = "PhotonPrecisionHICalo" if do_ion else "PhotonPrecisionCalo"
 
         return self.getStep(flags, stepName,[precisionCaloSequenceGenCfg], ion=do_ion, is_probe_leg=is_probe_leg)
     

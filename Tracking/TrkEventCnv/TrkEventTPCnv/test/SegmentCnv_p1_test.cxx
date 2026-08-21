@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file TrkEventTPCnv/test/SegmentCnv_p1_test.cxx
@@ -13,11 +13,8 @@
 #include "TrkSurfaces/PerigeeSurface.h"
 #include "TrkSurfaces/Surface.h"
 #include "TrkEventPrimitives/FitQuality.h"
-//#include "TrkMeasurementBase/MeasurementBase.h"
 #include "TrkPseudoMeasurementOnTrack/PseudoMeasurementOnTrack.h"
-//#include "TrkMaterialOnSegment/MaterialEffectsOnSegment.h"
 #include "TrkEventTPCnv/SegmentCollectionCnv_tlp3.h"
-//#include "GeoPrimitives/GeoPrimitivesHelpers.h"
 #include "TestTools/FLOATassert.h"
 #include "GaudiKernel/MsgStream.h"
 #include "TestTools/leakcheck.h"
@@ -163,9 +160,9 @@ void test1 ATLAS_NOT_THREAD_SAFE ()
   DataVector<const Trk::MeasurementBase> mvec (SG::VIEW_ELEMENTS);
   mvec.push_back (&pmeas);
 
-  TestSegment trans1 (Trk::LocalParameters(locpars),
+  TestSegment trans1 (Trk::LocalParameters(std::move(locpars)),
                       Amg::MatrixX(cov),
-                      DataVector<const Trk::MeasurementBase> (mvec),
+                      DataVector<const Trk::MeasurementBase> (std::move(mvec)),
                       new Trk::FitQuality(fq),
                       Trk::Segment::Muonboy,
                       psurf);

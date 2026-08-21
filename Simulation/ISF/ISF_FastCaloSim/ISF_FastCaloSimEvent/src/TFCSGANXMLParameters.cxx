@@ -13,6 +13,8 @@
 #include "XMLCoreParser/XMLCoreNode.h"
 
 #include "CxxUtils/hexdump.h"
+#include "CxxUtils/StringUtils.h"
+#include <format>
 
 TFCSGANXMLParameters::TFCSGANXMLParameters() = default;
 
@@ -49,21 +51,13 @@ void TFCSGANXMLParameters::InitialiseFromXML(
           m_latentDim = nodeParticle->get_int_attrib ("latentDim");
 
           for (const XMLCoreNode* nodeLayer : nodeBin->get_children ("Layer")) {
-            std::vector<double> edges;
-            std::string s = nodeLayer->get_attrib ("r_edges");
-            std::istringstream ss(s);
-            std::string token;
-
-            while (std::getline(ss, token, ',')) {
-              edges.push_back(std::stod(token));
-            }
+            const std::string &rEdgesStr = nodeLayer->get_attrib("r_edges");
+            std::vector<double> edges = CxxUtils::tokenizeDouble(rEdgesStr, ",");
 
             int binsInAlpha = nodeLayer->get_int_attrib ("n_bin_alpha");
             int layer = nodeLayer->get_int_attrib ("id");
 
-            std::string name = "hist_pid_" + std::to_string(pid) +
-              "_region_" + std::to_string(regionId) +
-              "_layer_" + std::to_string(layer);
+            const std::string name = std::format("hist_pid_{}_region_{}_layer_{}", pid, regionId, layer);
             int xBins = static_cast<int>(edges.size()) - 1;
 
             if (xBins <= 0) {
@@ -87,6 +81,7 @@ void TFCSGANXMLParameters::InitialiseFromXML(
                                          TH2D(name.c_str(), name.c_str(), xBins, edges.data(),
                                               binsInAlpha, minAlpha, M_PI));
             itr.first->second.SetDirectory(nullptr);
+            ROOT::Internal::MarkTObjectAsNotOnHeap(itr.first->second);
           }
         }
       }

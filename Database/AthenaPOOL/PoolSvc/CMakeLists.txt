@@ -9,10 +9,10 @@ find_package( CORAL COMPONENTS CoralBase CoralKernel RelationalAccess )
 atlas_add_library( PoolSvcLib
                    INTERFACE
                    PUBLIC_HEADERS PoolSvc
-                   LINK_LIBRARIES GaudiKernel CollectionSvc PersistencySvc DataModelRoot )
+                   LINK_LIBRARIES DataModelRoot GaudiKernel )
 
 # Component(s) in the package:
 atlas_add_component( PoolSvc
                      PoolSvc/*.h src/*.cxx src/components/*.cxx
                      INCLUDE_DIRS ${CORAL_INCLUDE_DIRS}
-                     LINK_LIBRARIES ${CORAL_LIBRARIES} AthenaBaseComps CollectionSvc CxxUtils DataModelRoot GaudiKernel PathResolver PersistencySvc PersistentDataModel PoolSvcLib StorageSvc )
+                     LINK_LIBRARIES ${CORAL_LIBRARIES} AthenaBaseComps CxxUtils DataModelRoot GaudiKernel PathResolver PersistentDataModel PoolSvcLib CollectionSvc PersistencySvc StorageSvc )

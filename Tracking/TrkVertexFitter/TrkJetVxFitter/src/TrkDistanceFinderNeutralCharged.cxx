@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // to get AmgMatrix plugin:
@@ -225,7 +225,10 @@ TrkDistanceFinderNeutralCharged::getPointAndDistance(const Trk::NeutralTrack& ne
       ATH_MSG_WARNING("Hessian indicates a maximum: derivative will be zero but result incorrect");
       throw Error::NewtonProblem("Maximum point found");
     }
-
+    if (det == 0.) {
+      ATH_MSG_WARNING("Divisor 'det' is zero.");
+      throw Error::NewtonProblem("Divisor is zero");
+    }
     //Now apply the Newton formula in more than one dimension
     deltaa_lambda=-(d2db_phi2*d1da_lambda-d2dadb_lambdaphi*d1db_phi)/det;
     deltab_phi=-(-d2dadb_lambdaphi*d1da_lambda+d2da_lambda2*d1db_phi)/det;

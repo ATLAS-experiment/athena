@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "PFOHistUtils/FlowElement_LinkerPlots.h"
@@ -64,10 +64,10 @@ namespace PFO {
   }
   void FlowElement_LinkerPlots::fill(const xAOD::FlowElement& FE, const xAOD::EventInfo& eventInfo){
     // methods work for both CFE and NFE since the auxvars are named the same
-    SG::AuxElement::ConstAccessor< std::vector < ElementLink< xAOD::MuonContainer > > > acc_muon_FE_Link("FE_MuonLinks");
-    SG::AuxElement::ConstAccessor< std::vector < ElementLink< xAOD::PhotonContainer > > > acc_photon_FE_Link("FE_PhotonLinks");
-    SG::AuxElement::ConstAccessor< std::vector < ElementLink< xAOD::ElectronContainer > > > acc_electron_FE_Link("FE_ElectronLinks");
-    SG::AuxElement::ConstAccessor< std::vector < ElementLink< xAOD::TauJetContainer > > > acc_tau_FE_Link("FE_TauLinks");
+    SG::ConstAccessor< std::vector < ElementLink< xAOD::MuonContainer > > > acc_muon_FE_Link("FE_MuonLinks");
+    SG::ConstAccessor< std::vector < ElementLink< xAOD::PhotonContainer > > > acc_photon_FE_Link("FE_PhotonLinks");
+    SG::ConstAccessor< std::vector < ElementLink< xAOD::ElectronContainer > > > acc_electron_FE_Link("FE_ElectronLinks");
+    SG::ConstAccessor< std::vector < ElementLink< xAOD::TauJetContainer > > > acc_tau_FE_Link("FE_TauLinks");
     
     TLorentzVector FE_fourvec=FE.p4();
     // Muon block

@@ -77,6 +77,20 @@ const std::vector<const Trk::Surface*>& HGTD_DetectorElement::surfaces() const
     return *m_surfaces.ptr();
 }
 
+//============================================================
+// Module transform
+//============================================================
+
+const Amg::Transform3D& HGTD_DetectorElement::moduleTransform() const
+{
+    return transform();
+}
+
+Amg::Transform3D HGTD_DetectorElement::defModuleTransform() const
+{
+    return defTransform();
+}
+
 double HGTD_DetectorElement::get_rz() const
 {
     // Calculate z (endcap)

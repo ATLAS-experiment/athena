@@ -1,33 +1,34 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef DCMATH_SEGMENTFINDER_H
 #define DCMATH_SEGMENTFINDER_H
 
-#include <cmath>
+
+
+#include "CxxUtils/checker_macros.h"
+#include "TrkDriftCircleMath/ChamberGeometry.h" //used
+
+#include "TrkDriftCircleMath/DCSLFitter.h" //used in header
+#include "TrkDriftCircleMath/DCSLHitSelector.h" //member
+#include "TrkDriftCircleMath/IsSubsetSegment.h" //template
+#include "TrkDriftCircleMath/LocVec2D.h" //member
+#include "TrkDriftCircleMath/MatchCrossedTubes.h" //member
+#include "TrkDriftCircleMath/ResolvedCollection.h" //template
+
+#include <cmath> //for M_PI_2
 #include <memory>
 #include <mutex>
 #include <vector>
 
-#include "CxxUtils/checker_macros.h"
-#include "TrkDriftCircleMath/ChamberGeometry.h"
-#include "TrkDriftCircleMath/Cluster.h"
-#include "TrkDriftCircleMath/CurvedSegmentFinder.h"
-#include "TrkDriftCircleMath/DCSLFitter.h"
-#include "TrkDriftCircleMath/DCSLHitSelector.h"
-#include "TrkDriftCircleMath/DriftCircle.h"
-#include "TrkDriftCircleMath/IsSubsetSegment.h"
-#include "TrkDriftCircleMath/Line.h"
-#include "TrkDriftCircleMath/LocVec2D.h"
-#include "TrkDriftCircleMath/MatchCrossedTubes.h"
-#include "TrkDriftCircleMath/MatchDCWithLine.h"
-#include "TrkDriftCircleMath/ResidualWithLine.h"
-#include "TrkDriftCircleMath/ResolvedCollection.h"
-#include "TrkDriftCircleMath/Segment.h"
-#include "TrkDriftCircleMath/SortDcsByY.h"
 
 namespace TrkDriftCircleMath {
+    class DriftCircle;
+    class Line;
+    class MatchDCWithLine;
+    struct SortDcsByY;
+    class Segment;
 
     class SegmentFinder {
     public:
@@ -62,7 +63,7 @@ namespace TrkDriftCircleMath {
         void setUseChamberPhi(bool useChamberPhi);
         void setRemoveSingleOutliers(bool removeSingleOutliers);
         void setCurvedSegmentFinder(bool doCurvedSegmentFinder);
-        void setFitter(std::shared_ptr<const DCSLFitter> fitter) { m_fitter = fitter; }
+        void setFitter(std::shared_ptr<const DCSLFitter> fitter) { m_fitter = std::move(fitter); }
         void setMaxDropDepth(int max);
         void setResidualCutT0(double resCut);
         void setDeltaCutT0(double deltaCut);

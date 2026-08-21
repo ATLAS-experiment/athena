@@ -88,7 +88,7 @@ class defaultGeometryTags:
     RUN2 = "ATLAS-R2-2016-01-00-01"
     RUN2_BEST_KNOWLEDGE = "ATLAS-R2-2016-01-02-01"
     RUN3 = "ATLAS-R3S-2021-03-02-00"
-    RUN4 = "ATLAS-P2-RUN4-04-00-00"
+    RUN4 = "ATLAS-P2-RUN4-05-00-00"
 
     RUN2_ZDC = "ATLAS-R2-2016-01-03-00" # default ZDC geometry tag for Run2
     RUN3_ZDC23 = "ATLAS-R3S-2021-03-03-00" # default ZDC geometry tag for Run3 Year 2023

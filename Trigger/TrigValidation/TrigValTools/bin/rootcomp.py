@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 #
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 # @file:    rootcomp.py
 # @purpose: Script to compare the histograms in two root files
 # @author:  Frank Winklmeier, Will Buttinger
@@ -99,7 +99,6 @@ def main():
    if not opts.noSkipList:
       opts.skip += ["Unpck$", "BufFreeCnt$", "CalEvtSize$"]     # muon calibration buffer
       opts.skip += ["/TIME_"]                          # timers from Monitored framework
-      opts.skip += ["/athenaHLT.*/.*Time$"]            # HLTMPPU timing histograms
       opts.skip += ["HltEventLoopMgr/.*Time.*"]        # custom timers
       opts.skip += ["HltEventLoopMgr/PopScheduler.*"]  # scheduler monitoring
       opts.skip += ["MessageSvc/MessageCount"]         # MessageSvc

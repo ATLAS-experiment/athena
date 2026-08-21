@@ -487,16 +487,16 @@ atlas_add_citest( TriggerMC_HI
 atlas_add_citest( TriggerData
    SCRIPT test_trig_data_v1Dev_build.py )
 
-atlas_add_citest( Trigger_athenaHLT_v1Dev
+atlas_add_citest( Trigger_athenaEF_v1Dev
    SCRIPT test_trigP1_v1Dev_decodeBS_build.py )
 
-atlas_add_citest( Trigger_athenaHLT_v1PhysP1
+atlas_add_citest( Trigger_athenaEF_v1PhysP1
    SCRIPT test_trigP1_v1PhysP1_build.py )
 
-atlas_add_citest( Trigger_athenaHLT_v1Cosmic
+atlas_add_citest( Trigger_athenaEF_v1Cosmic
    SCRIPT test_trigP1_v1Cosmic_build.py )
 
-atlas_add_citest( Trigger_athenaHLT_v1PhysP1_HI
+atlas_add_citest( Trigger_athenaEF_v1PhysP1_HI
    SCRIPT test_trigP1_v1PhysP1_HI_run3_build.py )
 
 atlas_add_citest( TriggerConfigFlags

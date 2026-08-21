@@ -1,5 +1,5 @@
 #!/usr/bin/env athena
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 ## This file runs runHLT with external menus
 # 3 tests of the CF to cover different menu generation frameworks and data inputs:
@@ -29,9 +29,7 @@ def set_flags(flags):
     flags.Common.isOnline = True    # online environment
     flags.Input.Files = []          # menu cannot depend on input files
     
-    from TriggerJobOpts.TriggerConfigFlags import ROBPrefetching
     flags.Trigger.triggerMenuSetup = "Dev_pp_run3_v1"
-    flags.Trigger.ROBPrefetchingOptions = [ROBPrefetching.StepRoI]
     flags.Trigger.enableL1MuonPhase1 = False  # doesn't work in this minimal setup
     flags.Trigger.enabledSignatures = ['Muon', 'Tau','MinBias','Bphysics','Egamma', 'Electron', 'Photon', 'MET', 'Jet','Bjet','Calib']
     log.info("Running on these signatures: %s",flags.Trigger.enabledSignatures)

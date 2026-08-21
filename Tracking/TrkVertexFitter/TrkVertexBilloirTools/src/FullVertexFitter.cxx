@@ -17,12 +17,12 @@
 #include "TrkVertexFitterInterfaces/IVertexLinearizedTrackFactory.h"
 #include "VxVertex/LinearizedTrack.h"
 #include "VxVertex/VxTrackAtVertex.h"
-#include <memory>
-#include <cmath>
-#include <memory>
+
 //xAOD includes 
 #include "xAODTracking/Vertex.h" 
-#include "xAODTracking/TrackParticle.h" 
+#include "xAODTracking/TrackParticle.h"
+ 
+#include <cmath>
 
 /* These are some local helper classes only needed for convenience, therefor
 within anonymous namespace. They do contain temporary calculations of matrices
@@ -432,23 +432,12 @@ namespace Trk
 			{
 				/* Store the vertex */
 				chi2 = chi2New;
-				//const AmgMatrix(3,3) * newCovarianceMatrix =  &cov_delta_V_mat ;
-				//const AmgMatrix(3,3) newErrorMatrix = newCovarianceMatrix->inverse().eval();
-				//fittedVertex = RecVertex ( linPoint.position(), newErrorMatrix, ndf, chi2 );
 
-                                //the cov_delta_V_mat is already the inverted form.  -katy 2/2/16
+
+        //the cov_delta_V_mat is already the inverted form.  -katy 2/2/16
 				fittedVertex->setPosition( linPoint );
                                 fittedVertex->setCovariancePosition( cov_delta_V_mat );
                                 fittedVertex->setFitQuality( chi2, ndf );
-
-				// new go through vector and delete entries
-				/* // TODO: not needed anymore, tracksAtVertex doesn't store pointers - just the objects themselves <David Shope> (EDM Migration) 03/21/16
-				for ( std::vector<Trk::VxTrackAtVertex*>::const_iterator itr = tracksAtVertex.begin();
-				        itr != tracksAtVertex.end(); ++itr )
-				{
-					delete ( *itr );
-				}
-				*/
 
 				tracksAtVertex.clear();
 				/* Store the tracks at vertex */
@@ -460,18 +449,17 @@ namespace Trk
 				for ( BTIter = billoirTracks.begin(); BTIter != billoirTracks.end() ; ++BTIter )
 				{
 					const AmgMatrix(5,5) * newTrackCovarianceMatrix =  &cov_delta_P_mat[iter] ;
-					//Covariance matrix does not need to be inverted:
-					//					AmgMatrix(5,5)  newTrackErrorMatrix = (AmgMatrix(5,5)) newTrackCovarianceMatrix->inverse().eval();
+					//Covariance matrix does not need to be inverted.
 					AmgMatrix(5,5)  newTrackErrorMatrix = (AmgMatrix(5,5)) newTrackCovarianceMatrix->eval();
 					refittedPerigee = new Trk::Perigee ( 0.,0.,mom_at_Origin[iter][0],mom_at_Origin[iter][1],mom_at_Origin[iter][2], 
                                                Surface, std::move(newTrackErrorMatrix) );
-					Trk::VxTrackAtVertex* tmpVxTrkAtVtx = new Trk::VxTrackAtVertex ( ( *BTIter ).chi2, refittedPerigee, ( *BTIter ).originalPerigee );
-					tracksAtVertex.push_back ( *tmpVxTrkAtVtx );
+					//Trk::VxTrackAtVertex takes ownership of refittedPerigee
+					tracksAtVertex.emplace_back ( BTIter->chi2, refittedPerigee, BTIter->originalPerigee);
 					iter ++;
 				}
 			}
 		} // end of iteration
-		fittedVertex->vxTrackAtVertex() = tracksAtVertex;
+		fittedVertex->vxTrackAtVertex() = std::move(tracksAtVertex);
 		//ATH_MSG_VERBOSE("Final Vertex Fitted: " << fittedVxCandidate->recVertex()); // TODO: can no longer print vertex after converting to xAOD
 		return fittedVertex;
 	}

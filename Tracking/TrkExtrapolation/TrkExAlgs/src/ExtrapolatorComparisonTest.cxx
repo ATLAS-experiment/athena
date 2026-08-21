@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -92,7 +92,7 @@ StatusCode Trk::ExtrapolatorComparisonTest::initialize()
        trkSurfaceTriplet.push_back(new Trk::CylinderSurface(Amg::Transform3D(Amg::Translation3D(0.,0.,    0.)),radius, halfZ));
        trkSurfaceTriplet.push_back(new Trk::DiscSurface    (Amg::Transform3D(Amg::Translation3D(0.,0.,-halfZ)),    0.,radius));
        ATH_MSG_INFO("Creating Trk::Surface at: R " << radius << " Z " << halfZ);
-       m_atlasReferenceSurfaceTriples.push_back(trkSurfaceTriplet);
+       m_atlasReferenceSurfaceTriples.push_back(std::move(trkSurfaceTriplet));
        
        // create the Surface triplet
        std::vector<std::shared_ptr<const Acts::Surface>> actsSurfaceTriplet;
@@ -109,7 +109,7 @@ StatusCode Trk::ExtrapolatorComparisonTest::initialize()
        actsSurfaceTriplet.push_back(cSurface  );
        actsSurfaceTriplet.push_back(negSurface);
        ATH_MSG_INFO("Creating Acts::Surface at: R " << radius << " Z " << halfZ);
-       m_actsReferenceSurfaceTriples.push_back(actsSurfaceTriplet);
+       m_actsReferenceSurfaceTriples.push_back(std::move(actsSurfaceTriplet));
        
        m_referenceSurfaceNegativeBoundary.push_back(atan2(radius,-halfZ));
        m_referenceSurfacePositiveBoundary.push_back(atan2(radius, halfZ));
@@ -231,10 +231,12 @@ StatusCode Trk::ExtrapolatorComparisonTest::execute(const EventContext& ctx) con
   }
   auto end = xclock::now();   
   auto secs = std::chrono::duration_cast<std::chrono::milliseconds>(end-start).count() / milliseconds_to_seconds;
-  double secs_per_ex = secs / n_extraps;
-  
-  ATH_MSG_INFO("ATLAS : Time for " << n_extraps << " iterations: " << secs << "s (" << secs_per_ex << "s per extrapolation)");
-  
+  if (n_extraps == 0)[[unlikely]]{
+    ATH_MSG_ERROR("n_extraps is zero" );
+  } else {
+    double secs_per_ex = secs / n_extraps;
+    ATH_MSG_INFO("ATLAS : Time for " << n_extraps << " iterations: " << secs << "s (" << secs_per_ex << "s per extrapolation)");
+  }
   n_extraps = 0;  
   start = xclock::now();
   for (auto& perigee : parameters) {
@@ -313,10 +315,12 @@ StatusCode Trk::ExtrapolatorComparisonTest::execute(const EventContext& ctx) con
   
   end = xclock::now();   
   secs = std::chrono::duration_cast<std::chrono::milliseconds>(end-start).count() / milliseconds_to_seconds;
-  secs_per_ex = secs / n_extraps;
-  
-  ATH_MSG_INFO("ACTS : Time for " << n_extraps << " iterations: " << secs << "s (" << secs_per_ex << "s per extrapolation)");
-  
+  if (n_extraps == 0)[[unlikely]]{
+    ATH_MSG_ERROR("n_extraps is zero" );
+  } else {
+    double secs_per_ex = secs / n_extraps;
+    ATH_MSG_INFO("ATLAS : Time for " << n_extraps << " iterations: " << secs << "s (" << secs_per_ex << "s per extrapolation)");
+  }    
   return StatusCode::SUCCESS;
 }
 

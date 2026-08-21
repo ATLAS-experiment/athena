@@ -210,7 +210,7 @@ public:
     double phi,
     double theat,
     double qop,
-    std::optional<AmgSymMatrix(5)> cov = std::nullopt) const = 0;
+    const std::optional<AmgSymMatrix(5)> & cov = std::nullopt) const = 0;
 
   /** Use the Surface as a ParametersBase constructor, from global parameters -
    * charged.
@@ -219,7 +219,7 @@ public:
     const Amg::Vector3D&,
     const Amg::Vector3D&,
     double,
-    std::optional<AmgSymMatrix(5)> cov = std::nullopt) const = 0;
+    const std::optional<AmgSymMatrix(5)> & cov = std::nullopt) const = 0;
 
   /** Use the Surface as a ParametersBase constructor, from local parameters -
    * neutral.
@@ -230,7 +230,7 @@ public:
     double phi,
     double theat,
     double qop,
-    std::optional<AmgSymMatrix(5)> cov = std::nullopt) const = 0;
+    const std::optional<AmgSymMatrix(5)> & cov = std::nullopt) const = 0;
 
   /** Use the Surface as a ParametersBase constructor, from global parameters -
    * neutral.
@@ -239,7 +239,7 @@ public:
     const Amg::Vector3D&,
     const Amg::Vector3D&,
     double charge = 0.,
-    std::optional<AmgSymMatrix(5)> cov = std::nullopt) const = 0;
+    const std::optional<AmgSymMatrix(5)> & cov = std::nullopt) const = 0;
 
   /** positionOnSurface() returns the  LocalPosition on the
     Surface,<br>

@@ -1,8 +1,9 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "PFOHistUtils/ClusterPlots.h"
+#include "AthenaKernel/Units.h"
 
 namespace PFO {
 
@@ -33,34 +34,34 @@ namespace PFO {
   }
 
   void ClusterPlots::fill(const xAOD::CaloCluster& Cluster, const xAOD::EventInfo& eventInfo){
-    m_Cluster_pt->Fill(Cluster.pt()/1000.0,eventInfo.beamSpotWeight());
+    m_Cluster_pt->Fill(Cluster.pt()/Athena::Units::GeV,eventInfo.beamSpotWeight());
     m_Cluster_eta->Fill(Cluster.eta(),eventInfo.beamSpotWeight());
     m_Cluster_phi->Fill(Cluster.phi(),eventInfo.beamSpotWeight());
-    m_Cluster_m->Fill(Cluster.m()/1000.0,eventInfo.beamSpotWeight());
+    m_Cluster_m->Fill(Cluster.m()/Athena::Units::GeV,eventInfo.beamSpotWeight());
 
-    m_Cluster_ptEM->Fill((Cluster.rawE()/cosh(Cluster.rawEta()))/1000.0,eventInfo.beamSpotWeight());
+    m_Cluster_ptEM->Fill((Cluster.rawE()/cosh(Cluster.rawEta()))/Athena::Units::GeV,eventInfo.beamSpotWeight());
     m_Cluster_etaEM->Fill(Cluster.rawEta(),eventInfo.beamSpotWeight());
     m_Cluster_phiEM->Fill(Cluster.rawPhi(),eventInfo.beamSpotWeight());
-    m_Cluster_mEM->Fill(Cluster.rawM()/1000.0,eventInfo.beamSpotWeight());
+    m_Cluster_mEM->Fill(Cluster.rawM()/Athena::Units::GeV,eventInfo.beamSpotWeight());
 
     m_Cluster_time->Fill(Cluster.time(),eventInfo.beamSpotWeight());
     m_Cluster_clusterSize->Fill(Cluster.clusterSize(),eventInfo.beamSpotWeight());
 
-    if (Cluster.pt()/1000.0 > -20 && Cluster.pt()/1000.0 < 20){
+    if (Cluster.pt()/Athena::Units::GeV > -20 && Cluster.pt()/Athena::Units::GeV < 20){
         m_Cluster_eta_lowpt->Fill(Cluster.eta(),eventInfo.beamSpotWeight());
     }
-    m_Cluster_pt_interval->Fill(Cluster.pt()/1000.0,eventInfo.beamSpotWeight());
-    m_Cluster_pt_zoom->Fill(Cluster.pt()/1000.0,eventInfo.beamSpotWeight());
+    m_Cluster_pt_interval->Fill(Cluster.pt()/Athena::Units::GeV,eventInfo.beamSpotWeight());
+    m_Cluster_pt_zoom->Fill(Cluster.pt()/Athena::Units::GeV,eventInfo.beamSpotWeight());
 
     float eSample_EM;
    eSample_EM = Cluster.eSample(CaloSampling::PreSamplerB) + Cluster.eSample(CaloSampling::EMB1) + Cluster.eSample(CaloSampling::EMB2) + Cluster.eSample(CaloSampling::EMB3) + Cluster.eSample(CaloSampling::PreSamplerE) + Cluster.eSample(CaloSampling::EME1) + Cluster.eSample(CaloSampling::EME2) + Cluster.eSample(CaloSampling::EME3) + Cluster.eSample(CaloSampling::FCAL0);
-   m_Cluster_eSample_EM->Fill((double)eSample_EM/1000.0,eventInfo.beamSpotWeight());
+   m_Cluster_eSample_EM->Fill((double)eSample_EM/Athena::Units::GeV,eventInfo.beamSpotWeight());
    
    
    
    float eSample_HAD;
    eSample_HAD = Cluster.eSample(CaloSampling::TileBar0) + Cluster.eSample(CaloSampling::TileBar1) + Cluster.eSample(CaloSampling::TileBar2) + Cluster.eSample(CaloSampling::HEC0) + Cluster.eSample(CaloSampling::HEC1) + Cluster.eSample(CaloSampling::HEC2) + Cluster.eSample(CaloSampling::HEC3) + Cluster.eSample(CaloSampling::FCAL1) + Cluster.eSample(CaloSampling::FCAL2);
-   m_Cluster_eSample_HAD->Fill((double)eSample_HAD/1000.0,eventInfo.beamSpotWeight());
+   m_Cluster_eSample_HAD->Fill((double)eSample_HAD/Athena::Units::GeV,eventInfo.beamSpotWeight());
 
   }
 

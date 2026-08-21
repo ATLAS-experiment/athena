@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file   GsfMeasurementUpdator.cxx
@@ -614,8 +614,7 @@ weights(Trk::MultiComponentState&& predictedState,
                                measurement.localCovariance().topLeftCorner<5, 5>(),
                                measurementLocalParameters.parameterKey());
       } break;
-      default: {
-      }
+      
     }
 
     if (result.first == 0) {

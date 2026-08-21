@@ -1,11 +1,11 @@
 #!/usr/bin/env python
 
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 ##############################################################################
 
 import os, os.path, sys, json, argparse
-
+from pathlib import Path
 from PyJobTransforms.trfLogger import msg
 
 ##############################################################################
@@ -31,20 +31,13 @@ def _getTransformsFromPATH():
 
     result = []
 
-    for path in os.environ['PATH'].split(":"):
-
-        try: 
-
-            for name in [entry for entry in os.listdir(path) if entry.endswith("_tf.py")]:
-
-                if name not in done_list\
-                   and                  \
-                   name not in skip_list:
-
-                    done_list.add(name)
-
-                    result.append(os.path.join(path, name))
-
+    for path_dir in os.environ.get('PATH', '').split(os.pathsep):
+        try:
+            for f in Path(path_dir).glob("*_tf.py"):
+                if f.is_file():  # check for broken symlink
+                    if f.name not in done_list and f.name not in skip_list:
+                        done_list.add(f.name)
+                        result.append(str(f))
         except OSError:
             pass
 

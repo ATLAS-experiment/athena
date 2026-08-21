@@ -96,7 +96,6 @@ TriggerL2List = [
     ('TrigL2BphysContainer#HLT_L2DsPhiPiFexDs',                           'BS ESD AODFULL AODSLIM', 'Bphys'),
     ('TrigL2BphysContainer#HLT_L2DsPhiPiFexPhi',                          'BS ESD AODFULL AODSLIM', 'Bphys'),
     ('TrigL2BphysContainer#HLT_L2JpsieeFex',                              'BS ESD AODFULL AODSLIM', 'Bphys'),
-    ('TrigL2BphysContainer#HLT_TrigDiMuon',                               'BS ESD AODFULL AODSLIM', 'Bphys'),
     ('TrigL2BphysContainer#HLT_L2TrackMass',                              'BS ESD AODFULL AODSLIM', 'Bphys'),
     ('TrigL2BphysContainer#HLT_L2MultiMuFex',                             'BS ESD AODFULL AODSLIM', 'Bphys'),
 

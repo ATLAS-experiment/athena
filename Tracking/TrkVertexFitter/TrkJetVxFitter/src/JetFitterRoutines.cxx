@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /***************************************************************************
@@ -19,7 +19,7 @@
      
  ***************************************************************************/
 
-#include <iostream>
+
 
 // to get AmgMatrix plugin:
 #include "GeoPrimitives/GeoPrimitives.h"
@@ -42,16 +42,17 @@
 #include "TrkNeutralParameters/NeutralParameters.h"
 #include "TrkJetVxFitter/Utilities.h"
 
-#include <TMath.h>
-#include <cmath>
-#include <sstream>
 
 #include "TrkJetVxFitter/TrkDistanceFinderNeutralCharged.h"
 #include "TrkJetVxFitter/TrkDistanceFinderNeutralNeutral.h"
 
+#include <TMath.h>
+#include <cmath>
+#include <sstream>
+#include <iostream>
+#include <algorithm>
 
-//#define JetFitterRoutines_DEBUG2
-//#define JetFitterRoutines_DEBUG
+
 
 namespace Trk
 {
@@ -151,7 +152,7 @@ namespace Trk
     if (associatedVertices.empty()) {//Was that your intention? to be checked... 15.03.2007
       SG::ReadCondHandle<AtlasFieldCacheCondObj> readHandle{m_fieldCacheCondObjInputKey};
       const AtlasFieldCacheCondObj* fieldCondObj{*readHandle};
-      if (!readHandle.isValid()) {
+      if (!readHandle.isValid() or !fieldCondObj) {
          std::stringstream msg;
          msg << "Failed to retrieve magmnetic field conditions data " << m_fieldCacheCondObjInputKey.key() << ".";
          throw std::runtime_error(msg.str());
@@ -551,26 +552,22 @@ namespace Trk
 
     bool ok = true;
     if (myPrimary->getNumVertex() != -10) {
-      ok = false;
       ATH_MSG_WARNING("Numvertex of primary vertex not correctly initialized. "
                       "Not proceeding with the fit!");
+      return false;
     }
 
     const std::vector<VxTrackAtVertex*>& primaryVectorTracks =
       myPrimary->getTracksAtVertex();
 
     sizeprimary = primaryVectorTracks.size();
-
-    ok = (std::find(primaryVectorTracks.begin(),
-                    primaryVectorTracks.end(),
-                    nullptr) == primaryVectorTracks.end());
-    if (not ok)
-      ATH_MSG_WARNING("One of the VxTrackAtVertex is a null pointer. Not "
+    ok = std::ranges::none_of(primaryVectorTracks,[](const auto* track) { return track == nullptr; });
+    if (not ok){
+      ATH_MSG_WARNING("At least one of the VxTrackAtVertex is a null pointer. Not "
                       "proceeding with the fit!");
-
-    if (!ok) {
       return false;
     }
+    
     // end if else rimary==0
 
     // check std::vector<VxVertexOnJetAxis*> (if pointers are not empty and if

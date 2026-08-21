@@ -120,9 +120,9 @@ namespace Trk {
 
     IGlobalTrackFitter::AlignmentCache alignCache;
     alignCache.m_minIterations = m_nIterations;
-    const Track* refittedTrack = m_fitter->alignmentFit(ctx, alignCache, *trackForRefit,
+    std::unique_ptr<Track> refittedTrack(m_fitter->alignmentFit(ctx, alignCache, *trackForRefit,
             m_runOutlierRemoval,
-            m_particleHypothesis);
+            m_particleHypothesis));
     if (!refittedTrack) {
       msg(MSG::WARNING)  << "initial track refit failed" << endmsg;
       return false;
@@ -151,9 +151,9 @@ namespace Trk {
     double shiftsize = shiftSize(*alignParIt);
     if (ishift>0) shiftsize*=-1.;
     m_alignModuleTool->shiftModule(*moduleIt,alignTrack,(**alignParIt).paramType(),shiftsize);
-    refittedTrack = (m_fitter->fit(ctx,
+    refittedTrack = m_fitter->fit(ctx,
                                   *trackForRefit,m_runOutlierRemoval,
-                                  m_particleHypothesis)).release();
+                                  m_particleHypothesis);
     m_alignModuleTool->restoreModule(*moduleIt);
     if (!refittedTrack) {
       msg(MSG::WARNING) << "track refit failed!"<<endmsg;
@@ -903,7 +903,7 @@ bool ShiftingDerivCalcTool::getAllDerivatives(
     if (vec.rows()<1) return false; // derivatives won't be set for alignTrack because it's a bad track
 
     deriv_vec.push_back(vec);
-    derivErr_vec.push_back(derivErr);
+    derivErr_vec.push_back(std::move(derivErr));
     actualsecderiv_vec.push_back(actualSecondDeriv);
 
     for (int i=0;i<m_nFits;i++) {

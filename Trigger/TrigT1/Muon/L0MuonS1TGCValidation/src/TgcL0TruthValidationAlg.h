@@ -13,6 +13,7 @@
 #include "StoreGate/WriteHandleKey.h"
 #include "TrkExInterfaces/IExtrapolator.h"
 
+#include <cstdint>
 #include <vector>
 
 namespace L0Muon {
@@ -65,9 +66,9 @@ class TgcL0TruthValidationAlg final : public AthReentrantAlgorithm {
   Gaudi::Property<int> m_maxAbsBarcode{
       this, "MaxAbsBarcode", 9999,
       "Maximum absolute HepMC barcode for selected truth muons"};
-  Gaudi::Property<int> m_requiredBcTag{
-      this, "RequiredBcTag", 0,
-      "BC tag used for truth matching; set to -1 to disable the filter"};
+  Gaudi::Property<std::uint16_t> m_requiredBcTagMask{
+      this, "RequiredBcTagMask", 0x2U,
+      "Required BC-tag bit mask for truth matching; zero disables the filter"};
   Gaudi::Property<std::vector<double>> m_stationAbsZ{
       this, "StationAbsZ", {13436.5, 14728.2, 15148.2},
       "Nominal absolute z positions of the M1, M2, and M3 validation planes"};

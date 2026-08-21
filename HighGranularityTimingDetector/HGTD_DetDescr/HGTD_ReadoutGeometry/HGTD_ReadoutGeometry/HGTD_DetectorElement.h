@@ -76,6 +76,15 @@ public:
     /** Returns the full list of surfaces associated to this detector element */
     const std::vector<const Trk::Surface*>& surfaces() const;
 
+    /////////////////////////////////////////////////////////////////
+    /// Transform of the HGTD module.
+    /// For HGTD one detector element corresponds to one module,
+    /// so this is simply the detector element transform.
+    const Amg::Transform3D& moduleTransform() const;
+
+    /// Default (unaligned) module transform.
+    Amg::Transform3D defModuleTransform() const;
+
     ///////////////////////////////////////////////////////////////////
     //
     /// @name Element Extent

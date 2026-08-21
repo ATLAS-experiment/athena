@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 //
 // The VKalExtPropagator object is created if ATHENA propagator exists
@@ -120,12 +120,7 @@ namespace Trk {
 //
 //-------------------- Extrapolation itself
 //
-      const Trk::TrackParameters* endPer = nullptr;
-      if(trkID<0){
-            endPer = myExtrapWithMatUpdate( trkID, inpPar, &endPointG, state);
-      }else{
-            endPer = myExtrapWithMatUpdate( trkID, inpPar, &endPointG, state);
-      }
+      const Trk::TrackParameters* endPer = myExtrapWithMatUpdate( trkID, inpPar, &endPointG, state);
 //-----------------------------------
       if( endPer == nullptr ) {   // No extrapolation done!!!
         ParNew[0]=0.; ParNew[1]=0.;ParNew[2]=0.;ParNew[3]=0.;ParNew[4]=0.;
@@ -145,12 +140,15 @@ namespace Trk {
       }
       if( (Line==nullptr && mPer==nullptr) || CovMtx==nullptr ){
         ParNew[0]=0.; ParNew[1]=0.;ParNew[2]=0.;ParNew[3]=0.;ParNew[4]=0.;
-        delete inpPer; return;
+        delete endPer;
+        delete inpPer; 
+        return;
       }
 
       if((*CovMtx)(0,0)<=0. || (*CovMtx)(1,1)<=0.){                     //protection against bad error matrix
         ParNew[0]=0.; ParNew[1]=0.;ParNew[2]=0.;ParNew[3]=0.;ParNew[4]=0.;
-        delete inpPer; delete endPer;
+        delete inpPer; 
+        delete endPer;
         return;
       }
       double CovVertTrk[15];
