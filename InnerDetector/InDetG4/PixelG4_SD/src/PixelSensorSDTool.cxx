@@ -48,7 +48,7 @@ G4VSensitiveDetector* PixelSensorSDTool::makeSD() const
                                 (m_outputCollectionNames[0] == "BCMPrimeHits" ||
                                  m_outputCollectionNames[0] == "BCMPrimeHits_G4");
   if (diagnoseBCMPrime) {
-    ATH_MSG_INFO("BCMPrimeSensorSD diagnostic: PixelSensorSDTool::makeSD for tool '" << name()
+    ATH_MSG_DEBUG("BCMPrimeSensorSD diagnostic: PixelSensorSDTool::makeSD for tool '" << name()
                  << "', GmxSensor=" << (m_gmxSensor.value() ? "true" : "false")
                  << ", outputCollection=" << m_outputCollectionNames[0]
                  << ", LogicalVolumeNames=" << m_volumeNames.value());
@@ -66,12 +66,12 @@ G4VSensitiveDetector* PixelSensorSDTool::makeSD() const
   // Create a fresh SD
   if (!m_gmxSensor){
     if (diagnoseBCMPrime) {
-      ATH_MSG_INFO("BCMPrimeSensorSD diagnostic: creating PixelSensorSD");
+      ATH_MSG_DEBUG("BCMPrimeSensorSD diagnostic: creating PixelSensorSD");
     }
     return new PixelSensorSD(name(), m_outputCollectionNames[0]);
   } else {
     if (diagnoseBCMPrime) {
-      ATH_MSG_INFO("BCMPrimeSensorSD diagnostic: creating PixelSensorGmxSD, sqlreader="
+      ATH_MSG_DEBUG("BCMPrimeSensorSD diagnostic: creating PixelSensorGmxSD, sqlreader="
                    << (sqlreader ? "set" : "null"));
     }
     return new PixelSensorGmxSD(name(), m_outputCollectionNames[0],sqlreader);

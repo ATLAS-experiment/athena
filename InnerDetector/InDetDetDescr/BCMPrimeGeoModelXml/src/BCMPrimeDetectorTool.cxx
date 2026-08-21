@@ -27,7 +27,7 @@ BCMPrimeDetectorTool::BCMPrimeDetectorTool(const std::string &type,
 
 StatusCode BCMPrimeDetectorTool::create()
 {
-  // retrieve the common stuff
+  
   ATH_CHECK(createBaseTool());
 
   ATH_MSG_INFO("BCMPrime GmxFilename = '" << m_gmxFilename << "'");
@@ -79,13 +79,14 @@ StatusCode BCMPrimeDetectorTool::create()
                                                  m_envelopeVolumeName,
                                                  sqlreader);
 
-  if (topVolume) { //see that a valid pointer is returned
+  if (topVolume) { 
     manager->addTreeTop(topVolume);
     manager->initNeighbours();
-    ATH_MSG_INFO("BCMPrime topVolume ptr = " << topVolume);
-    ATH_MSG_INFO("BCMPrime num tree tops = " << manager->getNumTreeTops());
-    ATH_MSG_INFO("BCMPrime num detector elements = " << manager->getNumDetectorElements());
-    ATH_MSG_INFO("BCMPrime topVolume name = " << topVolume->getLogVol()->getName());
+    ATH_MSG_DEBUG("BCMPrime topVolume ptr = " << topVolume);
+    ATH_MSG_DEBUG("BCMPrime num tree tops = " << manager->getNumTreeTops());
+    ATH_MSG_DEBUG("BCMPrime num detector elements = " << manager->getNumDetectorElements());
+    ATH_MSG_INFO("BCMPrime built: '" << topVolume->getLogVol()->getName()
+               << "', " << manager->getNumDetectorElements() << " detector elements");
   } else {
     ATH_MSG_FATAL("Could not find the BCMPrime Top Volume!!!");
     return StatusCode::FAILURE;

@@ -1,13 +1,13 @@
 # Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
-# Declare the package name:
+# Package name:
 atlas_subdir( BCMPrimeGeoModelXml )
 
 # External dependencies:
 find_package( XercesC )
 find_package( GeoModel COMPONENTS GeoModelKernel GeoModelXml ExpressionEvaluator )
 
-# Component(s) in the package:
+# Components in the package:
 atlas_add_component( BCMPrimeGeoModelXml
                      src/*.cxx
                      src/components/*.cxx

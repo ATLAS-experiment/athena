@@ -118,16 +118,16 @@ void BCMPrimeGmxInterface::makeBCMPrimeDiamondDesign(const std::string& typeName
 {
     ATH_MSG_DEBUG("makeBCMPrimeDiamondDesign for type " << typeName);
 
-    // Check if we already created this design
+    
     if (m_geometryMap.find(typeName) != m_geometryMap.end()) {
         ATH_MSG_DEBUG("Design " << typeName << " already exists");
         return;
     }
 
-    // Parse parameters from ITKLayouts (bcm_full.xml)
-    double sizeX = 10.0;        // Default: 10 mm
-    double sizeY = 10.0;        // Default: 10 mm
-    double thickness = 0.5;     // Default: 0.5 mm diamond
+
+    double sizeX = 10.0;        
+    double sizeY = 10.0;        
+    double thickness = 0.5;     
 
     auto sizeX_it = parameters.find("sizeX");
     if (sizeX_it != parameters.end()) {

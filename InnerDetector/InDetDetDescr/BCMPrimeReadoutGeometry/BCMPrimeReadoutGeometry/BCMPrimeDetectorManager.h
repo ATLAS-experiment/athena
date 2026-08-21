@@ -40,17 +40,13 @@ namespace InDetDD {
     class BCMPrimeDetectorManager : public SiDetectorManager {
     public:
 
-        /** Constructor */
         BCMPrimeDetectorManager(StoreGateSvc* detStore, const std::string& name);
 
-        /** Access to raw geometry: */
         virtual unsigned int getNumTreeTops()           const override;
         virtual PVConstLink  getTreeTop(unsigned int i) const override;
 
-        /** Add a Tree top: */
         void addTreeTop (const PVConstLink& treeTop);
 
-        /** Access readout elements. */
         virtual const SiDetectorElement* getDetectorElement(const Identifier& id) const override;
         virtual const SiDetectorElement* getDetectorElement(const IdentifierHash& idHash) const override;
         const SiDetectorElement* getDetectorElement(int barrelEndcap,
@@ -83,7 +79,6 @@ namespace InDetDD {
                                      const CondAttrListCollection* obj = nullptr,
                                      GeoVAlignmentStore* alignStore = nullptr) const override;
 
-        /** Get number of detector elements: */
         unsigned int getNumDetectorElements() const;
 
     private:

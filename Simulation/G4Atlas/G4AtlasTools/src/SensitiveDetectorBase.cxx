@@ -48,68 +48,6 @@ bool inBCMPrimeSteppingRegion(const G4ThreeVector& pos)
   return std::abs(pos.z()) > 1700. && pos.perp() < 150.;
 }
 
-class BCMPrimeSteppingDiagnostic : public G4UserSteppingAction
-{
-public:
-  void UserSteppingAction(const G4Step* step) override
-  {
-    if (!step) {
-      return;
-    }
-    const G4StepPoint* pre = step->GetPreStepPoint();
-    if (!pre) {
-      return;
-    }
-    const G4ThreeVector& pos = pre->GetPosition();
-    if (!inBCMPrimeSteppingRegion(pos)) {
-      return;
-    }
-
-    const int eventId = []() {
-      if (auto* eventManager = G4EventManager::GetEventManager()) {
-        if (const G4Event* event = eventManager->GetConstCurrentEvent()) {
-          return event->GetEventID();
-        }
-      }
-      return -1;
-    }();
-    if (eventId != m_eventId) {
-      m_eventId = eventId;
-      m_logCount = 0;
-      m_loggedVolumes.clear();
-    }
-    if (m_logCount >= s_maxLogsPerEvent) {
-      return;
-    }
-
-    const G4VPhysicalVolume* physVol = pre->GetPhysicalVolume();
-    const G4String lvName = physVol && physVol->GetLogicalVolume()
-                              ? physVol->GetLogicalVolume()->GetName()
-                              : "NO_VOLUME";
-    const std::string lvKey = lvName;
-    if (!m_loggedVolumes.insert(lvKey).second) {
-      return;
-    }
-
-    const int pdg = step->GetTrack() && step->GetTrack()->GetDefinition()
-                      ? step->GetTrack()->GetDefinition()->GetPDGEncoding()
-                      : 0;
-    G4cout << "BCMPrime step diagnostic: event=" << eventId
-           << " volume='" << lvName << "'"
-           << " pos(mm)=(" << pos.x() << ", " << pos.y() << ", " << pos.z() << ")"
-           << " r(mm)=" << pos.perp()
-           << " pid=" << pdg
-           << G4endl;
-    ++m_logCount;
-  }
-
-private:
-  static constexpr int s_maxLogsPerEvent = 40;
-  int m_eventId{-1};
-  int m_logCount{0};
-  std::unordered_set<std::string> m_loggedVolumes;
-};
-
 class BCMPrimeSteppingChainer : public G4UserSteppingAction
 {
 public:
@@ -129,37 +67,7 @@ public:
 
 private:
   const G4UserSteppingAction* m_existingAction{nullptr};
-  BCMPrimeSteppingDiagnostic m_diagnostic;
 };
-
-void installBCMPrimeSteppingDiagnostic()
-{
-  static std::mutex installMutex;
-  std::lock_guard<std::mutex> lock(installMutex);
-
-  auto* runManager = G4RunManager::GetRunManager();
-  if (!runManager) {
-    G4cout << "BCMPrime step diagnostic: no G4RunManager, stepping diagnostic not installed"
-           << G4endl;
-    return;
-  }
-
-  const auto* existing = runManager->GetUserSteppingAction();
-  if (dynamic_cast<const BCMPrimeSteppingDiagnostic*>(existing) != nullptr ||
-      dynamic_cast<const BCMPrimeSteppingChainer*>(existing) != nullptr) {
-    return;
-  }
-
-  if (existing == nullptr) {
-    runManager->SetUserAction(new BCMPrimeSteppingDiagnostic());
-    G4cout << "BCMPrime step diagnostic: installed standalone stepping action" << G4endl;
-    return;
-  }
-
-  runManager->SetUserAction(new BCMPrimeSteppingChainer(existing));
-  G4cout << "BCMPrime step diagnostic: chained stepping action in front of existing handler"
-         << G4endl;
-}
 
 void printBCMPrimePlacement(const G4VPhysicalVolume* physVol,
                             const G4RotationMatrix& worldRot,
@@ -346,14 +254,7 @@ assignSD(std::unique_ptr<G4VSensitiveDetector> sd, const std::vector<std::string
                 m_outputCollectionNames.value().end(),
                 "BCMPrimeHits_G4") != m_outputCollectionNames.value().end();
     auto logicalVolumeStore = G4LogicalVolumeStore::GetInstance();
-    if (diagnoseBCMPrime) {
-      ATH_MSG_INFO("BCMPrimeSensorSD diagnostic: tool name = '" << name()
-                   << "', SD name = '" << sdName << "'");
-      ATH_MSG_INFO("BCMPrimeSensorSD diagnostic: G4LogicalVolumeStore size = "
-                   << logicalVolumeStore->size());
-      dumpBCMPrimePadPlacements();
-      installBCMPrimeSteppingDiagnostic();
-    }
+    
     for(const auto& volumeName : volumes) {
       // Keep track of how many volumes we find with this name string.
       // We allow for multiple matches.

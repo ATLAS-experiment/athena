@@ -35,7 +35,7 @@ private:
   const InDetDD::BCMPrimeDetectorManager *m_detManager{};
   std::unique_ptr<InDetDD::SiCommonItems> m_commonItems{};
 
-  // Match PLR: attach BCMPrime inside the ITkPixel envelope when pixel is built
+  // Attach BCMPrime inside the ITkPixel envelope when pixel is built
   Gaudi::Property<std::string> m_containingDetectorName{this, "ContainingDetector", "", "Containing detector name"};
   Gaudi::Property<std::string> m_envelopeVolumeName{this, "EnvelopeVolume", "ITkPixelDetector", "Envelope volume name"};
 };
