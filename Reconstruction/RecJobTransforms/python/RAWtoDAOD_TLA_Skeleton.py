@@ -131,8 +131,7 @@ def fromRunArgs(runArgs):
         'PhysicsTLA': [],
         'FTagPEBTLA':
         [
-            'xAOD::BTaggingContainer#BTagging_HLT_AntiKt4EMPFlowJets_subresjesgscIS_ftf_TLA',
-            'xAOD::BTaggingAuxContainer#BTagging_HLT_AntiKt4EMPFlowJets_subresjesgscIS_ftf_TLAAux.',
+            'xAOD::JetAuxContainer#HLT_AntiKt4EMPFlowJets_subresjesgscIS_ftf_TLAAux.TracksForBTagging.GN2v01_pb.GN2v01_pc.GN2v01_pu.GN2v01_ptau',
         ],
         'DarkJetPEBTLA': [],
         'EgammaPEBTLA': [],
