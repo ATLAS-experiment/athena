@@ -26,8 +26,8 @@ RoIBResult_PERS* RoIBResultCnv::createPersistent( ROIB::RoIBResult* transObj ) {
  */
 ROIB::RoIBResult* RoIBResultCnv::createTransient(const Token* token) {
 
-   static const pool::Guid p1_guid( "A9FF18A0-E5A2-4F24-82C7-605CAA9EA1F8" );
-   static const pool::Guid p0_guid( "E9F89B95-329A-4FF1-9110-4CE48D1D7176" );
+   static const Guid p1_guid( "A9FF18A0-E5A2-4F24-82C7-605CAA9EA1F8" );
+   static const Guid p0_guid( "E9F89B95-329A-4FF1-9110-4CE48D1D7176" );
 
    if( this->compareClassGuid(token,  p1_guid ) ) {
 

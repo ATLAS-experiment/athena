@@ -18,7 +18,7 @@ RpcByteStreamErrorContainer_PERS* RpcByteStreamErrorContainerCnv::createPersiste
    
 Muon::RpcByteStreamErrorContainer* RpcByteStreamErrorContainerCnv::createTransient(const Token* token) {
   using namespace Muon;
-  static const pool::Guid   p1_guid("4E46BDDC-E1F9-420A-A11F-47EF082A3E3A");
+  static const Guid   p1_guid("4E46BDDC-E1F9-420A-A11F-47EF082A3E3A");
   if( compareClassGuid(token, p1_guid) ) {
     std::unique_ptr< RpcByteStreamErrorContainer_p1 > col_vect( poolReadObject< RpcByteStreamErrorContainer_p1 >(token) );
     MsgStream log(msgSvc(), "RpcByteStreamErrorContainer_p1" );

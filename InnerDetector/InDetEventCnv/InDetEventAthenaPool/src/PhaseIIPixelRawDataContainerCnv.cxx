@@ -59,7 +59,7 @@ PixelRDO_Container_PERS* PhaseIIPixelRawDataContainerCnv::createPersistent(Phase
 PhaseIIPixelRawDataContainer* PhaseIIPixelRawDataContainerCnv::createTransient(const Token* token) {
   // @TODO add support for  p0 guid  7F2C09B6-0B47-4957-8BBA-EDC665A290AC i.e. initial version Pixel1RawData
   // @TODO add support for  p2 guid  DA76970C-E019-43D2-B2F9-25660DCECD9D i.e. for t/p separated version with InDetRawDataContainer_p1
-  static const pool::Guid   TP2_guid("7138342E-0A80-4A32-A387-2842A01C2539"); // for t/p separated version with InDetRawDataContainer_p2
+  static const Guid   TP2_guid("7138342E-0A80-4A32-A387-2842A01C2539"); // for t/p separated version with InDetRawDataContainer_p2
   if( compareClassGuid(token, TP2_guid) ) {
     std::unique_ptr< InDetRawDataContainer_p2 >   persCont( poolReadObject< InDetRawDataContainer_p2 >(token) );
     std::unique_ptr<PhaseIIPixelRawDataContainer> transCont(std::make_unique<PhaseIIPixelRawDataContainer>(m_idHelper->wafer_hash_max(),

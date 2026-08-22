@@ -35,7 +35,7 @@ TrigPassBitsCollection * TrigPassBitsCollectionCnv::createTransient(const Token*
 {
   MsgStream mlog(msgSvc(), "TrigPassBitsCollectionConverter" );
   
-  static const pool::Guid p1_guid( "E6E4F396-D696-4C1C-A0C4-7766E0AF9BB5" );
+  static const Guid p1_guid( "E6E4F396-D696-4C1C-A0C4-7766E0AF9BB5" );
 
   //  TrigPassBitsCollection *p_collection = 0;
   if( compareClassGuid(token,  p1_guid ) )     

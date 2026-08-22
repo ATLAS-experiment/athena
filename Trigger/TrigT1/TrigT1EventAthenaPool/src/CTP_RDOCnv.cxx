@@ -26,9 +26,9 @@ CTP_RDO_PERS* CTP_RDOCnv::createPersistent( CTP_RDO* transObj ) {
  */
 CTP_RDO* CTP_RDOCnv::createTransient(const Token* token) {
 
-   static const pool::Guid p2_guid( "12717F15-E516-4ECD-BC07-82C72B524AD5" );
-   static const pool::Guid p1_guid( "5E6D3E52-952F-4144-BC68-83ACE605AA45" );
-   static const pool::Guid p0_guid( "56C714CC-DC17-4927-B413-9151C82792BB" );
+   static const Guid p2_guid( "12717F15-E516-4ECD-BC07-82C72B524AD5" );
+   static const Guid p1_guid( "5E6D3E52-952F-4144-BC68-83ACE605AA45" );
+   static const Guid p0_guid( "56C714CC-DC17-4927-B413-9151C82792BB" );
 
    if( this->compareClassGuid(token,  p2_guid ) ) {
 

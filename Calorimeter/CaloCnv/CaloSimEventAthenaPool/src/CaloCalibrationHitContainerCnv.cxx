@@ -27,11 +27,11 @@ CaloCalibrationHitContainer* CaloCalibrationHitContainerCnv::createTransient(con
     CaloCalibrationHitContainerCnv_p4   converter_p4;
 
     CaloCalibrationHitContainer       *trans_cont(0);
-    static const pool::Guid  p1_guid("185FEF89-2350-4D1E-A1A7-9CB5A357232E");
-    static const pool::Guid  p2_guid("4942B9D4-F545-4C68-BD2D-A8E5923C29F3");
-    static const pool::Guid  p3_guid("D4E51325-2A55-41E4-B163-5224F2FA27CB");
-    static const pool::Guid  p4_guid("0191C6F6-90B5-7B57-861D-6865CE3FDF69");
-    static const pool::Guid  p0_guid("33CDAED0-F472-47D2-8F28-27C6D6761F35");
+    static const Guid  p1_guid("185FEF89-2350-4D1E-A1A7-9CB5A357232E");
+    static const Guid  p2_guid("4942B9D4-F545-4C68-BD2D-A8E5923C29F3");
+    static const Guid  p3_guid("D4E51325-2A55-41E4-B163-5224F2FA27CB");
+    static const Guid  p4_guid("0191C6F6-90B5-7B57-861D-6865CE3FDF69");
+    static const Guid  p0_guid("33CDAED0-F472-47D2-8F28-27C6D6761F35");
 
     if( this->compareClassGuid(token, p4_guid)) {
       std::unique_ptr< CaloCalibrationHitContainer_p4 >   col_vect( this->poolReadObject< CaloCalibrationHitContainer_p4 >(token) );

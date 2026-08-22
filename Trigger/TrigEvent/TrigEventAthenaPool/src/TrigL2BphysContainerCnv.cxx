@@ -50,10 +50,10 @@ TrigL2BphysContainer * TrigL2BphysContainerCnv::createTransient(const Token* tok
   m_impl->m_log << MSG::DEBUG
                 << "TrigL2BphysContainerCnv::createTransient called" << endmsg;
 
-  static const pool::Guid tlp2_guid( "2E35788D-BE17-4FE1-9DB5-709E05880CEC" );
-  static const pool::Guid tlp1_guid( "E8AA6B0A-B057-4058-B5A9-AC0B719626AF" );
-  static const pool::Guid p0_guid( "23296C53-6811-4D19-BD32-816B5DD0508F" );
-  static const pool::Guid p0_guid2( "390F41C1-CCFA-4A1D-B046-F9F462FD64D0" );
+  static const Guid tlp2_guid( "2E35788D-BE17-4FE1-9DB5-709E05880CEC" );
+  static const Guid tlp1_guid( "E8AA6B0A-B057-4058-B5A9-AC0B719626AF" );
+  static const Guid p0_guid( "23296C53-6811-4D19-BD32-816B5DD0508F" );
+  static const Guid p0_guid2( "390F41C1-CCFA-4A1D-B046-F9F462FD64D0" );
  
   TrigL2BphysContainer *p_collection = 0;
   if( compareClassGuid(token,  tlp2_guid ) ) {

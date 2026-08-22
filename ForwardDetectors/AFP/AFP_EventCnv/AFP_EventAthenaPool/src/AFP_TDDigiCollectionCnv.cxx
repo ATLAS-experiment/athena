@@ -21,7 +21,7 @@ AFP_TDDigiCollection* AFP_TDDigiCollectionCnv::createTransient(const Token* toke
 	MsgStream mlog(msgSvc(), "AFP_TDDigiCollectionConverter" );
 
 	//GUID of persistence collection class (see selection.xml in AFP_EventTPCnv, class item AFP_TDDigiCollection_p1
-	static const pool::Guid p1_guid("352BE1B9-96FA-46BB-B1AE-51DDF56380EB");
+	static const Guid p1_guid("352BE1B9-96FA-46BB-B1AE-51DDF56380EB");
 
 	AFP_TDDigiCollectionCnv_p1 TPConverter_p1;
 	AFP_TDDigiCollection *pTransColl=nullptr;

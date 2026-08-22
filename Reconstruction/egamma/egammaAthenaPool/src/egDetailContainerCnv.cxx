@@ -54,9 +54,9 @@ egDetailContainer* egDetailContainerCnv::createTransient(const Token* token)
 
   egDetailContainer *transObj = nullptr;
 
-  static const pool::Guid tr_guid("F8C02E11-E6C5-4843-A57D-3DB2EFACCC5B");
-  static const pool::Guid p1_guid("C3E26ADE-A984-41AC-83DF-F430F6DF1F1F");
-  static const pool::Guid p2_guid("6AB9ADFD-836F-416D-B343-3DDF7D4F6E18");
+  static const Guid tr_guid("F8C02E11-E6C5-4843-A57D-3DB2EFACCC5B");
+  static const Guid p1_guid("C3E26ADE-A984-41AC-83DF-F430F6DF1F1F");
+  static const Guid p2_guid("6AB9ADFD-836F-416D-B343-3DDF7D4F6E18");
 
   if ( compareClassGuid(token, tr_guid) ) {
 

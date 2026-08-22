@@ -13,8 +13,8 @@ TBBPCCont_PERS* TBBPCContCnv::createPersistent(TBBPCCont* transCont) {
     
 TBBPCCont* TBBPCContCnv::createTransient(const Token* token) {
    MsgStream log(msgSvc(), "TBBPCContConverter" );
-   static const pool::Guid   p1_guid("89A09260-F284-4694-8687-3C6C72989A96");  // GUID of the persistent object
-   static const pool::Guid   p0_guid("05E6C927-F43C-4C2A-B654-C671BF8FDB67");  // GUID of the transient object
+   static const Guid   p1_guid("89A09260-F284-4694-8687-3C6C72989A96");  // GUID of the persistent object
+   static const Guid   p0_guid("05E6C927-F43C-4C2A-B654-C671BF8FDB67");  // GUID of the transient object
    if( compareClassGuid(token, p1_guid) ) {
       // using unique_ptr ensures deletion of the persistent object
       std::unique_ptr< TBBPCCont_p1 > col_vect( poolReadObject< TBBPCCont_p1 >(token) );

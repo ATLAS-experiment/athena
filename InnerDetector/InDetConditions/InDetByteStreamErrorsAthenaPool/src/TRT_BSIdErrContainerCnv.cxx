@@ -20,7 +20,7 @@ TRT_BSIdErrContainerCnv::createPersistent(TRT_BSIdErrContainer* transCont) {
 TRT_BSIdErrContainer* 
 TRT_BSIdErrContainerCnv::createTransient(const Token* token) {
   MsgStream log(msgSvc(), "TRT_BSIdErrContainerCnv" );
-  static const pool::Guid   p1_guid("26F44F1E-D1F5-43B3-93E9-09376AB37491");
+  static const Guid   p1_guid("26F44F1E-D1F5-43B3-93E9-09376AB37491");
   if( compareClassGuid(token, p1_guid) ) {
     // using unique_ptr ensures deletion of the persistent object
     std::unique_ptr< TRT_BSIdErrContainer_p1 > col_vect( poolReadObject< TRT_BSIdErrContainer_p1 >(token) );

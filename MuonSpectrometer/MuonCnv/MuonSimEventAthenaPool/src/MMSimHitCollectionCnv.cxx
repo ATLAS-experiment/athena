@@ -34,9 +34,9 @@ MMSimHitCollection_PERS*    MMSimHitCollectionCnv::createPersistent (MMSimHitCol
 
 MMSimHitCollection* MMSimHitCollectionCnv::createTransient(const Token* token) {
     MsgStream log(msgSvc(), "MMSimHitCollectionCnv" );
-    static const pool::Guid   p1_guid("AC0B677C-FE08-11E8-B174-02163E018187");
-    static const pool::Guid   p2_guid("B9BDD436-FE08-11E8-A40F-02163E018187");
-    static const pool::Guid   p3_guid("018E2DAC-18EB-7EAA-A141-F0FD2A6E1E06");
+    static const Guid   p1_guid("AC0B677C-FE08-11E8-B174-02163E018187");
+    static const Guid   p2_guid("B9BDD436-FE08-11E8-A40F-02163E018187");
+    static const Guid   p3_guid("018E2DAC-18EB-7EAA-A141-F0FD2A6E1E06");
     ATH_MSG_DEBUG("createTransient(const Token* token): main converter");
     MMSimHitCollection* p_collection(nullptr);
     if( compareClassGuid(token, p3_guid) ) {

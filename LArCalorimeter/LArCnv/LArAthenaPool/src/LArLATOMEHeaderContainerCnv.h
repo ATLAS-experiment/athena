@@ -23,7 +23,7 @@ protected:
   virtual LArLATOMEHeaderContainer* createTransient(const Token* token) override final;
   virtual LArLATOMEHeaderContainerPERS* createPersistent(LArLATOMEHeaderContainer*) override;
 private:
-  pool::Guid   m_p1_guid;
+  Guid   m_p1_guid;
   
 };
 

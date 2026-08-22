@@ -27,7 +27,7 @@
 #include <format>
 
 
-static const pool::Guid DHForm_p6_Guid("7BE56CEF-C866-4BEE-9348-A5F34B5F1DAD");
+static const Guid DHForm_p6_Guid("7BE56CEF-C866-4BEE-9348-A5F34B5F1DAD");
 
 // cppcheck-suppress uninitMemberVar
 DataHeaderCnv::DataHeaderCnv(ISvcLocator* svcloc) :
@@ -576,10 +576,10 @@ DataHeader* DataHeaderCnv::createTransient(const Token* token) {
       dh->insert(dhe);
       return(dh);
    }
-   static const pool::Guid p6_guid("4DDBD295-EFCE-472A-9EC8-15CD35A9EB8D");
-   static const pool::Guid p5_guid("D82968A1-CF91-4320-B2DD-E0F739CBC7E6");
-   static const pool::Guid p4_guid("9630EB7B-CCD7-47D9-A39B-CBBF4133CDF2");
-   static const pool::Guid p3_guid("EC1318F0-8E28-45F8-9A2D-2597C1CC87A6");
+   static const Guid p6_guid("4DDBD295-EFCE-472A-9EC8-15CD35A9EB8D");
+   static const Guid p5_guid("D82968A1-CF91-4320-B2DD-E0F739CBC7E6");
+   static const Guid p4_guid("9630EB7B-CCD7-47D9-A39B-CBBF4133CDF2");
+   static const Guid p3_guid("EC1318F0-8E28-45F8-9A2D-2597C1CC87A6");
    try {
       if( compareClassGuid(token,  p6_guid ) ) {
          std::unique_ptr<DataHeader_p6> header( poolReadObject_p6(token) );

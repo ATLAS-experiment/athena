@@ -24,8 +24,8 @@ TBLArDigitContainerPERS* TBLArDigitContainerCnv::createPersistent(TBLArDigitCont
 
 TBLArDigitContainer* TBLArDigitContainerCnv::createTransient(const Token* token) {
    MsgStream log(msgSvc(), "TBLArDigitContainerCnv" );
-   constexpr pool::Guid p0_guid("B15FFDA0-206D-4062-8B5F-582A1ECD5502"); // GUID of the transient object
-   constexpr pool::Guid p1_guid("9F58DDD2-ACDC-4ECF-A714-779B05F94649");  // GUID of the persistent object
+   constexpr Guid p0_guid("B15FFDA0-206D-4062-8B5F-582A1ECD5502"); // GUID of the transient object
+   constexpr Guid p1_guid("9F58DDD2-ACDC-4ECF-A714-779B05F94649");  // GUID of the persistent object
    auto trans = std::make_unique<TBLArDigitContainer>();
    TBLArDigitContainer* result{};
    if (compareClassGuid(token, p0_guid)) {

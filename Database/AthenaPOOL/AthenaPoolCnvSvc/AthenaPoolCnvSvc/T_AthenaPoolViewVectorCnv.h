@@ -99,13 +99,13 @@ private:
    * The first entry will be the guid for @c ti itself, followed
    * by entries for any earlier persistent versions.
    */
-  std::vector<pool::Guid> initGuids (const std::type_info& ti) const;
+  std::vector<Guid> initGuids (const std::type_info& ti) const;
 
   /// List of guids for @c ViewVector classes.
-  std::vector<pool::Guid> m_guids;
+  std::vector<Guid> m_guids;
 
   /// List of guids for @c std::vector<ElementLink<DV> > classes.
-  std::vector<pool::Guid> m_guids2;
+  std::vector<Guid> m_guids2;
 };
 
 

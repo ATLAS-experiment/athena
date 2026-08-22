@@ -17,7 +17,7 @@ RpcSectorLogicContainer_p1* RpcSectorLogicContainerCnv::createPersistent(RpcSect
 }
    
 RpcSectorLogicContainer* RpcSectorLogicContainerCnv::createTransient(const Token* token) {
-    static const pool::Guid   p1_guid("93035F54-0FA9-4A56-98E0-A808DD23C089");
+    static const Guid   p1_guid("93035F54-0FA9-4A56-98E0-A808DD23C089");
     if( compareClassGuid(token, p1_guid) ) {
         // using unique_ptr ensures deletion of the persistent object
         std::unique_ptr< RpcSectorLogicContainer_p1 > col_vect( poolReadObject< RpcSectorLogicContainer_p1 >(token) );

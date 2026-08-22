@@ -30,10 +30,10 @@ MuonSimDataCollection_PERS*    MuonSimDataCollectionCnv::createPersistent (MuonS
 
 MuonSimDataCollection* MuonSimDataCollectionCnv::createTransient(const Token* token) {
     MsgStream log(msgSvc(), "MuonSimDataCollectionCnv" );
-    static const pool::Guid   p0_guid("5B50C32E-A036-4B49-AC97-716E53210BE2");
-    static const pool::Guid   p1_guid("0605B4A3-3744-4486-B39D-F9C9E809D868");
-    static const pool::Guid   p2_guid("E0AA3013-4EF7-45B6-BDB1-17B21BF60791");
-    static const pool::Guid   p3_guid("018F527E-346B-7A37-8C3D-5E7420A9C76A");
+    static const Guid   p0_guid("5B50C32E-A036-4B49-AC97-716E53210BE2");
+    static const Guid   p1_guid("0605B4A3-3744-4486-B39D-F9C9E809D868");
+    static const Guid   p2_guid("E0AA3013-4EF7-45B6-BDB1-17B21BF60791");
+    static const Guid   p3_guid("018F527E-346B-7A37-8C3D-5E7420A9C76A");
     ATH_MSG_DEBUG("createTransient(const Token* token): main converter");
     MuonSimDataCollection* p_collection(nullptr);
     if( compareClassGuid(token, p3_guid) ) {

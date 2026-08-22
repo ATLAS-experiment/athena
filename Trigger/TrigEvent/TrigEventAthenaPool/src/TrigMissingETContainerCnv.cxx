@@ -27,8 +27,8 @@ TrigMissingETContainer* TrigMissingETContainerCnv::createTransient(const Token* 
   
   mlog << MSG::DEBUG << "TrigMissingETContainerCnv::createTransient" << endmsg;
 
-  static const pool::Guid p3_guid( "F5C98A61-4F40-4FE6-A1A9-D5EF00FFFBF0" );
-  static const pool::Guid tlp1_guid( "23EC84A7-8614-42D6-B82D-B0861D3CE08D" );
+  static const Guid p3_guid( "F5C98A61-4F40-4FE6-A1A9-D5EF00FFFBF0" );
+  static const Guid tlp1_guid( "23EC84A7-8614-42D6-B82D-B0861D3CE08D" );
 
   if( compareClassGuid(token,  p3_guid ) ){
          std::unique_ptr< TrigMissingETContainer_p3 > col_vect( poolReadObject< TrigMissingETContainer_p3 >(token) );

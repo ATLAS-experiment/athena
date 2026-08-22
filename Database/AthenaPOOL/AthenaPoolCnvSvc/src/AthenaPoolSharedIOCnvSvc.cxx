@@ -24,6 +24,7 @@
 #include "PersistentDataModel/DataHeader.h"
 
 #include "StorageSvc/DbReflex.h"
+#include "StorageSvc/DbType.h"
 #include "StorageSvc/DbTypeInfo.h"
 
 #include "RootAuxDynIO/IRootAuxDynIO.h"
@@ -449,6 +450,7 @@ Token* AthenaPoolSharedIOCnvSvc::registerForWrite(Placement* placement, const vo
       }
    }
    Token* token = nullptr;
+   const Guid guid = pool::DbReflex::guid(classDesc);
    if (!m_outputStreamingTool.empty() && m_outputStreamingTool->isClient()
 	   && (!m_parallelCompression || placement->containerName().compare(0, m_metadataContainerProp.value().size(), m_metadataContainerProp.value()) == 0)) {
       // Lock object
@@ -494,9 +496,9 @@ Token* AthenaPoolSharedIOCnvSvc::registerForWrite(Placement* placement, const vo
          m_outputStreamingTool->putObject(nullptr, 0).ignore();
          return(nullptr);
       }
-      const pool::DbTypeInfo* info = pool::DbTypeInfo::create(pool::DbReflex::guid(classDesc));
+      const pool::DbTypeInfo* info = pool::DbTypeInfo::create(guid);
       if (info != nullptr) {
-         if (m_auxDynTool->hasAuxStore(placement->containerName(), info->clazz().Class() ) && !m_auxOutput->sendStore(info->clazz().Class(), obj, pool::DbReflex::guid(classDesc).toString(), placement->containerName()).isSuccess()) {
+         if (m_auxDynTool->hasAuxStore(placement->containerName(), info->clazz().Class() ) && !m_auxOutput->sendStore(info->clazz().Class(), obj, guid.toString(), placement->containerName()).isSuccess()) {
             ATH_MSG_ERROR("Could not share dynamic aux store for: " << placementStr);
             m_outputStreamingTool->putObject(nullptr, 0).ignore();
             return(nullptr);
@@ -526,14 +528,14 @@ Token* AthenaPoolSharedIOCnvSvc::registerForWrite(Placement* placement, const vo
       }
       Token* tempToken = new Token();
       tempToken->fromString(tokenStr); tokenStr = nullptr;
-      tempToken->setClassID(pool::DbReflex::guid(classDesc));
+      tempToken->setClassID(guid);
       token = tempToken; tempToken = nullptr;
 // Client Write Request
    } else {
       if (!m_outputStreamingTool.empty() && !m_outputStreamingTool->isClient() && !m_outputStreamingTool->isServer()) {
          ATH_MSG_DEBUG("registerForWrite SKIPPED for uninitialized server, Placement = " << placement->toString());
          Token* tempToken = new Token();
-         tempToken->setClassID(pool::DbReflex::guid(classDesc));
+         tempToken->setClassID(guid);
          token = tempToken; tempToken = nullptr;
       } else if (!m_outputStreamingTool.empty() && !m_outputStreamingTool->isClient() && !m_streamServerActive) {
          if(placement->technology() == 0) { // No technology specified, use the default
@@ -631,7 +633,8 @@ void AthenaPoolSharedIOCnvSvc::setObjPtr(void*& obj, const Token* token) {
             ATH_MSG_ERROR("Failed to get Data for " << token->toString());
             obj = nullptr;
          } else {
-            obj = m_serializeSvc->deserialize(buffer, nbytes, token->classID()); buffer = nullptr;
+            RootType cltype(pool::DbReflex::forGuid(token->classID()));
+            obj = m_serializeSvc->deserialize(buffer, nbytes, cltype); buffer = nullptr;
             buffer = nullptr;
             nbytes = 0;
             sc = m_inputStreamingTool->getObject(&buffer, nbytes);
@@ -700,7 +703,18 @@ StatusCode AthenaPoolSharedIOCnvSvc::createAddress(long svcType,
          return(StatusCode::RECOVERABLE);
       }
    } else {
-      return AthenaPoolCnvSvc::createAddress(svcType, clid, par, ip, refpAddress);
+      if (par[0].compare(0, 3, "SHM") == 0) {
+         std::unique_ptr<Token> token;
+         token = std::make_unique<Token>();
+         token->setOid(Token::OID_t(ip[0], ip[1]));
+         token->setAuxString("[PNAME=" + par[2] + "]");
+         RootType classDesc = RootType::ByNameNoQuiet(par[2]);
+         token->setClassID(pool::DbReflex::guid(classDesc));
+         refpAddress = new TokenAddress(repSvcType(), clid, "", par[1], IPoolSvc::kInputStream, std::move(token));
+         return(StatusCode::SUCCESS);
+      } else {
+         return AthenaPoolCnvSvc::createAddress(svcType, clid, par, ip, refpAddress);
+      }
    }
 }
 //______________________________________________________________________________

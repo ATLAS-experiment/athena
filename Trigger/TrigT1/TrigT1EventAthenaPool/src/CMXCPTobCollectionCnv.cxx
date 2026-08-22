@@ -32,7 +32,7 @@ CMXCPTobCollection * CMXCPTobCollectionCnv::createTransient(const Token* token)
   
   //mlog << MSG::DEBUG << "CMXCPTobCollectionCnv::createTransient called" << endmsg;
 
-  static const pool::Guid tlp1_guid( "0E42AA28-7C10-4934-9E54-97C38C249544" );
+  static const Guid tlp1_guid( "0E42AA28-7C10-4934-9E54-97C38C249544" );
  
   CMXCPTobCollection *p_collection = 0;
   if( compareClassGuid(token,  tlp1_guid ) )     

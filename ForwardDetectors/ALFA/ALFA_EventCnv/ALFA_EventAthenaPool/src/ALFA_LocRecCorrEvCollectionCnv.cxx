@@ -21,7 +21,7 @@ ALFA_LocRecCorrEvCollection* ALFA_LocRecCorrEvCollectionCnv::createTransient(con
     ALFA_LocRecCorrEvCollectionCnv_p1   TPConverter_p1;
 
     ALFA_LocRecCorrEvCollection       *trans_cont(nullptr); // probably inicialization
-    static const pool::Guid p1_guid ("E6C77BF6-011B-4A7F-847A-E34A0B402976");
+    static const Guid p1_guid ("E6C77BF6-011B-4A7F-847A-E34A0B402976");
 
     
     if( this->compareClassGuid(token, p1_guid)) {
