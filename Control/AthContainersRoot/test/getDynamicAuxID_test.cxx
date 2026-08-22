@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file AthContainersRoot/test/getDynamicAuxID_test.cxx
@@ -19,13 +19,13 @@
 #include "TInterpreter.h"
 #include "TROOT.h"
 #include "TClass.h"
-#include <iostream>
+#include <print>
 #include <cassert>
 
 
 void test1 (SG::auxid_t a1_id)
 {
-  std::cout << "test1\n";
+  std::println ("test1");
   SG::AuxTypeRegistry& r = SG::AuxTypeRegistry::instance();
 
   assert (SG::getDynamicAuxID (typeid(int),
@@ -102,7 +102,7 @@ void test1 (SG::auxid_t a1_id)
 void test_linked()
 {
   SG::AuxTypeRegistry& r = SG::AuxTypeRegistry::instance();
-  std::cout << "test_linked\n";
+  std::println ("test_linked");
 
   SG::auxid_t l1_id = SG::getDynamicAuxID (typeid(AthContainersRootTest::L1),
                                            "linked1_linked",
