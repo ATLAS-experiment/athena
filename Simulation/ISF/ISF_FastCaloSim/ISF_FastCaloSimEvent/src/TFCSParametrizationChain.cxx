@@ -248,7 +248,7 @@ void TFCSParametrizationChain::Streamer(TBuffer &R_b) {
           }
         }
         if(R_t){
-          R_t->checkHists();
+          R_t->fixHists();
           R_stl.emplace_back(R_t.release());
         }
       }
