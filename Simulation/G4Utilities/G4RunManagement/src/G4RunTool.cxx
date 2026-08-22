@@ -3,6 +3,7 @@
 */
 
 #include "G4RunTool.h"
+#include "G4RunToolWorkerRunManager.h"
 
 // Gaudi includes
 #include "GaudiKernel/ServiceHandle.h"
@@ -174,7 +175,10 @@ void G4RunTool::Geant4main() {
   // before any pre-initialization UI commands are applied.
   m_physicsListSvc->SetPhysicsListOptions();
 
-  runManager->SetUserInitialization(std::make_unique<G4AtlasActionInitialization>(m_userActionSvc.get()).release());
+  runManager->SetUserInitialization(
+    std::make_unique<G4RunToolWorkerThreadInitialization>().release());
+  runManager->SetUserInitialization(
+    std::make_unique<G4AtlasActionInitialization>(m_userActionSvc.get()).release());
 
   // G4 user interface commands
   G4UImanager *ui = G4UImanager::GetUIpointer();

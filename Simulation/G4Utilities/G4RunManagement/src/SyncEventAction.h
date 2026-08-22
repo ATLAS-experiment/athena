@@ -14,7 +14,6 @@ class SyncEventAction : public G4UserEventAction
 {
 public:
   virtual void BeginOfEventAction(const G4Event*) override;
-  virtual void EndOfEventAction(const G4Event*) override;
 };
 
 } // namespace G4UA
