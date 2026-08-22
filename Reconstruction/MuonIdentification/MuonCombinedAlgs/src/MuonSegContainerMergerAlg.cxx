@@ -69,7 +69,6 @@ StatusCode MuonSegContainerMergerAlg::execute(const EventContext& ctx) const {
         } else {
             ATH_MSG_VERBOSE("Retrieved "<<tag_map.fullKey()<< " with size "<<tag_map->size());
         }
-        good_tags.reserve(tag_map->size() + good_tags.size());
         for (const auto& tag_pair : *tag_map) {
             good_tags.push_back(tag_pair.second.get());
         }

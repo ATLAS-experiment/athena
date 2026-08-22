@@ -61,7 +61,7 @@ private:
     StatusCode create(const EventContext& ctx, InDetCandidateCache& output_cache) const;
 
     bool isValidTrackParticle(const Trk::ITrackSelectorTool* currentTrackSelector, const xAOD::TrackParticle* const tp) const;
-    void printTrackParticleInfo(const xAOD::TrackParticle* const tp, const std::string& what) const;
+    void printTrackParticleInfo(const xAOD::TrackParticle* const tp, std::string_view what) const;
 
     static int getCount(const xAOD::TrackParticle& tp, const xAOD::SummaryType type);
 

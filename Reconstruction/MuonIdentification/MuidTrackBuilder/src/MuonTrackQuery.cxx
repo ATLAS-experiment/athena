@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonTrackQuery.h"
@@ -670,7 +670,7 @@ namespace Rec {
             // select MaterialEffects up to calorimeter volume
             if (!tsos->materialEffectsOnTrack()) continue;
 
-            const Trk::MaterialEffectsOnTrack* meot = dynamic_cast<const Trk::MaterialEffectsOnTrack*>(tsos->materialEffectsOnTrack());
+            const Trk::MaterialEffectsOnTrack* meot = static_cast<const Trk::MaterialEffectsOnTrack*>(tsos->materialEffectsOnTrack());
 
             const Amg::Vector3D& position = meot->associatedSurface().globalReferencePoint();
 
@@ -718,21 +718,21 @@ namespace Rec {
 
             if (std::abs(totalSigma) > std::abs(curvatureSignificance)) {
                 curvatureSignificance = totalSigma;
-                curvatureRadius = radii[index];
+                curvatureRadius = radii.at(index);
             }
 
-            if (std::abs(sigmas[index] + previousSignificance) > std::abs(neighbourSignificance)) {
+            if (std::abs(sigmas.at(index) + previousSignificance) > std::abs(neighbourSignificance)) {
                 neighbourSignificance = sigmas[index] + previousSignificance;
 
                 if (std::abs(neighbourSignificance) > 0.) {
-                    neighbourRadius = (sigmas[index] * radii[index] + previousSignificance * previousRadius) / neighbourSignificance;
+                    neighbourRadius = (sigmas[index] * radii.at(index) + previousSignificance * previousRadius) / neighbourSignificance;
                 } else {
                     neighbourRadius = 0.;
                 }
             }
 
             previousSignificance = sigmas[index];
-            previousRadius = radii[index];
+            previousRadius = radii.at(index);
         }
 
         // normalize
