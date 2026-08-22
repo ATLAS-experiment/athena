@@ -1,6 +1,6 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 // Author: Bill Balunas <balunas@cern.ch>, based on earlier implementation by M. Leigh
 ///////////////////////////////////////////////////////////////////
@@ -219,8 +219,8 @@ namespace met {
     ATH_MSG_VERBOSE( "Saving network inputs to base MET container" );
     xAOD::MissingET* net_inpts = nullptr;
     ATH_CHECK( fillMET( net_inpts, metCont, "NetInputDummy", static_cast<MissingETBase::Types::bitmask_t>(MissingETBase::Source::Type::UnknownType) ) );
-    dec_inputnames( *(*metCont)["NetInputDummy"] ) = input_names;
-    dec_inputvalues( *(*metCont)["NetInputDummy"] ) = input_values;
+    dec_inputnames( *(*metCont)["NetInputDummy"] ) = std::move(input_names);
+    dec_inputvalues( *(*metCont)["NetInputDummy"] ) = std::move(input_values);
 
     return StatusCode::SUCCESS;
   }
