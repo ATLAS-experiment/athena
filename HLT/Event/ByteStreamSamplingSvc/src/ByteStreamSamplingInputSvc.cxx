@@ -104,15 +104,16 @@ bool ByteStreamSamplingInputSvc::subscribe(State& state) {
   while (!webdaq::is::get(m_partition, "RunParams", "RunParams", runParams)) {
     ATH_MSG_INFO("No such partition (yet?): " << m_partition
                                               << " -> waiting...");
-    sleep(20);
+    sleep(10);
+  }
+
+  if (m_readDetectorMask) {
+      get_runparams();
   }
 
   while (true) {
     state.m_subscription = webdaq::emon::subscribe(m_partition, m_subscribe_criteria);
     if (!state.m_subscription.empty()) {
-      if (m_readDetectorMask) {
-        get_runparams();
-      }
       state.m_partition = m_partition;
       return true;
     } else {
@@ -144,13 +145,11 @@ const RawEvent* ByteStreamSamplingInputSvc::nextEvent() {
     }
   }
 
-  // delete previous event, if any
-  if (state.m_re) {
-    if (state.m_raw) {
-      state.m_raw.reset();
-    }
-    state.m_re.reset();
-  }
+  // Delete previous event, if any
+  // We do this explicitly to avoid a situation where m_re and m_raw are
+  // inconsistent later in case of errors
+  state.m_re.reset();
+  state.m_raw.reset();
 
   while (!state.m_re) {
 
