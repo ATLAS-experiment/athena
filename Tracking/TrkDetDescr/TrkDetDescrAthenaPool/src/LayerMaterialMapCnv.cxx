@@ -53,7 +53,7 @@ LayerMaterialMapCnv::createPersistentWithKey (Trk::LayerMaterialMap* transCont,
 Trk::LayerMaterialMap*
 LayerMaterialMapCnv::createTransientWithKey (const Token* token, const std::string& key)
 {
-  static const pool::Guid tlp1_guid( "3DA92DBD-DA78-43A2-BFDF-9E19E2BF1E8A" );
+  static const Guid tlp1_guid( "3DA92DBD-DA78-43A2-BFDF-9E19E2BF1E8A" );
 
   Trk::LayerMaterialMap *p_collection = nullptr;
 

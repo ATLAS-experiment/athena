@@ -33,7 +33,7 @@ MaterialStepCollectionCnv::createTransientWithKey ( const Token* token, const st
 {
   MsgStream log (m_msgSvc, "MaterialStepCollectionCnv:" + key);
 
-  static const pool::Guid p1_guid( "DF8A7FA8-693F-44E0-A5E5-F9907B8B429E" );
+  static const Guid p1_guid( "DF8A7FA8-693F-44E0-A5E5-F9907B8B429E" );
 
   Trk::MaterialStepCollection* tCollection = nullptr;
   if( compareClassGuid(token,  p1_guid ) ) {

@@ -20,8 +20,8 @@ MissingETComposition_PERS* MissingETCompositionCnv::createPersistent(MissingETCo
 
 MissingETComposition* MissingETCompositionCnv::createTransient(const Token* token)
 {
-    static const pool::Guid   p1_guid("78E9CC2F-1FB4-4740-AD44-7C849D9CC865");
-    static const pool::Guid   p2_guid("CF4110FB-35B4-4C8B-BB51-FE8C6CBE0277");
+    static const Guid   p1_guid("78E9CC2F-1FB4-4740-AD44-7C849D9CC865");
+    static const Guid   p2_guid("CF4110FB-35B4-4C8B-BB51-FE8C6CBE0277");
     
   if( compareClassGuid(token, p2_guid) ){
       if ( ! bool(m_TPconverter_p2) )

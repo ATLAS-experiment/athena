@@ -21,7 +21,7 @@ ALFA_ODDigitCollection* ALFA_ODDigitCollectionCnv::createTransient(const Token* 
     ALFA_ODDigitCollectionCnv_p1   TPConverter_p1;
 
     ALFA_ODDigitCollection       *trans_cont(nullptr); // probably inicialization
-    static const pool::Guid p1_guid ("26807BD7-E90A-4FDF-B1BF-0A7F821C5970");
+    static const Guid p1_guid ("26807BD7-E90A-4FDF-B1BF-0A7F821C5970");
 
     
     if( this->compareClassGuid(token, p1_guid)) {

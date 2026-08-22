@@ -15,10 +15,6 @@
 #include "PersistentDataModel/Token.h"
 #include "PersistentDataModel/Guid.h"
 
-namespace pool {
-   typedef ::Guid Guid;
-}
-
 #include <string>
 #include <map>
 

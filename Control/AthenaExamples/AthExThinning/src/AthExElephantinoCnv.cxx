@@ -62,7 +62,7 @@ AthExElephantino* AthExElephantinoCnv::createTransient(const Token* token)
 
    AthExElephantino *transObj = 0;
 
-   static const pool::Guid p1_guid("F90BE215-64AD-45E3-B5E4-6AD7DE35BDF9");
+   static const Guid p1_guid("F90BE215-64AD-45E3-B5E4-6AD7DE35BDF9");
 
    if ( compareClassGuid(token, p1_guid) ) {
 

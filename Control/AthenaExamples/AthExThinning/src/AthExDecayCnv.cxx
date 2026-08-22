@@ -62,7 +62,7 @@ AthExDecay* AthExDecayCnv::createTransient(const Token* token)
 
    AthExDecay *transObj = 0;
 
-   static const pool::Guid p1_guid("FD6FC38A-2EE4-4EC6-916B-DBF6A8E88A03");
+   static const Guid p1_guid("FD6FC38A-2EE4-4EC6-916B-DBF6A8E88A03");
 
    if ( compareClassGuid(token, p1_guid) ) {
 

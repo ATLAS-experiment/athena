@@ -39,7 +39,7 @@ ElementTableCnv::createTransientWithKey (const Token* token, const std::string& 
 {
    MsgStream log (m_msgSvc, "ElementTableCnv: " + key);
 
-   static const pool::Guid p1_guid( "B157B642-94C0-11E3-B1C2-02163E00A511" );
+   static const Guid p1_guid( "B157B642-94C0-11E3-B1C2-02163E00A511" );
 
    Trk::ElementTable* tCollection = nullptr;
    if( compareClassGuid(token,  p1_guid ) ) {

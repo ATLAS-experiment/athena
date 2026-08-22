@@ -29,10 +29,10 @@ TrigTauClusterContainer* TrigTauClusterContainerCnv::createTransient(const Token
 
     mlog << MSG::DEBUG << "TrigTauClusterContainerCnv::createTransient called" << endmsg;
 
-    static const pool::Guid p5_guid("8384F60B-952E-4DE4-B307-1AC1C405E156");
-    static const pool::Guid p4_guid("D41E29BA-0FE8-4319-85F4-93EA68AD9195");
-    static const pool::Guid p3_guid("3BB1A500-2188-47D4-9352-6638DEA3FC7D");
-    static const pool::Guid tlp1_guid("E1FC5307-A747-42D7-9542-998A9AACB445");
+    static const Guid p5_guid("8384F60B-952E-4DE4-B307-1AC1C405E156");
+    static const Guid p4_guid("D41E29BA-0FE8-4319-85F4-93EA68AD9195");
+    static const Guid p3_guid("3BB1A500-2188-47D4-9352-6638DEA3FC7D");
+    static const Guid tlp1_guid("E1FC5307-A747-42D7-9542-998A9AACB445");
 
     if(compareClassGuid(token, p5_guid))
     {

@@ -30,7 +30,7 @@ TrigOperationalInfo* TrigOperationalInfoCnv::createTransient(const Token* token)
 {
   MsgStream mlog(msgSvc(), "TrigOperationalInfoConverter" );
 
-  static const pool::Guid p1_guid("765F0281-801B-4F5C-8C4C-5BE7E7DB5E42");
+  static const Guid p1_guid("765F0281-801B-4F5C-8C4C-5BE7E7DB5E42");
 
   TrigOperationalInfo *trans_obj(0);
   

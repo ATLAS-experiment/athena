@@ -47,11 +47,11 @@ EventInfo_PERS* EventInfoCnv::createPersistent(EventInfo* transObj) {
     
 EventInfo* EventInfoCnv::createTransient(const Token* token) {
 
-    static const pool::Guid   p4_guid("C634FDB6-CC4B-4BA2-B8F9-A84BE6A786C7");
-    static const pool::Guid   p3_guid("3E240CA8-5124-405B-9059-FAFC4C5954C6");
-    static const pool::Guid   p2_guid("22006E19-F0DA-4EFB-AF55-6FBDA421BF06");
-    static const pool::Guid   p1_guid("A3053CD9-47F4-4C0F-B73A-A6F93F5CC7B7");
-    static const pool::Guid   p0_guid("380D8BB9-B34F-470F-92CC-06C3D60F7BE4");
+    static const Guid   p4_guid("C634FDB6-CC4B-4BA2-B8F9-A84BE6A786C7");
+    static const Guid   p3_guid("3E240CA8-5124-405B-9059-FAFC4C5954C6");
+    static const Guid   p2_guid("22006E19-F0DA-4EFB-AF55-6FBDA421BF06");
+    static const Guid   p1_guid("A3053CD9-47F4-4C0F-B73A-A6F93F5CC7B7");
+    static const Guid   p0_guid("380D8BB9-B34F-470F-92CC-06C3D60F7BE4");
     if( compareClassGuid(token, p4_guid) ) {
         // using unique_ptr ensures deletion of the persistent object
         std::unique_ptr< EventInfo_p4 > col_vect( poolReadObject< EventInfo_p4 >(token) );

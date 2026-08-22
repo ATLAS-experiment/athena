@@ -37,9 +37,9 @@ sTgcPrepDataContainer_PERS*    sTgcPrepDataContainerCnv::createPersistent (Muon:
 
 Muon::sTgcPrepDataContainer* sTgcPrepDataContainerCnv::createTransient(const Token* token) {
     MsgStream log(msgSvc(), "sTgcPrepDataContainerCnv" );
-    static const pool::Guid   p1_guid("7AB87DDE-8D7C-11E2-AA7C-001517648C14"); 
-    static const pool::Guid   p2_guid("9E1B8028-D22C-4E02-BA82-D0EC79DB4F6C"); 
-    static const pool::Guid   p3_guid("F06F048C-878D-11EE-AFB6-5811229BAA38"); 
+    static const Guid   p1_guid("7AB87DDE-8D7C-11E2-AA7C-001517648C14"); 
+    static const Guid   p2_guid("9E1B8028-D22C-4E02-BA82-D0EC79DB4F6C"); 
+    static const Guid   p3_guid("F06F048C-878D-11EE-AFB6-5811229BAA38"); 
 
     if (log.level() <= MSG::DEBUG) log<<MSG::DEBUG<<"createTransient(const Token* token): main converter"<<endmsg;
     Muon::sTgcPrepDataContainer* p_collection(nullptr);

@@ -35,11 +35,11 @@ RPCSimHitCollection_PERS*    RPCSimHitCollectionCnv::createPersistent (RPCSimHit
 
 RPCSimHitCollection* RPCSimHitCollectionCnv::createTransient(const Token* token) {
     MsgStream log(msgSvc(), "RPCSimHitCollectionCnv" );
-    static const pool::Guid   p0_guid("45EB013E-FC8E-4612-88B7-6E0CAF718F79"); // before t/p split
-    static const pool::Guid   p1_guid("C4C57487-41DC-4706-9604-721D76F0AA52");
-    static const pool::Guid   p2_guid("1B611C70-CC6F-42AE-9F6D-7DA6A9A22546");
-    static const pool::Guid   p3_guid("B48E5E17-FB26-4BC0-A0E2-5324925EAE2F");
-    static const pool::Guid   p4_guid("018E2DAC-18EB-714B-B9BD-F9354E30CB51");
+    static const Guid   p0_guid("45EB013E-FC8E-4612-88B7-6E0CAF718F79"); // before t/p split
+    static const Guid   p1_guid("C4C57487-41DC-4706-9604-721D76F0AA52");
+    static const Guid   p2_guid("1B611C70-CC6F-42AE-9F6D-7DA6A9A22546");
+    static const Guid   p3_guid("B48E5E17-FB26-4BC0-A0E2-5324925EAE2F");
+    static const Guid   p4_guid("018E2DAC-18EB-714B-B9BD-F9354E30CB51");
     if (log.level() <= MSG::DEBUG) log<<MSG::DEBUG<<"createTransient(const Token* token): main converter"<<endmsg;
     RPCSimHitCollection* p_collection(nullptr);
     if( compareClassGuid(token, p4_guid) ) {

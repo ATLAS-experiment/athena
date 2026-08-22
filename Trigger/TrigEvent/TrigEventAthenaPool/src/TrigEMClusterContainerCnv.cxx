@@ -25,9 +25,9 @@ TrigEMClusterContainer * TrigEMClusterContainerCnv::createTransient(const Token*
   
   mlog << MSG::DEBUG << "TrigEMClusterContainerCnv::createTransient called" << endmsg;
 
-  static const pool::Guid p3_guid( "0BF627E6-52A0-4F10-9FFD-A513DF2DBC31" );
-  static const pool::Guid p4_guid( "7B430CA8-5D16-4E26-B0A4-461F983610EB" );
-  static const pool::Guid tlp1_guid( "CAA8145E-F382-4727-A114-26E137D4B27E" );
+  static const Guid p3_guid( "0BF627E6-52A0-4F10-9FFD-A513DF2DBC31" );
+  static const Guid p4_guid( "7B430CA8-5D16-4E26-B0A4-461F983610EB" );
+  static const Guid tlp1_guid( "CAA8145E-F382-4727-A114-26E137D4B27E" );
 
  if( compareClassGuid(token,  p4_guid ) ){
          std::unique_ptr< TrigEMClusterContainer_p4 > col_vect( poolReadObject< TrigEMClusterContainer_p4 >(token) );

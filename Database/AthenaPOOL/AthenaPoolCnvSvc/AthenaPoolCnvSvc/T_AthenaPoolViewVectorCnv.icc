@@ -24,7 +24,7 @@ T_AthenaPoolViewVectorCnv<DV>::T_AthenaPoolViewVectorCnv (ISvcLocator* svcloc)
 
 
 template <class DV>
-std::vector<pool::Guid>
+std::vector<Guid>
 T_AthenaPoolViewVectorCnv<DV>::initGuids (const std::type_info& ti) const
 {
   std::vector<Guid> guids;
@@ -117,7 +117,7 @@ T_AthenaPoolViewVectorCnv<DV>::createTransient NO_SANITIZE_UNDEFINED (const Toke
   // That works for current ElementLink classes, but it's not very nice.
   // This also gets a ubsan warning with gcc6.2, so we suppress it
   // for this function.
-  for (const pool::Guid& guid : m_guids) {
+  for (const Guid& guid : m_guids) {
     if( this->compareClassGuid(token,  guid ) ) {
       std::unique_ptr<pers_t> v (this->template poolReadObject< pers_t >(token));
       if (guid != m_guids.front()) {
@@ -137,7 +137,7 @@ T_AthenaPoolViewVectorCnv<DV>::createTransient NO_SANITIZE_UNDEFINED (const Toke
   }
 
 
-  for (const pool::Guid& guid : m_guids2) {
+  for (const Guid& guid : m_guids2) {
     if( this->compareClassGuid(token,  guid ) ) {
       std::unique_ptr<pers2_t> v (this->template poolReadObject< pers2_t >(token));
       auto c = std::make_unique<ConstDataVector<trans_t> > (*v);

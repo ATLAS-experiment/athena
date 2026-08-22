@@ -41,11 +41,11 @@ TgcRdoContainerCnv::createTransient(const Token* token)
    // using the correct persistent type pointer
 
    TgcRdoContainer *trans_cont = 0;
-   static const pool::Guid	p4_guid("176667F0-DEC8-42A4-94AF-B4750829671A");
-   static const pool::Guid	p3_guid("E7D45D90-CB92-4A7D-B5FE-2791CE34FFEE");
-   static const pool::Guid	p2_guid("3DA250DA-321C-4DD3-996A-BB0E67A6034D");
-   static const pool::Guid	p1_guid("BF9D17EA-AC87-4243-9126-8FC86DDCDAA3");
-   static const pool::Guid	p0_guid("FBF8D72D-A6B9-4689-8E02-BB0F435BF2F7");
+   static const Guid	p4_guid("176667F0-DEC8-42A4-94AF-B4750829671A");
+   static const Guid	p3_guid("E7D45D90-CB92-4A7D-B5FE-2791CE34FFEE");
+   static const Guid	p2_guid("3DA250DA-321C-4DD3-996A-BB0E67A6034D");
+   static const Guid	p1_guid("BF9D17EA-AC87-4243-9126-8FC86DDCDAA3");
+   static const Guid	p0_guid("FBF8D72D-A6B9-4689-8E02-BB0F435BF2F7");
 
    if( compareClassGuid(token, p4_guid) ) {
       std::unique_ptr< TgcRdoContainer_p4 >  col_vect( this->poolReadObject<TgcRdoContainer_p4>(token) );

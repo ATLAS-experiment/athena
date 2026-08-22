@@ -11,7 +11,7 @@ NSW_PadTriggerDataContainer_PERS* NSW_PadTriggerDataContainerCnv::createPersiste
 Muon::NSW_PadTriggerDataContainer* NSW_PadTriggerDataContainerCnv::createTransient(const Token* token) {
     MsgStream log(msgSvc(), "NSW_PadTriggerDataContainerCnv");
     // UUID of of NSW_PadTriggerDataContainer_p1
-    static const pool::Guid p1_guid("5E3C969A-84BF-4DA1-94B9-F1A6A94C3123");
+    static const Guid p1_guid("5E3C969A-84BF-4DA1-94B9-F1A6A94C3123");
     if(compareClassGuid(token, p1_guid)) {
         std::unique_ptr<Muon::NSW_PadTriggerDataContainer_p1> pContainer
             { poolReadObject<Muon::NSW_PadTriggerDataContainer_p1>(token) };

@@ -36,12 +36,12 @@ TGCSimHitCollection_PERS*    TGCSimHitCollectionCnv::createPersistent (TGCSimHit
 
 TGCSimHitCollection* TGCSimHitCollectionCnv::createTransient(const Token* token) {
     MsgStream log(msgSvc(), "TGCSimHitCollectionCnv" );
-    static const pool::Guid   p0_guid("D7C91818-4730-4717-A650-107F52C0221E"); // before t/p split
-    static const pool::Guid   p1_guid("BD569381-2489-4402-BBD3-91EE8C009F26");
-    static const pool::Guid   p2_guid("710241EE-D5F7-4CB6-A1D7-6E80D040E637");
-    static const pool::Guid   p3_guid("BACD19A8-4737-4857-A22D-B9DF833A0A80");
-    static const pool::Guid   p4_guid("F8F77562-BBD9-45DB-A276-6A21018EA7FA");
-    static const pool::Guid   p5_guid("018E2DAC-18EB-7E5B-9F18-CC2E36343F17");
+    static const Guid   p0_guid("D7C91818-4730-4717-A650-107F52C0221E"); // before t/p split
+    static const Guid   p1_guid("BD569381-2489-4402-BBD3-91EE8C009F26");
+    static const Guid   p2_guid("710241EE-D5F7-4CB6-A1D7-6E80D040E637");
+    static const Guid   p3_guid("BACD19A8-4737-4857-A22D-B9DF833A0A80");
+    static const Guid   p4_guid("F8F77562-BBD9-45DB-A276-6A21018EA7FA");
+    static const Guid   p5_guid("018E2DAC-18EB-7E5B-9F18-CC2E36343F17");
     log<<MSG::DEBUG<<"createTransient(const Token* token): main converter"<<endmsg;
     TGCSimHitCollection* p_collection(nullptr);
     if(compareClassGuid(token, p5_guid) ) {

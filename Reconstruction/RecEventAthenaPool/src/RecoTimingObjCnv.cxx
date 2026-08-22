@@ -34,7 +34,7 @@ RecoTimingObj* RecoTimingObjCnv::createTransient(const Token* token)
 
   RecoTimingObj *transObj = 0;
   
-  static const pool::Guid p1_guid("4A28542C-DD7F-441A-9866-37A74ED49850");
+  static const Guid p1_guid("4A28542C-DD7F-441A-9866-37A74ED49850");
   
   if ( compareClassGuid(token, p1_guid) )
     {

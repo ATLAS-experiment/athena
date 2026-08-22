@@ -22,11 +22,11 @@ TrigElectronContainer* TrigElectronContainerCnv::createTransient(const Token* to
     MsgStream mlog(msgSvc(), "TrigElectronContainerConverter" );
     mlog << MSG::DEBUG << "TrigElectronContainerCnv::createTransient" << endmsg;
 
-    static const pool::Guid p3_guid("F2E0066A-3BC5-44F2-A18C-57C63481988D");
-    static const pool::Guid tlp2_guid("2EDB14B9-0B61-4014-90C2-20AEB7AAFEBE");
-    static const pool::Guid tlp1_guid("8831D2A9-F4B6-40BE-97C1-4BD7F9468267");
-    static const pool::Guid p0_guid2("2F97E0FB-7C93-4616-B322-1A01BF65D331");
-    static const pool::Guid p0_guid1("EA6EA1A5-16FC-4DBF-896E-D933B25E65E0");
+    static const Guid p3_guid("F2E0066A-3BC5-44F2-A18C-57C63481988D");
+    static const Guid tlp2_guid("2EDB14B9-0B61-4014-90C2-20AEB7AAFEBE");
+    static const Guid tlp1_guid("8831D2A9-F4B6-40BE-97C1-4BD7F9468267");
+    static const Guid p0_guid2("2F97E0FB-7C93-4616-B322-1A01BF65D331");
+    static const Guid p0_guid1("EA6EA1A5-16FC-4DBF-896E-D933B25E65E0");
 
     if( compareClassGuid(token,  p3_guid ) ){
        std::unique_ptr< TrigElectronContainer_p3 > col_vect( poolReadObject< TrigElectronContainer_p3 >(token) );

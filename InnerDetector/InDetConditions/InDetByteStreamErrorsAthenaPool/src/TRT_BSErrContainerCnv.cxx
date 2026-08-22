@@ -23,8 +23,8 @@ TRT_BSErrContainerCnv::createPersistent(TRT_BSErrContainer* transCont) {
 TRT_BSErrContainer* 
 TRT_BSErrContainerCnv::createTransient(const Token* token) {
   MsgStream log(msgSvc(), "TRT_BSErrContainerCnv" ); 
-  static const pool::Guid   p1_guid("D461AC01-02CA-4A9E-886B-24EC14309121");
-  static const pool::Guid   p2_guid("A815E78C-BB68-4CA5-9B95-739E9B47043A");
+  static const Guid   p1_guid("D461AC01-02CA-4A9E-886B-24EC14309121");
+  static const Guid   p2_guid("A815E78C-BB68-4CA5-9B95-739E9B47043A");
   
   if( compareClassGuid(token, p2_guid) ) {
     // using unique_ptr ensures deletion of the persistent object

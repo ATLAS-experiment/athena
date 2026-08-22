@@ -21,7 +21,7 @@ ZdcRawChannelCollection* ZdcRawChannelCollectionCnv::createTransient(const Token
 
     ZdcRawChannelCollection       *trans_cont(nullptr);
 
-    static const pool::Guid   p1_guid("A2BDA733-7A0A-459D-9237-33DFF3DC9982");
+    static const Guid   p1_guid("A2BDA733-7A0A-459D-9237-33DFF3DC9982");
     if( this->compareClassGuid(token, p1_guid)) {
       std::unique_ptr< ZdcRawChannelCollection_p1 >   cont( this->poolReadObject< ZdcRawChannelCollection_p1 >(token) );
       trans_cont = converter_p1.createTransient( cont.get(), mlog );

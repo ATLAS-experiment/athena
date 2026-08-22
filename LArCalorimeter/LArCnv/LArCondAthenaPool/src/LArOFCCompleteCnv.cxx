@@ -25,8 +25,8 @@ LArOFCCompleteCnv::createPersistent (LArOFCTransType* transObj)
 
 LArConditionsSubset<LArOFCP1>*
 LArOFCCompleteCnv::createTransient(const Token* token) {
-    static const pool::Guid   p1_guid("0A1DE2E2-90E4-4A24-BC6E-2092EDC9FDF6");
-    static const pool::Guid   p0_guid("3E5389EF-D163-4099-91D9-D3F0EE06C1CD");
+    static const Guid   p1_guid("0A1DE2E2-90E4-4A24-BC6E-2092EDC9FDF6");
+    static const Guid   p0_guid("3E5389EF-D163-4099-91D9-D3F0EE06C1CD");
 
     if( compareClassGuid(token, p1_guid) ) {
         // using unique_ptr ensures deletion of the persistent object

@@ -20,8 +20,8 @@ TileBeamElemContainer* TileBeamElemContainerCnv::createTransient(const Token* to
 
     TileBeamElemContainer       *trans_cont(0);
 
-    static const pool::Guid   p1_guid("CF8DE6AB-8E15-4B5F-881B-39B736EAB4E0");
-    static const pool::Guid   p0_guid("7FCE8F30-B59E-41E6-9A66-0DCD6134552E");
+    static const Guid   p1_guid("CF8DE6AB-8E15-4B5F-881B-39B736EAB4E0");
+    static const Guid   p0_guid("7FCE8F30-B59E-41E6-9A66-0DCD6134552E");
 
     if( this->compareClassGuid(token, p1_guid)) {
         std::unique_ptr< TileBeamElemContainer_p1 >   cont( this->poolReadObject< TileBeamElemContainer_p1 >(token) );

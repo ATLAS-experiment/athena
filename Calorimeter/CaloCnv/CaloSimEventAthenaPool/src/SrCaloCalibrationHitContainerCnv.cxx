@@ -22,7 +22,7 @@ SrCaloCalibrationHitContainerCnv::createTransient(const Token* token) {
   SrCaloCalibrationHitContainerCnv_p1 converter_p1;
 
   SrCaloCalibrationHitContainer* trans_cont(0);
-  static const pool::Guid p1_guid("A435D71D-5A7B-4B96-AE4A-F245D14432D9");
+  static const Guid p1_guid("A435D71D-5A7B-4B96-AE4A-F245D14432D9");
 
   if (this->compareClassGuid(token, p1_guid)) {
     std::unique_ptr<SrCaloCalibrationHitContainer_p1> col_vect(

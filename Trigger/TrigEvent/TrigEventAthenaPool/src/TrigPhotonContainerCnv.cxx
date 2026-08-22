@@ -28,11 +28,11 @@ TrigPhotonContainer * TrigPhotonContainerCnv::createTransient(const Token* token
   
   mlog << MSG::DEBUG << "TrigPhotonContainerCnv::createTransient called" << endmsg;
 
-  static const pool::Guid p3_guid( "40192614-E7C5-4BAF-825F-CB9F3E023315" );
-  static const pool::Guid tlp2_guid( "96487DD7-9CF7-4351-BF33-011E6CA515F0" );
-  static const pool::Guid tlp1_guid( "7F4B4EF4-D7F6-4208-B522-4003A34EC664" );
-  static const pool::Guid p0_guid2( "65F1CCA1-B672-4E26-B74E-397CE6C8F617" );
-  static const pool::Guid p0_guid( "CB04DF3E-C363-49E3-9BE1-AD25230AB1EA" );
+  static const Guid p3_guid( "40192614-E7C5-4BAF-825F-CB9F3E023315" );
+  static const Guid tlp2_guid( "96487DD7-9CF7-4351-BF33-011E6CA515F0" );
+  static const Guid tlp1_guid( "7F4B4EF4-D7F6-4208-B522-4003A34EC664" );
+  static const Guid p0_guid2( "65F1CCA1-B672-4E26-B74E-397CE6C8F617" );
+  static const Guid p0_guid( "CB04DF3E-C363-49E3-9BE1-AD25230AB1EA" );
 
   if( compareClassGuid(token,  p3_guid ) ){
          std::unique_ptr< TrigPhotonContainer_p3 > col_vect( poolReadObject< TrigPhotonContainer_p3 >(token) );

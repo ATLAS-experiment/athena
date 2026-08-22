@@ -304,8 +304,13 @@ StatusCode MetaDataSvc::prepareOutput(const std::string& outputName)
 }
 
 
-StatusCode MetaDataSvc::shmProxy(const std::string& filename)
+StatusCode MetaDataSvc::shmProxy(const std::string& tokenStr)
 {
+   if (m_addrCrtr.name() != "AthenaPoolSharedIOCnvSvc") {
+      ATH_MSG_ERROR("shmProxy failed: unsupported AddressCreator " << m_addrCrtr.name());
+      return StatusCode::FAILURE;
+   }
+
    if (!m_clearedInputDataStore) {
       ATH_CHECK(m_inputDataStore->clearStore(true));
       m_clearedInputDataStore = true;
@@ -314,7 +319,8 @@ StatusCode MetaDataSvc::shmProxy(const std::string& filename)
       ATH_CHECK(m_outputDataStore->clearStore(true));
       m_clearedOutputDataStore = true;
    }
-   ATH_CHECK(addProxyToInputMetaDataStore(filename));
+
+   ATH_CHECK(addProxyToInputMetaDataStore(tokenStr));
    return StatusCode::SUCCESS;
 }
 
