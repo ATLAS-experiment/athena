@@ -1,5 +1,5 @@
 /* 
-   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #include "MissingETMonitoring/METMonitorAlgorithm.h" 
 #include "xAODMissingET/MissingET.h" 
@@ -164,7 +164,7 @@ StatusCode METMonitoringAlg::fillHistograms( const EventContext& ctx ) const {
        name = "MET_" +calString + "_phi";
        auto phi = Monitored::Scalar<double>(name,-1.0);
        name = "MET_" +calString + "_sumet";
-       auto sumet = Monitored::Scalar<double>(name,-1.0);
+       auto sumet = Monitored::Scalar<double>(std::move(name),-1.0);
        ex = xmetCal->mpx() / GeV;
        ey = xmetCal->mpy() / GeV;
        et = xmetCal->met() / GeV;
