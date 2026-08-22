@@ -104,12 +104,24 @@ struct TgcL0ValidationCandidateBlock {
   std::vector<int> truthIndex;
 };
 
+/** @brief TGC Sector Logic words and their placeholder metadata. */
+struct TgcL0ValidationSectorLogicBlock {
+  std::vector<std::uint32_t> inputCandidateIndex;
+  std::vector<std::uint32_t> candWord;
+  std::vector<std::uint32_t> candExtraWord;
+  std::vector<std::uint16_t> boardId;
+  std::vector<std::uint16_t> fiberId;
+  std::vector<int> bcidOffset;
+  std::vector<std::uint16_t> veto;
+};
+
 /** @brief ROOT-independent validation data for one event. */
 struct TgcL0ValidationEvent {
   TgcL0ValidationEventInfo event;
   TgcL0ValidationTruthBlock truth;
   TgcL0ValidationSegmentBlock segments;
   TgcL0ValidationCandidateBlock candidates;
+  TgcL0ValidationSectorLogicBlock sectorLogic;
 };
 
 }  // namespace L0Muon

@@ -12,16 +12,20 @@
 #include "StoreGate/ReadHandleKey.h"
 #include "StoreGate/WriteHandleKey.h"
 #include "TrkExInterfaces/IExtrapolator.h"
+#include "xAODL0MuonCand/TGCCandDataContainer.h"
+#include "xAODTrigL0Muon/SectorLogicCandDataContainer.h"
 
 #include <cstdint>
 #include <vector>
 
 namespace L0Muon {
 
-/** @brief Calculates event-local TGC truth-validation quantities.
+/** @brief Calculates event-local TGC validation quantities.
  *
  * The algorithm has no ROOT or histogram dependency. Its transient output can
- * be consumed by replaceable validation-output backends.
+ * be consumed by replaceable validation-output backends. The optional Sector
+ * Logic check validates the downstream conversion without affecting normal
+ * truth-validation users.
  */
 class TgcL0TruthValidationAlg final : public AthReentrantAlgorithm {
  public:
@@ -39,6 +43,12 @@ class TgcL0TruthValidationAlg final : public AthReentrantAlgorithm {
       "Projection segments published by reconstruction"};
   SG::ReadHandleKey<McEventCollection> m_truthEventKey{
       this, "TruthEventKey", "TruthEvent", "Input truth-event collection"};
+  SG::ReadHandleKey<xAOD::TGCCandDataContainer> m_finalCandidateKey{
+      this, "FinalCandidateKey", "L0MuonTGCCandData",
+      "Final TGC candidates sent to L0MuonEndcap"};
+  SG::ReadHandleKey<xAOD::SectorLogicCandDataContainer> m_sectorLogicKey{
+      this, "SectorLogicKey", "L0MuonTGCSectorLogicCandData",
+      "TGC Sector Logic candidates sent towards MuCTPI"};
   SG::WriteHandleKey<TgcL0ValidationEvent> m_outputKey{
       this, "OutputKey", "L0MuonTGCValidationEvent",
       "Calculated event-local truth-validation data"};
@@ -48,6 +58,9 @@ class TgcL0TruthValidationAlg final : public AthReentrantAlgorithm {
   Gaudi::Property<float> m_maxMeanDeltaR{
       this, "TruthMatchMaxMeanDeltaR", 0.08F,
       "Maximum station-averaged deltaR for truth matching"};
+  Gaudi::Property<bool> m_validateSectorLogic{
+      this, "ValidateSectorLogic", false,
+      "Validate and publish the TGC Sector Logic conversion"};
   Gaudi::Property<float> m_maxWireSegmentDeltaEta{
       this, "TruthWireSegmentMaxDeltaEta", 0.08F,
       "Maximum |delta eta| for truth-to-wire-segment matching"};
