@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // METEgammaAssociator.cxx 
@@ -628,19 +628,12 @@ namespace met {
           if( !track->summaryValue(N_innermostHit, numberOfInnermostPixelLayerHits) ) {
             ATH_MSG_WARNING("Track summary retrieval failed for 'numberOfInnermostPixelLayerHits'");
             return StatusCode::FAILURE;
-            if(N_innermostHit==0 ) {
-              ATH_MSG_VERBOSE("Accept nearby track w/o innermost hit");
-              tracklist.insert(track);
-            }
           }
         } else if(expect_nextToInnermostHit) {
           if( !track->summaryValue(N_nextToInnermostHit, numberOfNextToInnermostPixelLayerHits) ) {
             ATH_MSG_WARNING("Track summary retrieval failed for 'numberOfNextToInnermostPixelLayerHits'");
             return StatusCode::FAILURE;
-            if(N_nextToInnermostHit==0 ) {
-              ATH_MSG_VERBOSE("Accept nearby track w/o next-to-innermost hit");
-              tracklist.insert(track);
-            }
+            
           }
         }
         

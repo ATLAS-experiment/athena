@@ -26,19 +26,18 @@ namespace met {
 
   METMakerAlg::METMakerAlg(const std::string& name,
 			   ISvcLocator* pSvcLocator )
-    : ::AthReentrantAlgorithm( name, pSvcLocator ),
+     : ::AthReentrantAlgorithm( name, pSvcLocator ),
     m_metKey(""),
     m_metmaker(this),  
     m_muonSelTool(this,""),
     m_elecSelLHTool(this,""),
     m_photonSelIsEMTool(this,""),
     m_tauSelTool(this,"")
-
  {
     declareProperty( "Maker",          m_metmaker                        );
     declareProperty( "METCoreName",    m_CoreMetKey  = "MET_Core"        );
-    declareProperty("METName",         m_metKey = std::string("MET_Reference"),"MET container");
-    declareProperty("METMapName",      m_metMapKey = "METAssoc" );
+    declareProperty( "METName",         m_metKey = std::string("MET_Reference"),"MET container");
+    declareProperty( "METMapName",      m_metMapKey = "METAssoc" );
 
     declareProperty( "METSoftClName",  m_softclname  = "SoftClus"        );
     declareProperty( "METSoftTrkName", m_softtrkname = "PVSoftTrk"       );
