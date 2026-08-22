@@ -21,9 +21,10 @@
 
 #include <variant>
 
-using namespace Acts::UnitLiterals;
 
 namespace ActsTrk {
+  using namespace Acts::UnitLiterals;
+
   /** @brief Tool to extrapolate bound track parameters through the Acts::TrackingGeometry.
    *         Extrapolation can be either done towards a target surface, 
     */
