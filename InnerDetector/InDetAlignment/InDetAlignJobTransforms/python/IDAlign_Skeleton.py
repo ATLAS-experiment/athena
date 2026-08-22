@@ -232,7 +232,7 @@ def configureITkFlags(runArgs, flags):
 
 
     if runArgs.localgeo:
-        flags.ITk.Geometry.AllLocal = False      # Original: True
+        flags.ITk.Geometry.AllLocal = True      
 
     if not flags.Input.isMC and runArgs.isCosmics:
         from AthenaConfiguration.Enums import BeamType
@@ -412,27 +412,21 @@ def fromRunArgsInDet(runArgs, flags):
     import sys
     sys.exit(sc.isFailure())
 
-def isITkGeometryFromInput(runArgs):
-    if (getattr(runArgs, "inputRDOFile", None) is None):
-        return False
-    else:
-        return "RUN4" in str(runArgs.inputRDOFile)
-
 
 def isITkGeometry(flags):
     return flags.GeoModel.Run > LHCPeriod.Run3
 
 def applyDetectorDefaults(runArgs, flags):
 
+    isITk = isITkGeometry(flags)
+
     if getattr(runArgs, "atlasVersion", None) is None:
-        if isITkGeometryFromInput(runArgs):
+        if isITk:
             runArgs.atlasVersion = defaultGeometryTags.RUN4
         else:
             runArgs.atlasVersion = defaultGeometryTags.RUN3
     
-    flags.GeoModel.AtlasVersion = runArgs.atlasVersion
-    
-    isITk = isITkGeometry(flags)       
+    flags.GeoModel.AtlasVersion = runArgs.atlasVersion    
 
     if getattr(runArgs, "inputTracksCollection", None) is None:
         runArgs.inputTracksCollection = (
@@ -458,7 +452,6 @@ def applyDetectorDefaults(runArgs, flags):
 
 
 def fromRunArgs(runArgs):
-
 
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
     flags = initConfigFlags()
