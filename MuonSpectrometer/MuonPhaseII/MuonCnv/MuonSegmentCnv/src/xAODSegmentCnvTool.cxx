@@ -13,8 +13,12 @@
 #include "ActsGeoUtils/SurfacePlacement.h"
 #include "Acts/Geometry/TrackingGeometry.hpp"
 #include "Acts/Surfaces/PlaneSurface.hpp"
+#include "Acts/Definitions/Units.hpp"
 
 namespace MuonR4{
+
+   using namespace Acts::UnitLiterals;
+
 
     StatusCode xAODSegmentCnvTool::initialize() {
         ATH_CHECK(m_idHelperSvc.retrieve());
