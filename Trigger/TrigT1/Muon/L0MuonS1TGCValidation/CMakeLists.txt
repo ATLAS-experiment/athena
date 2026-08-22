@@ -24,14 +24,16 @@ atlas_add_component( L0MuonS1TGCValidation
     TrkEventPrimitives
     TrkExInterfaces
     TrkParameters
-    TrkSurfaces )
+    TrkSurfaces
+    xAODL0MuonCand
+    xAODTrigL0Muon )
 
 # Protect the ROOT-independent validation-data contract with a lightweight
 # unit test.  This test has no ROOT, extrapolator, or reconstruction dependency.
 atlas_add_test( TgcL0ValidationEventCheck_test
   SOURCES test/TgcL0ValidationEventCheck_test.cxx
   LINK_LIBRARIES L0MuonS1TGCValidationLib
-  POST_EXEC_SCRIPT nopost.sh )
+  POST_EXEC_SCRIPT noerror.sh )
 
 atlas_add_test( L0MuonS1TGCValidationConfig
   SCRIPT python -m L0MuonS1TGCValidation.L0MuonS1TGCValidationConfig --nEvents 1

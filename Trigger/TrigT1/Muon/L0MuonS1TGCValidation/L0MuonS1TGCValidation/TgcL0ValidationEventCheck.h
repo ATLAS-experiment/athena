@@ -26,6 +26,7 @@ inline TgcL0ValidationCheckResult checkTgcL0ValidationEvent(
   const std::size_t nTruth = event.truth.pdgId.size();
   const std::size_t nSegments = event.segments.subdetectorId.size();
   const std::size_t nCandidates = event.candidates.subdetectorId.size();
+  const std::size_t nSectorLogic = event.sectorLogic.candWord.size();
 
   const auto invalid = [](std::string message) {
     return TgcL0ValidationCheckResult{false, std::move(message)};
@@ -49,6 +50,13 @@ inline TgcL0ValidationCheckResult checkTgcL0ValidationEvent(
     return size == nCandidates
                ? TgcL0ValidationCheckResult{}
                : invalid(std::string{"Candidate block size mismatch for "} +
+                         field);
+  };
+  const auto checkSectorLogicSize = [&](const std::size_t size,
+                                        const char* field) {
+    return size == nSectorLogic
+               ? TgcL0ValidationCheckResult{}
+               : invalid(std::string{"Sector Logic block size mismatch for "} +
                          field);
   };
 
@@ -130,6 +138,21 @@ inline TgcL0ValidationCheckResult checkTgcL0ValidationEvent(
   TGC_CHECK_CANDIDATE_SIZE(truthIndex);
 #undef TGC_CHECK_CANDIDATE_SIZE
 
+#define TGC_CHECK_SECTOR_LOGIC_SIZE(FIELD)              \
+  do {                                                  \
+    const auto result = checkSectorLogicSize(           \
+        event.sectorLogic.FIELD.size(), #FIELD);        \
+    if (!result.valid) return result;                   \
+  } while (false)
+
+  TGC_CHECK_SECTOR_LOGIC_SIZE(inputCandidateIndex);
+  TGC_CHECK_SECTOR_LOGIC_SIZE(candExtraWord);
+  TGC_CHECK_SECTOR_LOGIC_SIZE(boardId);
+  TGC_CHECK_SECTOR_LOGIC_SIZE(fiberId);
+  TGC_CHECK_SECTOR_LOGIC_SIZE(bcidOffset);
+  TGC_CHECK_SECTOR_LOGIC_SIZE(veto);
+#undef TGC_CHECK_SECTOR_LOGIC_SIZE
+
   const auto wireProjection =
       static_cast<std::uint8_t>(TgcL0ValidationProjection::Wire);
   const auto stripProjection =
@@ -166,6 +189,20 @@ inline TgcL0ValidationCheckResult checkTgcL0ValidationEvent(
     const int truth = event.candidates.truthIndex[candidate];
     if (truth >= 0 && static_cast<std::size_t>(truth) >= nTruth) {
       return invalid("Candidate truth index is out of range");
+    }
+  }
+
+  for (std::size_t candidate = 0U; candidate < nSectorLogic; ++candidate) {
+    if (candidate != 0U &&
+        event.sectorLogic.inputCandidateIndex[candidate] <=
+            event.sectorLogic.inputCandidateIndex[candidate - 1U]) {
+      return invalid("Sector Logic input-candidate indices are not ordered");
+    }
+    if (event.sectorLogic.boardId[candidate] != 0U ||
+        event.sectorLogic.fiberId[candidate] != 0U ||
+        event.sectorLogic.bcidOffset[candidate] != 0 ||
+        event.sectorLogic.veto[candidate] != 0U) {
+      return invalid("Sector Logic placeholder metadata is not zero");
     }
   }
 

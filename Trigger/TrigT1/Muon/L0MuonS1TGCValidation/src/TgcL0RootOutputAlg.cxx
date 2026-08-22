@@ -104,6 +104,15 @@ void TgcL0RootOutputAlg::copyToBranches(
   m_candidateCharge = input.candidates.charge;
   m_candidateGoodMagneticField = input.candidates.goodMagneticField;
   m_candidateTruthIndex = input.candidates.truthIndex;
+
+  m_sectorLogicInputCandidateIndex =
+      input.sectorLogic.inputCandidateIndex;
+  m_sectorLogicCandWord = input.sectorLogic.candWord;
+  m_sectorLogicCandExtraWord = input.sectorLogic.candExtraWord;
+  m_sectorLogicBoardId = input.sectorLogic.boardId;
+  m_sectorLogicFiberId = input.sectorLogic.fiberId;
+  m_sectorLogicBcidOffset = input.sectorLogic.bcidOffset;
+  m_sectorLogicVeto = input.sectorLogic.veto;
 }
 
 }  // namespace L0Muon

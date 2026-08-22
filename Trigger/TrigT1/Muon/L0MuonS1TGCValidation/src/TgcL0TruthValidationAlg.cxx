@@ -107,6 +107,23 @@ struct SegmentMatch {
   std::size_t segment{0U};
 };
 
+bool matchesTgcFields(const xAOD::TGCCandData& input,
+                      const xAOD::SectorLogicCandData& output) {
+  return output.pT() == input.pt() &&
+         output.charge() == input.candCharge() &&
+         output.rawPhi() == input.phi() &&
+         output.rawEta() == input.eta() &&
+         output.ptThresh() == input.threshold() &&
+         output.TCID() == input.tcId() &&
+         output.coinType() == input.coinType();
+}
+
+bool hasOnlyTgcFields(const xAOD::SectorLogicCandData& candidate) {
+  return candidate.isMDT() == 0U && candidate.mdtFlag() == 0U &&
+         candidate.numMDTSeg() == 0U && candidate.mdtSegQual() == 0U &&
+         candidate.tileCoin() == 0U && candidate.exotTrig() == 0U;
+}
+
 
 }  // namespace
 
@@ -116,6 +133,8 @@ StatusCode TgcL0TruthValidationAlg::initialize() {
   ATH_CHECK(m_candidateKey.initialize());
   ATH_CHECK(m_segmentKey.initialize());
   ATH_CHECK(m_truthEventKey.initialize());
+  ATH_CHECK(m_finalCandidateKey.initialize(m_validateSectorLogic));
+  ATH_CHECK(m_sectorLogicKey.initialize(m_validateSectorLogic));
   ATH_CHECK(m_outputKey.initialize());
   ATH_CHECK(m_extrapolator.retrieve());
 
@@ -151,12 +170,84 @@ StatusCode TgcL0TruthValidationAlg::execute(const EventContext& ctx) const {
     ATH_MSG_ERROR("Failed to retrieve " << m_truthEventKey.fullKey());
     return StatusCode::FAILURE;
   }
-
   auto output = std::make_unique<TgcL0ValidationEvent>();
   output->event.runNumber = ctx.eventID().run_number();
   output->event.eventNumber = ctx.eventID().event_number();
   output->event.lumiBlock = ctx.eventID().lumi_block();
   output->event.bcid = ctx.eventID().bunch_crossing_id();
+
+  if (m_validateSectorLogic) {
+    SG::ReadHandle<xAOD::TGCCandDataContainer> finalCandidates{
+        m_finalCandidateKey, ctx};
+    if (!finalCandidates.isValid()) {
+      ATH_MSG_ERROR("Failed to retrieve " << m_finalCandidateKey.fullKey());
+      return StatusCode::FAILURE;
+    }
+    SG::ReadHandle<xAOD::SectorLogicCandDataContainer> sectorLogicCandidates{
+        m_sectorLogicKey, ctx};
+    if (!sectorLogicCandidates.isValid()) {
+      ATH_MSG_ERROR("Failed to retrieve " << m_sectorLogicKey.fullKey());
+      return StatusCode::FAILURE;
+    }
+
+    std::size_t sectorLogicIndex{0U};
+    for (std::size_t inputIndex = 0U; inputIndex < finalCandidates->size();
+         ++inputIndex) {
+      const xAOD::TGCCandData* inputCandidate = (*finalCandidates)[inputIndex];
+      if (inputCandidate == nullptr) {
+        ATH_MSG_ERROR("Null TGC candidate at index " << inputIndex);
+        return StatusCode::FAILURE;
+      }
+      if (inputCandidate->tcId() == 0U) continue;
+      if (sectorLogicIndex >= sectorLogicCandidates->size()) {
+        ATH_MSG_ERROR(
+            "Fewer Sector Logic candidates than non-empty TGC candidates");
+        return StatusCode::FAILURE;
+      }
+      const xAOD::SectorLogicCandData* sectorLogicCandidate =
+          (*sectorLogicCandidates)[sectorLogicIndex];
+      if (sectorLogicCandidate == nullptr) {
+        ATH_MSG_ERROR("Null Sector Logic candidate at index "
+                      << sectorLogicIndex);
+        return StatusCode::FAILURE;
+      }
+      if (!matchesTgcFields(*inputCandidate, *sectorLogicCandidate)) {
+        ATH_MSG_ERROR("Sector Logic candidate " << sectorLogicIndex
+                      << " does not preserve TGC candidate " << inputIndex);
+        return StatusCode::FAILURE;
+      }
+      if (!hasOnlyTgcFields(*sectorLogicCandidate)) {
+        ATH_MSG_ERROR("Sector Logic candidate " << sectorLogicIndex
+                      << " contains non-TGC payload");
+        return StatusCode::FAILURE;
+      }
+      if (sectorLogicCandidate->boardID() != 0U ||
+          sectorLogicCandidate->fiberID() != 0U ||
+          sectorLogicCandidate->BCIDOffset() != 0 ||
+          sectorLogicCandidate->veto() != 0U) {
+        ATH_MSG_ERROR("Sector Logic candidate " << sectorLogicIndex
+                      << " has unexpected placeholder metadata");
+        return StatusCode::FAILURE;
+      }
+      output->sectorLogic.inputCandidateIndex.emplace_back(
+          static_cast<std::uint32_t>(inputIndex));
+      output->sectorLogic.candWord.emplace_back(
+          sectorLogicCandidate->candWord());
+      output->sectorLogic.candExtraWord.emplace_back(
+          sectorLogicCandidate->candExtraWord());
+      output->sectorLogic.boardId.emplace_back(sectorLogicCandidate->boardID());
+      output->sectorLogic.fiberId.emplace_back(sectorLogicCandidate->fiberID());
+      output->sectorLogic.bcidOffset.emplace_back(
+          sectorLogicCandidate->BCIDOffset());
+      output->sectorLogic.veto.emplace_back(sectorLogicCandidate->veto());
+      ++sectorLogicIndex;
+    }
+    if (sectorLogicIndex != sectorLogicCandidates->size()) {
+      ATH_MSG_ERROR(
+          "More Sector Logic candidates than non-empty TGC candidates");
+      return StatusCode::FAILURE;
+    }
+  }
 
   const auto processParticle = [&](const auto& particle) -> StatusCode {
     if (!particle || std::abs(particle->pdg_id()) != 13 ||
