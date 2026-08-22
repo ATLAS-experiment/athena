@@ -1865,7 +1865,7 @@
   <x title="reco_{d_{0}} - truth_{d_{0}} [mm]" n="100" lo="-&D0RES;" hi="&D0RES;"/>
   <y title="Number of Entries"/>
 </h>
-<h id="res_z0" type="TH1F" title="reco_{z0} - truth_{z_{0}}">
+<h id="res_z0" type="TH1F" title="reco_{z_{0}} - truth_{z_{0}}">
   <x title="reco_{z_{0}} - truth_{z_{0}} [mm]" n="100" lo="-&Z0RES;" hi="&Z0RES;"/>
   <y title="Number of Entries"/>
 </h>
