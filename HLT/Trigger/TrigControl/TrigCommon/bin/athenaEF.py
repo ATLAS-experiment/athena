@@ -1249,7 +1249,6 @@ def main():
 
    # Update args and set athena flags
    from AthenaConfiguration.AllConfigFlags import initConfigFlags
-   from TrigPSC import PscConfig
    from TrigServices.TriggerUnixStandardSetup import setDefaultOnlineFlags
    
    # Create flags with online defaults
@@ -1276,22 +1275,21 @@ def main():
 
    update_run_params(args, flags)
 
+   # If the HLT PSK was given on the command line OR from OKS (--online-environment), ignore what is
+   # stored in COOL and read that key directly from the DB (ATR-25974).
+   # This is needed because COOL may point to a different HLTPSK for the forced run number.
+   # NB: must be evaluated before update_trigconf_keys, which fills args.hltpsk from COOL/OKS.
+   force_psk = args.use_database and ((args.hltpsk is not None) or args.online_environment)
+
    if args.use_database:
-      # If HLTPSK was given on the command line OR from OKS (--online-environment),
-      # we ignore what is stored in COOL and use the specified key directly from the DB.
-      # This is needed because COOL may point to a different HLTPSK for the forced run number.
-      PscConfig.forcePSK = (args.hltpsk is not None) or args.online_environment
       # Read trigger config keys from COOL/OKS if not specified
       update_trigconf_keys(args, flags)
 
    # Fill flags from command line (if not running from DB/JSON)
    if not args.use_database and args.jobOptions and not args.jobOptions.endswith('.json'):
-      PscConfig.unparsedArguments = unparsed_args
+      AthHLT.unparsedArguments = unparsed_args
       for flag_arg in unparsed_args:
          flags.fillFromString(flag_arg)
-
-   PscConfig.interactive = args.interactive
-   PscConfig.exitAfterDump = args.dump_config_exit
 
    # NOTE: Do NOT set flags.Input.Files here!
    # We keep Input.Files=[] during configuration to ensure the configuration
@@ -1356,8 +1354,7 @@ def main():
       # Run number used for the conditions IOV lookup 
       overrides.set('HltEventLoopMgr.forceRunNumber', args.conditions_run)
 
-   # If HLT PSK is set on command line, read it from DB instead of COOL (ATR-25974).
-   if PscConfig.forcePSK:
+   if force_psk:
       overrides.set('HLTPrescaleCondAlg.Source', 'DB')
 
    # Histogram service:  
@@ -1473,7 +1470,7 @@ def main():
 
       # Re-exec from the JSON. Replaces the process image freeing up the configuration heap.
       log.info("Configuration dumped to %s.json. Re-exec...", fname)
-      AthHLT.reload_from_json(f"{fname}.json", suppress_args=PscConfig.unparsedArguments + ['--dump-config'], jobOptions=args.jobOptions)
+      AthHLT.reload_from_json(f"{fname}.json", suppress_args=unparsed_args + ['--dump-config'], jobOptions=args.jobOptions)
       
    # Execute postcommands
    if args.postcommand:
