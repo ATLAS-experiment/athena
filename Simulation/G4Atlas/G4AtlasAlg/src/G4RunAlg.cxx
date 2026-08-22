@@ -190,7 +190,7 @@ StatusCode G4RunAlg::execute(const EventContext& ctx)
     ATH_MSG_DEBUG("Pushing Athena event " << ctx.eventID().event_number() << " onto event buffer");
     m_g4RunTool->PushEvent(std::move(eventInfo));
     ATH_MSG_DEBUG("Buffer size=" << m_g4RunTool->Size() << ", waiting for event to finish");
-    //G4 should tell Athena in an EndOfEventAction that the simulation of the event is done
+    // G4 tells Athena after the worker run manager has terminated the event.
     syncInterface->WaitStatusDone();
 
     if (syncInterface->EventAborted()) {

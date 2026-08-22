@@ -31,11 +31,12 @@ auto G4EventSynchronizationInterface::Status() const -> EventStatus
   return m_status;
 }
 
-void G4EventSynchronizationInterface::SetStatus(const EventStatus& status)
+void G4EventSynchronizationInterface::Complete(bool eventAborted)
 {
   {
     std::scoped_lock lk(m_mutex);
-    m_status=status;
+    m_event_aborted = eventAborted;
+    m_status = EventStatus::Done;
   }
   m_cv.notify_all();
 }
