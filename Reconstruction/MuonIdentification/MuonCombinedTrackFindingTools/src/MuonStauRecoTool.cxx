@@ -235,7 +235,7 @@ namespace MuonCombined {
         }
 
         // set candidates to the refinedCandidates
-        candidates = refinedCandidates;
+        candidates = std::move(refinedCandidates);
 
         // print results afer refineCandidate
         if (m_doSummary || msgLvl(MSG::DEBUG)) {
@@ -430,7 +430,7 @@ namespace MuonCombined {
                     clVec.insert(clVec.end(), clusters.begin(), clusters.end());
                 }
             } else if (m_idHelperSvc->isCsc(id)) {
-                const Muon::CscClusterOnTrack* csc = dynamic_cast<const Muon::CscClusterOnTrack*>(meas);
+                const Muon::CscClusterOnTrack* csc = static_cast<const Muon::CscClusterOnTrack*>(meas);
 
                 MuGirlNS::StauHitTechnology tech = MuGirlNS::CSC_STAU_HIT;
                 float distance = pars->position().mag();
@@ -450,7 +450,7 @@ namespace MuonCombined {
         }
 
         auto insertRpcs = [betaSeed, this](const Trk::TrackParameters& pars, const RpcClVec& clusters,
-                                           MuonStauRecoTool::Candidate& candidate, Muon::TimePointBetaFitter::HitVec& hits) {
+                                           MuonStauRecoTool::Candidate& cand, Muon::TimePointBetaFitter::HitVec& hits) {
             if (clusters.empty()) return;
 
             std::vector<const Muon::MuonClusterOnTrack*> calibratedClusters;
@@ -487,7 +487,7 @@ namespace MuonCombined {
             if (std::abs(beta - betaSeed) > m_mdttBetaAssociationCut) return;
 
             hits.push_back(Muon::TimePointBetaFitter::Hit(distance, time, er));
-            candidate.stauHits.push_back(MuGirlNS::StauHit(tech, time + tof, ix, iy, iz, id, ie, er, sh, isEta, propTime));
+            cand.stauHits.push_back(MuGirlNS::StauHit(tech, time + tof, ix, iy, iz, id, ie, er, sh, isEta, propTime));
         };
 
         // get RPC timing per chamber
@@ -848,7 +848,7 @@ namespace MuonCombined {
         }
 
         // remove all candidates that were not combined
-        candidates = combinedCandidates;
+        candidates = std::move(combinedCandidates);
 
         // print results afer combineCandidate
         if (m_doSummary || msgLvl(MSG::DEBUG)) {
@@ -996,7 +996,7 @@ namespace MuonCombined {
 
                     // update the candidate
                     theCandidate->hits.insert(theCandidate->hits.end(), newhits.begin(), newhits.end());
-                    theCandidate->layerDataVec.push_back(newLayerData);
+                    theCandidate->layerDataVec.push_back(std::move(newLayerData));
                     usedMaximumData.insert(maximumData.get());
 
                     ATH_MSG_DEBUG(" adding maximumData: candidate hits " << theCandidate->hits.size() << " LayerDataVec "
@@ -1162,15 +1162,15 @@ namespace MuonCombined {
         const std::vector<std::shared_ptr<const Muon::MuonClusterOnTrack>>& phiClusterOnTracks = maximumData.phiClusterOnTracks;
 
         // lambda to handle calibration and selection of MDTs
-        auto handleMdt = [intersection, muonPRDSelectionTool](const Muon::MdtPrepData& prd,
+        auto handleMdt = [intersection, &muonPRDSelectionTool](const Muon::MdtPrepData& prd,
                                                               std::vector<const Muon::MdtDriftCircleOnTrack*>& mdts,
-                                                              float beta) {
-            const Muon::MdtDriftCircleOnTrack* mdt = muonPRDSelectionTool->calibrateAndSelect(intersection, prd, beta);
+                                                              float b) {
+            const Muon::MdtDriftCircleOnTrack* mdt = muonPRDSelectionTool->calibrateAndSelect(intersection, prd, b);
             if (mdt) mdts.push_back(mdt);
         };
 
         // lambda to handle calibration and selection of clusters
-        auto handleCluster = [intersection, muonPRDSelectionTool](const Muon::MuonCluster& prd,
+        auto handleCluster = [intersection, &muonPRDSelectionTool](const Muon::MuonCluster& prd,
                                                                   std::vector<const Muon::MuonClusterOnTrack*>& clusters) {
             const Muon::MuonClusterOnTrack* cluster = muonPRDSelectionTool->calibrateAndSelect(intersection, prd);
             if (cluster) clusters.push_back(cluster);
@@ -1313,7 +1313,7 @@ namespace MuonCombined {
                     const Muon::RpcClusterOnTrack* rcl = dynamic_cast<const Muon::RpcClusterOnTrack*>(cl);
                     if (rcl) rpcTimeMeasurement.rpcClusters.push_back(std::shared_ptr<const Muon::RpcClusterOnTrack>(rcl));
                 }
-                rpcTimeMeasurements.push_back(rpcTimeMeasurement);
+                rpcTimeMeasurements.push_back(std::move(rpcTimeMeasurement));
             } else {
                 // if no time measurement was created we need to clean up the memory
                 for (const auto* cl : clusters) delete cl;
