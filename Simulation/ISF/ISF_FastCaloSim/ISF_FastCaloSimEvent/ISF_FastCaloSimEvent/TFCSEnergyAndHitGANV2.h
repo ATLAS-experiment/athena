@@ -92,9 +92,9 @@ public:
                         const TFCSTruthState *truth = nullptr,
                         const TFCSExtrapolationState *extrapol = nullptr);
 
-  // Called immediately after being read to check the integrity
-  // of histograms.  See ATLASSIM-7031.
-  virtual void checkHists() override;
+  // Called immediately after being read to fix histograms that erroneously
+  // have kIsOnHeap set.  See ATLASSIM-7031.
+  virtual void fixHists() override;
 
 
 protected:
