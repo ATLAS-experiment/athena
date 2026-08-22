@@ -159,13 +159,17 @@ G4bool FatrasG4::IsApplicable(const G4ParticleDefinition& particleType)
 
 G4bool FatrasG4::ModelTrigger(const G4FastTrack& fastTrack)
 {
+  // IsApplicable also accepts electrons and positrons, so that Geant4 attaches
+  // the fast simulation process to them inside the region. The model never acts
+  // on them, so they are declined before anything else is done.
+  const G4ParticleDefinition* definition =
+      fastTrack.GetPrimaryTrack() -> GetDefinition();
+  if (definition == G4Electron::ElectronDefinition() ||
+      definition == G4Positron::PositronDefinition())
+    return false;
+
   // No conversion until one of the triggers below fires
   m_doConversion = false;
-
-  // IsApplicable also accepts electrons and positrons, so the type is checked
-  // here: the model never triggers on them.
-  if (fastTrack.GetPrimaryTrack() -> GetDefinition() != G4Gamma::GammaDefinition())
-    return false;
 
   #ifdef FATRASG4_DEBUG
     G4cout<<"[FatrasG4::ModelTrigger] Got particle with "                                                      <<"\n"
