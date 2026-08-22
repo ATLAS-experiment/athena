@@ -144,11 +144,11 @@ const RawEvent* ByteStreamSamplingInputSvc::nextEvent() {
     }
   }
 
+  // delete previous event, if any
   if (state.m_re) {
-    OFFLINE_FRAGMENTS_NAMESPACE::PointerType st = nullptr;
-    state.m_re->start(st);
-    if (st)
-      delete[] st;
+    if (state.m_raw) {
+      state.m_raw.reset();
+    }
     state.m_re.reset();
   }
 
@@ -162,15 +162,11 @@ const RawEvent* ByteStreamSamplingInputSvc::nextEvent() {
       continue;
     }
 
-    OFFLINE_FRAGMENTS_NAMESPACE::DataType* buf =
-        new OFFLINE_FRAGMENTS_NAMESPACE::DataType[length];
-    memcpy(buf, raw_data.get(),
-           length * sizeof(OFFLINE_FRAGMENTS_NAMESPACE::DataType));
+    auto buf = raw_data.get();
 
     if (buf[0] != eformat::FULL_EVENT) {
       ATH_MSG_ERROR("nextEvent: Got invalid fragment of unknown type: 0x"
                     << std::hex << buf[0] << std::dec);
-      delete[] buf;
       continue;
     }
 
@@ -183,11 +179,13 @@ const RawEvent* ByteStreamSamplingInputSvc::nextEvent() {
       ss << ex;
       ATH_MSG_ERROR("nextEvent: Invalid event fragment: " << ss.str());
       if (!m_corrupted_events) {
-        delete[] buf;
         state.m_re.reset();
         continue;
       }
     }
+
+    // we got an event, take ownership of the raw buffer
+    state.m_raw = std::move(raw_data);
     m_robProvider->setNextEvent(Gaudi::Hive::currentContext(),
                                 state.m_re.get());
     m_robProvider->setEventStatus(Gaudi::Hive::currentContext(), 0);

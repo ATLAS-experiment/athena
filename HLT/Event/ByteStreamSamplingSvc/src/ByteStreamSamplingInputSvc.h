@@ -46,12 +46,11 @@ class ByteStreamSamplingInputSvc
  private:
   // our per slot state
   struct State {
-    ~State();
-    std::unique_ptr<RawEvent> m_re{
-        nullptr};                  // current raw event pointer (per slot)
-    std::string m_subscription{};  // an opaque string representing our
-                                   // subscription identifier
-    std::string m_partition;  // copy of partition name, needed in destructore
+     ~State();
+     std::unique_ptr<RawEvent> m_re{nullptr};  // current event
+     std::unique_ptr<uint32_t[]> m_raw;        // raw data
+     std::string m_subscription{};  // an opaque string representing our subscription
+    std::string m_partition{};      // copy of partition name, needed in destructore
   };
 
   bool subscribe(State& state);
