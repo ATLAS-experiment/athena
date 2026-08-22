@@ -128,6 +128,8 @@ G4bool FatrasG4::IsApplicable(const G4ParticleDefinition& particleType)
 {
   // Check whether we can simulate the particle with FatrasG4
   bool isPhoton   = &particleType == G4Gamma::GammaDefinition();
+  bool isElectron = &particleType == G4Electron::ElectronDefinition();
+  bool isPositron = &particleType == G4Positron::PositronDefinition();
 
   // Check particle energy
   // for FatrasG4 we use the fast models for 1-100GeV
@@ -139,8 +141,11 @@ G4bool FatrasG4::IsApplicable(const G4ParticleDefinition& particleType)
   const auto particleEnergy = currentTrack ? currentTrack -> GetTotalEnergy() : 0.;
   if (particleEnergy < s_minEnergy || particleEnergy > s_maxEnergy) return false;
 
-  // FatrasG4 is applicable if it is photon (for now)
-  bool isApplicable = isPhoton;
+  // The model only acts on photons. Electrons and positrons are declared
+  // applicable so that Geant4 attaches the fast simulation process to them in
+  // the region as well; ModelTrigger then always declines them, leaving their
+  // transport to the standard physics.
+  bool isApplicable = isPhoton || isElectron || isPositron;
 
   #ifdef FATRASG4_DEBUG
     const std::string pName = particleType.GetParticleName();
@@ -157,9 +162,10 @@ G4bool FatrasG4::ModelTrigger(const G4FastTrack& fastTrack)
   // No conversion until one of the triggers below fires
   m_doConversion = false;
 
-  // The particle type is not checked here: Geant4 only attaches this model to
-  // the particles accepted by IsApplicable, so every track seen here is a
-  // photon.
+  // IsApplicable also accepts electrons and positrons, so the type is checked
+  // here: the model never triggers on them.
+  if (fastTrack.GetPrimaryTrack() -> GetDefinition() != G4Gamma::GammaDefinition())
+    return false;
 
   #ifdef FATRASG4_DEBUG
     G4cout<<"[FatrasG4::ModelTrigger] Got particle with "                                                      <<"\n"
