@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef LARRAWCONDITIONS_LAREMEC_HVALPHACOMPLETE_H
@@ -8,6 +8,7 @@
 #include "LArElecCalib/ILArEMEC_HValpha.h" 
 #include "LArRawConditions/LArEMEC_HValphaP.h"
 #include "LArRawConditions/LArConditionsContainer.h"
+#include "AthenaKernel/BaseInfo.h"
 
 #include <vector>
 
@@ -48,4 +49,5 @@ class LArEMEC_HValphaComplete: public ILArEMEC_HValpha,
 };
 
 CLASS_DEF( LArEMEC_HValphaComplete,89432706,1)
+SG_BASES( LArEMEC_HValphaComplete, ILArEMEC_HValpha );
 #endif 
