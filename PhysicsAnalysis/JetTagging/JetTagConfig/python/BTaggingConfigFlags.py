@@ -225,6 +225,9 @@ def createBTaggingConfigFlags():
     #    from. Schedules PoorMansIpAugmenterAlg with this prefix. See
     #    _ip_definitions in FlavorTaggingConfig.py for the allowed
     #    prefixes and the definition each one selects.
+    #  - <group>_ip_prefix (optional): same, for one constituent group
+    #    ('tracks', 'electrons', 'muons'). A group with no entry follows
+    #    ip_prefix, which is itself the tracks prefix.
     btagcf.addFlag("BTagging.NNs", getNNs)
     btagcf.addFlag("BTagging.AK4TaggerName", lambda pcf: (
         "GN2HLv01" if pcf.GeoModel.Run>=LHCPeriod.Run4 else "GN2v01"))

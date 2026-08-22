@@ -37,6 +37,13 @@ _ip_definitions = {
     'poormanIpD0_': True,
 }
 
+# The standard impact parameters, written by BTagTrackAugmenterAlg rather
+# than by the poor man's augmenter.
+_default_ip_prefix = 'btagIp_'
+
+# Constituent groups that can override the general ip_prefix.
+_ip_prefix_groups = ('tracks', 'electrons', 'muons')
+
 
 def _resolve_tagger_name(dirname: str, networks: dict) -> str:
     """
@@ -227,15 +234,18 @@ def FlavorTaggingCfg(
 
         # Taggers trained on the poor man's impact parameters read their
         # IP inputs from a second set of decorations, written alongside
-        # the standard ones.
+        # the standard ones. A group can ask for a different prefix than
+        # the tracks with '<group>_ip_prefix'.
+        _checkIpPrefixKeys(networks)
         if ip_prefix := networks.get('ip_prefix'):
-            if ip_prefix not in _ip_definitions:
-                raise ValueError(
-                    f'unknown ip_prefix {ip_prefix!r}, expected one of '
-                    f'{sorted(_ip_definitions)}')
-            acc.merge(_fastCfg(flags, pv=pv_col, tc=trackCollection,
-                               pfx=ip_prefix))
+            acc.merge(_ipInputsCfg(flags, ip_prefix, pv_col, trackCollection))
             args['remapping'].setdefault('btagIp_', ip_prefix)
+        for group in _ip_prefix_groups:
+            if group_prefix := networks.get(f'{group}_ip_prefix'):
+                acc.merge(_ipInputsCfg(flags, group_prefix, pv_col,
+                                       trackCollection))
+                args['remapping'].setdefault(
+                    f'{group}_ip_prefix', group_prefix)
 
         if foldHashName := networks.get('hash'):
             args['foldHashName'] = foldHashName
@@ -349,10 +359,33 @@ def JetBTagginglessByVertexAlgCfg(
 
     return acc
 
+def _checkIpPrefixKeys(networks):
+    valid = {'ip_prefix'} | {f'{g}_ip_prefix' for g in _ip_prefix_groups}
+    for key in networks:
+        if key.endswith('ip_prefix') and key not in valid:
+            raise ValueError(
+                f'unsupported IP prefix setting {key!r}, expected one of '
+                f'{sorted(valid)}')
+    if 'ip_prefix' in networks and 'tracks_ip_prefix' in networks:
+        raise ValueError(
+            "set either 'ip_prefix' or 'tracks_ip_prefix', not both")
+
+
+def _ipInputsCfg(flags, prefix, pv, tc):
+    """Schedule whatever writes the IP decorations under prefix."""
+    if prefix == _default_ip_prefix:
+        return ComponentAccumulator()
+    if prefix not in _ip_definitions:
+        raise ValueError(
+            f'unknown IP prefix {prefix!r}, expected {_default_ip_prefix!r} '
+            f'or one of {sorted(_ip_definitions)}')
+    return _fastCfg(flags, pv=pv, tc=tc, pfx=prefix)
+
+
 def _fastCfg(flags, pv, tc, pfx):
     acc = ComponentAccumulator()
     name = f'PoorMansAugmenter_{tc}_{pv}_{pfx}'
-    prefix = pfx or 'btagIp_'
+    prefix = pfx or _default_ip_prefix
     acc.addEventAlgo(
         CompFactory.FlavorTagDiscriminants.PoorMansIpAugmenterAlg(
             name=name,

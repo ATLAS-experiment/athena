@@ -745,6 +745,29 @@ namespace {
       };
     }
 
+    // Impact parameter decorations a constituent variable reads, empty
+    // for variables that don't use them
+    std::set<std::string> ipDataDependencies(
+      const std::string& name, const std::string& prefix) {
+      if (getterFromTracksWithIpDep(name, prefix)) {
+        return BTagTrackIpAccessor(prefix).getTrackIpDataDependencyNames();
+      }
+      return {};
+    }
+
+    // The impact parameters can come from a different set of decorations
+    // for each constituent type
+    template <typename T>
+    std::string ipPrefix(const FTagOptions& options) {
+      if (std::is_same_v<T, xAOD::Electron> && !options.electron_ip_prefix.empty()) {
+        return options.electron_ip_prefix;
+      }
+      if (std::is_same_v<T, xAOD::Muon> && !options.muon_ip_prefix.empty()) {
+        return options.muon_ip_prefix;
+      }
+      return options.track_prefix;
+    }
+
     // Case for constituent variables
     // Returns getter function with dependencies
     template <typename T>
@@ -820,7 +843,7 @@ namespace {
     template <typename T>
     std::pair<typename SeqGetter<T>::InputSequence, std::set<std::string>> 
     SeqGetter<T>::seqFromConsituents(const InputVariableConfig& cfg, const FTagOptions& options){
-      const std::string prefix = options.track_prefix;
+      const std::string prefix = ipPrefix<T>(options);
       switch (cfg.type) {
         case ConstituentsEDMType::INT: return {
             NamedSeqGetter<int, T>(cfg.name), {cfg.name}
