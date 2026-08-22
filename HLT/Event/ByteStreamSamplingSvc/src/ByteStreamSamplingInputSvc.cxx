@@ -20,11 +20,10 @@
 #include "webdaq/webdaq.hpp"
 #include "xAODEventInfo/EventAuxInfo.h"
 #include "xAODEventInfo/EventInfo.h"
+#include <nlohmann/json.hpp>
 
 #include <cstdlib>
-#include <exception>
 #include <memory>
-#include <nlohmann/json.hpp>
 #include <random>
 #include <sstream>
 #include <string>
@@ -78,16 +77,22 @@ StatusCode ByteStreamSamplingInputSvc::initialize() {
     m_group_id = std::format("athena-{}-{}-{}", hostname, getpid(), random);
   }
 
+  // Convert the criteria into JSON and add the other arguments
+  m_subscribe_criteria = nlohmann::json::parse(m_criteria, nullptr, false);
+  if(m_subscribe_criteria.is_discarded()) {
+    ATH_MSG_ERROR("Subscription criteria cannot be parsed as JSON");
+    return StatusCode::FAILURE;
+  }
+
+  m_subscribe_criteria["sampler_type"] = m_sampler_type;
+  m_subscribe_criteria["group_id"] = m_group_id;
+  m_subscribe_criteria["sampler_keys"] = nlohmann::json(m_sampler_names.value());
+
   //-------------------------------------------------------------------------
   // Setup the InputMetaDataStore
   //-------------------------------------------------------------------------
   ATH_CHECK(m_inputMetaDataStore.retrieve());
   ATH_CHECK(m_robProvider.retrieve());
-
-  // Read run parameters from the partition
-  if (m_readDetectorMask) {
-    get_runparams();
-  }
 
   ATH_MSG_INFO("initialized for: " << m_partition);
 
@@ -102,20 +107,8 @@ bool ByteStreamSamplingInputSvc::subscribe(State& state) {
     sleep(20);
   }
 
-  nlohmann::json criteria;
-
-  try {
-    criteria = nlohmann::json::parse(m_criteria);
-    criteria["sampler_type"] = m_sampler_type;
-    criteria["group_id"] = m_group_id;
-    criteria["sampler_keys"] = nlohmann::json(m_sampler_names.value());
-  } catch (std::exception& ex) {
-    ATH_MSG_ERROR("Subscription criteria cannot be parsed as JSON");
-    return false;
-  }
-
   while (true) {
-    state.m_subscription = webdaq::emon::subscribe(m_partition, criteria);
+    state.m_subscription = webdaq::emon::subscribe(m_partition, m_subscribe_criteria);
     if (!state.m_subscription.empty()) {
       if (m_readDetectorMask) {
         get_runparams();

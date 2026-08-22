@@ -23,6 +23,7 @@
 
 #include <memory>
 #include <vector>
+#include <nlohmann/json.hpp>
 
 class StoreGateSvc;
 
@@ -97,6 +98,7 @@ class ByteStreamSamplingInputSvc
   ServiceHandle<StoreGateSvc> m_inputMetaDataStore;
   ServiceHandle<StoreGateSvc> m_sgSvc;
   ServiceHandle<IROBDataProviderSvc> m_robProvider;
+  nlohmann::json m_subscribe_criteria;
 };
 
 #endif
