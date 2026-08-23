@@ -14,7 +14,7 @@
 // INCLUDES
 #include <algorithm>
 #include <cassert>
-#include <iostream>
+#include <print>
 #include <stdexcept>
 #include <atomic>
 
@@ -53,9 +53,8 @@ public:
     dtor_log.push_back (m_i);
 #ifdef MAKEITBOMB
     //int* ifg(0);
-    //std::cout << *ifg << std::endl; 
+    //std::println ("{}", *ifg);
 #endif
-    //    std::cout << "~Foo @" << this << " i() " << i() << std::endl;
   }
 private:
   int m_i;
@@ -186,23 +185,22 @@ namespace Athena_test
     std::vector<CLID> clids = rSG.clids();
     std::set<CLID> clid_set (clids.begin(), clids.end());
     if (expCLIDs != clid_set) {
-      cout << "ERROR: CLID set mismatch\n";
-      cout << "  Expected ";
-      for (CLID id : expCLIDs) cout << id << " ";
-      cout << "\n  Got: ";
-      for (CLID id : clid_set) cout << id << " ";
-      cout << "\n";
+      std::println ("ERROR: CLID set mismatch");
+      std::print ("  Expected ");
+      for (CLID id : expCLIDs) std::print (" {}", id);
+      std::print ("\n  Got: ");
+      for (CLID id : clid_set) std::print (" {}", id);
+      std::println();
       std::abort();
     }
   }
 
   void testRecord(::StoreGateSvc& rSG) 
   {  
-    cout << "*** StoreGateSvcClient_test record BEGINS ***" << endl;
+    std::println ("*** StoreGateSvcClient_test record BEGINS ***");
     std::vector<CLID> initCLIDs = rSG.clids();
     std::set<CLID> expCLIDs (initCLIDs.begin(), initCLIDs.end());
     Foo* pFoo = new Foo(1);    
-    //    cout << "pFoo=" << hex << pFoo << dec << endl;
     assert(rSG.record(pFoo, "pFoo1").isSuccess());
     expCLIDs.insert (ClassID_traits<Foo>::ID());
     checkCLIDs (rSG, expCLIDs);
@@ -271,12 +269,12 @@ namespace Athena_test
 
     checkCLIDs (rSG, expCLIDs);
 
-    cout << "*** StoreGateSvcClient_test records OK ***\n\n" <<endl;
+    std::println ("*** StoreGateSvcClient_test records OK ***\n\n");
   }
 
   void testRemove(::StoreGateSvc& rSG) 
   {  
-    cout << "*** StoreGateSvcClient_test remove BEGINS ***" << endl;
+    std::println ("*** StoreGateSvcClient_test remove BEGINS ***");
     // retrieve a keyless object: Should fail because ambiguous retrieve
     Foo* pFoo;
     SGASSERTERROR(rSG.retrieve(pFoo).isSuccess());
@@ -289,9 +287,9 @@ namespace Athena_test
     pFoo = new Foo();
     assert(rSG.record(pFoo, "pFooKey").isSuccess());
     assert(rSG.remove(pFoo).isSuccess());
-    cout << " Now we expect to see an error for invalid proxy >>> " << endl;
+    std::println (" Now we expect to see an error for invalid proxy >>> ");
     assert(rSG.retrieve(pFoo, "pFooKey").isFailure());
-    cout << " end of error >>>>>>>>>>>>> " << endl;
+    std::println (" end of error >>>>>>>>>>>>> ");
 
     pFoo = new Foo();
     assert(rSG.record(pFoo, "pFooKey").isSuccess());
@@ -307,7 +305,7 @@ namespace Athena_test
     assert(0 == rSG.proxy(pFoo));
     assert(0 == rSG.proxy(ClassID_traits<Foo>::ID(), "pFooKey"));
     assert(0 == rSG.proxy(ClassID_traits<Foo>::ID(), "pFooKey", DONTCHECK));
-    cout << "*** StoreGateSvcClient_test removes OK ***\n\n" <<endl;
+    std::println ("*** StoreGateSvcClient_test removes OK ***\n\n");
   }
 
   void testSymLink(::StoreGateSvc& rSG) 
@@ -316,7 +314,7 @@ namespace Athena_test
     Foo *noFoo(0);
     Base* bDum(0);
 
-    cout << "*** StoreGateSvcClient_test symlinks BEGINS ***" <<endl;
+    std::println ("*** StoreGateSvcClient_test symlinks BEGINS ***");
     SGASSERTERROR(rSG.retrieve(cFoo).isSuccess());
     SGASSERTERROR(rSG.symLink(cFoo, bDum).isSuccess());
 
@@ -362,8 +360,7 @@ namespace Athena_test
     assert(rSG.retrieve(ciBaseBeg, ciBaseEnd).isSuccess());
     assert(ciBaseBeg != ciBaseEnd);
 
-    cout << "*** StoreGateSvcClient_test symlinks OK ***\n\n" <<endl;
-
+    std::println ("*** StoreGateSvcClient_test symlinks OK ***\n\n");
   }
 
   void test_symlink2 (::StoreGateSvc& sg)
@@ -386,9 +383,8 @@ namespace Athena_test
     SG::DataProxy* dp = sg.proxy (ClassID_traits<D1>::ID(), std::string("d1"));
     assert (dp != 0);
     assert (dp->refCount() == 2); // since auto-symLink made
-    std::cout << dp->store() << std::endl;
-    std::cout << &sg << sg.name()  << std::endl;
-    //    assert (dp->store() == &sg);
+    std::println ("{}", static_cast<const void*>(dp->store()));
+    std::println ("{} {}", static_cast<void*>(&sg), sg.name());
 
     expCLIDs.insert (ClassID_traits<B1>::ID());
     expCLIDs.insert (ClassID_traits<D1>::ID());
@@ -450,8 +446,7 @@ namespace Athena_test
     std::vector<std::string> keyList;
     sg.keys<D1>(keyList, true);
     for (const std::string& key : keyList) {
-      std::cout << "Found key = " << key << " for object D1 in StoreGate " 
-		<< std::endl; 
+      std::println ("Found key = {} for object D1 in StoreGate ", key);
     } 
     /// type D1 was recorded with "d1" and "d2"
     /// two alias to d1 but sg.remove() remove alled d1
@@ -581,7 +576,7 @@ namespace Athena_test {
 
   void testContains(::StoreGateSvc& rSG) 
   {  
-    cout << "*** StoreGateSvcClient_test contains BEGINS ***" << endl;
+    std::println ("*** StoreGateSvcClient_test contains BEGINS ***");
     //    assert(rSG.contains<Foo>());
     //    assert(!rSG.contains<NotThere>());
 
@@ -590,14 +585,14 @@ namespace Athena_test {
     assert(rSG.transientContains<Foo>("UnLocked"));
     assert(!rSG.transientContains<Foo>("sully"));
 
-    cout << "*** StoreGateSvcClient_test contains OK ***\n\n" <<endl;
+    std::println ("*** StoreGateSvcClient_test contains OK ***\n\n");
   }
 
 #ifdef FOLDERS_ASDOBJ
 #include "SGTools/SGIFolder.h"
   void testFolders(::StoreGateSvc& rSG) 
   {  
-    cout << "*** StoreGateSvcClient_test folders BEGINS ***" <<endl;
+    std::println ("*** StoreGateSvcClient_test folders BEGINS ***");
     //this of course depend on the job opts
     SG::IFolder *pMyFolder, *pYourFolder, *pNotFolder;
     assert(rSG.retrieve(pMyFolder, "MyFolder").isSuccess());
@@ -605,13 +600,13 @@ namespace Athena_test {
     assert(rSG.retrieve(pYourFolder, "YourFolder").isSuccess());
     SGASSERTERROR((rSG.retrieve(pNotFolder, "NotAFolder").isSuccess()));
 
-    cout << "*** StoreGateSvcClient_test folders OK ***\n\n" <<endl;
+    std::println ("*** StoreGateSvcClient_test folders OK ***\n\n");
   }
 #endif
 
   void testRetrieve(::StoreGateSvc& rSG) {
 
-    cout << "*** StoreGateSvcClient_test retrieve BEGINS ***" <<endl;
+    std::println ("*** StoreGateSvcClient_test retrieve BEGINS ***");
     const Foo *cFoo;
     const NotThere* notThere;
     SGASSERTERROR(rSG.retrieve(cFoo).isSuccess());
@@ -630,13 +625,13 @@ namespace Athena_test {
     assert(rSG.retrieve(ciNotThereBeg, ciNotThereEnd).isFailure());
     assert(ciNotThereBeg == ciNotThereEnd);
 
-    cout << "*** StoreGateSvcClient_test retrieve OK ***\n\n" <<endl;
+    std::println ("*** StoreGateSvcClient_test retrieve OK ***\n\n");
   }
 
   void testTryRetrieve(::StoreGateSvc& rSG) {
 
-    cout << "*** StoreGateSvcClient_test tryRetrieve BEGINS ***" <<endl;
-    cout << "we should see no WARNING message for failed retrieves" <<endl; 
+    std::println ("*** StoreGateSvcClient_test tryRetrieve BEGINS ***");
+    std::println ("we should see no WARNING message for failed retrieves");
     assert(rSG.tryRetrieve<Foo> () == 0);
     assert(rSG.tryConstRetrieve<Foo> () == 0);
 
@@ -645,7 +640,7 @@ namespace Athena_test {
     assert (rSG.retrieve<const Foo> ("UnLocked") == cFoo);
     assert(rSG.tryConstRetrieve<Foo> ("UnLockedxxx") == 0);
 
-    cout << "*** StoreGateSvcClient_test tryRetrieve OK ***\n\n" <<endl;
+    std::println ("*** StoreGateSvcClient_test tryRetrieve OK ***\n\n");
   }
 
 
@@ -703,7 +698,7 @@ namespace Athena_test {
 
   void testVersionedKey(::StoreGateSvc& rSG) 
   {  
-    cout << "\n*** StoreGateSvcClient_test VersionedKey BEGINS ***" << endl;
+    std::println ("\n*** StoreGateSvcClient_test VersionedKey BEGINS ***");
     //start by creating an unversioned object to test handling of legacy keys
     StatusCode sc;
     sc = rSG.record(new Foo(11), "aVersObj"); assert(sc.isSuccess());
@@ -756,12 +751,12 @@ namespace Athena_test {
     assert(rSG.retrieveHighestVersion(highest, baseKey));
     assert(highest.versionedKey.version() == 88);
     
-    cout << "*** StoreGateSvcClient_test VersionedKey OK ***\n\n" <<endl;
+    std::println ("*** StoreGateSvcClient_test VersionedKey OK ***\n\n");
   }
 
   void testKeys(::StoreGateSvc& rSG) {
 
-    cout << "\n*** StoreGateSvcClient_test Keys BEGINS ***" << endl;
+    std::println ("\n*** StoreGateSvcClient_test Keys BEGINS ***");
     rSG.clearStore().ignore();
 
     assert(rSG.record(new Foo, "LockReset", LOCKED, RESET).isSuccess());
@@ -773,23 +768,15 @@ namespace Athena_test {
 
     std::vector<std::string> keys;
     rSG.keys<Foo>(keys);
-    //    copy(keys.begin(), keys.end(),ostream_iterator<string>(cout," - "));
-    //    cout << endl;
     assert(4==keys.size());
     rSG.keys<Foo>(keys, /*allKeys=*/true);
-    //    copy(keys.begin(), keys.end(),ostream_iterator<string>(cout," - "));
-    //    cout << endl;
     assert(5==keys.size());
 
     rSG.clearStore().ignore();
     rSG.keys<Foo>(keys, /*allKeys=*/true, /*onlyValid=*/false);
-    //    copy(keys.begin(), keys.end(),ostream_iterator<string>(cout," - "));
-    //    cout << endl;
     assert(2==keys.size());
 
     rSG.keys<Foo>(keys);
-    //    copy(keys.begin(), keys.end(),ostream_iterator<string>(cout," - "));
-    //    cout << endl;
     assert(0==keys.size());
 
     //get rid of the two RESET dobjs
@@ -801,25 +788,21 @@ namespace Athena_test {
     assert(rSG.record(new Foo, "UnLockDelete", !LOCKED, DELETE).isSuccess());
     rSG.clearStore().ignore();
     rSG.keys<Foo>(keys);
-    //    copy(keys.begin(), keys.end(),ostream_iterator<string>(cout," - "));
-    //    cout << endl;
 
     assert(0==keys.size());
 
     rSG.keys<Foo>(keys, /*allKeys=*/true, /*onlyValid=*/false);
-    //    copy(keys.begin(), keys.end(),ostream_iterator<string>(cout," - "));
-    //    cout << endl;
     assert(0==keys.size());
 
     rSG.clearStore(/*force=*/true).ignore();
 
-    cout << "\n*** StoreGateSvcClient_test Keys ENDS ***" << endl;
+    std::println ("\n*** StoreGateSvcClient_test Keys ENDS ***");
 
   }
 
   void testRetrieveAux(::StoreGateSvc& rSG) 
   {  
-    cout << "\n*** StoreGateSvcClient_test retrieveAux BEGINS ***" << endl;
+    println ("\n*** StoreGateSvcClient_test retrieveAux BEGINS ***");
     TestVector<BX>* pVec = new TestVector<BX>;
     pVec->push_back(new BX(1));
     pVec->push_back(new BX(2));
@@ -869,12 +852,12 @@ namespace Athena_test {
     //assert (pb->usingStandAloneStore());
     //assert (pb->getStore() == pAux_b);
     
-    cout << "*** StoreGateSvcClient_test retrieveAux OK ***\n\n" <<endl;
+    std::println ("*** StoreGateSvcClient_test retrieveAux OK ***\n\n");
   }
 
   void testCreate(::StoreGateSvc& rSG) 
   {  
-    cout << "\n*** StoreGateSvcClient_test testCreate BEGINS ***" << endl;
+    std::println ("\n*** StoreGateSvcClient_test testCreate BEGINS ***");
 
     //recommended usage
     auto pFooD = rSG.create<Foo>("pCreateFooDefault");
@@ -889,12 +872,12 @@ namespace Athena_test {
     //make sure we left the old one alone
     assert(rSG.retrieve<Foo>("pCreateFoo1")->i() == 1);
 
-    cout << "*** StoreGateSvcClient_test testCreate OK ***\n\n" <<endl;
+    std::println ("*** StoreGateSvcClient_test testCreate OK ***\n\n");
   }
 
   void testBoundReset(StoreGateSvc& rSG)
   {
-    cout << "\n*** StoreGateSvcClient_test testBoundReset BEGINS ***" << endl;
+    std::println ("\n*** StoreGateSvcClient_test testBoundReset BEGINS ***");
     rSG.commitNewDataObjects();
 
     {
@@ -918,13 +901,13 @@ namespace Athena_test {
                            true));
     rSG.commitNewDataObjects();
 
-    cout << "\n*** StoreGateSvcClient_test testBoundReset OK ***\n\n" << endl;
+    std::println ("\n*** StoreGateSvcClient_test testBoundReset OK ***\n\n");
   }
 
 
   void testRecordObject(StoreGateSvc& rSG)
   {
-    cout << "\n*** StoreGateSvcClient_test testRecordObject BEGINS ***" << endl;
+    std::println ("\n*** StoreGateSvcClient_test testRecordObject BEGINS ***");
     Foo::dtor_log.clear();
 
     auto obj101_uptr = std::make_unique<Foo> (101);
@@ -949,13 +932,13 @@ namespace Athena_test {
     assert (Foo::dtor_log.empty());
 
     // Dup with returnExisting false.
-    std::cout << ">>> test duplicate record1\n";
+    std::println (">>> test duplicate record1");
     SG::DataObjectSharedPtr<DataObject> obj103
       (SG::asStorable (std::make_unique<Foo> (103)));
     SG::DataProxy* proxy103 = rSG.recordObject (obj103, "obj101", false, false);
     assert (proxy103 == nullptr);
     assert (obj103->refCount() == 2); // Held by m_trash
-    std::cout << "<<< test duplicate record1\n";
+    std::println ("<<< test duplicate record1");
 
     // Dup with returnExisting true.
     SG::DataObjectSharedPtr<DataObject> obj104
@@ -965,11 +948,11 @@ namespace Athena_test {
     assert (obj104->refCount() == 1);
 
     // Dup with returnExisting false but different key.
-    std::cout << ">>> test duplicate record2\n";
+    std::println (">>> test duplicate record2");
     SG::DataProxy* proxy999 = rSG.recordObject (obj101, "obj999", false, false);
     assert (proxy999 == nullptr);
     assert (obj101->refCount() == 3); // Held by m_trash
-    std::cout << "<<< test duplicate record2\n";
+    std::println ("<<< test duplicate record2");
 
     // Making alias.
     assert (proxy101->refCount() == 1);
@@ -987,12 +970,12 @@ namespace Athena_test {
     assert (proxy101->refCount() == 3);
 
     // Error handling.
-    std::cout << ">>> test duplicate error\n";
+    std::println (">>> test duplicate error");
     SG::DataObjectSharedPtr<DataObject> obj106
       (new SymlinkDataObject (543543, static_cast<Base*>(obj101_ptr)));
     SG::DataProxy* proxy106 = rSG.recordObject (obj106, "obj101xxx", false, true);
     assert (proxy106 == nullptr);
-    std::cout << "<<< test duplicate error\n";
+    std::println ("<<< test duplicate error");
 
     rSG.clearStore().ignore();
     assert (obj101->refCount() == 1);
@@ -1018,13 +1001,13 @@ namespace Athena_test {
     assert (proxy101->refCount() == 3);
     assert (proxy101->isConst());
 
-    cout << "\n*** StoreGateSvcClient_test testRecordObject OK ***" << endl;
+    std::println ("\n*** StoreGateSvcClient_test testRecordObject OK ***");
   }
 
 
   void testWriteAux(StoreGateSvc& rSG)
   {
-    cout << "\n*** StoreGateSvcClient_test testWriteAux BEGINS ***" << endl;
+    std::println ("\n*** StoreGateSvcClient_test testWriteAux BEGINS ***");
 
     TestAuxStore* paux = nullptr;
     {
@@ -1035,7 +1018,7 @@ namespace Athena_test {
       assert (h.record (std::move(obj), std::move(objAux)).isSuccess());
       assert (!paux->m_locked);
     }
-    cout << "\n*** StoreGateSvcClient_test testWriteAux OK ***" << endl;
+    std::println ("\n*** StoreGateSvcClient_test testWriteAux OK ***");
   }
 
 } //end namespace

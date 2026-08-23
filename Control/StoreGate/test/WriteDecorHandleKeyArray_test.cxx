@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file StoreGate/test/WriteDecorHandleKeyArrau_test.cxx
@@ -17,7 +17,7 @@
 #include "TestTools/initGaudi.h"
 #include "TestTools/expect_exception.h"
 #include <cassert>
-#include <iostream>
+#include <print>
 
 
 class MyObj {};
@@ -74,7 +74,7 @@ void TestHolder::addDependency(const DataObjID& id, const Gaudi::DataHandle::Mod
 
 void test1()
 {
-  std::cout << "test1\n";
+  std::println ("test1");
 
   SG::WriteDecorHandleKeyArray<MyObj> k1{"aaa.dec1", "aaa.dec2"};
   assert (k1[0].clid() == 293847295);
@@ -82,6 +82,15 @@ void test1()
   assert (k1[0].mode() == Gaudi::DataHandle::Writer);
   assert (k1[0].storeHandle().name() == "StoreGateSvc");
   assert (!k1[0].storeHandle().isSet());
+
+  {
+    std::ostringstream s1;
+    s1 << k1;
+    assert (s1.str() == "['StoreGateSvc+aaa.dec1','StoreGateSvc+aaa.dec2']");
+    std::ostringstream s2;
+    std::print (s2, "{}", k1);
+    assert (s2.str() == "['StoreGateSvc+aaa.dec1','StoreGateSvc+aaa.dec2']");
+  }
 
   assert (k1.initialize().isSuccess());
   assert (k1[0].storeHandle().isSet());
@@ -123,7 +132,7 @@ void test1()
 
 void test1a()
 {
-  std::cout << "test1a\n";
+  std::println ("test1a");
 
   SG::WriteDecorHandleKeyArray<MyObj, int> k1{"aaa.dec1", "aaa.dec2"};
   assert (k1[0].clid() == 293847295);
@@ -154,7 +163,7 @@ void test1a()
 
 void test2()
 {
-  std::cout << "test2" << std::endl;
+  std::println ("test2");
 
   TestHolder h;
   SG::WriteDecorHandleKeyArray<MyObj> k1{"aaa.dec1", "aaa.dec2"};

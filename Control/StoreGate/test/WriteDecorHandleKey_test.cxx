@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration.
  */
 /**
  * @file StoreGate/test/WriteDecorHandleKey_test.cxx
@@ -14,7 +14,7 @@
 #include "TestTools/initGaudi.h"
 #include "TestOwner.h"
 #include <cassert>
-#include <iostream>
+#include <print>
 
 
 class MyObj {};
@@ -71,7 +71,7 @@ void TestHolder::addDependency(const DataObjID& id, const Gaudi::DataHandle::Mod
 
 void test1()
 {
-  std::cout << "test1\n";
+  std::println ("test1");
 
   SG::WriteDecorHandleKey<MyObj> k1 ("aaa.dec");
   assert (k1.clid() == 293847295);
@@ -87,6 +87,15 @@ void test1()
   assert (k1.contHandleKey().mode() == Gaudi::DataHandle::Reader);
   assert (k1.contHandleKey().storeHandle().name() == "StoreGateSvc");
   assert (k1.contHandleKey().storeHandle().isSet());
+
+  {
+    std::ostringstream s1;
+    s1 << k1;
+    assert (s1.str() == "'StoreGateSvc+aaa.dec'");
+    std::ostringstream s2;
+    std::print (s2, "{}", k1);
+    assert (s2.str() == "'StoreGateSvc+aaa.dec'");
+  }
 
   k1 = "bbb.foo";
   assert (k1.key() == "bbb.foo");
@@ -147,7 +156,7 @@ void test1()
 
 void test2()
 {
-  std::cout << "test2\n";
+  std::println ("test2");
 
   TestHolder h;
   SG::WriteDecorHandleKey<MyObj> k1 ("aaa.dec");

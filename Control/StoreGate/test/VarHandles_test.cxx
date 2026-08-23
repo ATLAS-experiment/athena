@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #undef NDEBUG
@@ -14,7 +14,7 @@
 #include "SGTools/TestStore.h"
 
 #include <cassert>
-#include <iostream>
+#include <print>
 #include <list>
 
 using SG::ReadHandle;
@@ -198,7 +198,7 @@ namespace Athena_test {
     //assert(hMySameProxy->m_i==3);
     //assert(hMy==hMySameProxy);
     //assert(*hMy==*hMySameProxy);
-    cout << "*** VarHandles_test static handle test OK ***" <<endl;
+    std::println ("*** VarHandles_test static handle test OK ***");
     return;
   }  
 
@@ -252,7 +252,7 @@ namespace Athena_test {
     assert(!hRO.isValid());
     //kaboom    assert(44 == hRO->i());
 
-    std::cout << "*** VarHandles_test resetable test OK ***" <<std::endl;
+    std::println ("*** VarHandles_test resetable test OK ***");
     return;
   }
 
@@ -298,7 +298,7 @@ namespace Athena_test {
       assert (0==vp[i]->release());
     }
 
-    std::cout << "*** VarHandles_test ref count test OK ***" <<std::endl;
+    std::println ("*** VarHandles_test ref count test OK ***");
     return;
   }
 }
@@ -311,10 +311,10 @@ int main() {
   std::unique_ptr<SGTest::TestStore> store = SGTest::getTestStore();
   ISvcLocator* pDum;
   initGaudi(pDum); //need MessageSvc
-  cout << "*** VarHandles_test starts ***" <<endl;
+  std::println ("*** VarHandles_test starts ***");
   varHandleTest(*store);
   resetableTest();
   refCountTest();
-  cout << "*** VarHandles_test OK ***" <<endl;
+  std::println ("*** VarHandles_test OK ***");
   return 0; 
 }

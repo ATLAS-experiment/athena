@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file StoreGate/test/ReadHandle_test.cxx
@@ -21,7 +21,7 @@
 #include "AthenaKernel/errorcheck.h"
 #include "boost/timer/timer.hpp"
 #include <cassert>
-#include <iostream>
+#include <print>
 
 
 class MyObj
@@ -37,7 +37,7 @@ static const CLID MyCLID = 293847295;
 // Ctors.
 void test1()
 {
-  std::cout << "test1\n";
+  std::println ("test1");
 
   SG::ReadHandle<MyObj> h1;
   assert (h1.clid() == MyCLID);
@@ -59,6 +59,14 @@ void test1()
   assert (h3.key() == "asd");
   assert (h3.storeHandle().name() == "StoreGateSvc");
   assert (h3.mode() == Gaudi::DataHandle::Reader);
+
+  {
+    std::ostringstream s1;
+    s1 << h3;
+    std::ostringstream s2;
+    std::print (s2, "{}", h3);
+    assert (s1.str() == s2.str());
+  }
 
   {
     SG::ReadHandleKey<MyObj> k4 ("asd", "BazSvc");
@@ -111,7 +119,7 @@ void test1()
 // Copy.
 void test2()
 {
-  std::cout << "test2\n";
+  std::println ("test2");
   SGTest::TestStore testStore;
 
   MyObj* fooptr = new MyObj(13);
@@ -185,7 +193,7 @@ void test2()
 // Retrieve
 void test3()
 {
-  std::cout << "test3\n";
+  std::println ("test3");
   SGTest::TestStore testStore;
 
   MyObj* fooptr = new MyObj(23);
@@ -235,7 +243,7 @@ void test3()
 // makeHandle
 void test4()
 {
-  std::cout << "test4\n";
+  std::println ("test4");
   SGTest::TestStore testStore;
 
   SG::ReadHandleKey<MyObj> k1 ("asd");
@@ -279,7 +287,7 @@ void test4()
 // alias.
 void test5()
 {
-  std::cout << "test5\n";
+  std::println ("test5");
 
   SGTest::TestStore testStore;
 
@@ -321,7 +329,7 @@ void test5()
 // constructor from proxy.
 void test6()
 {
-  std::cout << "test6\n";
+  std::println ("test6");
 
   auto obj = std::make_unique<MyObj>();
   MyObj* objptr = obj.get();
@@ -352,7 +360,7 @@ void test6()
 // SG::get
 void test7(ISvcLocator* svcloc)
 {
-  std::cout << "test7\n";
+  std::println ("test7");
 
   SmartIF<StoreGateSvc> sg{svcloc->service ("StoreGateSvc")};
   assert (sg.isValid());
@@ -402,8 +410,8 @@ unsigned int perftest (ISvcLocator* svcloc, unsigned int ntry)
   }
   timer.stop();
   boost::timer::cpu_times times = timer.elapsed();
-  std::cout << ntry << " times: " << boost::timer::format(times);
-  std::cout << "Each: " << (float)times.user / ntry / 1000 << " us (user)\n";
+  std::print ("{} times: {}", ntry, boost::timer::format(times));
+  std::println ("Each: {} us (user)", (float)times.user / ntry / 1000);
 
   return sum;
 }

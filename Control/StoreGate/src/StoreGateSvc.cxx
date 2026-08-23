@@ -14,6 +14,7 @@
 #include "Gaudi/Interfaces/IOptionsSvc.h"
 #include "GaudiKernel/IAppMgrUI.h"
 #include <fstream>
+#include <print>
 #include <algorithm>
 
 using namespace SG;
@@ -109,11 +110,11 @@ StatusCode StoreGateSvc::initialize()    {
   // Initialize service:
   CHECK( Service::initialize() );
 
-  verbose() << "Initializing " << name() << endmsg;
+  SG_MSG_VERBOSE ("Initializing {}", name());
 
   SmartIF<Gaudi::Interfaces::IOptionsSvc> pJOSvc{serviceLocator()->service("JobOptionsSvc")};
   if ( !pJOSvc.isValid() ) {
-    error() << "Failed to retrieve JobOptionsSvc" << endmsg;
+    SG_MSG_ERROR ("Failed to retrieve JobOptionsSvc");
   }
   //copy our properties to the prototype (default) SGImplSvc
   const std::string implStoreName = name() + "_Impl";
@@ -126,12 +127,12 @@ StatusCode StoreGateSvc::initialize()    {
   // for example when we try to record an address from one of the address providers initialize methods
 
   std::string implStoreFullName = "SGImplSvc/" + implStoreName;
-  debug() << "trying to create store " << implStoreFullName << endmsg;
+  SG_MSG_DEBUG ("trying to create store {}", implStoreFullName);
   
   m_defaultStore = serviceLocator().as<ISvcManager>()->createService(implStoreFullName);
 
   if (!m_defaultStore) {
-    error() << "Could not create store " << implStoreFullName << endmsg;
+    SG_MSG_ERROR ("Could not create store {}", implStoreFullName);
     return StatusCode::FAILURE;
   }
   
@@ -142,12 +143,11 @@ StatusCode StoreGateSvc::initialize()    {
       m_defaultStore->makeCurrent();
     }
   } else {
-    error() << "Could not initialize default store " << implStoreFullName 
-            << endmsg;
+    SG_MSG_ERROR ("Could not initialize default store {}", implStoreFullName);
     return StatusCode::FAILURE;
   }
   if ( !m_incSvc.retrieve().isSuccess() ) {
-    error() << "Could not locate IncidentSvc" << endmsg;
+    SG_MSG_ERROR ("Could not locate IncidentSvc");
     return StatusCode::FAILURE;
   }
 
@@ -164,15 +164,15 @@ StatusCode StoreGateSvc::initialize()    {
 
 /// Service start
 StatusCode StoreGateSvc::stop()    {
-  verbose() << "Stop " << name() << endmsg;
+  SG_MSG_VERBOSE ("Stop {}", name());
   //HACK ALERT: ID event store objects refer to det store objects
   //by setting an ad-hoc priority for event store(s) we make sure they are finalized and hence cleared first
   // see e.g. https://savannah.cern.ch/bugs/index.php?99993
   if (m_defaultStore->store()->storeID() == StoreID::EVENT_STORE) {
     auto pISM = serviceLocator().as<ISvcManager>();
     pISM->setPriority(name(), pISM->getPriority(name())+1).ignore();
-    verbose() << "stop: setting service priority to " << pISM->getPriority(name()) 
-          << " so that event stores get finalized and cleared before other stores" <<endmsg;
+    SG_MSG_VERBOSE ("stop: setting service priority to {} so that event stores get finalized and cleared before other stores",
+                    pISM->getPriority(name()));
   }
   return StatusCode::SUCCESS;
 }
@@ -186,7 +186,7 @@ void StoreGateSvc::handle(const Incident &inc) {
 StatusCode
 StoreGateSvc::finalize() {
   CHECK( Service::finalize() );
-  verbose() << "Finalizing " << name() << endmsg;
+  SG_MSG_VERBOSE ("Finalizing {}", name());
   if (m_defaultStore) {
     // m_defaultStore is not active, so ServiceManager won't finalize it!
     CHECK( m_defaultStore->finalize());
@@ -529,22 +529,22 @@ void StoreGateSvc::printBadList (const BadItemList& bad,
     lines.push_back (id.fullKey() + " [" + id.m_algo + "]");
   }
   std::sort (lines.begin(), lines.end());
-  warning() << "Called " << what << " on these objects in a MT store" << endmsg;
+  SG_MSG_WARNING ("Called {} on these objects in a MT store", what);
   for (const std::string& s : lines) {
-    warning() << s << endmsg;
+    SG_MSG_WARNING (s);
   }
 }
 
 
 void SG_dump (StoreGateSvc* sg)
 {
-  std::cout << sg->dump() << "\n";
+  std::println ("{}", sg->dump());
 }
 
 void SG_dump (StoreGateSvc* sg, const char* fname)
 {
   std::ofstream f (fname);
-  f << sg->dump() << "\n";
+  std::println (f, "{}", sg->dump());
   f.close();
 }
 

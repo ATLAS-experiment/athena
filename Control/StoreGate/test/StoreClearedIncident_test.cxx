@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -13,6 +13,7 @@
 #undef NDEBUG
 
 #include "StoreGate/StoreClearedIncident.h"
+#include <print>
 #include <cassert>
 
 
@@ -32,8 +33,8 @@ void test1()
 
 int main()
 {
-  std::cerr << "*** StoreClearedIncident_test BEGIN ***" << std::endl;
+  std::println ("*** StoreClearedIncident_test BEGIN ***");
   test1();
-  std::cerr << "*** StoreClearedIncident_test END ***" << std::endl;
+  std::println ("*** StoreClearedIncident_test END ***");
 }
 

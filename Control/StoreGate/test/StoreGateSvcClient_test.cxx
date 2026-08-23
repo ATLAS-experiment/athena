@@ -11,7 +11,7 @@
 
 #undef NDEBUG
 
-#include <iostream>
+#include <print>
 #include <string>
 #include <cassert>
 
@@ -172,7 +172,7 @@ void test_DVL_conversions1 (StoreGateSvc& sg)
 
 void test_DVL_conversions (StoreGateSvc& sg)
 {
-  cout << "*** test_DVL_conversions\n";
+  std::println ("*** test_DVL_conversions");
   test_DVL_conversions1<DataVector<A>,
                         DataVector<B>,
                         DataVector<C>,
@@ -224,14 +224,14 @@ void test_const_DVL1 (StoreGateSvc& sg)
 
 void test_const_DVL (StoreGateSvc& sg)
 {
-  cout << "*** test_const_DVL\n";
+  std::println ("*** test_const_DVL");
   test_const_DVL1<CV, ConstDataVector<CV> > (sg);
 }
 
 
 void test_copy_conversions (StoreGateSvc& sg)
 {
-  cout << "*** test_copy_conversions\n";
+  std::println ("*** test_copy_conversions");
   auto x = std::make_unique<Athena_test::X>();
   x->a = 10;
   Athena_test::X* px = x.get();
@@ -254,7 +254,7 @@ void test_copy_conversions (StoreGateSvc& sg)
 
 void test_lock (StoreGateSvc& sg)
 {
-  cout << "*** test_lock\n";
+  std::println ("*** test_lock");
   Lockable* l = new Lockable;
   assert (sg.record (l, "lockable1").isSuccess());
   assert (l->m_locked == false);
@@ -272,7 +272,7 @@ void test_lock (StoreGateSvc& sg)
 int main ATLAS_NOT_THREAD_SAFE () {
   ISvcLocator* pSvcLoc;
   if (!initGaudi("StoreGate/StoreGate_jobOptions.txt", pSvcLoc)) {
-    cerr << "This test can not be run" << endl;
+    std::print (std::cerr, "This test can not be run");
     return 0;
   }
   assert(pSvcLoc);
@@ -292,9 +292,8 @@ int main ATLAS_NOT_THREAD_SAFE () {
   testFolders(*pStore);
 #endif
 
-  cout << "Testing dump: \n -------->>\n"
-       << pStore->dump()
-       << "\n<<--------" << endl;
+  std::println ("Testing dump: \n -------->>\n{}\n<<--------" ,
+                pStore->dump());
 
   pStore->clearStore(/*force=*/true).ignore();
 
@@ -332,6 +331,6 @@ int main ATLAS_NOT_THREAD_SAFE () {
 
   testRecord(*detStore);
 
-  cout << "*** StoreGateSvcClient_test OK ***" <<endl;
+  std::println ("*** StoreGateSvcClient_test OK ***");
   return 0;
 }

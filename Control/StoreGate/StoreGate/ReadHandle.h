@@ -1,6 +1,6 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file StoreGate/ReadHandle.h
@@ -51,8 +51,7 @@ namespace SG {
  *
  *   StatusCode MyAlg::execute()
  *   {
- *     ATH_MSG_INFO("int value @[" << m_int.name() << "]="
- *                  << *m_int);
+ *     ATH_MSG_INFO("int value @[{}]={}", m_int.name(), *m_int);
  *     return StatusCode::SUCCESS;
  *   }
  @endcode

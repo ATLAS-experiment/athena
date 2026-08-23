@@ -1,7 +1,6 @@
 /*
   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
-
 /**
  * @file StoreGate/src/VarHandleKey.cxx
  * @author scott snyder <snyder@bnl.gov>
@@ -96,7 +95,7 @@ StatusCode VarHandleKey::assign (const std::string& sgkey)
   try {
     parseKey (sgkey, m_storeHandle.name());
   } catch (SG::ExcBadHandleKey &e) {
-    std::cerr << "VarHandleKey::assign failure: " << e.what() << std::endl;
+    std::println (std::cerr, "VarHandleKey::assign failure: {}", e.what());
     return StatusCode::FAILURE;
   } catch (...) {
     return StatusCode::FAILURE;
@@ -323,28 +322,29 @@ std::string VarHandleKey::pythonRepr() const
     Gaudi::DataHandle::default_type : fullKey().className();
 
   std::ostringstream ost;
-  ost << "DataHandle(";
+  std::print (ost, "DataHandle(");;
   Gaudi::Utils::toStream(m_storeHandle.name() + storeSeparator + m_sgKey, ost);
-  ost << ",";
+  std::print (ost, ",");
   switch (mode()) {
   case Gaudi::DataHandle::Writer:
     Gaudi::Utils::toStream("W", ost); break;
   default:
     Gaudi::Utils::toStream("R", ost); break;
   }
-  ost << ","; Gaudi::Utils::toStream(className, ost);
-  ost << ","; Gaudi::Utils::toStream(isCondition(), ost);
-  ost << ")";
+  std::print (ost, ",");
+  Gaudi::Utils::toStream(className, ost);
+  std::print (ost, ",");
+  Gaudi::Utils::toStream(isCondition(), ost);
+  std::print (ost, ")");
 
   return ost.str();
 }
 
 
-} // namespace SG
-
-namespace std {
-  ostream& operator<<(ostream& s, const SG::VarHandleKey& m) {
-    s << "'" << m.objKey() << "'";
-    return s;
-  }
+std::ostream& operator<<(std::ostream& s, const SG::VarHandleKey& m) {
+  std::print (s, "{}", m);
+  return s;
 }
+
+
+} // namespace SG
