@@ -8,5 +8,6 @@ from .SimulationHelpers import enableFatrasG4 as FatrasG4
 from .SimulationHelpers import enableAFatrasG4 as AFatrasG4
 from .SimulationHelpers import useVerboseTracking, useSimpleRungeStepper, useClassicalRK4Stepper, useNystromRK4Stepper
 from .SimulationHelpers import enableFastIDKiller as enableFastIDKiller
+from .SimulationHelpers import enableFastIDKillerAll as enableFastIDKillerAll
 
-__all__ = ['G4SignalCavern', 'CalHits', 'ParticleID','FatrasG4','AFatrasG4', 'FastCaloSim', 'useVerboseTracking', 'useSimpleRungeStepper', 'useClassicalRK4Stepper', 'useNystromRK4Stepper', 'enableFastIDKiller']
+__all__ = ['G4SignalCavern', 'CalHits', 'ParticleID','FatrasG4','AFatrasG4', 'FastCaloSim', 'useVerboseTracking', 'useSimpleRungeStepper', 'useClassicalRK4Stepper', 'useNystromRK4Stepper', 'enableFastIDKiller', 'enableFastIDKillerAll']
