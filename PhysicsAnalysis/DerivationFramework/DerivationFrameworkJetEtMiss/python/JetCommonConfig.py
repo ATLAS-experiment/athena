@@ -101,7 +101,7 @@ def AddJvtDecorationAlgCfg(ConfigFlags, algName = "JvtPassDecorAlg", jetContaine
 
 def DecorateHSTP(ConfigFlags):
     """ Determin if the process is Dijet and would therefore need HSTP filtering.
-    
+
         QCD multijet (dijet) simulations face an ambiguity between HS and pileup jets, 
         since both originate from the same physics process. Combined with JZ sample slicing, 
         large in-time pileup in low-pT slices can cause events to leak into higher kinematic regimes, 
@@ -112,43 +112,56 @@ def DecorateHSTP(ConfigFlags):
     """
 
     from AthenaConfiguration.AutoConfigFlags import GetFileMD
-    from PathResolver import PathResolver
+    #from PathResolver import PathResolver
     import os
 
     dsid         = GetFileMD(ConfigFlags.Input.Files).get("mc_channel_number", 0)
     mc_campaign  = str(ConfigFlags.Input.MCCampaign)
-    pmgxsec_file = None
     sample_name  = None
+    candidates   = []
+    pmgxsec_files = []
+    pmg_dir = None
+
+    for calib_dir in os.environ.get("CALIBPATH", "").split(":"):
+        pmg_dir = os.path.join(calib_dir, "dev/PMGTools")
+        if not os.path.isdir(pmg_dir):
+            continue
 
     # First try MCCampaign
     if "MC" in mc_campaign:
       mc_number = mc_campaign.split("MC", 1)[1]
       mc_number = mc_number.rstrip("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
-      if mc_number.isdigit():
-        pmgxsec_file = PathResolver.FindCalibFile( f"dev/PMGTools/PMGxsecDB_mc{mc_number}.txt")
-        with open(pmgxsec_file) as xsec_file:
-            for line in xsec_file:
-                fields = line.split()
-                if fields and fields[0] == str(dsid):
-                    sample_name = fields[1]
-                    break
+      if mc_number.isdigit(): 
+        candidate = os.path.join(pmg_dir, f"PMGxsecDB_mc{mc_number}.txt")
+        if os.path.isfile(candidate):
+            candidates.append(candidate)
+        # candidate = PathResolver.FindCalibFile( f"dev/PMGTools/PMGxsecDB_mc{mc_number}.txt" )
+        # if candidate:
+        #   pmgxsec_files.append(candidate)
 
-    # If MC number not saved (fro Ex: "campaign.undefined"), searching all available databases
-    if not pmgxsec_file:
-      calib_dir = PathResolver.FindCalibDirectory("dev/PMGTools")
-      for filename in os.listdir(calib_dir):
-        if not filename.startswith("PMGxsecDB_mc") or not filename.endswith((".txt", "_14TeV.txt")):
+    else:# If MC number not saved (for Ex: "campaign.undefined"), searching all available databases
+        print("Not in MC")
+        # calib_dir = PathResolver.FindCalibDirectory("dev/PMGTools")
+        for filename in os.listdir(pmg_dir):
+          if not filename.startswith("PMGxsecDB_mc") or not filename.endswith(".txt"):
             continue
-        if not filename[12:-4].removesuffix("_14TeV").isdigit():
-            continue
-        candidate = os.path.join(calib_dir, filename) # open valid files and search for dsid / file name
-        with open(candidate) as xsec_file:
-          for line in xsec_file:
-            fields = line.split()
-            if fields and fields[0] == str(dsid):
-              pmgxsec_file = str(candidate)
-              sample_name = fields[1]
-              break
+          mc_part = filename[12:-4]  # accept files with names with TeV in, for ex: "PMGxsecDB_mc15_14TeV.tex
+          if "_TeV" in mc_part:
+            mc_part = mc_part.rsplit("_", 1)[0]
+          if mc_part.isdigit():
+            pmgxsec_files.append(os.path.join(pmg_dir, filename))
+
+    # Search all selected xSecDB files for the DSID
+    for candidate in pmgxsec_files:
+      with open(candidate) as xsec_file:
+        for line in xsec_file:
+          fields = line.split()
+          if len(fields) >= 2 and fields[0] == str(dsid):
+            sample_name = fields[1]
+            break
+
+        if sample_name is not None:
+            break
 
     if sample_name is None:
         return False
@@ -156,6 +169,7 @@ def DecorateHSTP(ConfigFlags):
     is_jz_sample = any( f"JZ{i}" in sample_name for i in range(10) )
 
     return is_jz_sample
+
 
 
 def AddEventCleanFlagsCfg(ConfigFlags, workingPoints = ['Loose', 'Tight', 'LooseLLP']):
