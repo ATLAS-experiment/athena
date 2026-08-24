@@ -42,14 +42,41 @@ available from the command line or metadata, DumpGeo uses the default Run-3
 tag. The output filename reflects the geometry tag that was dumped; for
 example, `geometry-ATLAS-R3S-2021-03-02-00.db`.
 
-Optionally, you can specify which geometry tag to dump by using the
-`--detDescr` option; for example:
+The preferred way to select which geometry tag to dump is the `--detDescr`
+option. This is a dedicated DumpGeo command-line option, not a general Athena
+option. For example:
 
 ```sh
 python -m DumpGeo.DumpGeoConfig --detDescr=ATLAS-R2-2016-01-00-01
 ```
 
-After issuing the command, a file named `geometry-ATLAS-R2-2016-01-00-01.db` will be created in the run folder.
+After issuing the command, a file named
+`geometry-ATLAS-R2-2016-01-00-01.db` will be created in the run directory.
+
+The default standalone invocation is an input-less geometry job. It does not
+open an example EVNT file and therefore does not depend on a test input on
+CVMFS. To derive the geometry tag and other settings from a real input file,
+provide it explicitly:
+
+```sh
+python -m DumpGeo.DumpGeoConfig \
+    --filesInput=/path/to/events.pool.root
+```
+
+For example, the following command reads the geometry tag and detector
+configuration from an EVNT test file on CVMFS. This particular file contains
+a conditions tag that is inconsistent with its simulation database instance,
+so a compatible conditions tag must be set explicitly:
+
+```sh
+python -m DumpGeo.DumpGeoConfig \
+    --filesInput=/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/CampaignInputs/mc23/EVNT/mc23_13p6TeV.601229.PhPy8EG_A14_ttbar_hdamp258p75_SingleLep.evgen.EVNT.e8514/EVNT.32288062._002040.pool.root.1 \
+    IOVDb.GlobalTag=OFLCOND-MC23-SDR-RUN3-11-02 \
+    --outFilename=test-input-metadata.db
+```
+
+The geometry tag remains metadata-derived; only the incompatible conditions
+tag is overridden by this example.
 
 The geometry tag is selected with the following precedence:
 
@@ -160,28 +187,52 @@ In that way, we get meaningful, comprehensive checkboxes when visualizing the ou
 
 ### Additional Options
 
-You can use all the common Athena flags to steer the dump mechanism. 
+In addition to its dedicated options, DumpGeo can be steered with the standard
+Athena command-line options and configuration flags. Generic flags use the
+`Flag.Name=value` syntax. Some useful examples are:
 
-When ZDC geometry is enabled with a geometry tag that is not one of the known
-ZDC tags, DumpGeo prints a warning before configuration. In standalone mode,
-the warning is repeated after the Athena run so that it remains visible after
-the geometry initialization messages.
+```sh
+# Select the geometry tag through the standard Athena flag.
+python -m DumpGeo.DumpGeoConfig \
+    GeoModel.AtlasVersion=ATLAS-R3S-2021-03-03-00
+
+# Enable the ZDC geometry.
+python -m DumpGeo.DumpGeoConfig \
+    --detDescr=ATLAS-R3S-2021-03-02-00 \
+    Detector.GeometryZDC=True
+
+# Read geometry and detector configuration from input-file metadata.
+python -m DumpGeo.DumpGeoConfig \
+    --filesInput=/path/to/events.pool.root
+
+# Override the conditions tag through a standard Athena flag.
+python -m DumpGeo.DumpGeoConfig \
+    IOVDb.GlobalTag=OFLCOND-MC23-SDR-RUN3-11-02
+
+# Increase the Athena logging verbosity.
+python -m DumpGeo.DumpGeoConfig --loglevel=DEBUG
+```
+
+ZDC geometry compatibility is validated by `ZDC_DetTool` while GeoModel is
+initialized. If geometry-service initialization fails before the DumpGeo
+algorithm can run, standalone DumpGeo prints a final reminder to inspect the
+preceding ZDC tool diagnostics.
 
 With the new CA configuration, you can use the `--help` option to get the list of all available options. 
 
-```bash
-$ python -m DumpGeo.DumpGeoConfig —help
+```sh
+python -m DumpGeo.DumpGeoConfig --help
 ```
 
 
 As soon as we add options to `DumpGeo`, you will get the new ones listed at the bottom of the “help” output, after the common Athena options
 
-```sh
-$ python -m DumpGeo.DumpGeoConfig —help
+```text
+python -m DumpGeo.DumpGeoConfig --help
 
 [...Athena options...]
 
---detDescr TAG                           The ATLAS geometry tag you want to dump (a convenience alias for the Athena flag 'GeoModel.AtlasVersion=TAG') (default: ATLAS-R3S-2021-03-02-00)
+--detDescr TAG                           Override the ATLAS geometry tag. This is a convenience alias for 'GeoModel.AtlasVersion=TAG'.
 
 --filterDetManagers FILTERDETMANAGERS    Only output the GeoModel Detector Managers specified in the FILTER list; input is a comma-separated list (default: None)
 
@@ -209,7 +260,8 @@ The tests cover:
 * non-destructive output-file preflight when overwrite is enabled;
 * suppression of configuration-flag dumps below the debug logging level;
 * geometry-tag precedence and its use in automatic output filenames;
-* ZDC warning selection for enabled, disabled, and known-tag configurations; and
+* recognition of empty, placeholder, and real input-file configurations;
+* the final ZDC diagnostic reminder after a failed standalone run; and
 * the configurable algorithm name.
 
 All tests are regular regression tests and are expected to pass.
