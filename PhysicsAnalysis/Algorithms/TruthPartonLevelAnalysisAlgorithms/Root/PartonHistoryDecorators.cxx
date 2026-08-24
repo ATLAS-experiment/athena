@@ -100,56 +100,60 @@ void CalcPartonHistory::Initialize4TopDecorators() {
   }
 }
 
-void CalcPartonHistory::InitializeTopDecorators() {
+void CalcPartonHistory::InitializeTopDecorators(bool fcnc) {
+  std:: string quarkSymbol = fcnc ? "q" : "b";
+  std::string bosonSymbol = fcnc ? "X" : "W";
   m_dec.initializePtEtaPhiMDecorator("MC_t_beforeFSR");
-  m_dec.initializePtEtaPhiMDecorator("MC_b_beforeFSR_from_t");
-  m_dec.initializePtEtaPhiMDecorator("MC_W_beforeFSR_from_t");
-  m_dec.initializePtEtaPhiMDecorator("MC_Wdecay1_beforeFSR_from_t");
-  m_dec.initializePtEtaPhiMDecorator("MC_Wdecay2_beforeFSR_from_t");
+  m_dec.initializePtEtaPhiMDecorator("MC_" + quarkSymbol + "_beforeFSR_from_t");
+  m_dec.initializePtEtaPhiMDecorator("MC_" + bosonSymbol + "_beforeFSR_from_t");
+  m_dec.initializePtEtaPhiMDecorator("MC_" + bosonSymbol + "decay1_beforeFSR_from_t");
+  m_dec.initializePtEtaPhiMDecorator("MC_" + bosonSymbol + "decay2_beforeFSR_from_t");
 
   m_dec.initializePtEtaPhiMDecorator("MC_t_afterFSR");
-  m_dec.initializePtEtaPhiMDecorator("MC_b_afterFSR_from_t");
-  m_dec.initializePtEtaPhiMDecorator("MC_W_afterFSR_from_t");
-  m_dec.initializePtEtaPhiMDecorator("MC_Wdecay1_afterFSR_from_t");
-  m_dec.initializePtEtaPhiMDecorator("MC_Wdecay2_afterFSR_from_t");
+  m_dec.initializePtEtaPhiMDecorator("MC_" + quarkSymbol + "_afterFSR_from_t");
+  m_dec.initializePtEtaPhiMDecorator("MC_" + bosonSymbol + "_afterFSR_from_t");
+  m_dec.initializePtEtaPhiMDecorator("MC_" + bosonSymbol + "decay1_afterFSR_from_t");
+  m_dec.initializePtEtaPhiMDecorator("MC_" + bosonSymbol + "decay2_afterFSR_from_t");
 
   m_dec.initializeIntDecorator("MC_t_beforeFSR_pdgId");
-  m_dec.initializeIntDecorator("MC_b_beforeFSR_from_t_pdgId");
-  m_dec.initializeIntDecorator("MC_W_beforeFSR_from_t_pdgId");
-  m_dec.initializeIntDecorator("MC_Wdecay1_beforeFSR_from_t_pdgId");
-  m_dec.initializeIntDecorator("MC_Wdecay2_beforeFSR_from_t_pdgId");
+  m_dec.initializeIntDecorator("MC_" + quarkSymbol + "_beforeFSR_from_t_pdgId");
+  m_dec.initializeIntDecorator("MC_" + bosonSymbol + "_beforeFSR_from_t_pdgId");
+  m_dec.initializeIntDecorator("MC_" + bosonSymbol + "decay1_beforeFSR_from_t_pdgId");
+  m_dec.initializeIntDecorator("MC_" + bosonSymbol + "decay2_beforeFSR_from_t_pdgId");
 
   m_dec.initializeIntDecorator("MC_t_afterFSR_pdgId");
-  m_dec.initializeIntDecorator("MC_b_afterFSR_from_t_pdgId");
-  m_dec.initializeIntDecorator("MC_W_afterFSR_from_t_pdgId");
-  m_dec.initializeIntDecorator("MC_Wdecay1_afterFSR_from_t_pdgId");
-  m_dec.initializeIntDecorator("MC_Wdecay2_afterFSR_from_t_pdgId");
+  m_dec.initializeIntDecorator("MC_" + quarkSymbol + "_afterFSR_from_t_pdgId");
+  m_dec.initializeIntDecorator("MC_" + bosonSymbol + "_afterFSR_from_t_pdgId");
+  m_dec.initializeIntDecorator("MC_" + bosonSymbol + "decay1_afterFSR_from_t_pdgId");
+  m_dec.initializeIntDecorator("MC_" + bosonSymbol + "decay2_afterFSR_from_t_pdgId");
 }
 
-void CalcPartonHistory::InitializeAntiTopDecorators() {
+void CalcPartonHistory::InitializeAntiTopDecorators(bool fcnc) {
+  std:: string quarkSymbol = fcnc ? "qbar" : "bbar";
+  std::string bosonSymbol = fcnc ? "X" : "W";
   m_dec.initializePtEtaPhiMDecorator("MC_tbar_beforeFSR");
-  m_dec.initializePtEtaPhiMDecorator("MC_bbar_beforeFSR_from_tbar");
-  m_dec.initializePtEtaPhiMDecorator("MC_W_beforeFSR_from_tbar");
-  m_dec.initializePtEtaPhiMDecorator("MC_Wdecay1_beforeFSR_from_tbar");
-  m_dec.initializePtEtaPhiMDecorator("MC_Wdecay2_beforeFSR_from_tbar");
+  m_dec.initializePtEtaPhiMDecorator("MC_" + quarkSymbol + "_beforeFSR_from_tbar");
+  m_dec.initializePtEtaPhiMDecorator("MC_" + bosonSymbol + "_beforeFSR_from_tbar");
+  m_dec.initializePtEtaPhiMDecorator("MC_" + bosonSymbol + "decay1_beforeFSR_from_tbar");
+  m_dec.initializePtEtaPhiMDecorator("MC_" + bosonSymbol + "decay2_beforeFSR_from_tbar");
 
   m_dec.initializePtEtaPhiMDecorator("MC_tbar_afterFSR");
-  m_dec.initializePtEtaPhiMDecorator("MC_bbar_afterFSR_from_tbar");
-  m_dec.initializePtEtaPhiMDecorator("MC_W_afterFSR_from_tbar");
-  m_dec.initializePtEtaPhiMDecorator("MC_Wdecay1_afterFSR_from_tbar");
-  m_dec.initializePtEtaPhiMDecorator("MC_Wdecay2_afterFSR_from_tbar");
+  m_dec.initializePtEtaPhiMDecorator("MC_" + quarkSymbol + "_afterFSR_from_tbar");
+  m_dec.initializePtEtaPhiMDecorator("MC_" + bosonSymbol + "_afterFSR_from_tbar");
+  m_dec.initializePtEtaPhiMDecorator("MC_" + bosonSymbol + "decay1_afterFSR_from_tbar");
+  m_dec.initializePtEtaPhiMDecorator("MC_" + bosonSymbol + "decay2_afterFSR_from_tbar");
 
   m_dec.initializeIntDecorator("MC_tbar_beforeFSR_pdgId");
-  m_dec.initializeIntDecorator("MC_bbar_beforeFSR_from_tbar_pdgId");
-  m_dec.initializeIntDecorator("MC_W_beforeFSR_from_tbar_pdgId");
-  m_dec.initializeIntDecorator("MC_Wdecay1_beforeFSR_from_tbar_pdgId");
-  m_dec.initializeIntDecorator("MC_Wdecay2_beforeFSR_from_tbar_pdgId");
+  m_dec.initializeIntDecorator("MC_" + quarkSymbol + "_beforeFSR_from_tbar_pdgId");
+  m_dec.initializeIntDecorator("MC_" + bosonSymbol + "_beforeFSR_from_tbar_pdgId");
+  m_dec.initializeIntDecorator("MC_" + bosonSymbol + "decay1_beforeFSR_from_tbar_pdgId");
+  m_dec.initializeIntDecorator("MC_" + bosonSymbol + "decay2_beforeFSR_from_tbar_pdgId");
 
   m_dec.initializeIntDecorator("MC_tbar_afterFSR_pdgId");
-  m_dec.initializeIntDecorator("MC_bbar_afterFSR_from_tbar_pdgId");
-  m_dec.initializeIntDecorator("MC_W_afterFSR_from_tbar_pdgId");
-  m_dec.initializeIntDecorator("MC_Wdecay1_afterFSR_from_tbar_pdgId");
-  m_dec.initializeIntDecorator("MC_Wdecay2_afterFSR_from_tbar_pdgId");
+  m_dec.initializeIntDecorator("MC_" + quarkSymbol + "_afterFSR_from_tbar_pdgId");
+  m_dec.initializeIntDecorator("MC_" + bosonSymbol + "_afterFSR_from_tbar_pdgId");
+  m_dec.initializeIntDecorator("MC_" + bosonSymbol + "decay1_afterFSR_from_tbar_pdgId");
+  m_dec.initializeIntDecorator("MC_" + bosonSymbol + "decay2_afterFSR_from_tbar_pdgId");
 }
 
 void CalcPartonHistory::InitializeBottomDecorators() {
