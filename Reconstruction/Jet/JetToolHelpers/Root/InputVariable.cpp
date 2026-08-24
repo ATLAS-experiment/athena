@@ -68,6 +68,12 @@ namespace JetHelper{
 					       return std::abs(jet.getAttribute<float>("DetectorEta"));
 					     });
 
+    if (name == "absConstEta")
+      return std::make_unique<InputVariable>(name,
+                                             [](const xAOD::Jet& jet, const JetContext&) {
+                                               return std::abs(jet.getAttribute<float>("JetConstitScaleMomentum_eta"));
+                                             });
+
     if (name == "LOGmOe")
       return std::make_unique<InputVariable>(name,
 					     [](const xAOD::Jet& jet, const JetContext&) {

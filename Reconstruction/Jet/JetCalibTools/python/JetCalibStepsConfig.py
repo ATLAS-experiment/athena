@@ -53,6 +53,11 @@ def smearingStep(flags, **configDict):
 
     return [smearStep]
 
+def areaStep(flags, **configDict):
+    configDict.setdefault('OutScale', 'JetPileupScaleMomentum')
+    area_step = CompFactory.PileupAreaCalibStep("PUArea", **configDict)
+    return [area_step]
+
 def puresidualStep(flags, **configDict):
     configDict.setdefault('OutScale', 'JetPileupScaleMomentum')
     configDict.setdefault('IsData', not flags.Input.isMC)
@@ -278,7 +283,7 @@ def mc2mcStep(flags, **configDic):
 #####################
     
 calibStepDic = dict(
-    JetArea = None,
+    JetArea = areaStep,
     Residual = puresidualStep,
     ResidualNew = newpuresidualStep,
     EtaJES = etajesStep,
