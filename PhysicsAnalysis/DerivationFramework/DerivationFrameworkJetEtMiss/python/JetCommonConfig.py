@@ -104,24 +104,46 @@ def DecorateHSTP(ConfigFlags):
 
     from AthenaConfiguration.AutoConfigFlags import GetFileMD
     from PathResolver import PathResolver
+    import os
 
     dsid         = GetFileMD(ConfigFlags.Input.Files).get("mc_channel_number", 0)
     mc_campaign  = str(ConfigFlags.Input.MCCampaign)
-    mc_number    = mc_campaign.split("MC", 1)[1]
-    mc_number    = mc_number.rstrip("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
-    pmgxsec_file = PathResolver.FindCalibFile(f"dev/PMGTools/PMGxsecDB_mc{mc_number}.txt")
+    pmgxsec_file = None
     sample_name  = None
 
-    with open(pmgxsec_file) as xsec_file:
-        for line in xsec_file:
+    # First try MCCampaign
+    if "MC" in mc_campaign:
+      mc_number = mc_campaign.split("MC", 1)[1]
+      mc_number = mc_number.rstrip("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
+      if mc_number.isdigit():
+        pmgxsec_file = PathResolver.FindCalibFile( f"dev/PMGTools/PMGxsecDB_mc{mc_number}.txt")
+        with open(pmgxsec_file) as xsec_file:
+            for line in xsec_file:
+                fields = line.split()
+                if fields and fields[0] == str(dsid):
+                    sample_name = fields[1]
+                    break
+
+    # If MC number not saved (fro Ex: "campaign.undefined"), searching all available databases
+    if not pmgxsec_file:
+      calib_dir = PathResolver.FindCalibDirectory("dev/PMGTools")
+      for filename in os.listdir(calib_dir):
+        if not filename.startswith("PMGxsecDB_mc") or not filename.endswith((".txt", "_14TeV.txt")):
+            continue
+        if not filename[12:-4].removesuffix("_14TeV").isdigit():
+            continue
+        candidate = os.path.join(calib_dir, filename) # open valid files and search for dsid / file name
+        with open(candidate) as xsec_file:
+          for line in xsec_file:
             fields = line.split()
             if fields and fields[0] == str(dsid):
-                sample_name = fields[1]
-                break
+              pmgxsec_file = str(candidate)
+              sample_name = fields[1]
+              break
 
     if sample_name is None:
         return False
-
+        
     is_jz_sample = any( f"JZ{i}" in sample_name for i in range(10) )
 
     return is_jz_sample
