@@ -36,12 +36,25 @@ namespace GlobalSim {
   }
 
   
-  StatusCode CommonMultAlgTool::countPassingTOBs(const EventContext& ctx, unsigned int& N_pass_tobs) const {
+  StatusCode
+  CommonMultAlgTool::countPassingTOBs(const EventContext& ctx,
+				      const std::unique_ptr<IDataCollector>& dc, 
+
+				      unsigned int& N_pass_tobs) const {
     auto tobs =
       SG::ReadHandle<GlobalSim::IOBitwise::CommonTOBContainer>(m_CommonTOBContainerKey,
 								  ctx);
 
     CHECK(tobs.isValid());
+
+    if(dc){
+      std::stringstream ss;
+      ss << "number of  tobs "<< tobs->size() << '\n';
+      dc->collect(*this, ss.str());
+      for (const GlobalSim::IOBitwise::CommonTOB* t : *tobs){
+	dc->collect(*this, t->to_string());
+      }
+    }
 
     // check if any of the incoming tobs is selected.
     N_pass_tobs = 0;
