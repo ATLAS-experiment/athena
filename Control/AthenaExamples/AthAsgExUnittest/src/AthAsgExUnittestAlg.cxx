@@ -5,6 +5,7 @@
 
 // AthAsgExUnittest includes
 #include "AthAsgExUnittestAlg.h"
+#include "Gaudi/PropertyFmt.h"
 
 AthAsgExUnittestAlg::AthAsgExUnittestAlg( const std::string& name, 
 			    ISvcLocator* pSvcLocator ) : 
@@ -17,19 +18,19 @@ AthAsgExUnittestAlg::~AthAsgExUnittestAlg() {}
 
 
 StatusCode AthAsgExUnittestAlg::initialize() {
-  ATH_MSG_INFO( "Initializing " << name() << "..." );
-  ATH_MSG_INFO( "MyProperty = " << m_property );
+  ATH_MSG_INFO( "Initializing {}...", name() );
+  ATH_MSG_INFO( "MyProperty = {}", m_property );
   CHECK(m_tool.retrieve());
   return StatusCode::SUCCESS;
 }
 
 StatusCode AthAsgExUnittestAlg::finalize() {
-  ATH_MSG_INFO( "Finalizing " << name() << "..." );
+  ATH_MSG_INFO( "Finalizing {}...", name() );
   return StatusCode::SUCCESS;
 }
 
 StatusCode AthAsgExUnittestAlg::execute(const EventContext& ctx) {
-  ATH_MSG_DEBUG( "Executing " << name() << "..." );
+  ATH_MSG_DEBUG( "Executing {}...", name() );
   setFilterPassed(false, ctx); //optional: start with algorithm not passed
 
   // Real algorithm here
