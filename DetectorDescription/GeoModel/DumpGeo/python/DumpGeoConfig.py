@@ -147,6 +147,35 @@ def resolveDumpGeoGeometryTag(det_descr, configured_tag, fallback_tag):
     return fallback_tag
 
 
+def dumpGeoHasInputFiles(input_files):
+    """Return whether standalone DumpGeo was given real input files."""
+    return bool(input_files) and input_files != [
+        "_ATHENA_GENERIC_INPUTFILE_NAME_"
+    ]
+
+
+def configureDumpGeoInputFlags(flags):
+    """Configure deterministic defaults for an input-less standalone job."""
+    if dumpGeoHasInputFiles(flags.Input.Files):
+        return False
+
+    from Campaigns.Utils import Campaign
+    from AthenaConfiguration.TestDefaults import defaultConditionsTags
+
+    flags.Input.Files = []
+
+    # MainServicesCfg and detector configuration require these normally
+    # metadata-derived flags to be initialized for an input-less job.
+    flags.Input.ProjectName = "mc23_13p6TeV"
+    flags.Input.RunNumbers = [330000]
+    flags.Input.TimeStamps = [1]
+    flags.Input.TypedCollections = []
+    flags.IOVDb.GlobalTag = defaultConditionsTags.RUN3_MC
+    flags.Input.isMC = True
+    flags.Input.MCCampaign = Campaign.Unknown
+    return True
+
+
 def validateDumpGeoOutputFile(output_file, force_overwrite):
     """Reject an existing output file unless overwrite is enabled."""
     if os.path.exists(output_file) and not force_overwrite:
@@ -158,36 +187,14 @@ def validateDumpGeoOutputFile(output_file, force_overwrite):
         )
 
 
-def zdcGeometryWarning(flags, default_geometry_tags):
-    """Return logger arguments for an incompatible ZDC geometry tag."""
-    if not flags.Detector.GeometryZDC:
-        return None
-
-    known_zdc_tags = {
-        default_geometry_tags.RUN2_ZDC,
-        default_geometry_tags.RUN3_ZDC23,
-        default_geometry_tags.RUN3_ZDC24,
-    }
-    if flags.GeoModel.AtlasVersion in known_zdc_tags:
-        return None
-
-    return (
-        "ZDC geometry was enabled with geometry tag '%s', which may "
-        "not contain a ZDC GeoDB payload. Consider using "
-        "--detDescr=%s or --detDescr=%s for Run 3.",
-        flags.GeoModel.AtlasVersion,
-        default_geometry_tags.RUN3_ZDC23,
-        default_geometry_tags.RUN3_ZDC24,
-    )
-
-
-def logZDCGeometryWarning(warning, repeated=False):
-    """Log a ZDC geometry warning, optionally as an end-of-run reminder."""
-    if not warning:
-        return
-    if repeated:
-        _logger.warning("Repeating the earlier ZDC geometry warning:")
-    _logger.warning(*warning)
+def logZDCFailureReminder(zdc_enabled, run_succeeded):
+    """Remind standalone users about ZDC diagnostics after a failed run."""
+    if zdc_enabled and not run_succeeded:
+        _logger.error(
+            "DumpGeo failed while ZDC geometry was enabled. Check the "
+            "preceding ZDC_DetTool messages: the selected geometry tag "
+            "may not contain ZDC geometry information."
+        )
 
 
 def DumpGeoCfg(flags, name="DumpGeoAlg", **kwargs):
@@ -313,8 +320,6 @@ if __name__=="__main__":
                         help="Show the content of the Treetops --- (by default, only the list of Treetops is shown)", action = 'store_true')
     parser.add_argument("--debugCA", help="Debug the CA configuration: print flags, tools, ... --- mainly, for DumpGeo developers. '1' prints a subset of the CA flags, '2' prints all of them.")
 
-    from AthenaConfiguration.TestDefaults import defaultTestFiles
-    parser.set_defaults(filesInput=f"{defaultTestFiles.EVNT[0]}")
     args = flags.fillFromArgs(parser=parser)
 
     # +++ Get CLI parameters and set the corresponding configuration flags
@@ -333,6 +338,13 @@ if __name__=="__main__":
         flags.GeoModel.DumpGeo.ShowTreetopContent = True
     if args.forceOverwrite:
         flags.GeoModel.DumpGeo.ForceOverwrite = True
+
+    # Athena uses a placeholder as the default Input.Files value. Treat that
+    # placeholder, as well as an explicitly empty list, as a genuine
+    # input-less job. In particular, do not replace it with a test EVNT file:
+    # standalone geometry dumping must not depend on CVMFS or on unrelated
+    # event-file metadata.
+    dumpgeo_empty_input = configureDumpGeoInputFlags(flags)
 
     # A custom filename is already final and can be checked without resolving
     # the geometry tag, which may otherwise require a metadata lookup.
@@ -366,8 +378,8 @@ if __name__=="__main__":
     # Fail as soon as the final geometry tag is known and before detector or
     # geometry configuration. Resolving a metadata-derived tag necessarily
     # performs the metadata lookup first. This check deliberately does not
-    # delete an existing file when force overwrite is enabled; deletion remains
-    # in DumpGeoCfg after configuration succeeds.
+    # delete an existing file when force overwrite is enabled; deletion is
+    # deferred to the C++ algorithm's initialize() method.
     validateDumpGeoOutputFile(
         dumpGeoOutputFileName(flags),
         flags.GeoModel.DumpGeo.ForceOverwrite,
@@ -433,12 +445,6 @@ if __name__=="__main__":
     )
     _logger.verbose("+ ... Done")
 
-    # ZDC geometry is stored only in dedicated geometry tags. Warn rather than
-    # silently replacing the user's selected tag, since the choice between the
-    # available ZDC layouts is significant.
-    zdc_warning = zdcGeometryWarning(flags, defaultGeometryTags)
-    logZDCGeometryWarning(zdc_warning)
-
     # finalize setting flags: lock them.
     flags.lock()
 
@@ -479,6 +485,9 @@ if __name__=="__main__":
     cfg.merge(DumpGeoCfg(flags))
     status = cfg.run()
 
-    logZDCGeometryWarning(zdc_warning, repeated=True)
+    logZDCFailureReminder(
+        flags.Detector.GeometryZDC,
+        status.isSuccess(),
+    )
 
     sys.exit(not status.isSuccess())
