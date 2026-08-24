@@ -5,7 +5,6 @@ from AnalysisAlgorithmsConfig.ConfigBlock import ConfigBlock
 from AnalysisAlgorithmsConfig.ConfigSequence import groupBlocks
 from AthenaCommon.SystemOfUnits	import GeV
 from AthenaConfiguration.Enums import LHCPeriod
-from AthenaConfiguration.AutoConfigFlags import GetFileMD
 from AnalysisAlgorithmsConfig.ConfigAccumulator import (
     DataType, Run4FallbackWarning, TestingOnlyWarning)
 import warnings
