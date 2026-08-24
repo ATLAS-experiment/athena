@@ -15,7 +15,7 @@
 
 // Framework include(s):
 #include "AsgTools/AsgMetadataTool.h"
-#include "AsgTools/AnaToolHandle.h"
+#include "AsgTools/ToolHandle.h"
 #include "AsgTools/PropertyWrapper.h"
 
 // Local include(s):
@@ -111,7 +111,7 @@ private:
   Gaudi::Property<std::vector<int>> m_vecEfficiencyCorrectionTypes{this, "EfficiencyCorrectionTypes", {}};
 
   std::vector<int> m_vEfficiencyCorrectionTypes;
-  asg::AnaToolHandle<ITauEfficiencyCorrectionsTool> m_tTool;
+  ToolHandle<ITauEfficiencyCorrectionsTool> m_tTool{this, "Tool", {}};
   std::string m_sInputFilePathDecayModeHadTau;
   std::string m_sVarName;
   bool m_bIsData;
