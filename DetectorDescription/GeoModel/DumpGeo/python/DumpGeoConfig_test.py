@@ -3,6 +3,7 @@
 """Unit tests for the DumpGeo ComponentAccumulator configuration."""
 
 import unittest
+from types import SimpleNamespace
 from unittest.mock import patch
 
 from AthenaConfiguration.AthConfigFlags import AthConfigFlags
@@ -10,6 +11,8 @@ from AthenaConfiguration.ComponentAccumulator import ConfigurationError
 
 from DumpGeo.DumpGeoConfig import (
     DumpGeoCfg,
+    configureDumpGeoInputFlags,
+    dumpGeoHasInputFiles,
     dumpGeoOutputFileName,
     logZDCFailureReminder,
     resolveDumpGeoGeometryTag,
@@ -242,6 +245,38 @@ class DumpGeoConfigTest(unittest.TestCase):
             resolveDumpGeoGeometryTag(None, None, "FALLBACK-TAG"),
             "FALLBACK-TAG",
         )
+
+    def test_input_file_detection(self):
+        """Only actual filenames enable input metadata configuration."""
+        self.assertFalse(dumpGeoHasInputFiles([]))
+        self.assertFalse(
+            dumpGeoHasInputFiles(["_ATHENA_GENERIC_INPUTFILE_NAME_"])
+        )
+        self.assertTrue(dumpGeoHasInputFiles(["events.pool.root"]))
+
+    def test_inputless_flags_are_initialized_without_an_event_file(self):
+        flags = SimpleNamespace(
+            Input=SimpleNamespace(
+                Files=["_ATHENA_GENERIC_INPUTFILE_NAME_"]
+            ),
+            IOVDb=SimpleNamespace(),
+        )
+
+        self.assertTrue(configureDumpGeoInputFlags(flags))
+        self.assertEqual(flags.Input.Files, [])
+        self.assertEqual(flags.Input.RunNumbers, [330000])
+        self.assertEqual(flags.Input.TimeStamps, [1])
+        self.assertEqual(flags.Input.TypedCollections, [])
+        self.assertTrue(flags.Input.isMC)
+
+    def test_real_input_files_are_preserved(self):
+        flags = SimpleNamespace(
+            Input=SimpleNamespace(Files=["events.pool.root"]),
+            IOVDb=SimpleNamespace(),
+        )
+
+        self.assertFalse(configureDumpGeoInputFlags(flags))
+        self.assertEqual(flags.Input.Files, ["events.pool.root"])
 
     def test_resolved_geometry_tag_is_used_in_output_filename(self):
         geometry_tag = resolveDumpGeoGeometryTag(
