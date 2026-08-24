@@ -724,7 +724,7 @@ def muEFSAFSAlgSequenceCfg(flags, suffix="", useBucketFilter=False):
     
     viewName=f"EFMuMSReco_FS{suffix}"
     ViewCreatorFSROITool=CompFactory.ViewCreatorFSROITool
-    roiTool         = ViewCreatorFSROITool(RoisWriteHandleKey="MuonFS_RoIs")
+    roiTool         = ViewCreatorFSROITool(RoisWriteHandleKey=f"MuonFS_RoIs{suffix}")
     requireParentView = False
                                                          
     recoMS = InViewRecoCA(name=viewName, RoITool = roiTool, RequireParentView = requireParentView)
