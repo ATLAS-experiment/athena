@@ -71,6 +71,7 @@ atlas_add_test( TileRawChannel2Bytes4_test
 atlas_add_test( TileROD_Decoder_test
                 SOURCES test/TileROD_Decoder_test.cxx
                 LINK_LIBRARIES TileByteStreamLib IdDictParser PathResolver TestTools
+                LOG_IGNORE_PATTERN "of type TileDetDescrManager"
                 ENVIRONMENT "JOBOPTSEARCHPATH=${CMAKE_CURRENT_SOURCE_DIR}/share" )
 
 atlas_add_test( TileHid2RESrcIDConfig_test
