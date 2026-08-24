@@ -41,7 +41,7 @@ Ntup::~Ntup()
 ////////////////////////////
 StatusCode Ntup::initialize()
 {
-  ATH_MSG_INFO ("Initializing " << name() << "...");
+  ATH_MSG_INFO ("Initializing {}...", name());
   ATH_CHECK( m_ntSvc.retrieve() );
   ATH_CHECK( m_evt.initialize() );
    
@@ -63,14 +63,14 @@ StatusCode Ntup::initialize()
 
 StatusCode Ntup::finalize()
 {
-  ATH_MSG_INFO ("Finalizing " << name() << "...");
+  ATH_MSG_INFO ("Finalizing {}...", name());
 
   return StatusCode::SUCCESS;
 }
 
 StatusCode Ntup::execute(const EventContext& ctx)
 {  
-  ATH_MSG_DEBUG ("Executing " << name() << "...");
+  ATH_MSG_DEBUG ("Executing {}...", name());
 
   // clear data...
   m_rundata.clear();
@@ -101,9 +101,9 @@ StatusCode Ntup::execute(const EventContext& ctx)
     ATH_MSG_WARNING("problems writing n-tuple");
   }
 
-  ATH_MSG_INFO("run: [" << m_run << "]" << endmsg <<
-               "size: [" << m_size << "]" << endmsg <<
-               "rundata-sz: [" << m_rundata.size() << "]");
+  ATH_MSG_INFO("run: [{}]", m_run);
+  ATH_MSG_INFO("size: [{}]", m_size);
+  ATH_MSG_INFO("rundata-sz: [{}]", m_rundata.size());
 
   return StatusCode::SUCCESS;
 }
