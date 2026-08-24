@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef CALORINGERTOOLS_CALORINGERREADERUTILS_ICC
@@ -122,7 +122,7 @@ void BuildCaloRingsFctor<container_t>::operator() ( const particle_t *part )
 
   if(!caloRingsLinks){
     // Decorate particle with CaloRings:
-    m_decor->operator()( *part ) = clRingsLinks;
+    m_decor->operator()( *part ) = std::move(clRingsLinks);
   }
 
   checkRelease();
