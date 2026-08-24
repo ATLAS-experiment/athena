@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 // Local include(s).
 #include "EvaluateModel.h"
@@ -25,10 +25,10 @@ namespace AthOnnx {
        }
      // read input file, and the target file for comparison.
      std::string pixelFilePath = PathResolver::find_calib_file(m_pixelFileName.value());
-     ATH_MSG_INFO( "Using pixel file: " << pixelFilePath );
+     ATH_MSG_INFO( "Using pixel file: {}", pixelFilePath );
   
      m_input_tensor_values_notFlat = EvaluateUtils::read_mnist_pixel_notFlat(pixelFilePath);
-      ATH_MSG_INFO("Total no. of samples: "<<m_input_tensor_values_notFlat.size());
+     ATH_MSG_INFO("Total no. of samples: {}", m_input_tensor_values_notFlat.size());
     
       return StatusCode::SUCCESS;
 }
@@ -44,7 +44,7 @@ namespace AthOnnx {
    }
 
    int64_t batchSize = m_onnxTool->getBatchSize(inputData.size());
-   ATH_MSG_INFO("Batch size is " << batchSize << ".");
+   ATH_MSG_INFO("Batch size is {}.", batchSize);
    assert(batchSize == m_batchSize);
 
    // bind the input data to the input tensor
@@ -65,14 +65,16 @@ namespace AthOnnx {
      	float max = -999;
      	int max_index = 0;
      	for (int i = 0; i < 10; i++){
-       		ATH_MSG_DEBUG("Score for class "<< i <<" = "<<outputScores[i] << " in batch " << ibatch);
+            ATH_MSG_DEBUG("Score for class {} = {} in batch {}",
+                          i, outputScores[i], ibatch);
             int index = i + ibatch * 10;
        		if (max < outputScores[index]){
           		max = outputScores[index];
           		max_index = index;
        		}
      	}
-      ATH_MSG_INFO("Class: "<<max_index<<" has the highest score: "<<outputScores[max_index] << " in batch " << ibatch);
+        ATH_MSG_INFO("Class: {} has the highest score: {} in batch {}",
+                     max_index, outputScores[max_index], ibatch);
    }
 
       return StatusCode::SUCCESS;
