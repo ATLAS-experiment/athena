@@ -382,9 +382,9 @@ bool FourMuonEvent::EventSelectionNew(ZTYPE eType)
     //
     if ( m_workAsFourMuons ) { // till here we have the muon vertices list
       m_nVertex = vtxListX.size(); 
-      if (vtxListX.size()>0) vertexstatus = true;
-      // check that the muons are not split into too many vertices
-      if (vtxListX.size() >= m_numberOfFullPassMuons - 1) vertexstatus = false;
+      // no point setting vertexstatus here, it will be overwritten before use 
+      // check that the muons are not split into too many vertices is therefore redundant
+      // no point setting vertexstatus here, it will be overwritten before use
       // noVertexCountMuon is zero here
       if (m_doDebug || true) {
 	std::cout << " * FourMuonEvent::EventSelection(" << eType <<") * vertices ID of the muons = " << std::endl
@@ -424,7 +424,7 @@ bool FourMuonEvent::EventSelectionNew(ZTYPE eType)
 	}
       }
     }
-      
+    //how temporary was this?
     vertexstatus = true; // Temporary fix to work on R22
 
     if(m_doDebug) {
