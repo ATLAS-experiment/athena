@@ -201,6 +201,10 @@ private:
   Gaudi::Property<bool> m_buildDetrayGeometry{this, "BuildDetrayGeometry", false,
       "Convert the constructed Acts::TrackingGeometry into a Detray geometry. "
       "Requires ACTS to have been built with the Detray plugin (Acts::PluginDetray)."};
+
+  Gaudi::Property<bool> m_checkDetrayGeometry{this, "CheckDetrayGeometry", true,
+      "Run the Detray consistency check on the converted geometry. "
+      "Only used when BuildDetrayGeometry is enabled."};
   
   Gaudi::Property<std::string> m_blueprintGraphviz{this, "BlueprintGraphviz", 
                                                    "", "Write the blueprint graph to a file. No file will be written if empty"};

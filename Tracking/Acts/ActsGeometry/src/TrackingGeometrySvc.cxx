@@ -43,6 +43,7 @@
 #include <ActsPlugins/Json/JsonMaterialDecorator.hpp>
 #include <ActsPlugins/Json/MaterialMapJsonConverter.hpp>
 #ifdef ACTSGEOMETRY_HAVE_DETRAY
+#include <detray/utils/consistency_checker.hpp>
 #include <vecmem/memory/host_memory_resource.hpp>
 #endif
 #include <Acts/Surfaces/PlanarBounds.hpp>
@@ -1320,19 +1321,33 @@ StatusCode TrackingGeometrySvc::buildDetrayGeometry() {
       makeActsAthenaLogger(this, "DetrayGeomCnv", std::string("ActsTGSvc")));
 
   vecmem::host_memory_resource mr;
+  ActsPlugins::DetrayGeometryConverter::DetrayGeometry<DetrayMetadata> detrayGeometry{};
   try {
-    auto detrayGeometry = converter.convert<DetrayMetadata>(
+    detrayGeometry = converter.convert<DetrayMetadata>(
         mr, getNominalContext().context(), m_trackingGeometry, name());
-    m_detrayGeometry = std::move(detrayGeometry.detector);
   } catch (const std::exception& e) {
     ATH_MSG_ERROR("Failed to convert the Acts::TrackingGeometry into a Detray geometry: " << e.what());
     return StatusCode::FAILURE;
   }
 
-  if (!m_detrayGeometry) {
+  if (!detrayGeometry.detector) {
     ATH_MSG_ERROR("Detray geometry conversion did not produce a detector");
     return StatusCode::FAILURE;
   }
+
+  if (m_checkDetrayGeometry) {
+    ATH_MSG_INFO("Checking the consistency of the converted Detray geometry");
+    try {
+      detray::detail::check_consistency(*detrayGeometry.detector, true,
+                                        detrayGeometry.names);
+    } catch (const std::exception& e) {
+      ATH_MSG_ERROR("The converted Detray geometry is not consistent: " << e.what());
+      return StatusCode::FAILURE;
+    }
+  }
+
+  m_detrayGeometry = std::move(detrayGeometry.detector);
+
   ATH_MSG_INFO("Successfully built the Detray geometry from the Acts::TrackingGeometry");
   return StatusCode::SUCCESS;
 }
