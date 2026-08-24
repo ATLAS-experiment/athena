@@ -1,7 +1,6 @@
 /*
- * Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration.
  */
-
 /**
  * @file AthenaBaseComps/test/AthAlgTool_test.cxx
  * @author scott snyder <snyder@bnl.gov>
@@ -21,7 +20,7 @@
 #include "AthenaKernel/errorcheck.h"
 #include <vector>
 #include <cassert>
-#include <iostream>
+#include <print>
 
 
 namespace AthenaBaseCompsTest {
@@ -118,13 +117,13 @@ void comphandles (const std::vector<Gaudi::DataHandle*>& hvec,
   std::sort (hkeys.begin(), hkeys.end());
   std::sort (keys.begin(), keys.end());
   if (keys != hkeys) {
-    std::cout << "Handle list mismatch.\n";
-    std::cout << "Expected: ";
-    for (const std::string& s : keys) std::cout << s << " ";
-    std::cout << "\n:";
-    std::cout << "Got: ";
-    for (const std::string& s : hkeys) std::cout << s << " ";
-    std::cout << "\n:";
+    std::println ("Handle list mismatch.");
+    std::println ("Expected: ");
+    for (const std::string& s : keys) std::print ("{} ", s);
+    std::println();
+    std::print ("Got: ");
+    for (const std::string& s : hkeys) std::print ("{} ", s);
+    std::println();
     std::abort();
   }
 }
@@ -132,7 +131,7 @@ void comphandles (const std::vector<Gaudi::DataHandle*>& hvec,
 
 void test1 (ISvcLocator* svcloc)
 {
-  std::cout << "test1\n";
+  std::println ("test1");
 
   MyAlg alg ("toolalg", svcloc);  alg.addRef();
   MyAlgTool tool ("MyAlgTool", "tool2", &alg);  tool.addRef();
@@ -155,7 +154,7 @@ void test1 (ISvcLocator* svcloc)
   std::vector<std::string> extraInputKeys { "StoreGateSvc+thh" };
   assert (tool.extra_inputs.size() == extraInputKeys.size());
   for (size_t i = 0; i < tool.extra_inputs.size(); i++) {
-    // std::cout << "extra inp " << tool.extra_inputs[i].key() << "\n";
+    // std::println ("extra inp {}", tool.extra_inputs[i].key());
     assert (tool.extra_inputs[i].key() == extraInputKeys[i]);
   }
 
@@ -167,7 +166,7 @@ void test1 (ISvcLocator* svcloc)
   };
   if (exp != tool.outputDataObjs()) {
     for (const DataObjID& o : tool.outputDataObjs()) {
-      std::cout << "obj " << o.clid() << " " << o.key() << "\n";
+      std::println ("obj {} {}", o.clid(), o.key());
     }
   }
 }
@@ -205,7 +204,7 @@ MyArrAlgTool::MyArrAlgTool (const std::string& type,
 // Testing handle arrays.
 void test2 (ISvcLocator* svcLoc)
 {
-  std::cout << "test2\n";
+  std::println ("test2");
 
   MyAlg alg ("arralg", svcLoc);  alg.addRef();
   MyArrAlgTool tool ("MyAlgTool", "arrtool", &alg);  tool.addRef();

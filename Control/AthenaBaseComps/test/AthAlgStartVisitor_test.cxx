@@ -1,8 +1,6 @@
 /*
   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
-/*
- */
 /**
  * @file AthenaBaseComps/test/AthAlgStartVisitor_test.cxx
  * @author scott snyder <snyder@bnl.gov>
@@ -15,7 +13,7 @@
 #include "AthenaBaseComps/AthAlgorithm.h"
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "TestTools/initGaudi.h"
-#include <iostream>
+#include <print>
 #include <cassert>
 
 
@@ -60,7 +58,7 @@ public:
 
 void test1 (ISvcLocator* svcLoc)
 {
-  std::cout << "test1\n";
+  std::println ("test1");
 
   TestHandleKey h1 ("h1");
   TestHandleKey h2 ("h2");
@@ -126,7 +124,7 @@ int main()
   if (!Athena_test::initGaudi ("propertyHandling_test.txt", svcLoc))
     return 1;
 
-  std::cout << "AthAlgStartVisitor_test\n";
+  std::println ("AthAlgStartVisitor_test");
   test1 (svcLoc);
   return 0;
 }

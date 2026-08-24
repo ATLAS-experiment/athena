@@ -28,25 +28,25 @@ FilteredAlgorithm::initialize()
 
   // Register stream, no matter what Properties it has
   if (!m_decSvc->addStream(this->name()).isSuccess()) {
-    ATH_MSG_ERROR("Couldn't add stream " << this->name());
+    ATH_MSG_ERROR("Couldn't add stream {}", this->name());
   }
 
   // Propagate the FilteredAlgorithm's Properties to IDecisionSvc
   for (const std::string& alg : m_acceptNames.value()) {
     if (!m_decSvc->addAcceptAlg(alg, this->name()).isSuccess()) {
-      ATH_MSG_ERROR("Could not add '" << alg << "' to AcceptAlg list");
+      ATH_MSG_ERROR("Could not add '{}' to AcceptAlg list", alg);
     }
   }
 
   for (const std::string& alg : m_requireNames.value()) {
     if (!m_decSvc->addRequireAlg(alg, this->name()).isSuccess()) {
-      ATH_MSG_ERROR("Could not add '" << alg << "' to RequireAlg list");
+      ATH_MSG_ERROR("Could not add '{}' to RequireAlg list", alg);
     }
   }
 
   for (const std::string& alg : m_vetoNames.value()) {
     if (!m_decSvc->addVetoAlg(alg, this->name()).isSuccess()) {
-      ATH_MSG_ERROR("Could not add '" << alg << "' to VetoAlg list");
+      ATH_MSG_ERROR("Could not add '{}' to VetoAlg list", alg);
     }
   }
 

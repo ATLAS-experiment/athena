@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // AthCnvSvc.cxx 
@@ -80,7 +80,7 @@ AthCnvSvc::~AthCnvSvc()
     m_dataSvc = 0;
   }
 
-  ATH_MSG_DEBUG ("release-ing all workers (" << m_workers.size() << ")...");
+  ATH_MSG_DEBUG ("release-ing all workers ({})...", m_workers.size());
   for ( Workers::iterator
 	  i    = m_workers.begin(),
 	  iend = m_workers.end();
@@ -94,7 +94,7 @@ AthCnvSvc::~AthCnvSvc()
       }
     }
   }
-  ATH_MSG_DEBUG ("release-ing all workers (" << m_workers.size() << ")... [done]");
+  ATH_MSG_DEBUG ("release-ing all workers ({})... [done]", m_workers.size());
   m_workers.clear();
 
 }
@@ -118,7 +118,7 @@ StatusCode AthCnvSvc::finalize()
 	i != iend;
 	++i ) {
     if (!i->second.converter()->finalize().isSuccess()) {
-      ATH_MSG_ERROR ("finalizing worker w/ clid=[" << i->first << "]");
+      ATH_MSG_ERROR ("finalizing worker w/ clid=[{}]", i->first);
     }
     i->second.converter()->release();
   }
@@ -375,7 +375,7 @@ AthCnvSvc::converter(const CLID& clid)
       return worker->second.converter();
     }
   } else {
-    ATH_MSG_INFO("problem adding converter for CLID [" << clid << "]");
+    ATH_MSG_INFO("problem adding converter for CLID [{}]", clid);
   }
   return 0;
 }
@@ -579,11 +579,9 @@ AthCnvSvc::makeCall (int typ,
         return status;
       }
       status.ignore();
-      msg(MSG::INFO) << "No converter for object ";
-      if ( pObject != 0 )   {
-        msg(MSG::INFO) << System::typeinfoName(typeid(*pObject));
-      }
-      msg(MSG::INFO) << "  CLID= " << obj_class << endmsg;
+      ATH_MSG_INFO("No converter for object {}  CLID={}",
+                   pObject != 0 ? System::typeinfoName(typeid(*pObject)) : "",
+                   obj_class);
       return Status::NO_CONVERTER;
     }
     return Status::INVALID_OBJECT;

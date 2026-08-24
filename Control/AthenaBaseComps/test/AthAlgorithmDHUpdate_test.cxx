@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration.
  */
 /**
  * @file AthenaBaseComps/test/AthAlgorithmDHUpdate_test.cxx
@@ -15,7 +15,7 @@
 #include "AthenaKernel/BaseInfo.h"
 #include "TestTools/initGaudi.h"
 #include <cassert>
-#include <iostream>
+#include <print>
 
 
 class A2 {};
@@ -111,7 +111,7 @@ void TestChain::visit (const IDataHandleHolder* dhh)
 
 void test1()
 {
-  std::cout << "test1\n";
+  std::println ("test1");
 
   TestHolder h;
   Gaudi::DataHandle h1 (DataObjID (ClassID_traits<A1>::ID(), "a1"));
@@ -141,7 +141,7 @@ void test1()
 
   if (linkedObjs != exp) {
     for (const DataObjID& o : linkedObjs) {
-        std::cout << "linked " << o.clid() << " " << o.key() << "\n";
+      std::println ("linked {} {}", o.clid(), o.key());
     }
   }
 
