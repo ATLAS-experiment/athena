@@ -23,7 +23,7 @@ namespace GlobalSim {
     // If we only run TOB creators, then don't write the TIP word
     // as this leads to SG clashes (or spurious stuff in SG)
     CHECK(m_tipWordKey.initialize(!m_TIPwriters.empty()));
-    
+
     if (m_enableDumps) {
       std::stringstream ss;
       ss << "\nTOB creators (" << m_algTools.size() << ")\n";
@@ -67,36 +67,48 @@ namespace GlobalSim {
     using TIPWord = std::bitset<ITIPWriterAlgTool::s_nbits_TIP>;
 
     auto dc = std::unique_ptr<IDataCollector>(nullptr);
-    dc.reset(new BasicDataCollector());
+    if(m_enableDumps){
+      dc.reset(new BasicDataCollector());
+    }
 
     for (const auto& tool : m_algTools) {
       ATH_MSG_DEBUG("Running Algtool " << tool.name());
       CHECK(tool -> run(dc, ctx));
     }
 
-    if(!m_TIPwriters.empty()) {
-      auto tipword = std::make_unique<TIPWord>(); // all zeros
-      for (const auto& tool : m_TIPwriters) {
-        ATH_MSG_DEBUG("Collecting TIP bits  " << tool.name());
-        CHECK(tool -> updateTIP(*tipword, dc, ctx));
+    if(m_TIPwriters.empty()) {return StatusCode::SUCCESS;}
+      
+    auto tipword = std::make_unique<TIPWord>(); // all zeros
+    for (const auto& tool : m_TIPwriters) {
+      ATH_MSG_DEBUG("Collecting TIP bits  " << tool.name());
+      CHECK(tool -> updateTIP(*tipword, dc, ctx));
+    }
+
+    if (m_enableDumps) {
+      
+      {
+	std::stringstream ss;
+	ss << "\nRun " << ctx <<' ' << "TIP:\n" << *tipword << '\n';
+	
+	std::ofstream out(name() + "_tip.log", std::ios_base::app);
+	out << ss.str();
+	out.close();
       }
 
-      if (m_enableDumps) {
-        std::stringstream ss;
-        ss << "\nRun " << ctx <<' ' << "TIP:\n" << *tipword << '\n';
-        
-  
-        std::ofstream out(name() + "_tip.log", std::ios_base::app);
-        out << ss.str();
-        out.close();
+      {
+	std::stringstream ss;
+	ss << name() << "_datacol_"<< ctx.eventID().event_number()<<".log";
+	std::ofstream out(ss.str());
+	out << dc->to_string();
+	out.close();
       }
-      
-      ATH_MSG_DEBUG("TIP " << *tipword);
-      
-      // write out the selection result
-      SG::WriteHandle<TIPWord> h_write(m_tipWordKey, ctx);
-      CHECK(h_write.record(std::move(tipword)));
     }
+      
+    ATH_MSG_DEBUG("TIP " << *tipword);
+      
+    // write out the selection result
+    SG::WriteHandle<TIPWord> h_write(m_tipWordKey, ctx);
+    CHECK(h_write.record(std::move(tipword)));
     
     return StatusCode::SUCCESS;
   }
