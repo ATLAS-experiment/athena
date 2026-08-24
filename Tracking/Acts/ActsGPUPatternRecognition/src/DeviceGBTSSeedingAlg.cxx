@@ -9,6 +9,11 @@
 // traccc EDM
 #include "traccc/edm/silicon_cell_collection.hpp"
 #include "traccc/edm/measurement_collection.hpp"
+#include "TrigInDetPattRecoTools/GNN_FasTrackConnector.h"
+#include "TrigInDetPattRecoTools/GNN_Geometry.h"
+#include "PixelReadoutGeometry/PixelDetectorManager.h"
+
+#include "PathResolver/PathResolver.h"
 
 // vecmem
 #include "vecmem/memory/memory_resource.hpp"
@@ -17,6 +22,11 @@
 #include "ActsInterop/Logger.h"
 
 #include <fstream>
+#include <memory>
+#include <cstdint>
+#include <unordered_map>
+#include <algorithm>
+#include <vector>
 
 namespace ActsTrk {
 
@@ -132,8 +142,9 @@ StatusCode DeviceGBTSSeedingAlg::configureGBTS()
     IdContext pixel_context = m_pixelID->wafer_context();
     for (std::pair<std::uint64_t, Identifier> dToI : detrayToAthena) {
         if (m_pixelManager->identifierBelongs(dToI.second)) {
-            IdentifierHash idHash = 0;
-            m_pixelID->get_hash(dToI.second, idHash, &pixel_context);
+            IdentifierHash idHash{};//default c'tor produces detectable invalid hash
+            int rc = m_pixelID->get_hash(dToI.second, idHash, &pixel_context); //rc=0 is ok
+            if (rc!=0)[[unlikely]] continue; 
             identifierBinning.push_back(std::make_pair(
                 dToI.first, pixel_h2l->at(static_cast<int>(idHash))));
         }
@@ -142,7 +153,7 @@ StatusCode DeviceGBTSSeedingAlg::configureGBTS()
 
     std::vector<std::pair<unsigned int, std::vector<unsigned int>>> binGroups;
     {
-        const auto rawBinGroups = GBTS_geo->bin_groups();
+        const auto & rawBinGroups = GBTS_geo->bin_groups();
         binGroups.reserve(rawBinGroups.size());
         for (const auto& p : rawBinGroups) {
             binGroups.emplace_back(static_cast<unsigned int>(p.first),
@@ -158,7 +169,7 @@ StatusCode DeviceGBTSSeedingAlg::configureGBTS()
     }
 
     // traccc::gbts_seedfinder_config gbts_config; 
-    if (!m_gbts_config.setLinkingScheme(binGroups, layerInfo, identifierBinning,
+    if (!m_gbts_config.setLinkingScheme(binGroups, std::move(layerInfo), identifierBinning,
                                     900.0f, makeActsAthenaLogger(this, "GBTSConfig")))
         return StatusCode::FAILURE;
 

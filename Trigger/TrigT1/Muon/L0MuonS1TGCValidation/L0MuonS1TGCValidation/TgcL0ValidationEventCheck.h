@@ -52,8 +52,9 @@ inline TgcL0ValidationCheckResult checkTgcL0ValidationEvent(
                : invalid(std::string{"Candidate block size mismatch for "} +
                          field);
   };
+  //coverity[AUTO_CAUSES_COPY:FALSE]
   const auto checkSectorLogicSize = [&](const std::size_t size,
-                                        const char* field) {
+                                        const char* field){
     return size == nSectorLogic
                ? TgcL0ValidationCheckResult{}
                : invalid(std::string{"Sector Logic block size mismatch for "} +
