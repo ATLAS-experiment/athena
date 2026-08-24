@@ -147,6 +147,35 @@ def resolveDumpGeoGeometryTag(det_descr, configured_tag, fallback_tag):
     return fallback_tag
 
 
+def dumpGeoHasInputFiles(input_files):
+    """Return whether standalone DumpGeo was given real input files."""
+    return bool(input_files) and input_files != [
+        "_ATHENA_GENERIC_INPUTFILE_NAME_"
+    ]
+
+
+def configureDumpGeoInputFlags(flags):
+    """Configure deterministic defaults for an input-less standalone job."""
+    if dumpGeoHasInputFiles(flags.Input.Files):
+        return False
+
+    from Campaigns.Utils import Campaign
+    from AthenaConfiguration.TestDefaults import defaultConditionsTags
+
+    flags.Input.Files = []
+
+    # MainServicesCfg and detector configuration require these normally
+    # metadata-derived flags to be initialized for an input-less job.
+    flags.Input.ProjectName = "mc23_13p6TeV"
+    flags.Input.RunNumbers = [330000]
+    flags.Input.TimeStamps = [1]
+    flags.Input.TypedCollections = []
+    flags.IOVDb.GlobalTag = defaultConditionsTags.RUN3_MC
+    flags.Input.isMC = True
+    flags.Input.MCCampaign = Campaign.Unknown
+    return True
+
+
 def validateDumpGeoOutputFile(output_file, force_overwrite):
     """Reject an existing output file unless overwrite is enabled."""
     if os.path.exists(output_file) and not force_overwrite:
@@ -291,8 +320,6 @@ if __name__=="__main__":
                         help="Show the content of the Treetops --- (by default, only the list of Treetops is shown)", action = 'store_true')
     parser.add_argument("--debugCA", help="Debug the CA configuration: print flags, tools, ... --- mainly, for DumpGeo developers. '1' prints a subset of the CA flags, '2' prints all of them.")
 
-    from AthenaConfiguration.TestDefaults import defaultTestFiles
-    parser.set_defaults(filesInput=f"{defaultTestFiles.EVNT[0]}")
     args = flags.fillFromArgs(parser=parser)
 
     # +++ Get CLI parameters and set the corresponding configuration flags
@@ -311,6 +338,13 @@ if __name__=="__main__":
         flags.GeoModel.DumpGeo.ShowTreetopContent = True
     if args.forceOverwrite:
         flags.GeoModel.DumpGeo.ForceOverwrite = True
+
+    # Athena uses a placeholder as the default Input.Files value. Treat that
+    # placeholder, as well as an explicitly empty list, as a genuine
+    # input-less job. In particular, do not replace it with a test EVNT file:
+    # standalone geometry dumping must not depend on CVMFS or on unrelated
+    # event-file metadata.
+    dumpgeo_empty_input = configureDumpGeoInputFlags(flags)
 
     # A custom filename is already final and can be checked without resolving
     # the geometry tag, which may otherwise require a metadata lookup.
@@ -344,57 +378,13 @@ if __name__=="__main__":
     # Fail as soon as the final geometry tag is known and before detector or
     # geometry configuration. Resolving a metadata-derived tag necessarily
     # performs the metadata lookup first. This check deliberately does not
-    # delete an existing file when force overwrite is enabled; deletion remains
-    # in DumpGeoCfg after configuration succeeds.
+    # delete an existing file when force overwrite is enabled; deletion is
+    # deferred to the C++ algorithm's initialize() method.
     validateDumpGeoOutputFile(
         dumpGeoOutputFileName(flags),
         flags.GeoModel.DumpGeo.ForceOverwrite,
     )
 
-    # +++ Set the empty input
-    _logger.verbose("+ About to set flags related to the input")
-    
-    # Empty input is not normal for Athena, so we will need to check 
-    # this repeatedly below (the same as with VP1)
-    dumpgeo_empty_input = False  
-    
-    # This covers the use case where we launch DumpGeo
-    # without input files; e.g., to check the detector description
-    from AthenaConfiguration.AutoConfigFlags import GetFileMD
-
-    input_metadata = GetFileMD(flags.Input.Files)
-    input_geometry_tag = input_metadata.get("GeoAtlas", None)
-
-    # Treat both None and an empty string as a missing geometry tag.
-    dumpgeo_empty_input = (
-        len(flags.Input.Files) == 0 or not input_geometry_tag
-    )
-
-    if dumpgeo_empty_input:
-        from Campaigns.Utils import Campaign
-        from AthenaConfiguration.TestDefaults import (
-            defaultConditionsTags, 
-            defaultGeometryTags
-        )
-
-        # NB Must set e.g. ConfigFlags.Input.Runparse_args() Number and
-        # ConfigFlags.Input.TimeStamp before calling the 
-        # MainServicesCfg to avoid it attempting auto-configuration 
-        # from an input file, which is empty in this use case.
-        # If you don't have it, it (and/or other Cfg routines) complains and crashes. 
-        # See also: 
-        # https://acode-browser1.usatlas.bnl.gov/lxr/source/athena/InnerDetector/InDetConditions/SCT_ConditionsAlgorithms/python/SCT_DCSConditionsTestAlgConfig.py#0023
-        flags.Input.ProjectName = "mc23_13p6TeV"
-        flags.Input.RunNumbers = [330000]  
-        flags.Input.TimeStamps = [1]  
-        flags.Input.TypedCollections = []
-
-        # set default CondDB and Geometry version
-        flags.IOVDb.GlobalTag = defaultConditionsTags.RUN3_MC
-        flags.Input.isMC = True
-        flags.Input.MCCampaign = Campaign.Unknown
-
-    _logger.verbose("+ ... Done")
     _logger.verbose("+ empty input: '%s'", dumpgeo_empty_input)
 
 
