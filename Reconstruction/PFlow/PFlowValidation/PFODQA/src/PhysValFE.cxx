@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "PhysValFE.h"
@@ -69,7 +69,7 @@ StatusCode PhysValFE::bookHistograms(){
 
   hists.insert(hists.end(),additional_hists.begin(),additional_hists.end()); // append lepton-FE linker plots to collection of hists  
 
-  for (auto hist : hists) {
+  for (const auto & hist : hists) {
     ATH_MSG_DEBUG("Processing histogram named: "<<hist.first->GetName()<<" (title) "<<hist.first->GetTitle());
     ATH_CHECK(regHist(hist.first,hist.second,all));
   }

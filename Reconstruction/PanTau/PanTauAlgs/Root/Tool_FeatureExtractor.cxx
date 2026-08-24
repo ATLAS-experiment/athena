@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "PanTauAlgs/Tool_FeatureExtractor.h"
@@ -274,6 +274,7 @@ StatusCode PanTau::Tool_FeatureExtractor::calculateFeatures(PanTau::PanTauSeed* 
       int     etaBinIndex = m_HelperFunctions.getBinIndex(m_Config_BinEdges_Eta, std::abs(etaCurConst));
       int     numTrack    = inSeed->getTauJet()->nTracks();
       if(numTrack == 1) { mvaCorrection = m_Config_CellBased_EtaBinned_Pi0MVACut_1prong.at(etaBinIndex); }
+      //coverity[NEGATIVE_RETURNS:FALSE]
       else              { mvaCorrection = m_Config_CellBased_EtaBinned_Pi0MVACut_3prong.at(etaBinIndex); }
 
       value_BDT = value_BDT - mvaCorrection;
