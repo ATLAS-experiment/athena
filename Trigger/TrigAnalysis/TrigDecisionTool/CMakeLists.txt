@@ -4,7 +4,6 @@
 atlas_subdir( TrigDecisionTool )
 
 # External dependencies:
-find_package( Boost )
 find_package( ROOT COMPONENTS Core )
 set( ROOT_LIBRARIES_NOPYTHON ${ROOT_LIBRARIES} )
 unset( ROOT_FOUND )
@@ -23,7 +22,6 @@ if( XAOD_STANDALONE )
    atlas_add_library( TrigDecisionToolLib
       TrigDecisionTool/*.h Root/*.cxx
       PUBLIC_HEADERS TrigDecisionTool
-      INCLUDE_DIRS ${Boost_INCLUDE_DIRS}
       PRIVATE_INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
       LINK_LIBRARIES ${COMMON_LIBRARIES}
       PRIVATE_LINK_LIBRARIES ${COMMON_PRIVATE_LIBRARIES} )
@@ -32,7 +30,6 @@ else()
       atlas_add_library( TrigDecisionToolLib
          TrigDecisionTool/*.h Root/*.cxx src/*.cxx
          PUBLIC_HEADERS TrigDecisionTool
-         INCLUDE_DIRS ${Boost_INCLUDE_DIRS}
          PRIVATE_INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
          LINK_LIBRARIES ${COMMON_LIBRARIES} EventInfo GaudiKernel StoreGateLib
          PRIVATE_LINK_LIBRARIES ${COMMON_PRIVATE_LIBRARIES} AthenaBaseComps AthenaKernel )
@@ -40,7 +37,6 @@ else()
       atlas_add_library( TrigDecisionToolLib
          TrigDecisionTool/*.h Root/*.cxx src/*.cxx
          PUBLIC_HEADERS TrigDecisionTool
-         INCLUDE_DIRS ${Boost_INCLUDE_DIRS}
          PRIVATE_INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
          LINK_LIBRARIES ${COMMON_LIBRARIES} EventInfo GaudiKernel StoreGateLib
          AnalysisTriggerEvent TrigSteeringEvent TrigNavigationLib TrigDecisionEvent
