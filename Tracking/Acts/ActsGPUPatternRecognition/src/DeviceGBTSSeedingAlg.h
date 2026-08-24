@@ -8,24 +8,22 @@
 #include "GaudiKernel/ToolHandle.h"
 #include "StoreGate/ReadHandleKey.h"
 #include "StoreGate/WriteHandleKey.h"
-#include "PathResolver/PathResolver.h"
 
 #include "IDeviceSeedingAlgProviderTool.h"
 #include "AthDeviceInterfaces/IMemoryResourceTool.h"
-#include "AthDeviceInterfaces/ICopyTool.h"
 #include "TrigInDetToolInterfaces/ITrigL2LayerNumberTool.h"
 #include "ActsGPUInterfaces/IDeviceDetectorDescriptionProviderSvc.h"
 
-#include "ActsGPUEvent/TracccDetectorGeometryDescription.h"
 #include "ActsGPUEvent/TracccMeasurementCollection.h"
 #include "ActsGPUEvent/TracccSpacepointCollection.h"
 #include "ActsGPUEvent/TracccSeedCollection.h"
 
-#include "TrigInDetPattRecoTools/GNN_FasTrackConnector.h"
-#include "TrigInDetPattRecoTools/GNN_Geometry.h"
-#include "PixelReadoutGeometry/PixelDetectorManager.h"
 
-#include "vecmem/utils/cuda/copy.hpp"
+
+class PixelID;
+namespace InDetDD{
+  class PixelDetectorManager;
+}
 
 namespace ActsTrk {
 /**
