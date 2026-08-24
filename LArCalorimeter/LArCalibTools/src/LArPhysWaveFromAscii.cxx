@@ -9,9 +9,8 @@
 #include "LArRawConditions/LArPhysWaveContainer.h"
 
 #include "CaloIdentifier/CaloGain.h"
+#include <CxxUtils/StringUtils.h>
 
-#include <boost/algorithm/string/split.hpp>
-#include <boost/algorithm/string/classification.hpp>
 #include <fstream>
 #include <memory>
 
@@ -47,8 +46,7 @@ StatusCode LArPhysWaveFromAscii::stop()
 
   while ( ! std::getline(inf, line).eof() )
   {
-    std::vector<std::string> strvec;
-    boost::split(strvec, line, boost::is_any_of(" "));
+    std::vector<std::string> strvec = CxxUtils::tokenize(line, ' ');
     if(strvec.size() != lsize) {
        ATH_MSG_WARNING("Wrong line: "<<line<<", skipped "<<strvec.size());
        continue;

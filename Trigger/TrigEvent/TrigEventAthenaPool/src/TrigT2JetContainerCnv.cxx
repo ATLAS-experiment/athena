@@ -29,8 +29,8 @@ TrigT2JetContainer * TrigT2JetContainerCnv::createTransient(const Token* token)
 
   mlog << MSG::DEBUG << "TrigT2JetContainerCnv::createTransient called" << endmsg;
 
-  static const pool::Guid tlp1_guid( "3B670168-C5AA-48A1-9813-C94530980EBF" );
-  static const pool::Guid p3_guid( "6215BEE2-45E7-4681-9089-9BD470CDAF4D" );
+  static const Guid tlp1_guid( "3B670168-C5AA-48A1-9813-C94530980EBF" );
+  static const Guid p3_guid( "6215BEE2-45E7-4681-9089-9BD470CDAF4D" );
 
 
   if( compareClassGuid(token,  p3_guid ) ){

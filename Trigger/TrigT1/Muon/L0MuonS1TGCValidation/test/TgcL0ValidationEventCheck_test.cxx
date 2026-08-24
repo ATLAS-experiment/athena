@@ -71,7 +71,19 @@ TgcL0ValidationEvent makeValidEvent() {
   event.candidates.phi = {0.25F};
   event.candidates.deltaTheta = {0.001F};
   event.candidates.deltaPhi = {0.002F};
+  event.candidates.pt = {25.F};
+  event.candidates.threshold = {6U};
+  event.candidates.charge = {-1};
+  event.candidates.goodMagneticField = {1U};
   event.candidates.truthIndex = {0};
+
+  event.sectorLogic.inputCandidateIndex = {0U};
+  event.sectorLogic.candWord = {0x12345678U};
+  event.sectorLogic.candExtraWord = {0x9abcdef0U};
+  event.sectorLogic.boardId = {0U};
+  event.sectorLogic.fiberId = {0U};
+  event.sectorLogic.bcidOffset = {0};
+  event.sectorLogic.veto = {0U};
 
   return event;
 }
@@ -171,10 +183,31 @@ int main() {
   }
   {
     auto event = makeValidEvent();
-    event.candidates.deltaPhi.clear();
+    event.candidates.pt.clear();
     success &= expectInvalid(event,
-                             "Candidate block size mismatch for deltaPhi",
+                             "Candidate block size mismatch for pt",
                              "candidate-size mismatch");
+  }
+  {
+    auto event = makeValidEvent();
+    event.candidates.goodMagneticField[0] = 2U;
+    success &= expectInvalid(event,
+                             "Candidate GoodMag flag is not binary",
+                             "invalid GoodMag flag");
+  }
+  {
+    auto event = makeValidEvent();
+    event.sectorLogic.candExtraWord.clear();
+    success &= expectInvalid(
+        event, "Sector Logic block size mismatch for candExtraWord",
+        "sector-logic-size mismatch");
+  }
+  {
+    auto event = makeValidEvent();
+    event.sectorLogic.boardId[0] = 1U;
+    success &= expectInvalid(
+        event, "Sector Logic placeholder metadata is not zero",
+        "sector-logic placeholder metadata");
   }
   {
     auto event = makeValidEvent();

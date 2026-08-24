@@ -35,10 +35,10 @@ sTGCSimHitCollection_PERS*    sTGCSimHitCollectionCnv::createPersistent (sTGCSim
 
 sTGCSimHitCollection* sTGCSimHitCollectionCnv::createTransient(const Token* token) {
     MsgStream log(msgSvc(), "sTGCSimHitCollectionCnv" );
-    static const pool::Guid   p1_guid("F8B975D2-8130-11E8-ABF4-4B4A6A2B6EE5");
-    static const pool::Guid   p2_guid("B9521CC6-6E3B-11E8-ADBB-02163E01BDDD");
-    static const pool::Guid   p3_guid("8F3FFD1C-C9A0-4DA7-B99E-A3828B6AC789");
-    static const pool::Guid   p4_guid("018E2DAC-18EB-79C4-B562-FD7C035C92C1");
+    static const Guid   p1_guid("F8B975D2-8130-11E8-ABF4-4B4A6A2B6EE5");
+    static const Guid   p2_guid("B9521CC6-6E3B-11E8-ADBB-02163E01BDDD");
+    static const Guid   p3_guid("8F3FFD1C-C9A0-4DA7-B99E-A3828B6AC789");
+    static const Guid   p4_guid("018E2DAC-18EB-79C4-B562-FD7C035C92C1");
 
     ATH_MSG_DEBUG("createTransient(const Token* token): main converter");
     sTGCSimHitCollection* p_collection(nullptr);

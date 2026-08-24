@@ -442,7 +442,7 @@ StatusCode HltEventLoopMgr::hltUpdateAfterFork(const ptree& /*pt*/)
   }
 
   // Make sure output files, i.e. histograms are written to their own directory.
-  // Nothing happens if the online TrigMonTHistSvc is used as there are no output files.
+  // Nothing happens if the online THistSvc is used as there are no output files.
   SmartIF<IIoComponent> histsvc = serviceLocator()->service("THistSvc", /*createIf=*/ false).as<IIoComponent>();
   if ( !m_ioCompMgr->io_retrieve(histsvc.get()).empty() ) {
     std::filesystem::path worker_dir = std::filesystem::absolute("athenaHLT_workers");

@@ -26,6 +26,16 @@ public:
 private:
     const HGTD_DetectorManager *m_detManager{};
     std::unique_ptr<InDetDD::SiCommonItems> m_commonItems{};
+
+    Gaudi::Property<bool> m_alignable{
+        this, "Alignable", false,
+        "Enable HGTD alignment"
+    };
+
+    Gaudi::Property<std::string> m_alignmentFolderName{
+        this, "AlignmentFolderName", "/HGTD/Align",
+        "Alignment folder name for HGTD"
+    };
 };
 
 #endif // HGTD_GEOMODELXML_HGTD_GMX_DETECTORTOOL_H

@@ -231,7 +231,7 @@ StatusCode InDetSecVtxTruthMatchTool::matchVertices( std::vector<const xAOD::Ver
           } else {
             ElementLink<xAOD::TruthVertexContainer> elLink;
             elLink.setElement(*it); 
-            elLink.setStorableObject(*dynamic_cast<const xAOD::TruthVertexContainer*>((*it)->container()));
+            elLink.setStorableObject(*static_cast<const xAOD::TruthVertexContainer*>((*it)->container()));
             size_t matchIdx = indexOfMatchInfo(matchinfo, elLink);
 
             if (m_doMuSA) {

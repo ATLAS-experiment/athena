@@ -96,7 +96,6 @@ def ActsInDetMainTrackFindingAlgCfg(flags,
         kwargs.setdefault("MaximumIterations", 10000)
         kwargs.setdefault("NMeasurementsMin", 7)
     
-    kwargs.setdefault("refitSeeds", seedOrder(flags, pixel=[False], strip=[False]))
     kwargs.setdefault("doTwoWay", flags.Acts.doTwoWayCKF)
     kwargs.setdefault("inflateCovarianceTwoWay", True)
     kwargs.setdefault("twoWayinflateCovarianceFactor", 100.0)
@@ -157,21 +156,13 @@ def ActsInDetMainTrackFindingAlgCfg(flags,
 
     if 'TrackParamsEstimationTool' not in kwargs:
         from ActsConfig.ActsTrackParamsEstimationConfig import ActsTrackParamsEstimationToolCfg
-        kwargs.setdefault('TrackParamsEstimationTool', acc.popToolsAndMerge(ActsTrackParamsEstimationToolCfg(flags)))
+        tpe = acc.popToolsAndMerge(ActsTrackParamsEstimationToolCfg(flags))
+        kwargs.setdefault('TrackParamsEstimationTool', seedOrder(flags, pixel=[tpe], strip=[tpe]))
         
     if flags.Acts.doPrintTrackStates and 'TrackStatePrinter' not in kwargs:
         kwargs.setdefault(
             "TrackStatePrinter",
             acc.popToolsAndMerge(ActsInDetTrackStatePrinterToolCfg(flags)),
-        )
-
-    if 'FitterTool' not in kwargs:
-        from ActsConfig.ActsTrackFittingConfig import ActsFitterCfg 
-        kwargs.setdefault(
-            'FitterTool',
-            acc.popToolsAndMerge(ActsFitterCfg(flags, 
-                                               ReverseFilteringPt=0,
-                                               OutlierChi2Cut=float('inf')))
         )
 
     # !!! Calibrator is not used for Inner Detector yet

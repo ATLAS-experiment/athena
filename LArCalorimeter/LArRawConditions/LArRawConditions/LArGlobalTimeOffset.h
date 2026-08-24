@@ -1,11 +1,12 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef LARGLOBALTIMEOFFSET_H
 #define LARGLOBALTIMEOFFSET_H
 
 #include "AthenaKernel/CLASS_DEF.h" 
+#include "AthenaKernel/BaseInfo.h"
 #include "LArElecCalib/ILArGlobalTimeOffset.h"
 
 class LArGlobalTimeOffset: public ILArGlobalTimeOffset {
@@ -20,5 +21,6 @@ class LArGlobalTimeOffset: public ILArGlobalTimeOffset {
 };
 
 
-CLASS_DEF( LArGlobalTimeOffset, 213690101, 1) 
+CLASS_DEF( LArGlobalTimeOffset, 213690101, 1)
+SG_BASES( LArGlobalTimeOffset, ILArGlobalTimeOffset );
 #endif 

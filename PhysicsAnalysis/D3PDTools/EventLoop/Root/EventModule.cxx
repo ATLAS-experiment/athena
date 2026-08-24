@@ -21,7 +21,6 @@
 #include <EventLoop/StatusCode.h>
 #include <EventLoop/Worker.h>
 #include <RootCoreUtils/Assert.h>
-#include <RootCoreUtils/ThrowMsg.h>
 #include <SampleHandler/MetaObject.h>
 #include <xAODCore/tools/ReadStats.h>
 #include <xAODCore/tools/PerfStats.h>
@@ -132,7 +131,10 @@ namespace EL
       // move to next event
       m_store->clear ();
       if (m_event->getEntry (data.m_inputEntry) < 0)
-        RCU_THROW_MSG ("failed to read from xAOD");
+      {
+        ANA_MSG_ERROR ("failed to read from xAOD");
+        return StatusCode::FAILURE;
+      }
       return StatusCode::SUCCESS;
     }
 

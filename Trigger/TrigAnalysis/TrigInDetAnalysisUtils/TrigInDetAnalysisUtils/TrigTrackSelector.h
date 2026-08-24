@@ -14,8 +14,6 @@
 
 #include "TrigInDetAnalysisUtils/TIDA_newtracking.h"
 
-/// L2 tracks
-#include "TrigInDetEvent/TrigInDetTrackCollection.h"
 
 /// offline and EF
 #include "Particle/TrackParticle.h"
@@ -97,12 +95,6 @@ public:
 
   virtual void clear() override { for ( size_t i=m_tracks.size() ; i-- ; ) delete m_tracks[i]; m_tracks.clear(); }   
 
-
-  bool selectTrack( const TrigInDetTrack* track );
-
-
-  // extract all the tracks from a TrigInDetTrack collection and convert them
-  void selectTracks( const TrigInDetTrackCollection* trigtracks );
 
   // add a TrackParticle 
   bool selectTrack( const Rec::TrackParticle* track );

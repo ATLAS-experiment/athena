@@ -83,8 +83,7 @@ run "Reconstruction-acts" \
     Reco_tf.py \
     --conditionsTag "default:${conditionsTag}" \
     --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingRecoPreInclude,ActsConfig.ActsCIFlags.actsProductionFlags" \
-    --preExec "flags.Tracking.writeExtendedSi_PRDInfo=True; \
-    	       flags.Acts.doLargeRadius=True;" \
+    --preExec "flags.Tracking.writeExtendedSi_PRDInfo=True;" \
     --inputRDOFile ${rdo} \
     --outputAODFile AOD.acts.root \
     --maxEvents ${n_events} \

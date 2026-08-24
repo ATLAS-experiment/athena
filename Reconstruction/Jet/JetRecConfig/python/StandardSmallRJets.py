@@ -55,7 +55,7 @@ standardmods_ufo = (
 
 clustermods      = ("ECPSFrac","ClusterMoments",) 
 truthmods        = ("PartonTruthLabel","JetDeltaRLabel:5000", "JetGhostLabel")
-pflowmods        = ()
+pflowmods        = ("JetIRCSafeLabel",)
 
 substrmods = ("nsubjettiness","ecorr")
 

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -19,6 +19,8 @@
 
 #include <utility>
 #include <vector>
+#include <numbers>
+#include <algorithm>
 
 class MsgStream;
 
@@ -358,6 +360,9 @@ private:
   /** Linear search in vector - superior in O(10) searches: arbitraty 2*/
   static size_t searchInVectorWithBoundary(float value, const BinningData& bData)
   {
+    if (bData.boundaries.empty())[[unlikely]]{
+      throw std::runtime_error("searchInVectorWithBoundary: boundaries vector is empty.");
+    }
     if (bData.binvalue == binPhi)
       while (value < bData.boundaries[0])
         value += 2 * M_PI;
@@ -374,44 +379,38 @@ private:
     // search
     std::vector<float>::const_iterator vIter = bData.boundaries.begin();
     size_t bin = 0;
-    for (; vIter != bData.boundaries.end(); ++vIter, ++bin)
-      if ((*vIter) > value)
+    for (; vIter != bData.boundaries.end(); ++vIter, ++bin){
+      if ((*vIter) > value){
         break;
+      }
+    }
+    //overflow (i.e. bin == 0) can only happen if the boundaries vector is empty, 
+    //which is already checked
+    //coverity[INTEGER_OVERFLOW]
     return (bin - 1);
   }
 
   /** A binary search with underflow/overflow - faster than vector search for O(50) objects*/
   static size_t binarySearchWithBoundary(float value, const BinningData& bData)
   {
+    if (bData.boundaries.empty())[[unlikely]]{
+      throw std::runtime_error("binarySearchWithBoundary: boundaries vector is empty.");
+    }
     // Binary search in an array of n values to locate value
     if (bData.binvalue == binPhi)
       while (value < bData.boundaries[0])
-        value += 2 * acos(-1.);
+        value += 2.f * std::numbers::pi_v<float>;
     if (bData.binvalue == binPhi)
       while (value > bData.max)
-        value -= 2 * acos(-1.);
+        value -= 2.f * std::numbers::pi_v<float>;
     // underflow
     if (value <= bData.boundaries[0])
       return (bData.option == closed) ? (bData.bins - 1) : 0;
-    size_t nabove;
-    size_t nbelow;
-    size_t middle;
     // overflow
-    nabove = bData.boundaries.size() + 1;
     if (value >= bData.max)
-      return (bData.option == closed) ? 0 : nabove - 2;
-    // binary search
-    nbelow = 0;
-    while (nabove - nbelow > 1) {
-      middle = (nabove + nbelow) / 2;
-      if (value == bData.boundaries[middle - 1])
-        return middle - 1;
-      if (value < bData.boundaries[middle - 1])
-        nabove = middle;
-      else
-        nbelow = middle;
-    }
-    return nbelow - 1;
+      return (bData.option == closed) ? 0 : bData.boundaries.size() - 1; 
+    const auto it = std::ranges::upper_bound(bData.boundaries, value);
+    return std::distance(bData.boundaries.begin(), it) - 1;
   }
 
   /** Search in mixed vector - linear in O-10 bins, otherwise binary */

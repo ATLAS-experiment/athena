@@ -54,7 +54,10 @@ StatusCode TrigMuonEFHypoTool::initialize(){
     ATH_MSG_DEBUG("MonTool name: " << m_monTool);
   }
 
-  if(m_doSA) m_type = xAOD::Muon::TrackParticleType::ExtrapolatedMuonSpectrometerTrackParticle;
+  if(m_doSA) {
+    m_type = m_isPhII ? xAOD::Muon::TrackParticleType::Primary
+                      : xAOD::Muon::TrackParticleType::ExtrapolatedMuonSpectrometerTrackParticle;
+  }
   else m_type = xAOD::Muon::TrackParticleType::CombinedTrackParticle;
 
   return StatusCode::SUCCESS;

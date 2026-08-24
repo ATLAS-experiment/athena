@@ -84,14 +84,17 @@ def CommonSimulationCfg(flags, log):
             cfg.addSequence(CompFactory.AthSequencer('SimSequence'), parentName='AthAlgSeq')
             cfg.addSequence(CompFactory.AthSequencer('CopyHitSequence'), parentName='AthAlgSeq')
 
+    # force CollectionType to be RootCollection to ensure Event Tag reading
+    if flags.Input.Files:
+        evSel = cfg.getService("EventSelector")
+        evSel.CollectionType = "RootCollection"
+
     if flags.Sim.ISF.ReSimulation:
         # Case 4
         from ISF_Algorithms.ISF_AlgorithmsConfig import SimEventFilterCfg, InvertedSimEventFilterCfg, RenameHitCollectionsCfg
         cfg.merge(SimEventFilterCfg(flags, sequenceName='SimSequence'))
         cfg.merge(InvertedSimEventFilterCfg(flags, sequenceName='CopyHitSequence'))
         cfg.merge(RenameHitCollectionsCfg(flags, sequenceName='CopyHitSequence'))
-        evSel = cfg.getService("EventSelector")
-        evSel.CollectionType = "RootCollection"
     else:
         #Cases 1, 2, 3
         # add BeamEffectsAlg

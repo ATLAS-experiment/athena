@@ -7,6 +7,11 @@
 #include "StoreGate/StoreGateSvc.h"
 #include "AthenaBaseComps/AthMsgStreamMacros.h"
 
+#include "InDetReadoutGeometry/ExtendedAlignableTransform.h"
+#include "Identifier/IdentifierHash.h"
+#include "GeoModelKernel/GeoVAlignmentStore.h"
+#include "GeoPrimitives/GeoPrimitivesHelpers.h"
+
 using InDetDD::HGTD_DetectorElementCollection;
 using InDetDD::HGTD_DetectorElement;
 using InDetDD::SiCommonItems;
@@ -28,7 +33,9 @@ HGTD_DetectorManager::HGTD_DetectorManager(StoreGateSvc* detStore)
     // Initialize the collections
     if (m_idHelper) {
         m_elementCollection.resize(m_idHelper->wafer_hash_max());
+        m_alignableTransforms.resize(m_idHelper->wafer_hash_max());
     }
+    ATH_MSG_INFO("HGTD_DetectorManager initialized");
 }
 
 HGTD_DetectorManager::~HGTD_DetectorManager() = default;
@@ -77,9 +84,174 @@ const HGTD_DetectorElementCollection* HGTD_DetectorManager::getDetectorElementCo
 void HGTD_DetectorManager::addDetectorElement(HGTD_DetectorElement * element)
 {
     IdentifierHash idHash = element->identifyHash();
-    if (idHash >=  m_elementCollection.size())
-        ATH_MSG_ERROR ("HGTD_DetectorManager: Error adding detector element.");
+    if (idHash >=  m_elementCollection.size()) {
+        throw std::runtime_error(
+            "HGTD_DetectorManager: Error adding detector element."
+        );
+    }
     m_elementCollection[idHash] = element;
+}
+
+// Register alignable transform
+void HGTD_DetectorManager::addAlignableTransform(int level,
+                                                 const Identifier& id,
+                                                 GeoAlignableTransform* transform,
+                                                 const GeoVFullPhysVol* child)
+{
+    (void)level;
+
+    if (!m_idHelper) return;
+
+    IdentifierHash idHash = m_idHelper->wafer_hash(id);
+
+    if (!idHash.is_valid()) {
+        ATH_MSG_WARNING("Invalid idHash for alignable transform");
+        return;
+    }
+    
+    ATH_MSG_DEBUG("STORE ALIGNABLE:"
+                << " hash=" << idHash
+                << " transform ptr=" << transform
+                << " child ptr=" << child);
+
+    m_alignableTransforms[idHash] =
+        std::make_unique<InDetDD::ExtendedAlignableTransform>(transform, child);
+    
+    ATH_MSG_DEBUG("Alignable container size = " 
+                << m_alignableTransforms.size());
+
+    ATH_MSG_DEBUG("HGTD ALIGNABLE ADDED: idHash = " << idHash);
+
+    int count = 0;
+    for (const auto& t : m_alignableTransforms) {
+        if (t) count++;
+    }
+
+    ATH_MSG_DEBUG("HGTD alignable transforms registered: " << count);
+}
+
+bool HGTD_DetectorManager::setAlignableTransformDelta(int level,
+                                                      const Identifier& id,
+                                                      const Amg::Transform3D& delta,
+                                                      GeoVAlignmentStore* alignStore) const
+{
+    (void)level;
+    
+    IdentifierHash idHash = m_idHelper->wafer_hash(id);
+
+    if (!idHash.is_valid()) return false;
+
+    ATH_MSG_DEBUG("idHash = " << idHash);
+
+    auto* transform = m_alignableTransforms[idHash].get();
+    ATH_MSG_DEBUG("RETRIEVE ALIGNABLE:"
+             << " hash=" << idHash
+             << " ext transform ptr=" << transform
+             << " geo alignable ptr="
+             << (transform ? transform->alignableTransform() : nullptr));
+
+    ATH_MSG_DEBUG("transform ptr = " << transform);
+    
+    if (!transform){
+        ATH_MSG_ERROR("NO ALIGNABLE FOUND");
+        return false;
+    }
+    ATH_MSG_DEBUG("SETTING DELTA dx="
+                << delta.translation().x()
+                << " dy="
+                << delta.translation().y()
+                << " dz="
+                << delta.translation().z());
+                
+    alignStore->setDelta(transform->alignableTransform(), delta);
+
+    return true;
+
+}
+
+StatusCode HGTD_DetectorManager::align(
+    const AlignableTransformContainer* container,
+    GeoVAlignmentStore* alignStore) const
+{
+    ATH_MSG_DEBUG("Applying HGTD alignment");
+
+    ATH_MSG_DEBUG("Entered align()");
+    if (!container) {
+        ATH_MSG_ERROR("Null AlignableTransformContainer");
+        return StatusCode::FAILURE;
+    }
+    ATH_MSG_DEBUG("Container pointer = " << container);
+    ATH_MSG_DEBUG("Container size = " << container->size());
+
+    if (container->empty()) {
+        ATH_MSG_WARNING("AlignableTransformContainer is empty");
+        return StatusCode::SUCCESS;
+    }
+
+    ATH_MSG_DEBUG("AlignableTransformContainer has "
+                << container->size()
+                << " AlignableTransform collection(s)");
+
+    // Use only the last tag of each AlignableTransform, exactly like InDet
+    std::map<std::string,const AlignableTransform*> transforms;
+
+    for (const auto* pat : *container) {
+
+        if (!pat) {
+            ATH_MSG_WARNING("Null AlignableTransform pointer");
+            continue;
+        }
+
+        ATH_MSG_DEBUG("--------------------------------");
+        ATH_MSG_DEBUG("Collection tag = " << pat->tag());
+        ATH_MSG_DEBUG("Collection size = " << pat->size());
+        transforms[pat->tag()] = pat;
+
+    }
+
+    for (const auto& entry : transforms) {
+
+        const AlignableTransform* transformCollection = entry.second;
+
+        ATH_MSG_DEBUG("Processing tag " << entry.first);
+
+        for (AlignableTransform::AlignTransMem_citr transIter =
+                 transformCollection->begin();
+             transIter != transformCollection->end();
+             ++transIter)
+        {
+
+            Identifier id = transIter->identify();
+            
+            ATH_MSG_DEBUG("--------------------------------");
+            ATH_MSG_DEBUG("Identifier = " << id.get_compact());
+     
+            Amg::Transform3D delta =
+                Amg::CLHEPTransformToEigen(transIter->transform());
+
+            ATH_MSG_DEBUG("Translation = ("
+                        << delta.translation().x() << ", "
+                        << delta.translation().y() << ", "
+                        << delta.translation().z() << ")");
+
+            bool ok =
+                setAlignableTransformDelta(
+                    0,
+                    id,
+                    delta,
+                    alignStore);
+
+            ATH_MSG_DEBUG("setAlignableTransformDelta returned "
+                        << std::boolalpha << ok);
+
+            if (!ok) {
+                ATH_MSG_WARNING("Failed to apply alignment for identifier "
+                                << id.get_compact());
+            }
+        }
+    }
+
+    return StatusCode::SUCCESS;
 }
 
 const HGTD_ID* HGTD_DetectorManager::getIdHelper() const

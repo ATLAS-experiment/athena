@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////////////////
@@ -348,7 +348,7 @@ namespace MuonCombined {
                         if (!Amg::hasPositiveDiagElems(invCov)) continue;
 
                         MuonCombined::MuonSegmentInfo info =
-                            m_MuTagMatchingTool->muTagSegmentInfo(ctx, track.track(), *seg_ptr, atSegSurface);
+                            m_MuTagMatchingTool->muTagSegmentInfo(ctx, track.track(), *seg_ptr, std::move(atSegSurface));
                         isMatched = m_MuTagMatchingTool->matchSegmentPosition(info, trkEtaInfo);
                         if (!isMatched) {
                             if (m_doTable) {
@@ -431,7 +431,7 @@ namespace MuonCombined {
 
         ATH_MSG_DEBUG("segmentsInfoSelected size after track loop " << segmentsInfoSelected.size());
         std::vector<MuonCombined::MuonSegmentInfo> segmentsInfoFinal =
-            m_MuTagAmbiguitySolverTool->solveAmbiguities(ctx, segmentsInfoSelected);
+            m_MuTagAmbiguitySolverTool->solveAmbiguities(ctx, std::move(segmentsInfoSelected));
         ATH_MSG_DEBUG("segmentsInfoFinal size " << segmentsInfoFinal.size());
 
         if (msgLevel(MSG::DEBUG)) {

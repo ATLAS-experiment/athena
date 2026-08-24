@@ -35,6 +35,9 @@ class TGCSimulation : public AthReentrantAlgorithm {
   SG::WriteHandleKey<xAOD::TGCCandDataContainer> m_outputKey{
       this, "OutputKey", "L0MuonTGCCandData",
       "TGC Sector Logic candidate output"};
+  SG::WriteHandleKey<xAOD::TGCCandDataContainer> m_outputToMdtKey{
+      this, "OutputToMdtKey", "L0MuonTGCCandDataToMdt",
+      "View of the highest-pT TGC candidates sent to MDTTP"};
 
   ToolHandle<ITgcL0CandidateBuilderTool> m_candidateBuilderTool{
       this, "CandidateBuilderTool", "", "TGC candidate-builder implementation"};

@@ -59,6 +59,41 @@ namespace ParticleJetTools {
     SG::ConstAccessor<int> acc_uid;
   };
 
+  struct IRCSafeLabelNames {
+    std::string IFNsingleint = "IRCSafeLabelIFN";
+    std::string CMPsingleint = "IRCSafeLabelCMP";
+    std::string GHSsingleint = "IRCSafeLabelGHS";
+    std::string SDFsingleint = "IRCSafeLabelSDF";
+    std::string AKTsingleint = "IRCSafeLabelAKT";
+  };
+
+  struct IRCSafeLabelDecorators {
+    IRCSafeLabelDecorators(const IRCSafeLabelNames& n)
+      : IFNsingleint(n.IFNsingleint),
+        CMPsingleint(n.CMPsingleint),
+        GHSsingleint(n.GHSsingleint),
+        SDFsingleint(n.SDFsingleint),
+        AKTsingleint(n.AKTsingleint) {}
+    SG::Decorator<int> IFNsingleint;
+    SG::Decorator<int> CMPsingleint;
+    SG::Decorator<int> GHSsingleint;
+    SG::Decorator<int> SDFsingleint;
+    SG::Decorator<int> AKTsingleint;
+  };
+
+  struct Tag_PseudoJets {
+    std::vector<const fastjet::PseudoJet*> IFN_b;
+    std::vector<const fastjet::PseudoJet*> IFN_c;
+    std::vector<const fastjet::PseudoJet*> CMP_b;
+    std::vector<const fastjet::PseudoJet*> CMP_c;
+    std::vector<const fastjet::PseudoJet*> GHS_b;
+    std::vector<const fastjet::PseudoJet*> GHS_c;
+    std::vector<const fastjet::PseudoJet*> SDF_b;
+    std::vector<const fastjet::PseudoJet*> SDF_c;
+    std::vector<const fastjet::PseudoJet*> AKT_b;
+    std::vector<const fastjet::PseudoJet*> AKT_c;
+  };
+
   class IParticleLinker {
   public:
     IParticleLinker(const SG::ReadHandleKey<xAOD::TruthParticleContainer>&,
@@ -128,3 +163,4 @@ namespace ParticleJetTools {
 }
 
 #endif
+

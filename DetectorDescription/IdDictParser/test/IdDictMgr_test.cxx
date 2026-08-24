@@ -17,8 +17,7 @@
 #include <filesystem>
 
 #include <boost/test/unit_test.hpp>
-#include <boost/test/tools/output_test_stream.hpp>
-#include <boost/tokenizer.hpp>
+#include <CxxUtils/StringUtils.h>
 #include <iostream>
 #include <algorithm>
 namespace utf = boost::unit_test;
@@ -60,12 +59,10 @@ findXMLFiles (const std::string& dir)
 
   std::vector<std::pair<std::string, std::string> > out;
 
-  using tokenizer = boost::tokenizer<boost::char_separator<char> >;
-  boost::char_separator<char> sep(":");
   std::string xmlpath (getenv("XMLPATH"));
-  tokenizer tokens(xmlpath, sep);
+  std::vector<std::string> tokens = CxxUtils::tokenize(xmlpath, ':');
 
-  for (std::string xmldir : tokens) {
+  for (const std::string& xmldir : tokens) {
     path d = path(xmldir) / dir;
     if (!std::filesystem::exists (d)) continue;
     for (const directory_entry& dirent : directory_iterator(d)) {

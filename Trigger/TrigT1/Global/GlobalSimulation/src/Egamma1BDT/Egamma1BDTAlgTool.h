@@ -69,9 +69,9 @@ namespace GlobalSim {
     SG::ReadHandleKey<eEmNbhoodTOBContainer>
     m_nbhdTOBContainerReadKey {
       this,
-      "LArNeighborhoodTOBContainerReadKey",
+      "LArNeighborhoodTOBContainerKey",
       "stripNeighborhoodTOBContainer",
-      "key to read inLArNeighborhoodTOBsReadKeys"};
+      "key to read inLArNeighborhoodTOBs"};
 
     SG::WriteHandleKey<eEmEg1BDTTOBContainer>
     m_eEmEg1BDTTOBContainerKey {

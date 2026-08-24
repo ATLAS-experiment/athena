@@ -24,7 +24,7 @@ ElectronMuonTopoInfoContainer * ElectronMuonTopoInfoContainerCnv::createTransien
   
   mlog << MSG::DEBUG << "ElectronMuonTopoInfoContainerCnv::createTransient called" << endmsg;
 
-  static const pool::Guid p1_guid( "0A775717-3FC9-4FF4-A18B-3F520B2D4DAC" );
+  static const Guid p1_guid( "0A775717-3FC9-4FF4-A18B-3F520B2D4DAC" );
 
  if( compareClassGuid(token,  p1_guid ) ){
    std::unique_ptr< ElectronMuonTopoInfoContainer_p1 > col_vect( poolReadObject< ElectronMuonTopoInfoContainer_p1 >(token) );

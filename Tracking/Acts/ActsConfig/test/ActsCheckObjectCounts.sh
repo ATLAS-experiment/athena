@@ -14,7 +14,6 @@ Reco_tf.py \
   --preExec "flags.Exec.FPE=-1; \
        flags.Detector.EnableCalo=True; \
        flags.Detector.EnableHGTD=True; \
-       flags.Acts.doLargeRadius=True; \
        flags.Acts.doLowPt=True;" \
   --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude,ActsConfig.ActsCIFlags.actsProductionFlags" \
   --ignorePatterns "${ignore_pattern}" \

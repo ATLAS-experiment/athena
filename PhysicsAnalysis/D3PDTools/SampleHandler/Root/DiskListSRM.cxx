@@ -13,7 +13,6 @@
 #include <vector>
 #include <RootCoreUtils/Assert.h>
 #include <RootCoreUtils/ShellExec.h>
-#include <RootCoreUtils/ThrowMsg.h>
 
 //
 // method implementations

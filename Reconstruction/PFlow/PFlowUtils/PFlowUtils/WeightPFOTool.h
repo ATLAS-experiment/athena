@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef WEIGHTPFOTOOL_H
@@ -8,6 +8,8 @@
 /** Simple class to weight charged PFO for jets and met */
 
 #include "AsgTools/AsgTool.h"
+
+#include "AsgTools/PropertyWrapper.h"
 
 #include "PFlowUtils/IWeightPFOTool.h"
 
@@ -30,8 +32,8 @@ namespace CP {
 
   private:
 
-    bool m_doEoverPweight;
-    std::string m_theNeutralPFOScaleString;
+    Gaudi::Property<bool> m_doEoverPweight{this, "DoEoverPWeight", true};
+    Gaudi::Property<std::string> m_theNeutralPFOScaleString{this, "NeutralPFOScale", "EM"};  
 
     void fillInterpolationWeight(const xAOD::FlowElement& cpfo, float& weight) const;
     void fillDoubleCountingWeight(const xAOD::FlowElement& cpfo, float& weight) const;

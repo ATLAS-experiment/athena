@@ -21,18 +21,17 @@
 // ----------------------------
 //  Constructor
 // ----------------------------
-egamma::egamma() :
-  IAthenaBarCode(),
-  INavigable (),
-  I4Momentum (),
-  INavigable4Momentum (),
-  egammaImpl_t(),
-  m_author (egammaParameters::AuthorUnknown),
-  m_momentumCluster() 
-{ 
-  m_egPID = new egPID;
+egamma::egamma()
+  : IAthenaBarCode()
+  , INavigable()
+  , I4Momentum()
+  , INavigable4Momentum()
+  , egammaImpl_t()
+  , m_author(egammaParameters::AuthorUnknown)
+  , m_egPID(std::make_unique<egPID>())
+  , m_momentumCluster()
+{
 }
-
 // ==========================================================
 egamma::egamma(unsigned int author) :
   IAthenaBarCode(),
@@ -41,21 +40,17 @@ egamma::egamma(unsigned int author) :
   INavigable4Momentum (),
   egammaImpl_t(),
   m_author (author),
+  m_egPID(std::make_unique<egPID>()),
   m_momentumCluster() 
 { 
-  m_egPID = new egPID;
+  
 }
 
 // --------------------------
 // Destructor
 // --------------------------
-egamma::~egamma()
-{
-  if(m_egPID) {
-    delete m_egPID; 
-    m_egPID = nullptr;
-  }
-}
+egamma::~egamma() = default;
+
 
 // ==========================================================
 // copy constructor
@@ -66,7 +61,7 @@ egamma::egamma(const egamma &rhs, bool copyDetails, bool copyMinimal):
   INavigable4Momentum (rhs),
   egammaImpl_t        (rhs),
   m_author            (rhs.m_author),
-  m_egPID             (new egPID(*(rhs.m_egPID))),
+  m_egPID             (std::make_unique<egPID>(*(rhs.m_egPID))),
   m_momentumCluster   (rhs.m_momentumCluster)
 {
   if (!copyMinimal) {
@@ -76,6 +71,7 @@ egamma::egamma(const egamma &rhs, bool copyDetails, bool copyMinimal):
     if (copyDetails) {
       m_egDetails     = rhs.m_egDetails;
     }
+    m_rings = rhs.m_rings;
   }
 }
 
@@ -92,13 +88,15 @@ egamma& egamma::operator=(const egamma& rhs)
     m_cluster       = rhs.m_cluster;
     m_trackParticle = rhs.m_trackParticle;
     m_conversion    = rhs.m_conversion;
-    if(m_egPID)       delete m_egPID;
-    m_egPID         = new egPID(*(rhs.m_egPID));
+    m_egPID         = std::make_unique<egPID>(*(rhs.m_egPID));
     m_egDetails     = rhs.m_egDetails;
     m_momentumCluster = rhs.m_momentumCluster; // ??? 
+    m_rings = rhs.m_rings;
   }
   return *this;
 }
+
+
 
 // ----------------------------
 // print egamma object
@@ -641,15 +639,9 @@ egamma::setDetailElementLinkVector(ElementLinkVector<egDetailContainer>&& v)
 // ==========================================================
 const egPID* egamma::pid() const 
 { 
-  return m_egPID; 
+  return m_egPID.get(); 
 }
 
-// ==========================================================
-void egamma::set_pid(egPID* ptr) 
-{ 
-  if (m_egPID != nullptr) delete m_egPID;
-  m_egPID = ptr; 
-}
 
 // ==========================================================
 bool egamma::isElectron(unsigned int mask, 

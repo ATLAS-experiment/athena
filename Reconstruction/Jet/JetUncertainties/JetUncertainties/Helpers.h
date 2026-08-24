@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef JETUNCERTAINTIES_HELPERS_H
@@ -15,14 +15,13 @@
 #include "TObjArray.h"
 #include "TFile.h"
 
-// #include "AsgMessaging/MsgStreamMacros.h
 
 #include "xAODJet/Jet.h"
 #include "xAODJet/JetAccessors.h"
 
 #define JESUNC_ERROR_CODE -1234
 #define JESUNC_NO_DEFAULT_CONSTRUCTOR ATH_MSG_FATAL("Default constructor is not supported");
-#define JESUNC_SAFE_DELETE(T) { if(T) { delete T; T = NULL; } }
+#define JESUNC_SAFE_DELETE(T) { delete T; T = nullptr; }
 
 class TH1;
 

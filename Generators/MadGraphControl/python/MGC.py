@@ -886,7 +886,7 @@ class ParamCard:
                 self.paramCardDict[block] = params[block]
                 
                          
-    def write_paramCard(self):
+    def write_paramCard(self, output_location=None):
         """Write out paramCardDict to disk. 
         The function will copy the layout and format from the default card. 
         """
@@ -897,7 +897,8 @@ class ParamCard:
         with open(self.paramCard_default_loc,'r') as f:
             oldCard = f.read()
 
-        newCard = open(self.paramCard_loc,'w')
+        # Write the output to our standard file spot, or to a new location if requested
+        newCard = open(self.paramCard_loc if output_location is None else output_location,'w')
         dict_blocks = [v.lower() for v in self.paramCardDict]
 
         oldCard_blocks = oldCard.split('\n\n')
@@ -993,4 +994,4 @@ class ParamCard:
                     elif key is None or key.strip() == '':
                         continue
                     
-        mglog.info("Finished writing paramCardDict to param_card.dat")
+        mglog.info("Finished writing paramCardDict to " + ("param_card.dat" if output_location is None else output_location))

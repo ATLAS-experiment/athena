@@ -18,6 +18,9 @@
 #include "StoreGate/ReadHandleKey.h"
 #include "StoreGate/WriteHandleKey.h"
 
+#include <atomic>
+#include <vector>
+
 // Event classes
 class LArDigitContainer;
 class LArRawChannelContainer;
@@ -30,6 +33,7 @@ class LArOFFCRawChannelBuilder : public AthReentrantAlgorithm {
 
   StatusCode initialize() override;
   StatusCode execute(const EventContext& ctx) const override;
+  StatusCode finalize() override;
 
  private:
   // Event input
@@ -73,24 +77,22 @@ class LArOFFCRawChannelBuilder : public AthReentrantAlgorithm {
       "Use shape derivative in Q-factor computation"};
   Gaudi::Property<bool> m_useDBFortQ{this, "useDB", true,
                                      "Use DB for cut on t,Q"};
+  /// Index of the digit sample the OFC window starts at, i.e. the amplitude is
+  /// that of sum_j (samples[firstSample+j]-pedestal)*OFC_a[j]. Not an offset
+  /// into the reference shape: the digitisation writes shape index
+  /// k-nPreceedingSamples into digit sample k.
   Gaudi::Property<int> m_firstSample{
       this, "firstSample", 0,
-      "First of the 32 samples of the MC shape to be used"};
+      "Index of the digit sample the OFC window starts at"};
 
   /**
-   * The OFFC algorithm extends the standard optimal filtering by identifying
-   * in-time pulses and subtracting their expected contribution from future
-   * samples. This mitigates out-of-time pileup by iteratively removing pulse
-   * shapes that are consistent with the detector response.
-   *
-   * The algorithm operates on pedestal-subtracted ADC samples and applies:
-   *  - an optimal filter convolution,
-   *  - a local-maximum pulse-finding criterion,
-   *  - an optional shape-consistency (Q3) quality cut,
-   *  - and a forward subtraction using the OFC–shape convolution.
-   *
-   * The parameters below control noise suppression, pulse acceptance,
-   * and the handling of overlapping pulses.
+   * The OFFC extends optimal filtering by finding pulses in the preceding
+   * samples and subtracting their expected filter response from the later
+   * ones. At every position of the pedestal-subtracted digit it applies:
+   *  - the optimal filter,
+   *  - a local-maximum pulse search on the corrected filter output,
+   *  - a shape-consistency (Q3) cut against that same response,
+   *  - and a forward subtraction of the response of each accepted pulse.
    */
 
   // OFFC algorithm configuration
@@ -101,38 +103,56 @@ class LArOFFCRawChannelBuilder : public AthReentrantAlgorithm {
       this, "BelowThreshold", 0,
       "ADC threshold below which samples are treated as noise"};
 
-  /// Number of consecutive below-threshold samples required before
-  /// the forward-subtraction cache is reset.
-  /// This prevents stale pulse contributions from persisting indefinitely
-  /// in quiet regions of the readout.
+  /// Number of consecutive below-threshold samples after which the pending
+  /// corrections are dropped, so that stale ones cannot persist through a
+  /// quiet region. Either this or BelowThreshold at zero disables the reset.
   Gaudi::Property<int> m_belowTillReset{
       this, "BelowTillReset", 0,
-      "Number of consecutive noise samples before cache reset"};
+      "Number of consecutive noise samples before cache reset (<=0 disables)"};
 
-  /// Maximum number of overlapping pulses that can be tracked simultaneously.
-  /// Each accepted pulse occupies a context slot for the duration of the
-  /// OFC–shape convolution window.
+  /// Maximum number of pulse corrections in flight at once. A slot is held
+  /// until the pulse response has been fully subtracted, which for a typical
+  /// shape outlasts the digit: in practice this caps the pulses per digit.
   Gaudi::Property<int> m_nPulse{
-      this, "NPulse", 0, "Maximum number of overlapping pulses to subtract"};
+      this, "NPulse", 0, "Maximum number of pulse corrections in flight"};
 
-  /// Quality cut used for pulse acceptance.
-  /// Q3 is computed as the sum of absolute residuals between the filtered
-  /// samples and the expected pulse shape around the peak.
-  /// Pulses with Q3 below this threshold are accepted and subtracted.
+  /// Quality cut for pulse acceptance. Q3 sums the absolute residuals of the
+  /// corrected filter output against the expected response at lags -2, -1 and
+  /// +1 from the candidate peak, and is zero for a clean pulse of any
+  /// amplitude. The cut is applied to Q3/A, so it is a fractional mismatch and
+  /// does not have to be rescaled with the pulse size. Pulses below it are
+  /// accepted and subtracted.
   Gaudi::Property<double> m_Q3cut{
-      this, "Q3Cut", 0, "Shape-consistency quality cut for pulse acceptance"};
+      this, "Q3Cut", 0.1,
+      "Shape-consistency cut for pulse acceptance, on Q3/A"};
 
-  /// Minimum filtered amplitude required to consider a sample as a pulse peak.
+  /// Absolute term of the Q3 cut, in ADC. Q3 has a noise floor of a few times
+  /// the sample noise whatever the amplitude, so a purely relative cut would
+  /// reject small pulses on noise alone. Set this comparable to
+  /// FilterThreshold, the smallest amplitude worth looking at.
+  Gaudi::Property<double> m_Q3Offset{
+      this, "Q3Offset", 2.0,
+      "Absolute term of the Q3 cut in ADC, covering the noise floor"};
+
+  /// Minimum pile-up corrected amplitude required to accept a pulse peak.
   /// This suppresses spurious pulse finding due to noise fluctuations.
   Gaudi::Property<double> m_filterThreshold{
       this, "FilterThreshold", 0,
-      "Minimum filtered amplitude for pulse finding"};
+      "Minimum corrected amplitude for pulse finding"};
 
   // Identifier helper
   const LArOnlineID* m_onlineId = nullptr;
 
+  /// Accepted pulses, and those NPulse left no room to subtract. Only touched
+  /// on the rare accepted-pulse branch, summarised in finalize().
+  mutable std::atomic<unsigned long> m_nSubtracted{0};
+  mutable std::atomic<unsigned long> m_nDropped{0};
+
   // --- Member functions ---
-  std::vector<double> convolvePulse(const ILArShape::ShapeRef_t& shape,
+  /// Filter output for a unit-amplitude pulse, tabulated over every offset of
+  /// the shape against the OFC window at which the two overlap. Entry k is the
+  /// response for an offset of k-(ofc.size()-1) samples.
+  std::vector<double> pulseResponse(const ILArShape::ShapeRef_t& shape,
                                     const ILArOFC::OFCRef_t& ofc) const;
 
   double computeOFFC(const std::vector<short>& samples, int firstSample,

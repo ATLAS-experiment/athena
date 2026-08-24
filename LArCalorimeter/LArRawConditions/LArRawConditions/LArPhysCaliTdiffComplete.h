@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef LARRAWCONDITIONS_LARPHYSCALITDIFFCOMPLETE_H
@@ -8,6 +8,7 @@
 #include "LArElecCalib/ILArPhysCaliTdiff.h" 
 #include "LArRawConditions/LArPhysCaliTdiffP.h"
 #include "LArRawConditions/LArConditionsContainer.h"
+#include "AthenaKernel/BaseInfo.h"
 
 /** This class implements the ILArPhysCaliTdiff interface
 ` *
@@ -41,4 +42,5 @@ class LArPhysCaliTdiffComplete: public ILArPhysCaliTdiff,
 };
 
 CLASS_DEF( LArPhysCaliTdiffComplete,265448020,1)
+SG_BASES( LArPhysCaliTdiffComplete, ILArPhysCaliTdiff );
 #endif 

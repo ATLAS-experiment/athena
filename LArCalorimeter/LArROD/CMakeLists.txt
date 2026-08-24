@@ -27,7 +27,14 @@ atlas_add_component( LArROD
 
 # Install files from the package:
 atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
+atlas_install_scripts( test/*.sh )
+atlas_install_scripts( test/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
 
 atlas_add_test( LArRawChannelBuilderAlg 
 		SCRIPT python ${CMAKE_CURRENT_SOURCE_DIR}/python/LArRawChannelBuilderAlgConfig.py
 		POST_EXEC_SCRIPT " /usr/bin/diff LArRawChannels.txt ${CMAKE_CURRENT_SOURCE_DIR}/share/LArRawChannels.txt.ref > diff.log " )
+
+# Builds the ComponentAccumulator only. No reference output to compare.
+atlas_add_test( LArOFFCConfig
+		SCRIPT python ${CMAKE_CURRENT_SOURCE_DIR}/test/test_LArOFFCConfig.py
+		POST_EXEC_SCRIPT nopost.sh )

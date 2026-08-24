@@ -25,9 +25,9 @@ TrigTauTracksInfoCollection * TrigTauTracksInfoCollectionCnv::createTransient(co
   
   mlog << MSG::DEBUG << "TrigTauTracksInfoCollectionCnv::createTransient called" << endmsg;
   
-  static const pool::Guid p2_guid( "1AF8C4E5-4862-4625-B9B6-D9B53E716B17" );
-  static const pool::Guid p1_guid( "8A208FA7-C52F-4CD3-AE20-EF1C99FC92A6" );
-  static const pool::Guid p0_guid( "27E95E77-0D99-417D-83C7-7F1B8E6DE511" );
+  static const Guid p2_guid( "1AF8C4E5-4862-4625-B9B6-D9B53E716B17" );
+  static const Guid p1_guid( "8A208FA7-C52F-4CD3-AE20-EF1C99FC92A6" );
+  static const Guid p0_guid( "27E95E77-0D99-417D-83C7-7F1B8E6DE511" );
   
   if( compareClassGuid(token,  p2_guid ) ){
          std::unique_ptr< TrigTauTracksInfoCollection_p2 > col_vect( poolReadObject< TrigTauTracksInfoCollection_p2 >(token) );

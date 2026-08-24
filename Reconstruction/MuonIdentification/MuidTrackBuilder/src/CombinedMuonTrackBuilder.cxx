@@ -1376,7 +1376,7 @@ namespace Rec {
 
             param_owner = m_propagator->propagate(ctx, *param_owner, middleParameters->associatedSurface(), Trk::alongMomentum, false,
                                                   m_magFieldProperties, Trk::nonInteracting);
-
+            //coverity[REVERSE_NULL:FALSE]
             if (!param_owner) {
                 // failed propagation to middleTSOS
                 m_messageHelper->printWarning(27);
@@ -1585,7 +1585,7 @@ namespace Rec {
         trackStateOnSurfaces->reserve(track->trackStateOnSurfaces()->size());
 
         for (const Trk::TrackStateOnSurface* trk_srf : *track->trackStateOnSurfaces()) {
-            if (calo_entrance == trk_srf || calo_entrance == trk_srf) {
+            if (calo_entrance == trk_srf ) {
                 if (!trk_srf->materialEffectsOnTrack()) {
                     ATH_MSG_DEBUG("No material effect on track");
                     continue;
@@ -2223,8 +2223,8 @@ namespace Rec {
         appendSelectedTSOS(*trackStateOnSurfaces, s, end);
         /// Check that the perigee parameters exist
         if (!hasAlreadyPerigee && std::find_if(trackStateOnSurfaces->begin(), trackStateOnSurfaces->end(),
-                [] (const Trk::TrackStateOnSurface* tsos){
-                     return tsos->type(Trk::TrackStateOnSurface::Perigee);
+                [] (const Trk::TrackStateOnSurface* t){
+                     return t->type(Trk::TrackStateOnSurface::Perigee);
         }) == trackStateOnSurfaces->end() && muonTrack.perigeeParameters() ){
             trackStateOnSurfaces->push_back( Muon::MuonTSOSHelper::createPerigeeTSOS(muonTrack.perigeeParameters()->uniqueClone()));
             /// Move the perigee to the front

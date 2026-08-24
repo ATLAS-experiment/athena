@@ -71,7 +71,7 @@ namespace EL
     /// \par Guarantee
     ///   no-fail
   public:
-    virtual ~AnaReentrantAlgorithm() noexcept;
+    virtual ~AnaReentrantAlgorithm() noexcept = default;
 
 
 
@@ -173,7 +173,7 @@ namespace EL
     ///   job not configured for xAODs
     /// \post result != nullptr
     ///
-    /// \warn The user should *not* be calling this function directly,
+    /// \warning The user should *not* be calling this function directly,
     /// ever, and it may very well disappear at any point without
     /// notice, and it does *not* exist in Athena which defeats the
     /// whole purpose of having a reentrant algorithm.

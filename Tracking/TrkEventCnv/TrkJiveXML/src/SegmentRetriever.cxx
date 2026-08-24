@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrkJiveXML/SegmentRetriever.h"
@@ -57,6 +57,12 @@ namespace JiveXML {
       
 	//Loop over the segments
 	Trk::SegmentCollection::const_iterator SegmentItr;
+	//reserve once to avoid reallocation
+	std::size_t nMeasurements{};
+	for (const Trk::Segment * segment : *cont.cptr()){
+	  nMeasurements+= segment->containedMeasurements().size();
+	}
+	hits.reserve(nMeasurements);
 	for (SegmentItr=cont.cptr()->begin(); SegmentItr!=cont.cptr()->end(); ++SegmentItr) {
         
 	  //Retrieve primitive variables
@@ -68,9 +74,6 @@ namespace JiveXML {
 
 	  //Count number of valid (non-null) RIO_OnTracks
 	  int NRoTs = 0;
-	  //Reserve space for expected number
-	  hits.reserve(hits.size()+(*SegmentItr)->containedMeasurements().size());
-
 	  //Loop over segment measurments
 	  std::vector< const Trk::MeasurementBase * >::const_iterator measItr, measEnd;
 	  measItr=(*SegmentItr)->containedMeasurements().begin();
@@ -97,17 +100,18 @@ namespace JiveXML {
 
 	//Add data to our map
 	DataMap DataMap;
-	DataMap["x"] = x;
-	DataMap["y"] = y;
-	DataMap["z"] = z;
-	DataMap["phi"] = phi;
-	DataMap["theta"] = theta;
-	DataMap["numHits"] = numHits;
+	DataMap["x"] = std::move(x);
+	DataMap["y"] = std::move(y);
+	DataMap["z"] = std::move(z);
+	DataMap["phi"] = std::move(phi);
+	DataMap["theta"] = std::move(theta);
+	std::size_t n = numHits.size();
+	DataMap["numHits"] = std::move(numHits);
 
 	//Hits are stored as multiple with average size given in XML header
 	if (NSegs > 0) {
-	  std::string multiple = "hits multiple=\"" + DataType( hits.size()*1./numHits.size()).toString() + "\"";
-	  DataMap[multiple] = hits;
+	  std::string multiple = "hits multiple=\"" + DataType( hits.size()*1./n).toString() + "\"";
+	  DataMap[multiple] = std::move(hits);
 	}
     
 	//forward data to formating tool

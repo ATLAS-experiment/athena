@@ -12,17 +12,12 @@ def LArOFFCRawChannelBuilderCfg(flags, name="LArOFFCRawChannelBuilder", **kwargs
 
     acc = LArADC2MeVCondAlgCfg(flags)
 
-    # Default OFFC Configuration
-    kwargs.setdefault("BelowThreshold", flags.LAr.ROD.OFFCBelowThreshold)
-    kwargs.setdefault("BelowTillReset", flags.LAr.ROD.OFFCBelowTillReset)
-    kwargs.setdefault("NPulse", flags.LAr.ROD.OFFCNPulse)
-    kwargs.setdefault("Q3Cut", flags.LAr.ROD.OFFCQ3Cut)
-    kwargs.setdefault("FilterThreshold", flags.LAr.ROD.OFFCFilterThreshold)
-    
+    # Index of the digit sample the OFC window starts at, same convention as
+    # the other raw channel builders
     kwargs.setdefault(
         "firstSample",
         (
-            (flags.LAr.ROD.nPreceedingSamples - 1)
+            flags.LAr.ROD.nPreceedingSamples
             if flags.LAr.ROD.nPreceedingSamples != 0
             else flags.LAr.ROD.FirstSample
         ),
@@ -83,13 +78,17 @@ def LArOFFCRawChannelBuilderCfg(flags, name="LArOFFCRawChannelBuilder", **kwargs
         dbInstance = "LAR_ONL"
         acc.merge(addFolders(flags, fld, dbInstance, className=obj, db=dbString))
 
-    kwargs.setdefault(dspkey, sgkey)
+    # Run 1 MC falls back to a flat threshold and sets no folder at all
+    if len(dspkey) > 0:
+        kwargs.setdefault(dspkey, sgkey)
 
     if (
         flags.LAr.ROD.forceIter
         or flags.LAr.RawChannelSource is RawChannelSource.Calculated
     ):
-        # iterative OFC procedure
+        # Iterative OFC procedure. There is no OFFC variant of it, so this
+        # falls back to the standard iterative builder and none of the OFFC
+        # properties below may be set here: it declares none of them.
         kwargs.setdefault("minSample", 2)
         kwargs.setdefault("maxSample", 12)
         kwargs.setdefault("minADCforIterInSigma", 4)
@@ -99,7 +98,7 @@ def LArOFFCRawChannelBuilderCfg(flags, name="LArOFFCRawChannelBuilder", **kwargs
         from LArConditionsCommon.LArRunFormat import getLArFormatForRun
 
         larformat = getLArFormatForRun(
-            flags.Input.RunNumber[0],
+            flags.Input.RunNumbers[0],
             connstring="COOLONL_LAR/" + flags.IOVDb.DatabaseInstance,
         )
         if larformat is not None:
@@ -114,6 +113,13 @@ def LArOFFCRawChannelBuilderCfg(flags, name="LArOFFCRawChannelBuilder", **kwargs
 
         acc.addEventAlgo(CompFactory.LArRawChannelBuilderIterAlg(**kwargs))
     else:
+        # Default OFFC Configuration
+        kwargs.setdefault("BelowThreshold", flags.LAr.ROD.OFFCBelowThreshold)
+        kwargs.setdefault("BelowTillReset", flags.LAr.ROD.OFFCBelowTillReset)
+        kwargs.setdefault("NPulse", flags.LAr.ROD.OFFCNPulse)
+        kwargs.setdefault("Q3Cut", flags.LAr.ROD.OFFCQ3Cut)
+        kwargs.setdefault("Q3Offset", flags.LAr.ROD.OFFCQ3Offset)
+        kwargs.setdefault("FilterThreshold", flags.LAr.ROD.OFFCFilterThreshold)
 
         acc.addEventAlgo(CompFactory.LArOFFCRawChannelBuilder(name, **kwargs))
 

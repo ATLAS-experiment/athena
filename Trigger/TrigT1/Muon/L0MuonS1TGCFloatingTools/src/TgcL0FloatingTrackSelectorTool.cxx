@@ -4,12 +4,16 @@
 
 #include "TgcL0FloatingTrackSelectorTool.h"
 
+#include "TgcL0TrackSelector.h"
+
 namespace L0Muon {
 
-StatusCode TgcL0FloatingTrackSelectorTool::select(const TgcL0CandidateContainer& candidates, xAOD::TGCCandDataContainer& output, const EventContext& ctx) const {
-  (void)candidates;
-  (void)output;
+StatusCode TgcL0FloatingTrackSelectorTool::select(
+    const TgcL0CandidateContainer &candidates,
+    xAOD::TGCCandDataContainer &output, const EventContext &ctx) const {
   (void)ctx;
+  const TgcL0Floating::TrackSelector selector;
+  selector.select(candidates, output);
   return StatusCode::SUCCESS;
 }
 

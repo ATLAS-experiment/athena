@@ -136,7 +136,7 @@ def SetConfigTag(flags):
             elif flags.Input.ProjectName in ["data24_5p36TeV", "data24_900GeV", "data24_13p6TeV", "data24_refcomm"]:
                 config = "pp2024"
             elif flags.Input.ProjectName in ["data24_hi", "data24_hicomm"]:
-                config = "configZDC_PbPb2024.v5.json" 
+                config = "configZDC_PbPb2024.v6.json" 
             elif flags.Input.ProjectName in ["data25_hipcomm"]:
                 config = "pO2025"
             elif flags.Input.ProjectName in ["data25_hip"]:
@@ -145,9 +145,9 @@ def SetConfigTag(flags):
                 if (aa_type == 8 or aa_type == 10):
                     config = "OONeNe2025"
                 if (aa_type == 82):
-                    config = "configZDC_PbPb2025.v1.json"
+                    config = "configZDC_PbPb2025.v3.json"
             elif flags.Input.ProjectName in ["data26_comm", "data26_cos", "data26_900GeV", "data26_13p6TeV"]:
-                config = "configZDC_PbPb2025.v2.1.json" # assume same config for 2026 pp as for PbPb for 2025 run
+                config = "configZDC_PbPb2026.v2.json"
             elif flags.Input.ProjectName in ["data26_hi","data26_hicomm"]:
                 config = "configZDC_PbPb2026.v2.json"
 
@@ -160,9 +160,9 @@ def SetConfigTag(flags):
                 config = "pPb2016"
             elif flags.Input.ProjectName == "data16_hip8TeV":
                 if(aa_type == 1):
-                    config = "configZDC_pPb2016.v1.json"
+                    config = "configZDC_pPb2016.v2.json"
                 if(aa_type == 82):
-                    config = "configZDC_Pbp2016.v1.json"
+                    config = "configZDC_Pbp2016.v2.json"
             elif flags.Input.ProjectName == "data18_hi":
                 config = "PbPb2018"
 

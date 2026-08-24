@@ -27,7 +27,7 @@ LArFebErrorSummaryCnv::createTransient(const Token* token)
   LArFebErrorSummary         *trans = NULL;
   
   // GUID for persistent classes
-  static const pool::Guid   guid_p1("9448FB64-AB7E-4995-A5FC-23E9A6C1AF80");
+  static const Guid   guid_p1("9448FB64-AB7E-4995-A5FC-23E9A6C1AF80");
 
   if( compareClassGuid(token, guid_p1) ) {
       std::unique_ptr<LArFebErrorSummary_p1> col_vect( poolReadObject<LArFebErrorSummary_p1>(token) );

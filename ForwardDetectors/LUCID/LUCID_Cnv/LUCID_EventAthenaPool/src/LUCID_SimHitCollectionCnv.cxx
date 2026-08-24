@@ -26,10 +26,10 @@ LUCID_SimHitCollection* LUCID_SimHitCollectionCnv::createTransient(const Token* 
   LUCID_SimHitCollectionCnv_p1 converter_p1;
   LUCID_SimHitCollectionCnv_p2 converter_p2;
   LUCID_SimHitCollectionCnv_p3 converter_p3;
-  static const pool::Guid p3_guid ("018E3850-0AAE-776B-9BDE-69C14B881C19");
-  static const pool::Guid p2_guid ("149F1834-1D98-4F35-A1B3-C9AA083D6838");
-  static const pool::Guid p1_guid ("9ACC906C-74CA-4F77-AC16-2A503358C2D1");
-  static const pool::Guid old_guid("7BCDF079-FD96-4B18-B1E7-FA5EDDB026F2");
+  static const Guid p3_guid ("018E3850-0AAE-776B-9BDE-69C14B881C19");
+  static const Guid p2_guid ("149F1834-1D98-4F35-A1B3-C9AA083D6838");
+  static const Guid p1_guid ("9ACC906C-74CA-4F77-AC16-2A503358C2D1");
+  static const Guid old_guid("7BCDF079-FD96-4B18-B1E7-FA5EDDB026F2");
 
   LUCID_SimHitCollection* trans_cont{};
   if (this->compareClassGuid(token, p3_guid)) {

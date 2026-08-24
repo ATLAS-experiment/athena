@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 ## @package PyJobTransforms.trfAMI
 #  @brief Utilities for configuration of transforms via AMI tags
@@ -219,7 +219,7 @@ class TagInfo(object):
 #  The caller is allowed to update the replica via the 
 #  config.endpoints value.
 #  @returns pyAMI.client.Client instance
-def getAMIClient(endpoints = ['atlas-replica','atlas']):
+def getAMIClient(endpoints = 'atlas'):
     msg.debug('Getting AMI client...')
     
     try:

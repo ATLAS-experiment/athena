@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "JetMonitoring/HIEfficiencyResponseHistos.h"
@@ -104,10 +104,10 @@ int HIEfficiencyResponseHistos::fillHistosFromContainer(const xAOD::JetContainer
   CHECK( evtStore()->retrieve(m_eventShape,m_container_key), 1 );
   m_FCalET=0;
   m_psiN_FCal=0;
-  //  m_vN_fcal=0;
+  static const SG::ConstAccessor<std::string> SummaryAcc("Summary");
+  const std::string defaultVal = "";
   for(const xAOD::HIEventShape* sh : *m_eventShape){
-    static const SG::ConstAccessor<std::string> SummaryAcc("Summary");
-    std::string summary = SummaryAcc.withDefault(*sh, "");
+    std::string summary = SummaryAcc.withDefault(*sh, defaultVal);
     if(summary.compare("FCal")==0){
       m_FCalET=sh->et()*toTeV;
       float qx=sh->etCos().at(m_harmonic);

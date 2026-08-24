@@ -19,8 +19,7 @@
 namespace EL
 {
   PythonConfigBase ::
-  PythonConfigBase ()
-  {}
+  PythonConfigBase () = default;
 
 
 

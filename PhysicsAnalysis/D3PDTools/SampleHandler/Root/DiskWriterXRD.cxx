@@ -14,7 +14,6 @@
 #include <CxxUtils/hash_utils.h>
 #include <RootCoreUtils/Assert.h>
 #include <RootCoreUtils/ShellExec.h>
-#include <RootCoreUtils/ThrowMsg.h>
 #include <TFile.h>
 #include <TSystem.h>
 #include <format>
@@ -22,6 +21,7 @@
 #include <iostream>
 #include <random>
 #include <sstream>
+#include <stdexcept>
 #include <sys/types.h>
 #include <thread>
 #include <unistd.h>
@@ -129,7 +129,7 @@ namespace SH
     if (m_file->IsOpen())
     {
       if (m_file->Write () < 0)
-	RCU_THROW_MSG ("failed to write to file: " + m_path);
+        throw std::runtime_error ("failed to write to file: " + m_path);
       m_file->Close ();
     }
 

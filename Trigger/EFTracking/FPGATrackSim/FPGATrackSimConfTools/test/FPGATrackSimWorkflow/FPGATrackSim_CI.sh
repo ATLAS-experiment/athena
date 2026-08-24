@@ -38,10 +38,14 @@ mv test.root $TVInputFile
 
 
 echo "Running F-150 in Reco_tf mode for a few single-mu events"
-FPGATrackSim_F150_RecoTf.sh -w -n 10
+FPGATrackSim_F150_RecoTf.sh -w -n 10 -c -o $OUTPUT_AOD_FILE
+
+python -m FPGATrackSimConfTools.FPGATrackSimValidateAODOutput $OUTPUT_AOD_FILE --useITkNames
 
 echo "Running F-150 GNN in Reco_tf mode for a few single-mu events"
-FPGATrackSim_F150_RecoTf.sh -j -n 10
+FPGATrackSim_F150_RecoTf.sh -j -n 10 -c -o $OUTPUT_AOD_FILE
+
+python -m FPGATrackSimConfTools.FPGATrackSimValidateAODOutput $OUTPUT_AOD_FILE --useITkNames
 
 echo "Running F-100 standalone (cluster validation) for a pu200 ttbar event"
 FPGATrackSim_F100.sh -t -n 1 -c

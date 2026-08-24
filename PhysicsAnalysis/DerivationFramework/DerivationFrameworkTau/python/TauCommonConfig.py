@@ -139,7 +139,7 @@ def AddTauTESCompatibilityDecorationCfg(flags, **kwargs):
     
     TauCombinedTESWrapper = TauCombinedTESWrapper( name = f"{prefix}_TauCombinedTES", **kwargs )                                     
     acc.addPublicTool(TauCombinedTESWrapper)
-    acc.addEventAlgo(TauCombinedTESKernel(name              = "TauCombinedTESKernel",
+    acc.addEventAlgo(TauCombinedTESKernel(name              = f"{prefix}_TauCombinedTESKernel",
                                           AugmentationTools = [TauCombinedTESWrapper]))
     return acc
     

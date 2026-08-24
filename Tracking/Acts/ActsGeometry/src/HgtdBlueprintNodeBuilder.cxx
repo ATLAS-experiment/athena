@@ -26,6 +26,7 @@
 #include <Acts/Navigation/TryAllNavigationPolicy.hpp>
 #include <Acts/Surfaces/SurfaceArray.hpp>
 #include <Acts/Utilities/AxisDefinitions.hpp>
+#include <Acts/Utilities/AxisSpec.hpp>
 #include <cstddef>
 #include <ranges>
 #include <string>
@@ -51,7 +52,6 @@ namespace {
 using namespace ActsTrk::detail::GeoVolIds;
 using enum Acts::CylinderVolumeBounds::Face;
 using enum Acts::AxisDirection;
-using enum Acts::AxisBoundaryType;
 using enum Acts::SurfaceArrayNavigationPolicy::LayerType;
 using AttachmentStrategy = Acts::VolumeAttachmentStrategy;
 using ResizeStrategy = Acts::VolumeResizeStrategy;
@@ -184,17 +184,17 @@ void HgtdBlueprintNodeBuilder::addHgtdLayers(
   using enum Acts::SurfaceArrayNavigationPolicy::LayerType;
   using enum Acts::CylinderVolumeBounds::Face;
   using enum Acts::AxisDirection;
-  using enum Acts::AxisBoundaryType;
 
   parent.addMaterial(name + "_Material", [&](auto& mat) {
     if (index == 3) {
       mat.configureFace(bec > 0 ? NegativeDisc : PositiveDisc,
-                        {AxisR, Bound, 20}, {AxisPhi, Closed, 40});
+                        AxisSpec::DeferredEquidistant(20, AxisR),
+                        AxisSpec::DeferredEquidistant(40, AxisPhi));
     } else {
-      mat.configureFace(NegativeDisc, {AxisR, Bound, 20},
-                        {AxisPhi, Closed, 40});
-      mat.configureFace(PositiveDisc, {AxisR, Bound, 20},
-                        {AxisPhi, Closed, 40});
+      mat.configureFace(NegativeDisc, AxisSpec::DeferredEquidistant(20, AxisR),
+                        AxisSpec::DeferredEquidistant(40, AxisPhi));
+      mat.configureFace(PositiveDisc, AxisSpec::DeferredEquidistant(20, AxisR),
+                        AxisSpec::DeferredEquidistant(40, AxisPhi));
     }
 
     mat.addLayer(name, [&surfaces](auto& layer) {

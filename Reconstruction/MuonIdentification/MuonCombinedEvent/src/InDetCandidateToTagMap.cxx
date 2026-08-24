@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonCombinedEvent/InDetCandidateToTagMap.h"
@@ -12,6 +12,7 @@ namespace MuonCombined {
     const TagBase* InDetCandidateToTagMap::getTag(const InDetCandidate* idcand) const {
         tagMap::const_iterator pos = m_tagMap.find(idcand);
         if (pos == end()) return nullptr;
+        //coverity[INVALIDATE_ITERATOR:FALSE]
         return pos->second.get();
     }
 

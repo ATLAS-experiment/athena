@@ -61,8 +61,8 @@ class CalcPartonHistory : public asg::AsgTool {
                             std::vector<int>& pdgIds);
 
   void Initialize4TopDecorators();
-  void InitializeTopDecorators();
-  void InitializeAntiTopDecorators();
+  void InitializeTopDecorators(bool fcnc = false);
+  void InitializeAntiTopDecorators(bool fcnc = false);
   void InitializeBottomDecorators();
   void InitializeVectorBottomDecorators();
   void InitializeAntiBottomDecorators();
@@ -118,10 +118,12 @@ class CalcPartonHistory : public asg::AsgTool {
                                 const std::string& mode = "resonant");
   void FillWPartonHistory(const std::string& parent, int nWs = 1,
                           const std::string& mode = "resonant");
-  void FillTopPartonHistory();
-  void FillAntiTopPartonHistory();
+  void FillXPartonHistory(const std::string& parent,            // for FCNC t -> qX, where X can be W
+                          const std::string& symbolX = "H");    // the default FCNC is Higgs
+  void FillTopPartonHistory(bool fcnc = false);
+  void FillAntiTopPartonHistory(bool fcnc = false);
   void FillHiggsPartonHistory(const std::string& mode);
-  void FillTtbarPartonHistory();
+  void FillTtbarPartonHistory(bool fcnc = false);
 
   // Helpers for non-resonant / off-shell reconstruction.
   void setHiggs(const std::string& fsr);

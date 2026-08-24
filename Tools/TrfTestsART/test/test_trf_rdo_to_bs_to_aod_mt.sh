@@ -8,7 +8,7 @@
 : ${events:=100} #Allow overwriting from command line
 RDOFile=$(python -c "from AthenaConfiguration.TestDefaults import defaultTestFiles; print(defaultTestFiles.RDO_RUN4[0])")
 conditions=$(python -c "from AthenaConfiguration.TestDefaults import defaultConditionsTags; print(defaultConditionsTags.RUN4_MC)")
-geometry=$(python -c "from AthenaConfiguration.TestDefaults import defaultGeometryTags; print(defaultGeometryTags.RUN4)")
+geometry="ATLAS-P2-RUN4-04-00-00" # Should match RDO input file, which might not use the default geotag
 Reco_tf.py \
 --inputRDOFile ${RDOFile} \
 --outputBSFile created.BS \

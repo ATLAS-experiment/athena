@@ -257,7 +257,6 @@ StatusCode TrigCOOLUpdateHelper::extractFolderUpdates(const EventContext& ctx)
   const std::vector<uint32_t> robs{m_ctpRobId};
   IROBDataProviderSvc::VROBFRAG ctpRobs;
   try {
-    m_robDataProviderSvc->addROBData(ctx, robs, name());
     m_robDataProviderSvc->getROBData(ctx, robs, ctpRobs, name());
   }
   catch (const std::exception& ex) {

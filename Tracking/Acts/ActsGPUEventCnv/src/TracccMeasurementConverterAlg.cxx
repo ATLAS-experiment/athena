@@ -396,6 +396,8 @@ StatusCode TracccMeasurementConverterAlg::execute(const EventContext& ctx) const
                                                            ctx};
   ATH_CHECK(stripHandle.record(std::move(strip_cont), std::move(strip_aux)));
 
+  ATH_MSG_DEBUG("Wrote clusters to " << m_outputPixelKey.key() << " and  " << m_outputStripKey.key());
+
   return StatusCode::SUCCESS;
 }
 

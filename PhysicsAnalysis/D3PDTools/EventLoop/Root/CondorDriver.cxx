@@ -17,7 +17,6 @@
 #include <EventLoop/ManagerData.h>
 #include <EventLoop/MessageCheck.h>
 #include <RootCoreUtils/Assert.h>
-#include <RootCoreUtils/ThrowMsg.h>
 #include <TSystem.h>
 #include <fstream>
 #include <memory>
@@ -76,7 +75,10 @@ namespace EL
             const std::string newLocation = data.submitDir + "/submit/" + tarballName;
             int status=gSystem->CopyFile(tarballName.c_str(),newLocation.c_str());
             if(status != 0)
-              RCU_THROW_MSG( ("failed to copy " + tarballName + " to " + newLocation).c_str() );
+            {
+              ANA_MSG_ERROR ("failed to copy " << tarballName << " to " << newLocation);
+              return ::StatusCode::FAILURE;
+            }
           }
         }
 
@@ -126,7 +128,10 @@ namespace EL
           cmd << "cd " << data.submitDir << "/submit && condor_submit "
               << data.options.castString (Job::optSubmitFlags) << " submit";
           if (gSystem->Exec (cmd.str().c_str()) != 0)
-            RCU_THROW_MSG (("failed to execute: " + cmd.str()).c_str());
+          {
+            ANA_MSG_ERROR ("failed to execute: " << cmd.str());
+            return ::StatusCode::FAILURE;
+          }
         }
         data.submitted = true;
       }

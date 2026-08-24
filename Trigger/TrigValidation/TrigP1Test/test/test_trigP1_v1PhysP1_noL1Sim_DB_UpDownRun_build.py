@@ -142,7 +142,6 @@ runDB.args += ' --DBl1pskey=`source filesForUpload/exportMenuKeys.sh && echo ${L
 runDB.args += ' --DBhltpskey=`source filesForUpload/exportMenuKeys.sh && echo ${HLTPSK}`'
 runDB.args += ' --prodSysBSRDO True'
 runDB.args += ' --outputHIST_HLTMONFile=hltmon.root'
-runDB.args += ' --trigExe=athenaEF.py'
 # potential other outputs not created currently
 # runDB.args += ' --outputBSFile=RAW.pool.root'
 # runDB.args += ' --outputDRAW_TRIGCOSTFile=TRIGCOST.pool.root'

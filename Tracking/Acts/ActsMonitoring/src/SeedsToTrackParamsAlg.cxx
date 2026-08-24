@@ -28,6 +28,7 @@ namespace ActsTrk {
 
     const Acts::GeometryContext tgContext = m_ctxProvider.getGeometryContext(ctx);
     const Acts::MagneticFieldContext mfContext = m_ctxProvider.getMagneticFieldContext(ctx);
+    const Acts::CalibrationContext calContext = m_ctxProvider.getCalibrationContext(ctx);
 
     SG::ReadHandle<ActsTrk::SeedContainer> seedContainerHandle = SG::makeHandle(m_inputSeedContainerKey, ctx);
     SG::ReadCondHandle<InDetDD::SiDetectorElementCollection> detEleHandle = SG::makeHandle(m_detEleCollKey, ctx);
@@ -57,12 +58,13 @@ namespace ActsTrk {
           return *m_geometryConvTool->convertSurfaceToActs(atlas_surface);
         };
 
-      std::optional<Acts::BoundTrackParameters> optTrackParams =
+      const auto& [optTrackParams, estimationStatus] =
         m_paramEstimationTool->estimateTrackParameters(
 						       seed,
 						       useTopSp,
 						       tgContext,
 						       mfContext,
+						       calContext,
 						       retrieveSurfaceFunction);
 
       if (!optTrackParams.has_value()) {
@@ -88,6 +90,5 @@ namespace ActsTrk {
 
     return r > rBoundary || z > zBoundary;
   }
-
 
 }

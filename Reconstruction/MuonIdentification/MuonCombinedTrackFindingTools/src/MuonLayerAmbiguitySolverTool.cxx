@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonLayerAmbiguitySolverTool.h"
@@ -44,7 +44,7 @@ namespace Muon {
             }
 
             // create first candidate from seed and extend it
-            std::vector<MuonLayerIntersection> layerIntersections = {layerIntersection};
+            std::vector<MuonLayerIntersection> layerIntersections ={ std::move(layerIntersection)};
             std::vector<MuonCandidate> candidates = {MuonCandidate(std::move(layerIntersections))};
             if (extendCandidatesWithLayers(ctx, candidates, muonLayerDataHashVec, inverseSeedLayerOrder)) {
                 // add candidates to output list

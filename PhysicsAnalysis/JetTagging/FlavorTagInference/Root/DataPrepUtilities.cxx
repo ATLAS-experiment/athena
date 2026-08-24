@@ -335,6 +335,15 @@ namespace FlavorTagInference {
       if (auto h = remap_scalar.extract(options.track_prefix)) {
         options.track_prefix = h.mapped();
       }
+      if (auto h = remap_scalar.extract("tracks_ip_prefix")) {
+        options.track_prefix = h.mapped();
+      }
+      if (auto h = remap_scalar.extract("electrons_ip_prefix")) {
+        options.electron_ip_prefix = h.mapped();
+      }
+      if (auto h = remap_scalar.extract("muons_ip_prefix")) {
+        options.muon_ip_prefix = h.mapped();
+      }
       if (auto h = remap_scalar.extract(options.track_link_name)) {
         options.track_link_name = h.mapped();
       }

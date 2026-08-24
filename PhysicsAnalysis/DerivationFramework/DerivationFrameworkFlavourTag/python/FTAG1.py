@@ -50,6 +50,18 @@ if TYPE_CHECKING:
     from AthenaConfiguration.AthConfigFlags import AthConfigFlags
 
 
+GN3_LATENT_VARS = [
+    "GN3EPCLV01_Latent",
+    "GN3EPCLV01_Latent128",
+    "GN3EPCLV01_Latent64",
+    "GN3EPCLV01_Latent32",
+    "GN3EPCLV01SimpleFlip_Latent",
+    "GN3EPCLV01SimpleFlip_Latent128",
+    "GN3EPCLV01SimpleFlip_Latent64",
+    "GN3EPCLV01SimpleFlip_Latent32",
+]
+
+
 def FTAG1KernelCfg(
     flags: AthConfigFlags,
     name: str = "FTAG1Kernel",
@@ -82,6 +94,7 @@ def FTAG1CoreCfg(
     keep_truth_collections: bool = True,
     keep_track_covariance_offdiag: bool = True,
     tau_as_smart_collection: bool = False,
+    compress_gn3_latent: bool = True,
 ) -> ComponentAccumulator:
     """Configure FTAG1 slimming and output content."""
     if extra_SmartCollections is None:
@@ -276,12 +289,20 @@ def FTAG1CoreCfg(
 
         ftag1_item_list = [_drop_cov(item) for item in ftag1_item_list]
 
+    gn3_latent_compression = []
+    if compress_gn3_latent:
+        gn3_latent_compression = [
+            "xAOD::AuxContainerBase!#AntiKt4EMPFlowJetsAux."
+            + ".".join(GN3_LATENT_VARS)
+        ]
+
     acc.merge(
         OutputStreamCfg(
             flags=flags,
             streamName="DAOD_" + name_tag,
             ItemList=ftag1_item_list,
             AcceptAlgs=[name_tag + "Kernel"],
+            CompressionListHigh=gn3_latent_compression,
         )
     )
 

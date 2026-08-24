@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //////////////////////////////////////////////////////////////////
@@ -7,8 +7,6 @@
 ///////////////////////////////////////////////////////////////////
 
 #include "TrkGeometry/LayerMaterialRecord.h"
-
-#include <climits>
 
 #include "EventPrimitives/EventPrimitivesToStringConverter.h"
 #include "TrkGeometry/AssociatedMaterial.h"
@@ -323,6 +321,9 @@ void Trk::LayerMaterialRecord::finalizeRun(bool recordElements) {
             peIter.second *= eventNorm;
             preTotalFraction += peIter.second;
           }
+          if (preTotalFraction == 0.) [[unlikely]]{
+            throw std::runtime_error("Trk::LayerMaterialRecord::finalizeRun: preTotalFraction is zero.");
+          }
           // first loop to sort rescale
           std::map<double, unsigned int> probabilityOrdered;
           double totalFraction = 0.;
@@ -332,6 +333,9 @@ void Trk::LayerMaterialRecord::finalizeRun(bool recordElements) {
             if (eFraction < m_minFraction) continue;
             probabilityOrdered[eIter.second] = eIter.first;
             totalFraction += eIter.second;
+          }
+          if (totalFraction == 0.) [[unlikely]]{
+            throw std::runtime_error("Trk::LayerMaterialRecord::finalizeRun: totalFraction is zero.");
           }
           // second loop to fill the element fractions
           std::vector<Trk::ElementFraction> elementFractions;
@@ -354,7 +358,7 @@ void Trk::LayerMaterialRecord::finalizeRun(bool recordElements) {
       }
       matVector.push_back(binMaterial);
     }
-    m_associatedLayerMaterial.push_back(matVector);
+    m_associatedLayerMaterial.push_back(std::move(matVector));
   }
 }
 
@@ -395,6 +399,6 @@ void Trk::LayerMaterialRecord::copyMaterial(
       matProp.push_back(((*matIter) ? (*matIter)->clone() : nullptr));
     }
     // and now push back the vector
-    m_associatedLayerMaterial.push_back(matProp);
+    m_associatedLayerMaterial.push_back(std::move(matProp));
   }
 }

@@ -1,5 +1,5 @@
 #
-#  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 #
 
 '''@file SCTErrMonAlg_jobOptions.py
@@ -27,8 +27,10 @@ def SCTErrMonAlgConfig(flags):
     helper = AthMonitorCfgHelper(flags, 'SCTErrMonCfg')
 
     from AthenaConfiguration.ComponentFactory import CompFactory
+    from AthenaMonitoring.AtlasReadyFilterConfig import AtlasReadyFilterCfg
     myMonAlg = helper.addAlgorithm(CompFactory.SCTErrMonAlg, 'SCTErrMonAlg')
     myMonAlg.TriggerChain = ""
+    myMonAlg.ReadyFilterTool = result.popToolsAndMerge(AtlasReadyFilterCfg(flags))
 
     from SCT_ConditionsTools.SCT_ConditionsToolsConfig import SCT_ConditionsSummaryToolCfg
     myMonAlg.SCT_ConditionsSummaryTool = result.popToolsAndMerge(

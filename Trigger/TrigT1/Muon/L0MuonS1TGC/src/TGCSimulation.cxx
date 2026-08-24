@@ -6,6 +6,7 @@
 
 #include "StoreGate/ReadHandle.h"
 #include "StoreGate/WriteHandle.h"
+#include "TgcL0MdtCandidateSelector.h"
 #include "xAODL0MuonCand/TGCCandDataAuxContainer.h"
 #include "xAODMuonViews/FillContainer.h"
 
@@ -16,6 +17,7 @@ namespace L0Muon {
 StatusCode TGCSimulation::initialize() {
   ATH_CHECK(m_keyTgcRdo.initialize());
   ATH_CHECK(m_outputKey.initialize());
+  ATH_CHECK(m_outputToMdtKey.initialize());
   ATH_CHECK(m_validationCandidateKey.initialize(!m_validationCandidateKey.empty()));
   ATH_CHECK(m_validationSegmentKey.initialize(!m_validationSegmentKey.empty()));
   ATH_CHECK(m_candidateBuilderTool.retrieve());
@@ -57,7 +59,14 @@ StatusCode TGCSimulation::execute(const EventContext& ctx) const {
                       xAOD::TGCCandDataAuxContainer>
       output{};
   ATH_CHECK(m_trackSelectorTool->select(candidates, *output, ctx));
+  const TgcL0MdtCandidateSelector mdtCandidateSelector;
+  std::unique_ptr<xAOD::TGCCandDataContainer> outputToMdt =
+      mdtCandidateSelector.select(*output);
+
   ATH_CHECK(output.record(m_outputKey, ctx));
+  SG::WriteHandle<xAOD::TGCCandDataContainer> outputToMdtHandle{
+      m_outputToMdtKey, ctx};
+  ATH_CHECK(outputToMdtHandle.record(std::move(outputToMdt)));
   return StatusCode::SUCCESS;
 }
 

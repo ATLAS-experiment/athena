@@ -158,10 +158,6 @@ StatusCode TrigCaloDataAccessSvc::loadCollections ( const EventContext& context,
 StatusCode TrigCaloDataAccessSvc::loadFullCollections ( const EventContext& context,
                                                         CaloConstCellContainer& cont ) {
 
-  // Gets all data
-  m_robDataProvider->addROBData( context, m_vrodid32fullDet );
-  m_robDataProvider->addROBData( context, m_vrodid32tile );
-
   ATH_CHECK( prepareLArFullCollections( context ) );
 
   ATH_CHECK( prepareTileFullCollections( context ) );
@@ -220,7 +216,6 @@ StatusCode TrigCaloDataAccessSvc::prepareLArFullCollections( const EventContext&
 
   for(std::vector<uint32_t>& vrodid32fullDet : m_vrodid32fullDetHG) {
     std::vector<const OFFLINE_FRAGMENTS_NAMESPACE::ROBFragment*> robFrags;
-    m_robDataProvider->addROBData( context, vrodid32fullDet );
     m_robDataProvider->getROBData( context, vrodid32fullDet, robFrags );
 
     convertROBs( robFrags, cache->larContainer.get(), cache->larRodBlockStructure_per_slot,
@@ -383,13 +378,6 @@ void TrigCaloDataAccessSvc::lateInit(const EventContext& context) { // non-const
       m_tileDecoder->loadRw2Pmt  ( i, tilecell->Rw2PmtMap (i) );
     }
     m_tileDecoder->loadMBTS( tilecell->MBTS_map(), tilecell->MBTS_channel() );
-
-    const std::vector<unsigned int>* mbts_rods = tilecell->MBTS_RODs();
-    for(size_t i = 0 ; i < mbts_rods->size(); i++) {
-      m_mbts_add_rods.insert(m_mbts_add_rods.end(), mbts_rods->begin(), mbts_rods->end());
-    }
-    sort(m_mbts_add_rods.begin(),m_mbts_add_rods.end());
-    m_mbts_add_rods.erase(std::unique(m_mbts_add_rods.begin(), m_mbts_add_rods.end()), m_mbts_add_rods.end());
 
     auto d0cellsp = std::make_unique<TileROD_Decoder::D0CellsHLT>();
     for (unsigned int lcidx=0; lcidx < tilecell->size(); lcidx++){
@@ -627,7 +615,6 @@ StatusCode TrigCaloDataAccessSvc::prepareLArCollections( const EventContext& con
   default: break;
   }
 
-  m_robDataProvider->addROBData( context, requestROBs );
   m_robDataProvider->getROBData( context, requestROBs, robFrags );
   if ( robFrags.empty() && !requestROBs.empty() ) {
     return StatusCode::SUCCESS;
@@ -683,11 +670,9 @@ StatusCode TrigCaloDataAccessSvc::prepareTileCollections( const EventContext& co
   if ( cache->lastFSEvent == context.evt() ) return StatusCode::SUCCESS;
 
   std::vector<uint32_t> requestROBs;
-  std::vector<const OFFLINE_FRAGMENTS_NAMESPACE::ROBFragment*> robFrags;
   std::vector<IdentifierHash> rIds;
   m_regionSelector_TILE->lookup(context)->ROBIDList( 0, roi, requestROBs ); 
   m_regionSelector_TILE->lookup(context)->HashIDList(roi, rIds);
-  m_robDataProvider->addROBData( context, requestROBs );
 
   std::scoped_lock lock{cache->mutex};
   if ( cache->tileContainer->eventNumber() != context.evt() ) {
@@ -707,9 +692,6 @@ StatusCode TrigCaloDataAccessSvc::prepareMBTSCollections( const EventContext& co
   // If the full event was already unpacked, don't need to unpack RoI
   HLTCaloEventCache* cache = m_hLTCaloSlot.get( context );
   if ( cache->lastFSEvent == context.evt() ) return StatusCode::SUCCESS;
-
-  std::vector<const OFFLINE_FRAGMENTS_NAMESPACE::ROBFragment*> robFrags;
-  m_robDataProvider->addROBData( context, m_mbts_add_rods );
 
   std::scoped_lock lock{cache->mutex};
   if ( cache->tileContainer->eventNumber() != context.evt() ) {

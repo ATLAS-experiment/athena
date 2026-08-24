@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "CxxUtils/checker_macros.h"
@@ -170,7 +170,7 @@ TEST_F(PseudoJetContainerOfflineTest, test_append) {
   // check that the jets have the appropriate constituents or associated
   // objects set.
 
-  bool debug{false};
+  static constexpr bool debug{false};
   
   // create the PseudoContainers
   PseudoJetContainer psc0(std::move(m_pExtractor_noghost), m_pjVec0);

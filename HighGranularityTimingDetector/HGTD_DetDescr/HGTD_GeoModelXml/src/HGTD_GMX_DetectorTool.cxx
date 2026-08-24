@@ -10,6 +10,7 @@
 #include <GeoModelKernel/GeoPhysVol.h>
 #include <GeoModelUtilities/GeoModelExperiment.h>
 #include <SGTools/DataProxy.h>
+#include <DetDescrConditions/AlignableTransformContainer.h>
 
 
 HGTD_GMX_DetectorTool::HGTD_GMX_DetectorTool(const std::string &type,
@@ -32,7 +33,7 @@ StatusCode HGTD_GMX_DetectorTool::create()
     ATH_CHECK(detStore()->retrieve(theExpt, "ATLAS"));
 
     m_commonItems = std::make_unique<InDetDD::SiCommonItems>(idHelper);
-
+ 
     //
     // Check the availability
     //
@@ -55,6 +56,16 @@ StatusCode HGTD_GMX_DetectorTool::create()
     GeoPhysVol *world = &*theExpt->getPhysVol();
     auto *manager = new HGTD_DetectorManager(&*detStore());
 
+    // --------------------------------------------------
+    // Alignment folder setup
+    // --------------------------------------------------
+    if (m_alignable) {
+        ATH_MSG_DEBUG("HGTD alignment enabled (GeoModel level only)");
+    }
+    else {
+        ATH_MSG_DEBUG("HGTD alignment DISABLED");
+    }
+    
     HGTD_GmxInterface gmxInterface(manager, m_commonItems.get());
 
     // Load the geometry, create the volume, 
@@ -66,7 +77,7 @@ StatusCode HGTD_GMX_DetectorTool::create()
     if(sqlreader){
         bool useNewIdentifierScheme = idHelper->get_useNewIdentifierScheme();
         if (useNewIdentifierScheme){
-            ATH_MSG_INFO("Building HGTD Readout Geometry from SQLite using "<<m_geoDbTagSvc->getParamSvcName());
+            ATH_MSG_DEBUG("Building HGTD Readout Geometry from SQLite using "<<m_geoDbTagSvc->getParamSvcName());
             gmxInterface.buildReadoutGeometryFromSqlite(m_sqliteReadSvc.operator->(),sqlreader);
         } else {
             ATH_MSG_FATAL("SQLite workflow is unsupported for old HGTD identifier scheme!");

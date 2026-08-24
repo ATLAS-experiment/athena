@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /*********************************************************************
@@ -78,10 +78,13 @@ NewtonTrkDistanceFinder::GetClosestPoints (const PointOnTrack & firsttrack,
   // Setup magnetic field retrieval
   SG::ReadCondHandle<AtlasFieldCacheCondObj> readHandle{m_fieldCacheCondObjInputKey, Gaudi::Hive::currentContext()};
   const AtlasFieldCacheCondObj* fieldCondObj{*readHandle};
-
+  if (!fieldCondObj){
+    ATH_MSG_ERROR("GetClosestPoints: fieldCondObj is nullptr.");
+    return "fieldCondObj is nullptr";
+  }
   MagField::AtlasFieldCache fieldCache;
   fieldCondObj->getInitializedCache (fieldCache);
-
+  
   double magnFieldVect[3];
   double posXYZ[3];
   posXYZ[0] = firsttrack.getPerigee().associatedSurface().center().x();
@@ -247,7 +250,10 @@ NewtonTrkDistanceFinder::GetClosestPoints (const PointOnTrack & firsttrack,
       ATH_MSG_DEBUG( "Hessian indicates a maximum: derivative will be zero but result incorrect" );
       return "Maximum point found";
     }
-
+    if (det == 0.) [[unlikely]]{
+      ATH_MSG_DEBUG( "Hessian is zero" );
+      return "Hessian is zero";
+    }
     //Now apply the Newton formula in more than one dimension
     const double deltaa_phi = -(d2db_phi2*d1da_phi-d2da_phib_phi*d1db_phi)/det;
     const double deltab_phi = -(-d2da_phib_phi*d1da_phi+d2da_phi2*d1db_phi)/det;

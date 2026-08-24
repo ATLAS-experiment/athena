@@ -10,6 +10,9 @@
 // includes
 //
 
+#include <stdexcept>
+#include <typeinfo>
+
 //
 // method implementations
 //

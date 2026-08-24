@@ -82,15 +82,6 @@ public: // Non-static members
    virtual
    unsigned int getInputContextMapSize() const override;
 
-   /// @return the context.
-   virtual
-   const coral::Context* context() const override;
-
-   /// @return void
-   /// @param compName [IN] string name of the component to be loaded.
-   virtual
-   void loadComponent(const std::string& compName) override;
-
    /// @return void
    /// @param shareCat [IN] bool to share the file catalog.
    virtual
@@ -125,7 +116,7 @@ public: // Non-static members
    virtual
    pool::ICollection* createCollection(const std::string& connection,
 	   const std::string& collectionName,
-           const pool::DbType& collectionType = pool::POOL_StorageType.type(),
+           const pool::DbType& collectionType,
 	   unsigned int contextId = IPoolSvc::kInputStream) const override;
 
    /// @return a token for a container entry.
@@ -196,10 +187,6 @@ public: // Non-static members
 	   const std::string& contName = "",
 	   unsigned int contextId = IPoolSvc::kOutputStream) const override;
 
-   /// Setup Frontier cache for given logical or physical connection name
-   virtual
-   StatusCode setFrontierCache(const std::string& conn) override;
-
    /// Standard Service Constructor
    using base_class::base_class;
 
@@ -222,7 +209,7 @@ private: // data
    };
 
    mutable CallMutex                                 m_pool_mut;
-   coral::Context*                                   m_context{nullptr};
+ 
    bool                                              m_shareCat{false};
    pool::IFileCatalog*                               m_catalog{nullptr};
    std::vector<pool::ISession*>      m_dbSessionVec;
@@ -250,17 +237,7 @@ private: // properties
 
    /// AttemptCatalogPatch, option to create catalog: default = false.
    Gaudi::Property<bool> m_attemptCatalogPatch{this,"AttemptCatalogPatch",true};
-   /// ConnectionRetrialPeriod, retry period for CORAL Connection Service: default = 30 seconds
-   Gaudi::Property<int> m_retrialPeriod{this,"ConnectionRetrialPeriod",300};
-   /// ConnectionRetrialTimeOut, the retrial time out for CORAL Connection Service: default = 300 seconds
-   Gaudi::Property<int> m_retrialTimeOut{this,"ConnectionRetrialTimeOut",3600};
-   /// ConnectionTimeOut, the time out for CORAL Connection Service: default = 5 seconds
-   Gaudi::Property<int> m_timeOut{this,"ConnectionTimeOut",5};
-   /// ConnectionCleanUp - whether to use CORAL connection management thread: default = false.
-   Gaudi::Property<bool> m_connClean{this,"ConnectionCleanUp",false};
-   /// Frontier proprties, compression level and list of schemas to be refreshed: default = 5
-   Gaudi::Property<int> m_frontierComp{this,"FrontierCompression",5};
-   Gaudi::Property<std::vector<std::string>> m_frontierRefresh{this,"FrontierRefreshSchema",{}};
+ 
 
 private: // internal helper functions
    // delete all Persistency Services, Catalog, Mutexes and Indexes

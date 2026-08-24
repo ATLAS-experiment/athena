@@ -1,11 +1,11 @@
-#  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 import TrigExamples.MTCalibPebConfig as Conf
 
 
 def run(flags):
-   """Test timeout handling in athenaHLT"""
+   """Test timeout handling in athenaEF"""
 
    # Setup flags
    Conf.set_flags(flags)

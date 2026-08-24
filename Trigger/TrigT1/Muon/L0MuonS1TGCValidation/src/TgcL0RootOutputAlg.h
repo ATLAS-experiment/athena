@@ -127,7 +127,28 @@ class TgcL0RootOutputAlg final : public AthHistogramAlgorithm {
   TGCL0_VECTOR_BRANCH(float, m_candidatePhi, "candidatePhi");
   TGCL0_VECTOR_BRANCH(float, m_candidateDeltaTheta, "candidateDeltaTheta");
   TGCL0_VECTOR_BRANCH(float, m_candidateDeltaPhi, "candidateDeltaPhi");
+  TGCL0_VECTOR_BRANCH(float, m_candidatePt, "candidatePt");
+  TGCL0_VECTOR_BRANCH(std::uint8_t, m_candidateThreshold,
+                      "candidateThreshold");
+  TGCL0_VECTOR_BRANCH(std::int8_t, m_candidateCharge, "candidateCharge");
+  TGCL0_VECTOR_BRANCH(std::uint8_t, m_candidateGoodMagneticField,
+                      "candidateGoodMagneticField");
   TGCL0_VECTOR_BRANCH(int, m_candidateTruthIndex, "candidateTruthIndex");
+
+  TGCL0_VECTOR_BRANCH(std::uint32_t, m_sectorLogicInputCandidateIndex,
+                      "sectorLogicInputCandidateIndex");
+  TGCL0_VECTOR_BRANCH(std::uint32_t, m_sectorLogicCandWord,
+                      "sectorLogicCandWord");
+  TGCL0_VECTOR_BRANCH(std::uint32_t, m_sectorLogicCandExtraWord,
+                      "sectorLogicCandExtraWord");
+  TGCL0_VECTOR_BRANCH(std::uint16_t, m_sectorLogicBoardId,
+                      "sectorLogicBoardId");
+  TGCL0_VECTOR_BRANCH(std::uint16_t, m_sectorLogicFiberId,
+                      "sectorLogicFiberId");
+  TGCL0_VECTOR_BRANCH(int, m_sectorLogicBcidOffset,
+                      "sectorLogicBcidOffset");
+  TGCL0_VECTOR_BRANCH(std::uint16_t, m_sectorLogicVeto,
+                      "sectorLogicVeto");
 
 #undef TGCL0_VECTOR_BRANCH
 };

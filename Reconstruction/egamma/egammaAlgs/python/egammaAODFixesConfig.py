@@ -3,6 +3,7 @@
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.AccumulatorCache import AccumulatorCache
+from AthenaConfiguration.Enums import LHCPeriod
 from RecJobTransforms.AODFixHelper import releaseInRange
 from AthenaCommon.Logging import logging
 
@@ -69,14 +70,17 @@ def doFixTime(flags,relNum = None):
       releaseInRange(flags,"Athena-24.0.0","Athena-24.0.200",relNum) or \
       releaseInRange(flags,"Athena-25.0.0","Athena-25.0.200",relNum)
 
-def runAODFix(flags, correctCluster = True, checkRelWithAMI = True):
+def runAODFix(flags, correctCluster = True, checkRelWithAMI = False):
 
     msg=logging.getLogger("GetDecisionToRunAODFix")
 
     ALToFix = flags.Input.AODFixesDone.find('AmbiguityLinks') < 0
     TimeToFix = flags.Input.AODFixesDone.find('egammatopoIsoFix') < 0
 
-    doFix_meta = doFixTime(flags) and TimeToFix
+    if flags.GeoModel.Run >= LHCPeriod.Run3:
+        doFix_meta = doFixTime(flags) and TimeToFix
+    else:
+        doFix_meta=False
     doAmbiguityFix_meta = releaseInRange(flags,"Athena-24.0.0","Athena-24.0.83") and ALToFix
 
     doFix = doFix_meta
@@ -112,6 +116,8 @@ def runAODFix(flags, correctCluster = True, checkRelWithAMI = True):
             name += ' egammatopoIsoFix'
             if correctCluster:
                 name += ' egClusterL2_3Fix'
+        else:
+            doFix = doAmbiguityFix
 
     return doFix, name
 
@@ -123,8 +129,12 @@ def egammaAODFixesCfg(flags, correctCluster = True):
     msg.info('Decision for egamma AOD fix = %s',doFix)
     if not doFix:
         return None
-    else:
-        msg.info('Will apply fixes = %s',name)
+    else: 
+        if name!='':
+            msg.info('Will apply fixes = %s',name)
+        else:
+            msg.info('Range is ok but there are no fix to apply')
+            return None
 
     # I do this because there are in fact two AOD fixes here:
     # one for ambiguity links, one for timing issue (topoetcone + cluster fixes)

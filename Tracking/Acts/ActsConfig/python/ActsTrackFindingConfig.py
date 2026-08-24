@@ -105,8 +105,9 @@ def ActsMainTrackFindingAlgCfg(flags,
         kwargs.setdefault("MaximumIterations", 10000)
         kwargs.setdefault("NMeasurementsMin", 7)
     
-    kwargs.setdefault("refitSeeds", seedOrder(flags, pixel=[False], strip=[False]))
     kwargs.setdefault("doTwoWay", flags.Acts.doTwoWayCKF)
+    # drop the track states on material-only surfaces: nothing downstream reads them, and the CKF is faster without
+    kwargs.setdefault("recordMaterialStates", False)
     kwargs.setdefault("autoReverseSearch", flags.Tracking.ActiveConfig.autoReverseSearch)
     # forceTrackOnSeed isn't effective with secondary passes, which will have removed most/all of the seed measurements from the measurement containers.
     kwargs.setdefault("forceTrackOnSeed", flags.Acts.forceTrackOnSeed and not flags.Tracking.ActiveConfig.isSecondaryPass)
@@ -157,18 +158,6 @@ def ActsMainTrackFindingAlgCfg(flags,
     if flags.Acts.SeedingStrategy not in (SeedingStrategy.GbtsFtf, SeedingStrategy.Gbts):
         kwargs.setdefault("ptMinMeasurements", seedOrder(flags, pixel=[3], strip=[6]))
         kwargs.setdefault("absEtaMaxMeasurements", seedOrder(flags, pixel=[3], strip=[999999]))
-    
-
-    if 'TrackParamsEstimationTool' not in kwargs:
-        from ActsConfig.ActsTrackParamsEstimationConfig import ActsTrackParamsEstimationToolCfg
-
-        tpe_tool_kwargs = {}
-        if flags.Tracking.ActiveConfig.isLargeD0:
-            tpe_tool_kwargs["allowPropagatorFailure"] = True
-        tpe_tool_kwargs["stripCalibrationIterations"] = flags.Acts.stripCalibrationIterations
-
-        kwargs.setdefault('TrackParamsEstimationTool', acc.popToolsAndMerge(ActsTrackParamsEstimationToolCfg(flags, **tpe_tool_kwargs)))
-        
 
     if flags.Acts.doPrintTrackStates and 'TrackStatePrinter' not in kwargs:
         kwargs.setdefault(
@@ -176,24 +165,6 @@ def ActsMainTrackFindingAlgCfg(flags,
             acc.popToolsAndMerge(ActsTrackStatePrinterToolCfg(flags)),
         )
  
-    if 'FitterTool' not in kwargs:
-        from ActsConfig.ActsTrackFittingConfig import ActsFitterCfg
-        # This fitter is only used for the seed refit, so restore a finite
-        # OutlierChi2Cut only if a refit is scheduled for at least one seed
-        # collection (currently the LRT strip seeds), letting the refit
-        # potentially downweight bad hits before they bias initial parameters fed to CKF.
-        # currently does nothing (flag defaults to inf == disabled)
-        if any(kwargs["refitSeeds"]):
-            seedRefitOutlierChi2Cut = flags.Acts.SeedRefitOutlierChi2Cut
-        else:
-            seedRefitOutlierChi2Cut = float('inf')
-        kwargs.setdefault(
-            'FitterTool',
-            acc.popToolsAndMerge(ActsFitterCfg(flags, 
-                                               ReverseFilteringPt=0,
-                                               OutlierChi2Cut=seedRefitOutlierChi2Cut))
-        )
-
     if 'PixelCalibrator' not in kwargs:
         from AthenaConfiguration.Enums import BeamType
 
@@ -261,26 +232,34 @@ def ActsTrackFindingCfg(flags,
     pixelDetElements = ['ITkPixelDetectorElementCollection']
     stripDetElements = ['ITkStripDetectorElementCollection']
 
-    pixelRefit = [False]
-    stripRefit = [False]
+    tpe_tool_kwargs = {}
     if flags.Tracking.ActiveConfig.isLargeD0:
-        #allow to set whether we do a strip seed refit for LRT
-        stripRefit = [flags.Acts.LrtStripSeedRefit]
+        tpe_tool_kwargs["allowPropagatorFailure"] = True
+    tpe_tool_kwargs["stripCalibrationIterations"] = flags.Acts.stripCalibrationIterations
 
     if pixelSeedLabels is None:
         pixelSeedKeys = None
         pixelDetElements = None
-        pixelRefit = None
+        pixelTpe = None
+    elif 'TrackParamsEstimationTool' not in kwargs:
+        from ActsConfig.ActsTrackParamsEstimationConfig import ActsTrackParamsEstimationToolCfg
+        pixelTpe = [acc.popToolsAndMerge(ActsTrackParamsEstimationToolCfg(flags, "PixelTrackParamsEstimationTool", **tpe_tool_kwargs))]
+
     if stripSeedLabels is None:
         stripSeedKeys = None
         stripDetElements = None
-        stripRefit = None
+        stripTpe = None
+    elif 'TrackParamsEstimationTool' not in kwargs:
+        from ActsConfig.ActsTrackParamsEstimationConfig import ActsTrackParamsEstimationToolCfg
+        if flags.Tracking.ActiveConfig.isLargeD0 and flags.Acts.LrtStripSeedRefit:
+            tpe_tool_kwargs["refitSeeds"] = True
+        stripTpe = [acc.popToolsAndMerge(ActsTrackParamsEstimationToolCfg(flags, "StripTrackParamsEstimationTool", **tpe_tool_kwargs))]
 
+    kwargs.setdefault("TrackParamsEstimationTool", seedOrder(flags, pixel=pixelTpe, strip=stripTpe))
     kwargs.setdefault('ACTSTracksLocation', f"{flags.Tracking.ActiveConfig.extension}Tracks")
     kwargs.setdefault('UncalibratedMeasurementContainerKeys', isdet(flags, pixel=[pixelClusters], strip=[stripClusters], hgtd=[hgtdClusters]))
     kwargs.setdefault('SeedLabels', seedOrder(flags, pixel=pixelSeedLabels, strip=stripSeedLabels))
     kwargs.setdefault('SeedContainerKeys', seedOrder(flags, pixel=pixelSeedKeys, strip=stripSeedKeys))
-    kwargs.setdefault("refitSeeds", seedOrder(flags, pixel=pixelRefit, strip=stripRefit))
 
     acc.merge(ActsMainTrackFindingAlgCfg(flags,
                                          name=f"{flags.Tracking.ActiveConfig.extension}TrackFindingAlg",
@@ -362,10 +341,6 @@ def ActsTrackFindingGNNCfg(flags, **kwargs) -> ComponentAccumulator:
         from ActsConfig.ActsTrackParamsEstimationConfig import ActsTrackParamsEstimationToolCfg
         kwargs.setdefault('TrackParamsEstimationTool', acc.popToolsAndMerge(ActsTrackParamsEstimationToolCfg(flags)))
 
-    if 'FitterTool' not in kwargs:
-        from ActsConfig.ActsTrackFittingConfig import ActsFitterCfg
-        kwargs.setdefault('FitterTool', acc.popToolsAndMerge(ActsFitterCfg(flags, ReverseFilteringPt=0, OutlierChi2Cut=float('inf'))))
-    
     from ActsAlignmentAlgs.AlignmentAlgsConfig import ActsGeometryContextAlgCfg
     from ActsConfig.ActsGeometryConfig import ActsTrackingGeometrySvcCfg
     acc.merge(ActsGeometryContextAlgCfg(flags))

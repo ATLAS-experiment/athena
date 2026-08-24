@@ -21,7 +21,7 @@ HistogramFactory::HistogramFactory(const ServiceHandle<ITHistSvc>& histSvc,
 : m_histSvc(histSvc)
 {
   // The Gaudi/offline THistSvc does not delete objects on de-registration,
-  // but the online TrigMonTHistSvc does. We detect the latter case by checking
+  // but the online THistSvc does. We detect the latter case by checking
   // the existence of one of its properties.
   SmartIF<const IProperty> hs{histSvc.get()};
   if (hs && hs->hasProperty("IncludeName")) {

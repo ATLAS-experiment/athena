@@ -1,12 +1,11 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef RECBACKGROUNDALGS_BEAMBACKGROUNDFILLER
 #define RECBACKGROUNDALGS_BEAMBACKGROUNDFILLER
 
-#include <string>
-#include <vector>
+
 
 #include "AthLinks/ElementLinkVector.h"
 #include "AthenaBaseComps/AthReentrantAlgorithm.h"
@@ -22,6 +21,8 @@
 #include "GaudiKernel/SystemOfUnits.h"
 #include "MuonSegmentMakerToolInterfaces/IMuonSegmentSelectionTool.h"
 
+#include <string>
+#include <vector>
 /**
  * @brief Implementation of the Beam Background Identification Method
  *

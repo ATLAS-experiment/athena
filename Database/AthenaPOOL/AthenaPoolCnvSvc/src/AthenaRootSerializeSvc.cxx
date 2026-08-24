@@ -9,7 +9,6 @@
 #include "AthenaRootSerializeSvc.h"
 #include "DataModelRoot/RootType.h"
 
-#include "StorageSvc/DbReflex.h"
 #include "TBufferFile.h"
 #include "TClass.h"
 
@@ -34,16 +33,6 @@ StatusCode AthenaRootSerializeSvc::initialize() {
 }
 
 //___________________________________________________________________________
-void* AthenaRootSerializeSvc::serialize(const void* /*object*/, const std::string& /*name*/, size_t& /*nbytes*/) const {
-   return(nullptr);
-}
-
-//___________________________________________________________________________
-void* AthenaRootSerializeSvc::serialize(const void* object, const Guid& id, size_t& nbytes) const {
-   return(this->serialize(object, pool::DbReflex::forGuid(id), nbytes));
-}
-
-//___________________________________________________________________________
 void* AthenaRootSerializeSvc::serialize(const void* object, const RootType& cltype, size_t& nbytes) const {
    TBufferFile writeBuffer(TBuffer::kWrite);
    writeBuffer.WriteObjectAny(object, cltype);
@@ -51,16 +40,6 @@ void* AthenaRootSerializeSvc::serialize(const void* object, const RootType& clty
    nbytes = writeBuffer.Length();
    writeBuffer.ResetBit(TBuffer::kIsOwner); writeBuffer.SetBuffer(nullptr);
    return(buffer);
-}
-
-//___________________________________________________________________________
-void* AthenaRootSerializeSvc::deserialize(void* /*buffer*/, size_t& /*nbytes*/, const std::string& /*name*/) const {
-   return(nullptr);
-}
-
-//___________________________________________________________________________
-void* AthenaRootSerializeSvc::deserialize(void* buffer, size_t& nbytes, const Guid& id) const {
-   return(this->deserialize(buffer, nbytes, pool::DbReflex::forGuid(id)));
 }
 
 //___________________________________________________________________________

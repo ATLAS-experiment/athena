@@ -52,6 +52,8 @@ class LArADC2MeV {
 
   bool set(const IdentifierHash& hid, const int gain, const std::vector<float>& adc2mev);
 
+  int nGains() const {return m_nGains;};
+
  private:
  
   struct validVec_t {
@@ -64,6 +66,7 @@ class LArADC2MeV {
   const LArOnlineID_Base* m_onlineID{};
   const LArOnOffIdMapping* m_cabling{};
   const unsigned m_rampDegree{};
+  const int m_nGains{};
 };
 
 #include "AthenaKernel/CLASS_DEF.h"

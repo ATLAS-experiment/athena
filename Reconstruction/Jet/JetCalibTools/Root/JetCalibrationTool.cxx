@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // JetCalibrationTool.cxx 
@@ -239,7 +239,7 @@ StatusCode JetCalibrationTool::initialize() {
 StatusCode JetCalibrationTool::getCalibClass(const TString& calibration) {
   TString jetAlgo = m_jetAlgo;
   const TString calibPath = "CalibArea-" + m_calibAreaTag + "/";
-
+  bool ok{true};
   // Metadata needed to configure some corrections
   TString generatorsInfo{};
   TString simFlavour{};
@@ -251,7 +251,7 @@ StatusCode JetCalibrationTool::getCalibClass(const TString& calibration) {
 
     if(m_isData){
       UInt_t dataYear = 0;
-      fmd->value(xAOD::FileMetaData::dataYear, dataYear);
+      ok &= fmd->value(xAOD::FileMetaData::dataYear, dataYear);
       if (dataYear >= 2015 && dataYear <= 2018) {
         mcCampaign = "MC20";
       } else if (dataYear >= 2022 && dataYear <= 2024) {
@@ -262,25 +262,27 @@ StatusCode JetCalibrationTool::getCalibClass(const TString& calibration) {
 
     } else { // is MC
       std::string str_generatorsInfo;
-      fmd->value(xAOD::FileMetaData::generatorsInfo, str_generatorsInfo);
+      ok &= fmd->value(xAOD::FileMetaData::generatorsInfo, str_generatorsInfo);
       generatorsInfo = str_generatorsInfo;
 
       std::string str_simFlavour;
-      fmd->value(xAOD::FileMetaData::simFlavour, str_simFlavour);
+      ok &= fmd->value(xAOD::FileMetaData::simFlavour, str_simFlavour);
       simFlavour = str_simFlavour;
 
-      fmd->value(xAOD::FileMetaData::mcProcID, mcDSID);    
+      ok &= fmd->value(xAOD::FileMetaData::mcProcID, mcDSID);    
 
       std::string str_mcCampaign;
-      fmd->value(xAOD::FileMetaData::mcCampaign, str_mcCampaign);
+      ok &= fmd->value(xAOD::FileMetaData::mcCampaign, str_mcCampaign);
       str_mcCampaign.resize(4); //Only keep top-level of campaign (e.g. mc20 or mc23)
       mcCampaign = str_mcCampaign;
       mcCampaign.ToUpper();
-
       ATH_MSG_INFO("Have loaded metadata mcDSID:" << mcDSID << ", generatorsInfo: " << generatorsInfo << ", mcCampaign: " << mcCampaign << ", simFlavour: " << simFlavour);
     }
   }
-  // Force the MCCamapign (or data equivalent) for missing Metadata or tests
+  if (not ok){
+    ATH_MSG_DEBUG("Some values in FileMetaData returned false for 'value()'.");
+  }
+  // Force the MCCampaign (or data equivalent) for missing Metadata or tests
   if( m_forceCampaign != "" ){
     mcCampaign = m_forceCampaign;
   }

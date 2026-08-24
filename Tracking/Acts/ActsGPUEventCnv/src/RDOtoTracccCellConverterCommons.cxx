@@ -11,6 +11,7 @@
 #include <GaudiKernel/IMessageSvc.h>
 
 #include <algorithm>
+#include <cstddef>
 
 namespace ActsTrk {
 
@@ -29,6 +30,7 @@ RDOtoTracccCellConverterCommons::RDOtoTracccCellConverterCommons(
       "Whether to sort traccc cells on CPU or GPU"}
   , m_UsePixelToTForCellActivation{&parent, "UsePixelToTForCellActivation", true,
       "Use Pixel hit time over threshold value to set traccc cell activation value, otherwise defaults to 1"}
+  , m_stripRDOTimeBinStr{&parent, "timeBins", "Allowed time bins pattern for Strip RDOs"} 
 {
 }
 
@@ -51,6 +53,8 @@ StatusCode RDOtoTracccCellConverterCommons::initialize()
   }
   ATH_MSG_INFO("Built detray→detcond map with "
       << m_DetrayIdToDetDescrIndexMap.size() << " entries");
+
+  ATH_CHECK(decodeTimeBins());
 
   return StatusCode::SUCCESS;
 }
@@ -118,6 +122,37 @@ void sort_traccc_soa(
   for (size_type i : indices) {
     sorted_cells.at(s++) = cells.at(i);
   }
+}
+
+StatusCode RDOtoTracccCellConverterCommons::decodeTimeBins()
+{
+  static const size_t MAX_BINS = 2;
+  if (m_stripRDOTimeBinStr.size() > MAX_BINS) {
+    ATH_MSG_WARNING("Time bin string has excess characters");
+  }
+
+  for (size_t i = 0; i < MAX_BINS; ++i) {
+    switch (std::toupper(m_stripRDOTimeBinStr[i])) {
+      case 'X': m_stripRDOTimeBinBits[i] = -1; break;
+      case '0': m_stripRDOTimeBinBits[i] =  0; break;
+      case '1': m_stripRDOTimeBinBits[i] =  1; break;
+      default:
+          ATH_MSG_FATAL("Invalid time bin string: " << m_stripRDOTimeBinStr);
+          return StatusCode::FAILURE;
+    }
+  }
+  return StatusCode::SUCCESS;
+}
+
+bool RDOtoTracccCellConverterCommons::passTiming(const std::bitset<3>& timePattern) const
+{
+  // Convert the given timebin to a bit set and test each bit
+  // if bit is -1 (i.e. X) it always passes, otherwise require exact match of 0/1
+  // N.B. bitset has opposite order to the bit pattern we define
+  if (m_stripRDOTimeBinBits[0] != -1 and timePattern.test(2) != static_cast<bool>(m_stripRDOTimeBinBits[0])) return false;
+  if (m_stripRDOTimeBinBits[1] != -1 and timePattern.test(1) != static_cast<bool>(m_stripRDOTimeBinBits[1])) return false;
+  if (m_stripRDOTimeBinBits[2] != -1 and timePattern.test(0) != static_cast<bool>(m_stripRDOTimeBinBits[2])) return false;
+  return true;
 }
 
 } // namespace ActsTrk

@@ -8,7 +8,7 @@
 #include "TTree.h"
 
 #include "HistogramFiller.h"
-#include <boost/algorithm/string.hpp>
+#include <CxxUtils/StringUtils.h>
 
 namespace Monitored {
   template <typename T> void scalarFillerFunc(TBranch* branch, const IMonitoredVariable& var);
@@ -77,8 +77,7 @@ namespace Monitored {
     std::vector<std::function<void(TBranch*, const IMonitoredVariable&)>> m_fillerFunctions;
 
     void parseDefinition() {
-      std::vector<std::string> tokenized;
-      boost::split(tokenized, m_histDef->treeDef, [](char c){ return c ==':'; });
+      std::vector<std::string> tokenized = CxxUtils::tokenize(m_histDef->treeDef, ":");
       for (const auto& token : tokenized) {
         auto ipart = token.find('/');
         if (ipart == std::string::npos) {

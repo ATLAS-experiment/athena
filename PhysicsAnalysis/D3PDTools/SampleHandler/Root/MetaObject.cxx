@@ -12,13 +12,14 @@
 #include <SampleHandler/MetaObject.h>
 
 #include <cstdlib>
+#include <format>
 #include <memory>
 #include <sstream>
+#include <stdexcept>
 #include <TList.h>
 #include <TNamed.h>
 #include <TBuffer.h>
 #include <RootCoreUtils/Assert.h>
-#include <RootCoreUtils/ThrowMsg.h>
 #include <SampleHandler/MetaData.h>
 
 //
@@ -51,7 +52,7 @@ namespace SH
       {
 	if (field.empty())
 	  return;
-	RCU_THROW_MSG ("no conversion defined from type " + TypeName<From>::name + " to type " + TypeName<To>::name + " for field " + field);
+	throw std::runtime_error ("no conversion defined from type " + TypeName<From>::name() + " to type " + TypeName<To>::name() + " for field " + field);
       }
     };
 
@@ -76,7 +77,7 @@ namespace SH
 	}
 	if (field.empty())
 	  return;
-	RCU_THROW_MSG ("unable to convert string '" + from + "' to type " + TypeName<To>::name() + " for field " + field);
+	throw std::runtime_error ("unable to convert string '" + from + "' to type " + TypeName<To>::name() + " for field " + field);
       }
     };
 
@@ -125,7 +126,7 @@ namespace SH
 	}
 	if (field.empty())
 	  return;
-	RCU_THROW_MSG ("unable to convert string '" + from + "' to type bool for field " + field);
+	throw std::runtime_error ("unable to convert string '" + from + "' to type bool for field " + field);
       }
     };
 
@@ -162,7 +163,7 @@ namespace SH
       if (convertSingle<int> (from, to, field)) return;
       if (convertSingle<bool> (from, to, field)) return;
       if (!field.empty())
-	RCU_THROW_MSG ("unkown input type " + std::string (typeid(*from).name()) + " for field " + field);
+        throw std::runtime_error (std::format ("unkown input type {} for field {}", typeid(*from).name(), field));
     }
 
     /// \brief trim leading/trailing spaces from the given string
@@ -567,8 +568,7 @@ namespace SH
 	return result;
       }
     case CAST_NOCAST_THROW:
-      RCU_THROW_MSG ("invalid input value for " + name);
-      return def_val;
+      throw std::runtime_error ("invalid input value for " + name);
     case CAST_NOCAST_DEFAULT:
       return def_val;
     }
@@ -589,7 +589,7 @@ namespace SH
 	std::string value = trim(source.substr(split+1,pos-split-1));
 	this->setString(key,value);
       } else {
-	RCU_THROW_MSG ("unable to parse string '"+source+"'");
+        throw std::runtime_error ("unable to parse string '" + source + "'");
       }
       oldpos = pos+1;
     }

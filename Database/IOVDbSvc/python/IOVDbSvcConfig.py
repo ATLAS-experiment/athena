@@ -20,7 +20,7 @@ def DBReplicaSvcCfg(flags, vetoDBRelease=False, **kwargs):
         kwargs.setdefault('COOLSQLiteVetoPattern', '/DBRelease/')
 
     result = ComponentAccumulator()
-    result.addService(CompFactory.DBReplicaSvc(**kwargs))
+    result.addService(CompFactory.DBReplicaSvc(**kwargs),create=True)
     return result
 
 
@@ -68,8 +68,8 @@ def IOVDbSvcCfg(flags, **kwargs):
     result.addService(CompFactory.CondSvc())
     result.addService(CompFactory.ProxyProviderSvc(ProviderNames=['IOVDbSvc']))
 
-    if not flags.Input.isMC:
-        result.merge(DBReplicaSvcCfg(flags, vetoDBRelease=True))
+    if not flags.IOVDb.UseCREST:
+        result.merge(DBReplicaSvcCfg(flags, vetoDBRelease=not flags.Input.isMC))
 
     # Get TagInfoMgr
     from EventInfoMgt.TagInfoMgrConfig import TagInfoMgrCfg

@@ -7,8 +7,6 @@
 #ifndef ROOT_CORE_UTILS__HADD_H
 #define ROOT_CORE_UTILS__HADD_H
 
-#include <RootCoreUtils/Global.h>
-
 #include <string>
 #include <vector>
 

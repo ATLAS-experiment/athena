@@ -104,8 +104,7 @@ StatusCode LArRawSCDataReadingAlg::execute(const EventContext& ctx) const {
   //
     
   std::vector<const OFFLINE_FRAGMENTS_NAMESPACE::ROBFragment*> robFrags;
-  m_robDataProviderSvc->addROBData( ctx, m_robList ); 
-  m_robDataProviderSvc->getROBData( ctx, m_robList, robFrags ); 
+  m_robDataProviderSvc->getROBData( ctx, m_robList, robFrags );
 
   // Call the converter
   StatusCode sc = m_latomeDecoder->convert(robFrags, map,

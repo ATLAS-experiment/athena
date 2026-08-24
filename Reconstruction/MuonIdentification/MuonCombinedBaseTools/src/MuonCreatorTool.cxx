@@ -1112,10 +1112,10 @@ namespace MuonCombined {
             for (const TagBase* tag : indet_cand.second) {
                 /// In principle we can include here STACO as well but that is lower ranked as MuidSA
                 if (tag->author() == xAOD::Muon::Author::MuidCo) {
-                    const CombinedFitTag* cmb_tag = dynamic_cast<const CombinedFitTag*>(tag);
+                    const CombinedFitTag* cmb_tag = static_cast<const CombinedFitTag*>(tag);
                     used_candidates.insert(&cmb_tag->muonCandidate());
                 } else if (tag->author() == xAOD::Muon::Author::STACO && indet_cand.second[0] == tag) {
-                    const StacoTag* staco_tag = dynamic_cast<const StacoTag*>(tag);
+                    const StacoTag* staco_tag = static_cast<const StacoTag*>(tag);
                     used_candidates.insert(&staco_tag->muonCandidate());
                 }
             }

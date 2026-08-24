@@ -66,7 +66,8 @@ def createLArConfigFlags():
     lcf.addFlag("LAr.ROD.OFFCBelowThreshold", 3)
     lcf.addFlag("LAr.ROD.OFFCBelowTillReset", 7)
     lcf.addFlag("LAr.ROD.OFFCNPulse", 7)
-    lcf.addFlag("LAr.ROD.OFFCQ3Cut", 2500)
+    lcf.addFlag("LAr.ROD.OFFCQ3Cut", 0.1)  # relative term, on Q3/A
+    lcf.addFlag("LAr.ROD.OFFCQ3Offset", 2.0)  # absolute term in ADC
     lcf.addFlag("LAr.ROD.OFFCFilterThreshold", 2.0)
 
     # Perform a minbias correct to the LArDigit energies before building the raw channels 

@@ -30,7 +30,6 @@ class TrigTauMonAlgBuilder:
   # This will bias the background events variable distributions of online objects, but will better represent the signal events (the events included in the efficiency numerators)
 
   do_duplicate_var_plots_without_offline_taus = True # Duplicate variable distribution plots without the requirement of at least 1 offline good-quality tau (regardless of p_T) on ALL events (except in the Truth monitoring).
-  do_duplicate_with_offline_gntau = True # Duplicate all plots with offline GNTaus (except in the Truth monitoring).
 
   #=============================================
   # TauID monitoring
@@ -293,6 +292,7 @@ class TrigTauMonAlgBuilder:
     self.mon_alg_single.HLTTauCaloHitsPreselIDScores = self.hlt_calohits_presel_scores
     self.mon_alg_single.HLTTauHitZVars = self.hlt_hitz_variables
     self.mon_alg_single.OfflineTauIDScores = self.offline_tauid_scores
+    self.mon_alg_single.OfflineTauID = 2
 
     self.logger.info('  |- Booking all histograms')
     for trigger in self.HLT_single_items:
@@ -338,67 +338,19 @@ class TrigTauMonAlgBuilder:
         self.bookIDInputTrack(self.mon_alg_single_no_offline, path, trigger, online=True)
         self.bookIDInputCluster(self.mon_alg_single_no_offline, path, trigger, online=True)
 
-    if self.do_duplicate_with_offline_gntau:
-      self.mon_alg_single_gntau = self._configureAlgorithm(CompFactory.TrigTauMonitorSingleAlgorithm, 'TrigTauMonAlgSingleGNTau')
-      self.mon_alg_single_gntau.TriggerList = self.HLT_single_items
-      self.mon_alg_single_gntau.DoTotalEfficiency = self.do_total_efficiency
-      self.mon_alg_single_gntau.RequireOfflineTaus = self.require_offline_taus
-      self.mon_alg_single_gntau.HLTTauIDScores = self.hlt_tauid_scores
-      self.mon_alg_single_gntau.HLTTauCaloHitsPreselIDScores = self.hlt_calohits_presel_scores
-      self.mon_alg_single_gntau.HLTTauHitZVars = self.hlt_hitz_variables
-      self.mon_alg_single_gntau.OfflineTauIDScores = self.offline_tauid_scores
-      self.mon_alg_single_gntau.OfflineTauID = 2
-
-      self.logger.info('  |- Booking all histograms')
-      path = f'{self.base_path}/OfflineGNTau'
-      for trigger in self.HLT_single_items:
-        # Efficiencies
-        for p in ('1P', '3P'):
-            self.bookHLTEffHistograms(self.mon_alg_single_gntau, path, trigger, n_prong=p)
-
-        # Online distributions
-        for p in ('0P', '1P', 'MP'):
-          self.bookBasicVars(self.mon_alg_single_gntau, path, trigger, n_prong=p, online=True)
-          self.bookIDScores(self.mon_alg_single_gntau, path, trigger, n_prong=p, online=True)
-          self.bookIDInputScalar(self.mon_alg_single_gntau, path, trigger, n_prong=p, online=True)
-          self.bookHitZVars(self.mon_alg_single_gntau, path, trigger, n_prong=p)
-        self.bookIDInputTrack(self.mon_alg_single_gntau, path, trigger, online=True)
-        self.bookIDInputCluster(self.mon_alg_single_gntau, path, trigger, online=True)
-
-        # Offline distributions
-        for p in ('1P', '3P'):
-          self.bookBasicVars(self.mon_alg_single_gntau, path, trigger, p, online=False)
-          self.bookIDScores(self.mon_alg_single_gntau, path, trigger, p, online=False)
-          self.bookIDInputScalar(self.mon_alg_single_gntau, path, trigger, n_prong=p, online=False)
-        self.bookIDInputTrack(self.mon_alg_single_gntau, path, trigger, online=False)
-        self.bookIDInputCluster(self.mon_alg_single_gntau, path, trigger, online=False)
-      
-
 
   def configureAlgorithmDiTau(self):
     self.mon_alg_ditau = self._configureAlgorithm(CompFactory.TrigTauMonitorDiTauAlgorithm, 'TrigTauMonAlgDiTau')
     self.mon_alg_ditau.TriggerList = self.HLT_ditau_items
     self.mon_alg_ditau.DoTotalEfficiency = self.do_total_efficiency
     self.mon_alg_ditau.RequireOfflineTaus = self.require_offline_taus
+    self.mon_alg_ditau.OfflineTauID = 2
 
     self.logger.info('  |- Booking all histograms')
     for trigger in self.HLT_ditau_items:
       self.bookDiTauHLTEffHistograms(self.mon_alg_ditau, self.base_path, trigger)
       self.bookDiTauVars(self.mon_alg_ditau, self.base_path, trigger)
 
-
-    if self.do_duplicate_with_offline_gntau:
-      self.mon_alg_ditau_gntau = self._configureAlgorithm(CompFactory.TrigTauMonitorDiTauAlgorithm, 'TrigTauMonAlgDiTauGNTau')
-      self.mon_alg_ditau_gntau.TriggerList = self.HLT_ditau_items
-      self.mon_alg_ditau_gntau.DoTotalEfficiency = self.do_total_efficiency
-      self.mon_alg_ditau_gntau.RequireOfflineTaus = self.require_offline_taus
-      self.mon_alg_ditau_gntau.OfflineTauID = 2
-
-      self.logger.info('  |- Booking all histograms')
-      path = f'{self.base_path}/OfflineGNTau'
-      for trigger in self.HLT_ditau_items:
-        self.bookDiTauHLTEffHistograms(self.mon_alg_ditau_gntau, path, trigger)
-        self.bookDiTauVars(self.mon_alg_ditau_gntau, path, trigger)
 
   def configureAlgorithmBoostedDiTau(self):
     self.mon_alg_boosted_ditau = self._configureAlgorithm(CompFactory.TrigTauMonitorBoostedDiTauAlgorithm, 'TrigTauMonAlgBoostedDiTau')
@@ -412,23 +364,12 @@ class TrigTauMonAlgBuilder:
     self.mon_alg_tag_and_probe = self._configureAlgorithm(CompFactory.TrigTauMonitorTandPAlgorithm, 'TrigTauMonAlgTandP')
     self.mon_alg_tag_and_probe.TriggerList = self.HLT_tag_and_probe_items
     self.mon_alg_tag_and_probe.RequireOfflineTaus = self.require_offline_taus
+    self.mon_alg_tag_and_probe.OfflineTauID = 2
 
     self.logger.info('  |- Booking all histograms')
     for trigger in self.HLT_tag_and_probe_items:
       self.bookTAndPHLTEffHistograms(self.mon_alg_tag_and_probe, self.base_path, trigger)
       self.bookTAndPVars(self.mon_alg_tag_and_probe, self.base_path, trigger)
-
-
-    if self.do_duplicate_with_offline_gntau:
-      self.mon_alg_tag_and_probe_gntau = self._configureAlgorithm(CompFactory.TrigTauMonitorTandPAlgorithm, 'TrigTauMonAlgTandPGNTau')
-      self.mon_alg_tag_and_probe_gntau.TriggerList = self.HLT_tag_and_probe_items
-      self.mon_alg_tag_and_probe_gntau.RequireOfflineTaus = self.require_offline_taus
-
-      self.logger.info('  |- Booking all histograms')
-      path = f'{self.base_path}/OfflineGNTau'
-      for trigger in self.HLT_tag_and_probe_items:
-        self.bookTAndPHLTEffHistograms(self.mon_alg_tag_and_probe_gntau, path, trigger)
-        self.bookTAndPVars(self.mon_alg_tag_and_probe_gntau, path, trigger)
 
 
   def configureAlgorithmTruth(self):
@@ -448,6 +389,7 @@ class TrigTauMonAlgBuilder:
     self.mon_alg_L1 = self._configureAlgorithm(CompFactory.TrigTauMonitorL1Algorithm, 'TrigTauMonAlgL1')
     self.mon_alg_L1.TriggerList = self.L1_items
     self.mon_alg_L1.RequireOfflineTaus = self.require_offline_taus
+    self.mon_alg_L1.OfflineTauID = 2
     if not has_xtob_etau_rois:
       self.logger.info('  |- No L1_eTauxRoI container is available: e/cTAU BDT scores will be set to 0')
       self.mon_alg_L1.Phase1L1eTauxRoIKey = ''
@@ -488,21 +430,6 @@ class TrigTauMonAlgBuilder:
         for p in ('1P', '3P'):
           self.bookL1EffHistograms(self.mon_alg_L1_alt, path, trigger, n_prong=p)
         self.bookL1Vars(self.mon_alg_L1_alt, path, trigger)
-
-    if self.do_duplicate_with_offline_gntau:
-      self.mon_alg_L1_gntau = self._configureAlgorithm(CompFactory.TrigTauMonitorL1Algorithm, 'TrigTauMonAlgL1GNTau')
-      self.mon_alg_L1_gntau.TriggerList = self.L1_items
-      self.mon_alg_L1_gntau.RequireOfflineTaus = self.require_offline_taus
-      if not has_xtob_etau_rois:
-        self.logger.info('  |- No L1_eTauxRoI container is available: e/cTAU BDT scores will be set to 0')
-        self.mon_alg_L1_gntau.Phase1L1eTauxRoIKey = ''
-
-      self.logger.info('  |- Booking all histograms')
-      path = f'{self.base_path}/OfflineGNTau'
-      for trigger in self.L1_items:
-        for p in ('1P', '3P'):
-          self.bookL1EffHistograms(self.mon_alg_L1_gntau, path, trigger, n_prong=p)
-        self.bookL1Vars(self.mon_alg_L1_gntau, path, trigger)
 
 
   def bookHLTEffHistograms(self, mon_alg, base_path, trigger, n_prong):

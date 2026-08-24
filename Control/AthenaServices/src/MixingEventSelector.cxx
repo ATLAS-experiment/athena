@@ -23,8 +23,8 @@ ATLAS_NO_CHECK_FILE_THREAD_SAFETY;  // non-MT EventSelector
 #include "GaudiKernel/MsgStream.h"
 #include "GaudiKernel/GenericAddress.h"
 #include "CLHEP/Random/RandFlat.h"
+#include "CxxUtils/StringUtils.h"
 #include <charconv>
-#include <boost/tokenizer.hpp>
 #include <algorithm>
 #include <cassert>
 #include <functional>
@@ -35,8 +35,6 @@ ATLAS_NO_CHECK_FILE_THREAD_SAFETY;  // non-MT EventSelector
 #include <string>
 
 using namespace std;
-using boost::tokenizer;
-using boost::char_separator;
 using SG::DataProxy;
 
 #ifdef DEBUG_OUTPUT_STATUS
@@ -112,12 +110,10 @@ MixingEventSelector::setUpTriggerList(Gaudi::Details::PropertyBase&) {
 void 
 MixingEventSelector::decodeTrigger(const std::string & triggDescr) {
   //all this would be much more readable without error reporting...
-  typedef  tokenizer<char_separator<char> > Tokenizer;
-  Tokenizer tokens(triggDescr, char_separator<char>(" :"));
+  const auto tokens = CxxUtils::tokenize(triggDescr, " :");
   //we need exactly three tokens: selector name, first and last event 2 B read
-  if ( (distance(tokens.begin(), tokens.end()) == 3) ||
-       (distance(tokens.begin(), tokens.end()) == 3) ){
-    Tokenizer::iterator iToken(tokens.begin());
+  if (tokens.size() == 3) {
+    auto iToken = tokens.begin();
       Gaudi::Utils::TypeNameString selTN(*iToken++);
       //get selector
       SmartIF<IEvtSelector> pSelector(serviceLocator()->service(selTN));

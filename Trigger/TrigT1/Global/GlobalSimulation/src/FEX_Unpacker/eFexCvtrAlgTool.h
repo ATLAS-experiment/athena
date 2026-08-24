@@ -49,7 +49,7 @@ namespace GlobalSim {
     SG::WriteHandleKey<GlobalSim::IOBitwise::eEmTOBContainer>
     m_eEmTOBContainerKey {
       this,
-      "eEmTOBs",
+      "eEmTOBContainerKey",
       "eEmTOBs",
       "Key for GlobalSim eEmTOB container"};
 

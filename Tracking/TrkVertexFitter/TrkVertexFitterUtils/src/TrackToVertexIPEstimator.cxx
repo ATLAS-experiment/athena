@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrkVertexFitterUtils/TrackToVertexIPEstimator.h"
@@ -209,6 +209,7 @@ namespace Trk
    return newIPandSigma;
   }
     ATH_MSG_DEBUG ("Cannot extrapolate the trajectory state. Returning null. ");
+    delete extrapolatedParameters;
     return nullptr;
   //end of successfull extrapolation check
  }//end of actual calculation method

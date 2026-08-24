@@ -1,6 +1,6 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 // JetForwardJvtToolBDT.cxx
 // Implementation file for class JetForwardJvtToolBDT
@@ -60,6 +60,10 @@ StatusCode JetForwardJvtToolBDT::initialize()
       m_mvfjvtThresh = std::unique_ptr< TH3D >( dynamic_cast<TH3D*>( m_wpFileIn->Get( "MVfJVT_loose" ) ) );
     } else {
       ATH_MSG_ERROR(m_OP << " working point doesn't exist." );
+      return StatusCode::FAILURE;
+    }
+    if (!m_mvfjvtThresh)[[unlikely]]{
+      ATH_MSG_ERROR("'m_mvfjvtThresh' is nullptr" );
       return StatusCode::FAILURE;
     }
     m_mvfjvtThresh->SetDirectory(nullptr);
@@ -329,6 +333,10 @@ StatusCode JetForwardJvtToolBDT::getInputs(const xAOD::Jet *jet) const {
                                                                     CENTER_MAGAcc(*cl));
 
     cleHandle(*jet) = cle1;
+    if (cle2 == 0.f)[[unlikely]]{
+      ATH_MSG_ERROR("JetForwardJvtToolBDT::getMVfJVT: divide by zero.");
+      return StatusCode::FAILURE;
+    }
     clisoHandle(*jet)= cliso1/cle2;
     clemprobHandle(*jet) =clemprob1/cle2;
 

@@ -17,10 +17,19 @@ def STDM13KernelCfg(flags, name='STDM13Kernel', **kwargs):
     from DerivationFrameworkPhys.PhysCommonConfig import PhysCommonAugmentationsCfg
     acc.merge(PhysCommonAugmentationsCfg(flags, TriggerListsHelper = kwargs['TriggerListsHelper']))
 
-
     ## FTAG augmentations - run b-tagging on PFlow jets
     from BTagging.FlavorTaggingConfig import FlavorTaggingCfg
     acc.merge(FlavorTaggingCfg(flags, "AntiKt4EMPFlowJets"))
+
+    if flags.Input.isMC:
+        ## Jet IRC-safe flavour labels
+        from JetRecConfig.JetRecConfig import getModifier
+        from JetRecConfig.StandardJetMods import stdJetModifiers
+        from JetRecConfig.StandardSmallRJets import AntiKt4EMPFlow
+        JetIRCSafeLabelTool = getModifier(AntiKt4EMPFlow, stdJetModifiers['JetIRCSafeLabel'], stdJetModifiers['JetIRCSafeLabel'].modspec, flags=flags)
+        acc.addEventAlgo(CompFactory.JetDecorationAlg(name='JetIRCSafeLabelAlg',
+                                                    JetContainer='AntiKt4EMPFlowJets', 
+                                                    Decorators=[JetIRCSafeLabelTool]))
 
     #===================================================
     # HEAVY FLAVOR CLASSIFICATION FOR ttbar+jets EVENTS
@@ -62,7 +71,8 @@ def STDM13KernelCfg(flags, name='STDM13Kernel', **kwargs):
     skimmingTools = [STDM13StringSkimmingTool]
     
     DerivationKernel = CompFactory.DerivationFramework.DerivationKernel
-    acc.addEventAlgo(DerivationKernel(name, SkimmingTools = skimmingTools, ThinningTools = thinningTools))       
+    acc.addEventAlgo(DerivationKernel(name, SkimmingTools = skimmingTools, ThinningTools = thinningTools))
+
     return acc
 
 
@@ -144,6 +154,9 @@ def STDM13Cfg(flags):
         from DerivationFrameworkMCTruth.MCTruthCommonConfig import AddTauAndDownstreamParticlesCfg
         acc.merge(AddTauAndDownstreamParticlesCfg(flags))
         STDM13SlimmingHelper.AllVariables += ['TruthTausWithDecayParticles','TruthTausWithDecayVertices']
+
+        ## Jet IRC-safe flavour labels
+        STDM13SlimmingHelper.ExtraVariables += ["AntiKt4EMPFlowJets.IRCSafeLabelIFN.IRCSafeLabelCMP.IRCSafeLabelGHS.IRCSafeLabelSDF.IRCSafeLabelAKT" ]
 
     # Extra content
     STDM13SlimmingHelper.ExtraVariables += ["AntiKt4EMPFlowJets.QGTransformer_ConstScore.DFCommonJets_QGTagger_truthjet_nCharged.DFCommonJets_QGTagger_truthjet_pt.DFCommonJets_QGTagger_truthjet_eta.DFCommonJets_QGTagger_NTracks.DFCommonJets_QGTagger_TracksWidth.DFCommonJets_QGTagger_TracksC1.ConeExclBHadronsFinal.ConeExclCHadronsFinal.GhostBHadronsFinal.GhostCHadronsFinal.GhostBHadronsFinalCount.GhostBHadronsFinalPt.GhostCHadronsFinalCount.GhostCHadronsFinalPt.GhostPartons.isJvtHS.isJvtPU.IsoFixedCone5PtPUsub" ]

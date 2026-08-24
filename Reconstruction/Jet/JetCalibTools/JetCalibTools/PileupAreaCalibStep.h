@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef JETCALIBTOOLS_JETPILEUPAREACALIBSTEP_H
@@ -7,8 +7,6 @@
 
 /* Implementation of JetAreaSubtraction class
  * This class will apply the jet area pile up correction
- *
- * Date: Jan  2024
  */
 
 #include "AsgTools/AsgTool.h"
@@ -16,11 +14,6 @@
 #include "JetAnalysisInterfaces/IJetCalibStep.h"
 #include "xAODEventShape/EventShape.h"
 #include "AsgDataHandles/ReadHandleKey.h"
-
-
-namespace PUCorrection {
-  struct PU3DCorrectionHelper;
-}
 
 class PileupAreaCalibStep   : public asg::AsgTool,
 			      virtual public IJetCalibStep
@@ -41,7 +34,7 @@ class PileupAreaCalibStep   : public asg::AsgTool,
   Gaudi::Property<bool> m_doOrigin{this, "DoOrigin", false, "doc"};
 
   Gaudi::Property<std::string> m_jetInScale {this, "InScale", "JetConstitScaleMomentum", "Starting jet scale" };
-  Gaudi::Property<std::string> m_jetOutScale {this, "OutScale", "JetAreaSubtractScaleMomentum", "Ending jet scale" };
+  Gaudi::Property<std::string> m_jetOutScale {this, "OutScale", "JetPileupScaleMomentum", "Ending jet scale" };
  
 };
 

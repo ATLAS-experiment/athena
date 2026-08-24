@@ -102,7 +102,7 @@ StatusCode JetTrackMomentsTool::decorate(const xAOD::JetContainer& jets) const {
         size_t numConstit = jet->numConstituents();
         for ( size_t i=0; i<numConstit; i++ ) {
           const xAOD::PFO* constit = dynamic_cast<const xAOD::PFO*>(jet->rawConstituent(i));
-          if (constit->isCharged()){
+          if (constit && constit->isCharged()){
             const xAOD::TrackParticle *thisTrack = constit->track(0);//by construction xAOD::PFO can only have one track, in eflowRec usage
             pflowTracks.push_back(thisTrack);
           }// We have a charged PFO
@@ -144,9 +144,9 @@ StatusCode JetTrackMomentsTool::decorate(const xAOD::JetContainer& jets) const {
         trackWidthVec[iVertex] = moments.at(iVertex).trackWidth;
       }
       // Set moment decorations
-      numTrkHandle(*jet) = numTrkVec;
-      sumPtTrkHandle(*jet) = sumPtTrkVec;
-      trkWidthHandle(*jet) = trackWidthVec;
+      numTrkHandle(*jet) = std::move(numTrkVec);
+      sumPtTrkHandle(*jet) = std::move(sumPtTrkVec);
+      trkWidthHandle(*jet) = std::move(trackWidthVec);
 
       if(m_doPFlowMoments) {
         SG::WriteDecorHandle<xAOD::JetContainer, std::vector<int> > numCPFOHandle(m_keysNumCPFO.at(iCut));
@@ -165,9 +165,9 @@ StatusCode JetTrackMomentsTool::decorate(const xAOD::JetContainer& jets) const {
             pflowTrackWidthVec[iVertex] = pflowMoments.at(iVertex).trackWidth;
           }
           // Set moment decorations
-          numCPFOHandle(*jet) = pflowNumTrkVec;
-          sumPtCPFOHandle(*jet) = pflowSumPtTrkVec;
-          cPFOWidthHandle(*jet) = pflowTrackWidthVec;
+          numCPFOHandle(*jet) = std::move(pflowNumTrkVec);
+          sumPtCPFOHandle(*jet) = std::move(pflowSumPtTrkVec);
+          cPFOWidthHandle(*jet) = std::move(pflowTrackWidthVec);
         }
         else{
           // User configured for PFO track moments but this isn't a PFlow jet. Set them to empty vectors.

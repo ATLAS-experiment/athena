@@ -144,7 +144,11 @@ for fn in unknown_args:
     args.postInclude += [fn]
     unknown_args.remove(fn)
 args.postConfig += [x[4:] for x in unknown_args if x.startswith("cfg.")]
-if any([not x.startswith("cfg.") for x in unknown_args]):
+# put unknown_args into a flag, in case plugins want to ingest
+if len(args.postInclude):
+  flags.addFlag("L1CaloAthMon.UnknownArgs",[x for x in unknown_args if not x.startswith("cfg.")])
+  if "--help" in sys.argv: flags.L1CaloAthMon.UnknownArgs += ["--help"] # add to allow plugin to override help
+elif any([not x.startswith("cfg.") for x in unknown_args]):
   raise KeyError("Unknown flags: " + " ".join([x for x in unknown_args if not x.startswith("cfg.")]))
 
 # before doing any postInclude interactions, do the file setup...
@@ -157,7 +161,7 @@ if len(flags.Input.Files)>0:
   flags.Input.Files = [item for x in flags.Input.Files for item in (x if isinstance(x,list) else [x])] # flatten mix of str and list
   # now also check for non-existent input files before continuing
   for f in flags.Input.Files:
-    if not os.path.exists(f):
+    if not os.path.exists(f) and not any([os.path.exists(fpart) for fpart in f.split(":")]):
       log.fatal(f"file '{f}' does not exist")
       exit(-1)
 
@@ -180,36 +184,7 @@ if args.runNumber is not None:
     flags.Input.Files += glob(tryStr)
   log.info(" ".join(("Found",str(len(flags.Input.Files)),"files")))
 
-standalone = False
-# require at least 1 input file if running offline, unless running config-generating mode ....
-if not flags.Common.isOnline and len(flags.Input.Files)==0:
-  if flags.Exec.MaxEvents==0:
-    # this test file is used for generating the han config file
-    flags.Input.Files = ["/eos/atlas/atlascerngroupdisk/det-l1calo/OfflineSoftware/TestFiles/data24_13p6TeV/data24_13p6TeV.00477048.physics_Main.daq.RAW._lb0821._SFO-20._0001.data"]
-  else:
-    if len(postHelpArgs): flags.fillFromArgs(listOfArgs=postHelpArgs)
-    log.fatal("Running in offline mode but no input files provided. Please specify with: --filesInput <file>")
-    from AthenaConfiguration.TestDefaults import defaultTestFiles
-    log.fatal("You can specify one of the default test files:" + ",".join([f for f in dir(defaultTestFiles) if f[0].isupper()]))
-    exit(-1)
-elif flags.Common.isOnline:
-  log.info("Running Online with Partition: "+partition.name())
-  # if the partition name is not set in the flags, run the autoconfig again
-  # this occurs when running the online monitoring config in offline environment for testing
-  if flags.Trigger.Online.partitionName == '':
-    # must ensure doLVL1 and doHLT are False, otherwise will get ByteStreamCnvSvc conflicts (TrigByteStreamCnvSvc is setup, but EMon setup provides ByteStreamCnvSvc)
-    # see TriggerByteStreamConfig.py
-    flags.Trigger.doLVL1 = False
-    flags.Trigger.doHLT = False
-    from AthenaConfiguration.AutoConfigOnlineRecoFlags import autoConfigOnlineRecoFlags
-    autoConfigOnlineRecoFlags(flags, partition.name())
-  standalone = (partition.name()!="ATLAS")
-  if standalone : log.info("Using local menu because partition is not ATLAS")
-  elif len(flags.Input.Files)==0 and partition.isValid():
-    # wait here for 2 minutes, to give LAr time to put fw info in the database
-    import time
-    log.info("Waiting 2 minutes for LATOME to get their databases in order")
-    time.sleep(120)
+
 
 
 if len(args.postInclude):
@@ -240,7 +215,40 @@ if len(args.postInclude):
         if not name: raise RuntimeError( 'plugin file %s can not be found' % fn )
       func = load_function(name,"setup")
       if func:
+        topLog.setLevel(logging.INFO) # take back to info level before doing postInclude setup
         func(flags)
+        topLog.setLevel(logging.WARNING)
+
+standalone = False
+# require at least 1 input file if running offline, unless running config-generating mode or MC ....
+if not flags.Common.isOnline and len(flags.Input.Files)==0 and not flags.Input.isMC:
+  if flags.Exec.MaxEvents==0:
+    # this test file is used for generating the han config file
+    flags.Input.Files = ["/eos/atlas/atlascerngroupdisk/det-l1calo/OfflineSoftware/TestFiles/data24_13p6TeV/data24_13p6TeV.00477048.physics_Main.daq.RAW._lb0821._SFO-20._0001.data"]
+  else:
+    if len(postHelpArgs): flags.fillFromArgs(listOfArgs=postHelpArgs)
+    log.fatal("Running in offline mode but no input files provided. Please specify with: --filesInput <file>")
+    from AthenaConfiguration.TestDefaults import defaultTestFiles
+    log.fatal("You can specify one of the default test files:" + ",".join([f for f in dir(defaultTestFiles) if f[0].isupper()]))
+    exit(-1)
+elif flags.Common.isOnline:
+  log.info("Running Online with Partition: "+partition.name())
+  # if the partition name is not set in the flags, run the autoconfig again
+  # this occurs when running the online monitoring config in offline environment for testing
+  if flags.Trigger.Online.partitionName == '':
+    # must ensure doLVL1 and doHLT are False, otherwise will get ByteStreamCnvSvc conflicts (TrigByteStreamCnvSvc is setup, but EMon setup provides ByteStreamCnvSvc)
+    # see TriggerByteStreamConfig.py
+    flags.Trigger.doLVL1 = False
+    flags.Trigger.doHLT = False
+    from AthenaConfiguration.AutoConfigOnlineRecoFlags import autoConfigOnlineRecoFlags
+    autoConfigOnlineRecoFlags(flags, partition.name())
+  standalone = (partition.name()!="ATLAS")
+  if standalone : log.info("Using local menu because partition is not ATLAS")
+  elif len(flags.Input.Files)==0 and partition.isValid():
+    # wait here for 2 minutes, to give LAr time to put fw info in the database
+    import time
+    log.info("Waiting 2 minutes for LATOME to get their databases in order")
+    time.sleep(120)
 
 if len(args.postInclude)==0 and not any([flags.Trigger.L1.doCalo,flags.Trigger.L1.doCaloInputs,flags.Trigger.L1.doeFex,flags.Trigger.L1.dojFex,flags.Trigger.L1.dogFex,flags.Trigger.L1.doTopo,flags.DQ.useTrigger]):
   log.info("No steering flags specified and no postInclude, turning on all phase 1 systems (trex,efex,jfex,gfex,topo)")
@@ -359,7 +367,7 @@ elif flags.Input.Format == Format.POOL:
   log.info(f"Running Offline on {len(flags.Input.Files)} POOL files: {flags.Input.Files[0]} ...")
   from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
   cfg.merge(PoolReadCfg(flags))
-else:
+elif len(flags.Input.Files)>0:
   log.info(f"Running Offline on {len(flags.Input.Files)} bytestream files: {flags.Input.Files[0]} ...")
   #from ByteStreamCnvSvc.ByteStreamConfig import ByteStreamReadCfg
   #TODO: Figure out why the above line causes CA conflict @ P1 if try to run on a RAW file there
@@ -396,7 +404,9 @@ if flags.Trigger.triggerConfig=="FILE":
     log.fatal(f"L1Menu file does not exist: {menuFilename}")
     exit(1)
   createL1PrescalesFileFromMenu(flags)
-cfg.merge(L1ConfigSvcCfg(flags))
+
+# Add L1 Config unless in inputless offline mode
+if not (not flags.Common.isOnline and len(flags.Input.Files)==0): cfg.merge(L1ConfigSvcCfg(flags))
 
 # -------- CHANGES GO BELOW ------------
 # setup the L1Calo software we want to monitor
@@ -627,7 +637,8 @@ if type(args.dbOverrides)==list:
 
 
 # configure output AOD if requested
-if flags.Output.AODFileName != "":
+# don't set this up if running in inputless mode (which some plugins use for unusual input jobs like text files)
+if flags.Output.AODFileName != "" and len(flags.Input.Files)>0:
   def addEDM(edmType, edmName):
     if edmName.endswith("Sim") and flags.Input.Format == Format.POOL: edmName = edmName.replace("Sim","_ReSim")
     auxType = edmType.replace('Container','AuxContainer')
@@ -768,6 +779,11 @@ with ConfigurableCABehavior():
 for conf in args.postConfig:
   compName,propNameAndVal=conf.split(".",1)
   propName,propVal=propNameAndVal.split("=",1)
+  try:
+    ast.literal_eval(propVal)
+  except Exception:  # Can't determine type, assume we got an un-quoted string
+    propVal=f"\"{propVal}\""
+    propNameAndVal = f"{propName}={propVal}"
   applied = False
   from collections import defaultdict
   availableComps = defaultdict(list)

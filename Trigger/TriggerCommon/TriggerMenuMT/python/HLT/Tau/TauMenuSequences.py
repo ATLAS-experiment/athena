@@ -60,16 +60,10 @@ def tauCaloMVASequenceGenCfg(flags: AthConfigFlags, is_probe_leg: bool = False) 
     from TrigTauRec.TrigTauRecConfig import trigTauRecMergedCaloMVACfg
     recoAcc.mergeReco(trigTauRecMergedCaloMVACfg(flags))
 
-
-    # Calo ROB prefetching, to reduce number of calls to the readout
-    from TrigGenericAlgs.TrigGenericAlgsConfig import ROBPrefetchingAlgCfg_Calo
-    robPrefetchAlg = ROBPrefetchingAlgCfg_Calo(flags, nameSuffix=f'IM_{recoAcc.name}_probe' if is_probe_leg else f'IM_{recoAcc.name}')
-
-
-    # Selection sequence CA (seqAND), executing the recoAcc view creation alg. first, the rob prefetching alg. second, 
-    # the reco CA (with all the reco algs) after, and the Hypo alg. at last
+    # Selection sequence CA (seqAND), executing the recoAcc view creation alg. first,
+    # the reco CA (with all the reco algs) second, and the Hypo alg. at last
     selAcc = SelectionCA('tauCalo', isProbe=is_probe_leg)
-    selAcc.mergeReco(recoAcc, robPrefetchCA=robPrefetchAlg)
+    selAcc.mergeReco(recoAcc)
 
 
     # Hypothesis:
@@ -109,34 +103,12 @@ def tauCaloHitsSequenceGenCfg(orig_flags: AthConfigFlags, seq_name: str, precisi
     )
 
 
-    # If we're running on small RoIs, we will optionally prefetch ROBs for the larger 'tauIso' RoIs ahead of time,
-    # to avoid retrieving more detector information again later in the next step
-    from TriggerJobOpts.TriggerConfigFlags import ROBPrefetching
-    if doExtraPrefetching := ROBPrefetching.TauCoreLargeRoI in flags.Trigger.ROBPrefetchingOptions:
-        prefetch_flags = getFlagsForActiveConfig(orig_flags, f'tauIso{seq_name}', log)
-        prefetchRoIUpdater = CompFactory.RoiUpdaterTool(
-            useBeamSpot=True,
-            NSigma=1.5,
-            EtaWidth=prefetch_flags.Tracking.ActiveConfig.etaHalfWidth,
-            PhiWidth=prefetch_flags.Tracking.ActiveConfig.phiHalfWidth,
-            ZedWidth=prefetch_flags.Tracking.ActiveConfig.zedHalfWidth, # Shouldn't this be the larger tauCore RoI z width?
-        )
-
-        prefetchRoITool = CompFactory.ViewCreatorExtraPrefetchROITool(
-            RoiCreator=newRoITool,
-            RoiUpdater=prefetchRoIUpdater,
-            ExtraPrefetchRoIsKey=f'{newRoITool.RoisWriteHandleKey}_forPrefetching',
-            PrefetchRoIsLinkName='prefetchRoI',
-            MergeWithOriginal=True,
-        )
-
-
     # Reconstruction sequence CA (parOR), executting all reco algorithms within the View (from the RoI)
     # in parallel whenever possible, according to their data dependencies.
     # Create the EventViews from the resized RoIs, based on the 'UpdatedCaloRoI' created in the CaloMVA step
     recoAcc = InViewRecoCA(
         name=f'tauCaloHits_{seq_name}',
-        RoITool=prefetchRoITool if doExtraPrefetching else newRoITool,
+        RoITool=newRoITool,
         ViewFallThrough=True,
         RequireParentView=True,
         mergeUsingFeature=True,
@@ -211,18 +183,10 @@ def tauCaloHitsSequenceGenCfg(orig_flags: AthConfigFlags, seq_name: str, precisi
         ))
 
 
-    # ROB prefetching for the Pixel and SCT data
-    from TrigGenericAlgs.TrigGenericAlgsConfig import ROBPrefetchingAlgCfg_Si
-    sfx = '_probe' if is_probe_leg else ''
-    robPrefetchAlg = ROBPrefetchingAlgCfg_Si(flags, nameSuffix=f'IM_{recoAcc.name}{sfx}')
-    if doExtraPrefetching:
-        robPrefetchAlg.RoILinkName = prefetchRoITool.PrefetchRoIsLinkName
-
-
-    # Selection sequence CA (seqAND), executing the recoAcc view creation alg. first, the rob prefetching alg. second, 
-    # the reco CA (with all the reco algs) after, and the Hypo alg. at last
+    # Selection sequence CA (seqAND), executing the recoAcc view creation alg. first,
+    # the reco CA (with all the reco algs) second, and the Hypo alg. at last
     selAcc = SelectionCA(f'tauCaloHits_{seq_name}', isProbe=is_probe_leg)
-    selAcc.mergeReco(recoAcc, robPrefetchCA=robPrefetchAlg)
+    selAcc.mergeReco(recoAcc)
 
 
     # Hypothesis:
@@ -285,34 +249,12 @@ def tauFTFCoreSequenceGenCfg(orig_flags: AthConfigFlags, calohits_seq_name: str 
     )
 
 
-    # If we're running on tauCore RoIs, we will optionally prefetch ROBs for the larger 'tauIso' RoIs ahead of time,
-    # to avoid retrieving more detector information again later in the next step
-    from TriggerJobOpts.TriggerConfigFlags import ROBPrefetching
-    if doExtraPrefetching := not calohits_seq_name and tracking_cfg == 'tauCore' and ROBPrefetching.TauCoreLargeRoI in flags.Trigger.ROBPrefetchingOptions:
-        prefetch_flags = getFlagsForActiveConfig(orig_flags, 'tauIso', log)
-        prefetchRoIUpdater = CompFactory.RoiUpdaterTool(
-            useBeamSpot=True,
-            NSigma=1.5,
-            EtaWidth=prefetch_flags.Tracking.ActiveConfig.etaHalfWidth,
-            PhiWidth=prefetch_flags.Tracking.ActiveConfig.phiHalfWidth,
-            ZedWidth=prefetch_flags.Tracking.ActiveConfig.zedHalfWidth,
-        )
-
-        prefetchRoITool = CompFactory.ViewCreatorExtraPrefetchROITool(
-            RoiCreator=newRoITool,
-            RoiUpdater=prefetchRoIUpdater,
-            ExtraPrefetchRoIsKey=f'{newRoITool.RoisWriteHandleKey}_forPrefetching',
-            PrefetchRoIsLinkName='prefetchRoI',
-            MergeWithOriginal=True,
-        )
-
-
     # Reconstruction sequence CA (parOR), executting all reco algorithms within the View (from the RoI)
     # in parallel whenever possible, according to their data dependencies.
     # Create the EventViews from the resized RoIs, based on the upstream RoI created in the CaloMVA or CaloHits steps
     recoAcc = InViewRecoCA(
         f'tauFastTrack{name}',
-        RoITool=prefetchRoITool if doExtraPrefetching else newRoITool,
+        RoITool=newRoITool,
         ViewFallThrough=True,
         RequireParentView=True,
         mergeUsingFeature=True,
@@ -353,17 +295,10 @@ def tauFTFCoreSequenceGenCfg(orig_flags: AthConfigFlags, calohits_seq_name: str 
     ))
 
 
-    # ROB prefetching for the Pixel and SCT data
-    from TrigGenericAlgs.TrigGenericAlgsConfig import ROBPrefetchingAlgCfg_Si
-    robPrefetchAlg = ROBPrefetchingAlgCfg_Si(flags, nameSuffix=f'IM_{recoAcc.name}')
-    if doExtraPrefetching:
-        robPrefetchAlg.RoILinkName = prefetchRoITool.PrefetchRoIsLinkName
-    
-
-    # Selection sequence CA (seqAND), executing the recoAcc view creation alg. first, the rob prefetching alg. second, 
-    # the reco CA (with all the reco algs) after, and the Hypo alg. at last
+    # Selection sequence CA (seqAND), executing the recoAcc view creation alg. first,
+    # the reco CA (with all the reco algs) second, and the Hypo alg. at last
     selAcc = SelectionCA(f'tauFTF{name}', isProbe=is_probe_leg)
-    selAcc.mergeReco(recoAcc, robPrefetchCA=robPrefetchAlg)
+    selAcc.mergeReco(recoAcc)
 
 
     # Hypothesis:
@@ -450,21 +385,10 @@ def tauFTFIsoSequenceGenCfg(orig_flags: AthConfigFlags, calohits_seq_name: str |
     from TrigInDetConfig.TrigInDetConfig import trigInDetFastTrackingCfg
     recoAcc.mergeReco(trigInDetFastTrackingCfg(flags, roisKey=RoIs, signatureName=tracking_cfg))
 
-
-    # ROB prefetching for the Pixel and SCT data
-    # Note: if enabled in the config flags, the tauIso RoI would have already been prefetched in the previous step
-    #       through the 'extra prefetching' procedure, so we can skip it
-    from TriggerJobOpts.TriggerConfigFlags import ROBPrefetching
-    if ROBPrefetching.TauCoreLargeRoI in flags.Trigger.ROBPrefetchingOptions:
-        robPrefetchAlg = None
-    else:
-        from TrigGenericAlgs.TrigGenericAlgsConfig import ROBPrefetchingAlgCfg_Si
-        robPrefetchAlg = ROBPrefetchingAlgCfg_Si(flags, nameSuffix=f'IM_{recoAcc.name}')
-
-    # Selection sequence CA (seqAND), executing the recoAcc view creation alg. first, the rob prefetching alg. second (if enabled), 
-    # the reco CA (with all the reco algs) after, and the Hypo alg. at last
+    # Selection sequence CA (seqAND), executing the recoAcc view creation alg. first,
+    # the reco CA (with all the reco algs) second, and the Hypo alg. at last
     selAcc = SelectionCA(f'tauFTF{name}', isProbe=is_probe_leg)
-    selAcc.mergeReco(recoAcc, robPrefetchCA=robPrefetchAlg)
+    selAcc.mergeReco(recoAcc)
 
 
     # Hypothesis:
@@ -548,8 +472,6 @@ def tauPrecTrackSequenceGenCfg(orig_flags: AthConfigFlags, calohits_seq_name: st
 
     # Selection sequence CA (seqAND), executing the recoAcc view creation alg. first,
     # the reco CA (with all the reco algs) after, and the Hypo alg. at last
-    # Note: no need to prefetch anything from Pixel or SCT, since we already prefetched 
-    #       all the necesary information in the previous step
     selAcc = SelectionCA(f'tauPT{name}', isProbe=is_probe_leg)
     selAcc.mergeReco(recoAcc)
 
@@ -666,7 +588,7 @@ def tauPrecisionSequenceGenCfg(orig_flags: AthConfigFlags, seq_name: str, calohi
 
 
     # Selection sequence CA (seqAND), executing the recoAcc view creation alg. first,
-    # the reco CA (with all the reco algs) after, and the Hypo alg. at last (no ROB prefetching)
+    # the reco CA (with all the reco algs) after, and the Hypo alg. at last
     selAcc = SelectionCA(f'tauPrecision_{seq_name}', isProbe=is_probe_leg)
     selAcc.mergeReco(recoAcc)
 

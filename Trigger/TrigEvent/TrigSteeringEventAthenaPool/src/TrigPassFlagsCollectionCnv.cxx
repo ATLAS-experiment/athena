@@ -35,7 +35,7 @@ TrigPassFlagsCollection * TrigPassFlagsCollectionCnv::createTransient(const Toke
 {
   MsgStream mlog(msgSvc(), "TrigPassFlagsCollectionConverter" );
   
-  static const pool::Guid p1_guid( "7DE670AF-A256-4E8E-BC44-1CA30810F294" );
+  static const Guid p1_guid( "7DE670AF-A256-4E8E-BC44-1CA30810F294" );
 
   //  TrigPassFlagsCollection *p_collection = 0;
   if( compareClassGuid(token,  p1_guid ) )     

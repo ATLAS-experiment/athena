@@ -7,8 +7,7 @@
 #include "TrigConfL1Data/L1DataDef.h"
 #include "TrigConfL1Data/TriggerItemNode.h"
 #include "TrigConfL1Data/TriggerThreshold.h"
-#include <boost/algorithm/string/trim.hpp>
-#include "boost/algorithm/string.hpp"
+#include <CxxUtils/StringUtils.h>
 #include <iostream>
 #include <sstream>
 #include <cassert>
@@ -25,15 +24,14 @@ using namespace TrigConf;
 
 std::vector<std::string>
 TrigConf::split(const std::string& line, const std::string& del) {
-   std::vector<std::string> res;
-   boost::split(res, line, boost::is_any_of(del));
+   std::vector<std::string> res = CxxUtils::tokenize(line, del);
    return res;
 }
 
 // helper method: removing all spaces at beginning and end of a string
 void
 TrigConf::strip(std::string& str) {
-  boost::algorithm::trim(str);
+   str = CxxUtils::trimWhiteSpaces(str);
 }
 
 // helper method: replace tabs by single space

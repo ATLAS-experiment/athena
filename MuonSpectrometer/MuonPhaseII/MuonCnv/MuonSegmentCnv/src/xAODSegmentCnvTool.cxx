@@ -13,8 +13,12 @@
 #include "ActsGeoUtils/SurfacePlacement.h"
 #include "Acts/Geometry/TrackingGeometry.hpp"
 #include "Acts/Surfaces/PlaneSurface.hpp"
+#include "Acts/Definitions/Units.hpp"
 
 namespace MuonR4{
+
+   using namespace Acts::UnitLiterals;
+
 
     StatusCode xAODSegmentCnvTool::initialize() {
         ATH_CHECK(m_idHelperSvc.retrieve());
@@ -257,7 +261,7 @@ namespace MuonR4{
             Counter& increment = {isOutlier ? outliers: hits};
 
             increment.precision  += xAOD::isPrecisionHit(meas);
-            const auto* muonMeas = dynamic_cast<const xAOD::MuonMeasurement*>(meas);
+            const auto* muonMeas = static_cast<const xAOD::MuonMeasurement*>(meas);
 
             increment.triggerPhi += (muonMeas->measuresPhi()  ||
                                     //RPC BI / MDT twin or sTGC strip + pad hits

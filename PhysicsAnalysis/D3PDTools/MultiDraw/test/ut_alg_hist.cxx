@@ -22,11 +22,11 @@
 #include <EventLoop/Job.h>
 #include <MultiDraw/AlgHist.h>
 #include <MultiDraw/FormulaSvc.h>
-#include <RootCoreUtils/ThrowMsg.h>
 #include <RootCoreUtils/UnitTestDir.h>
 #include <SampleHandler/Sample.h>
 #include <SampleHandler/SampleLocal.h>
 #include <memory>
+#include <stdexcept>
 
 //
 // main program
@@ -63,7 +63,7 @@ int main ()
     TFile hist_file ((output + "/hist-dataset.root").Data(), "READ");
     TH1 *hist = dynamic_cast<TH1*>(hist_file.Get ("el_n"));
     if (hist == 0)
-      RCU_THROW_MSG ("didn't find histogram el_n");
+      throw std::runtime_error ("didn't find histogram el_n");
     float content [6] = {0, 0, 1, 5, 4, 0};
     for (int bin = 0, end = 6; bin != end; ++ bin)
     {
@@ -73,7 +73,7 @@ int main ()
 	str << "bin content missmatch in bin " << bin
 	    << " found " << hist->GetBinContent (bin)
 	    << " expected " << content[bin];
-	RCU_THROW_MSG (str.str());
+	throw std::runtime_error (str.str());
       }
     }
   } catch (std::exception& e)

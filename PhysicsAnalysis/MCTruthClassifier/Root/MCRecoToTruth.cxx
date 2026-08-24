@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef GENERATIONBASE
@@ -160,7 +160,7 @@ MCTruthClassifier::particleTruthClassifier(const xAOD::Jet* jet, bool DR, IMCTru
   else {
     xAOD::JetConstituentVector vec = jet->getConstituents();
     for (const auto *particle0 : vec) {
-      const xAOD::TruthParticle* thePart = dynamic_cast<const xAOD::TruthParticle*>(particle0->rawConstituent());
+      const xAOD::TruthParticle* thePart = static_cast<const xAOD::TruthParticle*>(particle0->rawConstituent());
       if (MC::isStable(thePart)) {
         constituents.insert(thePart);
       }

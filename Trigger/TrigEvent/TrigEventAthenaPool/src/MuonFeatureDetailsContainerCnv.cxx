@@ -22,8 +22,8 @@ MuonFeatureDetailsContainer * MuonFeatureDetailsContainerCnv::createTransient(co
     MsgStream mlog(msgSvc(), "MuonFeatureDetailsContainerConverter" );
     // mlog << MSG::DEBUG << "MuonFeatureDetailsContainerCnv::createTransient called" << endmsg;
 
-    static const pool::Guid tlp1_guid( "CF2FFCB2-3936-4800-9146-52B203A47478" );
-    static const pool::Guid p2_guid( "95327E52-C8B2-45E4-9EAF-C65A17AB27F5" );
+    static const Guid tlp1_guid( "CF2FFCB2-3936-4800-9146-52B203A47478" );
+    static const Guid p2_guid( "95327E52-C8B2-45E4-9EAF-C65A17AB27F5" );
     
     if( compareClassGuid(token,  p2_guid ) ){
          std::unique_ptr< MuonFeatureDetailsContainer_p2 > col_vect( poolReadObject< MuonFeatureDetailsContainer_p2 >(token) );

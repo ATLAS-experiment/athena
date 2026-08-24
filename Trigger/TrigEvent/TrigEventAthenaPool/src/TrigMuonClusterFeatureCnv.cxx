@@ -30,8 +30,8 @@ TrigMuonClusterFeature *TrigMuonClusterFeatureCnv::createTransient(const Token* 
   
   mlog << MSG::DEBUG << "TrigMuonClusterFeatureCnv::createTransient " << endmsg;
   
-  static const pool::Guid p1_guid("AE4D5D57-689D-40CB-83B3-CB047884952F");
-  static const pool::Guid p0_guid("A7B1865B-55D0-49D2-9778-5E0797FB06FE");
+  static const Guid p1_guid("AE4D5D57-689D-40CB-83B3-CB047884952F");
+  static const Guid p0_guid("A7B1865B-55D0-49D2-9778-5E0797FB06FE");
 
   if( compareClassGuid(token,  p1_guid ) ) {
     std::unique_ptr< TrigMuonClusterFeature_tlp1 > col_vect( poolReadObject< TrigMuonClusterFeature_tlp1 >(token) );

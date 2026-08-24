@@ -1,11 +1,12 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef LARRAWCONDITIONS_LARCABLELENGTHCOMPLETE_H
 #define LARRAWCONDITIONS_LARCABLELENGTHCOMPLETE_H
 
 #include "AthenaKernel/CLASS_DEF.h"
+#include "AthenaKernel/BaseInfo.h"
 #include "LArElecCalib/ILArCableLength.h" 
 #include "LArRawConditions/LArCableLengthP.h"
 #include "LArRawConditions/LArConditionsContainer.h"
@@ -44,4 +45,5 @@ class LArCableLengthComplete: public ILArCableLength,
 };
 
 CLASS_DEF( LArCableLengthComplete,205539859,1)
+SG_BASES( LArCableLengthComplete, ILArCableLength );
 #endif 

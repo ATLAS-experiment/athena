@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "L1CorrelationAlg.h"
@@ -157,7 +157,6 @@ StatusCode L1CorrelationAlg::execute(const EventContext& ctx) const {
   std::vector<uint32_t> roblist;
   // magic number!
   roblist.push_back(0x770000); 
-  m_robDataProviderSvc->addROBData(ctx, roblist);
   m_robDataProviderSvc->getROBData(ctx, roblist, robFragments);
     if (msgLvl(MSG::DEBUG)) {
     std::ostringstream os;

@@ -22,7 +22,6 @@
 #include <EventLoop/ProofDriver.h>
 #include <MultiDraw/AlgHist.h>
 #include <RootCoreUtils/Assert.h>
-#include <RootCoreUtils/ThrowMsg.h>
 #include <SampleHandler/DiskListEOS.h>
 #include <SampleHandler/MetaObject.h>
 #include <SampleHandler/SampleHandler.h>

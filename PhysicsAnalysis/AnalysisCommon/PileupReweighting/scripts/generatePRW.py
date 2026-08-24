@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 __author__ = "Will Buttinger"
 __doc__ = """
@@ -34,7 +34,7 @@ def main():
       print("Also ensure you have a valid certificate (voms-proxy-init -voms atlas)")
       return 1
 
-    client = pyAMI.client.Client(['atlas', 'atlas-replica'])
+    client = pyAMI.client.Client('atlas')
     atlasAPI.init()
 
     #read datasets into list

@@ -34,7 +34,9 @@ class TFCSGANXMLParameters : public ISF_FCS::MLogging {
   bool IsSymmetrisedAlpha() const { return m_symmetrisedAlpha; };
   const std::string& GetInputFolder() const { return m_fastCaloGANInputFolderName; };
 
-  void checkHists();
+  // Called immediately after being read to fix histograms that erroneously
+  // have kIsOnHeap set.  See ATLASSIM-7031.
+  void fixHists();
 
  private:
   bool m_symmetrisedAlpha{};

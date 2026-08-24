@@ -1,5 +1,5 @@
 /*
- *  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+ *  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
  */
 
 #include <iostream>
@@ -43,7 +43,7 @@ int main ATLAS_NOT_THREAD_SAFE() {
   std::cout << "Check DV casting" << '\n';
   std::cout << track2.trackStateOnSurfaces()->at(0)->variety() << '\n';
   const MultiComponentStateOnSurfaceDV* multiStates =
-      dynamic_cast<MultiComponentStateOnSurfaceDV*>(
+      static_cast<MultiComponentStateOnSurfaceDV*>(
           track2.trackStateOnSurfaces());
   std::cout << (multiStates->at(0) != nullptr) << '\n';
 

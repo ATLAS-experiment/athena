@@ -21,7 +21,6 @@
 #include <array>
 #include <cmath>
 #include <cstdint>
-#include <limits>
 #include <memory>
 #include <vector>
 
@@ -108,6 +107,23 @@ struct SegmentMatch {
   std::size_t segment{0U};
 };
 
+bool matchesTgcFields(const xAOD::TGCCandData& input,
+                      const xAOD::SectorLogicCandData& output) {
+  return output.pT() == input.pt() &&
+         output.charge() == input.candCharge() &&
+         output.rawPhi() == input.phi() &&
+         output.rawEta() == input.eta() &&
+         output.ptThresh() == input.threshold() &&
+         output.TCID() == input.tcId() &&
+         output.coinType() == input.coinType();
+}
+
+bool hasOnlyTgcFields(const xAOD::SectorLogicCandData& candidate) {
+  return candidate.isMDT() == 0U && candidate.mdtFlag() == 0U &&
+         candidate.numMDTSeg() == 0U && candidate.mdtSegQual() == 0U &&
+         candidate.tileCoin() == 0U && candidate.exotTrig() == 0U;
+}
+
 
 }  // namespace
 
@@ -117,6 +133,8 @@ StatusCode TgcL0TruthValidationAlg::initialize() {
   ATH_CHECK(m_candidateKey.initialize());
   ATH_CHECK(m_segmentKey.initialize());
   ATH_CHECK(m_truthEventKey.initialize());
+  ATH_CHECK(m_finalCandidateKey.initialize(m_validateSectorLogic));
+  ATH_CHECK(m_sectorLogicKey.initialize(m_validateSectorLogic));
   ATH_CHECK(m_outputKey.initialize());
   ATH_CHECK(m_extrapolator.retrieve());
 
@@ -131,12 +149,6 @@ StatusCode TgcL0TruthValidationAlg::initialize() {
   }
   if (m_validationPlaneToleranceZ.value() < 0.0) {
     ATH_MSG_ERROR("ValidationPlaneToleranceZ must be non-negative");
-    return StatusCode::FAILURE;
-  }
-  if (m_requiredBcTag.value() < -1 ||
-      m_requiredBcTag.value() >
-          static_cast<int>(std::numeric_limits<std::uint16_t>::max())) {
-    ATH_MSG_ERROR("RequiredBcTag must be -1 or a uint16 value");
     return StatusCode::FAILURE;
   }
   return StatusCode::SUCCESS;
@@ -158,12 +170,84 @@ StatusCode TgcL0TruthValidationAlg::execute(const EventContext& ctx) const {
     ATH_MSG_ERROR("Failed to retrieve " << m_truthEventKey.fullKey());
     return StatusCode::FAILURE;
   }
-
   auto output = std::make_unique<TgcL0ValidationEvent>();
   output->event.runNumber = ctx.eventID().run_number();
   output->event.eventNumber = ctx.eventID().event_number();
   output->event.lumiBlock = ctx.eventID().lumi_block();
   output->event.bcid = ctx.eventID().bunch_crossing_id();
+
+  if (m_validateSectorLogic) {
+    SG::ReadHandle<xAOD::TGCCandDataContainer> finalCandidates{
+        m_finalCandidateKey, ctx};
+    if (!finalCandidates.isValid()) {
+      ATH_MSG_ERROR("Failed to retrieve " << m_finalCandidateKey.fullKey());
+      return StatusCode::FAILURE;
+    }
+    SG::ReadHandle<xAOD::SectorLogicCandDataContainer> sectorLogicCandidates{
+        m_sectorLogicKey, ctx};
+    if (!sectorLogicCandidates.isValid()) {
+      ATH_MSG_ERROR("Failed to retrieve " << m_sectorLogicKey.fullKey());
+      return StatusCode::FAILURE;
+    }
+
+    std::size_t sectorLogicIndex{0U};
+    for (std::size_t inputIndex = 0U; inputIndex < finalCandidates->size();
+         ++inputIndex) {
+      const xAOD::TGCCandData* inputCandidate = (*finalCandidates)[inputIndex];
+      if (inputCandidate == nullptr) {
+        ATH_MSG_ERROR("Null TGC candidate at index " << inputIndex);
+        return StatusCode::FAILURE;
+      }
+      if (inputCandidate->tcId() == 0U) continue;
+      if (sectorLogicIndex >= sectorLogicCandidates->size()) {
+        ATH_MSG_ERROR(
+            "Fewer Sector Logic candidates than non-empty TGC candidates");
+        return StatusCode::FAILURE;
+      }
+      const xAOD::SectorLogicCandData* sectorLogicCandidate =
+          (*sectorLogicCandidates)[sectorLogicIndex];
+      if (sectorLogicCandidate == nullptr) {
+        ATH_MSG_ERROR("Null Sector Logic candidate at index "
+                      << sectorLogicIndex);
+        return StatusCode::FAILURE;
+      }
+      if (!matchesTgcFields(*inputCandidate, *sectorLogicCandidate)) {
+        ATH_MSG_ERROR("Sector Logic candidate " << sectorLogicIndex
+                      << " does not preserve TGC candidate " << inputIndex);
+        return StatusCode::FAILURE;
+      }
+      if (!hasOnlyTgcFields(*sectorLogicCandidate)) {
+        ATH_MSG_ERROR("Sector Logic candidate " << sectorLogicIndex
+                      << " contains non-TGC payload");
+        return StatusCode::FAILURE;
+      }
+      if (sectorLogicCandidate->boardID() != 0U ||
+          sectorLogicCandidate->fiberID() != 0U ||
+          sectorLogicCandidate->BCIDOffset() != 0 ||
+          sectorLogicCandidate->veto() != 0U) {
+        ATH_MSG_ERROR("Sector Logic candidate " << sectorLogicIndex
+                      << " has unexpected placeholder metadata");
+        return StatusCode::FAILURE;
+      }
+      output->sectorLogic.inputCandidateIndex.emplace_back(
+          static_cast<std::uint32_t>(inputIndex));
+      output->sectorLogic.candWord.emplace_back(
+          sectorLogicCandidate->candWord());
+      output->sectorLogic.candExtraWord.emplace_back(
+          sectorLogicCandidate->candExtraWord());
+      output->sectorLogic.boardId.emplace_back(sectorLogicCandidate->boardID());
+      output->sectorLogic.fiberId.emplace_back(sectorLogicCandidate->fiberID());
+      output->sectorLogic.bcidOffset.emplace_back(
+          sectorLogicCandidate->BCIDOffset());
+      output->sectorLogic.veto.emplace_back(sectorLogicCandidate->veto());
+      ++sectorLogicIndex;
+    }
+    if (sectorLogicIndex != sectorLogicCandidates->size()) {
+      ATH_MSG_ERROR(
+          "More Sector Logic candidates than non-empty TGC candidates");
+      return StatusCode::FAILURE;
+    }
+  }
 
   const auto processParticle = [&](const auto& particle) -> StatusCode {
     if (!particle || std::abs(particle->pdg_id()) != 13 ||
@@ -276,6 +360,12 @@ StatusCode TgcL0TruthValidationAlg::execute(const EventContext& ctx) const {
     output->candidates.phi.emplace_back(candidate.phi);
     output->candidates.deltaTheta.emplace_back(candidate.deltaTheta);
     output->candidates.deltaPhi.emplace_back(candidate.deltaPhi);
+    output->candidates.pt.emplace_back(candidate.preInnerCoincidencePt);
+    output->candidates.threshold.emplace_back(
+        candidate.preInnerCoincidenceThreshold);
+    output->candidates.charge.emplace_back(candidate.charge);
+    output->candidates.goodMagneticField.emplace_back(
+        candidate.goodMagneticField ? 1U : 0U);
     output->candidates.truthIndex.emplace_back(-1);
   }
 
@@ -287,8 +377,8 @@ StatusCode TgcL0TruthValidationAlg::execute(const EventContext& ctx) const {
     for (std::size_t candidate = 0U; candidate < candidates->size();
          ++candidate) {
       const TgcL0Candidate& inputCandidate = (*candidates)[candidate];
-      if (m_requiredBcTag.value() >= 0 &&
-          inputCandidate.bcTag != static_cast<std::uint16_t>(m_requiredBcTag.value())) {
+      if (m_requiredBcTagMask.value() != 0U &&
+          (inputCandidate.bcTag & m_requiredBcTagMask.value()) == 0U) {
         continue;
       }
       if (output->truth.eta[truth] * inputCandidate.eta < 0.F) continue;
@@ -359,9 +449,9 @@ StatusCode TgcL0TruthValidationAlg::execute(const EventContext& ctx) const {
       for (std::size_t segment = 0U;
            segment < output->segments.projection.size(); ++segment) {
         if (output->segments.projection[segment] != projectionValue) continue;
-        if (m_requiredBcTag.value() >= 0 &&
-            output->segments.bcTag[segment] !=
-                static_cast<std::uint16_t>(m_requiredBcTag.value())) {
+        if (m_requiredBcTagMask.value() != 0U &&
+            (output->segments.bcTag[segment] &
+             m_requiredBcTagMask.value()) == 0U) {
           continue;
         }
         if (output->truth.eta[truth] * output->segments.eta[segment] < 0.F) {

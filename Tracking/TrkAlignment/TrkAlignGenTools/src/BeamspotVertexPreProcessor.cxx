@@ -239,7 +239,7 @@ bool BeamspotVertexPreProcessor::isAssociatedToVertex(const Trk::Track * track, 
   std::vector<VxTrackAtVertex >::const_iterator iVxTrackBegin = vertexTracks.begin();
   std::vector<VxTrackAtVertex >::const_iterator iVxTrackEnd   = vertexTracks.end();
 
-  std::vector<VxTrackAtVertex>::const_iterator findResult = std::find_if(iVxTrackBegin, iVxTrackEnd, thisCompare);
+  std::vector<VxTrackAtVertex>::const_iterator findResult = std::find_if(iVxTrackBegin, iVxTrackEnd, std::move(thisCompare));
 
   return findResult != iVxTrackEnd;
 }
@@ -281,7 +281,7 @@ const xAOD::Vertex* BeamspotVertexPreProcessor::findVertexCandidate(const Track*
     auto iVxTrackEnd    = thisPair.second.end();
     Trk::CompareTwoTracks thisCompare(track, "compareAddress");
 
-    auto findResult = std::find_if(iVxTrackBegin, iVxTrackEnd, thisCompare);
+    auto findResult = std::find_if(iVxTrackBegin, iVxTrackEnd, std::move(thisCompare));
 
     if(findResult != iVxTrackEnd){
       ATH_MSG_DEBUG("the found VxTrackAtVertex: "<<*findResult);
@@ -318,8 +318,11 @@ const VertexOnTrack* BeamspotVertexPreProcessor::provideVotFromVertex(const Trac
 
     if(updatedVtx){
 
-      if(!selectUpdatedVertices(updatedVtx))
+      if(!selectUpdatedVertices(updatedVtx)){
+        delete tmpVtx;
+        if ( tmpVtx!= updatedVtx) delete updatedVtx;
         return vot;
+      }
 
       if( !m_doFullVertexConstraint )
         ATH_MSG_DEBUG(" updated Vertex by KalmanVertexUpdator: "<<updatedVtx);
@@ -376,11 +379,9 @@ const VertexOnTrack* BeamspotVertexPreProcessor::provideVotFromVertex(const Trac
         errorMatrix = Amg::MatrixX( vtxCov.similarity(Jacobian) );
       }
       delete perigee;
+      perigee = nullptr;
 
-      // in fact, in most of the normal situation, pointer tmpVtx and updatedVtx are the same. You can check the source code
-      // But for safety, I would like to delete them seperately
-      // sroe(2016.09.23): This would result in an illegal double delete, if they really point to the same thing!
-      // http://stackoverflow.com/questions/9169774/what-happens-in-a-double-delete
+      // in fact, in most of the normal situation, pointer tmpVtx and updatedVtx are the same. You can check the source code.
       if (tmpVtx != updatedVtx){
         delete updatedVtx;
       }
@@ -395,7 +396,9 @@ const VertexOnTrack* BeamspotVertexPreProcessor::provideVotFromVertex(const Trac
       ATH_MSG_DEBUG("the VertexOnTrack created from vertex: "<<*vot);
     }
   }
-
+  //belt and braces approach
+  delete tmpVtx;
+  if ( tmpVtx!= updatedVtx) delete updatedVtx;
   return vot;
 
 }

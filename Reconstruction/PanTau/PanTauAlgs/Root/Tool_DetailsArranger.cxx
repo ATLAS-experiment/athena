@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "PanTauAlgs/Tool_DetailsArranger.h"
@@ -218,7 +218,7 @@ StatusCode PanTau::Tool_DetailsArranger::arrangePFOLinks(PanTau::PanTauSeed* inS
 	SetNeutralConstituentVectorMasses(pi0PFOLinks, neutralPFOContainer, 2*MASS_PI0);
 	  
 	// assign the same constituents to Pantau:
-	preLinkPi0PFOLinks=pi0PFOLinks;
+	preLinkPi0PFOLinks = std::move(pi0PFOLinks);
 	  
       } else {
 	  
@@ -279,7 +279,7 @@ StatusCode PanTau::Tool_DetailsArranger::arrangePFOLinks(PanTau::PanTauSeed* inS
     }
 
     static const SG::Accessor<std::vector< ElementLink< xAOD::PFOContainer > > > accPi0PFOLinks("pi0PFOLinks");
-    accPi0PFOLinks(*p) = pfo_link_vector;
+    accPi0PFOLinks(*p) = std::move(pfo_link_vector);
 
     ElementLink< xAOD::IParticleContainer > linkToPi0;
     linkToPi0.toContainedElement(pi0Container, dynamic_cast<xAOD::IParticle*> (p));
@@ -466,7 +466,7 @@ void PanTau::Tool_DetailsArranger::createPi0Vectors(xAOD::TauJet* tauJet, std::v
       vPi0s.push_back(tauJet->pi0PFO(iPFO)->p4());
       std::vector< ElementLink<xAOD::PFOContainer> > pfovec;
       pfovec.push_back(tauJet->pi0PFOLinks()[iPFO]);
-      vec_pi0pfos.push_back( pfovec );
+      vec_pi0pfos.push_back( std::move(pfovec));
     }
   }
 

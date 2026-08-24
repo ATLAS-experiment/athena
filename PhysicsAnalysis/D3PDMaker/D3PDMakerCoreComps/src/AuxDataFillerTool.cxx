@@ -15,8 +15,7 @@
 #include "AthContainers/AuxElement.h"
 #include "AthContainers/AuxTypeRegistry.h"
 #include "AthenaKernel/errorcheck.h"
-#include "boost/algorithm/string/trim.hpp"
-#include "boost/algorithm/string/split.hpp"
+#include <CxxUtils/StringUtils.h>
 #include "TROOT.h"
 
 
@@ -212,8 +211,7 @@ StatusCode AuxDataFillerTool::parseVars()
       label.erase (0, ipos+1);
     }
 
-    std::vector<std::string> labels;
-    boost::algorithm::split (labels, label, boost::algorithm::is_any_of(","));
+    std::vector<std::string> labels = CxxUtils::tokenize(label, ',');
     std::vector<std::string> label_classes;
     for (std::string& l : labels) {
       std::string label_class;
@@ -222,15 +220,15 @@ StatusCode AuxDataFillerTool::parseVars()
         label_class = l.substr (0, ipos);
         l.erase (0, ipos+2);
       }
-      boost::algorithm::trim (l);
+      l = CxxUtils::trimWhiteSpaces(l);
       l = m_auxprefix + l;
-      boost::algorithm::trim (label_class);
+      label_class = CxxUtils::trimWhiteSpaces(label_class);
       label_classes.push_back (std::move(label_class));
     }
 
-    boost::algorithm::trim (name);
-    boost::algorithm::trim (docstring);
-    boost::algorithm::trim (defstring);
+    name = CxxUtils::trimWhiteSpaces(name);
+    docstring = CxxUtils::trimWhiteSpaces(docstring);
+    defstring = CxxUtils::trimWhiteSpaces(defstring);
 
     // If a type was given in the default field, make sure this variable
     // name has been registered.
@@ -238,7 +236,7 @@ StatusCode AuxDataFillerTool::parseVars()
       ipos = defstring.find (':');
       if (ipos != std::string::npos) {
         std::string typname = defstring.substr (0, ipos);
-        boost::algorithm::trim (typname);
+        typname = CxxUtils::trimWhiteSpaces(typname);
         defstring.erase (0, ipos+1);
         
         RootUtils::Type typ (typname);

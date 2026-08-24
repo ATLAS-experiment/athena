@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //////////////////////////////////////////////////////////////////
@@ -417,7 +417,7 @@ DataVector< const Trk::TrackStateData >* Trk::TrackDiff::extractDataFromTrack( c
         const Trk::TrackStateData *tsData = new const Trk::TrackStateData(  (*iter),
                                                                             ROT,
                                                                             &surface,
-                                                                            detTypeName,
+                                                                            std::move(detTypeName),
                                                                             detType);
         trackStateData->push_back(tsData);
         //ATH_MSG_VERBOSE  ( detTypeName << " surf:  " << surface << " (" << surface->center().x() << ", " << surface->center().y() << "," << surface->center().z() << ")" 

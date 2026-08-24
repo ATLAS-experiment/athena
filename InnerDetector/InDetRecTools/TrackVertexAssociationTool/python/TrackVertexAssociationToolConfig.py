@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -20,7 +20,13 @@ def TTVAToolCfg(flags, name, addDecoAlg=True, VertexContName="PrimaryVertices", 
 
     acc = ComponentAccumulator()
 
+    # For cosmics or config without PV reconstruction, don't even try
+    if not flags.Tracking.doVertexFinding:
+        return acc
+
     kwargs.setdefault("TrackContName", "InDetTrackParticles")
+    kwargs.setdefault("AMVFVerticesDeco", "TTVA_AMVFVertices_forReco")
+    kwargs.setdefault("AMVFWeightsDeco",  "TTVA_AMVFWeights_forReco")
 
     acc.setPrivateTools(getTTVAToolForReco(name, **kwargs))
 
@@ -28,7 +34,8 @@ def TTVAToolCfg(flags, name, addDecoAlg=True, VertexContName="PrimaryVertices", 
         from InDetUsedInFitTrackDecoratorTool.UsedInVertexFitTrackDecoratorConfig import (
             UsedInVertexFitTrackDecoratorCfg)
         acc.merge(UsedInVertexFitTrackDecoratorCfg(
-            flags, kwargs["TrackContName"], VertexContName))
+            flags, trackCont=kwargs["TrackContName"], vtxCont=VertexContName,
+            vertexDeco=kwargs["AMVFVerticesDeco"], weightDeco=kwargs["AMVFWeightsDeco"]))
 
     return acc
 
@@ -56,6 +63,14 @@ def CVF_TTVAToolCfg(flags, name="CVF_TTVATool", **kwargs):
  
 
 def GNNHS_TTVAToolCfg(flags, name="TrackVertexAssociationTool_GNNHS", **kwargs):
+    # The import should be done here as TrkConfig is not part of AthAnalysis
+    from TrkConfig.VertexFindingFlags import VertexSortingSetup
+
     kwargs.setdefault("WorkingPoint", "Prompt_MaxWeight")
-    kwargs.setdefault("VertexContName", "PrimaryVertices_initial")
+    kwargs.setdefault("VertexContName", "PrimaryVertices_initial"
+                      if flags.Tracking.PriVertex.sortingSetup is VertexSortingSetup.GNNSorting else
+                      "PrimaryVertices")
+    kwargs.setdefault("HardScatterLinkDeco", "")
+    kwargs.setdefault("AMVFVerticesDeco", "TTVA_AMVFVertices_forGNN")
+    kwargs.setdefault("AMVFWeightsDeco", "TTVA_AMVFWeights_forGNN")
     return TTVAToolCfg(flags, name, **kwargs)

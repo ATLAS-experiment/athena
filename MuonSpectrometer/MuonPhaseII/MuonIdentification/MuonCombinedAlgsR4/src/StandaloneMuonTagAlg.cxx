@@ -13,6 +13,8 @@
 
 #include "xAODMuonViews/ContainerDecorator.h"
 namespace MuonCombinedR4{
+    using namespace Acts::UnitLiterals;
+
     StatusCode StandaloneMuonTagAlg::initialize(){
         ATH_CHECK(m_msTrackKey.initialize());
 

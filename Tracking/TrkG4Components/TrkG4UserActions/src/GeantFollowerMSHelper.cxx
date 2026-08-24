@@ -1,19 +1,16 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
 // GeantFollowerMSHelper.cxx, (c) ATLAS Detector Software
 ///////////////////////////////////////////////////////////////////
 
-// StoreGate
 #include "TrkG4UserActions/GeantFollowerMSHelper.h"
 
 #include "GaudiKernel/ITHistSvc.h"
 #include "StoreGate/StoreGateSvc.h"
 #include "TTree.h"
-// Trk
-#include <cmath>
 
 #include "GeoPrimitives/GeoPrimitives.h"
 #include "TrkExInterfaces/IExtrapolator.h"
@@ -23,7 +20,7 @@
 #include "TrkMaterialOnTrack/ScatteringAngles.h"
 #include "TrkParameters/TrackParameters.h"
 #include "TrkSurfaces/PlaneSurface.h"
-
+#include <cmath>
 Trk::GeantFollowerMSHelper::GeantFollowerMSHelper(const std::string& t,
                                                   const std::string& n,
                                                   const IInterface* p)
@@ -590,7 +587,7 @@ void Trk::GeantFollowerMSHelper::trackParticle(const G4ThreeVector& pos,
     // Backwards from Exit to ME
     if (trkParameters) {
       ATH_MSG_DEBUG(" forward extrapolation succeeded ");
-      bool doBackWard = false;
+      constexpr bool doBackWard = false;
       if (doBackWard) {
         std::unique_ptr<Trk::TrackParameters> trkParameters_BACK =
             m_extrapolateDirectly
@@ -795,6 +792,11 @@ void Trk::GeantFollowerMSHelper::trackParticle(const G4ThreeVector& pos,
   }
 
   double Elosst = 0.;
+  if (!matvec) [[unlikely]]{
+    ATH_MSG_ERROR("matvec pointer is null.");
+    return;
+    
+  }
   const std::vector<const Trk::TrackStateOnSurface*> matvecNewRepAggrUp =
       modifyTSOSvector(*matvec, 1.0, 1.0, true, true, true, 0., 0., 10000., 0.,
                        Elosst);

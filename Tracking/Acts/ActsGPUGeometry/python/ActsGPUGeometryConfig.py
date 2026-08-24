@@ -23,6 +23,8 @@ def JSONDeviceDetectorDescriptionProviderSvcCfg(flags, **kwargs) -> ComponentAcc
     kwargs.setdefault("HostDigitizationObjectName", "TracccHostDigitizationConfig")
     kwargs.setdefault("DeviceConditionsObjectName", "TracccDeviceCondConfig")
     kwargs.setdefault("HostConditionsObjectName", "TracccHostCondConfig")
+    kwargs.setdefault("DeviceDetectorName", "TracccDeviceDetectorGeometry")
+    kwargs.setdefault("HostDetectorName", "TracccHostDetectorGeometry")
     svc = CompFactory.ActsTrk.JSONDeviceDetectorDescriptionProviderSvc(**kwargs)
     acc.addService(svc, primary=True, create=True)
     return acc

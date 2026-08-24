@@ -23,14 +23,17 @@ struct GenericFillOp {
 
 /// Maps to an existing Fill*PartonHistory method on CalcPartonHistory.
 enum class SpecialFillType {
-  Top,      ///< FillTopPartonHistory
-  AntiTop,  ///< FillAntiTopPartonHistory
-  Ttbar,    ///< FillTtbarPartonHistory
-  Z,        ///< FillZPartonHistory(history, parent, dec, count, mode)
-  Ztautau,  ///< FillZtautauPartonHistory(history, parent, dec, count, mode)
-  W,        ///< FillWPartonHistory(history, parent, dec, count, mode)
-  Higgs,    ///< FillHiggsPartonHistory(history, mode, dec)
-  Gamma,    ///< FillGammaPartonHistory(history, parent, dec)
+  Top,          ///< FillTopPartonHistory
+  TopFCNC,      ///< FillTopPartonHistory(true)
+  AntiTop,      ///< FillAntiTopPartonHistory
+  AntiTopFCNC,  ///< FillAntiTopPartonHistory(true)
+  Ttbar,        ///< FillTtbarPartonHistory
+  TtbarFCNC,    ///< pass
+  Z,            ///< FillZPartonHistory
+  Ztautau,      ///< FillZtautauPartonHistory
+  W,            ///< FillWPartonHistory
+  Higgs,        ///< FillHiggsPartonHistory
+  Gamma,        ///< FillGammaPartonHistory
 };
 
 /// Parameterizes one special fill call.
@@ -45,7 +48,9 @@ struct SpecialFillOp {
 /// Maps to an existing Initialize*Decorators method (non-parameterized ones).
 enum class DecoratorGroup {
   Top,               ///< InitializeTopDecorators()
+  TopFCNC,           ///< InitializeTopDecorators(true)
   AntiTop,           ///< InitializeAntiTopDecorators()
+  AntiTopFCNC,       ///< InitializeAntiTopDecorators(true)
   FourTop,           ///< Initialize4TopDecorators()
   Ttbar,             ///< InitializeTtbarDecorators()
   Bottom,            ///< InitializeBottomDecorators()

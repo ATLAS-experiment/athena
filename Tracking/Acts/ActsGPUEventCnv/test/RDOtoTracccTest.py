@@ -84,6 +84,8 @@ if __name__ == "__main__":
     from AthenaConfiguration.TestDefaults import defaultTestFiles
     flags = initConfigFlags()
 
+    flags.Tracking.doPixelDigitalClustering = True
+    
     if PERFORMANCE_TESTING:
         flags.Input.Files = [
             "/eos/atlas/atlasgroupdisk/trig-daq/dq2/rucio/mc21_14TeV/af/f5/RDO.39626672._000001.pool.root.1",

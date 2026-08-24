@@ -1,12 +1,8 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrkJiveXML/VertexRetriever.h"
-#include <string>
-#include <vector>
-#include <map>
-#include <cmath>
 
 #include "VxVertex/VxContainer.h"
 #include "VxVertex/VxCandidate.h"
@@ -24,6 +20,10 @@
 #include "TrkParticleBase/LinkToTrackParticleBase.h"
 #include "TrkParameters/TrackParameters.h"
 
+#include <string>
+#include <vector>
+#include <map>
+#include <cmath>
 
 namespace JiveXML {
 
@@ -193,17 +193,6 @@ namespace JiveXML {
 
       ATH_MSG_DEBUG("Reading vertex container " << vtxCollectionItr.key() 
 		    << " with " << NVtx << " entries");
-      
-      //Declare all the data vectors we want to retrieve and reserve space
-      x.reserve(x.size()+NVtx);
-      y.reserve(y.size()+NVtx);
-      z.reserve(z.size()+NVtx);
-      primVxCand.reserve(primVxCand.size()+NVtx);
-      chi2.reserve(chi2.size()+NVtx);
-      sgkey.reserve(sgkey.size()+NVtx);
-      covMatrix.reserve(covMatrix.size()+NVtx);
-      numTracks.reserve(numTracks.size()+NVtx);
-      vertexType.reserve(numTracks.size()+NVtx);
 
       StatusCode sc = fillPerigeeList();
       if (!sc.isFailure()) {
@@ -299,25 +288,23 @@ namespace JiveXML {
 
     //Finally add all retrieved data to the data map
     DataMap dataMap;
-    dataMap["x"] = x;
-    dataMap["y"] = y;
-    dataMap["z"] = z;
-    dataMap["primVxCand"] = primVxCand;
-    dataMap["chi2"] = chi2;
-    dataMap["covMatrix multiple=\"6\""] = covMatrix;
-    dataMap["numTracks"] = numTracks;
-    dataMap["sgkey"] = sgkey;
-    dataMap["vertexType"] = vertexType;
+    dataMap["x"] = std::move(x);
+    dataMap["y"] = std::move(y);
+    dataMap["z"] = std::move(z);
+    dataMap["primVxCand"] = std::move(primVxCand);
+    dataMap["chi2"] = std::move(chi2);
+    dataMap["covMatrix multiple=\"6\""] = std::move(covMatrix);
+    const std::size_t nTracks = numTracks.size();
+    dataMap["numTracks"] = std::move(numTracks);
+    dataMap["sgkey"] = std::move(sgkey);
+    dataMap["vertexType"] = std::move(vertexType);
     
     //If there had been any tracks, add a tag
-    if (!numTracks.empty()){
+    if (nTracks!=0){
       //Calculate average number of tracks per vertex
-      double NTracksPerVertex = tracks.size()*1./numTracks.size();
+      double NTracksPerVertex = tracks.size()*1./nTracks;
       std::string tag = "tracks multiple=\"" +DataType(NTracksPerVertex).toString()+"\"";
-      dataMap[tag] = tracks;
-///// sgkey in current scheme is _not_ a multiple !
-//      std::string tag2 = "sgkey multiple=\"" +DataType(NTracksPerVertex).toString()+"\"";
-//      dataMap[tag2] = sgkey;
+      dataMap[tag] = std::move(tracks);
     } 
 
     ////forward data to formating tool and return

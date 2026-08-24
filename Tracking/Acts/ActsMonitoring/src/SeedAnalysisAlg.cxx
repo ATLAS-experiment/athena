@@ -37,6 +37,7 @@ namespace ActsTrk {
     ATH_CHECK( m_paramEstimationTool.retrieve(EnableTool{!m_prdTruth.empty()}) );
     ATH_CHECK( m_trackingGeometrySvc.retrieve() );
     ATH_CHECK( m_geometryConvTool.retrieve(EnableTool{!m_prdTruth.empty()}) );
+    ATH_CHECK( m_ctxProvider.initialize() );
  
     ATH_MSG_DEBUG("Monitoring settings ...");
     ATH_MSG_DEBUG(m_monGroupName);
@@ -228,7 +229,7 @@ namespace ActsTrk {
 
     Acts::MagneticFieldContext magFieldContext(fieldCondObj);
     const auto & geo_context = m_trackingGeometrySvc->getNominalContext();
-
+    const Acts::CalibrationContext calContext = m_ctxProvider.getCalibrationContext(ctx);
 
     // utilities
     // Used for param estimation
@@ -253,12 +254,13 @@ namespace ActsTrk {
     estimated_eta.reserve(seed_container.size());
 
     for (auto seed : seed_container) {
-      std::optional<Acts::BoundTrackParameters> optTrackParams =
+      const auto& [optTrackParams, estimationStatus] =
         m_paramEstimationTool->estimateTrackParameters(
 						       seed,
 						       m_useTopSp,
 						       geo_context.context(),
 						       magFieldContext,
+						       calContext,
 						       retrieveSurfaceFunction);
 
       if ( not optTrackParams.has_value() ) continue;

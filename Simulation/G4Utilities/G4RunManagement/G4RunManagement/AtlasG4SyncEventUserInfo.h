@@ -33,13 +33,15 @@ class G4EventSynchronizationInterface
     };
   public:
     EventStatus Status() const;
-    void SetStatusDone() {SetStatus(EventStatus::Done);};
+    /// Mark all Geant4 processing for this event as complete and wake Athena.
+    void Complete(bool eventAborted);
     void WaitStatusDone() {WaitStatus(EventStatus::Done);};
-    bool EventAborted() const { return m_event_aborted; }
-    void EventAborted(bool aborted) { m_event_aborted = aborted; }
+    bool EventAborted() const {
+      std::scoped_lock lk(m_mutex);
+      return m_event_aborted;
+    }
     
   private:
-    void SetStatus(const EventStatus&);
     void WaitStatus(const EventStatus&);
 
     bool m_event_aborted{false};

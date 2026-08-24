@@ -126,7 +126,6 @@ def BPHY24Cfg(flags):
     from DerivationFrameworkEGamma.EGammaToolsConfig import EGElectronLikelihoodToolWrapperCfg
     ElectronPassLHvloose = acc.addPublicTool(acc.popToolsAndMerge(EGElectronLikelihoodToolWrapperCfg(flags, name = "ElectronPassLHvloose",
                                             EGammaElectronLikelihoodTool = ElectronLHSelectorLHvloose,
-                                            EGammaFudgeMCTool = "",
                                             CutType = "",
                                             StoreGateEntryName = "DFCommonElectronsLHVeryLoose",
                                             ContainerName = "Electrons",
@@ -134,7 +133,6 @@ def BPHY24Cfg(flags):
 
     ElectronPassLHvloosenod0 = acc.addPublicTool(acc.popToolsAndMerge(EGElectronLikelihoodToolWrapperCfg(flags, name = "ElectronPassLHvloosenod0",
                                             EGammaElectronLikelihoodTool = ElectronLHSelectorLHvloose_nod0,
-                                            EGammaFudgeMCTool = "",
                                             CutType = "",
                                             StoreGateEntryName = "DFCommonElectronsLHVeryLoosenod0",
                                             ContainerName = "Electrons",

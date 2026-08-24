@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # ********************* WARNING **********************
 #
@@ -1033,10 +1033,6 @@ TriggerLvl1List=[
     ]
 
 
-TriggerIDTruth= [
-    ('TrigInDetTrackTruthMap#TrigInDetTrackTruthMap', 'ESD AODFULL AODSLIM', 'Tracking') # changed from Unknown to Tracking (ATR-18320)
-    ]
-
 
 TriggerRoiList = [
     "xAOD::RoiDescriptorStore#HLT_xAOD__RoiDescriptorStore_secondaryRoI_L2" , "xAOD::RoiDescriptorStoreAuxInfo#HLT_xAOD__RoiDescriptorStore_secondaryRoI_L2Aux.", 
@@ -1120,7 +1116,6 @@ TriggerL2EvolutionList = [
 ('TrigL2BphysContainer#HLT_L2DsPhiPiFexDs',                              'xAOD::TrigBphysContainer#HLT_L2DsPhiPiFexDs'),
 ('TrigL2BphysContainer#HLT_L2DsPhiPiFexPhi',                             'xAOD::TrigBphysContainer#HLT_L2DsPhiPiFexPhi'),
 ('TrigL2BphysContainer#HLT_L2JpsieeFex',                                 'xAOD::TrigBphysContainer#HLT_L2JpsieeFex'),
-#('TrigL2BphysContainer#HLT_TrigDiMuon',                                 ), # xAOD equivalent not found
 ('TrigL2BphysContainer#HLT_L2TrackMass',                                 'xAOD::TrigBphysContainer#HLT_L2TrackMass'),
 ('TrigL2BphysContainer#HLT_L2MultiMuFex',                                'xAOD::TrigBphysContainer#HLT_L2MultiMuFex')
 #('TrigInDetTrackCollection#HLT',                                         ), # xAOD equivalents for TrigInDetTrackCollections not found
@@ -1375,7 +1370,6 @@ EDMDetails["LVL1::CMMRoI"]                        = {'persistent':"",           
 EDMDetails["CTP_RDO"]                             = {'persistent':"",               'typealias':'' }
 EDMDetails["MuCTPI_RDO"]                          = {'persistent':"",               'typealias':'' }
 EDMDetails["ROIB::RoIBResult"]                    = {'persistent':"",               'typealias':'' }
-EDMDetails["TrigInDetTrackTruthMap"]              = {'persistent':"",               'typealias':'' }
 
 #xAOD details. 
 
@@ -1536,28 +1530,20 @@ EDMDetails['xAOD::CMXRoIAuxContainer']                    = {'persistent': "", '
 # Move list of EDM libraries from HLTTriggerGetter.py to TriggerEDM.py
 #
 EDMLibraries = [ 'TrigSteeringEvent', 'TrigMuonEvent',
-                 'TrigBphysicsEvent', 'TrigCaloEvent',
+                 'TrigCaloEvent',
                  'TrigInDetEvent',
                  'TrigParticle',      'TrigMissingEtEvent',
                  'TrigDecisionEvent', 'TrigMonitoringEvent',
-                 'TrigTopoEvent' , 'TrigCombinedEvent',
+                 'TrigTopoEvent',
                  'TrigMonitoringEventTPCnv',   'RecTPCnv',
                  'TrigCaloEventTPCnv',
                  'TrigDecisionEventTPCnv',     'TrigInDetEventTPCnv',
                  'TrigMissingEtEventTPCnv',    'TrigMuonEventTPCnv',
                  'TrigParticleTPCnv',          'TrigSteeringEventTPCnv',
-                 'TrigTopoEventTPCnv',         'TrigCombinedEventTPCnv',
-                 'tauEventTPCnvDict',          'RecTPCnvDict',
+                 'TrigTopoEventTPCnv',
+                 'RecTPCnvDict',
                  'TrigMonitoringEventTPCnvDict',
                  'OLD_RecTPCnvDict',
-#
-                 #'TrigCombinedEventTPCnv1Dict',     'TrigCaloEventTPCnv1Dict',
-                 #'TrigDecisionEventTPCnv1Dict',     'TrigInDetEventTPCnv1Dict',
-                 #'TrigMissingEtEventTPCnv1Dict',    'TrigMuonEventTPCnv1Dict',
-                 #'TrigParticleTPCnv1Dict',          'TrigSteeringEventTPCnv1Dict',
-                 #'OLD_TrigDecisionEventTPCnv1Dict', 'OLD_TrigMuonEventTPCnv1Dict',
-                 #'OLD_TrigParticleTPCnv1Dict',      'OLD_TrigSteeringEventTPCnv1Dict',
-#
                  'xAODCaloEvent', 'xAODEgamma', 'xAODTracking', 'xAODMuon', 'xAODTau', 'xAODJet',
                  'xAODTrigBphys', 'xAODTrigMissingET', 'xAODTrigEgamma', 'xAODTrigMuon', 'xAODTrigCalo',
                  'xAODTrigMinBias', 'xAODBTagging', 'xAODTrigRinger', 
@@ -1566,12 +1552,4 @@ EDMLibraries = [ 'TrigSteeringEvent', 'TrigMuonEvent',
                  'xAODTrigBphysDict', 'xAODTrigMissingETDict', 'xAODTrigEgammaDict', 'xAODTrigMuonDict', 'xAODTrigCaloDict',
                  'xAODTrigMinBiasDict', 'xAODBTaggingDict',
                  'xAODHIEventDict'
-                 #'ARA_TrigMonitoringEventTPCnvDict',
-                 #'ARA_TrigCaloEventTPCnv1Dict',
-                 #'ARA_TrigDecisionEventTPCnv1Dict',  #'ARA_TrigInDetEventTPCnv1Dict',
-                 #'ARA_TrigMissingEtEventTPCnv1Dict', 'ARA_TrigMuonEventTPCnv1Dict',
-                 #'ARA_TrigParticleTPCnv1Dict',
-                 #'ARA_TrigSteeringEventTPCnv1Dict',
-                 #'ARA_RecTPCnvDict', 'ARA_tauEventTPCnvDict'
          ]
-

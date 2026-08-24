@@ -11,8 +11,9 @@
 //protect
 #include <SampleHandler/TagList.h>
 
+#include <format>
+#include <stdexcept>
 #include <RootCoreUtils/Assert.h>
-#include <RootCoreUtils/ThrowMsg.h>
 
 //
 // method implementations
@@ -115,7 +116,7 @@ namespace SH
 	 tag != end; ++ tag)
     {
       if (tag->find (separator) != std::string::npos)
-	RCU_THROW_MSG (std::string ("can't use separator ") + separator + " it is part of tag " + *tag);
+        throw std::runtime_error (std::format ("can't use separator {} it is part of tag {}", separator, *tag));
       if (!result.empty())
 	result += separator;
       result += *tag;

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef BYTESTREAMCNVSVCBASE_ROBDATAPROVIDERSVC_H
@@ -47,12 +47,6 @@ public:
    /// initialize the service
    virtual StatusCode initialize() override;
 
-   /// Add ROBFragments to cache for given ROB ids, ROB fragments may be retrieved with DataCollector
-   virtual void addROBData(const EventContext& context, const std::vector<uint32_t>& robIds, const std::string_view callerName="UNKNOWN") override;
-
-   /// Add a given LVL1/LVL2 ROBFragment to cache
-   virtual void setNextEvent(const EventContext& context, const std::vector<OFFLINE_FRAGMENTS_NAMESPACE::ROBFragment>& result) override;
-
    /// Add all ROBFragments of a RawEvent to cache
    virtual void setNextEvent(const EventContext& context, const RawEvent* re) override;
 
@@ -71,9 +65,6 @@ public:
 
    virtual void processCachedROBs(const EventContext& context, 
 				  const std::function< void(const ROBF* )>& fn ) const override;
-
-   virtual bool isEventComplete(const EventContext& /*context*/) const override { return true; }
-   virtual int collectCompleteEventData(const EventContext& /*context*/, const std::string_view /*callerName*/ ) override {  return 0; }
 
 protected:
    /// vector of ROBFragment class
@@ -110,7 +101,6 @@ protected:
 
    /// Filter out empty ROB fragments which are send by the ROS
    Gaudi::Property<bool> m_filterEmptyROB{this, "filterEmptyROB", false, "Filter out empty ROB fragments"};
-   bool m_maskL2EFModuleID = false;    
 
 private:
   static void robmapClear(ROBMAP& toclear);

@@ -17,7 +17,6 @@
 #include <PathResolver/PathResolver.h>
 #include <RootCoreUtils/Assert.h>
 #include <RootCoreUtils/hadd.h>
-#include <RootCoreUtils/ExceptionMsg.h>
 #include <RootCoreUtils/ShellExec.h>
 #include <SampleHandler/MetaObject.h>
 #include <SampleHandler/Sample.h>

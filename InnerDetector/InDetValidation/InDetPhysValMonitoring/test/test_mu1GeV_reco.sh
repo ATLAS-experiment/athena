@@ -5,6 +5,7 @@
 # art-input-nfiles: 10
 # art-cores: 8
 # art-memory: 4096
+# art-pathena-flags-add: --site=GoeGrid
 # art-include: main/Athena
 # art-include: 24.0/Athena
 # art-output: physval*.root

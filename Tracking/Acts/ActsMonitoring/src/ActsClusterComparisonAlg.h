@@ -63,6 +63,18 @@ public:
         StatusCode validateClusters(const EventContext& eventContext, std::unordered_map<const xAOD::PixelCluster*, const xAOD::PixelCluster*>& pixel_cluster_matches, std::unordered_map<const xAOD::StripCluster*, const xAOD::StripCluster*>& strip_cluster_matches) const;
         StatusCode validatePixelSpacepoints(const EventContext& eventContext, std::unordered_map<const xAOD::PixelCluster*, const xAOD::PixelCluster*>& pixel_cluster_matches) const;
 
+        void matchPixelClusters(
+            std::vector<const xAOD::PixelCluster*>& monitored_list,
+            std::vector<const xAOD::PixelCluster*>& reference_list,
+            const std::string& module_id,
+            std::vector<std::pair<const xAOD::PixelCluster*, const xAOD::PixelCluster*>>& pairs) const;
+        
+        void matchStripClusters(
+            std::vector<const xAOD::StripCluster*>& monitored_list,
+            std::vector<const xAOD::StripCluster*>& reference_list,
+            const std::string& module_id,
+            std::vector<std::pair<const xAOD::StripCluster*, const xAOD::StripCluster*>>& pairs) const;        
+
         /// @name Boolean varibale turning on/off spacepoint validation
         /// {@
         Gaudi::Property<bool> m_checkSpacepoints{
@@ -103,6 +115,10 @@ public:
         mutable Gaudi::Accumulators::Counter<> m_strip_unequal;
         mutable Gaudi::Accumulators::Counter<> m_matched_pixel; 
         mutable Gaudi::Accumulators::Counter<> m_matched_strip;
+        mutable Gaudi::Accumulators::Counter<> m_pix_unmatched_mon;
+        mutable Gaudi::Accumulators::Counter<> m_pix_unmatched_ref;
+        mutable Gaudi::Accumulators::Counter<> m_strip_unmatched_mon;
+        mutable Gaudi::Accumulators::Counter<> m_strip_unmatched_ref;
         mutable Gaudi::Accumulators::Counter<> m_pixel_pos_diff_1sig;
         mutable Gaudi::Accumulators::Counter<> m_pixel_pos_diff_0p5sig;
         mutable Gaudi::Accumulators::Counter<> m_pixel_pos_diff_0p25sig;
@@ -128,9 +144,9 @@ public:
         const InDetDD::PixelDetectorManager* m_pixelManager{nullptr};
         const InDetDD::SCT_DetectorManager* m_stripManager{nullptr};
         const SCT_ID* m_stripID {nullptr};
-        ToolHandle<ISiLorentzAngleTool> m_lorentzAngleTool{
-            this, "LorentzAngleTool", "SiLorentzAngleTool",
-            "Tool to retrieve Lorentz angle"};
+        ToolHandle<ISiLorentzAngleTool> m_stripLorentzAngleTool{
+            this, "StripLorentzAngleTool", "SiLorentzAngleTool",
+            "Tool to retrieve Lorentz angle of Strip"};
         ToolHandle<ISiLorentzAngleTool> m_pixelLorentzAngleTool{
             this, "PixelLorentzAngleTool", "",
             "Tool to retreive Lorentz angle of Pixel"};

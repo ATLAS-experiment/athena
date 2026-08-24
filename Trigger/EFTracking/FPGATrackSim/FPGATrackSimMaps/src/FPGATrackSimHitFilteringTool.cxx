@@ -15,7 +15,7 @@
 #include <cmath>
 #include <iostream>
 #include <sstream>
-#include <boost/algorithm/string.hpp>
+#include <CxxUtils/StringUtils.h>
 
 using namespace asg::msgUserCode;
 
@@ -70,12 +70,12 @@ StatusCode FPGATrackSimHitFilteringTool::initialize()
         std::getline(inFile, line);
         if(line.substr(0,1) == "#" || line == "")
           continue;
-        std::vector<std::string> strs, cuts_str;
-        boost::split(strs, line, boost::is_any_of("\t"));
+        std::vector<std::string> strs = CxxUtils::tokenize(line, '\t');
+        std::vector<std::string> cuts_str;
         if(m_useNstrips)
-          boost::split(cuts_str, strs[4], boost::is_any_of(","));
+          cuts_str = CxxUtils::tokenize(strs[4], ',');
         else
-          boost::split(cuts_str, strs[3], boost::is_any_of(","));
+          cuts_str = CxxUtils::tokenize(strs[3], ',');
         std::pair<float,float> cuts;
         cuts.first = std::stof(cuts_str[0]);
         cuts.second = std::stof(cuts_str[1]);

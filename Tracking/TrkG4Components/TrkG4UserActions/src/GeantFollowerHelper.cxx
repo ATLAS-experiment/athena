@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -18,7 +18,6 @@
 #include "TrkSurfaces/PlaneSurface.h"
 // Amg
 #include "GeoPrimitives/GeoPrimitives.h"
-//other
 
 // constructor
 Trk::GeantFollowerHelper::GeantFollowerHelper(const std::string& t, const std::string& n, const IInterface* p) :
@@ -168,15 +167,15 @@ void Trk::GeantFollowerHelper::trackParticle(const G4ThreeVector& pos,
   const Trk::PlaneSurface& destinationSurface = g4Parameters->associatedSurface();
   // extrapolate to the destination surface
   const EventContext& ctx = Gaudi::Hive::currentContext();
-  const Trk::TrackParameters* trkParameters = m_extrapolateDirectly ?
+  auto trkParameters = m_extrapolateDirectly ?
     m_extrapolator->extrapolateDirectly(ctx,
                                         *m_parameterCache,
                                         destinationSurface,
-                                        Trk::alongMomentum,false).release() :
+                                        Trk::alongMomentum,false):
     m_extrapolator->extrapolate(ctx,
                                 *m_parameterCache,
                                 destinationSurface,
-                                Trk::alongMomentum,false).release();
+                                Trk::alongMomentum,false);
   // fill the geant information and the trk information
   m_treeData->m_g4_p[m_treeData->m_g4_steps]       =  mom.mag();
   m_treeData->m_g4_eta[m_treeData->m_g4_steps]     =  mom.eta();
@@ -205,7 +204,7 @@ void Trk::GeantFollowerHelper::trackParticle(const G4ThreeVector& pos,
   // update the parameters if needed/configured
   if (m_extrapolateIncrementally && trkParameters) {
     delete m_parameterCache;
-    m_parameterCache = trkParameters;
+    m_parameterCache = trkParameters.release();
   }
   // delete cache and increment
   delete g4Parameters;

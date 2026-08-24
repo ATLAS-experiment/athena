@@ -12,9 +12,9 @@
 
 #include <RootCoreUtils/Assert.h>
 #include <RootCoreUtils/StringUtil.h>
-#include <RootCoreUtils/ThrowMsg.h>
 #include <SampleHandler/DiskListLocal.h>
 #include <SampleHandler/GridTools.h>
+#include <SampleHandler/MessageCheck.h>
 #include <SampleHandler/MetaFields.h>
 #include <SampleHandler/MetaObject.h>
 #include <SampleHandler/SampleGrid.h>
@@ -27,6 +27,7 @@
 #include <TTree.h>
 #include <fstream>
 #include <memory>
+#include <stdexcept>
 
 //
 // method implementations
@@ -158,7 +159,7 @@ namespace SH
 	if (added)
 	  return;
       }
-      RCU_THROW_MSG ("failed to find any datasets matching pattern: " + pattern);
+      throw std::runtime_error ("failed to find any datasets matching pattern: " + pattern);
     }
   }
 
@@ -229,7 +230,7 @@ namespace SH
         name.append(ds);
     }
     if (!file.eof())
-      RCU_THROW_MSG ("failed to read file: " + dsFile);
+      throw std::runtime_error ("failed to read file: " + dsFile);
 
     auto sample = std::make_unique<SampleGrid> (dsName);
     sample->meta()->setString (MetaFields::gridName, name);
@@ -242,6 +243,8 @@ namespace SH
 		       const std::string& from, const std::string& to,
 		       bool allow_partial)
   {
+    using namespace msgDiscovery;
+
     SampleHandler mysh;
 
     for (auto sample : sh.samples())
@@ -255,7 +258,7 @@ namespace SH
       {
         const std::string ds = grid->meta()->castString (MetaFields::gridName);
         if (ds.empty())
-          RCU_THROW_MSG ("no dataset configured for grid dataset " + ds);
+          throw std::runtime_error ("no dataset configured for grid dataset " + ds);
 
         std::regex pattern (RCU::glob_to_regexp (grid->meta()->castString (MetaFields::gridFilter, MetaFields::gridFilter_default)));
 
@@ -280,12 +283,12 @@ namespace SH
         if (usedFiles.empty())
         {
           if (allow_partial)
-            RCU_WARN_MSG ("dataset " + ds + " not at " + disk + ", skipped");
+            ANA_MSG_WARNING ("dataset " << ds << " not at " << disk << ", skipped");
         } else if (knownFiles.size() != usedFiles.size())
         {
           if (allow_partial)
           {
-            RCU_WARN_MSG ("only incomplete version of dataset " + ds + " at " + disk);
+            ANA_MSG_WARNING ("only incomplete version of dataset " << ds << " at " << disk);
           } else
           {
             usedFiles.clear ();
@@ -324,7 +327,7 @@ namespace SH
     }
     std::unique_ptr<TFile> file (TFile::Open (mysample->fileName(0).c_str()));
     if (!file.get())
-      RCU_THROW_MSG ("could not open file: " + mysample->fileName(0));
+      throw std::runtime_error ("could not open file: " + mysample->fileName(0));
     TObject *object = 0;
     std::regex mypattern (pattern);
     for (TIter iter (file->GetListOfKeys()); (object = iter.Next()); )
@@ -374,7 +377,7 @@ namespace SH
       }
     }
     if (!myfile.eof())
-      RCU_THROW_MSG ("failed to read file: " + file);
+      throw std::runtime_error ("failed to read file: " + file);
     sh.add (std::move (sample));
   }
 }

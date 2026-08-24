@@ -3,7 +3,11 @@ from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 
 
-def L0MuonTGCSimCfg(flags, name="L0Muon.TGCSimulation", **kwargs):
+def L0MuonTGCSimCfg(
+        flags,
+        name="L0Muon.TGCSimulation",
+        configureHistSvc=True,
+        **kwargs):
 
     result = ComponentAccumulator()
 
@@ -46,11 +50,12 @@ def L0MuonTGCSimCfg(flags, name="L0Muon.TGCSimulation", **kwargs):
     )
     alg.MonTool = monTool
 
-    histSvc = CompFactory.THistSvc(
-        Output=["EXPERT DATAFILE='" + name + ".root' OPT='RECREATE'"]
-    )
     result.addEventAlgo(alg)
-    result.addService(histSvc)
+    if configureHistSvc:
+        histSvc = CompFactory.THistSvc(
+            Output=["EXPERT DATAFILE='" + name + ".root' OPT='RECREATE'"]
+        )
+        result.addService(histSvc)
     return result
 
 

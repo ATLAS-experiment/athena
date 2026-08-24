@@ -1,11 +1,10 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-#include <iostream>
-#include <math.h>
-#include <float.h>
 #include "JetSubStructureMomentTools/Validator.h"
+#include "xAODJet/Jet.h"
+#include "xAODJet/JetContainer.h"
 #include <TFile.h>
 #include <TH1.h>
 
@@ -36,12 +35,16 @@ int Validator::execute() const
     return 1;
   }
 	jets = evtStore()->retrieve<const xAOD::JetContainer>(m_InputContainer);
+	if (!jets)[[unlikely]]{
+	  ATH_MSG_ERROR("'jets' pointer is nullptr.");
+	  return 1;
+	}
 	if(jets->empty()) return 0;
 	const xAOD::Jet *jet = jets->at(0); // This assumes the container is sorted
 
 	// Loop over float moments
 	for(unsigned int i=0; i<m_FloatMoments.size(); i++) {
-		TH1 *outputHist;
+		TH1 *outputHist{};
 		if(m_histSvc->exists("/JetSubstructureMoments/" + m_FloatMoments[i])) {
 			m_histSvc->getHist("/JetSubstructureMoments/" + m_FloatMoments[i], outputHist).ignore();
 		}

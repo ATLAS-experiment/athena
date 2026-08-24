@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef jetsubstructureutils_boostedxbbtag_header
@@ -8,15 +8,17 @@
 // @Author: Giordon Stark
 // @Email: gstark@cern.ch
 
-// c++ includes
-#include <set>
-#include <string>
-#include<memory>
-
 // EDM includes
+#include <xAODJet/Jet.h>
 #include <xAODJet/JetContainer.h>
 #include <xAODMuon/MuonContainer.h>
 #include "MuonSelectorTools/MuonSelectionTool.h"
+
+// c++ includes
+#include <set>
+#include <string>
+#include <memory>
+#include <vector>
 
 // forward-declare the ROOT includes
 class TFile;

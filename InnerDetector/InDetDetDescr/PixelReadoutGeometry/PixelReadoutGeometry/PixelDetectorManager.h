@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -183,13 +183,10 @@ namespace InDetDD {
 
 #ifndef GAUDI_NEUTRAL
 #include "AthenaKernel/CLASS_DEF.h"
+#include "AthenaKernel/BaseInfo.h"
 CLASS_DEF(InDetDD::PixelDetectorManager, 18429566, 1)
+SG_BASES( InDetDD::PixelDetectorManager, InDetDD::SiDetectorManager );
 
 #endif
 
 #endif
-
-
-
-
-

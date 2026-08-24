@@ -2,75 +2,45 @@
   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
+#ifndef TRIGNAVIGATION_TYPEREGISTRATION_H
+#define TRIGNAVIGATION_TYPEREGISTRATION_H
+
 #include "TrigNavigation/NavigationInit.h"
 #include "TrigStorageDefinitions/EDM_TypeInfo.h"
+#include <type_traits>
 
-#include <iostream>
 
-template<typename CONTAINER>
-struct register_feature{
-  template<class FEATURE>
+/// Register feature type
+struct registertype {
+  template<typename TypeInfoElement>
   void operator()() const {
-    //std::cout << "\t\t registering feature: " << typeid(FEATURE).name() <<  " -> ";
-    //std::cout << "container: " << typeid(CONTAINER).name() << std::endl;
-    
-    HLT::RegisterFeatureContainerTypes<FEATURE,CONTAINER>::instan();
+    using FEATURES  = typename TypeInfoElement::list_of_features;
+    using CONTAINER = typename TypeInfoElement::container;
+    using AUX       = typename TypeInfoElement::aux;
+
+    // Register feature container
+    FEATURES::for_each( []<typename FEATURE>() {
+      HLT::RegisterFeatureContainerTypes<FEATURE, CONTAINER>::instan();} );
+
+    // Register Aux container if needed
+    if constexpr (!std::is_same_v<AUX, HLT::TypeInformation::no_aux>) {
+      HLT::RegisterAuxType<AUX>::instan();
+    }
   }
 };
 
 
-template<class AUX>
-struct register_aux{
-  static void do_it() {
-    HLT::RegisterAuxType<AUX>::instan();
-  }
-};
-
-
-template<>
-struct register_aux<HLT::TypeInformation::no_aux>{
-  static void do_it() {}
-};
-
-
-
-
-struct registertype{
-  template<class typeinfo_element>
-  void operator()() const {
-    typedef typename typeinfo_element::list_of_features FEATURES;
-    typedef typename typeinfo_element::container CONTAINER;
-    typedef typename typeinfo_element::aux AUX;
-
-    //std::cout << "list of features for contaier " <<  typeid(CONTAINER).name() << " ";
-    //HLT::TypeInformation::for_each_type<FEATURES,HLT::TypeInformation::simple_printer >::do_it();
-    //std::cout<< std::endl;
-
-    FEATURES::for_each(register_feature<CONTAINER>{});
-    register_aux<AUX>::do_it();
-  }
-};
-
-//we want to exectute a function upon loading of a library (i.e. 'static'). since this is not possible
-//per se, we take a detour via a default constructor. we declare a class with a static data member
-//and initizalize that static member. This will call the default ctor of this member type during 
-//which we can register all kinds of types to the navigation. This also uses the looping functionality
-//of the typemap
-
-
+/// Use inline static variable initialization to execute the registration at startup
 template <typename TYPELIST>
-struct a_default_ctor{
-  a_default_ctor() {
-    TYPELIST::for_each(registertype{});
-   }
-};
+inline const bool trignav_register = []() {
+  TYPELIST::for_each(registertype{});
+  return true;
+}();
 
-template <typename TYPELIST>
-struct a_class_that_calls_default_ctor{
-  static const a_default_ctor<TYPELIST> member;
-};
 
-#define REGISTER_PACKAGE_WITH_NAVI(name)\
-template<> a_default_ctor<class_##name::map>\
-const a_class_that_calls_default_ctor<class_##name::map>::member = \
-a_default_ctor<class_##name::map>();
+/// Macro to register a package with the Navigation
+#define REGISTER_PACKAGE_WITH_NAVI(name) \
+  inline const bool trignav_registry_##name = trignav_register<class_##name::map>;
+
+
+#endif // TRIGNAVIGATION_TYPEREGISTRATION_H

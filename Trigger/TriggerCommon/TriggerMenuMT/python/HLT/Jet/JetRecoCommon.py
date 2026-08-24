@@ -60,11 +60,10 @@ def extractRecoDict(chainParts):
     for p in chainParts:
         for k in recoKeys:
             # Look for our key in the chain part
-            if k in p.keys():
+            if k in p:
                 # found the key, check for consistency with other chain parts of this chain
-                if k in recoDict.keys():
-                    if p[k] != recoDict[k]:
-                        raise RuntimeError('Inconsistent reco setting for %s' % k)
+                if k in recoDict and p[k] != recoDict[k]:
+                    raise RuntimeError('Inconsistent reco setting for %s' % k)
                 # copy this entry to the reco dictionary
                 recoDict[k] = p[k]
 
@@ -134,8 +133,7 @@ def jetDefToString(jetDef):
     algstr = f'{str.lower(_jetDef.algorithm[0])}{formatRvalue(_jetDef._radius)}{poststr}'
     constitdef = _jetDef.inputdef
     if constitdef.label == 'HI':
-        if _jetDef.context == 'hi': constitstr = 'ion'
-        else: constitstr = 'ionp'
+        constitstr = "ion" if _jetDef.context == "hi" else "ionp"
     else:
         clusterCalib = 'lcw' if 'LC' in constitdef.label else 'em'
         constittype = 'pf' if 'PFlow' in constitdef.label else 'tc'

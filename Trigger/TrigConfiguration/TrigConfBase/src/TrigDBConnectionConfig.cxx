@@ -11,12 +11,12 @@
 
 #include "TrigConfBase/TrigDBConnectionConfig.h"
 #include <stdexcept>
-#include <boost/regex.hpp>
-#include <boost/algorithm/string.hpp>
+#include <regex>
+#include <algorithm>
+#include <cctype>
 #include <sstream>
 
 using PSKeys = TrigConf::TrigDBConnectionConfig::PSKeys;
-using namespace boost;
 using namespace std;
 
 namespace
@@ -123,7 +123,7 @@ namespace
     // first validade the format
     if(regex_match(str, re_list))
       // iterate over the pairs that are contained in the list
-      for(sregex_iterator it = make_regex_iterator(str, re_pair);
+      for(sregex_iterator it = sregex_iterator(str.begin(), str.end(), re_pair);
           it != sregex_iterator(); ++it)
         // push back a pair with the two captured integers
         ret.push_back(make_pair(stoi((*it)[1], nullptr, 0),
@@ -145,7 +145,7 @@ namespace
                    + e_param_close);
 
     // get to the last occurrence
-    for(sregex_iterator it = make_regex_iterator(str, re_param);
+    for(sregex_iterator it = sregex_iterator(str.begin(), str.end(), re_param);
         it != sregex_iterator(); ++it)
       val = (*it)[1]; // if no match, we never get here and end up returning ""
 
@@ -241,7 +241,8 @@ void TrigConf::TrigDBConnectionConfig::diggestStr(const string& str)
 ////////////////////////////////////////////////////////////////////////////////
 void TrigConf::TrigDBConnectionConfig::setTypeFromStr(const string& typeStr)
 {
-  string low = algorithm::to_lower_copy(typeStr);
+  string low = typeStr;
+  transform(low.begin(), low.end(), low.begin(), [](unsigned char c){ return tolower(c); });
   if(low == "oracle")
     m_type = Oracle;
   else if(low == "mysql")

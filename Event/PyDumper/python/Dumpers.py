@@ -20,7 +20,6 @@ __author__ = "Scott Snyder, Sebastien Binet"
 from contextlib import contextmanager
 import sys
 from io import StringIO
-from functools import cmp_to_key
 from math import \
      log as math_log,\
      sqrt as math_sqrt,\
@@ -72,11 +71,6 @@ if hasattr(ROOT,'TrackParticleTruthCollection'):
     if hasattr(ROOT,'Analysis::MuonContainer'):
         getattr(ROOT, 'ElementLink<Analysis::MuonContainer>')().isValid()
     getattr(ROOT, 'vector<xAOD::CaloClusterBadChannelData_v1>')().__assign__(getattr(ROOT, 'vector<xAOD::CaloClusterBadChannelData_v1>')())
-if hasattr (ROOT, 'TrigInDetParticleTruth'):
-    ROOT.TrigInDetTrackTruth().getFamilyTree()
-    getattr(ROOT, 'ElementLinkVector<TrigInDetTrackCollection>')
-    getattr(ROOT, 'std::vector<Trig3Momentum>')
-    ROOT.TrigSpacePointCounts().droppedSctModules()
 hasattr (ROOT, 'xAOD::TruthParticle_v1')
 ROOT.TClass.GetClass('ElementLink<DataVector<xAOD::TruthParticle_v1> >')
 if hasattr (ROOT, 'xAOD::Muon_v1'):
@@ -3282,24 +3276,6 @@ def dump_DetStatusMap (m, f):
     return
 
 
-def dump_TrigInDetTrackTruth (t, f):
-    fprint (f, t.nrMatches())
-    if t.nrMatches() == 0: return
-    fprint (f, t.bestMatch().barcode(),
-            t.bestSiMatch().barcode(),
-            t.bestTRTMatch().barcode(),
-            t.nrMatches(),
-            t.nrCommonHitsBestSi(),
-            t.nrCommonHitsBestTRT())
-    fprint (f, formatItemUsingLong([(forceInt(t.truthMatch(i).barcode()),
-                                     t.nrCommonHits(i),
-                                     t.nrCommonSiHits(i),
-                                     t.nrCommonTRTHits(i))
-                                    for i in range(t.nrMatches())]))
-    fprint (f, formatItemUsingLong ([(p.first, p.second) for p in t.getFamilyTree()]))
-    return
-
-
 def dump_TrigInDetTrackFitPar (p, f):
     fprint (f, "%f %f %f %f %f %f %f %f %f %f %f %d" %
             (p.a0,
@@ -3380,36 +3356,6 @@ class PyTrigInDetTrack:
         else:
             self.endParam = None
         return
-
-
-def _tmcmp (x, y):
-    xbc = 0
-    if x[0].nrMatches() > 0:
-        xbc = x[0].bestSiMatch().barcode()
-    ybc = 0
-    if y[0].nrMatches() > 0:
-        ybc = y[0].bestSiMatch().barcode()
-    c = xbc - ybc
-    if c < 0:
-        return -1
-    elif c > 0:
-        return 1
-    return cmp (x[1].chi2, y[1].chi2)
-
-
-@nolist
-def dump_TrigInDetTrackTruthMap (m, f):
-    #fprint (f, m.size())
-    #fprint (f, m.tracki(0))
-    tm = [(m.truthi(i), PyTrigInDetTrack(m.tracki(i)))
-          for i in range(m.size()) if m.trackiLink(i).isValid()]
-    tm.sort (key = cmp_to_key (_tmcmp))
-    for (i, (truth, track)) in enumerate(tm):
-        fprint (f, '\n  ', i)
-        dump_TrigInDetTrackTruth (truth, f)
-        fprint (f, '\n    ')
-        dump_TrigInDetTrack (track, f)
-    return
 
 
 # Deal with the possibility that some of the ELs in the target set
@@ -5795,7 +5741,6 @@ dumpspecs = [
     ["HLT::HLTResultMT",                     dump_HLTResultMT],
     ["MissingETSig",                         dump_MissingETSig],
     ["INav4MomAssocs",                       dump_INav4MomAssocs],
-    ["TrigInDetTrackTruthMap",               dump_TrigInDetTrackTruthMap],
     ["MissingETSigObjContainer",             dump_MissingETSigObject],
     ["DetStatusMap",                         dump_DetStatusMap],
     ["AtlasHitsVector<TrackRecord>",         dump_TrackRecord],

@@ -11,7 +11,6 @@
 #include <SampleHandler/Sample.h>
 
 #include <RootCoreUtils/Assert.h>
-#include <RootCoreUtils/PrintMsg.h>
 #include <RootCoreUtils/RootUtils.h>
 #include <SampleHandler/MetaFields.h>
 #include <SampleHandler/MetaNames.h>
@@ -217,7 +216,7 @@ namespace SH
 
     const std::string treeName (meta()->castString (MetaFields::treeName, MetaFields::treeName_default));
     if (treeName.empty())
-      RCU_THROW_MSG ("sample " + name() + " does not have a tree name associated");
+      throw std::runtime_error ("sample " + name() + " does not have a tree name associated");
     std::unique_ptr<TChain> result (new TChain (treeName.c_str()));
     for (std::vector<std::string>::const_iterator file = files.begin(),
 	   end = files.end(); file != end; ++ file)
@@ -297,7 +296,7 @@ namespace SH
     {
       std::unique_ptr<TFile> file (TFile::Open (fileName->c_str(), "READ"));
       if (file.get() == 0)
-	RCU_THROW_MSG ("failed to open file: " + *fileName);
+        throw std::runtime_error ("failed to open file: " + *fileName);
       TTree *tree = dynamic_cast<TTree*>(file->Get (treeName.c_str()));
       if (tree)
 	result += tree->GetEntries();
@@ -437,12 +436,12 @@ namespace SH
     RCU_READ_INVARIANT (this);
     std::vector<std::string> fileList (makeFileList());
     if (fileList.size() > 1)
-      RCU_THROW_MSG ("reading histgrams from samples with multiple files is not (yet) implemented");
+      throw std::runtime_error ("reading histgrams from samples with multiple files is not (yet) implemented");
     if (fileList.size() == 0)
       return nullptr;
     std::unique_ptr<TFile> file (TFile::Open (fileList[0].c_str(), "READ"));
     if (file == nullptr)
-      RCU_THROW_MSG ("could not open file " + fileList[0]);
+      throw std::runtime_error ("could not open file " + fileList[0]);
     //cppcheck-suppress nullPointerRedundantCheck 
     TObject *object = file->Get (name.c_str());
     if (object != nullptr)

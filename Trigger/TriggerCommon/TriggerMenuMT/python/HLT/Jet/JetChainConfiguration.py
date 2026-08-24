@@ -219,7 +219,7 @@ class JetChainConfiguration(ChainConfigurationBase):
     def getJetCaloPreselChainStep(self, flags):
 
         #Find if a a4 or a10 calo jet needs to be used in the pre-selection from the last chain dict
-        assert 'recoAlg' in self.trkpresel_parsed_reco.keys(), "Impossible to find \'recoAlg\' key in last chain dictionary for preselection"
+        assert 'recoAlg' in self.trkpresel_parsed_reco, "Impossible to find \'recoAlg\' key in last chain dictionary for preselection"
         #Want to match now only a4 and a10 in the original reco algorithm. We don't want to use a10sd or a10t in the preselection
         matched_reco = re.match(r'^a\d?\d?', self.trkpresel_parsed_reco['recoAlg'])
         assert matched_reco is not None, "Impossible to get matched reco algorithm for jet trigger preselection The reco expression {0} seems to be impossible to be parsed.".format(self.trkpresel_parsed_reco['recoAlg'])
@@ -243,7 +243,7 @@ class JetChainConfiguration(ChainConfigurationBase):
     def getJetRoITrackJetTagPreselChainStep(self, flags, jetDef):
 
         #Find if a a4 or a10 calo jet needs to be used in the pre-selection from the last chain dict
-        assert 'recoAlg' in self.trkpresel_parsed_reco.keys(), "Impossible to find \'recoAlg\' key in last chain dictionary for preselection"
+        assert 'recoAlg' in self.trkpresel_parsed_reco, "Impossible to find \'recoAlg\' key in last chain dictionary for preselection"
         #Want to match now only a4 and a10 in the original reco algorithm. We don't want to use a10sd or a10t in the preselection
         matched_reco = re.match(
             r'^a\d?\d?', self.trkpresel_parsed_reco['recoAlg'])
@@ -291,10 +291,7 @@ class JetChainConfiguration(ChainConfigurationBase):
         
         if 'calratiovar' in exotdictstring:
             MinjetlogR = 1.2
-            if 'calratiovarrmbib' in exotdictstring:
-               doBIBremoval = int(1)
-            else:
-               doBIBremoval = int(0)
+            doBIBremoval = int(1) if "calratiovarrmbib" in exotdictstring else int(0)
         else:
             log.error('Misconfiguration of trackless exotic jet chain - need calratiovar selection')
             exit(1)
@@ -307,10 +304,7 @@ class JetChainConfiguration(ChainConfigurationBase):
         
         if 'calratio' in exotdictstring  and  ('calratiovar' not in exotdictstring):
             MinjetlogR = 1.2
-            if 'calratiormbib' in exotdictstring:
-               doBIBremoval = int(1)
-            else:
-               doBIBremoval = int(0)
+            doBIBremoval = int(1) if "calratiormbib" in exotdictstring else int(0)
         else:
             log.error('Misconfiguration of trackless exotic jet chain - need calratio selection')
             exit(1)

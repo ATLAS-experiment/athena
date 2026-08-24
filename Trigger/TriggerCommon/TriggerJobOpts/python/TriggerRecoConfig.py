@@ -304,7 +304,7 @@ def Run2BSExtractionCfg( flags ):
         extr.HLTResultKeyIn = ""
         extr.HLTResultKeyOut = ""
 
-    HLTResults = [ f"HLT::HLTResult/{k}" for k in robIDMap.keys() ]
+    HLTResults = [ f"HLT::HLTResult/{k}" for k in robIDMap ]
     acc.addService( CompFactory.ByteStreamAddressProviderSvc( TypeNames = HLTResults) )
 
     from TrigEDMConfig.TriggerEDM import getTPList

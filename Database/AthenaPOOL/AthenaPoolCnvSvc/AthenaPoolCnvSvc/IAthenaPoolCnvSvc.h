@@ -22,10 +22,6 @@ class IPoolSvc;
 class Placement;
 class Token;
 
-namespace pool {
-   class DbType;
-}
-
 
 /** @class IAthenaPoolCnvSvc
  *  @brief This class provides the interface between Athena and PoolSvc.

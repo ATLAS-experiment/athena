@@ -241,14 +241,15 @@ Trk::DenseEnvironmentsAmbiguityScoreProcessorTool::updatePixelSplitInformationFo
      const Trk::ClusterSplitProbabilityContainer::ProbabilityInfo &splitProbCurrent = (pixelCluster
                                                                                       ? splitProbContainer.splitProbability(pixelCluster)
                                                                                       : Trk::ClusterSplitProbabilityContainer::getNoSplitProbability());
-
-     ATH_MSG_DEBUG (  "---- "<< pixelCluster->globalPosition().perp()
+     if (pixelCluster){
+       ATH_MSG_DEBUG (  "---- "<< pixelCluster->globalPosition().perp()
                       <<" Updating split probs 1: " << pixelCluster->identify() << ": Old " <<  splitProbCurrent.splitProbability1() << "  New " << splitProb.splitProbability(2)
                       <<" Probs 2:  Old " << splitProbCurrent.splitProbability2() << "  New " << splitProb.splitProbability(3)
                       << "\n"
                       << " --- pixelCluster: " <<  *pixelCluster
                       << "\n"
                       << " --- trk params: " << *clusterTrkPara.second  );
+    }
   }
   const Trk::ClusterSplitProbabilityContainer::ProbabilityInfo &
      splitProbNew = splitProbContainer.setSplitInformation(pixelCluster, splitProb.splitProbability(2), splitProb.splitProbability(3));

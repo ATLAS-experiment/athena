@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrkVertexFitterValidationUtils/TrkPriVxPurityTool.h"
@@ -185,7 +185,7 @@ namespace Trk {
                                                             if ( inp ->pdg_id() == link_pid  && tmpVertex_loc) {
 // seems like a brem (this can be generator/simulation dependent unfortunately)
 // continue iterating
-                                                                pVertex = tmpVertex_loc;
+                                                                pVertex = std::move(tmpVertex_loc);
                                                             }else {
                                                                 secondary_track = true;
                                                                 out_weights.push_back ( ( *vt )->weight() );

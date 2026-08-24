@@ -45,6 +45,8 @@ namespace G4UA
       /// @param[in] collMap A map of recording envelope volume name to output
       /// TrackRecordCollection name.
       MCTruthSteppingAction(const VolumeCollectionMap_t& collMap,
+                            int secondarySavingLevel,
+                            int subDetVolLevel,
                             IMessageSvc* msgSvc, MSG::Level level);
 
       /// Called at the start of each G4 event. Used to ensure that the
@@ -66,6 +68,12 @@ namespace G4UA
 
       /// Used to delay initialization until the event loop, after geo is ready
       bool m_isInitialized;
+
+      /// The saving level for secondaries
+      int m_secondarySavingLevel;
+
+      /// The level in the G4 volume hierarchy at which we find the sub-detector
+      int m_subDetVolLevel;
 
       /// Map of volume name to output collection name
       VolumeCollectionMap_t m_volumeCollectionMap;

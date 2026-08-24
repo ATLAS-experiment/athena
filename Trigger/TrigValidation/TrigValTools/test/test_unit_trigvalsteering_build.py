@@ -17,7 +17,7 @@ Common.package_prefix_dict['TrigValTools']='unit_'
 
 test = Test.Test()
 
-for test_type in ['athena','athenaHLT','athenaEF','Reco_tf','Trig_reco_tf']:
+for test_type in ['athena','athenaEF','Reco_tf','Trig_reco_tf']:
     ex = ExecStep.ExecStep('Test_'+test_type)
     ex.type = test_type
     if '_tf' not in test_type:
@@ -46,7 +46,6 @@ test.check_steps = CheckSteps.default_check_steps(test)
 regtest_ref_text = """\
 ### athena.log ###
 ### athena.Test_athena.log ###
-### athenaHLT.Test_athenaHLT.log ###
 ### athenaEF.Test_athenaEF.log ###
 ### Reco_tf.Test_Reco_tf.log ###
 ### Trig_reco_tf.Test_Trig_reco_tf.log ###

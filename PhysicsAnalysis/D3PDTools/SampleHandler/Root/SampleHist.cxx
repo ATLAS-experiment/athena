@@ -12,10 +12,10 @@
 
 #include <RootCoreUtils/Assert.h>
 #include <RootCoreUtils/RootUtils.h>
-#include <RootCoreUtils/ThrowMsg.h>
 #include <SampleHandler/SampleLocal.h>
 #include <TFile.h>
 #include <memory>
+#include <stdexcept>
 
 //
 // method implementations
@@ -79,8 +79,7 @@ namespace SH
   doMakeLocal () const
   {
     RCU_READ_INVARIANT (this);
-    RCU_THROW_MSG ("Sample::makeLocal not supported for SampleHist");
-    return {}; // compiler dummy
+    throw std::runtime_error ("Sample::makeLocal not supported for SampleHist");
   }
 
 
@@ -114,7 +113,7 @@ namespace SH
 
     std::unique_ptr<TFile> file (TFile::Open (m_file.c_str(), "READ"));
     if (file.get() == 0)
-      RCU_THROW_MSG ("could not open file " + m_file);
+      throw std::runtime_error ("could not open file " + m_file);
     TObject *object = file->Get (name.c_str());
     if (object != 0)
       RCU::SetDirectory (object, 0);

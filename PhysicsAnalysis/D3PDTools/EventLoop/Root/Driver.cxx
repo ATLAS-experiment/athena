@@ -24,7 +24,6 @@
 #include <EventLoop/SubmitDirManager.h>
 #include <EventLoop/SubmitManager.h>
 #include <RootCoreUtils/RootUtils.h>
-#include <RootCoreUtils/ThrowMsg.h>
 #include <SampleHandler/DiskListLocal.h>
 #include <SampleHandler/Sample.h>
 #include <SampleHandler/SampleHist.h>
@@ -36,6 +35,7 @@
 #include <fstream>
 #include <iostream>
 #include <memory>
+#include <stdexcept>
 #include <signal.h>
 
 using namespace EL::msgEventLoop;
@@ -207,7 +207,7 @@ namespace EL
     {
       std::ifstream file ((location + "/location").c_str());
       if (!std::getline (file, from))
-	RCU_THROW_MSG ("failed to read submit location from " + location + "/location");
+	throw std::runtime_error ("failed to read submit location from " + location + "/location");
     }
     std::string to = location;
     while (!to.empty() && to[to.size()-1] == '/')

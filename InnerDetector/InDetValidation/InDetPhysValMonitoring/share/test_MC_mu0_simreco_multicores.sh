@@ -140,6 +140,10 @@ case $ArtProcess in
 
         echo "art-result: $? dcube_rec_last"
     fi
+
+    echo "Clean up output directory (based on compiler)"
+    clean_up_outdir.sh ${AtlasBuildBranch} ${AtlasProject} ${AtlasBuildStamp}
+
     ;;
   *)
     # Setup for multi-cores
@@ -219,6 +223,8 @@ case $ArtProcess in
 
         idpvm_tf_exit_code=$?
         echo "art-result: $idpvm_tf_exit_code idpvm"
+
+
     fi
     ;;
 esac

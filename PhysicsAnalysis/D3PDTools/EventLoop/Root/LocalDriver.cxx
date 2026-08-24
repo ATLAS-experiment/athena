@@ -19,7 +19,6 @@
 #include <EventLoop/MessageCheck.h>
 #include <RootCoreUtils/Assert.h>
 #include <RootCoreUtils/ShellExec.h>
-#include <RootCoreUtils/ThrowMsg.h>
 #include <mutex>
 #include <thread>
 
@@ -83,7 +82,10 @@ namespace EL
         if (!data.resubmit)
         {
           if (gSystem->MakeDirectory (basedirName.str().c_str()) != 0)
-            RCU_THROW_MSG ("failed to create directory " + basedirName.str());
+          {
+            ANA_MSG_ERROR ("failed to create directory " << basedirName.str());
+            return StatusCode::FAILURE;
+          }
         }
         auto submitSingle = [&] (std::size_t index) noexcept -> StatusCode
         {

@@ -32,7 +32,7 @@ JEMHitsCollection * JEMHitsCollectionCnv::createTransient(const Token* token)
   
   //mlog << MSG::DEBUG << "JEMHitsCollectionCnv::createTransient called" << endmsg;
 
-  static const pool::Guid tlp1_guid( "A9D89195-219E-4F33-9B19-4684639CCA5B" );
+  static const Guid tlp1_guid( "A9D89195-219E-4F33-9B19-4684639CCA5B" );
  
   JEMHitsCollection *p_collection = 0;
   if( compareClassGuid(token,  tlp1_guid ) )     

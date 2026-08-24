@@ -20,7 +20,7 @@
 
 //-------------------------------------------------
 // Other stuff
-#include<iostream>
+#include <iostream>
 
 namespace Trk{
 
@@ -198,6 +198,8 @@ std::unique_ptr<xAOD::Vertex> TrkVKalVrtFitter::fit(const EventContext& ctx,
                                      const std::vector<const TrackParameters*> & perigeeListC,
                                      const Amg::Vector3D & startingPoint) const
 {
+    //Local variable state uses 49312 bytes of stack space
+    //coverity[STACK_USE]
     State state;
     initState (ctx, state);
     setApproximateVertex(startingPoint.x(),
@@ -227,6 +229,8 @@ std::unique_ptr<xAOD::Vertex> TrkVKalVrtFitter::fit(const EventContext& ctx,
                                      const std::vector<const NeutralParameters*> & perigeeListN,
                                      const Amg::Vector3D & startingPoint) const
 {
+    //Local variable state uses 49312 bytes of stack space
+    //coverity[STACK_USE]
     State state;
     initState (ctx, state);
     setApproximateVertex(startingPoint.x(),
@@ -260,6 +264,8 @@ std::unique_ptr<xAOD::Vertex> TrkVKalVrtFitter::fit(const EventContext& ctx,
                                      const std::vector<const TrackParameters*> & perigeeListC,
                                      const xAOD::Vertex & constraint) const
 {
+    //Local variable state uses 49312 bytes of stack space
+    //coverity[STACK_USE]
     State state;
     initState (ctx, state);
     if(msgLvl(MSG::DEBUG)) msg(MSG::DEBUG)<< "A priori vertex constraint is activated in VKalVrt fitter!" << endmsg;
@@ -309,6 +315,8 @@ std::unique_ptr<xAOD::Vertex> TrkVKalVrtFitter::fit(const EventContext& ctx,
                                      const std::vector<const NeutralParameters*> & perigeeListN,
                                      const xAOD::Vertex & constraint) const
 {
+    //Local variable state uses 49312 bytes of stack space
+    //coverity[STACK_USE]
     State state;
     initState (ctx, state);
 
@@ -360,6 +368,8 @@ TrkVKalVrtFitter::fit(const EventContext& ctx,
                       const std::vector<const xAOD::TrackParticle*>& xtpListC,
                       const Amg::Vector3D& startingPoint) const
 {
+  //Local variable state uses 49312 bytes of stack space
+  //coverity[STACK_USE]
   State state;
   initState(ctx, state);
   return std::unique_ptr<xAOD::Vertex>(fit(xtpListC, startingPoint, state));
@@ -406,6 +416,8 @@ std::unique_ptr<xAOD::Vertex> TrkVKalVrtFitter::fit(const EventContext& ctx,
                                      const std::vector<const xAOD::NeutralParticle*> & xtpListN,
                                      const Amg::Vector3D & startingPoint) const
 {
+    //Local variable state uses 49312 bytes of stack space
+    //coverity[STACK_USE]
     State state;
     initState (ctx, state);
     std::unique_ptr<xAOD::Vertex> tmpVertex;
@@ -448,6 +460,8 @@ std::unique_ptr<xAOD::Vertex> TrkVKalVrtFitter::fit(const EventContext& ctx,
                                      const std::vector<const xAOD::TrackParticle*> & xtpListC,
                                      const xAOD::Vertex & constraint) const
 {
+    //Local variable state uses 49312 bytes of stack space
+    //coverity[STACK_USE]
     State state;
     initState (ctx, state);
     return fit (xtpListC, constraint, state);
@@ -503,6 +517,8 @@ std::unique_ptr<xAOD::Vertex> TrkVKalVrtFitter::fit(const EventContext& ctx,
                                      const std::vector<const xAOD::NeutralParticle*> & xtpListN,
                                      const xAOD::Vertex & constraint) const
 {
+    //Local variable state uses 49312 bytes of stack space
+    //coverity[STACK_USE]
     State state;
     initState (ctx, state);
 
@@ -554,6 +570,8 @@ std::unique_ptr<xAOD::Vertex> TrkVKalVrtFitter::fit(const EventContext& ctx,
 std::unique_ptr<xAOD::Vertex> TrkVKalVrtFitter::fit(const EventContext& ctx,
                                      const std::vector<const  TrackParameters*> & perigeeListC) const
 {
+    //Local variable state uses 49312 bytes of stack space
+    //coverity[STACK_USE]
     State state;
     initState (ctx, state);
     Amg::Vector3D VertexIni(0.,0.,0.);
@@ -580,6 +598,8 @@ std::unique_ptr<xAOD::Vertex> TrkVKalVrtFitter::fit(const EventContext& ctx,
                                      const std::vector<const  TrackParameters*>   & perigeeListC,
                                      const std::vector<const  NeutralParameters*> & perigeeListN) const
 {
+    //Local variable state uses 49312 bytes of stack space
+    //coverity[STACK_USE]
     State state;
     initState (ctx, state);
     Amg::Vector3D VertexIni(0.,0.,0.);

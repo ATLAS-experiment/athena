@@ -25,7 +25,11 @@ StatusCode MuonInJetCorrectionTool::applyMuonInJetCorrection
     TLorentzVector Loss;
     Loss.SetVectM(eLoss * (mu_tlv.Vect().Unit()), 0.);
     TLorentzVector j = jet.p4() - Loss + mu_tlv;
-    xAOD::JetFourMom_t new_jet(j.Pt(), jet.eta(), jet.phi(), j.M());
+    xAOD::JetFourMom_t new_jet(
+      j.Pt(),
+      m_changeAngularComponents ? j.Eta() : jet.eta(),
+      m_changeAngularComponents ? j.Phi() : jet.phi(),
+      j.M());
     jet.setJetP4(new_jet);
   }
 

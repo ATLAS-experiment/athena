@@ -19,8 +19,8 @@ PixelGangedClusterAmbiguities_PERS* PixelGangedClusterAmbiguitiesCnv::createPers
 }
     
 InDet::PixelGangedClusterAmbiguities* PixelGangedClusterAmbiguitiesCnv::createTransient(const Token* token) {
-    static const pool::Guid   p1_guid("FE36CE7E-EADF-481F-A55A-26DA0030DFAA");
-//     static const pool::Guid   p0_guid("380D8BB9-B34F-470F-92CC-06C3D60F7BE4");
+    static const Guid   p1_guid("FE36CE7E-EADF-481F-A55A-26DA0030DFAA");
+//     static const Guid   p0_guid("380D8BB9-B34F-470F-92CC-06C3D60F7BE4");
     if( compareClassGuid(token, p1_guid) ) {
         // using unique_ptr ensures deletion of the persistent object
         std::unique_ptr< InDet::PixelGangedClusterAmbiguities_p1 > col_vect( poolReadObject< InDet::PixelGangedClusterAmbiguities_p1 >(token) );

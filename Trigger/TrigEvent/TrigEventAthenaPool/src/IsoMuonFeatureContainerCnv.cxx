@@ -27,10 +27,10 @@ IsoMuonFeatureContainer * IsoMuonFeatureContainerCnv::createTransient(const Toke
   
   mlog << MSG::DEBUG << "IsoMuonFeatureContainerCnv::createTransient called" << endmsg;
   
-  static const pool::Guid p3_guid( "291897DE-5380-424C-AE8F-FFE69DCC8F15" );
-  static const pool::Guid p2_guid( "A9A660B1-DEFD-4B56-A10D-9F41178715BD" );
-  static const pool::Guid tlp1_guid( "B9543660-E776-405D-8DB7-06AD06A24BAB" );
-  static const pool::Guid p0_guid( "3962B221-2A36-4160-AEE5-3BB6BC29BB46" );
+  static const Guid p3_guid( "291897DE-5380-424C-AE8F-FFE69DCC8F15" );
+  static const Guid p2_guid( "A9A660B1-DEFD-4B56-A10D-9F41178715BD" );
+  static const Guid tlp1_guid( "B9543660-E776-405D-8DB7-06AD06A24BAB" );
+  static const Guid p0_guid( "3962B221-2A36-4160-AEE5-3BB6BC29BB46" );
 
   //IsoMuonFeatureContainer *p_collection = 0;
   if( compareClassGuid(token,  p3_guid ) ){

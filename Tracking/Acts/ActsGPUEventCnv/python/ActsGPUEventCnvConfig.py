@@ -8,6 +8,7 @@ from AthDeviceComps.AthDeviceCompsConfig import (
     CopyToolCfg,
     CopiesToolCfg,
 )
+from AthenaConfiguration.Enums import BeamType
 
 # ============================================================
 # Algorithm configurations
@@ -21,6 +22,11 @@ def RDOtoTracccCellConverterAlgCfg(flags,
         raise ValueError("clusterization on device is not compatible "
             "with analog clustering at the moment due to incorrent "
             "ToT values for Pixel hits in the simulation data.")
+
+    if flags.ITk.selectStripIntimeHits and 'timeBins' not in kwargs:
+        coll_25ns = flags.Beam.BunchSpacing<=25 and flags.Beam.Type is BeamType.Collisions
+        kwargs.setdefault("timeBins", "01X" if coll_25ns else "X1X")
+
     acc = ComponentAccumulator()
     kwargs.setdefault("HostMR", acc.popToolsAndMerge(HostMemoryResourceToolCfg(flags)))
     kwargs.setdefault("DeviceMR", acc.popToolsAndMerge(DeviceMemoryResourceToolCfg(flags)))
@@ -43,6 +49,11 @@ def PhaseIIRDOtoTracccCellConverterAlgCfg(flags,
         raise ValueError("clusterization on device is not compatible "
             "with analog clustering at the moment due to incorrent "
             "ToT values for Pixel hits in the simulation data.")
+
+    if flags.ITk.selectStripIntimeHits and 'timeBins' not in kwargs:
+        coll_25ns = flags.Beam.BunchSpacing<=25 and flags.Beam.Type is BeamType.Collisions
+        kwargs.setdefault("timeBins", "01X" if coll_25ns else "X1X")
+
     acc = ComponentAccumulator()
     kwargs.setdefault("HostMR", acc.popToolsAndMerge(HostMemoryResourceToolCfg(flags)))
     kwargs.setdefault("DeviceMR", acc.popToolsAndMerge(DeviceMemoryResourceToolCfg(flags)))

@@ -521,8 +521,14 @@ void CalcPartonHistory::initializeDecorators() {
       case DecoratorGroup::Top:
         InitializeTopDecorators();
         break;
+      case DecoratorGroup::TopFCNC:
+        InitializeTopDecorators(true);
+        break;
       case DecoratorGroup::AntiTop:
         InitializeAntiTopDecorators();
+        break;
+      case DecoratorGroup::AntiTopFCNC:
+        InitializeAntiTopDecorators(true);
         break;
       case DecoratorGroup::FourTop:
         Initialize4TopDecorators();
@@ -596,11 +602,20 @@ StatusCode CalcPartonHistory::runHistorySaver(
       case SpecialFillType::Top:
         FillTopPartonHistory();
         break;
+      case SpecialFillType::TopFCNC:
+        FillTopPartonHistory(true);
+        break;
       case SpecialFillType::AntiTop:
         FillAntiTopPartonHistory();
         break;
+      case SpecialFillType::AntiTopFCNC:
+        FillAntiTopPartonHistory(true);
+        break;
       case SpecialFillType::Ttbar:
         FillTtbarPartonHistory();
+        break;
+      case SpecialFillType::TtbarFCNC:
+        FillTtbarPartonHistory(true);
         break;
       case SpecialFillType::Z:
         FillZPartonHistory(op.parent, op.count, op.mode);

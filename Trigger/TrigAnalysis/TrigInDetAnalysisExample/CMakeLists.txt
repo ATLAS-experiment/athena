@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( TrigInDetAnalysisExample )
@@ -13,7 +13,7 @@ atlas_add_library( TrigInDetAnalysisExampleLib
                    src/*.cxx
                    PUBLIC_HEADERS TrigInDetAnalysisExample
                    INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
-                   LINK_LIBRARIES ${ROOT_LIBRARIES} AthenaBaseComps AthenaMonitoringKernelLib AthenaMonitoringLib AtlasHepMCLib EventInfo GaudiKernel GeneratorObjects  McParticleEvent TrigCompositeUtilsLib TrigDecisionToolLib TrigAnalysisHelpersLib TrigInDetAnalysis TrigInDetAnalysisUtils TrigSteeringEvent VxVertex egammaEvent muonEvent xAODEventInfo xAODTracking
+                   LINK_LIBRARIES ${ROOT_LIBRARIES} AthenaBaseComps AthenaMonitoringKernelLib AthenaMonitoringLib AtlasHepMCLib EventInfo GaudiKernel GeneratorObjects  McParticleEvent TrigCompositeUtilsLib TrigDecisionToolLib TrigAnalysisHelpersLib TrigInDetAnalysis TrigInDetAnalysisUtils TrigSteeringEvent VxVertex xAODEventInfo xAODTracking
                    PRIVATE_LINK_LIBRARIES TrkParameters TrkTrack xAODTruth )
 
 atlas_add_component( TrigInDetAnalysisExample

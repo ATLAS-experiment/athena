@@ -13,7 +13,6 @@
 
 #include <EventLoop/ManagerData.h>
 #include <EventLoop/MessageCheck.h>
-#include <RootCoreUtils/ThrowMsg.h>
 
 //
 // method implementations
@@ -69,7 +68,8 @@ namespace EL
         // ROOT-python dictionaries).
         execvp(argv[0], const_cast<char**>(argv));
         auto myerrno = errno;
-        RCU_THROW_MSG ("failed to execute eventloop_exec_worker: " + std::string (strerror (myerrno)));
+        ANA_MSG_ERROR ("failed to execute eventloop_exec_worker: " << strerror (myerrno));
+        return ::StatusCode::FAILURE;
       }
       break;
 

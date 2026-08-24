@@ -17,6 +17,7 @@
 #include <Acts/Geometry/VolumeAttachmentStrategy.hpp>
 #include <Acts/Geometry/VolumeResizeStrategy.hpp>
 #include <Acts/Utilities/AxisDefinitions.hpp>
+#include <Acts/Utilities/AxisSpec.hpp>
 
 #include "AthenaBaseComps/AthMsgStreamMacros.h"
 #include "ActsGeometryInterfaces/GeometryDefs.h"
@@ -31,7 +32,6 @@ using namespace ActsTrk::detail::GeoVolIds;
 
 using enum Acts::CylinderVolumeBounds::Face;
 using enum Acts::AxisDirection;
-using enum Acts::AxisBoundaryType;
 using AttachmentStrategy = Acts::VolumeAttachmentStrategy;
 using ResizeStrategy = Acts::VolumeResizeStrategy;
 
@@ -137,8 +137,9 @@ BeamPipeBlueprintNodeBuilder::buildBlueprintNode(
 
   beamPipeContainer.addMaterial("BeamPipe_Material", [&](auto& mat) {
     // Place material on the outer cylindrical surface facing outward
-    mat.configureFace(OuterCylinder, {AxisRPhi, Closed, 20},
-                      {AxisZ, Bound, 20});
+    mat.configureFace(OuterCylinder,
+                      Acts::AxisSpec::DeferredEquidistant(20, AxisRPhi),
+                      Acts::AxisSpec::DeferredEquidistant(20, AxisZ));
     // A solid cylinder from r=0 to beamPipeRadius, extending ±3 m in z
     mat.addStaticVolume(beamPipeTransform,
                         std::make_shared<Acts::CylinderVolumeBounds>(

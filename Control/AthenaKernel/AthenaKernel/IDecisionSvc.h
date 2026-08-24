@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // IDecisionSvc.h 
@@ -17,6 +17,8 @@
  * @brief This class defines a protocol to register boolean decisions and 
  * @brief and retrieve them and their combined result 
  */
+
+#include "GaudiKernel/INamedInterface.h"
 
 // STL includes
 #include <vector>

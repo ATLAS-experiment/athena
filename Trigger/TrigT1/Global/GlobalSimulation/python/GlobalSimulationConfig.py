@@ -21,7 +21,7 @@ def GlobalSimulationCfg(flags, algLogLevel=None):
         valueLeastSignificantBit=40,
         valueGainFactor=4,
         GlobalLArCellsKey="GlobalLArCells",
-        caloCells="SeedLessFS",
+        CaloCellsKey="SeedLessFS",
         OutputLevel=algLogLevel
     ))
 

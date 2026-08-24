@@ -95,7 +95,7 @@ class MuonChainConfiguration(ChainConfigurationBase):
     # --------------------
     def getmuFast(self, flags, is_probe_leg=False):
 
-        # useNewFast only if we are in PhaseII and ACTS reco is scheduled
+        # useNewFast only if we are using PhaseII software & ACTS reco
         isPhaseII = flags.Trigger.Offline.SA.Muon.usePhaseIIGeoSetup and flags.Trigger.Offline.SA.Muon.scheduleActsReco
         useNewFast = isPhaseII and 'newFast' in self.chainPart['l2AlgInfo']
 
@@ -177,7 +177,11 @@ class MuonChainConfiguration(ChainConfigurationBase):
 
     # --------------------
     def getFSmuEFSA(self, flags, is_probe_leg=False):
-        return self.getStep(flags, 'FSmuEFSA', [muEFSAFSSequenceGenCfg], is_probe_leg=is_probe_leg)
+        isPhaseII = flags.Trigger.Offline.SA.Muon.usePhaseIIGeoSetup and flags.Trigger.Offline.SA.Muon.scheduleActsReco
+        useBucketFilter = isPhaseII and 'mlbkt' in self.chainPart['addInfo']
+
+        step_name = f'FSmuEFSA{"_mlbkt" if useBucketFilter else ""}'
+        return self.getStep(flags, step_name, [muEFSAFSSequenceGenCfg], useBucketFilter=useBucketFilter)
 
     # --------------------
     def getFSmuEFCB(self, flags, is_probe_leg=False):

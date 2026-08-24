@@ -13,6 +13,8 @@
 #include "XMLCoreParser/XMLCoreNode.h"
 
 #include "CxxUtils/hexdump.h"
+#include "CxxUtils/StringUtils.h"
+#include <format>
 
 TFCSGANXMLParameters::TFCSGANXMLParameters() = default;
 
@@ -49,21 +51,13 @@ void TFCSGANXMLParameters::InitialiseFromXML(
           m_latentDim = nodeParticle->get_int_attrib ("latentDim");
 
           for (const XMLCoreNode* nodeLayer : nodeBin->get_children ("Layer")) {
-            std::vector<double> edges;
-            std::string s = nodeLayer->get_attrib ("r_edges");
-            std::istringstream ss(s);
-            std::string token;
-
-            while (std::getline(ss, token, ',')) {
-              edges.push_back(std::stod(token));
-            }
+            const std::string &rEdgesStr = nodeLayer->get_attrib("r_edges");
+            std::vector<double> edges = CxxUtils::tokenizeDouble(rEdgesStr, ",");
 
             int binsInAlpha = nodeLayer->get_int_attrib ("n_bin_alpha");
             int layer = nodeLayer->get_int_attrib ("id");
 
-            std::string name = "hist_pid_" + std::to_string(pid) +
-              "_region_" + std::to_string(regionId) +
-              "_layer_" + std::to_string(layer);
+            const std::string name = std::format("hist_pid_{}_region_{}_layer_{}", pid, regionId, layer);
             int xBins = static_cast<int>(edges.size()) - 1;
 
             if (xBins <= 0) {
@@ -87,6 +81,7 @@ void TFCSGANXMLParameters::InitialiseFromXML(
                                          TH2D(name.c_str(), name.c_str(), xBins, edges.data(),
                                               binsInAlpha, minAlpha, M_PI));
             itr.first->second.SetDirectory(nullptr);
+            ROOT::Internal::MarkTObjectAsNotOnHeap(itr.first->second);
           }
         }
       }
@@ -109,14 +104,6 @@ void TFCSGANXMLParameters::Print() const {
     int layer = element.first;
     const TH2D* h = &element.second;
 
-    // attempt to debug intermittent ci issues described in
-    // https://its.cern.ch/jira/browse/ATLASSIM-7031
-    if (h->IsZombie()) {
-      ATH_MSG_WARNING("Histogram pointer for layer "
-                      << layer << " is broken. Skipping.");
-      continue;
-    }
-
     int xBinNum = h->GetNbinsX();
     const TAxis* x = h->GetXaxis();
 
@@ -135,32 +122,17 @@ void TFCSGANXMLParameters::Print() const {
 }
 
 
-void TFCSGANXMLParameters::checkHists()
+void TFCSGANXMLParameters::fixHists()
 {
   for (auto &[layer, h] : m_binning) {
-    if (*reinterpret_cast<void*const*>(&h) == nullptr || h.IsZombie() || h.IsOnHeap() || dynamic_cast<const TH2D*>(&h) == nullptr) {
-      ATH_MSG_ERROR("Histogram for layer " << layer << " at " << &h <<
-                    " is broken after read; " <<
-                    "report this on ATLASSIM-7031 with a full log file.");
-
-      std::ostringstream ss;
-      ss << "Node dump:\n";
-      CxxUtils::safeHexdump (ss, (reinterpret_cast<const char*>(&h)) - 8*sizeof(void*), 4096);
-      ss << "Map head:\n";
-      CxxUtils::safeHexdump (ss, &m_binning, sizeof(m_binning));
-      ATH_MSG_INFO(ss.str());
-      ss.str("");
-      ss << "First node:\n";
-      auto it = m_binning.begin();
-      CxxUtils::safeHexdump (ss, (reinterpret_cast<const char*>(&*it)) - 8*sizeof(void*), 4096);
-      ATH_MSG_INFO(ss.str());
-      ATH_MSG_INFO("zombie: " << h.IsZombie() <<
-                   " on heap: " << h.IsOnHeap());
-      ATH_MSG_INFO(" dynamic type: " << typeid(h).name());
-    }
-
-    // Make good and sure that nobody thinks that they own this histogram
-    // as a dynamic allocation.
+    // The histograms we've read in are in an STL container.
+    // Rarely, ROOT can falsely set the kIsOnHeap flag on one of them.
+    // In that case, it will try to delete the histogram when the
+    // file is closed, which will lead to a crash later on.
+    // Make sure kIsOnHeap is clear, and also make sure that nobody else
+    // thinks that they own one of these histograms.
+    // See ATLASSIM-7031.
     h.SetDirectory (nullptr);
+    h.ResetBit (TObject::kIsOnHeap);
   }
 }

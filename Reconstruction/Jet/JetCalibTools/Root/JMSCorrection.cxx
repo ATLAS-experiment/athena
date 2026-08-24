@@ -9,18 +9,16 @@
  *
  */
 
+#include "JetCalibTools/CalibrationMethods/JMSCorrection.h"
+#include "JetCalibTools/JetCalibUtils.h"
+#include "JetCalibTools/RootHelpers.h"
+#include "PathResolver/PathResolver.h"
 #include <TAxis.h>
 #include <TEnv.h>
 #include <TFile.h>
 #include <TKey.h>
 #include <cmath>
 #include <utility>
-
-#include "JetCalibTools/CalibrationMethods/JMSCorrection.h"
-#include "JetCalibTools/JetCalibUtils.h"
-#include "JetCalibTools/RootHelpers.h"
-#include "PathResolver/PathResolver.h"
-
 
 JMSCorrection::JMSCorrection()
   : JetCalibrationStep::JetCalibrationStep(),
@@ -178,7 +176,7 @@ StatusCode JMSCorrection::initialize() {
     else{Combination_File.Insert(14,m_calibAreaTag);}
     TString file_combination_Name(PathResolverFindCalibFile(Combination_File.Data()));
     std::unique_ptr<TFile> inputFile_combination(TFile::Open(file_combination_Name));
-    if (!inputFile_combination && !m_onlyCombination){
+    if (!inputFile_combination){
       ATH_MSG_FATAL("Cannot open Mass Combination file " << file_combination_Name);
       return StatusCode::FAILURE;
     }
@@ -615,7 +613,10 @@ StatusCode JMSCorrection::calibrate(xAOD::Jet& jet, JetEventInfo&) const {
 	  return StatusCode::FAILURE;
 	  break;
 	}
-
+      if (massFactor == 0.){
+        ATH_MSG_WARNING("Divisor 'massFactor' is zero; resetting to 1.");
+        massFactor = 1.;
+      }
       mass_corr = jetStartP4.mass() / massFactor;
       if (mass_corr > jetStartP4.e()) {
         mass_corr = jetStartP4.mass();
@@ -999,10 +1000,11 @@ StatusCode JMSCorrection::calibrate(xAOD::Jet& jet, JetEventInfo&) const {
           }
           
 	// Watch for division by zero
-	if(m_useCorrelatedWeights && (relCalo*relCalo + relTA*relTA - 2 * rho* relCalo * relTA == 0)){
+	if(relCalo*relCalo + relTA*relTA - 2 * rho* relCalo * relTA == 0.){
 	  ATH_MSG_ERROR("Encountered division by zero when calculating mass combination weight using correlated weights");
 	  return StatusCode::FAILURE;
 	}
+	
 	const double Weight = ( relTA*relTA - rho *relCalo*relTA ) / ( relCalo*relCalo + relTA*relTA - 2 * rho* relCalo * relTA );
 
 	// Zero should be only returned by resolution functions if jet mass is negative

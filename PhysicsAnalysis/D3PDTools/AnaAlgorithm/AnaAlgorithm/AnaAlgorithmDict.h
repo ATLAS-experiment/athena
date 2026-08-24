@@ -7,7 +7,7 @@
 
 #include "AnaAlgorithm/AnaAlgorithm.h"
 #include "AnaAlgorithm/AnaReentrantAlgorithm.h"
-#ifdef ROOTCORE
+#ifdef XAOD_STANDALONE
 #include "AnaAlgorithm/AnaAlgorithmConfig.h"
 #include "AnaAlgorithm/AnaAlgorithmWrapper.h"
 #include "AnaAlgorithm/AnaReentrantAlgorithmConfig.h"

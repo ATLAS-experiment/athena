@@ -372,13 +372,13 @@ SCTErrMonAlg::fillByteStreamErrors(const EventContext& ctx) const {
       /// Fill /SCT/DetectorCoverage/SCT_Coverage*VsLbs ///
       auto lumiBlockAcc{Monitored::Scalar<int>("lumiBlock", pEvent->lumiBlock())};
       auto detectorCoverageAcc{Monitored::Scalar<double>("detectorCoverage"+coverageVarNames[iProblem], detector_coverage)};
-      fill("SCTErrMonitor", lumiBlockAcc, detectorCoverageAcc);
+      fill(histoName, lumiBlockAcc, detectorCoverageAcc);
 
       if (iProblem==summary) {
 	auto detectorCoverageR4PAcc{Monitored::Scalar<double>("detectorCoverage"+coverageVarNames[iProblem]+"InR4P", detector_coverage)};
 	bool atlasReady = m_atlasReadyFilter->accept(ctx);
 	if(atlasReady) {
-	  fill("SCTErrMonitor", lumiBlockAcc, detectorCoverageR4PAcc);
+	  fill(histoName, lumiBlockAcc, detectorCoverageR4PAcc);
 	}
       }
     }
@@ -387,7 +387,7 @@ SCTErrMonAlg::fillByteStreamErrors(const EventContext& ctx) const {
     // Modules affected by PS Tirp
     auto lumiBlockAcc{Monitored::Scalar<int>("lumiBlock", pEvent->lumiBlock())};
     auto psTripModulesAcc{Monitored::Scalar<int>("psTripModules", psTripModules)};
-    fill("SCTErrMonitor", lumiBlockAcc, psTripModulesAcc);
+    fill(histoName, lumiBlockAcc, psTripModulesAcc);
 
   }
 

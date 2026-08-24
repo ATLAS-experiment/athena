@@ -21,9 +21,6 @@
 #include <memory>
 #include "GaudiKernel/SystemOfUnits.h"
 
-#include "TrigInDetEvent/TrigInDetTrack.h"
-#include "TrigInDetEvent/TrigInDetTrackCollection.h"
-
 #include "TrkTrack/Track.h"
 #include "TrkTrack/TrackInfo.h"
 #include "TrkTrack/TrackStateOnSurface.h"

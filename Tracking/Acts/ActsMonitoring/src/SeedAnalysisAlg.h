@@ -27,6 +27,7 @@
 #include "ActsToolInterfaces/ITrackParamsEstimationTool.h"
 #include "ActsGeometryInterfaces/ITrackingGeometrySvc.h"
 #include "ActsGeometryInterfaces/IGeometryRealmConvTool.h"
+#include "ActsEvent/ContextUtility.h"
 
 #include "xAODEventInfo/EventInfo.h"
 
@@ -79,6 +80,10 @@ namespace ActsTrk {
 
     Gaudi::Property< bool > m_useTopSp {this, "useTopSp", false, "Use top SP. By default, use bottom SP."};
     Gaudi::Property< bool > m_usePixel {this, "UsePixel", true, ""};
+
+    /** @brief Auxiliary class to access the calibration context.
+        TODO: Could also be used for magnetic field and geometry? */
+    ContextUtility m_ctxProvider{this};
   };
 
 }

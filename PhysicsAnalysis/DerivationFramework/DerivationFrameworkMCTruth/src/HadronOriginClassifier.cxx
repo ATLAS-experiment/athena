@@ -502,7 +502,7 @@ namespace DerivationFramework{
           else if(isDirectlyFromTop(part)){
             partonsOrigin[ part ] = c_from_top;
           }
-          else if((IsHerwigPP()&&IsSherpa())&&isDirectlyFSR(part)){
+          else if((IsHerwigPP()||IsSherpa())&&isDirectlyFSR(part)){
             partonsOrigin[ part ] = c_FSR;
           }
           else if(IsPythia8()&&isDirectlyFSRPythia8(part)){
