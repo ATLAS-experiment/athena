@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "ReadTriggerDecision.h"
@@ -42,7 +42,8 @@ StatusCode ReadTriggerDecision::finalize() {
     ATH_MSG_INFO("==========================");
     ATH_MSG_INFO("SUMMARY OF TRIGGER COUNTS:");
     ATH_MSG_INFO("==========================");
-    ATH_MSG_INFO("Trigger with name " << m_triggerName << " fired for " << std::to_string(m_triggerCounter) << " events");
+    ATH_MSG_INFO("Trigger with name {} fired for {} events",
+                 m_triggerName, m_triggerCounter.load());
 
     return StatusCode::SUCCESS;
 }
