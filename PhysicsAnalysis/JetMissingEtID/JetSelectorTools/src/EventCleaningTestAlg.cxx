@@ -84,9 +84,11 @@ StatusCode EventCleaningTestAlg::execute(const EventContext& ctx)
     eventDecor(*eventInfo) = result;
   }
 
-  // Decorate Dijet events with the Hard-Scatter Softer Than Pile-up (HSTP) filter decision.
-  // see: https://atlas-jetetmiss.docs.cern.ch/users/QCD-samples/#hard-scatter-softer-than-pileup-hstp-filter 
+
   if (m_doHSTPFiltering){
+    // Decorate Dijet events with the Hard-Scatter Softer Than Pile-up (HSTP) filter decision.
+    // see: https://atlas-jetetmiss.docs.cern.ch/users/QCD-samples/#hard-scatter-softer-than-pileup-hstp-filter 
+    
     const xAOD::JetContainer* tjets   = nullptr;
     const xAOD::JetContainer* tPUjets = nullptr;
     

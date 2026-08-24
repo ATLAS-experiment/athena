@@ -152,7 +152,109 @@ cmake --build $TestArea
 
 Test_HSTP /eos/user/m/mbsmith/QT_AODs/Individual_Files/DAOD_JETM2_MC23a.36803052._000487.pool.root.1 /afs/cern.ch/user/m/mbsmith/HSTP_athena/run/DAOD_JETM1.art.pool.root
 
-Derivation_tf.py --inputAODFile /eos/user/m/mbsmith/QT_AODs/Individual_Files/MC23e_Dijet_AOD.46808784._000193.pool.root.1 --outputDAODFile art.pool.root --formats JETM1 --maxEvents 1000 > Out.txt 2>&1 
+Derivation_tf.py --inputAODFile /eos/user/m/mbsmith/QT_AODs/Individual_Files/MC23e_Dijet_AOD.46808784._000193.pool.root.1 --outputDAODFile Dijet.art.pool.root --formats JETM2 --maxEvents 10 > Out.txt 2>&1 
+
+Derivation_tf.py --inputAODFile /eos/user/m/mbsmith/QT_AODs/Individual_Files/MinBias_AOD.28353412._002336.pool.root.1 --outputDAODFile minBias.art.pool.root --formats JETM2 --maxEvents 10 > OutMinBias.txt 2>&1 
 
 
+/cvmfs/atlas.cern.ch/repo/sw/database/GroupData/dev/PMGTools/PMGxsecDB_mc23.txt
 */
+
+
+
+
+
+// typedef enum { LocalSearch, RecursiveSearch } SearchType;
+// typedef enum { PR_regular_file, PR_directory } PR_file_type;
+
+// std::string PathResolver::find_calib_file(const std::string& logical_file_name){
+//   checkForDev(asgMsg(), logical_file_name);
+
+//   if (logical_file_name.starts_with("root://")) {
+//     //xrootd access .. try to open file ...
+//     std::unique_ptr<TFile> fTmp{TFile::Open(logical_file_name.c_str())};
+//     if (!fTmp || fTmp->IsZombie()) {
+//       msg(MSG::WARNING) << "Could not open " << logical_file_name << endmsg;
+//       return {};
+//     }
+//     return logical_file_name;
+//   }
+
+//   std::string path_list;
+//   System::getEnv( "CALIBPATH", path_list );
+
+//   std::string out( "" );
+//   bf::path lfn( logical_file_name );
+//   PR_find( lfn, path_list, PR_regular_file, LocalSearch, out );
+
+//   if (out.empty()) {
+//     msg(MSG::WARNING) << "Could not locate " << logical_file_name << endmsg;
+//   }
+//   return out;
+// }
+
+
+//  static bool PR_find( const bf::path& file, const string& search_list, PR_file_type file_type,
+//                       PathResolver::SearchType search_type, string& result ) {
+
+//    bool found( false );
+
+//    // look for file as specified first
+
+//    try {
+//      if ( ( file_type == PR_regular_file && is_regular_file( file ) ) ||
+//           ( file_type == PR_directory && is_directory( file ) ) ) {
+//        result = bf::system_complete( file ).string();
+//        return true;
+//      }
+//    } catch ( const bf::filesystem_error& /*err*/ ) {}
+
+//    // assume that "." is always part of the search path, so check locally first
+
+//    try {
+//      bf::path local = bf::initial_path() / file;
+//      if ( ( file_type == PR_regular_file && is_regular_file( local ) ) ||
+//           ( file_type == PR_directory && is_directory( local ) ) ) {
+//        result = bf::system_complete( file ).string();
+//       return true;
+//     }
+//   } catch ( const bf::filesystem_error& /*err*/ ) {}
+
+//   // iterate through search list
+//   vector<string> spv;
+//   split( spv, search_list, boost::is_any_of( path_separator ), boost::token_compress_on );
+//   for ( const auto& itr : spv ) {
+
+//     bf::path fp = itr / file;
+
+//     try {
+//       if ( ( file_type == PR_regular_file && is_regular_file( fp ) ) ||
+//            ( file_type == PR_directory && is_directory( fp ) ) ) {
+//         result = bf::system_complete( fp ).string();
+//         return true;
+//       }
+//     } catch ( const bf::filesystem_error& /*err*/ ) {}
+
+//     // if recursive searching requested, drill down
+//     if ( search_type == PathResolver::RecursiveSearch && is_directory( bf::path( itr ) ) ) {
+
+//       bf::recursive_directory_iterator end_itr;
+//       try {
+//         for ( bf::recursive_directory_iterator ritr( itr ); ritr != end_itr; ++ritr ) {
+
+//           // skip if not a directory
+//           if ( !is_directory( bf::path( *ritr ) ) ) { continue; }
+
+//           bf::path fp2 = bf::path( *ritr ) / file;
+//           if ( ( file_type == PR_regular_file && is_regular_file( fp2 ) ) ||
+//                ( file_type == PR_directory && is_directory( fp2 ) ) ) {
+//             result = bf::system_complete( fp2 ).string();
+//             return true;
+//           }
+//         }
+//       } catch ( const bf::filesystem_error& /*err*/ ) {}
+//     }
+//   }
+
+//   return found;
+// }
