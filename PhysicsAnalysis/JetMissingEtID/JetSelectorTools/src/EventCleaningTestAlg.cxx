@@ -84,11 +84,14 @@ StatusCode EventCleaningTestAlg::execute(const EventContext& ctx)
     eventDecor(*eventInfo) = result;
   }
 
-  // Decorate event with HSTP
+  // Decorate Dijet events with the Hard-Scatter Softer Than Pile-up (HSTP) filter decision.
+  // see: https://atlas-jetetmiss.docs.cern.ch/users/QCD-samples/#hard-scatter-softer-than-pileup-hstp-filter 
   if (m_doHSTPFiltering){
     const xAOD::JetContainer* tjets   = nullptr;
     const xAOD::JetContainer* tPUjets = nullptr;
     
+    // Get truth jet container. 
+    // Prioritize AntiKt4TruthDressedWZJets thn AntiKt4TruthWZJets then AntiKt4TruthJets if the former are not avialable
     SG::ReadHandle<xAOD::JetContainer> truthJets{m_truthJetKey, ctx};
     if (truthJets.isValid())  tjets = truthJets.cptr();
     else {
@@ -99,12 +102,13 @@ StatusCode EventCleaningTestAlg::execute(const EventContext& ctx)
         if (truthJetsDefault.isValid())  tjets = truthJetsDefault.cptr();
       }
     }
-
     if (!tjets) {
       ATH_MSG_FATAL("Failed to retrieve truth jet collection");
       return StatusCode::FAILURE;
     }
 
+    
+    // Get Pileup truth jet container. 
     SG::ReadHandle<xAOD::JetContainer> truthPUJets{ m_truthPUJetKey, ctx};
     if (truthPUJets.isValid()) {
       tPUjets = truthPUJets.cptr();
@@ -113,8 +117,11 @@ StatusCode EventCleaningTestAlg::execute(const EventContext& ctx)
       return StatusCode::FAILURE;
     }
 
+    // Checks if any PU jet has a larger pT then the largest HS jet.
+    // In the rare case of no HS truth jets in the event, assume it is close to the jetThreshold (default 5000 MeV)
     const bool hstpResult = m_ecTool->passHSTPFilter(tjets, tPUjets, 5000);
 
+    // Write decoration
     SG::WriteDecorHandle<xAOD::EventInfo, char> eventDecor{m_evtInfoDecorHSTP, ctx};
     if (!eventDecor.isValid()){
        ATH_MSG_FATAL("Failed to retrieve the event info "<<m_evtKey.fullKey());

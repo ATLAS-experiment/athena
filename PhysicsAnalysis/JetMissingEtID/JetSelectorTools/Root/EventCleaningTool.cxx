@@ -141,10 +141,21 @@ int EventCleaningTool::keepJet(const xAOD::Jet& jet) const
 
 bool EventCleaningTool::passHSTPFilter(const xAOD::JetContainer* jets, const xAOD::JetContainer* puJets, const double jetThreshold) const
 {
-  // Assume unsorted jetContainer, find leading jet
+  /*
+    QCD multijet (dijet) simulations face an ambiguity between HS and pileup jets, 
+    since both originate from the same physics process. Combined with JZ sample slicing, 
+    large in-time pileup in low-pT slices can cause events to leak into higher kinematic regimes, 
+    leading to unphysical normalization in the detector-level jet spectrum. 
+    The Hard-Scatter Softer Than Pile-up filter requires the HS jet to have higher pT than all pileup jets, 
+    restoring a physical reconstructed jet pT spectrum.
+    See: https://atlas-jetetmiss.docs.cern.ch/users/QCD-samples/#hard-scatter-softer-than-pileup-hstp-filter
+  */
+
+
   // In the rare case of no HS truth jets in the event, assume it is close to the jetThreshold (default 5000 MeV)
   double maxHsJetPt = jetThreshold; 
 
+  // Assume unsorted jetContainer, find leading jet
   for (const auto thisJet : *jets){
     if (thisJet->pt() > maxHsJetPt){
       maxHsJetPt = thisJet->pt();

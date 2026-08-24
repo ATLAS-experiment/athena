@@ -100,7 +100,16 @@ def AddJvtDecorationAlgCfg(ConfigFlags, algName = "JvtPassDecorAlg", jetContaine
 
 
 def DecorateHSTP(ConfigFlags):
-    """Configure the HSTP skimming tool for JZ samples."""
+    """ Determin if the process is Dijet and would therefore need HSTP filtering.
+    
+        QCD multijet (dijet) simulations face an ambiguity between HS and pileup jets, 
+        since both originate from the same physics process. Combined with JZ sample slicing, 
+        large in-time pileup in low-pT slices can cause events to leak into higher kinematic regimes, 
+        leading to unphysical normalization in the detector-level jet spectrum. 
+        The Hard-Scatter Softer Than Pile-up filter requires the HS jet to have higher pT than all pileup jets, 
+        restoring a physical reconstructed jet pT spectrum.
+        See: https://atlas-jetetmiss.docs.cern.ch/users/QCD-samples/#hard-scatter-softer-than-pileup-hstp-filter
+    """
 
     from AthenaConfiguration.AutoConfigFlags import GetFileMD
     from PathResolver import PathResolver
@@ -270,6 +279,8 @@ def AddEventCleanFlagsCfg(ConfigFlags, workingPoints = ['Loose', 'Tight', 'Loose
 
         ## for passHSTPFilter
         if 'HSTP' in wp:
+            # Decorates the decision of the Hard-Scatter Softer Than Pile-up filter, relevent ONLY for Dijet samples.
+            # see: https://atlas-jetetmiss.docs.cern.ch/users/QCD-samples/#hard-scatter-softer-than-pileup-hstp-filter
             # We are forced to instatiate a jetcleaning tool to make an eventcleaning tool. This does not get used.
             jetCleaningTool = acc.popToolsAndMerge(JetCleaningToolCfg(
                     ConfigFlags, 'JetCleaningTool_'+cleaningLevel,
