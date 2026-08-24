@@ -486,7 +486,7 @@ InDetVKalVxInJetTool::getVrtSecMulti(workVectorArrxAOD* xAODwrk,
 	if(xAODwrk) vProb = refitVertex(newV, xAODwrk->listJetTracks, *state, true);
 	if(vProb>probVrtMergeLimit){
 	  onetVrt.Good=false;
-	  ntrVrt=newV;
+	  ntrVrt=std::move(newV);
 	  ntrVrt.detachedTrack=-1;
 	}
 	break;
@@ -532,7 +532,7 @@ InDetVKalVxInJetTool::getVrtSecMulti(workVectorArrxAOD* xAODwrk,
 	  if(xAODwrk) vProb = refitVertex( newV, xAODwrk->listJetTracks, *state, true);
 	  if(vProb>probVrtMergeLimit){
 	    onetVrt.Good = false;
-	    ntrVrt = newV;
+	    ntrVrt = std::move(newV);
 	  }
 	}
 

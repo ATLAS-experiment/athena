@@ -31,6 +31,9 @@
 #include "LumiBlockData/LuminosityCondData.h"
 #include "LumiBlockData/LBDurationCondData.h"
 #include "LumiBlockData/TrigLiveFractionCondData.h"
+#include "CxxUtils/transparent_string_hash.h"
+#include <string_view>
+
 
 namespace Trig {
 class TrigDecisionTool;
@@ -242,7 +245,7 @@ public:
      * @param name string name of the desired tool
      * @return reference to the desired monitoring tool
      */
-    const ToolHandle<GenericMonitoringTool>& getGroup( const std::string& name ) const;
+    const ToolHandle<GenericMonitoringTool>& getGroup( std::string_view name ) const;
 
 
     /** 
@@ -369,7 +372,7 @@ protected:
 private:
     typedef std::vector<std::reference_wrapper<Monitored::IMonitoredVariable>> MonVarVec_t;
     std::string m_name;
-    std::unordered_map<std::string, size_t> m_toolLookupMap;
+    std::unordered_map<std::string, size_t, CxxUtils::TransparentStringHash, std::equal_to<>> m_toolLookupMap;
 
     const ToolHandle<GenericMonitoringTool> m_dummy;
 
