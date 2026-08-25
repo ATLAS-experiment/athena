@@ -25,11 +25,10 @@ namespace
 {
   struct V0FitterTrack final
   {
-    V0FitterTrack() : originalPerigee(nullptr), chi2(-1.) {}
-    const Trk::TrackParameters * originalPerigee;
-    double chi2;
-    AmgVector(5) TrkPar;
-    AmgSymMatrix(5) Wi_mat;
+    const Trk::TrackParameters * originalPerigee{};
+    double chi2{-1.};
+    AmgVector(5) TrkPar{0,0,0,0,0};
+    AmgSymMatrix(5) Wi_mat{};
   };
 }
 
