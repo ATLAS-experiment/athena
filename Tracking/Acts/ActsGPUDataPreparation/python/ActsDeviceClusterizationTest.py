@@ -6,11 +6,10 @@
 #   RDO -> traccc cells -> traccc measurements -> xAOD clusters
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
-from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaCommon.Constants import DEBUG
 
 from ActsGPUDataPreparation.ActsGPUDataPreparationConfig import DeviceClusterizationAlgCfg
-from ActsGPUEventCnv.ActsGPUEventCnvConfig import RDOtoTracccCellConverterAlgCfg, TracccMeasurementConverterAlgCfg
+from ActsGPUEventCnv.ActsGPUEventCnvConfig import TracccMeasurementConverterAlgCfg
 from ActsGPUGeometry.ActsGPUGeometryConfig import JSONDeviceDetectorDescriptionProviderSvcCfg
 
 def GPUClusterizationCfg(flags) -> ComponentAccumulator:
@@ -62,7 +61,7 @@ def GPUClusterizationCfg(flags) -> ComponentAccumulator:
     from SiLorentzAngleTool.ITkStripLorentzAngleConfig import ITkStripLorentzAngleToolCfg
     from AthenaConfiguration.ComponentFactory import CompFactory
     acc.addEventAlgo(CompFactory.ActsTrk.ActsClusterComparisonAlg(
-        "GPUTrackingValidationAlg",
+        "GPU_ActsClusterComparisonAlg",
         checkSpacepoints=False,
         monitoredSpacepointsKey="ITkTracccPixelSpacepoints",
         referenceSpacepointsKey="ITkPixelSpacePoints",
@@ -84,7 +83,6 @@ if __name__ == "__main__":
 
     flags = initConfigFlags()
     
-    from AthenaConfiguration.TestDefaults import defaultTestFiles
     flags.Input.Files = defaultTestFiles.RDO_RUN4
     flags.Exec.MaxEvents = 1
 
@@ -103,9 +101,6 @@ if __name__ == "__main__":
     acc = MainServicesCfg(flags)
     from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
     acc.merge(PoolReadCfg(flags))
-
-    msg_svc = acc.getService('MessageSvc')
-    msg_svc.Format = "%t % F%{:d}W%C%7W%R%T %0W%M".format(flags.Common.MsgSourceLength)
 
     # Needed for PixelID and SCT_ID
     from PixelGeoModelXml.ITkPixelGeoModelConfig import ITkPixelReadoutGeometryCfg
