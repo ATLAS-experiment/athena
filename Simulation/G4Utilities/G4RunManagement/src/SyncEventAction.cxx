@@ -4,17 +4,26 @@
 
 #include "SyncEventAction.h"
 
+#include "G4RunManagement/AtlasG4SyncEventUserInfo.h"
+
 #include "G4RunManager.hh"
 #include "G4Event.hh"
-#include "G4EventManager.hh"
 
 namespace G4UA
 {
 
 void SyncEventAction::BeginOfEventAction(const G4Event* event)
 {
-  if(!event->GetUserInformation()) {
+  const auto* eventInfo = dynamic_cast<const AtlasG4SyncEventUserInfo*>(
+    event->GetUserInformation());
+  if(!eventInfo) {
+    // No sync event user info identifies a shutdown sentinel.
     G4RunManager::GetRunManager()->AbortRun();
+  }
+  else if(eventInfo->EventPreparationFailed()) {
+    // Event preparation failed. Abort only this event so that the worker can
+    // continue processing subsequent Athena events.
+    G4RunManager::GetRunManager()->AbortEvent();
   }
 }
 
