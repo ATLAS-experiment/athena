@@ -276,7 +276,7 @@ StatusCode TrackRNN::classifyTracks(std::vector<xAOD::TauTrack*>& vTracks,
   SeqNodeMap seqInput;
   NodeMap nodeInput;
   
-  seqInput["input_1"] = valueMap; 
+  seqInput["input_1"] = std::move(valueMap); 
 
   VectorMap mValue = m_RNNClassifier->scan(nodeInput, seqInput, "time_distributed_2");
 
