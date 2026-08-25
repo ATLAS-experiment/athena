@@ -22,6 +22,15 @@ StatusCode
       // Retrieve all needed components.
       ATH_CHECK(m_metadataStore.retrieve());
 
+      // Compile the configured patterns once, so that the event loop doesn't
+      // have to do it for every object of every event.
+      m_ignoreKeyRegexes.reserve(m_ignoreKeys.size());
+      for (const std::string& pattern : m_ignoreKeys.value())
+        m_ignoreKeyRegexes.emplace_back(pattern, std::regex::optimize);
+      m_typeNameRegexes.reserve(m_typeNames.size());
+      for (const std::string& pattern : m_typeNames.value())
+        m_typeNameRegexes.emplace_back(pattern, std::regex::optimize);
+
       if (m_dataHeaderKey.empty()) {
         // find out name of stream we are working for
         const Gaudi::Algorithm *parentAlg =
@@ -76,8 +85,8 @@ StatusCode
         // Skip objects that were set up to be ignored.
         {
           bool ignoreObject = false;
-          for (const std::string& ignorePattern : m_ignoreKeys.value()) {
-            if (std::regex_match(key, std::regex(ignorePattern))) {
+          for (const std::regex& ignorePattern : m_ignoreKeyRegexes) {
+            if (std::regex_match(key, ignorePattern)) {
               ignoreObject = true;
               break;
             }
@@ -102,8 +111,8 @@ StatusCode
         // should be stored.
         {
           bool ignoreObject = true;
-          for (const std::string& typePattern : m_typeNames.value()) {
-            if (std::regex_match(typeName, std::regex(typePattern))) {
+          for (const std::regex& typePattern : m_typeNameRegexes) {
+            if (std::regex_match(typeName, typePattern)) {
               ignoreObject = false;
               break;
             }
