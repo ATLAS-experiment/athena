@@ -19,7 +19,6 @@
 #include "TTree.h"
 #include "TROOT.h"
 
-#include <iostream>
 #include <map>
 #include <vector>
 #include <deque>
@@ -278,7 +277,7 @@ namespace VKalVrtAthena {
       WrkVrt backup = vertex;
       StatusCode sc = refitVertexWithSuggestion( ctx, vertex, vertex.vertex );
       if( sc.isFailure() ) {
-        vertex = backup;
+        vertex = std::move(backup);
         return 0;
       }
     }
@@ -312,7 +311,7 @@ namespace VKalVrtAthena {
       StatusCode sc = refitVertexWithSuggestion( ctx, vertex, vertex.vertex );
 
       if( sc.isFailure() || vertex_backup.fitQuality() < vertex.fitQuality() ) {
-        vertex = vertex_backup;
+        vertex = std::move(vertex_backup);
         chi2Probability = 0;
         break;
       }
@@ -479,8 +478,8 @@ namespace VKalVrtAthena {
 
     StatusCode sc = refitVertex( ctx, v1 );
     if( sc.isFailure() ) {
-      v1 = v1_bak;
-      v2 = v2_bak;
+      v1 = std::move(v1_bak);
+      v2 = std::move(v2_bak);
 
       ATH_MSG_DEBUG(" >>> " << __FUNCTION__ << ": failure in merging" );
 
@@ -2157,7 +2156,9 @@ namespace VKalVrtAthena {
 
       if( !std::get<isGood>( point ) ) {
         const auto& detectorType = getDetectorType( point );
-        disabledPattern += (1 << detectorType);
+        if (detectorType != AlgConsts::invalidUnsigned )[[likely]]{
+          disabledPattern += (1 << detectorType);
+        }
       }
     }
 
