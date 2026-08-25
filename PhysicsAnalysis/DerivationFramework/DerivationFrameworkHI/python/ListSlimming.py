@@ -624,8 +624,6 @@ def HION9BasicJetVars(JetColl):
 
     return ExtraVars
 
-def HION8BasicJetVars(JetColl):
-    return HION9BasicJetVars(JetColl)
 #################################################################################
 #HION12
 

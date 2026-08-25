@@ -72,13 +72,14 @@ def HION9SkimmingToolCfg(flags, format="HION9"):
             filterList += [SkimmingTool_trig]
 
     else:
-        expression = ('count('+JetColl+'AntiKt2HIJets.pt > 15000) > 1 || ' +
-        expression = ('count('+JetColl+'AntiKt3HIJets.pt > 15000) > 1 || ' +
-        expression = ('count('+JetColl+'AntiKt4HIJets.pt > 15000) > 1 || ' +
-        expression = ('count('+JetColl+'AntiKt5HIJets.pt > 15000) > 1 || ' +
-        expression = ('count('+JetColl+'AntiKt6HIJets.pt > 15000) > 1 || ' +
-        expression = ('count('+JetColl+'AntiKt8HIJets.pt > 15000) > 1 || ' +
-                      'count('+JetColl+'AntiKt10HIJets.pt > 15000) > 1')
+        expression = (
+                'count('+JetColl+'AntiKt2HIJets.pt > 15000) > 1 || ' +
+                'count('+JetColl+'AntiKt3HIJets.pt > 15000) > 1 || ' +
+                'count('+JetColl+'AntiKt4HIJets.pt > 15000) > 1 || ' +
+                'count('+JetColl+'AntiKt5HIJets.pt > 15000) > 1 || ' +
+                'count('+JetColl+'AntiKt6HIJets.pt > 15000) > 1 || ' +
+                'count('+JetColl+'AntiKt8HIJets.pt > 15000) > 1 || ' +
+                'count('+JetColl+'AntiKt10HIJets.pt > 15000) > 1')
         StringSkimmingTool = acc.addPublicTool(acc.getPrimaryAndMerge(
             xAODStringSkimmingToolCfg(flags, name = format+"StringSkimmingTool",
                                       expression = expression)), primary = True)
@@ -98,6 +99,7 @@ def HION9KernelCfg(flags, name='HION9Kernel', **kwargs):
     from DerivationFrameworkHI.HION7 import (
         PhysAugmentationsHION7Cfg, HION7GlobalAugmentationToolCfg)
     acc.merge(PhysAugmentationsHION7Cfg(flags))
+    from DerivationFrameworkHI.HION9 import getDFJets
     acc.merge(getDFJets(flags))
 
 #########################################################################################
@@ -179,10 +181,15 @@ def HION9KernelCfg(flags, name='HION9Kernel', **kwargs):
          JetKey                  = JetColl+"AntiKt10HIJets",
          SelectionString         = JetColl+"AntiKt10HIJets.pt > "+ str(pTCut) +"*GeV",
          InDetTrackParticlesKey  = "InDetTrackParticles"))
-    
+
     thinningTools = [TrackParticleThinningTool,
                     AntiKt2HIJetsThinningTool,
-                    AntiKt4HIJetsThinningTool]
+                    AntiKt3HIJetsThinningTool,
+                    AntiKt4HIJetsThinningTool,
+                    AntiKt5HIJetsThinningTool,
+                    AntiKt6HIJetsThinningTool,
+                    AntiKt8HIJetsThinningTool,
+                    AntiKt10HIJetsThinningTool]
     if flags.Input.isMC or flags.Overlay.DataOverlay:
         from DerivationFrameworkMCTruth.TruthDerivationToolsConfig import GenericTruthThinningCfg
         truth_thinning_expression = "(TruthParticles.status==1) && (TruthParticles.pt > "+str(minTrackPt-0.2)+"*GeV) && (abs(TruthParticles.eta) < 2.7)"
