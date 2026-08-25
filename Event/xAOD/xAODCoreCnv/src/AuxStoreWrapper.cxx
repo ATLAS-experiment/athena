@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // $Id: AuxStoreWrapper.cxx 695881 2015-09-21 08:47:05Z will $
@@ -210,15 +210,19 @@ namespace xAODMaker {
       CHECK( evtStore()->removeProxy( storeProxy, nullptr, true ) );
 
       // Create the new object as a wrapper around the original:
-      xAOD::AuxContainerBase* holder = new xAOD::AuxContainerBase();
-      holder->setStore( const_cast< SG::IAuxStore* >( store ) );
+      auto holder_p = std::make_unique<xAOD::AuxContainerBase>();
+      holder_p->setStore( const_cast< SG::IAuxStore* >( store ) );
 
       // Record the new container with the same key:
-      CHECK( evtStore()->overwrite( holder, name, false, true ) );
+      CHECK( evtStore()->overwrite( std::move(holder_p), name, false, true ) );
 
       ATH_MSG_DEBUG( "Overwrote store object with key \""
                      << name << "\" with an xAOD::AuxContainerBase "
                      << "object" );
+
+      // Fetch it back from the store.
+      const xAOD::AuxContainerBase* holder = nullptr;
+      CHECK( evtStore()->retrieve( holder, name ) );
 
       // The key of the interface container:
       const std::string intName = name.substr( 0, name.size() - 4 );
@@ -288,15 +292,19 @@ namespace xAODMaker {
                        << " and name \"" << name << "\"" );
 
       // Create the new as a wrapper around the original:
-      xAOD::AuxInfoBase* holder = new xAOD::AuxInfoBase();
-      holder->setStore( const_cast< SG::IAuxStore* >( store ) );
+      auto holder_p = std::make_unique<xAOD::AuxInfoBase>();
+      holder_p->setStore( const_cast< SG::IAuxStore* >( store ) );
 
       // Record the new container with a different key:
-      CHECK( evtStore()->overwrite( holder, name, false, true ) );
+      CHECK( evtStore()->overwrite( std::move(holder_p), name, false, true ) );
 
       ATH_MSG_DEBUG( "Wrapped store object with key \""
                      << name << "\" into xAOD::AuxInfoBase "
                      << "object" );
+
+      // Fetch it back from the store.
+      const xAOD::AuxContainerBase* holder = nullptr;
+      CHECK( evtStore()->retrieve( holder, name ) );
 
        // The key of the interface object:
       const std::string intName = name.substr( 0, name.size() - 4 );
