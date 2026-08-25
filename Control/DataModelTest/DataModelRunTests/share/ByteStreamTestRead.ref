@@ -37,9 +37,9 @@ ClassIDSvc           INFO getRegistryEntries: read 1547 CLIDRegistry entries for
 TrigSe...izeCnvSvc   INFO initialize()
 ByteStreamInputSvc   INFO Initializing
 ROBDataProviderSvc   INFO Initializing
-ROBDataProviderSvc   INFO  ---> Filter out empty ROB fragments                               =  'filterEmptyROB':False
-ROBDataProviderSvc   INFO  ---> Filter out specific ROBs by Status Code: # ROBs = 0
-ROBDataProviderSvc   INFO  ---> Filter out Sub Detector ROBs by Status Code: # Sub Detectors = 0
+ROBDataProviderSvc   INFO ---> Filter out empty ROB fragments = false
+ROBDataProviderSvc   INFO ---> Filter out specific ROBs by Status Code: # ROBs = 0
+ROBDataProviderSvc   INFO ---> Filter out Sub Detector ROBs by Status Code: # Sub Detectors = 0
 EventSelector        INFO reinitialization...
 ByteStreamInputSvc   INFO Picked valid file: test.bs
 AthenaEventLoopMgr   INFO Setup EventSelector service EventSelector
