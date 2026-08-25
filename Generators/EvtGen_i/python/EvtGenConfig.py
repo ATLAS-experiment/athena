@@ -14,7 +14,8 @@ def EvtGenCfg(flags,
               decayFile = None,
               whiteList = None,
               allowAllKnownDecays = False,
-              auxfiles = None):
+              auxfiles = None,
+              pdtFile = 'inclusive.pdt'):
 
     # Set defaults
     if flags.Beam.Energy*2/GeV > 13001.:
@@ -71,7 +72,8 @@ def EvtGenCfg(flags,
           "EvtInclusiveDecay", 
           decayFile = decayFile,
           allowAllKnownDecays = allowAllKnownDecays,
-          whiteList = whiteList
+          whiteList = whiteList,
+          pdtFile = pdtFile,
         )
     )
 

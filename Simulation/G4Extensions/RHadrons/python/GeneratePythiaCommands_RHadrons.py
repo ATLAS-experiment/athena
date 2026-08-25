@@ -346,7 +346,7 @@ def configureAndRunMadGraph(flags):
 
     # Build the param card, aka SLHA file
     from MadGraphControl.MadGraphUtils import modify_param_card
-    modify_param_card(param_card_input='param_card.dat', params={'MASS': masses,'DECAY':decays}, output_location='SLHA_INPUT.DAT')
+    modify_param_card(param_card_input='PROC*/Cards/param_card.dat', params={'MASS': masses,'DECAY':decays}, output_location='SLHA_INPUT.DAT')
 
     # Now if the user didn't ask to keep it, get rid of the directory
     if not keepMadGraphOutput:

@@ -27,6 +27,10 @@ The list of possible R-hadrons comes from the Pythia8 code, in src/RHadrons.cc (
 first_mass_set = 4
 offset_options = {
 # Fundamental SUSY particles
+        1000001 : [       0 , False , '~d         ' , -1./3. , 0.000 , 0.000 , 0.000 , 0.000 , 0.000 , 0.000 , 0.000 , 0.000 , 0.000 ] ,
+        1000002 : [       0 , False , '~u          ' , -2./3. , 0.000 , 0.000 , 0.000 , 0.000 , 0.000 , 0.000 , 0.000 , 0.000 , 0.000 ] ,
+        1000003 : [       0 , False , '~s         ' , -1./3. , 0.000 , 0.000 , 0.000 , 0.000 , 0.000 , 0.000 , 0.000 , 0.000 , 0.000 ] ,
+        1000004 : [       0 , False , '~c          ' , -2./3. , 0.000 , 0.000 , 0.000 , 0.000 , 0.000 , 0.000 , 0.000 , 0.000 , 0.000 ] ,
         1000005 : [       0 , False , '~b          ' , -1./3. , 0.000 , 0.000 , 0.000 , 0.000 , 0.000 , 0.000 , 0.000 , 0.000 , 0.000 ] ,
         1000006 : [       0 , False , '~t          ' ,  2./3. , 0.000 , 0.000 , 0.000 , 0.000 , 0.000 , 0.000 , 0.000 , 0.000 , 0.000 ] ,
         1000021 : [       0 , False , '~g          ' ,  0 , 0.000 , 0.000 , 0.000 , 0.000 , 0.000 , 0.000 , 0.000 , 0.000 , 0.000 ] ,
@@ -248,6 +252,46 @@ def get_gluino_Rhadron_masses(input_file, mass_spectrum=1):
     return masses
 
 
+def get_gluino_Rhadron_masses_fromDict(input_dict={}, mass_spectrum=1):
+    """ Function to return a dictionary of PDG IDs and masses based on an input param/SLHA/LHE file
+        First parameter: input file (string or file handle)
+        Second parameter: mass spectrum (enumeration value)
+    """
+
+    # Expect SLHA file format.  Read for mass block, then look for relevant masses, then exit
+    masses = dict(input_dict["MASS"])
+    masses = {int(k): float(v) for k, v in input_dict["MASS"].items()}
+    mass ={}
+    mass_block = False
+    # Set the remainder of the masses
+    had_rhadron=False
+    for pid in masses:
+        if masses[pid] > 7e3: continue
+        mass[pid] = masses[pid]
+    for pid in offset_options:
+        # Skip fundamental particles - they should be read from the input file!
+        if offset_options[pid][0] == 0: continue
+        # Check if the constituent is in there (e.g. skip stop R-hadrons for gluino production)
+        if offset_options[pid][0] not in mass: 
+            print(offset_options[pid][0])
+            continue
+        # Check if the mass spectrum is available
+        if mass_spectrum<0 or first_mass_set+mass_spectrum>len(offset_options[pid]):
+            raise RuntimeError("Unknown mass set requested: "+str(mass_spectrum)+" > number of options ("+str(len(offset_options[pid])-first_mass_set+1)+") for PID "+str(pid))
+        # Add 'normal' R-hadron
+        mass[pid] = mass[ offset_options[pid][0] ] + offset_options[pid][first_mass_set+mass_spectrum]
+        # If needed, add anti-R-hadron
+        if offset_options[pid][1]:
+            mass[-pid] = mass[ offset_options[pid][0] ] + offset_options[pid][first_mass_set+mass_spectrum]
+        had_rhadron = True
+
+    # Make sure we generated some R-hadrons
+    if not had_rhadron:
+        raise RuntimeError('No R-hadrons generated!')
+
+    # Return the dictionary
+    return mass
+
 def update_PDG_table(input_file, pdg_table, mass_spectrum=1):
     """ Function to update a PDG table with R-hadron masses
         First input parameter: input file (string or file handle)
@@ -285,6 +329,45 @@ def update_PDG_table(input_file, pdg_table, mass_spectrum=1):
     updateExtraParticleAcceptList('G4particle_acceptlist_ExtraParticles.txt', pdgcodes)
     # Nothing to return
 
+def update_PDG_table_fromDict(input_dict, pdg_table, mass_spectrum=1):
+    """ Function to update a PDG table with R-hadron masses
+        First input parameter: input file (string or file handle)
+        Second input parameter: output PDG table (string or file handle)
+        Third input parameter: mass spectrum (enumeration value)
+        Gets R-hadron masses based on get_gluino_Rhadron_masses()
+    """
+    # Check that we had the right output file type
+    # Get the masses that we need
+    masses = get_gluino_Rhadron_masses_fromDict(input_dict,mass_spectrum)
+    print("BBBBBBB, ", masses)
+    # Get the output file ready
+    # Open for appending (assume that's what was done if given a file handle)
+    lines = None
+    if isinstance(pdg_table, str):
+        lines = open(pdg_table).readlines()
+    else:
+        lines = pdg_table.readlines()
+    # Add all our R-hadrons to the table!
+    pdgcodes = []
+    for pid in masses:
+        if pid >= 2000001:
+            continue
+        pdgcodes += [pid]
+        # For the PDG table, we only write positive-signed PDG ID particles
+        if pid<0: continue
+        # Note that we follow the Pythia6 convention of *including* fundamental SUSY particles
+        # The format is VERY specific; needs mass and width (we always set the width to 0)
+        # Mass is in MeV here, rather than GeV as in the dictionary
+        lines.append('M %i                          %11.7E  +0.0E+00 -0.0E+00 %s       %s'%(pid,masses[pid]*1000.,offset_options[pid][2],charge(offset_options[pid][3])) + '\n')
+        lines.append('W %i                          %11.7E  +0.0E+00 -0.0E+00 %s       %s'%(pid,0.E+00,offset_options[pid][2],charge(offset_options[pid][3])) + '\n')
+
+    update = open('PDGTABLE.MeV', 'w')
+    update.write(''.join(lines))
+    update.close()
+
+    from ExtraParticles.PDGHelpers import updateExtraParticleAcceptList
+    updateExtraParticleAcceptList('G4particle_acceptlist_ExtraParticles.txt', pdgcodes)
+    # Nothing to return
 
 def update_particle_table(input_file, particle_table='particles.txt', mass_spectrum=1):
     """ Function to update a particle table with R-hadron masses
@@ -340,6 +423,59 @@ def update_particle_table(input_file, particle_table='particles.txt', mass_spect
 
     # Nothing to return
 
+def update_particle_table_fromDict(input_dict={}, particle_table='particles.txt', mass_spectrum=1):
+    """ Function to update a particle table with R-hadron masses
+        First input parameter: input file (string or file handle)
+        Second input parameter: output particle table (string or file handle)
+        Third input parameter: mass spectrum (enumeration value)
+        Gets R-hadron masses based on get_gluino_Rhadron_masses()
+    """
+    # Get the masses that we need
+    masses = get_gluino_Rhadron_masses_fromDict(input_dict,mass_spectrum)
+    # Get the output file ready
+    # Open for appending (assume that's what was done if given a file handle)
+    if isinstance (particle_table, str):
+        out_file = open(particle_table,'a')
+    else:
+        out_file = particle_table
+    # Add all our R-hadrons to the table!
+    # Note that we MUST write the primary first, followed by the compound particles
+    primaries = []
+    extras = []
+    for pid in masses:
+        if offset_options[abs(pid)][0]==0: extras += [pid]
+        elif not offset_options[abs(pid)][0] in primaries: primaries += [ offset_options[abs(pid)][0] ]
+
+    # Rounds per primary
+    for p in primaries:
+        # Note that we follow the old convention of *including* fundamental SUSY particles
+        # The format is VERY specific; needs mass and width (we always set the width to 0)
+        # Mass is in MeV here, rather than GeV as in the dictionary
+        if p>0: out_file.write('     %i  %04.3f   # %s\n'%(p,masses[p],offset_options[abs(p)][2]))
+        # For the anti-particle, also need the anti-name
+        else:     out_file.write('    %i  %04.3f   # %s\n'%(p,masses[p],anti_name(offset_options[abs(p)][2])))
+        # Now include the secondaries
+        for pid in masses:
+            if offset_options[abs(pid)][0]!=p: continue
+            # Note that we follow the old convention of *including* fundamental SUSY particles
+            # The format is VERY specific; needs mass and width (we always set the width to 0)
+            # Mass is in MeV here, rather than GeV as in the dictionary
+            if pid>0: out_file.write('     %i  %04.3f   # %s\n'%(pid,masses[pid],offset_options[abs(pid)][2]))
+            # For the anti-particle, also need the anti-name
+            else:     out_file.write('    %i  %04.3f   # %s\n'%(pid,masses[pid],anti_name(offset_options[abs(pid)][2])))
+        # Done with secondaries for this primary
+
+    for p in extras:
+        if p in primaries: continue
+        if p>0: out_file.write('     %i  %04.3f   # %s\n'%(p,masses[p],offset_options[abs(p)][2]))
+        # For the anti-particle, also need the anti-name
+        else:   out_file.write('    %i  %04.3f   # %s\n'%(p,masses[p],anti_name(offset_options[abs(p)][2])))
+
+    # Done writing all the lines!  Clean up if necessary
+    if isinstance(particle_table, str):
+        out_file.close()
+
+    # Nothing to return
 
 def get_Pythia8_commands(input_file, mass_spectrum=1):
     """ Function to return a list of Pythia8 commands to set up an R-hadron mass spectrum.
@@ -362,6 +498,25 @@ def get_Pythia8_commands(input_file, mass_spectrum=1):
     return commands
 
 
+def get_Pythia8_commands_fromDict(input_dict={}, mass_spectrum=1):
+    """ Function to return a list of Pythia8 commands to set up an R-hadron mass spectrum.
+        First input parameter: input file (string or file handle)
+        Second input parameter: mass spectrum (enumeration value)
+    """
+    # Get the masses for this configuration
+    masses = get_gluino_Rhadron_masses_fromDict(input_dict,mass_spectrum)
+    # Tell Pythia8 we are going to use our own masses
+    commands = ['RHadrons:setMasses = off']
+    
+    # Add commands to set all the masses
+    for pid in masses:
+        # Only set masses for particles (not anti-particles)
+        if pid<0: continue
+        # Actual command takes the form PDGID:m0 = somemass
+        commands += [ str(pid)+':m0 = '+str(masses[pid]) ]
+
+    # All done!
+    return commands
 def get_interaction_list(input_file, interaction_file='ProcessList.txt', mass_spectrum=1):
     """ Function to write all possible interactiosn that we need
         First input parameter: input file (string or file handle)
@@ -478,6 +633,119 @@ def get_interaction_list(input_file, interaction_file='ProcessList.txt', mass_sp
     # Nothing to return
 
 
+
+def get_interaction_list_fromDict(input_dict={}, interaction_file='ProcessList.txt', mass_spectrum=1):
+    """ Function to write all possible interactiosn that we need
+        First input parameter: input file (string or file handle)
+        Second input parameter: output PDG table (string or file handle)
+        Third input parameter: mass spectrum (enumeration value)
+        Gets R-hadron masses based on get_gluino_Rhadron_masses()
+    """
+    # Get the masses that we need. Note that we don't really need masses, just PDG IDs
+    masses = get_gluino_Rhadron_masses_fromDict(input_dict,mass_spectrum)
+    # Get the output file ready
+    # Open for appending (assume that's what was done if given a file handle)
+    if isinstance (interaction_file, str):
+        out_file = open(interaction_file,'a')
+    else:
+        out_file = interaction_file
+
+    # Helpful lists to move us along
+    sm_particles = {
+      # Name  :  Charge , Baryon # , Strangeness
+        'pi0' : [  0 , 0 ,  0 ],
+        'pi+' : [  1 , 0 ,  0 ],
+        'pi-' : [ -1 , 0 ,  0 ],
+    'neutron' : [  0 , 1 ,  0 ],
+     'proton' : [  1 , 1 ,  0 ],
+      'kaon0' : [  0 , 0 ,  1 ],
+ 'anti_kaon0' : [  0 , 0 , -1 ],
+      'kaon+' : [  1 , 0 ,  1 ],
+      'kaon-' : [ -1 , 0 , -1 ]
+                   }
+    targets = [ 'proton' , 'neutron' ]
+
+    incoming_rhadrons = {}
+    outgoing_rhadrons = {}
+    for pid in masses:
+        # Only for bound states
+        if offset_options[abs(pid)][0]==0: continue
+        # All of them are on the list of incoming RHadrons
+        # Deal with strangeness
+        # Approximation! Bottom number -> -Charm number -> Strangeness
+        # Approximation needed because outgoing SM charms are not treated in G4 at the moment
+        s_number = 0
+        my_q = get_quarks(pid)
+        if '3' in my_q or '4' in my_q or '5' in my_q:
+            if len(my_q)>2:
+                # Gluino R-baryons
+                s_number = -(my_q.count('3')-my_q.count('4')+my_q.count('5')) if pid>0 else my_q.count('3')-my_q.count('4')+my_q.count('5')
+            elif len(my_q)>1 and '9' in str(pid):
+                # Gluino R-mesons
+                if my_q in ['33','44','55','35']: s_number=0 # 33, 44, 55, 35 - one is anti-quark, so they cancel
+                # By convention both 43 and 53 have charge +1, which means c-sbar or c-bbar
+                elif my_q in ['43','53']: s_number = 2 if pid>0 else -2
+                # Only one of bottom / charm / strange. Deal with neutral convention first
+                elif offset_options[abs(pid)][3]==0 and ('3' in my_q or '5' in my_q): s_number=1 if pid>0 else -1
+                elif offset_options[abs(pid)][3]==0 and '4' in my_q: s_number=1 if pid<0 else -1
+                # Now charged convention
+                elif '3' in my_q or '5' in my_q: s_number=offset_options[abs(pid)][3]
+                elif '4' in my_q: s_number=-offset_options[abs(pid)][3]
+            elif len(my_q)>1:
+                # Squark R-baryons
+                s_number = -(my_q.count('3')-my_q.count('4')+my_q.count('5')) if pid>0 else my_q.count('3')-my_q.count('4')+my_q.count('5')
+            else:
+                # Squark R-mesons
+                s_number = my_q.count('3') - my_q.count('4') + my_q.count('5')
+                s_number = s_number if pid>0 else -s_number
+        else: s_number=0
+        # Build the dictionary
+        pid_name = offset_options[pid][2].strip() if pid>0 else anti_name(offset_options[abs(pid)][2]).strip()
+        charge = offset_options[abs(pid)][3] if pid>0 else -offset_options[abs(pid)][3]
+        incoming_rhadrons[pid_name] = [ charge , is_baryon(pid) , s_number ]
+        # Smaller list of outgoing rhadrons.
+        # No charm or bottom
+        if '4' in my_q or '5' in my_q: continue
+        outgoing_rhadrons[pid_name] = [ charge , is_baryon(pid) , s_number ]
+
+    # Add all our R-hadrons to the table
+    for proj in incoming_rhadrons:
+        # Loop over targets
+        for t in targets:
+            # Loop over possible outgoing R-hadrons
+            for orhad in outgoing_rhadrons:
+                # Possible 2>2 reactions
+                for osm1 in sm_particles:
+                    # Check for charge conservation
+                    total_charge = incoming_rhadrons[proj][0]+sm_particles[t][0]-outgoing_rhadrons[orhad][0]-sm_particles[osm1][0]
+                    # Check for baryon number conservation
+                    total_bnumber = incoming_rhadrons[proj][1]+sm_particles[t][1]-outgoing_rhadrons[orhad][1]-sm_particles[osm1][1]
+                    # Check for strangeness conservation
+                    total_snumber = incoming_rhadrons[proj][2]+sm_particles[t][2]-outgoing_rhadrons[orhad][2]-sm_particles[osm1][2]
+                    # Check if it's an allowed reaction
+                    if total_charge==0 and total_bnumber==0 and total_snumber==0:
+                        out_file.write( ' # '.join([str(proj),str(t),str(orhad),str(osm1)])+'\n' )
+                    # Now loop over possible 2>3 reactions
+                    for osm2 in sm_particles:
+                        # Check for charge conservation
+                        total_charge = incoming_rhadrons[proj][0]+sm_particles[t][0]-outgoing_rhadrons[orhad][0]-sm_particles[osm1][0]-sm_particles[osm2][0]
+                        # Check for baryon number conservation
+                        total_bnumber = incoming_rhadrons[proj][1]+sm_particles[t][1]-outgoing_rhadrons[orhad][1]-sm_particles[osm1][1]-sm_particles[osm2][1]
+                        # Check for strangeness conservation
+                        total_snumber = incoming_rhadrons[proj][2]+sm_particles[t][2]-outgoing_rhadrons[orhad][2]-sm_particles[osm1][2]-sm_particles[osm2][2]
+                        # Check if it's an allowed reaction
+                        if total_charge==0 and total_bnumber==0 and total_snumber==0:
+                            out_file.write( ' # '.join([str(proj),str(t),str(orhad),str(osm1),str(osm2)])+'\n' )
+                        # Wrote out the reaction
+                    # Loop over 2>3
+                # Loop over 2>2
+            # Loop over outgoing RHadrons
+        # Loop over targets
+    # Loop over projectiles
+
+    # Done writing all the lines!  Clean up if necessary
+    if isinstance(interaction_file, str):
+        out_file.close()
 def print_masses(spectrum=-1):
     """ Print the mass spectra.
     Input parameter: spectrum number.  If -1, print all spectra.

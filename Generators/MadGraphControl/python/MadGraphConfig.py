@@ -48,15 +48,21 @@ def _prepare_lhe_for_shower(produced_output, lhe_file):
         )
 
     primary_output = None
+
     if produced_output:
         if produced_output.endswith(".tar.gz"):
             root = produced_output[:-7]
         elif produced_output.endswith(".tgz"):
             root = produced_output[:-4]
+        elif produced_output.endswith(".gz"):
+
+            root = produced_output[:-3]
+
         else:
             root, _ = os.path.splitext(produced_output)
-        primary_output = f"{root}.events"
-
+        #primary_output = f"{root}.events"
+        primary_output = f"{root}"
+    
     # If the transform requested a specific TXT output name, symlink the 
     # produced output to the filename that the transform expects
     candidates = [candidate 
@@ -82,8 +88,10 @@ def _symlink_first_existing(link_name, candidates, overwrite=False):
 
     for candidate in candidates:
         if not candidate or not os.path.exists(candidate):
+            print(os.path.exists(candidate))
             continue
         if os.path.abspath(candidate) == os.path.abspath(link_name):
+            print(os.path.abspath(link_name))
             return True
         if os.path.lexists(link_name):
             os.remove(link_name)
@@ -241,7 +249,6 @@ def MadGraphCfg(
     # by default "events.lhe".
     if prepare_lhe_for_shower:
         _prepare_lhe_for_shower(produced_output, lhe_file)
-
     # If the transform requested a specific TXT output name, symlink the 
     # produced output to the filename that the transform expects
     # (only if the file does not exist).
@@ -250,5 +257,5 @@ def MadGraphCfg(
         root, _ = os.path.splitext(requested_output)
         candidates = [candidate for candidate in (produced_output, f"{root}.events", "events.events") if candidate]
         _symlink_first_existing(requested_output, candidates, overwrite=True)
-
+    
     return ca
