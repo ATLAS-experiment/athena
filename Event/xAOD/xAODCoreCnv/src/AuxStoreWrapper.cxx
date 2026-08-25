@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // $Id: AuxStoreWrapper.cxx 695881 2015-09-21 08:47:05Z will $
@@ -210,15 +210,8 @@ namespace xAODMaker {
       CHECK( evtStore()->removeProxy( storeProxy, nullptr, true ) );
 
       // Create the new object as a wrapper around the original:
-      xAOD::AuxContainerBase* holder = new xAOD::AuxContainerBase();
+      auto holder = std::make_unique<xAOD::AuxContainerBase>();
       holder->setStore( const_cast< SG::IAuxStore* >( store ) );
-
-      // Record the new container with the same key:
-      CHECK( evtStore()->overwrite( holder, name, false, true ) );
-
-      ATH_MSG_DEBUG( "Overwrote store object with key \""
-                     << name << "\" with an xAOD::AuxContainerBase "
-                     << "object" );
 
       // The key of the interface container:
       const std::string intName = name.substr( 0, name.size() - 4 );
@@ -261,13 +254,20 @@ namespace xAODMaker {
       // And now connect the interface to the store depending on the const-ness
       // of the interface:
       if( proxy->isConst() ) {
-         interface->setConstStore( holder );
+         interface->setConstStore( holder.get() );
       } else {
-         interface->setStore( holder );
+         interface->setStore( holder.get() );
       }
 
       ATH_MSG_DEBUG( "Interface container with key \"" << intName
                      << "\" updated" );
+
+      // Record the new container with the same key:
+      CHECK( evtStore()->overwrite( std::move(holder), name, false, true ) );
+
+      ATH_MSG_DEBUG( "Overwrote store object with key \""
+                     << name << "\" with an xAOD::AuxContainerBase "
+                     << "object" );
 
       // Return gracefully:
       return StatusCode::SUCCESS;
@@ -288,15 +288,8 @@ namespace xAODMaker {
                        << " and name \"" << name << "\"" );
 
       // Create the new as a wrapper around the original:
-      xAOD::AuxInfoBase* holder = new xAOD::AuxInfoBase();
+      auto holder = std::make_unique<xAOD::AuxInfoBase>();
       holder->setStore( const_cast< SG::IAuxStore* >( store ) );
-
-      // Record the new container with a different key:
-      CHECK( evtStore()->overwrite( holder, name, false, true ) );
-
-      ATH_MSG_DEBUG( "Wrapped store object with key \""
-                     << name << "\" into xAOD::AuxInfoBase "
-                     << "object" );
 
        // The key of the interface object:
       const std::string intName = name.substr( 0, name.size() - 4 );
@@ -339,13 +332,20 @@ namespace xAODMaker {
       // And now connect the interface to the store depending on the const-ness
       // of the interface:
       if( proxy->isConst() ) {
-         interface->setConstStore( holder );
+         interface->setConstStore( holder.get() );
       } else {
-         interface->setStore( holder );
+         interface->setStore( holder.get() );
       }
 
       ATH_MSG_DEBUG( "Interface object with key \"" << intName
                      << "\" updated" );
+
+      // Record the new container with a different key:
+      CHECK( evtStore()->overwrite( std::move(holder), name, false, true ) );
+
+      ATH_MSG_DEBUG( "Wrapped store object with key \""
+                     << name << "\" into xAOD::AuxInfoBase "
+                     << "object" );
 
       // Return gracefully:
       return StatusCode::SUCCESS;
