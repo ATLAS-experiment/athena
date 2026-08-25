@@ -120,18 +120,19 @@ def PersistifyTrackParticles(flags,
     toAOD = []
     if trackParticleCollections is not None:
         trackparticles_shortlist = ['-clusterAssociation',
-                                    '-TTVA_AMVFVertices_forReco',
                                     '-AssoClustersUFO',
-                                    '-TTVA_AMVFWeights_forReco',
                                     '-trackParameterCovarianceMatrices',
                                     '-caloExtensionLink',
-                                     '-parameterX', '-parameterY', '-parameterZ',
-                                     '-parameterPX', '-parameterPY', '-parameterPZ',
-                                     '-parameterPosition']
+                                    '-parameterX', '-parameterY', '-parameterZ',
+                                    '-parameterPX', '-parameterPY', '-parameterPZ',
+                                    '-parameterPosition',
+                                    '-truthHitEfficiency', '-truthHitPurity']
 
         # exclude TTVA decorations
         trackparticles_shortlist += ['-TTVA_AMVFVertices',
-                                     '-TTVA_AMVFWeights']
+                                     '-TTVA_AMVFWeights',
+                                     '-TTVA_AMVFVertices_forReco',
+                                     '-TTVA_AMVFWeights_forReco']
         # acts track link
         if not flags.Acts.EDM.PersistifyTracks:
             trackparticles_shortlist += ['-actsTrack',
