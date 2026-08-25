@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #include "StoreGate/ReadDecorHandle.h"
 
@@ -395,7 +395,7 @@ StatusCode UFOTool::fillTCC(xAOD::FlowElementContainer* tccContainer, const Trac
       if(!PVMatchedAcc(*pfo)) continue;
     }
     
-    const xAOD::FlowElementContainer *tmp_pfoContainer = dynamic_cast< const xAOD::FlowElementContainer* >(pfo->container());
+    const xAOD::FlowElementContainer *tmp_pfoContainer = static_cast< const xAOD::FlowElementContainer* >(pfo->container());
     ElementLink< xAOD::FlowElementContainer > pfoLink(tmp_pfoContainer,pfo->index());
     const std::vector< ElementLink<xAOD::FlowElementContainer> > PFOLink {pfoLink};    
     xAOD::FlowElement* tcc = new xAOD::FlowElement;
@@ -404,7 +404,7 @@ StatusCode UFOTool::fillTCC(xAOD::FlowElementContainer* tccContainer, const Trac
     if(pfo->isCharged()) {
       //retrieve the track from the charged PFO
       const xAOD::IParticle* pfo_chargedobj=pfo->chargedObjects().at(0);
-      const xAOD::TrackParticle* pfo_track=dynamic_cast<const xAOD::TrackParticle*>(pfo_chargedobj);
+      const xAOD::TrackParticle* pfo_track=static_cast<const xAOD::TrackParticle*>(pfo_chargedobj);
       
       setParameters(tcc, pfo->pt(), pfo->eta(), pfo->phi(), pfo->m(), xAOD::FlowElement::SignalType::Charged, ElementLink<xAOD::TrackParticleContainer>(*tccInfo.allTracks, pfo_track->index()), PFOLink);
     }else{
