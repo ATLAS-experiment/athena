@@ -465,10 +465,10 @@ namespace MissingEtDQA {
       ATH_MSG_ERROR ( "Failed to retrieve Muon container. Exiting." );
       return StatusCode::FAILURE;
     }
-    ConstDataVector<MuonContainer> BasicSelectionMuons(SG::VIEW_ELEMENTS);
+    ConstDataVector<MuonContainer> basicSelectionMuons(SG::VIEW_ELEMENTS);
     for(const auto mu : *muons) {
       if(Accept(mu)) {
-        BasicSelectionMuons.push_back(mu);
+        basicSelectionMuons.push_back(mu);
       }
     }
 
@@ -479,10 +479,10 @@ namespace MissingEtDQA {
       ATH_MSG_ERROR ( "Failed to retrieve Electron container. Exiting." );
       return StatusCode::FAILURE;
     }
-   ConstDataVector<ElectronContainer> BasicSelectionElectrons(SG::VIEW_ELEMENTS);
+   ConstDataVector<ElectronContainer> basicSelectionElectrons(SG::VIEW_ELEMENTS);
    for(const auto el : *electrons) {
      if(Accept(el)) {
-       BasicSelectionElectrons.push_back(el);
+       basicSelectionElectrons.push_back(el);
      }
    }
 
@@ -493,10 +493,10 @@ namespace MissingEtDQA {
       ATH_MSG_ERROR ( "Failed to retrieve Photon container. Exiting." );
       return StatusCode::FAILURE;
     }
-    ConstDataVector<PhotonContainer> BasicSelectionPhotons(SG::VIEW_ELEMENTS);
+    ConstDataVector<PhotonContainer> basicSelectionPhotons(SG::VIEW_ELEMENTS);
     for(const auto ph : *photons) {
       if(Accept(ph)) {
-        BasicSelectionPhotons.push_back(ph);
+        basicSelectionPhotons.push_back(ph);
       }
     }
 
@@ -507,10 +507,10 @@ namespace MissingEtDQA {
       ATH_MSG_ERROR("Failed to retrieve TauJet container: " << m_tauColl);
       return StatusCode::SUCCESS;
     }
-    ConstDataVector<TauJetContainer> BasicSelectionTaus(SG::VIEW_ELEMENTS);
+    ConstDataVector<TauJetContainer> basicSelectionTaus(SG::VIEW_ELEMENTS);
     for(const auto tau : *taus) {
       if(Accept(tau)) {
-        BasicSelectionTaus.push_back(tau);
+        basicSelectionTaus.push_back(tau);
       }
     }
 
@@ -523,9 +523,9 @@ namespace MissingEtDQA {
         ATH_MSG_ERROR ( "Failed to retrieve Jet container: " << name_jet << ". Exiting." );
         return StatusCode::FAILURE;
       }
-      ConstDataVector<JetContainer> BasicSelectionJets(SG::VIEW_ELEMENTS);
+      ConstDataVector<JetContainer> basicSelectionJets(SG::VIEW_ELEMENTS);
       for(const auto jet : *jets){ //for jets assign jets
-        BasicSelectionJets.push_back(jet);
+        basicSelectionJets.push_back(jet);
       }
 
       //Prepare Rebuilding MET
@@ -571,19 +571,19 @@ namespace MissingEtDQA {
 
       //See if we can build terms. This will also add the particles into METMaker
       // Electrons
-      if( (*m_metmaker)->rebuildMET("RefEle", xAOD::Type::Electron, met, BasicSelectionElectrons.asDataVector(), metHelper).isFailure() ) {
+      if( (*m_metmaker)->rebuildMET("RefEle", xAOD::Type::Electron, met, basicSelectionElectrons.asDataVector(), metHelper).isFailure() ) {
         ATH_MSG_WARNING("Failed to build electron term.");
       }
       // Photons
-      if( (*m_metmaker)->rebuildMET("RefGamma", xAOD::Type::Photon, met, BasicSelectionPhotons.asDataVector(), metHelper).isFailure() ) {
+      if( (*m_metmaker)->rebuildMET("RefGamma", xAOD::Type::Photon, met, basicSelectionPhotons.asDataVector(), metHelper).isFailure() ) {
         ATH_MSG_WARNING("Failed to build photon term.");
       }
       // Taus
-      if( (*m_metmaker)->rebuildMET("RefTau", xAOD::Type::Tau, met,BasicSelectionTaus.asDataVector(),metHelper).isFailure() ) {
+      if( (*m_metmaker)->rebuildMET("RefTau", xAOD::Type::Tau, met,basicSelectionTaus.asDataVector(),metHelper).isFailure() ) {
         ATH_MSG_WARNING("Failed to build tau term.");
       }
       // Muons
-      if( (*m_metmaker)->rebuildMET("RefMuons", xAOD::Type::Muon, met, BasicSelectionMuons.asDataVector(), metHelper).isFailure() ) {
+      if( (*m_metmaker)->rebuildMET("RefMuons", xAOD::Type::Muon, met, basicSelectionMuons.asDataVector(), metHelper).isFailure() ) {
         ATH_MSG_WARNING("Failed to build muon term.");
       }
       // Jets
@@ -628,7 +628,7 @@ namespace MissingEtDQA {
       //electron
       TLorentzVector el_tlv;
       double sum_el = 0;
-      for(const auto p : BasicSelectionElectrons){
+      for(const auto p : basicSelectionElectrons){
         el_tlv += p->p4();
         sum_el += p->pt();
         has_electron = 1;
@@ -636,7 +636,7 @@ namespace MissingEtDQA {
       //muon
       TLorentzVector mu_tlv;
       double sum_mu = 0;
-      for(const auto p : BasicSelectionMuons){
+      for(const auto p : basicSelectionMuons){
         mu_tlv += p->p4();
         sum_mu += p->pt();
         has_muon = 1;
@@ -644,7 +644,7 @@ namespace MissingEtDQA {
       //Tau
       TLorentzVector tau_tlv;
       double sum_tau = 0;
-      for(const auto p : BasicSelectionTaus){
+      for(const auto p : basicSelectionTaus){
         tau_tlv += p->p4();
         sum_tau += p->pt();
         has_tau = 1;
@@ -652,7 +652,7 @@ namespace MissingEtDQA {
       //photon
       TLorentzVector photon_tlv;
       double sum_photon = 0;
-      for(const auto p : BasicSelectionPhotons){
+      for(const auto p : basicSelectionPhotons){
         photon_tlv += p->p4();
         sum_photon += p->pt();
         has_photon = 1;
