@@ -10,7 +10,6 @@
 
 #ifndef XAOD_ANALYSIS
 #include "TrkParameters/TrackParameters.h"
-// #include "TrkCaloExtension/CaloExtension.h"
 #endif // XAOD_ANALYSIS
 #include <iomanip>
 
@@ -115,32 +114,40 @@ namespace CP {
 		return true;
 	}
 
-	bool IsolationHelper::updateIsolation(xAOD::MuonContainer*& copy,xAOD::ShallowAuxContainer*& copyaux, std::vector<xAOD::Iso::IsolationType>& types, xAOD::Iso::IsolationCaloCorrectionBitset corrMask, std::string muonkey, bool recordSG) const {
+	bool IsolationHelper::updateIsolation(xAOD::MuonContainer*& copy,
+	   xAOD::ShallowAuxContainer*& copyaux, std::vector<xAOD::Iso::IsolationType>& types, 
+	   xAOD::Iso::IsolationCaloCorrectionBitset corrMask, const std::string & muonkey, 
+	   bool recordSG) const {
 		const xAOD::MuonContainer* muons(nullptr);
 		ATH_CHECK( evtStore()->retrieve(muons,muonkey), false );
-      xAOD::ShallowCopyResult_t<xAOD::MuonContainer> shallowcopy =
-		  xAOD::shallowCopy(*muons);
-		copy = shallowcopy.first.get();
-		copyaux = shallowcopy.second.get();
-
+    xAOD::ShallowCopyResult_t<xAOD::MuonContainer> shallowcopy = xAOD::shallowCopy(*muons);
 		for(auto par: *copy){
 			for(auto type: types){
 				float value = 0;
-					if(!isolation(value, *par, type, corrMask)) return false;
-					const auto *acc = xAOD::getIsolationAccessor( type );
-                    if(acc){
-                      (*acc)(*par) = value;
-                    } else {
-                      return false;
-					}
-                    auto acc2 = xAOD::getIsolationCorrectionBitsetAccessor(xAOD::Iso::isolationFlavour(type));
-                    acc2(*par) = corrMask.to_ulong();
-            }
+        if(!isolation(value, *par, type, corrMask)){
+          copy = shallowcopy.first.release();
+		      copyaux = shallowcopy.second.release();
+          return false;
+        } 
+        const auto *acc = xAOD::getIsolationAccessor( type );
+        if(acc){
+          (*acc)(*par) = value;
+        } else {
+          copy = shallowcopy.first.release();
+		      copyaux = shallowcopy.second.release();
+          return false;
         }
+        auto acc2 = xAOD::getIsolationCorrectionBitsetAccessor(xAOD::Iso::isolationFlavour(type));
+        acc2(*par) = corrMask.to_ulong();
+      }
+    }
 
-			if(recordSG) {
-                          ATH_CHECK( evtStore()->record(std::move(shallowcopy.first), "IsoFixed_"+muonkey), false );
-                          ATH_CHECK( evtStore()->record(std::move(shallowcopy.second),"IsoFixed_"+muonkey+"Aux."), false );
+		if(recordSG) {
+      ATH_CHECK( evtStore()->record(std::move(shallowcopy.first), "IsoFixed_"+muonkey), false );
+      ATH_CHECK( evtStore()->record(std::move(shallowcopy.second),"IsoFixed_"+muonkey+"Aux."), false );
+		} else {
+		  copy = shallowcopy.first.release();
+		  copyaux = shallowcopy.second.release();
 		}
 		return true;
 	}
