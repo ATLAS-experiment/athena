@@ -26,7 +26,9 @@ def MuonPrdCacheCfg(flags):
     # Use MuonGeometryFlags to identify which configuration is being used
 
     acc = ComponentAccumulator()
-
+    from MuonConfig.MuonGeometryConfig import MuonIdHelperSvcCfg
+    MuonIdHelperSvc = acc.getPrimaryAndMerge( MuonIdHelperSvcCfg(flags) )
+    
     MuonPRDCacheCreator=CompFactory.MuonPRDCacheCreator
     cacheCreator = MuonPRDCacheCreator(CscStripCacheKey  = (MuonPrdCacheNames.CscStripCache if flags.Detector.GeometryCSC else ""),
                                        MdtCacheKey       = MuonPrdCacheNames.MdtCache,
@@ -37,6 +39,7 @@ def MuonPrdCacheCfg(flags):
                                        MmCacheKey        = (MuonPrdCacheNames.MmCache if flags.Detector.GeometryMM else ""),
                                        TgcCoinCacheStr   = MuonPrdCacheNames.TgcCoinCache,
                                        RpcCoinCacheKey   = MuonPrdCacheNames.RpcCoinCache,
+                                       MuonIdHelperSvc = MuonIdHelperSvc
                                        )
 
     acc.addEventAlgo( cacheCreator, primary=True )
