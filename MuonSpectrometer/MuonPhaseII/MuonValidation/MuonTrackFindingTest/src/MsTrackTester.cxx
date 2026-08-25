@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #include "MsTrackTester.h"
 
@@ -181,6 +181,23 @@ namespace MuonValR4 {
                 std::format("{:}_nTruthSegments", m_truthTrks->name()), [&] (const xAOD::TruthParticle& p) -> unsigned short {
                     return getTruthSegments(p).size();
                 }));
+
+            m_truthTrks->addVariable(
+                std::make_unique<GenericPartDecorBranch<xAOD::TruthParticle, float>>(m_tree,
+                std::format("{:}_eLossInMS", m_truthTrks->name()), [] (const xAOD::TruthParticle& p) -> float {
+                    std::vector<const xAOD::MuonSimHit*> allHits{};
+                    for (const xAOD::MuonSegment* seg : getTruthSegments(p)){
+                        auto hits = getMatchingSimHits(*seg);
+                        allHits.insert(allHits.end(), hits.begin(), hits.end());
+                    }
+                    if (allHits.empty()) {
+                        return 0.;
+                    }
+                    auto [min, max] = std::ranges::minmax(allHits, [](const xAOD::MuonSimHit* a, const xAOD::MuonSimHit* b){
+                        return a->kineticEnergy() < b->kineticEnergy();
+                    });
+                    return (max->kineticEnergy() - min->kineticEnergy()) / Gaudi::Units::GeV;
+                }));
             /// Calculate the truth seed length
             auto cone = std::make_shared<VectorBranch<float>>(m_tree,
                                         std::format("{}_seedThetaCone", m_truthTrks->name()));
@@ -210,7 +227,7 @@ namespace MuonValR4 {
                     qTimesP->push_back(m_seedingTool->estimateQtimesP(gctx->context(), *truthSeed, magField) / Gaudi::Units::GeV);
 
                     return length;
-                }));            
+                }));
 
             m_tree.addBranch(m_truthTrks);
             m_trkTruthLinks.emplace_back(m_truthSegmentKey, "truthParticleLink");
