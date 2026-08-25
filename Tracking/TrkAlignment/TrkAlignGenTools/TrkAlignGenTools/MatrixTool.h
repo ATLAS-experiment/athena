@@ -28,6 +28,7 @@
 #include "CLHEP/Matrix/SymMatrix.h"
 
 #include <string>
+#include <memory>
 
 class TString;
 
@@ -143,10 +144,10 @@ namespace Trk {
       this, "AlignModuleTool", "Trk::AlignModuleTool/AlignModuleTool"};
 
     /** matrix to contain second derivative terms to be used for alignment */
-    AlSymMatBase* m_bigmatrix = nullptr;
+    std::unique_ptr<AlSymMatBase> m_bigmatrix;
     
     /** vector to contain first derivative terms to be used for alignment */
-    AlVec* m_bigvector = nullptr;
+    std::unique_ptr<AlVec> m_bigvector;
     
     /** flag to use AlSpaMat for the big matrix (default is AlSymMat) */
     Gaudi::Property<bool> m_useSparse{this, "UseSparse", false};
