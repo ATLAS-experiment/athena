@@ -12,7 +12,7 @@ atlas_add_component( RootStorageSvc
                    src/*.cpp
                    NO_PUBLIC_HEADERS
                    INCLUDE_DIRS ${ROOT_INCLUDE_DIRS} ${VDT_INCLUDE_DIRS}
-                   PRIVATE_LINK_LIBRARIES ${ROOT_LIBRARIES} RootUtils RootUtilsPyROOT
+                   PRIVATE_LINK_LIBRARIES ${ROOT_LIBRARIES} DataModelRoot RootUtils RootUtilsPyROOT
                                           RootAuxDynIOHeaders StorageSvc
                                           GaudiKernel AthenaKernel CxxUtils AthenaBaseComps
                 ) 

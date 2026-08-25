@@ -15,7 +15,6 @@
 // Framework include files
 #include "PersistentDataModel/Token.h"
 #include "DbStorageSvc.h"
-#include "StorageSvc/DbReflex.h"
 #include "StorageSvc/DbTypeInfo.h"
 #include "StorageSvc/DbContainer.h"
 #include "StorageSvc/DbDatabase.h"
@@ -45,7 +44,7 @@ namespace pool  {
   typedef const DbDatabaseObj *DbDatabaseH;
   typedef       DbDatabaseObj *DbDatabaseHNC;
 
-  class DbClassMap : public map<TypeH, Guid> {};
+  class DbClassMap : public map<RootType, Guid> {};
 
 
    

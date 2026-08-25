@@ -12,7 +12,6 @@
 //====================================================================
 // Framework header files
 #include "StorageSvc/pool.h"
-#include "StorageSvc/DbReflex.h"
 #include "StorageSvc/DbColumn.h"
 // C++ header files
 #include <cstdio>
