@@ -83,7 +83,7 @@ StatusCode tauMonitorAlgorithm::fillHistograms(const EventContext &ctx) const {
 
   const int lowerEtThreshold = 15;
   const int higherEtThreshold = 75;
-  auto tool = getGroup(m_kinGroupName);
+  const auto & tool = getGroup(m_kinGroupName);
 
   auto tauEta = Monitored::Scalar<float>("tauEta", 0.0);
 
@@ -515,12 +515,8 @@ StatusCode tauMonitorAlgorithm::fillHistograms(const EventContext &ctx) const {
       trackLogSeedJetPt = logTauSeedPt;
 
       fill(tool, trackLogSeedJetPt);
-
+      static const SG::Accessor< xAOD::TauTrack::TrackParticleLinks_t>trackAcc("trackLinks");
       for (const xAOD::TauTrack *track : tau->allTracks()) {
-
-        static const SG::Accessor<
-            xAOD::TauTrack::TrackParticleLinks_t>
-            trackAcc("trackLinks");
         if (!trackAcc(*track)[0]) {
           continue;
         }
