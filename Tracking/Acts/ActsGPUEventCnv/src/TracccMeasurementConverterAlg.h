@@ -92,6 +92,12 @@ private:
   SG::WriteHandleKey<xAOD::PixelClusterContainer> m_outputPixelKey{
       this, "OutputPixelClusters", "ITkTracccPixelClusters",
       "Output xAOD pixel cluster container"};
+  SG::WriteHandleKey<xAOD::SpacePointContainer> m_outputPixelSpacePointsKey{
+      this, "OutputPixelSpacePoints", "ITkTracccPixelSpacepoints",
+      "Output xAOD pixel space point container"};
+  SG::WriteHandleKey<std::vector<unsigned int>> m_outputMeasToPixelSPKey{
+      this, "OutputMeasToPixelSP", "ITkTracccMeasToPixelSP",
+      "Output mapping from traccc measurement index to pixel spacepoint index"};        
   SG::WriteHandleKey<xAOD::StripClusterContainer> m_outputStripKey{
       this, "OutputStripClusters", "ITkTracccStripClusters",
       "Output xAOD strip cluster container"};
