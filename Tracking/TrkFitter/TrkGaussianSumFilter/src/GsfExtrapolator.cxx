@@ -28,7 +28,7 @@
 #include "TrkParameters/TrackParameters.h"
 #include "TrkTrack/TrackStateOnSurface.h"
 //
-#include <boost/container/flat_set.hpp>
+#include <flat_set>
 #include <boost/container/small_vector.hpp>
 #include <utility>
 
@@ -705,7 +705,7 @@ Trk::GsfExtrapolator::extrapolateFromLayerToLayer(
   const Trk::Layer* nextLayer =
     currentLayer->nextLayer(currentPosition, currentDirection);
 
-  using LayerSet = boost::container::flat_set<
+  using LayerSet = std::flat_set<
     const Trk::Layer*,
     std::less<const Trk::Layer*>,
     boost::container::small_vector<const Trk::Layer*, 8>>;
