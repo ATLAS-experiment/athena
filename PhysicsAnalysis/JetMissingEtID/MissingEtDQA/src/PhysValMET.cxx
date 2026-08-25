@@ -523,10 +523,6 @@ namespace MissingEtDQA {
         ATH_MSG_ERROR ( "Failed to retrieve Jet container: " << name_jet << ". Exiting." );
         return StatusCode::FAILURE;
       }
-      ConstDataVector<JetContainer> basicSelectionJets(SG::VIEW_ELEMENTS);
-      for(const auto jet : *jets){ //for jets assign jets
-        basicSelectionJets.push_back(jet);
-      }
 
       //Prepare Rebuilding MET
       ATH_MSG_INFO( "  Rebuilding MET_" << jet_type );
@@ -619,7 +615,7 @@ namespace MissingEtDQA {
       auto aux_jetonly = std::make_unique<xAOD::MissingETAuxContainer>();
       met_jetonly->setStore(aux_jetonly.get());
       (*m_metmaker2)->rebuildJetMET("RefJet", "SoftClus", "PVSoftTrk", met_jetonly.get(), jets, coreMet, metHelper, true);
-      std::vector<const xAOD::Jet*> only_jet_elems = met::getMETElements<xAOD::Jet>(*(*met_jetonly)[str_jet]);
+      std::vector<const xAOD::Jet*> only_jet_elems = met::getMETElements<xAOD::Jet>(*(*met_jetonly)["RefJet"]);
 
       //Sum up the pT's of the objects
       bool has_muon = 0, has_electron = 0, has_photon = 0, has_tau = 0, has_jet = 0;
