@@ -107,7 +107,7 @@ namespace MissingEtDQA {
   //initialize
   StatusCode PhysValMET::initialize()
   {
-    ATH_MSG_INFO ("Initializing " << name() << "...");    
+    ATH_MSG_DEBUG ("Initializing " << name() << "...");    
     ATH_CHECK(ManagedMonitorToolBase::initialize());
 
     //setup names
@@ -142,7 +142,7 @@ namespace MissingEtDQA {
     m_terms.emplace_back("FinalTrk");
     m_terms.emplace_back("FinalClus");
 
-    ATH_MSG_INFO("Retrieving tools...");
+    ATH_MSG_DEBUG("Retrieving tools...");
 
     //retrieve tools
     ATH_CHECK( m_metmakerTopo.retrieve() ); 
@@ -183,7 +183,7 @@ namespace MissingEtDQA {
   StatusCode PhysValMET::bookHistograms()
   { 
 
-    ATH_MSG_INFO ("Booking hists " << name() << "...");
+    ATH_MSG_DEBUG ("Booking hists " << name() << "...");
       
     //define hist info
     int nbinp = 100;
@@ -231,7 +231,7 @@ namespace MissingEtDQA {
 
         //Create and Register histograms for and Rebuilt
         std::vector <std::string> met_type = {"MET_Rebuilt_"};
-        ATH_MSG_INFO("****STARTING****");
+        ATH_MSG_DEBUG("****STARTING****");
 
         //loop for rebuilt
         for (const auto& type : met_type){
@@ -454,7 +454,7 @@ namespace MissingEtDQA {
       }
     }
 
-    ATH_MSG_INFO("Physics objects");
+    ATH_MSG_DEBUG("Physics objects");
 
     //Set up Physics Objects
 
@@ -525,7 +525,7 @@ namespace MissingEtDQA {
       }
 
       //Prepare Rebuilding MET
-      ATH_MSG_INFO( "  Rebuilding MET_" << jet_type );
+      ATH_MSG_DEBUG( "  Rebuilding MET_" << jet_type );
       MissingETContainer* met = new MissingETContainer(); //Define MET Container
       if( evtStore()->record(met,("MET_Rebuilt_"+jet_type).c_str()).isFailure() ) {
         ATH_MSG_WARNING("Unable to record MissingETContainer: MET_Rebuilt_" << jet_type);
@@ -557,7 +557,7 @@ namespace MissingEtDQA {
       }
 
       //Start for MET Rebuilt
-      ATH_MSG_INFO( "  MET_Rebuilt_" << jet_type << ":" );
+      ATH_MSG_DEBUG( "  MET_Rebuilt_" << jet_type << ":" );
 
       //Select and flag objects for final MET building ***************************
       if( jet_type.find("PFlow") != std::string::npos) m_metmaker = &m_metmakerPFlow;
@@ -727,7 +727,7 @@ namespace MissingEtDQA {
       }
 
       //Fill MET Angles
-      ATH_MSG_INFO( "  MET_Angles :" );
+      ATH_MSG_DEBUG( "  MET_Angles :" );
 
       //define vars
       double leadPt = 0., subleadPt = 0., leadPhi = 0., subleadPhi = 0.;
@@ -811,7 +811,7 @@ namespace MissingEtDQA {
 
       // Fill Resolution histos
       if(m_doTruth){
-        ATH_MSG_INFO( "  Resolution:" );
+        ATH_MSG_DEBUG( "  Resolution:" );
         //Fill Rebuilt plots
         (m_MET_Resolution["MET_Rebuilt_"+jet_type]).at(0)->Fill(((*met)["FinalClus"]->mpx()-(*met_Truth)["NonInt"]->mpx())/1000., weight);
         (m_MET_Resolution["MET_Rebuilt_"+jet_type]).at(1)->Fill(((*met)["FinalClus"]->mpy()-(*met_Truth)["NonInt"]->mpy())/1000., weight);
@@ -953,7 +953,7 @@ namespace MissingEtDQA {
   // Proc Hists
   StatusCode PhysValMET::procHistograms()
   {
-    ATH_MSG_INFO ("Finalising hists " << name() << "...");
+    ATH_MSG_DEBUG ("Finalising hists " << name() << "...");
   
     //loop over jet types
     for (const auto& jet_type : m_types){
