@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "tauRecTools/TauVertexedClusterDecorator.h"
@@ -63,7 +63,7 @@ StatusCode TauVertexedClusterDecorator::execute(xAOD::TauJet& tau) const {
   }
 
   static const SG::Accessor<std::vector<xAOD::CaloVertexedTopoCluster>> vertexedClustersAcc("VertexedClusters");
-  vertexedClustersAcc(tau) = vertexedClusterList;
+  vertexedClustersAcc(tau) = std::move(vertexedClusterList);
 
   return StatusCode::SUCCESS;
 } 

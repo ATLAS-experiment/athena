@@ -122,6 +122,8 @@ StatusCode TauElectronVetoVariables::execute(xAOD::TauJet& pTau) const {
     }
     
     // Loop through jets, get links to clusters
+    //Local variable cellSeen uses 25000 bytes of stack space
+    //coverity[STACK_USE]
     std::bitset<200000> cellSeen{};
     const std::unordered_map<int, int> samplingLookup{
       {4,0}, {5,1}, {6,2}, {7,3}, {8,12},
