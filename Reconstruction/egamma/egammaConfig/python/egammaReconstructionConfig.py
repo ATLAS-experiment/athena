@@ -23,7 +23,7 @@ def egammaReconstructionCfg(flags, name="egammaReconstruction"):
     if flags.Egamma.doTracking:
 
         if flags.Acts.GsfRefitActs:
-            if flags.Acts.extrapolateElectronsLegacy or not flags.Acts.TrackingGeometry.UseBlueprint:
+            if flags.Acts.extrapolateElectronsLegacy:
                 from egammaAlgs.egammaSelectedTrackCopyConfig import (
                     egammaSelectedTrackCopyCfg)
                 acc.merge(egammaSelectedTrackCopyCfg(flags))
