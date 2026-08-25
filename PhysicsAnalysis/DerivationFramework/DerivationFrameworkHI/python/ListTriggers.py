@@ -826,24 +826,114 @@ def HION7SkimmingTriggers2025():
 
     return triggers
 
+def HION7SkimmingTriggers2026():
+    triggers  = HION7SkimmingTriggers2024()
+
+    return triggers
+
+## HION8
+
+def HION8SkimmingTriggersPP():
+    triggers  = HION7JetTriggersPP()
+    triggers.update(HION7FwdJetTriggersPP())
+    triggers.update(HION7MinBiasTriggersPP())
+
+    return triggers
+
+def HION8SkimmingTriggers2023():
+    triggers  = HION7JetTriggers2023()
+    triggers.update(HION7FwdJetTriggers2023())
+    triggers.update(HION7PCCCTriggers2023())
+
+    return triggers
+
+def HION8SkimmingTriggers2024():
+    triggers  = HION7JetTriggers2024()
+    triggers.update(HION7FwdJetTriggers2024())
+    triggers.update(HION7PCCCTriggers2024())
+
+    return triggers
+
+def HION8SkimmingTriggers2025():
+    triggers  = HION8SkimmingTriggers2024()
+
+    return triggers
+
+def HION8SkimmingTriggers2026():
+    triggers  = HION8SkimmingTriggers2024()
+
+    return triggers
+
+## HION9
+
+def HION9SkimmingTriggersPP():
+    triggers  = HION7JetTriggersPP()
+    triggers.update(HION7MinBiasTriggersPP())
+
+    return triggers
+
+def HION9SkimmingTriggers2023():
+    triggers  = HION7JetTriggers2023()
+    triggers.update(HION7PCCCTriggers2023())
+
+    return triggers
+
+def HION9SkimmingTriggers2024():
+    triggers  = HION7JetTriggers2024()
+    triggers.update(HION7PCCCTriggers2024())
+
+    return triggers
+
+def HION9SkimmingTriggers2025():
+    triggers  = HION9SkimmingTriggers2024()
+
+    return triggers
+
+def HION9SkimmingTriggers2026():
+    triggers  = HION9SkimmingTriggers2024()
+
+    return triggers
+
 #################################################################################
-def GetTriggers(project_tag, isSmallSystem):
+def GetTriggers(project_tag, isSmallSystem, deriv_format):
     switcher_HION7 = {
         'data23_hi': HION7SkimmingTriggers2023(),
         'data24_hi': HION7SkimmingTriggers2024(),
         'data25_hi': HION7SkimmingTriggers2025(),
+        'data26_hi': HION7SkimmingTriggers2026(),
+        }
+
+    switcher_HION8 = {
+        'data23_hi': HION8SkimmingTriggers2023(),
+        'data24_hi': HION8SkimmingTriggers2024(),
+        'data25_hi': HION8SkimmingTriggers2025(),
+        'data26_hi': HION8SkimmingTriggers2026(),
+        }
+
+    switcher_HION9 = {
+        'data23_hi': HION9SkimmingTriggers2023(),
+        'data24_hi': HION9SkimmingTriggers2024(),
+        'data25_hi': HION9SkimmingTriggers2025(),
+        'data26_hi': HION9SkimmingTriggers2026(),
         }
 
     switcher_SmallSystems = {
-        'data24_5p36TeV': HION7SkimmingTriggersPP(),
+            'data24_5p36TeV': lambda deriv_format:
+                HION7SkimmingTriggersPP() if deriv_format=="HION7"
+                else HION8SkimmingTriggersPP() if deriv_format=="HION8" 
+                else HION9SkimmingTriggersPP(),
         'data25_hip': HION7SkimmingTriggerspO(),
         'data25_hi': HION7SkimmingTriggersOO(),
         }
 
     if isSmallSystem:
         return  switcher_SmallSystems.get(project_tag, "Invalid project tag")
-    else:
+    elif deriv_format=="HION7":
         return  switcher_HION7.get(project_tag, "Invalid project tag")
+    elif deriv_format=="HION8":
+        return  switcher_HION8.get(project_tag, "Invalid project tag")
+    else:
+        return  switcher_HION9.get(project_tag, "Invalid project tag")
 
 
 #################################################################################

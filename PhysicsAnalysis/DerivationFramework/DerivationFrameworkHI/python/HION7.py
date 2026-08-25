@@ -105,7 +105,7 @@ def HION7SkimmingToolCfg(flags, format="HION7"):
     if not flags.Input.isMC and not flags.Overlay.DataOverlay:
         print('project: ', flags.Input.ProjectName,
               ', isSmallSystem: ', isSmallSystem)
-        TriggerDict = ListTriggers.GetTriggers(flags.Input.ProjectName, isSmallSystem)
+        TriggerDict = ListTriggers.GetTriggers(flags.Input.ProjectName, isSmallSystem,"HION7")
         for key in TriggerDict:
             filterList_trig = []
             expression = (
