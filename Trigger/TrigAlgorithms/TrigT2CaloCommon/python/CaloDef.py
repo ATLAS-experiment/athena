@@ -36,6 +36,24 @@ def fastCaloRecoSequenceCfg(flags, inputEDM="", ClustersName="HLT_FastCaloEMClus
                 acc.merge(t2CaloEgamma_AllCfg(flags, "L2CaloLayersFex",RoIs=inputEDM,ExtraInputs=CaloDataAccessSvcDependencies, ClustersName = ClustersName))
     return acc
 
+#
+# fast calo algorithm (central or forward regions)
+#
+@AccumulatorCache
+def fastCaloPhotonPointRecoSequenceCfg(flags, inputEDM="", ClustersName="HLT_FastCaloPhotonPointClusters" ):
+
+    acc = ComponentAccumulator()
+    acc.merge(trigCaloDataAccessSvcCfg(flags))
+    if not inputEDM:
+        from HLTSeeding.HLTSeedingConfig import mapThresholdToL1RoICollection
+        # using jet seeds for testing. we should use EM as soon as we have EM seeds into the L1
+        inputEDM = mapThresholdToL1RoICollection("EM")
+
+    from TrigT2CaloEgamma.TrigT2CaloEgammaConfig import t2CaloEgamma_PhotonPointCfg
+    acc.merge(t2CaloEgamma_PhotonPointCfg(flags, "L2CaloPhotonPointFex",RoIs=inputEDM,ExtraInputs= CaloDataAccessSvcDependencies, ClustersName = ClustersName,doNotRecord=True))
+    return acc
+
+
 def fastCaloVDVCfg(flags,name="fastCaloVDV",InViewRoIs="EMCaloRoIs") :
     reco = ComponentAccumulator()
     fastCaloVDV = CompFactory.AthViews.ViewDataVerifier(name)
