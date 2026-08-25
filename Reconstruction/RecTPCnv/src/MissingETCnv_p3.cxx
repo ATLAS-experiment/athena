@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /********************************************************************
@@ -21,8 +21,12 @@ PURPOSE:  Transient/Persisten converter for MissingET class
 #include "RecTPCnv/MissingETCnv_p3.h"
 #include "RecTPCnv/MissingEtRegionsCnv_p3.h"
 
+#include <bit>
+#include <utility>
+#include <memory>
+#include <vector>
 
-// #include <stdlib.h> // not needed here?
+class MsgStream;
 
 // region converter
 static const MissingEtRegionsCnv_p3 regCnv;
@@ -42,32 +46,19 @@ void MissingETCnv_p3::transToPers(  const MissingET* trans, MissingET_p3* pers, 
 
 
 void MissingETCnv_p3::persToTrans( MissingET* trans, std::vector<float>::const_iterator i) const {
-	
-    //float version;
-    //version = (*i);
-    ++i; // as there is just one it is not used.
-	
-	union conv{  unsigned int i;   float f;  } c;
-	c.f=(*i); ++i;
-        MissingET::Source source = static_cast<MissingET::Source>(c.i>>1);
+  ++i; // as there is just one it is not used.
+	float fcnv=(*i); ++i;
+	auto icnv = std::bit_cast<unsigned int>(fcnv);
+  MissingET::Source source = static_cast<MissingET::Source>(icnv>>1);
 	double ex     = (*i);++i;
 	double ey     = (*i);++i;
 	double etSum  = (*i);++i;
-        std::unique_ptr<MissingEtRegions> regions;
-	if( c.i & 1) {
+  std::unique_ptr<MissingEtRegions> regions;
+	if( icnv & 1) {
           regions = std::make_unique<MissingEtRegions>();
           regCnv.persToTrans( regions.get(), i);
 	}
-        *trans = MissingET (source,
-                            std::move (regions),
-                            ex, ey, etSum);
-	
-    // std::cout<<"IN  source: "<<trans->m_source;
-    // std::cout<<"\tex: "<<trans->m_ex;
-    // std::cout<<"\tey: "<<trans->m_ey;
-    // std::cout<<"\tetSum: "<<trans->m_etSum;
-    // if (trans->m_regions != 0) std::cout<<"\thas Regions"<<std::endl; else std::cout<<"\tNO Regions"<<std::endl;
-	
+  *trans = MissingET (source, std::move (regions), ex, ey, etSum);
 	return;
 }
 
@@ -91,12 +82,6 @@ void  MissingETCnv_p3::transToPers(  const MissingET* trans,  std::vector<float>
 	
 	// calling regions tTP
 	if( trans->getRegions() != 0) regCnv.transToPers(trans->getRegions(), all);
-	
-    // std::cout<<"OUT source: "<<trans->m_source;
-    // std::cout<<"\tex: "<<trans->m_ex;
-    // std::cout<<"\tey: "<<trans->m_ey;
-    // std::cout<<"\tetSum: "<<trans->m_etSum;
-    // if (trans->m_regions != 0) std::cout<<"\thas Regions"<<std::endl; else std::cout<<"\tNO Regions"<<std::endl;
     
 	return;
 }

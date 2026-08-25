@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /********************************************************************
@@ -23,6 +23,7 @@ PURPOSE:  Transient/Persisten converter for MissingET class
 
 
 #include <stdlib.h>
+#include <bit>
 
 // region converter
 static const MissingEtRegionsCnv_p2 regCnv;
@@ -41,15 +42,15 @@ void MissingETCnv_p2::transToPers(  const MissingET* trans, MissingET_p2* pers, 
 }
 
 
-void MissingETCnv_p2::persToTrans( MissingET* trans, std::vector<float>::const_iterator i) const {
-	union conv{  unsigned int i;   float f;  } c;
-	c.f=(*i); ++i;
-        MissingET::Source source = static_cast<MissingET::Source>(c.i>>1);
+void MissingETCnv_p2::persToTrans( MissingET* trans, std::vector<float>::const_iterator i) const {   
+	float fcnv=(*i); ++i;
+	auto icnv = std::bit_cast<unsigned int>(fcnv);
+  MissingET::Source source = static_cast<MissingET::Source>(icnv>>1);
 	double ex     = (*i);++i;
 	double ey     = (*i);++i;
 	double etSum  = (*i);++i;
-        std::unique_ptr<MissingEtRegions> regions;
-	if( c.i & 1) {
+  std::unique_ptr<MissingEtRegions> regions;
+	if( icnv & 1) {
           regions = std::make_unique<MissingEtRegions>();
           regCnv.persToTrans( regions.get(), i);
 	}
