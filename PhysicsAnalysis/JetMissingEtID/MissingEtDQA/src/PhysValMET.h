@@ -103,7 +103,7 @@ class PhysValMET
   bool Accept(const xAOD::Jet* jet, double JvtCut, ToolHandle<IJetUpdateJvt>* jvtTool);
 
   // vector of collections
-  std::vector <std::string> m_types;
+  std::vector <std::string> m_jet_types;
 
   // vector of terms
   std::vector <std::string> m_terms;

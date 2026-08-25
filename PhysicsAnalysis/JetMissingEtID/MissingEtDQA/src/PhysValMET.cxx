@@ -77,7 +77,7 @@ namespace MissingEtDQA {
   PhysValMET::~PhysValMET()
   {
     m_names.clear();
-    m_types.clear();
+    m_jet_types.clear();
     m_terms.clear();
     m_MET.clear();
     m_MET_x.clear();
@@ -126,9 +126,9 @@ namespace MissingEtDQA {
     m_names["PVTrack_Pileup"] = "Track MET for each pileup vertex";
 
     //define the Jet types
-    m_types.clear();
-    m_types.emplace_back("AntiKt4EMTopo");
-    m_types.emplace_back("AntiKt4EMPFlow");
+    m_jet_types.clear();
+    m_jet_types.emplace_back("AntiKt4EMTopo");
+    m_jet_types.emplace_back("AntiKt4EMPFlow");
 
     //setup terms
     m_terms.clear();
@@ -200,7 +200,7 @@ namespace MissingEtDQA {
     if (m_detailLevel >= 10) {
 
       //loop through jet types
-      for (const auto& jet_type : m_types){
+      for (const auto& jet_type : m_jet_types){
         //define variables
         std::string name_met;
         std::string name_sub;
@@ -515,7 +515,7 @@ namespace MissingEtDQA {
     }
 
     //Jets
-    for (const auto& jet_type : m_types){
+    for (const auto& jet_type : m_jet_types){
       std::string name_jet = jet_type + "Jets";
       const xAOD::JetContainer* jets = nullptr;
       ATH_CHECK( evtStore()->retrieve(jets,name_jet) );
@@ -956,7 +956,7 @@ namespace MissingEtDQA {
     ATH_MSG_DEBUG ("Finalising hists " << name() << "...");
   
     //loop over jet types
-    for (const auto& jet_type : m_types){
+    for (const auto& jet_type : m_jet_types){
       for(std::vector<TH1D*>::size_type i = 0; i < (m_MET["MET_Rebuilt_"+jet_type]).size(); ++i) {
         //Term hists
         (m_MET["MET_Rebuilt_"+jet_type]).at(i)->Sumw2();
