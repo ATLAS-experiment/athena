@@ -14,7 +14,7 @@
 #include "PixelReadoutGeometry/PixelModuleDesign.h"
 #include "InDetIdentifier/PixelID.h"
 #include "TrkSurfaces/RectangleBounds.h"
-#include "CxxUtils/flat_set.h"
+#include <flat_set>
 
 namespace InDet
 {
@@ -189,7 +189,7 @@ namespace InDet
     //std::unordered_set<Identifier> > idset;
 
     // This is not used for ITk, still we are creating it for the moment and could be optimized away in the future
-    CxxUtils::flat_set<Identifier> idset;
+    std::flat_set<Identifier> idset;
 
     for(const auto *const rdo : collection) {
       const Identifier rdoID = rdo->identify();
