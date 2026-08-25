@@ -173,7 +173,6 @@ namespace TrigConf {
       int               m_chain_counter{};       //!< chain counter
       int               m_chain_version{};       //!< chain version
       std::string       m_level;               //!< trigger level
-      bool              m_has_l2;              //!< For EF level chains, has_l2 is true if the chain seeds from a L2 item (Run 1) or false if it seeds from a L1 item (Run 4+)
       std::string       m_lower_chain_name;    //!< name of the lower trigger chain (or the LVL1 trigger item)
       int               m_lower_chain_counter{}; //!< counter of the lower trigger chain (or the ID of the LVL1 trigger item)
       std::vector<int>  m_lower_chain_counters;//!< counters of the lower trigger items if more than 1
@@ -188,6 +187,9 @@ namespace TrigConf {
       std::vector<HLTStreamTag*>                         m_streams_orig;
       std::vector<HLTStreamTag*>                         m_streams;
       std::unordered_map<std::string, HLTStreamTag*>   m_streams_map;
+      // For EF level chains, has_l2 is true if the chain seeds from a L2 item (Run 1) or false if it seeds from a L1 item (Run 4+).
+      // Added 2026 as the last member to preserve ABI and minimise migration bugs - this class is used by templated feature retrieval code.
+      bool m_has_l2{false};
 
       friend std::ostream & operator<<(std::ostream &, const HLTChain &);
 

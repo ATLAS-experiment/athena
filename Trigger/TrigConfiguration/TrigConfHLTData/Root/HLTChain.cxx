@@ -31,7 +31,6 @@ TrigConf::HLTChain::HLTChain() :
    m_chain_counter(0),
    m_chain_version(0),
    m_level(""),
-   m_has_l2(false),
    m_lower_chain_name(""),
    m_lower_chain_counter(0),
    m_lower_chain_hash_id(0),
@@ -74,7 +73,8 @@ HLTChain::HLTChain( const HLTChain& o ) :
    m_lower_chain_counters( o.m_lower_chain_counters ),
    m_EB_after_step       ( o.m_EB_after_step ),
    m_prescales           ( o.m_prescales ),
-   m_groups              ( o.m_groups )
+   m_groups              ( o.m_groups ),
+   m_has_l2              ( o.m_has_l2 )
 {
    // deep copy to ensure ownership
    for(HLTSignature* sig : o.m_HLTSignatureList)
