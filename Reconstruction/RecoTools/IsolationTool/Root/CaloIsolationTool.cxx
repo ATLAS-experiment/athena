@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //////////////////////////////////////////////////////////////////////////////
@@ -741,7 +741,7 @@ for( auto isoType : isoTypes ){
       std::map<Iso::IsolationCorrectionParameter,float> corecorr;
       corecorr[Iso::coreEnergy] = totE;
       corecorr[Iso::coreArea]   = coreConeDR*coreConeDR*M_PI;
-      result.coreCorrections[Iso::coreCone] = corecorr;
+      result.coreCorrections[Iso::coreCone] = std::move(corecorr);
       ATH_MSG_DEBUG("done etcone, coreCone");
 
       /// apply the correction if required.
@@ -798,7 +798,7 @@ for( auto isoType : isoTypes ){
 	std::map<Iso::IsolationCorrectionParameter,float> corecorr;
 	corecorr[Iso::coreEnergy] = totE;
 	corecorr[Iso::coreArea]   = coreConeDR*coreConeDR*M_PI;
-	result.coreCorrections[Iso::coreCone] = corecorr;
+	result.coreCorrections[Iso::coreCone] = std::move(corecorr);
 	ATH_MSG_DEBUG("done etcone, coreCone");
 	/// apply the correction if required.                                                                                                                                                           
 	if(result.corrlist.calobitset.test(static_cast<unsigned int>(Iso::coreCone))){
@@ -1169,7 +1169,7 @@ for( auto isoType : isoTypes ){
     std::map<Iso::IsolationCorrectionParameter,float> corecorr;
     corecorr[Iso::coreEnergy] = coreV;
     corecorr[Iso::coreArea]   = 5*0.025*7*TMath::Pi()/128;
-    result.coreCorrections[Iso::core57cells] = corecorr;
+    result.coreCorrections[Iso::core57cells] = std::move(corecorr);
     if (result.corrlist.calobitset.test(static_cast<unsigned int>(Iso::core57cells))) {
       for (unsigned int i = 0; i < isoTypes.size(); i++){
 	result.etcones[i] -= coreV;
@@ -1286,7 +1286,7 @@ for( auto isoType : isoTypes ){
       std::map<Iso::IsolationCorrectionParameter,float> corecorrSC;
       corecorrSC[Iso::coreEnergy] = topoCoreSCem;
       corecorrSC[Iso::coreArea]   = areacore;
-      result.coreCorrections[Iso::coreConeSC] = corecorrSC;
+      result.coreCorrections[Iso::coreConeSC] = std::move(corecorrSC);
 
     }
 
@@ -1295,7 +1295,7 @@ for( auto isoType : isoTypes ){
     std::map<Iso::IsolationCorrectionParameter,float> corecorr;
     corecorr[Iso::coreEnergy] = topoCore;
     corecorr[Iso::coreArea]   = areacore;
-    result.coreCorrections[Iso::coreCone] = corecorr;
+    result.coreCorrections[Iso::coreCone] = std::move(corecorr);
 
     float toSub = 0;
     bool  doSub = false;
@@ -1410,7 +1410,7 @@ bool CaloIsolationTool::correctIsolationEnergy_pflowCore(CaloIsolation& result,
       std::map<Iso::IsolationCorrectionParameter,float> corecorrSC;
       corecorrSC[Iso::coreEnergy] = pflowCoreSC;
       corecorrSC[Iso::coreArea]   = 0;
-      result.coreCorrections[Iso::coreConeSC] = corecorrSC;
+      result.coreCorrections[Iso::coreConeSC] = std::move(corecorrSC);
     }
 
     /// set results
@@ -1421,7 +1421,7 @@ bool CaloIsolationTool::correctIsolationEnergy_pflowCore(CaloIsolation& result,
     std::map<Iso::IsolationCorrectionParameter,float> corecorr;
     corecorr[Iso::coreEnergy] = pflowCore;
     corecorr[Iso::coreArea]   = areacore;
-    result.coreCorrections[Iso::coreCone] = corecorr;
+    result.coreCorrections[Iso::coreCone] = std::move(corecorr);
 
     if (result.corrlist.calobitset.test(static_cast<unsigned int>(Iso::coreCone))) {
       for (unsigned int i = 0; i < result.etcones.size(); i++) {
@@ -1455,7 +1455,7 @@ bool CaloIsolationTool::correctIsolationEnergy_pflowCore(CaloIsolation& result,
     std::map<Iso::IsolationCorrectionParameter,float> corecorr;
     corecorr[Iso::coreEnergy] = ecore;
     corecorr[Iso::coreArea]   = 0;
-    result.coreCorrections[Iso::coreMuon] = corecorr;
+    result.coreCorrections[Iso::coreMuon] = std::move(corecorr);
 
     if (result.corrlist.calobitset.test(static_cast<unsigned int>(Iso::coreMuon))) {
       for( unsigned int i=0;i<result.etcones.size();++i ) {
@@ -1490,7 +1490,7 @@ bool CaloIsolationTool::correctIsolationEnergy_pflowCore(CaloIsolation& result,
 		      << ", ptcorr = " << corrvec[i] << ", isol pt corrected = " << result.etcones[i] );
       }
     }
-    result.noncoreCorrections[Iso::ptCorrection] = corrvec;
+    result.noncoreCorrections[Iso::ptCorrection] = std::move(corrvec);
     /// FIX LATER
     // get the correction from xAOD file
 
@@ -1513,7 +1513,7 @@ bool CaloIsolationTool::correctIsolationEnergy_pflowCore(CaloIsolation& result,
       esKey = (fabs(eta) < 1.5) ? &m_efEDCentral : &m_efEDForward;
     } else if (fwdClus != nullptr) {
       ATH_MSG_DEBUG("No pileup correction for forward electron isolation yet");
-      result.noncoreCorrections[Iso::pileupCorrection] = corrvec;
+      result.noncoreCorrections[Iso::pileupCorrection] = std::move(corrvec);
       return true;
     }
 
@@ -1534,14 +1534,15 @@ bool CaloIsolationTool::correctIsolationEnergy_pflowCore(CaloIsolation& result,
     // Get the core size
     float areacore = 0;
     std::map<xAOD::Iso::IsolationCorrectionParameter,float> ecore;
-    if(result.corrlist.calobitset.test(static_cast<unsigned int>(Iso::coreMuon))){
-      ecore = result.coreCorrections.find(Iso::coreMuon)->second;
-    }else if(result.corrlist.calobitset.test(static_cast<unsigned int>(Iso::core57cells))){
-      ecore = result.coreCorrections.find(Iso::core57cells)->second;
-    }else if(result.corrlist.calobitset.test(static_cast<unsigned int>(Iso::coreCone))){
-      ecore = result.coreCorrections.find(Iso::coreCone)->second;
+    for (const auto param:{Iso::coreMuon, Iso::core57cells,Iso::coreCone}){
+      if (result.corrlist.calobitset.test(static_cast<unsigned int>(param))){
+        if (auto it = result.coreCorrections.find(param); it != result.coreCorrections.end()) {
+          ecore = it->second;
+        }
+        break;
+      }
     }
-
+    
     auto iter = ecore.find(xAOD::Iso::coreArea);
     if (iter != ecore.end())
       areacore = ecore.find(xAOD::Iso::coreArea)->second;
@@ -1575,7 +1576,7 @@ bool CaloIsolationTool::correctIsolationEnergy_pflowCore(CaloIsolation& result,
       ATH_MSG_DEBUG("ED correction ("<< type << ")for size " << dR << " = " << toSub << " (areacore=" << areacore << ")");
     }
 
-    result.noncoreCorrections[Iso::pileupCorrection] = corrvec;
+    result.noncoreCorrections[Iso::pileupCorrection] = std::move(corrvec);
     return true;
   }
 

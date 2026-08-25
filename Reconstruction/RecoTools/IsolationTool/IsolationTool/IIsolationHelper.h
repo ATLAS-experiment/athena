@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ISOLATIONTOOL_IISOLATIONHELPERTOOL_H
@@ -31,7 +31,7 @@ namespace CP
             virtual bool correction(float& value, const xAOD::IParticle& par, xAOD::Iso::IsolationType type, const xAOD::Iso::IsolationCaloCorrectionBitset& corrMask) const = 0;
             virtual bool getPileupCorrection(float& value, const xAOD::IParticle& par, xAOD::Iso::IsolationType type, xAOD::Iso::IsolationCaloCorrectionBitset corrMask) const = 0;
             virtual bool getPileupCorrection(float& value, const xAOD::IParticle& par, xAOD::Iso::IsolationType type, float coreArea) const = 0;
-            virtual bool updateIsolation(xAOD::MuonContainer*& copy,xAOD::ShallowAuxContainer*& copyaux, std::vector<xAOD::Iso::IsolationType>& types, xAOD::Iso::IsolationCaloCorrectionBitset corrMask, std::string muonkey, bool recordSG) const = 0;
+            virtual bool updateIsolation(xAOD::MuonContainer*& copy,xAOD::ShallowAuxContainer*& copyaux, std::vector<xAOD::Iso::IsolationType>& types, xAOD::Iso::IsolationCaloCorrectionBitset corrMask, const std::string & muonkey, bool recordSG) const = 0;
     };
   
 }
