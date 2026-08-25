@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 ///
 ///     @author Vadim Kostyukhin <vadim.kostyukhin@cern.ch>
@@ -23,7 +23,7 @@ namespace Rec{
 
 //-----------------------------------------------------------------------------------
 //  Find track contributing most to the vertex invariant mass
-   int NewVrtSecInclusiveTool::mostHeavyTrk(WrkVrt V, std::vector<const xAOD::TrackParticle*> AllTracks)
+   int NewVrtSecInclusiveTool::mostHeavyTrk(const WrkVrt & V, std::vector<const xAOD::TrackParticle*> AllTracks)
    
    {
       int NTrk=V.selTrk.size(), SelT=-1;

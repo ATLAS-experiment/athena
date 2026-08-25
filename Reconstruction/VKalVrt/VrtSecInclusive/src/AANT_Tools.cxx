@@ -349,7 +349,15 @@ namespace VKalVrtAthena {
   
   //____________________________________________________________________________________________________
   StatusCode VrtSecInclusive::fillAANT_SecondaryVertices( xAOD::VertexContainer *vertices ) {
-    
+    //initialise accessors out of loop
+    static const SG::ConstAccessor<float> pt_wrtSVAcc("pt_wrtSV");
+    static const SG::ConstAccessor<float> eta_wrtSVAcc("eta_wrtSV");
+    static const SG::ConstAccessor<float> phi_wrtSVAcc("phi_wrtSV");
+    static const SG::ConstAccessor<float> d0_wrtSVAcc("d0_wrtSV");
+    static const SG::ConstAccessor<float> z0_wrtSVAcc("z0_wrtSV");
+    static const SG::ConstAccessor<float> errP_wrtSVAcc("errP_wrtSV");
+    static const SG::ConstAccessor<float> errd0_wrtSVAcc("errd0_wrtSV");
+    static const SG::ConstAccessor<float> errz0_wrtSVAcc("errz0_wrtSV");
     // Loop over vertices
     for( xAOD::Vertex *vertex : *vertices ) {
       
@@ -378,14 +386,7 @@ namespace VKalVrtAthena {
         m_ntupleVars->get< vector<int> >( "SecVtx_TrkPixExclBLay" ) .emplace_back( trk_summary.numPixelHits - trk_summary.numIBLHits );
         m_ntupleVars->get< vector<int> >( "SecVtx_TrkSCT" )         .emplace_back( trk_summary.numSctHits );
         
-        static const SG::ConstAccessor<float> pt_wrtSVAcc("pt_wrtSV");
-        static const SG::ConstAccessor<float> eta_wrtSVAcc("eta_wrtSV");
-        static const SG::ConstAccessor<float> phi_wrtSVAcc("phi_wrtSV");
-        static const SG::ConstAccessor<float> d0_wrtSVAcc("d0_wrtSV");
-        static const SG::ConstAccessor<float> z0_wrtSVAcc("z0_wrtSV");
-        static const SG::ConstAccessor<float> errP_wrtSVAcc("errP_wrtSV");
-        static const SG::ConstAccessor<float> errd0_wrtSVAcc("errd0_wrtSV");
-        static const SG::ConstAccessor<float> errz0_wrtSVAcc("errz0_wrtSV");
+
         ATH_MSG_VERBOSE(" >> fillAANT_SecondaryVertices : filling track vars wrt. SV");
         if( pt_wrtSVAcc.isAvailable(*trk) &&
             eta_wrtSVAcc.isAvailable(*trk) &&
