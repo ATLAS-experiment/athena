@@ -26,8 +26,8 @@ namespace ActsTrk {
     // Make the logger And Propagate to ACTS routines
     m_logger = makeActsAthenaLogger(this, "Acts");
 
-    // eta,etaMinus,etaPlus,phi,phiMinus,Phiplus,z,zMinus,zPlus
-    m_internalRoi.emplace(0, -4.5, 4.5, 0, -std::numbers::pi, std::numbers::pi, 0, -150.0,150.0);
+    // etaMin,etaMax,zMin,zMax
+    m_internalRoi.emplace(-4.5, 4.5, -150.0, 150.0);
 
     ATH_CHECK( prepareConfiguration());
     printGbtsConfig();
@@ -110,7 +110,7 @@ namespace ActsTrk {
 
       float clusterWidth = 0.0f;
       float localPositionY = 0.0f;
-      if (m_finderCfg.useMl && isPixel) {
+      if (m_finderCfg.useClusterWidthCuts && isPixel) {
         assert(dynamic_cast<const xAOD::PixelCluster*>(sp->measurements().front())!=nullptr);
         const xAOD::PixelCluster* pCL = static_cast<const xAOD::PixelCluster*>(sp->measurements().front());
         clusterWidth = pCL->widthInEta();
@@ -159,7 +159,7 @@ namespace ActsTrk {
   
   StatusCode GbtsSeedingTool::prepareConfiguration() {
     m_finderCfg.lrtMode = m_LRTmode;
-    m_finderCfg.useMl = m_useML;
+    m_finderCfg.useClusterWidthCuts = m_useML;
     m_finderCfg.matchBeforeCreate = m_matchBeforeCreate;
     m_finderCfg.useOldTunings = m_useOldTunings;
     m_finderCfg.etaBinWidthOverride = m_etaBinWidthOverride;
@@ -215,7 +215,7 @@ void GbtsSeedingTool::printGbtsConfig() const {
   ATH_MSG_DEBUG( "connectorInputFile: " << m_finderCfg.connectorInputFile);
   ATH_MSG_DEBUG( "lutInputFile: " << m_finderCfg.lutInputFile);
   ATH_MSG_DEBUG( "lrtMode: " << m_finderCfg.lrtMode);
-  ATH_MSG_DEBUG( "useMl: " << m_finderCfg.useMl);
+  ATH_MSG_DEBUG( "useClusterWidthCuts: " << m_finderCfg.useClusterWidthCuts);
   ATH_MSG_DEBUG( "matchBeforeCreate: " << m_finderCfg.matchBeforeCreate);
   ATH_MSG_DEBUG( "useOldTunings: " << m_finderCfg.useOldTunings);
   ATH_MSG_DEBUG( "tauRatioPrecut: " << m_finderCfg.tauRatioPrecut);
