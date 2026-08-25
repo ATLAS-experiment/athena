@@ -6,6 +6,7 @@
 #include "AthenaPoolCnvSvc/IAthenaPoolCnvSvc.h"
 #include "AthenaBaseComps/AthService.h"
 #include "StorageSvc/DbType.h"
+#include "StorageSvc/DbTypeInfo.h"
 #include "StorageSvc/DbReflex.h"
 
 #include <cstdint>

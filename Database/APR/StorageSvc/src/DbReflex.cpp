@@ -39,36 +39,20 @@ constexpr std::pair<Guid, const char*> GuidToClname[] = {
 using namespace pool;
 using namespace std;
 
-typedef map<Guid,TypeH> GuidMap;
+typedef map<Guid,RootType> GuidMap;
 static GuidMap& guid_mapping()  {
   static GuidMap s_map ATLAS_THREAD_SAFE; // protected by guidMapMutex
   return s_map;
 }
 
-typedef map<TypeH,Guid> TypeMap;
+typedef map<RootType,Guid> TypeMap;
 static TypeMap& type_mapping()  {
   static TypeMap s_map ATLAS_THREAD_SAFE; // protected by guidMapMutex
   return s_map;
 }
 
-/// Access to reflection information by type name
-const TypeH DbReflex::forTypeName(const string& name)  {
-   return TypeH(name);
-}
-
-/// Access to reflection information by type info
-const TypeH DbReflex::forTypeInfo(const type_info& info)  {
-   TypeH t = TypeH(info);
-   return (t)? t : forTypeName( DbTypeInfo::typeName(info) );
-}
-
-string DbReflex::fullTypeName(const TypeH& typ)  {
-  return typ.Name();
-}
-
-
 /// Convert Guid to nomalized string (all char upper case!)
-Guid DbReflex::guid(const TypeH& type)
+Guid DbReflex::guid(const RootType& type)
 {
    upgrading_lock_t lock(guidMapMutex);
    TypeMap::iterator i = type_mapping().find(type);
@@ -95,7 +79,7 @@ Guid DbReflex::guid(const TypeH& type)
      else  {
         Guid id;
         // fill GUID with 16byte MD5 binary checksum digest of the typename
-        MD5 checkSum(fullTypeName(type));
+        MD5 checkSum(type.Name());
         checkSum.raw_digest(reinterpret_cast<unsigned char*>(&id));
         guid_mapping()[id] = type;
         type_mapping()[type] = id;
@@ -107,7 +91,7 @@ Guid DbReflex::guid(const TypeH& type)
 
 
 /// Access to reflection information by Guid
-const TypeH DbReflex::forGuid(const Guid& id)
+const RootType DbReflex::forGuid(const Guid& id)
 {
    {
       upgrading_lock_t lock(guidMapMutex);
@@ -122,7 +106,7 @@ const TypeH DbReflex::forGuid(const Guid& id)
   // Check the transformation map
   const DbTypeInfo* info = 0;
   if ( DbTransform::getShape(id, info).isSuccess() )  {
-     TypeH t = info->clazz();
+     RootType t = info->clazz();
      if ( t )  {
         Guid g = guid(t);
         if ( ::memcmp(&g, &id, sizeof(Guid))==0 )  {           
@@ -136,7 +120,7 @@ const TypeH DbReflex::forGuid(const Guid& id)
   for( auto& el : GuidToClname ) {
      if( id==el.first ) {
         // we have this guid in the hardcoded mapping
-        const TypeH typ( el.second );
+        const RootType typ( el.second );
         if( typ ) {
            Guid g( guid( typ ) );  // call this to update guid->type maps
            if( g != id ) {
@@ -169,10 +153,10 @@ const TypeH DbReflex::forGuid(const Guid& id)
     }
   } ALG;
 
-  size_t sz = TypeH::TypeSize();
+  size_t sz = RootType::TypeSize();
   for(size_t i=0; i<sz; ++i)  {
-     TypeH t = TypeH::TypeAt(i); // This may change/increase TypeH::TypeSize(), can't optimize
-     size_t sz_new = TypeH::TypeSize();
+     RootType t = RootType::TypeAt(i); // This may change/increase RootType::TypeSize(), can't optimize
+     size_t sz_new = RootType::TypeSize();
      if (sz_new > sz) {
         log << MSG::DEBUG << " ROOT gClassTable size increase for " << t.Name() << endmsg;
         sz = sz_new;
@@ -187,5 +171,5 @@ const TypeH DbReflex::forGuid(const Guid& id)
   }
 
   log << MSG::WARNING << "Type lookup for class ID " << id << " failed" << endmsg; 
-  return TypeH();
+  return RootType();
 }
