@@ -1,6 +1,6 @@
 /*
-  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
-*/
+   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
+ */
 
 ///////////////////////////////////////////////////////////////////
 // ExtrapolatorComparisonTest.cxx, (c) ATLAS Detector software
@@ -48,12 +48,11 @@ using xclock = std::chrono::steady_clock;
 //================ Constructor =================================================
 
 Trk::ExtrapolatorComparisonTest::ExtrapolatorComparisonTest(const std::string& name, ISvcLocator* pSvcLocator) :
-  AthReentrantAlgorithm(name,pSvcLocator) {}
+  AthReentrantAlgorithm(name, pSvcLocator) {}
 
 //================ Destructor =================================================
 
-Trk::ExtrapolatorComparisonTest::~ExtrapolatorComparisonTest()
-{
+Trk::ExtrapolatorComparisonTest::~ExtrapolatorComparisonTest() {
   // cleanup of the Trk::Surfaces
   for (const auto& surfaceTriple : m_atlasReferenceSurfaceTriples) {
     for (const auto* surface : surfaceTriple) {
@@ -62,75 +61,74 @@ Trk::ExtrapolatorComparisonTest::~ExtrapolatorComparisonTest()
   }
 }
 
-
 //================ Initialisation =================================================
 
-StatusCode Trk::ExtrapolatorComparisonTest::initialize()
-{
+StatusCode Trk::ExtrapolatorComparisonTest::initialize() {
   // Code entered here will be executed once at program start.
-  
+
   ATH_MSG_INFO(" initialize()");
-  
-  ATH_CHECK( m_extrapolationTool.retrieve() );
-  ATH_CHECK( m_atlasExtrapolator.retrieve() );
-  ATH_CHECK( m_trackingGeometrySvc.retrieve() );
+
+  ATH_CHECK(m_extrapolationTool.retrieve());
+  ATH_CHECK(m_atlasExtrapolator.retrieve());
+  ATH_CHECK(m_trackingGeometrySvc.retrieve());
 
   // Create the destination surfaces for extrapolation
   // --> you need the Trk::Surfaces and the Acts::Surfaces
   if (m_referenceSurfaceRadius.size() == m_referenceSurfaceHalflength.size()) {
-     // assign the size
-     m_referenceSurfaces = m_referenceSurfaceRadius.size();
-     // loop over it and create the 
-     for (unsigned int surface = 0; surface < m_referenceSurfaces; surface++) {
-       
-       double radius = m_referenceSurfaceRadius[surface];
-       double halfZ  = m_referenceSurfaceHalflength[surface];
-       
-       // create the Surface triplet
-       std::vector< const Trk::Surface*> trkSurfaceTriplet;
-       trkSurfaceTriplet.push_back(new Trk::DiscSurface    (Amg::Transform3D(Amg::Translation3D(0.,0., halfZ)),    0.,radius));
-       trkSurfaceTriplet.push_back(new Trk::CylinderSurface(Amg::Transform3D(Amg::Translation3D(0.,0.,    0.)),radius, halfZ));
-       trkSurfaceTriplet.push_back(new Trk::DiscSurface    (Amg::Transform3D(Amg::Translation3D(0.,0.,-halfZ)),    0.,radius));
-       ATH_MSG_INFO("Creating Trk::Surface at: R " << radius << " Z " << halfZ);
-       m_atlasReferenceSurfaceTriples.push_back(std::move(trkSurfaceTriplet));
-       
-       // create the Surface triplet
-       std::vector<std::shared_ptr<const Acts::Surface>> actsSurfaceTriplet;
-       
-       Acts::Transform3 posTransf(Acts::Transform3::Identity()*Acts::Translation3(Acts::Vector3(0.,0., halfZ)));
-       Acts::Transform3   cTransf(Acts::Transform3::Identity()*Acts::Translation3(Acts::Vector3(0.,0.,    0.)));
-       Acts::Transform3 negTransf(Acts::Transform3::Identity()*Acts::Translation3(Acts::Vector3(0.,0.,-halfZ)));
-       
-       auto posSurface = Acts::Surface::makeShared<Acts::DiscSurface>    (posTransf ,    0.,radius);
-       auto cSurface   = Acts::Surface::makeShared<Acts::CylinderSurface>(  cTransf ,radius, halfZ);
-       auto negSurface = Acts::Surface::makeShared<Acts::DiscSurface>    (negTransf ,    0.,radius);
-       
-       actsSurfaceTriplet.push_back(posSurface);
-       actsSurfaceTriplet.push_back(cSurface  );
-       actsSurfaceTriplet.push_back(negSurface);
-       ATH_MSG_INFO("Creating Acts::Surface at: R " << radius << " Z " << halfZ);
-       m_actsReferenceSurfaceTriples.push_back(std::move(actsSurfaceTriplet));
-       
-       m_referenceSurfaceNegativeBoundary.push_back(atan2(radius,-halfZ));
-       m_referenceSurfacePositiveBoundary.push_back(atan2(radius, halfZ));
-     }
-  } else { 
+    // assign the size
+    m_referenceSurfaces = m_referenceSurfaceRadius.size();
+    // loop over it and create the
+    for (unsigned int surface = 0; surface < m_referenceSurfaces; surface++) {
+      double radius = m_referenceSurfaceRadius[surface];
+      double halfZ = m_referenceSurfaceHalflength[surface];
+
+      // create the Surface triplet
+      std::vector< const Trk::Surface*> trkSurfaceTriplet;
+      trkSurfaceTriplet.push_back(new Trk::DiscSurface(Amg::Transform3D(Amg::Translation3D(0., 0., halfZ)), 0.,
+                                                       radius));
+      trkSurfaceTriplet.push_back(new Trk::CylinderSurface(Amg::Transform3D(Amg::Translation3D(0., 0., 0.)), radius,
+                                                           halfZ));
+      trkSurfaceTriplet.push_back(new Trk::DiscSurface(Amg::Transform3D(Amg::Translation3D(0., 0., -halfZ)), 0.,
+                                                       radius));
+      ATH_MSG_INFO("Creating Trk::Surface at: R " << radius << " Z " << halfZ);
+      m_atlasReferenceSurfaceTriples.push_back(std::move(trkSurfaceTriplet));
+
+      // create the Surface triplet
+      std::vector<std::shared_ptr<const Acts::Surface> > actsSurfaceTriplet;
+
+      Acts::Transform3 posTransf(Acts::Transform3::Identity() * Acts::Translation3(Acts::Vector3(0., 0., halfZ)));
+      Acts::Transform3 cTransf(Acts::Transform3::Identity() * Acts::Translation3(Acts::Vector3(0., 0., 0.)));
+      Acts::Transform3 negTransf(Acts::Transform3::Identity() * Acts::Translation3(Acts::Vector3(0., 0., -halfZ)));
+
+      auto posSurface = Acts::Surface::makeShared<Acts::DiscSurface>    (posTransf, 0., radius);
+      auto cSurface = Acts::Surface::makeShared<Acts::CylinderSurface>(cTransf, radius, halfZ);
+      auto negSurface = Acts::Surface::makeShared<Acts::DiscSurface>    (negTransf, 0., radius);
+
+      actsSurfaceTriplet.push_back(posSurface);
+      actsSurfaceTriplet.push_back(cSurface);
+      actsSurfaceTriplet.push_back(negSurface);
+      ATH_MSG_INFO("Creating Acts::Surface at: R " << radius << " Z " << halfZ);
+      m_actsReferenceSurfaceTriples.push_back(std::move(actsSurfaceTriplet));
+
+      m_referenceSurfaceNegativeBoundary.push_back(atan2(radius, -halfZ));
+      m_referenceSurfacePositiveBoundary.push_back(atan2(radius, halfZ));
+    }
+  } else {
     ATH_MSG_WARNING("Not compatible size of ReferenceSurfaceRadius and ReferenceSurfaceHalfZ!! Returning FAILURE!");
     return StatusCode::FAILURE;
   }
 
-  ATH_CHECK( m_atlasPropResultWriterSvc.retrieve() );
-  ATH_CHECK( m_actsPropResultWriterSvc.retrieve() );
-  ATH_CHECK( m_rndmSvc.retrieve() );
-  m_randomEngine = m_rndmSvc->getEngine (this, "ExtrapolatorComparisonTest");
+  ATH_CHECK(m_atlasPropResultWriterSvc.retrieve());
+  ATH_CHECK(m_actsPropResultWriterSvc.retrieve());
+  ATH_CHECK(m_rndmSvc.retrieve());
+  m_randomEngine = m_rndmSvc->getEngine(this, "ExtrapolatorComparisonTest");
 
   return StatusCode::SUCCESS;
 }
 
 //================ Finalisation =================================================
 
-StatusCode Trk::ExtrapolatorComparisonTest::finalize()
-{
+StatusCode Trk::ExtrapolatorComparisonTest::finalize() {
   // Code entered here will be executed once at the end of the program run.
   return StatusCode::SUCCESS;
 }
@@ -138,49 +136,50 @@ StatusCode Trk::ExtrapolatorComparisonTest::finalize()
 //================ Execution ====================================================
 
 StatusCode Trk::ExtrapolatorComparisonTest::execute(const EventContext& ctx) const {
-  
   float milliseconds_to_seconds = 1000.;
-  
+
   // generate perigees with random number generator
   CLHEP::HepRandomEngine* engine = m_randomEngine->getEngine(ctx);
 
   std::vector<perigeeParameters> parameters = {};
-  for (int ext = 0; ext<m_eventsPerExecute; ext++) {
+  for (int ext = 0; ext < m_eventsPerExecute; ext++) {
     // generate with random number generator
     double d0 = CLHEP::RandGauss::shoot(engine) * m_sigmaD0;
     double z0 = CLHEP::RandGauss::shoot(engine) * m_sigmaZ0;
-    double phi = m_minPhi + (m_maxPhi-m_minPhi)* CLHEP::RandFlat::shoot(engine);
-    double eta = m_minEta + CLHEP::RandFlat::shoot(engine)*(m_maxEta-m_minEta);
-    double pt = m_minPt + CLHEP::RandFlat::shoot(engine)*(m_maxPt-m_minPt);
-    double charge = (CLHEP::RandFlat::shoot(engine) > 0.5 ) ? -1. : 1.;
+    double phi = m_minPhi + (m_maxPhi - m_minPhi) * CLHEP::RandFlat::shoot(engine);
+    double eta = m_minEta + CLHEP::RandFlat::shoot(engine) * (m_maxEta - m_minEta);
+    double pt = m_minPt + CLHEP::RandFlat::shoot(engine) * (m_maxPt - m_minPt);
+    double charge = (CLHEP::RandFlat::shoot(engine) > 0.5) ? -1. : 1.;
     parameters.emplace_back(d0, z0, phi, eta, pt, charge);
   }
-  
-  int n_extraps = 0;  
+
+  int n_extraps = 0;
   auto start = xclock::now();
   for (auto& perigee : parameters) {
-    
-    Acts::Vector3 momentum(perigee.m_pt * std::cos(perigee.m_phi), perigee.m_pt * std::sin(perigee.m_phi), perigee.m_pt * std::sinh(perigee.m_eta));
+    Acts::Vector3 momentum(perigee.m_pt * std::cos(perigee.m_phi), perigee.m_pt * std::sin(
+                             perigee.m_phi), perigee.m_pt * std::sinh(perigee.m_eta));
     double theta = Acts::VectorHelpers::theta(momentum);
     double qOverP = perigee.m_charge / momentum.norm();
-    
+
     const Trk::PerigeeSurface atlPerigeeSurface;
-    auto atlPerigee = std::make_unique<Trk::Perigee>(perigee.m_d0, perigee.m_z0, perigee.m_phi, theta, qOverP, atlPerigeeSurface);
-    
+    auto atlPerigee = std::make_unique<Trk::Perigee>(perigee.m_d0, perigee.m_z0, perigee.m_phi, theta, qOverP,
+                                                     atlPerigeeSurface);
+
     for (unsigned int surface = 0; surface < m_atlasReferenceSurfaceTriples.size(); surface++) {
       n_extraps++;
 
       double negRef = m_referenceSurfaceNegativeBoundary.at(surface);
       double posRef = m_referenceSurfacePositiveBoundary.at(surface);
-    
+
       // decide which reference surface to take
       int refSurface = theta < posRef ? 2 : 1;
-      refSurface     = theta > negRef ? 0 : 1;
-      
+      refSurface = theta > negRef ? 0 : 1;
+
       const Trk::Surface* destinationSurface = m_atlasReferenceSurfaceTriples.at(surface).at(refSurface);
-      
-      ATH_MSG_VERBOSE("Starting extrapolation " << n_extraps << " from : "       << *atlPerigee << " to : " << *destinationSurface);
-      
+
+      ATH_MSG_VERBOSE(
+        "Starting extrapolation " << n_extraps << " from : " << *atlPerigee << " to : " << *destinationSurface);
+
       auto start_fwd = xclock::now();
       auto destParameters =
         m_atlasExtrapolator->extrapolate(
@@ -191,14 +190,16 @@ StatusCode Trk::ExtrapolatorComparisonTest::execute(const EventContext& ctx) con
           true,
           static_cast<Trk::ParticleHypothesis>(m_particleType.value()));
       auto end_fwd = xclock::now();
-      float ms_fwd = std::chrono::duration_cast<std::chrono::milliseconds>(end_fwd-start_fwd).count();
-      
+      float ms_fwd = std::chrono::duration_cast<std::chrono::milliseconds>(end_fwd - start_fwd).count();
+
       if (destParameters) {
-        ATH_MSG_VERBOSE(" ATLAS Extrapolator succeded!! --> Forward" );           
-        ATH_MSG_VERBOSE(" [ intersection ] with surface at (x,y,z) = " << destParameters->position().x() << ", " << destParameters->position().y() << ", " << destParameters->position().z() );   
-        ATH_MSG_VERBOSE(" [ intersection ] parameters: " << destParameters->parameters() );   
-        ATH_MSG_VERBOSE(" [ intersection ] cov matrix: " << destParameters->covariance() );
-        
+        ATH_MSG_VERBOSE(" ATLAS Extrapolator succeded!! --> Forward");
+        ATH_MSG_VERBOSE(
+          " [ intersection ] with surface at (x,y,z) = " << destParameters->position().x() << ", " << destParameters->position().y() << ", " <<
+            destParameters->position().z());
+        ATH_MSG_VERBOSE(" [ intersection ] parameters: " << destParameters->parameters());
+        ATH_MSG_VERBOSE(" [ intersection ] cov matrix: " << destParameters->covariance());
+
         // now try backward extrapolation
         auto start_bkw = xclock::now();
         auto finalperigee =
@@ -210,121 +211,131 @@ StatusCode Trk::ExtrapolatorComparisonTest::execute(const EventContext& ctx) con
             true,
             static_cast<Trk::ParticleHypothesis>(m_particleType.value()));
         auto end_bkw = xclock::now();
-        float ms_bkw = std::chrono::duration_cast<std::chrono::milliseconds>(end_bkw-start_bkw).count();
-        
-         if (finalperigee) {
-           ATH_MSG_VERBOSE(" ATLAS Extrapolator succeded!! --> Backward" );           
-           ATH_MSG_VERBOSE(" [extrapolation to perigee]      input: " << atlPerigee->parameters() );   
-           ATH_MSG_VERBOSE(" [extrapolation to perigee]     output: " << finalperigee->parameters() );   
-           ATH_MSG_VERBOSE(" [extrapolation to perigee] cov matrix: " << finalperigee->covariance() );
-           
-         } else if (!finalperigee) {
-           ATH_MSG_DEBUG(" ATLAS Extrapolation to perigee failed for input parameters: " << destParameters->parameters());
-         }
-         
-         m_atlasPropResultWriterSvc->write<Trk::TrackParameters>(atlPerigee.get(), destParameters.get(), ms_fwd, finalperigee.get(), ms_bkw);
+        float ms_bkw = std::chrono::duration_cast<std::chrono::milliseconds>(end_bkw - start_bkw).count();
+
+        if (finalperigee) {
+          ATH_MSG_VERBOSE(" ATLAS Extrapolator succeded!! --> Backward");
+          ATH_MSG_VERBOSE(" [extrapolation to perigee]      input: " << atlPerigee->parameters());
+          ATH_MSG_VERBOSE(" [extrapolation to perigee]     output: " << finalperigee->parameters());
+          ATH_MSG_VERBOSE(" [extrapolation to perigee] cov matrix: " << finalperigee->covariance());
+        } else if (!finalperigee) {
+          ATH_MSG_DEBUG(" ATLAS Extrapolation to perigee failed for input parameters: " <<
+            destParameters->parameters());
+        }
+
+        m_atlasPropResultWriterSvc->write<Trk::TrackParameters>(atlPerigee.get(),
+                                                                destParameters.get(), ms_fwd, finalperigee.get(),
+                                                                ms_bkw);
       } else if (!destParameters) {
-        ATH_MSG_DEBUG(" ATLAS Extrapolation not successful! " );
+        ATH_MSG_DEBUG(" ATLAS Extrapolation not successful! ");
         m_atlasPropResultWriterSvc->write<Trk::TrackParameters>(atlPerigee.get());
       }
-    }    
+    }
   }
-  auto end = xclock::now();   
-  auto secs = std::chrono::duration_cast<std::chrono::milliseconds>(end-start).count() / milliseconds_to_seconds;
-  if (n_extraps == 0)[[unlikely]]{
-    ATH_MSG_ERROR("n_extraps is zero" );
-  } else {
-    double secs_per_ex = secs / n_extraps;
-    ATH_MSG_INFO("ATLAS : Time for " << n_extraps << " iterations: " << secs << "s (" << secs_per_ex << "s per extrapolation)");
-  }
-  n_extraps = 0;  
+  auto end = xclock::now();
+  auto secs = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count() / milliseconds_to_seconds;
+  if (n_extraps == 0) [[unlikely]] {
+      ATH_MSG_ERROR("n_extraps is zero");
+    } else {
+      double secs_per_ex = secs / n_extraps;
+      ATH_MSG_INFO(
+        "ATLAS : Time for " << n_extraps << " iterations: " << secs << "s (" << secs_per_ex << "s per extrapolation)");
+    }
+  n_extraps = 0;
   start = xclock::now();
   for (auto& perigee : parameters) {
-    Acts::Vector3 momentum(perigee.m_pt * std::cos(perigee.m_phi), perigee.m_pt * std::sin(perigee.m_phi), perigee.m_pt * std::sinh(perigee.m_eta));
+    Acts::Vector3 momentum(perigee.m_pt * std::cos(perigee.m_phi), perigee.m_pt * std::sin(
+                             perigee.m_phi), perigee.m_pt * std::sinh(perigee.m_eta));
     double theta = Acts::VectorHelpers::theta(momentum);
     double qOverP = perigee.m_charge / momentum.norm();
-    
-    std::shared_ptr<Acts::PerigeeSurface> actsPerigeeSurface = Acts::Surface::makeShared<Acts::PerigeeSurface>(Acts::Vector3(0, 0, 0));
+
+    std::shared_ptr<Acts::PerigeeSurface> actsPerigeeSurface = Acts::Surface::makeShared<Acts::PerigeeSurface>(Acts::Vector3(
+                                                                                                                 0, 0,
+                                                                                                                 0));
     double t = 0.;
     Acts::BoundVector pars;
     //cppcheck-suppress constStatement
     pars << perigee.m_d0, perigee.m_z0, perigee.m_phi, theta, qOverP, t;
     std::optional<Acts::BoundMatrix> cov = std::nullopt;
-    
+
     // Perigee, no alignment -> default geo context
     const ActsTrk::GeometryContext& gctx = m_trackingGeometrySvc->getNominalContext();
     auto anygctx = gctx.context();
-    const auto* startParameters = new const Acts::BoundTrackParameters(std::move(actsPerigeeSurface), pars, std::move(cov), Acts::ParticleHypothesis::pion());
-    
+    const auto* startParameters =
+      new const Acts::BoundTrackParameters(std::move(actsPerigeeSurface), pars, std::move(
+                                             cov), Acts::ParticleHypothesis::pion());
+
     for (unsigned int surface = 0; surface < m_actsReferenceSurfaceTriples.size(); surface++) {
       n_extraps++;
-      
+
       double negRef = m_referenceSurfaceNegativeBoundary.at(surface);
       double posRef = m_referenceSurfacePositiveBoundary.at(surface);
-    
+
       // decide which reference surface to take
       int refSurface = theta < posRef ? 2 : 1;
-      refSurface     = theta > negRef ? 0 : 1;
-      
+      refSurface = theta > negRef ? 0 : 1;
+
       auto destinationSurface = m_actsReferenceSurfaceTriples.at(surface).at(refSurface);
-      
-     ATH_MSG_VERBOSE("Starting extrapolation " << n_extraps << " from : "       << pars << " to : " << destinationSurface);
-      
+
+      ATH_MSG_VERBOSE("Starting extrapolation " << n_extraps << " from : " << pars << " to : " << destinationSurface);
+
       auto start_fwd = xclock::now();
-      auto destParameters = m_extrapolationTool->propagate(ctx, *startParameters, *destinationSurface, Acts::Direction::Forward());
+      auto destParameters = m_extrapolationTool->propagate(ctx, *startParameters, *destinationSurface,
+                                                           Acts::Direction::Forward());
       auto end_fwd = xclock::now();
-      float ms_fwd = std::chrono::duration_cast<std::chrono::milliseconds>(end_fwd-start_fwd).count();
-      
+      float ms_fwd = std::chrono::duration_cast<std::chrono::milliseconds>(end_fwd - start_fwd).count();
+
       if (destParameters.ok()) {
-        ATH_MSG_VERBOSE(" ACTS Extrapolator succeded!! --> Forward" );           
-        ATH_MSG_VERBOSE(" [ intersection ] with surface at (x,y,z) = " << destParameters->position(anygctx).x() << ", " << destParameters->position(anygctx).y() << ", " << destParameters->position(anygctx).z() );   
-        ATH_MSG_VERBOSE(" [ intersection ] parameters: " << destParameters->parameters() );   
-        ATH_MSG_VERBOSE(" [ intersection ] cov matrix: " << *destParameters->covariance() );
-        
+        ATH_MSG_VERBOSE(" ACTS Extrapolator succeded!! --> Forward");
+        ATH_MSG_VERBOSE(" [ intersection ] with surface at (x,y,z) = " << destParameters->position(
+                          anygctx).x() << ", " << destParameters->position(anygctx).y() << ", " <<
+          destParameters->position(anygctx).z());
+        ATH_MSG_VERBOSE(" [ intersection ] parameters: " << destParameters->parameters());
+        ATH_MSG_VERBOSE(" [ intersection ] cov matrix: " << *destParameters->covariance());
+
         // now try backward extrapolation
         auto start_bkw = xclock::now();
-        auto finalperigee = m_extrapolationTool->propagate(ctx, *destParameters, startParameters->referenceSurface(), Acts::Direction::Backward());
+        auto finalperigee = m_extrapolationTool->propagate(ctx, *destParameters,
+                                                           startParameters->referenceSurface(),
+                                                           Acts::Direction::Backward());
         auto end_bkw = xclock::now();
-        float ms_bkw = std::chrono::duration_cast<std::chrono::milliseconds>(end_bkw-start_bkw).count();
-        
+        float ms_bkw = std::chrono::duration_cast<std::chrono::milliseconds>(end_bkw - start_bkw).count();
+
         if (finalperigee.ok()) {
-           ATH_MSG_VERBOSE(" ACTS Extrapolator succeded!! --> Backward" );           
-           ATH_MSG_VERBOSE(" [extrapolation to perigee]      input: " << startParameters->parameters() );   
-           ATH_MSG_VERBOSE(" [extrapolation to perigee]     output: " << finalperigee->parameters() );   
-           ATH_MSG_VERBOSE(" [extrapolation to perigee] cov matrix: " << *finalperigee->covariance() );
-           
-         } else if (!finalperigee.ok()) {
-           ATH_MSG_DEBUG(" ACTS Extrapolation to perigee failed for input parameters: " << destParameters->parameters());
-         }
+          ATH_MSG_VERBOSE(" ACTS Extrapolator succeded!! --> Backward");
+          ATH_MSG_VERBOSE(" [extrapolation to perigee]      input: " << startParameters->parameters());
+          ATH_MSG_VERBOSE(" [extrapolation to perigee]     output: " << finalperigee->parameters());
+          ATH_MSG_VERBOSE(" [extrapolation to perigee] cov matrix: " << *finalperigee->covariance());
+        } else if (!finalperigee.ok()) {
+          ATH_MSG_DEBUG(" ACTS Extrapolation to perigee failed for input parameters: " << destParameters->parameters());
+        }
 
-         // Construct wrappers for Acts track parameters
-         auto startWrapper = std::make_unique<ActsTrackWrapper>(startParameters, anygctx);
-         auto destWrapper  = std::make_unique<ActsTrackWrapper>(&destParameters.value(), anygctx);
-         auto finalWrapper = std::make_unique<ActsTrackWrapper>(&finalperigee.value(), anygctx);
+        // Construct wrappers for Acts track parameters
+        auto startWrapper = std::make_unique<ActsTrackWrapper>(startParameters, anygctx);
+        auto destWrapper = std::make_unique<ActsTrackWrapper>(&destParameters.value(), anygctx);
+        auto finalWrapper = std::make_unique<ActsTrackWrapper>(&finalperigee.value(), anygctx);
 
-         m_actsPropResultWriterSvc->write<ActsTrackWrapper>(startWrapper.get(), destWrapper.get(), ms_fwd, finalWrapper.get(), ms_bkw);
-
+        m_actsPropResultWriterSvc->write<ActsTrackWrapper>(startWrapper.get(),
+                                                           destWrapper.get(), ms_fwd, finalWrapper.get(), ms_bkw);
       } else if (!destParameters.ok()) {
-        ATH_MSG_DEBUG(" ACTS Extrapolation not successful! " );
+        ATH_MSG_DEBUG(" ACTS Extrapolation not successful! ");
         auto startWrapper = std::make_unique<ActsTrackWrapper>(startParameters, anygctx);
         m_actsPropResultWriterSvc->write<ActsTrackWrapper>(startWrapper.get());
       }
     }
     delete startParameters;
   }
-  
-  end = xclock::now();   
-  secs = std::chrono::duration_cast<std::chrono::milliseconds>(end-start).count() / milliseconds_to_seconds;
-  if (n_extraps == 0)[[unlikely]]{
-    ATH_MSG_ERROR("n_extraps is zero" );
-  } else {
-    double secs_per_ex = secs / n_extraps;
-    ATH_MSG_INFO("ATLAS : Time for " << n_extraps << " iterations: " << secs << "s (" << secs_per_ex << "s per extrapolation)");
-  }    
+
+  end = xclock::now();
+  secs = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count() / milliseconds_to_seconds;
+  if (n_extraps == 0) [[unlikely]] {
+      ATH_MSG_ERROR("n_extraps is zero");
+    } else {
+      double secs_per_ex = secs / n_extraps;
+      ATH_MSG_INFO(
+        "ATLAS : Time for " << n_extraps << " iterations: " << secs << "s (" << secs_per_ex << "s per extrapolation)");
+    }
   return StatusCode::SUCCESS;
 }
 
 //============================================================================================
-
-
- 
