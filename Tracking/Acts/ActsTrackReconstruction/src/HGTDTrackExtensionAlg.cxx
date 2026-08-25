@@ -146,7 +146,7 @@ StatusCode HGTDTrackExtensionAlg::execute(const EventContext& ctx) const
   SG::WriteDecorHandle<xAOD::TrackParticleContainer, std::vector<float>> layerClusterTimeHandle(m_layerClusterTimeKey, ctx);
   SG::WriteDecorHandle<xAOD::TrackParticleContainer, float> extrapXHandle(m_extrapXKey, ctx);
   SG::WriteDecorHandle<xAOD::TrackParticleContainer, float> extrapYHandle(m_extrapYKey, ctx);
-  SG::WriteDecorHandle<xAOD::TrackParticleContainer, int> numHGTDHitsHandle(m_numHGTDHitsKey, ctx);
+  SG::WriteDecorHandle<xAOD::TrackParticleContainer, uint8_t> numHGTDHitsHandle(m_numHGTDHitsKey, ctx);
   SG::WriteDecorHandle<xAOD::TrackParticleContainer, ElementLink<ActsTrk::TrackContainer>> hgtdTrackLink(m_hgtdTrackLinkKey, ctx);
   
   // ================================================== //
