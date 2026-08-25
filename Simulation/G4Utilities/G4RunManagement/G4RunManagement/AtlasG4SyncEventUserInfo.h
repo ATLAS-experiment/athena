@@ -32,19 +32,22 @@ class G4EventSynchronizationInterface
       Size
     };
   public:
+    enum class EventOutcome {
+      Success,
+      Aborted,
+      PreparationFailed
+    };
+
     EventStatus Status() const;
     /// Mark all Geant4 processing for this event as complete and wake Athena.
-    void Complete(bool eventAborted);
+    void Complete(EventOutcome outcome);
     void WaitStatusDone() {WaitStatus(EventStatus::Done);};
-    bool EventAborted() const {
-      std::scoped_lock lk(m_mutex);
-      return m_event_aborted;
-    }
+    EventOutcome Outcome() const;
     
   private:
     void WaitStatus(const EventStatus&);
 
-    bool m_event_aborted{false};
+    EventOutcome m_outcome{EventOutcome::Success};
     EventStatus m_status{EventStatus::Ready};
     mutable std::mutex m_mutex;
     std::condition_variable m_cv;
@@ -54,7 +57,7 @@ class G4EventSynchronizationInterface
 class AtlasG4SyncEventUserInfo : public AtlasG4EventUserInfo
 {
   public:
-    using EventFactoryFunction = std::function<StatusCode(G4Event&, std::unique_ptr<AtlasG4SyncEventUserInfo>)>;
+    using EventFactoryFunction = std::function<StatusCode(G4Event&)>;
     using SPSyncInterface = std::shared_ptr<G4EventSynchronizationInterface>;
 
     AtlasG4SyncEventUserInfo(CLHEP::HepRandomEngine*, EventFactoryFunction&&, const EventContext&);
@@ -67,8 +70,16 @@ class AtlasG4SyncEventUserInfo : public AtlasG4EventUserInfo
       return m_rng_engine;
     }
 
-    EventFactoryFunction EventFactory() const {
+    const EventFactoryFunction& EventFactory() const {
       return m_event_factory;
+    }
+
+    void SetEventPreparationFailed() {
+      m_event_preparation_failed = true;
+    }
+
+    bool EventPreparationFailed() const {
+      return m_event_preparation_failed;
     }
 
     SPSyncInterface SyncInterface() const {
@@ -80,6 +91,8 @@ class AtlasG4SyncEventUserInfo : public AtlasG4EventUserInfo
     CLHEP::HepRandomEngine* m_rng_engine{nullptr};
     // Factory function for Athena to prepare the G4 event
     EventFactoryFunction m_event_factory;
+    // Set on the Geant4 worker if the event factory returns failure.
+    bool m_event_preparation_failed{false};
     // Synchronization interface between Athena and Geant4 for this event
     // held in a shared pointer to allow access from Athena after G4Event is destroyed
     SPSyncInterface m_sync_interface;

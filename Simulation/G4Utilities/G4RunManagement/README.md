@@ -43,12 +43,17 @@ Athena thread (G4RunAlg)  ⇄  G4RunTool ⇄  Geant4 main & worker threads
    `G4EventSynchronizationInterface` so that the Athena thread can wait for the
    event-completion notification even after Geant4 has destroyed its `G4Event`.
 4. `G4RunAlg` hands the prepared user info to `G4RunTool::PushEvent()`.  The
-   Geant4 primary generator action pulls entries via `GetEvent()` and invokes
-   the stored factory to convert the HepMC event to G4 primaries.
+   Geant4 primary generator action pulls entries via `GetEvent()`, attaches the
+   user info to the `G4Event`, and invokes the stored factory to convert the
+   HepMC event to G4 primaries. Attaching the user info first ensures Athena is
+   notified even if event preparation fails. Exceptions from the factory are
+   caught and handled as preparation failures.
 5. `G4UA::SyncEventAction` checks that each `G4Event` really carried the user
-   info (otherwise it aborts the run). After all event actions, analysis,
-   scoring and event cleanup have finished, `G4RunToolWorkerRunManager` updates
-   the synchronization interface and wakes the Athena thread.
+   info (otherwise it aborts the run). If preparation failed, it aborts only
+   that event. After all event actions, analysis, scoring and event cleanup
+   have finished, `G4RunToolWorkerRunManager` updates the synchronization
+   interface and wakes the Athena thread, which performs its own cleanup before
+   propagating the preparation failure.
 6. The Athena thread waits on `syncInterface->WaitStatusDone()` before running
    the end-of-event hooks (`Begin/EndOfAthenaEvent` for the sensitive detector,
    fast simulation and user action services).
@@ -62,18 +67,19 @@ Athena thread (G4RunAlg)  ⇄  G4RunTool ⇄  Geant4 main & worker threads
 2. Build `AtlasG4SyncEventUserInfo` with:
    - The seeded `CLHEP::HepRandomEngine`.
    - A lambda that calls `ISF::ITruthSvc::initializeTruthCollection`,
-     sets the `G4Event` ID and invokes `ISF::IInputConverter::convertHepMCToG4Event`.
+     then invokes `ISF::IInputConverter::convertHepMCToG4Event`.
    - The `EventContext` so that `AtlasG4EventUserInfo` can still expose it to
      user actions after transport.
 3. Call `BeginOfAthenaEvent` on the user action, sensitive detector and fast
    simulation services, then `PushEvent` into the run tool.
 4. Wait until the synchronization interface reports that the Geant4 event has
    been completed. `G4RunToolWorkerRunManager::TerminateOneEvent` captures the
-   `event->IsAborted()` flag, invokes Geant4's event termination, then sets the
-   completion status.
+   event outcome, invokes Geant4's event termination, then sets the completion
+   status.
 5. Handle aborted events according to `FlagAbortedEvents` and
    `KillAbortedEvents`.  Close out the Athena-side services with
-   `EndOfAthenaEvent` and ask the truth service to release the event.
+   `EndOfAthenaEvent` and ask the truth service to release the event. Event
+   preparation failures are propagated after this cleanup.
 6. (Optional) undo any quasi-stable particle workarounds before leaving execute.
 
 ## Key Components
@@ -95,7 +101,8 @@ Athena thread (G4RunAlg)  ⇄  G4RunTool ⇄  Geant4 main & worker threads
 - Inherits from `AtlasG4EventUserInfo` so that existing code can still
   retrieve the event context, hit collection map and truth links.
 - Owns a shared `G4EventSynchronizationInterface` object that exposes
-  `WaitStatusDone()` / `Complete()` and the `EventAborted` flag.
+  `WaitStatusDone()` / `Complete()`, the aborted-event flag and the event
+  preparation status.
 - Holds the RNG engine and the event factory functor used by
   `SyncPrimaryGeneratorAction` to materialize the `G4Event` inside the Geant4
   worker thread.
@@ -108,7 +115,8 @@ Athena thread (G4RunAlg)  ⇄  G4RunTool ⇄  Geant4 main & worker threads
   `AtlasG4SyncEventUserInfo` objects from the queue, seeds Geant4’s RNG and
   invokes the stored factory to build primaries.
 - `SyncEventAction`: verifies that every event carries user info, aborting the
-  run when a shutdown sentinel is received.
+  run when a shutdown sentinel is received or aborting only the current event
+  when its preparation failed.
 - `G4RunToolWorkerRunManager`: completes the synchronization interface only
   after Geant4 has finished all processing and termination for the event.
 

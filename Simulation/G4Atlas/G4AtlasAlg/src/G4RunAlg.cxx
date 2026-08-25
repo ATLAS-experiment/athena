@@ -163,14 +163,14 @@ StatusCode G4RunAlg::execute(const EventContext& ctx)
     : HepMC::maxGeneratedParticleBarcode(outputTruthCollection->at(0)); // TODO make this more robust
   const int largestGeneratedVertexBC =  (outputTruthCollection->empty()) ? HepMC::UNDEFINED_ID
     : HepMC::maxGeneratedVertexBarcode(outputTruthCollection->at(0)); // TODO make this more robust
+  using EventOutcome = G4EventSynchronizationInterface::EventOutcome;
+  EventOutcome eventOutcome = EventOutcome::Success;
   {
 
     // called by the Geant4 PrimaryGeneratorAction because primary vertices must be instantiated by Geant4 threads
-    auto prepare_event = [this, &outputTruthCollection, &shadowTruth, largestGeneratedParticleBC, largestGeneratedVertexBC](G4Event& event, std::unique_ptr<AtlasG4SyncEventUserInfo> g4eventInfo) -> StatusCode {
+    auto prepare_event = [this, &outputTruthCollection, &shadowTruth, largestGeneratedParticleBC, largestGeneratedVertexBC](G4Event& event) -> StatusCode {
       // tell TruthService we're starting a new event
       ATH_CHECK( m_truthRecordSvc->initializeTruthCollection(largestGeneratedParticleBC, largestGeneratedVertexBC) );
-      event.SetEventID(g4eventInfo->AthenaEventID());
-      event.SetUserInformation(g4eventInfo.release());
       ATH_CHECK(m_inputConverter->convertHepMCToG4Event(
           *outputTruthCollection, event, *shadowTruth));
       return StatusCode::SUCCESS;
@@ -192,8 +192,9 @@ StatusCode G4RunAlg::execute(const EventContext& ctx)
     ATH_MSG_DEBUG("Buffer size=" << m_g4RunTool->Size() << ", waiting for event to finish");
     // G4 tells Athena after the worker run manager has terminated the event.
     syncInterface->WaitStatusDone();
+    eventOutcome = syncInterface->Outcome();
 
-    if (syncInterface->EventAborted()) {
+    if (eventOutcome == EventOutcome::Aborted) {
       ATH_MSG_WARNING("Event was aborted !! ");
       ATH_MSG_WARNING("Simulation will now go on to the next event ");
       if (m_killAbortedEvents) {
@@ -226,6 +227,11 @@ StatusCode G4RunAlg::execute(const EventContext& ctx)
     for (HepMC::GenEvent* currentGenEvent : *outputTruthCollection ) {
       ATH_CHECK(m_qspatcher->removeWorkaround(*currentGenEvent));
     }
+  }
+
+  if (eventOutcome == EventOutcome::PreparationFailed) {
+    ATH_MSG_ERROR("Failed to prepare Geant4 event");
+    return StatusCode::FAILURE;
   }
 
   return StatusCode::SUCCESS;

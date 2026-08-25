@@ -12,14 +12,21 @@
 
 void G4RunToolWorkerRunManager::TerminateOneEvent()
 {
+  using EventOutcome = G4EventSynchronizationInterface::EventOutcome;
+
   std::shared_ptr<G4EventSynchronizationInterface> syncInterface;
-  bool eventAborted = false;
+  EventOutcome outcome = EventOutcome::Success;
 
   if (currentEvent) {
-    eventAborted = currentEvent->IsAborted();
     if (auto* eventInfo = dynamic_cast<AtlasG4SyncEventUserInfo*>(
           currentEvent->GetUserInformation())) {
       syncInterface = eventInfo->SyncInterface();
+      if (eventInfo->EventPreparationFailed()) {
+        outcome = EventOutcome::PreparationFailed;
+      }
+      else if (currentEvent->IsAborted()) {
+        outcome = EventOutcome::Aborted;
+      }
     }
   }
 
@@ -28,7 +35,7 @@ void G4RunToolWorkerRunManager::TerminateOneEvent()
   G4RunManager::TerminateOneEvent();
 
   if (syncInterface) {
-    syncInterface->Complete(eventAborted);
+    syncInterface->Complete(outcome);
   }
 }
 
