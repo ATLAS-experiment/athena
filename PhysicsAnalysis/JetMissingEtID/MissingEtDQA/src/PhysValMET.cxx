@@ -606,19 +606,13 @@ namespace MissingEtDQA {
       {
         ATH_MSG_WARNING("Building MET FinalClus sum failed.");
       }
-      ///////
-      std::string str_ele = "RefEle";
-      std::string str_gam = "RefGamma";
-      std::string str_tau = "RefTau";
-      std::string str_mu = "RefMuons";
-      std::string str_jet = "RefJet";
 
       // Get elements with OR and JVT applied
-      std::vector<const xAOD::Electron*> el_elems = met::getMETElements<xAOD::Electron>(*(*met)[str_ele]);
-      std::vector<const xAOD::Photon*> ph_elems = met::getMETElements<xAOD::Photon>(*(*met)[str_gam]);
-      std::vector<const xAOD::TauJet*> ta_elems = met::getMETElements<xAOD::TauJet>(*(*met)[str_tau]);
-      std::vector<const xAOD::Muon*> mu_elems = met::getMETElements<xAOD::Muon>(*(*met)[str_mu]);
-      std::vector<const xAOD::Jet*> jet_elems = met::getMETElements<xAOD::Jet>(*(*met)[str_jet]);
+      std::vector<const xAOD::Electron*> el_elems = met::getMETElements<xAOD::Electron>(*(*met)["RefEle"]);
+      std::vector<const xAOD::Photon*> ph_elems = met::getMETElements<xAOD::Photon>(*(*met)["RefGamma"]);
+      std::vector<const xAOD::TauJet*> ta_elems = met::getMETElements<xAOD::TauJet>(*(*met)["RefTau"]);
+      std::vector<const xAOD::Muon*> mu_elems = met::getMETElements<xAOD::Muon>(*(*met)["RefMuons"]);
+      std::vector<const xAOD::Jet*> jet_elems = met::getMETElements<xAOD::Jet>(*(*met)["RefJet"]);
 
       //Getting jets with JVT and OR without other particles applied. This is used for Jet Diff histos
       auto met_jetonly = std::make_unique<xAOD::MissingETContainer>();
