@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRIGSTORAGEDEF_TRIGPARTICLEEVENT
@@ -49,23 +49,6 @@ namespace Analysis{
 
 
 HLT_BEGIN_TYPE_REGISTRATION
-    // Level2
-  HLT_REGISTER_TYPE(class TrigElectron, class TrigElectronContainer,class  TrigElectronContainer)
-  HLT_REGISTER_TYPE(class TrigL2Bphys, class  TrigL2BphysContainer, class TrigL2BphysContainer)
-  HLT_REGISTER_TYPE(class TrigPhoton, class TrigPhotonContainer,class TrigPhotonContainer)
-  HLT_REGISTER_TYPE(class TrigTau, class TrigTau,class TrigTauContainer)
-  HLT_REGISTER_TYPE(class TrigL2Bjet, class TrigL2BjetContainer,class TrigL2BjetContainer)
-     // EF
-  HLT_REGISTER_TYPE(class TrigEFBphys, class  TrigEFBphysContainer,class TrigEFBphysContainer)
-  HLT_REGISTER_TYPE(class TrigEFBjet, class TrigEFBjetContainer,class TrigEFBjetContainer)
-  HLT_REGISTER_TYPE(class JetKeyDescriptor, class JetKeyDescriptor,class JetKeyDescriptorCollection )
-  HLT_REGISTER_TYPE(class JetMomentMap,class  JetMomentMap,class JetMomentMapCollection )
-  HLT_REGISTER_TYPE(class Jet, class  JetCollection,class JetCollection )
-  HLT_REGISTER_TYPE(class egamma, class  egammaContainer,class egammaContainer)
-  HLT_REGISTER_TYPE(class egDetail, class egDetailContainer, class egDetailContainer )
-
-  // xAOD
-  //  HLT_REGISTER_TYPE(xAOD::Egamma, xAOD::EgammaContainer, xAOD::EgammaContainer, xAOD::EgammaAuxContainer)  
   HLT_REGISTER_TYPE(xAOD::Electron, xAOD::ElectronContainer, xAOD::ElectronContainer, xAOD::ElectronTrigAuxContainer)
   HLT_REGISTER_TYPE(xAOD::Photon, xAOD::PhotonContainer, xAOD::PhotonContainer, xAOD::PhotonTrigAuxContainer)
   HLT_REGISTER_TYPE(xAOD::TauJet, xAOD::TauJetContainer, xAOD::TauJetContainer, xAOD::TauJetAuxContainer)  

@@ -1,7 +1,7 @@
 // -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -87,27 +87,16 @@ namespace TrigDec {
     SPECIALZE_CONTAINER_FOR_CLASS(a::x, y)
 
     DECLARE_ATTACHED_CONTAINER(CaloCell, CaloCellContainer)
-    DECLARE_ATTACHED_CONTAINER(TrigPhoton, TrigPhotonContainer)
-    DECLARE_ATTACHED_CONTAINER(TrigElectron, TrigElectronContainer)
-    DECLARE_ATTACHED_CONTAINER(TrigL2Bjet, TrigL2BjetContainer)
-    //DECLARE_ATTACHED_CONTAINER(CosmicMuon, CosmicMuonCollection)
-    //DECLARE_ATTACHED_CONTAINER(MdtTrackSegment, MdtTrackSegmentCollection)
-    DECLARE_ATTACHED_CONTAINER(TrigL2Bphys, TrigL2BphysContainer)
     DECLARE_ATTACHED_CONTAINER(TrigInDetTrack, TrigInDetTrackCollection)
     DECLARE_ATTACHED_CONTAINER(TrigVertex, TrigVertexCollection)
     DECLARE_ATTACHED_CONTAINER(CaloCluster, CaloClusterContainer)
     DECLARE_ATTACHED_CONTAINER(TrigMuonEF, TrigMuonEFContainer)
     DECLARE_ATTACHED_CONTAINER(TrigMuonEFInfo, TrigMuonEFInfoContainer)
     DECLARE_ATTACHED_CONTAINER(CaloShower, CaloShowerContainer)
-    DECLARE_ATTACHED_CONTAINER(egamma, egammaContainer)
     DECLARE_ATTACHED_CONTAINER_NAMESPACE(Rec, TrackParticle, TrackParticleContainer)
     DECLARE_ATTACHED_CONTAINER_NAMESPACE(Analysis, TauDetails, TauDetailsContainer)
-    DECLARE_ATTACHED_CONTAINER(TrigEFBjet, TrigEFBjetContainer)
-    DECLARE_ATTACHED_CONTAINER(TrigEFBphys, TrigEFBphysContainer)
     DECLARE_ATTACHED_CONTAINER_NAMESPACE(Analysis, TauJet, TauJetContainer)
-    DECLARE_ATTACHED_CONTAINER(Jet, JetCollection)
     DECLARE_ATTACHED_CONTAINER(CaloTower, CaloTowerContainer)
-    DECLARE_ATTACHED_CONTAINER(egDetail, egDetailContainer)
     DECLARE_ATTACHED_CONTAINER_OBJECT_NAMESPACE(Trk, VxCandidate, VxContainer)
 
 #undef SPECIALIZE_CONTAINER_FOR_CLASS
