@@ -249,8 +249,6 @@ LArConditionsTestAlg::testCondObjects()
     if (!m_readCondObjs) {
 	// Save in DetectorStore
         ATH_CHECK( detStore()->record(ramps, "/LArCalorimeter/LArTests/LArRampsSingleGroup") );
-	const ILArRamp* iramps = 0;
-        ATH_CHECK( detStore()->symLink(ramps, iramps) );
 
 	/// Statistics: total number of conditions 
         if (ramps) {
@@ -297,8 +295,6 @@ LArConditionsTestAlg::testCondObjects()
     if (!m_readCondObjs) {
 	// Save in DetectorStore
         ATH_CHECK( detStore()->record(ramps, "/LArCalorimeter/LArTests/LArRampsSubDetectorGrouping") );
-	const ILArRamp* iramps = 0;
-	ATH_CHECK( detStore()->symLink(ramps, iramps) );
 	/// Statistics: total number of conditions 
         if (ramps) {
           ATH_MSG_DEBUG  ( "Total number of conditions objects"
@@ -344,8 +340,6 @@ LArConditionsTestAlg::testCondObjects()
     if (!m_readCondObjs) {
 	// Save in DetectorStore
       ATH_CHECK( detStore()->record(ramps, "/LArCalorimeter/LArTests/LArRampsFeedThroughGrouping") );
-	const ILArRamp* iramps = 0;
-	ATH_CHECK( detStore()->symLink(ramps, iramps) );
 	/// Statistics: total number of conditions 
         if (ramps) {
           ATH_MSG_DEBUG  ( "Total number of conditions objects"
