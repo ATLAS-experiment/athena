@@ -13,7 +13,10 @@ def ActsGbtsFtfSeedingTrigToolCfg(flags,name: str = "GbtsFtfActsSeedingTool", **
 
   if "layerNumberTool" not in kwargs:
     from TrigFastTrackFinder.TrigFastTrackFinderConfig import ITkTrigL2LayerNumberToolCfg
-    ntargs = {"UseNewLayerScheme" : True}
+    ntargs = {"UseNewLayerScheme" : True,
+              "dumpGbtsGeometry": flags.Acts.Gbts.dumpGbtsGeometry,
+              "geometryDump": flags.Acts.Gbts.geometryDump,
+    }
     kwargs.setdefault("layerNumberTool",acc.popToolsAndMerge(ITkTrigL2LayerNumberToolCfg(flags,**ntargs)))
   
   kwargs.setdefault("DoPhiFiltering", False) #no phi-filtering for full-scan tracking
@@ -276,13 +279,16 @@ def ActsPixelGbtsSeedingToolCfg(flags,
     acc = ComponentAccumulator()
     if "layerNumberTool" not in kwargs:
         from TrigFastTrackFinder.TrigFastTrackFinderConfig import ITkTrigL2LayerNumberToolCfg
-        ntargs = {"UseNewLayerScheme": True}
+        ntargs = {"UseNewLayerScheme" : True,
+                  "dumpGbtsGeometry": flags.Acts.Gbts.dumpGbtsGeometry,
+                  "geometryDump": flags.Acts.Gbts.geometryDump,
+        }
         kwargs.setdefault(
             "layerNumberTool",
             acc.popToolsAndMerge(ITkTrigL2LayerNumberToolCfg(flags, **ntargs))
         )
     ## For ITkPixel, use default values for ActsTrk::GbtsSeedingTool
-    kwargs.setdefault("connectorInputFile" , find_datafile("binTables_ITK_RUN4.txt"))
+    kwargs.setdefault("connectorInputFile" , find_datafile(flags.Acts.Gbts.connectionTable))
     kwargs.setdefault("lutInputFile" , find_datafile("gbts_ml_pixel_barrel_loose.lut"))
     kwargs.setdefault("minPt" , flags.Tracking.ActiveConfig.minPTSeed / GaudiUnits.GeV * ActsUnits.GeV)
 
@@ -295,7 +301,10 @@ def ActsStripGbtsSeedingToolCfg(flags,
     acc = ComponentAccumulator()
     if "layerNumberTool" not in kwargs:
         from TrigFastTrackFinder.TrigFastTrackFinderConfig import ITkTrigL2LayerNumberToolCfg
-        ntargs = {"UseNewLayerScheme": True}
+        ntargs = {"UseNewLayerScheme" : True,
+                  "dumpGbtsGeometry": flags.Acts.Gbts.dumpGbtsGeometry,
+                  "geometryDump": flags.Acts.Gbts.geometryDump,
+        }
         kwargs.setdefault(
             "layerNumberTool",
             acc.popToolsAndMerge(ITkTrigL2LayerNumberToolCfg(flags, **ntargs))
@@ -303,7 +312,7 @@ def ActsStripGbtsSeedingToolCfg(flags,
     ## For ITkStrip LRT, enable LRT mode and use the LRT connector file
     kwargs.setdefault("LRTmode", True)
     kwargs.setdefault("useML", False)
-    kwargs.setdefault("connectorInputFile", find_datafile("binTables_ITK_RUN4_LRT.txt"))
+    kwargs.setdefault("connectorInputFile", find_datafile(flags.Acts.Gbts.connectionTableLrt))
     kwargs.setdefault("minPt", flags.Tracking.ActiveConfig.minPTSeed / GaudiUnits.GeV * ActsUnits.GeV)
     kwargs.setdefault("d0Max", 300. * ActsUnits.mm)
     kwargs.setdefault("filterMaxZ0", 500. * ActsUnits.mm)

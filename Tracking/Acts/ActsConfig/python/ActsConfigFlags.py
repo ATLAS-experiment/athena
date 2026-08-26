@@ -169,7 +169,10 @@ def createActsConfigFlags():
 
     # Seeding
     actscf.addFlag("Acts.SeedingStrategy", SeedingStrategy.GridTriplet, type=SeedingStrategy)  # Define Seeding Strategy
-    
+    actscf.addFlag("Acts.Gbts.connectionTable", 'binTables_ITK_RUN4.txt')
+    actscf.addFlag("Acts.Gbts.connectionTableLrt", 'binTables_ITK_RUN4_LRT.txt')
+    actscf.addFlag("Acts.Gbts.dumpGbtsGeometry", False)
+    actscf.addFlag("Acts.Gbts.geometryDump", 'gbts_layer_geometry.txt') # for gbts training tool
     # Track finding
     actscf.addFlag('Acts.PixelCalibrationStrategy', PixelCalibrationStrategy.Uncalibrated, type=PixelCalibrationStrategy)
     actscf.addFlag('Acts.StripCalibrationStrategy', StripCalibrationStrategy.Uncalibrated, type=StripCalibrationStrategy)
