@@ -5,6 +5,7 @@
 
 #include "eflowTrackExtrapolatorBaseAlgTool.h"
 
+#include "ActsGeometryInterfaces/IExtrapolationTool.h"
 #include "AthenaBaseComps/AthAlgTool.h"
 
 static const InterfaceID IID_PFTrackCaloExtensionTool("PFTrackCaloExtensionTool", 1, 0);
@@ -24,6 +25,15 @@ public:
   virtual StatusCode initialize() override;
   virtual std::unique_ptr<eflowTrackCaloPoints> execute(const EventContext& ctx, const xAOD::TrackParticle* track) const override;
   virtual StatusCode finalize() override;
+
+private:
+
+     ToolHandle<ActsTrk::IExtrapolationTool> m_extrapolationTool {
+     this,
+     "ExtrapolationTool",
+     "ExtrapolationTool",
+     "Tool to run propagation in an ACTS tracking geometry"
+    };
 
 };
 #endif
