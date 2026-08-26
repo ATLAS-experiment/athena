@@ -107,9 +107,9 @@ StatusCode ExecuteOngRPCCall::executeEvent(MinimalEventLoopMgr* el,
     std::this_thread::sleep_for(std::chrono::milliseconds(100));
   }
 
-  ATH_MSG_ALWAYS("Got input, upacking ...");
-
-  for (auto& tool : m_packingTools) {
+  ATH_MSG_INFO("Got input, upacking with " << m_unpackingTools.size() << " tools...");
+  for (auto& tool : m_unpackingTools) {
+    ATH_MSG_INFO("Unpacking with " << tool.name() << "...");
     ATH_CHECK(tool->unpack(*(r->request), context));
   }
   ATH_MSG_ALWAYS("After decoding done, executing algorithms ...");

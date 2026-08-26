@@ -160,6 +160,35 @@ def AthenaHiveEventLoopMgrCfg(flags):
 
     return cfg
 
+def AthenaRemoteEventLoopMgrCfg(flags):
+    cfg = ComponentAccumulator()
+    # hivesvc = CompFactory.SG.HiveMgrSvc("EventDataSvc",
+    #                                     NSlots = flags.Concurrency.NumConcurrentEvents)
+    # cfg.addService( hivesvc )
+    #
+    arp = CompFactory.AlgResourcePool(TopAlg = ["AthMasterSeq"]) #this should enable control flow
+    cfg.addService( arp )
+
+    scheduler = cfg.getPrimaryAndMerge(AvalancheSchedulerSvcCfg(flags))
+
+    elmgr = CompFactory.AthenaRemoteEventLoopMgr(
+        # WhiteboardSvc = "EventDataSvc",
+        # SchedulerSvc = scheduler.getName(),
+        # EventPrintoutInterval = flags.Exec.EventPrintoutInterval
+    )
+
+    # if flags.Input.OverrideRunNumber:
+    #     from AthenaKernel.EventIdOverrideConfig import EvtIdModifierSvcCfg
+    #     elmgr.EvtIdModifierSvc = cfg.getPrimaryAndMerge(EvtIdModifierSvcCfg(flags))
+    #
+    # if flags.Common.isOverlay and not flags.Overlay.DataOverlay:
+    #     elmgr.RequireInputAttributeList = True
+    #     elmgr.UseSecondaryEventNumber = True
+
+    cfg.addService( elmgr )
+
+    return cfg
+
 def AthenaMpEventLoopMgrCfg(flags):
     cfg = ComponentAccumulator()
     if flags.Common.isOverlay and not flags.Overlay.DataOverlay:
@@ -311,7 +340,7 @@ def addEvgenSequences(flags, cfg):
     cfg.addSequence(EvgenSequenceFactory(EvgenSequence.Post), parentName=EvgenSequence.Main.value)
 
 
-def MainServicesCfg(flags, LoopMgr='AthenaEventLoopMgr'):
+def MainServicesCfg(flags, LoopMgr='AthenaEventLoopMgr', forceRemoteELMgr=False):
     # Set the Python OutputLevel on the root logger
     from AthenaCommon.Logging import log
     log.setLevel(flags.Exec.OutputLevel)
@@ -334,6 +363,9 @@ def MainServicesCfg(flags, LoopMgr='AthenaEventLoopMgr'):
 
         if flags.Concurrency.NumProcs > 0:
             LoopMgr = "AthMpEvtLoopMgr"
+
+        if forceRemoteELMgr:  # FIXME:
+            LoopMgr = 'AthenaRemoteEventLoopMgr'
 
     # Core components needed for serial and threaded jobs:
     cfg = MainServicesMiniCfg(flags, loopMgr=LoopMgr, masterSequence='AthMasterSeq')
@@ -399,6 +431,9 @@ def MainServicesCfg(flags, LoopMgr='AthenaEventLoopMgr'):
         cfg.addAuditor( CompFactory.SGCommitAuditor() )
     elif LoopMgr == 'AthenaEventLoopMgr':
         cfg.merge(AthenaEventLoopMgrCfg(flags))
+
+    # FIXME: Always merge AthenaRemoteEventLoopMgr
+    cfg.merge(AthenaRemoteEventLoopMgrCfg(flags))
 
     # Performance monitoring and profiling:
     if flags.PerfMon.doFastMonMT or flags.PerfMon.doFullMonMT:

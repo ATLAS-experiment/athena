@@ -44,16 +44,19 @@ StatusCode EventInfoPackagingTool::pack(OffloadMessage& msg,
 
 StatusCode EventInfoPackagingTool::unpack(const OffloadMessage& msg,
                                           EventContext& context) const {
+  ATH_MSG_INFO("Asked to unpack event information...");
   const ::EventInfoMessage& mei = msg.event();
 
   EventIDBase eventId(mei.runnumber(), mei.eventnumber(), mei.timestamp(),
                       mei.timestampnsoffset(), mei.bcid(), mei.lumiblock());
 
+  ATH_MSG_INFO("Run = " << mei.runnumber() << " evt = " << mei.eventnumber());
   context.setEventID(eventId);
   context.setValid(true);
-  const EventIDBase& restoredEventId = context.eventID();
+  // const EventIDBase& restoredEventId = context.eventID();
 
   {
+    ATH_MSG_INFO("Creating xAOD::EventInfo...");
     auto outputEvent = std::make_unique<xAOD::EventInfo>();
     auto outputEventAux = std::make_unique<xAOD::EventAuxInfo>();
     outputEvent->setStore(outputEventAux.get());
@@ -69,6 +72,7 @@ StatusCode EventInfoPackagingTool::unpack(const OffloadMessage& msg,
   }
 
   {
+    ATH_MSG_INFO("Creating legacy EventInfo...");
     // produce as well the legacy EventInfo, should not be used anymore but it still is
     auto eid = std::make_unique<EventID>(
         context.eventID().run_number(), context.eventID().event_number(),
@@ -82,6 +86,7 @@ StatusCode EventInfoPackagingTool::unpack(const OffloadMessage& msg,
   }
 
   {
+    ATH_MSG_INFO("Creating DataHeader...");
     // This is exactly what ByteStreamEventStorageInputSvc::generateDataHeader
     // is doing, but we use correct file GUID and event offsets
     auto makeBSProvenance = [&mei]() -> std::unique_ptr<DataHeaderElement> {
@@ -135,6 +140,8 @@ StatusCode EventInfoPackagingTool::unpack(const OffloadMessage& msg,
     // of skipped events.
     ATH_CHECK(evtStore()->record<DataHeader>(
         dataHeader.release(), "ByteStreamDataHeader", true, false, true));
+
+    ATH_MSG_INFO("SG after EventInfoPackagingTool::unpack: " << (void*)evtStore().get() << "\n" << evtStore()->dump());
   }
 
   return StatusCode::SUCCESS;

@@ -8,7 +8,7 @@ from AthenaCommon.Constants import DEBUG, VERBOSE
 from ByteStreamCnvSvc.ByteStreamConfig import ByteStreamReadCfg
 
 flags = initConfigFlags()
-flags.Input.Files = defaultTestFiles.RAW_RUN3 # this is completely dummy input to get event loop going
+flags.Input.Files = defaultTestFiles.RAW_RUN3_DATA22 # this is completely dummy input to get event loop going
 flags.GeoModel.AtlasVersion =  defaultGeometryTags.RUN3
 flags.IOVDb.GlobalTag = defaultConditionsTags.RUN3_DATA22
 
@@ -20,12 +20,12 @@ flags.Concurrency.NumOffloadThreads=3
 flags.lock()
 
 
-acc = MainServicesCfg(flags)
+acc = MainServicesCfg(flags, forceRemoteELMgr=True)
 
 
 # TODO, this would be configured in advance, when ELMgr is configured
 robsSvc = acc.addService(CompFactory.ROBDataProviderSvc())
-el =acc.getService("AthenaHiveEventLoopMgr")
+el = acc.getService("AthenaRemoteEventLoopMgr")
 el.OutputLevel=VERBOSE
 unpackEI = CompFactory.EventInfoPackagingTool("UnpackEI")
 unpackBS = CompFactory.BSPackagingTool("UnpackBS", OutputLevel=DEBUG, ROBDataProvider=robsSvc)

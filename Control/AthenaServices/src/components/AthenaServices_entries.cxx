@@ -23,6 +23,7 @@
 #include "../MetaDataSvc.h"
 #include "../OutputStreamSequencerSvc.h"
 #include "../AthenaHiveEventLoopMgr.h"
+#include "../AthenaRemoteEventLoopMgr.h"
 #include "../AthenaMtesEventLoopMgr.h"
 #include "../AthIncFirerAlg.h"
 #include "../ConditionsCleanerSvc.h"
@@ -41,6 +42,7 @@ DECLARE_COMPONENT( TestRandomSeqAlg )
 DECLARE_COMPONENT( MultipleEventLoopMgr )
 DECLARE_COMPONENT( AthenaEventLoopMgr )
 DECLARE_COMPONENT( AthenaHiveEventLoopMgr )
+DECLARE_COMPONENT( AthenaRemoteEventLoopMgr )
 DECLARE_COMPONENT( AthenaMtesEventLoopMgr )
 DECLARE_COMPONENT( PyAthenaEventLoopMgr )
 DECLARE_COMPONENT( MPIHiveEventLoopMgr )
