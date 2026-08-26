@@ -62,12 +62,14 @@ namespace MuonValR4{
         /** @brief Dump the reconstructed information */
         StatusCode dumpRecoContent(const EventContext& ctx);
 
-        /** @brief  */
+        /** @brief The output tree object  */
         MuonVal::MuonTesterTree m_tree{"MsTrackValidTest", "MuonTrackTester"};
-        /** @brief */
+        /** @brief The detector manager to fetch the segment surfaces */
         const MuonGMR4::MuonDetectorManager* m_detMgr{nullptr};
-
+        /** @brief Toggle whether the job runs on MC or not */
         Gaudi::Property<bool> m_isMC{this, "isMC", false};
+        /** @brief Toggle whether to process ID tracks or not */
+        Gaudi::Property<bool> m_storeID{this, "storeIdTrks", true};
 
 
         using TruthHitCol = std::unordered_set<const xAOD::MuonSimHit*>;
@@ -101,6 +103,8 @@ namespace MuonValR4{
         ToolHandle<MuonR4::ISegmentSelectionTool> m_segSelector{this, "SegmentSelectionTool" , "" };
         /** @brief Legacy track reconstruction chain */
         TrackKey_t m_legacyTrackKey{this,"LegacyTrackKey", "MuonSpectrometerTrackParticles"};
+        /** @brief  The collection of ID tracks associated with the truth particle*/
+        TrackKey_t m_idTrackKey{this, "IdTrackKey", "InDetTrackParticles"};
         /** @brief Dependency on the magnetic field */
         SG::ReadCondHandleKey<AtlasFieldCacheCondObj> m_fieldCacheKey{this, "MagFieldKey", "fieldCondObj", "Name of the Magnetic Field conditions object key"};
 
@@ -112,7 +116,10 @@ namespace MuonValR4{
         ParticleBranchPtr_t m_truthTrks{};
         /** @brief Stored muon information from the Acts muon reco chain */
         ParticleBranchPtr_t m_muonTrks{};
+        /** @brief Stored ID track information */
+        ParticleBranchPtr_t m_idTracks{};
 
+        /** @brief Abrivation of the branches containing sement information */
         using SegmentBranchPtr_t = std::shared_ptr<MuonPRDTest::SegmentVariables>;
         SegmentBranchPtr_t m_truthSegs{};
         SegmentBranchPtr_t m_recoSegs{};
