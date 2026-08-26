@@ -99,10 +99,20 @@ def gscStep(flags, **configDict):
         histTool_PunchThrough=[dict(varX = "e", varY = dict(Name="Nsegments", Type="int",), histName=f"AntiKt4EMPFlow_PunchThrough_interpolation_resp_eta_{j}", inputFile=defaultFileGSC) for j in range(2)],
     )
 
-    gsc_steps = ['histTool_EM3', 'histTool_CharFrac', 'histTool_Tile0', 'histTool_nTrk', 'histTool_trackWIDTH']
+    gsc_steps = []
+    if configDict.get('applyChargedFraction', True):
+        gsc_steps.append('histTool_CharFrac')
+    if configDict.get('applyEM3', True):
+        gsc_steps.append('histTool_EM3')
+    if configDict.get('applyTile0', True):
+        gsc_steps.append('histTool_Tile0')
+    if configDict.get('applyNtrk', True):
+        gsc_steps.append('histTool_nTrk')
+    if configDict.get('applyTrackWidth', True):
+        gsc_steps.append('histTool_trackWIDTH')
     if configDict.get('applyPunchThrough',False):
         gsc_steps.append('histTool_PunchThrough')
-        
+
     # Build the hist tools
     for key in gsc_steps:
         # Use defaultHistTools by default
