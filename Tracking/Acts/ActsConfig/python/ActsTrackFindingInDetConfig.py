@@ -1,5 +1,5 @@
 
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -273,7 +273,7 @@ def ActsInDetTrackFindingCfg(flags,
     #                                                 InputDestinyCollection = f'{seedKey}Destiny'))
 
     # Persistification
-    if flags.Acts.EDM.PersistifyTracks:
+    if flags.Acts.EDM.PersistifyTracks or flags.Output.doWriteESD:
         trackColl = kwargs['ACTSTracksLocation']
         from ActsConfig.ActsEventCnvConfig import ActsToXAODTrackConverterAlgCfg
         acc.merge(ActsToXAODTrackConverterAlgCfg(flags,

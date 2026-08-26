@@ -297,7 +297,7 @@ def ActsTrackFindingCfg(flags,
                                                     InputDestinyCollection = f'{seedKey}Destiny'))
 
     # Persistification
-    if flags.Acts.EDM.PersistifyTracks:
+    if flags.Acts.EDM.PersistifyTracks or flags.Output.doWriteESD:
         trackColl = kwargs['ACTSTracksLocation']
         from ActsConfig.ActsEventCnvConfig import ActsToXAODTrackConverterAlgCfg
         acc.merge(ActsToXAODTrackConverterAlgCfg(flags,
@@ -424,7 +424,7 @@ def ActsAmbiguityResolutionCfg(flags,
                                           TracksLocation=f"{flags.Tracking.ActiveConfig.extension}ResolvedTracks"))
 
     # Persistification
-    if flags.Acts.EDM.PersistifyTracks:
+    if flags.Acts.EDM.PersistifyTracks or flags.Output.doWriteESD:
         trackColl = kwargs['ResolvedTracksLocation']
         from ActsConfig.ActsEventCnvConfig import ActsToXAODTrackConverterAlgCfg
         acc.merge(ActsToXAODTrackConverterAlgCfg(flags,

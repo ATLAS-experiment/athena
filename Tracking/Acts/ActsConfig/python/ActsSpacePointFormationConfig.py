@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -454,7 +454,7 @@ def ActsSpacePointFormationCfg(flags,
 
 
     # Persistification
-    if flags.Acts.EDM.PersistifySpacePoints and kwargs['runReconstruction']:        
+    if kwargs['runReconstruction']:        
         from ActsConfig.ActsPersistificationConfig import PersistifySpacePoints
         pixelSpacePointCollections = None if not kwargs['processPixels'] else [kwargs['PixelSpacePointFormationAlg.PixelSpacePoints']]
         stripSpacePointCollections = []
