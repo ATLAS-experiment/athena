@@ -167,6 +167,10 @@ if( NOT SIMULATIONBASE AND NOT GENERATIONBASE AND NOT XAOD_ANALYSIS )
       SCRIPT python -m IOVDbSvc.IOVDbSvcConfig
       POST_EXEC_SCRIPT noerror.sh )
 
+   atlas_add_test( IOVDbAutoCfgFlagsTest
+      SCRIPT python -m IOVDbSvc.IOVDbAutoCfgFlags
+      POST_EXEC_SCRIPT noerror.sh )
+
     atlas_add_test( TagFunctions_test
       SOURCES test/TagFunctions_test.cxx src/TagFunctions.cxx
       src/IOVDbStringFunctions.cxx
