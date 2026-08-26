@@ -895,6 +895,14 @@ def HION9SkimmingTriggers2026():
     return triggers
 
 #################################################################################
+def get_small_system_triggers(deriv_format):
+    if deriv_format == "HION7":
+        return HION7SkimmingTriggersPP()
+    elif deriv_format == "HION8":
+        return HION8SkimmingTriggersPP()
+    else:
+        return HION9SkimmingTriggersPP()
+
 def GetTriggers(project_tag, isSmallSystem, deriv_format):
     switcher_HION7 = {
         'data23_hi': HION7SkimmingTriggers2023(),
@@ -917,11 +925,10 @@ def GetTriggers(project_tag, isSmallSystem, deriv_format):
         'data26_hi': HION9SkimmingTriggers2026(),
         }
 
+
+
     switcher_SmallSystems = {
-            'data24_5p36TeV': lambda deriv_format:
-                HION7SkimmingTriggersPP() if deriv_format=="HION7"
-                else HION8SkimmingTriggersPP() if deriv_format=="HION8" 
-                else HION9SkimmingTriggersPP(),
+        'data24_5p36TeV': get_small_system_triggers(deriv_format),
         'data25_hip': HION7SkimmingTriggerspO(),
         'data25_hi': HION7SkimmingTriggersOO(),
         }

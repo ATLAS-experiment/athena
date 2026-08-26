@@ -99,7 +99,7 @@ def HION9KernelCfg(flags, name='HION9Kernel', **kwargs):
     from DerivationFrameworkHI.HION7 import (
         PhysAugmentationsHION7Cfg, HION7GlobalAugmentationToolCfg)
     acc.merge(PhysAugmentationsHION7Cfg(flags))
-    from DerivationFrameworkHI.HION9 import getDFJets
+    from DerivationFrameworkHI.HION8 import getDFJets
     acc.merge(getDFJets(flags))
 
 #########################################################################################
@@ -113,11 +113,11 @@ def HION9KernelCfg(flags, name='HION9Kernel', **kwargs):
     if isSmallSystem:
         pTCut = 15
 
-    JetColl = 4
+    JetColl = flags.HeavyIon.HIJetPrefix
 
     from DerivationFrameworkInDet.InDetToolsConfig import TrackParticleThinningCfg,JetTrackParticleThinningCfg
     
-    minTrackPt = flags.HeavyIon.MinTrackPt
+    minTrackPt = 4
     track_thinning_expression  = "InDetTrackParticles.pt > "+str(minTrackPt)+"*GeV"
     TrackParticleThinningTool  = acc.getPrimaryAndMerge(TrackParticleThinningCfg(
          flags,
@@ -240,8 +240,7 @@ def HION9Cfg(flags):
     HION9ItemList  = HION9SlimmingHelper.GetItemList()
     HIJetRemovedBranches=ListSlimming.makeHIJetRemovedBranchList()
     jet_var_str = '.-'.join ([''] + HIJetRemovedBranches)
-    jetRlist = [2,3,4,5,6,8,10] 
-    #flags.HeavyIon.Jet.RValues #Default [0.2,0.4]
+    jetRlist = flags.HeavyIon.Jet.RValues
     for jetR in jetRlist:
         output = ["xAOD::JetContainer#"+JetColl+"AntiKt"+str(jetR)+"HIJets",
                 "xAOD::JetAuxContainer#"+JetColl+"AntiKt"+str(jetR)+"HIJetsAux.-PseudoJet"+jet_var_str]

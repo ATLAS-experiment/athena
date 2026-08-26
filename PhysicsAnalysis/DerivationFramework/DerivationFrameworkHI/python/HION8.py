@@ -107,11 +107,11 @@ def HION8KernelCfg(flags, name='HION8Kernel', **kwargs):
     if isSmallSystem:
         pTCut = 15
 
-    JetColl = 4
+    JetColl = flags.HeavyIon.HIJetPrefix 
 
     from DerivationFrameworkInDet.InDetToolsConfig import TrackParticleThinningCfg,JetTrackParticleThinningCfg
     
-    minTrackPt = flags.HeavyIon.MinTrackPt
+    minTrackPt = 4
     track_thinning_expression  = "InDetTrackParticles.pt > "+str(minTrackPt)+"*GeV"
     TrackParticleThinningTool  = acc.getPrimaryAndMerge(TrackParticleThinningCfg(
          flags,
