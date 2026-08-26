@@ -20,7 +20,7 @@ namespace MuonGM {
 
     class MuonDetectorFactory001 : public GeoVDetectorFactory {
 
-        typedef std::map<std::string, std::string> AltAsciiDBMap;
+        typedef std::map<std::string, std::string, std::less<>> AltAsciiDBMap;
 
       public:
         // Constructor:
