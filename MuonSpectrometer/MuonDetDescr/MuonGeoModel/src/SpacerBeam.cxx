@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonGeoModel/SpacerBeam.h"
@@ -49,25 +49,25 @@ namespace MuonGM {
         lowerThickness = 0.;
 
         if (componentType == "CHV") {
-            const CHV *ch = dynamic_cast<const CHV*>(mysql.GetTechnology(s->name));
+            const CHV *ch = static_cast<const CHV*>(mysql.GetTechnology(s->name));
             thickness = ch->thickness;
             largeness = ch->largeness;
             height = ch->height - tol;
 
         } else if (componentType == "CRO") {
-            const CRO *cr = dynamic_cast<const CRO*>(mysql.GetTechnology(s->name));
+            const CRO *cr = static_cast<const CRO*>(mysql.GetTechnology(s->name));
             thickness = cr->thickness;
             largeness = cr->largeness;
             height = cr->height - tol;
 
         } else if (componentType == "CMI") {
-            const CMI *cn = dynamic_cast<const CMI*>(mysql.GetTechnology(s->name));
+            const CMI *cn = static_cast<const CMI*>(mysql.GetTechnology(s->name));
             thickness = cn->thickness;
             largeness = cn->largeness;
             height = cn->height - tol;
 
         } else if (componentType.substr(0, 2) == "LB") {
-            const LBI *lb = dynamic_cast<const LBI*>(mysql.GetTechnology(s->name));
+            const LBI *lb = static_cast<const LBI*>(mysql.GetTechnology(s->name));
             thickness = lb->thickness;
             lowerThickness = lb->lowerThickness;
             largeness = thickness;
