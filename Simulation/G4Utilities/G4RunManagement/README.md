@@ -32,11 +32,14 @@ Athena thread (G4RunAlg)  ⇄  G4RunTool ⇄  Geant4 main & worker threads
 1. During `G4RunAlg::initialize` the public `G4RunTool` is retrieved.
    `G4RunTool::initialize` already spawned the Geant4 main thread, so `G4RunAlg` calls
    `WaitBeginRun()` to block until the Geant4 run manager reports that it has
-   reached `BeginOfRun` through `G4UA::SyncRunAction`.
-2. `G4RunTool` keeps a `StateSynchronization` structure with condition
-   variables.  The Geant4 thread calls `NotifyBeginRun()` once the master run
-   action executes, unblocking the Athena side.  A subsequent `AthenaFinalize`
-   status is used to stop the Geant4 run loop.
+   reached `BeginOfRun` through `G4UA::SyncRunAction`. If the Geant4 main thread
+   fails or exits before that point, the wait returns failure instead of
+   blocking indefinitely.
+2. `G4RunTool` keeps a mutex-protected lifecycle state with condition
+   variables. The Geant4 thread calls `NotifyBeginRun()` once the master run
+   action executes, unblocking the Athena side. Explicit finalize, failure and
+   stopped states provide terminal conditions for all waits and run-loop
+   checks.
 3. Per event, `G4RunAlg` prepares a `std::unique_ptr<AtlasG4SyncEventUserInfo>`
    that owns the RNG engine seeded by Athena and a factory functor that will
    populate a `G4Event`.  The user info also stores a shared
@@ -88,6 +91,8 @@ Athena thread (G4RunAlg)  ⇄  G4RunTool ⇄  Geant4 main & worker threads
 
 - Retrieves the detector construction, physics list, user limits and user action
   services and initializes them in the Geant4 main thread.
+- Converts initialization failures and exceptions in the Geant4 main thread
+  into a lifecycle failure that is returned by `WaitBeginRun()`.
 - Accepts a list of additional action tools (`UserActionTools` property) that
   will be registered with the `G4UA::UserActionSvc`.
 - Sends all configured Geant4 UI commands (`G4Commands`, `Dll`, `Physics`,

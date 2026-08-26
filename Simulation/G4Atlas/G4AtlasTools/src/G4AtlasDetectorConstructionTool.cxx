@@ -1,10 +1,11 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // Include files
 #include <type_traits>
 
+#include "G4GeometryManager.hh"
 #include "G4LogicalVolumeStore.hh"
 #include "G4PhysicalVolumeStore.hh"
 #include "G4Version.hh"
@@ -89,6 +90,16 @@ auto G4AtlasDetectorConstructionTool::GetDetectorConstruction()
 //=================================
 // G4VUserDetectorConstruction method overrides
 //=================================
+G4AtlasDetectorConstructionTool::G4AtlasDetectorConstruction::
+    ~G4AtlasDetectorConstruction() {
+  // The master run manager deletes its detector construction after joining
+  // all workers and before deleting the Geant4 kernel. Clean the shared
+  // physical volumes in that safe teardown window, including when run-manager
+  // destruction is caused by an early return or exception.
+  G4GeometryManager::GetInstance()->OpenGeometry();
+  G4PhysicalVolumeStore::GetInstance()->Clean();
+}
+
 G4VPhysicalVolume*
 G4AtlasDetectorConstructionTool::G4AtlasDetectorConstruction::Construct() {
   ATH_MSG_DEBUG("Detectors " << m_detConstructionTool->m_detTool.name()

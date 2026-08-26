@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef G4ATLASINTERFACES_IG4RunTool_H
@@ -28,7 +28,8 @@ class IG4RunTool : virtual public IAlgTool {
 
   // Synchronization methods
   virtual void NotifyBeginRun() = 0;
-  virtual void WaitBeginRun() = 0;
+  /// Wait for BeginOfRun, or return failure if the Geant4 thread stops first.
+  virtual StatusCode WaitBeginRun() = 0;
   
   // Event queue management
   virtual size_t Size() const = 0;
