@@ -98,7 +98,6 @@ def AddJvtDecorationAlgCfg(ConfigFlags, algName = "JvtPassDecorAlg", jetContaine
     acc.addEventAlgo(CompFactory.JetDecorationAlg(algName, **kwargs), primary = True)
     return acc
 
-
 def DecorateHSTP(ConfigFlags):
     """ Determin if the process is Dijet and would therefore need HSTP filtering.
 
@@ -115,41 +114,38 @@ def DecorateHSTP(ConfigFlags):
     #from PathResolver import PathResolver
     import os
 
-    dsid         = GetFileMD(ConfigFlags.Input.Files).get("mc_channel_number", 0)
-    mc_campaign  = str(ConfigFlags.Input.MCCampaign)
-    sample_name  = None
-    candidates   = []
+    dsid          = GetFileMD(ConfigFlags.Input.Files).get("mc_channel_number", 0)
+    mc_campaign   = str(ConfigFlags.Input.MCCampaign)
+    sample_name   = None
     pmgxsec_files = []
-    pmg_dir = None
+    pmg_dir       = None
 
+    # This for loop replaces a call to PathResolver.FindCalibDirectory("dev/PMGTools"), 
+    # It is implimented to avoid Error status from referencing dev/. 
+    # Feedback welcome! See: https://atlas-talk.web.cern.ch/t/best-practice-for-identifying-dijet-jz-samples-in-athena/48613/3
     for calib_dir in os.environ.get("CALIBPATH", "").split(":"):
         pmg_dir = os.path.join(calib_dir, "dev/PMGTools")
         if not os.path.isdir(pmg_dir):
             continue
 
-    # First try MCCampaign
-    if "MC" in mc_campaign:
-      mc_number = mc_campaign.split("MC", 1)[1]
-      mc_number = mc_number.rstrip("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
-      if mc_number.isdigit(): 
-        candidate = os.path.join(pmg_dir, f"PMGxsecDB_mc{mc_number}.txt")
-        if os.path.isfile(candidate):
-            candidates.append(candidate)
-        # candidate = PathResolver.FindCalibFile( f"dev/PMGTools/PMGxsecDB_mc{mc_number}.txt" )
-        # if candidate:
-        #   pmgxsec_files.append(candidate)
-
-    else:# If MC number not saved (for Ex: "campaign.undefined"), searching all available databases
-        print("Not in MC")
-        # calib_dir = PathResolver.FindCalibDirectory("dev/PMGTools")
-        for filename in os.listdir(pmg_dir):
-          if not filename.startswith("PMGxsecDB_mc") or not filename.endswith(".txt"):
-            continue
-          mc_part = filename[12:-4]  # accept files with names with TeV in, for ex: "PMGxsecDB_mc15_14TeV.tex
-          if "_TeV" in mc_part:
-            mc_part = mc_part.rsplit("_", 1)[0]
-          if mc_part.isdigit():
-            pmgxsec_files.append(os.path.join(pmg_dir, filename))
+        # First try MCCampaign
+        if "MC" in mc_campaign:
+          mc_number = mc_campaign.split("MC", 1)[1]
+          mc_number = mc_number.rstrip("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ ")
+          if mc_number.isdigit(): 
+            finename = os.path.join(pmg_dir, f"PMGxsecDB_mc{mc_number}.txt")
+            if os.path.isfile(finename):
+              pmgxsec_files.append(finename)
+        # If MC number not saved (for Ex: "campaign.undefined"), searching all available databases
+        else:
+            for filename in os.listdir(pmg_dir):
+              if not filename.startswith("PMGxsecDB_mc") or not filename.endswith(".txt"):
+                continue
+              mc_part = filename[12:-4]  # accept files with names with TeV in, for ex: "PMGxsecDB_mc15_14TeV.tex
+              if "_TeV" in mc_part:
+                mc_part = mc_part.rsplit("_", 1)[0]
+              if mc_part.isdigit():
+                pmgxsec_files.append(os.path.join(pmg_dir, filename))
 
     # Search all selected xSecDB files for the DSID
     for candidate in pmgxsec_files:
@@ -159,10 +155,8 @@ def DecorateHSTP(ConfigFlags):
           if len(fields) >= 2 and fields[0] == str(dsid):
             sample_name = fields[1]
             break
-
         if sample_name is not None:
             break
-
     if sample_name is None:
         return False
         
@@ -226,7 +220,7 @@ def AddEventCleanFlagsCfg(ConfigFlags, workingPoints = ['Loose', 'Tight', 'Loose
     # Add support for passHSTPFilter event flag
     if DecorateHSTP(ConfigFlags):
         workingPoints.append('HSTP')
-
+    
     for wp in workingPoints:
         if wp not in supportedWPs:
             continue
@@ -293,18 +287,13 @@ def AddEventCleanFlagsCfg(ConfigFlags, workingPoints = ['Loose', 'Tight', 'Loose
 
         ## for passHSTPFilter
         if 'HSTP' in wp:
+
             # Decorates the decision of the Hard-Scatter Softer Than Pile-up filter, relevent ONLY for Dijet samples.
             # see: https://atlas-jetetmiss.docs.cern.ch/users/QCD-samples/#hard-scatter-softer-than-pileup-hstp-filter
             # We are forced to instatiate a jetcleaning tool to make an eventcleaning tool. This does not get used.
-            jetCleaningTool = acc.popToolsAndMerge(JetCleaningToolCfg(
-                    ConfigFlags, 'JetCleaningTool_'+cleaningLevel,
-                    'AntiKt4EMPFlowJets', cleaningLevel, False))
-            acc.addPublicTool(jetCleaningTool)
-    
             ecTool = acc.popToolsAndMerge(EventCleaningToolCfg(ConfigFlags,'EventCleaningTool_' + wp, cleaningLevel))
-            ecTool.JetContainer    = "AntiKt4EMPFlowJets"  # Must provide a JetContainer name.  The HSTP is a truth level only filter and wont use this.
-            ecTool.JetCleaningTool = jetCleaningTool
-            ecTool.DoDecorations   = False
+            ecTool.JetContainer  = "AntiKt4EMPFlowJets"  # Must provide a JetContainer name.  The HSTP is a truth level only filter and wont use this.
+            ecTool.DoDecorations = False
             acc.addPublicTool(ecTool)
 
             eventCleanAlg = CompFactory.EventCleaningTestAlg('EventCleaningTestAlg_'+wp,

@@ -57,11 +57,11 @@ class EventCleaningTestAlg : public AthAlgorithm
 
     SG::WriteDecorHandleKey<xAOD::EventInfo> m_evtInfoDecorHSTP{this, "EvtDecorKeyHSTP", "" , "Will be overwritten in initialze"};  
 
-    SG::ReadHandleKey<xAOD::JetContainer> m_truthJetKey{ this, "TruthJetCollectionName", "AntiKt4TruthDressedWZJets", "Default truth jet collection" };
+    SG::ReadHandleKey<xAOD::JetContainer> m_truthJetDressedWZKey{ this, "TruthJetDressedWZCollectionName", "AntiKt4TruthDressedWZJets", "Default truth jet collection" };
 
     SG::ReadHandleKey<xAOD::JetContainer> m_truthJetWZKey{ this, "TruthJetWZCollectionName", "AntiKt4TruthWZJets", "Alternative truth jet collection"};
 
-    SG::ReadHandleKey<xAOD::JetContainer> m_truthJetDefaultKey{ this, "TruthJetDefaultCollectionName", "AntiKt4TruthJets", "Alternative truth jet collection"};
+    SG::ReadHandleKey<xAOD::JetContainer> m_truthJetKey{ this, "TruthJetCollectionName", "AntiKt4TruthJets", "Alternative truth jet collection"};
 
     SG::ReadHandleKey<xAOD::JetContainer> m_truthPUJetKey{ this, "TruthPUJetCollectionName", "InTimeAntiKt4TruthJets", "Truth pile-up jet collection"};
 

@@ -70,12 +70,14 @@ StatusCode EventCleaningTool::initialize()
     return StatusCode::FAILURE;
   }
 
-  //initialize jet cleaning tool
-  ATH_CHECK(m_jetCleaningTool.setProperty("JetContainer", m_jetContainerName ));
-  ATH_CHECK(m_jetCleaningTool.setProperty("CutLevel", m_cleaningLevel ));
-  ATH_CHECK(m_jetCleaningTool.setProperty("UseDecorations", m_useDecorations ));  //for AODs we can't use decorations
-  ATH_CHECK(m_jetCleaningTool.retrieve());
-  ATH_MSG_INFO( "Event cleaning tool configured with cut level " << m_cleaningLevel  );
+  // initialize jet cleaning tool if not empty.
+  if (!m_jetCleaningTool.empty()) {
+    ATH_CHECK(m_jetCleaningTool.setProperty("JetContainer", m_jetContainerName ));
+    ATH_CHECK(m_jetCleaningTool.setProperty("CutLevel", m_cleaningLevel ));
+    ATH_CHECK(m_jetCleaningTool.setProperty("UseDecorations", m_useDecorations ));  //for AODs we can't use decorations
+    ATH_CHECK(m_jetCleaningTool.retrieve());
+    ATH_MSG_INFO( "Event cleaning tool configured with cut level " << m_cleaningLevel  );
+  }
 
   m_passJvtKey = m_jetContainerName + "." + m_prefix + m_passJvtKey.key();
   m_passORKey = m_jetContainerName + "." + m_prefix + m_passORKey.key();
@@ -150,7 +152,6 @@ bool EventCleaningTool::passHSTPFilter(const xAOD::JetContainer* jets, const xAO
     restoring a physical reconstructed jet pT spectrum.
     See: https://atlas-jetetmiss.docs.cern.ch/users/QCD-samples/#hard-scatter-softer-than-pileup-hstp-filter
   */
-
 
   // In the rare case of no HS truth jets in the event, assume it is close to the jetThreshold (default 5000 MeV)
   double maxHsJetPt = jetThreshold; 

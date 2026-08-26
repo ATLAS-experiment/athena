@@ -28,9 +28,9 @@ StatusCode EventCleaningTestAlg::initialize()
   ATH_CHECK( m_jetKey.initialize());
   ATH_CHECK( m_evtKey.initialize() );
 
-  ATH_CHECK(m_truthJetKey.initialize());
+  ATH_CHECK(m_truthJetDressedWZKey.initialize());
   ATH_CHECK(m_truthJetWZKey.initialize());
-  ATH_CHECK(m_truthJetDefaultKey.initialize());
+  ATH_CHECK(m_truthJetKey.initialize());
   ATH_CHECK(m_truthPUJetKey.initialize());
 
   // Create the decorator
@@ -94,14 +94,14 @@ StatusCode EventCleaningTestAlg::execute(const EventContext& ctx)
     
     // Get truth jet container. 
     // Prioritize AntiKt4TruthDressedWZJets thn AntiKt4TruthWZJets then AntiKt4TruthJets if the former are not avialable
-    SG::ReadHandle<xAOD::JetContainer> truthJets{m_truthJetKey, ctx};
-    if (truthJets.isValid())  tjets = truthJets.cptr();
+    SG::ReadHandle<xAOD::JetContainer> truthJetsDressedWZ{m_truthJetDressedWZKey, ctx};
+    if (truthJetsDressedWZ.isValid())  tjets = truthJetsDressedWZ.cptr();
     else {
           SG::ReadHandle<xAOD::JetContainer> truthJetsWZ{ m_truthJetWZKey, ctx};
       if (truthJetsWZ.isValid())  tjets = truthJetsWZ.cptr();
       else {
-        SG::ReadHandle<xAOD::JetContainer> truthJetsDefault{ m_truthJetDefaultKey, ctx};
-        if (truthJetsDefault.isValid())  tjets = truthJetsDefault.cptr();
+        SG::ReadHandle<xAOD::JetContainer> truthJets{ m_truthJetKey, ctx};
+        if (truthJets.isValid())  tjets = truthJets.cptr();
       }
     }
     if (!tjets) {
