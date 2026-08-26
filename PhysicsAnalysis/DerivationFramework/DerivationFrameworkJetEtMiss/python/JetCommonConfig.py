@@ -17,7 +17,7 @@ def JetCommonCfg(ConfigFlags):
     if "McEventCollection#GEN_EVENT" not in ConfigFlags.Input.TypedCollections:
         acc.merge(AddBadBatmanCfg(ConfigFlags))
     acc.merge(AddDistanceInTrainCfg(ConfigFlags))
-    acc.merge(AddSidebandEventShapeCfg(ConfigFlags))
+    acc.merge(AddNeutralEventShapeCfg(ConfigFlags))
     acc.merge(AddEventCleanFlagsCfg(ConfigFlags))
     
     return acc
@@ -65,22 +65,15 @@ def AddDistanceInTrainCfg(ConfigFlags):
 
     return acc
 
-def AddSidebandEventShapeCfg(ConfigFlags):
+def AddNeutralEventShapeCfg(ConfigFlags):
     """Special rho definitions for PFlow jets"""
-    from JetRecConfig.JetRecConfig import getInputAlgs,getConstitPJGAlg,reOrderAlgs
+    from JetRecConfig.JetRecConfig import getConstitPJGAlg
     from JetRecConfig.StandardJetConstits import stdConstitDic as cst
     from JetRecConfig.JetInputConfig import buildEventShapeAlg
 
     acc = ComponentAccumulator()
 
-    constit_algs = getInputAlgs(cst.GPFlow, flags=ConfigFlags)
-    constit_algs, ca = reOrderAlgs( [a for a in constit_algs if a is not None])
-
-    acc.merge(ca)
-    for a in constit_algs:
-        acc.addEventAlgo(a)
-
-    #New "sideband" definition when using CHS based on TTVA
+    #New rho definition using only neutral PFOs
     acc.addEventAlgo(getConstitPJGAlg(cst.GPFlow, suffix='Neut'))
     acc.addEventAlgo(buildEventShapeAlg(cst.GPFlow, '', suffix = 'Neut' ))
 
