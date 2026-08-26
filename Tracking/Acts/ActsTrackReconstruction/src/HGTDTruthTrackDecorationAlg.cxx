@@ -193,7 +193,6 @@ namespace ActsTrk{
         
         assert( state.hasUncalibratedSourceLink() );
         auto uncalibMeas = detail::xAODUncalibMeasCalibrator::unpack(state.getUncalibratedSourceLink());
-      
         if (association_map->at(uncalibMeas->index()).empty()) {
           cluster_truth_info.origin = ActsTrk::ClusterTruthOrigin::SECONDARY;
           ATH_MSG_DEBUG("    \\__Layer "<< layerIndex << " SECONDARY: hit doesnt have truth particle associated with it");
@@ -221,10 +220,14 @@ namespace ActsTrk{
           }
         }
       
-        
-        truthClassPerLayer[layerIndex]      = (int) cluster_truth_info.origin;
-        isShadowedPerLayer[layerIndex]      = cluster_truth_info.is_shadowed;
-        isMergedPerLayer[layerIndex]        = cluster_truth_info.is_merged;
+        ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<" - "<<uncalibMeas->type()<<", geoID: "<<geoID<<", layerIndex: "<<layerIndex);
+        if (layerIndex >= truthClassPerLayer.size()) {
+          ATH_MSG_WARNING(__func__<<"() "<<__LINE__<<" - "<<uncalibMeas->type()<<", geoID: "<<geoID<<" results in an invalid index "<<layerIndex);
+          continue;
+        }
+        truthClassPerLayer.at(layerIndex)      = Acts::toUnderlying(cluster_truth_info.origin);
+        isShadowedPerLayer.at(layerIndex)      = cluster_truth_info.is_shadowed;
+        isMergedPerLayer.at(layerIndex)        = cluster_truth_info.is_merged;
       }
     }
 
@@ -250,10 +253,15 @@ namespace ActsTrk{
       const Acts::Surface* surface = m_surfAcc.get(uncalibMeas);
       Acts::GeometryIdentifier geoID = surface->geometryId();
       std::size_t layerIndex = getHGTDLayerIndex(geoID);
-      if(measurementTruthParticles.size() > 0){
+      ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<" - "<<uncalibMeas->type()<<", geoID: "<<geoID<<", layerIndex: "<<layerIndex);
+      if (layerIndex >= isPrimaryExistsVec.size()) {
+          ATH_MSG_WARNING(__func__<<"() "<<__LINE__<<" - "<<uncalibMeas->type()<<", geoID: "<<geoID<<" results in an invalid index "<<layerIndex);
+          continue;
+      }
+      if(measurementTruthParticles.size() > 0) {
         for(auto measTruthParticle : measurementTruthParticles){
           if ( truthParticle->index() == measTruthParticle->index()){
-            isPrimaryExistsVec[layerIndex] = true;
+            isPrimaryExistsVec.at(layerIndex) = true;
             ATH_MSG_DEBUG("         \\__HIT Exepected at " << layerIndex);
           }
         }
