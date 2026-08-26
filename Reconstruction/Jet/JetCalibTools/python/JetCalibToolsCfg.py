@@ -42,10 +42,10 @@ def defineJetCalibTool(jetdef, modspec):
     from JetCalibTools.JetCalibStepsConfig import calibToolFromConfigFile
 
     # Get the yaml file and calibration sequence
-    cfg, calibSeqOverride = getJetCalibToolSettings(jetdef, modspec)
+    cfg, calibSeqKey = getJetCalibToolSettings(jetdef, modspec)
     path_configFile = PathResolver.FindCalibFile(cfg) 
     toolname = "jetcalib_new_{0}_{1}".format(jetdef.basename,modspec)
-    jct = calibToolFromConfigFile(jetdef._cflags, path_configFile, toolname, calibSeqOverride)
+    jct = calibToolFromConfigFile(jetdef._cflags, path_configFile, toolname, calibSeqKey)
 
     return jct
 
@@ -54,7 +54,7 @@ def defineJetCalibTool(jetdef, modspec):
 def getJetCalibToolPrereqs(jetdef, modspec):
     from JetCalibTools.JetCalibStepsConfig import load_yaml_cfg
 
-    cfg, calibSeqOverride = getJetCalibToolSettings(jetdef, modspec)
+    cfg, _ = getJetCalibToolSettings(jetdef, modspec)
     configDic = load_yaml_cfg(cfg)
 
     prereqs = ["mod:ConstitFourMom"]
@@ -91,7 +91,8 @@ def getJetCalibToolPrereqs(jetdef, modspec):
 def getJetCalibToolSettings(jetdef, modspec):
 
     calibspecs = modspec.split(':')
-    context = calibspecs[0]
+
+    context = calibspecs[0] # T0/Trigger/etc. - used to extract calbration sequence from YAML config file
 
     ##############################
     # Get the jet collection name
@@ -111,21 +112,6 @@ def getJetCalibToolSettings(jetdef, modspec):
     if "_tauSeedEleRM" in jetcollection :
         jetcollection = jetcollection.replace("_tauSeedEleRM","")
 
-    ##############################
-    # Get the calibration sequence
-    ##############################
-
-    # Per default, the calibration sequence is determined from the yaml file
-    calibSeqOverride = None
-    # Check if specified in configuration (e.g. for low / no pT jet collections)
-    if len(calibspecs) > 2:
-        calibSeqOverride = calibspecs[2]
-    # Check if T0 configuration, if yes, want to apply only certain calibrations
-    elif context == "T0":
-        calibSeqOverride = "JetArea_Residual_EtaJES"
-        if jetcollection == "AntiKt10UFOCSSKSoftDropBeta100Zcut10":
-            calibSeqOverride = "EtaJES_JMS"
-
     ##########################################
     # Retrieve the yaml file for JetCalibTools
     ##########################################
@@ -139,4 +125,4 @@ def getJetCalibToolSettings(jetdef, modspec):
     else:
         cfg = calibdic[context][jetcollection]
 
-    return cfg, calibSeqOverride
+    return cfg, context

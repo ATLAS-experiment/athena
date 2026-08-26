@@ -47,7 +47,7 @@ class PileupAreaResidualCalibStep   : public asg::AsgTool,
 
   /// Event properties
   SG::ReadHandleKey<xAOD::EventShape> m_rhoKey{this, "RhoKey", "auto"};
-  SG::ReadHandleKey<xAOD::VertexContainer> m_pvKey{this, "PrimaryVerticesContainerName", "PrimaryVertices"};
+  SG::ReadHandleKey<xAOD::VertexContainer> m_pvKey{this, "VertexContainer", "PrimaryVertices"};
   SG::ReadDecorHandleKey<xAOD::EventInfo> m_muKey {this, "averageInteractionsPerCrossingKey",
     "EventInfo.averageInteractionsPerCrossing","Decoration for Average Interaction Per Crossing"};
 

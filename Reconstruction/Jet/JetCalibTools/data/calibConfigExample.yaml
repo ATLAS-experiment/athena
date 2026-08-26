@@ -10,13 +10,15 @@
 # --------------------------------------------------------------------------------------------------------------------------------------------------------------
 # Set calibration step ordering
 Sequence:
-  Run2: 
-    FullSim: [Residual, EtaJES, GSC, PtResidual, MC2MC, Smear]
-    AF3: [Residual, EtaJES, GSC, PtResidual, AF3, MC2MC, Smear]
-    Data: [Residual, EtaJES, GSC, PtResidual, Insitu]
-  Run3: 
-    FullSim: [Residual, EtaJES, GSC, PtResidual, MC2MC, Smear]
-    AF3: [Residual, EtaJES, GSC, PtResidual, AF3, MC2MC, Smear]
+  Default:
+      FullSim: [Residual, EtaJES, GSC, PtResidual, MC2MC, Smear]
+      AF3: [Residual, EtaJES, GSC, PtResidual, AF3, MC2MC, Smear]
+      Data: [Residual, EtaJES, GSC, PtResidual, Insitu]
+  Run4: 
+    Data: [Residual, EtaJES, Insitu]
+  T0: [Residual, EtaJES]
+  Trigger: 
+    MC: [Residual, EtaJES, GSC, PtResidual]
     Data: [Residual, EtaJES, GSC, PtResidual, Insitu]
 
 # --------------------------------------------------------------------------------------------------------------------------------------------------------------
