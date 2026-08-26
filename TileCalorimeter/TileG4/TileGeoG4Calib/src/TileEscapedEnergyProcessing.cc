@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////
@@ -21,7 +21,6 @@
 #include "G4VPhysicalVolume.hh"
 #include "G4SDManager.hh"
 #include "G4VSensitiveDetector.hh"
-#include "CxxUtils/AthUnlikelyMacros.h"
 
 TileEscapedEnergyProcessing::TileEscapedEnergyProcessing(const int /*verboseLevel*/)
   : m_escaped(false),
@@ -47,17 +46,17 @@ G4bool TileEscapedEnergyProcessing::Process( G4Step* fakeStep ) {
   G4VPhysicalVolume* volume = fakeStep->GetPreStepPoint()->GetPhysicalVolume();
 
   // If the volume is valid...
-  if (ATH_LIKELY(volume)) {
+  if (volume) [[likely]] {
     // Is this volume associated with a sensitive detector?
     G4VSensitiveDetector* sensitiveDetector = volume->GetLogicalVolume()->GetSensitiveDetector();
 
-    if (ATH_LIKELY(sensitiveDetector)) {
+    if (sensitiveDetector) [[likely]] {
       // We've found a sensitive detector.
       TileGeoG4CalibSD* calibSD = dynamic_cast<TileGeoG4CalibSD*>(sensitiveDetector);
 
-      if (ATH_LIKELY(calibSD)) {
+      if (calibSD) [[likely]] {
         G4String volumeName = volume->GetName();
-        if (ATH_UNLIKELY(volumeName.find("Tile") == G4String::npos)) {
+        if (volumeName.find("Tile") == G4String::npos) [[unlikely]] {
           G4ExceptionDescription description;
           description << "Process: escaped particle was created in "
                       << volume->GetName() << ", out of TILE.\n"
