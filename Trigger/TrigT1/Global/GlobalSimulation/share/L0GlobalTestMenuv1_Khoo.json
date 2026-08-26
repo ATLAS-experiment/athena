@@ -172,6 +172,10 @@
         "eFexCvtrAlgTool/eFexCvtr": {
             "input": {"eFexEMRoI": "L1_eEMRoI"},
             "output": {"eEmTOBContainer": "eEMTOBs"}
+        },
+        "JET1Alg/JET1": {
+            "input": {"topoc_pu_type": "GlobalSim_CellTowers"},
+            "output": {"main_output": "GlobalSim_JET1Jets"}
         }
     },
     "boards": {
