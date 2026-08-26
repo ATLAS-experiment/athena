@@ -36,7 +36,8 @@ def PersistifyClusters(flags,
 
     from OutputStreamAthenaPool.OutputStreamConfig import addToESD, addToAOD
     acc.merge(addToESD(flags, toESD + toAOD))
-    acc.merge(addToAOD(flags, toAOD))
+    if flags.Acts.EDM.PersistifyClusters:
+        acc.merge(addToAOD(flags, toAOD))
     return acc
 
 
@@ -79,7 +80,8 @@ def PersistifySpacePoints(flags,
 
     from OutputStreamAthenaPool.OutputStreamConfig import addToESD, addToAOD
     acc.merge(addToESD(flags, toESD + toAOD))
-    acc.merge(addToAOD(flags, toAOD))
+    if flags.Acts.EDM.PersistifySpacePoints:
+        acc.merge(addToAOD(flags, toAOD))
     return acc
 
 
@@ -109,7 +111,8 @@ def PersistifyTracks(flags,
 
     from OutputStreamAthenaPool.OutputStreamConfig import addToESD, addToAOD
     acc.merge(addToESD(flags, toESD + toAOD))
-    acc.merge(addToAOD(flags, toAOD))
+    if flags.Acts.EDM.PersistifyTracks:
+        acc.merge(addToAOD(flags, toAOD))
     return acc
 
 
