@@ -707,6 +707,31 @@ def HION7PCCCTriggers2024():
 
     return triggers
 
+def HION7JetTriggers2025():
+    triggers  = {}
+    triggers.update({'HLT_j60_a2_ion_L1jJ55' : 60})
+    triggers.update({'HLT_j75_a2_ion_L1jJ55' : 75})
+    triggers.update({'HLT_j75_ion_L1jJ55' : 75})
+    triggers.update({'HLT_j100_ion_L1jJ55' : 100})
+
+    return triggers
+
+def HION7FwdJetTriggers2025(): # currently not included in HION7
+    triggers  = {}
+    triggers.update({'HLT_j30f_ion_L1jTE20' : 30})
+    triggers.update({'HLT_j50f_ion_L1jTE50' : 50})
+    triggers.update({'HLT_j50f_ion_L1jJ40p30ETA49' : 50})
+    triggers.update({'HLT_j60f_ion_L1jJ40p30ETA49' : 60})
+
+    return triggers
+
+def HION7JetTriggers2026():
+    triggers  = {}
+    triggers.update({'HLT_j60_ion_L1jJ40' : 100})
+    triggers.update({'HLT_j75_ion_L1jJ55' : 75})
+
+    return triggers
+
 def HION7JetTriggersPP():
     triggers  = {}
     triggers.update({'HLT_j20_L1RD0_FILLED' : 20})
@@ -822,12 +847,16 @@ def HION7SkimmingTriggersOO():
     return triggers
 
 def HION7SkimmingTriggers2025():
-    triggers  = HION7SkimmingTriggers2024()
+    triggers  = HION7JetTriggers2025()
+    triggers.update(HION7MuonTriggers())
+    triggers.update(HION7PCCCTriggers2024())
 
     return triggers
 
 def HION7SkimmingTriggers2026():
-    triggers  = HION7SkimmingTriggers2024()
+    triggers  = HION7JetTriggers2026()
+    triggers.update(HION7MuonTriggers())
+    triggers.update(HION7PCCCTriggers2024())
 
     return triggers
 
@@ -855,12 +884,16 @@ def HION8SkimmingTriggers2024():
     return triggers
 
 def HION8SkimmingTriggers2025():
-    triggers  = HION8SkimmingTriggers2024()
+    triggers  = HION7JetTriggers2025()
+    triggers.update(HION7FwdJetTriggers2025())
+    triggers.update(HION7PCCCTriggers2024())
 
     return triggers
 
 def HION8SkimmingTriggers2026():
-    triggers  = HION8SkimmingTriggers2024()
+    triggers  = HION7JetTriggers2026()
+    triggers.update(HION7FwdJetTriggers2025())
+    triggers.update(HION7PCCCTriggers2024())
 
     return triggers
 
@@ -885,12 +918,14 @@ def HION9SkimmingTriggers2024():
     return triggers
 
 def HION9SkimmingTriggers2025():
-    triggers  = HION9SkimmingTriggers2024()
+    triggers  = HION7JetTriggers2025()
+    triggers.update(HION7PCCCTriggers2024())
 
     return triggers
 
 def HION9SkimmingTriggers2026():
-    triggers  = HION9SkimmingTriggers2024()
+    triggers  = HION7JetTriggers2026()
+    triggers.update(HION7PCCCTriggers2024())
 
     return triggers
 
