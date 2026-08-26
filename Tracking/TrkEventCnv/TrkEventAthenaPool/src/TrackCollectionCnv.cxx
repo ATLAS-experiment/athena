@@ -1,9 +1,5 @@
 /*
-<<<<<<< HEAD
   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
-=======
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
->>>>>>> 397770f5fcb (Revert "remove TrkEventAthenaPool package")
 */
 
 //-----------------------------------------------------------------------------
@@ -82,11 +78,7 @@ TrackCollection_PERS * TrackCollectionCnv::createPersistentWithKey( TrackCollect
                                                                     const std::string& key)
 {
     std::string logname = "TrackCollectionCnv";
-<<<<<<< HEAD
     MsgStream log (m_msgSvc, std::move(logname) );
-=======
-    MsgStream log (m_msgSvc, logname );
->>>>>>> 397770f5fcb (Revert "remove TrkEventAthenaPool package")
 
     return m_TPConverter.createPersistentWithKey ( transCont, key, log );
 }
@@ -97,7 +89,6 @@ TrackCollection_PERS * TrackCollectionCnv::createPersistentWithKey( TrackCollect
 TrackCollection *TrackCollectionCnv::createTransientWithKey(const Token* token, const std::string& key)
 {
     m_log.setLevel( m_msgSvc->outputLevel() );
-<<<<<<< HEAD
     static const Guid p7_guid( "D8806153-CA92-4A1A-9859-68E40EB4E336" );
     static const Guid p6_guid( "3228B252-2C5D-11E8-B170-0800271C02BC" );
     static const Guid p5_guid( "436E4996-9D6E-11E3-AD2A-6C3BE51AB9F1" );
@@ -106,16 +97,6 @@ TrackCollection *TrackCollectionCnv::createTransientWithKey(const Token* token, 
     static const Guid p2_guid( "2D8B19DC-DB2E-4F56-BB94-D7C4544D501A" );
     static const Guid p1_guid( "ECB12567-B999-4908-B0C6-C43CF9F9A987" );
     static const Guid p0_guid( "70ECEBFC-BE00-46C2-8B35-4CC12D18DE39" );
-=======
-    static const pool::Guid p7_guid( "D8806153-CA92-4A1A-9859-68E40EB4E336" );
-    static const pool::Guid p6_guid( "3228B252-2C5D-11E8-B170-0800271C02BC" );
-    static const pool::Guid p5_guid( "436E4996-9D6E-11E3-AD2A-6C3BE51AB9F1" );
-    static const pool::Guid p4_guid( "3BEB819F-6ED2-48F6-9F95-E65E1759E781" );
-    static const pool::Guid p3_guid( "A1E9FDCB-2F4A-4AC8-BF4E-2D70B9C70F8A" );
-    static const pool::Guid p2_guid( "2D8B19DC-DB2E-4F56-BB94-D7C4544D501A" );
-    static const pool::Guid p1_guid( "ECB12567-B999-4908-B0C6-C43CF9F9A987" );
-    static const pool::Guid p0_guid( "70ECEBFC-BE00-46C2-8B35-4CC12D18DE39" );
->>>>>>> 397770f5fcb (Revert "remove TrkEventAthenaPool package")
 
     TrackCollection *p_collection = nullptr;
     if( compareClassGuid(token,  p7_guid )){

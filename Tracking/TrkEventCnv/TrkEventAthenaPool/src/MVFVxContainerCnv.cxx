@@ -57,13 +57,8 @@ MVFVxContainer_PERS * MVFVxContainerCnv::createPersistent( MVFVxContainer* )
 MVFVxContainer * MVFVxContainerCnv::createTransient(const Token* token)
 {
     MsgStream log(msgSvc());
-<<<<<<< HEAD
  static const Guid p1_guid( "D7BAA7AD-1A46-4DA3-9CA7-350A1A3F0656" );
  static const Guid p0_guid( "6C6999B7-F961-4B72-B6D9-DF71CB2364CC" );
-=======
- static const pool::Guid p1_guid( "D7BAA7AD-1A46-4DA3-9CA7-350A1A3F0656" );
- static const pool::Guid p0_guid( "6C6999B7-F961-4B72-B6D9-DF71CB2364CC" );
->>>>>>> 397770f5fcb (Revert "remove TrkEventAthenaPool package")
 
  MVFVxContainer *p_collection = nullptr;
  
@@ -84,11 +79,7 @@ MVFVxContainer * MVFVxContainerCnv::createTransient(const Token* token)
 
 void        MVFVxContainerCnv::readObjectFromPool( const Token* token )
 {
-<<<<<<< HEAD
   static const Guid p1_guid( "D7BAA7AD-1A46-4DA3-9CA7-350A1A3F0656" );
-=======
-  static const pool::Guid p1_guid( "D7BAA7AD-1A46-4DA3-9CA7-350A1A3F0656" );
->>>>>>> 397770f5fcb (Revert "remove TrkEventAthenaPool package")
   
    // select the object type based on its GUID 
    if( compareClassGuid(token,  p1_guid ) ) {
