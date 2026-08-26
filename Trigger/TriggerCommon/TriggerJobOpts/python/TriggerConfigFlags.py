@@ -142,6 +142,9 @@ def createTriggerFlags(doTriggerRecoFlags):
                   help=('Check validity of each Decision objects in the entire decision tree (CPU expensive). '
                         'Also enable per-step decision printouts.'))
 
+    # Enables logging of per-leg feature counts
+    flags.addFlag('Trigger.doPerLegFeatureCounts', True)
+
     def EDMVersion(flags):
         """Determine Trigger EDM version based on the input file."""
         _log = logging.getLogger('TriggerConfigFlags.EDMVersion')

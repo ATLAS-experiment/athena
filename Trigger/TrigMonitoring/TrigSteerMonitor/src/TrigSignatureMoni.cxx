@@ -153,6 +153,12 @@ StatusCode TrigSignatureMoni::stop() {
       // Check that the step name is set with the same position in the execution (empty steps support)
       if (std::format("Step{:d}", nstep) == stepName) {
         chainToStepsId[chain.name()].insert(nstep);
+        if(m_countLegFeatures && chain.legMultiplicities().size()>1) {
+          for (size_t legID = 0; legID < chain.legMultiplicities().size(); ++ legID) {
+            const std::string legName = ( TrigCompositeUtils::createLegName(HLT::Identifier(chain.name()), legID).name() );
+            chainToStepsId[legName].insert(nstep);
+          }
+        }
       } else {
       	ATH_MSG_DEBUG("Missing counts for step" << nstep << " in chain " << chain.name());
       }
@@ -191,12 +197,14 @@ StatusCode TrigSignatureMoni::stop() {
   v += std::format("{:<11s}", "Express");
   
   ATH_MSG_INFO("Chains passing step (1st row events & 2nd row decision counts):");  
+  ATH_MSG_INFO("    Feature counts reflect the number of unique objects contributing to a positive chain decision (0 if step fails), including L1RoI for empty steps.");
+  if(m_countLegFeatures) {
+    ATH_MSG_INFO("    Leg feature counts indicate the number of unique objects that pass the leg's step selection (regardless of multiplicity), which may overlap with other legs.");
+    ATH_MSG_INFO("    'PROBE' L1 RoIs are counted separately.");
+  }
+
   ATH_MSG_INFO(std::format("{:<30s}", "ChainName") << v);
 
-  /*
-    comment for future dev:
-    for combined chains we find x2 the number of decisions, because we count both the HypoAlg and the combo Alg decisions
-  */
   
   for (int bin = 1; bin <= (*m_passHistogram)->GetXaxis()->GetNbins(); ++bin) {
     const std::string chainName = m_passHistogram->GetXaxis()->GetBinLabel(bin);
@@ -208,6 +216,10 @@ StatusCode TrigSignatureMoni::stop() {
     }
     if (chainName.starts_with( "All")){
       ATH_MSG_INFO( std::format("{:<30s}", chainName) << collToString( bin, m_passHistogram) );
+    }
+    if (chainName.starts_with("leg")) { // print features only for legs
+      const std::string legID = chainName.substr(0,6);
+      ATH_MSG_INFO( std::format("{:<30s}", std::format("-- #{} Features", legID)) << collToString( bin, m_countHistogram , 2, 1 ) );
     }
   }
 
@@ -222,12 +234,14 @@ StatusCode TrigSignatureMoni::fillHistogram(const TrigCompositeUtils::DecisionID
 
   for (TrigCompositeUtils::DecisionID id : dc)  {
     auto id2bin = m_chainIDToBinMap.find( id );
-    if ( id2bin != m_chainIDToBinMap.end() ) {
-      lockedHist->Fill( id2bin->second, static_cast<double>(row) );
-    }
-    else {
-      if ( !TrigCompositeUtils::isLegId(HLT::Identifier(id)) )
+    // Can ignore leg IDs if we are not explicitly saving their counts
+    if ( id2bin == m_chainIDToBinMap.end() ) {
+      if (!(!m_countLegFeatures && TrigCompositeUtils::isLegId(HLT::Identifier(id)))) {
         ATH_MSG_WARNING( "HLT chain " << HLT::Identifier(id) << " not configured to be monitored" );
+      }
+    } else {
+      ATH_MSG_VERBOSE( "Filling histogram for " << HLT::Identifier(id).name() << " ==> bin " << id2bin->second );
+      lockedHist->Fill( id2bin->second, static_cast<double>(row) );
     }
   }
   return StatusCode::SUCCESS;
@@ -243,12 +257,12 @@ StatusCode TrigSignatureMoni::fillPassEvents(const TrigCompositeUtils::DecisionI
 
 StatusCode TrigSignatureMoni::fillDecisionCount(const std::vector<TrigCompositeUtils::DecisionID>& dc, int row) const {
   for (TrigCompositeUtils::DecisionID id : dc)  {
-    TrigCompositeUtils::DecisionID chain = id;
-    if (TrigCompositeUtils::isLegId(HLT::Identifier(id)) ) chain = TrigCompositeUtils::getIDFromLeg(id);
-    auto id2bin = m_chainIDToBinMap.find( chain );
+    if (!m_countLegFeatures && TrigCompositeUtils::isLegId(HLT::Identifier(id)))  {continue;}
+    auto id2bin = m_chainIDToBinMap.find( id );
     if ( id2bin == m_chainIDToBinMap.end()) {    
-      ATH_MSG_WARNING("HLT chain " << HLT::Identifier(chain) << " not configured to be monitored");
+      ATH_MSG_WARNING("HLT chain " << HLT::Identifier(id) << " not configured to be monitored");
     } else {
+      ATH_MSG_VERBOSE( "Filling histogram for " << HLT::Identifier(id).name() << " ==> bin " << id2bin->second);
       m_countHistogram->Fill(id2bin->second, static_cast<double>(row));
     }
   }
@@ -417,7 +431,15 @@ int TrigSignatureMoni::nBinsX() const {
 }
 
 int TrigSignatureMoni::nChains(SG::ReadHandle<TrigConf::HLTMenu>& hltMenuHandle) const {
-  return hltMenuHandle->size() + 1; // Chains + "All"
+  int nchains = hltMenuHandle->size();
+  // If we want the leg counts, need to accumulate the multiplicities from each chain
+  if(m_countLegFeatures) {
+    for (const TrigConf::Chain& chain : *hltMenuHandle){
+      std::vector<size_t> legs = chain.legMultiplicities();
+      if(legs.size()>1) {nchains += legs.size();}
+    }
+  }
+  return nchains + 1; // Chains + "All"
 }
 
 int TrigSignatureMoni::nSteps() const {
@@ -430,14 +452,36 @@ StatusCode TrigSignatureMoni::initHist(LockedHandle<TH2>& hist, SG::ReadHandle<T
   int bin = 2; // 1 is for total count, (remember bin numbering in ROOT starts from 1)
 
   std::set<std::string> sortedChainsList;
+  std::map<unsigned int,size_t> chainMultiplicities;
   for ( const TrigConf::Chain& chain: *hltMenuHandle ) {
     sortedChainsList.insert( chain.name() );
+    // if counting features, record the number of legs for later
+    if(m_countLegFeatures) {
+      std::vector<size_t> legs = chain.legMultiplicities();
+      chainMultiplicities.emplace( HLT::Identifier(chain.name()).numeric() ,legs.size());
+      if(legs.size()>1) {
+        ATH_MSG_DEBUG("For chain " << chain.name() << ", also recording feature counts for " << legs.size() << " legs.");
+      }
+    }
   }
   
   for ( const std::string& chainName: sortedChainsList ) {
     x->SetBinLabel( bin, chainName.c_str() );
-    m_chainIDToBinMap[ HLT::Identifier( chainName ).numeric() ] = bin;
-    bin++;
+    unsigned int chainID = HLT::Identifier( chainName ).numeric();
+    m_chainIDToBinMap[ chainID ] = bin;
+    ATH_MSG_VERBOSE(chainName << " --> bin " << bin );
+    ++bin;
+    if(m_countLegFeatures && chainMultiplicities[chainID]>1) {
+      size_t nlegs = chainMultiplicities[chainID];
+      // n.b. we don't care about the content of this vector (the required multiplicity per leg), just its size
+      for (size_t legID = 0; legID < nlegs; ++ legID) {
+        const std::string legName = ( TrigCompositeUtils::createLegName(HLT::Identifier(chainName), legID).name() );
+        ATH_MSG_VERBOSE("  " << legName << " --> bin " << bin );
+        x->SetBinLabel( bin, legName.c_str() );
+        m_chainIDToBinMap[ HLT::Identifier( legName ).numeric() ] = bin;
+        ++bin;
+      }
+    }
   }
 
  
