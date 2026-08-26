@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "G4RunTool.h"
@@ -12,14 +12,14 @@
 #include "G4MTRunManager.hh"
 #include "G4StateManager.hh"
 #include "G4UImanager.hh"
-#include "G4GeometryManager.hh"
-#include "G4PhysicalVolumeStore.hh"
 #include "G4EventManager.hh"
 
 #include "G4AtlasTools/G4AtlasActionInitialization.h"
 
 // Standard library
+#include <exception>
 #include <memory>
+#include <stdexcept>
 
 /// Initialize and start the Geant4 main thread, then wait until Geant4 is ready to start the run.
 StatusCode G4RunTool::initialize() {
@@ -41,7 +41,7 @@ StatusCode G4RunTool::initialize() {
 
 StatusCode G4RunTool::finalize(){
   // Signal finalization to G4 threads
-  m_statusSync.SetStatus(StateSynchronization::Status::AthenaFinalize);
+  m_statusSync.RequestFinalize();
   
   // G4 worker threads should be waiting for the next event to simulate at this state
   // Pushing empty event, will cause one worker thread to realize we are done and call AbortRun for G4
@@ -51,7 +51,11 @@ StatusCode G4RunTool::finalize(){
 
   if (m_thread) {
     try {
-      if(m_thread->joinable()) m_thread->join();
+      if(m_thread->joinable()) {
+        m_thread->join();
+        ATH_MSG_INFO("Geant4 main thread ended");
+      }
+
     }  
     catch(const std::exception& e) {
       ATH_MSG_ERROR("Failure in G4RunTool::finalize, joining Geant4 main thread:" << e.what());
@@ -67,25 +71,17 @@ StatusCode G4RunTool::finalize(){
 
 // Notify Athena that Geant4 is ready to start a run (called by Geant4 BeginOfRunAction).
 void G4RunTool::NotifyBeginRun() {
-  m_statusSync.SetStatus(StateSynchronization::Status::BeginRun);
+  m_statusSync.NotifyBeginRun();
 }
 
 // Wait until Geant4 is ready to start a run (called by Athena initialize).
-void G4RunTool::WaitBeginRun() {
-  m_statusSync.WaitStatus(StateSynchronization::Status::BeginRun);
-}
-
-void G4RunTool::StateSynchronization::SetStatus(const Status& status) {
-  {
-    std::scoped_lock lk(m_mutex);
-    m_status = status;
+StatusCode G4RunTool::WaitBeginRun() {
+  std::string failureMessage;
+  if (!m_statusSync.WaitBeginRun(failureMessage)) {
+    ATH_MSG_ERROR("Geant4 failed to start: " << failureMessage);
+    return StatusCode::FAILURE;
   }
-  m_cv.notify_all();
-}
-
-void G4RunTool::StateSynchronization::WaitStatus(const Status& status) {
-  std::unique_lock lk(m_mutex);
-  m_cv.wait(lk, [this, status]{ return m_status == status; });
+  return StatusCode::SUCCESS;
 }
 
 //---------------------------------------------------------------------------
@@ -122,7 +118,22 @@ auto G4RunTool::GetEvent() -> UPEvent {
 //---------------------------------------------------------------------------
 
 // G4 main thread management
-void G4RunTool::Geant4main() {
+void G4RunTool::Geant4main() noexcept {
+  try {
+    Geant4mainImpl();
+  }
+  catch(const std::exception& error) {
+    m_statusSync.Fail(error.what());
+    ATH_MSG_ERROR("Exception in Geant4 main thread: " << error.what());
+  }
+  catch(...) {
+    m_statusSync.Fail("Unknown exception in Geant4 main thread");
+    ATH_MSG_ERROR("Unknown exception in Geant4 main thread");
+  }
+  m_statusSync.NotifyThreadExit();
+}
+
+void G4RunTool::Geant4mainImpl() {
 
   ATH_MSG_INFO("Geant4 main thread starts with id " << std::this_thread::get_id());
   
@@ -136,21 +147,25 @@ void G4RunTool::Geant4main() {
 
   if(m_detConstruction.retrieve().isFailure()) {
     ATH_MSG_ERROR("Failed to retrieve DetectorGeometryService");
+    m_statusSync.Fail("Failed to retrieve DetectorGeometryService");
     return;
   }
 
   if(m_physicsListSvc.retrieve().isFailure()) {
     ATH_MSG_ERROR("Failed to retrieve PhysicsListService");
+    m_statusSync.Fail("Failed to retrieve PhysicsListService");
     return;
   }
 
   if(m_userActionSvc.retrieve().isFailure()) {
     ATH_MSG_ERROR("Failed to retrieve UserActionService");
+    m_statusSync.Fail("Failed to retrieve UserActionService");
     return;
   }
 
   if(m_actionTools.retrieve().isFailure()) {
     ATH_MSG_ERROR("Failed to retrieve ActionTools");
+    m_statusSync.Fail("Failed to retrieve ActionTools");
     return;
   }
 
@@ -232,14 +247,9 @@ void G4RunTool::Geant4main() {
   ATH_MSG_INFO("Geant4 initialization done, BeamOn...");
 
   // Repeat BeamOn as long as athena event loop is not finished
-  while (m_statusSync.m_status != StateSynchronization::Status::AthenaFinalize) {
+  while (!m_statusSync.StopRequested()) {
     runManager->BeamOn(m_nG4eventsPerRun);
   }
-
-  // Clean up geometry
-  G4GeometryManager::GetInstance()->OpenGeometry();
-  G4PhysicalVolumeStore::GetInstance()->Clean();
-  ATH_MSG_INFO("Geant4 main thread ended");
 }
 
 void G4RunTool::commandLog(int returnCode, const std::string& commandString) const

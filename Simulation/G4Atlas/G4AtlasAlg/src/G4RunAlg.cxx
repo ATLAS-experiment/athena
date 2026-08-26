@@ -64,7 +64,7 @@ StatusCode G4RunAlg::initialize ATLAS_NOT_THREAD_SAFE ()
   // We have to wait on the Geant4 main thread to finish initializing.
   // Wait has to be done here because Gaudi tool initialization are protected by a recursive mutex
   // which would lead to a deadlock between the Geant4 main thread and the Athena thread
-  m_g4RunTool->WaitBeginRun();
+  ATH_CHECK(m_g4RunTool->WaitBeginRun());
   
   // Initialize algorithm-specific services
   ATH_CHECK(m_rndmGenSvc.retrieve());
