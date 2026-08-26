@@ -584,7 +584,7 @@ namespace GlobalSim {
                                                                   \
         FOR_EACH(FIELD_ACCESSOR, __VA_ARGS__)                    \
                                                                   \
-    };
+    }
 
 
 
