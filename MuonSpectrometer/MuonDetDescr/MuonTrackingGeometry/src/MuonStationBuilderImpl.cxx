@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonTrackingGeometry/MuonStationBuilderImpl.h"
@@ -8,9 +8,6 @@
 #include "GeoPrimitives/GeoPrimitivesToStringConverter.h"
 #include "GeoPrimitives/GeoPrimitivesHelpers.h"
 
-#include <fstream>
-#include <map>
-#include <memory>
 
 #include "AthenaKernel/IOVInfiniteRange.h"
 #include "GeoModelKernel/GeoBox.h"
@@ -59,6 +56,9 @@
 #include "TrkVolumes/DoubleTrapezoidVolumeBounds.h"
 #include "TrkVolumes/SimplePolygonBrepVolumeBounds.h"
 #include "TrkVolumes/TrapezoidVolumeBounds.h"
+#include <fstream>
+#include <map>
+#include <memory>
 
 
 namespace Muon{
@@ -210,7 +210,7 @@ void MuonStationBuilderImpl::identifyLayers(
                     is_valid);
                 if (!is_valid)
                     continue;
-                const auto *stripSurf = dynamic_cast<const Trk::PlaneSurface*>(&(cscRE->surface(idi)));
+                const auto *stripSurf = static_cast<const Trk::PlaneSurface*>(&(cscRE->surface(idi)));
                 const Amg::Vector3D& gpi = stripSurf->center();
                 Trk::TrackingVolume* assocVol =
                     station->trackingVolume()->associatedSubVolume(gpi);
@@ -253,8 +253,8 @@ void MuonStationBuilderImpl::identifyLayers(
         const int zi = eta - MuonGM::MuonDetectorManager::NTgcStEtaOffset;
         const int stationEta =
             zi + (eta >= MuonGM::MuonDetectorManager::NTgcStEtaOffset);
-        auto getReadout = [stationName, stationEta, muonMgr, &idHelper](int phi) {
-            const int stationPhi = phi + 1;
+        auto getReadout = [stationName, stationEta, muonMgr, &idHelper](int p) {
+            const int stationPhi = p + 1;
             bool is_valid{false};
             const Identifier id = idHelper.elementID(stationName, stationEta, stationPhi, is_valid);
             return is_valid ? muonMgr->getTgcReadoutElement(id) : nullptr;
@@ -1007,13 +1007,13 @@ MuonStationBuilderImpl::buildDetachedTrackingVolumeType(const MuonGM::MuonDetect
         const GeoShape* shapeS = clv->getShape();
         while (shapeS->type() != "Trd") {
             if (shapeS->type() == "Shift") {
-                const GeoShapeShift* shift = dynamic_cast<const GeoShapeShift*>(shapeS);
+                const GeoShapeShift* shift = static_cast<const GeoShapeShift*>(shapeS);
                 shapeS = shift->getOp();
             } else if (shapeS->type() == "Subtraction") {
-                const GeoShapeSubtraction* sub = dynamic_cast<const GeoShapeSubtraction*>(shapeS);
+                const GeoShapeSubtraction* sub = static_cast<const GeoShapeSubtraction*>(shapeS);
                 shapeS = sub->getOpA();
             } else if (shapeS->type() == "Union") {
-                const GeoShapeUnion* uni = dynamic_cast<const GeoShapeUnion*>(shapeS);
+                const GeoShapeUnion* uni = static_cast<const GeoShapeUnion*>(shapeS);
                 shapeS = uni->getOpA();
             } else {
                 ATH_MSG_WARNING("unexpected station shape ? "<< shapeS->type() << ", station not built");

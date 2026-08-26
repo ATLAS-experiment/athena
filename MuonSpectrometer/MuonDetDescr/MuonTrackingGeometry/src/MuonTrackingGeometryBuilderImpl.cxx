@@ -1065,7 +1065,7 @@ TrackingVolumePtr MuonTrackingGeometryBuilderImpl::processVolume(const Trk::Volu
                                   Trk::open, Trk::binZ);
         buPhi += buZ;
 
-        auto volBinUtil = Trk::BinUtility(buPhi);
+        auto volBinUtil = Trk::BinUtility(std::move(buPhi));
         auto subVols = std::make_unique<Trk::BinnedArray2D<Trk::TrackingVolume>>(std::move(subVolumes),
                                                                                  volBinUtil);
 
@@ -1392,12 +1392,13 @@ TrackingVolumePtr MuonTrackingGeometryBuilderImpl::processVolume(const Trk::Volu
                     //The following is used for glueing of volumes to volumes
                     //Notice that we effectively have a "view" ptr.
                     auto& back = subVolumesVect.back();
+                    //coverity[MULTIPLE_INIT_SMART_PTRS]
                     auto ptrNoDelete = std::shared_ptr<Trk::TrackingVolume>(
                         back.first.get(),
                         Trk::do_not_delete<Trk::TrackingVolume>);
                     hSubsTr.push_back({ptrNoDelete,back.second});
                 }
-                phiSubs.push_back(hSubs);
+                phiSubs.push_back(std::move(hSubs));
                 auto volBinArray = std::make_unique<Trk::BinnedArray1D<Trk::TrackingVolume>>(hSubsTr,
                                                                                              hBinUtil[eta][phi]);
                 phBins.emplace_back(std::move(volBinArray));
@@ -1428,11 +1429,11 @@ TrackingVolumePtr MuonTrackingGeometryBuilderImpl::processVolume(const Trk::Volu
                     }
                 }
             }
-            subVolumes.push_back(phiSubs);
-            hBins.push_back(phBins);
+            subVolumes.push_back(std::move(phiSubs));
+            hBins.push_back(std::move(phBins));
         }
 
-        auto hBinVecPtr = hBinUtil;
+        auto hBinVecPtr = std::move(hBinUtil);
         auto subVols = std::make_unique<Trk::BinnedArray1D1D1D<Trk::TrackingVolume>>(subVolumesVect,
                                                                                      zBinUtil,
                                                                                      pBinUtil,
@@ -1581,7 +1582,7 @@ TrackingVolumePtr MuonTrackingGeometryBuilderImpl::processVolume(const Trk::Volu
 
         zBinUtil += pBinUtil;
 
-        auto volBinUtil = Trk::BinUtility(zBinUtil);  // TODO verify ordering PhiZ vs. ZPhi
+        auto volBinUtil = Trk::BinUtility(std::move(zBinUtil));  // TODO verify ordering PhiZ vs. ZPhi
 
         auto subVols = std::make_unique<Trk::BinnedArray2D<Trk::TrackingVolume>>(subVolumes,
                                                                                  volBinUtil);
@@ -1779,11 +1780,12 @@ TrackingVolumePtr MuonTrackingGeometryBuilderImpl::processShield(const Trk::Volu
             // The following is used for glueing of volumes to volumes
             //Notice that we effectively have a "view" ptr.
             auto& back = subVolumesVect.back();
+            //coverity[MULTIPLE_INIT_SMART_PTRS]
             auto ptrNoDelete = std::shared_ptr<Trk::TrackingVolume>(
                 back.first.get(), Trk::do_not_delete<Trk::TrackingVolume>);
             hSubsTr.push_back({ptrNoDelete, back.second});
         }
-        phiSubs.push_back(hSubs);
+        phiSubs.push_back(std::move(hSubs));
         /// Fix me
         auto volBinArray = std::make_unique<Trk::BinnedArray1D<Trk::TrackingVolume>>(hSubsTr, hBinUtil[eta][phi]);
         phBins.push_back(std::move(volBinArray));
@@ -1796,11 +1798,11 @@ TrackingVolumePtr MuonTrackingGeometryBuilderImpl::processShield(const Trk::Volu
                                                                       phBins[phi]);
             }
         }
-        subVolumes.push_back(phiSubs);
-        hBins.push_back(phBins);
+        subVolumes.push_back(std::move(phiSubs));
+        hBins.push_back(std::move(phBins));
     }
 
-    auto hBinVecPtr = hBinUtil;
+    auto hBinVecPtr = std::move(hBinUtil);
     auto subVols = std::make_unique<Trk::BinnedArray1D1D1D<Trk::TrackingVolume>>(subVolumesVect,
                                                                                  zBinUtil,
                                                                                  pBinUtil,
@@ -2487,10 +2489,10 @@ void MuonTrackingGeometryBuilderImpl::getHParts(
     barrelZ1F1.emplace_back(0, aLVC.m_outerBarrelRadius);
 
     std::vector<std::vector<std::vector<std::pair<int, float> > > > barrelZF(2);
-    barrelZF[0].push_back(barrelZ0F0);
-    barrelZF[0].push_back(barrelZ0F1);
-    barrelZF[1].push_back(barrelZ1F0);
-    barrelZF[1].push_back(barrelZ1F1);
+    barrelZF[0].push_back(std::move(barrelZ0F0));
+    barrelZF[0].push_back(std::move(barrelZ0F1));
+    barrelZF[1].push_back(std::move(barrelZ1F0));
+    barrelZF[1].push_back(std::move(barrelZ1F1));
 
     // small wheel 1x2 ( no z BT sector)
     // non BT sector
@@ -2530,8 +2532,8 @@ void MuonTrackingGeometryBuilderImpl::getHParts(
     swZ0F1.emplace_back(0, aLVC.m_outerBarrelRadius);
 
     std::vector<std::vector<std::vector<std::pair<int, float> > > > swZF(1);
-    swZF[0].push_back(swZ0F0);
-    swZF[0].push_back(swZ0F1);
+    swZF[0].push_back(std::move(swZ0F0));
+    swZF[0].push_back(std::move(swZ0F1));
 
     // inner endcap/ECT 2x3
     // ect coil, non-BT z
@@ -2658,12 +2660,12 @@ void MuonTrackingGeometryBuilderImpl::getHParts(
     innerZ1F2.emplace_back(0, aLVC.m_outerBarrelRadius);
 
     std::vector<std::vector<std::vector<std::pair<int, float> > > > innerZF(2);
-    innerZF[0].push_back(innerZ0F0);
-    innerZF[0].push_back(innerZ0F1);
-    innerZF[0].push_back(innerZ0F2);
-    innerZF[1].push_back(innerZ1F0);
-    innerZF[1].push_back(innerZ1F1);
-    innerZF[1].push_back(innerZ1F2);
+    innerZF[0].push_back(std::move(innerZ0F0));
+    innerZF[0].push_back(std::move(innerZ0F1));
+    innerZF[0].push_back(std::move(innerZ0F2));
+    innerZF[1].push_back(std::move(innerZ1F0));
+    innerZF[1].push_back(std::move(innerZ1F1));
+    innerZF[1].push_back(std::move(innerZ1F2));
 
     // outer 1x1
     std::vector<std::pair<int, float> > outerZ0F0;
@@ -2691,16 +2693,17 @@ void MuonTrackingGeometryBuilderImpl::getHParts(
     std::vector<std::vector<std::vector<std::pair<int, float> > > > outerZF(2);
     outerZF[0].push_back(outerZ0F0);
     outerZF[0].push_back(outerZ0F0);
-    outerZF[0].push_back(outerZ0F0);
+    outerZF[0].push_back(std::move(outerZ0F0));
+    //
     outerZF[1].push_back(outerZ0F1);
     outerZF[1].push_back(outerZ0F1);
-    outerZF[1].push_back(outerZ0F1);
+    outerZF[1].push_back(std::move(outerZ0F1));
 
     // collect everything
-    aLVC.m_hPartitions.push_back(barrelZF);
-    aLVC.m_hPartitions.push_back(swZF);
-    aLVC.m_hPartitions.push_back(innerZF);
-    aLVC.m_hPartitions.push_back(outerZF);
+    aLVC.m_hPartitions.push_back(std::move(barrelZF));
+    aLVC.m_hPartitions.push_back(std::move(swZF));
+    aLVC.m_hPartitions.push_back(std::move(innerZF));
+    aLVC.m_hPartitions.push_back(std::move(outerZF));
 }
 
 void MuonTrackingGeometryBuilderImpl::getShieldParts(
@@ -2727,13 +2730,13 @@ void MuonTrackingGeometryBuilderImpl::getShieldParts(
     outerShield.emplace_back(0, 436.7);  // outer envelope
     outerShield.emplace_back(0, 1050.);  // outer envelope
     outerShield.emplace_back(0, m_outerShieldRadius);
-    aLVC.m_shieldHPart.push_back(outerShield);
+    aLVC.m_shieldHPart.push_back(std::move(outerShield));
 
     std::vector<std::pair<int, float> > innerShield;
     innerShield.emplace_back(0, m_beamPipeRadius);
     innerShield.emplace_back(0, 530.);
     innerShield.emplace_back(0, m_innerShieldRadius);
-    aLVC.m_shieldHPart.push_back(innerShield);
+    aLVC.m_shieldHPart.push_back(std::move(innerShield));
 
     std::vector<std::pair<int, float> > diskShield;
     diskShield.emplace_back(0, 0.);
@@ -2741,7 +2744,7 @@ void MuonTrackingGeometryBuilderImpl::getShieldParts(
     diskShield.emplace_back(0, 750.);
     diskShield.emplace_back(0, 2700.);
     diskShield.emplace_back(0, 4255.);
-    aLVC.m_shieldHPart.push_back(diskShield);
+    aLVC.m_shieldHPart.push_back(std::move(diskShield));
 }
 
 void MuonTrackingGeometryBuilderImpl::blendMaterial(
