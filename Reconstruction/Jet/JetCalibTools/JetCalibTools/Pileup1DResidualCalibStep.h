@@ -72,7 +72,7 @@ class Pileup1DResidualCalibStep   : public asg::AsgTool,
 
   
   SG::ReadHandleKey<xAOD::EventShape> m_rhoKey{this, "RhoKey", "auto"};
-  SG::ReadHandleKey<xAOD::VertexContainer> m_pvKey{this, "PrimaryVerticesContainerName", "PrimaryVertices"};
+  SG::ReadHandleKey<xAOD::VertexContainer> m_pvKey{this, "VertexContainer", "PrimaryVertices"};
 
   
   Gaudi::Property<bool> m_doMuOnly{this, "ApplyOnlyMuResidual", false, "doc"};   // only used in ResidualOffsetCorrection

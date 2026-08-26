@@ -306,52 +306,92 @@ generatorDic = {
     "Pythia8": ["Pythia", "dipole", "cluster"]
 }
 
-def calibConfigToToolList(flags, calibSeqOverride=None, **configDict):
-    """
-    Returns a list of instantiated tools for each of the calibration steps. 
-    Tools are instantiated by calling functions declared in the calibStepDic dictionary.
-    The order of the steps is determined by the Sequence block of the config. 
-    The calibSeqOverride argument can be set to a '_'-separated string of step names, 
-    which will override the step ordering set by the Sequence block.
-    """
-
+def getSampleMetadata(flags):
+    ''' Returns sample type (AF3/FullSim/Data) and run (Run2/Run3/Run4) '''
     # Identify type of sample
-    isFullSim = True
     if flags.Input.isMC:
         metaData = GetFileMD(flags.Input.Files[0])
         simFlavour = metaData.get('Simulator','') # ATLFAST3 or FullG4
         if 'ATLFAST3' in simFlavour:
-            isFullSim = False
-            sampleKey = 'AF3'
+            sampleType = 'AF3'
         else:
-            sampleKey = 'FullSim'
+            sampleType = 'FullSim'
     else:
-        sampleKey = 'Data'
+        sampleType = 'Data'
 
     if flags.GeoModel.Run == LHCPeriod.Run2:
-        runKey = 'Run2'
+        run = 'Run2'
     elif flags.GeoModel.Run == LHCPeriod.Run3:
-        runKey = 'Run3'
+        run = 'Run3'
     elif flags.GeoModel.Run >= LHCPeriod.Run4:
-        runKey = 'Run4'
+        run = 'Run4'
     else:
         jcslog.warning('LHCPeriod not recognised')
+        run = None
 
+    return sampleType, run
 
-    if calibSeqOverride:
-        # If calibSeqOverride is set, use this to determine ordering
-        sequence = calibSeqOverride.split('_')
-        jcslog.info('Expert option calibSeqOverride set - overriding step sequence')
-    else:
-        # Ordering of calib steps based on Sequence block and type of sample
-        try:
-            seqDict = configDict.pop('Sequence')
-            sequence = seqDict[runKey][sampleKey]
-        except KeyError:
-            raise JetCalibConfigError(f"{runKey} {sampleKey} sample identified. YAML should specify step ordering via the following block structure: \n \
-    Sequence:\n \
-        {runKey}: \n \
-            {sampleKey}: [list of steps] ")
+def sequenceForSample(seqBlock, sampleKeys):
+    """
+    Returns (sequence, matched sample key) for a Sequence sub-block, which is either a plain
+    list of steps (matched key None) or a dict keyed by sample type. sampleKeys is the list of
+    accepted sample keys, in order of preference. Returns (None, None) if nothing matches.
+    """
+    if isinstance(seqBlock, list):
+        return seqBlock, None
+    if isinstance(seqBlock, dict):
+        for key in sampleKeys:
+            if key in seqBlock:
+                return seqBlock[key], key
+    return None, None
+
+def calibConfigToToolList(flags, calibSeqKey = None, **configDict):
+    """
+    Returns a list of instantiated tools for each of the calibration steps. 
+    Tools are instantiated by calling functions declared in the calibStepDic dictionary.
+    The order of the steps is determined by the Sequence block of the config.
+
+    Parameters:
+    -----------
+    calibSeqKey: str
+        Specifies which sub-block of Sequence to take the calibration sequence from (e.g. Default/T0/Run3 etc.).
+        If not set, Default is used unless a "RunX" sub-block exists matching the metadata of the sample.
+        Default is also used if the requested sub-block has no entry for this sample type.
+    configDict: dict
+        A dictionary of config options (usually extracted from a YAML config file).
+    """
+
+    sampleKey, runKey = getSampleMetadata(flags)
+    
+    # 'MC' can be used in the YAML as a shorthand covering both FullSim and AF3
+    sampleKeys = [sampleKey] if sampleKey=='Data' else [sampleKey, 'MC']
+
+    # Ordering of calib steps based on Sequence block and type of sample
+    if 'Sequence' not in configDict:
+        raise JetCalibConfigError("Sequence block not found in YAML file.")
+    seqDict = configDict.pop('Sequence')
+
+    # Use the run-specific sequence if one is supplied for this sample, otherwise Default
+    if calibSeqKey is None:
+        calibSeqKey = runKey if sequenceForSample(seqDict.get(runKey), sampleKeys)[0] else 'Default'
+
+    if calibSeqKey not in seqDict:
+        raise JetCalibConfigError(f"{calibSeqKey} key not found in YAML Sequence block")
+
+    # Extract the step sequence for this sample type
+    sequence, matchedKey = sequenceForSample(seqDict[calibSeqKey], sampleKeys)
+
+    # Fall back on Default if the requested sub-block has no entry for this sample type
+    if sequence is None and calibSeqKey!='Default':
+        jcslog.warning(f'No {sampleKey} sequence in Sequence[{calibSeqKey}] - falling back on Default')
+        calibSeqKey = 'Default'
+        sequence, matchedKey = sequenceForSample(seqDict.get('Default'), sampleKeys)
+
+    # Raise an error if the sequence for this sample could not be identified
+    if sequence is None:
+        raise JetCalibConfigError(f'No sequence for sample type "{sampleKey}" found in Sequence[{calibSeqKey}] YAML sub-block')
+
+    jcslog.info(f'Using {calibSeqKey} step sequence' + (f' for {matchedKey}' if matchedKey else ''))
 
     toolList = []
     jcslog.debug('Configuring jet calib steps:')
@@ -359,15 +399,17 @@ def calibConfigToToolList(flags, calibSeqOverride=None, **configDict):
 
         if step not in configDict:
             raise JetCalibConfigError(f'Sequence includes step {step} but no YAML block is provided.')
-        configDict.get(step).pop('prereqs',{}) # removes the 'prereqs' entry not refined in steps    
+
+        calibConfig = configDict[step]
+        calibConfig.pop('prereqs',{}) # removes the 'prereqs' entry not refined in steps
 
         # expert option to skip a step
-        if configDict.get(step).pop('noRun',False):
+        if calibConfig.pop('noRun',False):
             jcslog.warning(f'Expert option: Skipping calib step {step}')
             continue
 
         # Warning: Insitu for MC
-        if step=="Insitu" and flags.Input.isMC and not configDict.get("Insitu").get("CalibrateMC",False):
+        if step=="Insitu" and flags.Input.isMC and not calibConfig.get("CalibrateMC",False):
             jcslog.warning('Insitu step included for MC but CalibrateMC is False - no calibration will be run')
 
         if step=="MC2MC":
@@ -376,9 +418,7 @@ def calibConfigToToolList(flags, calibSeqOverride=None, **configDict):
                 jcslog.warning('Running MC2MC calibration for data')
 
             # Skip MC to MC calibration for Pythia8
-            for key, value in flags.Input.GeneratorsInfo.items():
-                generator = key
-                break
+            generator = next(iter(flags.Input.GeneratorsInfo), '')
             if 'Pythia' in generator:
                 jcslog.debug('Skipping MC2MC calibration for Pythia8')
                 continue
@@ -388,7 +428,7 @@ def calibConfigToToolList(flags, calibSeqOverride=None, **configDict):
             if not flags.Input.isMC:
                 jcslog.warning('Running FastSimulation calibration for data')
 
-            if isFullSim:
+            if sampleKey=='FullSim':
                 jcslog.warning('Running FastSimulation calibration for full sim')
 
         calibFunc = calibStepDic.get(step,None)
@@ -396,21 +436,14 @@ def calibConfigToToolList(flags, calibSeqOverride=None, **configDict):
         if calibFunc is None:
             raise NotImplementedError(f'Calibration step {step} is not found in calibStepDic')
 
-        calibConfig = configDict.get(step)
-
-        # Config can contain run-specific settings in a 'RunX:' sub-block
-        for overrideKey in ['Run2', 'Run3', 'Run4']:
-            # All override blocks should be removed from the configDict
-            overrideDict = calibConfig.pop(overrideKey,{}) 
-            # Only apply the overrides for the relevant Run
-            if runKey!=overrideKey or not overrideDict:
-                continue
-            jcslog.debug(f'{step}: Applying {runKey} override settings')
-
-            for key in overrideDict:
-                if key in calibConfig:
-                    jcslog.warning(f'{key} will be overwritten by {overrideKey} settings')
-                calibConfig[key] = overrideDict[key]
+        # Config can contain run-specific settings in 'RunX:' sub-blocks. All are removed from
+        # the configDict, but only the block matching this sample's Run is applied.
+        runOverrides = {key: calibConfig.pop(key) for key in ['Run2', 'Run3', 'Run4'] if key in calibConfig}
+        for key, value in runOverrides.get(runKey,{}).items():
+            jcslog.debug(f'{step}: Applying {runKey} override for {key}')
+            if key in calibConfig:
+                jcslog.warning(f'{key} will be overwritten by {runKey} settings')
+            calibConfig[key] = value
 
         # Start from ConstitScale. For subsequent steps set InScale to OutScale of previous step
         if len(toolList)==0:
@@ -418,11 +451,12 @@ def calibConfigToToolList(flags, calibSeqOverride=None, **configDict):
         else:
             inScale = toolList[-1].OutScale
 
-        calibConfig.setdefault('InScale', inScale)
+        configInScale = calibConfig.setdefault('InScale', inScale)
 
-        if calibConfig['InScale']!=inScale:
-            jcslog.warning(f'InScale set to {calibConfig['InScale']} in YAML config, but expected {inScale} from Sequence ordering -- is this intentional?')
-        
+        if configInScale!=inScale:
+            jcslog.warning(f'InScale set to {configInScale} in YAML config, but expected {inScale} from Sequence ordering -- is this intentional?')
+
+
         # each func returns a list (to allow one YAML block to configure multiple steps run in order)
         newToolList = calibFunc(flags, **calibConfig)
         jcslog.debug(f'{step}: InScale = {newToolList[0].InScale}, OutScale = {newToolList[-1].OutScale}')
@@ -431,10 +465,10 @@ def calibConfigToToolList(flags, calibSeqOverride=None, **configDict):
 
     return toolList
 
-def calibToolFromConfigFile(flags, configFile, name = "jetcalib", calibSeqOverride = None):
+def calibToolFromConfigFile(flags, configFile, name = "jetcalib", calibSeqKey = None):
     """
     Returns a list of instantiated tools for each of the calibration steps. 
-    The order of the steps is determined by the Sequence block of the config, unless calibSeqOverride is set.
+    The order of the steps is determined by the Sequence block of the config.
 
     Parameters:
     -----------
@@ -442,11 +476,10 @@ def calibToolFromConfigFile(flags, configFile, name = "jetcalib", calibSeqOverri
         Path to YAML configuration file
     name: str
         Internal name of the configured jet calib tool
-    
-    Expert options:
-    ---------------
-    calibSeqOverride: str
-        Optional '_'-separated string of step names. If provided this will override the step ordering set by the Sequence block.
+    calibSeqKey: str
+        Specifies which sub-block of Sequence to take the calibration sequence from (e.g. Default/T0/Run3 etc.).
+        If not set, Default is used unless a "RunX" sub-block exists matching the metadata of the sample.
+        Default is also used if the requested sub-block has no entry for this sample type.
     """
     infoMsg = f'Configuring JetCalibTools with {configFile}'
     jcslog.info(infoMsg)
@@ -455,16 +488,36 @@ def calibToolFromConfigFile(flags, configFile, name = "jetcalib", calibSeqOverri
 
     globalSettings = configDic.pop('Global',{})
 
-    calibTool = CompFactory.JetCalibTool(name, CalibSteps=calibConfigToToolList(flags, calibSeqOverride, **configDic), **globalSettings)
+    calibTool = CompFactory.JetCalibTool(name, CalibSteps=calibConfigToToolList(flags, calibSeqKey, **configDic), **globalSettings)
     return calibTool
+
+def combine(baseDict, extendDict):
+    ''' Return baseDict with keys recursively overwritten by extendDict '''
+    merged = dict(baseDict)
+    for key, value in extendDict.items():
+        if isinstance(merged.get(key), dict) and isinstance(value, dict):
+            merged[key] = combine(merged[key], value)
+        else:
+            merged[key] = value
+    return merged
+
 
 def load_yaml_cfg(configFile):
     from yaml import safe_load
 
     path_configFile = PathResolver.FindCalibFile(configFile)
     configDic = safe_load(open(path_configFile))
-    return configDic
-
+    
+    # If configDic includes the 'BaseConfig' keyword, it will be combined with the specified base config file
+    baseConfigFile = configDic.pop('BaseConfig',None)
+    if not baseConfigFile:
+        return configDic
+    else:
+        jcslog.info(f'Extending base config file {baseConfigFile} with supplied overrides')
+        # Combine config files recursively
+        baseConfigDic = load_yaml_cfg(baseConfigFile)
+        combinedConfig = combine(baseConfigDic, configDic)
+        return combinedConfig
 
 class JetCalibConfigError(Exception):
     """ Exception raised for invalid jet calibration config """

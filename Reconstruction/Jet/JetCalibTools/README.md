@@ -55,30 +55,81 @@ When you provide a relative path, `PathResolver.FindCalibFile` locates the file 
 ## YAML configuration file
 
 A single YAML file defines the full calibration for a given jet collection and data-taking period. 
-In addition to the central config files on CMVFS, examples can be found in `data/calibConfigExample.yaml` (for Small-R jets) and `data/calibConfigExample_largeR.yaml` (for Large-R jets). 
+In addition to the central config files on CMVFS, examples can be found in `data/calibConfigExample.yaml` (for Small-R jets), `data/calibConfigExample_largeR.yaml` (for Large-R jets) and `data/baseConfigExample.yaml` (example of the `BaseConfig` functionality). 
 
-Each top-level block (except for `Sequence` and `Global`) corresponds to a calibration step.
+Each top-level block (except for `BaseConfig`, `Sequence` and `Global` - see below) corresponds to a calibration step.
 See [Calibration Steps](#calibration-steps) for details of the name and options available for each step.
 
 <details>
+<summary> BaseConfig: Used to import another config file as a base</summary>
+
+`BaseConfig` can be set to a path to another config file. The specific settings provided in the subsequent blocks override the settings in `BaseConfig`. This is useful to avoid duplication for config files that just need to change a small number of settings compared to the default recommendation.
+
+```yaml
+BaseConfig: calibConfigExample.yaml
+
+Residual:
+  RhoKey: "Kt4EMPFlowCustomVtxEventShape" 
+
+GSC:
+  VertexContainer: HggPrimaryVertices
+```
+
+Notes:
+- It is also possible to have a chain of files with `BaseConfig` (a base config file can itself have a base). 
+- Lists are replaced entirely, not merged.
+
+</details>
+<br/>
+<details>
 <summary>The ordering of the calibration steps for different sample types is determined by the Sequence block</summary>
+
+By default, the `Default` sub-block is used, and the step list for `FullSim`/`AF3`/`Data` picked based on the sample metadata:
 
 ```yaml
 Sequence:
-  Run2: 
-    FullSim: [Residual, EtaJES, GSC, Smear, PtResidual, MC2MC]
-    AF3: [Residual, EtaJES, GSC, Smear, AF3, PtResidual, MC2MC]
-    Data: [Residual, EtaJES, GSC, Insitu]
-  Run3: 
-    FullSim: [Residual, EtaJES, GSC, Smear, PtResidual, MC2MC]
-    AF3: [Residual, EtaJES, GSC, Smear, AF3, PtResidual, MC2MC]
-    Data: [Residual, EtaJES, GSC, Insitu]
+  Default:
+      FullSim: [Residual, EtaJES, GSC, PtResidual, MC2MC, Smear]
+      AF3: [Residual, EtaJES, GSC, PtResidual, AF3, MC2MC, Smear]
+      Data: [Residual, EtaJES, GSC, PtResidual, Insitu]
 ```
+
+Run-specific step sequences can also be specified by a `RunX` sub-block. If the sample meta-data matches this run and one of the sub-keys provided, this will be used (overriding `Default`). For example, to set a different sequence for Run 4 data:
+```yaml
+Sequence:
+  Default:
+      FullSim: [Residual, EtaJES, GSC, PtResidual, MC2MC, Smear]
+      AF3: [Residual, EtaJES, GSC, PtResidual, AF3, MC2MC, Smear]
+      Data: [Residual, EtaJES, GSC, PtResidual, Insitu]
+  Run4: 
+    Data: [Residual, EtaJES, Insitu]
+```
+
+Additionally, a `calibSeqKey` argument can be provided to `calibToolFromConfigFile()`/`calibConfigToToolList()` to specify an alternative sub-block to `Default` from which to extract the sequence. For example, dedicated `T0` or `Trigger` sequences can be used by setting `calibSeqKey = T0` or `Trigger` and providing corresponding sub-blocks in the YAML. If a sequence isn't provided for the sample type, the config falls back to `Default` (e.g. running the config below with `calibSeqKey = Test` for an MC sample).
+
+```yaml
+Sequence:
+  Default:
+      FullSim: [Residual, EtaJES, GSC, PtResidual, MC2MC, Smear]
+      AF3: [Residual, EtaJES, GSC, PtResidual, AF3, MC2MC, Smear]
+      Data: [Residual, EtaJES, GSC, PtResidual, Insitu]
+  Run4: 
+    Data: [Residual, EtaJES, Insitu]
+  T0: [Residual, EtaJES]
+  Trigger: 
+    MC: [Residual, EtaJES, GSC, PtResidual]
+    Data: [Residual, EtaJES, GSC, PtResidual, Insitu]
+  Test: 
+    Data: [Residual, EtaJES, Insitu]
+```
+
+Note that the ordering of the individual step blocks in the YAML file does not matter, the steps are always run in the order specified by the `Sequence` block.
+
 </details>
 <br/>
 <details>
 <summary>
-Run-specific settings can optionally be supplied using the Run2, Run3, Run4 sub-blocks. Any settings provided by such a sub-block will only be applied to samples for the corresponding run. 
+Run-specific settings for each step can optionally be supplied using the Run2, Run3, Run4 sub-blocks. Any settings provided by such a sub-block will only be applied to samples for the corresponding run. 
 </summary>
 
 ```yaml
@@ -92,11 +143,26 @@ EtaJES:
   Run3:
     UseSpline: True # Note this is just an example, not a recommendation!
 ```
+
+This can also be used to override a setting only for specific runs:
+
+```yaml
+EtaJES:
+  ParametrizedVars:
+    varE: "e"
+    varEta: "DetectorEta"
+  CalibConstantFile: JetCalibTools/CalibArea-00-04-82/CalibrationFactors/MC16a_MCJES_4EMPFlow_Oct2017.config
+  UseSpline: False
+  Run4:
+    UseSpline: True # Only set UseSpline: True for Run 4 samples
+```
+
 </details>
 
 <br/>
 
-Additionally, a top-level block `Global` can be used to set properties applied directly to the `JetCalibTool`. Note that no such properties currently exist.
+`Global` can be used to set properties applied directly to the `JetCalibTool`. Note that no such properties currently exist. 
+
 
 ---
 
@@ -249,7 +315,7 @@ of as a separate `JetArea` step.
 |---|---|---|---|
 | `IsData` | bool | `false` | Set automatically from `flags.Input.isMC`; override only if needed |
 | `averageInteractionsPerCrossingKey` | string | `EventInfo.averageInteractionsPerCrossing` | StoreGate decoration key for μ |
-| `PrimaryVerticesContainerName` | string | `PrimaryVertices` | StoreGate key for the primary vertex container |
+| `VertexContainer` | string | `PrimaryVertices` | StoreGate key for the primary vertex container |
 | `DoSequentialResidual` | bool | `false` | Apply μ and NPV terms sequentially rather than simultaneously |
 | `OnlyResidual` | bool | `false` | Apply only the residual term, skipping the jet-area subtraction |
 | `ApplyOnlyMuResidual` | bool | `false` | Apply only the μ-based term |
@@ -958,7 +1024,7 @@ The top-level tool (`JetCalibTool`) holds an ordered `ToolHandleArray` of `IJetC
 tools. On each call to `JetCalibTool::calibrate(jets)` it simply loops over the steps and
 calls `step->calibrate(jets)` in order.
 
-The ordering is determined by the `Sequence` block in the YAML configuration file, as described below.
+The ordering is determined by the `Sequence` block in the YAML configuration file.
 Each step has two mandatory properties — `InScale` and `OutScale` — that name the
 `xAOD::JetFourMom_t` moment read and written on the jet object. Note that the python configuration in `JetCalibStepsConfig.py` 
 automatically sets `InScale` for each step to the `OutScale` of the previous step, following the ordering supplied in the `Sequence` block of the YAML config file. The first step uses `InScale = JetConstitScaleMomentum`. 
@@ -994,56 +1060,8 @@ Note that the `SmearingCalibStep` tool (optionally applied to MC only) can be qu
 
 A single YAML file defines the full calibration for a given jet collection and data-taking period. An example can be found in `data/calibConfigExample.yaml` (for Small-R jets) and `data/calibConfigExample_largeR.yaml` (for Large-R jets). 
 
-Each top-level block corresponds to a calibration step, keyed by the step name as registered in `JetCalibStepsConfig.calibStepDic`.
+Each top-level block corresponds to a calibration step (except for `BaseConfig`, `Sequence` and `Global` - see [here](#yaml-configuration-file)), keyed by the step name as registered in `JetCalibStepsConfig.calibStepDic`.
 See [Calibration Steps](#calibration-steps) for details of the name and options available for each step.
-
-The ordering of the calibration steps is determined by a `Sequence` block, for example:
-```yaml
-Sequence:
-  Run2: 
-    FullSim: [Residual, EtaJES, GSC, Smear, PtResidual, MC2MC]
-    AF3: [Residual, EtaJES, GSC, Smear, AF3, PtResidual, MC2MC]
-    Data: [Residual, EtaJES, GSC, Insitu]
-  Run3: 
-    FullSim: [Residual, EtaJES, GSC, Smear, PtResidual, MC2MC]
-    AF3: [Residual, EtaJES, GSC, Smear, AF3, PtResidual, MC2MC]
-    Data: [Residual, EtaJES, GSC, Insitu]
-```
-The ordering of the individual step blocks in the YAML file does not matter, the steps are always run in the order specified by the `Sequence` block.
-
-Run-specific settings can optionally be supplied using the `Run2`, `Run3`, `Run4` sub-blocks. 
-<details>
-<summary>Any settings provided by such a sub-block will only be applied to samples for the corresponding run. For example: </summary>
-
-```yaml
-EtaJES:
-  ParametrizedVars:
-    varE: "e"
-    varEta: "DetectorEta"
-  CalibConstantFile: JetCalibTools/CalibArea-00-04-82/CalibrationFactors/MC16a_MCJES_4EMPFlow_Oct2017.config
-  Run2:
-    UseSpline: False
-  Run3:
-    UseSpline: True # Note this is just an example, not a recommendation!
-```
-</details>
-<details>
-<summary>This can also be used to override a setting only for specific runs:</summary>
-
-```yaml
-EtaJES:
-  ParametrizedVars:
-    varE: "e"
-    varEta: "DetectorEta"
-  CalibConstantFile: JetCalibTools/CalibArea-00-04-82/CalibrationFactors/MC16a_MCJES_4EMPFlow_Oct2017.config
-  UseSpline: False
-  Run4:
-    UseSpline: True # Only set UseSpline: True for Run 4 samples
-```
-</details>
-</br>
-
-Additionally, a top-level block `Global` can be used to set properties applied directly to the `JetCalibTool`. Note that no such properties currently exist.
 
 #### Python configuration
 
@@ -1279,6 +1297,7 @@ JetCalibTools/
 ├── data/                           # Default/example YAML configuration files
 │   └── calibConfigExample.yaml
 │   └── calibConfigExample_largeR.yaml
+│   └── baseConfigExample.yaml
 ├── util/                            # Test executables / scripts (note currently these are all deprecated)
 └── CMakeLists.txt
 ```
