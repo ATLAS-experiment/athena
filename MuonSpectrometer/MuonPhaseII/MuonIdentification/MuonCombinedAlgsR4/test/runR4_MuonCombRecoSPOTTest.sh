@@ -18,7 +18,6 @@ Reco_tf.py \
     --multithreaded True \
     --geometrySQLite True \
     --geometrySQLiteFullPath "${GEOMODEL_DB_FILE}" \
-    --geometryVersion "default:${ATLAS_GEO_TAG}" \
     --conditionsTag "default:${ATLAS_CONDDB_TAG}" \
     --preInclude "all:ActsConfig.ActsCIFlags.actsProductionFlags" \
     --preExec "all:flags.Scheduler.CheckDependencies=True;flags.Scheduler.ShowDataDeps=True;flags.Scheduler.ShowDataFlow=True;flags.Scheduler.ShowControlFlow = True;flags.Detector.EnablePLR=False;flags.Detector.EnableBCMPrime=False;flags.Acts.TrackingGeometry.UseBlueprint = True;flags.Acts.doLargeRadius=False" \

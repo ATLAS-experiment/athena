@@ -98,6 +98,7 @@ namespace MuonValR4 {
         ATH_CHECK(m_legacyMuonKey.initialize(!m_legacyMuonKey.empty()));
         ATH_CHECK(m_legacyTrackKey.initialize(!m_legacyMuonKey.empty()));
         ATH_CHECK(m_legacySegmentKey.initialize(!m_legacyMuonKey.empty()));
+        ATH_CHECK(m_idTrackKey.initialize(m_isMC && m_storeID));
 
         ATH_CHECK(detStore()->retrieve(m_detMgr));
 
@@ -264,8 +265,10 @@ namespace MuonValR4 {
             m_legacyTrks = std::make_unique<IParticleFourMomBranch>(m_tree, "LegacyMSTrks");
             m_legacyTrks->addVariable(std::make_unique<TrackChi2Branch>(*m_legacyTrks));
             if (m_isMC) {
-                BilateralLinkerBranch::connectCollections(m_legacyTrks, m_truthTrks, [](const xAOD::IParticle* trk){ 
-                                                      return xAOD::TruthHelpers::getTruthParticle(*trk); }, "truth", "LegacyMS");
+                BilateralLinkerBranch::connectCollections(m_legacyTrks, m_truthTrks, 
+                                                          [](const xAOD::IParticle* trk){ 
+                                                            return xAOD::TruthHelpers::getTruthParticle(*trk); 
+                                                          }, "truth", "LegacyMS");
             }
             for (const auto& summary : trackSummaries) {
                 m_legacyTrks->addVariable<uint8_t>(-1, summary); 
@@ -281,18 +284,21 @@ namespace MuonValR4 {
         m_muonTrks->addVariable(std::make_unique<TrackFitIterBranch>(*m_muonTrks));
 
         using TrkType = xAOD::Muon::TrackParticleType;
-        auto dumpTrack = [&](const std::string& trkName,
-                                  TrkType type) {
+        auto dumpTrack = [&](const std::string& trkName, TrkType type) {
             auto trkColl = std::make_shared<IParticleFourMomBranch>(m_tree, std::format("Acts{:}", trkName));
             trkColl->addVariable(std::make_unique<TrackChi2Branch>(*trkColl));
-            trkColl->addVariable(std::make_unique<TrackFitIterBranch>(*trkColl));
+            if (type != TrkType::InnerDetectorTrackParticle) {
+                trkColl->addVariable(std::make_unique<TrackFitIterBranch>(*trkColl));
+            }
             trkColl->addVariable(std::make_unique<MaterialRecorderBranch>(*trkColl));
             trkColl->addVariable(std::make_unique<EnergyLossBranch>(*trkColl));
             
             trkColl->addVariable<float>("d0");
             trkColl->addVariable<float>("z0");
-            for (const auto& summary : trackSummaries) {
-                trkColl->addVariable<uint8_t>(-1, summary); 
+            if (type != TrkType::InnerDetectorTrackParticle) {
+                for (const auto& summary : trackSummaries) {
+                    trkColl->addVariable<uint8_t>(-1, summary); 
+                }
             }
             m_muonTrks->addVariable(std::make_unique<MuonVal::LinkerBranch>(*m_muonTrks, trkColl, 
                                     [type](const xAOD::IParticle* muonP) -> const xAOD::IParticle* {
@@ -302,10 +308,26 @@ namespace MuonValR4 {
                                         }
                                         return muon->trackParticle(type);
                                     }, trkName));
+            return trkColl;
         };
 
         dumpTrack("MsTrk", TrkType::MuonSpectrometerTrackParticle);
         dumpTrack("MeTrk", TrkType::ExtrapolatedMuonSpectrometerTrackParticle);
+
+        m_idTracks = dumpTrack("IdTrk", TrkType::InnerDetectorTrackParticle);
+        if (m_isMC) {
+            BilateralLinkerBranch::connectCollections(m_idTracks, m_truthTrks, 
+                [this](const xAOD::IParticle* trk) -> const xAOD::IParticle* { 
+                    const xAOD::TruthParticle* truthTrk = xAOD::TruthHelpers::getTruthParticle(*trk);
+                    for (const xAOD::IParticle* part : m_truthTrks->getCached()) {
+                        if (truthTrk ==  xAOD::TruthHelpers::getTruthParticle(*part)) {
+                            return part;
+                        }
+                    }
+                    return nullptr; 
+                }, "truth", "IdTrack");
+        }
+        
         
         m_muonTrks->addVariable<uint16_t>("allAuthors");
         m_muonTrks->addVariable<uint16_t>("author");
@@ -458,6 +480,21 @@ namespace MuonValR4 {
 
         const AtlasFieldCacheCondObj* magCache{nullptr};
         ATH_CHECK(SG::get(magCache, m_fieldCacheKey, ctx));
+
+        const xAOD::TrackParticleContainer* idTracks{nullptr};
+        ATH_CHECK(SG::get(idTracks, m_idTrackKey, ctx));
+
+        /// Collect only the ID tracks that belong to a truth muon of interest.
+        if (idTracks) {
+            for (const xAOD::TrackParticle* idTrk : *idTracks) {
+                if (m_truthTrks->find([idTrk](const xAOD::IParticle* p){
+                    return xAOD::TruthHelpers::getTruthParticle(*idTrk) == 
+                          xAOD::TruthHelpers::getTruthParticle(*p);
+                }) < m_truthTrks->size()) {
+                    m_idTracks->push_back(idTrk);
+                }
+            }
+        }
 
         MagField::AtlasFieldCache magField{};
         magCache->getInitializedCache(magField);

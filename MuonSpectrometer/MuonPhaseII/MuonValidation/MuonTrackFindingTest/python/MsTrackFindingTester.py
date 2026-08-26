@@ -16,6 +16,7 @@ def MsTrackTesterCfg(flags, name = "MsTrackTester", scheduleLegacy = True,
     kwargs.setdefault("SegmentSelectionTool", result.popToolsAndMerge(SegmentSelectorCfg(flags)))
     kwargs.setdefault("SummaryTool", result.popToolsAndMerge(TrackSummaryToolCfg(flags)))
     kwargs.setdefault("SeedingTool", result.popToolsAndMerge(MsTrackSeedingToolCfg(flags)))
+    kwargs.setdefault("storeIdTrks", flags.Reco.EnableTracking)
     if not scheduleLegacy:
         kwargs.setdefault("LegacySegmentKey", "")
         kwargs.setdefault("LegacyTrackKey", "")
