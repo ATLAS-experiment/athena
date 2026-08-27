@@ -9,6 +9,7 @@
 #include "HepMC_Interfaces/ILorentzVectorGenerator.h"
 #include "StoreGate/ReadHandleKey.h"
 #include "xAODTracking/VertexContainer.h"
+#include "GeneratorObjects/McEventCollection.h"
 
 // STL includes
 #include <string>
@@ -36,7 +37,9 @@ class MatchingBkgVertexPositioner
 
  private:
   SG::ReadHandleKey<xAOD::VertexContainer> m_vertexContainerKey{
-      this, "PrimaryVertexContainerName", "PrimaryVertices"};
+      this, "PrimaryVertexContainerName", ""};
+  SG::ReadHandleKey<McEventCollection> m_mcEventKey{
+      this, "McEventCollectionName", "", "Use MC collection (typically Bkg_TruthEvent) as source of vertex position"};
 };
 
 }  // namespace Simulation

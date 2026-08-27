@@ -96,6 +96,8 @@ def MatchingBkgVertexPositionerCfg(flags, name="MatchingBkgVertexPositioner", **
 
         from SGComps.SGInputLoaderConfig import SGInputLoaderCfg
         acc.merge(SGInputLoaderCfg(flags, [f'xAOD::VertexContainer#{kwargs["PrimaryVertexContainerName"]}']))
+    else:
+        kwargs.setdefault("McEventCollectionName", f"{flags.Overlay.BkgPrefix}TruthEvent")
 
     acc.setPrivateTools(CompFactory.Simulation.MatchingBkgVertexPositioner(name, **kwargs))
     return acc
