@@ -65,10 +65,33 @@ def createLArConfigFlags():
 
     lcf.addFlag("LAr.ROD.OFFCBelowThreshold", 3)
     lcf.addFlag("LAr.ROD.OFFCBelowTillReset", 7)
-    lcf.addFlag("LAr.ROD.OFFCNPulse", 7)
-    lcf.addFlag("LAr.ROD.OFFCQ3Cut", 0.1)  # relative term, on Q3/A
+    lcf.addFlag("LAr.ROD.OFFCNPulse", 5)
+    lcf.addFlag("LAr.ROD.OFFCQ3Cut", 3.0)  # relative term, on Q3/A
     lcf.addFlag("LAr.ROD.OFFCQ3Offset", 2.0)  # absolute term in ADC
     lcf.addFlag("LAr.ROD.OFFCFilterThreshold", 2.0)
+    lcf.addFlag("LAr.ROD.OFFCFilterThresholdByLayer", {
+        "EMEC-OW/1": 100.0,
+        "FCAL/2":     25.0,
+        "EMB/1":      50.0,
+        "EMEC-OW/0":  50.0,
+        "EMB/2":      25.0,
+        "FCAL/3":     25.0,
+        "EMB/0":      75.0,
+        "EMEC-OW/2":  50.0,
+        "FCAL/1":     25.0,
+        "HEC/0":     100.0,
+        "EMEC-IW/2":  25.0,
+        "HEC/3":      75.0,
+        "EMEC-IW/1":  50.0,
+        "EMB/3":     250.0,
+        "EMEC-OW/3": 250.0,
+        "HEC/1":      50.0,
+        "HEC/2":     250.0,
+    })
+    lcf.addFlag("LAr.ROD.OFFCEnabledLayers", [])
+    lcf.addFlag("LAr.ROD.OFFCQ3CutByLayer", {})
+    lcf.addFlag("LAr.ROD.OFFCQ3OffsetByLayer", {})
+    lcf.addFlag("LAr.ROD.OFFCNPulseByLayer", {})
 
     # Perform a minbias correct to the LArDigit energies before building the raw channels 
     # (SHOULD TURN OFF ConfigFlags.Calo.Cell.doPileupOffsetBCIDCorr to not double count)
