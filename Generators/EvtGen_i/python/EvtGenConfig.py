@@ -10,11 +10,14 @@ import os
 from AthenaCommon.Logging import logging
 log = logging.getLogger("EvtGenConfig")
 
-def EvtGenCfg(flags, 
-              decayFile = None,
-              whiteList = None,
-              allowAllKnownDecays = False,
-              auxfiles = None):
+def EvtGenCfg(
+    flags,
+    decayFile=None,
+    whiteList=None,
+    allowAllKnownDecays=False,
+    auxfiles=None,
+    pdtFile=None,
+):
 
     # Set defaults
     if flags.Beam.Energy*2/GeV > 13001.:
@@ -66,13 +69,18 @@ def EvtGenCfg(flags,
 
     # Define CA object
     ca = ComponentAccumulator(EvgenSequenceFactory(EvgenSequence.Generator)) 
+    evtgen_kwargs = {
+        "decayFile": decayFile,
+        "allowAllKnownDecays": allowAllKnownDecays,
+        "whiteList": whiteList,
+        "RandomSeed": flags.Random.SeedOffset,
+        "Dsid": flags.Generator.DSID,
+    }
+    if pdtFile is not None:
+        evtgen_kwargs["pdtFile"] = pdtFile
+
     ca.addEventAlgo(
-        CompFactory.EvtInclusiveDecay(
-          "EvtInclusiveDecay", 
-          decayFile = decayFile,
-          allowAllKnownDecays = allowAllKnownDecays,
-          whiteList = whiteList
-        )
+        CompFactory.EvtInclusiveDecay("EvtInclusiveDecay", **evtgen_kwargs)
     )
 
     # Announce generator to service

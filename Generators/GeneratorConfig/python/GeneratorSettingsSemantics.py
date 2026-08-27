@@ -13,16 +13,15 @@ class GeneratorSettingsKeep(str, Enum):
     """
     Which duplicate setting survives after layers are sorted by precedence.
 
-    Layers are resolved in increasing precedence order: BASE, then TUNE, then
-    USER. A duplicate is either a parsed command with the same normalized key,
-    or an unparsed command with the same normalized full text.
+    Layers are resolved in increasing precedence order: BASE, TUNE, PROCESS,
+    then USER. A duplicate is either a parsed command with the same normalized
+    key, or an unparsed command with the same normalized full text.
 
     FIRST keeps the first duplicate encountered. This preserves lower-precedence
     defaults when later layers repeat the same setting.
 
     LAST keeps the last duplicate encountered. This is the normal generator
-    behavior: tune settings override base settings, and user settings override
-    both.
+    behavior: each higher-precedence layer overrides the layers below it.
     """
     FIRST = "first"
     LAST = "last"
@@ -52,6 +51,7 @@ class GeneratorSettingsPrecedence(IntEnum):
     """
     BASE = 10
     TUNE = 20
+    PROCESS = 25
     USER = 100
 
 

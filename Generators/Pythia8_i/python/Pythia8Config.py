@@ -109,8 +109,9 @@ def Pythia8EvtGenBaseCfg(flags, **kwargs):
     from EvtGen_i.EvtGenConfig import EvtGenCfg
     ca = EvtGenCfg(
         flags,
-        whiteList = whiteList,
-        auxfiles = auxfiles
+        pdtFile="inclusiveP8DsDPlus.pdt",
+        whiteList=whiteList,
+        auxfiles=auxfiles,
     )
 
     return ca

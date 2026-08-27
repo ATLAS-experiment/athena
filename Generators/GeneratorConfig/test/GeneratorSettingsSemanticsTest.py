@@ -66,6 +66,30 @@ class TestGeneratorSettingsSemantics(unittest.TestCase):
             ["ParticleDecays:limitTau0 = on", "Main:timesAllowErrors = 60000"],
         )
 
+    def test_process_settings_override_tune_and_are_overridden_by_user(self):
+        result = self.semantics.merge(
+            self._layer(
+                "tune",
+                ["HardQCD:all = off"],
+                GeneratorSettingsPrecedence.TUNE,
+            ),
+            self._layer(
+                "process",
+                ["HardQCD:all = on"],
+                GeneratorSettingsPrecedence.PROCESS,
+            ),
+        )
+        result = self.semantics.merge(
+            result,
+            self._layer(
+                "user",
+                ["HardQCD:all = off"],
+                GeneratorSettingsPrecedence.USER,
+            ),
+        )
+
+        self.assertEqual(result.data, ["HardQCD:all = off"])
+
     def test_identical_assignment_with_different_spacing_is_deduplicated(self):
         result = self.semantics.merge(
             self._layer(
