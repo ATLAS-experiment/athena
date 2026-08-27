@@ -194,7 +194,7 @@ public: // Non-static members
    virtual ~PoolSvc();
 
 private: // data
-   typedef std::recursive_mutex CallMutex;
+   using CallMutex = std::recursive_mutex;
    // Lock Guard class to safely lock a mutex for a given contextId
    class ContextLock {
       std::unique_lock< CallMutex > m_lock;

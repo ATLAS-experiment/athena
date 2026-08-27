@@ -94,7 +94,7 @@ StatusCode PoolSvc::io_reinit() {
    }
    std::vector<std::string> readcat = m_readCatalog.value();
    for (std::size_t icat = 0, imax = readcat.size(); icat < imax; icat++) {
-      if (readcat[icat].compare(0, 16, "xmlcatalog_file:") == 0) {
+      if (readcat[icat].starts_with("xmlcatalog_file:")) {
          std::string fileName = readcat[icat].substr(16);
          if (iomgr->io_contains(this, fileName)) {
             if (!iomgr->io_retrieve(this, fileName).isSuccess()) {
@@ -107,7 +107,7 @@ StatusCode PoolSvc::io_reinit() {
    }
    // all good... copy over.
    m_readCatalog = readcat;
-   if (m_writeCatalog.value().compare(0, 16, "xmlcatalog_file:") == 0) {
+   if (m_writeCatalog.value().starts_with("xmlcatalog_file:")) {
       std::string fileName = m_writeCatalog.value().substr(16);
       if (iomgr->io_contains(this, fileName)) {
          if (!iomgr->io_retrieve(this, fileName).isSuccess()) {
@@ -139,7 +139,7 @@ StatusCode PoolSvc::setupPersistencySvc() {
       ATH_MSG_FATAL("Failed to enable thread safety in ROOT via PersistencySvc.");
       return(StatusCode::FAILURE);
    }
-   m_contextMaxFile.insert(std::pair<unsigned int, int>(IPoolSvc::kInputStream, m_dbAgeLimit));
+   m_contextMaxFile.try_emplace(IPoolSvc::kInputStream, m_dbAgeLimit.value());
    if (!connect(Io::READ, IPoolSvc::kInputStream).isSuccess()) {
       ATH_MSG_FATAL("Failed to connect Input PersistencySvc.");
       return(StatusCode::FAILURE);
@@ -218,9 +218,9 @@ Token* PoolSvc::registerForWrite(const Placement* placement,
    unsigned int contextId = IPoolSvc::kOutputStream;
    const std::string& auxString = placement->auxString();
    if (!auxString.empty()) {
-      if (auxString.compare(0, 6, "[CTXT=") == 0) {
+      if (auxString.starts_with("[CTXT=")) {
          ::sscanf(auxString.c_str(), "[CTXT=%08X]", &contextId);
-      } else if (auxString.compare(0, 8, "[CLABEL=") == 0) {
+      } else if (auxString.starts_with("[CLABEL=")) {
          contextId = this->getOutputContext(auxString);
       }
       if (contextId >= m_dbSessionVec.size()) {
@@ -240,9 +240,9 @@ void PoolSvc::setObjPtr(void*& obj, const Token* token) {
    unsigned int contextId = IPoolSvc::kInputStream;
    const std::string& auxString = token->auxString();
    if (!auxString.empty()) {
-      if (auxString.compare(0, 6, "[CTXT=") == 0) {
+      if (auxString.starts_with("[CTXT=")) {
          ::sscanf(auxString.c_str(), "[CTXT=%08X]", &contextId);
-      } else if (auxString.compare(0, 8, "[CLABEL=") == 0) {
+      } else if (auxString.starts_with("[CLABEL=")) {
          contextId = this->getInputContext(auxString);
       }
       if (contextId >= m_dbSessionVec.size()) {
@@ -268,7 +268,7 @@ unsigned int PoolSvc::getOutputContext(const std::string& label) {
    std::lock_guard<CallMutex> lock(m_pool_mut);
    if (m_mainOutputLabel.empty()) {
       m_mainOutputLabel = label;
-      m_outputContextLabel.insert(std::pair<std::string, unsigned int>(label, IPoolSvc::kOutputStream));
+      m_outputContextLabel.try_emplace(label, IPoolSvc::kOutputStream);
    }
    if (label == m_mainOutputLabel || label.empty()) {
       return(IPoolSvc::kOutputStream);
@@ -280,7 +280,7 @@ unsigned int PoolSvc::getOutputContext(const std::string& label) {
    const unsigned int id = m_dbSessionVec.size();
    m_dbSessionVec.push_back(pool::createSession(*m_catalog).release());
    m_pers_mut.push_back(new CallMutex);
-   m_outputContextLabel.insert(std::pair<std::string, unsigned int>(label, id));
+   m_outputContextLabel.try_emplace(label, id);
    return(id);
 }
 //__________________________________________________________________________
@@ -303,9 +303,9 @@ unsigned int PoolSvc::getInputContext(const std::string& label, unsigned int max
       return(IPoolSvc::kInputStream);
    }
    if (!label.empty()) {
-      m_inputContextLabel.insert(std::pair<std::string, unsigned int>(label, id));
+      m_inputContextLabel.try_emplace(label, id);
    }
-   m_contextMaxFile.insert(std::pair<unsigned int, int>(id, maxFile));
+   m_contextMaxFile.try_emplace(id, maxFile);
    return(id);
 }
 //__________________________________________________________________________
@@ -337,11 +337,11 @@ void PoolSvc::commitCatalog() {
 //__________________________________________________________________________
 void PoolSvc::lookupBestPfn(const std::string& token, std::string& pfn, std::string& type) const {
    std::string dbID;
-   if (token.compare(0, 4, "PFN:") == 0) {
+   if (token.starts_with("PFN:")) {
       m_catalog->lookupFileByPFN(token.substr(4), dbID, type); // PFN -> FID
-   } else if (token.compare(0, 4, "LFN:") == 0) {
+   } else if (token.starts_with("LFN:")) {
       dbID = m_catalog->lookupLFN(token.substr(4)); // LFN -> FID
-   } else if (token.compare(0, 4, "FID:") == 0) {
+   } else if (token.starts_with("FID:")) {
       dbID = token.substr(4);
    } else if (token.size() > Guid::stringSize()) { // full token
       Token tok;
@@ -381,7 +381,7 @@ pool::ICollection* PoolSvc::createCollection(const std::string& connection,
    ContextLock lock(contextId, m_pool_mut, m_pers_mut);
    // Check POOL FileCatalog entry.
    bool insertFile = false;
-   if (connection.compare(0, 4, "PFN:") == 0) {
+   if (connection.starts_with("PFN:")) {
       std::string fid, fileType;
       m_catalog->lookupFileByPFN(connection.substr(4), fid, fileType);
       if (fid.empty()) { // No entry in file catalog
@@ -713,7 +713,7 @@ StatusCode PoolSvc::setAttribute(const std::string& optName,
    }
    bool retError = false;
    std::string objName;
-   bool hasTTreeName = (contName.length() > 6 && contName.compare(0, 6, "TTree=") == 0);
+   bool hasTTreeName = contName.starts_with("TTree=");
    if (contName.empty() || hasTTreeName || m_dbSessionVec[contextId]->transaction().type() == Io::READ) {
       objName = hasTTreeName ? contName.substr(6) : contName;
       if( !isNumber(data) ) {
@@ -765,7 +765,7 @@ pool::IFileCatalog* PoolSvc::createCatalog() {
    ctlg->removeCatalog("*");
    for (auto& catalog : m_readCatalog.value()) {
       ATH_MSG_DEBUG("POOL ReadCatalog is " << catalog);
-      if (catalog.compare(0, 8,"apcfile:") == 0 || catalog.compare(0, 7, "prfile:") == 0) {
+      if (catalog.starts_with("apcfile:") || catalog.starts_with("prfile:")) {
          std::string::size_type cpos = catalog.find(':');
          // check for file accessed via ATLAS_POOLCOND_PATH
          std::string file = poolCondPath(catalog.substr(cpos + 1));
@@ -816,11 +816,11 @@ std::unique_ptr<pool::IDatabase> PoolSvc::getDbHandle(unsigned int contextId, co
          return(nullptr);
       }
    }
-   if (dbName.compare(0, 4,"PFN:") == 0) {
+   if (dbName.starts_with("PFN:")) {
       return sesH->databaseHandle(dbName.substr(4), pool::DatabaseSpecification::PFN);
-   } else if (dbName.compare(0, 4, "LFN:") == 0) {
+   } else if (dbName.starts_with("LFN:")) {
       return sesH->databaseHandle(dbName.substr(4), pool::DatabaseSpecification::LFN);
-   } else if (dbName.compare(0, 4,"FID:") == 0) {
+   } else if (dbName.starts_with("FID:")) {
       return sesH->databaseHandle(dbName.substr(4), pool::DatabaseSpecification::FID);
    }
    return sesH->databaseHandle(dbName, pool::DatabaseSpecification::PFN);
