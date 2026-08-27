@@ -528,7 +528,7 @@ HGTDTrackExtensionAlg::TrackExtensionData HGTDTrackExtensionAlg::processTrackExt
           if (layerIndex < 4) { 
             nHGTDHits++;
             hasHitInLayer[layerIndex] = true;
-            chi2PerLayer[layerIndex] =chi2/ndf; //state.chi2();
+            chi2PerLayer[layerIndex] = state.chi2();
                   
             // Get the measured time from the calibrated 3D measurement (local x, y, time)
             float rawTime = 0.0f;
