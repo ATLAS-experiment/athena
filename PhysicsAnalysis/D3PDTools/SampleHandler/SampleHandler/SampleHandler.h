@@ -452,9 +452,9 @@ namespace SH
 
     /// \brief the iterator to use
   public:
-    typedef boost::transform_iterator<
+    using iterator = boost::transform_iterator<
       SamplePtrToRawSample,
-      std::vector<std::shared_ptr<Sample>>::const_iterator> iterator;
+      std::vector<std::shared_ptr<Sample>>::const_iterator>;
 
 
     /// \brief the begin iterator to use
@@ -500,8 +500,13 @@ namespace SH
 
 
     /// \brief the samples accessed via smart pointer
+    ///
+    /// \par Rationale
+    ///   the span is over const shared pointers, so that callers cannot
+    ///   replace a sample in a slot and desync the by-name map from the
+    ///   sample vector
   public:
-    std::span<std::shared_ptr<Sample>> samples ();
+    std::span<const std::shared_ptr<Sample>> samples () const;
 
 
 
@@ -519,7 +524,7 @@ namespace SH
   private:
     std::map<std::string,std::shared_ptr<Sample>> m_named;
 
-    ClassDef (SampleHandler, 1)
+    ClassDefOverride (SampleHandler, 1)
   };
 }
 

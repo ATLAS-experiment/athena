@@ -10,7 +10,6 @@
 
 #include <SampleHandler/DiskListSRM.h>
 
-#include <vector>
 #include <RootCoreUtils/Assert.h>
 #include <RootCoreUtils/ShellExec.h>
 
@@ -50,23 +49,34 @@ namespace SH
   {
     RCU_CHANGE_INVARIANT (this);
 
-    if (m_list.empty())
+    if (!m_isRead)
     {
-      m_list = RCU::Shell::exec_read ("srmls " + m_dir);
+      m_list = RCU::Shell::exec_read ("srmls " + RCU::Shell::quote (m_dir));
+      m_isRead = true;
+      m_pos = 0;
+      // rationale: skip the header line of the srmls output
       std::string::size_type split1 = m_list.find ('\n');
       if (split1 == std::string::npos)
 	return false;
-      m_list = m_list.substr (split1 + 1);
+      m_pos = split1 + 1;
     }
 
-    while (!m_list.empty())
+    // rationale: we advance a running index through m_list rather than
+    //   repeatedly copying its tail, so that listing N entries costs
+    //   O(N) rather than O(N^2).
+    while (m_pos < m_list.size())
     {
-      std::string::size_type split1 = m_list.find ('\n');
+      std::string::size_type split1 = m_list.find ('\n', m_pos);
+      std::string line;
       if (split1 == std::string::npos)
-	return false;
-
-      const std::string line = m_list.substr (0, split1);
-      m_list = m_list.substr (split1 + 1);
+      {
+	line = m_list.substr (m_pos);
+	m_pos = m_list.size();
+      } else
+      {
+	line = m_list.substr (m_pos, split1 - m_pos);
+	m_pos = split1 + 1;
+      }
       if (line.size() > 2)
       {
 	std::string::size_type split2 = line.rfind ('/', line.size()-2);
@@ -103,7 +113,7 @@ namespace SH
     RCU_READ_INVARIANT (this);
 
     if (m_file.empty() || !m_isDir)
-      return 0;
+      return nullptr;
 
     return new DiskListSRM (m_dir + "/" + m_file, m_prefix + "/" + m_file);
   }

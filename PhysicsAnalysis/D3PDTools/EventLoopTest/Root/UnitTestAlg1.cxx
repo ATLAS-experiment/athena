@@ -32,9 +32,7 @@ namespace EL
 {
   void UnitTestAlg1 ::
   testInvariant () const
-  {
-    RCU_INVARIANT (this != 0);
-  }
+  {}
 
 
 

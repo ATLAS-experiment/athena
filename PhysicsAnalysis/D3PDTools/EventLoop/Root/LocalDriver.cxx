@@ -32,9 +32,7 @@ namespace EL
 {
   void LocalDriver ::
   testInvariant () const
-  {
-    RCU_INVARIANT (this != 0);
-  }
+  {}
 
 
 

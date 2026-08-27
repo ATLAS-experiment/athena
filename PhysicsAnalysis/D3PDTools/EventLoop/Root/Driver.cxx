@@ -54,9 +54,7 @@ namespace EL
 
   void Driver ::
   testInvariant () const
-  {
-    RCU_INVARIANT (this != 0);
-  }
+  {}
 
 
 

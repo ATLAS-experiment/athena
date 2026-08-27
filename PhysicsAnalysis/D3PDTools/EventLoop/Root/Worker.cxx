@@ -68,7 +68,6 @@ namespace EL
   void Worker ::
   testInvariant () const
   {
-    RCU_INVARIANT (this != nullptr);
     for (std::size_t iter = 0, end = m_algs.size(); iter != end; ++ iter)
     {
       RCU_INVARIANT (m_algs[iter].m_algorithm != nullptr);

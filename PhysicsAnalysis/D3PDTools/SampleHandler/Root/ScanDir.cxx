@@ -192,12 +192,11 @@ namespace SH
 
     std::map<std::string,std::shared_ptr<Sample>> samples;
     recurse (samples, list, hierarchy);
-    for (auto sample = samples.begin(), end = samples.end();
-	 sample != end; ++ sample)
+    for (const auto& sample : samples)
     {
-      if (sample->second != nullptr)
+      if (sample.second != nullptr)
       {
-	sh.add (sample->second);
+	sh.add (sample.second);
       }
     }
     return *this;
@@ -215,7 +214,7 @@ namespace SH
     ANA_MSG_DEBUG ("scanning directory: " << list.dirname());
     while (list.next())
     {
-      std::unique_ptr<DiskList> sublist (list.openDir());
+      std::unique_ptr<DiskList> sublist (list.openDirUnique());
 
       if (sublist.get() != 0)
       {
@@ -225,6 +224,12 @@ namespace SH
         } else if (hierarchy.size() > m_maxDepth)
         {
           ANA_MSG_DEBUG ("maxDepth exceeded, skipping directory " << list.path());
+        } else if (hierarchy.size() >= 100)
+        {
+          // rationale: a hard sanity cap so that a directory symlink
+          //   loop (or a link to an ancestor) does not recurse forever
+          //   when the user has not set an explicit maxDepth.
+          ANA_MSG_WARNING ("directory nesting exceeds 100 levels, not descending further (possible symlink loop): " << list.path());
         } else
 	{
           ANA_MSG_DEBUG ("descending into directory " << list.path());
@@ -334,7 +339,12 @@ namespace SH
     int myindex = absSampleDepth+1;
     if (relSampleDepth < 0)
       myindex = relSampleDepth + hierarchy.size();
-    if (std::size_t (myindex) >= hierarchy.size())
+    // rationale: only apply the upper-bound check for a non-negative
+    //   index; a negative index (e.g. absSampleDepth <= -2) is meant to
+    //   climb up the hierarchy in the else branch below, and converting
+    //   it to std::size_t here would wrap to SIZE_MAX and drop every
+    //   file.
+    if (myindex >= 0 && std::size_t (myindex) >= hierarchy.size())
       return sampleName;
     if (myindex > 0)
     {

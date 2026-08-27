@@ -36,9 +36,7 @@ namespace EL
 {
   void DirectDriver ::
   testInvariant () const
-  {
-    RCU_INVARIANT (this != 0);
-  }
+  {}
 
 
 

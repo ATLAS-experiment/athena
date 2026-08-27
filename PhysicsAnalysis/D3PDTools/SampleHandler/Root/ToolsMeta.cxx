@@ -51,17 +51,16 @@ namespace SH
 	  throw std::runtime_error ("readSusyMeta: failed to parse line: " + line);
 
 	std::string mydsid = "." + DSID + ".";
-	for (SampleHandler::iterator sample = sh.begin(),
-	       end = sh.end(); sample != end; ++ sample)
+	for (auto *sample : sh)
 	{
-	  if ((*sample)->name().find (mydsid) != std::string::npos)
+	  if (sample->name().find (mydsid) != std::string::npos)
 	  {
             double oldCrossSection
-              = (*sample)->meta()->castDouble (MetaFields::crossSection);
-	    (*sample)->meta()->setDouble (MetaFields::crossSection, oldCrossSection + crossSection);
-	    (*sample)->meta()->setDouble (MetaFields::kfactor, kFactor);
-	    (*sample)->meta()->setDouble (MetaFields::filterEfficiency, filterEfficiency);
-	    (*sample)->meta()->setDouble (MetaFields::crossSectionRelUncertainty, xsUncertainty);
+              = sample->meta()->castDouble (MetaFields::crossSection);
+	    sample->meta()->setDouble (MetaFields::crossSection, oldCrossSection + crossSection);
+	    sample->meta()->setDouble (MetaFields::kfactor, kFactor);
+	    sample->meta()->setDouble (MetaFields::filterEfficiency, filterEfficiency);
+	    sample->meta()->setDouble (MetaFields::crossSectionRelUncertainty, xsUncertainty);
 	  }
 	}
       }
@@ -77,6 +76,12 @@ namespace SH
     try
     {
       dirp = gSystem->OpenDirectory (mydir.Data());
+      // rationale: OpenDirectory returns null for a missing/mistyped
+      //   directory, and GetDirEntry/FreeDirectory tolerate a null
+      //   handle, so this would otherwise silently read nothing; throw
+      //   for consistency with readSusyMeta on a missing file.
+      if (dirp == nullptr)
+        throw std::runtime_error ("could not open directory: " + inputDir);
       const char *file = 0;
       while ((file = gSystem->GetDirEntry (dirp)))
       {

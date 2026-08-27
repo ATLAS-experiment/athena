@@ -34,9 +34,7 @@ namespace EL
 {
   void CondorDriver ::
   testInvariant () const
-  {
-    RCU_INVARIANT (this != 0);
-  }
+  {}
 
 
 

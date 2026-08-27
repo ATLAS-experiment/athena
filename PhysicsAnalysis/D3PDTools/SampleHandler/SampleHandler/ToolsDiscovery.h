@@ -70,7 +70,15 @@ namespace SH
   ///   TChain object
   /// guarantee: strong
   /// failures: out of memory II
+  [[deprecated("use makeFromTChainUnique() instead")]]
   Sample *makeFromTChain (const std::string& name, const TChain& chain);
+
+
+  /// effects: create a sample with the given name from the given
+  ///   TChain object
+  /// guarantee: strong
+  /// failures: out of memory II
+  std::unique_ptr<Sample> makeFromTChainUnique (const std::string& name, const TChain& chain);
 
 
   /// effects: make a list from DQ2 using the given pattern
@@ -148,7 +156,7 @@ namespace SH
   /// guarantee: strong
   /// failures: out of memory III
   /// failures: i/o errors
-  void scanForTrees (SampleHandler& sh, std::shared_ptr<Sample>& sample,
+  void scanForTrees (SampleHandler& sh, const std::shared_ptr<Sample>& sample,
 		     const std::string& pattern = ".*");
   void scanForTrees (SampleHandler& sh, const std::string& pattern = ".*");
 

@@ -29,7 +29,7 @@ TEST (DiskListTest, DISABLED_all)
   bool valid = true;
   while ((valid = list1.next()) && list1.fileName() != "EventLoop-UnitTest") {};
   ASSERT_TRUE (valid);
-  std::unique_ptr<DiskList> list2 (list1.openDir());
+  std::unique_ptr<DiskList> list2 (list1.openDirUnique());
   ASSERT_TRUE (list2.get() != 0);
   if (!list2->next())
     ADD_FAILURE() << "empty dir";

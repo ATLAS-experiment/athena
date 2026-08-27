@@ -43,7 +43,6 @@ namespace EL
   void VomsProxySvc ::
   testInvariant () const
   {
-    RCU_INVARIANT (this != nullptr);
   }
 
 

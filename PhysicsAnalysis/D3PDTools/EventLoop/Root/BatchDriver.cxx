@@ -289,9 +289,7 @@ namespace EL
 
   void BatchDriver ::
   testInvariant () const
-  {
-    RCU_INVARIANT (this != 0);
-  }
+  {}
 
 
 

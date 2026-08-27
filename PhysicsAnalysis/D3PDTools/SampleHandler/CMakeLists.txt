@@ -37,6 +37,10 @@ atlas_add_library( SampleHandler
    INCLUDE_DIRS ${ROOT_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS}
    LINK_LIBRARIES ${ROOT_LIBRARIES} AsgMessagingLib RootCoreUtils CxxUtils)
 
+# Install python modules (needed by fetchMetaData, which imports
+# SampleHandler.SampleHandler_QueryAMI at runtime):
+atlas_install_python_modules( python/*.py )
+
 # Test(s) in the package:
 function( _add_gtest cxx_name )
    get_filename_component( test_name ${cxx_name} NAME_WE )

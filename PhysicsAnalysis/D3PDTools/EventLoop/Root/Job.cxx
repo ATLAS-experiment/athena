@@ -137,9 +137,7 @@ namespace EL
 
   void Job ::
   testInvariant () const
-  {
-    RCU_INVARIANT (this);
-  }
+  {}
 
 
 

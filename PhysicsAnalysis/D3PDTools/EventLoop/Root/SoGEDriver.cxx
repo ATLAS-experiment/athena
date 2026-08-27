@@ -29,9 +29,7 @@ namespace EL
 {
   void SoGEDriver ::
   testInvariant () const
-  {
-    RCU_INVARIANT (this != 0);
-  }
+  {}
 
 
 

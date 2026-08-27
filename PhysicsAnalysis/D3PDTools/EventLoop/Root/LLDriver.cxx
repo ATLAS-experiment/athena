@@ -37,9 +37,7 @@ namespace EL
 {
   void LLDriver ::
   testInvariant () const
-  {
-    RCU_INVARIANT (this != 0);
-  }
+  {}
 
 
 

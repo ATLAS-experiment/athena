@@ -49,10 +49,19 @@ namespace SH
 	result += ",tags=" + dbg (obj.tags(), verbosity / 10);
       if (verbosity % 10 > 1)
       {
-	result += "\n";
-	for (std::size_t iter = 0, end = obj.numFiles();
-	     iter != end; ++ iter)
-	  result += obj.fileName (iter) + "\n";
+	// rationale: some samples (e.g. SampleComposite) do not support
+	//   file listing and throw from numFiles(); handle that
+	//   gracefully so that printing never throws.
+	try
+	{
+	  result += "\n";
+	  for (std::size_t iter = 0, end = obj.numFiles();
+	       iter != end; ++ iter)
+	    result += obj.fileName (iter) + "\n";
+	} catch (std::exception& e)
+	{
+	  result += "\n <file listing not available: " + std::string (e.what()) + ">\n";
+	}
       };
     };
     return result;
@@ -63,7 +72,7 @@ namespace SH
   void Sample ::
   testInvariant () const
   {
-    RCU_INVARIANT (m_meta != 0);
+    RCU_INVARIANT (m_meta != nullptr);
  }
 
 
@@ -218,9 +227,8 @@ namespace SH
     if (treeName.empty())
       throw std::runtime_error ("sample " + name() + " does not have a tree name associated");
     std::unique_ptr<TChain> result (new TChain (treeName.c_str()));
-    for (std::vector<std::string>::const_iterator file = files.begin(),
-	   end = files.end(); file != end; ++ file)
-      result->AddFile (file->c_str());
+    for (const auto& file : files)
+      result->AddFile (file.c_str());
     return result.release();
   }
 
@@ -247,9 +255,9 @@ namespace SH
   contains (const std::string& name) const
   {
     RCU_READ_INVARIANT (this);
-    if (m_name == name)
-      return true;
-    return false;
+    // rationale: also consult the virtual getContains(), so that
+    //   composite samples can detect nested containment / rings.
+    return m_name == name || getContains (name);
   }
 
 
@@ -291,12 +299,11 @@ namespace SH
       = meta()->castString (MetaFields::treeName, MetaFields::treeName_default);
     Long64_t result = 0;
     std::vector<std::string> fileList = makeFileList();
-    for (std::vector<std::string>::const_iterator fileName = fileList.begin(),
-	   end = fileList.end(); fileName != end; ++ fileName)
+    for (const auto& fileName : fileList)
     {
-      std::unique_ptr<TFile> file (TFile::Open (fileName->c_str(), "READ"));
-      if (file.get() == 0)
-        throw std::runtime_error ("failed to open file: " + *fileName);
+      std::unique_ptr<TFile> file (TFile::Open (fileName.c_str(), "READ"));
+      if (file.get() == nullptr)
+        throw std::runtime_error ("failed to open file: " + fileName);
       TTree *tree = dynamic_cast<TTree*>(file->Get (treeName.c_str()));
       if (tree)
 	result += tree->GetEntries();
@@ -339,7 +346,7 @@ namespace SH
     std::unique_ptr<TNamed> mymeta (meta_swallow);
 
     // no invariant used
-    RCU_REQUIRE_SOFT (meta_swallow != 0);
+    RCU_REQUIRE_SOFT (meta_swallow != nullptr);
 
     meta()->addReplace (mymeta.release());
   }
