@@ -2,7 +2,10 @@
 
 import ROOT
 
-def L2MuonSAMonConfig(helper):
+from TriggerMenuMT.HLT.Muon.TrigMuonKeys import muonNames
+muNames = muonNames().getNames('RoI')
+
+def L2MuonSAMonConfig(helper, isPhaseII=False, **kwargs):
     
     from AthenaConfiguration.ComponentFactory import CompFactory
 
@@ -10,20 +13,29 @@ def L2MuonSAMonConfig(helper):
 
     from MuonSelectorTools.MuonSelectorToolsConfig import MuonLoosenedNonCalibratedSelectionToolCfg
     from .MuonMatchingToolConfig import MuonMatchingToolConfig
-    monAlg = helper.addAlgorithm(CompFactory.L2MuonSAMon,'L2MuonSAMon',
-                                 MuonSelectionTool = helper.result().popToolsAndMerge(MuonLoosenedNonCalibratedSelectionToolCfg(helper.flags, MuQuality=1)),
-                                 MuonMatchingTool = helper.result().popToolsAndMerge(MuonMatchingToolConfig(helper.flags)))
 
-    # Check wheter we are running the phase-2 menu
-    from TrigConfigSvc.TriggerConfigAccess import getHLTMonitoringAccess, getHLTMenuAccess
-    isRun4Menu = (getHLTMenuAccess(helper.flags).name()).find("run4") != -1
-    if not isRun4Menu:
-        monAlg.EFFastRecoSAContainerName = ""
+    # Set the offline muon container
+    kwargs.setdefault("MuonContainerName", "Muons")
+
+    monAlg = helper.addAlgorithm(CompFactory.L2MuonSAMon,'L2MuonSAMon',
+                                 MuonSelectionTool = helper.result().popToolsAndMerge(MuonLoosenedNonCalibratedSelectionToolCfg(helper.flags, 
+                                                                                                                                MuQuality=1)),
+                                 MuonMatchingTool = helper.result().popToolsAndMerge(MuonMatchingToolConfig(helper.flags,
+                                                                                                            isPhaseII=isPhaseII, 
+                                                                                                            MuonContainerName=kwargs["MuonContainerName"])),
+                                 **kwargs)
+
+    from TrigConfigSvc.TriggerConfigAccess import getHLTMenuAccess, getHLTMonitoringAccess
+    isR4Menu = "run4" in getHLTMenuAccess(helper.flags).name()
+
+    # Set containers names
+    monAlg.L2StandAloneMuonContainerName = muNames.L2SAMuons
+    monAlg.EFFastRecoSAContainerName = muNames.L2SAMuonsPhII if isR4Menu and isPhaseII else ""
 
     ### monitorig groups
     moniAccess = getHLTMonitoringAccess(helper.flags)
     Chains = moniAccess.monitoredChains(signatures="muonMon",monLevels=["shifter","t0","val"])
-    monAlg.MonitoredChains = [c for c in Chains if ('mu24_ivarmedium' in c) or ('2mu14' in c)] 
+    monAlg.MonitoredChains = [c for c in Chains if ('mu24' in c) or ('2mu14' in c)] 
     # adding lower pt chains, if menu is not pp collisions
     if len(monAlg.MonitoredChains) == 0:
         monAlg.MonitoredChains = [c for c in Chains if ('mu6' in c) or ('mu8' in c) or ('2mu4' in c)]

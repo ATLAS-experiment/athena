@@ -14,7 +14,7 @@ L2MuonSAMon :: L2MuonSAMon(const std::string& name, ISvcLocator* pSvcLocator )
 
 StatusCode L2MuonSAMon :: initialize(){
   StatusCode sc = TrigMuonMonitorAlgorithm::initialize();
-  ATH_CHECK( m_L2MuonSAContainerKey.initialize() );
+  ATH_CHECK( m_L2MuonSAContainerKey.initialize(!m_L2MuonSAContainerKey.empty()) );
   ATH_CHECK( m_EFFastRecoContainerKey.initialize(!m_EFFastRecoContainerKey.empty()) );
   return sc;
 }
@@ -257,6 +257,7 @@ StatusCode L2MuonSAMon :: fillVariablesPerChain(const EventContext &ctx, const s
 
 
     // matching to offline
+    if (m_MuonContainerKey.empty()) continue;
     const xAOD::Muon* RecMuonCB = m_matchTool->matchL2SAtoOff(ctx, (*muEL));
     if(RecMuonCB == nullptr) continue;
 
@@ -301,28 +302,19 @@ StatusCode L2MuonSAMon :: fillVariablesPerOfflineMuonPerChain(const EventContext
   const bool isPh2FastReco = chain.find("newFast") != std::string::npos;
   if (isPh2FastReco) {
 
-    bool isPassedL2 {false};
-    const xAOD::Muon* muSA = m_matchTool->matchFastRecoSA(ctx, mu, chain, isPassedL2);
-    if ( muSA ) {
-      isMatchedL2SA = true;
+    const TrigCompositeUtils::LinkInfo<xAOD::MuonContainer> muLinkInfo = m_matchTool->searchFastRecoSALinkInfo(mu, chain);
+    if ( !muLinkInfo.isValid() )  return StatusCode::SUCCESS;
+    const ElementLink<xAOD::MuonContainer> muEL = muLinkInfo.link;
+    isMatchedL2SA = m_matchTool->isMatchedFastRecoSA( *muEL, mu);
 
-      muSAdR = xAOD::P4Helpers::deltaR(mu, muSA, false); 
-      muSAPt = muSA->pt() * muSA->charge() / Gaudi::Units::GeV; // signed pt
+    muSAdR = xAOD::P4Helpers::deltaR(mu, *muEL, false); 
+    muSAPt = (*muEL)->pt() * (*muEL)->charge() / Gaudi::Units::GeV; // signed pt
 
-      bool isPassedL1 {false};
-      const xAOD::MuonRoI* l1roi = m_matchTool->matchL1(ctx, muSA, chain, isPassedL1);
-      roiEta = l1roi ? l1roi->eta() : -999.;
-      roiPhi = l1roi ? l1roi->phi() : -999.;
+    bool isPassedL1 {false};
+    const xAOD::MuonRoI* l1roi = m_matchTool->matchL1(ctx, *muEL, chain, isPassedL1);
 
-    } else {
-      isMatchedL2SA = false;
-
-      const TrigCompositeUtils::LinkInfo<xAOD::MuonContainer> muLinkInfo = m_matchTool->searchFastRecoSALinkInfo(mu, chain);
-      if ( !muLinkInfo.isValid() )  return StatusCode::SUCCESS;
-      const ElementLink<xAOD::MuonContainer> muEL = muLinkInfo.link;
-
-      muSAdR = xAOD::P4Helpers::deltaR(mu, *muEL, false); 
-    }
+    roiEta = l1roi ? l1roi->eta() : -999.;
+    roiPhi = l1roi ? l1roi->phi() : -999.;
 
   } else {
     // get L2SA muon link
@@ -476,7 +468,7 @@ StatusCode L2MuonSAMon :: fillVariablesPerOfflineMuon(const EventContext &ctx, c
   }
 
   if (!m_EFFastRecoContainerKey.empty()) {
-    ATH_CHECK( fillVariablesRatioPlots<xAOD::Muon>(ctx, mu, "L2SA", xAOD::Muon::TrackParticleType::ExtrapolatedMuonSpectrometerTrackParticle,
+    ATH_CHECK( fillVariablesRatioPlots<xAOD::Muon>(ctx, mu, "L2SAPhII", xAOD::Muon::TrackParticleType::ExtrapolatedMuonSpectrometerTrackParticle,
                                                    [this](const EventContext &ctx, const xAOD::Muon *m){ return m_matchTool->matchFastRecoSAReadHandle(ctx,m); }
                                                    ));
   }
