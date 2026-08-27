@@ -56,11 +56,6 @@ public:
   virtual bool isMonitoredEvent(const EventContext& context, const bool includeMultiSlot) const = 0;
 
   /**
-   * @brief To be used to cache ROBs for ROS
-   */
-  virtual StatusCode monitorROS(const EventContext& context, robmonitor::ROBDataMonitorStruct payload) = 0;
-
-  /**
    * @brief To be used to generate timeout report
    */
   virtual StatusCode generateTimeoutReport(const EventContext& context, std::string& report) = 0;
