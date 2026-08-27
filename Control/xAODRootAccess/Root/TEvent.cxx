@@ -1602,6 +1602,9 @@ StatusCode TEvent::setAuxStore(const std::string &key,
 
   // Get the auxiliary store object:
   const SG::IConstAuxStore* store = 0;
+#ifndef XAOD_STANDALONE
+  SG::IAuxStore* store_nc = 0;
+#endif
   if (m_auxMode == kBranchAccess) {
     // Get the concrete auxiliary manager:
     TAuxManager* amgr = dynamic_cast<TAuxManager* >(auxMgr);
@@ -1619,6 +1622,9 @@ StatusCode TEvent::setAuxStore(const std::string &key,
                : TAuxStore::EStructMode::kObjectStore);
       amgr->getStore()->setStructMode(mode);
     }
+#ifndef XAOD_STANDALONE
+    store_nc = amgr->getStore();
+#endif
   } else if (m_auxMode == kClassAccess || m_auxMode == kAthenaAccess) {
     // Get the concrete auxiliary manager:
     TObjectManager* omgr = dynamic_cast<TObjectManager* >(auxMgr);
@@ -1628,12 +1634,21 @@ StatusCode TEvent::setAuxStore(const std::string &key,
       return StatusCode::FAILURE;
     }
     void* p = omgr->holder()->getAs(typeid(SG::IConstAuxStore));
-    store = reinterpret_cast<const SG::IConstAuxStore* >(p);
+    SG::IConstAuxStore* store1 = reinterpret_cast<SG::IConstAuxStore* >(p);
+    store = store1;
+#ifndef XAOD_STANDALONE
+    store_nc = dynamic_cast<SG::IAuxStore*>(store1);
+#endif
   }
   if (!store) {
     ATH_MSG_FATAL("Logic error detected in the code");
     return StatusCode::FAILURE;
   }
+
+#ifndef XAOD_STANDALONE
+  // Call toTransient on the aux store.
+  store_nc->toTransient( this->currentContext() );
+#endif
 
   // Connect the two:
   if (vec) {
@@ -2107,19 +2122,12 @@ StatusCode TEvent::setUpDynamicStore(TObjectManager &mgr, ::TTree* tree) {
     return StatusCode::FAILURE;
   }
 
-  // If we read an auxiliary store, call toTransient on it.
-  const EventContext& ctx = this->currentContext();
-#ifndef XAOD_STANDALONE
-  if (SG::IAuxStore* istore = dynamic_cast<SG::IAuxStore*> (storeHolder)) {
-    istore->toTransient( ctx );
-  }
-#endif
-
   // Create a TAuxStore instance that will read the dynamic variables
   // of this container. Notice that the TAuxManager doesn't own the
   // TAuxStore object. It will be owned by the SG::IAuxStoreHolder
   // object.
   static constexpr bool TOP_STORE = false;
+  const EventContext& ctx = this->currentContext();
   auto store = std::make_unique<TAuxStore>(
       ctx, mgr.branch()->GetName(), TOP_STORE,
       (storeHolder->getStoreType() == SG::IAuxStoreHolder::AST_ObjectStore
@@ -2128,9 +2136,6 @@ StatusCode TEvent::setUpDynamicStore(TObjectManager &mgr, ::TTree* tree) {
   // This object is used to read data from the input, it needs to be
   // locked:
   store->lock();
-
-  // Set it up to read from the input RNTuple.
-  ATH_CHECK(store->readFrom(*tree));
 
   // Set it up to read from the input TTree.
   ATH_CHECK(store->readFrom(*tree));
