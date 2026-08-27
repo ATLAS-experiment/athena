@@ -246,23 +246,6 @@ StatusCode sTgcDigitizationTool::processAllSubEvents(const EventContext& ctx) {
   return StatusCode::SUCCESS;
 }
 
-template <class CondType> StatusCode sTgcDigitizationTool::retrieveCondData(const EventContext& ctx,
-                                                                            SG::ReadCondHandleKey<CondType>& key,
-                                                                            const CondType* & condPtr) const{
-    if (key.empty()) {
-       ATH_MSG_DEBUG("No key has been configured for object "<<typeid(CondType).name()<<". Clear pointer");
-       condPtr = nullptr;
-       return StatusCode::SUCCESS;
-    }
-    SG::ReadCondHandle<CondType> readHandle{key, ctx};
-    if (!readHandle.isValid()){
-        ATH_MSG_FATAL("Failed to load conditions object "<<key.fullKey()<<".");
-        return StatusCode::FAILURE;
-    }
-    condPtr = readHandle.cptr();
-    return StatusCode::SUCCESS;
-}
-
 /*******************************************************************************/
 StatusCode sTgcDigitizationTool::doDigitization(const EventContext& ctx) {
 
@@ -271,9 +254,9 @@ StatusCode sTgcDigitizationTool::doDigitization(const EventContext& ctx) {
   
   sTgcDigitMaker::DigiConditions digitCond{};
   digitCond.rndmEngine = getRandomEngine(m_rndmEngineName, ctx);
-  ATH_CHECK(retrieveCondData(ctx, m_detMgrKey, digitCond.detMgr));
-  ATH_CHECK(retrieveCondData(ctx, m_effiKey, digitCond.efficiencies));
-  ATH_CHECK(retrieveCondData(ctx, m_condThrshldsKey , digitCond.thresholdData));
+  ATH_CHECK(SG::get(digitCond.detMgr, m_detMgrKey, ctx));
+  ATH_CHECK(SG::get(digitCond.efficiencies, m_effiKey, ctx));
+  ATH_CHECK(SG::get(digitCond.thresholdData,m_condThrshldsKey, ctx));
   
 
   // create and record the Digit container in StoreGate
