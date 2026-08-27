@@ -38,10 +38,10 @@ namespace GlobalSim {
 // ============================================================================
 
     struct AuxSpec {
-        std::string_view name;
-        std::uint64_t mask;
-        std::size_t shift;
-        bool has_mask;
+        std::string_view name{};
+        std::uint64_t mask{};
+        std::size_t shift{};
+        bool has_mask{};
 
         static constexpr std::size_t parseNumber(std::string_view str,std::size_t& pos,std::size_t end) {
             std::size_t value{};
