@@ -28,5 +28,16 @@ atlas_add_test( G4RunToolStateSynchronization_test
                 POST_EXEC_SCRIPT noerror.sh
                 PROPERTIES TIMEOUT 10 )
 
+atlas_add_test( G4RunToolEventQueue_test
+                SOURCES test/G4RunToolEventQueue_test.cxx
+                        src/G4RunToolEventQueue.cxx
+                        src/AtlasG4SyncEventUserInfo.cxx
+                INCLUDE_DIRS ${GEANT4_INCLUDE_DIRS}
+                             ${CMAKE_CURRENT_SOURCE_DIR}/src
+                LINK_LIBRARIES ${GEANT4_LIBRARIES} Threads::Threads
+                               AthenaKernel GaudiKernel HitManagement MCTruth
+                POST_EXEC_SCRIPT noerror.sh
+                PROPERTIES TIMEOUT 10 )
+
 # Install files from the package:
 atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )

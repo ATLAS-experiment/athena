@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "SyncEventAction.h"
@@ -17,7 +17,7 @@ void SyncEventAction::BeginOfEventAction(const G4Event* event)
   const auto* eventInfo = dynamic_cast<const AtlasG4SyncEventUserInfo*>(
     event->GetUserInformation());
   if(!eventInfo) {
-    // No sync event user info identifies a shutdown sentinel.
+    // A closed event queue supplies no sync event user info.
     G4RunManager::GetRunManager()->AbortRun();
   }
   else if(eventInfo->EventPreparationFailed()) {
