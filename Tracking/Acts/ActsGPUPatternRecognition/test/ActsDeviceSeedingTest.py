@@ -10,18 +10,19 @@ from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaCommon.Constants import DEBUG
 
 from ActsGPUDataPreparation.ActsGPUDataPreparationConfig import DeviceClusterizationAlgCfg, DeviceSPFormationAlgCfg
-from ActsGPUPatternRecognition.ActsGPUPatternRecognitionConfig import DeviceGBTSSeedingAlgCfg, DeviceTripletSeedingAlgCfg
+from ActsGPUPatternRecognition.ActsGPUPatternRecognitionConfig import DeviceGBTSSeedingAlgCfg, DeviceTripletSeedingAlgCfg, DeviceTrkParamEstimationAlgCfg
 from ActsGPUEventCnv.ActsGPUEventCnvConfig import RDOtoTracccCellConverterAlgCfg, TracccMeasurementConverterAlgCfg
 from ActsGPUGeometry.ActsGPUGeometryConfig import JSONDeviceDetectorDescriptionProviderSvcCfg
+from ActsGPUMagField.ActsGPUMagFieldConfig import JSONDeviceMagFieldProviderSvcCfg
 
 def GPUSeedingCfg(flags) -> ComponentAccumulator:
     acc = ComponentAccumulator()
 
     # Service runs first — loads all device detector description data into detStore
     acc.merge(JSONDeviceDetectorDescriptionProviderSvcCfg(flags,
-        # DeviceDetectorName = "TracccDeviceDetectorGeometry",
-        # HostDetectorName = "TracccHostDetectorGeometry",
         OutputLevel = DEBUG))
+    acc.merge(JSONDeviceMagFieldProviderSvcCfg(flags,
+        OutputLevel = DEBUG))    
 
     acc.merge(RDOtoTracccCellConverterAlgCfg(flags,
         TracccCells = "TracccCellCollection",
@@ -52,6 +53,14 @@ def GPUSeedingCfg(flags) -> ComponentAccumulator:
         InputTracccMeasurements="TracccMeasurementCollection",
         OutputTracccPixelSeeds="TracccPixelGBTSSeedCollection",
         OutputLevel = DEBUG))
+
+    acc.merge(DeviceTrkParamEstimationAlgCfg(flags,
+        InputTracccSpacepoints="TracccPixelSpacepointCollection",
+        InputTracccMeasurements="TracccMeasurementCollection",
+        InputTracccSeeds="TracccPixelGBTSSeedCollection",
+        OutputTracccTrackParameters="TracccTrkParamCollection",
+        OutputLevel = DEBUG
+    ))    
 
     return acc
 

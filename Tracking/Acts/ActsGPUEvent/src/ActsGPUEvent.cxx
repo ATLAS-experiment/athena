@@ -12,6 +12,7 @@
 #include "ActsGPUEvent/TracccSiliconClusterCollection.h"
 #include "ActsGPUEvent/TracccSpacepointCollection.h"
 #include "ActsGPUEvent/TracccSeedCollection.h"
+#include "ActsGPUEvent/TracccTrkParamCollection.h"
 #include "ActsGPUEvent/TracccDetectorDesignDescription.h"
 #include "ActsGPUEvent/TracccMagField.h"
 #include "ActsGPUEvent/TracccDetectorConditionsDescription.h"
