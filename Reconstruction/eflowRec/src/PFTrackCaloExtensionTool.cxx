@@ -2,6 +2,7 @@
 
 #include "PFTrackCaloExtensionTool.h"
 
+#include "Acts/Geometry/TrackingGeometry.hpp"
 #include "Acts/Material/MaterialInteraction.hpp"
 #include "Acts/Propagator/detail/SteppingLogger.hpp"
 #include "Acts/Surfaces/CurvilinearSurface.hpp"
@@ -17,6 +18,23 @@ PFTrackCaloExtensionTool::PFTrackCaloExtensionTool(const std::string& type, cons
 
 StatusCode PFTrackCaloExtensionTool::initialize() {
   ATH_CHECK(m_extrapolationTool.retrieve());
+  ATH_CHECK(m_trackingGeometrySvc.retrieve());
+
+  std::array<std::string,3 > caloNames = {"EMB1_Layer", "EMB2_Layer", "EMB3_Layer"};
+
+  m_trackingGeometrySvc->trackingGeometry()->visitVolumes([&](const Acts::TrackingVolume *vol) {
+    const auto & name = vol->volumeName();
+    ATH_MSG_DEBUG(name << " - " << vol->geometryId() << " - surfaces: " << vol->surfaces().size());
+    if (std::ranges::contains(caloNames, name)){
+        ATH_MSG_DEBUG("About to insert caloName " << name << " into map");
+        m_caloNameGeoIDMap[name] = vol->geometryId();
+    } 
+  });
+
+  for (const auto& caloName : caloNames){
+    if (!m_caloNameGeoIDMap.contains(caloName)) ATH_MSG_ERROR("No volume inserted into map for calo name: " << caloName);
+  }
+
   return StatusCode::SUCCESS;
 }
 

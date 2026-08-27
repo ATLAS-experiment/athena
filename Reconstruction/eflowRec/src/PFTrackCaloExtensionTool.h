@@ -6,6 +6,7 @@
 #include "eflowTrackExtrapolatorBaseAlgTool.h"
 
 #include "ActsGeometryInterfaces/IExtrapolationTool.h"
+#include "ActsGeometryInterfaces/ITrackingGeometrySvc.h"
 #include "AthenaBaseComps/AthAlgTool.h"
 
 static const InterfaceID IID_PFTrackCaloExtensionTool("PFTrackCaloExtensionTool", 1, 0);
@@ -34,6 +35,10 @@ private:
      "ExtrapolationTool",
      "Tool to run propagation in an ACTS tracking geometry"
     };
+
+    ServiceHandle<ActsTrk::ITrackingGeometrySvc> m_trackingGeometrySvc{this, "TrackingGeometrySvc", "ActsTrackingGeometrySvc"};
+
+    std::map<std::string, Acts::GeometryIdentifier> m_caloNameGeoIDMap;
 
 };
 #endif
