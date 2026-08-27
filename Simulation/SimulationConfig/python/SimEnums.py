@@ -30,6 +30,7 @@ class CavernBackground(FlagEnum):
 class InDetParameterization(FlagEnum):
     NONE = 0
     FatrasG4 = 1
+    AFatrasG4 = 2
 
 class LArParameterization(FlagEnum):
     NoFrozenShowers = 0

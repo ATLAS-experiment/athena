@@ -1,9 +1,10 @@
 # Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
-from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.Enums import BeamType
 from SimulationConfig.SimEnums import BeamPipeSimMode, CalibrationRun, CavernBackground, InDetParameterization, LArParameterization
 from AthenaConfiguration.AccumulatorCache import AccumulatorCache
+from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
+
 
 
 @AccumulatorCache
@@ -17,7 +18,11 @@ def FastSimulationToolListCfg(flags):
     if flags.Sim.InDetParameterization is InDetParameterization.FatrasG4:
         from G4FastSimulation.G4FastSimulationConfig import FatrasG4Cfg
         tools += [ result.popToolsAndMerge(FatrasG4Cfg(flags)) ]
-    
+
+    if flags.Sim.InDetParameterization is InDetParameterization.AFatrasG4:
+        from G4FastSimulation.G4FastSimulationConfig import AFatrasG4Cfg
+        tools += [ result.popToolsAndMerge(AFatrasG4Cfg(flags)) ]    
+
     if flags.Detector.GeometryBpipe:
         if  not flags.Detector.GeometryFwdRegion and (flags.Detector.GeometryAFP or flags.Detector.GeometryALFA or flags.Detector.GeometryZDC):
             # equivalent of simFlags.ForwardDetectors() == 2:
@@ -108,6 +113,49 @@ def G4CaloTransportToolCfg(flags, name='G4CaloTransportTool', **kwargs):
         kwargs.setdefault('MaxSteps', 5000)
     
     result.setPrivateTools(CompFactory.G4CaloTransportTool(name, **kwargs))
+    return result
+
+def ActsFatrasG4ToolCfg(flags, name="ActsFatrasG4Tool", **kwargs):
+    # Use rules below to decide how to retrieve dependencies for this tool:
+    # Private tool	            popToolsAndMerge()
+    # Primary component	        getPrimaryAndMerge()
+    # Plain alg/service/cond alg	merge()
+
+    # declare component accumulator
+    result = ComponentAccumulator()
+    from AthenaCommon.Logging import logging
+    mlog = logging.getLogger(name)
+    mlog.info('Start configuration of ActsFatrasG4Tool')
+
+    # other arguments
+    # see: ActsExtrapolationToolCfg in ActsConfig/python/ActsGeometryConfig.py for example 
+    # --- Schedule magnetic field conditions alg properly ---
+    from MagFieldServices.MagFieldServicesConfig import AtlasFieldCacheCondAlgCfg
+    result.merge(AtlasFieldCacheCondAlgCfg(flags))
+    
+    # Tracking geometry
+    from ActsConfig.ActsGeometryConfig import ActsTrackingGeometrySvcCfg
+    result.merge(ActsTrackingGeometrySvcCfg(flags))
+
+    from ActsAlignmentAlgs.AlignmentAlgsConfig import ActsGeometryContextAlgCfg
+    result.merge(ActsGeometryContextAlgCfg(flags)) 
+
+    kwargs.setdefault("MaxSteps", 2000)
+    # always set to false, only for debugging purpose
+    kwargs.setdefault("DebugInjectParticle", flags.Sim.ActsFatrasG4.DebugInjectParticle)
+
+    # RNG service
+    from RngComps.RngCompsConfig import AthRNGSvcCfg
+    kwargs.setdefault(
+        "RNGService",
+        result.getPrimaryAndMerge(AthRNGSvcCfg(flags))
+    )
+
+    # create the tool 
+    tool = CompFactory.ActsFatrasG4Tool(name, **kwargs)
+    # set as private tool
+    result.setPrivateTools(tool)
+
     return result
 
 def PunchThroughG4ClassifierCfg(flags, name="PunchThroughG4Classifier", **kwargs):
@@ -368,11 +416,21 @@ def SimHitContainerListCfg(flags):
     if flags.Detector.EnablePixel:
         if (flags.Sim.ISFRun and flags.Sim.ISF.HITSMergingRequired.get('ID', True)):
             writtenContainers += [("SiHitCollection", "PixelHits_G4")]
+            if flags.Sim.InDetParameterization in (
+               InDetParameterization.FatrasG4,
+               InDetParameterization.AFatrasG4,
+            ):
+             writtenContainers += [("SiHitCollection", "PixelHits_ActsFatrasG4")]
         else:
             writtenContainers += [("SiHitCollection", "PixelHits")]
     if flags.Detector.EnableSCT:
         if (flags.Sim.ISFRun and flags.Sim.ISF.HITSMergingRequired.get('ID', True)):
-           writtenContainers += [("SiHitCollection", "SCT_Hits_G4")]
+            writtenContainers += [("SiHitCollection", "SCT_Hits_G4")]
+            if flags.Sim.InDetParameterization in (
+               InDetParameterization.FatrasG4,
+               InDetParameterization.AFatrasG4,
+            ):
+              writtenContainers += [("SiHitCollection" , "SCT_Hits_ActsFatrasG4")]
         else:
             writtenContainers += [("SiHitCollection", "SCT_Hits")]
     if flags.Detector.EnableITkPixel:

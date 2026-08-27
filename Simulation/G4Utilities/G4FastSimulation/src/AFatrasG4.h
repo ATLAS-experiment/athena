@@ -2,8 +2,8 @@
   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef G4FASTSIMULATION_FATRASG4_H
-#define G4FASTSIMULATION_FATRASG4_H
+#ifndef G4FASTSIMULATION_AFATRASG4_H
+#define G4FASTSIMULATION_AFATRASG4_H
 
 // Service handle to define smart pointer to Fatras parametrisation service
 #include "GaudiKernel/ServiceHandle.h"
@@ -14,21 +14,21 @@
 #include "G4AtlasInterfaces/IActsFatrasG4Tool.h"
 
 // FatrasG4 tool
-#include "FatrasG4Tool.h"
+#include "AFatrasG4Tool.h"
 
 class G4FieldTrack;
 class G4SafetyHelper;
 
-class FatrasG4: public G4VFastSimulationModel
+class AFatrasG4: public G4VFastSimulationModel
 {
  public:
-  FatrasG4(const std::string& name,
+  AFatrasG4(const std::string& name,
                 G4Region* region,
                 const PublicToolHandle<IActsFatrasG4Tool>& ActsFatrasG4Tool,
                 bool doG4Transport,
-                FatrasG4Tool * FatrasG4Tool);
+                AFatrasG4Tool * FatrasG4Tool);
   
-  virtual ~FatrasG4() = default;
+  virtual ~AFatrasG4() = default;
 
   virtual G4bool IsApplicable(const G4ParticleDefinition&) override final;
   virtual void DoIt(const G4FastTrack&, G4FastStep&) override final;
@@ -46,5 +46,5 @@ class FatrasG4: public G4VFastSimulationModel
 
 };
 
-#endif //G4FASTSIMULATION_FATRASG4_H
+#endif //G4FASTSIMULATION_AFATRASG4_H
 

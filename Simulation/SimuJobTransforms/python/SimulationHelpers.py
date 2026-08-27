@@ -95,6 +95,10 @@ def enableFatrasG4(flags):
     # Set InDetParametrization to FatrasG4
     flags.Sim.InDetParameterization = InDetParameterization.FatrasG4
 
+def enableAFatrasG4(flags):
+    # Set InDetParametrization to AFatrasG4
+    flags.Sim.InDetParameterization = InDetParameterization.AFatrasG4
+
 def useVerboseTracking(flags):
     # Use verbose G4 tracking
     flags.Sim.G4Commands += ['/tracking/verbose 1']

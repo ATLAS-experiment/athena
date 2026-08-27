@@ -2,15 +2,15 @@
   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "FatrasG4Tool.h"
-#include "FatrasG4.h"
+#include "AFatrasG4Tool.h"
+#include "AFatrasG4.h"
 
-FatrasG4Tool::FatrasG4Tool(const std::string& type, const std::string& name, const IInterface *parent)
+AFatrasG4Tool::AFatrasG4Tool(const std::string& type, const std::string& name, const IInterface *parent)
 : FastSimulationBase(type, name, parent)
 {
 }
 
-StatusCode FatrasG4Tool::initializeFastSim()
+StatusCode AFatrasG4Tool::initializeFastSim()
 {
     ATH_CHECK(FastSimulationBase::initializeFastSim());
     ATH_CHECK(m_ActsFatrasG4Tool.retrieve());
@@ -19,9 +19,9 @@ StatusCode FatrasG4Tool::initializeFastSim()
     return StatusCode::SUCCESS;
 }
 
-StatusCode FatrasG4Tool::BeginOfAthenaEvent(HitCollectionMap& hcm)
+StatusCode AFatrasG4Tool::BeginOfAthenaEvent(HitCollectionMap& hcm)
 {
-    ATH_MSG_DEBUG("FatrasG4Tool:BeginOfAthenaEvent");
+    ATH_MSG_DEBUG("AFatrasG4Tool:BeginOfAthenaEvent");
     ATH_CHECK(FastSimulationBase::BeginOfAthenaEvent(hcm));
     if (msgLvl(MSG::DEBUG)){
       const EventContext& ctx = Gaudi::Hive::currentContext();
@@ -32,16 +32,16 @@ StatusCode FatrasG4Tool::BeginOfAthenaEvent(HitCollectionMap& hcm)
 }
 
 
-G4VFastSimulationModel* FatrasG4Tool::makeFastSimModel()
+G4VFastSimulationModel* AFatrasG4Tool::makeFastSimModel()
 {
-  ATH_MSG_INFO("Initializing Fast Simulation Model FatrasG4");
-  // Create the FatrasG4 fast simulation model
-  return new FatrasG4(name(), getRegion(), m_ActsFatrasG4Tool, m_doG4Transport, this);
+  ATH_MSG_INFO("Initializing Fast Simulation Model AFatrasG4");
+  // Create the AFatrasG4 fast simulation model
+  return new AFatrasG4(name(), getRegion(), m_ActsFatrasG4Tool, m_doG4Transport, this);
 }
 
-StatusCode FatrasG4Tool::EndOfAthenaEvent(HitCollectionMap& hcm)
+StatusCode AFatrasG4Tool::EndOfAthenaEvent(HitCollectionMap& hcm)
 {
-    ATH_MSG_DEBUG("FatrasG4Tool:EndOfAthenaEvent");
+    ATH_MSG_DEBUG("AFatrasG4Tool:EndOfAthenaEvent");
     const EventContext& ctx = Gaudi::Hive::currentContext();
     ATH_MSG_DEBUG("EndOfAthenaEvent slot=" << ctx.slot()); //check if same slot as in BeginOfAthenaEvent
 
