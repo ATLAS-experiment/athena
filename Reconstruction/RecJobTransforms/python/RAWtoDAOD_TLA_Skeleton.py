@@ -2,7 +2,6 @@
 
 from PyJobTransforms.TransformUtils import processPreExec, processPreInclude, processPostExec, processPostInclude
 from RecJobTransforms.RecoSteering import RecoSteering
-from AthenaConfiguration.ComponentFactory import CompFactory 
 
 from AthenaCommon.Logging import logging
 log = logging.getLogger('RAWtoDAOD_TLA')
@@ -194,6 +193,8 @@ def fromRunArgs(runArgs):
             cfg.getEventAlgo('InDetTRT_RIO_Maker').RegSelTool=cfg.popToolsAndMerge(regSelTool_TRT_Cfg(flags))
 
         if flags.Detector.GeometryCalo:
+            from TriggerJobOpts.TriggerTransBSConfig import triggerTransBSCfg_Calo
+            cfg.merge(triggerTransBSCfg_Calo(flags))
             from TrigCaloRec.TrigCaloRecConfig import hltCaloCellMakerCfg
             cfg.merge(hltCaloCellMakerCfg(flags,name='RoICaloCellmaker', roisKey='HLT_Roi_Selected_'+ebType, CellsName='AllCalo', doTau=True))
         else:
