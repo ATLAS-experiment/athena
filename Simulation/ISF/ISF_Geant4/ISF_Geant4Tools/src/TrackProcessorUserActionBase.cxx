@@ -130,9 +130,7 @@ void TrackProcessorUserActionBase::setupPrimary(G4Track& aTrack)
     // carrying the TrackInformation from its first pass. The Quirks extension
     // is the only user of fSuspend. A resumed track keeps its step counter, so
     // a primary genuinely started twice is still fatal below.
-    setCurrentParticle( trackInfo->GetBaseISFParticle(),
-                        trackInfo->GetPrimaryHepMCParticle(),
-                        trackInfo->GetHepMCParticle() );
+    updateCurrentBaseISFParticle( trackInfo->GetBaseISFParticle() );
     return;
   }
   if ( trackInfo ) {
