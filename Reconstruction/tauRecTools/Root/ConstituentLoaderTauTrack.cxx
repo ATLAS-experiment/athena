@@ -76,6 +76,7 @@ namespace FlavorTagInference {
         } catch (const std::out_of_range &e) {
             throw std::runtime_error("Variable '" + var_name + "' not defined");
         }
+        //coverity[COPY_INSTEAD_OF_MOVE]
         return [func_as_ref](const xAOD::TauTrack& trk, const xAOD::TauJet& tau) {
             float out;
             bool success = func_as_ref(tau, trk, out);

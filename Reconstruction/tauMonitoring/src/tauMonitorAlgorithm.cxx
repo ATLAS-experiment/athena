@@ -309,6 +309,7 @@ StatusCode tauMonitorAlgorithm::fillHistograms(const EventContext &ctx) const {
 
     // TauB/Identification/EleVetoBDTinputs
     PSSFrac = tau->detail<float>(xAOD::TauJetParameters::PSSFraction);
+    //coverity[UNNECESSARY_STRING_COPY:FALSE]
     static const SG::ConstAccessor<float> EMFracFixedAcc("EMFracFixed");
     EMFrac = EMFracFixedAcc(*tau);
 
@@ -500,6 +501,7 @@ StatusCode tauMonitorAlgorithm::fillHistograms(const EventContext &ctx) const {
         trackZ0sinthetaSigTJVA = 999.;
         float rConv = 999.;
         float rConvII = 999.;
+        //coverity[UNNECESSARY_STRING_COPY:FALSE]
         static const SG::ConstAccessor<float> z0sinthetaTJVAAcc("z0sinthetaTJVA");
         if (z0sinthetaTJVAAcc.isAvailable(*track)) {
           d0TJVA = track->d0TJVA();
@@ -535,6 +537,7 @@ StatusCode tauMonitorAlgorithm::fillHistograms(const EventContext &ctx) const {
         uint8_t numberOfSCTHoles = 0;
         trackParticle->summaryValue(numberOfSCTHoles, xAOD::numberOfSCTHoles);
         float eProbabilityHT = 0.;
+        //coverity[UNNECESSARY_STRING_COPY:FALSE]
         static const SG::ConstAccessor<float> eProbabilityNNAcc("eProbabilityNN"); 
 
         float eProbabilityNN = eProbabilityNNAcc.withDefault(*trackParticle, -1);

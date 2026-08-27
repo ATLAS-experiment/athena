@@ -188,7 +188,7 @@ StatusCode PanTau::Tool_DetailsArranger::arrangePFOLinks(PanTau::PanTauSeed* inS
     } else {
 
       // assign the same constituents to Pantau:
-      preLinkPi0PFOLinks=pi0PFOLinks;
+      preLinkPi0PFOLinks = std::move(pi0PFOLinks);
 	
       // set all masses correctly:
       SetNeutralConstituentVectorMasses(preLinkPi0PFOLinks, neutralPFOContainer, MASS_PI0);
@@ -224,7 +224,7 @@ StatusCode PanTau::Tool_DetailsArranger::arrangePFOLinks(PanTau::PanTauSeed* inS
 	  
 	// copy all (really only one) pi0s from the sub-alg and add
 	// the highest BDT-score neutral:
-	preLinkPi0PFOLinks=pi0PFOLinks;
+	preLinkPi0PFOLinks = std::move(pi0PFOLinks);
 	if(!preSelected_neutralPFOLinks.empty()) preLinkPi0PFOLinks.push_back( preSelected_neutralPFOLinks.at(0) );
 	else ATH_MSG_WARNING("No neutral PFO Links although there should be!!");
 	  
@@ -439,7 +439,7 @@ void PanTau::Tool_DetailsArranger::createPi0Vectors(xAOD::TauJet* tauJet, std::v
     std::vector< ElementLink<xAOD::PFOContainer> > pfovec;
     pfovec.push_back(tauJet->pi0PFOLinks()[0]);
     pfovec.push_back(tauJet->pi0PFOLinks()[1]);
-    vec_pi0pfos.push_back( pfovec );
+    vec_pi0pfos.push_back( std::move(pfovec) );
 
   } else if (iDecayMode == xAOD::TauJetParameters::DecayMode::Mode_1pXn && iNumPi0PFO == 1){
 
@@ -458,7 +458,7 @@ void PanTau::Tool_DetailsArranger::createPi0Vectors(xAOD::TauJet* tauJet, std::v
     std::vector< ElementLink<xAOD::PFOContainer> > pfovec;
     pfovec.push_back(tauJet->pi0PFOLinks()[0]);
     vec_pi0pfos.push_back( pfovec );
-    vec_pi0pfos.push_back( pfovec );//fix rare crash?
+    vec_pi0pfos.push_back( std::move(pfovec) );//fix rare crash?
 
   }  else {
     // if it's not any of the special cases above then just collect the PFOs:
