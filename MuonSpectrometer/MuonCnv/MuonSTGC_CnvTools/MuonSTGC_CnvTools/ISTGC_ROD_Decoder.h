@@ -31,9 +31,9 @@ namespace Muon
 
       /** Convert ROBFragments to RDOs */
       virtual StatusCode fillCollection(const EventContext& ctx,
-                                        const OFFLINE_FRAGMENTS_NAMESPACE::ROBFragment&, 
-                                        const std::vector<IdentifierHash>&, 
-                                        std::unordered_map<IdentifierHash, std::unique_ptr<STGC_RawDataCollection>>&  ) const = 0;
+                                        const OFFLINE_FRAGMENTS_NAMESPACE::ROBFragment& fragment, 
+                                        const std::vector<IdentifierHash>& chambersToDecode, 
+                                        std::vector<std::unique_ptr<STGC_RawDataCollection>>& outColl) const = 0;
   };
 
 } // end of namespace

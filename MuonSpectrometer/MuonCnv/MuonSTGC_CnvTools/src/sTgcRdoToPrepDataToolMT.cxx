@@ -24,10 +24,8 @@ namespace Muon{
  sTgcRdoToPrepDataToolMT::DataCache::DataCache(const std::size_t hashMax,
                                                const PrdKey_t& key,
                                                const EventContext& ctx):
-        prdWriteHandle{key, ctx}{
-    
+        prdWriteHandle{key, ctx} {
     collections.resize(hashMax);
-
 }
 
 void sTgcRdoToPrepDataToolMT::DataCache::translateAndSort(sTgcPrepDataCollection& coll) {
@@ -42,8 +40,10 @@ void sTgcRdoToPrepDataToolMT::DataCache::translateAndSort(sTgcPrepDataCollection
     for (sTgcPrepData* prd : coll) {
         prd->setHashAndIndex(coll.identifyHash(), idx++);
     }
+    translate(coll);
+}
+void sTgcRdoToPrepDataToolMT::DataCache::translate(const sTgcPrepDataCollection& coll) {
     const IMuonIdHelperSvc* idHelperSvc = detMgr->idHelperSvc();
-    
     const sTgcIdHelper& id_helper = idHelperSvc->stgcIdHelper();
     for (const sTgcPrepData* prd : coll) {
         const Identifier prdId = prd->identify();
@@ -324,29 +324,14 @@ StatusCode sTgcRdoToPrepDataToolMT::processCollection(const EventContext& ctx,
     return StatusCode::SUCCESS;
 }
 
-
 //============================================================================
-const STGC_RawDataContainer* sTgcRdoToPrepDataToolMT::getRdoContainer(const EventContext& ctx) const 
-{
-    auto rdoContainerHandle  = SG::makeHandle(m_rdoContainerKey, ctx);
-    if(rdoContainerHandle.isValid()) {
-        ATH_MSG_DEBUG("STGC_getRdoContainer success");
-        return rdoContainerHandle.cptr();  
-    }
-    ATH_MSG_WARNING("Retrieval of STGC_RawDataContainer failed !");
-
-    return nullptr;
-}
-
-
-//============================================================================
-void sTgcRdoToPrepDataToolMT::processRDOContainer(const EventContext& ctx, 
+StatusCode sTgcRdoToPrepDataToolMT::processRDOContainer(const EventContext& ctx, 
                                                         DataCache& cache,
                                                         const std::vector<IdentifierHash>& idsToDecode) const
 {
     ATH_MSG_DEBUG("In processRDOContainer");
-    const STGC_RawDataContainer* rdoContainer = getRdoContainer(ctx);
-    if (!rdoContainer) return;
+    const STGC_RawDataContainer* rdoContainer{};
+    ATH_CHECK(SG::get(rdoContainer,m_rdoContainerKey ,ctx ));
   
     // run in unseeded mode
     for (const STGC_RawDataCollection* rdoColl : *rdoContainer) {
@@ -356,15 +341,15 @@ void sTgcRdoToPrepDataToolMT::processRDOContainer(const EventContext& ctx,
         const IdentifierHash hash = rdoColl->identifyHash();
 
         // check if we actually want to decode this RDO collection
-        if(!idsToDecode.empty() and std::find(idsToDecode.begin(), idsToDecode.end(), hash)==idsToDecode.end()) {
+        if(!idsToDecode.empty() and std::ranges::find(idsToDecode, hash)==idsToDecode.end()) {
             ATH_MSG_DEBUG("Hash ID " << hash << " not in input list, ignore");
             continue;
-        } else ATH_MSG_DEBUG("Going to decode " << hash);
-
-        if(processCollection(ctx, cache, rdoColl).isFailure()) {
-            ATH_MSG_DEBUG("processCsm returns a bad StatusCode - keep going for new data collections in this event");
+        } else {
+            ATH_MSG_DEBUG("Going to decode " << hash);
         }
+        ATH_CHECK(processCollection(ctx, cache, rdoColl));
     } 
+    return StatusCode::SUCCESS;
 }
 
 // methods for ROB-based decoding
@@ -376,8 +361,7 @@ StatusCode sTgcRdoToPrepDataToolMT::decode(const EventContext& ctx,
     DataCache outCache = setupOutputContainers(ctx);
     if (!outCache.isValid) return StatusCode::FAILURE;
 
-    processRDOContainer(ctx, outCache, idVect);
-    return StatusCode::SUCCESS;
+    return processRDOContainer(ctx, outCache, idVect);
 } 
 
 
