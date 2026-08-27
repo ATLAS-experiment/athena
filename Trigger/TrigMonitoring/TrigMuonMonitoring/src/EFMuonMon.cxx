@@ -22,6 +22,7 @@ StatusCode EFMuonMon::initialize(){
   ATH_CHECK( m_EFSATrackKey.initialize() );
   ATH_CHECK( m_EFSAMlbktTrackKey.initialize(!m_EFSAMlbktTrackKey.empty()) );
   ATH_CHECK( m_EFSANewFastTrackKey.initialize(!m_EFSANewFastTrackKey.empty()) );
+  ATH_CHECK( m_MSOnlytrackContainerKey.initialize() );
   ATH_CHECK( m_EFCBTrackKey.initialize() );
   ATH_CHECK( m_muonIso30Key.initialize() );
 
