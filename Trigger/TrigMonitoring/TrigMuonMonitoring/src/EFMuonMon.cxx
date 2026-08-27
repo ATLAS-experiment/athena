@@ -4,31 +4,34 @@
 
 #include "EFMuonMon.h"
 
-#include "xAODTrigMuon/TrigMuonDefs.h"
 #include "MuonMatchingTool.h"
 #include "StoreGate/ReadDecorHandle.h"
 #include "TrigCompositeUtils/TrigCompositeUtils.h"
 
-EFMuonMon :: EFMuonMon(const std::string& name, ISvcLocator* pSvcLocator )
+EFMuonMon::EFMuonMon(const std::string& name, ISvcLocator* pSvcLocator )
   : TrigMuonMonitorAlgorithm(name, pSvcLocator)
 {}
 
 
-StatusCode EFMuonMon :: initialize(){
+StatusCode EFMuonMon::initialize(){
   StatusCode sc = TrigMuonMonitorAlgorithm::initialize();
-  ATH_CHECK( m_EFSAMuonContainerKey.initialize() );
-  ATH_CHECK( m_EFCBMuonContainerKey.initialize() );
-  ATH_CHECK( m_MStrackContainerKey.initialize() );
-  ATH_CHECK( m_CBtrackContainerKey.initialize() );
+  ATH_CHECK( m_EFSAMuonKey.initialize() );
+  ATH_CHECK( m_EFSAMlbktMuonKey.initialize(!m_EFSAMlbktMuonKey.empty()) );
+  ATH_CHECK( m_EFSANewFastMuonKey.initialize(!m_EFSANewFastMuonKey.empty()) );
+  ATH_CHECK( m_EFCBMuonKey.initialize() );
+  ATH_CHECK( m_EFSATrackKey.initialize() );
+  ATH_CHECK( m_EFSAMlbktTrackKey.initialize(!m_EFSAMlbktTrackKey.empty()) );
+  ATH_CHECK( m_EFSANewFastTrackKey.initialize(!m_EFSANewFastTrackKey.empty()) );
+  ATH_CHECK( m_EFCBTrackKey.initialize() );
   ATH_CHECK( m_muonIso30Key.initialize() );
 
   for( const std::string& chain : m_monitored_chains ){
     m_doEFSA[chain] = true;
 
-    if( chain.find("msonly") != std::string::npos ) m_doEFCB[chain] = false;
+    if(chain.contains("msonly")) m_doEFCB[chain] = false;
     else m_doEFCB[chain] = true;
 
-    if( chain.find("ivar") != std::string::npos ) m_doEFIso[chain] = true;
+    if(chain.contains("ivar")) m_doEFIso[chain] = true;
     else m_doEFIso[chain] = false;
   }
 
@@ -36,7 +39,7 @@ StatusCode EFMuonMon :: initialize(){
 }
 
 
-StatusCode EFMuonMon :: fillVariablesPerChain(const EventContext &ctx, const std::string &chain) const {
+StatusCode EFMuonMon::fillVariablesPerChain(const EventContext &ctx, const std::string &chain) const {
 
   ATH_MSG_DEBUG ("Filling histograms for " << name() << "...");
 
@@ -114,7 +117,7 @@ StatusCode EFMuonMon :: fillVariablesPerChain(const EventContext &ctx, const std
 }
 
 
-StatusCode EFMuonMon :: fillVariablesPerOfflineMuonPerChain(const EventContext &ctx, const xAOD::Muon* mu, const std::string &chain) const {
+StatusCode EFMuonMon::fillVariablesPerOfflineMuonPerChain(const EventContext &ctx, const xAOD::Muon* mu, const std::string &chain) const {
 
   ATH_MSG_DEBUG ("Filling histograms for " << name() << "...");
 
@@ -155,7 +158,9 @@ StatusCode EFMuonMon :: fillVariablesPerOfflineMuonPerChain(const EventContext &
     // get the EFSA muon matched to offlineSA muon
     const TrigCompositeUtils::LinkInfo<xAOD::MuonContainer> EFSAMuonLinkInfo = m_matchTool->matchEFSALinkInfo(mu, chain); 
     if( EFSAMuonLinkInfo.isValid() ){
-      const xAOD::TrackParticle* EFSATrack = m_matchTool->SearchEFTrack(ctx, EFSAMuonLinkInfo, m_MStrackContainerKey);
+      const auto& trkReadHandleKey {chain.contains("newFast") ? m_EFSANewFastTrackKey 
+        : (chain.contains("mlbkt") ? m_EFSAMlbktTrackKey : m_EFSATrackKey)};
+      const xAOD::TrackParticle* EFSATrack = m_matchTool->SearchEFTrack(ctx, EFSAMuonLinkInfo, trkReadHandleKey);
       if ( EFSATrack ){
         matchedEFSA = true;
   
@@ -171,16 +176,25 @@ StatusCode EFMuonMon :: fillVariablesPerOfflineMuonPerChain(const EventContext &
   
         // correlation histograms offlineSA (matched to EFSA) vs. offlineSA (matched to L2SA)
         // get L2SA feature
-        const TrigCompositeUtils::Decision* EFSAMuonDecision = EFSAMuonLinkInfo.source;
-        const std::vector<TrigCompositeUtils::LinkInfo<xAOD::L2StandAloneMuonContainer>> L2SALinkInfo = TrigCompositeUtils::findLinks<xAOD::L2StandAloneMuonContainer>(ctx, EFSAMuonDecision, "feature");
-        if(L2SALinkInfo.size() > 1) {
-           ATH_MSG_DEBUG("More than one L2SA candidate associated to the EFSA");
-        } 
-        ATH_CHECK( L2SALinkInfo.at(0).isValid());
-        const ElementLink<xAOD::L2StandAloneMuonContainer> L2SAEL = L2SALinkInfo.at(0).link;
+        const xAOD::Muon *OfflineSAmatchedL2SA {nullptr};
+        if (chain.contains("newFast")) {
+            
+            const TrigCompositeUtils::LinkInfo<xAOD::MuonContainer> L2SALinkInfo = m_matchTool->searchFastRecoSALinkInfo(mu, chain);
+            ATH_CHECK( L2SALinkInfo.isValid());
 
-        // get offline muon matched to L2SA
-        const xAOD::Muon *OfflineSAmatchedL2SA = m_matchTool->matchL2SAtoOff(ctx, (*L2SAEL));
+            // get offline muon matched to L2SA
+            const ElementLink<xAOD::MuonContainer> L2SAEL = L2SALinkInfo.link;
+            OfflineSAmatchedL2SA = m_matchTool->matchFastRecoSAtoOff(ctx, (*L2SAEL));
+        } else {
+
+            const TrigCompositeUtils::LinkInfo<xAOD::L2StandAloneMuonContainer> L2SALinkInfo = m_matchTool->searchL2SALinkInfo(mu, chain);
+            ATH_CHECK( L2SALinkInfo.isValid());
+            
+            // get offline muon matched to L2SA
+            const ElementLink<xAOD::L2StandAloneMuonContainer> L2SAEL = L2SALinkInfo.link;
+            OfflineSAmatchedL2SA = m_matchTool->matchL2SAtoOff(ctx, (*L2SAEL));
+        }
+        
         if (OfflineSAmatchedL2SA){
           const xAOD::TrackParticle* OfflineSATrackmatchedL2SA = OfflineSAmatchedL2SA->trackParticle(xAOD::Muon::TrackParticleType::ExtrapolatedMuonSpectrometerTrackParticle);
           if ( OfflineSATrackmatchedL2SA ){
@@ -228,7 +242,7 @@ StatusCode EFMuonMon :: fillVariablesPerOfflineMuonPerChain(const EventContext &
     // get the closest EFCB muon
     const TrigCompositeUtils::LinkInfo<xAOD::MuonContainer> EFCBMuonLinkInfo = m_matchTool->matchEFCBLinkInfo(mu, chain);
     if( EFCBMuonLinkInfo.isValid() ){
-      const xAOD::TrackParticle* EFCBTrack = m_matchTool->SearchEFTrack(ctx, EFCBMuonLinkInfo, m_CBtrackContainerKey);
+      const xAOD::TrackParticle* EFCBTrack = m_matchTool->SearchEFTrack(ctx, EFCBMuonLinkInfo, m_EFCBTrackKey);
       if ( EFCBTrack ){
         matchedEFCB = true;
   
@@ -303,19 +317,26 @@ StatusCode EFMuonMon :: fillVariablesPerOfflineMuonPerChain(const EventContext &
 }
 
 
-StatusCode EFMuonMon :: fillVariables(const EventContext &ctx) const {
+StatusCode EFMuonMon::fillVariables(const EventContext &ctx) const {
 
   ATH_MSG_DEBUG ("Filling histograms for " << name() << "...");
 
-  ATH_CHECK( fillVariableEtaPhi<xAOD::Muon>(ctx, m_EFSAMuonContainerKey, "EFSA", &MuonMatchingTool::trigPosForMatchSATrack));
-  ATH_CHECK( fillVariableEtaPhi<xAOD::Muon>(ctx, m_EFCBMuonContainerKey, "EFCB", &MuonMatchingTool::trigPosForMatchCBTrack));
+  ATH_CHECK( fillVariableEtaPhi<xAOD::Muon>(ctx, m_EFSAMuonKey, "EFSA", &MuonMatchingTool::trigPosForMatchSATrack));
 
+  if (!m_EFSAMlbktMuonKey.empty()) {
+    ATH_CHECK( fillVariableEtaPhi<xAOD::Muon>(ctx, m_EFSAMlbktMuonKey, "EFSA_mlbkt", &MuonMatchingTool::trigPosForMatchSATrack));
+  }
+
+  if (!m_EFSANewFastMuonKey.empty()) {
+    ATH_CHECK( fillVariableEtaPhi<xAOD::Muon>(ctx, m_EFSANewFastMuonKey, "EFSA_newFast", &MuonMatchingTool::trigPosForMatchSATrack));
+  }
+  
+  ATH_CHECK( fillVariableEtaPhi<xAOD::Muon>(ctx, m_EFCBMuonKey, "EFCB", &MuonMatchingTool::trigPosForMatchCBTrack));
   return StatusCode::SUCCESS;
-
 }
 
 
-StatusCode EFMuonMon :: fillVariablesPerOfflineMuon(const EventContext &ctx, const xAOD::Muon* mu) const {
+StatusCode EFMuonMon::fillVariablesPerOfflineMuon(const EventContext &ctx, const xAOD::Muon* mu) const {
 
   ATH_CHECK( fillVariablesRatioPlots<xAOD::Muon>(ctx, mu, "EFSA", xAOD::Muon::TrackParticleType::ExtrapolatedMuonSpectrometerTrackParticle,
                                                  [this](const EventContext &ctx, const xAOD::Muon *mu){ return m_matchTool->matchEFSAReadHandle(ctx,mu); }
@@ -326,5 +347,4 @@ StatusCode EFMuonMon :: fillVariablesPerOfflineMuon(const EventContext &ctx, con
                                                  )); 
 
   return StatusCode::SUCCESS;
-
 }

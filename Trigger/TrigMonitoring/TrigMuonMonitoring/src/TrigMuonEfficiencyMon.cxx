@@ -209,19 +209,19 @@ StatusCode TrigMuonEfficiencyMon :: selectMuonsTagAndProbe(const EventContext& c
       bool bit_mass = (dimu_mass > m_mass_lowlim) && (dimu_mass < m_mass_highlim);
       bool bit_dR = lvmu1.DeltaR(lvmu2)>0.5;
       if(m_use_extrapolator){
-	const xAOD::TrackParticle *track1 = mu1->trackParticle(xAOD::Muon::TrackParticleType::Primary);
-	const Trk::TrackParameters *extTrack1 = m_matchTool->extTrackToPivot(ctx, track1);
-	const xAOD::TrackParticle *track2 = mu2->trackParticle(xAOD::Muon::TrackParticleType::Primary);
-	const Trk::TrackParameters *extTrack2 = m_matchTool->extTrackToPivot(ctx, track2);
-	if(extTrack1 && extTrack2){
-	  TLorentzVector lvext1 = lvmu1;
-	  TLorentzVector lvext2 = lvmu2;
-	  double mupt1 = mu1->pt();
-	  double mupt2 = mu2->pt();
-	  lvext1.SetPtEtaPhiM( mupt1, extTrack1->position().eta(), extTrack1->position().phi(), mu1->m());
-	  lvext2.SetPtEtaPhiM( mupt2, extTrack2->position().eta(), extTrack2->position().phi(), mu2->m());
-	  bit_dR = lvext1.DeltaR(lvext2) > (MuonMatchingTool::reqdRL1byPt(mupt1)+MuonMatchingTool::reqdRL1byPt(mupt2));
-	}
+        const xAOD::TrackParticle *track1 = mu1->trackParticle(xAOD::Muon::TrackParticleType::Primary);
+        std::unique_ptr<Trk::TrackParameters> extTrack1 = m_matchTool->extTrackToPivot(ctx, track1);
+        const xAOD::TrackParticle *track2 = mu2->trackParticle(xAOD::Muon::TrackParticleType::Primary);
+        std::unique_ptr<Trk::TrackParameters> extTrack2 = m_matchTool->extTrackToPivot(ctx, track2);
+        if(extTrack1 && extTrack2){
+            TLorentzVector lvext1 = lvmu1;
+            TLorentzVector lvext2 = lvmu2;
+            double mupt1 = mu1->pt();
+            double mupt2 = mu2->pt();
+            lvext1.SetPtEtaPhiM( mupt1, extTrack1->position().eta(), extTrack1->position().phi(), mu1->m());
+            lvext2.SetPtEtaPhiM( mupt2, extTrack2->position().eta(), extTrack2->position().phi(), mu2->m());
+            bit_dR = lvext1.DeltaR(lvext2) > (MuonMatchingTool::reqdRL1byPt(mupt1)+MuonMatchingTool::reqdRL1byPt(mupt2));
+        }
       }
 
       // For ttbar events
@@ -247,9 +247,8 @@ StatusCode TrigMuonEfficiencyMon :: selectMuonsTagAndProbe(const EventContext& c
     if(pass1){
       if(std::find(probes.begin(), probes.end(), dimu.second)==probes.end()){
 	      if(m_BarrelOnly){
-          if( std::abs( dimu.second->eta() ) > 0. && std::abs( dimu.second->eta() ) < 1.05 ) probes.push_back(dimu.second);
-        }
-        else probes.push_back(dimu.second);
+            if( std::abs( dimu.second->eta() ) > 0. && std::abs( dimu.second->eta() ) < 1.05 ) probes.push_back(dimu.second);
+          } else probes.push_back(dimu.second);
       }
     }
     if(pass2){

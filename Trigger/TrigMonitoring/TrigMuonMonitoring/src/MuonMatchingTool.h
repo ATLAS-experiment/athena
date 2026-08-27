@@ -15,7 +15,6 @@
 #include "TrkParameters/TrackParameters.h"
 #include "TrkExInterfaces/IExtrapolator.h"
 #include "FourMomUtils/xAODP4Helpers.h"
-#include "GaudiKernel/SystemOfUnits.h"
 #include <string>
 #include <memory>
 #include <tuple>
@@ -148,6 +147,14 @@ class MuonMatchingTool : public AthAlgTool {
    */
   const xAOD::L2CombinedMuon* matchL2CB(const xAOD::Muon *mu, std::string trigger, bool &pass) const;
 
+  /**
+   * @brief Function that searches for an L2 combined muon (L2muComb) candidate and judges if it is matched to a given truth muon.
+   * @param mu Truth muon around which L2muComb candidates are searched.
+   * @param trigger Considered chain name, e.g. HLT_mu26_ivarmedium_L1MU20, etc.
+   * @param pass True if the matched candidate passed the hypothesis step.
+   * @return Pointer to the matched candidate. This is @c nullptr when there is no candidate found.
+   * Important: a valid pointer doesn't mean that it passed the hypothesis, users should check @c pass for the decision.
+   */
   const xAOD::L2CombinedMuon* matchL2CB(const xAOD::TruthParticle *mu, std::string trigger, bool &pass) const;
 
   /**
@@ -377,6 +384,7 @@ class MuonMatchingTool : public AthAlgTool {
 
 
   bool isMatchedL2SA(const xAOD::L2StandAloneMuon*, const xAOD::Muon*) const;
+  bool isMatchedFastRecoSA(const xAOD::Muon*, const xAOD::Muon*) const;
   bool isMatchedL2CB(const xAOD::L2CombinedMuon*, const xAOD::Muon*) const;
   bool isMatchedL2InsideOut(const xAOD::L2CombinedMuon*, const xAOD::Muon*) const;
 
@@ -389,7 +397,7 @@ class MuonMatchingTool : public AthAlgTool {
    * @see @c reqdRL1byPt
    * @todo Return std::unique_ptr when this is available.
    */
-  const Trk::TrackParameters* extTrackToPivot(const EventContext& ctx, const xAOD::TrackParticle *track) const;
+  std::unique_ptr<Trk::TrackParameters> extTrackToPivot(const EventContext& ctx, const xAOD::TrackParticle *track) const;
 
   /**
    * @brief Function compute dR used for matching offline muons and level 1 RoIs at the pivot plane.
@@ -402,7 +410,7 @@ class MuonMatchingTool : public AthAlgTool {
 
   static std::tuple<bool,double,double> trigPosForMatchSATrack(const xAOD::Muon *mu);
   static std::tuple<bool,double,double> trigPosForMatchCBTrack(const xAOD::Muon *mu);
-  static std::tuple<bool,double,double> PosForMatchSATrack(const xAOD::Muon *mu);
+  static std::tuple<bool,double,double> PosForMatchSATrack(const xAOD::Muon *mu, const bool isPhaseII = false);
   static std::tuple<bool,double,double> PosForMatchCBTrack(const xAOD::Muon *mu);
 
   
@@ -483,33 +491,35 @@ class MuonMatchingTool : public AthAlgTool {
    * @todo Consider improving the argument list.
    */
   template<class T> const xAOD::Muon* matchOff(const EventContext& ctx, const T* trig, float reqdR,
-                                               std::tuple<bool,double,double> (*offlinePosForMatchFunc)(const xAOD::Muon*),
-                                               std::tuple<bool,double,double> (*trigPosForMatchFunc)(const T*) = &MuonMatchingTool::trigPosForMatch<T>) const;
+                                               std::function<std::tuple<bool,double,double>(const xAOD::Muon*)> offlinePosForMatchFunc,
+                                               std::function<std::tuple<bool,double,double>(const T*)> trigPosForMatchFunc = &MuonMatchingTool::trigPosForMatch<T>) const;
 
 
-  const Amg::Vector3D offlineMuonAtPivot(const EventContext& ctx, const xAOD::Muon *mu) const;
-  static double FermiFunction(double x, double x0, double w) ;
-  const Trk::TrackParameters* extTrackToTGC(const EventContext& ctx, const xAOD::TrackParticle *track) const;
-  const Trk::TrackParameters* extTrackToRPC(const EventContext& ctx, const xAOD::TrackParticle *track) const;
+  Amg::Vector3D offlineMuonAtPivot(const EventContext& ctx, const xAOD::Muon& mu) const;
+  std::unique_ptr<Trk::TrackParameters> extTrackToTGC(const EventContext& ctx, const xAOD::TrackParticle& track) const;
+  std::unique_ptr<Trk::TrackParameters> extTrackToRPC(const EventContext& ctx, const xAOD::TrackParticle& track) const;
 
   // static methods
   // Template methods that perform different matching schemes for T=xAOD::L2StandAloneMuon, xAOD::L2CombinedMuon and xAOD::Muon (EF).
   template<class T> static inline std::tuple<bool,double,double> trigPosForMatch(const T *trig);
 
-  SG::ReadHandleKey<xAOD::MuonRoIContainer> m_MuonRoIContainerKey {this, "MuonRoIContainerName", "LVL1MuonRoIs", "Level 1 muon container"};
-  SG::ReadHandleKey<xAOD::MuonContainer> m_MuonContainerKey {this, "MuonContainerName", "Muons", "Offline muon container"};
-  SG::ReadHandleKey<xAOD::L2StandAloneMuonContainer> m_L2MuonSAContainerKey {this, "L2StandAloneMuonContainerName", "HLT_MuonL2SAInfo", "L2MuonSA container"};
-  SG::ReadHandleKey<xAOD::MuonContainer> m_EFFastRecoContainerKey {this, "EFFastRecoSAContainerName", "HLT_FastMuonsInfo", "EFFastRecoSA container (Phase2)"};
-  SG::ReadHandleKey<xAOD::L2CombinedMuonContainer> m_L2muCombContainerKey {this, "L2CombinedMuonContainerName", "HLT_MuonL2CBInfo", "L2muComb container"};
-  SG::ReadHandleKey<xAOD::MuonContainer> m_EFSAMuonContainerKey {this, "EFSAMuonContainerName", "HLT_Muons_RoI", "EFSAMuon container"};
-  SG::ReadHandleKey<xAOD::MuonContainer> m_EFCBMuonContainerKey {this, "EFCBMuonContainerName", "HLT_MuonsCB_RoI", "EFCBMuon container"};
-  SG::ReadHandleKey<xAOD::MuonContainer> m_EFSAFSMuonContainerKey {this, "EFSAFSMuonContainerName", "HLT_Muons_FS", "EFSAFSMuon container"};
-  SG::ReadHandleKey<xAOD::MuonContainer> m_EFCBFSMuonContainerKey {this, "EFCBFSMuonContainerName", "HLT_MuonsCB_FS", "EFCBFSMuon container"};
-  SG::ReadHandleKey<xAOD::TrackParticleContainer> m_MStrackContainerKey {this, "ExtrapolatedMStrackConntainner", "HLT_MSExtrapolatedMuons_RoITrackParticles", "ExtrapolatedMuons track container"};
-  SG::ReadHandleKey<xAOD::TrackParticleContainer> m_CBtrackContainerKey {this, "CBtrackContainerName", "HLT_CBCombinedMuon_RoITrackParticles", "CombinedMuon track container"};
+  SG::ReadHandleKey<xAOD::MuonRoIContainer> m_MuonRoIKey {this, "MuonRoIContainerName", "LVL1MuonRoIs", "Level 1 muon container"};
+  SG::ReadHandleKey<xAOD::MuonContainer> m_MuonKey {this, "MuonContainerName", "Muons", "Offline muon container"};
+  SG::ReadHandleKey<xAOD::L2StandAloneMuonContainer> m_L2SAMuonKey {this, "L2StandAloneMuonContainerName", "HLT_FastMuons_RoI", "L2MuonSA container"};
+  SG::ReadHandleKey<xAOD::MuonContainer> m_FastRecoSAMuonKey {this, "FastRecoSAContainerName", "HLT_FastMuonsInfo", "EFFastRecoSA container (Phase2)"};
+  SG::ReadHandleKey<xAOD::L2CombinedMuonContainer> m_L2CBMuonKey {this, "L2CombinedMuonContainerName", "HLT_MuonL2CBInfo", "L2muComb container"};
+  SG::ReadHandleKey<xAOD::MuonContainer> m_EFSAMuonKey {this, "EFSAMuonContainerName", "HLT_Muons_RoI", "EFSAMuon container"};
+  SG::ReadHandleKey<xAOD::MuonContainer> m_EFSAMlbktMuonKey {this, "EFSAMlbktMuonContainerName", "HLT_Muons_RoI", "EFSAMuon container"};
+  SG::ReadHandleKey<xAOD::MuonContainer> m_EFSANewFastMuonKey {this, "EFSANewFastMuonContainerName", "HLT_Muons_RoI", "EFSAMuon container"};
+  SG::ReadHandleKey<xAOD::MuonContainer> m_EFCBMuonKey {this, "EFCBMuonContainerName", "HLT_MuonsCB_RoI", "EFCBMuon container"};
+  SG::ReadHandleKey<xAOD::MuonContainer> m_EFSAFSMuonKey {this, "EFSAFSMuonContainerName", "HLT_Muons_FS", "EFSAFSMuon container"};
+  SG::ReadHandleKey<xAOD::MuonContainer> m_EFSAFSMlbktMuonKey {this, "EFSAFSMlbktMuonContainerName", "HLT_Muons_FS", "EFSAFSMuon container"};
+  SG::ReadHandleKey<xAOD::MuonContainer> m_EFSAFSNewFastMuonKey {this, "EFSAFSNewFastMuonContainerName", "HLT_Muons_FS", "EFSAFSMuon container"};
+  SG::ReadHandleKey<xAOD::MuonContainer> m_EFCBFSMuonKey {this, "EFCBFSMuonContainerName", "HLT_MuonsCB_FS", "EFCBFSMuon container"};
 
   // properties
   Gaudi::Property<bool> m_use_extrapolator {this, "UseExtrapolator", false, "Flag to enable the extrapolator for matching offline and trigger muons"};
+  BooleanProperty m_isPhII {this, "isPhaseII", false, "Whether the muons have been processed with Phase II software"};
 
   // tools
   ToolHandle<LVL1::ITrigThresholdDecisionTool> m_thresholdTool{

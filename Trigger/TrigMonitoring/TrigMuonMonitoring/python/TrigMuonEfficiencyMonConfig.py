@@ -46,7 +46,7 @@ def get_singlemu_chain_closest_to(chainList, ref_hlt_pt, ref_hlt_type, ref_l1_pt
 ##
 # @brief A special configuration for ttbar samples, where the cut on m_mumu is loosened to improve the acceptance.
 # This is useless for data samples because the ttbar process has very small contribution.
-def TrigMuonEfficiencyMonTTbarConfig(helper):
+def TrigMuonEfficiencyMonTTbarConfig(helper, isPhaseII=False, **kwargs):
     
     from AthenaConfiguration.ComponentFactory import CompFactory
 
@@ -72,10 +72,18 @@ def TrigMuonEfficiencyMonTTbarConfig(helper):
 
     from MuonSelectorTools.MuonSelectorToolsConfig import MuonLoosenedNonCalibratedSelectionToolCfg
     from .MuonMatchingToolConfig import MuonMatchingToolConfig
+
+    # Set the offline muon container
+    kwargs.setdefault("MuonContainerName", "Muons")
+
     for chain in MonitoredChains:
         monAlg = helper.addAlgorithm(CompFactory.TrigMuonEfficiencyMon,'TrigMuEff_ttbar_'+chain,
-                                     MuonSelectionTool = helper.result().popToolsAndMerge(MuonLoosenedNonCalibratedSelectionToolCfg(helper.flags, MuQuality=1)),
-                                     MuonMatchingTool = helper.result().popToolsAndMerge(MuonMatchingToolConfig(helper.flags)))
+                                     MuonSelectionTool = helper.result().popToolsAndMerge(MuonLoosenedNonCalibratedSelectionToolCfg(helper.flags, 
+                                                                                                                                    MuQuality=1)),
+                                     MuonMatchingTool = helper.result().popToolsAndMerge(MuonMatchingToolConfig(helper.flags, 
+                                                                                                                isPhaseII=isPhaseII, 
+                                                                                                                MuonContainerName=kwargs["MuonContainerName"])),
+                                     **kwargs)
 
         monAlg.EventTrigger = tagandprobe_chain
         monAlg.TagTrigger = tagandprobe_chain
@@ -95,7 +103,7 @@ def TrigMuonEfficiencyMonTTbarConfig(helper):
     return
 
 
-def TrigMuonEfficiencyMonZTPConfig(helper):
+def TrigMuonEfficiencyMonZTPConfig(helper, isPhaseII=False, **kwargs):
 
     from AthenaConfiguration.ComponentFactory import CompFactory
 
@@ -122,10 +130,18 @@ def TrigMuonEfficiencyMonZTPConfig(helper):
 
     from MuonSelectorTools.MuonSelectorToolsConfig import MuonLoosenedNonCalibratedSelectionToolCfg
     from .MuonMatchingToolConfig import MuonMatchingToolConfig
+
+    # Set the offline muon container
+    kwargs.setdefault("MuonContainerName", "Muons")
+
     for chain in MonitoredChains:
         monAlg = helper.addAlgorithm(CompFactory.TrigMuonEfficiencyMon,'TrigMuEff_ZTP_'+chain,
-                                     MuonSelectionTool = helper.result().popToolsAndMerge(MuonLoosenedNonCalibratedSelectionToolCfg(helper.flags, MuQuality=1)),
-                                     MuonMatchingTool = helper.result().popToolsAndMerge(MuonMatchingToolConfig(helper.flags)))
+                                     MuonSelectionTool = helper.result().popToolsAndMerge(MuonLoosenedNonCalibratedSelectionToolCfg(helper.flags, 
+                                                                                                                                    MuQuality=1)),
+                                     MuonMatchingTool = helper.result().popToolsAndMerge(MuonMatchingToolConfig(helper.flags, 
+                                                                                                                isPhaseII=isPhaseII, 
+                                                                                                                MuonContainerName=kwargs["MuonContainerName"])),
+                                     **kwargs)
 
         monAlg.EventTrigger = tagandprobe_chain
         monAlg.TagTrigger = tagandprobe_chain
