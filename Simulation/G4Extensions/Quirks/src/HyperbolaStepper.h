@@ -14,7 +14,6 @@
 
 class G4Track;
 class G4Field;
-class G4ElectroMagneticField;
 
 class HyperbolaStepper : public G4MagIntegratorStepper {
 public:
@@ -37,7 +36,7 @@ public:
     virtual G4int IntegratorOrder() const {return 1;}
 
     G4double GetForce() const;
-    const G4ElectroMagneticField* GetField() const;
+    const G4Field* GetField() const;
     G4double GetMass() const;
     G4double GetCharge() const;
     const G4LorentzVector& GetStartMomentum() const;
@@ -52,7 +51,7 @@ private:
     static const G4int m_NUM_VARS = 9;
 
     InfracolorForce& m_string;
-    const G4ElectroMagneticField* const m_field;
+    const G4Field* const m_field;
     const G4double m_mass;
     const G4double m_charge;
     const G4LorentzVector m_startMomentum;
@@ -68,7 +67,7 @@ private:
 };
 
 inline G4double HyperbolaStepper::GetForce() const {return m_string.GetStringForce();}
-inline const G4ElectroMagneticField* HyperbolaStepper::GetField() const {return m_field;}
+inline const G4Field* HyperbolaStepper::GetField() const {return m_field;}
 inline G4double HyperbolaStepper::GetMass() const {return m_mass;}
 inline G4double HyperbolaStepper::GetCharge() const {return m_charge;}
 inline const G4LorentzVector& HyperbolaStepper::GetStartMomentum() const {return m_startMomentum;}

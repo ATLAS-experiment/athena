@@ -7,7 +7,7 @@
 #include "HyperbolaStepper.h"
 #include "InfracolorForce.h"
 
-#include "G4ElectroMagneticField.hh"
+#include "G4Field.hh"
 #include "G4Track.hh"
 #include "G4DynamicParticle.hh"
 
