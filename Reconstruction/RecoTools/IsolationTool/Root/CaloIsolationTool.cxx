@@ -845,7 +845,7 @@ for( auto isoType : isoTypes ){
 	std::map<Iso::IsolationCorrectionParameter,float> corecorr;
 	corecorr[Iso::coreEnergy] = totE;
 	corecorr[Iso::coreArea]   = coreConeDR*coreConeDR*M_PI;
-	result.coreCorrections[Iso::coreCone] = corecorr;
+	result.coreCorrections[Iso::coreCone] = std::move(corecorr);
 	ATH_MSG_DEBUG("done etcone, coreCone");
 	
 	/// apply the correction if required.
