@@ -157,8 +157,7 @@ template <class T, class U> StatusCode ChargedHadronSubtractionTool::matchToPrim
           }
         }
       }
-      else
-      { // Use Primary Vertex
+      else if (vtx) { // Use Primary Vertex
         if (vtx->vertexType() == xAOD::VxType::NoVtx)
         {                                // No reconstructed vertices
           matchedToPrimaryVertex = true; // simply match all cPFOs in this case

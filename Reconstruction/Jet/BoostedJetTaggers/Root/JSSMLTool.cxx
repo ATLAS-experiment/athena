@@ -52,8 +52,9 @@ namespace AthONNX {
 
     // then dump it to a vector
     for(int v=0; v<m_nvars; ++v){
-      std::string name = m_JSSInputMap.find(v)->second;
-      input_tensor_values[v] = JSSVars[name];
+      if (auto found = m_JSSInputMap.find(v);found != m_JSSInputMap.end())[[likely]]{
+        input_tensor_values[v] = JSSVars[found->second];
+      }
     }
 
     return input_tensor_values;

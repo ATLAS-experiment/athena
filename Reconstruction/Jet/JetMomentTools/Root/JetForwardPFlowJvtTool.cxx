@@ -291,10 +291,17 @@
                                  inclusive_jets[i].area_4vector().m());
       vertjets->push_back(jet);
       jet->setJetP4(tempjetp4);
-      jet->setJetP4("JetConstitScaleMomentum",tempjetp4);
-      jet->setJetP4("JetPileupScaleMomentum",tempjetp4);
-      jet->setAttribute("ActiveArea4vec",newArea);
-      jet->setAttribute("DetectorEta",jet->eta());
+      //
+      static const std::string p4Str1{"JetConstitScaleMomentum"};
+      static const std::string p4Str2{"JetPileupScaleMomentum"};
+      static const std::string activeAreaStr{"ActiveArea4vec"};
+      static const std::string detectorEtaStr{"DetectorEta"};
+      //
+      jet->setJetP4(p4Str1,tempjetp4);
+      jet->setJetP4(p4Str2,tempjetp4);
+      jet->setAttribute(activeAreaStr,newArea);
+      jet->setAttribute(detectorEtaStr,jet->eta());
+      //
       std::vector<fastjet::PseudoJet> constituents = inclusive_jets[i].constituents();
       float chargedpart = 0;
       for (size_t j = 0; j < constituents.size(); j++) {
