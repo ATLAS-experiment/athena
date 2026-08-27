@@ -15,7 +15,7 @@ namespace
 
   struct WaitResult
   {
-    bool success;
+    bool success{false};
     std::string failureMessage;
   };
 
