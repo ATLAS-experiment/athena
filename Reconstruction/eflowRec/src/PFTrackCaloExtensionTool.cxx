@@ -16,6 +16,7 @@ PFTrackCaloExtensionTool::PFTrackCaloExtensionTool(const std::string& type, cons
 }
 
 StatusCode PFTrackCaloExtensionTool::initialize() {
+  ATH_CHECK(m_extrapolationTool.retrieve());
   return StatusCode::SUCCESS;
 }
 
