@@ -98,6 +98,16 @@ namespace ActsTrk {
         Gaudi::Property< bool > m_processOverlapForStrip{this, "ProcessOverlapForStrip", true, "Enable production of eta/phi overlapping strip space points."};
         //@}
 
+        /// @name Beam spot override
+        /// Used for cosmics, where there is no meaningful beam spot. When enabled
+        /// the beam spot conditions data is not requested at all.
+        //@{
+        Gaudi::Property< bool >  m_overrideBeamSpot{this, "OverrideBeamSpot", false, "Use the configured vertex instead of the beam spot."};
+        Gaudi::Property< float > m_xVertex{this, "VertexX", 0.};
+        Gaudi::Property< float > m_yVertex{this, "VertexY", 0.};
+        Gaudi::Property< float > m_zVertex{this, "VertexZ", 0.};
+        //@}
+
         //caching
         using Cache_IDC = typename Cache::Handles<xAOD::SpacePoint>::IDC;
         using Cache_BackendUpdateHandleKey = typename Cache::Handles<xAOD::SpacePoint>::BackendUpdateHandleKey;

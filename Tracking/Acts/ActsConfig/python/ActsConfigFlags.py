@@ -13,6 +13,13 @@ class AmbiguitySolverStrategy(FlagEnum):
     Greedy = "GreedySolver"
     ScoreBased = "ScoreBasedAmbiguitySolver"
 
+# Which implementation to use for space point formation
+# ActsTrk  : the Athena implementation
+# ActsCore : the ACTS space point builders, and the only one supporting cosmics
+class SpacePointStrategy(FlagEnum):
+    ActsTrk = "ActsTrk"
+    ActsCore = "ActsCore"
+
 # Define the Ambiguity resolution strategy modes
 # OUTSIDE_TF : run the ambiguity resolution in a separate algorithm
 # END_OF_TF  : run the ambiguity resolution at the end of the track finding, on the track candidate container
@@ -166,6 +173,9 @@ def createActsConfigFlags():
     
     # SpacePoint
     actscf.addFlag('Acts.SpacePoints.useBeamSpotConstraintStrips', True)
+    # Strip and pixel are chosen separately so that either can be validated on its own
+    actscf.addFlag('Acts.SpacePointStrategy', SpacePointStrategy.ActsTrk, type=SpacePointStrategy)
+    actscf.addFlag('Acts.PixelSpacePointStrategy', SpacePointStrategy.ActsTrk, type=SpacePointStrategy)
 
     # Seeding
     actscf.addFlag("Acts.SeedingStrategy", SeedingStrategy.GridTriplet, type=SeedingStrategy)  # Define Seeding Strategy
