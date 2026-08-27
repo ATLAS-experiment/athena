@@ -27,6 +27,8 @@ In case you would like to run with a modified version of the monitoring, you wou
 Similarly, to execute the tau monitoring on the GRID, after setting up Athena and `panda` (with `lsetup panda && voms-proxy-init -voms atlas`), use
 
 ```
+export ATHENA_CORE_NUMBER=4
+
 pathena --trf 'Run3DQTestingDriver.py --threads=$ATHENA_CORE_NUMBER --dqOffByDefault --inputFiles=%IN Output.HISTFileName=%OUT.HIST.root DQ.Steering.doHLTMon=True DQ.Steering.HLT.doBjet=False DQ.Steering.HLT.doBphys=False DQ.Steering.HLT.doCalo=False DQ.Steering.HLT.doEgamma=False DQ.Steering.HLT.doJet=False DQ.Steering.HLT.doMET=False DQ.Steering.HLT.doMinBias=False DQ.Steering.HLT.doMuon=False DQ.Steering.HLT.doInDet=False' --inDS=user.myname.myxAODDataset --outDS=user.myname.myHIST
 
 ```
