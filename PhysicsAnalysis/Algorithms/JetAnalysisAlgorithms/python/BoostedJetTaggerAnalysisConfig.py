@@ -68,7 +68,7 @@ class BoostedJetTaggerAnalysisConfig (ConfigBlock) :
         # output info
         decoration_name = self.Tagger
         if self.Generation == 'ParT':
-            decoration_name += 'Transformer'
+            decoration_name += 'Transformer_50eff'
         else:
             raise Exception('not supported tagger!')
         config.addOutputVar(self.containerName, decoration_name + '_Tagged', decoration_name + '_Tagged', auxType='char')
