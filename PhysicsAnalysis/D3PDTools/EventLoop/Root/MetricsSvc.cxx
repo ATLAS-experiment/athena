@@ -21,9 +21,7 @@ namespace EL
 }
 
 void EL::MetricsSvc :: testInvariant () const
-{
-  RCU_INVARIANT (this != 0);
-}
+{}
 
 const char *EL::MetricsSvc :: GetName() const
 {

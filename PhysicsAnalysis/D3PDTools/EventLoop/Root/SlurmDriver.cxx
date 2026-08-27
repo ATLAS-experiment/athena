@@ -32,9 +32,7 @@ namespace EL
 {
   //****************************************************
   void SlurmDriver :: testInvariant () const
-  {
-    RCU_INVARIANT (this != 0);
-  }
+  {}
   //****************************************************
   SlurmDriver :: SlurmDriver ()
   {

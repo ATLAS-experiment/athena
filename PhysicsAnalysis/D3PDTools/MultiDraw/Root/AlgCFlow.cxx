@@ -35,7 +35,6 @@ namespace MD
   void AlgCFlow ::
   testInvariant () const
   {
-    RCU_INVARIANT (this != 0);
     if (m_hist != 0)
     {
       RCU_INVARIANT (m_hist->GetDirectory() == 0);

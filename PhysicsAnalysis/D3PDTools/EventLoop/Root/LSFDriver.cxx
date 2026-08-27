@@ -28,9 +28,7 @@ namespace EL
 {
   void LSFDriver ::
   testInvariant () const
-  {
-    RCU_INVARIANT (this != 0);
-  }
+  {}
 
 
 

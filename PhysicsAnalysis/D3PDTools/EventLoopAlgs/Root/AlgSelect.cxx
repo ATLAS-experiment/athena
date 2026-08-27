@@ -29,8 +29,6 @@ namespace EL
   void AlgSelect ::
   testInvariant () const
   {
-    RCU_INVARIANT (this != 0);
-
     RCU_INVARIANT (!m_outputStream.empty());
     for (std::size_t form = 0, end = m_cuts.size(); form != end; ++ form)
       RCU_INVARIANT (!m_cuts[form].empty());

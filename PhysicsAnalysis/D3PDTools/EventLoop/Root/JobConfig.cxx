@@ -29,9 +29,7 @@ namespace EL
 {
   void JobConfig :: 
   testInvariant () const
-  {
-    RCU_INVARIANT (this != nullptr);
-  }
+  {}
 
 
 

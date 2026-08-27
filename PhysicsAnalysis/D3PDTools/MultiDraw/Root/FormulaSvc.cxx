@@ -70,8 +70,6 @@ namespace MD
   void FormulaSvc ::
   testInvariant () const
   {
-    RCU_INVARIANT (this != 0);
-
     for (std::size_t form = 0, end = m_vars.size(); form != end; ++ form)
     {
       RCU_INVARIANT (m_vars[form] != 0);

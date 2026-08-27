@@ -24,11 +24,10 @@ namespace SH
   void SampleLocal ::
   testInvariant () const
   {
-    for (FilesIter file = m_files.begin(),
-	   end = m_files.end(); file != end; ++ file)
+    for (const auto& file : m_files)
     {
-      RCU_INVARIANT (!file->empty());
-      RCU_INVARIANT ((*file)[0]==0 || file->find (":/") != std::string::npos);
+      RCU_INVARIANT (!file.empty());
+      RCU_INVARIANT (file[0]==0 || file.find (":/") != std::string::npos);
     }
   }
 
@@ -105,9 +104,8 @@ namespace SH
     RCU_READ_INVARIANT (this);
 
     std::vector<std::string> result;
-    for (FilesIter file = m_files.begin(),
-	   end = m_files.end(); file != end; ++ file)
-      result.push_back (*file);
+    for (const auto& file : m_files)
+      result.push_back (file);
     return result;
   }
 
@@ -116,12 +114,20 @@ namespace SH
   void SampleLocal ::
   doUpdateLocation (const std::string& from, const std::string& to)
   {
-    RCU_READ_INVARIANT (this);
-    for (FilesMIter file = m_files.begin(),
-	   end = m_files.end(); file != end; ++ file)
+    RCU_CHANGE_INVARIANT (this);
+    for (auto& file : m_files)
     {
-      if (strncmp (file->c_str(), from.c_str(), from.size()) == 0)
-	*file = to + "/" + file->substr (from.size());
+      // rationale: only replace the prefix on a path boundary (so that
+      //   "/a/b" does not also match "/a/bc") and join without
+      //   inserting a duplicate '/'.
+      if (file.starts_with (from) &&
+	  (file.size() == from.size() || file[from.size()] == '/'))
+      {
+	std::string rest = file.substr (from.size());
+	if (!rest.empty() && rest.front() == '/')
+	  rest.erase (0, 1);
+	file = rest.empty() ? to : to + "/" + rest;
+      }
     }
   }
 }

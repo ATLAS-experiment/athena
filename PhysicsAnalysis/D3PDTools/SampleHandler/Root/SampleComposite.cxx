@@ -25,11 +25,10 @@ namespace SH
   void SampleComposite ::
   testInvariant () const
   {
-    for (SamplesIter sample = m_samples.begin(),
-	   end = m_samples.end(); sample != end; ++ sample)
+    for (const auto& sample : m_samples)
     {
-      RCU_INVARIANT (*sample != nullptr);
-    };
+      RCU_INVARIANT (sample != nullptr);
+    }
   }
 
 
@@ -88,10 +87,9 @@ namespace SH
     RCU_READ_INVARIANT (this);
 
     std::vector<std::string> result;
-    for (SamplesIter sample = m_samples.begin(),
-	   end = m_samples.end(); sample != end; ++ sample)
+    for (const auto& sample : m_samples)
     {
-      std::vector<std::string> subresult = (*sample)->makeFileList();
+      std::vector<std::string> subresult = sample->makeFileList();
       result.insert (result.end(), subresult.begin(), subresult.end());
     }
     return result;
@@ -112,10 +110,9 @@ namespace SH
   doUpdateLocation (const std::string& from, const std::string& to)
   {
     RCU_READ_INVARIANT (this);
-    for (auto sample = m_samples.begin(),
-	   end = m_samples.end(); sample != end; ++ sample)
+    for (const auto& sample : m_samples)
     {
-      (*sample)->updateLocation (from, to);
+      sample->updateLocation (from, to);
     }
   }
 
@@ -125,12 +122,11 @@ namespace SH
   getContains (const std::string& name) const
   {
     RCU_READ_INVARIANT (this);
-    for (SamplesIter sample = m_samples.begin(),
-	   end = m_samples.end(); sample != end; ++ sample)
+    for (const auto& sample : m_samples)
     {
-      if ((*sample)->contains (name))
+      if (sample->contains (name))
 	return true;
-    };
+    }
     return false;
   }
 
@@ -143,6 +139,6 @@ namespace SH
     for (auto& sample : m_samples)
     {
       sample->addSamples (result, sample);
-    };
+    }
   }
 }

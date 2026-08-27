@@ -105,7 +105,6 @@ namespace EL
     void OutputStreamData ::
     testInvariant () const
     {
-      RCU_INVARIANT (this != nullptr);
       RCU_INVARIANT (m_writer != nullptr);
     }
 

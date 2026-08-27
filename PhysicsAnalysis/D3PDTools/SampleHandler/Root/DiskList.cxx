@@ -100,6 +100,16 @@ namespace SH
 
 
 
+  std::unique_ptr<DiskList> DiskList ::
+  openDirUnique () const
+  {
+    RCU_READ_INVARIANT (this);
+    RCU_REQUIRE2_SOFT (m_state == S_VALID, "getNext() has not been called successfully");
+    return std::unique_ptr<DiskList> (doOpenDir());
+  }
+
+
+
   std::string DiskList ::
   dirname () const
   {

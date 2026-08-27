@@ -24,9 +24,7 @@ namespace EL
 {
   void ExecDriver ::
   testInvariant () const
-  {
-    RCU_INVARIANT (this != 0);
-  }
+  {}
 
 
 

@@ -28,9 +28,7 @@ namespace EL
 {
   void TorqueDriver ::
   testInvariant () const
-  {
-    RCU_INVARIANT (this != 0);
-  }
+  {}
 
 
 

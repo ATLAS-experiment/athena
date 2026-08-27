@@ -496,9 +496,7 @@ static SH::SampleHandler outputSH(const SH::SampleHandler& in,
 }
 
 void EL::PrunDriver::testInvariant() const 
-{
-  RCU_INVARIANT(this != 0);
-}
+{}
 
 EL::PrunDriver::PrunDriver() 
 {

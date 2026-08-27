@@ -33,9 +33,7 @@ namespace EL
 {
   void KubernetesDriver ::
   testInvariant () const
-  {
-    RCU_INVARIANT (this != 0);
-  }
+  {}
 
 
 

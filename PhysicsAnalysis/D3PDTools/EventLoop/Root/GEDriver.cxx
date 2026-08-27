@@ -28,9 +28,7 @@ namespace EL
 {
   void GEDriver ::
   testInvariant () const
-  {
-    RCU_INVARIANT (this != 0);
-  }
+  {}
 
 
 

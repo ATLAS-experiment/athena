@@ -29,7 +29,6 @@ namespace EL
   void OutputStream ::
   testInvariant () const
   {
-    RCU_INVARIANT (this);
     RCU_INVARIANT (!m_label.empty());
   }
 

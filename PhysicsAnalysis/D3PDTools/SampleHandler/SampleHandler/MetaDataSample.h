@@ -73,7 +73,7 @@ namespace SH
     ///   out of memory II
     MetaDataSample (const std::string& val_name = "");
 
-    ClassDef (MetaDataSample, 1);
+    ClassDefOverride (MetaDataSample, 1);
   };
 }
 

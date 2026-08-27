@@ -30,9 +30,7 @@ namespace EL
 {
   void Algorithm ::
   testInvariant () const
-  {
-    RCU_INVARIANT (this != 0);
-  }
+  {}
 
 
 
