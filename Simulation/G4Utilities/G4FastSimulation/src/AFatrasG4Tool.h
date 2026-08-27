@@ -2,8 +2,8 @@
   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef G4FASTSIMULATION_FATRASG4TOOL_H
-#define G4FASTSIMULATION_FATRASG4TOOL_H
+#ifndef G4FASTSIMULATION_AFATRASG4TOOL_H
+#define G4FASTSIMULATION_AFATRASG4TOOL_H
 
 #include "HitManagement/HitCollectionMap.h"
 
@@ -19,11 +19,11 @@
 #include "InDetSimEvent/SiHit.h"
 
 class G4VFastSimulationModel;
-class FatrasG4Tool: public FastSimulationBase
+class AFatrasG4Tool: public FastSimulationBase
 {
 public:
 
-  FatrasG4Tool(const std::string& type, const std::string& name, const IInterface *parent);   //!< Default constructor
+  AFatrasG4Tool(const std::string& type, const std::string& name, const IInterface *parent);   //!< Default constructor
 
 protected:
   /** Method to make the actual fast simulation model itself, which
@@ -65,4 +65,4 @@ protected:
   };  
 };
 
-#endif //G4FASTSIMULATION_FATRASG4TOOL_H
+#endif //G4FASTSIMULATION_AFATRASG4TOOL_H

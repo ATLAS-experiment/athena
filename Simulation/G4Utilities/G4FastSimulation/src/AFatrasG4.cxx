@@ -3,15 +3,13 @@
 */
 
 // Header include
-#include "FatrasG4.h"
+#include "AFatrasG4.h"
 
 
 // Geant4 particle includes
 #include "G4Gamma.hh"
 #include "G4Electron.hh"
 #include "G4Positron.hh"
-#include "G4PionPlus.hh"
-#include "G4PionMinus.hh"
 
 //Geant4
 #include "G4ParticleTable.hh"
@@ -23,14 +21,14 @@
 // G4 sensitive detector includes
 #include "G4SDManager.hh"
 
-//#define FATRASG4_DEBUG
+//#define AFATRASG4_DEBUG
 
 
-FatrasG4::FatrasG4(const std::string& name,
+AFatrasG4::AFatrasG4(const std::string& name,
                          G4Region* region,
                          const PublicToolHandle<IActsFatrasG4Tool>& ActsFatrasG4Tool,
                          bool doG4Transport,
-                         FatrasG4Tool * /*FatrasG4Tool*/)
+                         AFatrasG4Tool * /*AFatrasG4Tool*/)
 
 : G4VFastSimulationModel(name, region),
   m_ActsFatrasG4Tool(ActsFatrasG4Tool),
@@ -38,7 +36,7 @@ FatrasG4::FatrasG4(const std::string& name,
 {
 }
 
-G4bool FatrasG4::IsApplicable(const G4ParticleDefinition& particleType)
+G4bool AFatrasG4::IsApplicable(const G4ParticleDefinition& particleType)
 {
   // Check whether we can simulate the particle with FatrasG4
   bool isPhoton   = &particleType == G4Gamma::GammaDefinition();
@@ -49,22 +47,22 @@ G4bool FatrasG4::IsApplicable(const G4ParticleDefinition& particleType)
   // FatrasG4 is applicable if it is photon, electron, positron or any hadron
   bool isApplicable = isPhoton || isElectron || isPositron || isHadron;
 
-  #ifdef FATRASG4_DEBUG
+  #ifdef AFATRASG4_DEBUG
     const std::string pName = particleType.GetParticleName();
-    G4cout<< "[FatrasG4::IsApplicable] Got " << pName <<G4endl;
-    if(isApplicable) G4cout<<"[FatrasG4::IsApplicable] APPLICABLE"<<G4endl;
-    else G4cout<<"[FatrasG4::IsApplicable] NOT APPLICABLE"<<G4endl;
+    G4cout<< "[AFatrasG4::IsApplicable] Got " << pName <<G4endl;
+    if(isApplicable) G4cout<<"[AFatrasG4::IsApplicable] APPLICABLE"<<G4endl;
+    else G4cout<<"[AFatrasG4::IsApplicable] NOT APPLICABLE"<<G4endl;
   #endif
 
 
   return isApplicable;
 }
 
-G4bool FatrasG4::ModelTrigger(const G4FastTrack& fastTrack)
+G4bool AFatrasG4::ModelTrigger(const G4FastTrack& fastTrack)
 {
 
-  #ifdef FATRASG4_DEBUG
-    G4cout<<"[FatrasG4::ModelTrigger] Got particle with "                                                         <<"\n"
+  #ifdef AFATRASG4_DEBUG
+    G4cout<<"[AFatrasG4::ModelTrigger] Got particle with "                                                         <<"\n"
                                     <<" pdg=" <<fastTrack.GetPrimaryTrack() -> GetDefinition()->GetPDGEncoding()  <<"\n"
                                     <<" Ekin="<<fastTrack.GetPrimaryTrack() -> GetKineticEnergy()                 <<"\n"
                                     <<" p="   <<fastTrack.GetPrimaryTrack() -> GetMomentum().mag()                <<"\n"
@@ -86,8 +84,8 @@ G4bool FatrasG4::ModelTrigger(const G4FastTrack& fastTrack)
 
   // Pass all photons, electrons and positrons to FatrasG4
   if (isPhoton || isElectron || isPositron){
-    #ifdef FATRASG4_DEBUG 
-      G4cout<<"[FatrasG4::ModelTrigger] Photons, electrons or positron. Model triggered."<<G4endl;
+    #ifdef AFATRASG4_DEBUG 
+      G4cout<<"[AFatrasG4::ModelTrigger] Photons, electrons or positron. Model triggered."<<G4endl;
     #endif
     return true;
   }
@@ -95,10 +93,10 @@ G4bool FatrasG4::ModelTrigger(const G4FastTrack& fastTrack)
 
 }
 
-void FatrasG4::DoIt(const G4FastTrack& fastTrack, G4FastStep& fastStep)
+void AFatrasG4::DoIt(const G4FastTrack& fastTrack, G4FastStep& fastStep)
 {
-  #ifdef FATRASG4_DEBUG 
-    G4cout<<"FatrasG4::DoIt called"<<G4endl;
+  #ifdef AFATRASG4_DEBUG 
+    G4cout<<"AFatrasG4::DoIt called"<<G4endl;
   #endif
 
   if (!m_ActsFatrasG4Tool.isValid()) {
