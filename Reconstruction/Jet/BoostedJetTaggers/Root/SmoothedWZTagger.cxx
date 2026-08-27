@@ -197,6 +197,9 @@ StatusCode SmoothedWZTagger::initialize() {
     renounce(m_decValidEventContentKey);
     renounce(m_decPassNtrkKey);
     renounce(m_decCutNtrkKey);
+    renounce(m_decValidKinRangeKey);
+    renounce(m_decCutScoreKey);
+    renounce(m_decPassScoreKey);
   }
 #endif
   
