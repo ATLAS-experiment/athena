@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <memory>
@@ -20,13 +20,6 @@
 #include "STGC_ROD_Decoder.h"
 
 using OFFLINE_FRAGMENTS_NAMESPACE::ROBFragment;
-
-//==============================================================================
-Muon::STGC_ROD_Decoder::STGC_ROD_Decoder(const std::string& t, const std::string& n, const IInterface*  p) 
-: AthAlgTool(t, n, p)
-{
-  declareInterface<ISTGC_ROD_Decoder>(this);
-}
 
 
 //==============================================================================
@@ -49,7 +42,7 @@ StatusCode Muon::STGC_ROD_Decoder::initialize()
 StatusCode Muon::STGC_ROD_Decoder::fillCollection(const EventContext& ctx,
                                                   const ROBFragment& robFrag, 
                                                   const std::vector<IdentifierHash>& rdoIdhVect, 
-                                                  std::unordered_map<IdentifierHash, std::unique_ptr<STGC_RawDataCollection>>& rdo_map) const
+                                                  std::vector<std::unique_ptr<STGC_RawDataCollection>>& rdo_map) const
 {
 
   // check fragment for errors
@@ -61,33 +54,13 @@ StatusCode Muon::STGC_ROD_Decoder::fillCollection(const EventContext& ctx,
   }
   
   const NswDcsDbData* dcsData{nullptr};
-  if(!m_dscKey.empty()) {
-     SG::ReadCondHandle<NswDcsDbData> readCondHandle{m_dscKey, ctx};
-     if(!readCondHandle.isValid()){
-        ATH_MSG_ERROR("Cannot find the NSW DcsCondDataObj "<<m_dscKey.fullKey());
-        return StatusCode::FAILURE;
-     }
-     dcsData = readCondHandle.cptr();
-  }
+  ATH_CHECK(SG::get(dcsData, m_dscKey, ctx));
 
   const Nsw_CablingMap* sTgcCablingMap{nullptr};
-  if (!m_cablingKey.empty()) {
-      SG::ReadCondHandle<Nsw_CablingMap> readCondHandle{m_cablingKey, ctx};
-      if(!readCondHandle.isValid()){
-        ATH_MSG_ERROR("Cannot find Micromegas cabling map!");
-        return StatusCode::FAILURE;
-      }
-      sTgcCablingMap = readCondHandle.cptr();
-  }
+  ATH_CHECK(SG::get(sTgcCablingMap, m_cablingKey, ctx));
 
-  SG::ReadCondHandle<MuonGM::MuonDetectorManager> muonGeoMgrHandle{m_DetectorManagerKey, ctx};
-
-  if (!muonGeoMgrHandle.isValid()) {
-      ATH_MSG_FATAL("Failed to retrieve the detector manager from the conditions store");
-      return StatusCode::FAILURE;
-  }
-
-  const MuonGM::MuonDetectorManager* muonGeoMgr = *muonGeoMgrHandle;
+  const MuonGM::MuonDetectorManager* muonGeoMgr{};
+  ATH_CHECK(SG::get(muonGeoMgr, m_DetectorManagerKey, ctx));
 
   // if the vector of hashes is not empty, then we are in seeded mode
   bool seeded_mode(!rdoIdhVect.empty());
@@ -96,15 +69,18 @@ StatusCode Muon::STGC_ROD_Decoder::fillCollection(const EventContext& ctx,
   Muon::nsw::NSWCommonDecoder common_decoder(robFrag);  
   const std::vector<Muon::nsw::NSWElink *>&   elinks = common_decoder.get_elinks();  
   ATH_MSG_DEBUG("Retrieved "<<elinks.size()<<" elinks");
-  if (elinks.empty()) return StatusCode::SUCCESS;
-
+  if (elinks.empty()) {
+    return StatusCode::SUCCESS;
+  }
+  rdo_map.resize(m_stgcIdHelper->module_hash_max());
   // loop on elinks. for STGCs a "module" is a quadruplet
   // therefore, we need an RDO (collection) per quadruplet!
   for (auto* elink : elinks) {
 
     // skip null packets
-    if (elink->isNull()) continue;
-    
+    if (elink->isNull()) {
+      continue;
+    }
     // get the offline ID hash (module ctx) to be passed to the RDO 
     // also specifies the index of the RDO in the container.
     const char*  station_name = elink->elinkId()->is_large_station() ? "STL" : "STS";
@@ -114,11 +90,13 @@ StatusCode Muon::STGC_ROD_Decoder::fillCollection(const EventContext& ctx,
     unsigned int gas_gap      = (unsigned int)elink->elinkId()->gas_gap();
     Identifier   module_ID    = m_stgcIdHelper->elementID(station_name, station_eta, station_phi);
 
-    IdentifierHash module_hashID;
+    IdentifierHash module_hashID{};
     m_stgcIdHelper->get_module_hash(module_ID, module_hashID);
     const MuonGM::sTgcReadoutElement* roElement = muonGeoMgr->getsTgcReadoutElement(module_ID);
     // if we are in ROI-seeded mode, check if this hashID is requested
-    if (seeded_mode && std::find(rdoIdhVect.begin(), rdoIdhVect.end(), module_hashID) == rdoIdhVect.end()) continue;
+    if (seeded_mode && std::ranges::find(rdoIdhVect, module_hashID) == rdoIdhVect.end()) {
+      continue;
+    }
     std::unique_ptr<STGC_RawDataCollection>& rdo = rdo_map[module_hashID];
     if (!rdo) rdo = std::make_unique<STGC_RawDataCollection>(module_hashID);
   
@@ -147,7 +125,7 @@ StatusCode Muon::STGC_ROD_Decoder::fillCollection(const EventContext& ctx,
 
        if (dcsData && !dcsData->isGood(ctx, channel_ID, isOuterQ1)) continue;
        bool timeAndChargeInCounts = true; // always true for data from detector
-       rdo->push_back(new STGC_RawData(channel_ID, channel->rel_bcid(), channel->tdo(), channel->pdo(), false,timeAndChargeInCounts)); // isDead = false (ok?)
+       rdo->push_back(std::make_unique<STGC_RawData>(channel_ID, channel->rel_bcid(), channel->tdo(), channel->pdo(), false,timeAndChargeInCounts)); // isDead = false (ok?)
     }
   }
 
