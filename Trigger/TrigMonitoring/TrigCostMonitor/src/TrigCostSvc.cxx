@@ -56,7 +56,6 @@ StatusCode TrigCostSvc::initialize() {
 
   ATH_CHECK(m_algStartInfo.initialize(m_eventSlots));
   ATH_CHECK(m_algStopTime.initialize(m_eventSlots));
-  ATH_CHECK(m_rosData.initialize(m_eventSlots));
 
   return StatusCode::SUCCESS;
 }
@@ -87,7 +86,6 @@ StatusCode TrigCostSvc::startEvent(const EventContext& context, const bool enabl
       // Empty transient thread-safe stores in preparation for recording this event's cost data
       ATH_CHECK(m_algStartInfo.clear(context, msg()));
       ATH_CHECK(m_algStopTime.clear(context, msg()));
-      ATH_CHECK(m_rosData.clear(context, msg()));
     }
 
     // Enable collection of data in this slot for monitoredEvents
@@ -170,38 +168,6 @@ StatusCode TrigCostSvc::monitor(const EventContext& context, const AlgorithmIden
 
   return StatusCode::SUCCESS;
 }
-
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-
-StatusCode TrigCostSvc::monitorROS(const EventContext& context, robmonitor::ROBDataMonitorStruct payload){
-  ATH_CHECK(checkSlot(context));
-  ATH_MSG_DEBUG( "Received ROB payload " << payload );
-
-  // Associate payload with an algorithm
-  AlgorithmIdentifier theAlg;
-  {
-    tbb::concurrent_hash_map<std::thread::id, AlgorithmIdentifier, ThreadHashCompare>::const_accessor acc;
-    bool result = m_threadToAlgMap.find(acc, std::this_thread::get_id());
-    //checking the return type 'result' is sufficient to know whether acc is bound
-    if (!result){
-      ATH_MSG_WARNING( "Cannot find algorithm on this thread (id=" << std::this_thread::get_id() << "). Request "<< payload <<" won't be monitored");
-      return StatusCode::SUCCESS;
-    }
-    //coverity[FORWARD_NULL:FALSE]
-    theAlg = acc->second;
-  }
-
-  // Record data in TrigCostDataStore
-  ATH_MSG_DEBUG( "Adding ROBs from" << payload.requestor_name << " to " << theAlg.m_hash );
-  {
-    std::shared_lock lockShared( m_slotMutex[ context.slot() ] );
-    ATH_CHECK( m_rosData.push_back(theAlg, std::move(payload), msg()) );
-  }
-
-  return StatusCode::SUCCESS;
-}
-
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
@@ -357,8 +323,6 @@ StatusCode TrigCostSvc::endEvent(const EventContext& context, SG::WriteHandle<xA
   typedef tbb::concurrent_hash_map< AlgorithmIdentifier, std::vector<robmonitor::ROBDataMonitorStruct>, AlgorithmIdentifierHashCompare>::const_iterator ROBConstIt;
   ROBConstIt beginRob;
   ROBConstIt endRob;
-  
-  ATH_CHECK(m_rosData.getIterators(context, msg(), beginRob, endRob));
   
   for (ROBConstIt it = beginRob; it != endRob; ++it) {
     size_t aiHash = it->first.m_hash;
