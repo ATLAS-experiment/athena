@@ -111,9 +111,6 @@ public:
 private:
 
   CLHEP::HepRandomEngine* getRandomEngine(const std::string& streamName, const EventContext& ctx) const;
-  template <class CondType> StatusCode retrieveCondData(const EventContext& ctx,
-                                                        SG::ReadCondHandleKey<CondType>& key,
-                                                        const CondType* & condPtr) const;
 
   /** Get next event and extract collection of hit collections */
   StatusCode getNextEvent(const EventContext& ctx);
