@@ -233,6 +233,10 @@ StatusCode G4RunAlg::execute(const EventContext& ctx)
     ATH_MSG_ERROR("Failed to prepare Geant4 event");
     return StatusCode::FAILURE;
   }
+  if (eventOutcome == EventOutcome::RunTerminated) {
+    ATH_MSG_ERROR("Geant4 terminated before completing this event");
+    return StatusCode::FAILURE;
+  }
 
   return StatusCode::SUCCESS;
 }

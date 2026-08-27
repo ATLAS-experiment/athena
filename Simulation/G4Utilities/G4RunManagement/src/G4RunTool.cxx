@@ -42,12 +42,10 @@ StatusCode G4RunTool::initialize() {
 StatusCode G4RunTool::finalize(){
   // Signal finalization to G4 threads
   m_statusSync.RequestFinalize();
-  
-  // G4 worker threads should be waiting for the next event to simulate at this state
-  // Pushing empty event, will cause one worker thread to realize we are done and call AbortRun for G4
-  for(int i = 0; i < m_nG4threads; ++i) {
-    PushEvent(nullptr);
-  }
+
+  // Wake every worker blocked waiting for an Athena event. GetEvent() returns
+  // nullptr once the queue is closed, causing SyncEventAction to abort the run.
+  m_eventQueue.Close();
 
   if (m_thread) {
     try {
@@ -90,27 +88,17 @@ StatusCode G4RunTool::WaitBeginRun() {
 
 // Check the size of the event queue
 size_t G4RunTool::Size() const {
-  std::scoped_lock lk(m_eventQueueSync.m_mutex);
-  return m_eventQueueSync.m_events.size();
+  return m_eventQueue.Size();
 }
 
 // Push an event to the queue (called from Athena threads)
 void G4RunTool::PushEvent(UPEvent ev) {
-  {
-    std::scoped_lock lk(m_eventQueueSync.m_mutex);
-    m_eventQueueSync.m_events.push(std::move(ev));
-  }
-  m_eventQueueSync.m_cv.notify_one();
+  m_eventQueue.PushEvent(std::move(ev));
 }
 
 /// Get an event from the queue (called from Geant4 threads)
 auto G4RunTool::GetEvent() -> UPEvent {
-
-  std::unique_lock lk(m_eventQueueSync.m_mutex);
-  m_eventQueueSync.m_cv.wait(lk, [this]{ return m_eventQueueSync.m_events.size() > 0; });
-  UPEvent ev = std::move(m_eventQueueSync.m_events.front());
-  m_eventQueueSync.m_events.pop();
-  return ev;
+  return m_eventQueue.GetEvent();
 }
 
 //---------------------------------------------------------------------------
@@ -119,8 +107,13 @@ auto G4RunTool::GetEvent() -> UPEvent {
 
 // G4 main thread management
 void G4RunTool::Geant4main() noexcept {
+  std::unique_ptr<G4MTRunManager> runManager;
   try {
-    Geant4mainImpl();
+    // Keep ownership outside the exception boundary. On failure, the event
+    // queue must be closed before the run manager tries to join workers that
+    // may still be blocked in GetEvent().
+    runManager = std::make_unique<G4MTRunManager>();
+    Geant4mainImpl(*runManager);
   }
   catch(const std::exception& error) {
     m_statusSync.Fail(error.what());
@@ -130,20 +123,24 @@ void G4RunTool::Geant4main() noexcept {
     m_statusSync.Fail("Unknown exception in Geant4 main thread");
     ATH_MSG_ERROR("Unknown exception in Geant4 main thread");
   }
+
+  // Teardown ordering is significant: wake blocked workers, join them while
+  // destroying the run manager, publish the terminal lifecycle state, and
+  // only then release Athena event waiters and their associated resources.
+  m_eventQueue.Close();
+  runManager.reset();
   m_statusSync.NotifyThreadExit();
+  m_eventQueue.CompleteOutstandingEvents();
 }
 
-void G4RunTool::Geant4mainImpl() {
+void G4RunTool::Geant4mainImpl(G4MTRunManager& runManager) {
 
   ATH_MSG_INFO("Geant4 main thread starts with id " << std::this_thread::get_id());
-  
-  // Construct the default run manager
-  auto runManager = std::make_unique<G4MTRunManager>();
 
-  runManager->SetNumberOfThreads(m_nG4threads);
+  runManager.SetNumberOfThreads(m_nG4threads);
   constexpr int seedFirstEventOnly = 1; // name the magic number
   // we will take care of reseeding each event, turn off Geant4 reseeding
-  runManager->SetSeedOncePerCommunication(seedFirstEventOnly);
+  runManager.SetSeedOncePerCommunication(seedFirstEventOnly);
 
   if(m_detConstruction.retrieve().isFailure()) {
     ATH_MSG_ERROR("Failed to retrieve DetectorGeometryService");
@@ -181,18 +178,18 @@ void G4RunTool::Geant4mainImpl() {
   m_userActionSvc->G4RunTool(this);
 
   // Many of the objects created here must be created in the same thread as the run manager
-  runManager->SetUserInitialization(m_detConstruction->GetDetectorConstruction().release());
+  runManager.SetUserInitialization(m_detConstruction->GetDetectorConstruction().release());
 
   // The actual physics list object must be created in the same thread as the run manager
-  runManager->SetUserInitialization(m_physicsListSvc->GetPhysicsList());
+  runManager.SetUserInitialization(m_physicsListSvc->GetPhysicsList());
 
   // Set global physics-list options as soon as the list has been created and
   // before any pre-initialization UI commands are applied.
   m_physicsListSvc->SetPhysicsListOptions();
 
-  runManager->SetUserInitialization(
+  runManager.SetUserInitialization(
     std::make_unique<G4RunToolWorkerThreadInitialization>().release());
-  runManager->SetUserInitialization(
+  runManager.SetUserInitialization(
     std::make_unique<G4AtlasActionInitialization>(m_userActionSvc.get()).release());
 
   // G4 user interface commands
@@ -227,7 +224,7 @@ void G4RunTool::Geant4mainImpl() {
   }
 
   // Initialize run
-  runManager->Initialize();
+  runManager.Initialize();
 
   // Process-specific UI commands require the processes to exist first. They
   // are forwarded to the workers with the command stack at the next BeamOn.
@@ -248,7 +245,7 @@ void G4RunTool::Geant4mainImpl() {
 
   // Repeat BeamOn as long as athena event loop is not finished
   while (!m_statusSync.StopRequested()) {
-    runManager->BeamOn(m_nG4eventsPerRun);
+    runManager.BeamOn(m_nG4eventsPerRun);
   }
 }
 

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef G4RUNMANAGEMENT_AtlasG4SyncEventUserInfo_H
@@ -35,12 +35,13 @@ class G4EventSynchronizationInterface
     enum class EventOutcome {
       Success,
       Aborted,
-      PreparationFailed
+      PreparationFailed,
+      RunTerminated
     };
 
     EventStatus Status() const;
-    /// Mark all Geant4 processing for this event as complete and wake Athena.
-    void Complete(EventOutcome outcome);
+    /// Record the first completion outcome and wake Athena.
+    void Complete(EventOutcome outcome) noexcept;
     void WaitStatusDone() {WaitStatus(EventStatus::Done);};
     EventOutcome Outcome() const;
     
@@ -98,4 +99,4 @@ class AtlasG4SyncEventUserInfo : public AtlasG4EventUserInfo
     SPSyncInterface m_sync_interface;
 };
 
-#endif// G4RUNMANAGEMENT_AtlasG4SyncEventUserInfo_H
+#endif // G4RUNMANAGEMENT_AtlasG4SyncEventUserInfo_H

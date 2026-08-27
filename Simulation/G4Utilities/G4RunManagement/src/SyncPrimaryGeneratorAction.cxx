@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "SyncPrimaryGeneratorAction.h"
@@ -61,7 +61,8 @@ void SyncPrimaryGeneratorAction::GeneratePrimaries(G4Event* anEvent)
       // SyncEventAction will abort this event at BeginOfEventAction.
     }
   }
-  // if GetEvent returns nullptr, this means that no more events are available and the run should be aborted.
+  // If GetEvent returns nullptr, the event queue has been closed and the run
+  // should be aborted.
   // Because GeneratePrimaries runs before Geant4 enters EventProc, AbortRun
   // must be called in BeginOfEventAction.
 }
