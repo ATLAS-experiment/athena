@@ -25,6 +25,7 @@ public:
     int16_t ASDstartChannel{0};
     int16_t channelRangeStart{0};
     int16_t channelRangeEnd{0};
+    int16_t offlineChannelStart{0};
     bool reversed{false};
     bool hasSecondCellAddress{false};
     };

@@ -140,7 +140,7 @@ bool TgcCablingMap::insertChannels(const JsonEntry& entry, MsgStream& log) {
          asdChannel <= entry.channelRangeEnd;
          ++asdChannel) {
         const int offset = asdChannel - entry.channelRangeStart;
-        const int offlineChannel = entry.ASDstartChannel + offset;
+        const int offlineChannel = entry.offlineChannelStart + offset;
         const int bitPosition = entry.reversed ? 16 - asdChannel
                                                : asdChannel - 1;
 
@@ -172,7 +172,6 @@ bool TgcCablingMap::insertChannels(const JsonEntry& entry, MsgStream& log) {
                 << ", offlineChannel: " << offlineChannel << endmsg;
             return false;
         }
-
         if (!convert(channelId, cablingData)) {
             log << MSG::ERROR << "Failed to convert TGC identifier from "
                 << entry << ", offlineChannel: " << offlineChannel << endmsg;

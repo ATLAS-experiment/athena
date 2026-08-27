@@ -6,12 +6,15 @@
 #define MUONCABLINGDATA_TgcCablingAlg_H
 
 #include "AthenaBaseComps/AthCondAlgorithm.h"
+#include "AthenaPoolUtilities/CondAttrListCollection.h"  // ADDED
+#include "StoreGate/ReadCondHandleKey.h"                 // ADDED
 #include "StoreGate/WriteCondHandleKey.h"
 
 #include "MuonCablingDataR4/TgcCablingMap.h"
 #include "MuonIdHelpers/IMuonIdHelperSvc.h"
 
 #include <nlohmann/json.hpp>
+#include <string>
 
 namespace MuonR4 {
 
@@ -23,13 +26,9 @@ public:
     StatusCode execute(const EventContext& ctx) const override;
 
 private:
-    StatusCode parsePayload(TgcCablingMap& cablingMap,
-                            const nlohmann::json& payload) const;
-
-    StatusCode findSLID(const nlohmann::json& stationBlock,
-                        int stationEta,
-                        int stationPhi,
-                        int16_t& slid) const;
+    StatusCode parseJsonString(TgcCablingMap& cablingMap, const std::string& jsonString, const std::string& source) const;  // ADDED
+    StatusCode parsePayload(TgcCablingMap& cablingMap, const nlohmann::json& payload) const;
+    StatusCode findSLID(const nlohmann::json& stationBlock, int stationEta, int stationPhi, int16_t& slid) const;
 
     ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{
         this,
@@ -45,11 +44,18 @@ private:
         "TGC cabling map condition object"
     };
 
+    SG::ReadCondHandleKey<CondAttrListCollection> m_readKeyMap{  // ADDED
+        this,
+        "MapFolders",
+        "",
+        "Conditions database folder containing the Run-4 TGC cabling JSON"
+    };
+
     Gaudi::Property<std::string> m_jsonFile{
         this,
         "JSONFile",
         "",
-        "Run-4 TGC cabling JSON file resolved through PathResolver"
+        "External Run-4 TGC cabling JSON file"
     };
 };
 
