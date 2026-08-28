@@ -74,6 +74,28 @@ def getT0SolveDB(runArgs):
 
 
 def configureInDetFlags(runArgs, flags):
+
+    ## Detector defaults
+    if getattr(runArgs, "atlasVersion", None) is None:
+        runArgs.atlasVersion = defaultGeometryTags.RUN3
+    
+    flags.GeoModel.AtlasVersion = runArgs.atlasVersion    
+
+    if getattr(runArgs, "inputTracksCollection", None) is None:
+        runArgs.inputTracksCollection = "CombinedInDetTracks"
+
+    if getattr(runArgs, "globalTag", None) is None:
+        isMC = getattr(flags.Input, "isMC", None) 
+
+        if isMC:
+            msg.warn("Running Align_tf on Run2/3 RDOs is not yet supported. Please use RAW input files for pre-HL-LHC geometries.")
+    
+        runArgs.globalTag = (
+            defaultConditionsTags.RUN3_MC
+            if isMC
+            else defaultConditionsTags.RUN3_DATA
+        )
+
     
     ## Turn off ID parts if wished (may cause conflicts with level setting)
     for IDpart in runArgs.excludeIDPart:
@@ -192,6 +214,20 @@ def configureInDetFlags(runArgs, flags):
     return flags
 
 def configureITkFlags(runArgs, flags):
+
+    ## Detector defaults
+    if getattr(runArgs, "atlasVersion", None) is None:
+        runArgs.atlasVersion = defaultGeometryTags.RUN4
+    
+    flags.GeoModel.AtlasVersion = runArgs.atlasVersion   
+
+    if getattr(runArgs, "inputTracksCollection", None) is None:
+        runArgs.inputTracksCollection = "CombinedITkTracks"
+
+    if getattr(runArgs, "globalTag", None) is None:
+        runArgs.globalTag = defaultConditionsTags.RUN4_MC
+
+
 
     ## Disable all non-track related flag parameter
     from InDetConfig.ConfigurationHelpers import OnlyTrackingPreInclude
@@ -416,40 +452,6 @@ def fromRunArgsInDet(runArgs, flags):
 def isITkGeometry(flags):
     return flags.GeoModel.Run > LHCPeriod.Run3
 
-def applyDetectorDefaults(runArgs, flags):
-
-    isITk = isITkGeometry(flags)
-
-    if getattr(runArgs, "atlasVersion", None) is None:
-        if isITk:
-            runArgs.atlasVersion = defaultGeometryTags.RUN4
-        else:
-            runArgs.atlasVersion = defaultGeometryTags.RUN3
-    
-    flags.GeoModel.AtlasVersion = runArgs.atlasVersion    
-
-    if getattr(runArgs, "inputTracksCollection", None) is None:
-        runArgs.inputTracksCollection = (
-            "CombinedITkTracks"
-            if isITk
-            else "CombinedInDetTracks"
-        )
-
-    if getattr(runArgs, "globalTag", None) is None:
-
-        isMC = getattr(flags.Input, "isMC", None) 
-
-        if isITk:
-            runArgs.globalTag = defaultConditionsTags.RUN4_MC
-        else:
-            if isMC:
-                msg.warn("Running Align_tf on Run2/3 RDOs is not yet supported. Please use RAW input files for pre-HL-LHC geometries.")
-            runArgs.globalTag = (
-                defaultConditionsTags.RUN3_MC
-                if isMC
-                else defaultConditionsTags.RUN3_DATA
-            )
-
 
 def fromRunArgs(runArgs):
 
@@ -463,10 +465,6 @@ def fromRunArgs(runArgs):
         flags.Input.Files = [os.path.abspath(inputFile) for inputFile in runArgs.inputRDOFile]
     else:
         flags.Input.Files = [os.path.abspath(inputFile) for inputFile in runArgs.inputRAWFile]
-
-    # Handling of default values for specific tags (flags.GeoModel.AtlasVersion, runArgs.inputTracksCollection, runArgs.globalTag, )
-    # N.B.: The function could be reorganised, putting the ITk/InDet parts in the respective configureITk/InDetFlags() functions
-    applyDetectorDefaults(runArgs, flags)
 
     # Configure flags based on the detector geometry
     if isITkGeometry(flags):
