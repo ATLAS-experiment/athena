@@ -12,6 +12,11 @@
 
 #include <memory>
 
+#ifdef ACTSGEOMETRY_HAVE_DETRAY
+#include <detray/core/detector.hpp>
+#include <detray/detectors/itk_metadata.hpp>
+#endif
+
 
 namespace Acts {
     class TrackingGeometry;
@@ -23,6 +28,12 @@ namespace ActsTrk{
 }
 
 namespace ActsTrk{
+#ifdef ACTSGEOMETRY_HAVE_DETRAY
+/// @brief Detray metadata used when converting the Acts::TrackingGeometry into
+///        a Detray geometry. detray::itk_metadata is generated for the ATLAS ITk
+using DetrayMetadata = detray::itk_metadata<detray::array<float>>;
+using DetrayDetector = detray::detector<DetrayMetadata>;
+#endif
 
 /** @brief Interface class for the ATLAS service providing the 
            ActsTrackingGeometry. The tracking geometry is built at
@@ -46,6 +57,14 @@ public:
     /** @brief Returns the pointer to the identifier mapping between Acts::surface ID
          *         & IdentifierHash of the ITk surfaces */
     virtual const ActsTrk::DetectorElementToActsGeometryIdMap* surfaceIdMap() const= 0;
+
+#ifdef ACTSGEOMETRY_HAVE_DETRAY
+    /** @brief Returns the Detray geometry converted from the Acts::TrackingGeometry.
+               Only populated when the service was configured to build it.
+               Only declared in builds where ACTS was compiled with the Detray
+               plugin (Acts::PluginDetray). */
+    virtual std::shared_ptr<const ActsTrk::DetrayDetector> detrayGeometry() const = 0;
+#endif
 };
 }
 

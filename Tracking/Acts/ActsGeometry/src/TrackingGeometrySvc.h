@@ -22,8 +22,6 @@
 
 #ifdef ACTSGEOMETRY_HAVE_DETRAY
 #include <ActsPlugins/Detray/DetrayGeometryConverter.hpp>
-#include <detray/core/detector.hpp>
-#include <detray/detectors/itk_metadata.hpp>
 #endif
 
 // STL
@@ -60,19 +58,6 @@ class BlueprintNode;
 
 namespace ActsTrk{
 
-#ifdef ACTSGEOMETRY_HAVE_DETRAY
-/// @brief Detray metadata used when converting the Acts::TrackingGeometry into
-///        a Detray geometry. detray::itk_metadata is generated for the ATLAS ITk
-///        (see DETRAY_GENERATE_METADATA in the ACTS build) and carries only the
-///        mask shapes and accelerators the ITk actually needs. It supports
-///        grid-based material maps but not homogeneous surface material;
-///        DetrayGeometryConverter::convert() checks the target metadata for
-///        material slab/rod support and skips homogeneous material when it is
-///        absent, so the ITk metadata can be used directly.
-using DetrayMetadata = detray::itk_metadata<detray::array<float>>;
-using DetrayDetector = detray::detector<DetrayMetadata>;
-#endif
-
 class TrackingGeometrySvc : public extends<AthService, ActsTrk::ITrackingGeometrySvc> {
 public:
 
@@ -96,7 +81,7 @@ public:
              Only populated when the BuildDetrayGeometry property is enabled.
              Only available in builds where ACTS was compiled with the Detray
              plugin (Acts::PluginDetray). */
-  std::shared_ptr<const DetrayDetector> detrayGeometry() const { return m_detrayGeometry; }
+  std::shared_ptr<const ActsTrk::DetrayDetector> detrayGeometry() const override { return m_detrayGeometry; }
 #endif
 
 private:
@@ -218,7 +203,7 @@ private:
   std::unique_ptr<const ActsTrk::DetectorElementToActsGeometryIdMap> m_detIdMap{};
 
 #ifdef ACTSGEOMETRY_HAVE_DETRAY
-  std::shared_ptr<const DetrayDetector> m_detrayGeometry{nullptr};
+  std::shared_ptr<const ActsTrk::DetrayDetector> m_detrayGeometry{nullptr};
 #endif
 };
 
