@@ -89,20 +89,20 @@ By default, the `Default` sub-block is used, and the step list for `FullSim`/`AF
 ```yaml
 Sequence:
   Default:
-      FullSim: [Residual, EtaJES, GSC, PtResidual, MC2MC, Smear]
-      AF3: [Residual, EtaJES, GSC, PtResidual, AF3, MC2MC, Smear]
-      Data: [Residual, EtaJES, GSC, PtResidual, Insitu]
+      FullSim: [Pileup, EtaJES, GSC, PtResidual, MC2MC, Smear]
+      AF3: [Pileup, EtaJES, GSC, PtResidual, AF3, MC2MC, Smear]
+      Data: [Pileup, EtaJES, GSC, PtResidual, Insitu]
 ```
 
 Run-specific step sequences can also be specified by a `RunX` sub-block. If the sample meta-data matches this run and one of the sub-keys provided, this will be used (overriding `Default`). For example, to set a different sequence for Run 4 data:
 ```yaml
 Sequence:
   Default:
-      FullSim: [Residual, EtaJES, GSC, PtResidual, MC2MC, Smear]
-      AF3: [Residual, EtaJES, GSC, PtResidual, AF3, MC2MC, Smear]
-      Data: [Residual, EtaJES, GSC, PtResidual, Insitu]
+      FullSim: [Pileup, EtaJES, GSC, PtResidual, MC2MC, Smear]
+      AF3: [Pileup, EtaJES, GSC, PtResidual, AF3, MC2MC, Smear]
+      Data: [Pileup, EtaJES, GSC, PtResidual, Insitu]
   Run4: 
-    Data: [Residual, EtaJES, Insitu]
+    Data: [Pileup, EtaJES, Insitu]
 ```
 
 Additionally, a `calibSeqKey` argument can be provided to `calibToolFromConfigFile()`/`calibConfigToToolList()` to specify an alternative sub-block to `Default` from which to extract the sequence. For example, dedicated `T0` or `Trigger` sequences can be used by setting `calibSeqKey = T0` or `Trigger` and providing corresponding sub-blocks in the YAML. If a sequence isn't provided for the sample type, the config falls back to `Default` (e.g. running the config below with `calibSeqKey = Test` for an MC sample).
@@ -110,17 +110,17 @@ Additionally, a `calibSeqKey` argument can be provided to `calibToolFromConfigFi
 ```yaml
 Sequence:
   Default:
-      FullSim: [Residual, EtaJES, GSC, PtResidual, MC2MC, Smear]
-      AF3: [Residual, EtaJES, GSC, PtResidual, AF3, MC2MC, Smear]
-      Data: [Residual, EtaJES, GSC, PtResidual, Insitu]
+      FullSim: [Pileup, EtaJES, GSC, PtResidual, MC2MC, Smear]
+      AF3: [Pileup, EtaJES, GSC, PtResidual, AF3, MC2MC, Smear]
+      Data: [Pileup, EtaJES, GSC, PtResidual, Insitu]
   Run4: 
-    Data: [Residual, EtaJES, Insitu]
-  T0: [Residual, EtaJES]
+    Data: [Pileup, EtaJES, Insitu]
+  T0: [Pileup, EtaJES]
   Trigger: 
-    MC: [Residual, EtaJES, GSC, PtResidual]
-    Data: [Residual, EtaJES, GSC, PtResidual, Insitu]
+    MC: [Pileup, EtaJES, GSC, PtResidual]
+    Data: [Pileup, EtaJES, GSC, PtResidual, Insitu]
   Test: 
-    Data: [Residual, EtaJES, Insitu]
+    Data: [Pileup, EtaJES, Insitu]
 ```
 
 Note that the ordering of the individual step blocks in the YAML file does not matter, the steps are always run in the order specified by the `Sequence` block.
@@ -190,7 +190,7 @@ The following table lists all registered step names and their corresponding C++ 
 | `Insitu` | `InSituCalibStep` (+ optional `InSituJMSCalibStep`) | In-situ data/MC correction; skipped for MC by default |
 | `JMS` | `JMSCalibStep` | MC jet mass scale calibration |
 | `Smear` | `SmearingCalibStep` | JER smearing (MC only) |
-| `JetArea` | `PileupAreaCalibStep` | Jet area four-vector subtraction. Note there is no Python/YAML configuration implemented, and this step is already folded into Residual below |
+| `Pileup` | `PileupCalibStep` | rho * area + histogram-based 1D residual pile-up calibration (μ, NPV) |
 | `Residual` | `Pileup1DResidualCalibStep` | 1D residual pile-up (μ, NPV, or NJet) |
 | `AF3` | `Generic4VecCorrectionStep` | ATLFAST3 fast-sim correction; skipped for data and full sim |
 | `PtResidual` | `Generic4VecCorrectionStep` | Generic 4-vector correction |
@@ -258,39 +258,6 @@ EtaJES:
 ```
 </details>
 
-<details>
-<summary>PileupArea — Jet Area Pile-up Subtraction</summary>
-
-**Source:** `src/PileupAreaCalibStep.cxx`
- 
-**What it does:** Subtracts the average pile-up energy contribution using the jet catchment
-area and the event-level transverse energy density ρ. Two modes are available: a full
-four-vector subtraction (`p4_calib = p4 − ρ × A4vec`) or a pT-only scaling that protects
-against negative pT/energy. A `PileupCorrected` integer decoration is set on each jet after
-the correction is applied.
- 
-**YAML options:**
- 
-| Key | Type | Default | Description |
-|---|---|---|---|
-| `OutScale` | string | `JetAreaSubtractScaleMomentum` | Output jet moment name |
-| `RhoKey` | string | `auto` | StoreGate key of the `xAOD::EventShape` containing ρ |
- 
-**Expert options:**
- 
-| Key | Type | Default | Description |
-|---|---|---|---|
-| `UseFull4vecArea` | bool | `false` | If `true`, subtract the full 4-vector `ρ·A`; if `false`, apply pT-only scaling with protection against negative pT |
- 
-**Example YAML block:**
- 
-```yaml
-JetArea:
-  OutScale: JetAreaSubtractScaleMomentum
-  RhoKey:   Kt4EMPFlowEventShape
-```
- </details>
- 
  <details>
 <summary>Residual — 1D Pile-up Residual Correction</summary>
 
@@ -356,17 +323,71 @@ Residual:
   NPVTerm:   [0.024,  0.233, ...]
 ```
  </details>
+ 
+ <details>
+<summary>Pileup — rho*area + histogram-based 1D residual </summary>
+
+**Source:** `src/PileupCalibStep.cxx`
+ 
+**What it does:** Applies the jet-area a ρ subtraction (configured via `DoJetArea`) and/or the residual pile-up correction parametrised (configured via `DoResidual`) linearly in μ and NPV, in bins of |η|. The correction is:
+ 
+```
+ΔpT = α(|η|) × (μ − μ_ref) + β(|η|) × (NPV − NPV_ref)
+```
+ 
+where α and β are piecewise-linear functions of |η| defined directly in the YAML. The main difference w.r.t. the `Residual` correction described above is that the calibration factors are implemented here as a histogram. 
+ 
+**YAML options:**
+ 
+| Key                     | Type   | Default                  | Description                                                                        |
+| ----------------------- | ------ | ------------------------ | ---------------------------------------------------------------------------------- |
+| `OutScale`              | string | `JetPileupScaleMomentum` | Output jet moment name                                                             |
+| `RhoKey`                | string | `auto`                   | StoreGate key of the `xAOD::EventShape` containing ρ (used when `DoJetArea: true`) |
+| `DefaultMuRef`          | float  | —                        | Reference μ value                                                                  |
+| `DefaultNPVRef`         | float  | —                        | Reference NPV value                                                                |
+| `MuScaleFactor`         | float  | `1.0`                    | Scale factor applied to μ (MC only)                                                |
+| `DoJetArea`             | bool   | `false`                  | Also apply jet-area ρ subtraction within this step                                 |
+| `DoResidual`            | bool   | `true`                   | Should the residual correction be applied?                                         |
+| `histoParamsMu.histName`  | string | -                        | Histogram name with μ-based correction factors in the ROOT file                    |
+| `histoParamsMu.varX`      | string | -                        | Variable for histogram x-axis                                                      |
+| `histoParamsNPV.histName` | string | -                        | Histogram name with NPV-based correction factors in the ROOT file                  |
+| `histoParamsNPV.varX`     | string | -                        | Variable for histogram x-axis                                                      |
+
+    
+**Expert options:**
+ 
+| Key | Type | Default | Description |
+|---|---|---|---|
+| `IsData` | bool | `false` | Set automatically from `flags.Input.isMC`; override only if needed |
+| `averageInteractionsPerCrossingKey` | string | `EventInfo.averageInteractionsPerCrossing` | StoreGate decoration key for μ |
+| `VertexContainer` | string | `PrimaryVertices` | StoreGate key for the primary vertex container |
+ 
+**Example YAML block:**
+ 
+```yaml
+Residual:
+  OutScale: JetPileupScaleMomentum
+  RhoKey:   Kt4EMPFlowNeutEventShape
+  DefaultMuRef:  0
+  DefaultNPVRef: 1
+  MuScaleFactor: 1.00
+  DoJetArea: true
+  DoResidual: true
+  histoParamsMu:
+    histName: 'AntiKt4EMPFlow_mu_corr_vs_eta'
+    varX: 'absConstEta'
+  histoParamsNPV:
+    histName: 'AntiKt4EMPFlow_NPV_corr_vs_eta'
+    varX: 'absConstEta'
+```
+ </details>
 
 <details>
 <summary>GSC — Global Sequential Calibration</summary>
 
 **Source:** `src/GSCCalibStep.cxx`
  
-**What it does:** Reduces flavour dependence and improves jet energy resolution by applying
-a sequence of multiplicative corrections based on jet sub-structure observables. Five
-corrections are always applied in this order: charged fraction, Tile layer 0 energy fraction,
-EM layer 3 energy fraction, track multiplicity (nTrk), and track width. An optional
-punch-through correction based on muon segment counts can be enabled via `applyPunchThrough`.
+**What it does:** Reduces flavour dependence and improves jet energy resolution by applying a sequence of multiplicative corrections based on jet sub-structure observables. Five corrections are usually applied in this order: charged fraction, Tile layer 0 energy fraction, EM layer 3 energy fraction, track multiplicity (nTrk), and track width (however can be individually turned off). An optional punch-through correction based on muon segment counts can be enabled via `applyPunchThrough`.
  
 Each correction uses a 2D histogram lookup as a function of jet pT and the relevant variable,
 with separate histograms per η bin. The hard-scatter primary vertex index is determined from
@@ -379,16 +400,21 @@ needed (see expert options).
  
 **YAML options:**
  
-| Key | Type | Default | Description |
-|---|---|---|---|
-| `OutScale` | string | `JetGSCScaleMomentum` | Output jet moment name |
-| `fileGSC` | string | — | Calibration ROOT file (resolved via PathResolver) |
-| `histTool_EM3` | dict | (auto) | Override config for the EM3 histogram readers; accepts `N_hist` + `histNameBase`, or a full list of reader configs |
-| `histTool_CharFrac` | dict | (auto) | Override config for the charged-fraction histogram readers |
-| `histTool_Tile0` | dict | (auto) | Override config for the Tile0 histogram readers |
-| `histTool_nTrk` | dict | (auto) | Override config for the nTrk histogram readers |
-| `histTool_trackWIDTH` | dict | (auto) | Override config for the track-width histogram readers |
-| `applyPunchThrough` | bool | `false` | Enable the punch-through correction |
+| Key                    | Type   | Default               | Description                                                                                                        |
+| ---------------------- | ------ | --------------------- | ------------------------------------------------------------------------------------------------------------------ |
+| `OutScale`             | string | `JetGSCScaleMomentum` | Output jet moment name                                                                                             |
+| `fileGSC`              | string | —                     | Calibration ROOT file (resolved via PathResolver)                                                                  |
+| `histTool_EM3`         | dict   | (auto)                | Override config for the EM3 histogram readers; accepts `N_hist` + `histNameBase`, or a full list of reader configs |
+| `histTool_CharFrac`    | dict   | (auto)                | Override config for the charged-fraction histogram readers                                                         |
+| `histTool_Tile0`       | dict   | (auto)                | Override config for the Tile0 histogram readers                                                                    |
+| `histTool_nTrk`        | dict   | (auto)                | Override config for the nTrk histogram readers                                                                     |
+| `histTool_trackWIDTH`  | dict   | (auto)                | Override config for the track-width histogram readers                                                              |
+| `applyPunchThrough`    | bool   | `false`               | Enable the punch-through correction                                                                                |
+| `applyChargedFraction` | bool   | true                  | Enable charged fraction correction                                                                                 |
+| `applyEM3`             | bool   | true                  | Enable EM3 correction                                                                                              |
+| `applyTile0`           | bool   | true                  | Enable Tile0 correction                                                                                            |
+| `applyNtrk`            | bool   | true                  | Enable Ntrk correction                                                                                             |
+| `applyTrackWidth`      | bool   | true                  | Enable TrackWidth correction                                                                                       |
  
 **Expert options:**
  

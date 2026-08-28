@@ -53,18 +53,14 @@ def smearingStep(flags, **configDict):
 
     return [smearStep]
 
-def areaStep(flags, **configDict):
-    configDict.setdefault('OutScale', 'JetPileupScaleMomentum')
-    area_step = CompFactory.PileupAreaCalibStep("PUArea", **configDict)
-    return [area_step]
-
 def puresidualStep(flags, **configDict):
     configDict.setdefault('OutScale', 'JetPileupScaleMomentum')
     configDict.setdefault('IsData', not flags.Input.isMC)
     PU_step = CompFactory.Pileup1DResidualCalibStep("PUResid", **configDict)
     return [PU_step]
 
-def newpuresidualStep(flags, **configDict):
+def puCorrectionStep(flags, **configDict):
+    # rho * area and histogram-based 1D residual correction
     configDict.setdefault('OutScale', 'JetPileupScaleMomentum')
     configDict.setdefault('IsData', not flags.Input.isMC)
 
@@ -80,7 +76,7 @@ def newpuresidualStep(flags, **configDict):
     configDict["histTool_mu"] = histToolMu
     configDict["histTool_NPV"] = histToolNPV
 
-    PU_step = CompFactory.PileupAreaResidualCalibStep("PUAreaResidual", **configDict)
+    PU_step = CompFactory.PileupCalibStep("PileUpCorrection", **configDict)
     return [PU_step]
 
 def gscStep(flags, **configDict):
@@ -293,9 +289,8 @@ def mc2mcStep(flags, **configDic):
 #####################
     
 calibStepDic = dict(
-    JetArea = areaStep,
     Residual = puresidualStep,
-    ResidualNew = newpuresidualStep,
+    Pileup = puCorrectionStep,
     EtaJES = etajesStep,
     JMS = jmsStep,
     GSC = gscStep,

@@ -11,12 +11,12 @@
 # Set calibration step ordering
 Sequence:
   Default:
-      FullSim: [Residual, EtaJES, GSC, PtResidual, MC2MC, Smear]
-      AF3: [Residual, EtaJES, GSC, PtResidual, AF3, MC2MC, Smear]
-      Data: [Residual, EtaJES, GSC, PtResidual, Insitu]
+      FullSim: [Pileup, EtaJES, GSC, PtResidual, MC2MC, Smear]
+      AF3: [Pileup, EtaJES, GSC, PtResidual, AF3, MC2MC, Smear]
+      Data: [Pileup, EtaJES, GSC, PtResidual, Insitu]
   Run4: 
     Data: [Residual, EtaJES, Insitu]
-  T0: [Residual, EtaJES]
+  T0: [Pileup, EtaJES]
   Trigger: 
     MC: [Residual, EtaJES, GSC, PtResidual]
     Data: [Residual, EtaJES, GSC, PtResidual, Insitu]
@@ -47,6 +47,36 @@ Residual:
   NPVTerm: [-0.020, -0.001, 0.021, 0.077, 0.068, 0.565, -0.382, 0.203, 0.039, -0.214]
 
   OutScale: "JetPileupScaleMomentum" # optional (OutScale is set to a sensible default for every step)
+  prereqs:
+    default: []
+
+# --------------------------------------------------------------------------------------------------------------------------------------------------------------
+# Histogram-based pile-up correction
+Pileup:
+
+  # Apply the rho * area correction
+  DoJetArea: True
+  # Apply the residual correction
+  DoResidual: True
+  # These corrections should correspond to the conditions of the absolute JES calibration
+  DefaultMuRef: 0
+  DefaultNPVRef: 1
+  # mu-scale factor used (only for MC)
+  MuScaleFactor: 1.00
+
+  # Event shape density:
+  RhoKey: Kt4EMPFlowEventShape
+  # Absolute path to /eos until the calibration factors are moved to cvmfs
+  calibFile: /eos/atlas/atlascerngroupdisk/perf-jets/JSV/JetCalibToolsMigration/files_PUcorr/PreRec22_MC20j_AntiKt4EMPFlow_ResidualPileUp_December22.root
+
+  histoParamsMu:
+    histName: 'AntiKt4EMPFlow_mu_corr_vs_eta'
+    varX: 'absConstEta'
+  histoParamsNPV:
+    histName: 'AntiKt4EMPFlow_NPV_corr_vs_eta'
+    varX: 'absConstEta'
+
+  OutScale: "JetPileupScaleMomentum"
   prereqs:
     default: []
 
