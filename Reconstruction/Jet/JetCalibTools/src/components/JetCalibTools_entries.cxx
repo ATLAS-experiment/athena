@@ -13,6 +13,7 @@
 #include "JetCalibTools/MuonInJetCorrectionTool.h"
 #include "JetCalibTools/BJetCorrectionTool.h"
 #include "JetCalibTools/JetResponseTool.h"
+#include "JetCalibTools/JetCalibTestAlg.h"
 
 #ifndef XAOD_STANDALONE
 #include "CalibratedJetCopyAlg.h"
@@ -37,6 +38,7 @@ DECLARE_COMPONENT( MuonInJetCorrectionTool )
 DECLARE_COMPONENT( BJetCorrectionTool )
 DECLARE_COMPONENT( Pileup1DResidualCalibStep )
 DECLARE_COMPONENT( JetResponseTool )
+DECLARE_COMPONENT( JetCalibTestAlg )
 
 #ifndef XAOD_STANDALONE
 DECLARE_COMPONENT( CalibratedJetCopyAlg )
