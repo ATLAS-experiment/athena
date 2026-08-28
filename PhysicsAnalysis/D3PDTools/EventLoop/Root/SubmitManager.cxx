@@ -77,6 +77,11 @@ namespace EL
         {
           {
             std::unique_ptr<TFile> file (TFile::Open ((data.submitDir + "/driver.root").c_str(), "RECREATE"));
+            if (file == nullptr || file->IsZombie())
+            {
+              ANA_MSG_ERROR ("failed to open " << data.submitDir << "/driver.root for writing");
+              return ::StatusCode::FAILURE;
+            }
             file->WriteObject (data.driver, "driver");
             file->Close ();
           }
@@ -87,14 +92,13 @@ namespace EL
           }
 
           SH::SampleHandler sh_hist;
-          for (SH::SampleHandler::iterator sample = data.job->sampleHandler().begin(),
-                 end = data.job->sampleHandler().end(); sample != end; ++ sample)
+          for (SH::Sample *sample : data.job->sampleHandler())
           {
             const std::string histfile
-              = data.submitDir + "/hist-" + (*sample)->name() + ".root";
+              = data.submitDir + "/hist-" + sample->name() + ".root";
             std::unique_ptr<SH::SampleHist> hist
-              (new SH::SampleHist ((*sample)->name(), histfile));
-            hist->meta()->fetch (*(*sample)->meta());
+              (new SH::SampleHist (sample->name(), histfile));
+            hist->meta()->fetch (*sample->meta());
             sh_hist.add (std::move (hist));
           }
           sh_hist.save (data.submitDir + "/hist");

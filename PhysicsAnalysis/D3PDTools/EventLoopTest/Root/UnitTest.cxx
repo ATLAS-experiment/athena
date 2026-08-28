@@ -145,7 +145,7 @@ namespace EL
 	sh.setMetaString ("mymeta", "test");
 	job.sampleHandler (sh);
       }
-      job.algsAdd (new UnitTestAlg (alg));
+      job.algsAddClone (alg);
       bool outputDone = outputDisk == 0;
       for (Job::outputMIter outputStream = job.outputBegin(),
 	     end = job.outputEnd(); outputStream != end; ++ outputStream)

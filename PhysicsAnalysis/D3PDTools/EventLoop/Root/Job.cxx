@@ -131,6 +131,7 @@ namespace EL
     swap (a.m_sampleHandler, b.m_sampleHandler);
     a.m_jobConfig.swap (b.m_jobConfig);
     swap (a.m_output, b.m_output);
+    swap (a.m_options, b.m_options);
   }
 
 
@@ -341,7 +342,7 @@ namespace EL
   outputBegin ()
   {
     RCU_READ_INVARIANT (this);
-    return ( m_output.size() ? &m_output[0] : nullptr );
+    return m_output.data();
   }
 
 
@@ -350,7 +351,7 @@ namespace EL
   outputBegin () const
   {
     RCU_READ_INVARIANT (this);
-    return ( m_output.size() ? &m_output[0] : nullptr );
+    return m_output.data();
   }
 
 
@@ -359,7 +360,7 @@ namespace EL
   outputEnd ()
   {
     RCU_READ_INVARIANT (this);
-    return ( m_output.size() ? &m_output[m_output.size()] : nullptr );
+    return m_output.data() + m_output.size();
   }
 
 
@@ -368,7 +369,7 @@ namespace EL
   outputEnd () const
   {
     RCU_READ_INVARIANT (this);
-    return ( m_output.size() ? &m_output[m_output.size()] : nullptr );
+    return m_output.data() + m_output.size();
   }
 
 
@@ -386,7 +387,7 @@ namespace EL
   bool Job ::
   outputHas (const std::string& name) const
   {
-    RCU_CHANGE_INVARIANT (this);
+    RCU_READ_INVARIANT (this);
     for (outputIter iter = outputBegin(),
 	   end = outputEnd(); iter != end; ++ iter)
     {

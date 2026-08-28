@@ -15,9 +15,9 @@
 #include <EventLoop/MessageCheck.h>
 #include <RootCoreUtils/Assert.h>
 #include <TSystem.h>
-#include <iomanip>
-#include <ios>
-#include <numeric>
+#include <algorithm>
+#include <functional>
+#include <sstream>
 
 //
 // method implementations

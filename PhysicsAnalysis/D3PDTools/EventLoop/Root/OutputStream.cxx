@@ -36,7 +36,7 @@ namespace EL
 
   OutputStream ::
   OutputStream ()
-    : m_label ("out"), m_output (0)
+    : m_label ("out"), m_output (nullptr)
   {
     RCU_NEW_INVARIANT (this);
   }
@@ -45,7 +45,7 @@ namespace EL
 
   OutputStream ::
   OutputStream (const std::string& val_label)
-    : m_label (val_label), m_output (0)
+    : m_label (val_label), m_output (nullptr)
   {
     RCU_REQUIRE_SOFT (!val_label.empty());
 
@@ -56,7 +56,7 @@ namespace EL
 
   OutputStream ::
   OutputStream (const std::string& val_label, const std::string& val_type)
-    : m_label (val_label), m_output (0)
+    : m_label (val_label), m_output (nullptr)
   {
     RCU_REQUIRE_SOFT (!val_label.empty());
 
@@ -70,14 +70,14 @@ namespace EL
   OutputStream ::
   OutputStream (const OutputStream& that)
     : TObject (that), m_label (that.m_label), 
-      m_options (that.m_options), m_output (0)
+      m_options (that.m_options), m_output (nullptr)
   {
     RCU_READ_INVARIANT (&that);
 
-    if (that.m_output != 0)
+    if (that.m_output != nullptr)
     {
       m_output = dynamic_cast<SH::DiskOutput*>(that.m_output->Clone ());
-      RCU_ASSERT (m_output != 0);
+      RCU_ASSERT (m_output != nullptr);
     }
   }
 

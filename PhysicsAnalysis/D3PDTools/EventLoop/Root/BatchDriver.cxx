@@ -180,6 +180,15 @@ namespace EL
         RCU_ASSERT_SOFT (*nevents >= 0);
         eventsSum += *nevents;
       }
+      if (eventsSum == 0)
+      {
+        // an all-empty sample still needs a single segment so that its
+        // (empty) files get processed, e.g. for metadata; there is no
+        // per-event split to compute and the division by numJobs below
+        // would be undefined for numJobs == 0.
+        segments.push_back (BatchSegment ());
+        return;
+      }
       if (numJobs > eventsSum)
         numJobs = eventsSum;
       Long64_t eventsMax
@@ -199,7 +208,10 @@ namespace EL
         segment.begin_event -= eventsFile[segment.begin_file];
         ++ segment.begin_file;
       }
-      RCU_ASSERT (segments.size() == numJobs);
+      // eventsMax is rounded up, so the number of segments produced can be
+      // fewer than the requested number of jobs (never more) for inputs
+      // that do not divide evenly.
+      RCU_ASSERT (segments.size() <= numJobs);
     }
 
 
@@ -270,15 +282,13 @@ namespace EL
       fillJob (myjob, job, location);
       *myjob.job.options() = meta;
 
-      for (std::size_t sampleIndex = 0, end = job.sampleHandler().size();
-           sampleIndex != end; ++ sampleIndex)
+      for (const SH::Sample *sample : job.sampleHandler())
       {
         BatchSample mysample;
-        fillSample (mysample, *job.sampleHandler()[sampleIndex], meta);
+        fillSample (mysample, *sample, meta);
 
         std::vector<BatchSegment> subsegments;
         splitSample (mysample, subsegments);
-        myjob.njobs_old.push_back (subsegments.size());
 
         addSample (myjob, mysample, subsegments);
       }
@@ -382,7 +392,19 @@ namespace EL
         {
           std::string path = data.submitDir + "/submit/config.root";
           std::unique_ptr<TFile> file (TFile::Open (path.c_str(), "RECREATE"));
-          data.batchJob->Write ("job");
+          if (file == nullptr || file->IsZombie())
+          {
+            ANA_MSG_ERROR ("failed to open " << path << " for writing");
+            return ::StatusCode::FAILURE;
+          }
+          // write into this file explicitly; TObject::Write would target
+          // the current gDirectory, silently dropping the config if the
+          // open above had failed.
+          if (file->WriteObject (data.batchJob.get(), "job") <= 0)
+          {
+            ANA_MSG_ERROR ("failed to write job configuration to " << path);
+            return ::StatusCode::FAILURE;
+          }
         }
         {
           std::ofstream file ((data.submitDir + "/submit/segments").c_str());
@@ -509,9 +531,9 @@ namespace EL
         {
           std::ostringstream command;
           command << "rm -rf";
-          command << " " << data.submitDir << "/status/completed-" << segment;
-          command << " " << data.submitDir << "/status/fail-" << segment;
-          command << " " << data.submitDir << "/status/done-" << segment;
+          command << " " << RCU::Shell::quote (data.submitDir) << "/status/completed-" << segment;
+          command << " " << RCU::Shell::quote (data.submitDir) << "/status/fail-" << segment;
+          command << " " << RCU::Shell::quote (data.submitDir) << "/status/done-" << segment;
           RCU::Shell::exec (command.str());
         }
         data.options = *data.batchJob->job.options();
@@ -550,11 +572,17 @@ namespace EL
 
     // <path of build dir>/x86_64-slc6-gcc62-opt (comes from CMake, we need this)
     const char *WORKDIR_DIR         = getenv ("WorkDir_DIR");
-    // As a backup, keep the CMAKE_PREFIX_PATH
-    std::string CMAKE_DIR_str ( getenv ("CMAKE_PREFIX_PATH") );
+    // As a backup, keep the CMAKE_PREFIX_PATH (only needed, and only read,
+    // when $WorkDir_DIR is not set; std::string(nullptr) would be UB)
+    std::string CMAKE_DIR_str;
     if (WORKDIR_DIR == nullptr){
       msgEventLoop::ANA_MSG_INFO ("Could not find environment variable $WorkDir_DIR");
+      const char *CMAKE_PREFIX_PATH = getenv ("CMAKE_PREFIX_PATH");
+      if (CMAKE_PREFIX_PATH == nullptr){
+        throw std::runtime_error ("neither $WorkDir_DIR nor $CMAKE_PREFIX_PATH is set, cannot locate the release");
+      }
       // Instead, build from the first path in CMAKE_PREFIX_PATH
+      CMAKE_DIR_str = CMAKE_PREFIX_PATH;
       if (CMAKE_DIR_str.find(":") != std::string::npos){
         // Erase everything from the colon onwards
         CMAKE_DIR_str.erase( CMAKE_DIR_str.find(":") , std::string::npos );
@@ -602,7 +630,7 @@ namespace EL
       defaultSetupCommand << "echo \"Using default setup command\"";
     }
 
-    file << options()->castString(Job::optBatchSetupCommand, defaultSetupCommand.str()) << " || abortJob\n";
+    file << data.options.castString(Job::optBatchSetupCommand, defaultSetupCommand.str()) << " || abortJob\n";
     if(data.sharedFileSystem) file << "source " << WORKDIR_DIR << "/setup.sh || abortJob\n";
     else                 file << "source build/setup.sh || abortJob\n";
     file << "\n";
@@ -618,8 +646,13 @@ namespace EL
         throw std::runtime_error ("failed to execute: " + cmd.str());
       }
 
+      const char *WorkDir_VERSION = std::getenv ("WorkDir_VERSION");
+      const char *WorkDir_PLATFORM = std::getenv ("WorkDir_PLATFORM");
+      if (WorkDir_VERSION == nullptr || WorkDir_PLATFORM == nullptr){
+        throw std::runtime_error ("$WorkDir_VERSION and $WorkDir_PLATFORM must both be set to build the release tarball");
+      }
       std::ostringstream mv_command;
-      mv_command << "mv WorkDir_" << std::getenv("WorkDir_VERSION") << "_" << std::getenv("WorkDir_PLATFORM") << ".tar.gz " << tarballName;
+      mv_command << "mv WorkDir_" << WorkDir_VERSION << "_" << WorkDir_PLATFORM << ".tar.gz " << tarballName;
       if (gSystem->Exec (mv_command.str().c_str()) != 0){
         throw std::runtime_error ("failed to execute: " + mv_command.str());
       }
@@ -638,6 +671,14 @@ namespace EL
 
     std::string name = data.batchName;
     bool multiFile = (name.find ("{JOBID}") != std::string::npos);
+
+    // Build the release setup once, outside the per-script loop.  The text
+    // is the same for every script, and defaultReleaseSetup also builds the
+    // release tarball as a side effect (for a non-shared file system), which
+    // must not be repeated once per generated script.
+    const std::string releaseSetup =
+      data.batchSkipReleaseSetup ? std::string() : defaultReleaseSetup (data);
+
     for (std::size_t index = 0, end = multiFile ? njobs : 1; index != end; ++ index)
     {
       std::ostringstream str;
@@ -684,7 +725,7 @@ namespace EL
         }
 
         if (!data.batchSkipReleaseSetup)
-          file << defaultReleaseSetup (data);
+          file << releaseSetup;
 
         file << "eventloop_batch_worker $EL_JOBID '" << data.batchSubmitLocation << "/config.root' || abortJob\n";
 
@@ -696,7 +737,7 @@ namespace EL
 
       {
         std::ostringstream cmd;
-        cmd << "chmod +x " << fileName;
+        cmd << "chmod +x " << RCU::Shell::quote (fileName);
         if (gSystem->Exec (cmd.str().c_str()) != 0)
           throw std::runtime_error ("failed to execute: " + cmd.str());
       }
@@ -735,7 +776,6 @@ namespace EL
 
     ANA_MSG_DEBUG ("merging histograms in location " << data.submitDir);
 
-    RCU_ASSERT (data.batchJob->njobs_old.size() == data.batchJob->samples.size());
     for (std::size_t sample = 0, end = data.batchJob->samples.size();
          sample != end; ++ sample)
     {
@@ -788,19 +828,19 @@ namespace EL
 
               output << "/" << data.batchJob->samples[sample].name << ".root";
 
-              std::vector<std::string> input;
+              std::vector<std::string> dataInput;
               for (std::size_t segment = mysample.begin_segments,
-                     end = mysample.end_segments; segment != end; ++ segment)
+                     dataEnd = mysample.end_segments; segment != dataEnd; ++ segment)
                 {
                   const BatchSegment& mysegment = data.batchJob->segments[segment];
 
                   const std::string infile =
                     data.submitDir + "/fetch/data-" + out->label() + "/" + mysegment.fullName + ".root";
 
-                  input.push_back (infile);
+                  dataInput.push_back (infile);
                 }
 
-              RCU::hadd(output.str(), input);
+              RCU::hadd(output.str(), dataInput);
             }
         }
       }

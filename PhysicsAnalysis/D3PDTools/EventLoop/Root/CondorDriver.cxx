@@ -17,6 +17,7 @@
 #include <EventLoop/ManagerData.h>
 #include <EventLoop/MessageCheck.h>
 #include <RootCoreUtils/Assert.h>
+#include <RootCoreUtils/ShellExec.h>
 #include <TSystem.h>
 #include <fstream>
 #include <memory>
@@ -68,7 +69,7 @@ namespace EL
 
         if (!data.resubmit)
         {
-          if(!data.options.castBool(Job::optBatchSharedFileSystem,true))
+          if(!data.sharedFileSystem)
           {
             const std::string newLocation = data.submitDir + "/submit/" + tarballName;
             int status=gSystem->CopyFile(tarballName.c_str(),newLocation.c_str());
@@ -88,7 +89,7 @@ namespace EL
           file << "output                  = submit/log-$(Item).out\n";
           file << "error                   = submit/log-$(Item).err\n";
           file << "initialdir              = " << data.submitDir << "\n";
-          if(!data.options.castBool(Job::optBatchSharedFileSystem,true))
+          if(!data.sharedFileSystem)
           { // Transfer data with non-shared file-systems
             file << "should_transfer_files   = YES\n";
             file << "when_to_transfer_output = ON_EXIT\n";
@@ -123,7 +124,7 @@ namespace EL
 
         {
           std::ostringstream cmd;
-          cmd << "cd " << data.submitDir << "/submit && condor_submit "
+          cmd << "cd " << RCU::Shell::quote (data.submitDir) << "/submit && condor_submit "
               << data.options.castString (Job::optSubmitFlags) << " submit";
           if (gSystem->Exec (cmd.str().c_str()) != 0)
           {

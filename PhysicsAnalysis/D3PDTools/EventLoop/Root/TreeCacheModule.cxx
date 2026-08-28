@@ -42,7 +42,7 @@ namespace EL
     StatusCode TreeCacheModule ::
     onCloseInputFile (ModuleData& data)
     {
-      if (printPerFileStats.value())
+      if (printPerFileStats.value() && data.m_inputTree)
       {
         ANA_MSG_INFO ("file stats for: " << data.m_inputFileUrl);
         data.m_inputTree->PrintCacheStats ();

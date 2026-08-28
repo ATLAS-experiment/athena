@@ -121,6 +121,10 @@ namespace EL
         {
           if (numParallelProcs == 0)
             numParallelProcs = std::thread::hardware_concurrency();
+          // hardware_concurrency() may legally return 0; make sure we still
+          // create at least one worker thread so the job makes progress
+          if (numParallelProcs < 1)
+            numParallelProcs = 1;
           if (numParallelProcs > int (data.batchJobIndices.size()))
             numParallelProcs = data.batchJobIndices.size();
           std::vector<std::thread> threads;

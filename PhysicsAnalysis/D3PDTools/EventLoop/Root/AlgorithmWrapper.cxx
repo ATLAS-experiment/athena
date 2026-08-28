@@ -17,7 +17,6 @@
 #include <EventLoop/Algorithm.h>
 #include <EventLoop/IWorker.h>
 #include <RootCoreUtils/Assert.h>
-#include <xAODRootAccess/Event.h>
 
 #include <format>
 #include <stdexcept>
@@ -31,6 +30,7 @@ namespace EL
   void AlgorithmWrapper ::
   testInvariant () const
   {
+    RCU_INVARIANT (m_algorithm != nullptr);
   }
 
 

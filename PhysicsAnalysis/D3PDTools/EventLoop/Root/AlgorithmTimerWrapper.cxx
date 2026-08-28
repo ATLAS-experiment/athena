@@ -16,6 +16,7 @@
 #include <RootCoreUtils/Assert.h>
 #include <iomanip>
 #include <ios>
+#include <sstream>
 
 //
 // method implementations
