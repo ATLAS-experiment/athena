@@ -95,9 +95,6 @@ from ActsConfig.ActsGeometryConfig import ActsWriteTrackingGeometryCfg
 cfg.merge(ActsWriteTrackingGeometryCfg(flags,
                                        name="ActsWriteTrackingGeometry"))
 
-from AthenaConfiguration.FPEAndCoreDumpConfig import FPEAndCoreDumpCfg
-cfg.merge(FPEAndCoreDumpCfg(flags))
-
 cfg.printConfig(withDetails = True, summariseProps = True)
 
 cfg.run(1)
