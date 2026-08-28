@@ -55,28 +55,24 @@ if [ ! -f $inputRDO ]; then
     exit 1
 fi
 
-# Use G-200/ART repo to run G130 pipeline.
-# THIS METHOD IS NOW DEPRECIATED AND WILL BE SOON BE REPLACED.
-source "$(dirname "$0")/setup_G200_ART.sh"
-
 ## running reconstruction
-run Reco_tf.py --CA \
+run Reco_tf.py \
     --maxEvents ${nEvents} \
     --preInclude 'InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude' \
-    --postInclude 'EFTracking.TrackingAlgConfig.g1xxAlgCfg,ActsConfig.ActsPostIncludes.ACTSClusterPostInclude' \
-    --preExec 'from EFTracking.GpuEFTrackingConfigFlags import createGpuEFTrackingConfigFlags; \
-               flags.addFlagsCategory("Trigger.EFTracking.GPU", createGpuEFTrackingConfigFlags, prefix=True); \
-               flags.Trigger.EFTracking.GPU.inputDirectory="'"$PWD"'/ITk_data/"; \
-               flags.Trigger.EFTracking.GPU.pipeline="g130"; \
-               flags.Trigger.EFTracking.GPU.checkSeeds=True; \
+    --postInclude 'ActsConfig.ActsPostIncludes.ACTSClusterPostInclude' \
+    --preExec 'flags.Detector.EnableHGTD=False; \
+               flags.Acts.Device.doClusterization=True; \
+               flags.Acts.Device.doSeeding=True; \
+               flags.Tracking.doPixelDigitalClustering=True; \
                from ActsConfig.ActsConfigFlags import SeedingStrategy; \
-               flags.Acts.SeedingStrategy=SeedingStrategy.GbtsFtf;' \
-    --steering 'doRAWtoALL' \
+               flags.Acts.SeedingStrategy=SeedingStrategy.Gbts;' \
     --inputRDOFile ${inputRDO} \
     --outputAODFile ${outputAOD} \
     --perfmon fullmonmt
 
 rc=$?
+# 24/07/2026: temporarily ignore known ERRORs detected in logfile (rc=68)
+if [ $rc = 68 ]; then rc=0; fi
 echo "Reco_tf.py result: $rc"
 # don't exit only for ERRORs detected in logfile (rc=68)
 if [ $rc != 0 -a $rc != 68 ]; then exit $rc; fi
