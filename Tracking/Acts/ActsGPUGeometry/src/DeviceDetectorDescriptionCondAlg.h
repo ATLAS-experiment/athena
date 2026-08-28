@@ -7,15 +7,13 @@
 #include "AthenaBaseComps/AthCondAlgorithm.h"
 #include "StoreGate/ReadCondHandleKey.h"
 #include "StoreGate/WriteCondHandleKey.h"
-
 #include "GaudiKernel/ToolHandle.h"
 #include "PathResolver/PathResolver.h"
+
 #include "ActsGPUInterfaces/IDeviceDetectorDescriptionProviderSvc.h"
 #include "ActsGeometryInterfaces/ITrackingGeometrySvc.h"
 #include "InDetCondTools/ISiLorentzAngleTool.h"
-#include "SiSpacePointFormation/SiElementPropertiesTable.h"
 
-#include "StoreGate/ReadCondHandleKey.h"
 #include "AthDeviceInterfaces/IMemoryResourcesTool.h"
 #include "AthDeviceInterfaces/ICopyTool.h"
 #include "InDetIdentifier/PixelID.h"
@@ -40,6 +38,7 @@
 #include "ActsGPUEvent/TracccDetectorConditionsDescription.h"
 #include "ActsGPUEvent/TracccDetectorDesignDescription.h"
 #include "ActsGPUEvent/TracccDetectorGeometryDescription.h"
+#include "ActsGPUEvent/GeometryIdMapping.h"
 
 #include "traccc/io/read_detector.hpp"
 #include "traccc/geometry/detector_design_description.hpp"
@@ -165,6 +164,9 @@ private:
         this, "DeviceConditionsObjectName", "",
         "Key for writing the per-IOV traccc device conditions object"};
 
+    Gaudi::Property<std::string> m_geoIdMappingObjectName{
+        this, "GeoIdMappingObjectName", "",
+        "StoreGate name for the detray/acts/athena geo id mapping"};
 
     /// Conversion helpers (to retrieve module design, hash, etc.)
     /// {@
@@ -178,13 +180,8 @@ private:
     const InDetDD::PixelDetectorManager* m_pixelManager{nullptr};
     const InDetDD::SCT_DetectorManager*  m_stripManager{nullptr};
     
-    SG::ReadCondHandleKey<InDet::SiElementPropertiesTable> m_stripPropertiesKey{
-        this, "StripPropertiesKey","ITkStripElementPropertiesTable",
-        "Key of input SiElementPropertiesTable for strip"};
     /// @}
 
-    // std::unique_ptr<traccc::host_detector> m_hostDetector;
-    const traccc::host_detector* m_hostDetector{nullptr};
     std::vector<StaticCondEntry> m_staticCondEntries;
     std::vector<std::size_t> m_designSizes;  // for device buffer construction, reused every execute()
     // Athena Identifier -> row index in the conditions table (stable across
