@@ -23,7 +23,7 @@ set( component_srcs src/components/JetCalibTools_entries.cxx )
 set( component_libs )
 if( NOT XAOD_STANDALONE )
    list( APPEND component_srcs src/components/CalibratedJetCopyAlg.cxx
-                               src/components/JetCalibrationDecoratorAlg.cxx )
+                               src/components/JetCalibrationDecoratorAlg.cxx)
    list( APPEND component_libs AthenaBaseComps StoreGateLib xAODBase xAODCore )
 endif()
 
@@ -68,5 +68,6 @@ atlas_add_executable( JetCalibTools_SmearingPlots
    xAODCore xAODRootAccess JetCalibToolsLib ${_extraLibs} )
    
 atlas_install_python_modules( python/*.py )
+atlas_install_scripts( util/JetCalibTestAlgConfig.py )
 
 atlas_install_data( data/* )

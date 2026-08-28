@@ -163,6 +163,19 @@ EtaJES:
 
 `Global` can be used to set properties applied directly to the `JetCalibTool`. Note that no such properties currently exist. 
 
+### Testing
+
+To test if a YAML config file is valid, a simple test algorithm `JetCalibTestAlg` is available. This can be run for example via
+```
+setupATLAS
+asetup Athena,main,latest
+
+JetCalibTestAlgConfig.py 
+   --configFile=JetCalibTools/calibConfigExample.yaml \
+   --evtMax 10 \
+   --filesInput /eos/atlas/atlascerngroupdisk/perf-jets/Hackathon/mc23_13p6TeV.830187.H7EG_H72NNPDF30NLO_jetjet_Lund_JZ1.deriv.DAOD_PHYS.e8551_s4159_r15224_p6266/DAOD_PHYS.40788428._000097.pool.root.1
+   --debugAlg
+```
 
 ---
 
@@ -897,7 +910,8 @@ MC2MC:
 
 ## Example: Integrating into an analysis algorithm
 
-The following example code shows how you can integrate a JetCalibTool instance into an analysis algorithm.
+The following example code shows how you can integrate a JetCalibTool instance into an analysis algorithm. 
+Also see the example JetCalibTestAlg algorithm in the JetCalibTools package.
 
 <details>
 <summary>Python configuration</summary>
