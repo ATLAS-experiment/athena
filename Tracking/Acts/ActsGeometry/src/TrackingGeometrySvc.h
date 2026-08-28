@@ -23,7 +23,7 @@
 #ifdef ACTSGEOMETRY_HAVE_DETRAY
 #include <ActsPlugins/Detray/DetrayGeometryConverter.hpp>
 #include <detray/core/detector.hpp>
-#include <detray/detectors/default_metadata.hpp>
+#include <detray/detectors/itk_metadata.hpp>
 #endif
 
 // STL
@@ -62,14 +62,14 @@ namespace ActsTrk{
 
 #ifdef ACTSGEOMETRY_HAVE_DETRAY
 /// @brief Detray metadata used when converting the Acts::TrackingGeometry into
-///        a Detray geometry. detray::itk_metadata (generated for the ATLAS ITk,
-///        see DETRAY_GENERATE_METADATA in the ACTS build) only supports
-///        grid-based material maps, not homogeneous surface material, so it
-///        cannot be instantiated with DetrayGeometryConverter::convert(), which
-///        unconditionally requires homogeneous material support. detray::default_metadata
-///        supports both, and every mask shape used across the ATLAS ITk
-///        (rectangle, trapezoid, annulus, straw tube).
-using DetrayMetadata = detray::default_metadata<detray::array<float>>;
+///        a Detray geometry. detray::itk_metadata is generated for the ATLAS ITk
+///        (see DETRAY_GENERATE_METADATA in the ACTS build) and carries only the
+///        mask shapes and accelerators the ITk actually needs. It supports
+///        grid-based material maps but not homogeneous surface material;
+///        DetrayGeometryConverter::convert() checks the target metadata for
+///        material slab/rod support and skips homogeneous material when it is
+///        absent, so the ITk metadata can be used directly.
+using DetrayMetadata = detray::itk_metadata<detray::array<float>>;
 using DetrayDetector = detray::detector<DetrayMetadata>;
 #endif
 
