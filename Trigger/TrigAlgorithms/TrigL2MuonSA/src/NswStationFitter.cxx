@@ -1,16 +1,17 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
-
 #include "NswStationFitter.h"
 #include "xAODTrigMuon/TrigMuonDefs.h"
 
 #include "RecMuonRoIUtils.h"
-#include <cmath>
+
 #include "AthenaBaseComps/AthMsgStreamMacros.h"
 
+#include <cmath>
 #include <vector>
 #include <array>
+#include <stdexcept>
 
 namespace{
   constexpr double ZERO_LIMIT = 1.e-9;
@@ -125,7 +126,7 @@ StatusCode TrigL2MuonSA::NswStationFitter::selectStgcHits(const TrigRoiDescripto
   }
 
   stgcHits.clear();
-  stgcHits = selectedStgcHits;
+  stgcHits = std::move(selectedStgcHits);
 
   return StatusCode::SUCCESS;
 
@@ -175,7 +176,7 @@ StatusCode TrigL2MuonSA::NswStationFitter::selectMmHits(const TrigRoiDescriptor*
   }
 
   mmHits.clear();
-  mmHits = selectedMmHits;
+  mmHits = std::move(selectedMmHits);
 
   return StatusCode::SUCCESS;
 
@@ -359,7 +360,7 @@ StatusCode TrigL2MuonSA::NswStationFitter::findStgcHitsInSegment(TrigL2MuonSA::S
 }
 
 void TrigL2MuonSA::NswStationFitter::findSetOfStgcHitIds(TrigL2MuonSA::StgcHits& stgcHits,
-                                                         std::array<std::vector<int>,8> hitIdByLayer,
+                                                         const std::array<std::vector<int>,8> & hitIdByLayer,
                                                          std::vector<std::array<int, 8>>& hitIdsCandidate) const
 {
   double NSWCenterZ = 7526.329;
@@ -393,7 +394,7 @@ void TrigL2MuonSA::NswStationFitter::findSetOfStgcHitIds(TrigL2MuonSA::StgcHits&
       if (nHitsInOuter > 0xffff-1) {nHitsInOuter = 0xffff-1;}
     }
 
-    bool foundCounterparts[256] = {};
+    std::array<bool, 256> foundCounterparts{};
     // Loop over hits in the i-th layer
     for(unsigned int iHit = 0; iHit < nHitsInInner; ++iHit){
       bool foundCounterpart = 0;
@@ -465,7 +466,7 @@ void TrigL2MuonSA::NswStationFitter::findSetOfStgcHitIds(TrigL2MuonSA::StgcHits&
         interceptInTwo[iPair].push_back(intercept);
 
         foundCounterpart = 1;
-        foundCounterparts[jHit] = 1;
+        foundCounterparts.at(jHit) = 1;
       }//end of jHit in the (i+4)-th layer
       if(!foundCounterpart){ // in case of no counterpart in the (i+4)-th layer
         unsigned int encodedIds = (iHitId<<16) + 0xffff; // fill all bits with 1 for hit id for the layer with no hit
@@ -481,7 +482,7 @@ void TrigL2MuonSA::NswStationFitter::findSetOfStgcHitIds(TrigL2MuonSA::StgcHits&
     }//end of iHit in the i-th layer
     // Loop over hits in the (i+4)-th layer
     for(unsigned int jHit = 0; jHit < nHitsInOuter; ++jHit){
-      if (!foundCounterparts[jHit]) {
+      if (!foundCounterparts.at(jHit)) {
         int jHitId = hitIdByLayer[iPair+4].at(jHit);
         unsigned int encodedIds = 0xffff0000 + jHitId; // fill all bits with 1 for hit id for the layer with no hit
         hitIdsInTwo[iPair].push_back(encodedIds);
@@ -523,8 +524,8 @@ void TrigL2MuonSA::NswStationFitter::findSetOfStgcHitIds(TrigL2MuonSA::StgcHits&
   for(unsigned int iQuad = 0; iQuad < 2; ++iQuad){
     unsigned int nPairsInInner = hitIdsInTwo[iQuad].size();
     unsigned int nPairsInOuter = hitIdsInTwo[iQuad+2].size();
-
-    bool foundCounterparts[0xffff] = {};
+    //coverity[STACK_USE]
+    std::array<bool, 0xffff> foundCounterparts{};
     for(unsigned int iPair = 0; iPair < nPairsInInner; ++iPair){
       bool foundCounterpart = 0;
       double slope[2];
@@ -784,7 +785,7 @@ StatusCode TrigL2MuonSA::NswStationFitter::MakeSegment(TrigL2MuonSA::TrackPatter
     selectedStgcHits.push_back(stgcHits.at(iHit));
   }
   trackPattern.stgcSegment.clear();
-  trackPattern.stgcSegment = selectedStgcHits;
+  trackPattern.stgcSegment = std::move(selectedStgcHits);
   return StatusCode::SUCCESS;
 }
 StatusCode TrigL2MuonSA::NswStationFitter::MakeSegment(TrigL2MuonSA::TrackPattern& trackPattern,
@@ -798,7 +799,7 @@ StatusCode TrigL2MuonSA::NswStationFitter::MakeSegment(TrigL2MuonSA::TrackPatter
     selectedMmHits.push_back(mmHits.at(iHit));
   }
   trackPattern.mmSegment.clear();
-  trackPattern.mmSegment = selectedMmHits;
+  trackPattern.mmSegment = std::move(selectedMmHits);
   return StatusCode::SUCCESS;
 }
   
@@ -826,6 +827,9 @@ void TrigL2MuonSA::NswStationFitter::LinearFit(std::vector<double>& x,std::vecto
     }
   }
   else if(nHits == 1) {
+    if (sumX == 0.)[[unlikely]]{
+      throw std::runtime_error("NswStationFitter::LinearFit: divisor is zero.");
+    }
     *slope = sumY/sumX;
     *intercept = 0.;
   }
@@ -896,6 +900,9 @@ void TrigL2MuonSA::NswStationFitter::LinearFitWeight(std::vector<double>& x,std:
     }
   }
   else if(nHits == 1) {
+    if (sumX == 0.)[[unlikely]]{
+      throw std::runtime_error("NswStationFitter::LinearFitWeight: divisor is zero.");
+    }
     *slope = sumY/sumX;
     *intercept = 0.;
   }
@@ -1013,6 +1020,9 @@ StatusCode TrigL2MuonSA::NswStationFitter::calcMergedHit(TrigL2MuonSA::TrackPatt
     }
     if (mmHits.at(iHit).layerNumber >1 && mmHits.at(iHit).layerNumber < 6){
       double rInterpolate = slopefit * mmHits.at(iHit).z + interceptfit;
+      if (rInterpolate == 0. or tanTiltAngleU == 0.)[[unlikely]]{
+        throw std::runtime_error("NswStationFitter::calcMergedHit: divisor is zero.");
+      }
       double rProj = mmHits.at(iHit).r;
       if(std::abs(side_mm) < ZERO_LIMIT) {
         phiLocal.push_back(0);
@@ -1139,14 +1149,14 @@ StatusCode TrigL2MuonSA::NswStationFitter::calcMergedHit(TrigL2MuonSA::TrackPatt
       slopefit = slopefit_stgc;
       interceptfit = interceptfit_stgc;
       mse = mse_stgc;
-      z = z_stgc;
+      z = std::move(z_stgc);
       side = side_stgc;
       fmerge = 2;
     } else {
       slopefit = slopefit_mm;
       interceptfit = interceptfit_mm;
       mse = mse_mm;
-      z = z_mm;
+      z = std::move(z_mm);
       side = side_mm;
       fmerge = 3;
     }
@@ -1237,7 +1247,7 @@ StatusCode TrigL2MuonSA::NswStationFitter::findMmHitsInSegment(TrigL2MuonSA::MmH
 }
 
 void TrigL2MuonSA::NswStationFitter::findSetOfMmHitIds(TrigL2MuonSA::MmHits& mmHits,
-                                                       std::array<std::vector<int>,8> hitIdByLayer,
+                                                       const std::array<std::vector<int>,8> & hitIdByLayer,
                                                        std::vector<std::array<int, 8>>& hitIdsCandidate) const
 {
   
@@ -1272,8 +1282,8 @@ void TrigL2MuonSA::NswStationFitter::findSetOfMmHitIds(TrigL2MuonSA::MmHits& mmH
       if (nHitsInInner > 0xffff-1) {nHitsInInner = 0xffff-1;}
       if (nHitsInOuter > 0xffff-1) {nHitsInOuter = 0xffff-1;}
     }
-
-    bool foundCounterparts[0xffff] = {};
+    //coverity[STACK_USE]
+    std::array<bool, 0xffff> foundCounterparts{};
     // Loop over hits in the i-th layer
     for(unsigned int iHit = 0; iHit < nHitsInInner; ++iHit){
 

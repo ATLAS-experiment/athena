@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef  TRIGL2MUONSA_NSWSTATIONFITTER_H
@@ -43,13 +43,13 @@ namespace TrigL2MuonSA {
     StatusCode findStgcHitsInSegment(TrigL2MuonSA::StgcHits& stgcHits) const;
 
     void findSetOfStgcHitIds(TrigL2MuonSA::StgcHits& stgcHits,
-                             std::array<std::vector<int>,8> hitIdByLayer,
+                             const std::array<std::vector<int>,8> & hitIdByLayer,
                              std::vector<std::array<int, 8>>& hitIdsCandidate) const;
 
     StatusCode findMmHitsInSegment(TrigL2MuonSA::MmHits& mmHits) const;
 
     void findSetOfMmHitIds(TrigL2MuonSA::MmHits& mmHits,
-                           std::array<std::vector<int>,8> hitIdByLayer,
+                           const std::array<std::vector<int>,8> & hitIdByLayer,
                            std::vector<std::array<int, 8>>& hitIdsCandidate) const;
 
     StatusCode MakeSegment(TrigL2MuonSA::TrackPattern& trackPattern, 
