@@ -37,7 +37,7 @@ StatusCode TracccMeasurementConverterAlg::initialize()
     ATH_CHECK(detStore()->retrieve(m_pixelManager, "ITkPixel"));
     ATH_CHECK(detStore()->retrieve(m_stripManager, "ITkStrip"));
 
-    m_detrayToAthena = &m_detDescSvc->detrayToAthenaMap();
+    ATH_CHECK(m_idMappingKey.initialize());
 
     ATH_MSG_DEBUG("Successfully initialized");
     return StatusCode::SUCCESS;
@@ -142,6 +142,9 @@ StatusCode TracccMeasurementConverterAlg::execute(const EventContext& ctx) const
   auto measurements = SG::makeHandle(m_inputMeasKey, ctx);
   ATH_CHECK(measurements.isValid());
 
+  // ---- Retrieve geometry id mappings ----
+  SG::ReadHandle<ActsTrk::GeometryIdMapping> idMapping(m_idMappingKey, ctx);
+
   auto copy = m_copy->copy(ctx);
 
   traccc::edm::measurement_collection::buffer traccc_measurements_buffer{
@@ -216,7 +219,12 @@ StatusCode TracccMeasurementConverterAlg::execute(const EventContext& ctx) const
   for (std::size_t i = 0; i < traccc_measurements.size(); ++i) {
     const auto& meas = traccc_measurements.at(i);
     const uint64_t detrayId = meas.surface_link().value();
-    const Identifier athenaId = m_detrayToAthena->at(detrayId);
+    auto athenaIdOpt = idMapping->detrayToAthena(detrayId);
+    if (!athenaIdOpt.has_value()) {
+        ATH_MSG_FATAL("No Athena module found for detray id " << detrayId << " — skipping measurement.");
+        return StatusCode::FAILURE;  
+    }
+    const Identifier athenaId = *athenaIdOpt;
 
     // ---- Pixel ----
     if (meas.dimensions() == 2u) {
