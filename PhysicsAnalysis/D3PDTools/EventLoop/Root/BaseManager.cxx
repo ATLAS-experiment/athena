@@ -16,8 +16,6 @@
 #include <EventLoop/ManagerData.h>
 #include <EventLoop/ManagerOrder.h>
 #include <EventLoop/MessageCheck.h>
-#include <RootCoreUtils/Assert.h>
-#include <TSystem.h>
 
 using namespace EL::msgEventLoop;
 

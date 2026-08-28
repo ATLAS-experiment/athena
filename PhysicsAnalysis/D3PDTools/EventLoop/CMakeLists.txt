@@ -23,7 +23,7 @@ atlas_add_root_dictionary( EventLoop
    EXTERNAL_PACKAGES ROOT )
 
 atlas_add_library( EventLoop
-   EventLoop/*.h EventLoop/*.ihh Root/*.cxx ${EventLoopDictSource}
+   EventLoop/*.h Root/*.cxx ${EventLoopDictSource}
    PUBLIC_HEADERS EventLoop
    INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
    PRIVATE_INCLUDE_DIRS ${Boost_INCLUDE_DIRS}
@@ -48,7 +48,7 @@ atlas_add_test (EventLoop_gt_OutputStreamData
       LINK_LIBRARIES ${ROOT_LIBRARIES} EventLoop AsgTestingLib
       POST_EXEC_SCRIPT noerror.sh)
 
-      atlas_add_test (EventLoop_gt_SubmitDirManager
+atlas_add_test (EventLoop_gt_SubmitDirManager
       SOURCES test/gt_SubmitDirManager.cxx
       INCLUDE_DIRS ${Boost_INCLUDE_DIRS} ${ROOT_INCLUDE_DIRS}
       LINK_LIBRARIES ${Boost_LIBRARIES} ${ROOT_LIBRARIES} EventLoop AsgTestingLib

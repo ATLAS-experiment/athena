@@ -30,6 +30,23 @@ namespace EL
     StatusCode BatchInputModule ::
     processInputs (ModuleData& data, IInputModuleActions& actions)
     {
+      if (data.m_batchJob == nullptr)
+      {
+        ANA_MSG_ERROR ("no batch job configured for the input module");
+        return StatusCode::FAILURE;
+      }
+      if (jobId.value() < 0)
+      {
+        ANA_MSG_ERROR ("no valid job id configured: " << jobId.value());
+        return StatusCode::FAILURE;
+      }
+      if (std::size_t (jobId.value()) >= data.m_batchJob->segments.size())
+      {
+        ANA_MSG_ERROR ("job id " << jobId.value() << " out of range, only "
+                       << data.m_batchJob->segments.size() << " segments");
+        return StatusCode::FAILURE;
+      }
+
       BatchSegment *segment = &data.m_batchJob->segments.at(jobId.value());
       if (int (segment->job_id) != jobId.value())
       {
@@ -46,6 +63,13 @@ namespace EL
       Long64_t endEvent   = segment->end_event;
       if (endEvent > 0) endFile += 1;
 
+      // the number of events still to be processed across the whole
+      // segment, so that maxEvents is honoured for the segment as a whole
+      // rather than being reapplied to every file
+      std::optional<std::int64_t> toProcess;
+      if (maxEvents != -1)
+        toProcess = maxEvents.value();
+
       for (Long64_t file = beginFile; file != endFile; ++ file)
       {
         RCU_ASSERT (std::size_t(file) < sample->files.size());
@@ -53,17 +77,25 @@ namespace EL
         eventRange.m_url = sample->files[file];
         eventRange.m_beginEvent = (file == beginFile ? beginEvent : 0);
         eventRange.m_endEvent = (file == lastFile ? endEvent : EventRange::eof);
-        if (maxEvents != -1)
+        if (toProcess.has_value())
         {
           if (eventRange.m_endEvent == EventRange::eof)
           {
             ANA_CHECK (actions.openInputFile (eventRange.m_url));
             eventRange.m_endEvent = actions.inputFileNumEntries();
           }
-          eventRange.m_endEvent = std::min<std::uint64_t> (eventRange.m_endEvent, eventRange.m_beginEvent + maxEvents.value());
+          if (eventRange.m_endEvent > eventRange.m_beginEvent + toProcess.value())
+            eventRange.m_endEvent = eventRange.m_beginEvent + toProcess.value();
+          toProcess.value() -= eventRange.m_endEvent - eventRange.m_beginEvent;
         }
-          
+
         ANA_CHECK (actions.processEvents (eventRange));
+
+        if (toProcess.has_value() && toProcess.value() == 0)
+        {
+          ANA_MSG_INFO ("Reached maximum number of events, stopping.");
+          break;
+        }
       }
 
       return StatusCode::SUCCESS;

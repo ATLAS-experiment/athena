@@ -9,6 +9,7 @@
 #define EVENT_LOOP__BATCH_INPUT_MODULE_H
 
 #include <EventLoop/Module.h>
+#include <AsgTools/PropertyWrapper.h>
 #include <cstdint>
 #include <optional>
 

@@ -15,10 +15,6 @@
 #include <EventLoop/ModuleData.h>
 #include <EventLoop/OutputStreamData.h>
 #include <Rtypes.h>
-#include <unordered_map>
-
-class TList;
-class TStopwatch;
 
 namespace EL
 {
@@ -260,9 +256,6 @@ namespace EL
       EC_BADINPUT = 223
     };
 
-  private:
-    void gridCreateJobSummary(uint64_t eventsProcessed);
-
 
     /// \brief set the \ref metaData
     /// \par Guarantee
@@ -401,19 +394,6 @@ namespace EL
     /// \brief Error handler for file opening
   private:
     static bool fileOpenErrorFilter(int level, bool, const char*, const char *);
-
-
-    /// \brief the output map
-  private:
-    typedef std::map<std::string,TH1*>::const_iterator OutputHistMapIter;
-    std::map<std::string,TH1*> m_outputHistMap;
-
-
-    /// description: the list of output trees
-  private:
-    typedef std::map<std::pair<std::string,std::string>,TTree*>::const_iterator
-       OutputTreeMapIter;
-    std::map<std::pair<std::string,std::string>,TTree*> m_outputTreeMap;
 
 
     /// \brief the list of modules we hold
