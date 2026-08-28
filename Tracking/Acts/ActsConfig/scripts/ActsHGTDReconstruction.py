@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # Main script execution
 if __name__ == "__main__":
@@ -60,10 +60,8 @@ if __name__ == "__main__":
     flags.Acts.doITkConversion=False
     flags.Tracking.doITkConversion=False
     
-    flags.Tracking.ITkMainPass.doAthenaToActsSpacePoint=True
-    flags.Tracking.ITkMainPass.doAthenaToActsCluster=True
     from TrkConfig.TrkConfigFlags import TrackingComponent
-    flags.Tracking.recoChain = [TrackingComponent.ActsLegacyChain] # Use ActsLegacyChain to avoid fast tracking requirement
+    flags.Tracking.recoChain = [TrackingComponent.ActsChain]
     flags.Acts.doRotCorrection = False
 
     flags.lock()

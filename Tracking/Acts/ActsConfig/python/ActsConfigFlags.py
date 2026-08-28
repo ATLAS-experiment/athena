@@ -1,7 +1,7 @@
 # Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.AthConfigFlags import AthConfigFlags
-from AthenaConfiguration.Enums import FlagEnum
+from AthenaConfiguration.Enums import FlagEnum, LHCPeriod
 
 class SeedingStrategy(FlagEnum):
     GridTriplet = "GridTriplet"
@@ -163,7 +163,8 @@ def createActsConfigFlags():
     actscf.addFlag('Acts.Particles.doAnalysis', lambda pcf: pcf.Acts.doAnalysis)
     actscf.addFlag('Acts.storeTrackStateInfo', False)
     actscf.addFlag('Acts.doTruthInspection', False)
-    actscf.addFlag('Acts.doxAODToTrkConversion', False)
+    # Save Trk::Track link for combined muon reconstruction, temporary
+    actscf.addFlag('Acts.doxAODToTrkConversion', True)
 
     # Cluster
     actscf.addFlag("Acts.Clusters.UseWeightedPosition", False)
@@ -204,7 +205,7 @@ def createActsConfigFlags():
     actscf.addFlag('Acts.refitSeeds', False) # refit seeds for CKF initial parameters
         
     # Ambiguity resolution    
-    actscf.addFlag('Acts.doAmbiguityResolution', True)
+    actscf.addFlag('Acts.doAmbiguityResolution', False)
     actscf.addFlag('Acts.AmbiguitySolverStrategy', AmbiguitySolverStrategy.Greedy, type=AmbiguitySolverStrategy)  # Define Ambiguity Solver Strategy
     actscf.addFlag('Acts.AmbiguitySolverMode', lambda pcf: AmbiguitySolverMode.OUTSIDE_TF if pcf.Acts.doAmbiguityResolution else AmbiguitySolverMode.DURING_TF, type=AmbiguitySolverMode)
     
@@ -218,10 +219,12 @@ def createActsConfigFlags():
 
     # GSF specific flags
     actscf.addFlag("Acts.GsfRefitLegacyTrk", False) # Refit Legacy tracks using ACTS GSF
-    actscf.addFlag("Acts.GsfRefitActs", False) # Refit ACTS tracks using ACTS GSF
+    actscf.addFlag("Acts.GsfRefitActs", lambda pcf:
+                   pcf.GeoModel.Run >= LHCPeriod.Run4) # Refit ACTS tracks using ACTS GSF
     actscf.addFlag("Acts.GsfMaxComponents", 12)
     actscf.addFlag("Acts.GsfComponentMergeMethod", 'MaxWeight')
-    actscf.addFlag("Acts.GsfDirectNavigation", False)
+    actscf.addFlag("Acts.GsfDirectNavigation", lambda pcf:
+                   pcf.GeoModel.Run >= LHCPeriod.Run4)
     actscf.addFlag("Acts.GsfOutlierChi2Cut", 1e4) # Effectively no cut. Compatible with legacy
     actscf.addFlag("Acts.extrapolateElectronsLegacy", lambda pcf:
                    not pcf.Acts.TrackingGeometry.UseBlueprint) # Use legacy calo extrapolation with ACTS tracks
