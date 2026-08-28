@@ -1,7 +1,8 @@
 #!/bin/bash
-## For the moment, this script checks out the G-200 branch and builds.
-## Later it should be replaced with any special setup to run from Athena - or maybe just a noop.
-## This script can be used to for G-0xx, G-1xx, and G-2xx pipelines.
+## For the moment, this script checks out the G-200/ART repo and builds.
+## THAT REPOSITORY IS NO-LONGER IN DEVELOPMENT AND WILL SOON BE OUTDATED/NON-FUNCTIONAL
+## This script is currently used for the G-1xx and G-2xx pipelines, BUT THIS IS DEPRECIATED AND WILL SOON BE REPLACED.
+##
 ## Normally, this script should be `source`d so environment variables are inherited by the caller. Error `exit`s will exit the caller.
 
 cmd() {
