@@ -7,6 +7,11 @@ def PersistifyClusters(flags,
                        pixelClusterCollections: list[str] = None,
                        stripClusterCollections: list[str] = None,
                        hgtdClusterCollections: list[str] = None) -> ComponentAccumulator:
+
+    acc = ComponentAccumulator()
+    if not flags.Acts.EDM.PersistifyClusters:
+        return acc
+
     toESD = []
     toAOD = []
     if pixelClusterCollections is not None:
@@ -32,12 +37,9 @@ def PersistifyClusters(flags,
             toAOD += [f"xAOD::HGTDClusterContainer#{hgtdClusterCollection}",
                       f"xAOD::HGTDClusterAuxContainer#{hgtdClusterCollection}Aux.{hgtd_cluster_variables}"]
 
-    acc = ComponentAccumulator()
-
     from OutputStreamAthenaPool.OutputStreamConfig import addToESD, addToAOD
     acc.merge(addToESD(flags, toESD + toAOD))
-    if flags.Acts.EDM.PersistifyClusters:
-        acc.merge(addToAOD(flags, toAOD))
+    acc.merge(addToAOD(flags, toAOD))
     return acc
 
 
@@ -45,6 +47,11 @@ def PersistifySpacePoints(flags,
                           *,
                           pixelSpacePointCollections: list[str] = None,
                           stripSpacePointCollections: list[str] = None) -> ComponentAccumulator:
+
+    acc = ComponentAccumulator()
+    if not flags.Acts.EDM.PersistifySpacePoints:
+        return acc
+
     toESD = []
     toAOD = []
     aux_container_type = "xAOD::SpacePointAuxContainer"
@@ -75,13 +82,10 @@ def PersistifySpacePoints(flags,
         for stripSpacePointCollection in stripSpacePointCollections:
             toAOD += [f'xAOD::SpacePointContainer#{stripSpacePointCollection}',
                       f"{aux_container_type}#{stripSpacePointCollection}Aux.{strip_spacepoint_variables}"]
-            
-    acc = ComponentAccumulator()
 
     from OutputStreamAthenaPool.OutputStreamConfig import addToESD, addToAOD
     acc.merge(addToESD(flags, toESD + toAOD))
-    if flags.Acts.EDM.PersistifySpacePoints:
-        acc.merge(addToAOD(flags, toAOD))
+    acc.merge(addToAOD(flags, toAOD))
     return acc
 
 

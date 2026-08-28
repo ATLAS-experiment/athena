@@ -372,6 +372,9 @@ atlas_add_citest( ACTS_Propagation_ID
 atlas_add_citest( ACTS_Workflow
    SCRIPT ActsWorkflow.sh )
 
+atlas_add_citest( Athena_Tracking_Workflow_Legacy
+   SCRIPT AthenaTrackingWorkflowLegacy.sh )
+ 
 atlas_add_citest( ACTS_Workflow_Legacy
    SCRIPT ActsWorkflowLegacy.sh )
 
@@ -380,36 +383,15 @@ atlas_add_citest( ACTS_Workflow_Cached
  
 atlas_add_citest( ACTS_Workflow_HeavyIons
    SCRIPT ActsWorkflowHeavyIons.sh )
- 
-atlas_add_citest( ACTS_ValidateClusters
-   SCRIPT ActsValidateClusters.sh )
 
 atlas_add_citest( ACTS_ActsPersistifyEDM 
    SCRIPT ActsPersistifyEDM.sh )
 
-atlas_add_citest( ACTS_ValidateTracks
-   SCRIPT ActsValidateTracks.sh )
-
-atlas_add_citest( ACTS_ValidateResolvedTracks
-   SCRIPT ActsValidateResolvedTracks.sh )
-
-atlas_add_citest( ACTS_ValidateAmbiguityResolution
-   SCRIPT ActsValidateAmbiguityResolution.sh )
-
 atlas_add_citest( ACTS_WorkflowWithScoreBasedAmbiguity
    SCRIPT ActsWorkflowWithScoreBasedAmbiguity.sh )
 
-atlas_add_citest( ACTS_ActsGx2fRefitting
-   SCRIPT ActsGx2fRefitting.sh )
-   
-atlas_add_citest( ACTS_ActsKfRefitting
-   SCRIPT ActsKfRefitting.sh )
-
 atlas_add_citest( ACTS_ActsEFTrackFit
    SCRIPT ActsEFTrackFit.sh )
-
-atlas_add_citest( ACTS_ActsGSFRefitting
-   SCRIPT ActsGSFRefitting.sh )
 
 atlas_add_citest( ACTS_ActsGSFRefittingWithActsElectronExtrapolation
    SCRIPT ActsGSFRefitWithActsElectronExtrapolation.sh )

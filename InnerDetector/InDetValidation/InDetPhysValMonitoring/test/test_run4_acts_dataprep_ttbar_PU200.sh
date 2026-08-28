@@ -28,9 +28,6 @@ run () {
     echo "Running ${name}..."
     time "${cmd[@]}"
     rc=$?
-    # Only report hard failures for comparison Acts-Trk since we know
-    # they are different. We do not expect this test to succeed
-    [ "${name}" = "dcube-trk" ] && [ $rc -ne 255 ] && rc=0
     echo "art-result: $rc ${name}"
     return $rc
 }
@@ -45,8 +42,8 @@ run "Reconstruction-acts" \
     --inputRDOFile ${rdo} \
     --outputAODFile AOD.acts.root \
     --conditionsTag "default:${conditionsTag}" \
-    --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude,ActsConfig.ActsCIFlags.actsLegacyWorkflowFlags" \
-    --preExec "flags.Reco.EnableHGTDExtension=False;flags.Acts.EDM.PersistifyClusters=True;flags.Acts.EDM.PersistifySpacePoints=True;" \
+    --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude" \
+    --preExec "flags.Acts.EDM.PersistifyClusters=True;flags.Acts.EDM.PersistifySpacePoints=True;" \
     --maxEvents ${nEvents} \
     --perfmon fullmonmt \
     --multithreaded
@@ -60,44 +57,10 @@ if [ $reco_rc != 0 ]; then
     exit $reco_rc
 fi
 
-# Run Athena Reco
-run "Reconstruction-athena" \
-    Reco_tf.py \
-    --inputRDOFile ${rdo} \
-    --outputAODFile AOD.athena.root \
-    --conditionsTag "default:${conditionsTag}" \
-    --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude" \
-    --postInclude "InDetConfig.InDetPrepRawDataFormationConfig.ITkInDetToXAODClusterConversionCfg,InDetConfig.SiSpacePointFormationConfig.InDetToXAODSpacePointConversionCfg,ActsConfig.ActsPostIncludes.PersistifyActsEDMCfg" \
-    --preExec "flags.Reco.EnableHGTDExtension=False;flags.Acts.EDM.PersistifyClusters=True;flags.Acts.EDM.PersistifySpacePoints=True;" \
-    --maxEvents ${nEvents} \
-    --perfmon fullmonmt \
-    --multithreaded
-
-reco_rc=$?
-
-# Rename log
-mv log.RAWtoALL log.RAWtoALL.athena
-
-if [ $reco_rc != 0 ]; then
-    exit $reco_rc
-fi
-
 run "IDPVM-acts" \
     runIDPVM.py \
     --filesInput AOD.acts.root \
     --outputFile idpvm.acts.root \
-    --OnlyTrackingPreInclude \
-    --doActs
-
-reco_rc=$?
-if [ $reco_rc != 0 ]; then
-    exit $reco_rc
-fi
-
-run "IDPVM-athena" \
-    runIDPVM.py \
-    --filesInput AOD.athena.root \
-    --outputFile idpvm.athena.root \
     --OnlyTrackingPreInclude \
     --doActs
 
@@ -116,16 +79,6 @@ run "dcube-last" \
     --plotopts=ratio \
     -c ${dcubeXmlAbsPath} \
     -r ${lastref_dir}/idpvm.acts.root \
-    idpvm.acts.root
-
-run "dcube-trk" \
-    $ATLAS_LOCAL_ROOT/dcube/current/DCubeClient/python/dcube.py \
-    -p -x dcube_trk \
-    --plotopts=ratio \
-    -c ${dcubeXmlAbsPath} \
-    -r idpvm.athena.root \
-    -M "acts" \
-    -R "athena" \
     idpvm.acts.root
 
 echo "Clean up output directory (based on compiler)"

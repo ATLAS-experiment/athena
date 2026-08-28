@@ -56,9 +56,9 @@ if [ ! -f $inputRDO ]; then
 fi
 
 ## running reconstruction
-run Reco_tf.py --CA \
+run Reco_tf.py \
     --maxEvents ${nEvents} \
-    --preInclude 'InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude,ActsConfig.ActsCIFlags.actsProductionFlags' \
+    --preInclude 'InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude' \
     --postInclude 'ActsConfig.ActsPostIncludes.ACTSClusterPostInclude' \
     --preExec 'flags.Detector.EnableHGTD=False; \
                flags.Acts.doLargeRadius=False; \
@@ -67,7 +67,6 @@ run Reco_tf.py --CA \
                flags.Tracking.ITkActsPass.storeTrackSeeds=True; \
                from ActsConfig.ActsConfigFlags import SeedingStrategy; \
                flags.Acts.SeedingStrategy=SeedingStrategy.Gbts;' \
-    --steering 'doRAWtoALL' \
     --inputRDOFile ${inputRDO} \
     --outputAODFile ${outputAOD} \
     --perfmon fullmonmt

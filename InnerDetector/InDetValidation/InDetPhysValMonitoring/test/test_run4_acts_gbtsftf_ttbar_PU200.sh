@@ -43,10 +43,9 @@ export ATHENA_CORE_NUMBER=4
 # Run Athena with ACTS fast tracking and FTF GBTS seeding
 run "Reconstruction-gbts" \
     Reco_tf.py \
-    --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude,ActsConfig.ActsCIFlags.actsProductionFlags" \
+    --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude" \
     --preExec "from ActsConfig.ActsConfigFlags import SeedingStrategy; \
                flags.Acts.SeedingStrategy=SeedingStrategy.GbtsFtf; \
-               flags.Tracking.doPixelDigitalClustering=True; \
                flags.Tracking.writeExtendedSi_PRDInfo=True; \
                flags.Acts.doMonitoring=True; \
                flags.Acts.doAnalysis=True; \
@@ -84,11 +83,13 @@ if [ $reco_rc != 0 ]; then
     exit $reco_rc
 fi
 
-# Run Athena with ACTS fast tracking and default seeding
+# Run Athena with ACTS fast tracking and triplet seeding
 run "Reconstruction-acts" \
     Reco_tf.py \
-    --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude,ActsConfig.ActsCIFlags.actsProductionFlags" \
-    --preExec "flags.Tracking.writeExtendedSi_PRDInfo=True; \
+    --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude" \
+    --preExec "from ActsConfig.ActsConfigFlags import SeedingStrategy; \
+               flags.Acts.SeedingStrategy=SeedingStrategy.GridTriplet; \
+	       flags.Tracking.writeExtendedSi_PRDInfo=True; \
                flags.Acts.doMonitoring=True; \
                flags.Acts.doAnalysis=True; \
                flags.Acts.doAnalysisNtuples=False; \

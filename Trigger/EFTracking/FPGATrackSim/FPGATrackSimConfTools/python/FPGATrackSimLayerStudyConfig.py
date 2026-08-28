@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaCommon.Logging import logging
@@ -167,12 +167,8 @@ if __name__ == "__main__":
     FinalProtoTrackChainxAODTracksKey="FPGA"
     flags.Detector.EnableCalo = False
 
-    # ensure that the xAOD SP and cluster containers are available
-    flags.Tracking.ITkMainPass.doAthenaToActsSpacePoint=True
-    flags.Tracking.ITkMainPass.doAthenaToActsCluster=True
-    from ActsConfig.ActsCIFlags import actsLegacyWorkflowFlags
-    actsLegacyWorkflowFlags(flags)
     flags.Acts.doRotCorrection = False
+    flags.Acts.doxAODToTrkConversion = False
 
     ############################################
     flags.Concurrency.NumThreads=1
@@ -208,7 +204,6 @@ if __name__ == "__main__":
 
     flags.lock()
     flags.dump()
-    flags = flags.cloneAndReplace("Tracking.ActiveConfig","Tracking.MainPass")
     acc=MainServicesCfg(flags)
 
 
@@ -244,6 +239,7 @@ if __name__ == "__main__":
     acc.merge(FPGATrackSimRunLayerStudyOnManyRegions(flags))
 
     # Configure dataprep as well; layerstudy is already configured above
+    flags = flags.cloneAndReplace("Tracking.ActiveConfig", "Tracking.ITkActsPass")
     acc.merge(FPGATrackSimDataPrepConfig.FPGATrackSimDataPrepAlgCfg(flags))
 
     acc.store(open('AnalysisConfig.pkl','wb'))

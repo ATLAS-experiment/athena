@@ -43,10 +43,9 @@ export ATHENA_CORE_NUMBER=8
 # Run Athena with ACTS fast tracking and GBTS core seeding
 run "Reconstruction-gbtsacts" \
     Reco_tf.py \
-    --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude,ActsConfig.ActsCIFlags.actsProductionFlags" \
+    --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude" \
     --preExec "from ActsConfig.ActsConfigFlags import SeedingStrategy; \
                flags.Acts.SeedingStrategy=SeedingStrategy.Gbts; \
-               flags.Tracking.doPixelDigitalClustering=True; \
                flags.Tracking.writeExtendedSi_PRDInfo=True; \
                flags.Acts.doMonitoring=True; \
                flags.Acts.doAnalysis=True; \
@@ -87,10 +86,9 @@ fi
 # Run Athena with ACTS fast tracking and FTF GBTS seeding
 run "Reconstruction-gbtsftf" \
     Reco_tf.py \
-    --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude,ActsConfig.ActsCIFlags.actsProductionFlags" \
+    --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude" \
     --preExec "from ActsConfig.ActsConfigFlags import SeedingStrategy; \
                flags.Acts.SeedingStrategy=SeedingStrategy.GbtsFtf; \
-               flags.Tracking.doPixelDigitalClustering=True; \
                flags.Tracking.writeExtendedSi_PRDInfo=True; \
                flags.Acts.doMonitoring=True; \
                flags.Acts.doAnalysis=True; \

@@ -571,12 +571,6 @@ def runDataPrepChain():
     from InDetConfig.ConfigurationHelpers import OnlyTrackingPreInclude
     OnlyTrackingPreInclude(flags)
     
-    
-    
-    ############################################    
-    from ActsConfig.ActsCIFlags import actsProductionFlags
-    actsProductionFlags(flags)
-    
     ############################################
     flags.Concurrency.NumThreads=1
     flags.Concurrency.NumConcurrentEvents=1

@@ -14,7 +14,7 @@ Reco_tf.py \
   --preExec "flags.Exec.FPE=-1; \
        from ActsConfig.ActsConfigFlags import SeedingStrategy; \
        flags.Acts.SeedingStrategy=SeedingStrategy.Gbts;" \
-  --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude,ActsConfig.ActsCIFlags.actsProductionFlags" \
+  --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude" \
   --ignorePatterns "${ignore_pattern}" \
   --conditionsTag ${conditions_tag} \
   --inputRDOFile ${input_rdo} \

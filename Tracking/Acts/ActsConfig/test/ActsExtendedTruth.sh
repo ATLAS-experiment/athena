@@ -72,7 +72,7 @@ Reco_tf.py \
                flags.Scheduler.ShowDataDeps=True; \
                flags.Scheduler.ShowDataFlow=True; \
                flags.Scheduler.ShowControlFlow = True;" \
-    --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude,ActsConfig.ActsCIFlags.actsProductionFlags" \
+    --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude" \
     --multithreaded
 
 rc=$?

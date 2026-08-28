@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.AthConfigFlags import AthConfigFlags
 from AthenaConfiguration.Enums import FlagEnum
@@ -11,7 +11,7 @@ def createHGTD_ConfigFlags():
   hgtdcf = AthConfigFlags()
 
   hgtdcf.addFlag('HGTD.doMonitoring', False)
-  hgtdcf.addFlag('HGTD.doActs', False)
+  hgtdcf.addFlag('HGTD.doActs', True)
   hgtdcf.addFlag('HGTD.outputAltirocRDO', False)
   hgtdcf.addFlag('HGTD.Acts.ClusteringStrategy', ClusteringStrategy.SinglePad, type=ClusteringStrategy)
   hgtdcf.addFlag('HGTD.useALTIROC_RDO',False)
