@@ -2,10 +2,9 @@
 # Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # single mu HITS
-input_hits=/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/PhaseIIUpgrade/HITS/ATLAS-P2-RUN4-04-00-00/mc21_14TeV.900495.PG_single_muonpm_Pt10_etaFlatnp0_43.simul.HITS.e8481_s4494/*
+input_hits=/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/PhaseIIUpgrade/HITS/ATLAS-P2-RUN4-05-00-00/mc21_14TeV.900495.PG_single_muonpm_Pt10_etaFlatnp0_43.simul.HITS.e8481_s4676/*
 n_events=1000
 
-default_geometry="ATLAS-P2-RUN4-04-00-00"
 default_condition=$(python -c "from AthenaConfiguration.TestDefaults import defaultConditionsTags; print(defaultConditionsTags.RUN4_MC)")
 
 checkCollectionOnFile() {
@@ -35,7 +34,6 @@ Reco_tf.py \
     --outputRDOFile RDO.pool.root \
     --maxEvents ${n_events} \
     --conditionsTag "${default_condition}" \
-    --geometryVersion "${default_geometry}" \
     --preExec "all:flags.Scheduler.CheckDependencies=True; \
                flags.Scheduler.ShowDataDeps=True; \
                flags.Scheduler.ShowDataFlow=True; \
