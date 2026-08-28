@@ -159,6 +159,18 @@ def ActsMainTrackFindingAlgCfg(flags,
         kwargs.setdefault("ptMinMeasurements", seedOrder(flags, pixel=[3], strip=[6]))
         kwargs.setdefault("absEtaMaxMeasurements", seedOrder(flags, pixel=[3], strip=[999999]))
 
+    if 'TrackParamsEstimationTool' not in kwargs:
+        from ActsConfig.ActsTrackParamsEstimationConfig import ActsTrackParamsEstimationToolCfg
+
+        # set TrackParamsEstimationTool in case not defined by caller
+        tpe_tool_kwargs = {}
+        if flags.Tracking.ActiveConfig.isLargeD0:
+            tpe_tool_kwargs["allowPropagatorFailure"] = True
+        tpe_tool_kwargs["stripCalibrationIterations"] = flags.Acts.stripCalibrationIterations
+        tpe = acc.popToolsAndMerge(ActsTrackParamsEstimationToolCfg(flags, **tpe_tool_kwargs))
+
+        kwargs.setdefault('TrackParamsEstimationTool', seedOrder(flags, pixel=[tpe], strip=[tpe]))
+
     if flags.Acts.doPrintTrackStates and 'TrackStatePrinter' not in kwargs:
         kwargs.setdefault(
             "TrackStatePrinter",
