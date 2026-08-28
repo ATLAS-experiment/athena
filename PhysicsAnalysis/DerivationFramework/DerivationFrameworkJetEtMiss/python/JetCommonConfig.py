@@ -99,7 +99,7 @@ def AddJvtDecorationAlgCfg(ConfigFlags, algName = "JvtPassDecorAlg", jetContaine
     return acc
 
 def DecorateHSTP(ConfigFlags):
-    """ Determin if the process is Dijet and would therefore need HSTP filtering.
+    """ Determine if the process is Dijet and would therefore need HSTP filtering.
 
         QCD multijet (dijet) simulations face an ambiguity between HS and pileup jets, 
         since both originate from the same physics process. Combined with JZ sample slicing, 
@@ -111,59 +111,51 @@ def DecorateHSTP(ConfigFlags):
     """
 
     from AthenaConfiguration.AutoConfigFlags import GetFileMD
-    #from PathResolver import PathResolver
+    from AthenaCommon.Utils.unixtools import find_datafile
+    from AthenaCommon.Logging import logging
     import os
+    import re
 
+    log           = logging.getLogger('DecorateHSTP')
     dsid          = GetFileMD(ConfigFlags.Input.Files).get("mc_channel_number", 0)
     mc_campaign   = str(ConfigFlags.Input.MCCampaign)
-    sample_name   = None
     pmgxsec_files = []
-    pmg_dir       = None
-
-    # This for loop replaces a call to PathResolver.FindCalibDirectory("dev/PMGTools"), 
-    # It is implimented to avoid Error status from referencing dev/. 
-    # Feedback welcome! See: https://atlas-talk.web.cern.ch/t/best-practice-for-identifying-dijet-jz-samples-in-athena/48613/3
-    for calib_dir in os.environ.get("CALIBPATH", "").split(":"):
-        pmg_dir = os.path.join(calib_dir, "dev/PMGTools")
-        if not os.path.isdir(pmg_dir):
-            continue
-
-        # First try MCCampaign
-        if "MC" in mc_campaign:
-          mc_number = mc_campaign.split("MC", 1)[1]
-          mc_number = mc_number.rstrip("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ ")
-          if mc_number.isdigit(): 
-            finename = os.path.join(pmg_dir, f"PMGxsecDB_mc{mc_number}.txt")
-            if os.path.isfile(finename):
-              pmgxsec_files.append(finename)
-        # If MC number not saved (for Ex: "campaign.undefined"), searching all available databases
-        else:
-            for filename in os.listdir(pmg_dir):
-              if not filename.startswith("PMGxsecDB_mc") or not filename.endswith(".txt"):
-                continue
-              mc_part = filename[12:-4]  # accept files with names with TeV in, for ex: "PMGxsecDB_mc15_14TeV.tex
-              if "_TeV" in mc_part:
-                mc_part = mc_part.rsplit("_", 1)[0]
-              if mc_part.isdigit():
-                pmgxsec_files.append(os.path.join(pmg_dir, filename))
+ 
+    # First try database search via MC campaign
+    mc_match = re.search(r"MC(\d+(?:_14TeV)?)", mc_campaign)
+    if mc_match:
+      mc_number = mc_match.group(1)
+      file_name = find_datafile( f"JetSelectorTools/DijetMCsamples/PMGxsecDB_mc{mc_number}.txt" )
+      if file_name and os.path.isfile(file_name):
+        pmgxsec_files.append(file_name)
+    # If MC campaign is undefined, or mc_number doesnt correespond with a file searching all available databases
+    if not pmgxsec_files:
+      print("here")
+      dijet_samples_dir = os.path.dirname( find_datafile( "JetSelectorTools/DijetMCsamples/PMGxsecDB_mc23.txt" ) )
+      pmgxsec_files = [
+        os.path.join(dijet_samples_dir, file_name)
+        for file_name in os.listdir(dijet_samples_dir)
+        if file_name.endswith(".txt")
+      ]
 
     # Search all selected xSecDB files for the DSID
+    is_jz_sample = False
     for candidate in pmgxsec_files:
-      with open(candidate) as xsec_file:
+      with open(candidate, 'r', encoding="utf-8") as xsec_file:
         for line in xsec_file:
           fields = line.split()
-          if len(fields) >= 2 and fields[0] == str(dsid):
-            sample_name = fields[1]
+          if fields and fields[0] == str(dsid):
+            is_jz_sample = True
             break
-        if sample_name is not None:
-            break
-    if sample_name is None:
-        return False
-        
-    is_jz_sample = any( f"JZ{i}" in sample_name for i in range(10) )
+      if is_jz_sample:
+        break
+
+    if is_jz_sample:
+      log.info("DSID %s is a Dijet (JZ) process. Decorating passHSTPFilter", dsid)
+    else:
+      log.info("DSID %s is not a Dijet (JZ) process.", dsid)
 
     return is_jz_sample
-
 
 
 def AddEventCleanFlagsCfg(ConfigFlags, workingPoints = ['Loose', 'Tight', 'LooseLLP']):

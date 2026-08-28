@@ -78,7 +78,7 @@ StatusCode EventCleaningTestAlg::execute(const EventContext& ctx)
 
     SG::WriteDecorHandle<xAOD::EventInfo, char> eventDecor{m_evtInfoDecor, ctx};
     if (!eventDecor.isValid()){
-       ATH_MSG_FATAL("Failed to retrieve the event info "<<m_evtKey.fullKey());
+       ATH_MSG_FATAL("Failed to retrieve the event info "<<m_evtInfoDecor.fullKey());
        return StatusCode::FAILURE;
     }
     eventDecor(*eventInfo) = result;
@@ -126,7 +126,7 @@ StatusCode EventCleaningTestAlg::execute(const EventContext& ctx)
     // Write decoration
     SG::WriteDecorHandle<xAOD::EventInfo, char> eventDecor{m_evtInfoDecorHSTP, ctx};
     if (!eventDecor.isValid()){
-       ATH_MSG_FATAL("Failed to retrieve the event info "<<m_evtKey.fullKey());
+       ATH_MSG_FATAL("Failed to retrieve the event info "<<m_evtInfoDecorHSTP.fullKey());
        return StatusCode::FAILURE;
     }
     eventDecor(*eventInfo) = hstpResult;
