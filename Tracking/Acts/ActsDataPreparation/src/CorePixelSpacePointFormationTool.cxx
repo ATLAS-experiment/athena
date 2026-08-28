@@ -7,8 +7,6 @@
 #include "Acts/SpacePointFormation/PixelSpacePointBuilder.hpp"
 #include "Acts/Surfaces/Surface.hpp"
 
-#include "GaudiKernel/ThreadLocalContext.h"
-
 #include "xAODMeasurementBase/UncalibratedMeasurementContainer.h"
 
 #include <algorithm>
@@ -24,7 +22,8 @@ namespace ActsTrk {
     }
 
     StatusCode
-    CorePixelSpacePointFormationTool::producePixelSpacePoint(const Acts::GeometryContext& gctx,
+    CorePixelSpacePointFormationTool::producePixelSpacePoint(const EventContext& ctx,
+                                                             const Acts::GeometryContext& gctx,
                                                              const xAOD::PixelCluster& cluster,
                                                              xAOD::SpacePoint& sp,
                                                              const InDetDD::SiDetectorElement& /*element*/) const
@@ -48,7 +47,6 @@ namespace ActsTrk {
       // Returned in the order (z, r)
       Acts::Vector2 variance;
       if (m_useSurfaceCache) {
-        const EventContext& ctx = Gaudi::Hive::currentContext();
         SurfaceCache& cache = *m_surfaceCache.get(ctx);
         if (cache.idHash != idHash or cache.evt != ctx.evt()) {
           // Key updated only on success, so a failed look-up leaves no stale frame.
