@@ -17,6 +17,7 @@
 #include "xAODInDetMeasurement/PixelClusterContainer.h"
 #include "xAODInDetMeasurement/SpacePointContainer.h"
 
+#include <limits>
 #include <string>
 
 namespace ActsTrk {
@@ -48,11 +49,11 @@ namespace ActsTrk {
 
     ActsTrk::detail::xAODUncalibMeasSurfAcc m_surfaceAccessor{};
 
-    /// Reference frame of the last surface seen, reusable for every cluster on the
-    /// same module. Stamped with the event so an alignment change cannot go stale.
+    /// Reference frame of the last module seen, keyed on the identifier hash and
+    /// stamped with the event so an alignment change cannot go stale.
     struct SurfaceCache {
-      const Acts::Surface* surface{nullptr};
       Acts::RotationMatrix3 rotLocalToGlobal{Acts::RotationMatrix3::Identity()};
+      xAOD::DetectorIDHashType idHash{std::numeric_limits<xAOD::DetectorIDHashType>::max()};
       EventContext::ContextEvt_t evt{EventContext::INVALID_CONTEXT_EVT};
     };
     mutable SG::SlotSpecificObj<SurfaceCache> m_surfaceCache ATLAS_THREAD_SAFE;

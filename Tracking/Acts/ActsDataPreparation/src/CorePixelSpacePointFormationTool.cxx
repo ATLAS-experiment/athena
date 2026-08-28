@@ -29,32 +29,38 @@ namespace ActsTrk {
                                                              xAOD::SpacePoint& sp,
                                                              const InDetDD::SiDetectorElement& /*element*/) const
     {
-      const Acts::Surface* surface = m_surfaceAccessor.get(&cluster);
-      if (surface == nullptr) {
-        ATH_MSG_FATAL("No ACTS surface for pixel cluster with identifier hash " << cluster.identifierHash());
-        return StatusCode::FAILURE;
-      }
-
+      const xAOD::DetectorIDHashType idHash = cluster.identifierHash();
       const Acts::Vector3 globalPosition = cluster.globalPosition().cast<double>();
       const Acts::SquareMatrix2 localCov = cluster.localCovariance<2>().cast<double>();
+
+      // Clusters come grouped by module: look up the surface only when the module changes.
+      auto lookupReferenceFrame = [this, &gctx, &cluster, idHash](Acts::RotationMatrix3& rot) -> StatusCode {
+        const Acts::Surface* surface = m_surfaceAccessor.get(&cluster);
+        if (surface == nullptr) {
+          ATH_MSG_FATAL("No ACTS surface for pixel cluster with identifier hash " << idHash);
+          return StatusCode::FAILURE;
+        }
+        // Position and direction are unused by plane and disc surfaces
+        rot = surface->referenceFrame(gctx, Acts::Vector3::Zero(), Acts::Vector3::Zero());
+        return StatusCode::SUCCESS;
+      };
 
       // Returned in the order (z, r)
       Acts::Vector2 variance;
       if (m_useSurfaceCache) {
         const EventContext& ctx = Gaudi::Hive::currentContext();
         SurfaceCache& cache = *m_surfaceCache.get(ctx);
-        if (cache.surface != surface or cache.evt != ctx.evt()) {
-          // Position and direction are unused by plane and disc surfaces
-          cache.rotLocalToGlobal = surface->referenceFrame(gctx, Acts::Vector3::Zero(),
-                                                           Acts::Vector3::Zero());
-          cache.surface = surface;
+        if (cache.idHash != idHash or cache.evt != ctx.evt()) {
+          // Key updated only on success, so a failed look-up leaves no stale frame.
+          ATH_CHECK( lookupReferenceFrame(cache.rotLocalToGlobal) );
+          cache.idHash = idHash;
           cache.evt = ctx.evt();
         }
         variance = Acts::PixelSpacePointBuilder::computeCovarianceZR(cache.rotLocalToGlobal,
                                                                      globalPosition, localCov).diagonal();
       } else {
-        const Acts::RotationMatrix3 rotLocalToGlobal =
-          surface->referenceFrame(gctx, Acts::Vector3::Zero(), Acts::Vector3::Zero());
+        Acts::RotationMatrix3 rotLocalToGlobal;
+        ATH_CHECK( lookupReferenceFrame(rotLocalToGlobal) );
         variance = Acts::PixelSpacePointBuilder::computeCovarianceZR(rotLocalToGlobal,
                                                                      globalPosition, localCov).diagonal();
       }
@@ -67,7 +73,7 @@ namespace ActsTrk {
         cov_r = std::min(cov_r, m_maxVarianceR.value());
       }
 
-      sp.setSpacePoint(cluster.identifierHash(),
+      sp.setSpacePoint(idHash,
                        cluster.globalPosition(),
                        cov_r,
                        cov_z,
