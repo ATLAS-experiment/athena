@@ -77,9 +77,8 @@ class TrigCostSvc : public extends <AthService, ITrigCostSvc> {
    * @brief Implementation of ITrigCostSvc::endEvent.
    * @param[in] context The event context
    * @param[out] costOutputHandle Write handle to fill with execution summary if the event was monitored
-   * @param[out] rosOutputHandle Write handle to fill with ROS requests summary if the event was monitored
    */
-  virtual StatusCode endEvent(const EventContext& context, SG::WriteHandle<xAOD::TrigCompositeContainer>& costOutputHandle, SG::WriteHandle<xAOD::TrigCompositeContainer>& rosOutputHandle) override; 
+  virtual StatusCode endEvent(const EventContext& context, SG::WriteHandle<xAOD::TrigCompositeContainer>& costOutputHandle) override; 
 
   /**
    * @return If the current context is flagged as being monitored. 
