@@ -35,8 +35,6 @@ def PhysValMETCfg(flags, **kwargs):
                                                    JetSelection="Loose",
                                                    DoPFlow=True)
 
-    METMakerTopo.OutputLevel=VERBOSE
-    METMakerPFlow.OutputLevel=VERBOSE
 
     kwargs.setdefault("METMakerTopo", METMakerTopo )
     kwargs.setdefault("METMakerPFlow", METMakerPFlow )
