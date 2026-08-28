@@ -55,6 +55,8 @@ if [ ! -f $inputRDO ]; then
     exit 1
 fi
 
+# Use G-200/ART repo to run G230 pipeline.
+# THIS METHOD IS NOW DEPRECIATED AND WILL BE SOON BE REPLACED.
 source "$(dirname "$0")/setup_G200_ART.sh"
 
 ## running reconstruction
