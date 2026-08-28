@@ -92,7 +92,7 @@ StatusCode ITkPixelCsvWaferIdAlg::execute(const EventContext& ctx) const {
                    << x << "\t"
                    << b.to_string() << "\t"
                    << febits.to_string() << "\t"
-                   << bec << "\t"
+                   << std::dec << bec << "\t"
                    << ld << "\t"
                    << phi << "\t"
                    << eta << "\t"
