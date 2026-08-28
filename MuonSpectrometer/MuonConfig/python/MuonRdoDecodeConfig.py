@@ -210,7 +210,6 @@ def TgcRDODecodeCfg(flags, name="MuonTgcRdoToPrdConv", RDOContainer = None,  **k
 
 def StgcRdoToPrepDataToolCfg(flags, name="STGC_PrepDataProviderTool", **kwargs):
     result = ComponentAccumulator()
-    kwargs.setdefault("PrdCacheKey" , MuonPrdCacheNames.sTgcCache if flags.Muon.MuonTrigger else "")
     kwargs.setdefault("UseR4DetMgr", flags.Muon.usePhaseIIGeoSetup)
     if flags.Muon.writexAODPRD or flags.Muon.usePhaseIIGeoSetup:
         kwargs.setdefault("xAODStripKey", "xAODsTgcStrips")
@@ -248,7 +247,6 @@ def StgcRDODecodeCfg(flags, name="MuonStgcRdoToPrdConv", **kwargs):
 
 def MMRdoToPrepDataToolCfg(flags, name="MmRdoToPrepDataTool", **kwargs):
     result = ComponentAccumulator()
-    kwargs.setdefault("PrdCacheKey" , MuonPrdCacheNames.MmCache if flags.Trigger.doHLT  else "")
 
     from MuonConfig.MuonRecToolsConfig import SimpleMMClusterBuilderToolCfg
     kwargs.setdefault("ClusterBuilderTool",result.popToolsAndMerge(SimpleMMClusterBuilderToolCfg(flags)))
