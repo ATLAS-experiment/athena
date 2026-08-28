@@ -73,18 +73,6 @@ namespace pool   {
     }
   }
 
-  /// Release Reference countable pointer
-  template<class T> inline int decrementPtr(T*& p)  {
-    if ( p )    {
-      int cnt = p->release();
-      if ( 0 >= cnt )  {
-        p = 0;
-      }
-      return cnt;
-    }
-    return ~0x0;
-  }
-
   class RefCounter {
   private: 
     int m_count = 1;
