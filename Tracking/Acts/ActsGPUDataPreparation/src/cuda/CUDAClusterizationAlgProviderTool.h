@@ -4,17 +4,16 @@
 #ifndef ACTSGPUDATAPREPARATION_CUDACLUSTERIZATIONALGPROVIDERTOOL_H
 #define ACTSGPUDATAPREPARATION_CUDACLUSTERIZATIONALGPROVIDERTOOL_H
 
-#include "AthenaBaseComps/AthAlgTool.h"
-#include "AthDeviceInterfaces/IMemoryResourcesTool.h"
-#include "AthDeviceInterfaces/ICopyTool.h"
-#include "AthCUDAInterfaces/IStreamTool.h"
+// Local include(s).
 #include "../IDeviceClusterizationAlgProviderTool.h"
 
-#include "vecmem/utils/cuda/copy.hpp"
-
-#include <Gaudi/Property.h>
-#include <memory>
-#include <string>
+// Framework include(s).
+#include "AthCUDAInterfaces/IStreamTool.h"
+#include "AthDeviceInterfaces/ICopyTool.h"
+#include "AthDeviceInterfaces/IMemoryResourcesTool.h"
+#include "AthenaBaseComps/AthAlgTool.h"
+#include "Gaudi/Property.h"
+#include "GaudiKernel/ToolHandle.h"
 
 namespace ActsTrk {
 
@@ -33,45 +32,44 @@ namespace ActsTrk {
  * @author Neža Ribarič <neza.ribaric@cern.ch>
  */
 class CUDAClusterizationAlgProviderTool
-    : public extends<AthAlgTool, IDeviceClusterizationAlgProviderTool>
-{
-public:
+    : public extends<AthAlgTool, IDeviceClusterizationAlgProviderTool> {
+ public:
   using extends::extends;
   /// Function initializing the algorithm
   virtual StatusCode initialize() override;
 
   /// Function constructing the traccc cuda clusterization algorithm
   /// @return cuda clusterization algorithm and vecmem copy object
-  virtual std::pair<std::shared_ptr<const vecmem::copy>, std::shared_ptr<const traccc::device::clusterization_algorithm>> getClusterizationAlgorithm(const EventContext& ctx) const override;
+  virtual DeviceAlgorithmT<traccc::device::clusterization_algorithm>
+  getClusterizationAlgorithm(const EventContext& ctx) const override;
 
   /// Function constructing the traccc cuda measurement sorting algorithm
   /// Neccesary because the CKF requires measurements to be sorted by module ID
   /// @return cuda measurement sorting algorithm and vecmem copy object
-  virtual std::pair<std::shared_ptr<const vecmem::copy>, std::shared_ptr<const IDeviceClusterizationAlgProviderTool::sorting_algorithm_type>>
-    getSortingAlgorithm(const EventContext& ctx) const override;
+  virtual DeviceAlgorithmT<sorting_algorithm_type> getSortingAlgorithm(
+      const EventContext& ctx) const override;
 
-
-private:
-
+ private:
   traccc::clustering_config m_clusteringConfig{};
 
   /// @name Whether to sort traccc cells on GPU prior to clusterization
-  Gaudi::Property<bool> m_sortCells{this, "CellSorting", true,
-    "Whether to sort traccc cells on GPU prior to clusterization"};
-  /// @name The host and device memory resources tool to use for memory allocations
+  Gaudi::Property<bool> m_sortCells{
+      this, "CellSorting", true,
+      "Whether to sort traccc cells on GPU prior to clusterization"};
+  /// @name The host and device memory resources tool to use for memory
+  /// allocations
   ToolHandle<AthDevice::IMemoryResourcesTool> m_MRs{
-        this, "MemoryResourcesTool", "",
-        "The memory resources tool to use for allocating memory on the device"};
+      this, "MemoryResourcesTool", "",
+      "The memory resources tool to use for allocating memory on the device"};
 
   /// @name The device copy tool to use
-  ToolHandle<AthDevice::ICopyTool> m_copy{
-      this, "CopyProviderTool", "", "Vecmem copy provider tool"};
+  ToolHandle<AthDevice::ICopyTool> m_copy{this, "CopyProviderTool", "",
+                                          "Vecmem copy provider tool"};
   /// @name The cuda stream provider tool
-  ToolHandle<AthCUDA::IStreamTool> m_streamTool{
-      this, "StreamTool", "", "CUDA stream provider tool"};
-
+  ToolHandle<AthCUDA::IStreamTool> m_streamTool{this, "StreamTool", "",
+                                                "CUDA stream provider tool"};
 };
 
-} // namespace ActsTrk
+}  // namespace ActsTrk
 
-#endif // ACTSGPUDATAPREPARATION_CUDACLUSTERIZATIONALGPROVIDERTOOL_H
+#endif  // ACTSGPUDATAPREPARATION_CUDACLUSTERIZATIONALGPROVIDERTOOL_H

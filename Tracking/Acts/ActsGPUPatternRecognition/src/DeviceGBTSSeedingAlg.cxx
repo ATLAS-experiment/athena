@@ -66,13 +66,12 @@ StatusCode DeviceGBTSSeedingAlg::execute(const EventContext& ctx) const
                          << inputTracccMeasurements.key() << "'");
 
   // ---- 2. Get traccc seeding alg ---------------------------------------------
-  auto seeding_pair = m_seedingAlgProviderTool->getGBTSAlgorithm(ctx, m_gbts_config);
-  std::shared_ptr<const traccc::device::gbts_seeding_algorithm> seeding_alg = seeding_pair.second;
-  
+  auto seeding_alg = m_seedingAlgProviderTool->getGBTSAlgorithm(ctx, m_gbts_config);
+
   // ---- 3. Run traccc pixel seed formation ---------------------------------------------
   traccc::edm::seed_collection::buffer pixel_seeds_gpu_buffer = (*seeding_alg)(*inputTracccPixelSpacepoints, *inputTracccMeasurements);
 
-  ATH_MSG_DEBUG("Reconstructed " << (seeding_pair.first)->get_size(pixel_seeds_gpu_buffer) << " pixel seeds.");
+  ATH_MSG_DEBUG("Reconstructed " << seeding_alg.copy().get_size(pixel_seeds_gpu_buffer) << " pixel seeds.");
 
   // ---- 4. Write output traccc seeds to StoreGate -------------------------
   auto outputTracccPixelSeeds = SG::makeHandle(m_outputPixelSeedsKey, ctx);
@@ -107,14 +106,14 @@ StatusCode DeviceGBTSSeedingAlg::configureGBTS()
         m_layerNumberTool->layerGeometry();
     std::vector<TrigInDetSiLayer> layerGeometry;
     std::copy(pVL->begin(), pVL->end(), std::back_inserter(layerGeometry));
-    
+
     std::unique_ptr<TrigFTF_GNN_Geometry> GBTS_geo =
         std::make_unique<TrigFTF_GNN_Geometry>(layerGeometry, gbts_connector);
-    
+
     traccc::device::gbts_layerInfo layerInfo;
     // convert save and convert layer info to SoA
     layerInfo.reserve(GBTS_geo->num_layers());
-   
+
     for (unsigned int index = 0; index < GBTS_geo->num_layers(); ++index) {
         const TrigFTF_GNN_Layer* layer =
             GBTS_geo->getTrigFTF_GNN_LayerByIndex(index);
@@ -131,20 +130,20 @@ StatusCode DeviceGBTSSeedingAlg::configureGBTS()
         layerInfo.addLayer(type, layer->m_bins[0], layer->num_bins(),
                            layer->m_minEta, layer->m_etaBin);
     }
-    
+
     const std::vector<short>* pixel_h2l = m_layerNumberTool->pixelLayers();
-    
+
 
     std::vector<std::pair<std::uint64_t, short>> identifierBinning;
     identifierBinning.reserve(detrayToAthena.size());
-    
+
     // construct identifier -> layer table
     IdContext pixel_context = m_pixelID->wafer_context();
     for (std::pair<std::uint64_t, Identifier> dToI : detrayToAthena) {
         if (m_pixelManager->identifierBelongs(dToI.second)) {
             IdentifierHash idHash{};//default c'tor produces detectable invalid hash
             int rc = m_pixelID->get_hash(dToI.second, idHash, &pixel_context); //rc=0 is ok
-            if (rc!=0)[[unlikely]] continue; 
+            if (rc!=0)[[unlikely]] continue;
             identifierBinning.push_back(std::make_pair(
                 dToI.first, pixel_h2l->at(static_cast<int>(idHash))));
         }
@@ -168,7 +167,7 @@ StatusCode DeviceGBTSSeedingAlg::configureGBTS()
         }
     }
 
-    // traccc::gbts_seedfinder_config gbts_config; 
+    // traccc::gbts_seedfinder_config gbts_config;
     if (!m_gbts_config.setLinkingScheme(binGroups, std::move(layerInfo), identifierBinning,
                                     900.0f, makeActsAthenaLogger(this, "GBTSConfig")))
         return StatusCode::FAILURE;

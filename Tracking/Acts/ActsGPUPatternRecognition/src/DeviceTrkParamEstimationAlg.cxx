@@ -49,25 +49,24 @@ StatusCode DeviceTrkParamEstimationAlg::execute(const EventContext& ctx) const
   ATH_CHECK(inputTracccMeasurements.isValid());
   ATH_MSG_DEBUG("Read traccc measurements from '"
                          << inputTracccMeasurements.key() << "'");
-  
+
   auto inputTracccSpacePoints = SG::makeHandle(m_inputSpacePointsKey, ctx);
   ATH_CHECK(inputTracccSpacePoints.isValid());
   ATH_MSG_DEBUG("Read traccc space points from '"
-                         << inputTracccSpacePoints.key() << "'");  
+                         << inputTracccSpacePoints.key() << "'");
 
   auto inputTracccSeeds = SG::makeHandle(m_inputSeedsKey, ctx);
   ATH_CHECK(inputTracccSeeds.isValid());
   ATH_MSG_DEBUG("Read traccc seeds from '"
-                         << inputTracccSeeds.key() << "'");  
+                         << inputTracccSeeds.key() << "'");
 
   // ---- 2. Get traccc track params estimation alg ---------------------------------------------
-  auto trkparam_pair = m_trkParamAlgProviderTool->getTrkParamAlgorithm(ctx, m_trkparam_config);
-  std::shared_ptr<const traccc::device::seed_parameter_estimation_algorithm> trkparam_alg = trkparam_pair.second;
-  
+  auto trkparam_alg = m_trkParamAlgProviderTool->getAlgorithm(ctx, m_trkparam_config);
+
   // ---- 3. Run traccc initial track params estimation ---------------------------------------------
   traccc::bound_track_parameters_collection_types::buffer trkparam_gpu_buffer = (*trkparam_alg)(*m_deviceMagField, *inputTracccMeasurements, *inputTracccSpacePoints, *inputTracccSeeds);
 
-  ATH_MSG_DEBUG("Reconstructed " << (trkparam_pair.first)->get_size(trkparam_gpu_buffer) << " track parameters.");
+  ATH_MSG_DEBUG("Reconstructed " << trkparam_alg.copy().get_size(trkparam_gpu_buffer) << " track parameters.");
 
   // ---- 4. Write output traccc track parameters to StoreGate -------------------------
   auto outputTracccTrkParams = SG::makeHandle(m_outputTrkParamKey, ctx);
@@ -78,7 +77,5 @@ StatusCode DeviceTrkParamEstimationAlg::execute(const EventContext& ctx) const
 
   return StatusCode::SUCCESS;
 }
-
-
 
 } // namespace ActsTrk
