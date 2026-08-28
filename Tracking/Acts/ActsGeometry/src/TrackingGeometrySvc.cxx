@@ -1295,15 +1295,39 @@ const Acts::TrackingVolume*
 #ifdef ACTSGEOMETRY_HAVE_DETRAY
 StatusCode TrackingGeometrySvc::buildDetrayGeometry() {
   using namespace ActsTrk::detail::GeoVolIds;
-  const Acts::TrackingVolume* beamPipeVolume =
-      m_trackingGeometry->findVolume(Acts::GeometryIdentifier{}.withVolume(s_beamPipeVolumeId));
-  if (!beamPipeVolume) {
-    ATH_MSG_ERROR("BuildDetrayGeometry was requested, but no beam pipe volume "
-                  "(GeometryIdentifier volume=" << s_beamPipeVolumeId
-                  << ") could be found in the tracking geometry. Detray "
-                  "requires the beam pipe volume to be present.");
+  // Detray puts the beam pipe volume at detector index 0 and requires it to
+  // contain the origin, so resolve it by position instead of by GeometryIdentifier.
+  // An id-based lookup would not work anyway: BeamPipeBlueprintNodeBuilder assigns
+  // s_beamPipeVolumeId to *every* volume of the beam pipe subtree (the static
+  // cylinder plus whatever gap volumes the container spawned) and hands out layer
+  // ids incrementally starting at 1, so findVolume() on volume=s_beamPipeVolumeId
+  // -- which implies layer == 0 -- never matches.
+  auto beamPipeResult = m_trackingGeometry->resolveLowestTrackingVolume(
+      getNominalContext().context(), Acts::Vector3::Zero());
+  if (!beamPipeResult.ok()) {
+    ATH_MSG_ERROR("BuildDetrayGeometry was requested, but the tracking volume "
+                  "containing the origin could not be resolved: "
+                  << beamPipeResult.error().message());
     return StatusCode::FAILURE;
   }
+
+  const Acts::TrackingVolume* beamPipeVolume = *beamPipeResult;
+  if (beamPipeVolume == nullptr) {
+    ATH_MSG_ERROR("BuildDetrayGeometry was requested, but no tracking volume "
+                  "contains the origin. Detray requires a beam pipe volume "
+                  "covering (0, 0, 0).");
+    return StatusCode::FAILURE;
+  }
+  if (beamPipeVolume->geometryId().volume() != s_beamPipeVolumeId) {
+    ATH_MSG_WARNING("The tracking volume containing the origin, '"
+                    << beamPipeVolume->volumeName() << "' ("
+                    << beamPipeVolume->geometryId()
+                    << "), is not part of the beam pipe subtree (expected "
+                       "GeometryIdentifier volume=" << s_beamPipeVolumeId
+                    << "). Using it as the Detray beam pipe volume regardless.");
+  }
+  ATH_MSG_INFO("Using '" << beamPipeVolume->volumeName() << "' ("
+               << beamPipeVolume->geometryId() << ") as the Detray beam pipe volume");
 
   ActsPlugins::DetrayPayloadConverter::Config payloadConfig{};
   payloadConfig.beampipeVolume = beamPipeVolume;
