@@ -129,7 +129,7 @@ StatusCode METMonitoringAlg::fillHistograms( const EventContext& ctx ) const {
 	name = metKey + "_phi";
 	auto phi = Monitored::Scalar<double>(name,-1.0);
 	name = metKey + "_sumet";
-	auto sumet = Monitored::Scalar<double>(name,-1.0);
+	auto sumet = Monitored::Scalar<double>(std::move(name),-1.0);
 	ex = xMissEt->mpx() / GeV;        
 	ey =  xMissEt->mpy() / GeV;            
 	et =  xMissEt->met() / GeV;        
