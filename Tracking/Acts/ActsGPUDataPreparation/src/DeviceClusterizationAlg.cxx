@@ -44,12 +44,10 @@ StatusCode DeviceClusterizationAlg::execute(const EventContext& ctx) const
                          << m_inputCellsKey.key() << "'");
 
   // ---- 2. Get traccc clusterization alg ---------------------------------------------
-  auto clustering_pair = m_clusteringAlgProviderTool->getClusterizationAlgorithm(ctx);
-  std::shared_ptr<const traccc::device::clusterization_algorithm> clustering_alg = clustering_pair.second;
+  auto clustering_alg = m_clusteringAlgProviderTool->getClusterizationAlgorithm(ctx);
 
   // ---- 2.5 Retrieve the sorting algorithm ---------------------------------------------
-  auto sorting_pair = m_clusteringAlgProviderTool->getSortingAlgorithm(ctx);
-  std::shared_ptr<const IDeviceClusterizationAlgProviderTool::sorting_algorithm_type> sorting_alg = sorting_pair.second;
+  auto sorting_alg = m_clusteringAlgProviderTool->getSortingAlgorithm(ctx);
 
   // ---- 3. Run traccc clusterization ---------------------------------------------
   traccc::edm::silicon_cluster_collection::buffer cluster_gpu_buffer;
@@ -70,7 +68,7 @@ StatusCode DeviceClusterizationAlg::execute(const EventContext& ctx) const
   auto sortedTracccMeasurements =
       (*sorting_alg)(measurements_gpu_buffer);
 
-  ATH_MSG_DEBUG("Reconstructed " << (clustering_pair.first)->get_size(measurements_gpu_buffer) << " measurements.");
+  ATH_MSG_DEBUG("Reconstructed " << clustering_alg.copy().get_size(measurements_gpu_buffer) << " measurements.");
 
   // ---- 4. Write output traccc measurements to StoreGate -------------------------
   auto outputTracccMeas = SG::makeHandle(m_outputMeasKey, ctx);

@@ -5,23 +5,33 @@
 #ifndef ACTSTRK_IDEVICETRKPARAMALGPROVIDERTOOL_H
 #define ACTSTRK_IDEVICETRKPARAMALGPROVIDERTOOL_H
 
-#include "GaudiKernel/IAlgTool.h"
+// Framework include(s).
 #include "GaudiKernel/EventContext.h"
+#include "GaudiKernel/IAlgTool.h"
 
-#include <traccc/utils/algorithm.hpp>
+// ActsGPU include(s).
+#include "ActsGPUInterfaces/DeviceAlgorithmT.h"
+
+// Traccc include(s).
 #include <traccc/seeding/device/seed_parameter_estimation_algorithm.hpp>
 
 namespace ActsTrk {
 
+/// Interface for tools providing an Acts device/GPU track parameter estimation
+/// algorithm
 class IDeviceTrkParamAlgProviderTool : virtual public IAlgTool {
-public:
+ public:
+  /// Declare the interface ID for this tool.
   DeclareInterfaceID(IDeviceTrkParamAlgProviderTool, 1, 0);
 
-  
-  virtual std::pair<std::shared_ptr<const vecmem::copy>, std::shared_ptr<const traccc::device::seed_parameter_estimation_algorithm>> getTrkParamAlgorithm(const EventContext& ctx, const traccc::track_params_estimation_config& trkparam_config) const = 0;
-  
-};
+  /// Get the device specific track parameter estimation algorithm.
+  virtual DeviceAlgorithmT<traccc::device::seed_parameter_estimation_algorithm>
+  getAlgorithm(
+      const EventContext& ctx,
+      const traccc::track_params_estimation_config& trkparam_config) const = 0;
 
-} // namespace ActsTrk
+};  // class IDeviceTrkParamAlgProviderTool
 
-#endif // ACTSTRK_IDEVICETRKPARAMALGPROVIDERTOOL_H
+}  // namespace ActsTrk
+
+#endif  // ACTSTRK_IDEVICETRKPARAMALGPROVIDERTOOL_H
