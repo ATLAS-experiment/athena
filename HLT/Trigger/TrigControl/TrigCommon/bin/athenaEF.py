@@ -1136,7 +1136,7 @@ def configure_from_ca(args, unparsed_args):
    from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
    from AthenaConfiguration.ComponentFactory import CompFactory
    from AthenaConfiguration.MainServicesConfig import addMainSequences
-   from TrigServices.TriggerUnixStandardSetup import commonServicesCfg, setDefaultOnlineFlags
+   from TrigServices.TrigServicesConfig import commonServicesCfg, setDefaultOnlineFlags
 
    # Create flags with online defaults
    flags = initConfigFlags()
