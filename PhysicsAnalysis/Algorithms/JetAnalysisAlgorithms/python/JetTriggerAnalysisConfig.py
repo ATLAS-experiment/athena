@@ -22,7 +22,6 @@ def configure_emulationTool(alg, config, emulatedChains):
     for prop, value in tool_kwargs.items():
         setattr(trigEmulationTool, prop, value)
 
-    print( f"IZU DEBUG {decisionTool.getType()}/{decisionTool.getName()}")
     trigEmulationTool.TrigDecisionTool = (
             f"{decisionTool.getType()}/{decisionTool.getName()}")
 
