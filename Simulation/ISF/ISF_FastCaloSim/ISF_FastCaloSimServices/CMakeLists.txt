@@ -38,5 +38,9 @@ atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
 atlas_add_test( ISF_FastCaloSimServices_Config_test
                 SCRIPT test/FastCaloSimServicesTest.py -n 3
                 PRIVATE_WORKING_DIRECTORY
+                # Ignore spurious FPEs originating from inside Geant (G4Tubs)
+                # in the clang build (due to Geant not being compiled
+                # with trapping FP).
+                LOG_IGNORE_PATTERN "FPE .*ISF_Kernel_ATLFAST3MT"
                 POST_EXEC_SCRIPT noerror.sh
                 PROPERTIES TIMEOUT 4000)
