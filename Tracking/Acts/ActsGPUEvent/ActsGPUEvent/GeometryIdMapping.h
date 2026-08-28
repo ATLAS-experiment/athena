@@ -119,8 +119,6 @@ class GeometryIdMapping {
 
 }  // namespace ActsTrk
 
-// Needed to record/retrieve this via StoreGate — put the actual hash
-// somewhere stable (e.g. generate with clid.db or pick one and register it).
 #include "AthenaKernel/CLASS_DEF.h"
 CLASS_DEF(ActsTrk::GeometryIdMapping, 263041249, 1)
 
