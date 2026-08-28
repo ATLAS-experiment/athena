@@ -242,6 +242,12 @@ def commonServicesCfg(flags):
         TimeOut = 120e9),        # timeout for stack trace generation changed to 120s (ATR-17112,ATR-25404)
                     create = True )    # always create the service
 
+    # Miscellaneous environment settings.
+    # This includes fixing the cache sizes that Eigen assumes, so that
+    # operations on large matrices will give identical results across
+    # hardware with differing cache sizes.
+    cfg.addService(CompFactory.AthEnvironmentSvc(), create=True)
+
     # IOVSvc
     cfg.addService( CompFactory.IOVSvc(
         updateInterval = "RUN",
