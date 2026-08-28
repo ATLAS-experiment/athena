@@ -1124,7 +1124,7 @@ namespace met {
             // Remove the Eloss assuming the parameterised value
             // The correction is limited to the selected clusters
             total_eloss += mu_Eloss;
-            muons_selflags |= (1<<assoc->findIndex(mu_test));
+            muons_selflags |= (static_cast<MissingETBase::Types::bitmask_t >(1)<<assoc->findIndex(mu_test));
           }
           ATH_MSG_VERBOSE("Mu index " << mu_test->index());
         }

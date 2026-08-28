@@ -11,11 +11,7 @@
 #include "xAODMissingET/MissingETAssociationMap.h"
 #include "xAODMissingET/MissingETAssociationHelper.h"
 
-#include "MuonAnalysisInterfaces/IMuonSelectionTool.h"
-#include "EgammaAnalysisInterfaces/IAsgElectronLikelihoodTool.h"
-#include "EgammaAnalysisInterfaces/IAsgPhotonIsEMSelector.h"
 #include "PATCore/AcceptData.h"
-#include "TauAnalysisTools/ITauSelectionTool.h"
 
 using std::string;
 using namespace xAOD;
@@ -23,39 +19,6 @@ using namespace xAOD;
 namespace met {
 
   //**********************************************************************
-
-  METMakerAlg::METMakerAlg(const std::string& name,
-			   ISvcLocator* pSvcLocator )
-     : ::AthReentrantAlgorithm( name, pSvcLocator ),
-    m_metKey(""),
-    m_metmaker(this),  
-    m_muonSelTool(this,""),
-    m_elecSelLHTool(this,""),
-    m_photonSelIsEMTool(this,""),
-    m_tauSelTool(this,"")
- {
-    declareProperty( "Maker",          m_metmaker                        );
-    declareProperty( "METCoreName",    m_CoreMetKey  = "MET_Core"        );
-    declareProperty( "METName",         m_metKey = std::string("MET_Reference"),"MET container");
-    declareProperty( "METMapName",      m_metMapKey = "METAssoc" );
-
-    declareProperty( "METSoftClName",  m_softclname  = "SoftClus"        );
-    declareProperty( "METSoftTrkName", m_softtrkname = "PVSoftTrk"       );
-
-    declareProperty( "InputJets",      m_JetContainerKey      = "AntiKt4LCTopoJets" );
-    declareProperty( "InputElectrons", m_ElectronContainerKey = "Electrons" );
-    declareProperty( "InputPhotons",   m_PhotonContainerKey   = "Photons"   );
-    declareProperty( "InputTaus",      m_TauJetContainerKey   = "TauJets"   );
-    declareProperty( "InputMuons",     m_MuonContainerKey     = "Muons"     );
-
-    declareProperty( "MuonSelectionTool",        m_muonSelTool           );
-    declareProperty( "ElectronLHSelectionTool",  m_elecSelLHTool         );
-    declareProperty( "PhotonIsEMSelectionTool" , m_photonSelIsEMTool     );
-    declareProperty( "TauSelectionTool",         m_tauSelTool            );
-
-    declareProperty( "DoTruthLeptons", m_doTruthLep = false              );
-
-  }
 
   //**********************************************************************
 
