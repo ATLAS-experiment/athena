@@ -72,6 +72,43 @@ def getT0SolveDB(runArgs):
     return latestLocalDataBase
 
 
+def commonFlagsConfig(runArgs, flags):
+    ## Disable all non-track related flag parameter
+    from InDetConfig.ConfigurationHelpers import OnlyTrackingPreInclude
+    OnlyTrackingPreInclude(flags)
+
+    flags.Exec.MaxEvents = runArgs.maxEvents if not runArgs.solve else 1
+
+    flags.IOVDb.GlobalTag = runArgs.globalTag
+
+    if not flags.Input.isMC and runArgs.isCosmics:
+        from AthenaConfiguration.Enums import BeamType
+        
+        flags.Beam.NumberOfCollisions = 0
+        flags.Beam.Type = BeamType.Cosmics
+        flags.Beam.Energy = 0.
+        flags.Beam.BunchSpacing = 50
+
+    if runArgs.isHeavyIon:
+        flags.Beam.BunchSpacing = 50
+        flags.Reco.EnableHI = True
+        flags.HeavyIon.doGlobal = True
+        
+    else:
+        flags.Beam.BunchSpacing = 25
+                
+    if not runArgs.isBFieldOff:
+        flags.BField.solenoidOn = True
+        flags.BField.barrelToroidOn = True
+        flags.BField.endcapToroidOn = True
+            
+    else:
+        flags.BField.solenoidOn = False
+        flags.BField.barrelToroidOn = False
+        flags.BField.endcapToroidOn = False
+
+    return flags
+
 
 def configureInDetFlags(runArgs, flags):
 
@@ -96,7 +133,8 @@ def configureInDetFlags(runArgs, flags):
             else defaultConditionsTags.RUN3_DATA
         )
 
-    
+    flags = commonFlagsConfig(runArgs, flags)
+
     ## Turn off ID parts if wished (may cause conflicts with level setting)
     for IDpart in runArgs.excludeIDPart:
         setattr(flags.InDet.Align, f"align{IDpart}", False)
@@ -146,10 +184,6 @@ def configureInDetFlags(runArgs, flags):
     else:
         raise Exception(f"No valid alignment level has been selected: '{runArgs.alignLevel}'")
 
-    ## Disable all non-track related flag parameter
-    from InDetConfig.ConfigurationHelpers import OnlyTrackingPreInclude
-    OnlyTrackingPreInclude(flags)
-
     ## Update flags based on parser line args
     flags.InDet.Align.accumulate = runArgs.accumulate
     flags.InDet.Align.baseDir = os.path.abspath(runArgs.baseDir)
@@ -168,38 +202,9 @@ def configureInDetFlags(runArgs, flags):
         flags.InDet.Align.outputConditionFile = f"{flags.InDet.Align.baseDir}/Solve/{runArgs.outputConditionFile}"
         flags.IOVDb.DBConnection = f"sqlite://;schema={flags.InDet.Align.baseDir}/Solve/{runArgs.outputDBFile};dbname=CONDBR2"
         
-
-    flags.Exec.MaxEvents = runArgs.maxEvents if not runArgs.solve else 1
     flags.Exec.SkipEvents = runArgs.skipEvents if hasattr(runArgs, "skipEvents") else 0   
     flags.Exec.OutputLevel = getattr(AthenaCommon.Constants, runArgs.logLevel)
     flags.Exec.FPE = -2
-    flags.IOVDb.GlobalTag = runArgs.globalTag
-        
-    if not flags.Input.isMC and runArgs.isCosmics:
-        from AthenaConfiguration.Enums import BeamType
-        
-        flags.Beam.NumberOfCollisions = 0
-        flags.Beam.Type = BeamType.Cosmics
-        flags.Beam.Energy = 0.
-        flags.Beam.BunchSpacing = 50
-
-    if runArgs.isHeavyIon:
-        flags.Beam.BunchSpacing = 50
-        flags.Reco.EnableHI = True
-        flags.HeavyIon.doGlobal = True
-          
-    else:
-        flags.Beam.BunchSpacing = 25
-                
-    if not runArgs.isBFieldOff:
-        flags.BField.solenoidOn = True
-        flags.BField.barrelToroidOn = True
-        flags.BField.endcapToroidOn = True
-            
-    else:
-        flags.BField.solenoidOn = False
-        flags.BField.barrelToroidOn = False
-        flags.BField.endcapToroidOn = False
 
     # process pre-include/exec
     processPreInclude(runArgs, flags)
@@ -227,15 +232,10 @@ def configureITkFlags(runArgs, flags):
     if getattr(runArgs, "globalTag", None) is None:
         runArgs.globalTag = defaultConditionsTags.RUN4_MC
 
-
-
-    ## Disable all non-track related flag parameter
-    from InDetConfig.ConfigurationHelpers import OnlyTrackingPreInclude
-    OnlyTrackingPreInclude(flags)
-
+    
+    flags = commonFlagsConfig(runArgs, flags)
 
     ## Update flags based on parser line args
-
     flags.ITk.Align.accumulate = runArgs.accumulate
     flags.ITk.Align.baseDir = os.path.abspath(runArgs.baseDir)
 
@@ -262,39 +262,9 @@ def configureITkFlags(runArgs, flags):
         flags.ITk.Align.inputTFiles = []
 
 
-    flags.Exec.MaxEvents = runArgs.maxEvents if not runArgs.solve else 1
-
-    flags.IOVDb.GlobalTag = runArgs.globalTag
-
 
     if runArgs.localgeo:
         flags.ITk.Geometry.AllLocal = True      
-
-    if not flags.Input.isMC and runArgs.isCosmics:
-        from AthenaConfiguration.Enums import BeamType
-        
-        flags.Beam.NumberOfCollisions = 0
-        flags.Beam.Type = BeamType.Cosmics
-        flags.Beam.Energy = 0.
-        flags.Beam.BunchSpacing = 50
-
-    if runArgs.isHeavyIon:
-        flags.Beam.BunchSpacing = 50
-        flags.Reco.EnableHI = True
-        flags.HeavyIon.doGlobal = True
-        
-    else:
-        flags.Beam.BunchSpacing = 25
-                
-    if not runArgs.isBFieldOff:
-        flags.BField.solenoidOn = True
-        flags.BField.barrelToroidOn = True
-        flags.BField.endcapToroidOn = True
-            
-    else:
-        flags.BField.solenoidOn = False
-        flags.BField.barrelToroidOn = False
-        flags.BField.endcapToroidOn = False
 
 
     if hasattr(runArgs, "localDB") and runArgs.localDB:
@@ -302,7 +272,6 @@ def configureITkFlags(runArgs, flags):
         DBFile = runArgs.localDB
         flags.IOVDb.DBConnection = f"sqlite://;schema={runArgs.localDB};dbname=OFLCOND"
         flags.ITk.Geometry.alignmentFolder = "/Indet/AlignITk"
-
 
 
     if flags.ITk.Align.alignITkPixel:
@@ -316,6 +285,7 @@ def configureITkFlags(runArgs, flags):
 
     # Lock flags
     flags.lock()
+
     return flags
 
 def fromRunArgsITk(runArgs, flags):
