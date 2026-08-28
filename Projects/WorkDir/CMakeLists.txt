@@ -1,0 +1,190 @@
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
+#
+# Project file for building a selected set of packages against an
+# installed ATLAS release/nightly.
+#
+
+# Set up the project.
+cmake_minimum_required( VERSION 3.25 )
+# Note that there is a second `project` call further below to set
+# the version and languages.
+project( WorkDir )
+
+# Enable the CI tests in the CITest package in case the user wants to
+# run them locally:
+set( ATLAS_ENABLE_CI_TESTS TRUE CACHE BOOL
+   "Set up tests in CITest package" )
+
+# Try to figure out what project is our parent. Just using a hard-coded list
+# of possible project names. Basically the names of all the other
+# sub-directories inside the Projects/ directory in the repository.
+set( _parentProjectNames Athena AthenaP1 AnalysisBase ColumnarAnalysis AthAnalysis
+  AthSimulation AthDerivation AthDataQuality AthGeneration DetCommon )
+set( _defaultParentProject Athena )
+foreach( _pp ${_parentProjectNames} )
+   if( NOT "$ENV{${_pp}_DIR}" STREQUAL "" )
+      set( _defaultParentProject ${_pp} )
+      break()
+   endif()
+endforeach()
+
+# Set the parent project name based on the previous findings:
+set( ATLAS_PROJECT ${_defaultParentProject}
+   CACHE STRING "The name of the parent project to build against" )
+
+# Apply (compiler) settings from CxxUtils:
+if( IS_DIRECTORY "${CMAKE_SOURCE_DIR}/../../Control/CxxUtils" )
+   set( CxxUtilsSettings_DIR
+      "${CMAKE_SOURCE_DIR}/../../Control/CxxUtils/cmake" )
+else()
+   set( CxxUtilsSettings_DIR
+      "$ENV{${ATLAS_PROJECT}_DIR}/src/Control/CxxUtils/cmake" )
+endif()
+find_package( CxxUtilsSettings )
+
+# Clean up:
+unset( _parentProjectNames )
+unset( _defaultParentProject )
+
+# Let the user pick up updated AtlasCMake/AtlasLCG versions for testing.
+# Remember that it's not a problem if AtlasCMake is not found, that's why
+# we use the QUIET keyword.
+find_package( AtlasCMake QUIET )
+
+# Check for the availability of extra compilers/languages. So that the Acts
+# override could make use of them if needed.
+include( CheckLanguage )
+check_language( Fortran )
+check_language( CUDA )
+check_language( HIP )
+
+# Potentially override the Acts package to use a local checkout.
+include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/ActsOverride.cmake)
+
+# Find the project that we depend on:
+find_package( ${ATLAS_PROJECT} REQUIRED )
+
+# Set up the project with its version and baseline languages.
+project( WorkDir VERSION ${${ATLAS_PROJECT}_VERSION} LANGUAGES C CXX )
+
+# Set up all additional languages that are available.
+if( CMAKE_Fortran_COMPILER )
+   enable_language( Fortran )
+endif()
+if( CMAKE_CUDA_COMPILER )
+   enable_language( CUDA )
+   find_package( CUDAToolkit )
+endif()
+if( CMAKE_HIP_COMPILER )
+   enable_language( HIP )
+endif()
+
+# If the parent project build type was "Release" enable the generation of debug
+# symbols for local builds. If you absolutely do want to keep "Release", use a
+# different capitalization, e.g. "-DCMAKE_BUILD_TYPE=RELEASE".
+if( "${CMAKE_BUILD_TYPE}" STREQUAL "Release" )
+   set( CMAKE_BUILD_TYPE "RelWithDebInfo" CACHE STRING
+      "Build mode for the release" FORCE )
+endif()
+
+# Set up where to find the AthenaPoolUtilitiesTest CMake code.
+if( IS_DIRECTORY
+   "${CMAKE_SOURCE_DIR}/../../Database/AthenaPOOL/AthenaPoolUtilities" )
+   set( AthenaPoolUtilitiesTest_DIR
+      "${CMAKE_SOURCE_DIR}/../../Database/AthenaPOOL/AthenaPoolUtilities/cmake"
+      CACHE PATH "Directory holding the AthenaPoolUtilititesTest module" )
+endif()
+
+# Set up where to find the xAODUtilities CMake code.
+if( IS_DIRECTORY
+   "${CMAKE_SOURCE_DIR}/../../Event/xAOD/xAODCore/cmake" )
+   set( xAODUtilities_DIR
+      "${CMAKE_SOURCE_DIR}/../../Event/xAOD/xAODCore/cmake"
+      CACHE PATH "Directory holding the xAODUtilities module" )
+endif()
+
+# Set up where to find the AtlasGeant4Utilities CMake code.
+if( IS_DIRECTORY
+   "${CMAKE_SOURCE_DIR}/../../Simulation/AtlasGeant4/cmake" )
+   set( AtlasGeant4Utilities_DIR
+      "${CMAKE_SOURCE_DIR}/../../Simulation/AtlasGeant4/cmake"
+      CACHE PATH "Directory holding the AtlasGeant4Utilities module" )
+endif()
+
+# Set up CTest:
+atlas_ctest_setup()
+
+# Generate a compile_commands.json file, which VS Code can use to interpret
+# our code correctly.
+set( CMAKE_EXPORT_COMPILE_COMMANDS TRUE CACHE BOOL
+   "Create compile_commands.json" FORCE )
+
+# Re-check all of the wildcarded expressions on every re-build in this
+# project.
+set( ATLAS_ALWAYS_CHECK_WILDCARDS TRUE CACHE BOOL
+   "(Re-)Check wildcards in file specifications on every build" )
+
+# Set up CppCheck.
+if( ATLAS_USE_CPPCHECK )
+   find_package( Cppcheck 2.17 )
+
+   # Find ATLAS-specific wrapper:
+   find_program( CPPCHECK_ATLAS cppcheck_atlas
+      PATHS "${CMAKE_CURRENT_SOURCE_DIR}/../../Control/CxxUtils/scripts" )
+   mark_as_advanced( CPPCHECK_ATLAS )
+
+   if( CPPCHECK_FOUND AND CPPCHECK_ATLAS )
+      # Prepend cppcheck command to already defined command line options:
+      list( PREPEND CMAKE_CPPCHECK_DEFAULT ${CPPCHECK_ATLAS} )
+
+      # Ignore externals:
+      foreach( ignored_path "${LCG_RELEASE_BASE}"
+            "${TDAQ-COMMON_INCLUDE_DIR}" "${TDAQ_INCLUDE_DIR}"
+            "${${ATLAS_PROJECT}Externals_INCLUDE_DIR}" )
+         if( ignored_path )
+            list( APPEND CMAKE_CPPCHECK_DEFAULT "--suppress=*:${ignored_path}/*" )
+         endif()
+      endforeach()
+
+      # Set the cache variable(s) that CMake uses to decide how to use cppcheck:
+      set( CMAKE_C_CPPCHECK "${CMAKE_CPPCHECK_DEFAULT}"
+         CACHE STRING "CppCheck command to use for the C source files" )
+      set( CMAKE_CXX_CPPCHECK "${CMAKE_CPPCHECK_DEFAULT}"
+         CACHE STRING "CppCheck command to use for the C++ source files" )
+      # Let the user know what happened:
+      if( CMAKE_C_CPPCHECK OR CMAKE_CXX_CPPCHECK )
+         list( JOIN CMAKE_CPPCHECK_DEFAULT " " _cmd )
+         message( STATUS "Checking C/C++ files with: ${_cmd}" )
+      endif()
+   else()
+      message( WARNING "Cppcheck is enabled via ATLAS_USE_CPPCHECK but cannot be found.")
+   endif()
+endif()
+
+# Set up a work directory project with the same version as our parent:
+atlas_project( USE ${ATLAS_PROJECT} ${${ATLAS_PROJECT}_VERSION}
+   PROJECT_ROOT ${CMAKE_SOURCE_DIR}/../../ )
+
+# Set up the runtime environment setup script(s):
+lcg_generate_env( SH_FILE ${CMAKE_BINARY_DIR}/${ATLAS_PLATFORM}/env_setup.sh )
+install( FILES ${CMAKE_BINARY_DIR}/${ATLAS_PLATFORM}/env_setup.sh
+   DESTINATION . )
+
+# Setup IDE integration:
+set( ATLAS_ENABLE_IDE_HELPERS OFF CACHE BOOL "Enable IDE helpers" )
+if( ATLAS_ENABLE_IDE_HELPERS )
+   set( ATLAS_IDEHELPERSCRIPTS_SETUP
+      "${CMAKE_SOURCE_DIR}/../../.vscode/IDEHelperScripts/Setup.cmake"
+      CACHE FILEPATH "Setup file for the IDE / VS Code helpers" )
+   include( "${ATLAS_IDEHELPERSCRIPTS_SETUP}" )
+endif()
+
+# Set up CPack:
+atlas_cpack_setup()
+
+# Remind to set up the environment
+message( STATUS "")
+message( STATUS "            In order to test your updates, please don't forget to" )
+message( STATUS "            set up the environment with e.g.:" )
+message( STATUS "            --->   source ${ATLAS_PLATFORM}/setup.sh" )
+message( STATUS "")

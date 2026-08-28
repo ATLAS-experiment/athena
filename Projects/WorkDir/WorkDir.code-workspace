@@ -1,0 +1,17 @@
+{
+	"folders": [
+		{
+			"path": "."
+		},
+		{
+			"path": "../../"
+		}
+	],
+	"settings": {
+		"files.associations": {
+			"*.icc": "cpp",
+			"*.hip": "cpp",
+			"*.sycl": "cpp"
+		}
+	}
+}
