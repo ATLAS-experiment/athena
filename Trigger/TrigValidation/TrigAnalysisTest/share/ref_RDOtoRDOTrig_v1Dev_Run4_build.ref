@@ -2003,7 +2003,7 @@ HLT_e26_lhmedium_mu8noL1_L1eEM26M:
     4: 10
     5: 10
     6: 8
-    7: 4
+    7: 5
     8: 2
   stepFeatures:
     0: 20
@@ -2013,7 +2013,7 @@ HLT_e26_lhmedium_mu8noL1_L1eEM26M:
     4: 20
     5: 20
     6: 16
-    7: 9
+    7: 13
     8: 4
   eventCount: 2
 leg000_HLT_e26_lhmedium_mu8noL1_L1eEM26M:
@@ -2025,7 +2025,7 @@ leg000_HLT_e26_lhmedium_mu8noL1_L1eEM26M:
     4: 10
     5: 10
     6: 8
-    7: 4
+    7: 5
     8: 2
   stepFeatures:
     0: 10
@@ -2035,7 +2035,7 @@ leg000_HLT_e26_lhmedium_mu8noL1_L1eEM26M:
     4: 10
     5: 10
     6: 8
-    7: 4
+    7: 5
     8: 2
   eventCount: 0
 leg001_HLT_e26_lhmedium_mu8noL1_L1eEM26M:
@@ -2047,7 +2047,7 @@ leg001_HLT_e26_lhmedium_mu8noL1_L1eEM26M:
     4: 10
     5: 10
     6: 8
-    7: 4
+    7: 5
     8: 2
   stepFeatures:
     0: 10
@@ -2057,7 +2057,7 @@ leg001_HLT_e26_lhmedium_mu8noL1_L1eEM26M:
     4: 10
     5: 10
     6: 8
-    7: 5
+    7: 8
     8: 2
   eventCount: 0
 HLT_e26_lhtight_e14_etcut_probe_50invmAB130_L1eEM26M:
@@ -4871,12 +4871,14 @@ HLT_g35_tight_icalotight_mu18noL1_L1eEM28M:
     2: 10
     3: 8
     4: 7
+    5: 1
   stepFeatures:
     0: 21
     1: 21
     2: 21
     3: 16
     4: 14
+    5: 2
   eventCount: 0
 leg000_HLT_g35_tight_icalotight_mu18noL1_L1eEM28M:
   stepCounts:
@@ -4885,12 +4887,14 @@ leg000_HLT_g35_tight_icalotight_mu18noL1_L1eEM28M:
     2: 10
     3: 8
     4: 7
+    5: 1
   stepFeatures:
     0: 11
     1: 11
     2: 11
     3: 8
     4: 7
+    5: 1
   eventCount: 0
 leg001_HLT_g35_tight_icalotight_mu18noL1_L1eEM28M:
   stepCounts:
@@ -4899,12 +4903,14 @@ leg001_HLT_g35_tight_icalotight_mu18noL1_L1eEM28M:
     2: 10
     3: 8
     4: 7
+    5: 1
   stepFeatures:
     0: 10
     1: 10
     2: 10
     3: 8
     4: 7
+    5: 1
   eventCount: 0
 HLT_g40_loose_L1eEM24L_mu40_msonly_L1MU14FCH:
   stepCounts:
@@ -7368,13 +7374,13 @@ HLT_mu20_2mu4noL1_L1MU14FCH:
     1: 3
     2: 3
     3: 2
-    4: 1
+    4: 2
   stepFeatures:
     0: 9
     1: 7
     2: 7
     3: 5
-    4: 6
+    4: 11
   eventCount: 0
 leg000_HLT_mu20_2mu4noL1_L1MU14FCH:
   stepCounts:
@@ -7382,13 +7388,13 @@ leg000_HLT_mu20_2mu4noL1_L1MU14FCH:
     1: 3
     2: 3
     3: 2
-    4: 1
+    4: 2
   stepFeatures:
     0: 5
     1: 4
     2: 4
     3: 3
-    4: 2
+    4: 3
   eventCount: 0
 leg001_HLT_mu20_2mu4noL1_L1MU14FCH:
   stepCounts:
@@ -7396,13 +7402,13 @@ leg001_HLT_mu20_2mu4noL1_L1MU14FCH:
     1: 3
     2: 3
     3: 2
-    4: 1
+    4: 2
   stepFeatures:
     0: 4
     1: 3
     2: 3
     3: 2
-    4: 4
+    4: 8
   eventCount: 0
 HLT_mu20_LRT_d0loose_L1MU14FCH:
   stepCounts:
@@ -7476,7 +7482,7 @@ HLT_mu20_ivarmedium_mu4noL1_10invmAB70_L1MU14FCH:
     2: 7
     3: 5
     4: 5
-    5: 9
+    5: 11
   eventCount: 0
 leg000_HLT_mu20_ivarmedium_mu4noL1_10invmAB70_L1MU14FCH:
   stepCounts:
@@ -7508,7 +7514,7 @@ leg001_HLT_mu20_ivarmedium_mu4noL1_10invmAB70_L1MU14FCH:
     2: 3
     3: 2
     4: 2
-    5: 6
+    5: 8
   eventCount: 0
 HLT_mu20_ivarmedium_mu8noL1_L1MU14FCH:
   stepCounts:
@@ -7517,7 +7523,7 @@ HLT_mu20_ivarmedium_mu8noL1_L1MU14FCH:
     2: 3
     3: 2
     4: 2
-    5: 1
+    5: 2
     6: 1
   stepFeatures:
     0: 9
@@ -7525,7 +7531,7 @@ HLT_mu20_ivarmedium_mu8noL1_L1MU14FCH:
     2: 7
     3: 5
     4: 5
-    5: 4
+    5: 7
     6: 4
   eventCount: 1
 leg000_HLT_mu20_ivarmedium_mu8noL1_L1MU14FCH:
@@ -7535,7 +7541,7 @@ leg000_HLT_mu20_ivarmedium_mu8noL1_L1MU14FCH:
     2: 3
     3: 2
     4: 2
-    5: 1
+    5: 2
     6: 1
   stepFeatures:
     0: 5
@@ -7543,7 +7549,7 @@ leg000_HLT_mu20_ivarmedium_mu8noL1_L1MU14FCH:
     2: 4
     3: 3
     4: 3
-    5: 2
+    5: 3
     6: 2
   eventCount: 0
 leg001_HLT_mu20_ivarmedium_mu8noL1_L1MU14FCH:
@@ -7553,7 +7559,7 @@ leg001_HLT_mu20_ivarmedium_mu8noL1_L1MU14FCH:
     2: 3
     3: 2
     4: 2
-    5: 1
+    5: 2
     6: 1
   stepFeatures:
     0: 4
@@ -7561,7 +7567,7 @@ leg001_HLT_mu20_ivarmedium_mu8noL1_L1MU14FCH:
     2: 3
     3: 2
     4: 2
-    5: 2
+    5: 4
     6: 2
   eventCount: 0
 HLT_mu20_ivarperf_L1MU12FCH:
@@ -7610,14 +7616,14 @@ HLT_mu22_mlbkt_mu8noL1_mlbkt_L1MU14FCH:
     1: 2
     2: 2
     3: 2
-    4: 1
+    4: 2
     5: 1
   stepFeatures:
     0: 9
     1: 5
     2: 5
     3: 5
-    4: 4
+    4: 7
     5: 4
   eventCount: 1
 leg000_HLT_mu22_mlbkt_mu8noL1_mlbkt_L1MU14FCH:
@@ -7626,14 +7632,14 @@ leg000_HLT_mu22_mlbkt_mu8noL1_mlbkt_L1MU14FCH:
     1: 2
     2: 2
     3: 2
-    4: 1
+    4: 2
     5: 1
   stepFeatures:
     0: 5
     1: 3
     2: 3
     3: 3
-    4: 2
+    4: 3
     5: 2
   eventCount: 0
 leg001_HLT_mu22_mlbkt_mu8noL1_mlbkt_L1MU14FCH:
@@ -7642,14 +7648,14 @@ leg001_HLT_mu22_mlbkt_mu8noL1_mlbkt_L1MU14FCH:
     1: 2
     2: 2
     3: 2
-    4: 1
+    4: 2
     5: 1
   stepFeatures:
     0: 4
     1: 2
     2: 2
     3: 2
-    4: 2
+    4: 4
     5: 2
   eventCount: 0
 HLT_mu22_mu8noL1_L1MU14FCH:
@@ -7658,14 +7664,14 @@ HLT_mu22_mu8noL1_L1MU14FCH:
     1: 2
     2: 2
     3: 2
-    4: 1
+    4: 2
     5: 1
   stepFeatures:
     0: 9
     1: 5
     2: 5
     3: 5
-    4: 4
+    4: 7
     5: 4
   eventCount: 1
 leg000_HLT_mu22_mu8noL1_L1MU14FCH:
@@ -7674,14 +7680,14 @@ leg000_HLT_mu22_mu8noL1_L1MU14FCH:
     1: 2
     2: 2
     3: 2
-    4: 1
+    4: 2
     5: 1
   stepFeatures:
     0: 5
     1: 3
     2: 3
     3: 3
-    4: 2
+    4: 3
     5: 2
   eventCount: 0
 leg001_HLT_mu22_mu8noL1_L1MU14FCH:
@@ -7690,14 +7696,14 @@ leg001_HLT_mu22_mu8noL1_L1MU14FCH:
     1: 2
     2: 2
     3: 2
-    4: 1
+    4: 2
     5: 1
   stepFeatures:
     0: 4
     1: 2
     2: 2
     3: 2
-    4: 2
+    4: 4
     5: 2
   eventCount: 0
 HLT_mu24_idperf_L1MU14FCH:
@@ -8045,9 +8051,11 @@ HLT_mu80_L1MU14FCH:
 HLT_mu80_msonly_3layersEC_L1MU14FCH:
   stepCounts:
     0: 3
+    1: 1
   stepFeatures:
     0: 4
-  eventCount: 0
+    1: 1
+  eventCount: 1
 HLT_noalg_CostMonDS_L1All:
   stepCounts:
     0: 20
