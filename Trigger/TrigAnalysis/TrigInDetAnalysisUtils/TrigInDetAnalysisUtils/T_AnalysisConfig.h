@@ -5,7 +5,7 @@
  **     @author  mark sutton
  **     @date    Fri 11 Jan 2019 07:06:39 CET
  **
- **     Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+ **     Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
  **/
 
 
@@ -19,7 +19,6 @@
 
 #include "GaudiKernel/IToolSvc.h"
 #include "GaudiKernel/ITHistSvc.h"
-// #include "GaudiKernel/AlgFactory.h"
 
 #include "TrigDecisionTool/TrigDecisionTool.h"
 
@@ -28,9 +27,6 @@
 #include "TrigInDetAnalysis/TrackAssociator.h"
 #include "TrigInDetAnalysis/TrackAnalysis.h"
 
-
-// #include "TrigInDetAnalysisUtils/RoI.h"
-// #include "TrigInDetAnalysisUtils/Converter.h"
 #include "TrigInDetAnalysisUtils/TrigTrackSelector.h"
 #include "TrigInDetAnalysisUtils/OfflineObjectSelection.h"
 #include "TrigInDetAnalysis/TrackTrigObject.h"
@@ -74,6 +70,10 @@ public:
     m_provider(0),
     m_tdt(0),
     m_analysisInstanceName(analysisInstanceName),
+    m_chainNames { {testChainName}, {referenceChainName}, {selectionChainName} },
+    m_types      { {testType},      {referenceType},      {selectionType}      },
+    m_keys       { {testKey},       {referenceKey},       {selectionKey}       },
+    m_filters    { {testFilter},    {referenceFilter},    {selectionFilter}    },
     m_refChainName(referenceChainName),
     m_refChainKey(referenceKey),
     m_testChainName(testChainName),
@@ -93,28 +93,8 @@ public:
     m_useHighestPT(false),
     m_vtxIndex(-1),
     m_filterOnRoi(true),
-    m_requireDecision(false)
-  {
-      // Rearrange objects in vectors: chain names
-      std::vector<std::string> testChainNames; testChainNames.push_back(testChainName);
-      std::vector<std::string> referenceChainNames; referenceChainNames.push_back(referenceChainName);
-      std::vector<std::string> selectionChainNames; selectionChainNames.push_back(selectionChainName);
-      m_chainNames.push_back(testChainNames); m_chainNames.push_back(referenceChainNames); m_chainNames.push_back(selectionChainNames);
-      // Types
-      std::vector<std::string> testTypes; testTypes.push_back(testType);
-      std::vector<std::string> referenceTypes; referenceTypes.push_back(referenceType);
-      std::vector<std::string> selectionTypes; selectionTypes.push_back(selectionType);
-      m_types.push_back(testTypes); m_types.push_back(referenceTypes); m_types.push_back(selectionTypes);
-      // Keys
-      std::vector<std::string> testKeys; testKeys.push_back(testKey);
-      std::vector<std::string> referenceKeys; referenceKeys.push_back(referenceKey);
-      std::vector<std::string> selectionKeys; selectionKeys.push_back(selectionKey);
-      m_keys.push_back(testKeys); m_keys.push_back(referenceKeys); m_keys.push_back(selectionKeys);
-      // Filters
-      std::vector<TrackFilter*> testFilters; testFilters.push_back(testFilter);
-      std::vector<TrackFilter*> referenceFilters; referenceFilters.push_back(referenceFilter);
-      std::vector<TrackFilter*> selectionFilters; selectionFilters.push_back(selectionFilter);
-      m_filters.push_back(testFilters); m_filters.push_back(referenceFilters); m_filters.push_back(selectionFilters);
+    m_requireDecision(false) {
+    
   }
 
 
@@ -133,6 +113,10 @@ public:
     m_provider(0),
     m_tdt(0),
     m_analysisInstanceName(analysisInstanceName),
+    m_chainNames { {testChainName}, {referenceChainName}, {"NONE"} },
+    m_types      { {testType},      {referenceType},      {""}     },
+    m_keys       { {testKey},       {referenceKey},       {""}     },
+    m_filters    { {testFilter},    {referenceFilter},    {}       },
     m_refChainName(referenceChainName),
     m_refChainKey(referenceKey),
     m_testChainName(testChainName),
@@ -152,31 +136,8 @@ public:
     m_useHighestPT(false),
     m_vtxIndex(-1),
     m_filterOnRoi(true),
-    m_requireDecision(false)
-  {
-      // Rearrange objects in vectors: chain names
-      std::vector<std::string> testChainNames; testChainNames.push_back(testChainName);
-      std::vector<std::string> referenceChainNames; referenceChainNames.push_back(referenceChainName);
-      std::vector<std::string> selectionChainNames; selectionChainNames.push_back("NONE");
-      m_chainNames.push_back(testChainNames); m_chainNames.push_back(referenceChainNames); m_chainNames.push_back(selectionChainNames);
-      // Types
-      std::vector<std::string> testTypes; testTypes.push_back(testType);
-      std::vector<std::string> referenceTypes; referenceTypes.push_back(referenceType);
-      std::vector<std::string> selectionTypes; selectionTypes.push_back("");
-      m_types.push_back(testTypes); m_types.push_back(referenceTypes); m_types.push_back(selectionTypes);
-      // Keys
-      std::vector<std::string> testKeys; testKeys.push_back(testKey);
-      std::vector<std::string> referenceKeys; referenceKeys.push_back(referenceKey);
-      std::vector<std::string> selectionKeys; selectionKeys.push_back("");
-      m_keys.push_back(testKeys); m_keys.push_back(referenceKeys); m_keys.push_back(selectionKeys);
-      // Filters
-      std::vector<TrackFilter*> testFilters; testFilters.push_back(testFilter);
-      std::vector<TrackFilter*> referenceFilters; referenceFilters.push_back(referenceFilter);
-      std::vector<TrackFilter*> selectionFilters;
-      m_filters.push_back(testFilters); m_filters.push_back(referenceFilters); m_filters.push_back(selectionFilters);
-
-      // m_selectorRef  = new TrigTrackSelector( referenceFilter );
-      // m_selectorTest = new TrigTrackSelector( testFilter );
+    m_requireDecision(false){
+     
   }
 
 
@@ -943,15 +904,14 @@ protected:
   std::vector< std::vector<std::string> > m_chainNames;
   std::vector< std::vector<std::string> > m_types;
   std::vector< std::vector<std::string> > m_keys;
+  // Analysis tools
+  std::vector< std::vector<TrackFilter*> > m_filters;
 
   std::string m_refChainName;
   std::string m_refChainKey;
 
   std::string m_testChainName;
   std::string m_testChainKey;
-
-  // Analysis tools
-  std::vector< std::vector<TrackFilter*> > m_filters;
 
   TrigTrackSelector*     m_selectorRef;
   TrigTrackSelector*     m_selectorTest;
