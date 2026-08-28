@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef AthenaMonitoringKernel_HistogramFiller_HistogramFiller2D_h
@@ -9,7 +9,6 @@
 
 #include "HistogramFiller.h"
 #include "HistogramFillerUtils.h"
-#include "CxxUtils/AthUnlikelyMacros.h"
 #include "GaudiKernel/MsgStream.h"
 
 namespace Monitored {
@@ -26,17 +25,17 @@ namespace Monitored {
       : HistogramFiller(definition, std::move(provider)) {}
 
     virtual unsigned fill( const HistogramFiller::VariablesPack& vars) const override {
-      if (ATH_UNLIKELY(vars.size()!=2 or vars[0] == nullptr or vars[1] == nullptr )) return 0;
+      if (vars.size()!=2 or vars[0] == nullptr or vars[1] == nullptr ) [[unlikely]] return 0;
 
       const size_t size0 = vars[0]->size();
       const size_t size1 = vars[1]->size();
 
-      if (ATH_UNLIKELY(size0 == 0 || size1 == 0)) {
+      if (size0 == 0 || size1 == 0) [[unlikely]] {
         // nothing to do
         return 0;
       }
 
-      if (ATH_UNLIKELY(size0 > 1 && size1 > 1 && size0 != size1)) {
+      if (size0 > 1 && size1 > 1 && size0 != size1) [[unlikely]] {
         MsgStream log(Athena::getMessageSvc(), "HistogramFiller2D");
         log << MSG::ERROR << "Mismatch of provided vector sizes "
             << size0 << "," << size1 << " for " << m_histDef->alias << endmsg;
@@ -47,8 +46,8 @@ namespace Monitored {
         const size_t maskSize = vars.cut->size();
         // Abort if no cut entries or first (and only) entry is false
         if (maskSize == 0 || (maskSize == 1 && !vars.cut->get(0))) { return 0; }
-        if (ATH_UNLIKELY(size0 > 1 && size1 > 1 &&
-                         maskSize > 1 && size0 != maskSize)) {
+        if (size0 > 1 && size1 > 1 &&
+            maskSize > 1 && size0 != maskSize) [[unlikely]] {
           MsgStream log(Athena::getMessageSvc(), "HistogramFiller2D");
           log << MSG::ERROR << "CutMask does not match the size of plotted variable: "
               << maskSize << " " << size0 << endmsg;
@@ -61,8 +60,8 @@ namespace Monitored {
 
       if (vars.weight) {
         auto weightAccessor = [&](size_t i){ return vars.weight->get(i); };
-        if (ATH_UNLIKELY(size0 > 1 && size1 > 1 &&
-                         vars.weight->size() > 1 && size0 != vars.weight->size())) {
+        if (size0 > 1 && size1 > 1 &&
+            vars.weight->size() > 1 && size0 != vars.weight->size()) [[unlikely]]  {
           MsgStream log(Athena::getMessageSvc(), "HistogramFiller2D");
           log << MSG::ERROR << "Weight does not match the size of plotted variable: "
               << vars.weight->size() << " " << size0 << endmsg;

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */  
   
 #ifndef AthenaMonitoringKernel_HistogramFiller_VecHistogramFiller1D_h
@@ -15,14 +15,14 @@ namespace Monitored {
 
 
     virtual unsigned fill(const HistogramFiller::VariablesPack& vars) const override {
-      if ( ATH_UNLIKELY(vars.size() == 0 or vars[0] == nullptr) ) { return 0; }
+      if (vars.size() == 0 or vars[0] == nullptr) [[unlikely]] { return 0; }
 
       if (vars.cut) {
         const size_t maskSize = vars.cut->size();
         // Abort if no cut entries or first (and only) entry is false
         if (maskSize == 0 || (maskSize == 1 && !vars.cut->get(0))) { return 0; }
 
-        if (ATH_UNLIKELY(maskSize > 1 && maskSize != vars[0]->size())) {
+        if (maskSize > 1 && maskSize != vars[0]->size()) [[unlikely]] {
           MsgStream log(Athena::getMessageSvc(), "VecHistogramFiller1D");
           log << MSG::ERROR << "CutMask does not match the size of plotted variable: "
               << maskSize << " " << vars[0]->size() << endmsg;
@@ -31,7 +31,7 @@ namespace Monitored {
 
       auto histogram = this->histogram<TH1>();
        
-      if ( ATH_UNLIKELY( static_cast<size_t>(histogram->GetNbinsX()) + (m_histDef->kVecUO ? 2 : 0) != vars[0]->size() ) ) {
+      if ( static_cast<size_t>(histogram->GetNbinsX()) + (m_histDef->kVecUO ? 2 : 0) != vars[0]->size() ) [[unlikely]] {
           MsgStream log(Athena::getMessageSvc(), "VecHistogramFiller1D");
           log << MSG::WARNING << "Histogram " << histogram->GetName()
               << " filled with kVec(UO) option with variable " << vars[0]->name()

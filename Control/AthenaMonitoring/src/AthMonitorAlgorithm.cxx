@@ -169,7 +169,7 @@ const ToolHandle<GenericMonitoringTool>& AthMonitorAlgorithm::getGroup( std::str
     // get the pointer to the tool, and check that it exists
     auto idx = m_toolLookupMap.find(name);
     //Check if the tool exists in the map
-    if (ATH_LIKELY(idx != m_toolLookupMap.end())) {
+    if (idx != m_toolLookupMap.end()) [[likely]] {
         return m_tools[idx->second];
     }
     else {

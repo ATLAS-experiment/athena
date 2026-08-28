@@ -1,11 +1,10 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "EventContainers/InternalOnline.h"
 #include <algorithm>
 #include "EventContainers/IDC_WriteHandleBase.h"
-#include "CxxUtils/AthUnlikelyMacros.h"
 #include "CxxUtils/checker_macros.h"
 #include "EventContainers/IdentifiableCacheBase.h"
 
@@ -114,7 +113,7 @@ void InternalOnline::resetMask() {
 }
 
 StatusCode InternalOnline::fetchOrCreate(IdentifierHash hashId) {
-    if(ATH_UNLIKELY(!m_cacheLink->IMakerPresent())) return StatusCode::FAILURE;
+    if (!m_cacheLink->IMakerPresent()) [[unlikely]] return StatusCode::FAILURE;
     auto ptr = m_cacheLink->get(hashId);
     if(ptr) { m_mask.set(hashId); m_waitNeeded.store(true, std::memory_order_relaxed); }
     return StatusCode::SUCCESS;
@@ -122,7 +121,7 @@ StatusCode InternalOnline::fetchOrCreate(IdentifierHash hashId) {
 
 StatusCode InternalOnline::fetchOrCreate(const std::vector<IdentifierHash> &/*hashIds*/) {
     throw std::runtime_error("Not implemented");
-//    if(ATH_UNLIKELY(!m_cacheLink->IMakerPresent())) return StatusCode::FAILURE;
+//    if (!m_cacheLink->IMakerPresent()) [[unlikely]] return StatusCode::FAILURE;
 //    m_cacheLink->createSet(hashIds, m_mask);
 //    return StatusCode::SUCCESS;
 }
@@ -145,7 +144,7 @@ const void* InternalOnline::findIndexPtr(IdentifierHash hashId) const noexcept {
 
 StatusCode InternalOnline::addLock(IdentifierHash hashId, const void* ptr) {
     std::pair<bool, const void*> added = m_cacheLink->addLock(hashId, ptr);
-    if(ATH_UNLIKELY(!added.first)) {
+    if (!added.first) [[unlikely]] {
       throw std::runtime_error("IDC WARNING Deletion shouldn't occur in addLock paradigm");
     }
     m_mask.set(hashId); //it wasn't added it is already present therefore mask could be true
