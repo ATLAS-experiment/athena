@@ -1,12 +1,13 @@
 # Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 # =======================================================================
 # EGAMPEBPHYS.py
-# This defines DAOD_EGAMPEBPHYS, a specialist format for the EGammaPEB stream
-# based on DAOD_PHYS. All calls to unavailable Muon objects are disabled.
+# This defines DAOD_EGAMPEBPHYS, a specialist format for the EGammaPEB 
+# stream based on DAOD_PHYS. All calls to unavailable Muon objects are 
+# disabled.
 #
-# Tau, flavour, met, Higgs, AFP, large-r are removed. 
+# Tau, flavour, met, Higgs, AFP, large-r, Trigger matching are removed. 
 #
-# MC, Truth, Trigger, CloseByIsolation, IFF, TrackParticleThinningTool 
+# MC, Truth, CloseByIsolation, IFF, TrackParticleThinningTool 
 # are currently disabled (to be enabled in the future?)
 #
 # CloseByIsolation, TrackParticleThinningTool fail due to requesting
@@ -14,7 +15,7 @@
 # 
 # IFF fails due to retriveing non-existant btag decoration
 #
-# Trigger fails due to missing HLTNav_Summary
+# Trigger fails due to missing HLTNav_Summary from BS
 #
 # HLT TLA Photons and EMclusters are added.
 # =======================================================================
@@ -139,16 +140,6 @@ def EGAMPEBPHYSCommonAugmentationsCfg(flags,**kwargs):
         SmallRJetNeutralFELinksDecorKey="",
         LargeRJetChargedFELinksDecorKey="",
         LargeRJetNeutralFELinksDecorKey=""))
-    
-    # # Trigger matching and postprocessing
-    # if flags.Reco.EnableTrigger or flags.Trigger.triggerConfig == 'INFILE':
-
-    #     from DerivationFrameworkPhys.TriggerMatchingCommonConfig import TriggerMatchingCommonRun3Cfg
-    #     triggerListsHelper = kwargs['TriggerListsHelper']
-
-    #     # This sets up the Run-3 style navigation slimming for trigger-matching from DAOD
-    #     acc.merge(TriggerMatchingCommonRun3Cfg(
-    #         flags, TriggerList = triggerListsHelper.Run3TriggerNames + ["HLT_2g13_loose_EgammaPEBTLA_L12DR15-0M30-2eEM12L","HLT_2g13_loose_EgammaPEBTLA_L113DR25-25M70-2eEM12L"]))
 
     return acc
 
@@ -290,12 +281,6 @@ def EGAMPEBPHYSCoreCfg(flags, name_tag='EGAMPEBPHYS', StreamName='StreamDAOD_EGA
 
     #Trigger content for EgammaPEB 
     EGAMPEBPHYSSlimmingHelper.AllVariables += ['HLT_egamma_Photons_TLA','HLT_CaloEMClusters_Photon']
-
-    # Trigger matching
-    # Run 3, or Run 2 with navigation conversion
-    # if flags.Trigger.EDMVersion == 3 or (flags.Trigger.EDMVersion == 2 and flags.Trigger.doEDMVersionConversion):
-    #     from TrigNavSlimmingMT.TrigNavSlimmingMTConfig import AddRun3TrigNavSlimmingCollectionsToSlimmingHelper
-    #     AddRun3TrigNavSlimmingCollectionsToSlimmingHelper(EGAMPEBPHYSSlimmingHelper)
 
     # L1 trigger objects
     from Campaigns.Utils import getDataYear
