@@ -15,6 +15,7 @@
 #include "ActsEvent/TrackContainer.h"
 #include "ActsEvent/MeasurementToTruthParticleAssociation.h"
 #include "Identifier/Identifier.h"
+#include "HGTD_Identifier/HGTD_ID.h"
 
 #include "src/detail/AtlasMeasurementSelector.h"
 #include "src/detail/OnTrackCalibrator.h"
@@ -67,9 +68,11 @@ namespace ActsTrk {
     SG::WriteDecorHandleKey<xAOD::TrackParticleContainer> m_layerPrimaryExpectedKey { this, "HGTD_primary_expected", m_trackParticleContainerName, "HGTD_primary_expected", "Decoration for primary expected cluster" };  
       
     ActsTrk::detail::xAODUncalibMeasSurfAcc m_surfAcc{};
-   ServiceHandle<ActsTrk::ITrackingGeometrySvc> m_trackingGeometrySvc{this, "TrackingGeometrySvc", "ActsTrackingGeometrySvc"};
+    ServiceHandle<ActsTrk::ITrackingGeometrySvc> m_trackingGeometrySvc{this, "TrackingGeometrySvc", "ActsTrackingGeometrySvc"};
 
     std::unique_ptr<SG::AuxElement::Accessor<int>> m_acc_nHgtdHits;
+
+    const HGTD_ID* m_id_helper{nullptr}; //!< Handle to the ID helper
 
     /// @brief Data structure to hold truth information about the HGTD track extension
     struct TruthTrackExtensionData {
@@ -120,16 +123,6 @@ namespace ActsTrk {
       const ActsTrk::MeasurementToTruthParticleAssociation* association_map,
       std::vector<char> &isPrimaryExistsVec) const;    
 
-    /**
-      * @brief returns the index of HGTD layer where surfaces lies.
-      * This index is used at to locate where in the vectors of
-      * TrackExtensionData the hit information should be written
-      * Returns 99 if surface is outiside of HGTD.
-      *
-      * @param geoID - surface geometry id
-      */  
-    std::size_t getHGTDLayerIndex(const Acts::GeometryIdentifier& geoID) const;
-    
   };
   
 } // namespace ActsTrk
