@@ -102,7 +102,7 @@ from DerivationFrameworkEGamma.EGAM9 import EGAM9Cfg
 from DerivationFrameworkEGamma.EGAM10 import EGAM10Cfg
 from DerivationFrameworkEGamma.EGAM11 import EGAM11Cfg
 from DerivationFrameworkEGamma.EGAM12 import EGAM12Cfg
-from DerivationFrameworkEGamma.EGAMPEB import EGAMPEBCfg
+from DerivationFrameworkEGamma.EGAMPEBPHYS import EGAMPEBPHYSCfg
 
 # FTAG derivations
 from DerivationFrameworkFlavourTag.FTAG1 import FTAG1Cfg
@@ -190,7 +190,7 @@ __all__ = ['TEST1Cfg','TEST2Cfg','TEST3Cfg','TEST4Cfg','TEST5Cfg','TEST6Cfg','TE
            'STDM6Cfg', 'STDM7Cfg','STDM13Cfg','STDM16Cfg','STDM17Cfg',
            'TCAL1Cfg', 'TCAL2Cfg',
            'EGAM1Cfg', 'EGAM2Cfg', 'EGAM3Cfg', 'EGAM4Cfg', 'EGAM5Cfg',
-           'EGAM7Cfg', 'EGAM8Cfg', 'EGAM9Cfg', 'EGAM10Cfg', 'EGAM11Cfg', 'EGAM12Cfg', 'EGAMPEBCfg',
+           'EGAM7Cfg', 'EGAM8Cfg', 'EGAM9Cfg', 'EGAM10Cfg', 'EGAM11Cfg', 'EGAM12Cfg', 'EGAMPEBPHYSCfg',
            'JETM1Cfg','JETM2Cfg','JETM3Cfg','JETM4Cfg','JETM5Cfg','JETM7Cfg','JETM12Cfg','JETM42Cfg',
            'TOPQ7Cfg',
            'TRIG8Cfg',"TRIG9Cfg","TRIG10Cfg",'L1CALO1Cfg',

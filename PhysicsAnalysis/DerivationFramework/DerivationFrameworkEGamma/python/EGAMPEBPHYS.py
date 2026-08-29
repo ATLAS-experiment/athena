@@ -1,7 +1,7 @@
 # Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 # =======================================================================
-# EGAMPEB.py
-# This defines DAOD_EGAMPEB, a specialist format for the EGammaPEB stream
+# EGAMPEBPHYS.py
+# This defines DAOD_EGAMPEBPHYS, a specialist format for the EGammaPEB stream
 # based on DAOD_PHYS. All calls to unavailable Muon objects are disabled.
 #
 # Tau, flavour, met, Higgs, AFP, large-r are removed. 
@@ -24,12 +24,12 @@ from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.Enums import MetadataCategory #, LHCPeriod
 from AthenaCommon.Logging import logging
-logEGAMPEB = logging.getLogger('EGAMPEB')
+logEGAMPEBPHYS = logging.getLogger('EGAMPEBPHYS')
 
-def JetEGAMPEBConfig(ConfigFlags):
+def JetEGAMPEBPHYSConfig(ConfigFlags):
     from DerivationFrameworkJetEtMiss.JetCommonConfig import AddBadBatmanCfg, AddDistanceInTrainCfg, AddSidebandEventShapeCfg, AddEventCleanFlagsCfg
     
-    """EGAMPEB config for jet reconstruction and decorations"""
+    """EGAMPEBPHYS config for jet reconstruction and decorations"""
 
     acc = ComponentAccumulator()
 
@@ -58,7 +58,7 @@ def JetEGAMPEBConfig(ConfigFlags):
     for jd in jetList:
         acc.merge(JetRecCfg(ConfigFlags,jd))
 
-    # JetEGAMPEBCfg
+    # JetEGAMPEBPHYSCfg
     if "McEventCollection#GEN_EVENT" not in ConfigFlags.Input.TypedCollections:
         acc.merge(AddBadBatmanCfg(ConfigFlags))
     acc.merge(AddDistanceInTrainCfg(ConfigFlags))
@@ -68,8 +68,8 @@ def JetEGAMPEBConfig(ConfigFlags):
     return acc
     
 
-def EGAMPEBCommonAugmentationsCfg(flags,**kwargs):
-    """Configure the EGAMPEB augmentation, modified from common Phys"""
+def EGAMPEBPHYSCommonAugmentationsCfg(flags,**kwargs):
+    """Configure the EGAMPEBPHYS augmentation, modified from common Phys"""
     acc = ComponentAccumulator()
 
     from TrkConfig.VertexFindingFlags import VertexSortingSetup
@@ -124,7 +124,7 @@ def EGAMPEBCommonAugmentationsCfg(flags,**kwargs):
                              MergeLRT = False)) 
     acc.merge(EGammaCommonCfg(flags))
     # Jets,
-    acc.merge(JetEGAMPEBConfig(flags))
+    acc.merge(JetEGAMPEBPHYSConfig(flags))
     #We also need to build links between the newly created jet constituents (GlobalFE)
     #and electrons,photons,muons and taus
     from eflowRec.PFCfg import getEGamFlowElementAssocAlgorithm 
@@ -153,12 +153,12 @@ def EGAMPEBCommonAugmentationsCfg(flags,**kwargs):
     return acc
 
 # Main algorithm config
-def EGAMPEBKernelCfg(flags, name='EGAMPEBKernel', **kwargs):
-    """Configure the derivation framework driving algorithm (kernel) for EGAMPEB"""
+def EGAMPEBPHYSKernelCfg(flags, name='EGAMPEBPHYSKernel', **kwargs):
+    """Configure the derivation framework driving algorithm (kernel) for EGAMPEBPHYS"""
     acc = ComponentAccumulator()
 
     # Common augmentations
-    acc.merge(EGAMPEBCommonAugmentationsCfg(
+    acc.merge(EGAMPEBPHYSCommonAugmentationsCfg(
         flags, 
         TriggerListsHelper     = kwargs['TriggerListsHelper']
     ))
@@ -186,7 +186,7 @@ def EGAMPEBKernelCfg(flags, name='EGAMPEBKernel', **kwargs):
     return acc
 
 
-def EGAMPEBCoreCfg(flags, name_tag='EGAMPEB', StreamName='StreamDAOD_EGAMPEB', TriggerListsHelper=None, addExtraVariables=None):
+def EGAMPEBPHYSCoreCfg(flags, name_tag='EGAMPEBPHYS', StreamName='StreamDAOD_EGAMPEBPHYS', TriggerListsHelper=None, addExtraVariables=None):
     
     if TriggerListsHelper is None:
         from DerivationFrameworkPhys.TriggerListsHelper import TriggerListsHelper
@@ -210,8 +210,8 @@ def EGAMPEBCoreCfg(flags, name_tag='EGAMPEB', StreamName='StreamDAOD_EGAMPEB', T
     from xAODMetaDataCnv.InfileMetaDataConfig import SetupMetaDataForStreamCfg
     from DerivationFrameworkCore.SlimmingHelper import SlimmingHelper
     
-    EGAMPEBSlimmingHelper = SlimmingHelper(name_tag+"SlimmingHelper", NamesAndTypes = flags.Input.TypedCollections, flags = flags)
-    EGAMPEBSlimmingHelper.SmartCollections = ["EventInfo",
+    EGAMPEBPHYSSlimmingHelper = SlimmingHelper(name_tag+"SlimmingHelper", NamesAndTypes = flags.Input.TypedCollections, flags = flags)
+    EGAMPEBPHYSSlimmingHelper.SmartCollections = ["EventInfo",
                                            "Electrons",
                                            "Photons",
                                            "PrimaryVertices",
@@ -231,10 +231,10 @@ def EGAMPEBCoreCfg(flags, name_tag='EGAMPEB', StreamName='StreamDAOD_EGAMPEB', T
     StaticContent += ["xAOD::VertexContainer#NVSI_SecVrt_Tight"]
     StaticContent += ["xAOD::VertexAuxContainer#NVSI_SecVrt_TightAux."+excludedVertexAuxData]   
 
-    EGAMPEBSlimmingHelper.StaticContent = StaticContent
+    EGAMPEBPHYSSlimmingHelper.StaticContent = StaticContent
    
     # Extra content
-    EGAMPEBSlimmingHelper.ExtraVariables += ["AntiKt4EMTopoJets.ConeExclBHadronsFinal.ConeExclCHadronsFinal.GhostBHadronsFinal.GhostCHadronsFinal.GhostBHadronsFinalCount.GhostBHadronsFinalPt.GhostCHadronsFinalCount.GhostCHadronsFinalPt.IsoFixedCone5PtPUsub",
+    EGAMPEBPHYSSlimmingHelper.ExtraVariables += ["AntiKt4EMTopoJets.ConeExclBHadronsFinal.ConeExclCHadronsFinal.GhostBHadronsFinal.GhostCHadronsFinal.GhostBHadronsFinalCount.GhostBHadronsFinalPt.GhostCHadronsFinalCount.GhostCHadronsFinalPt.IsoFixedCone5PtPUsub",
                                           "AntiKt4EMPFlowJets.ConeExclBHadronsFinal.ConeExclCHadronsFinal.GhostBHadronsFinal.GhostCHadronsFinal.GhostBHadronsFinalCount.GhostBHadronsFinalPt.GhostCHadronsFinalCount.GhostCHadronsFinalPt.isJvtHS.isJvtPU.IsoFixedCone5PtPUsub",
                                           "TruthPrimaryVertices.t.x.y.z",
                                           "InDetTrackParticles.eProbabilityHT.numberOfTRTHits.numberOfTRTOutliers",
@@ -242,25 +242,25 @@ def EGAMPEBCoreCfg(flags, name_tag='EGAMPEB', StreamName='StreamDAOD_EGAMPEB', T
                                           ]
 
     if addExtraVariables:
-        EGAMPEBSlimmingHelper.ExtraVariables += addExtraVariables
+        EGAMPEBPHYSSlimmingHelper.ExtraVariables += addExtraVariables
 
     # HSGNN Score
     from TrkConfig.VertexFindingFlags import VertexSortingSetup
     if flags.Tracking.PriVertex.sortingSetup is VertexSortingSetup.GNNSorting:
-        EGAMPEBSlimmingHelper.ExtraVariables += ["PrimaryVertices.gnnScore"]
+        EGAMPEBPHYSSlimmingHelper.ExtraVariables += ["PrimaryVertices.gnnScore"]
 
 
     # IFF extra content
     # from LeptonTaggers.LeptonTaggersConfig import GetExtraPLITVariablesForDxAOD
-    # EGAMPEBSlimmingHelper.ExtraVariables += GetExtraPLITVariablesForDxAOD()
+    # EGAMPEBPHYSSlimmingHelper.ExtraVariables += GetExtraPLITVariablesForDxAOD()
                                   
     # # Truth extra content
     # if flags.Input.isMC:
 
     #     from DerivationFrameworkMCTruth.MCTruthCommonConfig import addTruth3ContentToSlimmerTool
-    #     addTruth3ContentToSlimmerTool(EGAMPEBSlimmingHelper)
-    #     EGAMPEBSlimmingHelper.AllVariables += ['TruthLHEParticles','InTimeAntiKt4TruthJets','OutOfTimeAntiKt4TruthJets']
-    #     EGAMPEBSlimmingHelper.ExtraVariables += ["Electrons.TruthLink",
+    #     addTruth3ContentToSlimmerTool(EGAMPEBPHYSSlimmingHelper)
+    #     EGAMPEBPHYSSlimmingHelper.AllVariables += ['TruthLHEParticles','InTimeAntiKt4TruthJets','OutOfTimeAntiKt4TruthJets']
+    #     EGAMPEBPHYSSlimmingHelper.ExtraVariables += ["Electrons.TruthLink",
     #                                           "Muons.TruthLink",
     #                                           "Photons.TruthLink",
     #                                           "AntiKt4TruthDressedWZJets.IsoFixedCone5Pt.HFHadronOriginID",
@@ -271,55 +271,55 @@ def EGAMPEBCoreCfg(flags, name_tag='EGAMPEB', StreamName='StreamDAOD_EGAMPEB', T
 
     #     from DerivationFrameworkMCTruth.MCTruthCommonConfig import AddTauAndDownstreamParticlesCfg
     #     acc.merge(AddTauAndDownstreamParticlesCfg(flags))
-    #     EGAMPEBSlimmingHelper.ExtraVariables += ["TruthTausWithDecayParticles.prodVtxLink.prodVtxLink.prodVtxLink.decayVtxLink.decayVtxLink.decayVtxLink.m.px.py.pz.e.pdgId.Classification.uid.classifierParticleOrigin.classifierParticleType.classifierParticleOutCome.status",
+    #     EGAMPEBPHYSSlimmingHelper.ExtraVariables += ["TruthTausWithDecayParticles.prodVtxLink.prodVtxLink.prodVtxLink.decayVtxLink.decayVtxLink.decayVtxLink.m.px.py.pz.e.pdgId.Classification.uid.classifierParticleOrigin.classifierParticleType.classifierParticleOutCome.status",
     #                                           "TruthTausWithDecayVertices.incomingParticleLinks.outgoingParticleLinks.uid.status.x.y.z.t"]
 
 
     # Trigger content
-    EGAMPEBSlimmingHelper.IncludeTriggerNavigation = False
-    EGAMPEBSlimmingHelper.IncludeJetTriggerContent = False
-    EGAMPEBSlimmingHelper.IncludeMuonTriggerContent = False
-    EGAMPEBSlimmingHelper.IncludeEGammaTriggerContent = False #TODO: enable?
-    EGAMPEBSlimmingHelper.IncludeTauTriggerContent = False
-    EGAMPEBSlimmingHelper.IncludeEtMissTriggerContent = False
-    EGAMPEBSlimmingHelper.IncludeBJetTriggerContent = False
-    EGAMPEBSlimmingHelper.IncludeBPhysTriggerContent = False
-    EGAMPEBSlimmingHelper.IncludeMinBiasTriggerContent = False
+    EGAMPEBPHYSSlimmingHelper.IncludeTriggerNavigation = False
+    EGAMPEBPHYSSlimmingHelper.IncludeJetTriggerContent = False
+    EGAMPEBPHYSSlimmingHelper.IncludeMuonTriggerContent = False
+    EGAMPEBPHYSSlimmingHelper.IncludeEGammaTriggerContent = False #TODO: enable?
+    EGAMPEBPHYSSlimmingHelper.IncludeTauTriggerContent = False
+    EGAMPEBPHYSSlimmingHelper.IncludeEtMissTriggerContent = False
+    EGAMPEBPHYSSlimmingHelper.IncludeBJetTriggerContent = False
+    EGAMPEBPHYSSlimmingHelper.IncludeBPhysTriggerContent = False
+    EGAMPEBPHYSSlimmingHelper.IncludeMinBiasTriggerContent = False
     # Compact b-jet trigger matching info
-    EGAMPEBSlimmingHelper.IncludeBJetTriggerByYearContent = False
+    EGAMPEBPHYSSlimmingHelper.IncludeBJetTriggerByYearContent = False
 
     #Trigger content for EgammaPEB 
-    EGAMPEBSlimmingHelper.AllVariables += ['HLT_egamma_Photons_TLA','HLT_CaloEMClusters_Photon']
+    EGAMPEBPHYSSlimmingHelper.AllVariables += ['HLT_egamma_Photons_TLA','HLT_CaloEMClusters_Photon']
 
     # Trigger matching
     # Run 3, or Run 2 with navigation conversion
     # if flags.Trigger.EDMVersion == 3 or (flags.Trigger.EDMVersion == 2 and flags.Trigger.doEDMVersionConversion):
     #     from TrigNavSlimmingMT.TrigNavSlimmingMTConfig import AddRun3TrigNavSlimmingCollectionsToSlimmingHelper
-    #     AddRun3TrigNavSlimmingCollectionsToSlimmingHelper(EGAMPEBSlimmingHelper)
+    #     AddRun3TrigNavSlimmingCollectionsToSlimmingHelper(EGAMPEBPHYSSlimmingHelper)
 
     # L1 trigger objects
     from Campaigns.Utils import getDataYear
     if getDataYear(flags) >= 2024:
         # Run 3 with Phase I jet RoIs.
         from DerivationFrameworkPhys.TriggerMatchingCommonConfig import AddjFexRoIsToSlimmingHelper
-        AddjFexRoIsToSlimmingHelper(SlimmingHelper = EGAMPEBSlimmingHelper)
+        AddjFexRoIsToSlimmingHelper(SlimmingHelper = EGAMPEBPHYSSlimmingHelper)
     elif getDataYear(flags) >= 2015:
         # Run 2 and early Run 3, legacy L1 RoIs
         from DerivationFrameworkPhys.TriggerMatchingCommonConfig import AddLegacyL1JetRoIsToSlimmingHelper
-        AddLegacyL1JetRoIsToSlimmingHelper(SlimmingHelper = EGAMPEBSlimmingHelper)
+        AddLegacyL1JetRoIsToSlimmingHelper(SlimmingHelper = EGAMPEBPHYSSlimmingHelper)
 
     # Output stream    
-    EGAMPEBItemList = EGAMPEBSlimmingHelper.GetItemList()
-    acc.merge(OutputStreamCfg(flags, "DAOD_"+name_tag, ItemList=EGAMPEBItemList, AcceptAlgs=[name_tag+"Kernel"]))
+    EGAMPEBPHYSItemList = EGAMPEBPHYSSlimmingHelper.GetItemList()
+    acc.merge(OutputStreamCfg(flags, "DAOD_"+name_tag, ItemList=EGAMPEBPHYSItemList, AcceptAlgs=[name_tag+"Kernel"]))
     acc.merge(SetupMetaDataForStreamCfg(flags, "DAOD_"+name_tag, AcceptAlgs=[name_tag+"Kernel"], createMetadata=[MetadataCategory.CutFlowMetaData, MetadataCategory.TruthMetaData]))
 
     return acc
 
-def EGAMPEBCfg(flags):
+def EGAMPEBPHYSCfg(flags):
 
-    logEGAMPEB.info('****************** STARTING EGAMPEB *****************')
+    logEGAMPEBPHYS.info('****************** STARTING EGAMPEBPHYS *****************')
 
-    stream_name = 'StreamDAOD_EGAMPEB'
+    stream_name = 'StreamDAOD_EGAMPEBPHYS'
     acc = ComponentAccumulator()
 
     # Get the lists of triggers needed for trigger matching.
@@ -327,21 +327,21 @@ def EGAMPEBCfg(flags):
     # for actually configuring the matching, so we create it here and pass it down
     # TODO: this should ideally be called higher up to avoid it being run multiple times in a train
     from DerivationFrameworkPhys.TriggerListsHelper import TriggerListsHelper
-    EGAMPEBTriggerListsHelper = TriggerListsHelper(flags)
+    EGAMPEBPHYSTriggerListsHelper = TriggerListsHelper(flags)
 
     # Common augmentations
-    acc.merge(EGAMPEBKernelCfg(
+    acc.merge(EGAMPEBPHYSKernelCfg(
         flags,
-        name="EGAMPEBKernel",
+        name="EGAMPEBPHYSKernel",
         StreamName = stream_name,
-        TriggerListsHelper = EGAMPEBTriggerListsHelper
+        TriggerListsHelper = EGAMPEBPHYSTriggerListsHelper
     ))
-    # EGAMPEB content
-    acc.merge(EGAMPEBCoreCfg(
+    # EGAMPEBPHYS content
+    acc.merge(EGAMPEBPHYSCoreCfg(
         flags,
-        "EGAMPEB",
+        "EGAMPEBPHYS",
         StreamName = stream_name,
-        TriggerListsHelper = EGAMPEBTriggerListsHelper
+        TriggerListsHelper = EGAMPEBPHYSTriggerListsHelper
         ))
     
     return acc
