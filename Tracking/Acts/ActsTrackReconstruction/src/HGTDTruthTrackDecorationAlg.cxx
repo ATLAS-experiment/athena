@@ -48,6 +48,7 @@ namespace ActsTrk{
     ATH_CHECK( m_hgtdTrackLinkKey.initialize() );
     ATH_CHECK( m_truthParticleLinkKey.initialize() );
     ATH_CHECK( m_trackingGeometrySvc.retrieve());
+    ATH_CHECK(detStore()->retrieve(m_id_helper, "HGTD_ID"));
     ATH_CHECK( m_uncalibratedMeasurementContainerKey_HGTD.initialize() );
 
     // Initialize surface accessor
@@ -186,11 +187,16 @@ namespace ActsTrk{
       if (flags.isMeasurement()) {
         // Check if this is an HGTD hit 
         const auto& surface = state.referenceSurface();
+        const auto* detElem = getActsDetectorElement(surface);
+        if(detElem->detectorType() != DetectorType::Hgtd){
+          continue;
+        }
+
         Acts::GeometryIdentifier geoID = surface.geometryId();
-                              
-        std::size_t layerIndex = getHGTDLayerIndex(geoID);
+        std::size_t layerIndex = m_id_helper->layer(detElem->identify());
+
         ClusterTruthInfo cluster_truth_info;
-        
+
         assert( state.hasUncalibratedSourceLink() );
         auto uncalibMeas = detail::xAODUncalibMeasCalibrator::unpack(state.getUncalibratedSourceLink());
         if (association_map->at(uncalibMeas->index()).empty()) {
@@ -252,7 +258,14 @@ namespace ActsTrk{
       auto measurementTruthParticles = association_map->at(uncalibMeas->index());
       const Acts::Surface* surface = m_surfAcc.get(uncalibMeas);
       Acts::GeometryIdentifier geoID = surface->geometryId();
-      std::size_t layerIndex = getHGTDLayerIndex(geoID);
+
+      const auto* detElem = getActsDetectorElement(surface);
+      if(detElem->detectorType() != DetectorType::Hgtd){
+        continue;
+      }
+      
+      std::size_t layerIndex = m_id_helper->layer(detElem->identify());
+
       ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<" - "<<uncalibMeas->type()<<", geoID: "<<geoID<<", layerIndex: "<<layerIndex);
       if (layerIndex >= isPrimaryExistsVec.size()) {
           ATH_MSG_WARNING(__func__<<"() "<<__LINE__<<" - "<<uncalibMeas->type()<<", geoID: "<<geoID<<" results in an invalid index "<<layerIndex);
@@ -269,39 +282,6 @@ namespace ActsTrk{
     }
   
     return StatusCode::SUCCESS; 
-  }
-
-  std::size_t HGTDTruthTrackDecorationAlg::getHGTDLayerIndex(const Acts::GeometryIdentifier& geoID) const {
-    // Get volume and layer ID
-    std::uint32_t volume = geoID.volume();
-    std::uint32_t layer = geoID.layer();
-    
-    // Check if we're in the positive or negative endcap 
-    bool isPositiveEndcap = (volume == 25); 
-    bool isNegativeEndcap = (volume == 2); 
-    
-    // Different mapping for different sides to maintain consistent physical ordering
-    if (isPositiveEndcap) {
-      // Mapping for positive endcap
-      switch(layer) {
-        case 2: return 0;  // First HGTD layer (closest to IP)
-        case 4: return 1;  // Second HGTD layer
-        case 6: return 2;  // Third HGTD layer
-        case 8: return 3;  // Fourth HGTD layer (farthest from IP)
-        default: return 99; // Invalid layer
-      }
-    } else if (isNegativeEndcap) {
-      // Mapping for negative endcap - potentially different ordering
-      switch(layer) {
-        case 2: return 3; 
-        case 4: return 2;  
-        case 6: return 1;
-        case 8: return 0;
-        default: return 99; // Invalid layer
-      }
-    } else {
-      return 99; // Not an HGTD volume
-    }
   }
   
 }
