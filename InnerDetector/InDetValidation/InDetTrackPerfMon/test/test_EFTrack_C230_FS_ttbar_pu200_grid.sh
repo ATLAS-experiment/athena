@@ -67,12 +67,12 @@ if [ ! -f "${InputRDOfiles}" ]; then
     exit 1
 fi
 
-## Track reconstruction step
+## Track reconstruction step. See runReco_C230_FS.sh --help for list of supported options.
 run "${pipelineName}" \
   runReco_C230_FS.sh \
     -i ${InputRDOfiles} \
-    -o "${OutSampleName}.AOD.pool.root"
-    #-n 10
+    -o "${OutSampleName}.AOD.pool.root" \
+    "$@"
 
 ## Don't run if IDTPM json config is not found
 if [ ! -f "$IDTPMjsonConfig_absPath" ]; then
