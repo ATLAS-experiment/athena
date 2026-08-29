@@ -56,6 +56,7 @@ if [ ! -f $inputRDO ]; then
 fi
 
 ## running reconstruction
+ignore_pattern='ERROR Locating dev file .+ Do not let this propagate to a release'
 run Reco_tf.py \
     --maxEvents ${nEvents} \
     --preInclude 'InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude' \
@@ -69,11 +70,10 @@ run Reco_tf.py \
                flags.Acts.SeedingStrategy=SeedingStrategy.Gbts;' \
     --inputRDOFile ${inputRDO} \
     --outputAODFile ${outputAOD} \
+    --ignorePatterns "${ignore_pattern}" \
     --perfmon fullmonmt
 
 rc=$?
-# 24/07/2026: temporarily ignore known ERRORs detected in logfile (rc=68)
-if [ $rc = 68 ]; then rc=0; fi
 echo "Reco_tf.py result: $rc"
 # don't exit only for ERRORs detected in logfile (rc=68)
 if [ $rc != 0 -a $rc != 68 ]; then exit $rc; fi
