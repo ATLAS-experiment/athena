@@ -270,7 +270,7 @@ def EGAMPEBPHYSCoreCfg(flags, name_tag='EGAMPEBPHYS', StreamName='StreamDAOD_EGA
     EGAMPEBPHYSSlimmingHelper.IncludeTriggerNavigation = False
     EGAMPEBPHYSSlimmingHelper.IncludeJetTriggerContent = False
     EGAMPEBPHYSSlimmingHelper.IncludeMuonTriggerContent = False
-    EGAMPEBPHYSSlimmingHelper.IncludeEGammaTriggerContent = False #TODO: enable?
+    EGAMPEBPHYSSlimmingHelper.IncludeEGammaTriggerContent = True
     EGAMPEBPHYSSlimmingHelper.IncludeTauTriggerContent = False
     EGAMPEBPHYSSlimmingHelper.IncludeEtMissTriggerContent = False
     EGAMPEBPHYSSlimmingHelper.IncludeBJetTriggerContent = False
