@@ -38,7 +38,6 @@ def ITkPixelDecodingAlgCfg(flags, name = "ITkPixelDecodingAlg", **kwargs) -> Com
     from ITkPixelCabling.ITkPixelCablingAlgConfig import ITkPixelCablingAlgCfg
     acc.merge(ITkPixelCablingAlgCfg(flags, UseTestCabling=True))
 
-
     acc.addEventAlgo(CompFactory.ITkPixelDecodingAlg(name, **kwargs))
 
     return acc
