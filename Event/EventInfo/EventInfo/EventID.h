@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
  */
 
 #ifndef EVENTINFO_EVENTID_H
@@ -13,12 +13,11 @@
  *
  * @author RD Schaffer <R.D.Schaffer@cern.ch>
  * @author Paolo Calafiura <pcalafiura@lbl.gov>
- *
- * $Id: EventID.h,v 1.10 2007-12-04 18:22:32 schaffer Exp $
  */
 
 //<<<<<< INCLUDES                                                       >>>>>>
 
+#include <format>
 #include <iostream>
 #include <stdint.h>
 
@@ -160,18 +159,36 @@ EventID::detector_mask(void) const {
   return(result);
 }
 
+
+namespace std {
+
+/// A C++20-compatible formatter for EventID.
+template <>
+struct formatter<EventID>
+  : public formatter<string_view>
+{
+  template <class FmtContext>
+  FmtContext::iterator format (const EventID& ei, FmtContext& ctx) const
+  {
+    return std::format_to (ctx.out(),
+                           "[Run,Evt,Lumi,Time,BunchCross,DetMask] = [{},{},{},{}:{},{},{:#0x},{:#0x},{:#0x}]",
+                           ei.run_number(),
+                           ei.event_number(),
+                           ei.lumi_block(),
+                           ei.time_stamp(),
+                           ei.time_stamp_ns_offset(),
+                           ei.bunch_crossing_id(),
+                           ei.detector_mask(),
+                           ei.detector_mask2(),
+                           ei.detector_mask3());
+  }
+};
+
+} // namespace std
+
+
 inline std::ostream& operator << (std::ostream& os, const EventID& rhs) {
-  os << "[Run,Evt,Lumi,Time,BunchCross,DetMask] = ["
-     << rhs.run_number()
-     << "," << rhs.event_number()
-     << "," << rhs.lumi_block()
-     << "," << rhs.time_stamp()
-     << ":" << rhs.time_stamp_ns_offset()
-     << "," << rhs.bunch_crossing_id()
-     << ",0x" << std::hex << rhs.detector_mask()
-     << ",0x" << std::hex << rhs.detector_mask2()
-     << ",0x" << std::hex << rhs.detector_mask3() << std::dec
-     << "]";
+  os << std::format ("{}", rhs);
   return os;
 }
 
