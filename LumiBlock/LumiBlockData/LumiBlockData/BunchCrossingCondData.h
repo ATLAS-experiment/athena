@@ -1,6 +1,6 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 /*
- * Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration.
  */
 /**
  * @file LumiBlockData/BunchCrossingCondData.h
@@ -337,26 +337,26 @@ CONDCONT_MIXED_DEF (BunchCrossingCondData, 157905099 );
 
 inline 
 bool BunchCrossingCondData::isFilled(const bcid_type bcid) const {
-  if (ATH_UNLIKELY(bcid>=m_MAX_BCID)) return false;
+  if (bcid>=m_MAX_BCID) [[unlikely]] return false;
   return m_luminous.test(bcid);
 }
 
 inline
 bool  BunchCrossingCondData::isBeam1(const bcid_type bcid) const {
-  if (ATH_UNLIKELY(bcid>=m_MAX_BCID)) return false;
+  if (bcid>=m_MAX_BCID) [[unlikely]] return false;
   return m_beam1.test(bcid);
 }
 
 inline
 bool BunchCrossingCondData::isBeam2(const bcid_type bcid) const {
-  if (ATH_UNLIKELY(bcid>=m_MAX_BCID)) return false;
+  if (bcid>=m_MAX_BCID) [[unlikely]] return false;
   return  m_beam2.test(bcid);
 }
 
 
 inline 
 bool  BunchCrossingCondData::isUnpaired(const bcid_type bcid) const {
-  if (ATH_UNLIKELY(bcid>=m_MAX_BCID)) return false;
+  if (bcid>=m_MAX_BCID) [[unlikely]] return false;
   return ((m_beam1.test(bcid) || m_beam2.test(bcid)) && !m_luminous.test(bcid)); 
 
 }

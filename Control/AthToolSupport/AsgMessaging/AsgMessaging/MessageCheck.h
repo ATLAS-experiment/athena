@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Nils Krumnack
@@ -8,8 +8,6 @@
 
 #ifndef ASG_MESSAGING__MESSAGE_CHECK_H
 #define ASG_MESSAGING__MESSAGE_CHECK_H
-
-#include "CxxUtils/AthUnlikelyMacros.h"
 
 /// \file MessageCheck.h
 /// \brief macros for messaging and checking status codes
@@ -324,7 +322,7 @@ typedef StatusCode AsgToolsCheckResultType;
 #define ANA_CHECK(EXP)							\
   { const auto sc__ = EXP;						\
     typedef typename std::decay<decltype(sc__)>::type scType__;		\
-    if (ATH_UNLIKELY(!::asg::CheckHelper<scType__>::isSuccess (sc__))) { \
+    if (!::asg::CheckHelper<scType__>::isSuccess (sc__)) [[unlikely]] { \
       ANA_MSG_ERROR ("Failed to call \"" << #EXP << "\"");		\
       return ::asg::CheckHelper<AsgToolsCheckResultType>::failureCode(); \
     } }
@@ -339,7 +337,7 @@ typedef StatusCode AsgToolsCheckResultType;
 #define ANA_CHECK_THROW(EXP)						\
   { const auto sc__ = EXP;						\
     typedef typename std::decay<decltype(sc__)>::type scType__;		\
-    if (ATH_UNLIKELY(!::asg::CheckHelper<scType__>::isSuccess (sc__))) { \
+    if (!::asg::CheckHelper<scType__>::isSuccess (sc__)) [[unlikely]] { \
       std::ostringstream str;						\
       str << #EXP;							\
       ANA_MSG_ERROR ("Failed to call \"" << str.str() << "\", throwing exception"); \

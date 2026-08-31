@@ -5,7 +5,7 @@
 
 
 float  BunchCrossingIntensityCondData::GetBeam1IntensityBCID(const bcid_type bcid, int channel) const {
-  if (ATH_UNLIKELY(bcid>=m_MAX_BCID)) return 0;
+  if (bcid>=m_MAX_BCID) [[unlikely]] return 0;
   if (channel==0)
     return m_beam1Intensity.at(bcid);
   else if (channel==1)
@@ -16,7 +16,7 @@ float  BunchCrossingIntensityCondData::GetBeam1IntensityBCID(const bcid_type bci
 
 
 float  BunchCrossingIntensityCondData::GetBeam2IntensityBCID(const bcid_type bcid, int channel) const {
-  if (ATH_UNLIKELY(bcid>=m_MAX_BCID)) return 0;
+  if (bcid>=m_MAX_BCID) [[unlikely]] return 0;
   if (channel==0)
     return m_beam2Intensity.at(bcid);
   else if (channel==1)
@@ -30,7 +30,6 @@ float  BunchCrossingIntensityCondData::GetBeam2IntensityBCID(const bcid_type bci
 
 
 const std::vector<float>&  BunchCrossingIntensityCondData::GetBeam1IntensityPerBCIDVector(int channel) const {
-  // if (ATH_UNLIKELY(bcid>=m_MAX_BCID)) return false;
   if(channel==0)
     return m_beam1Intensity;
   // else if(channel==1)
@@ -41,7 +40,6 @@ const std::vector<float>&  BunchCrossingIntensityCondData::GetBeam1IntensityPerB
 
 
 const std::vector<float>&  BunchCrossingIntensityCondData::GetBeam2IntensityPerBCIDVector(int channel) const {
-  // if (ATH_UNLIKELY(bcid>=m_MAX_BCID)) return false;
   if(channel==0)
     return m_beam2Intensity;
   else //if(channel==1)
@@ -51,7 +49,6 @@ const std::vector<float>&  BunchCrossingIntensityCondData::GetBeam2IntensityPerB
 
 
 float BunchCrossingIntensityCondData::GetBeam1IntensityAll(int channel) const {
-  // if (ATH_UNLIKELY(bcid>=m_MAX_BCID)) return false;
   if(channel==0)
     return m_beam1IntensityAll;
   else if(channel==1)
@@ -62,7 +59,6 @@ float BunchCrossingIntensityCondData::GetBeam1IntensityAll(int channel) const {
 
 
 float BunchCrossingIntensityCondData::GetBeam2IntensityAll(int channel) const {
-  // if (ATH_UNLIKELY(bcid>=m_MAX_BCID)) return false;
   if(channel==0)
     return m_beam2IntensityAll;
   else if(channel==1)
@@ -73,7 +69,6 @@ float BunchCrossingIntensityCondData::GetBeam2IntensityAll(int channel) const {
 
 
 unsigned long long BunchCrossingIntensityCondData::GetRunLB() const {
-  // if (ATH_UNLIKELY(bcid>=m_MAX_BCID)) return false;
   return m_RunLB;
 }
 
