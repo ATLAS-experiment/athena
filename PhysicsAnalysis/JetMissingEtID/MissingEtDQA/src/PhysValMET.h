@@ -109,7 +109,7 @@ class PhysValMET
   std::vector <std::string> m_terms;
 
   // Map for names
-  std::map <std::string,std::string> m_names;
+  std::map <std::string,std::string> m_term_names;
 
   // Hists
   TH1D *m_MET_Track = nullptr, *m_MET_Track_x = nullptr, *m_MET_Track_y = nullptr, *m_MET_Track_phi = nullptr, *m_MET_Track_sum = nullptr;

@@ -74,7 +74,7 @@ namespace MissingEtDQA {
   ///////////////
   PhysValMET::~PhysValMET()
   {
-    m_names.clear();
+    m_term_names.clear();
     m_jet_types.clear();
     m_terms.clear();
     m_MET.clear();
@@ -102,26 +102,25 @@ namespace MissingEtDQA {
   // Athena algtool's Hooks
   ////////////////////////////
 
-  //initialize
   StatusCode PhysValMET::initialize()
   {
     ATH_MSG_DEBUG ("Initializing " << name() << "...");    
     ATH_CHECK(ManagedMonitorToolBase::initialize());
 
     //setup names
-    m_names.clear();
-    m_names["RefEle"] = "Electron term";
-    m_names["RefGamma"] = "Photon term";
-    m_names["RefTau"] = "Tau term";
-    m_names["RefMuons"] = "Muon term";
-    m_names["RefJet"] = "Jet term";
-    m_names["SoftClus"] = "Cluster-based soft term";
-    m_names["PVSoftTrk"] = "Track-based soft term (PV-matched)";
-    m_names["FinalTrk"] = "Total MET with TST";
-    m_names["FinalClus"] = "Total MET with CST";
-    m_names["Track"] = "Track MET, loose selection";
-    m_names["PVTrack_Nominal"] = "Track MET for highest sum p_{T}^{2} PV";
-    m_names["PVTrack_Pileup"] = "Track MET for each pileup vertex";
+    m_term_names.clear();
+    m_term_names["RefEle"] = "Electron term";
+    m_term_names["RefGamma"] = "Photon term";
+    m_term_names["RefTau"] = "Tau term";
+    m_term_names["RefMuons"] = "Muon term";
+    m_term_names["RefJet"] = "Jet term";
+    m_term_names["SoftClus"] = "Cluster-based soft term";
+    m_term_names["PVSoftTrk"] = "Track-based soft term (PV-matched)";
+    m_term_names["FinalTrk"] = "Total MET with TST";
+    m_term_names["FinalClus"] = "Total MET with CST";
+    m_term_names["Track"] = "Track MET, loose selection";
+    m_term_names["PVTrack_Nominal"] = "Track MET for highest sum p_{T}^{2} PV";
+    m_term_names["PVTrack_Pileup"] = "Track MET for each pileup vertex";
 
     //define the Jet types
     m_jet_types.clear();
@@ -261,11 +260,11 @@ namespace MissingEtDQA {
 
           //Setup Term histograms
           for(const auto& term : m_terms){
-            v_MET.push_back( new  TH1D((name_met + "_" + term).c_str(), (name_met + " " + m_names[term] + "; E_{T}^{miss} [GeV]; Entries / 5 GeV").c_str(), nbinp, 0., suptmi) );
-            v_MET_x.push_back( new  TH1D((name_met + "_" + term +"_x").c_str(), (name_met + " " + m_names[term] + " x; E_{x}^{miss} [GeV]; Entries / 5 GeV").c_str(), nbinpxy, -suptmixy, suptmixy) );
-            v_MET_y.push_back( new  TH1D((name_met + "_" + term + "_y").c_str(), (name_met + " " + m_names[term] + " y; E_{y}^{miss} [GeV]; Entries / 5 GeV").c_str(), nbinpxy, -suptmixy, suptmixy) );
-            v_MET_phi.push_back( new  TH1D((name_met + "_" + term + "_phi").c_str(), (name_met + " " + m_names[term] + " phi; #Phi; Entries / 0.1").c_str(), nbinphi,-binphi,binphi) );
-            v_MET_sum.push_back( new  TH1D((name_met + "_" + term + "_sum").c_str(), (name_met + " " + m_names[term] + " sum; E_{T}^{sum} [GeV]; Entries / 25 GeV").c_str(), nbinE, lowET, suET) );
+            v_MET.push_back( new  TH1D((name_met + "_" + term).c_str(), (name_met + " " + m_term_names[term] + "; E_{T}^{miss} [GeV]; Entries / 5 GeV").c_str(), nbinp, 0., suptmi) );
+            v_MET_x.push_back( new  TH1D((name_met + "_" + term +"_x").c_str(), (name_met + " " + m_term_names[term] + " x; E_{x}^{miss} [GeV]; Entries / 5 GeV").c_str(), nbinpxy, -suptmixy, suptmixy) );
+            v_MET_y.push_back( new  TH1D((name_met + "_" + term + "_y").c_str(), (name_met + " " + m_term_names[term] + " y; E_{y}^{miss} [GeV]; Entries / 5 GeV").c_str(), nbinpxy, -suptmixy, suptmixy) );
+            v_MET_phi.push_back( new  TH1D((name_met + "_" + term + "_phi").c_str(), (name_met + " " + m_term_names[term] + " phi; #Phi; Entries / 0.1").c_str(), nbinphi,-binphi,binphi) );
+            v_MET_sum.push_back( new  TH1D((name_met + "_" + term + "_sum").c_str(), (name_met + " " + m_term_names[term] + " sum; E_{T}^{sum} [GeV]; Entries / 25 GeV").c_str(), nbinE, lowET, suET) );
             m_dir_met.push_back("MET/" + name_met + "/Terms/" + term + "/");
           }
         
@@ -344,12 +343,12 @@ namespace MissingEtDQA {
           v_MET_CorrFinalClus.reserve(corrClus_names.size());
 
           for(const auto& it : corrClus_names) {
-            v_MET_CorrFinalClus.push_back( new  TH2D((name_met + "_" + it + "_FinalClus").c_str(), (name_met + " " + m_names[it] + " vs. CST MET; E_{T," + it + "}^{miss} [GeV]; E_{T,CST}^{miss} [GeV]; Entries").c_str(), nbinp, 0., suptmi, nbinp, 0., suptmi) );
+            v_MET_CorrFinalClus.push_back( new  TH2D((name_met + "_" + it + "_FinalClus").c_str(), (name_met + " " + m_term_names[it] + " vs. CST MET; E_{T," + it + "}^{miss} [GeV]; E_{T,CST}^{miss} [GeV]; Entries").c_str(), nbinp, 0., suptmi, nbinp, 0., suptmi) );
           }
           v_MET_CorrFinalTrk.reserve(corrTrk_names.size());
 
           for(const auto& it : corrTrk_names) {
-            v_MET_CorrFinalTrk.push_back( new  TH2D((name_met + "_" + it + "_FinalTrk").c_str(), (name_met + " " + m_names[it] + " vs. TST MET; E_{T," + it + "}^{miss} [GeV]; E_{T,TST}^{miss} [GeV]; Entries").c_str(), nbinp, 0., suptmi, nbinp, 0., suptmi) );
+            v_MET_CorrFinalTrk.push_back( new  TH2D((name_met + "_" + it + "_FinalTrk").c_str(), (name_met + " " + m_term_names[it] + " vs. TST MET; E_{T," + it + "}^{miss} [GeV]; E_{T,TST}^{miss} [GeV]; Entries").c_str(), nbinp, 0., suptmi, nbinp, 0., suptmi) );
           }
 
           m_MET_CorrFinalClus[name_met] = v_MET_CorrFinalClus;
@@ -367,11 +366,11 @@ namespace MissingEtDQA {
          
           //Setup Diff histograms
           for(const auto& it : sum_names) {
-            v_MET_Diff.push_back( new  TH1D((name_met + "_Diff_" + it).c_str(), ("MET_Diff " + m_names[it] + " in " + name_met +"; #Sigma p_{T}^{Val} - #Sigma p_{T}^{No Val} [GeV]; Entries / 4 GeV").c_str(), nbinpxy, -200, 200));
-            v_MET_Diff_x.push_back( new  TH1D((name_met + "_Diff_" + it +"_x").c_str(), ("MET_Diff x " + m_names[it] + " in " + name_met +"; #Sigma p_{x}^{Val} - #Sigma p_{x}^{No Val} [GeV]; Entries / 4 GeV").c_str(), nbinpxy, -200, 200) );
-            v_MET_Diff_y.push_back( new  TH1D((name_met + "_Diff_" + it +"_y").c_str(), ("MET_Diff y " + m_names[it] + " in " + name_met +"; #Sigma p_{y}^{Val} - #Sigma p_{y}^{No Val} [GeV]; Entries / 4 GeV").c_str(), nbinpxy, -200, 200) );
-            v_MET_Diff_phi.push_back( new  TH1D((name_met + "_Diff_" + it +"_phi").c_str(), ("MET_Diff phi " + m_names[it] + " in " + name_met +"; #Delta#Phi(#Sigma p_{T}^{Val},#Sigma p_{T}^{No Val}); Entries / 0.1").c_str(), nbinphi,-binphi,binphi) );
-            v_MET_Diff_sum.push_back( new  TH1D((name_met + "_Diff_" + it +"_sum").c_str(), ("MET_Diff sumet " + m_names[it] + " in " + name_met +"; E_{T}^{sum Val} - #Sigma |p_{T}^{No Val}| [GeV]; Entries / 6 GeV").c_str(), nbinpxy, -300, 300) );
+            v_MET_Diff.push_back( new  TH1D((name_met + "_Diff_" + it).c_str(), ("MET_Diff " + m_term_names[it] + " in " + name_met +"; #Sigma p_{T}^{Val} - #Sigma p_{T}^{No Val} [GeV]; Entries / 4 GeV").c_str(), nbinpxy, -200, 200));
+            v_MET_Diff_x.push_back( new  TH1D((name_met + "_Diff_" + it +"_x").c_str(), ("MET_Diff x " + m_term_names[it] + " in " + name_met +"; #Sigma p_{x}^{Val} - #Sigma p_{x}^{No Val} [GeV]; Entries / 4 GeV").c_str(), nbinpxy, -200, 200) );
+            v_MET_Diff_y.push_back( new  TH1D((name_met + "_Diff_" + it +"_y").c_str(), ("MET_Diff y " + m_term_names[it] + " in " + name_met +"; #Sigma p_{y}^{Val} - #Sigma p_{y}^{No Val} [GeV]; Entries / 4 GeV").c_str(), nbinpxy, -200, 200) );
+            v_MET_Diff_phi.push_back( new  TH1D((name_met + "_Diff_" + it +"_phi").c_str(), ("MET_Diff phi " + m_term_names[it] + " in " + name_met +"; #Delta#Phi(#Sigma p_{T}^{Val},#Sigma p_{T}^{No Val}); Entries / 0.1").c_str(), nbinphi,-binphi,binphi) );
+            v_MET_Diff_sum.push_back( new  TH1D((name_met + "_Diff_" + it +"_sum").c_str(), ("MET_Diff sumet " + m_term_names[it] + " in " + name_met +"; E_{T}^{sum Val} - #Sigma |p_{T}^{No Val}| [GeV]; Entries / 6 GeV").c_str(), nbinpxy, -300, 300) );
             m_dir_met.push_back("MET/" + name_met + "/Differences/" + it + "/");
           }
         
@@ -393,10 +392,10 @@ namespace MissingEtDQA {
 
           //Setup Kin histos
           for(const auto& it : sum_names){
-            v_MET_pt.push_back( new  TH1D((name_met + it+"_pt").c_str(), ("MET_pt " + m_names[it] + " in " + name_met +"; p_{T} [GeV]; Entries / 3 GeV").c_str(), nbinpxy, 0, 300));
-            v_MET_eta.push_back( new  TH1D((name_met + it +"_eta").c_str(), ("MET_eta " + m_names[it] + " in " + name_met +"; #eta ; Entries / 0.1").c_str(), 100, -5, 5) );
-            v_MET_phi.push_back( new  TH1D((name_met + it +"_phi").c_str(), ("MET_phi " + m_names[it] + " in " + name_met +"; #Phi ; Entries / 0.1").c_str(), nbinphi, -binphi, binphi) );
-            v_MET_multi.push_back( new  TH1D((name_met + "_multi_" + it).c_str(), ("MET_multi " + m_names[it] + " in " + name_met +"; Multiplicity; Entries").c_str(), 20,-0.5,20.5) );
+            v_MET_pt.push_back( new  TH1D((name_met + it+"_pt").c_str(), ("MET_pt " + m_term_names[it] + " in " + name_met +"; p_{T} [GeV]; Entries / 3 GeV").c_str(), nbinpxy, 0, 300));
+            v_MET_eta.push_back( new  TH1D((name_met + it +"_eta").c_str(), ("MET_eta " + m_term_names[it] + " in " + name_met +"; #eta ; Entries / 0.1").c_str(), 100, -5, 5) );
+            v_MET_phi.push_back( new  TH1D((name_met + it +"_phi").c_str(), ("MET_phi " + m_term_names[it] + " in " + name_met +"; #Phi ; Entries / 0.1").c_str(), nbinphi, -binphi, binphi) );
+            v_MET_multi.push_back( new  TH1D((name_met + "_multi_" + it).c_str(), ("MET_multi " + m_term_names[it] + " in " + name_met +"; Multiplicity; Entries").c_str(), 20,-0.5,20.5) );
             m_dir_met.push_back("MET/" + name_met + "/Kinematics/" + it + "/");                                      
           }
           m_MET_pt[name_met] = v_MET_pt;
@@ -422,11 +421,11 @@ namespace MissingEtDQA {
       std::string dir = "MET/" + name_met + "/";
 
       //Create and register Calo hists
-      ATH_CHECK(regHist(m_MET_Calo = new  TH1D("Calo", (name_met + " " + m_names["Calo"] + "; E_{T}^{miss} [GeV]; Entries / 5 GeV").c_str(), nbinp, 0., suptmi), dir, all));
-      ATH_CHECK(regHist(m_MET_Calo_x = new  TH1D("Calo_x", (name_met + " " + m_names["Calo"] + " x; E_{x}^{miss} [GeV]; Entries / 5 GeV").c_str(), nbinpxy, -suptmixy, suptmixy), dir, all));
-      ATH_CHECK(regHist(m_MET_Calo_y = new  TH1D("Calo_y", (name_met + " " + m_names["Calo"] + " y; E_{y}^{miss} [GeV]; Entries / 5 GeV").c_str(), nbinpxy, -suptmixy, suptmixy), dir, all));
-      ATH_CHECK(regHist(m_MET_Calo_phi = new  TH1D("Calo_phi", (name_met + " " + m_names["Calo"] + " phi;  #Phi; Entries / 0.1").c_str(), nbinphi,-binphi,binphi), dir, all));
-      ATH_CHECK(regHist(m_MET_Calo_sum = new  TH1D("Calo_sum", (name_met + " " + m_names["Calo"] + " sum; E_{T}^{sum} [GeV]; Entries / 25 GeV").c_str(), nbinE, lowET, suET), dir, all));
+      ATH_CHECK(regHist(m_MET_Calo = new  TH1D("Calo", (name_met + " " + m_term_names["Calo"] + "; E_{T}^{miss} [GeV]; Entries / 5 GeV").c_str(), nbinp, 0., suptmi), dir, all));
+      ATH_CHECK(regHist(m_MET_Calo_x = new  TH1D("Calo_x", (name_met + " " + m_term_names["Calo"] + " x; E_{x}^{miss} [GeV]; Entries / 5 GeV").c_str(), nbinpxy, -suptmixy, suptmixy), dir, all));
+      ATH_CHECK(regHist(m_MET_Calo_y = new  TH1D("Calo_y", (name_met + " " + m_term_names["Calo"] + " y; E_{y}^{miss} [GeV]; Entries / 5 GeV").c_str(), nbinpxy, -suptmixy, suptmixy), dir, all));
+      ATH_CHECK(regHist(m_MET_Calo_phi = new  TH1D("Calo_phi", (name_met + " " + m_term_names["Calo"] + " phi;  #Phi; Entries / 0.1").c_str(), nbinphi,-binphi,binphi), dir, all));
+      ATH_CHECK(regHist(m_MET_Calo_sum = new  TH1D("Calo_sum", (name_met + " " + m_term_names["Calo"] + " sum; E_{T}^{sum} [GeV]; Entries / 25 GeV").c_str(), nbinE, lowET, suET), dir, all));
     }
   
     return StatusCode::SUCCESS;      
