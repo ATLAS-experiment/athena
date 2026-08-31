@@ -166,6 +166,12 @@ namespace MuonR4{
                                                "Load the sTgc time on the track states for the fit"};
             Gaudi::Property<bool> m_MdtSignFromSegment{this, "useSegmentSigns", true,
                                     "Mdt drift signs are copied from the segment line instead from the track state"};
+
+            /** @brief Scale factor applied to the sTGC strip measurement uncertainty */
+            Gaudi::Property<double> m_sTgcStripErrorScale{ this, "sTgcStripErrorScale", 1.0, "Scale factor applied to the sTGC strip measurement uncertainty" };
+
+            /** @brief Scale factor applied to the MM strip measurement uncertainty */
+            Gaudi::Property<double> m_mmStripErrorScale{ this, "mmStripErrorScale", 1.0, "Scale factor applied to the MM strip measurement uncertainty" };
     };
 
 }
