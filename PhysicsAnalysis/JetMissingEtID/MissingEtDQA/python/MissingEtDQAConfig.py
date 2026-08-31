@@ -3,8 +3,7 @@
 #
 
 '''@file MissingEtDAQConfig.py
-@author T. Strebler
-@date 2022-06-16
+@contact atlas-cp-jetetmiss-jsv-conveners@cern.ch
 @brief Main CA-based python configuration for MissingEtDQA
 '''
 
