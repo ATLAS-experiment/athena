@@ -1,6 +1,11 @@
 # PhysVal MET athena code
 
-This code was written by Daniel Buescher <daniel.buescher@cern.ch> & Philipp Mogg <philipp.mogg@cern.ch> in 2022. The current version was modified by Owen Darragh Aug 2026. Contact owendarragh@cmail.carleton.ca if you have questions.
+Contributers: 
+Daniel Buescher, Philipp Mogg - 2022
+Owen Darragh - 2026
+
+For questions please contect the JSV conveners: atlas-cp-jetetmiss-jsv-conveners@cern.ch
+
 
 The following code is used for the production of MET histograms for NTUP_PHYSVAL.root files used for physics validation. 
 
@@ -23,4 +28,10 @@ Derivation_tf.py --inputDAOD_PHYSVALFile="DAOD_PHYSVAL.48599043._000003.pool.roo
 ```
 Note: its is the doMET validation flag which used the MET PhysVal code. Other flags may also be used with a "," as spacing.
 
+
+Types of histograms produced
+
+
 For validation the NTUP_PHYSVAL.root files produced using this will be used for the weekly physics validations. These validations produce comparison histograms between a pair of NTUP_PHYSVAL.root files and upload them to the PhysVal page: https://atlas-physval.web.cern.ch/ for examination.
+
+For more information on the full PhysVal procedure please check out this TWiki: https://twiki.cern.ch/twiki/bin/view/AtlasProtected/PhysValMonitoring
