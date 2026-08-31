@@ -205,20 +205,10 @@ EventContext AthenaRemoteEventLoopMgr::createEventContext() {
 StatusCode AthenaRemoteEventLoopMgr::nextEvent([[maybe_unused]] int maxevt) {
   ATH_MSG_INFO("In AthenaRemoteEventLoopMgr::nextEvent()");
 
-  // Gaudi::setAppReturnCode(m_appMgrProperty, Gaudi::ReturnCode::Success, true)
-  //     .ignore();
+  Gaudi::setAppReturnCode(m_appMgrProperty, Gaudi::ReturnCode::Success, true)
+      .ignore();
 
   StatusCode sc(StatusCode::SUCCESS);
-
-  // sc = initializeAlgorithms();
-  // if (!sc.isSuccess()) {
-  //   return StatusCode::FAILURE;
-  // }
-
-  // sc = m_eventStore->clearStore();
-  // if (!sc.isSuccess()) {
-  //   return StatusCode::FAILURE;
-  // }
 
   ATH_MSG_INFO("Waiting for events from clients...");
   while (sc.isSuccess()) {
@@ -233,12 +223,8 @@ StatusCode AthenaRemoteEventLoopMgr::nextEvent([[maybe_unused]] int maxevt) {
         sc = StatusCode::FAILURE;
       } else {
         m_whiteboard->selectStore(ctx.slot()).ignore();
-        // sc = m_eventStore->clearStore();
-        // if (!sc.isSuccess()) {
-        //   ATH_MSG_ERROR("Unable to clear event store. Terminating loop.");
-        //   break;
-        // }
 
+        // CHECK: Needed?
         // m_incidentSvc->fireIncident(
         //     Incident("BeginEvent", IncidentType::BeginEvent));
 
@@ -250,6 +236,7 @@ StatusCode AthenaRemoteEventLoopMgr::nextEvent([[maybe_unused]] int maxevt) {
         ATH_MSG_INFO("Entering m_eventExecutionTool::executeEvent()...");
         sc = m_eventExecutionTool->executeEvent(this, std::move(ctx));
 
+        // CHECK: Needed?
         // m_incidentSvc->fireIncident(
         //     Incident("EndEvent", IncidentType::EndEvent));
       }

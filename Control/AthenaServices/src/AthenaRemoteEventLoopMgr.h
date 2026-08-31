@@ -81,7 +81,7 @@ class AthenaRemoteEventLoopMgr
   /// Reference to the Algorithm Execution State Svc
   SmartIF<IAlgExecStateSvc> m_aess;
   /// Property interface of ApplicationMgr
-  // SmartIF<IProperty> m_appMgrProperty;
+  SmartIF<IProperty> m_appMgrProperty;
   /// A shortcut for the scheduler
   SmartIF<IScheduler> m_schedulerSvc;
   /// Name of the scheduler to be used
