@@ -387,7 +387,7 @@ namespace MuonR4{
             THROW_EXCEPTION("Failed to calibrate MM cluster "<<m_idHelperSvc->toString(cluster.identify()));
         }
         ATH_MSG_DEBUG("new loc pos " << locPos[0] << " new cov" << calibCov(0,0)  );
-        return std::make_pair(locPos[0], calibCov(0,0));
+        return std::make_pair(locPos[0], Acts::square(m_mmStripErrorScale.value()) * calibCov(0,0));
     }
 
     std::pair<double, double> SpacePointCalibrator::calibratesTGC(const EventContext& /*ctx*/, 
@@ -404,8 +404,7 @@ namespace MuonR4{
         }
 
         // For now just copying over the local position and covariance. Eventually this should apply corrections from B-Lines and as build geometry
-        
-        return std::make_pair(cluster.localPosition<1>()[0], cluster.localCovariance<1>()(0,0));
+        return std::make_pair( cluster.localPosition<1>()[0], Acts::square(m_sTgcStripErrorScale.value()) * cluster.localCovariance<1>()(0,0));
     }
     void SpacePointCalibrator::calibrateCombinedPrd(const EventContext& ctx, 
                                                     const ActsTrk::GeometryContext& gctx,
