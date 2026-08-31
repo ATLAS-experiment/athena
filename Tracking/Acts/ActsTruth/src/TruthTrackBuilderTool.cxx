@@ -1,0 +1,112 @@
+/*
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
+*/
+
+#include "TruthTrackBuilderTool.h"
+#include "xAODTruth/TruthVertex.h"
+
+namespace ActsTrk{
+
+  TruthTrackBuilderTool::TruthTrackBuilderTool( const std::string& type,
+                                                const std::string& name,
+                                                const IInterface* parent)
+    : AthAlgTool(type, name, parent){}
+    
+  StatusCode TruthTrackBuilderTool::initialize(){
+
+    // initialize all the conatiners needed
+    ATH_CHECK(m_pixelClustersKey.initialize());
+    ATH_CHECK(m_pixelTruthAssociationKey.initialize());
+    ATH_CHECK(m_stripClustersKey.initialize());
+    ATH_CHECK(m_stripTruthAssociationKey.initialize());
+
+    return StatusCode::SUCCESS;
+  }
+
+  StatusCode TruthTrackBuilderTool::buildTruthTracks(const EventContext& ctx, TruthTracks& truthTracks) const{
+
+    // obtain truth map and clusters
+    SG::ReadHandle<xAOD::PixelClusterContainer> pixelClusters{ m_pixelClustersKey, ctx};
+    SG::ReadHandle<MeasurementToTruthParticleAssociation> pixelTruthAssociations{m_pixelTruthAssociationKey, ctx};
+    SG::ReadHandle<xAOD::StripClusterContainer> stripClusters{m_stripClustersKey, ctx};
+    SG::ReadHandle<MeasurementToTruthParticleAssociation> stripTruthAssociations{m_stripTruthAssociationKey, ctx};
+
+    if (!pixelClusters.isValid()) {
+
+    ATH_MSG_ERROR("Could not read pixel clusters: " << m_pixelClustersKey.key());
+    return StatusCode::FAILURE;
+    }
+
+    if (!pixelTruthAssociations.isValid()) {
+
+      ATH_MSG_ERROR( "Could not read pixel truth associations: " << m_pixelTruthAssociationKey.key());
+      return StatusCode::FAILURE;
+    }
+
+    if (!stripClusters.isValid()) {
+
+      ATH_MSG_ERROR("Could not read strip clusters: " << m_stripClustersKey.key());
+      return StatusCode::FAILURE;
+    }
+
+    if (!stripTruthAssociations.isValid()) {
+
+      ATH_MSG_ERROR("Could not read strip truth associations: " << m_stripTruthAssociationKey.key());
+      return StatusCode::FAILURE;
+    }
+
+    //  for every cluster, obtain its truth particle and add to map
+    // This can be optional for both pixel and strip clusters
+        
+    // add pixel clusters
+    if(m_usePixelClusters){
+      addClusterToTruthTacks(*pixelClusters,
+                            *pixelTruthAssociations,
+                            truthTracks);  
+      }
+      
+    // add strip clusters
+    if(m_useStripClusters){   
+      addClusterToTruthTacks(*stripClusters,
+                            *stripTruthAssociations,
+                            truthTracks);
+    }
+
+    // reorder clusters for each associated truth particle
+    // This is done by ordering by distance away from truth particle production vertex (assuming small bending)
+    for (auto it = truthTracks.begin(); it != truthTracks.end();){
+            
+      auto& [truthParticle, truthClusters] = *it;
+
+      if (truthParticle == nullptr || !truthParticle->hasProdVtx()) {
+
+        ATH_MSG_WARNING(
+            "Truth particle does not have a production vertex, erasing");
+        it = truthTracks.erase(it);
+        continue;
+      }
+
+      const xAOD::TruthVertex* vertex = truthParticle->prodVtx();
+      std::sort(truthClusters.begin(), truthClusters.end(), 
+                [&vertex](const TruthHit& firstCluster, const TruthHit& secondCluster){
+
+                  const Vector3 vertexPosition{vertex->x(), vertex->y(), vertex->z()};
+
+                  const Vector3 firstClusterDis = firstCluster.globalPosition - vertexPosition;
+                  const Vector3 secondClusterDis = secondCluster.globalPosition - vertexPosition;
+
+                  const float firstClusterNorm = firstClusterDis.squaredNorm();
+                  const float secondClusterNorm = secondClusterDis.squaredNorm();
+
+                  return firstClusterNorm < secondClusterNorm;
+
+                  });
+                  
+      ++it;
+    }
+    
+    return StatusCode::SUCCESS;
+  }
+
+
+}
