@@ -109,6 +109,14 @@ private:
 #ifdef ACTSGEOMETRY_HAVE_DETRAY
   /** @brief Converts the built Acts::TrackingGeometry into a Detray geometry and stores it in m_detrayGeometry */
   StatusCode buildDetrayGeometry();
+
+  /** @brief Reports how many portal links of the converted Detray geometry are
+             reciprocal. Detray's own consistency checker only verifies that a
+             portal links to an existing volume, not that the neighbour links
+             back, so a one-directional link passes check_consistency() but
+             makes the navigation a one-way street. */
+  void reportDetrayPortalLinks(const DetrayDetector& detector,
+                               const detray::name_map& names) const;
 #endif
 
 
