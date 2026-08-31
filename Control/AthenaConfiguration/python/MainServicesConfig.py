@@ -38,6 +38,9 @@ def AvalancheSchedulerSvcCfg(flags, **kwargs):
     kwargs.setdefault("DataDepsGraphAlgPattern", flags.Scheduler.DataDepsGraphAlgPattern)
     kwargs.setdefault("DataDepsGraphObjectPattern", flags.Scheduler.DataDepsGraphObjectPattern)
     kwargs.setdefault("NumOffloadThreads", flags.Concurrency.NumOffloadThreads)
+    from AthenaCommon.Constants import DEBUG
+    kwargs.setdefault("OutputLevel", DEBUG)
+    
     
     cfg = ComponentAccumulator()
     scheduler = CompFactory.AvalancheSchedulerSvc(**kwargs)
@@ -162,18 +165,21 @@ def AthenaHiveEventLoopMgrCfg(flags):
 
 def AthenaRemoteEventLoopMgrCfg(flags):
     cfg = ComponentAccumulator()
-    # hivesvc = CompFactory.SG.HiveMgrSvc("EventDataSvc",
-    #                                     NSlots = flags.Concurrency.NumConcurrentEvents)
+    hivesvc = CompFactory.SG.HiveMgrSvc("EventDataSvc",
+                                        NSlots = flags.Concurrency.NumConcurrentEvents)
     # cfg.addService( hivesvc )
     #
     arp = CompFactory.AlgResourcePool(TopAlg = ["AthMasterSeq"]) #this should enable control flow
     cfg.addService( arp )
 
     scheduler = cfg.getPrimaryAndMerge(AvalancheSchedulerSvcCfg(flags))
-
+    from AthenaCommon.Constants import VERBOSE
+    execOngRPCCall = CompFactory.ExecuteOngRPCCall(OutputLevel=VERBOSE)
     elmgr = CompFactory.AthenaRemoteEventLoopMgr(
-        # WhiteboardSvc = "EventDataSvc",
-        # SchedulerSvc = scheduler.getName(),
+        Whiteboard = hivesvc,
+        Scheduler = scheduler,
+        eventExecTool = execOngRPCCall,
+        OutputLevel=VERBOSE
         # EventPrintoutInterval = flags.Exec.EventPrintoutInterval
     )
 

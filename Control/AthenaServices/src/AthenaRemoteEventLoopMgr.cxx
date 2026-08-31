@@ -1,5 +1,6 @@
 #include "AthenaRemoteEventLoopMgr.h"
 
+#include <AthenaBaseComps/AthCheckMacros.h>
 #include <AthenaKernel/ExtendedEventContext.h>
 #include <EventInfo/EventID.h>
 #include <EventInfo/EventInfo.h>
@@ -9,12 +10,12 @@ AthenaRemoteEventLoopMgr::AthenaRemoteEventLoopMgr(const std::string& nam,
     : base_class(nam, svcLoc),
       AthMessaging(nam),
       m_incidentSvc("IncidentSvc", nam),
-      m_eventStore("StoreGateSvc", nam),
+      // m_eventStore("StoreGateSvc", nam),
       m_tools(this),
       m_firstRun(true),
       m_nevt(0),
       m_useTools(false) {
-  declareProperty("EventStore", m_eventStore);
+  // declareProperty("EventStore", m_eventStore);
   declareProperty("PreSelectTools", m_tools, "AlgTools for event pre-selection")
       ->declareUpdateHandler(&AthenaRemoteEventLoopMgr::setupPreSelectTools,
                              this);
@@ -29,15 +30,22 @@ StatusCode AthenaRemoteEventLoopMgr::initialize() {
     return sc;
   }
 
-  sc = m_eventStore.retrieve();
-  if (!sc.isSuccess()) {
-    ATH_MSG_FATAL("Error retrieving pointer to StoreGateSvc");
-    return sc;
-  }
+  // sc = m_eventStore.retrieve();
+  // if (!sc.isSuccess()) {
+  //   ATH_MSG_FATAL("Error retrieving pointer to StoreGateSvc");
+  //   return sc;
+  // }
 
   // Listen to the BeforeFork and EndAlgorithms incidents
   m_incidentSvc->addListener(this, "BeforeFork", 0);
   m_incidentSvc->addListener(this, "EndAlgorithms", 0);
+
+  ATH_CHECK(m_scheduler.retrieve());
+  ATH_CHECK(m_algResourcePool.retrieve());
+  ATH_CHECK(m_algExecState.retrieve());
+  ATH_CHECK(m_eventStore.retrieve());
+  ATH_CHECK(m_whiteBoard.retrieve());
+  ATH_CHECK(m_eventStore.retrieve());
 
   ATH_MSG_INFO("Leaving AthenaRemoteEventLoopMgr::initialize()");
   return StatusCode::SUCCESS;
@@ -217,6 +225,16 @@ StatusCode AthenaRemoteEventLoopMgr::executeEvent(EventContext&& ctx) {
 
   m_incidentSvc->fireIncident(
       Incident(name(), IncidentType::BeginProcessing, ctx));
+  StatusCode addEventStatus =
+      m_scheduler->pushNewEvent(new EventContext{std::move(ctx)});
+
+  // If this fails, we need to wait for something to complete
+  if (!addEventStatus.isSuccess()) {
+    ATH_MSG_FATAL(
+        "An event processing slot should be now free in the scheduler, but "
+        "it appears not to be the case.");
+        return StatusCode::FAILURE;
+  }
 
   ATH_MSG_INFO("Leaving AthenaRemoteEventLoopMgr::executeEvent()");
   return StatusCode::SUCCESS;
