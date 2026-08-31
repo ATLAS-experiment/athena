@@ -194,6 +194,7 @@ namespace MissingEtDQA {
     double suET = 2500.;
 
     // Physics validation plots are level 10
+    // this is the level of detail used in the monitoring
     if (m_detailLevel >= 10) {
 
       //loop through jet types
