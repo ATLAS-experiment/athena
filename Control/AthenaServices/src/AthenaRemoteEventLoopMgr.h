@@ -9,8 +9,6 @@
 #include <AthenaKernel/Timeout.h>
 #include <GaudiKernel/IEvtSelector.h>
 #include <GaudiKernel/IScheduler.h>
-#include "GaudiKernel/IAlgResourcePool.h"
-#include "GaudiKernel/IAlgExecStateSvc.h"
 #include <GaudiKernel/MinimalEventLoopMgr.h>
 #include <StoreGate/StoreGateSvc.h>
 
@@ -63,7 +61,7 @@ class AthenaRemoteEventLoopMgr
   void setupPreSelectTools(Gaudi::Details::PropertyBase&);
 
   typedef ServiceHandle<IIncidentSvc> IIncidentSvc_t;
-//   typedef ServiceHandle<StoreGateSvc> StoreGateSvc_t;
+  typedef ServiceHandle<StoreGateSvc> StoreGateSvc_t;
 
   typedef IAthenaEvtLoopPreSelectTool tool_type;
   typedef ToolHandleArray<tool_type> tool_store;
@@ -71,15 +69,10 @@ class AthenaRemoteEventLoopMgr
   typedef std::vector<unsigned int> tool_stats;
   typedef tool_stats::const_iterator tool_stats_iterator;
 
-  ServiceHandle<IScheduler> m_scheduler{this, "Scheduler", ""};
-  ServiceHandle<IAlgResourcePool> m_algResourcePool{this, "AlgResourcePool", "AlgResourcePool"};
-  ServiceHandle<IAlgExecStateSvc> m_algExecState{this, "AlgExecSatate", "AlgExecStateSvc"};
-  ServiceHandle<IHiveWhiteBoard> m_whiteBoard{this, "Whiteboard", "EventDataSvc"};
-   ServiceHandle<StoreGateSvc> m_eventStore{this, "EventStore", "StoreGateSvc"};
   /// Reference to the incident service
   IIncidentSvc_t m_incidentSvc;
   /// Reference to StoreGateSvc;
-//   StoreGateSvc_t m_eventStore;  ///< Property
+  StoreGateSvc_t m_eventStore;  ///< Property
 
   ///@property List of AthenaEventLoopPreselectTools
   tool_stats m_toolInvoke;  ///< tool called counter
