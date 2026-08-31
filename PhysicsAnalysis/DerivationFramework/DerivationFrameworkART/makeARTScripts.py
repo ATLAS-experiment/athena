@@ -12,6 +12,7 @@ formatList = ["PHYSVAL","PHYS","PHYSLITE",
               "IDTR2",
               "EGAM1","EGAM2","EGAM3","EGAM4","EGAM5","EGAM7","EGAM8","EGAM9","EGAM10",
               "FTAG1","FTAG1LITE","FTAG2","FTAG3","FTAGPU","FTAGXBB","FTAGSSV",
+              "HID1",
               "BPHY1","BPHY2","BPHY3","BPHY4","BPHY5","BPHY6","BPHY10","BPHY12","BPHY14","BPHY15","BPHY16","BPHY18","BPHY21","BPHY22",
               "BPHY23","BPHY24","BPHY28",
               "STDM6","STDM7","STDM13","STDM16","STDM17",
@@ -235,6 +236,13 @@ if (makeDataDAODs or makeMCDAODs):
                          "defaultTestFiles.AOD_RUN3_MC[0]")
             generateText(formatName,"mc21_14TeV_",None,False,"100",
                          "defaultTestFiles.AOD_RUN4_MC[0]")
+         continue
+      if formatName == "HID1":
+         # HID1 is an MC-only format, so no data tests are generated
+         if makeMCDAODs:
+            generateText(formatName,"mc20",mc20File,False,"-1")
+            generateText(formatName,"mc23",mc23aFile,False,"-1")
+            generateText(formatName,"mc21_14TeV_",mc21_14TeV_File,False,"-1")
          continue
       if formatName == "JETM42":
          # JETM42 currently only used for upgrade studies
