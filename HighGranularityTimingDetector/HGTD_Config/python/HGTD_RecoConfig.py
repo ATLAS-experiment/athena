@@ -32,7 +32,7 @@ def HGTD_RecoCfg(flags):
 
             # HGTD clusters to truth matching
             from ActsConfig.ActsTruthConfig import ActsHgtdClusterToTruthAssociationAlgCfg
-            result.merge(ActsHgtdClusterToTruthAssociationAlgCfg(flags,DepositedEnergyMin=0))
+            result.merge(ActsHgtdClusterToTruthAssociationAlgCfg(flags))
 
             # Extensions to truth matching
             from ActsConfig.ActsHGTDTrackExtensionAlgConfig import HGTDTruthTrackDecorationAlgCfg
