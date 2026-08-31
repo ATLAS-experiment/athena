@@ -263,7 +263,9 @@ def TauxAODthinngCfg(flags):
                                             TauShotClusters      = flags.Tau.ActiveConfig.TauShotClusters,
                                             TauShotCellLinks     = flags.Tau.ActiveConfig.TauShotClustersLinks,
                                             TauHadronicPFOs      = flags.Tau.ActiveConfig.TauHadronicPFOs,
-                                            TauSecondaryVertices = flags.Tau.ActiveConfig.TauSecondaryVertices)
+                                            TauSecondaryVertices = flags.Tau.ActiveConfig.TauSecondaryVertices,
+                                            MinNeutralPFOPt      = flags.Tau.MinNeutralPFOPt,
+                                            doRun4               = flags.GeoModel.Run > LHCPeriod.Run3,)
     result.addEventAlgo(tauThinAlg)
     return result
 
