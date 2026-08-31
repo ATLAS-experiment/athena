@@ -132,12 +132,18 @@ StatusCode TrackOverlayDecisionAlg::execute(const EventContext &ctx) const
     float eventPySum = 0.0;
     float eventPt = 0.0;
     float puEvents = 0.0;
-
     std::vector<float> pxValues, pyValues, pzValues, eValues, etaValues, phiValues, ptValues;
     float truthMultiplicity = 0.0;
     const int truthParticles = truthParticlesVec.size();
+    bool forceMCOverlay = false;
     for (int itruth = 0; itruth < truthParticles; itruth++) {
         const xAOD::TruthParticle* thisTruth = truthParticlesVec[itruth];
+        if (thisTruth->pdgId() == 22 && thisTruth->status() == 1 &&
+            thisTruth->pt() * 0.001 > 25 &&
+            std::abs(thisTruth->eta()) < 2.5 &&
+            thisTruth->e() * 0.001 > 100.0 ) {
+	    forceMCOverlay = true;
+        }
         const IAthSelectionTool::CutResult accept = m_truthSelectionTool->accept(thisTruth);
         if(accept){
            pxValues.push_back((thisTruth->px()*0.001-1.46988000e+03)* px_diff); //as MinMaxScaler: 1.46988000e+03 is the lowest value of px from a J7 sample; *(0.001) is used to convert unit rather than *(1/1000) to speed up.
@@ -240,7 +246,6 @@ StatusCode TrackOverlayDecisionAlg::execute(const EventContext &ctx) const
     predictions.push_back(prediction);
     }//for i
     float threshold = m_MLthreshold;
-    ATH_MSG_ALWAYS("ML threshold:" << threshold);
     int badTracks = 0;
     for (float prediction : predictions) {
        if (prediction > threshold) {
@@ -252,7 +257,7 @@ StatusCode TrackOverlayDecisionAlg::execute(const EventContext &ctx) const
     FilterReporter filter(m_filterParams, false, ctx);
     bool pass = false;
     int decision = rouletteScore == 0;
-    if (decision==0){ //if ML decision is False, it goes to the MC-overlay workflow
+    if (decision==0 || forceMCOverlay){ //if ML decision is False, it goes to the MC-overlay workflow
       pass = true;
     }
     else{
