@@ -83,7 +83,7 @@ struct gRPCServerHelper final : public UniversalOffloadService::Service {
       std::this_thread::sleep_for(std::chrono::milliseconds(1));
     }
     auto r = s_completedRequests[id];
-    r->response->set_identifier("done");
+    r->response->set_identifier(std::format("done for event={}", id));
     std::cout << "Returning to the client " << id << "\n";
     // TODO we should fill event info in the return message so that client can
     // crosscheck this needs protection
@@ -107,7 +107,8 @@ StatusCode ExecuteOngRPCCall::executeEvent(MinimalEventLoopMgr* el,
     std::this_thread::sleep_for(std::chrono::milliseconds(100));
   }
 
-  ATH_MSG_INFO("Got input, upacking with " << m_unpackingTools.size() << " tools...");
+  ATH_MSG_INFO("Got input, upacking with " << m_unpackingTools.size()
+                                           << " tools...");
   for (auto& tool : m_unpackingTools) {
     ATH_MSG_INFO("Unpacking with " << tool.name() << "...");
     ATH_CHECK(tool->unpack(*(r->request), context));
@@ -129,7 +130,8 @@ StatusCode ExecuteOngRPCCall::completeEvent(MinimalEventLoopMgr* el,
   auto eventId = getId(context);
   ATH_MSG_INFO("will look for matching request " << eventId);
   std::shared_ptr<ReqResp> r = s_ongoingRequests[eventId];
-  ATH_MSG_INFO("found one " << (void*)(r->request) << " " << (void*)(r->response));
+  ATH_MSG_INFO("found one " << (void*)(r->request) << " "
+                            << (void*)(r->response));
 
   for (auto& tool : m_packingTools)
     ATH_CHECK(tool->pack(*(r->response), context));

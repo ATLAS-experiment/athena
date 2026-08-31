@@ -7,6 +7,7 @@
 #include <AthenaKernel/IEventExecutionTool.h>
 #include <AthenaKernel/IEventSeek.h>
 #include <AthenaKernel/Timeout.h>
+#include <GaudiKernel/IAlgResourcePool.h>
 #include <GaudiKernel/IEvtSelector.h>
 #include <GaudiKernel/IScheduler.h>
 #include <GaudiKernel/MinimalEventLoopMgr.h>
@@ -73,6 +74,20 @@ class AthenaRemoteEventLoopMgr
   IIncidentSvc_t m_incidentSvc;
   /// Reference to StoreGateSvc;
   StoreGateSvc_t m_eventStore;  ///< Property
+  /// Reference to the Whiteboard interface
+  SmartIF<IHiveWhiteBoard> m_whiteboard;
+  /// Reference to the Algorithm resource pool
+  SmartIF<IAlgResourcePool> m_algResourcePool;
+  /// Reference to the Algorithm Execution State Svc
+  SmartIF<IAlgExecStateSvc> m_aess;
+  /// Property interface of ApplicationMgr
+  // SmartIF<IProperty> m_appMgrProperty;
+  /// A shortcut for the scheduler
+  SmartIF<IScheduler> m_schedulerSvc;
+  /// Name of the scheduler to be used
+  std::string m_schedulerName;
+  /// Name of the Whiteboard to be used
+  std::string m_whiteboardName;
 
   ///@property List of AthenaEventLoopPreselectTools
   tool_stats m_toolInvoke;  ///< tool called counter
@@ -91,6 +106,9 @@ class AthenaRemoteEventLoopMgr
 
   /// Initialize all algorithms and output streams
   StatusCode initializeAlgorithms();
+
+  /// Run the algorithms for the current event
+  virtual StatusCode executeAlgorithms();
 
   bool m_firstRun{true};
 

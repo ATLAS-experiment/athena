@@ -8,10 +8,9 @@
 #include <xAODEventInfo/EventInfo.h>
 
 #include "ByteStreamCnvSvcBase/ByteStreamAddress.h"
-#include "EventInfo/EventInfo.h"
 #include "EventInfo/EventID.h"
+#include "EventInfo/EventInfo.h"
 #include "EventInfo/EventType.h"
-
 #include "GaudiKernel/EventIDBase.h"
 #include "PersistentDataModel/DataHeader.h"
 
@@ -36,8 +35,10 @@ StatusCode EventInfoPackagingTool::pack(OffloadMessage& msg,
   ATH_CHECK(evtStore()->retrieve(dataHeader, "ByteStreamDataHeader"));
 
   ei->mutable_meta()->set_key("StreamRAW");
-  ei->mutable_meta()->set_file_guid(dataHeader->elements().at(0).getToken()->dbID().toString());
-  ei->mutable_meta()->set_event_offset(dataHeader->elements().at(0).getToken()->oid().second);
+  ei->mutable_meta()->set_file_guid(
+      dataHeader->elements().at(0).getToken()->dbID().toString());
+  ei->mutable_meta()->set_event_offset(
+      dataHeader->elements().at(0).getToken()->oid().second);
 
   return StatusCode::SUCCESS;
 }
@@ -73,7 +74,8 @@ StatusCode EventInfoPackagingTool::unpack(const OffloadMessage& msg,
 
   {
     ATH_MSG_INFO("Creating legacy EventInfo...");
-    // produce as well the legacy EventInfo, should not be used anymore but it still is
+    // produce as well the legacy EventInfo, should not be used anymore but it
+    // still is
     auto eid = std::make_unique<EventID>(
         context.eventID().run_number(), context.eventID().event_number(),
         context.eventID().time_stamp(),

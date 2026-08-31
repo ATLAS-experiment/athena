@@ -162,18 +162,21 @@ def AthenaHiveEventLoopMgrCfg(flags):
 
 def AthenaRemoteEventLoopMgrCfg(flags):
     cfg = ComponentAccumulator()
-    # hivesvc = CompFactory.SG.HiveMgrSvc("EventDataSvc",
-    #                                     NSlots = flags.Concurrency.NumConcurrentEvents)
-    # cfg.addService( hivesvc )
-    #
-    arp = CompFactory.AlgResourcePool(TopAlg = ["AthMasterSeq"]) #this should enable control flow
-    cfg.addService( arp )
+    hivesvc = CompFactory.SG.HiveMgrSvc(
+        "EventDataSvc", NSlots=flags.Concurrency.NumConcurrentEvents
+    )
+    cfg.addService(hivesvc)
+
+    arp = CompFactory.AlgResourcePool(
+        TopAlg=["AthMasterSeq"]
+    )  # this should enable control flow
+    cfg.addService(arp)
 
     scheduler = cfg.getPrimaryAndMerge(AvalancheSchedulerSvcCfg(flags))
 
     elmgr = CompFactory.AthenaRemoteEventLoopMgr(
-        # WhiteboardSvc = "EventDataSvc",
-        # SchedulerSvc = scheduler.getName(),
+        WhiteboardSvc=hivesvc.getName(),
+        SchedulerSvc=scheduler.getName(),
         # EventPrintoutInterval = flags.Exec.EventPrintoutInterval
     )
 
@@ -185,7 +188,7 @@ def AthenaRemoteEventLoopMgrCfg(flags):
     #     elmgr.RequireInputAttributeList = True
     #     elmgr.UseSecondaryEventNumber = True
 
-    cfg.addService( elmgr )
+    cfg.addService(elmgr)
 
     return cfg
 
@@ -432,8 +435,8 @@ def MainServicesCfg(flags, LoopMgr='AthenaEventLoopMgr', forceRemoteELMgr=False)
     elif LoopMgr == 'AthenaEventLoopMgr':
         cfg.merge(AthenaEventLoopMgrCfg(flags))
 
-    # FIXME: Always merge AthenaRemoteEventLoopMgr
-    cfg.merge(AthenaRemoteEventLoopMgrCfg(flags))
+    # FIXME: Integrate this in a nicer way
+    # cfg.merge(AthenaRemoteEventLoopMgrCfg(flags))
 
     # Performance monitoring and profiling:
     if flags.PerfMon.doFastMonMT or flags.PerfMon.doFullMonMT:

@@ -1,8 +1,11 @@
 #include "AthenaRemoteEventLoopMgr.h"
 
+#include <AthenaKernel/EventContextClid.h>
 #include <AthenaKernel/ExtendedEventContext.h>
 #include <EventInfo/EventID.h>
 #include <EventInfo/EventInfo.h>
+#include <GaudiKernel/AppReturnCode.h>
+#include <GaudiKernel/ITimelineSvc.h>
 
 AthenaRemoteEventLoopMgr::AthenaRemoteEventLoopMgr(const std::string& nam,
                                                    ISvcLocator* svcLoc)
@@ -15,9 +18,16 @@ AthenaRemoteEventLoopMgr::AthenaRemoteEventLoopMgr(const std::string& nam,
       m_nevt(0),
       m_useTools(false) {
   declareProperty("EventStore", m_eventStore);
+
   declareProperty("PreSelectTools", m_tools, "AlgTools for event pre-selection")
       ->declareUpdateHandler(&AthenaRemoteEventLoopMgr::setupPreSelectTools,
                              this);
+
+  declareProperty("WhiteboardSvc", m_whiteboardName = "EventDataSvc",
+                  "Name of the Whiteboard to be used");
+
+  declareProperty("SchedulerSvc", m_schedulerName = "ForwardSchedulerSvc",
+                  "Name of the scheduler to be used");
 }
 
 StatusCode AthenaRemoteEventLoopMgr::initialize() {
@@ -33,6 +43,36 @@ StatusCode AthenaRemoteEventLoopMgr::initialize() {
   if (!sc.isSuccess()) {
     ATH_MSG_FATAL("Error retrieving pointer to StoreGateSvc");
     return sc;
+  }
+
+  sc = m_incidentSvc.retrieve();
+  if (!sc.isSuccess()) {
+    ATH_MSG_FATAL("Error retrieving IncidentSvc.");
+    return sc;
+  }
+
+  m_whiteboard = serviceLocator()->service(m_whiteboardName);
+  if (!m_whiteboard.isValid()) {
+    ATH_MSG_FATAL("Error retrieving WhiteboardSvc interface IHiveWhiteBoard.");
+    return StatusCode::FAILURE;
+  }
+
+  m_algResourcePool = serviceLocator()->service("AlgResourcePool");
+  if (!m_algResourcePool.isValid()) {
+    ATH_MSG_FATAL("Error retrieving AlgResourcePool");
+    return StatusCode::FAILURE;
+  }
+
+  m_aess = serviceLocator()->service("AlgExecStateSvc");
+  if (!m_aess.isValid()) {
+    ATH_MSG_FATAL("Error retrieving AlgExecStateSvc");
+    return StatusCode::FAILURE;
+  }
+
+  m_schedulerSvc = serviceLocator()->service(m_schedulerName);
+  if (!m_schedulerSvc.isValid()) {
+    ATH_MSG_FATAL("Error retrieving SchedulerSvc interface ISchedulerSvc.");
+    return StatusCode::FAILURE;
   }
 
   // Listen to the BeforeFork and EndAlgorithms incidents
@@ -59,8 +99,44 @@ StatusCode AthenaRemoteEventLoopMgr::stop() {
 StatusCode AthenaRemoteEventLoopMgr::finalize() {
   ATH_MSG_INFO("In AthenaRemoteEventLoopMgr::finalize()");
 
+  StatusCode sc = MinimalEventLoopMgr::finalize();
+  if (sc.isFailure()) {
+    ATH_MSG_ERROR("Error in Service base class Finalize");
+  }
+
+  m_whiteboard = 0;
+  m_algResourcePool = 0;
+  m_schedulerSvc = 0;
+
+  m_incidentSvc.release().ignore();
+
+  if (m_useTools) {
+    tool_iterator firstTool = m_tools.begin();
+    tool_iterator lastTool = m_tools.end();
+    unsigned int toolCtr = 0;
+    ATH_MSG_INFO(
+        "Summary of AthenaEvtLoopPreSelectTool invocation: "
+        "(invoked/success/failure)");
+    ATH_MSG_INFO("-----------------------------------------------------");
+
+    for (; firstTool != lastTool; ++firstTool) {
+      ATH_MSG_INFO(std::setw(2)
+                   << std::setiosflags(std::ios_base::right) << toolCtr + 1
+                   << ".) " << std::resetiosflags(std::ios_base::right)
+                   << std::setw(48) << std::setfill('.')
+                   << std::setiosflags(std::ios_base::left)
+                   << (*firstTool)->name()
+                   << std::resetiosflags(std::ios_base::left)
+                   << std::setfill(' ') << " (" << std::setw(6)
+                   << std::setiosflags(std::ios_base::right)
+                   << m_toolInvoke[toolCtr] << "/" << m_toolAccept[toolCtr]
+                   << "/" << m_toolReject[toolCtr] << ")");
+      toolCtr++;
+    }
+  }
+
   ATH_MSG_INFO("Leaving AthenaRemoteEventLoopMgr::finalize()");
-  return StatusCode::SUCCESS;
+  return sc;
 }
 
 void AthenaRemoteEventLoopMgr::setupPreSelectTools(
@@ -107,18 +183,37 @@ void AthenaRemoteEventLoopMgr::setupPreSelectTools(
 EventContext AthenaRemoteEventLoopMgr::createEventContext() {
   ATH_MSG_INFO("In AthenaRemoteEventLoopMgr::createEventContext()");
 
-  return EventContext{m_nevt++, 0};
+  EventContext ctx{m_nevt, m_whiteboard->allocateStore(m_nevt)};
+
+  StatusCode sc = m_whiteboard->selectStore(ctx.slot());
+  if (sc.isFailure()) {
+    ATH_MSG_FATAL("Slot " << ctx.slot()
+                          << " could not be selected for the WhiteBoard");
+    return EventContext{};  // invalid EventContext
+  } else {
+    Atlas::setExtendedEventContext(
+        ctx, Atlas::ExtendedEventContext(m_eventStore->hiveProxyDict()));
+
+    ATH_MSG_INFO("created EventContext, num: " << ctx.evt()
+                                               << "  in slot: " << ctx.slot());
+  }
+
+  ATH_MSG_INFO("Leaving AthenaRemoteEventLoopMgr::createEventContext()");
+  return ctx;
 }
 
 StatusCode AthenaRemoteEventLoopMgr::nextEvent([[maybe_unused]] int maxevt) {
   ATH_MSG_INFO("In AthenaRemoteEventLoopMgr::nextEvent()");
 
+  // Gaudi::setAppReturnCode(m_appMgrProperty, Gaudi::ReturnCode::Success, true)
+  //     .ignore();
+
   StatusCode sc(StatusCode::SUCCESS);
 
-  sc = initializeAlgorithms();
-  if (!sc.isSuccess()) {
-    return StatusCode::FAILURE;
-  }
+  // sc = initializeAlgorithms();
+  // if (!sc.isSuccess()) {
+  //   return StatusCode::FAILURE;
+  // }
 
   // sc = m_eventStore->clearStore();
   // if (!sc.isSuccess()) {
@@ -127,42 +222,68 @@ StatusCode AthenaRemoteEventLoopMgr::nextEvent([[maybe_unused]] int maxevt) {
 
   ATH_MSG_INFO("Waiting for events from clients...");
   while (sc.isSuccess()) {
-    auto ctx = createEventContext();
+    ATH_MSG_INFO("Free slots: " << m_schedulerSvc->freeSlots());
 
-    if (!ctx.valid()) {
-      sc = StatusCode::FAILURE;
-    } else {
-      // FIXME: Extra one here, so logs show correct slot/event numbers
-      Gaudi::Hive::setCurrentContext(ctx);
+    if (m_schedulerSvc->freeSlots() > 0) {
+      ATH_MSG_INFO("Got free slots, adding events to scheduler");
 
-      sc = m_eventStore->clearStore();
-      if (!sc.isSuccess()) {
-        ATH_MSG_ERROR("Unable to clear event store. Terminating loop.");
-        break;
+      auto ctx = createEventContext();
+
+      if (!ctx.valid()) {
+        sc = StatusCode::FAILURE;
+      } else {
+        m_whiteboard->selectStore(ctx.slot()).ignore();
+        // sc = m_eventStore->clearStore();
+        // if (!sc.isSuccess()) {
+        //   ATH_MSG_ERROR("Unable to clear event store. Terminating loop.");
+        //   break;
+        // }
+
+        // m_incidentSvc->fireIncident(
+        //     Incident("BeginEvent", IncidentType::BeginEvent));
+
+        // CHECK: Put this also here, not only in ::executeEvent so unpacking
+        // tools called by m_eventExecutionTool->executeEvent() put everything
+        // in the correct context?
+        Gaudi::Hive::setCurrentContext(ctx);
+
+        ATH_MSG_INFO("Entering m_eventExecutionTool::executeEvent()...");
+        sc = m_eventExecutionTool->executeEvent(this, std::move(ctx));
+
+        // m_incidentSvc->fireIncident(
+        //     Incident("EndEvent", IncidentType::EndEvent));
       }
 
-      m_incidentSvc->fireIncident(
-          Incident("BeginEvent", IncidentType::BeginEvent));
+      if (!sc.isSuccess()) {
+        ATH_MSG_ERROR(
+            "Terminating event processing loop due to errors in executeEvent");
+        break;
+      }
+    } else {
+      ATH_MSG_INFO("No free slots, draining scheduler");
 
-      ATH_MSG_INFO("Entering m_eventExecutionTool::executeEvent()...");
-      sc = m_eventExecutionTool->executeEvent(this, std::move(ctx));
+      EventContext* ctx{nullptr};
 
-      m_incidentSvc->fireIncident(Incident("EndEvent", IncidentType::EndEvent));
-    }
+      // FIXME: Hangs on this
+      sc = m_schedulerSvc->popFinishedEvent(ctx);
+      if (sc.isSuccess()) {
+        ATH_MSG_INFO("drainScheduler: scheduler not empty: Context " << ctx);
+      } else {
+        // no more events left in scheduler to be drained
+        ATH_MSG_INFO("drainScheduler: scheduler empty");
+      }
 
-    if (!sc.isSuccess()) {
-      ATH_MSG_ERROR(
-          "Terminating event processing loop due to errors in executeEvent");
-      break;
-    }
-
-    ATH_MSG_INFO("Processesed " << m_nevt << " event(s) remotely");
-    sc = m_eventExecutionTool->completeEvent(this, std::move(ctx));
-
-    if (!sc.isSuccess()) {
-      ATH_MSG_ERROR(
-          "Terminating event processing loop due to errors in completeEvent");
-      break;
+      // TODO: Finish this after figuring out why above hangs
+      //
+      // ATH_MSG_INFO("Processesed " << m_nevt << " event(s) remotely");
+      // sc = m_eventExecutionTool->completeEvent(this, std::move(ctx));
+      //
+      // if (!sc.isSuccess()) {
+      //   ATH_MSG_ERROR(
+      //       "Terminating event processing loop due to errors in
+      //       completeEvent");
+      //   break;
+      // }
     }
   }
 
@@ -171,33 +292,51 @@ StatusCode AthenaRemoteEventLoopMgr::nextEvent([[maybe_unused]] int maxevt) {
 }
 
 StatusCode AthenaRemoteEventLoopMgr::initializeAlgorithms() {
+  ATH_MSG_INFO("In AthenaRemoteEventLoopMgr::initializeAlgorithms()");
+
+  ATH_MSG_INFO("Leaving AthenaRemoteEventLoopMgr::initializeAlgorithms()");
+  return StatusCode::SUCCESS;
+}
+
+StatusCode AthenaRemoteEventLoopMgr::executeAlgorithms() {
+  ATH_MSG_INFO("In AthenaRemoteEventLoopMgr::executeAlgorithms()");
+
+  ATH_MSG_INFO("Leaving AthenaRemoteEventLoopMgr::executeAlgorithms()");
   return StatusCode::SUCCESS;
 }
 
 StatusCode AthenaRemoteEventLoopMgr::executeEvent(EventContext&& ctx) {
   ATH_MSG_INFO("In AthenaRemoteEventLoopMgr::executeEvent()");
 
+  m_aess->reset(ctx);
+
   Gaudi::Hive::setCurrentContext(ctx);
 
+  // From AthenaHiveEventLoopMgr::declareEventRootAddress()
+  // CHECK: Is this needed?
   if (m_eventStore->loadEventProxies().isFailure()) {
     ATH_MSG_ERROR("Error loading Event proxies");
     return StatusCode::FAILURE;
   }
 
+  if (m_eventStore->record(std::make_unique<EventContext>(ctx), "EventContext")
+          .isFailure()) {
+    ATH_MSG_ERROR("Error recording event context object");
+    return StatusCode::FAILURE;
+  }
+
   EventID::event_number_t evtNumber = ctx.eventID().event_number();
-  unsigned int conditionsRun = ctx.eventID().run_number();
+  unsigned int runNumber = ctx.eventID().run_number();
 
   if (m_firstRun) {
     m_firstRun = false;
-    ATH_MSG_INFO("  ===>>>  start processing events from run " << conditionsRun
+    ATH_MSG_INFO("  ===>>>  start processing events from run " << runNumber
                                                                << "  <<<===");
-    // FIXME: Crashes on this, but is this needed at all?
-    // m_incidentSvc->fireIncident(Incident(name(), IncidentType::BeginRun,
-    // ctx));
+    m_incidentSvc->fireIncident(Incident(name(), IncidentType::BeginRun, ctx));
   }
 
+  bool toolsPassed = true;
   if (m_useTools) {
-    bool toolsPassed = true;
     std::size_t toolCtr = 0;
     tool_store::iterator theTool = m_tools.begin();
     tool_store::iterator lastTool = m_tools.end();
@@ -210,13 +349,29 @@ StatusCode AthenaRemoteEventLoopMgr::executeEvent(EventContext&& ctx) {
     }
   }
 
+  if (toolsPassed) {
+    ATH_MSG_INFO("Adding event " << ctx.evt() << ", nr "
+                                 << ctx.eventID().event_number() << ", slot "
+                                 << ctx.slot() << " to the scheduler");
+
+    m_incidentSvc->fireIncident(
+        Incident(name(), IncidentType::BeginProcessing, ctx));
+    if (!m_schedulerSvc->pushNewEvent(new EventContext{std::move(ctx)})
+             .isSuccess()) {
+      ATH_MSG_ERROR("Error while pushing event to scheduler");
+      return StatusCode::FAILURE;
+    }
+  }
+
   ATH_MSG_INFO("  ===>>>  start processing event #"
-               << evtNumber << ", run #" << conditionsRun << " on slot "
+               << evtNumber << ", run #" << runNumber << " on slot "
                << ctx.slot() << ",  " << m_nevt
                << " events processed so far  <<<===");
 
-  m_incidentSvc->fireIncident(
-      Incident(name(), IncidentType::BeginProcessing, ctx));
+  ++m_nevt;
+
+  // invalidate thread local context once outside of event execute loop
+  Gaudi::Hive::setCurrentContext(EventContext());
 
   ATH_MSG_INFO("Leaving AthenaRemoteEventLoopMgr::executeEvent()");
   return StatusCode::SUCCESS;
@@ -264,6 +419,15 @@ int AthenaRemoteEventLoopMgr::size() {
 void AthenaRemoteEventLoopMgr::handle(const Incident& inc) {
   ATH_MSG_INFO(
       "In AthenaRemoteEventLoopMgr::handle() for incident: " << inc.type());
+
+  if (inc.type() == "EndAlgorithms") {
+    ATH_MSG_INFO("Clearing event storage for slot " << inc.context().slot());
+    if (!m_whiteboard->clearStore(inc.context().slot()).isSuccess()) {
+      ATH_MSG_WARNING("Clear of Event data store failed");
+    }
+  } else {
+    ATH_MSG_ERROR("Unhandled incident type! " << inc.type());
+  }
 
   ATH_MSG_INFO("Leaving AthenaRemoteEventLoopMgr::handle() for incident: "
                << inc.type());

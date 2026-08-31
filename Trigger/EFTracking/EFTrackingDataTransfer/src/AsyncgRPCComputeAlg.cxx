@@ -64,7 +64,7 @@ StatusCode AsyncgRPCComputeAlg::execute(const EventContext& context) const {
   if constexpr (!useAsync) {
     auto status = m_stub->doComputation(gRPCClientContext.get(), *requestMsg,
                                         responseMsg);
-    ATH_MSG_INFO("Service responded with: " << responseMsg->identifier());
+    ATH_MSG_INFO("Service responded with: " << responseMsg->identifier() << " (for event=" << context.eventID().event_number() << ")");
   } else {
     // using Promise_t = boost::fibers::promise<OffloadMessage*>;
     // using Future_t = boost::fibers::future<OffloadMessage*>;
