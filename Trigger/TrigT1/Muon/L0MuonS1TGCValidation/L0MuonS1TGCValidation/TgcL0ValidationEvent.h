@@ -23,6 +23,14 @@ enum class TgcL0ValidationProjection : std::uint8_t {
   Strip = 1U
 };
 
+/** @brief Station used as the reconstructed candidate position reference. */
+enum class TgcL0ValidationStation : std::uint8_t {
+  M1 = 0U,
+  M2 = 1U,
+  M3 = 2U,
+  Invalid = 255U
+};
+
 /** @brief Reason why a selected truth muon has no matched candidate. */
 enum class TgcL0ValidationUnmatchedReason : std::uint8_t {
   NotFullyExtrapolated = 0U,
@@ -57,6 +65,10 @@ struct TgcL0ValidationTruthBlock {
   std::vector<int> matchedCandidateIndex;
   std::vector<float> matchMeanDeltaR;
   std::vector<std::uint8_t> unmatchedReason;
+  std::vector<std::uint8_t> finalCandidateMatched;
+  std::vector<int> matchedFinalCandidateIndex;
+  std::vector<float> finalCandidateMatchDeltaR;
+  std::vector<std::uint8_t> finalCandidateUnmatchedReason;
   std::vector<std::uint8_t> wireSegmentMatched;
   std::vector<std::uint8_t> stripSegmentMatched;
   std::vector<int> matchedWireSegmentIndex;
@@ -104,6 +116,28 @@ struct TgcL0ValidationCandidateBlock {
   std::vector<int> truthIndex;
 };
 
+/** @brief Final post-selection TGC candidates and their truth matching. */
+struct TgcL0ValidationFinalCandidateBlock {
+  std::vector<int> sourceCandidateIndex;
+  std::vector<std::uint8_t> referenceStation;
+  std::vector<std::uint16_t> subdetectorId;
+  std::vector<std::uint16_t> triggerSector;
+  std::vector<std::uint16_t> bcTag;
+  std::vector<std::uint8_t> tcId;
+  std::vector<std::uint16_t> rawEta;
+  std::vector<std::uint16_t> rawPhi;
+  std::vector<float> eta;
+  std::vector<float> phi;
+  std::vector<std::uint8_t> ptCode;
+  std::vector<float> pt;
+  std::vector<std::uint8_t> threshold;
+  std::vector<std::int8_t> charge;
+  std::vector<std::uint8_t> innerCoincidence;
+  std::vector<std::uint8_t> goodMagneticField;
+  std::vector<int> truthIndex;
+  std::vector<float> truthMatchDeltaR;
+};
+
 /** @brief TGC Sector Logic words and their placeholder metadata. */
 struct TgcL0ValidationSectorLogicBlock {
   std::vector<std::uint32_t> inputCandidateIndex;
@@ -121,6 +155,7 @@ struct TgcL0ValidationEvent {
   TgcL0ValidationTruthBlock truth;
   TgcL0ValidationSegmentBlock segments;
   TgcL0ValidationCandidateBlock candidates;
+  TgcL0ValidationFinalCandidateBlock finalCandidates;
   TgcL0ValidationSectorLogicBlock sectorLogic;
 };
 
