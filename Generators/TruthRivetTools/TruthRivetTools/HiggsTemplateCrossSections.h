@@ -682,6 +682,12 @@ int getBin(double x, const std::vector<double>& bins) const {
   HTXS::Stage1_3::Category getStage1_3_Category(const HTXS::HiggsProdMode prodMode, const Particle &higgs,
                                                 const Jets &jets, const Particle &V) const {
     using namespace HTXS::Stage1_3;
+    if (prodMode == HTXS::BBH) {
+      const Category ggFCategory = getStage1_3_Category(HTXS::GGF, higgs, jets, V);
+      if (ggFCategory == UNKNOWN) return UNKNOWN;
+      return Category(BBH_FWDH + static_cast<int>(ggFCategory) - GG2H_FWDH);
+    }
+
     int Njets = jets.size(), ctrlHiggs = std::abs(higgs.rapidity()) < 2.5, fwdHiggs = !ctrlHiggs;
     int vbfTopo = vbfTopology(jets, higgs);
 
@@ -775,9 +781,7 @@ int getBin(double x, const std::vector<double>& bins) const {
         return TTH_FWDH;
       else
         return Category(TTH_PTH_0_60 + getBin(higgs.pt(), {0, 60, 120, 200, 300, 450, 650}));
-    } else if (prodMode == HTXS::BBH)
-      return Category(BBH_FWDH + ctrlHiggs);
-    else if (prodMode == HTXS::TH)
+    } else if (prodMode == HTXS::TH)
       return Category(TH_FWDH + ctrlHiggs);
     return UNKNOWN;
   }
@@ -786,24 +790,14 @@ int getBin(double x, const std::vector<double>& bins) const {
   HTXS::Stage1_3_Fine::Category getStage1_3_Fine_Category(const HTXS::HiggsProdMode prodMode, const Particle &higgs,
                                                           const Jets &jets, const Particle &V, const bool isTHW) const {
     using namespace HTXS::Stage1_3_Fine;
+    if (prodMode == HTXS::BBH) {
+      const Category ggFCategory = getStage1_3_Fine_Category(HTXS::GGF, higgs, jets, V, isTHW);
+      if (ggFCategory == UNKNOWN) return UNKNOWN;
+      return Category(BBH_FWDH + static_cast<int>(ggFCategory) - GG2H_FWDH);
+    }
+
     int Njets = jets.size(), ctrlHiggs = std::abs(higgs.rapidity()) < 2.5, fwdHiggs = !ctrlHiggs;
     int vbfTopo = vbfTopology_Stage1_3_Fine(jets, higgs);
-
-    // For debugging:
-    std::cout << "[Event] pth = " << higgs.pt() << ", yh = " << std::abs(higgs.rapidity()) << ", njet = " << Njets << ", ptv = " << V.pt() << std::endl;
-    if (Njets >= 1){
-        double pthj = (jets[0].momentum() + higgs.momentum()).pt();
-        std::cout << "pthj/pth = " << pthj/higgs.pt() << std::endl;
-    }
-    if (Njets >= 2){
-        double mjj = (jets[0].mom() + jets[1].mom()).mass();
-        double pthjj = (jets[0].momentum() + jets[1].momentum() + higgs.momentum()).pt();
-        double deltaphijj =
-        jets[0].eta() > jets[1].eta()
-        ? deltaPhi(jets[0], jets[1])
-        : -1*deltaPhi(jets[0], jets[1]);
-        std::cout << "mjj = " << mjj << ", pthjj = " << pthjj << ", dphijj = " << deltaphijj << std::endl; 
-    }
 
     // 1. GGF Stage 1.3 categories (fine)
     if (prodMode == HTXS::GGF || (prodMode == HTXS::GG2ZH && quarkDecay(V))) {
@@ -901,9 +895,7 @@ int getBin(double x, const std::vector<double>& bins) const {
         return TTH_FWDH;
       else
         return Category(TTH_PTH_0_60 + getBin(higgs.pt(), {0, 60, 120, 200, 300, 450, 650}));
-    } else if (prodMode == HTXS::BBH)
-      return Category(BBH_FWDH + ctrlHiggs);
-    else if (prodMode == HTXS::TH)
+    } else if (prodMode == HTXS::TH)
       return Category(THQ_FWDH + 2*isTHW + ctrlHiggs);
     return UNKNOWN;
   }
@@ -976,11 +968,11 @@ int getBin(double x, const std::vector<double>& bins) const {
       // Stage 1.2-Fine enum offsets for each production mode: GGF=28, VBF=25, WH= 16, QQ2ZH=16, GG2ZH=16, TTH=7, BBH=2, TH=2
       static const vector<int> offset1_2_Fine({0,1,29,54,70,86,102,109,111,113});
       int off1_2_Fine = offset1_2_Fine[P];
-      // Stage 1_3 enum offsets for each production mode: GGF=25, VBF=15, WH= 9, QQ2ZH=9, GG2ZH=9, TTH=8, BBH=2, TH=2
-      static const vector<int> offset1_3({0,1,26,41,50,59,68,76,78,80});
+      // Stage 1_3 enum offsets for each production mode: GGF=25, VBF=15, WH=9, QQ2ZH=9, GG2ZH=9, TTH=8, BBH=25, TH=2
+      static const vector<int> offset1_3({0,1,26,41,50,59,68,76,101,103});
       int off1_3 = offset1_3[P];
-      // Stage 1_3 Fine enum offsets for each production mode: GGF=62, VBF=86, WH= 19, QQ2ZH=19, GG2ZH=19, TTH=8, BBH=2, TH=3
-      static const vector<int> offset1_3_fine({0,1,63,149,168,187,206,214,216,219});
+      // Stage 1_3 Fine enum offsets for each production mode: GGF=62, VBF=86, WH=19, QQ2ZH=19, GG2ZH=19, TTH=8, BBH=62, TH=4
+      static const vector<int> offset1_3_fine({0,1,63,149,168,187,206,214,276,280});
       int off1_3_fine = offset1_3_fine[P];
 
 
@@ -1057,10 +1049,10 @@ int getBin(double x, const std::vector<double>& bins) const {
       book(m_hist_stage1_2_pTjet30,"HTXS_stage1_2_pTjet30",57,0,57);
       book(m_hist_stage1_2_fine_pTjet25,"HTXS_stage1_2_fine_pTjet25",113,0,113);
       book(m_hist_stage1_2_fine_pTjet30,"HTXS_stage1_2_fine_pTjet30",113,0,113);
-      book(m_hist_stage1_3_pTjet25, "STXS_stage1_3_pTjet25", 80, 0, 80);
-      book(m_hist_stage1_3_pTjet30, "STXS_stage1_3_pTjet30", 80, 0, 80);
-      book(m_hist_stage1_3_fine_pTjet25, "STXS_stage1_3_fine_pTjet25", 220, 0, 220);
-      book(m_hist_stage1_3_fine_pTjet30, "STXS_stage1_3_fine_pTjet30", 220, 0, 220);
+      book(m_hist_stage1_3_pTjet25, "STXS_stage1_3_pTjet25", 103, 0, 103);
+      book(m_hist_stage1_3_pTjet30, "STXS_stage1_3_pTjet30", 103, 0, 103);
+      book(m_hist_stage1_3_fine_pTjet25, "STXS_stage1_3_fine_pTjet25", 280, 0, 280);
+      book(m_hist_stage1_3_fine_pTjet30, "STXS_stage1_3_fine_pTjet30", 280, 0, 280);
       book(m_hist_pT_Higgs,"pT_Higgs",80,0,400);
       book(m_hist_y_Higgs,"y_Higgs",80,-4,4);
       book(m_hist_pT_V,"pT_V",80,0,400);
