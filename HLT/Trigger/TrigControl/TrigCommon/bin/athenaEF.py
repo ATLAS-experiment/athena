@@ -37,7 +37,6 @@ import sys
 import os
 import argparse
 import json
-import pickle
 import traceback
 from datetime import datetime as dt
 
@@ -833,6 +832,9 @@ def check_args(parser, args):
    if not args.jobOptions and not args.use_database:
       parser.error("No job options file specified")
 
+   if args.jobOptions and args.jobOptions.endswith('.pkl'):
+      parser.error("Running from a pickle file is not supported in athenaEF.")
+
    if (not args.file and not args.dump_config_exit
        and (args.efdf_interface_library or 'TrigDFEmulator') == 'TrigDFEmulator'):
       parser.error("--file is required unless using --dump-config-exit or online efdf-interface-library")
@@ -1245,7 +1247,7 @@ def main():
 
    ## Global options
    g = parser.add_argument_group('Options')
-   g.add_argument('jobOptions', nargs='?', help='job options: CA module (package.module:function), pickle file (.pkl), or JSON file (.json)')
+   g.add_argument('jobOptions', nargs='?', help='job options: CA module (package.module:function) or JSON file (.json)')
    g.add_argument('--threads', metavar='N', type=int, default=1, help='number of threads')
    g.add_argument('--concurrent-events', metavar='N', type=int, help='number of concurrent events if different from --threads')
    g.add_argument('--log-level', '-l', metavar='LVL', default='INFO', help='OutputLevel of athena')
@@ -1357,9 +1359,8 @@ def main():
 
    # Determine the source of the configuration. 
    is_database = args.use_database
-   is_pickle = bool(args.jobOptions) and not is_database and args.jobOptions.endswith('.pkl')
    is_json   = bool(args.jobOptions) and not is_database and args.jobOptions.endswith('.json')
-   is_ca     = not (is_database or is_pickle or is_json)
+   is_ca     = not (is_database or is_json)
 
    # CREST configuration (only used with --use-database, see check_args)
    log.info("Using CREST for trigger configuration: %s", args.use_crest)
@@ -1385,11 +1386,10 @@ def main():
       configure_from_ca(args, unparsed_args)
 
    ##
-   ## From here on the configuration comes from the trigger database, a JSON file or a
-   ## pickled CA: anything that needs to be changed from the command line is applied via RuntimeOverrides.
+   ## From here on the configuration comes from the trigger database or a JSON file:
+   ## anything that needs to be changed from the command line is applied via RuntimeOverrides.
    ##
-   config_source = ("the trigger database" if is_database else
-                    "a pickle file" if is_pickle else "a JSON file")
+   config_source = "the trigger database" if is_database else "a JSON file"
 
    if unparsed_args:
       log.warning("Ignoring flag(s) given on the command line, the configuration is read from %s: %s",
@@ -1471,13 +1471,6 @@ def main():
       acc = load_from_database(db_alias, args.smk, args.l1psk, args.hltpsk, run_params, overrides=overrides)
       log.info("Configuration loaded from database")
 
-   elif is_pickle:
-      # Load ComponentAccumulator from pickle file
-      log.info("Loading configuration from pickle file: %s", args.jobOptions)
-      with open(args.jobOptions, 'rb') as f:
-         acc = pickle.load(f)
-      log.info("Configuration loaded from pickle")
-
    else:   # is_json
       # Load configuration from JSON file
       log.info("Loading configuration from JSON file: %s", args.jobOptions)
@@ -1519,18 +1512,6 @@ def main():
                json.dump(hlt_json, f, indent=4, sort_keys=True, ensure_ascii=True)
          else:
             log.warning("No properties available to dump")
-            
-      elif is_pickle:
-         # For pickle-loaded ComponentAccumulator, gather properties
-         app_props, msg_props, comp_props = acc.gatherProps()
-         props = {"ApplicationMgr": app_props, "MessageSvc": msg_props}
-         for comp, name, value in comp_props:
-            props.setdefault(comp, {})[name] = value
-         
-         log.info("Dumping configuration to %s.json", fname)
-         hlt_json = {'filetype': 'joboptions', 'properties': props}
-         with open(f"{fname}.json", "w") as f:
-            json.dump(hlt_json, f, indent=4, sort_keys=True, ensure_ascii=True)
 
       if args.dump_config_exit:
          log.info("Configuration dumped. Exiting...")
