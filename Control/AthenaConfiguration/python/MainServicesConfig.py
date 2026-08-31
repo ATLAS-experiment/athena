@@ -1,7 +1,7 @@
 # Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
-from AthenaCommon.Constants import INFO
+from AthenaCommon.Constants import INFO, WARNING
 
 
 def MainServicesMiniCfg(flags, loopMgr='AthenaEventLoopMgr', masterSequence='AthAlgSeq'):
@@ -219,30 +219,29 @@ def AthenaMtesEventLoopMgrCfg(flags, mtEs=False, channel=''):
 
 def MessageSvcCfg(flags):
     cfg = ComponentAccumulator()
-    msgsvc = CompFactory.MessageSvc()
-    msgsvc.OutputLevel = flags.Exec.OutputLevel
-    msgsvc.Format = "% F%{:d}W%C%7W%R%T %0W%M".format(flags.Common.MsgSourceLength)
-    msgsvc.enableSuppression = flags.Common.MsgSuppression
-    if flags.Common.ShowMsgStats:
-        msgsvc.showStats = True
-        from AthenaCommon.Constants import WARNING
-        msgsvc.statLevel = WARNING
+    defaultLimit = 500
 
+    msgsvc = CompFactory.MessageSvc(
+        OutputLevel = flags.Exec.OutputLevel,
+        Format = (f"% F%{flags.Common.MsgSourceLength}W%C%6W%R%e%s%8W%R%T %0W%M" if flags.Concurrency.NumThreads>0 else
+                  f"% F%{flags.Common.MsgSourceLength}W%C%7W%R%T %0W%M"),
+        enableSuppression = flags.Common.MsgSuppression,
+        showStats = flags.Common.ShowMsgStats,
+        statLevel = WARNING,
+        # Disable suppression limit if we are debugging components
+        verboseLimit = 0 if flags.Exec.VerboseMessageComponents else defaultLimit,
+        debugLimit = 0 if flags.Exec.DebugMessageComponents else defaultLimit,
+        infoLimit = 0 if flags.Exec.InfoMessageComponents else defaultLimit,
+        warningLimit = 0 if flags.Exec.WarningMessageComponents else defaultLimit,
+        errorLimit = 0 if flags.Exec.ErrorMessageComponents else defaultLimit,
+    )
+
+    # Temporary to match legacy configuration for serial simulation/digitization/overlay jobs (FIXME)
     from AthenaConfiguration.Enums import ProductionStep
-    if flags.Common.ProductionStep not in [ProductionStep.Default, ProductionStep.Reconstruction, ProductionStep.Derivation]:
-        msgsvc.Format = "% F%18W%S%7W%R%T %0W%M" # Temporary to match legacy configuration for serial simulation/digitization/overlay jobs
-    if flags.Concurrency.NumThreads>0:
-        msgsvc.Format = "% F%{:d}W%C%6W%R%e%s%8W%R%T %0W%M".format(flags.Common.MsgSourceLength)
-    if flags.Exec.VerboseMessageComponents:
-        msgsvc.verboseLimit=0
-    if flags.Exec.DebugMessageComponents:
-        msgsvc.debugLimit=0
-    if flags.Exec.InfoMessageComponents:
-        msgsvc.infoLimit=0
-    if flags.Exec.WarningMessageComponents:
-        msgsvc.warningLimit=0
-    if flags.Exec.ErrorMessageComponents:
-        msgsvc.errorLimit=0
+    if flags.Common.ProductionStep not in (ProductionStep.Default,
+                                           ProductionStep.Reconstruction,
+                                           ProductionStep.Derivation):
+        msgsvc.Format = "% F%18W%S%7W%R%T %0W%M"
 
     cfg.addService(msgsvc)
     return cfg
