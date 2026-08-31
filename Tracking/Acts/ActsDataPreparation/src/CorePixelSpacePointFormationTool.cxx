@@ -29,7 +29,9 @@ namespace ActsTrk {
                                                              const InDetDD::SiDetectorElement& /*element*/) const
     {
       const xAOD::DetectorIDHashType idHash = cluster.identifierHash();
-      const Acts::Vector3 globalPosition = cluster.globalPosition().cast<double>();
+      // The accessor is a call into libxAODInDetMeasurement, and the space point
+      // is filled with the same position the variances are computed from.
+      const auto globalPosition = cluster.globalPosition();
       const Acts::SquareMatrix2 localCov = cluster.localCovariance<2>().cast<double>();
 
       // Clusters come grouped by module: look up the surface only when the module changes.
@@ -54,13 +56,13 @@ namespace ActsTrk {
           cache.idHash = idHash;
           cache.evt = ctx.evt();
         }
-        variance = Acts::PixelSpacePointBuilder::computeCovarianceZR(cache.rotLocalToGlobal,
-                                                                     globalPosition, localCov).diagonal();
+        variance = Acts::PixelSpacePointBuilder::computeVarianceZR(cache.rotLocalToGlobal,
+                                                                   globalPosition.cast<double>(), localCov);
       } else {
         Acts::RotationMatrix3 rotLocalToGlobal;
         ATH_CHECK( lookupReferenceFrame(rotLocalToGlobal) );
-        variance = Acts::PixelSpacePointBuilder::computeCovarianceZR(rotLocalToGlobal,
-                                                                     globalPosition, localCov).diagonal();
+        variance = Acts::PixelSpacePointBuilder::computeVarianceZR(rotLocalToGlobal,
+                                                                   globalPosition.cast<double>(), localCov);
       }
 
       float cov_z = static_cast<float>(variance[0]);
@@ -72,7 +74,7 @@ namespace ActsTrk {
       }
 
       sp.setSpacePoint(idHash,
-                       cluster.globalPosition(),
+                       globalPosition,
                        cov_r,
                        cov_z,
                        std::vector< const xAOD::UncalibratedMeasurement* >({&cluster}));
