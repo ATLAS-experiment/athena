@@ -159,7 +159,7 @@ StatusCode TauThinningAlg::execute (const EventContext& ctx) const
       if(cluster->p4().DeltaR(tauAxis) > m_DrTauNeutrals) continue;	     
 
       // check if neutral should be kept based on neutral PFO min pt - applied only to Run4
-      if(m_doRun4 && tau->neutralPFO(i)->pt() <= m_minNeutralPFOPt) continue;
+      if(tau->neutralPFO(i)->pt() <= m_minNeutralPFOPt) continue;
 
       // neutral PFOs
       neutralPFOs.keep(tau->neutralPFO(i)->index());
