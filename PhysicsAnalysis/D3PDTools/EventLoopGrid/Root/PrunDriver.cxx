@@ -32,8 +32,13 @@
 #include <TSystem.h>
 
 #include <algorithm>
+#include <any>
+#include <array>
 #include <cstdlib>
+#include <filesystem>
 #include <iostream>
+#include <optional>
+#include <set>
 #include <sstream>
 #include <string>
 #include <vector>
@@ -57,8 +62,7 @@ namespace {
       for (unsigned int i = 0; i != NSTATES; ++i) {
 	if (what == name[i]) { return static_cast<Enum>(i); }
       }
-      RCU_ASSERT0("Failed to parse job state string");
-      throw std::runtime_error("PrunDriver.cxx: Failed to parse job state string"); //compiler dummy
+      throw std::runtime_error("PrunDriver.cxx: Failed to parse job state string");
     }
   }
 
@@ -66,22 +70,13 @@ namespace {
   // corresponding values in `data/ELG_jediState.py` script
   // are changed accordingly
   namespace Status {
-    //static const int NSTATES = 3;
     enum Enum { DONE=0, PENDING=1, FAIL=2 };
   }
 
   struct TransitionRule {
-    JobState::Enum fromState; 
-    Status::Enum status; 
-    JobState::Enum toState; 
-    TransitionRule(JobState::Enum fromState,
-		   Status::Enum status,
-		   JobState::Enum toState)
-      : fromState(fromState)
-      , status(status)
-      , toState(toState)
-    {
-    }
+    JobState::Enum fromState;
+    Status::Enum status;
+    JobState::Enum toState;
   };
 
   struct TmpCd {
@@ -110,29 +105,27 @@ static JobState::Enum nextState(JobState::Enum state, Status::Enum status)
 {
   RCU_REQUIRE(state != JobState::FINISHED);
   RCU_REQUIRE(state != JobState::FAILED);
-  static const TransitionRule TABLE[] =
-    {
-      TransitionRule(JobState::INIT,     Status::DONE,    JobState::RUN),
-      TransitionRule(JobState::INIT,     Status::PENDING, JobState::INIT),
-      TransitionRule(JobState::INIT,     Status::FAIL,    JobState::FAILED),
-      TransitionRule(JobState::RUN,      Status::DONE,    JobState::DOWNLOAD),
-      TransitionRule(JobState::RUN,      Status::PENDING, JobState::RUN),
-      TransitionRule(JobState::RUN,      Status::FAIL,    JobState::FAILED),
-      TransitionRule(JobState::DOWNLOAD, Status::DONE,    JobState::MERGE),
-      TransitionRule(JobState::DOWNLOAD, Status::PENDING, JobState::DOWNLOAD),
-      TransitionRule(JobState::DOWNLOAD, Status::FAIL,    JobState::FAILED),
-      TransitionRule(JobState::MERGE,    Status::DONE,    JobState::FINISHED),
-      TransitionRule(JobState::MERGE,    Status::PENDING, JobState::MERGE),
-      TransitionRule(JobState::MERGE,    Status::FAIL,    JobState::DOWNLOAD)
-    };
-  static const unsigned int TABLE_SIZE = sizeof(TABLE) / sizeof(TABLE[0]);
-  for (unsigned int i = 0; i != TABLE_SIZE; ++i) {
-    if (TABLE[i].fromState == state && TABLE[i].status == status) {
-      return TABLE[i].toState;
+  static constexpr std::array<TransitionRule, 12> TABLE =
+    {{
+      {JobState::INIT,     Status::DONE,    JobState::RUN},
+      {JobState::INIT,     Status::PENDING, JobState::INIT},
+      {JobState::INIT,     Status::FAIL,    JobState::FAILED},
+      {JobState::RUN,      Status::DONE,    JobState::DOWNLOAD},
+      {JobState::RUN,      Status::PENDING, JobState::RUN},
+      {JobState::RUN,      Status::FAIL,    JobState::FAILED},
+      {JobState::DOWNLOAD, Status::DONE,    JobState::MERGE},
+      {JobState::DOWNLOAD, Status::PENDING, JobState::DOWNLOAD},
+      {JobState::DOWNLOAD, Status::FAIL,    JobState::FAILED},
+      {JobState::MERGE,    Status::DONE,    JobState::FINISHED},
+      {JobState::MERGE,    Status::PENDING, JobState::MERGE},
+      {JobState::MERGE,    Status::FAIL,    JobState::DOWNLOAD}
+    }};
+  for (const TransitionRule& rule : TABLE) {
+    if (rule.fromState == state && rule.status == status) {
+      return rule.toState;
     }
   }
-  RCU_ASSERT0("Missing state transition rule");
-  throw std::logic_error("PrunDriver.cxx: Missing state transition rule"); 
+  throw std::logic_error("PrunDriver.cxx: Missing state transition rule");
 }
 
 static SH::MetaObject defaultOpts()
@@ -145,17 +138,35 @@ static SH::MetaObject defaultOpts()
   const std::string mergestr = "elg_merge jobdef.root %OUT %IN";
   o.setString("nc_mergeScript", mergestr);
   return o;
-} 
+}
 
-static bool downloadContainer(const std::string& name, 
+// Serialize message output from the worker threads.  In standalone builds the
+// EL::msgEventLoop MsgStream is a single shared std::ostringstream with no
+// internal locking (and the printer writes to std::cout unguarded), so
+// concurrent ANA_MSG_* calls from the download/run threads would otherwise race
+// on that shared buffer.
+static std::mutex& logMutex()
+{
+  static std::mutex mutex;
+  return mutex;
+}
+
+static bool downloadContainer(const std::string& name,
 			      const std::string& location)
 {
-  RCU_ASSERT(not name.empty()); 
-  RCU_ASSERT(name[name.size()-1] == '/'); 
-  RCU_ASSERT(not location.empty()); 
+  using namespace EL::msgEventLoop;
+  RCU_ASSERT(not name.empty());
+  RCU_ASSERT(name[name.size()-1] == '/');
+  RCU_ASSERT(not location.empty());
 
   try {
-    gSystem->Exec(Form("mkdir -p %s", location.c_str()));
+    std::error_code ec;
+    std::filesystem::create_directories(location, ec);
+    if (ec) {
+      std::lock_guard<std::mutex> lock(logMutex());
+      ANA_MSG_ERROR("Failed to create directory " << location << ": " << ec.message());
+      return false;
+    }
 
     std::vector<std::string> datasets;
     for (auto& entry : SH::rucioListDids (name))
@@ -170,10 +181,43 @@ static bool downloadContainer(const std::string& name,
       if (result.notDownloaded != 0)
         return false;
     }
-  } catch (...) { 
+  } catch (const std::exception& e) {
+    std::lock_guard<std::mutex> lock(logMutex());
+    ANA_MSG_ERROR("Failed to download " << name << ": " << e.what());
     return false;
   }
   return true;
+}
+
+// Call the Python function @c func (defined in the macro file @c macroFile,
+// loaded once on first use) on @c sample and return its integer result.
+//
+// The whole macro-load / bind / exec / unbind sequence is serialized under a
+// single mutex.  @c ELG_SAMPLE is one global Python name shared by every
+// caller, and the underlying CPython interpreter must be entered with the GIL
+// held, so without this lock concurrent callers (e.g. the RUN-state polling
+// threads) would clobber each other's binding and query the wrong sample's
+// status.  Serializing is cheap here since these calls only poll task state.
+// The alternative would be to pass the needed metadata as function arguments
+// rather than through a global binding.
+static int callPythonOnSample(const char* macroFile, const char* func,
+                              SH::Sample* sample)
+{
+  static std::mutex mutex;
+  std::lock_guard<std::mutex> lock(mutex);
+
+  static std::set<std::string> loadedMacros;
+  if (loadedMacros.insert(macroFile).second) {
+    TPython::LoadMacro(PathResolverFindCalibFile(macroFile).c_str());
+  }
+
+  TPython::Bind(sample, "ELG_SAMPLE");
+  std::any result;
+  const std::string code =
+    std::string("_anyresult = ROOT.std.make_any['int'](") + func + "(ELG_SAMPLE))";
+  TPython::Exec(code.c_str(), &result);
+  TPython::Bind(nullptr, "ELG_SAMPLE");
+  return std::any_cast<int>(result);
 }
 
 static Status::Enum submit(SH::Sample* const sample, const bool isFirstSample)
@@ -183,27 +227,9 @@ static Status::Enum submit(SH::Sample* const sample, const bool isFirstSample)
 
   ANA_MSG_INFO( "Submitting " << sample->name() << "..." );
 
-  static bool loaded = false;
-  if (not loaded) {
-    // TString path = "$ROOTCOREBIN/python/EventLoopGrid/ELG_prun.py";
-    // gSystem->ExpandPathName(path);
-    // TPython::LoadMacro(path.Data());
-    std::string path = PathResolverFindCalibFile("EventLoopGrid/ELG_prun.py");
-    TPython::LoadMacro(path.c_str());
-    loaded = true;
-  }
+  int ret = callPythonOnSample("EventLoopGrid/ELG_prun.py", "ELG_prun", sample);
 
-  TPython::Bind(dynamic_cast<TObject*>(sample), "ELG_SAMPLE"); 
-#if ROOT_VERSION_CODE >= ROOT_VERSION(6,33,01)
-  std::any result;
-  TPython::Exec("_anyresult = ROOT.std.make_any['int'](ELG_prun(ELG_SAMPLE))", &result);
-  int ret = std::any_cast<int>(result);
-#else
-  int ret = TPython::Eval("ELG_prun(ELG_SAMPLE)");
-#endif
-  TPython::Bind(0, "ELG_SAMPLE");
-
-  // Tarball is created for the first sample to be submitted 
+  // Tarball is created for the first sample to be submitted
   // then the tarball is simply reused for the other samples 
   // If the returned value is 1 it implies the tarball creation failed 
   // See EventLoopGrid/data/ELG_prun.py script
@@ -232,22 +258,7 @@ static Status::Enum checkPandaTask(SH::Sample* const sample)
   RCU_REQUIRE(sample);
   RCU_REQUIRE(static_cast<int>(sample->meta()->castDouble("nc_jediTaskID",0, SH::MetaObject::CAST_NOCAST_DEFAULT)) > 100);
 
-  static bool loaded = false;
-  if (not loaded) {
-    std::string path = PathResolverFindCalibFile("EventLoopGrid/ELG_jediState.py");
-    TPython::LoadMacro(path.c_str());
-    loaded = true;
-  }
-
-  TPython::Bind(dynamic_cast<TObject*>(sample), "ELG_SAMPLE");
-#if ROOT_VERSION_CODE >= ROOT_VERSION(6,33,01)
-  std::any result;
-  TPython::Exec("_anyresult = ROOT.std.make_any['int'](ELG_jediState(ELG_SAMPLE))", &result);
-  int ret = std::any_cast<int>(result);
-#else
-  int ret =  TPython::Eval("ELG_jediState(ELG_SAMPLE)");
-#endif
-  TPython::Bind(0, "ELG_SAMPLE");
+  int ret = callPythonOnSample("EventLoopGrid/ELG_jediState.py", "ELG_jediState", sample);
 
   if (ret == Status::DONE) return Status::DONE;
   if (ret == Status::FAIL) return Status::FAIL;
@@ -266,27 +277,29 @@ static Status::Enum checkPandaTask(SH::Sample* const sample)
 static Status::Enum download(SH::Sample* const sample)
 {
   RCU_REQUIRE(sample);
+  using namespace EL::msgEventLoop;
 
+  // This can run on several download threads at once; the shared message stream
+  // is not thread-safe, so serialize the logging (see logMutex()).
   {
-    static std::mutex mutex;
-    std::lock_guard<std::mutex> lock(mutex);
-    std::cout << "Downloading output from: " 
-	      << sample->name() << "..." << std::endl;
+    std::lock_guard<std::mutex> lock(logMutex());
+    ANA_MSG_INFO("Downloading output from: " << sample->name() << "...");
   }
 
   std::string container = sample->meta()->castString("nc_outDS", "", SH::MetaObject::CAST_NOCAST_DEFAULT);
   RCU_ASSERT(not container.empty());
   if (container[container.size()-1] == '/') {
-    container.resize(container.size() - 1); 
+    container.resize(container.size() - 1);
   }
   container += "_hist/";
 
   bool downloadOk = downloadContainer(container, "elg/download/" + container);
 
   if (not downloadOk) {
-    std::cerr << "Failed to download one or more files" << std::endl;
-    sample->meta()->setString("nc_ELG_state_details", 
-                              "error, check log for details"); 
+    std::lock_guard<std::mutex> lock(logMutex());
+    ANA_MSG_ERROR("Failed to download one or more files");
+    sample->meta()->setString("nc_ELG_state_details",
+                              "error, check log for details");
     return Status::PENDING;
   }
 
@@ -296,11 +309,14 @@ static Status::Enum download(SH::Sample* const sample)
 static Status::Enum merge(SH::Sample* const sample)
 {
   RCU_REQUIRE(sample);
+  // The MERGE state is always processed single-threaded, so the logging here
+  // needs no serialization (unlike download(), see logMutex()).
+  using namespace EL::msgEventLoop;
 
   std::string container = sample->meta()->castString("nc_outDS", "", SH::MetaObject::CAST_NOCAST_DEFAULT);
   RCU_ASSERT(not container.empty());
   if (container[container.size()-1] == '/') {
-    container.resize(container.size() - 1); 
+    container.resize(container.size() - 1);
   }
   container += "_hist/";
   const std::string dir = "elg/download/" + container;
@@ -308,37 +324,62 @@ static Status::Enum merge(SH::Sample* const sample)
   const std::string fileName = "hist-output.root";
 
   const std::string target = Form("hist-%s.root", sample->name().c_str());
-  
-  const std::string findCmd(Form("find %s -name \"*.%s*\" | tr '\n' ' '", 
-				 dir.c_str(), fileName.c_str()));
-  std::istringstream input(gSystem->GetFromPipe(findCmd.c_str()).Data()); 
-  std::vector<std::string> files((std::istream_iterator<std::string>(input)),
-				 std::istream_iterator<std::string>());
-  
+
+  // Collect the per-job output files, i.e. those whose name contains
+  // ".hist-output.root" (matching the old `find -name "*.hist-output.root*"`).
+  namespace fs = std::filesystem;
+  const std::string needle = "." + fileName;
+  std::vector<std::string> files;
+  std::error_code ec;
+  for (fs::recursive_directory_iterator it(dir, ec), end; it != end; it.increment(ec)) {
+    if (ec) { break; }
+    if (it->is_regular_file() &&
+        it->path().filename().string().find(needle) != std::string::npos) {
+      files.push_back(it->path().string());
+    }
+  }
+
   std::sort(files.begin(), files.end());
-  RCU_ASSERT(std::unique(files.begin(), files.end()) == files.end());
-  
+  // Duplicates are not expected (the directory scan never lists a file twice),
+  // but drop them with a real runtime check rather than a side-effecting assert.
+  std::vector<std::string> duplicates;
+  for (size_t i = 1; i < files.size(); ++i) {
+    if (files[i] == files[i - 1]) { duplicates.push_back(files[i]); }
+  }
+  if (not duplicates.empty()) {
+    std::ostringstream dup;
+    for (const std::string& name : duplicates) { dup << ' ' << name; }
+    ANA_MSG_WARNING("Ignoring duplicate input file(s) for merging:" << dup.str());
+    files.erase(std::unique(files.begin(), files.end()), files.end());
+  }
+
   if (not files.size()) {
-    std::cerr << "Found no input files for merging! "
-	      << "Requeueing sample for download..." << std::endl;
-    sample->meta()->setString("nc_ELG_state_details", "retry, files were lost"); 
+    ANA_MSG_ERROR("Found no input files for merging! "
+		  "Requeueing sample for download...");
+    sample->meta()->setString("nc_ELG_state_details", "retry, files were lost");
     return Status::FAIL;
   }
 
   try {
-    RCU::hadd(target.c_str(), files); 
+    RCU::hadd(target.c_str(), files);
   } catch (...) {
-    sample->meta()->setString("nc_ELG_state_details", 
-                              "error, check log for details"); 
-    gSystem->Exec(Form("rm -f %s", target.c_str()));
+    sample->meta()->setString("nc_ELG_state_details",
+                              "error, check log for details");
+    fs::remove(target, ec);
     return Status::PENDING;
   }
 
-  for (size_t i = 0; i != files.size(); ++i) {
-    gSystem->Exec(Form("rm %s", files[i].c_str()));
-  }  
-  gSystem->Exec(Form("rmdir %s/*", dir.c_str()));
-  gSystem->Exec(Form("rmdir %s", dir.c_str()));
+  // Remove the merged inputs and the (now empty) download tree.
+  for (const std::string& file : files) {
+    fs::remove(file, ec);
+    if (ec) {
+      ANA_MSG_WARNING("Failed to remove merged input " << file << ": " << ec.message());
+    }
+  }
+  fs::remove_all(dir, ec);
+  if (ec) {
+    ANA_MSG_WARNING("Failed to remove download directory " << dir << ": " << ec.message());
+  }
 
   return Status::DONE;
 }
@@ -382,14 +423,68 @@ static void processAllInState(const SH::SampleHandler& sh, JobState::Enum state,
   WorkList workList;
 
   bool isFirstSample = true;
-  for (SH::SampleHandler::iterator s = sh.begin(); s != sh.end(); ++s) {
-    if (sampleState(*s) == state) {
-      workList.push_back([s, isFirstSample]()->void{ processTask(*s, isFirstSample); });
+  for (SH::Sample* const sample : sh) {
+    if (sampleState(sample) == state) {
+      workList.push_back([sample, isFirstSample, state]()->void{
+        if (state == JobState::INIT) {
+          // INIT is always processed single-threaded, so let an exception
+          // (e.g. the deliberate tarball-creation abort in submit()) propagate
+          // and stop the submission.
+          processTask(sample, isFirstSample);
+        } else {
+          // On a worker thread an escaping exception would call std::terminate.
+          // Record it against the sample and mark it FAILED so the pool
+          // finishes processing the remaining samples.
+          try {
+            processTask(sample, isFirstSample);
+          } catch (const std::exception& e) {
+            using namespace EL::msgEventLoop;
+            {
+              std::lock_guard<std::mutex> lock(logMutex());
+              ANA_MSG_ERROR ("Exception while processing " << sample->name()
+                             << ": " << e.what());
+            }
+            sample->meta()->setString ("nc_ELG_state_details",
+                                       std::string ("exception: ") + e.what());
+            sample->meta()->setString ("nc_ELG_state",
+                                       JobState::name[JobState::FAILED]);
+          }
+        }
+      });
       // Change boolean to false as already processed one sample
       isFirstSample = false;
     }
   }
   process(workList, nThreads);
+}
+
+// Look up the grid nickname via panda's PsubUtils, going through TPython (which
+// is already used for submission) instead of spawning a python subprocess.
+// Returns nullopt when the nickname cannot be determined (e.g. no valid proxy
+// yet), so the caller can leave %nickname% in the output pattern for the
+// python side to substitute later.  Only a successful lookup is cached, so a
+// proxy created later in the same process is still picked up.
+static std::optional<std::string> gridNickname()
+{
+  static std::optional<std::string> cached;
+  if (cached.has_value()) { return cached; }
+
+  std::any result;
+  const char* code =
+    "try:\n"
+    "    from pandatools import PsubUtils\n"
+    "    _nick = str(PsubUtils.getNickname())\n"
+    "except Exception:\n"
+    "    _nick = ''\n"
+    "_anyresult = ROOT.std.make_any['std::string'](_nick)\n";
+  TPython::Exec(code, &result);
+  const std::string nickname = std::any_cast<std::string>(result);
+
+  // An empty result means the lookup failed; a very long one is panda's
+  // "no proxy" message rather than an actual nickname.
+  if (nickname.empty() || nickname.length() > 20) { return std::nullopt; }
+  cached = nickname;
+  return cached;
 }
 
 static std::string formatOutputName(const SH::MetaObject& sampleMeta,
@@ -399,18 +494,14 @@ static std::string formatOutputName(const SH::MetaObject& sampleMeta,
   RCU_REQUIRE(not pattern.empty());
   using namespace EL::msgEventLoop;
 
-  static const std::string nickname = 
-    gSystem->GetFromPipe(Form("python -c \"%s\" 2>/dev/null", 
-			      "from pandatools import PsubUtils;"
-			      "print(PsubUtils.getNickname());")).Data();
-
   TString out = pattern.c_str();
 
   // Handle case of no proxy; will create a proxy later in the submission
-  if (nickname.length()>20){
+  const std::optional<std::string> nickname = gridNickname();
+  if (not nickname.has_value()){
     ANA_MSG_WARNING( "No proxy available - cannot use nickname yet. Will try a late replacement.");
   } else {
-    out.ReplaceAll("%nickname%", nickname);
+    out.ReplaceAll("%nickname%", *nickname);
   }
 
   out.ReplaceAll("%in:name%", sampleName);
@@ -426,28 +517,26 @@ static std::string formatOutputName(const SH::MetaObject& sampleMeta,
   while (out.Index("%in:") != -1) {
     int i1 = out.Index("%in:");
     int i2 = out.Index("%", i1+1);
+    if (i2 == -1) {
+      ANA_MSG_ERROR("malformed output name pattern, unterminated %in: token in \""
+		    << out.Data() << "\"");
+      break;
+    }
     TString metaName = out(i1+4, i2-i1-4);
-    out.ReplaceAll("%in:"+metaName+"%", 
-		   sampleMeta.castString(std::string(metaName.Data())));  
+    out.ReplaceAll("%in:"+metaName+"%",
+		   sampleMeta.castString(std::string(metaName.Data())));
   }
   out.ReplaceAll("/", "");
   return out.Data();
 }
 
-std::string outputFileNames(const EL::Job& job)
+static std::string outputFileNames(const EL::Job& job)
 {
-  TList outputs;
-  for (EL::Job::outputIter out = job.outputBegin(),
-	 end = job.outputEnd(); out != end; ++out) {
-    outputs.Add(out->Clone());
-  }      
   std::string out = "hist:hist-output.root";
-  TIter itr(&outputs);
-  TObject *obj = 0;
-  while ((obj = itr())) {
-    EL::OutputStream *os = dynamic_cast<EL::OutputStream*>(obj);
+  for (EL::Job::outputIter os = job.outputBegin(),
+	 end = job.outputEnd(); os != end; ++os) {
     const std::string name = os->label() + ".root";
-    const std::string ds = 
+    const std::string ds =
       os->options()->castString(EL::OutputStream::optContainerSuffix);
     out += "," + (ds.empty() ? name : ds + ":" + name);
   }
@@ -457,17 +546,18 @@ std::string outputFileNames(const EL::Job& job)
 // Save algortihms and lists of inputs and outputs to a root file
 static void saveJobDef(const std::string& fileName,
 		       const EL::Job& job,
-		       const SH::SampleHandler sh)
-{    
-  TFile file(fileName.c_str(), "RECREATE"); 
-  TList outputs; 
-  for (EL::Job::outputIter o = job.outputBegin(); o !=job.outputEnd(); ++o) 
+		       const SH::SampleHandler& sh)
+{
+  TFile file(fileName.c_str(), "RECREATE");
+  TList outputs;
+  outputs.SetOwner(true);
+  for (EL::Job::outputIter o = job.outputBegin(); o !=job.outputEnd(); ++o)
     outputs.Add(o->Clone());
   file.WriteTObject(&job.jobConfig(), "jobConfig", "SingleKey");        
   file.WriteTObject(&outputs, "outputs", "SingleKey");        
   bool haveDefault = false;
-  for (SH::SampleHandler::iterator s = sh.begin(); s != sh.end(); ++s) {
-    const SH::MetaObject& meta = *((*s)->meta());
+  for (SH::Sample* const sample : sh) {
+    const SH::MetaObject& meta = *(sample->meta());
     file.WriteObject(&meta, meta.castString("sample_name").c_str());
     if (!haveDefault)
     {
@@ -484,9 +574,9 @@ static SH::SampleHandler outputSH(const SH::SampleHandler& in,
   SH::SampleHandler out;
   const std::string outputFile = "*" + outputLabel + ".root*";
   const std::string outDSSuffix = '_' + outputLabel + ".root/"; 
-  for (SH::SampleHandler::iterator s = in.begin(); s != in.end(); ++s) {
-    auto outSample = std::make_unique<SH::SampleGrid>((*s)->name());
-    const std::string outputDS = (*s)->meta()->castString("nc_outDS", "", SH::MetaObject::CAST_NOCAST_DEFAULT) + outDSSuffix;
+  for (SH::Sample* const sample : in) {
+    auto outSample = std::make_unique<SH::SampleGrid>(sample->name());
+    const std::string outputDS = sample->meta()->castString("nc_outDS", "", SH::MetaObject::CAST_NOCAST_DEFAULT) + outDSSuffix;
     outSample->meta()->setString("nc_grid", outputDS);
     outSample->meta()->setString("nc_grid_filter", outputFile);
     out.add(std::move(outSample));
@@ -514,19 +604,39 @@ doManagerStep (Detail::ManagerData& data) const
     {
       const std::string jobELGDir = data.submitDir + "/elg";
       const std::string runShFile = jobELGDir + "/runjob.sh";
-      //const std::string runShOrig = "$ROOTCOREBIN/data/EventLoopGrid/runjob.sh";
       const std::string mergeShFile = jobELGDir + "/elg_merge";
-      //const std::string mergeShOrig = 
-      //  "$ROOTCOREBIN/user_scripts/EventLoopGrid/elg_merge";
       const std::string runShOrig = PathResolverFindCalibFile("EventLoopGrid/runjob.sh");
       const std::string mergeShOrig = PathResolverFindCalibFile("EventLoopGrid/elg_merge");
 
       const std::string jobDefFile = jobELGDir + "/jobdef.root";
-      gSystem->Exec(Form("mkdir -p %s", jobELGDir.c_str()));
-      gSystem->Exec(Form("cp %s %s", runShOrig.c_str(), runShFile.c_str()));
-      gSystem->Exec(Form("chmod +x %s", runShFile.c_str()));
-      gSystem->Exec(Form("cp %s %s", mergeShOrig.c_str(), mergeShFile.c_str()));
-      gSystem->Exec(Form("chmod +x %s", mergeShFile.c_str()));
+
+      namespace fs = std::filesystem;
+      std::error_code ec;
+      fs::create_directories(jobELGDir, ec);
+      if (ec) {
+        ANA_MSG_ERROR("could not create directory " << jobELGDir << ": " << ec.message());
+        return StatusCode::FAILURE;
+      }
+      // Copy the grid scripts into the submission directory and make them
+      // executable, aborting submission if either step fails.
+      const auto copyExecutable =
+        [&] (const std::string& from, const std::string& to) -> StatusCode {
+          std::error_code ec2;
+          fs::copy_file(from, to, fs::copy_options::overwrite_existing, ec2);
+          if (ec2) {
+            ANA_MSG_ERROR("could not copy " << from << " to " << to << ": " << ec2.message());
+            return StatusCode::FAILURE;
+          }
+          fs::permissions(to, fs::perms::owner_exec | fs::perms::group_exec |
+                          fs::perms::others_exec, fs::perm_options::add, ec2);
+          if (ec2) {
+            ANA_MSG_ERROR("could not make " << to << " executable: " << ec2.message());
+            return StatusCode::FAILURE;
+          }
+          return StatusCode::SUCCESS;
+        };
+      ANA_CHECK(copyExecutable(runShOrig, runShFile));
+      ANA_CHECK(copyExecutable(mergeShOrig, mergeShFile));
 
       // create symbolic links for additionnal files/directories if any to ship to the grid 
       std::string listToShipToGrid = data.options.castString(EL::Job::optGridPrunShipAdditionalFilesOrDirs, ""); 
@@ -543,15 +653,24 @@ doManagerStep (Detail::ManagerData& data) const
         // Create symbolic links of files or directories to the submission directory
         for (const std::string & fileOrDirToShip: vect_filesOrDirToShip){
           ANA_MSG_INFO (("Creating symbolic link for: " +fileOrDirToShip).c_str());
-          RCU::Shell::exec("ln -sf " + fileOrDirToShip + " " + jobELGDir);
+          const fs::path linkPath =
+            fs::path(jobELGDir) / fs::path(fileOrDirToShip).filename();
+          // emulate `ln -sf`: replace any pre-existing link/file
+          fs::remove(linkPath, ec);
+          fs::create_symlink(fileOrDirToShip, linkPath, ec);
+          if (ec) {
+            ANA_MSG_ERROR("could not create symbolic link " << linkPath.string()
+                          << " -> " << fileOrDirToShip << ": " << ec.message());
+            return StatusCode::FAILURE;
+          }
         }
         ANA_MSG_INFO ("Finished creation of symbolic links");
       }
 
       const SH::SampleHandler& sh = data.job->sampleHandler();
 
-      for (SH::SampleHandler::iterator s = sh.begin(); s != sh.end(); ++s) {
-        SH::MetaObject& meta = *(*s)->meta();
+      for (SH::Sample* const sample : sh) {
+        SH::MetaObject& meta = *sample->meta();
         meta.fetchDefaults(data.options);
         meta.fetchDefaults(defaultOpts());
         meta.setString("nc_outputs", outputFileNames(*data.job));
@@ -560,10 +679,10 @@ doManagerStep (Detail::ManagerData& data) const
           outputSampleName = "user.%nickname%.%in:name%";
         }
         meta.setString("nc_outDS", formatOutputName(meta, outputSampleName));
-        meta.setString("nc_inDS", meta.castString("nc_grid", (*s)->name()));
+        meta.setString("nc_inDS", meta.castString("nc_grid", sample->name()));
         meta.setString("nc_writeInputToTxt", "IN:input.txt");
         meta.setString("nc_match", meta.castString("nc_grid_filter"));
-        const std::string execstr = "runjob.sh " + (*s)->name();
+        const std::string execstr = "runjob.sh " + sample->name();
         meta.setString("nc_exec", execstr);
         meta.setString("nc_framework", "EventLoopGrid");
       }
@@ -622,12 +741,12 @@ doManagerStep (Detail::ManagerData& data) const
   std::cout << std::endl;
 
   bool allDone = true;
-  for (SH::SampleHandler::iterator s = sh.begin(); s != sh.end(); ++s) {    
-    JobState::Enum state = sampleState(*s);
-    std::string details = (*s)->meta()->castString("nc_ELG_state_details", "", SH::MetaObject::CAST_NOCAST_DEFAULT);
+  for (SH::Sample* const sample : sh) {
+    JobState::Enum state = sampleState(sample);
+    std::string details = sample->meta()->castString("nc_ELG_state_details", "", SH::MetaObject::CAST_NOCAST_DEFAULT);
     if (not details.empty()) { details = '(' + details + ')'; }
 
-    std::cout << (*s)->name() << "\t"; 
+    std::cout << sample->name() << "\t";
     switch (state) {
     case JobState::INIT:
     case JobState::RUN:
@@ -663,11 +782,11 @@ void EL::PrunDriver::status(const std::string& location)
   RCU_ASSERT(sh.size());
   processAllInState(sh, JobState::RUN, 0); 
   sh.save("input");
-  for (SH::SampleHandler::iterator s = sh.begin(); s != sh.end(); ++s) {    
-    JobState::Enum state = sampleState(*s);
-    std::string details = (*s)->meta()->castString("nc_ELG_state_details", "", SH::MetaObject::CAST_NOCAST_DEFAULT);
+  for (SH::Sample* const sample : sh) {
+    JobState::Enum state = sampleState(sample);
+    std::string details = sample->meta()->castString("nc_ELG_state_details", "", SH::MetaObject::CAST_NOCAST_DEFAULT);
     if (not details.empty()) { details = '(' + details + ')'; }
-    std::cout << (*s)->name() << "\t" << JobState::name[state] 
+    std::cout << sample->name() << "\t" << JobState::name[state]
 	      << "\t" << details << std::endl;
   }
 }
