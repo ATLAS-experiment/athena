@@ -28,6 +28,11 @@
 
 #include "MuonPatternEvent/MuonPatternContainer.h"
 #include "MuonTrackEvent/MsTrackSeed.h"
+#include "MuonTrackEvent/MuonTag.h"
+
+#include "ActsEvent/ContextUtility.h"
+#include "ActsGeometryInterfaces/IExtrapolationTool.h"
+
 
 namespace MuonValR4{
   class MsTrackTester : public AthHistogramAlgorithm {
@@ -44,7 +49,7 @@ namespace MuonValR4{
           *        if either no segment is matched to the particle or no valid seed could be constructed
           *  @param gctx: The geometry context to align the segment within ATLAS
           *  @param truthMuon: Reference to the truth muon for which a seed should be constructed */
-        std::optional<MuonR4::MsTrackSeed> makeSeedFromTruth(const ActsTrk::GeometryContext& gctx,
+        std::optional<MuonR4::MsTrackSeed> makeSeedFromTruth(const Acts::GeometryContext& tgContext,
                                                              const xAOD::TruthParticle& truthMuon) const;
         /** @brief Calculate the length of the seed and the theta deflection angle
          *         The length is defined as the spread of the seed's segments in the
@@ -52,8 +57,38 @@ namespace MuonValR4{
          *         of the theta angles of the individual segments
          *  @param gctx: The geometry context to align the segment within ATLAS
          *  @param seed: The seed with the contributing segments */
-        std::pair<double, double>  calcSeedLength(const ActsTrk::GeometryContext& gctx,
+        std::pair<double, double>  calcSeedLength(const Acts::GeometryContext& tgContext,
                                                   const MuonR4::MsTrackSeed& seed) const;
+
+        
+        /** @brief Returns the matched truth particle that is dumped in the tree. This method
+         *         only works downstream the dumpTruthContent call
+         *  @param part: Reference to the particle of interest */
+        const xAOD::TruthParticle* truthTreeParticle(const xAOD::IParticle& part) const;
+
+        std::vector<const xAOD::MuonSegment*> getAssociatedSegments(const xAOD::TrackParticle& idTrack,
+                                                                    const EventContext& ctx) const;
+
+
+        struct SegmentTagVariables{
+            /** @brief  Indices of the matched segments in the tree*/
+            std::vector<std::uint8_t> recoSegs{};
+            /** @brief chi2 scores of the matching procedure */
+            std::vector<float> matchScores{};
+            /** @brief Difference in theta between ID and segment parameters */
+            std::vector<float> deltaTheta{};
+            /** @brief Difference in phi between ID and segment parameters */
+            std::vector<float> deltaPhi{};
+            /** @brief Difference in y0 between ID and segment parameters */
+            std::vector<float> deltaY0{};
+            /** @brief Difference in x0 between ID and segment parameters */
+            std::vector<float> deltaX0{};
+            /** @brief Is the extrapolation to the surface good */
+            std::vector<std::uint8_t> goodExtp{};
+        };
+      
+        SegmentTagVariables calcMuTagIMOScore(const xAOD::TrackParticle& idTrack,
+                                              const EventContext& ctx); 
 
         /** @brief Dumps the legacy containers to the TTree */
         StatusCode dumpLegacyTracks(const EventContext& ctx);
@@ -71,7 +106,6 @@ namespace MuonValR4{
         /** @brief Toggle whether to process ID tracks or not */
         Gaudi::Property<bool> m_storeID{this, "storeIdTrks", true};
 
-
         using TruthHitCol = std::unordered_set<const xAOD::MuonSimHit*>;
         /** @brief Abrivate the ReadHandleKey_t for the segment container */
         using SegmentKey_t = SG::ReadHandleKey<xAOD::MuonSegmentContainer>;
@@ -79,6 +113,8 @@ namespace MuonValR4{
         using TrackKey_t = SG::ReadHandleKey<xAOD::TrackParticleContainer>;
         /** @brief Abrivate the key type for the muon container */
         using MuonKey_t = SG::ReadHandleKey<xAOD::MuonContainer>;
+        /** @brief Abrivate the muon tag container */
+        using MuonTagKey_t = SG::ReadHandleKey<MuonR4::MuonTagContainer>;
         /** @brief Segment from the truth hits */
         SegmentKey_t m_truthSegmentKey{this, "TruthSegmentKey", "MuonTruthSegments"};
         /** @brief Primary segment container */
@@ -91,9 +127,10 @@ namespace MuonValR4{
         SG::ReadDecorHandleKeyArray<SG::AuxVectorBase> m_trkTruthLinks{this, "TruthTrackLinks", {}};
         /** @brief Temporary container write handle to push the seeds to store gate for later efficiency analysis */
         SG::ReadHandleKey<MuonR4::MsTrackSeedContainer> m_msTrkSeedKey{this, "MsTrkSeedKey", "MsTrackSeeds"};
-        /** @brief Dependency on the geometry alignment */
-        ActsTrk::GeoContextReadKey_t m_geoCtxKey{this, "AlignmentKey", "ActsAlignment", "cond handle key"};
-       /** @brief Dependency on the R4 muon container */
+
+        /** @brief Context provider for geometry, magnetic field and calibration contexts */
+        ActsTrk::ContextUtility m_ctxProvider{this};
+        /** @brief Dependency on the R4 muon container */
         MuonKey_t m_muonKey{this, "MuonKey", "MuonsR4"};
         /** @brief Hit summary tool */
         ToolHandle<MuonR4::ITrackSummaryTool> m_summaryTool{this, "SummaryTool" ,""};
@@ -101,13 +138,29 @@ namespace MuonValR4{
         ToolHandle<MuonR4::ITrackSeedingDiagnosticsTool> m_seedingTool{this, "SeedingTool", ""};
         /** @brief Selection tool to quantify the segment candidate quality */
         ToolHandle<MuonR4::ISegmentSelectionTool> m_segSelector{this, "SegmentSelectionTool" , "" };
+        /** @brief Track extrapolation tool */
+        ToolHandle<ActsTrk::IExtrapolationTool> m_extrapolationTool{this, "ExtrapolationTool" ,"" };
         /** @brief Legacy track reconstruction chain */
         TrackKey_t m_legacyTrackKey{this,"LegacyTrackKey", "MuonSpectrometerTrackParticles"};
         /** @brief  The collection of ID tracks associated with the truth particle*/
         TrackKey_t m_idTrackKey{this, "IdTrackKey", "InDetTrackParticles"};
-        /** @brief Dependency on the magnetic field */
-        SG::ReadCondHandleKey<AtlasFieldCacheCondObj> m_fieldCacheKey{this, "MagFieldKey", "fieldCondObj", "Name of the Magnetic Field conditions object key"};
 
+        MuonTagKey_t m_idTagKey{this, "IdTagKey", "MuonInDetCandidates"};
+
+        MuonTagKey_t m_segTagKey{this, "SegTagKey", "SegmentTags"};
+
+        /** @brief Extra tolerance applied on the non-bending intercept when calculating
+         *         the matching score */
+        Gaudi::Property<double> m_toleranceX0{this, "toleranceX0", 15.*Gaudi::Units::cm};
+        /** @brief Extra tolerance applied on the bending intercept when calculating
+         *         the matching score */
+        Gaudi::Property<double> m_toleranceY0{this, "toleranceY0", 5.*Gaudi::Units::cm};
+        /** @brief Extra tolerance applied on the bending direction when calculating the
+         *         matching score */
+        Gaudi::Property<double> m_toleranceTheta{this, "toleranceTheta", 0.05*Gaudi::Units::deg};
+        /** @brief Extra tolerance applied on the bending direction when calculating the
+         *         matching score */
+        Gaudi::Property<double> m_tolerancePhi{this, "tolerancePhi", 2.*Gaudi::Units::deg};
 
         /** @brief Legacy muons  */
         MuonKey_t m_legacyMuonKey{this,"LegacyMuonKey", "Muons"};

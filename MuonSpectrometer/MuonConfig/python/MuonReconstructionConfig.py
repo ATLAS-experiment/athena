@@ -166,7 +166,7 @@ def MuonReconstructionCfg(flags):
         result.merge(MuonDetailedTrackTruthMakerCfg(flags, name="MuonStandaloneDetailedTrackTruthMaker",
                                                     TrackCollectionNames=track_cols))
 
-        if not flags.Muon.scheduleActsReco:
+        if not flags.Muon.usePhaseIIGeoSetup:
             for i in range(len(track_cols)):
                 from TrkConfig.TrkTruthAlgsConfig import TrackTruthSelectorCfg, TrackParticleTruthAlgCfg
                 result.merge(TrackTruthSelectorCfg(flags, tracks=track_cols[i]))

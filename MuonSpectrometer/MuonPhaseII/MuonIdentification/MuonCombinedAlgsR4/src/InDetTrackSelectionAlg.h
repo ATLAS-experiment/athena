@@ -108,6 +108,8 @@ namespace MuonCombinedR4 {
             /** @brief Flag toggling whether the last track parameters shall be retrieved 
              *          from the calo extension linked to the ID tracks */
             Gaudi::Property<bool> m_useCaloExtension{this, "useCaloExtension", true};
+            /** @brief Use the reconstructed MS tracks to match the InDetCandidates */
+            Gaudi::Property<bool> m_matchWithMsTrk{this, "matchWithMsTracks" , true};
             /** @brief The minimum momentum cut applied on the ID tracks to be considered */
             Gaudi::Property<float> m_trackPt{this, "minPt", 2.5*Gaudi::Units::GeV};
             /** @brief Apply a maximum eta cut to stay within the MS acceptance */

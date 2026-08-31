@@ -16,7 +16,7 @@ Reco_tf.py \
     --geometrySQLite True \
     --geometrySQLiteFullPath "${GEOMODEL_DB_FILE}" \
     --conditionsTag "default:${ATLAS_CONDDB_TAG}" \
-    --preExec "all:flags.Common.MsgSuppression=False;flags.Scheduler.CheckDependencies=True;flags.Scheduler.ShowDataDeps=True;flags.Scheduler.ShowDataFlow=True;flags.Scheduler.ShowControlFlow = True;flags.Detector.EnablePLR=False;flags.Detector.EnableBCMPrime=False;flags.Acts.TrackingGeometry.UseBlueprint = True;" \
+    --preExec "all:flags.Common.MsgSuppression=False;flags.Scheduler.CheckDependencies=True;flags.Scheduler.ShowDataDeps=True;flags.Scheduler.ShowDataFlow=True;flags.Scheduler.ShowControlFlow = True;flags.Detector.EnablePLR=False;flags.Detector.EnableBCMPrime=False;flags.Acts.TrackingGeometry.UseBlueprint = True;flags.Muon.scheduleActsReco = True;" \
     --postExec "default:flags.dump(evaluate=True);from MuonTrackFindingTest.MsTrackFindingTester import MsTrackTesterCfg;cfg.merge(MsTrackTesterCfg(flags));cfg.printConfig(withDetails=True, summariseProps=True);cfg.getService('MessageSvc').setFatal=['copyAuxStoreThinned']" \
     --postInclude 'all:PyJobTransforms.UseFrontier' \
     --outputESDFile myESD.pool.root \
