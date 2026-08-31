@@ -26,6 +26,7 @@ ISF::ActsFatrasSimTool::~ActsFatrasSimTool() {}
 
 StatusCode ISF::ActsFatrasSimTool::initialize() {
   ATH_CHECK(BaseSimulatorTool::initialize());
+  ATH_CHECK(m_ctxProvider.initialize());
   ATH_MSG_INFO("ISF::ActsFatrasSimTool update with ACTS version: v"
     << Acts::VersionMajor << "." << Acts::VersionMinor << "."
     << Acts::VersionPatch << " [" << Acts::CommitHash.value_or("unknown hash") << "]");
@@ -42,8 +43,8 @@ StatusCode ISF::ActsFatrasSimTool::initialize() {
   }
 
   // retrive tracking geo tool
-  ATH_CHECK(m_trackingGeometryTool.retrieve());
-  m_trackingGeometry = m_trackingGeometryTool->trackingGeometry();
+  ATH_CHECK(m_trackingGeometrySvc.retrieve());
+  m_trackingGeometry = m_trackingGeometrySvc->trackingGeometry();
 
   // Acts Extrapolator
   ATH_CHECK(m_extrapolationTool.retrieve());
@@ -51,8 +52,7 @@ StatusCode ISF::ActsFatrasSimTool::initialize() {
   
   //retrive Magnetfield tool
   ATH_MSG_VERBOSE("Using ATLAS magnetic field service");
-  ATH_CHECK( m_fieldCacheCondObjInputKey.initialize());
-
+  
   // Random number service
   if (m_rngSvc.retrieve().isFailure()) {
     ATH_MSG_FATAL("Could not retrieve " << m_rngSvc);
@@ -142,9 +142,8 @@ StatusCode ISF::ActsFatrasSimTool::simulateVector(
   
   // get Geo and Mag map
   ATH_MSG_VERBOSE(name() << " Getting per event Geo and Mag map");
-  Acts::MagneticFieldContext mctx = getMagneticFieldContext(ctx);
-  const auto& gctx = m_trackingGeometryTool->getGeometryContext(ctx);
-  auto anygctx = gctx.context();
+  auto mctx = m_ctxProvider.getMagneticFieldContext(ctx);
+  auto anygctx = m_ctxProvider.getGeometryContext(ctx);
   // Loop over ISFParticleVector and process each separately
   ATH_MSG_VERBOSE(name() << " Processing particles in ISFParticleVector.");
   for (const auto isfp : selectedParticles) {
@@ -397,17 +396,6 @@ StatusCode ISF::ActsFatrasSimTool::simulateVector(
     std::vector<ActsFatras::Hit>().swap(hits);
   } // end of isfp loop
   return StatusCode::SUCCESS;
-}
-
-Acts::MagneticFieldContext ISF::ActsFatrasSimTool::getMagneticFieldContext(const EventContext& ctx) const {
-  SG::ReadCondHandle<AtlasFieldCacheCondObj> readHandle{m_fieldCacheCondObjInputKey, ctx};
-  if (!readHandle.isValid()) {
-    ATH_MSG_ERROR(name() + ": Failed to retrieve magnetic field condition data " + m_fieldCacheCondObjInputKey.key() + ".");
-  }
-  else ATH_MSG_DEBUG(name() << "retrieved magnetic field condition data "<< m_fieldCacheCondObjInputKey.key());
-  const AtlasFieldCacheCondObj* fieldCondObj{*readHandle};
-
-  return Acts::MagneticFieldContext(fieldCondObj);
 }
 
 bool ISF::ActsFatrasSimTool::checkStartSurface(const Acts::MagneticFieldContext& mctx,

@@ -9,6 +9,7 @@
 #include "StoreGate/ReadHandle.h"
 #include "xAODTruth/xAODTruthHelpers.h"
 #include "MuonTruthHelpers/MuonSimHitHelpers.h" 
+#include "xAODMuonViews/ContainerDecorator.h"
 
 using Link_t = ElementLink<xAOD::TruthParticleContainer>;
 
@@ -54,7 +55,7 @@ namespace MuonR4{
 
         const xAOD::MuonContainer* muons{nullptr};
         ATH_CHECK(SG::get(muons, m_muonKey, ctx));
-        SG::WriteDecorHandle<xAOD::MuonContainer, Link_t> truthLinkDecor{m_truthPartLinkKey, ctx};
+        xAOD::ContainerDecorator truthLinkDecor{m_truthPartLinkKey, ctx, Link_t{}};
         using enum xAOD::Muon::TrackParticleType;
         for (const xAOD::Muon* muon : *muons) {
             Link_t& truthLink = truthLinkDecor(*muon);
@@ -69,10 +70,17 @@ namespace MuonR4{
                     continue;
                 }
             }
-            std::unordered_map<const xAOD::TruthParticle*, unsigned> counts{};
+            std::vector<std::pair<const xAOD::TruthParticle*, unsigned>> counts{};
             for (unsigned seg =0 ; seg < muon->nMuonSegments(); ++ seg) {
                 const xAOD::TruthParticle* truth = getTruthMatchedParticle(*muon->muonSegment(seg));
-                ++counts[truth];
+                auto itr = std::ranges::find_if(counts, [truth](const auto&  known){
+                    return known.first == truth;
+                });
+                if(itr != counts.end()) {
+                    ++itr->second;
+                } else {
+                    counts.emplace_back(std::make_pair(truth , 1));
+                }
             }
             if (counts.empty()) {
                 continue;

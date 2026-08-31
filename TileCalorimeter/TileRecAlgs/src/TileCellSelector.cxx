@@ -1238,7 +1238,7 @@ StatusCode TileCellSelector::execute(const EventContext& ctx) {
               ch_type = 1;
             }
             if (emptyBad  && !m_chanBad[hash] ) {
-              m_chanBad[hash] = m_tileBadChanTool->getAdcStatus(drawerIdx,channel,adc).isBad() ||
+              m_chanBad[hash] = m_tileBadChanTool->getAdcStatus(drawerIdx,channel,adc,ctx).isBad() ||
                 (DQstatus && !DQstatus->isAdcDQgood(ros,drawer,channel,adc)) ||
                 (m_checkDCS && m_tileDCS->getDCSStatus(ros, drawer, channel) > TileDCSState::WARNING);
             }
@@ -1477,7 +1477,7 @@ StatusCode TileCellSelector::execute(const EventContext& ctx) {
             }
           } else if (m_checkDCS && m_tileDCS->getDCSStatus(ros, drawer, channel) > TileDCSState::WARNING) {
             badname = " BADDCS";
-          } else if (m_tileBadChanTool->getAdcStatus(drawerIdx,channel,adc).isBad()) {
+          } else if (m_tileBadChanTool->getAdcStatus(drawerIdx,channel,adc,ctx).isBad()) {
             badname = " BADDB";
             if (isConnected) {
               ++nChBadDB;
@@ -1854,7 +1854,7 @@ StatusCode TileCellSelector::execute(const EventContext& ctx) {
                   cellname = " EMPTY";
                 }
                 const char *badname = "";
-                if (m_tileBadChanTool->getAdcStatus(drawerIdx, channel, adc).isBad()) {
+                if (m_tileBadChanTool->getAdcStatus(drawerIdx, channel, adc, ctx).isBad()) {
                   badname = " BADDB";
                 } else if (DQstatus && !DQstatus->isAdcDQgood(ros, drawer, channel, adc)) {
                   badname = " BADDQ";

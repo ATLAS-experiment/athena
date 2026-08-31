@@ -4,16 +4,14 @@
 atlas_subdir( TriggerMatchingTool )
 
 # External dependencies:
-find_package( Boost )
 find_package( ROOT COMPONENTS Core Hist RIO )
 
 # Component(s) in the package:
 atlas_add_library( TriggerMatchingToolLib
    TriggerMatchingTool/*.h Root/*.cxx
    PUBLIC_HEADERS TriggerMatchingTool
-   PRIVATE_INCLUDE_DIRS ${Boost_INCLUDE_DIRS}
    LINK_LIBRARIES AsgTools xAODBase TrigNavStructure TrigDecisionToolLib AnaAlgorithmLib CxxUtils SGCoreLib
-   PRIVATE_LINK_LIBRARIES ${Boost_LIBRARIES} FourMomUtils xAODTrigger xAODEgamma)
+   PRIVATE_LINK_LIBRARIES  FourMomUtils xAODTrigger xAODEgamma)
 
 if( NOT XAOD_STANDALONE )
    atlas_add_component( TriggerMatchingTool

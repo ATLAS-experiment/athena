@@ -22,9 +22,7 @@
 // TODO: rewrite with 1 modifier <-> 1 class (not 1 modifier <-> 2 classes amount + modifier)
 // TODO: remove all not used cases
 
-#include <string>
-#include <vector>
-#include <memory>
+
 
 #include "AsgTools/AsgTool.h"
 #include "AsgMessaging/AsgMessaging.h"
@@ -39,19 +37,21 @@
 #include "egammaLayerRecalibTool/corr_HV_EMBPS.h"
 #include "egammaLayerRecalibTool/corr_HV_EMECPS.h"
 #include "egammaLayerRecalibTool/corr_pileupShift.h"
-
+#include <string>
+#include <vector>
+#include <memory>
 
 struct StdCalibrationInputs
 {
-  float averageInteractionsPerCrossing;  // only for pileup correction
-  unsigned int RunNumber;   // only for HV presampler correction and accordion energy correction
-  double eta;
-  double phi;               // only for HV presampler correction
-  double E0raw;
-  double E1raw;
-  double E2raw;
-  double E3raw;
-  double etaCalo;
+  float averageInteractionsPerCrossing{};  // only for pileup correction
+  unsigned int RunNumber{};   // only for HV presampler correction and accordion energy correction
+  double eta{};
+  double phi{};               // only for HV presampler correction
+  double E0raw{};
+  double E1raw{};
+  double E2raw{};
+  double E3raw{};
+  double etaCalo{};
 };
 
 
@@ -83,7 +83,7 @@ struct GetAmountPileupE0 : public GetAmountBase
   GetAmountPileupE0(corr_pileupShift* tool) : m_tool(tool) { };
   virtual float operator()(const StdCalibrationInputs & inputs) const;
 private:
-  corr_pileupShift* m_tool;
+  corr_pileupShift* m_tool{};
 };
 
 struct GetAmountPileupE1 : public GetAmountBase
@@ -91,7 +91,7 @@ struct GetAmountPileupE1 : public GetAmountBase
   GetAmountPileupE1(corr_pileupShift* tool) : m_tool(tool) { };
   virtual float operator()(const StdCalibrationInputs & inputs) const;
 private:
-  corr_pileupShift* m_tool;
+  corr_pileupShift* m_tool{};
 };
 
 struct GetAmountPileupE2 : public GetAmountBase
@@ -99,7 +99,7 @@ struct GetAmountPileupE2 : public GetAmountBase
   GetAmountPileupE2(corr_pileupShift* tool) : m_tool(tool) { };
   virtual float operator()(const StdCalibrationInputs & inputs) const;
 private:
-  corr_pileupShift* m_tool;
+  corr_pileupShift* m_tool{};
 };
 
 struct GetAmountPileupE3 : public GetAmountBase
@@ -107,7 +107,7 @@ struct GetAmountPileupE3 : public GetAmountBase
   GetAmountPileupE3(corr_pileupShift* tool) : m_tool(tool) { };
   virtual float operator()(const StdCalibrationInputs & inputs) const;
 private:
-  corr_pileupShift* m_tool;
+  corr_pileupShift* m_tool{};
 };
 
 
@@ -184,7 +184,7 @@ public:
   GetAmountFixed(float amount) : m_amount(amount) { }
   virtual float operator()(const StdCalibrationInputs & input) const;
 private:
-  float m_amount;
+  float m_amount{};
 };
 
 struct InputModifier
@@ -199,7 +199,7 @@ private:
   // here we are one based (amount == 1 <=> null scale)
   virtual void scale_inputs(StdCalibrationInputs&, float amount) const=0;
   virtual void shift_inputs(StdCalibrationInputs&, float amount) const=0;
-  NullPoint m_base;
+  NullPoint m_base{};
 };
 
 

@@ -11,6 +11,7 @@
 #include "xAODInDetMeasurement/HGTDClusterContainer.h"
 #include "xAODInDetMeasurement/HGTDClusterAuxContainer.h"
 #include "GeoModelKernel/throwExcept.h"
+#include "xAODInDetMeasurement/Utilities.h"
 
 constexpr static double one_over_twelve = 1. / 12.;
 
@@ -90,6 +91,7 @@ namespace TrackingUtilities {
     xaodCluster.globalPosition() = globalPosition;
     xaodCluster.setToTlist(ToTs);
     xaodCluster.setChargelist(charges);
+    xaodCluster.setTotalCharge( xAOD::xAODInDetMeasurement::Utilities::computeTotalCharge(xaodCluster) );
     xaodCluster.setLVL1A(indetCluster.LVL1A());
     xaodCluster.setChannelsInPhiEta(width.colRow()[0], width.colRow()[1]);
     xaodCluster.setWidthInEta(static_cast<float>(width.widthPhiRZ()[1]));

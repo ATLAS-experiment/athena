@@ -146,7 +146,7 @@ def getTrigEgammaKeys(flags: AthConfigFlags, name='', ion=False):
         '_LRTGSF'  : TrigEgammaKeys_LRTGSF(flags, ion),
         }
 
-    if name in _d.keys():
+    if name in _d:
         return _d[name]
     else:
         raise Exception('getTrigEgammaKeys() called with non valid name : ' + name + ' valid names are:' + str(_d.keys()) )

@@ -12,8 +12,6 @@
 
 #include "xAODTrigger/TrigCompositeContainer.h"
 #include "StoreGate/WriteHandle.h"
-#include "TrigDataAccessMonitoring/ROBDataMonitor.h"
-
 #include <string>
 
 
@@ -48,17 +46,12 @@ public:
   /**
    * @brief To be used to signal end of an event in a given slot, and to write an output payload to a given handle.
    */
-  virtual StatusCode endEvent(const EventContext&, SG::WriteHandle<xAOD::TrigCompositeContainer>&, SG::WriteHandle<xAOD::TrigCompositeContainer>&) = 0; 
+  virtual StatusCode endEvent(const EventContext&, SG::WriteHandle<xAOD::TrigCompositeContainer>&) = 0; 
 
   /**
    * @brief To be used by external suppliers of data to know if they should spend the CPU to collate their monitoring data
    */
   virtual bool isMonitoredEvent(const EventContext& context, const bool includeMultiSlot) const = 0;
-
-  /**
-   * @brief To be used to cache ROBs for ROS
-   */
-  virtual StatusCode monitorROS(const EventContext& context, robmonitor::ROBDataMonitorStruct payload) = 0;
 
   /**
    * @brief To be used to generate timeout report

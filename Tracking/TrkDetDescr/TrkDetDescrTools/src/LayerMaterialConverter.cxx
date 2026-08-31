@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -10,18 +10,10 @@
 #include "TrkDetDescrTools/LayerMaterialConverter.h"
 
 // constructor
-Trk::LayerMaterialConverter::LayerMaterialConverter(const std::string& t, const std::string& n, const IInterface* p)
-: AthAlgTool(t,n,p)
+Trk::LayerMaterialConverter::LayerMaterialConverter(const std::string& t, const std::string& n, const IInterface* p) : AthAlgTool(t,n,p)
 {
     declareInterface<Trk::ILayerMaterialManipulator>(this);
-
-    // Name specification from outside
-    declareProperty("LayerMaterialCreator", m_layerMaterialCreator);
 }
-
-// destructor
-Trk::LayerMaterialConverter::~LayerMaterialConverter()
-= default;
 
 
 // the AthAlgTool interface methods

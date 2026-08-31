@@ -115,7 +115,7 @@ StatusCode HGTDTrackExtensionAlg::initialize()
   ATH_CHECK(m_hgtdTrackLinkKey.initialize());
 
   // Initialize surface accessor
-  m_surfAcc = ActsTrk::detail::xAODUncalibMeasSurfAcc{m_trackingGeometryTool.get()};
+  m_surfAcc = ActsTrk::detail::xAODUncalibMeasSurfAcc{m_trackingGeometrySvc.get()};
 
   return StatusCode::SUCCESS;
 }
@@ -146,7 +146,7 @@ StatusCode HGTDTrackExtensionAlg::execute(const EventContext& ctx) const
   SG::WriteDecorHandle<xAOD::TrackParticleContainer, std::vector<float>> layerClusterTimeHandle(m_layerClusterTimeKey, ctx);
   SG::WriteDecorHandle<xAOD::TrackParticleContainer, float> extrapXHandle(m_extrapXKey, ctx);
   SG::WriteDecorHandle<xAOD::TrackParticleContainer, float> extrapYHandle(m_extrapYKey, ctx);
-  SG::WriteDecorHandle<xAOD::TrackParticleContainer, int> numHGTDHitsHandle(m_numHGTDHitsKey, ctx);
+  SG::WriteDecorHandle<xAOD::TrackParticleContainer, uint8_t> numHGTDHitsHandle(m_numHGTDHitsKey, ctx);
   SG::WriteDecorHandle<xAOD::TrackParticleContainer, ElementLink<ActsTrk::TrackContainer>> hgtdTrackLink(m_hgtdTrackLinkKey, ctx);
   
   // ================================================== //
@@ -172,7 +172,7 @@ StatusCode HGTDTrackExtensionAlg::execute(const EventContext& ctx) const
                   " source links from measurements in " << m_uncalibratedMeasurementContainerKeys[icontainer].key());
     measurements.addMeasurements(icontainer,
                                   *uncalibratedMeasurementContainers[icontainer],
-                                  *m_trackingGeometryTool->surfaceIdMap(),
+                                  *m_trackingGeometrySvc->surfaceIdMap(),
                                   &measurementIndex);
   }
 
@@ -191,10 +191,10 @@ StatusCode HGTDTrackExtensionAlg::execute(const EventContext& ctx) const
   event_stat.resize(m_stat.size());
 
   DetectorContextHolder detContext {
-    .geometry = m_trackingGeometryTool->getGeometryContext(ctx).context(),
-    .magField = m_extrapolationTool->getMagneticFieldContext(ctx),
+    .geometry = m_ctxProvider.getGeometryContext(ctx),
+    .magField = m_ctxProvider.getMagneticFieldContext(ctx),
     // CalibrationContext converter not implemented yet.
-    .calib = getCalibrationContext(ctx)
+    .calib = m_ctxProvider.getCalibrationContext(ctx)
   };
   
   Acts::VectorTrackContainer actsTrackBackend;
@@ -373,7 +373,7 @@ bool HGTDTrackExtensionAlg::findExtension(
   const DetectorContextHolder& detContext,
   const detail::TrackFindingMeasurements &measurements,
   const detail::MeasurementIndex& measurementIndex,
-  const Acts::BoundTrackParameters initialParameters,
+  const Acts::BoundTrackParameters & initialParameters,
   detail::RecoTrackContainer &tracksContainerTemp,
   detail::RecoTrackContainer &actsTracksContainer,
   EventStats &event_stat,
@@ -460,8 +460,8 @@ HGTDTrackExtensionAlg::TrackExtensionData HGTDTrackExtensionAlg::processTrackExt
   // Modern approach uses surface accessor instead of detector element map
   
   // Apply track smoothing before trying to access chi2 values
-  Acts::GeometryContext geoContext = m_trackingGeometryTool->getGeometryContext(ctx).context();
-  const Acts::TrackingGeometry* acts_tracking_geometry = m_trackingGeometryTool->trackingGeometry().get();
+  Acts::GeometryContext geoContext = m_ctxProvider.getGeometryContext(ctx);
+  const Acts::TrackingGeometry* acts_tracking_geometry = m_trackingGeometrySvc->trackingGeometry().get();
 
   
   // Count measurements, holes, and HGTD hits specifically
@@ -789,7 +789,7 @@ const xAOD::HGTDCluster* HGTDTrackExtensionAlg::getHGTDClusterFromState(
         // Modern approach uses surface accessor instead of detector element map
         
         // Get global position of the state surface
-        const Acts::GeometryContext& geoContext = m_trackingGeometryTool->getGeometryContext(ctx).context();
+        const Acts::GeometryContext& geoContext = m_ctxProvider.getGeometryContext(ctx);
         Acts::Vector3 statePos = surface.center(geoContext);
         
         // Find the closest cluster to this state position

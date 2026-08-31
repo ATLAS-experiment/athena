@@ -24,13 +24,17 @@ protected:
   void readBlob(const CondAttrListCollection* attrList, MsgStream& msg);
 
   float pedestalByHash(const IdentifierHash& hs, const unsigned gain) const {
-    // check ranges ???
-    return m_pPedestal[gain][hs];
+    if (m_nChannels==1) //MC case, same pedestal for all channels
+      return m_pPedestal[gain][0];
+    else
+      return m_pPedestal[gain][hs];
   }
 
   float pedestalRMSByHash(const IdentifierHash& hs, const unsigned gain) const {
-    // check ranges ???
-    return m_pPedestalRMS[gain][hs];
+    if (m_nChannels == 1) //MC-case, same pedestal for all channels
+      return m_pPedestalRMS[gain][0]; 
+    else 
+      return m_pPedestalRMS[gain][hs];
   }
 
 private:

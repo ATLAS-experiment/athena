@@ -167,6 +167,9 @@ class FileMetaDataCreatorTool
   /// FileMetaData has been filled with event information
   bool m_filledEvent{false};
 
+  /// Input file incident check
+  bool m_hasInputFile{false};
+
   /// creation of FileMetaData should happen on a single thread
   std::mutex m_toolMutex;
 };  // class FileMetaDataCreatorTool

@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 #
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 """
 Module to test beamspot updates using a local sqlite file. Two steps are necessary:
@@ -137,7 +137,7 @@ def setup():
 
 
 def run(flags):
-   """CA cfg function to be used from athenaHLT"""
+   """CA cfg function to be used from athenaEF"""
 
    from AthenaCommon.Constants import DEBUG
    from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
@@ -152,7 +152,7 @@ def run(flags):
    # addFolders requires at least an empty sqlite file
    Path('beampos.db').touch()
 
-   # These folders are filled in Testing/condStopStart.trans
+   # These folders are filled in setup()
    cfg.merge( addFolders(flags, '/Indet/Onl/Beampos <key>/Indet/Beampos</key>',
                          detDb='beampos.db',
                          tag='IndetBeamposOnl-HLT-UPD1-001-00',

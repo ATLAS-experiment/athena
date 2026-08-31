@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -24,7 +24,6 @@
 #include "MdtHistCoder.h"
 #include "MuonCalibIdentifier/MuonFixedId.h"
 #include "MuonDQAUtils/MuonChamberNameConverter.h"
-#include "MuonDQAUtils/MuonChambersRange.h"
 #include "MuonDQAUtils/MuonDQAHistMap.h"
 #include "MuonIdHelpers/MdtIdHelper.h"
 #include "MuonRIO_OnTrack/MdtDriftCircleOnTrack.h"
@@ -435,7 +434,7 @@ StatusCode MdtRawDataMonAlg::fillHistograms(const EventContext& ctx) const
             int nHighOccChambers = 0;
             for (const auto& iterstat : evnt_hitsperchamber_map) {
                 const auto iter_tubesperchamber = m_tubesperchamber_map.find(iterstat.first);
-                if (ATH_UNLIKELY(iter_tubesperchamber == m_tubesperchamber_map.end())) {  // indicates software error
+                if (iter_tubesperchamber == m_tubesperchamber_map.end()) [[unlikely]] {  // indicates software error
                     ATH_MSG_ERROR("Unable to find chamber " << iterstat.first);
                     continue;
                 }

@@ -16,7 +16,6 @@
 #include "StorageSvc/DbDatabase.h"
 #include "StorageSvc/DbColumn.h"
 #include "StorageSvc/DbTypeInfo.h"
-#include "StorageSvc/DbReflex.h"
 #include "CxxUtils/checker_macros.h"
 
 #include "Gaudi/PluginService.h"

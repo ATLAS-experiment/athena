@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef BOOSTEDJETSTAGGERS_JSSTAGGERBASE_H
@@ -34,6 +34,8 @@
 #include <TF1.h>
 
 #include <atomic>
+#include <memory>
+#include <map>
 
 class JSSTaggerBase :   public asg::AsgTool ,
   virtual public IJetDecorator
@@ -187,6 +189,8 @@ class JSSTaggerBase :   public asg::AsgTool ,
 
     /// Decoration name
     std::string m_decorationName;
+    Gaudi::Property<std::string> m_scoreDecorationName{this, "scoreDecorationName", "", "tagger output scoure decoration name"};
+
 
     /// Flag to calculate scale factor
     bool m_calcSF{};
@@ -201,8 +205,8 @@ class JSSTaggerBase :   public asg::AsgTool ,
 
     /// Histograms for scale factors
     std::unique_ptr<TFile> m_weightConfig;
-    std::map<std::string, std::unique_ptr<TH2D>> m_weightHistograms;
-    std::map<std::string, std::unique_ptr<TH2D>> m_efficiencyHistograms;
+    std::map<std::string, std::unique_ptr<TH2D>, std::less<>> m_weightHistograms;
+    std::map<std::string, std::unique_ptr<TH2D>, std::less<>> m_efficiencyHistograms;
 
     /// Truth label options
     bool m_truthLabelUseTRUTH3{};

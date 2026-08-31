@@ -1,8 +1,9 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrkAlignEvent/AlignVertex.h"
+#include "GaudiKernel/MsgStream.h"
 #include <iostream>
 
 namespace Trk {
@@ -34,7 +35,7 @@ namespace Trk {
     : m_nTracks(rhs.m_nTracks)
     , m_matrix(new AmgSymMatrix(3)(*(rhs.m_matrix)))
     , m_vector(new Amg::Vector3D(*(rhs.m_vector)))
-    , m_original(new xAOD::Vertex(*(rhs.m_original)))
+    , m_original(rhs.m_original) //non-owning
     , m_originalPosition(new Amg::Vector3D( *(rhs.m_originalPosition )))
     , m_position(new Amg::Vector3D(*(rhs.m_position)))
     , m_covariance(new AmgSymMatrix(3) (*(rhs.m_covariance)) )
@@ -53,7 +54,7 @@ namespace Trk {
       m_nTracks = rhs.m_nTracks;
       delete m_matrix; m_matrix = new AmgSymMatrix(3)(*(rhs.m_matrix));
       delete m_vector; m_vector = new Amg::Vector3D(*(rhs.m_vector));
-      delete m_original; m_original = new xAOD::Vertex(*(rhs.m_original));
+      m_original = rhs.m_original; //non-owning
     	delete m_originalPosition; m_originalPosition = new Amg::Vector3D( *(rhs.m_originalPosition ));
     	delete m_position; m_position = new Amg::Vector3D(*(rhs.m_position));
     	delete m_covariance; m_covariance = new AmgSymMatrix(3) (*(rhs.m_covariance));

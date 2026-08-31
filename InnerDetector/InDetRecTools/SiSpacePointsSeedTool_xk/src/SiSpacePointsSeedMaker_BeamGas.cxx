@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -738,34 +738,52 @@ void InDet::SiSpacePointsSeedMaker_BeamGas::fillLists(EventData& data) const
     if (!data.r_map[i]) continue;
     r = data.r_Sorted[i].begin();
 
-    while (r!=data.r_Sorted[i].end()) {
-      
-      // Azimuthal angle sort
-      //
-      float F = (*r)->phi(); if (F<0.) F+=pi2;
-
-      int   f = static_cast<int>(F*m_sF);
-      if (f < 0) f = m_fNmax;
-      else if (f > m_fNmax) f = 0;
-
-      data.rf_Sorted[f].push_back(*r);
-      if (!data.rf_map[f]++) data.rf_index[data.nrf++] = f;
-
-      int z; float Z = (*r)->z();
-
-      // Azimuthal angle and Z-coordinate sort
-      //
-      if (Z>0.) {
-	Z< 250.?z=5:Z< 450.?z=6:Z< 925.?z=7:Z< 1400.?z=8:Z< 2500.?z=9:z=10;
-      } else {
-	Z>-250.?z=5:Z>-450.?z=4:Z>-925.?z=3:Z>-1400.?z=2:Z>-2500.?z=1:z= 0;
+    for (InDet::SiSpacePointForSeed* spacePoint : data.r_Sorted[i]) {
+      float F = spacePoint->phi();
+      if (F < 0.F) {
+        F += pi2;
       }
-      int n = f*SizeZ+z;
+    
+      int f = static_cast<int>(F * m_sF);
+      if (f < 0) {
+        f = m_fNmax;
+      } else if (f > m_fNmax) {
+        f = 0;
+      }
+    
+      data.rf_Sorted[f].push_back(spacePoint);
+      if (!data.rf_map[f]++) {
+        data.rf_index[data.nrf++] = f;
+      }
+    
+      const float Z = spacePoint->z();
+      int z;
+    
+      if (Z > 0.F) {
+        z = Z < 250.F  ? 5
+          : Z < 450.F  ? 6
+          : Z < 925.F  ? 7
+          : Z < 1400.F ? 8
+          : Z < 2500.F ? 9
+                        : 10;
+      } else {
+        z = Z > -250.F  ? 5
+          : Z > -450.F  ? 4
+          : Z > -925.F  ? 3
+          : Z > -1400.F ? 2
+          : Z > -2500.F ? 1
+                         : 0;
+      }
+    
+      const int n = f * SizeZ + z;
       ++data.nsaz;
-      data.rfz_Sorted[n].push_back(*r);
-      if (!data.rfz_map[n]++) data.rfz_index[data.nrfz++] = n;
-      data.r_Sorted[i].erase(r++);
+      data.rfz_Sorted[n].push_back(spacePoint);
+      if (!data.rfz_map[n]++) {
+        data.rfz_index[data.nrfz++] = n;
+      }
     }
+    
+    data.r_Sorted[i].clear();
     data.r_map[i] = 0;
   }
   data.nr    = 0;

@@ -23,7 +23,7 @@ TrigPassBits_PERS* TrigPassBitsCnv::createPersistent(TrigPassBits* transObj) {
 TrigPassBits* TrigPassBitsCnv::createTransient(const Token* token) {
     MsgStream mlog(msgSvc(), "TrigPassBitsConverter" );
 
-    static const pool::Guid p1_guid("391FFE21-5D82-471E-9FFC-B77150142B8F");
+    static const Guid p1_guid("391FFE21-5D82-471E-9FFC-B77150142B8F");
 
     if( compareClassGuid(token, p1_guid) ) {
 

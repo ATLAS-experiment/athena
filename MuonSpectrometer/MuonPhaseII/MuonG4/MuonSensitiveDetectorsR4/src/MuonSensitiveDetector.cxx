@@ -9,6 +9,7 @@
 #include <GeoPrimitives/CLHEPtoEigenConverter.h>
 #include <GeoModelKernel/throwExcept.h>
 #include <xAODMuonSimHit/MuonSimHitAuxContainer.h>
+#include <StoreGate/ReadHandle.h>
 
 #include <G4Geantino.hh>
 #include <G4ChargedGeantino.hh>

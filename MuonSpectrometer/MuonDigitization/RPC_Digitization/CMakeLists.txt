@@ -15,4 +15,4 @@ atlas_add_component( RPC_Digitization
                      LINK_LIBRARIES ${CLHEP_LIBRARIES} ${ROOT_LIBRARIES} AtlasHepMCLib AthenaBaseComps PileUpToolsLib 
                                     xAODEventInfo GaudiKernel MuonSimData MuonSimEvent HitManagement AthenaKernel 
                                     GeneratorObjects MuonCondData MuonReadoutGeometry MuonDigitContainer MuonIdHelpersLib 
-                                    PathResolver GeoModelInterfaces EventInfoMgtLib RDBAccessSvcLib )
+                                    PathResolver GeoModelInterfaces EventInfoMgtLib RDBAccessSvcLib CxxUtils )

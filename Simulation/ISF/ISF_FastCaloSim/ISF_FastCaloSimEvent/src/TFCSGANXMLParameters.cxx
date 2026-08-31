@@ -12,6 +12,10 @@
 #include "XMLCoreParser/XMLCoreParser.h"
 #include "XMLCoreParser/XMLCoreNode.h"
 
+#include "CxxUtils/hexdump.h"
+#include "CxxUtils/StringUtils.h"
+#include <format>
+
 TFCSGANXMLParameters::TFCSGANXMLParameters() = default;
 
 TFCSGANXMLParameters::~TFCSGANXMLParameters() = default;
@@ -47,21 +51,13 @@ void TFCSGANXMLParameters::InitialiseFromXML(
           m_latentDim = nodeParticle->get_int_attrib ("latentDim");
 
           for (const XMLCoreNode* nodeLayer : nodeBin->get_children ("Layer")) {
-            std::vector<double> edges;
-            std::string s = nodeLayer->get_attrib ("r_edges");
-            std::istringstream ss(s);
-            std::string token;
-
-            while (std::getline(ss, token, ',')) {
-              edges.push_back(std::stod(token));
-            }
+            const std::string &rEdgesStr = nodeLayer->get_attrib("r_edges");
+            std::vector<double> edges = CxxUtils::tokenizeDouble(rEdgesStr, ",");
 
             int binsInAlpha = nodeLayer->get_int_attrib ("n_bin_alpha");
             int layer = nodeLayer->get_int_attrib ("id");
 
-            std::string name = "hist_pid_" + std::to_string(pid) +
-              "_region_" + std::to_string(regionId) +
-              "_layer_" + std::to_string(layer);
+            const std::string name = std::format("hist_pid_{}_region_{}_layer_{}", pid, regionId, layer);
             int xBins = static_cast<int>(edges.size()) - 1;
 
             if (xBins <= 0) {
@@ -85,6 +81,7 @@ void TFCSGANXMLParameters::InitialiseFromXML(
                                          TH2D(name.c_str(), name.c_str(), xBins, edges.data(),
                                               binsInAlpha, minAlpha, M_PI));
             itr.first->second.SetDirectory(nullptr);
+            ROOT::Internal::MarkTObjectAsNotOnHeap(itr.first->second);
           }
         }
       }
@@ -107,14 +104,6 @@ void TFCSGANXMLParameters::Print() const {
     int layer = element.first;
     const TH2D* h = &element.second;
 
-    // attempt to debug intermittent ci issues described in
-    // https://its.cern.ch/jira/browse/ATLASSIM-7031
-    if (h->IsZombie()) {
-      ATH_MSG_WARNING("Histogram pointer for layer "
-                      << layer << " is broken. Skipping.");
-      continue;
-    }
-
     int xBinNum = h->GetNbinsX();
     const TAxis* x = h->GetXaxis();
 
@@ -129,5 +118,21 @@ void TFCSGANXMLParameters::Print() const {
       ATH_MSG(INFO) << x->GetBinUpEdge(ix) << ",";
     }
     ATH_MSG(INFO) << END_MSG(INFO);
+  }
+}
+
+
+void TFCSGANXMLParameters::fixHists()
+{
+  for (auto &[layer, h] : m_binning) {
+    // The histograms we've read in are in an STL container.
+    // Rarely, ROOT can falsely set the kIsOnHeap flag on one of them.
+    // In that case, it will try to delete the histogram when the
+    // file is closed, which will lead to a crash later on.
+    // Make sure kIsOnHeap is clear, and also make sure that nobody else
+    // thinks that they own one of these histograms.
+    // See ATLASSIM-7031.
+    h.SetDirectory (nullptr);
+    h.ResetBit (TObject::kIsOnHeap);
   }
 }

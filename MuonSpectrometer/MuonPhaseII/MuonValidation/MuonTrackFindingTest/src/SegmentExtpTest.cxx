@@ -57,11 +57,11 @@ namespace MuonValR4{
 
         auto extrapolate = [&](const Acts::BoundTrackParameters& start,
                                const MuonR4::SpacePoint& sp) {
-            const Amg::Transform3D& trf = sp.msSector()->localToGlobalTransform(*gctx);
+            const Amg::Transform3D& trf = sp.msSector()->localToGlobalTransform(tgContext);
             const Acts::Surface& target = xAOD::muonSurface(sp.primaryMeasurement());
             const Amg::Vector3D n = target.normal(tgContext, 
-                                                  Amg::Vector3D::Zero(), 
-                                                  Amg::Vector3D::Zero());
+                                                  Amg::Vector3D::Zero(),
+                                                  {1e-12, 0, 0});
                                                       
             auto lambda = sp.isStraw() ? Amg::intersect<3>(trf * sp.localPosition(),
                                                            trf.linear() * sp.sensorDirection(),
@@ -104,14 +104,14 @@ namespace MuonValR4{
             const MuonGMR4::SpectrometerSector* sector = m_detMgr->getSectorEnvelope(segment->chamberIndex(), 
                                                                                      segment->sector(), 
                                                                                      segment->etaIndex());
-            auto startPars = boundSegmentPars(*gctx, *detSeg);
+            auto startPars = boundSegmentPars(tgContext, *detSeg);
 
             Acts::ObjVisualization3D visualHelper{};
             if (m_drawEvent) {
                 /// Draw the reference segment as a red line
-                drawSegmentLine(*gctx, *segment, visualHelper,
+                drawSegmentLine(tgContext, *segment, visualHelper,
                                 Acts::ViewConfig{.color = {220, 0, 0}});
-                drawSegmentMeasurements(*gctx, *segment, visualHelper, Acts::s_viewSurface);
+                drawSegmentMeasurements(tgContext, *segment, visualHelper, Acts::s_viewSurface);
             }
             
             if (msgLvl(MSG::VERBOSE)) {
@@ -184,7 +184,7 @@ namespace MuonValR4{
                 }
                 if (m_drawEvent) {
                     /// Draw the true intersection from the extrapolator as blue lines
-                    drawBoundParameters(*gctx, *extpPars, visualHelper,
+                    drawBoundParameters(tgContext, *extpPars, visualHelper,
                                         Acts::ViewConfig{.color = {0, 0, 220}}, 6._cm); 
                 }
                 chiSqObj.reset();

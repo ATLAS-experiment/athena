@@ -50,11 +50,18 @@ if args.localgeo:
   flags.ITk.Geometry.AllLocal = True
 
 flags.Acts.TrackingGeometry.UseBlueprint = True
+flags.Acts.TrackingGeometry.KeepGoingOnMaterialMergeFailure = True
 
-from AthenaConfiguration.DetectorConfigFlags import setupDetectorsFromList
-detectors = args.detectors if 'detectors' in args and args.detectors else ['ITkPixel', 'ITkStrip', 'HGTD']
-detectors.append('Bpipe')  # always run with beam pipe
-setupDetectorsFromList(flags, detectors, toggle_geometry=True)
+if args.detectors:
+    from AthenaConfiguration.DetectorConfigFlags import setupDetectorsFromList
+    detectors = args.detectors
+    detectors.append('Bpipe')  # always run with beam pipe
+    setupDetectorsFromList(flags, detectors, toggle_geometry=True)
+else:
+    flags.Detector.GeometryBpipe = True
+    flags.Detector.GeometryHGTD = True
+    flags.Detector.GeometryITkPixel = True
+    flags.Detector.GeometryITkStrip = False
 
 flags.IOVDb.GlobalTag = "OFLCOND-SIM-00-00-00"
 flags.GeoModel.Align.Dynamic = False
@@ -87,9 +94,6 @@ flags.dump()
 from ActsConfig.ActsGeometryConfig import ActsWriteTrackingGeometryCfg
 cfg.merge(ActsWriteTrackingGeometryCfg(flags,
                                        name="ActsWriteTrackingGeometry"))
-
-from AthenaConfiguration.FPEAndCoreDumpConfig import FPEAndCoreDumpCfg
-cfg.merge(FPEAndCoreDumpCfg(flags))
 
 cfg.printConfig(withDetails = True, summariseProps = True)
 

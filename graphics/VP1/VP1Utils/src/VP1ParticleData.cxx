@@ -15,18 +15,15 @@
 #include "VP1Utils/VP1ParticleData.h"
 #include "VP1Base/VP1Msg.h"
 
-#include "GaudiKernel/Bootstrap.h"
-#include "GaudiKernel/ISvcLocator.h"
-#include "GaudiKernel/IPartPropSvc.h"
+#include "GeneratorModules/GenData.h"
+#include "TruthUtils/HepMCHelpers.h"
 
-#include "HepPDT/ParticleDataTable.hh"
-#include "HepPDT/ParticleData.hh"
+#include <cstdlib>
 
 //____________________________________________________________________
 class VP1ParticleData::Imp {
 public:
-  static bool m_badInit;
-  static const HepPDT::ParticleDataTable * m_particleDataTable;
+  static GenData m_genData;
   static std::map<int,double> m_particleAbsPDGCodeToMass;
   static std::map<int,double> m_particlePDGCodeToCharge;
   static std::map<int,QString> m_particleAbsPDGCodeToName;
@@ -34,8 +31,7 @@ public:
   static const QString m_badName;
 };
 
-bool VP1ParticleData::Imp::m_badInit = false;
-const HepPDT::ParticleDataTable * VP1ParticleData::Imp::m_particleDataTable = 0;
+GenData VP1ParticleData::Imp::m_genData;
 std::map<int,double> VP1ParticleData::Imp::m_particleAbsPDGCodeToMass;
 std::map<int,double> VP1ParticleData::Imp::m_particlePDGCodeToCharge;
 std::map<int,QString> VP1ParticleData::Imp::m_particleAbsPDGCodeToName;
@@ -43,58 +39,18 @@ const double VP1ParticleData::Imp::m_badValue = -1.0e99;
 const QString VP1ParticleData::Imp::m_badName = "_Bad_Name_";
 
 //____________________________________________________________________
-const HepPDT::ParticleData * VP1ParticleData::particleData( const int& pdgcode )
-{
-  if (Imp::m_badInit)
-    return 0;
-  if (!Imp::m_particleDataTable) {
-    //init
-    ISvcLocator* svcLocator = Gaudi::svcLocator();
-    if (!svcLocator) {
-      VP1Msg::message("VP1ParticleData ERROR: Could not get svcLocator.");
-      Imp::m_badInit = true;
-      return 0;
-    }
-
-    SmartIF<IPartPropSvc> partPropSvc{svcLocator->service( "PartPropSvc" )};
-    if(!partPropSvc) {
-      VP1Msg::message("VP1ParticleData ERROR: Could not get particle property service.");
-      Imp::m_badInit = true;
-      return 0;
-    }
-    const HepPDT::ParticleDataTable* tab = partPropSvc->PDT();
-    Imp::m_particleDataTable = tab;
-    if (!tab) {
-      VP1Msg::message("VP1ParticleData ERROR: Could not get particle data table from particle property service.");
-      Imp::m_badInit = true;
-      return 0;
-    }
-  }
-
-  const HepPDT::ParticleData* particle =
-    Imp::m_particleDataTable->particle(HepPDT::ParticleID(pdgcode));
-  if (!particle&&VP1Msg::verbose())
-    VP1Msg::messageVerbose("VP1ParticleData WARNING: Could not get particle data table for pdgcode="+QString::number(pdgcode));
-
-  return particle;
-}
-
-//____________________________________________________________________
 double VP1ParticleData::particleMass( const int& pdgcode, bool& ok )
 {
-  std::map<int,double>::const_iterator it = Imp::m_particleAbsPDGCodeToMass.find(abs(pdgcode));
+  const int absPdgCode = std::abs(pdgcode);
+  std::map<int,double>::const_iterator it = Imp::m_particleAbsPDGCodeToMass.find(absPdgCode);
   if (it!=Imp::m_particleAbsPDGCodeToMass.end()) {
     ok = it->second != Imp::m_badValue;
     return ok ? it->second : 0;
   }
-  const HepPDT::ParticleData * data = particleData( abs(pdgcode) );
-  double m;
-  if (data)
-    m = data->mass().value();
-  else
-    m = Imp::m_badValue;
+  const auto mOpt = Imp::m_genData.particleMass(absPdgCode);
+  const double m = mOpt.value_or(Imp::m_badValue);
 
-  Imp::m_particleAbsPDGCodeToMass[abs(pdgcode)] = m;
+  Imp::m_particleAbsPDGCodeToMass[absPdgCode] = m;
   ok = m != Imp::m_badValue;
   return m;
 }
@@ -111,12 +67,10 @@ double VP1ParticleData::particleCharge( const int& pdgcode, bool& ok )
     ok = it->second != Imp::m_badValue;
     return ok ? it->second : 0;
   }
-  const HepPDT::ParticleData * data = particleData( abs(pdgcode) );
-  double c;
-  if (data)
-    c = pdgcode >= 0 ? data->charge() : - data->charge();
-  else
-    c = Imp::m_badValue;
+  const double c = MC::isValid(pdgcode) ? MC::charge(pdgcode) : Imp::m_badValue;
+  if (c == Imp::m_badValue && VP1Msg::verbose()) {
+    VP1Msg::messageVerbose("VP1ParticleData WARNING: Invalid PDG code for charge lookup pdgcode="+QString::number(pdgcode));
+  }
 
   Imp::m_particlePDGCodeToCharge[pdgcode] = c;
   ok = c != Imp::m_badValue;
@@ -162,9 +116,9 @@ QString VP1ParticleData::particleName( const int& pdgcode, bool& ok )
   }
 
   if (name.isEmpty()) {
-    const HepPDT::ParticleData * data = particleData( abs(pdgcode) );
-    if (data)
-      name = (pdgcode<0?"anti-":"")+QString(data->name().c_str());//fixme: anything [[:alpha:]](+|-) we
+    const auto nameOpt = Imp::m_genData.particleName(std::abs(pdgcode));
+    if (nameOpt)
+      name = (pdgcode<0?"anti-":"")+QString::fromStdString(*nameOpt);//fixme: anything [[:alpha:]](+|-) we
                                                                   //    change + and -
     else
       name = Imp::m_badName;

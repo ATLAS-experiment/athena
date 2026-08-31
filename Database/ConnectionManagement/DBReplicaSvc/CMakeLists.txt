@@ -3,6 +3,9 @@
 # Declare the package name:
 atlas_subdir( DBReplicaSvc )
 
+# External dependencies:
+find_package( CORAL COMPONENTS RelationalAccess CoralKernel )
+
 atlas_add_library( DBReplicaSvcLib
                    INTERFACE
                    PUBLIC_HEADERS DBReplicaSvc
@@ -12,4 +15,5 @@ atlas_add_library( DBReplicaSvcLib
 atlas_add_component( DBReplicaSvc
                      src/DBReplicaSvc.cxx
                      src/components/*.cxx
-                     LINK_LIBRARIES AthenaBaseComps DBReplicaSvcLib PathResolver )
+                     INCLUDE_DIRS ${CORAL_INCLUDE_DIRS}
+                     LINK_LIBRARIES ${CORAL_LIBRARIES} AthenaBaseComps DBReplicaSvcLib PathResolver )

@@ -14,8 +14,8 @@
 #include <cmath>
 #include <regex>
 #include <sstream>
+#include <stdexcept>
 #include <RootCoreUtils/Assert.h>
-#include <RootCoreUtils/ThrowMsg.h>
 
 bool operator < (const CP::SystematicVariation& a, const CP::SystematicVariation& b)
 {
@@ -62,10 +62,10 @@ namespace CP
       std::istringstream str (value);
       unsigned result = 0;
       if (!(str >> result))
-	RCU_THROW_MSG ("failed to parse \"" + value + "\" into an unsigned");
+        throw std::runtime_error ("failed to parse \"" + value + "\" into an unsigned");
       char c;
       if (str >> c)
-	RCU_THROW_MSG ("failed to parse \"" + value + "\" into an unsigned");
+        throw std::runtime_error ("failed to parse \"" + value + "\" into an unsigned");
       return result;
     }
 
@@ -118,10 +118,10 @@ namespace CP
 	{
 	  std::istringstream str (value.substr (0, split) + "." + value.substr (split + separator.size()));
 	  if (!(str >> result))
-	    RCU_THROW_MSG ("failed to parse into a float: " + value);
+	    throw std::runtime_error ("failed to parse into a float: " + value);
 	  char c;
 	  if (str >> c)
-	    RCU_THROW_MSG ("failed to parse into a float: " + value);
+	    throw std::runtime_error ("failed to parse into a float: " + value);
 	  return true;
 	}
       }
@@ -148,8 +148,7 @@ namespace CP
 	result *= -1;
 	return result;
       }
-      RCU_THROW_MSG ("failed to parse into a float: " + value);
-      return 0; //compiler dummy
+      throw std::runtime_error ("failed to parse into a float: " + value);
     }
   }
 
@@ -157,9 +156,7 @@ namespace CP
 
   void SystematicVariation ::
   testInvariant () const
-  {
-    //RCU_INVARIANT (this != 0);
-  }
+  {}
 
 
 
@@ -380,10 +377,10 @@ namespace CP
     const std::size_t prefixSize = 4;
     const auto split1 = variation.find ("toy_");
     if (split1 != 0)
-      RCU_THROW_MSG ("not a toy variation: " + name());
+      throw std::runtime_error ("not a toy variation: " + name());
     const auto split2 = variation.find ("_", split1 + prefixSize);
     if (split2 == std::string::npos)
-      RCU_THROW_MSG ("not a toy variation: " + name());
+      throw std::runtime_error ("not a toy variation: " + name());
 
     const auto sub1 = variation.substr (prefixSize, split2 - prefixSize);
     const auto sub2 = variation.substr (split2 + 1);

@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 #
 
 '''
@@ -16,8 +16,8 @@ from TrigValTools.TrigValSteering.Input import is_input_defined, get_input
 class ExecStep(Step):
     '''
     Step executing the main job of a Trigger ART test. This can be either
-    athena or athenaHLT or a transform. There can be several ExecSteps in
-    one Test
+    athena or athenaEF or a transform. There can be several ExecSteps in
+    one Test.
     '''
 
     def __init__(self, name=None):
@@ -78,7 +78,7 @@ class ExecStep(Step):
             self.misconfig_abort('Cannot configure a step without specified type or executable')
 
         # Configure executable from type
-        known_types = ['athena', 'athenaHLT', 'athenaEF', 'Reco_tf', 'Trig_reco_tf', 'Derivation_tf']
+        known_types = ['athena', 'athenaEF', 'Reco_tf', 'Trig_reco_tf', 'Derivation_tf']
         if self.type in known_types:
             if self.executable is not None:
                 self.log.warning('type=%s was specified, so executable=%s '
@@ -192,7 +192,7 @@ class ExecStep(Step):
             self.log.debug('Disabling perfmon because forks=%d > 1', self.forks)
             self.perfmon = False
         # Disable perfmon for transforms (Reco_tf enables it itself, Trig_reco_tf would need special handling
-        # depending on whether it runs athena or athenaHLT)
+        # depending on whether it runs athena or athenaEF)
         if self.type.endswith('_tf') and self.perfmon:
             self.log.debug('Disabling perfmon for the transform step type %s', self.type)
             self.perfmon = False
@@ -202,7 +202,7 @@ class ExecStep(Step):
             if self.imf:
                 athenaopts += ' --imf'
             if self.perfmon:
-                if self.type == 'athenaHLT' or self.type == 'athenaEF':
+                if self.type == 'athenaEF':
                     athenaopts += ' --perfmon'
                 elif self.type == 'athena':
                     athenaopts += ' --perfmon=fastmonmt'
@@ -219,7 +219,7 @@ class ExecStep(Step):
         # Run config-only if requested
         if self.config_only :
 
-            if self.type == 'athenaHLT' or self.type == 'athenaEF' or (self.type == "other" and self.executable == "athenaHLT.py") or (self.type == "other" and self.executable == "athenaEF.py") :
+            if self.type == 'athenaEF' or (self.type == "other" and self.executable == "athenaEF.py") :
                 athenaopts += ' --dump-config-exit'
 
             elif self.type == 'athena' or self.type == 'Reco_tf' or self.type == 'Derivation_tf' or (self.type == "other" and self.executable == "athena.py") :
@@ -231,13 +231,6 @@ class ExecStep(Step):
                 self.misconfig_abort('Cannot determine what config-only option is needed. Consider adding the appropriate flag to "args" instead.')
 
         # Default threads/concurrent_events/forks
-        if test.package_name == 'TrigP1Test' and self.type == 'athenaHLT':
-            if self.threads is None:
-                self.threads = 1
-            if self.concurrent_events is None:
-                self.concurrent_events = 1
-            if self.forks is None:
-                self.forks = 1
         if test.package_name == 'TrigP1Test' and self.type == 'athenaEF':
             if self.threads is None:
                 self.threads = 1
@@ -280,14 +273,14 @@ class ExecStep(Step):
         # Append max/skip events
         if self.type == 'athena':
             self.args += ' --evtMax={}'.format(self.max_events)
-        elif self.type == 'athenaHLT' or self.type == 'athenaEF':
+        elif self.type == 'athenaEF':
             self.args += ' --number-of-events={}'.format(self.max_events)
         elif self.type.endswith('_tf'):
             self.args += ' --maxEvents={}'.format(self.max_events)
         if self.skip_events is not None:
             if self.type == 'athena':
                 self.args += ' --skipEvents={}'.format(self.skip_events)
-            elif self.type == 'athenaHLT' or self.type == 'athenaEF':
+            elif self.type == 'athenaEF':
                 self.args += ' --skip-events={}'.format(self.skip_events)
             elif self.type.endswith('_tf'):
                 self.args += ' --skipEvents={}'.format(self.skip_events)
@@ -295,7 +288,7 @@ class ExecStep(Step):
         # Append input
         if len(self.input) > 0:
             if self.input_object is not None:
-                if self.type == 'athenaHLT' or self.type == 'athenaEF':
+                if self.type == 'athenaEF':
                     input_str = ' --file='.join(self.input_object.paths)
                 else:
                     input_str = ','.join(self.input_object.paths)
@@ -303,7 +296,7 @@ class ExecStep(Step):
                 input_str = self.input
             if self.type == 'athena':
                 self.args += ' --filesInput={}'.format(input_str)
-            elif self.type == 'athenaHLT' or self.type == 'athenaEF':
+            elif self.type == 'athenaEF':
                 self.args += ''.join([f" --file={inputFile}" for inputFile in input_str.split(',')])
             elif self.type.endswith('_tf'):
                 if self.input_object is None:

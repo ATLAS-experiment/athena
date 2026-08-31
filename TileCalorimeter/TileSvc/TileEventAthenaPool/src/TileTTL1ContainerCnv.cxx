@@ -38,8 +38,8 @@ TileTTL1Container* TileTTL1ContainerCnv::createTransient(const Token* token) {
 
   TileTTL1Container *transObj = 0;
 
-  static const pool::Guid tr_guid("F06C00C1-896A-4773-9F9C-21893C1E0CE7");
-  static const pool::Guid p1_guid("213FA88B-52AE-4229-8886-62D7D54FA7A3");
+  static const Guid tr_guid("F06C00C1-896A-4773-9F9C-21893C1E0CE7");
+  static const Guid p1_guid("213FA88B-52AE-4229-8886-62D7D54FA7A3");
 
   if ( compareClassGuid(token, tr_guid) ) {
 

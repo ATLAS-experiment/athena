@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonGeoModel/Rpc.h"
@@ -71,7 +71,7 @@ namespace MuonGM {
         MsgStream log(Athena::getMessageSvc(), "MuonGM::Rpc::build");
 
         std::string geometry_version = mysql.getGeometryVersion();
-        const RPC *r = dynamic_cast<const RPC*>(mysql.GetTechnology(name));
+        const RPC *r = static_cast<const RPC*>(mysql.GetTechnology(name));
 
         // Retrieve geometrical information, these are for middle and outer alyers ("standard" RPCs)
         double thickness = r->maxThickness;

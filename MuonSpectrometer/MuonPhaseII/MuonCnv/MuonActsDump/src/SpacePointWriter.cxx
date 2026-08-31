@@ -33,7 +33,7 @@ namespace {
     StatusCode SpacePointWriter::initialize(){
        ATH_CHECK(m_tree.init(this));
        ATH_CHECK(m_spacePointKeys.initialize());
-       ATH_CHECK(m_trackingGeometryTool.retrieve());
+       ATH_CHECK(m_ctxProvider.initialize());
        ATH_MSG_DEBUG("Successfully initialized");
        return StatusCode::SUCCESS;
     }
@@ -41,7 +41,7 @@ namespace {
       unsigned bucketCounter{0u};
       m_eventId = ctx.eventID().event_number();
 
-      const Acts::GeometryContext tgContext = m_trackingGeometryTool->getGeometryContext(ctx).context();
+      const Acts::GeometryContext tgContext = m_ctxProvider.getGeometryContext(ctx);
 
       const MuonR4::SpacePointPerLayerSorter layerSorter{};
 
@@ -67,7 +67,7 @@ namespace {
                m_driftR += toFloat(spacePoint->driftRadius());
                m_time += toFloat(spacePoint->time());
 
-               m_toMeasFrame += spacePoint->msSector()->surface().localToGlobalTransform(tgContext).inverse()*
+               m_toMeasFrame += spacePoint->msSector()->globalToLocalTransform(tgContext)*
                                 measSurface.localToGlobalTransform(tgContext);
                using namespace MuonR4::SegmentFit;
                m_covLoc0 += toFloat(spacePoint->covariance()[Acts::toUnderlying(AxisDefs::etaCov)]);

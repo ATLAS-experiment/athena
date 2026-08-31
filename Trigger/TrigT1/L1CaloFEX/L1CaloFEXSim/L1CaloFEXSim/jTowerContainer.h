@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // Stolen shamelessly from CaloCellContainer.h and modified as required
@@ -19,13 +19,11 @@
 #include "AthContainers/DataVector.h"
 #include "AthenaKernel/CLASS_DEF.h"
 #include "L1CaloFEXSim/jTower.h"
+#include "GaudiKernel/MsgStream.h"
 
-#include "Identifier/IdentifierHash.h"
-#include "CxxUtils/PackedArray.h"
-#include "CxxUtils/CachedValue.h"
-#include "AthLinks/tools/findInContainer.h"
-
+#include <vector>
 #include <unordered_map>
+
 
 namespace LVL1 {
 

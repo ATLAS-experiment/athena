@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -6,6 +6,27 @@ from AthenaMonitoringKernel.GenericMonitoringTool import GenericMonitoringTool
 
 from AthenaCommon.Logging import logging
 log = logging.getLogger('TrigServicesConfig')
+
+
+def setDefaultOnlineFlags(flags):
+    """Populate flags with the default settings for online running"""
+
+    from AthenaConfiguration.Enums import Format
+    flags.Common.isOnline = True
+    flags.Input.Files = []
+    flags.Input.isMC = False
+    flags.Input.Format = Format.BS
+    flags.Trigger.doHLT = True  # This distinguishes the HLT setup from online reco (GM, EventDisplay)
+    flags.Trigger.Online.isPartition = True  # athenaHLT and partition at P1
+    flags.Trigger.EDMVersion = 3
+    flags.Trigger.writeBS = True
+    flags.Scheduler.CheckDependencies = True
+    flags.Scheduler.ShowDataDeps = True
+    flags.Scheduler.ShowControlFlow = True
+    flags.Scheduler.ShowDataFlow = True
+    flags.Scheduler.EnableVerboseViews = True
+    flags.Scheduler.AutoLoadUnmetDependencies = False
+    flags.Input.FailOnUnknownCollections = True
 
 
 def getMessageSvc(flags, msgSvcType="TrigMessageSvc"):
@@ -71,35 +92,6 @@ def getTrigCOOLUpdateHelper(flags, name='TrigCOOLUpdateHelper'):
 
    acc.setPrivateTools( cool_helper )
    return acc
-
-
-def getHltROBDataProviderSvc(flags, name='ROBDataProviderSvc'):
-   '''online ROB data provider service'''
-   svc = CompFactory.HltROBDataProviderSvc(name,
-      doCostMonitoring = (flags.Trigger.CostMonitoring.doCostMonitoring and
-                          flags.Trigger.CostMonitoring.monitorROBs) )
-
-   svc.MonTool = GenericMonitoringTool(flags, 'MonTool', HistPath='HLTFramework/'+name)
-   svc.MonTool.defineHistogram('TIME_ROBReserveData', path='EXPERT', type='TH1F',
-                               title='Time to reserve ROBs for later retrieval;time [mu s]',
-                               xbins=100, xmin=0, xmax=1000)
-   svc.MonTool.defineHistogram('NUMBER_ROBReserveData', path='EXPERT', type='TH1F',
-                               title='Number of reserved ROBs for later retrieval;number',
-                               xbins=100, xmin=0, xmax=500)
-   svc.MonTool.defineHistogram('TIME_ROBRequest', path='EXPERT', type='TH1F',
-                               title='Time for ROB retrievals;time [mu s]',
-                               xbins=400, xmin=0, xmax=200000)
-   svc.MonTool.defineHistogram('NUMBER_ROBRequest', path='EXPERT', type='TH1F',
-                               title='Number of retrieved ROBs;number',
-                               xbins=100, xmin=0, xmax=1000)
-   svc.MonTool.defineHistogram('TIME_CollectAllROBs', path='EXPERT', type='TH1F',
-                               title='Time for retrieving complete event data;time [mu s]',
-                               xbins=400, xmin=0, xmax=200000)
-   svc.MonTool.defineHistogram('NUMBER_CollectAllROBs', path='EXPERT', type='TH1F',
-                               title='Number of received ROBs for collect call;number',
-                               xbins=100, xmin=0, xmax=2500)
-
-   return svc
 
 
 def getHltEventLoopMgr(flags, name='HltEventLoopMgr'):
@@ -174,11 +166,7 @@ def TrigServicesCfg(flags):
    acc = ComponentAccumulator()
 
    acc.addService( getMessageSvc(flags) )
-   
-   if flags.Trigger.Online.useEFByteStreamSvc:
-      acc.addService(CompFactory.ROBDataProviderSvc('ROBDataProviderSvc'))
-   else:
-      acc.addService(getHltROBDataProviderSvc(flags))
+   acc.addService(CompFactory.ROBDataProviderSvc('ROBDataProviderSvc'))
 
    cool_helper = acc.popToolsAndMerge( getTrigCOOLUpdateHelper(flags) )
 
@@ -211,11 +199,84 @@ def TrigServicesCfg(flags):
    return acc
 
 
+def commonServicesCfg(flags):
+    from AthenaCommon.Constants import INFO
+    from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
+    from AthenaConfiguration.ComponentFactory import CompFactory
+
+    # Basic services
+    cfg = ComponentAccumulator()
+    cfg.addService(CompFactory.ClassIDSvc(CLIDDBFiles = ['clid.db','Gaudi_clid.db']))
+
+    cfg.addService(CompFactory.AlgContextSvc(BypassIncidents=True))
+    cfg.addAuditor(CompFactory.AlgContextAuditor())
+
+    cfg.addService(CompFactory.StoreGateSvc())
+    cfg.addService(CompFactory.StoreGateSvc("DetectorStore"))
+    cfg.addService(CompFactory.StoreGateSvc("HistoryStore"))
+    cfg.addService(CompFactory.StoreGateSvc("ConditionStore"))
+
+    cfg.addService( CompFactory.SG.HiveMgrSvc(
+        "EventDataSvc",
+        NSlots = flags.Concurrency.NumConcurrentEvents) )
+
+    cfg.addService( CompFactory.AlgResourcePool(
+        OutputLevel = INFO,
+        TopAlg=["AthSequencer/AthMasterSeq"]) )
+
+    from AthenaConfiguration.MainServicesConfig import AvalancheSchedulerSvcCfg
+    cfg.merge( AvalancheSchedulerSvcCfg(flags, maxParallelismExtra=1) )
+
+    # SGCommitAuditor to sweep new DataObjects at end of Alg execute
+    cfg.addAuditor( CompFactory.SGCommitAuditor() )
+
+    # CoreDumpSvc
+    cfg.addService( CompFactory.CoreDumpSvc(
+        CoreDumpStream = "stdout",
+        CallOldHandler = False,  # avoid calling e.g. ROOT signal handler
+        FastStackTrace = True,   # first produce a fast stacktrace
+        StackTrace = True,       # then produce full stacktrace using gdb
+        DumpCoreFile = True,     # also produce core file (if allowed by ulimit -c)
+        FatalHandler = 0,        # no extra fatal handler
+        KillOnSigInt = True,    # athenaEF runs the event loop in-process (ATR-32990)
+        TimeOut = 120e9),        # timeout for stack trace generation changed to 120s (ATR-17112,ATR-25404)
+                    create = True )    # always create the service
+
+    # Miscellaneous environment settings.
+    # This includes fixing the cache sizes that Eigen assumes, so that
+    # operations on large matrices will give identical results across
+    # hardware with differing cache sizes.
+    cfg.addService(CompFactory.AthEnvironmentSvc(), create=True)
+
+    # IOVSvc
+    cfg.addService( CompFactory.IOVSvc(
+        updateInterval = "RUN",
+        preLoadData = True,
+        preLoadExtensibleFolders = False,  # ATR-19392
+        forceResetAtBeginRun = False) )
+
+    # PerfMon
+    if flags.PerfMon.doFastMonMT or flags.PerfMon.doFullMonMT:
+        from PerfMonComps.PerfMonCompsConfig import PerfMonMTSvcCfg
+        cfg.merge( PerfMonMTSvcCfg(flags) )
+
+    from TrigServices.TrigServicesConfig import TrigServicesCfg
+    cfg.merge( TrigServicesCfg(flags) )
+
+    # ApplicationMgr properties
+    cfg.setAppProperty('AuditAlgorithms', True)
+    cfg.setAppProperty('InitializationLoopCheck', False)
+
+    return cfg
+
+
 if __name__=="__main__":
-   from TrigPSC.PscDefaultFlags import defaultOnlineFlags
-   flags = defaultOnlineFlags()
+   from AthenaConfiguration.AllConfigFlags import initConfigFlags
+
+   flags = initConfigFlags()
+   setDefaultOnlineFlags(flags)
    flags.lock()
 
    cfg = ComponentAccumulator()
-   cfg.merge( TrigServicesCfg(flags) )
+   cfg.merge( commonServicesCfg(flags) )
    cfg.wasMerged()

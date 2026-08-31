@@ -116,6 +116,8 @@ protected:
   
 private:
 
+  CxxUtils::CachedValue<bool> m_bIsTESCompatibilityCheckAvailable; 
+
   // Execute at each event
   virtual StatusCode beginEvent();
 

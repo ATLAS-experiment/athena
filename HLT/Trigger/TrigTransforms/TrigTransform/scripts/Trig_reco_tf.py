@@ -43,20 +43,11 @@ def getTransform():
     executorSet = set()
 
     # BSRDOtoRAW is the HLT step of the trigger transform
-    # literalRunargs used for when running with athena
-    executorSet.add(trigRecoExecutor(name = 'BSRDOtoRAW', skeletonFile = 'TriggerJobOpts/runHLT_standalone.py',
+    executorSet.add(trigRecoExecutor(name = 'BSRDOtoRAW',
                                      skeletonCA = 'TriggerJobOpts.runHLT',
                                      substep = 'b2r', tryDropAndReload = False,
                                      inData = ['BS_RDO', 'RDO'], outData = ['BS', 'DRAW_TRIGCOST', 'HIST_HLTMON', 'HIST_DEBUGSTREAMMON'],
-                                     perfMonFile = 'ntuple_BSRDOtoRAW.pmon.gz',
-                                     literalRunargs = ['writeBS = runArgs.writeBS',
-                                                       'from AthenaCommon.AthenaCommonFlags import jobproperties as jps',
-                                                       'jps.AthenaCommonFlags.FilesInput.set_Value_and_Lock(runArgs.inputBS_RDOFile)',
-                                                       'jps.AthenaCommonFlags.EvtMax.set_Value_and_Lock(runArgs.maxEvents)',
-                                                       'if hasattr(runArgs,\'skipEvents\'):',
-                                                       '   jps.AthenaCommonFlags.SkipEvents.set_Value_and_Lock(runArgs.skipEvents)',
-                                                       'if hasattr(runArgs,\'outputBSFile\'):',
-                                                       '   jps.AthenaCommonFlags.BSRDOOutput.set_Value_and_Lock( runArgs.outputBSFile )']))
+                                     perfMonFile = 'ntuple_BSRDOtoRAW.pmon.gz'))
 
     # RAWtoCOST is the COST step for trigger transform
     # runs in athena and will succeed if input BS file has costmon enabled
@@ -145,7 +136,7 @@ def addTriggerArgs(parser):
 
     # trigger executable
     parser.add_argument('--trigExe', type=trfArgClasses.argFactory(trfArgClasses.argString, runarg=True),
-                        default=trfArgClasses.argString("athenaHLT.py"),
+                        default=trfArgClasses.argString("athenaEF.py"),
                         help='Executable to run in the trigger step', group='Trigger')
 
     # For prodsys to make sure uses inputBS_RDOFile rather than inputBSFile when running the b2r step

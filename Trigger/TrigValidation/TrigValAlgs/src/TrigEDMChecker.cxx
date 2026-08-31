@@ -4,166 +4,68 @@
 
 /** Adapted from code by A.Hamilton to check trigger EDM; R.Goncalo 21/11/07 */
 
-#include "GaudiKernel/IToolSvc.h"
+#include "TrigEDMChecker.h"
 
-#include "AnalysisTriggerEvent/LVL1_ROI.h"
-#include "AnalysisTriggerEvent/EmTau_ROI.h"
-#include "AnalysisTriggerEvent/EnergySum_ROI.h"
-#include "AnalysisTriggerEvent/Jet_ROI.h"
+#include "AthViews/ViewHelper.h"
+#include "AthViews/View.h"
 
-#include "xAODTrigger/TrigPassBitsContainer.h"
-#include "xAODTrigger/TrigPassBits.h"
-#include "xAODTrigger/TriggerMenuContainer.h"
-#include "TrigNavStructure/TriggerElement.h"
 #include "TrigConfHLTUtils/HLTUtils.h"
+#include "TrigNavStructure/TriggerElement.h"
+#include "TrigT1Interfaces/RecEmTauRoI.h"
 
-#include "AthContainers/debug.h"
-#include "CxxUtils/checker_macros.h"
-#include "xAODJet/JetContainer.h"
+#include "xAODEgamma/Electron.h"
+#include "xAODEgamma/ElectronContainer.h"
+#include "xAODEgamma/Photon.h"
+#include "xAODEgamma/PhotonContainer.h"
+
 #include "xAODJet/JetConstituentVector.h"
-#include "xAODTrigMissingET/TrigMissingETAuxContainer.h"
-#include "xAODTrigMissingET/TrigMissingETContainer.h"
-#include "TrigMissingEtEvent/TrigMissingETContainer.h"
-#include "TrigMuonEvent/MuonFeature.h"
-#include "TrigMuonEvent/TrigMuonEFInfoTrackContainer.h"
-#include "TrigMuonEvent/TrigMuonEFInfoTrack.h"
-#include "TrigMuonEvent/TrigMuonEFIsolationContainer.h"
-#include "TrigMuonEvent/CombinedMuonFeatureContainer.h"
-#include "TrigMuonEvent/TileMuFeatureContainer.h"
-#include "TrigMuonEvent/TileTrackMuFeatureContainer.h"
-#include "TrigParticle/TrigPhotonContainer.h"
-#include "xAODTrigBphys/TrigBphysContainer.h"
-#include "xAODTrigBphys/TrigBphys.h"
-#include "TrigParticle/TrigEFBjetContainer.h"
-#include "TrigParticle/TrigL2BjetContainer.h"
-#include "TrigMuonEvent/TrigMuonEFContainer.h"
-#include "TrigMuonEvent/TrigMuonEFInfoContainer.h"
-#include "TrigMuonEvent/TrigMuonEFInfo.h"
-#include "TrigMuonEvent/TrigMuonEFTrack.h"
-#include "TrigMuonEvent/TrigMuonEFCbTrack.h"
-#include "TrigParticle/TrigElectronContainer.h"
-#include "TrigParticle/TrigTauContainer.h"
-#include "TrigSteeringEvent/HLTResult.h"
-#include "TrigInDetEvent/TrigTauTracksInfo.h"
-#include "TrigInDetEvent/TrigVertexCollection.h"
-#include "TrigCaloEvent/TrigEMCluster.h"
-#include "TrigCaloEvent/TrigEMClusterContainer.h"
-#include "TrigCaloEvent/TrigTauClusterContainer.h"
-#include "Particle/TrackParticleContainer.h"
-#include "tauEvent/TauJetContainer.h"
-#include "tauEvent/TauJet.h"
+#include "xAODJet/JetContainer.h"
 
 #include "xAODMuon/MuonContainer.h"
+
+#include "xAODTau/TauDefs.h"
+#include "xAODTau/TauJet.h"
+#include "xAODTau/TauJetAuxContainer.h"
+#include "xAODTau/TauJetContainer.h"
 
 #include "xAODTracking/TrackParticleContainer.h"
 #include "xAODTracking/VertexContainer.h"
 
-#include "xAODTrigEgamma/TrigElectronContainer.h"
-#include "xAODTrigEgamma/TrigElectron.h"
-#include "xAODTrigEgamma/TrigPhotonContainer.h"
-#include "xAODTrigEgamma/TrigPhoton.h"
+#include "xAODTrigBphys/TrigBphys.h"
+#include "xAODTrigBphys/TrigBphysContainer.h"
+
 #include "xAODTrigCalo/TrigEMCluster.h"
 #include "xAODTrigCalo/TrigEMClusterContainer.h"
 
-#include "xAODEgamma/ElectronContainer.h"
-#include "xAODEgamma/Electron.h"
-#include "xAODEgamma/PhotonContainer.h"
-#include "xAODEgamma/Photon.h"
+#include "xAODTrigEgamma/TrigElectron.h"
+#include "xAODTrigEgamma/TrigElectronContainer.h"
+#include "xAODTrigEgamma/TrigPhoton.h"
+#include "xAODTrigEgamma/TrigPhotonContainer.h"
 
-
-#include "xAODTau/TauJetContainer.h"
-#include "xAODTau/TauJetAuxContainer.h"
-#include "xAODTau/TauDefs.h"
-#include "xAODTau/TauJet.h"
-
-
-#include "TrigEDMChecker.h"
-
-#include "xAODTrigMinBias/TrigSpacePointCountsContainer.h"
 #include "xAODTrigMinBias/TrigSpacePointCounts.h"
-#include "xAODTrigMinBias/TrigT2MbtsBitsContainer.h"
+#include "xAODTrigMinBias/TrigSpacePointCountsContainer.h"
 #include "xAODTrigMinBias/TrigT2MbtsBits.h"
-#include "xAODTrigMinBias/TrigVertexCountsContainer.h"
-#include "xAODTrigMinBias/TrigVertexCounts.h"
-#include "xAODTrigMinBias/TrigTrackCountsContainer.h"
+#include "xAODTrigMinBias/TrigT2MbtsBitsContainer.h"
 #include "xAODTrigMinBias/TrigTrackCounts.h"
+#include "xAODTrigMinBias/TrigTrackCountsContainer.h"
+#include "xAODTrigMinBias/TrigVertexCounts.h"
+#include "xAODTrigMinBias/TrigVertexCountsContainer.h"
+
+#include "xAODTrigMissingET/TrigMissingETAuxContainer.h"
+#include "xAODTrigMissingET/TrigMissingETContainer.h"
+
+#include "xAODTrigger/TrigPassBits.h"
+#include "xAODTrigger/TrigPassBitsContainer.h"
+#include "xAODTrigger/TriggerMenuContainer.h"
 
 #include "TrigSteeringEvent/TrigRoiDescriptor.h"
 #include "TrigRoiConversion/RoiSerialise.h"
 #include "xAODTrigger/RoiDescriptorStore.h"
 
-#include "TrigT1Interfaces/RecEmTauRoI.h"
-
-
-
-#include "AthViews/ViewHelper.h"
-#include "AthViews/View.h"
-
-
 #include <iostream>
 #include <fstream>
 #include <queue>
 
-static const int maxRepWarnings = 5;
-
-
-TrigEDMChecker::TrigEDMChecker(const std::string& name, ISvcLocator* pSvcLocator)
-  : AthAnalysisAlgorithm(name, pSvcLocator),
-    m_clidSvc( "ClassIDSvc", name )
-{
-  /** switches to control the analysis through job options */
-
-  declareProperty("doDumpAll", m_doDumpAll = true);
-  declareProperty("doDumpTrigPassBits", m_doDumpTrigPassBits = false);
-  declareProperty("doDumpLVL1_ROI", m_doDumpLVL1_ROI = false);
-  declareProperty("doDumpTrigMissingET", m_doDumpTrigMissingET = false);
-  declareProperty("doDumpxAODTrigMissingET", m_doDumpxAODTrigMissingET = false);
-  declareProperty("doDumpMuonFeature", m_doDumpMuonFeature = false);
-  declareProperty("doDumpCombinedMuonFeature", m_doDumpCombinedMuonFeature = false);
-  declareProperty("doDumpTileMuFeature",      m_doDumpTileMuFeature = false);
-  declareProperty("doDumpTileTrackMuFeature", m_doDumpTileTrackMuFeature = false);
-  declareProperty("doDumpTrigPhotonContainer", m_doDumpTrigPhotonContainer = false);
-  declareProperty("doDumpTrigL2BphysContainer", m_doDumpTrigL2BphysContainer = false);
-  declareProperty("doDumpTrigEFBphysContainer", m_doDumpTrigEFBphysContainer = false);
-  declareProperty("doDumpTrigEFBjetContainer", m_doDumpTrigEFBjetContainer = false);
-  declareProperty("doDumpTrigL2BjetContainer", m_doDumpTrigL2BjetContainer = false);
-  declareProperty("doDumpxAODJetContainer", m_doDumpxAODJetContainer = false);
-  declareProperty("doDumpTrigMuonEFContainer", m_doDumpTrigMuonEFContainer = false);
-  declareProperty("doDumpTrigMuonEFInfoContainer", m_doDumpTrigMuonEFInfoContainer = false);
-  declareProperty("doDumpTrigMuonEFIsolationContainer", m_doDumpTrigMuonEFIsolationContainer = false);
-  declareProperty("doDumpxAODMuonContainer", m_doDumpxAODMuonContainer = false);
-  declareProperty("doDumpTrigElectronContainer", m_doDumpTrigElectronContainer = false);
-  declareProperty("doDumpxAODTrigElectronContainer", m_doDumpxAODTrigElectronContainer = false);
-  declareProperty("doDumpxAODTrigPhotonContainer", m_doDumpxAODTrigPhotonContainer = false);
-  declareProperty("doDumpxAODElectronContainer", m_doDumpxAODElectronContainer = false);
-  declareProperty("doDumpxAODPhotonContainer", m_doDumpxAODPhotonContainer = false);
-  declareProperty("doDumpHLTResult", m_doDumpHLTResult = false);
-  declareProperty("doDumpTrigTauContainer", m_doDumpTrigTauContainer = false);
-  declareProperty("doDumpTrigTauTracksInfo", m_doDumpTrigTauTracksInfo = false);
-  declareProperty("doDumpTrigVertexCollection", m_doDumpTrigVertexCollection = false);
-  declareProperty("doDumpTrigEMCluster", m_doDumpTrigEMCluster = false);
-  declareProperty("doDumpTrigEMClusterContainer", m_doDumpTrigEMClusterContainer = false);
-  declareProperty("doDumpxAODTrigEMCluster", m_doDumpxAODTrigEMCluster = false);
-  declareProperty("doDumpxAODTrigEMClusterContainer", m_doDumpxAODTrigEMClusterContainer = false);
-  declareProperty("doDumpTrigTauClusterContainer", m_doDumpTrigTauClusterContainer = false);
-  declareProperty("doDumpTrackParticleContainer", m_doDumpTrackParticleContainer = false);
-  declareProperty("doDumpTauJetContainer", m_doDumpTauJetContainer = false);
-  declareProperty("doDumpxAODTrackParticle", m_doDumpxAODTrackParticle = false);
-  declareProperty("doDumpxAODVertex", m_doDumpxAODVertex = false);
-  declareProperty("doDumpxAODTauJetContainer", m_doDumpxAODTauJetContainer = false);
-  declareProperty("doDumpxAODTrigMinBias", m_doDumpxAODTrigMinBias = false);
-  declareProperty("doDumpStoreGate", m_doDumpStoreGate = false );
-  declareProperty("doDumpAllTrigComposite", m_doDumpAllTrigComposite = false );
-  declareProperty("dumpTrigCompositeContainers", m_dumpTrigCompositeContainers, "List of TC to dump" );
-  declareProperty("doDumpTrigCompsiteNavigation", m_doDumpTrigCompsiteNavigation = false );
-  declareProperty("doDumpNavigation", m_doDumpNavigation = false );
-  declareProperty("doTDTCheck", m_doTDTCheck = false );
-  declareProperty( "ClassIDSvc", m_clidSvc, "Service providing CLID info" );
-}
-
-
-
-TrigEDMChecker::~TrigEDMChecker() {}
 
 StatusCode TrigEDMChecker::initialize() {
 
@@ -176,35 +78,15 @@ StatusCode TrigEDMChecker::initialize() {
   ATH_MSG_INFO("REGTEST Initializing...");
   ATH_MSG_INFO("REGTEST m_doDumpAll                      = " << m_doDumpAll );
   ATH_MSG_INFO("REGTEST m_doDumpLVL1_ROI                 = " << m_doDumpLVL1_ROI);
-  ATH_MSG_INFO("REGTEST m_doDumpTrigMissingET            = " << m_doDumpTrigMissingET );
   ATH_MSG_INFO("REGTEST m_doDumpxAODTrigMissingET        = " << m_doDumpxAODTrigMissingET );
-  ATH_MSG_INFO("REGTEST m_doDumpMuonFeature              = " << m_doDumpMuonFeature );
-  ATH_MSG_INFO("REGTEST m_doDumpCombinedMuonFeature      = " << m_doDumpCombinedMuonFeature );
-  ATH_MSG_INFO("REGTEST m_doDumpTileMuFeature            = " << m_doDumpTileMuFeature);
-  ATH_MSG_INFO("REGTEST m_doDumpTileTrackMuFeature       = " << m_doDumpTileTrackMuFeature);
-  ATH_MSG_INFO("REGTEST m_doDumpTrigPhotonContainer      = " << m_doDumpTrigPhotonContainer );
   ATH_MSG_INFO("REGTEST m_doDumpTrigL2BphysContainer     = " << m_doDumpTrigL2BphysContainer );
   ATH_MSG_INFO("REGTEST m_doDumpTrigEFBphysContainer     = " << m_doDumpTrigEFBphysContainer );
-  ATH_MSG_INFO("REGTEST m_doDumpTrigEFBjetContainer      = " << m_doDumpTrigEFBjetContainer );
-  ATH_MSG_INFO("REGTEST m_doDumpTrigL2BjetContainer      = " << m_doDumpTrigL2BjetContainer );
   ATH_MSG_INFO("REGTEST m_doDumpxAODJetContainer         = " << m_doDumpxAODJetContainer );
-  ATH_MSG_INFO("REGTEST m_doDumpTrigMuonEFContainer      = " << m_doDumpTrigMuonEFContainer );
-  ATH_MSG_INFO("REGTEST m_doDumpTrigMuonEFInfoContainer  = " << m_doDumpTrigMuonEFInfoContainer );
   ATH_MSG_INFO("REGTEST m_doDumpxAODMuonContainer        = " << m_doDumpxAODMuonContainer );
-  ATH_MSG_INFO("REGTEST m_doDumpTrigElectronContainer    = " << m_doDumpTrigElectronContainer );
   ATH_MSG_INFO("REGTEST m_doDumpxAODTrigElectronContainer= " << m_doDumpxAODTrigElectronContainer );
   ATH_MSG_INFO("REGTEST m_doDumpxAODTrigPhotonContainer  = " << m_doDumpxAODTrigPhotonContainer );
   ATH_MSG_INFO("REGTEST m_doDumpxAODElectronContainer    = " << m_doDumpxAODElectronContainer );
   ATH_MSG_INFO("REGTEST m_doDumpxAODPhotonContainer      = " << m_doDumpxAODPhotonContainer );
-  ATH_MSG_INFO("REGTEST m_doDumpHLTResult                = " << m_doDumpHLTResult );
-  ATH_MSG_INFO("REGTEST m_doDumpTrigTauContainer         = " << m_doDumpTrigTauContainer );
-  ATH_MSG_INFO("REGTEST m_doDumpTrigTauTracksInfo        = " << m_doDumpTrigTauTracksInfo );
-  ATH_MSG_INFO("REGTEST m_doDumpTrigVertexCollection     = " << m_doDumpTrigVertexCollection );
-  ATH_MSG_INFO("REGTEST m_doDumpTrigEMCluster            = " << m_doDumpTrigEMCluster );
-  ATH_MSG_INFO("REGTEST m_doDumpTrigEMClusterContainer   = " << m_doDumpTrigEMClusterContainer );
-  ATH_MSG_INFO("REGTEST m_doDumpTrigTauClusterContainer  = " << m_doDumpTrigTauClusterContainer );
-  ATH_MSG_INFO("REGTEST m_doDumpTrackParticleContainer   = " << m_doDumpTrackParticleContainer );
-  ATH_MSG_INFO("REGTEST m_doDumpTauJetContainer          = " << m_doDumpTauJetContainer );
   ATH_MSG_INFO("REGTEST m_doDumpxAODTrackParticle        = " << m_doDumpxAODTrackParticle );
   ATH_MSG_INFO("REGTEST m_doDumpxAODVertex               = " << m_doDumpxAODVertex );
   ATH_MSG_INFO("REGTEST m_doDumpxAODTauJetContainer      = " << m_doDumpxAODTauJetContainer );
@@ -214,8 +96,6 @@ StatusCode TrigEDMChecker::initialize() {
   ATH_MSG_INFO("REGTEST m_dumpTrigCompositeContainers    = " << m_dumpTrigCompositeContainers );
   ATH_MSG_INFO("REGTEST m_doDumpTrigCompsiteNavigation   = " << m_doDumpTrigCompsiteNavigation );
   ATH_MSG_INFO("REGTEST m_doTDTCheck                     = " << m_doTDTCheck );
-
-  ATH_MSG_INFO("maxRepWarning      = " <<  maxRepWarnings );
 
   if(m_doDumpxAODMuonContainer || m_doDumpAll) {
     ATH_CHECK( m_muonPrinter.retrieve() );
@@ -238,30 +118,7 @@ StatusCode TrigEDMChecker::initialize() {
 
 StatusCode TrigEDMChecker::execute(const EventContext& ctx) {
 
-  /* fwinkl, Mar 20222:
-     Some attempt was made to make the code pass the thread-checker. Methods that
-     are clearly not thread-safe (e.g. use of DataHandle) are marked as such. Calling
-     these methods from within execute would still trigger a thread-checker warning.
-     Since this algorithm is only ever used for validation and in single-threaded athena,
-     we suppress these warnings by the following assignment. This has the advantage
-     (as opposed to disabling the checking for the entire file) that new code is still
-     being checked and will hopefully be written in a thread-safe manner, i.e. using
-     ReadHandleKeys. If someone is very eager they could migrate all uses of DataHandles...
-  */
-  StatusCode sc ATLAS_THREAD_SAFE = do_execute(ctx);
-  return sc;
-}
-
-StatusCode TrigEDMChecker::do_execute ATLAS_NOT_THREAD_SAFE(const EventContext& ctx) {
-
-  ATH_MSG_INFO( " ==========START of event===========" );
-
-	if(m_doDumpTrackParticleContainer){
-		StatusCode sc = dumpTrackParticleContainer();
-		if (sc.isFailure()) {
-          ATH_MSG_ERROR("The method dumpTrackParticleContainer() failed");
-		}
-	}
+    ATH_MSG_INFO( " ==========START of event===========" );
 
 	if(m_doDumpAll || m_doDumpLVL1_ROI ){
 		StatusCode sc = dumpLVL1_ROI();
@@ -270,69 +127,12 @@ StatusCode TrigEDMChecker::do_execute ATLAS_NOT_THREAD_SAFE(const EventContext& 
 		}
 	}
 
-    /*
-	if(m_doDumpAll || m_doDumpTrigMissingET){
-		StatusCode sc = dumpTrigMissingET();
-		if (sc.isFailure()) {
-			mLog << MSG::ERROR << "The method dumpTrigMissingET() failed" << endmsg;
-
-		}
-	}
-	*/
-
 	if(m_doDumpAll || m_doDumpxAODTrigMissingET){
 		StatusCode sc = dumpxAODTrigMissingET();
 		if (sc.isFailure()) {
           ATH_MSG_ERROR("The method dumpxAODTrigMissingET() failed");
 		}
     }
-
-	if(m_doDumpAll || m_doDumpMuonFeature){
-		StatusCode sc = dumpMuonFeature();
-		if (sc.isFailure()) {
-          ATH_MSG_ERROR("The method dumpMuonFeature() failed");
-		}
-	}
-
-	if(m_doDumpAll || m_doDumpCombinedMuonFeature){
-		StatusCode sc = dumpCombinedMuonFeature();
-		if (sc.isFailure()) {
-          ATH_MSG_ERROR("The method dumpCombinedMuonFeature() failed");
-		}
-		sc = dumpCombinedMuonFeatureContainer();
-		if (sc.isFailure()) {
-          ATH_MSG_ERROR("The method dumpCombinedMuonFeatureContainer() failed");
-          return StatusCode::SUCCESS;
-		}
-	}
-
-	if(m_doDumpAll || m_doDumpTileMuFeature) {
-		StatusCode sc = dumpTileMuFeatureContainer();
-		if (sc.isFailure()) {
-          ATH_MSG_ERROR("The method dumpTileMuFeatureContainer() failed");          
-		}
-	}
-
-	if(m_doDumpAll || m_doDumpTileTrackMuFeature) {
-		StatusCode sc = dumpTileTrackMuFeatureContainer();
-		if (sc.isFailure()) {
-          ATH_MSG_ERROR("The method dumpTileTrackMuFeatureContainer() failed");
-		}
-	}
-
-	if(m_doDumpAll || m_doDumpTrigEMCluster){
-		StatusCode sc = dumpTrigEMCluster();
-		if (sc.isFailure()) {
-          ATH_MSG_ERROR("The method dumpTrigEMCluster() failed");
-		}
-	}
-
-	if(m_doDumpAll || m_doDumpTrigEMClusterContainer){
-		StatusCode sc = dumpTrigEMClusterContainer();
-		if (sc.isFailure()) {
-          ATH_MSG_ERROR("The method dumpTrigEMClusterContainer() failed");          
-		}
-	}
 
     if(m_doDumpAll || m_doDumpxAODTrigEMCluster){
       StatusCode sc = dumpxAODTrigEMCluster();
@@ -347,20 +147,6 @@ StatusCode TrigEDMChecker::do_execute ATLAS_NOT_THREAD_SAFE(const EventContext& 
         ATH_MSG_ERROR("The method dumpxAODTrigEMClusterContainer() failed");
       }
     }
-
-	if(m_doDumpTrigTauClusterContainer){
-		StatusCode sc = dumpTrigTauClusterContainer();
-		if (sc.isFailure()) {
-          ATH_MSG_ERROR("The method dumpTrigTauClusterContainer() failed");
-		}
-	}
-
-	if(m_doDumpAll || m_doDumpTrigPhotonContainer){
-		StatusCode sc = dumpTrigPhotonContainer();
-		if (sc.isFailure()) {
-          ATH_MSG_ERROR("The method dumpTrigPhotonContainer() failed");
-		}
-	}
 
 	if(m_doDumpAll || m_doDumpxAODJetContainer){
 		StatusCode sc = dumpxAODJetContainer();
@@ -383,53 +169,11 @@ StatusCode TrigEDMChecker::do_execute ATLAS_NOT_THREAD_SAFE(const EventContext& 
 		}
 	}
 
-	if(m_doDumpAll || m_doDumpTrigEFBjetContainer){
-		StatusCode sc = dumpTrigEFBjetContainer();
-		if (sc.isFailure()) {
-          ATH_MSG_ERROR("The method dumpTrigEFBjetContainer() failed");
-		}
-	}
-
-	if(m_doDumpAll || m_doDumpTrigL2BjetContainer){
-		StatusCode sc = dumpTrigL2BjetContainer();
-		if (sc.isFailure()) {
-          ATH_MSG_ERROR("The method dumpTrigL2BjetContainer() failed");
-		}
-	}
-
-	if(m_doDumpAll || m_doDumpTrigMuonEFContainer){
-		StatusCode sc = dumpTrigMuonEFContainer();
-		if (sc.isFailure()) {
-          ATH_MSG_ERROR("The method dumpTrigMuonEFContainer() failed");
-		}
-	}
-
-	if(m_doDumpAll || m_doDumpTrigMuonEFInfoContainer){
-		StatusCode sc = dumpTrigMuonEFInfoContainer();
-		if (sc.isFailure()) {
-          ATH_MSG_ERROR("The method dumpTrigMuonEFInfoContainer() failed");          
-		}
-	}
-
-	if(m_doDumpAll || m_doDumpTrigMuonEFIsolationContainer) {
-	  StatusCode sc = dumpTrigMuonEFIsolationContainer();
-	  if(sc.isFailure()) {
-	    ATH_MSG_ERROR("The method dumpTrigMuonEFIsolationContainer() failed");
-	  }
-	}
-
 	if(m_doDumpAll || m_doDumpxAODMuonContainer) {
 	  StatusCode sc = dumpxAODMuonContainer();
 	  if(sc.isFailure()) {
 	    ATH_MSG_ERROR("The method dumpxAODMuonContainer() failed");
 	  }
-	}
-
-	if(m_doDumpAll || m_doDumpTrigElectronContainer){
-		StatusCode sc = dumpTrigElectronContainer();
-		if (sc.isFailure()) {
-          ATH_MSG_ERROR("The method dumpTrigElectronContainer() failed");
-		}
 	}
 
 	if(m_doDumpAll || m_doDumpxAODTrigElectronContainer){
@@ -460,46 +204,11 @@ StatusCode TrigEDMChecker::do_execute ATLAS_NOT_THREAD_SAFE(const EventContext& 
       }
 	}
 
-    if(m_doDumpTrigTauContainer){
-      StatusCode sc = dumpTrigTauContainer();
-      if (sc.isFailure()) {
-        ATH_MSG_ERROR("The method dumpTrigTauContainer() failed");
-      }
-	}
-
-	if(m_doDumpTrigTauTracksInfo){
-		StatusCode sc = dumpTrigTauTracksInfo();
-		if (sc.isFailure()) {
-          ATH_MSG_ERROR("The method dumpTrigTauTracksInfo() failed");
-		}
-	}
-
-	if(m_doDumpAll || m_doDumpHLTResult){
-		StatusCode sc = dumpHLTResult();
-		if (sc.isFailure()) {
-          ATH_MSG_ERROR("The method dumpHLTResult() failed");
-		}
-	}
-
-	if(m_doDumpAll || m_doDumpTrigVertexCollection){
-      StatusCode sc = dumpTrigVertexCollection();
-      if (sc.isFailure()) {
-        ATH_MSG_ERROR("The method dumpTrigVertexCollection() failed");
-      }
-	}
-
 	if(m_doDumpAll || m_doDumpxAODTauJetContainer){
       StatusCode sc = dumpxAODTauJetContainer();
       if (sc.isFailure()) {
         ATH_MSG_ERROR("The method dumpxAODTauJetContainer() failed");
       }
-	}
-
-	if(m_doDumpTauJetContainer){
-		StatusCode sc = dumpTauJetContainer();
-		if (sc.isFailure()) {
-          ATH_MSG_ERROR("The method dumpTauJetContainer() failed");
-		}
 	}
 
 	if(m_doDumpAll || m_doDumpxAODTrackParticle){
@@ -542,7 +251,7 @@ StatusCode TrigEDMChecker::do_execute ATLAS_NOT_THREAD_SAFE(const EventContext& 
   }
 
   if (m_doDumpAll || m_doTDTCheck) {
-    ATH_CHECK(dumpTDT());
+    ATH_CHECK(dumpTDT(ctx));
   }
 
   if (m_doDumpAll || m_doDumpAllTrigComposite || m_dumpTrigCompositeContainers.size() > 0) {
@@ -887,269 +596,6 @@ StatusCode TrigEDMChecker::dumpxAODTrigMissingET() {
 
 //////////////////////////////////////////////////////////////////////////////////
 
-
-
-StatusCode TrigEDMChecker::dumpTrigMissingET ATLAS_NOT_THREAD_SAFE() {
-
-  ATH_MSG_DEBUG("in dumpTrigMissingET()");
-
-  int ntag=3;
-  std::string METTags[]={"HLT_TrigMissingETContainer_TrigEFMissingET", "HLT_TrigMissingETContainer_TrigEFMissingET_FEB", "HLT_TrigMissingETContainer_TrigEFMissingET_topocl"};
-
-  /// >= 14.2.10 /// ----------------------------
-  for (int itag=0; itag < ntag; itag++) { // loop over L2, EF
-    const TrigMissingETContainer* trigMETcont;
-    StatusCode sc=evtStore()->retrieve(trigMETcont , METTags[itag]);
-    if( sc.isFailure() ){
-      ATH_MSG_INFO("Failed to retrieve TrigMissingETContainer with key " << METTags[itag]);
-      continue;
-    }
-
-    ATH_MSG_INFO("Got TrigMissingETContainer with key \"" << METTags[itag]<< "\"");
-
-    for (const TrigMissingET* met : *trigMETcont) {
-
-      ATH_MSG_INFO("REGTEST ==========START of TrigMissingET DUMP===========");
-
-      std::string s;
-      char buff[128];
-
-      snprintf(buff, sizeof(buff), "REGTEST %s Ex =         %10.2f CLHEP::MeV", s.c_str(), met->ex() );
-      ATH_MSG_INFO(buff);
-      snprintf(buff, sizeof(buff), "REGTEST %s Ey =         %10.2f CLHEP::MeV", s.c_str(), met->ey() );
-      ATH_MSG_INFO(buff);
-      snprintf(buff, sizeof(buff), "REGTEST %s Ez =         %10.2f CLHEP::MeV", s.c_str(), met->ez() );
-      ATH_MSG_INFO(buff);
-      snprintf(buff, sizeof(buff), "REGTEST %s Et =         %10.2f CLHEP::MeV", s.c_str(), met->et() );
-      ATH_MSG_INFO(buff);
-      snprintf(buff, sizeof(buff), "REGTEST %s SumEt =      %10.2f CLHEP::MeV", s.c_str(), met->sumEt() );
-      ATH_MSG_INFO(buff);
-      snprintf(buff, sizeof(buff), "REGTEST %s SumE =       %10.2f CLHEP::MeV", s.c_str(), met->sumE() );
-      ATH_MSG_INFO(buff);
-      snprintf(buff, sizeof(buff), "REGTEST %s E =          %10.2f CLHEP::MeV", s.c_str(), met->e() );
-      ATH_MSG_INFO(buff);
-      snprintf(buff, sizeof(buff), "REGTEST %s flag =    %10d",       s.c_str(), met->getFlag() );
-      ATH_MSG_INFO(buff);
-      snprintf(buff, sizeof(buff), "REGTEST %s RoIword = %10ld",      s.c_str(), met->RoIword() );
-      ATH_MSG_INFO(buff);
-
-      unsigned int Nc = met->getNumOfComponents();
-      if (Nc > 0) {
-        s="REGTEST __name____status_usedChannels__sumOfSigns__calib1_calib0";
-        s+="/MeV__ex/MeV_____ey/MeV_____ez/MeV___sumE/MeV__sumEt/CLHEP::MeV";
-        ATH_MSG_INFO(s);
-
-        for (unsigned int i=0; i<Nc; ++i) { // loop over components
-          std::string name =              met->getNameOfComponent(i);
-          const short status =            met->getStatus(i);
-          const unsigned short usedChan = met->getUsedChannels(i);
-          const short sumOfSigns =        met->getSumOfSigns(i);
-          const float calib0 =            met->getComponentCalib0(i);
-          const float calib1 =            met->getComponentCalib1(i);
-          const float ex =                met->getExComponent(i);
-          const float ey =                met->getEyComponent(i);
-          const float ez =                met->getEzComponent(i);
-          const float sumE =              met->getSumEComponent(i);
-          const float sumEt =             met->getSumEtComponent(i);
-
-          snprintf(buff, sizeof(buff),
-                   "REGTEST   %s   %6d %12d %10d   %6.2f  %6.3f %10.2f %10.2f %10.2f %10.2f %10.2f",
-                   name.c_str(), status, usedChan, sumOfSigns, calib1, calib0,
-                   ex, ey, ez, sumE, sumEt);
-          ATH_MSG_INFO(buff);
-        } // loop over components
-      }
-    } // loop over TrigMissingET objects
-  } // loop over TrigMissingETContainers
-
-	// if( sc.isSuccess() ) return sc; // Commented out by FB (12.07.14)
-
-	/// up to 14.2.0 /// ----------------------------
-  ATH_MSG_INFO("Trying to fetch TrigMissingET objects from older releases");
-
-  SG::ConstIterator<TrigMissingET> trigMETfirst ,trigMETlast;
-  StatusCode sc=evtStore()->retrieve(trigMETfirst ,trigMETlast);
-  if( sc.isFailure() ){
-    ATH_MSG_INFO("Failed to retrieve TrigMissingET (rel. <= 14.2.0)");
-  }
-
-  for( ; trigMETfirst != trigMETlast ; ++trigMETfirst ){ // loop over TrigMissingET objects
-    const std::string& name(trigMETfirst.key());
-    ATH_MSG_INFO("Got TrigMissingET object with key \"" << name << "\"");
-
-    std::string s;
-    char buff[3000];
-
-    if( name.find("TrigEFMissingET") != std::string::npos ) {
-      s="REGTEST EF: ";
-    } else if( name.find("T2MissingET") != std::string::npos ){
-      s="REGTEST L2: ";
-    } else {
-      ATH_MSG_WARNING(" This is UNKNOWN! " << name);
-      s="REGTEST ??? ";
-    }
-
-    snprintf(buff, sizeof(buff), "%s Ex =         %10.2f CLHEP::MeV", s.c_str(), trigMETfirst->ex() );
-    ATH_MSG_INFO(buff);
-    snprintf(buff, sizeof(buff), "%s Ey =         %10.2f CLHEP::MeV", s.c_str(), trigMETfirst->ey() );
-    ATH_MSG_INFO(buff);
-    snprintf(buff, sizeof(buff), "%s Ez =         %10.2f CLHEP::MeV", s.c_str(), trigMETfirst->ez() );
-    ATH_MSG_INFO(buff);
-    snprintf(buff, sizeof(buff), "%s Et =         %10.2f CLHEP::MeV", s.c_str(), trigMETfirst->et() );
-    ATH_MSG_INFO(buff);
-    snprintf(buff, sizeof(buff), "%s SumE =       %10.2f CLHEP::MeV", s.c_str(), trigMETfirst->sumE() );
-    ATH_MSG_INFO(buff);
-    snprintf(buff, sizeof(buff), "%s SumEt =      %10.2f CLHEP::MeV", s.c_str(), trigMETfirst->sumEt() );
-    ATH_MSG_INFO(buff);
-    snprintf(buff, sizeof(buff), "%s E =          %10.2f CLHEP::MeV", s.c_str(), trigMETfirst->e() );
-    ATH_MSG_INFO(buff);
-    snprintf(buff, sizeof(buff), "%s flag =    %10d",       s.c_str(), trigMETfirst->getFlag() );
-    ATH_MSG_INFO(buff);
-    snprintf(buff, sizeof(buff), "%s RoIword = %10ld",      s.c_str(), trigMETfirst->RoIword() );
-    ATH_MSG_INFO(buff);
-
-    unsigned int Nc = trigMETfirst->getNumOfComponents();
-    if (Nc > 0) {
-      s="REGTEST __name____status_usedChannels__sumOfSigns__calib1_calib0";
-      s+="/MeV__ex/MeV_____ey/MeV_____ez/MeV___sumE/MeV__sumEt/CLHEP::MeV";
-      ATH_MSG_INFO(s);
-
-      for (unsigned int i=0; i<Nc; ++i) { // loop over components
-        std::string name =              trigMETfirst->getNameOfComponent(i);
-        const short status =            trigMETfirst->getStatus(i);
-        const unsigned short usedChan = trigMETfirst->getUsedChannels(i);
-        const short sumOfSigns =        trigMETfirst->getSumOfSigns(i);
-        const float calib0 =            trigMETfirst->getComponentCalib0(i);
-        const float calib1 =            trigMETfirst->getComponentCalib1(i);
-        const float ex =                trigMETfirst->getExComponent(i);
-        const float ey =                trigMETfirst->getEyComponent(i);
-        const float ez =                trigMETfirst->getEzComponent(i);
-        const float sumE =              trigMETfirst->getSumEComponent(i);
-        const float sumEt =             trigMETfirst->getSumEtComponent(i);
-
-        snprintf(buff, sizeof(buff),
-                 "REGTEST   %s   %6d %12d %10d   %6.2f  %6.3f %10.2f %10.2f %10.2f %10.2f %10.2f",
-                 name.c_str(), status, usedChan, sumOfSigns, calib1, calib0,
-                 ex, ey, ez, sumE, sumEt);
-        ATH_MSG_INFO(buff);
-      } // loop over components
-    }
-  } // loop over TrigMissingET objects
-
-  ATH_MSG_INFO("REGTEST ==========END of TrigMissingET DUMP===========");
-
-  return StatusCode::SUCCESS;
-}
-
-//////////////////////////////////////////////////////////////////////////////////
-
-StatusCode TrigEDMChecker::dumpTrackParticleContainer() {
-
-  ATH_MSG_DEBUG("in dumpTrackParticleContainer()");
-
-  ATH_MSG_INFO("REGTEST ==========START of TrackParticleContainer DUMP===========");
-
-	std::string trackPtags[]={"HLT_InDetTrigParticleCreation_Bjet_EFID",
-			"HLT_InDetTrigParticleCreation_Bphysics_EFID",
-			"HLT_InDetTrigParticleCreation_Electron_EFID",
-			"HLT_InDetTrigParticleCreation_FullScan_EFID",
-			"HLT_InDetTrigParticleCreation_Muon_EFID",
-			"HLT_InDetTrigParticleCreation_Photon_EFID",
-			"HLT_InDetTrigParticleCreation_Tau_EFID"};
-
-	int ntag=7;
-
-	StatusCode returnsc=StatusCode::SUCCESS;
-
-	for (int itag=0; itag<ntag; itag++){
-		const Rec::TrackParticleContainer*  pTrackParticleC = nullptr;
-		StatusCode sc = evtStore()->retrieve(pTrackParticleC, trackPtags[itag]);
-		if (sc.isFailure()) {
-          ATH_MSG_INFO("REGTEST No TrackParticleContainer found with tag " << trackPtags[itag]);
-			continue;
-		}
-		ATH_MSG_INFO("TrackParticleContainer found with tag " << trackPtags[itag]
-                     << " and size " << pTrackParticleC->size());
-
-		Rec::TrackParticleContainer::const_iterator trackItr  = pTrackParticleC->begin();
-		Rec::TrackParticleContainer::const_iterator trackItrE = pTrackParticleC->end();
-		for (int ind=1; trackItr != trackItrE; ++trackItr, ind++) {
-			const Rec::TrackParticle * trackParticle = (*trackItr);
-			ATH_MSG_INFO(" TrackParticle " << ind << " charge "
-                         << trackParticle->charge() << " p "
-                         << trackParticle->p()<< " eta " << trackParticle->eta()
-                         << " phi " <<  trackParticle->phi());            
-
-			/// track
-			const Trk::Track * track = trackParticle->originalTrack();
-			if ( track ) {
-              ATH_MSG_INFO(" Got attached track");
-				const Trk::TrackParameters* perigee = track->perigeeParameters();
-				if (perigee) {
-					const auto& parameterVector = perigee->parameters();
-					ATH_MSG_INFO(" q/P " << parameterVector[Trk::qOverP] <<
-                                 " theta " << parameterVector[Trk::theta] <<
-                                 " phi   " <<parameterVector[Trk::phi]);
-				} else {
-                  ATH_MSG_INFO(" No perigee attached to track");
-				}
-
-			} else {
-			  if(   m_trackWarningNum <= maxRepWarnings ) {
-			    ATH_MSG_DEBUG(" No attached track");
-			    if(  m_trackWarningNum == maxRepWarnings) {
-			      ATH_MSG_WARNING(" Max attached track warning reached, no further warnings given");
-			    }
-			    m_trackWarningNum++;
-			  }
-			}
-
-			/// track vertex position
-			const Trk::VxCandidate * vertex = trackParticle->reconstructedVertex();
-			if ( vertex ) {
-				const Trk::RecVertex& vtx = vertex->recVertex();
-				const Amg::Vector3D& position = vtx.position();
-				ATH_MSG_INFO(" vertex position (" << position[0] << ", " <<
-                             position[1] << ", " << position[2] << ") ");
-			} else {
-			  if(   m_vertexWarningNum <= maxRepWarnings ) {
-			    ATH_MSG_DEBUG(" No attached vertex");
-			    if(  m_vertexWarningNum == maxRepWarnings) {
-			      ATH_MSG_WARNING(" Max attached vertex warning reached, no further warnings given");
-			    }
-			    m_vertexWarningNum++;
-			  }
-			}
-
-			const Trk::Perigee* perigee = trackParticle->measuredPerigee();
-			if (perigee) {
-				const auto& parameters = perigee->parameters();
-				ATH_MSG_INFO("Trk::Perigee parameters:");
-				ATH_MSG_INFO(" * d_0   : "<< parameters[Trk::d0]      );
-				ATH_MSG_INFO(" * z_0   : "<< parameters[Trk::z0]      );
-				ATH_MSG_INFO(" * phi   : "<< parameters[Trk::phi]     );
-				ATH_MSG_INFO(" * Theta : "<< parameters[Trk::theta]   );
-				ATH_MSG_INFO(" * q/p   : "<< parameters[Trk::qOverP]  );
-			} else {
-              ATH_MSG_WARNING(" No attached perigee");
-			}
-			/// access to TrackSummary information
-			const Trk::TrackSummary* summary = trackParticle->trackSummary();
-			if (summary) {
-              ATH_MSG_DEBUG("Track summary information:");
-              ATH_MSG_DEBUG(" * Number of B layer hits : "<<summary->get(Trk::numberOfBLayerHits));
-              ATH_MSG_DEBUG(" * Number of pixel hits : "<<summary->get(Trk::numberOfPixelHits));
-              ATH_MSG_DEBUG(" * Number of SCT hits : "<<summary->get(Trk::numberOfSCTHits));
-              ATH_MSG_DEBUG(" * Number of TRT hits : "<<summary->get(Trk::numberOfTRTHits));
-			}
-		}
-	}
-	return returnsc;
-}
-
-
-//////////////////////////////////////////////////////////////////////////////////
-
 StatusCode TrigEDMChecker::dumpLVL1_ROI() {
 
   ATH_MSG_DEBUG("in dumpLVL1_ROI()");
@@ -1188,140 +634,7 @@ StatusCode TrigEDMChecker::dumpLVL1_ROI() {
   return StatusCode::SUCCESS;
 }
 
-
 //////////////////////////////////////////////////////////////////////////////////
-
-StatusCode TrigEDMChecker::dumpTrigPhotonContainer ATLAS_NOT_THREAD_SAFE() {
-
-  ATH_MSG_DEBUG("in dumpTrigPhotonContainer()");
-
-  ATH_MSG_INFO("REGTEST ==========START of TrigPhotonContainer DUMP===========");
-
-  SG::ConstIterator< TrigPhotonContainer > trigPhoton;
-  SG::ConstIterator< TrigPhotonContainer > lastTrigPhoton;
-
-  StatusCode sc = evtStore()->retrieve(trigPhoton,lastTrigPhoton);
-  if (sc.isFailure()) {
-    ATH_MSG_INFO("REGTEST No TrigPhotonContainer found");
-    return  StatusCode::SUCCESS;
-  }
-  ATH_MSG_INFO("REGTEST TrigPhotonContainers retrieved");
-
-
-  for (int i=0; trigPhoton != lastTrigPhoton; ++trigPhoton, ++i) {
-
-    ATH_MSG_INFO("REGTEST Looking at TrigPhotonContainer " << i);
-
-    TrigPhotonContainer::const_iterator PhotonItr  = trigPhoton->begin();
-    TrigPhotonContainer::const_iterator PhotonItrE = trigPhoton->end();
-
-    for (int j=0; PhotonItr != PhotonItrE; ++PhotonItr, ++j ) {
-
-      ATH_MSG_INFO("REGTEST Looking at TrigPhoton " << j);
-
-      ATH_MSG_INFO("REGTEST TrigPhoton->dPhi() returns " << (*PhotonItr)->dPhi());
-      ATH_MSG_INFO("REGTEST TrigPhoton->dEta() returns " << (*PhotonItr)->dEta());
-      ATH_MSG_INFO("REGTEST TrigPhoton->rCore() returns " << (*PhotonItr)->rCore());
-      ATH_MSG_INFO("REGTEST TrigPhoton->isValid() returns " << (*PhotonItr)->isValid());
-      ATH_MSG_INFO("REGTEST TrigPhoton->Et() returns " << (*PhotonItr)->Et());
-
-      if ( (*PhotonItr)->cluster() != NULL ) {
-        ATH_MSG_INFO("REGTEST Cluster info: ");
-        ATH_MSG_INFO("REGTEST cluster->e() returns " << (*PhotonItr)->cluster()->e());
-        ATH_MSG_INFO("REGTEST cluster->e237() returns " << (*PhotonItr)->cluster()->e237());
-        ATH_MSG_INFO("REGTEST cluster->e277() returns " << (*PhotonItr)->cluster()->e277());
-        ATH_MSG_INFO("REGTEST cluster->fracs1() returns " << (*PhotonItr)->cluster()->fracs1());
-        ATH_MSG_INFO("REGTEST cluster->weta2() returns " << (*PhotonItr)->cluster()->weta2());
-        ATH_MSG_INFO("REGTEST cluster->ehad() returns " << (*PhotonItr)->cluster()->ehad1());
-        ATH_MSG_INFO("REGTEST cluster->emaxs1() returns " << (*PhotonItr)->cluster()->emaxs1());
-
-        ATH_MSG_INFO("REGTEST Looking at P4PtEtaPhiM " << j);
-
-        ATH_MSG_INFO("REGTEST P4PtEtaPhiM->Pt() returns " << (*PhotonItr)->pt());
-        ATH_MSG_INFO("REGTEST P4PtEtaPhiM->Eta() returns " << (*PhotonItr)->eta());
-        ATH_MSG_INFO("REGTEST P4PtEtaPhiM->Phi() returns " << (*PhotonItr)->phi());
-        ATH_MSG_INFO("REGTEST P4PtEtaPhiM->m() returns " << (*PhotonItr)->m());
-      }
-
-      // printout variables using the new << operator
-      ATH_MSG_INFO("TrigPhoton printout:");
-      ATH_MSG_INFO("REGTEST " << (**PhotonItr));
-
-      // do second loop to compare TrigPhotons using comparison operators
-      TrigPhotonContainer::const_iterator PhotonItr2  = PhotonItr;
-      TrigPhotonContainer::const_iterator PhotonItr2E = trigPhoton->end();
-
-      for (int k=0; PhotonItr2 != PhotonItr2E; ++PhotonItr2, ++k ) {
-        // find if TrigPhotons are the same (i.e. have same cluster and track
-        if ( (**PhotonItr) == (**PhotonItr2) ) {
-          ATH_MSG_INFO("REGTEST TrigPhoton nr. " << j << " is the same as TrigPhoton nr. " << k);
-        } else {
-          // TrigPhotons are different, print out differences
-          std::map<std::string, double> v_diff;
-          diff(*(*PhotonItr),*(*PhotonItr2), v_diff);
-          ATH_MSG_INFO("TrigPhoton " << k << " different form TrigPhoton " << j << " :");
-          for (const auto& p : v_diff) {
-            ATH_MSG_INFO("TrigPhoton Delta_" << p.first << " = " << p.second);
-          }
-        }
-      }
-    }
-  }
-
-  ATH_MSG_INFO("REGTEST ==========END of TrigPhotonContainer DUMP===========");
-  ATH_MSG_DEBUG("dumpTrigPhotonContainer() succeeded");
-
-  return StatusCode::SUCCESS;
-}
-
-
-//////////////////////////////////////////////////////////////////////////////////
-
-StatusCode TrigEDMChecker::dumpTrigMuonEFContainer ATLAS_NOT_THREAD_SAFE() {
-
-  ATH_MSG_DEBUG("in dumpTrigMuonEFContainer()");
-
-  ATH_MSG_INFO("REGTEST ==========START of TrigMuonEFContainer DUMP===========");
-
-  SG::ConstIterator< TrigMuonEFContainer > trigMuon;
-  SG::ConstIterator< TrigMuonEFContainer > lastTrigMuon;
-
-  StatusCode sc = evtStore()->retrieve(trigMuon,lastTrigMuon);
-  if (sc.isFailure()) {
-    ATH_MSG_INFO("REGTEST No TrigMuonEFContainer found");
-    return  StatusCode::SUCCESS;
-  }
-  ATH_MSG_INFO("REGTEST TrigMuonEFContainers retrieved");
-
-  for (int i=0; trigMuon != lastTrigMuon; ++trigMuon, ++i) {
-
-    ATH_MSG_INFO("REGTEST Looking at TrigMuonEFContainer " << i);
-
-    TrigMuonEFContainer::const_iterator MuonItr  = trigMuon->begin();
-    TrigMuonEFContainer::const_iterator MuonItrE = trigMuon->end();
-
-    for (int j=0; MuonItr != MuonItrE; ++MuonItr, ++j ) {
-
-      ATH_MSG_INFO("REGTEST Looking at TrigMuonEF " << j);
-
-      ATH_MSG_INFO("REGTEST TrigMuonEF->muonCode() returns " << (*MuonItr)->MuonCode());
-      ATH_MSG_INFO("REGTEST TrigMuonEF->roi() returns " << (*MuonItr)->RoINum());
-      ATH_MSG_INFO("REGTEST TrigMuonEF->charge() returns " << (*MuonItr)->Charge());
-
-      ATH_MSG_INFO("REGTEST Looking at P4IPtCotThPhiM " << j);
-
-      ATH_MSG_INFO("REGTEST P4IPtCotThPhiM->iPt() returns " << (*MuonItr)->iPt());
-      ATH_MSG_INFO("REGTEST P4IPtCotThPhiM->CotTh() returns " << (*MuonItr)->cotTh());
-      ATH_MSG_INFO("REGTEST P4IPtCotThPhiM->Phi() returns " << (*MuonItr)->phi());
-      ATH_MSG_INFO("REGTEST P4IPtCotThPhiM->m() returns " << (*MuonItr)->m());
-    }
-  }
-
-  ATH_MSG_INFO("REGTEST ==========END of TrigMuonEFContainer DUMP===========");
-  ATH_MSG_DEBUG("dumpTrigMuonEFContainer() succeeded");
-
-  return StatusCode::SUCCESS;
-}
 
 StatusCode TrigEDMChecker::dumpxAODMuonContainer() {
 
@@ -1347,304 +660,6 @@ StatusCode TrigEDMChecker::dumpxAODMuonContainer() {
 
 //////////////////////////////////////////////////////////////////////////////////
 
-StatusCode TrigEDMChecker::dumpTrigMuonEFInfoContainer ATLAS_NOT_THREAD_SAFE() {
-
-  ATH_MSG_DEBUG("in dumpTrigMuonEFInfoContainer()");
-
-  ATH_MSG_INFO("REGTEST ==========START of TrigMuonEFInfoContainer DUMP===========");
-
-  SG::ConstIterator< TrigMuonEFInfoContainer > trigMuon;
-  SG::ConstIterator< TrigMuonEFInfoContainer > lastTrigMuon;
-
-  StatusCode sc = evtStore()->retrieve(trigMuon,lastTrigMuon);
-  if (sc.isFailure()) {
-    ATH_MSG_INFO("REGTEST No TrigMuonEFInfoContainer found");
-    return  StatusCode::SUCCESS;
-  }
-  ATH_MSG_INFO("REGTEST TrigMuonEFInfoContainers retrieved");
-
-
-  for (int i=0; trigMuon != lastTrigMuon; ++trigMuon, ++i) {
-
-    ATH_MSG_INFO("REGTEST -+-+-+-+ Looking at TrigMuonEFInfoContainer " << i);
-
-    TrigMuonEFInfoContainer::const_iterator MuonItr  = trigMuon->begin();
-    TrigMuonEFInfoContainer::const_iterator MuonItrE = trigMuon->end();
-
-    for (int j=0; MuonItr != MuonItrE; ++MuonItr, ++j ) {
-
-      ATH_MSG_INFO("REGTEST Looking at TrigMuonEFInfo " << j);
-
-      const TrigMuonEFInfo* muonInfo = (*MuonItr);
-
-      ATH_MSG_INFO("REGTEST Test self equality ");
-      if (*muonInfo == *muonInfo) {
-        ATH_MSG_INFO("REGTEST passed ");
-      }
-      else {
-        ATH_MSG_INFO("REGTEST failed ");
-      }
-
-
-      if (muonInfo->hasTrack()) {
-        ATH_MSG_INFO("REGTEST Test new version ");
-
-        ATH_MSG_INFO("REGTEST hasTracks()=true ");
-        const TrigMuonEFInfoTrackContainer *tc = muonInfo->TrackContainer();
-        ATH_MSG_INFO("REGTEST TrackContainer size: " <<  tc->size());
-
-        for (TrigMuonEFInfoTrackContainer::const_iterator TrackItr = tc->begin() ; TrackItr!=tc->end(); ++TrackItr) {
-
-          const TrigMuonEFInfoTrack* muonInfo = (*TrackItr);
-          ATH_MSG_INFO("REGTEST MuonType(): ");
-
-          const TrigMuonEFTrack* muonTrack = muonInfo->SpectrometerTrack();
-          if (muonTrack) {
-            printMuonTrk(muonTrack);
-          } else {
-            ATH_MSG_INFO("REGTEST no SpectrometerTrack track found");
-          }
-
-          ATH_MSG_INFO("REGTEST Looking at TrigMuonEFTrack ExtrapolatedTrack()");
-          muonTrack = muonInfo->ExtrapolatedTrack();
-          if (muonTrack) {
-            printMuonTrk(muonTrack);
-          } else {
-            ATH_MSG_INFO("REGTEST no ExtrapolatedTrack track found");
-          }
-
-          ATH_MSG_INFO("REGTEST Looking at TrigMuonEFTrack CombinedTrack()");
-          const TrigMuonEFCbTrack* muonCbTrack = muonInfo->CombinedTrack();
-          if (muonCbTrack) {
-            printMuonTrk(muonTrack);
-          } else {
-            ATH_MSG_INFO("REGTEST no CombinedTrack track found");
-          }
-        }
-
-      }
-
-      if (!muonInfo) {
-        ATH_MSG_INFO("REGTEST no TrigMuonEFInfo found");
-        return StatusCode::SUCCESS;
-      }
-      ATH_MSG_INFO("REGTEST TrigMuonEFInfo->RoINum() returns " << muonInfo->RoINum());
-    }
-  }
-
-  ATH_MSG_INFO("REGTEST ==========END of TrigMuonEFInfoContainer DUMP===========");
-  ATH_MSG_DEBUG("dumpTrigMuonEFInfoContainer() succeeded");
-
-  return StatusCode::SUCCESS;
-}
-
-//////////////////////////////////////////////////////////////////////////////////
-
-StatusCode TrigEDMChecker::dumpTrigMuonEFIsolationContainer ATLAS_NOT_THREAD_SAFE() {
-
-  ATH_MSG_DEBUG("in dumpTrigMuonEFIsolationContainer()");
-
-  ATH_MSG_INFO("REGTEST ==========START of TrigMuonEFIsolationContainer DUMP===========");
-
-  SG::ConstIterator< TrigMuonEFIsolationContainer > trigMuon;
-  SG::ConstIterator< TrigMuonEFIsolationContainer > lastTrigMuon;
-
-  StatusCode sc = evtStore()->retrieve(trigMuon,lastTrigMuon);
-  if (sc.isFailure()) {
-    ATH_MSG_INFO("REGTEST No TrigMuonEFIsolationContainer found");
-    return  StatusCode::SUCCESS;
-  }
-  ATH_MSG_INFO("REGTEST TrigMuonEFIsolationContainers retrieved");
-
-
-  for (int i=0; trigMuon != lastTrigMuon; ++trigMuon, ++i) {
-
-    ATH_MSG_INFO("REGTEST -+-+-+-+ Looking at TrigMuonEFIsolationContainer " << i);
-
-    TrigMuonEFIsolationContainer::const_iterator MuonItr  = trigMuon->begin();
-    TrigMuonEFIsolationContainer::const_iterator MuonItrE = trigMuon->end();
-
-    for (int j=0; MuonItr != MuonItrE; ++MuonItr, ++j ) {
-
-      ATH_MSG_INFO("REGTEST Looking at TrigMuonEFIsolation " << j);
-
-      const TrigMuonEFIsolation* muonIsolation = (*MuonItr);
-
-      ATH_MSG_INFO("REGTEST Test self equality ");
-      if (*muonIsolation == *muonIsolation) {
-        ATH_MSG_INFO("REGTEST passed ");
-      }
-      else {
-        ATH_MSG_INFO("REGTEST failed ");
-      }
-
-      ATH_MSG_INFO("REGTEST sumTrkPtCone02(): " << muonIsolation->sumTrkPtCone02());
-      ATH_MSG_INFO("REGTEST sumTrkPtCone03(): " << muonIsolation->sumTrkPtCone03());
-      ATH_MSG_INFO("REGTEST sumEtCone01()   : " << muonIsolation->sumEtCone01());
-      ATH_MSG_INFO("REGTEST sumEtCone02()   : " << muonIsolation->sumEtCone02());
-      ATH_MSG_INFO("REGTEST sumEtCone03()   : " << muonIsolation->sumEtCone03());
-      ATH_MSG_INFO("REGTEST sumEtCone04()   : " << muonIsolation->sumEtCone04());
-      ATH_MSG_INFO("REGTEST trackPosition() : " << muonIsolation->trackPosition() );
-      // access MuonInfo* - only works for >=2012 data
-      if(muonIsolation->getMuonInfo()) {
-        ATH_MSG_INFO("REGTEST Link MuonEFInfo found: " << muonIsolation->getMuonInfo());
-        if(!muonIsolation->getEFMuonInfoTrack()) {
-          ATH_MSG_WARNING("REGTEST No InfoTrack attached to this EFIsolation object");
-        }
-        else {
-          const TrigMuonEFInfoTrack* trk = muonIsolation->getEFMuonInfoTrack();
-          ATH_MSG_INFO("REGTEST Linke EFInfoTrack has MuonType : " << trk->MuonType());
-          if(trk->hasCombinedTrack()) ATH_MSG_INFO("REGTEST Linked EFInfoTrack combined pt : " << trk->CombinedTrack()->pt());
-          if(trk->hasExtrapolatedTrack()) ATH_MSG_INFO("REGTEST Linked EFInfoTrack extrapolated pt : " << trk->ExtrapolatedTrack()->pt());
-          if(trk->hasSpectrometerTrack()) ATH_MSG_INFO("REGTEST Linked EFInfoTrack MS pt : " << trk->SpectrometerTrack()->pt());
-          if(trk->hasCombinedTrack()) {
-            if(trk->CombinedTrack()->getIDTrackParticle()) 
-              ATH_MSG_INFO("REGTEST Linked EFInfoTrack ID track pt : " << trk->CombinedTrack()->getIDTrackParticle()->pt());
-          }
-
-        }
-      }else {
-        ATH_MSG_INFO("REGTEST No Linked MuonEFInfo, expected for pre 2012 data");
-      }
-
-    }//TrigMuonEFIsolation loop
-  }//TrigMuonEFIsolationContainer loop
-
-  ATH_MSG_INFO("REGTEST ==========END of TrigMuonEFIsolationContainer DUMP===========");
-  ATH_MSG_DEBUG("dumpTrigMuonEFIsolationContainer() succeeded");
-
-  return StatusCode::SUCCESS;
-
-}//dumpTrigMuonEFIsolationContainer
-
-
-void TrigEDMChecker::printMuonTrk(const TrigMuonEFTrack* muonTrack) {
-  ATH_MSG_INFO("POINTER TrigMuonEFTrack: " << muonTrack);
-	//if(muonTrack) mLog << MSG::INFO << "REGTEST TrigMuonEFTrack: " << *muonTrack << endmsg;
-
-// 	mLog <<MSG::INFO << "REGTEST TrigMuonEFTrack->charge() returns " << muonTrack->Charge() << endmsg;
-// 	mLog <<MSG::INFO << "REGTEST P4IPtCotThPhiM->iPt() returns " << muonTrack->iPt() << endmsg;
-// 	mLog <<MSG::INFO << "REGTEST P4IPtCotThPhiM->CotTh() returns " << muonTrack->cotTh() << endmsg;
-// 	mLog <<MSG::INFO << "REGTEST P4IPtCotThPhiM->Phi() returns " << muonTrack->phi() << endmsg;
-// 	mLog <<MSG::INFO << "REGTEST P4IPtCotThPhiM->m() returns " << muonTrack->m() << endmsg;
-// 	mLog <<MSG::INFO << "REGTEST chi2() returns " << muonTrack->chi2() << endmsg;
-// 	mLog <<MSG::INFO << "REGTEST chi2prob() returns " << muonTrack->chi2prob() << endmsg;
-// 	mLog <<MSG::INFO << "REGTEST posX() returns " << muonTrack->posX() << endmsg;
-// 	mLog <<MSG::INFO << "REGTEST posY() returns " << muonTrack->posY() << endmsg;
-// 	mLog <<MSG::INFO << "REGTEST posZ() returns " << muonTrack->posZ() << endmsg;
-// 	mLog <<MSG::INFO << "REGTEST NCscHitsEta() returns " << muonTrack->NCscHitsEta() << endmsg;
-// 	mLog <<MSG::INFO << "REGTEST NCscHitsPhi() returns " << muonTrack->NCscHitsPhi() << endmsg;
-// 	mLog <<MSG::INFO << "REGTEST NTgcHitsEta() returns " << muonTrack->NTgcHitsEta() << endmsg;
-// 	mLog <<MSG::INFO << "REGTEST NTgcHitsPhi() returns " << muonTrack->NTgcHitsPhi() << endmsg;
-//  	mLog <<MSG::INFO << "REGTEST NMdtHitsEta() returns " << muonTrack->NMdtHitsEta() << endmsg;
-//  	mLog <<MSG::INFO << "REGTEST NMdtHitsPhi() returns " << muonTrack->NMdtHitsPhi() << endmsg;
-// 	mLog <<MSG::INFO << "REGTEST NRpcHitsEta() returns " << muonTrack->NRpcHitsEta() << endmsg;
-// 	mLog <<MSG::INFO << "REGTEST NRpcHitsPhi() returns " << muonTrack->NRpcHitsPhi() << endmsg;
-// 	mLog <<MSG::INFO << "REGTEST d0() returns " << muonTrack->d0() << endmsg;
-// 	mLog <<MSG::INFO << "REGTEST z0() returns " << muonTrack->z0() << endmsg;
-}
-
-void TrigEDMChecker::printMuonTrk(const TrigMuonEFCbTrack* muonTrack) {
-  ATH_MSG_INFO(" POINTER TrigMuonEFCbTrack: " << muonTrack);
-	//if(muonTrack) mLog << MSG::INFO << "REGTEST TrigMuonEFCbTrack: " << *muonTrack << endmsg;
-
-// 	printMuonTrk(mLog,(TrigMuonEFTrack*)muonTrack);
-//  	mLog <<MSG::INFO << "REGTEST TrigMuonEFCbTrack " << muonTrack << endmsg;
-// 	mLog <<MSG::INFO << "REGTEST NIdPixelHits() returns " << muonTrack->NIdPixelHits() << endmsg;
-// 	mLog <<MSG::INFO << "REGTEST NIdSctHits() returns " << muonTrack->NIdSctHits() << endmsg;
-// 	mLog <<MSG::INFO << "REGTEST NTrtHits() returns " << muonTrack->NTrtHits() << endmsg;
-// 	mLog <<MSG::INFO << "REGTEST matchChi2() returns " << muonTrack->matchChi2() << endmsg;
-}
-
-//////////////////////////////////////////////////////////////////////////////////
-
-StatusCode TrigEDMChecker::dumpTrigElectronContainer ATLAS_NOT_THREAD_SAFE() {
-
-  ATH_MSG_DEBUG("in dumpTrigElectronContainer()");
-
-  ATH_MSG_INFO("REGTEST ==========START of TrigElectronContainer DUMP===========");
-
-	SG::ConstIterator< TrigElectronContainer > trigElec;
-	SG::ConstIterator< TrigElectronContainer > lastTrigElec;
-
-	StatusCode sc = evtStore()->retrieve(trigElec,lastTrigElec);
-	if (sc.isFailure()) {
-      ATH_MSG_INFO("REGTEST No TrigelectronContainer found");
-		return  StatusCode::SUCCESS;
-	}
-	ATH_MSG_INFO("REGTEST TrigElectronContainers retrieved");
-
-	// declare pointer to the last trigElectron to test comparison operators
-	TrigElectronContainer::const_iterator firstTrigEl ;
-
-	for (int i=0; trigElec != lastTrigElec; ++trigElec, ++i) {
-
-	  ATH_MSG_INFO("REGTEST Looking at TrigElectronContainer " << i);
-
-	  TrigElectronContainer::const_iterator elecItr  = trigElec->begin();
-	  TrigElectronContainer::const_iterator elecItrE = trigElec->end();
-
-	  for (int j=0; elecItr != elecItrE; ++elecItr, ++j ) {
-
-	    ATH_MSG_INFO("REGTEST Looking at TrigElectron " << j);
-	    // 			mLog <<MSG::INFO << "REGTEST TrigElectron->isValid()      returns " << (*elecItr)->isValid() << endmsg;
-	    // 			mLog <<MSG::INFO << "REGTEST TrigElectron->pt()           returns " << (*elecItr)->pt() << endmsg;
-	    // 			mLog <<MSG::INFO << "REGTEST TrigElectron->eta()          returns " << (*elecItr)->eta() << endmsg;
-	    // 			mLog <<MSG::INFO << "REGTEST TrigElectron->phi()          returns " << (*elecItr)->phi() << endmsg;
-	    // 			mLog <<MSG::INFO << "REGTEST TrigElectron->Zvtx()         returns " << (*elecItr)->Zvtx() << endmsg;
-
-	    // 			mLog <<MSG::INFO << "REGTEST TrigElectron->charge()       returns " << (*elecItr)->charge() << endmsg;
-	    // 			mLog <<MSG::INFO << "REGTEST TrigElectron->trackIndx()    returns " << (*elecItr)->trackIndx() << endmsg;
-	    // 			mLog <<MSG::INFO << "REGTEST TrigElectron->trkClusDphi()  returns " << (*elecItr)->trkClusDphi() << endmsg;
-	    // 			mLog <<MSG::INFO << "REGTEST TrigElectron->trkClusDeta()  returns " << (*elecItr)->trkClusDeta() << endmsg;
-	    // 			mLog <<MSG::INFO << "REGTEST TrigElectron->Pt() (track)   returns " << (*elecItr)->Pt() << endmsg;
-	    // 			mLog <<MSG::INFO << "REGTEST TrigElectron->err_Pt()       returns " << (*elecItr)->err_Pt() << endmsg;
-	    // 			mLog <<MSG::INFO << "REGTEST TrigElectron->err_eta()      returns " << (*elecItr)->err_eta() << endmsg;
-	    // 			mLog <<MSG::INFO << "REGTEST TrigElectron->err_phi()      returns " << (*elecItr)->err_phi() << endmsg;
-	    // 			mLog <<MSG::INFO << "REGTEST TrigElectron->err_Zvtx()     returns " << (*elecItr)->err_Zvtx() << endmsg;
-
-	    // 			mLog <<MSG::INFO << "REGTEST New methods: " << endmsg;
-	    // 			mLog <<MSG::INFO << "REGTEST TrigElectron->roiWord()      returns " << (*elecItr)->roiWord() << endmsg;
-	    // 			mLog <<MSG::INFO << "REGTEST TrigElectron->trkEtaAtCalo() returns " << (*elecItr)->trkEtaAtCalo() << endmsg;
-	    // 			mLog <<MSG::INFO << "REGTEST TrigElectron->trkPhiAtCalo() returns " << (*elecItr)->trkPhiAtCalo() << endmsg;
-	    // 			mLog <<MSG::INFO << "REGTEST TrigElectron->caloEta()      returns " << (*elecItr)->caloEta() << endmsg;
-	    // 			mLog <<MSG::INFO << "REGTEST TrigElectron->caloPhi()      returns " << (*elecItr)->caloPhi() << endmsg;
-	    // 			mLog <<MSG::INFO << "REGTEST TrigElectron->Rcore()        returns " << (*elecItr)->Rcore() << endmsg;
-	    // 			mLog <<MSG::INFO << "REGTEST TrigElectron->Eratio()       returns " << (*elecItr)->Eratio() << endmsg;
-	    // 			mLog <<MSG::INFO << "REGTEST TrigElectron->EThad()        returns " << (*elecItr)->EThad() << endmsg;
-
-	    // printout variables using the new << operator
-	    ATH_MSG_INFO("TrigElectron printout:");
-	    ATH_MSG_INFO("REGTEST " << (**elecItr));
-
-	    // do second loop to compare TrigElectrons using comparison operators
-	    TrigElectronContainer::const_iterator elecItr2  = elecItr; //trigElec->begin();
-	    TrigElectronContainer::const_iterator elecItr2E = trigElec->end();
-
-	    for (int k=0; elecItr2 != elecItr2E; ++elecItr2, ++k ) {
-	      // find if TrigElectrons are the same (i.e. have same cluster and track
-	      if ( (**elecItr) == (**elecItr2) ) {
-            ATH_MSG_INFO("REGTEST TrigElectron nr. " << j << " is the same as TrigElectron nr. " << k);
-	      } else {
-            // TrigElectrons are different, print out differences
-            std::map<std::string, double> v_diff;
-            diff(*(*elecItr),*(*elecItr2), v_diff);
-            ATH_MSG_INFO("TrigElectron " << k << " different form TrigElectron " << j << " :");
-            for (const auto& p : v_diff) {
-              ATH_MSG_INFO("TrigElectron Delta_" << p.first << " = " << p.second);
-            }
-	      }
-	    }
-	  }
-	}
-
-	ATH_MSG_INFO("REGTEST ==========END of TrigElectronContainer DUMP===========");
-    ATH_MSG_DEBUG("dumpTrigElectronContainer() succeeded");
-
-	return StatusCode::SUCCESS;
-}
-
-//////////////////////////////////////////////////////////////////////////////////
 StatusCode TrigEDMChecker::dumpxAODTrigElectronContainer() {
 
   ATH_MSG_DEBUG("In dumpxAODElectronContainer");
@@ -1767,6 +782,7 @@ StatusCode TrigEDMChecker::dumpxAODElectronContainer() {
   //
   static const SG::AuxElement::Accessor< float > accLH("LHValue");
   static const SG::AuxElement::Accessor< float > accLHCalo("LHCaloValue");
+  static const SG::AuxElement::Accessor<ElementLink<xAOD::CaloClusterContainer> > orig ("originalCaloCluster");
   for (const auto eg : *elCont){
       //REGTEST printout
       if (eg) {
@@ -1840,7 +856,6 @@ StatusCode TrigEDMChecker::dumpxAODElectronContainer() {
           ATH_MSG_INFO(" REGTEST: problems with egamma cluster pointer" );
       }
       ATH_MSG_INFO("REGTEST: Check the original (uncalibrated)");
-      static const SG::AuxElement::Accessor<ElementLink<xAOD::CaloClusterContainer> > orig ("originalCaloCluster");
       if (!orig.isAvailable(*eg->caloCluster()) || !orig(*eg->caloCluster()).isValid()){
           ATH_MSG_INFO("Problem with original cluster link");
       }
@@ -1919,7 +934,8 @@ StatusCode TrigEDMChecker::dumpxAODPhotonContainer() {
   unsigned int isEMbit=0;
   //DEBUG output for xAOD::PhotonContainer
   ATH_MSG_INFO(" REGTEST: xAOD Reconstruction variables: ");
-  //                //Cluster and ShowerShape info
+  //Cluster and ShowerShape info
+  static const SG::AuxElement::Accessor<ElementLink<xAOD::CaloClusterContainer> > orig ("originalCaloCluster");
   for (const auto eg : *phCont){
       //REGTEST printout
       if (eg) {
@@ -1951,7 +967,6 @@ StatusCode TrigEDMChecker::dumpxAODPhotonContainer() {
           ATH_MSG_INFO(" REGTEST: problems with egamma cluster pointer" );
       }
       ATH_MSG_INFO("REGTEST: Check the original (uncalibrated)");
-      static const SG::AuxElement::Accessor<ElementLink<xAOD::CaloClusterContainer> > orig ("originalCaloCluster");
       if (!orig.isAvailable(*eg->caloCluster()) || !orig(*eg->caloCluster()).isValid()){
           ATH_MSG_INFO("Problem with original cluster link");
       }
@@ -1992,189 +1007,8 @@ StatusCode TrigEDMChecker::dumpxAODPhotonContainer() {
   return StatusCode::SUCCESS;
 
 }
-//////////////////////////////////////////////////////////////////////////////////
-
-StatusCode TrigEDMChecker::dumpTrigTauContainer ATLAS_NOT_THREAD_SAFE() {
-
-  ATH_MSG_DEBUG("in dumpTrigTauContainer()");
-  ATH_MSG_INFO("REGTEST ==========START of TrigTauContainer DUMP===========");
-
-  SG::ConstIterator< TrigTauContainer > trigTau;
-  SG::ConstIterator< TrigTauContainer > lastTrigTau;
-
-  StatusCode sc = evtStore()->retrieve(trigTau,lastTrigTau);
-  if (sc.isFailure()) {
-    ATH_MSG_INFO("REGTEST No TrigTauContainer found");
-    return  StatusCode::SUCCESS;
-  }
-  ATH_MSG_INFO("REGTEST TrigTauContainer retrieved");
-
-  for (int i=0; trigTau != lastTrigTau; ++trigTau, ++i) {
-
-    ATH_MSG_INFO("REGTEST Looking at TrigTauContainer " << i);
-
-    TrigTauContainer::const_iterator TrigTauItr  = trigTau->begin();
-    TrigTauContainer::const_iterator TrigTauItrE = trigTau->end();
-
-    for (int j=0; TrigTauItr != TrigTauItrE; ++TrigTauItr, ++j ) {
-
-      ATH_MSG_INFO("REGTEST Looking at TrigTau " << j);
-
-      ATH_MSG_INFO("REGTEST TrigTau->pt() returns " << (*TrigTauItr)->pt());
-      ATH_MSG_INFO("REGTEST TrigTau->eta() returns " << (*TrigTauItr)->eta());
-      ATH_MSG_INFO("REGTEST TrigTau->phi() returns " << (*TrigTauItr)->phi());
-
-      ATH_MSG_INFO("REGTEST TrigTau->nMatchedTracks() returns " << (*TrigTauItr)->nMatchedTracks());
-      ATH_MSG_INFO("REGTEST TrigTau->simpleEtFlow() returns " << (*TrigTauItr)->simpleEtFlow());
-      ATH_MSG_INFO("REGTEST TrigTau->m() returns " << (*TrigTauItr)->m());
-    }
-  }
-
-  ATH_MSG_INFO("REGTEST ==========END of TrigTau DUMP===========");
-  ATH_MSG_DEBUG("dumpTrigTauContainer() succeeded");
-
-  return StatusCode::SUCCESS;
-}
 
 //////////////////////////////////////////////////////////////////////////////////
-StatusCode TrigEDMChecker::dumpTrigTauTracksInfo ATLAS_NOT_THREAD_SAFE() {
-
-  ATH_MSG_DEBUG("in dumpTrigTauTracksInfo()");
-  ATH_MSG_INFO("REGTEST ==========START of TrigTauTracksInfo DUMP===========");
-
-  SG::ConstIterator< TrigTauTracksInfo > trigTau;
-  SG::ConstIterator< TrigTauTracksInfo > lastTrigTau;
-
-  StatusCode sc = evtStore()->retrieve(trigTau,lastTrigTau);
-  if (sc.isFailure()) {
-    ATH_MSG_INFO("REGTEST No TrigTauTracksInfo found");
-    return  StatusCode::SUCCESS;
-  }
-  ATH_MSG_INFO("REGTEST TrigTauTracksInfos retrieved");
-
-  for (int i=0; trigTau != lastTrigTau; ++trigTau, ++i) {
-
-    const TrigTauTracksInfo* thisTrigTau = &(*trigTau);
-
-    ATH_MSG_INFO("REGTEST Looking at TrigTauTracksInfo " << i);
-
-    ATH_MSG_INFO("REGTEST TrigTauTracksInfo->pt() returns " << thisTrigTau->pt());
-    ATH_MSG_INFO("REGTEST TrigTauTracksInfo->eta() returns " << thisTrigTau->eta());
-    ATH_MSG_INFO("REGTEST TrigTauTracksInfo->phi() returns " << thisTrigTau->phi());
-
-    ATH_MSG_INFO("REGTEST TrigTauTracksInfo->nCoreTracks() returns " << thisTrigTau->nCoreTracks());
-    ATH_MSG_INFO("REGTEST TrigTauTracksInfo->nSlowTracks() returns " << thisTrigTau->nSlowTracks());
-    ATH_MSG_INFO("REGTEST TrigTauTracksInfo->nIsoTracks() returns " << thisTrigTau->nIsoTracks());
-
-    ATH_MSG_INFO("REGTEST TrigTauTracksInfo->charge() returns " << thisTrigTau->charge());
-    ATH_MSG_INFO("REGTEST TrigTauTracksInfo->leadingTrackPt() returns " <<
-                 thisTrigTau->leadingTrackPt());
-    ATH_MSG_INFO("REGTEST TrigTauTracksInfo->scalarPtSumCore() returns " <<
-                 thisTrigTau->scalarPtSumCore());
-    ATH_MSG_INFO("REGTEST TrigTauTracksInfo->scalarPtSumIso() returns " <<
-                 thisTrigTau->scalarPtSumIso());
-    ATH_MSG_INFO("REGTEST TrigTauTracksInfo->threeFastestTracks().pt() returns " <<
-                 thisTrigTau->threeFastestTracks().pt());
-  }
-
-  ATH_MSG_INFO("REGTEST ==========END of TrigTauTracksInfo DUMP===========");
-  ATH_MSG_DEBUG("dumpTrigTauTracksInfo() succeeded");
-
-  return StatusCode::SUCCESS;
-}
-
-//////////////////////////////////////////////////////////////////////////////////
-
-StatusCode TrigEDMChecker::dumpHLTResult() {
-
-  ATH_MSG_DEBUG("in dumpHLTResult()");
-
-  ATH_MSG_INFO("REGTEST ==========START of HLTResult DUMP===========");
-
-  const HLT::HLTResult* hltResult = 0;
-  StatusCode sc=evtStore()->retrieve( hltResult, "HLTResult_L2");
-  if( sc.isFailure()  ||  !hltResult ) {
-    ATH_MSG_INFO("No HLTResult_L2 found in TDS");
-    return StatusCode::SUCCESS;
-  }
-  ATH_MSG_INFO("REGTEST HLTResult_L2 Successfully Retrieved");
-
-  ATH_MSG_INFO("REGTEST HLTResult_L2->isEmpty() returns " << hltResult->isEmpty());
-  ATH_MSG_INFO("REGTEST HLTResult_L2->size() returns " << hltResult->size());
-  ATH_MSG_INFO("REGTEST HLTResult_L2->isPassThrough() returns " << hltResult->isPassThrough());
-  ATH_MSG_INFO("REGTEST HLTResult_L2->isAccepted() returns " << hltResult->isAccepted());
-
-  ATH_MSG_INFO("REGTEST ==========END of HLTResult DUMP===========");
-
-  ATH_MSG_DEBUG("dumpHLTResult() succeeded");
-
-  return StatusCode::SUCCESS;
-}
-
-
-
-/////////////////////////////////////////////////////////////////////
-
-StatusCode TrigEDMChecker::dumpTrigVertexCollection ATLAS_NOT_THREAD_SAFE() {
-
-  ATH_MSG_DEBUG("in dumpTrigVertexCollection()");
-  ATH_MSG_INFO("REGTEST ==========START of TrigVertexCollection DUMP===========");
-
-  SG::ConstIterator< TrigVertexCollection > trigVertex;
-  SG::ConstIterator< TrigVertexCollection > lastTrigVertex;
-
-  StatusCode sc = evtStore()->retrieve(trigVertex,lastTrigVertex);
-  if (sc.isFailure()) {
-    ATH_MSG_INFO("REGTEST No TrigVertexCollection found");
-    return  StatusCode::SUCCESS;
-  }
-  ATH_MSG_INFO("REGTEST TrigVertexCollection retrieved");
-
-
-  for (int i=0; trigVertex != lastTrigVertex; ++trigVertex, ++i) {
-
-    ATH_MSG_INFO("REGTEST Looking at TrigVertexCollection " << i);
-
-    TrigVertexCollection::const_iterator VertexItr  = trigVertex->begin();
-    TrigVertexCollection::const_iterator VertexItrE = trigVertex->end();
-
-    for (int j=0; VertexItr != VertexItrE; ++VertexItr, ++j ) {
-
-      ATH_MSG_INFO("REGTEST Looking at TrigVertex " << j);
-
-      ATH_MSG_INFO("REGTEST TrigVertex->x() returns " << (*VertexItr)->x());
-      ATH_MSG_INFO("REGTEST TrigVertex->y() returns " << (*VertexItr)->y());
-      ATH_MSG_INFO("REGTEST TrigVertex->z() returns " << (*VertexItr)->z());
-      ATH_MSG_INFO("REGTEST TrigVertex->energyFraction() returns " << (*VertexItr)->energyFraction());
-      ATH_MSG_INFO("REGTEST TrigVertex->ndof() returns " << (*VertexItr)->ndof());
-
-      if(((*VertexItr)->tracks())!=NULL ){
-        //	mLog <<MSG::INFO << "REGTEST *** ((*VertexItr)->tracks())!=NULL *** " << endmsg;
-        TrackInVertexList::const_iterator trkItr  = (*VertexItr)->tracks()->begin();
-        TrackInVertexList::const_iterator trkItrE = (*VertexItr)->tracks()->end();
-
-        for (int p=0; trkItr != trkItrE; ++trkItr, ++p ) {
-
-          ATH_MSG_INFO("REGTEST Looking at track " << p);
-
-          ATH_MSG_INFO("REGTEST Tracks info: ");
-          ATH_MSG_INFO("REGTEST tracks->NStrawHits() returns " << (*trkItr)->NStrawHits());
-          ATH_MSG_INFO("REGTEST tracks->NStrawTime() returns " << (*trkItr)->NStrawTime());
-          ATH_MSG_INFO("REGTEST tracks->NTRHits() returns " << (*trkItr)->NTRHits());
-        }
-      }
-    }
-  }
-
-  ATH_MSG_INFO("REGTEST ==========END of TrigVertexCollection DUMP===========");
-  ATH_MSG_DEBUG("dumpTrigVertexCollection() succeeded");
-
-  return StatusCode::SUCCESS;
-}
-
-
-//////////////////////////////////////////////////////////////////////////////////
-
 
 StatusCode TrigEDMChecker::dumpTrigEFBphysContainer() {
 
@@ -2716,315 +1550,9 @@ StatusCode TrigEDMChecker::dumpxAODJetContainer() {
     return StatusCode::SUCCESS;
 }
 
-
 //////////////////////////////////////////////////////////////////////////////////
 
-StatusCode TrigEDMChecker::dumpTrigEFBjetContainer ATLAS_NOT_THREAD_SAFE() {
-
-  ATH_MSG_DEBUG("in dumpTrigEFBjetContainer()");
-  ATH_MSG_INFO("REGTEST ==========START of TrigEFBjetContainer DUMP===========");
-
-  SG::ConstIterator< TrigEFBjetContainer > trigEFBjet;
-  SG::ConstIterator< TrigEFBjetContainer > lastTrigEFBjet;
-
-  StatusCode sc = evtStore()->retrieve(trigEFBjet,lastTrigEFBjet);
-  if (sc.isFailure()) {
-    ATH_MSG_INFO("REGTEST No TrigEFBjetContainer found");
-    return  StatusCode::SUCCESS;
-  }
-  ATH_MSG_INFO("REGTEST TrigEFBjetContainers retrieved");
-
-
-  for (int i=0; trigEFBjet != lastTrigEFBjet; ++trigEFBjet, ++i) {
-
-    ATH_MSG_INFO("REGTEST Looking at TrigEFBjetContainer " << i);
-
-    TrigEFBjetContainer::const_iterator EFBjetItr  = trigEFBjet->begin();
-    TrigEFBjetContainer::const_iterator EFBjetItrE = trigEFBjet->end();
-
-    for (int j=0; EFBjetItr != EFBjetItrE; ++EFBjetItr, ++j ) {
-
-      ATH_MSG_INFO("REGTEST Looking at TrigEFBjet " << j);
-
-      ATH_MSG_INFO("REGTEST TrigEFBjet->prmVtx() returns " << (*EFBjetItr)->prmVtx());
-      ATH_MSG_INFO("REGTEST TrigEFBjet->xComb() returns " << (*EFBjetItr)->xComb());
-      //      mLog <<MSG::INFO << "REGTEST TrigEFBjet->x2D() returns " << (*EFBjetItr)->x2D() << endmsg;
-      ATH_MSG_INFO("REGTEST TrigEFBjet->xIP1D() returns " << (*EFBjetItr)->xIP1D());
-      ATH_MSG_INFO("REGTEST TrigEFBjet->isValid() returns " << (*EFBjetItr)->isValid());
-      ATH_MSG_INFO("REGTEST TrigEFBjet->roiId() returns " << (*EFBjetItr)->roiId());
-      //      mLog <<MSG::INFO << "REGTEST TrigEFBjet->xD0() returns " << (*EFBjetItr)->xD0() << endmsg;
-      ATH_MSG_INFO("REGTEST TrigEFBjet->xIP2D() returns " << (*EFBjetItr)->xIP2D());
-      //      mLog <<MSG::INFO << "REGTEST TrigEFBjet->xZ0() returns " << (*EFBjetItr)->xZ0() << endmsg;
-      ATH_MSG_INFO("REGTEST TrigEFBjet->xIP3D() returns " << (*EFBjetItr)->xIP3D());
-      // new one:
-      ATH_MSG_INFO("REGTEST TrigEFBjet->xCHI2() returns " << (*EFBjetItr)->xCHI2());
-      //      mLog <<MSG::INFO << "REGTEST TrigEFBjet->x3D() returns " << (*EFBjetItr)->x3D() << endmsg; // replaced by :
-      ATH_MSG_INFO("REGTEST TrigEFBjet->xSV() returns " << (*EFBjetItr)->xSV());
-      //
-      ATH_MSG_INFO("REGTEST TrigEFBjet->xMVtx() returns " << (*EFBjetItr)->xMVtx());
-      ATH_MSG_INFO("REGTEST TrigEFBjet->xEVtx() returns " << (*EFBjetItr)->xEVtx());
-      ATH_MSG_INFO("REGTEST TrigEFBjet-> xNVtx() returns " << (*EFBjetItr)-> xNVtx());
-    }
-  }
-  ATH_MSG_INFO("REGTEST ==========END of TrigEFBjetContainer DUMP===========");
-  ATH_MSG_DEBUG("dumpTrigEFBjetContainer() succeeded");
-
-  return StatusCode::SUCCESS;
-}
-
-
-//////////////////////////////////////////////////////////////////////////////////
-
-StatusCode TrigEDMChecker::dumpTrigL2BjetContainer ATLAS_NOT_THREAD_SAFE() {
-
-  ATH_MSG_DEBUG("in dumpTrigL2BjetContainer()");
-  ATH_MSG_INFO("REGTEST ==========START of TrigL2BjetContainer DUMP===========");
-
-  SG::ConstIterator< TrigL2BjetContainer > trigL2Bjet;
-  SG::ConstIterator< TrigL2BjetContainer > lastTrigL2Bjet;
-
-  StatusCode sc = evtStore()->retrieve(trigL2Bjet,lastTrigL2Bjet);
-  if (sc.isFailure()) {
-    ATH_MSG_INFO("REGTEST No TrigL2BjetContainer found");
-    return  StatusCode::SUCCESS;
-  }
-  ATH_MSG_INFO("REGTEST TrigL2BjetContainers retrieved");
-
-
-  for (int i=0; trigL2Bjet != lastTrigL2Bjet; ++trigL2Bjet, ++i) {
-
-    ATH_MSG_INFO("REGTEST Looking at TrigL2BjetContainer " << i);
-
-    TrigL2BjetContainer::const_iterator L2BjetItr  = trigL2Bjet->begin();
-    TrigL2BjetContainer::const_iterator L2BjetItrE = trigL2Bjet->end();
-
-    for (int j=0; L2BjetItr != L2BjetItrE; ++L2BjetItr, ++j ) {
-
-      ATH_MSG_INFO("REGTEST Looking at TrigL2Bjet " << j);
-      ATH_MSG_INFO("REGTEST TrigL2Bjet->prmVtx() returns " << (*L2BjetItr)->prmVtx());
-      ATH_MSG_INFO("REGTEST TrigL2Bjet->xComb() returns " << (*L2BjetItr)->xComb());
-      // ATH_MSG_INFO("REGTEST TrigL2Bjet->x2D() returns " << (*L2BjetItr)->x2D());
-      ATH_MSG_INFO("REGTEST TrigL2Bjet->xIP1D() returns " << (*L2BjetItr)->xIP1D());
-      ATH_MSG_INFO("REGTEST TrigL2Bjet->isValid() returns " << (*L2BjetItr)->isValid());
-      ATH_MSG_INFO("REGTEST TrigL2Bjet->roiId() returns " << (*L2BjetItr)->roiId());
-      // ATH_MSG_INFO("REGTEST TrigL2Bjet->xD0() returns " << (*L2BjetItr)->xD0());
-      ATH_MSG_INFO("REGTEST TrigL2Bjet->xIP2D() returns " << (*L2BjetItr)->xIP2D());
-      // ATH_MSG_INFO("REGTEST TrigL2Bjet->xZ0() returns " << (*L2BjetItr)->xZ0());
-      ATH_MSG_INFO("REGTEST TrigL2Bjet->xIP3D() returns " << (*L2BjetItr)->xIP3D());
-      // new one:
-      ATH_MSG_INFO("REGTEST TrigL2Bjet->xCHI2() returns " << (*L2BjetItr)->xCHI2());
-      // ATH_MSG_INFO("REGTEST TrigL2Bjet->x3D() returns " << (*L2BjetItr)->x3D());
-      ATH_MSG_INFO("REGTEST TrigL2Bjet->xSV() returns " << (*L2BjetItr)->xSV());
-      ATH_MSG_INFO("REGTEST TrigL2Bjet->xMVtx() returns " << (*L2BjetItr)->xMVtx());
-      ATH_MSG_INFO("REGTEST TrigL2Bjet->xEVtx() returns " << (*L2BjetItr)->xEVtx());
-      ATH_MSG_INFO("REGTEST TrigL2Bjet-> xNVtx() returns " << (*L2BjetItr)-> xNVtx());
-    }
-  }
-  ATH_MSG_INFO("REGTEST ==========END of TrigL2BjetContainer DUMP===========");
-  ATH_MSG_DEBUG("dumpTrigL2BjetContainer() succeeded");
-
-  return StatusCode::SUCCESS;
-}
-
-//////////////////////////////////////////////////////////////////////////////////
-
-StatusCode TrigEDMChecker::dumpMuonFeature ATLAS_NOT_THREAD_SAFE() {
-
-  ATH_MSG_DEBUG("in dumpMuonFeature()");
-
-  ATH_MSG_INFO("REGTEST ==========START of MuonFeature DUMP===========");
-
-  SG::ConstIterator< MuonFeature > MuFeature;
-  SG::ConstIterator< MuonFeature > lastMuFeature;
-
-  StatusCode sc = evtStore()->retrieve(MuFeature,lastMuFeature);
-  if (sc.isFailure()) {
-    ATH_MSG_INFO("REGTEST No MuonFeature found");
-    return  StatusCode::SUCCESS;
-  }
-  ATH_MSG_INFO("REGTEST MuonFeature retrieved");
-
-
-  for (int i=0; MuFeature != lastMuFeature; ++MuFeature, ++i) {
-
-    const MuonFeature* thisMuFeature = &(*MuFeature);
-
-    ATH_MSG_INFO("REGTEST Looking at MuonFeature " << i);
-    ATH_MSG_INFO("REGTEST MuonFeature->roiId() returns " << thisMuFeature->roiId());
-    ATH_MSG_INFO("REGTEST MuonFeature->eta() returns " << thisMuFeature->eta());
-    ATH_MSG_INFO("REGTEST MuonFeature->phi() returns " << thisMuFeature->phi());
-    ATH_MSG_INFO("REGTEST MuonFeature->saddress() returns " << thisMuFeature->saddress());
-    ATH_MSG_INFO("REGTEST MuonFeature->pt() returns " << thisMuFeature->pt());
-    ATH_MSG_INFO("REGTEST MuonFeature->radius() returns " << thisMuFeature->radius());
-    ATH_MSG_INFO("REGTEST MuonFeature->dir_phi() returns " << thisMuFeature->dir_phi());
-    ATH_MSG_INFO("REGTEST MuonFeature->zeta() returns " << thisMuFeature->zeta());
-    ATH_MSG_INFO("REGTEST MuonFeature->dir_zeta() returns " << thisMuFeature->dir_zeta());
-    ATH_MSG_INFO("REGTEST MuonFeature->beta() returns " << thisMuFeature->beta());
-  }
-
-  ATH_MSG_INFO("REGTEST ==========END of MuonFeature DUMP===========");
-  ATH_MSG_DEBUG("dumpMuonFeature() succeeded");
-
-  return StatusCode::SUCCESS;
-}
-
-//////////////////////////////////////////////////////////////////////////////////
-
-StatusCode TrigEDMChecker::dumpCombinedMuonFeature ATLAS_NOT_THREAD_SAFE() {
-
-  ATH_MSG_DEBUG("in dumpCombinedMuonFeature()");
-
-  ATH_MSG_INFO("REGTEST ==========START of CombinedMuonFeature DUMP===========");
-
-  SG::ConstIterator< CombinedMuonFeature > CombMuon;
-  SG::ConstIterator< CombinedMuonFeature > lastCombMuon;
-
-  StatusCode sc = evtStore()->retrieve(CombMuon,lastCombMuon);
-  if (sc.isFailure()) {
-    ATH_MSG_INFO("REGTEST No CombinedMuonFeature found");
-    return  StatusCode::SUCCESS;
-  }
-  ATH_MSG_INFO("REGTEST CombinedMuonFeatures retrieved");
-
-  for (int i=0; CombMuon != lastCombMuon; ++CombMuon, ++i) {
-
-    const CombinedMuonFeature* thisCombMuFeature = &(*CombMuon);
-
-    ATH_MSG_INFO("REGTEST Looking at CombinedMuonFeature " << i);
-    ATH_MSG_INFO("REGTEST TrigPhoton->pt() returns " << (thisCombMuFeature)->pt());
-    ATH_MSG_INFO("REGTEST TrigPhoton->sigma_pt() returns " << (thisCombMuFeature)->sigma_pt());
-    ATH_MSG_INFO("REGTEST MuonFeature info: ");
-    //      if ((thisCombMuFeature)->muFastTrack()) {
-    if ((thisCombMuFeature)->muFastTrackLink().isValid() ) {
-      ATH_MSG_INFO("REGTEST muFastTrack->eta() returns " << (thisCombMuFeature)->muFastTrack()->eta());
-      ATH_MSG_INFO("REGTEST muFastTrack->phi() returns " << (thisCombMuFeature)->muFastTrack()->phi());
-      ATH_MSG_INFO("REGTEST muFastTrack->radius() returns " << (thisCombMuFeature)->muFastTrack()->radius());
-      ATH_MSG_INFO("REGTEST muFastTrack->zeta() returns " << (thisCombMuFeature)->muFastTrack()->zeta());
-    } else {
-      ATH_MSG_INFO("CombinedMuonFeature has no muFastTrack" );
-    }
-
-    ATH_MSG_INFO("REGTEST TrigInDetTrack info: ");
-    //      if ((thisCombMuFeature)->IDTrack()) {
-    if ((thisCombMuFeature)->IDTrackLink().isValid() ) {
-      ATH_MSG_INFO("REGTEST IDTrack->algorithmId() returns " <<(thisCombMuFeature)->IDTrack()->algorithmId());
-      ATH_MSG_INFO("REGTEST IDTrack->chi2() returns " << (thisCombMuFeature)->IDTrack()->chi2());
-      ATH_MSG_INFO("REGTEST IDTrack->NStrawHits() returns " <<(thisCombMuFeature)->IDTrack()->NStrawHits());
-      ATH_MSG_INFO("REGTEST IDTrack->NStraw() returns " << (thisCombMuFeature)->IDTrack()->NStraw());
-      ATH_MSG_INFO("REGTEST IDTrack->NStrawTime() returns " <<(thisCombMuFeature)->IDTrack()->NStrawTime());
-      ATH_MSG_INFO("REGTEST IDTrack->NTRHits() returns " <<(thisCombMuFeature)->IDTrack()->NTRHits());
-    } else {
-      ATH_MSG_INFO("CombinedMuonFeature has no IDTrack" );
-    }
-
-  }
-
-  ATH_MSG_INFO("REGTEST ==========END of CombinedMuonFeature DUMP===========");
-  ATH_MSG_DEBUG("dumpCombinedMuonFeature() succeeded");
-
-  return StatusCode::SUCCESS;
-}
-
-StatusCode TrigEDMChecker::dumpCombinedMuonFeatureContainer ATLAS_NOT_THREAD_SAFE() {
-
-  ATH_MSG_DEBUG("in dumpCombinedMuonFeatureContainer()");
-  ATH_MSG_INFO("REGTEST ==========START of CombinedMuonFeatureContainer DUMP===========");
-
-  SG::ConstIterator< CombinedMuonFeatureContainer > CombMuon;
-  SG::ConstIterator< CombinedMuonFeatureContainer > lastCombMuon;
-
-  StatusCode sc = evtStore()->retrieve(CombMuon,lastCombMuon);
-  if (sc.isFailure()) {
-    ATH_MSG_INFO("REGTEST No CombinedMuonFeatureContainer found");
-    return  StatusCode::SUCCESS;
-  }
-  ATH_MSG_INFO("REGTEST CombinedMuonFeaturesContainer retrieved");
-
-  for (int j=0; CombMuon != lastCombMuon; ++CombMuon, ++j) {
-    ATH_MSG_INFO("REGTEST Looking at CombinedMuonFeatureContainer " << j);
-
-    const CombinedMuonFeatureContainer* container = &(*CombMuon);
-    CombinedMuonFeatureContainer::const_iterator muon;
-
-    int i = 0;
-    for ( muon = container->begin() ; muon != container->end(); ++i, ++muon ) {
-      const CombinedMuonFeature* thisCombMuFeature = *muon;
-      ATH_MSG_INFO("REGTEST Looking at CombinedMuonFeature " << i);
-
-      ATH_MSG_INFO("REGTEST CombinedMuonFeature->pt() returns " << (thisCombMuFeature)->pt());
-      ATH_MSG_INFO("REGTEST CombinedMuonFeature->sigma_pt() returns " << (thisCombMuFeature)->sigma_pt());
-
-      ATH_MSG_INFO("REGTEST MuonFeature info: ");
-      if ( thisCombMuFeature->muFastTrackLink().isValid() ) {
-        ATH_MSG_INFO("REGTEST muFastTrack->eta() returns " << (thisCombMuFeature)->muFastTrack()->eta());
-        ATH_MSG_INFO("REGTEST muFastTrack->phi() returns " << (thisCombMuFeature)->muFastTrack()->phi());
-        ATH_MSG_INFO("REGTEST muFastTrack->radius() returns " << (thisCombMuFeature)->muFastTrack()->radius());
-        ATH_MSG_INFO("REGTEST muFastTrack->zeta() returns " << (thisCombMuFeature)->muFastTrack()->zeta());
-      } else {
-        ATH_MSG_WARNING("MuonFeature has no muFastTrack!" );
-      }
-
-      ATH_MSG_INFO("REGTEST TrigInDetTrack info: ");
-      if ( thisCombMuFeature->IDTrackLink().isValid() ) {
-        ATH_MSG_INFO("REGTEST IDTrack->algorithmId() returns " <<(thisCombMuFeature)->IDTrack()->algorithmId());
-        ATH_MSG_INFO("REGTEST IDTrack->chi2() returns " << (thisCombMuFeature)->IDTrack()->chi2());
-        ATH_MSG_INFO("REGTEST IDTrack->NStrawHits() returns " <<(thisCombMuFeature)->IDTrack()->NStrawHits());
-
-        ATH_MSG_INFO("REGTEST IDTrack->NStraw() returns " << (thisCombMuFeature)->IDTrack()->NStraw());
-        ATH_MSG_INFO("REGTEST IDTrack->NStrawTime() returns " <<(thisCombMuFeature)->IDTrack()->NStrawTime());
-        ATH_MSG_INFO("REGTEST IDTrack->NTRHits() returns " <<(thisCombMuFeature)->IDTrack()->NTRHits());
-      } else {
-        ATH_MSG_WARNING("MuonFeature has no IDTrack!" );
-      }
-
-    }
-  }
-  return StatusCode::SUCCESS;
-}
-
-//////////////////////////////////////////////////////////////////////////////////
-
-StatusCode TrigEDMChecker::dumpTrigEMCluster ATLAS_NOT_THREAD_SAFE() {
-
-  ATH_MSG_DEBUG("in dumpTrigEMCluster()");
-  ATH_MSG_INFO("REGTEST ==========START of TrigEMCluster DUMP===========");
-
-  SG::ConstIterator< TrigEMCluster > EMCluster;
-  SG::ConstIterator< TrigEMCluster > lastEMCluster;
-
-  StatusCode sc = evtStore()->retrieve(EMCluster,lastEMCluster);
-  if (sc.isFailure()) {
-    ATH_MSG_INFO("REGTEST No TrigEMCluster found");
-    return  StatusCode::SUCCESS;
-  }
-  ATH_MSG_INFO("REGTEST TrigEMCluster retrieved");
-
-  for (int i=0; EMCluster != lastEMCluster; ++EMCluster, ++i) {
-
-    const TrigEMCluster* thisEMCluster = &(*EMCluster);
-
-    ATH_MSG_INFO("REGTEST Looking at TrigEMCluster " << i);
-
-    ATH_MSG_INFO("REGTEST TrigEMCluster->energy() returns " << thisEMCluster->energy());
-    ATH_MSG_INFO("REGTEST TrigEMCluster->e() returns " << thisEMCluster->e());
-    ATH_MSG_INFO("REGTEST TrigEMCluster->phi() returns " << thisEMCluster->phi());
-
-    ATH_MSG_INFO("REGTEST TrigEMCluster->eta() returns " << thisEMCluster->eta());
-    ATH_MSG_INFO("REGTEST TrigEMCluster->e237() returns " << thisEMCluster->e237());
-    ATH_MSG_INFO("REGTEST TrigEMCluster->e277() returns " << thisEMCluster->e277());
-    ATH_MSG_INFO("REGTEST TrigEMCluster->fracs1() returns " << thisEMCluster->fracs1());
-    ATH_MSG_INFO("REGTEST TrigEMCluster->weta2() returns " << thisEMCluster->weta2());
-    ATH_MSG_INFO("REGTEST TrigEMCluster->ehad1() returns " << thisEMCluster->ehad1());
-    ATH_MSG_INFO("REGTEST TrigEMCluster->Eta1() returns " << thisEMCluster->Eta1());
-  }
-
-  ATH_MSG_INFO("REGTEST ==========END of TrigEMCluster DUMP===========");
-  ATH_MSG_DEBUG("dumpTrigEMCluster() succeeded");
-
-  return StatusCode::SUCCESS;
-}
-
-StatusCode TrigEDMChecker::dumpxAODTrigEMCluster ATLAS_NOT_THREAD_SAFE() {
+StatusCode TrigEDMChecker::dumpxAODTrigEMCluster() {
 
   ATH_MSG_DEBUG("in dumpxAODTrigEMCluster()");
 
@@ -3068,162 +1596,7 @@ StatusCode TrigEDMChecker::dumpxAODTrigEMCluster ATLAS_NOT_THREAD_SAFE() {
 
 //////////////////////////////////////////////////////////////////////////////////
 
-StatusCode TrigEDMChecker::dumpTrigTauClusterContainer ATLAS_NOT_THREAD_SAFE() {
-
-  ATH_MSG_DEBUG("in dumpTrigTauClusterContainer()");
-
-  ATH_MSG_INFO("REGTEST ==========START of TrigTauClusterContainer/TrigTauClusterDetailsContainer DUMP===========");
-
-  SG::ConstIterator< TrigTauClusterContainer > TauCluster;
-  SG::ConstIterator< TrigTauClusterContainer > lastTauCluster;
-
-  StatusCode sc = evtStore()->retrieve(TauCluster,lastTauCluster);
-  if (sc.isFailure()) {
-    ATH_MSG_INFO("REGTEST No TrigTauClusterContainer found");
-    return  StatusCode::SUCCESS;
-  }
-  ATH_MSG_INFO("REGTEST TrigTauClusterContainer retrieved");
-
-
-  int nClusters = 0;
-  for (int i=0; TauCluster != lastTauCluster; ++TauCluster, ++i) {
-
-    ATH_MSG_INFO("REGTEST Looking at TrigTauClusterContainer " << i);
-
-    TrigTauClusterContainer::const_iterator TauClusterItr  = TauCluster->begin();
-    TrigTauClusterContainer::const_iterator TauClusterItrE = TauCluster->end();
-
-    for (int j=0; TauClusterItr != TauClusterItrE; ++TauClusterItr, ++j ) {
-      nClusters++;
-      ATH_MSG_INFO("REGTEST Looking at TrigTauCluster " << j);
-
-      ATH_MSG_INFO("REGTEST TrigTauCluster->energy() returns " << (*TauClusterItr)->energy());
-      ATH_MSG_INFO("REGTEST TrigTauCluster->et() returns " << (*TauClusterItr)->et());
-      ATH_MSG_INFO("REGTEST TrigTauCluster->EMCalibEnergy() returns " << (*TauClusterItr)->EMCalibEnergy());
-
-      ATH_MSG_INFO("REGTEST TrigTauCluster->EMenergy() returns " << (*TauClusterItr)->EMenergy());
-      ATH_MSG_INFO("REGTEST TrigTauCluster->HADenergy() returns " << (*TauClusterItr)->HADenergy());
-      ATH_MSG_INFO("REGTEST TrigTauCluster->eta() returns " << (*TauClusterItr)->eta());
-      ATH_MSG_INFO("REGTEST TrigTauCluster->phi() returns " << (*TauClusterItr)->phi());
-      ATH_MSG_INFO("REGTEST TrigTauCluster->IsoFrac() returns " << (*TauClusterItr)->IsoFrac());
-      ATH_MSG_INFO("REGTEST TrigTauCluster->stripWidth() returns " << (*TauClusterItr)->stripWidth());
-      ATH_MSG_INFO("REGTEST TrigTauCluster->numStripCells() returns " << (*TauClusterItr)->numStripCells());
-      ATH_MSG_INFO("REGTEST TrigTauCluster->CaloRadius() returns " << (*TauClusterItr)->CaloRadius());
-      ATH_MSG_INFO("REGTEST TrigTauCluster->numTotCells() returns " << (*TauClusterItr)->numTotCells());
-
-
-      if( (*TauClusterItr)->clusterDetails() == 0 )
-        ATH_MSG_WARNING("REGTEST TrigTauCluster-> Details link is MISSING ");
-      else{
-        ATH_MSG_INFO("REGTEST TrigTauCluster->Energy in Narrow cone : EM[0/1/2/3]="
-                     <<(*TauClusterItr)->EMenergyNarrow(0) << " " << (*TauClusterItr)->EMenergyNarrow(1) << " "
-                     <<(*TauClusterItr)->EMenergyNarrow(2) << " ");
-        ATH_MSG_INFO("REGTEST TrigTauCluster->Energy in Narrow cone : HAD[0/1/2]="
-                     <<(*TauClusterItr)->HADenergyNarrow(0) << " " << (*TauClusterItr)->HADenergyNarrow(1) << " "
-                     <<(*TauClusterItr)->HADenergyNarrow(2));
-      }
-    }
-  }
-
-  int nDetails = 0;
-  SG::ConstIterator< TrigTauClusterDetailsContainer > TauDetailsCluster;
-  SG::ConstIterator< TrigTauClusterDetailsContainer > lastTauDetailsCluster;
-  sc = evtStore()->retrieve(TauDetailsCluster,lastTauDetailsCluster);
-  if (sc.isFailure()) {
-    ATH_MSG_INFO("REGTEST No TrigTauDetailsClusterContainer found");
-    return  StatusCode::SUCCESS;
-  }
-  ATH_MSG_INFO("REGTEST TrigTauDetailsClusterContainer retrieved");
-
-  for (int i=0; TauDetailsCluster != lastTauDetailsCluster; ++TauDetailsCluster, ++i) {
-
-    ATH_MSG_INFO("REGTEST Looking at TrigTauClusterDetailsContainer " << i);
-
-    TrigTauClusterDetailsContainer::const_iterator TauDetailsClusterItr  = TauDetailsCluster->begin();
-    TrigTauClusterDetailsContainer::const_iterator TauDetailsClusterItrE = TauDetailsCluster->end();
-
-    for (int j=0; TauDetailsClusterItr != TauDetailsClusterItrE; ++TauDetailsClusterItr, ++j ) {
-      nDetails++;
-      ATH_MSG_INFO("REGTEST Looking at TrigTauClusterDetails " << j);
-
-      for(unsigned int i = 0; i<4; ++i ) {
-        ATH_MSG_INFO("REGTEST TrigTauClusterDetails-> EM["<<i <<"] Radius/EnergyNar/EnergyMid/EnergyWid returns "
-                     << (*TauDetailsClusterItr)->EMRadius(i) << " "
-                     << (*TauDetailsClusterItr)->EMenergyNarrow(i) << " "
-                     << (*TauDetailsClusterItr)->EMenergyMedium(i) << " "
-                     << (*TauDetailsClusterItr)->EMenergyWide(i));
-      }
-      for(unsigned int i = 0; i<3; ++i ) {
-        ATH_MSG_INFO("REGTEST TrigTauClusterDetails-> HAD["<<i <<"] Radius/EnergyNar/EnergyMid/EnergyWid returns "
-                     << (*TauDetailsClusterItr)->HADRadius(i) << " "
-                     << (*TauDetailsClusterItr)->HADenergyNarrow(i) << " "
-                     << (*TauDetailsClusterItr)->HADenergyMedium(i) << " "
-                     << (*TauDetailsClusterItr)->HADenergyWide(i));
-      }      
-    }
-  }
-
-  if( nDetails != nClusters)
-    ATH_MSG_WARNING("REGTEST inconsistent number of TrigTauClusters ("<< nClusters<< ") and TrigTauClusterDetails ("
-                    << nDetails << ")");
-
-  ATH_MSG_INFO("REGTEST ==========END of TrigTauClusterContainer/TrigTauClusterDetailsContainer DUMP===========");
-
-  ATH_MSG_DEBUG("dumpTrigTauClusterContainer() succeeded");
-
-  return StatusCode::SUCCESS;
-}
-
-//////////////////////////////////////////////////////////////////////////////////
-
-StatusCode TrigEDMChecker::dumpTrigEMClusterContainer ATLAS_NOT_THREAD_SAFE() {
-
-  ATH_MSG_DEBUG("in dumpTrigEMClusterContainer()");
-
-  ATH_MSG_INFO("REGTEST ==========START of TrigEMClusterContainer DUMP===========");
-
-  SG::ConstIterator< TrigEMClusterContainer > EMCluster;
-  SG::ConstIterator< TrigEMClusterContainer > lastEMCluster;
-
-  StatusCode sc = evtStore()->retrieve(EMCluster,lastEMCluster);
-  if (sc.isFailure()) {
-    ATH_MSG_INFO("REGTEST No TrigEMClusterContainer found");
-    return  StatusCode::SUCCESS;
-  }
-  ATH_MSG_INFO("REGTEST TrigEMClusterContainer retrieved");
-
-
-  for (int i=0; EMCluster != lastEMCluster; ++EMCluster, ++i) {
-
-    ATH_MSG_INFO("REGTEST Looking at TrigEMClusterContainer " << i);
-
-    TrigEMClusterContainer::const_iterator EMClusterItr  = EMCluster->begin();
-    TrigEMClusterContainer::const_iterator EMClusterItrE = EMCluster->end();
-
-    for (int j=0; EMClusterItr != EMClusterItrE; ++EMClusterItr, ++j ) {
-
-      ATH_MSG_INFO("REGTEST Looking at TrigEMCluster " << j);
-
-      ATH_MSG_INFO("REGTEST TrigEMCluster->energy() returns " << (*EMClusterItr)->energy());
-      ATH_MSG_INFO("REGTEST TrigEMCluster->et() returns " << (*EMClusterItr)->et());
-      ATH_MSG_INFO("REGTEST TrigEMCluster->eta() returns " << (*EMClusterItr)->eta());
-      ATH_MSG_INFO("REGTEST TrigEMCluster->phi() returns " << (*EMClusterItr)->phi());
-      ATH_MSG_INFO("REGTEST TrigEMCluster->print() gives");
-      int level = msg().level();
-      // little trick to print out stuff
-      msg().setLevel(MSG::DEBUG);
-      (*EMClusterItr)->print(msg());
-      msg().setLevel(level);
-    }
-  }
-
-  ATH_MSG_INFO("REGTEST ==========END of TrigEMClusterContainer DUMP===========");
-  ATH_MSG_DEBUG("dumpTrigEMClusterContainer() succeeded");
-
-  return StatusCode::SUCCESS;
-}
-
-StatusCode TrigEDMChecker::dumpxAODTrigEMClusterContainer ATLAS_NOT_THREAD_SAFE() {
+StatusCode TrigEDMChecker::dumpxAODTrigEMClusterContainer() {
 
   ATH_MSG_DEBUG("in dumpxAODTrigEMClusterContainer()");
 
@@ -3269,128 +1642,8 @@ StatusCode TrigEDMChecker::dumpxAODTrigEMClusterContainer ATLAS_NOT_THREAD_SAFE(
   return StatusCode::SUCCESS;
 }
 
-//////////////////////////////////////////////////////////////////////////////////
-
-StatusCode TrigEDMChecker::dumpTileMuFeatureContainer ATLAS_NOT_THREAD_SAFE() {
-
-  ATH_MSG_DEBUG("in dumpTileMuFeatureContainer()");
-  ATH_MSG_INFO("REGTEST ==========START of TileMuFeatureContainer DUMP===========");
-
-  SG::ConstIterator< TileMuFeatureContainer > TileMu;
-  SG::ConstIterator< TileMuFeatureContainer > lastTileMu;
-
-  StatusCode sc = evtStore()->retrieve(TileMu, lastTileMu);
-  if (sc.isFailure()) {
-    ATH_MSG_INFO("REGTEST No TileMuFeatureContainer found");
-    return  StatusCode::SUCCESS;
-  }
-  ATH_MSG_INFO("REGTEST TileMuFeatureContainer retrieved");
-
-  for (int i=0; TileMu != lastTileMu; ++TileMu, ++i) {
-    ATH_MSG_INFO("REGTEST Looking at TileMuFeatureContainer " << i);
-    TileMuFeatureContainer::const_iterator TileMuItr  = TileMu->begin();
-    TileMuFeatureContainer::const_iterator TileMuItrE = TileMu->end();
-
-    for(int j=0; TileMuItr != TileMuItrE; ++TileMuItr, ++j) {
-      ATH_MSG_INFO("REGTEST Looking at TileMuFeature " << j);
-      ATH_MSG_INFO("REGTEST TileMuFeature->eta()          returns " << (*TileMuItr)->eta());
-      ATH_MSG_INFO("REGTEST TileMuFeature->phi()          returns " << (*TileMuItr)->phi());
-      ATH_MSG_INFO("REGTEST TileMuFeature->enedep().at(0) returns " << (*TileMuItr)->enedep().at(0));
-      ATH_MSG_INFO("REGTEST TileMuFeature->enedep().at(1) returns " << (*TileMuItr)->enedep().at(1));
-      ATH_MSG_INFO("REGTEST TileMuFeature->enedep().at(2) returns " << (*TileMuItr)->enedep().at(2));
-      ATH_MSG_INFO("REGTEST TileMuFeature->enedep().at(3) returns " << (*TileMuItr)->enedep().at(3));
-      ATH_MSG_INFO("REGTEST TileMuFeature->quality()      returns " << (*TileMuItr)->quality());
-
-    }
-  }
-
-  ATH_MSG_INFO("REGTEST ==========END of TileMuFeatureContainer DUMP===========");
-  ATH_MSG_DEBUG("dumpTileMuFeatureContainer() succeeded");
-
-  return StatusCode::SUCCESS;
-}
-
-//////////////////////////////////////////////////////////////////////////////////
-
-StatusCode TrigEDMChecker::dumpTileTrackMuFeatureContainer ATLAS_NOT_THREAD_SAFE() {
-
-  ATH_MSG_DEBUG("in dumpTileTrackMuFeatureContainer()");
-  ATH_MSG_INFO("REGTEST ==========START of TileTrackMuFeatureContainer DUMP===========");
-  
-  SG::ConstIterator< TileTrackMuFeatureContainer > TileTrackMu;
-  SG::ConstIterator< TileTrackMuFeatureContainer > lastTileTrackMu;
-  
-  StatusCode sc = evtStore()->retrieve(TileTrackMu, lastTileTrackMu);
-  if (sc.isFailure()) {
-	ATH_MSG_INFO("REGTEST No TileTrackMuFeatureContainer found");
-	return StatusCode::SUCCESS;
-  }
-  ATH_MSG_INFO("REGTEST TileTrackMuFeatureContainer retrieved");
-  
-  for (int i=0; TileTrackMu!=lastTileTrackMu; ++TileTrackMu, ++i) {
-	ATH_MSG_INFO("REGTEST Looking at TileTrackMuFeatureContainer " << i);
-
-	TileTrackMuFeatureContainer::const_iterator TileTrackMuItr = TileTrackMu->begin();
-	TileTrackMuFeatureContainer::const_iterator TileTrackMuItrE= TileTrackMu->end();
-
-	for (int j=0; TileTrackMuItr != TileTrackMuItrE; ++TileTrackMuItr, ++j) {
-      ATH_MSG_INFO("REGTEST Looking at TileTrackMuFeature " << j);
-      ATH_MSG_INFO("REGTEST TileTrackMuFeature->PtTR_Trk()  returns " << (*TileTrackMuItr)->PtTR_Trk());
-      ATH_MSG_INFO("REGTEST TileTrackMuFeature->EtaTR_Trk() returns " << (*TileTrackMuItr)->EtaTR_Trk());
-      ATH_MSG_INFO("REGTEST TileTrackMuFeature->PhiTR_Trk() returns " << (*TileTrackMuItr)->PhiTR_Trk());
-      ATH_MSG_INFO("REGTEST TileTrackMuFeature->Typ_IDTrk() returns " << (*TileTrackMuItr)->Typ_IDTrk());
-
-      ATH_MSG_INFO("REGTEST TileMuFeature info: ");
-      ElementLink<TileMuFeatureContainer> TileMuEL = (*TileTrackMuItr)->TileMuLink();
-      const TileMuFeature* TileMu;
-      if ( !TileMuEL.isValid() ) {
-        ATH_MSG_INFO("REGTEST No TileMuFeature (Something Wrong)");
-        TileMu = 0;
-      } else{
-        TileMu = *TileMuEL;
-      }
-
-      if( TileMu != 0 ){
-        ATH_MSG_INFO("REGTEST TileMuLink->eta()          returns " << TileMu->eta());
-        ATH_MSG_INFO("REGTEST TileMuLink->phi()          returns " << TileMu->phi());
-        ATH_MSG_INFO("REGTEST TileMuLink->enedep().at(0) returns " << TileMu->enedep().at(0));
-        ATH_MSG_INFO("REGTEST TileMuLink->enedep().at(1) returns " << TileMu->enedep().at(1));
-        ATH_MSG_INFO("REGTEST TileMuLink->enedep().at(2) returns " << TileMu->enedep().at(2));
-        ATH_MSG_INFO("REGTEST TileMuLink->enedep().at(3) returns " << TileMu->enedep().at(3));
-        ATH_MSG_INFO("REGTEST TileMuLink->quality()      returns " << TileMu->quality());
-      }
-
-      ATH_MSG_INFO("REGTEST TrigInDetTrack info: ");
-      ElementLink<TrigInDetTrackCollection> IDScanEL = (*TileTrackMuItr)->IDScanLink();
-      const TrigInDetTrack* Track;
-      if ( !IDScanEL.isValid() ) {
-        ATH_MSG_INFO("REGTEST No valid IDtracks");
-        Track = 0;
-      } else{
-        Track = *IDScanEL;
-      }
-
-      if (Track != 0) {
-        ATH_MSG_INFO("REGTEST IDScanLink->algorithmId()     returns " << Track->algorithmId());
-        ATH_MSG_INFO("REGTEST IDScanLink->chi2()            returns " << Track->chi2());
-        ATH_MSG_INFO("REGTEST IDScanLink->NStrawHits()      returns ");
-        ATH_MSG_INFO("REGTEST IDScanLink->NStraw()          returns " << Track->NStraw());
-        ATH_MSG_INFO("REGTEST IDScanLink->NStrawTime()      returns " << Track->NStrawTime());
-        ATH_MSG_INFO("REGTEST IDScanLink->NTRHits()         returns " << Track->NTRHits());
-        ATH_MSG_INFO("REGTEST IDScanLink->param()->phi0()   returns " << Track->param()->phi0());
-        ATH_MSG_INFO("REGTEST IDScanLink->param()->eta()    returns " << Track->param()->eta());
-        ATH_MSG_INFO("REGTEST IDScanLink->param()->pT()     returns " << Track->param()->pT());
-      }
-	}
-  }
-
-  ATH_MSG_INFO("REGTEST ==========END of TileTrackMuFeatureContainer DUMP===========");
-  ATH_MSG_DEBUG("dumpTileTrackMuFeatureContainer() succeeded");
-  return StatusCode::SUCCESS;
-}
-
 /////////////////////////////////////////////////
-StatusCode TrigEDMChecker::dumpxAODTauJetContainer ATLAS_NOT_THREAD_SAFE() {
+StatusCode TrigEDMChecker::dumpxAODTauJetContainer() {
 
   ATH_MSG_DEBUG("In dumpxAODTauJetContainer");
   ATH_MSG_INFO( "REGTEST ==========START of xAOD::TauJetContainer DUMP===========" );
@@ -3540,164 +1793,7 @@ StatusCode TrigEDMChecker::dumpxAODTauJetContainer ATLAS_NOT_THREAD_SAFE() {
 
 }
 
-
 /////////////////////////////////////////////////////////////////////////////////
-
-StatusCode TrigEDMChecker::dumpTauJetContainer ATLAS_NOT_THREAD_SAFE() {
-
-  ATH_MSG_INFO("REGTEST ==========START of TauJetContainer DUMP===========");
-
-  using namespace Analysis;
-
-  StatusCode sCode=StatusCode::FAILURE;
-  int ntag=1;
-  std::string TauContainerTags[]={"HLT_TrigTauRecMerged"};
-  for (int itag=0; itag < ntag; itag++) {
-    const TauJetContainer* TauJetcont = nullptr;
-    sCode=evtStore()->retrieve(TauJetcont , TauContainerTags[itag]);
-    if( sCode.isFailure() ){
-      ATH_MSG_INFO("Failed to retrieve TauJetContainer  with key " << TauContainerTags[itag]);
-      continue;
-    }
-
-    for(Analysis::TauJetContainer::const_iterator tauIt = TauJetcont->begin(); tauIt != TauJetcont->end(); ++tauIt){
-
-      bool IsTaurec = false;
-      bool Is1p3p = false;
-      if ((*tauIt)->hasAuthor( TauJetParameters::tauRec)) {
-        ATH_MSG_INFO("Is TauRec Seeded ");
-        IsTaurec = true;
-      }
-
-      if ((*tauIt)->hasAuthor( TauJetParameters::tau1P3P)) {
-        ATH_MSG_INFO("Is Tau1p3p Seeded ");
-        Is1p3p = true;
-      }
-
-      if ((*tauIt)->hasAuthor( TauJetParameters::unknown)) {
-        ATH_MSG_INFO("Is unknown seeded ");
-      }
-
-      const Analysis::TauCommonDetails*  TauDetails = (*tauIt)->details<const Analysis::TauCommonDetails>();
-      if (TauDetails == NULL) {
-        ATH_MSG_INFO(" TauDetails == NULL ");
-        continue;
-      }
-
-      ATH_MSG_INFO("REGTEST (*tauIt)->eta()                    returns " << (*tauIt)->eta());
-      ATH_MSG_INFO("REGTEST (*tauIt)->phi()                    returns " << (*tauIt)->phi());
-      ATH_MSG_INFO("REGTEST (*tauIt)->numTrack()               returns " << (*tauIt)->numTrack());
-      ATH_MSG_INFO("REGTEST TauDetails->nLooseTrk()            returns " << TauDetails->nLooseTrk());
-      ATH_MSG_INFO("REGTEST TauDetails->leadTrkPt()            returns " << TauDetails->leadTrkPt());
-      ATH_MSG_INFO("REGTEST TauDetails->leadLooseTrkPt()       returns " << TauDetails->leadLooseTrkPt());
-      ATH_MSG_INFO("REGTEST TauDetails->ipZ0SinThetaSigLeadTrk() returns " << TauDetails->ipZ0SinThetaSigLeadTrk());
-      ATH_MSG_INFO("REGTEST TauDetails->ipSigLeadTrk() returns "<<TauDetails->ipSigLeadTrk());
-      ATH_MSG_INFO("REGTEST TauDetails->ipSigLeadLooseTrk() returns "<<TauDetails->ipSigLeadLooseTrk());
-      ATH_MSG_INFO("REGTEST TauDetails->trkWidth2() returns "<<TauDetails->trkWidth2());
-      ATH_MSG_INFO("REGTEST TauDetails->trFlightPathSig() returns "<< TauDetails->trFlightPathSig());
-
-      if(IsTaurec) {
-        ATH_MSG_INFO("Calo seeded");
-        ATH_MSG_INFO("REGTEST TauDetails->seedCalo_etHadCalib()                returns " << TauDetails->seedCalo_etHadCalib());
-        ATH_MSG_INFO("REGTEST TauDetails->seedCalo_etEMCalib()                 returns " << TauDetails->seedCalo_etEMCalib());
-        ATH_MSG_INFO("REGTEST TauDetails->seedCalo_EMRadius()                  returns " << TauDetails->seedCalo_EMRadius());
-        ATH_MSG_INFO("REGTEST TauDetails->seedCalo_isolFrac()                  returns " << TauDetails->seedCalo_isolFrac());
-        ATH_MSG_INFO("REGTEST TauDetails->seedCalo_centFrac()                  returns " << TauDetails->seedCalo_centFrac());
-        ATH_MSG_INFO("REGTEST TauDetails->seedCalo_stripWidth2()               returns " << TauDetails->seedCalo_stripWidth2());
-        ATH_MSG_INFO("REGTEST TauDetails->seedCalo_nStrip()                    returns " << TauDetails->seedCalo_nStrip());
-        ATH_MSG_INFO("REGTEST TauDetails->seedCalo_etEMAtEMScale()             returns " << TauDetails->seedCalo_etEMAtEMScale());
-        ATH_MSG_INFO("REGTEST TauDetails->seedCalo_etHADAtEMScale()            returns " << TauDetails->seedCalo_etHadAtEMScale());
-        ATH_MSG_INFO("REGTEST TauDetails->seedCalo_hadRadius()                 returns " << TauDetails->seedCalo_hadRadius());
-        ATH_MSG_INFO("REGTEST TauDetails->seedCalo_nIsolLooseTrk()             returns " << TauDetails->seedCalo_nIsolLooseTrk());
-        ATH_MSG_INFO("REGTEST TauDetails->seedCalo_trkAvgDist()                returns " << TauDetails->seedCalo_trkAvgDist());
-        ATH_MSG_INFO("REGTEST TauDetails->seedCalo_trkRmsDist()                returns " << TauDetails->seedCalo_trkRmsDist());
-      }
-
-      if(Is1p3p) {
-        ATH_MSG_INFO("Track seeded");
-        ATH_MSG_INFO("REGTEST TauDetails->seedTrk_EMRadius()                   returns " << TauDetails->seedTrk_EMRadius());
-        ATH_MSG_INFO("REGTEST TauDetails->seedTrk_isolFrac()                   returns " << TauDetails->seedTrk_isolFrac());
-        ATH_MSG_INFO("REGTEST TauDetails->seedTrk_etChrgHadOverSumTrkPt ()     returns " << TauDetails->seedTrk_etChrgHadOverSumTrkPt ());
-        ATH_MSG_INFO("REGTEST TauDetails->seedTrk_isolFracWide()               returns " << TauDetails->seedTrk_isolFracWide());
-        ATH_MSG_INFO("REGTEST TauDetails->seedTrk_etHadAtEMScale()             returns " << TauDetails->seedTrk_etHadAtEMScale());
-        ATH_MSG_INFO("REGTEST TauDetails->seedTrk_etEMAtEMScale()              returns " << TauDetails->seedTrk_etEMAtEMScale());
-        ATH_MSG_INFO("REGTEST TauDetails->seedTrk_etEMCL()                     returns " << TauDetails->seedTrk_etEMCL());
-        ATH_MSG_INFO("REGTEST TauDetails->seedTrk_etChrgEM()                   returns " << TauDetails->seedTrk_etChrgEM());
-        ATH_MSG_INFO("REGTEST TauDetails->seedTrk_etNeuEM()                    returns " << TauDetails->seedTrk_etNeuEM());
-        ATH_MSG_INFO("REGTEST TauDetails->seedTrk_etResNeuEM()                 returns " << TauDetails->seedTrk_etResNeuEM());
-        ATH_MSG_INFO("REGTEST TauDetails->seedTrk_hadLeakEt()                  returns " << TauDetails->seedTrk_hadLeakEt());
-        ATH_MSG_INFO("REGTEST TauDetails->seedTrk_sumEMCellEtOverLeadTrkPt()   returns " << TauDetails->seedTrk_sumEMCellEtOverLeadTrkPt());
-        ATH_MSG_INFO("REGTEST TauDetails->seedTrk_secMaxStripEt()              returns " << TauDetails->seedTrk_secMaxStripEt());
-        ATH_MSG_INFO("REGTEST TauDetails->seedTrk_stripWidth2()                returns " << TauDetails->seedTrk_stripWidth2());       
-        ATH_MSG_INFO("REGTEST TauDetails->seedTrk_nStrip()                     returns " << TauDetails->seedTrk_nStrip());
-        ATH_MSG_INFO("REGTEST TauDetails->seedTrk_etChrgHad()                  returns " << TauDetails->seedTrk_etChrgHad());
-        ATH_MSG_INFO("REGTEST TauDetails->seedTrk_nOtherCoreTrk()              returns " << TauDetails->seedTrk_nOtherCoreTrk());
-        ATH_MSG_INFO("REGTEST TauDetails->seedTrk_nIsolTrk()                   returns " << TauDetails->seedTrk_nIsolTrk());
-        ATH_MSG_INFO("REGTEST TauDetails->seedTrk_etIsolEM()                   returns " << TauDetails->seedTrk_etIsolEM());
-        ATH_MSG_INFO("REGTEST TauDetails->seedTrk_etIsolHad()                  returns " << TauDetails->seedTrk_etIsolHad());
-      }
-
-      const Analysis::TauJet* tj = *tauIt;
-      if ( tj->clusterLink().isValid() ) {
-        ATH_MSG_INFO("REGTEST CaloCluster present");
-      } else {
-        ATH_MSG_INFO("REGTEST CaloCluster missing");
-      }
-
-      if( TauDetails->looseTrk().size() !=0 ) {
-        ATH_MSG_INFO("REGTEST TauDetails->looseTrk() link present ");
-      } else {
-        ATH_MSG_INFO("REGTEST TauDetails->looseTrk() link missing ");
-      }
-
-      if ( tj->cellClusterLink().isValid() ) {
-        ATH_MSG_INFO("REGTEST CellCaloCluster present");
-      } else {
-        ATH_MSG_INFO("REGTEST CellCaloCluster missing");
-      }
-
-      if ( tj->jetLink().isValid() ) {
-        ATH_MSG_INFO("REGTEST Jet present");
-      } else {
-        ATH_MSG_INFO("REGTEST Jet missing");
-      }
-
-      if ( tj->jetLink().isValid() ) {
-        ATH_MSG_INFO("REGTEST Jet present");
-      } else {
-        ATH_MSG_INFO("REGTEST Jet missing");
-      }
-
-      ATH_MSG_INFO("REGTEST numTrack                returns " << tj->numTrack());
-
-      if ( tj->trackLinkVector().size() != 0 ) {
-        ATH_MSG_INFO("REGTEST TrackLinkVector present");
-      } else {
-        ATH_MSG_INFO("REGTEST TrackkLinkVector missing");
-      }
-
-      ATH_MSG_INFO("REGTEST author                  returns " << tj->author());
-      ATH_MSG_INFO("REGTEST ROIWord                 returns " << tj->author());
-    }
-  }
-
-  SG::ConstIterator< TauJetContainer > TauJet;
-  SG::ConstIterator< TauJetContainer > lastTauJet;
-  StatusCode sc = evtStore()->retrieve(TauJet, lastTauJet);
-  if (sc.isFailure()) {
-    ATH_MSG_INFO("REGTEST No TauJetContainer found");
-    return StatusCode::FAILURE;
-  }
-  else ATH_MSG_DEBUG("Found TauJetContainer");
-
-  ATH_MSG_INFO("REGTEST TauJetContainer retrieved");
-
-  for ( ; TauJet != lastTauJet ; ++TauJet ) {
-    ATH_MSG_INFO("REGTEST TauJetContainer key: " << TauJet.key());
-  }
-
-  return StatusCode::SUCCESS;
-}
 
 StatusCode TrigEDMChecker::dumpxAODTrackParticle() {
 
@@ -3855,7 +1951,7 @@ StatusCode TrigEDMChecker::dumpxAODVertex() {
 	return StatusCode::SUCCESS;
 }
 
-StatusCode TrigEDMChecker::dumpTDT() {
+StatusCode TrigEDMChecker::dumpTDT(const EventContext& ctx) {
   using namespace TrigCompositeUtils; // LinkInfo
   ATH_MSG_INFO( "REGTEST ==========START of TDT DUMP===========" );
   // Note: This minimal TDT dumper is for use during run-3 dev
@@ -3930,7 +2026,7 @@ StatusCode TrigEDMChecker::dumpTDT() {
   if (m_trigDec->getNavigationFormat() == "TrigComposite") {
     // Check associateToEventView helper function
     std::vector< LinkInfo<xAOD::IParticleContainer> > muons = m_trigDec->features<xAOD::IParticleContainer>("HLT_mu24_idperf_L1MU20", TrigDefs::Physics, "HLT_MuonL2CBInfo");
-    SG::ReadHandle<xAOD::TrackParticleContainer> muonTracksReadHandle(m_muonTracksKey, Gaudi::Hive::currentContext());
+    SG::ReadHandle<xAOD::TrackParticleContainer> muonTracksReadHandle(m_muonTracksKey, ctx);
     for (const LinkInfo<xAOD::IParticleContainer>& mu : muons) {
       // Note: auto here refers to type std::pair< xAOD::TrackParticleContainer::const_iterator, xAOD::TrackParticleContainer::const_iterator>
       const auto roiTrackItPair = m_trigDec->associateToEventView<xAOD::TrackParticleContainer>(muonTracksReadHandle, mu, "roi");
@@ -3955,7 +2051,7 @@ StatusCode TrigEDMChecker::dumpTrigComposite() {
   if (m_doDumpAllTrigComposite) {
     m_dumpTrigCompositeContainers.clear();
     const CLID TrigCompositeCLID = static_cast<CLID>( ClassID_traits< xAOD::TrigCompositeContainer >::ID() );
-    evtStore()->keys(TrigCompositeCLID, m_dumpTrigCompositeContainers);
+    evtStore()->keys(TrigCompositeCLID, m_dumpTrigCompositeContainers.value());
     std::string typeNameTC;
     ATH_CHECK(m_clidSvc->getTypeNameOfID(TrigCompositeCLID, typeNameTC));
     ATH_MSG_DEBUG("dumpTrigComposite got " <<  m_dumpTrigCompositeContainers.size() << " keys for " << typeNameTC);

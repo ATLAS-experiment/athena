@@ -14,7 +14,7 @@ atlas_add_component(ThinningUtils
    src/*.h src/*.cxx src/components/*.cxx
    LINK_LIBRARIES AthContainers AtlasHepMCLib AthLinks AthenaBaseComps StoreGateLib EventInfo xAODBase
    xAODCaloEvent xAODEgamma xAODJet xAODMuon xAODParticleEvent xAODPFlow xAODTau
-   xAODTracking xAODTruth GaudiKernel InDetReadoutGeometry TRT_ReadoutGeometry ExpressionEvaluationLib MCTruthClassifierLib DerivationFrameworkInterfaces ${extra_libs})
+   xAODTracking xAODTruth GaudiKernel InDetReadoutGeometry TRT_ReadoutGeometry ExpressionEvaluationLib TruthUtils DerivationFrameworkInterfaces ${extra_libs})
 
 # Install files from the package:
 atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )

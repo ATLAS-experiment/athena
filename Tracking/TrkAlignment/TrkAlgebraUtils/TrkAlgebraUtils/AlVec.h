@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRKALGS_ALVEC_H
@@ -7,9 +7,12 @@
 
 // PBdR (17Apr2007)
 
-#include <exception>
+#include <stdexcept>
 #include <map>
 #include <vector>
+#include <string>
+#include <string_view>
+#include <fstream>
 
 class StatusCode;
 
@@ -75,10 +78,10 @@ class AlVec {
   int  RemoveElements(std::vector<int>);
   void SetPathBin(const std::string&);
   void SetPathTxt(const std::string&);
-  StatusCode Write(const std::string&, bool, double, std::map<int,unsigned long long>, float);
-  StatusCode WritePartial(const std::string&, bool, double, std::map<int,unsigned long long>, float);
-  StatusCode WritePartial(const std::string&, bool, double, std::map<int,std::string>, float);
-  StatusCode InitializeOutputVector(const std::string&, bool, double, float, std::ofstream&);
+  StatusCode Write(std::string_view, bool, double, const std::map<int,unsigned long long>&, float);
+  StatusCode WritePartial(std::string_view, bool, double, const std::map<int,unsigned long long>&, float);
+  StatusCode WritePartial(std::string_view, bool, double, const std::map<int,std::string>&, float);
+  StatusCode InitializeOutputVector(std::string_view, bool, double, float, std::ofstream&);
 
   static StatusCode CheckVecVersion(const std::string&, bool&);
   StatusCode Read(const std::string&, double&, std::map<int,unsigned long long>&, float&);

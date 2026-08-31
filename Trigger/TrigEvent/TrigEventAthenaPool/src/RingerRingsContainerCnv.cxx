@@ -23,8 +23,8 @@ RingerRingsContainer *RingerRingsContainerCnv::createTransient(const Token* toke
   
   mlog << MSG::DEBUG << "RingerRingsContainerCnv::createTransient called" << endmsg;
 
-  static const pool::Guid p2_guid("30D29B68-6D41-429E-AC16-930ACF71280D");
-  static const pool::Guid tlp1_guid("B5587828-50D8-4DAA-97F3-5E41A7F3E3FE");
+  static const Guid p2_guid("30D29B68-6D41-429E-AC16-930ACF71280D");
+  static const Guid tlp1_guid("B5587828-50D8-4DAA-97F3-5E41A7F3E3FE");
 
   if( compareClassGuid(token,  p2_guid ) ){
          std::unique_ptr< RingerRingsContainer_p2 > col_vect( poolReadObject< RingerRingsContainer_p2 >(token) );

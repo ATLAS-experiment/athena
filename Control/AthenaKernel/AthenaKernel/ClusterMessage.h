@@ -5,6 +5,7 @@
 #define ATHENAKERNEL_CLUSTERMESSAGE_H
 
 #include <array>
+#include <cstdint>
 #include <optional>
 #include <variant>
 
@@ -33,8 +34,10 @@ struct ClusterMessage {
   // If message type is Data, FinalWorkerStatus or WorkerError, payload
   // in header indicates tag used to send body.
   // message type, source, int payload
-  using WireMsgHdr = std::array<int, 3>; // three ints for the three components of the header
-  using WireMsgBody = std::array<int, 10>; // 320 bit max body length (for a DataDescr)
+  using WireMsgHdr = std::array<std::uint32_t, 3>;  // three ints for the three
+                                                    // components of the header
+  using WireMsgBody = std::array<std::uint32_t, 10>;  // 320 bit max body length
+                                                      // (for a DataDescr)
   using WireMsg = std::tuple<WireMsgHdr, std::optional<WireMsgBody>>;
 
   int source = -1;  // Filled in when it is sent
@@ -62,7 +65,7 @@ struct ClusterMessage {
         : ptr((void*)ptr), len(count * sizeof(T)), align(alignof(T)) {}
 
     DataDescr(DataDescr&& rhs) noexcept;
-    
+
     DataDescr(const DataDescr&) = delete;
     DataDescr& operator=(const DataDescr&) = delete;
 

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonGeoModel/Tgc.h"
@@ -55,7 +55,7 @@ namespace MuonGM {
                                const MYSQL& mysql,
                                int minimalgeo, int cutoutson,
                                const std::vector<Cutout *>& vcutdef) {
-        const TGC *t = dynamic_cast<const TGC*>(mysql.GetTechnology(name));
+        const TGC *t = static_cast<const TGC*>(mysql.GetTechnology(name));
         thickness = t->thickness;
 
         // Build TGC mother volume out of G10

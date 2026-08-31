@@ -123,7 +123,7 @@ Trk::TrackSelectionProcessorTool::addNewTracks(TrackScoreMap &trackScoreTrackMap
         PrdSignature prdSig;
         prdSig.insert( prds.begin(),prds.end() );
         // we try to insert it into the set, if we fail (pair.second), it then exits already
-        if ( !(prdSigSet.insert(prdSig)).second ) {
+        if ( !(prdSigSet.insert(std::move(prdSig))).second ) {
           ATH_MSG_DEBUG ("Double track, reject it !");
           reject = true;
         } else {

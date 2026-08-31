@@ -115,7 +115,7 @@ namespace SH
 
     /// \brief the iterator for \ref m_samples
   private:
-    typedef std::vector<std::shared_ptr<Sample>>::const_iterator SamplesIter;
+    using SamplesIter = std::vector<std::shared_ptr<Sample>>::const_iterator;
 
     ClassDefOverride (SampleComposite, 1);
   };

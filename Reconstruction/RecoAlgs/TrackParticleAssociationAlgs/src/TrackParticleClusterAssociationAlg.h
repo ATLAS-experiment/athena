@@ -66,6 +66,8 @@ class TrackParticleClusterAssociationAlg : public AthReentrantAlgorithm
   // Whether or not to use the DetectorEta attribute of the clusters, which is important if the input cluster container has had the origin correction applied
   // Default assumes no origin correction, must be configured if desired
   SG::ReadDecorHandleKey<xAOD::CaloClusterContainer> m_detectorEtaDecor { this, "DetectorEtaName", m_caloClusters, "", "Decoration for CaloCluster DetectorEta" };
+  SG::ReadDecorHandleKey<xAOD::TrackParticleContainer> m_trkLinkKey{this, "TrackLinkKey", m_trackParticleCollectionHandle, "trackLink"};
+
   bool m_doDetEta = false;
 
   // vertex handling

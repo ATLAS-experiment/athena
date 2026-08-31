@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "xAODJiveXML/xAODJetRetriever.h"
@@ -33,15 +33,22 @@ namespace JiveXML {
     } else {
       m_nTaggers = m_bTaggerNames.size();
     }
+    const std::string taggerKey{"TaggerName"};
+    const std::string authorKey{"JetAuthor"};
+    const std::string authorVal{"AntiKt4EMPFlowJets"};
+    const std::string opKey{"OperatingPoint"};
+    const std::string opVal{"FixedCutBEff_70"};
+    const std::string fnameKey{"FlvTagCutDefinitionsFileName"};
+    const std::string minPtKey{"MinPt"};
     for (unsigned int i=0; i<m_nTaggers; i++){
       std::string taggerName = m_bTaggerNames[i];
       asg::AnaToolHandle<IBTaggingSelectionTool> btagSelTool;
       btagSelTool.setTypeAndName("BTaggingSelectionTool/btagSelTool_"+taggerName);
-      ATH_CHECK(btagSelTool.setProperty("TaggerName", taggerName));
-      ATH_CHECK(btagSelTool.setProperty("JetAuthor", "AntiKt4EMPFlowJets")); // only AntiKt4EMPFlowJets is supported
-      ATH_CHECK(btagSelTool.setProperty("OperatingPoint", "FixedCutBEff_70")); // the working point doesn't matter because we don't cut on the tagger discriminant, but it must exist in CDI.
-      ATH_CHECK(btagSelTool.setProperty("FlvTagCutDefinitionsFileName", m_CDIPaths[i]));
-      ATH_CHECK(btagSelTool.setProperty( "MinPt", 0.0));
+      ATH_CHECK(btagSelTool.setProperty(taggerKey, taggerName));
+      ATH_CHECK(btagSelTool.setProperty(authorKey, authorVal)); // only AntiKt4EMPFlowJets is supported
+      ATH_CHECK(btagSelTool.setProperty(opKey, opVal)); // the working point doesn't matter because we don't cut on the tagger discriminant, but it must exist in CDI.
+      ATH_CHECK(btagSelTool.setProperty(fnameKey, m_CDIPaths[i]));
+      ATH_CHECK(btagSelTool.setProperty( minPtKey, 0.0));
       ATH_CHECK(btagSelTool.initialize());
       m_btagSelTools.emplace(taggerName, btagSelTool);
     }
@@ -132,7 +139,7 @@ namespace JiveXML {
 	    // This jet is either a PFlow jet (constituent type: xAOD::FlowElement::PFlow) or UFO jets
 	    for (size_t i = 0; i < numConstit; i++) {
 	      const xAOD::PFO *constit =
-		dynamic_cast<const xAOD::PFO *>(jet->rawConstituent(i));
+		static_cast<const xAOD::PFO *>(jet->rawConstituent(i));
 	      if (constit->isCharged()) {
 		const xAOD::TrackParticle *thisTrack = constit->track(0); // by construction xAOD::PFO can only have one track, in eflowRec usage
 		trackKey.emplace_back(DataType(thisTrack->index()));
@@ -163,7 +170,7 @@ namespace JiveXML {
 	  } else if (ctype == xAOD::Type::CaloCluster) {
 	    // get associated cluster
 	    for (size_t j = 0; j < numConstit; ++j) {
-	      const xAOD::CaloCluster *cluster = dynamic_cast<const xAOD::CaloCluster *>(jet->rawConstituent(j));
+	      const xAOD::CaloCluster *cluster = static_cast<const xAOD::CaloCluster *>(jet->rawConstituent(j));
 	      clusterID.emplace_back(DataType(cluster->index()));
 	      if(!cluster->getCellLinks())continue;
 	      for (const auto cc : *(cluster->getCellLinks())) {
@@ -282,42 +289,43 @@ namespace JiveXML {
     } // end loop
 
     // four-vectors
-    DataMap["phi"] = phi;
-    DataMap["eta"] = eta;
-    DataMap["et"] = et;
-    DataMap["energy"] = energy;
-    DataMap["mass"] = mass;
+    const std::size_t nphi = phi.size();
+    DataMap["phi"] = std::move(phi);
+    DataMap["eta"] = std::move(eta);
+    DataMap["et"] = std::move(et);
+    DataMap["energy"] = std::move(energy);
+    DataMap["mass"] = std::move(mass);
     std::string str_nTaggers = m_nTaggers>0 ? std::to_string(m_nTaggers) : "1"; // default to 1 if no btaggers so that atlantis can process the jets properly
-    DataMap["bTagName multiple=\""+str_nTaggers+"\""] = bTagName; // assigned by hand !
-    DataMap["bTagValue multiple=\""+str_nTaggers+"\""] = bTagValue;
-    DataMap["charge"] = charge;
-    DataMap["id"] = idVec;
-    DataMap["px"] = px;
-    DataMap["py"] = py;
-    DataMap["pz"] = pz;
-    DataMap["jvf"] = jvf;
-    DataMap["jvt"] = jvt;
-    DataMap["emfrac"] = emfrac;
+    DataMap["bTagName multiple=\""+str_nTaggers+"\""] = std::move(bTagName); // assigned by hand !
+    DataMap["bTagValue multiple=\""+str_nTaggers+"\""] = std::move(bTagValue);
+    DataMap["charge"] = std::move(charge);
+    DataMap["id"] = std::move(idVec);
+    DataMap["px"] = std::move(px);
+    DataMap["py"] = std::move(py);
+    DataMap["pz"] = std::move(pz);
+    DataMap["jvf"] = std::move(jvf);
+    DataMap["jvt"] = std::move(jvt);
+    DataMap["emfrac"] = std::move(emfrac);
 
-    if ((trackKey.size()) != 0){
+    if (!trackKey.empty()){
       double NTracksPerVertex = trackKey.size()*1./jetCont->size();
       std::string tag = "trackIndex multiple=\"" +DataType(NTracksPerVertex).toString()+"\"";
-      DataMap[tag] = trackKey;
+      DataMap[tag] = std::move(trackKey);
       tag = "trackKey multiple=\"" +DataType(NTracksPerVertex).toString()+"\"";
-      DataMap[tag] = trackContKey;
+      DataMap[tag] = std::move(trackContKey);
     }
 
-    if ((clusterID.size())!=0){
+    if (!clusterID.empty()){
       std::string tag = "clusterIndex multiple=\"" + DataType(clusterID.size()).toString()+"\"";
       double NCellsPerJet = cellID.size()*1./jetCont->size();
       tag = "cells multiple=\"" +DataType(NCellsPerJet).toString()+"\"";
-      DataMap[tag]=cellID;
+      DataMap[tag] = std::move(cellID);
     }
 
-    DataMap["trackLinkCount"] = trackLinkCount;
-    DataMap["numCells"] = numCells;
+    DataMap["trackLinkCount"] = std::move(trackLinkCount);
+    DataMap["numCells"] = std::move(numCells);
 
-    ATH_MSG_DEBUG( dataTypeName() << " retrieved with " << phi.size() << " entries" );
+    ATH_MSG_DEBUG( dataTypeName() << " retrieved with " << nphi << " entries" );
 
     return DataMap;
   }

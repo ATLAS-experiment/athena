@@ -10,6 +10,8 @@ atlas_add_library( TrigMuonEvent
                    LINK_LIBRARIES AthContainers AthLinks AthenaKernel EventKernel FourMom GaudiKernel Navigation Particle TrigInDetEvent
                    PRIVATE_LINK_LIBRARIES MuidEvent MuonPattern MuonSegment TrigNavigationLib )
 
+atlas_generate_cliddb( TrigMuonEvent )
+
 atlas_add_sercnv_library( TrigMuonEventSerCnv
                           FILES TrigMuonEvent/MuonFeature.h TrigMuonEvent/MuonFeatureContainer.h TrigMuonEvent/CombinedMuonFeature.h TrigMuonEvent/CombinedMuonFeatureContainer.h TrigMuonEvent/IsoMuonFeature.h TrigMuonEvent/IsoMuonFeatureContainer.h TrigMuonEvent/TrigMuonClusterFeature.h TrigMuonEvent/TrigMuonClusterFeatureContainer.h TrigMuonEvent/TrigMuonEF.h TrigMuonEvent/TrigMuonEFContainer.h TrigMuonEvent/TileMuFeature.h TrigMuonEvent/TileMuFeatureContainer.h TrigMuonEvent/TileTrackMuFeature.h TrigMuonEvent/TileTrackMuFeatureContainer.h TrigMuonEvent/TrigMuonEFTrack.h TrigMuonEvent/TrigMuonEFCbTrack.h TrigMuonEvent/TrigMuonEFInfo.h TrigMuonEvent/TrigMuonEFInfoContainer.h TrigMuonEvent/TrigMuonEFInfoTrack.h TrigMuonEvent/TrigMuonEFInfoTrackContainer.h TrigMuonEvent/TrigMuonEFIsolation.h TrigMuonEvent/TrigMuonEFIsolationContainer.h TrigMuonEvent/MuonFeatureDetails.h TrigMuonEvent/MuonFeatureDetailsContainer.h
                           LINK_LIBRARIES TrigMuonEvent )

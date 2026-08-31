@@ -125,7 +125,7 @@ public:
     double phi,
     double theta,
     double qop,
-    std::optional<AmgSymMatrix(5)> cov = std::nullopt) const override final;
+    const std::optional<AmgSymMatrix(5)> & cov = std::nullopt) const override final;
 
   /** Use the Surface as a ParametersBase constructor, from global parameters -
    * charged*/
@@ -133,7 +133,7 @@ public:
     const Amg::Vector3D& position,
     const Amg::Vector3D& momentum,
     double charge,
-    std::optional<AmgSymMatrix(5)> cov = std::nullopt) const override final;
+    const std::optional<AmgSymMatrix(5)> & cov = std::nullopt) const override final;
 
   /** Use the Surface as a ParametersBase constructor, from local parameters -
    * neutral */
@@ -143,7 +143,7 @@ public:
     double phi,
     double theta,
     double qop,
-    std::optional<AmgSymMatrix(5)> cov = std::nullopt) const override final;
+    const std::optional<AmgSymMatrix(5)> & cov = std::nullopt) const override final;
 
   /** Use the Surface as a ParametersBase constructor, from global parameters -
    * neutral */
@@ -151,7 +151,7 @@ public:
     const Amg::Vector3D& position,
     const Amg::Vector3D& momentum,
     double charge,
-    std::optional<AmgSymMatrix(5)> cov = std::nullopt) const override final;
+    const std::optional<AmgSymMatrix(5)> & cov = std::nullopt) const override final;
 
   /** Use the Surface as a ParametersBase constructor, from local parameters */
   template<int DIM, class T>
@@ -161,7 +161,7 @@ public:
     double phi,
     double theta,
     double qop,
-    std::optional<AmgSymMatrix(DIM)> cov = std::nullopt) const;
+    const std::optional<AmgSymMatrix(DIM)> & cov = std::nullopt) const;
 
   /** Use the Surface as a ParametersBase constructor, from global parameters */
   template<int DIM, class T>
@@ -169,7 +169,7 @@ public:
     const Amg::Vector3D& position,
     const Amg::Vector3D& momentum,
     double charge,
-    std::optional<AmgSymMatrix(DIM)> cov = std::nullopt) const;
+    const std::optional<AmgSymMatrix(DIM)> & cov = std::nullopt) const;
 
   /** Return the measurement frame - this is needed for alignment, in particular
      for StraightLine and Perigee Surface

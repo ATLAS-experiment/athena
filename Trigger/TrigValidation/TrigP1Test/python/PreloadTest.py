@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 from TrigValTools.TrigValSteering import Input, ExecStep, PyStep, Test
 from TrigP1Test import TrigP1TestSteps
@@ -33,7 +33,7 @@ def test_trigP1_preload(menu):
 
     # 3) Create configuration JSON based on original data file
     ex_dump = ExecStep.ExecStep('dump-config')
-    ex_dump.type = 'athenaHLT'
+    ex_dump.type = 'athenaEF'
     ex_dump.job_options = 'TriggerJobOpts.runHLT'
     ex_dump.input = 'data'
     ex_dump.args = '-M --dump-config-exit'
@@ -57,10 +57,10 @@ def test_trigP1_preload(menu):
 
     ex_fix = PyStep.PyStep(fix_json)
 
-    # 5) Run athenaHLT from JSON on renumbered file
-    ex = ExecStep.ExecStep('athenaHLT')
+    # 5) Run athenaEF from JSON on renumbered file
+    ex = ExecStep.ExecStep('athenaEF')
     ex.type = 'other'
-    ex.executable = 'athenaHLT.py'
+    ex.executable = 'athenaEF.py'
     ex.input = ''
     ex.explicit_input = True
     ex.args = '-M -f ./raw._0001.data'
@@ -73,6 +73,6 @@ def test_trigP1_preload(menu):
     test = Test.Test()
     test.art_type = 'build'
     test.exec_steps = [ex_rm, ex_bs, ex_dump, ex_fix, ex]
-    test.check_steps = TrigP1TestSteps.default_check_steps_OHMon(test, 'r0000999999_athenaHLT_HLT-Histogramming.root:run_999999/lb_-1')
+    test.check_steps = TrigP1TestSteps.default_check_steps_OHMon(test, 'r0000999999_athenaEF_Histogramming.root:run_999999/lb_-1')
 
     return test

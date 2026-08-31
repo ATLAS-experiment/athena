@@ -1,7 +1,7 @@
 #!/usr/bin/env python
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
-# art-description: athenaHLT test of the Dev_pp_run3_v1 menu with with reversed order of views to check their independence
+# art-description: athenaEF test of the Dev_pp_run3_v1 menu with with reversed order of views to check their independence
 # art-type: build                                                                  
 # art-include: main/Athena/x86_64-el9-gcc15-opt
 # art-include: 24.0/Athena                                                       
@@ -9,7 +9,7 @@
 from TrigValTools.TrigValSteering import Test, ExecStep, CheckSteps
 
 ex = ExecStep.ExecStep()
-ex.type = 'athenaHLT'
+ex.type = 'athenaEF'
 ex.job_options = 'TriggerJobOpts.runHLT'
 ex.input = 'data'
 ex.max_events = 50

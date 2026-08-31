@@ -1,6 +1,6 @@
 # Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 
-from AthenaCommon import Logging
+from ... import Logging
 from .external_base import ExternalBase
 
 ## Get handle to Athena logging

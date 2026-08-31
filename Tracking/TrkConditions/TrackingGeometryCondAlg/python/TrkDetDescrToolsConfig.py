@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -63,17 +63,12 @@ def CylinderVolumeCreatorCfg(flags, name='CylinderVolumeCreator',
     result = ComponentAccumulator()
 
     if "LayerArrayCreator" not in kwargs:
-        layerArrayCreator = result.popToolsAndMerge(
-            LayerArrayCreatorCfg(flags))
-        result.addPublicTool(layerArrayCreator)
-        kwargs.setdefault("LayerArrayCreator", layerArrayCreator)
+        kwargs.setdefault("LayerArrayCreator", result.popToolsAndMerge(
+            LayerArrayCreatorCfg(flags)))
 
     if "TrackingVolumeArrayCreator" not in kwargs:
-        trackingVolumeArrayCreator = result.popToolsAndMerge(
-            TrackingVolumeArrayCreatorCfg(flags))
-        result.addPublicTool(trackingVolumeArrayCreator)
-        kwargs.setdefault("TrackingVolumeArrayCreator",
-                          trackingVolumeArrayCreator)
+        kwargs.setdefault("TrackingVolumeArrayCreator", result.popToolsAndMerge(
+            TrackingVolumeArrayCreatorCfg(flags)))
 
     result.setPrivateTools(
         CompFactory.Trk.CylinderVolumeCreator(name, **kwargs))
@@ -84,10 +79,8 @@ def InDetCylinderVolumeCreatorCfg(flags, name='InDetCylinderVolumeCreator',
     result = ComponentAccumulator()
 
     if "TrackingVolumeHelper" not in kwargs:
-        trackingVolumeHelper = result.popToolsAndMerge(
-            InDetTrackingVolumeHelperCfg(flags))
-        result.addPublicTool(trackingVolumeHelper)
-        kwargs.setdefault("TrackingVolumeHelper", trackingVolumeHelper)
+        kwargs.setdefault("TrackingVolumeHelper", result.popToolsAndMerge(
+            InDetTrackingVolumeHelperCfg(flags)))
 
     kwargs.setdefault("PassiveLayerBinsRZ", 1)
 
@@ -100,10 +93,8 @@ def ITkCylinderVolumeCreatorCfg(flags, name='ITkCylinderVolumeCreator',
     result = ComponentAccumulator()
 
     if "TrackingVolumeHelper" not in kwargs:
-        trackingVolumeHelper = result.popToolsAndMerge(
-            ITkTrackingVolumeHelperCfg(flags))
-        result.addPublicTool(trackingVolumeHelper)
-        kwargs.setdefault("TrackingVolumeHelper", trackingVolumeHelper)
+        kwargs.setdefault("TrackingVolumeHelper", result.popToolsAndMerge(
+            ITkTrackingVolumeHelperCfg(flags)))
 
     kwargs.setdefault("PassiveLayerThickness", 1.) # in mm
     kwargs.setdefault("PassiveLayerBinsRZ",
@@ -120,10 +111,8 @@ def HGTD_CylinderVolumeCreatorCfg(flags, name='HGTD_CylinderVolumeCreator',
     result = ComponentAccumulator()
 
     if "TrackingVolumeHelper" not in kwargs:
-        trackingVolumeHelper = result.popToolsAndMerge(
-            HGTD_TrackingVolumeHelperCfg(flags))
-        result.addPublicTool(trackingVolumeHelper)
-        kwargs.setdefault("TrackingVolumeHelper", trackingVolumeHelper)
+        kwargs.setdefault("TrackingVolumeHelper", result.popToolsAndMerge(
+            HGTD_TrackingVolumeHelperCfg(flags)))
 
     kwargs.setdefault("PassiveLayerBinsRZ",
                       flags.HGTD.trackingGeometry.passiveBarrelMatZbins)

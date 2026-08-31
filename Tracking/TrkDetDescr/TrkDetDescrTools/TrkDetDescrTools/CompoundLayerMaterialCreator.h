@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -45,9 +45,6 @@ namespace Trk {
         /** Constructor */
         CompoundLayerMaterialCreator(const std::string&,const std::string&,const IInterface*);
 
-        /** Destructor */
-        ~CompoundLayerMaterialCreator();
-
         /** process the material properties */
         LayerMaterialProperties* createLayerMaterial(const LayerMaterialRecord& lmr) const;
         
@@ -58,7 +55,7 @@ namespace Trk {
         /** private method that can be called by both create/convertLayerMaterial */
         LayerMaterialProperties* createCompoundLayerMaterial(const MaterialPropertiesMatrix& lmm, const BinUtility& lmbu) const;
         
-        bool        m_fullCompoundCalculation;
+        Gaudi::Property<bool> m_fullCompoundCalculation{this, "FullCompoundCalculation", false};
 
     };
     

@@ -712,8 +712,8 @@ StatusCode TileRawChNoiseCalibAlg::fillRawChannels(const TileDQstatus* dqStatus,
                                                    const SG::ReadHandleKey<TileRawChannelContainer>& rawChannelContainerKey,
                                                    RCtype rctype) {
 /*---------------------------------------------------------*/
-
-  SG::ReadHandle<TileRawChannelContainer> rawChannelContainer(rawChannelContainerKey);
+  const EventContext& ctx = Gaudi::Hive::currentContext();
+  SG::ReadHandle<TileRawChannelContainer> rawChannelContainer(rawChannelContainerKey, ctx);
   ATH_CHECK( rawChannelContainer.isValid() );
 
   if ((rctype == Dsp) && (m_trigType != Phys)) {
@@ -764,7 +764,7 @@ StatusCode TileRawChNoiseCalibAlg::fillRawChannels(const TileDQstatus* dqStatus,
 
       // we fill the cell information now for selected method
       // note that fillCell is called only for good channels
-      if (rctype == m_UseforCells) fillCell(RChUnit, rch);
+      if (rctype == m_UseforCells) fillCell(RChUnit, rch, ctx);
 
       double amp = rch->amplitude();
       if (RChUnit > TileRawChannelUnit::OnlineADCcounts) {
@@ -867,7 +867,7 @@ void TileRawChNoiseCalibAlg::finalRawCh(int rctype) {
 // fillCell is called at every events.
 // Statistics is summed for Average, RMS calculations
 /*---------------------------------------------------------*/
-void TileRawChNoiseCalibAlg::fillCell(TileRawChannelUnit::UNIT RChUnit, const TileRawChannel * rch) {
+void TileRawChNoiseCalibAlg::fillCell(TileRawChannelUnit::UNIT RChUnit, const TileRawChannel * rch, const EventContext& ctx) {
   /*---------------------------------------------------------*/
 
   int index, pmt;
@@ -877,7 +877,7 @@ void TileRawChNoiseCalibAlg::fillCell(TileRawChannelUnit::UNIT RChUnit, const Ti
     m_tileIdTrans->getIndices(rch->adc_HWID(), ros, drawer, channel, gain);
     unsigned int drawerIdx = TileCalibUtils::getDrawerIdx(ros, drawer);
 
-    if (m_maskBadChannels && m_tileBadChanTool->getAdcStatus(drawerIdx, channel, gain).isBad()) {
+    if (m_maskBadChannels && m_tileBadChanTool->getAdcStatus(drawerIdx, channel, gain, ctx).isBad()) {
       ATH_MSG_VERBOSE( "Skipping Module: " << TileCalibUtils::getDrawerString(ros, drawer)
                        << " channel: " << channel
                        << " ADC: " << gain

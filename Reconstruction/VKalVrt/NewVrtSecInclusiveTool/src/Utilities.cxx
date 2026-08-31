@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 ///
 ///    @author Vadim Kostyukhin <vadim.kostyukhin@cern.ch>
@@ -422,7 +422,11 @@ namespace Rec{
      float distanceP=1.e9, distanceN=1.e9;
      if(extrapParP)distanceP=PntPntDist(extrapParP->position(), Vrt.fitVertex);
      if(extrapParN)distanceN=PntPntDist(extrapParN->position(), Vrt.fitVertex);
-     if(distanceP==1.e9 && distanceN==1.e9) return 1.e9;
+     if(distanceP==1.e9 && distanceN==1.e9) {
+       delete extrapParP;
+       delete extrapParN;
+       return 1.e9;
+     }
 
      //std::pair<const Trk::TrackParameters*,const Trk::Layer*> next= 
      //         m_extrapolator->extrapolateToNextActiveLayer(pseudoVrtPart,Trk::anyDirection,true,Trk::pion) ;

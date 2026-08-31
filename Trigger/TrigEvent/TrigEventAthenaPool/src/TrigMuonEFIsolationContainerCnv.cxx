@@ -31,8 +31,8 @@ TrigMuonEFIsolationContainer* TrigMuonEFIsolationContainerCnv::createTransient(c
   MsgStream mlog(msgSvc(), "TrigMuonEFIsolationContainerConverter" );
   mlog << MSG::DEBUG << "TrigMuonEFIsolationContainerCnv::createTransient" << endmsg;
 
-  static const pool::Guid p1_guid("5C3ECE20-F26F-4811-BA76-B2DC567858BC");
-  static const pool::Guid p2_guid("B24570F4-BB65-4D5C-A8E2-C44E36E7B0B5");
+  static const Guid p1_guid("5C3ECE20-F26F-4811-BA76-B2DC567858BC");
+  static const Guid p2_guid("B24570F4-BB65-4D5C-A8E2-C44E36E7B0B5");
 
   TrigMuonEFIsolationContainer* trans_cont(0);
 

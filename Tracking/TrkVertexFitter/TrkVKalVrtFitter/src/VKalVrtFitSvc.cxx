@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // Header include
@@ -152,7 +152,8 @@ StatusCode TrkVKalVrtFitter::VKalVrtFit(const std::vector<const xAOD::TrackParti
           }
           if(closestHitR<1.e6){
             auto perFMP=m_fitPropagator->myxAODFstPntOnTrk(trkFMP);  //FMP is calculated by extrapolation to radiusOfFirstHit
-            if(perFMP) cnstRefPoint=perFMP->position();
+            if(perFMP) cnstRefPoint = perFMP->position();
+            delete perFMP;
           }
        }
        Amg::Vector3D unitMom=Amg::Vector3D(Momentum.Px()/Momentum.P(),Momentum.Py()/Momentum.P(),Momentum.Pz()/Momentum.P());
@@ -370,7 +371,7 @@ int TrkVKalVrtFitter::VKalVrtFit3( int ntrk,
       VKalToTrkTrack(effectiveBMAG,(double)state.m_parfs[i][0],(double)state.m_parfs[i][1],(double)state.m_parfs[i][2],
                       TrkPar[0],TrkPar[1],TrkPar[2]);
       TrkPar[2] = -TrkPar[2];        // Change of sign needed
-      TrkAtVrt.push_back( TrkPar );
+      TrkAtVrt.push_back( std::move(TrkPar) );
     }
     return 0;
   }

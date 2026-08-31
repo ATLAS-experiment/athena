@@ -16,6 +16,10 @@
 namespace SH
 {
   ANA_MSG_HEADER (msgScanDir)
+  ANA_MSG_HEADER (msgFetch)
+  ANA_MSG_HEADER (msgDiscovery)
+  ANA_MSG_HEADER (msgSplit)
+  ANA_MSG_HEADER (msgDuplicates)
 }
 
 #endif

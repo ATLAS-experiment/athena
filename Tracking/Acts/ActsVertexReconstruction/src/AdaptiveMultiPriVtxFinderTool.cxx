@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "src/AdaptiveMultiPriVtxFinderTool.h"
@@ -42,12 +42,6 @@ namespace
   };
 } //anonymous namespace
 
-ActsTrk::AdaptiveMultiPriVtxFinderTool::AdaptiveMultiPriVtxFinderTool(const std::string& type,
-                                                                      const std::string& name,
-                                                                      const IInterface* parent)
-  : base_class(type, name, parent)
-{}
-
 StatusCode
 ActsTrk::AdaptiveMultiPriVtxFinderTool::initialize()
 {
@@ -56,17 +50,16 @@ ActsTrk::AdaptiveMultiPriVtxFinderTool::initialize()
     ATH_CHECK(m_beamSpotKey.initialize());
     ATH_CHECK(m_trkFilter.retrieve());
 
+    ATH_CHECK(m_ctxProvider.initialize());
     ATH_MSG_INFO("Initializing ACTS AMVF tool");
-    ATH_CHECK( m_trackingGeometryTool.retrieve() );
+    ATH_CHECK( m_trackingGeometrySvc.retrieve() );
     std::shared_ptr<const Acts::TrackingGeometry> trackingGeometry
-    = m_trackingGeometryTool->trackingGeometry();
-
-    ATH_CHECK( m_extrapolationTool.retrieve() );
+    = m_trackingGeometrySvc->trackingGeometry();
 
     // Logger
     m_logger = makeActsAthenaLogger(this, "Acts");
     
-    Acts::Navigator navigator( Acts::Navigator::Config{ trackingGeometry },
+    Acts::Navigator navigator( Acts::Navigator::Config{ std::move(trackingGeometry) },
 			       logger().cloneWithSuffix("Navigator"));
 
     auto bField = std::make_shared<ATLASMagneticFieldWrapper>();
@@ -95,7 +88,7 @@ ActsTrk::AdaptiveMultiPriVtxFinderTool::initialize()
 
     // Vertex fitter configuration
     VertexFitter::Config fitterCfg(ipEst);
-    fitterCfg.annealingTool = annealingUtility;
+    fitterCfg.annealingTool = std::move(annealingUtility);
     fitterCfg.maxIterations = m_fitterMaxIterations;
     fitterCfg.maxDistToLinPoint = m_fitterMaxDistToLinPoint;
     fitterCfg.minWeight = m_minWeightFitter;
@@ -103,7 +96,7 @@ ActsTrk::AdaptiveMultiPriVtxFinderTool::initialize()
     fitterCfg.doSmoothing = m_fitterDoSmoothing;
     fitterCfg.extractParameters.connect<&TrackWrapper::extractParameters>();
     fitterCfg.trackLinearizer.connect<&TrackLinearizer::linearizeTrack>(&*m_linearizer);
-    VertexFitter fitter(fitterCfg, logger().cloneWithSuffix("Fitter"));
+    VertexFitter fitter(std::move(fitterCfg), logger().cloneWithSuffix("Fitter"));
 
   std::string seederType = m_seederType;
 
@@ -124,11 +117,11 @@ ActsTrk::AdaptiveMultiPriVtxFinderTool::initialize()
       VertexFinder::Config finderConfig(
           std::move(fitter),
           std::make_shared<Acts::GridDensityVertexFinder>(gridSeedFinder),
-          ipEst,
+          std::move(ipEst),
           bField
       );
 
-      initializeVertexFinder(finderConfig);
+      initializeVertexFinder(std::move(finderConfig));
     }
     else if (seederType == "Gaussian") {
       Acts::GaussianTrackDensity::Config trackDensityConfig;
@@ -143,11 +136,11 @@ ActsTrk::AdaptiveMultiPriVtxFinderTool::initialize()
       VertexFinder::Config finderConfig(
           std::move(fitter),
           seedFinder,
-          ipEst,
+          std::move(ipEst),
           bField
       );
 
-      initializeVertexFinder(finderConfig);
+      initializeVertexFinder(std::move(finderConfig));
     }
     else {
       ATH_MSG_ERROR("Unknown seederType '" << seederType << "'.");
@@ -159,7 +152,7 @@ ActsTrk::AdaptiveMultiPriVtxFinderTool::initialize()
   }
 
   void
-  ActsTrk::AdaptiveMultiPriVtxFinderTool::initializeVertexFinder(VertexFinder::Config& finderConfig)
+  ActsTrk::AdaptiveMultiPriVtxFinderTool::initializeVertexFinder(VertexFinder::Config&& finderConfig)
   {
  
   finderConfig.tracksMaxZinterval          = m_tracksMaxZinterval;
@@ -266,15 +259,17 @@ ActsTrk::AdaptiveMultiPriVtxFinderTool::findVertex(const EventContext& ctx,
 {
     using namespace Acts::UnitLiterals; // !!!
     
-    SG::ReadCondHandle<InDet::BeamSpotData> beamSpotHandle { m_beamSpotKey, ctx};
+    const InDet::BeamSpotData* beamSpotHandle{};
+    if (!SG::get(beamSpotHandle, m_beamSpotKey, ctx).isSuccess()) {
+      return {};
+    }
     const Acts::Vector3& beamSpotPos = beamSpotHandle->beamVtx().position();
     Acts::Vertex beamSpotConstraintVtx(beamSpotPos);
     beamSpotConstraintVtx.setCovariance(beamSpotHandle->beamVtx().covariancePosition());
 
     // Get the magnetic field context
-    Acts::MagneticFieldContext magFieldContext = m_extrapolationTool->getMagneticFieldContext(ctx);
-
-    const auto& geoContext = m_trackingGeometryTool->getGeometryContext(ctx).context();
+    const Acts::MagneticFieldContext magFieldContext = m_ctxProvider.getMagneticFieldContext(ctx);
+    const Acts::GeometryContext geoContext = m_ctxProvider.getGeometryContext(ctx);
 
     // The output vertex containers
     xAOD::VertexContainer* theVertexContainer = new xAOD::VertexContainer;
@@ -342,7 +337,7 @@ ActsTrk::AdaptiveMultiPriVtxFinderTool::findVertex(const EventContext& ctx,
     }
 
     vertexingOptions.useConstraintInFit = m_useBeamConstraint;
-    vertexingOptions.constraint = beamSpotConstraintVtx;
+    vertexingOptions.constraint = std::move(beamSpotConstraintVtx);
 
     auto finderState = m_vertexFinder->makeState(magFieldContext);
 
@@ -394,7 +389,7 @@ ActsTrk::AdaptiveMultiPriVtxFinderTool::findVertex(const EventContext& ctx,
         trkAtVtx.setTrackQuality(Trk::FitQuality(trk.chi2Track, trk.ndf));
         trkAtVtx.setVtxCompatibility(trk.vertexCompatibility);
         trkAtVtx.setWeight(trk.trackWeight);
-        trkAtVtxVec->push_back(trkAtVtx);
+        trkAtVtxVec->push_back(std::move(trkAtVtx));
 
         const Trk::LinkToXAODTrackParticle* linkToXAODTP =
         dynamic_cast<const Trk::LinkToXAODTrackParticle*>(originalParams->trackLink());

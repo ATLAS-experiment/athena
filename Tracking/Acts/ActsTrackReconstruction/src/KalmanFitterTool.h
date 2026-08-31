@@ -19,8 +19,7 @@
 
 // PACKAGE
 #include "ActsEvent/TrackContainer.h"
-#include "ActsGeometryInterfaces/IExtrapolationTool.h"
-#include "ActsGeometryInterfaces/ITrackingGeometryTool.h"
+#include "ActsGeometryInterfaces/ITrackingGeometrySvc.h"
 #include "ActsGeometryInterfaces/IGeometryRealmConvTool.h"
 
 #include "ActsCalibrators/TrkMeasSurfaceAccessor.h"
@@ -30,6 +29,9 @@
 #include "src/detail/OnTrackCalibrator.h"
 
 #include "ActsToolInterfaces/IFitterTool.h"
+
+
+#include "MuonRecToolInterfacesR4/ISpacePointCalibrator.h"
 
 class EventContext;
 
@@ -112,9 +114,10 @@ private:
                                  detail::SourceLinkType slType) const;
 
 
-  ToolHandle<IExtrapolationTool> m_extrapolationTool{this, "ExtrapolationTool", ""};
-  PublicToolHandle<ITrackingGeometryTool> m_trackingGeometryTool{this, "TrackingGeometryTool", ""};
+  ServiceHandle<ITrackingGeometrySvc> m_trackingGeometrySvc{this, "TrackingGeometrySvc", "ActsTrackingGeometrySvc"};
   PublicToolHandle<IGeometryRealmConvTool> m_geometryConvTool{this, "GeometryRealmConvTool", ""};
+
+  ToolHandle<MuonR4::ISpacePointCalibrator> m_muonCalibrator{this, "MuonCalibrationTool", ""};
 
   ToolHandle<Trk::IRIO_OnTrackCreator> m_ROTcreator {this, "RotCreatorTool", ""};
 
@@ -138,9 +141,11 @@ private:
   detail::TrkPrepRawDataSurfaceAcc m_prdSurfAcc{};
   /** @brief Accessor to fetch surfaces from the xAOD::UncalibratedMeasurements (Phase-II EDM) */
   detail::xAODUncalibMeasSurfAcc m_unalibMeasSurfAcc{};
-  /** @brief Calibrator of the uncalibrated measurements */
-  using xAODUnCalibrator_t = detail::OnTrackCalibrator<ActsTrk::MutableTrackStateBackend> ;
-  xAODUnCalibrator_t m_uncalibMeasCalibrator{};
+   /** @brief Calibrator for the uncalibrated xAOD::UnCalibratedMeasurement objects */
+  detail::xAODUncalibMeasCalibrator m_uncalibMeasCalibrator{};
+  /** @brief Calibrator of the ID / ITk measurements */
+  using xAODItkCalibrator_t = detail::OnTrackCalibrator<ActsTrk::MutableTrackStateBackend> ;
+  xAODItkCalibrator_t m_idCalibrator{};
 
 
   /// Type erased track fitter function.

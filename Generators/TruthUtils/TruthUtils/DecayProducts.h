@@ -27,7 +27,7 @@ public:
 };
 #ifdef ATLASHEPMC_GENEVENT_H
 #ifdef ATLASHEPMC_GENPARTICLE_H
-    template <class Y,std::enable_if_t<std::is_same<Y, HepMC::GenParticlePtr>::value ||std::is_same<Y, HepMC::ConstGenParticlePtr>::value, bool > = true >
+    template <class Y, std::enable_if_t<std::is_same<Y, HepMC::GenParticlePtr>::value ||std::is_same<Y, HepMC::ConstGenParticlePtr>::value, bool > = true >
     DecayBase<Y> DecayProducts(const Y& p) {
         DecayBase<Y> t;
         auto v = p->end_vertex();
@@ -36,42 +36,42 @@ public:
     }
 #endif
 #ifdef ATLASHEPMC_GENVERTEX_H
-    template <class Y,std::enable_if_t<std::is_same<Y, HepMC::GenVertexPtr>::value ||std::is_same<Y, HepMC::ConstGenVertexPtr>::value, bool > = true>
+    template <class Y, std::enable_if_t<std::is_same<Y, HepMC::GenVertexPtr>::value ||std::is_same<Y, HepMC::ConstGenVertexPtr>::value, bool > = true>
     DecayBase<Y> DecayProducts(const Y& p) {
         DecayBase<Y> t;
         if (p) for (auto prod: *p) if (prod) t.count(prod->pdg_id());
-        return t;        
+        return t;
     }
 #endif
 #endif
 #ifdef XAODTRUTH_TRUTHPARTICLE_H
-    template <class Y,std::enable_if_t<std::is_same<Y, xAOD::TruthParticle>::value, bool > = true>
+    template <class Y, std::enable_if_t<std::is_same<Y, xAOD::TruthParticle>::value, bool > = true>
     DecayBase<Y> DecayProducts(const Y& p) {
         DecayBase<Y> t;
         auto v = p.end_vertex();
         if (v) for (auto prod: v->particles_out()) if (prod) t.count(prod->pdg_id());
-        return t;        
+        return t;
     }
-    template <class Y,std::enable_if_t<std::is_same<Y, xAOD::TruthParticle*>::value || std::is_same<Y, xAOD::TruthParticle const*>::value , bool > = true>
+    template <class Y, std::enable_if_t<std::is_same<Y, xAOD::TruthParticle*>::value || std::is_same<Y, xAOD::TruthParticle const*>::value, bool > = true>
     DecayBase<Y> DecayProducts(const Y& p) {
         DecayBase<Y> t;
         auto v = p->end_vertex();
         if (v) for (auto prod: v->particles_out()) if (prod) t.count(prod->pdg_id());
-        return t;        
+        return t;
     }
-    template <class Y,std::enable_if_t<std::is_same<Y, std::vector<const xAOD::TruthParticle*> >::value, bool > = true>
+    template <class Y, std::enable_if_t<std::is_same<Y, std::vector<const xAOD::TruthParticle*> >::value, bool > = true>
     DecayBase<Y> DecayProducts(const Y& p) {
         DecayBase<Y> t;
         for (auto prod: p) if (prod) t.count(prod->pdg_id());
-        return t;        
+        return t;
     }
 #endif
 #ifdef XAODTRUTH_TRUTHVERTEX_H
-    template <class Y,std::enable_if_t<std::is_same<Y, xAOD::TruthVertex*>::value || std::is_same<Y, xAOD::TruthVertex const*>::value , bool > = true>
+    template <class Y, std::enable_if_t<std::is_same<Y, xAOD::TruthVertex*>::value || std::is_same<Y, xAOD::TruthVertex const*>::value, bool > = true>
     DecayBase<Y> DecayProducts(const Y& p) {
         DecayBase<Y> t;
         if (p) for (auto prod: p->particles_out()) if (prod) t.count(prod->pdg_id());
-        return t;        
+        return t;
     }
 #endif
 #endif

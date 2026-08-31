@@ -146,6 +146,9 @@ private:
   BooleanProperty m_doActs{this, "doActs", false,
       "Use ACTS track representation for last-hit extraction"};
 
+  BooleanProperty m_doTruth{this, "doTruth", false,
+    "Use Truth information"};
+
   CleaningResult
   runTimeConsistencyCuts(const std::vector<float>& times,
 			 const std::vector<char>& has_clusters,

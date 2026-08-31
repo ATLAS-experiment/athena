@@ -84,9 +84,6 @@ StatusCode eSuperCellTowerMapper::AssignTriggerTowerMapper(std::unique_ptr<eTowe
   return StatusCode::SUCCESS;
 }
 
-void eSuperCellTowerMapper::reset() const {
-  return;
-}
 
   // works for real supercells from MC
   StatusCode eSuperCellTowerMapper::AssignSuperCellsToTowers(std::unique_ptr<eTowerContainer> & my_eTowerContainerRaw) const

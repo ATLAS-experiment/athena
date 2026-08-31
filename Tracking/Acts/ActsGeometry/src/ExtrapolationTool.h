@@ -8,10 +8,7 @@
 // ATHENA
 #include "GeoPrimitives/GeoPrimitives.h"
 #include "AthenaBaseComps/AthAlgTool.h"
-#include "GaudiKernel/IInterface.h"
-#include "GaudiKernel/ServiceHandle.h"
-#include "Gaudi/Property.h"
-#include "GaudiKernel/EventContext.h"
+
 #include "TrkEventPrimitives/ParticleHypothesis.h"
 #include "TrkEventPrimitives/PdgToParticleHypothesis.h"
 
@@ -22,8 +19,10 @@
 
 // PACKAGE
 #include "ActsGeometryInterfaces/IExtrapolationTool.h"
-#include "ActsGeometryInterfaces/ITrackingGeometryTool.h"
+#include "ActsGeometryInterfaces/ITrackingGeometrySvc.h"
 #include "ActsGeometry/ATLASMagneticFieldWrapper.h"
+
+#include "ActsEvent/ContextUtility.h"
 
 // ACTS
 #include "Acts/MagneticField/ConstantBField.hpp"
@@ -65,31 +64,39 @@ public:
   virtual Acts::Result<PropagationOutput> 
           propagationSteps(const EventContext& ctx,
                            const Acts::BoundTrackParameters& startParameters,
-                           Acts::Direction navDir, double pathLimit) const override final;
+                           const Acts::Direction navDir, 
+                           const double pathLimit) const override final;
 
   /** @copydoc IExtrapolationTool::propagate */
   virtual Acts::Result<Acts::BoundTrackParameters>
           propagate(const EventContext& ctx,
                     const Acts::BoundTrackParameters& startParameters,
-                    Acts::Direction navDir, double pathLimit) const override final;
+                    const Acts::Direction navDir, 
+                    const double pathLimit) const override final;
 
   /** @copydoc IExtrapolationTool::propagationSteps */
   virtual Acts::Result<PropagationOutput>
           propagationSteps(const EventContext& ctx,
                            const Acts::BoundTrackParameters& startParameters,
                            const Acts::Surface& target,
-                           Acts::Direction navDir, double pathLimit) const override;
+                           const Acts::Direction navDir, 
+                           const double pathLimit) const override;
  
   /** @copydoc IExtrapolationTool::propagate */
  virtual Acts::Result<Acts::BoundTrackParameters>
          propagate(const EventContext& ctx,
                    const Acts::BoundTrackParameters& startParameters,
                    const Acts::Surface& target,
-                   Acts::Direction navDir, double pathLimit) const override;
+                   const Acts::Direction navDir, 
+                   const double pathLimit) const override;
          
-  /** @copydoc IExtrapolationTool::getMagneticFieldContext */
-  virtual Acts::MagneticFieldContext getMagneticFieldContext(const EventContext& ctx) const override;
-  
+  /** @copydoc IExtrapolationTool::propagate */
+  virtual Acts::Result<Acts::BoundTrackParameters> propagate(const EventContext& ctx,
+                                                             const Acts::BoundTrackParameters& startParameters,
+                                                             const Acts::TrackingVolume& target,
+                                                             const VolumeAbort stopVolumeFlag,
+                                                             const Acts::Direction navDir,
+                                                             const double pathLimit) const override;
   /** @copydoc IExtrapolationTool::propagateAndRecord */
   virtual Acts::Result<BoundParamVec_t> propagateAndRecord(const EventContext& ctx,
                                                            const Acts::BoundTrackParameters& startParameters,
@@ -100,10 +107,10 @@ public:
 
   std::unique_ptr<const ActsExtrapolationDetail::VariantPropagator> m_varProp;
   std::unique_ptr<const Acts::Logger> m_logger{nullptr};
+  /** @brief Utility to fetch the geometry, magnetic field and calibration context in the event */
+  ContextUtility m_ctxProvider{this};
 
-  SG::ReadCondHandleKey<AtlasFieldCacheCondObj> m_fieldCacheCondObjInputKey {this, "AtlasFieldCacheCondObj", "fieldCondObj", "Name of the Magnetic Field conditions object key"};
-
-  PublicToolHandle<ActsTrk::ITrackingGeometryTool> m_trackingGeometryTool{this, "TrackingGeometryTool", "ActsTrackingGeometryTool"};
+  ServiceHandle<ActsTrk::ITrackingGeometrySvc> m_trackingGeometrySvc{this, "TrackingGeometrySvc", "ActsTrackingGeometrySvc"};
 
   Gaudi::Property<std::string> m_fieldMode{this, "FieldMode", "ATLAS", "Either ATLAS or Constant or StraightLine"};
   Gaudi::Property<std::vector<double>> m_constantFieldVector{this, "ConstantFieldVector", {0, 0, 0}, "Constant field value to use if FieldMode == Constant"};

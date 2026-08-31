@@ -69,10 +69,7 @@ AthenaPoolAddressProviderSvc                        DEBUG Cannot retrieve DataHe
 EventInfoCnvAlg.EventInfoCnvTool                     INFO Beam spot information not available
 EventInfoCnvAlg.EventInfoCnvTool                     INFO Will not fill beam spot information into xAOD::EventInfo
 StreamReWrite                                       DEBUG In initialize
-StreamReWrite                                       DEBUG In initialize 
-StreamReWrite                                       DEBUG Found IDecisionSvc.
 DecisionSvc                                          INFO Inserting stream: StreamReWrite with no Algs
-StreamReWrite                                       DEBUG End initialize 
 StreamReWrite                                       DEBUG Found StoreGateSvc/StoreGateSvc store.
 StreamReWrite                                       DEBUG Found StoreGateSvc/MetaDataStore store.
 AthDictLoaderSvc                                     INFO in initialize...
@@ -173,6 +170,7 @@ CollectionTree(EventInfo_p4/McEventInfo)            DEBUG Branch container 'Even
 CollectionTree(EventInfo_p4/McEventInfo)            DEBUG Opened container CollectionTree(EventInfo_p4/McEventInfo) of type ROOT_Tree
 AthenaEventLoopMgr                                   INFO   ===>>>  start of run 1    <<<===
 IOVDbSvc                                             INFO Only 5 POOL conditions files will be open at once
+IOVDbSvc                                             INFO IOVDbSvc configured to use a COOL database
 IOVDbSvc                                             INFO Initialised with 1 connections and 0 folders
 IOVDbSvc                                             INFO Service IOVDbSvc initialised successfully
 AthenaEventLoopMgr                                   INFO   ===>>>  start processing event #4294967297, run #1 0 events processed so far  <<<===

@@ -324,7 +324,7 @@ def STDM17Cfg(flags):
     # Output stream    
     STDM17ItemList = STDM17SlimmingHelper.GetItemList()
     acc.merge(OutputStreamCfg(flags, "DAOD_STDM17", ItemList=STDM17ItemList, AcceptAlgs=["STDM17Kernel"]))
-    acc.merge(SetupMetaDataForStreamCfg(flags, "DAOD_STDM17", AcceptAlgs=["STDM17Kernel"], createMetadata=[MetadataCategory.CutFlowMetaData]))
+    acc.merge(SetupMetaDataForStreamCfg(flags, "DAOD_STDM17", AcceptAlgs=["STDM17Kernel"], createMetadata=[MetadataCategory.CutFlowMetaData, MetadataCategory.TruthMetaData]))
 
     return acc
 

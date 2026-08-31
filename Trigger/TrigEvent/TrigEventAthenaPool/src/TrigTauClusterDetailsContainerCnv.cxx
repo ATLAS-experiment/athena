@@ -25,8 +25,8 @@ TrigTauClusterDetailsContainer * TrigTauClusterDetailsContainerCnv::createTransi
   
   mlog << MSG::DEBUG << "TrigTauClusterDetailsContainerCnv::createTransient called" << endmsg;
 
-  static const pool::Guid p2_guid( "AAEE63E0-BA47-45AD-AC28-E07EC68812C4" );
-  static const pool::Guid tlp1_guid( "D7DA2036-9F38-4060-A5C9-75C72AF104C4" );
+  static const Guid p2_guid( "AAEE63E0-BA47-45AD-AC28-E07EC68812C4" );
+  static const Guid tlp1_guid( "D7DA2036-9F38-4060-A5C9-75C72AF104C4" );
 
   if( compareClassGuid(token,  p2_guid ) ){
          std::unique_ptr< TrigTauClusterDetailsContainer_p2 > col_vect( poolReadObject< TrigTauClusterDetailsContainer_p2 >(token) );

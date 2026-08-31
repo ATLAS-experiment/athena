@@ -27,39 +27,44 @@
 #include "PathResolver/PathResolver.h"
 
 namespace {
-// Read an ATLAS Bethe-Heitler .par file (format: "n_cmps  degree\n[data]").
-Acts::AtlasBetheHeitlerApprox::Data readBHParFile(const std::string& path) {
-  std::ifstream fin(path);
-  if (!fin) {
-    throw std::invalid_argument("Could not open BH par file: " + path);
+  // Read an ATLAS Bethe-Heitler .par file (format: "n_cmps  degree\n[data]").
+  //see, for example:
+  //athena/Tracking/TrkFitter/TrkGaussianSumFilter/Data/BetheHeitler_cdfmom_nC6_O5.par
+  //try to indicate a sane maximum value for degree
+  constexpr std::size_t MAXDEGREE = 30;
+  //
+  Acts::AtlasBetheHeitlerApprox::Data readBHParFile(const std::string& path) {
+    std::ifstream fin(path);
+    if (!fin) {
+      throw std::invalid_argument("Could not open BH par file: " + path);
+    }
+    std::size_t n_cmps = 0, degree = 0;
+    fin >> n_cmps >> degree;
+    if (!fin || n_cmps == 0 || degree == 0 || degree > MAXDEGREE) {
+      throw std::invalid_argument("Bad header in BH par file: " + path);
+    }
+    Acts::AtlasBetheHeitlerApprox::Data data(n_cmps);
+    for (auto& cmp : data) {
+      cmp.weightCoeffs.resize(degree + 1);
+      cmp.meanCoeffs.resize(degree + 1);
+      cmp.varCoeffs.resize(degree + 1);
+      for (double& c : cmp.weightCoeffs) { fin >> c; }
+      for (double& c : cmp.meanCoeffs)   { fin >> c; }
+      for (double& c : cmp.varCoeffs)    { fin >> c; }
+    }
+    if (!fin) {
+      throw std::invalid_argument("Truncated data in BH par file: " + path);
+    }
+    return data;
   }
-  std::size_t n_cmps = 0, degree = 0;
-  fin >> n_cmps >> degree;
-  if (!fin || n_cmps == 0 || degree == 0) {
-    throw std::invalid_argument("Bad header in BH par file: " + path);
-  }
-  Acts::AtlasBetheHeitlerApprox::Data data(n_cmps);
-  for (auto& cmp : data) {
-    cmp.weightCoeffs.resize(degree + 1);
-    cmp.meanCoeffs.resize(degree + 1);
-    cmp.varCoeffs.resize(degree + 1);
-    for (double& c : cmp.weightCoeffs) { fin >> c; }
-    for (double& c : cmp.meanCoeffs)   { fin >> c; }
-    for (double& c : cmp.varCoeffs)    { fin >> c; }
-  }
-  if (!fin) {
-    throw std::invalid_argument("Truncated data in BH par file: " + path);
-  }
-  return data;
-}
 } // anonymous namespace
 
 namespace ActsTrk {
 
 StatusCode GaussianSumFitterTool::initialize() {
   ATH_MSG_DEBUG(name() << "::" << __FUNCTION__);
-  ATH_CHECK(m_trackingGeometryTool.retrieve());
-  ATH_CHECK(m_extrapolationTool.retrieve());
+  ATH_CHECK(m_trackingGeometrySvc.retrieve());
+  ATH_CHECK(m_ctxProvider.initialize());
   ATH_CHECK(m_geometryConvTool.retrieve());
   ATH_CHECK(m_ROTcreator.retrieve(EnableTool{!m_ROTcreator.empty()}));
   m_logger = makeActsAthenaLogger(this, "Acts Gaussian Sum Refit");
@@ -93,7 +98,7 @@ StatusCode GaussianSumFitterTool::initialize() {
 						    logger().cloneWithSuffix("DirectGaussianSumFitter"));
 
   } else {
-    Acts::Navigator navigator(Acts::Navigator::Config{ m_trackingGeometryTool->trackingGeometry() },
+    Acts::Navigator navigator(Acts::Navigator::Config{ m_trackingGeometrySvc->trackingGeometry() },
                               logger().cloneWithSuffix("Navigator") );
     Acts::Propagator<Acts::MultiEigenStepperLoop<>, Acts::Navigator> propagator(std::move(stepper), 
                       std::move(navigator),
@@ -133,8 +138,8 @@ StatusCode GaussianSumFitterTool::initialize() {
   }
   /// Configure the fit extensions for the uncalibrated measurement fits
   {
-    m_unalibMeasSurfAcc = detail::xAODUncalibMeasSurfAcc{m_trackingGeometryTool.get()}; 
-    m_uncalibMeasCalibrator = xAODUnCalibrator_t::NoCalibration(m_trackingGeometryTool.get());
+    m_unalibMeasSurfAcc = detail::xAODUncalibMeasSurfAcc{m_trackingGeometrySvc.get()}; 
+    m_uncalibMeasCalibrator = xAODUnCalibrator_t::NoCalibration(m_trackingGeometrySvc.get());
 
     m_refitCalibrator = std::make_unique<detail::RefittingCalibrator>(m_geometryConvTool.get(), m_ROTcreator.get());
     m_refitCalibrator->connect<&xAODUnCalibrator_t::calibrate>(xAOD::UncalibMeasType::PixelClusterType, &m_uncalibMeasCalibrator);
@@ -240,9 +245,9 @@ StatusCode GaussianSumFitterTool::fit(
     return StatusCode::SUCCESS;
   }
 
-  Acts::GeometryContext tgContext = m_trackingGeometryTool->getGeometryContext(ctx).context();
-  Acts::MagneticFieldContext mfContext = m_extrapolationTool->getMagneticFieldContext(ctx);
-  Acts::CalibrationContext calContext{getCalibrationContext(ctx)};
+  const Acts::GeometryContext tgContext{m_ctxProvider.getGeometryContext(ctx)};
+  const Acts::MagneticFieldContext mfContext{m_ctxProvider.getMagneticFieldContext(ctx)};
+  const Acts::CalibrationContext calContext{m_ctxProvider.getCalibrationContext(ctx)};
 
   std::unique_ptr< ActsTrk::MutableTrackContainer > refittedTracks = 
     fit(sourceLinks, initialParams, tgContext, mfContext, calContext, &pSurface);

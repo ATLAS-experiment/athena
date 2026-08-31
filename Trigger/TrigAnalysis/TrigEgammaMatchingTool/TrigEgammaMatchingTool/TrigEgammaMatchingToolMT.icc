@@ -1,7 +1,9 @@
 /*
   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
-#include <boost/algorithm/string.hpp>
+#include <ranges>
+#include <string_view>
+#include <vector>
 
 
 // L2Calo, L2Electron, L2Photon, EFCalo, Electron and Photon trigger passed access
@@ -155,7 +157,7 @@ TrigEgammaMatchingToolMT::getFeatures<xAOD::TrigElectronContainer>( const EventC
                                                                     const std::string& trigger,
                                                                     unsigned int condition ) const
 {
-  if(boost::contains(trigger,"lrt")){
+  if(trigger.contains("lrt")){
     return getFeatures<xAOD::TrigElectronContainer>(ctx, dec, trigger, key("FastElectrons_LRT"), condition);
   }else{
     return getFeatures<xAOD::TrigElectronContainer>(ctx, dec, trigger, key("FastElectrons"), condition);
@@ -185,11 +187,10 @@ TrigEgammaMatchingToolMT::getFeatures<xAOD::CaloClusterContainer>( const EventCo
                                                                    unsigned int condition ) const
 {
   std::vector<std::string> parts;
-  boost::split(parts,trigger,boost::is_any_of("_"));
-
-  if(boost::contains(trigger,"lrt")){
+  for (auto&& part : trigger | std::views::split('_')) parts.emplace_back(part.begin(), part.end());
+  if(trigger.contains("lrt")){
     return getFeatures<xAOD::CaloClusterContainer>(ctx, dec, trigger, key("PrecisionCalo_LRT"), condition );
-  }else if(boost::contains(parts.at(0),"g")){
+  }else if(parts.at(0).contains("g")){
     return getFeatures<xAOD::CaloClusterContainer>(ctx, dec, trigger, key("PrecisionCalo_Photon"), condition );
   }else{
     return getFeatures<xAOD::CaloClusterContainer>(ctx, dec, trigger, key("PrecisionCalo_Electron"), condition );
@@ -207,9 +208,9 @@ TrigEgammaMatchingToolMT::getFeatures<xAOD::ElectronContainer>(const EventContex
                                                                const std::string& trigger,
                                                                unsigned int condition) const
 {
-  if (boost::contains(trigger,"gsf")){
+  if (trigger.contains("gsf")){
     return getFeatures<xAOD::ElectronContainer>(ctx, dec, trigger, key("Electrons_GSF") , condition);
-  }else if(boost::contains(trigger,"lrt")){
+  }else if(trigger.contains("lrt")){
     return getFeatures<xAOD::ElectronContainer>(ctx, dec, trigger, key("Electrons_LRT") , condition);
   }else{
     return getFeatures<xAOD::ElectronContainer>(ctx, dec, trigger, key("Electrons") , condition);

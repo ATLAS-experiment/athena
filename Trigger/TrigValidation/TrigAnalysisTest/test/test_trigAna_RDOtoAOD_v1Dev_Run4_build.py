@@ -23,8 +23,7 @@ rdo2aod.type = 'Reco_tf'
 rdo2aod.input = 'ttbar_pu200_Run4'
 rdo2aod.threads = 1
 rdo2aod.args = '--outputAODFile=AOD.pool.root --steering "doRDO_TRIG"'
-rdo2aod.args += ' --CA "all:True"'
-rdo2aod.args += ' --preInclude "all:Campaigns.PhaseIIPileUp200"'
+rdo2aod.args += ' --preInclude "all:Campaigns.MC23PhaseIIPileUp200"'
 rdo2aod.args += f' --preExec "all:{preExec};"'
 rdo2aod.args += ' --conditionsTag "default:' + conditions + '"'
 rdo2aod.timeout = 5400 # default = 3600 s

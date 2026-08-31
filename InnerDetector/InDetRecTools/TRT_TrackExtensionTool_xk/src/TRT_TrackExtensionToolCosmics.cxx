@@ -387,12 +387,15 @@ InDet::TRT_TrackExtensionToolCosmics::extendTrack(const EventContext& /*ctx*/,
      if (pos.perp()<500. || !surf.insideBounds(locpos,50.,50.)) continue;
 
      Amg::Vector3D pos2=surf.transform()*Amg::Vector3D(locintersec.x(),locintersec.y(),0);
-
-     const Trk::PlaneSurface *plsurf=dynamic_cast<const Trk::PlaneSurface *>(&surf);
-     const Trk::DiscSurface *discsurf=dynamic_cast<const Trk::DiscSurface *>(&surf);
+     
      Trk::TrackParameters *newpar=nullptr;
-     if (plsurf) newpar=new Trk::AtaPlane(pos2,per->parameters()[Trk::phi],per->parameters()[Trk::theta],per->parameters()[Trk::qOverP],*plsurf);
-     else newpar=new Trk::AtaDisc(pos2,per->parameters()[Trk::phi],per->parameters()[Trk::theta],per->parameters()[Trk::qOverP],*discsurf); 
+     if (auto st = surf.type(); st == Trk::SurfaceType::Plane){
+       const Trk::PlaneSurface *plsurf=static_cast<const Trk::PlaneSurface *>(&surf);
+       newpar=new Trk::AtaPlane(pos2,per->parameters()[Trk::phi],per->parameters()[Trk::theta],per->parameters()[Trk::qOverP],*plsurf);
+     } else if (st == Trk::SurfaceType::Disc){
+       const Trk::DiscSurface *discsurf=static_cast<const Trk::DiscSurface *>(&surf);
+       newpar=new Trk::AtaDisc(pos2,per->parameters()[Trk::phi],per->parameters()[Trk::theta],per->parameters()[Trk::qOverP],*discsurf);
+     }
      vecTP.push_back(newpar);
    }
   tpars_down=new std::vector<const Trk::TrackParameters* >;

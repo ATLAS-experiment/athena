@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #include <MuonTesterTree/LinkerBranch.h>
 #include <format>
@@ -10,8 +10,10 @@ namespace MuonVal{
                                const std::string& altName):
         VectorBranch<unsigned short>{parent.tree(), 
                                      std::format("{:}_{:}Link", parent.name(), altName.empty() ? linkColl->name() : altName)},
-        m_linkColl{linkColl},
-        m_linkerFunc{std::move(linker)} {}
+        m_linkColl{linkColl.get()},
+        m_linkerFunc{std::move(linker)} {
+            parent.getTree().addBranch(linkColl); 
+        }
 
     void LinkerBranch::operator+=(const xAOD::IParticle* p) {
         push_back(p);
@@ -24,9 +26,8 @@ namespace MuonVal{
     }
     void LinkerBranch::push_back(const xAOD::IParticle* p) {
         const xAOD::IParticle* related = m_linkerFunc(p);
-        ParticleBranch_ptr linkColl = m_linkColl.lock();
-        linkColl->push_back(related);
-        VectorBranch<unsigned short>::push_back(linkColl->find(related));
+        m_linkColl->push_back(related);
+        VectorBranch<unsigned short>::push_back(m_linkColl->find(related));
     }
 
     
@@ -35,20 +36,35 @@ namespace MuonVal{
                                                    Linker_t fromPrimToSec,
                                                    const std::string& altPrimName,
                                                    const std::string& altSecName) {
-        return primColl->addVariable(std::make_unique<LinkerBranch>(*primColl, secondColl, fromPrimToSec, altPrimName)) &&
-               secondColl->addVariable(std::unique_ptr<IParticleDecorationBranch>{new BilateralLinkerBranch(*secondColl, std::move(primColl), std::move(fromPrimToSec), altSecName)});
+        return connectCollections(primColl, secondColl, fromPrimToSec, 
+                                  [](const xAOD::IParticle* a, const xAOD::IParticle* b){
+                                        return a == b;
+                                  }, altPrimName, altSecName);
     }
+    bool BilateralLinkerBranch::connectCollections(ParticleBranch_ptr primColl,
+                                                   ParticleBranch_ptr secondColl,
+                                                   Linker_t fromPrimToSec,
+                                                   BiLinker_t fromSecToPrim,
+                                                   const std::string& altPrimName,
+                                                   const std::string& altSecName) {
+        return primColl->addVariable(std::make_unique<LinkerBranch>(*primColl, secondColl, fromPrimToSec, altPrimName)) &&
+               secondColl->addVariable(std::unique_ptr<IParticleDecorationBranch>{new BilateralLinkerBranch(*secondColl, std::move(primColl), std::move(fromPrimToSec), std::move(fromSecToPrim), altSecName)});
+    }
+
                      
     BilateralLinkerBranch::BilateralLinkerBranch(IParticleFourMomBranch& parent,
                                                  ParticleBranch_ptr primColl,
                                                  Linker_t linker,
+                                                 BiLinker_t fromSecToPrim,
                                                  const std::string& altName):
         VectorBranch<unsigned short>{parent.tree(), 
                                      std::format("{:}_{:}Link", parent.name(), altName.empty() ? primColl->name() : altName)},
         m_parent{parent},
-        m_linkColl{primColl},
-        m_linkerFunc{std::move(linker)} {
+        m_linkColl{primColl.get()},
+        m_linkPrimToSec{std::move(linker)},
+        m_linkSecToPrim{std::move(fromSecToPrim)} {
         setDefault(-1);
+        parent.getTree().addBranch(primColl);
     }
 
     void BilateralLinkerBranch::push_back(const xAOD::IParticle* /* p*/) {
@@ -66,10 +82,12 @@ namespace MuonVal{
         if (m_parent.size()) {
             /** Allocate the memory */
             get(m_parent.size() -1);
-            ParticleBranch_ptr linkColl = m_linkColl.lock();
-            const std::vector<const xAOD::IParticle*>& linkeMe = linkColl->getCached();
-            for (std::size_t primToSec = 0 ; primToSec < linkeMe.size(); ++primToSec) {
-                const size_t linkIdx = m_parent.find(m_linkerFunc(linkeMe[primToSec]));
+            const std::vector<const xAOD::IParticle*>& linkMe = m_linkColl->getCached();
+            for (std::size_t primToSec = 0 ; primToSec < linkMe.size(); ++primToSec) {
+                const xAOD::IParticle* primP = m_linkPrimToSec(linkMe[primToSec]);
+                const size_t linkIdx = m_parent.find([&](const xAOD::IParticle* inBilat){
+                    return m_linkSecToPrim(primP, inBilat);
+                });
                 if (linkIdx < size()) {
                     get(linkIdx) = primToSec;
                 }

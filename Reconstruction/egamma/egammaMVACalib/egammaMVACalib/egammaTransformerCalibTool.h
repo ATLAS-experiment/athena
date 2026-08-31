@@ -113,6 +113,7 @@ class egammaTransformerCalibTool : public asg::AsgTool,
 
   // Transformer model utils
   std::unique_ptr<const FlavorTagInference::SaltModel> m_saltModel;
+  std::string m_outputName;
   int m_num_cluster_features = 0;
   int m_num_cell_features = 0;
   static constexpr double m_timeCut = 12.;

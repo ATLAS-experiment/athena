@@ -22,7 +22,7 @@
 
 // EventUtils includes
 #include "ThinGeantTruthAlg.h"
-#include "MCTruthClassifier/MCTruthClassifierDefs.h"
+#include "TruthUtils/TruthClasses.h"
 #include "xAODTruth/xAODTruthHelpers.h"
 // STL includes
 #include <algorithm>
@@ -217,6 +217,13 @@ ThinGeantTruthAlg::execute(const EventContext& ctx) const
       descendants(particle, particleMask, encounteredUniqueIDs);
       encounteredUniqueIDs.clear();
     }
+
+    // Retain stable Tau particles produced by Geant4 and their descendants
+    if (MC::isTau(particle) && MC::isStable(particle)) {
+      descendants(particle, particleMask, encounteredUniqueIDs);
+      encounteredUniqueIDs.clear();
+    }
+
     // Retain children of longer-lived generator particles
     if (MC::isStable(particle)) {
       int pdgId = abs(particle->pdgId());

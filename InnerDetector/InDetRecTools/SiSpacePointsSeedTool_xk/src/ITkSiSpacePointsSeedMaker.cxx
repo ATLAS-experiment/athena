@@ -80,7 +80,7 @@ StatusCode SiSpacePointsSeedMaker::initialize()
   m_umax = 100. - std::abs(m_umax) * 300.;
 
   if (m_writeNtuple) {
-
+    //coverity[MISSING_LOCK]
     ATH_CHECK( m_thistSvc.retrieve() );
 
     m_treeName = (std::string("SeedTree_")+name());
@@ -1497,7 +1497,10 @@ void SiSpacePointsSeedMaker::production3Sp(EventData &data) const
   int nPhiBins;
   std::array<int, arraySizePhiZ> nNeighbourCellsBottom{};
   std::array<int, arraySizePhiZ> nNeighbourCellsTop{};
+  //coverity[STACK_USE]
   std::array<std::array<int, arraySizeNeighbourBins>, arraySizePhiZ> neighbourCellsBottom{};
+  // Local variable neighbourCellsTop uses 79200 bytes of stack space,
+  //coverity[STACK_USE]
   std::array<std::array<int, arraySizeNeighbourBins>, arraySizePhiZ> neighbourCellsTop{};
 
   if (isPixel)
@@ -2783,7 +2786,8 @@ void SiSpacePointsSeedMaker::fillSeeds(EventData &data)
     {
       /// otherwise, extend the seed list and update the iterators
       data.i_ITkSeeds.emplace_back(*(*it_seedCandidate).second);
-      theSeed = &(data.i_ITkSeeds.back());
+      //unused value, keep in comment to avoid repeating in future
+      //theSeed = &(data.i_ITkSeeds.back()); 
       data.i_ITkSeedEnd = data.i_ITkSeeds.end();
     }
 

@@ -320,7 +320,7 @@ NewVrtSecInclusiveTool::NewVrtSecInclusiveTool(const std::string& type,
       }
     }
 
-    std::unique_ptr<Trk::VxSecVertexInfo> res = std::make_unique<Trk::VxSecVertexInfo>(Trk::VxSecVertexInfo(listVrtSec));
+    auto res = std::make_unique<Trk::VxSecVertexInfo>(Trk::VxSecVertexInfo(std::move(listVrtSec)));
 
     if(m_fillHist){
       Hists& h = getHists();

@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 #
 # art-description: Test of the RDOtoRDOTrigger transform with threads=1
 # art-type: build
@@ -24,7 +24,6 @@ ex.type = 'Reco_tf'
 ex.input = 'pbpb'
 ex.threads = 1
 ex.args = '--outputRDO_TRIGFile=RDO_TRIG.pool.root'
-ex.args += ' --CA "all:True"'
 ex.args += ' --preExec="all:{:s};"'.format(preExec)
 ex.args += ' --preInclude "all:Campaigns.MC23a"'
 ex.args += ' --conditionsTag "default:' + conditions + '"'

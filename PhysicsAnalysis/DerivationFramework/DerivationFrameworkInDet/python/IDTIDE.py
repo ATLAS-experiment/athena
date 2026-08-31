@@ -408,7 +408,7 @@ def IDTIDECfg(flags):
                 "PLRMeasurementsAux": "xAOD::TrackMeasurementValidationAuxContainer"
             })
 
-    SmartCollections += ["Muons", "Electrons", "Photons"]
+    SmartCollections += ["Muons", "Electrons", "Photons", "TauJets"]
 
     AllVariables += ["EventInfo",
                      "JetETMissNeutralParticleFlowObjects",

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -15,9 +15,9 @@
 #include "TrkGeometry/MaterialProperties.h"
 // Amg
 #include "GeoPrimitives/GeoPrimitives.h"
-// Gaudi
-#include "GaudiKernel/MsgStream.h"
+#include <iosfwd>
 
+class MsgStream;
 namespace Trk {
 
 /**

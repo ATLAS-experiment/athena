@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 
@@ -10,9 +10,8 @@ def ActsToTrkConverterToolCfg(flags,
                               **kwargs) -> ComponentAccumulator:
     acc = ComponentAccumulator()
 
-    from ActsConfig.ActsGeometryConfig import ActsTrackingGeometryToolCfg, ActsGeometryRealmConvTool
-    kwargs.setdefault("TrackingGeometryTool", acc.getPrimaryAndMerge(ActsTrackingGeometryToolCfg(flags)))
-    kwargs.setdefault("GeometryRealmConvTool", acc.getPrimaryAndMerge(ActsGeometryRealmConvTool(flags)))
+    from ActsConfig.ActsGeometryConfig import ActsGeometryRealmConvToolCfg
+    kwargs.setdefault("GeometryRealmConvTool", acc.getPrimaryAndMerge(ActsGeometryRealmConvToolCfg(flags)))
 
     setupMuon = setupMuon and flags.Muon.usePhaseIIGeoSetup
     setupITk = setupITk and (flags.Detector.GeometryITk or flags.Detector.GeometryID)
@@ -95,8 +94,6 @@ def xAODtoTrkConverterAlgCfg(flags, name ="xAODToTrkConversionAlg",
                              setupMuon = False, setupITk = True, **kwargs):
     result = ComponentAccumulator()
     if setupITk:
-        if flags.Tracking.ITkMainPass.doAthenaToActsCluster:
-            return result
         from InDetConfig.InDetPrepRawDataFormationConfig import ITkXAODToInDetClusterConversionCfg
         result.merge(ITkXAODToInDetClusterConversionCfg(flags))
     if 'ATLASConverterTool' not in kwargs:
@@ -113,8 +110,6 @@ def ActsToXAODTrackConverterAlgCfg(flags,
     kwargs.setdefault('InputActsTracksLocation', '')
     kwargs.setdefault('OutputActsTracksLocation', '')
 
-    from ActsConfig.ActsGeometryConfig import ActsTrackingGeometryToolCfg
-    kwargs.setdefault('TrackingGeometryTool', acc.getPrimaryAndMerge(ActsTrackingGeometryToolCfg(flags)))
     acc.addEventAlgo(CompFactory.ActsTrk.ActsToXAODTrackConverterAlg(name, **kwargs), primary = True)    
     return acc
 
@@ -128,14 +123,12 @@ def ActsTrackToTrackParticleCnvToolCfg(flags,
         AtlasFieldCacheCondAlgCfg)
     acc.merge(AtlasFieldCacheCondAlgCfg(flags))
 
-    from ActsConfig.ActsGeometryConfig import ActsExtrapolationToolCfg
-    kwargs.setdefault('ExtrapolationTool', acc.popToolsAndMerge(ActsExtrapolationToolCfg(flags)) )
-    from ActsConfig.ActsGeometryConfig import ActsTrackingGeometryToolCfg
-    kwargs.setdefault("TrackingGeometryTool", acc.getPrimaryAndMerge(ActsTrackingGeometryToolCfg(flags)))
     kwargs.setdefault('FirstAndLastParameterOnly',True)
     kwargs.setdefault('ComputeExpectedLayerPattern',True)
 
 
+    from ActsConfig.ActsGeometryConfig import ActsExtrapolationToolCfg
+    kwargs.setdefault('ExtrapolationTool', acc.popToolsAndMerge(ActsExtrapolationToolCfg(flags)) )
     acc.setPrivateTools(CompFactory.ActsTrk.TrackToTrackParticleCnvTool(name, **kwargs))
     return acc
 
@@ -219,13 +212,6 @@ def RunTrackConversion(flags, track_collections = [], outputfile='dump.json', se
     )
     cfg.merge(acc)
     cfg.printConfig(withDetails=True, summariseProps=True)
-    from AthenaCommon.Constants import FATAL
-    ### The translation of the Phase-II stlye muon geometry throws a ton
-    ### of error messages which degrades the physics performance but does
-    ### not harm the technical execution. In order, to make the tests pass
-    ### silence the algorithm until the tracking geometry translation understands
-    ### the new style of geometry building.
-    cfg.getCondAlgo("AtlasTrackingGeometryCondAlg").OutputLevel = FATAL
 
     sc = cfg.run()
     if not sc.isSuccess():

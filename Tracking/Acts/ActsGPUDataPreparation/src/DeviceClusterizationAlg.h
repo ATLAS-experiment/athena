@@ -77,9 +77,6 @@ private:
     ToolHandle<AthDevice::IMemoryResourceTool> m_deviceMR{
         this, "DeviceMR", "",
         "Device memory resource tool"};
-    /// @name The device copy tool to use for debug printing
-    ToolHandle<AthDevice::ICopyTool> m_copy{
-        this, "CopyProviderTool", "", "Vecmem copy provider tool"};
 
     /// @name The name of device resident input traccc cell collection
     SG::ReadHandleKey<traccc::edm::silicon_cell_collection::const_view> m_inputCellsKey{
@@ -97,8 +94,8 @@ private:
     /// @}
 
     // Device buffers — retrieved from detStore
-    const traccc::detector_design_description::const_view* m_deviceDesign{};
-    const traccc::detector_conditions_description::const_view* m_deviceCond{};
+    const traccc::detector_design_description::const_view* m_deviceDesign{nullptr};
+    const traccc::detector_conditions_description::const_view* m_deviceCond{nullptr};
 
 };
 

@@ -55,23 +55,21 @@ if [ ! -f $inputRDO ]; then
     exit 1
 fi
 
-source "$(dirname "$0")/setup_G200_ART.sh"
-
 ## running reconstruction
-run Reco_tf.py --CA \
+ignore_pattern='ERROR Locating dev file .+ Do not let this propagate to a release'
+run Reco_tf.py \
     --maxEvents ${nEvents} \
     --preInclude 'InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude' \
-    --postInclude 'EFTracking.TrackingAlgConfig.g1xxAlgCfg,ActsConfig.ActsPostIncludes.ACTSClusterPostInclude' \
-    --preExec 'from EFTracking.GpuEFTrackingConfigFlags import createGpuEFTrackingConfigFlags; \
-               flags.addFlagsCategory("Trigger.EFTracking.GPU", createGpuEFTrackingConfigFlags, prefix=True); \
-               flags.Trigger.EFTracking.GPU.inputDirectory="'"$PWD"'/ITk_data/"; \
-               flags.Trigger.EFTracking.GPU.pipeline="g130"; \
-               flags.Trigger.EFTracking.GPU.checkSeeds=True; \
+    --postInclude 'ActsConfig.ActsPostIncludes.ACTSClusterPostInclude' \
+    --preExec 'flags.Detector.EnableHGTD=False; \
+               flags.Acts.Device.doClusterization=True; \
+               flags.Acts.Device.doSeeding=True; \
+               flags.Tracking.doPixelDigitalClustering=True; \
                from ActsConfig.ActsConfigFlags import SeedingStrategy; \
-               flags.Acts.SeedingStrategy=SeedingStrategy.GbtsFtf;' \
-    --steering 'doRAWtoALL' \
+               flags.Acts.SeedingStrategy=SeedingStrategy.Gbts;' \
     --inputRDOFile ${inputRDO} \
     --outputAODFile ${outputAOD} \
+    --ignorePatterns "${ignore_pattern}" \
     --perfmon fullmonmt
 
 rc=$?

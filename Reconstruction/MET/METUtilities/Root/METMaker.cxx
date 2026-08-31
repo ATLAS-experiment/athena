@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // METMaker.cxx
@@ -1075,7 +1075,7 @@ namespace met {
     }
 
     if(metSoftClus) {
-      dec_constitObjLinks(*metSoftClus) = softJetLinks;
+      dec_constitObjLinks(*metSoftClus) = std::move(softJetLinks);
       ATH_MSG_DEBUG("Number of softclus jets: " << dec_constitObjLinks(*metSoftClus).size());
     }
 
@@ -1124,7 +1124,7 @@ namespace met {
             // Remove the Eloss assuming the parameterised value
             // The correction is limited to the selected clusters
             total_eloss += mu_Eloss;
-            muons_selflags |= (1<<assoc->findIndex(mu_test));
+            muons_selflags |= (static_cast<MissingETBase::Types::bitmask_t >(1)<<assoc->findIndex(mu_test));
           }
           ATH_MSG_VERBOSE("Mu index " << mu_test->index());
         }

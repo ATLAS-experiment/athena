@@ -37,9 +37,9 @@ TrigVertexCountsCollection* TrigVertexCountsCollectionCnv::createTransient(const
   
   mlog << MSG::DEBUG << "TrigVertexCountsCollectionCnv::createTransient" << endmsg;
 
-  static const pool::Guid tlp1_guid( "2A1D4A4E-D566-4C71-B051-D5D79A856753" );
-  static const pool::Guid p1_guid( "232B47D0-65CA-4883-AC51-0D76EAEA3194" );
-  static const pool::Guid trans_guid( "7A4412AD-C11D-4EFD-AE15-D343D2CB28BC" );
+  static const Guid tlp1_guid( "2A1D4A4E-D566-4C71-B051-D5D79A856753" );
+  static const Guid p1_guid( "232B47D0-65CA-4883-AC51-0D76EAEA3194" );
+  static const Guid trans_guid( "7A4412AD-C11D-4EFD-AE15-D343D2CB28BC" );
 
 
   TrigVertexCountsCollection *p_container = 0;

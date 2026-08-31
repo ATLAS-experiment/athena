@@ -19,7 +19,7 @@ EventShapeStore_PERS* EventShapeStoreCnv::createPersistent(EventShapeStore* tran
 
 EventShapeStore* EventShapeStoreCnv::createTransient(const Token* token)
 {
-  static const pool::Guid   p1_guid("730C49D9-47C2-45D4-A755-1313F4A2ACB1");
+  static const Guid   p1_guid("730C49D9-47C2-45D4-A755-1313F4A2ACB1");
   if( compareClassGuid(token, p1_guid) )
     {
       EventShapeStoreCnv_p1   TPconverter;

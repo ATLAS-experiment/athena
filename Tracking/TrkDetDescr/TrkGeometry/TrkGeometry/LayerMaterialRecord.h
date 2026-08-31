@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //////////////////////////////////////////////////////////////////
@@ -9,12 +9,15 @@
 #ifndef TRKGEOMETRY_LAYERMATERIALRECORD_H
 #define TRKGEOMETRY_LAYERMATERIALRECORD_H
 
-#include <climits>
+
 
 #include "GeoPrimitives/GeoPrimitives.h"
 #include "TrkDetDescrUtils/BinUtility.h"
 #include "TrkDetDescrUtils/MaterialAssociationType.h"
 #include "TrkGeometry/MaterialProperties.h"
+
+#include <climits>
+#include <vector>
 
 #ifndef UCHARCONV
 #define UCHARCONV

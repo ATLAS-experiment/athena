@@ -100,7 +100,7 @@ StatusCode TrackingGeometrySvc::initialize() {
                << Acts::VersionPatch << " [" << Acts::CommitHash.value_or("unknown hash") << "]");
 
   // load which subdetectors to build from property
-  std::set<std::string> buildSubdet(m_buildSubdetectors.begin(),
+  std::set<std::string, std::less<>> buildSubdet(m_buildSubdetectors.begin(),
                                     m_buildSubdetectors.end());
   ATH_MSG_INFO("Configured to build " << buildSubdet.size()
                                       << " subdetectors:");
@@ -109,23 +109,23 @@ StatusCode TrackingGeometrySvc::initialize() {
   }
 
   ATH_MSG_DEBUG("Loading detector manager(s)");
-  if (buildSubdet.find("Pixel") != buildSubdet.end()) {
+  if (buildSubdet.contains("Pixel") ) {
     ATH_CHECK(m_detStore->retrieve(p_pixelManager, "Pixel"));
   }
-  if (buildSubdet.find("SCT") != buildSubdet.end()) {
+  if (buildSubdet.contains("SCT") ) {
     ATH_CHECK(m_detStore->retrieve(p_SCTManager, "SCT"));
   }
-  if (buildSubdet.find("TRT") != buildSubdet.end()) {
+  if (buildSubdet.contains("TRT") ) {
     ATH_CHECK(m_detStore->retrieve(p_TRTManager, "TRT"));
     ATH_CHECK(m_detStore->retrieve(m_TRT_idHelper, "TRT_ID"));
   }
-  if (buildSubdet.find("ITkPixel") != buildSubdet.end()) {
+  if (buildSubdet.contains("ITkPixel") ) {
     ATH_CHECK(m_detStore->retrieve(p_ITkPixelManager, "ITkPixel"));
   }
-  if (buildSubdet.find("ITkStrip") != buildSubdet.end()) {
+  if (buildSubdet.contains("ITkStrip") ) {
     ATH_CHECK(m_detStore->retrieve(p_ITkStripManager, "ITkStrip"));
   }
-  if (buildSubdet.find("HGTD") != buildSubdet.end()) {
+  if (buildSubdet.contains("HGTD") ) {
     ATH_CHECK(m_detStore->retrieve(p_HGTDManager, "HGTD"));
     ATH_CHECK(m_detStore->retrieve(m_HGTD_idHelper, "HGTD_ID"));
   }
@@ -157,7 +157,7 @@ StatusCode TrackingGeometrySvc::initialize() {
 
 
     ATH_MSG_INFO("Using Blueprint API for geometry construction");
-    std::set<std::string> buildSubdet(m_buildSubdetectors.begin(),
+    std::set<std::string, std::less<>> buildSubdet(m_buildSubdetectors.begin(),
                                      m_buildSubdetectors.end());
 
     ATH_CHECK(m_blueprintNodeBuilders.retrieve());
@@ -170,17 +170,17 @@ StatusCode TrackingGeometrySvc::initialize() {
                std::back_inserter(ptrBuilders),
                [](ToolHandle<ActsTrk::IBlueprintNodeBuilder>& b) { return b.get(); });
 
-    auto logger = makeActsAthenaLogger(this, std::string("Blueprint"), std::string("ActsTGSvc"));
+    auto logger = makeActsAthenaLogger(this, name());
     
-    Acts::Experimental::Blueprint::Config cfg;
+    Acts::Blueprint::Config cfg;
     cfg.envelope[AxisZ] = {20_mm, 20_mm};
     cfg.envelope[AxisR] = {0_mm, 20_mm};
 
-    auto blueprint = std::make_unique<Acts::Experimental::Blueprint>(cfg);
+    auto blueprint = std::make_unique<Acts::Blueprint>(cfg);
 
     auto& root = blueprint->addCylinderContainer("Detector", AxisZ);
     //The starting top node 
-    std::shared_ptr<Acts::Experimental::BlueprintNode> currentTop{nullptr};
+    std::shared_ptr<Acts::BlueprintNode> currentTop{nullptr};
 
     for (auto& builder : ptrBuilders) {
       currentTop = builder->buildBlueprintNode(getNominalContext().context(), std::move(currentTop));
@@ -189,8 +189,10 @@ StatusCode TrackingGeometrySvc::initialize() {
 
     root.addChild(std::move(currentTop));
     
+    Acts::BlueprintOptions blueprintOptions;
+    blueprintOptions.keepGoingOnMaterialMergeFailure = m_keepGoingOnMaterialMergeFailure;
     std::unique_ptr<Acts::TrackingGeometry> trackingGeometry = blueprint->construct(
-      {}, getNominalContext().context(), *logger->clone(std::nullopt, Acts::Logging::DEBUG));
+      blueprintOptions, getNominalContext().context(), *logger->clone(std::nullopt, Acts::Logging::DEBUG));
 
     for (auto& refineVisitor : m_refineVisitors) {
         trackingGeometry->apply(*refineVisitor);
@@ -220,6 +222,10 @@ StatusCode TrackingGeometrySvc::initialize() {
         Acts::detail::TrackingGeometryPrintVisitor printer{m_nominalContext.context()};
         m_trackingGeometry->apply(printer);
         ATH_MSG_INFO("Built tracking geometry \n"<<printer.stream().str());
+    }
+    m_detIdMap = createDetectorElementToGeoIdMap();
+    if (!m_detIdMap) {
+        return StatusCode::FAILURE;
     }
 
     return StatusCode::SUCCESS;
@@ -264,7 +270,7 @@ StatusCode TrackingGeometrySvc::initialize() {
       matDeco = std::make_shared<const Acts::JsonMaterialDecorator>(
 	   jsonGeoConvConfig, matFileFullPath, ActsTrk::actsLevelVector(msg().level()));
     }
-    tgbConfig.materialDecorator = matDeco;
+    tgbConfig.materialDecorator = std::move(matDeco);
   }
 
   std::array<double, 2> sctECEnvelopeZ{20_mm, 20_mm};
@@ -289,7 +295,7 @@ StatusCode TrackingGeometrySvc::initialize() {
 
 
     // PIXEL
-    if (buildSubdet.count("Pixel") > 0) {
+    if (buildSubdet.contains("Pixel")) {
       tgbConfig.trackingVolumeBuilders.push_back([&](const auto &gctx,
                                                      const auto &inner,
                                                      const auto &) {
@@ -313,7 +319,7 @@ StatusCode TrackingGeometrySvc::initialize() {
     }
 
     // ITK PIXEL
-    if (buildSubdet.count("ITkPixel") > 0) {
+    if (buildSubdet.contains("ITkPixel") ) {
       tgbConfig.trackingVolumeBuilders.push_back(
           [&](const auto &gctx, const auto &inner, const auto &) {
             auto cfg = makeLayerBuilderConfig(p_ITkPixelManager);
@@ -372,7 +378,7 @@ StatusCode TrackingGeometrySvc::initialize() {
     }
 
     // ITK STRIP
-    if (buildSubdet.count("ITkStrip") > 0) {
+    if (buildSubdet.contains("ITkStrip")) {
       tgbConfig.trackingVolumeBuilders.push_back(
           [&](const auto &gctx, const auto &inner, const auto &) {
             auto cfg = makeLayerBuilderConfig(p_ITkStripManager);
@@ -391,7 +397,7 @@ StatusCode TrackingGeometrySvc::initialize() {
             cvbConfig.volumeName = "ITkStrip";
             cvbConfig.layerBuilder = lb;
             cvbConfig.buildToRadiusZero = 
-              buildSubdet.count("ITkPixel") == 0 && !m_buildBeamPipe;
+              !buildSubdet.contains("ITkPixel") && !m_buildBeamPipe;
 
             Acts::CylinderVolumeBuilder cvb(
                 cvbConfig,
@@ -401,8 +407,8 @@ StatusCode TrackingGeometrySvc::initialize() {
           });
     }
 
-    bool buildSCT = buildSubdet.count("SCT") > 0;
-    bool buildTRT = buildSubdet.count("TRT") > 0;
+    bool buildSCT = buildSubdet.contains("SCT") ;
+    bool buildTRT = buildSubdet.contains("TRT");
 
     if (buildSCT && buildTRT) {
       // building both we need to take care
@@ -453,7 +459,7 @@ StatusCode TrackingGeometrySvc::initialize() {
             cvbConfig.layerEnvelopeZ = 2_mm;
             cvbConfig.trackingVolumeHelper = cylinderVolumeHelper;
             cvbConfig.volumeName = "TRT";
-            cvbConfig.layerBuilder = lb;
+            cvbConfig.layerBuilder = std::move(lb);
             cvbConfig.buildToRadiusZero = false;
 
             Acts::CylinderVolumeBuilder cvb(
@@ -465,7 +471,7 @@ StatusCode TrackingGeometrySvc::initialize() {
     }
 
     //HGTD
-    if(buildSubdet.count("HGTD") > 0) {
+    if(buildSubdet.contains("HGTD") ) {
       tgbConfig.trackingVolumeBuilders.push_back(
           [&](const auto &gctx, const auto &inner, const auto &) {
             auto lb = makeHGTDLayerBuilder(p_HGTDManager); //using ActsHGTDLayerBuilder
@@ -474,7 +480,7 @@ StatusCode TrackingGeometrySvc::initialize() {
             cvbConfig.layerEnvelopeZ = 1_mm;
             cvbConfig.trackingVolumeHelper = cylinderVolumeHelper;
             cvbConfig.volumeName = "HGTD";
-            cvbConfig.layerBuilder = lb;
+            cvbConfig.layerBuilder = std::move(lb);
             cvbConfig.buildToRadiusZero = false;
 
             Acts::CylinderVolumeBuilder cvb(
@@ -522,11 +528,19 @@ StatusCode TrackingGeometrySvc::initialize() {
     }
   }
 
+  m_detIdMap = createDetectorElementToGeoIdMap();
+  if (!m_detIdMap) {
+      return StatusCode::FAILURE;
+  }
+
+
   ATH_MSG_INFO("Acts TrackingGeometry construction completed");
 
   return StatusCode::SUCCESS;
 }
-
+const ActsTrk::DetectorElementToActsGeometryIdMap* TrackingGeometrySvc::surfaceIdMap() const {
+  return m_detIdMap.get();
+}
 bool TrackingGeometrySvc::runConsistencyChecks() const {
   bool result = true;
 
@@ -753,7 +767,7 @@ bool TrackingGeometrySvc::runConsistencyChecks() const {
 }
 
 std::shared_ptr<const Acts::TrackingGeometry>
-TrackingGeometrySvc::trackingGeometry() {
+TrackingGeometrySvc::trackingGeometry() const {
 
   ATH_MSG_VERBOSE("Retrieving tracking geometry");
   return m_trackingGeometry;
@@ -1234,5 +1248,81 @@ const Acts::TrackingVolume*
         THROW_EXCEPTION("There is no system envelope "<<envType);
       }
       return retVol;
+}
+
+std::unique_ptr<ActsTrk::DetectorElementToActsGeometryIdMap> 
+    TrackingGeometrySvc::createDetectorElementToGeoIdMap() const {
+    // create map from
+    auto detector_element_to_geoid = std::make_unique<DetectorElementToActsGeometryIdMap>();
+
+    struct Counter{ 
+        unsigned n_sensitive_elements{0};
+        unsigned n_detector_elements{0};
+        unsigned n_wrong_type{0};
+    };
+    Counter counter {};
+    trackingGeometry()->visitSurfaces([this, &counter, &detector_element_to_geoid](const Acts::Surface *surface) {
+        if (!surface || !surface->isSensitive()) {
+            ++counter.n_wrong_type;
+            return;
+        }
+        ++counter.n_sensitive_elements;
+        const auto* placement = dynamic_cast<const ISurfacePlacement*>(surface->surfacePlacement());
+        if (!placement) {           
+            return;
+        }
+
+        auto insert_id = [&detector_element_to_geoid, &surface, &counter](const xAOD::UncalibMeasType type) {
+            auto * possibleElement = getActsDetectorElement(surface);
+            if (!possibleElement){
+              return;
+            } 
+            auto hash = possibleElement->identifyHash();
+            detector_element_to_geoid->insert(std::make_pair(makeDetectorElementKey(type, hash),
+                                                             DetectorElementToActsGeometryIdMap::makeValue(surface->geometryId())));
+            ++counter.n_detector_elements;
+        };
+        switch(placement->detectorType()) {
+            using enum DetectorType;
+            case Pixel:
+                insert_id(xAOD::UncalibMeasType::PixelClusterType);
+                break;
+            case Sct:
+                insert_id(xAOD::UncalibMeasType::StripClusterType);
+                break;
+            case Hgtd:
+                insert_id(xAOD::UncalibMeasType::HGTDClusterType);
+                break;
+            case Trt: {
+                break;
+            }
+            /// Muon system
+            case Mdt:
+            case Rpc:
+            case Tgc:
+            case Csc:
+            case Mm:
+            case sTgc:{
+                // surface map not needed for the muon detectors
+               ++counter.n_detector_elements; 
+               break;
+            }
+            case UnDefined:
+                ATH_MSG_ERROR("Undefined element encountered");
+                counter.n_detector_elements = 0;
+                return;
+        }
+    }, true /*sensitive surfaces*/);
+    ATH_MSG_INFO( "Surfaces without associated detector elements " << (counter.n_sensitive_elements -counter.n_detector_elements)
+                << " (with " << counter.n_detector_elements << ")" );
+    if (counter.n_sensitive_elements > 0 && 
+        counter.n_detector_elements==0) {
+        ATH_MSG_ERROR( "No surface with associated detector element" );
+        return nullptr;
+    }
+    if (counter.n_wrong_type>0) {
+        ATH_MSG_WARNING( "Surfaces associated to detector elements not of type Trk::TrkDetElementBase :" << counter.n_wrong_type);
+    }
+    return detector_element_to_geoid;
 }
 }

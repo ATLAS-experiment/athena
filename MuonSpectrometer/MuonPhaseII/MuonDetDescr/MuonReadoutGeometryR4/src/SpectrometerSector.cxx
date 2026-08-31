@@ -62,6 +62,14 @@ const ChamberSet& SpectrometerSector::chambers() const{ return m_args.chambers; 
 const Acts::PlaneSurface& SpectrometerSector::surface() const {
     return *m_args.surface;
 }
+
+
+const Amg::Transform3D& SpectrometerSector::localToGlobalTransform(const Acts::GeometryContext& tgContext) const{
+    return surface().localToGlobalTransform(tgContext); 
+}
+Amg::Transform3D SpectrometerSector::globalToLocalTransform(const Acts::GeometryContext& tgContext) const{
+    return localToGlobalTransform(tgContext).inverse(); 
+}
 const Amg::Transform3D& SpectrometerSector::localToGlobalTransform(const ActsTrk::GeometryContext& gctx) const {
     return surface().localToGlobalTransform(gctx.context());
 }            

@@ -25,11 +25,10 @@ namespace
 {
   struct V0FitterTrack final
   {
-    V0FitterTrack() : originalPerigee(nullptr), chi2(-1.) {}
-    const Trk::TrackParameters * originalPerigee;
-    double chi2;
-    AmgVector(5) TrkPar;
-    AmgSymMatrix(5) Wi_mat;
+    const Trk::TrackParameters * originalPerigee{};
+    double chi2{-1.};
+    AmgVector(5) TrkPar{0,0,0,0,0};
+    AmgSymMatrix(5) Wi_mat{};
   };
 }
 
@@ -339,7 +338,10 @@ namespace Trk
        throw std::runtime_error(msg);
     }
     const AtlasFieldCacheCondObj* fieldCondObj{*readHandle};
-
+    if (!fieldCondObj){
+      ATH_MSG_ERROR("fieldCondObj is nullptr");
+      return nullptr;
+    }
     MagField::AtlasFieldCache fieldCache;
     fieldCondObj->getInitializedCache (fieldCache);
 
@@ -394,7 +396,7 @@ namespace Trk
         }
 
         // store track parameters at starting point
-        V0FitterTrack locV0FitterTrack;
+        V0FitterTrack locV0FitterTrack{};
         locV0FitterTrack.TrkPar[0] = extrapolatedPerigee->parameters()[Trk::d0];
         locV0FitterTrack.TrkPar[1] = extrapolatedPerigee->parameters()[Trk::z0];
         locV0FitterTrack.TrkPar[2] = extrapolatedPerigee->parameters()[Trk::phi];

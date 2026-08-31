@@ -11,13 +11,14 @@
 #include "TauAnalysisTools/Enums.h"
 #include "TauAnalysisTools/SharedFilesVersion.h"
 
+#include <AsgTools/AsgToolConfig.h>
+
 namespace TauAnalysisTools
 {
 
 //______________________________________________________________________________
 TauEfficiencyCorrectionsTool::TauEfficiencyCorrectionsTool( const std::string& sName )
   : asg::AsgMetadataTool( sName )
-  , m_vCommonEfficiencyTools()
   , m_bIsData(false)
   , m_bIsConfigured(false)
   , m_iRunNumber(0)
@@ -25,10 +26,7 @@ TauEfficiencyCorrectionsTool::TauEfficiencyCorrectionsTool( const std::string& s
 
 //______________________________________________________________________________
 TauEfficiencyCorrectionsTool::~TauEfficiencyCorrectionsTool()
-{
-  for (auto tTool : m_vCommonEfficiencyTools)
-    delete tTool;
-}
+{}
 
 //______________________________________________________________________________
 StatusCode TauEfficiencyCorrectionsTool::initialize()
@@ -52,13 +50,6 @@ StatusCode TauEfficiencyCorrectionsTool::initialize()
   } else {
     ATH_MSG_ERROR("Unknown RecommendationTag " << m_sRecommendationTag);
     return StatusCode::FAILURE;
-  }
-
-  // for (auto tCommonEfficiencyTool : m_vCommonEfficiencyTools)
-  for (auto it = m_vCommonEfficiencyTools.begin(); it != m_vCommonEfficiencyTools.end(); it++)
-  {
-    ATH_CHECK((**it).setProperty("OutputLevel", this->msg().level()));
-    ATH_CHECK((**it).initialize());
   }
 
   // Add the affecting systematics to the global registry
@@ -94,7 +85,7 @@ StatusCode TauEfficiencyCorrectionsTool::beginEvent()
     m_firstEvent = true;
       
   }
-  if (m_bIsData)
+  if (m_bIsData && !m_applyToData)
     return StatusCode::SUCCESS;
 
   const xAOD::EventInfo* xEventInfo = nullptr;
@@ -135,88 +126,82 @@ void TauEfficiencyCorrectionsTool::printConfig() const
 CP::CorrectionCode TauEfficiencyCorrectionsTool::getEfficiencyScaleFactor( const xAOD::TauJet& xTau,
 		double& eff, unsigned int /*iRunNumber*/)
 {
-	eff = 1.;
+  eff = 1.;
 
-	if (m_bIsData)
-		return CP::CorrectionCode::Ok;
+  if (m_bIsData && !m_applyToData)
+    return CP::CorrectionCode::Ok;
 
-	ANA_CHECK_SET_TYPE (CP::CorrectionCode);
-	ANA_CHECK(readRandomRunNumber());
+  ANA_CHECK_SET_TYPE (CP::CorrectionCode);
+  ANA_CHECK(readRandomRunNumber());
 
-	for (auto it = m_vCommonEfficiencyTools.begin(); it != m_vCommonEfficiencyTools.end(); it++)
-	{
-		if ( !(**it)->isSupportedRunNumber(m_iRunNumber) )
-			continue;
-		double dToolEff = 1.;
-		CP::CorrectionCode tmpCorrectionCode = (**it)->getEfficiencyScaleFactor(xTau, dToolEff, m_iRunNumber);
-		if (tmpCorrectionCode != CP::CorrectionCode::Ok)
-			return tmpCorrectionCode;
-		eff *= dToolEff;
-	}
-	return CP::CorrectionCode::Ok;
+  if(!(m_tTool->isSupportedRunNumber(m_iRunNumber)))
+    return CP::CorrectionCode::Ok;	  
+
+  double dToolEff = 1.;
+  CP::CorrectionCode tmpCorrectionCode = m_tTool->getEfficiencyScaleFactor(xTau, dToolEff, m_iRunNumber);
+  if (tmpCorrectionCode != CP::CorrectionCode::Ok)
+    return tmpCorrectionCode;
+
+  eff *= dToolEff;
+  
+  return CP::CorrectionCode::Ok;
 }
 
 //______________________________________________________________________________
 CP::CorrectionCode TauEfficiencyCorrectionsTool::applyEfficiencyScaleFactor( const xAOD::TauJet& xTau, unsigned int /*iRunNumber*/)
 {
-	if (m_bIsData)
-		return CP::CorrectionCode::Ok;
+  if (m_bIsData && !m_applyToData)
+    return CP::CorrectionCode::Ok;
 
-	ANA_CHECK_SET_TYPE (CP::CorrectionCode);
-	ANA_CHECK(readRandomRunNumber());
+  ANA_CHECK_SET_TYPE (CP::CorrectionCode);
+  ANA_CHECK(readRandomRunNumber());
 
-	for (auto it = m_vCommonEfficiencyTools.begin(); it != m_vCommonEfficiencyTools.end(); it++)
-	{
-		CP::CorrectionCode tmpCorrectionCode = (**it)->applyEfficiencyScaleFactor(xTau, m_iRunNumber);
-		if (tmpCorrectionCode != CP::CorrectionCode::Ok)
-			return tmpCorrectionCode;
-	}
-	return CP::CorrectionCode::Ok;
+  CP::CorrectionCode tmpCorrectionCode = m_tTool->applyEfficiencyScaleFactor(xTau, m_iRunNumber);
+  if (tmpCorrectionCode != CP::CorrectionCode::Ok)
+    return tmpCorrectionCode;
+
+  return CP::CorrectionCode::Ok;
 }
 
 /// returns: whether this tool is affected by the given systematics
 //______________________________________________________________________________
 bool TauEfficiencyCorrectionsTool::isAffectedBySystematic( const CP::SystematicVariation& systematic ) const
 {
-	for (auto it = m_vCommonEfficiencyTools.begin(); it != m_vCommonEfficiencyTools.end(); it++)
-		if ((**it)->isAffectedBySystematic(systematic))
-			return true;
-	return false;
+   if (m_tTool->isAffectedBySystematic(systematic))
+     return true;
+
+   return false;
 }
 
 /// returns: the list of all systematics this tool can be affected by
 //______________________________________________________________________________
 CP::SystematicSet TauEfficiencyCorrectionsTool::affectingSystematics() const
 {
-	CP::SystematicSet sAffectingSystematics;
-	for (auto it = m_vCommonEfficiencyTools.begin(); it != m_vCommonEfficiencyTools.end(); it++)
-		sAffectingSystematics.insert((**it)->affectingSystematics());
-	return sAffectingSystematics;
+  CP::SystematicSet sAffectingSystematics;
+  sAffectingSystematics.insert(m_tTool->affectingSystematics());
+  return sAffectingSystematics;
 }
 
 /// returns: the list of all systematics this tool recommends to use
 //______________________________________________________________________________
 CP::SystematicSet TauEfficiencyCorrectionsTool::recommendedSystematics() const
 {
-	CP::SystematicSet sRecommendedSystematics;
-	for (auto it = m_vCommonEfficiencyTools.begin(); it != m_vCommonEfficiencyTools.end(); it++)
-		sRecommendedSystematics.insert((**it)->recommendedSystematics());
-	return sRecommendedSystematics;
+  CP::SystematicSet sRecommendedSystematics;
+  sRecommendedSystematics.insert(m_tTool->recommendedSystematics());
+  return sRecommendedSystematics;
 }
 
 //______________________________________________________________________________
 StatusCode TauEfficiencyCorrectionsTool::applySystematicVariation ( const CP::SystematicSet& sSystematicSet)
 {
-	for (auto it = m_vCommonEfficiencyTools.begin(); it != m_vCommonEfficiencyTools.end(); it++)
-		if ((**it)->applySystematicVariation(sSystematicSet) == StatusCode::FAILURE)
-			return StatusCode::FAILURE;
-	return StatusCode::SUCCESS;
+  ATH_CHECK(m_tTool->applySystematicVariation(sSystematicSet));
+  return StatusCode::SUCCESS;
 }
 
 //=================================PRIVATE-PART=================================
 StatusCode TauEfficiencyCorrectionsTool::initializeTools_2025_prerec()
 {
-	std::string sDirectory = "TauAnalysisTools/" + std::string(sSharedFilesVersion) + "/EfficiencyCorrections/";
+  std::string sDirectory = "TauAnalysisTools/" + std::string(sSharedFilesVersion) + "/EfficiencyCorrections/";
   for (auto iEfficiencyCorrectionType : m_vEfficiencyCorrectionTypes){
 
     if (iEfficiencyCorrectionType == SFJetIDHadTau)
@@ -247,23 +232,31 @@ StatusCode TauEfficiencyCorrectionsTool::initializeTools_2025_prerec()
         continue;
       }
 
-      asg::AnaToolHandle<ITauEfficiencyCorrectionsTool>* tTool = new asg::AnaToolHandle<ITauEfficiencyCorrectionsTool>("TauAnalysisTools::CommonEfficiencyTool/JetIDHadTauTool", this);
-      m_vCommonEfficiencyTools.push_back(tTool);
-      ATH_CHECK(tTool->setProperty("InputFilePath", m_sInputFilePathJetIDHadTau));
-      ATH_CHECK(tTool->setProperty("VarName", m_sVarName));
-      ATH_CHECK(tTool->setProperty("SkipTruthMatchCheck", m_bSkipTruthMatchCheck));
-      ATH_CHECK(tTool->setProperty("WP", sJetIDWP));
+      if (m_tTool.empty()){
+        asg::AsgToolConfig config("TauAnalysisTools::CommonEfficiencyTool/JetIDHadTauTool_tauID_"+sJetIDWP);
+        ATH_CHECK(config.setProperty("InputFilePath", m_sInputFilePathJetIDHadTau));
+        ATH_CHECK(config.setProperty("VarName", m_sVarName));
+        ATH_CHECK(config.setProperty("SkipTruthMatchCheck", m_bSkipTruthMatchCheck));
+        ATH_CHECK(config.setProperty("WP", sJetIDWP));
+        ATH_CHECK(config.setProperty("ApplyToData", m_applyToData));
+        ATH_CHECK(config.makePrivateTool(m_tTool));
+      }
+      ATH_CHECK(m_tTool.retrieve());
     }
     else if (iEfficiencyCorrectionType == SFRecoHadTau)
     {
       if (m_sInputFilePathRecoHadTau.empty()) m_sInputFilePathRecoHadTau = sDirectory + "Reco_TrueHadTau_2026_v0.root";
       m_sVarName = "TauScaleFactorReconstructionHadTau";
 
-      asg::AnaToolHandle<ITauEfficiencyCorrectionsTool>* tTool = new asg::AnaToolHandle<ITauEfficiencyCorrectionsTool>("TauAnalysisTools::CommonEfficiencyTool/RecoHadTauTool", this);
-      m_vCommonEfficiencyTools.push_back(tTool);
-      ATH_CHECK(tTool->setProperty("InputFilePath", m_sInputFilePathRecoHadTau));
-      ATH_CHECK(tTool->setProperty("VarName", m_sVarName));
-      ATH_CHECK(tTool->setProperty("SkipTruthMatchCheck", m_bSkipTruthMatchCheck));
+      if (m_tTool.empty()){
+        asg::AsgToolConfig config("TauAnalysisTools::CommonEfficiencyTool/RecoHadTauTool");
+        ATH_CHECK(config.setProperty("InputFilePath", m_sInputFilePathRecoHadTau));
+        ATH_CHECK(config.setProperty("VarName", m_sVarName));
+        ATH_CHECK(config.setProperty("SkipTruthMatchCheck", m_bSkipTruthMatchCheck));
+        ATH_CHECK(config.setProperty("ApplyToData", m_applyToData));
+        ATH_CHECK(config.makePrivateTool(m_tTool));
+      }
+      ATH_CHECK(m_tTool.retrieve());   
     }
     else if (iEfficiencyCorrectionType == SFEleIDHadTau)
     {
@@ -278,14 +271,19 @@ StatusCode TauEfficiencyCorrectionsTool::initializeTools_2025_prerec()
         }
       }	
       m_sVarName = "TauScaleFactorEleIDHadTau";
+      std::string ele_wp = ConvertEleIDToString(m_iEleIDLevel);
 
-      asg::AnaToolHandle<ITauEfficiencyCorrectionsTool>* tTool = new asg::AnaToolHandle<ITauEfficiencyCorrectionsTool>("TauAnalysisTools::CommonEfficiencyTool/EleIDHadTauTool", this);
-      m_vCommonEfficiencyTools.push_back(tTool);
-      ATH_CHECK(tTool->setProperty("InputFilePath", m_sInputFilePathEleIDHadTau));
-      ATH_CHECK(tTool->setProperty("VarName", m_sVarName));
-      ATH_CHECK(tTool->setProperty("SkipTruthMatchCheck", m_bSkipTruthMatchCheck));
-      ATH_CHECK(tTool->setProperty("WP", ConvertEleIDToString(m_iEleIDLevel)));
-      ATH_CHECK(tTool->setProperty("UseTauSubstructure", false));
+      if (m_tTool.empty()){
+        asg::AsgToolConfig config("TauAnalysisTools::CommonEfficiencyTool/EleIDHadTauTool_eRNN_"+ele_wp);
+        ATH_CHECK(config.setProperty("InputFilePath", m_sInputFilePathEleIDHadTau));
+        ATH_CHECK(config.setProperty("VarName", m_sVarName));
+        ATH_CHECK(config.setProperty("SkipTruthMatchCheck", m_bSkipTruthMatchCheck));
+        ATH_CHECK(config.setProperty("WP", ele_wp));
+        ATH_CHECK(config.setProperty("UseTauSubstructure", false));
+        ATH_CHECK(config.setProperty("ApplyToData", m_applyToData));   
+        ATH_CHECK(config.makePrivateTool(m_tTool));
+      }
+      ATH_CHECK(m_tTool.retrieve());
     }
     else if (iEfficiencyCorrectionType == SFEleIDElectron)
     {
@@ -335,14 +333,20 @@ StatusCode TauEfficiencyCorrectionsTool::initializeTools_2025_prerec()
         }
       }
       m_sVarName = "TauScaleFactorEleIDElectron";
+      std::string ele_wp = ConvertEleIDToString(m_iEleIDLevel);
+      std::string sJetIDWP = ConvertJetIDToString(m_iJetIDLevel); 
 
-      asg::AnaToolHandle<ITauEfficiencyCorrectionsTool>* tTool = new asg::AnaToolHandle<ITauEfficiencyCorrectionsTool>("TauAnalysisTools::CommonEfficiencyTool/EleIDElectronTool", this);
-      m_vCommonEfficiencyTools.push_back(tTool);
-      ATH_CHECK(tTool->setProperty("InputFilePath", m_sInputFilePathEleIDElectron));
-      ATH_CHECK(tTool->setProperty("VarName", m_sVarName));
-      ATH_CHECK(tTool->setProperty("SkipTruthMatchCheck", m_bSkipTruthMatchCheck));
-      ATH_CHECK(tTool->setProperty("WP", ConvertEleIDToString(m_iEleIDLevel)));
-      ATH_CHECK(tTool->setProperty("UseTauSubstructure", false));
+      if (m_tTool.empty()){
+        asg::AsgToolConfig config("TauAnalysisTools::CommonEfficiencyTool/EleIDHadTauTool_eRNN_"+ele_wp);
+        ATH_CHECK(config.setProperty("InputFilePath", m_sInputFilePathEleIDElectron));
+        ATH_CHECK(config.setProperty("VarName", m_sVarName));
+        ATH_CHECK(config.setProperty("SkipTruthMatchCheck", m_bSkipTruthMatchCheck));
+        ATH_CHECK(config.setProperty("WP", ele_wp));
+        ATH_CHECK(config.setProperty("UseTauSubstructure", false));
+        ATH_CHECK(config.setProperty("ApplyToData", m_applyToData));
+        ATH_CHECK(config.makePrivateTool(m_tTool));
+      }
+      ATH_CHECK(m_tTool.retrieve());
 
     } else if (iEfficiencyCorrectionType == SFTriggerHadTau){
 
@@ -399,14 +403,19 @@ StatusCode TauEfficiencyCorrectionsTool::initializeTools_2025_prerec()
 	}
       }
       m_sVarName = "TauScaleFactorTriggerHadTau";
-	 
-      asg::AnaToolHandle<ITauEfficiencyCorrectionsTool>* tTool = new asg::AnaToolHandle<ITauEfficiencyCorrectionsTool>("TauAnalysisTools::CommonEfficiencyTool/TriggerHadTauTool", this);
-      m_vCommonEfficiencyTools.push_back(tTool);
-      ATH_CHECK(tTool->setProperty("InputFilePath", m_sInputFilePathTriggerHadTau));
-      ATH_CHECK(tTool->setProperty("VarName", m_sVarName));
-      ATH_CHECK(tTool->setProperty("SkipTruthMatchCheck", m_bSkipTruthMatchCheck));
-      ATH_CHECK(tTool->setProperty("WP", ConvertTriggerIDToString(m_iJetIDLevel)));
-      ATH_CHECK(tTool->setProperty("DoTauTrig", true));
+      std::string sJetIDWP = ConvertTriggerIDToString(m_iJetIDLevel);
+       
+      if (m_tTool.empty()){  
+        asg::AsgToolConfig config("TauAnalysisTools::CommonEfficiencyTool/TriggerHadTauTool_"+m_sTriggerName+"_tauID_"+sJetIDWP);
+        ATH_CHECK(config.setProperty("InputFilePath", m_sInputFilePathTriggerHadTau));
+        ATH_CHECK(config.setProperty("VarName", m_sVarName));
+        ATH_CHECK(config.setProperty("SkipTruthMatchCheck", m_bSkipTruthMatchCheck));
+        ATH_CHECK(config.setProperty("WP", sJetIDWP));
+        ATH_CHECK(config.setProperty("DoTauTrig", true));
+        ATH_CHECK(config.setProperty("ApplyToData", m_applyToData));
+        ATH_CHECK(config.makePrivateTool(m_tTool));
+      }
+      ATH_CHECK(m_tTool.retrieve());
     }
     else {
       ATH_MSG_WARNING("unsupported EfficiencyCorrectionsType with enum " << iEfficiencyCorrectionType);

@@ -16,6 +16,7 @@ def MsTrackTesterCfg(flags, name = "MsTrackTester", scheduleLegacy = True,
     kwargs.setdefault("SegmentSelectionTool", result.popToolsAndMerge(SegmentSelectorCfg(flags)))
     kwargs.setdefault("SummaryTool", result.popToolsAndMerge(TrackSummaryToolCfg(flags)))
     kwargs.setdefault("SeedingTool", result.popToolsAndMerge(MsTrackSeedingToolCfg(flags)))
+    kwargs.setdefault("storeIdTrks", flags.Reco.EnableTracking)
     if not scheduleLegacy:
         kwargs.setdefault("LegacySegmentKey", "")
         kwargs.setdefault("LegacyTrackKey", "")
@@ -63,6 +64,11 @@ if __name__=="__main__":
     flags.Trigger.Muon.useNewRegionSelector = False
     flags.Muon.scheduleActsReco = True
     flags.Muon.includePileUpTruth = True
+    
+    from ActsConfig.ActsConfigFlags import TrackFitterType
+    if False: flags.Muon.TrackFitterType = TrackFitterType.KalmanFitter
+    if False: flags.Muon.trackGeometryMaterialMap = MuonPhaseIITestDefaults.TRKGEO_MATERIALMAP
+
     flags, cfg = setupGeoR4TestCfg(args,flags)
 
     cfg.getService("MessageSvc").setVerbose= []

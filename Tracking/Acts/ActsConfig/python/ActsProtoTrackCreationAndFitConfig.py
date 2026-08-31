@@ -26,20 +26,6 @@ def ActsProtoTackCreationAndFitAlgCfg(flags,
     kwargs.setdefault('StripClusterContainer', 'ITkStripClusters')
     kwargs.setdefault('ACTSTracksLocation', 'EFTestTracks')
     
-    if "TrackingGeometryTool" not in kwargs:
-        from ActsConfig.ActsGeometryConfig import ActsTrackingGeometryToolCfg
-        kwargs.setdefault(
-            "TrackingGeometryTool",
-            acc.getPrimaryAndMerge(ActsTrackingGeometryToolCfg(flags)),
-        )  # PrivateToolHandle
-        
-    if 'ExtrapolationTool' not in kwargs:
-        from ActsConfig.ActsGeometryConfig import ActsExtrapolationToolCfg
-        kwargs.setdefault(
-            "ExtrapolationTool",
-            acc.popToolsAndMerge(ActsExtrapolationToolCfg(flags, MaxSteps=10000)),
-        )  # PrivateToolHandle
-
     if 'ActsFitter' not in kwargs:
         from ActsConfig.ActsTrackFittingConfig import ActsFitterCfg
         kwargs.setdefault("ActsFitter", acc.popToolsAndMerge(ActsFitterCfg(flags,
@@ -64,7 +50,6 @@ def ActsProtoTrackReportingAlgCfg(flags,
     return acc
 
 if __name__ == "__main__":
-    from InDetConfig.ITkTrackRecoConfig import ITkTrackRecoCfg
             
     def SetupHistSvc(flags, streamName, dataFile):
         acc = ComponentAccumulator()
@@ -85,13 +70,16 @@ if __name__ == "__main__":
 
     # Disable calo for this test
     flags.Detector.EnableCalo = False
+    flags.Detector.EnableHGTD = False
 
+    flags.Acts.doRotCorrection = False
 
+    # Only runs with legacy Athena reconstruction
+    from ActsConfig.ActsCIFlags import athenaLegacyTrackingFlags
+    athenaLegacyTrackingFlags(flags)
     # ensure that the xAOD SP and cluster containers are available
     flags.Tracking.ITkMainPass.doAthenaToActsSpacePoint=True
     flags.Tracking.ITkMainPass.doAthenaToActsCluster=True
-
-    flags.Acts.doRotCorrection = False
     
     # IDTPM flags
     from InDetTrackPerfMon.InDetTrackPerfMonFlags import initializeIDTPMConfigFlags, initializeIDTPMTrkAnaConfigFlags
@@ -118,7 +106,6 @@ if __name__ == "__main__":
     
     flags.Debug.DumpEvtStore = True
     flags.lock()
-    flags = flags.cloneAndReplace("Tracking.ActiveConfig","Tracking.MainPass")
     
     # Main services
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg
@@ -133,8 +120,9 @@ if __name__ == "__main__":
         top_acc.merge(GEN_AOD2xAODCfg(flags))
 
     # Standard reco
+    from InDetConfig.ITkTrackRecoConfig import ITkTrackRecoCfg
     top_acc.merge(ITkTrackRecoCfg(flags))
-
+    
     # ProtoTrackChain Track algo
     top_acc.merge(SetupHistSvc(flags,streamName="HmmRefits",dataFile=flags.outputNTupleFile))
     top_acc.merge(ActsProtoTackCreationAndFitAlgCfg(flags,"ActsProtoTackCreationAndFitAlg",ACTSTracksLocation=ACTSProtoTrackChainTrackKey   ))
@@ -145,29 +133,31 @@ if __name__ == "__main__":
     top_acc.merge(ActsTruthParticleHitCountAlgCfg(flags))
     
     from ActsConfig.ActsTruthConfig import ActsTrackToTruthAssociationAlgCfg, ActsTrackFindingValidationAlgCfg
-    acts_tracks=f"{flags.Tracking.ActiveConfig.extension}Tracks" if not flags.Acts.doAmbiguityResolution else f"{flags.Tracking.ActiveConfig.extension}ResolvedTracks"
-    top_acc.merge(ActsTrackToTruthAssociationAlgCfg(flags,
-                                                    name=f"{acts_tracks}TrackToTruthAssociationAlg",
-                                                    ACTSTracksLocation=ACTSProtoTrackChainTrackKey,
-                                                    AssociationMapOut=acts_tracks+"ToTruthParticleAssociation"))
+    acts_tracks="ActsTracks" if not flags.Acts.doAmbiguityResolution else "ActsResolvedTracks"
+    top_acc.merge(ActsTrackToTruthAssociationAlgCfg(
+        flags,
+        name=f"{acts_tracks}ProtoTrackToTruthAssociationAlg",
+        ACTSTracksLocation=ACTSProtoTrackChainTrackKey,
+        AssociationMapOut=acts_tracks+"ToTruthParticleAssociation"))
 
-    top_acc.merge(ActsTrackFindingValidationAlgCfg(flags,
-                                                    name=f"{acts_tracks}TrackFindingValidationAlg",
-                                                    TrackToTruthAssociationMap=acts_tracks+"ToTruthParticleAssociation"
-                                                    ))
+    top_acc.merge(ActsTrackFindingValidationAlgCfg(
+        flags,
+        name=f"{acts_tracks}TrackFindingValidationAlg",
+        TrackToTruthAssociationMap=acts_tracks+"ToTruthParticleAssociation"))
 
     # Convert ActsTrk::TrackContainer to xAOD::TrackParticleContainer
-    prefix = flags.Tracking.ActiveConfig.extension
     from ActsConfig.ActsEventCnvConfig import ActsTrackToTrackParticleCnvAlgCfg
-    top_acc.merge(ActsTrackToTrackParticleCnvAlgCfg(flags, f"{prefix}ResolvedProtoTrackToAltTrackParticleCnvAlg",
-                                                       ACTSTracksLocation=[ACTSProtoTrackChainTrackKey,],
-                                                       TrackParticlesOutKey=f"{FinalProtoTrackChainxAODTracksKey}TrackParticles"))
+    top_acc.merge(ActsTrackToTrackParticleCnvAlgCfg(
+        flags, "ActsResolvedProtoTrackToAltTrackParticleCnvAlg",
+        ACTSTracksLocation=[ACTSProtoTrackChainTrackKey,],
+        TrackParticlesOutKey=f"{FinalProtoTrackChainxAODTracksKey}TrackParticles"))
    
     from ActsConfig.ActsTruthConfig import ActsTrackParticleTruthDecorationAlgCfg
-    top_acc.merge(ActsTrackParticleTruthDecorationAlgCfg(flags,
-                                                         f"{prefix}ActsSandboxTrackParticleTruthDecorationAlg",
-                                                         TrackToTruthAssociationMaps=[acts_tracks+"ToTruthParticleAssociation"],
-                                                         TrackParticleContainerName=f"{FinalProtoTrackChainxAODTracksKey}TrackParticles"))
+    top_acc.merge(ActsTrackParticleTruthDecorationAlgCfg(
+        flags,
+        "ActsSandboxTrackParticleTruthDecorationAlg",
+        TrackToTruthAssociationMaps=[acts_tracks+"ToTruthParticleAssociation"],
+        TrackParticleContainerName=f"{FinalProtoTrackChainxAODTracksKey}TrackParticles"))
 
     # Add the truth decorators
     from InDetPhysValMonitoring.InDetPhysValDecorationConfig import AddDecoratorCfg

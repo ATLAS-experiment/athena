@@ -37,13 +37,13 @@ if( XAOD_STANDALONE )
    atlas_add_executable( MuonSelectorToolsTester
       util/MuonSelectorToolsTester.cxx
       INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
-      LINK_LIBRARIES ${ROOT_LIBRARIES} xAODRootAccess xAODEventInfo xAODMuon MCTruthClassifierLib
+      LINK_LIBRARIES ${ROOT_LIBRARIES} xAODRootAccess xAODEventInfo xAODMuon TruthUtils
       xAODTracking xAODCore MuonSelectorToolsLib PATCoreLib )
 else()
    atlas_add_executable( MuonSelectorToolsTester
       util/MuonSelectorToolsTester.cxx
       INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
-      LINK_LIBRARIES ${ROOT_LIBRARIES} POOLRootAccessLib xAODRootAccess xAODEventInfo xAODMuon MCTruthClassifierLib
+      LINK_LIBRARIES ${ROOT_LIBRARIES} POOLRootAccessLib xAODRootAccess xAODEventInfo xAODMuon TruthUtils
       xAODTracking xAODCore MuonSelectorToolsLib PATCoreLib )
 endif()
 

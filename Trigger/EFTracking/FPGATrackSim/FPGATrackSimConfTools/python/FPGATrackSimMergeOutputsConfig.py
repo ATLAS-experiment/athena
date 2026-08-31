@@ -18,7 +18,7 @@ def FPGATrackSimMergeOutputsAlgCfg(flags,**kwargs):
     MergeOutputsAlg = CompFactory.FPGATrackSimMergeOutputsAlg(name = 'FPGAMergeOutputsAlg', **kwargs,
                                                             OverlapRemoval = acc.getPrimaryAndMerge(FPGATrackSimOverlapRemovalToolCfg(flags)))
     MergeOutputsAlg.OverlapRemoval.MinChi2 = 1e15 ## disable here
-    MergeOutputsAlg.SkipEvents = flags.Exec.SkipEvents
+    MergeOutputsAlg.SkipWritingEvents = flags.Exec.SkipEvents
     MergeOutputsAlg.SortTracks = flags.Trigger.FPGATrackSim.SortTracks
     acc.addEventAlgo(MergeOutputsAlg)
 

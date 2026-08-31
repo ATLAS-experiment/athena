@@ -13,6 +13,7 @@ def ActsTrackingGeometrySvcCfg(flags,
                                           DetectorType.Hgtd])
   kwargs.setdefault("UseBlueprint", flags.Acts.TrackingGeometry.UseBlueprint)
   kwargs.setdefault("ObjDebugOutput", flags.Acts.TrackingGeometry.ObjDebugOutput)
+  kwargs.setdefault("KeepGoingOnMaterialMergeFailure", flags.Acts.TrackingGeometry.KeepGoingOnMaterialMergeFailure)
 
   subDetectors = []
   blueprintTools = []
@@ -67,10 +68,13 @@ def ActsTrackingGeometrySvcCfg(flags,
 
   #first add the itk builder and then the muon system - this is the correct order
   if flags.Acts.TrackingGeometry.UseBlueprint:
+    if False: ### Disable the ITk material allocation until it's finalized
+        refineTools += [acc.popToolsAndMerge(ITkMaterialDecoratorToolCfg(flags))]
+    blueprintTools += [acc.popToolsAndMerge(BeamPipeBlueprintNodeBuilderCfg(flags))]
     if flags.Detector.GeometryITkPixel or flags.Detector.GeometryITkStrip:
-      if False: ### Disable the ITk material allocation until it's finalized
-          refineTools+= [acc.popToolsAndMerge(ITkMaterialDecoratorToolCfg(flags))]
       blueprintTools += [acc.popToolsAndMerge(ItkBlueprintNodeBuilderCfg(flags))]
+    if flags.Detector.GeometryHGTD:
+      blueprintTools += [acc.popToolsAndMerge(HgtdBlueprintNodeBuilderCfg(flags))]
     if flags.Detector.GeometryCalo:
       subDetectors += ["Calo"]
       blueprintTools += [acc.popToolsAndMerge(caloBlueprintNodeBuilderCfg(flags))]
@@ -156,30 +160,24 @@ def ITkMaterialDecoratorToolCfg(flags, name="ITkMaterialDecorator", **kwargs) ->
     result.setPrivateTools(the_tool)
     return result
 
-def ActsTrackingGeometryToolCfg(flags,
-                                name: str = "ActsTrackingGeometryTool" ) -> ComponentAccumulator:
-  acc = ComponentAccumulator()
-  acc.merge(ActsTrackingGeometrySvcCfg(flags))
-  from ActsAlignmentAlgs.AlignmentAlgsConfig import ActsGeometryContextAlgCfg
-  acc.merge(ActsGeometryContextAlgCfg(flags))
-  acc.addPublicTool(CompFactory.ActsTrk.TrackingGeometryTool(name), primary = True)
-  return acc
-
 def ActsExtrapolationToolCfg(flags,
                              name: str = "ActsExtrapolationTool",
                              **kwargs) -> ComponentAccumulator:
   acc = ComponentAccumulator()
   from MagFieldServices.MagFieldServicesConfig import AtlasFieldCacheCondAlgCfg
   acc.merge(AtlasFieldCacheCondAlgCfg(flags))
-  kwargs.setdefault("TrackingGeometryTool", acc.getPrimaryAndMerge(ActsTrackingGeometryToolCfg(flags))) # PrivateToolHandle
+  from ActsAlignmentAlgs.AlignmentAlgsConfig import ActsGeometryContextAlgCfg
+  acc.merge(ActsGeometryContextAlgCfg(flags))
+  acc.merge(ActsTrackingGeometrySvcCfg(flags))
   acc.setPrivateTools(CompFactory.ActsTrk.ExtrapolationTool(name, **kwargs))
   return acc
 
 
-def ActsGeometryRealmConvTool(flags, name: str = "ActsGeometryRealmConvTool", **kwargs) -> ComponentAccumulator:
+def ActsGeometryRealmConvToolCfg(flags, name: str = "ActsGeometryRealmConvTool", **kwargs) -> ComponentAccumulator:
     acc = ComponentAccumulator()
-    from ActsConfig.ActsGeometryConfig import ActsTrackingGeometryToolCfg
-    kwargs.setdefault("TrackingGeometryTool", acc.getPrimaryAndMerge(ActsTrackingGeometryToolCfg(flags)))
+    from ActsAlignmentAlgs.AlignmentAlgsConfig import ActsGeometryContextAlgCfg
+    acc.merge(ActsGeometryContextAlgCfg(flags))
+    acc.merge(ActsTrackingGeometrySvcCfg(flags)) 
     kwargs.setdefault("ExtractMuonSurfaces", flags.Muon.usePhaseIIGeoSetup)
     acc.addPublicTool(CompFactory.ActsTrk.GeometryRealmConvTool(name, **kwargs), primary = True)
     return acc
@@ -208,8 +206,7 @@ def ActsWriteTrackingGeometryCfg(flags,
                                  name: str = "ActsWriteTrackingGeometry",
                                  **kwargs) -> ComponentAccumulator:
     acc = ComponentAccumulator()
-        
-    kwargs.setdefault("TrackingGeometryTool", acc.getPrimaryAndMerge(ActsTrackingGeometryToolCfg(flags))) # PrivateToolHandle
+    acc.merge(ActsTrackingGeometrySvcCfg(flags))    
     acc.addEventAlgo(CompFactory.ActsTrk.WriteTrackingGeometry(name, **kwargs), primary = True)
     return acc
 
@@ -218,9 +215,6 @@ def ActsWriteTrackingGeometryTransformsAlgCfg(flags,
                                               **kwargs: dict) -> ComponentAccumulator:
     acc = ComponentAccumulator()
 
-    if 'TrackingGeometryTool' not in kwargs:
-      kwargs.setdefault("TrackingGeometryTool", acc.getPrimaryAndMerge(ActsTrackingGeometryToolCfg(flags))) # PrivateToolHandle
-
     acc.addEventAlgo(CompFactory.ActsWriteTrackingGeometryTransforms(name,**kwargs))
     return acc
 
@@ -228,9 +222,6 @@ def ActsVolumeIdToDetectorCollectionMappingAlgCfg(flags,
                            name: str = "ActsVolumeIdToDetectorCollectionMappingAlgCfg",
                            **kwargs) -> ComponentAccumulator:
     acc = ComponentAccumulator()
-    if 'TrackingGeometryTool' not in kwargs :
-      kwargs.setdefault('TrackingGeometryTool',
-                        acc.getPrimaryAndMerge(ActsTrackingGeometryToolCfg(flags)))
     kwargs.setdefault('ActsVolumeIdToDetectorElementCollectionMap', 'VolumeIdToDetectorElementCollectionMap')
 
     def filterCollections(flags, pixel_det_el, strip_det_el) :
@@ -252,9 +243,6 @@ def ActsInDetVolumeIdToDetectorCollectionMappingAlgCfg(flags,
                            **kwargs) -> ComponentAccumulator:
     # Inner Detector version of ActsVolumeIdToDetectorCollectionMappingAlgCfg
     acc = ComponentAccumulator()
-    if 'TrackingGeometryTool' not in kwargs :
-      kwargs.setdefault('TrackingGeometryTool',
-                        acc.getPrimaryAndMerge(ActsTrackingGeometryToolCfg(flags)))
     kwargs.setdefault('ActsVolumeIdToDetectorElementCollectionMap', 'VolumeIdToDetectorElementCollectionMap')
 
     def filterCollections(flags, pixel_det_el, strip_det_el) :
@@ -271,13 +259,37 @@ def ActsInDetVolumeIdToDetectorCollectionMappingAlgCfg(flags,
     acc.addCondAlgo(CompFactory.ActsTrk.ActsVolumeIdToDetectorElementCollectionMappingAlg(name, **kwargs))
     return acc
 
+def BeamPipeBlueprintNodeBuilderCfg(
+    flags, name: str = "BeamPipeBlueprintNodeBuilder", **kwargs
+) -> ComponentAccumulator:
+    result = ComponentAccumulator()
+    kwargs.setdefault("loadFromDatabase", flags.Detector.GeometryBpipe)
+    result.setPrivateTools(
+        CompFactory.ActsTrk.BeamPipeBlueprintNodeBuilder(name, **kwargs)
+    )
+    return result
+
+
 def ItkBlueprintNodeBuilderCfg(flags,
                                    name: str = "ItkBlueprintNodeBuilder",
                                    **kwargs) -> ComponentAccumulator:
     result = ComponentAccumulator()
+    kwargs.setdefault("buildPixel", flags.Detector.GeometryITkPixel)
+    kwargs.setdefault("buildStrip", flags.Detector.GeometryITkStrip)
     the_tool = CompFactory.ActsTrk.ItkBlueprintNodeBuilder(name, **kwargs)
     result.setPrivateTools(the_tool)
     return result
+
+
+def HgtdBlueprintNodeBuilderCfg(
+    flags, name: str = "HgtdBlueprintNodeBuilder", **kwargs
+) -> ComponentAccumulator:
+    result = ComponentAccumulator()
+    the_tool = CompFactory.ActsTrk.HgtdBlueprintNodeBuilder(
+        name, **kwargs)
+    result.setPrivateTools(the_tool)
+    return result
+
 
 def caloBlueprintNodeBuilderCfg(flags,
                                    name: str = "CaloBlueprintNodeBuilder",

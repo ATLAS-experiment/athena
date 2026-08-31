@@ -22,7 +22,7 @@ using namespace MCTruthPartClassifier;
 
 #ifndef XAOD_ANALYSIS
 std::pair<ParticleType, ParticleOrigin>
-MCTruthClassifier::particleHepMCTruthClassifier(const HepMcParticleLink& theLink, MCTruthPartClassifier::Info* info /*= nullptr*/) const {
+MCTruthClassifier::particleHepMCTruthClassifier(const HepMcParticleLink& theLink, IMCTruthClassifier::Info* info /*= nullptr*/) const {
   // Retrieve the links between HepMC and xAOD::TruthParticle
   const EventContext& ctx = info ? info->eventContext : Gaudi::Hive::currentContext();
   SG::ReadHandle<xAODTruthParticleLinkVector> truthParticleLinkVecReadHandle(m_truthLinkVecReadHandleKey, ctx);
@@ -39,9 +39,9 @@ MCTruthClassifier::particleHepMCTruthClassifier(const HepMcParticleLink& theLink
 #endif
 
 std::pair<ParticleType, ParticleOrigin>
-MCTruthClassifier::particleTruthClassifier(const xAOD::TruthParticle* thePart, MCTruthPartClassifier::Info* infoin /*= nullptr*/) const {
-  MCTruthPartClassifier::Info tmpinfo;
-  MCTruthPartClassifier::Info& info = (infoin) ? *infoin : tmpinfo;
+MCTruthClassifier::particleTruthClassifier(const xAOD::TruthParticle* thePart, IMCTruthClassifier::Info* infoin /*= nullptr*/) const {
+  IMCTruthClassifier::Info tmpinfo;
+  IMCTruthClassifier::Info& info = (infoin) ? *infoin : tmpinfo;
 
   ATH_MSG_DEBUG("Executing particleTruthClassifier");
 
@@ -185,9 +185,26 @@ MCTruthClassifier::particleTruthClassifier(const xAOD::TruthParticle* thePart, M
   ATH_MSG_DEBUG("particleTruthClassifier  succeeded ");
   return std::make_pair(partType, partOrig);
 }
-
-
-bool MCTruthClassifier::TruthLoopDetectionMethod1(const xAOD::TruthVertex * childOrigVtx, const xAOD::TruthParticle* parent) const
+namespace {
+  // Method3: Returns true if the parent and child production vertices
+  // are the same.
+bool TruthLoopDetectionMethod3(const xAOD::TruthVertex * childOrigVtx, const xAOD::TruthParticle* parent)
+{
+  // Start of method 3 of protecting against loops
+  // to resolve Sherpa loop
+  const xAOD::TruthVertex* parentOrigVtx = parent->hasProdVtx() ? parent->prodVtx() : nullptr;
+  if (parentOrigVtx && HepMC::is_same_vertex(parentOrigVtx,childOrigVtx)) {
+    // The "parent" and the "child" have the same production vertex.
+    return true;
+  }
+  return false;
+  // End of method 3 of protecting against loops
+}
+  // Temporary helper methods for detecting loops in the truth record
+  // Method1: Returns true if the parent particle is in the list of
+  // children of its decay vertex. Otherwise, returns the result of
+  // Method3.
+bool TruthLoopDetectionMethod1(const xAOD::TruthVertex * childOrigVtx, const xAOD::TruthParticle* parent)
 {
   // Start of method 1 of protecting against loops
   const int parentPDG = parent->pdgId();
@@ -207,8 +224,10 @@ bool MCTruthClassifier::TruthLoopDetectionMethod1(const xAOD::TruthVertex * chil
   // End of method 1 of protecting against loops
 }
 
-
-bool MCTruthClassifier::TruthLoopDetectionMethod2(const xAOD::TruthParticle* child, const xAOD::TruthParticle* parent) const
+  // Method2: Returns true if the parent production vertex is the
+  // child decay vertex and the child production vertex is the parent
+  // decay vertex.
+bool TruthLoopDetectionMethod2(const xAOD::TruthParticle* child, const xAOD::TruthParticle* parent)
 {
   // Start of method 2 of protecting against loops
   // to prevent Sherpa loop
@@ -230,24 +249,12 @@ bool MCTruthClassifier::TruthLoopDetectionMethod2(const xAOD::TruthParticle* chi
 }
 
 
-bool MCTruthClassifier::TruthLoopDetectionMethod3(const xAOD::TruthVertex * childOrigVtx, const xAOD::TruthParticle* parent) const
-{
-  // Start of method 3 of protecting against loops
-  // to resolve Sherpa loop
-  const xAOD::TruthVertex* parentOrigVtx = parent->hasProdVtx() ? parent->prodVtx() : nullptr;
-  if (parentOrigVtx && HepMC::is_same_vertex(parentOrigVtx,childOrigVtx)) {
-    // The "parent" and the "child" have the same production vertex.
-    return true;
-  }
-  return false;
-  // End of method 3 of protecting against loops
-}
-
+} /// namespace
 
 ParticleOrigin MCTruthClassifier::defOrigOfElectron(const xAOD::TruthParticleContainer& xTruthParticleContainer,
                                                     const xAOD::TruthParticle* thePart,
                                                     bool& isPrompt,
-                                                    MCTruthPartClassifier::Info& info) const
+                                                    IMCTruthClassifier::Info& info) const
 {
   ATH_MSG_DEBUG("Executing DefOrigOfElectron ");
 
@@ -541,7 +548,7 @@ ParticleOrigin MCTruthClassifier::defOrigOfElectron(const xAOD::TruthParticleCon
 ParticleOrigin MCTruthClassifier::defOrigOfMuon(const xAOD::TruthParticleContainer& xTruthParticleContainer,
                                                 const xAOD::TruthParticle* thePart,
                                                 bool& isPrompt,
-                                                MCTruthPartClassifier::Info& info) const
+                                                IMCTruthClassifier::Info& info) const
 {
   ATH_MSG_DEBUG("Executing DefOrigOfMuon ");
 
@@ -778,7 +785,7 @@ ParticleOrigin MCTruthClassifier::defOrigOfMuon(const xAOD::TruthParticleContain
 ParticleOrigin MCTruthClassifier::defOrigOfTau(const xAOD::TruthParticleContainer& xTruthParticleContainer,
                                                const xAOD::TruthParticle* thePart,
                                                int ancestorPDGin,
-                                               MCTruthPartClassifier::Info& info) const
+                                               IMCTruthClassifier::Info& info) const
 {
   ATH_MSG_DEBUG("Executing DefOrigOfTau ");
 
@@ -969,7 +976,7 @@ ParticleOrigin MCTruthClassifier::defOrigOfTau(const xAOD::TruthParticleContaine
 ParticleOrigin MCTruthClassifier::defOrigOfPhoton(const xAOD::TruthParticleContainer& xTruthParticleContainer,
                                                   const xAOD::TruthParticle* thePart,
                                                   bool& isPrompt,
-                                                  MCTruthPartClassifier::Info& info) const
+                                                  IMCTruthClassifier::Info& info) const
 {
   if (!thePart) return NonDefined; // FIXME Why is this extra protection needed for this function and not the others?
   ATH_MSG_DEBUG("Executing DefOrigOfPhoton ");
@@ -1232,7 +1239,7 @@ ParticleOrigin
 MCTruthClassifier::defOrigOfNeutrino(const xAOD::TruthParticleContainer& xTruthParticleContainer,
                                      const xAOD::TruthParticle* thePart,
                                      bool& isPrompt,
-                                     MCTruthPartClassifier::Info& info) const
+                                     IMCTruthClassifier::Info& info) const
 {
   ATH_MSG_DEBUG("Executing DefOrigOfNeutrino ");
 

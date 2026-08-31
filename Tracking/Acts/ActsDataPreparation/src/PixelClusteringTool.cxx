@@ -1,6 +1,11 @@
 /*
   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
+
+// Tell clang not to allow spurious FPEs.
+#include "CxxUtils/trapping_fp.h"
+CXXUTILS_TRAPPING_FP;
+
 #include "PixelClusteringTool.h"
 
 #include <xAODInDetMeasurement/PixelCluster.h>
@@ -8,6 +13,7 @@
 #include <xAODInDetMeasurement/PixelClusterAuxContainer.h>
 #include <InDetPrepRawData/SiWidth.h>
 #include <TrkSurfaces/Surface.h>
+#include <xAODInDetMeasurement/Utilities.h>
 
 #include "details/PixelRDOCollectionAdapter.h"
 
@@ -28,7 +34,7 @@ namespace {
       assert( std::in_range<T1>(a) );
       return static_cast<T1>(a);
    }
-
+   
    inline bool isFEI3(const InDetDD::PixelModuleDesign& design) {
       return  design.getReadoutTechnology() == InDetDD::PixelReadoutTechnology::FEI3;
    }
@@ -116,15 +122,15 @@ PixelClusteringToolImpl<T_RDOContainer>::countCellsImpl(const T_RDOContainer& rd
                                                         const std::vector<IdentifierHash> &listOfIds,
                                                         const InDetDD::SiDetectorElementCollection &detector_elements) const {
    auto getNHits =[](const ActsTrk::RDOContainerTraits<T_RDOContainer>::PerModuleRDOs &RDOs,
-                     const InDetDD::SiDetectorElementCollection &detector_elements,
+                     const InDetDD::SiDetectorElementCollection &elements,
 		     const PixelID* pixelID)
       -> unsigned int
    {
       unsigned int n_hits = RDOs.size();
       if constexpr(GANGED) {
-         assert(detector_elements.at(RDOs.identifyHash()));
-         assert(dynamic_cast<const InDetDD::PixelModuleDesign *>(&detector_elements.at(RDOs.identifyHash())->design()) != nullptr);
-         const InDetDD::PixelModuleDesign &design = static_cast<const InDetDD::PixelModuleDesign &>(detector_elements.at(RDOs.identifyHash())->design());
+         assert(elements.at(RDOs.identifyHash()));
+         assert(dynamic_cast<const InDetDD::PixelModuleDesign *>(&elements.at(RDOs.identifyHash())->design()) != nullptr);
+         const InDetDD::PixelModuleDesign &design = static_cast<const InDetDD::PixelModuleDesign &>(elements.at(RDOs.identifyHash())->design());
          if (isFEI3(design)) {
             for(RDOAdapter<T_RDOContainer> rdo : RDOs) {
                if (rdo.isGanged(design, *pixelID)) {
@@ -183,14 +189,16 @@ PixelClusteringToolImpl<T_RDOContainer>::makeCluster(size_t icluster,
                                                  const double lorentzShift,
                                                  xAOD::PixelCluster::ClusterVars& clusterVars) const
 { 
-
   Amg::Vector2D pos_acc(0,0);
   float tot_acc = 0.f;
-
-  InDetDD::PixelDiodeTree::CellIndexType rowmax = std::numeric_limits<InDetDD::PixelDiodeTree::CellIndexType>::min();
-  InDetDD::PixelDiodeTree::CellIndexType colmax = std::numeric_limits<InDetDD::PixelDiodeTree::CellIndexType>::min();
-  InDetDD::PixelDiodeTree::CellIndexType rowmin = std::numeric_limits<InDetDD::PixelDiodeTree::CellIndexType>::max();
-  InDetDD::PixelDiodeTree::CellIndexType colmin = std::numeric_limits<InDetDD::PixelDiodeTree::CellIndexType>::max();
+  //to start, set max to the min possible int and min to the max possible int
+  static constexpr InDetDD::PixelDiodeTree::CellIndexType defaultMax = std::numeric_limits<InDetDD::PixelDiodeTree::CellIndexType>::min();
+  static constexpr InDetDD::PixelDiodeTree::CellIndexType defaultMin = std::numeric_limits<InDetDD::PixelDiodeTree::CellIndexType>::max();
+  //
+  InDetDD::PixelDiodeTree::CellIndexType rowmax = defaultMax;
+  InDetDD::PixelDiodeTree::CellIndexType colmax = defaultMax;
+  InDetDD::PixelDiodeTree::CellIndexType rowmin = defaultMin;
+  InDetDD::PixelDiodeTree::CellIndexType colmin = defaultMin;
   InDetDD::PixelDiodeTree::DiodeProxyWithPosition colmin_diode{};
   InDetDD::PixelDiodeTree::DiodeProxyWithPosition colmax_diode{};
   InDetDD::PixelDiodeTree::DiodeProxyWithPosition rowmin_diode{};
@@ -207,10 +215,11 @@ PixelClusteringToolImpl<T_RDOContainer>::makeCluster(size_t icluster,
   Identifier module_id = element.identify();
   std::optional<Identifier::value_type> first_rdo_id;
   int cluster_lvl1min = std::numeric_limits<int>::max();
-
+  float totalCharge = 0.f;
+  
   using CellProxy = InPlaceClusterization::CellProxy<const typename IClusteringToolType::CellContainer>;
   for (CellProxy cellProxy : cluster) {
-
+    
     //Construct the identifier class
 
     // We temporary comment this since it is not used
@@ -274,6 +283,7 @@ PixelClusteringToolImpl<T_RDOContainer>::makeCluster(size_t icluster,
     }
     clusterVars.rdoList.setValue(n_rdos,rdo_id.get_compact());
     clusterVars.totList.setValue(n_rdos,tot);
+    totalCharge += charge;
     ++n_rdos;
     
     const InDetDD::PixelDiodeTree::CellIndexType &row = diode_idx[0];
@@ -308,14 +318,17 @@ PixelClusteringToolImpl<T_RDOContainer>::makeCluster(size_t icluster,
       tot_acc += 1;
     }
     
-  }
+  } // loop on cluster's cells
   assert(n_rdos>0); // clusters must not be empty
   if (tot_acc > 0)
     pos_acc /= tot_acc;
-
   
-  const int colWidth = colmax - colmin + 1;
-  const int rowWidth = rowmax - rowmin + 1;
+  const long long diffCol = static_cast<long long>(colmax) - static_cast<long long>(colmin) + 1LL;
+  const long long diffRow = static_cast<long long>(rowmax) - static_cast<long long>(rowmin) + 1LL;
+  assert(std::in_range<int>(diffCol));
+  assert(std::in_range<int>(diffRow));
+  const int colWidth = static_cast<int>(diffCol);
+  const int rowWidth = static_cast<int>(diffRow);
 
   double etaWidth = colmax_diode.xEtaMax() - colmin_diode.xEtaMin(); // design.widthFromColumnRange(colmin, colmax);
   double phiWidth = rowmax_diode.xPhiMax() - rowmin_diode.xPhiMin(); // design.widthFromColumnRange(colmin, colmax);
@@ -360,6 +373,7 @@ PixelClusteringToolImpl<T_RDOContainer>::makeCluster(size_t icluster,
   xAOD::VectorMap<3>(clusterVars.globalPosition[icluster].data()) = globalPos.cast<float>();
   clusterVars.totList.updateEndIndex(icluster,n_rdos);
   clusterVars.chargeList.updateEndIndex(icluster, (calibData ? n_rdos : 0u));
+  clusterVars.totalCharge[icluster] = totalCharge;
   clusterVars.lvl1a[icluster] = cluster_lvl1min;
   clusterVars.channelsInPhi[icluster] = rowWidth;
   clusterVars.channelsInEta[icluster] = colWidth;

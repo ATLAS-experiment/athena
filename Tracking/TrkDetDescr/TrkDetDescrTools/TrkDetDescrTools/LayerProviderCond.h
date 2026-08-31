@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRKDETDESCRTOOLS_LAYERPROVIDERCOND_H
@@ -30,10 +30,7 @@ class LayerProviderCond final
 
 public:
   /** Constructor */
-  LayerProviderCond(const std::string&, const std::string&, const IInterface*);
-
-  /** Destructor */
-  virtual ~LayerProviderCond() = default;
+  using base_class::base_class;
 
   /** initialize */
   virtual StatusCode initialize() override final;

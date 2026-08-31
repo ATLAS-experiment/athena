@@ -5,7 +5,7 @@
 #include "PhotonCnvPlots.h"
 #include "xAODEgamma/EgammaxAODHelpers.h"
 #include "xAODEgamma/PhotonxAODHelpers.h"
-#include "MCTruthClassifier/MCTruthClassifierDefs.h"
+#include "TruthUtils/TruthClasses.h"
 
 namespace Egamma{
 

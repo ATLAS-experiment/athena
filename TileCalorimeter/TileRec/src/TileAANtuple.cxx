@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //*****************************************************************************
@@ -463,7 +463,7 @@ StatusCode TileAANtuple::execute(const EventContext& ctx) {
   
   // store DCS data
   if (m_checkDCS) {
-    empty &= storeDCS().isFailure();
+    empty &= storeDCS(ctx).isFailure();
   }
  
   if (empty) {
@@ -1468,7 +1468,7 @@ TileAANtuple::initNTuple(const EventContext& ctx) {
       ATH_MSG_ERROR( "Problem registering TileRec CellMap Tree" );
     }
     
-    fillCellMap(ntuplePtr);
+    fillCellMap(ntuplePtr, ctx);
     
     //Ntuple creation
     m_ntuplePtr = new TTree(m_ntupleID.c_str(), "TileCal-Ntuple");
@@ -1529,8 +1529,9 @@ TileAANtuple::initNTuple(const EventContext& ctx) {
  //
  //////////////////////////////////////////////////////////////////////////////
  */
-void TileAANtuple::fillCellMap(TTree* ntuplePtr) {
+void TileAANtuple::fillCellMap(TTree* ntuplePtr, const EventContext& ctx) {
   
+  //coverity[STACK_USE]
   float eta[4][64][48];
   float phi[4][64][48];
   short tower[4][64][48];
@@ -1589,6 +1590,7 @@ void TileAANtuple::fillCellMap(TTree* ntuplePtr) {
   }
   
   const MbtsDetDescrManager* mbtsMgr = nullptr; //!< Pointer to MbtsDetDescrManager
+  //coverity[STACK_USE]
   if ( detStore()->retrieve(mbtsMgr).isFailure() ) {
     ATH_MSG_WARNING( "Unable to retrieve MbtsDetDescrManager from DetectorStore" );
     mbtsMgr = nullptr;
@@ -1599,7 +1601,7 @@ void TileAANtuple::fillCellMap(TTree* ntuplePtr) {
       for (int chan = 0; chan < 48; ++chan) {
         for (int adc = 0; adc < 2; ++adc) {
           HWIdentifier adc_id = m_tileHWID->adc_id(ROS, drawer, chan, adc);
-          bad[rosI][drawer][chan][adc] = (short) m_tileBadChanTool->encodeStatus(m_tileBadChanTool->getAdcStatus(adc_id));
+          bad[rosI][drawer][chan][adc] = (short) m_tileBadChanTool->encodeStatus(m_tileBadChanTool->getAdcStatus(adc_id, ctx));
           int index, pm;
           Identifier cell_id = m_cabling->h2s_cell_id_index(adc_id, index, pm);
           if (index == -2) { // MBTS
@@ -2247,7 +2249,7 @@ void TileAANtuple::DCS_addBranch() {
   }
 }
 
-StatusCode TileAANtuple::storeDCS() {
+StatusCode TileAANtuple::storeDCS(const EventContext& ctx) {
 
   ATH_MSG_DEBUG( "Filling DCS ntuple:"
                  <<" evtCnt=" << m_evtNr
@@ -2288,7 +2290,7 @@ StatusCode TileAANtuple::storeDCS() {
         
       unsigned int drawerIdx = TileCalibUtils::getDrawerIdx(ROS,drawer);
       for (int channel=0; channel<48; ++channel){
-        TileBchStatus chStat = m_tileBadChanTool->getChannelStatus(drawerIdx,channel);
+        TileBchStatus chStat = m_tileBadChanTool->getChannelStatus(drawerIdx,channel,ctx);
         m_arrays->m_HV[rosI][drawer][channel]       = m_tileDCS->getChannelHV(ROS, drawer, channel);
         m_arrays->m_HVSET[rosI][drawer][channel]    = m_tileDCS->getChannelHVSet(ROS, drawer, channel);
         m_arrays->m_HVSTATUS[rosI][drawer][channel] = m_tileDCS->getDCSHVStatus(ROS, drawer, channel);

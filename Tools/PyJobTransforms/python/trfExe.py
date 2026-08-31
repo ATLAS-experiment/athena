@@ -831,7 +831,7 @@ class scriptExecutor(transformExecutor):
         if 'checkEventCount' in self.conf.argdict and self.conf.argdict['checkEventCount'].returnMyValue(exe=self) is False:
             msg.info('Event counting for substep {0} is skipped'.format(self.name))
         else:
-            if 'mpi' in self.conf.argdict and not mpi.mpiShouldValidate():
+            if 'mpi' in self.conf.argdict and self.conf.argdict['mpi'].value and not mpi.mpiShouldValidate():
                 msg.info('MPI mode -- skipping output event count check')
             else:
                 checkcount=trfValidation.eventMatch(self)
@@ -1160,7 +1160,7 @@ class athenaExecutor(scriptExecutor):
             self._athenaMPWorkerTopDir = self._athenaMPFileReport = None
 
         ## Handle MPI setup
-        if 'mpi' in self.conf.argdict:
+        if 'mpi' in self.conf.argdict and self.conf.argdict['mpi'].value:
             msg.info("Running in MPI mode")
             mpi.setupMPIConfig(output, self.conf.dataDictionary)
 
@@ -1247,7 +1247,7 @@ class athenaExecutor(scriptExecutor):
     def postExecute(self):
         super(athenaExecutor, self).postExecute()
         # MPI merging
-        if 'mpi' in self.conf.argdict:
+        if 'mpi' in self.conf.argdict and self.conf.argdict['mpi'].value:
             mpi.mergeOutputs()
 
         # Handle executor substeps
@@ -1438,23 +1438,31 @@ class athenaExecutor(scriptExecutor):
 
     ## @brief Check if running with CA
     def _isCAEnabled(self):
-        # CA not present
-        if 'CA' not in self.conf.argdict:
-            # If there is no legacy skeleton, then we are running with CA
-            if not self._skeleton:
-                return True
-            else:
+        # CA is now enabled by default, except for Gen_tf.py
+        if self._name != 'generate' and self._name != 'afterburn':
+            if 'CA' in self.conf.argdict and (self.conf.argdict['CA'] is False or self.conf.argdict['CA'].returnMyValue(name=self.name, substep=self.substep) is False):
                 return False
+            else:
+                return True
+        # the old logic is kept for Gen_tf.py, to be dropped once migrated to CA
+        else:
+            # CA not present
+            if 'CA' not in self.conf.argdict:
+                # If there is no legacy skeleton, then we are running with CA
+                if not self._skeleton:
+                    return True
+                else:
+                    return False
 
-        # CA present but None, all substeps running with CA
-        if self.conf.argdict['CA'] is None:
-            return True
+            # CA present but None, all substeps running with CA
+            if self.conf.argdict['CA'] is None:
+                return True
 
-        # CA enabled for a substep, running with CA
-        if self.conf.argdict['CA'].returnMyValue(name=self.name, substep=self.substep) is True:
-            return True
+            # CA enabled for a substep, running with CA
+            if self.conf.argdict['CA'].returnMyValue(name=self.name, substep=self.substep) is True:
+                return True
 
-        return False
+            return False
 
     ## @brief Prepare the correct command line to be used to invoke athena
     def _prepAthenaCommandLine(self):
@@ -2361,4 +2369,3 @@ class archiveExecutor(scriptExecutor):
                 )
             self._cmd.append('unarchive_wrapper.py')
         super(archiveExecutor, self).preExecute(input=input, output=output)
-

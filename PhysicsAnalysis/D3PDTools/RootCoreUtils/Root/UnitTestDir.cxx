@@ -11,10 +11,11 @@
 #include <RootCoreUtils/UnitTestDir.h>
 
 #include <cstdlib>
-#include <TSystem.h>
-#include <TString.h>
+#include <filesystem>
+#include <stdexcept>
+#include <vector>
 #include <RootCoreUtils/Assert.h>
-#include <RootCoreUtils/ThrowMsg.h>
+#include <RootCoreUtils/MessageCheck.h>
 
 //
 // method implementations
@@ -22,30 +23,21 @@
 
 namespace RCU
 {
-  void UnitTestDir ::
-  testInvariant () const
-  {
-    //RCU_INVARIANT (this != 0);
-  }
-
-
-
   UnitTestDir ::
   UnitTestDir (const std::string& package, const std::string& name)
-    : m_cleanup (getenv ("ROOTCORE_AUTO_UT") != 0)
+    : m_cleanup (getenv ("ROOTCORE_AUTO_UT") != nullptr)
   {
-    TString output = "/tmp";
-    {
-      const char *tmpdir = getenv ("TMPDIR");
-      if (tmpdir)
-	output = tmpdir;
-    };
-    output += ("/ut-" + package + "-" + name + ".$$").c_str();
-    gSystem->ExpandPathName (output);
-    m_path = output.Data ();
-    
-    if (gSystem->MakeDirectory (output.Data()) != 0)
-      RCU_THROW_MSG (("could not create output directory " + output).Data());
+    std::string tmpdir = "/tmp";
+    if (const char *env = getenv ("TMPDIR"))
+      tmpdir = env;
+
+    // use mkdtemp to create a unique, collision-proof directory
+    const std::string templ = tmpdir + "/ut-" + package + "-" + name + "-XXXXXX";
+    std::vector<char> buffer (templ.begin(), templ.end());
+    buffer.push_back ('\0');
+    if (mkdtemp (buffer.data()) == nullptr)
+      throw std::runtime_error ("could not create output directory from template " + templ);
+    m_path = buffer.data();
   }
 
 
@@ -53,12 +45,15 @@ namespace RCU
   UnitTestDir ::
   ~UnitTestDir ()
   {
-    RCU_DESTROY_INVARIANT (this);
+    using namespace msgRootCoreUtils;
 
     if (m_cleanup)
-      gSystem->Exec (("rm -rf " + m_path).c_str());
+    {
+      std::error_code ec;
+      std::filesystem::remove_all (m_path, ec);
+    }
     else
-      RCU_PRINT_MSG ("unit test data located at " + m_path);
+      ANA_MSG_INFO ("unit test data located at " << m_path);
   }
 
 
@@ -66,7 +61,6 @@ namespace RCU
   const std::string& UnitTestDir ::
   path () const
   {
-    RCU_READ_INVARIANT (this);
     return m_path;
   }
 
@@ -75,7 +69,6 @@ namespace RCU
   bool UnitTestDir ::
   cleanup () const
   {
-    RCU_READ_INVARIANT (this);
     return m_cleanup;
   }
 
@@ -84,7 +77,6 @@ namespace RCU
   void UnitTestDir ::
   cleanup (bool val_cleanup)
   {
-    RCU_CHANGE_INVARIANT (this);
     m_cleanup = val_cleanup;
   }
 }

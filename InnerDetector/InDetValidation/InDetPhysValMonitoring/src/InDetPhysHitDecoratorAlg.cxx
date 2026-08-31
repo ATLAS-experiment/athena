@@ -78,7 +78,9 @@ InDetPhysHitDecoratorAlg::initialize() {
     ATH_CHECK(detStore()->retrieve(m_idHelper, "AtlasID"));
     ATH_CHECK(detStore()->retrieve(m_pixelID, "PixelID"));
     ATH_CHECK(detStore()->retrieve(m_sctID, "SCT_ID"));
-    ATH_CHECK(detStore()->retrieve(m_trtID, "TRT_ID"));
+    if (m_useTRT) {
+      ATH_CHECK(detStore()->retrieve(m_trtID, "TRT_ID"));
+    }
 
     if (m_residualPullCalculator.empty()) {
         ATH_MSG_INFO("No residual/pull calculator for general hit residuals configured.");
@@ -464,6 +466,10 @@ bool InDetPhysHitDecoratorAlg::decideDetectorRegion(const Identifier& id, Subdet
         layer = m_sctID->layer_disk(id);
     }
     else if (m_idHelper->is_trt(id)) {
+        if (!m_useTRT) {
+	  ATH_MSG_ERROR("Inconsistency regarding TRT geometry");
+	  return false;
+        }
         detector = TRT;
         region = (std::abs(m_trtID->barrel_ec(id)) == trtBarrelIndex) ? (BARREL) : (ENDCAP);
         layer = m_trtID->layer_or_wheel(id);

@@ -42,7 +42,7 @@ namespace MuonValR4{
      * @param vsualHelper: Obj helper to which the drawn line is appended
      * @param viewConfig: Configuration style of the drawn line
      * @param standardLength: Length of the segment as a fallback solution */
-    void drawBoundParameters(const ActsTrk::GeometryContext& gctx,
+    void drawBoundParameters(const Acts::GeometryContext& tgContext,
                              const Acts::BoundTrackParameters& pars,
                              Acts::ObjVisualization3D& visualHelper,
                              const Acts::ViewConfig& viewConfig = Acts::s_viewLine,
@@ -55,7 +55,7 @@ namespace MuonValR4{
      *  @param vsualHelper: Obj helper to which the segment is appended.
      *  @param viewConfig: Configuration style of the drawn line
      *  @param standardLength: Length of the segment as a fallback solution */
-    void drawSegmentLine(const ActsTrk::GeometryContext& gctx,
+    void drawSegmentLine(const Acts::GeometryContext& tgContext,
                          const xAOD::MuonSegment& segment,
                          Acts::ObjVisualization3D& visualHelper,
                          const Acts::ViewConfig& viewConfig = Acts::s_viewLine,
@@ -66,7 +66,7 @@ namespace MuonValR4{
      *  @param segment: The segment which is meant to draw
      *  @param vsualHelper: Obj helper to which the segment is appended.
      *  @param viewConfig: Configuration style of the drawn line */
-    void drawSegmentLine(const ActsTrk::GeometryContext& gctx,
+    void drawSegmentLine(const Acts::GeometryContext& tgContext,
                          const MuonR4::Segment& segment,
                          Acts::ObjVisualization3D& visualHelper,
                          const Acts::ViewConfig& viewConfig = Acts::s_viewLine);
@@ -75,7 +75,7 @@ namespace MuonValR4{
      *  @param segment: The segment which from which the measurements are taken
      *  @param vsualHelper: Obj helper to which the measurements are appended.
      *  @param viewConfig: Configuration style of the drawn measurements */
-    void drawSegmentMeasurements(const ActsTrk::GeometryContext& gctx,
+    void drawSegmentMeasurements(const Acts::GeometryContext& tgContext,
                                  const xAOD::MuonSegment& segment,
                                  Acts::ObjVisualization3D& visualHelper,
                                  const Acts::ViewConfig& viewConfig = Acts::s_viewSensitive);
@@ -84,7 +84,7 @@ namespace MuonValR4{
      *  @param segment: The segment which from which the measurements are taken
      *  @param vsualHelper: Obj helper to which the measurements are appended.
      *  @param viewConfig: Configuration style of the drawn measurements */
-    void drawSegmentMeasurements(const ActsTrk::GeometryContext& gctx,
+    void drawSegmentMeasurements(const Acts::GeometryContext& tgContext,
                                  const MuonR4::Segment& segment,
                                  Acts::ObjVisualization3D& visualHelper,
                                  const Acts::ViewConfig& viewConfig = Acts::s_viewSensitive);
@@ -94,7 +94,7 @@ namespace MuonValR4{
      *  @param meas: Pointer to the muon measurement to visualize
      *  @param vsualHelper: Obj helper to which the measurement is appended.
      *  @param viewConfig: Configuration style of the drawn measurement */
-    void drawMeasurement(const ActsTrk::GeometryContext& gctx,
+    void drawMeasurement(const Acts::GeometryContext& tgContext,
                          const xAOD::UncalibratedMeasurement* meas,
                          Acts::ObjVisualization3D& visualHelper,
                          const Acts::ViewConfig& viewConfig = Acts::s_viewSensitive);
@@ -105,7 +105,7 @@ namespace MuonValR4{
      *  @param spacePoint: Reference to the space point to visualize
      *  @param vsualHelper: Obj helper to which the measurement is appended.
      *  @param viewConfig: Configuration style of the drawn measurement */
-    void drawSpacePoint(const ActsTrk::GeometryContext& gctx,
+    void drawSpacePoint(const Acts::GeometryContext& tgContext,
                         const MuonR4::SpacePoint& spacePoint,
                         Acts::ObjVisualization3D& visualHelper,
                         const Acts::ViewConfig& viewConfig = Acts::s_viewSensitive);
@@ -116,7 +116,7 @@ namespace MuonValR4{
      *  @param msSector: Pointer to the associated msSector (Fetch the transform for the auxiliaries)
      *  @param vsualHelper: Obj helper to which the measurement is appended.
      *  @param viewConfig: Configuration style of the drawn measurement */
-    void drawSpacePoint(const ActsTrk::GeometryContext& gctx,
+    void drawSpacePoint(const Acts::GeometryContext& tgContext,
                         const MuonR4::CalibratedSpacePoint& spacePoint,
                         const MuonGMR4::SpectrometerSector* msSector,
                         Acts::ObjVisualization3D& visualHelper,

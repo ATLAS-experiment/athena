@@ -7,7 +7,7 @@
 
 #include "MCTruthClassifier/IMCTruthClassifier.h"
 #include "MCTruthClassifier/MCTruthClassifier.h"
-#include "MCTruthClassifier/MCTruthClassifierDefs.h"
+#include "TruthUtils/TruthClasses.h"
 
  namespace MCTruthClassifierEnumsDict {
    struct tmp {

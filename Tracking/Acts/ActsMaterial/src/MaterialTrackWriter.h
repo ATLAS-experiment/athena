@@ -6,10 +6,10 @@
 #define ACTSMATERIAL_MATERIALTRACKWRITER_H
 
 #include "AthenaBaseComps/AthHistogramAlgorithm.h"
-#include "GaudiKernel/ServiceHandle.h"
+
 #include "StoreGate/ReadHandleKey.h"
 
-#include "ActsGeometryInterfaces/ITrackingGeometryTool.h"
+#include "ActsEvent/ContextUtility.h"
 #include "ActsGeometry/RecordedMaterialTrackCollection.h"
 
 #include <ActsPlugins/Root/RootMaterialTrackIo.hpp>
@@ -57,9 +57,10 @@ namespace ActsTrk {
 
             Gaudi::Property<bool> m_useTrackingGeo{this, "useTrackingGeometry", false, 
                                                     "Use the tracking geometry to retrieve the geometry context"};
-            /// The tracking geometry service to retrive the geometry context
-            PublicToolHandle<ActsTrk::ITrackingGeometryTool> m_trackingGeometryTool{this, "TrackingGeometryTool",
-                                                                                    "", "The ACTS geometry service for the geometry context"};
+            
+            
+            /** @brief Context provider for geometry, magnetic field and calibration contexts */
+            ContextUtility m_ctxProvider{this};
             using Config_t = ActsPlugins::RootMaterialTrackIo::Config;
             /// The read - write payload
             ActsPlugins::RootMaterialTrackIo m_accessor{Config_t{}};

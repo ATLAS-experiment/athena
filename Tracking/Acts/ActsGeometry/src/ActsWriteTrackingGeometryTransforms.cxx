@@ -1,10 +1,10 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // PACKAGE
 #include "ActsGeometry/ActsDetectorElement.h"
-#include "ActsGeometry/ActsWriteTrackingGeometryTransforms.h"
+#include "ActsWriteTrackingGeometryTransforms.h"
 #include "ActsGeometryInterfaces/ITrackingGeometrySvc.h"
 #include "ActsGeometryInterfaces/GeometryContext.h"
 
@@ -36,7 +36,8 @@ StatusCode ActsWriteTrackingGeometryTransforms::initialize() {
   ATH_CHECK (detStore()->retrieve(m_pixelID, "PixelID") );
   ATH_CHECK (detStore()->retrieve(m_SCT_ID,"SCT_ID") );
   
-  ATH_CHECK(m_trackingGeometryTool.retrieve());
+  ATH_CHECK(m_trackingGeometrySvc.retrieve());
+  ATH_CHECK(m_ctxProvider.initialize());
   
   std::ofstream os(m_outputName); // truncate
 
@@ -49,9 +50,9 @@ StatusCode ActsWriteTrackingGeometryTransforms::execute(const EventContext& ctx)
 
 
   
-  auto trackingGeometry = m_trackingGeometryTool->trackingGeometry();
+  auto trackingGeometry = m_trackingGeometrySvc->trackingGeometry();
   ATH_MSG_DEBUG("Retrieved tracking Geometry");
-  const ActsTrk::GeometryContext& gctx = m_trackingGeometryTool->getGeometryContext(ctx);
+  const Acts::GeometryContext tgContext = m_ctxProvider.getGeometryContext(ctx);
   ATH_MSG_DEBUG("Retrieved geometry context");
 
   std::stringstream ss;
@@ -115,10 +116,9 @@ StatusCode ActsWriteTrackingGeometryTransforms::execute(const EventContext& ctx)
     
     ATH_MSG_DEBUG(geoID<<" "<<ath_geoid<<" "<<bec<<" "<<ld<<" "<<etam<<" "<<phim<<" "<<side);
     
-    const ActsTrk::GeometryContext& void_gctx = m_trackingGeometryTool->getNominalGeometryContext();
     if (m_writeFullTransform) {
       // iterate over components of transform
-      const auto* p = srf->localToGlobalTransform(gctx.context()).data();
+      const auto* p = srf->localToGlobalTransform(tgContext).data();
       for(size_t i=0;i<16;i++) {
         if(i>0) {
           os << ",";
@@ -126,9 +126,9 @@ StatusCode ActsWriteTrackingGeometryTransforms::execute(const EventContext& ctx)
         os << *(p+i);
       }
     } else { // only write center of the detector element
-      double cx = srf->center(void_gctx.context()).x();
-      double cy = srf->center(void_gctx.context()).y();
-      double cz = srf->center(void_gctx.context()).z();
+      double cx = srf->center(tgContext).x();
+      double cy = srf->center(tgContext).y();
+      double cz = srf->center(tgContext).z();
       os<<cx<<","<<cy<<","<<cz;
     }
     

@@ -13,8 +13,12 @@
 namespace xAOD
 {
 
-  /** @brief Data class describing the L0 muon candidates from TGC-SL to MDT-TP
-  */
+  /** @brief Data class describing the L0 muon candidates produced by TGC-SL
+   *
+   * The candidates are consumed by MDT-TP and L0MuonEndcap. Common candidate
+   * quantities are provided by ICandData_v1; this class stores only TGC-specific
+   * information.
+   */
 
   class TGCCandData_v1 : public ICandData_v1 {
   public:
@@ -28,40 +32,10 @@ namespace xAOD
      */
     uint8_t tcId() const;
     /**
-     * @brief Retrieve the passed pT-threshold index
-     * @return Four-bit pT-threshold index
-     */
-    uint8_t passedPtThresholdIndex() const;
-    /**
-     * @brief Retrieve the software-side encoded TGC pT estimate
-     * @return Encoded TGC pT-value index
-     */
-    uint8_t estimatedPtValueIndex() const;
-    /**
-     * @brief Retrieve the software-side TGC pT estimate in GeV
-     * @return TGC pT estimate in 0.5 GeV bins
+     * @brief Retrieve the inherited encoded pT value in GeV
+     * @return Candidate pT in 0.5 GeV steps; zero denotes an invalid pT estimate
      */
     float ptValueGeV() const;
-    /**
-     * @brief Check whether the software-side encoded TGC pT estimate is valid
-     * @return True when the encoded pT estimate is valid
-     */
-    bool estimatedPtValueValid() const;
-    /**
-     * @brief Retrieve the detector side
-     * @return True for side A and false for side C
-     */
-    bool side() const;
-    /**
-     * @brief Retrieve the endcap flag
-     * @return One-bit endcap flag
-     */
-    uint8_t endcapFlag() const;
-    /**
-     * @brief Retrieve the TGC trigger-sector number
-     * @return Six-bit sector number
-     */
-    uint8_t sector() const;
     /**
      * @brief Check whether the candidate passed Inner Coincidence
      * @return True when the Inner Coincidence bit is set in CoinType
@@ -103,36 +77,6 @@ namespace xAOD
      * @param value Three-bit trigger-candidate identifier; zero denotes an empty candidate
      */
     void setTcId(uint8_t value);
-    /**
-     * @brief Set the passed pT-threshold index
-     * @param value Four-bit pT-threshold index
-     */
-    void setPassedPtThresholdIndex(uint8_t value);
-    /**
-     * @brief Set the software-side encoded TGC pT estimate
-     * @param value Encoded TGC pT-value index
-     */
-    void setEstimatedPtValueIndex(uint8_t value);
-    /**
-     * @brief Set the software-side encoded TGC pT estimate validity
-     * @param value True when the encoded pT estimate is valid
-     */
-    void setEstimatedPtValueValid(bool value);
-    /**
-     * @brief Set the detector side
-     * @param value True for side A and false for side C
-     */
-    void setSide(bool value);
-    /**
-     * @brief Set the endcap flag
-     * @param value One-bit endcap flag
-     */
-    void setEndcapFlag(uint8_t value);
-    /**
-     * @brief Set the TGC trigger-sector number
-     * @param value Six-bit sector number
-     */
-    void setSector(uint8_t value);
     /**
      * @brief Set the Inner Coincidence bit in CoinType
      * @param value New state of the Inner Coincidence bit
@@ -188,8 +132,6 @@ namespace xAOD
     static constexpr uint32_t NSW_BIT_MASK = 0xfffffff;
     /// Bit mask for the trigger-candidate identifier
     static constexpr uint8_t TC_ID_BIT_MASK = 0x7;
-    /// Bit mask for the passed pT-threshold index
-    static constexpr uint8_t PT_THRESHOLD_BIT_MASK = 0xf;
 
   };
 

@@ -16,11 +16,10 @@ conditions=$(python -c "from AthenaConfiguration.TestDefaults import defaultCond
 
 # RUN4 setup
 Sim_tf.py \
---CA \
 --conditionsTag "default:${conditions}" \
 --simulator 'FullG4MT' \
 --postInclude 'default:PyJobTransforms.UseFrontier' \
---preInclude 'EVNTtoHITS:Campaigns.PhaseIISimulation' \
+--preInclude 'EVNTtoHITS:Campaigns.MC23PhaseIISimulation' \
 --geometryVersion "default:${geometry}" \
 --inputEVNTFile "$Input" \
 --outputHITSFile "$Output" \

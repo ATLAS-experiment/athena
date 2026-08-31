@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # art-description: Trigger test for Run4 with ttbar mu=200
 # art-type: build
@@ -15,7 +15,7 @@ from AthenaConfiguration.TestDefaults import defaultConditionsTags
 run = MCBuildStep(
     menu='MC_pp_run4_v1',
     global_tag=defaultConditionsTags.RUN4_MC,
-    mc_campaign='Campaigns.PhaseIIPileUp200'
+    mc_campaign='Campaigns.MC23PhaseIIPileUp200'
 )
 run.input = 'ttbar_pu200_Run4'
 

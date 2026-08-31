@@ -17,7 +17,7 @@
 
 #include "xAODTruth/TruthParticleContainer.h"
 #include "xAODTruth/TruthVertexContainer.h"
-#include "MCTruthClassifier/MCTruthClassifier.h"
+#include "MCTruthClassifier/IMCTruthClassifier.h"
 #include "TruthUtils/HepMCHelpers.h"
 #include "TruthUtils/MagicNumbers.h"
 #include <unordered_set>

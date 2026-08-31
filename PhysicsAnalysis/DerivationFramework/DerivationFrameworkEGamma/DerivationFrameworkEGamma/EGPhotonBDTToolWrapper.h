@@ -14,7 +14,6 @@
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "EgammaAnalysisInterfaces/IAsgEGammaIsEMSelector.h"
 #include "EgammaAnalysisInterfaces/IPhotonObservableTool.h"
-#include "EgammaAnalysisInterfaces/IElectronPhotonShowerShapeFudgeTool.h"
 #include "GaudiKernel/ToolHandle.h"
 #include "xAODEgamma/EgammaContainer.h"
 //
@@ -34,12 +33,10 @@ namespace DerivationFramework {
   private:
     // selector tool
     ToolHandle<IAsgEGammaIsEMSelector> m_selectorTool{this, "PhotonBDTSelectionTool", "", "Selector tool",};
-    // photon observable tool (for calculating the BDT score)
-    ToolHandle<IPhotonObservableTool> m_observableTool{this, "PhotonObservableTool", "", "Observable tool",};
-    // shower shape correction tool
-    ToolHandle<IElectronPhotonShowerShapeFudgeTool> m_fudgeMCTool{ this, "EGammaFudgeMCTool", "", "Fudging tool" };
     // photon container name
     SG::ReadHandleKey<xAOD::EgammaContainer> m_ContainerName{ this, "ContainerName", "", "Input" };
+    // Fudged photon container name
+    SG::ReadHandleKey<xAOD::EgammaContainer> m_fudgedContainerName{ this, "FudgedContainerName", "", "Input with fudge factors applied" };
 
     // Write decoration handle keys
     // these are not really configuarable
@@ -47,8 +44,6 @@ namespace DerivationFramework {
       "decoratorPass", m_ContainerName, "", "" };
     SG::WriteDecorHandleKey<xAOD::EgammaContainer> m_decoratorIsEM{ this,
       "decoratorIsEM", m_ContainerName, "", "" };
-    SG::WriteDecorHandleKey<xAOD::EgammaContainer> m_decoratorScore{ this,
-      "decoratorScore", m_ContainerName, "", "" };
     Gaudi::Property<std::string> m_cut{ this, "CutType", "", "cut type" };
   };
 }

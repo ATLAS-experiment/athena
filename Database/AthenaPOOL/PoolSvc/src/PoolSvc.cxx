@@ -14,8 +14,6 @@
 
 #include "PathResolver/PathResolver.h"
 
-#include "CoralKernel/Context.h"
-
 #include "PersistentDataModel/Placement.h"
 #include "PersistentDataModel/Token.h"
 
@@ -30,16 +28,6 @@
 
 #include "StorageSvc/DbType.h"
 #include "StorageSvc/DbPrint.h"
-
-#include "RelationalAccess/ConnectionService.h"
-#include "RelationalAccess/IConnectionServiceConfiguration.h"
-#include "RelationalAccess/IWebCacheControl.h"
-#include "RelationalAccess/IWebCacheInfo.h"
-#include "RelationalAccess/ILookupService.h"
-#include "RelationalAccess/IDatabaseServiceSet.h"
-#include "RelationalAccess/IDatabaseServiceDescription.h"
-
-#include "DBReplicaSvc/IDBReplicaSvc.h"
 
 #include <cstdlib>
 #include <cstring>
@@ -85,44 +73,7 @@ StatusCode PoolSvc::initialize() {
    if (!allGood) {
       return(StatusCode::FAILURE);
    }
-   m_context = &coral::Context::instance();
-   if (m_context == nullptr) {
-      ATH_MSG_FATAL("Failed to access CORAL Context");
-      return(StatusCode::FAILURE);
-   }
-   coral::ConnectionService conSvcH;
-   coral::IConnectionServiceConfiguration& csConfig = conSvcH.configuration();
-   csConfig.setConnectionRetrialPeriod(m_retrialPeriod);
-   csConfig.setConnectionRetrialTimeOut(m_retrialTimeOut);
-   if (m_connClean) {
-      csConfig.enablePoolAutomaticCleanUp();
-      csConfig.setConnectionTimeOut(m_timeOut);
-   } else {
-      csConfig.disablePoolAutomaticCleanUp();
-      csConfig.setConnectionTimeOut(0);
-   }
-   ATH_MSG_INFO("Set connectionsvc retry/timeout/IDLE timeout to "
-	   << m_retrialPeriod
-	   << "/"
-	   << m_retrialTimeOut
-	   << "/"
-	   << m_timeOut
-	   << " seconds with connection cleanup "
-	   << (csConfig.isPoolAutomaticCleanUpEnabled() ? "enabled" : "disabled"));
-   // set Frontier web cache compression level
-   coral::IWebCacheControl& webCache = conSvcH.webCacheControl();
-   webCache.setCompressionLevel(m_frontierComp);
-   ATH_MSG_INFO("Frontier compression level set to " << webCache.compressionLevel());
-   if (m_sortReplicas) {
-      // set replica sorter - get service
-      ServiceHandle<IDBReplicaSvc> replicasvc("DBReplicaSvc", name());
-      if (replicasvc.retrieve().isSuccess()) {
-         csConfig.setReplicaSortingAlgorithm(*replicasvc);
-         ATH_MSG_INFO("Successfully setup replica sorting algorithm");
-      } else {
-         ATH_MSG_WARNING("Cannot setup replica sorting algorithm");
-      }
-   }
+ 
    MSG::Level athLvl = msg().level();
    ATH_MSG_DEBUG("OutputLevel is " << (int)athLvl);
    pool::DbPrintLvl::setLevel(athLvl);
@@ -143,7 +94,7 @@ StatusCode PoolSvc::io_reinit() {
    }
    std::vector<std::string> readcat = m_readCatalog.value();
    for (std::size_t icat = 0, imax = readcat.size(); icat < imax; icat++) {
-      if (readcat[icat].compare(0, 16, "xmlcatalog_file:") == 0) {
+      if (readcat[icat].starts_with("xmlcatalog_file:")) {
          std::string fileName = readcat[icat].substr(16);
          if (iomgr->io_contains(this, fileName)) {
             if (!iomgr->io_retrieve(this, fileName).isSuccess()) {
@@ -156,7 +107,7 @@ StatusCode PoolSvc::io_reinit() {
    }
    // all good... copy over.
    m_readCatalog = readcat;
-   if (m_writeCatalog.value().compare(0, 16, "xmlcatalog_file:") == 0) {
+   if (m_writeCatalog.value().starts_with("xmlcatalog_file:")) {
       std::string fileName = m_writeCatalog.value().substr(16);
       if (iomgr->io_contains(this, fileName)) {
          if (!iomgr->io_retrieve(this, fileName).isSuccess()) {
@@ -188,7 +139,7 @@ StatusCode PoolSvc::setupPersistencySvc() {
       ATH_MSG_FATAL("Failed to enable thread safety in ROOT via PersistencySvc.");
       return(StatusCode::FAILURE);
    }
-   m_contextMaxFile.insert(std::pair<unsigned int, int>(IPoolSvc::kInputStream, m_dbAgeLimit));
+   m_contextMaxFile.try_emplace(IPoolSvc::kInputStream, m_dbAgeLimit.value());
    if (!connect(Io::READ, IPoolSvc::kInputStream).isSuccess()) {
       ATH_MSG_FATAL("Failed to connect Input PersistencySvc.");
       return(StatusCode::FAILURE);
@@ -267,9 +218,9 @@ Token* PoolSvc::registerForWrite(const Placement* placement,
    unsigned int contextId = IPoolSvc::kOutputStream;
    const std::string& auxString = placement->auxString();
    if (!auxString.empty()) {
-      if (auxString.compare(0, 6, "[CTXT=") == 0) {
+      if (auxString.starts_with("[CTXT=")) {
          ::sscanf(auxString.c_str(), "[CTXT=%08X]", &contextId);
-      } else if (auxString.compare(0, 8, "[CLABEL=") == 0) {
+      } else if (auxString.starts_with("[CLABEL=")) {
          contextId = this->getOutputContext(auxString);
       }
       if (contextId >= m_dbSessionVec.size()) {
@@ -289,9 +240,9 @@ void PoolSvc::setObjPtr(void*& obj, const Token* token) {
    unsigned int contextId = IPoolSvc::kInputStream;
    const std::string& auxString = token->auxString();
    if (!auxString.empty()) {
-      if (auxString.compare(0, 6, "[CTXT=") == 0) {
+      if (auxString.starts_with("[CTXT=")) {
          ::sscanf(auxString.c_str(), "[CTXT=%08X]", &contextId);
-      } else if (auxString.compare(0, 8, "[CLABEL=") == 0) {
+      } else if (auxString.starts_with("[CLABEL=")) {
          contextId = this->getInputContext(auxString);
       }
       if (contextId >= m_dbSessionVec.size()) {
@@ -317,7 +268,7 @@ unsigned int PoolSvc::getOutputContext(const std::string& label) {
    std::lock_guard<CallMutex> lock(m_pool_mut);
    if (m_mainOutputLabel.empty()) {
       m_mainOutputLabel = label;
-      m_outputContextLabel.insert(std::pair<std::string, unsigned int>(label, IPoolSvc::kOutputStream));
+      m_outputContextLabel.try_emplace(label, IPoolSvc::kOutputStream);
    }
    if (label == m_mainOutputLabel || label.empty()) {
       return(IPoolSvc::kOutputStream);
@@ -329,7 +280,7 @@ unsigned int PoolSvc::getOutputContext(const std::string& label) {
    const unsigned int id = m_dbSessionVec.size();
    m_dbSessionVec.push_back(pool::createSession(*m_catalog).release());
    m_pers_mut.push_back(new CallMutex);
-   m_outputContextLabel.insert(std::pair<std::string, unsigned int>(label, id));
+   m_outputContextLabel.try_emplace(label, id);
    return(id);
 }
 //__________________________________________________________________________
@@ -352,9 +303,9 @@ unsigned int PoolSvc::getInputContext(const std::string& label, unsigned int max
       return(IPoolSvc::kInputStream);
    }
    if (!label.empty()) {
-      m_inputContextLabel.insert(std::pair<std::string, unsigned int>(label, id));
+      m_inputContextLabel.try_emplace(label, id);
    }
-   m_contextMaxFile.insert(std::pair<unsigned int, int>(id, maxFile));
+   m_contextMaxFile.try_emplace(id, maxFile);
    return(id);
 }
 //__________________________________________________________________________
@@ -367,30 +318,30 @@ unsigned int PoolSvc::getInputContextMapSize() const {
    std::lock_guard<CallMutex> lock(m_pool_mut);
    return(m_inputContextLabel.size());
 }
-//__________________________________________________________________________
-const coral::Context* PoolSvc::context() const {
-   return(m_context);
-}
-//__________________________________________________________________________
-void PoolSvc::loadComponent(const std::string& compName) {
-   m_context->loadComponent(compName);
-}
-//__________________________________________________________________________
+
 void PoolSvc::setShareMode(bool shareCat) {
    m_shareCat = shareCat;
 }
 //__________________________________________________________________________
-const pool::IFileCatalog* PoolSvc::catalog() const {
-   return(m_catalog);
+void PoolSvc::startCatalog() {
+   if (m_catalog != nullptr) {
+      m_catalog->start();
+   }
+}
+//__________________________________________________________________________
+void PoolSvc::commitCatalog() {
+   if (m_catalog != nullptr) {
+      m_catalog->commit();
+   }
 }
 //__________________________________________________________________________
 void PoolSvc::lookupBestPfn(const std::string& token, std::string& pfn, std::string& type) const {
    std::string dbID;
-   if (token.compare(0, 4, "PFN:") == 0) {
+   if (token.starts_with("PFN:")) {
       m_catalog->lookupFileByPFN(token.substr(4), dbID, type); // PFN -> FID
-   } else if (token.compare(0, 4, "LFN:") == 0) {
-      m_catalog->lookupFileByLFN(token.substr(4), dbID); // LFN -> FID
-   } else if (token.compare(0, 4, "FID:") == 0) {
+   } else if (token.starts_with("LFN:")) {
+      dbID = m_catalog->lookupLFN(token.substr(4)); // LFN -> FID
+   } else if (token.starts_with("FID:")) {
       dbID = token.substr(4);
    } else if (token.size() > Guid::stringSize()) { // full token
       Token tok;
@@ -430,7 +381,7 @@ pool::ICollection* PoolSvc::createCollection(const std::string& connection,
    ContextLock lock(contextId, m_pool_mut, m_pers_mut);
    // Check POOL FileCatalog entry.
    bool insertFile = false;
-   if (connection.compare(0, 4, "PFN:") == 0) {
+   if (connection.starts_with("PFN:")) {
       std::string fid, fileType;
       m_catalog->lookupFileByPFN(connection.substr(4), fid, fileType);
       if (fid.empty()) { // No entry in file catalog
@@ -496,7 +447,7 @@ pool::ICollection* PoolSvc::createCollection(const std::string& connection,
    }
    // For multithreaded processing (with multiple events in flight),
    // increase virtual tree size to accomodate back reads
-   if (m_useROOTMaxTree && Gaudi::Concurrency::ConcurrencyFlags::numConcurrentEvents() > 1) {
+   if (m_useROOTMaxTree && contextId == IPoolSvc::kInputStream && Gaudi::Concurrency::ConcurrencyFlags::numConcurrentEvents() > 1) {
       if (!this->setAttribute("TREE_MAX_VIRTUAL_SIZE", "-1", pool::ROOT_StorageType.type(), connection.substr(4), "CollectionTree", IPoolSvc::kInputStream).isSuccess()) {
          ATH_MSG_WARNING("Failed to increase maximum virtual TTree size.");
       }
@@ -762,7 +713,7 @@ StatusCode PoolSvc::setAttribute(const std::string& optName,
    }
    bool retError = false;
    std::string objName;
-   bool hasTTreeName = (contName.length() > 6 && contName.compare(0, 6, "TTree=") == 0);
+   bool hasTTreeName = contName.starts_with("TTree=");
    if (contName.empty() || hasTTreeName || m_dbSessionVec[contextId]->transaction().type() == Io::READ) {
       objName = hasTTreeName ? contName.substr(6) : contName;
       if( !isNumber(data) ) {
@@ -807,72 +758,14 @@ StatusCode PoolSvc::setAttribute(const std::string& optName,
    }
    return(StatusCode::SUCCESS);
 }
-//__________________________________________________________________________
-StatusCode PoolSvc::setFrontierCache(const std::string& conn) {
-   std::lock_guard<CallMutex> lock(m_pool_mut);
-   ATH_MSG_VERBOSE("setFrontierCache called for connection:" << conn);
-   // setup the Frontier cache information for the given logical or physical connection string
-   // first determine if the connection is logical (no ':')
-   std::vector<std::string> physcons;
-   if (conn.find(':') == std::string::npos) {
-      // if logical, have to lookup list of physical replicas, and consider each
-      // need the CORAL ILookupSvc interface which must be loaded if needed
-      const std::string lookSvcStr("CORAL/Services/XMLLookupService");
-      coral::IHandle<coral::ILookupService> lookSvcH = m_context->query<coral::ILookupService>();
-      if (!lookSvcH.isValid()) {
-         m_context->loadComponent(lookSvcStr);
-         lookSvcH = m_context->query<coral::ILookupService>();
-      }
-      if (!lookSvcH.isValid()) {
-         ATH_MSG_ERROR("Cannot locate " << lookSvcStr);
-         return(StatusCode::FAILURE);
-      }
-      coral::IDatabaseServiceSet* dbset = lookSvcH->lookup(conn, coral::ReadOnly);
-      if (dbset != nullptr) {
-         for (int irep = 0, nrep = dbset->numberOfReplicas(); irep < nrep; ++irep) {
-	    const std::string pcon = dbset->replica(irep).connectionString();
-	    if (pcon.compare(0, 9, "frontier:") == 0) {
-               physcons.push_back(std::move(pcon));
-            }
-         }
-         delete dbset; dbset = nullptr;
-      } else {
-         ATH_MSG_DEBUG("setFrontierCache: Could not find any replicas for " << conn);
-      }
-   } else if (conn.compare(0, 9, "frontier:") == 0) {
-      physcons.push_back(conn);
-   }
-   // check if any replicas will try and use frontier
-   if (physcons.size() == 0) {
-      return(StatusCode::SUCCESS);
-   }
-   coral::ConnectionService conSvcH;
-   // for each frontier replica, define the web cache info
-   // get the WebCacheControl interface via ConnectionSvc
-   // note ConnectionSvc should already be loaded by initialize
-   coral::IWebCacheControl& webCache = conSvcH.webCacheControl();
-   for (const auto& physcon : physcons) {
-      const auto& refreshList = m_frontierRefresh.value();
-      if (std::find(refreshList.begin(), refreshList.end(), physcon) == refreshList.end()
-          && std::find(refreshList.begin(), refreshList.end(), conn) == refreshList.end()) {
-         // set that a table DUMMYTABLE should be refreshed - indicates that everything
-         // else in the schema should not be
-         webCache.refreshTable(physcon, "DUMMYTABLE");
-      } else {
-         // set the schema to be refreshed
-         webCache.refreshSchemaInfo(physcon);
-      }
-      ATH_MSG_DEBUG("Cache flag for connection " << physcon << " set to " << webCache.webCacheInfo(physcon).isSchemaInfoCached());
-   }
-   return(StatusCode::SUCCESS);
-}
+
 //__________________________________________________________________________
 pool::IFileCatalog* PoolSvc::createCatalog() {
    pool::IFileCatalog* ctlg = new pool::IFileCatalog;
    ctlg->removeCatalog("*");
    for (auto& catalog : m_readCatalog.value()) {
       ATH_MSG_DEBUG("POOL ReadCatalog is " << catalog);
-      if (catalog.compare(0, 8,"apcfile:") == 0 || catalog.compare(0, 7, "prfile:") == 0) {
+      if (catalog.starts_with("apcfile:") || catalog.starts_with("prfile:")) {
          std::string::size_type cpos = catalog.find(':');
          // check for file accessed via ATLAS_POOLCOND_PATH
          std::string file = poolCondPath(catalog.substr(cpos + 1));
@@ -923,11 +816,11 @@ std::unique_ptr<pool::IDatabase> PoolSvc::getDbHandle(unsigned int contextId, co
          return(nullptr);
       }
    }
-   if (dbName.compare(0, 4,"PFN:") == 0) {
+   if (dbName.starts_with("PFN:")) {
       return sesH->databaseHandle(dbName.substr(4), pool::DatabaseSpecification::PFN);
-   } else if (dbName.compare(0, 4, "LFN:") == 0) {
+   } else if (dbName.starts_with("LFN:")) {
       return sesH->databaseHandle(dbName.substr(4), pool::DatabaseSpecification::LFN);
-   } else if (dbName.compare(0, 4,"FID:") == 0) {
+   } else if (dbName.starts_with("FID:")) {
       return sesH->databaseHandle(dbName.substr(4), pool::DatabaseSpecification::FID);
    }
    return sesH->databaseHandle(dbName, pool::DatabaseSpecification::PFN);

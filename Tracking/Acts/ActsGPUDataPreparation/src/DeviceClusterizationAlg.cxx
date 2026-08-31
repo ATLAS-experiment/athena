@@ -29,10 +29,6 @@ StatusCode DeviceClusterizationAlg::initialize()
   ATH_CHECK(detStore()->retrieve(m_deviceDesign, m_deviceDesignObjectName.value()));
   ATH_CHECK(detStore()->retrieve(m_deviceCond, m_deviceCondObjectName.value()));
 
-  // for debug prints only (size of device buffers)
-  ATH_CHECK(m_copy.retrieve());
-
-
   ATH_MSG_DEBUG("Successfully initialized");
   return StatusCode::SUCCESS;
 }
@@ -47,15 +43,11 @@ StatusCode DeviceClusterizationAlg::execute(const EventContext& ctx) const
   ATH_MSG_DEBUG("Read traccc cells from '"
                          << m_inputCellsKey.key() << "'");
 
-  ATH_MSG_DEBUG("Receiving " << (m_copy->copy(ctx))->get_size(*inputTracccCells) << " cells.");
-
   // ---- 2. Get traccc clusterization alg ---------------------------------------------
-  auto clustering_pair = m_clusteringAlgProviderTool->getClusterizationAlgorithm(ctx);
-  std::shared_ptr<const traccc::device::clusterization_algorithm> clustering_alg = clustering_pair.second;
+  auto clustering_alg = m_clusteringAlgProviderTool->getClusterizationAlgorithm(ctx);
 
   // ---- 2.5 Retrieve the sorting algorithm ---------------------------------------------
-  auto sorting_pair = m_clusteringAlgProviderTool->getSortingAlgorithm(ctx);
-  std::shared_ptr<const IDeviceClusterizationAlgProviderTool::sorting_algorithm_type> sorting_alg = sorting_pair.second;
+  auto sorting_alg = m_clusteringAlgProviderTool->getSortingAlgorithm(ctx);
 
   // ---- 3. Run traccc clusterization ---------------------------------------------
   traccc::edm::silicon_cluster_collection::buffer cluster_gpu_buffer;
@@ -76,7 +68,7 @@ StatusCode DeviceClusterizationAlg::execute(const EventContext& ctx) const
   auto sortedTracccMeasurements =
       (*sorting_alg)(measurements_gpu_buffer);
 
-  ATH_MSG_DEBUG("Reconstructed " << (m_copy->copy(ctx))->get_size(measurements_gpu_buffer) << " measurements.");
+  ATH_MSG_DEBUG("Reconstructed " << clustering_alg.copy().get_size(measurements_gpu_buffer) << " measurements.");
 
   // ---- 4. Write output traccc measurements to StoreGate -------------------------
   auto outputTracccMeas = SG::makeHandle(m_outputMeasKey, ctx);

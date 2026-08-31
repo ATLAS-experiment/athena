@@ -2,15 +2,7 @@
   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-#include <iostream>
-#include <exception>
-#include <cassert>
-#include <string>
-#include <map>
-#include <sstream>
-#include <algorithm>
-#include <cmath>
-#include <limits>
+
 
 #include <TFile.h>
 #include <TObjString.h>
@@ -19,6 +11,15 @@
 
 #include "egammaLayerRecalibTool/egammaLayerRecalibTool.h"
 #include "xAODEgamma/EgammaxAODHelpers.h"
+
+#include <iostream>
+#include <stdexcept>
+#include <cassert>
+#include <map>
+#include <sstream>
+#include <algorithm>
+#include <cmath>
+#include <limits>
 
 namespace {
 const float VALUE_OVERFLOW = std::numeric_limits<float>::max();
@@ -1176,10 +1177,10 @@ void egammaLayerRecalibTool::clear_corrections()
 
 
 // helper
-std::map<std::string, std::string> parse(const std::string& list)
+std::map<std::string, std::string, std::less<>> parse(const std::string& list)
 {
   std::cout << "list: '" << list << "'" << std::endl;
-  std::map<std::string, std::string> result;
+  std::map<std::string, std::string, std::less<>> result;
   TIter next(TString(list).Tokenize(","));
   while (TObjString* sObj = (TObjString*) next())
     {
@@ -1212,7 +1213,7 @@ std::map<std::string, std::string> parse(const std::string& list)
 std::pair<std::string, egammaLayerRecalibTool*>
 egammaLayerRecalibTool::create(const std::string& type, const std::string& args)
 {
-  std::map<std::string, std::string> args_map = parse(args);
+  auto args_map = parse(args);
   egammaLayerRecalibTool* tool = new egammaLayerRecalibTool("egammaLayerRecalibTool", "");
   std::string name = "";
   std::string amount_name = "";
@@ -1221,8 +1222,8 @@ egammaLayerRecalibTool::create(const std::string& type, const std::string& args)
   GetAmountBase* amount_getter = nullptr;
   InputModifier* modifier = nullptr;
 
-  if (args_map.find("amount") != args_map.end()) {
-    std::string amount_str = args_map["amount"];
+  if (auto pa = args_map.find("amount"); pa != args_map.end()) {
+    std::string amount_str = pa->second;
     bool perc = false;
     if (amount_str.back()=='%') {
       perc = true;
@@ -1237,16 +1238,16 @@ egammaLayerRecalibTool::create(const std::string& type, const std::string& args)
     std::replace(amount_name.begin(), amount_name.end(), '-', 'n');
     std::replace(amount_name.begin(), amount_name.end(), '.', 'p');
   }
-  else if (args_map.find("name") != args_map.end()) {
-    name = args_map["name"];
+  else if (auto pn = args_map.find("name"); pn != args_map.end()) {
+    name = pn->second;
   }
   else if (args_map.find("histo") != args_map.end()) {
     int dim = 0;
-    if (args_map.find("file") == args_map.end()) {
+    if (not args_map.contains("file")) {
       std::cerr << "with histo you must specify file" << std::endl;
       assert(false);
     }
-    if (args_map.find("formulax") != args_map.end()) dim = 1;
+    if (args_map.contains("formulax") ) dim = 1;
 
     if (dim == 0)
       {

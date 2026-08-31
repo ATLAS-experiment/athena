@@ -1,11 +1,12 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef TABLE_UTILS_H
 #define TABLE_UTILS_H
 
 #include <array>
 #include <string>
+#include <string_view>
 #include <cassert>
 #include <iomanip>
 #include <ostream>
@@ -154,7 +155,7 @@ namespace TableUtils {
                        Range2D<T_Counter>   counter,
                        const Range<std::string>& row_label,
                        const Range<std::string>& column_label,
-                       const std::string &top_left_label,
+                       std::string_view top_left_label,
                        const std::string &label_prefix,
                        const std::size_t column_width,
                        const std::size_t min_label_width,
@@ -553,7 +554,7 @@ template <typename T, std::size_t Nrows, std::size_t Ncolumns>
 TableUtils::MultiColumnTable<T> makeTable(const std::array<std::array<T, Ncolumns>, Nrows> &counter,
                                           const std::array<std::string, Nrows>    &row_label,
                                           const std::array<std::string, Ncolumns> &column_label,
-                                          const std::string &top_left_label="") {
+                                          std::string_view top_left_label="") {
    return TableUtils::MultiColumnTable<T> {
       TableUtils::Range2D<T>         {!counter.empty() ? counter[0].data() : nullptr,
                                       counter.size(), column_label.size(),
@@ -562,7 +563,7 @@ TableUtils::MultiColumnTable<T> makeTable(const std::array<std::array<T, Ncolumn
                                       1u}, // offset between columns
       TableUtils::Range<std::string> {row_label.data(),    row_label.size(),   1u},
       TableUtils::Range<std::string> {column_label.data(), column_label.size(),1u},
-      top_left_label
+      std::string{top_left_label}
    };
 }
 
@@ -573,7 +574,7 @@ TableUtils::MultiColumnTable<T> makeTable(const std::vector<T> &counter,
                                           std::size_t row_stride,
                                           const std::vector<std::string>    &row_label,
                                           const std::vector<std::string> &column_label,
-                                          const std::string &top_left_label="") {
+                                          std::string_view top_left_label="") {
    if (start_idx + (row_label.size()-1) * row_stride >= counter.size() || row_stride < column_label.size()) {
       std::stringstream msg;
       msg << "Counter dimension and label dimensions (" << row_label.size() << " * " << column_label.size()
@@ -601,7 +602,7 @@ TableUtils::MultiColumnTable<T> makeTable(const std::vector<T> &counter,
                                       1u},                   // offset between columns
       TableUtils::Range<std::string> {row_label.data(),    row_label.size() },
       TableUtils::Range<std::string> {column_label.data(), column_label.size()},
-      top_left_label
+      std::string{top_left_label}
    };
 }
 
@@ -613,7 +614,7 @@ TableUtils::MultiColumnTable<T> makeTable(const std::vector<std::array<T,N> > &c
                                           std::size_t column_stride,
                                           const std::vector<std::string>    &row_label,
                                           const std::vector<std::string> &column_label,
-                                          const std::string &top_left_label="") {
+                                          std::string_view top_left_label="") {
    if (start_row_idx + (row_label.size()-1) * row_stride >= counter.size()*N
        || start_column_idx + (column_label.size()-1) * column_stride >= counter.size()*N
        || (row_stride*row_label.size()>column_stride && column_stride*column_label.size()>row_stride) ) {
@@ -651,7 +652,7 @@ TableUtils::MultiColumnTable<T> makeTable(const std::vector<std::array<T,N> > &c
                                       column_stride},                   // offset between columns
       TableUtils::Range<std::string> {row_label.data(),    row_label.size() },
       TableUtils::Range<std::string> {column_label.data(), column_label.size()},
-      top_left_label};
+      std::string{top_left_label}};
 }
 
 
@@ -660,7 +661,7 @@ template <typename T>
 TableUtils::MultiColumnTable<T> makeTable(const std::vector<T> &counter,
                                           const std::vector<std::string> &row_label,
                                           const std::vector<std::string> &column_label,
-                                          const std::string &top_left_label="") {
+                                          std::string_view top_left_label="") {
    return makeTable(counter, 0u, column_label.size(), row_label, column_label, top_left_label);
 }
 

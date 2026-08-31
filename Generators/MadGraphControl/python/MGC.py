@@ -324,10 +324,9 @@ class MGControl:
 
     def _add_seed_and_beam_settings(self):
         """Add seed and beam settings to runCardDict."""
-        # Check if the run arguments are already implemented.
-        if 'iseed' not in self.runCardDict: #if there is no setting in self.runCardDict for iseed
-            self.runCardDict['iseed'] = self.random_seed
-        if not self.isNLO and 'python_seed' not in self.runCardDict: #If the process is LO and there is no 'python_seed' setting in self.runCardDict
+        # Overwrite the run-card default seed with transform seed
+        self.runCardDict['iseed'] = self.random_seed
+        if not self.isNLO:
             self.runCardDict['python_seed'] = self.random_seed
         if 'beamenergy' in self.runCardDict: #if the beam energy is defined in self.runCardDict
             raise RuntimeError('Do not set beamenergy in the run card. Use flags (or runArgs during migration) instead.')
@@ -763,22 +762,13 @@ class ParamCard:
                     continue #temp while I write function to get DECAY params
                 else:
                     l = line.strip()
-                    if len(l.split(' ',3)) >= 4:
-                        if l.split(' ',3)[1] == '' and not l.split(' ',3)[2].strip().startswith('#'): #checks if the the parameter has numerous keys
-                            key = l.split(' ',3)[0] +' ' +l.split(' ',3)[1] + l.split(' ',3)[2]
-                            value = l.split(' ',3)[3]
-                        else:
-                            key = l.split(' ',3)[0] +' ' +l.split(' ',3)[1]
-                            value = l.split(' ',3)[2] + ' '+ l.split(' ',3)[3]
-                    elif len(l.split(' ',3)) == 3:
-                        key = l.split(' ',3)[0]
-                        value = l.split(' ',3)[1] + ' '+ l.split(' ',3)[2]
-                    elif len(l.split(' ',3)) == 2:
-                        key = l.split(' ',3)[0]
-                        value = l.split(' ',3)[1]
-                    else:
-                        key = l.split(' ',3)[0]
-                        value = None
+                    data, separator, comment = l.partition('#')
+                    columns = data.split()
+                    if len(columns) < 2:
+                        continue
+                    key, value = ' '.join(columns[:-1]), columns[-1]
+                    if separator:
+                        value += ' # ' + comment.strip() + ' '
 
                     setting.update({key.strip() : value})
             
@@ -896,7 +886,7 @@ class ParamCard:
                 self.paramCardDict[block] = params[block]
                 
                          
-    def write_paramCard(self):
+    def write_paramCard(self, output_location=None):
         """Write out paramCardDict to disk. 
         The function will copy the layout and format from the default card. 
         """
@@ -907,7 +897,8 @@ class ParamCard:
         with open(self.paramCard_default_loc,'r') as f:
             oldCard = f.read()
 
-        newCard = open(self.paramCard_loc,'w')
+        # Write the output to our standard file spot, or to a new location if requested
+        newCard = open(self.paramCard_loc if output_location is None else output_location,'w')
         dict_blocks = [v.lower() for v in self.paramCardDict]
 
         oldCard_blocks = oldCard.split('\n\n')
@@ -981,14 +972,7 @@ class ParamCard:
                     if name.lower() == 'decay':
                         continue
                     else:
-                        if len(l.split(' ',3)) >= 4:
-                            ID = (l.split(' ',3)[0] +' ' +l.split(' ',3)[1]).strip()
-                        elif len(l.split(' ',3)) == 3:
-                            ID = l.split(' ',3)[0].strip()
-                        elif len(l.split(' ',3)) == 2:
-                            ID = l.split(' ',3)[0].strip()
-                        else:
-                            ID = l.split(' ',3)[0].strip()
+                        ID = ' '.join(l.partition('#')[0].split()[:-1])
                         newCard.write(f"    {ID} {self.paramCardDict[name][ID]}\n")
                         nParams.append(ID)
                     
@@ -1010,5 +994,4 @@ class ParamCard:
                     elif key is None or key.strip() == '':
                         continue
                     
-        mglog.info("Finished writing paramCardDict to param_card.dat")
-
+        mglog.info("Finished writing paramCardDict to " + ("param_card.dat" if output_location is None else output_location))

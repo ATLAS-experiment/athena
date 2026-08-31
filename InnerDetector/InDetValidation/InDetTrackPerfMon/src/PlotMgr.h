@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef INDETTRACKPERFMON_PLOTMGR_H
@@ -25,6 +25,7 @@
 
 /// STL include(s)
 #include <string>
+#include <string_view>
 #include <vector>
 
 
@@ -49,8 +50,8 @@ namespace IDTPM {
     /// Retrieve a single histogram definition, given the unique string identifier
     SinglePlotDefinition retrieveDefinition(
         const std::string& identifier,
-        const std::string& folderOverride = "",
-        const std::string& nameOverride = "" ) const;
+        std::string_view folderOverride = "",
+        std::string_view nameOverride = "" ) const;
 
     /// --------------------------
     /// --- Book plots methods ---
@@ -64,8 +65,8 @@ namespace IDTPM {
     StatusCode retrieveAndBook(
         P*& pHisto,
         const std::string& identifier,
-        const std::string& folderOverride = "",
-        const std::string& nameOverride = "" )
+        std::string_view folderOverride = "",
+        std::string_view nameOverride = "" )
     {
       const SinglePlotDefinition& def =
           retrieveDefinition( identifier, folderOverride, nameOverride );

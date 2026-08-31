@@ -15,9 +15,10 @@ namespace MuonPRDTest {
             m_key{containerKey},
             m_name{outName}{
 
-        for (const auto summary : {"nPrecisionOutliers", "nTriggerPhiOutliers", "nTriggerEtaOutliers",
+        for (const auto & summary : {"nPrecisionOutliers", "nTriggerPhiOutliers", "nTriggerEtaOutliers",
                                    "nPrecisionHoles", "nTriggerPhiHoles", "nTriggerEtaHoles"}) {
-            auto br = std::make_unique<AuxElementBranch<std::uint8_t>>(tree, std::format("{:}_{:}", outName, summary));
+            const std::string s = std::format("{:}_{:}", outName, summary);  
+            auto br = std::make_unique<AuxElementBranch<std::uint8_t>>(tree, s, summary);
             br->setDefault(0);
             addVariable(std::move(br));
         }

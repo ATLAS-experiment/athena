@@ -21,10 +21,10 @@
 #include "ActsCalibrators/SourceLinkHash.h"
 
 // ActsTrk
-#include "ActsCalibBase/CalibrationContext.h"
+
 #include "ActsEvent/TrackContainer.h"
 #include "ActsGeometry/ActsDetectorElement.h"
-#include "ActsGeometryInterfaces/GeometryContext.h"
+
 #include "ActsEvent/ExpectedHitUtils.h"
 #include "ActsEvent/TrackContainerUtils.h"
 #include "src/detail/TrackFindingMeasurements.h"
@@ -73,7 +73,6 @@ namespace ActsTrk
 
     ATH_CHECK(TrackFindingBaseAlg::initialize());
     ATH_MSG_DEBUG("   " << m_skipDuplicateSeeds);
-    ATH_MSG_DEBUG("   " << m_refitSeeds);
     ATH_MSG_DEBUG("   " << m_statEtaBins);
     ATH_MSG_DEBUG("   " << m_seedLabels);
     ATH_MSG_DEBUG("   " << m_dumpAllStatEtaBins);
@@ -93,6 +92,10 @@ namespace ActsTrk
 
     m_storeDestinies = not m_seedDestiny.empty();
     ATH_CHECK(m_seedDestiny.initialize(m_storeDestinies));
+
+    if (m_paramEstimationTool.size() != m_seedContainerKeys.size()) {
+      ATH_MSG_FATAL("There are " << m_seedContainerKeys.size() << " SeedContainerKeys. Each needs its own TrackParamsEstimationTool, but there are " << m_paramEstimationTool.size());
+    }
 
     if (m_useTopSpRZboundary.size() != 2)
       {
@@ -187,7 +190,7 @@ namespace ActsTrk
       ATH_MSG_DEBUG("Create " << uncalibratedMeasurementContainers[icontainer]->size() << " source links from measurements in " << m_uncalibratedMeasurementContainerKeys[icontainer].key());
       measurements.addMeasurements(icontainer,
                                    *uncalibratedMeasurementContainers[icontainer],
-                                   *m_trackingGeometryTool->surfaceIdMap(),
+                                   *m_trackingGeometrySvc->surfaceIdMap(),
                                    m_forceTrackOnSeed ? &measurementIndex : nullptr);
     }
 
@@ -205,12 +208,10 @@ namespace ActsTrk
     for (std::size_t icontainer = 0; icontainer < seedContainers.size(); ++icontainer)
       {
         duplicateSeedDetector.addSeeds(icontainer, *seedContainers[icontainer], measurementIndex,
-                                       m_paramEstimationTool->spacePointIndicesFun(),
+                                       m_paramEstimationTool[icontainer]->spacePointIndicesFun(),
                                        [this,icontainer](const ActsTrk::Seed& seed) -> bool {
                                          const bool reverseSearch = m_autoReverseSearch && shouldReverseSearch(seed);
-                                         const bool refitSeeds = icontainer < m_refitSeeds.size() && m_refitSeeds[icontainer];
-                                         const bool useTopSp = reverseSearch && !refitSeeds;
-                                         return useTopSp;
+                                         return m_paramEstimationTool[icontainer]->estimateFromTopSp(reverseSearch);
                                        });
       }
 
@@ -253,10 +254,10 @@ namespace ActsTrk
     event_stat.resize(m_stat.size());
 
     DetectorContextHolder detContext {
-      .geometry = m_trackingGeometryTool->getGeometryContext(ctx).context(),
-      .magField = m_extrapolationTool->getMagneticFieldContext(ctx),
+      .geometry = m_ctxProvider.getGeometryContext(ctx),
+      .magField = m_ctxProvider.getMagneticFieldContext(ctx),
       // CalibrationContext converter not implemented yet.
-      .calib = getCalibrationContext(ctx)
+      .calib = m_ctxProvider.getCalibrationContext(ctx)
     };
 
     detail::SharedHitCounter sharedHits;
@@ -454,8 +455,8 @@ namespace ActsTrk
 
     // Function for Estimate Track Parameters
     auto retrieveSurfaceFunction =
-       [detectorElementToGeometryIdMapPtr=m_trackingGeometryTool->surfaceIdMap(),
-        actsTrackingGeometryPtr=m_trackingGeometryTool->trackingGeometry().get()] (const ActsTrk::Seed& seed, bool useTopSp) -> const Acts::Surface& {
+       [detectorElementToGeometryIdMapPtr=m_trackingGeometrySvc->surfaceIdMap(),
+        actsTrackingGeometryPtr=m_trackingGeometrySvc->trackingGeometry().get()] (const ActsTrk::Seed& seed, bool useTopSp) -> const Acts::Surface& {
         const xAOD::SpacePoint* sp = useTopSp ? seed.sp().back() : seed.sp().front();
         const xAOD::UncalibratedMeasurement* meas = useTopSp ? sp->measurements().back() : sp->measurements().front();
         const auto geoid_iter = detectorElementToGeometryIdMapPtr->find(ActsTrk::makeDetectorElementKey(meas->type(), meas->identifierHash()));
@@ -479,21 +480,59 @@ namespace ActsTrk
         tracksContainerTemp.clear();
 
         const bool reverseSearch = m_autoReverseSearch && shouldReverseSearch(seed);
-        const bool refitSeeds = typeIndex < m_refitSeeds.size() && m_refitSeeds[typeIndex];
-        const bool useTopSp = reverseSearch && !refitSeeds;
 
         // Check if the seed is a duplicate seed
         const bool isDupSeed = duplicateSeedDetector.isDuplicate(typeIndex, iseed);
-        xAOD::TrackFitter current_fitter = xAOD::KalmanFitter;
-        // @TODO introduce additional enums to distinguish Acts CKF from other implementations?
-
         if (isDupSeed) {
           ATH_MSG_DEBUG("skip " << seedType << " seed " << iseed << " - already found");
-          category_i = getSeedCategory(typeIndex, seed, useTopSp);
+          category_i = getSeedCategory(typeIndex, seed, m_paramEstimationTool[typeIndex]->estimateFromTopSp(reverseSearch));
           ++event_stat[category_i][kNTotalSeeds];
           ++event_stat[category_i][kNDuplicateSeeds];
           if (m_storeDestinies) destiny->at(iseed) = DestinyType::DUPLICATE;
           if (!m_trackStatePrinter.isSet()) continue;  // delay continue to estimate track parms for TrackStatePrinter?
+        }
+
+        // Get first estimate of parameters from the seed
+        const auto& [optTrackParams, estimationStatus] =
+          m_paramEstimationTool[typeIndex]->estimateTrackParameters(seed,
+                                                                    reverseSearch,
+                                                                    detContext.geometry,
+                                                                    detContext.magField,
+                                                                    detContext.calib,
+                                                                    retrieveSurfaceFunction);
+
+        if (!optTrackParams) {
+          ATH_MSG_DEBUG("Failed to estimate track parameters for seed " << iseed);
+          if (!isDupSeed) {
+            category_i = getSeedCategory(typeIndex, seed, m_paramEstimationTool[typeIndex]->estimateFromTopSp(reverseSearch));
+            ++event_stat[category_i][kNTotalSeeds];
+            ++event_stat[category_i][kNNoEstimatedParams];
+            if (m_storeDestinies) destiny->at(iseed) = DestinyType::FAILURE;
+          }
+          continue;
+        }
+
+        printSeed(iseed, detContext, seeds, *optTrackParams, measurementIndex, nPrinted, seedType);
+        if (isDupSeed) continue;  // skip now if not done before
+
+        double etaInitial = -std::log(std::tan(0.5 * optTrackParams->theta()));
+        category_i = getStatCategory(typeIndex, etaInitial);
+        ++event_stat[category_i][kNTotalSeeds];  // also updated for duplicate seeds
+        ++event_stat[category_i][kNUsedSeeds];
+
+        if (estimationStatus != ITrackParamsEstimationTool::kNoSeedRefit) {
+          if (estimationStatus == ITrackParamsEstimationTool::kSeedRefitFailed) {
+            ++event_stat[category_i][kNSeedRefitFailure];
+          } else {
+            // Check pTmin requirement
+            const auto &cutSet = getCuts(etaInitial);
+            if (optTrackParams->transverseMomentum() < cutSet.ptMin * m_seedRefitPtMinFactor) {
+              ATH_MSG_VERBOSE("min pt requirement not satisfied after param refinement: pt min is " << cutSet.ptMin << " but Refined params have pt of " << optTrackParams->transverseMomentum());
+              ++event_stat[category_i][kNRejectedRefinedSeeds];
+              if (m_storeDestinies) destiny->at(iseed) = DestinyType::FAILURE;
+              continue;
+            }
+          }
         }
 
         // Set the option accordingly - we change the direction and the target surface accordingly
@@ -503,55 +542,8 @@ namespace ActsTrk
         secondOptions.targetSurface = reverseSearch ? nullptr : &pSurface;
         // TODO since the second pass is strictly an extension we should have a separate branch stopper which never drops and always extrapolates to the target surface
 
-        // Get first estimate of parameters from the seed
-        std::optional<Acts::BoundTrackParameters> optTrackParams =
-          m_paramEstimationTool->estimateTrackParameters(seed,
-                                                         useTopSp,
-                                                         detContext.geometry,
-                                                         detContext.magField,
-                                                         retrieveSurfaceFunction);
-
-        if (!optTrackParams) {
-          ATH_MSG_DEBUG("Failed to estimate track parameters for seed " << iseed);
-          if (!isDupSeed) {
-            category_i = getSeedCategory(typeIndex, seed, useTopSp);
-            ++event_stat[category_i][kNTotalSeeds];
-            ++event_stat[category_i][kNNoEstimatedParams];
-            if (m_storeDestinies) destiny->at(iseed) = DestinyType::FAILURE;
-          }
-          continue;
-        }
-
-        Acts::BoundTrackParameters *initialParameters = &(*optTrackParams);
-        printSeed(iseed, detContext, seeds, *initialParameters, measurementIndex, nPrinted, seedType);
-        if (isDupSeed) continue;  // skip now if not done before
-
-        double etaInitial = -std::log(std::tan(0.5 * initialParameters->theta()));
-        category_i = getStatCategory(typeIndex, etaInitial);
-        ++event_stat[category_i][kNTotalSeeds];  // also updated for duplicate seeds
-        ++event_stat[category_i][kNUsedSeeds];
-
-        // Optional refit track parameters to get more refined value
-        std::unique_ptr<Acts::BoundTrackParameters> refitSeedParameters;  // owner if refit used
-        if (refitSeeds) {
-          bool rejectedRefinedSeed = false;
-          std::visit(
-              Acts::overloaded{
-                  [&](std::unique_ptr<Acts::BoundTrackParameters> refitResult) {
-                    refitSeedParameters = std::move(refitResult);
-                    initialParameters = refitSeedParameters.get();
-                    printSeed(iseed, detContext, seeds, *initialParameters, measurementIndex, nPrinted, seedType, true);
-                  },
-                  [&](EStat refitError) {
-                    ++event_stat[category_i][refitError];
-                    if (refitError == kNRejectedRefinedSeeds) {
-                      if (m_storeDestinies) destiny->at(iseed) = DestinyType::FAILURE;
-                      rejectedRefinedSeed = true;  // skip seed
-                    }
-                  }},
-              doRefit(seed, *initialParameters, detContext, reverseSearch));
-          if (rejectedRefinedSeed) continue;
-        }
+        xAOD::TrackFitter current_fitter = xAOD::KalmanFitter;
+        // @TODO introduce additional enums to distinguish Acts CKF from other implementations?
 
         auto measurementRangesForced =
             m_forceTrackOnSeed ? measurements.createMeasurementRangesForced(seed, measurementIndex)
@@ -562,7 +554,7 @@ namespace ActsTrk
 
         // Get the Acts tracks, given this seed
         Acts::Result<std::vector<TrkProxy> > result =
-          trackFinder().ckf.findTracks(*initialParameters, options, tracksContainerTemp);
+          trackFinder().ckf.findTracks(*optTrackParams, options, tracksContainerTemp);
 
         // The result for this seed
         if (not result.ok()) {
@@ -748,7 +740,7 @@ namespace ActsTrk
                                                                            const std::vector< const InDet::SiDetectorElementStatus *> &det_el_status_arr,
                                                                            detail::TrackFindingMeasurements &measurements) const {
     const Acts::TrackingGeometry *
-      acts_tracking_geometry = m_trackingGeometryTool->trackingGeometry().get();
+      acts_tracking_geometry = m_trackingGeometrySvc->trackingGeometry().get();
     ATH_CHECK(acts_tracking_geometry != nullptr);
 
     using Counter = struct { unsigned int n_volumes, n_volumes_with_status, n_missing_detector_elements, n_detector_elements, n_disabled_detector_elements;};

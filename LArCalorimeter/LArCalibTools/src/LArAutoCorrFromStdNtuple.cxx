@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArCalibTools/LArAutoCorrFromStdNtuple.h"
@@ -58,18 +58,6 @@ const float sFcalcovr[31][3]={
    {   0.000133223, -5.59111e-06, 6.85495e-06}
        };
 
-LArAutoCorrFromStdNtuple::LArAutoCorrFromStdNtuple (const std::string& name, ISvcLocator* pSvcLocator) : AthAlgorithm(name, pSvcLocator)
-{  
-  declareProperty("Nsamples",    m_nsamples=7);
-  declareProperty("FileNames", m_root_file_names);
-  declareProperty("NtupleName", m_ntuple_name="AUTOCORR");
-  declareProperty("StoreKey", m_store_key="FromStdNtuple");
-  declareProperty("GroupingType", m_groupingType="ExtendedSubDetector");
-  declareProperty("isComplete",   m_isComplete=false);
-  declareProperty("doSFcal",   m_sFcal=false);
-
-}
-
 LArAutoCorrFromStdNtuple::~LArAutoCorrFromStdNtuple() 
 = default;
 
@@ -101,11 +89,11 @@ StatusCode LArAutoCorrFromStdNtuple::stop()
   SG::ReadCondHandle<LArOnOffIdMapping> cablingHdl{m_cablingKey, ctx};
   const LArOnOffIdMapping* cabling{*cablingHdl};
   if(!cabling) {
-     ATH_MSG_ERROR( "DO not have mapping from cabling key " << m_cablingKey.key() );
+     ATH_MSG_ERROR( "Do not have mapping from cabling key " << m_cablingKey.key() );
      return StatusCode::FAILURE;
   }
 
-  TChain* outfit = new TChain(m_ntuple_name.c_str());
+  TChain* outfit = new TChain(m_ntuple_name.value().c_str());
   for (const std::string& s : m_root_file_names) {
     outfit->Add(s.c_str());
   }

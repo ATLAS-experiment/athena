@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArCalibTools/LArMphysOverMcalFromTuple.h"
@@ -20,24 +20,12 @@
 #include <string>
 
 
-LArMphysOverMcalFromTuple::LArMphysOverMcalFromTuple (const std::string& name, ISvcLocator* pSvcLocator) : AthAlgorithm(name, pSvcLocator)
-{  
-  declareProperty("FileNames", m_root_file_names);
-  declareProperty("StoreKey", m_store_key="FROMTUPLE");
-}
-
 LArMphysOverMcalFromTuple::~LArMphysOverMcalFromTuple() 
 = default;
 
-StatusCode LArMphysOverMcalFromTuple::initialize() 
-{
-  return StatusCode::SUCCESS ;
-}
-
-
 StatusCode LArMphysOverMcalFromTuple::stop()
 {
-  ATH_MSG_INFO ( "... in finalize()" );
+  ATH_MSG_INFO ( "... in stop()" );
   
   // get LArOnlineID helper
   const LArOnlineID* onlineHelper = nullptr;
@@ -84,11 +72,8 @@ StatusCode LArMphysOverMcalFromTuple::stop()
 
   // store 
   ATH_CHECK( detStore()->record(container,m_store_key) );
-  // Symlink LArMphysOverMcalComplete to ILArMphysOverMcal for further use
-  ILArMphysOverMcal *larMphysOverMcal = nullptr;
-  ATH_CHECK( detStore()->symLink(container,larMphysOverMcal) );
 
-  ATH_MSG_INFO ( "LArMphysOverMcalyFromTuple finalized!" );
+  ATH_MSG_INFO ( "LArMphysOverMcalyFromTuple stopped!" );
   
   return StatusCode::SUCCESS;
 }

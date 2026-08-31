@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 
 def ITkActsTrackParticleCreationCfg(flags,
@@ -41,7 +41,8 @@ def ITkActsTrackParticleCreationCfg(flags,
                                                 PerigeeExpression = PerigeeExpression))
     ### Do not convert Temporary track particles from the heavy ion chain
     ### or TrackContainer made up of ITk track seeds (No track parameters)
-    if "Temporary" not in TrackParticleContainer and \
+    if flags.Acts.doxAODToTrkConversion and \
+       "Temporary" not in TrackParticleContainer and \
        "Seed" not in TrackParticleContainer:
         acc.merge(xAODtoTrkConverterAlgCfg(flags,
                                        name=f"{prefix}TrackParticleToTrkCnvAlg",

@@ -7,13 +7,11 @@
 
 // ATHENA
 #include "AthenaBaseComps/AthAlgTool.h"
-#include "GaudiKernel/ToolHandle.h"
 #include "ActsToolInterfaces/IFitterTool.h"
 
+#include "ActsEvent/ContextUtility.h"
 #include "TrkFitterInterfaces/ITrackFitter.h"
 #include "ActsToolInterfaces/ITrackConverterTool.h"
-#include "ActsGeometryInterfaces/IExtrapolationTool.h"
-#include "ActsGeometryInterfaces/ITrackingGeometryTool.h"
 #include "ActsGeometryInterfaces/IGeometryRealmConvTool.h"
 
 namespace ActsTrk {
@@ -149,15 +147,12 @@ class ActsToTrkFitterWrapTool : public extends<AthAlgTool, Trk::ITrackFitter> {
     /** @brief The underlying Acts fitter tool */
     ToolHandle<IFitterTool> m_actsFitterTool{this, "ActsFitterTool", ""};
     
-    /** @brief Acts extrapolation tool */
-    ToolHandle<IExtrapolationTool> m_extrapolationTool{this, "ExtrapolationTool", ""};
-    /** @brief Tracking geometry tool */
-    PublicToolHandle<ITrackingGeometryTool> m_trackingGeometryTool{this, "TrackingGeometryTool", ""};
     /** @brief Track converter tool for converting Acts tracks to ATLAS tracks */
     ToolHandle<ITrackConverterTool> m_ATLASConverterTool{this, "ATLASConverterTool", ""};
     /** @brief Geometry realm converter tool */
     PublicToolHandle<IGeometryRealmConvTool> m_geometryConvTool{this, "GeometryRealmConvTool", ""};
-
+    /** @brief Auxiliary class to access the magnetic field, geometry and calibration context */
+    ContextUtility m_ctxProvider{this};
     /** @brief Property for the seed covariance scale factor */
     Gaudi::Property< double > m_option_seedCovarianceScale {this, "SeedCovarianceScale", 1.,
       "Scale factor for the input seed covariance when doing refitting"};

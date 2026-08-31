@@ -29,9 +29,12 @@ namespace GlobalSim {
 
 
   // Main functional block running for each event
-  StatusCode GlobalCellTowerAlgTool::run(const EventContext& ctx) const {
+  StatusCode
+  GlobalCellTowerAlgTool::run(const std::unique_ptr<IDataCollector>& dc,
+			      const EventContext& ctx) const {
 
     ATH_MSG_DEBUG("Building cell towers");
+    if (dc){dc->collect(*this, "start");}
 
     // Read in GlobalLArCellContainer
     auto h_gblLArCells = SG::makeHandle(m_gblLArCellContainerKey, ctx);
@@ -77,6 +80,8 @@ namespace GlobalSim {
     ATH_MSG_DEBUG("Built " << towers->size() << " cell towers and stored them as GenericTobs");
 
     CHECK(h_towerTOBs.record(std::move(towers))); 
+
+    if (dc){dc->collect(*this, "end");}
 
     return StatusCode::SUCCESS;
   }

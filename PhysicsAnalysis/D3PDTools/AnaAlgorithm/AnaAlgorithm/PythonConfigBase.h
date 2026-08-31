@@ -9,7 +9,7 @@
 #ifndef ANA_ALGORITHM__PYTHON_CONFIG_BASE_H
 #define ANA_ALGORITHM__PYTHON_CONFIG_BASE_H
 
-#ifndef ROOTCORE
+#ifndef XAOD_STANDALONE
 #ifndef __CPPCHECK__
 #error only include this header in AnalysisBase
 #endif

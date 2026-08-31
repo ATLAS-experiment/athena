@@ -18,7 +18,7 @@ public:
     TrigTauInfo(const std::string& trigger);
     TrigTauInfo(const std::string& trigger, const std::map<std::string, float>& L1Phase1_thresholds);
     TrigTauInfo(const std::string& trigger, const std::map<std::string, float>& L1Phase1_thresholds, const std::map<std::string, uint64_t>& L1Phase1_threshold_patterns);
-    TrigTauInfo(const std::string& trigger, const std::map<int, int>& L1Phase1ThrMap_eTAU, const std::map<int, int>& L1Phase1ThrMap_jTAU);
+    TrigTauInfo(const std::string& trigger, const std::map<int, int>& L1Phase1ThrMap_eTAU);
 
     inline const std::string& getTriggerName() const { return m_trigger; }
     inline bool isStreamer() const { return m_isStreamer; }
@@ -101,7 +101,7 @@ private:
     std::vector<std::string> m_L1Items; // full L1 trigger items
     std::vector<float> m_tauL1Thr; // L1 Tau item thresholds, corrected for Phase1 items
     std::vector<std::string> m_tauL1Items; // Individual l1 tau items
-    std::vector<std::string> m_tauL1Type; // Individual l1 tau item type (eTAU, jTAU, cTAU, TAU)
+    std::vector<std::string> m_tauL1Type; // Individual l1 tau item type (eTAU, cTAU, TAU)
     std::vector<std::string> m_tauL1Iso; // Individual l1 tau item isolation ("", L, M, T, HL, HM, HT, H, IM)
     std::vector<int64_t> m_tauL1ThresholdPattern; // Individual l1 tau item thresholdPattern mask
 
@@ -121,7 +121,7 @@ private:
     void parseTriggerString(bool remove_L1_phase1_thresholds = true); // Parse the trigger string, without applying the Phase1 remapping (L1 thresholds will be set to -1 on Phase1 items)
     void parseTriggerString(const std::map<std::string, float>& L1Phase1_thresholds); // Parse the trigger string, applying the Phase1 ET mapping
     void parseTriggerString(const std::map<std::string, float>& L1Phase1_thresholds, const std::map<std::string, uint64_t>& L1Phase1_threshold_patterns); // Parse the trigger string, applying the Phase1 threshold mapping
-    void parseTriggerString(const std::map<int, int>& L1Phase1ThrMap_eTAU, const std::map<int, int>& L1Phase1ThrMap_jTAU); // Parse the trigger string, applying the Phase1 remapping
+    void parseTriggerString(const std::map<int, int>& L1Phase1ThrMap_eTAU); // Parse the trigger string, applying the Phase1 remapping
 };
 
 #endif

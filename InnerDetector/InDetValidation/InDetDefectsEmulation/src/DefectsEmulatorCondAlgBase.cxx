@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #include "DefectsEmulatorCondAlgBase.h"
 
@@ -489,6 +489,7 @@ namespace InDet{
               return StatusCode::FAILURE;
            }
            m_perPatternCornerDefectNCornerCummulativeProb[pattern_i].reserve( m_cornerDefectNCornerFractionsPerPattern[pattern_i].size());
+           //coverity[DIVIDE_BY_ZERO:FALSE]
            scale = m_cornerDefectParamsPerPattern[pattern_i][kCornerDefectProb]/scale;
            double total = 0.;
            for (double fraction : m_cornerDefectNCornerFractionsPerPattern[pattern_i]) {

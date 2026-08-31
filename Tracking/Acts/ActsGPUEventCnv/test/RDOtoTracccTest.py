@@ -1,50 +1,113 @@
-#!/usr/bin/env athena
-
-# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
-#
-# Run script for the GPU EDM input conversion chain:
-#   RDO -> traccc cells
+#!/usr/bin/env athena.py
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
-from AthenaConfiguration.ComponentFactory import CompFactory
-from AthenaCommon.Constants import DEBUG
-
-from AthCUDAServices.AthCUDAServicesConfig import HostMemoryResourceToolCfg, DeviceMemoryResourceToolCfg, CopyToolCfg
-
+from AthenaCommon.Constants import DEBUG, INFO
+from ActsConfig.ActsPhaseIIRawDataEdmConfig import (
+    PhaseIIPixelRawDataContainerCfg,
+    PhaseIIStripRawDataContainerCfg,
+    )
 from ActsGPUGeometry.ActsGPUGeometryConfig import JSONDeviceDetectorDescriptionProviderSvcCfg
-from ActsGPUEventCnv.ActsGPUEventCnvConfig import RDOtoTracccCellConverterAlgCfg
+from ActsGPUEventCnv.ActsGPUEventCnvConfig import (
+    RDOtoTracccCellConverterAlgCfg,
+    PhaseIIRDOtoTracccCellConverterAlgCfg,
+    TracccCellValidationAlgCfg,
+)
+from AthCUDAServices.AthCUDAServicesConfig import (
+    HostMemoryResourceToolCfg,
+    DeviceMemoryResourceToolCfg,
+    CopyToolCfg,
+)
+from AthDeviceComps.AthDeviceCompsConfig import HostCopyToolCfg
 
-def RDOtoTracccCellConverterTest(flags) -> ComponentAccumulator:
+ComponentAccumulator.debugMode = "trackCA trackEventAlgo"
+
+# Enable for development and testing:
+# - DEBUG algs
+# - config and SG dumps
+TESTING = False
+# Enable for performance testing:
+# - runs input algo twice to make sure data from files are loaded in memory on
+#   second execution
+# - different input events (400 x ttbar, pu200)
+PERFORMANCE_TESTING = False
+
+def RDOtoTracccCellConversionTest(flags, cpu_cell_sorting: bool) -> ComponentAccumulator:
     acc = ComponentAccumulator()
 
-    hostMR   = acc.popToolsAndMerge(HostMemoryResourceToolCfg(flags, name="HostMR"))
-    deviceMR = acc.popToolsAndMerge(DeviceMemoryResourceToolCfg(flags, name="DeviceMR"))
-    copyTool = acc.popToolsAndMerge(CopyToolCfg(flags, name="CopyProviderTool"))
+    acc.merge(JSONDeviceDetectorDescriptionProviderSvcCfg(flags))
 
-    # Service runs first — loads all device detector description data into detStore
-    acc.merge(JSONDeviceDetectorDescriptionProviderSvcCfg(flags,
-        HostMR   = hostMR,
-        DeviceMR = deviceMR,
-        CopyProviderTool = copyTool))
+    Ph1Cells = "TracccCellsPh1"
+    Ph2Cells = "TracccCellsPh2"
 
+    output_level = DEBUG if TESTING else INFO
+
+    if PERFORMANCE_TESTING:
+        # Make sure the data are loaded in memory when the real algo starts
+        acc.merge(RDOtoTracccCellConverterAlgCfg(flags,
+            name="DummyPh1AlgToPreloadData",
+            TracccCells = "DummyCells",
+            CPUCellSorting = False,
+            ))
     acc.merge(RDOtoTracccCellConverterAlgCfg(flags,
-        HostMR  = hostMR,
-        DeviceMR = deviceMR,
-        CopyProviderTool = copyTool))
+        TracccCells = Ph1Cells,
+        CPUCellSorting = cpu_cell_sorting,
+        OutputLevel = output_level,
+        ))
+
+    # Make the PhaseII RDO containers available
+    acc.merge(PhaseIIPixelRawDataContainerCfg(flags))
+    acc.merge(PhaseIIStripRawDataContainerCfg(flags))
+    if PERFORMANCE_TESTING:
+        # Make sure the data are loaded in memory when the real algo starts
+        acc.merge(PhaseIIRDOtoTracccCellConverterAlgCfg(flags,
+            name="DummyPh2AlgToPreloadData",
+            TracccCells = "DummyCells",
+            CPUCellSorting = False,
+            ))
+    acc.merge(PhaseIIRDOtoTracccCellConverterAlgCfg(flags,
+        TracccCells = Ph2Cells,
+        CPUCellSorting = cpu_cell_sorting,
+        OutputLevel = output_level,
+        ))
+        
+    acc.merge(TracccCellValidationAlgCfg(flags,
+        name = "ValidatePh2Cells",
+        ReferenceCells = Ph1Cells,
+        Cells = Ph2Cells,
+    ))
 
     return acc
+
 
 if __name__ == "__main__":
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
     from AthenaConfiguration.TestDefaults import defaultTestFiles
     flags = initConfigFlags()
 
-    # ---- Input ----
-    flags.Input.Files = defaultTestFiles.RDO_RUN4
+    flags.Tracking.doPixelDigitalClustering = True
+    
+    if PERFORMANCE_TESTING:
+        flags.Input.Files = [
+            "/eos/atlas/atlasgroupdisk/trig-daq/dq2/rucio/mc21_14TeV/af/f5/RDO.39626672._000001.pool.root.1",
+            "/eos/atlas/atlasgroupdisk/trig-daq/dq2/rucio/mc21_14TeV/2d/fc/RDO.39626672._000003.pool.root.1",
+            "/eos/atlas/atlasgroupdisk/trig-daq/dq2/rucio/mc21_14TeV/95/73/RDO.39626672._000004.pool.root.1",
+            "/eos/atlas/atlasgroupdisk/trig-daq/dq2/rucio/mc21_14TeV/a9/d8/RDO.39626672._000005.pool.root.1",
+        ]
+    else:
+        flags.Input.Files = defaultTestFiles.RDO_RUN4
+
+    if TESTING:
+        flags.Scheduler.ShowDataDeps          = True
+        flags.Scheduler.ShowDataFlow          = True
+        flags.Scheduler.CheckDependencies     = True
+
+    flags.PerfMon.doFullMonMT = True
 
     flags.fillFromArgs()
 
     flags.lock()
+    if TESTING:
+        flags.dump()
 
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg
     acc = MainServicesCfg(flags)
@@ -60,8 +123,19 @@ if __name__ == "__main__":
     from StripGeoModelXml.ITkStripGeoModelConfig import ITkStripReadoutGeometryCfg
     acc.merge(ITkStripReadoutGeometryCfg(flags))
 
-    acc.merge(RDOtoTracccCellConverterTest(flags))
+    acc.merge(RDOtoTracccCellConversionTest(
+        flags,
+        cpu_cell_sorting=False
+        ))
     acc.printConfig(withDetails=True, summariseProps=True)
+
+    if PERFORMANCE_TESTING:
+        from PerfMonComps.PerfMonCompsConfig import PerfMonMTSvcCfg
+        acc.merge(PerfMonMTSvcCfg(flags))
+
+    if TESTING:
+        sg = acc.getService("StoreGateSvc")
+        sg.Dump = True
 
     statusCode = acc.run(flags.Exec.MaxEvents)
     assert statusCode.isSuccess(), "Application execution did not succeed"

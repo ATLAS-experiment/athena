@@ -9,10 +9,10 @@ find_package( ROOT COMPONENTS Core )
 # Component(s) in the package:
 atlas_add_poolcnv_library( xAODMuonAthenaPoolPoolCnv
    src/*.h src/*.cxx
-   FILES xAODMuon/MuonContainer.h xAODMuon/MuonAuxContainer.h
+   FILES xAODMuon/MuonContainer.h xAODMuon/MuonAuxContainer.h xAODMuon/MuonAuxContainerR4.h
          xAODMuon/SlowMuonContainer.h xAODMuon/SlowMuonAuxContainer.h
          xAODMuon/MuonSegmentContainer.h xAODMuon/MuonSegmentAuxContainer.h
-   TYPES_WITH_NAMESPACE xAOD::MuonContainer xAOD::MuonAuxContainer
+   TYPES_WITH_NAMESPACE xAOD::MuonContainer xAOD::MuonAuxContainer xAOD::MuonAuxContainerR4
                         xAOD::SlowMuonContainer xAOD::SlowMuonAuxContainer
                         xAOD::MuonSegmentContainer xAOD::MuonSegmentAuxContainer
    CNV_PFX xAOD

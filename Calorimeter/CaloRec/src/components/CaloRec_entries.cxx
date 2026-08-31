@@ -32,6 +32,7 @@
 #include "../ToolConstantsCondAlg.h"
 #include "../CaloNoiseSigmaDiffCondAlg.h"
 #include "../CaloClusterMLCalibAlgLite.h"
+#include "../CaloClusterTimingFilter.h"
 
 //Includes for CaloTopoTowers
 #include "../CaloTopoClusterTowerMerger.h"
@@ -93,3 +94,4 @@ DECLARE_COMPONENT ( CaloTopoTowerBuilderTool )
 
 DECLARE_COMPONENT( CaloTowerStoreTestAlg )
 DECLARE_COMPONENT( CaloClusterMLCalibAlgLite)
+DECLARE_COMPONENT( CaloClusterTimingFilter )

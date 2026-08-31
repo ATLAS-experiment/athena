@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2020-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2020-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -69,14 +69,9 @@ getMaterialProperties(const Trk::TrackParameters* trackParameters,
                       const Trk::Layer& layer)
 {
 
-  const Trk::MaterialProperties* materialProperties(nullptr);
+  const Trk::MaterialProperties* materialProperties(layer.fullUpdateMaterialProperties(*trackParameters));
   double pathCorrection(0.);
 
-  // Check that the material properties have been defined - if not define them
-  // from the layer information
-  materialProperties = materialProperties
-                         ? materialProperties
-                         : layer.fullUpdateMaterialProperties(*trackParameters);
   // Bail out if still no material properties can be found
   if (!materialProperties) {
     return { nullptr, 0 };

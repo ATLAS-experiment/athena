@@ -1,10 +1,9 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #include "EventContainers/IdentifiableContainerBase.h"
 #include <algorithm>
 #include "EventContainers/IDC_WriteHandleBase.h"
-#include "CxxUtils/AthUnlikelyMacros.h"
 #include "EventContainers/InternalOnline.h"
 #include "EventContainers/InternalOffline.h"
 #include "EventContainers/InternalOfflineFast.h"

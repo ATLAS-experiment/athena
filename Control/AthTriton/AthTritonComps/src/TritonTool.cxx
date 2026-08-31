@@ -47,6 +47,10 @@ template <>
 struct TritonDType<int64_t> {
   static constexpr const char* value = "INT64";
 };
+template <>
+struct TritonDType<uint8_t> {
+  static constexpr const char* value = "UINT8";
+};
 
 struct TritonTool::Impl : public AthMessaging {
 
@@ -110,7 +114,8 @@ struct TritonTool::Impl : public AthMessaging {
     return tc::Error::Success;
   }
 
-  void waitBeforeRetry(const int retryDelayMs) const {
+  void waitBeforeRetry(int retryDelayMs, int attempt) const {
+    retryDelayMs *= (1 << attempt);
     if (retryDelayMs > 0) {
       std::this_thread::sleep_for(std::chrono::milliseconds(retryDelayMs));
     }
@@ -174,7 +179,7 @@ struct TritonTool::Impl : public AthMessaging {
       ATH_MSG_WARNING("Triton inference attempt " << (attempt + 1)
                                                   << " failed: " << err
                                                   << "; retrying");
-      waitBeforeRetry(retryDelayMs);
+      waitBeforeRetry(retryDelayMs, attempt);
     }
 
     return StatusCode::FAILURE;

@@ -13,13 +13,14 @@ def egammaMVAToolCfg(flags, **kwargs):
 
 def egammaTransformerToolCfg(flags, **kwargs):
     acc = ComponentAccumulator()
-    doFix, _ = False, 'dummy'
-    if doFix:
+    from egammaAlgs.egammaAODFixesConfig import runAODFix
+    _, fixes = runAODFix(flags)
+    # cluster AOD fix done, do not try to recover. If HI, no timing cut, so no fix here
+    if ('egClusterL2_3Fix' in fixes) or flags.Reco.EnableHI:
         kwargs['egammaCellRecoveryTool'] = None
         kwargs['useFixForMissingCells'] = False
     acc.setPrivateTools(CompFactory.egammaTransformerCalibTool(**kwargs))
     return acc
-
 
 def egammaMVASvcCfg(flags, name="egammaMVASvc", **kwargs):
 

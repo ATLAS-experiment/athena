@@ -3149,8 +3149,7 @@ int AtlCoolCopy::resolvePoolRefs ATLAS_NOT_THREAD_SAFE () {
   if (!m_addlfn.empty()) {
     for (std::vector<std::string>::const_iterator itr=m_addlfn.begin();
 	 itr!=m_addlfn.end();++itr) {
-      std::string guid;
-      catalog->lookupFileByLFN(*itr,guid);
+      std::string guid = catalog->lookupLFN(*itr);
       std::cout << "Add POOL file GUID: " << guid << " from LFN " << *itr
 		<< std::endl;
       m_poolrefs[guid]=PoolMapElement(1,"ADDLFN");

@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 // Local include(s).
 #include "BoostedJetTaggers/JSSMLTool.h"
@@ -43,15 +43,18 @@ namespace AthONNX {
 
     // apply features scaling
     for(const auto & var : JSSVars){
-      double mean = m_scaler.find(var.first)->second[0];
-      double std  = m_scaler.find(var.first)->second[1];
+      auto p = m_scaler.find(var.first);
+      if (p == m_scaler.end()) continue;
+      double mean = p->second[0];
+      double std  = p->second[1];
       JSSVars[var.first] = (var.second - mean) / std;
     }
 
     // then dump it to a vector
     for(int v=0; v<m_nvars; ++v){
-      std::string name = m_JSSInputMap.find(v)->second;
-      input_tensor_values[v] = JSSVars[name];
+      if (auto found = m_JSSInputMap.find(v);found != m_JSSInputMap.end())[[likely]]{
+        input_tensor_values[v] = JSSVars[found->second];
+      }
     }
 
     return input_tensor_values;
@@ -169,7 +172,7 @@ namespace AthONNX {
     std::vector<float> input_tensor_values(input_tensor_size);
 
     // loading input data
-    input_tensor_values = ReadJetImagePixels(Images);
+    input_tensor_values = ReadJetImagePixels(std::move(Images));
     
     // preparing container to hold output data
     int testSample = 0;    
@@ -541,7 +544,7 @@ namespace AthONNX {
     std::vector<float> input_tensor_values(m_nvars);
 
     // loading input data
-    input_tensor_values = ReadJSSInputs(JSSVars);
+    input_tensor_values = ReadJSSInputs(std::move(JSSVars));
     
     // preparing container to hold output data
     int testSample = 0; 
@@ -597,7 +600,7 @@ namespace AthONNX {
   } // end retrieve HighLevel score ----
     
   // extra methods
-  StatusCode JSSMLTool::SetScaler(std::map<std::string, std::vector<double>> scaler){
+  StatusCode JSSMLTool::SetScaler(const std::map<std::string, std::vector<double>> & scaler){
     m_scaler = scaler;
 
     // ToDo:

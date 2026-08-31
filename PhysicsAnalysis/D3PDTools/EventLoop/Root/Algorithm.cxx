@@ -13,11 +13,12 @@
 #include <EventLoop/StatusCode.h>
 #include <EventLoop/Worker.h>
 #include <RootCoreUtils/Assert.h>
-#include <RootCoreUtils/ThrowMsg.h>
 #include <TH1.h>
 
 #include <AsgMessaging/MsgLevel.h>
 #include <AsgMessaging/MsgStream.h>
+
+#include <stdexcept>
 
 //
 // method implementations
@@ -29,9 +30,7 @@ namespace EL
 {
   void Algorithm ::
   testInvariant () const
-  {
-    RCU_INVARIANT (this != 0);
-  }
+  {}
 
 
 
@@ -64,7 +63,7 @@ namespace EL
 
   Algorithm ::
   Algorithm ()
-    : m_wk (0)
+    : m_wk (nullptr)
   {
     RCU_NEW_INVARIANT (this);
   }
@@ -137,7 +136,7 @@ namespace EL
   void Algorithm ::
   setMsgLevel (int level)
   {
-    RCU_READ_INVARIANT (this);
+    RCU_CHANGE_INVARIANT (this);
     if (m_msg)
       m_msg->setLevel (MSG::Level (level));
     m_msgLevel = level;
@@ -249,7 +248,7 @@ namespace EL
   {
     RCU_CHANGE_INVARIANT (this);
     if (setupJob (job) != StatusCode::SUCCESS)
-      RCU_THROW_MSG ("Algorithm::setupJob returned StatusCode::FAILURE");
+      throw std::runtime_error ("Algorithm::setupJob returned StatusCode::FAILURE");
   }
 
 

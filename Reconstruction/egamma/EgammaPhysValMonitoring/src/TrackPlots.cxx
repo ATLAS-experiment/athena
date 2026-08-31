@@ -1,12 +1,12 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-#include <utility>
+
 
 #include "TrackPlots.h"
 #include "xAODEgamma/ElectronxAODHelpers.h"
- 
+#include <utility>
 namespace Egamma{
 
 TrackPlots::TrackPlots(PlotBase* pParent, const std::string& sDir, std::string sParticleType):PlotBase(pParent, sDir), 
@@ -141,8 +141,8 @@ void TrackPlots::initializePlots(){
   eProbHT->Fill(eprobht, weight);
   }
 
-  uint8_t numTotalTRTHits = RetrieveHitInfo(electron, xAOD::numberOfTRTHits) + RetrieveHitInfo(electron, xAOD::numberOfTRTOutliers);
-  uint8_t numTotalTRTHighThresholdHits = RetrieveHitInfo(electron, xAOD::numberOfTRTHighThresholdHits) + RetrieveHitInfo(electron, xAOD::numberOfTRTHighThresholdOutliers);
+  unsigned numTotalTRTHits = RetrieveHitInfo(electron, xAOD::numberOfTRTHits) + RetrieveHitInfo(electron, xAOD::numberOfTRTOutliers);
+  unsigned numTotalTRTHighThresholdHits = RetrieveHitInfo(electron, xAOD::numberOfTRTHighThresholdHits) + RetrieveHitInfo(electron, xAOD::numberOfTRTHighThresholdOutliers);
   float totalTRTratio= (numTotalTRTHits != 0) ? float(numTotalTRTHighThresholdHits)/float(numTotalTRTHits) : 0;
   trt->Fill(RetrieveHitInfo(electron, xAOD::numberOfTRTHits), weight);
   trt_xe->Fill(RetrieveHitInfo(electron, xAOD::numberOfTRTXenonHits), weight);

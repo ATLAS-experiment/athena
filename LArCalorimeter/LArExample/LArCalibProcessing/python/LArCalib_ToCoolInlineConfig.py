@@ -176,7 +176,6 @@ if __name__=="__main__":
 
     cfg.getService("PoolSvc").WriteCatalog=("xmlcatalog_file:%s"%args.poolcat)
     cfg.getService("PoolSvc").ReadCatalog+=["xmlcatalog_file:PoolFileCatalog.xml",]
-    cfg.getService("PoolSvc").SortReplicas = False 
 
     cfg.getService("MessageSvc").debugLimit=9999999
     

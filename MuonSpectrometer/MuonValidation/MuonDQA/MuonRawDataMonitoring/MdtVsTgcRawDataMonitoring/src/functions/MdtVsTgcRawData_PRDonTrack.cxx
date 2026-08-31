@@ -21,7 +21,6 @@
  
 #include "TrkSurfaces/TrapezoidBounds.h"
 #include "TrkRIO_OnTrack/RIO_OnTrack.h"
-#include "muonEvent/MuonContainer.h"
 #include "MuonCompetingRIOsOnTrack/CompetingMuonClustersOnTrack.h"
 #include "MuonRIO_OnTrack/MuonClusterOnTrack.h"
 

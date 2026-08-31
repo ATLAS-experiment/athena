@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // ColumnarMETMaker.cxx
@@ -929,7 +929,7 @@ namespace met {
             // Remove the Eloss assuming the parameterised value
             // The correction is limited to the selected clusters
             total_eloss += mu_Eloss;
-            muons_selflags |= (1<<m_assocAcc.findIndex(*assoc,mu_in_jet));
+            muons_selflags |= (static_cast<MissingETBase::Types::bitmask_t>(1)<<m_assocAcc.findIndex(*assoc,mu_in_jet));
         }
       }
       ATH_MSG_VERBOSE("Muon selection flags: " << muons_selflags);
@@ -1129,7 +1129,7 @@ namespace met {
             // Remove the Eloss assuming the parameterised value
             // The correction is limited to the selected clusters
             total_eloss += mu_Eloss;
-            muons_selflags |= (1<<m_assocAcc.findIndex(*assoc,mu_test));
+            muons_selflags |= (static_cast<MissingETBase::Types::bitmask_t >(1)<<m_assocAcc.findIndex(*assoc,mu_test));
           }
           ATH_MSG_VERBOSE("Mu index " << mu_test->index());
         }

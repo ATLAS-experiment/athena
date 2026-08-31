@@ -1,14 +1,14 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef PixelChargeInterpolationCalibration_h
 #define PixelChargeInterpolationCalibration_h
 
 #include "CxxUtils/checker_macros.h"
+#include <string>
+#include <vector>
 
-class string;
-template < class T, class Allocator > class vector;
 class TDirectory;
 
 namespace PixelCalib{
@@ -39,9 +39,9 @@ private:
   PixelChargeInterpolationCalibration(const PixelChargeInterpolationCalibration &);
   PixelChargeInterpolationCalibration &operator=(const PixelChargeInterpolationCalibration&);
 
-	PixelChargeInterpolationHistograms *m_DigitalCalibration;
-	PixelChargeInterpolationHistograms *m_AnalogCalibration;
-	PixelChargeInterpolationPlot *m_plots;
+	PixelChargeInterpolationHistograms *m_DigitalCalibration{};
+	PixelChargeInterpolationHistograms *m_AnalogCalibration{};
+	PixelChargeInterpolationPlot *m_plots{};
 };
 
 }

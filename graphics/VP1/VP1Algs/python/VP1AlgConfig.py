@@ -194,7 +194,7 @@ def SetupVP1():
         help="Directory to keep local copies of processed event files. If --eventsrc is set, then -eventcpy will default to /tmp/emoyse/vp1events/6897 .",
     )
     # group.add_argument('--nocleanupeventcpy', action='store_true', help="Prevent removal of eventcpy directory after athena process finishes.")
-    # Commented, because I'm not sure how to implement this safely.
+    # Commented, because I'm not sure how to implement this safely, yet -- TODO.
 
     args = flags.fillFromArgs(parser=parser)
 
@@ -213,6 +213,11 @@ def SetupVP1():
 
     _logger.verbose("+ About to set flags related to the input")
 
+
+    # This dict stores the variables to set the VP1Alg properties
+    vp1config = {}
+
+
     # Empty input is not normal for Athena, so we will need to check
     # this repeatedly below
     vp1_empty_input = False
@@ -224,6 +229,8 @@ def SetupVP1():
         from AthenaConfiguration.TestDefaults import defaultGeometryTags
 
         vp1_empty_input = True
+        vp1config.setdefault("EmptyInput", vp1_empty_input)
+
         # NB Must set e.g. ConfigFlags.Input.Runparse_args() Number and
         # ConfigFlags.Input.TimeStamp before calling the
         # MainServicesCfg to avoid it attempting auto-configuration
@@ -336,9 +343,12 @@ def SetupVP1():
             from TrkConfig.TrackCollectionReadConfig import TrackCollectionReadCfg
             cfg.merge(TrackCollectionReadCfg(flags, "Tracks"))
 
-            from TrkConfig.AtlasExtrapolationEngineConfig import AtlasExtrapolationEngineCfg
-            AtlasExtrapolationEngine = cfg.getPrimaryAndMerge(AtlasExtrapolationEngineCfg(flags))
-            cfg.addPublicTool(AtlasExtrapolationEngine)
+
+            from TrkConfig.AtlasExtrapolatorConfig import AtlasExtrapolatorCfg
+            toolAtlasExtrapolator = cfg.popToolsAndMerge(AtlasExtrapolatorCfg(flags))
+            cfg.addPublicTool(toolAtlasExtrapolator)
+            vp1config.setdefault("ExtrapolatorTool", toolAtlasExtrapolator)
+
 
             from TrkEventCnvTools.TrkEventCnvToolsConfig import TrkEventCnvSuperToolCfg
             cfg.merge(TrkEventCnvSuperToolCfg(flags))
@@ -356,11 +366,10 @@ def SetupVP1():
     _logger.verbose("+ ... Geometry done")
 
     # Setup some VP1 specific stuff
-    vp1config = {}
     if not args.verboseAthena:
         # Suppress the output from Athena
-        print("Suppressing most messages from Athena.")
-        print("To see more, set the --verboseAthena flag to true.")
+        _logger.warning("From here, we are suppressing most messages from Athena.")
+        _logger.info("To see more, use the --verboseAthena flag; e.g., 'vp1 myESD.root --verboseAthena'")
         msgService = cfg.getService("MessageSvc")
         msgService.OutputLevel = 4
 

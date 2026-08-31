@@ -24,7 +24,7 @@ namespace RCU
 {
   bool SetDirectory (TObject *object, TDirectory *directory)
   {
-    RCU_ASSERT (object != 0);
+    RCU_ASSERT (object != nullptr);
 
     TH1 *const hist = dynamic_cast<TH1*>(object);
     if (hist)

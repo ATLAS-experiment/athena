@@ -317,7 +317,7 @@ def getTopoCalibMoments(flags):
                                                        ,"TileCalibHitDeadMaterial"]
     return TopoCalibMoments
 
-def CaloTopoClusterToolCfg(flags, cellsname):
+def CaloTopoClusterToolCfg(flags, cellsname, cellthresholds=(4,2,0)):
     result=ComponentAccumulator()
     # maker tools
     TopoMaker = CompFactory.CaloTopoClusterMaker("TopoMaker")
@@ -339,9 +339,9 @@ def CaloTopoClusterToolCfg(flags, cellsname):
     TopoMaker.NeighborOption = "super3D"
     TopoMaker.RestrictHECIWandFCalNeighbors  = False
     TopoMaker.RestrictPSNeighbors  = True
-    TopoMaker.CellThresholdOnEorAbsEinSigma     =    0.0
-    TopoMaker.NeighborThresholdOnEorAbsEinSigma =    2.0
-    TopoMaker.SeedThresholdOnEorAbsEinSigma     =    4.0
+    TopoMaker.CellThresholdOnEorAbsEinSigma     =    cellthresholds[2]
+    TopoMaker.NeighborThresholdOnEorAbsEinSigma =    cellthresholds[1]
+    TopoMaker.SeedThresholdOnEorAbsEinSigma     =    cellthresholds[0]
 
     #timing
     TopoMaker.SeedCutsInT = flags.Calo.TopoCluster.doTimeCut
@@ -405,7 +405,25 @@ def CaloTopoClusterSplitterToolCfg(flags):
     result.setPrivateTools(TopoSplitter)
     return result
 
-def CaloTopoClusterCfg(flags, cellsname="AllCalo", clustersname=None, clustersnapname="CaloTopoClusters"):
+def CaloClusterTimingFilterCfg(flags, name="CaloClusterTimingFilter", **kwargs):
+    acc = ComponentAccumulator()
+
+    kwargs.setdefault("MinTime", flags.Calo.TopoCluster.clusterTimingCutLower)
+    kwargs.setdefault("MaxTime", flags.Calo.TopoCluster.clusterTimingCutUpper)
+    kwargs.setdefault("InputClusters",  "CaloCalTopoClusters")
+    kwargs.setdefault("OutputClusters", "CaloCalTopoClustersFiltered")
+    kwargs.setdefault("OutputCellLinkName", kwargs["OutputClusters"] + "_links")
+
+    acc.addEventAlgo(CompFactory.CaloClusterTimingFilter(name, **kwargs))
+    return acc
+
+def CaloTopoClusterCfg(
+        flags,
+        cellsname="AllCalo",
+        clustersname=None,
+        clustersnapname="CaloTopoClusters",
+        cellthresholds=(4,2,0)
+    ):
     """
     Configures topo clustering
 
@@ -418,6 +436,10 @@ def CaloTopoClusterCfg(flags, cellsname="AllCalo", clustersname=None, clustersna
 
     if clustersname=="CaloTopoClusters" and doLCCalib is True: 
         raise RuntimeError("Inconsistent arguments: Name must not be 'CaloTopoClusters' if doLCCalib is True")
+
+    clustersname_final = clustersname
+    if flags.Calo.TopoCluster.applyClusterTimingCut:
+        clustersname = f"{clustersname}BeforeTimingCut"
 
     result=ComponentAccumulator()
 
@@ -435,7 +457,7 @@ def CaloTopoClusterCfg(flags, cellsname="AllCalo", clustersname=None, clustersna
 
     result.merge(TileGMCfg(flags))
 
-    TopoMaker = result.popToolsAndMerge( CaloTopoClusterToolCfg(flags, cellsname=cellsname))
+    TopoMaker = result.popToolsAndMerge( CaloTopoClusterToolCfg(flags, cellsname=cellsname, cellthresholds=cellthresholds))
     TopoSplitter = result.popToolsAndMerge( CaloTopoClusterSplitterToolCfg(flags) )
     #
     # the following options are not set, since these are the default
@@ -507,7 +529,15 @@ def CaloTopoClusterCfg(flags, cellsname="AllCalo", clustersname=None, clustersna
 
     result.addEventAlgo(CaloTopoCluster,primary=True)
 
-    if CaloTopoCluster.ClustersOutputName in flags.Calo.TopoCluster.skipWriteList:
+    if flags.Calo.TopoCluster.applyClusterTimingCut:
+        result.merge(CaloClusterTimingFilterCfg(
+            flags,
+            name = f"{clustersname}Filter",
+            InputClusters = clustersname,
+            OutputClusters = clustersname_final,
+        ))
+
+    if clustersname_final in flags.Calo.TopoCluster.skipWriteList:
         # don't add these clusters to ESD and AOD
         return result
     
@@ -564,11 +594,11 @@ def CaloTopoClusterCfg(flags, cellsname="AllCalo", clustersname=None, clustersna
 
 
     from OutputStreamAthenaPool.OutputStreamConfig import addToAOD, addToESD
-    toESD = [f"xAOD::CaloClusterContainer#{CaloTopoCluster.ClustersOutputName}",
-             f"xAOD::CaloClusterAuxContainer#{CaloTopoCluster.ClustersOutputName}Aux.-sigmaWidth",
-             f"CaloClusterCellLinkContainer#{CaloTopoCluster.ClustersOutputName}_links"]
-    toAOD = [f"xAOD::CaloClusterContainer#{CaloTopoCluster.ClustersOutputName}",
-             f"CaloClusterCellLinkContainer#{CaloTopoCluster.ClustersOutputName}_links"]
+    toESD = [f"xAOD::CaloClusterContainer#{clustersname_final}",
+             f"xAOD::CaloClusterAuxContainer#{clustersname_final}Aux.-sigmaWidth",
+             f"CaloClusterCellLinkContainer#{clustersname_final}_links"]
+    toAOD = [f"xAOD::CaloClusterContainer#{clustersname_final}",
+             f"CaloClusterCellLinkContainer#{clustersname_final}_links"]
 
     AODMoments.append("CellLink") #Add data-link to cell-link container
     if flags.Calo.TopoCluster.addCalibrationHitDecoration: #Add calib hit deco if requried 
@@ -583,7 +613,7 @@ def CaloTopoClusterCfg(flags, cellsname="AllCalo", clustersname=None, clustersna
     if flags.Calo.TopoCluster.addCPData:
         AODMoments += ["ClusterWidthEta","ClusterWidthPhi"]
 
-    auxItems = f"xAOD::CaloClusterAuxContainer#{CaloTopoCluster.ClustersOutputName}Aux."
+    auxItems = f"xAOD::CaloClusterAuxContainer#{clustersname_final}Aux."
     auxItems+= ".".join(AODMoments)    
 
     toAOD.append(auxItems)

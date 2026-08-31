@@ -1,8 +1,6 @@
 /*
   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
-
-// $Id$
 /**
  * @file xAODRootAccess/test/ut_xaodrootaccess_tauxstore_insertmove_test.cxx
  * @author scott snyder <snyder@bnl.gov>
@@ -16,6 +14,7 @@
 #include "xAODRootAccess/tools/ReturnCheck.h"
 #include "AthContainers/AuxTypeRegistry.h"
 #include "AthContainers/AuxStoreInternal.h"
+#include "AthContainers/CurrentContext.h"
 #include "TTree.h"
 #include <iostream>
 #include <sstream>
@@ -57,7 +56,7 @@ StatusCode test1()
   SG::auxid_t mtyp1 = SG::AuxTypeRegistry::instance().getAuxID<MoveTest> ("moveTest");
 
   TTree tree ("t", "t");
-  xAOD::TAuxStore s1( "fooAux." );
+  xAOD::TAuxStore s1( Gaudi::Hive::currentContext(), "fooAux." );
   RETURN_CHECK( APP_NAME, s1.readFrom (tree) );
   s1.resize(5);
 

@@ -139,7 +139,7 @@ def AddTauTESCompatibilityDecorationCfg(flags, **kwargs):
     
     TauCombinedTESWrapper = TauCombinedTESWrapper( name = f"{prefix}_TauCombinedTES", **kwargs )                                     
     acc.addPublicTool(TauCombinedTESWrapper)
-    acc.addEventAlgo(TauCombinedTESKernel(name              = "TauCombinedTESKernel",
+    acc.addEventAlgo(TauCombinedTESKernel(name              = f"{prefix}_TauCombinedTESKernel",
                                           AugmentationTools = [TauCombinedTESWrapper]))
     return acc
     
@@ -235,9 +235,10 @@ def AddMuonRemovalTauAODReRecoAlgCfg(flags, **kwargs):
             tool.inAOD = True
         kwargs.setdefault("officialTools", tools_after)
 
-    kwargs.setdefault("ExtraInputs",
-                      [ ( 'xAOD::TauJetContainer' , "StoreGateSvc+{baseName}.truthJetLink".format(baseName = inputTauJets)),
-                        ( 'xAOD::TauJetContainer' , "StoreGateSvc+{baseName}.truthParticleLink".format(baseName = inputTauJets)) ] )
+    if flags.Input.isMC:
+        kwargs.setdefault("ExtraInputs",
+                        [ ( 'xAOD::TauJetContainer' , f"StoreGateSvc+{inputTauJets}.truthJetLink" ),
+                            ( 'xAOD::TauJetContainer' , f"StoreGateSvc+{inputTauJets}.truthParticleLink" ) ] )
     TauAODRunnerAlg=CompFactory.getComp("TauAODRunnerAlg")
     myTauAODRunnerAlg = TauAODRunnerAlg(
         name = "MuonRemovalTauAODReRecoAlg",

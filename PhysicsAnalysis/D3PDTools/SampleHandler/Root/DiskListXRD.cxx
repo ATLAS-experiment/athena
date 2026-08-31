@@ -11,13 +11,9 @@
 #include <SampleHandler/DiskListXRD.h>
 
 #include <sstream>
-#include <vector>
 #include <RootCoreUtils/Assert.h>
 #include <RootCoreUtils/ShellExec.h>
-#include <RootCoreUtils/ThrowMsg.h>
 #include <SampleHandler/MessageCheck.h>
-
-#include <iostream>
 
 //
 // method implementations
@@ -51,23 +47,33 @@ namespace SH
 
     if (!m_isRead)
     {
-      std::string command = "xrdfs " + m_server + " ls -l " + m_directory;
+      std::string command = "xrdfs " + RCU::Shell::quote (m_server) + " ls -l " + RCU::Shell::quote (m_directory);
       ANA_MSG_DEBUG ("trying XRD command: " << command);
       m_list = RCU::Shell::exec_read (command);
-      ANA_MSG_DEBUG ("XRD command output:\n" << command);
+      ANA_MSG_DEBUG ("XRD command output:\n" << m_list);
       m_context = "command: " + command + "\n" + m_list;
       m_isRead = true;
+      m_pos = 0;
     }
 
-    while (!m_list.empty())
+    // rationale: we advance a running index through m_list rather than
+    //   repeatedly copying its tail, so that listing N entries costs
+    //   O(N) rather than O(N^2).  a final line without a trailing
+    //   newline is still processed.
+    while (m_pos < m_list.size())
     {
-      std::string::size_type split1 = m_list.find ('\n');
+      std::string::size_type split1 = m_list.find ('\n', m_pos);
+      std::string line;
       if (split1 == std::string::npos)
-	split1 = m_list.size();
-
-      const std::string line (m_list.substr (0, split1));
+      {
+	line = m_list.substr (m_pos);
+	m_pos = m_list.size();
+      } else
+      {
+	line = m_list.substr (m_pos, split1 - m_pos);
+	m_pos = split1 + 1;
+      }
       ANA_MSG_DEBUG ("next XRD list line: " << line);
-      m_list = m_list.substr (split1 + 1);
 
       std::string::size_type split2 = line.find ('/');
       if (split2 != std::string::npos &&
@@ -109,7 +115,7 @@ namespace SH
     RCU_READ_INVARIANT (this);
 
     if (m_file.empty() || !m_isDir)
-      return 0;
+      return nullptr;
 
     return new DiskListXRD (m_server, m_file, m_laxParser);
   }

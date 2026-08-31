@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
   Author : B. Laforge (laforge@lpnhe.in2p3.fr)
   4 May 2020
@@ -172,7 +172,7 @@ StatusCode MonitorPhotonAlgorithm::fillHistograms( const EventContext& ctx ) con
     Float_t myet = 0.;
     Float_t myeta = 0.;
     Float_t myphi = 0.;
-
+    const std::string monitorPhotonStr{"MonitorPhoton"};
     for (const auto *const p_iter : *photons) {
       // Check that the electron meets our requirements
       bool isGood;
@@ -328,7 +328,7 @@ StatusCode MonitorPhotonAlgorithm::fillHistograms( const EventContext& ctx ) con
           time_barrel = mytime; ehad1_barrel = myehad1; coreem_barrel = myecore;
           f0_barrel = myf0; f1_barrel = myf1; f2_barrel = myf2; f3_barrel = myf3; re233e237_barrel = myre233e237; re237e277_barrel = myre237e277;
           rconv_barrel = myrconv ; convtype_barrel = myconvtype ; contrkmatch1_barrel = mycontrkmatch1 ; contrkmatch2_barrel = mycontrkmatch2 ;
-          fill("MonitorPhoton", et_barrel,eta_barrel,phi_barrel, time_barrel, ehad1_barrel,coreem_barrel,
+          fill(monitorPhotonStr, et_barrel,eta_barrel,phi_barrel, time_barrel, ehad1_barrel,coreem_barrel,
 	       f0_barrel,f1_barrel,f2_barrel, f3_barrel,re233e237_barrel,re237e277_barrel,
 	       rconv_barrel,convtype_barrel,contrkmatch1_barrel,contrkmatch2_barrel,is_pt_gt_4gev_barrel,is_pt_gt_2_5gev_barrel,is_pt_gt_20gev_barrel);
           break;
@@ -338,7 +338,7 @@ StatusCode MonitorPhotonAlgorithm::fillHistograms( const EventContext& ctx ) con
           time_endcap = mytime; ehad1_endcap = myehad1; coreem_endcap = myecore;
           f0_endcap = myf0; f1_endcap = myf1; f2_endcap = myf2; f3_endcap = myf3; re233e237_endcap = myre233e237; re237e277_endcap = myre237e277;
           rconv_endcap = myrconv ; convtype_endcap = myconvtype ; contrkmatch1_endcap = mycontrkmatch1 ; contrkmatch2_endcap = mycontrkmatch2 ;
-          fill("MonitorPhoton",et_endcap,eta_endcap,phi_endcap,
+          fill(monitorPhotonStr,et_endcap,eta_endcap,phi_endcap,
 	       time_endcap, ehad1_endcap,coreem_endcap,
 	       f0_endcap,f1_endcap,f2_endcap,f3_endcap,re233e237_endcap,re237e277_endcap,
 	       rconv_endcap,convtype_endcap,contrkmatch1_endcap,contrkmatch2_endcap,is_pt_gt_4gev_endcap,is_pt_gt_2_5gev_endcap,is_pt_gt_20gev_endcap);
@@ -349,7 +349,7 @@ StatusCode MonitorPhotonAlgorithm::fillHistograms( const EventContext& ctx ) con
           time_crack = mytime; ehad1_crack = myehad1; coreem_crack = myecore;
           f0_crack = myf0; f1_crack = myf1; f2_crack = myf2; f3_crack = myf3; re233e237_crack = myre233e237; re237e277_crack = myre237e277;
           rconv_crack = myrconv ; convtype_crack = myconvtype ; contrkmatch1_crack = mycontrkmatch1 ; contrkmatch2_crack = mycontrkmatch2 ;
-          fill("MonitorPhoton",et_crack,eta_crack,phi_crack,time_crack, ehad1_crack,coreem_crack,
+          fill(monitorPhotonStr,et_crack,eta_crack,phi_crack,time_crack, ehad1_crack,coreem_crack,
           f0_crack,f1_crack,f2_crack,f3_crack,re233e237_crack,re237e277_crack,
 	  rconv_crack,convtype_crack,contrkmatch1_crack,contrkmatch2_crack,is_pt_gt_4gev_crack,is_pt_gt_2_5gev_crack,is_pt_gt_20gev_crack);
           break;
@@ -361,7 +361,7 @@ StatusCode MonitorPhotonAlgorithm::fillHistograms( const EventContext& ctx ) con
       // Fill. First argument is the tool name, all others are the variables to be histogramed
 
       lb = mylb; lbevonphotonsunconv = mylb ; lbevonphotonsconv = mylb; lbNCandidates = mylb;
-      fill("MonitorPhoton",
+      fill(monitorPhotonStr,
 	   lbevonphotonsconv,lbevonphotonsunconv,lb,lbNCandidates,
 	   et,eta,phi,time,ptcone20,topoetcone40,
 	   etconv,etaconv,phiconv,
@@ -376,7 +376,7 @@ StatusCode MonitorPhotonAlgorithm::fillHistograms( const EventContext& ctx ) con
     npconv = mynpconv;
     npunconv = mynpunconv;
 
-    fill("MonitorPhoton",np,npconv,npunconv);
+    fill(monitorPhotonStr,np,npconv,npunconv);
 
     return StatusCode::SUCCESS;
 }

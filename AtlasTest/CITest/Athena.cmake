@@ -32,7 +32,7 @@ atlas_add_citest( SimulationRun3AF3Checks
    DEPENDS_SUCCESS SimulationRun3AF3 )
 
 atlas_add_citest( SimulationRun4FullSim
-   SCRIPT RunWorkflowTests_Run4.py --CI -s -w FullSim -e '--maxEvents 5' --no-output-checks
+   SCRIPT RunWorkflowTests_Run4.py --CI -s -w FullSim -e '--maxEvents 5 --preInclude="Campaigns.MC23PhaseIISimulation"' --no-output-checks
    LOG_IGNORE_PATTERN "WARNING FPE" )  # ignore FPEs from Geant4
 
 atlas_add_citest( PileUpPresamplingRun2
@@ -42,7 +42,7 @@ atlas_add_citest( PileUpPresamplingRun3
    SCRIPT RunWorkflowTests_Run3.py --CI -p -w PileUpPresampling -e '--maxEvents 5' --no-output-checks )
 
 atlas_add_citest( PileUpPresamplingRun4FullTruth
-   SCRIPT RunWorkflowTests_Run4.py --CI -p -w PileUpPresampling -e '--maxEvents 5' )
+   SCRIPT RunWorkflowTests_Run4.py --CI -p -w PileUpPresampling -e '--maxEvents 5 --preInclude="Campaigns.MC23PhaseIIPileUp200"' )
 
 atlas_add_citest( DataOverlayPreparationRun3
    SCRIPT RunWorkflowTests_Run3.py --CI -p -w MinbiasPreprocessing -e '--maxEvents 5 --conditionsTag CONDBR2-BLKPA-2023-07' )
@@ -129,7 +129,7 @@ atlas_add_citest( RecoRun3Data_Overlay
    DEPENDS_SUCCESS OverlayRun3DataChain )
 
 atlas_add_citest( RecoRun4MC
-   SCRIPT RunWorkflowTests_Run4.py --CI -r -w MCReco -e '--maxEvents 5 --inputHITSFile=../../SimulationRun4FullSim/run_s3761/myHITS.pool.root' # go two levels up as the test runs in a subfolder
+   SCRIPT RunWorkflowTests_Run4.py --CI -r -w MCReco -e '--maxEvents 5 --preInclude="Campaigns.MC23PhaseIINoPileUp" --inputHITSFile=../../SimulationRun4FullSim/run_s3761/myHITS.pool.root' # go two levels up as the test runs in a subfolder
    DEPENDS_SUCCESS SimulationRun4FullSim )
 
 #################################################################################
@@ -368,51 +368,30 @@ atlas_add_citest( ACTS_Propagation_ITk_Muon_Gen3
 
 atlas_add_citest( ACTS_Propagation_ID
    SCRIPT ActsExtrapolationAlgTest.py )
-
- atlas_add_citest( ACTS_Production
-   SCRIPT ActsProduction.sh )
  
 atlas_add_citest( ACTS_Workflow
    SCRIPT ActsWorkflow.sh )
 
+atlas_add_citest( Athena_Tracking_Workflow_Legacy
+   SCRIPT AthenaTrackingWorkflowLegacy.sh )
+ 
 atlas_add_citest( ACTS_Workflow_Legacy
    SCRIPT ActsWorkflowLegacy.sh )
 
-atlas_add_citest( ACTS_Workflow_Cached_Legacy
-   SCRIPT ActsWorkflowCachedLegacy.sh )
+atlas_add_citest( ACTS_Workflow_Cached
+   SCRIPT ActsWorkflowCached.sh )
  
 atlas_add_citest( ACTS_Workflow_HeavyIons
    SCRIPT ActsWorkflowHeavyIons.sh )
- 
-atlas_add_citest( ACTS_ValidateClusters
-   SCRIPT ActsValidateClusters.sh )
 
 atlas_add_citest( ACTS_ActsPersistifyEDM 
    SCRIPT ActsPersistifyEDM.sh )
 
-atlas_add_citest( ACTS_ValidateTracks
-   SCRIPT ActsValidateTracks.sh )
-
-atlas_add_citest( ACTS_ValidateResolvedTracks
-   SCRIPT ActsValidateResolvedTracks.sh )
-
-atlas_add_citest( ACTS_ValidateAmbiguityResolution
-   SCRIPT ActsValidateAmbiguityResolution.sh )
-
 atlas_add_citest( ACTS_WorkflowWithScoreBasedAmbiguity
    SCRIPT ActsWorkflowWithScoreBasedAmbiguity.sh )
 
-atlas_add_citest( ACTS_ActsGx2fRefitting
-   SCRIPT ActsGx2fRefitting.sh )
-   
-atlas_add_citest( ACTS_ActsKfRefitting
-   SCRIPT ActsKfRefitting.sh )
-
 atlas_add_citest( ACTS_ActsEFTrackFit
    SCRIPT ActsEFTrackFit.sh )
-
-atlas_add_citest( ACTS_ActsGSFRefitting
-   SCRIPT ActsGSFRefitting.sh )
 
 atlas_add_citest( ACTS_ActsGSFRefittingWithActsElectronExtrapolation
    SCRIPT ActsGSFRefitWithActsElectronExtrapolation.sh )
@@ -428,13 +407,9 @@ atlas_add_citest( ACTS_ActsPersistifySeeds
 
 atlas_add_citest( ACTS_ActsDumpGeometryIdentifiers
    SCRIPT ActsDumpGeometryIdentifiers.sh )
- 
-atlas_add_citest( ACTS_ActsBenchmarkLegacyWithSpot
-   SCRIPT ActsBenchmarkLegacyWithSpot.sh 8 100
-   PROPERTIES PROCESSOR 8 )
 
-atlas_add_citest( ACTS_ActsBenchmarkLegacyWithSpot_Cached
-   SCRIPT ActsBenchmarkLegacyWithSpotCached.sh 8 100
+atlas_add_citest( ACTS_ActsBenchmarkWithSpot_Cached
+   SCRIPT ActsBenchmarkWithSpotCached.sh 8 100
    PROPERTIES PROCESSOR 8 )
 
 atlas_add_citest( ACTS_ActsBenchmarkTrackingWithSpot
@@ -452,14 +427,8 @@ atlas_add_citest( ACTS_ActsBenchmarkWithSpotGbts
 atlas_add_citest( ACTS_ActsAnalogueClustering
   SCRIPT ActsAnalogueClustering.sh )
 
-atlas_add_citest( ACTS_CheckObjectCounts_Workflow_Legacy
-  SCRIPT CheckCountTest.sh ActsCheckObjectCountsLegacy )
-
-atlas_add_citest( ACTS_CheckObjectCounts_WorkflowCached_Legacy
-  SCRIPT CheckCountTest.sh ActsCheckObjectCountsCachedLegacy )
-
-atlas_add_citest( ACTS_CheckObjectCounts_WorkflowHgtd_Legacy
-  SCRIPT CheckCountTest.sh ActsCheckObjectCountsHgtdLegacy )
+atlas_add_citest( ACTS_ActsNNClustering
+  SCRIPT ActsNNClustering.sh )
 
 atlas_add_citest( ACTS_CheckObjectCounts_Workflow
   SCRIPT CheckCountTest.sh ActsCheckObjectCounts )
@@ -500,29 +469,27 @@ atlas_add_citest( TriggerMC_HI
 atlas_add_citest( TriggerData
    SCRIPT test_trig_data_v1Dev_build.py )
 
-atlas_add_citest( Trigger_athenaHLT_v1Dev
+atlas_add_citest( Trigger_athenaEF_v1Dev
    SCRIPT test_trigP1_v1Dev_decodeBS_build.py )
 
-atlas_add_citest( Trigger_athenaHLT_v1PhysP1
+atlas_add_citest( Trigger_athenaEF_v1PhysP1
    SCRIPT test_trigP1_v1PhysP1_build.py )
 
-atlas_add_citest( Trigger_athenaHLT_v1Cosmic
+atlas_add_citest( Trigger_athenaEF_v1Cosmic
    SCRIPT test_trigP1_v1Cosmic_build.py )
 
-atlas_add_citest( Trigger_athenaHLT_v1PhysP1_HI
+atlas_add_citest( Trigger_athenaEF_v1PhysP1_HI
    SCRIPT test_trigP1_v1PhysP1_HI_run3_build.py )
 
 atlas_add_citest( TriggerConfigFlags
-   SCRIPT python -m TriggerJobOpts.TriggerConfigFlags --verbose
-   POST_EXEC_SCRIPT nopost.sh )
+   SCRIPT python -m TriggerJobOpts.TriggerConfigFlags --verbose )
 
 atlas_add_citest( EFTracking_FPGATrackSim_CI
   SCRIPT FPGATrackSim_CI.sh
    LOG_IGNORE_PATTERN "FPGATrackSimProto.*ERROR Propagation reached the step count limit.*|FPGATrackSimProto.*ERROR.*Propagation failed: PropagatorError.*|WARNING FPE.*FPGATrackSimProtoTackFitAlg.*|.*WARNING FPE INVALID.*ResolvedProtoTrackToAltTrackParticleCnvAlg.*|.*ERROR.*No start volume resolved.*|.*WARNING ERROR message limit.*|.*ERROR \|" )
 
 atlas_add_citest (TrigInDetValidationMenu 
-               SCRIPT TrigInDetValidation_menu_test.py
-               POST_EXEC_SCRIPT nopost.sh )
+               SCRIPT TrigInDetValidation_menu_test.py )
 
 #################################################################################
 # RNTuple

@@ -111,6 +111,15 @@ atlas_add_test( test_hdf5_threads
   POST_EXEC_SCRIPT noerror.sh )
 
 
+# test merging
+atlas_add_executable( test-hdf5-merge
+  util/test-hdf5-merge.cxx
+  LINK_LIBRARIES HDF5Utils )
+
+atlas_add_test( test_hdf5_merge
+  SCRIPT test-hdf5-merge
+  POST_EXEC_SCRIPT noerror.sh )
+
 # half precision tests
 atlas_add_executable( test-half-precision
   util/test-half-precision.cxx

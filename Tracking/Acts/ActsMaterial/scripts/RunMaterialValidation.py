@@ -58,6 +58,7 @@ flags.GeoModel.AtlasVersion = args.geometrytag
 flags.IOVDb.GlobalTag = "OFLCOND-SIM-00-00-00"
 flags.GeoModel.Align.Dynamic = False
 
+
 # This should run serially
 flags.Concurrency.NumThreads = 1
 flags.Concurrency.NumConcurrentEvents = 1
@@ -72,7 +73,7 @@ if args.geoModelSqLiteFile:
      from AthenaConfiguration.Enums import LHCPeriod
      flags.GeoModel.Run = LHCPeriod.Run4
 else:
-    defaultDetectors = ['ITkPixel', 'ITkStrip']
+    defaultDetectors = ['ITkPixel', 'ITkStrip', 'HGTD']
     detectors = args.detectors if 'detectors' in args and args.detectors else defaultDetectors
     detectors.append('Bpipe')  # always run with beam pipe
     setupDetectorFlags(flags, detectors, toggle_geometry=True)

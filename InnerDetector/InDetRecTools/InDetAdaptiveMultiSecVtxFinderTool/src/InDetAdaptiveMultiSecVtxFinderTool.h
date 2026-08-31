@@ -36,6 +36,7 @@
 #include "xAODTracking/VertexContainerFwd.h"
 #include "xAODTracking/VertexFwd.h"
 
+#include <utility>
 namespace Trk {
 
     class Track;

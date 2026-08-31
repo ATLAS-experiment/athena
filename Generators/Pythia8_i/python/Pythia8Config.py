@@ -50,6 +50,10 @@ def Pythia8BaseCfg(flags, name="Pythia8_i", **kwargs):
     if "CollisionEnergy" not in kwargs:
         kwargs["CollisionEnergy"] = flags.Beam.Energy * 2 / GeV
 
+    # Random Seed and DSID
+    kwargs.setdefault("RandomSeed", flags.Random.SeedOffset)
+    kwargs.setdefault("Dsid", flags.Generator.DSID)
+
     # Load basic parameters
     base_cmds.extend([
         "6:m0 = 172.5",
@@ -250,8 +254,14 @@ def Pythia8_MadGraph_Cfg(flags, ShowerCfg=Pythia8BaseCfg, **kwargs):
     Pythia8BaseCfg) so tune/EvtGen fragments can be injected without
     instantiating Pythia8_i twice.
     """
-    # Set LHE file name (override with LHEFile="myfile.lhe" if needed).
-    kwargs.setdefault("LHEFile", "events.lhe")
+    # Match Pythia8's input name to the file prepared by EvgenHelpers.
+    # This can still be overridden by setting in the config LHEFile="myfile.lhe[.gz]".
+    lhe_file = (
+        "events.lhe.gz"
+        if flags.Generator.avoidExtracting
+        else "events.lhe"
+    )
+    kwargs.setdefault("LHEFile", lhe_file)
 
     # Configure Pythia8 through the selected shower fragment.
     ca = ShowerCfg(flags, **kwargs)

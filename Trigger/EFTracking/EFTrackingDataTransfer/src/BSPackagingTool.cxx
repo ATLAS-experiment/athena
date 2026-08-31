@@ -24,7 +24,7 @@ StatusCode BSPackagingTool::pack(OffloadMessage& msg,
                                  const EventContext& context) const {
 
   msg.mutable_identifier()->assign("RawEvent");
-  m_robsSvc->collectCompleteEventData(context);
+  // m_robsSvc->collectCompleteEventData(context); // FIXME: Removed in 0a1b1507aba0ebdea6a9f4f8adcbe54b4c5f3ecc
   const RawEvent* fullEvent = m_robsSvc->getEvent(context);
   fullEvent->uncompress();
   ATH_MSG_DEBUG(" event " << fullEvent->global_id() << " children "

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /*********************************************************************
@@ -723,7 +723,10 @@ namespace Trk
     }
     double P2 = Px*Px+Py*Py+Pz*Pz;
     double B = Px*dx+Py*dy+Pz*dz;
-
+    if (P2 == 0.)[[unlikely]]{
+      ATH_MSG_ERROR("a0zError: Divisor is zero - returning zero.");
+      return 0.;
+    }
     double da0dx  = (Px*Pz)/P2;
     double da0dy  = (Py*Pz)/P2;
     double da0dz  = (Pz*Pz)/P2 - 1.;
@@ -974,6 +977,10 @@ namespace Trk
     }
     double PTsq = Px*Px+Py*Py;
     double PT = (PTsq>0.) ? sqrt(PTsq) : 0.;
+    if (PTsq == 0.)[[unlikely]]{
+      ATH_MSG_ERROR("lxyError: Divisor is zero - returning zero.");
+      return 0.;
+    }
     double LXYoverPT = (Px*dx+Py*dy)/PTsq;
 
     for( unsigned int it=0; it<NTrk; it++) {
@@ -1097,6 +1104,10 @@ namespace Trk
     }
     double Psq = Px*Px+Py*Py+Pz*Pz;
     double P = (Psq>0.) ? sqrt(Psq) : 0.;
+    if (Psq == 0.)[[unlikely]]{
+      ATH_MSG_ERROR("lxyzError: Divisor is zero - returning zero.");
+      return 0.;
+    }
     double LXYZoverP = (Px*dx+Py*dy+Pz*dz)/Psq;
 
     for( unsigned int it=0; it<NTrk; it++) {

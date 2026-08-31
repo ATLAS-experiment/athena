@@ -27,6 +27,7 @@
 #include "StoreGate/ReadDecorHandle.h"
 #include <vector>
 #include <cmath>
+#include <stdexcept>
 
 namespace InDet
 {
@@ -738,6 +739,9 @@ bool InDetV0FinderTool::pointAtVertex(const xAOD::Vertex* v0, const xAOD::Vertex
     float prob = m_V0Tools->vertexProbability(v0);
     float nLogProb = 999999;
     if (prob>0) nLogProb = -1*log10f(prob); //bdt model uses the log, not the raw value
+    if (v0lxyError == 0.){
+      throw std::runtime_error("v0lxyError is zero in division.");
+    }
     std::vector<float> bdt_vars = {
                                     nLogProb,
                                     std::abs(v0a0xy),

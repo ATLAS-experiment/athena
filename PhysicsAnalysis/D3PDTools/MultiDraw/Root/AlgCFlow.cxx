@@ -20,7 +20,9 @@
 #include <MultiDraw/Formula.h>
 #include <MultiDraw/FormulaSvc.h>
 #include <RootCoreUtils/Assert.h>
-#include <RootCoreUtils/ThrowMsg.h>
+#include <AsgMessaging/MsgStreamMacros.h>
+
+#include <stdexcept>
 
 //
 // method implementations
@@ -33,7 +35,6 @@ namespace MD
   void AlgCFlow ::
   testInvariant () const
   {
-    RCU_INVARIANT (this != 0);
     if (m_hist != 0)
     {
       RCU_INVARIANT (m_hist->GetDirectory() == 0);
@@ -96,7 +97,7 @@ namespace MD
 	      m_back.back() = form2;
 	  }
 	  if (m_back.back() == form)
-	    RCU_THROW_MSG ("unknown back formula: " + back);
+	    throw std::runtime_error ("unknown back formula: " + back);
 	}
       }
     }
@@ -163,8 +164,8 @@ namespace MD
       if (m_index[form]) switch (m_index[form]->ndim())
       {
       case -1:
-	RCU_THROW_MSG ("formula not valid: " + m_formulas[form]);
-	break;
+        ATH_MSG_ERROR ("formula not valid: " << m_formulas[form]);
+        return EL::StatusCode::FAILURE;
       case 0:
 	if (m_index[form]->ndata() > 0)
 	  m_values[form] = m_index[form]->value (0);
@@ -177,7 +178,8 @@ namespace MD
 	  size = m_index[form]->ndata();
 	break;
       default:
-	RCU_THROW_MSG ("unknown formula dimension: " + m_formulas[form]);
+        ATH_MSG_ERROR ("unknown formula dimension: " << m_formulas[form]);
+        return EL::StatusCode::FAILURE;
       }
     }
 

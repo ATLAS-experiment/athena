@@ -40,7 +40,10 @@ namespace EL
         const std::string& libName = preloaderList[iter];
         const std::string& funcName = preloaderList[iter + 1];
 
-        if (gSystem->Load(libName.c_str()) != 0)
+        // TSystem::Load returns 1 when the library is already loaded (e.g.
+        // pulled in via dictionary auto-loading), which is not an error;
+        // only a negative return value indicates an actual failure.
+        if (gSystem->Load(libName.c_str()) < 0)
         {
           ANA_MSG_ERROR ("Failed to load library " << libName);
           return StatusCode::FAILURE;

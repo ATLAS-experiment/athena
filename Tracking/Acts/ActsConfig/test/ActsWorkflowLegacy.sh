@@ -24,8 +24,6 @@ Reco_tf.py \
 	     flags.Scheduler.ShowControlFlow = True; \
 	     flags.Detector.EnableCalo=True;" \
   --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingRecoPreInclude,ActsConfig.ActsCIFlags.actsLegacyWorkflowFlags" \
-  --outputDAOD_IDTRKVALIDFile DAOD.IDTRKVALID.pool.root \
-  --outputDAOD_IDTIDEFile DAOD.CTIDE.pool.root \
   --ignorePatterns "${ignore_pattern}" \
   --conditionsTag ${conditions_tag} \
   --inputRDOFile ${input_rdo} \

@@ -1,7 +1,7 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file AthContainers/tests/DVLIterator.h
@@ -20,43 +20,8 @@
 #include "AthContainers/tools/ElementProxy.h"
 #include "CxxUtils/checker_macros.h"
 #include <boost/iterator/iterator_adaptor.hpp>
-#include <boost/version.hpp>
 #include <iterator>
 #include <cstdlib>
-
-
-#if BOOST_VERSION < 105000
-namespace boost { namespace detail {
-
-
-/**
- * @brief Hack for dictionary generation.
- *
- * This is a hack to allow the operator->() defined by the boost base class
- * of iterator to compile.  It actually makes no sense to ever use operator->,
- * since value_type is always a pointer.  But if you try to generate
- * dictionary information for one of these iterators, then you'll
- * be trying to instantiate operator->, whether or not it makes sense.
- * This should be sufficient to get things to compile; we'll just stick
- * in abort in case anyone manages to actually call the thing.
- */
-template <class T, class U>
-struct operator_arrow_result<T*,
-                             DataModel_detail::ElementProxy<U>,
-                             T**>
-{
-public:
-  typedef T* ValueType;
-  typedef DataModel_detail::ElementProxy<U> Reference;
-  typedef T** Pointer;
-  typedef Pointer type;
-  static type make (Reference /*x*/) { std::abort(); return 0; }
-};
-
-
-}}
-#endif
-
 
 namespace DataModel_detail {
 

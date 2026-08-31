@@ -10,7 +10,7 @@
 // Author: Bill Balunas <bill.balunas@cern.ch>
 ///////////////////////////////////////////////////////////////////
 
-#include <iostream>
+
 
 // METUtilities includes
 #include "METUtilities/METHelpers.h"
@@ -26,6 +26,7 @@
 #include "xAODJet/JetContainer.h"
 
 #include "FourMomUtils/xAODP4Helpers.h"
+#include <iostream>
 
 namespace met {
   ANA_MSG_SOURCE (msgMET, "METUtilities")
@@ -33,6 +34,7 @@ namespace met {
   void addGhostMuonsToJets(const xAOD::MuonContainer& muons, xAOD::JetContainer& jets)
   {
     std::vector<const xAOD::TrackParticle*> jet_tracks;
+    const std::string ghostMuonStr{"GhostMuon"};
     for (xAOD::Jet* jet: jets) {
       // Fill this with muons to be associated
       std::vector<const xAOD::Muon*> muons_in_jet;
@@ -56,7 +58,7 @@ namespace met {
           } // loop over jet tracks
         } // loop over muons
       } // jet has associated tracks
-      jet->setAssociatedObjects( "GhostMuon", muons_in_jet) ;
+      jet->setAssociatedObjects( ghostMuonStr, muons_in_jet) ;
     } // loop over jets
   }
 

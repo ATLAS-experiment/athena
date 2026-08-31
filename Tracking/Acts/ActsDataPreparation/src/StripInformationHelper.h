@@ -7,6 +7,8 @@
 
 #include "GeoPrimitives/GeoPrimitives.h"
 
+#include "Acts/SpacePointFormation/StripSpacePointBuilder.hpp"
+
 namespace ActsTrk {
 
   /// @brief Total number of neightbours and indices
@@ -55,11 +57,13 @@ namespace ActsTrk {
     //@{
     const unsigned int& idHash() const {return m_idHash;}
     const size_t& clusterIndex() const {return m_clusterIndex;}
-    const Amg::Vector3D& stripCenter () const {return m_stripCenter ;}
-    const Amg::Vector3D& stripDirection () const {return m_stripDir ;}
-    const Amg::Vector3D& trajDirection () const {return m_trajDir ;}
-    const Amg::Vector3D& normal() const {return m_normal;}
-    const double& oneOverStrip() const {return m_oneOverStrip;}
+    const Amg::Vector3D& stripCenter () const {return m_cache.mid ;}
+    const Amg::Vector3D& stripDirection () const {return m_cache.btmToTop ;}
+    const Amg::Vector3D& trajDirection () const {return m_cache.vtxToMid2 ;}
+    const Amg::Vector3D& normal() const {return m_cache.normal;}
+    const double& oneOverStrip() const {return m_cache.invLength;}
+    /// The same quantities in the layout Acts::StripSpacePointBuilder consumes
+    const Acts::StripSpacePointBuilder::ConstrainedStripCache& constrainedCache() const {return m_cache;}
     const float& locX() const {return m_locX;}
     const size_t& stripIndex() const {return m_stripIndex;}
     Amg::Vector3D position(const double& shift) const;
@@ -68,21 +72,10 @@ namespace ActsTrk {
   private:
 
     /// @name Private members
-    /// @param m_stripCenter Center of strip, evaluated in setting function
-    /// as (stripStart+stripEnd)*0.5
-    Amg::Vector3D m_stripCenter {0., 0., 0.};
-    /// @param m_stripDir Direction of strip, evaluated in setting function
-    /// as (stripStart-stripEnd)
-    Amg::Vector3D m_stripDir {0., 0., 0.};
-    /// @param m_trajDir Direction of trajectory, evaluated in setting function
-    /// as (stripStart+stripEnd-2*beamSpotVertex)
-    Amg::Vector3D m_trajDir {0., 0., 0.};
-    /// @param m_normal Normal to strip diretion and trjectory direction plane,
-    /// evaluated in setting function as cross product
-    /// between stripDirection and trajDirection
-    Amg::Vector3D m_normal {0., 0., 0.};
-    /// @param m_oneOverStrip Inverse of length of the strip
-    double        m_oneOverStrip {0.};
+    /// @param m_cache The strip geometry, in the layout Acts::StripSpacePointBuilder
+    /// wants it, evaluated in the setting function. See the accessors above for the
+    /// correspondence with the Athena names.
+    Acts::StripSpacePointBuilder::ConstrainedStripCache m_cache {};
     /// @param m_locX Location X of cluster
     float         m_locX {0.};
     /// @param m_stripIndex index of the strip corresponding to location

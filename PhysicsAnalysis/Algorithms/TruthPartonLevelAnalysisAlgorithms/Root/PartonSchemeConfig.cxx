@@ -137,6 +137,20 @@ const PartonSchemeConfig& getSchemeConfig(const std::string& schemeName) {
         {}}},
 
       // ------------------------------------------------------------------ //
+      // TtbarFCNC: t -> q X, X -> decay1 decay2
+      // ------------------------------------------------------------------ //
+      {"TtbarFCNC",
+       {{"TruthTop"},
+        {DecoratorGroup::TopFCNC, DecoratorGroup::AntiTopFCNC, DecoratorGroup::Ttbar},
+        {},
+        {
+            {SpecialFillType::TopFCNC},
+            {SpecialFillType::AntiTopFCNC},
+            {SpecialFillType::TtbarFCNC},
+        },
+        {}}},
+
+      // ------------------------------------------------------------------ //
       // Ttbarbbbar
       // ------------------------------------------------------------------ //
       {"Ttbarbbbar",

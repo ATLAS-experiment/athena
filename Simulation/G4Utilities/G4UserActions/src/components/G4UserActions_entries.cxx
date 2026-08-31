@@ -25,7 +25,6 @@
 #include "../VolumeDumperTool.h"
 #include "../TestActionTool.h"
 #include "../AthenaStackingActionTool.h"
-#include "../AthenaTrackingActionTool.h"
 
 #ifdef ATHSIMULATION_USE_CELER
 #include "../Celeritas/CelerOffloadTool.h"
@@ -53,7 +52,6 @@ DECLARE_COMPONENT( G4UA::LooperThresholdSetTool )
 DECLARE_COMPONENT( G4UA::TestActionTool )
 DECLARE_COMPONENT( G4UA::VolumeDumperTool )
 DECLARE_COMPONENT( G4UA::AthenaStackingActionTool )
-DECLARE_COMPONENT( G4UA::AthenaTrackingActionTool )
 
 #ifdef ATHSIMULATION_USE_CELER
 DECLARE_COMPONENT( G4UA::CelerOffloadTool )

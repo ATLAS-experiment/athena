@@ -39,7 +39,7 @@ StatusCode ActsEMBremCollectionBuilder::initialize() {
 
   ATH_CHECK(m_actsFitter.retrieve());
   ATH_CHECK(m_cnvTool.retrieve());
-  ATH_CHECK(m_trackingGeometryTool.retrieve());
+  ATH_CHECK(m_trackingGeometrySvc.retrieve());
 
   std::string backendname{};
   try {
@@ -177,7 +177,8 @@ StatusCode ActsEMBremCollectionBuilder::convertTracks(
 
   static const SG::AuxElement::Accessor<ElementLink<xAOD::TrackParticleContainer>>
       originalTPLink("originalTrackParticle");
-
+      
+  static const SG::AuxElement::Accessor<float> QoverPLM("QoverPLM");
   for (const auto [track, originalTP] : Acts::zip(actsContainer, originals)) {
     xAOD::TrackParticle* tp = outputTPs.push_back(std::make_unique<xAOD::TrackParticle>());
 
@@ -196,7 +197,7 @@ StatusCode ActsEMBremCollectionBuilder::convertTracks(
         break;
       }
     }
-    static const SG::AuxElement::Accessor<float> QoverPLM("QoverPLM");
+    
     QoverPLM(*tp) = QoverPLast;
 
     // isRefitted option should check the actual refit status

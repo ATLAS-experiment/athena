@@ -20,6 +20,29 @@ def executeTest(cfg):
     cfg.printConfig(withDetails=True, summariseProps=True)
     if not cfg.run().isSuccess(): exit(1)
 
+def configureDefaultTags(flags):
+    from AthenaCommon.Logging import logging
+    log = logging.getLogger('GeometryConfiguration')
+
+    if not flags.GeoModel.AtlasVersion:
+        if not flags.GeoModel.SQLiteDB:
+            raise ValueError("Default tag configuration only works for SQLite")
+        ### For dummy purposes configure the R2 geometry tag such that the job does not crash
+        from AthenaConfiguration.TestDefaults import defaultGeometryTags
+        flags.GeoModel.AtlasVersion = defaultGeometryTags.RUN2    
+        from AthenaConfiguration.Enums import LHCPeriod
+        if flags.GeoModel.Run == LHCPeriod.Run3:   
+            flags.GeoModel.AtlasVersion = defaultGeometryTags.RUN3
+        elif flags.GeoModel.Run == LHCPeriod.Run4:
+            flags.GeoModel.AtlasVersion = defaultGeometryTags.RUN4
+        else:
+            raise ValueError(f"Invalid run period {flags.GeoModel.Run}")
+
+    configureCondTag(flags)
+
+    log.info(f"Setup {flags.GeoModel.AtlasVersion} geometry loading {flags.GeoModel.SQLiteDBFullPath}")
+    log.info(f"Use conditions tag {flags.IOVDb.GlobalTag}")
+
 def configureCondTag(flags):
     if not flags.GeoModel.AtlasVersion:
         raise ValueError("No ATLAS version is configured")
@@ -34,6 +57,27 @@ def configureCondTag(flags):
           flags.IOVDb.GlobalTag = defaultConditionsTags.RUN4_MC
     else:
         raise ValueError(f"Invalid run period {flags.GeoModel.Run}")
+
+
+def prepareInput(flags, inputTokens : list) :
+    flags.Input.Files = []
+    ### Assemble all files in a directory or all files not having the suffix txt conf. 
+    ### The latter are interpreted as file lists
+    from os import path, listdir
+    for fileArg in inputTokens:
+        if path.isdir(fileArg):
+            flags.Input.Files += [ "{dir}/{file}".format(dir=fileArg, file=y) for y in listdir(fileArg) ]
+        else:
+            if fileArg[fileArg.rfind(".")+1 :]not in ["txt", "conf"]:
+                    flags.Input.Files+=[fileArg]
+            else:
+                with open(fileArg) as inStream:
+                   #Check if the input is a string of comma separated files, and if it is, split it into a list
+                   if isinstance(inStream, str) and "," in inStream:
+                       flags.Input.Files += inStream.split(",")
+                   else:
+                      flags.Input.Files+=[ line.strip() for line in inStream if line[0]!='#'] 
+
 
 def SetupMuonStandaloneConfigFlags():
     """

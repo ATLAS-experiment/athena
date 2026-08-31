@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // Athena includes
@@ -172,8 +172,8 @@ StatusCode TileInfoDump::execute(const EventContext& ctx) {
   if (m_print1gNoise) print1gNoise();
 
   //=== Print Bad Channels
-  if (m_printBadChannels) printBadChannels();
-  if (m_printBadCells) printBadCells();
+  if (m_printBadChannels) printBadChannels(ctx);
+  if (m_printBadCells) printBadCells(ctx);
 
   return StatusCode::SUCCESS;
 }
@@ -511,7 +511,7 @@ void TileInfoDump::printPulseShapes() {
 
 //
 //___________________________________________________________________________________________
-void TileInfoDump::printBadChannels() {
+void TileInfoDump::printBadChannels(const EventContext& ctx) {
 
   ATH_MSG_DEBUG( "in printBadChannels()" );
 
@@ -542,7 +542,7 @@ void TileInfoDump::printBadChannels() {
       for (unsigned int channel = 0; channel < TileCalibUtils::MAX_CHAN; ++channel) {
 
         //=== check channel status
-        TileBchStatus status = m_tileBadChanTool->getChannelStatus(drawerIdx, channel);
+        TileBchStatus status = m_tileBadChanTool->getChannelStatus(drawerIdx, channel, ctx);
         if (status.isAffected()) {
           if (status.isBad()) {
             sDet << TileCalibUtils::getDrawerString(ros, drawer)
@@ -560,7 +560,7 @@ void TileInfoDump::printBadChannels() {
 
           //==== check connected adc status
           for (unsigned int adc = 0; adc < TileCalibUtils::MAX_GAIN; ++adc) {
-            status = m_tileBadChanTool->getAdcStatus(drawerIdx, channel, adc);
+            status = m_tileBadChanTool->getAdcStatus(drawerIdx, channel, adc, ctx);
             if (status.isBad()) {
               sDet << "-B-> " << TileCalibUtils::getDrawerString(ros, drawer)
                    << "/ch" << channel << "/" << adc << " : " << status.getString() << std::endl;
@@ -637,7 +637,7 @@ void FillCell(TH2F *hist, const CaloDetDescrElement* elem) {
 
 //
 //____________________________________________________________________________
-void TileInfoDump::printBadCells() {
+void TileInfoDump::printBadCells(const EventContext& ctx) {
 
   ATH_MSG_DEBUG( "in printBadCells()" );
 
@@ -666,7 +666,6 @@ void TileInfoDump::printBadCells() {
   HWIdentifier ch1_id, ch2_id;
   TileBchStatus ch1_status, ch2_status;
 
-  const EventContext &ctx = Gaudi::Hive::currentContext();
   SG::ReadCondHandle<CaloDetDescrManager> caloMgrHandle{m_caloMgrKey,ctx};
   const CaloDetDescrManager* caloMgr = *caloMgrHandle;
 
@@ -682,12 +681,12 @@ void TileInfoDump::printBadCells() {
     }
 
     ch1_id = cabling->s2h_channel_id(m_tileID->pmt_id(cell_id, 0));
-    ch1_status = m_tileBadChanTool->getChannelStatus(ch1_id);
+    ch1_status = m_tileBadChanTool->getChannelStatus(ch1_id, ctx);
 
     if (m_tileID->is_tile_gapscin(cell_id)) ch2_id = ch1_id;
     else ch2_id = cabling->s2h_channel_id(m_tileID->pmt_id(cell_id, 1));
 
-    ch2_status = m_tileBadChanTool->getChannelStatus(ch2_id);
+    ch2_status = m_tileBadChanTool->getChannelStatus(ch2_id, ctx);
 
     //--- get channel
     int ich1 = m_tileHWID->channel(ch1_id);

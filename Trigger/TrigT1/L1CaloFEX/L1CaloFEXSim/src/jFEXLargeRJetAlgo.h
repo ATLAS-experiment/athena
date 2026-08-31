@@ -1,5 +1,5 @@
 /*
- Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+ Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 //***************************************************************************
 //              jFEXLargeRJetAlgo - Algorithm for large R jet Algorithm in jFEX
@@ -16,6 +16,7 @@
 #include "L1CaloFEXToolInterfaces/IjFEXSmallRJetAlgo.h"
 #include "L1CaloFEXSim/jTowerContainer.h"
 
+#include <vector>
 
 namespace LVL1 {
 
@@ -29,7 +30,7 @@ namespace LVL1 {
     virtual StatusCode initialize() override;
 
     /** Destructor */
-    virtual ~jFEXLargeRJetAlgo();
+    virtual ~jFEXLargeRJetAlgo() = default;
 
     virtual StatusCode safetyTest() override;
     virtual void setupCluster(int inputTable[15][15]) override;
@@ -49,7 +50,7 @@ namespace LVL1 {
     bool getTTowerSat(unsigned int TTID );
     bool m_saturation =false;
     int m_largeRJetEtRing_IDs[15][15];
-    int getTTowerET(unsigned int TTID ) ;
+    int getTTowerET(unsigned int TTID ) const;
     std::unordered_map<int,std::vector<int> > m_map_Etvalues;
   };
 

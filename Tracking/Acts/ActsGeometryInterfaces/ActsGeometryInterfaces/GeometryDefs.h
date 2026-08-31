@@ -54,6 +54,9 @@ namespace ActsTrk {
         constexpr std::size_t s_innerPixelVolumeId = 5;
         constexpr std::size_t s_outerPixelVolumeId = 10;
         constexpr std::size_t s_beamPipeVolumeId = 1;
+        /** HGTD volume IDs */
+        constexpr std::size_t s_hgtdPosVolumeId = 30;
+        constexpr std::size_t s_hgtdNegVolumeId = 31;
         /** Volume Ids ofthe Calorimeter */
         constexpr std::size_t s_caloEnvelopeID = 39;
         constexpr std::size_t s_caloBarrelId = 40;

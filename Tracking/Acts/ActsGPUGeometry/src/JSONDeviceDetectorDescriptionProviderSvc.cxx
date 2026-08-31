@@ -8,8 +8,10 @@
 #include "PixelReadoutGeometry/PixelModuleDesign.h"
 #include "ActsGPUEvent/TracccDetectorConditionsDescription.h"
 #include "ActsGPUEvent/TracccDetectorDesignDescription.h"
+#include "ActsGPUEvent/TracccDetectorGeometryDescription.h"
 
 #include "traccc/io/read_detector_description.hpp"
+#include "traccc/io/read_detector.hpp"
 #include "traccc/io/data_format.hpp"
 
 #include "vecmem/utils/copy.hpp"
@@ -25,16 +27,15 @@ StatusCode JSONDeviceDetectorDescriptionProviderSvc::initialize()
 {
   ATH_MSG_DEBUG("Initializing  device detector description provider service ");
 
-  ATH_CHECK(m_hostMR.retrieve());
-  ATH_CHECK(m_deviceMR.retrieve());
+  ATH_CHECK(m_MRs.retrieve());
   ATH_CHECK(m_copy.retrieve());
   ATH_CHECK(loadIdMaps());
 
-  auto hostDesign = std::make_unique<traccc::detector_design_description::host>(m_hostMR->mr());
-  auto hostCond   = std::make_unique<traccc::detector_conditions_description::host>(m_hostMR->mr());
+  auto hostDesign = std::make_unique<traccc::detector_design_description::host>(*m_MRs->hostMR());
+  auto hostCond   = std::make_unique<traccc::detector_conditions_description::host>(*m_MRs->hostMR());
 
   std::unique_ptr<traccc::detector_design_description::buffer>     deviceDesign;
-  std::unique_ptr<traccc::detector_conditions_description::buffer> deviceCond;
+  std::unique_ptr<traccc::detector_conditions_description::buffer> deviceCond; 
 
   auto copy = m_copy->copy(EventContext{});
 
@@ -51,6 +52,17 @@ StatusCode JSONDeviceDetectorDescriptionProviderSvc::initialize()
       << ",  digitization: " << m_digitizationFile.value()
       << ",  conditions:   " << m_conditionsFile.value());
 
+  // Construct detector geometry
+  ATH_MSG_INFO("Loading traccc detector");
+  auto hostDetector = std::make_unique<traccc::host_detector>();
+  traccc::io::read_detector(
+      *hostDetector, *m_MRs->hostMR(),
+      PathResolverFindCalibFile(m_geometryFile.value()));
+
+  auto deviceDetector =
+        std::make_unique<traccc::detector_buffer>(traccc::buffer_from_host_detector(*hostDetector, m_MRs->mainMR(), const_cast<vecmem::copy&>(*copy)));
+  
+  // Construct detector description
   traccc::io::read_detector_description(
       *hostDesign, *hostCond,
       PathResolverFindCalibFile(m_geometryFile.value()),
@@ -72,7 +84,7 @@ StatusCode JSONDeviceDetectorDescriptionProviderSvc::initialize()
 
   deviceDesign =
         std::make_unique<traccc::detector_design_description::buffer>(
-          sizes, m_deviceMR->mr(), &(m_hostMR->mr()),
+          sizes, m_MRs->mainMR(), m_MRs->hostMR(),
           vecmem::data::buffer_type::resizable);
   (*copy).setup(*deviceDesign)->wait();
   (*copy)(vecmem::get_data(*hostDesign), *deviceDesign)->wait();
@@ -82,7 +94,7 @@ StatusCode JSONDeviceDetectorDescriptionProviderSvc::initialize()
       std::make_unique<traccc::detector_conditions_description::buffer>(
           static_cast<traccc::detector_conditions_description::buffer::size_type>(
               hostCond->size()),
-          m_deviceMR->mr());
+          m_MRs->mainMR());
   (*copy).setup(*deviceCond)->wait();
   (*copy)(vecmem::get_data(*hostCond), *deviceCond)->wait();
 
@@ -95,6 +107,9 @@ StatusCode JSONDeviceDetectorDescriptionProviderSvc::initialize()
   ATH_CHECK(m_detStore->record(std::move(deviceCond), m_deviceCondObjectName.value(), allowMods));
   ATH_CHECK(m_detStore->record(std::move(hostDesign), m_hostDesignObjectName.value(), allowMods));
   ATH_CHECK(m_detStore->record(std::move(hostCond), m_hostCondObjectName.value(), allowMods));
+
+  ATH_CHECK(m_detStore->record(std::move(deviceDetector), m_deviceDetectorName.value(), allowMods));
+  ATH_CHECK(m_detStore->record(std::move(hostDetector), m_hostDetectorName.value(), allowMods));
 
   ATH_MSG_DEBUG("Successfully initialized");
   return StatusCode::SUCCESS;

@@ -35,11 +35,8 @@ def defaultTrigTrackingFlags(flags : AthConfigFlags):
   flags.addFlag("etaHalfWidth",         0.1)
   flags.addFlag("phiHalfWidth",         0.1)
   flags.addFlag("zedHalfWidth",        -999)    # don't set this parameter unless it is >= 0)
-  flags.addFlag("doFullScan",           False)
-  flags.addFlag("monPS",                1)
-  flags.addFlag("monPtMin",             1*Units.GeV)
   flags.addFlag("doTRT",                True)
-  flags.addFlag("keepTrackParameters",  False) # Keep track parameters in conversion to TrackParticles
+  #flags.addFlag("keepTrackParameters",  False) # TODO Keep track parameters in conversion to TrackParticles 
   flags.addFlag("UsePixelSpacePoints",  True)
   flags.addFlag("TrackInitialD0Max",    20.0)
   flags.addFlag("TrackZ0Max",           300.0)
@@ -49,14 +46,12 @@ def defaultTrigTrackingFlags(flags : AthConfigFlags):
   flags.addFlag("roi",                  "")
   flags.addFlag("LRT_D0Min",            2.0)
   flags.addFlag("LRT_HardPtMin",        1.0*Units.GeV)
-  flags.addFlag("doRecord",             True)
   flags.addFlag("vertex",               "")
   flags.addFlag("adaptiveVertex",       False)
   flags.addFlag("addSingleTrackVertices", False)
   flags.addFlag("TracksMaxZinterval",   1*Units.mm) 
   flags.addFlag("minNSiHits_vtx",       10)        #from vtxCuts
   flags.addFlag("vertex_jet",           "")
-  flags.addFlag("adaptiveVertex_jet",   False)
   flags.addFlag("dodEdxTrk",            False)
   flags.addFlag("doHitDV",              False)
   flags.addFlag("doDisappearingTrk",    False)
@@ -80,10 +75,8 @@ def defaultTrigTrackingFlags(flags : AthConfigFlags):
   flags.doBremRecoverySi = False                    #fix2023 setTrue for electron once validated
 
   flags.addFlag("refitROT", True) 
-  flags.addFlag("trtExtensionType", "xf") 
   flags.addFlag("doTruth",  False)  
   flags.addFlag("perigeeExpression","BeamLine")   #always use beamline regardless of Reco.EnableHI
-  flags.addFlag("SuperRoI",  False)               #TBD - move to bphys/menu
   
   flags.addFlag("trkTracks_FTF",   "")
   flags.addFlag("trkTracks_IDTrig","")
@@ -168,6 +161,19 @@ def defaultITkActsTrigTrackingFlags() -> AthConfigFlags:
     
   return flags
 
+def actsLRTTrigTrackingFlags(flags: AthConfigFlags) -> None:
+  """Apply the Acts-specific steering and cuts needed by trigger LRT."""
+  flags.isLargeD0 = True
+  flags.autoReverseSearch = True
+  flags.etaBins = [-1.0, 2.7]
+  flags.minPT = [1.0 * Units.GeV]
+  flags.minPTSeed = 1.0 * Units.GeV
+  flags.maxPrimaryImpactSeed = 300.0 * Units.mm
+  flags.maxZImpactSeed = 500.0 * Units.mm
+  flags.minPixel = [0]
+  flags.Xi2max = [25.0]
+  flags.Xi2maxNoAdd = [50.0]
+
 def defaultModeTrigTrackingFlags(flags: AthConfigFlags) -> AthConfigFlags:
   return flags
 
@@ -195,11 +201,9 @@ def signatureTrigTrackingFlags(mode : str) -> AthConfigFlags:
     "bjet"          : bjet,
     
     "fullScan"      : fullScan,
-    "FS"            : fullScan,
     "jetSuper"      : jetSuper,
 
     "beamSpot"      : beamSpot,
-    "BeamSpot"      : beamSpot,
     "beamSpotFS"    : beamSpotFS,
                 
     "cosmics"      : cosmics,
@@ -244,7 +248,7 @@ def signatureTrigTrackingFlags(mode : str) -> AthConfigFlags:
     def run(self):
       return self.fun(self.flags,self.sig,self.mode)
     
-  for i in signatureSet.keys():
+  for i in signatureSet:
     trackingflags = deepcopy(defaults())
     a = categoryGeneratorWrapper(signatureSet[i],trackingflags,i,mode)
     signatureCategory = "{}.{}".format(category,i)
@@ -265,6 +269,17 @@ def signatureActions(func):
   return invokeSteps
 
 
+def lrtSignatureActions(func):
+  """Set common LRT flags before applying per-signature overrides."""
+  @signatureActions
+  def invokeSteps(flags: AthConfigFlags, instanceName: str, recoMode: str):
+    flags.isLRT = True
+    if recoMode == "Acts":
+      actsLRTTrigTrackingFlags(flags)
+    return func(flags, instanceName, recoMode)
+  return invokeSteps
+
+
 def tsetter(var, value):
   """ use previous type of the var and convert value to it
       for the moment just makes list of a value if needed
@@ -275,10 +290,7 @@ def tsetter(var, value):
     var = value
   else:
     basic = (bool, str, int, float, type(None))
-    if isinstance(var,basic):
-      var = value
-    else:
-      var = [value]
+    var = value if isinstance(var, basic) else [value]
 
   return var
 
@@ -310,7 +322,6 @@ def electron(flags: AthConfigFlags, instanceName: str, recoMode: str) -> AthConf
   flags.doSeedRedundancyCheck = True
   if recoMode=="InDet":
     flags.doTRT             = True
-  flags.keepTrackParameters = True
   flags.electronPID         = True
   return flags
 
@@ -325,7 +336,6 @@ def muon(flags: AthConfigFlags, instanceName: str, recoMode: str) -> AthConfigFl
   flags.doResMon            = True
   flags.DoPhiFiltering      = False
   flags.doSeedRedundancyCheck = True
-  flags.monPtMin            = 12*Units.GeV
   return flags
   
 @signatureActions
@@ -436,7 +446,6 @@ def jetSuper(flags: AthConfigFlags, instanceName: str, recoMode: str) -> AthConf
   flags.roi          = "HLT_Roi_JetSuper"
   flags.etaHalfWidth = 0.3
   flags.phiHalfWidth = 0.3
-  flags.doFullScan   = True
   flags.minPT  = processEtaDepSettings(flags.minPT,[1.*Units.GeV])
 
   #-----
@@ -457,7 +466,6 @@ def minBias(flags: AthConfigFlags, instanceName: str, recoMode: str) -> AthConfi
   flags.name       = "minBias"
   flags.suffix     = "MinBias"
   flags.roi        = "HLT_Roi_MinBias"
-  flags.doFullScan = True
   flags.minPT      = processEtaDepSettings(flags.minPT,[0.1*Units.GeV])
 
   flags.doTRT           = False
@@ -482,7 +490,6 @@ def minBiasPixel(flags: AthConfigFlags, instanceName: str, recoMode: str) -> Ath
   flags.name       = "minBiasPixel"
   flags.suffix     = "MinBiasPixel"
   flags.roi        = "HLT_Roi_MinBias"
-  flags.doFullScan = True
   flags.minPT      = processEtaDepSettings(flags.minPT,[0.1*Units.GeV])
 
 
@@ -497,7 +504,6 @@ def minBiasPixel(flags: AthConfigFlags, instanceName: str, recoMode: str) -> Ath
   if recoMode=="InDet":
     flags.useSCT           = False
     flags.useSCTSeeding    = False
-    flags.useTRT           = False
 
     flags.roadWidth        = 12.0
     flags.Xi2max           = 15
@@ -530,7 +536,6 @@ def beamSpot(flags: AthConfigFlags, instanceName: str, recoMode: str) -> AthConf
   flags.name     = "beamSpot"
   flags.suffix   = "BeamSpot"
   flags.roi      = "HLT_Roi_FS"
-  flags.doFullScan      = True
   flags.doZFinder       = True
   flags.DoubletDR_Max   = 200
   flags.SeedRadBinWidth = 10
@@ -538,7 +543,6 @@ def beamSpot(flags: AthConfigFlags, instanceName: str, recoMode: str) -> AthConf
   flags.phiHalfWidth    = math.pi
   flags.doTRT           = False
   flags.doSeedRedundancyCheck = True
-  flags.doRecord        = False
   return flags
 
 
@@ -555,8 +559,6 @@ def fullScan(flags: AthConfigFlags, instanceName: str, recoMode: str) -> AthConf
   # flags.addSingleTrackVertices = True
   # flags.TracksMaxZinterval = 3
   flags.vertex_jet          = "HLT_IDVertex_FS"
-  flags.adaptiveVertex_jet  = True
-  flags.doFullScan      = True
   flags.etaHalfWidth    = 3.
   flags.phiHalfWidth    = math.pi
   flags.doTRT           = False
@@ -568,7 +570,7 @@ def fullScan(flags: AthConfigFlags, instanceName: str, recoMode: str) -> AthConf
   flags.UseTrigSeedML   = 4
   flags.dodEdxTrk         = True
   flags.doHitDV           = True
-  flags.doDisappearingTrk = True if recoMode=="InDet" else False
+  flags.doDisappearingTrk = recoMode=="InDet"
   flags.roadWidth =         5.
   return flags
 
@@ -580,7 +582,6 @@ def beamSpotFS(flags: AthConfigFlags, instanceName: str, recoMode: str) -> AthCo
   flags.name     = "fullScan"
   flags.suffix   = "FS"
   flags.roi      = "HLT_Roi_FS"
-  flags.doFullScan      = True
   flags.etaHalfWidth    = 3.
   flags.phiHalfWidth    = math.pi
   flags.doTRT           = False
@@ -589,7 +590,6 @@ def beamSpotFS(flags: AthConfigFlags, instanceName: str, recoMode: str) -> AthCo
   flags.TripletDoPPS    = False
   flags.nClustersMin    = 8
   flags.UseTrigSeedML   = 4
-  flags.doRecord        = False
   return flags
 
 
@@ -605,7 +605,6 @@ def cosmics(flags: AthConfigFlags, instanceName: str, recoMode: str) -> AthConfi
   flags.TrackInitialD0Max   = 1000.
   flags.TrackZ0Max          = 1000.
   flags.doTRT           = False      
-  flags.doFullScan      = True
   flags.etaHalfWidth    = 3
   flags.phiHalfWidth    = math.pi
 
@@ -647,7 +646,6 @@ def bmumux(flags: AthConfigFlags, instanceName: str, recoMode: str) -> AthConfig
   flags.phiHalfWidth        = 0.75
   flags.zedHalfWidth        = 50.
   flags.doSeedRedundancyCheck = True
-  flags.SuperRoI = True
   return flags
 
 @signatureActions
@@ -665,10 +663,9 @@ def bhh(flags: AthConfigFlags, instanceName: str, recoMode: str) -> AthConfigFla
   flags.minPT               = processEtaDepSettings(flags.minPT,[2*Units.GeV])
 
   flags.doSeedRedundancyCheck = True
-  flags.SuperRoI = True
   return flags
 
-@signatureActions
+@lrtSignatureActions
 def electronLRT(flags: AthConfigFlags, instanceName: str, recoMode: str) -> AthConfigFlags:
 
   flags.input_name = instanceName
@@ -682,10 +679,8 @@ def electronLRT(flags: AthConfigFlags, instanceName: str, recoMode: str) -> AthC
   flags.TrackInitialD0Max   = 300.
   flags.TrackZ0Max          = 500.
   flags.zedHalfWidth        = 225.
-  flags.keepTrackParameters = True
   flags.doSeedRedundancyCheck = True
   flags.nClustersMin        = 8
-  flags.isLRT               = True
   #pt config
   flags.maxPrimaryImpact    = tsetter(flags.maxPrimaryImpact, 300.*Units.mm)
   flags.maxEMImpact         = tsetter(flags.maxEMImpact, 300.*Units.mm)
@@ -694,7 +689,7 @@ def electronLRT(flags: AthConfigFlags, instanceName: str, recoMode: str) -> AthC
   return flags
 
 
-@signatureActions
+@lrtSignatureActions
 def muonLRT(flags: AthConfigFlags, instanceName: str, recoMode: str) -> AthConfigFlags:
 
   flags.input_name = instanceName
@@ -710,7 +705,6 @@ def muonLRT(flags: AthConfigFlags, instanceName: str, recoMode: str) -> AthConfi
   flags.zedHalfWidth        = 225.
   flags.doSeedRedundancyCheck = True
   flags.nClustersMin        = 8
-  flags.isLRT               = True
   flags.doResMon            = True
   flags.DoPhiFiltering      = False
   #pt config
@@ -723,7 +717,7 @@ def muonLRT(flags: AthConfigFlags, instanceName: str, recoMode: str) -> AthConfi
 
 
 
-@signatureActions
+@lrtSignatureActions
 def tauLRT(flags: AthConfigFlags, instanceName: str, recoMode: str) -> AthConfigFlags:
 
   flags.input_name = instanceName
@@ -741,7 +735,6 @@ def tauLRT(flags: AthConfigFlags, instanceName: str, recoMode: str) -> AthConfig
   flags.TrackInitialD0Max   = 300.
   flags.TrackZ0Max          = 500.
   flags.nClustersMin        = 8
-  flags.isLRT               = True
   #pt config
   flags.maxPrimaryImpact    = tsetter(flags.maxPrimaryImpact, 300.*Units.mm)
   flags.maxEMImpact         = tsetter(flags.maxEMImpact, 300.*Units.mm)
@@ -753,7 +746,7 @@ def tauLRT(flags: AthConfigFlags, instanceName: str, recoMode: str) -> AthConfig
   return flags
 
 
-@signatureActions
+@lrtSignatureActions
 def bjetLRT(flags: AthConfigFlags, instanceName: str, recoMode: str) -> AthConfigFlags:
 
   flags.input_name = instanceName
@@ -767,7 +760,6 @@ def bjetLRT(flags: AthConfigFlags, instanceName: str, recoMode: str) -> AthConfi
   flags.TrackInitialD0Max   = 300.
   flags.TrackZ0Max          = 500.
   flags.nClustersMin        = 8
-  flags.isLRT               = True
   #pt config
   flags.maxPrimaryImpact    = tsetter(flags.maxPrimaryImpact, 300.*Units.mm)
   flags.maxEMImpact         = tsetter(flags.maxEMImpact, 300.*Units.mm)
@@ -777,14 +769,13 @@ def bjetLRT(flags: AthConfigFlags, instanceName: str, recoMode: str) -> AthConfi
   return flags
 
 
-@signatureActions
+@lrtSignatureActions
 def fullScanLRT(flags: AthConfigFlags, instanceName: str, recoMode: str) -> AthConfigFlags:
 
   flags.input_name = instanceName
   flags.name     = "fullScanLRT"
   flags.suffix   = "FSLRT"
   flags.roi      = "HLT_Roi_FS"
-  flags.doFullScan      = True
   flags.etaHalfWidth    = 3.
   flags.phiHalfWidth    = math.pi
   flags.doTRT           = False
@@ -796,7 +787,6 @@ def fullScanLRT(flags: AthConfigFlags, instanceName: str, recoMode: str) -> AthC
   flags.Triplet_D0_PPS_Max    = 300.
   flags.DoubletDR_Max         = 200
   flags.nClustersMin          = 8
-  flags.isLRT                 = True
   #pt config
   flags.maxPrimaryImpact      = tsetter(flags.maxPrimaryImpact, 300.*Units.mm)
   flags.maxEMImpact           = tsetter(flags.maxEMImpact, 300.*Units.mm)
@@ -806,14 +796,13 @@ def fullScanLRT(flags: AthConfigFlags, instanceName: str, recoMode: str) -> AthC
   return flags
 
 
-@signatureActions
+@lrtSignatureActions
 def DJetLRT(flags: AthConfigFlags, instanceName: str, recoMode: str) -> AthConfigFlags:
 
   flags.input_name = instanceName
   flags.name     = "DJetLRT"
   flags.suffix   = "DJLRT"
   flags.roi      = "HLT_Roi_DJ"
-  flags.doFullScan      = False
   flags.etaHalfWidth    = 0.4
   flags.phiHalfWidth    = 0.4
   flags.zedHalfWidth    = 225.
@@ -826,7 +815,6 @@ def DJetLRT(flags: AthConfigFlags, instanceName: str, recoMode: str) -> AthConfi
   flags.Triplet_D0_PPS_Max    = 300.
   flags.DoubletDR_Max         = 200
   flags.nClustersMin          = 8
-  flags.isLRT                 = True
   #pt config
   flags.maxPrimaryImpact      = tsetter(flags.maxPrimaryImpact, 300.*Units.mm)
   flags.maxEMImpact           = tsetter(flags.maxEMImpact, 300.*Units.mm)
@@ -836,14 +824,13 @@ def DJetLRT(flags: AthConfigFlags, instanceName: str, recoMode: str) -> AthConfi
   return flags
 
 
-@signatureActions
+@lrtSignatureActions
 def DVtxLRT(flags: AthConfigFlags, instanceName: str, recoMode: str) -> AthConfigFlags:
 
   flags.input_name = instanceName
   flags.name     = "DVtxLRT"
   flags.suffix   = "DVLRT"
   flags.roi      = "HLT_Roi_DV"
-  flags.doFullScan      = False
   flags.etaHalfWidth    = 0.35
   flags.phiHalfWidth    = 0.35
   flags.doTRT           = False
@@ -855,7 +842,6 @@ def DVtxLRT(flags: AthConfigFlags, instanceName: str, recoMode: str) -> AthConfi
   flags.Triplet_D0_PPS_Max    = 300.
   flags.DoubletDR_Max         = 200
   flags.nClustersMin          = 8
-  flags.isLRT                 = True
   #pt config
   flags.maxPrimaryImpact      = tsetter(flags.maxPrimaryImpact, 300.*Units.mm)
   flags.maxEMImpact           = tsetter(flags.maxEMImpact, 300.*Units.mm)
@@ -902,16 +888,16 @@ def collToRecordable(flags,name):
   #       and not setting parameters using tests on the signature name
   ret = name
   signature = flags.input_name
-  firstStage = True if "FTF" in name else False
+  firstStage = "FTF" in name
   record = True
   if firstStage:
     if signature in ["tauHitsHitZ","minBias","minBiasPixel","bjetLRT",
-                     "beamSpot","BeamSpot"]:
+                     "beamSpot"]:
       record = False
   else:
     if signature in ["tauHitsHitZ","tauCore","tauCoreHitZ","tauIso","tauIsoHitZ","tauIsoBDT",
-                     "jet","fullScan","FS","jetSuper","bhh",
-                     "beamSpot", "BeamSpot","beamSpotFS",
+                     "jet","fullScan","jetSuper","bhh",
+                     "beamSpot","beamSpotFS",
                      "bjetLRT","DJetLRT","DVtxLRT"]:
       record = False
 

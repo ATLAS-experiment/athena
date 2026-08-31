@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -284,7 +284,7 @@ Trk::TrackingVolume::TrackingVolume(const Trk::TrackingVolume& trVol,
     if (confLays) {
       m_confinedLayers = std::make_unique<Trk::NavBinnedArray1D<Trk::Layer>>(
         *confLays,
-        std::vector<std::shared_ptr<Trk::Layer>>(layerOrder),
+        std::vector<std::shared_ptr<Trk::Layer>>(std::move(layerOrder)),
         transform);
     }
   }
@@ -344,7 +344,7 @@ Trk::TrackingVolume::TrackingVolume(const Trk::TrackingVolume& trVol,
     if (confVols)
       m_confinedVolumes = std::make_unique<Trk::NavBinnedArray1D<Trk::TrackingVolume>>(
         *confVols,
-        std::vector<std::shared_ptr<Trk::TrackingVolume>>(volOrder),
+        std::vector<std::shared_ptr<Trk::TrackingVolume>>(std::move(volOrder)),
         transform);
   }
 

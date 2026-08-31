@@ -15,7 +15,6 @@
 
 #include "TrkEventPrimitives/TrkEventPrimitivesDict.h"
 #include "TrkRIO_OnTrack/RIO_OnTrack.h"
-#include "muonEvent/MuonContainer.h"
 #include "MuonCompetingRIOsOnTrack/CompetingMuonClustersOnTrack.h"
 //use new MDT segment container 
 #include "xAODMuon/MuonSegmentContainer.h"

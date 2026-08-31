@@ -27,9 +27,9 @@ class ItkBlueprintNodeBuilder
    *  @param gctx Geometry context
    *  @param child Optional beam pipe node to nest inside the ITk AxisR
    * container.*/
-  std::shared_ptr<Acts::Experimental::BlueprintNode> buildBlueprintNode(
+  std::shared_ptr<Acts::BlueprintNode> buildBlueprintNode(
       const Acts::GeometryContext& gctx,
-      std::shared_ptr<Acts::Experimental::BlueprintNode>&& child) override;
+      std::shared_ptr<Acts::BlueprintNode>&& child) override;
 
  private:
   const InDetDD::SiDetectorManager* m_itkPixelMgr{nullptr};
@@ -42,9 +42,9 @@ class ItkBlueprintNodeBuilder
   Gaudi::Property<bool> m_buildStrip{this, "buildStrip", true};
 
   void buildItkStripBlueprintNode(const Acts::GeometryContext& gctx,
-                                  Acts::Experimental::BlueprintNode& node);
+                                  Acts::BlueprintNode& node);
   void buildItkPixelBlueprintNode(const Acts::GeometryContext& gctx,
-                                  Acts::Experimental::BlueprintNode& node);
+                                  Acts::BlueprintNode& node);
 };
 
 }  // namespace ActsTrk

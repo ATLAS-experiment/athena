@@ -5,10 +5,11 @@
 #define ActsMonitoring_ReadoutGeoDumpAlg_H
 
 #include <AthenaBaseComps/AthHistogramAlgorithm.h>
-#include <ActsGeometryInterfaces/ITrackingGeometryTool.h>
+#include <ActsGeometryInterfaces/ITrackingGeometrySvc.h>
 
 #include "Identifier/Identifier.h"
 #include "MuonTesterTree/MuonTesterTree.h"
+#include "ActsEvent/ContextUtility.h"
 #include "MuonTesterTree/CoordTransformBranch.h"
 
 #include "Acts/Utilities/Helpers.hpp"
@@ -45,7 +46,10 @@ namespace ActsTrk {
             MuonVal::CoordTransformBranch m_readoutTransform{m_tree, "GeoModelTransform"};
 
             /** @brief Tool handle to the tracking geometry */
-            PublicToolHandle<ITrackingGeometryTool> m_trackingGeoTool{this, "TrackingGeometryTool", ""};
+            ServiceHandle<ActsTrk::ITrackingGeometrySvc> m_trackingGeometrySvc{this, "TrackingGeometrySvc", "ActsTrackingGeometrySvc"};
+            /** @brief Context provider for geometry, magnetic field and calibration contexts */
+            ActsTrk::ContextUtility m_ctxProvider{this};
+
             /** @brief Configure which detector types shall be dumped */
             Gaudi::Property<std::set<unsigned short>> m_detTypes{this, "Detectors", {
                                                             Acts::toUnderlying(DetectorType::Pixel),

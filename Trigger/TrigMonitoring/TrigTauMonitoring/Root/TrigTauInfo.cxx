@@ -25,10 +25,10 @@ TrigTauInfo::TrigTauInfo(const std::string& trigger, const std::map<std::string,
     parseTriggerString(L1Phase1_thresholds, L1Phase1_threshold_patterns);
 }
 
-TrigTauInfo::TrigTauInfo(const std::string& trigger, const std::map<int, int>& L1Phase1ThrMap_eTAU, const std::map<int, int>& L1Phase1ThrMap_jTAU)
+TrigTauInfo::TrigTauInfo(const std::string& trigger, const std::map<int, int>& L1Phase1ThrMap_eTAU)
     : m_trigger{trigger}
 {
-    parseTriggerString(L1Phase1ThrMap_eTAU, L1Phase1ThrMap_jTAU);
+    parseTriggerString(L1Phase1ThrMap_eTAU);
 }
 
 void TrigTauInfo::parseTriggerString(bool remove_L1_phase1_thresholds)
@@ -327,7 +327,7 @@ void TrigTauInfo::parseTriggerString(const std::map<std::string, float>& L1Phase
     }
 }
 
-void TrigTauInfo::parseTriggerString(const std::map<int, int>& L1Phase1ThrMap_eTAU, const std::map<int, int>& L1Phase1ThrMap_jTAU)
+void TrigTauInfo::parseTriggerString(const std::map<int, int>& L1Phase1ThrMap_eTAU)
 {
     parseTriggerString(false);
 
@@ -336,8 +336,6 @@ void TrigTauInfo::parseTriggerString(const std::map<int, int>& L1Phase1ThrMap_eT
         const std::string& item_type = m_tauL1Type.at(i);
         if(item_type == "eTAU" || item_type == "cTAU") {
             m_tauL1Thr[i] = L1Phase1ThrMap_eTAU.at(m_tauL1Thr.at(i));
-        } else if(item_type == "jTAU") {
-            m_tauL1Thr[i] = L1Phase1ThrMap_jTAU.at(m_tauL1Thr.at(i));
-        }
+        } 
     }
 }

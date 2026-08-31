@@ -1,11 +1,11 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef LARPHYSWAVEFROMTuple_H
 #define LARPHYSWAVEFROMTuple_H
 
-#include "AthenaBaseComps/AthAlgorithm.h"
+#include "AthenaBaseComps/AthReentrantAlgorithm.h"
 
 #include <vector>
 #include <string>
@@ -22,20 +22,18 @@ LArPhysWaveContainer conating the corresponding PhysWave. The root tree should
  */
 
 
-class LArPhysWaveFromTuple : public AthAlgorithm
+class LArPhysWaveFromTuple : public AthReentrantAlgorithm
 {
  public:
-  LArPhysWaveFromTuple(const std::string & name, ISvcLocator * pSvcLocator);
+  using AthReentrantAlgorithm::AthReentrantAlgorithm;
 
-  ~LArPhysWaveFromTuple();
+  virtual ~LArPhysWaveFromTuple();
 
   //standard algorithm methods
-  StatusCode initialize() ; 
+  virtual StatusCode initialize() override;
 
-  StatusCode execute(const EventContext&) {return StatusCode::SUCCESS;}
-
-  StatusCode finalize(){return StatusCode::SUCCESS;}
-  StatusCode stop();
+  virtual StatusCode execute(const EventContext&) const override {return StatusCode::SUCCESS;}
+  virtual StatusCode stop() override;
  
  private:
   /// max number of points of the waveform in the ntuple

@@ -32,7 +32,7 @@ CPMTobRoICollection * CPMTobRoICollectionCnv::createTransient(const Token* token
   
   //mlog << MSG::DEBUG << "CPMTobRoICollectionCnv::createTransient called" << endmsg;
 
-  static const pool::Guid tlp1_guid( "E575088B-8CD0-471C-A278-EA6E508A171E" );
+  static const Guid tlp1_guid( "E575088B-8CD0-471C-A278-EA6E508A171E" );
  
   CPMTobRoICollection *p_collection = 0;
   if( compareClassGuid(token,  tlp1_guid ) )     

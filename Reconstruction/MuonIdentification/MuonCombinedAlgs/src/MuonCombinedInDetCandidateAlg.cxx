@@ -125,7 +125,7 @@ bool MuonCombinedInDetCandidateAlg::isValidTrackParticle(const Trk::ITrackSelect
     return true;
 }
 
-void MuonCombinedInDetCandidateAlg::printTrackParticleInfo(const xAOD::TrackParticle* const tp, const std::string& what) const {
+void MuonCombinedInDetCandidateAlg::printTrackParticleInfo(const xAOD::TrackParticle* const tp, std::string_view what) const {
     ATH_MSG_DEBUG(what << " InDet TrackParticle: pt " << tp->pt() << " eta " << tp->eta() << " phi " << tp->phi() << " Pixel "
                        << getCount(*tp, xAOD::numberOfInnermostPixelLayerHits) + getCount(*tp, xAOD::numberOfPixelHits) << " SCT "
                        << getCount(*tp, xAOD::numberOfSCTHits) << " TRT " << getCount(*tp, xAOD::numberOfTRTHits));

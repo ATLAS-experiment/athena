@@ -5,7 +5,11 @@
 #include "src/GridTripletSeedingTool.h"
 
 #include <cmath>
+#include <cstdint>
 #include <numbers>
+#include <span>
+#include <string_view>
+#include <vector>
 
 namespace ActsTrk {
 
@@ -137,52 +141,87 @@ StatusCode GridTripletSeedingTool::initialize() {
   // Make the logger && Propagate to ACTS routines
   m_logger = makeActsAthenaLogger(this, "Acts");
 
-  if (m_zBinEdges.size() - 1 != m_zBinNeighborsTop.size() &&
-      not m_zBinNeighborsTop.empty()) {
-    ATH_MSG_ERROR("Inconsistent config zBinNeighborsTop");
+  // Both edge vectors define the bins of the corresponding grid axis, so n
+  // edges give n-1 bins. Guard against an empty vector before subtracting, the
+  // sizes are unsigned.
+  if (m_zBinEdges.size() < 2 || m_rBinEdges.size() < 2) {
+    ATH_MSG_ERROR("zBinEdges and rBinEdges must each contain at least two "
+                  "edges, got "
+                  << m_zBinEdges.size() << " and " << m_rBinEdges.size());
     return StatusCode::FAILURE;
   }
+  const std::size_t nZBins = m_zBinEdges.size() - 1;
+  const std::size_t nRBins = m_rBinEdges.size() - 1;
 
-  if (m_zBinEdges.size() - 1 != m_zBinNeighborsBottom.size() &&
-      not m_zBinNeighborsBottom.empty()) {
-    ATH_MSG_ERROR("Inconsistent config zBinNeighborsBottom");
-    return StatusCode::FAILURE;
-  }
-
-  if (m_rBinEdges.size() - 1 != m_rBinNeighborsTop.size() &&
-      not m_rBinNeighborsTop.empty()) {
-    ATH_MSG_ERROR("Inconsistent config rBinNeighborsTop");
-    return StatusCode::FAILURE;
-  }
-
-  if (m_rBinEdges.size() - 1 != m_rBinNeighborsBottom.size() &&
-      not m_rBinNeighborsBottom.empty()) {
-    ATH_MSG_ERROR("Inconsistent config rBinNeighborsBottom");
-    return StatusCode::FAILURE;
-  }
-
-  if (m_zBinsCustomLooping.size() != 0) {
-    // zBinsCustomLooping can contain a number of elements <= to the total
-    // number of bin in zBinEdges
-    for (std::size_t i : m_zBinsCustomLooping) {
-      if (i >= m_zBinEdges.size()) {
-        ATH_MSG_ERROR(
-            "Inconsistent config zBinsCustomLooping contains bins that are not "
-            "in zBinEdges");
-        return StatusCode::FAILURE;
-      }
+  // The neighbour vectors hold one entry per bin and are indexed 0-based by
+  // Acts::GridBinFinder. An empty vector means "one neighbour on each side".
+  auto checkNeighbors = [this](std::string_view name,
+                               std::span<const std::pair<int, int>> values,
+                               std::size_t nBins) {
+    if (values.empty() || values.size() == nBins) {
+      return true;
     }
+    ATH_MSG_ERROR("Inconsistent config " << name << ": got " << values.size()
+                                         << " entries but the grid has "
+                                         << nBins << " bins");
+    return false;
+  };
+
+  if (!checkNeighbors("zBinNeighborsTop", m_zBinNeighborsTop.value(), nZBins) ||
+      !checkNeighbors("zBinNeighborsBottom", m_zBinNeighborsBottom.value(),
+                      nZBins) ||
+      !checkNeighbors("rBinNeighborsTop", m_rBinNeighborsTop.value(), nRBins) ||
+      !checkNeighbors("rBinNeighborsBottom", m_rBinNeighborsBottom.value(),
+                      nRBins)) {
+    return StatusCode::FAILURE;
   }
 
-  if (m_rBinsCustomLooping.size() != 0) {
-    for (std::size_t i : m_rBinsCustomLooping) {
-      if (i >= m_rBinEdges.size()) {
-        ATH_MSG_ERROR(
-            "Inconsistent config rBinsCustomLooping contains bins that are not "
-            "in rBinEdges");
-        return StatusCode::FAILURE;
+  // The custom looping vectors are the Acts::BinnedGroup navigation and use
+  // the 1-based local bin numbering of the grid axis: valid entries run from 1
+  // to the number of bins. Bin 0 is the underflow bin, which never holds a
+  // space point, so listing it would silently drop an entry from the loop. A
+  // vector may list a subset of the bins in order to skip the remaining ones,
+  // but must not repeat a bin. An empty vector means all bins in their natural
+  // order.
+  auto checkLooping = [this](std::string_view name,
+                             std::span<const std::size_t> bins,
+                             std::size_t nBins) {
+    std::vector<bool> visited(nBins + 1, false);
+    for (std::size_t i : bins) {
+      if (i == 0 || i > nBins) {
+        ATH_MSG_ERROR("Inconsistent config "
+                      << name << ": bin " << i
+                      << " is out of range, the numbering is 1-based and the "
+                         "grid has "
+                      << nBins << " bins (valid entries are 1.." << nBins
+                      << ")");
+        return false;
       }
+      if (visited[i]) {
+        ATH_MSG_ERROR("Inconsistent config " << name << ": bin " << i
+                                             << " is listed more than once");
+        return false;
+      }
+      visited[i] = true;
     }
+    return true;
+  };
+
+  if (!checkLooping("zBinsCustomLooping", m_zBinsCustomLooping.value(),
+                    nZBins) ||
+      !checkLooping("rBinsCustomLooping", m_rBinsCustomLooping.value(),
+                    nRBins)) {
+    return StatusCode::FAILURE;
+  }
+
+  // rRangeMiddleSP is indexed 0-based by z bin in retrieveRadiusRangeForMiddle,
+  // so it needs exactly one entry per z bin. It is only read when the variable
+  // middle range is disabled.
+  if (!m_useVariableMiddleSPRange && m_rRangeMiddleSP.size() != nZBins) {
+    ATH_MSG_ERROR("Inconsistent config rRangeMiddleSP: got "
+                  << m_rRangeMiddleSP.size()
+                  << " entries but the grid has " << nZBins << " z bins");
+    return StatusCode::FAILURE;
   }
 
   m_gridCfg.minPt = m_minPt;
@@ -223,12 +262,6 @@ StatusCode GridTripletSeedingTool::initialize() {
   m_bottomDoubletFinderCfg.cotThetaMax = m_cotThetaMax;
   m_bottomDoubletFinderCfg.minPt = m_minPt;
   m_bottomDoubletFinderCfg.helixCutTolerance = 1.;
-  if (m_useExperimentCuts || m_doubletDPhiCut) {
-    m_bottomDoubletFinderCfg.experimentCuts
-        .connect<&ActsTrk::GridTripletSeedingTool::doubletSelectionFunction>(
-            this);
-  }
-
   m_topDoubletFinderCfg = m_bottomDoubletFinderCfg;  // copy the bottom cuts
   m_topDoubletFinderCfg.candidateDirection = Acts::Direction::Forward();
   m_topDoubletFinderCfg.deltaRMin = m_deltaRMinTopSP;
@@ -344,6 +377,7 @@ bool GridTripletSeedingTool::spacePointSelectionFunction(
 }
 
 bool GridTripletSeedingTool::doubletSelectionFunction(
+    const std::vector<float>& spPhi, const std::vector<float>& spAsinD0OverR,
     const Acts::ConstSpacePointProxy& middle,
     const Acts::ConstSpacePointProxy& other, float cotTheta,
     bool isBottomCandidate) const {
@@ -354,26 +388,26 @@ bool GridTripletSeedingTool::doubletSelectionFunction(
     // widening only knows the full radial span; this applies the exact
     // per-pair bound before the doublet enters the triplet stage.
     // NB: this container only fills the packed coordinate columns, so the
-    // packed accessors xy()/zr() must be used here.
+    // packed accessor zr() must be used here.
     const float rM = middle.zr()[1];
     const float rO = other.zr()[1];
     const float rInner = std::min(rM, rO);
     const float rOuter = std::max(rM, rO);
-    const float d0 =
-        m_doubletDPhiD0Max < 0.f ? m_impactMax.value() : m_doubletDPhiD0Max.value();
 
-    const std::array<float, 2>& xyM = middle.xy();
-    const std::array<float, 2>& xyO = other.xy();
-    float dPhi = std::atan2(xyO[1], xyO[0]) - std::atan2(xyM[1], xyM[0]);
+    // phi(SP) and asin(d0/r) depend only on the SP (d0 is constant from the
+    // config), so they are computed once per SP in createSeeds and looked up
+    // via copiedFromIndex, avoiding two atan2 and two asin calls per
+    // candidate. asin(d0/r) is monotone in r, so the inner-minus-outer swing
+    // equals the absolute difference of the two per-SP terms.
+    const auto iM = middle.copiedFromIndex();
+    const auto iO = other.copiedFromIndex();
+    float dPhi = spPhi[iO] - spPhi[iM];
+    const float swing = std::abs(spAsinD0OverR[iO] - spAsinD0OverR[iM]);
     if (dPhi > std::numbers::pi_v<float>) {
       dPhi -= 2.f * std::numbers::pi_v<float>;
     } else if (dPhi < -std::numbers::pi_v<float>) {
       dPhi += 2.f * std::numbers::pi_v<float>;
     }
-
-    const float swing =
-        std::asin(std::min(1.f, d0 / std::max(rInner, 1.f))) -
-        std::asin(std::min(1.f, d0 / std::max(rOuter, 1.f)));
     const float bound = m_doubletDPhiConst +
                         m_doubletDPhiSlope * (rOuter - rInner) +
                         std::min(m_doubletDPhiCap.value(), swing);
@@ -456,6 +490,16 @@ StatusCode GridTripletSeedingTool::createSeeds(
   std::vector<float> selectedSpacePointsR;
   selectedXAODSpacePoints.reserve(totalSpacePoints);
   selectedSpacePointsR.reserve(totalSpacePoints);
+  // Per-SP inputs for the doublet dPhi selection (see
+  // doubletSelectionFunction); only filled when the cut is enabled.
+  std::vector<float> selectedSpacePointsPhi;
+  std::vector<float> selectedSpacePointsAsinD0OverR;
+  const float dPhiCutD0 =
+      m_doubletDPhiD0Max < 0.f ? m_impactMax.value() : m_doubletDPhiD0Max.value();
+  if (m_doubletDPhiCut) {
+    selectedSpacePointsPhi.reserve(totalSpacePoints);
+    selectedSpacePointsAsinD0OverR.reserve(totalSpacePoints);
+  }
 
   for (const xAOD::SpacePointContainer* spacePoints : spacePointCollections) {
     for (const xAOD::SpacePoint* sp : *spacePoints) {
@@ -472,6 +516,11 @@ StatusCode GridTripletSeedingTool::createSeeds(
       grid.insert(selectedXAODSpacePoints.size(), phi, z, r);
       selectedXAODSpacePoints.push_back(sp);
       selectedSpacePointsR.push_back(r);
+      if (m_doubletDPhiCut) {
+        selectedSpacePointsPhi.push_back(phi);
+        selectedSpacePointsAsinD0OverR.push_back(
+            std::asin(std::min(1.f, dPhiCutD0 / std::max(r, 1.f))));
+      }
     }
   }
 
@@ -560,6 +609,24 @@ StatusCode GridTripletSeedingTool::createSeeds(
   }();
 
   auto bottomDoubletFinderCfg = m_bottomDoubletFinderCfg;
+  auto topDoubletFinderCfg = m_topDoubletFinderCfg;
+
+  // set up the cache for the doublet selection function, which needs to know the per-SP phi and
+  // asin(d0/r) values for the middle and other SPs. The cache is filled in
+  // createSeeds, and the selection function is connected to the doublet finders below.
+  auto doubletSelection =
+      [this, &selectedSpacePointsPhi, &selectedSpacePointsAsinD0OverR](
+          const Acts::ConstSpacePointProxy& middle,
+          const Acts::ConstSpacePointProxy& other, float cotTheta,
+          bool isBottomCandidate) {
+        return doubletSelectionFunction(selectedSpacePointsPhi,
+                                        selectedSpacePointsAsinD0OverR, middle,
+                                        other, cotTheta, isBottomCandidate);
+      };
+  if (m_useExperimentCuts || m_doubletDPhiCut) {
+    bottomDoubletFinderCfg.experimentCuts.connect(doubletSelection);
+    topDoubletFinderCfg.experimentCuts.connect(doubletSelection);
+  }
 
   if(m_useHVCollisionRegion) {
     SG::ReadHandle<xAOD::VertexContainer> inputHoughVtx = SG::makeHandle(m_inputHoughVtxKey, ctx);
@@ -581,7 +648,7 @@ StatusCode GridTripletSeedingTool::createSeeds(
       Acts::DoubletSeedFinder::create(Acts::DoubletSeedFinder::DerivedConfig(
           bottomDoubletFinderCfg, bFieldInZ));
   auto topDoubletFinder = Acts::DoubletSeedFinder::create(
-      Acts::DoubletSeedFinder::DerivedConfig(m_topDoubletFinderCfg, bFieldInZ));
+      Acts::DoubletSeedFinder::DerivedConfig(topDoubletFinderCfg, bFieldInZ));
   auto tripletFinder = Acts::TripletSeedFinder::create(
       Acts::TripletSeedFinder::DerivedConfig(m_tripletFinderCfg, bFieldInZ));
 

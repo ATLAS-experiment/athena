@@ -4,11 +4,13 @@
 from TrkConfig.TrkConfigFlags import TrackingComponent
 from AthenaConfiguration.Enums import LHCPeriod
 
-
+# actsProductionFlags are default now
 def actsProductionFlags(flags) -> None:
     """flags for ACTS reconstruction to be used for production jobs"""
     # Reco chain to ACTS flavour
     flags.Tracking.recoChain = [TrackingComponent.ActsChain]
+    # Save Trk::Track link for combined muon reconstruction
+    flags.Acts.doxAODToTrkConversion = True
     # Track reconstruction algorithms
     flags.Acts.doAmbiguityResolution = False
     flags.Tracking.doITkFastTracking = True
@@ -22,29 +24,27 @@ def actsProductionFlags(flags) -> None:
     # HGTD components
     flags.HGTD.doActs = True
 
+def athenaLegacyTrackingFlags(flags) -> None:
+    """flags to revert to Athena legacy Run 4 tracking reconstruction, kept for testing purposes alone"""
+    # Reco chain to ACTS flavour
+    flags.Tracking.recoChain = [TrackingComponent.AthenaChain]
+    flags.Tracking.doITkFastTracking = False
+    flags.Tracking.doPixelDigitalClustering = False
+    flags.HGTD.doActs = False
+
 def actsLegacyWorkflowFlags(flags) -> None:
     """flags for Reco_tf with CA used in CI tests: add Acts (legacy like) workflow to reco sequence"""
-    flags.Reco.EnableHGTDExtension = False
-    flags.Acts.GsfRefitActs = True
-    flags.Acts.GsfDirectNavigation=True
     flags.Tracking.recoChain = [TrackingComponent.ActsLegacyChain]
-    flags.Tracking.doPixelDigitalClustering = lambda pcf: pcf.GeoModel.Run >= LHCPeriod.Run4
+    flags.Tracking.doITkFastTracking = False
 
 def actsInnerDetectorWorkflowFlags(flags) -> None:
     """flags for Reco_tf with CA used in unit test: schedule a pure ACTS workflow to reco sequence, with Inner Detector settings"""
     flags.Tracking.recoChain = [TrackingComponent.ActsChain]
-
-def actsScoreBasedAmbiguityWorkflowFlags(flags) -> None:
-    """flags for Reco_tf with CA used in unit test: schedule a pure ACTS (legacy like) workflow to reco sequence"""
-    actsLegacyWorkflowFlags(flags)
-    from ActsConfig.ActsConfigFlags import AmbiguitySolverStrategy
-    flags.Acts.AmbiguitySolverStrategy = AmbiguitySolverStrategy.ScoreBased
         
 def actsHeavyIonFlags(flags) -> None:
     flags.Reco.EnableHGTDExtension = False
-    flags.Acts.doAmbiguityResolution = False
-    flags.Tracking.doPixelDigitalClustering = lambda pcf: pcf.GeoModel.Run >= LHCPeriod.Run4
     flags.Tracking.recoChain = [TrackingComponent.ActsHeavyIon]
+    flags.Tracking.doITkFastTracking = False
 
 
 # Validation workflows
@@ -74,28 +74,6 @@ def actsValidateAmbiguityResolutionFlags(flags) -> None:
     """flags for Reco_tf with CA used in CI tests: use Acts Ambiguity Resolution after Athena reconstruction"""
     flags.Reco.EnableHGTDExtension = False 
     flags.Tracking.recoChain = [TrackingComponent.ActsValidateAmbiguityResolution]
-
-def actsValidateGSFFlags(flags) -> None:
-    """flags for Reco_tf with CA used in CI tests: use GaussianSumFitter"""
-    from ActsConfig.ActsConfigFlags import TrackFitterType
-    flags.Acts.trackFitterType = TrackFitterType.GaussianSumFitter
-
-def actsValidateGX2FFlags(flags) -> None:
-    """flags for Reco_tf with CA used in CI tests: use GlobalChiSquareFitter"""
-    from ActsConfig.ActsConfigFlags import TrackFitterType
-    flags.Acts.trackFitterType = TrackFitterType.GlobalChiSquareFitter
-
-def actsGSFEgammaFlags(flags) -> None:
-    """flags for Reco_tf with CA used in CI tests: ACTS GSF refitting for electron ACTS tracks"""
-    flags.DQ.useTrigger = False
-    flags.Acts.doAnalysis =  False
-    flags.Acts.doMonitoring = False
-    flags.Acts.doAmbiguityResolution = True
-    flags.Tracking.recoChain = [ TrackingComponent.ActsLegacyChain]
-    flags.Reco.EnableHGTDExtension = False
-    flags.Tracking.doITkConversion = False
-    flags.Acts.GsfRefitActs = True
-    flags.Acts.GsfDirectNavigation = True
 
 def actsValidateF100Flags(flags) -> None:
     actsProductionFlags(flags)

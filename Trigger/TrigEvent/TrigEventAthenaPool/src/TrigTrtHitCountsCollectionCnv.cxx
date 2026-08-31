@@ -27,10 +27,10 @@ TrigTrtHitCountsCollection* TrigTrtHitCountsCollectionCnv::createTransient(const
   
   mlog << MSG::DEBUG << "TrigTrtHitCountsCollectionCnv::createTransient" << endmsg;
 
-  static const pool::Guid p2_guid( "47CBB4D9-381C-423E-A560-A7B5C325A5DD" );
-  static const pool::Guid tlp1_guid( "A0763CCA-553C-4365-8091-04CA2036FD97" );
-  static const pool::Guid p1_guid( "0CC00AC1-FB95-4E69-8C6E-29B6BB713AAE" );
-  static const pool::Guid trans_guid( "7631C2C2-612F-4245-8C8B-D40F59222E1E" );
+  static const Guid p2_guid( "47CBB4D9-381C-423E-A560-A7B5C325A5DD" );
+  static const Guid tlp1_guid( "A0763CCA-553C-4365-8091-04CA2036FD97" );
+  static const Guid p1_guid( "0CC00AC1-FB95-4E69-8C6E-29B6BB713AAE" );
+  static const Guid trans_guid( "7631C2C2-612F-4245-8C8B-D40F59222E1E" );
 
   if( compareClassGuid(token,  p2_guid ) ){
          std::unique_ptr< TrigTrtHitCountsCollection_p2 > col_vect( poolReadObject< TrigTrtHitCountsCollection_p2 >(token) );

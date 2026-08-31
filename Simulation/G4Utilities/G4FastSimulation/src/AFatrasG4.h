@@ -1,0 +1,50 @@
+/*
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
+*/
+
+#ifndef G4FASTSIMULATION_AFATRASG4_H
+#define G4FASTSIMULATION_AFATRASG4_H
+
+// Service handle to define smart pointer to Fatras parametrisation service
+#include "GaudiKernel/ServiceHandle.h"
+// Geant4 fast simulation base class
+#include "G4VFastSimulationModel.hh"
+
+// Geant4 ACTSFatras G4 Tool
+#include "G4AtlasInterfaces/IActsFatrasG4Tool.h"
+
+// FatrasG4 tool
+#include "AFatrasG4Tool.h"
+
+class G4FieldTrack;
+class G4SafetyHelper;
+
+class AFatrasG4: public G4VFastSimulationModel
+{
+ public:
+  AFatrasG4(const std::string& name,
+                G4Region* region,
+                const PublicToolHandle<IActsFatrasG4Tool>& ActsFatrasG4Tool,
+                bool doG4Transport,
+                AFatrasG4Tool * FatrasG4Tool);
+  
+  virtual ~AFatrasG4() = default;
+
+  virtual G4bool IsApplicable(const G4ParticleDefinition&) override final;
+  virtual void DoIt(const G4FastTrack&, G4FastStep&) override final;
+
+  /** Determines the applicability of the fast sim model to this particular track.
+  Checks that geometric location, energy, and particle type are within bounds **/
+  virtual G4bool ModelTrigger(const G4FastTrack &) override final;
+
+ private:
+  // Geant4 ACTSFatras G4 Tool
+  PublicToolHandle<IActsFatrasG4Tool> m_ActsFatrasG4Tool;
+
+  // Boolean flag to enable Geant4 transportation
+  bool m_doG4Transport;
+
+};
+
+#endif //G4FASTSIMULATION_AFATRASG4_H
+

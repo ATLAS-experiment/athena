@@ -7,7 +7,7 @@
 # art-output: *.root
 # art-output: *.xml
 # art-output: dcube*
-# art-html: dcube_acts_shifter_last
+# art-html: dcube_ambi_shifter_last
 # art-athena-mt: 8
 
 lastref_dir=last_results
@@ -31,7 +31,7 @@ run () {
     rc=$?
     # Only report hard failures for comparison Acts-Trk since we know
     # they are different. We do not expect these tests to succeed
-    [ "${name}" = "dcube-athena-acts" ] && [ $rc -ne 255 ] && rc=0
+    [ "${name}" = "dcube-default-ambi" ] && [ $rc -ne 255 ] && rc=0
     echo "art-result: $rc ${name}"
     return $rc
 }
@@ -42,30 +42,30 @@ conditionsTag=$(python -c "from AthenaConfiguration.TestDefaults import defaultC
 
 
 # Run with full ACTS chain, including ACTS ambi. resolution
-run "Reconstruction-acts" \
+run "Reconstruction-ambi" \
     Reco_tf.py \
     --conditionsTag "default:${conditionsTag}" \
-    --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude,ActsConfig.ActsCIFlags.actsValidateAmbiguityResolutionFlags" \
-    --preExec "all:flags.Scheduler.ShowDataDeps = True;flags.Scheduler.ShowDataFlow = True" \
+    --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude" \
+    --preExec "all:flags.Scheduler.ShowDataDeps = True;flags.Scheduler.ShowDataFlow = True; flags.Acts.doAmbiguityResolution=True" \
     --inputRDOFile ${ArtInFile} \
-    --outputAODFile AOD.acts.root \
+    --outputAODFile AOD.ambi.root \
     --postExec "cfg.printConfig(withDetails=True, summariseProps=True);" \
     --maxEvents ${n_events} \
     --multithreaded
 
 reco_rc=$?
 
-mv log.RAWtoALL log.RAWtoALL.ACTS
+mv log.RAWtoALL log.RAWtoALL.ambi
 
 if [ $reco_rc != 0 ]; then
     exit $reco_rc
 fi
 
-run "IDPVM-acts" \
+run "IDPVM-ambi" \
     runIDPVM.py \
     --OnlyTrackingPreInclude \
-    --filesInput AOD.acts.root \
-    --outputFile idpvm.acts.root
+    --filesInput AOD.ambi.root \
+    --outputFile idpvm.ambi.root
 
 reco_rc=$?
 if [ $reco_rc != 0 ]; then
@@ -73,30 +73,29 @@ if [ $reco_rc != 0 ]; then
 fi
 
 
-# Run with legacy Athena
-run "Reconstruction-athena" \
+# Run with default ACTS
+run "Reconstruction" \
     Reco_tf.py \
     --conditionsTag "default:${conditionsTag}" \
     --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude" \
-    --preExec "flags.Tracking.ITkMainPass.doAmbiguityProcessorTrackFit=False;flags.Reco.EnableHGTDExtension=False;" \
     --inputRDOFile ${ArtInFile} \
-    --outputAODFile AOD.athena.root \
+    --outputAODFile AOD.default.root \
     --maxEvents ${n_events} \
     --multithreaded
 
 reco_rc=$?
 
-mv log.RAWtoALL log.RAWtoALL.ATHENA
+mv log.RAWtoALL log.RAWtoALL.default
 
 if [ $reco_rc != 0 ]; then
     exit $reco_rc
 fi
 
-run "IDPVM-athena" \
+run "IDPVM-default" \
     runIDPVM.py \
     --OnlyTrackingPreInclude \
-    --filesInput AOD.athena.root \
-    --outputFile idpvm.athena.root
+    --filesInput AOD.default.root \
+    --outputFile idpvm.default.root
 
 reco_rc=$?
 if [ $reco_rc != 0 ]; then
@@ -108,29 +107,29 @@ echo "download latest result..."
 art.py download --user=artprod --dst="$lastref_dir" "$ArtPackage" "$ArtJobName"
 ls -la "$lastref_dir"
 
-run "dcube-athena-last" \
+run "dcube-default-last" \
     $ATLAS_LOCAL_ROOT/dcube/current/DCubeClient/python/dcube.py \
-    -p -x dcube_athena_shifter_last \
+    -p -x dcube_default_shifter_last \
     -c ${dcubeXmlAbsPath} \
-    -r ${lastref_dir}/idpvm.athena.root \
-    idpvm.athena.root
+    -r ${lastref_dir}/idpvm.default.root \
+    idpvm.default.root
 
-run "dcube-acts-last" \
+run "dcube-ambi-last" \
     $ATLAS_LOCAL_ROOT/dcube/current/DCubeClient/python/dcube.py \
-    -p -x dcube_acts_shifter_last \
+    -p -x dcube_ambi_shifter_last \
     -c ${dcubeXmlAbsPath} \
-    -r ${lastref_dir}/idpvm.acts.root \
-    idpvm.acts.root
+    -r ${lastref_dir}/idpvm.ambi.root \
+    idpvm.ambi.root
 
-# Compare performance ACTS vs Athena
-run "dcube-athena-acts" \
+# Compare performance without vs with ambi
+run "dcube-default-ambi" \
     $ATLAS_LOCAL_ROOT/dcube/current/DCubeClient/python/dcube.py \
-    -p -x dcube_athena_acts \
+    -p -x dcube_default_ambi \
     -c ${dcubeXmlAbsPath} \
-    -r idpvm.athena.root \
-    -M "acts" \
-    -R "athena" \
-    idpvm.acts.root
+    -r idpvm.default.root \
+    -M "ambi" \
+    -R "default" \
+    idpvm.ambi.root
 
 echo "Clean up output directory (based on compiler)"
 clean_up_outdir.sh ${AtlasBuildBranch} ${AtlasProject} ${AtlasBuildStamp}

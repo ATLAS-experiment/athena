@@ -4,7 +4,6 @@
 #include "../ExtrapolateMuonToIPTool.h"
 #include "../MuonAlignmentUncertTool.h"
 #include "../MuonCaloTagTool.h"
-#include "../MuonCandidateTool.h"
 #include "../MuonCombinedFitTagTool.h"
 #include "../MuonCombinedStacoTagTool.h"
 #include "../MuonCreatorTool.h"
@@ -14,7 +13,6 @@
 
 using namespace MuonCombined;
 using namespace Muon;
-DECLARE_COMPONENT(MuonCandidateTool)
 DECLARE_COMPONENT(MuonAlignmentUncertTool)
 DECLARE_COMPONENT(MuonCreatorTool)
 DECLARE_COMPONENT(MuonDressingTool)

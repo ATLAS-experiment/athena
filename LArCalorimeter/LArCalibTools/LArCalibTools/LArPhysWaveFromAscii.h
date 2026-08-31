@@ -5,7 +5,7 @@
 #ifndef LARPHYSWAVEFROMASCII_H
 #define LARPHYSWAVEFROMASCII_H
 
-#include "AthenaBaseComps/AthAlgorithm.h"
+#include "AthenaBaseComps/AthReentrantAlgorithm.h"
 
 /** @class LArPhysWaveFromAscii
 
@@ -14,15 +14,14 @@ LArPhysWaveContainer containing the corresponding PhysWave.
  */
 
 
-class LArPhysWaveFromAscii : public AthAlgorithm
+class LArPhysWaveFromAscii : public AthReentrantAlgorithm
 {
  public:
-  LArPhysWaveFromAscii(const std::string & name, ISvcLocator * pSvcLocator);
+  using AthReentrantAlgorithm::AthReentrantAlgorithm;
 
-  ~LArPhysWaveFromAscii();
+  virtual ~LArPhysWaveFromAscii();
 
-  //standard algorithm methods
-  virtual StatusCode execute(const EventContext&) override {return StatusCode::SUCCESS;}
+  virtual StatusCode execute(const EventContext&) const override {return StatusCode::SUCCESS;}
   virtual StatusCode stop() override final;
  
  private:

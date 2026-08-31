@@ -126,6 +126,10 @@ void MuonCreatorAlg::createMuon(const EventContext& ctx,
             newMuon->setTrackParticleLink(Trk_t::InnerDetectorTrackParticle,
                                           linkParticle(ctx, tag->idTrack()));
         }
+         if (!p4Set || !newMuon->trackParticle(Trk_t::ExtrapolatedMuonSpectrometerTrackParticle)){
+            newMuon->setTrackParticleLink(Trk_t::ExtrapolatedMuonSpectrometerTrackParticle,
+                                          linkParticle(ctx, tag->meTrack()));
+        }
         if (!p4Set || !newMuon->trackParticle(Trk_t::MuonSpectrometerTrackParticle)){
             newMuon->setTrackParticleLink(Trk_t::MuonSpectrometerTrackParticle,
                                           linkParticle(ctx, tag->msTrack()));
@@ -139,6 +143,12 @@ void MuonCreatorAlg::createMuon(const EventContext& ctx,
                 segLinks.emplace_back(static_cast<const xAOD::MuonSegmentContainer&>(*seg->container()),
                                       seg->index(), ctx);
             }
+        }
+        /// We know that every STACO or MuidCo muon needs to have a MS track
+        /// Manually add MuidSA for these cases
+        if (tag->author() == xAOD::Muon::Author::STACO ||
+            tag->author() == xAOD::Muon::Author::MuidCo) {
+            newMuon->addAllAuthor(xAOD::Muon::Author::MuidSA);
         }
         newMuon->addAllAuthor(tag->author());
         tag->copyParameters(*newMuon);

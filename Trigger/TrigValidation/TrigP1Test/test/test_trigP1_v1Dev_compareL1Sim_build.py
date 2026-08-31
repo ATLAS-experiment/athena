@@ -29,7 +29,7 @@ rerunBS.job_options = 'TriggerJobOpts.runHLT'
 rerunBS.input = ''
 rerunBS.args = '-f `find .. -name \'*.physics_Main.*.data\' | tail -n 1`'
 rerunBS.workdir = 'test2'
-rerunBS.flags = ['Trigger.triggerMenuSetup="Dev_pp_run3_v1"']
+rerunBS.flags = ['Trigger.triggerMenuSetup="Dev_pp_run3_v1_HLTReprocessing_prescale"']
 
 test = Test.Test()
 test.art_type = 'build'

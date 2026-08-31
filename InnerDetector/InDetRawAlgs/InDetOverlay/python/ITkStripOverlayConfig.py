@@ -54,8 +54,15 @@ def ITkStripTruthOverlayCfg(flags, name="ITkStripSDOOverlay", **kwargs):
     """Return a ComponentAccumulator for the ITk Strip SDO overlay algorithm"""
     acc = ComponentAccumulator()
 
-    # We do not need background SCT SDOs
-    kwargs.setdefault("BkgInputKey", "")
+    # We do not need background SCT SDOs for data overlay
+    if not flags.Input.isMC:
+        kwargs.setdefault("BkgInputKey", "")
+    else:
+        kwargs.setdefault("BkgInputKey", f"{flags.Overlay.BkgPrefix}ITkStripSDO_Map")
+
+    if kwargs["BkgInputKey"]:
+        from SGComps.SGInputLoaderConfig import SGInputLoaderCfg
+        acc.merge(SGInputLoaderCfg(flags, [f'InDetSimDataCollection#{kwargs["BkgInputKey"]}']))
 
     kwargs.setdefault("SignalInputKey", f"{flags.Overlay.SigPrefix}ITkStripSDO_Map")
     kwargs.setdefault("OutputKey", "ITkStripSDO_Map")

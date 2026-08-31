@@ -486,7 +486,7 @@ InDetVKalVxInJetTool::getVrtSecMulti(workVectorArrxAOD* xAODwrk,
 	if(xAODwrk) vProb = refitVertex(newV, xAODwrk->listJetTracks, *state, true);
 	if(vProb>probVrtMergeLimit){
 	  onetVrt.Good=false;
-	  ntrVrt=newV;
+	  ntrVrt=std::move(newV);
 	  ntrVrt.detachedTrack=-1;
 	}
 	break;
@@ -508,7 +508,7 @@ InDetVKalVxInJetTool::getVrtSecMulti(workVectorArrxAOD* xAODwrk,
 	if(xAODwrk) vProb = refitVertex(newV, xAODwrk->listJetTracks, *state, true);
 	if(vProb>probVrtMergeLimit){
 	  jVrt.Good = false;
-	  iVrt = newV;
+	  iVrt = std::move(newV);
 	  iVrt.detachedTrack = -1;
 	}
 	break;
@@ -532,7 +532,7 @@ InDetVKalVxInJetTool::getVrtSecMulti(workVectorArrxAOD* xAODwrk,
 	  if(xAODwrk) vProb = refitVertex( newV, xAODwrk->listJetTracks, *state, true);
 	  if(vProb>probVrtMergeLimit){
 	    onetVrt.Good = false;
-	    ntrVrt = newV;
+	    ntrVrt = std::move(newV);
 	  }
 	}
 
@@ -1461,7 +1461,7 @@ InDetVKalVxInJetTool::getVrtSecMulti(workVectorArrxAOD* xAODwrk,
 			     nVrt.vertexCharge, nVrt.vertexCov,
 			     nVrt.chi2PerTrk, nVrt.trkAtVrt, nVrt.chi2,
 			     istate, false);
-         if(sc.isSuccess()) (*wrkVrtSet).push_back(nVrt);
+         if(sc.isSuccess()) (*wrkVrtSet).push_back(std::move(nVrt));
 
       } else if( detachedTrk.size()==1 ){
          bool tFound = false;

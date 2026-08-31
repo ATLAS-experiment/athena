@@ -1,7 +1,7 @@
 #!/usr/bin/env python
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
-# art-description: Runs athenaHLT writing BS output and then runs BS decoding
+# art-description: Runs athenaEF writing BS output and then runs BS decoding
 # art-type: grid
 # art-include: main/Athena/x86_64-el9-gcc15-opt
 # art-include: 24.0/Athena
@@ -33,9 +33,9 @@ from TrigP1Test.TrigP1TestSteps import filterBS, decodeBS
 # Test definition
 ##################################################
 
-# Run standard athenaHLT BS->BS job
+# Run standard athenaEF BS->BS job
 writeBS = ExecStep.ExecStep("WriteBS")
-writeBS.type = 'athenaHLT'
+writeBS.type = 'athenaEF'
 writeBS.job_options = 'TriggerJobOpts.runHLT'
 writeBS.input = 'data'
 writeBS.threads = 8

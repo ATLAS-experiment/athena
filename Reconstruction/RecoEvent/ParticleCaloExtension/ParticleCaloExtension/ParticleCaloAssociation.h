@@ -1,13 +1,13 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef REC_PARTICLECALOASSOCIATION_H
 #define REC_PARTICLECALOASSOCIATION_H
 
-#include <vector>
 #include "AthContainers/DataVector.h"
 #include  "TrkCaloExtension/CaloExtension.h"
+#include <vector>
 
 namespace Rec {
   
@@ -88,7 +88,7 @@ namespace Rec {
   template<class T>
   inline ParticleCaloAssociation<T>::ParticleCaloAssociation( const Trk::CaloExtension* caloExtension, Data&& data, float coneSize ) :
     m_caloExtension(caloExtension),
-    m_data(data),
+    m_data(std::move(data)),
     m_associationConeSize(coneSize) {
     // cppcheck-suppress missingReturn; false positive
   }

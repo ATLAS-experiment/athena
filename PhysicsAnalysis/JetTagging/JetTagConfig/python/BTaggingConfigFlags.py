@@ -99,7 +99,7 @@ def getNNs(flags):
         "BTagging/20250213/GN3PflowMuonsV00/antikt4empflow/network.onnx", # Tracks+Muons+PFlow
     ] if isRun3Derivation(flags) else []
     gn3v01_paths = [
-        "BTagging/20250912/GN3EPCLV01/antikt4empflow/network.onnx", # Electrons+Pflow+Charge+Muons
+        "BTagging/20260805/GN3EPCLV01/antikt4empflow/network.onnx", # Electrons+Pflow+Charge+Muons
     ] if isRun3Derivation(flags) else []
     # Combine the paths for GN3v00 and GN3v01 models
     gn3_paths = gn3v00_paths + gn3v01_paths
@@ -220,6 +220,14 @@ def createBTaggingConfigFlags():
     # dicts. The dict has several keys:
     #  - folds: list of NNs to run
     #  - remapping (optional): any variable remapping
+    #  - ip_prefix (optional): for taggers trained on the poor man's
+    #    impact parameters, the decoration prefix they should be read
+    #    from. Schedules PoorMansIpAugmenterAlg with this prefix. See
+    #    _ip_definitions in FlavorTaggingConfig.py for the allowed
+    #    prefixes and the definition each one selects.
+    #  - <group>_ip_prefix (optional): same, for one constituent group
+    #    ('tracks', 'electrons', 'muons'). A group with no entry follows
+    #    ip_prefix, which is itself the tracks prefix.
     btagcf.addFlag("BTagging.NNs", getNNs)
     btagcf.addFlag("BTagging.AK4TaggerName", lambda pcf: (
         "GN2HLv01" if pcf.GeoModel.Run>=LHCPeriod.Run4 else "GN2v01"))

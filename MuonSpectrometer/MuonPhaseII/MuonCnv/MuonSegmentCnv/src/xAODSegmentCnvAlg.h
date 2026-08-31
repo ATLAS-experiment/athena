@@ -6,24 +6,16 @@
 
 
 #include "AthenaBaseComps/AthReentrantAlgorithm.h"
-#include "StoreGate/ReadHandleKey.h"
 #include "StoreGate/WriteHandleKey.h"
 #include "StoreGate/WriteDecorHandleKey.h"
 
-#include "xAODMuonViews/FillContainer.h"
-#include "StoreGate/WriteDecorHandle.h"
+#include "MuonRecToolInterfacesR4/IxAODSegmentCnvTool.h"
 
-#include "ActsGeometryInterfaces/ITrackingGeometryTool.h"
-#include "ActsGeometryInterfaces/IExtrapolationTool.h"
-
-#include "MuonIdHelpers/IMuonIdHelperSvc.h"
 #include "MuonPatternEvent/MuonPatternContainer.h"
 
 #include "xAODMuon/MuonSegmentContainer.h"
 #include "xAODMuonPrepData/CombinedMuonStripContainer.h"
-#include "xAODMuonPrepData/CombinedMuonStripAuxContainer.h"
 
-#include "xAODMeasurementBase/UncalibratedMeasurementContainer.h" 
 #include "ActsEvent/AuxiliaryMeasurementHandler.h"
 
 namespace MuonR4{
@@ -48,103 +40,15 @@ namespace MuonR4{
             virtual StatusCode execute(const EventContext& ctx) const override final;
         
         private:
-            /** @brief Abrivation to call an uncalibrated measurement container */
-            using PrdCont_t = xAOD::UncalibratedMeasurementContainer;
-            /** @brief Abrivation to call the link to an element inside an 
-             *         uncalibrated measurement container */
-            using PrdLink_t = ElementLink<PrdCont_t>;
-            /** @brief Abrivation of a collection of Prd links */
-            using PrdLinkVec_t = std::vector<PrdLink_t>;
 
-            /** @brief Auxiliary struct to ship the WriteDecorHandle and writeHandles
-             *         needed to link the uncalibrated meausrements to the segment. */
-            struct PrepDataCollectorShip {
-                /** @brief Constructor to initialize the ship
-                 *  @param parent: The reference to the instantiatting algorithm. 
-                 *                 Needed to fetch the neccessary keys
-                 * @param ctx: Current EventContext to instantiate the handles
-                 * @param tgContext: The geometry context to instantiate the auxiliary
-                 *                    measurement creator */
-                PrepDataCollectorShip(const xAODSegmentCnvAlg& parent,
-                                      const EventContext& ctx,
-                                      const Acts::GeometryContext& tgContext):
-                    dec_prdLinks{parent.m_prdLinkKey, ctx},
-                    dec_prdStates{parent.m_prdStateKey, ctx},
-                    beamSpotMeasCreator{parent.m_auxMeasProv.makeHandle(ctx, tgContext)}{}
-                /** @brief List of element links to the associated measurements */
-                SG::WriteDecorHandle<xAOD::MuonSegmentContainer, PrdLinkVec_t> dec_prdLinks;
-                /** @brief Flag indicating whether each measurement is valid or an outlier */
-                SG::WriteDecorHandle<xAOD::MuonSegmentContainer, std::vector<char>> dec_prdStates;
-                /** @brief Container handle to create the beamspot measurement, if needed */
-                Acts::Result<ActsTrk::AuxiliaryMeasurementHandler::MeasurementProvider, 
-                            ActsTrk::AuxiliaryMeasurementHandler::HandleStatus> beamSpotMeasCreator;
-                /** @brief Container handle to create the combined measurements of Rpc/Tgc/sTgc */
-                xAOD::FillContainer<xAOD::CombinedMuonStripContainer,
-                            xAOD::CombinedMuonStripAuxContainer> prdCombContainer{};
-                /** @brief Pointer to the commonly shared beamspot measurement */
-                const xAOD::UncalibratedMeasurement* beamSpot{};
-            };
-
-            /** @brief Helper struct to keep track of the number of precision,
-              *        trigger phi and trigger eta hits */
-            struct Counter{
-                std::uint8_t precision{0};
-                std::uint8_t triggerPhi{0};
-                std::uint8_t triggerEta{0};
-            };
-            /** @brief Decorate the prd links onto the output muon segment. Eta & phi measurements are absorbed converted
-             *         into a CombinedMuonStrip which is a source link linke object carrying a link to both prds. In this way,
-             *         only one track state is generated later in the track fit from the two measurements. 
-             *         Two assumptions are made for the linking
-             *                - There's exclusivley one eta & one phi measurement @maximum on the segment
-             *                - The measurements are sorted along the segment trajectory.
-             *  @param gctx: The geometry context to construct the local segment parameters  
-             *  @param inSegment: The segment from which the space points are collected
-             *  @param targetSegment: The xAOD segment onto which all the links are decorated
-             *  @param ship: Reference to the auxiliary ship carrying all the write decor handles
-             *               needed for the linking */
-            StatusCode linkMeasurements(const ActsTrk::GeometryContext& gctx,                       
-                                        const Segment& inSegment,
-                                        xAOD::MuonSegment& targetSegment,
-                                        PrepDataCollectorShip& ship) const;
-
-            /** @brief Calculate the number of hits, outliers and holes on the segment
-             *         and set the hit summary fields of the passed segment
-             *  @param ctx: EventContext to access conditions data and to propagate
-             *  @param segment: The segment for which the hit summary shall be evaluated */
-            void evaluateSummary(const EventContext& ctx, 
-                                 xAOD::MuonSegment& segment) const;
-
-            /** @brief Find potential sensitive surfaces crossed by the segment but without
-              *        contributing measurements. The segment line is propagated from the startPars
-              *        to the target surface + some margin using the Acts::Propagator. The propaator
-              *        records every surface crossing. The associated SurfacePlacements are then used
-              *        to determine the ATLAS identifier and then to assign whether there's a hole or not.
-              * @param ctx: EventContext to be passed to the extrapolation tool
-              * @param startPars: The start parameters from which the propagation starts. The surface is the 
-              *                    bottom boundary surface of the volume where's the first segment measurement.
-              * @param target: The top boundary surface of the volume with the last segment measurement.
-              * @param geoIdsWithHits: The list of ATLAS identifiers with segmen measurements (outlier + hit)
-              * @param holeCounter: Mutable reference to the segment hole counter.  */                   
-            void findHoles(const EventContext& ctx,
-                           const Acts::BoundTrackParameters& startPars,
-                           const Acts::Surface* target,
-                           const std::unordered_set<Identifier>& geoIdsWithHits,
-                           Counter& holeCounter) const;
-
-            /** @brief IdHelperSvc for Identifier printing & manipulation */
-            ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{this, "MuonIdHelperSvc",  
-                                                                "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
             /** @brief Input segment container key */
             SG::ReadHandleKeyArray<SegmentContainer> m_readKeys{this, "InSegmentKeys", {"R4MuonSegments"}};
-            /** @brief Output segment container key */
+            /** @brief Output xAOD::segment container key */
             SG::WriteHandleKey<xAOD::MuonSegmentContainer> m_writeKey{this, "OutSegmentKey", "MuonSegmentsFromR4"};
+            /** @brief Segment converter tool */
+            ToolHandle<IxAODSegmentCnvTool> m_segmentCnvTool{this, "SegmentCnvTool", ""};
             /** @brief Alignment container key */            
             ActsTrk::GeoContextReadKey_t m_geoCtxKey{this, "AlignmentKey", "ActsAlignment", "cond handle key"};
-            /** @brief Tracking geometry tool to search for holes  */
-            PublicToolHandle<ActsTrk::ITrackingGeometryTool> m_trackingGeometryTool{this, "TrackingGeometryTool", ""};
-             /** @brief Acts extrapolation tool to search for holes */
-            ToolHandle<ActsTrk::IExtrapolationTool> m_extrapolationTool{this, "ExtrapolationTool", ""};
 
             /** @brief Abrivation of the extra declared auxVariables  */
             using DecorKey_t = SG::WriteDecorHandleKey<xAOD::MuonSegmentContainer>;
@@ -162,12 +66,9 @@ namespace MuonR4{
             SG::WriteHandleKey<xAOD::CombinedMuonStripContainer> m_combMeasKey{this, "combinedPrdKey", "CombinedMuonPrds"};
             /** @brief Handler to parse the auxiliary beam spot constaint */
             ActsTrk::AuxiliaryMeasurementHandler m_auxMeasProv{this};
+
             /** @brief Flag to convert the beamspot constaint as well */
             Gaudi::Property<bool> m_convertBeamSpot{this, "convertBeamSpot", false};
-            /** @brief Flag to tell whether the hole summary shall be written */
-            Gaudi::Property<bool> m_estimateHoles{this, "estimateHoles", true};
-            /** @brief Extra path length for the propagation after the last surface was crossed. */
-            Gaudi::Property<double> m_extraHolePath{this, "extraHolePath", 20.*Gaudi::Units::cm};
     };
 }
 #endif

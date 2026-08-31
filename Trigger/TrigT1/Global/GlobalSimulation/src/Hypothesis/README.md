@@ -6,9 +6,10 @@ This holds source code for simulation of the Global Trigger hypothesis block.
 TIP Writers
 ---
 
-Global Algorithms that perform the final selection of TOBs write to the TIP word,
-which is sent to CTP. The bits added to the TIP indicate the number of TOBs
-passing the selection.
+Global Algorithms that perform the final selection of TOBs write to the TIP word;
+a 1024b word which is sent to the CTP. The bits added to the TIP indicate the number of TOBs
+passing the selection. Each TIP writer writes a fixed number of bits, in a specified bit position
+dependent upon the current menu configuration.
 
 Each TIP writer is implemented as an Athena `AlgTool`, and executed by an instance
 of `GlobalSimulationAlg`, and must extend the `ITIPWriterAlgTool` interface.

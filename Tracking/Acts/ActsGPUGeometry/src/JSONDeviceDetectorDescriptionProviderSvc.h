@@ -10,7 +10,7 @@
 #include "ActsGPUInterfaces/IDeviceDetectorDescriptionProviderSvc.h"
 
 #include "StoreGate/ReadCondHandleKey.h"
-#include "AthDeviceInterfaces/IMemoryResourceTool.h"
+#include "AthDeviceInterfaces/IMemoryResourcesTool.h"
 #include "AthDeviceInterfaces/ICopyTool.h"
 #include "InDetIdentifier/PixelID.h"
 #include "InDetIdentifier/SCT_ID.h"
@@ -20,6 +20,11 @@
 
 #include "traccc/geometry/detector_design_description.hpp"
 #include "traccc/geometry/detector_conditions_description.hpp"
+
+#include "detray/core/detail/container_views.hpp"
+#include "detray/core/detector.hpp"
+#include "detray/detectors/itk_metadata.hpp"
+
 
 #include "vecmem/utils/cuda/copy.hpp"
 
@@ -74,13 +79,11 @@ public:
 private:
 
     ServiceHandle<StoreGateSvc> m_detStore{this, "DetectorStore", "StoreGateSvc/DetectorStore"};
-    /// @name The host and device memory resources tools to use for memory allocations
-    /// @{
-    ToolHandle<AthDevice::IMemoryResourceTool> m_hostMR{
-        this, "HostMR", "", "Host memory resource tool"};
-    ToolHandle<AthDevice::IMemoryResourceTool> m_deviceMR{
-        this, "DeviceMR", "", "Device memory resource tool"};
-    /// @}
+    /// @name The host and device memory resources tool to use for memory allocations
+    ToolHandle<AthDevice::IMemoryResourcesTool> m_MRs{
+        this, "MemoryResourcesTool", "",
+        "The memory resources tool to use for allocating memory on the device"};
+
     /// The copy tool used for copying data to device
     ToolHandle<AthDevice::ICopyTool> m_copy{
         this, "CopyProviderTool", "", "Vecmem copy provider tool"};
@@ -97,8 +100,8 @@ private:
         this, "ConditionsFile", "",
         "Traccc conditions config JSON file"};
     Gaudi::Property<std::string> m_mapFile{
-    this, "MapFile", "",
-    "Path to the athena<->detray ID map CSV file"};
+        this, "MapFile", "",
+        "Path to the athena<->detray ID map CSV file"};   
     /// @}
 
     /// @name The output object names
@@ -115,6 +118,12 @@ private:
     Gaudi::Property<std::string> m_hostCondObjectName{
         this, "HostConditionsObjectName", "",
         "Traccc host conditions object"};
+    Gaudi::Property<std::string> m_deviceDetectorName{
+        this, "DeviceDetectorName", "",
+        "Detray device detector object"};
+    Gaudi::Property<std::string> m_hostDetectorName{
+        this, "HostDetectorName", "",
+        "Detray host detector object"};    
     /// @}
 
     /// Helper function to load Athena<->detray ID maps from csv

@@ -25,11 +25,11 @@ namespace ActsTrk {
                                      const size_t& clusterIndex,
                                      const size_t& stripIndex)
     {
-        m_stripCenter  = 0.5*(stripStart+stripEnd);
-        m_stripDir     = stripStart-stripEnd;
-        m_trajDir      = 2.*(m_stripCenter-beamSpotVertex);
-        m_normal       = m_stripDir.cross(m_trajDir);
-        m_oneOverStrip = 1./m_stripDir.mag();
+        m_cache.mid       = 0.5*(stripStart+stripEnd);
+        m_cache.btmToTop  = stripStart-stripEnd;
+        m_cache.vtxToMid2 = 2.*(m_cache.mid-beamSpotVertex);
+        m_cache.normal    = m_cache.btmToTop.cross(m_cache.vtxToMid2);
+        m_cache.invLength = 1./m_cache.btmToTop.mag();
         m_locX         = locx;
         m_clusterIndex = clusterIndex;
         m_stripIndex   = stripIndex;
@@ -38,6 +38,6 @@ namespace ActsTrk {
 
     Amg::Vector3D StripInformationHelper::position(const double& shift) const
     {
-        return (m_stripCenter+(0.5*shift)*m_stripDir);
+        return (m_cache.mid+(0.5*shift)*m_cache.btmToTop);
     }
 }

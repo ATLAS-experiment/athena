@@ -14,7 +14,7 @@ StatusCode TrigMuonMonitorAlgorithm :: initialize(){
   StatusCode sc = AthMonitorAlgorithm::initialize();
   ATH_CHECK( m_matchTool.retrieve() );
   ATH_CHECK( m_muonSelectionTool.retrieve() );
-  ATH_CHECK( m_MuonContainerKey.initialize() );
+  ATH_CHECK( m_MuonContainerKey.initialize(!m_MuonContainerKey.empty()) );
   return sc;
 }
 
@@ -32,6 +32,11 @@ StatusCode TrigMuonMonitorAlgorithm :: fillHistograms(const EventContext& ctx) c
     //// Per chain monitoring ////
     for(const std::string& chain : m_monitored_chains){
       ATH_CHECK( fillVariablesPerChain(ctx, chain) );
+    }
+
+    if (m_MuonContainerKey.empty()) {
+      ATH_MSG_DEBUG("No offline muon container provided, skipping per offline muon monitoring");
+      return StatusCode::SUCCESS;
     }
 
 

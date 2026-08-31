@@ -38,8 +38,8 @@ MMPrepDataContainer_PERS*    MMPrepDataContainerCnv::createPersistent (Muon::MMP
 
 Muon::MMPrepDataContainer* MMPrepDataContainerCnv::createTransient(const Token* token) {
     MsgStream log(msgSvc(), "MMPrepDataContainerCnv" );
-    static const pool::Guid   p1_guid("5E5C97E2-8D7C-11E2-9FCB-001517648C14"); 
-    static const pool::Guid   p2_guid("86B42223-304D-4AFA-8E94-A49B23AC8865"); 
+    static const Guid   p1_guid("5E5C97E2-8D7C-11E2-9FCB-001517648C14"); 
+    static const Guid   p2_guid("86B42223-304D-4AFA-8E94-A49B23AC8865"); 
     if (log.level() <= MSG::DEBUG) log<<MSG::DEBUG<<"createTransient(const Token* token): main converter"<<endmsg;
     Muon::MMPrepDataContainer* p_collection(nullptr);
     if( compareClassGuid(token, p1_guid) ) {

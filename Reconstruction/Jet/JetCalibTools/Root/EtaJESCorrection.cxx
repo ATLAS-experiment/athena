@@ -8,6 +8,7 @@
 #include <TAxis.h>
 #include <TEnv.h>
 #include <utility>
+#include <cmath>
 
 EtaJESCorrection::EtaJESCorrection()
   : JetCalibrationStep::JetCalibrationStep(),
@@ -95,9 +96,9 @@ StatusCode EtaJESCorrection::initialize() {
       // Read in absolute JES calibration factors
       TString key=Form("JES.%s_Bin%d",m_jetAlgo.Data(),ieta);
       std::vector<double> params = JetCalibUtils::VectorizeD(m_config->GetValue(key,""));
-      m_nPar = params.size();
+      m_nPar = std::ssize(params);
       if (m_nPar<s_nParMin || m_nPar>s_nParMax) { ATH_MSG_FATAL( "Cannot read JES calib constants " << key ); return StatusCode::FAILURE; }
-      for (uint ipar=0;ipar<m_nPar;++ipar) m_JESFactors[ieta][ipar] = params[ipar];
+      for (int ipar=0;ipar<m_nPar;++ipar) m_JESFactors[ieta][ipar] = params[ipar];
 
         //Protections for high order extrapolation methods at low Et (Et < _minPt_JES)
         if(m_lowPtExtrap > 0) {
@@ -135,10 +136,9 @@ StatusCode EtaJESCorrection::initialize() {
     // Read in jet eta calibration factors
     TString key=Form("EtaCorr.%s_Bin%d",m_jetAlgo.Data(),ieta);
     std::vector<double> params = JetCalibUtils::VectorizeD(m_config->GetValue(key,""));
-    m_nPar = params.size();
+    m_nPar = std::ssize(params);
 
-    if (params.size()!=m_nPar) { ATH_MSG_FATAL( "Cannot read jet eta calib constants " << key ); return StatusCode::FAILURE; }
-    for (uint ipar=0;ipar<m_nPar;++ipar) m_etaCorrFactors[ieta][ipar] = params[ipar];
+    for (int ipar=0;ipar<m_nPar;++ipar) m_etaCorrFactors[ieta][ipar] = params[ipar];
 
     if(m_freezeJESatHighE){ // Read starting energy values to freeze JES correction
       key=Form("EmaxJES.%s_Bin%d",m_jetAlgo.Data(),ieta);
@@ -151,8 +151,8 @@ StatusCode EtaJESCorrection::initialize() {
         // Read in absolute JMS calibration factors
         key=Form("MassCorr.%s_Bin%d",m_jetAlgo.Data(),ieta);
         params = JetCalibUtils::VectorizeD(m_config->GetValue(key,""));
-        if (params.size()!=m_nPar) {ATH_MSG_FATAL( "Cannot read JMS calib constants " << key ); return StatusCode::FAILURE;}
-        for (uint ipar=0;ipar<m_nPar;++ipar) m_JMSFactors[ieta][ipar] = params[ipar];
+        if (std::ssize(params)!=m_nPar) {ATH_MSG_FATAL( "Cannot read JMS calib constants " << key ); return StatusCode::FAILURE;}
+        for (int ipar=0;ipar<m_nPar;++ipar) m_JMSFactors[ieta][ipar] = params[ipar];
     }
 
   }
@@ -259,22 +259,20 @@ double EtaJESCorrection::getJES(double E_uncorr, double eta_det) const {
 
   double E = E_uncorr/m_GeV; // E in GeV
   //Check if the Pt goes below the minimum value, if so use the special GetLowPtJES method
-  if(m_useSecondaryminPt_JES){
-    if(fabs(eta_det) < m_etaSecondaryminPt_JES && E/cosh(eta_det) < m_minPt_JES){
-      double R = getLowPtJES(E,eta_det);
-      return 1.0/R;
-    }
-    if(fabs(eta_det) >= m_etaSecondaryminPt_JES && E/cosh(eta_det) < m_secondaryminPt_JES){
-      double R = getLowPtJES(E,eta_det);
-      return 1.0/R;
-    }
-  }else{
-    if ( E/cosh(eta_det) < m_minPt_JES ) {
-      double R = getLowPtJES(E,eta_det);
-      return 1.0/R;
-    }
-  }
+  const double pt = E / std::cosh(eta_det);
 
+  const double minPt =
+    m_useSecondaryminPt_JES && std::abs(eta_det) >= m_etaSecondaryminPt_JES
+     ? m_secondaryminPt_JES : m_minPt_JES;
+
+  if (pt < minPt) {
+    double R = getLowPtJES(E, eta_det);
+    if (R == 0.)[[unlikely]]{
+      ATH_MSG_ERROR("EtaJESCorrection::getJES: Divisor 'R' is zero.");
+      return 0.;
+    }
+    return 1.0 / R;
+  }
   // Get the factors
   int ieta = getEtaBin(eta_det);
 
@@ -292,6 +290,10 @@ double EtaJESCorrection::getJES(double E_uncorr, double eta_det) const {
   
   // Calculate the jet response and then the JES as 1/R
   double R = getLogPolN(factors,E);
+  if (R == 0.)[[unlikely]]{
+      ATH_MSG_ERROR("EtaJESCorrection::getJES: Divisor 'R' is zero.");
+      return 0.;
+  }
   return 1.0/R;
 }
 
@@ -344,8 +346,8 @@ double EtaJESCorrection::getEtaCorr(double E_corr, double eta_det) const {
   const double *factors = m_etaCorrFactors[ieta];
   
   double E = E_corr/m_GeV;
-  if ( E < m_minPt_EtaCorr*cosh(eta_det) ) 
-    E = m_minPt_EtaCorr*cosh(eta_det);
+  if ( E < m_minPt_EtaCorr*std::cosh(eta_det) ) 
+    E = m_minPt_EtaCorr*std::cosh(eta_det);
   if ( E>m_maxE_EtaCorr ) E=m_maxE_EtaCorr;
   
   double etaCorr = getLogPolN(factors,E);
@@ -361,24 +363,28 @@ double EtaJESCorrection::getMassCorr(double E_corr, double eta_det) const {
 
   int ieta = getEtaBin(eta_det);
   const double *factors = m_JMSFactors[ieta];
-  double E = ( E_corr/cosh(eta_det)<5.0*m_GeV ? 5.0*cosh(eta_det) : E_corr/m_GeV ); // E in GeV
+  double E = ( E_corr/std::cosh(eta_det)<5.0*m_GeV ? 5.0*std::cosh(eta_det) : E_corr/m_GeV ); // E in GeV
 
   double massR = getLogPolN(factors,E);
+  if (massR == 0.) [[unlikely]]{
+    ATH_MSG_ERROR( "EtaJESCorrection::getMassCorr: Divisor 'massR' is zero");
+    return 0.;
+  }
   return 1.0/massR;
 }
 
 double EtaJESCorrection::getLogPolN(const double *factors, double x) const {
   double y=0;
-  for ( uint i=0; i<m_nPar; ++i )
-    y += factors[i]*TMath::Power(log(x),Int_t(i));
+  for ( int i=0; i<m_nPar; ++i )
+    y += factors[i]*std::pow(std::log(x),i);
   return y;
 }
 
 double EtaJESCorrection::getLogPolNSlope(const double *factors, double x) const {
   double y=0;
   const double inv_x = 1. / x;
-  for ( uint i=0; i<m_nPar; ++i )
-    y += i*factors[i]*TMath::Power(log(x),Int_t(i-1))*inv_x;
+  for ( int i=0; i<m_nPar; ++i )
+    y += i*factors[i]*std::pow(std::log(x),i-1)*inv_x;
   return y;
 }
 

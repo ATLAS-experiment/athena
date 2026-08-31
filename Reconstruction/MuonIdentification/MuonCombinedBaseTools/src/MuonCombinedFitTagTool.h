@@ -13,7 +13,6 @@
 #include "GaudiKernel/ToolHandle.h"
 #include "MagFieldConditions/AtlasFieldCacheCondObj.h"
 #include "MuidInterfaces/ICombinedMuonTrackBuilder.h"
-#include "MuidInterfaces/IMuidMuonRecovery.h"
 #include "MuidInterfaces/IMuonMatchQuality.h"
 #include "MuidInterfaces/IMuonTrackQuery.h"
 #include "MuonCombinedToolInterfaces/IMuonCombinedTagTool.h"
@@ -69,7 +68,6 @@ namespace MuonCombined {
         ToolHandle<Rec::IMuonTrackQuery> m_trackQuery{this, "TrackQuery", "Rec::MuonTrackQuery/MuonTrackQuery"};
         ToolHandle<Rec::IMuonMomentumBalanceSignificance> m_momentumBalanceTool{
             this, "MomentumBalanceTool", "Rec::MuonMomentumBalanceSignificanceTool/MuonMomentumBalanceSignifTool"};
-        ToolHandle<Rec::IMuidMuonRecovery> m_muonRecovery{this, "MuonRecovery", ""};
         ToolHandle<Rec::IMuonMatchQuality> m_matchQuality{this, "MatchQuality", "Rec::MuonMatchQuality/MuonMatchQuality"};
         ToolHandle<Trk::ITrackScoringTool> m_trackScoringTool{this, "TrackScoringTool", "Muon::MuonTrackScoringTool/MuonTrackScoringTool"};
 

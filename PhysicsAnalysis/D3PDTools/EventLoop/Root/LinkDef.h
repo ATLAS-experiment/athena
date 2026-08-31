@@ -35,7 +35,6 @@
 #pragma link C++ typedef EL::StatusCode+;
 #pragma link C++ class EL::TorqueDriver+;
 #pragma link C++ class EL::VomsProxySvc+;
-#pragma link C++ class EL::IWorker+;
 #pragma link C++ class EL::WorkerConfig+;
 
 #pragma link C++ class std::pair<Long64_t,Long64_t>+;

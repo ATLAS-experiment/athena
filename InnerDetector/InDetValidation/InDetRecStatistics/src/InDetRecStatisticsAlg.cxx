@@ -19,11 +19,7 @@
 #include "GaudiKernel/SmartDataPtr.h"
 #include "CLHEP/Units/SystemOfUnits.h"
 #include "TruthUtils/HepMCHelpers.h"
-#include <cmath>
-#include <memory>
-#include <ostream>
-#include <iostream>
-#include <sstream>
+
 
 #include "InDetIdentifier/PixelID.h"
 #include "InDetIdentifier/SCT_ID.h"
@@ -65,6 +61,12 @@
 #include "TruthUtils/HepMCHelpers.h"
 #include "IdDict/IdDictDictionary.h"
 #include "IdDict/IdDictMgr.h"
+
+#include <cmath>
+#include <memory>
+#include <ostream>
+#include <iostream>
+#include <sstream>
 
 
 
@@ -560,8 +562,7 @@ selectGenSignal  (const McEventCollection* SimTracks,
 	  if (std::abs(charge)<0.5) continue;
 	  if (std::abs(particle->momentum().perp()) >  m_minPt  &&
 	      std::abs(particle->momentum().pseudoRapidity()) < m_maxEta ) {
-	    std::pair<HepMC::ConstGenParticlePtr,int> thisPair(particle,ievt);
-	    GenSignal.push_back(thisPair);
+	    GenSignal.emplace_back(particle,ievt);
 	  }
 	} // End of a particle iteration
     } // End of one GenEvent iteration

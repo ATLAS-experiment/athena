@@ -68,27 +68,42 @@ namespace Muon
                                                xAOD::sTgcWireAuxContainer>;
         using PadCont_t = xAOD::FillContainer<xAOD::sTgcPadContainer,
                                               xAOD::sTgcPadAuxContainer>;
+        /** @brief Container to hold the translated xAOD strips*/
         StripCont_t strips{};
+        /** @brief Container to hold the translated xAOD wires*/
         WireCont_t  wires{};
+        /** @brief Container to hold the translated xAOD pads*/
         PadCont_t   pads{};
 
+        /** @brief Constructor to instantiate the cache
+         *  @param hashMax: Number of sTGC chambers (summarizing ML 1 + ML2)
+         *  @param key: The writeHandleKey to fetch the container from StoreGate */
         DataCache(const std::size_t hashMax,
                   const PrdKey_t& key,
                   const EventContext& ctx);
-        
+        /** @brief Instantiated WriteHandle */
         SG::WriteHandle<sTgcPrepDataContainer> prdWriteHandle{};
-
+        /** @brief Prep data collections that will be appended to the container in store gate */
         std::vector<std::unique_ptr<sTgcPrepDataCollection>> collections{};
-
+        /** @brief Pointer to the R4 detector manager */
         const MuonGMR4::MuonDetectorManager* detMgr{nullptr};
-
+        /** @brief Flag indicating whether the container is valid */
         bool isValid{false};
-
+        /** @brief Overwrite the destructor to ensure that the xAOD containers are made */
         ~DataCache();
+        /** @brief Default move operator */
         DataCache& operator=(DataCache&& other) = default;
+        /** @brief Default move constructor */
         DataCache(DataCache&& other) = default;
-
+        /** @brief Sort the prepdata collection by the Identifier
+          *        of the objects contained and then translate the
+          *        prd objects into xAOD objects 
+          * @param coll: Reference to the collection to process*/
         void translateAndSort(sTgcPrepDataCollection& coll);
+        /** @brief Translate the prd objects conained in the collection
+          *        to xAOD objects.
+          * @param coll: Reference to the collection to process*/
+        void translate(const sTgcPrepDataCollection& coll);
       };
       
       StatusCode processCollection(const EventContext& ctx, 
@@ -96,11 +111,10 @@ namespace Muon
                                    const STGC_RawDataCollection *rdoColl) const;
             
       DataCache setupOutputContainers(const EventContext& ctx) const;
-      const STGC_RawDataContainer* getRdoContainer(const EventContext& ctx) const;
-
-      void processRDOContainer(const EventContext& ctx,
-                               DataCache& xAODcontainers,
-                               const std::vector<IdentifierHash>& idsToDecode) const;
+   
+      StatusCode processRDOContainer(const EventContext& ctx,
+                                     DataCache& xAODcontainers,
+                                     const std::vector<IdentifierHash>& idsToDecode) const;
 
       SG::ReadCondHandleKey<MuonGM::MuonDetectorManager> m_muDetMgrKey {this, "DetectorManagerKey", "MuonDetectorManager", "Key of input MuonDetectorManager condition data"}; 
 

@@ -26,9 +26,9 @@ LArPedestalCompleteCnv::createPersistent (LArPedTransType* transObj)
 LArConditionsSubset<LArPedestalP1>*
 LArPedestalCompleteCnv::createTransient(const Token* token)
 {
-    static const pool::Guid p2_guid("8BD3FE69-A3C4-418C-ACB9-E362CE524353");
-    static const pool::Guid   p1_guid("E365F747-264B-4A0C-B80A-570DBE099881");
-    static const pool::Guid   p0_guid("E17191DD-4C0A-4B1A-AE49-7D587C6BE3EE");
+    static const Guid p2_guid("8BD3FE69-A3C4-418C-ACB9-E362CE524353");
+    static const Guid   p1_guid("E365F747-264B-4A0C-B80A-570DBE099881");
+    static const Guid   p0_guid("E17191DD-4C0A-4B1A-AE49-7D587C6BE3EE");
 
     if (compareClassGuid(token, p2_guid)) {
       // using unique_ptr ensures deletion of the persistent object

@@ -53,7 +53,7 @@ private:
 
   eflowCalo::LAYER getLayer(const Trk::CurvilinearParameters* clParameters) const;
 
-  ToolHandle<Trk::IParticleCaloExtensionTool> m_theTrackExtrapolatorTool;
+  ToolHandle<Trk::IParticleCaloExtensionTool> m_theTrackExtrapolatorTool{this, "TrackCaloExtensionTool", {}, "TrackCaloExtension Tool Handle"};
 
   std::unique_ptr<Trk::TrackParametersIdHelper> m_trackParametersIdHelper;
 

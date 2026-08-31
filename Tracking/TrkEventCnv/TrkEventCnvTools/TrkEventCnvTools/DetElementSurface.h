@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRKEVENTCNVTOOLS_DETELEMENTSURFACE_H
@@ -60,7 +60,7 @@ class DetElementSurface : public Surface
                                 double,
                                 double,
                                 double,
-                                std::optional<AmgSymMatrix(5)> = std::nullopt) const
+                                const std::optional<AmgSymMatrix(5)> & = std::nullopt) const
     {
       return nullptr;
     }
@@ -68,7 +68,7 @@ class DetElementSurface : public Surface
     createUniqueTrackParameters(const Amg::Vector3D&,
                                 const Amg::Vector3D&,
                                 double,
-                                std::optional<AmgSymMatrix(5)> = std::nullopt) const
+                                const std::optional<AmgSymMatrix(5)> & = std::nullopt) const
     {
       return nullptr;
     }
@@ -79,7 +79,7 @@ class DetElementSurface : public Surface
                                   double,
                                   double,
                                   double,
-                                  std::optional<AmgSymMatrix(5)> = std::nullopt) const
+                                  const std::optional<AmgSymMatrix(5)> & = std::nullopt) const
     {
       return nullptr;
     }
@@ -87,7 +87,7 @@ class DetElementSurface : public Surface
     createUniqueNeutralParameters(const Amg::Vector3D&,
                                   const Amg::Vector3D&,
                                   double,
-                                  std::optional<AmgSymMatrix(5)> = std::nullopt) const
+                                  const std::optional<AmgSymMatrix(5)> & = std::nullopt) const
     {
       return nullptr;
     }

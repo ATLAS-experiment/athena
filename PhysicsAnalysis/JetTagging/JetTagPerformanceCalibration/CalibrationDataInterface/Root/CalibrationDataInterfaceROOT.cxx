@@ -261,7 +261,7 @@ End_Html */
 
 #include "CalibrationDataInterface/CalibrationDataEigenVariations.h"
 #include "CalibrationDataInterface/CalibrationDataInternals.h"
-#include <boost/algorithm/string.hpp>
+#include <CxxUtils/StringUtils.h>
 
 #include "TMath.h"
 #include "TEnv.h"
@@ -283,7 +283,7 @@ using Analysis::CalibrationDataContainer;
 using Analysis::UncertaintyResult;
 using Analysis::CalibrationDataEigenVariations;
 using Analysis::CalibrationDataInterface::split;
-using boost::trim;
+using CxxUtils::trimWhiteSpaces;
 
 #ifndef __CINT__
 ClassImp(Analysis::CalibrationDataInterfaceROOT)
@@ -308,8 +308,8 @@ Analysis::CalibrationDataInterfaceROOT::CalibrationDataInterfaceROOT(const strin
 
   // ROOT file containing the calibrations
   TString filename = env.GetValue("File", "BTaggingPerformanceCalibrations.root");
-  m_filenameEff = string(env.GetValue("FileEff", "")); trim(m_filenameEff);
-  m_filenameSF =  string(env.GetValue("FileSF", ""));  trim(m_filenameSF);
+  m_filenameEff = string(env.GetValue("FileEff", "")); m_filenameEff = trimWhiteSpaces(m_filenameEff);
+  m_filenameSF =  string(env.GetValue("FileSF", ""));  m_filenameSF = trimWhiteSpaces(m_filenameSF);
   if (m_filenameEff == "") {
     m_filenameEff = pathname + filename.Data();
   }
@@ -358,7 +358,8 @@ Analysis::CalibrationDataInterfaceROOT::CalibrationDataInterfaceROOT(const strin
   std::map<string, string> SFNames;
   for (auto const& flavour : m_flavours) {
     string test(testPrefix); test += "ScaleFactorCalibration"; test += flavour; test += "Name";
-    SFNames[flavour] = string(env.GetValue(test.c_str(), "default")); trim(SFNames[flavour]);
+    SFNames[flavour] = string(env.GetValue(test.c_str(), "default"));
+    SFNames[flavour] = trimWhiteSpaces(SFNames[flavour]);
   }
   setSFCalibrationNames(SFNames);
 
@@ -376,8 +377,9 @@ Analysis::CalibrationDataInterfaceROOT::CalibrationDataInterfaceROOT(const strin
       // NB: TEnv imposes a maximum string length of 1024 characters -- is this a problem?
       string::size_type arrow = alias.find("->");
       if (arrow == string::npos) continue;
-      string target = alias.substr(0,arrow); trim(target);
-      m_aliases[target] = alias.substr(arrow+2); trim(m_aliases[target]);
+      string target = alias.substr(0,arrow); target = trimWhiteSpaces(target);
+      m_aliases[target] = alias.substr(arrow+2);
+      m_aliases[target] = trimWhiteSpaces(m_aliases[target]);
       if (end != string::npos) AL = AL.substr(end+1);
     } while (end != string::npos);
   }
@@ -435,7 +437,8 @@ Analysis::CalibrationDataInterfaceROOT::CalibrationDataInterfaceROOT(const strin
     mappings["Tight"] = Tight;
     for (auto const& flavour : m_flavours) {
       test = testPrefix; test += "EigenvectorReduction"; test += flavour;
-      std::string reduction = string(env.GetValue(test.c_str(), "Loose")); trim(reduction);
+      std::string reduction = string(env.GetValue(test.c_str(), "Loose"));
+      reduction = trimWhiteSpaces(reduction);
       m_EVReductions[flavour] = mappings.find(reduction) == mappings.end() ? mappings["Loose"] : mappings.find(reduction)->second;
     }
   }
@@ -445,7 +448,8 @@ Analysis::CalibrationDataInterfaceROOT::CalibrationDataInterfaceROOT(const strin
   if (m_maxAbsEta < 0) m_maxAbsEta = 2.5;
 
   // set validation / protection strategy in case an out-of-bounds eta value is specified
-  string strategy = string(env.GetValue("OutOfBoundsEta", "GiveUp")); trim(strategy);
+  string strategy = string(env.GetValue("OutOfBoundsEta", "GiveUp"));
+  strategy = trimWhiteSpaces(strategy);
   if (strategy == "GiveUp") m_absEtaStrategy = GiveUp;
   else if (strategy == "Flag") m_absEtaStrategy = Flag;
   else if (strategy == "Ignore") m_absEtaStrategy = Ignore;
@@ -455,7 +459,8 @@ Analysis::CalibrationDataInterfaceROOT::CalibrationDataInterfaceROOT(const strin
   }
 
   // set validation / protection strategy in case out-of-bounds variables are specified
-  strategy = string(env.GetValue("OutOfBoundsOther", "Flag")); trim(strategy);
+  strategy = string(env.GetValue("OutOfBoundsOther", "Flag"));
+  strategy = trimWhiteSpaces(strategy);
   if (strategy == "GiveUp") m_otherStrategy = GiveUp;
   else if (strategy == "GiveUpExtrapolated") m_otherStrategy = GiveUpExtrapolated;
   else if (strategy == "Flag") m_otherStrategy = Flag;

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // $Id: ICaloRingerInputReader.h 707325 2015-11-12 02:47:45Z wsfreund $
@@ -16,10 +16,7 @@
    $$$
 */
 
-// STL Includes:
-//#include <map>
-#include <vector>
-#include <memory>
+
 
 // Core Includes:
 #include "GaudiKernel/IAlgTool.h"
@@ -34,11 +31,7 @@ class ICaloRingerInputReader : virtual public IAlgTool
 {
  public:
 
-   //typedef std::map< 
-   //        const xAOD::IParticle*, 
-   //        const std::unique_ptr< xAOD::CaloRingsLinks > >
-   //    decoMap_t;
-
+   
   /** @brief Virtual destructor*/
   virtual ~ICaloRingerInputReader() {};
 	

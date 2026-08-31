@@ -26,7 +26,8 @@ class NNClusterCalibrator;
 /// calibrator
 template <typename calib_data_t, typename traj_t>
 struct NNClusterCalibratorOptions {
-  int m_minClusterSizeForNN = 0;  ///! minimum number of hits to run NN
+  std::size_t m_minClusterSizeForNN = 0;  ///! minimum number of hits to run NN
+  double m_minClusterChargeForNN = 15000.;
   const OnnxNNCollection* m_models =
       nullptr;  ///! set of models for inference (non owning pointer)
   std::unique_ptr<AnalogueClusteringCalibrator<calib_data_t, traj_t>>
@@ -137,9 +138,13 @@ class NNClusterCalibratorToolImpl
   NNClusterCalibratorOptions<calib_data_t, traj_t> createOptions(
       const EventContext& ctx) const;
 
-  Gaudi::Property<int> m_minClusterSizeForNN{
+  Gaudi::Property<std::size_t> m_minClusterSizeForNN{
       this, "minClusterSizeForNN", 0,
-      "how big the cluster needs to be to apply NN to it"};
+      "Use Analogue calibrator if size is smaller that this value"};
+  
+  Gaudi::Property<double> m_minClusterChargeForNN{
+      this, "minClusterChargeForNN", 0,
+      "Minimum total charge to enable NN clustering"};
 
   SG::ReadCondHandleKey<OnnxNNCollection> m_readKeyONNX {
       this, "NnCollectionONNXReadKey", "PixelClusterNNONNX",

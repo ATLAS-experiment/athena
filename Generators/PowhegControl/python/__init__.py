@@ -2,4 +2,13 @@
 
 # flake8: noqa
 
-from .powheg_control import PowhegControl
+__all__ = ['PowhegControl']
+
+import importlib
+
+
+def __getattr__(name):
+    if name == 'PowhegControl':
+        module = importlib.import_module('.powheg_control', __package__)
+        return getattr(module, name)
+    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")

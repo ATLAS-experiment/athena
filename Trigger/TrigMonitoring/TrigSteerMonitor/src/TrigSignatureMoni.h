@@ -98,6 +98,8 @@ class TrigSignatureMoni : public extends<AthReentrantAlgorithm, IIncidentListene
   ServiceHandle<ITHistSvc> m_histSvc{ this, "THistSvc", "THistSvc/THistSvc", "Histogramming svc" };
   Gaudi::Property<std::string> m_bookingPath{ this, "HistPath", "/EXPERT/HLTFramework", "Booking path for the histogram"};
 
+  Gaudi::Property<bool> m_countLegFeatures{ this, "CountLegFeatures", false, "Save features per leg as well as per chain"};
+
   // Necessary for asynchronous calling callback function
   Gaudi::Property<unsigned int> m_duration {this, "RateIntegrationDuration", 10, "Integration time for the rate histogram in seconds"};
   Gaudi::Property<unsigned int> m_intervals {this, "RateIntegrationIntervals", 6, "Number of the rate histogram publications"};

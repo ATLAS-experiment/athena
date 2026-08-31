@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 ## @package PyJobTransforms.trfValidation
 #
@@ -14,13 +14,8 @@
 import fnmatch
 import os
 import re
-
-from subprocess import Popen, STDOUT, PIPE
-
 import logging
 msg = logging.getLogger(__name__)
-
-from PyUtils import RootUtils
 
 from PyJobTransforms.trfExeStepTools import getExecutorStepEventCounts
 from PyJobTransforms.trfExitCodes import trfExit
@@ -29,71 +24,6 @@ from PyJobTransforms.trfArgClasses import argFile
 
 import PyJobTransforms.trfExceptions as trfExceptions
 import PyJobTransforms.trfUtils as trfUtils
-
-
-# @brief Check a Pool file for corruption, return N events or -1 if access problem, -2 if corruption
-def corruptionTestPool(filename, verbose=False):
-    if not os.access(filename, os.R_OK):
-        msg.info("ERROR can't access file %s", filename)
-        return -1
-
-    ROOT = RootUtils.import_root()
-
-    try:
-        f = ROOT.TFile.Open(filename)
-    except Exception:
-        msg.info("Can't open file %s", filename)
-        return -1
-
-    nEvents = None
-
-    keys = f.GetListOfKeys()
-    for k in keys:
-        try:
-            tn = k.GetName()
-            t = f.Get(tn)
-            if not isinstance(t, ROOT.TTree): return
-        except Exception:
-            msg.info("Can't get tree %s from file %s", tn, filename)
-            f.Close()
-            return -1
-
-        if (verbose): msg.info("Working on tree %s", tn)
-        n = t.GetEntriesFast()
-        for i in range(n):
-            s = t.GetEntry(i)
-            if s <= 0:
-                msg.info("Tree %s: Found corruption in event %i", i, n)
-                f.Close()
-                return -2
-            else:
-                if verbose and i > 0 and i % 100 == 0:
-                    msg.info("Checking event %s", i)
-        msg.info("Tree %s: %i event(s) ok", tn, n)
-
-        # Use CollectionTree determine the number of events
-        if tn == 'CollectionTree':
-            nEvents = n
-        pass  # end of loop over trees
-
-    f.Close()
-    msg.info("ROOT file %s looks ok", filename)
-    if n is None:
-        msg.info("Failed to determine number of events in file %s. No tree named 'CollectionTree'", filename)
-        return 0
-    return nEvents
-
-# @brief Check BS file for corruption
-def corruptionTestBS(filename):
-    # First try AtlListBSEvents -c %filename:
-    cmd = ['AtlListBSEvents', '-c', filename]
-    p = Popen(cmd, shell=False, stdout=PIPE, stderr=STDOUT, close_fds=True)
-    while p.poll() is None:
-        line = p.stdout.readline()
-        if line:
-            msg.info("AtlListBSEvents Report: %s", line.strip())
-    rc = p.returncode
-    return rc
 
 
 ## @brief Class of patterns that can be ignored from athena logfiles

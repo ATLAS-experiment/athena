@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef DERIVATIONFRAMEWORK_DIMUONTAGGINGALG_H
@@ -18,13 +18,14 @@
 #include "xAODMuon/MuonContainer.h"
 #include "xAODTruth/TruthParticleContainer.h"
 
+#include "xAODMuonViews/ContainerDecorator.h"
 
 namespace DerivationFramework {
 
     class DiMuonTaggingAlg : public AthReentrantAlgorithm {
     public:
         /** Constructor with parameters */
-        DiMuonTaggingAlg(const std::string& name, ISvcLocator* pSvcLocator);
+        using AthReentrantAlgorithm::AthReentrantAlgorithm;
 
         /** Destructor */
         virtual ~DiMuonTaggingAlg() = default;
@@ -34,7 +35,7 @@ namespace DerivationFramework {
         virtual StatusCode execute(const EventContext& ctx) const override;
 
     private:
-        using TrackPassDecor = SG::WriteDecorHandle<xAOD::TrackParticleContainer, bool>;
+        using TrackPassDecor = xAOD::ContainerDecorator<xAOD::TrackParticleContainer, std::uint8_t>;
         /// Returns true of the pointer is valid and also whether the pt and absEta are above and below the thresholds, respectively
         bool passKinematicCuts(const xAOD::IParticle* mu, const float ptMin, const float absEtaMax) const;
 

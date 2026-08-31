@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // METJetAssocTool.cxx
@@ -137,7 +137,7 @@ namespace met {
       if (mismatchedPFlow) getPFOs(jet,consts,constits,momenta);
       else if (mismatchedState) getClus(jet,consts);
       else if (newConstVec) getOther(jet,consts,&newConst);
-      if (newConstVec) MissingETComposition::setJetConstSum(metMap,jet,consts,momenta);
+      if (newConstVec) MissingETComposition::setJetConstSum(metMap,jet,consts,std::move(momenta));
       ATH_MSG_VERBOSE("Added association " << metMap->findIndex(jet) << " pointing to jet " << jet);
       ATH_MSG_VERBOSE("Jet pt, eta, phi = " << jet->pt() << ", " << jet->eta() << "," << jet->phi() );
 

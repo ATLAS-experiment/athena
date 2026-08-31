@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /***************************************************************************
@@ -71,7 +71,7 @@ namespace Rec
                                std::move(trkSummary),
                                std::move(parameters),
                                std::move(fitQuality),
-                               std::move(info))
+                               info)
       , P4PxPyPzE(mom)
       , NavigableTerminalNode()
     {}

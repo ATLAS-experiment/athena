@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // JetConstituentFiller.h
@@ -13,11 +13,11 @@
 // Utility that copies the pseudojet constituents to
 // ATLAS jet constituents (including ghosts).
 
-#include <string>
-#include <vector>
+
 #include "xAODJet/Jet.h"
 #include "JetEDM/PseudoJetVector.h"
-
+#include <string>
+#include <vector>
 namespace xAOD {
   class IParticle;
 }
@@ -54,7 +54,7 @@ public :
   static PseudoJetVector constituentPseudoJets(const xAOD::Jet& jet, bool ignoreGhosts=true, bool requireJetStructure=false);
 
  protected:
-  bool m_isTrigger;
+  bool m_isTrigger{};
     
 };
 

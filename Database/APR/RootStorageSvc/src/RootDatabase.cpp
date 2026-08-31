@@ -620,6 +620,39 @@ StatusCode RootDatabase::setOption(const DbOption& opt)  {
           return FAILURE;
       }
       break;
+    case 'S':
+      if ( !strcasecmp(n, "SET_ACTIVE_ENTRY" ) ) // string
+      {
+          char* tempStr = nullptr;
+          if (opt.getValue(tempStr).isSuccess() && tempStr) {
+              Token poolToken;
+              poolToken.fromString(tempStr);
+              const std::string prefix = poolToken.contID().substr(0, poolToken.contID().find_first_of("()_"));
+              const std::uint64_t idx  = poolToken.oid().second;
+              // If we're reading an RNTuple, this is where we set the slot-specific active entry number
+              // for the underlying RNTupleReader of the main event data. This ensures the RNTupleReader
+              // will not evict the cached data until the slot moves onto the next event.
+              // The limitations of the current implementation are:
+              // 1. The DataHeader is expected to be in the same RNTuple as the main event data
+              // 2. We have a single unified RNTuple (and associated RNTupleReader) for all containers
+              if(auto it = m_ntupleReaderMap.find(prefix); it != m_ntupleReaderMap.end()) {
+                  // Extract the entry number through the index lookup
+                  const std::uint64_t entryNumber = indexLookup(it->second.get(), idx);
+                  // Set the active entry token for the underlying RNTupleReader, creating it if it does not exist yet
+                  if (!m_activeEntryTokenPtr) {
+                      m_activeEntryTokenPtr.emplace();
+                  }
+                  auto& activeTokenPtr = *m_activeEntryTokenPtr->get();
+                  if(!activeTokenPtr) {
+                      activeTokenPtr = std::make_unique<ROOT::RNTupleReader::RActiveEntryToken>(it->second->CreateActiveEntryToken());
+                  }
+                  activeTokenPtr->SetEntryNumber(entryNumber);
+              }
+              return SUCCESS;
+          }
+          return FAILURE;
+      }
+      break;
     case 'T':
        if( !strcasecmp(n+5,"BRANCH_OFFSETTAB_LEN") )  {
           return opt.getValue(m_branchOffsetTabLen);
@@ -634,7 +667,10 @@ StatusCode RootDatabase::setOption(const DbOption& opt)  {
        }
        else if ( !strcasecmp(n+5,"MAX_VIRTUAL_SIZE") )  {
           ATH_MSG_DEBUG("Request virtual tree size");
-          if ( !m_file ) return FAILURE;
+          if (!m_file) {
+             ATH_MSG_DEBUG("Could not find tree " << opt.option() << ", no TREE_MAX_VIRTUAL_SIZE will be set");
+             return SUCCESS;
+          }
           ATH_MSG_DEBUG("File name " << name());
 
           int virtMaxSize = 0;
@@ -657,7 +693,10 @@ StatusCode RootDatabase::setOption(const DbOption& opt)  {
        }
        else if ( !strcasecmp(n+5,"CACHE") )  {
            ATH_MSG_DEBUG("Request tree cache");
-           if( !m_file ) return FAILURE;
+           if (!m_file) {
+               ATH_MSG_DEBUG("Could not find tree " << m_treeNameWithCache << ", no TREE_CACHE will be set");
+               return SUCCESS;
+           }
            ATH_MSG_DEBUG("File name " << name());
 
            int cacheSize = 0;

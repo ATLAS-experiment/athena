@@ -383,6 +383,11 @@ class MuonWorkingPointEfficiencyConfig (ConfigBlock) :
             info="save all the independent detailed object scale factors.")
         self.addOption ('saveCombinedSF', False, type=bool,
             info="save the combined object scale factor.")
+        self.addOption('useLRT', False, type=bool,
+            info="apply the LRT-specific reco/ID efficiency SF treatment. When "
+              "set (and quality is Medium, the only WP supported for LRT muons), "
+              "the reco SF tool routes per-muon via the isLRT flag and uses the "
+              "LRT-specific CalibrationRelease.")
     
     def instanceName (self) :
         if self.postfix is not None:
@@ -414,10 +419,13 @@ class MuonWorkingPointEfficiencyConfig (ConfigBlock) :
             alg.outOfValidity = 2 #silent
             alg.outOfValidityDeco = 'muon_reco_bad_eff' + postfix
             alg.efficiencyScaleFactorTool.WorkingPoint = self.quality
+            # LRT muons: MCP supports only Medium WP. Enable per-muon isLRT flag and use dedicated LRT reco-sf release.
+            if self.useLRT and self.quality != 'Medium':
+              raise ValueError ("useLRT is only supported with the Medium quality working point, not '%s'" % self.quality)
             if config.geometry() >= LHCPeriod.Run3:
-                alg.efficiencyScaleFactorTool.CalibrationRelease = '251211_Preliminary_r24run3'
+                alg.efficiencyScaleFactorTool.CalibrationRelease = '250418_Preliminary_r24run3' if self.useLRT else '251211_Preliminary_r24run3'
             else:
-                alg.efficiencyScaleFactorTool.CalibrationRelease = '230213_Preliminary_r22run2_loosefix'
+                alg.efficiencyScaleFactorTool.CalibrationRelease = '240620_LRT_r22run2' if self.useLRT else '230213_Preliminary_r22run2_loosefix'
             alg.efficiencyScaleFactorTool.BreakDownSystematics = self.systematicBreakdown
             alg.muons = config.readName (self.containerName)
             alg.preselection = config.getPreselection (self.containerName, self.selectionName)
@@ -565,6 +573,8 @@ class MuonTriggerAnalysisSFBlock (ConfigBlock):
                 2022: 410000,
                 2023: 450000,
                 2024: 470000,
+                2025: 495000,
+                2026: 516000,
             }
 
             triggerConfigs = {}

@@ -24,12 +24,15 @@ StatusCode ActsTrk::RandomProtoTrackCreatorTool::findProtoTracks(const EventCont
     size_t nPix = 1; 
     size_t nStrip = 7; 
     for (size_t k = 0; k < nPix; ++k){
+        //we don't worry about the quality of randomness for this purpose
+        //coverity[DC.WEAK_CRYPTO)]
         auto index = rand() % pixelContainer.size();
         dummyPoints.push_back(pixelContainer.at(index));
     }
 
 
     for (size_t k = 0; k < nStrip; ++k){
+        //coverity[DC.WEAK_CRYPTO)]
         auto index = rand() % stripContainer.size();
         dummyPoints.push_back(stripContainer.at(index));
     }
@@ -41,16 +44,16 @@ StatusCode ActsTrk::RandomProtoTrackCreatorTool::findProtoTracks(const EventCont
     auto inputPerigee = makeDummyParams(dummyPoints[0]);
 
     // and add to the list (will only make one prototrack per event for now)
-    foundProtoTracks.push_back({dummyPoints,std::move(inputPerigee)});
+    foundProtoTracks.push_back({std::move(dummyPoints),std::move(inputPerigee)});
 
     return StatusCode::SUCCESS;
 }
 
 Amg::Vector3D ActsTrk::RandomProtoTrackCreatorTool::getMeasurementPos(const xAOD::UncalibratedMeasurement* theMeas) const {
     if (theMeas->type() == xAOD::UncalibMeasType::PixelClusterType) {
-      return dynamic_cast <const xAOD::PixelCluster*>(theMeas)->globalPosition().cast<double>();
+      return static_cast <const xAOD::PixelCluster*>(theMeas)->globalPosition().cast<double>();
     } else if (theMeas->type() == xAOD::UncalibMeasType::StripClusterType){
-      return dynamic_cast<const xAOD::StripCluster*>(theMeas)->globalPosition().cast<double>();
+      return static_cast<const xAOD::StripCluster*>(theMeas)->globalPosition().cast<double>();
     }
     return Amg::Vector3D::Zero();
 }
@@ -61,7 +64,7 @@ std::unique_ptr<Acts::BoundTrackParameters> ActsTrk::RandomProtoTrackCreatorTool
   using namespace Acts::UnitLiterals;
   std::shared_ptr<const Acts::Surface> actsSurface = Acts::Surface::makeShared<Acts::PerigeeSurface>(
         Acts::Vector3::Zero());
-  Acts::BoundVector params;
+  Acts::BoundVector params{};
 
   auto globalPos = getMeasurementPos(measurement); 
 

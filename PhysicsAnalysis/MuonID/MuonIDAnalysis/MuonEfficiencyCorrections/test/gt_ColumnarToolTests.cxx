@@ -71,7 +71,7 @@ TEST_F (ColumnarMemoryTest, MuonEfficiencyScaleFactors)
   // there is no special reason for this value, it is just what came
   // out of my first test run.  if the tool changes, feel free to
   // update this value.
-  columnMap.setExpectation ("Muons.sfOut", {0.99509060382843018});
+  columnMap.setExpectation ("Muons.sfOut", {0.99569094181060791});
   columnMap.setExpectation ("Muons.validOut", {1});
 
   columnMap.connectColumnsToTool ();

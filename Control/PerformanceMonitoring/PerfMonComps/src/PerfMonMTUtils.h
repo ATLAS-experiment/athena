@@ -417,15 +417,21 @@ inline bool PMonMT::doesDirectoryExist(const std::string& dir) {
   return (stat(dir.c_str(), &buffer) == 0);
 }
 
+// gperftools 2.18 (LCG_110) no longer exports the public mallinfo2 symbol, so
+// mallinfo2() no longer returns tcmalloc's numbers. Call tc_mallinfo2 directly:
+// a weak symbol resolved to the preloaded libtcmalloc, or nullptr otherwise.
+extern "C" [[gnu::weak]] struct mallinfo2 tc_mallinfo2(void);
+
 /*
- * Get Malloc (from SemiDetMisc.h) 
+ * Get Malloc (from SemiDetMisc.h)
  */
 inline double PMonMT::get_malloc_kb ATLAS_NOT_THREAD_SAFE () {
 #ifndef __linux
   return 0.0;
 #else
-  struct mallinfo2 m = mallinfo2();
-  return (m.uordblks+m.hblkhd)/1024.0;
+  // Use tc_mallinfo2 when tcmalloc is preloaded, else fall back to mallinfo2().
+  const struct mallinfo2 m = (tc_mallinfo2 != nullptr) ? tc_mallinfo2() : mallinfo2();
+  return (m.uordblks + m.hblkhd) / 1024.0;
 #endif
 }
 

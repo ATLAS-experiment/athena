@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /***************************************************************************
@@ -79,10 +79,10 @@ class TileInfoDump: public AthAlgorithm {
     bool m_printPulseShapes;
     float m_printPulseShapesStep;
 
-    void printBadChannels();
+    void printBadChannels(const EventContext& ctx);
     bool m_printBadChannels;
 
-    void printBadCells();
+    void printBadCells(const EventContext& ctx);
     bool m_printBadCells;
 
     void printOfcs();

@@ -51,10 +51,10 @@ TrigRoiDescriptorCollection* TrigRoiDescriptorCollectionCnv::createTransient(con
 {
   MsgStream mlog(msgSvc(), "TrigRoiDescriptorCollectionConverter" );
 
-  static const pool::Guid p3_guid("615418EF-EEFB-4E87-A396-7313E67C547E");
-  static const pool::Guid p2_guid("D1A44F23-416C-4AB6-BFFA-2EA280565D4E");
-  static const pool::Guid p1_guid("D0A0B6E7-9E0C-484E-AE8C-AC57B5111EA0");
-  static const pool::Guid tlp1_guid("CE80FC4E-B16B-40B2-9D9E-EB4916B663B0");
+  static const Guid p3_guid("615418EF-EEFB-4E87-A396-7313E67C547E");
+  static const Guid p2_guid("D1A44F23-416C-4AB6-BFFA-2EA280565D4E");
+  static const Guid p1_guid("D0A0B6E7-9E0C-484E-AE8C-AC57B5111EA0");
+  static const Guid tlp1_guid("CE80FC4E-B16B-40B2-9D9E-EB4916B663B0");
   
   TrigRoiDescriptorCollection *trans_obj(0);
 

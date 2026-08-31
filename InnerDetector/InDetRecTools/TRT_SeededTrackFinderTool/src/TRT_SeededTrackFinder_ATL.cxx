@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -576,7 +576,7 @@ InDet::TRT_SeededTrackFinder_ATL::findTrack(const EventContext& ctx, MagField::A
     //
     // --------------- Drop spurious pixel hits
     //
-    cTracks=cleanTrack(aTracks);
+    cTracks=cleanTrack(std::move(aTracks));
 
     //
     // --------------- Add tracks in the track multimap and in the overall list of TRT segment associated tracks
@@ -882,6 +882,7 @@ InDet::TRT_SeededTrackFinder_ATL::newClusters(const std::vector<const Trk::Space
        prd[n] = (*s)->clusterList().first;
        t  [n] = event_data.clusterTrack().find(prd[n]); if(t[n]!=te) ++nc; ++n;
      }
+     if (n == 40) break; //dont access at index = 40 in next section
      if((*s)->clusterList().second) {
        prd[n] = (*s)->clusterList().second;
        t  [n] = event_data.clusterTrack().find(prd[n]); if(t[n]!=te) ++nc; ++n;

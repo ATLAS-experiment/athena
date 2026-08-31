@@ -85,10 +85,10 @@ namespace InDet {
       //Loop over all elements (pixels/strips) in the cluster
       if(pixSdoColl.isValid()){
         for (auto rdoIter :  rdos){
-          auto simDataIter = pixSdoColl->find(rdoIter);
+          const auto & simDataIter = pixSdoColl->find(rdoIter);
           if (simDataIter != pixSdoColl->end()){
             // get the SimData and count the individual contributions
-            auto simData = (simDataIter->second);
+            const auto & simData = (simDataIter->second);
             for( const auto& deposit : simData.getdeposits() ){
               //If deposit exists
               if (!deposit.first){ATH_MSG_DEBUG("No deposits found"); continue;}
@@ -116,7 +116,7 @@ namespace InDet {
           auto simDataIter = pixSdoColl->find(rdoIter);
           if (simDataIter != pixSdoColl->end()){
             // get the SimData and count the individual contributions
-            auto simData = (simDataIter->second);
+            const auto & simData = (simDataIter->second);
             for( const auto& deposit : simData.getdeposits() ){
               //If deposit exists
               if (!deposit.first){ATH_MSG_DEBUG("No deposits found"); continue;}

@@ -16,7 +16,7 @@ Muon::NSW_TrigRawDataContainer* NSW_TrigRawDataContainerCnv::createTransient(con
   MsgStream log(msgSvc(), "NSW_TrigRawDataContainerCnv");
   if (log.level() <= MSG::DEBUG) log << MSG::DEBUG << "NSW_TrigRawDataContainerCnv::createTransient(const Token* token)" << endmsg;
   // UUID of the NSW_TrigRawDataContainer_p1 representation, created by uuidgen command
-  static const pool::Guid p1_guid("5D25FB79-BFE3-44DC-9EEC-8A93CE7776B3");
+  static const Guid p1_guid("5D25FB79-BFE3-44DC-9EEC-8A93CE7776B3");
 
   Muon::NSW_TrigRawDataContainer *transCont = nullptr;
   if(compareClassGuid(token, p1_guid)) {

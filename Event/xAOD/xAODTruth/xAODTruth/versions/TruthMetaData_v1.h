@@ -52,6 +52,12 @@ namespace xAOD {
       const std::string& evgenTune() const;
       void setEvgenTune( const std::string& value );
 
+      const std::string& hadronizationModel() const;
+      void setHadronizationModel( const std::string& value );
+
+      const std::string& partonShowerModel() const;
+      void setPartonShowerModel( const std::string& value );
+
       const std::string& hardPDF() const;
       void setHardPDF( const std::string& value );
 

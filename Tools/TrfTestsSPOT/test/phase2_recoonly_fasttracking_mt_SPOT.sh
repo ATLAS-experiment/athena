@@ -8,8 +8,13 @@ RDOFile=$(python -c "from AthenaConfiguration.TestDefaults import defaultTestFil
 conditions=$(python -c "from AthenaConfiguration.TestDefaults import defaultConditionsTags; print(defaultConditionsTags.RUN4_MC)")
 
 # Run the job
+source "$(dirname "${BASH_SOURCE[0]}")/spot_numa.sh"
+spot_numa_setup "${NTHREADS}"
+
 export TRF_ECHO=1;
+echo "${SPOT_NUMA_INFO}" > __log.txt
 ATHENA_CORE_NUMBER=${NTHREADS} \
+${SPOT_NUMA_PREFIX} \
 Reco_tf.py \
           --maxEvents ${NEVENTS} \
           --perfmon 'fullmonmt' \
@@ -17,11 +22,11 @@ Reco_tf.py \
           --autoConfiguration 'everything' \
           --conditionsTag "default:${conditions}" \
           --postInclude 'all:PyJobTransforms.UseFrontier' \
-          --preInclude 'all:Campaigns.PhaseIIPileUp200' \
+          --preInclude 'all:Campaigns.MC23PhaseIIPileUp200' \
           --steering 'doRAWtoALL' \
           --preExec 'all:flags.Tracking.doITkFastTracking=True' \
           --postExec 'all:cfg.getService("AlgResourcePool").CountAlgorithmInstanceMisses = True' \
           --inputRDOFile ${RDOFile} \
-          --outputAODFile 'myAOD.pool.root' >  __log.txt 2>&1;
+          --outputAODFile 'myAOD.pool.root' >>  __log.txt 2>&1;
 
 echo $? > __exitcode;

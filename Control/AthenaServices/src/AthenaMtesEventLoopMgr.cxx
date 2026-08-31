@@ -1106,10 +1106,14 @@ int AthenaMtesEventLoopMgr::declareEventRootAddress(EventContext& ctx){
       return -1;
     }
 
+    // Absolute input event index, matching the
+    // is->seek(*m_evtContext,m_currentEvntNum-1) target above
+    const long evtModIdx = m_currentEvntNum - 1;
+
     const EventInfo* pEventObserver{pEvent.get()};
     if (!pEventObserver) {
         // Retrieve the Event object
-        EventInfoCnvParams::eventIndex = ctx.evt();
+        EventInfoCnvParams::eventIndex = evtModIdx;
         pEventObserver = m_eventStore->tryConstRetrieve<EventInfo>();
         if( !pEventObserver ) {
          
@@ -1140,7 +1144,7 @@ int AthenaMtesEventLoopMgr::declareEventRootAddress(EventContext& ctx){
     // so the raw pEventObserver pointer is also still valid
     // cppcheck-suppress invalidLifetime
     modifyEventContext(ctx, *(pEventObserver->event_ID()),
-                       consume_modifier_stream);
+                       consume_modifier_stream, evtModIdx);
 
   }  else  {
 
@@ -1162,7 +1166,7 @@ int AthenaMtesEventLoopMgr::declareEventRootAddress(EventContext& ctx){
     pEvent = std::make_unique<EventInfo>(std::move(eid),
                                          std::make_unique<EventType>());
 
-    modifyEventContext(ctx,*(pEvent->event_ID()), true);
+    modifyEventContext(ctx,*(pEvent->event_ID()), true, ctx.evt());
 
     debug() << "selecting store: " << ctx.slot() << endmsg;
 
@@ -1182,13 +1186,14 @@ int AthenaMtesEventLoopMgr::declareEventRootAddress(EventContext& ctx){
 //---------------------------------------------------------------------------
 void AthenaMtesEventLoopMgr::modifyEventContext(EventContext& ctx,
                                                 const EventID& eID,
-                                                bool consume_modifier_stream) {
+                                                bool consume_modifier_stream,
+                                                long evtModIdx) {
 
   if (m_evtIdModSvc.isSet()) {
     EventID new_eID(eID);
-    // In Mtes EventLoopMgr ctx.evt() gets set to m_nevt and *then* m_nevt is
-    // incremented later so it's zero-indexed and we don't need to subtract one
-    m_evtIdModSvc->modify_evtid(new_eID, ctx.evt(), consume_modifier_stream);
+    // use absolute input index, so modification tracks input position
+    // not the per-worker counter (they differ under AthenaMP)
+    m_evtIdModSvc->modify_evtid(new_eID, evtModIdx, consume_modifier_stream);
     if (msgLevel(MSG::DEBUG)) {
       unsigned int oldrunnr = eID.run_number();
       unsigned int oldLB = eID.lumi_block();

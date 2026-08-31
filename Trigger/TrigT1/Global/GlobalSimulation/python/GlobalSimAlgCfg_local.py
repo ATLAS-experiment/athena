@@ -48,10 +48,12 @@ from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 
 from AthenaCommon.Logging import logging
 logger = logging.getLogger(__name__)
-from AthenaCommon.Constants import DEBUG
+from AthenaCommon import Constants
 
 from GlobalSimulation.Digraph import Digraph
 from  GlobalSimulation.graphAlgs import Topological
+
+from PathResolver import PathResolver
 
 import xml.etree.ElementTree as ET
 import os
@@ -72,7 +74,7 @@ from collections import defaultdict
 read_handles = {
     'eFexCvtrAlgTool': {'in0': 'eFexEMRoIKey'},
     'gFexRhoCvtrAlgTool': {'in0': 'gFexJetRoIKey'},
-    'Egamma1BDTAlgTool': {'in0': 'LArNeighborhoodTOBContainerReadKey'},
+    'Egamma1BDTAlgTool': {'in0': 'LArNeighborhoodTOBContainerKey'},
     'GlobalCellTowerAlgTool': {'in0': 'GlobalLArCellsKey'},
     'GlobalJet1AlgTool': {'in0': 'GlobalCellTowersKey'},
     'eEmMultAlgTool': {'in0': 'eEmTOBs'},
@@ -81,8 +83,8 @@ read_handles = {
     }
 
 write_handles = {
-    'eFexCvtrAlgTool': 'eEmTOBs',
-    'gFexRhoCvtrAlgTool': 'gFexRhoTOBs',
+    'eFexCvtrAlgTool': 'eEmTOBContainerKey',
+    'gFexRhoCvtrAlgTool': 'gFexRhoTOBContainerKey',
     'Egamma1BDTAlgTool': 'eEmEg1BDTTOBContainerKey',
     'GlobalCellTowerAlgTool': 'GlobalCellTowersKey',
     'GlobalJet1AlgTool': 'GlobalJet1JetsKey',
@@ -92,20 +94,27 @@ def GlobalSimulationAlgCfg(flags,
                            dump=False,
                            fn=None,
                            algName='GlobalSimTestAlg',
-                           OutputLevel=DEBUG):
+                           OutputLevel=Constants.INFO):
 
     logger.setLevel(OutputLevel)
     cfg = ComponentAccumulator()
 
-    if fn is None:
-        fn = os.environ.get('GS_CFG_FILE', None)
-        if fn is None:
-            logger.error('Please set export environment variable GS_CFG_FILE'
-                         ' with the name of a GlobalSim config xml file')
-            return cfg
-
+    fn = os.environ.get('GS_CFG_FILE', None)
+    if fn is not None:
+        if not os.path.exists(fn):
+            raise RuntimeError ('specified cfg file ' +  fn + ' does not exist')
+    else:
+        def_fn = "GlobalSimulation/globalSim_AllChainsCfg.xml"
+        logger.info('environment variable GS_CFG_FILE not set ' +
+                    'looking for default config file'+  def_fn)
+        fn = PathResolver.FindCalibFile(def_fn)
+        if not fn:
+            logger.info ('could not find default cfg file ' + def_fn +
+                         'giving up')
+            raise RuntimeError ('default cfg file ' +  def_fn + ' not found')
+ 
     logger.info('GlobalSim local config, cfg file: ' + fn)
-   
+
     def str_id(toolEl):
         """ obtain a string id for each AlgTool"""
         
@@ -340,7 +349,7 @@ def GlobalSimulationAlgCfg(flags,
         tname =  tool.__class__.__name__ + '/' + tool.name
 
         logger.debug('GS tool name ' + tname)
-        logger.debug('GS r_handle str(tool)' , str(tool))
+        logger.debug('GS r_handle str(tool) ' + str(tool))
 
         handle_name = read_handles.get(tool.__class__.__name__, None)
         if handle_name is None:
@@ -366,9 +375,6 @@ def GlobalSimulationAlgCfg(flags,
     alg.OutputLevel = OutputLevel
     alg.enableDumps = dump
 
-    
-    from TrigCaloRec.TrigCaloRecConfig import hltCaloCellSeedlessMakerCfg
-    cfg.merge(hltCaloCellSeedlessMakerCfg(flags, roisKey=''))
 
     cfg.addEventAlgo(alg)
     return cfg

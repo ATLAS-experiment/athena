@@ -15,6 +15,11 @@ def PhysCommonAugmentationsCfg(flags,**kwargs):
     """Configure the common augmentation"""
     acc = ComponentAccumulator()
 
+    from TrkConfig.VertexFindingFlags import VertexSortingSetup
+    if flags.Tracking.PriVertex.sortingSetup is VertexSortingSetup.GNNSorting:
+        from DerivationFrameworkPhys.GNNVertexConfig import GNNVertexCfg
+        acc.merge(GNNVertexCfg(flags))
+
     # MC truth
     if flags.Input.isMC:
         from DerivationFrameworkMCTruth.MCTruthCommonConfig import (

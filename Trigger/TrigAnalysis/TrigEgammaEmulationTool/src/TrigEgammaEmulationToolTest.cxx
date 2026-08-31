@@ -105,7 +105,7 @@ StatusCode TrigEgammaEmulationToolTest::fillHistograms( const EventContext &ctx 
       ATH_MSG_DEBUG( "EFTrack : " << accept.getCutResult(4) << " / " << emu_accept.getCutResult(4));
       ATH_MSG_DEBUG( "HLT     : " << accept.getCutResult(5) << " / " << emu_accept.getCutResult(5));
 
-      auto monGroup = getGroup( trigger );
+      const auto& monGroup = getGroup( trigger );
 
       
       // Fill trigger decision tool steps
@@ -260,13 +260,13 @@ TrigEgammaEmulationToolTest::TrigInfo TrigEgammaEmulationToolTest::getInfo( std:
 {
     std::string type = "electron"; // default
     std::vector<std::string> strs;
-    boost::split(strs,trigger,boost::is_any_of("_"));
-    if(boost::contains(trigger,"HLT_e")) type = "electron";
-    else if(boost::contains(trigger,"HLT_g")) type = "photon";
-    bool idperf = boost::contains(trigger, "idperf"); 
-    bool etcut = boost::contains(trigger, "etcut"); 
-    bool lrt = boost::contains(trigger, "lrt"); 
-    bool gsf = boost::contains(trigger, "gsf");
+    for (auto&& str : trigger | std::views::split('_')) strs.emplace_back(str.begin(), str.end());
+    if(trigger.contains("HLT_e")) type = "electron";
+    else if(trigger.contains("HLT_g")) type = "photon";
+    bool idperf = trigger.contains("idperf"); 
+    bool etcut = trigger.contains("etcut"); 
+    bool lrt = trigger.contains("lrt"); 
+    bool gsf = trigger.contains("gsf");
     std::string str_thr = strs.at(1);
     str_thr.erase(0, 1);
     float et = atof(str_thr.c_str());

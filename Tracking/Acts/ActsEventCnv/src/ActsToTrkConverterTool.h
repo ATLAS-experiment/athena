@@ -10,7 +10,6 @@
 // ATHENA
 #include "AthenaBaseComps/AthAlgTool.h"
 
-
 #include "TrkToolInterfaces/IExtendedTrackSummaryTool.h"
 #include "TrkToolInterfaces/IRIO_OnTrackCreator.h"
 
@@ -25,12 +24,13 @@
 
 // PACKAGE
 #include "ActsToolInterfaces/ITrackConverterTool.h"
-#include "ActsGeometryInterfaces/ITrackingGeometryTool.h"
 
 #include "ActsCalibBase/SourceLinkType.h"
 #include "ActsCalibrators/TrkMeasurementCalibrator.h"
 #include "ActsCalibrators/TrkPrepRawDataCalibrator.h"
 #include "ActsCalibrators/xAODUncalibMeasCalibrator.h"
+#include "ActsEvent/ContextUtility.h"
+
 
 #include "Acts/EventData/BoundTrackParameters.hpp"
 
@@ -110,9 +110,11 @@ private:
      const Acts::BoundTrackParameters& actsParameter,
      const Trk::TrackParameters& tsos, const Acts::GeometryContext& gctx) const;
 
-  PublicToolHandle<ITrackingGeometryTool> m_trackingGeometryTool{this, "TrackingGeometryTool", ""};
+  
   PublicToolHandle<IGeometryRealmConvTool> m_geometryConvTool{this, "GeometryRealmConvTool", ""};
   
+  /** @brief Utility to fetch the geometry, magnetic field and calibration context in the event */
+  ContextUtility m_ctxProvider{this};
   /** @brief Tools needed to create Trk::Tracks from the ACts fit result */
   ToolHandle<Trk::IExtendedTrackSummaryTool> m_trkSummaryTool {this, "SummaryTool", "", "ToolHandle for track summary tool"};
   ToolHandle<Trk::IRIO_OnTrackCreator> m_ROTcreator {this, "RotCreatorTool", ""};

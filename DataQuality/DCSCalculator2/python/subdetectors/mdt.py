@@ -1,6 +1,6 @@
 # Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
 
-from pkg_resources import resource_string
+from importlib.resources import files
 
 from ..lib import (DCSC_DefectTranslate_Subdetector,
                    DCSC_Variable_With_Mapping,
@@ -19,7 +19,7 @@ def generate_mdt_mappings():
         hv, lv, jtag, name, output_channel = line.split()
         return int(hv), int(lv), int(jtag), name, int(output_channel)
 
-    mdtcodes = resource_string("DCSCalculator2.subdetectors.data", "mdt_codes.dat").decode().strip().split("\n")
+    mdtcodes = files("DCSCalculator2.subdetectors.data").joinpath("mdt_codes.dat").read_bytes().decode().strip().split("\n")
 
 
     lines = [line for line in [fix_line(raw_line) for raw_line in mdtcodes if raw_line] if line]

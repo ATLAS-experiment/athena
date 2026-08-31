@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "src/InDetToXAODSpacePointConversion.h"
@@ -206,7 +206,7 @@ namespace InDet {
     // Conversion
     for (const ::SpacePointCollection *spc : *strip_container) {
       for (const Trk::SpacePoint *sp : *spc) {
-	const InDet::SCT_SpacePoint *indetSP = dynamic_cast<const InDet::SCT_SpacePoint *>(sp);
+	const InDet::SCT_SpacePoint *indetSP = static_cast<const InDet::SCT_SpacePoint *>(sp);
 
 	strip_xaod_container->push_back( new xAOD::SpacePoint() );	
 	ATH_CHECK( TrackingUtilities::convertTrkToXaodStripSpacePoint(*indetSP, vertex, *strip_xaod_container->back()) );

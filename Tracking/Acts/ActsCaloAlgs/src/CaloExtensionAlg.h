@@ -15,13 +15,13 @@
 #include "StoreGate/WriteDecorHandleKey.h"
 
 #include "CaloDetDescr/CaloDetDescrManager.h"
-#include "ActsGeometryInterfaces/ITrackingGeometryTool.h"
+#include "ActsGeometryInterfaces/ITrackingGeometrySvc.h"
 #include "ActsGeometryInterfaces/IExtrapolationTool.h"
 
 #include "egammaInterfaces/IegammaCaloClusterSelector.h"
 
 #include "InDetTrackSelectionTool/IInDetTrackSelectionTool.h"
-
+#include "ActsEvent/ContextUtility.h"
 
 #include "Acts/Propagator/Propagator.hpp"
 #include "Acts/Propagator/Navigator.hpp"
@@ -117,8 +117,10 @@ namespace ActsTrk{
             /** @brief Tool to filter the calo clusters. */
             ToolHandle<IegammaCaloClusterSelector> m_clusterSelector{this, "ClusterSelector", "egammaCaloClusterSelector", 
                                                                                 "Tool that makes the cluster selection"};
-            /** @brief Tracking geometry tool */
-            PublicToolHandle<ITrackingGeometryTool> m_trackingGeometryTool{this, "TrackingGeometryTool", ""};
+            /** @brief Tracking geometry service */
+            ServiceHandle<ActsTrk::ITrackingGeometrySvc> m_trackingGeometrySvc{this, "TrackingGeometrySvc", "ActsTrackingGeometrySvc"};
+            /** @brief Context provider for geometry, magnetic field and calibration contexts */
+            ActsTrk::ContextUtility m_ctxProvider{this};
 
             /** @brief Acts extrapolation tool to record the surface intersections */
             ToolHandle<IExtrapolationTool> m_extrapolationTool{this, "ExtrapolationTool", ""};

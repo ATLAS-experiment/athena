@@ -75,23 +75,22 @@ namespace ActsTrk {
     ATH_CHECK(m_tracksBackendHandlesHelper.initialize(ActsTrk::prefixFromTrackContainerName(m_trackContainerKey.key())));
 
     ATH_CHECK(m_monTool.retrieve(EnableTool{not m_monTool.empty()}));
-    ATH_CHECK(m_trackingGeometryTool.retrieve());
-    ATH_CHECK(m_extrapolationTool.retrieve());
+    ATH_CHECK(m_trackingGeometrySvc.retrieve());
+    ATH_CHECK(m_ctxProvider.initialize());
     ATH_CHECK(m_trackStatePrinter.retrieve(EnableTool{not m_trackStatePrinter.empty()}));
-    ATH_CHECK(m_fitterTool.retrieve());
     ATH_CHECK(m_pixelCalibTool.retrieve(EnableTool{not m_pixelCalibTool.empty()}));
     ATH_CHECK(m_stripCalibTool.retrieve(EnableTool{not m_stripCalibTool.empty()}));
     ATH_CHECK(m_hgtdCalibTool.retrieve(EnableTool{not m_hgtdCalibTool.empty()}));
 
     auto magneticField = std::make_unique<ATLASMagneticFieldWrapper>();
-    auto trackingGeometry = m_trackingGeometryTool->trackingGeometry();
+    auto trackingGeometry = m_trackingGeometrySvc->trackingGeometry();
 
     detail::Stepper stepper(std::move(magneticField));
-    detail::Navigator::Config config{trackingGeometry};
+    detail::Navigator::Config config{std::move(trackingGeometry)};
     config.resolvePassive = false;
     config.resolveMaterial = true;
     config.resolveSensitive = true;
-    detail::Navigator navigator(config, logger().cloneWithSuffix("Navigator"));
+    detail::Navigator navigator(std::move(config), logger().cloneWithSuffix("Navigator"));
     detail::Propagator propagator(std::move(stepper), std::move(navigator), logger().cloneWithSuffix("Prop"));
 
     // Using the CKF propagator as extrapolator
@@ -163,8 +162,6 @@ namespace ActsTrk {
 
     trackFinder().ckfExtensions.updater.connect<&ActsTrk::detail::FitterHelperFunctions::gainMatrixUpdate<detail::RecoTrackStateContainer>>();
 
-    m_unalibMeasSurfAcc = detail::xAODUncalibMeasSurfAcc {m_trackingGeometryTool.get()};
-
     initStatTables();
 
     return StatusCode::SUCCESS;
@@ -216,6 +213,7 @@ namespace ActsTrk {
     // Set the CombinatorialKalmanFilter options
     TrackFinderOptions options(detContext.geometry, detContext.magField, detContext.calib,
                                trackFinder().ckfExtensions, plainOptions, pSurface);
+    options.recordMaterialStates = m_recordMaterialStates;
 
     std::unique_ptr<ActsTrk::IMeasurementSelector> measurementSelector = setMeasurementSelector(ctx, measurements, options);
 
@@ -227,6 +225,7 @@ namespace ActsTrk {
                                      options.extensions, plainSecondOptions, pSurface);
     secondOptions.targetSurface = pSurface;
     secondOptions.skipPrePropagationUpdate = true;
+    secondOptions.recordMaterialStates = m_recordMaterialStates;
 
     return {std::move(options), std::move(secondOptions), std::move(measurementSelector)};
   };

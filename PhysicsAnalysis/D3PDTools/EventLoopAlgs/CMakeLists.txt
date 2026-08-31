@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # Set the name of the package:
 atlas_subdir( EventLoopAlgs )
@@ -27,12 +27,12 @@ atlas_add_test( gt_DuplicateChecker
    INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
    LINK_LIBRARIES ${ROOT_LIBRARIES} AsgMessagingLib AsgTestingLib AthContainers
    EventLoop EventLoopAlgs RootCoreUtils SampleHandler xAODEventInfo xAODRootAccess
-   POST_EXEC_SCRIPT nopost.sh )
+   POST_EXEC_SCRIPT noerror.sh )
 set_tests_properties (EventLoopAlgs_gt_DuplicateChecker_ctest PROPERTIES LABELS "EventLoopAlgs;EventLoop;SampleHandler" )
 
 atlas_add_test( ut_alg_skim
    SOURCES test/ut_alg_skim.cxx
    INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
    LINK_LIBRARIES ${ROOT_LIBRARIES} EventLoop EventLoopAlgs RootCoreUtils SampleHandler
-   POST_EXEC_SCRIPT nopost.sh )
+   POST_EXEC_SCRIPT noerror.sh )
 set_tests_properties (EventLoopAlgs_ut_alg_skim_ctest PROPERTIES LABELS "EventLoopAlgs;EventLoop;SampleHandler" )

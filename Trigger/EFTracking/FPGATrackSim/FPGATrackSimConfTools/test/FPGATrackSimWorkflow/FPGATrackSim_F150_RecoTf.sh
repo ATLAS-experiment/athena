@@ -16,6 +16,7 @@ usage () {
     -d  |  --skipEvents         INT         Number of events to skip at start (default = 0)
     -s  |  --skipCheck                      skip checks on output AOD file
     -k  |  --doSeeds                        persistify track seeds (default off)
+    -c  |  --doClusters                     persistify xAOD cluster and space point containers
     -w  |  --writeAdditionalOutputData      write extra FPGATrackSim outputs (default off)
     -r  |  --region             STRING      region list; e.g. \"[34,98,162]\" or \"10-60,!20\" or \"*\".
     -g  |  --keepHitsStrategy   INT         GenScan.keepHitsStrategy value (default = 2)
@@ -37,6 +38,7 @@ outputAOD="AOD.root"
 nEvents="-1"
 skipCheck=0
 doSeeds="0"
+storeClusters=False
 skipEvents=0
 writeAdditionalOutputData="0"
 regionList="[34, 98, 162, 226, 290, 354, 418, 482, 546, 610, 674, 738, 802, 866, 930, 994, 1058, 1122, 1186, 1250]"
@@ -54,6 +56,7 @@ while [ $# -ge 1 ]; do
         -d  | --skipEvents )    if [ $# -lt 2 ] ; then usage 1 "Missing value for --skipEvents"; fi ; skipEvents="$2" ; shift ;;
         -s  | --skipCheck )     skipCheck=1 ;;
         -k  | --doSeeds )       doSeeds="1" ;;
+        -c  | --doClusters )    if [ $# -lt 1 ] ; then usage ; fi ; storeClusters=True;;
         -w  | --writeAdditionalOutputData ) writeAdditionalOutputData="1" ;;
         -r  | --region )        if [ $# -lt 2 ] ; then usage 1 "Missing value for --region"; fi ; regionList="$2" ; shift ;;
         -g  | --keepHitsStrategy ) if [ $# -lt 2 ] ; then usage 1 "Missing value for --keepHitsStrategy"; fi ; keepHitsStrategy="$2" ; shift ;;
@@ -97,6 +100,7 @@ MAPS_5L="maps_5L/InsideOut/v0.35/"
 preExecFlags="flags.Tracking.doPixelDigitalClustering=True;\
                flags.Trigger.FPGATrackSim.GenScan.keepHitsStrategy=${keepHitsStrategy};\
                flags.Tracking.ITkActsValidateF150Pass.storeTrackSeeds=${doSeeds};\
+               flags.Acts.EDM.PersistifyClusters=${storeClusters};\
                flags.Trigger.FPGATrackSim.mapsDir=\"${MAPS_5L}\";\
                flags.Trigger.FPGATrackSim.regionList=${regionList};\
                flags.Trigger.FPGATrackSim.bankDir=\"${BANKS_5L}\";"

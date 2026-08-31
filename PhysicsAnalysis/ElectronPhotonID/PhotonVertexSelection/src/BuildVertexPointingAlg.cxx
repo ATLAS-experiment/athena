@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "PhotonVertexSelection/BuildVertexPointingAlg.h"
@@ -173,7 +173,7 @@ void BuildVertexPointingAlg::selectPhotons(
   }
   ATH_MSG_DEBUG("number of photons selected for pointing after limiting: "
                 << photons_selected.size());
-  if (ATH_UNLIKELY(this->msgLvl(MSG::DEBUG))) {
+  if (this->msgLvl(MSG::DEBUG)) [[unlikely]] {
     for (const xAOD::Egamma* photon : photons_selected) {
       ATH_MSG_DEBUG("photon selected for pointing: pT = " << photon->pt()
                                                           << " GeV");

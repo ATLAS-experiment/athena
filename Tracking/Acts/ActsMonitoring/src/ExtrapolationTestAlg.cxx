@@ -17,7 +17,7 @@
 
 // PACKAGE
 #include "ActsGeometryInterfaces/GeometryContext.h"
-#include "ActsGeometryInterfaces/ITrackingGeometryTool.h"
+#include "ActsGeometryInterfaces/ITrackingGeometrySvc.h"
 #include "ActsInterop/Logger.h"
 
 // OTHER
@@ -36,7 +36,7 @@ StatusCode ExtrapolationTestAlg::initialize() {
 
   ATH_CHECK(m_rndmGenSvc.retrieve());
   ATH_CHECK(m_extrapolationTool.retrieve());
-  ATH_CHECK(m_trackingGeometryTool.retrieve());
+  ATH_CHECK(m_trackingGeometrySvc.retrieve());
   ATH_CHECK( m_materialTrackCollectionKey.initialize() );
   ATH_CHECK(m_tree.init(this));
   return StatusCode::SUCCESS;
@@ -118,12 +118,12 @@ StatusCode ExtrapolationTestAlg::execute(const EventContext &ctx) {
          ATH_CHECK(writePropagationSteps(ctx, output.first));
       }
 
-      if(m_writeMaterialTracks){
+      if(m_writeMaterialTracks && coll){
         Acts::RecordedMaterialTrack track;
         track.first.first = Acts::Vector3::Zero();
         track.first.second = momentum;
         track.second = std::move(output.second);
-        coll->push_back(track);
+        coll->push_back(std::move(track));
       }
     }
 

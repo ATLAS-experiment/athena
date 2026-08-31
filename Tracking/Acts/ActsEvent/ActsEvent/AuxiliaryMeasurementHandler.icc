@@ -15,6 +15,7 @@ namespace ActsTrk{
             m_msgLevel{[owner](const MSG::Level msg) { 
                 return owner->msgLvl(msg);
             }},
+            m_viewKey{owner, "AuxiliaryMeasViewKey", ""},
             m_writeKey1D{owner, "AuxiliaryMeasKey1D", ""},
             m_writeKey2D{owner, "AuxiliaryMeasKey2D", ""},
             m_writeKey3D{owner, "AuxiliaryMeasKey3D", ""},
@@ -52,6 +53,7 @@ namespace ActsTrk{
         }
         xAOD::AuxiliaryMeasurement::SurfLink_t link{*m_surfaceContainer, cached_itr->second->index(), m_ctx};
         meas->setSurface(surface, std::move(link));
+        m_viewHandle->push_back(meas);
         return meas;
     }
 }

@@ -31,14 +31,28 @@ def _get_nevents(flags, safety):
 
 
 def _prepare_lhe_for_shower(produced_output, lhe_file):
+    # The supported lhe file formats are .lhe, .lhe.gz, .tar.gz, and .tgz.
+    # .tar.gz and .tgz are tarballs that contain a single .lhe file
+    # .gz files can be read directly by Pythia so we don't want to unzip them.
+    if (produced_output and produced_output.endswith(".gz")
+            and not produced_output.endswith((".tar.gz", ".tgz"))):
+        compressed_lhe_file = (
+            lhe_file if lhe_file.endswith(".gz") else f"{lhe_file}.gz"
+        )
+        if _symlink_first_existing(
+                compressed_lhe_file, [produced_output], overwrite=True):
+            return
+        raise RuntimeError(
+            "Could not prepare compressed LHE file for showering. "
+            f"Expected: {produced_output}"
+        )
+
     primary_output = None
     if produced_output:
         if produced_output.endswith(".tar.gz"):
             root = produced_output[:-7]
         elif produced_output.endswith(".tgz"):
             root = produced_output[:-4]
-        elif produced_output.endswith(".gz"):
-            root = produced_output[:-3]
         else:
             root, _ = os.path.splitext(produced_output)
         primary_output = f"{root}.events"
@@ -122,7 +136,8 @@ def MadGraphCfg(
     process_definition,
     *,
     safety=None,
-    settings=None,
+    run_card_settings=None,
+    param_card_settings=None,
     pdf_setting=None,
     devices=None,
     catch_errors=None,
@@ -148,6 +163,10 @@ def MadGraphCfg(
 
     process_definition is required, the rest is optional.
 
+    run_card_settings maps run_card.dat settings to their requested values.
+    param_card_settings maps param_card.dat settings to dictionaries of
+    parameter indices and values.
+
     If prepare_lhe_for_shower is True, the produced LHE file will be 
     symlinked to lhe_file (default: events.lhe) 
     for later use in the showering step.
@@ -172,9 +191,11 @@ def MadGraphCfg(
         usePMGSettings=usePMGSettings,
     )
 
-    run_card_settings = {} if settings is None else dict(settings)
+    run_card_settings = {} if run_card_settings is None else dict(run_card_settings)
+    param_card_settings = {} if param_card_settings is None else dict(param_card_settings)
 
-    # Get nEvents
+    # Overwrite the number of events in the run_card_settings with the value
+    # determined from the flags and safety factor.
     run_card_settings["nevents"] = _get_nevents(flags, cfg["safety"])
 
     # Create the MGC instance
@@ -196,11 +217,13 @@ def MadGraphCfg(
 
     # Create the process directory
     process_dir = mgc.process_dir
-    MadGraphUtils.modify_run_card(
-        process_dir=process_dir,
-        flags=flags,
-        settings=run_card_settings,
-        pdf_setting=cfg["pdf_setting"],
+
+    # Modify the run_card settings in the process directory before generating events.
+    mgc.runCardDict.update(run_card_settings)
+
+    # Modify the parameter_card settings in the process directory before generating events.
+    mgc.paramCard.modify_paramCardDict(
+        params=param_card_settings
     )
 
     # Generate events

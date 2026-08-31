@@ -36,7 +36,6 @@
 #include "xAODInDetMeasurement/SpacePointContainer.h"
 #include "xAODInDetMeasurement/SpacePointAuxContainer.h"
 
-#include <numbers>
 #include <memory>
 
 namespace ActsTrk {
@@ -153,7 +152,7 @@ namespace ActsTrk {
     Gaudi::Property<float> m_edgeMaskMinEta {this, "edgeMaskMinEta", 1.5, "minimum eta allowed for masking edges in graph so they are not used again"};
     Gaudi::Property<float> m_hitShareThreshold {this, "hitShareThreshold", 0.49, "threshold of hits that are shared between seeds before one seed is labelled a clone"};
 
-    // GbtsDataStorage
+    // GbtsNodeStorage
     Gaudi::Property<float> m_maxEndcapClusterwidth {this, "maxEndcapClusterwidth", 0.35, "discards any spacepoints which dr/dz cant be accurately modelled"};
   };
   

@@ -24,9 +24,9 @@ class BeamPipeBlueprintNodeBuilder
   /** @brief Build the BeamPipe Blueprint Node
    *  @param gctx Geometry context
    *  @param child Expected to be null; beam pipe has no inner child. */
-  std::shared_ptr<Acts::Experimental::BlueprintNode> buildBlueprintNode(
+  std::shared_ptr<Acts::BlueprintNode> buildBlueprintNode(
       const Acts::GeometryContext& gctx,
-      std::shared_ptr<Acts::Experimental::BlueprintNode>&& child) override;
+      std::shared_ptr<Acts::BlueprintNode>&& child) override;
 
  private:
   const BeamPipeDetectorManager* m_beamPipeMgr{nullptr};

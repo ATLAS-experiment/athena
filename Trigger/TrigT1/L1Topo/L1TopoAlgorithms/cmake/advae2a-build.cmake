@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 #
 # Recipe for building ADVAE2A as part of the package.
 #
@@ -26,6 +26,12 @@ set( ADVAE2A_INCLUDE_DIRS
 set( ADVAE2A_LIBRARIES
    "${ADVAE2A_INSTALL_DIR}/${CMAKE_INSTALL_LIBDIR}/${CMAKE_STATIC_LIBRARY_PREFIX}advae2a${CMAKE_STATIC_LIBRARY_SUFFIX}" )
 
+# Suppress some gcc16 warnings
+set( ADVAE2A_CMAKE_ARGS "")
+if( CMAKE_CXX_COMPILER_ID STREQUAL "GNU" AND CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL 16 )
+  set( ADVAE2A_CMAKE_ARGS "-DCMAKE_CXX_FLAGS=-Wno-deprecated-enum-enum-conversion")
+endif()
+
 # Build ADVAE2A into a static library, that would only be used privately
 # by this package.
 ExternalProject_Add( ADVAE2A
@@ -41,6 +47,7 @@ ExternalProject_Add( ADVAE2A
       -DCMAKE_INSTALL_LIBDIR:PATH=${CMAKE_INSTALL_LIBDIR}
       -DBUILD_SHARED_LIBS:BOOL=OFF
       -DCMAKE_POSITION_INDEPENDENT_CODE:BOOL=ON
+   CMAKE_ARGS ${ADVAE2A_CMAKE_ARGS}
    LOG_CONFIGURE 1
    BUILD_BYPRODUCTS ${ADVAE2A_LIBRARIES} )
 ExternalProject_Add_Step( ADVAE2A forcedownload

@@ -68,11 +68,14 @@ def ActsTrackReaderAlgCfg(flags,
     name - the collections prefix, for consistency it also is the prefix of the output container name   
     """
     acc = ComponentAccumulator()
-    from ActsConfig.ActsGeometryConfig import ActsTrackingGeometryToolCfg
+    from ActsConfig.ActsGeometryConfig import ActsTrackingGeometrySvcCfg
+    acc.merge(ActsTrackingGeometrySvcCfg(flags))
+    from ActsAlignmentAlgs.AlignmentAlgsConfig import ActsGeometryContextAlgCfg
+    acc.merge(ActsGeometryContextAlgCfg(flags))
+    from MagFieldServices.MagFieldServicesConfig import AtlasFieldCacheCondAlgCfg
+    acc.merge(AtlasFieldCacheCondAlgCfg(flags))
     acc.addEventAlgo(CompFactory.ActsTrk.TrackContainerReader(f"{prefix}TrackContainerReaderAlg",
-                                                               TrackContainer=prefix+"Tracks",
-                                                               TrackingGeometryTool=acc.getPrimaryAndMerge(ActsTrackingGeometryToolCfg(flags))
-                                                              ))
+                                                               TrackContainer=prefix+"Tracks"))
     return acc
 
 def ActsPoolReadCfg(flags) -> ComponentAccumulator:

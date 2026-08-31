@@ -16,7 +16,7 @@
 #include "StoreGate/WriteHandleKey.h"
 
 #include "CaloDetDescr/CaloDetDescrManager.h"
-#include "ActsGeometryInterfaces/ITrackingGeometryTool.h"
+#include "ActsGeometryInterfaces/ITrackingGeometrySvc.h"
 #include "ActsGeometryInterfaces/IExtrapolationTool.h"
 
 #include "AthContainers/ConstDataVector.h"
@@ -77,7 +77,7 @@ private:
     const xAOD::CaloCluster& cluster,
     const EventContext& ctx) const;
 
-  PublicToolHandle<ActsTrk::ITrackingGeometryTool> m_trackingGeometryTool{this, "TrackingGeometryTool", ""};
+ ServiceHandle<ActsTrk::ITrackingGeometrySvc> m_trackingGeometrySvc{this, "TrackingGeometrySvc", "ActsTrackingGeometrySvc"};
 
   ToolHandle<ActsTrk::IExtrapolationTool> m_extrapolationTool {
     this,

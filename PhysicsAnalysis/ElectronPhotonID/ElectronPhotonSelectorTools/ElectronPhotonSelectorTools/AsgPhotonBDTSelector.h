@@ -17,9 +17,7 @@
   The working point (binning and thresholds) is read from a TEnv
   configuration file
 
-  The tool can either:
-    - compute the score on-the-fly via PhotonBDTCalculator (if allowed and the
-      score decoration is missing), or
+  The tool can:
     - reuse an existing score decoration already present on the photon.
 
   @note The meaning of the isEM bits is specific to this BDT selector and is
@@ -34,13 +32,19 @@
 #include "AsgTools/AsgTool.h"
 #include "AsgTools/ToolHandle.h"
 #include "AsgTools/CurrentContext.h"
-#include "xAODEgamma/PhotonFwd.h"
-#include "xAODEgamma/EgammaFwd.h"
-#include "xAODEgamma/ElectronFwd.h"
+#include "AsgTools/PropertyWrapper.h"
+
+#include "AsgDataHandles/ReadHandleKey.h"
+#include "AsgDataHandles/ReadDecorHandleKey.h"
+
+#include "xAODEgamma/Photon.h"
+#include "xAODEgamma/Egamma.h"
+#include "xAODEgamma/Electron.h"
+#include "xAODEgamma/EgammaEnums.h"
+#include "xAODEgamma/EgammaContainer.h"
 #include "xAODBase/IParticle.h"
 
 #include "EgammaAnalysisInterfaces/IAsgPhotonIsEMSelector.h"
-#include "PhotonBDTCalculator.h"
 
 
 #include <string>
@@ -55,8 +59,7 @@ class AsgPhotonBDTSelector : public asg::AsgTool, virtual public IAsgPhotonIsEMS
   ASG_TOOL_CLASS2(AsgPhotonBDTSelector, IAsgPhotonIsEMSelector, IAsgSelectionTool)
 
 public:
-  AsgPhotonBDTSelector(const std::string& name);
-  virtual ~AsgPhotonBDTSelector() override = default;
+  using asg::AsgTool::AsgTool;
 
   virtual StatusCode initialize() override;
 
@@ -77,19 +80,14 @@ private:
   asg::AcceptData acceptBDT(const EventContext& ctx, const xAOD::Photon& ph, unsigned int* isEM = nullptr) const;
   virtual const asg::AcceptInfo& getAcceptInfo() const override;
 
-  // Tool to compute and decorate score
-  ToolHandle<PhotonBDTCalculator> m_bdtTool {this, "BDTTool", "", "Photon BDT calculator tool"};
-
   // Properties
   Gaudi::Property<std::string> m_workingPoint {this, "WorkingPoint", "", "Name of the Photon ID BDT Working point"};
-  Gaudi::Property<std::string> m_scoreDecoration {this, "ScoreDecoration", "BDTScore", "Name of the float decoration containing the score"};
-  Gaudi::Property<bool> m_computeIfMissing {this, "ComputeIfMissing", true, "Compute score with BDTTool if decoration missing"};
   Gaudi::Property<bool> m_excludeTRT {this, "ExcludeTRT", true, "Conversion definition for Run 3"};
   Gaudi::Property<bool> m_reapplyWPIfNoShowerShapes {this, "ReapplyWPIfNoShowerShapes", true, "Reapply the WP calculation, based on the BDT score and isEM word (works only if these are available!) "};
   Gaudi::Property<std::string> m_isEMDecoration {this, "IsEMDecoration", "BDTIsEM", "Name of the int decoration containing the isEM word (used if ReapplyWPIfNoShowerShapes is true)"};
 
   // Config file with binning and cuts
-  std::string m_configFile;
+  std::string m_configFile = "";
 
   // Binning and cuts
   std::vector<float> m_etaBins;
@@ -119,6 +117,13 @@ private:
   float getCut(const bool converted, const size_t iEta, const size_t iEt) const;
   static asg::AcceptData makeReject(const asg::AcceptInfo& info) ;
   float getShowerShape(const xAOD::Photon& ph, xAOD::EgammaParameters::ShowerShapeType t, const char *name = "") const;
+
+  SG::ReadHandleKey<xAOD::EgammaContainer> m_ContainerName{ this, "ContainerName", "", "Input" };
+  SG::ReadDecorHandleKey<xAOD::EgammaContainer> m_decoratorScore{ this,
+    "ScoreDecoration", m_ContainerName, "", "" };
+
+  Gaudi::Property<bool> m_suppressInputDeps{this, "SuppressInputDependence", false,      "Will BDT score be created in the same algorithm that uses this tool?"};
+
 
 };
 

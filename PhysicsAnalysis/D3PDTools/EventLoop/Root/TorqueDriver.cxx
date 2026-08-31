@@ -15,7 +15,7 @@
 #include <EventLoop/Job.h>
 #include <EventLoop/ManagerData.h>
 #include <EventLoop/MessageCheck.h>
-#include <RootCoreUtils/ThrowMsg.h>
+#include <RootCoreUtils/ShellExec.h>
 #include <TSystem.h>
 #include <sstream>
 
@@ -29,9 +29,7 @@ namespace EL
 {
   void TorqueDriver ::
   testInvariant () const
-  {
-    RCU_INVARIANT (this != 0);
-  }
+  {}
 
 
 
@@ -62,18 +60,32 @@ namespace EL
     case Detail::ManagerStep::doResubmit:
       {
         if (data.resubmit)
-          RCU_THROW_MSG ("resubmission not supported for this driver");
+        {
+          ANA_MSG_ERROR ("resubmission not supported for the Torque driver");
+          return StatusCode::FAILURE;
+        }
 
-        assert (!data.batchJobIndices.empty());
-        assert (data.batchJobIndices.back() + 1 == data.batchJobIndices.size());
+        if (data.batchJobIndices.empty())
+        {
+          ANA_MSG_ERROR ("no job indices to submit");
+          return ::StatusCode::FAILURE;
+        }
+        if (data.batchJobIndices.back() + 1 != data.batchJobIndices.size())
+        {
+          ANA_MSG_ERROR ("submitting a non-contiguous set of job indices is not supported");
+          return ::StatusCode::FAILURE;
+        }
         const std::size_t njob = data.batchJobIndices.size();
 
         std::ostringstream cmd;
-        cmd << "cd " << data.submitDir << "/submit && qsub "
+        cmd << "cd " << RCU::Shell::quote (data.submitDir) << "/submit && qsub "
             << data.options.castString (Job::optSubmitFlags)
             << " -t 0-" << (njob-1) << " run";
         if (gSystem->Exec (cmd.str().c_str()) != 0)
-          RCU_THROW_MSG (("failed to execute: " + cmd.str()).c_str());
+        {
+          ANA_MSG_ERROR ("failed to execute: " << cmd.str());
+          return StatusCode::FAILURE;
+        }
         data.submitted = true;
       }
       break;

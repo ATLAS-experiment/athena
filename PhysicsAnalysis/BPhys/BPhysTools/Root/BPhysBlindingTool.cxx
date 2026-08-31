@@ -3,8 +3,7 @@
 */
 
 // system include:
-#include "boost/tokenizer.hpp"
-#include <boost/algorithm/string.hpp>
+#include "CxxUtils/StringUtils.h"
 #include <set>
 #include <cmath>
 
@@ -425,14 +424,7 @@ namespace xAOD {
   std::vector<std::string>
   BPhysBlindingTool::getTokens(std::string input, std::string seperators) {
     
-    std::vector<std::string> tokens;
-    boost::char_separator<char> sep(seperators.c_str());
-    typedef boost::tokenizer<boost::char_separator<char> > Tokenizer_t;
-    Tokenizer_t tokenizer(input, sep);
-    for (auto& token : tokenizer) {
-      tokens.push_back(token);
-    }
-    return tokens;
+    return CxxUtils::tokenize(input, seperators);
   }
   //--------------------------------------------------------------------------
   // Format vector of floats as string

@@ -19,7 +19,7 @@ def writeParametersToMetaData(flags, folderName, parameters, beginRun, endRun):
     """
     from IOVDbSvc.IOVDbSvcConfig import IOVDbSvcCfg
 
-    acc = IOVDbSvcCfg(flags, FoldersToMetaData=[folderName])
+    acc = IOVDbSvcCfg(flags, FoldersToMetaData=(folderName,))
 
     # Get the IOVDbMetaDataTool and configure its Payloads property
     metaDataTool = acc.getPublicTool("IOVDbMetaDataTool")

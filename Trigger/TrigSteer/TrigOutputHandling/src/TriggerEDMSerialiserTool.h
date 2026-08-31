@@ -6,6 +6,9 @@
 
 #include <string>
 #include "AthenaBaseComps/AthAlgTool.h"
+#include "CxxUtils/ConcurrentToValMap.h"
+#include "CxxUtils/SimpleUpdater.h"
+#include "CxxUtils/checker_macros.h"
 #include "GaudiKernel/IClassIDSvc.h"
 #include "GaudiKernel/ServiceHandle.h"
 #include "xAODCore/AuxSelection.h"
@@ -104,6 +107,15 @@ class TriggerEDMSerialiserTool: public extends<AthAlgTool, HLTResultMTMakerTool>
     std::string transTypeName() const {return transType+"#"+key;}
     std::string persTypeName() const {return persType+"#"+key;}
   };
+
+  /// A thread-safe map to store the AuxId to Address mapping for dynamic variables
+  using AuxIdTypeMap_t = CxxUtils::ConcurrentToValMap<SG::auxid_t, Address,
+                                                      CxxUtils::SimpleUpdater,
+                                                      std::hash<SG::auxid_t>,
+                                                      std::equal_to<SG::auxid_t>,
+                                                      SG::null_auxid>;
+
+  mutable AuxIdTypeMap_t m_dynAuxAddress ATLAS_THREAD_SAFE;
 
   /**
    * @class TruncationInfo

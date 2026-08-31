@@ -19,7 +19,6 @@
 #define VP1PARTICLEDATA_H
 
 #include <QString>
-namespace HepPDT { class ParticleData; }
 
 class VP1ParticleData {
 public:
@@ -29,9 +28,6 @@ public:
   static double particleMass( const int& pdgcode, bool& ok );//ok == false indicates problems
   static double particleCharge( const int& pdgcode, bool& ok );//ok == false indicates problems
   static QString particleName( const int& pdgcode, bool& ok );//ok == false indicates problems
-
-  //Full information:
-  static const HepPDT::ParticleData * particleData( const int& pdgcode );//Returns 0 in case of problems
 
 private:
   VP1ParticleData(){}

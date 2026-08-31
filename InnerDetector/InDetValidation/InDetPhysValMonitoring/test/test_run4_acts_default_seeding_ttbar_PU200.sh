@@ -28,24 +28,16 @@ run () {
     echo "Running ${name}..."
     time "${cmd[@]}"
     rc=$?
-    # Only report hard failures for comparison Acts-Trk since we know
-    # they are different. We do not expect this test to succeed
-    [ "${name}" = "dcube-trk" ] && [ $rc -ne 255 ] && rc=0
     echo "art-result: $rc ${name}"
     return $rc
 }
 
-# Only schedule what we need for this specific test
-# We want to run Athena
-# We want to schedule Trk->xAOD SP convertion
-# We want to run the Acts Seeding Algorithm
-# We want to activate the analysis of seed and estimated track parameters (flag)
 run "Reconstruction" \
     Reco_tf.py \
     --inputRDOFile ${input_rdo} \
     --outputAODFile AOD.pool.root \
     --conditionsTag "default:${conditionsTag}" \
-    --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude,ActsConfig.ActsCIFlags.actsLegacyWorkflowFlags" \
+    --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude" \
     --preExec "flags.DQ.useTrigger=False; \
 	       flags.Acts.doAnalysis=True; \
 	       flags.Output.HISTFileName=\"ActsMonitoringOutput.root\";" \

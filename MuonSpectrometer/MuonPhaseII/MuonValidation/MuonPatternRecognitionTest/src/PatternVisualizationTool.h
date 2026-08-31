@@ -6,7 +6,6 @@
 
 #include <MuonRecToolInterfacesR4/IPatternVisualizationTool.h>
 #include <MuonRecToolInterfacesR4/IRootVisualizationService.h>
-
 #include <AthenaBaseComps/AthAlgTool.h>
 
 #include <StoreGate/ReadDecorHandleKeyArray.h>
@@ -21,11 +20,116 @@
 #include <MuonPatternEvent/HoughEventData.h>
 
 
+#include "TLegend.h"
+#include "TLegendEntry.h"
+
+#include <bitset>
+
+
 namespace MuonR4 {
     class SpacePoint;
 }
 
 namespace MuonValR4 {
+
+
+enum class LegendItem : std::size_t {
+    RecoSegmentLine = 0,
+    TruthSegmentLine,
+    AuxiliaryConstraint,
+
+    // general hits in the bucket (hollow filling)
+    MdtHit,
+    RpcHit,
+    TgcHit,
+    MmHit,
+    StgcStripWireHit,
+    StgcPadHit,
+    OutlierHit,
+
+    // hits on the objects (seeds, segments, etc) (full filling)
+    MdtHitOnObject,
+    RpcHitOnObject,
+    TgcHitOnObject,
+    MmHitOnObject,
+    StgcStripWireHitOnObject,
+    StgcPadHitOnObject,
+
+    //True matched hits
+    LabeledBox,
+    LabeledTube,
+
+    SelectedHit,
+    AvailableHit,
+
+    NumItems
+};
+using LegendMask = std::bitset<static_cast<std::size_t>(LegendItem::NumItems)>;
+
+class DynamicLegend {
+public:
+    DynamicLegend()
+        : m_legend{
+              std::make_unique<TLegend>(
+                  0.68, 0.56, 0.94, 0.90)} {
+
+        m_legend->SetBorderSize(0);
+        m_legend->SetFillStyle(0);
+        m_legend->SetTextFont(43);
+        m_legend->SetTextSize(10);
+    }
+
+    DynamicLegend( double xmin, double ymin, double xmax, double ymax,
+                   int textfont = 43, double textSize = 10)
+        : m_legend{
+              std::make_unique<TLegend>(
+                  xmin, ymin, xmax, ymax)} {
+
+        m_legend->SetBorderSize(0);
+        m_legend->SetFillStyle(0);
+        m_legend->SetTextFont(textfont);
+        m_legend->SetTextSize(textSize);
+    }
+
+    TLegendEntry* addOnce(
+        const LegendItem item,
+        TObject* object,
+        const char* label,
+        const char* option) {
+
+        const std::size_t index =
+            static_cast<std::size_t>(item);
+
+        if (m_entries.test(index)) {
+            return nullptr;
+        }
+
+        TLegendEntry* entry =
+            m_legend->AddEntry(
+                object, label, option);
+
+        if (entry) {
+            m_entries.set(index);
+        }
+
+        return entry;
+    }
+
+    bool empty() const {
+        return m_legend->GetNRows() == 0;
+    }
+
+    std::unique_ptr<TLegend> release() {
+        return std::move(m_legend);
+    }
+
+private:
+    LegendMask m_entries{};
+    std::unique_ptr<TLegend> m_legend;
+};
+
+
+
     class PatternVisualizationTool : public extends<AthAlgTool, IPatternVisualizationTool> {
         public:
             
@@ -100,7 +204,7 @@ namespace MuonValR4 {
             template<class SpacePointType>
                 bool drawHits(const MuonR4::SpacePointBucket& bucket,
                               const std::vector<SpacePointType>& hitsToDraw,
-                              Canvas_t& canvasDim,
+                              Canvas_t& canvasDim, DynamicLegend& legend,
                               unsigned int view) const;
 
             /** @brief Converts a Hit into a particular TBox/ TEllipse for drawing. If the hit
@@ -113,7 +217,7 @@ namespace MuonValR4 {
              *  @param fillStyle: Standard fill style for the box e.g. full. */
             template<class SpacePointType>
                 const MuonR4::SpacePoint* drawHit(const SpacePointType& hit,
-                                                  Canvas_t& canvas,
+                                                  Canvas_t& canvas, DynamicLegend& legend,
                                                   const unsigned int view, 
                                                   unsigned int fillStyle) const;
             /** @brief Writes the chi2 of the hits onto the Canvas.
@@ -194,6 +298,8 @@ namespace MuonValR4 {
 
     };
     
+
+
 }
 
 #endif

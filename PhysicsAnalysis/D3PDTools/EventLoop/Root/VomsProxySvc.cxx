@@ -12,15 +12,12 @@
 
 #include <AsgMessaging/MessageCheck.h>
 #include <RootCoreUtils/Assert.h>
-#include <RootCoreUtils/ThrowMsg.h>
 #include <SampleHandler/GridTools.h>
 #include <errno.h>
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
-#include <unistd.h>
-#include <sys/types.h>
 #include <fstream>
 #include <TSystem.h>
 
@@ -44,7 +41,6 @@ namespace EL
   void VomsProxySvc ::
   testInvariant () const
   {
-    RCU_INVARIANT (this != nullptr);
   }
 
 
@@ -67,7 +63,10 @@ namespace EL
       file = str.str();
     }
     if (file.empty() || gSystem->AccessPathName (file.c_str()) != false)
-      RCU_THROW_MSG ("failed to find X509 proxy file: " + file);
+    {
+      ANA_MSG_ERROR ("failed to find X509 proxy file: " << file);
+      return StatusCode::FAILURE;
+    }
 
     {
       std::ifstream stream (file);
@@ -75,10 +74,13 @@ namespace EL
       while (stream.get (ch))
 	m_proxyData += ch;
       if (!stream.eof())
-	RCU_THROW_MSG ("error reading: " + file);
+      {
+        ANA_MSG_ERROR ("error reading X509 proxy file: " << file);
+        return StatusCode::FAILURE;
+      }
     }
 
-    return StatusCode::FAILURE;
+    return StatusCode::SUCCESS;
   }
 
 
@@ -98,7 +100,7 @@ namespace EL
     RCU_READ_INVARIANT (this);
     if (!SH::checkVomsProxy())
     {
-      int fd = open (m_fileName.c_str(), O_CREAT | O_WRONLY, S_IRUSR | S_IWUSR);
+      int fd = open (m_fileName.c_str(), O_CREAT | O_WRONLY | O_TRUNC, S_IRUSR | S_IWUSR);
       if (fd == -1)
       {
 	auto myerrno = errno;

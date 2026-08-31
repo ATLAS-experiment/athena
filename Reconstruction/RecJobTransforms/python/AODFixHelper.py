@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 import re
 from AthenaCommon.Logging import logging
@@ -6,30 +6,33 @@ from AthenaCommon.Logging import logging
 #Helper method to determine if the input release is in particular release range. 
 #The boundaries rel1 and rel2 are inclusive.
 
-def releaseInRange(flags,rel1,rel2):
+def releaseInRange(flags,rel1,rel2,inputRelease=None):
     msg=logging.getLogger("releaseInRange")
 
     #This regex matches 3 and 4 digit release numbers
     #It also matches only something that start with Athena-xx
     relPattern=re.compile(r"^Athena-(\d+(\.\d+){2,3}(\.\*)?)$")
+    relPattern_Nightly=re.compile(r"^Athena-\d+(\.\d+){2,3}-(?:\d+\.\d+|main)-\d{4}-\d{2}-\d{2}T\d{4}$")#in case of a Nightly release used for production of the sample
 
     for r in (rel1,rel2):
         if not relPattern.match(r):
             raise RuntimeError("Release number %s doesn't match the expected format"%r)
 
-    inputRelease=flags.Input.Release
-    
+    if inputRelease is None:
+        inputRelease=flags.Input.Release
+
     # protection against AOD with very old releases or not read correctly by MetaReader.py
     if inputRelease == "" or not inputRelease.startswith("Athena-"):
         msg.debug("flags.Input.Release is read as empty or it does not start with 'Athena-'")
         return False
     
-    if not relPattern.match(inputRelease):
+    if not relPattern.match(inputRelease) and not relPattern_Nightly.match(inputRelease):
         raise RuntimeError("Input release number %s doesn't match the expected format"%inputRelease)
    
     # convert 3 digits releases to 4 digits
     if rel1.count(".") == 2:         rel1=f"{rel1}.0"
     if rel2.count(".") == 2:         rel2=f"{rel2}.0"
+    if relPattern_Nightly.match(inputRelease): inputRelease = re.sub(r"(-(?:\d+\.\d+|main)-\d{4}-\d{2}-\d{2}T\d{4})$", "", inputRelease) #removing the Nightly part (the usefull part of the release name should be remaining)
     if inputRelease.count(".") == 2: inputRelease=f"{inputRelease}.0"
 
     #By Atlas convention, the first number denotes the major release, the second one the purpose (Tier0, Generation, ... ) 
@@ -50,6 +53,7 @@ def releaseInRange(flags,rel1,rel2):
     if identifyMajorAndMinorRel(rel1) != identifyMajorAndMinorRel(inputRelease):
         msg.info("Input release %s not from the same release series %s.", inputRelease, rel1)
         return False
+    msg.info("Input release %s from the same release series %s.", inputRelease, rel1)
 
     #convert number to int for comparison
     lower=mangleRunningAndPatch(rel1)

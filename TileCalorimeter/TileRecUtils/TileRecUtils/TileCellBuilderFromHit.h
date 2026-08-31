@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TILERECUTILS_TILECELLBUILDERFROMHIT_H
@@ -195,9 +195,10 @@ class TileCellBuilderFromHit
      or recovers from single-channel failure. It returns true if cell was changed, false otherwise
      */
     bool maskBadChannel (TileDrawerEvtStatusArray& drawerEvtStatus,
-                         TileCell* pCell) const;
+                         TileCell* pCell, const EventContext& ctx) const;
     bool maskBadChannels (TileDrawerEvtStatusArray& drawerEvtStatus,
-                          TileCell* pCell, bool single_PMT_C10, bool Ecell) const;
+                          TileCell* pCell, bool single_PMT_C10, bool Ecell,
+                          const EventContext& ctx) const;
 
     void correctCell(TileCell* pCell, int correction, int pmt, int gain, float ener, float time,
         unsigned char iqual, unsigned char qbit) const; //!< Compute calibrated energy, time, etc. for TileCell and adjust it.

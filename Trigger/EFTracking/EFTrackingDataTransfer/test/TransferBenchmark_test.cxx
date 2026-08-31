@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #undef NDEBUG
 
@@ -129,12 +129,13 @@ void writeAndReadContainerWithGivenAlgorithm(const F& alg, const TestData& origT
 
 void setSpacePointFromNthPosition(xAOD::SpacePointContainer& spContainer, const TestData& testData, const uint64_t pos)
 {
+  std::vector< const xAOD::UncalibratedMeasurement* > meas = testData.measurementIndexes[pos];
   spContainer[pos]->setSpacePoint(
     testData.elementIdList[pos],
     testData.globalPosition[pos],
     testData.varianceR[pos],
     testData.varianceZ[pos],
-    testData.measurementIndexes[pos]
+    std::move(meas)
   );
 }
 

@@ -5,6 +5,7 @@
 #include "GeneratorFilters/xAODChargedTracksWeightFilter.h"
 #include "GeneratorFilters/xAODDecaysFinalStateFilter.h"
 #include "GeneratorFilters/xAODDecayTimeFilter.h"
+#include "GeneratorFilters/xAODDecayVolumeFilter.h"
 #include "GeneratorFilters/xAODDiLeptonMassFilter.h"
 #include "GeneratorFilters/xAODDirectPhotonFilter.h"
 #include "GeneratorFilters/xAODElectronFilter.h"
@@ -116,6 +117,7 @@ DECLARE_COMPONENT( xAODChargedTracksFilter )
 DECLARE_COMPONENT( xAODChargedTracksWeightFilter )
 DECLARE_COMPONENT( xAODDecaysFinalStateFilter )
 DECLARE_COMPONENT( xAODDecayTimeFilter )
+DECLARE_COMPONENT( xAODDecayVolumeFilter )
 DECLARE_COMPONENT( xAODDiLeptonMassFilter )
 DECLARE_COMPONENT( xAODDirectPhotonFilter )
 DECLARE_COMPONENT( xAODElectronFilter )

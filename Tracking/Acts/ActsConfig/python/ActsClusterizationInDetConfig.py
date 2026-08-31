@@ -313,7 +313,7 @@ def ActsIDClusterizationCfg(flags,
                 kwargs.setdefault('StripClusterPreparationAlg.InputIDC', f'{flags.Tracking.ActiveConfig.extension}StripClustersCache')
 
     # Persistification
-    if flags.Acts.EDM.PersistifyClusters and kwargs['runReconstruction']:
+    if kwargs['runReconstruction']:
         from ActsConfig.ActsPersistificationConfig import PersistifyClusters
         pixelClusterCollections = None if not kwargs['processPixels'] else [kwargs['PixelClusterizationAlg.ClustersKey']]
         stripClusterCollections = None if not kwargs['processStrips'] else [kwargs['StripClusterizationAlg.ClustersKey']]

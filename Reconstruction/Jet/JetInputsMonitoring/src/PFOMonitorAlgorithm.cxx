@@ -1,8 +1,11 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "PFOMonitorAlgorithm.h"
+
+#include "AthenaMonitoringKernel/Monitored.h"
+#include "xAODPFlow/PFO.h"
 #include "xAODPFlow/FEHelpers.h"
 #include "AthenaKernel/Units.h"
 using Athena::Units::GeV;
@@ -22,16 +25,16 @@ StatusCode PFOMonitorAlgorithm::initialize() {
     ATH_CHECK( m_ChargedPFOContainerKey.initialize() );
     ATH_CHECK( m_NeutralPFOContainerKey.initialize() );
 
-    // release 21 containters
-    //ATH_CHECK( m_oldChargedPFOContainerKey.initialize() );
-    //ATH_CHECK( m_oldNeutralPFOContainerKey.initialize() );
     return StatusCode::SUCCESS;
 }
 
 
 StatusCode PFOMonitorAlgorithm::fillHistograms( const EventContext& ctx ) const {
     using namespace Monitored;
-
+    const std::string allPFOs{"PFOMonitorAllPFOs"};
+    const std::string chargedPFOs{"PFOMonitorChargedPFOs"};
+    const std::string neutralPFOs{"PFOMonitorNeutralPFOs"};
+    
     // Declare the quantities which should be monitored
     auto nPFOs = Monitored::Scalar<int>("nPFOs",0.0);
     auto pT     = Monitored::Scalar<float>("pfopT",0.0);
@@ -95,9 +98,9 @@ StatusCode PFOMonitorAlgorithm::fillHistograms( const EventContext& ctx ) const 
     nChPFOs = chpfos->size();
     nNuPFOs = nupfos->size();
 
-    fill("PFOMonitorAllPFOs",nPFOs);
-    fill("PFOMonitorChargedPFOs",nChPFOs);
-    fill("PFOMonitorNeutralPFOs",nNuPFOs);    
+    fill(allPFOs,nPFOs);
+    fill(chargedPFOs,nChPFOs);
+    fill(neutralPFOs,nNuPFOs);    
 
     // Accessors for neutral PFO moments
     const static SG::AuxElement::ConstAccessor<float> acc_SECOND_R("SECOND_R");
@@ -148,9 +151,9 @@ StatusCode PFOMonitorAlgorithm::fillHistograms( const EventContext& ctx ) const 
       ChExpE= expectedEnergy;
 
       // Fill. First argument is the tool name, all others are the variables to be saved.
-      fill("PFOMonitorAllPFOs",pT,eta,phi,mass,E,y);
+      fill(allPFOs,pT,eta,phi,mass,E,y);
       DenseEnvFlag = denseEnv;
-      fill("PFOMonitorChargedPFOs",ChpT,Cheta,Chphi,Chmass,ChE,Chy,ChDenseEnv,ChExpE,DenseEnvFlag);
+      fill(chargedPFOs,ChpT,Cheta,Chphi,Chmass,ChE,Chy,ChDenseEnv,ChExpE,DenseEnvFlag);
 	      
     }
 
@@ -213,8 +216,8 @@ StatusCode PFOMonitorAlgorithm::fillHistograms( const EventContext& ctx ) const 
       //else {ATH_MSG_DEBUG("This neutral PFO did not have ENG_FRAC_MAX set");}
 
       // Fill. First argument is the tool name, all others are the variables to be saved.
-      fill("PFOMonitorAllPFOs",pT,eta,phi,mass,E,y);
-      fill("PFOMonitorNeutralPFOs",NupT,Nueta,Nuphi,Numass,NuE,Nuy,NuIso,NuEPos,NuNBadC,NuEBadCells,NuAvgLarQ,NuSecondR,NuCenterLambda,NuSecondLambda,NuBadLarQFrac,NuEMProb);
+      fill(allPFOs,pT,eta,phi,mass,E,y);
+      fill(neutralPFOs,NupT,Nueta,Nuphi,Numass,NuE,Nuy,NuIso,NuEPos,NuNBadC,NuEBadCells,NuAvgLarQ,NuSecondR,NuCenterLambda,NuSecondLambda,NuBadLarQFrac,NuEMProb);
     }
 
     return StatusCode::SUCCESS;

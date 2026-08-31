@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+    Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //***************************************************************************
@@ -161,9 +161,6 @@ StatusCode jTowerMakerFromJfexTowers::execute(const EventContext& ctx) const
     // STEP 4 - Write the completed jTowerContainer into StoreGate (move the local copy in memory)
     SG::WriteHandle<LVL1::jTowerContainer> jTowerContainerSG(m_jTowerContainerSGKey, ctx);
     ATH_CHECK(jTowerContainerSG.record(std::move( local_jTowerContainerRaw ) ) );
-
-    // STEP 5 - Close and clean the event
-    m_jTowerBuilderTool->reset();
 
     return StatusCode::SUCCESS;
 }

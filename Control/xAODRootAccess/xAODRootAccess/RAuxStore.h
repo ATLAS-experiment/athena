@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 #ifndef XAODROOTACCESS_RAUXSTORE_H
 #define XAODROOTACCESS_RAUXSTORE_H
 
@@ -27,6 +27,9 @@ using Experimental::REntry;
 #endif  // ROOT_VERSION_CODE < ROOT_VERSION(6, 36, 0)
 
 
+// Forward declaration(s):
+class EventContext;
+
 namespace xAOD {
 
 /// @short "ROOT @c RNTuple implementation" of @c IAuxStore
@@ -39,7 +42,8 @@ class RAuxStore : public details::AuxStoreBase {
 
  public:
   /// Constructor
-  RAuxStore(std::string_view prefix = "", bool topStore = true,
+  RAuxStore(const EventContext& ctx,
+            std::string_view prefix = "", bool topStore = true,
             EStructMode mode = EStructMode::kUndefinedStore);
   /// Destructor
   virtual ~RAuxStore();

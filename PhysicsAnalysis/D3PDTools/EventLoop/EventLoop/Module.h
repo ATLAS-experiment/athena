@@ -11,7 +11,6 @@
 
 #include <AsgMessaging/StatusCode.h>
 #include <AsgTools/AsgComponent.h>
-#include <AsgTools/PropertyWrapper.h>
 
 namespace EL
 {

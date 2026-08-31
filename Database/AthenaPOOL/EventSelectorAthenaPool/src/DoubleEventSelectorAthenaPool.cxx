@@ -16,6 +16,7 @@
 // Pool
 #include "CollectionSvc/ICollectionCursor.h"
 #include "CollectionSvc/CollectionRowBuffer.h"
+
 #include "PersistentDataModel/AthenaAttributeList.h"
 
 

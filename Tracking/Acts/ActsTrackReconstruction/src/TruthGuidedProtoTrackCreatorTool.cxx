@@ -62,7 +62,7 @@ StatusCode ActsTrk::TruthGuidedProtoTrackCreatorTool::findProtoTracks(const Even
 
 
 
-            identToHepMCMap[curIdentifier] = curGenP;
+            identToHepMCMap[curIdentifier] = std::move(curGenP);
         }
     }
 

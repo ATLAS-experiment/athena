@@ -125,6 +125,14 @@ void TrackProcessorUserActionBase::setupPrimary(G4Track& aTrack)
   //
 
   auto* trackInfo = ::iGeant4::ISFG4Helper::getISFTrackInfo(aTrack);
+  if ( trackInfo && aTrack.GetCurrentStepNumber() > 0 ) {
+    // A suspended primary re-enters PreUserTrackingAction on resume, still
+    // carrying the TrackInformation from its first pass. The Quirks extension
+    // is the only user of fSuspend. A resumed track keeps its step counter, so
+    // a primary genuinely started twice is still fatal below.
+    updateCurrentBaseISFParticle( trackInfo->GetBaseISFParticle() );
+    return;
+  }
   if ( trackInfo ) {
     G4ExceptionDescription description;
     description << G4String("PreUserTrackingAction: ")

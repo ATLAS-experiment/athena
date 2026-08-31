@@ -12,7 +12,7 @@
 #include "TrigConfData/L1Menu.h"
 #include "TrigConfData/L1Threshold.h"
 
-#include <boost/algorithm/string.hpp>
+#include <CxxUtils/StringUtils.h>
 
 using namespace std;
 
@@ -766,7 +766,7 @@ int main(int argc, char** argv) {
       if( env_AV != nullptr and env_xmlpath != nullptr ) {
          vector<string> paths;
          string xmlpath(env_xmlpath);
-         boost::algorithm::split(paths, xmlpath, boost::is_any_of(":"));
+         paths = CxxUtils::tokenize(xmlpath, ':');
          for( const string & p : paths) {
             string testFN = p + "/TriggerMenuMT/L1Menu_Dev_pp_run3_v1_" + string(env_AV) + ".json";
             struct stat buffer;

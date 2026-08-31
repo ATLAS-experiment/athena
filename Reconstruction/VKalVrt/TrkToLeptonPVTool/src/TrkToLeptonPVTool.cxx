@@ -70,8 +70,8 @@ TrkToLeptonPVTool::TrkToLeptonPVTool(const std::string& type,
      TPC.push_back(new (std::nothrow) xAOD::TrackParticle(*trk));
      if(!TPC[0])return {nullptr};
 
-     const float mvx= (eventINFO) ? eventINFO->beamPosX() : 0.;
-     const float mvy= (eventINFO) ? eventINFO->beamPosY() : 0.;
+     const float mvx= eventINFO->beamPosX();
+     const float mvy= eventINFO->beamPosY();
      static const SG::ConstAccessor<float> vzAcc("vz");
      const float mvz= (vzAcc.isAvailable(*trk)) ? trk->vz() : 0.;
      TPC[0]->setParametersOrigin( mvx, mvy, mvz);

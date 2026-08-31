@@ -25,8 +25,10 @@ StatusCode PU1SuppAlgTool::initialize() {
   return StatusCode::SUCCESS;
 }
 
-StatusCode PU1SuppAlgTool::run(const EventContext& ctx) const {
+StatusCode PU1SuppAlgTool::run(const std::unique_ptr<IDataCollector>& dc,
+			       const EventContext& ctx) const {
   ATH_MSG_DEBUG("Running PU1SuppAlgTool");
+  if (dc){dc->collect(*this, "start");}
 
   // Read input FIFO of TOBs
   SG::ReadHandle<GepAlgoPU1SuppFIFO> fifoHandle(m_HypoFIFOReadKey, ctx);
@@ -67,6 +69,8 @@ StatusCode PU1SuppAlgTool::run(const EventContext& ctx) const {
   ATH_MSG_DEBUG("PU1 suppression outputs recorded to event store under key: "
                 << m_portsOutWriteKey.key());
 
+
+  if (dc){dc->collect(*this, "end");}
   return StatusCode::SUCCESS;
 }
 

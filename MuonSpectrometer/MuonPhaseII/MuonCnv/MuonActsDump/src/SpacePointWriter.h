@@ -13,7 +13,7 @@
 
 
 #include "StoreGate/ReadHandleKeyArray.h"
-#include "ActsGeometryInterfaces/ITrackingGeometryTool.h"
+#include "ActsEvent/ContextUtility.h"
 
 #include "MuonIdHelpers/IMuonIdHelperSvc.h"
 
@@ -40,8 +40,8 @@ namespace MuonValR4{
             /** @brief Service handle towards the IdHelper svc */
             ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{this, "MuonIdHelperSvc", "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
 
-            /** @brief The tool handle of the tracking geometry tool */
-            PublicToolHandle<ActsTrk::ITrackingGeometryTool> m_trackingGeometryTool{this, "TrackingGeometryTool", ""};
+            /** @brief Context provider for geometry, magnetic field and calibration contexts */
+            ActsTrk::ContextUtility m_ctxProvider{this};
             
             SG::ReadHandleKeyArray<MuonR4::SpacePointContainer> m_spacePointKeys{this, "SpacePointKeys", {"MuonSpacePoints", "NswSpacePoints"} };
 

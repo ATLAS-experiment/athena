@@ -4,7 +4,7 @@
 
 // system include:
 #include <format>
-#include "boost/tokenizer.hpp"
+#include "CxxUtils/StringUtils.h"
 
 // EDM includes:
 #include "xAODEventInfo/EventInfo.h"
@@ -628,14 +628,7 @@ namespace xAOD {
   std::vector<std::string> BPhysTrackVertexMapTool
   ::getTokens(std::string input, std::string seperators) {
 
-    std::vector<std::string> tokens;
-    boost::char_separator<char> sep(seperators.c_str());
-    typedef boost::tokenizer<boost::char_separator<char> > Tokenizer_t;
-    Tokenizer_t tokenizer(input, sep);
-    for (auto& token : tokenizer) {
-      tokens.push_back(token);
-    }
-    return tokens;
+    return CxxUtils::tokenize(input, seperators);
   }
   //--------------------------------------------------------------------------
 } // namespace xAOD

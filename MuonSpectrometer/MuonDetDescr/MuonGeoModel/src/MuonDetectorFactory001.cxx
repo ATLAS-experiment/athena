@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonGeoModel/MuonDetectorFactory001.h"
@@ -310,7 +310,7 @@ namespace MuonGM {
             log << MSG::INFO << "Fine Clash Fixing disabled: (should be ON/OFF for Simulation/Reconstruction)" << endmsg;
         }
 
-        StationSelector sel(*mysql, slist);
+        StationSelector sel(*mysql, std::move(slist));
         StationSelector::StationIterator it;
 
         for (it = sel.begin(); it != sel.end(); ++it) {

@@ -9,6 +9,7 @@
 # art-html: dcube_simGPU
 
 conditionsTag=$(python -c "from AthenaConfiguration.TestDefaults import defaultConditionsTags; print(defaultConditionsTags.RUN4_MC)")
+geometryTag=$(python -c "from AthenaConfiguration.TestDefaults import defaultGeometryTags; print(defaultGeometryTags.RUN4)")
 
 echo "--- modinfo ---"
 modinfo nvidia | grep -i version
@@ -35,9 +36,9 @@ timeout 10800 AtlasG4_tf.py  \
   --maxEvents 100 \
   --multithreaded \
   --detectors 'Calo' \
-  --preInclude 'AtlasG4Tf:Campaigns.PhaseIISimulation,SimulationConfig.disablePhotonRussianRoulette,SimulationConfig.disableNeutronRussianRoulette,SimulationConfig.disableFrozenShowersFCalOnly' \
+  --preInclude 'AtlasG4Tf:Campaigns.MC23PhaseIISimulation,SimulationConfig.disablePhotonRussianRoulette,SimulationConfig.disableNeutronRussianRoulette,SimulationConfig.disableFrozenShowersFCalOnly' \
   --conditionsTag "${conditionsTag}" \
-  --geometryVersion 'default:ATLAS-P2-RUN4-04-00-00' \
+  --geometryVersion 'default:${geometryTag}' \
   --postExec 'with open("ConfigSimCA.pkl", "wb") as f: cfg.store(f)' \
   --physicsList 'FTFP_BERT_ATL_Celer' \
   --preExec 'flags.Sim.OptionalUserActionList+=[ "G4UserActions.G4UserActionsConfig.CelerOffloadToolCfg" ]; from SimulationConfig.SimEnums import CalibrationRun; flags.Sim.CalibrationRun=CalibrationRun.Off; flags.Sim.G4Commands+=[ "/celer/maxNumTracks 262144", "/celer/maxInitializers 524288", "/celer/secondaryStackFactor 2", "/celer/maxNumSteps 1000", "/celer/device/stackSize 32192", "/celer/device/heapSize 104857600" ]; flags.GeoModel.EMECStandard=True' \

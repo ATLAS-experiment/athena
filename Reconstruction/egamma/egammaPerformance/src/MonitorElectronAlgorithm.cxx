@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
   Author : B. Laforge (laforge@lpnhe.in2p3.fr)
   4 May 2020
@@ -153,7 +153,7 @@ StatusCode MonitorElectronAlgorithm::fillHistograms( const EventContext& ctx ) c
     u_int16_t mynp_barrel = 0;
     u_int16_t mynp_crack = 0;
     u_int16_t mynp_endcap = 0;
-
+    const std::string monitorElectronStr{"MonitorElectron"};
     for (const auto *const e_iter : *electrons) {
  
     // Check that the electron meets our requirements
@@ -312,7 +312,7 @@ StatusCode MonitorElectronAlgorithm::fillHistograms( const EventContext& ctx ) c
 	et_barrel = myet ; eta_barrel = myeta ; phi_barrel = myphi ;
 	time_barrel = mytime; ehad1_barrel = myehad1; coreem_barrel = myecore;
 	f0_barrel = myf0; f1_barrel = myf1; f2_barrel = myf2; f3_barrel = myf3; re233e237_barrel = myre233e237; re237e277_barrel = myre237e277;
-	fill("MonitorElectron",np_barrel, nofblayerhits_barrel, nofpixelhits_barrel, nofscthits_barrel, noftrthits_barrel, noftrthighthresholdhits_barrel, 
+	fill(monitorElectronStr,np_barrel, nofblayerhits_barrel, nofpixelhits_barrel, nofscthits_barrel, noftrthits_barrel, noftrthighthresholdhits_barrel, 
 	     deltaeta1_barrel, deltaphi2_barrel,trackd0_barrel,eoverp_barrel,
 	     et_barrel,eta_barrel,phi_barrel, time_barrel, ehad1_barrel,coreem_barrel, f0_barrel,f1_barrel,f2_barrel, f3_barrel,
 	     re233e237_barrel,re237e277_barrel,is_pt_gt_4gev_barrel,is_pt_gt_2_5gev_barrel,is_pt_gt_20gev_barrel);
@@ -326,7 +326,7 @@ StatusCode MonitorElectronAlgorithm::fillHistograms( const EventContext& ctx ) c
 	et_endcap = myet ; eta_endcap = myeta ; phi_endcap = myphi ;
 	time_endcap = mytime; ehad1_endcap = myehad1; coreem_endcap = myecore;
 	f0_endcap = myf0; f1_endcap = myf1; f2_endcap = myf2; f3_endcap = myf3; re233e237_endcap = myre233e237; re237e277_endcap = myre237e277;
-	fill("MonitorElectron",np_endcap,nofblayerhits_endcap,nofpixelhits_endcap,nofscthits_endcap,noftrthits_endcap,noftrthighthresholdhits_endcap,
+	fill(monitorElectronStr,np_endcap,nofblayerhits_endcap,nofpixelhits_endcap,nofscthits_endcap,noftrthits_endcap,noftrthighthresholdhits_endcap,
 	     deltaeta1_endcap, deltaphi2_endcap,trackd0_endcap,eoverp_endcap,et_endcap,eta_endcap,phi_endcap,
 	     time_endcap, ehad1_endcap,coreem_endcap,
 	     f0_endcap,f1_endcap,f2_endcap,f3_endcap,re233e237_endcap,re237e277_endcap,is_pt_gt_4gev_endcap,is_pt_gt_2_5gev_endcap,is_pt_gt_20gev_endcap);
@@ -340,7 +340,7 @@ StatusCode MonitorElectronAlgorithm::fillHistograms( const EventContext& ctx ) c
 	et_crack = myet ; eta_crack = myeta ; phi_crack = myphi ;
 	time_crack = mytime; ehad1_crack = myehad1; coreem_crack = myecore;
 	f0_crack = myf0; f1_crack = myf1; f2_crack = myf2; f3_crack = myf3; re233e237_crack = myre233e237; re237e277_crack = myre237e277;
-	fill("MonitorElectron",np_crack,nofblayerhits_crack, nofpixelhits_crack,nofscthits_crack,noftrthits_crack,noftrthighthresholdhits_crack,
+	fill(monitorElectronStr,np_crack,nofblayerhits_crack, nofpixelhits_crack,nofscthits_crack,noftrthits_crack,noftrthighthresholdhits_crack,
 	     deltaeta1_crack, deltaphi2_crack,trackd0_crack,eoverp_crack,et_crack,eta_crack,phi_crack,
 	     time_crack, ehad1_crack,coreem_crack,f0_crack,f1_crack,f2_crack,f3_crack,re233e237_crack,re237e277_crack,is_pt_gt_4gev_crack,is_pt_gt_2_5gev_crack,is_pt_gt_20gev_crack);
 	break;
@@ -351,7 +351,7 @@ StatusCode MonitorElectronAlgorithm::fillHistograms( const EventContext& ctx ) c
       }
 
       et = myet ; eta = myeta ; phi = myphi ;
-      fill("MonitorElectron",et,eta,phi,time,ptcone20,topoetcone40,lbNCandidates,
+      fill(monitorElectronStr,et,eta,phi,time,ptcone20,topoetcone40,lbNCandidates,
       is_pt_gt_2_5gev, is_pt_gt_4gev, is_pt_gt_20gev);
 
       // Fill. First argument is the tool name, all others are the variables to be histogramed
@@ -362,7 +362,7 @@ StatusCode MonitorElectronAlgorithm::fillHistograms( const EventContext& ctx ) c
     np_endcap = mynp_endcap;
     np_crack = mynp_crack;
 
-    fill("MonitorElectron",np,np_barrel,np_endcap,np_crack);
+    fill(monitorElectronStr,np,np_barrel,np_endcap,np_crack);
 
     return StatusCode::SUCCESS;
 }

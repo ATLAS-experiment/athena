@@ -22,12 +22,24 @@ StatusCode GSCCalibStep::initialize() {
 
   ATH_MSG_DEBUG("Reading from " << m_jetInScale << " and writing to " << m_jetOutScale);
 
-  ATH_CHECK( m_histTool_EM3.retrieve());
-  ATH_CHECK( m_histTool_ChargedFraction.retrieve());
-  ATH_CHECK( m_histTool_Tile0.retrieve());
-  ATH_CHECK( m_histTool_PunchThrough.retrieve());
-  ATH_CHECK( m_histTool_nTrk.retrieve());
-  ATH_CHECK( m_histTool_trackWIDTH.retrieve());
+  if(m_applyChargedFraction){
+    ATH_CHECK( m_histTool_ChargedFraction.retrieve());
+  }
+  if(m_applyEM3){
+    ATH_CHECK( m_histTool_EM3.retrieve());
+  }
+  if(m_applyTile0){
+    ATH_CHECK( m_histTool_Tile0.retrieve());
+  }
+  if(m_applyNtrk){
+     ATH_CHECK( m_histTool_nTrk.retrieve());
+  }
+  if(m_applyTrackWidth){
+    ATH_CHECK( m_histTool_trackWIDTH.retrieve());
+  }
+  if(m_applyPunchThrough){
+    ATH_CHECK( m_histTool_PunchThrough.retrieve());
+  }
 
   ATH_CHECK(m_vertexContainer_key.initialize());
   ATH_CHECK(m_eventInfo_key.initialize());
@@ -146,15 +158,26 @@ StatusCode GSCCalibStep::calibrate(xAOD::JetContainer& jets) const {
     ATH_MSG_DEBUG("NTrk Response: " <<getNTrkResponse(*jet, jc, etabin));
     ATH_MSG_DEBUG("TrkWidth Response: " <<getTrackWIDTHResponse(*jet, jc, etabin));
 
-    getGSCCorrection*=1./getChargedFractionResponse(*jet, jc, etabin);
-    jet->setJetP4( startingP4*getGSCCorrection );
-    getGSCCorrection*=1./getTile0Response(*jet, jc, etabin);
-    jet->setJetP4( startingP4*getGSCCorrection );
-    getGSCCorrection*=1./getEM3Response(*jet, jc, etabin);
-    jet->setJetP4( startingP4*getGSCCorrection );
-    getGSCCorrection*=1./getNTrkResponse(*jet, jc, etabin);
-    jet->setJetP4( startingP4*getGSCCorrection );
-    getGSCCorrection*=1./getTrackWIDTHResponse(*jet, jc, etabin);
+    if(m_applyChargedFraction){
+      getGSCCorrection*=1./getChargedFractionResponse(*jet, jc, etabin);
+      jet->setJetP4( startingP4*getGSCCorrection );
+    }
+    if(m_applyTile0){
+      getGSCCorrection*=1./getTile0Response(*jet, jc, etabin);
+      jet->setJetP4( startingP4*getGSCCorrection );
+    }
+    if(m_applyEM3){
+      getGSCCorrection*=1./getEM3Response(*jet, jc, etabin);
+      jet->setJetP4( startingP4*getGSCCorrection );
+    }
+    if(m_applyNtrk){
+      getGSCCorrection*=1./getNTrkResponse(*jet, jc, etabin);
+      jet->setJetP4( startingP4*getGSCCorrection );
+    }
+    if(m_applyTrackWidth){
+      getGSCCorrection*=1./getTrackWIDTHResponse(*jet, jc, etabin);
+      jet->setJetP4( startingP4*getGSCCorrection );
+    }
     if(m_applyPunchThrough && startingP4.Pt() >= m_punchThroughMinPt){
       jet->setJetP4( startingP4*getGSCCorrection );
       getGSCCorrection*=1./getPunchThroughResponse(*jet, jc, std::abs(detectorEta));
@@ -166,7 +189,6 @@ StatusCode GSCCalibStep::calibrate(xAOD::JetContainer& jets) const {
     jet->setJetP4( startingP4*getGSCCorrection );
 
     ATH_MSG_DEBUG("Jet pt calibrated:" << jet->pt()*1e-3);
-
 
   }// loop jets
 

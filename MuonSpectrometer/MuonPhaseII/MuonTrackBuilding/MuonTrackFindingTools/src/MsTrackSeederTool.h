@@ -9,13 +9,15 @@
 #include "GaudiKernel/SystemOfUnits.h"
 #include "Acts/Utilities/KDTree.hpp"
 
+#include "ActsEvent/ContextUtility.h"
+
 
 #include "xAODMuon/MuonSegmentContainer.h"
 #include "MuonTrackEvent/MsTrackSeed.h"
 #include "MuonReadoutGeometryR4/MuonDetectorManager.h"
 #include "MuonRecToolInterfacesR4/ISegmentSelectionTool.h"
 #include "MuonRecToolInterfacesR4/ITrackSeedingDiagnosticsTool.h"
-#include "ActsGeometryInterfaces/ITrackingGeometryTool.h"
+#include "ActsGeometryInterfaces/ITrackingGeometrySvc.h"
 #include "ActsGeometryInterfaces/IExtrapolationTool.h"
 #include "MagFieldConditions/AtlasFieldCacheCondObj.h"
 
@@ -196,9 +198,10 @@ namespace MuonR4{
              *         two segments for their compatibilitiy */
             ToolHandle<ISegmentSelectionTool> m_segSelector{this, "SegmentSelectionTool" , "" };
             /** @brief Tracking geometry tool */
-            PublicToolHandle<ActsTrk::ITrackingGeometryTool> m_trackingGeometryTool{this, "TrackingGeometryTool", ""};
-            /** @brief Track extrapolation tool */
-            ToolHandle<ActsTrk::IExtrapolationTool> m_extrapolationTool{this, "ExtrapolationTool" ,"" };
+           ServiceHandle<ActsTrk::ITrackingGeometrySvc> m_trackingGeometrySvc{this, "TrackingGeometrySvc", "ActsTrackingGeometrySvc"};
+
+            /** @brief Utility to fetch the geometry, magnetic field and calibration context in the event */
+            ActsTrk::ContextUtility m_ctxProvider{this};
             /** @brief Declare the data dependency on the standard Mdt+Rpc+Tgc segment container
              *         & on the NSW segment container */
             SG::ReadHandleKey<xAOD::MuonSegmentContainer> m_segmentKey{this, "SegmentContainer", "MuonSegmentsFromR4" };

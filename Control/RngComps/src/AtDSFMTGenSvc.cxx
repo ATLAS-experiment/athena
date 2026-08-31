@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "GaudiKernel/ISvcLocator.h"
@@ -116,7 +116,7 @@ StatusCode AtDSFMTGenSvc::initialize()
   // Create the various streams according to user's request
   for (const auto& i : m_streams_seeds.value()) {
     string stream; 
-    uint32_t seed1, seed2, offset(0);
+    uint32_t seed1{}, seed2{}, offset{};
     //parse the stream property string
     if (interpretSeeds(i, stream, seed1, seed2, offset)) {
       ATH_MSG_VERBOSE("Seeds property: stream " << stream 

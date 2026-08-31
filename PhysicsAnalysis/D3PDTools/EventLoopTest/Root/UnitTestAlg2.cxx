@@ -14,7 +14,6 @@
 #include <EventLoop/OutputStream.h>
 #include <EventLoop/Worker.h>
 #include <RootCoreUtils/Assert.h>
-#include <RootCoreUtils/ThrowMsg.h>
 #include <TEfficiency.h>
 #include <TFile.h>
 #include <TH1.h>
@@ -34,9 +33,7 @@ namespace EL
 {
   void UnitTestAlg2 ::
   testInvariant () const
-  {
-    RCU_INVARIANT (this != 0);
-  }
+  {}
 
 
 
@@ -80,12 +77,6 @@ namespace EL
     ANA_CHECK (book (TH1F ("test_property", "test_property", 1, 0, 1)));
     hist("test_property")->Fill (0.5, m_property);
 
-    // if (wk()->metaData()->castDouble ("jobOpt") != 42)
-    //   RCU_THROW_MSG ("failed to read meta-data from job options");
-
-    // if (wk()->metaData()->castString ("mymeta") != "test")
-    //   RCU_THROW_MSG ("failed to read meta-data from worker");
-
     wk()->addOutput (/*m_hist = */new TH1F (m_name.c_str(), m_name.c_str(),
 					50, 0, 50));
     if (makeOutput)
@@ -116,7 +107,10 @@ namespace EL
     RCU_ASSERT (wk()->tree() != 0);
     m_branch = wk()->tree()->GetBranch (m_name.c_str());
     if (m_branch == 0)
-      RCU_THROW_MSG ("failed to find branch " + m_name);
+    {
+      ATH_MSG_ERROR ("failed to find branch " << m_name);
+      return StatusCode::FAILURE;
+    }
     m_branch->SetAddress (&m_value);
 
     RCU_ASSERT (m_branch != nullptr);

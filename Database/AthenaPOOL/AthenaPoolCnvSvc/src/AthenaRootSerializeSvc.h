@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ATHENAROOTSERIALIZESVC_H
@@ -29,12 +29,8 @@ public:
    /// Gaudi Service Interface method implementations:
    virtual StatusCode initialize() override;
 
-   virtual void* serialize(const void* object, const std::string& name, size_t& nbytes) const override;
-   virtual void* serialize(const void* object, const Guid& id, size_t& nbytes) const override;
    virtual void* serialize(const void* object, const RootType& cltype, size_t& nbytes) const override;
 
-   virtual void* deserialize(void* buffer, size_t& nbytes, const std::string& name) const override;
-   virtual void* deserialize(void* buffer, size_t& nbytes, const Guid& id) const override;
    virtual void* deserialize(void* buffer, size_t& nbytes, const RootType& cltype) const override;
 };
 

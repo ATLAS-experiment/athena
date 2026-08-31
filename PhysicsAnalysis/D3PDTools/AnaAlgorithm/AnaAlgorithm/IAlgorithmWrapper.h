@@ -40,7 +40,7 @@ namespace EL
   /// serialization (writing to files and reading back) before
   /// `initialize` is called.
   ///
-  /// \warn While users could develop their own algorithm class and
+  /// \warning While users could develop their own algorithm class and
   /// wrap it in an object of this class, that is generally strongly
   /// discouraged.  And anybody who does this regardless of this
   /// warning should not expect this interface to remain unchanged
@@ -63,7 +63,7 @@ namespace EL
     virtual std::unique_ptr<IAlgorithmWrapper> makeClone() const = 0;
 
     /// \brief get the legacy algorithm, if we wrap one
-    virtual Algorithm *getLegacyAlg () {return nullptr;};
+    virtual Algorithm *getLegacyAlg () {return nullptr;}
 
     /// \brief call initialize on the algorithm
     virtual StatusCode initialize (const AlgorithmWorkerData& workerData) = 0;
@@ -72,7 +72,7 @@ namespace EL
     virtual StatusCode execute (const EventContext& ctx) = 0;
 
     /// \brief call postExecute on the algorithm
-    virtual StatusCode postExecute () {return StatusCode::SUCCESS;};
+    virtual StatusCode postExecute () {return StatusCode::SUCCESS;}
 
     /// \brief call finalize on the algorithm
     virtual StatusCode finalize () = 0;

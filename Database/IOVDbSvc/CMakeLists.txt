@@ -26,9 +26,9 @@ atlas_add_component( IOVDbSvc
    ${Boost_INCLUDE_DIRS} ${CrestApi_INCLUDE_DIRS} CxxUtils
    LINK_LIBRARIES ${ROOT_LIBRARIES} ${CORAL_LIBRARIES} ${COOL_LIBRARIES}
    ${Boost_LIBRARIES} nlohmann_json::nlohmann_json GaudiKernel
-   AthenaBaseComps AthenaKernel StoreGateLib PersistencySvc AthenaPoolUtilities
+   AthenaBaseComps AthenaKernel StoreGateLib AthenaPoolUtilities
    CoraCool IOVDbDataModel EventInfoUtils GeoModelInterfaces
-   IOVDbMetaDataToolsLib EventInfoMgtLib PoolSvcLib IOVDbSvcLib 
+   IOVDbMetaDataToolsLib EventInfoMgtLib PoolSvcLib IOVDbSvcLib
    CxxUtils DBLock SGTools CrestApi::CrestApiLib )
 
 
@@ -165,6 +165,10 @@ atlas_add_test( Base64Codec_test
 if( NOT SIMULATIONBASE AND NOT GENERATIONBASE AND NOT XAOD_ANALYSIS )
    atlas_add_test( IOVDbSvcCfgTest
       SCRIPT python -m IOVDbSvc.IOVDbSvcConfig
+      POST_EXEC_SCRIPT noerror.sh )
+
+   atlas_add_test( IOVDbAutoCfgFlagsTest
+      SCRIPT python -m IOVDbSvc.IOVDbAutoCfgFlags
       POST_EXEC_SCRIPT noerror.sh )
 
     atlas_add_test( TagFunctions_test

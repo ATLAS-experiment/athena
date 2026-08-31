@@ -1,10 +1,8 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "BeamBackgroundFiller.h"
-
-#include <cmath>
 
 #include "AthenaKernel/errorcheck.h"
 #include "CaloGeoHelpers/CaloSampling.h"
@@ -22,6 +20,9 @@
 
 #include "MuonPrepRawData/MMPrepData.h"
 #include "MuonPrepRawData/sTgcPrepData.h"
+
+#include <cmath>
+
 namespace {
   constexpr double inv_c = 1./Gaudi::Units::c_light;
 }
@@ -90,7 +91,7 @@ void BeamBackgroundFiller::FillMatchMatrix(const EventContext& ctx,
       unsigned int ncbCounter = 0;
       for (const Trk::Segment *ncbSegment : *ncbSegmentHandle) {
         ++ncbCounter;
-        const Muon::MuonSegment* seg =dynamic_cast<const Muon::MuonSegment*>(ncbSegment);
+        const Muon::MuonSegment* seg = static_cast<const Muon::MuonSegment*>(ncbSegment);
 
         const Identifier id = m_edmHelperSvc->chamberId(*seg);
         if (!id.is_valid()|| !m_idHelperSvc->isMuon(id)) {
@@ -170,7 +171,7 @@ void BeamBackgroundFiller::FillMatchMatrix(const EventContext& ctx,
         bool matched{false};
 
         for (unsigned int j = 0; j < cache.m_indexSeg.size(); j++) {
-            const Muon::MuonSegment* seg = dynamic_cast<const Muon::MuonSegment*>(*(cache.m_indexSeg[j]));
+            const Muon::MuonSegment* seg = static_cast<const Muon::MuonSegment*>(*(cache.m_indexSeg[j]));
         
             const Amg::Vector3D& globalPos = seg->globalPosition();
             const double phiSeg = globalPos.phi();
@@ -262,7 +263,7 @@ void BeamBackgroundFiller::SegmentMethod(Cache& cache) const {
   ///
   for (unsigned int segIndex = 0; segIndex < cache.m_indexSeg.size(); ++segIndex) {
 
-    const Muon::MuonSegment* seg =dynamic_cast<const Muon::MuonSegment*>(*(cache.m_indexSeg[segIndex]));
+    const Muon::MuonSegment* seg = static_cast<const Muon::MuonSegment*>(*(cache.m_indexSeg[segIndex]));
 
     const Amg::Vector3D& globalPos = seg->globalPosition();
     double zSeg = globalPos.z();
@@ -302,7 +303,7 @@ void BeamBackgroundFiller::SegmentMethod(Cache& cache) const {
 
     for (unsigned int segIndexC = 0; segIndexC < cache.m_indexSeg.size(); segIndexC++) {
 
-      const Muon::MuonSegment* segC = dynamic_cast<const Muon::MuonSegment*>(*(cache.m_indexSeg[segIndexC]));
+      const Muon::MuonSegment* segC = static_cast<const Muon::MuonSegment*>(*(cache.m_indexSeg[segIndexC]));
 
       const Amg::Vector3D& globalPos = segC->globalPosition();
       double zSegC = globalPos.z();
@@ -382,7 +383,7 @@ void BeamBackgroundFiller::OneSidedMethod(Cache& cache) const {
       if (!(cache.m_matchMatrix[clusIndex][segIndex] & BeamBackgroundData::Matched)){
         continue;
       }
-      const Muon::MuonSegment* seg = dynamic_cast<const Muon::MuonSegment*>(*(cache.m_indexSeg[segIndex]));
+      const Muon::MuonSegment* seg = static_cast<const Muon::MuonSegment*>(*(cache.m_indexSeg[segIndex]));
  
       const Amg::Vector3D& globalPos = seg->globalPosition();
       double zSeg = globalPos.z();
@@ -482,7 +483,7 @@ void BeamBackgroundFiller::TwoSidedMethod(Cache& cache) const {
       if (!(cache.m_matchMatrix[clusIndex][segIndexA] & BeamBackgroundData::Matched))
         continue;
 
-      const Muon::MuonSegment* seg = dynamic_cast<const Muon::MuonSegment*>(*(cache.m_indexSeg[segIndexA]));
+      const Muon::MuonSegment* seg = static_cast<const Muon::MuonSegment*>(*(cache.m_indexSeg[segIndexA]));
 
       const Amg::Vector3D& globalPos = seg->globalPosition();
       double zSegA = globalPos.z();
@@ -507,7 +508,7 @@ void BeamBackgroundFiller::TwoSidedMethod(Cache& cache) const {
         if (!(cache.m_matchMatrix[clusIndex][segIndexC] & BeamBackgroundData::Matched)){
           continue;
         }
-        const Muon::MuonSegment* seg = dynamic_cast<const Muon::MuonSegment*>(*(cache.m_indexSeg[segIndexC]));
+        const Muon::MuonSegment* seg = static_cast<const Muon::MuonSegment*>(*(cache.m_indexSeg[segIndexC]));
 
         const Amg::Vector3D& globalPos = seg->globalPosition();
         double zSegC = globalPos.z();

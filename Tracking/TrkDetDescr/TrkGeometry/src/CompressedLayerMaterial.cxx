@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -32,7 +32,7 @@ Trk::CompressedLayerMaterial::CompressedLayerMaterial(
     const std::vector<unsigned short int>& materialIndices, double splitFactor)
     : Trk::LayerMaterialProperties(splitFactor),
       m_binUtility(binutility.release()),
-      m_fullMaterial(fullProperties),
+      m_fullMaterial(std::move(fullProperties)),
       m_materialBins(materialIndices) {}
 
 Trk::CompressedLayerMaterial::~CompressedLayerMaterial() {

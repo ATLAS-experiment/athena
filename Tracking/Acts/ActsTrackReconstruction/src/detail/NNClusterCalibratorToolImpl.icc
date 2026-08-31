@@ -41,6 +41,7 @@ NNClusterCalibratorToolImpl<calib_data_t, traj_t>::createOptions(
     const EventContext& ctx) const {
   NNClusterCalibratorOptions<calib_data_t, traj_t> opt;
   opt.m_minClusterSizeForNN = m_minClusterSizeForNN;
+  opt.m_minClusterChargeForNN = m_minClusterChargeForNN;
   SG::ReadCondHandle<OnnxNNCollection> onnxCollection(m_readKeyONNX, ctx);
   if (!onnxCollection.isValid()) {
     ATH_MSG_FATAL("Failed to get ONNX network collection with key "
@@ -71,10 +72,9 @@ NNClusterCalibrator<calib_data_t, traj_t>::calibrate(
     const Acts::CalibrationContext& cctx, const xAOD::PixelCluster& cluster,
     const InDetDD::SiDetectorElement& detElement,
     const std::pair<float, float>& tan_incidence_angles) const {
-
-  if (static_cast<int>(cluster.chargeList().size()) <
-      m_options.m_minClusterSizeForNN) {
-
+    double totalCharge = cluster.totalCharge();
+    if (totalCharge < m_options.m_minClusterChargeForNN || cluster.chargeList().size() <
+      	m_options.m_minClusterSizeForNN) {
     return m_options.m_fallback->calibrate(ctx, gctx, cctx, cluster,
                                              detElement, tan_incidence_angles);
   }
@@ -145,7 +145,7 @@ NNClusterCalibrator<calib_data_t, traj_t>::weightedClusterCenter(
   double sum = 0;
   InDetDD::SiLocalPosition position(0, 0);
   auto idvals = Acts::zip(cluster.rdoList(), cluster.chargeList());
-  for (auto [rdoID, charge] : idvals) {
+  for (const auto & [rdoID, charge] : idvals) {
     const Identifier singlePixelID(rdoID);
     const int x = static_cast<int>(this->pixelID().phi_index(singlePixelID));
     const int y = static_cast<int>(this->pixelID().eta_index(singlePixelID));
@@ -184,7 +184,7 @@ void NNClusterCalibrator<calib_data_t, traj_t>::fillClusterData(
                     yMin + static_cast<int>(NNinput::Index::windowSize));
 
   const InDetDD::PixelModuleDesign* design(
-      dynamic_cast<const InDetDD::PixelModuleDesign*>(&detElement.design()));
+      static_cast<const InDetDD::PixelModuleDesign*>(&detElement.design()));
 
   nn.centerCell = weightedClusterCenter(cluster, design);
   nn.centerPosition = design->localPositionOfCell(nn.centerCell);
@@ -192,7 +192,7 @@ void NNClusterCalibrator<calib_data_t, traj_t>::fillClusterData(
   const int yCenter = nn.centerCell.etaIndex();
 
   auto idvals = Acts::zip(cluster.rdoList(), cluster.chargeList());
-  for (auto [rdoID, charge] : idvals) {
+  for (const auto & [rdoID, charge] : idvals) {
     const Identifier singlePixelID(rdoID);
     const int x = static_cast<int>(this->pixelID().phi_index(singlePixelID));
     const int y = static_cast<int>(this->pixelID().eta_index(singlePixelID));

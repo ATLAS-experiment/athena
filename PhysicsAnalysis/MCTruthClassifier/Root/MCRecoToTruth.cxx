@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef GENERATIONBASE
@@ -8,7 +8,7 @@
 using namespace MCTruthPartClassifier;
 
 std::pair<ParticleType, ParticleOrigin>
-MCTruthClassifier::particleTruthClassifier(const xAOD::TrackParticle* trkPtr, MCTruthPartClassifier::Info* info /*= nullptr*/) const
+MCTruthClassifier::particleTruthClassifier(const xAOD::TrackParticle* trkPtr, IMCTruthClassifier::Info* info /*= nullptr*/) const
 {
   ATH_MSG_DEBUG("Executing trackClassifier");
   ParticleType parttype = Unknown;
@@ -21,7 +21,7 @@ MCTruthClassifier::particleTruthClassifier(const xAOD::TrackParticle* trkPtr, MC
 }
 
 std::pair<ParticleType, ParticleOrigin>
-MCTruthClassifier::particleTruthClassifier(const xAOD::Electron* elec, MCTruthPartClassifier::Info* info /*= nullptr*/) const
+MCTruthClassifier::particleTruthClassifier(const xAOD::Electron* elec, IMCTruthClassifier::Info* info /*= nullptr*/) const
 {
   ATH_MSG_DEBUG("Executing egamma electron Classifier");
   ParticleType parttype = Unknown;
@@ -51,7 +51,7 @@ MCTruthClassifier::particleTruthClassifier(const xAOD::Electron* elec, MCTruthPa
 }
 
 std::pair<ParticleType, ParticleOrigin>
-MCTruthClassifier::particleTruthClassifier(const xAOD::Photon* phot, MCTruthPartClassifier::Info* info /*= nullptr*/) const
+MCTruthClassifier::particleTruthClassifier(const xAOD::Photon* phot, IMCTruthClassifier::Info* info /*= nullptr*/) const
 {
   ATH_MSG_DEBUG("Executing egamma photon Classifier");
   ParticleType parttype = Unknown;
@@ -90,7 +90,7 @@ MCTruthClassifier::particleTruthClassifier(const xAOD::Photon* phot, MCTruthPart
 }
 
 std::pair<ParticleType, ParticleOrigin>
-MCTruthClassifier::particleTruthClassifier(const xAOD::Muon* mu, MCTruthPartClassifier::Info* info /*= nullptr*/) const
+MCTruthClassifier::particleTruthClassifier(const xAOD::Muon* mu, IMCTruthClassifier::Info* info /*= nullptr*/) const
 {
   ATH_MSG_DEBUG("Executing muon  Classifier");
   ParticleType parttype = Unknown;
@@ -107,7 +107,7 @@ MCTruthClassifier::particleTruthClassifier(const xAOD::Muon* mu, MCTruthPartClas
 }
 
 std::pair<ParticleType, ParticleOrigin>
-MCTruthClassifier::particleTruthClassifier(const xAOD::CaloCluster* clus, MCTruthPartClassifier::Info* info /*= nullptr*/) const
+MCTruthClassifier::particleTruthClassifier(const xAOD::CaloCluster* clus, IMCTruthClassifier::Info* info /*= nullptr*/) const
 {
   ATH_MSG_DEBUG("Executing egamma photon Classifier with cluster Input");
   ParticleType parttype = Unknown;
@@ -127,7 +127,7 @@ MCTruthClassifier::particleTruthClassifier(const xAOD::CaloCluster* clus, MCTrut
 }
 
 std::pair<ParticleType, ParticleOrigin>
-MCTruthClassifier::particleTruthClassifier(const xAOD::Jet* jet, bool DR, MCTruthPartClassifier::Info* info /*= nullptr*/) const
+MCTruthClassifier::particleTruthClassifier(const xAOD::Jet* jet, bool DR, IMCTruthClassifier::Info* info /*= nullptr*/) const
 {
   ATH_MSG_DEBUG("Executing Classifier with jet Input");
   ParticleType parttype = UnknownJet;
@@ -138,7 +138,34 @@ MCTruthClassifier::particleTruthClassifier(const xAOD::Jet* jet, bool DR, MCTrut
   if (!jet) return std::make_pair(parttype, partorig);
   allJetMothers.clear();
   constituents.clear();
-  findJetConstituents(jet, constituents, DR);
+  if (DR) {
+    // use a DR matching scheme (default)
+    // retrieve collection and get a pointer
+    SG::ReadHandle<xAOD::TruthParticleContainer> truthParticleContainerReadHandle(m_truthParticleContainerKey);
+
+    if (!truthParticleContainerReadHandle.isValid()) {
+      ATH_MSG_WARNING(" Invalid ReadHandle for xAOD::TruthParticleContainer with key: " << truthParticleContainerReadHandle.key());
+     
+    } else {
+    ATH_MSG_DEBUG("xAODTruthParticleContainer with key  " << truthParticleContainerReadHandle.key() << " has valid ReadHandle ");
+    // find the matching truth particles
+    for (const auto *const thePart : *truthParticleContainerReadHandle) {
+      // match truth particles to the jet
+      if (MC::isStable(thePart) && thePart->p4().DeltaR(jet->p4()) < m_jetPartDRMatch) {
+        constituents.insert(thePart);
+      }
+    }
+   }
+  }
+  else {
+    xAOD::JetConstituentVector vec = jet->getConstituents();
+    for (const auto *particle0 : vec) {
+      const xAOD::TruthParticle* thePart = static_cast<const xAOD::TruthParticle*>(particle0->rawConstituent());
+      if (MC::isStable(thePart)) {
+        constituents.insert(thePart);
+      }
+    }
+  }
   // AV: Jet type is the type of hadron with "heaviest" flavour among the jet constituents.
   // AV: No hadrons in the jet -- the flavour is unknown.
   // AV: The algorithm will fail on 4/5 quark hadrons and probably on nonBSM hadrons. To be fixed.
@@ -174,7 +201,7 @@ MCTruthClassifier::particleTruthClassifier(const xAOD::Jet* jet, bool DR, MCTrut
 }
 
 const xAOD::TruthParticle*
-MCTruthClassifier::getGenPart(const xAOD::TrackParticle* trk, MCTruthPartClassifier::Info* info /*= nullptr*/) const
+MCTruthClassifier::getGenPart(const xAOD::TrackParticle* trk, IMCTruthClassifier::Info* info /*= nullptr*/) const
 {
   // return GenParticle corresponding to given TrackParticle
   ATH_MSG_DEBUG("Executing getGenPart ");
@@ -256,8 +283,8 @@ MCTruthClassifier::getGenPart(const xAOD::TrackParticle* trk, MCTruthPartClassif
 
   uint8_t NumOfSiHits = NumOfSCTHits + NumOfPixHits;
 
-  float deltaPhi = detPhi(theGenParticle->phi(), trk->phi());
-  float deteta = detEta(theGenParticle->eta(), trk->eta());
+  float deltaPhi = std::abs(std::remainder(theGenParticle->phi() - trk->phi(), 2*std::numbers::pi));
+  float deteta = std::abs(theGenParticle->eta() - trk->eta());
   float deltaRMatch = std::hypot(deltaPhi, deteta);
   if ((NumOfSiHits > m_NumOfSiHitsCut && deltaRMatch > m_deltaRMatchCut) ||
       (NumOfSiHits <= m_NumOfSiHitsCut && deltaPhi > m_deltaPhiMatchCut)) theGenParticle = nullptr;
@@ -269,62 +296,6 @@ MCTruthClassifier::getGenPart(const xAOD::TrackParticle* trk, MCTruthPartClassif
   }
   ATH_MSG_DEBUG("getGenPart  succeeded ");
   return (theGenParticle);
-}
-
-void MCTruthClassifier::findJetConstituents(const xAOD::Jet* jet,
-                                       std::set<const xAOD::TruthParticle*>& constituents,
-                                       bool DR) const
-{
-  if (DR) {
-    // use a DR matching scheme (default)
-    // retrieve collection and get a pointer
-    SG::ReadHandle<xAOD::TruthParticleContainer> truthParticleContainerReadHandle(m_truthParticleContainerKey);
-
-    if (!truthParticleContainerReadHandle.isValid()) {
-      ATH_MSG_WARNING(" Invalid ReadHandle for xAOD::TruthParticleContainer with key: " << truthParticleContainerReadHandle.key());
-      return;
-    }
-    ATH_MSG_DEBUG("xAODTruthParticleContainer with key  " << truthParticleContainerReadHandle.key() << " has valid ReadHandle ");
-    // find the matching truth particles
-    for (const auto *const thePart : *truthParticleContainerReadHandle) {
-      // match truth particles to the jet
-      if (MC::isStable(thePart) && thePart->p4().DeltaR(jet->p4()) < m_jetPartDRMatch) {
-        constituents.insert(thePart);
-      }
-    }
-  }
-  else {
-    xAOD::JetConstituentVector vec = jet->getConstituents();
-    for (const auto *particle0 : vec) {
-      const xAOD::TruthParticle* thePart = dynamic_cast<const xAOD::TruthParticle*>(particle0->rawConstituent());
-      if (MC::isStable(thePart)) {
-        constituents.insert(thePart);
-      }
-    }
-  }
-}
-double MCTruthClassifier::fracParticleInJet(const xAOD::TruthParticle* thePart, const xAOD::Jet* jet, bool DR, bool nparts) const
-{
-  std::set<const xAOD::TruthParticle*> constituents;
-  std::set<const xAOD::TruthParticle*> daughters;
-  std::set<const xAOD::TruthParticle*> intersect;
-
-  findJetConstituents(jet, constituents, DR);
-  MC::findParticleStableDescendants(thePart, daughters);
-  if (daughters.empty()) daughters.insert(thePart);
-  // Get the intersection of constituents and daughters
-  std::set_intersection(constituents.begin(),
-                        constituents.end(),
-                        daughters.begin(),
-                        daughters.end(),
-                        std::inserter(intersect, intersect.begin()));
-
-  if (nparts) return 1.0*intersect.size() / daughters.size();
-  double frac = 0;
-  double tot = 0;
-  for (const auto *daughter : daughters) { tot += daughter->pt();}
-  for (const auto *particle : intersect) { frac += particle->pt();}
-  return frac/tot;
 }
 
 #endif

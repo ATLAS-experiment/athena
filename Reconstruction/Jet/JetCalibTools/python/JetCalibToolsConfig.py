@@ -80,6 +80,7 @@ calibcontexts = {
     "AntiKt4EMPFlow_noElectrons":pflowcontexts,
     "AntiKt4EMPFlow_noMuons":pflowcontexts,
     "AntiKt4EMPFlow_noLeptons":pflowcontexts,
+    "AntiKt4EMPFlow_inclMuons":pflowcontexts,
     "AntiKt4EMPFlow_tauSeedEleRM":pflowcontexts,
     "AntiKt4EMPFlowByVertex":pflowcontexts,
     "AntiKt4GPFlow":pflowcontexts,
@@ -98,13 +99,14 @@ calibcontexts = {
     "AntiKt10UFOCSSK_noLeptonsSoftDropBeta100Zcut10":fatjetcontexts,
     # Large-R PFlow Soft Drop CSSK
     "AntiKt10EMPFlowCSSKSoftDropBeta100Zcut10":fatjetcontexts,
+    "AntiKt10UFOCSSK_inclMuonsSoftDropBeta100Zcut10":fatjetcontexts,
     # R-Scan
     "AntiKt2LCTopo":rscanlc2,
     "AntiKt6LCTopo":rscanlc6,
 
 }
 
-hasInSitu = ["AntiKt4LCTopo", "AntiKt4EMTopo", "AntiKt4EMPFlow", "AntiKt4EMPFlow_noElectrons", "AntiKt4EMPFlow_noMuons", "AntiKt4EMPFlow_noLeptons","AntiKt4EMPFlow_tauSeedEleRM","TrigAntiKt4EMTopo"]
+hasInSitu = ["AntiKt4LCTopo", "AntiKt4EMTopo", "AntiKt4EMPFlow", "AntiKt4EMPFlow_noElectrons", "AntiKt4EMPFlow_noMuons", "AntiKt4EMPFlow_noLeptons", "AntiKt4EMPFlow_inclMuons","AntiKt4EMPFlow_tauSeedEleRM","TrigAntiKt4EMTopo"]
 
 # This method extracts the relevant configuration, does some consistency checks,
 # then forwards the configuration to defineJetCalibTool, returning the output.
@@ -169,6 +171,8 @@ def getJetCalibTool(jetdef, context, data_type, calibseq = "", rhoname = "", pvn
             _jetcollection = _jetcollection.replace("_noMuons","")
         if "_noLeptons" in jetcollection :
             _jetcollection = _jetcollection.replace("_noLeptons","")
+        if "_inclMuons" in jetcollection :
+            _jetcollection = _jetcollection.replace("_inclMuons","")
         if "_tauSeedEleRM" in jetcollection :
             _jetcollection = _jetcollection.replace("_tauSeedEleRM","")
 

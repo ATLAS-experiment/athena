@@ -19,6 +19,7 @@
 //////////////////////////////////////////////////////////////////////
 
 #include "TrigConfBase/MsgStream.h"
+#include <CxxUtils/StringUtils.h>
 
 #include "TrigConfStorage/StorageMgr.h"
 #include "TrigConfStorage/DBLoader.h"
@@ -46,7 +47,6 @@
 #include "CoolKernel/IObject.h"
 
 #include "boost/algorithm/string.hpp"
-
 
 #include <iostream>
 #include <fstream>
@@ -233,8 +233,7 @@ JobConfig::parseProgramOptions(int argc, char* argv[]) {
    if( inpar.size()>=1 && inpar[0].find(".db") != string::npos ) {
       // sqlite file
       input = COOL;
-      vector<string> ksv;
-      boost::split(ksv,inpar[0],boost::is_any_of(";"));
+      vector<string> ksv = CxxUtils::tokenize(inpar[0], ';');
       if(ksv.size()==1) { // defaults to CONDBR2
          coolInputConnection = "sqlite://;schema="+ksv[0]+";dbname=CONDBR2";
       } else {
@@ -242,8 +241,7 @@ JobConfig::parseProgramOptions(int argc, char* argv[]) {
       }
    } else if( inpar.size()>=1 && startswith(inpar[0],"COOLONL_TRIGGER") ) {
       input = COOL;
-      vector<string> ksv;
-      boost::split(ksv,inpar[0],boost::is_any_of("/"));
+      vector<string> ksv = CxxUtils::tokenize(inpar[0], '/');
       if(ksv.size()==1) {
          coolInputConnection = ksv[0]+"/CONDBR2";
       } else {
@@ -253,8 +251,7 @@ JobConfig::parseProgramOptions(int argc, char* argv[]) {
    } else if( inpar.size()==2 ) {
       input = DB;
       db = inpar[0];
-      vector<string> ksv;
-      boost::split(ksv,inpar[1],boost::is_any_of(","));
+      vector<string> ksv = CxxUtils::tokenize(inpar[1], ',');
       for(const string& ks: ksv) {
          keys.push_back( static_cast<unsigned int>(std::stoul(ks)) );
       };
@@ -277,8 +274,7 @@ JobConfig::parseProgramOptions(int argc, char* argv[]) {
       if( output & JobConfig::COOL ) {
          string dbname = "CONDBR2";
          string outfile = outBase;
-         vector<string> ksv;
-         boost::split(ksv,outBase,boost::is_any_of(";"));
+         vector<string> ksv = CxxUtils::tokenize(outBase, ';');
          if(ksv.size()==2) { // defaults to CONDBR2
             outfile = ksv[0];
             dbname = ksv[1];

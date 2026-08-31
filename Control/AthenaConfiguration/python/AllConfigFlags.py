@@ -6,7 +6,7 @@ from AthenaConfiguration.AutoConfigFlags import GetFileMD, getInitialTimeStampsF
 from AthenaConfiguration.Enums import BeamType, Format, ProductionStep, BunchStructureSource, Project, LHCPeriod
 from Campaigns.Utils import Campaign
 from PyUtils.moduleExists import moduleExists
-import os
+
 
 def _addFlagsCategory (acf, name, generator, modName = None):
     """Add flags category and return True/False on success/failure"""
@@ -100,9 +100,9 @@ def initConfigFlags():
                                                           else GetFileMD(prevFlags.Input.Files).get("triggerStreamOfFile", ""), help='trigger stream name')
     acf.addFlag('Input.Format', lambda prevFlags : Format.BS if GetFileMD(prevFlags.Input.Files).get("file_type", "BS") == "BS" else Format.POOL, type=Format, help='input format type')
     acf.addFlag('Input.ProcessingTags', lambda prevFlags : GetFileMD(prevFlags.Input.Files).get("processingTags", []), help='list of stream names in this file')
-    acf.addFlag('Input.GeneratorsInfo', lambda prevFlags : getGeneratorsInfo(prevFlags), help='generator version')
+    acf.addFlag('Input.GeneratorsInfo', getGeneratorsInfo, help='generator version')
     acf.addFlag('Input.Keywords', _keywordsFromFlags, type=list, help='evtgen keywords')
-    acf.addFlag('Input.SpecialConfiguration', lambda prevFlags : getSpecialConfigurationMetadata(prevFlags), help='special configuration options read from input file metadata')
+    acf.addFlag('Input.SpecialConfiguration', getSpecialConfigurationMetadata, help='special configuration options read from input file metadata')
 
     def _inputCollections(inputFile):
         rawCollections = [type_key[1] for type_key in GetFileMD(inputFile).get("itemList", [])]
@@ -344,7 +344,8 @@ def initConfigFlags():
 
 #IOVDbSvc Flags:
     if isGaudiEnv():
-        from IOVDbSvc.IOVDbAutoCfgFlags import getLastGlobalTag, getDatabaseInstanceDefault
+        from IOVDbSvc.IOVDbAutoCfgFlags import (getLastGlobalTag, getDatabaseInstanceDefault,
+                                                getCrestServer, getCrestAPI, getCrestConnection)
 
         def __getTrigTag(flags):
             from TriggerJobOpts.TriggerConfigFlags import trigGlobalTag
@@ -359,8 +360,6 @@ def initConfigFlags():
         # Run dependent simulation
         acf.addFlag("IOVDb.RunToTimestampDict", lambda prevFlags: getRunToTimestampDict(), help='runNumber to timestamp map')
 
-        acf.addFlag("IOVDb.DBConnection", lambda prevFlags : "sqlite://;schema=mycool.db;dbname=" + prevFlags.IOVDb.DatabaseInstance, help='default DB connection string')
-        
         def __useCrest(flags):
             if flags.Common.Project is Project.AthGeneration:
                 return False
@@ -369,15 +368,27 @@ def initConfigFlags():
             else:
                 return False
         
-        acf.addFlag("IOVDb.UseCREST", lambda prevFlags : __useCrest(prevFlags), help='Use CREST for conditions access')
-        acf.addFlag("IOVDb.CrestServer", lambda prevFlags : os.environ.get('CREST_SERVER') if prevFlags.IOVDb.UseCREST and os.environ.get('CREST_SERVER') else "https://crest.cern.ch",help="CREST server URL") # FIXME could this be merged with IOVDb.DBConnection?
+        acf.addFlag("IOVDb.UseCREST", __useCrest, help='Use CREST for conditions access')
+        acf.addFlag("IOVDb.CrestServer", lambda prevFlags: getCrestServer(), help="CREST server URL")
+        acf.addFlag("IOVDb.CrestAPI", lambda prevFlags : getCrestAPI(), help="CREST API version")
         
         #For HLT-jobs, the ring-size should be 0 (eg no cleaning at all since there are no IOV-updates during the job)
         acf.addFlag("IOVDb.CleanerRingSize",lambda prevFlags : 0 if prevFlags.Trigger.doHLT else 2*max(1, prevFlags.Concurrency.NumConcurrentEvents), help='size of ring-buffer for conditions cleaner')
         acf.addFlag("IOVDb.SqliteInput","",help="Folders found in this file will be used instead of the production db")
         acf.addFlag("IOVDb.SqliteFolders",(),help="Folders listed here will be taken from the IOVDb.SqliteInput file instead of the production db. If empty, all folders found in the file are used.")
         acf.addFlag("IOVDb.WriteParametersAsMetaData", True, help="Write simulation/digitization parameters directly as in-file metadata (True) or via intermediate sqlite files (False)")
-        
+
+        def _buildDBConn(flags):
+            if flags.IOVDb.UseCREST:
+                return getCrestConnection(flags.IOVDb.CrestServer, flags.IOVDb.CrestAPI)
+            else:
+                # In case of COOL, we have many different connection strings
+                # (like COOLONL_LAR/CONDR2 or COOLOFL_SCT/OFLP200), which are set for each
+                # folder individually. The value here is rather a dummy.
+                return "sqlite://;schema=mycool.db;dbname="+flags.IOVDb.DatabaseInstance
+
+        acf.addFlag("IOVDb.DBConnection", _buildDBConn, help='database connection string')
+
 #PoolSvc Flags:
     acf.addFlag("PoolSvc.MaxFilesOpen", lambda prevFlags : 2 if prevFlags.MP.UseSharedReader else 0, help='maximum number of open files')
     acf.addFlag("PoolSvc.PersSvcPerInputType", False, help='enable separate persistency service for each input type')

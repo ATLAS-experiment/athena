@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
  */
 
 /**
@@ -28,7 +28,7 @@
 #include "TrkParameters/TrackParameters.h"
 #include "TrkTrack/TrackStateOnSurface.h"
 //
-#include <boost/container/flat_set.hpp>
+#include <flat_set>
 #include <boost/container/small_vector.hpp>
 #include <utility>
 
@@ -345,7 +345,6 @@ Trk::GsfExtrapolator::extrapolateImpl(
       break;
     }
 
-    combinedState = nullptr;
     // Initialise the oscillation checker
     previousVolume = currentVolume;
     // As the extrapolation is moving into the next volume, the next volume ->
@@ -706,7 +705,7 @@ Trk::GsfExtrapolator::extrapolateFromLayerToLayer(
   const Trk::Layer* nextLayer =
     currentLayer->nextLayer(currentPosition, currentDirection);
 
-  using LayerSet = boost::container::flat_set<
+  using LayerSet = std::flat_set<
     const Trk::Layer*,
     std::less<const Trk::Layer*>,
     boost::container::small_vector<const Trk::Layer*, 8>>;

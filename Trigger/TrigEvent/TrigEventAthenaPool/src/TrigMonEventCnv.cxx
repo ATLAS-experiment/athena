@@ -37,7 +37,7 @@ TrigMonEvent* TrigMonEventCnv::createTransient(const Token* token)
 {
   (*m_log) << MSG::DEBUG << "TrigMonEventCnv::createTransient " << endmsg;
   
-  static const pool::Guid p1_guid("AECD5837-E8DA-4FF3-8601-44B4C17355ED");
+  static const Guid p1_guid("AECD5837-E8DA-4FF3-8601-44B4C17355ED");
   TrigMonEvent *trans_obj(0);
   
   if( compareClassGuid(token, p1_guid) ) {

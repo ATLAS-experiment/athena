@@ -23,10 +23,6 @@ using namespace Acts::UnitLiterals;
 
 namespace ActsTrk {
 
-    MeasurementToTrackParticleDecorationAlg::MeasurementToTrackParticleDecorationAlg(const std::string &name,
-										     ISvcLocator *pSvcLocator) :
-      AthReentrantAlgorithm(name,pSvcLocator)
-    {}
 
     StatusCode MeasurementToTrackParticleDecorationAlg::initialize()
     {
@@ -56,16 +52,15 @@ namespace ActsTrk {
         ATH_CHECK(m_measurementLocCovYkey.initialize());
         ATH_CHECK(m_trackParameterLocCovYkey.initialize());
 
-	ATH_CHECK(m_trackingGeometryTool.retrieve());
-	
-        return StatusCode::SUCCESS;
+		ATH_CHECK(m_ctxProvider.initialize());
+		return StatusCode::SUCCESS;
     }
 
   StatusCode MeasurementToTrackParticleDecorationAlg::execute(const EventContext& ctx) const
     {
         ATH_MSG_DEBUG("Executing " << name() << " ...");
 
-	auto tgContext = m_trackingGeometryTool->getGeometryContext(ctx).context();
+	auto tgContext = m_ctxProvider.getGeometryContext(ctx);
 
 	SG::WriteDecorHandle<xAOD::TrackParticleContainer, std::vector<int>> measurementRegionHandle(m_measurementRegionKey, ctx);
 	SG::WriteDecorHandle<xAOD::TrackParticleContainer, std::vector<int>> measurementDetectorHandle(m_measurementDetectorKey, ctx);
@@ -149,7 +144,7 @@ namespace ActsTrk {
             std::vector<float>& trackParametersLocCovY{trackParameterLocCovYhandle(*track_particle)};
             trackParametersLocCovY.reserve(track.nMeasurements());
 
-            for (const auto state : track.trackStatesReversed()) {
+            for (const auto & state : track.trackStatesReversed()) {
 
                 auto flag = state.typeFlags();
 		// consider holes and measurements (also outliers)
@@ -286,7 +281,7 @@ namespace ActsTrk {
 		  }
 		  
 		  const auto& [unbiasedParameters, unbiasedCovariance] =
-		    evaluateUnbiased ? Acts::calculateUnbiasedParametersCovariance(state) : std::make_pair(state.parameters(), state.covariance());
+		    evaluateUnbiased ? Acts::calculateUnbiasedParametersCovariance(Acts::AnyConstTrackStateProxy{state}) : std::make_pair(state.parameters(), state.covariance());
 		  
 		  measurementLocX = calibratedParameters[Acts::eBoundLoc0];
 		  measurementLocCovX = calibratedCovariance(Acts::eBoundLoc0, Acts::eBoundLoc0);

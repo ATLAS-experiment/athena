@@ -1,5 +1,3 @@
-///////////////////////// -*- C++ -*- /////////////////////////////
-
 /*
   Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
 */
@@ -13,23 +11,13 @@
 
 /** FilterRange implements the range (ie: [min, max]) the filters will use to
  *  take their filtering decisions.
- *  Internally it uses the Boost class interval but maybe one could use a
- *  SEAL class (FML/RangeSet or FML/Bound)
+ *  Internally it stores just the lower and upper bounds.
  */
 
 // STL includes
 #include <cfloat>
 #include <iostream>
 #include <optional>
-
-// Boost includes
-#include <boost/numeric/interval/interval.hpp>
-#include <boost/numeric/interval/checking.hpp>
-#include <boost/numeric/interval/policies.hpp>
-#include <boost/numeric/interval/compare/certain.hpp>
-
-//>Wait for SEAL 1.4.0 and const-correctness
-//#include "FML/RangeSet.h" 
 
 class FilterRange 
 { 
@@ -138,10 +126,18 @@ class FilterRange
   // Protected data: 
   /////////////////////////////////////////////////////////////////// 
  protected: 
-  
-  typedef boost::numeric::interval<double> interval_t;
+    class interval_t
+    {
+    public:
+      interval_t( double lower, double upper ) : m_lower( lower ), m_upper( upper ) {}
+      double lower() const { return m_lower;}
+      double upper() const { return m_upper; }
+    private:
+      double m_lower{};
+      double m_upper{};
+    };
 
-  /** The boost interval wrapped by a boost optional. 
+    /** The interval wrapped by a std::optional. 
    *  This is to allow the instantiation of uninitialised ranges
    */
   std::optional<interval_t> m_range;

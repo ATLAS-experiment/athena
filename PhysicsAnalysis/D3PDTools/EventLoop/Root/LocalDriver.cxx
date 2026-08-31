@@ -19,7 +19,6 @@
 #include <EventLoop/MessageCheck.h>
 #include <RootCoreUtils/Assert.h>
 #include <RootCoreUtils/ShellExec.h>
-#include <RootCoreUtils/ThrowMsg.h>
 #include <mutex>
 #include <thread>
 
@@ -33,9 +32,7 @@ namespace EL
 {
   void LocalDriver ::
   testInvariant () const
-  {
-    RCU_INVARIANT (this != 0);
-  }
+  {}
 
 
 
@@ -83,7 +80,10 @@ namespace EL
         if (!data.resubmit)
         {
           if (gSystem->MakeDirectory (basedirName.str().c_str()) != 0)
-            RCU_THROW_MSG ("failed to create directory " + basedirName.str());
+          {
+            ANA_MSG_ERROR ("failed to create directory " << basedirName.str());
+            return StatusCode::FAILURE;
+          }
         }
         auto submitSingle = [&] (std::size_t index) noexcept -> StatusCode
         {
@@ -121,6 +121,10 @@ namespace EL
         {
           if (numParallelProcs == 0)
             numParallelProcs = std::thread::hardware_concurrency();
+          // hardware_concurrency() may legally return 0; make sure we still
+          // create at least one worker thread so the job makes progress
+          if (numParallelProcs < 1)
+            numParallelProcs = 1;
           if (numParallelProcs > int (data.batchJobIndices.size()))
             numParallelProcs = data.batchJobIndices.size();
           std::vector<std::thread> threads;

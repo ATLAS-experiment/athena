@@ -267,7 +267,7 @@ TauJetCaloHitsPresel_vars_str = '.'.join(TauJetCaloHitsPresel_vars)
 
 TauJet_vars = []
 TauJet_vars += getTauIDVars('GNTau')
-TauJet_vars += getTauIDVars('GNTauDev1', wps=['Loose', 'Medium', 'LooseVar1', 'MediumVar1', 'LooseVar2', 'MediumVar2'])
+TauJet_vars += getTauIDVars('GNTauDev1', wps=['Loose', 'Medium'])
 TauJet_vars_str = '.'.join(TauJet_vars)
 
 TauTrack_vars = ['pt', 'eta', 'phi', 'flagSet', 'trackLinks', 'd0TJVA', 'd0SigTJVA', 'z0sinthetaTJVA', 'z0sinthetaSigTJVA']
@@ -659,7 +659,7 @@ TriggerHLTListRun3 = [
     ('xAOD::TrigBphysAuxContainer#HLT_NoMuonDiElecPrecisionGSFAux.',        'BS ESD AODFULL AODSLIM AODBLSSLIM', 'Bphys'),
 
     # xAOD muons (msonly (x2: roi+FS), combined (x2: FS+RoI)
-    ('xAOD::MuonContainer#HLT_Muons_RoI',                                       'BS ESD AODFULL AODSLIM', 'Muon', [InViews('EFMuMSReco_RoIViews'), InViews("EFMuMSReco_RoI_newFastViews"), InViews("EFMuMSReco_RoI_mlbktViews")]),
+    ('xAOD::MuonContainer#HLT_Muons_RoI',                                       'BS ESD AODFULL AODSLIM', 'Muon', [InViews('EFMuMSReco_RoIViews')]),
     ('xAOD::MuonAuxContainer#HLT_Muons_RoIAux.',                                'BS ESD AODFULL AODSLIM', 'Muon'),
 
     ('xAOD::MuonContainer#HLT_Muons_FS',                                        'BS ESD AODFULL AODSLIM', 'Muon', [InViews('EFMuMSReco_FSViews')]),
@@ -1275,9 +1275,8 @@ def persistent( transient ):
 
     Uses list defined above. If absent assumes v1
     """
-    if transient in EDMDetailsRun3:
-        if 'persistent' in EDMDetailsRun3[transient]:
-            return EDMDetailsRun3[transient]['persistent']
+    if transient in EDMDetailsRun3 and 'persistent' in EDMDetailsRun3[transient]:
+        return EDMDetailsRun3[transient]['persistent']
     return transient
 
 
@@ -1286,7 +1285,7 @@ def tpMap():
     List
     """
     l = {}
-    for tr in EDMDetailsRun3.keys():
+    for tr in EDMDetailsRun3:
         if "xAOD" in tr:
             continue
         l[tr] = persistent(tr)

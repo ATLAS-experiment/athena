@@ -14,6 +14,7 @@ atlas_subdir( TrigGpuTest )
 find_package(TBB)
 
 atlas_install_scripts( test/test*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
+atlas_install_data( share/*.ref )
 
 atlas_add_executable( trigGpuTest
    src/*.cxx

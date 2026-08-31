@@ -235,13 +235,22 @@ int fitVertex(VKVertex * vk)
       //--- Check whether propagation step must be truncated
       if( forcedExtrapolation || vk->truncatedStep || !insideGoodVolume){
         insideGoodVolume=false;
+        // When the *first* estimate is outside the good volume, no previous extrapolation point exists
+        // use the iteration ref. vtx as the target instead to prevent accessing vec out of bounds
+        Vect3DF prevExtrapPnt; prevExtrapPnt.Set(vk->refIterV);
+        if( it>=2 ) prevExtrapPnt = savedExtrapVertices[it-2];
+        int nTruncPasses=0;
         while( !insideGoodVolume ){      //check extrapolation and limit step if needed
-          newVrtXYZ[0]=(2.*savedExtrapVertices[it-1].X + savedExtrapVertices[it-2].X)/3.; //Use 2/3 of the initial distance
-          newVrtXYZ[1]=(2.*savedExtrapVertices[it-1].Y + savedExtrapVertices[it-2].Y)/3.; //for extrapolation
-          newVrtXYZ[2]=(2.*savedExtrapVertices[it-1].Z + savedExtrapVertices[it-2].Z)/3.;
+          newVrtXYZ[0]=(2.*savedExtrapVertices[it-1].X + prevExtrapPnt.X)/3.; //Use 2/3 of the initial distance
+          newVrtXYZ[1]=(2.*savedExtrapVertices[it-1].Y + prevExtrapPnt.Y)/3.; //for extrapolation
+          newVrtXYZ[2]=(2.*savedExtrapVertices[it-1].Z + prevExtrapPnt.Z)/3.;
           savedExtrapVertices[it-1].Set(newVrtXYZ);
           insideGoodVolume=checkPosition(vk,newVrtXYZ);
-          if(!insideGoodVolume && savedExtrapVertices[it-1].Dist3D(savedExtrapVertices[it-2])<5.) { return -11; }
+          // !(d>=5.) so that a NaN distance also terminates the loop (otherwise identical to d<5 for non-NaN)
+          if(!insideGoodVolume && !(savedExtrapVertices[it-1].Dist3D(prevExtrapPnt)>=5.)) { return -11; }
+          // last-ditch sanity check, to reach double max value by 2/3rds takes ~1750 iterations
+          // so this bound is unreachable for non-pathological cases but prevents any further edge cases of infinite loops
+          if(++nTruncPasses > 1800) { return -11; }
         } }
       //------------------------------
       extrapolationDone=true;

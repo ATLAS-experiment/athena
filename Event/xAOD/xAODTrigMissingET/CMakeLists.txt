@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name.
 atlas_subdir( xAODTrigMissingET )
@@ -22,3 +22,11 @@ atlas_add_dictionary( xAODTrigMissingETDict
    ${_selectionFile}
    LINK_LIBRARIES xAODCore xAODTrigMissingET
    EXTRA_FILES Root/dict/*.cxx )
+
+IF( NOT XAOD_ANALYSIS )
+   atlas_add_sercnv_library( TrigMissingEtEventxAODSerCnv
+      FILES xAODTrigMissingET/TrigMissingETContainer.h xAODTrigMissingET/TrigMissingETAuxContainer.h
+      TYPES_WITH_NAMESPACE xAOD::TrigMissingETContainer xAOD::TrigMissingETAuxContainer
+      CNV_PFX xAOD
+      LINK_LIBRARIES xAODTrigMissingET TrigSerializeCnvSvcLib )
+endif()

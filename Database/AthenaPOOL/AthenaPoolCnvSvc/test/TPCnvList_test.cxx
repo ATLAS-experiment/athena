@@ -124,6 +124,7 @@ void test1()
   TestConverter cnv1;
   {
     std::unique_ptr<X> xptr = tpcnv.createTransient (cnv1, X_p1_poolToken, "key", msg);
+    assert (xptr);
     assert (xptr->m_a == 20);
   }
 
@@ -133,6 +134,7 @@ void test1()
   TestConverter cnv2;
   {
     std::unique_ptr<X> xptr = tpcnv.createTransient (cnv2, X_p2_poolToken, "key", msg);
+    assert (xptr);
     assert (xptr->m_a == 30);
   }
 
@@ -142,6 +144,7 @@ void test1()
   TestConverter cnv0;
   {
     std::unique_ptr<X> xptr = tpcnv.createTransient (cnv0, X_poolToken, "key", msg);
+    assert (xptr);
     assert (xptr->m_a == 10);
   }
 

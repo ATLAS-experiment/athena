@@ -26,7 +26,9 @@ def MuonPrdCacheCfg(flags):
     # Use MuonGeometryFlags to identify which configuration is being used
 
     acc = ComponentAccumulator()
-
+    from MuonConfig.MuonGeometryConfig import MuonIdHelperSvcCfg
+    MuonIdHelperSvc = acc.getPrimaryAndMerge( MuonIdHelperSvcCfg(flags) )
+    
     MuonPRDCacheCreator=CompFactory.MuonPRDCacheCreator
     cacheCreator = MuonPRDCacheCreator(CscStripCacheKey  = (MuonPrdCacheNames.CscStripCache if flags.Detector.GeometryCSC else ""),
                                        MdtCacheKey       = MuonPrdCacheNames.MdtCache,
@@ -37,6 +39,7 @@ def MuonPrdCacheCfg(flags):
                                        MmCacheKey        = (MuonPrdCacheNames.MmCache if flags.Detector.GeometryMM else ""),
                                        TgcCoinCacheStr   = MuonPrdCacheNames.TgcCoinCache,
                                        RpcCoinCacheKey   = MuonPrdCacheNames.RpcCoinCache,
+                                       MuonIdHelperSvc = MuonIdHelperSvc
                                        )
 
     acc.addEventAlgo( cacheCreator, primary=True )
@@ -207,7 +210,6 @@ def TgcRDODecodeCfg(flags, name="MuonTgcRdoToPrdConv", RDOContainer = None,  **k
 
 def StgcRdoToPrepDataToolCfg(flags, name="STGC_PrepDataProviderTool", **kwargs):
     result = ComponentAccumulator()
-    kwargs.setdefault("PrdCacheKey" , MuonPrdCacheNames.sTgcCache if flags.Muon.MuonTrigger else "")
     kwargs.setdefault("UseR4DetMgr", flags.Muon.usePhaseIIGeoSetup)
     if flags.Muon.writexAODPRD or flags.Muon.usePhaseIIGeoSetup:
         kwargs.setdefault("xAODStripKey", "xAODsTgcStrips")
@@ -245,7 +247,6 @@ def StgcRDODecodeCfg(flags, name="MuonStgcRdoToPrdConv", **kwargs):
 
 def MMRdoToPrepDataToolCfg(flags, name="MmRdoToPrepDataTool", **kwargs):
     result = ComponentAccumulator()
-    kwargs.setdefault("PrdCacheKey" , MuonPrdCacheNames.MmCache if flags.Trigger.doHLT  else "")
 
     from MuonConfig.MuonRecToolsConfig import SimpleMMClusterBuilderToolCfg
     kwargs.setdefault("ClusterBuilderTool",result.popToolsAndMerge(SimpleMMClusterBuilderToolCfg(flags)))

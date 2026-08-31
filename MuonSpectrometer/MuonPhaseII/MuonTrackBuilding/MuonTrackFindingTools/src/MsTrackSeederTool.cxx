@@ -19,6 +19,7 @@
 #include "xAODMuonPrepData/UtilFunctions.h"
 #include "MuonSpacePoint/SpacePointHelpers.h"
 #include "FourMomUtils/P4Helpers.h"
+#include "CxxUtils/trapping_fp.h"
 #include "GaudiKernel/PhysicalConstants.h"
 
 namespace {
@@ -33,6 +34,8 @@ namespace {
         return std::abs(PtimesQ1 - PtimesQ2) / denom;
     };
     float reducedChi2(const xAOD::MuonSegment& seg) {
+        // Tell clang to optimize assuming that FP operations may trap.
+        CXXUTILS_TRAPPING_FP;
         return seg.chiSquared() / std::max(1.f, seg.numberDoF());
     }
     std::string print(const xAOD::MuonSegment& seg) {
@@ -53,9 +56,9 @@ namespace MuonR4{
     using SearchTree_t = MsTrackSeederTool::SearchTree_t;
 
     StatusCode MsTrackSeederTool::initialize() {
+        ATH_CHECK(m_ctxProvider.initialize());
         ATH_CHECK(m_segSelector.retrieve());
-        ATH_CHECK(m_trackingGeometryTool.retrieve());
-        ATH_CHECK(m_extrapolationTool.retrieve());
+        ATH_CHECK(m_trackingGeometrySvc.retrieve());
         ATH_CHECK(m_segmentKey.initialize(!m_segmentKey.empty()));
         ATH_CHECK(detStore()->retrieve(m_detMgr));
 
@@ -74,12 +77,13 @@ namespace MuonR4{
     Acts::Result<Acts::BoundTrackParameters> 
         MsTrackSeederTool::estimateStartParameters(const EventContext& ctx,
                                                    const MsTrackSeed& seed) const {
-            const Acts::GeometryContext tgContext = m_trackingGeometryTool->getGeometryContext(ctx).context();
-            const Acts::MagneticFieldContext mfContext = m_extrapolationTool->getMagneticFieldContext(ctx);
+            const Acts::GeometryContext tgContext = m_ctxProvider.getGeometryContext(ctx);
+            const Acts::MagneticFieldContext mfContext = m_ctxProvider.getMagneticFieldContext(ctx);
             MagField::AtlasFieldCache magField{};
             mfContext.get<const AtlasFieldCacheCondObj*>()->getInitializedCache(magField);
 
             const xAOD::MuonSegment* refSeg{nullptr};
+            Acts::BoundMatrix cov{Acts::BoundMatrix::Zero()};
             for (const xAOD::MuonSegment* segment : seed.segments()) {    
                 /** Ususally we would like to take the first segment with a sufficient amount of phi hits 
                  *  to set the initial position and direction of the track fit. However in some cases,
@@ -87,12 +91,19 @@ namespace MuonR4{
                  *  all BW and OW hits in the first iteration. Therefore if the first segment is a NSW segment, we first try 
                  *  to use a non-NSW segments with enough phi hits. If we don't find any segment with enough phi hits 
                  *  we will use the NSW segment as reference as long as it passes the seeding quality criteria.  */
-                if (!isNswSegment(*segment) &&  
+                if (!refSeg && !isNswSegment(*segment) &&  
                     m_segSelector->passSeedingQuality(ctx, *segment)) {
                     refSeg = segment;
                     ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<" - Set reference segment to "<<::print(*segment));
-                    break;
                 }
+                Acts::BoundTrackParameters boundPars = SegmentFit::boundSegmentPars(tgContext, *m_detMgr, *segment);
+                if (!boundPars.covariance()) {
+                    continue;
+                }
+                for (int i =0 ; i < cov.cols(); ++i) {
+                    cov(i,i) += (*boundPars.covariance())(i,i);
+                }
+
             }
             //if we did not find a reference segment let's try the NSW one before we give up on the track
             if(!refSeg){
@@ -123,15 +134,12 @@ namespace MuonR4{
             const Acts::GeometryIdentifier volId = volumeId(firstSurf);
       
             // Find the first measurement
-            const Acts::TrackingVolume* volume{m_trackingGeometryTool->trackingGeometry()->findVolume(volId)};
+            const Acts::TrackingVolume* volume{MuonGMR4::highestAlignable(m_trackingGeometrySvc->trackingGeometry()->findVolume(volId))};
                        
             if (!volume) {
                 ATH_MSG_WARNING(__func__<<"() "<<__LINE__
                                 <<" - Failed to find tracking volume for seed measurement "<<volId);
                 return Acts::Result<Acts::BoundTrackParameters>::failure(std::make_error_code(std::errc::invalid_argument));
-            }
-            if (volume->motherVolume() && volume->motherVolume()->isAlignable()) {
-                volume = volume->motherVolume();
             }
             ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__
                             <<" - Bounding volume "<<volume->volumeName()
@@ -151,7 +159,15 @@ namespace MuonR4{
                                     <<", bounds: "<<volume->volumeBounds()<<", "
                                     <<SegmentFit::localSegmentPars(*frontSegment));
                 }
-
+                /** Update the local seed direction */
+                {
+                    const Amg::Transform3D& toLoc{volume->globalToLocalTransform(tgContext)};
+                    const Amg::Vector3D locSeedDir = toLoc.linear() * seedDir;
+                    const Amg::Vector3D frontSeedDir = toLoc.linear() * frontSegment->direction();
+                    seedDir = volume->localToGlobalTransform(tgContext).linear() *
+                              Acts::makeDirectionFromAxisTangents(houghTanAlpha(locSeedDir), 
+                                                                  houghTanBeta(frontSeedDir));
+                }
                 /** Extrapolate the seed segment onto the inner plane. We want to take the precision 
                     intercept from the inner segment and the non-precision intercept from the extrapolated
                     segment */
@@ -235,12 +251,13 @@ namespace MuonR4{
                 ATH_MSG_WARNING(__func__<<"() "<<__LINE__<<" Cannot create valid start parameters from seed "<<seed<<".");
                 return Acts::Result<Acts::BoundTrackParameters>::failure(std::make_error_code(std::errc::invalid_argument));
             }
-            /* Calcul*/
+            /** Calculate the initial q / p estimator */
             auto fourPos = ActsTrk::convertPosToActs(*pIsect, (*pIsect).mag() / Gaudi::Units::c_light);
             const double qOverP = 1./ ActsTrk::energyToActs(estimateQtimesP(tgContext, seed, magField));
+
+            cov (Acts::eBoundQOverP, Acts::eBoundQOverP) = Acts::square(0.8 * qOverP);
             return Acts::BoundTrackParameters::create(tgContext, targetSurf, 
-                                                      fourPos, seedDir, qOverP,
-                                                      Acts::BoundMatrix::Identity(), 
+                                                      fourPos, seedDir, qOverP, cov, 
                                                       Acts::ParticleHypothesis::muon());
     }
     Amg::Vector3D MsTrackSeederTool::segPosOntoPhiPlane(const Acts::GeometryContext& tgContext,
@@ -257,7 +274,7 @@ namespace MuonR4{
                 wireDir = xAOD::muonSurface(measPtr).localToGlobalTransform(tgContext).linear().col(Amg::z);
                 break;
             } else if (xAOD::isNSW(measPtr->type())) {
-                wireDir =  m_trackingGeometryTool->trackingGeometry()->findVolume(volumeId(xAOD::muonSurface(measPtr)))->
+                wireDir =  m_trackingGeometrySvc->trackingGeometry()->findVolume(volumeId(xAOD::muonSurface(measPtr)))->
                                                   localToGlobalTransform(tgContext).linear().col(Amg::x);
                 break;
             }
@@ -320,7 +337,7 @@ namespace MuonR4{
     double MsTrackSeederTool::estimateQtimesP(const EventContext& ctx,
                                               const Amg::Vector3D& planeNorm,
                                               std::span<const PosMomPair_t> circlePoints) const {
-        const Acts::MagneticFieldContext mfContext = m_extrapolationTool->getMagneticFieldContext(ctx);
+        const Acts::MagneticFieldContext mfContext = m_ctxProvider.getMagneticFieldContext(ctx);
         MagField::AtlasFieldCache magField{};
         mfContext.get<const AtlasFieldCacheCondObj*>()->getInitializedCache(magField);
         if (circlePoints.size() < 2 || circlePoints.size() > 3){
@@ -378,7 +395,7 @@ namespace MuonR4{
         }
         if (msgLvl(MSG::VERBOSE)) {
             std::vector<std::string> names {"Pair01", "Pair12", "Pair02Seg", "Pair02Pos"};
-            for (const auto& [i, est] : Acts::enumerate(estimates)) {
+            for (const auto [i, est] : Acts::enumerate(estimates)) {
                 ATH_MSG_VERBOSE(__func__<<"() Estimate "<<names[i]<<": PtimesQ: "<<est.PtimesQ*1e-3
                     <<", weight: "<<est.weight<<", score: "<<est.score);
             }
@@ -576,7 +593,7 @@ namespace MuonR4{
         
         const xAOD::MuonSegmentContainer* segments{nullptr};
         ATH_CHECK(SG::get(segments, m_segmentKey , ctx));
-        const Acts::GeometryContext tgContext = m_trackingGeometryTool->getGeometryContext(ctx).context();
+        const Acts::GeometryContext tgContext = m_ctxProvider.getGeometryContext(ctx);
         SearchTree_t orderedSegs{constructTree(tgContext, *segments)};
         MsTrackSeedContainer trackSeeds{};
         using enum SeedCoords;

@@ -251,6 +251,9 @@ def createSimConfigFlags():
     scf.addFlag("Sim.FastChain.PUWeights_lar_bapre", [1.0]) # LAr Barrel presampler
     scf.addFlag("Sim.FastChain.PUWeights_tile", [1.0]) # Tile
 
+    # ActsFatrasG4
+    scf.addFlag("Sim.ActsFatrasG4.DebugInjectParticle", False) 
+       
     # Fatras
     scf.addFlag("Sim.Fatras.RandomStreamName", "FatrasRnd")
     scf.addFlag("Sim.Fatras.G4RandomStreamName", "FatrasG4")

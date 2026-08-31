@@ -234,6 +234,21 @@ def addMCSignatures(chains):
 
         # HL-LHC TDR inspired chains
         ChainProp(name='HLT_2g20_tight_icaloloose_L12eEM10L', groups=PrimaryPhIGroup+MultiPhotonGroup),
+
+        # noringer single photon chains for comparison (ATR-31489)
+        ChainProp(name='HLT_g100_loose_noringer_L1eEM26M', groups=PrimaryPhIGroup+SinglePhotonGroup),
+        ChainProp(name='HLT_g120_loose_noringer_L1eEM26M', groups=PrimaryPhIGroup+SinglePhotonGroup),
+        ChainProp(name='HLT_g140_loose_noringer_L1eEM26M', groups=PrimaryPhIGroup+SinglePhotonGroup),
+        ChainProp(name='HLT_g160_loose_noringer_L1eEM26M', groups=PrimaryPhIGroup+SinglePhotonGroup),
+        ChainProp(name='HLT_g180_loose_noringer_L1eEM26M', groups=PrimaryPhIGroup+SinglePhotonGroup),
+        # noringer diphoton chains for comparison
+        ChainProp(name='HLT_2g20_tight_icaloloose_noringer_L12eEM18M', groups=PrimaryPhIGroup+MultiPhotonGroup),
+        ChainProp(name='HLT_2g22_tight_noringer_L12eEM18M', groups=PrimaryPhIGroup+MultiPhotonGroup),
+        ChainProp(name='HLT_g35_medium_noringer_g25_medium_noringer_L12eEM24L', l1SeedThresholds=['eEM24L','eEM24L'], groups=PrimaryPhIGroup+MultiPhotonGroup),
+        ChainProp(name='HLT_g45_medium_noringer_g20_medium_noringer_L1eEM40L_2eEM18L', l1SeedThresholds=['eEM40L', 'eEM18L'], groups=PrimaryPhIGroup+MultiPhotonGroup),
+        ChainProp(name='HLT_2g50_loose_noringer_L12eEM24L', groups=PrimaryPhIGroup+MultiPhotonGroup),
+        ChainProp(name='HLT_2g25_loose_noringer_g15_loose_noringer_L12eEM24L', l1SeedThresholds=['eEM24L','eEM12L'], groups=PrimaryPhIGroup+MultiPhotonGroup),
+        ChainProp(name='HLT_2g25_medium_noringer_L12eEM24L', l1SeedThresholds=['eEM24L'], groups=PrimaryPhIGroup+MultiPhotonGroup),
     ]
 
     chainsMC['Tau'] = [

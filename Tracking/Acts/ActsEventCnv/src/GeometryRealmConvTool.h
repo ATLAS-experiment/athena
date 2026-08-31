@@ -8,8 +8,9 @@
 #include "AthenaBaseComps/AthAlgTool.h"
 
 #include "ActsGeometryInterfaces/IGeometryRealmConvTool.h"
-#include "ActsGeometryInterfaces/ITrackingGeometryTool.h"
+#include "ActsGeometryInterfaces/ITrackingGeometrySvc.h"
 
+#include "ActsEvent/ContextUtility.h"
 #include "MuonReadoutGeometry/MuonDetectorManager.h"
 #include "StoreGate/ReadCondHandleKey.h"
 
@@ -57,9 +58,11 @@ namespace ActsTrk{
             SurfacePtr_t translateFreeSurface(const EventContext& ctx,
                                               const Acts::Surface& surface) const;
            
-            PublicToolHandle<ITrackingGeometryTool> m_trackingGeometryTool{this, "TrackingGeometryTool", ""};
+           ServiceHandle<ActsTrk::ITrackingGeometrySvc> m_trackingGeometrySvc{this, "TrackingGeometrySvc", "ActsTrackingGeometrySvc"};
 
-            std::shared_ptr<const Acts::TrackingGeometry> m_trackingGeometry{};
+            /** @brief Context provider for geometry, magnetic field and calibration contexts */
+            ActsTrk::ContextUtility m_ctxProvider{this};
+
             std::unordered_map<Identifier, std::shared_ptr<const Acts::Surface>> m_actsSurfaceMap{};
 
             Gaudi::Property<bool> m_extractMuonSurfaces{this, "ExtractMuonSurfaces", false,

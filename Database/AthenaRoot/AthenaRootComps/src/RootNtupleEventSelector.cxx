@@ -17,6 +17,7 @@
 #include <unordered_map>
 #include <unordered_set>
 
+#include "CxxUtils/StringUtils.h"
 // ROOT includes
 #include "TROOT.h"
 #include "RootUtils/TBranchElementClang.h"
@@ -64,7 +65,7 @@ CLASS_DEF( TObject,    74939790 , 1 )
 #include "RootBranchAddress.h"
 #include "RootGlobalsRestore.h"
 
-#include "boost/tokenizer.hpp"
+#include "CxxUtils/StringUtils.h"
 
 namespace {
   std::string
@@ -289,10 +290,7 @@ StatusCode RootNtupleEventSelector::initialize()
     return StatusCode::FAILURE;
   }
 
-  typedef boost::tokenizer<boost::char_separator<char> > tokenizer;
-  boost::char_separator<char> sep (" ;");
-  tokenizer tokens (m_tupleName.value(), sep);
-  m_tupleNames.assign (tokens.begin(), tokens.end());
+  m_tupleNames = CxxUtils::tokenize (m_tupleName.value(), " ;");
 
   if ( m_tupleNames.empty() ) {
     ATH_MSG_ERROR

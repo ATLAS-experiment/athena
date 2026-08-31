@@ -211,7 +211,7 @@ StatusCode egammaForwardBuilder::execute(const EventContext& ctx) const
 	m_MVACalibSvc->execute(*newCluster, xAOD::EgammaParameters::forwardelectron, gei).isFailure())
       { ATH_MSG_ERROR("Problem executing MVA cluster tool for fwd electron"); }
 
-    caloClusterLinks(*newCluster) = constituentLinks;
+    caloClusterLinks(*newCluster) = std::move(constituentLinks);
     outClusterContainer->push_back(std::move(newCluster));
 
     size_t index = outClusterContainer->size() - 1;
@@ -286,8 +286,8 @@ StatusCode egammaForwardBuilder::execute(const EventContext& ctx) const
     
     // Apply the Forward Electron selectors.
     for (size_t i = 0; i < m_forwardElectronIsEMSelectors.size(); ++i) {
-      const auto selector = m_forwardElectronIsEMSelectors[i];
-      const auto name = m_forwardElectronIsEMSelectorResultNames[i];
+      const auto & selector = m_forwardElectronIsEMSelectors[i];
+      const auto & name = m_forwardElectronIsEMSelectorResultNames[i];
 
       // Save the bool result.
       const asg::AcceptData accept = selector->accept(ctx, el);
@@ -302,8 +302,8 @@ StatusCode egammaForwardBuilder::execute(const EventContext& ctx) const
     if (m_fwdDNN) {	
       // Apply the Forward Electron selectors.
       for (size_t i = 0; i < m_forwardElectronNNSelectors.size(); ++i) {
-	const auto selector = m_forwardElectronNNSelectors[i];
-	const auto name = m_forwardElectronNNSelectorResultNames[i];
+	const auto & selector = m_forwardElectronNNSelectors[i];
+	const auto & name = m_forwardElectronNNSelectorResultNames[i];
 	
 	
 	// Save the bool result.
@@ -311,7 +311,7 @@ StatusCode egammaForwardBuilder::execute(const EventContext& ctx) const
 	el->setPassSelection(static_cast<bool>(accept), "DNN"+name);
       }
       std::string LikeliHoodName = "DNN_Score";
-      const auto selector = m_forwardElectronNNSelectors[0];
+      const auto & selector = m_forwardElectronNNSelectors[0];
       float val=selector->calculate(ctx,el);
       el->setLikelihoodValue(val,LikeliHoodName);
     }

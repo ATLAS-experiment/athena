@@ -6,34 +6,43 @@
 #ifndef ATLASHEPMC_ATTRIBUTENAMES_H
 #define ATLASHEPMC_ATTRIBUTENAMES_H
 #include <string>
+
+// Declare the attribute variables.
+// ATLASHEPMC_ATTRIBNAME can be defined before including this file
+// to make the definitions.
+#ifndef ATLASHEPMC_ATTRIBNAME
+# define ATLASHEPMC_ATTRIBNAME(N) extern const std::string N
+#endif
 namespace HepMCStr {
- inline const std::string BunchCrossingTime{"BunchCrossingTime"};
- inline const std::string LHERecord{"LHERecord"};
- inline const std::string PileUpType{"PileUpType"};
- inline const std::string ShadowParticle{"ShadowParticle"};
- inline const std::string ShadowParticleId{"ShadowParticleId"};
- inline const std::string alphaQCD{"alphaQCD"};
- inline const std::string alphaQED{"alphaQED"};
- inline const std::string barcode{"barcode"};
- inline const std::string barcodes{"barcodes"};
- inline const std::string cycles{"cycles"};
- inline const std::string event_scale{"event_scale"};
- inline const std::string filterHT{"filterHT"};
- inline const std::string filterMET{"filterMET"};
- inline const std::string filterWeight{"filterWeight"};
- inline const std::string flow{"flow"};
- inline const std::string flow1{"flow1"};
- inline const std::string flow2{"flow2"};
- inline const std::string flow3{"flow3"};
- inline const std::string flows{"flows"};
- inline const std::string long_long_event_number{"long_long_event_number"};
- inline const std::string mpi{"mpi"};
- inline const std::string phi{"phi"};
- inline const std::string random_states{"random_states"};
- inline const std::string signal_process_id{"signal_process_id"};
- inline const std::string signal_process_vertex{"signal_process_vertex"};
- inline const std::string signal_vertex_id{"signal_vertex_id"};
- inline const std::string theta{"theta"};
- inline const std::string weights{"weights"};
+ATLASHEPMC_ATTRIBNAME(BunchCrossingTime);      // Bunch crossing time offset.
+ATLASHEPMC_ATTRIBNAME(LHERecord);              // Original Les Houches Event record.
+ATLASHEPMC_ATTRIBNAME(PileUpType);             // ATLAS pile-up type classification.
+ATLASHEPMC_ATTRIBNAME(ShadowParticle);         // Marks a shadow particle.
+ATLASHEPMC_ATTRIBNAME(ShadowParticleId);       // Original particle identifier for a shadow particle.
+ATLASHEPMC_ATTRIBNAME(alphaQCD);               // Strong coupling constant.
+ATLASHEPMC_ATTRIBNAME(alphaQED);               // Electromagnetic coupling constant.
+ATLASHEPMC_ATTRIBNAME(barcode);                // Particle or vertex barcode.
+ATLASHEPMC_ATTRIBNAME(barcodes);               // Collection of barcodes.
+ATLASHEPMC_ATTRIBNAME(cycles);                 // Generator-specific cycle information. Set to 1 if the cycles(loops) are present.
+ATLASHEPMC_ATTRIBNAME(event_scale);            // Event hard-process scale.
+ATLASHEPMC_ATTRIBNAME(filterHT);               // Generator-level HT used for filtering. Typically from POWHEG.
+ATLASHEPMC_ATTRIBNAME(filterMET);              // Generator-level missing transverse energy used for filtering.  Typically from POWHEG.
+ATLASHEPMC_ATTRIBNAME(filterWeight);           // Event filter weight.
+ATLASHEPMC_ATTRIBNAME(flow);                   // Particle flow information.
+ATLASHEPMC_ATTRIBNAME(flow1);                  // First flow index.
+ATLASHEPMC_ATTRIBNAME(flow2);                  // Second flow index.
+ATLASHEPMC_ATTRIBNAME(flow3);                  // Third flow index.
+ATLASHEPMC_ATTRIBNAME(flows);                  // Collection of flow indices.
+ATLASHEPMC_ATTRIBNAME(long_long_event_number); // 64-bit event number.
+ATLASHEPMC_ATTRIBNAME(mpi);                    // Number of multiple parton interactions.
+ATLASHEPMC_ATTRIBNAME(phi);                    // Azimuthal angle for particle polarization.
+ATLASHEPMC_ATTRIBNAME(random_states);          // Random number generator states.
+ATLASHEPMC_ATTRIBNAME(signal_process_id);      // Signal process identifier.
+ATLASHEPMC_ATTRIBNAME(signal_process_vertex);  // Signal process vertex.
+ATLASHEPMC_ATTRIBNAME(signal_vertex_id);       // Signal vertex identifier.
+ATLASHEPMC_ATTRIBNAME(theta);                  // Polar angle for particle polarization.
+ATLASHEPMC_ATTRIBNAME(weights);                // Event weights.
 }
+
+#undef ATLASHEPMC_ATTRIBNAME
 #endif

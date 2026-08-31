@@ -174,16 +174,9 @@ StatusCode AthOnnx::OnnxRuntimeInferenceTool::inference(AthInfer::InputDataMap& 
     std::vector<Ort::Value> inputTensors;
     for (auto& [inputName, inputInfo] : inputData) {
         const std::vector<int64_t>& shape = inputInfo.first;
-        if (std::holds_alternative<std::vector<float>>(inputInfo.second)) {
-            auto& data = std::get<std::vector<float>>(inputInfo.second);
-            inputTensors.push_back(AthOnnxUtils::createTensor(data, shape));
-        } else if (std::holds_alternative<std::vector<int64_t>>(inputInfo.second)) {
-            auto& data = std::get<std::vector<int64_t>>(inputInfo.second);
-            inputTensors.push_back(AthOnnxUtils::createTensor(data, shape));
-        } else {
-            ATH_MSG_ERROR("Unsupported data type");
-            return StatusCode::FAILURE;
-        }
+        std::visit([&](auto& data){
+            inputTensors.emplace_back(AthOnnxUtils::createTensor(data, shape));
+        }, inputInfo.second);
     }
 
     // Create output tensors.
@@ -198,18 +191,11 @@ StatusCode AthOnnx::OnnxRuntimeInferenceTool::inference(AthInfer::InputDataMap& 
         auto& shape = outputInfo.first;
         auto tensorSize = std::accumulate(shape.begin(), shape.end(), 1, std::multiplies<int64_t>());
 
-        if (std::holds_alternative<std::vector<float>>(outputInfo.second)) {
-            auto& data = std::get<std::vector<float>>(outputInfo.second);
+        std::visit([&](auto& data) {
             data.resize(tensorSize);
             outputTensors.push_back(AthOnnxUtils::createTensor(data, shape));
-        } else if (std::holds_alternative<std::vector<int64_t>>(outputInfo.second)) {
-            auto& data = std::get<std::vector<int64_t>>(outputInfo.second);
-            data.resize(tensorSize);
-            outputTensors.push_back(AthOnnxUtils::createTensor(data, shape));
-        } else {
-            ATH_MSG_ERROR("Unsupported data type");
-            return StatusCode::FAILURE;
-        }
+        }, outputInfo.second);
+
     }
 
     ATH_CHECK(inference(inputTensors, outputTensors));

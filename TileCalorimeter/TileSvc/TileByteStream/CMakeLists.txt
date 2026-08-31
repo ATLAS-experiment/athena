@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( TileByteStream )
@@ -62,7 +62,7 @@ atlas_add_test( TileMuRcvContByteStreamRead_test
 atlas_add_test( TileRawChannel2Bytes5_test
                 SOURCES test/TileRawChannel2Bytes5_test.cxx
                 LINK_LIBRARIES TileByteStreamLib 
-                POST_EXEC_SCRIPT nopost.sh)
+                POST_EXEC_SCRIPT noerror.sh)
                 
 atlas_add_test( TileRawChannel2Bytes4_test
                 SOURCES test/TileRawChannel2Bytes4_test.cxx

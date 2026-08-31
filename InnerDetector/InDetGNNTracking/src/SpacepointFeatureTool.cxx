@@ -75,7 +75,7 @@ std::map<std::string, float> InDet::SpacepointFeatureTool::getFeatures(
     int region = 0; 
 
     if (!isStrip) {
-      const InDet::PixelCluster* cluster = dynamic_cast<const InDet::PixelCluster*>(cluster_1);
+      const InDet::PixelCluster* cluster = static_cast<const InDet::PixelCluster*>(cluster_1);
       const InDetDD::SiDetectorElement *element = cluster->detectorElement();
       int barrel_endcap = m_pixelID->barrel_ec(cluster->identify());
       switch (barrel_endcap) {

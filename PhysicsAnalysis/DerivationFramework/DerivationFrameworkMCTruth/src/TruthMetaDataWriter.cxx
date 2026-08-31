@@ -82,6 +82,8 @@ StatusCode DerivationFramework::TruthMetaDataWriter::addBranches(const EventCont
         md->setGenerators( m_tagInfoMgr->findTag("generators") );
         md->setEvgenProcess( m_tagInfoMgr->findTag("evgenProcess") );
         md->setEvgenTune( m_tagInfoMgr->findTag("evgenTune") );
+        md->setHadronizationModel( m_tagInfoMgr->findTag("hadronizationModel") );
+        md->setPartonShowerModel( m_tagInfoMgr->findTag("partonShowerModel") );
         md->setHardPDF( m_tagInfoMgr->findTag("hardPDF") );
         md->setSoftPDF( m_tagInfoMgr->findTag("softPDF") );
         // Done getting things from the TagInfo

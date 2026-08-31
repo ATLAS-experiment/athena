@@ -29,6 +29,7 @@ private:
    SG::ReadHandleKey<xAOD::TrackParticleContainer> m_FTFTracksKey{this, "FTFTracks", "HLT_IDTrack_Muon_FTF", ""};
 
    Gaudi::Property<bool> m_mapToPrevDec{ this, "MapToPreviousDecisions", false, "Map to decisions from previous decisions (needed if IM has mergeUsingFeature=True)"};
+   BooleanProperty m_isPhIIMuon { this, "IsPhIIMuon", false, "Whether it's phase-2 muoon software" };
 };
 
 #endif

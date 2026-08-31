@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -9,6 +9,9 @@
 #include "TrkGeometry/BinnedLayerMaterial.h"
 
 #include "TrkGeometry/MaterialProperties.h"
+
+#include "GaudiKernel/MsgStream.h"
+
 
 Trk::BinnedLayerMaterial::BinnedLayerMaterial()
     : Trk::LayerMaterialProperties(), m_binUtility(nullptr) {}
@@ -25,7 +28,7 @@ Trk::BinnedLayerMaterial::BinnedLayerMaterial(Trk::BinUtility& binutility)
     for (unsigned int ibin = 0; ibin < (unsigned int)binutility.max(0) + 1;
          ++ibin)
       matVec.push_back(nullptr);
-    m_fullMaterial.push_back(matVec);
+    m_fullMaterial.push_back(std::move(matVec));
   }
 }
 
@@ -71,8 +74,23 @@ Trk::BinnedLayerMaterial& Trk::BinnedLayerMaterial::operator=(
     // reassign
     m_binUtility = lmp.binUtility()->clone();
     clearMaterial();
-    // reassign teh material
+    // reassign the material
     fillMaterial(lmp.m_fullMaterial);
+  }
+  return (*this);
+}
+
+Trk::BinnedLayerMaterial& 
+Trk::BinnedLayerMaterial::operator=(Trk::BinnedLayerMaterial&& lmp) noexcept{
+  if (this != &lmp) {
+    
+    // first delete everything
+    delete m_binUtility;
+    clearMaterial();
+    m_binUtility = std::exchange(lmp.m_binUtility, nullptr);
+    // reassign the material
+    m_fullMaterial = std::move(lmp.m_fullMaterial);
+    Trk::LayerMaterialProperties::operator=(std::move(lmp));
   }
   return (*this);
 }
@@ -100,7 +118,7 @@ void Trk::BinnedLayerMaterial::fillMaterial(
     // reassign
     for (const auto& matIter : matMatrixIter)
       matVector.push_back(matIter ? matIter->clone() : nullptr);
-    m_fullMaterial.push_back(matVector);
+    m_fullMaterial.push_back(std::move(matVector));
   }
 }
 

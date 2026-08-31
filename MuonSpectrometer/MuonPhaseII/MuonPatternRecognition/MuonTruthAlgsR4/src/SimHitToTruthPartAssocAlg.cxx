@@ -7,10 +7,12 @@
 #include "StoreGate/WriteDecorHandle.h"
 #include "StoreGate/ReadHandle.h"
 
+#include "xAODMuonViews/ContainerDecorator.h"
+
 namespace {
     using SimHitVec_t = std::vector<const xAOD::MuonSimHit*>;
     using MCPartSimMap_t = std::unordered_map<HepMC::ConstGenParticlePtr, SimHitVec_t>;
-    using IdDecorHandle_t = SG::WriteDecorHandle<xAOD::TruthParticleContainer, std::vector<unsigned long long>>;
+    using IdDecorHandle_t = xAOD::ContainerDecorator<xAOD::TruthParticleContainer, std::vector<unsigned long long>>;
 }
 
 namespace MuonR4{

@@ -25,8 +25,7 @@ namespace ActsTrk {
 StatusCode GlobalChiSquareFitterTool::initialize() {
 
   ATH_MSG_DEBUG(name() << "::" << __FUNCTION__);
-  ATH_CHECK(m_trackingGeometryTool.retrieve());
-  ATH_CHECK(m_extrapolationTool.retrieve());
+  ATH_CHECK(m_trackingGeometrySvc.retrieve());
   ATH_CHECK(m_ROTcreator.retrieve(EnableTool{!m_ROTcreator.empty()}));
   ATH_CHECK(m_geometryConvTool.retrieve());
   ATH_CHECK(m_muonCalibrator.retrieve(EnableTool{!m_muonCalibrator.empty()}));
@@ -35,7 +34,7 @@ StatusCode GlobalChiSquareFitterTool::initialize() {
   if (!m_doStraightLine){
       // Fitter
       CurvedPropagator_t::Stepper stepper{std::make_shared<ATLASMagneticFieldWrapper>()};
-      Acts::Navigator::Config navConfig{m_trackingGeometryTool->trackingGeometry()};
+      Acts::Navigator::Config navConfig{m_trackingGeometrySvc->trackingGeometry()};
       Acts::Navigator navigator(std::move(navConfig), logger().cloneWithSuffix("Navigator"));
       CurvedPropagator_t propagator{stepper, std::move(navigator), logger().cloneWithSuffix("Prop")};
 
@@ -43,7 +42,7 @@ StatusCode GlobalChiSquareFitterTool::initialize() {
                                                   logger().cloneWithSuffix("GlobalChiSquareFitter"));
   } else {
       Acts::StraightLineStepper stepper{};
-      Acts::Navigator::Config navConfig{m_trackingGeometryTool->trackingGeometry()};
+      Acts::Navigator::Config navConfig{m_trackingGeometrySvc->trackingGeometry()};
       Acts::Navigator navigator(std::move(navConfig), logger().cloneWithSuffix("Navigator"));
       StraightPropagator_t propagator{stepper, std::move(navigator), logger().cloneWithSuffix("Prop")};
 
@@ -57,8 +56,7 @@ StatusCode GlobalChiSquareFitterTool::initialize() {
   Gx2FitterExtension_t extensionTemplate{};
   extensionTemplate.outlierFinder.connect<&detail::FitterHelperFunctions::ATLASOutlierFinder::operator()
                                             <MutableTrackStateBackend>>(&m_outlierFinder);
-  extensionTemplate.updater.connect<&detail::FitterHelperFunctions::gainMatrixUpdate<MutableTrackStateBackend>>();
-
+ 
   /// Configure the fit extensions for Trk::MeasuremenBase pass through fits.
   {
     m_trkMeasCalibrator = detail::TrkMeasurementCalibrator{};
@@ -80,14 +78,14 @@ StatusCode GlobalChiSquareFitterTool::initialize() {
     configureMe.surfaceAccessor.connect<&detail::TrkPrepRawDataSurfaceAcc::operator()>(&m_prdSurfaceAcc);
   }
   {
-    m_unalibMeasSurfAcc = detail::xAODUncalibMeasSurfAcc{m_trackingGeometryTool.get()};
+    m_unalibMeasSurfAcc = detail::xAODUncalibMeasSurfAcc{m_trackingGeometrySvc.get()};
 
     /// Needs to be filled with live.
     Gx2FitterExtension_t& configureMe = m_gx2fExtensions[Acts::toUnderlying(detail::SourceLinkType::xAODUnCalibMeas)];
     configureMe = extensionTemplate;
     configureMe.surfaceAccessor.connect<&detail::xAODUncalibMeasSurfAcc::operator()>(&m_unalibMeasSurfAcc);
     configureMe.calibrator.connect<&detail::xAODUncalibMeasCalibrator::calibrate>(&m_uncalibMeasCalibrator);
-    m_idCalibrator = xAODItkCalibrator_t::NoCalibration(m_trackingGeometryTool.get());
+    m_idCalibrator = xAODItkCalibrator_t::NoCalibration(m_trackingGeometrySvc.get());
 
     /// Connect the muon types with the muon calibrator
     using enum xAOD::UncalibMeasType;
@@ -96,7 +94,7 @@ StatusCode GlobalChiSquareFitterTool::initialize() {
         m_uncalibMeasCalibrator.connect<&MuonR4::ISpacePointCalibrator::calibrateSourceLink>(muonType, m_muonCalibrator.get());
       }
     }
-    for (const auto idType: {PixelClusterType, StripClusterType, Other, HGTDClusterType}) {
+    for (const auto idType: {PixelClusterType, StripClusterType, HGTDClusterType}) {
       m_uncalibMeasCalibrator.connect<&xAODItkCalibrator_t::calibrate>(idType, &m_idCalibrator);
     }
     
@@ -196,11 +194,13 @@ GlobalChiSquareFitterTool::fit(const std::vector<Acts::SourceLink>& sourceLinks,
                                                         std::move(multiTrajBackEnd));
   
   // Perform the fit
-  auto result = ATH_LIKELY(m_fitter) 
-    ? m_fitter->fit(sourceLinks.begin(), sourceLinks.end(), initialParams, kfOptions, *tracks)
-    : m_slFitter->fit(sourceLinks.begin(), sourceLinks.end(), initialParams, kfOptions, *tracks);
+  bool ok = false;
+  if (m_fitter) [[likely]]
+    ok = m_fitter->fit(sourceLinks.begin(), sourceLinks.end(), initialParams, kfOptions, *tracks).ok();
+  else
+    ok = m_slFitter->fit(sourceLinks.begin(), sourceLinks.end(), initialParams, kfOptions, *tracks).ok();
 
-  if (not result.ok()) {
+  if (not ok) {
       ATH_MSG_VERBOSE("Global chi2 fit failed");
       return nullptr;
   }

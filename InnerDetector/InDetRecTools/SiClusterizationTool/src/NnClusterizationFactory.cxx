@@ -269,7 +269,7 @@ namespace InDet {
     // We have only one node for now, so we just store things there.
     // Format for use with lwtnn
     std::vector<Eigen::VectorXd> vectorOfEigen;
-    vectorOfEigen.push_back(valuesVector);
+    vectorOfEigen.push_back(std::move(valuesVector));
     return vectorOfEigen;
   }
 
@@ -472,12 +472,13 @@ namespace InDet {
         ATH_MSG_DEBUG(" Original RAW Estimated positions (" << i << ") x: " << back_posX(position1P[0+i*2],applyRecentering) << " y: " << back_posY(position1P[1+i*2]));
         ATH_MSG_DEBUG(" Original estimated myPositions ("   << i << ") x: " << myPosition1[i][Trk::locX] << " y: " << myPosition1[i][Trk::locY]);
       }
-      std::vector<double> inputDataNew=inputData;
-      inputDataNew.reserve( inputDataNew.size() + numberSubClusters*2);
-      assert(  static_cast<unsigned int>(numberSubClusters*2) <= position1P.size() );
-      for (unsigned int i=0; i<static_cast<unsigned int>(numberSubClusters*2); ++i) {
-        inputDataNew.push_back(position1P[i]);
-      }
+      const std::size_t nPositions{static_cast<std::size_t>(numberSubClusters*2)};
+      assert(  nPositions <= position1P.size() );
+      //reserve space before copy, to avoid reallocation
+      std::vector<double> inputDataNew(inputData);
+      inputDataNew.reserve( inputData.size() + nPositions);
+      inputDataNew.insert(inputDataNew.end(), position1P.begin(), position1P.begin() + nPositions);
+      
       // get error network id for the given cluster multiplicity then
       // dereference unique_ptr<TTrainedNetwork> then call calculateOutput :
       const auto xNetworkIndex = m_NNId[kErrorXNN-1].at(subClusterIndex);
@@ -580,7 +581,7 @@ namespace InDet {
       erm.setZero();
       erm(0,0)=rmsX*rmsX;
       erm(1,1)=rmsY*rmsY;
-      errorMatrices.push_back(erm); 
+      errorMatrices.push_back(std::move(erm)); 
     }
     std::vector<Amg::Vector2D> myPositions = getPositionsFromOutput(positionValues,rawInput,pCluster);
     ATH_MSG_DEBUG(" Estimated myPositions (1) x: " << myPositions[0][Trk::locX] << " y: " << myPositions[0][Trk::locY]);
@@ -673,7 +674,7 @@ namespace InDet {
       erm.setZero();
       erm(0,0)=RMSx*RMSx;
       erm(1,1)=RMSy*RMSy;
-      errorMatrix.push_back(erm);
+      errorMatrix.push_back(std::move(erm));
     }//end nParticles
      }//getErrorMatrixFromOutput
 
@@ -1188,7 +1189,7 @@ namespace InDet {
       erm.setZero();
       erm(0, 0) = rmsX * rmsX;
       erm(1, 1) = rmsY * rmsY;
-      errors.push_back(erm);
+      errors.push_back(std::move(erm));
     }
 
     // Convert raw position outputs to detector coordinates

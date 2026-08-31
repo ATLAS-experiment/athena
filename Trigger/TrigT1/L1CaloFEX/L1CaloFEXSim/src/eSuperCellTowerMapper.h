@@ -1,13 +1,10 @@
 /*
-    Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+    Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 
 #ifndef ESUPERCELLTOWERMAPPER_H
 #define ESUPERCELLTOWERMAPPER_H
-
-// STL
-#include <string>
 
 // Athena/Gaudi
 #include "AthenaBaseComps/AthAlgTool.h"
@@ -19,6 +16,8 @@
 #include "L1CaloFEXSim/eTowerContainer.h"
 #include "xAODTrigL1Calo/TriggerTowerContainer.h"
 #include "L1CaloFEXSim/eFEXSuperCellTowerIdProvider.h"
+
+#include <string>
 
 class CaloIdManager;
 
@@ -37,7 +36,6 @@ class eSuperCellTowerMapper: public AthAlgTool, virtual public IeSuperCellTowerM
   virtual StatusCode AssignSuperCellsToTowers(/*eTowerContainer**/std::unique_ptr<eTowerContainer> & my_eTowerContainerRaw) const override;
   virtual StatusCode AssignTriggerTowerMapper(/*eTowerContainer**/std::unique_ptr<eTowerContainer> & my_eTowerContainerRaw) const override;
   
-  virtual void reset() const override;
 
  private:
   SG::ReadHandleKey<CaloCellContainer> m_scellsCollectionSGKey {this, "SCell", "SCell", "SCell"};

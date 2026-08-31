@@ -20,8 +20,8 @@ TileRawChannelContainer* TileRawChannelContainerCnv::createTransient(const Token
 
     TileRawChannelContainer       *trans_cont(0);
 
-    static const pool::Guid   p1_guid("BF727F06-9F94-4989-9C1F-9E59023988EA");
-    static const pool::Guid   p0_guid("E18095F6-01D9-4E8B-AD51-A8628F92E7FF");
+    static const Guid   p1_guid("BF727F06-9F94-4989-9C1F-9E59023988EA");
+    static const Guid   p0_guid("E18095F6-01D9-4E8B-AD51-A8628F92E7FF");
 
     if( this->compareClassGuid(token, p1_guid)) {
         std::unique_ptr< TileRawChannelContainer_p1 >   cont( this->poolReadObject< TileRawChannelContainer_p1 >(token) );

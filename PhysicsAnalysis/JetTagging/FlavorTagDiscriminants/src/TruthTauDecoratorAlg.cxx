@@ -5,7 +5,7 @@
 #include "FlavorTagDiscriminants/TruthTauDecoratorAlg.h"
 #include "StoreGate/WriteDecorHandle.h"
 #include "TruthUtils/TruthClasses.h"
-
+using namespace MCTruthPartClassifier;
 #include <cmath>
 #include <limits>
 

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrkValidationUtils/MatrixNtupleBranch.h"
@@ -7,15 +7,15 @@
 #include <TString.h>
 
 namespace Trk {
-  bool MatrixNtupleBranch::initForWrite(TTree& tree, const std::string& varname, int ncol, int nrow, const std::string& prefix ) {
+  bool MatrixNtupleBranch::initForWrite(TTree& tree, const std::string_view varname, int ncol, int nrow, std::string_view prefix ) {
     if( ncol >= COLMAX ) return false;
     if( nrow >= ROWMAX ) return false;
     m_ncols = ncol;
     m_nrows = nrow;
     for( int i=0;i<nrow;++i ){
       for( int j=0;j<ncol;++j ){
-	TString bname = prefix.c_str();
-	bname += varname;
+	TString bname{prefix.data(), static_cast<Ssiz_t>(prefix.size())};
+	bname.Append(varname.data(), static_cast<Ssiz_t>(varname.size()));
 	bname += i;
 	bname += j;
 	tree.Branch(bname,&m_matrix[i][j]);
@@ -24,15 +24,15 @@ namespace Trk {
     return true;
   }
 
-  bool MatrixNtupleBranch::initForRead(TTree& tree, const std::string& varname, int ncol, int nrow, const std::string& prefix ) { 
+  bool MatrixNtupleBranch::initForRead(TTree& tree, std::string_view varname, int ncol, int nrow, std::string_view prefix ) { 
     if( ncol >= COLMAX ) return false;
     if( nrow >= ROWMAX ) return false;
     m_ncols = ncol;
     m_nrows = nrow;
     for( int i=0;i<nrow;++i ){
       for( int j=0;j<ncol;++j ){
-	TString bname = prefix.c_str();
-	bname += varname;
+	TString bname{prefix.data(), static_cast<Ssiz_t>(prefix.size())};
+	bname.Append(varname.data(), static_cast<Ssiz_t>(varname.size()));
 	bname += i;
 	bname += j;
 	tree.SetBranchAddress(bname,&m_matrix[i][j]);

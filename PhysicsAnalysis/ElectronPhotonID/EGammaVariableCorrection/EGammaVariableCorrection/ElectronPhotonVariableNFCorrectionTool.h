@@ -102,7 +102,7 @@ public:
 private:
     //! @brief The configuration file for the tool, application mode and minimum photon pT cut in MeV
     Gaudi::Property<std::string> m_configFile {this, "ConfigFile", "", "The configuration file for Normalizing Flows to use"};
-    Gaudi::Property<bool> m_forceOneFold {this, "forceOneFold", false, "Force the usage of one fold regardless of the config file settings"};
+    Gaudi::Property<int> m_nFoldsOverride {this, "NFoldsOverride", -1, "If > 0, override the number of folds to use instead of the value from the config file (must not exceed NFolds in the config)"};
     Gaudi::Property<std::string> m_applyToStr {this, "ApplyTo", "TruthPhotons", "TruthPhotons or All"};
     Gaudi::Property<float>       m_pTcutMeV   {this, "pTcut", 10000.f, "Min photon pT in MeV"};
     

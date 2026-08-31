@@ -1,22 +1,22 @@
 /*
   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
-#include <AthContainers/ConstDataVector.h>
+#include "AthContainers/ConstDataVector.h"
 
 #include "TrackIsolationDecorAlg.h"
-#include "DerivationFrameworkMuons/Utils.h"
-#include <xAODMuon/MuonContainer.h>
-#include <xAODBase/IParticleHelpers.h>
-#include <xAODTracking/TrackParticleContainer.h>
+#include "xAODMuon/MuonContainer.h"
+#include "xAODBase/IParticleHelpers.h"
+#include "xAODTracking/TrackParticleContainer.h"
 
 //**********************************************************************
 
-#include <StoreGate/WriteDecorHandle.h>
-#include <MuonDetDescrUtils/MuonSectorMapping.h>
+#include "StoreGate/WriteDecorHandle.h"
+#include "MuonDetDescrUtils/MuonSectorMapping.h"
+#include "xAODMuonViews/ContainerDecorator.h"
+
+#include "format"
 
 namespace DerivationFramework {
-TrackIsolationDecorAlg::TrackIsolationDecorAlg(const std::string& name, ISvcLocator* pSvcLocator) :
-    AthReentrantAlgorithm(name, pSvcLocator) {}
 
 TrackIsolationDecorAlg::~TrackIsolationDecorAlg() = default;
 
@@ -24,16 +24,18 @@ StatusCode TrackIsolationDecorAlg::initialize() {
     m_trk_corr.trackbitset.set(static_cast<unsigned int>(xAOD::Iso::coreTrackPtr));
     ATH_CHECK(m_idTrkKey.initialize());
     ATH_CHECK(m_toDeorTrkKey.initialize());
-    for (const std::string& decor : m_trkSel_Decors) m_trkSel_keys.emplace_back(m_toDeorTrkKey, decor);
+    for (const std::string& decor : m_trkSel_Decors) {
+        m_trkSel_keys.emplace_back(m_toDeorTrkKey, decor);
+    }
     ATH_CHECK(m_trkSel_keys.initialize());
     ATH_CHECK(m_vtx_key.initialize());
-    m_ptcone20_key = std::string("ptcone20") + (m_customName.empty() ? "" : "_") + m_customName;
-    m_ptcone30_key = std::string("ptcone30") + (m_customName.empty() ? "" : "_") + m_customName;
-    m_ptcone40_key = std::string("ptcone40") + (m_customName.empty() ? "" : "_") + m_customName;
+    m_ptcone20_key = std::format("ptcone20{:}{:}", m_customName.empty() ? "" : "_" , m_customName.value());
+    m_ptcone30_key = std::format("ptcone30{:}{:}", m_customName.empty() ? "" : "_" , m_customName.value());
+    m_ptcone40_key = std::format("ptcone40{:}{:}", m_customName.empty() ? "" : "_" , m_customName.value());
 
-    m_ptvarcone20_key = std::string("ptvarcone20") + (m_customName.empty() ? "" : "_") + m_customName;
-    m_ptvarcone30_key = std::string("ptvarcone30") + (m_customName.empty() ? "" : "_") + m_customName;
-    m_ptvarcone40_key = std::string("ptvarcone40") + (m_customName.empty() ? "" : "_") + m_customName;
+    m_ptvarcone20_key = std::format("ptvarcone20{:}{:}", m_customName.empty() ? "" : "_", m_customName.value());
+    m_ptvarcone30_key = std::format("ptvarcone30{:}{:}", m_customName.empty() ? "" : "_", m_customName.value());
+    m_ptvarcone40_key = std::format("ptvarcone40{:}{:}", m_customName.empty() ? "" : "_", m_customName.value());
 
     ATH_CHECK(m_ptcone20_key.initialize());
     ATH_CHECK(m_ptcone30_key.initialize());
@@ -55,30 +57,21 @@ bool TrackIsolationDecorAlg::isSame(const xAOD::IParticle* P, const xAOD::IParti
 
 }
 StatusCode TrackIsolationDecorAlg::execute(const EventContext& ctx) const {
-    SG::ReadHandle<xAOD::TrackParticleContainer> idTracks{m_idTrkKey, ctx};
-    if (!idTracks.isPresent()) {
-        ATH_MSG_FATAL("Failed to load "<<m_idTrkKey.fullKey());
-        return StatusCode::FAILURE;
-    }
     
-    SG::ReadHandle<xAOD::TrackParticleContainer> tracks{m_toDeorTrkKey, ctx};
-    if (!tracks.isPresent()) {
-        ATH_MSG_FATAL("Failed to retrieve track collection " << m_toDeorTrkKey.fullKey());
-        return StatusCode::FAILURE;
-    }
-    SG::ReadHandle<xAOD::VertexContainer> vertices{m_vtx_key, ctx};
-    if (!vertices.isPresent()) {
-        ATH_MSG_FATAL("Failed to retrieve vertex collection " << m_vtx_key.fullKey());
-        return StatusCode::FAILURE;
-    }
-    using IsoDecorator = SG::WriteDecorHandle<xAOD::TrackParticleContainer, float>;
-    IsoDecorator decor_ptcone20{makeHandle<float>(ctx, m_ptcone20_key, -Gaudi::Units::GeV)};
-    IsoDecorator decor_ptcone30{makeHandle<float>(ctx, m_ptcone30_key, -Gaudi::Units::GeV)};
-    IsoDecorator decor_ptcone40{makeHandle<float>(ctx, m_ptcone40_key, -Gaudi::Units::GeV)};
+    const xAOD::TrackParticleContainer* idTracks{nullptr}, *tracks{nullptr};
+    const xAOD::VertexContainer* vertices{nullptr};
+    ATH_CHECK(SG::get(idTracks , m_idTrkKey, ctx));
+    ATH_CHECK(SG::get(tracks , m_toDeorTrkKey, ctx));
+    ATH_CHECK(SG::get(vertices, m_vtx_key, ctx));
+    
+    using IsoDecorator = xAOD::ContainerDecorator<xAOD::TrackParticleContainer, float>;
+    IsoDecorator decor_ptcone20{m_ptcone20_key, ctx, -Gaudi::Units::GeV};
+    IsoDecorator decor_ptcone30{m_ptcone30_key, ctx, -Gaudi::Units::GeV};
+    IsoDecorator decor_ptcone40{m_ptcone40_key, ctx, -Gaudi::Units::GeV};
 
-    IsoDecorator decor_ptvarcone20{makeHandle<float>(ctx, m_ptvarcone20_key, -Gaudi::Units::GeV)};
-    IsoDecorator decor_ptvarcone30{makeHandle<float>(ctx, m_ptvarcone30_key, -Gaudi::Units::GeV)};
-    IsoDecorator decor_ptvarcone40{makeHandle<float>(ctx, m_ptvarcone40_key, -Gaudi::Units::GeV)};
+    IsoDecorator decor_ptvarcone20{m_ptvarcone20_key, ctx, -Gaudi::Units::GeV};
+    IsoDecorator decor_ptvarcone30{m_ptvarcone30_key, ctx, -Gaudi::Units::GeV};
+    IsoDecorator decor_ptvarcone40{m_ptvarcone40_key, ctx, -Gaudi::Units::GeV};
 
     if (vertices->empty() || 
         std::find_if(vertices->begin(), vertices->end(), [](const xAOD::Vertex* vtx){
@@ -86,13 +79,12 @@ StatusCode TrackIsolationDecorAlg::execute(const EventContext& ctx) const {
         }) == vertices->end()) return StatusCode::SUCCESS;
     Muon::MuonSectorMapping sector_mapping{};
     
-    using SelDecorator = SG::ReadDecorHandle<xAOD::TrackParticleContainer, bool>;
+    using SelDecorator = SG::ReadDecorHandle<xAOD::TrackParticleContainer, std::uint8_t>;
     using TrkViewContainer = ConstDataVector<xAOD::TrackParticleContainer>;
     using view_map = std::map<int, std::vector<const xAOD::TrackParticle*> >;
     view_map track_sectors;
 
     for (const xAOD::TrackParticle* trk : *idTracks) {
-        if (!trk) continue;
         const int sec = sector_mapping.getSector(trk->phi());
         std::vector<const xAOD::TrackParticle*>& container = track_sectors[sec];
         if (container.empty()) container.reserve(idTracks->size());
@@ -106,7 +98,7 @@ StatusCode TrackIsolationDecorAlg::execute(const EventContext& ctx) const {
     }
     for (const xAOD::TrackParticle* trk : *tracks) {
         if (trk->pt() < m_pt_min) continue;
-        if (!selDecors.empty() && std::find_if(selDecors.begin(), selDecors.end(), [trk](const SelDecorator& dec){
+        if (!selDecors.empty() && std::ranges::find_if(selDecors, [trk](const SelDecorator& dec){
                 return dec(*trk);
         }) == selDecors.end()) continue;
         std::vector<int> sectors;

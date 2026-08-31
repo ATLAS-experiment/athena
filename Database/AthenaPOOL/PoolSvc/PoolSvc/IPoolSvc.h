@@ -13,20 +13,18 @@
 #include "GaudiKernel/IService.h"
 #include "GaudiKernel/IFileMgr.h"
 
-#include "CollectionSvc/ICollection.h"
-#include "StorageSvc/DbType.h"
-
 #include "DataModelRoot/RootType.h"
 
 #include <string>
 
-// Forward declarations
-namespace pool {
-   class IFileCatalog;
-}
 namespace coral {
    class Context;
 }
+namespace pool {
+   class DbType;
+   class ICollection;
+}
+
 class Placement;
 class Token;
 
@@ -72,19 +70,15 @@ public: // Non-static members
    /// @return size of the map of all labelled input contexts.
    virtual unsigned int getInputContextMapSize() const = 0;
 
-   /// @return the context.
-   virtual const coral::Context* context() const = 0;
-
-   /// @return void
-   /// @param compName [IN] string name of the component to be loaded.
-   virtual void loadComponent(const std::string& compName) = 0;
-
    /// @return void
    /// @param shareCat [IN] bool to share the file catalog.
    virtual void setShareMode(bool shareCat) = 0;
 
-   /// @return the file catalog.
-   virtual const pool::IFileCatalog* catalog() const = 0;
+   /// @return void
+   virtual void startCatalog() = 0;
+
+   /// @return void
+   virtual void commitCatalog() = 0;
 
    /// @return void
    /// @param token [IN] filename/token string to be translated
@@ -104,7 +98,7 @@ public: // Non-static members
    /// @param contextId [IN] id for PoolSvc persistency service to use for input.
    virtual pool::ICollection* createCollection(const std::string& connection,
 	   const std::string& collectionName,
-	   const pool::DbType& collectionType = pool::POOL_StorageType.type(),
+	   const pool::DbType& collectionType,
 	   unsigned int contextId = IPoolSvc::kInputStream) const = 0;
 
    /// @return a shared Token ptr for a container entry.
@@ -165,8 +159,6 @@ public: // Non-static members
 	   const std::string& contName = "",
 	   unsigned int contextId = IPoolSvc::kOutputStream) const = 0;
 
-   /// Setup Frontier cache for given logical or physical connection name
-   virtual StatusCode setFrontierCache(const std::string& conn) = 0;
 };
 
 #endif

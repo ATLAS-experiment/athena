@@ -4,7 +4,7 @@
 
 #include "G4Track.hh"
 #include "G4DynamicParticle.hh"
-#include "G4ElectroMagneticField.hh"
+#include "G4Field.hh"
 
 #include "DummyEquation.h"
 #include "HyperbolaStepper.h"
@@ -18,7 +18,10 @@ HyperbolaStepper::HyperbolaStepper(
     // x, y, z, px, py, pz, KE, t_lab, steplength (in place of t_proper)
     G4MagIntegratorStepper(new DummyEquation(), m_NUM_VARS),
     m_string(string),
-    m_field(dynamic_cast<const G4ElectroMagneticField*>(field)),
+    // G4Field, not G4ElectroMagneticField: since Geant4 10.6 G4MagneticField
+    // derives directly from G4Field, so the old dynamic_cast rejected the
+    // ATLAS field. Only G4Field::GetFieldValue() is used.
+    m_field(field),
     m_mass(track.GetDynamicParticle()->GetMass()),
     m_charge(track.GetDynamicParticle()->GetCharge()),
     m_startMomentum(track.GetDynamicParticle()->Get4Momentum()),
@@ -28,10 +31,6 @@ HyperbolaStepper::HyperbolaStepper(
     m_nPrevSteps(0),
     m_debug(false)
 {
-    if (field != 0 && m_field == 0) {
-        G4Exception("HyperbolaStepper::HyperbolaStepper", "QuirkNonEM", FatalErrorInArgument, "Non-EM fields not supported");
-    }
-
     // Precompute steps
     m_currStep.PrepareNextStep();
     m_steps.push_back(m_currStep);

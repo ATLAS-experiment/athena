@@ -107,7 +107,8 @@ bool IDTPM::TruthQualitySelectionTool::accept( const xAOD::TruthParticle* truth 
       truthParent = truthParentB ? truthParentB : (truthParentC ? truthParentC : nullptr);
     }
     if (m_isFromLightFlav and truthParent ) return false;
-    if (not m_isFromLightFlav and not truthParent) return false;  
+    if (not m_isFromLightFlav and not truthParent) return false;
+    if (not truthParent) return false;
     if (m_minParentPt!=-9999 and truthParent->pt() < m_minParentPt )           return false;
     if (m_maxParentPt!=-9999 and truthParent->pt() > m_maxParentPt )           return false;
   }

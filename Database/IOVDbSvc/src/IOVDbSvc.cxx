@@ -24,7 +24,6 @@
 #include "DBLock/DBLock.h"
 #include "EventInfoUtils/EventIDFromStore.h"
 #include "IOVDbDataModel/IOVMetaDataContainer.h"
-#include "PersistencySvc/IFileCatalog.h"
 #include "StoreGate/StoreClearedIncident.h"
 
 #include <algorithm>
@@ -177,6 +176,18 @@ StatusCode IOVDbSvc::initialize() {
     ATH_MSG_INFO(  "Online mode ignoring potential missing channels outside cache" );
   if (m_par_checklock)
     ATH_MSG_INFO( "Tags will be required to be locked");
+
+  if (m_par_source == "COOL_DATABASE") {
+    m_source=IOVDbFolder::source_t::COOLDB;
+    ATH_MSG_INFO("IOVDbSvc configured to use a COOL database");
+  } else if (m_par_source == "CREST") {
+    m_source=IOVDbFolder::source_t::CRESTDB;
+    ATH_MSG_INFO("IOVDbSvc configured to use a CREST database");
+  }
+  else {
+    ATH_MSG_ERROR("Unexpected property value " << m_par_source << ", allowed values are \"COOL_DATABASE\" or \"CREST\"" );
+    return StatusCode::FAILURE;
+  }
 
   // make sure iovTime is undefined
   m_iovTime.reset();
@@ -487,7 +498,7 @@ StatusCode IOVDbSvc::updateAddress(StoreID::type storeID, SG::TransientAddress* 
      // This problem is mitigated by limiting the scope of the dblock here.
      Athena::DBLock dblock;
      ATH_MSG_DEBUG("Validity key "<<vkey);
-     if (folder->source() == "CREST") {
+     if (folder->source() == IOVDbFolder::source_t::CRESTDB) {
         if (!folder->readMeta() && !folder->cacheValid((vkey))){
           fitr->second->loadCache(vkey, m_par_cacheAlign,m_globalTag,m_par_onlineMode);
       }
@@ -564,7 +575,7 @@ StatusCode IOVDbSvc::getRange( const CLID&        clid,
 
   // obtain the validity key for this folder (includes overrides)
   cool::ValidityKey vkey = folder->iovTime(time);
-  if (folder->source() == "CREST") {
+  if (folder->source() == IOVDbFolder::source_t::CRESTDB) {
       if (!folder->readMeta() && !folder->cacheValid((vkey))){
         fitr->second->loadCache(vkey, m_par_cacheAlign,m_globalTag,m_par_onlineMode);
       }
@@ -669,11 +680,8 @@ StatusCode IOVDbSvc::signalBeginRun(const IOVTime& beginRunTime,
   // this is before first event of each run
   ATH_MSG_DEBUG( "In online mode will recheck ... " );
   ATH_MSG_DEBUG( "First reload PoolCataloge ... " );
-  
-  pool::IFileCatalog* catalog ATLAS_THREAD_SAFE =  // we are not within the event loop yet
-    const_cast<pool::IFileCatalog*>(m_h_poolSvc->catalog());
-  catalog->commit();
-  catalog->start(); 
+  m_h_poolSvc->startCatalog();
+  m_h_poolSvc->commitCatalog();
   static const std::string preLoadProxyStr{"preLoadProxy"};
   for (const auto & pThisConnection : m_connections){
     // only access connections which are actually in use - avoids waking up
@@ -921,12 +929,16 @@ StatusCode IOVDbSvc::setupFolders() {
   // no wildcards are allowed
 
   // getting the pairs: folder name - CREST tag name:
-  if (m_par_source == "CREST"){
+  if (m_source == IOVDbFolder::source_t::CRESTDB){
     auto mLevel = static_cast<std::underlying_type_t<MSG::Level>>(msg().level());
     Crest::LogLevel cLevel = static_cast<Crest::LogLevel>(mLevel);
     Crest::Logger::setLogLevel(cLevel);	  
     m_cresttagmap.clear();
-    m_cresttagmap = CoralCrestManager::getGlobalTagMap(m_par_crestServer,m_par_globalTag);
+    m_cresttagmap = CoralCrestManager::getGlobalTagMap(m_par_defaultConnection,m_par_globalTag);
+    if (m_cresttagmap.empty()) {
+      ATH_MSG_FATAL("Got empty tag-map. GlobalTag "<< m_par_globalTag.value() << " does not exist.");
+      return StatusCode::FAILURE;
+    }
   }
   
   //1. Loop through folders
@@ -997,12 +1009,11 @@ StatusCode IOVDbSvc::setupFolders() {
 
   bool crestError=false;
   for (const auto& folderdata : allFolderdata) {
-    // find the connection specification first - db or dbConnection
+    // find the connection specification first
     // default is to use the 'default' connection
     IOVDbConn* conn=nullptr;
     std::string connstr;
-    if (folderdata.getKey("db","",connstr) || 
-        folderdata.getKey("dbConnection","",connstr)) {
+    if (folderdata.getKey("db","",connstr)) {
       // an explicit database name is specified
       // check if it is already present in the existing connections
       for (const auto & pThisConnection : m_connections) {
@@ -1031,10 +1042,10 @@ StatusCode IOVDbSvc::setupFolders() {
     // already been requested
 
     std::string crestTag;
-    if (m_par_source == "CREST"){
+    if (m_source == IOVDbFolder::source_t::CRESTDB){
       crestTag = m_cresttagmap[folderdata.folderName()];
       if(crestTag.empty() && folderdata.folderName() != "/TagInfo") {
-        ATH_MSG_FATAL( "GlobalTag "<< m_par_globalTag << " does not contain folder "
+        ATH_MSG_FATAL( "GlobalTag "<< m_par_globalTag.value() << " does not contain folder "
                        << folderdata.folderName());
         crestError=true;
         continue;
@@ -1042,8 +1053,8 @@ StatusCode IOVDbSvc::setupFolders() {
     }
     
     auto folder=std::make_unique<IOVDbFolder>(conn,folderdata,msg(),&(*m_h_clidSvc), &(*m_h_metaDataTool),
-                                              m_par_checklock, m_outputToFile, m_par_source,
-                                              m_par_crestServer, crestTag, m_crestCoolToFile);
+                                              m_par_checklock, m_outputToFile, m_source,
+                                              m_par_defaultConnection, crestTag, m_crestCoolToFile);
     const std::string& key=folder->key();
     if (m_foldermap.find(key)==m_foldermap.end()) {  //This check is too weak. For POOL-based folders, the SG key is in the folder description (not known at this point).
       m_foldermap[key]=std::move(folder);
@@ -1161,7 +1172,7 @@ StatusCode IOVDbSvc::checkConfigConsistency() const {
   // this is only done here as need global tag to be set even if read from file
   // @TODO should this not be done during initialize
 
-  if (!m_par_dbinst.empty() && !m_globalTag.empty() && m_par_source!="CREST") {
+  if (!m_par_dbinst.empty() && !m_globalTag.empty() && m_source!=IOVDbFolder::source_t::CRESTDB) {
     const std::string_view tagstub = std::string_view(m_globalTag).substr(0,7);
     ATH_MSG_DEBUG( "Checking " << m_par_dbinst << " against " <<tagstub );
 

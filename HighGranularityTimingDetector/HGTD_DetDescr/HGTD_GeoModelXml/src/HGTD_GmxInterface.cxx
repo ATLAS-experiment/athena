@@ -153,6 +153,9 @@ void HGTD_GmxInterface::addSensor(const std::string &typeName,
                                     index["layer"],
                                     index["moduleInLayer"],
                                     0);
+
+        ATH_MSG_DEBUG("SENSOR CHECK: moduleInLayer = " << index["moduleInLayer"]);
+        
         ATH_MSG_DEBUG("HGTD New ID scheme");
     } else {
         id = hgtdIdHelper->wafer_id(index["endcap"],
@@ -256,4 +259,71 @@ void HGTD_GmxInterface::buildReadoutGeometryFromSqlite(IRDBAccessSvc * rdbAccess
 
         addSensor(typeName,index,0,fullPhysVolPointer);
     }
+}
+
+void HGTD_GmxInterface::addAlignable(int level,
+                                     std::map<std::string, int> &index,
+                                     GeoVFullPhysVol *fpv,
+                                     GeoAlignableTransform *transform)
+{
+    ATH_MSG_DEBUG("HGTD addAlignable called");
+
+    const HGTD_ID* hgtdIdHelper =
+        dynamic_cast<const HGTD_ID*>(m_commonItems->getIdHelper());
+
+    if (!hgtdIdHelper) {
+        ATH_MSG_ERROR("Failed to get HGTD_ID");
+        return;
+    }
+
+    Identifier id;
+
+    //HGTD has only one meaningful level for now (module level)
+    if (level == 1) {
+        bool newScheme = hgtdIdHelper->get_useNewIdentifierScheme();
+
+        if (newScheme) {
+
+            id = hgtdIdHelper->wafer_id(
+                index["endcap"],
+                index["layer"],
+                index["moduleInLayer"],
+                0
+            );
+
+        } else {
+            id = hgtdIdHelper->wafer_id(
+                index["endcap"],
+                index["layer"],
+                index["rowNumber"],
+                index["moduleNumberInRow"]
+            );
+        }
+    }
+    else {
+        ATH_MSG_WARNING("Unsupported alignment level " << level);
+        return;
+    }
+
+    IdentifierHash hash = hgtdIdHelper->wafer_hash(id);
+
+    if (!hash.is_valid()) {
+        ATH_MSG_ERROR("Invalid ID in addAlignable");
+        return;
+    }
+
+    ATH_MSG_DEBUG("HGTD ALIGNABLE (GMX): "
+        << " endcap=" << index["endcap"]
+        << " layer=" << index["layer"]
+        << " moduleInLayer=" << index["moduleInLayer"]
+        << " idHash=" << hash);
+
+    ATH_MSG_DEBUG("REGISTER ALIGNABLE:"
+                << " hash=" << hash
+                << " transform ptr=" << transform
+                << " fpv ptr=" << fpv);
+    
+    ATH_MSG_DEBUG("ADD ALIGNABLE FPV = " << fpv);
+
+    m_detectorManager->addAlignableTransform(level, id, transform, fpv);
 }

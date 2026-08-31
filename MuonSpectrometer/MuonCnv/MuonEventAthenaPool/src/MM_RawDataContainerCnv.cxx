@@ -39,9 +39,9 @@ MM_RawDataContainerCnv::createTransient(const Token* token)
   using namespace Muon;
 
   MM_RawDataContainer *transCont = nullptr;
-  static const pool::Guid	p1_guid("5F202045-CE2C-4AD4-96BA-7DA18053B90F");
-  static const pool::Guid	p2_guid("A49EBDAC-A190-4198-95DF-BF75FBBB487F");
-  static const pool::Guid	p3_guid("229DDB7E-59D3-4BE5-B3D5-B873EBC5C9AA");
+  static const Guid	p1_guid("5F202045-CE2C-4AD4-96BA-7DA18053B90F");
+  static const Guid	p2_guid("A49EBDAC-A190-4198-95DF-BF75FBBB487F");
+  static const Guid	p3_guid("229DDB7E-59D3-4BE5-B3D5-B873EBC5C9AA");
 
   if( compareClassGuid(token, p1_guid) ) {
     std::unique_ptr< MM_RawDataContainer_p1 >  cont( this->poolReadObject<MM_RawDataContainer_p1>(token) );

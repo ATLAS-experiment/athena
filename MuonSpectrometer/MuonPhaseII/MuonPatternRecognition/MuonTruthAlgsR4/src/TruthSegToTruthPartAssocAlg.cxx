@@ -13,6 +13,7 @@
 #include "xAODTruth/TruthVertex.h"
 #include "ActsInterop/UnitConverters.h"
 #include "Acts/Surfaces/PlaneSurface.hpp"
+#include "xAODMuonViews/ContainerDecorator.h"
 
 #include <unordered_set>
 
@@ -50,7 +51,7 @@ namespace MuonR4{
         ATH_CHECK(m_segmentKey.initialize());
         ATH_CHECK(m_truthLinkKey.initialize());
         ATH_CHECK(m_idHelperSvc.retrieve());
-        ATH_CHECK(m_trackingGeometryTool.retrieve(EnableTool{m_includePileUpObjs}));
+        ATH_CHECK(m_ctxProvider.initialize());
         ATH_CHECK(m_extrapolationTool.retrieve(EnableTool{m_includePileUpObjs}));
         ATH_CHECK(detStore()->retrieve(m_detMgr));
         return StatusCode::SUCCESS;
@@ -63,7 +64,7 @@ namespace MuonR4{
         using IdDecorHandle_t = SG::ReadDecorHandle<xAOD::TruthParticleContainer, std::vector<unsigned long long>>;
         using SegLink_t = ElementLink<xAOD::MuonSegmentContainer>;
         using SegLinkVec_t = std::vector<SegLink_t>;
-        SG::WriteDecorHandle<xAOD::TruthParticleContainer, SegLinkVec_t> segLinkDecor{m_segLinkKey ,ctx};
+        xAOD::ContainerDecorator segLinkDecor{m_segLinkKey ,ctx, SegLinkVec_t{}};
 
         /// Initialize the Identifier decorators
         std::vector<IdDecorHandle_t> idDecorHandles{};
@@ -223,8 +224,7 @@ namespace MuonR4{
         }
         std::vector<char> segmentMatched(pileUpSegments.size(), 0);
 
-        const ActsTrk::GeometryContext& gctx{m_trackingGeometryTool->getGeometryContext(ctx)};
-        const Acts::GeometryContext tgContext = gctx.context();
+        const Acts::GeometryContext tgContext = m_ctxProvider.getGeometryContext(ctx);
 
         for (const xAOD::TruthParticle* bkgMuon : pileUpMuons) {
             const Acts::Vector4 fourPos = vertexPos(*bkgMuon);
@@ -276,7 +276,7 @@ namespace MuonR4{
                     continue;
                 }
                 ///
-                const Amg::Vector2D dPosExtp = propPars->localPosition() - (sector->globalToLocalTransform(gctx) * segPos).segment<2>(0);
+                const Amg::Vector2D dPosExtp = propPars->localPosition() - (sector->globalToLocalTransform(tgContext) * segPos).segment<2>(0);
                 const double dThetaExtp = std::abs(segDir.theta() - propPars->theta());
                 const double dPhiExtp  = std::abs(segDir.phi() - propPars->phi());
                 ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<" - Parameter difference: "<<Amg::toString(dPosExtp)
@@ -289,8 +289,8 @@ namespace MuonR4{
                         <<m_pileUpObjExtpDxCut<<", "<<m_pileUpObjExtpDyCut<<", "<<m_pileUpObjExtpDthetaCut<<", "<<m_pileUpObjExtpDphiCut);
                     continue;
                 }
-                truthPartDecor(*bkgSeg) = TruthPartLink_t{truthSegDecor.cptr(), bkgMuon->index()};
-                truthSegDecor(*bkgMuon).emplace_back(truthPartDecor.cptr(), bkgSeg->index());
+                truthPartDecor(*bkgSeg) = TruthPartLink_t{truthSegDecor.container(), bkgMuon->index()};
+                truthSegDecor(*bkgMuon).emplace_back(truthPartDecor.container(), bkgSeg->index());
                 segmentMatched[sIdx] = true;
             }
         }

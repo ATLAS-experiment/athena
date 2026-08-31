@@ -7,9 +7,10 @@ atlas_subdir( TrigServices )
 find_package( Boost COMPONENTS regex python )
 find_package( CORAL COMPONENTS CoralBase CoralKernel )
 find_package( ROOT COMPONENTS Core Tree Hist RIO )
-find_package( tdaq-common COMPONENTS CTPfragment eformat hltinterface ers webdaq )
+find_package( tdaq-common COMPONENTS CTPfragment eformat hltinterface ers webdaq webdaq-noroot )
 find_package( TBB )
 find_package( Python COMPONENTS Development )
+find_package( nlohmann_json )
 find_package( requests )
 
 # Component(s) in the package:
@@ -18,11 +19,11 @@ atlas_add_component( TrigServices
                      INCLUDE_DIRS
                      ${TDAQ-COMMON_INCLUDE_DIRS} ${ROOT_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS} ${CORAL_INCLUDE_DIRS} ${TBB_INCLUDE_DIRS}
                      LINK_LIBRARIES
-                     ${TDAQ-COMMON_LIBRARIES} ${ROOT_LIBRARIES} ${Boost_LIBRARIES} ${CORAL_LIBRARIES} ${TBB_LIBRARIES}
+                     ${TDAQ-COMMON_LIBRARIES} ${ROOT_LIBRARIES} ${Boost_LIBRARIES} ${CORAL_LIBRARIES} ${TBB_LIBRARIES} nlohmann_json::nlohmann_json
                      AthenaBaseComps AthenaInterprocess AthenaKernel AthenaMonitoringKernelLib AthenaPoolUtilities
-                     ByteStreamCnvSvcBaseLib ByteStreamData CxxUtils EventInfoUtils GaudiKernel RDBAccessSvcLib StoreGateLib TrigCostMonitorLib TrigKernel
-                     TrigDataAccessMonitoringLib TrigOutputHandlingLib TrigSteeringEvent TrigSteerMonitorLib
-                     TrigTimeAlgsLib xAODEventInfo xAODTrigger TrigT1Result)
+                     ByteStreamCnvSvcBaseLib ByteStreamData CxxUtils EventInfoUtils GaudiKernel RDBAccessSvcLib StoreGateLib TrigKernel
+                     TrigOutputHandlingLib TrigSteeringEvent TrigSteerMonitorLib
+                     xAODEventInfo xAODTrigger TrigT1Result)
 
 # Install files from the package:
 atlas_install_python_modules( python/*.py

@@ -37,6 +37,10 @@ class TauCalibrationConfig (ConfigBlock):
         self.addOption ('addGlobalFELinksDep', False, type=bool,
             info="whether to add dependencies for the global FE links (needed for PHYSLITE production)",
             expertMode=True)
+        self.addOption ('useGNTau', False, type=bool,
+            info="use GNTau-based ID instead of RNNTau ID. "
+            "Recommendations: experimental feature and might become default soon.",
+            expertMode=True)
 
     def instanceName (self) :
         """Return the instance name for this block"""
@@ -118,6 +122,9 @@ class TauCalibrationConfig (ConfigBlock):
         config.addPrivateTool( 'smearingTool', 'TauAnalysisTools::TauSmearingTool' )
         alg.smearingTool.useFastSim = config.dataType() is DataType.FastSim
         alg.smearingTool.Campaign = "mc23" if config.geometry() is LHCPeriod.Run3 else "mc20"
+        if config.geometry() is LHCPeriod.Run2 and self.useGNTau:
+           raise RuntimeError("Tau Smearing recommendations with GNTau are not yet available for Run2") 
+        alg.smearingTool.useGNTau = self.useGNTau
         alg.taus = config.readName (self.containerName)
         alg.tausOut = config.copyName (self.containerName)
         config.setExtraOutputs ({('xAOD::IParticleContainer' , 'StoreGateSvc+' + config.readName(self.containerName, nominal=True) + '.RNNEleScoreSigTrans_v1')})
@@ -627,6 +634,10 @@ class TauTriggerAnalysisSFBlock (ConfigBlock):
             # Temporary skip for MC23e until SFs are available
             if config.campaign() is Campaign.MC23e:
                 log.warning("Tau trigger scale factors are not available yet for MC23e")
+                return
+            # Temporary skip for MC23g until SFs are available
+            if config.campaign() is Campaign.MC23g:
+                log.warning("Tau trigger scale factors are not available yet for MC23g")
                 return
 
             triggers = trigger_set(config, self.triggerChainsPerYear,

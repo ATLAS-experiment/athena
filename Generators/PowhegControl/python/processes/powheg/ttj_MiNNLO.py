@@ -1,6 +1,6 @@
 # Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 
-from AthenaCommon import Logging
+from ... import Logging
 from ..powheg_V2 import PowhegV2
 from ..external import ExternalMadSpin
 import os
@@ -43,7 +43,9 @@ class ttj_MiNNLO(PowhegV2):
         
         # this is very hacky - needed to handle problems with error handling in some fortran codes
         errors = super(ttj_MiNNLO, self).openloops_error()
-        warnings = super(ttj_MiNNLO, self).hoppet_warning()
+        # list of message patterns to be treated as warnings
+        warnings = ["WARNING in get_lnlnQ_wgts"]
+        warnings += super(ttj_MiNNLO, self).hoppet_warning()
         infos = super(ttj_MiNNLO, self).hoppet_info()
         
         super(ttj_MiNNLO, self).__init__(base_directory, "ttJ_MiNNLO", warning_output=warnings, info_output=infos, error_output=errors, **kwargs)

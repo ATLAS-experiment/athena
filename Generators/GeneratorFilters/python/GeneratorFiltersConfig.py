@@ -448,11 +448,12 @@ def xAODMultiElectronFilterCommonCfg(flags, **kwargs):
 
 def xAODMultiLeptonFilterCommonCfg(flags, **kwargs):
     """common fragment for xAODMultiLepton filter conversion to xAOD,
-    creation of slimmed container containing electrons and muons
+    creation of slimmed container containing electrons, muons and taus
     connecting the filter"""
     cfg = ComponentAccumulator(EvgenSequenceFactory(EvgenSequence.Filter))
     cfg.merge(CreatexAODSlimmedContainerCfg(flags, containerName="TruthElectrons"))  # algs in PreFilter sequence
     cfg.merge(CreatexAODSlimmedContainerCfg(flags, containerName="TruthMuons"))  # algs in PreFilter sequence
+    cfg.merge(CreatexAODSlimmedContainerCfg(flags, containerName="TruthTaus"))  # algs in PreFilter sequence
     # To modify cuts make a new Cfg method depending on this one, where you set the required kwargs
     cfg.addEventAlgo(CompFactory.xAODMultiLeptonFilter("xAODMultiLeptonFilter", **kwargs))
     return cfg
@@ -648,6 +649,7 @@ if __name__ == "__main__":
     acc.merge( xAODChargedTracksFilterCommonCfg(flags))
     acc.merge( xAODChargedTracksWeightFilterCommonCfg(flags))
     acc.merge( xAODDecayTimeFilterCommonCfg(flags))
+    acc.merge( xAODDecayVolumeFilterCommonCfg(flags))
     acc.merge( xAODDecaysFinalStateFilterCommonCfg(flags))
     acc.merge( xAODDiLeptonMassFilterCommonCfg(flags))
     acc.merge( xAODDirectPhotonFilterCommonCfg(flags))

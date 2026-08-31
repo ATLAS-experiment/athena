@@ -29,8 +29,6 @@ class TrigCostFinalizeAlg : public AthReentrantAlgorithm
     SG::WriteHandleKey<xAOD::TrigCompositeContainer> m_costWriteHandleKey { this, "CostWriteHandleKey", "HLT_TrigCostContainer",
         "TrigComposite collections summarising the HLT execution" };
 
-    SG::WriteHandleKey<xAOD::TrigCompositeContainer> m_rosWriteHandleKey { this, "ROSWriteHandleKey", "HLT_TrigCostROSContainer",
-        "TrigComposite collections summarising the ROS requests" };
 };
 
 #endif //> !TRIGCOSTMONITOR_TRIGCOSTFINALIZEALG_H

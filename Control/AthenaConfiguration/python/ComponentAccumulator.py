@@ -25,6 +25,7 @@ class ConfigurationError(RuntimeError):
 
 # Always create these services in this order:
 _basicServicesToCreateOrder=("CoreDumpSvc/CoreDumpSvc",
+                             "DBReplicaSvc/DBReplicaSvc",
                              "GeoModelSvc/GeoModelSvc",
                              "DetDescrCnvSvc/DetDescrCnvSvc")
 

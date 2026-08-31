@@ -34,7 +34,9 @@ namespace DiTau{
     sublead_subjet_eta = Book1D("sublead_subjet_eta", "DiTau subleading subjet eta; DiTau Subleading Subjet Pseudo-Rapidity;Entries / 0.05", 32, -3.2, 3.2);
     sublead_subjet_phi = Book1D("sublead_subjet_phi", "DiTau subleading subjet phi; DiTau Subleading Subjet Azimuthal Angle;Entries / 0.05", 32, -3.2, 3.2);
     sublead_subjet_ntracks = Book1D("sublead_subjet_ntracks", "DiTau subleading subjet ntracks; DiTau Subleading Subjet Number of Tracks; Entries", 8,0,8);  
-   
+
+    ditau_jet_vertex_fraction = Book1D("ditau_jet_vertex_fraction", "ditau jet vertex fraction", 20, 0, 1);
+
   }
 
   void CorePlots::fill(const xAOD::DiTauJet& ditau, float weight) {
@@ -93,6 +95,10 @@ namespace DiTau{
      sublead_subjet_eta->Fill(ditau.subjetEta(1),weight);
      sublead_subjet_phi->Fill(ditau.subjetPhi(1),weight);
      sublead_subjet_ntracks->Fill(subl_ntracks);
+
+     float avariable = 0.;
+     bool test = ditau.detail(xAOD::DiTauJetParameters::TauJetVtxFraction, avariable);
+     if(test) ditau_jet_vertex_fraction->Fill(avariable, weight); 
 
   }
 }

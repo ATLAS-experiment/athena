@@ -38,6 +38,7 @@ ATHENA_CORE_NUMBER=${NTHREADS} FastChain_tf.py \
    --sharedWriter True \
    --parallelCompression False \
    --formats PHYS PHYSVAL \
+   --ignorePatterns "DoubleEventSelectorAthenaPool.cxx.*RECOVERABLE" \
    --athenaopts "EVNTtoRDO:--threads=0 --nprocs=${NTHREADS}" "RDOtoRDOTrigger:--threads=${NTHREADS} --nprocs=0" "RAWtoALL:--threads=${NTHREADS} --nprocs=0" \
    --imf False  > __log.txt 2>&1;
 

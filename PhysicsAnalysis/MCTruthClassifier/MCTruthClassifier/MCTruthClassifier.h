@@ -14,7 +14,7 @@ CREATED:  Sep 2007
 #include "AsgDataHandles/ReadHandleKey.h"
 #include "AsgTools/AsgTool.h"
 #include "MCTruthClassifier/IMCTruthClassifier.h"
-#include "MCTruthClassifier/MCTruthClassifierDefs.h"
+#include "TruthUtils/TruthClasses.h"
 // EDM includes
 #include "xAODTruth/TruthParticleContainer.h"
 #include "xAODTruth/TruthVertex.h"
@@ -74,7 +74,6 @@ public:
     declareProperty("partExtrConeEta", m_partExtrConeEta = 0.2);
     declareProperty("phtClasConePhi", m_phtClasConePhi = 0.05);
     declareProperty("phtClasConeEta", m_phtClasConeEta = 0.025);
-    declareProperty("useCaching", m_useCaching = true);
     declareProperty("phtdRtoTrCut", m_phtdRtoTrCut = 0.1);
     declareProperty("fwrdEledRtoTrCut", m_fwrdEledRtoTrCut = 0.15);
     declareProperty("ROICone", m_ROICone = false);
@@ -118,89 +117,75 @@ public:
 #endif
     return StatusCode::SUCCESS;
   }
+
+using IMCTruthClassifier::particleTruthClassifier;
+  
+protected:
   virtual std::pair<MCTruthPartClassifier::ParticleType, MCTruthPartClassifier::ParticleOrigin>
-  particleTruthClassifier(const xAOD::TruthParticle*,MCTruthPartClassifier::Info* info = nullptr) const override final;
+  particleTruthClassifier(const xAOD::TruthParticle*,IMCTruthClassifier::Info* info) const override final;
 
 #ifndef XAOD_ANALYSIS /*These can not run in Analysis Base*/
   virtual std::pair<MCTruthPartClassifier::ParticleType, MCTruthPartClassifier::ParticleOrigin>
-  particleHepMCTruthClassifier(const HepMcParticleLink& theLink,MCTruthPartClassifier::Info* info = nullptr) const override final;
+  particleHepMCTruthClassifier(const HepMcParticleLink& theLink,IMCTruthClassifier::Info* info) const override final;
 
 #endif
 
+public:
 #ifndef GENERATIONBASE /*These can not run in Generation only release*/
   //Main method for Track to Truth association
-  virtual const xAOD::TruthParticle* getGenPart(const xAOD::TrackParticle*, MCTruthPartClassifier::Info* info = nullptr) const override final;
+  virtual const xAOD::TruthParticle* getGenPart(const xAOD::TrackParticle*, IMCTruthClassifier::Info* info = nullptr) const override final;
 
 #ifndef XAOD_ANALYSIS
   //Main method for egamma clusters to Truth Particle association
-  virtual const xAOD::TruthParticle* egammaClusMatch(const xAOD::CaloCluster*,bool,MCTruthPartClassifier::Info* info) const override final;
+  virtual const xAOD::TruthParticle* egammaClusMatch(const xAOD::CaloCluster*,bool,IMCTruthClassifier::Info* info) const override final;
 #endif
 
+protected:
   virtual std::pair<MCTruthPartClassifier::ParticleType, MCTruthPartClassifier::ParticleOrigin>
-  particleTruthClassifier(const xAOD::TrackParticle*,MCTruthPartClassifier::Info* info = nullptr) const override final;
+  particleTruthClassifier(const xAOD::TrackParticle*,IMCTruthClassifier::Info* info) const override final;
 
   virtual std::pair<MCTruthPartClassifier::ParticleType, MCTruthPartClassifier::ParticleOrigin>
-  particleTruthClassifier(const xAOD::Electron*,MCTruthPartClassifier::Info* info = nullptr) const override final;
+  particleTruthClassifier(const xAOD::Electron*,IMCTruthClassifier::Info* info) const override final;
 
   virtual std::pair<MCTruthPartClassifier::ParticleType, MCTruthPartClassifier::ParticleOrigin>
-  particleTruthClassifier(const xAOD::Photon*,MCTruthPartClassifier::Info* info = nullptr) const override final;
+  particleTruthClassifier(const xAOD::Photon*,IMCTruthClassifier::Info* info) const override final;
 
   virtual std::pair<MCTruthPartClassifier::ParticleType, MCTruthPartClassifier::ParticleOrigin>
-  particleTruthClassifier(const xAOD::Muon*,MCTruthPartClassifier::Info* info = nullptr) const override final;
+  particleTruthClassifier(const xAOD::Muon*,IMCTruthClassifier::Info* info) const override final;
 
   virtual std::pair<MCTruthPartClassifier::ParticleType, MCTruthPartClassifier::ParticleOrigin>
-  particleTruthClassifier(const xAOD::CaloCluster*,MCTruthPartClassifier::Info* info = nullptr) const override final;
+  particleTruthClassifier(const xAOD::CaloCluster*,IMCTruthClassifier::Info* info) const override final;
 
   virtual std::pair<MCTruthPartClassifier::ParticleType, MCTruthPartClassifier::ParticleOrigin>
-  particleTruthClassifier(const xAOD::Jet*, bool DR, MCTruthPartClassifier::Info* info = nullptr) const override final;
+  particleTruthClassifier(const xAOD::Jet*, bool DR, IMCTruthClassifier::Info* info) const override final;
 #endif
 
 private:
-  inline double detEta(double x, double y) const { return std::abs(x - y); }
-  inline double detPhi(double x, double y)  const {
-    double det = x - y;
-    if (det > M_PI) det = det - 2. * M_PI;
-    if (det < -M_PI) det = det + 2. * M_PI;
-    return std::abs(det);
-  }
-
-  // Temporary helper methods for detecting loops in the truth record
-  // Method1: Returns true if the parent particle is in the list of
-  // children of its decay vertex. Otherwise, returns the result of
-  // Method3.
-  bool TruthLoopDetectionMethod1(const xAOD::TruthVertex* childOrigVtx, const xAOD::TruthParticle* parent) const;
-  // Method2: Returns true if the parent production vertex is the
-  // child decay vertex and the child production vertex is the parent
-  // decay vertex.
-  bool TruthLoopDetectionMethod2(const xAOD::TruthParticle* child, const xAOD::TruthParticle* parent) const;
-  // Method3: Returns true if the parent and child production vertices
-  // are the same.
-  bool TruthLoopDetectionMethod3(const xAOD::TruthVertex* childOrigVtx, const xAOD::TruthParticle* parent) const;
 
   MCTruthPartClassifier::ParticleOrigin defOrigOfElectron(const xAOD::TruthParticleContainer& xTruthParticleContainer,
                                                           const xAOD::TruthParticle*,
                                                           bool& isPrompt,
-                                                          MCTruthPartClassifier::Info& info) const;
+                                                          IMCTruthClassifier::Info& info) const;
 
   MCTruthPartClassifier::ParticleOrigin defOrigOfMuon(const xAOD::TruthParticleContainer& xTruthParticleContainer,
                                                       const xAOD::TruthParticle*,
                                                       bool& isPrompt,
-                                                      MCTruthPartClassifier::Info& info) const;
+                                                      IMCTruthClassifier::Info& info) const;
 
   MCTruthPartClassifier::ParticleOrigin defOrigOfTau(const xAOD::TruthParticleContainer& xTruthParticleContainer,
                                                      const xAOD::TruthParticle*,
                                                      int motherPDG,
-                                                     MCTruthPartClassifier::Info& info) const;
+                                                     IMCTruthClassifier::Info& info) const;
 
   MCTruthPartClassifier::ParticleOrigin defOrigOfPhoton(const xAOD::TruthParticleContainer& xTruthParticleContainer,
                                                         const xAOD::TruthParticle*,
                                                         bool& isPrompt,
-                                                        MCTruthPartClassifier::Info& info) const;
+                                                        IMCTruthClassifier::Info& info) const;
 
   MCTruthPartClassifier::ParticleOrigin defOrigOfNeutrino(const xAOD::TruthParticleContainer& xTruthParticleContainer,
                                                           const xAOD::TruthParticle*,
                                                           bool& isPrompt,
-                                                          MCTruthPartClassifier::Info& info) const;
+                                                          IMCTruthClassifier::Info& info) const;
 
 #if !defined(XAOD_ANALYSIS) && !defined(GENERATIONBASE)
   bool genPartToCalo(const EventContext& ctx,
@@ -210,12 +195,6 @@ private:
                      double& dRmatch,
                      bool& isNarrowCone,
                      const CaloDetDescrManager& caloDDMgr) const;
-
-#endif
-
-#ifndef GENERATIONBASE
-  double fracParticleInJet(const xAOD::TruthParticle*, const xAOD::Jet*, bool DR, bool nparts) const;
-  void findJetConstituents(const xAOD::Jet*, std::set<const xAOD::TruthParticle*>& constituents, bool DR) const;
 #endif
 
   /* Data members*/
@@ -233,7 +212,6 @@ private:
   float m_FwdElectronTruthExtrEtaWindowCut;
   float m_partExtrConeEta;
   float m_partExtrConePhi;
-  bool m_useCaching;
   float m_phtClasConePhi;
   float m_phtClasConeEta;
   float m_phtdRtoTrCut;

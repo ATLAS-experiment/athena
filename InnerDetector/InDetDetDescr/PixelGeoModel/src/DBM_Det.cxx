@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "DBM_Det.h"
@@ -95,11 +95,8 @@ GeoVPhysVol* DBM_Det::Build()
       }
     }
 
-
   // Set numerology for the full DBM system
-
-  if(m_DDmgr->numerology().numEndcapsDBM()==0){
-
+  if(m_DDmgr->numerology().numEndcapsDBM()==0) {
     int numDisk=3;
     int numPhiModules=4;    
     m_DDmgr->numerology().setNumDisksDBM(numDisk);
@@ -111,11 +108,5 @@ GeoVPhysVol* DBM_Det::Build()
     }
   }
 
-  if(m_sqliteReader) {
-    std::string key="DBM_Det_"+std::to_string(m_gmt_mgr->GetLD())+"_"+std::to_string(m_gmt_mgr->Phi())+"_"+std::to_string(m_gmt_mgr->Eta());
-    return (*m_mapFPV)[key];
-  }
-  else {
-    return Phys;
-  }
+  return Phys;
 }

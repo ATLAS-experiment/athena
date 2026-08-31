@@ -1,5 +1,7 @@
 #include "PFlowUtils/FEElectronHelper.h"
 
+static constexpr float GeV = 1000.f;
+
 FEElectronHelper::FEElectronHelper() : AsgMessaging("FEElectronHelper") {};
 
  bool FEElectronHelper::checkElectronLinks(const std::vector < ElementLink< xAOD::ElectronContainer > >& FE_ElectronLinks, const std::string& qualityString) const{
@@ -18,7 +20,7 @@ FEElectronHelper::FEElectronHelper() : AsgMessaging("FEElectronHelper") {};
             continue;
         }
     
-        if( electron->pt() > 10000 && passElectronID){
+        if( electron->pt() > 10*GeV && passElectronID){
           return true;
         }
       }

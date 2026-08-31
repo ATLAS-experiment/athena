@@ -56,8 +56,8 @@ TruthEtIsolationsContainer* TruthEtIsolationsContainerCnv::createTransient(const
 
    TruthEtIsolationsContainer *trans = 0;
 
-   //static pool::Guid tr_guid("003AE8C0-B033-4470-9F3D-869724F34E48");
-   static const pool::Guid p1_guid("EB6EC9D5-4D99-4565-9E4A-65BE1C21B35D");
+   //static Guid tr_guid("003AE8C0-B033-4470-9F3D-869724F34E48");
+   static const Guid p1_guid("EB6EC9D5-4D99-4565-9E4A-65BE1C21B35D");
 
    if ( compareClassGuid(token, p1_guid) ) {
      

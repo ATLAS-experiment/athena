@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "src/KalmanFitterTool.h"
@@ -31,10 +31,10 @@ namespace ActsTrk {
 StatusCode KalmanFitterTool::initialize() {
 
   ATH_MSG_DEBUG(name() << "::" << __FUNCTION__);
-  ATH_CHECK(m_trackingGeometryTool.retrieve());
-  ATH_CHECK(m_extrapolationTool.retrieve());
+  ATH_CHECK(m_trackingGeometrySvc.retrieve());
   ATH_CHECK(m_geometryConvTool.retrieve());
   ATH_CHECK(m_ROTcreator.retrieve(EnableTool{!m_ROTcreator.empty()}));
+  ATH_CHECK(m_muonCalibrator.retrieve(EnableTool{!m_muonCalibrator.empty()}));
   m_logger = makeActsAthenaLogger(this, "KalmanRefit");
 
   auto field = std::make_shared<ATLASMagneticFieldWrapper>();
@@ -52,7 +52,7 @@ StatusCode KalmanFitterTool::initialize() {
                 logger().cloneWithSuffix("DirectKalmanFitter"));
 
   } else {
-    Acts::Navigator navigator( Acts::Navigator::Config{ m_trackingGeometryTool->trackingGeometry() },
+    Acts::Navigator navigator( Acts::Navigator::Config{ m_trackingGeometrySvc->trackingGeometry() },
             logger().cloneWithSuffix("Navigator"));
     Acts::Propagator<Acts::SympyStepper, Acts::Navigator> propagator(stepper, 
                       std::move(navigator),
@@ -93,13 +93,26 @@ StatusCode KalmanFitterTool::initialize() {
   }
   /// Configure the fit extensions for the uncalibrated measurement fits
   {
-    m_unalibMeasSurfAcc = detail::xAODUncalibMeasSurfAcc{m_trackingGeometryTool.get()}; 
-    m_uncalibMeasCalibrator = xAODUnCalibrator_t::NoCalibration(m_trackingGeometryTool.get());
+    m_unalibMeasSurfAcc = detail::xAODUncalibMeasSurfAcc{m_trackingGeometrySvc.get()}; 
+
+   
+    m_idCalibrator = xAODItkCalibrator_t::NoCalibration(m_trackingGeometrySvc.get());
+
+    /// Connect the muon types with the muon calibrator
+    using enum xAOD::UncalibMeasType;
+    if (m_muonCalibrator.isEnabled()) {
+      for (const auto muonType : {MdtDriftCircleType, RpcStripType, TgcStripType, MMClusterType, sTgcStripType}) {
+        m_uncalibMeasCalibrator.connect<&MuonR4::ISpacePointCalibrator::calibrateSourceLink>(muonType, m_muonCalibrator.get());
+      }
+    }
+    for (const auto idType: {PixelClusterType, StripClusterType, HGTDClusterType}) {
+      m_uncalibMeasCalibrator.connect<&xAODItkCalibrator_t::calibrate>(idType, &m_idCalibrator);
+    }
 
     FitterExtension_t& configureMe = m_kfExtensions[Acts::toUnderlying(detail::SourceLinkType::xAODUnCalibMeas)];
     configureMe = extensionTemplate;
     configureMe.surfaceAccessor.connect<&detail::xAODUncalibMeasSurfAcc::operator()>(&m_unalibMeasSurfAcc);
-    configureMe.calibrator.connect<&xAODUnCalibrator_t::calibrate>(&m_uncalibMeasCalibrator);
+    configureMe.calibrator.connect<&detail::xAODUncalibMeasCalibrator::calibrate>(&m_uncalibMeasCalibrator);
   }
   return StatusCode::SUCCESS;
 }
@@ -112,8 +125,8 @@ KalmanFitterTool::FitterOptions_t
                                    const Acts::Surface* surface,
                                    detail::SourceLinkType slType) const {
   
-  
-  const auto& kfExtensions = m_kfExtensions[Acts::toUnderlying(slType)];
+  //slType = 3 is possible
+  const auto& kfExtensions = m_kfExtensions.at(Acts::toUnderlying(slType));
 
   Acts::PropagatorPlainOptions propagationOption(tgContext, mfContext);
   propagationOption.maxSteps = m_option_maxPropagationStep;

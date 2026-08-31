@@ -1164,7 +1164,7 @@ def LLP1Cfg(flags):
             LLP1SlimmingHelper.ExtraVariables += [ "InDetLargeD0TrackParticles." + '.'.join( [ var + suffix for var in VSITrackAuxVars] ) ]
             LLP1SlimmingHelper.ExtraVariables += [ "LRTGSFTrackParticles." + '.'.join( [ var + suffix for var in VSITrackAuxVars] ) ]
 
-    LLP1SlimmingHelper.ExtraVariables.append('CaloCalTopoClusters.e_samplCaloCalTopoClusters.e_sampl.calM.calE.calEta.calPhi.CENTER_MAG.SECOND_TIME.time.CENTER_LAMBDA.rawE.rawM.rawPhi.rawEta.clusterSize.eta0.phi0.altE.altEta.altPhi.altM.AVG_LAR_Q.AVG_TILE_Q.BADLARQ_FRAC.EM_PROBABILITY.ENG_BAD_CELLS.ENG_POS.ISOLATION.N_BAD_CELLS.SECOND_LAMBDA.SECOND_R')
+    LLP1SlimmingHelper.ExtraVariables.append('CaloCalTopoClusters.e_sampl.calM.calE.calEta.calPhi.CENTER_MAG.SECOND_TIME.time.CENTER_LAMBDA.rawE.rawM.rawPhi.rawEta.clusterSize.eta0.phi0.altE.altEta.altPhi.altM.AVG_LAR_Q.AVG_TILE_Q.BADLARQ_FRAC.EM_PROBABILITY.ENG_BAD_CELLS.ENG_POS.ISOLATION.N_BAD_CELLS.SECOND_LAMBDA.SECOND_R')
     LLP1SlimmingHelper.AppendToDictionary["EMOriginTopoClusters"]='xAOD::CaloClusterContainer'
     LLP1SlimmingHelper.AppendToDictionary["EMOriginTopoClustersAux"]='xAOD::ShallowAuxContainer'
     LLP1SlimmingHelper.ExtraVariables.append('EMOriginTopoClusters.e_sampl.calM.calE.calEta.calPhi.CENTER_MAG.SECOND_TIME.time.CENTER_LAMBDA.rawE.rawM.rawPhi.rawEta.clusterSize.eta0.phi0.altE.altEta.altPhi.altM.AVG_LAR_Q.AVG_TILE_Q.BADLARQ_FRAC.EM_PROBABILITY.ENG_BAD_CELLS.ENG_POS.ISOLATION.N_BAD_CELLS.SECOND_LAMBDA.SECOND_R')

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef DETDESCRCNVSVC_DETDESCRCNVSVC_H
@@ -82,6 +82,9 @@ class DetDescrCnvSvc : public ConversionSvc {
     BooleanProperty m_compact_ids_only{this, "CompactIDsOnly", false};
     BooleanProperty m_do_checks{this, "DoIdChecks", false};
     BooleanProperty m_do_neighbours{this, "DoInitNeighbours", true};
+
+    /// Switch on/off the TRT
+    BooleanProperty m_hasTRT{this, "HasTRT", false};
 
     /// Switch on/off the muon detectors
 

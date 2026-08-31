@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
-# art-description: Test of P1+Tier0 workflow, runs athenaHLT with PhysicsP1_pp_lowMu_run3_v1 menu followed by offline reco and monitoring
+# art-description: Test of P1+Tier0 workflow, runs athenaEF with PhysicsP1_pp_lowMu_run3_v1 menu followed by offline reco and monitoring
 # art-type: build
 # art-include: main/Athena/x86_64-el9-gcc15-opt
 # art-include: 24.0/Athena
@@ -17,7 +17,7 @@ triggermenu = 'PhysicsP1_pp_lowMu_run3_v1'
 
 # HLT step (BS->BS)
 hlt = ExecStep.ExecStep()
-hlt.type = 'athenaHLT'
+hlt.type = 'athenaEF'
 hlt.job_options = 'TriggerJobOpts.runHLT'
 hlt.input = 'data_lowmu'
 hlt.max_events = 50

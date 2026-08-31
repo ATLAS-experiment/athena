@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -30,9 +30,6 @@ namespace Trk {
       public:
         /** Constructor */
         LayerMaterialConverter(const std::string&,const std::string&,const IInterface*);
-
-        /** Destructor */
-        virtual ~LayerMaterialConverter();
         
         /** AlgTool initialize method */
         StatusCode initialize();
@@ -43,7 +40,8 @@ namespace Trk {
 
       private:
           
-        ToolHandle<ILayerMaterialCreator>   m_layerMaterialCreator;
+        ToolHandle<ILayerMaterialCreator> m_layerMaterialCreator
+          {this, "LayerMaterialCreator", ""};
         
     };
 

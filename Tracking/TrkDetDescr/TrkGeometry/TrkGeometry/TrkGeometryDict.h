@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRKGEOMETRY_TRKGEOMETRYDICT_H
@@ -13,6 +13,7 @@ namespace TrkDetDetDescrPoolRegister {
 /** the standard vector of MaterialStep */
 std::vector<Trk::MaterialStep*> registerMaterialStepVector;
 /** the DataVector of MaterialStep */
+//coverity[GLOBAL_INIT_ORDER]
 DataVector<Trk::MaterialStep> registerMaterialStepDataVector;
 }  // namespace TrkDetDetDescrPoolRegister
 

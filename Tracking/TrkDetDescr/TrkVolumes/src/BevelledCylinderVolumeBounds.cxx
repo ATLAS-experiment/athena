@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -373,6 +373,9 @@ Trk::BevelledCylinderVolumeBounds::boundarySurfaceAccessor(
             Trk::BevelledTubeZincreaseRincrease)};
 
     } else {
+      if (deltaR == 0.)[[unlikely]]{
+        throw std::runtime_error("deltaR is zero in BevelledCylinderVolumeBounds::boundarySurfaceAccessor");
+      }
       // solve the linear equation for the inner Radius
       Trk::BevelledBoundaryIntersector intersectRmin(
         posR, posZ, deltaZ / deltaR, m_innerRadius);

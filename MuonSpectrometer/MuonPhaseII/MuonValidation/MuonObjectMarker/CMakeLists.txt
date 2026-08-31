@@ -12,7 +12,7 @@ atlas_add_component( MuonObjectMarker
                      src/components/*.cxx src/*.cxx 
                      LINK_LIBRARIES AthenaKernel StoreGateLib MuonTruthHelpers
                                     xAODMuonSimHit xAODMuonPrepData MuonPatternEvent MuonPatternHelpers MuonSegment
-                                    DerivationFrameworkMuonsLib MuonReadoutGeometryR4 xAODMuon xAODMuonSimHit
+                                    MuonReadoutGeometryR4 xAODMuon xAODMuonSimHit
                                     TrkCompetingRIOsOnTrack xAODMuonViews)
 
 # Install files from the package:

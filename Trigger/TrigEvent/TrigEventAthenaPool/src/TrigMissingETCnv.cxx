@@ -32,9 +32,9 @@ TrigMissingET* TrigMissingETCnv::createTransient(const Token* token) {
 
   mlog << MSG::DEBUG << "TrigMissingETCnv::createTransient " << endmsg;
 
-  static const pool::Guid p2_guid("9972F10B-2B6A-42A7-AF71-D8FB60F07C6D");
-  static const pool::Guid p1_guid("A65F0499-A789-4D66-9930-E8651FE91F8A");
-  static const pool::Guid p0_guid("1403772C-7444-4340-930B-ABD51C243A09");
+  static const Guid p2_guid("9972F10B-2B6A-42A7-AF71-D8FB60F07C6D");
+  static const Guid p1_guid("A65F0499-A789-4D66-9930-E8651FE91F8A");
+  static const Guid p0_guid("1403772C-7444-4340-930B-ABD51C243A09");
   
   if( compareClassGuid(token, p2_guid) ) {
     

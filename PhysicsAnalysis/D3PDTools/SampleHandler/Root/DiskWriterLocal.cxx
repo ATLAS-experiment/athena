@@ -13,10 +13,10 @@
 
 #include <exception>
 #include <iostream>
+#include <stdexcept>
 #include <TFile.h>
 #include <TSystem.h>
 #include <RootCoreUtils/Assert.h>
-#include <RootCoreUtils/ThrowMsg.h>
 
 //
 // method implementations
@@ -38,8 +38,15 @@ namespace SH
     RCU_REQUIRE (!val_path.empty());
 
     std::string dir = gSystem->DirName (val_path.c_str());
-    gSystem->mkdir (dir.c_str(), true);
-    m_file = new TFile (val_path.c_str(), "RECREATE");
+    if (gSystem->mkdir (dir.c_str(), true) != 0 &&
+        gSystem->AccessPathName (dir.c_str()) != 0)
+      throw std::runtime_error ("failed to create directory: " + dir);
+    m_file = std::make_unique<TFile> (val_path.c_str(), "RECREATE");
+    if (m_file->IsZombie() || !m_file->IsOpen())
+    {
+      m_file.reset();
+      throw std::runtime_error ("failed to create file: " + val_path);
+    }
 
     RCU_NEW_INVARIANT (this);
   }
@@ -51,7 +58,7 @@ namespace SH
   {
     RCU_DESTROY_INVARIANT (this);
 
-    if (m_file != 0)
+    if (m_file)
     {
       try
       {
@@ -83,8 +90,8 @@ namespace SH
   getFile ()
   {
     RCU_CHANGE_INVARIANT (this);
-    RCU_REQUIRE2_SOFT (m_file != 0, "file already closed");
-    return m_file;
+    RCU_REQUIRE2_SOFT (m_file != nullptr, "file already closed");
+    return m_file.get();
   }
 
 
@@ -93,12 +100,12 @@ namespace SH
   doClose ()
   {
     RCU_CHANGE_INVARIANT (this);
-    RCU_REQUIRE2_SOFT (m_file != 0, "file already closed");
+    RCU_REQUIRE2_SOFT (m_file != nullptr, "file already closed");
 
-    if (m_file->Write () < 0)
-      RCU_THROW_MSG ("failed to write to file: " + m_path);
+    m_file->Write ();
+    if (m_file->TestBit (TFile::kWriteError))
+      throw std::runtime_error ("failed to write to file: " + m_path);
     m_file->Close ();
-    delete m_file;
-    m_file = 0;
+    m_file.reset();
   }
 }

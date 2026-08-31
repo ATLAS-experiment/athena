@@ -33,16 +33,25 @@ StatusCode PhysValTau::initialize()
   // selections are configured in PhysicsValidation job options
   ATH_CHECK(m_primTauSel.retrieve());
   ATH_CHECK(m_nomiTauSel.retrieve());
-   
+
+  ATH_CHECK( m_tauContainerKey.initialize() );
+  ATH_CHECK( m_truthTauContainerKey.initialize() );
+
+  m_IsTruthMatchedKey = m_tauContainerKey.key() + "." + m_IsTruthMatchedKey.key();
+  ATH_CHECK( m_IsTruthMatchedKey.initialize() );
+
+  m_IsHadronicTauKey = m_truthTauContainerKey.key() + "." + m_IsHadronicTauKey.key();
+  ATH_CHECK( m_IsHadronicTauKey.initialize() );  
+
   return StatusCode::SUCCESS;
 }
 
 StatusCode PhysValTau::bookHistograms()
 {
   ATH_MSG_INFO ("Booking hists " << name() << "...");
-   
+
   // Physics validation plots are level 10
-  m_oTauValidationPlotsNominal.reset(new TauValidationPlotsNominal(0,"Tau/" + m_TauJetContainerName + "_", m_TauJetContainerName));
+  m_oTauValidationPlotsNominal.reset(new TauValidationPlotsNominal(0,"Tau/" + m_tauContainerKey.key() + "_", m_tauContainerKey.key()));
   m_oTauValidationPlotsNominal->setDetailLevel(100);
   m_oTauValidationPlotsNominal->initialize();
   std::vector<HistData> hists_nominal = m_oTauValidationPlotsNominal->retrieveBookedHistograms();
@@ -52,9 +61,9 @@ StatusCode PhysValTau::bookHistograms()
   }
 
 
-  if(m_TauJetContainerName=="TauJets"){
+  if(m_tauContainerKey.key()=="TauJets"){
 
-    m_oTauValidationPlotsNoCuts.reset(new TauValidationPlotsNoCuts(0,"Tau/" + m_TauJetContainerName + "_", m_TauJetContainerName));
+    m_oTauValidationPlotsNoCuts.reset(new TauValidationPlotsNoCuts(0,"Tau/" + m_tauContainerKey.key() + "_", m_tauContainerKey.key()));
     m_oTauValidationPlotsNoCuts->setDetailLevel(100);
     m_oTauValidationPlotsNoCuts->initialize();
     std::vector<HistData> hists_nocuts = m_oTauValidationPlotsNoCuts->retrieveBookedHistograms();
@@ -68,26 +77,40 @@ StatusCode PhysValTau::bookHistograms()
   return StatusCode::SUCCESS;      
 }
 
-StatusCode PhysValTau::fillHistograms(const EventContext& /*ctx*/)
+StatusCode PhysValTau::fillHistograms(const EventContext& ctx)
 {
   ATH_MSG_DEBUG ("Filling hists " << name() << "...");
 
-  // Retrieve tau container
-  const xAOD::TauJetContainer* taus = nullptr;
-  if(evtStore()->contains<xAOD::TauJetContainer>(m_TauJetContainerName)){
-      ATH_CHECK( evtStore()->retrieve(taus, m_TauJetContainerName) ); 
-  } else {
-      ATH_MSG_INFO("Input collection " << m_TauJetContainerName << " not found. Skip the monitoring ..");
-      return StatusCode::SUCCESS;   
-  } 
+  SG::ReadHandle<xAOD::TauJetContainer> tauJetsReadHandle(m_tauContainerKey, ctx);
+  if (!tauJetsReadHandle.isValid()) {
+    ATH_MSG_ERROR ("Could not retrieve TauJetContainer with key " << tauJetsReadHandle.key());
+    return StatusCode::FAILURE;
+  }
+  const xAOD::TauJetContainer* taus = tauJetsReadHandle.cptr();
+
 
   ATH_MSG_DEBUG("Number of taus: " << taus->size());
 
-  
-  // Retrieve event info and beamSpotWeight
-  const xAOD::EventInfo* eventInfo = nullptr;
-  ATH_CHECK( evtStore()->retrieve(eventInfo, "EventInfo") );
+  bool found_truth_taus = false;
+  const xAOD::TruthParticleContainer* truth_taus =  nullptr;
+  // Retrieve truth tau container for efficiency calculation
+  if ( m_isMC ) {
+      SG::ReadHandle<xAOD::TruthParticleContainer> truthTauJetsReadHandle(m_truthTauContainerKey, ctx);
+      if(!truthTauJetsReadHandle.isValid()) {
+          ATH_MSG_INFO("Input collection " << m_truthTauContainerKey.key() << " not found. Won't do reco efficiency plots ..");
+          found_truth_taus = false;
+      } else {
+	truth_taus = truthTauJetsReadHandle.cptr();      
+        found_truth_taus = true;
+      }
+  }   
+  // Vectors to calculate the reco efficiency
+  std::vector<const xAOD::TruthParticle*> vec_truth_taus;
+  std::vector<const xAOD::TauJet*> vec_reco_taus;
 
+  // Retrieve event info and beamSpotWeight
+  SG::ReadHandle<xAOD::EventInfo> eventInfoReadHandle("EventInfo", ctx);
+  const xAOD::EventInfo* eventInfo = eventInfoReadHandle.cptr();
 
   float weight = eventInfo->beamSpotWeight();
   float avg_mu = eventInfo->averageInteractionsPerCrossing();
@@ -101,7 +124,7 @@ StatusCode PhysValTau::fillHistograms(const EventContext& /*ctx*/)
     bool nominal = static_cast<bool>(m_nomiTauSel->accept(*tau));
       
     // fill histograms for reconstructed taus
-    if(m_TauJetContainerName=="TauJets"){
+    if(m_tauContainerKey.key()=="TauJets"){
       m_oTauValidationPlotsNoCuts->m_oRecoTauAllProngsPlots.fill(*tau, weight);
       m_oTauValidationPlotsNoCuts->m_oNewCorePlots.fill(*tau, weight);
       m_oTauValidationPlotsNoCuts->m_oRecTauEffPlots.fill(*tau, weight, avg_mu);
@@ -115,7 +138,7 @@ StatusCode PhysValTau::fillHistograms(const EventContext& /*ctx*/)
     }
     int recProng = tau->nTracks();
     if ( recProng == 1 ) {
-      if(m_TauJetContainerName=="TauJets"){
+      if(m_tauContainerKey.key()=="TauJets"){
 	m_oTauValidationPlotsNoCuts->m_oRecoHad1ProngPlots.fill(*tau, weight);
 	m_oTauValidationPlotsNoCuts->m_oRecTauEff1PPlots.fill(*tau, weight, avg_mu);
       }
@@ -125,7 +148,7 @@ StatusCode PhysValTau::fillHistograms(const EventContext& /*ctx*/)
       }
     }
     else if ( recProng == 3 ) {
-      if(m_TauJetContainerName=="TauJets"){
+      if(m_tauContainerKey.key()=="TauJets"){
 	m_oTauValidationPlotsNoCuts->m_oRecoHad3ProngPlots.fill(*tau, weight);
 	m_oTauValidationPlotsNoCuts->m_oRecTauEff3PPlots.fill(*tau, weight, avg_mu);
       }
@@ -142,14 +165,14 @@ StatusCode PhysValTau::fillHistograms(const EventContext& /*ctx*/)
     auto trueTau = m_truthTool->getTruth(*tau);
 
     // Fill truth and fake histograms
-    static const SG::ConstAccessor<char> IsTruthMatchedAcc("IsTruthMatched");
-    if ( (bool)IsTruthMatchedAcc(*tau) && (!(MC::isSMQuark(trueTau) || MC::isGluon(trueTau))) ) {
+    SG::ReadDecorHandle<xAOD::TauJetContainer, char> isTruthMatched{m_IsTruthMatchedKey, ctx};   
+    if( (bool) isTruthMatched(*tau) && (!(MC::isSMQuark(trueTau) || MC::isGluon(trueTau))) ) {
       ATH_MSG_DEBUG("Tau is truth-matched and not with a quark or a jet");
       if ( trueTau->isTau() ) {
-        static const SG::ConstAccessor<char> IsHadronicTauAcc("IsHadronicTau");
-	if ( (bool)IsHadronicTauAcc(*trueTau) ) {
+        SG::ReadDecorHandle<xAOD::TruthParticleContainer, char> isHadronicTau{m_IsHadronicTauKey, ctx};
+	if( (bool) isHadronicTau(*trueTau) ) { 
 	  ATH_MSG_DEBUG("Tau is hadronic tau");
-	  if(m_TauJetContainerName=="TauJets"){
+	  if(m_tauContainerKey.key()=="TauJets"){
 	    m_oTauValidationPlotsNoCuts->m_oGeneralTauAllProngsPlots.fill(*tau, weight);
 	    m_oTauValidationPlotsNoCuts->m_oNewCoreMatchedPlots.fill(*tau, weight);
 	    m_oTauValidationPlotsNoCuts->m_oMatchedResolutionPlots.fill(*tau, *trueTau, weight);
@@ -164,9 +187,13 @@ StatusCode PhysValTau::fillHistograms(const EventContext& /*ctx*/)
 	    m_oTauValidationPlotsNominal->m_oMatchedTauEffPlotsNom.fill(*tau, weight, avg_mu);
 	    m_oTauValidationPlotsNominal->m_oMatchedTauRecoTauPlotsNom.fill(*tau, weight);
 	    m_oTauValidationPlotsNominal->m_oNewCoreMatchedPlotsNom.fill(*tau, weight);
+
+            if(found_truth_taus){
+              vec_reco_taus.push_back(tau); 
+	    }   
 	  }
 	  if ( recProng == 1 ) {
-	    if(m_TauJetContainerName=="TauJets"){
+	    if(m_tauContainerKey.key()=="TauJets"){
 	      m_oTauValidationPlotsNoCuts->m_oHad1ProngPlots.fill(*tau, weight);
 	      m_oTauValidationPlotsNoCuts->m_oMatchedTauEff1PPlots.fill(*tau, weight, avg_mu);
 	      m_oTauValidationPlotsNoCuts->m_oMatchedResolution1PPlots.fill(*tau, *trueTau, weight);
@@ -178,7 +205,7 @@ StatusCode PhysValTau::fillHistograms(const EventContext& /*ctx*/)
 	    }
 	  }
 	  else if ( recProng == 3 ) {
-	    if(m_TauJetContainerName=="TauJets"){
+	    if(m_tauContainerKey.key()=="TauJets"){
 	      m_oTauValidationPlotsNoCuts->m_oHad3ProngPlots.fill(*tau, weight);
 	      m_oTauValidationPlotsNoCuts->m_oMatchedTauEff3PPlots.fill(*tau, weight, avg_mu);
 	      m_oTauValidationPlotsNoCuts->m_oMatchedResolution3PPlots.fill(*tau, *trueTau, weight);
@@ -191,14 +218,14 @@ StatusCode PhysValTau::fillHistograms(const EventContext& /*ctx*/)
 	  }
 
 	  xAOD::TauJetParameters::DecayMode trueMode = m_truthTool->getDecayMode(*trueTau);
-	  if(m_TauJetContainerName=="TauJets") m_oTauValidationPlotsNoCuts->m_oMigrationPlots.fill(*tau, trueMode, weight);
+	  if(m_tauContainerKey.key()=="TauJets") m_oTauValidationPlotsNoCuts->m_oMigrationPlots.fill(*tau, trueMode, weight);
 	  if ( nominal ) {
 	    m_oTauValidationPlotsNominal->m_oMigrationPlotsNom.fill(*tau, trueMode, weight);
 	  }
 	}
       } else if(trueTau->isElectron()) {
 	ATH_MSG_DEBUG("Tau is matched to an electron");
-	if(m_TauJetContainerName=="TauJets"){
+	if(m_tauContainerKey.key()=="TauJets"){
 	  m_oTauValidationPlotsNoCuts->m_oElMatchedParamPlots.fill(*tau, weight);
 	  m_oTauValidationPlotsNoCuts->m_oElMatchedEVetoPlots.fill(*tau, weight);
 	}
@@ -211,7 +238,7 @@ StatusCode PhysValTau::fillHistograms(const EventContext& /*ctx*/)
     }
     else {
       ATH_MSG_DEBUG("Tau is matched to a jet or Tau is unmatched - consider it as fake");
-      if(m_TauJetContainerName=="TauJets"){
+      if(m_tauContainerKey.key()=="TauJets"){
 	m_oTauValidationPlotsNoCuts->m_oFakeGeneralTauAllProngsPlots.fill(*tau, weight);
 	// Substructure/PFO histograms
 	m_oTauValidationPlotsNoCuts->m_oFakeTauAllProngsPlots.fill(*tau, weight);
@@ -225,7 +252,7 @@ StatusCode PhysValTau::fillHistograms(const EventContext& /*ctx*/)
 	m_oTauValidationPlotsNominal->m_oNewCoreFakePlotsNom.fill(*tau, weight);
       }
       if ( recProng == 1 ) {
-	if(m_TauJetContainerName=="TauJets"){
+	if(m_tauContainerKey.key()=="TauJets"){
 	  m_oTauValidationPlotsNoCuts->m_oFakeHad1ProngPlots.fill(*tau, weight);
 	  m_oTauValidationPlotsNoCuts->m_oFakeTauEff1PPlots.fill(*tau, weight, avg_mu);
 	}
@@ -235,7 +262,7 @@ StatusCode PhysValTau::fillHistograms(const EventContext& /*ctx*/)
 	}
       }
       if ( recProng == 3 ) {
-	if(m_TauJetContainerName=="TauJets"){
+	if(m_tauContainerKey.key()=="TauJets"){
 	  m_oTauValidationPlotsNoCuts->m_oFakeTauEff3PPlots.fill(*tau, weight, avg_mu);
 	  m_oTauValidationPlotsNoCuts->m_oFakeHad3ProngPlots.fill(*tau, weight);
 	}
@@ -245,6 +272,17 @@ StatusCode PhysValTau::fillHistograms(const EventContext& /*ctx*/)
 	}
       }
     }
+  }
+
+  // plots for tau reco efficiency
+  if(found_truth_taus){
+    for (auto truth_tau : *truth_taus) {
+      vec_truth_taus.push_back(truth_tau);
+    }
+
+    // fill histograms
+    m_oTauValidationPlotsNominal->m_oMatchedTauRecoEffPlotsNom.fill(vec_truth_taus, vec_reco_taus, weight, avg_mu);
+    m_oTauValidationPlotsNominal->m_oMatchedTauTrkClassEffPlotsNom.fill(vec_truth_taus, vec_reco_taus, weight, avg_mu);
   }
 
   ATH_CHECK( m_truthTool->lockDecorations (*taus) );

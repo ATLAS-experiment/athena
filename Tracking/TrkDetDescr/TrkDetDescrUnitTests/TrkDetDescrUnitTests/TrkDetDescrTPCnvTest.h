@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //////////////////////////////////////////////////////////////////
@@ -28,18 +28,21 @@ namespace Trk {
      public:
 
        /** Standard Athena-Algorithm Constructor */
-       TrkDetDescrTPCnvTest(const std::string& name, ISvcLocator* pSvcLocator);
-       
+       using Trk::TrkDetDescrUnitTestBase::TrkDetDescrUnitTestBase;
+
        /* specify the test here */
        StatusCode runTest();
        
      private:
-         bool        m_writeMode;
+         Gaudi::Property<bool> m_writeMode{this, "WriteMode", true};
          
-         std::string m_materialStepCollectionName;
-         std::string m_layerMaterialCollectionName;
-         std::string m_elementTableName;
-                                           
+         Gaudi::Property<std::string> m_materialStepCollectionName
+	   {this, "MaterialStepCollection", "RandomMaterialSteps"};
+         Gaudi::Property<std::string> m_layerMaterialCollectionName
+	   {this, "LayerMaterialMap", "RandomLayerMaterialMap"};
+         Gaudi::Property<std::string> m_elementTableName
+	   {this, "ElementTable", "RandomElementTable"};
+
    };
 }
 

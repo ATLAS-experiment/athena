@@ -1,8 +1,7 @@
 /*
-   Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
  */
 
-// INCLUDE HEADER FILES:
 
 #include "EMTrackMatchBuilder.h"
 
@@ -22,7 +21,6 @@
 #include "SGTools/CurrentEventStore.h"
 #include "StoreGate/ReadHandle.h"
 
-//  END OF HEADER FILES INCLUDE
 
 using xAOD::EgammaHelpers::summaryValueInt;
 
@@ -95,7 +93,11 @@ EMTrackMatchBuilder::trackExecute(const EventContext& ctx,
   // retrieve corresponding cluster
   const xAOD::CaloCluster* cluster = eg->caloCluster();
   // check if the cluster is sane
-  if (cluster && cluster->e() == 0.0) {
+  if (!cluster){
+    ATH_MSG_WARNING("trackExecute: cluster ptr is null! Ignoring cluster.");
+    return StatusCode::SUCCESS;
+  }
+  if (cluster->e() == 0.0) {
     ATH_MSG_WARNING("trackExecute: cluster energy is 0.0! Ignoring cluster.");
     return StatusCode::SUCCESS;
   }

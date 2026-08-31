@@ -37,8 +37,8 @@ TrigOperationalInfoCollection* TrigOperationalInfoCollectionCnv::createTransient
 {
   MsgStream mlog(msgSvc(), "TrigOperationalInfoCollectionConverter" );
 
-  static const pool::Guid tlp1_guid("7D5A0227-E28B-4228-83C5-22F8BBB90BBF");
-  static const pool::Guid p1_guid("B6C95F89-C1B9-4B9D-A533-F6F4B57BD277");
+  static const Guid tlp1_guid("7D5A0227-E28B-4228-83C5-22F8BBB90BBF");
+  static const Guid p1_guid("B6C95F89-C1B9-4B9D-A533-F6F4B57BD277");
   
   TrigOperationalInfoCollection *trans_obj(0);
   

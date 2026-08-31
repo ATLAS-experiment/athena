@@ -35,7 +35,7 @@ TgcL1RdoContainerCnv::createTransient(const Token* token)
    // using the correct persistent type pointer
 
    TgcL1RdoContainer *trans_cont = 0;
-   static const pool::Guid	p1_guid("799C629C-ECA9-4963-9C84-A4AD7D775B24");
+   static const Guid	p1_guid("799C629C-ECA9-4963-9C84-A4AD7D775B24");
 
    if( compareClassGuid(token, p1_guid) ) {
       std::unique_ptr< TgcL1RdoContainer_p1 >  col_vect( this->poolReadObject<TgcL1RdoContainer_p1>(token) );

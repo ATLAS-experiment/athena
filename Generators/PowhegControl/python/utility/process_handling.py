@@ -1,8 +1,9 @@
 # Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
 
-from AthenaCommon import Logging
+from .. import Logging
 from .non_blocking_stream_reader import NonBlockingStreamReader
 import subprocess
+import re
 
 ## Get handle to Athena logging
 logger = Logging.logging.getLogger("PowhegControl")
@@ -117,10 +118,13 @@ class SingleProcessThread(object):
 
     def write_queued_output(self):
         """! Pass queued output to the logger."""
+        float_only = re.compile(r"^\s*[+-]?\d+\.\d+\s*$")
         for stream in ["stdout", "stderr"]:
             while True:
                 output, queue_size = getattr(self, stream).readline(timeout=0.1)
-                if output is not None and any([(pattern in output) for pattern in self.__error_output]):
+                if output is not None and float_only.match(output):
+                    self.log(output, "info")
+                elif output is not None and any([(pattern in output) for pattern in self.__error_output]):
                     self.log(output, "error")
                 elif output is not None and any([(pattern in output) for pattern in self.__warning_output]):
                     self.log(output, "warning")

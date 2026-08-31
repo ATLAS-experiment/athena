@@ -13,6 +13,7 @@ PoolSvc                                             DEBUG POOL ReadCatalog is ap
 PoolSvc                                             DEBUG POOL ReadCatalog is apcfile:poolcond/PoolCat_oflcond.xml
 PoolSvc                                             DEBUG POOL ReadCatalog is apcfile:poolcond/PoolCat_comcond.xml
 IOVDbSvc                                             INFO Only 5 POOL conditions files will be open at once
+IOVDbSvc                                             INFO IOVDbSvc configured to use a COOL database
 IOVDbFolder                                          INFO Read from meta data only for folder /TagInfo
 IOVDbSvc                                             INFO Initialised with 1 connections and 1 folders
 IOVDbSvc                                             INFO Service IOVDbSvc initialised successfully
@@ -28,10 +29,7 @@ WriteData                                           DEBUG data dependencies:
   + OUTPUT  ( 'ExampleHitContainer' , 'StoreGateSvc+MyHits' ) 
   + OUTPUT  ( 'ExampleHitContainer' , 'StoreGateSvc+PetersHits' ) 
 StreamStream1                                       DEBUG In initialize
-StreamStream1                                       DEBUG In initialize 
-StreamStream1                                       DEBUG Found IDecisionSvc.
 DecisionSvc                                          INFO Inserting stream: StreamStream1 with no Algs
-StreamStream1                                       DEBUG End initialize 
 StreamStream1                                       DEBUG Found StoreGateSvc/StoreGateSvc store.
 StreamStream1                                       DEBUG Found StoreGateSvc/MetaDataStore store.
 StreamStream1.StreamStream1Tool                      INFO Initializing StreamStream1.StreamStream1Tool

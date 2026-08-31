@@ -381,8 +381,8 @@ void TauTrackFinder::getTauTracksFromPV( const xAOD::TauJet& pTau,
   }
   // in EleRM reco, we need the original track particles
   if (inEleRM()){
+    static const SG::ConstAccessor<ElementLink<xAOD::TrackParticleContainer>> acc_originalTrack("ERMOriginalTrack");
     for (uint i = 0; i < ghostTracks.size(); i++){
-      static const SG::ConstAccessor<ElementLink<xAOD::TrackParticleContainer>> acc_originalTrack("ERMOriginalTrack");
       auto original_id_track_link = acc_originalTrack(*(ghostTracks[i]));
       if (!original_id_track_link.isValid()) {
           ATH_MSG_ERROR("Original track link is not valid");

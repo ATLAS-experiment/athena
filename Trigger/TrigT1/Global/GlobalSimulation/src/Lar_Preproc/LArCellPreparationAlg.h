@@ -73,7 +73,7 @@ namespace GlobalSim {
       "File associating LAr cells with readout FEBs and connection technology"};
 
     /** @brief Key to the CaloCell container */
-    SG::ReadHandleKey<CaloCellContainer> m_caloCellsKey {this, "caloCells", "AllCalo", "key to read in a CaloCell container"};
+    SG::ReadHandleKey<CaloCellContainer> m_caloCellsKey {this, "CaloCellsKey", "AllCalo", "key to read in a CaloCell container"};
 
     /** @brief Key to the total noise used for each CaloCell */
     SG::ReadCondHandleKey<CaloNoise> m_totalNoiseKey{this, "totalNoiseKey", "totalNoise", "SG Key of CaloNoise data object"};

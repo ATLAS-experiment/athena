@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArCalibTools/LArCompleteToFlat.h"
@@ -40,18 +40,8 @@
 ////////////////
 LArCompleteToFlat::LArCompleteToFlat( const std::string& name, 
 			  ISvcLocator* pSvcLocator ) : 
-  ::AthAlgorithm( name, pSvcLocator ),
-  m_hashMax(0),
-  m_onlineID(nullptr),
-  m_isSC(false)
+  ::AthReentrantAlgorithm( name, pSvcLocator )
 {
-  declareProperty("isSC",m_isSC);
-  declareProperty("uA2MeVInput",m_uA2MeVInput);//="LAruA2MeV");
-  declareProperty("DAC2uAVInput",m_DAC2uAInput);//="LArDAC2uA");
-  declareProperty("HVScaleCorrInput",m_HVScaleCorrInput);//="LArHVScaleCorr");
-  declareProperty("PedestalInput",m_PedestalInput);//="Pedestal");
-  declareProperty("RampInput",m_RampInput);//="LArRamp");
-  declareProperty("MphysOverMcalInput",m_MphysOverMcalInput);//="LArMphysOverMcal");
   declareProperty("OFCInput",m_OFCInput);//="LArOFC");
   declareProperty("OFCCaliInput",m_OFCCaliInput);//="LArOFC");
   declareProperty("ShapeInput",m_ShapeInput);//="LArShape");
@@ -67,8 +57,7 @@ LArCompleteToFlat::LArCompleteToFlat( const std::string& name,
 
 // Destructor
 ///////////////
-LArCompleteToFlat::~LArCompleteToFlat()
-= default;
+LArCompleteToFlat::~LArCompleteToFlat() = default;
 
 // Athena Algorithm's Hooks
 ////////////////////////////
@@ -769,23 +758,6 @@ StatusCode LArCompleteToFlat::stop() {
       }   
     } else {
       pedestalFlat(pedComplete,flatName+"/Pedestal");
-
-      /*
-     CondAttrListCollection* coll=pedestalFlat(pedComplete,"/LAR/ElecCalibFlat/Pedestal");
-     LArPedestalFlat* pf=new LArPedestalFlat(coll);
-  
-     sc=detStore()->record(pf,"PedestalFlat");
-     if (sc.isFailure()) {
-       ATH_MSG_ERROR( "Failed to record LArPedestalFlat" );
-     }
-   
-     ILArPedestal* iped=pf;
-     sc=detStore()->symLink(pf,iped);
-     if (sc.isFailure()) {
-       ATH_MSG_ERROR( "Failed to symlink LArPedestalFlat" );
-     }
-   }
-      */
     }
   }//end if have m_pedestalInput
 
@@ -840,22 +812,6 @@ StatusCode LArCompleteToFlat::stop() {
       }   
     } else {
       shapeFlat(shapeComplete,flatName+"/Shape");
-      /*
-      CondAttrListCollection* coll=shapeFlat(shapeComplete,"/LAR/ElecCalibFlat/Shape");
-
-      LArShapeFlat* sf=new LArShapeFlat(coll);
-     
-      sc=detStore()->record(sf,"ShapeFlat");
-      if (sc.isFailure()) {
-	ATH_MSG_ERROR( "Failed to record LArShapeFlat" );
-      }
-   
-      ILArShape* ishape=sf;
-      sc=detStore()->symLink(sf,ishape);
-      if (sc.isFailure()) {
-	ATH_MSG_ERROR( "Failed to symlink LArShapeFlat" );
-      }
-      */
     }
   }//end if have m_shapeInput
 

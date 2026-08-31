@@ -5,7 +5,7 @@ evgenConfig.generators += ["SuperChic"]
 from Superchic_i.SuperChicUtils import SuperChicConfig, SuperChicRun
 scConfig = SuperChicConfig(runArgs)
 
-SuperChicRun(scConfig, genSeq)
+# SuperChicRun(scConfig, genSeq) run after the scConfig setup
 
 
 

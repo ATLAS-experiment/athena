@@ -3,7 +3,7 @@
 import collections
 import os
 from . import processes 
-from AthenaCommon import Logging
+from . import Logging
 from .decorators import timed
 from .algorithms import Scheduler
 from .utility import HeartbeatTimer
@@ -45,10 +45,21 @@ class PowhegControl(object):
         @param run_opts  athena run options
         """
         ## Current directory
-        self.__run_directory = os.environ["PWD"]
-        
+        try:
+            self.__run_directory = os.environ.get("PWD", os.getcwd())
+        except KeyError:
+            self.__run_directory = os.getenv("PWD", os.getcwd())
+
         ## Add run directory to PYTHONPATH
-        os.environ["PYTHONPATH"] += ":" + self.__run_directory
+        try:
+            pythonpath = os.environ.get("PYTHONPATH")
+        except KeyError:
+            pythonpath = os.getenv("PYTHONPATH")
+
+        if pythonpath:
+            os.environ["PYTHONPATH"] = pythonpath + ":" + self.__run_directory
+        else:
+            os.environ["PYTHONPATH"] = self.__run_directory
 
         ## Name of output LHE file used by Generate_tf for showering
         self.__output_LHE_file = "PowhegOTF._1.events"

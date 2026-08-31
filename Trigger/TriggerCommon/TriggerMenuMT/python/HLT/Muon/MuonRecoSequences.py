@@ -14,47 +14,9 @@ from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 from TrigInDetConfig.utils import getFlagsForActiveConfig
 
-CBTPname = recordable("HLT_CBCombinedMuon_RoITrackParticles")
-CBTPnameFS = recordable("HLT_CBCombinedMuon_FSTrackParticles")
-CBTPnameLRT = recordable("HLT_CBCombinedMuon_LRTTrackParticles")
-ExtrpTPname = recordable("HLT_MSExtrapolatedMuons_RoITrackParticles")
-ExtrpTPnameFS = recordable("HLT_MSExtrapolatedMuons_FSTrackParticles")
-MSextrpTPname = recordable("HLT_MSOnlyExtrapolatedMuons_FSTrackParticles")
-
-
 from AthenaConfiguration.Enums import BeamType, LHCPeriod
 
-class muonNames(object):
-  def __init__(self):
-    #EFSA and EFCB containers have different names 
-    #for RoI and FS running. Other containers are 
-    #produced in RoIs only.
-
-    self.L2SAName = recordable("HLT_MuonL2SAInfo")
-    self.L2SANamePhII = recordable("HLT_FastMuonsInfo")
-    self.L2CBName = recordable("HLT_MuonL2CBInfo")
-    self.EFSAName = "Muons"
-    self.EFCBName = "MuonsCB"
-    self.EFCBOutInName = "MuonsCBOutsideIn"
-    self.EFCBInOutName = "HLT_MuonsCBInsideOut"
-    self.EFIsoMuonName = recordable("HLT_MuonsIso")
-    self.L2forIDName   = "RoIs_fromL2SAViews"
-
-  def getNames(self, name):
-
-    if "FS" in name:
-      self.EFSAName = recordable("HLT_Muons_FS")
-      self.EFCBName = recordable("HLT_MuonsCB_FS")
-      self.EFCBOutInName = "MuonsCBOutsideIn_FS"
-    if "RoI" in name:
-      self.EFSAName = recordable("HLT_Muons_RoI")
-      self.EFCBName = recordable("HLT_MuonsCB_RoI")
-    if "LRT" in name:
-      self.L2CBName = recordable("HLT_MuonL2CBInfoLRT")
-      self.EFSAName = recordable("HLT_Muons_RoI")
-      self.EFCBName = recordable("HLT_MuonsCB_LRT")
-    return self
-
+from .TrigMuonKeys import muonNames
 muNames = muonNames().getNames('RoI')
 muNamesFS = muonNames().getNames('FS')
 muNamesLRT = muonNames().getNames('LRT')
@@ -199,7 +161,7 @@ def muonDecodeCfg(flags, RoIs):
       
     return acc
 
-def muFastVDVCfg(flags, RoIs, postFix, InsideOutMode, extraLoads):
+def muFastVDVCfg(flags, RoIs, suffix, InsideOutMode, extraLoads):
   result=ComponentAccumulator()
   # In insideout mode, need to inherit muon decoding objects for TGC, RPC, MDT, CSC
   dataObjects=[]
@@ -230,43 +192,45 @@ def muFastVDVCfg(flags, RoIs, postFix, InsideOutMode, extraLoads):
   #For L2 multi-track SA mode
   if extraLoads:
     dataObjects += extraLoads
-  ViewVerify = CompFactory.AthViews.ViewDataVerifier("muFastRecoVDV"+postFix, DataObjects = dataObjects)
+  ViewVerify = CompFactory.AthViews.ViewDataVerifier("muFastRecoVDV"+suffix, DataObjects = dataObjects)
 
   result.addEventAlgo(ViewVerify)
   return result
 
-def muFastRecoSequenceCfg( flags, RoIs, doFullScanID = False, InsideOutMode=False, extraLoads=None, l2mtmode=False, calib=False, useNewFast=False ):
+def muFastRecoSequenceCfg( flags, RoIs, suffix="", doFullScanID = False, InsideOutMode=False, extraLoads=None, l2mtmode=False, calib=False, useNewFast=False ):
 
-  acc = ComponentAccumulator()
-  postFix = ""
-  if InsideOutMode:
-    postFix = "IOmode"
-  elif l2mtmode:
-    postFix = "l2mtmode"
-  elif calib:
-    postFix = "Calib"
+    acc = ComponentAccumulator()
 
-  acc.merge(muFastVDVCfg(flags, RoIs, postFix, InsideOutMode, extraLoads))
+    if useNewFast:
+        acc.merge(muFastVDVCfg(flags, RoIs=RoIs, suffix=suffix, InsideOutMode=False, extraLoads=None))
 
-  if useNewFast:
-    from MuonFastRecoAlgs.MuonFastReconstructionConfig import MuonFastReconstructionAlgCfg
-    acc.merge(MuonFastReconstructionAlgCfg(flags, name=f"MuonFastReconstructionAlg_{RoIs}",
-                                                  OutMuons=muNames.L2SANamePhII))
-  else:
-    ### set up MuFastSteering ###
-    from TrigL2MuonSA.TrigL2MuonSAConfig import l2MuFastAlgCfg
-    acc.merge(l2MuFastAlgCfg(flags,
-                             roisKey = RoIs,
-                             setup = postFix,
-                             FILL_FSIDRoI = doFullScanID,
-                             MuonL2SAInfo = muNames.L2SAName+postFix,
-                             L2IOCB = muNames.L2CBName+postFix,
-                             forID = muNames.L2forIDName+postFix,
-                             forMS = "forMS"+postFix,
-                             TrackParticlesContainerName = getIDTracks(flags)))
+        from MuonFastRecoAlgs.MuonFastReconstructionConfig import MuonFastReconstructionAlgCfg
+        acc.merge(MuonFastReconstructionAlgCfg(flags, name=f"MuonFastReconstructionAlg{suffix}",
+                                                      OutMuons=muNames.L2SAMuonsPhII))
+    else:
 
+        suffix = ""
+        if InsideOutMode:
+            suffix="IOmode"
+        elif l2mtmode:
+            suffix="l2mtmode"
+        elif calib:
+            suffix="Calib"
 
-  return acc
+        acc.merge(muFastVDVCfg(flags, RoIs=RoIs, suffix=suffix, InsideOutMode=InsideOutMode, extraLoads=extraLoads))
+
+        ### set up MuFastSteering ###
+        from TrigL2MuonSA.TrigL2MuonSAConfig import l2MuFastAlgCfg
+        acc.merge(l2MuFastAlgCfg(flags,
+                                roisKey = RoIs,
+                                setup = suffix,
+                                FILL_FSIDRoI = doFullScanID,
+                                MuonL2SAInfo = muNames.L2SAMuons+suffix,
+                                L2IOCB = muNames.L2CBMuons+suffix,
+                                forID = muNames.L2forIDName+suffix,
+                                forMS = "forMS"+suffix,
+                                TrackParticlesContainerName = getIDTracks(flags)))
+    return acc
 
 def muonIDtrackVDVCfg( flags, name, RoIs, extraLoads=None, extraLoadsForl2mtmode=None ):
   result=ComponentAccumulator()
@@ -310,7 +274,7 @@ def muonIDCosmicTrackingSequenceCfg( flags, RoIs, name, extraLoads=None, extraLo
 
 def muCombVDVCfg( flags, postFix):
   result=ComponentAccumulator()
-  dataObjects=[('xAOD::L2StandAloneMuonContainer','StoreGateSvc+%s' % muNames.L2SAName+postFix)]
+  dataObjects=[('xAOD::L2StandAloneMuonContainer','StoreGateSvc+%s' % muNames.L2SAMuons+postFix)]
   ViewVerify = CompFactory.AthViews.ViewDataVerifier("muCombAlgVDV"+postFix, DataObjects = dataObjects)
   result.addEventAlgo(ViewVerify)
   return result
@@ -327,7 +291,7 @@ def muCombRecoSequenceCfg( flags, RoIs, name, l2mtmode=False, l2CBname="" ):
   from TrigmuComb.TrigmuCombConfig import muCombCfg
   l2trackname = getIDTracks(flags) if l2mtmode else getIDTracks(flags, name)
   acc.merge(muCombCfg(flags, f'{postFix}_{name}', useBackExtrp=True,
-                      L2StandAloneMuonContainerName = muNames.L2SAName+postFix,
+                      L2StandAloneMuonContainerName = muNames.L2SAMuons+postFix,
                       L2CombinedMuonContainerName = l2CBname, TrackParticleContainerName = l2trackname ))
 
   return acc
@@ -374,17 +338,25 @@ def EFMuSADataPrepViewDataVerifierCfg(flags, RoIs, suffix=""):
     return result
 
 
-def muEFSARecoSequenceCfg( flags, RoIs, suffix="", useBucketFilter=False):
+def muEFSARecoSequenceCfg(flags, RoIs, suffix="", useBucketFilter=False):
 
     acc = ComponentAccumulator()
 
     acc.merge(EFMuSADataPrepViewDataVerifierCfg(flags, RoIs=RoIs, suffix=suffix))
 
-    msMuonName = muNames.EFSAName
-    if 'FS' in suffix:
-        msMuonName = muNamesFS.EFSAName
+    nameGroups = muNamesFS if 'FS' in suffix else muNames
 
     if flags.Muon.usePhaseIIGeoSetup and flags.Muon.scheduleActsReco:
+
+        if "newFast" in suffix:
+            msMuonName = nameGroups.EFSAMuonsPhIINewFast
+            msTrackName = nameGroups.EFSATrackParticlesPhIINewFast
+        elif useBucketFilter:
+            msMuonName = nameGroups.EFSAMuonsPhIIMlbkt
+            msTrackName = nameGroups.EFSATrackParticlesPhIIMlbkt
+        else:
+            msMuonName = nameGroups.EFSAMuonsPhII
+            msTrackName = nameGroups.EFSATrackParticlesPhII
 
         # Schedule reco-to-truth object association
         if flags.Muon.setupTruthAlgorithms:
@@ -400,7 +372,7 @@ def muEFSARecoSequenceCfg( flags, RoIs, suffix="", useBucketFilter=False):
         if useBucketFilter:
             from MuonInference.InferenceConfig import GraphBucketFilterToolCfg, GraphInferenceAlgCfg
             bucketTool = acc.popToolsAndMerge(GraphBucketFilterToolCfg(flags, name=f"GraphBucketFilterTool{suffix}", 
-                                                                                 WriteSpacePointKey=f"FilteredMlBuckets{suffix}"))
+                                                                              WriteSpacePointKey="FilteredMlBuckets"))
             acc.merge(GraphInferenceAlgCfg(flags, name = f"GraphInferenceAlg{suffix}",
                                                   InferenceTools=[bucketTool]))
 
@@ -418,7 +390,7 @@ def muEFSARecoSequenceCfg( flags, RoIs, suffix="", useBucketFilter=False):
                                                         CombinatorialReadKey = "MuonHoughNswMaxima"))
         
         if flags.Detector.GeometryMDT or flags.Detector.GeometryRPC or flags.Detector.GeometryTGC:
-            if flags.Muon.enableMLBucketFilter:
+            if useBucketFilter:
                 acc.merge(MuonEtaHoughTransformAlgCfg(flags, name = f"MuonEtaHoughTransformAlg{suffix}",
                                                              SpacePointContainer = "FilteredMlBuckets"))
             else:
@@ -442,16 +414,20 @@ def muEFSARecoSequenceCfg( flags, RoIs, suffix="", useBucketFilter=False):
         # Track building
         from MuonTrackFindingAlgs.TrackFindingConfig import MSTrackFinderAlgCfg, StandaloneTrackPartCnvCfg, MuidSaTagMakerAlgCfg, MuonCreatorAlgCfg
         acc.merge(MSTrackFinderAlgCfg(flags, name=f"MSTrackFinderAlg{suffix}"))
-        trackContainer = f"HLT_MSMuons_{suffix}"
         acc.merge(StandaloneTrackPartCnvCfg(flags, name=f"MuonMsTrackParticleCnvR4{suffix}",
-                                                   TrackParticlesOutKey = trackContainer))
+                                                   TrackParticlesOutKey = msTrackName))
         acc.merge(MuidSaTagMakerAlgCfg(flags, name=f"MuidSaTagMakerAlg{suffix}", 
-                                              MsTracks = trackContainer))
+                                              MsTracks = msTrackName))
         acc.merge(MuonCreatorAlgCfg(flags, name = f"MuonActsCreatorAlg{suffix}",
                                            TagKeys = ["MuonTagsSA"],
                                            MuonKey = msMuonName))
-        
-    else: 
+        # This alg needs to be removed once the Phase-2 combined steps is ready
+        from MuonCombinedConfig.MuonCombinedReconstructionConfig import MuonCombinedMuonCandidateAlgCfg
+        acc.merge(MuonCombinedMuonCandidateAlgCfg(flags, name=f"MuonCombinedMuonCandidateAlg{suffix}",
+                                                         MuonSpectrometerTrackParticleLocation = msTrackName))
+    else:
+        msMuonName = nameGroups.EFSAMuons
+
         from MuonConfig.MuonSegmentFindingConfig import MuonSegmentFinderAlgCfg, MuonLayerHoughAlgCfg
         acc.merge(MuonLayerHoughAlgCfg(flags, f"TrigMuonLayerHoughAlg{suffix}"))
         acc.merge(MuonSegmentFinderAlgCfg(flags, f"TrigMuonSegmentMaker{suffix}"))
@@ -522,9 +498,9 @@ def VDVPrecMuTrkCfg(flags, name, suffix):
     dataObjects += [( 'xAOD::TrackParticleContainer' , 'StoreGateSvc+'+getIDTracks(flags, trkname, muonIDreuse=flags.Muon.enableTrigIDtrackReuse) )]
   else:
     if suffix != 'idReuse':
-      MuonL2CBContainer = muNames.L2CBName+suffix
+      MuonL2CBContainer = muNames.L2CBMuons+suffix
     else:
-      MuonL2CBContainer = muNames.L2CBName
+      MuonL2CBContainer = muNames.L2CBMuons
     dataObjects += [( 'xAOD::L2CombinedMuonContainer', 'StoreGateSvc+'+MuonL2CBContainer)]
 
   if not flags.Input.isMC:
@@ -596,9 +572,9 @@ def muEFCBRecoSequenceCfg( flags, RoIs, name, suffix ):
         if flags.GeoModel.Run > LHCPeriod.Run3:
            acc.merge(VDVidReuseITkCfg(flags, suffix))
         if suffix != 'idReuse':
-           MuonL2CBInputContainer = muNames.L2CBName+suffix
+           MuonL2CBInputContainer = muNames.L2CBMuons+suffix
         else:
-           MuonL2CBInputContainer = muNames.L2CBName
+           MuonL2CBInputContainer = muNames.L2CBMuons
         from TrigMuonEF.TrigMuonEFConfig import GetL2CBmuonInDetTracksAlgCfg
         acc.merge(GetL2CBmuonInDetTracksAlgCfg(flags, name="GetL2CBInDetTracks"+suffix,
                                          MuonL2CBContainerLocation=MuonL2CBInputContainer, 
@@ -615,11 +591,12 @@ def muEFCBRecoSequenceCfg( flags, RoIs, name, suffix ):
 
   acc.merge(MuonCombinedAlgCfg(flags,name="TrigMuonCombinedAlg_"+name+suffix, MuonCandidateLocation=candidatesName, InDetCandidateLocation="InDetCandidates_"+name+suffix))
 
-  cbMuonName = muNames.EFCBOutInName
   if 'FS' in name:
-    cbMuonName = muNamesFS.EFCBOutInName
+    cbMuonName = muNamesFS.EFCBOutInMuons
   elif 'LRT' in name:
-    cbMuonName = muNamesLRT.EFCBName
+    cbMuonName = muNamesLRT.EFCBMuons
+  else:
+    cbMuonName = muNames.EFCBOutInMuons
 
 
   acc.merge(MuonCreatorAlgCfg(flags, name="TrigMuonCreatorAlgCB_"+name+suffix, MuonCandidateLocation=[candidatesName], TagMaps=["muidcoTagMap"], InDetCandidateLocation="InDetCandidates_"+name+suffix,
@@ -689,7 +666,7 @@ def muEFInsideOutRecoSequenceCfg(flags, RoIs, name, suffix ):
 
   #Inside-out reconstruction
 
-  cbMuonName = muNames.EFCBInOutName+suffix
+  cbMuonName = muNames.EFCBInOutMuons+suffix
   if 'Late' in name:
     cbMuonName = recordable(cbMuonName+"_Late")
     acc.merge(MuGirlStauAlgCfg(flags, name="TrigMuonLateInsideOutRecoAlg_"+name,InDetCandidateLocation="InDetCandidates_"+name))
@@ -741,9 +718,9 @@ def efmuisoRecoSequenceCfg( flags, RoIs, Muons, doMSiso=False ):
   # Isolation alg
   from TrigMuonEF.TrigMuonEFConfig import TrigMuonEFTrackIsolationAlgCfg
   acc.merge(TrigMuonEFTrackIsolationAlgCfg(flags,name="TrigEFMuIso"+name, requireCombinedMuon = not doMSiso, 
-                                           MuonEFContainer = Muons,IdTrackParticles = trackParticles, MuonContName = muNames.EFIsoMuonName+name,
-                                           ptcone02Name = muNames.EFIsoMuonName+name + ".ptcone02",
-                                           ptcone03Name = muNames.EFIsoMuonName+name + ".ptcone03"))
+                                           MuonEFContainer = Muons,IdTrackParticles = trackParticles, MuonContName = muNames.EFIsoMuons+name,
+                                           ptcone02Name = muNames.EFIsoMuons+name + ".ptcone02",
+                                           ptcone03Name = muNames.EFIsoMuons+name + ".ptcone03"))
 
   return acc
 

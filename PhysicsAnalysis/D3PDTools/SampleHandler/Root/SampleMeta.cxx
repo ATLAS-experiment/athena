@@ -10,8 +10,8 @@
 
 #include <SampleHandler/SampleMeta.h>
 
+#include <stdexcept>
 #include <RootCoreUtils/Assert.h>
-#include <RootCoreUtils/ThrowMsg.h>
 #include <SampleHandler/SampleLocal.h>
 
 //
@@ -61,8 +61,7 @@ namespace SH
   getFileName (std::size_t /*index*/) const
   {
     RCU_READ_INVARIANT (this);
-    RCU_THROW_MSG ("fileName() should not be called on SampleMeta");
-    return ""; //compiler dummy
+    throw std::runtime_error ("fileName() should not be called on SampleMeta");
   }
 
 
@@ -71,8 +70,7 @@ namespace SH
   doMakeLocal () const
   {
     RCU_READ_INVARIANT (this);
-    RCU_THROW_MSG ("makeLocal() should not be called on SampleMeta");
-    return {}; //compiler dummy
+    throw std::runtime_error ("makeLocal() should not be called on SampleMeta");
   }
 
 

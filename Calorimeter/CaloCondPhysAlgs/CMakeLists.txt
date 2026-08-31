@@ -19,6 +19,6 @@ atlas_add_component( CaloCondPhysAlgs
 		             CaloConditions TileConditionsLib CaloEvent LArRecEvent TileEvent CaloInterfaceLib CaloUtilsLib AthenaPoolUtilities Identifier xAODEventInfo LArHV LArReadoutGeometry LArSimEvent CxxUtils)
 
 # Install files from the package:
-atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
+atlas_install_python_modules( python/*.py share/CaloNoise_fillDB.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
 atlas_install_joboptions( share/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} --extend-ignore=F401,F821 )
 atlas_install_scripts( share/CaloRescaleNoiseHV.sh share/CaloNoise_fillDB.py share/CaloPedestalShift.sh share/CaloPedestal_fillDB.py share/CaloNoise2Ntuple.py share/CaloCellPos2Ntuple.py )

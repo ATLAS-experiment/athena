@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /* ***********************************************************************************\
@@ -101,7 +101,7 @@ StatusCode GlobalNNCalibration::initialize(){
     loadSplineHists(calibHistFile, "etaJes");
     m_JPtS_MinPt_Pt = JetCalibUtils::VectorizeD( m_config->GetValue("GNNC.ptCutoff","") );
     if(m_JPtS_MinPt_Pt.size() != m_closureEtaBins.size()-1){
-      ATH_MSG_FATAL("Pt cutoff vector has wrong length. There should be one value per eta bin."); return StatusCode::FAILURE;
+      ATH_MSG_FATAL("Pt cutoff vector has wrong length. There should be one value per eta bin.");
       return StatusCode::FAILURE;
     }
 
@@ -133,7 +133,7 @@ StatusCode GlobalNNCalibration::calibrate(xAOD::Jet& jet, JetEventInfo& jetEvent
   int closureEtaBin = getEtaBin(jet, m_closureEtaBins);
   std::map<std::string,double> NN_inputValues = getJetFeatures(jet, jetEventInfo);
   std::map<std::string,std::map<std::string,double>> inputs;
-  inputs["node_0"] = NN_inputValues;
+  inputs["node_0"] = std::move(NN_inputValues);
 
   std::map<std::string, double> outputs = m_lwnns[nnEtaBin]->compute(inputs);
   double nnCalibFactor =  outputs["out_0"];

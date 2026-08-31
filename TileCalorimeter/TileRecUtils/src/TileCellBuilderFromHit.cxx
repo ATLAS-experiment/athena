@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -462,7 +462,7 @@ unsigned char TileCellBuilderFromHit::qbits(TileDrawerEvtStatusArray& drawerEvtS
 // masking for MBTS with single channel
 bool
 TileCellBuilderFromHit::maskBadChannel (TileDrawerEvtStatusArray& drawerEvtStatus,
-                                        TileCell* pCell) const
+                                        TileCell* pCell, const EventContext& ctx) const
 {
   Identifier cell_id = pCell->ID();
 
@@ -473,7 +473,7 @@ TileCellBuilderFromHit::maskBadChannel (TileDrawerEvtStatusArray& drawerEvtStatu
   int drawerIdx = TileCalibUtils::getDrawerIdx(ros, drawer);
   int gain = pCell->gain1();
 
-  TileBchStatus chStatus = m_tileBadChanTool->getAdcStatus(drawerIdx, channel, gain);
+  TileBchStatus chStatus = m_tileBadChanTool->getAdcStatus(drawerIdx, channel, gain, ctx);
 
   // check quality first
   bool bad = ((int) pCell->qual1() > m_qualityCut);
@@ -517,7 +517,8 @@ TileCellBuilderFromHit::maskBadChannel (TileDrawerEvtStatusArray& drawerEvtStatu
 // masking for normal cells
 bool
 TileCellBuilderFromHit::maskBadChannels (TileDrawerEvtStatusArray& drawerEvtStatus,
-                                         TileCell* pCell, bool single_PMT_C10, bool Ecell) const {
+                                         TileCell* pCell, bool single_PMT_C10, bool Ecell,
+                                         const EventContext& ctx) const {
 
   const CaloDetDescrElement* caloDDE = pCell->caloDDE();
 
@@ -532,7 +533,7 @@ TileCellBuilderFromHit::maskBadChannels (TileDrawerEvtStatusArray& drawerEvtStat
   int drawer1 = m_tileHWID->drawer(ch_id1);
   int chan1 = m_tileHWID->channel(ch_id1);
   int drawerIdx1 = TileCalibUtils::getDrawerIdx(ros1, drawer1);
-  const TileBchStatus& chStatus1 = m_tileBadChanTool->getAdcStatus(drawerIdx1, chan1, (gain1 < 0) ? 1 : gain1);
+  const TileBchStatus& chStatus1 = m_tileBadChanTool->getAdcStatus(drawerIdx1, chan1, (gain1 < 0) ? 1 : gain1, ctx);
   
   // check quality first
   bool bad1 = ((int) pCell->qual1() > m_qualityCut);
@@ -579,7 +580,7 @@ TileCellBuilderFromHit::maskBadChannels (TileDrawerEvtStatusArray& drawerEvtStat
     int drawer2 = m_tileHWID->drawer(ch_id2);
     int chan2 = m_tileHWID->channel(ch_id2);
     int drawerIdx2 = TileCalibUtils::getDrawerIdx(ros2, drawer2);
-    const TileBchStatus& chStatus2 = m_tileBadChanTool->getAdcStatus(drawerIdx2, chan2, (gain2 < 0) ? 1 : gain2);
+    const TileBchStatus& chStatus2 = m_tileBadChanTool->getAdcStatus(drawerIdx2, chan2, (gain2 < 0) ? 1 : gain2, ctx);
 
     // check quality first
     bool bad2 = ((int) pCell->qual2() > m_qualityCut);
@@ -1070,7 +1071,7 @@ void TileCellBuilderFromHit::build(const CaloNoise* caloNoise,
     if (pCell) {      // cell exists
 
       if (m_maskBadChannels)
-        if (maskBadChannels (drawerEvtStatus, pCell,single_PMT_C10,Ecell))
+        if (maskBadChannels (drawerEvtStatus, pCell, single_PMT_C10, Ecell, ctx))
           ATH_MSG_VERBOSE ( "cell with id=" << m_tileID->to_string(pCell->ID(), -2)
                            << " bad channels masked, new energy=" << pCell->energy() );
 
@@ -1156,7 +1157,7 @@ void TileCellBuilderFromHit::build(const CaloNoise* caloNoise,
           }
           
           if (pCell) {
-            if (m_maskBadChannels && maskBadChannel (drawerEvtStatus, pCell))
+            if (m_maskBadChannels && maskBadChannel (drawerEvtStatus, pCell, ctx))
                 ATH_MSG_VERBOSE ( "MBTS cell with id=" << m_tileTBID->to_string(pCell->ID())
                                   << " bad channel masked, new energy=" << pCell->energy() );
 
@@ -1188,7 +1189,7 @@ void TileCellBuilderFromHit::build(const CaloNoise* caloNoise,
       }
 
       if (pCell) {
-        if (m_maskBadChannels && maskBadChannel (drawerEvtStatus, pCell))
+        if (m_maskBadChannels && maskBadChannel (drawerEvtStatus, pCell, ctx))
           ATH_MSG_VERBOSE ( "E4pr cell with id=" << m_tileTBID->to_string(pCell->ID())
                              << " bad channel masked, new energy=" << pCell->energy() );
 

@@ -640,8 +640,22 @@ StatusCode EgammaCalibrationAndSmearingTool::initialize() {
       // initialize the ServiceHandler egammaMVASvc
       // make the name unique
       std::ostringstream mva_service_name;
-      mva_service_name << "egammaMVASvc/service_mva_egamma_id"
+      size_t dot = this->name().find('.');
+      size_t underscore = this->name().rfind('_', dot);
+      std::string collection = "";
+      if (dot != std::string::npos &&
+	  underscore != std::string::npos &&
+	  underscore < dot)
+	{	
+	  collection = this->name().substr(underscore + 1, dot - underscore - 1);
+	  mva_service_name << "egammaMVASvc/service_mva_egamma_id"
+                       << collection;;
+	}
+      else
+	{
+	  mva_service_name << "egammaMVASvc/service_mva_egamma_id"
                        << (void const*)this;
+	}
       asg::AsgServiceConfig config_mva_service(mva_service_name.str());
       ATH_CHECK(config_mva_service.addPrivateTool("ElectronTool",
                                                   config_mva_electron));

@@ -25,5 +25,5 @@ target_compile_options( AthCUDAKernelLib PUBLIC
 atlas_add_test( ArrayKernelTask
    SOURCES test/test_ArrayKernelTask.cu
    LINK_LIBRARIES AthCUDAKernelLib
-   POST_EXEC_SCRIPT nopost.sh )
+   POST_EXEC_SCRIPT noerror.sh )
 set_property( TARGET AthCUDAKernel_ArrayKernelTask PROPERTY POSITION_INDEPENDENT_CODE TRUE )

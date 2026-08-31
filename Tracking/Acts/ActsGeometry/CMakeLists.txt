@@ -18,6 +18,7 @@ atlas_add_library( ActsGeometryLib
                    src/ActsStrawLayerBuilder.cxx
                    src/ActsHGTDLayerBuilder.cxx                   
                    src/BeamPipeBlueprintNodeBuilder.cxx
+                   src/HgtdBlueprintNodeBuilder.cxx
                    src/ItkBlueprintNodeBuilder.cxx
                    src/CaloBlueprintNodeBuilder.cxx
                    src/util/*.cxx
@@ -58,7 +59,6 @@ atlas_add_component( ActsGeometry
                      src/WriteTrackingGeometry.cxx
                      src/ActsWriteTrackingGeometryTransforms.cxx
                      src/ExtrapolationTool.cxx
-                     src/TrackingGeometryTool.cxx
                      src/ActsCaloTrackingVolumeBuilder.cxx
                      src/ITkMaterialDecoratorTool.cxx
                      src/TrackingGeometrySvc.cxx
@@ -70,6 +70,7 @@ atlas_add_component( ActsGeometry
                      ActsGeometryInterfacesLib
                      ActsGeometryLib
                      ActsInteropLib
+                     ActsEventLib
                      EventPrimitives
                      GeoPrimitives
                      AthenaBaseComps
@@ -92,8 +93,11 @@ atlas_add_component( ActsGeometry
 atlas_install_joboptions( scripts/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
 atlas_install_scripts( test/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
 
-atlas_add_test( CombinedGen3TrackTest
-                PROPERTIES TIMEOUT 2000
-                PRIVATE_WORKING_DIRECTORY
-                SCRIPT ActsITkMuonCaloTest.py
-                POST_EXEC_SCRIPT noerror.sh)
+if ( NOT "${CMAKE_BUILD_TYPE}" STREQUAL "Debug" )
+  # Disable this test in the debug build --- it takes too long to run.
+  atlas_add_test( CombinedGen3TrackTest
+                  PROPERTIES TIMEOUT 2000
+                  PRIVATE_WORKING_DIRECTORY
+                  SCRIPT ActsITkMuonCaloTest.py
+                  POST_EXEC_SCRIPT noerror.sh)
+endif()

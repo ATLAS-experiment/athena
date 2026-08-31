@@ -90,37 +90,41 @@ inline Amg::Vector3D GeoMDTHit::getGlobalPosition() const {
   
 }
 
-inline GeoRPCHit::GeoRPCHit (const RPCSimHit & h) {
-    m_hit = &h;
+inline GeoRPCHit::GeoRPCHit (const RPCSimHit & h):m_hit{&h} {
+    try{
+        
+        HitID hitid = m_hit->RPCid();
+        const RpcIdHelper* rpcID = mgr()->rpcIdHelper();
+        const RpcHitIdHelper* rpchhelper = RpcHitIdHelper::GetHelper(rpcID->gasGapMax());
+        std::string stname = rpchhelper->GetStationName(hitid);
+        int         steta  = rpchhelper->GetZSector(hitid);
+        int         stphi  = rpchhelper->GetPhiSector(hitid);
+        int         dbr    = rpchhelper->GetDoubletR(hitid);
+        int         dbz    = rpchhelper->GetDoubletZ(hitid);
+        int         dbp    = rpchhelper->GetDoubletPhi(hitid);
+        int         gg     = rpchhelper->GetGasGapLayer(hitid);
+        int         mfi    = rpchhelper->GetMeasuresPhi(hitid);
+        int         strip  = 1;
+        
+        m_id = rpcID->channelID(stname, steta, stphi,
+                                dbr, dbz, dbp, gg, mfi, strip, m_goodHit);
+        if (m_goodHit) {
+           m_goodHit = mgr()->idHelperSvc()->detElementHash(m_id) <
+                       rpcID->detectorElement_hash_max();
+        }
+    }catch(...) {
+        m_goodHit = false;
+    }
 }
 
 inline Amg::Vector3D GeoRPCHit::getGlobalPosition() const {
-
-    HitID hitid = m_hit->RPCid();
-    const RpcIdHelper* rpcID = mgr()->rpcIdHelper();
-    const RpcHitIdHelper* rpchhelper = RpcHitIdHelper::GetHelper(rpcID->gasGapMax());
-    std::string stname = rpchhelper->GetStationName(hitid);
-    int         steta  = rpchhelper->GetZSector(hitid);
-    int         stphi  = rpchhelper->GetPhiSector(hitid);
-    int         dbr    = rpchhelper->GetDoubletR(hitid);
-    int         dbz    = rpchhelper->GetDoubletZ(hitid);
-    int         dbp    = rpchhelper->GetDoubletPhi(hitid);
-    int         gg     = rpchhelper->GetGasGapLayer(hitid);
-    int         mfi    = rpchhelper->GetMeasuresPhi(hitid);
-    int         strip  = 1;
-    Identifier offid = rpcID->channelID(stname,
-                                        steta,
-                                        stphi,
-                                        dbr, dbz, dbp, gg, mfi, strip);
-    if ( offid == 0)
-        std::cerr<<" Cannot build a valid Identifier; skip "<<std::endl;
-
-    const MuonGM::RpcReadoutElement* rpcdet = mgr()->getRpcReadoutElement(offid);
+   
+    const MuonGM::RpcReadoutElement* rpcdet = mgr()->getRpcReadoutElement(m_id);
     if (rpcdet) {
-        return rpcdet->localToGlobalTransf(offid) * m_hit->localPosition();
+        return rpcdet->localToGlobalTransf(m_id) * m_hit->localPosition();
     }
     std::cerr<<"RPC readout element not found for Id = "
-                <<rpcID->show_to_string(offid)<<std::endl;
+                <<mgr()->idHelperSvc()->toString(m_id)<<std::endl;
     return Amg::Vector3D::Zero();
     
 

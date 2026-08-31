@@ -64,22 +64,22 @@ namespace SH
 
     /// \copydoc DiskList::getNext()
   protected:
-    virtual bool getNext ();
+    virtual bool getNext () override;
 
 
     /// \copydoc DiskList::getPath()
   protected:
-    virtual std::string getPath () const;
+    virtual std::string getPath () const override;
 
 
     /// \copydoc DiskList::doOpenDir()
   protected:
-    virtual DiskList *doOpenDir () const;
+    virtual DiskList *doOpenDir () const override;
 
 
     /// \copydoc DiskList::getDirname()
   protected:
-    virtual std::string getDirname () const;
+    virtual std::string getDirname () const override;
 
 
 
@@ -98,6 +98,10 @@ namespace SH
     /// \brief the result of the directory listing
   private:
     std::string m_list;
+
+    /// \brief the current parse position within \ref m_list
+  private:
+    std::string::size_type m_pos = 0;
 
     /// \brief the last file we read
   private:

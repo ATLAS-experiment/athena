@@ -8,10 +8,11 @@
 #include <string>
 #include <variant>
 #include <map>
+#include <cstdint>
 
 namespace AthInfer {
- 
-    using DataVariant = std::variant<std::vector<float>, std::vector<int64_t> >;
+
+    using DataVariant = std::variant<std::vector<float>, std::vector<int64_t>, std::vector<uint8_t> >;
     using InferenceData = std::pair<std::vector<int64_t>, DataVariant>;
     using InputDataMap = std::map<std::string, InferenceData>;
     using OutputDataMap = std::map<std::string, InferenceData>;

@@ -169,6 +169,13 @@ namespace MuonR4{
                                               translateCovariance(locSegPars, localSegmentCov(segment),
                                                                   msSector->localToGlobalTransform(gctx)), hypot};
         }
+
+        Acts::BoundTrackParameters boundSegmentPars(const Acts::GeometryContext& tgContext,
+                                                    const Segment& segment,
+                                                    const Acts::ParticleHypothesis hypot) {
+            return boundSegmentPars(*tgContext.get<const ActsTrk::GeometryContext*>(),
+                                     segment, hypot);
+        }
         Acts::BoundTrackParameters boundSegmentPars(const ActsTrk::GeometryContext& gctx,
                                                     const Segment& segment,
                                                     const Acts::ParticleHypothesis hypot) {

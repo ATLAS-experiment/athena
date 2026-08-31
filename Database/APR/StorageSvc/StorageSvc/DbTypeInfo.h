@@ -49,8 +49,6 @@ namespace pool  {
   class DbTypeInfo : public Shape   {
 
   public:
-    /// Definition of reflection class handle
-    typedef RootType TypeH;
     /// Column Container definition
     typedef std::vector<const DbColumn*> Columns;
 
@@ -62,11 +60,11 @@ namespace pool  {
     /// Multiplicity
     int         m_mult;
     /// Reflection class
-    CxxUtils::CachedValue<TypeH>       m_class;
+    CxxUtils::CachedValue<RootType>       m_class;
 
   protected:
     /// Constructor with type id
-    DbTypeInfo(const Guid& guid, TypeH cl, Columns& cols);
+    DbTypeInfo(const Guid& guid, RootType cl, Columns& cols);
     DbTypeInfo(const Guid& guid);
 
     /// Destructor
@@ -75,7 +73,7 @@ namespace pool  {
     /// Load type information object from string representation
     StatusCode i_fromString(const std::string& string_rep);
     /// try to add a new shape
-    static DbTypeInfo* regShape(const Guid& guid, const TypeH& type, Columns& cols);
+    static DbTypeInfo* regShape(const Guid& guid, const RootType& type, Columns& cols);
    
   public:
     /// Destroy type information; to be used with extreme care
@@ -106,7 +104,7 @@ namespace pool  {
     /// Releases the ownership
     void deleteRef() const;
     /// Access to reflection class. If not known, by default scan all types for class ID
-    TypeH clazz( bool noIdScan=false ) const;
+    RootType clazz( bool noIdScan=false ) const;
     /// Prepare for the case of discrete columns: Column information
     const Columns& columns()  const       {  return m_columns;                }
     /// Modify content of the object by editing columns

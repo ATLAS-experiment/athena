@@ -27,7 +27,6 @@ rdotrig_ref.threads = 1
 rdotrig_ref.max_events = nevents
 rdotrig_ref.args = '--outputRDO_TRIGFile=RDO_TRIG.ref.pool.root'
 rdotrig_ref.args += ' --preInclude "all:Campaigns.MC23e"'
-rdotrig_ref.args += ' --CA "all:True"'
 rdotrig_ref.args += f' --conditionsTag \'{defaultConditionsTags.RUN3_MC}\''
 rdotrig_ref.flags = [
    'Trigger.triggerMenuSetup=\'Dev_pp_run3_v1_TriggerValidation_prescale\'',
@@ -48,7 +47,7 @@ ex.job_options = 'TriggerJobOpts/runHLT.py'
 ex.threads = 1
 ex.input = ''
 ex.args += ' --filesInput created.BS'
-ex.args += ' --preExec "from AthenaConfiguration.DetectorConfigFlags import disableDetectors;disableDetectors(flags,[\'MM\',\'sTGC\'],toggle_geometry=True);disableDetectors(flags,[\'TRT\',\'MBTS\']);"'
+ex.args += ' --preExec "from AthenaConfiguration.DetectorConfigFlags import disableDetectors;disableDetectors(flags,[\'TRT\',\'MBTS\']);"'
 ex.args += ' --preInclude "Campaigns.MC23e"'
 ex.flags = [
    'Trigger.triggerMenuSetup="Dev_pp_run3_v1_TriggerValidation_prescale"', 'Trigger.doLVL1=True',
@@ -58,8 +57,6 @@ ex.flags = [
    'Egamma.doTruthAssociation=False',
    'Reco.PostProcessing.GeantTruthThinning=False',
    'Trigger.L1.dogFex=False',
-   'Trigger.L1.doMuon=False',
-   'Trigger.enableL1MuonPhase1=False',
    'Trigger.enableL1CaloLegacy=False',
    'Trigger.enabledSignatures=\'[\"Jet\"]\'',
    f'IOVDb.GlobalTag=\'{defaultConditionsTags.RUN3_MC}\'',

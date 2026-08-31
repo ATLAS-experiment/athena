@@ -380,7 +380,6 @@ def FPGATrackSimDataPrepAlgCfg(inputFlags):
     flags = prepareFlagsForFPGATrackSimDataPrepAlg(inputFlags)
 
     result=ComponentAccumulator()
-    
 
     theFPGATrackSimDataPrepAlg=CompFactory.FPGATrackSimDataPrepAlg()
     theFPGATrackSimDataPrepAlg.HitFiltering = flags.Trigger.FPGATrackSim.ActiveConfig.hitFiltering
@@ -413,8 +412,6 @@ def FPGATrackSimDataPrepAlgCfg(inputFlags):
             theFPGATrackSimDataPrepAlg.SecondInputToolN = flags.Trigger.FPGATrackSim.secondInputToolN
         theFPGATrackSimDataPrepAlg.SGInputTool = ""
     else:
-        from ActsConfig.ActsGeometryConfig import ActsTrackingGeometryToolCfg
-        result.getPrimaryAndMerge(ActsTrackingGeometryToolCfg(flags))
         theFPGATrackSimDataPrepAlg.InputTool = ""
         theFPGATrackSimDataPrepAlg.InputTool2 = ""
         from FPGATrackSimSGInput.FPGATrackSimSGInputConfig import FPGATrackSimSGInputToolCfg
@@ -574,12 +571,6 @@ def runDataPrepChain():
     from InDetConfig.ConfigurationHelpers import OnlyTrackingPreInclude
     OnlyTrackingPreInclude(flags)
     
-    
-    
-    ############################################    
-    from ActsConfig.ActsCIFlags import actsProductionFlags
-    actsProductionFlags(flags)
-    
     ############################################
     flags.Concurrency.NumThreads=1
     flags.Concurrency.NumConcurrentEvents=1
@@ -608,6 +599,11 @@ def runDataPrepChain():
         acc.addService(CompFactory.THistSvc(Output = ["FPGATRACKSIMOUTPUT DATAFILE='dataprep.root', OPT='RECREATE'"]))
 
 
+    from ActsConfig.ActsGeometryConfig import ActsTrackingGeometrySvcCfg
+    acc.merge(ActsTrackingGeometrySvcCfg(flags))
+    from ActsAlignmentAlgs.AlignmentAlgsConfig import ActsGeometryContextAlgCfg
+    acc.merge(ActsGeometryContextAlgCfg(flags))
+     
     acc.merge(FPGATrackSimDataPrepSetup(flags))
     
     # Use the imported configuration function for the data prep algorithm.

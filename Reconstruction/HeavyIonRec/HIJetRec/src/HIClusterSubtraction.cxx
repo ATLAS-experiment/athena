@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "HIClusterSubtraction.h"
@@ -127,14 +127,14 @@ int HIClusterSubtraction::execute() const
 		}
   }
 	bool missingMoment=false;
-
+  
 	const auto *originalCluster = readHandleClusters.cptr();
 	// Create the new container and its auxiliary store.
 	xAOD::CaloClusterContainer* copyClusters = new xAOD::CaloClusterContainer();
   xAOD::CaloClusterAuxContainer* copyClustersAux = new xAOD::CaloClusterAuxContainer();
   copyClusters->setStore(copyClustersAux);
   copyClusters->reserve (originalCluster->size());
-
+  
 	for (const xAOD::CaloCluster* oldCluster : *originalCluster) {
 	     xAOD::CaloCluster* newClu=new xAOD::CaloCluster();
 	     copyClusters->push_back (newClu);
@@ -152,7 +152,7 @@ int HIClusterSubtraction::execute() const
 			// but for the second we don't do origin correction. In principle the code is structured to do the same as the
 			//else for m_setMoments=true and HIJetClustersSubtractorTool, therefore we add the code for origin correction also here
 			m_subtractorTool->subtractWithMoments(cl, shape, es_index, m_modulatorTool, eshape);
-			if(isOriginPossible && m_originCorrection)
+			if(primVertex && isOriginPossible && m_originCorrection)
 			{
 				missingMoment = HIClusterSubtraction::doOriginCorrection( cl, primVertex, p4 );
 				HIJetRec::setClusterP4(p4,cl,HIJetRec::subtractedOriginCorrectedClusterState());
@@ -163,7 +163,7 @@ int HIClusterSubtraction::execute() const
 			m_subtractorTool->subtract(p4,cl,shape,es_index,m_modulatorTool,eshape);
 			HIJetRec::setClusterP4(p4,cl,HIJetRec::subtractedClusterState());
 
-			if(isOriginPossible && m_originCorrection)
+			if(primVertex && isOriginPossible && m_originCorrection)
 			{
 				ATH_MSG_DEBUG("Applying origin correction"
 							<< std::setw(12) << "Before:"

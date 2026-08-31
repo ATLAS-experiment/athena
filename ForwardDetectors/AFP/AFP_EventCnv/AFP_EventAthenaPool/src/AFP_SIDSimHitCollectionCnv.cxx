@@ -21,7 +21,7 @@ AFP_SIDSimHitCollection* AFP_SIDSimHitCollectionCnv::createTransient(const Token
 	MsgStream mlog(msgSvc(), "AFP_SIDSimHitCollectionConverter" );
 
 	//GUID of persistence collection class (see selection.xml in AFP_EventTPCnv, class item AFP_SIDSimHitCollection_p1
-	static const pool::Guid p1_guid("AAA03560-D4CC-40C3-80D6-165448375201");
+	static const Guid p1_guid("AAA03560-D4CC-40C3-80D6-165448375201");
 
 	AFP_SIDSimHitCollectionCnv_p1 TPConverter_p1;
 	AFP_SIDSimHitCollection *pTransColl=nullptr;

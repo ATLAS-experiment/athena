@@ -4,7 +4,7 @@
 
 // **********************************************************************
 // **********************************************************************
-
+#include <algorithm>
 #include <fstream>
 #include <iostream>
 #include <optional>
@@ -13,7 +13,7 @@
 #include <cctype>
 #include <ranges>
 
-#include "boost/algorithm/string/trim.hpp"
+#include "CxxUtils/StringUtils.h"
 
 #include "DataQualityInterfaces/MiniConfig.h"
 
@@ -156,7 +156,7 @@ ReadFile( std::string fileName )
     }
     if( sep == "=" ) {
       val = line.substr(linestream.tellg(), std::string::npos);
-      boost::trim(val);
+      val = CxxUtils::trimWhiteSpaces(val);
       //linestream >> val;
       if( val.size() == 0 ) {
         std::cerr << "MiniConfig::ReadFile(): "

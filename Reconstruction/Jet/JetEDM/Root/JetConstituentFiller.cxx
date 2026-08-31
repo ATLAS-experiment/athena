@@ -1,18 +1,18 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // JetConstituentFiller.cxx
 
 #include "JetEDM/JetConstituentFiller.h"
-#include <map>
+
 #include "JetEDM/IConstituentUserInfo.h"
 #include "JetEDM/IndexedTConstituentUserInfo.h"
 #include "JetEDM/LabelIndex.h"
 #include "xAODJet/JetContainer.h"
 #include "fastjet/PseudoJet.hh"
 #include "xAODMuon/MuonSegmentContainer.h"
-#include <iostream>
+#include <map>
 
 using PseudoJetVector = std::vector<fastjet::PseudoJet>;
 using xAOD::IParticle;
@@ -120,6 +120,7 @@ extractConstituents(xAOD::Jet& jet, const NameList* pghostlabs,
   
   // Set ghost associated particles:
   if (pli){
+    const static SG::AuxElement::ConstAccessor<ElementLink<xAOD::JetContainer> > cacc_parent("Parent");
     for ( size_t i=1; i<out.size(); ++i ) {
       if ( pghostlabs) {
         const NameList& ghostlabs = *pghostlabs;
@@ -133,7 +134,6 @@ extractConstituents(xAOD::Jet& jet, const NameList* pghostlabs,
       std::string ptname = pli->label(i) + "Pt";
       // Check if this is in the parent jet
       int count_test; // dummy var to retrieve into -- we don't care about the value
-      const static SG::AuxElement::ConstAccessor<ElementLink<xAOD::JetContainer> > cacc_parent("Parent");
       if(!m_isTrigger) {
         if(cacc_parent.isAvailable(jet) && cacc_parent(jet).isValid()) {
           if(!(*cacc_parent(jet))->getAttribute(cname,count_test)) {

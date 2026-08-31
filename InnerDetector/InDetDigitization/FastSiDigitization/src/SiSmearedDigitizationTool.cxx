@@ -667,7 +667,8 @@ SiSmearedDigitizationTool::mergeClusters(SCT_detElement_RIO_map* cluster_map)
       const auto range = cluster_map->equal_range(current_id);
 
       auto iter = range.first;
-
+      //coverity complains due to the erase; but there is a break immediately after
+      //coverity[INVALIDATE_ITERATOR]
       while (iter != range.second && !mergedThisPass) {
         auto inner_iter = std::next(iter);
 

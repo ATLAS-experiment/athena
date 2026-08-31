@@ -12,7 +12,6 @@ find_package( CLHEP )
 atlas_add_library( MuidEvent
                    src/CaloLayer.cxx
                    src/CaloMeas.cxx
-                   src/MuidTrack.cxx
                    src/MuonMatch.cxx
                    PUBLIC_HEADERS MuidEvent
                    PRIVATE_INCLUDE_DIRS ${CLHEP_INCLUDE_DIRS}

@@ -17,8 +17,7 @@ StatusCode FPGATrackSim::FPGATrackSimPrototrackFitterAlg::initialize() {
   ATH_CHECK(m_trackContainerKey.initialize());
   ATH_CHECK(m_tracksBackendHandlesHelper.initialize(ActsTrk::prefixFromTrackContainerName(m_trackContainerKey.key())));
   ATH_CHECK(m_actsFitter.retrieve()); 
-  ATH_CHECK(m_trackingGeometryTool.retrieve());
-  ATH_CHECK(m_extrapolationTool.retrieve());
+  ATH_CHECK(m_ctxProvider.initialize());
   ATH_CHECK(m_ProtoTrackCollectionFromFPGAKey.initialize());
   ATH_CHECK(m_chrono.retrieve());
   return StatusCode::SUCCESS;
@@ -46,9 +45,9 @@ StatusCode FPGATrackSim::FPGATrackSimPrototrackFitterAlg::execute(const EventCon
   /// The block is borrowed from the ACTS TrackFindingAlg and 
   /// should eventually be retired when this is no longer needed / 
   /// automated. 
-  const Acts::GeometryContext tgContext = m_trackingGeometryTool->getGeometryContext(ctx).context();
-  const Acts::MagneticFieldContext mfContext = m_extrapolationTool->getMagneticFieldContext(ctx);
-  const Acts::CalibrationContext calContext{ActsTrk::getCalibrationContext(ctx)};
+  const Acts::GeometryContext tgContext = m_ctxProvider.getGeometryContext(ctx);
+  const Acts::MagneticFieldContext mfContext = m_ctxProvider.getMagneticFieldContext(ctx);
+  const Acts::CalibrationContext calContext{m_ctxProvider.getCalibrationContext(ctx)};
 
   /// ----------------------------------------------------------
   /// and we are back to EF tracking! 

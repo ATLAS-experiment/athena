@@ -49,7 +49,7 @@ namespace JiveXML{
       
       /// Retrieve all the data
       virtual StatusCode retrieve(ToolHandle<IFormatTool> &FormatTool) override;
-      const DataMap getCaloTileData(const CaloCellContainer* cellContainer);
+      const DataMap getCaloTileData(const CaloCellContainer* cellContainer, const EventContext& ctx);
 
       /// Return the name of the data type
       virtual std::string dataTypeName() const override{ return "TileDigit"; };

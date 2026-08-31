@@ -11,8 +11,6 @@
 
 
 
-#include <RootCoreUtils/Global.h>
-
 namespace RCU
 {
   enum MessageType

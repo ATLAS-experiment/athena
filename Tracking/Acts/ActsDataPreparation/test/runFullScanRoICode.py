@@ -18,7 +18,7 @@ if __name__ == "__main__":
     # Set the Main Pass
     flags = flags.cloneAndReplace(
         "Tracking.ActiveConfig",
-        "Tracking.ITkMainPass")
+        "Tracking.ITkActsPass")
     
     flags.fillFromArgs()
     flags.lock()

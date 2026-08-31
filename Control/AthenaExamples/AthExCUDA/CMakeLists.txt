@@ -29,11 +29,11 @@ atlas_install_python_modules( python/*.py )
 atlas_add_test( LinearTransform
    PRE_EXEC_SCRIPT "nvidia-check.sh || exit 2"
    SCRIPT athena.py --threads=1 AthExCUDA/LinearTransformStandaloneExampleConfig.py
-   POST_EXEC_SCRIPT nopost.sh
+   POST_EXEC_SCRIPT noerror.sh
    PROPERTIES SKIP_RETURN_CODE 2 )
 
 atlas_add_test( LinearTransformAsync
    PRE_EXEC_SCRIPT "nvidia-check.sh || exit 2"
    SCRIPT athena.py --threads=4 AthExCUDA/LinearTransformAsyncExampleConfig.py
-   POST_EXEC_SCRIPT nopost.sh
+   POST_EXEC_SCRIPT noerror.sh
    PROPERTIES SKIP_RETURN_CODE 2 )

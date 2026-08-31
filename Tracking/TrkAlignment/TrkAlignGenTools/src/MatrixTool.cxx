@@ -60,11 +60,8 @@ namespace Trk {
   }
 
   //_______________________________________________________________________
-  MatrixTool::~MatrixTool()
-  {
-    delete m_bigmatrix;
-    delete m_bigvector;
-  }
+  MatrixTool::~MatrixTool() = default;
+ 
 
   //_______________________________________________________________________
   StatusCode MatrixTool::initialize()
@@ -106,11 +103,11 @@ namespace Trk {
 
     // Decide upon the big matrix representation:
     if( m_useSparse )
-      m_bigmatrix = new AlSpaMat(nDoF);
+      m_bigmatrix = std::make_unique<AlSpaMat>(nDoF);
     else
-      m_bigmatrix = new AlSymMat(nDoF);
+      m_bigmatrix = std::make_unique<AlSymMat>(nDoF);
 
-    m_bigvector       = new AlVec(nDoF);
+    m_bigvector       = std::make_unique<AlVec>(nDoF);
 
     ATH_MSG_INFO(" After Matrix and Vector allocation");
 
@@ -153,7 +150,6 @@ namespace Trk {
       msg(MSG::VERBOSE)<<"dumping matrix and vector to screen"<<endmsg;
       for (int i=0;i<nDoF;i++)
         for (int j=0;j<nDoF;j++)
-        //if (std::fabs((*m_bigmatrix)[i][j])>.0001)
           msg(MSG::VERBOSE)<<i<<", "<<j<<" : "<<(*m_bigmatrix)[i][j] <<endmsg;
 
       for (int i=0;i<nDoF;i++)
@@ -281,7 +277,6 @@ namespace Trk {
       msg(MSG::DEBUG)<<"dumping matrix and vector to screen"<<endmsg;
       for (int i=0;i<nDoF;i++)
         for (int j=0;j<nDoF;j++)
-        //if (std::fabs((*m_bigmatrix)[i][j])>.0001)
           msg(MSG::DEBUG)<<i<<", "<<j<<" : "<<(*m_bigmatrix)[i][j] <<endmsg;
 
       for (int i=0;i<nDoF;i++)
@@ -661,7 +656,7 @@ namespace Trk {
 
       // check modIndexMaps to make sure they are the same
       if (ivec==0)
-        modIndexMap = newModIndexMap;
+        modIndexMap = std::move(newModIndexMap);
       else if (modIndexMap!=newModIndexMap) {
         msg(MSG::FATAL)<<"module index maps don't agree!"<<endmsg;
         return false;
@@ -669,13 +664,13 @@ namespace Trk {
       if (ivec>0)
         *m_bigvector += newVector;
       else
-        *m_bigvector  = newVector;
+        *m_bigvector  = std::move(newVector);
     }
 
     m_scale = totalscale;
 
-    AlSymMat * symBigMatrix=dynamic_cast<AlSymMat*>(m_bigmatrix);
-    AlSpaMat * spaBigMatrix=dynamic_cast<AlSpaMat*>(m_bigmatrix);
+    auto symBigMatrix=dynamic_cast<AlSymMat*>(m_bigmatrix.get());
+    auto spaBigMatrix=dynamic_cast<AlSpaMat*>(m_bigmatrix.get());
 
 
     for (int imat=0;imat<(int)m_inputMatrixFiles.size();imat++) {
@@ -741,40 +736,25 @@ namespace Trk {
 
     ATH_MSG_DEBUG( "Created TMatrixDSparse" );
 
-  
-    double *val = new double[nDoF];
-    for (int i=0;i<nDoF;i++) {
-      val[i] = (*m_bigvector)[i];
-    }
-  
-    TVectorD myTVector(nDoF, val);
-    delete [] val;
+    TVectorD myTVector(nDoF, m_bigvector->ptrData());
   
     ATH_MSG_DEBUG( "Created TVectorD" );
 
   
     const AlignModuleList * moduleList = m_alignModuleTool->alignModules1D();
     int nModules = moduleList->size();
-  
-    double *hitmapA = new double[nModules];
-    double *hitmapB = new double[nModules];
-    AlignModuleList::const_iterator imod     = moduleList->begin();
-    AlignModuleList::const_iterator imod_end = moduleList->end();
-    int index(0);
-    for(; imod != imod_end; ++imod) {
-      AlignModule * module = *imod;
-      hitmapA[index] = (double)module->nHits();
-      hitmapB[index] = (double)module->nTracks();
+    std::vector<double> hitmapA(nModules);
+    std::vector<double> hitmapB(nModules);
+
+    
+    for(std::size_t index{};const auto * module : *moduleList) {
+      hitmapA[index] = static_cast<double>(module->nHits());
+      hitmapB[index] = static_cast<double>(module->nTracks());
       index++;
     }
   
-    TVectorD hitmapHits(nModules, hitmapA); 
-    TVectorD hitmapTracks(nModules, hitmapB);
-    
-    delete [] hitmapA;
-    delete [] hitmapB;
-    
-
+    TVectorD hitmapHits(nModules, hitmapA.data()); 
+    TVectorD hitmapTracks(nModules, hitmapB.data());
 
     TFile myFile(filename,"recreate");
     hitmapHits.Write("Hits");
@@ -800,7 +780,6 @@ namespace Trk {
         uint64_t  id = (*alignPars)[i]->alignModule()->identify().get_compact();
         memcpy(&target, &id, sizeof(target));
         moduleInfoA[i]=target;
-        //moduleInfoB[i]=(*alignPars)[i]->alignModule()->name();
         uint64_t dof = (*alignPars)[i]->paramType();
         memcpy(&target, &dof, sizeof(target));
         dofInfoA[i]=target;
@@ -832,10 +811,10 @@ namespace Trk {
     std::map<int,unsigned long long> DoFMap;
     double totalscale=0.;
 
-    AlSymMat * symBigMatrix=dynamic_cast<AlSymMat*>(m_bigmatrix);
-    AlSpaMat * spaBigMatrix=dynamic_cast<AlSpaMat*>(m_bigmatrix);
-    //TMatrixDSparse *accumMatrix(0);
-    AlSpaMat *accumMatrix = nullptr;
+    auto symBigMatrix=dynamic_cast<AlSymMat*>(m_bigmatrix.get());
+    auto spaBigMatrix=dynamic_cast<AlSpaMat*>(m_bigmatrix.get());
+    
+    std::unique_ptr<AlSpaMat> accumMatrix;
     
     const AlignModuleList * moduleList = m_alignModuleTool->alignModules1D();
     int nModules = moduleList->size();
@@ -847,7 +826,7 @@ namespace Trk {
    
     struct rusage myusage{};
     int itworked =  getrusage(RUSAGE_SELF,&myusage);
-    if(itworked)//note: rusage returns zero if it succeeds!
+    if(itworked == 0)//note: rusage returns zero if it succeeds!
 		  ATH_MSG_DEBUG("ItWorked");
 
     long intialMemUse = myusage.ru_maxrss;
@@ -861,8 +840,9 @@ namespace Trk {
       ATH_MSG_DEBUG("Reading File number " << ifile << ",  " << m_inputTFiles[ifile]);
       
       itworked =  getrusage(RUSAGE_SELF,&myusage);
-      ATH_MSG_DEBUG("Memory usage [MB], total " << myusage.ru_maxrss/1024 << ", increase  " << (myusage.ru_maxrss-intialMemUse)/1024);
-       
+      if (itworked ==0){
+        ATH_MSG_DEBUG("Memory usage [MB], total " << myusage.ru_maxrss/1024 << ", increase  " << (myusage.ru_maxrss-intialMemUse)/1024);
+      }
       TFile* myFile = TFile::Open(m_inputTFiles[ifile].c_str()); 
       
       if ( myFile->IsZombie() || !(myFile->IsOpen()) ) {
@@ -933,14 +913,13 @@ namespace Trk {
         continue;
       }
       
-      AlVec* newVector = new AlVec(nDoF);
+      auto newVector = std::make_unique<AlVec>(nDoF);
       newVector->SetPathBin(m_pathbin.value()+m_prefixName.value());
       newVector->SetPathTxt(m_pathtxt.value()+m_prefixName.value());
       
       if (newVector->size()  != m_bigvector->size() ) {
          msg(MSG::FATAL) << "vector wrong size!  newVector size " << newVector->size()
                          << ", bigvector size " << m_bigvector->size()<<endmsg;
-         delete newVector;
          delete vector;
          return false;
       }
@@ -948,7 +927,6 @@ namespace Trk {
       if (m_bigvector->size() != vector->GetNrows() ) {
          msg(MSG::FATAL) << "File vector wrong size!  File Vector size " << vector->GetNrows()
                          << ", bigvector size " << m_bigvector->size()<<endmsg;
-         delete newVector;
          delete vector;
          return false;
       }
@@ -961,25 +939,25 @@ namespace Trk {
       
       // check modIndexMaps to make sure they are the same
       if (ifile == 0){
-        DoFMap = newDoFMap;
+        DoFMap = std::move(newDoFMap);
       } else if (DoFMap!=newDoFMap) {
+        delete vector;
         msg(MSG::FATAL) << "module dofs don't agree!" << endmsg;
         return false;
       }
       
       if (ifile == 0){
-         modIndexMap = newModIndexMap;
+         modIndexMap = std::move(newModIndexMap);
       } else if (modIndexMap!=newModIndexMap) {
+         delete vector;
          msg(MSG::FATAL) << "module index maps don't agree!" << endmsg;
          return false;
       }
       
       if (ifile>0){
         *m_bigvector += *newVector;
-        delete newVector;  
       } else {
-        delete m_bigvector;
-        m_bigvector  = newVector;
+        m_bigvector  = std::move(newVector);
       }
       
       
@@ -995,7 +973,7 @@ namespace Trk {
       
       if (ifile == 0 ){ 
       
-        accumMatrix = new AlSpaMat(nDoF);
+        accumMatrix = std::make_unique<AlSpaMat>(nDoF);
         ATH_MSG_DEBUG("Matrix size b4 "<< accumMatrix->ptrMap()->size()  );
         
         //This method is ok for large matrix files... really only access the non zero elements
@@ -1078,8 +1056,9 @@ namespace Trk {
       
       myFile->Close("R");
       delete myFile;
-
-      itworked =  getrusage(RUSAGE_SELF,&myusage);
+      //
+      //setting 'itworked' here would be overwritten before use
+      //
       ATH_MSG_DEBUG("Memory usage [MB], total " << myusage.ru_maxrss/1024 << ", increase  " << (myusage.ru_maxrss-intialMemUse)/1024);
 
     }
@@ -1098,12 +1077,10 @@ namespace Trk {
         }       
 
         *symBigMatrix += newMatrix;
-        delete accumMatrix;
       } else if (spaBigMatrix) { 
         ATH_MSG_DEBUG( "should reassign matrix "<< spaBigMatrix->ptrMap()->size() );        
         *spaBigMatrix  += *accumMatrix;     
         ATH_MSG_DEBUG( "??????  "<< spaBigMatrix->ptrMap()->size() );
-        delete accumMatrix;
       }
     }
 
@@ -1210,7 +1187,7 @@ namespace Trk {
     int nDoF = alignParList->size();
 
 
-    const AlSymMat * chkMatrix = dynamic_cast<const AlSymMat*>(m_bigmatrix);
+    const AlSymMat * chkMatrix = dynamic_cast<const AlSymMat*>(m_bigmatrix.get());
     if(chkMatrix){
       // Method when using the dense matrix
       for (int i=0;i<nDoF;i++) {
@@ -1499,9 +1476,9 @@ namespace Trk {
       int thisNDoF = alignPars->size();
 
       // fill local covariance matrix
-      CLHEP::HepSymMatrix * covsub = nullptr;
+      std::unique_ptr<CLHEP::HepSymMatrix> covsub;;
       if(cov && module->nHits() >= m_minNumHits && module->nTracks() >= m_minNumTrks) {
-        covsub = new CLHEP::HepSymMatrix(thisNDoF,0);
+        covsub = std::make_unique<CLHEP::HepSymMatrix>(thisNDoF,0);
         for (int i=0;i<thisNDoF;++i) {
           int ipar = alignPars->at(i)->index();
           double sigma_i = alignPars->at(i)->sigma();
@@ -1525,9 +1502,8 @@ namespace Trk {
         }
       }
 
-      printModuleSolution(os,module,covsub);
+      printModuleSolution(os,module,covsub.get());
 
-      delete covsub;
     }
     os << "--------------------------------------------------------------------------------" << std::endl;
   }
@@ -1535,41 +1511,20 @@ namespace Trk {
   //________________________________________________________________________
   void MatrixTool::printGlobalSolution(std::ostream & os, const TMatrixDSym * cov0)
   {
-    CLHEP::HepSymMatrix * cov = nullptr;
+    std::unique_ptr<CLHEP::HepSymMatrix> cov;
     if(cov0) {
       int nsize = cov0->GetNrows();
-      cov = new CLHEP::HepSymMatrix(nsize,0);
+      cov = std::make_unique<CLHEP::HepSymMatrix>(nsize,0);
 
       for(int i=0; i<nsize; i++)
         for(int j=0; j<=i; j++)
           (*cov)[i][j] = (*cov0)[i][j];
     }
 
-    printGlobalSolution(os,cov);
+    printGlobalSolution(os,cov.get());
 
-    delete cov;
   }
-/**
-  namespace {
-    class RestoreIOSFlags 
-    {
-    public:
-      RestoreIOSFlags (std::ostream &os) 
-        : m_os(&os), 
-          m_flags(m_os->flags()),
-          m_precision(m_os->precision())
-      {}
-      ~RestoreIOSFlags() {
-        m_os->flags(m_flags);
-        m_os->precision(m_precision);
-      }
-    private:
-      std::ostream *m_os;
-      std::ios_base::fmtflags m_flags;
-      std::streamsize  m_precision;
-    };
-  }
-**/
+
   //________________________________________________________________________
   void MatrixTool::printModuleSolution(std::ostream & os, const AlignModule * module, const CLHEP::HepSymMatrix * cov) const
   {
@@ -1667,9 +1622,9 @@ namespace Trk {
     }
 
     // store the original matrix for checks
-    AlSymMat * d2Chi2 = nullptr;
+    std::unique_ptr<AlSymMat> d2Chi2 ;
     if (m_calculateFullCovariance)
-      d2Chi2 = new AlSymMat(*aBetterMat);
+      d2Chi2 = std::make_unique<AlSymMat>(*aBetterMat);
 
     clock_t starttime = clock();
 
@@ -1691,7 +1646,7 @@ namespace Trk {
     double time_solve = 0.;
     if (info==0) {
       starttime = clock();
-      postSolvingLapack(aBetterVec,d2Chi2,w,z,m_aNDoF);
+      postSolvingLapack(aBetterVec,d2Chi2.get(),w,z,m_aNDoF);
       stoptime = clock();
       time_solve = (stoptime-starttime)/double(CLOCKS_PER_SEC);
       ATH_MSG_INFO(" - time spent solving the system: "<<time_solve<<" s");
@@ -1711,7 +1666,6 @@ namespace Trk {
       *m_logStream<<"\n";
     }
 
-    delete d2Chi2;
     delete aBetterMat;
     delete aBetterVec;
 
@@ -2043,11 +1997,11 @@ namespace Trk {
     AlVec errSq(size);
 
     // full covariance matrix
-    CLHEP::HepSymMatrix * cov = nullptr;
+    std::unique_ptr<CLHEP::HepSymMatrix> cov;
     if(m_calculateFullCovariance)
       // Warning ! The matrix can be huge!
       // This can lead to memory problems
-      cov = new CLHEP::HepSymMatrix(size,0);
+      cov = std::make_unique<CLHEP::HepSymMatrix>(size,0);
 
     if(m_logStream)
       *m_logStream<<"/------ The Eigenvalue Spectrum -------\n";
@@ -2119,7 +2073,7 @@ namespace Trk {
     }
 
     if(m_logStream) {
-      printGlobalSolution(*m_logStream, cov);
+      printGlobalSolution(*m_logStream, cov.get());
 
       // norm of first derivative
       double norm1st = dChi2->norm();
@@ -2142,7 +2096,6 @@ namespace Trk {
       }
     }
 
-    delete cov;
   }
 
   //________________________________________________________________________
@@ -2163,14 +2116,14 @@ namespace Trk {
 
     AlSpaMat * ABetterMat = nullptr;
     bool isCopy = false;
-    if ( dynamic_cast<AlSymMat*>(m_bigmatrix) ) {
+    if ( dynamic_cast<AlSymMat*>(m_bigmatrix.get()) ) {
       ATH_MSG_INFO("Converting Matrix Format for fast solving");
-      ABetterMat = new AlSpaMat(*(dynamic_cast<AlSymMat*>(m_bigmatrix)));
+      ABetterMat = new AlSpaMat(*(dynamic_cast<AlSymMat*>(m_bigmatrix.get())));
       isCopy = true;
     }
-    else if ( dynamic_cast<AlSpaMat*>(m_bigmatrix) ) {
+    else if ( dynamic_cast<AlSpaMat*>(m_bigmatrix.get()) ) {
       ATH_MSG_INFO("Matrix format native to the fast solving");
-      ABetterMat = (dynamic_cast<AlSpaMat*>(m_bigmatrix));
+      ABetterMat = (dynamic_cast<AlSpaMat*>(m_bigmatrix.get()));
     }
     else {
       ATH_MSG_ERROR("Cannot cast to neither AlSymMat nor AlSpaMat");
@@ -2250,8 +2203,8 @@ namespace Trk {
     }
 
     if(m_logStream) {
-      CLHEP::HepSymMatrix * cov = nullptr;
-      printGlobalSolution(*m_logStream, cov);
+      std::unique_ptr<CLHEP::HepSymMatrix> cov;
+      printGlobalSolution(*m_logStream, cov.get());
 
       // norm of first derivative
       *m_logStream<<"norm of first derivative :            "<<origVec.norm()<<"\n";

@@ -70,10 +70,7 @@ WriteExampleElectron                                DEBUG data dependencies:
   + OUTPUT  ( 'xAOD::ExampleElectronContainer' , 'StoreGateSvc+TestContainer.decor1' ) 
   + OUTPUT  ( 'xAOD::ExampleElectronContainer' , 'StoreGateSvc+TestContainer.decor2' ) 
 StreamWritexAODElectrons                            DEBUG In initialize
-StreamWritexAODElectrons                            DEBUG In initialize 
-StreamWritexAODElectrons                            DEBUG Found IDecisionSvc.
 DecisionSvc                                          INFO Inserting stream: StreamWritexAODElectrons with no Algs
-StreamWritexAODElectrons                            DEBUG End initialize 
 StreamWritexAODElectrons                            DEBUG Found StoreGateSvc/StoreGateSvc store.
 StreamWritexAODElectrons                            DEBUG Found StoreGateSvc/MetaDataStore store.
 AthDictLoaderSvc                                     INFO in initialize...
@@ -179,6 +176,7 @@ CollectionTree(xAOD::EventAuxInfo_v3/EventInfo...)  DEBUG Opened container Colle
 TBranchAuxDynReader                                  INFO ../TBranchAuxDynReader.cxx (FUNC): attribute 'mcEventNumber' (id=1 typename=unsigned long) has different type than the branch: ULong64_t  Marking for schema evolution.
 AthenaEventLoopMgr                                   INFO   ===>>>  start of run 1    <<<===
 IOVDbSvc                                             INFO Only 5 POOL conditions files will be open at once
+IOVDbSvc                                             INFO IOVDbSvc configured to use a COOL database
 IOVDbSvc                                             INFO Initialised with 1 connections and 0 folders
 IOVDbSvc                                             INFO Service IOVDbSvc initialised successfully
 AthenaEventLoopMgr                                   INFO   ===>>>  start processing event #4294967297, run #1 0 events processed so far  <<<===

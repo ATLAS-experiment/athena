@@ -54,7 +54,7 @@
 #include "ActsEvent/TrackContainer.h"
 
 // Tools
-#include "ActsGeometryInterfaces/ITrackingGeometryTool.h"
+#include "ActsGeometryInterfaces/ITrackingGeometrySvc.h"
 #include "ActsCalibrators/xAODUncalibMeasSurfAcc.h"
 #include "Acts/Surfaces/PerigeeSurface.hpp"
 
@@ -93,7 +93,7 @@ private:
   
 
   // WriteDecorHandleKeys for decorating tracks
-  SG::WriteDecorHandleKey<xAOD::TrackParticleContainer> m_numHGTDHitsKey{this, "numHGTDHits", m_trackParticleContainerName, "numHGTDHits", "Number of HGTD hits on the track extension"};  
+  SG::WriteDecorHandleKey<xAOD::TrackParticleContainer> m_numHGTDHitsKey{this, "numHGTDHits", m_trackParticleContainerName, "numberOfHGTDHits", "Number of HGTD hits on the track extension"};  
   SG::WriteDecorHandleKey<xAOD::TrackParticleContainer> m_layerHasExtensionKey { this, "HGTD_has_extension", m_trackParticleContainerName, "HGTD_has_extension", "Decoration for layer extension" };
   SG::WriteDecorHandleKey<xAOD::TrackParticleContainer> m_layerExtensionChi2Key { this, "HGTD_extension_chi2", m_trackParticleContainerName, "HGTD_extension_chi2", "Decoration for chi2 of extension" };
   SG::WriteDecorHandleKey<xAOD::TrackParticleContainer> m_layerClusterRawTimeKey { this, "HGTD_cluster_raw_time", m_trackParticleContainerName, "HGTD_cluster_raw_time", "Decoration for raw time of cluster" };
@@ -144,7 +144,7 @@ private:
     const DetectorContextHolder& detContext,
     const detail::TrackFindingMeasurements &measurements,
     const detail::MeasurementIndex& measurementIndex,
-    const Acts::BoundTrackParameters lastMeasurementStateParameters,
+    const Acts::BoundTrackParameters & lastMeasurementStateParameters,
     detail::RecoTrackContainer &tracksContainerTemp,
     detail::RecoTrackContainer &actsTracksContainer,
     EventStats& event_stat,

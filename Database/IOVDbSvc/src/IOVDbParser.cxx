@@ -94,7 +94,7 @@ IOVDbParser::IOVDbParser(const std::string & input, MsgStream& log) :
       iofs=len;
     }
   }
-  this->clean(); //rectify obsolete key names
+
   if (log.level()<=MSG::VERBOSE) {
     log << MSG::VERBOSE << "parseXML processed input string: " << input << endmsg;
     for (KeyValMap::const_iterator itr=m_keys.begin();itr!=m_keys.end();++itr) {
@@ -217,16 +217,6 @@ bool
 IOVDbParser::noTagOverride() const{
   return at("noover").second;
 }
-
-
-void IOVDbParser::clean() {
-  auto it=m_keys.find("dbConnection");
-  if (it!=m_keys.end()) {
-    std::string connection=std::move(it->second);
-    m_keys.erase(it);
-    m_keys["db"]=std::move(connection);
-  }
-  }
 
 
 unsigned 

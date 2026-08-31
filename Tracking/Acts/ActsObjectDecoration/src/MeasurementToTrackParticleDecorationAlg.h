@@ -15,16 +15,16 @@
 #define MEASUREMENTTOTRACKPARTICLEDECORATIONALG_H
 
 #include "AthenaBaseComps/AthReentrantAlgorithm.h"
-#include "GaudiKernel/ServiceHandle.h"
+
 #include "StoreGate/ReadHandleKey.h"
 
 #include "StoreGate/WriteDecorHandleKey.h"
 #include "StoreGate/WriteDecorHandle.h"
 
-#include "ActsGeometryInterfaces/ITrackingGeometryTool.h"
 #include "xAODTracking/TrackParticleContainer.h"
 #include "Acts/Definitions/Units.hpp"
 #include "ActsEvent/TrackContainer.h"
+#include "ActsEvent/ContextUtility.h"
 #include "Acts/EventData/TrackStateProxy.hpp"
 
 
@@ -32,7 +32,7 @@ namespace ActsTrk {
 
     class MeasurementToTrackParticleDecorationAlg : public AthReentrantAlgorithm  {
     public:
-        MeasurementToTrackParticleDecorationAlg(const std::string &name,ISvcLocator *pSvcLocator);
+        using AthReentrantAlgorithm::AthReentrantAlgorithm;
         virtual ~MeasurementToTrackParticleDecorationAlg() = default;
 
         virtual StatusCode initialize() override;
@@ -60,8 +60,9 @@ namespace ActsTrk {
       
     private:
       
-      PublicToolHandle<ActsTrk::ITrackingGeometryTool> m_trackingGeometryTool{this, "TrackingGeometryTool", ""};
-      
+       /** @brief Context provider for geometry, magnetic field and calibration contexts */
+       ContextUtility m_ctxProvider{this};
+
       SG::ReadHandleKey<xAOD::TrackParticleContainer> m_trackParticlesKey {
 	this, "TrackParticleKey", "", "Input track particle collection"};
       

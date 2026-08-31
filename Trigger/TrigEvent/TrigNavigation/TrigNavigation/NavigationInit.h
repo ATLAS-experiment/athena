@@ -11,10 +11,6 @@
    * This code is from Scott Snyder
    */
 
-#include <boost/function_types/function_type.hpp>
-#include <boost/function_types/parameter_types.hpp>
-#include <boost/function_types/function_arity.hpp>
-#include <boost/typeof/std/utility.hpp>
 #include <type_traits>
 #include "AthLinks/ElementLink.h"
 #include "AthLinks/DataLink.h"

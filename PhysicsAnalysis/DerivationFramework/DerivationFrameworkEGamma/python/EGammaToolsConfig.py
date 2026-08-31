@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # ==============================================================================
 # Provides configs for the tools used for e-gamma decorations used in DAOD
@@ -51,6 +51,17 @@ def EGElectronLikelihoodToolWrapperCfg(flags, name, **kwargs):
     acc.setPrivateTools(CompFactory.DerivationFramework.EGElectronLikelihoodToolWrapper(name, **kwargs))
     return acc
 
+# Photon BDT decrotation tool
+def EGPhotonBDTToolDecoratorCfg(flags, name, **kwargs):
+    """Configure the E-gamma selection tool decorator"""
+    acc = ComponentAccumulator()
+    sgName = kwargs.pop("StoreGateEntryName", "")
+    if not sgName:
+        raise AttributeError("StoreGateEntryName not set")
+    kwargs.setdefault("decoratorScore", sgName + "Score")
+    acc.setPrivateTools(CompFactory.DerivationFramework.EGPhotonBDTToolDecorator(name, **kwargs))
+    return acc
+
 # Photon BDT selection tool wrapper
 def EGPhotonBDTToolWrapperCfg(flags, name, **kwargs):
     """Configure the E-gamma selection tool wrapper"""
@@ -63,7 +74,6 @@ def EGPhotonBDTToolWrapperCfg(flags, name, **kwargs):
         raise AttributeError("WorkingPointName not set")
     kwargs.setdefault("decoratorPass", sgName+wpName)
     kwargs.setdefault("decoratorIsEM", sgName+wpName + "IsEMValue")
-    kwargs.setdefault("decoratorScore", sgName + "Score")
     acc.setPrivateTools(CompFactory.DerivationFramework.EGPhotonBDTToolWrapper(name, **kwargs))
     return acc
 
@@ -203,4 +213,66 @@ def EGammaEnergyCalibrationWrapperCfg(
 
     acc.setPrivateTools(CompFactory.DerivationFramework.EGammaEnergyCalibrationWrapper(name, **kwargs))
 
+    return acc
+
+# ====================================================================
+# SHOWER SHAPE CORRECTIONS IN MC
+# The default tunes are set in
+# PhysicsAnalysis/ElectronPhotonID/EGammaVariableCorrection/python/EGammaVariableCorrectionConfig.py
+# AF3 is tuned to FullSim, so same FFs can be used for AF3 and FS
+# ====================================================================
+
+def ElectronFudgeAlgorithmCfg(flags, name="ElectronFudgeAlgorithm", **kwargs):
+    acc = ComponentAccumulator()
+
+    if "EGammaFudgeTool" not in kwargs:
+        from EGammaVariableCorrection.EGammaVariableCorrectionConfig import (
+            ElectronVariableCorrectionToolCfg)
+        ElectronVariableCorrectionTool = acc.popToolsAndMerge(
+            ElectronVariableCorrectionToolCfg(flags)
+        )
+        acc.addPublicTool(ElectronVariableCorrectionTool)
+        kwargs.setdefault("EGammaFudgeTool", ElectronVariableCorrectionTool)
+
+    kwargs.setdefault("Input", "Electrons")
+    kwargs.setdefault("Output", "FudgedElectrons")
+
+    acc.addEventAlgo(CompFactory.DerivationFramework.EGammaFudgeAlgorithm(name, **kwargs))
+    return acc
+
+def PhotonFudgeAlgorithmCfg(flags, name="PhotonFudgeAlgorithm", **kwargs):
+    acc = ComponentAccumulator()
+
+    if "EGammaFudgeTool" not in kwargs:
+        from EGammaVariableCorrection.EGammaVariableCorrectionConfig import (
+            PhotonVariableCorrectionToolCfg)
+        PhotonVariableCorrectionTool = acc.popToolsAndMerge(
+            PhotonVariableCorrectionToolCfg(flags)
+        )
+        acc.addPublicTool(PhotonVariableCorrectionTool)
+        kwargs.setdefault("EGammaFudgeTool", PhotonVariableCorrectionTool)
+
+    kwargs.setdefault("Input", "Photons")
+    kwargs.setdefault("Output", "FudgedPhotons")
+
+    acc.addEventAlgo(CompFactory.DerivationFramework.EGammaFudgeAlgorithm(name, **kwargs))
+    return acc
+
+def PhotonNFFudgeAlgorithmCfg(flags, name="PhotonNFFudgeAlgorithm", **kwargs):
+    acc = ComponentAccumulator()
+
+    if "EGammaFudgeTool" not in kwargs:
+        nFoldsNF = flags.Egamma.NFoldsNF if flags.hasFlag('Egamma.NFoldsNF') else None
+        from EGammaVariableCorrection.EGammaVariableCorrectionConfig import (
+            ElectronPhotonVariableNFCorrectionToolCfg)
+        PhotonVariableNFCorrectionTool = acc.popToolsAndMerge(
+                ElectronPhotonVariableNFCorrectionToolCfg(flags, nFolds=nFoldsNF)
+            )
+        acc.addPublicTool(PhotonVariableNFCorrectionTool)
+        kwargs.setdefault("EGammaFudgeTool", PhotonVariableNFCorrectionTool)
+
+    kwargs.setdefault("Input", "Photons")
+    kwargs.setdefault("Output", "NFFudgedPhotons")
+
+    acc.addEventAlgo(CompFactory.DerivationFramework.EGammaFudgeAlgorithm(name, **kwargs))
     return acc

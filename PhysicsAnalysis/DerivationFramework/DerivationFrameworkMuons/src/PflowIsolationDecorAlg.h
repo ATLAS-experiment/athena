@@ -1,16 +1,16 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef DERIVATIONFRAMEWORKMUONS_PFLOWISOLATIONDECORALG_H
 #define DERIVATIONFRAMEWORKMUONS_PFLOWISOLATIONDECORALG_H
 
-#include <AthenaBaseComps/AthReentrantAlgorithm.h>
-#include <StoreGate/ReadHandleKey.h>
-#include <StoreGate/WriteDecorHandleKey.h>
-#include <xAODPrimitives/IsolationType.h>
-#include <xAODTracking/TrackParticleContainer.h>
-#include <StoreGate/ReadDecorHandleKeyArray.h>
-#include <RecoToolInterfaces/INeutralEFlowIsolationTool.h>
+#include "AthenaBaseComps/AthReentrantAlgorithm.h"
+#include "StoreGate/ReadHandleKey.h"
+#include "StoreGate/WriteDecorHandleKey.h"
+#include "xAODPrimitives/IsolationType.h"
+#include "xAODTracking/TrackParticleContainer.h"
+#include "StoreGate/ReadDecorHandleKeyArray.h"
+#include "RecoToolInterfaces/INeutralEFlowIsolationTool.h"
 
 /// Algorithm to decorate the calorimeter isolation variables to the track particles
 
@@ -18,7 +18,7 @@ namespace DerivationFramework {
     class PflowIsolationDecorAlg : public AthReentrantAlgorithm {
     public:
         /// Constructor with parameters:
-        PflowIsolationDecorAlg(const std::string& name, ISvcLocator* pSvcLocator);
+        using AthReentrantAlgorithm::AthReentrantAlgorithm;
 
         /// Destructor:
         ~PflowIsolationDecorAlg() = default;

@@ -447,12 +447,15 @@ namespace CP {
                 }
             }
         } else return true;
-        Warning("CollectionContainer", "Could not find any SF period in %s matching the run number %u", EffiCollection::FileTypeName(type()).c_str(), RunNumber);
+        if (!m_warnedForRunNumber.contains(RunNumber)) {
+            Warning("CollectionContainer", "Could not find any SF period in %s matching the run number %u", EffiCollection::FileTypeName(type()).c_str(), RunNumber);
+            m_warnedForRunNumber.insert(RunNumber);
+        }
         return false;
     }
     EfficiencyScaleFactor* CollectionContainer::retrieve(unsigned int RunNumber) {
         if (!LoadPeriod(RunNumber)) {
-            return (*m_SF.begin()).get();
+            return (*m_SF.rbegin()).get();
         }
         return m_currentSF;
     }

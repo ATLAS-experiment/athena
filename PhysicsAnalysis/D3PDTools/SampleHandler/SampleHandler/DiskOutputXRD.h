@@ -62,13 +62,13 @@ namespace SH
     virtual std::unique_ptr<DiskWriter>
     doMakeWriter (const std::string& sampleName,
                   const std::string& segmentName,
-		  const std::string& suffix) const;
+		  const std::string& suffix) const override;
 
   protected:
     virtual std::string
     getTargetURL (const std::string& sampleName,
                   const std::string& segmentName,
-                  const std::string& suffix) const;
+                  const std::string& suffix) const override;
 
 
 
@@ -80,7 +80,7 @@ namespace SH
   private:
     std::string m_prefix;
 
-    ClassDef (DiskOutputXRD, 1);
+    ClassDefOverride (DiskOutputXRD, 1);
   };
 }
 

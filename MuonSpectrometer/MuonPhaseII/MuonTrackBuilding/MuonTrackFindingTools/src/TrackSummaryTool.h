@@ -35,7 +35,7 @@ namespace MuonR4 {
 
             /** @copydoc MuoNR4::ITrackSummaryTool::makeSummary */
             virtual HitSummary makeSummary(const EventContext& ctx,
-                                           const std::vector<const xAOD::MuonSegment*>& segments) const override final;
+                                           std::span<const xAOD::MuonSegment* const> segments) const override final;
             /** @copydoc MuoNR4::ITrackSummaryTool::makeSummary */
             virtual HitSummary makeSummary(const EventContext& ctx,
                                            const Trk::Track& track) const override final;

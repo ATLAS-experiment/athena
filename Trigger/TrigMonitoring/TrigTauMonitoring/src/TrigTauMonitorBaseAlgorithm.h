@@ -60,7 +60,6 @@ protected:
 
     // Get L1 RoIs
     std::vector<const xAOD::eFexTauRoI*> getL1eTAUs(const EventContext& ctx, const std::string& l1_item) const;
-    std::vector<const xAOD::jFexTauRoI*> getL1jTAUs(const EventContext& ctx, const std::string& l1_item) const;
     std::vector<std::pair<const xAOD::eFexTauRoI*, const xAOD::jFexTauRoI*>> getL1cTAUs(const EventContext& ctx, const std::string& l1_item) const;
 
     // Process event, after bad event cleaning

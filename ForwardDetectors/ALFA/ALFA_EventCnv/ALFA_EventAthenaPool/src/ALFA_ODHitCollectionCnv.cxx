@@ -21,7 +21,7 @@ ALFA_ODHitCollection* ALFA_ODHitCollectionCnv::createTransient(const Token* toke
     ALFA_ODHitCollectionCnv_p1   TPConverter_p1;
 
     ALFA_ODHitCollection       *trans_cont(nullptr); // probably inicialization
-    static const pool::Guid   p1_guid("11D7B0C9-54FF-44BF-A673-E9691004488B");
+    static const Guid   p1_guid("11D7B0C9-54FF-44BF-A673-E9691004488B");
     
     if( this->compareClassGuid(token, p1_guid)) {
          std::unique_ptr< ALFA_ODHitCollection_p1 >   col_vect( this->poolReadObject< ALFA_ODHitCollection_p1 >(token) );

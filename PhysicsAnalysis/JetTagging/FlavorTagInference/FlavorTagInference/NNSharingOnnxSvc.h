@@ -7,6 +7,7 @@
 
 #include "FlavorTagInference/INNSharingSvc.h"
 #include "AsgServices/AsgService.h"
+#include "AsgTools/PropertyWrapper.h"
 
 namespace FlavorTagInference
 {
@@ -21,6 +22,14 @@ namespace FlavorTagInference
     using val_t = std::shared_ptr<const GNN>;
     std::unordered_map<NNHashing::NNKey, val_t, NNHashing::NNHasher> m_gnns;
     std::unordered_map<std::string, val_t> m_base_gnns;
+    Gaudi::Property<std::string> m_executionProvider {
+      this, "executionProvider", "CPU",
+      "onnx execution provider to build the sessions on, CPU or CUDA"};
+    Gaudi::Property<int> m_deviceId {
+      this, "deviceId", 0, "device the CUDA provider runs on"};
+    Gaudi::Property<bool> m_useTF32 {
+      this, "useTF32", false,
+      "let tensor cores evaluate fp32 matmuls in TF32"};
   };
 
 }

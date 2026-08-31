@@ -15,14 +15,6 @@ def ActsEMBremCollectionBuilderCfg(flags,
         kwargs.setdefault("ActsFitter", acc.popToolsAndMerge(
             ActsGaussianSumFitterToolCfg(flags, name="ActsGSFTrackFitter")))
         
-    
-    if 'TrackingGeometryTool' not in kwargs:
-        from ActsConfig.ActsGeometryConfig import ActsTrackingGeometryToolCfg
-        kwargs.setdefault(
-            "TrackingGeometryTool",
-            acc.getPrimaryAndMerge(ActsTrackingGeometryToolCfg(flags)),
-        )
-
     if 'TrackToTrackParticleCnvTool' not in kwargs:
         from ActsConfig.ActsEventCnvConfig import ActsTrackToTrackParticleCnvToolCfg
         kwargs.setdefault("TrackToTrackParticleCnvTool", acc.popToolsAndMerge(
@@ -72,14 +64,6 @@ def TrigActsEMBremCollectionBuilderCfg(flags,
     from ActsConfig.ActsGaussianSumFitterConfig import ActsGaussianSumFitterToolCfg
     kwargs.setdefault("ActsFitter", acc.popToolsAndMerge(
         ActsGaussianSumFitterToolCfg(flags, name="ActsGSFTrackFitter")))
-        
-    
-  if 'TrackingGeometryTool' not in kwargs:
-      from ActsConfig.ActsGeometryConfig import ActsTrackingGeometryToolCfg
-      kwargs.setdefault(
-          "TrackingGeometryTool",
-          acc.getPrimaryAndMerge(ActsTrackingGeometryToolCfg(flags)),
-      )
 
   if 'TrackToTrackParticleCnvTool' not in kwargs:
       from ActsConfig.ActsEventCnvConfig import ActsTrackToTrackParticleCnvToolCfg

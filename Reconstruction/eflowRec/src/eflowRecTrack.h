@@ -12,10 +12,7 @@
 #ifndef EFLOWRECTRACK_H_
 #define EFLOWRECTRACK_H_
 
-#include <iostream>
-#include <cassert>
-#include <map>
-#include <string>
+
 
 #include "CaloEvent/CaloCell.h"
 #include "CaloEvent/CaloCellContainer.h"
@@ -35,6 +32,12 @@
 
 #include "xAODTracking/TrackParticle.h"
 #include "xAODTracking/TrackParticleContainer.h"
+
+#include <iostream>
+#include <cassert>
+#include <map>
+#include <string>
+#include <string_view>
 
 class eflowTrackClusterLink;
 class eflowTrackExtrapolatorBaseAlgTool;
@@ -70,7 +73,7 @@ public:
   //This must also clear deltaRPrime, which corresponds to dRPrime between the track and each cluster
   void clearClusterMatches() { m_clusterMatches.clear(); m_deltaRPrimes.clear(); }
 
-  const std::vector<eflowTrackClusterLink*>* getAlternativeClusterMatches(const std::string& key) const;// { return m_alternativeClusterMatches.at(key); }
+  const std::vector<eflowTrackClusterLink*>* getAlternativeClusterMatches(std::string_view key) const;// { return m_alternativeClusterMatches.at(key); }
 
   bool hasBin() const { return m_hasBin; }
   void setHasBin(bool hasBin) { m_hasBin = hasBin; }
@@ -145,7 +148,7 @@ private:
   std::vector<eflowTrackClusterLink*> m_clusterMatches;
   /** List of distance measurements between track and cluster used in first pass matching - i.e dRPrime */
   std::vector<float> m_deltaRPrimes;
-  std::map<std::string,std::vector<eflowTrackClusterLink*> > m_alternativeClusterMatches;
+  std::map<std::string,std::vector<eflowTrackClusterLink*> , std::less<>> m_alternativeClusterMatches;
 
   //for truth cheating mode only, we store the list of cells and their truth energies
   std::vector<std::pair<const CaloCell*, double> > m_cellTruthEnergyList;

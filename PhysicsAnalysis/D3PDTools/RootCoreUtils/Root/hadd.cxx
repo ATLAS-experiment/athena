@@ -16,8 +16,9 @@
 #include <TList.h>
 #include <TSystem.h>
 #include <RootCoreUtils/Assert.h>
-#include <RootCoreUtils/PrintMsg.h>
+#include <RootCoreUtils/MessageCheck.h>
 #include <filesystem>
+#include <stdexcept>
 
 //
 // method implementations
@@ -29,6 +30,8 @@ namespace RCU
 	     const std::vector<std::string>& input_files,
 	     unsigned max_files)
   {
+    using namespace msgRootCoreUtils;
+
     if (input_files.size() == 1)
     {
       // if there is only one input file, create a symlink instead of merging
@@ -48,16 +51,15 @@ namespace RCU
 
     if (!merger.OutputFile (output_file.c_str(), false, 1) )
     {
-      RCU_THROW_MSG ("error opening target file: " + output_file);
+      throw std::runtime_error ("error opening target file: " + output_file);
     }
 
-    for (std::vector<std::string>::const_iterator input = input_files.begin(),
-	   end = input_files.end(); input != end; ++ input)
+    for (const std::string& input : input_files)
     {
-      if (!merger.AddFile (input->c_str()))
+      if (!merger.AddFile (input.c_str()))
       {
-	RCU_THROW_MSG ("error adding input file: " + *input);
-      }         
+        throw std::runtime_error ("error adding input file: " + input);
+      }
     }
     merger.SetNotrees (false);
 
@@ -65,13 +67,10 @@ namespace RCU
 
     if (status)
     {
-      std::ostringstream msg;
-      msg << "merged " << merger.GetMergeList()->GetEntries()
-	  << " input files into " << output_file;
-      RCU_PRINT_MSG (msg.str());
+      ANA_MSG_INFO ("merged " << merger.GetMergeList()->GetEntries() << " input files into " << output_file);
     } else
     {
-      RCU_THROW_MSG ("hadd failure during the merge");
+      throw std::runtime_error ("hadd failure during the merge");
     }
   }
 }

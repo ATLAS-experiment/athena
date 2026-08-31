@@ -11,8 +11,6 @@
 
 #include <EventLoop/Global.h>
 
-#include <AnaAlgorithm/AnaAlgorithm.h>
-#include <AnaAlgorithm/AnaAlgorithmConfig.h>
 #include <AnaAlgorithm/IAlgorithmWrapper.h>
 
 namespace EL
@@ -73,10 +71,10 @@ namespace EL
     std::unique_ptr<Algorithm> m_algorithm;
 
     /// \brief whether this is the first file we encounter
-    bool m_firstFile {true};
+    bool m_firstFile {true}; //!
 
     /// \brief whether \ref Algorithm::initialize has been called
-    bool m_isInitialized {false};
+    bool m_isInitialized {false}; //!
   };
 }
 

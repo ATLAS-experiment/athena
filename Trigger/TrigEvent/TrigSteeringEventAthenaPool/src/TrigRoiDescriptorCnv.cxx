@@ -44,10 +44,10 @@ TrigRoiDescriptor* TrigRoiDescriptorCnv::createTransient(const Token* token)
 {
   MsgStream mlog(msgSvc(), "TrigRoiDescriptorConverter" );
 
-  static const pool::Guid p3_guid("28F5BCC8-1F3D-47B1-8286-087F1B298F0A");
-  static const pool::Guid p2_guid("D53CE59B-99A8-4B25-87D5-C08D1AF4BA8A");
-  static const pool::Guid p1_guid("391FFE21-5D82-471E-9FFC-B77150142B8F");
-  static const pool::Guid p0_guid("B2C86E23-8421-4F34-8014-AE4A7E4BA0A7");
+  static const Guid p3_guid("28F5BCC8-1F3D-47B1-8286-087F1B298F0A");
+  static const Guid p2_guid("D53CE59B-99A8-4B25-87D5-C08D1AF4BA8A");
+  static const Guid p1_guid("391FFE21-5D82-471E-9FFC-B77150142B8F");
+  static const Guid p0_guid("B2C86E23-8421-4F34-8014-AE4A7E4BA0A7");
 
   TrigRoiDescriptor *trans_obj(0);
   

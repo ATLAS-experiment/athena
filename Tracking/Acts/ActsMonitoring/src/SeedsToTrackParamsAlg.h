@@ -9,8 +9,6 @@
 
 #include "StoreGate/ReadHandleKey.h"
 
-#include "ActsGeometryInterfaces/IExtrapolationTool.h"
-#include "ActsGeometryInterfaces/ITrackingGeometryTool.h"
 #include "ActsGeometryInterfaces/IGeometryRealmConvTool.h"
 
 #include "ActsToolInterfaces/ITrackConverterTool.h"
@@ -19,6 +17,7 @@
 #include "ActsEvent/SeedContainer.h"
 #include "ActsEvent/TrackParameters.h"
 #include "ActsEvent/TrackParametersContainer.h"
+#include "ActsEvent/ContextUtility.h"
 
 #include "InDetReadoutGeometry/SiDetectorElementCollection.h"
 
@@ -27,14 +26,12 @@ namespace ActsTrk {
 
   class SeedsToTrackParamsAlg final : public AthReentrantAlgorithm {
   public:
-    SeedsToTrackParamsAlg(const std::string& name, ISvcLocator* pSvcLocator);
+    using AthReentrantAlgorithm::AthReentrantAlgorithm;
 
     virtual StatusCode initialize() override;
     virtual StatusCode execute(const EventContext &ctx) const override;
 
   private:
-    ToolHandle<ActsTrk::IExtrapolationTool> m_extrapolationTool{this, "ExtrapolationTool", ""};
-    PublicToolHandle<ActsTrk::ITrackingGeometryTool> m_trackingGeometryTool{this, "TrackingGeometryTool", ""};
     PublicToolHandle<IGeometryRealmConvTool> m_geometryConvTool{this, "GeometryRealmConvTool", ""};
     ToolHandle<ActsTrk::ITrackParamsEstimationTool> m_paramEstimationTool{this, "TrackParamsEstimationTool", "", "Track Param Estimation from Seeds"};
 
@@ -45,7 +42,8 @@ namespace ActsTrk {
 
     Gaudi::Property<bool> m_autoReverseSearch{this, "autoReverseSearch", false, "Whether to run the finding in seed parameter direction (false or not specified) or reverse direction (true), automatically determined by the param estimation tool"};
     Gaudi::Property<std::vector<double>> m_useTopSpRZboundary {this, "useTopSpRZboundary", {350. * Acts::UnitConstants::mm, 1060. * Acts::UnitConstants::mm}, "R/Z boundary for using the top space point in the track parameter estimation"};
-
+    /** @brief Auxiliary class to access the magnetic field, geometry and calibration context */
+    ContextUtility m_ctxProvider{this};
     bool shouldReverseSearch(const ActsTrk::Seed& seed) const;
 
   };

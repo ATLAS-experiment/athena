@@ -23,16 +23,8 @@ from ActsGPUEventCnv.ActsGPUEventCnvConfig import RDOtoTracccCellConverterAlgCfg
 def GPUGeometryCfg(flags) -> ComponentAccumulator:
     acc = ComponentAccumulator()
 
-    hostMR   = acc.popToolsAndMerge(HostMemoryResourceToolCfg(flags, name="HostMR"))
-    deviceMR = acc.popToolsAndMerge(DeviceMemoryResourceToolCfg(flags, name="DeviceMR"))
-    copyTool = acc.popToolsAndMerge(CopyToolCfg(flags, name="CopyProviderTool"))
-    streamTool = acc.popToolsAndMerge(StreamToolCfg(flags, name="StreamTool"))
-
     # Service runs first — loads all device detector description data into detStore
-    acc.merge(JSONDeviceDetectorDescriptionProviderSvcCfg(flags,
-        HostMR   = hostMR,
-        DeviceMR = deviceMR,
-        CopyProviderTool = copyTool))
+    acc.merge(JSONDeviceDetectorDescriptionProviderSvcCfg(flags))
 
     return acc
 

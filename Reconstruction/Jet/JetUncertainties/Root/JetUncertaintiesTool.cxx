@@ -1067,13 +1067,8 @@ UncertaintyComponent* JetUncertaintiesTool::buildUncertaintyComponent(const Comp
                 caloGroupH.correlation = CompCorrelation::Correlated;
                 caloGroupH.reducible = false;
 
-                UncertaintyGroup* caloGroup = new UncertaintyGroup(caloGroupH);
-                if (!caloGroup)
-                {
-                    ATH_MSG_ERROR("Failed to build calo-group for combined mass component: " << component.name.Data());
-                    return nullptr;
-                }
-
+                auto caloGroup = std::make_unique<UncertaintyGroup>(caloGroupH);
+                
                 // Get the calo terms and calo mass definitions
                 std::vector<TString> caloComps = jet::utils::vectorize<TString>(component.caloMassTerm,", ");
                 std::vector<TString> caloMassDefs = jet::utils::vectorize<TString>(component.caloMassDef,", ");
@@ -1109,8 +1104,10 @@ UncertaintyComponent* JetUncertaintiesTool::buildUncertaintyComponent(const Comp
                 }
 
                 // Done preparations, now set the calo mass group
-                if (cmuc->setCaloTerm(caloGroup).isFailure())
+                if (auto p = caloGroup.release(); cmuc->setCaloTerm(p).isFailure()){//passes ownership
+                    delete p;
                     return nullptr;
+                }
             }
             if (component.combMassType == CombMassComp::TA || component.combMassType == CombMassComp::Both)
             {
@@ -1122,12 +1119,8 @@ UncertaintyComponent* JetUncertaintiesTool::buildUncertaintyComponent(const Comp
                 TAGroupH.correlation = CompCorrelation::Correlated;
                 TAGroupH.reducible = false;
 
-                UncertaintyGroup* TAGroup = new UncertaintyGroup(TAGroupH);
-                if (!TAGroup)
-                {
-                    ATH_MSG_ERROR("Failed to build TA-group for combined mass component: " << component.name.Data());
-                    return nullptr;
-                }
+                auto TAGroup = std::make_unique<UncertaintyGroup>(TAGroupH);
+               
 
                 // Set the TA terms and TA mass definitions
                 std::vector<TString> TAComps = jet::utils::vectorize<TString>(component.TAMassTerm,", ");
@@ -1166,8 +1159,10 @@ UncertaintyComponent* JetUncertaintiesTool::buildUncertaintyComponent(const Comp
                 }
 
                 // Done preparations, now set the TA mass group
-                if (cmuc->setTATerm(TAGroup).isFailure())
+                if (auto p = TAGroup.release(); cmuc->setTATerm(p).isFailure()){//transfer ownership
+                    delete p;
                     return nullptr;
+                }
             }
 
             // Done, return the component

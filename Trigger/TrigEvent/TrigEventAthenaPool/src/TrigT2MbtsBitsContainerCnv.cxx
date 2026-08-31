@@ -25,10 +25,10 @@ TrigT2MbtsBitsContainer* TrigT2MbtsBitsContainerCnv::createTransient(const Token
   
   mlog << MSG::DEBUG << "TrigT2MbtsBitsContainerCnv::createTransient" << endmsg;
 
-  static const pool::Guid p3_guid( "60BD805D-F64E-46DF-87CD-0B4443660C97" );
-  static const pool::Guid tlp1_guid( "82BAAC80-62FC-4E6D-9BD7-1619064FF7AC" );
-  static const pool::Guid p1_guid( "139D9BFE-0944-44A6-8D9E-10CEEF8B30B9" );
-  static const pool::Guid trans_guid( "BBB00ED0-1D5C-4C73-8785-6BF239D07816" );
+  static const Guid p3_guid( "60BD805D-F64E-46DF-87CD-0B4443660C97" );
+  static const Guid tlp1_guid( "82BAAC80-62FC-4E6D-9BD7-1619064FF7AC" );
+  static const Guid p1_guid( "139D9BFE-0944-44A6-8D9E-10CEEF8B30B9" );
+  static const Guid trans_guid( "BBB00ED0-1D5C-4C73-8785-6BF239D07816" );
 
  if( compareClassGuid(token,  p3_guid ) ){
 

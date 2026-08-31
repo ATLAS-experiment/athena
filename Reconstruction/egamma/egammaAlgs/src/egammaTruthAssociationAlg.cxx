@@ -213,8 +213,7 @@ egammaTruthAssociationAlg::isPromptEgammaParticle(
       HepMC::is_simulation_particle(truth) || truth->pt() < m_minPt) {
     return false;
   }
-  MCTruthPartClassifier::Info mcinfo(ctx);
-  auto type = m_mcTruthClassifier->particleTruthClassifier(truth, &mcinfo);
+  auto type = m_mcTruthClassifier->particleTruthClassifier(truth, ctx);
 
   // Isolated electron or photons are kept
   if (type.first == MCTruthPartClassifier::IsoElectron ||
@@ -278,8 +277,7 @@ egammaTruthAssociationAlg::getNewTruthParticle(
   accTruthLink(*truthParticle) = TruthLink_t(truth, *oldContainer, ctx);
   accTruthLink(*truthParticle).toPersistent();
   // MCTruthClassifier info
-  MCTruthPartClassifier::Info mcinfo(ctx);
-  auto info = m_mcTruthClassifier->particleTruthClassifier(truth, &mcinfo);
+  auto info = m_mcTruthClassifier->particleTruthClassifier(truth, ctx);
   accType(*truthParticle) = static_cast<int>(info.first);
   accOrigin(*truthParticle) = static_cast<int>(info.second);
   accClassification(*truthParticle) = std::get<0>(MCTruthPartClassifier::defOrigOfParticle(truth)); // See AGENE-2351
@@ -323,11 +321,7 @@ egammaTruthAssociationAlg::particleTruthClassifier(
   const T* particle) const
 {
   MCTruthInfo_t info{};
-  MCTruthPartClassifier::Info mcinfo(ctx);
-  auto ret = m_mcTruthClassifier->particleTruthClassifier(particle, &mcinfo);
-  info.genPart = mcinfo.genPart;
-  info.first = ret.first;
-  info.second = ret.second;
+  std::tie(info.first, info.second, info.genPart, std::ignore) = m_mcTruthClassifier->particleTruthClassifier_full(particle, ctx);
   return info;
 }
 
@@ -340,17 +334,14 @@ egammaTruthAssociationAlg::particleTruthClassifier<xAOD::Electron>(
   const xAOD::Electron* electron) const
 {
   MCTruthInfo_t info{};
-  MCTruthPartClassifier::Info mcinfo(ctx);
-  auto ret = m_mcTruthClassifier->particleTruthClassifier(electron, &mcinfo);
-  if (ret.first == MCTruthPartClassifier::Unknown &&
+  auto ret = m_mcTruthClassifier->particleTruthClassifier_full(electron, ctx);
+  if (std::get<0>(ret) == MCTruthPartClassifier::Unknown &&
       !xAOD::EgammaHelpers::isFwdElectron(electron) &&
       electron->caloCluster()) {
     ATH_MSG_DEBUG("Trying cluster-based truth classification for electron");
-    ret = m_mcTruthClassifier->particleTruthClassifier(electron->caloCluster(),&mcinfo);
+    ret = m_mcTruthClassifier->particleTruthClassifier_full(electron->caloCluster(),ctx);
   }
-  info.genPart = mcinfo.genPart;
-  info.first = ret.first;
-  info.second = ret.second;
+  std::tie(info.first, info.second, info.genPart, std::ignore) = ret;
   return info;
 }
 

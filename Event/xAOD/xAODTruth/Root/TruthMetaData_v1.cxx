@@ -21,6 +21,8 @@ namespace xAOD {
    AUXSTORE_OBJECT_SETTER_AND_GETTER(TruthMetaData_v1, std::string, generators, setGenerators )
    AUXSTORE_OBJECT_SETTER_AND_GETTER(TruthMetaData_v1, std::string, evgenProcess, setEvgenProcess )
    AUXSTORE_OBJECT_SETTER_AND_GETTER(TruthMetaData_v1, std::string, evgenTune, setEvgenTune )
+   AUXSTORE_OBJECT_SETTER_AND_GETTER(TruthMetaData_v1, std::string, hadronizationModel, setHadronizationModel )
+   AUXSTORE_OBJECT_SETTER_AND_GETTER(TruthMetaData_v1, std::string, partonShowerModel, setPartonShowerModel )
    AUXSTORE_OBJECT_SETTER_AND_GETTER(TruthMetaData_v1, std::string, hardPDF, setHardPDF )
    AUXSTORE_OBJECT_SETTER_AND_GETTER(TruthMetaData_v1, std::string, softPDF, setSoftPDF )
 }

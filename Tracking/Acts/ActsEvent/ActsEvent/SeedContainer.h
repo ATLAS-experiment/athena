@@ -9,6 +9,7 @@
 #include <utility>
 #include <vector>
 
+#include "EventPrimitives/EventPrimitives.h"
 #include "Acts/EventData/SeedContainer.hpp"
 #include "xAODInDetMeasurement/SpacePoint.h"
 

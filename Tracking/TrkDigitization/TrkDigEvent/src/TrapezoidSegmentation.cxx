@@ -1,15 +1,10 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //////////////////////////////////////////////////////////////////
 // TrapezoidSegmentation.cxx, ATLAS Detector software
 ///////////////////////////////////////////////////////////////////
-
-// Trk includes
-#include <memory>
-
-
 
 #include "TrkDigEvent/TrapezoidSegmentation.h"
 #include "TrkSurfaces/PlaneSurface.h"
@@ -35,7 +30,7 @@ Trk::TrapezoidSegmentation::TrapezoidSegmentation(std::shared_ptr<const Trk::Tra
         if (m_binUtility)
             (*m_binUtility) += yBinUtility;
         else
-            m_binUtility = new Trk::BinUtility(yBinUtility);
+            m_binUtility = new Trk::BinUtility(std::move(yBinUtility));
     }
 }
 

@@ -17,6 +17,11 @@ from DerivationFrameworkEGamma.PhotonsCPDetailedContent import (
     PhotonsCPDetailedContent,
 )
 
+from DerivationFrameworkEGamma.TriggerContent import (
+    ExtraContainersTrigger,
+    ExtraContainersElectronTrigger,
+)
+
 
 def EGAM11SkimmingToolCfg(flags):
     """Configure the EGAM11 skimming tool"""
@@ -508,13 +513,16 @@ def EGAM11KernelCfg(flags, name="EGAM11Kernel", **kwargs):
 def EGAM11Cfg(flags):
     acc = ComponentAccumulator()
 
+    from DerivationFrameworkPhys.TriggerListsHelper import TriggerListsHelper
+    EGAM11TriggerListsHelper = TriggerListsHelper(flags)
+
     # configure skimming/thinning/augmentation tools
     acc.merge(
         EGAM11KernelCfg(
             flags,
             name="EGAM11Kernel",
             StreamName="StreamDAOD_EGAM11",
-            TriggerListsHelper=None,
+            TriggerListsHelper=EGAM11TriggerListsHelper,
         )
     )
 
@@ -540,6 +548,16 @@ def EGAM11Cfg(flags):
         "egammaClusters",
         "AntiKt4HIJets",
      ]
+
+    # for trigger studies we also add trigger containers
+    MenuType = ""
+    if flags.Trigger.EDMVersion == 2:
+        MenuType = "Run2"
+    elif flags.Trigger.EDMVersion == 3:
+        MenuType = "Run3"
+    if MenuType:
+        EGAM11SlimmingHelper.AllVariables += ExtraContainersTrigger[MenuType]
+        EGAM11SlimmingHelper.AllVariables += ExtraContainersElectronTrigger[MenuType]
 
     # on MC we also add:
     if flags.Input.isMC:
