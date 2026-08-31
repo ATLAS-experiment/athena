@@ -4,21 +4,28 @@ from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaCommon.Constants import INFO
 
 
-def MainServicesMiniCfg(flags, loopMgr='AthenaEventLoopMgr', masterSequence='AthAlgSeq'):
-    """Mininmal basic config, just good enough for HelloWorld and alike"""
-    cfg = ComponentAccumulator(CompFactory.AthSequencer(masterSequence, Sequential=True))
+def AppMgrCfg(flags, loopMgr='AthenaEventLoopMgr'):
+    """Top-level CA with TopAlg and ApplicationMgr settings"""
+
+    topSeq = CompFactory.AthSequencer('AthMasterSeq', Sequential=True)
+    cfg = ComponentAccumulator(sequence=topSeq)
     cfg.setAsTopLevel()
-    cfg.setAppProperty('TopAlg',['AthSequencer/'+masterSequence])
-    cfg.setAppProperty('MessageSvcType', 'MessageSvc')
-    cfg.setAppProperty('EventLoop', loopMgr)
-    cfg.setAppProperty('ExtSvcCreates', 'False')
-    cfg.setAppProperty('JobOptionsSvcType', 'JobOptionsSvc')
+
+    # AppMgr properties:
+    cfg.setAppProperty('AuditAlgorithms', True)
+    cfg.setAppProperty('InitializationLoopCheck', False)
+    cfg.setAppProperty('ExtSvcCreates', False)
     cfg.setAppProperty('JobOptionsType', 'NONE')
-    cfg.setAppProperty('JobOptionsPostAction', '')
-    cfg.setAppProperty('JobOptionsPreAction', '')
+    cfg.setAppProperty('EvtMax', flags.Exec.MaxEvents)
+    cfg.setAppProperty('TopAlg', [topSeq.getFullJobOptName()])
+    cfg.setAppProperty('EventLoop', loopMgr)
     cfg.setAppProperty('PrintAlgsSequence', flags.Exec.PrintAlgsSequence)
-    if flags.Debug.NameAuditor:
-        cfg.addAuditor(CompFactory.NameAuditor())
+    cfg.setAppProperty('OutputLevel', flags.Exec.OutputLevel)
+
+    if flags.Exec.OutputLevel > INFO:
+        # this turns off the AppMgr splash
+        cfg.setAppProperty('AppName', '')
+
     if flags.Exec.StopOnSignal:
         cfg.setAppProperty("StopOnSignal", True)
         cfg.addService(CompFactory.Gaudi.Utils.StopSignalHandler(Signals=flags.Exec.StopOnSignal))
@@ -354,7 +361,7 @@ def MainServicesCfg(flags, LoopMgr='AthenaEventLoopMgr'):
             LoopMgr = "AthMpEvtLoopMgr"
 
     # Core components needed for serial and threaded jobs:
-    cfg = MainServicesMiniCfg(flags, loopMgr=LoopMgr, masterSequence='AthMasterSeq')
+    cfg = AppMgrCfg(flags, loopMgr=LoopMgr)
 
     # Main sequences and incident handling:
     addMainSequences(flags, cfg)
@@ -375,6 +382,9 @@ def MainServicesCfg(flags, LoopMgr='AthenaEventLoopMgr'):
     from AthenaConfiguration.FPEAndCoreDumpConfig import FPEAndCoreDumpCfg
     cfg.merge(FPEAndCoreDumpCfg(flags))
 
+    if flags.Debug.NameAuditor:
+        cfg.addAuditor(CompFactory.NameAuditor())
+
     # Avoid stack traces to the exception handler. These traces
     # aren't very useful since they just point to the handler, not
     # the original bug.
@@ -385,15 +395,6 @@ def MainServicesCfg(flags, LoopMgr='AthenaEventLoopMgr'):
     # operations on large matrices will give identical results across
     # hardware with differing cache sizes.
     cfg.addService(CompFactory.AthEnvironmentSvc(), create=True)
-
-    # ApplicationMgr properties:
-    cfg.setAppProperty('AuditAlgorithms', True)
-    cfg.setAppProperty('InitializationLoopCheck', False)
-    cfg.setAppProperty('EvtMax', flags.Exec.MaxEvents)
-    if flags.Exec.OutputLevel > INFO:
-        # this turns off the appMgr spalsh
-        cfg.setAppProperty('AppName', '')
-    cfg.setAppProperty('OutputLevel', flags.Exec.OutputLevel)
 
     if flags.Exec.DebugStage != "":
         cfg.setDebugStage(flags.Exec.DebugStage)
