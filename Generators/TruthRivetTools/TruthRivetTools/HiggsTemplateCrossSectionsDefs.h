@@ -37,6 +37,12 @@ namespace HTXS {
   ///   P is digit for the physics process
   ///   and F is 0 for |yH|>2.5 and 11 for |yH|<2.5 ("in fiducial")
 
+  /// Higgs decay modes, corresponding to input sample for decay-side STXS
+  enum HiggsDecayMode {
+    UNKNOWNDecay = 0,
+    ZZ4l = 1
+  };
+
   /// Namespace for Stage0 categorization
   namespace Stage0 {
     /// @enum Stage-0 ategorization: Two-digit number of format PF, with P for process and F being 0 for |yH|>2.5 and 1 for |yH|<2.5
@@ -44,6 +50,32 @@ namespace HTXS {
       UNKNOWN  = 0, GG2H_FWDH = 10, GG2H = 11, VBF_FWDH = 20, VBF = 21, VH2HQQ_FWDH = 22, VH2HQQ = 23,
       QQ2HLNU_FWDH = 30, QQ2HLNU = 31, QQ2HLL_FWDH = 40, QQ2HLL = 41, GG2HLL_FWDH = 50, GG2HLL = 51,
       TTH_FWDH = 60, TTH = 61, BBH_FWDH = 70, BBH = 71, TH_FWDH = 80, TH = 81 };
+
+    /// @enum Stage-0 decay categorization: integer code arranged as IDIDIDID,
+    ///       where ID ~ PDG ID of the decay particle (ID=0 for absent, ID=20 for light jet).
+    ///       For the moment only the HZZ4e, HZZ4mu, HZZ2e2mu enums are used by the code.
+    enum DecayCategory {
+      UNKNOWNDecay    = 0,
+      Hdd             = 01010000, Huu     = 02020000, Hss       = 03030000,
+      Hcc             = 04040000, Hbb     = 05050000,
+      Hee             = 11110000, Hmumu   = 13130000, Htautau   = 15150000,
+      Hemu            = 11130000, Hetau   = 11150000, Hmutau    = 13150000,
+      Hjetjet         = 20200000,
+      Hgamgam         = 22220000,
+      H2egam          = 11112200,
+      H2mugam         = 13132200,
+      H2taugam        = 15152200,
+      HZZ4e      = 11111111,
+      Hgamgam4e  = 1111111100,
+      HZZ2e2mu   = 11111313,
+      HZZ4mu     = 13131313,
+      HZZ2e2tau  = 11111515,
+      HZZ2mu2tau = 13131515,
+      HZZ4tau    = 15151515,
+      HWWenuenu  = 11121112,
+      HWWenumun  = 11121314,
+      HWWmunmun  = 13141314
+    };
   }
  
   /// Categorization Stage 1:
@@ -751,6 +783,11 @@ enum Category {
       bool isZ2vvDecay{};
       // Flag to distinguish tHW from tHq using the event record.
       bool isTHW{};
+      // Higgs decay categorization (Stage-0)
+      HTXS::Stage0::DecayCategory decaystage0_cat{};
+      // Decay STXS observables and flag
+      std::vector<float> decay_observables{};
+      int decay_cuts_passed;
       // Error code :: classification was succesful or some error occured
       HTXS::ErrorCode errorCode{HTXS::ErrorCode::UNDEFINED};
     };
@@ -779,6 +816,10 @@ enum Category {
       cat->stage1_3_fine_cat_pTjet30GeV = htxs_cat_rivet.stage1_3_fine_cat_pTjet30GeV;
       cat->isZ2vvDecay = htxs_cat_rivet.isZ2vvDecay;
       cat->isTHW = htxs_cat_rivet.isTHW;
+      cat->decaystage0_cat = htxs_cat_rivet.decaystage0_cat;
+      cat->decay_observables = std::move(htxs_cat_rivet.decay_observables);
+      cat->decay_cuts_passed = htxs_cat_rivet.decay_cuts_passed;
+
       return cat;    
     }
     
@@ -1078,6 +1119,12 @@ namespace Rivet {
     bool isZ2vvDecay=false;
     /// Flag to distinguish tHW from tHq using the event record.
     bool isTHW=false;
+    /// Higgs decay categorization (Stage-0)
+    HTXS::Stage0::DecayCategory decaystage0_cat{};
+    /// Decay STXS observables
+    std::vector<float> decay_observables{};
+    /// Decay STXS cuts passed
+    int decay_cuts_passed;
     /// Error code: Whether classification was succesful or some error occured
     HTXS::ErrorCode errorCode;
   };
