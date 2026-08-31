@@ -37,6 +37,11 @@ namespace MuonCombinedR4{
             StatusCode execute(const EventContext& ctx) const override final;
 
         private:
+            /** @brief Helper struct collecting all the input needed for job execution.
+             *       - Ms track particles to be converted to a standalone tag
+             *       - Geometry, calibration and magnetic field context needed for
+             *         back extrapolation to the IP or a track refit with the IP constraint
+             *       - Instantiated output containers */
             struct DataShip{
                 /** @brief Collection of MS track particles to be processed */
                 std::vector<const xAOD::TrackParticle*> msTracks{};
@@ -59,9 +64,19 @@ namespace MuonCombinedR4{
                 /** @brief The calibration context neeeded for the refit */
                 Acts::CalibrationContext calContext{};
             };
-
+            /** @brief Prepare the input containers needed for job execution and set the 
+             *         corresponding pointers of the dataship.
+              * @param ctx: The current event context to access store gate
+              * @param ship: Reference to the data ship that is going to be initialized */
             StatusCode prepareContainers(const EventContext& ctx, DataShip& ship) const;
-
+            
+            /** @brief Express the MS track at the interaction point. Depending on the configuration
+             *         this can either mean that the track is entirely refitted or just extrapolated
+             *         to the IP and the parameters are expressed by a xAOD::TrackParticle
+             *  @param ctx: EventContext to access the conditions
+             *  @param msTrack: Reference to the MS track of interest
+             *  @param ship: The dataship to which containers the newly created track particle
+             *               will be appended */
             xAOD::TrackParticle* expressAtIP(const EventContext& ctx,
                                              const xAOD::TrackParticle& msTrack,
                                              DataShip& ship) const;

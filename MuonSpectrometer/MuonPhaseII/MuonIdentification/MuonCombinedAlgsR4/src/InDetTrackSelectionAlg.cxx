@@ -49,7 +49,7 @@ namespace MuonCombinedR4 {
     StatusCode InDetTrackSelectionAlg::initialize() {
         ATH_CHECK(m_idTrkKey.initialize());
         ATH_CHECK(m_extensionDecorKey.initialize(m_useCaloExtension));
-        ATH_CHECK(m_msTrkKey.initialize());
+        ATH_CHECK(m_msTrkKey.initialize(m_matchWithMsTrk));
         ATH_CHECK(m_ctxProvider.initialize());
         ATH_CHECK(m_selectionTool.retrieve(EnableTool{!m_selectionTool.empty()}));
         ATH_CHECK(m_trackingGeometrySvc.retrieve());
@@ -77,30 +77,32 @@ namespace MuonCombinedR4 {
         std::vector<const xAOD::MuonSegment*> uncombinedSegments{};
         uncombinedSegments.reserve(msSegments->size());
         std::copy_if(msSegments->begin(), msSegments->end(), 
-                     std::back_inserter(uncombinedSegments),
-                     [msTracks, this](const xAOD::MuonSegment* segment){
-                        return std::none_of(msTracks->begin(), msTracks->end(),
-                            [&segment, this](const xAOD::TrackParticle* msTrack) {
-                                auto actsTrk = ActsTrk::getActsTrack(*msTrack);
-                                if (!actsTrk) {
-                                    ATH_MSG_WARNING(__func__<<"() "<<__LINE__<<" - No acts track");
-                                    return false;
-                                }
-                                return Acts::rangeContainsValue(actsTrk->component<std::vector<const xAOD::MuonSegment*>>("muonSegLinks"), 
-                                                                segment);
-                            });
+                std::back_inserter(uncombinedSegments),
+                [msTracks, this](const xAOD::MuonSegment* segment){
+                return !msTracks || std::none_of(msTracks->begin(), msTracks->end(),
+                    [&segment, this](const xAOD::TrackParticle* msTrack) {
+                        auto actsTrk = ActsTrk::getActsTrack(*msTrack);
+                        if (!actsTrk) {
+                            ATH_MSG_WARNING(__func__<<"() "<<__LINE__<<" - No acts track");
+                            return false;
+                        }
+                        return Acts::rangeContainsValue(actsTrk->component<std::vector<const xAOD::MuonSegment*>>("muonSegLinks"), 
+                                                        segment);
                     });
+            });
 
         ATH_MSG_DEBUG(__func__<<"() "<<__LINE__
             <<" - Select track candidates suitable for combined reconstruction amongst "
             <<idTracks->size()<<" ID tracks.");
         IdCandidateCont_t idCandidates{};
         std::vector<Acts::BoundTrackParameters> msTrkPars{};
-        msTrkPars.reserve(msTracks->size());
-        std::transform(msTracks->begin(), msTracks->end(), std::back_inserter(msTrkPars),
-                       [](const xAOD::TrackParticle* trkPart){
-                           return ActsTrk::getActsTrack(*trkPart)->createParametersAtReference();
-                       });
+        if (msTracks) {
+            msTrkPars.reserve(msTracks->size());
+            std::transform(msTracks->begin(), msTracks->end(), std::back_inserter(msTrkPars),
+                           [](const xAOD::TrackParticle* trkPart){
+                               return ActsTrk::getActsTrack(*trkPart)->createParametersAtReference();
+                           });
+        }
         for (const xAOD::TrackParticle* idTrk : *idTracks) {
             /* Track does not satisfy the kinematic requirements
              * Or the optional track quality */
@@ -143,7 +145,7 @@ namespace MuonCombinedR4 {
     
         const Acts::GeometryContext tgContext = m_ctxProvider.getGeometryContext(ctx);
         const Acts::TrackingVolume* msEntrance = m_trackingGeometrySvc->getEnvelope(ActsTrk::SystemEnvelope::CaloExit);
-        ATH_MSG_ALWAYS(__func__<<"() "<<__LINE__<<" - Extrapolate ID "<<print(idTrack)<<"\n to the calorimeter exit.\n"
+        ATH_MSG_DEBUG(__func__<<"() "<<__LINE__<<" - Extrapolate ID "<<print(idTrack)<<"\n to the calorimeter exit.\n"
                         <<msEntrance->volumeBounds()<<", id: "<<msEntrance->geometryId());
         /** Retrieve the last state of the track to extrapolate into the MS  */
         auto idExitPars = lastTrackParameters(idTrack);
@@ -213,7 +215,7 @@ namespace MuonCombinedR4 {
                                                       const Acts::BoundTrackParameters& caloExitPars,
                                                       const Acts::BoundTrackParameters& msTrackPars) const {
         
-        ATH_MSG_ALWAYS(__func__<<"() "<<__LINE__<<" - Check MS track \n@ "<<msTrackPars
+        ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<" - Check MS track \n@ "<<msTrackPars
                                     <<", eta: "<<eta(msTrackPars));
         const double dPhi = std::abs(xAOD::P4Helpers::deltaPhi(msTrackPars.phi(), caloExitPars.phi())) ;
         const double dEta = std::abs(eta(msTrackPars) - eta(caloExitPars));
@@ -265,7 +267,6 @@ namespace MuonCombinedR4 {
     bool InDetTrackSelectionAlg::compatibleWithMsTrk(const Acts::GeometryContext& tgContext,
                                                      const Acts::BoundTrackParameters& itkParameters,
                                                      std::span<const Acts::BoundTrackParameters> msTrks) const {
-
         ATH_MSG_DEBUG(__func__<<"() "<<__LINE__<<" - Check whether the parameters \n"<<itkParameters
             <<", eta: "<<eta(itkParameters)<<" are compatible with one of the "<<msTrks.size()<<" MS tracks.");
         if (std::ranges::any_of(msTrks, 
@@ -289,7 +290,8 @@ namespace MuonCombinedR4 {
 
         const MuonGMR4::SpectrometerSector* lastSector{nullptr};
         Amg::Vector3D extPosOnSector{Amg::Vector3D::Zero()};
-
+        ATH_MSG_DEBUG(__func__<<"() "<<__LINE__<<" - Check whether a compatible segment can be matched to \n"
+                    <<caloExitPars<<"\n "<<Amg::toString(exitPos)<<" + "<<Amg::toString(exitDir));
         for (const xAOD::MuonSegment* segment : candidateSegs) {
             MuonR4::ExpandedSector segSector{segment->position().phi()};
             ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<" - Check compatibility with "<<MuonR4::printID(*segment)
@@ -298,43 +300,42 @@ namespace MuonCombinedR4 {
                 ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<" - Sector requirement failed");
                 continue;
             }
+            const double dEta = std::abs(segment->direction().eta() - caloEta);
             // Reject segments on oposite sides
-            if (std::abs(segment->direction().eta() - caloEta) > m_dEtaCutMsSeg) {
+            if (dEta > m_dEtaCutMsSeg) {
                 ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<" - Too large separation in dEta: "
-                    <<std::abs(segment->direction().eta() - caloEta)<<" cut: "<<m_dEtaCutMsSeg);
+                    <<dEta<<" cut: "<<m_dEtaCutMsSeg);
                 continue;
             }
+            ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<" - eta separation: "<<dEta<<", max: "<<m_dEtaCutMsSeg);
             /** Straight line extrapolation onto the surface */
             const MuonGMR4::SpectrometerSector* msSector = m_detMgr->getSectorEnvelope(segment->chamberIndex(), 
                                                                                        segment->sector(), 
                                                                                        segment->etaIndex());
+            if (lastSector != msSector) {
+                lastSector = msSector;
+                const Amg::Transform3D toLocal = msSector->globalToLocalTransform(tgContext);
+
+                const Amg::Vector3D locExitPos = toLocal * exitPos;
+                const Amg::Vector3D locExitDir = toLocal.linear()* exitDir;
+                using namespace Acts::PlanarHelper;
+                const auto iSect = intersectPlane(locExitPos, locExitDir, Amg::Vector3D::UnitZ(), 0.);
+                extPosOnSector = iSect.position();
+                ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<" - Extrapolate "<<Amg::toString(locExitPos)<<" + "
+                        <<Amg::toString(locExitDir)<<" to centre of "<<msSector->identString()
+                        <<" --> "<<iSect.pathLength()<<", "<<Amg::toString(iSect.position()));
+            }
             /** Segment parameters expressed on the envelope surface */
             Parameters segPars = localSegmentPars(*segment);
-
-            if (lastSector == msSector) {
-                if (std::abs(segPars[Acts::toUnderlying(ParamDefs::y0)] - extPosOnSector.y()) < m_dY0CutMsSeg) {
-                    ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<" Segment is close enough: "
-                                <<std::abs(segPars[Acts::toUnderlying(ParamDefs::y0)] - extPosOnSector.y()));
-                    return true;
-                }
-                continue;
-            }
-            lastSector = msSector;
-                                                    
-            const Amg::Transform3D toLocal = msSector->globalToLocalTransform(tgContext);
-
-            const Amg::Vector3D locExitPos = toLocal * exitPos;
-            const Amg::Vector3D locExitDir = toLocal.linear()* exitDir;
-
-            using namespace Acts::PlanarHelper;
-            auto iSect = intersectPlane(locExitPos, locExitDir, Amg::Vector3D::Zero(), 0.);
-            extPosOnSector = iSect.position();
-            if (std::abs(segPars[Acts::toUnderlying(ParamDefs::y0)] - extPosOnSector.y()) < m_dY0CutMsSeg) {
-                ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<" Segment is close enough: "
-                                <<std::abs(segPars[Acts::toUnderlying(ParamDefs::y0)] - extPosOnSector.y()));
+            const double dY = std::abs(segPars[Acts::toUnderlying(ParamDefs::y0)] - extPosOnSector.y());
+            if (dY < m_dY0CutMsSeg) {
+                ATH_MSG_DEBUG(__func__<<"() "<<__LINE__<<" - Segment is close enough: "<<dY);
                 return true;
             }
+            ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<" -  Segment outside acceptance "<<dY<<" max: "<<m_dY0CutMsSeg);
         }
+        ATH_MSG_DEBUG(__func__<<"() "<<__LINE__<<" - None of the "<<candidateSegs.size()
+                     <<" segments is compatible with Id track\n"<<caloExitPars);
         return false;
     }
 }

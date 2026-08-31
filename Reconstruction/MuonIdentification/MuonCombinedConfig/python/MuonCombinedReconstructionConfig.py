@@ -480,7 +480,7 @@ def CombinedMuonTrackTruthAlgsCfg(flags):
     result.merge(MuonDetailedTrackTruthMakerCfg(flags, name="MuonCombinedDetailedTrackTruthMaker",
                                                 TrackCollectionNames=trk_cols))
 
-    if(not flags.Muon.scheduleActsReco):
+    if not flags.Muon.usePhaseIIGeoSetup:
         for i in range(len(trk_cols)):
             from TrkConfig.TrkTruthAlgsConfig import TrackTruthSelectorCfg, TrackParticleTruthAlgCfg
             result.merge(TrackTruthSelectorCfg(flags, tracks=trk_cols[i])) 
@@ -492,6 +492,8 @@ def CombinedMuonTrackTruthAlgsCfg(flags):
 
 def CombinedMuonTruthAssociationAlgsCfg(flags):
     result = ComponentAccumulator()
+    if flags.Muon.usePhaseIIGeoSetup: 
+        return result
     trk_cols = GetCombinedTrkContainers(flags)[0]
 
     from MuonConfig.MuonTruthAlgsConfig import MuonTruthAssociationAlgCfg
