@@ -88,8 +88,6 @@ def MC23HeavyIons2023NoPileUp(flags):
     from SimulationConfig.SimEnums import PixelRadiationDamageSimulationType
     flags.Digitization.PixelPlanarRadiationDamageSimulationType = PixelRadiationDamageSimulationType.RamoPotential
 
-    from HIRecConfig.HIModeFlags import HImode
-    HImode(flags) 
     flags.Reco.EnableZDC = False # TO CHECK is this actually needed? I think it should be False by default
 
     #all
@@ -119,8 +117,6 @@ def MC23HeavyIons2023(flags):
     flags.Digitization.PU.FinalBunchCrossing = 0
     flags.Digitization.PU.NumberOfCavern = 1 # We are using the Cavern Background input for the Hijing HITS-level events
 
-    from HIRecConfig.HIModeFlags import HImode
-    HImode(flags) 
     flags.Reco.EnableZDC = False # TO CHECK is this actually needed? I think it should be False by default
 
     #all
@@ -196,8 +192,6 @@ def MC23ppReferenceRun2024(flags): # FIXME This configuration is a placeholder
     flags.Digitization.PU.BunchStructureConfig = 'RunDependentSimData.BunchStructure_Fill7314_BCMSPattern_Flat'
     flags.Digitization.PU.ProfileConfig = 'RunDependentSimData.PileUpProfile_run488000_MC23e_SingleBeamspot'
 
-    from HIRecConfig.HIModeFlags import HIPmode
-    HIPmode(flags) 
     flags.Reco.EnableZDC = False # TO CHECK is this actually needed? I think it should be False by default
 
     #all
@@ -220,8 +214,6 @@ def MC23HeavyIons2024NoPileUp(flags): # FIXME This configuration is a placeholde
     from SimulationConfig.SimEnums import PixelRadiationDamageSimulationType
     flags.Digitization.PixelPlanarRadiationDamageSimulationType = PixelRadiationDamageSimulationType.RamoPotential
 
-    from HIRecConfig.HIModeFlags import HImode
-    HImode(flags) 
     flags.Reco.EnableZDC = False # TO CHECK is this actually needed? I think it should be False by default
 
     #all
@@ -251,8 +243,6 @@ def MC23HeavyIons2024(flags): # FIXME This configuration is a placeholder
     flags.Digitization.PU.FinalBunchCrossing = 0
     flags.Digitization.PU.NumberOfCavern = 1 # We are using the Cavern Background input for the Hijing HITS-level events
 
-    from HIRecConfig.HIModeFlags import HImode
-    HImode(flags) 
     flags.Reco.EnableZDC = False # TO CHECK is this actually needed? I think it should be False by default
 
     #all
@@ -283,8 +273,6 @@ def MC23HeavyIons2025OO(flags):
     flags.Digitization.PU.FinalBunchCrossing = 0
     flags.Digitization.PU.NumberOfCavern = 1 # We are using the Cavern Background input for the Hijing HITS-level events
 
-    from HIRecConfig.HIModeFlags import HIPmode
-    HIPmode(flags)
     flags.Reco.EnableZDC = False
 
     #all
@@ -307,8 +295,6 @@ def MC23HeavyIons2025NoPileUp(flags):
     from SimulationConfig.SimEnums import PixelRadiationDamageSimulationType
     flags.Digitization.PixelPlanarRadiationDamageSimulationType = PixelRadiationDamageSimulationType.RamoPotential
 
-    from HIRecConfig.HIModeFlags import HImode
-    HImode(flags) 
     flags.Reco.EnableZDC = False # TO CHECK is this actually needed? I think it should be False by default
 
     #all
@@ -338,8 +324,6 @@ def MC23HeavyIons2025(flags):
     flags.Digitization.PU.FinalBunchCrossing = 0
     flags.Digitization.PU.NumberOfCavern = 1 # We are using the Cavern Background input for the Hijing HITS-level events
 
-    from HIRecConfig.HIModeFlags import HImode
-    HImode(flags) 
     flags.Reco.EnableZDC = False # TO CHECK is this actually needed? I think it should be False by default
 
     #all
@@ -362,8 +346,6 @@ def MC23HeavyIons2026NoPileUp(flags):
     from SimulationConfig.SimEnums import PixelRadiationDamageSimulationType
     flags.Digitization.PixelPlanarRadiationDamageSimulationType = PixelRadiationDamageSimulationType.RamoPotential
 
-    from HIRecConfig.HIModeFlags import HImode
-    HImode(flags) 
     flags.Reco.EnableZDC = False # TO CHECK is this actually needed? I think it should be False by default
 
     #all
@@ -393,8 +375,6 @@ def MC23HeavyIons2026(flags):
     flags.Digitization.PU.FinalBunchCrossing = 0
     flags.Digitization.PU.NumberOfCavern = 1 # We are using the Cavern Background input for the Hijing HITS-level events
 
-    from HIRecConfig.HIModeFlags import HImode
-    HImode(flags) 
     flags.Reco.EnableZDC = False # TO CHECK is this actually needed? I think it should be False by default
 
     #all
