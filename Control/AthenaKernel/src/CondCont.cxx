@@ -12,7 +12,6 @@
 #include "AthenaKernel/CondCont.h"
 #include "AthenaKernel/getMessageSvc.h"
 #include "AthenaKernel/ExtendedEventContext.h"
-#include "CxxUtils/AthUnlikelyMacros.h"
 #include "CxxUtils/checker_macros.h"
 #include "GaudiKernel/MsgStream.h"
 #include <iostream>
@@ -642,7 +641,7 @@ const void* CondContBase::findBase (const EventIDBase& t,
   switch (m_keyType) {
   case KeyType::RUNLBN:
   case KeyType::MIXED:
-    if (ATH_UNLIKELY (!t.isRunLumi())) {
+    if (!t.isRunLumi()) [[unlikely]] {
       MsgStream msg (Athena::getMessageSvc(), title());
       msg << MSG::ERROR << "CondContBase::findBase: "
           << "Non-Run/LBN key used in Run/LBN container."
@@ -652,7 +651,7 @@ const void* CondContBase::findBase (const EventIDBase& t,
     key = keyFromRunLBN (t);
     break;
   case KeyType::TIMESTAMP:
-    if (ATH_UNLIKELY (!t.isTimeStamp())) {
+    if (!t.isTimeStamp()) [[unlikely]] {
       MsgStream msg (Athena::getMessageSvc(), title());
       msg << MSG::ERROR << "CondContBase::findBase: "
           << "Non-timestamp key used in timestamp container."

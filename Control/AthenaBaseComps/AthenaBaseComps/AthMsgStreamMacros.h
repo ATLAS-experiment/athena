@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // AthMsgStreamMacros.h 
@@ -12,7 +12,6 @@
 #define ATHENABASECOMPS_ATHMSGSTREAMMACROS_H 1
 
 // CxxUtils
-#include "CxxUtils/AthUnlikelyMacros.h"
 
 // FIXME: operator precedence ?!
 #define ATH_MSG_LVL_NOCHK(lvl, x)               \
@@ -20,7 +19,7 @@
 
 #define ATH_MSG_LVL(lvl, x)                     \
   do {                                          \
-    if (ATH_UNLIKELY(this->msgLvl (lvl))) {     \
+    if (this->msgLvl (lvl)) [[unlikely]] {                      \
       ATH_MSG_LVL_NOCHK(lvl, x);                \
     }                                           \
   } while (0)
