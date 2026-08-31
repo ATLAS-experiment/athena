@@ -23,7 +23,7 @@ class AFatrasG4Tool: public FastSimulationBase
 {
 public:
 
-  AFatrasG4Tool(const std::string& type, const std::string& name, const IInterface *parent);   //!< Default constructor
+  using FastSimulationBase::FastSimulationBase;
 
 protected:
   /** Method to make the actual fast simulation model itself, which
@@ -40,9 +40,6 @@ protected:
   virtual G4VFastSimulationModel* makeFastSimModel() override final;  
  
  private:
-  
-  // Flag to enable G4 transportation
-  Gaudi::Property<bool> m_doG4Transport{this, "doG4Transport", false, "Flag to enable G4 transportation"};
 
   // Geant4 ACTSFatras G4 Tool
   PublicToolHandle<IActsFatrasG4Tool> m_ActsFatrasG4Tool{this, "ActsFatrasG4Tool", "ActsFatrasG4Tool", ""};

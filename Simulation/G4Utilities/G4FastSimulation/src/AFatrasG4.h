@@ -25,7 +25,6 @@ class AFatrasG4: public G4VFastSimulationModel
   AFatrasG4(const std::string& name,
                 G4Region* region,
                 const PublicToolHandle<IActsFatrasG4Tool>& ActsFatrasG4Tool,
-                bool doG4Transport,
                 AFatrasG4Tool * FatrasG4Tool);
   
   virtual ~AFatrasG4() = default;
@@ -40,9 +39,6 @@ class AFatrasG4: public G4VFastSimulationModel
  private:
   // Geant4 ACTSFatras G4 Tool
   PublicToolHandle<IActsFatrasG4Tool> m_ActsFatrasG4Tool;
-
-  // Boolean flag to enable Geant4 transportation
-  bool m_doG4Transport;
 
 };
 
