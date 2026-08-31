@@ -6,9 +6,7 @@
 
 // PhysValMET.cxx 
 // Implementation file for class PhysValMET
-// Author: Daniel Buescher <daniel.buescher@cern.ch>, Philipp Mogg <philipp.mogg@cern.ch>
-/////////////////////////////////////////////////////////////////// 
-// new version by Owen Darragh  2026
+// Contact: atlas-cp-jetetmiss-jsv-conveners@cern.ch
 ///////////////////////////////////////////////////////////////////
 
 // PhysVal includes
@@ -95,9 +93,9 @@ namespace MissingEtDQA {
     m_MET_dPhi.clear();
     m_MET_CorrFinalTrk.clear();
     m_MET_CorrFinalClus.clear();
-    m_MET_Kine_pt.clear();
-    m_MET_Kine_eta.clear();
-    m_MET_Kine_phi.clear();
+    m_MET_pt.clear();
+    m_MET_eta.clear();
+    m_MET_phi.clear();
     m_MET_multi.clear();
   }
    
@@ -171,9 +169,9 @@ namespace MissingEtDQA {
     m_MET_dPhi.clear();
     m_MET_CorrFinalTrk.clear();
     m_MET_CorrFinalClus.clear();
-    m_MET_Kine_pt.clear();
-    m_MET_Kine_eta.clear();
-    m_MET_Kine_phi.clear();
+    m_MET_pt.clear();
+    m_MET_eta.clear();
+    m_MET_phi.clear();
     m_MET_multi.clear(); 
    
     return StatusCode::SUCCESS;
@@ -254,9 +252,9 @@ namespace MissingEtDQA {
           std::vector<TH1D*> v_MET_Diff_y;
           std::vector<TH1D*> v_MET_Diff_phi;
           std::vector<TH1D*> v_MET_Diff_sum;
-          std::vector<TH1D*> v_MET_Kine_pt;
-          std::vector<TH1D*> v_MET_Kine_eta;
-          std::vector<TH1D*> v_MET_Kine_phi;
+          std::vector<TH1D*> v_MET_pt;
+          std::vector<TH1D*> v_MET_eta;
+          std::vector<TH1D*> v_MET_phi;
           std::vector<TH1D*> v_MET_multi;
 
           //Create histograms
@@ -395,22 +393,22 @@ namespace MissingEtDQA {
 
           //Setup Kin histos
           for(const auto& it : sum_names){
-            v_MET_Kine_pt.push_back( new  TH1D((name_met + "_Kine_" + it+"_pt").c_str(), ("MET_Kine pt " + m_names[it] + " in " + name_met +"; p_{T} [GeV]; Entries / 3 GeV").c_str(), nbinpxy, 0, 300));
-            v_MET_Kine_eta.push_back( new  TH1D((name_met + "_Kine_" + it +"_eta").c_str(), ("MET_Kine eta " + m_names[it] + " in " + name_met +"; #eta ; Entries / 0.1").c_str(), 100, -5, 5) );
-            v_MET_Kine_phi.push_back( new  TH1D((name_met + "_Kine_" + it +"_phi").c_str(), ("MET_Kine phi " + m_names[it] + " in " + name_met +"; #Phi ; Entries / 0.1").c_str(), nbinphi, -binphi, binphi) );
+            v_MET_pt.push_back( new  TH1D((name_met + it+"_pt").c_str(), ("MET_pt " + m_names[it] + " in " + name_met +"; p_{T} [GeV]; Entries / 3 GeV").c_str(), nbinpxy, 0, 300));
+            v_MET_eta.push_back( new  TH1D((name_met + it +"_eta").c_str(), ("MET_eta " + m_names[it] + " in " + name_met +"; #eta ; Entries / 0.1").c_str(), 100, -5, 5) );
+            v_MET_phi.push_back( new  TH1D((name_met + it +"_phi").c_str(), ("MET_phi " + m_names[it] + " in " + name_met +"; #Phi ; Entries / 0.1").c_str(), nbinphi, -binphi, binphi) );
             v_MET_multi.push_back( new  TH1D((name_met + "_multi_" + it).c_str(), ("MET_multi " + m_names[it] + " in " + name_met +"; Multiplicity; Entries").c_str(), 20,-0.5,20.5) );
             m_dir_met.push_back("MET/" + name_met + "/Kinematics/" + it + "/");                                      
           }
-          m_MET_Kine_pt[name_met] = v_MET_Kine_pt;
-          m_MET_Kine_eta[name_met] = v_MET_Kine_eta;
-          m_MET_Kine_phi[name_met] = v_MET_Kine_phi;
+          m_MET_pt[name_met] = v_MET_pt;
+          m_MET_eta[name_met] = v_MET_eta;
+          m_MET_phi[name_met] = v_MET_phi;
           m_MET_multi[name_met] = v_MET_multi;
 
           //Register Kin histograms
-          for(std::vector<TH1D*>::size_type i = 0; i < v_MET_Kine_pt.size(); ++i){
-            ATH_CHECK(regHist(m_MET_Kine_pt[name_met].at(i),m_dir_met[i],all));
-            ATH_CHECK(regHist(m_MET_Kine_eta[name_met].at(i),m_dir_met[i],all));
-            ATH_CHECK(regHist(m_MET_Kine_phi[name_met].at(i),m_dir_met[i],all));
+          for(std::vector<TH1D*>::size_type i = 0; i < v_MET_pt.size(); ++i){
+            ATH_CHECK(regHist(m_MET_pt[name_met].at(i),m_dir_met[i],all));
+            ATH_CHECK(regHist(m_MET_eta[name_met].at(i),m_dir_met[i],all));
+            ATH_CHECK(regHist(m_MET_phi[name_met].at(i),m_dir_met[i],all));
             ATH_CHECK(regHist(m_MET_multi[name_met].at(i),m_dir_met[i],all));
           }
         // End of loop
@@ -880,29 +878,29 @@ namespace MissingEtDQA {
 
       //Fill Kin Histos
       for(const auto p : el_elems){
-          (m_MET_Kine_pt["MET_Rebuilt_"+jet_type]).at(0)->Fill((p->pt())/1000., weight);
-          (m_MET_Kine_eta["MET_Rebuilt_"+jet_type]).at(0)->Fill(p->eta(), weight);
-          (m_MET_Kine_phi["MET_Rebuilt_"+jet_type]).at(0)->Fill(p->phi(), weight);
+          (m_MET_pt["MET_Rebuilt_"+jet_type]).at(0)->Fill((p->pt())/1000., weight);
+          (m_MET_eta["MET_Rebuilt_"+jet_type]).at(0)->Fill(p->eta(), weight);
+          (m_MET_phi["MET_Rebuilt_"+jet_type]).at(0)->Fill(p->phi(), weight);
       }
       for(const auto p : ph_elems){
-          (m_MET_Kine_pt["MET_Rebuilt_"+jet_type]).at(1)->Fill((p->pt())/1000., weight);
-          (m_MET_Kine_eta["MET_Rebuilt_"+jet_type]).at(1)->Fill(p->eta(), weight);
-          (m_MET_Kine_phi["MET_Rebuilt_"+jet_type]).at(1)->Fill(p->phi(), weight);
+          (m_MET_pt["MET_Rebuilt_"+jet_type]).at(1)->Fill((p->pt())/1000., weight);
+          (m_MET_eta["MET_Rebuilt_"+jet_type]).at(1)->Fill(p->eta(), weight);
+          (m_MET_phi["MET_Rebuilt_"+jet_type]).at(1)->Fill(p->phi(), weight);
       }
       for(const auto p : ta_elems){
-          (m_MET_Kine_pt["MET_Rebuilt_"+jet_type]).at(2)->Fill((p->pt())/1000., weight);
-          (m_MET_Kine_eta["MET_Rebuilt_"+jet_type]).at(2)->Fill(p->eta(), weight);
-          (m_MET_Kine_phi["MET_Rebuilt_"+jet_type]).at(2)->Fill(p->phi(), weight);
+          (m_MET_pt["MET_Rebuilt_"+jet_type]).at(2)->Fill((p->pt())/1000., weight);
+          (m_MET_eta["MET_Rebuilt_"+jet_type]).at(2)->Fill(p->eta(), weight);
+          (m_MET_phi["MET_Rebuilt_"+jet_type]).at(2)->Fill(p->phi(), weight);
       }
       for(const auto p : mu_elems){
-          (m_MET_Kine_pt["MET_Rebuilt_"+jet_type]).at(3)->Fill((p->pt())/1000., weight);
-          (m_MET_Kine_eta["MET_Rebuilt_"+jet_type]).at(3)->Fill(p->eta(), weight);
-          (m_MET_Kine_phi["MET_Rebuilt_"+jet_type]).at(3)->Fill(p->phi(), weight);
+          (m_MET_pt["MET_Rebuilt_"+jet_type]).at(3)->Fill((p->pt())/1000., weight);
+          (m_MET_eta["MET_Rebuilt_"+jet_type]).at(3)->Fill(p->eta(), weight);
+          (m_MET_phi["MET_Rebuilt_"+jet_type]).at(3)->Fill(p->phi(), weight);
       }
       for(const auto p : jet_elems){
-          (m_MET_Kine_pt["MET_Rebuilt_"+jet_type]).at(4)->Fill((p->pt())/1000., weight);
-          (m_MET_Kine_eta["MET_Rebuilt_"+jet_type]).at(4)->Fill(p->eta(), weight);
-          (m_MET_Kine_phi["MET_Rebuilt_"+jet_type]).at(4)->Fill(p->phi(), weight);
+          (m_MET_pt["MET_Rebuilt_"+jet_type]).at(4)->Fill((p->pt())/1000., weight);
+          (m_MET_eta["MET_Rebuilt_"+jet_type]).at(4)->Fill(p->eta(), weight);
+          (m_MET_phi["MET_Rebuilt_"+jet_type]).at(4)->Fill(p->phi(), weight);
       }
       //Fill Multiplicity Histos
       (m_MET_multi["MET_Rebuilt_"+jet_type]).at(0)->Fill(el_elems.size(), weight);
