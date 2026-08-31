@@ -5,10 +5,6 @@
 #include "AFatrasG4Tool.h"
 #include "AFatrasG4.h"
 
-AFatrasG4Tool::AFatrasG4Tool(const std::string& type, const std::string& name, const IInterface *parent)
-: FastSimulationBase(type, name, parent)
-{
-}
 
 StatusCode AFatrasG4Tool::initializeFastSim()
 {
@@ -36,7 +32,7 @@ G4VFastSimulationModel* AFatrasG4Tool::makeFastSimModel()
 {
   ATH_MSG_INFO("Initializing Fast Simulation Model AFatrasG4");
   // Create the AFatrasG4 fast simulation model
-  return new AFatrasG4(name(), getRegion(), m_ActsFatrasG4Tool, m_doG4Transport, this);
+  return new AFatrasG4(name(), getRegion(), m_ActsFatrasG4Tool, this);
 }
 
 StatusCode AFatrasG4Tool::EndOfAthenaEvent(HitCollectionMap& hcm)

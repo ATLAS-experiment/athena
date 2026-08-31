@@ -27,12 +27,10 @@
 AFatrasG4::AFatrasG4(const std::string& name,
                          G4Region* region,
                          const PublicToolHandle<IActsFatrasG4Tool>& ActsFatrasG4Tool,
-                         bool doG4Transport,
                          AFatrasG4Tool * /*AFatrasG4Tool*/)
 
 : G4VFastSimulationModel(name, region),
-  m_ActsFatrasG4Tool(ActsFatrasG4Tool),
-  m_doG4Transport(doG4Transport)
+  m_ActsFatrasG4Tool(ActsFatrasG4Tool)
 {
 }
 

@@ -5,10 +5,6 @@
 #include "FatrasG4Tool.h"
 #include "FatrasG4.h"
 
-FatrasG4Tool::FatrasG4Tool(const std::string& type, const std::string& name, const IInterface *parent)
-: FastSimulationBase(type, name, parent)
-{
-}
 
 StatusCode FatrasG4Tool::initializeFastSim()
 {
@@ -36,7 +32,7 @@ G4VFastSimulationModel* FatrasG4Tool::makeFastSimModel()
 {
   ATH_MSG_INFO("Initializing Fast Simulation Model FatrasG4");
   // Create the FatrasG4 fast simulation model
-  return new FatrasG4(name(), getRegion(), m_ActsFatrasG4Tool, m_doG4Transport, this);
+  return new FatrasG4(name(), getRegion(), m_ActsFatrasG4Tool, this);
 }
 
 StatusCode FatrasG4Tool::EndOfAthenaEvent(HitCollectionMap& hcm)
