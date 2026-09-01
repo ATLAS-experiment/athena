@@ -95,6 +95,7 @@ atlas_add_component( ActsGeometry
                      TrkGeometry
                      TrkParameters
                      TrkSurfaces
+                     detray::io
                      Acts::PluginGeoModel
                      PathResolver
                      BeamPipeGeoModelLib

@@ -42,6 +42,11 @@ def DeviceDetectorDescriptionCondAlgCfg(flags, name="ActsDeviceDetectorDescripti
             acc.getPrimaryAndMerge(ActsTrackingGeometrySvcCfg(flags)),
         )
 
+    if not flags.Acts.TrackingGeometry.UseBlueprint:
+        raise ValueError("In-memory conversion to Detray detector is not possible without ACTS Gen3 Geometry (set by 'Acts.TrackingGeometry.UseBlueprint' flag).")
+    if not flags.Acts.TrackingGeometry.BuildDetrayGeometry:
+        raise ValueError("Traccc detector description can not be built without a Detray detector.")
+
     from SiLorentzAngleTool.ITkPixelLorentzAngleConfig import ITkPixelLorentzAngleToolCfg
     from SiLorentzAngleTool.ITkStripLorentzAngleConfig import ITkStripLorentzAngleToolCfg    
 

@@ -74,6 +74,9 @@ if __name__ == "__main__":
     flags.Detector.GeometryCalo = False
     flags.Detector.GeometryMuon = False
 
+    flags.Acts.TrackingGeometry.UseBlueprint = True
+    flags.Acts.TrackingGeometry.BuildDetrayGeometry = True
+
     # ---- Input ----
     flags.Input.Files = defaultTestFiles.RDO_RUN4
 

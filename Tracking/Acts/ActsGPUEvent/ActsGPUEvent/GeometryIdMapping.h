@@ -38,9 +38,8 @@ class GeometryIdMapping {
 
   /// Reserve storage for @p nSurfaces detray surfaces.
   void reserve(std::size_t nSurfaces) {
-    m_detrayToActs.assign(nSurfaces, invalidActs());
-    m_detrayToAthena.assign(nSurfaces, 0);
-    m_hasAthena.assign(nSurfaces, false);
+    m_detrayToActs.reserve(nSurfaces);
+    m_detrayToAthena.reserve(nSurfaces);
     m_actsToDetray.reserve(nSurfaces);
     m_athenaToDetray.reserve(nSurfaces);
   }
@@ -50,18 +49,13 @@ class GeometryIdMapping {
   /// (e.g. passive surfaces)
   void addEntry(detray_id_type detrayId, acts_id_type actsId,
                 std::optional<Identifier> athenaId = std::nullopt) {
-    if (detrayId >= m_detrayToActs.size()) {
-      m_detrayToActs.resize(detrayId + 1, invalidActs());
-      m_detrayToAthena.resize(detrayId + 1, 0);
-      m_hasAthena.resize(detrayId + 1, false);
-    }
+    
 
-    m_detrayToActs[detrayId] = actsId;
+    m_detrayToActs.emplace(detrayId,actsId);
     m_actsToDetray.emplace(actsId, detrayId);
 
     if (athenaId.has_value()) {
-      m_detrayToAthena[detrayId] = athenaId->get_compact();
-      m_hasAthena[detrayId] = true;
+      m_detrayToAthena.emplace(detrayId,athenaId->get_compact());
       m_athenaToDetray.emplace(athenaId->get_compact(), detrayId);
     }
   }
@@ -69,27 +63,28 @@ class GeometryIdMapping {
   /// @name detray_id <-> acts_id
   ///@{
   std::optional<acts_id_type> detrayToActs(detray_id_type detrayId) const {
-    if (detrayId >= m_detrayToActs.size()) return std::nullopt;
-    return m_detrayToActs[detrayId];
+    auto it = m_detrayToActs.find(detrayId);
+    return it == m_detrayToActs.end() ? std::nullopt
+                                       : std::optional{it->second};
   }
   std::optional<detray_id_type> actsToDetray(acts_id_type actsId) const {
     auto it = m_actsToDetray.find(actsId);
-    if (it == m_actsToDetray.end()) return std::nullopt;
-    return it->second;
+    return it == m_actsToDetray.end() ? std::nullopt
+                                       : std::optional{it->second};
   }
   ///@}
 
   /// @name detray_id <-> Athena Identifier
   ///@{
   std::optional<Identifier> detrayToAthena(detray_id_type detrayId) const {
-    if (detrayId >= m_hasAthena.size() || !m_hasAthena[detrayId])
-      return std::nullopt;
-    return Identifier(m_detrayToAthena[detrayId]);
+    auto it = m_detrayToAthena.find(detrayId);
+    if (it == m_detrayToAthena.end()) return std::nullopt;
+    return Identifier(it->second);
   }
   std::optional<detray_id_type> athenaToDetray(const Identifier& athenaId) const {
     auto it = m_athenaToDetray.find(athenaId.get_compact());
-    if (it == m_athenaToDetray.end()) return std::nullopt;
-    return it->second;
+    return it == m_athenaToDetray.end() ? std::nullopt
+                                         : std::optional{it->second};
   }
   ///@}
 
@@ -105,13 +100,8 @@ class GeometryIdMapping {
   std::size_t size() const { return m_detrayToActs.size(); }
 
  private:
-  static acts_id_type invalidActs() {
-    return std::numeric_limits<acts_id_type>::max();
-  }
-
-  std::vector<acts_id_type> m_detrayToActs;
-  std::vector<Identifier::value_type> m_detrayToAthena;
-  std::vector<bool> m_hasAthena;
+  std::unordered_map<detray_id_type, acts_id_type> m_detrayToActs;
+  std::unordered_map<detray_id_type, Identifier::value_type> m_detrayToAthena;
 
   std::unordered_map<acts_id_type, detray_id_type> m_actsToDetray;
   std::unordered_map<Identifier::value_type, detray_id_type> m_athenaToDetray;
@@ -119,7 +109,9 @@ class GeometryIdMapping {
 
 }  // namespace ActsTrk
 
+// Needed to record/retrieve this via StoreGate
 #include "AthenaKernel/CLASS_DEF.h"
+
 CLASS_DEF(ActsTrk::GeometryIdMapping, 263041249, 1)
 
 #endif  // ACTSTRKEVENT_GEOMETRYIDMAPPING_H

@@ -13,7 +13,6 @@ endif()
 
 find_package(vecmem)
 find_package(traccc)
-find_package(detray)
 
 atlas_add_component( ActsGPUEventCnv
     src/*.h src/*.cxx

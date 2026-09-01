@@ -36,6 +36,7 @@ flags.Concurrency.NumConcurrentEvents = 64
 flags.Exec.MaxEvents = 10
 
 flags.Acts.TrackingGeometry.UseBlueprint = args.gen3
+flags.Acts.TrackingGeometry.BuildDetrayGeometry = args.build_detray
 flags.PerfMon.doFullMonMT = True
 
 flags.lock()
@@ -52,8 +53,8 @@ tgSvc = ActsTrackingGeometrySvcCfg(flags,
                                    RunConsistencyChecks=True,
                                    #  ConsistencyCheckOutput="trk_geo_check.csv", # enable debug output writing
                                    BlueprintGraphviz=str(Path.cwd() / "blueprint.dot"),
-                                   ObjDebugOutput=False,
-                                   BuildDetrayGeometry=args.build_detray)
+                                   ObjDebugOutput=False)
+                                   
 acc.merge(tgSvc)
 
 alg = ActsExtrapolationAlgCfg(flags,

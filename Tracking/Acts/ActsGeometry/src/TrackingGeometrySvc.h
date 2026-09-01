@@ -22,6 +22,7 @@
 
 #ifdef ACTSGEOMETRY_HAVE_DETRAY
 #include <ActsPlugins/Detray/DetrayGeometryConverter.hpp>
+#include "detray/io/frontend/detector_writer.hpp"
 #endif
 
 // STL
@@ -180,7 +181,7 @@ private:
 
   Gaudi::Property<bool> m_useBlueprint{this, "UseBlueprint", false, "Use the new Blueprint API for geometry construction"};
 
-  Gaudi::Property<bool> m_buildDetrayGeometry{this, "BuildDetrayGeometry", false,
+  Gaudi::Property<bool> m_buildDetrayGeometry{this, "BuildDetrayGeometry", true,
       "Convert the constructed Acts::TrackingGeometry into a Detray geometry. "
       "Requires ACTS to have been built with the Detray plugin (Acts::PluginDetray)."};
 
