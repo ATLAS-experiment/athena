@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #include "channelMappings/EfexCellMapping.h"
 /*!
@@ -101,21 +101,17 @@ void EfexCellMapping::init(int crate, int efexnumber,
        }
        */
     //        (m_tables)->GetTable(4)->PrintTable();
-    //Basic Lamdas to gen search pairs
-    auto genintstr = [] (int col, std::string str )
-    {return std::make_pair(col , str );};
-    auto genintint = [] (int col,int intstr)
-    {return std::make_pair(col , std::to_string(intstr) );};
+    
     using searchpairs = std::vector<std::pair<int,std::string>>;
 
     //Complete CSV search
 
     //METHOD #1 to retrieve eta-phi-layer   
     auto tab4search  = searchpairs();
-    tab4search.push_back(genintstr(0,efexcords));
-    tab4search.push_back(genintint(1,fpga));
-    tab4search.push_back(genintint(2,quad));
-    tab4search.push_back(genintint(3,mgtchannel));
+    tab4search.emplace_back(0,efexcords);
+    tab4search.emplace_back(1,std::to_string(fpga));
+    tab4search.emplace_back(2,std::to_string(quad));
+    tab4search.emplace_back(3,std::to_string(mgtchannel));
     auto tab4line = m_tables.GetTable(4)->FindLine(tab4search);
     if ( tab4line->size() == 0 )
       return;
@@ -126,8 +122,8 @@ void EfexCellMapping::init(int crate, int efexnumber,
     //Create a valid minipod str
     std::string mpod = tab4line->at(4);
     auto tab3search  = searchpairs();
-    tab3search.push_back(genintstr(0,efexcords));
-    tab3search.push_back(genintstr(1,mpod));
+    tab3search.emplace_back(0,efexcords);
+    tab3search.emplace_back(1,mpod);
     auto tab3line = m_tables.GetTable(3)->FindLine(tab3search);
     if ( tab3line->size() == 0 )
       return;
@@ -142,10 +138,10 @@ void EfexCellMapping::init(int crate, int efexnumber,
         m_inputconnector,std::move(mpod));
 
     auto tab2search  = searchpairs();
-    tab2search.push_back(genintstr(0,efexcords));
-    tab2search.push_back(genintint(1,m_inputconnector));
-    tab2search.push_back(genintint(2,m_fibrenumber));
-    tab2search.push_back(genintint(3,dataword ));
+    tab2search.emplace_back(0,efexcords);
+    tab2search.emplace_back(1,std::to_string(m_inputconnector));
+    tab2search.emplace_back(2,std::to_string(m_fibrenumber));
+    tab2search.emplace_back(3,std::to_string(dataword ));
     auto tab2line = m_tables.GetTable(2)->FindLine(tab2search);
     if ( tab2line->size() == 0 )
       return;
