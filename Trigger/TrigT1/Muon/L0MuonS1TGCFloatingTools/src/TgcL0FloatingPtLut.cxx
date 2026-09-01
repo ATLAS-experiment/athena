@@ -247,7 +247,6 @@ std::unique_ptr<TgcL0FloatingPtLut> TgcL0FloatingPtLut::loadAscii(
       return nullptr;
     }
     bin.knotOffset = static_cast<std::uint32_t>(lut->m_knots.size());
-    bin.knotCount = static_cast<std::uint32_t>(indexedKnots.size());
     unsigned int expectedIndex = 0U;
     float previousInversePt = -1.F;
     float previousResponse = -1.F;
@@ -265,7 +264,23 @@ std::unique_ptr<TgcL0FloatingPtLut> TgcL0FloatingPtLut::loadAscii(
       }
       previousInversePt = knot.inversePtGeVInv;
       previousResponse = knot.responseMagnitudeRad;
-      lut->m_knots.push_back(knot);
+      if (lut->m_knots.size() > bin.knotOffset &&
+          knot.responseMagnitudeRad ==
+              lut->m_knots.back().responseMagnitudeRad) {
+        // A monotonic calibration can contain a response plateau. Its
+        // inverse is ambiguous, so retain the largest inverse-pT value and
+        // therefore the most conservative pT estimate.
+        lut->m_knots.back() = knot;
+      } else {
+        lut->m_knots.push_back(knot);
+      }
+    }
+    bin.knotCount = static_cast<std::uint32_t>(lut->m_knots.size() -
+                                               bin.knotOffset);
+    if (bin.knotCount < 2U) {
+      error = "fewer than two distinct knot responses for bin " +
+              std::to_string(index);
+      return nullptr;
     }
   }
 

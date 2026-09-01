@@ -28,7 +28,8 @@ enum class Malformation {
 };
 
 void writeCalibration(const std::filesystem::path& path,
-                      const Malformation malformation = Malformation::None) {
+                      const Malformation malformation = Malformation::None,
+                      const bool repeatKnotResponse = false) {
   std::ofstream output{path};
   if (malformation == Malformation::LeadingEmptyField) {
     output << ",META,schemaVersion,1\n";
@@ -65,7 +66,9 @@ void writeCalibration(const std::filesystem::path& path,
            << "KNOT,0," << phi << ",2,0.4,"
            << (malformation == Malformation::NonMonotonicKnot && phi == 0U
                    ? 0.15F
-                   : 0.4F * scale)
+                   : repeatKnotResponse && phi == 0U
+                         ? 0.2F
+                         : 0.4F * scale)
            << "\n";
   }
   if (malformation == Malformation::DuplicateThreshold) {
@@ -199,6 +202,26 @@ int main() {
       !lut->evaluate(1.5F, std::numeric_limits<float>::quiet_NaN(), 0.1F)
            .modelValid,
       "non-finite phi");
+
+  const std::filesystem::path repeatedResponseCalibration{
+      "TgcL0FloatingPtLut_test_repeated_response.txt"};
+  writeCalibration(repeatedResponseCalibration, Malformation::None, true);
+  error.clear();
+  const auto repeatedResponseLut = L0Muon::TgcL0FloatingPtLut::loadAscii(
+      repeatedResponseCalibration.string(), error);
+  success &= check(static_cast<bool>(repeatedResponseLut),
+                   "repeated knot response is loaded");
+  success &= check(error.empty(),
+                   "repeated knot response reports no error");
+  if (repeatedResponseLut) {
+    success &= check(repeatedResponseLut->knotCount() == 5U,
+                     "repeated knot response is collapsed");
+    const auto plateau = repeatedResponseLut->evaluate(1.5F, 0.F, 0.2F);
+    success &= check(plateau.ptEstimateValid &&
+                         close(plateau.ptEstimateGeV, 2.5F),
+                     "response plateau uses the conservative pT estimate");
+  }
+  std::filesystem::remove(repeatedResponseCalibration);
 
   constexpr std::array malformedPayloads{
       Malformation::DuplicateThreshold, Malformation::NonMonotonicKnot,
