@@ -5,8 +5,11 @@
 
 #include "CxxUtils/StringUtils.h"
 
+#include <algorithm>
+#include <cmath>
 #include <exception>
 #include <fstream>
+#include <numbers>
 #include <string_view>
 
 namespace {
@@ -172,6 +175,39 @@ bool TgcL0GoodMagMap::isGood(const int etaBin,
                                 m_phiBinsPerFold +
                             static_cast<std::size_t>(phiFoldBin);
   return !m_poorBins[index];
+}
+
+int TgcL0GoodMagMap::etaBin(const float eta, const float absEtaMin,
+                            const float absEtaMax) const {
+  if (!std::isfinite(eta) || !std::isfinite(absEtaMin) ||
+      !std::isfinite(absEtaMax) || !(absEtaMax > absEtaMin)) {
+    return -1;
+  }
+  const float absEta = std::abs(eta);
+  if (absEta < absEtaMin || absEta > absEtaMax) return -1;
+  if (absEta == absEtaMax) return static_cast<int>(m_etaBins) - 1;
+  const float scaled =
+      (absEta - absEtaMin) * m_etaBins / (absEtaMax - absEtaMin);
+  const int bin = static_cast<int>(std::floor(scaled));
+  return bin >= 0 && bin < static_cast<int>(m_etaBins) ? bin : -1;
+}
+
+int TgcL0GoodMagMap::phiFoldBin(const float phi) const {
+  if (!std::isfinite(phi)) return -1;
+  const float period = 2.F * std::numbers::pi_v<float> / 8.F;
+  float folded = std::fmod(phi, period);
+  if (folded < 0.F) folded += period;
+  float fraction = folded / period;
+  if (fraction >= 1.F) fraction = 0.F;
+  return std::clamp(
+      static_cast<int>(std::floor(fraction * m_phiBinsPerFold)), 0,
+      static_cast<int>(m_phiBinsPerFold) - 1);
+}
+
+bool TgcL0GoodMagMap::isGood(const float eta, const float phi,
+                             const float absEtaMin,
+                             const float absEtaMax) const {
+  return isGood(etaBin(eta, absEtaMin, absEtaMax), phiFoldBin(phi));
 }
 
 }  // namespace L0Muon
