@@ -220,7 +220,8 @@ StatusCode BuildTruthTaus::examineTruthTau(const xAOD::TruthParticle& xTruthPart
     const xAOD::TruthParticle* xTruthDaughter = xDecayVertex->outgoingParticle(iOutgoingParticle);
     if (xTruthDaughter == nullptr)
     {
-      ATH_MSG_ERROR("examineTruthTau: Truth daughter of tau decay was not found in "<< m_truthParticleContainer.key() <<" container. Please ensure that this container has the full tau decay information or produce the TruthTaus container in AtlasDerivation.");
+      // recoverable, this tau gets skipped on failure so only emit a warning
+      ATH_MSG_WARNING("examineTruthTau: Truth daughter of tau decay was not found in "<< m_truthParticleContainer.key() <<" container. Please ensure that this container has the full tau decay information or produce the TruthTaus container in AtlasDerivation.");
       return StatusCode::FAILURE;
     }
 
@@ -395,7 +396,8 @@ StatusCode BuildTruthTaus::examineTruthTauDecay (const xAOD::TruthParticle& xTru
     const xAOD::TruthParticle* xTruthDaughter = xDecayVertex->outgoingParticle(iOutgoingParticle);
     if (xTruthDaughter == nullptr)
     {
-      ATH_MSG_ERROR("examineTruthTauDecay: Truth daughter of tau decay was not found in "<< m_truthParticleContainer.key() <<" container. Please ensure that this container has the full tau decay information or produce the TruthTaus container in AtlasDerivation.");
+      // recoverable: the caller skips this tau, so only emit a warning
+      ATH_MSG_WARNING("examineTruthTauDecay: Truth daughter of tau decay was not found in "<< m_truthParticleContainer.key() <<" container. Please ensure that this container has the full tau decay information or produce the TruthTaus container in AtlasDerivation.");
       return StatusCode::FAILURE;
     }
 
