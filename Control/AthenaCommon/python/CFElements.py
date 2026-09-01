@@ -72,7 +72,7 @@ def checkSequenceConsistency( seq ):
 
 
 def isSequence( obj ):
-    return isinstance(obj, AthSequencer)
+    return type(obj) is AthSequencer  # faster than isinstance and we do not care about inheritance
 
 
 def findSubSequence( start, nameToLookFor ):
