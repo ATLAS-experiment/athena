@@ -372,7 +372,7 @@ def MainServicesCfg(flags, LoopMgr='AthenaEventLoopMgr'):
 
     cfg.merge(MessageSvcCfg(flags))
 
-    from AthenaConfiguration.FPEAndCoreDumpConfig import FPEAndCoreDumpCfg
+    from AthenaServices.FPEAndCoreDumpConfig import FPEAndCoreDumpCfg
     cfg.merge(FPEAndCoreDumpCfg(flags))
 
     # Avoid stack traces to the exception handler. These traces
