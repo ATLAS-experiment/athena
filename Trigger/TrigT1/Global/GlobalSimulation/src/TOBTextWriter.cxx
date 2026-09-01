@@ -51,12 +51,19 @@ namespace GlobalSim {
       return StatusCode::FAILURE;
     }
 
+    // The reference implementation writes a space after every TOB, including
+    // the last one on a line.
     std::string line;
     for (const SG::AuxElement* tob : *tobs) {
-      if (!line.empty()) { line += ' '; }
       line += m_pack(*tob);
+      line += ' ';
     }
-    m_out << line << '\n';
+
+    // The newline separates lines rather than terminating them. An empty line
+    // denotes an event with no TOBs, so a file ending in a newline could not be
+    // told apart from one with a trailing empty event.
+    if (m_nWritten > 0) { m_out << '\n'; }
+    m_out << line;
 
     ++m_nextEvt;
     ++m_nWritten;
