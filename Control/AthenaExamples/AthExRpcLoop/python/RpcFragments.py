@@ -38,16 +38,6 @@ from AthenaCommon.Logging import logging
 
 _msg = logging.getLogger("RpcFragments")
 
-#: The encoding the framework itself implements: opaque bytes, recorded under
-#: the boundary's key as an ``AthExRpc::RpcBlob`` and converted by the fragment
-#: that published the schema. This is a convenience spelling, not an
-#: enumeration the system depends on -- an encoding is a string resolved against
-#: a codec registry at run time, and adding one costs nothing here at all.
-PROTOBUF = "protobuf"
-
-#: The StoreGate type a ``protobuf`` boundary materialises as.
-BLOB_TYPE = "AthExRpc::RpcBlob"
-
 #: Stores whose contents a client never supplies: a conditions read is served
 #: by AthCondSeq and a detector-store read by the geometry, so neither is an
 #: unmet dependency in the sense that matters here.
@@ -84,14 +74,20 @@ def _is_conditions(key, store):
     return store in _NON_EVENT_STORES or getattr(key, "IsCondition", False)
 
 
-def deriveBoundaries(payload, outputs, request_key, extra_inputs=(),
-                     ignore_inputs=(), produces=()):
+def deriveBoundaries(payload, outputs, request_key, boundaries=None,
+                     extra_inputs=(), ignore_inputs=(), produces=()):
     """Work out which keys cross a fragment's boundary, and their types.
 
     :param payload: the payload ComponentAccumulator
     :param outputs: keys to return to the client
     :param request_key: the request descriptor's key, which every gate reads and
         which must never be mistaken for a wire input
+    :param boundaries: ``{key: Codec}``, needed because a *converting* codec's
+        boundary is a name on the wire rather than a StoreGate key. For those,
+        the keys the payload actually reads and writes are the ones the codec
+        materialises, and this is what maps them back to the boundary carrying
+        them. Every other codec's boundary key is its StoreGate key and this
+        changes nothing.
     :param extra_inputs: keys to treat as client inputs even though nothing in
         the payload reads them -- for a fragment whose consumer is added later
     :param ignore_inputs: unmet reads that are *not* wire inputs, because the
@@ -137,7 +133,17 @@ def deriveBoundaries(payload, outputs, request_key, extra_inputs=(),
             "exemption is now hiding nothing")
     writes.update(produces)
 
-    unmet = set(k for k in reads if k not in writes)
+    # For a converting codec the boundary is a name on the wire and the objects
+    # live under keys of the fragment's choosing, so translate those back before
+    # deciding what is unmet. For everything else this map is empty.
+    boundaries = dict(boundaries or {})
+    carried = {}
+    for boundary_key, codec in boundaries.items():
+        for sg_key in codec.sgKeys(boundary_key):
+            if sg_key != boundary_key:
+                carried[sg_key] = boundary_key
+
+    unmet = set(carried.get(k, k) for k in reads if k not in writes)
     stale = [k for k in ignore_inputs if k not in unmet]
     if stale:
         raise ValueError(
@@ -148,6 +154,12 @@ def deriveBoundaries(payload, outputs, request_key, extra_inputs=(),
     inputs += [k for k in extra_inputs if k not in inputs]
 
     for key in inputs:
+        codec = boundaries.get(key)
+        if codec is not None and codec.schema_source != "derived":
+            # This boundary states its own schema, or needs none, and the
+            # scheduler learns the key from the codec -- so there is nothing
+            # left for a StoreGate type to be wanted for.
+            continue
         if key in types:
             continue
         candidates = reads.get(key, set())
@@ -159,7 +171,12 @@ def deriveBoundaries(payload, outputs, request_key, extra_inputs=(),
                 + ". Declare it explicitly with types={'" + key + "': ...}")
         types[key] = next(iter(candidates))
 
-    missing = [key for key in outputs if key not in writes]
+    def _produced(key):
+        codec = boundaries.get(key)
+        wanted = codec.sgKeys(key) if codec is not None else [key]
+        return all(sg_key in writes for sg_key in wanted)
+
+    missing = [key for key in outputs if not _produced(key)]
     if missing:
         raise ValueError(
             f"the payload does not produce {missing}; it writes "
@@ -168,49 +185,60 @@ def deriveBoundaries(payload, outputs, request_key, extra_inputs=(),
 
 
 def boundarySpecs(declarations):
-    """Boundaries as the strings the algorithms parse: ``key#encoding#schema``.
+    """Boundaries as the loop manager's description of them.
 
-    '#' rather than ':' or ',' because a schema may be a C++ type name, and
-    those contain both.
+    Only a service parses these; the algorithms are configured with codec tools
+    and parse nothing. See RpcBoundary.h.
     """
-    return [f"{key}#{encoding}#{schema}"
-            for key, _, encoding, schema in declarations]
+    return [codec.spec(key, sg_type)
+            for key, sg_type, codec in declarations]
 
 
-def boundaryDeps(declarations):
-    """Boundaries as scheduler dependencies.
+def boundaryTools(prefix, declarations, direction):
+    """One configured codec per boundary.
 
-    A boundary key cannot be a typed handle key -- the type is not known at
-    compile time, which is the whole point -- so the gate cannot declare itself
-    its producer the usual way, and the pack algorithm cannot declare itself its
-    consumer. Saying it here keeps the data-flow graph closed.
+    Named from the algorithm and the key, so a message from a codec says which
+    boundary of which fragment it came from.
 
-    Note this is the *StoreGate* type, not the schema: what the scheduler orders
-    is the appearance of an object under a key, and for a protobuf boundary that
-    object is a blob whatever message is inside it.
+    :param direction: ``"Write"`` for the instances that decode into the store,
+        ``"Read"`` for those that encode out of it. The same codec class serves
+        both, so the instance has to be told which it is -- and that is also
+        what decides whether the keys it touches are declared to the scheduler
+        as outputs or as inputs.
+
+    There is deliberately nothing here that builds a scheduler dependency. The
+    codec declares what it touches itself: with ordinary handle keys where it
+    has a C++ type to name, and with a key built from a CLID it resolved at
+    initialize() where it has none. Assembling a second declaration here would
+    be a second thing that could disagree with the first.
     """
-    return {(sg_type, f"StoreGateSvc+{key}")
-            for key, sg_type, _, _ in declarations}
+    return [codec.tool(f"{prefix}_{key}", key, direction, sg_type)
+            for key, sg_type, codec in declarations]
 
 
-def RpcRequestAlgCfg(name, sequence, target, inputs=(), outputs=(), **kwargs):
-    """The client-side algorithm, from the same declarations the fragment makes.
+def RpcRequestAlgCfg(name, fragment, target, **kwargs):
+    """The client side of a fragment, from the fragment's own declaration.
 
-    A client that imports its server's fragment declaration and passes it here
-    cannot disagree with the server about what crosses -- which is the whole
-    argument for both ends being Athena. A client that cannot import it (a
-    different release, a different language) discovers the same three strings
-    from ListSequences instead.
+    The client instantiates the *same* codec components the server does, the
+    other way round: it encodes what the server declares as inputs and decodes
+    what the server declares as outputs. Nothing is restated, so the two ends
+    cannot disagree -- which is the whole argument for both ends being Athena.
+
+    A client in another language shares the .proto files and nothing else; what
+    ListSequences advertises is the wire contract, which is all such a client
+    could act on. There is deliberately no way to turn an encoding string back
+    into a component: naming a codec names a class, and both ends of a boundary
+    import the same declaration.
     """
     alg = CompFactory.AthExRpc.RpcRequestAlg(
         name,
-        SequenceName=sequence,
+        SequenceName=fragment.name,
         Target=target,
-        Inputs=boundarySpecs(inputs),
-        Outputs=boundarySpecs(outputs),
+        # Mirror image of the server: the client encodes what the server
+        # declares as inputs and decodes what it declares as outputs.
+        Inputs=boundaryTools(name, fragment.inputs, "Read"),
+        Outputs=boundaryTools(name, fragment.outputs, "Write"),
         **kwargs)
-    alg.ExtraInputs = boundaryDeps(inputs)
-    alg.ExtraOutputs = boundaryDeps(outputs)
     return alg
 
 
@@ -221,14 +249,15 @@ class RpcFragment:
     state a boundary that cannot be derived.
 
     :param name: the sequence name, which is also what a request asks for
-    :param inputs: ``(key, sg_type, encoding, schema)`` the client must supply
+    :param inputs: ``(key, sg_type, codec)`` the client must supply
     :param outputs: the same, returned to the client
     :param reply_key: where the pack algorithm stages the reply; derived from
         the name unless given. A fragment with no outputs needs none, and gets
         no pack algorithm at all.
 
-    Note there is no list of supported types anywhere: a boundary is a key, an
-    encoding and a schema name, all strings resolved at run time.
+    Note there is no list of supported types anywhere: a boundary is a key, a
+    StoreGate type and a codec descriptor, and the descriptor names a component
+    directly rather than a string to be looked up.
     """
 
     def __init__(self, name, inputs=(), outputs=(), reply_key=None):
@@ -253,9 +282,8 @@ class RpcFragment:
             f"{self.name}Gate",
             SequenceName=self.name,
             Request=request_key,
-            Inputs=self.input_specs,
         )
-        alg.ExtraOutputs = boundaryDeps(self.inputs)
+        alg.Inputs = boundaryTools(alg.getName(), self.inputs, "Write")
         return alg
 
     def pack(self, request_key):
@@ -266,12 +294,11 @@ class RpcFragment:
             f"{self.name}Pack",
             Request=request_key,
             Reply=self.reply_key,
-            Outputs=self.output_specs,
         )
         # Only the outputs. What orders this algorithm after the whole payload
         # is that a fragment is a seqAND, which CFElements builds with
         # Sequential=True and to which the pack algorithm is appended last.
-        alg.ExtraInputs = boundaryDeps(self.outputs)
+        alg.Outputs = boundaryTools(alg.getName(), self.outputs, "Read")
         return alg
 
 
@@ -336,8 +363,8 @@ class RpcMenu:
         menu = RpcMenu()
         menu.add("RpcSeqSum", RpcSumPayloadCfg(flags),
                  outputs=["total"],
-                 boundaries={"addends": (PROTOBUF, "athexrpc.demo.v1.Ints"),
-                             "total": (PROTOBUF, "athexrpc.demo.v1.Ints")})
+                 boundaries={"addends": Protobuf("athexrpc.demo.v1.Ints"),
+                             "total": Protobuf("athexrpc.demo.v1.Ints")})
         cfg.merge(menu.build(flags))
     """
 
@@ -356,9 +383,10 @@ class RpcMenu:
             it would be for a normal job
         :param outputs: the keys to send back to the client. Not derivable: an
             intermediate that stays in the store is a legitimate choice.
-        :param boundaries: ``{key: (encoding, schema)}`` for every key that
-            crosses, inputs and outputs alike. Required, and a key without an
-            entry is an error rather than a default -- see the module docstring.
+        :param boundaries: ``{key: Codec}`` for every key that crosses, inputs
+            and outputs alike -- e.g. ``{"addends": Protobuf(INTS)}``. Required,
+            and a key without an entry is an error rather than a default; see
+            the module docstring and RpcCodecs.
         :param types: overrides for derived StoreGate types,
             ``{key: type_name}``. Needed when a consumer reads a base class
             rather than the concrete type, which is the one case the derivation
@@ -374,7 +402,7 @@ class RpcMenu:
         types = dict(types or {})
         boundaries = dict(boundaries or {})
         derived, derived_types = deriveBoundaries(
-            payload, outputs, self.request_key,
+            payload, outputs, self.request_key, boundaries=boundaries,
             extra_inputs=[k for k in (inputs or ()) if k in types],
             ignore_inputs=ignore_inputs, produces=produces)
         derived_types.update(types)
@@ -389,8 +417,8 @@ class RpcMenu:
         if undeclared:
             raise ValueError(
                 f"fragment '{name}' does not say how {sorted(undeclared)} "
-                "cross: give each an (encoding, schema) in boundaries=. There "
-                "is no default; a wire format is not derivable from a C++ type")
+                "cross: give each a codec in boundaries=. There is no default; "
+                "a wire format is not derivable from a C++ type")
         unused = [k for k in boundaries if k not in crossing]
         if unused:
             # A boundary declared for a key that does not cross is a rename
@@ -401,7 +429,10 @@ class RpcMenu:
                 f"which do not cross; it crosses {sorted(crossing)}")
 
         def declare(keys):
-            return [(key, derived_types[key]) + tuple(boundaries[key])
+            # Only a codec that takes its schema from the StoreGate type wants
+            # one. For the rest there is nothing to look up and nothing that
+            # needs it: the scheduler learns the key from the codec.
+            return [(key, derived_types.get(key, ""), boundaries[key])
                     for key in keys]
 
         fragment = RpcFragment(name,
@@ -416,6 +447,19 @@ class RpcMenu:
         self.fragments.append(fragment)
         self._payloads[name] = payload
         return fragment
+
+    def fragment(self, name):
+        """The declaration of one fragment, for a client that wants to call it.
+
+        A client configured from this cannot disagree with the server about any
+        part of the boundary, because there is only one declaration of it. See
+        RpcRequestAlgCfg.
+        """
+        for fragment in self.fragments:
+            if fragment.name == name:
+                return fragment
+        raise KeyError(f"this menu offers no fragment '{name}'; it offers "
+                       f"{[f.name for f in self.fragments]}")
 
     def build(self, flags):
         """The parOR, every fragment's sequence, and the algorithms between."""

@@ -22,10 +22,10 @@
  * object in the store. That is the whole reason the boundary is declared as
  * strings.
  *
- * Because the keys cannot be typed handle keys, the configuration declares them
- * in ExtraInputs and ExtraOutputs so the scheduler still orders this algorithm
- * correctly -- the same arrangement the gate and pack algorithms use, for the
- * same reason.
+ * Its codecs declare what they touch, as the gate's and the pack algorithm's
+ * do, so the scheduler orders this algorithm correctly without the
+ * configuration restating anything. Here they run the other way round: the ones
+ * carrying the request read, and the ones carrying the reply write.
  *
  * This is deliberately the simple client: one blocking call per event, no
  * retry, no pipelining. A refusal (the server is busy or shutting down) is
@@ -34,14 +34,13 @@
  * not to this algorithm.
  */
 
+#include "IPayloadCodec.h"
 #include "RpcClient.h"
-#include "RpcPayloadStore.h"
 
 #include "AthenaBaseComps/AthReentrantAlgorithm.h"
 #include "CxxUtils/checker_macros.h"
 #include "Gaudi/Property.h"
-#include "GaudiKernel/IClassIDSvc.h"
-#include "GaudiKernel/ServiceHandle.h"
+#include "GaudiKernel/ToolHandle.h"
 
 #include <atomic>
 #include <memory>
@@ -72,26 +71,23 @@ private:
   Gaudi::Property<std::string> m_sequence{
       this, "SequenceName", "", "Fragment to ask the server to run"};
 
-  Gaudi::Property<std::vector<std::string>> m_inputs{
+  ToolHandleArray<IPayloadCodec> m_inputs{
       this, "Inputs", {},
-      "What to send, each as \"key#encoding#schema\". The key is read from the "
-      "event store and is also the key the fragment sees"};
+      "One codec per boundary to send. Each reads its key from the event store "
+      "and encodes it; the fragment sees the same key on the far side"};
 
-  Gaudi::Property<std::vector<std::string>> m_outputs{
+  ToolHandleArray<IPayloadCodec> m_outputs{
       this, "Outputs", {},
-      "What to expect back, declared the same way, and recorded under the same "
-      "keys"};
+      "One codec per boundary to expect back, recorded under the same keys. "
+      "These are the *same* configured components the server's fragment uses, "
+      "which is what makes the two ends unable to disagree"};
 
   /// References pointing outside the payload set are a configuration fact, so
   /// they are reported on the first request that has any and not again.
   mutable std::atomic<bool> m_warnedDangling{false};
 
-  ServiceHandle<IClassIDSvc> m_clidSvc{
-      this, "ClassIDSvc", "ClassIDSvc",
-      "Resolves a boundary's schema to a CLID, for codecs that need it"};
-
-  std::vector<PayloadStore::Resolved> m_inputBoundaries;
-  std::vector<PayloadStore::Resolved> m_outputBoundaries;
+  /// The input codecs as raw pointers; see RpcPackAlg for why.
+  std::vector<const IPayloadCodec*> m_crossing;
 
   /// Shared by every slot. gRPC stubs are documented as safe for concurrent
   /// calls, and one channel per thread would defeat the connection pooling the

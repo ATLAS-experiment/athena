@@ -131,10 +131,19 @@ message ListSequencesReply {
   repeated SequenceInfo sequences = 1;
 }
 
-// What a fragment expects and returns. Carries encoding and schema alongside
-// the key so that a client can discover what to build rather than being told
-// out of band.
+// What a fragment expects and returns, so that a client can discover what to
+// build rather than being told out of band. All three fields are the wire
+// contract, and nothing else is advertised.
+//
+// Field 4 held an Athena-side StoreGate type; it is reserved so the number is
+// not reused for something a client would read differently.
+//
+// `schema` is empty for an encoding that carries exactly one payload type and
+// is therefore named completely by its encoding tag.
 message BoundaryInfo {
+  reserved 4;
+  reserved "storegate_type";
+
   string key      = 1;
   string encoding = 2;
   string schema   = 3;

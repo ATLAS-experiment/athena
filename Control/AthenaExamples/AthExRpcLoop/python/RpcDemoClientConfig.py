@@ -8,26 +8,24 @@ once, by the server's fragment, and imported here.
 
 The order is the mirror image of the server's::
 
-    DemoNumbersAlg      writes ordinary integers          (knows nothing)
-    DemoIntsPackAlg     integers   -> athexrpc.demo.v1.Ints
-    RpcRequestAlg       sends the message, records the reply's bytes
-    DemoIntsUnpackAlg   athexrpc.demo.v1.Ints -> integers
-    DemoCheckAlg        reads ordinary integers, asserts the answer
-                                                          (knows nothing)
+    DemoNumbersAlg   writes ordinary integers                   (knows nothing)
+    RpcRequestAlg    encodes them, sends, decodes the reply
+    DemoCheckAlg     reads ordinary integers, asserts the answer (knows nothing)
 
-The two adapter algorithms are the same C++ classes the server runs, configured
-the other way round. That is what makes the two ends unable to disagree about
-what the bytes mean, and it is the property a server whose code is a different
-implementation cannot have.
+Turning those integers into a message and the reply back into integers is the
+boundary's work rather than the client's, so the client is the work it does and
+the one call. The codecs either side of the socket are the same configured
+components, built from the server's own fragment declaration, which is what
+makes the two ends unable to disagree about what the bytes mean -- and is the
+property a server whose code is a different implementation cannot have.
 """
 
-from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.MainServicesConfig import MainServicesCfg
 from McEventSelector.McEventSelectorConfig import McEventSelectorCfg
 
-from AthExRpcLoop.RpcFragments import BLOB_TYPE, PROTOBUF, RpcRequestAlgCfg
-from AthExRpcLoop.RpcHiveLoopConfig import INTS
+from AthExRpcLoop.RpcFragments import RpcRequestAlgCfg
+from AthExRpcLoop.RpcHiveLoopConfig import RpcMenuCfg
 
 __all__ = ["RpcDemoClientCfg"]
 
@@ -48,23 +46,16 @@ def RpcDemoClientCfg(flags, target, addends=(3, 4), **kwargs):
 
     cfg.addEventAlgo(CompFactory.AthExRpc.DemoNumbersAlg(
         "RpcDemoNumbers", Values=["a", "b"], Offsets=list(addends)))
-    cfg.addEventAlgo(CompFactory.AthExRpc.DemoIntsPackAlg(
-        "RpcDemoPack", Values=["a", "b"], Payload="addends"))
 
-    # The declaration, in the four-tuple form RpcFragments uses everywhere:
-    # (key, StoreGate type, encoding, schema). A client in another release, or
-    # another language, gets the same three wire strings from ListSequences
-    # instead of importing them.
-    cfg.addEventAlgo(RpcRequestAlgCfg(
-        "RpcDemoRequest",
-        sequence="RpcSeqSum",
-        target=target,
-        inputs=[("addends", BLOB_TYPE, PROTOBUF, INTS)],
-        outputs=[("total", BLOB_TYPE, PROTOBUF, INTS)],
-        **kwargs))
+    # The server's own declaration of the fragment, imported rather than
+    # restated. Everything the client needs -- which keys cross, in which
+    # direction, on what encoding, against what schema, and with which codec
+    # components -- comes out of this one object, so the two ends cannot
+    # disagree about any of it.
+    fragment = RpcMenuCfg(flags).fragment("RpcSeqSum")
+    cfg.addEventAlgo(RpcRequestAlgCfg("RpcDemoRequest", fragment,
+                                      target=target, **kwargs))
 
-    cfg.addEventAlgo(CompFactory.AthExRpc.DemoIntsUnpackAlg(
-        "RpcDemoUnpack", Payload="total", Values=["sum"]))
     cfg.addEventAlgo(CompFactory.AthExRpc.DemoCheckAlg(
         "RpcDemoCheck", Values=["a", "b"], Result="sum"))
     return cfg

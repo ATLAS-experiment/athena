@@ -4,8 +4,6 @@
 
 #include "RpcPackAlg.h"
 
-#include "AthenaKernel/ExtendedEventContext.h"
-#include "AthenaKernel/IProxyDict.h"
 #include "StoreGate/ReadHandle.h"
 #include "StoreGate/WriteHandle.h"
 
@@ -24,14 +22,10 @@ StatusCode RpcPackAlg::initialize()
   ATH_CHECK( m_request.initialize() );
   ATH_CHECK( m_reply.initialize() );
 
-  if ( !m_outputs.empty() ) {
-    ATH_CHECK( m_clidSvc.retrieve() );
-    std::string error;
-    if ( PayloadStore::resolve( m_outputs, *m_clidSvc, m_boundaries, error )
-             .isFailure() ) {
-      ATH_MSG_ERROR( error );
-      return StatusCode::FAILURE;
-    }
+  ATH_CHECK( m_outputs.retrieve() );
+  m_crossing.reserve( m_outputs.size() );
+  for ( const ToolHandle<IPayloadCodec>& codec : m_outputs ) {
+    m_crossing.push_back( codec.get() );
   }
   return StatusCode::SUCCESS;
 }
@@ -48,23 +42,12 @@ StatusCode RpcPackAlg::execute( const EventContext& ctx ) const
   reply.status = AthExRpc::Status::Ok;
   reply.requestId = request->requestId();
 
-  if ( !m_boundaries.empty() ) {
-    IProxyDict* store = Atlas::getExtendedEventContext( ctx ).proxy();
-    if ( store == nullptr ) {
-      ATH_MSG_ERROR( "No proxy dictionary in the event context" );
-      return StatusCode::FAILURE;
-    }
-    reply.outputs.reserve( m_boundaries.size() );
+  if ( !m_outputs.empty() ) {
+    reply.outputs.reserve( m_outputs.size() );
     std::vector<std::string> dangling;
-    for ( const PayloadStore::Resolved& boundary : m_boundaries ) {
+    for ( const ToolHandle<IPayloadCodec>& codec : m_outputs ) {
       Payload payload;
-      std::string error;
-      if ( PayloadStore::read( *store, boundary, payload, error, &m_boundaries,
-                               &dangling )
-               .isFailure() ) {
-        ATH_MSG_ERROR( error );
-        return StatusCode::FAILURE;
-      }
+      ATH_CHECK( codec->read( ctx, payload, m_crossing, dangling ) );
       reply.outputs.push_back( std::move( payload ) );
     }
     // See RpcRequestAlg for why this is a warning reported once rather than an
@@ -73,7 +56,7 @@ StatusCode RpcPackAlg::execute( const EventContext& ctx ) const
     if ( !dangling.empty() &&
          !m_warnedDangling.exchange( true, std::memory_order_relaxed ) ) {
       ATH_MSG_WARNING( "This reply refers to keys it does not carry: "
-                       << PayloadStore::describeDangling( dangling )
+                       << describeDangling( dangling )
                        << ". They will not resolve on the client. Add them to "
                           "this fragment's outputs, or ignore this if they are "
                           "not meant to be followed there. Reported once" );

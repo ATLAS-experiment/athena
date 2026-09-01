@@ -16,20 +16,19 @@
  * one and the scheduler sees an unambiguous graph. Only the selected fragment
  * runs, so only its reply object ever exists in a given event.
  *
- * Like the gate, it enumerates no types: an output is a key, an encoding and a
- * schema name, resolved at run time. Because those keys cannot be typed handle
- * keys, the configuration declares them in ExtraInputs so the scheduler still
- * orders this algorithm after whatever produced them.
+ * Like the gate, it enumerates no types: each output arrives as a configured
+ * codec tool, which declares for itself that it reads that key -- so the
+ * scheduler orders this algorithm after whatever produced them without the
+ * configuration restating anything.
  */
 
-#include "RpcPayloadStore.h"
+#include "IPayloadCodec.h"
 #include "RpcReplyStaging.h"
 #include "RpcRequestDescriptor.h"
 
 #include "AthenaBaseComps/AthReentrantAlgorithm.h"
 #include "Gaudi/Property.h"
-#include "GaudiKernel/IClassIDSvc.h"
-#include "GaudiKernel/ServiceHandle.h"
+#include "GaudiKernel/ToolHandle.h"
 #include "StoreGate/ReadHandleKey.h"
 #include "StoreGate/WriteHandleKey.h"
 
@@ -53,19 +52,19 @@ private:
   SG::WriteHandleKey<RpcReplyStaging> m_reply{
       this, "Reply", "", "Where the loop manager will look for this reply"};
 
-  Gaudi::Property<std::vector<std::string>> m_outputs{
+  ToolHandleArray<IPayloadCodec> m_outputs{
       this, "Outputs", {},
-      "This fragment's outputs, each as \"key#encoding#schema\""};
+      "One codec per output boundary, each carrying its own key, schema and "
+      "mechanism"};
 
   /// References pointing outside the payload set are a configuration fact, so
   /// they are reported on the first reply that has any and not again.
   mutable std::atomic<bool> m_warnedDangling{false};
 
-  ServiceHandle<IClassIDSvc> m_clidSvc{
-      this, "ClassIDSvc", "ClassIDSvc",
-      "Resolves a boundary's schema to a CLID, for codecs that need it"};
-
-  std::vector<PayloadStore::Resolved> m_boundaries;
+  /// The same codecs as raw pointers, built once, because that is what
+  /// IPayloadCodec::read wants for its cross-reference check and rebuilding it
+  /// per request would allocate on every reply.
+  std::vector<const IPayloadCodec*> m_crossing;
 };
 
 }  // namespace AthExRpc

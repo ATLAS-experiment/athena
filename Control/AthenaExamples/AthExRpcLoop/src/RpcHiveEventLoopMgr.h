@@ -221,8 +221,10 @@ private:
   Gaudi::Property<std::map<std::string, std::vector<std::string>>> m_inputKeys{
       this, "Inputs", {},
       "Per sequence, the boundaries the client must supply, each as "
-      "\"key#encoding#schema\". Advertised by ListSequences, and used to "
-      "reject requests that do not match before they cost a slot"};
+      "\"key#encoding#schema\". "
+      "Advertised by ListSequences, and used to reject requests that do not "
+      "match before they cost a slot. See RpcBoundary.h for why a service "
+      "holds these as strings rather than as codecs"};
   Gaudi::Property<std::map<std::string, std::vector<std::string>>> m_outputKeys{
       this, "Outputs", {},
       "Per sequence, the boundaries returned to the client. Advertised by "

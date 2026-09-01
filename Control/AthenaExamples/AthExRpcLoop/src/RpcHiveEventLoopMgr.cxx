@@ -4,7 +4,7 @@
 
 #include "RpcHiveEventLoopMgr.h"
 
-#include "RpcPayloadCodec.h"
+#include "RpcBoundary.h"
 #include "RpcReplyStaging.h"
 #include "RpcRequestDescriptor.h"
 
@@ -192,9 +192,10 @@ StatusCode RpcHiveEventLoopMgr::startServing()
     const auto advertise = []( const std::vector<std::string>& specs,
                                std::vector<BoundaryInfo>& out ) {
       for ( const std::string& spec : specs ) {
-        PayloadCodec::Boundary boundary;
-        if ( PayloadCodec::parseBoundary( spec, boundary ) ) {
-          out.push_back( {boundary.key, boundary.encoding, boundary.schema} );
+        Boundary boundary;
+        if ( parseBoundary( spec, boundary ) ) {
+          out.push_back(
+              {boundary.key, boundary.encoding, boundary.schema} );
         }
       }
     };
@@ -601,11 +602,11 @@ AthExRpc::Status RpcHiveEventLoopMgr::validate( const ExecuteRequest& request,
   // inside the scheduler is reported as an algorithm failure, which tells the
   // client nothing about what was wrong with what it sent.
   const auto declared = m_inputKeys.value().find( request.sequence );
-  std::vector<PayloadCodec::Boundary> boundaries;
+  std::vector<Boundary> boundaries;
   if ( declared != m_inputKeys.value().end() ) {
     for ( const std::string& spec : declared->second ) {
-      PayloadCodec::Boundary boundary;
-      if ( PayloadCodec::parseBoundary( spec, boundary ) ) {
+      Boundary boundary;
+      if ( parseBoundary( spec, boundary ) ) {
         boundaries.push_back( std::move( boundary ) );
       }
     }
@@ -633,7 +634,7 @@ AthExRpc::Status RpcHiveEventLoopMgr::validate( const ExecuteRequest& request,
     }
     const auto boundary =
         std::find_if( boundaries.begin(), boundaries.end(),
-                      [&payload]( const PayloadCodec::Boundary& candidate ) {
+                      [&payload]( const Boundary& candidate ) {
                         return candidate.key == payload->key;
                       } );
     // An undeclared key is a client that thinks it is talking to a different
@@ -655,7 +656,7 @@ AthExRpc::Status RpcHiveEventLoopMgr::validate( const ExecuteRequest& request,
     }
   }
 
-  for ( const PayloadCodec::Boundary& boundary : boundaries ) {
+  for ( const Boundary& boundary : boundaries ) {
     const auto supplied = std::find_if(
         request.inputs.begin(), request.inputs.end(),
         [&boundary]( const Payload& p ) { return p.key == boundary.key; } );

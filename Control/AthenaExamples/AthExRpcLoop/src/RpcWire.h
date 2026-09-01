@@ -60,7 +60,7 @@ const char* toString( Status status );
 /// One value crossing the fragment boundary. Mirrors athrpc.v1.Payload.
 struct Payload {
   std::string key;       ///< StoreGate key at the fragment boundary
-  std::string encoding;  ///< serialisation mechanism; see RpcPayloadCodec.h
+  std::string encoding;  ///< serialisation mechanism; see IPayloadCodec.h
   std::string schema;    ///< what the bytes are, in that mechanism's terms
   std::string data;      ///< binary, and may contain embedded nulls
 };
@@ -112,6 +112,7 @@ struct ExecuteReply {
 struct BoundaryInfo {
   std::string key;
   std::string encoding;
+  /// Empty for an encoding that carries exactly one payload type.
   std::string schema;
 };
 

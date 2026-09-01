@@ -18,31 +18,31 @@
  * the fragment's input keys. Two consequences worth being explicit about:
  *
  * - It makes the gate the producer of those keys, so the data-flow graph is
- *   closed and the scheduler can validate the wiring. Because the types are not
- *   known at compile time the keys cannot be typed handle keys, so the
- *   configuration declares them in ExtraOutputs instead; RpcFragments does both
- *   from one declaration.
+ *   closed and the scheduler can validate the wiring. The gate does not declare
+ *   them: each codec declares what it touches, and a codec on a gate is one
+ *   that writes. Where the codec has a C++ type to name it does that with an
+ *   ordinary handle key; where it has none, because carrying anything is the
+ *   point, it declares a key built from the CLID it resolved at initialize().
+ *   Either way the statement is made once, by the component that knows.
  * - The genericity stops here. Downstream everything is an ordinary StoreGate
  *   object under an ordinary CLID, read through ordinary typed handles, so
  *   payload algorithms are RPC-ignorant and shareable with a normal job.
  *
  * There is one class, instantiated once per fragment, and it enumerates no
- * types at all: a boundary is a key, an encoding and a schema name, all
- * resolved at run time. It knows only the request name that selects it and the
- * boundaries it has to materialise.
+ * types at all: each boundary arrives as a configured codec tool that knows its
+ * own key, schema and mechanism. This algorithm knows only the request name
+ * that selects it, and which codecs to hand the payloads to.
  */
 
-#include "RpcPayloadStore.h"
+#include "IPayloadCodec.h"
 #include "RpcRequestDescriptor.h"
 
 #include "AthenaBaseComps/AthReentrantAlgorithm.h"
 #include "Gaudi/Property.h"
-#include "GaudiKernel/IClassIDSvc.h"
-#include "GaudiKernel/ServiceHandle.h"
+#include "GaudiKernel/ToolHandle.h"
 #include "StoreGate/ReadHandleKey.h"
 
 #include <string>
-#include <vector>
 
 namespace AthExRpc {
 
@@ -62,16 +62,10 @@ private:
   SG::ReadHandleKey<RpcRequestDescriptor> m_request{
       this, "Request", "RpcRequest", "The request, injected by the loop manager"};
 
-  Gaudi::Property<std::vector<std::string>> m_inputs{
+  ToolHandleArray<IPayloadCodec> m_inputs{
       this, "Inputs", {},
-      "This fragment's inputs, each as \"key#encoding#schema\" -- e.g. "
-      "\"addends#protobuf#athexrpc.demo.v1.Ints\""};
-
-  ServiceHandle<IClassIDSvc> m_clidSvc{
-      this, "ClassIDSvc", "ClassIDSvc",
-      "Resolves a boundary's schema to a CLID, for codecs that need it"};
-
-  std::vector<PayloadStore::Resolved> m_boundaries;
+      "One codec per input boundary. Each carries its own key, schema and "
+      "mechanism, so this algorithm parses nothing and knows no encodings"};
 };
 
 }  // namespace AthExRpc

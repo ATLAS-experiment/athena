@@ -20,7 +20,7 @@ package athexrpc.demo.v1;
 
 // A set of named integers.
 //
-// Named rather than positional so that the adapter maps entries onto StoreGate
+// Named rather than positional so that the codec maps entries onto StoreGate
 // keys by name: a fragment that gains an input does not silently reinterpret
 // the ones it already had.
 message Ints {

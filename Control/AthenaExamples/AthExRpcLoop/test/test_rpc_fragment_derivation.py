@@ -21,10 +21,8 @@ from AthenaConfiguration.AllConfigFlags import initConfigFlags
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 
-from AthExRpcLoop.RpcFragments import PROTOBUF, RpcMenu, RpcPayloadCfg
-
-INTS = "athexrpc.demo.v1.Ints"
-DOUBLES = "athexrpc.demo.v1.Doubles"
+from AthExRpcLoop.RpcDemoCodecs import DOUBLES, INTS, DemoDoubles, DemoInts
+from AthExRpcLoop.RpcFragments import RpcMenu, RpcPayloadCfg
 
 
 def _flags():
@@ -39,12 +37,16 @@ def _sum(name, a, b, out):
 
 
 def _ints(*keys):
-    """An (encoding, schema) for each of `keys`, all on the demo Ints schema."""
-    return {key: (PROTOBUF, INTS) for key in keys}
+    """A codec for each of `keys`, each carrying just its own key.
+
+    The simple case, where a boundary is one StoreGate object and its name and
+    that object's key are the same string. Most codecs are only ever this.
+    """
+    return {key: DemoInts([key]) for key in keys}
 
 
 def _keys(declarations):
-    return [key for key, _, _, _ in declarations]
+    return [key for key, _, _ in declarations]
 
 
 class TestDerivation(unittest.TestCase):
@@ -130,7 +132,7 @@ class TestDerivation(unittest.TestCase):
                           boundaries=_ints("a", "b", "sum"))
         self.assertIn("sum", str(caught.exception))
 
-    def test_a_boundary_without_an_encoding_is_refused(self):
+    def test_a_boundary_without_a_codec_is_refused(self):
         """There is no default wire format, and no guessing at one.
 
         A boundary whose serialisation is inferred from a C++ type is a
@@ -152,18 +154,65 @@ class TestDerivation(unittest.TestCase):
                           boundaries=_ints("a", "b", "sum", "nonesuch"))
         self.assertIn("nonesuch", str(caught.exception))
 
-    def test_the_storegate_type_still_comes_from_the_handle(self):
-        """The scheduler dependency uses the type, not the schema."""
+    def test_a_converting_boundary_carries_keys_of_another_name(self):
+        """One message, several objects, and the wire name is none of them.
+
+        The awkward case, and the only one: a codec that converts rather than
+        carries has a boundary name that is not a StoreGate key at all. What the
+        payload leaves unmet is 'a' and 'b'; what the client is asked for is the
+        message carrying both.
+        """
         fragment = self.menu.add(
             "RpcSeqT4",
+            RpcPayloadCfg(_sum("T4Alg", "a", "b", "sum")),
+            outputs=["total"],
+            boundaries={"addends": DemoInts(["a", "b"]),
+                        "total": DemoInts(["sum"])})
+        self.assertEqual(_keys(fragment.inputs), ["addends"])
+        self.assertEqual(fragment.input_specs, [f"addends#protobuf#{INTS}"])
+        self.assertEqual(_keys(fragment.outputs), ["total"])
+
+    def test_a_converting_output_is_produced_via_the_keys_it_carries(self):
+        """An output nothing writes under its own name is still produced."""
+        with self.assertRaises(ValueError) as caught:
+            self.menu.add("RpcSeqT4b",
+                          RpcPayloadCfg(_sum("T4bAlg", "a", "b", "sum")),
+                          outputs=["total"],
+                          boundaries={"addends": DemoInts(["a", "b"]),
+                                      "total": DemoInts(["nonesuch"])})
+        self.assertIn("total", str(caught.exception))
+
+    def test_nothing_restates_a_scheduler_dependency(self):
+        """The codec declares what it touches; the configuration does not.
+
+        Two statements of the same fact are two things that can disagree, so
+        there is one: the component that will do the recording is the component
+        that says the key will be recorded.
+        """
+        fragment = self.menu.add(
+            "RpcSeqT4c",
+            RpcPayloadCfg(_sum("T4cAlg", "a", "b", "sum")),
+            outputs=["sum"], boundaries=_ints("a", "b", "sum"))
+        gate = fragment.gate("RpcRequest")
+        self.assertFalse(getattr(gate, "ExtraOutputs", None))
+        # ...and the codec is told which way it carries, because the same class
+        # serves both ends of the boundary.
+        self.assertEqual([tool.Direction for tool in gate.Inputs],
+                         ["Write", "Write"])
+        self.assertEqual(
+            [tool.Direction for tool in fragment.pack("RpcRequest").Outputs],
+            ["Read"])
+
+    def test_a_vector_boundary_needs_no_type_either(self):
+        """A schema the fragment states is not derived from a handle."""
+        fragment = self.menu.add(
+            "RpcSeqT4d",
             RpcPayloadCfg(CompFactory.AthExRpc.ScaleVectorAlg(
-                "T4Alg", Input="points", Output="scaled")),
-            outputs=["scaled"],
-            boundaries={"points": (PROTOBUF, DOUBLES),
-                        "scaled": (PROTOBUF, DOUBLES)})
+                "T4dAlg", Input="values", Output="scaled")),
+            outputs=["scaledPoints"],
+            boundaries={"points": DemoDoubles("values"),
+                        "scaledPoints": DemoDoubles("scaled")})
         self.assertEqual(fragment.input_specs, [f"points#protobuf#{DOUBLES}"])
-        self.assertEqual(fragment.gate("RpcRequest").ExtraOutputs,
-                         {("std::vector<double>", "StoreGateSvc+points")})
 
     def test_an_unproduced_output_is_refused(self):
         """Asking for a key the payload never writes is a configuration error."""

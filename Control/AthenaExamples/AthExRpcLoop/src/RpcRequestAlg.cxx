@@ -4,8 +4,6 @@
 
 #include "RpcRequestAlg.h"
 
-#include "AthenaKernel/ExtendedEventContext.h"
-#include "AthenaKernel/IProxyDict.h"
 
 #include <chrono>
 #include <fstream>
@@ -51,19 +49,14 @@ StatusCode RpcRequestAlg::initialize()
     return StatusCode::FAILURE;
   }
 
-  ATH_CHECK( m_clidSvc.retrieve() );
-  std::string error;
-  // Resolved here rather than per event, so a typo stops the job instead of
-  // failing every request -- the same reasoning as RpcGateAlg::initialize.
-  if ( PayloadStore::resolve( m_inputs, *m_clidSvc, m_inputBoundaries, error )
-           .isFailure() ) {
-    ATH_MSG_ERROR( error );
-    return StatusCode::FAILURE;
-  }
-  if ( PayloadStore::resolve( m_outputs, *m_clidSvc, m_outputBoundaries, error )
-           .isFailure() ) {
-    ATH_MSG_ERROR( error );
-    return StatusCode::FAILURE;
+  // Retrieved here rather than per event, so a codec that cannot resolve its
+  // boundary stops the job instead of failing every request -- the same
+  // reasoning as RpcGateAlg::initialize.
+  ATH_CHECK( m_inputs.retrieve() );
+  ATH_CHECK( m_outputs.retrieve() );
+  m_crossing.reserve( m_inputs.size() );
+  for ( const ToolHandle<IPayloadCodec>& codec : m_inputs ) {
+    m_crossing.push_back( codec.get() );
   }
 
   const std::string target = resolveTarget( m_target.value(), m_readyTimeout );
@@ -87,14 +80,6 @@ StatusCode RpcRequestAlg::initialize()
 
 StatusCode RpcRequestAlg::execute( const EventContext& ctx ) const
 {
-  // From the context rather than evtStore(), so this does not depend on which
-  // slot happens to be running on this thread.
-  IProxyDict* store = Atlas::getExtendedEventContext( ctx ).proxy();
-  if ( store == nullptr ) {
-    ATH_MSG_ERROR( "No proxy dictionary in the event context" );
-    return StatusCode::FAILURE;
-  }
-
   ExecuteRequest request;
   request.sequence = m_sequence;
   request.requestId = ctx.evt();
@@ -110,17 +95,11 @@ StatusCode RpcRequestAlg::execute( const EventContext& ctx ) const
   request.eventId.timeStampNsOffset = id.time_stamp_ns_offset();
   request.eventId.bunchCrossingId = id.bunch_crossing_id();
 
-  request.inputs.reserve( m_inputBoundaries.size() );
+  request.inputs.reserve( m_inputs.size() );
   std::vector<std::string> dangling;
-  for ( const PayloadStore::Resolved& boundary : m_inputBoundaries ) {
+  for ( const ToolHandle<IPayloadCodec>& codec : m_inputs ) {
     Payload payload;
-    std::string error;
-    if ( PayloadStore::read( *store, boundary, payload, error,
-                             &m_inputBoundaries, &dangling )
-             .isFailure() ) {
-      ATH_MSG_ERROR( error );
-      return StatusCode::FAILURE;
-    }
+    ATH_CHECK( codec->read( ctx, payload, m_crossing, dangling ) );
     ATH_MSG_DEBUG( "Sending " << describe( payload ) );
     request.inputs.push_back( std::move( payload ) );
   }
@@ -134,7 +113,7 @@ StatusCode RpcRequestAlg::execute( const EventContext& ctx ) const
   if ( !dangling.empty() &&
        !m_warnedDangling.exchange( true, std::memory_order_relaxed ) ) {
     ATH_MSG_WARNING( "This request refers to keys it does not carry: "
-                     << PayloadStore::describeDangling( dangling )
+                     << describeDangling( dangling )
                      << ". They will not resolve on the server. Declare them "
                         "as inputs too, or ignore this if they are not meant "
                         "to be followed there. Reported once" );
@@ -153,28 +132,23 @@ StatusCode RpcRequestAlg::execute( const EventContext& ctx ) const
     return StatusCode::FAILURE;
   }
 
-  for ( const PayloadStore::Resolved& boundary : m_outputBoundaries ) {
+  for ( const ToolHandle<IPayloadCodec>& codec : m_outputs ) {
     const Payload* payload = nullptr;
     for ( const Payload& candidate : reply.outputs ) {
-      if ( candidate.key == boundary.boundary.key ) {
+      if ( candidate.key == codec->key() ) {
         payload = &candidate;
         break;
       }
     }
     if ( payload == nullptr ) {
       ATH_MSG_ERROR( "Reply to request " << reply.requestId
-                                         << " does not carry '"
-                                         << boundary.boundary.key << "'" );
+                                         << " does not carry '" << codec->key()
+                                         << "'" );
       return StatusCode::FAILURE;
     }
-    std::string error;
-    if ( PayloadStore::record( *store, *m_clidSvc, boundary, *payload, error )
-             .isFailure() ) {
-      ATH_MSG_ERROR( error );
-      return StatusCode::FAILURE;
-    }
+    ATH_CHECK( codec->record( ctx, *payload ) );
     ATH_MSG_DEBUG( "Received " << describe( *payload ) << " into '"
-                               << boundary.boundary.key << "'" );
+                               << codec->key() << "'" );
   }
   return StatusCode::SUCCESS;
 }

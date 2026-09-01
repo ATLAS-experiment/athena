@@ -10,7 +10,7 @@
  *
  * proto/athexrpc_demo.proto is this fragment's schema and DemoSchema.cxx is the
  * only file that has ever seen its generated code. Everything else in src/demo/
- * -- the four adapter algorithms -- goes through this header, exactly as the
+ * -- the two codecs -- goes through this header, exactly as the
  * rest of the package goes through RpcWire.h, and for the same reason (see
  * RpcWire.h for the protobuf-runtime argument).
  *

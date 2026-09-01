@@ -21,9 +21,9 @@ endif()
 # comment -- the transport, the loop manager, the gate and the pack algorithm
 # carry whatever a fragment puts on the boundary, and a serialisation library
 # is one fragment's business rather than the framework's. A codec that streams
-# dictionary-backed C++ objects belongs in a library of its own and registers
-# itself through src/RpcPayloadCodec.h; it is not here, and adding it must not
-# add ROOT to this list.
+# dictionary-backed C++ objects is an ordinary Gaudi tool implementing
+# src/IPayloadCodec.h, and belongs in a component library of its own; it is not
+# here, and adding it must not add ROOT to this list.
 
 # protoc cannot run bare in the build environment (libprotobuf/abseil are not in
 # LD_LIBRARY_PATH yet). Override the imported target's location with a wrapper
@@ -124,11 +124,17 @@ set_target_properties( AthExRpcLoopWireLib PROPERTIES CXX_CPPCHECK "" )
 # The Gaudi components. None of these sources may include a generated header:
 # they see the wire contract through RpcWire.h and RpcServer.h, and the
 # demonstration fragment's payload through DemoSchema.h.
+#
+# A codec is a component too (see src/IPayloadCodec.h), so adding an encoding
+# adds a tool rather than an entry in a table. The codecs that need ROOT, a
+# detector or a device therefore belong in their own guarded component
+# libraries, which is what keeps this one free of all three -- enforced by the
+# linker rather than asserted in a comment, since nothing below finds ROOT.
 atlas_add_component( AthExRpcLoop
-   src/RpcHiveEventLoopMgr.cxx
+   src/RpcHiveEventLoopMgr.cxx src/RpcBoundary.cxx
    src/RpcGateAlg.cxx src/RpcPackAlg.cxx src/RpcRequestAlg.cxx
-   src/RpcPayloadCodec.cxx src/RpcBlobCodec.cxx src/RpcPayloadStore.cxx
-   src/demo/DemoIntsAdapters.cxx src/demo/DemoDoublesAdapters.cxx
+   src/RpcPayloadCodecBase.cxx
+   src/demo/DemoIntsCodec.cxx src/demo/DemoDoublesCodec.cxx
    src/demo/DemoClientAlgs.cxx
    src/demo/SumAlg.cxx src/demo/OffsetAlg.cxx src/demo/ScaleVectorAlg.cxx
    src/demo/RpcCondAlg.cxx src/demo/DelayAlg.cxx src/demo/FailAlg.cxx
@@ -193,6 +199,15 @@ atlas_add_test( RpcWireRoundTrip
 atlas_add_test( RpcFragmentDerivation
    SCRIPT test_rpc_fragment_derivation.py
    POST_EXEC_SCRIPT nopost.sh )
+
+# A boundary is declared by two halves of the configuration -- the payload's
+# handles and the codec -- and they have to agree about what lands in the store.
+# This corrupts one of them and requires the job to refuse to start.
+atlas_add_test( RpcCodecMismatch
+   SCRIPT test/test_rpc_codec_mismatch.py
+   POST_EXEC_SCRIPT nopost.sh
+   PRIVATE_WORKING_DIRECTORY
+   PROPERTIES TIMEOUT 300 )
 
 # Everything except the socket: slots, gates, control flow, replies and every
 # error path, with no client process at all.

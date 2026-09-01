@@ -278,6 +278,14 @@ int main( int argc, char* argv[] )
                    info.inputs( 0 ).encoding() == "protobuf" &&
                    info.inputs( 0 ).schema() == kInts,
                "RpcSeqChain advertises its input, with encoding and schema" );
+        // ...and nothing else. What is advertised is the wire contract and
+        // only the wire contract: this client shares the .proto files and
+        // nothing more, so anything Athena-side in here would be something it
+        // could not act on. Asserted against the descriptor rather than a
+        // value, because the failure being guarded against is a *field* coming
+        // back, which no value check would notice.
+        check( athrpc::v1::BoundaryInfo::descriptor()->field_count() == 3,
+               "and advertises the wire contract and nothing besides" );
         check( info.outputs_size() == 1 &&
                    info.outputs( 0 ).key() == "chainTotal" &&
                    info.outputs( 0 ).schema() == kInts,
@@ -436,7 +444,8 @@ int main( int argc, char* argv[] )
   {
     // Declared correctly, but the bytes are not a message. This one *is* the
     // fragment's business -- the framework carried opaque bytes faithfully and
-    // the fragment's own adapter is what refuses them.
+    // the fragment's own codec is what refuses them, in the gate, before any
+    // of the payload runs.
     athrpc::v1::ExecuteRequest request;
     request.set_sequence( "RpcSeqSum" );
     request.set_request_id( 314 );
@@ -445,8 +454,8 @@ int main( int argc, char* argv[] )
     const athrpc::v1::ExecuteReply reply = call( *stub, request );
     check( reply.status() == athrpc::v1::STATUS_ALG_FAILURE,
            "an unparseable payload fails the fragment, not the server" );
-    check( reply.detail().find( "RpcSeqSumDecode" ) != std::string::npos,
-           "and the error names the fragment's own adapter" );
+    check( reply.detail().find( "RpcSeqSumGate" ) != std::string::npos,
+           "and the error names where the fragment refused them" );
   }
   {
     athrpc::v1::ExecuteRequest request;

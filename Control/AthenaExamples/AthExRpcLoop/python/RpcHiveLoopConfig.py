@@ -12,41 +12,34 @@ being driven over RPC.
 
 Every fragment here crosses on the ``protobuf`` encoding, against the schema in
 proto/athexrpc_demo.proto -- which is the demonstration fragment's own, not the
-framework's. The first and last algorithm of each payload is the adapter that
-converts it; everything between them is an unmodified Athena algorithm.
+framework's. Converting it is the boundary's business rather than the payload's,
+so each payload below is nothing but unmodified Athena algorithms: the codec on
+the gate turns the message into the keys they read, and the codec on the pack
+algorithm turns what they wrote back into one.
 """
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.MainServicesConfig import MainServicesCfg
 
+from AthExRpcLoop.RpcDemoCodecs import DOUBLES, INTS, DemoDoubles, DemoInts
 from AthExRpcLoop.RpcFragments import (
-    PROTOBUF, RPC_REQUEST_KEY, RPC_TOP, RpcMenu, RpcPayloadCfg,
+    RPC_REQUEST_KEY, RPC_TOP, RpcMenu, RpcPayloadCfg,
 )
 
 __all__ = ["RPC_REQUEST_KEY", "RPC_TOP", "RpcMenuCfg", "RpcHiveLoopCfg",
            "INTS", "DOUBLES"]
 
-#: The demonstration fragment's two message types, as they appear on the wire.
-#: Spelled here rather than derived, because a schema name is a contract: the
-#: adapter algorithm asserts the same string in C++, and the two disagreeing is
-#: exactly what that assertion is for.
-INTS = "athexrpc.demo.v1.Ints"
-DOUBLES = "athexrpc.demo.v1.Doubles"
-
 
 def RpcSumPayloadCfg(flags):
     """sum(a, b) -> sum. The minimal fragment.
 
-    Three algorithms: unpack the message into two ordinary integers, add them
-    with an algorithm that has never heard of an RPC, pack the answer back.
+    One algorithm. The message becomes two ordinary integers and the answer
+    becomes a message again, but both conversions belong to the boundary rather
+    than to the payload, so the fragment is exactly the work it does.
     """
     return RpcPayloadCfg(
-        CompFactory.AthExRpc.DemoIntsUnpackAlg(
-            "RpcSeqSumDecode", Payload="addends", Values=["a", "b"]),
         CompFactory.AthExRpc.SumAlg("RpcSeqSumAlg", A="a", B="b", Sum="sum"),
-        CompFactory.AthExRpc.DemoIntsPackAlg(
-            "RpcSeqSumEncode", Values=["sum"], Payload="total"),
     )
 
 
@@ -58,14 +51,10 @@ def RpcChainPayloadCfg(flags, delay=0):
     written, only 'chainTotal' is wanted back.
     """
     return RpcPayloadCfg(
-        CompFactory.AthExRpc.DemoIntsUnpackAlg(
-            "RpcSeqChainDecode", Payload="terms", Values=["p", "q", "r"]),
         CompFactory.AthExRpc.SumAlg("RpcSeqChainFirst", A="p", B="q", Sum="pq"),
         CompFactory.AthExRpc.DelayAlg("RpcSeqChainDelay", Milliseconds=delay),
         CompFactory.AthExRpc.SumAlg("RpcSeqChainSecond", A="pq", B="r",
                                     Sum="chain"),
-        CompFactory.AthExRpc.DemoIntsPackAlg(
-            "RpcSeqChainEncode", Values=["chain"], Payload="chainTotal"),
     )
 
 
@@ -83,14 +72,10 @@ def RpcCondPayloadCfg(flags):
     leaves it alone and only 'value' is asked of the client.
     """
     cfg = ComponentAccumulator()
-    cfg.addEventAlgo(CompFactory.AthExRpc.DemoIntsUnpackAlg(
-        "RpcSeqCondDecode", Payload="value", Values=["x"]))
     cfg.addEventAlgo(CompFactory.AthExRpc.OffsetAlg("RpcSeqCondAlg",
                                                     Input="x",
                                                     Offset="RpcCondOffset",
                                                     Output="offsetted"))
-    cfg.addEventAlgo(CompFactory.AthExRpc.DemoIntsPackAlg(
-        "RpcSeqCondEncode", Values=["offsetted"], Payload="offsetResult"))
     cfg.addCondAlgo(CompFactory.AthExRpc.RpcCondAlg("RpcCondAlg",
                                                     Offset="RpcCondOffset"))
     return cfg
@@ -99,12 +84,8 @@ def RpcCondPayloadCfg(flags):
 def RpcScalePayloadCfg(flags, factor=2.0):
     """An array rather than a handful of scalars, on the same machinery."""
     return RpcPayloadCfg(
-        CompFactory.AthExRpc.DemoDoublesUnpackAlg(
-            "RpcSeqScaleDecode", Payload="points", Values="values"),
         CompFactory.AthExRpc.ScaleVectorAlg(
             "RpcSeqScaleAlg", Input="values", Output="scaled", Factor=factor),
-        CompFactory.AthExRpc.DemoDoublesPackAlg(
-            "RpcSeqScaleEncode", Values="scaled", Payload="scaledPoints"),
     )
 
 
@@ -120,8 +101,6 @@ def RpcPingPayloadCfg(flags):
     return RpcPayloadCfg(
         CompFactory.AthExRpc.DemoNumbersAlg(
             "RpcSeqPingAlg", Values=["tick"], Offsets=[0]),
-        CompFactory.AthExRpc.DemoIntsPackAlg(
-            "RpcSeqPingEncode", Values=["tick"], Payload="pong"),
     )
 
 
@@ -135,32 +114,34 @@ def RpcMenuCfg(flags, delay=0, factor=2.0):
     """
     menu = RpcMenu()
 
-    # `produces` names what the adapters write through a handle array, which
-    # ComponentAccumulator.getIO() cannot see -- without it those keys look
-    # unmet and would be charged to the client. See RpcFragments.
+    # Only RpcSeqPing needs `produces=`, and for a real reason: DemoNumbersAlg
+    # writes through a handle array, which ComponentAccumulator.getIO() cannot
+    # see. Everywhere else the keys a message carries come from the boundary's
+    # own codec, which says which they are, so the derivation needs no
+    # exemption.
     menu.add("RpcSeqSum", RpcSumPayloadCfg(flags),
-             outputs=["total"], produces=["a", "b"],
-             boundaries={"addends": (PROTOBUF, INTS),
-                         "total": (PROTOBUF, INTS)})
+             outputs=["total"],
+             boundaries={"addends": DemoInts(["a", "b"]),
+                         "total": DemoInts(["sum"])})
 
     menu.add("RpcSeqChain", RpcChainPayloadCfg(flags, delay=delay),
-             outputs=["chainTotal"], produces=["p", "q", "r"],
-             boundaries={"terms": (PROTOBUF, INTS),
-                         "chainTotal": (PROTOBUF, INTS)})
+             outputs=["chainTotal"],
+             boundaries={"terms": DemoInts(["p", "q", "r"]),
+                         "chainTotal": DemoInts(["chain"])})
 
     menu.add("RpcSeqCond", RpcCondPayloadCfg(flags),
-             outputs=["offsetResult"], produces=["x"],
-             boundaries={"value": (PROTOBUF, INTS),
-                         "offsetResult": (PROTOBUF, INTS)})
+             outputs=["offsetResult"],
+             boundaries={"value": DemoInts(["x"]),
+                         "offsetResult": DemoInts(["offsetted"])})
 
     menu.add("RpcSeqScale", RpcScalePayloadCfg(flags, factor=factor),
              outputs=["scaledPoints"],
-             boundaries={"points": (PROTOBUF, DOUBLES),
-                         "scaledPoints": (PROTOBUF, DOUBLES)})
+             boundaries={"points": DemoDoubles("values"),
+                         "scaledPoints": DemoDoubles("scaled")})
 
     menu.add("RpcSeqPing", RpcPingPayloadCfg(flags),
              outputs=["pong"], produces=["tick"],
-             boundaries={"pong": (PROTOBUF, INTS)})
+             boundaries={"pong": DemoInts(["tick"])})
 
     # Always fails, to exercise the error path. No outputs, so also covers the
     # "fragment stages no reply" case.

@@ -9,8 +9,8 @@
 
 #include "../demo/DelayAlg.h"
 #include "../demo/DemoClientAlgs.h"
-#include "../demo/DemoDoublesAdapters.h"
-#include "../demo/DemoIntsAdapters.h"
+#include "../demo/DemoDoublesCodec.h"
+#include "../demo/DemoIntsCodec.h"
 #include "../demo/FailAlg.h"
 #include "../demo/OffsetAlg.h"
 #include "../demo/RpcCondAlg.h"
@@ -32,11 +32,11 @@ DECLARE_COMPONENT( AthExRpc::RpcCondAlg )
 DECLARE_COMPONENT( AthExRpc::DelayAlg )
 DECLARE_COMPONENT( AthExRpc::FailAlg )
 
-// ...and the adapters that convert its own schema, which are the only place in
-// the package that knows what a demonstration payload contains.
-DECLARE_COMPONENT( AthExRpc::DemoIntsUnpackAlg )
-DECLARE_COMPONENT( AthExRpc::DemoIntsPackAlg )
-DECLARE_COMPONENT( AthExRpc::DemoDoublesUnpackAlg )
-DECLARE_COMPONENT( AthExRpc::DemoDoublesPackAlg )
+// ...and the codecs that convert its own schema, which are the only place in
+// the package that knows what a demonstration payload contains. They are the
+// fragment's, not the framework's: this package implements no encoding of its
+// own, and Gaudi's factory is the only registry the design has.
+DECLARE_COMPONENT( AthExRpc::DemoIntsCodec )
+DECLARE_COMPONENT( AthExRpc::DemoDoublesCodec )
 DECLARE_COMPONENT( AthExRpc::DemoNumbersAlg )
 DECLARE_COMPONENT( AthExRpc::DemoCheckAlg )

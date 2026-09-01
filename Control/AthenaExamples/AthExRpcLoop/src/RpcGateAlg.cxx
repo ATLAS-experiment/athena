@@ -4,8 +4,6 @@
 
 #include "RpcGateAlg.h"
 
-#include "AthenaKernel/ExtendedEventContext.h"
-#include "AthenaKernel/IProxyDict.h"
 #include "StoreGate/ReadHandle.h"
 
 namespace AthExRpc {
@@ -19,17 +17,9 @@ StatusCode RpcGateAlg::initialize()
   }
   ATH_CHECK( m_request.initialize() );
 
-  if ( !m_inputs.empty() ) {
-    ATH_CHECK( m_clidSvc.retrieve() );
-    std::string error;
-    // Resolved once here rather than per request, so a typo in a fragment
-    // declaration stops the job instead of failing every request.
-    if ( PayloadStore::resolve( m_inputs, *m_clidSvc, m_boundaries, error )
-             .isFailure() ) {
-      ATH_MSG_ERROR( error );
-      return StatusCode::FAILURE;
-    }
-  }
+  // Retrieved here rather than per request: a codec that cannot resolve its
+  // own boundary stops the job instead of failing every request.
+  ATH_CHECK( m_inputs.retrieve() );
   return StatusCode::SUCCESS;
 }
 
@@ -54,34 +44,21 @@ StatusCode RpcGateAlg::execute( const EventContext& ctx ) const
   ATH_MSG_DEBUG( "Selected by request " << request->requestId() << " on slot "
                                         << ctx.slot() );
 
-  if ( m_boundaries.empty() ) {
+  if ( m_inputs.empty() ) {
     return StatusCode::SUCCESS;
   }
 
-  // The store comes from the context rather than from evtStore(), so this does
-  // not depend on which slot happens to be selected on this thread.
-  IProxyDict* store = Atlas::getExtendedEventContext( ctx ).proxy();
-  if ( store == nullptr ) {
-    ATH_MSG_ERROR( "No proxy dictionary in the event context" );
-    return StatusCode::FAILURE;
-  }
-
-  for ( const PayloadStore::Resolved& boundary : m_boundaries ) {
-    const Payload* payload = request->find( boundary.boundary.key );
+  for ( const ToolHandle<IPayloadCodec>& codec : m_inputs ) {
+    const Payload* payload = request->find( codec->key() );
     if ( payload == nullptr ) {
       ATH_MSG_ERROR( "Request " << request->requestId() << " for '"
                                 << request->sequence() << "' does not supply '"
-                                << boundary.boundary.key << "'" );
+                                << codec->key() << "'" );
       return StatusCode::FAILURE;
     }
-    std::string error;
-    if ( PayloadStore::record( *store, *m_clidSvc, boundary, *payload, error )
-             .isFailure() ) {
-      ATH_MSG_ERROR( error );
-      return StatusCode::FAILURE;
-    }
+    ATH_CHECK( codec->record( ctx, *payload ) );
     ATH_MSG_DEBUG( "Unpacked " << describe( *payload ) << " into '"
-                               << boundary.boundary.key << "'" );
+                               << codec->key() << "'" );
   }
   return StatusCode::SUCCESS;
 }
