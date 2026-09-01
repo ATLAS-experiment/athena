@@ -23,7 +23,7 @@ namespace TCS {
       jLJetTOB(const jLJetTOB & jet);
 
       // constructor with initial values
-      jLJetTOB(unsigned int Et, int eta, unsigned phi, uint32_t roiWord = 0, const std::string& tobName = "jLJetTOB" );
+      jLJetTOB(unsigned int Et, int eta, unsigned phi, uint32_t roiWord = 0, std::string_view tobName = "jLJetTOB" );
 
       // destructor
       virtual ~jLJetTOB();
