@@ -1,6 +1,4 @@
-################################################################################
-# Package: G4AtlasTools
-################################################################################
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( G4AtlasTools )
@@ -20,25 +18,13 @@ file(GLOB ALL_SRC_COMPONENT_FILES src/components/*.cxx)
 
 # define extra_incl, extra_lib for Athena builds (and not AthSimulation)
 if( NOT SIMULATIONBASE )
-  message(STATUS "is NOT SIMULATIONBASE")
-  find_package( Acts REQUIRED COMPONENTS PluginJson Fatras ) # for ActsFatrasG4
-  find_package( ROOT CONFIG COMPONENTS Core Tree MathCore Hist RIO pthread )
-  find_package( lwtnn REQUIRED )
-  find_package( LibXml2 REQUIRED )
-
-  # print message about ActsFatrasG4Tool
-  set(ALL_ACTS_INCS ${Acts_INCLUDE_DIR})
-  message(NOTICE "-- ActsFatrasG4Tool/CMakeLists: Using ACTS incs=${ALL_ACTS_INCS}")
-  
-  # set LIBXML
-  set(LIBXML_THREAD_ALLOC_ENABLED TRUE)
-  set(LIBXML_THREAD_ENABLED TRUE)
-  message(STATUS "LIBXML_THREAD_ALLOC_ENABLED: ${LIBXML_THREAD_ALLOC_ENABLED}")
-  message(STATUS "LIBXML_THREAD_ENABLED: ${LIBXML_THREAD_ENABLED}")
+  find_package( Acts COMPONENTS PluginJson Fatras ) # for ActsFatrasG4
+  find_package( ROOT COMPONENTS Core MathCore Hist RIO pthread )
+  find_package( lwtnn )
 
   # set extra_lib
-  set( extra_incl ${ROOT_INCLUDE_DIRS} ${LWTNN_INCLUDE_DIRS} ${LIBXML2_INCLUDE_DIRS} ${ALL_ACTS_INCS} )
-  set( extra_lib ${ROOT_LIBRARIES} ${LWTNN_LIBRARIES} ${LIBXML2_LIBRARIES}
+  set( extra_incl ${ROOT_INCLUDE_DIRS} ${LWTNN_INCLUDE_DIRS} )
+  set( extra_lib ${ROOT_LIBRARIES} ${LWTNN_LIBRARIES}
        PathResolver ISF_InterfacesLib
        Acts::Core Acts::Fatras Acts::PluginJson ActsEventLib ActsInteropLib ActsGeometryLib # for ActsFatrasG4 
        GeoModelUtilities TrkTrack InDetSimEvent MCTruth # for ActsFatrasG4
@@ -60,15 +46,15 @@ atlas_add_library( G4AtlasToolsLib
                    ${ALL_SRC_LIB_FILES}
                    OBJECT
                    PUBLIC_HEADERS G4AtlasTools
-                   INCLUDE_DIRS ${XERCESC_INCLUDE_DIRS} ${GEANT4_INCLUDE_DIRS} ${TBB_INCLUDE_DIRS} ${extra_incl} 
+                   INCLUDE_DIRS ${GEANT4_INCLUDE_DIRS} ${TBB_INCLUDE_DIRS} ${extra_incl}
                    PRIVATE_INCLUDE_DIRS ${CLHEP_INCLUDE_DIRS} 
                    PRIVATE_DEFINITIONS ${CLHEP_DEFINITIONS}
-                   LINK_LIBRARIES ${XERCESC_LIBRARIES} ${GEANT4_LIBRARIES} ${TBB_LIBRARIES} 
+                   LINK_LIBRARIES ${GEANT4_LIBRARIES} ${TBB_LIBRARIES}
                                   AthenaKernel AthenaBaseComps  
                                   G4AtlasInterfaces HitManagement 
-                                  AtlasDetDescr SubDetectorEnvelopesLib GeoPrimitives
+                                  SubDetectorEnvelopesLib GeoPrimitives
                                   ${extra_lib}
-                   PRIVATE_LINK_LIBRARIES ${CLHEP_LIBRARIES} XMLCoreParser  CxxUtils GaudiKernel PathResolver )
+                   PRIVATE_LINK_LIBRARIES ${CLHEP_LIBRARIES} XMLCoreParser CxxUtils GaudiKernel PathResolver )
 set_target_properties( G4AtlasToolsLib PROPERTIES INTERPROCEDURAL_OPTIMIZATION ${ATLAS_GEANT4_USE_LTO} )
 
 atlas_add_library( G4AtlasTools
