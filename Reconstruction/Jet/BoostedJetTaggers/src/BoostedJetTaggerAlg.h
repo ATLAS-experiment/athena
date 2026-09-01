@@ -15,7 +15,6 @@
 
 
 #include "AnaAlgorithm/AnaAlgorithm.h"
-//#include <AthContainers/ConstDataVector.h>
 #include <SystematicsHandles/SysListHandle.h>
 #include <SystematicsHandles/SysReadHandle.h>
 #include <xAODJet/JetContainer.h>

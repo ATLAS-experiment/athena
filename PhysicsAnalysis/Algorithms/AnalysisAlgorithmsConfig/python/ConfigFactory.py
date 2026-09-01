@@ -265,7 +265,7 @@ class ConfigFactory():
         self.addAlgConfigBlock(algName="JVT", alg=JetJvtAnalysisConfig,
             superBlocks="Jets")
 
-        ### Boosted Jet Tagger (W/Z, top, q/g)
+        # Boosted Jet Tagger (W/Z, top, q/g)
         from JetAnalysisAlgorithms.BoostedJetTaggerAnalysisConfig import BoostedJetTaggerAnalysisConfig
         self.addAlgConfigBlock(algName="BoostedJetTagger", alg=BoostedJetTaggerAnalysisConfig,
             superBlocks="Jets")

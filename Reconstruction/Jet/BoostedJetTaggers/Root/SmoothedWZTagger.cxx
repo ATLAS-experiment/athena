@@ -244,7 +244,7 @@ StatusCode SmoothedWZTagger::decorate( const xAOD::JetContainer& jets ) const {
   // loop over jets
   for(const xAOD::Jet* jet : jets){
 
-    // test
+    /// Reset the AcceptData cut results per each jet
     ATH_CHECK( resetCuts( acceptData ) );
 
     /// Check basic kinematic selection
@@ -283,7 +283,6 @@ StatusCode SmoothedWZTagger::decorate( const xAOD::JetContainer& jets ) const {
 
     /// Evaluate the cut criteria on mass and d2
     ATH_MSG_DEBUG( "Var Values : jet pT = " << jet_pt);
-
     ATH_MSG_DEBUG( "Cut Values : MassWindow = [" << cut_mass_low << "," << cut_mass_high << "], D2Cut = " << cut_d2 );
     ATH_MSG_DEBUG( "Var Values : JetMass = " << jet_mass << ", D2 = " << jet_d2 );
     ATH_MSG_DEBUG( "Cut Values : score = " << cut_score);
