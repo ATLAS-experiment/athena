@@ -165,10 +165,20 @@ def ContainersOnTheFly(flags=None):
         ["GlobalNeutralParticleFlowObjects","xAOD::FlowElementContainer"],
         ["GlobalNeutralParticleFlowObjectsAux","xAOD::FlowElementAuxContainer"],
 
+        ["GlobalClusterMLCorrectedChargedParticleFlowObjects","xAOD::FlowElementContainer"],
+        ["GlobalClusterMLCorrectedChargedParticleFlowObjectsAux","xAOD::ShallowAuxContainer"],
+        ["GlobalClusterMLCorrectedNeutralParticleFlowObjects","xAOD::FlowElementContainer"],
+        ["GlobalClusterMLCorrectedNeutralParticleFlowObjectsAux","xAOD::ShallowAuxContainer"],
+
         ["CHSGChargedParticleFlowObjects","xAOD::FlowElementContainer"],
         ["CHSGChargedParticleFlowObjectsAux","xAOD::ShallowAuxContainer"],
         ["CHSGNeutralParticleFlowObjects","xAOD::FlowElementContainer"],
         ["CHSGNeutralParticleFlowObjectsAux","xAOD::ShallowAuxContainer"],
+
+        ["CHSGlobalClusterMLCorrectedChargedParticleFlowObjects","xAOD::FlowElementContainer"],
+        ["CHSGlobalClusterMLCorrectedChargedParticleFlowObjectsAux","xAOD::ShallowAuxContainer"],
+        ["CHSGlobalClusterMLCorrectedNeutralParticleFlowObjects","xAOD::FlowElementContainer"],
+        ["CHSGlobalClusterMLCorrectedNeutralParticleFlowObjectsAux","xAOD::ShallowAuxContainer"],
 
         ["CSSKGChargedParticleFlowObjects","xAOD::FlowElementContainer"],
         ["CSSKGChargedParticleFlowObjectsAux","xAOD::ShallowAuxContainer"],

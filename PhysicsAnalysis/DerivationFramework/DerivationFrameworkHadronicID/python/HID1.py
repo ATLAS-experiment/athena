@@ -329,19 +329,6 @@ def _add_jet_content(
         "MuonSegments.x.y.z.px.py.pz",
     ]
 
-    slimming_helper.AppendToDictionary.update(
-        {
-            "CHSGlobalClusterMLCorrectedNeutralParticleFlowObjects": "xAOD::FlowElementContainer",
-            "CHSGlobalClusterMLCorrectedNeutralParticleFlowObjectsAux": "xAOD::ShallowAuxContainer",
-            "CHSGlobalClusterMLCorrectedChargedParticleFlowObjects": "xAOD::FlowElementContainer",
-            "CHSGlobalClusterMLCorrectedChargedParticleFlowObjectsAux": "xAOD::ShallowAuxContainer",
-            "GlobalClusterMLCorrectedChargedParticleFlowObjects": "xAOD::FlowElementContainer",
-            "GlobalClusterMLCorrectedChargedParticleFlowObjectsAux": "xAOD::ShallowAuxContainer",
-            "GlobalClusterMLCorrectedNeutralParticleFlowObjects": "xAOD::FlowElementContainer",
-            "GlobalClusterMLCorrectedNeutralParticleFlowObjectsAux": "xAOD::ShallowAuxContainer",
-        }
-    )
-
     addOriginCorrectedClustersToSlimmingTool(slimming_helper, writeLC=True, writeEM=True)
 
     if flags.Input.isMC:
