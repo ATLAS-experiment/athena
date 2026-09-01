@@ -13,18 +13,17 @@
 
 from __future__ import annotations
 
-from typing import Any, TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.Enums import LHCPeriod, MetadataCategory
-
 from DerivationFrameworkCore.SlimmingHelper import SlimmingHelper
 from DerivationFrameworkEGamma.ElectronsCPDetailedContent import ElectronsCPDetailedContent
 from DerivationFrameworkFlavourTag.FtagBaseContent import (
-    add_common_augmentation,
     add_baseline_slimming_allvariables,
     add_baseline_slimming_smartcollections,
+    add_common_augmentation,
     add_extra_variables_to_slimming_helper,
     add_truth_to_slimming_helper,
     add_truth_vertex_decorations,
@@ -193,29 +192,47 @@ def _add_ftag_content(
         "AntiKt10TruthSoftDropBeta100Zcut10Jets.constituentLinks",
         "AntiKt4TruthDressedWZJets.constituentLinks",
         "AntiKt4TruthJets.constituentLinks",
-        (
-            "AntiKt4EMTopoJets."
-            "HadronConeExclTruthLabelID."
-            "HadronGhostTruthLabelID."
-            "GhostBHadronsFinal."
-            "GhostCHadronsFinal."
-            "GhostTausFinal."
-            "ConeExclBHadronsFinal."
-            "ConeExclCHadronsFinal."
-            "ConeExclTausFinal"
-        ),
-        (
-            "AntiKt4LCTopoJets."
-            "HadronConeExclTruthLabelID."
-            "HadronGhostTruthLabelID."
-            "GhostBHadronsFinal."
-            "GhostCHadronsFinal."
-            "GhostTausFinal."
-            "ConeExclBHadronsFinal."
-            "ConeExclCHadronsFinal."
-            "ConeExclTausFinal"
-        ),
     ]
+
+    # Truth labelling for the topo-cluster jets, which are not smart-slimmed here
+    for jet_collection in ["AntiKt4EMTopoJets", "AntiKt4LCTopoJets"]:
+        slimming_helper.ExtraVariables.append(
+            ".".join(
+                [
+                    jet_collection,
+                    "HadronConeExclTruthLabelID",
+                    "HadronGhostTruthLabelID",
+                    "GhostBHadronsFinal",
+                    "GhostCHadronsFinal",
+                    "GhostTausFinal",
+                    "ConeExclBHadronsFinal",
+                    "ConeExclCHadronsFinal",
+                    "ConeExclTausFinal",
+                ]
+            )
+        )
+
+    # Extra ITk, HGTD and EMTopo jet content available with Run-4 inputs
+    if flags.GeoModel.Run >= LHCPeriod.Run4:
+        slimming_helper.SmartCollections += [
+            "AntiKt4EMTopoJets",
+            "MET_Baseline_AntiKt4EMTopo",
+        ]
+        slimming_helper.AllVariables += [
+            "AntiKt4EMTopoJets",
+            "AntiKt4TruthJets",
+            "ITkPixelMeasurements",
+            "ITkStripMeasurements",
+            "ITkPixelSpacePoints",
+            "ITkStripSpacePoints",
+            "ITkStripOverlapSpacePoints",
+        ]
+        slimming_helper.ExtraVariables += [
+            ".".join(["InDetTrackParticles"] + TrackingVariablesHGTD)
+        ]
+
+        # Needed for ITk space points
+        acc.merge(InDetPoolReadCfg(flags))
 
     # Optional pseudotrack content
     if flags.BTagging.Pseudotrack:
@@ -280,32 +297,40 @@ def _add_jet_content(
     slimming_helper.ExtraVariables += [".".join([LARGE_R_JETS] + ExtraJSSVariables)]
 
     slimming_helper.ExtraVariables += [
-        (
-            "AntiKt4EMPFlowJets."
-            "GhostTower."
-            "IsoFixedCone5Pt."
-            "IsoFixedCone5PtPUsub."
-            "constituentLinks"
+        ".".join(
+            [
+                "AntiKt4EMPFlowJets",
+                "GhostTower",
+                "IsoFixedCone5Pt",
+                "IsoFixedCone5PtPUsub",
+                "constituentLinks",
+            ]
         ),
         "AntiKt4EMTopoNoPtCutJets.IsoFixedCone5Pt.IsoFixedCone5PtPUsub.constituentLinks",
         f"{LARGE_R_JETS}.SizeParameter.GhostTrack.constituentLinks",
         "GSFTrackParticles.particleHypothesis.vx.vy.vz",
         "PrimaryVertices.x.y.z.covariance.trackWeights",
         "TauJets.clusterLinks",
-        (
-            "Muons.energyLossType.EnergyLoss.ParamEnergyLoss.MeasEnergyLoss."
-            "EnergyLossSigma.MeasEnergyLossSigma.ParamEnergyLossSigmaPlus."
-            "ParamEnergyLossSigmaMinus.clusterLinks.FSR_CandidateEnergy"
+        ".".join(
+            [
+                "Muons",
+                "energyLossType",
+                "EnergyLoss",
+                "ParamEnergyLoss",
+                "MeasEnergyLoss",
+                "EnergyLossSigma",
+                "MeasEnergyLossSigma",
+                "ParamEnergyLossSigmaPlus",
+                "ParamEnergyLossSigmaMinus",
+                "clusterLinks",
+                "FSR_CandidateEnergy",
+            ]
         ),
         "MuonSegments.x.y.z.px.py.pz",
     ]
 
     slimming_helper.AppendToDictionary.update(
         {
-            "CSSKGNeutralParticleFlowObjects": "xAOD::FlowElementContainer",
-            "CSSKGNeutralParticleFlowObjectsAux": "xAOD::ShallowAuxContainer",
-            "CSSKGChargedParticleFlowObjects": "xAOD::FlowElementContainer",
-            "CSSKGChargedParticleFlowObjectsAux": "xAOD::ShallowAuxContainer",
             "CHSGlobalClusterMLCorrectedNeutralParticleFlowObjects": "xAOD::FlowElementContainer",
             "CHSGlobalClusterMLCorrectedNeutralParticleFlowObjectsAux": "xAOD::ShallowAuxContainer",
             "CHSGlobalClusterMLCorrectedChargedParticleFlowObjects": "xAOD::FlowElementContainer",
@@ -314,27 +339,12 @@ def _add_jet_content(
             "GlobalClusterMLCorrectedChargedParticleFlowObjectsAux": "xAOD::ShallowAuxContainer",
             "GlobalClusterMLCorrectedNeutralParticleFlowObjects": "xAOD::FlowElementContainer",
             "GlobalClusterMLCorrectedNeutralParticleFlowObjectsAux": "xAOD::ShallowAuxContainer",
-            "UFO": "xAOD::FlowElementContainer",
-            "UFOAux": "xAOD::FlowElementAuxContainer",
-            "Kt4UFOCSSKEventShape": "xAOD::EventShape",
-            "Kt4UFOCSSKEventShapeAux": "xAOD::EventShapeAuxInfo",
-            "Kt4UFOCSSKNeutEventShape": "xAOD::EventShape",
-            "Kt4UFOCSSKNeutEventShapeAux": "xAOD::EventShapeAuxInfo",
-            "AntiKt4EMTopoNoPtCutJets": "xAOD::JetContainer",
-            "AntiKt4EMTopoNoPtCutJetsAux": "xAOD::JetAuxContainer",
         }
     )
 
     addOriginCorrectedClustersToSlimmingTool(slimming_helper, writeLC=True, writeEM=True)
 
     if flags.Input.isMC:
-        slimming_helper.AppendToDictionary.update(
-            {
-                "TruthParticles": "xAOD::TruthParticleContainer",
-                "TruthParticlesAux": "xAOD::TruthParticleAuxContainer",
-            }
-        )
-
         slimming_helper.AllVariables += [
             "TruthTopQuarkWithDecayParticles",
             "TruthTopQuarkWithDecayVertices",
@@ -353,19 +363,23 @@ def _add_jet_content(
             "AntiKt10TruthJets.constituentLinks",
             "AntiKt4TruthWZJets.IsoFixedCone5Pt.constituentLinks",
             "AntiKt4TruthDressedWZJets.IsoFixedCone5Pt.constituentLinks",
-            (
-                f"{LARGE_R_JETS}."
-                "GhostTQuarksFinalCount."
-                "GhostHBosonsCount."
-                "GhostZBosonsCount."
-                "GhostWBosonsCount"
+            ".".join(
+                [
+                    LARGE_R_JETS,
+                    "GhostTQuarksFinalCount",
+                    "GhostHBosonsCount",
+                    "GhostZBosonsCount",
+                    "GhostWBosonsCount",
+                ]
             ),
-            (
-                f"{LARGE_R_JETS}."
-                "GhostTQuarksFinalPt."
-                "GhostHBosonsPt."
-                "GhostZBosonsPt."
-                "GhostWBosonsPt"
+            ".".join(
+                [
+                    LARGE_R_JETS,
+                    "GhostTQuarksFinalPt",
+                    "GhostHBosonsPt",
+                    "GhostZBosonsPt",
+                    "GhostWBosonsPt",
+                ]
             ),
             f"{LARGE_R_JETS}.GhostBHadronsFinalPt.GhostCHadronsFinalPt",
         ]
@@ -453,28 +467,6 @@ def HID1CoreCfg(
         flags=flags,
         slimming_helper=slimming_helper,
     )
-
-    # Run-4-specific additions
-    if flags.GeoModel.Run >= LHCPeriod.Run4:
-        slimming_helper.SmartCollections += [
-            "AntiKt4EMTopoJets",
-            "MET_Baseline_AntiKt4EMTopo",
-        ]
-        slimming_helper.AllVariables += [
-            "AntiKt4EMTopoJets",
-            "AntiKt4TruthJets",
-            "ITkPixelMeasurements",
-            "ITkStripMeasurements",
-            "ITkPixelSpacePoints",
-            "ITkStripSpacePoints",
-            "ITkStripOverlapSpacePoints",
-        ]
-        slimming_helper.ExtraVariables += [
-            ".".join(["InDetTrackParticles"] + TrackingVariablesHGTD)
-        ]
-
-        # Needed for ITk space points
-        acc.merge(InDetPoolReadCfg(flags))
 
     # User-provided extras
     for container in extra_SmartCollections:

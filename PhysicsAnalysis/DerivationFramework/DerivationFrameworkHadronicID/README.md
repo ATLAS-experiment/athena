@@ -94,6 +94,13 @@ follow those when making changes to/adding code.
   modules, `FtagBaseContent` for flavour tagging and `CommonJETMXContent` for the
   low-level jet inputs. Derivation-specific additions should be made inside the
   derivation python file itself, not via an if-else block in the shared module.
+- Before adding a container to `AppendToDictionary`, check whether it is already
+  listed in `DerivationFrameworkCore.ContainersOnTheFly`. Containers that are built
+  on the fly by essentially every DAOD belong there, so that formats do not have to
+  declare them one by one.
+- Build the aux-variable strings by joining a Python list, for example
+  `".".join([container] + variables)`, rather than writing one long dotted string.
+  The lists can then be shared and combined between containers.
 - Keep derivation-specific content grouped in clearly labeled sections:
   flavour-tagging content, jet content, Run-4 additions, trigger content, and
   output stream setup.

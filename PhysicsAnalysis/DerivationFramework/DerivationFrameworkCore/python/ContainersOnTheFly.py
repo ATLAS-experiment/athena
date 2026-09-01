@@ -96,6 +96,8 @@ def ContainersOnTheFly(flags=None):
         ["AntiKt4UFOCSSKJetsAux","xAOD::JetAuxContainer"],
         ["AntiKt4UFOCSSKLowPtJets","xAOD::JetContainer"],
         ["AntiKt4UFOCSSKLowPtJetsAux","xAOD::JetAuxContainer"],
+        ["AntiKt4EMTopoNoPtCutJets","xAOD::JetContainer"],
+        ["AntiKt4EMTopoNoPtCutJetsAux","xAOD::JetAuxContainer"],
 
         ["AntiKt10LCTopoJets","xAOD::JetContainer"],
         ["AntiKt10LCTopoJetsAux","xAOD::JetAuxContainer"],
@@ -120,6 +122,10 @@ def ContainersOnTheFly(flags=None):
         ["Kt4EMPFlowNeutEventShapeAux","xAOD::EventShapeAuxInfo"],
         ["Kt4EMTopoOriginEventShape","xAOD::EventShape"],
         ["Kt4EMTopoOriginEventShapeAux","xAOD::EventShapeAuxInfo"],
+        ["Kt4UFOCSSKEventShape","xAOD::EventShape"],
+        ["Kt4UFOCSSKEventShapeAux","xAOD::EventShapeAuxInfo"],
+        ["Kt4UFOCSSKNeutEventShape","xAOD::EventShape"],
+        ["Kt4UFOCSSKNeutEventShapeAux","xAOD::EventShapeAuxInfo"],
 
         ["TrackCaloClustersCombinedAndNeutral","xAOD::TrackCaloClusterContainer"],
         ["TrackCaloClustersCombinedAndNeutralAux","xAOD::TrackCaloClusterAuxContainer"],
@@ -169,6 +175,8 @@ def ContainersOnTheFly(flags=None):
         ["CSSKGNeutralParticleFlowObjects","xAOD::FlowElementContainer"],
         ["CSSKGNeutralParticleFlowObjectsAux","xAOD::ShallowAuxContainer"],
 
+        ['UFO','xAOD::FlowElementContainer'],
+        ['UFOAux','xAOD::FlowElementAuxContainer'],
         ['UFOCSSK','xAOD::FlowElementContainer'],
         ['UFOCSSKAux','xAOD::FlowElementAuxContainer'],
 
