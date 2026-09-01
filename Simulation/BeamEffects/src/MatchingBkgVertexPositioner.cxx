@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MatchingBkgVertexPositioner.h"
@@ -36,7 +36,7 @@ CLHEP::HepLorentzVector *MatchingBkgVertexPositioner::generate(
     const EventContext &ctx) const {
   // we can currently not reliably determine if the timing information is
   // available
-  bool enableTime{};
+  constexpr bool enableTime{false};
   if(!m_vertexContainerKey.key().empty()) {
     SG::ReadHandle<xAOD::VertexContainer> vertices(m_vertexContainerKey, ctx);
     if (!vertices.isValid()) {

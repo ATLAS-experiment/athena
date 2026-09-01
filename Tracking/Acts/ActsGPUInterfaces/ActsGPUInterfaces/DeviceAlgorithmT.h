@@ -21,7 +21,7 @@ class DeviceAlgorithmT {
   /// Constructor with the algorithm and the copy object that it uses
   DeviceAlgorithmT(std::shared_ptr<const vecmem::copy> copy,
                    std::shared_ptr<const algorithm_type> algorithm)
-      : m_copy(copy), m_algorithm(algorithm) {}
+      : m_copy(std::move(copy)), m_algorithm(std::move(algorithm)) {}
   /// Copy constructor
   DeviceAlgorithmT(const DeviceAlgorithmT&) = default;
   /// Move constructor
