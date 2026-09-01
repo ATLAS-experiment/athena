@@ -38,6 +38,10 @@ class BoostedJetTaggerAnalysisConfig (ConfigBlock) :
             noneAction='error',
             info="the working point selection to apply.")
 
+        self.addOption ('decorations', [], type=list,
+            noneAction='error',
+            info="list of the names of decorations to add in output.")
+
 
     def instanceName (self) :
         """Return the instance name for this block"""
@@ -45,30 +49,62 @@ class BoostedJetTaggerAnalysisConfig (ConfigBlock) :
 
     def makeAlgs (self, config) :
 
-        if config.dataType() is DataType.Data: return
-
         # Set up the per-event jet efficiency scale factor calculation algorithm
         alg = config.createAlgorithm('BJT::BoostedJetTaggerAlg', 'BoostedJetTaggerAlg')
 
-        # pick the config file
+        # build the config file
         ConfigFile = self.Tagger + 'Tagger_AntiKt10UFOSoftDrop_' + self.Generation + '_FixSigEff' + self.WP
+        # or override it
         if self.ConfigFile != '':
             ConfigFile = self.ConfigFile
 
         # configure the tool
-        config.addPrivateTool('tagger', 'SmoothedWZTagger')
+        tagger_class = ''
+        if self.Tagger == 'W':
+            if self.Generation == 'ANN':
+                tagger_class = 'JSSWTopTaggerANN'
+            elif self.Generation == 'DNN':
+                tagger_class = 'JSSWTopTaggerDNN'
+            else:
+                tagger_class = 'SmoothedWZTagger'
+        elif self.Tagger == 'Top':
+            if self.Generation == 'ANN':
+                tagger_class = 'JSSWTopTaggerANN'
+            elif self.Generation == 'DNN':
+                tagger_class = 'JSSWTopTaggerDNN'
+            else:
+                tagger_class = 'SmoothedTopTagger'
+        elif self.Tagger == 'qg':
+            tagger_class = 'BJT::qgTagger'
+        elif self.Tagger == 'inference':
+            tagger_class = 'JSSTaggerUtils'
+        else:
+            raise Exception('not supported tagger!')
+
+        config.addPrivateTool('tagger', tagger_class)
         alg.tagger.ConfigFile = ConfigFile
         alg.tagger.CalibArea = self.CalibArea
-        alg.tagger.IsMC = True ### to adjust
-        alg.tagger.OutputLevel = DEBUG ### to remove
+        alg.tagger.IsMC = config.dataType() is not DataType.Data
+        # for debugging/developments, can configure it?
+        # alg.tagger.OutputLevel = DEBUG
 
         # configure algorithm
         alg.jets = config.readName(self.containerName)
 
         # output info
         decoration_name = self.Tagger
+        # auto config for ParT
         if self.Generation == 'ParT':
             decoration_name += 'Transformer_50eff'
+            decorations = [decoration_name]
         else:
             raise Exception('not supported tagger!')
-        config.addOutputVar(self.containerName, decoration_name + '_Tagged', decoration_name + '_Tagged', auxType='char')
+        # override from yaml config
+        if len(self.decorations) > 0:
+            decorations = self.decorations
+
+        for decoration_name in decorations:
+            config.addOutputVar(self.containerName,
+                                decoration_name + '_Tagged',
+                                decoration_name + '_Tagged',
+                                auxType='char')
