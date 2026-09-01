@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -80,7 +80,7 @@ bool TrigDkfTrackMakerTool::createDkfTrack(const Trk::Track& track,
     for(int i=0;i<3;i++) {
       M[i][0]=mx[i];M[i][1]=my[i];M[i][2]=mz[i];
     }
-    Trk::TrkPlanarSurface* pS = new Trk::TrkPlanarSurface(C,N,M,radLength, &(rSurf));
+    auto pS = std::make_unique<Trk::TrkPlanarSurface>(C,N,M,radLength, &(rSurf));
     
     const InDet::SiClusterOnTrack* siCLOT = dynamic_cast<const InDet::SiClusterOnTrack*>(*tMOT);
     if (siCLOT==nullptr) {
@@ -105,18 +105,18 @@ bool TrigDkfTrackMakerTool::createDkfTrack(const Trk::Track& track,
           const Trk::TrapezoidBounds& ecBounds=	dynamic_cast<const Trk::TrapezoidBounds&>(rBounds);
           double R=(ecBounds.maxHalflengthX()+ecBounds.minHalflengthX())*
             ecBounds.halflengthY()/(ecBounds.maxHalflengthX()-ecBounds.minHalflengthX());
-          vpTrkNodes.push_back(new Trk::TrkEndCapClusterNode(pS,DChi2,siCL,R));
+          vpTrkNodes.push_back(new Trk::TrkEndCapClusterNode(pS.release(),DChi2,siCL,R));
         }
         else if(sctElement->design().shape()==InDetDD::Box) {//SCT Barrel 
           ATH_MSG_DEBUG("SCT barrel node");
-          vpTrkNodes.push_back(new Trk::TrkClusterNode(pS,DChi2,siCL));
+          vpTrkNodes.push_back(new Trk::TrkClusterNode(pS.release(),DChi2,siCL));
         }
 	else if(sctElement->design().shape()==InDetDD::Annulus) { //Strip Endcap
 	  ATH_MSG_DEBUG("Strip endcap node");
 	  const Trk::SurfaceBounds& rBounds=rSurf.bounds();
           const Trk::AnnulusBounds& ecBounds=	dynamic_cast<const Trk::AnnulusBounds&>(rBounds);
           double R=ecBounds.waferCentreR();
-          vpTrkNodes.push_back(new Trk::TrkEndCapClusterNode(pS,DChi2,siCL,R));
+          vpTrkNodes.push_back(new Trk::TrkEndCapClusterNode(pS.release(),DChi2,siCL,R));
 	}
       }
       else {
@@ -125,7 +125,7 @@ bool TrigDkfTrackMakerTool::createDkfTrack(const Trk::Track& track,
     }
     else if (m_idHelper->is_pixel(id)) {//Pixel 
       ATH_MSG_DEBUG("Pixel node");
-      vpTrkNodes.push_back(new Trk::TrkPixelNode(pS,DChi2,siCL));
+      vpTrkNodes.push_back(new Trk::TrkPixelNode(pS.release(),DChi2,siCL));
     }
     else {
       ATH_MSG_WARNING("Identifier is neither SCT nor pixel");

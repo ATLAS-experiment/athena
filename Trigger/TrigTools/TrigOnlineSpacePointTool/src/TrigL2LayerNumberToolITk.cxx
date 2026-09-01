@@ -12,6 +12,7 @@
 #include "InDetReadoutGeometry/SiNumerology.h"
 
 #include <fstream>
+#include <stdexcept>
 
 TrigL2LayerNumberToolITk::TrigL2LayerNumberToolITk(const std::string& t, 
                                                    const std::string& n,
@@ -192,7 +193,10 @@ void TrigL2LayerNumberToolITk::createModuleHashMap(std::map<std::tuple<int, int,
 	      m_sctLayers[(*hIt).m_hash] = layerId;
 	      p = m_sctManager->getDetectorElement((*hIt).m_hash);
       }
-    
+      if (!p)[[unlikely]]{
+        ATH_MSG_WARNING("SiDetectorElement pointer is null.");
+        continue;
+      }
       const Amg::Vector3D& C = p->center();
   
       // find min and max r and z values of the layers
@@ -211,6 +215,9 @@ void TrigL2LayerNumberToolITk::createModuleHashMap(std::map<std::tuple<int, int,
 	
       }
       nModules++;
+    }
+    if (nModules == 0)[[unlikely]]{
+      throw std::runtime_error("TrigL2LayerNumberToolITk::createModuleHashMap: nModules is zero.");
     }
     m_layerGeometry[layerId].m_refCoord = rc/nModules;
     // r or z max/man are added depending on if layer is 

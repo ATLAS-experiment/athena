@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TrigConfHLTUtils_HLTUtils
@@ -47,9 +47,9 @@ namespace TrigConf {
   class HLTUtils {
   public:
     /**@brief hash function translating TE names into identifiers*/
-    static HLTHash string2hash( const std::string&, const std::string& category="TE" );
+    static HLTHash string2hash( const std::string&, const std::string& category=s_defaultCategory );
     /**@brief hash function translating identifiers into names (via internal dictionary)*/
-    static const std::string hash2string( HLTHash, const std::string& category="TE" );
+    static const std::string hash2string( HLTHash, const std::string& category=s_defaultCategory );
     /**@brief debugging output of internal dictionary*/
     static void hashes2file( const std::string& fileName="hashes2string.txt" );
     /**@brief debugging output of internal dictionary*/
@@ -58,7 +58,8 @@ namespace TrigConf {
   private:
     /**@brief In-file identifier*/
     inline static const std::string s_newCategory{"##NewCategory"};
-
+    /** Default category*/
+    inline static const std::string s_defaultCategory{"TE"};
     /**@brief Nested concurrent hash-maps to store (key=hash, value=string) pairs for different hash categories*/
     inline static HashStore s_hashStore ATLAS_THREAD_SAFE{};
   };
