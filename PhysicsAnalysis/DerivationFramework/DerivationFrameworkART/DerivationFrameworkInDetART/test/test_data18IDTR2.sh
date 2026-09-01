@@ -9,10 +9,12 @@
 # art-output: checkxAOD*.txt
 # art-output: checkIndexRefs*.txt
 
+AOD_File=$(python -c "from AthenaConfiguration.TestDefaults import defaultTestFiles; print(defaultTestFiles.AOD_RUN2_DATA[0])")
+
 set -e
 
 Derivation_tf.py \
---inputAODFile /cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/CampaignInputs/data18/AOD/data18_13TeV.00357772.physics_Main.merge.AOD.r13286_p4910/1000events.AOD.27655096._000455.pool.root.1 \
+--inputAODFile ${AOD_File} \
 --outputDAODFile art.pool.root \
 --formats IDTR2 \
 --maxEvents -1 \
