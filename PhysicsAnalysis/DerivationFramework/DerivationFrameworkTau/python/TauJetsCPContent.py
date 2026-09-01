@@ -10,7 +10,7 @@ TauJetsCPContent = [
     "InDetTrackParticles",
     "InDetTrackParticlesAux.phi.vertexLink.theta.qOverP.truthParticleLink.truthMatchProbability",
     "TauSecondaryVertices",
-    "TauSecondaryVerticesAux.x.y.z.covariance.trackParticleLinks",
+    "TauSecondaryVerticesAux.x.y.z.covariance",
     "TauNeutralParticleFlowObjects",
     "TauNeutralParticleFlowObjectsAux.pt.eta.phi.m",
     "TruthTaus",
