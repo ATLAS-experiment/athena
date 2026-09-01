@@ -41,14 +41,20 @@ G4VParticleChange* QuirkWatcher::PostStepDoIt(
     InfracolorForce& string = quirkDef->GetStringIn();
 
     if (track.GetCurrentStepNumber() > 1 && !string.IsSourceInitialized()) {
+        // if the partner quirk is still alive, clear its string state too so that it
+        // doesn't try to push a string vector to the orphan quirk and crash
+        // leave as just a warning so that the event can continue and the hits recorded so far are kept, like for looperKiller'd tracks
         string.Clear();
         string.GetReactionForce()->Clear();
         G4Exception(
             "QuirkWatcher::PostStepDoIt",
             "QuirkMissingPartner",
-            EventMustBeAborted,
-            "QuirkWatcher: missing partner for quirk"
+            JustWarning,
+            "QuirkWatcher: missing partner for quirk; killing orphan track"
         );
+        m_particleChange.Initialize(track);
+        m_particleChange.ProposeTrackStatus(fStopAndKill);
+        return &m_particleChange;
     }
 
     // Update track status
