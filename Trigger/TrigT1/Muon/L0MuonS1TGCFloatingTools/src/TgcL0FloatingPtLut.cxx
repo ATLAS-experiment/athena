@@ -3,7 +3,7 @@
 */
 #include "TgcL0FloatingPtLut.h"
 
-#include "CxxUtils/StringUtils.h"
+#include "CxxUtils/StringUtilsTemplates.h"
 
 #include <algorithm>
 #include <array>
@@ -17,30 +17,22 @@
 
 namespace {
 
-template <typename T>
-bool parseInteger(const std::string& text, T& value) {
+template <std::integral T>
+bool parseInteger(std::string_view text, T& value)
+{
   try {
-    const int parsed = CxxUtils::atoi(text);
-    if constexpr (std::is_unsigned_v<T>) {
-      if (parsed < 0 || static_cast<unsigned int>(parsed) >
-                            std::numeric_limits<T>::max()) {
-        return false;
-      }
-    } else if (parsed < std::numeric_limits<T>::lowest() ||
-               parsed > std::numeric_limits<T>::max()) {
-      return false;
-    }
-    value = static_cast<T>(parsed);
+    CxxUtils::convertToNumber(text, value);
     return true;
   } catch (const std::exception&) {
     return false;
   }
 }
 
-template <typename T>
-bool parseFloatingPoint(const std::string& text, T& value) {
+template <std::floating_point T>
+bool parseFloatingPoint(std::string_view text, T& value)
+{
   try {
-    value = static_cast<T>(CxxUtils::atof(text));
+    CxxUtils::convertToNumber(text, value);
     return true;
   } catch (const std::exception&) {
     return false;

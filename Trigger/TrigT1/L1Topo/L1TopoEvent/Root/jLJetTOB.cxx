@@ -12,7 +12,7 @@ TCS::jLJetTOB::jLJetTOB(uint32_t roiWord, std::string_view tobName) :
 {}
 
 // constructor with initial values
-TCS::jLJetTOB::jLJetTOB(unsigned int Et, int eta, unsigned phi, uint32_t roiWord, const std::string& tobName) :
+TCS::jLJetTOB::jLJetTOB(unsigned int Et, int eta, unsigned phi, uint32_t roiWord, std::string_view tobName) :
    BaseTOB( roiWord,tobName )
    , m_Et(Et)
    , m_eta(eta)
