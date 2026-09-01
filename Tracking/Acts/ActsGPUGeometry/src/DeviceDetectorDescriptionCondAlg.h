@@ -84,7 +84,7 @@ struct designKey {
 
 struct StaticCondEntry {
     unsigned int designId = 0;
-    detray::geometry::identifier geometryId{};
+    detray::geometry::identifier detrayGeometryId{};
     Acts::GeometryIdentifier::Value actsGeometryId = 0;
     Identifier athenaId;       // only meaningful if hasAthenaModule
     bool hasAthenaModule = false;

@@ -45,13 +45,16 @@ def GPUGeometryCfg(flags) -> ComponentAccumulator:
         OutputLevel = DEBUG,
     ))
 
-    acc.merge(DeviceDetectorDescriptionValidationAlgCfg(flags,
-        MonDesignObjectName = "TracccHostDigitizationConfig",
-        MonCondKey = "TracccHostCondConfig",
-        RefHostDesignObjectName = "JSONTracccHostDigitizationConfig",
-        RefHostCondKey = "JSONTracccHostCondConfig",
-        OutputLevel = DEBUG
-    ))
+    # NOTICE: there are no gen3 detray geometry JSON files
+    # therefore this validation can not be used
+    
+    # acc.merge(DeviceDetectorDescriptionValidationAlgCfg(flags,
+    #     MonDesignObjectName = "TracccHostDigitizationConfig",
+    #     MonCondKey = "TracccHostCondConfig",
+    #     RefHostDesignObjectName = "JSONTracccHostDigitizationConfig",
+    #     RefHostCondKey = "JSONTracccHostCondConfig",
+    #     OutputLevel = DEBUG
+    # ))
 
     return acc
 

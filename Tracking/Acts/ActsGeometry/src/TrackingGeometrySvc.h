@@ -22,7 +22,6 @@
 
 #ifdef ACTSGEOMETRY_HAVE_DETRAY
 #include <ActsPlugins/Detray/DetrayGeometryConverter.hpp>
-#include "detray/io/frontend/detector_writer.hpp"
 #endif
 
 // STL

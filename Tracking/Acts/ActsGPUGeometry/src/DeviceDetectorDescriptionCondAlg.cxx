@@ -3,7 +3,8 @@
 */
 #include "DeviceDetectorDescriptionCondAlg.h"
 #include "StoreGate/StoreGateSvc.h"
-
+#include "HGTD_ReadoutGeometry/HGTD_DetectorElement.h"
+#include "AthenaKernel/IOVInfiniteRange.h"
 
 namespace ActsTrk {
 
@@ -36,8 +37,8 @@ StatusCode DeviceDetectorDescriptionCondAlg::initialize()
     ATH_CHECK(m_stripLorentzAngleTool.retrieve());
     ATH_CHECK(m_pixelLorentzAngleTool.retrieve());
 
-    int nPix = 0, nStrip = 0, nRect = 0, nTrap = 0, nAnnu = 0, nEC = 0, nBar = 0;
-
+    int nPix = 0, nStrip = 0, nEC = 0, nBar = 0;
+    std::vector<Acts::GeometryIdentifier> actsHGTD;
     if (!m_trackingGeometrySvc.empty()) {
 
         // ---- 1. Get ACTS Tracking Geometry, populate Athena<->ACTS maps and fill module design (segmentation) information ----
@@ -48,12 +49,25 @@ StatusCode DeviceDetectorDescriptionCondAlg::initialize()
 
         m_trackingGeometry->visitSurfaces([&](const Acts::Surface *surface) {
             if (!surface) return;
-            m_allsurfaces.push_back(std::const_pointer_cast<Acts::Surface>(surface->getSharedPtr()));
+            // m_allsurfaces.push_back(surface->getSharedPtr());
             const auto *actsElement = getActsDetectorElement(surface);
-            if (!actsElement) return;
+            if (!actsElement){
+                ATH_MSG_DEBUG("Could not find matching Acts detector element for surface with geometryId " << surface->geometryId());
+                return;
+            } 
+            if(dynamic_cast<const InDetDD::HGTD_DetectorElement*>(actsElement->upstreamDetectorElement()) != nullptr) { 
+                // skip HGTD surfaces for now
+                // currently no time info is being used in traccc
+                ATH_MSG_VERBOSE("Found HGTD surface with geometryId " << surface->geometryId());
+                actsHGTD.push_back(surface->geometryId());
+                return;
+            }
             const auto *geoElement = actsElement->upstreamDetectorElement();
             const auto *detElem = dynamic_cast<const InDetDD::SiDetectorElement*>(geoElement);
-            if (!geoElement || !detElem) return;
+            if (!geoElement || !detElem) {
+                ATH_MSG_DEBUG("Could not find matching Athena silicon detector element for surface with geometryId " << surface->geometryId());
+                return;
+            }
             m_surfaces.push_back(std::const_pointer_cast<Acts::Surface>(surface->getSharedPtr()));
 
             Identifier athenaID;
@@ -142,7 +156,7 @@ StatusCode DeviceDetectorDescriptionCondAlg::initialize()
                 thismod.rows = p_design->rows();
                 thismod.columns = p_design->columns();
                
-            } else {
+            } else if (detElem->isSCT()) {
                 ++nStrip;
                 const Identifier moduleID = m_stripID->module_id(detElem->identify());
                 const IdentifierHash moduleHash = m_stripID->wafer_hash(moduleID);
@@ -156,26 +170,10 @@ StatusCode DeviceDetectorDescriptionCondAlg::initialize()
                 if (m_stripID->barrel_ec(athenaID) == 0) {
                     ++nBar;
                     const auto* s_design = static_cast<const InDetDD::SCT_BarrelModuleSideDesign*>(&detElem->design());
-                    auto boundsType = detElem->bounds().type();
-                    if (boundsType == Trk::SurfaceBounds::Rectangle) {
-                        ++nRect;
-                        thismod.module_width = s_design->width();
-                        thismod.module_length = s_design->length();
-                        thismod.rows = s_design->cells();
-                    }
-                    if (boundsType == Trk::SurfaceBounds::Trapezoid) {
-                        thismod.module_width = s_design->width();
-                        thismod.module_length = s_design->length();
-                        thismod.rows = s_design->cells();
-                        nTrap++;
-                    }
-                    if (boundsType == Trk::SurfaceBounds::Annulus) {
-                        ++nAnnu;
-                        thismod.isAnnulus = true;
-                        thismod.module_width = s_design->width();
-                        thismod.module_length = s_design->length();
-                        thismod.rows = s_design->cells();
-                    }
+                    
+                    thismod.module_width = s_design->width();
+                    thismod.module_length = s_design->length();
+                    thismod.rows = s_design->cells();
                 } else {
                     ++nEC;
                     const auto* annulus_design = static_cast<const InDetDD::StripStereoAnnulusDesign*>(&detElem->design());
@@ -190,16 +188,20 @@ StatusCode DeviceDetectorDescriptionCondAlg::initialize()
                     thismod.rows = nDiodes;
                     thismod.isAnnulus = true;
                 }
+            } else{
+                
+                ATH_MSG_DEBUG("Found non-pixel, non-strip detector element with geometryId " << surface->geometryId());
+                return;
             }
 
             m_atlasModuleInfo[athenaID] = thismod;
             const auto geo_id = surface->geometryId();
             m_actsToAthena[geo_id] = athenaID;
+            
         });
 
         ATH_MSG_INFO(nPix << " Atlas Pixel modules found.");
         ATH_MSG_INFO(nStrip << " Atlas Strip modules found, " << nBar << " in barrel and " << nEC << " in the endcap");
-        ATH_MSG_INFO("Out od those " << nRect << " are rectangular, " << nTrap << " are trapezoid and " << nAnnu << " are annulus.");
         ATH_MSG_INFO("Wrote segmentation info for " << m_atlasModuleInfo.size() << " modules");
 
         // ---- 2. Get Detray Tracking Geometry and populate Detray<->ACTS map ----
@@ -217,13 +219,17 @@ StatusCode DeviceDetectorDescriptionCondAlg::initialize()
             auto sf = detray::tracking_surface{*itkDetector, surface};
             const auto detray_id = sf.identifier().value();
 
-            if (m_actsToAthena.contains(acts_geom_id)) {
-                auto athena_id = m_actsToAthena.at(acts_geom_id);
+            if (auto pIdPair = m_actsToAthena.find(acts_geom_id); pIdPair != m_actsToAthena.end()) {
+                auto athena_id = pIdPair->second;
                 m_detrayToAthenaMap[detray_id] = athena_id;
                 m_athenaToDetrayMap[athena_id] = detray_id;
                 found_detray++;
             } else {
-                ATH_MSG_VERBOSE("ACTS surface with key " << acts_geom_id << " was not traslated to detray geometry.");
+                if (std::find(actsHGTD.begin(), actsHGTD.end(), acts_geom_id) != actsHGTD.end()) {
+                    ATH_MSG_VERBOSE("ACTS surface with key " << acts_geom_id << " is HGTD, detray id: " << detray_id);
+                    continue;
+                }
+                ATH_MSG_VERBOSE("ACTS surface with key " << acts_geom_id << " was not translated to detray geometry.");
                 missing_detray++;
                 if (surface.is_sensitive()) continue;
                 ATH_MSG_VERBOSE("found this passive surface in detray: " << acts_geom_id);
@@ -231,7 +237,7 @@ StatusCode DeviceDetectorDescriptionCondAlg::initialize()
             }
         }
 
-        ATH_MSG_INFO("Traccc detector has " << found_detray << " surfaces matching ACTS and " << missing_detray << " additional sufaces, out of which " << missing_detray_passives << " are passive.");
+        ATH_MSG_INFO("Traccc detector has " << found_detray << " surfaces matching ACTS and " << missing_detray << " additional surfaces, out of which " << missing_detray_passives << " are not sensitive.");
 
         // ---- 3. Deduplicate the designs ----
         // there are only a handful of unique module designs, only store unique values
@@ -247,20 +253,24 @@ StatusCode DeviceDetectorDescriptionCondAlg::initialize()
 
         for (std::size_t condIndex = 0; condIndex < nSurfaces; ++condIndex) {
             const auto& surface = itkDetector->surfaces()[condIndex];
+             if (!surface.is_sensitive()) {
+                ATH_MSG_VERBOSE("Skipping passive surface with geometryId " << surface.source);
+                continue;
+            }
             const auto geo_id = surface.source;
             const Acts::GeometryIdentifier acts_geom_id{geo_id};
             auto sf = detray::tracking_surface{*itkDetector, surface};
             const auto detray_id = sf.identifier().value();
 
             StaticCondEntry entry;
-            entry.geometryId = detray::geometry::identifier{detray_id};
+            entry.detrayGeometryId = detray::geometry::identifier{detray_id};
             entry.actsGeometryId = acts_geom_id.value();
 
             auto detrayIt = m_detrayToAthenaMap.find(detray_id);
             std::optional<Identifier> athenaId;
             if (detrayIt != m_detrayToAthenaMap.end()) {
                 athenaId = detrayIt->second;
-                auto modIt = m_atlasModuleInfo.find(detrayIt->second);
+                auto modIt = m_atlasModuleInfo.find(*athenaId);
                 if (modIt != m_atlasModuleInfo.end()) {
                     const moduleInfo& thismod = modIt->second;
 
@@ -277,18 +287,19 @@ StatusCode DeviceDetectorDescriptionCondAlg::initialize()
                     
                     designKey key{thismod.pixel, thismod.isAnnulus, edgesX, edgesY,
                                 std::abs(thismod.module_width), thismod.module_length};
-                    auto it = designLookup.find(key);
-                    if (it == designLookup.end()) {
-                        entry.designId = nextDesignId;
-                        designLookup.emplace(key, nextDesignId);
-                        ++nextDesignId;
-                    } else {
-                        entry.designId = it->second;
-                    }
-                    entry.athenaId = detrayIt->second;
+
+                    const auto [it, inserted] = designLookup.try_emplace(key, nextDesignId);
+                    entry.designId = it->second;
+                    if (inserted) ++nextDesignId;
+
+                    entry.athenaId = *athenaId;
                     entry.hasAthenaModule = true;
                 }
             }else{
+                if (std::find(actsHGTD.begin(), actsHGTD.end(), acts_geom_id) != actsHGTD.end()) {
+                    ATH_MSG_VERBOSE("ACTS surface with key " << acts_geom_id << " is HGTD, detray id: " << detray_id);
+                    continue;
+                }
                 ATH_MSG_ERROR("Could not find matching Athena module for detray surface with geometryId " << detray_id);
             }
 
@@ -376,7 +387,7 @@ StatusCode DeviceDetectorDescriptionCondAlg::execute(const EventContext& ctx) co
         const auto& entry = m_staticCondEntries[condIndex];
 
         hostCond->module_to_design_id()[condIndex] = entry.designId;
-        hostCond->geometry_id()[condIndex] = entry.geometryId;
+        hostCond->geometry_id()[condIndex] = entry.detrayGeometryId;
         hostCond->acts_geometry_id()[condIndex] = entry.actsGeometryId;
 
         float shiftX = 0.f, shiftY = 0.f;
@@ -387,13 +398,10 @@ StatusCode DeviceDetectorDescriptionCondAlg::execute(const EventContext& ctx) co
             if (isPixel) {
                 const IdentifierHash pixelHash = m_pixelID->wafer_hash(entry.athenaId);
                 shiftX = m_pixelLorentzAngleTool->getLorentzShift(pixelHash, ctx);
-                shiftY = 0.f;
             } else {
-                const IdentifierHash moduleHash = m_stripID->wafer_hash(
-                    m_stripID->module_id(entry.athenaId));
+                const IdentifierHash moduleHash = m_stripID->wafer_hash(entry.athenaId);
                 const int side = m_stripID->side(entry.athenaId);
-                shiftX = m_stripLorentzAngleTool->getLorentzShift(moduleHash + side, ctx);
-                shiftY = 0.f;   
+                shiftX = m_stripLorentzAngleTool->getLorentzShift(moduleHash + side, ctx);  
             }
         }
 
@@ -407,6 +415,14 @@ StatusCode DeviceDetectorDescriptionCondAlg::execute(const EventContext& ctx) co
         m_MRs->mainMR());
     (*copy).setup(*deviceCond)->wait();
     (*copy)(vecmem::get_data(*hostCond), *deviceCond)->wait();
+
+    // PLACEHOLDER: no real conditions dependency yet (e.g. alignment tag),
+    // so mark this object as valid for all run/lumi. Replace with a proper
+    // addDependency(ReadCondHandle<...>&) once this depends on something
+    // that actually changes over the run.
+    
+    writeHostHandle.addDependency(IOVInfiniteRange::infiniteRunLB());
+    writeDeviceHandle.addDependency(IOVInfiniteRange::infiniteRunLB());
 
     ATH_CHECK(writeHostHandle.record(std::move(hostCond)));
     ATH_CHECK(writeDeviceHandle.record(std::move(deviceCond)));

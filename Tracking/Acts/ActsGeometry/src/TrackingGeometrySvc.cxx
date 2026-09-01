@@ -45,7 +45,6 @@
 #ifdef ACTSGEOMETRY_HAVE_DETRAY
 #include <detray/utils/consistency_checker.hpp>
 #include <vecmem/memory/host_memory_resource.hpp>
-#include "detray/utils/print_detector.hpp"
 #endif
 #include <Acts/Surfaces/PlanarBounds.hpp>
 #include <Acts/Surfaces/AnnulusBounds.hpp>
@@ -1369,16 +1368,6 @@ StatusCode TrackingGeometrySvc::buildDetrayGeometry() {
       return StatusCode::FAILURE;
     }
   }
-
-  // std::cout << detray::utils::print_detector(*detrayGeometry.detector, detrayGeometry.names) << std::endl;
-  // auto writer_cfg =   detray::io::detector_writer_config{}
-  //                               .path("/home/nribaric/athena_dev/")
-  //                               .write_material(true)
-  //                               .write_grids(true)
-  //                               .format(detray::io::format::json)
-  //                               .replace_files(true);
-
-  // detray::io::write_detector(*detrayGeometry.detector, detrayGeometry.names, writer_cfg);
 
   m_detrayGeometry = std::move(detrayGeometry.detector);
 
