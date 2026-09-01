@@ -24,9 +24,13 @@ def get_kin_args_from_matchdict(groupdict):
                     '')  # will be assigned default value
     condargs.append(('pt', vals))
 
+    # HitZ counts jets over the full ITk acceptance, |eta| < 4.0: the hit
+    # pipeline tags to 4.0, the working points were scanned at 4.0, and the
+    # regression is flat in |eta| out to the edge of the detector. The 2.4 of
+    # the DIPZ scenario is a Run-3 tracking limit that does not apply here.
     vals = defaults('eta',
                     '', # will be assigned default value
-                    '240')
+                    '400')
     condargs.append(('eta', vals))
 
     return condargs
