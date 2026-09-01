@@ -185,7 +185,20 @@ def ITkActsDeviceTrackRecoCfg(flags, *, previousExtension=None):
                 OutputSeeds=f'{flags.Tracking.ActiveConfig.extension}PixelSeeds'))
             seedsLocation = DataLocation.HOST
            
-
+        # Extract track parameters from device seeds if requested
+        if flags.Tracking.ActiveConfig.storeTrackSeeds and flags.Acts.Device.doSeeding: # for clustering only pipelines this is controlled via the ActsSeedingConfig file
+            from ActsConfig.ActsSeedingConfig import ActsStoreTrackSeedsCfg
+            from InDetConfig.ITkActsHelpers import isFastPrimaryPass
+            processPixels = flags.Detector.EnableITkPixel
+            processStrips = flags.Detector.EnableITkStrip
+            if flags.Tracking.ActiveConfig.extension == "ActsConversion" or flags.Tracking.ActiveConfig.isLargeD0:
+                processPixels = False
+            elif isFastPrimaryPass(flags):
+                processStrips = False
+            acc.merge(ActsStoreTrackSeedsCfg(flags,
+                                             processPixels=processPixels,
+                                             processStrips=processStrips))
+            
         # CKF
         from ActsConfig.ActsTrackFindingConfig import ActsTrackFindingCfg
         acc.merge(ActsTrackFindingCfg(flags))

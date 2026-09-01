@@ -19,7 +19,7 @@ pipelineName='G130'
 SampleName='ttbar_pu200'  # as defined in samplesDict of InDetTrackPerfMon/scripts/getEFTrackSample.py
 OutSampleName="${pipelineName}_FS.${SampleName}"
 TrkCollName='InDetTrackParticles'
-TrkSeedCollName='TracccSeededSeedTrackParticles'
+TrkSeedCollName='SiSPSeedSegmentsActsPixelTrackParticles'
 referencePath='/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/InDetTrackPerfMon/EFTrackRefereceHistograms/'
 referenceName="C230_FS.${SampleName}"
 referenceName_absPath="${referencePath}/IDTPM.${referenceName}.HIST.root"
@@ -74,6 +74,7 @@ run "${pipelineName}" \
   runReco_G130_FS.sh \
     -i ${InputRDOfiles} \
     -o "${OutSampleName}.AOD.pool.root" \
+    --storeSeeds \
     "$@"
 
 ## Don't run if IDTPM json config is not found
