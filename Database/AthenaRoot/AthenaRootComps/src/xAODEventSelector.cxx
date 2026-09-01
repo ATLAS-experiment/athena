@@ -40,6 +40,8 @@
 #include "AthenaKernel/CLIDRegistry.h"
 #include "CxxUtils/checker_macros.h"
 #include "StorageSvc/DbType.h"
+#include "CollectionSvc/ICollection.h"
+#include "CollectionSvc/CollectionService.h"
 
 // StoreGate includes
 
@@ -1043,7 +1045,18 @@ StatusCode xAODEventSelector::setFile(const std::string& fname) {
   if(m_readMetadataWithPool) {
       //ensure input file collection created
       ATH_MSG_DEBUG("Creating poolsvc collection for " << fname);
-      m_poolSvc->createCollection( "PFN:"+fname , fname , pool::POOL_StorageType.type() );
+      StatusCode sc = m_poolSvc->connectCollection( "PFN:"+fname , fname , pool::POOL_StorageType.type() );
+      pool::CollectionService collSvc ATLAS_THREAD_SAFE = pool::CollectionService();
+      pool::ICollection* collPtr ATLAS_THREAD_SAFE = nullptr;
+      // Try to open EventTags Collection in the input file
+      try {
+         collPtr = collSvc.open(fname, pool::POOL_StorageType.type(), "PFN:"+fname, m_poolSvc->getInputContextSession(IPoolSvc::kInputStream));
+      } catch (std::exception &e) {
+         collPtr = nullptr;
+      }
+      if (sc.isRecoverable() || collPtr == nullptr) {
+         m_poolSvc->checkCollection(fname, IPoolSvc::kInputStream, collPtr == nullptr).ignore();
+      }
       //metadata will be read by MetaDataSvc, triggered by the BeginInputFile call
    } else {
       if (!createMetaDataRootBranchAddresses().isSuccess()) {

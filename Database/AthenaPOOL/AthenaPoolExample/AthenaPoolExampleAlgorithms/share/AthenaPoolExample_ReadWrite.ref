@@ -8,7 +8,7 @@ ReadData                                             INFO in initialize()
 MetaDataSvc                                          INFO Initializing MetaDataSvc
 PoolSvc                                             DEBUG OutputLevel is 2
 PoolSvc                                             DEBUG POOL ReadCatalog is file:Catalog1.xml
-PoolSvc                                             DEBUG createCollection() type=POOL, connection=PFN:SimplePoolFile1.root, name=Input, contextID=0
+PoolSvc                                             DEBUG connectCollection() type=POOL, connection=PFN:SimplePoolFile1.root, name=Input, contextID=0
 SimplePoolFile1.root                                DEBUG --> Access   DbContainer  READ      [ROOT_All] ##Shapes
 SimplePoolFile1.root                                DEBUG --> Access   DbContainer  READ      [ROOT_All] ##Shapes
 ##Shapes                                            DEBUG Opening
@@ -92,7 +92,7 @@ StreamReWrite                                       DEBUG data dependencies:
 AthenaEventLoopMgr                                   INFO Setup EventSelector service EventSelector
 ApplicationMgr                                       INFO Application Manager Initialized successfully
 RootDatabase                                        DEBUG Closing DB SimplePoolFile1.root
-PoolSvc                                             DEBUG createCollection() type=POOL, connection=PFN:SimplePoolFile1.root, name=Input, contextID=0
+PoolSvc                                             DEBUG connectCollection() type=POOL, connection=PFN:SimplePoolFile1.root, name=Input, contextID=0
 SimplePoolFile1.root                                DEBUG --> Access   DbContainer  READ      [ROOT_All] ##Shapes
 SimplePoolFile1.root                                DEBUG --> Access   DbContainer  READ      [ROOT_All] ##Shapes
 ##Shapes                                            DEBUG Opening

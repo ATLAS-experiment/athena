@@ -12,7 +12,7 @@ ToolSvc.AthPoolEx::ReadMeta                          INFO in initialize()
 EventSelector                                       DEBUG Initializing EventSelector
 EventSelector                                       DEBUG reinitialization...
 EventSelector                                       DEBUG Try item: "SimplePoolFile5.root" from the collection list.
-PoolSvc                                             DEBUG createCollection() type=POOL, connection=PFN:SimplePoolFile5.root, name=Input, contextID=0
+PoolSvc                                             DEBUG connectCollection() type=POOL, connection=PFN:SimplePoolFile5.root, name=Input, contextID=0
 SimplePoolFile5.root                                DEBUG --> Access   DbContainer  READ      [ROOT_All] ##Shapes
 SimplePoolFile5.root                                DEBUG --> Access   DbContainer  READ      [ROOT_All] ##Shapes
 ##Shapes                                            DEBUG Opening
@@ -69,7 +69,7 @@ AthenaEventLoopMgr                                   INFO Setup EventSelector se
 ApplicationMgr                                       INFO Application Manager Initialized successfully
 RootDatabase                                        DEBUG Closing DB SimplePoolFile5.root
 EventSelector                                       DEBUG Try item: "SimplePoolFile5.root" from the collection list.
-PoolSvc                                             DEBUG createCollection() type=POOL, connection=PFN:SimplePoolFile5.root, name=Input, contextID=0
+PoolSvc                                             DEBUG connectCollection() type=POOL, connection=PFN:SimplePoolFile5.root, name=Input, contextID=0
 SimplePoolFile5.root                                DEBUG --> Access   DbContainer  READ      [ROOT_All] ##Shapes
 SimplePoolFile5.root                                DEBUG --> Access   DbContainer  READ      [ROOT_All] ##Shapes
 ##Shapes                                            DEBUG Opening
