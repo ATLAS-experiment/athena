@@ -251,7 +251,7 @@ static size_t H5Z_filter_lz4(unsigned int flags, size_t cd_nelmts,
         roBuf += 4;
 
         outSize = 12; /* size of the output buffer. Header size (12 bytes) is included */
-
+        const unsigned int maxPossibleSize = 4294967295u - 4u;
         for(block = 0; block < nBlocks; ++block)
         {
             uint32_t compBlockSize; /// reserve space for compBlockSize
@@ -277,6 +277,9 @@ static size_t H5Z_filter_lz4(unsigned int flags, size_t cd_nelmts,
 
             rpos += blockSize;     	/* advance read pointer */
             roBuf += compBlockSize;       /* advance write pointer */
+            if (outSize >= maxPossibleSize){
+              goto error;
+            }
             outSize += compBlockSize + 4;
         }
 
@@ -287,8 +290,7 @@ static size_t H5Z_filter_lz4(unsigned int flags, size_t cd_nelmts,
         ret_value = outSize;
 
     }
-    if(outBuf)
-        free(outBuf);
+    //outBuf = NULL at this point, having been set above
     return ret_value;
 
 

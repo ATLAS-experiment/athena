@@ -116,8 +116,8 @@ namespace
     auto secondEvent = makeEvent(secondContext);
     auto firstInterface = firstEvent->SyncInterface();
     auto secondInterface = secondEvent->SyncInterface();
-    auto firstResult = waitForCompletion(firstInterface);
-    auto secondResult = waitForCompletion(secondInterface);
+    auto firstResult = waitForCompletion(std::move(firstInterface));
+    auto secondResult = waitForCompletion(std::move(secondInterface));
 
     queue.PushEvent(std::move(firstEvent));
     queue.PushEvent(std::move(secondEvent));

@@ -1647,7 +1647,12 @@ StatusCode TEvent::setAuxStore(const std::string &key,
 
 #ifndef XAOD_STANDALONE
   // Call toTransient on the aux store.
-  store_nc->toTransient( this->currentContext() );
+  if (store_nc)[[likely]] {
+    store_nc->toTransient( this->currentContext() );
+  } else {
+    ATH_MSG_FATAL("Logic error detected in the code");
+    return StatusCode::FAILURE;
+  }
 #endif
 
   // Connect the two:

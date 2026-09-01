@@ -156,7 +156,7 @@ class ActsFatrasG4Tool : virtual public extends<AthAlgTool, IActsFatrasG4Tool, I
 
         /// Alternatively construct the simulator with an external logger.
         SingleParticleSimulation(propagator_t &&propagator_, std::shared_ptr<const Acts::Logger> localLogger_)
-            : propagator(propagator_), localLogger(localLogger_) {}
+            : propagator(std::move(propagator_)), localLogger(std::move(localLogger_)) {}
 
         /// Provide access to the local logger instance, e.g. for logging macros.
         const Acts::Logger &logger() const { return *localLogger; }

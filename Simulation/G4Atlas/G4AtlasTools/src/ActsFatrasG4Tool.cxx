@@ -401,8 +401,8 @@ void ActsFatrasG4Tool::simulateFatrasTrack(const G4FastTrack& fastTrack, G4FastS
   if (msgLvl(MSG::DEBUG)){ATH_MSG_DEBUG("m_debugInject runtime value = " << m_debugInject);}  
   if (m_debugInject) {
     // run the debug injection
-    if (runDebugInjection(ctx, track, anygctx, mctx, generator, fastStep).isFailure()) {
-        return;
+    if (runDebugInjection(ctx, track, anygctx, mctx, generator, fastStep).isFailure()){
+      ATH_MSG_DEBUG("runDebugInjection failed");
     }
     return; // return so we escape scope after run, and so we don't enter production loop below
   } else {
