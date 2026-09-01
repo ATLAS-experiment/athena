@@ -16,7 +16,7 @@ find_package(traccc)
 find_package(detray)
 
 atlas_add_component( ActsGPUEventCnv
-    src/*.h src/*.cxx
+    src/*.h src/*.cxx src/*.cu
     src/components/*.cxx
     DEFINITIONS ALGEBRA_PLUGINS_INCLUDE_ARRAY
     LINK_LIBRARIES
@@ -39,6 +39,8 @@ atlas_add_component( ActsGPUEventCnv
     AthDeviceInterfacesLib
     PixelReadoutGeometryLib
     SCT_ReadoutGeometry
+    AthCUDAInterfacesLib
+    AthCUDAKernelLib
 )
 
 atlas_install_python_modules(python/*.py)

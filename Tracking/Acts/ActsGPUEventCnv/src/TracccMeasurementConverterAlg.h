@@ -11,6 +11,7 @@
 #include "ActsGPUEvent/TracccMeasurementCollection.h"
 #include "ActsGPUEvent/TracccSiliconClusterCollection.h"
 #include "ActsGPUEvent/TracccSiliconCellCollection.h"
+#include "ActsGPUEvent/GeometryIdMapping.h"
 #include "traccc/edm/measurement_collection.hpp"
 #include "AthDeviceInterfaces/IMemoryResourceTool.h"
 #include "AthDeviceInterfaces/ICopyTool.h"
@@ -34,9 +35,6 @@
 #include "SCT_ReadoutGeometry/SCT_ForwardModuleSideDesign.h"
 #include "SCT_ReadoutGeometry/SCT_ModuleSideDesign.h"
 #include "SCT_ReadoutGeometry/StripStereoAnnulusDesign.h"
-
-
-#include "ActsGPUInterfaces/IDeviceDetectorDescriptionProviderSvc.h"
 
 #include "GaudiKernel/ToolHandle.h"
 
@@ -110,8 +108,8 @@ private:
   ToolHandle<AthDevice::ICopyTool> m_copy{
       this, "CopyProviderTool", "", "Vecmem copy provider tool"};
   /// @name The detector description service providing the Athena<->Detray ID map
-  ServiceHandle<ActsTrk::IDeviceDetectorDescriptionProviderSvc> m_detDescSvc{
-    this, "DetectorDescriptionSvc", "ActsTrk::JSONDeviceDetectorDescriptionProviderSvc"};
+  SG::ReadHandleKey<ActsTrk::GeometryIdMapping> m_idMappingKey{
+    this, "GeoIdMapping", "", "Mapping object between detray<->acts<->athena geometry IDs."};
 
   /// The object counters for debug prints in finalize method
   /// {@
@@ -119,9 +117,6 @@ private:
   mutable std::atomic<int> m_nStrip = 0;
   mutable std::atomic<int> m_nMeas = 0;
   /// @}
-
-  /// The athena <-> detray identifier map
-  const std::unordered_map<uint64_t, Identifier>* m_detrayToAthena{};
 
   /// Conversion helpers (to retrieve module design, hash, etc.)
   /// {@
