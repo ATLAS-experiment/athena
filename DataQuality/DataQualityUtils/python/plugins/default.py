@@ -14,13 +14,12 @@ from PyCool import cool, coral
 import DBInfo
 
 userName = "ATLAS_COOL_READER"
-password = "COOLRED4PRO"
 
 connectString  = "oracle://" +  DBInfo.getWriteServer()
 connectString += ";schema=" +   DBInfo.getSchema()
 connectString += ";user=" +     userName
 connectString += ";dbname=" +   DBInfo.getDbName()
-connectString += ";password=" + password
+connectString += ";password=_"
 
 folderName = DBInfo.getFolder()
 

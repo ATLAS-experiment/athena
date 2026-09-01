@@ -8,7 +8,7 @@ include.block ( "IOVDbSvc/IOVRecExCommissionSR1.py" )
 IOVCoolDBTech="sqlite"
 IOVCoolDBProd="CMCPROD"
 IOVCoolDBUser="ATLAS_COOL_READER"
-IOVCoolDBPwd="COOLRED4PRO"
+IOVCoolDBPwd="_"
 #
 include("IOVDbSvc/IOVCondDB.py")
 

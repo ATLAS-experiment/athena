@@ -1,6 +1,6 @@
 #!/bin/bash
 # test for CoraCoolExample, writing and reading from Oracle
-export DBORACLE="oracle://devdb11;schema=ATLAS_COOLTEST;dbname=C$$;user=ATLAS_COOLTEST;password=Cool43devdb"
+export DBORACLE="oracle://devdb11;schema=ATLAS_COOLTEST;dbname=C$$;user=ATLAS_COOLTEST;password=_"
 # temporarily set TNS_ADMIN to override incorrect default in release 19 (2/7/14)
 # now removed for 19.2.0
 # export TNS_ADMIN=/afs/cern.ch/sw/lcg/external/oracle/11.2.0.3.0/admin
