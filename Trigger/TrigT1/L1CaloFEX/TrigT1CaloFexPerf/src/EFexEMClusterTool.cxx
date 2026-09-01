@@ -582,6 +582,10 @@ LVL1::EFexEMClusterTool::RHadTile(const CaloCell* centreCell, int etaWidth, int 
    }
    HadronicET = HadET/1e3;
    double EMcomp = sumVectorET(fullClus, digitScale, digitThresh);
+   if (EMcomp+HadET == 0.)[[unlikely]]{
+     ATH_MSG_WARNING ( "EMcomp+HadET == 0. ");
+     return 1.;
+   }
    double result = HadET/(EMcomp+HadET);
    if (result < 0. || result > 1.){
       ATH_MSG_WARNING ( "RHADTILE -> " << etaWidth << " * " << phiWidth);
