@@ -237,13 +237,6 @@ if (makeDataDAODs or makeMCDAODs):
             generateText(formatName,"mc21_14TeV_",None,False,"100",
                          "defaultTestFiles.AOD_RUN4_MC[0]")
          continue
-      if formatName == "HID1":
-         # HID1 is an MC-only format, so no data tests are generated
-         if makeMCDAODs:
-            generateText(formatName,"mc20",mc20File,False,"-1")
-            generateText(formatName,"mc23",mc23aFile,False,"-1")
-            generateText(formatName,"mc21_14TeV_",mc21_14TeV_File,False,"-1")
-         continue
       if formatName == "JETM42":
          # JETM42 currently only used for upgrade studies
          if makeMCDAODs:
@@ -251,7 +244,7 @@ if (makeDataDAODs or makeMCDAODs):
          continue
 
       # End special cases
-      if makeDataDAODs and not formatName in ["TOPQ7", "FTAG1", "FTAG1LITE"]:
+      if makeDataDAODs and not formatName in ["TOPQ7", "FTAG1", "FTAG1LITE", "HID1"]:
          generateText(formatName,"data18",None,False,"-1",
                       "defaultTestFiles.AOD_RUN2_DATA[0]")
          generateText(formatName,"data22",None,False,"-1",
