@@ -58,7 +58,7 @@ namespace ActsTrk{
     // templated function to fill truth tracks map for both pixel and strip clusters
     // This is a small function so did not feel the need to supply its own ipp file
     template <typename ClusterContainer>
-    void addClusterToTruthTacks( const ClusterContainer& clusters, 
+    void addClusterToTruthTracks( const ClusterContainer& clusters, 
                                  const MeasurementToTruthParticleAssociation& truthAssociations,
                                  TruthTracks& truthTracks) const {
         

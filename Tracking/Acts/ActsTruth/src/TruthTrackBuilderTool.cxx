@@ -26,10 +26,17 @@ namespace ActsTrk{
   StatusCode TruthTrackBuilderTool::buildTruthTracks(const EventContext& ctx, TruthTracks& truthTracks) const{
 
     // obtain truth map and clusters
-    SG::ReadHandle<xAOD::PixelClusterContainer> pixelClusters{ m_pixelClustersKey, ctx};
-    SG::ReadHandle<MeasurementToTruthParticleAssociation> pixelTruthAssociations{m_pixelTruthAssociationKey, ctx};
-    SG::ReadHandle<xAOD::StripClusterContainer> stripClusters{m_stripClustersKey, ctx};
-    SG::ReadHandle<MeasurementToTruthParticleAssociation> stripTruthAssociations{m_stripTruthAssociationKey, ctx};
+    SG::ReadHandle<xAOD::PixelClusterContainer> 
+      pixelClusters{ m_pixelClustersKey, ctx};
+
+    SG::ReadHandle<MeasurementToTruthParticleAssociation> 
+      pixelTruthAssociations{m_pixelTruthAssociationKey, ctx};
+
+    SG::ReadHandle<xAOD::StripClusterContainer> 
+      stripClusters{m_stripClustersKey, ctx};
+
+    SG::ReadHandle<MeasurementToTruthParticleAssociation> 
+      stripTruthAssociations{m_stripTruthAssociationKey, ctx};
 
     if (!pixelClusters.isValid()) {
 
@@ -60,14 +67,14 @@ namespace ActsTrk{
         
     // add pixel clusters
     if(m_usePixelClusters){
-      addClusterToTruthTacks(*pixelClusters,
+      addClusterToTruthTracks(*pixelClusters,
                             *pixelTruthAssociations,
                             truthTracks);  
       }
       
     // add strip clusters
     if(m_useStripClusters){   
-      addClusterToTruthTacks(*stripClusters,
+      addClusterToTruthTracks(*stripClusters,
                             *stripTruthAssociations,
                             truthTracks);
     }
