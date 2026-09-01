@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # Simple script to run the TElectronTestAlg with CA
 
@@ -29,13 +29,7 @@ if __name__ == "__main__":
     cfg = MainServicesCfg(flags)
     from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
     cfg.merge(PoolReadCfg(flags))
-    MessageSvc = CompFactory.MessageSvc
-    cfg.addService(MessageSvc(infoLimit=0))
     cfg.merge(TElectronTestAlgCfg())
 
     print("Start running...")
-    statusCode = None
-    statusCode = cfg.run()
-
-    assert statusCode is not None, "Issue while running"
-    sys.exit(not statusCode.isSuccess())
+    sys.exit(0 if cfg.run().isSuccess() else 1)
