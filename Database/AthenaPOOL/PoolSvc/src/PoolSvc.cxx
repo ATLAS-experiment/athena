@@ -17,8 +17,6 @@
 #include "PersistentDataModel/Placement.h"
 #include "PersistentDataModel/Token.h"
 
-#include "CollectionSvc/CollectionService.h"
-
 #include "PersistencySvc/ISession.h"
 #include "PersistencySvc/IDatabase.h"
 #include "PersistencySvc/IContainer.h"
@@ -318,7 +316,15 @@ unsigned int PoolSvc::getInputContextMapSize() const {
    std::lock_guard<CallMutex> lock(m_pool_mut);
    return(m_inputContextLabel.size());
 }
-
+//__________________________________________________________________________
+pool::ISession* PoolSvc::getInputContextSession(unsigned int contextId) const {
+   if (contextId >= m_dbSessionVec.size()) {
+      ATH_MSG_WARNING("getInputContextSession: Using default input Stream instead of id = " << contextId);
+      contextId = IPoolSvc::kInputStream;
+   }
+   return(m_dbSessionVec[contextId]);
+}
+//__________________________________________________________________________
 void PoolSvc::setShareMode(bool shareCat) {
    m_shareCat = shareCat;
 }
@@ -368,16 +374,17 @@ void PoolSvc::renamePfn(const std::string& pf, const std::string& newpf) {
    m_catalog->renamePFN(pf, newpf);
 }
 //__________________________________________________________________________
-pool::ICollection* PoolSvc::createCollection(const std::string& connection,
+StatusCode PoolSvc::connectCollection(const std::string& connection,
 		const std::string& collectionName,
 		const pool::DbType& collectionType,
 		unsigned int contextId) const {
-   ATH_MSG_DEBUG("createCollection() type=" << collectionType.storageName() << ", connection=" << connection
+   ATH_MSG_DEBUG("connectCollection() type=" << collectionType.storageName() << ", connection=" << connection
                  << ", name=" << collectionName << ", contextID=" << contextId);
    if (contextId >= m_dbSessionVec.size()) {
-      ATH_MSG_WARNING("createCollection: Using default input Stream instead of id = " << contextId);
+      ATH_MSG_WARNING("connectCollection: Using default input Stream instead of id = " << contextId);
       contextId = IPoolSvc::kInputStream;
    }
+
    ContextLock lock(contextId, m_pool_mut, m_pers_mut);
    // Check POOL FileCatalog entry.
    bool insertFile = false;
@@ -394,7 +401,7 @@ pool::ICollection* PoolSvc::createCollection(const std::string& connection,
       std::unique_ptr<pool::IDatabase> dbH = getDbHandle(contextId, connection);
       if (dbH == nullptr) {
          ATH_MSG_INFO("Failed to get Session/DatabaseHandle to create POOL collection.");
-         return(nullptr);
+         return(StatusCode::FAILURE);
       }
       try {
          if (dbH->openMode() == Io::INVALID) {
@@ -413,47 +420,33 @@ pool::ICollection* PoolSvc::createCollection(const std::string& connection,
          ATH_MSG_INFO("Failed to open container to check POOL collection - trying.");
       }
    }
-
-   // access to these variables is locked below:
-   pool::CollectionService collSvc ATLAS_THREAD_SAFE = pool::CollectionService();
-   pool::ICollection* collPtr ATLAS_THREAD_SAFE = nullptr;
-
-   // Try to open EventTags Collection in the input file
-   std::scoped_lock sc_lock(m_pool_mut);
-   std::string error_text;
-   try {
-      collPtr = collSvc.open(collectionName, collectionType, connection, m_dbSessionVec[contextId]);
-   } catch (std::exception &e) {
-      collPtr = nullptr;
-      error_text = e.what();
-   }
-   if( !collPtr ) {
-      std::unique_ptr<pool::IDatabase> dbH = getDbHandle(contextId, connection);
-      if (dbH != nullptr && !dbH->fid().empty()) {
-         return(nullptr); // no events
-      }
-      throw std::runtime_error( "Failed to open Collection: " + error_text  + ", PoolSvc::createCollection");
-   }
-   if (insertFile && m_attemptCatalogPatch.value()) {
-      std::unique_ptr<pool::IDatabase> dbH = getDbHandle(contextId, connection);
-      if (dbH == nullptr) {
-         ATH_MSG_INFO("Failed to create FileCatalog entry.");
-      } else if (dbH->fid().empty()) {
-         ATH_MSG_INFO("Cannot retrieve the FID of an existing POOL database: '"
-                      << connection << "' - FileCatalog will NOT be updated.");
-      } else {
-        patchCatalog(connection.substr(4), *dbH);
-      }
-   }
    // For multithreaded processing (with multiple events in flight),
    // increase virtual tree size to accomodate back reads
    if (m_useROOTMaxTree && contextId == IPoolSvc::kInputStream && Gaudi::Concurrency::ConcurrencyFlags::numConcurrentEvents() > 1) {
-      if (!this->setAttribute("TREE_MAX_VIRTUAL_SIZE", "-1", pool::ROOT_StorageType.type(), connection.substr(4), "CollectionTree", IPoolSvc::kInputStream).isSuccess()) {
-         ATH_MSG_WARNING("Failed to increase maximum virtual TTree size.");
+      if (!this->setAttribute("TREE_MAX_VIRTUAL_SIZE", "-1", pool::ROOT_StorageType.type(), connection.substr(4), "CollectionTree", contextId).isSuccess()) {
+         ATH_MSG_DEBUG("Failed to increase maximum virtual TTree size.");
       }
    }
+   if (insertFile) return(StatusCode::RECOVERABLE);
 
-   return(collPtr);
+   return(StatusCode::SUCCESS);
+}
+//__________________________________________________________________________
+StatusCode PoolSvc::checkCollection(const std::string& connection,
+		unsigned int contextId,
+                bool noContainer) const {
+   ContextLock lock(contextId, m_pool_mut, m_pers_mut);
+   std::unique_ptr<pool::IDatabase> dbH = getDbHandle(contextId, connection);
+   if (dbH != nullptr && !dbH->fid().empty()) {
+      if (noContainer) {
+         return(StatusCode::SUCCESS); // no events
+      }
+      if (m_attemptCatalogPatch.value()) {
+         patchCatalog(connection.substr(4), *dbH);
+      }
+      return(StatusCode::SUCCESS);
+   }
+   return(StatusCode::FAILURE);
 }
 //__________________________________________________________________________
 void PoolSvc::patchCatalog(const std::string& pfn, pool::IDatabase& dbH) const {

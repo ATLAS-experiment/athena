@@ -82,6 +82,10 @@ public: // Non-static members
    virtual
    unsigned int getInputContextMapSize() const override;
 
+   /// @return size of the map of all labelled input contexts.
+   virtual
+   pool::ISession* getInputContextSession(unsigned int contextId) const override;
+
    /// @return void
    /// @param shareCat [IN] bool to share the file catalog.
    virtual
@@ -108,16 +112,25 @@ public: // Non-static members
    virtual
    void renamePfn(const std::string& pf, const std::string& newpf) override;
 
-   /// @return a pointer to a Pool Collection.
-   /// @param collectionType [IN] string containing the collection type.
+   /// @return status of connect
    /// @param connection [IN] string containing the connection.
    /// @param collectionName [IN] string containing the persistent name of the collection.
+   /// @param collectionType [IN] string containing the collection type.
    /// @param contextId [IN] id for PoolSvc persistency service to use for input.
    virtual
-   pool::ICollection* createCollection(const std::string& connection,
-	   const std::string& collectionName,
+   StatusCode connectCollection(const std::string& connection,
+           const std::string& collectionName,
            const pool::DbType& collectionType,
-	   unsigned int contextId = IPoolSvc::kInputStream) const override;
+           unsigned int contextId = IPoolSvc::kInputStream) const override;
+
+   /// @return status of check
+   /// @param connection [IN] string containing the connection.
+   /// @param contextId [IN] id for PoolSvc persistency service to use for input.
+   /// @param noContainer [IN] if no collection was found check whether file exists or had no events
+   virtual
+   StatusCode checkCollection(const std::string& connection,
+           unsigned int contextId,
+           bool noContainer) const override;
 
    /// @return a token for a container entry.
    /// @param connection [IN] string containing the connection/file name.
