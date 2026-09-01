@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -9,6 +9,8 @@
 //                                                            //
 //  Author: Thomas H. Kittelmann (Thomas.Kittelmann@cern.ch)  //
 //  Initial version: June 2008 (rewritten January 2009)       //
+//  Main updates:
+//  - 2025, 05 -- R.M.Bianchi, Adding Muon digits (RDOs)
 //                                                            //
 ////////////////////////////////////////////////////////////////
 
@@ -17,6 +19,9 @@
 #include "VP1RawDataSystems/VP1RawDataColl_PixelRDO.h"
 #include "VP1RawDataSystems/VP1RawDataColl_SCT_RDO.h"
 #include "VP1RawDataSystems/VP1RawDataColl_TRT_RDO.h"
+#include "VP1RawDataSystems/VP1RawDataColl_MDT_RDO.h"
+#include "VP1RawDataSystems/VP1RawDataColl_MM_RDO.h"
+#include "VP1RawDataSystems/VP1RawDataColl_sTGC_RDO.h"
 #include "VP1RawDataSystems/VP1RawDataColl_BCM_RDO.h"
 #include "VP1RawDataSystems/VP1RawDataColl_LUCID.h"
 #include "VP1RawDataSystems/VP1RawDataCommonData.h"
@@ -56,6 +61,9 @@ public:
     l << createSpecificCollections<VP1RawDataColl_TRT_RDO>();
     l << createSpecificCollections<VP1RawDataColl_BCM_RDO>();
     l << createSpecificCollections<VP1RawDataColl_LUCID>();
+    l << createSpecificCollections<VP1RawDataColl_MDT_RDO>();
+    l << createSpecificCollections<VP1RawDataColl_MM_RDO>();
+    l << createSpecificCollections<VP1RawDataColl_sTGC_RDO>();
     return l;
   }
 
@@ -72,7 +80,7 @@ public:
 VP1RawDataSystem::VP1RawDataSystem()
   : IVP13DSystemSimple("RawHits",
 		       "System showing Raw Data (RDO's, BCM hits, ...)",
-		       "Thomas.Kittelmann@cern.ch"),
+		       "Thomas.Kittelmann@cern.ch, Riccardo.Maria.Bianchi@cern.ch"),
     m_d(new Imp(this))
 {
 }

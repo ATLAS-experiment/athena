@@ -837,6 +837,13 @@ void VP1MaterialButton::setMaterialParameters( SoMaterial * m, const double& in_
 }
 
 //____________________________________________________________________
+void VP1MaterialButton::setMaterialParametersFromRGB( SoMaterial * m, const int r, const int g, const int b, const double& brightness, const double& transp) 
+{
+  setMaterialParameters(m, VP1Color::getValFromRGB(r), VP1Color::getValFromRGB(g), VP1Color::getValFromRGB(b), brightness, transp);
+}
+
+
+//____________________________________________________________________
 void VP1MaterialButton::mousePressEvent(QMouseEvent *event)
 {
   if (event->button() == Qt::LeftButton)

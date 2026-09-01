@@ -101,7 +101,6 @@ def SetupVP1():
 
     flags = initConfigFlags()
     flags.Concurrency.NumThreads = 0
-
     # ^ VP1 will not work with the scheduler, since its condition/data dependencies are not known in advance
     # More in details: the scheduler needs to know BEFORE the event, what the dependencies of each Alg are.
     # So for VP1, no dependencies are declared, which means the conditions data is not there.
@@ -313,9 +312,9 @@ def SetupVP1():
 
     # DEBUG -- inspect the flags
     flags.dump()
-    # flags._loadDynaFlags('GeoModel')
-    # flags._loadDynaFlags('Detector')
-    # flags.dump('Detector.(Geometry|Enable)', True)
+    # flags._loadDynaFlags('GeoModel') # for debug
+    # flags._loadDynaFlags('Detector') # for debug
+    # flags.dump('Detector.(Geometry|Enable)', True) # for debug
 
     # ++++ Now we setup the actual configuration ++++
 
@@ -391,6 +390,23 @@ def SetupVP1():
 
     if args.live or args.livelocal:
         setup_live_mode(args, vp1config)
+
+    #TODO: This needs to be conditional: if RDOs are there, then add this algo...
+    _logger.verbose("+ About to setup Muon RDOs to Digits...")
+    # Add MDT RDO to digit config
+    from MuonConfig.MuonByteStreamCnvTestConfig import MdtRdoToMdtDigitCfg
+    cfg.merge(MdtRdoToMdtDigitCfg(flags))
+    _logger.verbose("+ MdtRdoToMdtDigitCfg added.")
+    # Add MM RDO to digit config
+    from MuonConfig.MuonByteStreamCnvTestConfig import MM_RdoToDigitCfg
+    cfg.merge(MM_RdoToDigitCfg(flags))
+    _logger.verbose("+ MM_RdoToDigitCfg added.")
+    # Add sTGC RDO to digit config
+    from MuonConfig.MuonByteStreamCnvTestConfig import STGC_RdoToDigitCfg
+    cfg.merge(STGC_RdoToDigitCfg(flags))
+    _logger.verbose("+ STGC_RdoToDigitCfg added.")
+    
+    _logger.verbose("+ ...Done")
 
     # configure VP1
     cfg.merge(VP1AlgCfg(flags, **vp1config))

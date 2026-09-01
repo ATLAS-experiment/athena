@@ -22,4 +22,7 @@
         "--ignore=B006,B007,B019,E701,E702,E704,E741",
         "--enable-extensions=ATL902"
     ],
+    "files.associations": {
+        "*.icc": "cpp",
+    },
 }
