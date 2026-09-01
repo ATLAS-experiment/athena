@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration.
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration.
 #
 # File: share/xAODRootTest.py
 # Author: snyder@bnl.gov
@@ -10,10 +10,9 @@
 # Otherwise we can get inconsistent resolution of a static std::string,
 # leading to a free() failure during exit().
 import ROOT
+import cppyy
 if ROOT.gSystem.FindDynamicLibrary (cppyy.gbl.TString ("libGaudiKernel"), True):
     ROOT.gSystem.Load("libGaudiKernel")
-
-import cppyy
 
 import sys
 cppyy.load_library("libDataModelTestDataCommonDict")
@@ -272,7 +271,7 @@ class xAODTestCopy:
         CHECK (event.copy (self.readPrefix + 'plinksInfo'))
         #CHECK (event.copy (self.readPrefix + 'hview'))
 
-        if self.writePrefix != None:
+        if self.writePrefix is not None:
             cinfo = event[self.readPrefix + 'cinfo']
             copy_obj (event, cinfo, self.writePrefix + 'cinfo')
 
@@ -326,7 +325,7 @@ class xAODTestDecor:
             self.decor.set(c, self.offset + c.anInt())
 
         ctrig = event[self.readPrefix + 'ctrig']
-        for c in cvec:
+        for c in ctrig:
             self.decor.set(c, self.offset + c.anInt())
 
         cinfo = event[self.readPrefix + 'cinfo']
@@ -404,14 +403,14 @@ class Analysis:
 
     def run (self, n=None):
         nent = self.event.getEntries()
-        if n != None:
+        if n is not None:
             nent = min (n, nent)
         for i in range(nent):
             self.event.getEntry(i)
             print ('---> Event', i)
             for a in self.algs:
                 a.execute (self.event)
-            if self.fout != None:
+            if self.fout is not None:
                 self.event.fill()
         return
 
