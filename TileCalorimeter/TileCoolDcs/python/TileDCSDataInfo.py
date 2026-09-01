@@ -149,7 +149,7 @@ class TileDCSDataInfo:
         self.dbstring = {"DEFAULT":[],"COOL":[],"ORACLE":[],"TESTBEAM":[]}
         self.dbstring['DEFAULT'] += [dbstring]*3
         dbstring = "oracle://ATLAS_COOLPROD;schema=ATLAS_COOLOFL_DCS;dbname=COMP200;"
-        dbstring+= "user=ATLAS_COOL_READER;password=COOLRED4PRO"
+        dbstring+= "user=ATLAS_COOL_READER;password=_"
         self.dbstring['COOL'] += [None]
         self.dbstring['COOL'] += [dbstring]
         self.dbstring['COOL'] += [dbstring.replace("COMP200","CONDBR2")]

@@ -31,7 +31,7 @@ print
 
 # get database service and open database
 dbSvc=cool.DatabaseSvcFactory.databaseService()
-dbstring="oracle://ATLAS_COOLPROD;schema=ATLAS_COOLONL_TRIGGER;dbname=COMP200;user=ATLAS_COOL_READER;password=COOLRED4PRO"
+dbstring="oracle://ATLAS_COOLPROD;schema=ATLAS_COOLONL_TRIGGER;dbname=COMP200;user=ATLAS_COOL_READER;password=_"
 
 try:
     db=dbSvc.openDatabase(dbstring,False)

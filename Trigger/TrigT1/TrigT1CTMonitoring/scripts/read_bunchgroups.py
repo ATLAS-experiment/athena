@@ -44,7 +44,7 @@ if (run == -1) :
 
 # get database service and open database
 dbSvc=cool.DatabaseSvcFactory.databaseService()
-dbstring="oracle://ATLAS_COOLPROD;schema=ATLAS_COOLONL_TRIGGER;dbname=COMP200;user=ATLAS_COOL_READER;password=COOLRED4PRO"
+dbstring="oracle://ATLAS_COOLPROD;schema=ATLAS_COOLONL_TRIGGER;dbname=COMP200;user=ATLAS_COOL_READER;password=_"
 #dbstring="sqlite://;schema=/afs/cern.ch/user/b/berge/trash/ctp.LBData.1190647872.sqlitefile.db;dbname=L1CTCOOL"
 
 try:

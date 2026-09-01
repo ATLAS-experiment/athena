@@ -51,8 +51,8 @@ log.info('Processing run '+str(opts.run)+' lb beg='+str(opts.lbbeg)+' to lb end=
 ###
 
 dbSvc=cool.DatabaseSvcFactory.databaseService()
-dbTrigString="oracle://ATLAS_COOLPROD;schema=ATLAS_COOLONL_TRIGGER;dbname=COMP200;user=ATLAS_COOL_READER;password=COOLRED4PRO"
-dbTdaqString="oracle://ATLAS_COOLPROD;schema=ATLAS_COOLONL_TDAQ;dbname=COMP200;user=ATLAS_COOL_READER;password=COOLRED4PRO"
+dbTrigString="oracle://ATLAS_COOLPROD;schema=ATLAS_COOLONL_TRIGGER;dbname=COMP200;user=ATLAS_COOL_READER;password=_"
+dbTdaqString="oracle://ATLAS_COOLPROD;schema=ATLAS_COOLONL_TDAQ;dbname=COMP200;user=ATLAS_COOL_READER;password=_"
 
 try:
     dbTrig=dbSvc.openDatabase(dbTrigString, False)

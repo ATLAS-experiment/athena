@@ -10,9 +10,6 @@ import AthenaCommon.AtlasUnixGeneratorJob
 # Set handler for traceback
 #gbl.AthenaServices.SetFatalHandler(438)
 
-#import password for devdb10 from devdb10pwd.py
-from devdb10_pwd import devdb10pwd
-
 ## get a handle to the default top-level algorithm sequence
 from AthenaCommon.AlgSequence import AlgSequence
 topSequence = AlgSequence()
@@ -88,9 +85,9 @@ IOVDbTestAlg.online = True				# Print lumiblock as well
 try:
     svcMgr.IOVDbSvc.dbConnection  = "impl=cool;techno=oracle;devdb10:"
     svcMgr.IOVDbSvc.dbConnection  += TESTCOOL
-    svcMgr.IOVDbSvc.dbConnection  += ":ATLAS_COOLTEST:%s" %devdb10pwd
+    svcMgr.IOVDbSvc.dbConnection  += ":ATLAS_COOLTEST:"
 except:
-	svcMgr.IOVDbSvc.dbConnection  = "oracle://devdb10;dbname=TESTCOOL;schema=ATLAS_COOLTEST;user=ATLAS_COOLTEST;password=%s" %devdb10pwd
+	svcMgr.IOVDbSvc.dbConnection  = "oracle://devdb10;dbname=TESTCOOL;schema=ATLAS_COOLTEST;user=ATLAS_COOLTEST;password=_"
 
 # uncomment this to use a local SQLite file instead
 #svcMgr.IOVDbSvc.dbConnection  = "sqlite://;schema=mytest.db;dbname=TESTCOOL"
