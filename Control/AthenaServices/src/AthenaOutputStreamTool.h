@@ -99,7 +99,6 @@ private:
    std::string  m_outputAttributes;
    std::string  m_metaDataOutputAttributes;
    SG::ReadHandleKey<AthenaAttributeList>  m_attrListKey{this, "AttributeListKey", "", "optional key for AttributeList to be written as part of the DataHeader: default = \"\""};
-   //SG::WriteHandleKey<AthenaAttributeList>  m_attrListWrite{this, "AttributeListWrite", "", "optional key for AttributeList to be written as part of the DataHeader: default = <AttributeListKey>+\"Decisions\""};
    std::string  m_attrListWrite{""};
 
    ServiceHandle<StoreGateSvc>   m_store{ this, "Store", "StoreGateSvc/DetectorStore", "Pointer to the data store"};

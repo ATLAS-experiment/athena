@@ -54,9 +54,6 @@ class AthenaOutputStream : public extends<FilteredAlgorithm,
                                           IIncidentListener, IIoComponent> {
 
 public:
-   /// typedefs
-   typedef std::vector<SG::DataProxy*>     Items;
-   typedef std::vector<std::pair<std::string, std::string> > TypeKeyPairs;
    typedef std::recursive_mutex mutex_t;
 
    /// Standard algorithm Constructor
@@ -165,9 +162,6 @@ protected:
    /// Decoded list of transient ids.
    ToolHandle<SG::IFolder>  m_transient;
 
-   /// Map of (clid,key) pairs to be excluded (comes from m_excludeList)
-   std::multimap<CLID,std::string> m_CLIDKeyPairs;
-
    /// Collection of objects being selected
    IDataSelector m_objects;
 
@@ -206,9 +200,6 @@ protected:
 
    /// Handler for ItemNames Property
    void itemListHandler(Gaudi::Details::PropertyBase& /* theProp */);
-
-   /// Handler for ItemNames Property
-   void excludeListHandler(Gaudi::Details::PropertyBase& /* theProp */);
 
    /// Handler for ItemNames Property
    void compressionListHandlerHigh(Gaudi::Details::PropertyBase& /* theProp */);
