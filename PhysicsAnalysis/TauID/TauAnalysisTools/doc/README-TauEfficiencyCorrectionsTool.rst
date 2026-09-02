@@ -118,7 +118,7 @@ are available for tool steering:
    * - ``JetIDLevel``
      - ``int``
      - ``JETIDNONE``
-     - ``JETIDRNNLOOSE``, ``JETIDRNNMEDIUM``, ``JETIDRNNTIGHT`` (for Run2 and Run3), ``JETIDGNTAULOOSE``, ``JETIDGNTAUMEDIUM``, ``JETIDGNTAUTIGHT`` (only for Run3)
+     - ``JETIDRNNLOOSE``, ``JETIDRNNMEDIUM``, ``JETIDRNNTIGHT`` (for Run2 and Run3), ``JETIDGNTAULOOSE``, ``JETIDGNTAUMEDIUM``, ``JETIDGNTAUTIGHT`` (for Run2 and Run3)
 
    * - ``EleIDLevel``
      - ``int``
@@ -138,7 +138,7 @@ are available for tool steering:
    * - ``useGNTau``
      - ``bool``
      - ``false``
-     - ``set to true to use GNTAU based recommendations - not available for Run2 and not available for TauTrigger for both Run2 and Run3``  
+     - ``set to true to use GNTAU based recommendations - for Run2, only Tau ID scale factors are currently available; not available for TauTrigger for both Run2 and Run3``
 
 In addition the following properties are available for further configurations:
      
