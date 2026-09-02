@@ -40,7 +40,8 @@ CUDASeedingAlgProviderTool::getTripletSeedingAlgorithm(const EventContext& ctx, 
     traccc::memory_resource{m_MRs->mainMR(), m_MRs->hostMR()},
     *copy,
     traccc::cuda::stream_wrapper{m_streamTool->stream(ctx)},
-    makeActsAthenaLogger(this, "TracccSPFormationCUDA"))};
+    makeActsAthenaLogger(this, "TracccTripletSeedingCUDA"))};
+
 }
 
 DeviceAlgorithmT<traccc::device::gbts_seeding_algorithm>
