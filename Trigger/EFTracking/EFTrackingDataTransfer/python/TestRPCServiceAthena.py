@@ -31,7 +31,7 @@ acc.merge(ByteStreamReadCfg(flags))
 
 unpackEI = CompFactory.EventInfoPackagingTool("UnpackEI")
 robsSvc = acc.addService(CompFactory.ROBDataProviderSvc())
-# unpackBS = CompFactory.BSPackagingTool("UnpackBS", OutputLevel=DEBUG, ROBDataProvider=robsSvc)
+unpackBS = CompFactory.BSPackagingTool("UnpackBS", OutputLevel=DEBUG, ROBDataProvider=robsSvc)
 
 execTool = CompFactory.ExecuteOngRPCCall(UnpackingTools=[unpackEI, unpackBS])
 
