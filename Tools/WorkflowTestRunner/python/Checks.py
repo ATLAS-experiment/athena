@@ -210,8 +210,8 @@ class FrozenTier0PolicyCheck(WorkflowCheck):
                 self.logger.error(f"Your change breaks the frozen derivation policy in test {test.ID}.")
                 self.logger.error("Please make sure you explain the reason for the change and ask relevant experts for approval.")
             else:
-                self.logger.error(f"Your change breaks the frozen tier0 policy in test {test.ID}.")
-                self.logger.error("Please make sure this has been discussed in the correct meeting (RIG or Simulation) meeting and approved by the relevant experts.")
+                self.logger.error(f"Your change affects standard outputs in test {test.ID}.")
+                self.logger.error("Please make sure you explain the reason for the change and ask relevant experts for approval.")
 
             # copy the artifacts
             if self.setup.disable_release_setup:
