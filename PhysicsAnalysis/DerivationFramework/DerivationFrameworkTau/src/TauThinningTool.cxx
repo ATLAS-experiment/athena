@@ -89,8 +89,6 @@ StatusCode DerivationFramework::TauThinningTool::doThinning(const EventContext& 
     }
   }   
 
-  static const SG::ConstAccessor<std::vector< ElementLink< xAOD::PFOContainer > > > linkAcc( "neutralPFOLinks" );
-
   // keep the various tau-related objects for taus passing the selection
   for (const auto* tau : tausToKeep) {
     // tau
@@ -106,13 +104,7 @@ StatusCode DerivationFramework::TauThinningTool::doThinning(const EventContext& 
 
     // neutral PFOs
     for (size_t i=0; i<tau->nNeutralPFOs(); i++) {
-      ///if (linkAcc.isAvailable(*tau->neutralPFO(i))) { 
-      //  std::vector<ElementLink<xAOD::PFOContainer>> nPFOLink = linkAcc(*tau->neutralPFO(i));
-      //  if ( nPFOLink.at(i).isValid() && tau->neutralPFO(i)->pt() > 100) {
-      //  std::cout << " do you see me ? "<< std::endl; 	
-      //    neutralPFOs.keep(tau->neutralPFO(i)->index());
-      //  }
-      //}
+      // prevent accessing some neutral PFO which might be thinned 
       try{ tau->neutralPFO(i); } catch (...) { continue;}
       neutralPFOs.keep(tau->neutralPFO(i)->index());   
 
