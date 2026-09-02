@@ -348,7 +348,7 @@ def addEvgenSequences(flags, cfg):
     cfg.addSequence(EvgenSequenceFactory(EvgenSequence.Post), parentName=EvgenSequence.Main.value)
 
 
-def MainServicesCfg(flags, LoopMgr='AthenaEventLoopMgr', forceRemoteELMgr=False):
+def MainServicesCfg(flags, LoopMgr='AthenaEventLoopMgr'):
     # Set the Python OutputLevel on the root logger
     from AthenaCommon.Logging import log
     log.setLevel(flags.Exec.OutputLevel)
@@ -379,14 +379,11 @@ def MainServicesCfg(flags, LoopMgr='AthenaEventLoopMgr', forceRemoteELMgr=False)
                 LoopMgr = "AthenaMtesEventLoopMgr"
             elif flags.Exec.MPI:
                 LoopMgr = "MPIHiveEventLoopMgr"
-            else:
+            elif LoopMgr != "AthenaRemoteEventLoopMgr":
                 LoopMgr = "AthenaHiveEventLoopMgr"
 
         if flags.Concurrency.NumProcs > 0:
             LoopMgr = "AthMpEvtLoopMgr"
-
-        if forceRemoteELMgr:  # FIXME:
-            LoopMgr = 'AthenaRemoteEventLoopMgr'
 
     # Core components needed for serial and threaded jobs:
     cfg = MainServicesMiniCfg(flags, loopMgr=LoopMgr, masterSequence='AthMasterSeq')
@@ -452,15 +449,14 @@ def MainServicesCfg(flags, LoopMgr='AthenaEventLoopMgr', forceRemoteELMgr=False)
             cfg.merge(AthenaMtesEventLoopMgrCfg(flags,True,flags.Exec.MTEventServiceChannel))
         elif flags.Exec.MPI:
             cfg.merge(MPIHiveEventLoopMgrCfg(flags))
+        elif LoopMgr == "AthenaRemoteEventLoopMgr":
+            cfg.merge(AthenaRemoteEventLoopMgrCfg(flags))
         else:
             cfg.merge(AthenaHiveEventLoopMgrCfg(flags))
         # Setup SGCommitAuditor to sweep new DataObjects at end of Alg execute
         cfg.addAuditor( CompFactory.SGCommitAuditor() )
     elif LoopMgr == 'AthenaEventLoopMgr':
         cfg.merge(AthenaEventLoopMgrCfg(flags))
-
-    # FIXME: Integrate this in a nicer way
-    # cfg.merge(AthenaRemoteEventLoopMgrCfg(flags))
 
     # Performance monitoring and profiling:
     if flags.PerfMon.doFastMonMT or flags.PerfMon.doFullMonMT:

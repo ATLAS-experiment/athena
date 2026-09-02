@@ -1,39 +1,43 @@
-from AthenaConfiguration.ComponentFactory import CompFactory
-from AthenaConfiguration.AllConfigFlags import initConfigFlags
-from AthenaConfiguration.MainServicesConfig import MainServicesCfg, AthenaRemoteEventLoopMgrCfg
-from AthenaConfiguration.TestDefaults import defaultTestFiles, defaultGeometryTags, defaultConditionsTags
 # from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
-from AthenaCommon.Constants import DEBUG, VERBOSE
-
+from AthenaCommon.Constants import VERBOSE
+from AthenaConfiguration.AllConfigFlags import initConfigFlags
+from AthenaConfiguration.ComponentFactory import CompFactory
+from AthenaConfiguration.MainServicesConfig import MainServicesCfg
+from AthenaConfiguration.TestDefaults import (
+    defaultConditionsTags,
+    defaultGeometryTags,
+    defaultTestFiles,
+)
 from ByteStreamCnvSvc.ByteStreamConfig import ByteStreamReadCfg
 
-
 flags = initConfigFlags()
-flags.Input.Files = defaultTestFiles.RAW_RUN3_DATA22 # this is completely dummy input to get event loop going
-flags.GeoModel.AtlasVersion =  defaultGeometryTags.RUN3
+
+# This is completely dummy input to get event loop going
+flags.Input.Files = defaultTestFiles.RAW_RUN3_DATA22
+flags.GeoModel.AtlasVersion = defaultGeometryTags.RUN3
 flags.IOVDb.GlobalTag = defaultConditionsTags.RUN3_DATA22
 
 flags.Exec.MaxEvents = -1
 
-flags.Exec.OutputLevel=VERBOSE
-flags.Concurrency.NumThreads=1
-flags.Concurrency.NumOffloadThreads=1
+flags.Exec.OutputLevel = VERBOSE
+flags.Concurrency.NumThreads = 1
+flags.Concurrency.NumOffloadThreads = 1
 flags.lock()
 
+LoopMgr = "AthenaHiveEventLoopMgr"
+acc = MainServicesCfg(flags, LoopMgr=LoopMgr)
+acc.merge(ByteStreamReadCfg(flags))
+# acc.addService(CompFactory.TimelineSvc("TimelineSvc", RecordTimeline=True, OutputLevel=DEBUG))
 
-acc = MainServicesCfg(flags, forceRemoteELMgr=True)
-acc.merge(AthenaRemoteEventLoopMgrCfg(flags))
-acc.addService(CompFactory.TimelineSvc("TimelineSvc", RecordTimeline=True, OutputLevel=DEBUG))
+unpackEI = CompFactory.EventInfoPackagingTool("UnpackEI")
+# robsSvc = acc.addService(CompFactory.ROBDataProviderSvc())
+# unpackBS = CompFactory.BSPackagingTool("UnpackBS", OutputLevel=DEBUG, ROBDataProvider=robsSvc)
+
+execTool = CompFactory.ExecuteOngRPCCall(UnpackingTools=[unpackEI])
 
 # TODO, this would be configured in advance, when ELMgr is configured
-robsSvc = acc.addService(CompFactory.ROBDataProviderSvc())
-el = acc.getService("AthenaRemoteEventLoopMgr")
-el.OutputLevel=VERBOSE
-unpackEI = CompFactory.EventInfoPackagingTool("UnpackEI")
-unpackBS = CompFactory.BSPackagingTool("UnpackBS", OutputLevel=DEBUG, ROBDataProvider=robsSvc)
-
-execTool = CompFactory.ExecuteOngRPCCall( UnpackingTools=[unpackEI, unpackBS])
-el.eventExecTool=execTool
+el = acc.getService(LoopMgr)
+el.eventExecTool = execTool
 
 # from TrigT2CaloCommon.TrigCaloDataAccessConfig import trigCaloDataAccessSvcCfg
 # acc.merge(trigCaloDataAccessSvcCfg(flags))
