@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRUTHRIVETTOOLS_HIGGSTEMPLATECROSSSECTIONSDEFS_H
@@ -1124,7 +1124,7 @@ namespace Rivet {
     /// Decay STXS observables
     std::vector<float> decay_observables{};
     /// Decay STXS cuts passed
-    int decay_cuts_passed;
+    int decay_cuts_passed{};
     /// Error code: Whether classification was succesful or some error occured
     HTXS::ErrorCode errorCode;
   };

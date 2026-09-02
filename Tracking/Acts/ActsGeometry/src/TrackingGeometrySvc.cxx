@@ -75,6 +75,7 @@ namespace {
   Acts::ViewConfigFunc viewConfigFunc(const Acts::ViewConfig& volumeCfg,
                                       const Acts::ViewConfig& portalCfg,
                                       const Acts::ViewConfig& sensitiveCfg) {
+    //coverity[AUTO_CAUSES_COPY]
     return [volumeCfg, portalCfg, sensitiveCfg](const Acts::GeometryObject& geoObj) {
       if (geoObj.geometryId().boundary() != 0) {
         return portalCfg;

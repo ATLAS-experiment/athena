@@ -21,6 +21,7 @@
 #include <ranges> 
 #include <cmath> //for sqrt
 #include <ios> //for hex, dec
+#include <memory>
 
 
 LArCaliWaveFromTuple::LArCaliWaveFromTuple (const std::string& name, ISvcLocator* pSvcLocator) : AthAlgorithm(name, pSvcLocator)
@@ -85,7 +86,7 @@ StatusCode LArCaliWaveFromTuple::stop()
   outfit->SetBranchAddress("ADC", &Amplitude);
 
   // Create new LArCaliWaveContainer
-  LArCaliWaveContainer* larCaliWaveContainerNew = new LArCaliWaveContainer();
+  auto larCaliWaveContainerNew = std::make_unique<LArCaliWaveContainer>();
   ATH_CHECK ( larCaliWaveContainerNew->setGroupingType(m_groupingType, msg()) );
   ATH_CHECK ( larCaliWaveContainerNew->initialize() );
 
@@ -152,7 +153,7 @@ StatusCode LArCaliWaveFromTuple::stop()
   } 
 	  
 
-  ATH_CHECK( detStore()->record(larCaliWaveContainerNew,m_store_key) );
+  ATH_CHECK( detStore()->record(std::move(larCaliWaveContainerNew),m_store_key) );
   ATH_MSG_INFO ( "LArCaliWaveFromTuple finalized!" );
   return StatusCode::SUCCESS;
 }
