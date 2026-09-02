@@ -106,7 +106,9 @@ def process_log_file(url, branch, test_name):
         # Okay, we have a digest change
         failing_tests[branch].append(process_digest_change(text, ami_tag, mr_number, human_readable_date, test_name))
 
-    if 'ERROR    Your change affects standard outputs in test' in text or 'ERROR    Your change breaks the frozen derivation policy in test' in text:
+    if ('ERROR    Your change affects standard outputs in test' in text or
+        'ERROR    Your change breaks the frozen tier0 policy in test' in text or
+        'ERROR    Your change breaks the frozen derivation policy in test' in text):
         # DiffPool change
         failing_tests[branch].append(process_diffpool_change(text, ami_tag, mr_number, human_readable_date, test_name))
     
