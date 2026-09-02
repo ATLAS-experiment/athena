@@ -15,6 +15,7 @@
 #include "AthenaKernel/IEventSeek.h"
 #include "AthenaKernel/ICollectionSize.h"
 #include "GaudiKernel/IIncidentListener.h"
+#include "GaudiKernel/IIncidentSvc.h"
 #include "AthenaKernel/Timeout.h"
 #include "GaudiKernel/MinimalEventLoopMgr.h"
 
@@ -36,6 +37,7 @@
 #include "GaudiKernel/IHiveWhiteBoard.h"
 #include "GaudiKernel/IScheduler.h"
 #include "GaudiKernel/IAlgExecStateSvc.h"
+#include "AthenaKernel/IEventExecutionTool.h"
 
 // Standard includes
 #include <functional>
@@ -145,6 +147,7 @@ protected:
   /// Initialize all algorithms and output streams
   StatusCode initializeAlgorithms();
 
+  ToolHandle<IEventExecutionTool> m_eventExecutionTool{this, "eventExecTool", "PlainEventExecutionTool/PlainEventExecutionTool", "Tool that wraps execution of the event"};
 
   //***********************************************************//
   // for Hive

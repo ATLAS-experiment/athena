@@ -172,6 +172,38 @@ def AthenaHiveEventLoopMgrCfg(flags):
 
     return cfg
 
+def AthenaRemoteEventLoopMgrCfg(flags):
+    cfg = ComponentAccumulator()
+    hivesvc = CompFactory.SG.HiveMgrSvc(
+        "EventDataSvc", NSlots=flags.Concurrency.NumConcurrentEvents
+    )
+    cfg.addService(hivesvc)
+
+    arp = CompFactory.AlgResourcePool(
+        TopAlg=["AthMasterSeq"]
+    )  # this should enable control flow
+    cfg.addService(arp)
+
+    scheduler = cfg.getPrimaryAndMerge(AvalancheSchedulerSvcCfg(flags))
+
+    elmgr = CompFactory.AthenaRemoteEventLoopMgr(
+        WhiteboardSvc=hivesvc.getName(),
+        SchedulerSvc=scheduler.getName(),
+        # EventPrintoutInterval = flags.Exec.EventPrintoutInterval
+    )
+
+    # if flags.Input.OverrideRunNumber:
+    #     from AthenaKernel.EventIdOverrideConfig import EvtIdModifierSvcCfg
+    #     elmgr.EvtIdModifierSvc = cfg.getPrimaryAndMerge(EvtIdModifierSvcCfg(flags))
+    #
+    # if flags.Common.isOverlay and not flags.Overlay.DataOverlay:
+    #     elmgr.RequireInputAttributeList = True
+    #     elmgr.UseSecondaryEventNumber = True
+
+    cfg.addService(elmgr)
+
+    return cfg
+
 def AthenaMpEventLoopMgrCfg(flags):
     cfg = ComponentAccumulator()
     if flags.Common.isOverlay and not flags.Overlay.DataOverlay:
@@ -353,7 +385,7 @@ def MainServicesCfg(flags, LoopMgr='AthenaEventLoopMgr'):
                 LoopMgr = "AthenaMtesEventLoopMgr"
             elif flags.Exec.MPI:
                 LoopMgr = "MPIHiveEventLoopMgr"
-            else:
+            elif LoopMgr != "AthenaRemoteEventLoopMgr":
                 LoopMgr = "AthenaHiveEventLoopMgr"
 
         if flags.Concurrency.NumProcs > 0:
@@ -417,6 +449,8 @@ def MainServicesCfg(flags, LoopMgr='AthenaEventLoopMgr'):
             cfg.merge(AthenaMtesEventLoopMgrCfg(flags,True,flags.Exec.MTEventServiceChannel))
         elif flags.Exec.MPI:
             cfg.merge(MPIHiveEventLoopMgrCfg(flags))
+        elif LoopMgr == "AthenaRemoteEventLoopMgr":
+            cfg.merge(AthenaRemoteEventLoopMgrCfg(flags))
         else:
             cfg.merge(AthenaHiveEventLoopMgrCfg(flags))
         # Setup SGCommitAuditor to sweep new DataObjects at end of Alg execute
