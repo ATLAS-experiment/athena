@@ -1,27 +1,25 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef DERIVATIONFRAMEWORK_PHOTONSDIRECTIONTOOL_H
-#define DERIVATIONFRAMEWORK_PHOTONSDIRECTIONTOOL_H
+#ifndef DERIVATIONFRAMEWORK_PHOTONSDIRECTIONALG_H
+#define DERIVATIONFRAMEWORK_PHOTONSDIRECTIONALG_H
 
-#include "DerivationFrameworkInterfaces/IAugmentationTool.h"
-//
-#include "AthenaBaseComps/AthAlgTool.h"
+#include "AthenaBaseComps/AthReentrantAlgorithm.h"
 #include "xAODEgamma/PhotonContainer.h"
 //
 #include <string>
 #include <vector>
 namespace DerivationFramework {
 
-  class PhotonsDirectionTool : public extends<AthAlgTool, IAugmentationTool>
+  class PhotonsDirectionAlg : public AthReentrantAlgorithm
   {
   public:
 
-    using base_class::base_class;
+    using AthReentrantAlgorithm::AthReentrantAlgorithm;
 
     virtual StatusCode initialize() override final;
-    virtual StatusCode addBranches(const EventContext& ctx) const override final;
+    virtual StatusCode execute(const EventContext& ctx) const override final;
 
   private:
     SG::ReadHandleKey<xAOD::PhotonContainer> m_collName{ this,
@@ -56,4 +54,4 @@ namespace DerivationFramework {
   };
 }
 
-#endif // DERIVATIONFRAMEWORK_PHOTONSDIRECTIONTOOL_H
+#endif // DERIVATIONFRAMEWORK_PHOTONSDIRECTIONALG_H

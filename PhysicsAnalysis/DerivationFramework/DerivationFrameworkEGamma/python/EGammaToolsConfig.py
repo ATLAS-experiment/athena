@@ -9,11 +9,11 @@ from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 
 
-# PhotonsDirectionTool
-def PhotonsDirectionToolCfg(flags, name, **kwargs):
-    """Configure the PhotonsDirectionTool"""
+# PhotonsDirectionAlg
+def PhotonsDirectionAlgCfg(flags, name, **kwargs):
+    """Configure the PhotonsDirectionAlg"""
     acc = ComponentAccumulator()
-    acc.setPrivateTools(CompFactory.DerivationFramework.PhotonsDirectionTool(name, **kwargs))
+    acc.addEventAlgo(CompFactory.DerivationFramework.PhotonsDirectionAlg(name, **kwargs))
     return acc
 
 

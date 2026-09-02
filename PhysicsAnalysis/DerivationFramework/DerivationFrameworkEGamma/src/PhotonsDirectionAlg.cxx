@@ -1,23 +1,23 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////
-// PhotonsDirectionTool
+// PhotonsDirectionAlg
 // compute photon et = E(cluster)/cosh(eta of 2nd sampling)
 // eventually E will be after recalibration
 ///////////////////////////////////////////////////////////////////
 // Author: Giovanni Marchiori (giovanni.marchiori@cern.ch)
 //
 
-#include "DerivationFrameworkEGamma/PhotonsDirectionTool.h"
+#include "DerivationFrameworkEGamma/PhotonsDirectionAlg.h"
 #include "xAODCaloEvent/CaloCluster.h"
 #include "xAODEgamma/PhotonContainer.h"
 
 namespace DerivationFramework {
 
 StatusCode
-PhotonsDirectionTool::initialize()
+PhotonsDirectionAlg::initialize()
 {
   ATH_CHECK(m_collName.initialize());
 
@@ -26,7 +26,7 @@ PhotonsDirectionTool::initialize()
   m_doEt = !(m_sgEt.key().empty());
   m_doE = !(m_sgE.key().empty());
   if (!m_doEta && !m_doPhi && !m_doE && !m_doEt) {
-    ATH_MSG_ERROR("You are requesting the PhotonsDirectionTool but have "
+    ATH_MSG_ERROR("You are requesting the PhotonsDirectionAlg but have "
                   "provided no SG names for any of the results");
     return StatusCode::FAILURE;
   }
@@ -38,7 +38,7 @@ PhotonsDirectionTool::initialize()
 }
 
 StatusCode
-PhotonsDirectionTool::addBranches(const EventContext& ctx) const
+PhotonsDirectionAlg::execute(const EventContext& ctx) const
 {
   // Retrieve photon container
   SG::ReadHandle<xAOD::PhotonContainer> photons(m_collName, ctx);

@@ -1,4 +1,4 @@
-#include "DerivationFrameworkEGamma/PhotonsDirectionTool.h"
+#include "DerivationFrameworkEGamma/PhotonsDirectionAlg.h"
 #include "DerivationFrameworkEGamma/EGInvariantMassTool.h"
 #include "DerivationFrameworkEGamma/EGTransverseMassTool.h"
 #include "DerivationFrameworkEGamma/EGSelectionToolWrapper.h"
@@ -15,7 +15,7 @@
 #include "DerivationFrameworkEGamma/EGammaFudgeAlgorithm.h"
 
 using namespace DerivationFramework;
-DECLARE_COMPONENT( PhotonsDirectionTool )
+DECLARE_COMPONENT( PhotonsDirectionAlg )
 DECLARE_COMPONENT( EGInvariantMassTool )
 DECLARE_COMPONENT( EGTransverseMassTool )
 DECLARE_COMPONENT( EGSelectionToolWrapper )

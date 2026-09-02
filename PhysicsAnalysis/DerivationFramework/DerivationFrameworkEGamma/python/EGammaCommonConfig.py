@@ -23,16 +23,14 @@ def EGammaCommonCfg(flags):
     # ====================================================================
     # PHOTON ETA (=ETA2), ET (=E/COSH(ETA2))
     # ====================================================================
-    from DerivationFrameworkEGamma.EGammaToolsConfig import PhotonsDirectionToolCfg
+    from DerivationFrameworkEGamma.EGammaToolsConfig import PhotonsDirectionAlgCfg
 
-    DFCommonPhotonsDirection = acc.addPublicTool(acc.popToolsAndMerge(
-        PhotonsDirectionToolCfg(
-            flags,
-            name="DFCommonPhotonsDirection",
-            EtaSGEntry="DFCommonPhotons_eta",
-            PhiSGEntry="DFCommonPhotons_phi",
-            EtSGEntry="DFCommonPhotons_et",
-        ) # TODO Migrate to AthReentrantAlgorithm
+    acc.merge(PhotonsDirectionAlgCfg(
+        flags,
+        name="DFCommonPhotonsDirection",
+        EtaSGEntry="DFCommonPhotons_eta",
+        PhiSGEntry="DFCommonPhotons_phi",
+        EtSGEntry="DFCommonPhotons_et",
     ))
 
     isMC = flags.Input.isMC
@@ -730,7 +728,6 @@ def EGammaCommonCfg(flags):
 
     # list of all the decorators so far
     EGAugmentationTools = [
-        DFCommonPhotonsDirection,
         ElectronPassLHVeryLoose,
         ElectronPassLHLoose,
         ElectronPassLHLooseBL,
