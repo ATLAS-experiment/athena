@@ -1,4 +1,4 @@
-#InputDB="oracle://ATONR_COOL;schema=ATLAS_COOLOFL_LAR;dbname=CONDBR2;;password=COOLRED4PRO"
+#InputDB="oracle://ATONR_COOL;schema=ATLAS_COOLOFL_LAR;dbname=CONDBR2;;password=_"
 InputDB="COOLOFL_LAR/CONDBR2"
 #Folder="/LAR/ElecCalibOfl/CaliWaves/CaliWave"
 FolderTag="LARElecCalibCaliWavesCaliWave-comm-08"

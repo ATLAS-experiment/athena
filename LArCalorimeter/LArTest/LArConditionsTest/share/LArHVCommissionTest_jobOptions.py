@@ -49,7 +49,7 @@ IOVDbSvc.OutputLevel        = DEBUG
 
 # set the connection string to the database you want to use
 #IOVDbSvc.dbConnection  = "impl=cool;techno=oracle;devdb10:TESTCOOL:ATLAS_COOLTEST:cool4devdb"
-IOVDbSvc.dbConnection  = "impl=cool;techno=oracle;schema=ATLAS_COOL_LAR;ATLAS_COOLPROD:DCSP130:ATLAS_COOL_READER:COOLRED4PRO"
+IOVDbSvc.dbConnection  = "impl=cool;techno=oracle;schema=ATLAS_COOL_LAR;ATLAS_COOLPROD:DCSP130:ATLAS_COOL_READER:_"
 
 #--------------------------------------------------------------
 # Set the following when reading back to adjust the run/event numbers

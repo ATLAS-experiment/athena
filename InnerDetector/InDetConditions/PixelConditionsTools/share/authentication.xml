@@ -2,7 +2,7 @@
  
 <connection name="oracle://ATLAS_COOLPROD/ATLAS_COOL_PIXEL">
 <parameter name="user" value="ATLAS_COOL_PIXEL_W" />
-<parameter name="password" value="WCOOL4PIXEL11" />
+<parameter name="password" value="_" />
 </connection>
  
 </connectionlist>
