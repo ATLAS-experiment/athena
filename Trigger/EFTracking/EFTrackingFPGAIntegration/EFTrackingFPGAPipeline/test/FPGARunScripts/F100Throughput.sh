@@ -95,7 +95,7 @@ preExecFlags="flags.Tracking.doTruth=True;flags.Tracking.ITkActsValidateF100Pass
 
 # In case of GBTS seeding strategy
 if [ "$useGBTS" == "True" ]; then
-    preExecFlags="${preExecFlags};from ActsConfig.ActsConfigFlags import SeedingStrategy;flags.Acts.SeedingStrategy=SeedingStrategy.GbtsFtf"
+    preExecFlags="${preExecFlags};from ActsConfig.ActsConfigFlags import SeedingStrategy;flags.Tracking.ITkActsValidateF100Pass.SeedingStrategy=SeedingStrategy.GbtsFtf"
 fi
 
 ATHENA_CORE_NUMBER=${threads} Reco_tf.py --CA \

@@ -16,7 +16,7 @@ def prepare_acts_rdo2aod(pipeline : str):
 
     if pipeline == "C230":
         _args.append('from ActsConfig.ActsConfigFlags import SeedingStrategy')
-        _args.append('flags.Acts.SeedingStrategy=SeedingStrategy.GbtsFtf')
+        _args.append('flags.Tracking.ITkActsPass.SeedingStrategy=SeedingStrategy.GbtsFtf')
 
     preExec = ';'.join(_args)
 

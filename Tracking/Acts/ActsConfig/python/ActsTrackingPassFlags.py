@@ -1,6 +1,7 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration 
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration 
 
 from TrkConfig.TrackingPassFlags import createTrackingPassFlags, createITkTrackingPassFlags, createITkFastTrackingPassFlags, createITkConversionTrackingPassFlags, createITkHeavyIonTrackingPassFlags, createITkLargeD0TrackingPassFlags, createITkLowPtTrackingPassFlags
+from ActsConfig.ActsConfigFlags import SeedingStrategy
 import AthenaCommon.SystemOfUnits as Units
 
 def deactivateAthenaComponents(icf):
@@ -30,6 +31,7 @@ def setActsDefaultTunings(icf):
     icf.addFlag("isSecondaryPass", False)
     icf.addFlag("isLargeD0", False)
     icf.addFlag("autoReverseSearch", False)
+    icf.addFlag("SeedingStrategy", SeedingStrategy.GridTriplet, type=SeedingStrategy)
     # Extension used to name the persistified track particle container
     # (InDet{extension}TrackParticles) when storeSeparateContainer is
     # requested. If empty, the pass extension is used.
@@ -173,6 +175,7 @@ def createEFValidateF150TrackingPassFlags():
     # Override acts default values
     icf.Xi2max = [50]
     icf.Xi2maxNoAdd = [100]
+    icf.SeedingStrategy = SeedingStrategy.F150
     return icf
 
 # Main Inner Detector ACTS Tracking pass
