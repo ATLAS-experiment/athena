@@ -74,7 +74,6 @@ run "${pipelineName}" \
   runReco_G130_FS.sh \
     -i ${InputRDOfiles} \
     -o "${OutSampleName}.AOD.pool.root" \
-    --storeSeeds \
     "$@"
 
 ## Don't run if IDTPM json config is not found

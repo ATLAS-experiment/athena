@@ -31,6 +31,7 @@ inputRDO=""
 outputAOD=""
 nEvents="-1"
 skipCheck=0
+storeTrackSeeds=True
 
 ## parsing flags
 while [ $# -ge 1 ];do
@@ -40,6 +41,7 @@ while [ $# -ge 1 ];do
         -o  | --outputAOD )     if [ $# -lt 2 ] ; then usage ; fi ; outputAOD="$2" ; shift ;;
         -n  | --nEvents )       if [ $# -lt 2 ] ; then usage ; fi ; nEvents="$2"   ; shift ;;
         -s  | --skipCheck )     if [ $# -lt 1 ] ; then usage ; fi ; skipCheck=1    ;;
+        -t  | --noStoreSeeds )  if [ $# -lt 1 ] ; then usage ; fi ; storeTrackSeeds=False ;;
         -h  | --help )          usage 0 ;;
         *) shift ;;
     esac
@@ -61,11 +63,11 @@ run Reco_tf.py \
     --maxEvents ${nEvents} \
     --preInclude 'InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude' \
     --postInclude 'ActsConfig.ActsPostIncludes.ACTSClusterPostInclude' \
-    --preExec 'flags.Detector.EnableHGTD=False; \
+    --preExec "flags.Detector.EnableHGTD=False; \
                flags.Acts.doLargeRadius=False; \
                flags.Acts.Device.doClusterization=True; \
                flags.Tracking.doPixelDigitalClustering=True; \
-               flags.Tracking.ITkActsPass.storeTrackSeeds=True; \
+               flags.Tracking.ITkActsPass.storeTrackSeeds=${storeTrackSeeds}; \
                from ActsConfig.ActsConfigFlags import SeedingStrategy; \
                flags.Tracking.ITkActsPass.SeedingStrategy=SeedingStrategy.Gbts;' \
     --inputRDOFile ${inputRDO} \
