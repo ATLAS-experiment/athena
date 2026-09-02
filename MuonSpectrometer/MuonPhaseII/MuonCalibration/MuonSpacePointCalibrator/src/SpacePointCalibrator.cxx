@@ -308,6 +308,11 @@ namespace MuonR4{
                 cov[Acts::toUnderlying(AxisDefs::etaCov)] = calibCov;
                 Amg::Transform3D toChamberTrans{ locToGlob.inverse() * cluster->readoutElement()->localToGlobalTransform(*gctx, cluster->layerHash())};
 
+                if (spacePoint->dimension() == 2) {
+                    cov[Acts::toUnderlying(AxisDefs::phiCov)] *=
+                        Acts::square(m_sTgcNonPrecCoordErrorScale.value());
+                }
+
                 // since we want to take the second coordiante from the external estimate we need to transform the sp posiiton to the layer frame, replace the precission coordinate and transform back
                 Amg::Vector3D calibSpPosInLayer = toChamberTrans.inverse() * calibSpPos;
                 ATH_MSG_DEBUG("in layer before calibration" << Amg::toString(calibSpPosInLayer));
@@ -404,7 +409,7 @@ namespace MuonR4{
         }
 
         // For now just copying over the local position and covariance. Eventually this should apply corrections from B-Lines and as build geometry
-        return std::make_pair( cluster.localPosition<1>()[0], Acts::square(m_sTgcStripErrorScale.value()) * cluster.localCovariance<1>()(0,0));
+        return std::make_pair( cluster.localPosition<1>()[0], Acts::square(m_sTgcPrecCoordErrorScale.value()) * cluster.localCovariance<1>()(0,0));
     }
     void SpacePointCalibrator::calibrateCombinedPrd(const EventContext& ctx, 
                                                     const ActsTrk::GeometryContext& gctx,
@@ -443,6 +448,9 @@ namespace MuonR4{
                                                                     trackPars.direction())};
                 cmbPos[0] = calibPosCov.first;
                 cmbCov(0,0) = calibPosCov.second;
+
+                // Loosen non-precision / second coordinate
+                cmbCov(1,1) *= Acts::square(m_sTgcNonPrecCoordErrorScale.value());
             }
             setState<2>(ProjectorType::e2DimNoTime, cmbPos, cmbCov, sl, state);
         
