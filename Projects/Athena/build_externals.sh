@@ -17,7 +17,6 @@ ATLAS_EXTRA_CMAKE_ARGS=(-DLCG_VERSION_NUMBER=110
                         -DATLAS_VECMEM_SOURCE="URL;http://cern.ch/atlas-software-dist-eos/externals/vecmem/v1.27.0.tar.gz;https://github.com/acts-project/vecmem/archive/refs/tags/v1.27.0.tar.gz;URL_MD5;30ef85b2a9326c08d291f4fea949e097"
                         -DATLAS_GEANT4_USE_LTO=TRUE
                         -DATLAS_VECGEOM_USE_LTO=TRUE
-                        -DATLAS_ONNXRUNTIME_USE_CUDA=TRUE
                         -DATLAS_GAUDI_USE_CUDA=TRUE)
 ATLAS_EXTRA_MAKE_ARGS=()
 
