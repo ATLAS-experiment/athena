@@ -248,29 +248,83 @@ StatusCode AthenaRemoteEventLoopMgr::nextEvent([[maybe_unused]] int maxevt) {
       }
     } else {
       ATH_MSG_INFO("No free slots, draining scheduler");
+      // NOTE: Code mostly copied from AthenaHiveEventLoopMgr
 
+      std::vector<std::unique_ptr<EventContext>> finishedEvtContexts;
       EventContext* ctx{nullptr};
 
-      // FIXME: Hangs on this
       sc = m_schedulerSvc->popFinishedEvent(ctx);
       if (sc.isSuccess()) {
         ATH_MSG_INFO("drainScheduler: scheduler not empty: Context " << ctx);
+        finishedEvtContexts.emplace_back(ctx);
       } else {
         // no more events left in scheduler to be drained
         ATH_MSG_INFO("drainScheduler: scheduler empty");
       }
 
-      // TODO: Finish this after figuring out why above hangs
-      //
-      // ATH_MSG_INFO("Processesed " << m_nevt << " event(s) remotely");
-      // sc = m_eventExecutionTool->completeEvent(this, std::move(ctx));
-      //
-      // if (!sc.isSuccess()) {
-      //   ATH_MSG_ERROR(
-      //       "Terminating event processing loop due to errors in
-      //       completeEvent");
-      //   break;
-      // }
+      // Let's see if we can pop other event contexts
+      while (m_schedulerSvc->tryPopFinishedEvent(ctx).isSuccess()) {
+        finishedEvtContexts.emplace_back(ctx);
+      }
+
+      for (auto& thisFinishedEvtContext : finishedEvtContexts) {
+        if (!thisFinishedEvtContext) {
+          ATH_MSG_FATAL("Detected nullptr ctxt while clearing WB!");
+          sc = StatusCode::FAILURE;
+          continue;
+        }
+
+        if (m_aess->eventStatus(*thisFinishedEvtContext) !=
+            EventStatus::Success) {
+          ATH_MSG_FATAL("Failed event detected on "
+                        << thisFinishedEvtContext << " w/ fail mode: "
+                        << m_aess->eventStatus(*thisFinishedEvtContext));
+          sc = StatusCode::FAILURE;
+          continue;
+        }
+
+        EventID::number_type n_run(0);
+        EventID::event_number_t n_evt(0);
+
+        if (m_whiteboard->selectStore(thisFinishedEvtContext->slot())
+                .isSuccess()) {
+          n_run = thisFinishedEvtContext->eventID().run_number();
+          n_evt = thisFinishedEvtContext->eventID().event_number();
+        } else {
+          ATH_MSG_ERROR("DrainSched: unable to select store "
+                        << thisFinishedEvtContext->slot());
+          sc = StatusCode::FAILURE;
+          continue;
+        }
+
+        // Some code still needs global context in addition to that passed in
+        // the incident
+        Gaudi::Hive::setCurrentContext(*thisFinishedEvtContext);
+        m_incidentSvc->fireIncident(Incident(
+            name(), IncidentType::EndProcessing, *thisFinishedEvtContext));
+
+        ATH_MSG_DEBUG("Clearing slot " << thisFinishedEvtContext->slot()
+                                       << " (event "
+                                       << thisFinishedEvtContext->evt()
+                                       << ") of the whiteboard");
+        m_eventExecutionTool->completeEvent(this, *thisFinishedEvtContext)
+            .ignore();
+        if (!m_whiteboard->freeStore(thisFinishedEvtContext->slot())
+                 .isSuccess()) {
+          ATH_MSG_ERROR("Whiteboard slot " << thisFinishedEvtContext->slot()
+                                           << " could not be properly cleared");
+          sc = StatusCode::FAILURE;
+          continue;
+        }
+
+        ATH_MSG_INFO("  ===>>>  done processing event #"
+                     << n_evt << ", run #" << n_run << " on slot "
+                     << thisFinishedEvtContext->slot() << ",  " << ++m_processed
+                     << " events processed so far  <<<===");
+
+        ATH_MSG_DEBUG("drainScheduler thisFinishedEvtContext: "
+                      << thisFinishedEvtContext);
+      }
     }
   }
 

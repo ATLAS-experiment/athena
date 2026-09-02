@@ -144,7 +144,7 @@ StatusCode ExecuteOngRPCCall::completeEvent(MinimalEventLoopMgr* el,
   return StatusCode::SUCCESS;
 }
 
-static tbb::task_group s_serverTask;
+// static tbb::task_group s_serverTask;
 static std::unique_ptr<gRPCServerHelper> s_serverHelper;
 static std::unique_ptr<Server> s_server;
 
@@ -165,7 +165,8 @@ StatusCode ExecuteOngRPCCall::initialize() {
   }
 
   ATH_MSG_INFO("Server ready, putting it to waiting state");
-  s_serverTask.run([]() { s_server->Wait(); });
+  // FIXME: This clashes with tbb inside Gaudi causing one of the slots to hang
+  // s_serverTask.run([]() { s_server->Wait(); });
   ATH_MSG_INFO("Server waiting");
 
   ATH_CHECK(m_unpackingTools.retrieve());

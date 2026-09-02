@@ -112,8 +112,11 @@ class AthenaRemoteEventLoopMgr
 
   bool m_firstRun{true};
 
-  /// Number of events processed
+  /// Number of events scheduled
   size_t m_nevt{0};
+
+  /// Number of events processed
+  size_t m_processed{0};
 
   bool m_useTools{false};
 };
