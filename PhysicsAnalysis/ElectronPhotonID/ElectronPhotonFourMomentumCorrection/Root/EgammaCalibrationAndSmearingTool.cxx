@@ -6,6 +6,8 @@
 #include <AsgTools/AsgToolConfig.h>
 
 #include <algorithm>
+#include <bit>
+#include <cstdint>
 #include <format>
 #include <memory>
 #include <string>
@@ -301,13 +303,24 @@ EgammaCalibrationAndSmearingTool::EgammaCalibrationAndSmearingTool(
                              columnar::EgammaId egamma,
                              columnar::EventInfoId ei) {
         const Accessors& acc = *tool.m_accessors;
-        // avoid 0 as result, see
-        // https://root.cern.ch/root/html/TRandom3.html#TRandom3:SetSeed
         auto cluster = acc.caloClusterAcc(egamma)[0].value();
-        return 1 + static_cast<RandomNumber>(
-                       std::abs(acc.clusterPhiAcc(cluster)) * 1E6 +
-                       std::abs(acc.clusterEtaAcc(cluster)) * 1E3 +
-                       acc.eventNumberAcc(ei));
+        // Seed the generator the same way Philox4x32HashRNGTestTool does: the
+        // per-tool seed base forms the Philox key (its "stream selector"), and
+        // the cluster eta/phi (as their raw 32-bit float bit patterns) plus the
+        // 64-bit event number fill the 4x32 (128-bit) counter (an exact fit),
+        // letting the counter-based bijection mix the components itself.  Since
+        // only a single random number is drawn per object, the seed base is
+        // used directly as the key.
+        const std::uint64_t eventNumber = acc.eventNumberAcc(ei);
+        const r123::Philox4x32::key_type key = {{
+            static_cast<std::uint32_t>(tool.m_seedBase.value()),
+            static_cast<std::uint32_t>(tool.m_seedBase.value() >> 32)}};
+        const r123::Philox4x32::ctr_type ctr = {{
+            std::bit_cast<std::uint32_t>(static_cast<float>(acc.clusterPhiAcc(cluster))),
+            std::bit_cast<std::uint32_t>(static_cast<float>(acc.clusterEtaAcc(cluster))),
+            static_cast<std::uint32_t>(eventNumber),
+            static_cast<std::uint32_t>(eventNumber >> 32)}};
+        return AtlasRoot::egammaEnergyCorrectionTool::Philox4x32Seed{ctr, key};
       }),
       m_accessors(std::make_unique<Accessors>(*this)) {
 
@@ -1025,7 +1038,7 @@ CP::CorrectionCode EgammaCalibrationAndSmearingTool::applyCorrection(
   const Accessors& acc = *m_accessors;
 
   // only used in simulation (for the smearing)
-  RandomNumber seed = m_set_seed_function(*this, input, event_info);
+  auto rng = m_set_seed_function(*this, input, event_info);
 
   columnar::ClusterId inputCluster = acc.caloClusterAcc (input)[0].value();
 
@@ -1263,7 +1276,7 @@ CP::CorrectionCode EgammaCalibrationAndSmearingTool::applyCorrection(
       acc.Es2Acc.isAvailable(inputCluster)
           ? acc.Es2Acc(inputCluster)
           : inputCluster(acc.energyBEAcc,2),
-      eraw, seed, oldtool_scale_flag_this_event(input, event_info),
+      eraw, rng, oldtool_scale_flag_this_event(input, event_info),
       oldtool_resolution_flag_this_event(input, event_info), m_TResolutionType,
       m_varSF);
 

@@ -22,11 +22,20 @@
 #include "TH2.h"
 #include "TList.h"
 #include "TSystem.h"
-#include "TRandom3.h"
+#include "TMath.h"
 #include "egammaUtils/eg_resolution.h"
+
+// Random123 is a vendored, header-only third-party library (see the
+// Random123 package's README.atlas).  Wrap its includes in diagnostic
+// pragmas so its code style does not break the ATLAS warning-free build.
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wold-style-cast"
+#include <Random123/uniform.hpp>
+#pragma GCC diagnostic pop
 
 #include <format>
 #include <cassert>
+#include <cstdint>
 #include <exception>
 #include <iomanip>
 #include <ios>
@@ -1851,7 +1860,7 @@ double egammaEnergyCorrectionTool::getCorrectedMomentum(
 double egammaEnergyCorrectionTool::getCorrectedEnergy(
     unsigned int runnumber, PATCore::ParticleDataType::DataType dataType,
     PATCore::ParticleType::Type ptype, double cl_eta, double cl_etaS2, double cl_etaCalo,
-    double energy, double energyS2, double eraw, RandomNumber random_seed,
+    double energy, double energyS2, double eraw, const Philox4x32Seed& rng,
     egEnergyCorr::Scale::Variation scaleVar,
     egEnergyCorr::Resolution::Variation resVar,
     egEnergyCorr::Resolution::resolutionType resType, double varSF) const {
@@ -1968,7 +1977,7 @@ double egammaEnergyCorrectionTool::getCorrectedEnergy(
     if (resVar != egEnergyCorr::Resolution::None)
       fullyCorrectedEnergy *=
           getSmearingCorrection(cl_eta, cl_etaCalo, fullyCorrectedEnergy,
-                                random_seed, ptype, dataType, resVar, resType);
+                                rng, ptype, dataType, resVar, resType);
 
     ATH_MSG_DEBUG(std::format("after resolution correction = {:.2f}", fullyCorrectedEnergy));
   }
@@ -3009,7 +3018,7 @@ double egammaEnergyCorrectionTool::fcn_sigma(double energy, double Cdata,
 // derive smearing correction
 
 double egammaEnergyCorrectionTool::getSmearingCorrection(
-    double cl_eta, double cl_etaCalo, double energy, RandomNumber seed,
+    double cl_eta, double cl_etaCalo, double energy, const Philox4x32Seed& rng,
     PATCore::ParticleType::Type ptype,
     PATCore::ParticleDataType::DataType dataType,
     egEnergyCorr::Resolution::Variation value,
@@ -3065,13 +3074,17 @@ double egammaEnergyCorrectionTool::getSmearingCorrection(
 
   const double sigma = sqrt(sigma2);
 
-  TRandom3 rng(seed);
-
-  const double DeltaE0 = rng.Gaus(0, sigma);
+  // Draw the smearing from a single Philox 4x32 keyed-hash evaluation (the
+  // same mechanism as Philox4x32HashRNGTestTool): map the first output word
+  // to a uniform in the open interval (0,1) via u01fixedpt (so the inverse
+  // CDF never hits +-infinity), then to a Gaussian via the inverse normal CDF.
+  const r123::Philox4x32::ctr_type out = r123::Philox4x32{}(rng.ctr, rng.key);
+  const double u = r123::u01fixedpt<double, std::uint32_t>(out[0]);
+  const double DeltaE0 = sigma * TMath::NormQuantile(u);
   const double cor0 = (energyGeV + DeltaE0) / energyGeV;
 
-  ATH_MSG_DEBUG("sigma|DeltaE0|cor0|seed = " << sigma << "|" << DeltaE0 << "|"
-                                             << cor0 << "|" << rng.GetSeed());
+  ATH_MSG_DEBUG("sigma|DeltaE0|cor0 = " << sigma << "|" << DeltaE0 << "|"
+                                        << cor0);
 
   return cor0;  // TODO: why not returning DeltaE0 and apply E -> E + DeltaE0 ?
 }

@@ -1,0 +1,17 @@
+This directory is a vendored, unmodified copy of the header-only
+Random123 library (counter-based random number generators) from
+
+  https://github.com/DEShawResearch/random123
+
+pinned to release tag v1.14.0 (the include/Random123 subtree).
+
+Random123 is BSD-3-Clause licensed; see the LICENSE file in this
+directory.
+
+DO NOT EDIT these headers locally.  To update, re-fetch the
+include/Random123 subtree from a newer Random123 release tag and replace
+this directory wholesale, keeping this note and the LICENSE.
+
+It is vendored here (rather than taken as an external) because it is
+header-only and is only used internally by Root/Philox4x32RNGTestTool.cxx
+for preliminary RNG performance studies.

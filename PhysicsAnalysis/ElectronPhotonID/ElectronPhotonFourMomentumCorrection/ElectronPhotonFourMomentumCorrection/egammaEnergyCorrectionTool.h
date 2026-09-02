@@ -22,6 +22,14 @@
 #include <vector>
 #include <memory>
 
+// Random123 is a vendored, header-only third-party library (see the
+// Random123 package's README.atlas).  Wrap its includes in diagnostic
+// pragmas so its code style does not break the ATLAS warning-free build.
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wold-style-cast"
+#include <Random123/philox.h>
+#pragma GCC diagnostic pop
+
 // Forward declarations
 class eg_resolution;
 class get_MaterialResolutionEffect;
@@ -377,7 +385,16 @@ static const double GeV = 1.e+3;
 class egammaEnergyCorrectionTool : public asg::AsgMessaging {
 
  public:
-  typedef unsigned int RandomNumber;
+  /// @brief the counter and key for a single Philox 4x32 keyed-hash
+  /// evaluation used to derive the smearing correction.  The counter encodes
+  /// the object identity (cluster eta/phi and event number) and the key
+  /// encodes the per-tool seed; the caller fills both (see
+  /// Philox4x32HashRNGTestTool for the reference mechanism).
+  struct Philox4x32Seed {
+    r123::Philox4x32::ctr_type ctr;
+    r123::Philox4x32::key_type key;
+  };
+
   egammaEnergyCorrectionTool();
   virtual ~egammaEnergyCorrectionTool();
 
@@ -430,7 +447,7 @@ class egammaEnergyCorrectionTool : public asg::AsgMessaging {
   double getCorrectedEnergy(
       unsigned int runnumber, PATCore::ParticleDataType::DataType dataType,
       PATCore::ParticleType::Type ptype, double cl_eta, double cl_etaS2,double cl_etaCalo,
-      double energy, double energyS2, double eraw, RandomNumber seed,
+      double energy, double energyS2, double eraw, const Philox4x32Seed& rng,
       egEnergyCorr::Scale::Variation scaleVar = egEnergyCorr::Scale::None,
       egEnergyCorr::Resolution::Variation resVar =
           egEnergyCorr::Resolution::None,
@@ -500,7 +517,7 @@ class egammaEnergyCorrectionTool : public asg::AsgMessaging {
   // Note : energies in MeV
 
   double getSmearingCorrection(
-      double eta, double etaCalo, double energy, RandomNumber seed,
+      double eta, double etaCalo, double energy, const Philox4x32Seed& rng,
       PATCore::ParticleType::Type ptype = PATCore::ParticleType::Electron,
       PATCore::ParticleDataType::DataType dataType =
           PATCore::ParticleDataType::Full,
