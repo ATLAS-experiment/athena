@@ -5,9 +5,6 @@ topSequence = AlgSequence()
 from AthenaCommon.AppMgr import ServiceMgr as svcMgr
 from AthenaCommon.AppMgr import theApp
 
-#import password for devdb10 from devdb10pwd.py
-from devdb10_pwd import devdb10pwd
-
 import IOVDbSvc.IOVDb
 
 from IOVDbTestAlg.IOVDbTestAlgConf import IOVDbTestAlg
@@ -41,9 +38,9 @@ IOVDbTestAlg.RegTime       = exTime
 try:
     svcMgr.IOVDbSvc.dbConnection  = "impl=cool;techno=oracle;devdb10:"
     svcMgr.IOVDbSvc.dbConnection  += TESTCOOL
-    svcMgr.IOVDbSvc.dbConnection  += ":ATLAS_COOLTEST:%s" %devdb10pwd
+    svcMgr.IOVDbSvc.dbConnection  += ":ATLAS_COOLTEST:"
 except:
-        svcMgr.IOVDbSvc.dbConnection  = "oracle://devdb10;dbname=TESTCOOL;schema=ATLAS_COOLTEST;user=ATLAS_COOLTEST;password=%s" %devdb10pwd
+        svcMgr.IOVDbSvc.dbConnection  = "oracle://devdb10;dbname=TESTCOOL;schema=ATLAS_COOLTEST;user=ATLAS_COOLTEST;password=_"
 
 # uncomment this to use a local SQLite file instead
 svcMgr.IOVDbSvc.dbConnection  = "sqlite://;schema=mytest.db;dbname=TESTCOOL"
