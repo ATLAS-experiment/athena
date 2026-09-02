@@ -211,6 +211,8 @@ StatusCode TauEfficiencyCorrectionsTool::initializeTools_2025_prerec()
 	if(m_useGNTau){
           if(m_sCampaign=="mc23"){
               m_sInputFilePathJetIDHadTau = sDirectory + "GNTauID_TrueHadTau_Run3.root";  		  
+	  } else if (m_sCampaign=="mc20"){
+	      m_sInputFilePathJetIDHadTau = sDirectory + "GNTauID_TrueHadTau_Run2.root";
 	  } else {  
               ATH_MSG_ERROR("GNTau ID correction not supported for campaign "<< m_sCampaign);
 	      return StatusCode::FAILURE;
