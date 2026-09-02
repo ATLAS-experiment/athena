@@ -89,9 +89,9 @@ std::unique_ptr<pool::ICollection> PoolCollectionConverter::createCollection(con
 
    // Try to open EventTags Collection in the input file
    try {
-      return collSvc.open(collectionName, collectionType, connection, m_poolSvc->getInputContextSession(contextId)) ;
+      collPtr = collSvc.open(collectionName, collectionType, connection, m_poolSvc->getInputContextSession(contextId)) ;
    } catch (std::exception &e) {
-      return nullptr;
+      collPtr = nullptr;
    }
    return collPtr;
 }
