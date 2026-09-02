@@ -85,15 +85,15 @@ std::unique_ptr<pool::ICollection> PoolCollectionConverter::createCollection(con
                 unsigned int contextId) const {
    // access to these variables is serial, since this is called by event selector only
    pool::CollectionService collSvc ATLAS_THREAD_SAFE = pool::CollectionService();
-   std::unique_ptr<pool::ICollection> collPtr ATLAS_THREAD_SAFE = nullptr;
+   std::unique_ptr<pool::ICollection> collPtr ATLAS_THREAD_SAFE ;
 
    // Try to open EventTags Collection in the input file
    try {
-      collPtr = collSvc.open(collectionName, collectionType, connection, m_poolSvc->getInputContextSession(contextId));
+      return collSvc.open(collectionName, collectionType, connection, m_poolSvc->getInputContextSession(contextId)) ;
    } catch (std::exception &e) {
-      collPtr = nullptr;
+      return nullptr;
    }
-   return(collPtr);
+   return collPtr;
 }
 //______________________________________________________________________________
 StatusCode PoolCollectionConverter::disconnectDb() {
