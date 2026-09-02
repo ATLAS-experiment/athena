@@ -68,11 +68,21 @@ template<class CONDITIONSCONTAINER>
 StatusCode LArCalibPatchingAlg<CONDITIONSCONTAINER>::stop() {
   ATH_MSG_INFO ( "Entering LArCalibPatchingAlg" );
   if(m_isSC) {
-     ATH_CHECK( detStore()->retrieve(m_onlineHelper, "LArOnline_SuperCellID") );
-     ATH_CHECK( detStore()->retrieve(m_caloId, "CaloCell_SuperCell_ID") );
+     const CaloCell_SuperCell_ID* scCaloId=nullptr;
+     const LArOnline_SuperCellID* scOnlineId=nullptr;
+     ATH_CHECK( detStore()->retrieve(scOnlineId, "LArOnline_SuperCellID") );
+     ATH_CHECK( detStore()->retrieve(scCaloId, "CaloCell_SuperCell_ID") );
+     //cast to base-class
+     m_onlineHelper=scOnlineId;
+     m_caloId=scCaloId;
   } else {
-     ATH_CHECK( detStore()->retrieve(m_onlineHelper, "LArOnlineID") );
-     ATH_CHECK( detStore()->retrieve(m_caloId, "CaloCell_ID") );
+     const CaloCell_ID* caloId=nullptr;
+     const LArOnlineID* onlineId=nullptr;
+     ATH_CHECK( detStore()->retrieve(onlineId, "LArOnlineID") );
+     ATH_CHECK( detStore()->retrieve(caloId, "CaloCell_ID") );
+     //cast to base-class
+     m_onlineHelper=onlineId;
+     m_caloId=caloId;
   }
 
   if(m_isSC) m_bcMask.setSC();
