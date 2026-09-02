@@ -14,7 +14,7 @@
 using namespace pool;
 
 
-pool::ICollection*
+std::unique_ptr<pool::ICollection>
 pool::CollectionService::create( const CollectionDescription& description )
 {
    if( description.name().empty() ) {
@@ -26,7 +26,7 @@ pool::CollectionService::create( const CollectionDescription& description )
 }
 
 
-pool::ICollection* 
+std::unique_ptr<pool::ICollection> 
 pool::CollectionService::open( const std::string& name,
                                const DbType& type,
                                const std::string& connection,
@@ -44,14 +44,14 @@ pool::CollectionService::setMessageSvcQuiet( bool quiet )
 }
 
 
-pool::ICollection*
+std::unique_ptr<pool::ICollection>
 pool::CollectionService::plugin( const CollectionDescription& description,
                                  ICollection::OpenMode openMode,
                                  ISession* session )
 {
    if( description.type().majorType() == pool::ROOT_StorageType.type() ) {
-      return new RootCollection( &description, openMode );
+      return std::make_unique<RootCollection>( &description, openMode );
    } else {
-      return new ImplicitCollection( &description, openMode, session );
+      return std::make_unique<ImplicitCollection>( &description, openMode, session );
    }
 }

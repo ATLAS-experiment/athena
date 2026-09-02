@@ -10,7 +10,7 @@
 #include "StorageSvc/DbType.h"
 
 #include "CxxUtils/checker_macros.h"
-
+#include <memory>
 
 namespace pool {
 
@@ -45,7 +45,7 @@ namespace pool {
      *
      * @param description Specification of collection or collection fragment properties.
      */
-    static ICollection* create ATLAS_NOT_THREAD_SAFE ( const CollectionDescription& description );
+    static std::unique_ptr<pool::ICollection> create ATLAS_NOT_THREAD_SAFE ( const CollectionDescription& description );
 
 
     /**
@@ -60,7 +60,7 @@ namespace pool {
      * @param connection Connection to database containing collection or collection fragment.
      * @param session Reference to database session (need only be set for implicit collections).
      */
-    static ICollection* open ATLAS_NOT_THREAD_SAFE ( const std::string & name,
+    static std::unique_ptr<pool::ICollection> open ATLAS_NOT_THREAD_SAFE ( const std::string & name,
                                const DbType& type,
                                const std::string & connection = "",
                                ISession* session = 0 );
@@ -70,7 +70,7 @@ namespace pool {
      */
     static void setMessageSvcQuiet( bool quiet=true );
 
-    static ICollection* plugin ATLAS_NOT_THREAD_SAFE ( const CollectionDescription& description,
+    static std::unique_ptr<pool::ICollection> plugin ATLAS_NOT_THREAD_SAFE ( const CollectionDescription& description,
                                  ICollection::OpenMode openMode,
                                  ISession* session = 0 );
 
