@@ -49,7 +49,7 @@ public:
    /// @param connection [IN] string containing the connection.
    /// @param collectionName [IN] string containing the persistent name of the collection.
    /// @param contextId [IN] id for PoolSvc persistency service to use for input.
-   pool::ICollection* createCollection(const std::string& connection,
+   std::unique_ptr<pool::ICollection> createCollection(const std::string& connection,
            const std::string& collectionName,
            const pool::DbType& collectionType,
            unsigned int contextId) const;
@@ -68,7 +68,7 @@ private: // data
    std::string m_inputCollection;
    unsigned int m_contextId;
    const IPoolSvc* m_poolSvc;
-   pool::ICollection* m_poolCollection;
+   std::unique_ptr<pool::ICollection> m_poolCollection;
 
 private: // hide copy and assignment
    PoolCollectionConverter(const PoolCollectionConverter& rhs);

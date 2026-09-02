@@ -43,7 +43,6 @@ PoolCollectionConverter::PoolCollectionConverter(const std::string& collectionTy
 PoolCollectionConverter::~PoolCollectionConverter() {
    if (m_poolCollection) {
       m_poolCollection->close();
-      delete m_poolCollection; m_poolCollection = nullptr;
    }
 }
 //______________________________________________________________________________
@@ -80,13 +79,13 @@ StatusCode PoolCollectionConverter::initialize() {
    return StatusCode::SUCCESS;
 }
 //______________________________________________________________________________
-pool::ICollection* PoolCollectionConverter::createCollection(const std::string& connection,
+std::unique_ptr<pool::ICollection> PoolCollectionConverter::createCollection(const std::string& connection,
                 const std::string& collectionName,
                 const pool::DbType& collectionType,
                 unsigned int contextId) const {
    // access to these variables is serial, since this is called by event selector only
    pool::CollectionService collSvc ATLAS_THREAD_SAFE = pool::CollectionService();
-   pool::ICollection* collPtr ATLAS_THREAD_SAFE = nullptr;
+   std::unique_ptr<pool::ICollection> collPtr ATLAS_THREAD_SAFE = nullptr;
 
    // Try to open EventTags Collection in the input file
    try {

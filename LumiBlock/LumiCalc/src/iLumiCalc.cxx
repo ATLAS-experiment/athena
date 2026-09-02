@@ -463,8 +463,8 @@ int main(int argc, char * argv[]){
 
       // get Value for a Key
       pool::CollectionService collectionService;
-      pool::ICollection* collection = collectionService.open(tagfilename, pool::ROOT_StorageType.type(), tagfilename);
-      if(collection == NULL) {
+      auto collection = collectionService.open(tagfilename, pool::ROOT_StorageType.type(), tagfilename);
+      if(collection == nullptr) {
          logger << Root::kERROR << "ICollection is NULL, exiting... " << Root::GEndl;
          exit(-1);
       }
