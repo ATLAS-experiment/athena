@@ -1,5 +1,5 @@
 # from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
-from AthenaCommon.Constants import VERBOSE
+from AthenaCommon.Constants import DEBUG, VERBOSE
 from AthenaConfiguration.AllConfigFlags import initConfigFlags
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.MainServicesConfig import MainServicesCfg
