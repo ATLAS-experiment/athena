@@ -15,7 +15,7 @@ atlas_add_library( InDetIdentifier
                    src/PLR_ID.cxx
                    src/SiliconID.cxx
                    PUBLIC_HEADERS InDetIdentifier
-                   LINK_LIBRARIES AthenaKernel AtlasDetDescr IdDict Identifier
+                   LINK_LIBRARIES AthenaKernel AtlasDetDescr IdDict Identifier AthenaKernel
                    PRIVATE_LINK_LIBRARIES GaudiKernel )
 
 atlas_add_dictionary( InDetIdentifierDict

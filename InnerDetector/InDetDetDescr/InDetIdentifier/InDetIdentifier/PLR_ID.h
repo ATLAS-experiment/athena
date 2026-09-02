@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
  */
 
 #ifndef INDETIDENTIFIER_PLR_ID_H
@@ -10,6 +10,8 @@
  */
 
 #include "InDetIdentifier/PixelID.h"
+#include "AthenaKernel/CLASS_DEF.h"
+#include "AthenaKernel/BaseInfo.h"
 
 /**
 **  @class PLR_ID
@@ -45,5 +47,6 @@ private:
 // This is required and checked at compile time when you try to record/retrieve
 // See here: https://gitlab.cern.ch/atlas/athena/-/blob/master/DetectorDescription/DetDescrCnvSvc/src/DetDescrCnvSvc.cxx#L165
 CLASS_DEF(PLR_ID, 131939624, 1)
+SG_BASES( PLR_ID, PixelID );
 
 #endif // INDETIDENTIFIER_PLR_ID_H
