@@ -19,7 +19,7 @@ atlas_add_component( ActsTruth
 		     INCLUDE_DIRS
                      LINK_LIBRARIES
                        ActsEventLib
-			   		   Acts::Core
+                       Acts::Core
 		       ActsTruthLib
 		       ActsGeometryLib
 		       ActsGeometryInterfacesLib
