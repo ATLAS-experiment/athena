@@ -2,7 +2,6 @@
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
-from AthenaCommon.Constants import DEBUG 
 from JetToolHelpers.HelperConfig import HistoInputCfg
 
 def qgTagAlgCfg(configFlags, 
@@ -175,7 +174,6 @@ def BJTToolCfg(flags, **kwargs):
 
     kwargs.setdefault("CalibArea", "Local")
     kwargs.setdefault("IsMC", 1)
-    kwargs.setdefault("OutputLevel", DEBUG)
 
     if flags['tagger'] == 'WZ':
         acc.setPrivateTools(CompFactory.SmoothedWZTagger(**kwargs))
@@ -189,9 +187,6 @@ def BJTToolCfg(flags, **kwargs):
 def BJTSFToolCfg(flags, **kwargs):
 
     acc = ComponentAccumulator()
-
-    kwargs.setdefault("OutputLevel", DEBUG)
-
     acc.setPrivateTools(CompFactory.BJT.ScaleFactors(**kwargs))
 
     return acc
