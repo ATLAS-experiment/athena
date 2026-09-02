@@ -24,19 +24,6 @@
 #include <memory>
 
 
-LArCaliWaveFromTuple::LArCaliWaveFromTuple (const std::string& name, ISvcLocator* pSvcLocator) : AthAlgorithm(name, pSvcLocator)
-{  
-}
-
-LArCaliWaveFromTuple::~LArCaliWaveFromTuple() 
-= default;
-
-StatusCode LArCaliWaveFromTuple::initialize() 
-{
-  return StatusCode::SUCCESS ;
-}
-
-
 StatusCode LArCaliWaveFromTuple::stop()
 {
   ATH_MSG_INFO ( "... in stop()" );
