@@ -20,16 +20,11 @@ LArCaliWaveContainer containg the corresponding CaliWave. The root tree should
 class LArCaliWaveFromTuple : public AthAlgorithm
 {
  public:
-  LArCaliWaveFromTuple(const std::string & name, ISvcLocator * pSvcLocator);
-
-  ~LArCaliWaveFromTuple();
-
-  //standard algorithm methods
-  StatusCode initialize() ; 
+  using AthAlgorithm::AthAlgorithm;
 
   StatusCode execute(const EventContext& ) override final {return StatusCode::SUCCESS;};
 
-  StatusCode stop();
+  StatusCode stop() override;
  
  private:
   /// max number of points of the waveform in the ntuple
