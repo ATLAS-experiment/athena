@@ -37,6 +37,7 @@
 //______________________________________________________________________________
 // Initialize the service.
 StatusCode AthenaPoolSharedIOCnvSvc::initialize() {
+   ATH_CHECK(m_poolSvc.retrieve());
    if (!m_inputStreamingTool.empty() || !m_outputStreamingTool.empty()) {
       // Retrieve AthenaSerializeSvc
       ATH_CHECK(m_serializeSvc.retrieve());
@@ -60,7 +61,7 @@ StatusCode AthenaPoolSharedIOCnvSvc::initialize() {
         ATH_CHECK(arswsvc.retrieve());
       }
       // Put PoolSvc into share mode to avoid duplicating catalog.
-      getPoolSvc()->setShareMode(true);
+      m_poolSvc->setShareMode(true);
    }
    ServiceHandle<IIncidentSvc> incSvc("IncidentSvc", name());
    long int pri = 1000;
@@ -542,7 +543,7 @@ Token* AthenaPoolSharedIOCnvSvc::registerForWrite(Placement* placement, const vo
             placement->setTechnology(pool::DbType::getType(m_defaultContainerType).type());
          }
          ATH_MSG_DEBUG("Requested write object for: " << placement->toString());
-         token = getPoolSvc()->registerForWrite(placement, obj, classDesc);
+         token = m_poolSvc->registerForWrite(placement, obj, classDesc);
       } else {
          if (!m_outputStreamingTool.empty() && m_outputStreamingTool->isClient() && m_parallelCompression) {
             placement->setFileName(placement->fileName() + m_streamPortString.value());
@@ -830,7 +831,7 @@ StatusCode AthenaPoolSharedIOCnvSvc::readData() {
       }
    } else if (token.dbID() != Guid::null()) {
       std::string returnToken;
-      Token* metadataToken = getPoolSvc()->getToken("FID:" + token.dbID().toString(), token.contID(), token.oid().first);
+      Token* metadataToken = m_poolSvc->getToken("FID:" + token.dbID().toString(), token.contID(), token.oid().first);
       if( metadataToken ) {
          returnToken = metadataToken->toString();
          metadataToken->release(); metadataToken = nullptr;
@@ -851,8 +852,8 @@ StatusCode AthenaPoolSharedIOCnvSvc::readData() {
 
 //________________________________________________________________________________
 StatusCode AthenaPoolSharedIOCnvSvc::commitCatalog() {
-   getPoolSvc()->commitCatalog();
-   getPoolSvc()->startCatalog();
+   m_poolSvc->commitCatalog();
+   m_poolSvc->startCatalog();
    return(StatusCode::SUCCESS);
 }
 

@@ -86,9 +86,6 @@ public:
    /// Disconnect to the output connection.
    virtual StatusCode disconnectOutput(const std::string& outputConnectionSpec) override;
 
-   /// @return pointer to PoolSvc instance.
-   virtual IPoolSvc* getPoolSvc() override;
-
    /// @return a string token to a Data Object written to Pool
    /// @param placement [IN] pointer to the placement hint
    /// @param obj [IN] pointer to the Data Object to be written to Pool

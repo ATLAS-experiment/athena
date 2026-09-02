@@ -117,6 +117,7 @@ public:
    virtual ~AthenaPoolSharedIOCnvSvc();
 
 private: // data
+   ServiceHandle<IPoolSvc> m_poolSvc{this, "PoolSvc", "PoolSvc"};
    ServiceHandle<IAthenaSerializeSvc> m_serializeSvc{this,"AthenaRootSerializeSvc","AthenaRootSerializeSvc"};
    std::unique_ptr<RootAuxDynIO::IFactoryTool> m_auxDynTool;
    ToolHandle<IAthenaIPCTool>    m_inputStreamingTool{this,"InputStreamingTool",{}};
