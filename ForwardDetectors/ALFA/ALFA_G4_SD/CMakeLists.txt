@@ -28,7 +28,7 @@ atlas_install_joboptions( share/optionForTest.txt )
 # Test(s) in the package:
 atlas_add_test( ALFA_SensitiveDetector_gtest
                 SOURCES test/ALFA_SensitiveDetector_gtest.cxx
-                LINK_LIBRARIES ALFA_G4_SDLib G4AtlasToolsLib TestTools CxxUtils
+                LINK_LIBRARIES ALFA_G4_SDLib G4AtlasToolsLib MCTruth TestTools CxxUtils
                 POST_EXEC_SCRIPT noerror.sh )
 
 # Turn on/off LTO for all targets in the package.
