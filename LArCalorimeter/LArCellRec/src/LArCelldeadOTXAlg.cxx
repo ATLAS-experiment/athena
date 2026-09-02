@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArCelldeadOTXAlg.h"
@@ -79,7 +79,7 @@ StatusCode LArCelldeadOTXAlg::execute(const EventContext& ctx) const {
     for (i = 0; i < nBCIDs && bcids[i] != bcid; i++)
       ;
 
-    if (ATH_LIKELY(!satur[i]))
+    if (!satur[i]) [[likely]]
       scEne = energies[i];
     if (scEne < m_scCut) {
       ATH_MSG_VERBOSE("SC value " << scEne << " below threshold, ignoring");
@@ -156,7 +156,7 @@ void LArCelldeadOTXAlg::buildMap(const EventContext& ctx, StatusCode& sc) const 
       std::vector<float> vector_of_multipliers;
       std::vector<uint32_t> vector_of_chans;
       const int nChans = m_onlineID->channelInSlotMax(febid);//may return -999
-      if (ATH_UNLIKELY(nChans < 0)) {
+      if (nChans < 0) [[unlikely]] {
         ATH_MSG_WARNING("LArCelldeadOTXAlg::buildMap : nChans<0");
         continue;
       }
@@ -176,7 +176,7 @@ void LArCelldeadOTXAlg::buildMap(const EventContext& ctx, StatusCode& sc) const 
         }
         const unsigned nCell = (m_scidtool->superCellToOfflineID(scID)).size();
         const CaloDetDescrElement* dde = caloDDM->get_element(hashId);
-        if (ATH_UNLIKELY(!dde)) {
+        if (!dde) [[unlikely]] {
           ATH_MSG_INFO("No DetDescElement for cell hash : " << hashId);
 	} else {
           // 12.5: Convert SC ADC to MeV (Et), et ->e, scale by the number of regular cells connected to this super-cell
