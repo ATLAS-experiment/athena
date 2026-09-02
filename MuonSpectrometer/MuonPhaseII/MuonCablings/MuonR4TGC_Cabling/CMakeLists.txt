@@ -15,6 +15,11 @@ atlas_add_component(
     MuonIdHelpersLib
 )
 
+atlas_add_test(TgcCablingAlg_test
+    SCRIPT python ${CMAKE_CURRENT_SOURCE_DIR}/test/TgcCablingAlg_test.py
+    PROPERTIES TIMEOUT 300
+)
+
 atlas_install_python_modules(
     python/*.py
 )
