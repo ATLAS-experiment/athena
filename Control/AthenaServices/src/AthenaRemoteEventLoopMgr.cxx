@@ -212,55 +212,14 @@ StatusCode AthenaRemoteEventLoopMgr::nextEvent([[maybe_unused]] int maxevt) {
 
   ATH_MSG_INFO("Waiting for events from clients...");
   while (sc.isSuccess()) {
-    ATH_MSG_INFO("Free slots: " << m_schedulerSvc->freeSlots());
+    ATH_MSG_INFO("Checking for any finished events...");
+    std::vector<std::unique_ptr<EventContext>> finishedEvtContexts;
+    EventContext* finishedEvtContext{nullptr};
 
-    if (m_schedulerSvc->freeSlots() > 0) {
-      ATH_MSG_INFO("Got free slots, adding events to scheduler");
-
-      auto ctx = createEventContext();
-
-      if (!ctx.valid()) {
-        sc = StatusCode::FAILURE;
-      } else {
-        m_whiteboard->selectStore(ctx.slot()).ignore();
-
-        // CHECK: Needed?
-        // m_incidentSvc->fireIncident(
-        //     Incident("BeginEvent", IncidentType::BeginEvent));
-
-        // CHECK: Put this also here, not only in ::executeEvent so unpacking
-        // tools called by m_eventExecutionTool->executeEvent() put everything
-        // in the correct context?
-        Gaudi::Hive::setCurrentContext(ctx);
-
-        ATH_MSG_INFO("Entering m_eventExecutionTool::executeEvent()...");
-        sc = m_eventExecutionTool->executeEvent(this, std::move(ctx));
-
-        // CHECK: Needed?
-        // m_incidentSvc->fireIncident(
-        //     Incident("EndEvent", IncidentType::EndEvent));
-      }
-
-      if (!sc.isSuccess()) {
-        ATH_MSG_ERROR(
-            "Terminating event processing loop due to errors in executeEvent");
-        break;
-      }
-    } else {
-      ATH_MSG_INFO("No free slots, draining scheduler");
-      // NOTE: Code mostly copied from AthenaHiveEventLoopMgr
-
-      std::vector<std::unique_ptr<EventContext>> finishedEvtContexts;
-      EventContext* finishedEvtContext{nullptr};
-
-      if (m_schedulerSvc->popFinishedEvent(finishedEvtContext).isSuccess()) {
-        ATH_MSG_INFO("drainScheduler: scheduler not empty: Context "
-                     << finishedEvtContext);
-        finishedEvtContexts.emplace_back(finishedEvtContext);
-      } else {
-        // no more events left in scheduler to be drained
-        ATH_MSG_INFO("drainScheduler: scheduler empty");
-      }
+    if (m_schedulerSvc->popFinishedEvent(finishedEvtContext).isSuccess()) {
+      ATH_MSG_INFO("drainScheduler: scheduler not empty: Context "
+                   << finishedEvtContext);
+      finishedEvtContexts.emplace_back(finishedEvtContext);
 
       // Let's see if we can pop other event contexts
       while (
@@ -325,6 +284,60 @@ StatusCode AthenaRemoteEventLoopMgr::nextEvent([[maybe_unused]] int maxevt) {
 
         ATH_MSG_DEBUG("drainScheduler thisFinishedEvtContext: "
                       << thisFinishedEvtContext);
+      }
+    } else {
+      // no more events left in scheduler to be drained
+      ATH_MSG_INFO("drainScheduler: scheduler empty");
+    }
+
+    ATH_MSG_INFO("Free slots: " << m_schedulerSvc->freeSlots());
+    while (m_schedulerSvc->freeSlots() > 0) {
+      ATH_MSG_INFO("Got free slots, adding events to scheduler");
+
+      auto ctx = createEventContext();
+
+      if (!ctx.valid()) {
+        sc = StatusCode::FAILURE;
+      } else {
+        int slot = ctx.slot();
+        m_whiteboard->selectStore(ctx.slot()).ignore();
+
+        // CHECK: Needed?
+        // m_incidentSvc->fireIncident(
+        //     Incident("BeginEvent", IncidentType::BeginEvent));
+
+        // CHECK: Put this also here, not only in ::executeEvent so unpacking
+        // tools called by m_eventExecutionTool->executeEvent() put everything
+        // in the correct context?
+        Gaudi::Hive::setCurrentContext(ctx);
+
+        ATH_MSG_INFO("Entering m_eventExecutionTool::executeEvent()...");
+        StatusCode scExecuteEvent =
+            m_eventExecutionTool->executeEvent(this, std::move(ctx));
+        sc = scExecuteEvent.isSuccess() or scExecuteEvent.isRecoverable()
+                 ? StatusCode::SUCCESS
+                 : StatusCode::FAILURE;
+
+        // Timeout from gRPC
+        if (scExecuteEvent.isRecoverable()) {
+          if (!m_whiteboard->freeStore(slot).isSuccess()) {
+            ATH_MSG_ERROR("Whiteboard slot "
+                          << slot << " could not be properly cleared");
+            sc = StatusCode::FAILURE;
+          }
+          break;
+        }
+
+        // CHECK: Needed?
+        // m_incidentSvc->fireIncident(
+        //     Incident("EndEvent", IncidentType::EndEvent));
+      }
+
+      if (!sc.isSuccess()) {
+        ATH_MSG_ERROR(
+            "Terminating event processing loop due to errors in "
+            "executeEvent");
+        break;
       }
     }
   }
@@ -407,7 +420,7 @@ StatusCode AthenaRemoteEventLoopMgr::executeEvent(EventContext&& ctx) {
 
   ATH_MSG_INFO("  ===>>>  start processing event #"
                << evtNumber << ", run #" << runNumber << " on slot "
-               << ctx.slot() << ",  " << m_nevt
+               << ctx.slot() << ",  " << m_processed
                << " events processed so far  <<<===");
 
   ++m_nevt;

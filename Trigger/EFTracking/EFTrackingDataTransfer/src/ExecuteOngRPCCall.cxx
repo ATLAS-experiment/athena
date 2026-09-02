@@ -101,10 +101,15 @@ ExecuteOngRPCCall::ExecuteOngRPCCall(const std::string& type,
 
 StatusCode ExecuteOngRPCCall::executeEvent(MinimalEventLoopMgr* el,
                                            EventContext&& context) {
-
+  std::size_t timeoutCounter = 0;
   std::shared_ptr<ReqResp> r;
   while (!s_incommingRequests.try_pop(r)) {
+    /// FIXME: Find a better way to do this
+    if (timeoutCounter > 20) {
+      return StatusCode::RECOVERABLE;
+    }
     std::this_thread::sleep_for(std::chrono::milliseconds(100));
+    timeoutCounter++;
   }
 
   ATH_MSG_INFO("Got input, upacking with " << m_unpackingTools.size()

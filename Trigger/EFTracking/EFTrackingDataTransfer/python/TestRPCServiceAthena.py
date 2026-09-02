@@ -19,19 +19,19 @@ flags.IOVDb.GlobalTag = defaultConditionsTags.RUN3_DATA22
 
 flags.Exec.MaxEvents = -1
 
-flags.Exec.OutputLevel = VERBOSE
-flags.Concurrency.NumThreads = 1
-flags.Concurrency.NumOffloadThreads = 1
+# flags.Exec.OutputLevel = VERBOSE
+flags.Concurrency.NumThreads = 3
+flags.Concurrency.NumOffloadThreads = 3
 flags.lock()
 
 LoopMgr = 'AthenaRemoteEventLoopMgr'
 acc = MainServicesCfg(flags, LoopMgr=LoopMgr)
 acc.merge(ByteStreamReadCfg(flags))
-acc.addService(CompFactory.TimelineSvc("TimelineSvc", RecordTimeline=True, OutputLevel=DEBUG))
+# acc.addService(CompFactory.TimelineSvc("TimelineSvc", RecordTimeline=True))
 
 unpackEI = CompFactory.EventInfoPackagingTool("UnpackEI")
 robsSvc = acc.addService(CompFactory.ROBDataProviderSvc())
-unpackBS = CompFactory.BSPackagingTool("UnpackBS", OutputLevel=DEBUG, ROBDataProvider=robsSvc)
+# unpackBS = CompFactory.BSPackagingTool("UnpackBS", OutputLevel=DEBUG, ROBDataProvider=robsSvc)
 
 execTool = CompFactory.ExecuteOngRPCCall(UnpackingTools=[unpackEI])
 
