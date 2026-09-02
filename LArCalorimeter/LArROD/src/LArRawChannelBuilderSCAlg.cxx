@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArRawChannelBuilderSCAlg.h" 
@@ -91,12 +91,12 @@ StatusCode LArRawChannelBuilderSCAlg::execute(const EventContext& ctx) const {
     const auto& adc2mev=adc2MeVs->ADC2MEV(id,gain);
     
     //Sanity check on input conditions data:
-    if (ATH_UNLIKELY(p==ILArPedestal::ERRORCODE)) {
+    if (p==ILArPedestal::ERRORCODE) [[unlikely]] {
       ATH_MSG_ERROR("No valid pedestal for channel " << m_onlineId->channel_name(id) << " gain " << gain);
       return StatusCode::FAILURE;
     }
 
-    if(ATH_UNLIKELY(adc2mev.size()<2)) { 
+    if(adc2mev.size()<2) [[unlikely]] {
         ATH_MSG_ERROR("No valid ADC2MeV for channel " << m_onlineId->channel_name(id) << " gain " << gain);
       return StatusCode::FAILURE;
     }
@@ -114,7 +114,7 @@ StatusCode LArRawChannelBuilderSCAlg::execute(const EventContext& ctx) const {
     bool passBCIDmax=false;
     //const size_t len=std::min(ofca.size(),samples.size());
     size_t nOFC=ofca.size();
-    if (ATH_UNLIKELY(nSamples<nOFC+2)) {
+    if (nSamples<nOFC+2) [[unlikely]] {
         ATH_MSG_ERROR("Not enough ADC samples for channel " << m_onlineId->channel_name(id) << " gain " << gain
                 << ". Found " << nSamples << ", expect at least " << nOFC+2 <<".");
     }   
@@ -166,7 +166,7 @@ StatusCode LArRawChannelBuilderSCAlg::execute(const EventContext& ctx) const {
 	}
       }
 
-      if (ATH_UNLIKELY(fullShape.size()<nOFC+firstSample)) {
+      if (fullShape.size()<nOFC+firstSample) [[unlikely]] {
         ATH_MSG_DEBUG("No valid shape for channel " <<  m_onlineId->channel_name(id) 
                 << " gain " << gain); 
         ATH_MSG_DEBUG("Got size " << fullShape.size() << ", expected at least " << nSamples+firstSample);
@@ -180,7 +180,7 @@ StatusCode LArRawChannelBuilderSCAlg::execute(const EventContext& ctx) const {
       bool useShapeDer=m_useShapeDer; 
       if (useShapeDer) {
 	const auto& fullshapeDer=shapes->ShapeDer(id,gain);
-	if (ATH_UNLIKELY(fullshapeDer.size()<nOFC)) {
+	if (fullshapeDer.size()<nOFC) [[unlikely]] {
 	  ATH_MSG_DEBUG("No valid shape derivative for channel " <<  m_onlineId->channel_name(id) 
 			<< " gain " << gain << ". Will not use shape derivative.");
 	  useShapeDer=false;

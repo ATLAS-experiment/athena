@@ -486,7 +486,7 @@ StatusCode LArOFFCRawChannelBuilder::execute(const EventContext& ctx) const {
       SG::ReadCondHandle<AthenaAttributeList> dspThrshAttr(
           m_run2DSPThresholdsKey, ctx);
       run2DSPThresh = std::make_unique<LArDSPThresholdsFlat>(*dspThrshAttr);
-      if (ATH_UNLIKELY(!run2DSPThresh->good())) {
+      if (!run2DSPThresh->good()) [[unlikely]] {
         ATH_MSG_ERROR(
             "Failed to initialize LArDSPThresholdFlat from attribute list "
             "loaded from "
@@ -555,7 +555,7 @@ StatusCode LArOFFCRawChannelBuilder::execute(const EventContext& ctx) const {
       return StatusCode::FAILURE;
     }
 
-    if (ATH_UNLIKELY(p == ILArPedestal::ERRORCODE)) {
+    if (p == ILArPedestal::ERRORCODE) [[unlikely]] {
       if (!connected)
         continue;  // No conditions for disconencted channel, who cares?
       ATH_MSG_ERROR("No valid pedestal for connected channel "
@@ -563,7 +563,7 @@ StatusCode LArOFFCRawChannelBuilder::execute(const EventContext& ctx) const {
       return StatusCode::FAILURE;
     }
 
-    if (ATH_UNLIKELY(adc2mev.size() < 2)) {
+    if (adc2mev.size() < 2) [[unlikely]] {
       if (!connected)
         continue;  // No conditions for disconencted channel, who cares?
       ATH_MSG_ERROR("No valid ADC2MeV for connected channel "
@@ -638,8 +638,7 @@ StatusCode LArOFFCRawChannelBuilder::execute(const EventContext& ctx) const {
       const int shapeShift =
           resp.empty() ? -1 : anchorIndex(resp) - static_cast<int>(nOFC) + 1;
 
-      if (ATH_UNLIKELY(shapeShift < 0 ||
-                       fullShape.size() < nOFC + shapeShift)) {
+      if (shapeShift < 0 || fullShape.size() < nOFC + shapeShift) [[unlikely]] {
         if (!connected)
           continue;  // No conditions for disconnected channel, who cares?
         ATH_MSG_ERROR("No valid shape for channel "
@@ -656,7 +655,7 @@ StatusCode LArOFFCRawChannelBuilder::execute(const EventContext& ctx) const {
       double q = 0;
       if (m_useShapeDer) {
         const auto& fullshapeDer = shapes->ShapeDer(id, gain);
-        if (ATH_UNLIKELY(fullshapeDer.size() < nOFC + shapeShift)) {
+        if (fullshapeDer.size() < nOFC + shapeShift) [[unlikely]] {
           ATH_MSG_ERROR("No valid shape derivative for channel "
                         << m_onlineId->channel_name(id) << " gain " << gain);
           ATH_MSG_ERROR("Got size " << fullshapeDer.size()
