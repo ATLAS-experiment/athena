@@ -103,7 +103,7 @@ signals:
   void adaptMuonChambersToEventData();
   void autoAdaptPixelsOrSCT(bool,bool,bool,bool,bool,bool);//pixel,brl,ecA,ecC,bcmA,bcmC
   void autoAdaptMuonNSW(bool,bool,bool,bool,bool,bool); // reset to full NSW geo, sTGC, MicroMegas, Spacer, Structure, APlate
-  void autoAdaptHGTD(bool,bool,bool,bool,bool,bool,bool,bool,bool,bool,bool,bool,bool,bool); // reset to full HGTD geo, Flex, Hybrid, Glue, Sensors, Inactive, ASIC, Plate, Front, Back, ModeratorIn, ModeratorOut, OuterR, CoolingLines
+  void autoAdaptHGTD(bool,bool,bool,bool,bool,bool,bool); // reset to full HGTD geo, Modules, Support, Cooling, Covers, Moderator, Services
   void resetSubSystems(VP1GeoFlags::SubSystemFlags);
   void autoExpandByVolumeOrMaterialName(bool,QString);//volname: (false,namestr), matname: (true,namestr)
   void autoIconifyByVolumeOrMaterialName(bool,QString);//volname: (false,namestr), matname: (true,namestr)

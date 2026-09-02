@@ -421,14 +421,6 @@ MatVisAttributes::MatVisAttributes() {
 
   {
     SoMaterial *m = new SoMaterial;
-    setColorFromRGB(m, "diffuse", 255, 220, 120);
-    setColorFromRGB(m, "ambient", 70, 60, 20);
-    m->shininess.setValue(0.20);
-    add("Epoxy", m);
-  }
-
-  {
-    SoMaterial *m = new SoMaterial;
     setColorFromRGB(m, "diffuse", 155, 160, 170);
     setColorFromRGB(m, "ambient", 45, 50, 60);
     setColorFromRGB(m, "specular", 235, 235, 235);
@@ -1652,8 +1644,6 @@ VolVisAttributes::VolVisAttributes() {
     add ("SV_Endcap34",m);
     add ("SV_Endcap45",m);
     add ("SV_Endcap5Out",m);
-    add( "SVatBulkhead_lv",m);
-
     add( "SVatBulkhead_lv",m);
     add( "StaveSignalSS",m);
     add( "StaveGround",m);

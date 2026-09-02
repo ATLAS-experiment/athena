@@ -22,7 +22,7 @@ atlas_add_library( VP1GuideLineSystems VP1GuideLineSystems/*.h src/*.cxx src/*.q
    LINK_LIBRARIES ${COIN3D_LIBRARIES} GeoPrimitives VP1Base VP1Utils
    Qt5::Core Qt5::Gui
    PRIVATE_INCLUDE_DIRS ${CMAKE_CURRENT_BINARY_DIR}
-   PRIVATE_LINK_LIBRARIES GaudiKernel VP1HEPVis )
+   PRIVATE_LINK_LIBRARIES GaudiKernel StoreGateLib GeoAdaptors InDetSimEvent VP1HEPVis VP1UtilsCoinSoQt )
 endif()
 
 # Enable Qt support for cppcheck:
@@ -41,4 +41,3 @@ atlas_add_library( VP1GuideLineSystems VP1GuideLineSystems/*.h src/*.cxx src/*.q
    PRIVATE_INCLUDE_DIRS ${CMAKE_CURRENT_BINARY_DIR}
    PRIVATE_LINK_LIBRARIES VP1HEPVis )
 endif()
-
