@@ -24,14 +24,14 @@ flags.Concurrency.NumThreads = 1
 flags.Concurrency.NumOffloadThreads = 1
 flags.lock()
 
-LoopMgr = "AthenaHiveEventLoopMgr"
+LoopMgr = 'AthenaRemoteEventLoopMgr'
 acc = MainServicesCfg(flags, LoopMgr=LoopMgr)
 acc.merge(ByteStreamReadCfg(flags))
-# acc.addService(CompFactory.TimelineSvc("TimelineSvc", RecordTimeline=True, OutputLevel=DEBUG))
+acc.addService(CompFactory.TimelineSvc("TimelineSvc", RecordTimeline=True, OutputLevel=DEBUG))
 
 unpackEI = CompFactory.EventInfoPackagingTool("UnpackEI")
-# robsSvc = acc.addService(CompFactory.ROBDataProviderSvc())
-# unpackBS = CompFactory.BSPackagingTool("UnpackBS", OutputLevel=DEBUG, ROBDataProvider=robsSvc)
+robsSvc = acc.addService(CompFactory.ROBDataProviderSvc())
+unpackBS = CompFactory.BSPackagingTool("UnpackBS", OutputLevel=DEBUG, ROBDataProvider=robsSvc)
 
 execTool = CompFactory.ExecuteOngRPCCall(UnpackingTools=[unpackEI])
 
