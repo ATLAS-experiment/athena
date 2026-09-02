@@ -5,17 +5,12 @@
 # stream based on DAOD_PHYS. All calls to unavailable Muon objects are 
 # disabled.
 #
-# Tau, flavour, met, Higgs, AFP, large-r, Trigger matching are removed. 
+# Tau, flavour, met, Higgs, AFP, large-r, IFF/PLIT, Trigger matching
+# are removed. 
 #
-# MC, Truth, CloseByIsolation, IFF, TrackParticleThinningTool 
-# are currently disabled (to be enabled in the future?)
+# MC, Truth are currently disabled (to be enabled in the future?)
 #
-# CloseByIsolation, TrackParticleThinningTool fail due to requesting
-# MDT geometry info, conditions config error?
-# 
-# IFF fails due to retriveing non-existant btag decoration
-#
-# Trigger fails due to missing HLTNav_Summary from BS
+# Trigger matching fails due to missing HLTNav_Summary from BS
 #
 # HLT TLA Photons and EMclusters are added.
 # =======================================================================
@@ -158,11 +153,8 @@ def EGAMPEBPHYSKernelCfg(flags, name='EGAMPEBPHYSKernel', **kwargs):
     # These are set up in PhysCommonThinningConfig. Only thing needed here the list of tools to schedule
     nametag = name.replace('Kernel', '') #get the name to label the tools below such that other formats can use this KernelCfg
     thinningToolsArgs = {
-        # 'TrackParticleThinningToolName'       : nametag+"TrackParticleThinningTool",
+        'TrackParticleThinningToolName'       : nametag+"TrackParticleThinningTool",
     } 
-    # for AOD produced before 24.0.17, the electron removal tau is not available
-    if flags.Tau.TauEleRM_isAvailable:
-        thinningToolsArgs['TauJets_EleRMThinningToolName'] = nametag+"TauJets_EleRMThinningTool"
     # Configure the thinning tools
     from DerivationFrameworkPhys.PhysCommonThinningConfig import PhysCommonThinningCfg
     acc.merge(PhysCommonThinningCfg(flags, StreamName = kwargs['StreamName'], **thinningToolsArgs))
@@ -185,15 +177,11 @@ def EGAMPEBPHYSCoreCfg(flags, name_tag='EGAMPEBPHYS', StreamName='StreamDAOD_EGA
     
     acc = ComponentAccumulator()
 
-    # ## CloseByIsolation correction augmentation
-    # ## For the moment, run BOTH CloseByIsoCorrection on AOD AND add in augmentation variables to be able to also run on derivation (the latter part will eventually be suppressed)
-    # from IsolationSelection.IsolationSelectionConfig import  IsoCloseByAlgsCfg
-    # acc.merge(IsoCloseByAlgsCfg(flags, isPhysLite = False, stream_name = StreamName))
+    ## CloseByIsolation correction augmentation
+    ## For the moment, run BOTH CloseByIsoCorrection on AOD AND add in augmentation variables to be able to also run on derivation (the latter part will eventually be suppressed)
+    from IsolationSelection.IsolationSelectionConfig import  IsoCloseByAlgsCfg
+    acc.merge(IsoCloseByAlgsCfg(flags, isPhysLite = False, containerNames = ["Electrons", "Photons"], stream_name = StreamName))
 
-    # ## IFF augmentation - Adding Lepton Taggers
-    # from LeptonTaggers.LeptonTaggersConfig import DecoratePLITAlgsCfg
-    # acc.merge(DecoratePLITAlgsCfg(flags, lepton_type="Electrons"))
-    
     # ============================
     # Define contents of the format
     # =============================
@@ -239,11 +227,6 @@ def EGAMPEBPHYSCoreCfg(flags, name_tag='EGAMPEBPHYS', StreamName='StreamDAOD_EGA
     from TrkConfig.VertexFindingFlags import VertexSortingSetup
     if flags.Tracking.PriVertex.sortingSetup is VertexSortingSetup.GNNSorting:
         EGAMPEBPHYSSlimmingHelper.ExtraVariables += ["PrimaryVertices.gnnScore"]
-
-
-    # IFF extra content
-    # from LeptonTaggers.LeptonTaggersConfig import GetExtraPLITVariablesForDxAOD
-    # EGAMPEBPHYSSlimmingHelper.ExtraVariables += GetExtraPLITVariablesForDxAOD()
                                   
     # # Truth extra content
     # if flags.Input.isMC:
