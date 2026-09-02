@@ -51,12 +51,12 @@ def BPHY18Cfg(flags):
 
     # decorate electrons with the output of LH
     from DerivationFrameworkEGamma.EGammaToolsConfig import EGElectronLikelihoodToolWrapperCfg
-    ElectronPassLHvloosenod0 = acc.addPublicTool(acc.popToolsAndMerge(EGElectronLikelihoodToolWrapperCfg(flags, name = "ElectronPassLHvloosenod0",
+    acc.merge(EGElectronLikelihoodToolWrapperCfg(flags, name = "ElectronPassLHvloosenod0",
                                             EGammaElectronLikelihoodTool = ElectronLHSelectorLHvloose_nod0,
                                             CutType = "",
                                             StoreGateEntryName = "DFCommonElectronsLHVeryLoosenod0",
                                             ContainerName = "Electrons",
-                                            StoreTResult=False)))
+                                            StoreTResult=False))
 
     BPHY18DiElectronFinder = CompFactory.Analysis.JpsiFinder_ee(
                              name                        = "BPHY18DiElectronFinder",
@@ -263,8 +263,7 @@ def BPHY18Cfg(flags):
                      ]
 
 
-    augTools = [ElectronPassLHvloosenod0,
-                BPHY18DiElectronSelectAndWrite, BPHY18_Select_DiElectrons,
+    augTools = [BPHY18DiElectronSelectAndWrite, BPHY18_Select_DiElectrons,
                 BPHY18BeeKstSelectAndWrite, BPHY18_Select_BeeKst, BPHY18_Select_BeeKstbar,
                 BPHY18_diMeson_revertex, BPHY18_Select_Kpi, BPHY18_Select_piK]
     skimTools = [BPHY18SkimmingAND]

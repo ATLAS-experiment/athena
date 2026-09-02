@@ -30,7 +30,7 @@ EGSelectionToolWrapper::initialize()
 }
 
 StatusCode
-EGSelectionToolWrapper::addBranches(const EventContext& ctx) const
+EGSelectionToolWrapper::execute(const EventContext& ctx) const
 {
   // retrieve container
   SG::ReadHandle<xAOD::EgammaContainer> particles;

@@ -145,7 +145,7 @@ def EGAM5KernelCfg(flags, name="EGAM5Kernel", **kwargs):
     # enu transverse mass
     # ====================================================================
     EGAM5enuTransverseMassTool = acc.popToolsAndMerge(
-        EGAM5enuTransverseMassToolCfg(flags)
+        EGAM5enuTransverseMassToolCfg(flags) # TODO Migrate to AthReentrantAlgorithm (uses ExpressionParser)
     )
     acc.addPublicTool(EGAM5enuTransverseMassTool)
     augmentationTools.append(EGAM5enuTransverseMassTool)

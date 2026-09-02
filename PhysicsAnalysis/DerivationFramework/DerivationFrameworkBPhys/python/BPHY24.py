@@ -112,32 +112,30 @@ def BPHY24Cfg(flags):
 
     augsList += [ BPHY24_Select_DiMuons ]
 
-    ElectronLHSelectorLHvloose = CompFactory.AsgElectronLikelihoodTool("ElectronLHSelectorLHvloose",
-            primaryVertexContainer = "PrimaryVertices",
-            ConfigFile="ElectronPhotonSelectorTools/offline/mc20_20210514/ElectronLikelihoodVeryLooseOfflineConfig2017_Smooth.conf")
-
-    
-
-    ElectronLHSelectorLHvloose_nod0 = CompFactory.AsgElectronLikelihoodTool("ElectronLHSelectorLHvloosenod0", primaryVertexContainer = "PrimaryVertices",
-            ConfigFile="ElectronPhotonSelectorTools/offline/mc16_20190328_nod0/ElectronLikelihoodVeryLooseOfflineConfig2017_Smooth_nod0.conf")   # Still OK to use in Run3?
-
-
     # decorate electrons with the output of LH vloose (nod0)
     from DerivationFrameworkEGamma.EGammaToolsConfig import EGElectronLikelihoodToolWrapperCfg
-    ElectronPassLHvloose = acc.addPublicTool(acc.popToolsAndMerge(EGElectronLikelihoodToolWrapperCfg(flags, name = "ElectronPassLHvloose",
-                                            EGammaElectronLikelihoodTool = ElectronLHSelectorLHvloose,
-                                            CutType = "",
-                                            StoreGateEntryName = "DFCommonElectronsLHVeryLoose",
-                                            ContainerName = "Electrons",
-                                            StoreTResult=False)))
 
-    ElectronPassLHvloosenod0 = acc.addPublicTool(acc.popToolsAndMerge(EGElectronLikelihoodToolWrapperCfg(flags, name = "ElectronPassLHvloosenod0",
-                                            EGammaElectronLikelihoodTool = ElectronLHSelectorLHvloose_nod0,
-                                            CutType = "",
-                                            StoreGateEntryName = "DFCommonElectronsLHVeryLoosenod0",
-                                            ContainerName = "Electrons",
-                                            StoreTResult=False)))
-    augsList += [ElectronPassLHvloose, ElectronPassLHvloosenod0]
+    ElectronLHSelectorLHvloose = CompFactory.AsgElectronLikelihoodTool("ElectronLHSelectorLHvloose",
+                                                                       primaryVertexContainer = "PrimaryVertices",
+                                                                       ConfigFile="ElectronPhotonSelectorTools/offline/mc20_20210514/ElectronLikelihoodVeryLooseOfflineConfig2017_Smooth.conf")
+
+    acc.merge(EGElectronLikelihoodToolWrapperCfg(flags, name = "ElectronPassLHvloose",
+                                                 EGammaElectronLikelihoodTool = ElectronLHSelectorLHvloose,
+                                                 CutType = "",
+                                                 StoreGateEntryName = "DFCommonElectronsLHVeryLoose",
+                                                 ContainerName = "Electrons",
+                                                 StoreTResult=False))
+
+    ElectronLHSelectorLHvloose_nod0 = CompFactory.AsgElectronLikelihoodTool("ElectronLHSelectorLHvloosenod0",
+                                                                            primaryVertexContainer = "PrimaryVertices",
+                                                                            ConfigFile="ElectronPhotonSelectorTools/offline/mc16_20190328_nod0/ElectronLikelihoodVeryLooseOfflineConfig2017_Smooth_nod0.conf")   # Still OK to use in Run3?
+
+    acc.merge(EGElectronLikelihoodToolWrapperCfg(flags, name = "ElectronPassLHvloosenod0",
+                                                 EGammaElectronLikelihoodTool = ElectronLHSelectorLHvloose_nod0,
+                                                 CutType = "",
+                                                 StoreGateEntryName = "DFCommonElectronsLHVeryLoosenod0",
+                                                 ContainerName = "Electrons",
+                                                 StoreTResult=False))
 
     BPHY24DiElectronFinder = CompFactory.Analysis.JpsiFinder_ee(
         name                        = "BPHY24DiElectronFinder",

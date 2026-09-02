@@ -58,14 +58,14 @@ def DRAW_EGZKernelCfg(flags, name='DRAW_EGZKernel', **kwargs):
                 Mass1Hypothesis=0.511,
                 Mass2Hypothesis=0.511,
                 CheckCharge=False,
-                StoreGateEntryName=sel[1])
+                StoreGateEntryName=sel[1]) # TODO Migrate to AthReentrantAlgorithm (uses Expression parser)
         else:
             tool = CompFactory.DerivationFramework.InvariantMassTool(
                 name=f'llmassToolFor{key}',
                 ContainerName='Electrons' if key.find('Zee') >= 0 else 'Muons',
                 ObjectRequirements=sel[0],
                 MassHypothesis=0.511 if key.find('Zee') >= 0 else 105.66,
-                StoreGateEntryName=sel[1])
+                StoreGateEntryName=sel[1]) # TODO Migrate to AthReentrantAlgorithm (uses Expression parser)
 
         augmentationTools.append(tool)
         acc.addPublicTool(tool)

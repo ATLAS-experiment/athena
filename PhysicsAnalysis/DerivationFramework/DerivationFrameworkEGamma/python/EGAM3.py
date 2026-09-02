@@ -117,7 +117,7 @@ def EGAM3eeMassTool1Cfg(flags):
             DoTransverseMass=False,
             MinDeltaR=0.0,
         )
-    )
+    ) # TODO Migrate to AthReentrantAlgorithm (uses Expression parser)
 
     return acc
 

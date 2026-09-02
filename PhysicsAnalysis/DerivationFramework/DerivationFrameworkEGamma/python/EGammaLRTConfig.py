@@ -25,70 +25,6 @@ def EGammaLRTCfg(flags):
     # Setting conf file not supported.  These are currently setup in the
     # LLP1.py config TODO: implement common ID in egamma tools
 
-    # ====================================================================
-    # ELECTRON CHARGE SELECTION
-    # ====================================================================
-    if not hasattr(acc, "ElectronChargeIDSelectorLoose"):
-        if flags.Derivation.Egamma.addECIDS:
-            from ElectronPhotonSelectorTools.AsgElectronChargeIDSelectorToolConfig import (
-                AsgElectronChargeIDSelectorToolCfg,
-            )
-
-            ElectronChargeIDSelector = acc.popToolsAndMerge(
-                AsgElectronChargeIDSelectorToolCfg(
-                    flags, name="ElectronChargeIDSelectorLoose"
-                )
-            )
-            ElectronChargeIDSelector.primaryVertexContainer = "PrimaryVertices"
-            ElectronChargeIDSelector.TrainingFile = (
-                "ElectronPhotonSelectorTools/ChargeID/"
-                + "ECIDS_20180731rel21Summer2018.root"
-            )
-            acc.addPublicTool(ElectronChargeIDSelector)
-
-    # ====================================================================
-    # AUGMENTATION TOOLS
-    # ====================================================================
-    from DerivationFrameworkEGamma.EGammaToolsConfig import (
-        EGElectronLikelihoodToolWrapperCfg,
-    )
-
-    # decorate electrons with the output of LH very loose
-    # TODO same as above, update with central ID
-
-    # decorate electrons with the output of ECIDS
-    if flags.Derivation.Egamma.addECIDS:
-        LRTElectronPassECIDS = acc.addPublicTool(acc.popToolsAndMerge(
-            EGElectronLikelihoodToolWrapperCfg(
-                flags,
-                name="LRTElectronPassECIDS",
-                EGammaElectronLikelihoodTool=ElectronChargeIDSelector,
-                CutType="",
-                StoreGateEntryName="DFCommonElectronsECIDS",
-                ContainerName="LRTElectrons",
-                StoreTResult=True,
-            ) # TODO Migrate to AthReentrantAlgorithm
-        ))
-
-    # decorate some electrons with an additional ambiguity flag
-    # against internal and early material conversion
-    from DerivationFrameworkEGamma.EGammaToolsConfig import EGElectronAmbiguityToolCfg
-
-    LRTElectronAmbiguity = acc.addPublicTool(acc.popToolsAndMerge(
-        EGElectronAmbiguityToolCfg(
-            flags,
-            name="LRTElectronAdditionnalAmbiguity",
-            idCut="DFCommonElectronsLHLooseNoPix",
-            ContainerName="LRTElectrons",
-            isMC=flags.Input.isMC,
-        ) # TODO Migrate to AthReentrantAlgorithm
-    ))
-
-    # list of all the decorators so far
-    LRTEGAugmentationTools = [LRTElectronAmbiguity]
-    if flags.Derivation.Egamma.addECIDS:
-        LRTEGAugmentationTools.extend([LRTElectronPassECIDS])
-
     # ==================================================
     # Calo cell recovery tool
     if flags.Derivation.Egamma.addMissingCellInfo:
@@ -121,8 +57,60 @@ def EGammaLRTCfg(flags):
     # CREATE THE DERIVATION KERNEL ALGORITHM
     # =======================================
 
-    for i, tool in enumerate(LRTEGAugmentationTools):
-        acc.addEventAlgo(CompFactory.DerivationFramework.CommonAugmentation(f"EGammaLRTKernel{i}", AugmentationTools = [tool])) # TODO Migrate to N Algs in second pass
+    from DerivationFrameworkEGamma.EGammaToolsConfig import (
+        EGElectronLikelihoodToolWrapperCfg,
+    )
+
+    # decorate electrons with the output of LH very loose
+    # TODO same as above, update with central ID
+
+    # decorate some electrons with an additional ambiguity flag
+    # against internal and early material conversion
+    from DerivationFrameworkEGamma.EGammaToolsConfig import EGElectronAmbiguityAlgCfg
+
+    acc.merge(
+        EGElectronAmbiguityAlgCfg(
+            flags,
+            name="LRTElectronAdditionnalAmbiguity",
+            idCut="DFCommonElectronsLHLooseNoPix",
+            ContainerName="LRTElectrons",
+            isMC=flags.Input.isMC,
+        )
+    )
+
+    # decorate electrons with the output of ECIDS
+    if flags.Derivation.Egamma.addECIDS:
+        # ====================================================================
+        # ELECTRON CHARGE SELECTION
+        # ====================================================================
+        if not hasattr(acc, "ElectronChargeIDSelectorLoose"):
+            from ElectronPhotonSelectorTools.AsgElectronChargeIDSelectorToolConfig import (
+                AsgElectronChargeIDSelectorToolCfg,
+            )
+
+            ElectronChargeIDSelector = acc.popToolsAndMerge(
+                AsgElectronChargeIDSelectorToolCfg(
+                    flags, name="ElectronChargeIDSelectorLoose"
+                )
+            )
+            ElectronChargeIDSelector.primaryVertexContainer = "PrimaryVertices"
+            ElectronChargeIDSelector.TrainingFile = (
+                "ElectronPhotonSelectorTools/ChargeID/"
+                + "ECIDS_20180731rel21Summer2018.root"
+            )
+            acc.addPublicTool(ElectronChargeIDSelector)
+
+        acc.merge(
+            EGElectronLikelihoodToolWrapperCfg(
+                flags,
+                name="LRTElectronPassECIDS",
+                EGammaElectronLikelihoodTool=ElectronChargeIDSelector,
+                CutType="",
+                StoreGateEntryName="DFCommonElectronsECIDS",
+                ContainerName="LRTElectrons",
+                StoreTResult=True,
+            )
+        )
 
     # =======================================
     # ADD TOOLS : custom electron, photon and muon track isolation

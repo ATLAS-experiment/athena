@@ -26,7 +26,7 @@ def EGSelectionToolWrapperCfg(flags, name, **kwargs):
         raise AttributeError("StoreGateEntryName not set")
     kwargs.setdefault("decoratorPass", sgName)
     kwargs.setdefault("decoratorIsEM", sgName + "IsEMValue")
-    acc.setPrivateTools(CompFactory.DerivationFramework.EGSelectionToolWrapper(name, **kwargs))
+    acc.addEventAlgo(CompFactory.DerivationFramework.EGSelectionToolWrapper(name, **kwargs))
     return acc
 
 
@@ -48,7 +48,7 @@ def EGElectronLikelihoodToolWrapperCfg(flags, name, **kwargs):
     kwargs.setdefault("decoratorIsEM", sgName + "IsEMValue")
     kwargs.setdefault("decoratorResult", sgName + "Result" if storeTResult else "")
     kwargs.setdefault("decoratorMultipleOutputs", sgMultipleNames if storeMultipleOutputs else [])
-    acc.setPrivateTools(CompFactory.DerivationFramework.EGElectronLikelihoodToolWrapper(name, **kwargs))
+    acc.addEventAlgo(CompFactory.DerivationFramework.EGElectronLikelihoodToolWrapper(name, **kwargs))
     return acc
 
 # Photon BDT decrotation tool
@@ -59,7 +59,7 @@ def EGPhotonBDTToolDecoratorCfg(flags, name, **kwargs):
     if not sgName:
         raise AttributeError("StoreGateEntryName not set")
     kwargs.setdefault("decoratorScore", sgName + "Score")
-    acc.setPrivateTools(CompFactory.DerivationFramework.EGPhotonBDTToolDecorator(name, **kwargs))
+    acc.addEventAlgo(CompFactory.DerivationFramework.EGPhotonBDTToolDecorator(name, **kwargs))
     return acc
 
 # Photon BDT selection tool wrapper
@@ -74,7 +74,7 @@ def EGPhotonBDTToolWrapperCfg(flags, name, **kwargs):
         raise AttributeError("WorkingPointName not set")
     kwargs.setdefault("decoratorPass", sgName+wpName)
     kwargs.setdefault("decoratorIsEM", sgName+wpName + "IsEMValue")
-    acc.setPrivateTools(CompFactory.DerivationFramework.EGPhotonBDTToolWrapper(name, **kwargs))
+    acc.addEventAlgo(CompFactory.DerivationFramework.EGPhotonBDTToolWrapper(name, **kwargs))
     return acc
 
 # Photon cleaning tool wrapper
@@ -85,16 +85,15 @@ def EGPhotonCleaningWrapperCfg(flags, name, **kwargs):
     # Write decoration handle keys
     kwargs.setdefault("decoratorPass", sgName)
     kwargs.setdefault("decoratorPassDelayed", sgName + "NoTime")
-    acc.setPrivateTools(CompFactory.DerivationFramework.EGPhotonCleaningWrapper(name, **kwargs))
+    acc.addEventAlgo(CompFactory.DerivationFramework.EGPhotonCleaningWrapper(name, **kwargs))
     return acc
 
 
 # Electron ambiguity tool
-def EGElectronAmbiguityToolCfg(flags, name, **kwargs):
+def EGElectronAmbiguityAlgCfg(flags, name, **kwargs):
     """Configure the electron ambiguity tool"""
     acc = ComponentAccumulator()
-    EGElectronAmbiguityTool = CompFactory.DerivationFramework.EGElectronAmbiguityTool
-    acc.setPrivateTools(EGElectronAmbiguityTool(name, **kwargs))
+    acc.addEventAlgo(CompFactory.DerivationFramework.EGElectronAmbiguityAlg(name, **kwargs))
     return acc
 
 
@@ -118,10 +117,10 @@ def ElectronMergerCfg(flags, name, **kwargs):  # TODO Remove as, no clients??
     return acc
 
 
-def PhotonVertexSelectionWrapperCfg(
-        flags, name="PhotonVertexSelectionWrapper", **kwargs):
+def PhotonVertexSelectionWrapperKernelCfg(
+        flags, name="PhotonVertexSelectionWrapperKernel", **kwargs):
     acc = ComponentAccumulator()
-    prefix = kwargs.pop("DecorationPrefix", "")
+   prefix = kwargs.pop("DecorationPrefix", "")
     if prefix: prefix += "_"
     kwargs.setdefault("pt", prefix + "pt")
     kwargs.setdefault("eta", prefix + "eta")
@@ -135,25 +134,14 @@ def PhotonVertexSelectionWrapperCfg(
         kwargs.setdefault("PhotonPointingTool", acc.popToolsAndMerge(
             PhotonPointingToolCfg(flags)))
 
-    acc.setPrivateTools(
+    acc.addEventAlgo(
         CompFactory.DerivationFramework.PhotonVertexSelectionWrapper(
             name, **kwargs))
+
     return acc
 
 
-def PhotonVertexSelectionWrapperKernelCfg(
-        flags, name="PhotonVertexSelectionWrapperKernel", **kwargs):
-    acc = ComponentAccumulator()
-
-    augmentationTools = [
-        acc.addPublicTool(acc.popToolsAndMerge(PhotonVertexSelectionWrapperCfg(flags)))
-    ]
-    for i, tool in enumerate(augmentationTools):
-        acc.addEventAlgo(CompFactory.DerivationFramework.CommonAugmentation(f"{name}Aug{i}", AugmentationTools = [tool]))
-    return acc
-
-
-def EGammaCookieCutClusterToolCfg(flags, name = 'EGCookieCutTool', **kwargs):
+def EGammaCookieCutClusterAlgCfg(flags, name = 'EGCookieCutAlg', **kwargs):
     acc = ComponentAccumulator()
     # needed for reading cells, do not rely on other config to do that
     from LArGeoAlgsNV.LArGMConfig import LArGMCfg
@@ -192,8 +180,8 @@ def EGammaCookieCutClusterToolCfg(flags, name = 'EGCookieCutTool', **kwargs):
     momentsMaker = acc.popToolsAndMerge(getTopoMoments(flags))
     kwargs.setdefault("ClusterMomentMaker",[momentsMaker])
 
-    acc.setPrivateTools(
-        CompFactory.DerivationFramework.EGammaCookieCutClusterTool(
+    acc.addEventAlgo(
+        CompFactory.DerivationFramework.EGammaCookieCutClusterAlg(
             name, **kwargs))
     return acc
 

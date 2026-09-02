@@ -5,7 +5,7 @@
 #ifndef DERIVATIONFRAMEWORK_EGSELECTIONTOOLWRAPPER_H
 #define DERIVATIONFRAMEWORK_EGSELECTIONTOOLWRAPPER_H
 
-#include "DerivationFrameworkInterfaces/IAugmentationTool.h"
+#include "AthenaBaseComps/AthReentrantAlgorithm.h"
 //
 #include "StoreGate/ReadHandle.h"
 #include "StoreGate/ReadHandleKey.h"
@@ -13,7 +13,6 @@
 #include "StoreGate/WriteHandleKey.h"
 //
 #include "AsgTools/IAsgTool.h"
-#include "AthenaBaseComps/AthAlgTool.h"
 #include "EgammaAnalysisInterfaces/IAsgEGammaIsEMSelector.h"
 #include "GaudiKernel/ToolHandle.h"
 #include "xAODEgamma/EgammaContainer.h"
@@ -22,14 +21,14 @@
 
 namespace DerivationFramework {
 
-  class EGSelectionToolWrapper : public extends<AthAlgTool, IAugmentationTool>
+  class EGSelectionToolWrapper : public AthReentrantAlgorithm
   {
   public:
 
-    using base_class::base_class;
+    using AthReentrantAlgorithm::AthReentrantAlgorithm;
 
     virtual StatusCode initialize() override final;
-    virtual StatusCode addBranches(const EventContext& ctx) const override final;
+    virtual StatusCode execute(const EventContext& ctx) const override final;
 
   private:
     ToolHandle<IAsgEGammaIsEMSelector> m_tool{

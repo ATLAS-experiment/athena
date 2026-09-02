@@ -98,21 +98,8 @@ def _run(args):
     # GSF + EMCal augmentation
 
     from DerivationFrameworkEGamma.EGammaGSFCalo import EGammaGSFCaloToolsCfg
-
-    GSFCaloTool = acc.popToolsAndMerge(
-        EGammaGSFCaloToolsCfg(flags, "GSFCaloImprovement")
-    )
-    acc.addPublicTool(GSFCaloTool)
-
-    from AthenaConfiguration.ComponentFactory import CompFactory
-
-    acc.addEventAlgo(CompFactory.DerivationFramework.CommonAugmentation("GSFRefitAugAlgo", AugmentationTools=[GSFCaloTool]))
-    acc.addEventAlgo(
-        CompFactory.DerivationFramework.DerivationKernel(
-            "GSFRefitAlgo",
-            SkimmingTools=None,
-            ThinningTools=None,
-        )
+    acc.merge(
+        EGammaGSFCaloToolsCfg(flags, "GSFRefitAlgo")
     )
 
     # Standard egamma output

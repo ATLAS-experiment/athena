@@ -11,7 +11,7 @@
 
 #ifndef DERIVATIONFRAMEWORK_EGELECTRONLIKELIHOODTOOLWRAPPER_H
 #define DERIVATIONFRAMEWORK_EGELECTRONLIKELIHOODTOOLWRAPPER_H
-#include "DerivationFrameworkInterfaces/IAugmentationTool.h"
+#include "AthenaBaseComps/AthReentrantAlgorithm.h"
 //
 #include "StoreGate/ReadHandle.h"
 #include "StoreGate/ReadHandleKey.h"
@@ -20,7 +20,6 @@
 #include "StoreGate/WriteDecorHandleKeyArray.h"
 //
 #include "AsgTools/IAsgTool.h"
-#include "AthenaBaseComps/AthAlgTool.h"
 #include "EgammaAnalysisInterfaces/IAsgElectronLikelihoodTool.h"
 #include "GaudiKernel/ToolHandle.h"
 #include "xAODEgamma/EgammaContainer.h"
@@ -29,14 +28,14 @@
 
 namespace DerivationFramework {
 
-  class EGElectronLikelihoodToolWrapper : public extends<AthAlgTool, IAugmentationTool>
+  class EGElectronLikelihoodToolWrapper : public AthReentrantAlgorithm
   {
   public:
 
-    using base_class::base_class;
+    using AthReentrantAlgorithm::AthReentrantAlgorithm;
 
     virtual StatusCode initialize() override final;
-    virtual StatusCode addBranches(const EventContext& ctx) const override final;
+    virtual StatusCode execute(const EventContext& ctx) const override final;
 
   private:
     ToolHandle<IAsgElectronLikelihoodTool> m_tool{

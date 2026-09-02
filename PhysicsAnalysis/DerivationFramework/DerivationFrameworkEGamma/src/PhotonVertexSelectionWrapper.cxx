@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "DerivationFrameworkEGamma/PhotonVertexSelectionWrapper.h"
@@ -30,7 +30,7 @@ PhotonVertexSelectionWrapper::initialize()
 }
 
 StatusCode
-PhotonVertexSelectionWrapper::addBranches(const EventContext& ctx) const
+PhotonVertexSelectionWrapper::execute(const EventContext& ctx) const
 {
   // retrieve the input containers
   SG::ReadHandle<xAOD::PhotonContainer> photons{ m_photonContainer, ctx };

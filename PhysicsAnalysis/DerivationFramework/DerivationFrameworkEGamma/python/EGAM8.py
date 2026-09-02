@@ -69,7 +69,7 @@ def EGAM8ZeeMassToolCfg(flags):
             DoTransverseMass=False,
             MinDeltaR=0.0,
         )
-    )
+    ) # TODO Migrate to AthReentrantAlgorithm (uses Expression parser)
 
     return acc
 
@@ -137,11 +137,11 @@ def EGAM8KernelCfg(flags, name="EGAM8Kernel", **kwargs):
     # ====================================================================
     # ee and mue invariant masses
     # ====================================================================
-    EGAM8ZeeMassTool = acc.popToolsAndMerge(EGAM8ZeeMassToolCfg(flags))
+    EGAM8ZeeMassTool = acc.popToolsAndMerge(EGAM8ZeeMassToolCfg(flags)) # TODO Migrate to AthReentrantAlgorithm
     acc.addPublicTool(EGAM8ZeeMassTool)
     augmentationTools.append(EGAM8ZeeMassTool)
 
-    EGAM8ZmueMassTool = acc.popToolsAndMerge(EGAM8ZmueMassToolCfg(flags))
+    EGAM8ZmueMassTool = acc.popToolsAndMerge(EGAM8ZmueMassToolCfg(flags)) # TODO Migrate to AthReentrantAlgorithm
     acc.addPublicTool(EGAM8ZmueMassTool)
     augmentationTools.append(EGAM8ZmueMassTool)
 
@@ -153,14 +153,12 @@ def EGAM8KernelCfg(flags, name="EGAM8Kernel", **kwargs):
     acc.merge(CaloDecoratorKernelCfg(flags))
 
     from DerivationFrameworkEGamma.EGammaToolsConfig import (
-        EGammaCookieCutClusterToolCfg)
-    cookieCutTool = acc.popToolsAndMerge(
-        EGammaCookieCutClusterToolCfg(flags,
-                                      name,
-                                      StoreInputMoments=True,
-                                      StoreCookedMoments=True))
-    acc.addPublicTool(cookieCutTool)
-    augmentationTools.append(cookieCutTool)
+        EGammaCookieCutClusterAlgCfg)
+    acc.merge(
+        EGammaCookieCutClusterAlgCfg(flags,
+                                     name,
+                                     StoreInputMoments=True,
+                                     StoreCookedMoments=True))
 
     # thinning tools
     thinningTools = []

@@ -371,97 +371,83 @@ def LRTElectronLHSelectorsCfg(flags):
     from DerivationFrameworkEGamma.EGammaToolsConfig import EGElectronLikelihoodToolWrapperCfg
 
     # decorate electrons with the output of LH very loose
-    ElectronPassLHVeryLooseNoPix = acc.addPublicTool(acc.popToolsAndMerge(EGElectronLikelihoodToolWrapperCfg(
+    acc.merge(EGElectronLikelihoodToolWrapperCfg(
         flags,
         name="ElectronPassLHVeryLooseNoPix",
         EGammaElectronLikelihoodTool=ElectronLHSelectorVeryLooseNoPix,
         CutType="",
         StoreGateEntryName="DFCommonElectronsLHVeryLooseNoPix",
         ContainerName="Electrons",
-        StoreTResult=True)))
+        StoreTResult=True))
 
-    ElectronPassLHVeryLooseNoPixLRT = acc.addPublicTool(acc.popToolsAndMerge(EGElectronLikelihoodToolWrapperCfg(
+    acc.merge(EGElectronLikelihoodToolWrapperCfg(
         flags,
         name="ElectronPassLHVeryLooseNoPixLRT",
         EGammaElectronLikelihoodTool=ElectronLHSelectorVeryLooseNoPix,
         CutType="",
         StoreGateEntryName="DFCommonElectronsLHVeryLooseNoPix",
         ContainerName="LRTElectrons",
-        StoreTResult=True)))
+        StoreTResult=True))
 
     # decorate electrons with the output of LH loose
-    ElectronPassLHLooseNoPix = acc.addPublicTool(acc.popToolsAndMerge(EGElectronLikelihoodToolWrapperCfg(
-        flags,   
+    acc.merge(EGElectronLikelihoodToolWrapperCfg(
+        flags,
         name="ElectronPassLHLooseNoPix",
         EGammaElectronLikelihoodTool=ElectronLHSelectorLooseNoPix,
         CutType="",
         StoreGateEntryName="DFCommonElectronsLHLooseNoPix",
         ContainerName="Electrons",
-        StoreTResult=False)))
+        StoreTResult=False))
 
-    ElectronPassLHLooseNoPixLRT = acc.addPublicTool(acc.popToolsAndMerge(EGElectronLikelihoodToolWrapperCfg(
-        flags,   
+    acc.merge(EGElectronLikelihoodToolWrapperCfg(
+        flags,
         name="ElectronPassLHLooseNoPixLRT",
         EGammaElectronLikelihoodTool=ElectronLHSelectorLooseNoPix,
         CutType="",
         StoreGateEntryName="DFCommonElectronsLHLooseNoPix",
         ContainerName="LRTElectrons",
-        StoreTResult=False)))
+        StoreTResult=False))
 
     # decorate electrons with the output of LH medium
-    ElectronPassLHMediumNoPix = acc.addPublicTool(acc.popToolsAndMerge(EGElectronLikelihoodToolWrapperCfg(
+    acc.merge(EGElectronLikelihoodToolWrapperCfg(
         flags,
         name="ElectronPassLHMediumNoPix",
         EGammaElectronLikelihoodTool=ElectronLHSelectorMediumNoPix,
         CutType="",
         StoreGateEntryName="DFCommonElectronsLHMediumNoPix",
         ContainerName="Electrons",
-        StoreTResult=False)))
+        StoreTResult=False))
 
-    ElectronPassLHMediumNoPixLRT = acc.addPublicTool(acc.popToolsAndMerge(EGElectronLikelihoodToolWrapperCfg(
+    acc.merge(EGElectronLikelihoodToolWrapperCfg(
         flags,
         name="ElectronPassLHMediumNoPixLRT",
         EGammaElectronLikelihoodTool=ElectronLHSelectorMediumNoPix,
         CutType="",
         StoreGateEntryName="DFCommonElectronsLHMediumNoPix",
         ContainerName="LRTElectrons",
-        StoreTResult=False)))
+        StoreTResult=False))
 
     # decorate electrons with the output of LH tight
-    ElectronPassLHTightNoPix = acc.addPublicTool(acc.popToolsAndMerge(EGElectronLikelihoodToolWrapperCfg(
+    acc.merge(EGElectronLikelihoodToolWrapperCfg(
         flags,
         name="ElectronPassLHTightNoPix",
         EGammaElectronLikelihoodTool=ElectronLHSelectorTightNoPix,
         CutType="",
         StoreGateEntryName="DFCommonElectronsLHTightNoPix",
         ContainerName="Electrons",
-        StoreTResult=False)))
+        StoreTResult=False))
 
-    ElectronPassLHTightNoPixLRT = acc.addPublicTool(acc.popToolsAndMerge(EGElectronLikelihoodToolWrapperCfg(
+    acc.merge(EGElectronLikelihoodToolWrapperCfg(
         flags,
         name="ElectronPassLHTightNoPixLRT",
         EGammaElectronLikelihoodTool=ElectronLHSelectorTightNoPix,
         CutType="",
         StoreGateEntryName="DFCommonElectronsLHTightNoPix",
         ContainerName="LRTElectrons",
-        StoreTResult=False)))
-
-    LRTEGAugmentationTools = [ElectronPassLHVeryLooseNoPix,
-                              ElectronPassLHVeryLooseNoPixLRT,
-                              ElectronPassLHLooseNoPix,
-                              ElectronPassLHLooseNoPixLRT,
-                              ElectronPassLHMediumNoPix,
-                              ElectronPassLHMediumNoPixLRT,
-                              ElectronPassLHTightNoPix,
-                              ElectronPassLHTightNoPixLRT]
-
-    for i, tool in enumerate(LRTEGAugmentationTools):
-        acc.addEventAlgo(CompFactory.DerivationFramework.CommonAugmentation(
-            f"LLP1EGammaLRTKernel{i}",
-            AugmentationTools=[tool]
-    )) # TODO Migrate to N Algs in second pass
+        StoreTResult=False))
 
     return acc
+
 
 # RecoverZeroPixelHitMuons setup
 def RecoverZeroPixelHitMuonsCfg(flags):
@@ -470,5 +456,5 @@ def RecoverZeroPixelHitMuonsCfg(flags):
     ExtraInputs = [('xAOD::IParticleContainer', 'Muons.' + v)
                    for v in iso_vars()]
     acc.addEventAlgo(CompFactory.RecoverZeroPixelHitMuons(name="RecoverZeroPixelHitMuons", ExtraInputs=ExtraInputs))
-    
-    return acc 
+
+    return acc
