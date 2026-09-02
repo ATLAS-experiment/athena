@@ -33,19 +33,18 @@ unpackEI = CompFactory.EventInfoPackagingTool("UnpackEI")
 robsSvc = acc.addService(CompFactory.ROBDataProviderSvc())
 # unpackBS = CompFactory.BSPackagingTool("UnpackBS", OutputLevel=DEBUG, ROBDataProvider=robsSvc)
 
-execTool = CompFactory.ExecuteOngRPCCall(UnpackingTools=[unpackEI])
+execTool = CompFactory.ExecuteOngRPCCall(UnpackingTools=[unpackEI, unpackBS])
 
 # TODO, this would be configured in advance, when ELMgr is configured
 el = acc.getService(LoopMgr)
 el.eventExecTool = execTool
 
-# from TrigT2CaloCommon.TrigCaloDataAccessConfig import trigCaloDataAccessSvcCfg
-# acc.merge(trigCaloDataAccessSvcCfg(flags))
-# from CaloRec.CaloRecoConfig import CaloRecoCfg
-# acc.merge(CaloRecoCfg(flags))
+from TrigT2CaloCommon.TrigCaloDataAccessConfig import trigCaloDataAccessSvcCfg
+acc.merge(trigCaloDataAccessSvcCfg(flags))
+from CaloRec.CaloRecoConfig import CaloRecoCfg
+acc.merge(CaloRecoCfg(flags))
 
-# from TileRecUtils.TileCellMakerConfig import TileCellMakerCfg
-# acc.merge(TileCellMakerCfg(flags))
-
+with open("server.config.pkl", "wb") as fp:
+    acc.store(fp)
 
 acc.run()

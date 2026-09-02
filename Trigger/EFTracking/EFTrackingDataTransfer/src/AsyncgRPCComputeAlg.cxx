@@ -10,15 +10,15 @@ StatusCode AsyncgRPCComputeAlg::initialize() {
   // this should realy be a service
   auto channel = grpc::CreateChannel("localhost:50051",
                                      grpc::InsecureChannelCredentials());
-
+  const unsigned initTimeout = 100;
   channel->WaitForConnected(std::chrono::system_clock::now() +
-                            std::chrono::seconds(100));
+                            std::chrono::seconds(initTimeout));
 
   auto state = channel->GetState(true);
   if (state == GRPC_CHANNEL_READY) {
     ATH_MSG_INFO("gRPC channel connected");
   } else {
-    ATH_MSG_ERROR("gRPC channel is not ready after 5 seconds, exiting ...");
+    ATH_MSG_ERROR("gRPC channel is not ready after " << initTimeout << " seconds, exiting ...");
     return StatusCode::FAILURE;
   }
   m_stub = std::make_unique<UniversalOffloadService::Stub>(channel);
