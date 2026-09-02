@@ -67,7 +67,7 @@ run Reco_tf.py \
                flags.Tracking.doPixelDigitalClustering=True; \
                flags.Tracking.ITkActsPass.storeTrackSeeds=True; \
                from ActsConfig.ActsConfigFlags import SeedingStrategy; \
-               flags.Acts.SeedingStrategy=SeedingStrategy.Gbts;' \
+               flags.Tracking.ITkActsPass.SeedingStrategy=SeedingStrategy.Gbts;' \
     --inputRDOFile ${inputRDO} \
     --outputAODFile ${outputAOD} \
     --ignorePatterns "${ignore_pattern}" \

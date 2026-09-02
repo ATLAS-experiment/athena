@@ -70,7 +70,7 @@ run Reco_tf.py --CA \
                flags.Trigger.EFTracking.GPU.pipeline="g230"; \
                flags.Trigger.EFTracking.GPU.checkSeeds=True; \
                from ActsConfig.ActsConfigFlags import SeedingStrategy; \
-               flags.Acts.SeedingStrategy=SeedingStrategy.GbtsFtf;' \
+               flags.Tracking.ITkActsPass.SeedingStrategy=SeedingStrategy.GbtsFtf;' \
     --steering 'doRAWtoALL' \
     --inputRDOFile ${inputRDO} \
     --outputAODFile ${outputAOD} \

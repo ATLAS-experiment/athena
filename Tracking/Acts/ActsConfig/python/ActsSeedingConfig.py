@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -346,11 +346,11 @@ def ActsPixelSeedingAlgCfg(flags,
     useFastTracking = kwargs.get("useFastTracking", isFastPrimaryPass(flags))
 
     if "SeedTool" not in kwargs:
-        if flags.Acts.SeedingStrategy is SeedingStrategy.Gbts:
+        if flags.Tracking.ActiveConfig.SeedingStrategy is SeedingStrategy.Gbts:
             kwargs.setdefault('SeedTool', acc.popToolsAndMerge(ActsPixelGbtsSeedingToolCfg(flags)))
-        elif flags.Acts.SeedingStrategy is SeedingStrategy.GbtsFtf:
+        elif flags.Tracking.ActiveConfig.SeedingStrategy is SeedingStrategy.GbtsFtf:
             kwargs.setdefault('SeedTool', acc.popToolsAndMerge(ActsGbtsFtfSeedingTrigToolCfg(flags)))
-        else:
+        elif flags.Tracking.ActiveConfig.SeedingStrategy is SeedingStrategy.GridTriplet:
             if useFastTracking:
                 kwargs.setdefault('SeedTool', acc.popToolsAndMerge(ActsFastPixelSeedingToolCfg(flags)))
             else:
@@ -386,12 +386,14 @@ def ActsStripSeedingAlgCfg(flags,
 
     if "SeedTool" not in kwargs:
         if flags.Tracking.ActiveConfig.isLargeD0:
-            if flags.Acts.SeedingStrategy is SeedingStrategy.Gbts:
+            if flags.Tracking.ActiveConfig.SeedingStrategy is SeedingStrategy.Gbts:
                 kwargs.setdefault('SeedTool', acc.popToolsAndMerge(ActsStripGbtsSeedingToolCfg(flags)))
-            else:
+            elif flags.Tracking.ActiveConfig.SeedingStrategy in [
+                SeedingStrategy.GridTriplet, SeedingStrategy.GbtsFtf]:
                 kwargs.setdefault('SeedTool', acc.popToolsAndMerge(ActsLargeRadiusStripSeedingToolCfg(flags)))
         else:
-            kwargs.setdefault('SeedTool', acc.popToolsAndMerge(ActsStripSeedingToolCfg(flags)))
+            if flags.Tracking.ActiveConfig.SeedingStrategy is SeedingStrategy.GridTriplet:
+                kwargs.setdefault('SeedTool', acc.popToolsAndMerge(ActsStripSeedingToolCfg(flags)))
 
     kwargs.setdefault('InputSpacePoints', ['ITkStripSpacePoints_Cached', 'ITkStripOverlapSpacePoints_Cached'] if flags.Acts.useCache else ['ITkStripSpacePoints', 'ITkStripOverlapSpacePoints'])
     kwargs.setdefault('OutputSeeds', 'ActsStripSeeds')
@@ -465,16 +467,17 @@ def ActsSeedingCfg(flags,**kwargs) -> ComponentAccumulator:
         kwargs.setdefault('PixelSeedingAlg.SeedTool', acc.popToolsAndMerge(ActsPixelSeedingToolCfg(flags,
                                                                                                    name=f'{flags.Tracking.ActiveConfig.extension}PixelSeedingTool')))
 
-    if processStrips and flags.Acts.SeedingStrategy is SeedingStrategy.Gbts and flags.Tracking.ActiveConfig.isLargeD0:
-        kwargs.setdefault('StripSeedingAlg.SeedTool', acc.popToolsAndMerge(ActsStripGbtsSeedingToolCfg(flags,
-                                                                                                        name=f'{flags.Tracking.ActiveConfig.extension}StripSeedingTool')))
-    elif processStrips and flags.Acts.SeedingStrategy is SeedingStrategy.GridTriplet:
+    if processStrips:
+      if flags.Tracking.ActiveConfig.SeedingStrategy is SeedingStrategy.Gbts:
+        kwargs.setdefault('StripSeedingAlg.SeedTool', acc.popToolsAndMerge(
+          ActsStripGbtsSeedingToolCfg(flags)))
+      elif flags.Tracking.ActiveConfig.SeedingStrategy is SeedingStrategy.GridTriplet:
         if flags.Tracking.ActiveConfig.isLargeD0:
-            kwargs.setdefault('StripSeedingAlg.SeedTool', acc.popToolsAndMerge(ActsLargeRadiusStripSeedingToolCfg(flags,
-                                                                                                                   name=f'{flags.Tracking.ActiveConfig.extension}StripSeedingTool')))
+          kwargs.setdefault('StripSeedingAlg.SeedTool', acc.popToolsAndMerge(
+            ActsLargeRadiusStripSeedingToolCfg(flags)))
         else:
-            kwargs.setdefault('StripSeedingAlg.SeedTool', acc.popToolsAndMerge(ActsStripSeedingToolCfg(flags,
-                                                                                                       name=f'{flags.Tracking.ActiveConfig.extension}StripSeedingTool')))
+          kwargs.setdefault('StripSeedingAlg.SeedTool', acc.popToolsAndMerge(
+            ActsStripSeedingToolCfg(flags)))
         
     if processPixels:
         # Seeding algo

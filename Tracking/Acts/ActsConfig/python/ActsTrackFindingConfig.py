@@ -1,5 +1,5 @@
 
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -155,7 +155,8 @@ def ActsMainTrackFindingAlgCfg(flags,
     ### kwargs.setdefault("maxSharedHits", tolist(flags.Tracking.ActiveConfig.maxShared))
 
     # GBTS produces much purer seeds, so the branch stopper selections aren't needed with GBTS seeds.
-    if flags.Acts.SeedingStrategy not in (SeedingStrategy.GbtsFtf, SeedingStrategy.Gbts):
+    if flags.Tracking.ActiveConfig.SeedingStrategy not in [
+            SeedingStrategy.GbtsFtf, SeedingStrategy.Gbts]:
         kwargs.setdefault("ptMinMeasurements", seedOrder(flags, pixel=[3], strip=[6]))
         kwargs.setdefault("absEtaMaxMeasurements", seedOrder(flags, pixel=[3], strip=[999999]))
 

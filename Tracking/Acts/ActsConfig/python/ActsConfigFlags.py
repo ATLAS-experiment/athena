@@ -179,7 +179,6 @@ def createActsConfigFlags():
     actscf.addFlag('Acts.PixelSpacePointStrategy', SpacePointStrategy.ActsTrk, type=SpacePointStrategy)
 
     # Seeding
-    actscf.addFlag("Acts.SeedingStrategy", SeedingStrategy.GridTriplet, type=SeedingStrategy)  # Define Seeding Strategy
     actscf.addFlag("Acts.Gbts.connectionTable", 'binTables_ITK_RUN4.txt')
     actscf.addFlag("Acts.Gbts.connectionTableLrt", 'binTables_ITK_RUN4_LRT.txt')
     actscf.addFlag("Acts.Gbts.dumpGbtsGeometry", False)
