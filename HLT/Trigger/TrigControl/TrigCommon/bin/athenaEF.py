@@ -524,6 +524,7 @@ class RuntimeOverrides:
       self.create_services = []  # (name, type) to create 
       self.drop_services = []    # service names to remove
       self.properties = {}       # "Component.Property" -> value
+      self.commands = []         # Post commands to execute (--postcommand)
 
    def declare_type(self, name, type_):
       """Schedule the service registered as 'name' to be of type 'type_'"""
@@ -540,6 +541,10 @@ class RuntimeOverrides:
    def set(self, key, value):
       """Schedule 'Component.Property' = value"""
       self.properties[key] = value
+
+   def add_command(self, cmd):
+      """Schedule a Python command to be executed after configure()"""
+      self.commands.append(cmd)
 
    def apply(self):
       """Apply all overrides."""
@@ -670,7 +675,14 @@ class ConfigRunner:
          output = []
          setTHistSvcOutput(output)
          iProperty("THistSvc").Output = output
-      
+
+      # Postcommands run last.
+      if self.overrides.commands:
+         log.info("Executing postcommand(s)")
+         for cmd in self.overrides.commands:
+            log.info("  %s", cmd)
+            exec(cmd, globals(), {'app': app})
+
       # Initialize
       sc = app.initialize()
       if not sc.isSuccess():
@@ -1447,6 +1459,10 @@ def main():
          overrides.declare_type('THistSvc', 'THistSvc')
          overrides.drop_service('WebdaqInfoSvc')
 
+   # Postcommands are applied by ConfigRunner.run() after configure(). NB: do not run for --dump-config-exit.
+   for cmd in args.postcommand:
+      overrides.add_command(cmd)
+
    # Execute precommands
    if args.precommand:
       log.info("Executing precommand(s)")
@@ -1478,13 +1494,6 @@ def main():
       run_params = get_run_params(args).to_dict()
       acc = load_from_json(args.jobOptions, run_params, overrides=overrides)
       log.info("Configuration loaded from JSON")
-
-   # Execute postcommands
-   if args.postcommand:
-      log.info("Executing postcommand(s)")
-      for cmd in args.postcommand:
-         log.info("  %s", cmd)
-         exec(cmd, globals(), {'acc': acc})
 
    # Dump configuration if requested
    if args.dump_config or args.dump_config_exit:
