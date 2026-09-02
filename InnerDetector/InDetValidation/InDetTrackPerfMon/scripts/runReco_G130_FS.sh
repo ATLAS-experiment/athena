@@ -31,7 +31,7 @@ inputRDO=""
 outputAOD=""
 nEvents="-1"
 skipCheck=0
-storeTrackSeeds=False
+storeTrackSeeds=True
 
 ## parsing flags
 while [ $# -ge 1 ];do
@@ -40,8 +40,8 @@ while [ $# -ge 1 ];do
         -i  | --inputRDO )      if [ $# -lt 2 ] ; then usage ; fi ; inputRDO="$2"  ; shift ;;
         -o  | --outputAOD )     if [ $# -lt 2 ] ; then usage ; fi ; outputAOD="$2" ; shift ;;
         -n  | --nEvents )       if [ $# -lt 2 ] ; then usage ; fi ; nEvents="$2"   ; shift ;;
-        -s  | --skipCheck )     if [ $# -lt 1 ] ; then usage ; fi ; skipCheck=1    ; shift ;;
-        -t  | --storeSeeds )    if [ $# -lt 1 ] ; then usage ; fi ; storeTrackSeeds=True; shift ;;
+        -s  | --skipCheck )     if [ $# -lt 1 ] ; then usage ; fi ; skipCheck=1    ;;
+        -t  | --noStoreSeeds )  if [ $# -lt 1 ] ; then usage ; fi ; storeTrackSeeds=False ;;
         -h  | --help )          usage 0 ;;
         *) shift ;;
     esac
