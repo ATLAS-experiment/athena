@@ -339,7 +339,7 @@ def trigTauRecMergedCaloHitsCfg(
 
 def trigTauRecMergedCaloMVACfg(flags: AthConfigFlags) -> ComponentAccumulator:
     '''
-    Reconstruct the CaloMVA TauJet from the calo-clusters.
+    Reconstruct the CaloMVA TauJet from the calo-clusters, using LC topo seeds.
 
     :param flags: Config flags.
     :return: CA with the TauJet CaloMVA reconstruction sequence.
@@ -392,6 +392,59 @@ def trigTauRecMergedCaloMVACfg(flags: AthConfigFlags) -> ComponentAccumulator:
 
     return acc
 
+
+def trigTauRecMergedCaloEMCfg(flags: AthConfigFlags) -> ComponentAccumulator:
+    '''
+    Reconstruct the CaloMVA TauJet from the calo-clusters, using EM topo seeds.
+
+    :param flags: Config flags.
+    :return: CA with the TauJet CaloMVA reconstruction sequence.
+    '''
+    # Main CA
+    acc = ComponentAccumulator()
+
+    tools = []
+
+    from AthenaConfiguration.ComponentFactory import CompFactory
+
+    # Set seedcalo energy scale (Full RoI)
+    tools.append(CompFactory.JetSeedBuilder())
+
+    # Set LC energy scale (0.2 cone) and intermediate axis (corrected for vertex: useless at trigger)
+    tools.append(CompFactory.TauAxisSetter(ClusterCone=0.2, VertexCorrection=False))
+
+    # Decorate the clusters
+    tools.append(CompFactory.TauClusterFinder(UseOriginalCluster=False)) # TODO: use JetRec.doVertexCorrection once available
+    tools.append(CompFactory.TauVertexedClusterDecorator(SeedJet=''))
+
+    # Calculate cell-based quantities: strip variables, EM and Had energies/radii, centFrac, isolFrac and ring energies
+    tools.append(CompFactory.TauCellVariables(CellCone=0.2, VertexCorrection = False))
+
+    # Compute MVA TES (ATR-17649), stores MVA TES as the default tau pt
+    tools.append(CompFactory.MvaTESVariableDecorator(Key_vertexInputContainer='', EventShapeKey='', VertexCorrection=False))
+    acc.addPublicTool(tools[-1])
+    tools.append(CompFactory.MvaTESEvaluator(WeightFileName=flags.Trigger.Offline.Tau.MvaTESConfig))
+    acc.addPublicTool(tools[-1])
+
+    # Set trigger-specific configuration for all the reconstruction tools
+    for tool in tools:
+        tool.inTrigger = True
+        tool.calibFolder = flags.Trigger.Offline.Tau.tauRecToolsCVMFSPath
+
+    from TrigEDMConfig.TriggerEDM import recordable
+    from TrigTauRec.TrigTauRecMonitoring import tauMonitoringCaloOnlyEM
+    acc.addEventAlgo(CompFactory.TrigTauRecMerged(
+        name='TrigTauRecMerged_TauCaloOnlyEM',
+        CommonTools=tools,
+        MonTool=tauMonitoringCaloOnlyEM(flags),
+        InputRoIs='UpdatedCaloRoIem',
+        InputCaloClusterContainer='HLT_TopoCaloClustersRoI',
+        OutputTauTrackContainer='HLT_tautrack_dummy',
+        OutputTauJetContainer='HLT_TrigTauRecMerged_CaloEMOnly',
+        OutputJetSeed=recordable('HLT_jet_seed'),
+    ))
+
+    return acc
 
 
 if __name__ == '__main__':
