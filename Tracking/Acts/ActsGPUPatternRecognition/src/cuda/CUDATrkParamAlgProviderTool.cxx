@@ -37,7 +37,7 @@ CUDATrkParamAlgProviderTool::getAlgorithm(const EventContext& ctx, const traccc:
     traccc::memory_resource{m_MRs->mainMR(), m_MRs->hostMR()},
     *copy,
     traccc::cuda::stream_wrapper{m_streamTool->stream(ctx)},
-    makeActsAthenaLogger(this, "TracccSPFormationCUDA"))};
+    makeActsAthenaLogger(this, "TracccTrkParamEstimationCUDA"))};
 
 }
 
