@@ -168,7 +168,10 @@ namespace MuonR4{
                                     "Mdt drift signs are copied from the segment line instead from the track state"};
 
             /** @brief Scale factor applied to the sTGC strip measurement uncertainty */
-            Gaudi::Property<double> m_sTgcStripErrorScale{ this, "sTgcStripErrorScale", 1.0, "Scale factor applied to the sTGC strip measurement uncertainty" };
+            Gaudi::Property<double> m_sTgcPrecCoordErrorScale{ this, "sTgcPrecCoordErrorScale", 1.0, "Scale factor applied to the sTGC strip measurement uncertainty" };
+
+            /** @brief Scale factor applied to the sTGC non-precise coordinate measurement uncertainty */
+            Gaudi::Property<double> m_sTgcNonPrecCoordErrorScale{ this, "sTgcNonPrecCoordErrorScale", 1.0, "Scale factor applied to the sTGC non-precise coordinate measurement uncertainty" };
 
             /** @brief Scale factor applied to the MM strip measurement uncertainty */
             Gaudi::Property<double> m_mmStripErrorScale{ this, "mmStripErrorScale", 1.0, "Scale factor applied to the MM strip measurement uncertainty" };
