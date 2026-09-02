@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArLATOMEBuilderAlg.h"
@@ -125,39 +125,39 @@ StatusCode LArLATOMEBuilderAlg::execute(const EventContext& ctx) const {
     float hvcorr=HVScaleCorrs->HVScaleCorr(id);
     float ELSB = 12.5; /// will take from DB later
 
-    if (ATH_UNLIKELY(ped==ILArPedestal::ERRORCODE)) {
+    if (ped==ILArPedestal::ERRORCODE) [[unlikely]] {
       ATH_MSG_ERROR("No valid pedestal for connected channel " << id.get_identifier32().get_compact() << " gain " << gain);
       return StatusCode::FAILURE;
     }
-    if(ATH_UNLIKELY(!ofca.valid())){
+    if(!ofca.valid()) [[unlikely]] {
       ATH_MSG_ERROR("No valid ofca for connected channel " << id.get_identifier32().get_compact() << " gain " << gain);
       return StatusCode::FAILURE;
     }
-    if(ATH_UNLIKELY(!ofcb.valid())){
+    if(!ofcb.valid()) [[unlikely]] {
       ATH_MSG_ERROR("No valid ofcb for connected channel " << id.get_identifier32().get_compact() << " gain " << gain);
       return StatusCode::FAILURE;
     }
-    if(ATH_UNLIKELY(!ramp.valid())){
+    if(!ramp.valid()) [[unlikely]] {
       ATH_MSG_ERROR("No valid ramp for connected channel " << id.get_identifier32().get_compact() << " gain " << gain);
       return StatusCode::FAILURE;
     }
-    if(ATH_UNLIKELY(ramp.size()!=2)){
+    if(ramp.size()!=2) [[unlikely]] {
       ATH_MSG_ERROR("wrong ramp size for connected channel " << id.get_identifier32().get_compact() << " gain " << gain);
       return StatusCode::FAILURE;
     }
-    if (ATH_UNLIKELY(dac2ua==ILArDAC2uA::ERRORCODE)) {
+    if (dac2ua==ILArDAC2uA::ERRORCODE) [[unlikely]] {
       ATH_MSG_ERROR("No valid dac2ua for connected channel " << id.get_identifier32().get_compact());
       return StatusCode::FAILURE;
     }
-    if (ATH_UNLIKELY(ua2mev==ILAruA2MeV::ERRORCODE)) {
+    if (ua2mev==ILAruA2MeV::ERRORCODE) [[unlikely]] {
       ATH_MSG_ERROR("No valid ua2mev for connected channel " << id.get_identifier32().get_compact());
       return StatusCode::FAILURE;
     }
-    if (ATH_UNLIKELY(mphys==ILArHVScaleCorr::ERRORCODE)) {
+    if (mphys==ILArHVScaleCorr::ERRORCODE) [[unlikely]] {
       ATH_MSG_ERROR("No valid mphys for connected channel " << id.get_identifier32().get_compact() << " gain " << gain);
       return StatusCode::FAILURE;
     }
-    if (ATH_UNLIKELY(hvcorr==ILArMphysOverMcal::ERRORCODE)) {
+    if (hvcorr==ILArMphysOverMcal::ERRORCODE) [[unlikely]] {
       ATH_MSG_ERROR("No valid hvcorr for connected channel " << id.get_identifier32().get_compact());
       return StatusCode::FAILURE;
     }
