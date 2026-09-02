@@ -309,7 +309,10 @@ StatusCode TgcL0TruthValidationAlg::execute(const EventContext& ctx) const {
       ATH_MSG_ERROR("Failed to retrieve " << m_sectorLogicKey.fullKey());
       return StatusCode::FAILURE;
     }
-
+    if (!finalCandidateContainer)[[unlikely]]{
+      ATH_MSG_ERROR("finalCandidateContainer is null.");
+      return StatusCode::FAILURE;
+    }
     std::size_t sectorLogicIndex{0U};
     for (std::size_t inputIndex = 0U;
          inputIndex < finalCandidateContainer->size();

@@ -55,7 +55,7 @@ coral::Blob BlobDataToBlob(const chai::BlobData& blob) {
 
    return data;
 }
-
+//coverity[UNCAUGHT_EXCEPT]
 int main(int argc, char ** argv) {
 
      boost::program_options::options_description description( "Options" );

@@ -967,7 +967,7 @@ int getBin(double x, const std::vector<double>& bins) const {
       doAngleDressing(dp_rest, cosangle, v_p4, v_pid);
       
       // findZZ4ldecay outputs a byte, last 6 bits indicate cuts passed
-      cuts_passed = findZZ4ldecay(v_p4, v_pid, decay_observables);
+      cuts_passed = findZZ4ldecay(std::move(v_p4), std::move(v_pid), decay_observables);
       bool isZZ4l = (cuts_passed & 0b111111) == 0b111111;
 
       // H -> ZZ* -> 4l

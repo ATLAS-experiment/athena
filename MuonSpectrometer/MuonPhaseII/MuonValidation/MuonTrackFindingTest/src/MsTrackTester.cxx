@@ -415,9 +415,9 @@ namespace MuonValR4 {
         if (!truthTrk || !m_truthTrks) {
             return nullptr;
         }
-        for (const xAOD::IParticle* part : m_truthTrks->getCached()) {
-            if (part == truthTrk || truthTrk ==  xAOD::TruthHelpers::getTruthParticle(*part)) {
-                return dynamic_cast<const xAOD::TruthParticle*>(part);
+        for (const xAOD::IParticle* thisPart : m_truthTrks->getCached()) {
+            if (thisPart == truthTrk || truthTrk ==  xAOD::TruthHelpers::getTruthParticle(*thisPart)) {
+                return dynamic_cast<const xAOD::TruthParticle*>(thisPart);
             }
         }
         return nullptr;
