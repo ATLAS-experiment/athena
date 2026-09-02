@@ -251,20 +251,21 @@ StatusCode AthenaRemoteEventLoopMgr::nextEvent([[maybe_unused]] int maxevt) {
       // NOTE: Code mostly copied from AthenaHiveEventLoopMgr
 
       std::vector<std::unique_ptr<EventContext>> finishedEvtContexts;
-      EventContext* ctx{nullptr};
+      EventContext* finishedEvtContext{nullptr};
 
-      sc = m_schedulerSvc->popFinishedEvent(ctx);
-      if (sc.isSuccess()) {
-        ATH_MSG_INFO("drainScheduler: scheduler not empty: Context " << ctx);
-        finishedEvtContexts.emplace_back(ctx);
+      if (m_schedulerSvc->popFinishedEvent(finishedEvtContext).isSuccess()) {
+        ATH_MSG_INFO("drainScheduler: scheduler not empty: Context "
+                     << finishedEvtContext);
+        finishedEvtContexts.emplace_back(finishedEvtContext);
       } else {
         // no more events left in scheduler to be drained
         ATH_MSG_INFO("drainScheduler: scheduler empty");
       }
 
       // Let's see if we can pop other event contexts
-      while (m_schedulerSvc->tryPopFinishedEvent(ctx).isSuccess()) {
-        finishedEvtContexts.emplace_back(ctx);
+      while (
+          m_schedulerSvc->tryPopFinishedEvent(finishedEvtContext).isSuccess()) {
+        finishedEvtContexts.emplace_back(finishedEvtContext);
       }
 
       for (auto& thisFinishedEvtContext : finishedEvtContexts) {
