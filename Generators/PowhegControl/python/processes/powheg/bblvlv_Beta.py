@@ -198,5 +198,5 @@ class bblvlv_Beta(PowhegBeta):
 
         __decay_mode_lookup = {"b mu+ vmu b~ e- ve~" : 0, "b e+ ve b~ mu- vmu~" : 1, "b emu+ vemu b~ emu- vemu~" : 2,\
                                "b tau+ vtau b~ e- ve~" : 3, "b e+ ve b~ tau- vtau~" : 4, \
-                               "b mu+ vmu b~ tau- vtau~" : 5, "b tau+ vtau b~ mu- vmu~" : 6, "b l+ vl b~ l- vl~" : 7}
+                               "b mu+ vmu b~ tau- vtau~" : 5, "b tau+ vtau b~ mu- vmu~" : 6, "b l+ vl b~ l- vl~" : 11}
         self.parameters_by_keyword("channel")[0].value = __decay_mode_lookup[self.decay_mode]
