@@ -251,12 +251,8 @@ def ActsTruthTrackBuilderToolCfg(
 
     acc = ComponentAccumulator()
 
-    kwargs.setdefault("PixelClusters", "ITkPixelClusters")
-    kwargs.setdefault("PixelClustersToTruthAssociationMap", "ITkPixelClustersToTruthParticles")
-    kwargs.setdefault("StripClusters", "ITkStripClusters")
-    kwargs.setdefault("StripClustersToTruthAssociationMap", "ITkStripClustersToTruthParticles")
-    kwargs.setdefault("usePixelClusters", flags.Acts.GbtsTraining.usePixelClusters)
-    kwargs.setdefault("useStripClusters", flags.Acts.GbtsTraining.useStripClusters)
+    kwargs.setdefault("usePixelClusters", flags.Acts.Gbts.Training.usePixelClusters)
+    kwargs.setdefault("useStripClusters", flags.Acts.Gbts.Training.useStripClusters)
 
     acc.setPrivateTools(
         CompFactory.ActsTrk.TruthTrackBuilderTool(
@@ -281,14 +277,10 @@ def ActsGbtsTrainingAlgCfg(flags,
         )
 
     kwargs.setdefault("geometryFile", find_datafile("gbts_layer_geometry.txt"))
-    kwargs.setdefault("outputConnectionTable", flags.Acts.GbtsTraining.outputConnectionTable)
-    kwargs.setdefault("zMinTol", 0.2340) # set based on seeing what positions where just missing the layers 
-    kwargs.setdefault("zMaxTol", 0.2340)
-    kwargs.setdefault("rMinTol", 2.5337)
-    kwargs.setdefault("rMaxTol", 2.5337)
-    kwargs.setdefault("doSymmetrization", flags.Acts.GbtsTraining.doSymmetrization)
-    kwargs.setdefault("useOldFormatting", flags.Acts.GbtsTraining.useOldFormatting)
-    kwargs.setdefault("probThreshold", flags.Acts.GbtsTraining.probThreshold)
+    kwargs.setdefault("outputConnectionTable", flags.Acts.Gbts.Training.outputConnectionTable)
+    kwargs.setdefault("doSymmetrization", flags.Acts.Gbts.Training.doSymmetrization)
+    kwargs.setdefault("useOldFormatting", flags.Acts.Gbts.Training.useOldFormatting)
+    kwargs.setdefault("probThreshold", flags.Acts.Gbts.Training.probThreshold)
 
     acc.addEventAlgo(
         CompFactory.ActsTrk.GbtsTrainingAlg(name=name, **kwargs)

@@ -194,14 +194,14 @@ def createActsConfigFlags():
 
     # GBTS Training 
     ## Connection table settings
-    actscf.addFlag("Acts.GbtsTraining.enable", False) 
-    actscf.addFlag("Acts.GbtsTraining.outputConnectionTable", "gbts_connection_table.txt") 
-    actscf.addFlag("Acts.GbtsTraining.doSymmetrization", False) 
-    actscf.addFlag("Acts.GbtsTraining.useOldFormatting", False) 
-    actscf.addFlag("Acts.GbtsTraining.probThreshold", -1.0) 
+    actscf.addFlag("Acts.Gbts.Training.enable", False) 
+    actscf.addFlag("Acts.Gbts.Training.outputConnectionTable", "gbts_connection_table.txt") 
+    actscf.addFlag("Acts.Gbts.Training.doSymmetrization", False) 
+    actscf.addFlag("Acts.Gbts.Training.useOldFormatting", False) 
+    actscf.addFlag("Acts.Gbts.Training.probThreshold", -1.0) 
     ## truth track builder tool
-    actscf.addFlag("Acts.GbtsTraining.usePixelClusters", True) 
-    actscf.addFlag("Acts.GbtsTraining.useStripClusters", True) 
+    actscf.addFlag("Acts.Gbts.Training.usePixelClusters", True) 
+    actscf.addFlag("Acts.Gbts.Training.useStripClusters", True) 
 
     # Track finding
     actscf.addFlag('Acts.PixelCalibrationStrategy', PixelCalibrationStrategy.Uncalibrated, type=PixelCalibrationStrategy)

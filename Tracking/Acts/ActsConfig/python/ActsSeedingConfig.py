@@ -587,7 +587,7 @@ def ActsSeedingCfg(flags) -> ComponentAccumulator:
         flags, processPixels=True, processStrips=True))
 
   # schedules the GBTS training algorithm
-  if flags.Acts.GbtsTraining.enable:
+  if flags.Acts.Gbts.Training.enable:
     from ActsConfig.ActsTruthConfig import ActsGbtsTrainingAlgCfg
     acc.merge(ActsGbtsTrainingAlgCfg(flags))
 
