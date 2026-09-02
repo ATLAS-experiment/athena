@@ -46,10 +46,10 @@ def HIGG1D1KernelCfg(flags, name='HIGG1D1Kernel', **kwargs):
     
     # Truth thinning
     if flags.Input.isMC:
-        truth_conditions = ["((abs(TruthParticles.pdgId) >= 23) && (abs(TruthParticles.pdgId) <= 25))",  # W, Z and Higgs
-                            "((abs(TruthParticles.pdgId) >= 11) && (abs(TruthParticles.pdgId) <= 16))",  # Leptons
-                            "((abs(TruthParticles.pdgId) ==  6))",                                       # Top quark
-                            "((abs(TruthParticles.pdgId) == 22) && (TruthParticles.pt > 1*GeV))",        # Photon
+        truth_conditions = ["(TruthParticles.isW || TruthParticles.isZ || TruthParticles.isHiggs)",  # W, Z and Higgs
+                            "(TruthParticles.isLepton)",  # Leptons
+                            "(TruthParticles.isTop)",                                       # Top quark
+                            "(TruthParticles.isPhoton) && (TruthParticles.pt > 1*GeV))",        # Photon
                             "(abs(TruthParticles.pdgId) >=  1000000)",                                   # BSM
                             "(TruthParticles.isGenStable)"]           # stable particles
         truth_expression = f'({" || ".join(truth_conditions)})'
