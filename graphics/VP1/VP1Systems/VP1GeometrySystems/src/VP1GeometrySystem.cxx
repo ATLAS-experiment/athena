@@ -409,7 +409,7 @@ QWidget * VP1GeometrySystem::buildController()
   connect(m_d->controller,SIGNAL(actionOnAllNonStandardVolumes(bool)),this,SLOT(actionOnAllNonStandardVolumes(bool)));
   connect(m_d->controller,SIGNAL(autoAdaptPixelsOrSCT(bool,bool,bool,bool,bool,bool)),this,SLOT(autoAdaptPixelsOrSCT(bool,bool,bool,bool,bool,bool)));
   connect(m_d->controller,SIGNAL(autoAdaptMuonNSW(bool,bool,bool,bool,bool,bool)),this,SLOT(autoAdaptMuonNSW(bool, bool,bool,bool,bool,bool)));
-  connect(m_d->controller,SIGNAL(autoAdaptHGTD(bool,bool,bool,bool,bool,bool,bool,bool,bool,bool,bool,bool,bool,bool)),this,SLOT(autoAdaptHGTD(bool,bool,bool,bool,bool,bool,bool,bool,bool,bool,bool,bool,bool,bool)));
+  connect(m_d->controller,SIGNAL(autoAdaptHGTD(bool,bool,bool,bool,bool,bool,bool)),this,SLOT(autoAdaptHGTD(bool,bool,bool,bool,bool,bool,bool)));
   connect(m_d->controller,SIGNAL(resetSubSystems(VP1GeoFlags::SubSystemFlags)),this,SLOT(resetSubSystems(VP1GeoFlags::SubSystemFlags)));
 
   connect(m_d->controller,SIGNAL(labelsChanged(int)),this,SLOT(setLabels(int)));
@@ -2450,7 +2450,7 @@ void VP1GeometrySystem::autoAdaptMuonNSW(bool reset, bool stgc, bool mm, bool pa
 
 
 //_____________________________________________________________________________________
-void VP1GeometrySystem::autoAdaptHGTD(bool reset, bool flex, bool hybrid, bool glue, bool sensors, bool inactive, bool asic, bool supportPlate, bool frontCover, bool backCover, bool moderatorIn, bool moderatorOut, bool outerRCover, bool coolingLines)
+void VP1GeometrySystem::autoAdaptHGTD(bool reset, bool modules, bool supportStructure, bool coolingLines, bool covers, bool moderator, bool servicesElectronics)
 {
   VP1Msg::messageDebug("VP1GeometrySystem::autoAdaptHGTD()");
 
@@ -2510,31 +2510,32 @@ void VP1GeometrySystem::autoAdaptHGTD(bool reset, bool flex, bool hybrid, bool g
       for (VolumeHandle* handle : handles) {
         const QString name = handle->getName();
         bool selected(false);
-        if (flex && (name=="HGTDFlexPackage" || name.startsWith("HGTDFlexTube"))) {
+        if (modules && (name=="HGTDFlexPackage" ||
+                        name.startsWith("HGTDFlexTube") ||
+                        name=="HGTDHybrid" ||
+                        name=="HGTDGlueSensor" ||
+                        name=="HGTDGlueAsic" ||
+                        name.startsWith("HGTDSiSensor") ||
+                        name=="HGTDLGADInactive" ||
+                        name=="HGTDASIC")) {
           selected = true;
-        } else if (hybrid && name=="HGTDHybrid") {
-          selected = true;
-        } else if (glue && (name=="HGTDGlueSensor" || name=="HGTDGlueAsic")) {
-          selected = true;
-        } else if (sensors && name.startsWith("HGTDSiSensor")) {
-          selected = true;
-        } else if (inactive && name=="HGTDLGADInactive") {
-          selected = true;
-        } else if (asic && name=="HGTDASIC") {
-          selected = true;
-        } else if (supportPlate && name=="HGTDSupportPlate") {
-          selected = true;
-        } else if (frontCover && name=="HGTDFrontCover") {
-          selected = true;
-        } else if (backCover && name=="HGTDBackCover") {
-          selected = true;
-        } else if (moderatorIn && name=="HGTDModeratorIn") {
-          selected = true;
-        } else if (moderatorOut && name=="HGTDModeratorOut") {
-          selected = true;
-        } else if (outerRCover && name=="HGTDOuterRCover") {
+        } else if (supportStructure && (name=="HGTDSupportPlate" || name=="HGTDCoolingPlate")) {
           selected = true;
         } else if (coolingLines && name=="HGTDPeripheralCoolingLines") {
+          selected = true;
+        } else if (covers && (name=="HGTDFrontCover" ||
+                              name=="HGTDBackCover" ||
+                              name=="HGTDOuterRCover" ||
+                              name=="HGTDInnerRCover1" ||
+                              name=="HGTDInnerRCover2" ||
+                              name=="HGTDInnerRCover3")) {
+          selected = true;
+        } else if (moderator && (name=="HGTDModeratorIn" || name=="HGTDModeratorOut")) {
+          selected = true;
+        } else if (servicesElectronics && (name=="support_F_vol" ||
+                                           name=="support_B_vol" ||
+                                           name.startsWith("PowerBlock_") ||
+                                           name.startsWith("VTRx_"))) {
           selected = true;
         }
 
