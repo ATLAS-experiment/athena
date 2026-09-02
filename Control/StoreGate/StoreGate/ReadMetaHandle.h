@@ -11,7 +11,6 @@
 
 #include "StoreGate/ReadHandle.h"
 #include "StoreGate/ReadMetaHandleKey.h"
-#include "CxxUtils/AthUnlikelyMacros.h"
 
 #include "GaudiKernel/DataHandle.h"
 #include "GaudiKernel/DataObjID.h"
@@ -81,14 +80,14 @@ namespace SG {
     , m_hkey(key)
   {
     MsgStream msg(Athena::getMessageSvc(), "ReadMetaHandle");
-    if (ATH_UNLIKELY(!m_hkey.isInit())) {
+    if (!m_hkey.isInit()) [[unlikely]] {
       msg << MSG::ERROR 
 	  << "ReadMetaHandleKey " << key.objKey() << " was not initialized"
 	  << endmsg;
       throw std::runtime_error("ReadMetaHandle: ReadMetaHandleKey was not initialized");
     }
 
-    if (ATH_UNLIKELY(m_cont == 0)) {
+    if (m_cont == 0) [[unlikely]] {
       // Try to retrieve it
       MetaContBase* cb{nullptr};
       if(m_hkey.getStore()->retrieve(cb, m_hkey.key()).isFailure()) {
@@ -121,7 +120,7 @@ namespace SG {
     // Initialize sid from dbKey found at ReadMetaHandleKey initialize
 //    m_sid = m_hkey.dbKey();    ???? Do I need this ????
 
-    if ( ATH_UNLIKELY(! m_cont->find(m_sid, m_ent)) ) {
+    if (! m_cont->find(m_sid, m_ent)) [[unlikely]] {
       std::ostringstream ost;
       m_cont->list(ost);
       MsgStream msg(Athena::getMessageSvc(), "ReadMetaHandle");
