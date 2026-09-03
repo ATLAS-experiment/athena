@@ -615,8 +615,7 @@ def JetRoITrackJetTagSequenceCfg(flags,jetsIn,trkopt,RoIs):
         acc.merge(
             hitZTaggingCfg(
                 flags,
-                jetsIn,
-                trkmap['Tracks']
+                jetsIn
             )
         )
 

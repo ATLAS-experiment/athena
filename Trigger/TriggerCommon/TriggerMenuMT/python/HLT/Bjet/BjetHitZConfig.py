@@ -142,7 +142,7 @@ def hitAssociationCfg(flags, inputJets, maxHits=MAX_HITS,
     return ca
 
 
-def hitZInferenceCfg(flags, inputJets, inputTracks, nnFile, remap=None):
+def hitZInferenceCfg(flags, inputJets, nnFile, remap=None):
     """Run the HitZ regression, mirroring the dl2_configs entries next door."""
     ca = ComponentAccumulator()
 
@@ -161,9 +161,9 @@ def hitZInferenceCfg(flags, inputJets, inputTracks, nnFile, remap=None):
             name='HitZJetTagAlg',
             container=inputJets,
             electronContainer='',
-            # the network has no track inputs, but an empty constituent key is
-            # rejected when the handle is initialised
-            constituentContainer=inputTracks,
+            # the network reads hits, not tracks, so it declares no track
+            # inputs and needs no constituent container
+            constituentContainer='',
             decorator=CompFactory.FlavorTagInference.GNNTool(
                 name='HitZGNNTool',
                 nnFile=nnFile,
@@ -184,7 +184,7 @@ def hitZInferenceCfg(flags, inputJets, inputTracks, nnFile, remap=None):
     return ca
 
 
-def hitZTaggingCfg(flags, inputJets, inputTracks):
+def hitZTaggingCfg(flags, inputJets):
     """Cluster conversion, hit association and HitZ inference, in that order."""
     if not flags.Detector.GeometryITk:
         raise ValueError('HitZ is configured for ITk (Run 4) only')
@@ -198,5 +198,5 @@ def hitZTaggingCfg(flags, inputJets, inputTracks):
     ca = ComponentAccumulator()
     ca.merge(hitClusterCnvCfg(flags))
     ca.merge(hitAssociationCfg(flags, inputJets))
-    ca.merge(hitZInferenceCfg(flags, inputJets, inputTracks, nnFile))
+    ca.merge(hitZInferenceCfg(flags, inputJets, nnFile))
     return ca
