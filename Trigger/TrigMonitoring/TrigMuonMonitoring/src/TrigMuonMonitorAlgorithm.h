@@ -119,7 +119,7 @@ class TrigMuonMonitorAlgorithm : public AthMonitorAlgorithm {
    */
   template<class T>
   StatusCode fillVariableEtaPhi(const EventContext &ctx,
-                                SG::ReadHandleKey<DataVector<T> > ReadHandleKey,
+                                const SG::ReadHandleKey<DataVector<T> > & ReadHandleKey,
                                 std::string &&trigstep,
                                 std::tuple<bool,double,double> (*PosFunc)(const T*) = &TrigMuonMonitorAlgorithm::defaultPosFunc<T>) const;
 

@@ -261,9 +261,9 @@ StatusCode L2MuonSAMon :: fillVariablesPerChain(const EventContext &ctx, const s
     const xAOD::Muon* RecMuonCB = m_matchTool->matchL2SAtoOff(ctx, (*muEL));
     if(RecMuonCB == nullptr) continue;
 
-    std::vector<float> res_inn_OffMatch = res_inn;
-    std::vector<float> res_mid_OffMatch = res_mid;
-    std::vector<float> res_out_OffMatch = res_out;
+    std::vector<float> res_inn_OffMatch = std::move(res_inn);
+    std::vector<float> res_mid_OffMatch = std::move(res_mid);
+    std::vector<float> res_out_OffMatch = std::move(res_out);
 
     auto mon_res_inn_OffMatch = Monitored::Collection(chain+"_MDT_Inn_residual_OffMatch",res_inn_OffMatch);
     auto mon_res_mid_OffMatch = Monitored::Collection(chain+"_MDT_Mid_residual_OffMatch",res_mid_OffMatch);
@@ -463,13 +463,13 @@ StatusCode L2MuonSAMon :: fillVariablesPerOfflineMuon(const EventContext &ctx, c
 
   if(!m_L2MuonSAContainerKey.empty()) {
     ATH_CHECK( fillVariablesRatioPlots<xAOD::L2StandAloneMuon>(ctx, mu, "L2SA", xAOD::Muon::TrackParticleType::ExtrapolatedMuonSpectrometerTrackParticle,
-                                                              [this](const EventContext &ctx, const xAOD::Muon *m){ return m_matchTool->matchL2SAReadHandle(ctx,m); }
+                                                              [this](const EventContext &c, const xAOD::Muon *m){ return m_matchTool->matchL2SAReadHandle(c,m); }
                                                               ));
   }
 
   if (!m_EFFastRecoContainerKey.empty()) {
     ATH_CHECK( fillVariablesRatioPlots<xAOD::Muon>(ctx, mu, "L2SAPhII", xAOD::Muon::TrackParticleType::ExtrapolatedMuonSpectrometerTrackParticle,
-                                                   [this](const EventContext &ctx, const xAOD::Muon *m){ return m_matchTool->matchFastRecoSAReadHandle(ctx,m); }
+                                                   [this](const EventContext &c, const xAOD::Muon *m){ return m_matchTool->matchFastRecoSAReadHandle(c,m); }
                                                    ));
   }
   
