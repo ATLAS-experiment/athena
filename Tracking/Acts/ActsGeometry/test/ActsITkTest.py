@@ -1,26 +1,23 @@
 #!/usr/bin/env python
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 """
-  Run ACTS geometry construction for ITk
+  Run ACTS geometry construction for ITk + HGTD
 """
 from pathlib import Path
 import argparse
 
-parser = argparse.ArgumentParser(description="Run ACTS geometry construction for ITk")
+parser = argparse.ArgumentParser(description="Run ACTS geometry construction for ITk + HGTD")
 parser.add_argument("--gen3", action="store_true", help="Use Gen3 geometry + construction")
 args = parser.parse_args()
 
 from AthenaConfiguration.AllConfigFlags import initConfigFlags
 flags = initConfigFlags()
 
-from AthenaConfiguration.Enums import ProductionStep
-flags.Common.ProductionStep = ProductionStep.Simulation
 from AthenaConfiguration.TestDefaults import defaultGeometryTags, defaultConditionsTags
 flags.GeoModel.AtlasVersion = defaultGeometryTags.RUN4
 flags.IOVDb.GlobalTag = defaultConditionsTags.RUN4_MC
-flags.GeoModel.Align.Dynamic = False
 flags.Input.Files = []
-flags.Input.isMC=True
+flags.Input.isMC = True
 
 flags.Detector.GeometryHGTD = True
 flags.Detector.GeometryITkPixel = True
@@ -41,32 +38,23 @@ flags.lock()
 flags.dump()
 
 from AthenaConfiguration.MainServicesConfig import MainServicesCfg
-acc = MainServicesCfg( flags )
+acc = MainServicesCfg(flags)
 
 from ActsConfig.ActsGeometryConfig import ActsExtrapolationAlgCfg, ActsTrackingGeometrySvcCfg
-
 from AthenaCommon.Constants import INFO
-tgSvc = ActsTrackingGeometrySvcCfg(flags,
-                                   OutputLevel=INFO,
-                                   RunConsistencyChecks=True,
-                                   #  ConsistencyCheckOutput="trk_geo_check.csv", # enable debug output writing
-                                   BlueprintGraphviz=str(Path.cwd() / "blueprint.dot"),
-                                   ObjDebugOutput=False)
-acc.merge(tgSvc)
 
-alg = ActsExtrapolationAlgCfg(flags,
-                              OutputLevel=INFO,
-                              NParticlesPerEvent = int(100),
-                              WritePropStep = True,
-                              WriteMaterialTracks = True,
-                              EtaRange = [-5, 5],
-                              PtRange = [20, 100])
+acc.merge(ActsTrackingGeometrySvcCfg(flags,
+                                     OutputLevel=INFO,
+                                     RunConsistencyChecks=True,
+                                     BlueprintGraphviz=str(Path.cwd() / "blueprint.dot"),
+                                     ObjDebugOutput=False))
 
-acc.merge(alg)
-
-from ActsConfig.ActsMaterialConfig import MaterialTrackWriterCfg
-acc.merge(MaterialTrackWriterCfg(flags, FileName="material-tracks-test.root",
-                                 MaterialTrackCollectionKey="MaterialTracks"))
+acc.merge(ActsExtrapolationAlgCfg(flags,
+                                  OutputLevel=INFO,
+                                  NParticlesPerEvent=int(100),
+                                  WritePropStep=True,
+                                  EtaRange=[-5, 5],
+                                  PtRange=[20, 100]))
 
 acc.printConfig()
 sc = acc.run()
