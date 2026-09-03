@@ -173,7 +173,7 @@ def FTAG1LITEKernelCfg(flags, name='FTAG1LITEKernel', **kwargs):
         )
         acc.addEventAlgo(CommonAugmentation(
             "PhysCommonTruthCharmKernel", AugmentationTools=[charmTool]
-        ))
+        )) # TODO Migrate public tool to AthReentrantAlgorithm
 
         acc.merge(AddHFAndDownstreamParticlesCfg(flags))
         acc.merge(AddStandardTruthContentsCfg(

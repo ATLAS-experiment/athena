@@ -305,7 +305,7 @@ def HIGG9D1KernelCfg(flags, name='HIGG9D1Kernel', **kwargs):
         MinimumPhotonPt    = 4800.0,
         DiphotonVertexName = "HIGG9D1_DiphotonPrimaryVertices"))
     acc.addPublicTool(DiphotonVertexDecorator)
-    acc.addEventAlgo(CompFactory.DerivationFramework.CommonAugmentation(name = "DiphotonVertexAugmentation", AugmentationTools = [DiphotonVertexDecorator]), sequenceName="HIGG9D1Sequence")
+    acc.addEventAlgo(CompFactory.DerivationFramework.CommonAugmentation(name = "DiphotonVertexAugmentation", AugmentationTools = [DiphotonVertexDecorator]), sequenceName="HIGG9D1Sequence") # TODO Migrate public tool to AthReentrantAlgorithm
 
     #================
     # Thinning tools

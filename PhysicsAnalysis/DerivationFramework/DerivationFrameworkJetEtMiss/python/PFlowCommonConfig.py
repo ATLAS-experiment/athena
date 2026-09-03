@@ -10,7 +10,7 @@ def PFlowCommonCfg(ConfigFlags):
     CommonAugmentation = CompFactory.DerivationFramework.CommonAugmentation
     from DerivationFrameworkJetEtMiss.JetToolConfig import PFlowAugmentationToolCfg
     PFlowAugTool = acc.getPrimaryAndMerge(PFlowAugmentationToolCfg(ConfigFlags))
-    acc.addEventAlgo(CommonAugmentation("PFlowAugmentation", AugmentationTools = [PFlowAugTool]))
+    acc.addEventAlgo(CommonAugmentation("PFlowAugmentation", AugmentationTools = [PFlowAugTool])) # TODO Migrate public tool to AthReentrantAlgorithm
 
     return acc
 

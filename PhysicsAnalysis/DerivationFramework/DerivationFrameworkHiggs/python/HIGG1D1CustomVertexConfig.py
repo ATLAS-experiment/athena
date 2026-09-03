@@ -38,7 +38,7 @@ def ZeeVertexRefitterCfg(flags, name="ZeeVertexRefitKernel"):
         ZeeVertexRefittingToolCfg(flags))
     acc.addPublicTool(ZeeVertexRefittingTool)
     acc.addEventAlgo(CompFactory.DerivationFramework.CommonAugmentation(
-        name, AugmentationTools=[ZeeVertexRefittingTool]))
+        name, AugmentationTools=[ZeeVertexRefittingTool])) # TODO Migrate public tool to AthReentrantAlgorithm (Uses ExpressionParser)
     return acc
 
 def DiphotonVertexDecoratorCfg(flags, **kwargs):
@@ -63,7 +63,7 @@ def DiPhotonVertexDecoratorKernelCfg(flags, name="DiphotonVertexKernel"):
         DiphotonVertexDecoratorCfg(flags))
     acc.addPublicTool(DiphotonVertexDecorator)
     acc.addEventAlgo(CompFactory.DerivationFramework.CommonAugmentation(
-        name,AugmentationTools=[DiphotonVertexDecorator]))
+        name,AugmentationTools=[DiphotonVertexDecorator])) # TODO Migrate public tool to AthReentrantAlgorithm
     return acc
 
 def DiPhotonVertexCfg(flags):

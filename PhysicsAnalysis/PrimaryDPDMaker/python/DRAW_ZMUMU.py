@@ -74,7 +74,6 @@ def DRAW_ZmumuKernelCfg(flags, name="DRAW_ZMUMUKernel", **kwargs):
 
     for tool in [muonSkimmingTool, mass_tool]:
         acc.addEventAlgo(CompFactory.DerivationFramework.CommonAugmentation(tool.name+"Aug", AugmentationTools = [tool])
-
     kwargs.setdefault("SkimmingTools", [DRAW_ZMUMU_SkimmingTool])
     kwargs.setdefault("doChronoStat", flags.Concurrency.NumThreads <= 1)
     the_alg = CompFactory.DerivationFramework.DerivationKernel(name, **kwargs)

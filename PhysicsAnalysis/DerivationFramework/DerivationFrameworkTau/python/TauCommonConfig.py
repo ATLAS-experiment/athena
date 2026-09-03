@@ -36,7 +36,7 @@ def AddTauAugmentationCfg(flags, wp="GNTauVeryLoose", **kwargs):
     TauAugmentationTools.append(TauWrapper)
 
     CommonAugmentation = CompFactory.DerivationFramework.CommonAugmentation
-    acc.addEventAlgo(CommonAugmentation(f"Tau{wp}AugmentationKernel", AugmentationTools = TauAugmentationTools))
+    acc.addEventAlgo(CommonAugmentation(f"Tau{wp}AugmentationKernel", AugmentationTools = TauAugmentationTools)) # TODO Migrate to N Algs in second pass
     return acc
 
 def AddTauIDDecorationCfg(flags, **kwargs):
@@ -113,7 +113,7 @@ def AddTauIDDecorationCfg(flags, **kwargs):
         print("PXQW TauIDDecoratorsWrapper: " + str(tauIDDecoratorWrapper))
         acc.addPublicTool(tauIDDecoratorWrapper)
         acc.addEventAlgo(TauIDDecoratorKernel(name = f"{prefix}_TauIDDecorKernel",
-                                              AugmentationTools = [tauIDDecoratorWrapper]))
+                                              AugmentationTools = [tauIDDecoratorWrapper])) # TODO Migrate public tool to AthReentrantAlgorithm
 
     return acc
 
@@ -180,7 +180,7 @@ def AddTauIDDisplacedDecorationCfg(flags, **kwargs):
         CompFactory.DerivationFramework.CommonAugmentation(
             name = f"{prefix}_TauDisplacedIDDecorKernel",
             AugmentationTools = [tauIDDecoratorWrapper],
-        )
+        ) # TODO Migrate public tool to AthReentrantAlgorithm
     )
     return acc
 

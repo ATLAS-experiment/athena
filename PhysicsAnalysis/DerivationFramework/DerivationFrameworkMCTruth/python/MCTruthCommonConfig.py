@@ -137,7 +137,7 @@ def PreJetMCTruthAugmentationsCfg(flags, **kwargs):
         augmentationToolsList.append(acc.getPrimaryAndMerge(DFCommonTruthMuonDressingToolCfg(flags, decorationName = kwargs['decorationDressing'])))
 
     for i, tool in enumerate(augmentationToolsList):
-        acc.addEventAlgo(CompFactory.DerivationFramework.CommonAugmentation(name ="MCTruthCommonPreJetKernelNo{num}".format(num = i+1), AugmentationTools = [tool]))
+        acc.addEventAlgo(CompFactory.DerivationFramework.CommonAugmentation(name ="MCTruthCommonPreJetKernelNo{num}".format(num = i+1), AugmentationTools = [tool])) # TODO Migrate public tool to AthReentrantAlgorithm
 
     return(acc)
 
@@ -169,7 +169,7 @@ def PostJetMCTruthAugmentationsCfg(flags, **kwargs):
     CommonAugmentation = CompFactory.DerivationFramework.CommonAugmentation
     for i, tool in enumerate(augmentationToolsList):
         acc.addEventAlgo(CommonAugmentation(name = "MCTruthCommonPostJetKernelNo{num}".format(num = i+1),
-                                        AugmentationTools = [tool]))
+                                        AugmentationTools = [tool])) # TODO Migrate public tool to AthReentrantAlgorithm
 
     # add SoW of individual SUSY final states, relies on augmentation from DecorateSUSYProcess()
     if IsSUSYSignalRun3(flags):
@@ -237,7 +237,7 @@ def AddParentAndDownstreamParticlesCfg(flags,
                                                                            RejectHadronChildren = rejectHadronChildren))
     CommonAugmentation = CompFactory.DerivationFramework.CommonAugmentation
     kernel_name = 'MCTruthCommon'+prefix+'AndDecaysKernel'
-    acc.addEventAlgo(CommonAugmentation(kernel_name, AugmentationTools = [collection_maker] ))
+    acc.addEventAlgo(CommonAugmentation(kernel_name, AugmentationTools = [collection_maker] )) # TODO Migrate public tool to AthReentrantAlgorithm
     return acc
 
 # Next two don't seem to be used for anything...
@@ -327,7 +327,7 @@ def AddHFAndDownstreamParticlesCfg(flags, **kwargs):
         Generations=kwargs['generations']))
     acc.addEventAlgo(CompFactory.DerivationFramework.CommonAugmentation(
         kwargs['prefix']+"MCTruthCommonHFAndDecaysKernel",
-        AugmentationTools = [DFCommonHFAndDecaysTool] ))
+        AugmentationTools = [DFCommonHFAndDecaysTool] )) # TODO Migrate public tool to AthReentrantAlgorithm
     return acc
 
 
@@ -343,7 +343,7 @@ def AddPVCollectionCfg(flags):
         NewCollectionName="TruthPrimaryVertices"))
     acc.addEventAlgo(CompFactory.DerivationFramework.CommonAugmentation(
         "MCTruthCommonTruthPVCollKernel",
-        AugmentationTools = [DFCommonTruthPVCollTool] ))
+        AugmentationTools = [DFCommonTruthPVCollTool] )) # TODO Migrate public tool to AthReentrantAlgorithm
     return acc
 
 
@@ -359,7 +359,7 @@ def AddTruthCollectionNavigationDecorationsCfg(flags, TruthCollections=[], prefi
                                                                                               InputCollections = TruthCollections))
         CommonAugmentation = CompFactory.DerivationFramework.CommonAugmentation
         acc.addEventAlgo(CommonAugmentation(prefix+"MCTruthNavigationDecoratorKernel",
-                                            AugmentationTools = [DFCommonTruthNavigationDecorator] ))
+                                            AugmentationTools = [DFCommonTruthNavigationDecorator] )) # TODO Migrate public tool to AthReentrantAlgorithm
     return acc
 
 # Add BSM particles and their downstream particles (immediate and further decay products) in a special collection
@@ -376,7 +376,7 @@ def AddBSMAndDownstreamParticlesCfg(flags, generations=-1):
                                                                                    Generations       = generations))
     CommonAugmentation = CompFactory.DerivationFramework.CommonAugmentation
     acc.addEventAlgo(CommonAugmentation(name              = "MCTruthCommonBSMAndDecaysKernel",
-                                        AugmentationTools = [DFCommonBSMAndDecaysTool] ))
+                                        AugmentationTools = [DFCommonBSMAndDecaysTool] )) # TODO Migrate public tool to AthReentrantAlgorithm
     return acc
 
 # Add a mini-collection for the born leptons
@@ -389,7 +389,7 @@ def AddBornLeptonCollectionCfg(flags):
                                                                                           name              = "DFCommonBornLeptonCollTool",
                                                                                           NewCollectionName ="BornLeptons"))
     CommonAugmentation = CompFactory.DerivationFramework.CommonAugmentation
-    acc.addEventAlgo(CommonAugmentation("MCTruthCommonBornLeptonsKernel", AugmentationTools = [DFCommonBornLeptonCollTool] ))
+    acc.addEventAlgo(CommonAugmentation("MCTruthCommonBornLeptonsKernel", AugmentationTools = [DFCommonBornLeptonCollTool] )) # TODO Migrate public tool to AthReentrantAlgorithm
     return acc
 
 def AddLargeRJetD2Cfg(flags):
@@ -402,7 +402,7 @@ def AddLargeRJetD2Cfg(flags):
                                                                      JetContainerKey = "AntiKt10TruthSoftDropBeta100Zcut10Jets",
                                                                      DecorationName  = "D2"))
     TruthD2DecoratorKernel = CompFactory.DerivationFramework.CommonAugmentation
-    acc.addEventAlgo(TruthD2DecoratorKernel("TRUTHD2Kernel", AugmentationTools = [theTruthD2Decorator] ))
+    acc.addEventAlgo(TruthD2DecoratorKernel("TRUTHD2Kernel", AugmentationTools = [theTruthD2Decorator] )) # TODO Migrate public tool to AthReentrantAlgorithm
     return acc
 
 
@@ -460,7 +460,7 @@ def AddTruthEnergyDensityCfg(flags):
 
     DFCommonTruthEDKernel = CompFactory.DerivationFramework.CommonAugmentation("DFCommonTruthEDKernel",
                                                                                AugmentationTools =
-                                                                               [acc.addPublicTool(acc.popToolsAndMerge(DFCommonTruthEDDecoratorCfg(flags)))] )
+                                                                               [acc.addPublicTool(acc.popToolsAndMerge(DFCommonTruthEDDecoratorCfg(flags)))] ) # TODO Migrate public tool to AthReentrantAlgorithm
     acc.addEventAlgo(DFCommonTruthEDKernel)
     return acc
 
@@ -498,7 +498,7 @@ def AddMiniTruthCollectionLinksCfg(flags, **kwargs):
     for i, tool in enumerate(aug_tools):
         acc.addEventAlgo(CompFactory.DerivationFramework.CommonAugmentation(
         "MiniCollectionTruthLinkKernelNo{num}".format(num=i+1),
-        AugmentationTools = [tool] ))
+        AugmentationTools = [tool] )) # TODO Migrate public tool to AthReentrantAlgorithm
     return acc
 
 

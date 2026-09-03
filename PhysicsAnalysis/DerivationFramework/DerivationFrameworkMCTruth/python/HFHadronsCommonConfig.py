@@ -19,5 +19,5 @@ def HFHadronsCommonCfg(flags):
                                                                                         name="DFCommonHadronOriginDecorator"))
         CommonAugmentation = CompFactory.DerivationFramework.CommonAugmentation
         acc.addEventAlgo(CommonAugmentation(name="HFHadronsCommonKernel",
-                                            AugmentationTools=[DFCommonhadronorigindecorator]))
+                                            AugmentationTools=[DFCommonhadronorigindecorator])) # TODO Migrate public tool to AthReentrantAlgorithm
     return acc

@@ -29,7 +29,7 @@ def TLACommonAugmentationsCfg(flags,**kwargs):
             flags,
             name = "TLACommonTruthCharmTool"))
         CommonAugmentation = CompFactory.DerivationFramework.CommonAugmentation
-        acc.addEventAlgo(CommonAugmentation("TLACommonTruthCharmKernel",AugmentationTools=[TLACommonTruthCharmTool]))
+        acc.addEventAlgo(CommonAugmentation("TLACommonTruthCharmKernel",AugmentationTools=[TLACommonTruthCharmTool])) # TODO Migrate public tool to AthReentrantAlgorithm
         acc.merge(AddHFAndDownstreamParticlesCfg(flags))
         acc.merge(AddStandardTLATruthContentsCfg(flags, useTLAPostJetAugmentations=True))
         acc.merge(AddTruthCollectionNavigationDecorationsCfg(

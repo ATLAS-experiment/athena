@@ -32,7 +32,7 @@ def EGammaCommonCfg(flags):
             EtaSGEntry="DFCommonPhotons_eta",
             PhiSGEntry="DFCommonPhotons_phi",
             EtSGEntry="DFCommonPhotons_et",
-        )
+        ) # TODO Migrate to AthReentrantAlgorithm
     ))
 
     isMC = flags.Input.isMC
@@ -425,7 +425,7 @@ def EGammaCommonCfg(flags):
             StoreGateEntryName="DFCommonElectronsLHVeryLoose",
             ContainerName="Electrons",
             StoreTResult=False,
-        )
+        ) # TODO Migrate to AthReentrantAlgorithm
     ))
 
     # decorate electrons with the output of LH loose
@@ -438,7 +438,7 @@ def EGammaCommonCfg(flags):
             StoreGateEntryName="DFCommonElectronsLHLoose",
             ContainerName="Electrons",
             StoreTResult=False,
-        )
+        ) # TODO Migrate to AthReentrantAlgorithm
     ))
 
     # decorate electrons with the output of LH loose+BL
@@ -451,7 +451,7 @@ def EGammaCommonCfg(flags):
             StoreGateEntryName="DFCommonElectronsLHLooseBL",
             ContainerName="Electrons",
             StoreTResult=False,
-        )
+        ) # TODO Migrate to AthReentrantAlgorithm
     ))
 
     # decorate electrons with the output of LH medium
@@ -464,7 +464,7 @@ def EGammaCommonCfg(flags):
             StoreGateEntryName="DFCommonElectronsLHMedium",
             ContainerName="Electrons",
             StoreTResult=False,
-        )
+        ) # TODO Migrate to AthReentrantAlgorithm
     ))
 
     # decorate electrons with the output of LH tight
@@ -477,7 +477,7 @@ def EGammaCommonCfg(flags):
             StoreGateEntryName="DFCommonElectronsLHTight",
             ContainerName="Electrons",
             StoreTResult=False,
-        )
+        ) # TODO Migrate to AthReentrantAlgorithm
     ))
 
     # decorate electrons with the output of DNN Loose
@@ -500,7 +500,7 @@ def EGammaCommonCfg(flags):
                 "DFCommonElectronsDNN_plh",
             ],
             StoreMultipleOutputs=True,
-        )
+        ) # TODO Migrate to AthReentrantAlgorithm
     ))
 
     # decorate electrons with the output of DNN Medium
@@ -514,7 +514,7 @@ def EGammaCommonCfg(flags):
             ContainerName="Electrons",
             FudgedContainerName="FudgedElectrons" if isMC else "",
             StoreTResult=False,
-        )
+        ) # TODO Migrate to AthReentrantAlgorithm
     ))
 
     # decorate electrons with the output of DNN Tight
@@ -528,7 +528,7 @@ def EGammaCommonCfg(flags):
             ContainerName="Electrons",
             FudgedContainerName="FudgedElectrons" if isMC else "",
             StoreTResult=False,
-        )
+        ) # TODO Migrate to AthReentrantAlgorithm
     ))
 
     # decorate electrons with the output of DNN VeryLoose97 without CF
@@ -542,7 +542,7 @@ def EGammaCommonCfg(flags):
             ContainerName="Electrons",
             FudgedContainerName="FudgedElectrons" if isMC else "",
             StoreTResult=False,
-        )
+        ) # TODO Migrate to AthReentrantAlgorithm
     ))
     # decorate electrons with the output of DNN Loose without CF
     ElectronPassDNNLooseNoCF = acc.addPublicTool(acc.popToolsAndMerge(
@@ -555,7 +555,7 @@ def EGammaCommonCfg(flags):
             ContainerName="Electrons",
             FudgedContainerName="FudgedElectrons" if isMC else "",
             StoreTResult=False,
-        )
+        ) # TODO Migrate to AthReentrantAlgorithm
     ))
 
     # decorate electrons with the output of DNN Medium without CF
@@ -569,7 +569,7 @@ def EGammaCommonCfg(flags):
             ContainerName="Electrons",
             FudgedContainerName="FudgedElectrons" if isMC else "",
             StoreTResult=False,
-        )
+        ) # TODO Migrate to AthReentrantAlgorithm
     ))
 
     # decorate electrons with the output of DNN Tight without CF
@@ -583,7 +583,7 @@ def EGammaCommonCfg(flags):
             ContainerName="Electrons",
             FudgedContainerName="FudgedElectrons" if isMC else "",
             StoreTResult=False,
-        )
+        ) # TODO Migrate to AthReentrantAlgorithm
     ))
 
     # decorate electrons with the output of ECIDS
@@ -597,7 +597,7 @@ def EGammaCommonCfg(flags):
                 StoreGateEntryName="DFCommonElectronsECIDS",
                 ContainerName="Electrons",
                 StoreTResult=True,
-            )
+            ) # TODO Migrate to AthReentrantAlgorithm
         ))
 
     if includeFwdElectrons:
@@ -610,7 +610,7 @@ def EGammaCommonCfg(flags):
                 CutType="",
                 StoreGateEntryName="DFCommonForwardElectronsLHLoose",
                 ContainerName="ForwardElectrons",
-            )
+            ) # TODO Migrate to AthReentrantAlgorithm
         ))
 
         # decorate forward electrons with the output of LH medium
@@ -622,7 +622,7 @@ def EGammaCommonCfg(flags):
                 CutType="",
                 StoreGateEntryName="DFCommonForwardElectronsLHMedium",
                 ContainerName="ForwardElectrons",
-            )
+            ) # TODO Migrate to AthReentrantAlgorithm
         ))
 
         # decorate forward electrons with the output of LH tight
@@ -634,7 +634,7 @@ def EGammaCommonCfg(flags):
                 CutType="",
                 StoreGateEntryName="DFCommonForwardElectronsLHTight",
                 ContainerName="ForwardElectrons",
-            )
+            ) # TODO Migrate to AthReentrantAlgorithm
         ))
 
     # decorate photons with the output of IsEM loose
@@ -649,7 +649,7 @@ def EGammaCommonCfg(flags):
             StoreGateEntryName="DFCommonPhotonsIsEMLoose",
             ContainerName="Photons",
             FudgedContainerName="FudgedPhotons" if isFullSim else "",
-        )
+        ) # TODO Migrate to AthReentrantAlgorithm
     ))
 
     # decorate photons with the output of IsEM medium
@@ -664,7 +664,7 @@ def EGammaCommonCfg(flags):
             StoreGateEntryName="DFCommonPhotonsIsEMMedium",
             ContainerName="Photons",
             FudgedContainerName="FudgedPhotons" if isFullSim else "",
-        )
+        ) # TODO Migrate to AthReentrantAlgorithm
     ))
 
     # decorate photons with the output of IsEM tight
@@ -679,7 +679,7 @@ def EGammaCommonCfg(flags):
             StoreGateEntryName="DFCommonPhotonsIsEMTight",
             ContainerName="Photons",
             FudgedContainerName="FudgedPhotons" if isFullSim else "",
-        )
+        ) # TODO Migrate to AthReentrantAlgorithm
     ))
 
     # decorate photons with the output of BDT tight
@@ -707,7 +707,7 @@ def EGammaCommonCfg(flags):
             WorkingPointName="Tight",
             ContainerName="Photons",
             FudgedContainerName= "FudgedPhotons" if isFullSim else ""
-        )
+        ) # TODO Migrate to AthReentrantAlgorithm
     ))
 
     # decorate photons with the output of IsEM tight
@@ -722,7 +722,7 @@ def EGammaCommonCfg(flags):
             StoreGateEntryName="DFCommonPhotonsIsEMTightNF",
             ContainerName="Photons",
             FudgedContainerName= "NFFudgedPhotons" if (isMC and isRun2orRun3) else ""
-        )
+        ) # TODO Migrate to AthReentrantAlgorithm
     ))
 
     # decorate photons with the output of BDT tight
@@ -749,7 +749,7 @@ def EGammaCommonCfg(flags):
             WorkingPointName="Tight",
             ContainerName="Photons",
             FudgedContainerName= "NFFudgedPhotons" if (isMC and isRun2orRun3) else ""
-        )
+        ) # TODO Migrate to AthReentrantAlgorithm
     ))
 
 
@@ -764,7 +764,7 @@ def EGammaCommonCfg(flags):
             StoreGateEntryName="DFCommonPhotonsCleaning",
             ContainerName="Photons",
             FudgedContainerName= "FudgedPhotons" if isFullSim else ""
-        )
+        ) # TODO Migrate to AthReentrantAlgorithm
     ))
 
     # decorate some electrons with an additional ambiguity flag
@@ -776,7 +776,7 @@ def EGammaCommonCfg(flags):
             flags,
             name="ElectronAdditionnalAmbiguity",
             isMC=flags.Input.isMC,
-        )
+        ) # TODO Migrate to AthReentrantAlgorithm
     ))
 
     # list of all the decorators so far
@@ -951,13 +951,13 @@ def EGammaCommonCfg(flags):
             acc.merge(PhotonNFFudgeAlgorithmCfg(flags))
         if isFullSim:
             acc.merge(PhotonFudgeAlgorithmCfg(flags))
-        
+
     # =======================================
     # CREATE THE DERIVATION KERNEL ALGORITHM
     # =======================================
 
     for i, tool in enumerate(EGAugmentationTools):
-        acc.addEventAlgo(CompFactory.DerivationFramework.CommonAugmentation(f"EGammaCommonKernel{i}", AugmentationTools = [tool]))
+        acc.addEventAlgo(CompFactory.DerivationFramework.CommonAugmentation(f"EGammaCommonKernel{i}", AugmentationTools = [tool])) # TODO Migrate to N Algs in second pass
 
     # =======================================
     # ADD TOOLS : custom electron, photon and muon track isolation

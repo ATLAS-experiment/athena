@@ -54,7 +54,7 @@ def STDM16Kernel(flags, name='STDM16Kernel', **kwargs):
             flags,
             name = "STDM16CommonTruthCharmTool"))
         CommonAugmentation = CompFactory.DerivationFramework.CommonAugmentation
-        acc.addEventAlgo(CommonAugmentation("STDM16CommonTruthCharmKernel",AugmentationTools=[STDM16CommonTruthCharmTool]))
+        acc.addEventAlgo(CommonAugmentation("STDM16CommonTruthCharmKernel",AugmentationTools=[STDM16CommonTruthCharmTool])) # TODO Migrate public tool to AthReentrantAlgorithm
 
         acc.merge(AddStandardTruthContentsCfg(flags))
         acc.merge(AddTruthCollectionNavigationDecorationsCfg(

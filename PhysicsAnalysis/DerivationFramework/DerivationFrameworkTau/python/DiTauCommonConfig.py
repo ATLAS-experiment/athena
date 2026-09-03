@@ -53,7 +53,7 @@ def AddDiTauIDDecorationCfg(flags, **kwargs):
 
     acc.addPublicTool(DiTauIDDecoratorWrapper)
     acc.addEventAlgo(DiTauIDDecoratorKernel(name              = "DiTauIDDecorKernel",
-                                            AugmentationTools = [DiTauIDDecoratorWrapper]))
+                                            AugmentationTools = [DiTauIDDecoratorWrapper])) # TODO Migrate public tool to AthReentrantAlgorithm
     return acc
 
 
@@ -73,6 +73,6 @@ def AddDiTauChargeDecoratorCfg(flags, **kwargs):
                                                 DiTauContainerName = kwargs['DiTauContainerName'])
     acc.addPublicTool(diTauChargeDecorator)
     acc.addEventAlgo(DiTauChargeDecoratorKernel(name              = f"{prefix}_DiTauIDDecorKernel",
-                                                AugmentationTools = [diTauChargeDecorator]))
+                                                AugmentationTools = [diTauChargeDecorator])) # TODO Migrate public tool to AthReentrantAlgorithm
 
     return acc

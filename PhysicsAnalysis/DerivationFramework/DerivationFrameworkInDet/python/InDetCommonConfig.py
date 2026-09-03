@@ -64,7 +64,7 @@ def InDetCommonCfg(flags, **kwargs):
 
             acc.addEventAlgo(CommonAugmentation(
                 "InDetSelectedPseudo",
-                AugmentationTools=[PseudoTrackSelectorTool]))
+                AugmentationTools=[PseudoTrackSelectorTool])) # TODO Migrate public tool to AthReentrantAlgorithm
 
         # ====================================================================
         # EXPRESSION OF Z0 AT THE PRIMARY VERTEX
@@ -177,7 +177,7 @@ def InDetCommonCfg(flags, **kwargs):
                                    DFCommonUsedInFitDecorator,
                                    DFCommonUsedInFitDecoratorLRT]:
                 acc.addEventAlgo(CommonAugmentation("InDetCommonKernel"+tool.name,
-                                 AugmentationTools=[tool]))
+                                 AugmentationTools=[tool])) # TODO Migrate public tool to AthReentrantAlgorithm
         else:
             AugTools = [DFCommonTrackSelection,
                         DFCommonZ0AtPV,
@@ -186,7 +186,7 @@ def InDetCommonCfg(flags, **kwargs):
                 AugTools += PseudoTrackDecorators
             for tool in AugTools:
                 acc.addEventAlgo(CommonAugmentation("InDetCommonKernel"+tool.name,
-                                                AugmentationTools=[tool]))
+                                                AugmentationTools=[tool])) # TODO Migrate public tool to AthReentrantAlgorithm
 
     # Add LRT merger job to the sequence when the LRT track particle is supposed to be made already
     if (kwargs['MergeLRT'] and kwargs['DoR3LargeD0'] and

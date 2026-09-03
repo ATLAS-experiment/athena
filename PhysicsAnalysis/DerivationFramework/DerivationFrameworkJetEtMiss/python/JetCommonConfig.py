@@ -49,7 +49,7 @@ def AddBadBatmanCfg(ConfigFlags):
     CommonAugmentation = CompFactory.DerivationFramework.CommonAugmentation
     from DerivationFrameworkJetEtMiss.JetToolConfig import BadBatmanToolCfg
     badBatmanTool = acc.getPrimaryAndMerge(BadBatmanToolCfg(ConfigFlags))
-    acc.addEventAlgo(CommonAugmentation("BadBatmanAugmentation", AugmentationTools = [badBatmanTool]))
+    acc.addEventAlgo(CommonAugmentation("BadBatmanAugmentation", AugmentationTools = [badBatmanTool])) # TODO Migrate public tool to AthReentrantAlgorithm
 
     return acc
 
@@ -61,7 +61,7 @@ def AddDistanceInTrainCfg(ConfigFlags):
 
     CommonAugmentation = CompFactory.DerivationFramework.CommonAugmentation
     distanceInTrainTool = acc.getPrimaryAndMerge(DistanceInTrainToolCfg(ConfigFlags))
-    acc.addEventAlgo(CommonAugmentation("DistanceInTrainAugmentation", AugmentationTools = [distanceInTrainTool]))
+    acc.addEventAlgo(CommonAugmentation("DistanceInTrainAugmentation", AugmentationTools = [distanceInTrainTool])) # TODO Migrate public tool to AthReentrantAlgorithm
 
     return acc
 
@@ -134,7 +134,7 @@ def AddEventCleanFlagsCfg(ConfigFlags, workingPoints = ['Loose', 'Tight', 'Loose
     CommonAugmentation = CompFactory.DerivationFramework.CommonAugmentation
     from DerivationFrameworkMuons.MuonsToolsConfig import MuonJetDrToolCfg
     muonJetDrTool = acc.getPrimaryAndMerge(MuonJetDrToolCfg(ConfigFlags, "MuonJetDrTool"))
-    acc.addEventAlgo(CommonAugmentation("DFCommonMuonsKernel2", AugmentationTools = [muonJetDrTool]))
+    acc.addEventAlgo(CommonAugmentation("DFCommonMuonsKernel2", AugmentationTools = [muonJetDrTool])) # TODO Migrate public tool to AthReentrantAlgorithm
 
     from JetSelectorTools.JetSelectorToolsConfig import EventCleaningToolCfg,JetCleaningToolCfg
     

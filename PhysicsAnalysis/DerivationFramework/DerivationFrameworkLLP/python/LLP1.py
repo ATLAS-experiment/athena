@@ -865,7 +865,7 @@ def LLP1KernelCfg(flags, name='LLP1Kernel', **kwargs):
                                                                                     RClusTrim                         = 0.2,
                                                                                     PtFracTrim                        = 0.05
                                                                                     ))
-    RCSubstructureClusterTrimAug = CompFactory.DerivationFramework.CommonAugmentation("RCSubstructureClusterTrimAug", AugmentationTools = [LLP1RCJetSubstructureClustTrimAugTool])
+    RCSubstructureClusterTrimAug = CompFactory.DerivationFramework.CommonAugmentation("RCSubstructureClusterTrimAug", AugmentationTools = [LLP1RCJetSubstructureClustTrimAugTool]) # TODO Migrate public tool to AthReentrantAlgorithm (Uses ExpressionParser)
     acc.addEventAlgo(RCSubstructureClusterTrimAug)
 
     LLP1RCJetSubstructureClustSDAugTool = acc.getPrimaryAndMerge(RCJetSubstructureAugCfg(flags,
@@ -879,7 +879,7 @@ def LLP1KernelCfg(flags, name='LLP1Kernel', **kwargs):
                                                                                     BetaSoft                          = 1.0,
                                                                                     ZcutSoft                          = 0.1
                                                                                     ))
-    RCSubstructureClusterSDAug = CompFactory.DerivationFramework.CommonAugmentation("RCSubstructureClusterSDAug", AugmentationTools = [LLP1RCJetSubstructureClustSDAugTool])
+    RCSubstructureClusterSDAug = CompFactory.DerivationFramework.CommonAugmentation("RCSubstructureClusterSDAug", AugmentationTools = [LLP1RCJetSubstructureClustSDAugTool]) # TODO Migrate public tool to AthReentrantAlgorithm (Uses ExpressionParser)
     acc.addEventAlgo(RCSubstructureClusterSDAug)
 
     # Compute RC substructure variables from tracks
@@ -899,7 +899,7 @@ def LLP1KernelCfg(flags, name='LLP1Kernel', **kwargs):
                                                                                         RClusTrim                         = 0.2,
                                                                                         PtFracTrim                        = 0.05
                                                                                         ))
-    RCSubstructureTrackTrimAug = CompFactory.DerivationFramework.CommonAugmentation("RCSubstructureTrackTrimAug", AugmentationTools = [LLP1RCJetSubstructureTrackTrimAugTool])
+    RCSubstructureTrackTrimAug = CompFactory.DerivationFramework.CommonAugmentation("RCSubstructureTrackTrimAug", AugmentationTools = [LLP1RCJetSubstructureTrackTrimAugTool]) # TODO Migrate public tool to AthReentrantAlgorithm (Uses ExpressionParser)
     acc.addEventAlgo(RCSubstructureTrackTrimAug)
 
     from DerivationFrameworkLLP.LLPToolsConfig import RCJetSubstructureAugCfg
@@ -914,7 +914,7 @@ def LLP1KernelCfg(flags, name='LLP1Kernel', **kwargs):
                                                                                         BetaSoft                          = 1.0,
                                                                                         ZcutSoft                          = 0.1
                                                                                         ))
-    RCSubstructureTrackSDAug = CompFactory.DerivationFramework.CommonAugmentation("RCSubstructureTrackSDAug", AugmentationTools = [LLP1RCJetSubstructureTrackSDAugTool])
+    RCSubstructureTrackSDAug = CompFactory.DerivationFramework.CommonAugmentation("RCSubstructureTrackSDAug", AugmentationTools = [LLP1RCJetSubstructureTrackSDAugTool]) # TODO Migrate public tool to AthReentrantAlgorithm (Uses ExpressionParser)
     acc.addEventAlgo(RCSubstructureTrackSDAug)
 
 

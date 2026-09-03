@@ -50,6 +50,6 @@ def TauTruthToolsCfg(flags):
         if "xAOD::TauJetContainer#"+cont in flags.Input.TypedCollections:
             acc.addEventAlgo(CommonAugmentation( f"TauTruthCommonKernel2_{cont}",
                                                  AugmentationTools = [acc.addPublicTool(acc.popToolsAndMerge(TauTruthMatchingWrapperCfg(flags, cont)))],
-                                                 ExtraInputs = {( 'xAOD::TruthParticleContainer' , 'StoreGateSvc+TruthTaus' )} ))
+                                                 ExtraInputs = {( 'xAOD::TruthParticleContainer' , 'StoreGateSvc+TruthTaus' )} )) # TODO Migrate to N Algs in second pass
 
     return acc

@@ -250,7 +250,7 @@ def LLP1TriggerMatchingToolRun2Cfg(flags, name, **kwargs):
             InputMuons =  kwargs['InputMuons'])) 
     CommonAugmentation = CompFactory.DerivationFramework.CommonAugmentation
     acc.addEventAlgo(CommonAugmentation(f"{outputContainerPrefix}TriggerMatchingKernel",
-                                        AugmentationTools=[PhysCommonTriggerMatchingTool]))
+                                        AugmentationTools=[PhysCommonTriggerMatchingTool])) # TODO Migrate public tool to AthReentrantAlgorithm
     return(acc)
 
 def LRTMuonMergerAlg(flags, name="LLP1_MuonLRTMergingAlg", **kwargs):
@@ -459,7 +459,7 @@ def LRTElectronLHSelectorsCfg(flags):
         acc.addEventAlgo(CompFactory.DerivationFramework.CommonAugmentation(
             f"LLP1EGammaLRTKernel{i}",
             AugmentationTools=[tool]
-    ))
+    )) # TODO Migrate to N Algs in second pass
 
     return acc
 

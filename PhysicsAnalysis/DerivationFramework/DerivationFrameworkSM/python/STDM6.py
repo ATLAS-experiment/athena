@@ -40,7 +40,7 @@ def STDM6KernelCfg(flags, name='STDM6Kernel', **kwargs):
         CutLevel       = "Loose",
         DecorationName = "DFJETM1Loose"))
 
-    acc.addEventAlgo(CompFactory.DerivationFramework.CommonAugmentation("JETM1CommonKernel", AugmentationTools = [DFCommonTrackSelection]))
+    acc.addEventAlgo(CompFactory.DerivationFramework.CommonAugmentation("JETM1CommonKernel", AugmentationTools = [DFCommonTrackSelection])) # TODO Migrate public tool to AthReentrantAlgorithm
 
     # Thinning tools
     # These are set up in PhysCommonThinningConfig. Only thing needed here the list of tools to schedule 

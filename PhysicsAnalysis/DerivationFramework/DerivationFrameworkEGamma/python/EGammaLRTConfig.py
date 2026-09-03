@@ -124,7 +124,7 @@ def EGammaLRTCfg(flags):
     # =======================================
 
     for i, tool in enumerate(LRTEGAugmentationTools):
-        acc.addEventAlgo(CompFactory.DerivationFramework.CommonAugmentation(f"EGammaLRTKernel{i}", AugmentationTools = [tool]))
+        acc.addEventAlgo(CompFactory.DerivationFramework.CommonAugmentation(f"EGammaLRTKernel{i}", AugmentationTools = [tool])) # TODO Migrate to N Algs in second pass
 
     # =======================================
     # ADD TOOLS : custom electron, photon and muon track isolation

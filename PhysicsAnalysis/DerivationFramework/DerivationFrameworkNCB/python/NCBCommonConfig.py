@@ -48,7 +48,7 @@ def NCBCommonAugmentationsCfg(flags,**kwargs):
             flags,
             name = "NCBCommonTruthCharmTool"))
         CommonAugmentation = CompFactory.DerivationFramework.CommonAugmentation
-        acc.addEventAlgo(CommonAugmentation("NCBCommonTruthCharmKernel",AugmentationTools=[NCBCommonTruthCharmTool]))
+        acc.addEventAlgo(CommonAugmentation("NCBCommonTruthCharmKernel",AugmentationTools=[NCBCommonTruthCharmTool])) # TODO Migrate public tool to AthReentrantAlgorithm
         acc.merge(AddHFAndDownstreamParticlesCfg(flags))
         acc.merge(AddStandardTruthContentsCfg(flags))
         acc.merge(AddTruthCollectionNavigationDecorationsCfg(

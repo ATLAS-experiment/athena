@@ -55,7 +55,7 @@ def HardScatterVertexDecoratorCfg(flags, name = "DFCommonHSDecorator", **kwargs)
     kwargs.setdefault("HardScatterDecoName", "hardScatterVertexLink")
     the_tool = CompFactory.DerivationFramework.HardScatterVertexDecorator(name = "HardScatterDecorTool", **kwargs)
     acc.addPublicTool(the_tool, primary=True)
-    the_alg = CompFactory.DerivationFramework.CommonAugmentation(name, AugmentationTools=[the_tool])
+    the_alg = CompFactory.DerivationFramework.CommonAugmentation(name, AugmentationTools=[the_tool]) # TODO Migrate public tool to AthReentrantAlgorithm
     acc.addEventAlgo(the_alg)
     return acc
 
@@ -137,7 +137,7 @@ def TSOS_CommonKernelCfg(flags, name="TSOS_CommonKernel",
         listOfAugmTools.append(TrackStateOnSurfaceDecorator)
 
     for tool in listOfAugmTools:
-        acc.addEventAlgo(CompFactory.DerivationFramework.CommonAugmentation(tool.name+"Aug", AugmentationTools = [tool]))
+        acc.addEventAlgo(CompFactory.DerivationFramework.CommonAugmentation(tool.name+"Aug", AugmentationTools = [tool])) # TODO Migrate to N Algs in second pass
     return acc
 
 def DFTrackStateOnSurfaceDecoratorCfg(
@@ -188,7 +188,7 @@ def ObserverTSOS_CommonKernelCfg(flags, name="ObserverTSOS_CommonKernel"):
     ObserverTrackStateOnSurfaceDecorator = acc.getPrimaryAndMerge(
         ObserverTrackStateOnSurfaceDecoratorCfg(flags))
     acc.addEventAlgo(CompFactory.DerivationFramework.CommonAugmentation(
-        name, AugmentationTools=[ObserverTrackStateOnSurfaceDecorator]))
+        name, AugmentationTools=[ObserverTrackStateOnSurfaceDecorator])) # TODO Migrate public tool to AthReentrantAlgorithm
     return acc
 
 def PseudoTrackStateOnSurfaceDecoratorCfg(
@@ -207,7 +207,7 @@ def PseudoTSOS_CommonKernelCfg(flags, name="PseudoTSOS_CommonKernel"):
     PseudoTrackStateOnSurfaceDecorator = acc.getPrimaryAndMerge(
         PseudoTrackStateOnSurfaceDecoratorCfg(flags))
     acc.addEventAlgo(CompFactory.DerivationFramework.CommonAugmentation(
-        name, AugmentationTools=[PseudoTrackStateOnSurfaceDecorator]))
+        name, AugmentationTools=[PseudoTrackStateOnSurfaceDecorator])) # TODO Migrate public tool to AthReentrantAlgorithm
     return acc
 
 def SiSPSeedsTrackStateOnSurfaceDecoratorCfg(
@@ -237,7 +237,7 @@ def SiSPSeedsTSOS_CommonKernelCfg(flags, name="SiSPSeedsTSOS_CommonKernel",
         listOfAugmTools.append(SiSPSeedsTrackStateOnSurfaceDecorator)
 
     for tool in listOfAugmTools:
-        acc.addEventAlgo(CompFactory.DerivationFramework.CommonAugmentation(tool.name+"Aug", AugmentationTools = [tool]))
+        acc.addEventAlgo(CompFactory.DerivationFramework.CommonAugmentation(tool.name+"Aug", AugmentationTools = [tool])) # TODO Migrate to N Algs in second pass
     return acc
 
 def SiSPTrackStateOnSurfaceDecoratorCfg(
@@ -267,7 +267,7 @@ def SiSPTSOS_CommonKernelCfg(flags, name="SiSPTSOS_CommonKernel",
         listOfAugmTools.append(SiSPTrackStateOnSurfaceDecorator)
 
     for tool in listOfAugmTools:
-        acc.addEventAlgo(CompFactory.DerivationFramework.CommonAugmentation(tool.name+"Aug", AugmentationTools = [tool]))
+        acc.addEventAlgo(CompFactory.DerivationFramework.CommonAugmentation(tool.name+"Aug", AugmentationTools = [tool])) # TODO Migrate to N Algs in second pass
     return acc
 
 def GSFTrackStateOnSurfaceDecoratorCfg(
@@ -287,7 +287,7 @@ def GSFTSOS_CommonKernelCfg(flags, name="GSFTSOS_CommonKernel"):
     GSFTrackStateOnSurfaceDecorator = acc.getPrimaryAndMerge(
         GSFTrackStateOnSurfaceDecoratorCfg(flags))
     acc.addEventAlgo(CompFactory.DerivationFramework.CommonAugmentation(
-        name, AugmentationTools=[GSFTrackStateOnSurfaceDecorator]))
+        name, AugmentationTools=[GSFTrackStateOnSurfaceDecorator])) # TODO Migrate public tool to AthReentrantAlgorithm
     return acc
 
 def ITkTrackStateOnSurfaceDecoratorCfg(
@@ -348,7 +348,7 @@ def ITkTSOS_CommonKernelCfg(flags, name="ITkTSOS_CommonKernel",
         listOfAugmTools.append(TrackStateOnSurfaceDecorator)
 
     for tool in listOfAugmTools:
-        acc.addEventAlgo(CompFactory.DerivationFramework.CommonAugmentation(tool.name+"Aug", AugmentationTools = [tool]))
+        acc.addEventAlgo(CompFactory.DerivationFramework.CommonAugmentation(tool.name+"Aug", AugmentationTools = [tool])) # TODO Migrate to N Algs in second pass
     return acc
 
 def DFITkTrackStateOnSurfaceDecoratorCfg(
@@ -410,7 +410,7 @@ def ITkSiSPSeedsTSOS_CommonKernelCfg(flags, name="ITkSiSPSeedsTSOS_CommonKernel"
         listOfAugmTools.append(SiSPSeedsTrackStateOnSurfaceDecorator)
 
     for tool in listOfAugmTools:
-        acc.addEventAlgo(CompFactory.DerivationFramework.CommonAugmentation(tool.name+"Aug", AugmentationTools = [tool]))
+        acc.addEventAlgo(CompFactory.DerivationFramework.CommonAugmentation(tool.name+"Aug", AugmentationTools = [tool])) # TODO Migrate to N Algs in second pass
     return acc
 
 def ITkSiSPTrackStateOnSurfaceDecoratorCfg(
@@ -437,7 +437,7 @@ def ITkSiSPTSOS_CommonKernelCfg(flags, name="ITkSiSPTSOS_CommonKernel",
         listOfAugmTools.append(ITkSiSPTrackStateOnSurfaceDecorator)
 
     for tool in listOfAugmTools:
-        acc.addEventAlgo(CompFactory.DerivationFramework.CommonAugmentation(tool.name+"Aug", AugmentationTools = [tool]))
+        acc.addEventAlgo(CompFactory.DerivationFramework.CommonAugmentation(tool.name+"Aug", AugmentationTools = [tool])) # TODO Migrate to N Algs in second pass
     return acc
 
 def ITkGSFTrackStateOnSurfaceDecoratorCfg(
@@ -456,7 +456,7 @@ def ITkGSFTSOS_CommonKernelCfg(flags, name="ITkGSFTSOS_CommonKernel"):
     GSFTrackStateOnSurfaceDecorator = acc.getPrimaryAndMerge(
         ITkGSFTrackStateOnSurfaceDecoratorCfg(flags))
     acc.addEventAlgo(CompFactory.DerivationFramework.CommonAugmentation(
-        name, AugmentationTools=[GSFTrackStateOnSurfaceDecorator]))
+        name, AugmentationTools=[GSFTrackStateOnSurfaceDecorator])) # TODO Migrate public tool to AthReentrantAlgorithm
     return acc
 
 # Expression of Z0 at the primary vertex

@@ -158,30 +158,30 @@ def HFClassificationCommonCfg(flags):
           ClassifyAndCalculateHFAugmentationTool.ClassifyAndComputeHFtool = acc.addPublicTool(acc.popToolsAndMerge(DFCommonClassifyAndCalculateHFToolCfg(flags, "")))
           ClassifyAndCalculateHFAugmentationTool.JetMatchingTool = acc.addPublicTool(acc.popToolsAndMerge(DFCommonMatchingToolCfg(flags, "")))
           acc.addEventAlgo(CommonAugmentation(name              = "HFClassificationCommonKernel",
-                                              AugmentationTools = [acc.addPublicTool(ClassifyAndCalculateHFAugmentationTool)]))
+                                              AugmentationTools = [acc.addPublicTool(ClassifyAndCalculateHFAugmentationTool)])) # TODO Migrate public tool to AthReentrantAlgorithm
 
           ClassifyAndCalculateHFAugmentationToolC5J20 = acc.popToolsAndMerge(ClassifyAndCalculateHFAugmentationCfg(flags, mc_channel_number, "C5J20"))
           ClassifyAndCalculateHFAugmentationToolC5J20.ClassifyAndComputeHFtool = acc.addPublicTool(acc.popToolsAndMerge(DFCommonClassifyAndCalculateHFToolC5J20Cfg(flags)))
           ClassifyAndCalculateHFAugmentationToolC5J20.JetMatchingTool = acc.addPublicTool(acc.popToolsAndMerge(DFCommonMatchingToolJ20Cfg(flags)))
           acc.addEventAlgo(CommonAugmentation(name              = "HFClassificationCommonKernelC5J20",
-                                              AugmentationTools = [acc.addPublicTool(ClassifyAndCalculateHFAugmentationToolC5J20)]))
+                                              AugmentationTools = [acc.addPublicTool(ClassifyAndCalculateHFAugmentationToolC5J20)])) # TODO Migrate public tool to AthReentrantAlgorithm
 
           ClassifyAndCalculateHFAugmentationToolC5J25 = acc.popToolsAndMerge(ClassifyAndCalculateHFAugmentationCfg(flags, mc_channel_number, "C5J25"))
           ClassifyAndCalculateHFAugmentationToolC5J25.ClassifyAndComputeHFtool = acc.addPublicTool(acc.popToolsAndMerge(DFCommonClassifyAndCalculateHFToolC5J25Cfg(flags)))
           ClassifyAndCalculateHFAugmentationToolC5J25.JetMatchingTool = acc.addPublicTool(acc.popToolsAndMerge(DFCommonMatchingToolJ25Cfg(flags)))
           acc.addEventAlgo(CommonAugmentation(name              = "HFClassificationCommonKernelC5J25",
-                                              AugmentationTools = [acc.addPublicTool(ClassifyAndCalculateHFAugmentationToolC5J25)]))
+                                              AugmentationTools = [acc.addPublicTool(ClassifyAndCalculateHFAugmentationToolC5J25)])) # TODO Migrate public tool to AthReentrantAlgorithm
 
           ClassifyAndCalculateHFAugmentationToolC15J20 = acc.popToolsAndMerge(ClassifyAndCalculateHFAugmentationCfg(flags, mc_channel_number, "C15J20"))
           ClassifyAndCalculateHFAugmentationToolC15J20.ClassifyAndComputeHFtool = acc.addPublicTool(acc.popToolsAndMerge(DFCommonClassifyAndCalculateHFToolC15J20Cfg(flags)))
           ClassifyAndCalculateHFAugmentationToolC15J20.JetMatchingTool = acc.addPublicTool(acc.popToolsAndMerge(DFCommonMatchingToolJ20Cfg(flags)))
           acc.addEventAlgo(CommonAugmentation(name              = "HFClassificationCommonKernelC15J20",
-                                              AugmentationTools = [acc.addPublicTool(ClassifyAndCalculateHFAugmentationToolC15J20)]))
+                                              AugmentationTools = [acc.addPublicTool(ClassifyAndCalculateHFAugmentationToolC15J20)])) # TODO Migrate public tool to AthReentrantAlgorithm
 
           ClassifyAndCalculateHFAugmentationToolC15J25 = acc.popToolsAndMerge(ClassifyAndCalculateHFAugmentationCfg(flags, mc_channel_number, "C15J25"))
           ClassifyAndCalculateHFAugmentationToolC15J25.ClassifyAndComputeHFtool = acc.addPublicTool(acc.popToolsAndMerge(DFCommonClassifyAndCalculateHFToolC15J25Cfg(flags)))
           ClassifyAndCalculateHFAugmentationToolC15J25.JetMatchingTool = acc.addPublicTool(acc.popToolsAndMerge(DFCommonMatchingToolJ25Cfg(flags)))
           acc.addEventAlgo(CommonAugmentation(name              = "HFClassificationCommonKernelC15J25",
-                                              AugmentationTools = [acc.addPublicTool(ClassifyAndCalculateHFAugmentationToolC15J25)]))
+                                              AugmentationTools = [acc.addPublicTool(ClassifyAndCalculateHFAugmentationToolC15J25)])) # TODO Migrate public tool to AthReentrantAlgorithm
 
     return acc

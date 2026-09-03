@@ -79,7 +79,7 @@ def TriggerMatchingCommonRun2Cfg(flags, name, **kwargs):
     CommonAugmentation = CompFactory.DerivationFramework.CommonAugmentation
     outputContainerPrefix = kwargs['OutputContainerPrefix']
     acc.addEventAlgo(CommonAugmentation(f"{outputContainerPrefix}TriggerMatchingKernel",
-                                        AugmentationTools=[PhysCommonTriggerMatchingTool]))
+                                        AugmentationTools=[PhysCommonTriggerMatchingTool])) # TODO Migrate public tool to AthReentrantAlgorithm
 
     return(acc)
 

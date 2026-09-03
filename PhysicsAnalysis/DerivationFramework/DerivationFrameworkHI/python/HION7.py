@@ -27,7 +27,7 @@ def PhysAugmentationsHION7Cfg(flags):
             flags,
             name = "PhysCommonTruthCharmTool"))
         CommonAugmentation = CompFactory.DerivationFramework.CommonAugmentation
-        acc.addEventAlgo(CommonAugmentation("PhysCommonTruthCharmKernel",AugmentationTools=[PhysCommonTruthCharmTool]))
+        acc.addEventAlgo(CommonAugmentation("PhysCommonTruthCharmKernel",AugmentationTools=[PhysCommonTruthCharmTool])) # TODO Migrate public tool to AthReentrantAlgorithm
         acc.merge(AddHFAndDownstreamParticlesCfg(flags))
         acc.merge(AddStandardTruthContentsCfg(
                   flags,

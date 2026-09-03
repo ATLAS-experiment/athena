@@ -49,7 +49,7 @@ def TLA2KernelCfg(flags, name='TLA2Kernel', **kwargs):
         CutLevel       = "Loose",
         DecorationName = "DFTLA2Loose"))
 
-    acc.addEventAlgo(CompFactory.DerivationFramework.CommonAugmentation("TLA2CommonKernel", AugmentationTools = [DFCommonTrackSelection]))
+    acc.addEventAlgo(CompFactory.DerivationFramework.CommonAugmentation("TLA2CommonKernel", AugmentationTools = [DFCommonTrackSelection])) # TODO Migrate public tool to AthReentrantAlgorithm
 
     # Thinning tools...
     from DerivationFrameworkInDet.InDetToolsConfig import MuonTrackParticleThinningCfg, EgammaTrackParticleThinningCfg, JetTrackParticleThinningCfg
