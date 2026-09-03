@@ -43,7 +43,6 @@
 #include "GeoModelInterfaces/IGeoModelSvc.h"
 #include "HitManagement/HitCollectionMap.h"
 #include "MCTruth/AtlasG4EventUserInfo.h"
-#include "MCTruthBase/TruthStrategyManager.h"
 #include "PathResolver/PathResolver.h"
 #include "StoreGate/ReadHandle.h"
 #include "StoreGate/WriteHandle.h"
@@ -107,12 +106,6 @@ StatusCode G4AtlasAlg::initialize ATLAS_NOT_THREAD_SAFE ()
   // Truth
   ATH_CHECK( m_truthRecordSvc.retrieve() );
   ATH_MSG_INFO( "- Using ISF TruthRecordSvc : " << m_truthRecordSvc.typeAndName() );
-  ATH_CHECK( m_geoIDSvc.retrieve() );
-  ATH_MSG_INFO( "- Using ISF GeoIDSvc       : " << m_geoIDSvc.typeAndName() );
-
-  TruthStrategyManager& sManager = TruthStrategyManager::GetStrategyManager_nc();
-  sManager.SetISFTruthSvc( &(*m_truthRecordSvc) );
-  sManager.SetISFGeoIDSvc( &(*m_geoIDSvc) );
 
   // I/O
   ATH_CHECK( m_inputTruthCollectionKey.initialize());
