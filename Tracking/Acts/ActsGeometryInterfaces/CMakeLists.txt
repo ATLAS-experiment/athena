@@ -10,12 +10,22 @@ if( NOT SIMULATIONBASE )
     set( extra_libs Acts::Core TrkGeometry ActsInteropLib)
 endif()
 
+# The conversion of the Gen3 Acts::TrackingGeometry into a Detray geometry is
+# only available if ACTS was built with the Detray plugin.
+set( _actsGeometryDetrayDefinitions )
+set( _actsGeometryDetrayLibraries )
+if( TARGET Acts::PluginDetray )
+  list( APPEND _actsGeometryDetrayDefinitions ACTSGEOMETRY_HAVE_DETRAY )
+  list( APPEND _actsGeometryDetrayLibraries Acts::PluginDetray )
+endif()
+
 # Component(s) in the package:
 atlas_add_library( ActsGeometryInterfacesLib
                    src/TransformStore.cxx
                    ActsGeometryInterfaces/*.h
                    PUBLIC_HEADERS ActsGeometryInterfaces
-                   LINK_LIBRARIES ${extra_libs} AthenaBaseComps AthenaKernel GaudiKernel GeoModelUtilities GeoPrimitives 
+                   DEFINITIONS ${_actsGeometryDetrayDefinitions}
+                   LINK_LIBRARIES ${extra_libs} ${_actsGeometryDetrayLibraries} AthenaBaseComps AthenaKernel GaudiKernel GeoModelUtilities GeoPrimitives 
                                   Identifier TrkEventPrimitives)
 
 

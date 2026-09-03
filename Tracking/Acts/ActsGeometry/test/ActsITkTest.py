@@ -8,6 +8,7 @@ import argparse
 
 parser = argparse.ArgumentParser(description="Run ACTS geometry construction for ITk")
 parser.add_argument("--gen3", action="store_true", help="Use Gen3 geometry + construction")
+parser.add_argument("--build-detray", action="store_true", help="Convert the built Acts::TrackingGeometry into a Detray geometry")
 args = parser.parse_args()
 
 from AthenaConfiguration.AllConfigFlags import initConfigFlags
@@ -35,6 +36,7 @@ flags.Concurrency.NumConcurrentEvents = 64
 flags.Exec.MaxEvents = 10
 
 flags.Acts.TrackingGeometry.UseBlueprint = args.gen3
+flags.Acts.TrackingGeometry.BuildDetrayGeometry = args.build_detray
 flags.PerfMon.doFullMonMT = True
 
 flags.lock()
@@ -52,6 +54,7 @@ tgSvc = ActsTrackingGeometrySvcCfg(flags,
                                    #  ConsistencyCheckOutput="trk_geo_check.csv", # enable debug output writing
                                    BlueprintGraphviz=str(Path.cwd() / "blueprint.dot"),
                                    ObjDebugOutput=False)
+                                   
 acc.merge(tgSvc)
 
 alg = ActsExtrapolationAlgCfg(flags,
