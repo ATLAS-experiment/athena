@@ -26,59 +26,57 @@ namespace ActsTrk{
   StatusCode TruthTrackBuilderTool::buildTruthTracks(const EventContext& ctx, TruthTracks& truthTracks) const{
 
     // obtain truth map and clusters
-    SG::ReadHandle<xAOD::PixelClusterContainer> 
-      pixelClusters{ m_pixelClustersKey, ctx};
-
-    SG::ReadHandle<MeasurementToTruthParticleAssociation> 
-      pixelTruthAssociations{m_pixelTruthAssociationKey, ctx};
-
-    SG::ReadHandle<xAOD::StripClusterContainer> 
-      stripClusters{m_stripClustersKey, ctx};
-
-    SG::ReadHandle<MeasurementToTruthParticleAssociation> 
-      stripTruthAssociations{m_stripTruthAssociationKey, ctx};
-
-    if (!pixelClusters.isValid()) {
-
-    ATH_MSG_ERROR("Could not read pixel clusters: " << m_pixelClustersKey.key());
-    return StatusCode::FAILURE;
-    }
-
-    if (!pixelTruthAssociations.isValid()) {
-
-      ATH_MSG_ERROR( "Could not read pixel truth associations: " << m_pixelTruthAssociationKey.key());
-      return StatusCode::FAILURE;
-    }
-
-    if (!stripClusters.isValid()) {
-
-      ATH_MSG_ERROR("Could not read strip clusters: " << m_stripClustersKey.key());
-      return StatusCode::FAILURE;
-    }
-
-    if (!stripTruthAssociations.isValid()) {
-
-      ATH_MSG_ERROR("Could not read strip truth associations: " << m_stripTruthAssociationKey.key());
-      return StatusCode::FAILURE;
-    }
-
-    //  for every cluster, obtain its truth particle and add to map
+    // for every cluster, obtain its truth particle and add to map
     // This can be optional for both pixel and strip clusters
-        
-    // add pixel clusters
-    if(m_usePixelClusters){
+    if (m_usePixelClusters) {
+      SG::ReadHandle<xAOD::PixelClusterContainer> 
+        pixelClusters{ m_pixelClustersKey, ctx};
+      
+      SG::ReadHandle<MeasurementToTruthParticleAssociation> 
+        pixelTruthAssociations{m_pixelTruthAssociationKey, ctx};
+
+      if (!pixelClusters.isValid()) {
+
+        ATH_MSG_ERROR("Could not read pixel clusters: " << m_pixelClustersKey.key());
+        return StatusCode::FAILURE;
+      }
+
+      if (!pixelTruthAssociations.isValid()) {
+
+        ATH_MSG_ERROR( "Could not read pixel truth associations: " << m_pixelTruthAssociationKey.key());
+        return StatusCode::FAILURE;
+      }
+
       addClusterToTruthTracks(*pixelClusters,
                             *pixelTruthAssociations,
-                            truthTracks);  
+                            truthTracks);
+    }
+
+    if(m_useStripClusters) {
+
+      SG::ReadHandle<xAOD::StripClusterContainer> 
+      stripClusters{m_stripClustersKey, ctx};
+
+      SG::ReadHandle<MeasurementToTruthParticleAssociation> 
+        stripTruthAssociations{m_stripTruthAssociationKey, ctx};
+
+      if (!stripClusters.isValid()) {
+
+        ATH_MSG_ERROR("Could not read strip clusters: " << m_stripClustersKey.key());
+        return StatusCode::FAILURE;
       }
-      
-    // add strip clusters
-    if(m_useStripClusters){   
+
+      if (!stripTruthAssociations.isValid()) {
+
+        ATH_MSG_ERROR("Could not read strip truth associations: " << m_stripTruthAssociationKey.key());
+        return StatusCode::FAILURE;
+      }
+
       addClusterToTruthTracks(*stripClusters,
                             *stripTruthAssociations,
                             truthTracks);
     }
-
+    
     // reorder clusters for each associated truth particle
     // This is done by ordering by distance away from truth particle production vertex (assuming small bending)
     for (auto it = truthTracks.begin(); it != truthTracks.end();){
@@ -94,10 +92,9 @@ namespace ActsTrk{
       }
 
       const xAOD::TruthVertex* vertex = truthParticle->prodVtx();
+      const Vector3 vertexPosition{vertex->x(), vertex->y(), vertex->z()};
       std::sort(truthClusters.begin(), truthClusters.end(), 
-                [&vertex](const TruthHit& firstCluster, const TruthHit& secondCluster){
-
-                  const Vector3 vertexPosition{vertex->x(), vertex->y(), vertex->z()};
+                [&vertexPosition](const TruthHit& firstCluster, const TruthHit& secondCluster){
 
                   const Vector3 firstClusterDis = firstCluster.globalPosition - vertexPosition;
                   const Vector3 secondClusterDis = secondCluster.globalPosition - vertexPosition;
