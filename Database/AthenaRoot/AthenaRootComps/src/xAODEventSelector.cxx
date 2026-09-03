@@ -1055,7 +1055,7 @@ StatusCode xAODEventSelector::setFile(const std::string& fname) {
          collPtr = nullptr;
       }
       if (sc.isRecoverable() || collPtr == nullptr) {
-         m_poolSvc->checkCollection(fname, IPoolSvc::kInputStream, collPtr == nullptr).ignore();
+         m_poolSvc->checkCollection("PFN:"+fname, IPoolSvc::kInputStream, collPtr == nullptr).ignore();
       }
       //metadata will be read by MetaDataSvc, triggered by the BeginInputFile call
    } else {
