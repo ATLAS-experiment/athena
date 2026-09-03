@@ -206,7 +206,11 @@ def ActsWriteTrackingGeometryCfg(flags,
                                  name: str = "ActsWriteTrackingGeometry",
                                  **kwargs) -> ComponentAccumulator:
     acc = ComponentAccumulator()
-    acc.merge(ActsTrackingGeometrySvcCfg(flags))    
+    from MagFieldServices.MagFieldServicesConfig import AtlasFieldCacheCondAlgCfg
+    acc.merge(AtlasFieldCacheCondAlgCfg(flags))
+    from ActsAlignmentAlgs.AlignmentAlgsConfig import ActsGeometryContextAlgCfg
+    acc.merge(ActsGeometryContextAlgCfg(flags))
+    acc.merge(ActsTrackingGeometrySvcCfg(flags))
     acc.addEventAlgo(CompFactory.ActsTrk.WriteTrackingGeometry(name, **kwargs), primary = True)
     return acc
 
