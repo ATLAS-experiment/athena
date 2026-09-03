@@ -90,9 +90,9 @@ def JETM4KernelCfg(flags, name='JETM4Kernel', **kwargs):
 
     if flags.Input.isMC:
         truth_cond_WZH    = "(TruthParticles.isW || TruthParticles.isZ || TruthParticles.isHiggs)"                                      # W, Z and Higgs
-        truth_cond_Lepton = "(TruthParticles.isLepton) && !(TruthParticles.isSimulationParticle))" # Leptons
+        truth_cond_Lepton = "((TruthParticles.isLepton) && !(TruthParticles.isSimulationParticle))" # Leptons
         truth_cond_QuarkGluon  = "((TruthParticles.isParton) && (TruthParticles.pt > 10000.)) || (TruthParticles.isTop)"       # Quarks and Gluons
-        truth_cond_Photon = "(TruthParticles.isPhoton) && (TruthParticles.pt > 10000.) && !(TruthParticles.isSimulationParticle))"      # Photon
+        truth_cond_Photon = "((TruthParticles.isPhoton) && (TruthParticles.pt > 10000.) && !(TruthParticles.isSimulationParticle))"      # Photon
 
         truth_expression = '('+truth_cond_WZH+' || '+truth_cond_Lepton +' || '+truth_cond_QuarkGluon+' || '+truth_cond_Photon+')'
 

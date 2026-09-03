@@ -106,7 +106,7 @@ def HIGG1D2KernelCfg(flags, name='HIGG1D2Kernel', **kwargs):
         truth_cond_1 = "(TruthParticles.isW || TruthParticles.isZ || TruthParticles.isHiggs)" # W, Z and Higgs
         truth_cond_2 = "(TruthParticles.isLepton)" # Leptons
         truth_cond_3 = "(TruthParticles.isTop)"                                     # Top quark
-        truth_cond_4 = "(TruthParticles.isPhoton) && (TruthParticles.pt > 1*GeV))"       # Photon
+        truth_cond_4 = "((TruthParticles.isPhoton) && (TruthParticles.pt > 1*GeV))"       # Photon
         truth_cond_finalState = '(TruthParticles.isGenStable)' # stable particles
         truth_expression = '('+truth_cond_1+' || '+truth_cond_2 +' || '+truth_cond_3 +' || '+truth_cond_4+') || ('+truth_cond_finalState+')'
     
