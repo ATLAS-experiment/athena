@@ -319,7 +319,6 @@ else
            exit 1
        fi
    else
-       tail $joblog
        echo "$RED post.sh> ERROR: Test ${ATLAS_CTEST_TESTNAME} failed with exit code: ${ATLAS_CTEST_TESTSTATUS}$RESET"
        echo  " post.sh> Please check ${PWD}/$joblog"
    fi
