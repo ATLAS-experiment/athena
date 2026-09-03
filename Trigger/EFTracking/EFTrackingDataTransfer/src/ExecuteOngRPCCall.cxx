@@ -112,16 +112,16 @@ StatusCode ExecuteOngRPCCall::executeEvent(MinimalEventLoopMgr* el,
     timeoutCounter++;
   }
 
-  ATH_MSG_INFO("Got input, upacking with " << m_unpackingTools.size()
-                                           << " tools...");
+  ATH_MSG_DEBUG("Got input, upacking with " << m_unpackingTools.size()
+                                            << " tools...");
   for (auto& tool : m_unpackingTools) {
-    ATH_MSG_INFO("Unpacking with " << tool.name() << "...");
+    ATH_MSG_DEBUG("Unpacking with " << tool.name() << "...");
     ATH_CHECK(tool->unpack(*(r->request), context));
   }
-  ATH_MSG_ALWAYS("After decoding done, executing algorithms ...");
+  ATH_MSG_DEBUG("After decoding done, executing algorithms ...");
   StatusCode sc = el->executeEvent(std::move(context));
   const auto id = getId(r->request);
-  ATH_MSG_ALWAYS("Event send for execution ... id " << id);
+  ATH_MSG_DEBUG("Event send for execution ... id " << id);
   r->response->set_identifier("ongoing");
   s_ongoingRequests[id] = std::move(r);
   return StatusCode::SUCCESS;
@@ -131,20 +131,21 @@ StatusCode ExecuteOngRPCCall::completeEvent(MinimalEventLoopMgr* el,
                                             const EventContext& context) {
   // copy necessary data from the store to output message
   // there should be a set of tools that would fetch and pack the results
-  ATH_MSG_INFO("eventStore content after execution\n" << evtStore()->dump());
+  ATH_MSG_DEBUG("eventStore content after execution\n" << evtStore()->dump());
   auto eventId = getId(context);
-  ATH_MSG_INFO("will look for matching request " << eventId);
+  ATH_MSG_DEBUG("will look for matching request " << eventId);
   std::shared_ptr<ReqResp> r = s_ongoingRequests[eventId];
-  ATH_MSG_INFO("found one " << (void*)(r->request) << " "
-                            << (void*)(r->response));
+  ATH_MSG_DEBUG("found one " << (void*)(r->request) << " "
+                             << (void*)(r->response));
 
-  for (auto& tool : m_packingTools)
+  for (auto& tool : m_packingTools) {
     ATH_CHECK(tool->pack(*(r->response), context));
+  }
 
   r->response->set_identifier("completed");
   s_completedRequests[eventId] = std::move(r);
   // s_ongoingRequests.unsafe_erase(eventId);
-  ATH_MSG_INFO("Request completed, will be now handed by doComputation");
+  ATH_MSG_DEBUG("Request completed, will be now handed by doComputation");
 
   return StatusCode::SUCCESS;
 }
@@ -169,10 +170,9 @@ StatusCode ExecuteOngRPCCall::initialize() {
     return StatusCode::FAILURE;
   }
 
-  ATH_MSG_INFO("Server ready, putting it to waiting state");
   // FIXME: This clashes with tbb inside Gaudi causing one of the slots to hang
   // s_serverTask.run([]() { s_server->Wait(); });
-  ATH_MSG_INFO("Server waiting");
+  ATH_MSG_DEBUG("Server ready and waiting");
 
   ATH_CHECK(m_unpackingTools.retrieve());
   ATH_CHECK(m_packingTools.retrieve());

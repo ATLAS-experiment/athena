@@ -31,7 +31,7 @@ AthenaRemoteEventLoopMgr::AthenaRemoteEventLoopMgr(const std::string& nam,
 }
 
 StatusCode AthenaRemoteEventLoopMgr::initialize() {
-  ATH_MSG_INFO("In AthenaRemoteEventLoopMgr::initialize()");
+  ATH_MSG_VERBOSE("In AthenaRemoteEventLoopMgr::initialize()");
 
   StatusCode sc = MinimalEventLoopMgr::initialize();
   if (!sc.isSuccess()) {
@@ -79,25 +79,25 @@ StatusCode AthenaRemoteEventLoopMgr::initialize() {
   m_incidentSvc->addListener(this, "BeforeFork", 0);
   m_incidentSvc->addListener(this, "EndAlgorithms", 0);
 
-  ATH_MSG_INFO("Leaving AthenaRemoteEventLoopMgr::initialize()");
+  ATH_MSG_VERBOSE("Leaving AthenaRemoteEventLoopMgr::initialize()");
   return StatusCode::SUCCESS;
 }
 
 // StatusCode AthenaRemoteEventLoopMgr::start() {
-//   ATH_MSG_INFO("In AthenaRemoteEventLoopMgr::start()");
+//   ATH_MSG_VERBOSE("In AthenaRemoteEventLoopMgr::start()");
 //
 //   return StatusCode::SUCCESS;
 // }
 
 StatusCode AthenaRemoteEventLoopMgr::stop() {
-  ATH_MSG_INFO("In AthenaRemoteEventLoopMgr::stop()");
+  ATH_MSG_VERBOSE("In AthenaRemoteEventLoopMgr::stop()");
 
-  ATH_MSG_INFO("Leaving AthenaRemoteEventLoopMgr::stop()");
+  ATH_MSG_VERBOSE("Leaving AthenaRemoteEventLoopMgr::stop()");
   return StatusCode::SUCCESS;
 }
 
 StatusCode AthenaRemoteEventLoopMgr::finalize() {
-  ATH_MSG_INFO("In AthenaRemoteEventLoopMgr::finalize()");
+  ATH_MSG_VERBOSE("In AthenaRemoteEventLoopMgr::finalize()");
 
   StatusCode sc = MinimalEventLoopMgr::finalize();
   if (sc.isFailure()) {
@@ -135,7 +135,7 @@ StatusCode AthenaRemoteEventLoopMgr::finalize() {
     }
   }
 
-  ATH_MSG_INFO("Leaving AthenaRemoteEventLoopMgr::finalize()");
+  ATH_MSG_VERBOSE("Leaving AthenaRemoteEventLoopMgr::finalize()");
   return sc;
 }
 
@@ -169,19 +169,19 @@ void AthenaRemoteEventLoopMgr::setupPreSelectTools(
 }
 
 // StatusCode AthenaRemoteEventLoopMgr::reinitialize() {
-//   ATH_MSG_INFO("In AthenaRemoteEventLoopMgr::reinitialize()");
+//   ATH_MSG_VERBOSE("In AthenaRemoteEventLoopMgr::reinitialize()");
 //
 //   return StatusCode::SUCCESS;
 // }
 
 // StatusCode AthenaRemoteEventLoopMgr::restart() {
-//   ATH_MSG_INFO("In AthenaRemoteEventLoopMgr::restart()");
+//   ATH_MSG_VERBOSE("In AthenaRemoteEventLoopMgr::restart()");
 //
 //   return StatusCode::SUCCESS;
 // }
 
 EventContext AthenaRemoteEventLoopMgr::createEventContext() {
-  ATH_MSG_INFO("In AthenaRemoteEventLoopMgr::createEventContext()");
+  ATH_MSG_VERBOSE("In AthenaRemoteEventLoopMgr::createEventContext()");
 
   EventContext ctx{m_nevt, m_whiteboard->allocateStore(m_nevt)};
 
@@ -194,16 +194,16 @@ EventContext AthenaRemoteEventLoopMgr::createEventContext() {
     Atlas::setExtendedEventContext(
         ctx, Atlas::ExtendedEventContext(m_eventStore->hiveProxyDict()));
 
-    ATH_MSG_INFO("created EventContext, num: " << ctx.evt()
-                                               << "  in slot: " << ctx.slot());
+    ATH_MSG_DEBUG("created EventContext, num: " << ctx.evt()
+                                                << "  in slot: " << ctx.slot());
   }
 
-  ATH_MSG_INFO("Leaving AthenaRemoteEventLoopMgr::createEventContext()");
+  ATH_MSG_VERBOSE("Leaving AthenaRemoteEventLoopMgr::createEventContext()");
   return ctx;
 }
 
 StatusCode AthenaRemoteEventLoopMgr::nextEvent([[maybe_unused]] int maxevt) {
-  ATH_MSG_INFO("In AthenaRemoteEventLoopMgr::nextEvent()");
+  ATH_MSG_VERBOSE("In AthenaRemoteEventLoopMgr::nextEvent()");
 
   Gaudi::setAppReturnCode(m_appMgrProperty, Gaudi::ReturnCode::Success, true)
       .ignore();
@@ -212,13 +212,13 @@ StatusCode AthenaRemoteEventLoopMgr::nextEvent([[maybe_unused]] int maxevt) {
 
   ATH_MSG_INFO("Waiting for events from clients...");
   while (sc.isSuccess()) {
-    ATH_MSG_INFO("Checking for any finished events...");
+    ATH_MSG_DEBUG("Checking for any finished events...");
     std::vector<std::unique_ptr<EventContext>> finishedEvtContexts;
     EventContext* finishedEvtContext{nullptr};
 
     if (m_schedulerSvc->popFinishedEvent(finishedEvtContext).isSuccess()) {
-      ATH_MSG_INFO("drainScheduler: scheduler not empty: Context "
-                   << finishedEvtContext);
+      ATH_MSG_DEBUG("drainScheduler: scheduler not empty: Context "
+                    << finishedEvtContext);
       finishedEvtContexts.emplace_back(finishedEvtContext);
 
       // Let's see if we can pop other event contexts
@@ -277,9 +277,10 @@ StatusCode AthenaRemoteEventLoopMgr::nextEvent([[maybe_unused]] int maxevt) {
           continue;
         }
 
+        m_processed++;
         ATH_MSG_INFO("  ===>>>  done processing event #"
                      << n_evt << ", run #" << n_run << " on slot "
-                     << thisFinishedEvtContext->slot() << ",  " << ++m_processed
+                     << thisFinishedEvtContext->slot() << ",  " << m_processed
                      << " events processed so far  <<<===");
 
         ATH_MSG_DEBUG("drainScheduler thisFinishedEvtContext: "
@@ -287,12 +288,12 @@ StatusCode AthenaRemoteEventLoopMgr::nextEvent([[maybe_unused]] int maxevt) {
       }
     } else {
       // no more events left in scheduler to be drained
-      ATH_MSG_INFO("drainScheduler: scheduler empty");
+      ATH_MSG_DEBUG("drainScheduler: scheduler empty");
     }
 
-    ATH_MSG_INFO("Free slots: " << m_schedulerSvc->freeSlots());
+    ATH_MSG_DEBUG("Free slots: " << m_schedulerSvc->freeSlots());
     while (m_schedulerSvc->freeSlots() > 0) {
-      ATH_MSG_INFO("Got free slots, adding events to scheduler");
+      ATH_MSG_DEBUG("Got free slots, adding events to scheduler");
 
       auto ctx = createEventContext();
 
@@ -311,7 +312,7 @@ StatusCode AthenaRemoteEventLoopMgr::nextEvent([[maybe_unused]] int maxevt) {
         // in the correct context?
         Gaudi::Hive::setCurrentContext(ctx);
 
-        ATH_MSG_INFO("Entering m_eventExecutionTool::executeEvent()...");
+        ATH_MSG_DEBUG("Entering m_eventExecutionTool::executeEvent()...");
         StatusCode scExecuteEvent =
             m_eventExecutionTool->executeEvent(this, std::move(ctx));
         sc = scExecuteEvent.isSuccess() or scExecuteEvent.isRecoverable()
@@ -342,26 +343,26 @@ StatusCode AthenaRemoteEventLoopMgr::nextEvent([[maybe_unused]] int maxevt) {
     }
   }
 
-  ATH_MSG_INFO("Leaving AthenaRemoteEventLoopMgr::nextEvent()");
+  ATH_MSG_VERBOSE("Leaving AthenaRemoteEventLoopMgr::nextEvent()");
   return sc;
 }
 
 StatusCode AthenaRemoteEventLoopMgr::initializeAlgorithms() {
-  ATH_MSG_INFO("In AthenaRemoteEventLoopMgr::initializeAlgorithms()");
+  ATH_MSG_VERBOSE("In AthenaRemoteEventLoopMgr::initializeAlgorithms()");
 
-  ATH_MSG_INFO("Leaving AthenaRemoteEventLoopMgr::initializeAlgorithms()");
+  ATH_MSG_VERBOSE("Leaving AthenaRemoteEventLoopMgr::initializeAlgorithms()");
   return StatusCode::SUCCESS;
 }
 
 StatusCode AthenaRemoteEventLoopMgr::executeAlgorithms() {
-  ATH_MSG_INFO("In AthenaRemoteEventLoopMgr::executeAlgorithms()");
+  ATH_MSG_VERBOSE("In AthenaRemoteEventLoopMgr::executeAlgorithms()");
 
-  ATH_MSG_INFO("Leaving AthenaRemoteEventLoopMgr::executeAlgorithms()");
+  ATH_MSG_VERBOSE("Leaving AthenaRemoteEventLoopMgr::executeAlgorithms()");
   return StatusCode::SUCCESS;
 }
 
 StatusCode AthenaRemoteEventLoopMgr::executeEvent(EventContext&& ctx) {
-  ATH_MSG_INFO("In AthenaRemoteEventLoopMgr::executeEvent()");
+  ATH_MSG_VERBOSE("In AthenaRemoteEventLoopMgr::executeEvent()");
 
   m_aess->reset(ctx);
 
@@ -405,9 +406,9 @@ StatusCode AthenaRemoteEventLoopMgr::executeEvent(EventContext&& ctx) {
   }
 
   if (toolsPassed) {
-    ATH_MSG_INFO("Adding event " << ctx.evt() << ", nr "
-                                 << ctx.eventID().event_number() << ", slot "
-                                 << ctx.slot() << " to the scheduler");
+    ATH_MSG_DEBUG("Adding event " << ctx.evt() << ", nr "
+                                  << ctx.eventID().event_number() << ", slot "
+                                  << ctx.slot() << " to the scheduler");
 
     m_incidentSvc->fireIncident(
         Incident(name(), IncidentType::BeginProcessing, ctx));
@@ -428,12 +429,12 @@ StatusCode AthenaRemoteEventLoopMgr::executeEvent(EventContext&& ctx) {
   // invalidate thread local context once outside of event execute loop
   Gaudi::Hive::setCurrentContext(EventContext());
 
-  ATH_MSG_INFO("Leaving AthenaRemoteEventLoopMgr::executeEvent()");
+  ATH_MSG_VERBOSE("Leaving AthenaRemoteEventLoopMgr::executeEvent()");
   return StatusCode::SUCCESS;
 }
 
 StatusCode AthenaRemoteEventLoopMgr::executeRun(int maxevt) {
-  ATH_MSG_INFO("In AthenaRemoteEventLoopMgr::executeRun()");
+  ATH_MSG_VERBOSE("In AthenaRemoteEventLoopMgr::executeRun()");
 
   if (nextEvent(maxevt).isFailure()) {
     return StatusCode::FAILURE;
@@ -441,42 +442,42 @@ StatusCode AthenaRemoteEventLoopMgr::executeRun(int maxevt) {
 
   m_incidentSvc->fireIncident(Incident(name(), "EndEvtLoop"));
 
-  ATH_MSG_INFO("Leaving AthenaRemoteEventLoopMgr::executeRun()");
+  ATH_MSG_VERBOSE("Leaving AthenaRemoteEventLoopMgr::executeRun()");
   return StatusCode::SUCCESS;
 }
 
 StatusCode AthenaRemoteEventLoopMgr::stopRun() {
-  ATH_MSG_INFO("In AthenaRemoteEventLoopMgr::stopRun()");
+  ATH_MSG_VERBOSE("In AthenaRemoteEventLoopMgr::stopRun()");
 
-  ATH_MSG_INFO("Leaving AthenaRemoteEventLoopMgr::stopRun()");
+  ATH_MSG_VERBOSE("Leaving AthenaRemoteEventLoopMgr::stopRun()");
   return StatusCode::SUCCESS;
 }
 
 StatusCode AthenaRemoteEventLoopMgr::seek([[maybe_unused]] int evt) {
-  ATH_MSG_INFO("In AthenaRemoteEventLoopMgr::seek()");
+  ATH_MSG_VERBOSE("In AthenaRemoteEventLoopMgr::seek()");
 
-  ATH_MSG_INFO("Leaving AthenaRemoteEventLoopMgr::seek()");
+  ATH_MSG_VERBOSE("Leaving AthenaRemoteEventLoopMgr::seek()");
   return StatusCode::SUCCESS;
 }
 
 int AthenaRemoteEventLoopMgr::curEvent() const {
-  ATH_MSG_INFO("In AthenaRemoteEventLoopMgr::curEvent()");
+  ATH_MSG_VERBOSE("In AthenaRemoteEventLoopMgr::curEvent()");
 
   return m_nevt;
 }
 
 int AthenaRemoteEventLoopMgr::size() {
-  ATH_MSG_INFO("In AthenaRemoteEventLoopMgr::size()");
+  ATH_MSG_VERBOSE("In AthenaRemoteEventLoopMgr::size()");
 
   return 0;
 }
 
 void AthenaRemoteEventLoopMgr::handle(const Incident& inc) {
-  ATH_MSG_INFO(
+  ATH_MSG_VERBOSE(
       "In AthenaRemoteEventLoopMgr::handle() for incident: " << inc.type());
 
   if (inc.type() == "EndAlgorithms") {
-    ATH_MSG_INFO("Clearing event storage for slot " << inc.context().slot());
+    ATH_MSG_DEBUG("Clearing event storage for slot " << inc.context().slot());
     if (!m_whiteboard->clearStore(inc.context().slot()).isSuccess()) {
       ATH_MSG_WARNING("Clear of Event data store failed");
     }
@@ -484,6 +485,6 @@ void AthenaRemoteEventLoopMgr::handle(const Incident& inc) {
     ATH_MSG_ERROR("Unhandled incident type! " << inc.type());
   }
 
-  ATH_MSG_INFO("Leaving AthenaRemoteEventLoopMgr::handle() for incident: "
-               << inc.type());
+  ATH_MSG_VERBOSE("Leaving AthenaRemoteEventLoopMgr::handle() for incident: "
+                  << inc.type());
 }
