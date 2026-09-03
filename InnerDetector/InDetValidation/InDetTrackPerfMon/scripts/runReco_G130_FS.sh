@@ -32,6 +32,7 @@ outputAOD=""
 nEvents="-1"
 skipCheck=0
 storeTrackSeeds=True
+numThreads=1
 
 ## parsing flags
 while [ $# -ge 1 ];do
@@ -42,6 +43,7 @@ while [ $# -ge 1 ];do
         -n  | --nEvents )       if [ $# -lt 2 ] ; then usage ; fi ; nEvents="$2"   ; shift ;;
         -s  | --skipCheck )     if [ $# -lt 1 ] ; then usage ; fi ; skipCheck=1    ;;
         -t  | --noStoreSeeds )  if [ $# -lt 1 ] ; then usage ; fi ; storeTrackSeeds=False ;;
+        -T  | --numThreads )    if [ $# -lt 2 ] ; then usage ; fi ; numThreads="$2" ; shift ;;
         -h  | --help )          usage 0 ;;
         *) shift ;;
     esac
@@ -69,7 +71,9 @@ run Reco_tf.py \
                flags.Tracking.doPixelDigitalClustering=True; \
                from ActsConfig.ActsConfigFlags import SeedingStrategy; \
                flags.Tracking.ITkActsPass.SeedingStrategy=SeedingStrategy.Gbts; \
-               flags.Tracking.ITkActsPass.storeTrackSeeds=${storeTrackSeeds};" \
+               flags.Tracking.ITkActsPass.storeTrackSeeds=${storeTrackSeeds}; \
+               flags.Concurrency.NumThreads=${numThreads}; \
+               flags.Concurrency.NumConcurrentEvents=${numThreads};" \
     --inputRDOFile ${inputRDO} \
     --outputAODFile ${outputAOD} \
     --ignorePatterns "${ignore_pattern}" \
