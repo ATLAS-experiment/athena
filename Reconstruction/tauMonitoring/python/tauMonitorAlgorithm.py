@@ -45,7 +45,6 @@ def tauMonitoringConfig(inputFlags,tauContainer='TauJets',**kwargs):
 
     tauMonitorAlgorithm = CompFactory.tauMonitorAlgorithm
     tauMonAlgBA = cfgHelper.addAlgorithm( tauMonitorAlgorithm, name='tauMonAlgBA', addFilterTools = [LArBadLBFilterToolCfg(inputFlags)])
-    tauMonAlgCR = cfgHelper.addAlgorithm( tauMonitorAlgorithm, name='tauMonAlgCR', addFilterTools = [LArBadLBFilterToolCfg(inputFlags)])
     tauMonAlgEC = cfgHelper.addAlgorithm( tauMonitorAlgorithm, name='tauMonAlgEC', addFilterTools = [LArBadLBFilterToolCfg(inputFlags)])
     tauMonAlgGlobal = cfgHelper.addAlgorithm( tauMonitorAlgorithm, name='tauMonAlgGlobal', addFilterTools = [LArBadLBFilterToolCfg(inputFlags)])
     tauMonAlgTauTrig1 = cfgHelper.addAlgorithm( tauMonitorAlgorithm, name='tauMonAlgTauTrig1', addFilterTools = [LArBadLBFilterToolCfg(inputFlags)])
@@ -54,8 +53,6 @@ def tauMonitoringConfig(inputFlags,tauContainer='TauJets',**kwargs):
     tauMonAlgTauTrig4 = cfgHelper.addAlgorithm( tauMonitorAlgorithm, name='tauMonAlgTauTrig4', addFilterTools = [LArBadLBFilterToolCfg(inputFlags)])
     tauMonAlgTauTrig5 = cfgHelper.addAlgorithm( tauMonitorAlgorithm, name='tauMonAlgTauTrig5', addFilterTools = [LArBadLBFilterToolCfg(inputFlags)])
     tauMonAlgTauTrig6 = cfgHelper.addAlgorithm( tauMonitorAlgorithm, name='tauMonAlgTauTrig6', addFilterTools = [LArBadLBFilterToolCfg(inputFlags)])
-    tauMonAlgTauTrig7 = cfgHelper.addAlgorithm( tauMonitorAlgorithm, name='tauMonAlgTauTrig7', addFilterTools = [LArBadLBFilterToolCfg(inputFlags)])
-    tauMonAlgTauTrig8 = cfgHelper.addAlgorithm( tauMonitorAlgorithm, name='tauMonAlgTauTrig8', addFilterTools = [LArBadLBFilterToolCfg(inputFlags)])
     tauMonAlgEleTrig = cfgHelper.addAlgorithm( tauMonitorAlgorithm, name='tauMonAlgEleTrig', addFilterTools = [LArBadLBFilterToolCfg(inputFlags)])
     tauMonAlgJetTrig = cfgHelper.addAlgorithm( tauMonitorAlgorithm, name='tauMonAlgJetTrig', addFilterTools = [LArBadLBFilterToolCfg(inputFlags)])
 
@@ -73,9 +70,7 @@ def tauMonitoringConfig(inputFlags,tauContainer='TauJets',**kwargs):
     tauMonAlgTauTrig3.TriggerChain = "HLT_tau160_mediumGNTau_L1eTAU140"
     tauMonAlgTauTrig4.TriggerChain = "HLT_tau35_mediumGNTau_tau25_mediumGNTau_03dRAB30_L1cTAU30M_2cTAU20M_DR-eTAU30eTAU20-jJ55"
     tauMonAlgTauTrig5.TriggerChain = "HLT_tau35_mediumGNTau_tau25_mediumGNTau_03dRAB_L1cTAU30M_2cTAU20M_4jJ30p0ETA25"
-    tauMonAlgTauTrig6.TriggerChain = "HLT_tau40_mediumGNTau_tau35_mediumGNTau_03dRAB_L1cTAU35M_2cTAU30M_2jJ55_3jJ50"
-    tauMonAlgTauTrig7.TriggerChain = "HLT_tau80_mediumGNTau_tau35_mediumGNTau_03dRAB30_L1eTAU80_2cTAU30M_DR-eTAU30eTAU20"
-    tauMonAlgTauTrig8.TriggerChain = "HLT_tau80_mediumGNTau_tau60_mediumGNTau_03dRAB_L1eTAU80_2eTAU60"
+    tauMonAlgTauTrig6.TriggerChain = "HLT_tau80_mediumGNTau_tau35_mediumGNTau_03dRAB30_L1eTAU80_2cTAU30M_DR-eTAU30eTAU20"
 
 
     tauMonAlgEleTrig.TriggerChain = "HLT_e[2-9][0-9]_.*"
@@ -83,12 +78,9 @@ def tauMonitoringConfig(inputFlags,tauContainer='TauJets',**kwargs):
 
     tauMonAlgBA.TauRecContainer = tauContainer
     tauMonAlgBA.etaMin = -1.
-    tauMonAlgBA.etaMax = 1.3
-    tauMonAlgCR.TauRecContainer = tauContainer
-    tauMonAlgCR.etaMin = 1.3
-    tauMonAlgCR.etaMax = 1.7
+    tauMonAlgBA.etaMax = 1.37
     tauMonAlgEC.TauRecContainer = tauContainer
-    tauMonAlgEC.etaMin = 1.7
+    tauMonAlgEC.etaMin = 1.52
     tauMonAlgEC.etaMax = 3.5
     tauMonAlgGlobal.TauRecContainer = tauContainer
     tauMonAlgGlobal.etaMin = -100
@@ -111,12 +103,6 @@ def tauMonitoringConfig(inputFlags,tauContainer='TauJets',**kwargs):
     tauMonAlgTauTrig6.TauRecContainer = tauContainer
     tauMonAlgTauTrig6.etaMin = -100
     tauMonAlgTauTrig6.etaMax = 100
-    tauMonAlgTauTrig7.TauRecContainer = tauContainer
-    tauMonAlgTauTrig7.etaMin = -100
-    tauMonAlgTauTrig7.etaMax = 100
-    tauMonAlgTauTrig8.TauRecContainer = tauContainer
-    tauMonAlgTauTrig8.etaMin = -100
-    tauMonAlgTauTrig8.etaMax = 100
 
     tauMonAlgEleTrig.TauRecContainer = tauContainer
     tauMonAlgEleTrig.etaMin = -100
@@ -126,7 +112,6 @@ def tauMonitoringConfig(inputFlags,tauContainer='TauJets',**kwargs):
     tauMonAlgJetTrig.etaMax = 100
 
     tauMonAlgBA.kinGroupName = 'tauMonKinGroupBA'
-    tauMonAlgCR.kinGroupName = 'tauMonKinGroupCR'
     tauMonAlgEC.kinGroupName = 'tauMonKinGroupEC'
     tauMonAlgGlobal.kinGroupName = 'tauMonKinGroupGlobal'
     tauMonAlgTauTrig1.kinGroupName = 'tauMonKinGroupTauTrig1'
@@ -135,8 +120,6 @@ def tauMonitoringConfig(inputFlags,tauContainer='TauJets',**kwargs):
     tauMonAlgTauTrig4.kinGroupName = 'tauMonKinGroupTauTrig4'
     tauMonAlgTauTrig5.kinGroupName = 'tauMonKinGroupTauTrig5'
     tauMonAlgTauTrig6.kinGroupName = 'tauMonKinGroupTauTrig6'
-    tauMonAlgTauTrig7.kinGroupName = 'tauMonKinGroupTauTrig7'
-    tauMonAlgTauTrig8.kinGroupName = 'tauMonKinGroupTauTrig8'
 
     tauMonAlgEleTrig.kinGroupName = 'tauMonKinGroupEleTrig'
     tauMonAlgJetTrig.kinGroupName = 'tauMonKinGroupJetTrig'
@@ -148,7 +131,6 @@ def tauMonitoringConfig(inputFlags,tauContainer='TauJets',**kwargs):
     # Add a generic monitoring tool (a "group" in old language). The returned 
     # object here is the standard GenericMonitoringTool.
     myKinGroupBA = cfgHelper.addGroup(alg=tauMonAlgBA, name='tauMonKinGroupBA', topPath='Tau/TauB/' )
-    myKinGroupCR = cfgHelper.addGroup(alg=tauMonAlgCR, name='tauMonKinGroupCR', topPath='Tau/TauCR/' )
     myKinGroupEC = cfgHelper.addGroup(alg=tauMonAlgEC, name='tauMonKinGroupEC', topPath='Tau/TauE/' )
     myKinGroupGlobal = cfgHelper.addGroup(alg=tauMonAlgGlobal, name='tauMonKinGroupGlobal', topPath='Tau/' )
     myKinGroupTauTrig1 = cfgHelper.addGroup(alg=tauMonAlgTauTrig1, name='tauMonKinGroupTauTrig1', topPath='Tau/Trigger/tauTrigger1/' )
@@ -157,15 +139,12 @@ def tauMonitoringConfig(inputFlags,tauContainer='TauJets',**kwargs):
     myKinGroupTauTrig4 = cfgHelper.addGroup(alg=tauMonAlgTauTrig4, name='tauMonKinGroupTauTrig4', topPath='Tau/Trigger/tauTrigger4/' )
     myKinGroupTauTrig5 = cfgHelper.addGroup(alg=tauMonAlgTauTrig5, name='tauMonKinGroupTauTrig5', topPath='Tau/Trigger/tauTrigger5/' )
     myKinGroupTauTrig6 = cfgHelper.addGroup(alg=tauMonAlgTauTrig6, name='tauMonKinGroupTauTrig6', topPath='Tau/Trigger/tauTrigger6/' )
-    myKinGroupTauTrig7 = cfgHelper.addGroup(alg=tauMonAlgTauTrig7, name='tauMonKinGroupTauTrig7', topPath='Tau/Trigger/tauTrigger7/' )
-    myKinGroupTauTrig8 = cfgHelper.addGroup(alg=tauMonAlgTauTrig8, name='tauMonKinGroupTauTrig8', topPath='Tau/Trigger/tauTrigger8/' )
     myKinGroupEleTrig = cfgHelper.addGroup(alg=tauMonAlgEleTrig, name='tauMonKinGroupEleTrig', topPath='Tau/Trigger/EleTrig/' )
     myKinGroupJetTrig = cfgHelper.addGroup(alg=tauMonAlgJetTrig, name='tauMonKinGroupJetTrig', topPath='Tau/Trigger/JetTrig/' )
 
 
     naming= {
             'BA': "Tau_TauB_",
-            'CR': "Tau_TauCR_",
             'EC': "Tau_TauE_",
             'Global': "",
             'EleTrig': "emTriggered_",
@@ -176,8 +155,6 @@ def tauMonitoringConfig(inputFlags,tauContainer='TauJets',**kwargs):
             'TauTrig4': "tauTriggered4_",
             'TauTrig5': "tauTriggered5_",
             'TauTrig6': "tauTriggered6_",
-            'TauTrig7': "tauTriggered7_",
-            'TauTrig8': "tauTriggered8_",
 
             }
 
@@ -203,7 +180,6 @@ def tauMonitoringConfig(inputFlags,tauContainer='TauJets',**kwargs):
 
     # Configure histograms
     for itup in [(myKinGroupBA,'BA'),
-                 (myKinGroupCR,'CR'),
                  (myKinGroupEC,'EC'),
                  (myKinGroupGlobal,'Global'),
                  (myKinGroupEleTrig,'EleTrig'),
@@ -213,9 +189,7 @@ def tauMonitoringConfig(inputFlags,tauContainer='TauJets',**kwargs):
                  (myKinGroupTauTrig3, 'TauTrig3'),
                  (myKinGroupTauTrig4, 'TauTrig4'),
                  (myKinGroupTauTrig5, 'TauTrig5'),
-                 (myKinGroupTauTrig6, 'TauTrig6'),
-                 (myKinGroupTauTrig7, 'TauTrig7'),
-                 (myKinGroupTauTrig8, 'TauTrig8')]:
+                 (myKinGroupTauTrig6, 'TauTrig6')]:
 
         (igroup, postfix) = itup
 
@@ -224,7 +198,7 @@ def tauMonitoringConfig(inputFlags,tauContainer='TauJets',**kwargs):
 
         folder = ""
 
-        if(postfix =="BA" or postfix =="CR" or postfix=="EC" or postfix == "Global" or postfix.startswith('TauTrig') or postfix=="EleTrig" or postfix =="JetTrig"):
+        if(postfix =="BA" or postfix=="EC" or postfix == "Global" or postfix.startswith('TauTrig') or postfix=="EleTrig" or postfix =="JetTrig"):
 
 
             #potentialHigh Pt replacement
@@ -275,7 +249,7 @@ def tauMonitoringConfig(inputFlags,tauContainer='TauJets',**kwargs):
             igroup.defineHistogram(namer('LB,tauPhi','tauPhiVsLB','',postfix), type='TH2F', title='Tau Phi vs Lumiblock;Lumiblock;Phi', 
                                    xbins=1200,xmin=0,xmax=1200,ybins=80,ymin=PHIMIN,ymax=PHIMAX,path=folder)
 
-        if(postfix =="BA" or postfix =="CR" or postfix=="EC" or postfix.startswith('TauTrig')):
+        if(postfix =="BA" or postfix=="EC" or postfix.startswith('TauTrig')):
 
             igroup.defineHistogram(namer('tauPhi'+tauid+'Loose','phi','Identification_'+tauid+'Loose',postfix), title='Phi of tau candidates ('+tauid+'Loose) ;Phi;Number of Candidates',
                 xbins=65, xmin=PHIMIN-0.098174/2., xmax=PHIMAX+0.098174/2., path=folder+"Identification/"+tauid+"Loose" )
@@ -400,7 +374,7 @@ def tauMonitoringConfig(inputFlags,tauContainer='TauJets',**kwargs):
                 xbins=20, xmin=0., xmax=2., path=folder+"SubStructure" )
 
         
-        if(postfix =="BA" or postfix =="CR" or postfix=="EC" or postfix.startswith('TauTrig') or postfix=="Global"):
+        if(postfix =="BA" or postfix=="EC" or postfix.startswith('TauTrig') or postfix=="Global"):
             #Cluster Histograms
             igroup.defineHistogram(namer('clusterLogEt','logEt','Cluster',postfix), title='log(cluster E_{T});log(cluster E_{T});Entries',path=folder+"Cluster",
             xbins=50, xmin=1.5, xmax=6.5 )
@@ -619,8 +593,8 @@ if __name__=='__main__':
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
     flags = initConfigFlags()
 
-    nightly = '/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/CommonInputs/'
-    file = 'data16_13TeV.00311321.physics_Main.recon.AOD.r9264/AOD.11038520._000001.pool.root.1'
+    nightly = '/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/CampaignInputs/data25/AOD/'
+    file = 'data25_13p6TeV.00509452.physics_Main.recon.AOD.r17521/1000evtsAOD.49752796._006808.pool.root.1'
     flags.Input.Files = [nightly+file]
 
     flags.Input.isMC = False
@@ -639,7 +613,6 @@ if __name__=='__main__':
 
     # If you want to turn on more detailed messages ...
     exampleMonitorAcc.getEventAlgo('tauMonAlgBA').OutputLevel = 2 # DEBUG
-    exampleMonitorAcc.getEventAlgo('tauMonAlgCR').OutputLevel = 2 # DEBUG
     exampleMonitorAcc.getEventAlgo('tauMonAlgEC').OutputLevel = 2 # DEBUG
     exampleMonitorAcc.getEventAlgo('tauMonAlgGlobal').OutputLevel = 2 # DEBUG
     exampleMonitorAcc.getEventAlgo('tauMonAlgTauTrig1').OutputLevel = 2 # DEBUG
@@ -648,8 +621,6 @@ if __name__=='__main__':
     exampleMonitorAcc.getEventAlgo('tauMonAlgTauTrig4').OutputLevel = 2 # DEBUG
     exampleMonitorAcc.getEventAlgo('tauMonAlgTauTrig5').OutputLevel = 2 # DEBUG
     exampleMonitorAcc.getEventAlgo('tauMonAlgTauTrig6').OutputLevel = 2 # DEBUG
-    exampleMonitorAcc.getEventAlgo('tauMonAlgTauTrig7').OutputLevel = 2 # DEBUG
-    exampleMonitorAcc.getEventAlgo('tauMonAlgTauTrig8').OutputLevel = 2 # DEBUG
     exampleMonitorAcc.getEventAlgo('tauMonAlgEleTrig').OutputLevel = 2 # DEBUG
     exampleMonitorAcc.getEventAlgo('tauMonAlgJetTrig').OutputLevel = 2 # DEBUG
 
