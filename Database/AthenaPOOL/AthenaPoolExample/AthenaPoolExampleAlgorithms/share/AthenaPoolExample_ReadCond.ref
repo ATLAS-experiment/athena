@@ -40,7 +40,7 @@ SimplePoolFile1.root                                DEBUG --> Access   DbContain
 SimplePoolFile1.root                                DEBUG --->Reading Param:PFN=[SimplePoolFile1.root]
 SimplePoolFile1.root                                DEBUG --->Reading Param:POOL_CONTAINERNAME_EVENTTAG=[POOLCollectionTree]
 SimplePoolFile1.root                                DEBUG --->Reading Param:POOL_CONTAINERNAME_DATAHEADER=[POOLContainer]
-##Params                                            DEBUG No objects passing selection criteria... Container has 6 Entries in total.
+##Params                                            DEBUG No objects passing selection criteria... Container has 5 Entries in total.
 SimplePoolFile1.root                                DEBUG --> Access   DbContainer  READ      [ROOT_TreeIndex] POOLContainer(DataHeader)
 POOLContainer(DataHeader)                           DEBUG Opening
 POOLContainer(DataHeader)                           DEBUG    attributes# = 1
@@ -99,7 +99,7 @@ SimplePoolFile1.root                                DEBUG --> Access   DbContain
 SimplePoolFile1.root                                DEBUG --->Reading Param:PFN=[SimplePoolFile1.root]
 SimplePoolFile1.root                                DEBUG --->Reading Param:POOL_CONTAINERNAME_EVENTTAG=[POOLCollectionTree]
 SimplePoolFile1.root                                DEBUG --->Reading Param:POOL_CONTAINERNAME_DATAHEADER=[POOLContainer]
-##Params                                            DEBUG No objects passing selection criteria... Container has 6 Entries in total.
+##Params                                            DEBUG No objects passing selection criteria... Container has 5 Entries in total.
 SimplePoolFile1.root                                DEBUG --> Access   DbContainer  READ      [ROOT_TreeIndex] POOLContainer(DataHeader)
 POOLContainer(DataHeader)                           DEBUG Opening
 POOLContainer(DataHeader)                           DEBUG    attributes# = 1
@@ -208,7 +208,7 @@ SimplePoolFile4.root                                DEBUG --> Access   DbContain
 SimplePoolFile4.root                                DEBUG --->Reading Param:PFN=[SimplePoolFile4.root]
 SimplePoolFile4.root                                DEBUG --->Reading Param:POOL_CONTAINERNAME_EVENTTAG=[POOLCollectionTree]
 SimplePoolFile4.root                                DEBUG --->Reading Param:POOL_CONTAINERNAME_DATAHEADER=[POOLContainer]
-##Params                                            DEBUG No objects passing selection criteria... Container has 6 Entries in total.
+##Params                                            DEBUG No objects passing selection criteria... Container has 5 Entries in total.
 SimplePoolFile4.root                                DEBUG --> Access   DbContainer  READ      [ROOT_TreeIndex] POOLContainer(DataHeader)
 POOLContainer(DataHeader)                           DEBUG Opening
 POOLContainer(DataHeader)                           DEBUG    attributes# = 1
@@ -242,7 +242,7 @@ SimplePoolFile4.root                                DEBUG --> Access   DbContain
 SimplePoolFile4.root                                DEBUG --->Reading Param:PFN=[SimplePoolFile4.root]
 SimplePoolFile4.root                                DEBUG --->Reading Param:POOL_CONTAINERNAME_EVENTTAG=[POOLCollectionTree]
 SimplePoolFile4.root                                DEBUG --->Reading Param:POOL_CONTAINERNAME_DATAHEADER=[POOLContainer]
-##Params                                            DEBUG No objects passing selection criteria... Container has 6 Entries in total.
+##Params                                            DEBUG No objects passing selection criteria... Container has 5 Entries in total.
 SimplePoolFile4.root                                DEBUG --> Access   DbContainer  READ      [ROOT_TreeIndex] ConditionsContainerExampleHitContainer_p1(PedestalWriteData)
 ConditionsContainerExa...ner_p1(PedestalWriteData)  DEBUG Opening
 ConditionsContainerExa...ner_p1(PedestalWriteData)  DEBUG    attributes# = 1
