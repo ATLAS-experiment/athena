@@ -180,7 +180,7 @@ def AthenaMpEventLoopMgrCfg(flags):
     if flags.Common.isOverlay and not flags.Overlay.DataOverlay:
         elmgr = CompFactory.AthenaEventLoopMgr(
             EventPrintoutInterval = flags.Exec.EventPrintoutInterval,
-            eRequireInputAttributeList = True,
+            RequireInputAttributeList = True,
             UseSecondaryEventNumber = True)
         cfg.addService( elmgr )
         cfg.setAppProperty('EventLoop', elmgr.name)
