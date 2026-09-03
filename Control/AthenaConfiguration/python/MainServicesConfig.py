@@ -232,7 +232,9 @@ def AthenaMtesEventLoopMgrCfg(flags, mtEs=False, channel=''):
 
 
 def PyAthenaEventLoopMgrCfg(flags):
+    cfg = ComponentAccumulator()
     cfg.setAppProperty('EventLoop', "PyAthenaEventLoopMgr")
+    return cfg
 
 
 def MessageSvcCfg(flags):
