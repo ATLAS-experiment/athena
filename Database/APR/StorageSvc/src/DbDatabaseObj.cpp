@@ -268,7 +268,7 @@ StatusCode DbDatabaseObj::addShape(const DbTypeInfo* pShape) {
 StatusCode DbDatabaseObj::open()   {
   if ( !m_info && m_dom.isValid() && db() )    {
     m_info = db()->createDatabase();
-    if ( m_info->open(m_dom, m_logon, mode()).isSuccess() )    {
+    if ( m_info->open( DbDatabase(this), m_logon, mode() ).isSuccess() )    {
       // Age open databases. Aging is only effective
       // for read-only databases. Otherwise no aging
       // is applied, because it is assumed, that objects
@@ -475,8 +475,7 @@ StatusCode DbDatabaseObj::open()   {
             }
           }
         }
-        DbDatabase dbd (this);
-        return m_info->onOpen(dbd, mode());
+        return StatusCode::SUCCESS;
       }
     }
     deletePtr(m_info);

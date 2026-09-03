@@ -50,7 +50,6 @@ constexpr const static auto FAILURE = StatusCode::FAILURE;
 RootDatabase::RootDatabase() :
         APRMessaging("RootDatabase"),
         m_file(nullptr), 
-        m_version ("2.0"),
         m_defCompression(1),
         m_defCompressionAlg(1),
         m_defSplitLevel(99),
@@ -90,31 +89,10 @@ long long int RootDatabase::size()  const   {
   return -1;
 }
 
-/// Callback after successful open of a database object
-StatusCode RootDatabase::onOpen(DbDatabase& dbH, Io::IoFlag mode)  {
-  m_dbH = dbH;
-  std::string par_val;
-  if ( !dbH.param("FORMAT_VSN", par_val).isSuccess() )  {
-    if ( mode == Io::WRITE || mode == Io::APPEND ) {
-      return dbH.addParam("FORMAT_VSN", m_version);
-    }
-    ATH_MSG_WARNING("No ROOT data format parameter present and file not opened for update.");
-  }
-  else {
-    m_version = std::move(par_val);
-  }
-  if ( m_file )  {
-    ATH_MSG_DEBUG(dbH.name() << " File version:" << int(m_file->GetVersion()));
-  }
-  else  {
-    ATH_MSG_ERROR("Unknown Root file ...");
-  }
-  return SUCCESS;
-}
-
 // Open a new root Database: Access the TFile
-StatusCode RootDatabase::open(const DbDomain& domH,const std::string& nam,Io::IoFlag mode)
+StatusCode RootDatabase::open(const DbDatabase& dbH,const std::string& nam,Io::IoFlag mode)
 {
+  m_dbH = dbH;
   const char* fname = nam.c_str();
   Bool_t result = ( mode == Io::READ ) ? kFALSE : gSystem->AccessPathName(fname, kFileExists);
   DbOption opt1("DEFAULT_COMPRESSION","");
@@ -123,6 +101,7 @@ StatusCode RootDatabase::open(const DbDomain& domH,const std::string& nam,Io::Io
   DbOption opt4("DEFAULT_AUTOSAVE","");
   DbOption opt5("DEFAULT_BUFFERSIZE","");
   DbOption opt6("TREE_BRANCH_OFFSETTAB_LEN","");
+  const DbDomain& domH = dbH.containedIn();
   CHECK( domH.getOption(opt1) );
   CHECK( domH.getOption(opt2) );
   CHECK( domH.getOption(opt3) );
@@ -194,20 +173,19 @@ StatusCode RootDatabase::open(const DbDomain& domH,const std::string& nam,Io::Io
       }
     }
   }
-  if ( m_file )   {
-    ATH_MSG_INFO(fname << " File version:" << m_file->GetVersion());
-    if ( !m_file->IsOpen() )   {
-      ATH_MSG_ERROR("Failed to open file:" << nam);
-      deletePtr(m_file);
-    }
+  if( !m_file ) {
+     if( mode == Io::READ ) {
+        ATH_MSG_ERROR("You cannot open the ROOT file [" << nam << "] in mode READ"
+          << " if it does not exists. ");
+     }
+     return FAILURE;
   }
-  else if ( mode == Io::READ )   {
-    ATH_MSG_ERROR("You cannot open the ROOT file [" << nam << "] in mode READ"
-                  << " if it does not exists. ");
+  if( !m_file->IsOpen() ) {
+     ATH_MSG_ERROR("Failed to open file:" << nam);
+     deletePtr(m_file);
+     return FAILURE;
   }
-
-  if( !m_file ) return FAILURE;
-
+  ATH_MSG_INFO(fname << " File version:" << m_file->GetVersion());
   if( mode != Io::READ ) {
      m_file->SetCompressionLevel(m_defCompression);
      m_file->SetCompressionAlgorithm(m_defCompressionAlg);
