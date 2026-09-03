@@ -2,8 +2,8 @@
  *   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
  */
 
-#ifndef TRIGL0GEPPERF_GEPCALOCELL_H
-#define TRIGL0GEPPERF_GEPCALOCELL_H
+#ifndef TRIGGEPPERF_GEPCALOCELL_H
+#define TRIGGEPPERF_GEPCALOCELL_H
 
 #include <vector>
 #include <string>
@@ -64,4 +64,4 @@ namespace Gep{
   };
 }
 
-#endif //TRIGL0GEPPERF_GEPCALOCELL_H
+#endif //TRIGGEPPERF_GEPCALOCELL_H

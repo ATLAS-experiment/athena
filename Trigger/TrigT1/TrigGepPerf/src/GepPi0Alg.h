@@ -2,8 +2,8 @@
  *   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
  */
 
-#ifndef TRIGL0GEPPERF_GEPPI0ALG_H
-#define TRIGL0GEPPERF_GEPPI0ALG_H
+#ifndef TRIGGEPPERF_GEPPI0ALG_H
+#define TRIGGEPPERF_GEPPI0ALG_H
 
 /*
   This algorithm provides a framework in which to study alternative

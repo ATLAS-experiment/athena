@@ -2,8 +2,8 @@
  *   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
  */
 
-#ifndef TRIGL0GEPPERF_CONEJETMAKER_H
-#define TRIGL0GEPPERF_CONEJETMAKER_H
+#ifndef TRIGGEPPERF_CONEJETMAKER_H
+#define TRIGGEPPERF_CONEJETMAKER_H
 
 
 #include "xAODTrigger/jFexSRJetRoIContainer.h"
@@ -57,4 +57,4 @@ namespace Gep
 
 }
 
-#endif //TRIGL0GEPPERF_CONEJETMAKER_H
+#endif //TRIGGEPPERF_CONEJETMAKER_H

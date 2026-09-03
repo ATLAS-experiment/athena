@@ -2,8 +2,8 @@
  *   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
  */
 
-#ifndef TRIGL0GEPPERF_IJETMAKER_H
-#define TRIGL0GEPPERF_IJETMAKER_H
+#ifndef TRIGGEPPERF_IJETMAKER_H
+#define TRIGGEPPERF_IJETMAKER_H
 
 #include <string>
 
