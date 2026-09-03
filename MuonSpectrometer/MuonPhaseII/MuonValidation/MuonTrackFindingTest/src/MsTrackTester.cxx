@@ -6,6 +6,7 @@
 #include "StoreGate/ReadHandle.h"
 #include "MuonTrackEvent/TrackingHelpers.h"
 #include "MuonTrackEvent/HitSummary.h"
+#include "MuonTrackEvent/TrackMatchingUtils.h"
 #include "MuonTruthHelpers/MuonSimHitHelpers.h"
 #include "MuonDetDescrUtils/MuonSectorMapping.h"
 #include "MuonPRDTestR4/TrackContainerModule.h"
@@ -14,6 +15,7 @@
 
 #include "ActsEvent/Decoration.h"
 #include "ActsEvent/CaloExtension.h"
+#include "ActsInterop/Logger.h"
 
 #include "Acts/Definitions/Units.hpp"
 #include "Acts/Surfaces/PlaneSurface.hpp"
@@ -33,6 +35,33 @@ namespace {
         return rad / 1._degree;
     }
     using Location = MsTrackSeed::Location;
+
+    const MuonR4::MuonTag* findTagMatchingToId(const xAOD::TrackParticle& idTrack,
+                                               const SG::ReadHandleKey<MuonR4::MuonTagContainer>& key,
+                                               const EventContext& ctx) {
+        const MuonR4::MuonTagContainer* muTagCont{nullptr};
+        if(!SG::get(muTagCont, key, ctx).isSuccess()){
+            THROW_EXCEPTION("Failed to retrieve "<<key.fullKey());
+        }
+        if (!muTagCont) {
+            return nullptr;
+        }
+        for (const MuonR4::MuonTag* muTag : *muTagCont) {
+            if (muTag->idTrack() == &idTrack){
+                return muTag;
+            }
+        }
+        return nullptr;
+    }
+
+    bool isOnCaloExit(const Acts::Surface& surf) {
+        return surf.geometryId().volume() == ActsTrk::detail::GeoVolIds::s_caloEnvelopeID;
+    }
+
+    bool isOnCaloExit(const Acts::BoundTrackParameters& pars) {
+        return isOnCaloExit(pars.referenceSurface());
+    }
+    
 }
 
 namespace MuonValR4 {
@@ -107,6 +136,7 @@ namespace MuonValR4 {
         ATH_CHECK(m_ctxProvider.initialize());
         ATH_CHECK(m_extrapolationTool.retrieve(EnableTool{m_storeID}));
         ATH_CHECK(detStore()->retrieve(m_detMgr));
+        m_logger = makeActsAthenaLogger(this, name());
 
         int evOpts{0};
 
@@ -202,7 +232,7 @@ namespace MuonValR4 {
                     auto [min, max] = std::ranges::minmax(allHits, [](const xAOD::MuonSimHit* a, const xAOD::MuonSimHit* b){
                         return a->kineticEnergy() < b->kineticEnergy();
                     });
-                    return (max->kineticEnergy() - min->kineticEnergy()) / Gaudi::Units::GeV;
+                    return (min->kineticEnergy() - max->kineticEnergy()) / Gaudi::Units::GeV;
                 }));
             /// Calculate the truth seed length
             auto cone = std::make_shared<VectorBranch<float>>(m_tree,
@@ -281,12 +311,9 @@ namespace MuonValR4 {
             m_tree.addBranch(m_legacyRecoSegs);
         }
 
-        m_seedSummary = std::make_shared<TrackSummaryModule>(m_tree, "MsTrkSeed", m_summaryTool.get());
+        m_seedSummary = std::make_shared<TrackSummaryModule>(m_tree, "TrkSeed", m_summaryTool.get());
         m_muonTrks = std::make_shared<IParticleFourMomBranch>(m_tree, "ActsMuons");
         m_muonTrks->addVariable(std::make_unique<TrackChi2Branch>(*m_muonTrks));
-        m_muonTrks->addVariable(std::make_unique<TrackFitIterBranch>(*m_muonTrks));
-
-
         m_muonTrks->addVariable<float>(4.5, "segmentDeltaEta");
         m_muonTrks->addVariable<float>(std::numbers::pi, "segmentDeltaPhi");
         m_muonTrks->addVariable<float>(-1., "segmentChi2OverDoF");
@@ -320,32 +347,49 @@ namespace MuonValR4 {
             return trkColl;
         };
 
-        dumpTrack("MsTrk", TrkType::MuonSpectrometerTrackParticle);
+        auto msTracks = dumpTrack("MsTrk", TrkType::MuonSpectrometerTrackParticle);
         dumpTrack("MeTrk", TrkType::ExtrapolatedMuonSpectrometerTrackParticle);
         m_idTracks = dumpTrack("IdTrk", TrkType::InnerDetectorTrackParticle);
 
-        /** Verify that the id track is selected */
-        m_idTracks->addVariable(std::make_unique<GenericPartDecorBranch<xAOD::TrackParticle, std::uint8_t>>(m_tree, 
-                std::format("{:}_isCandidate", m_idTracks->name()), [this] (const xAOD::TrackParticle& idTrack) -> std::uint8_t {
-                    const MuonR4::MuonTagContainer* tags{};
-                    SG::get(tags, m_idTagKey, Gaudi::Hive::currentContext()).ignore();
-                    return tags && std::any_of(tags->begin(), tags->end(), [&idTrack](const MuonR4::MuonTag* tag){
-                        return tag->idTrack() == &idTrack && tag->extrapolatedParsID(Acts::hashString("@CaloExit"));
-                    });
+        /** Dump whether the id track is selected and dump the parameters at calo exit */
+        {
+            auto& l0{m_tree.newVector<float>(std::format("{:}_caloExitLoc0", m_idTracks->name()))};
+            auto& l1{m_tree.newVector<float>(std::format("{:}_caloExitLoc1", m_idTracks->name()))};
+            auto& theta{m_tree.newVector<float>(std::format("{:}_caloExitTheta", m_idTracks->name()))};
+            auto& phi{m_tree.newVector<float>(std::format("{:}_caloExitPhi", m_idTracks->name()))};
+            auto& mom{m_tree.newVector<float>(std::format("{:}_caloExitMom", m_idTracks->name()))};
+            
+            m_idTracks->addVariable(std::make_unique<GenericPartDecorBranch<xAOD::TrackParticle, std::uint8_t>>(m_tree, 
+                std::format("{:}_isCandidate", m_idTracks->name()), 
+                [this, &l0, &l1, &theta, &phi, &mom] (const xAOD::TrackParticle& idTrack) -> std::uint8_t {
+                    const MuonR4::MuonTag* tag = findBaseIdTag(idTrack, Gaudi::Hive::currentContext());
+                    std::optional<Acts::BoundTrackParameters> trkPars = tag ? tag->extrapolatedParsID(Acts::hashString("@CaloExit"))
+                                                                            : std::nullopt;
+                    const std::size_t idx = l0.size();
+                    using namespace MuonCombinedR4;
+                    l0[idx] = trkPars ? longitudinalParam(*trkPars, logger()) : 1._km;
+                    l1[idx] = trkPars ? toDeg(localPolarAngle(*trkPars, logger())) : 360.;
+                    
+                    theta[idx] = trkPars ? toDeg(trkPars->get<Acts::eBoundTheta>()) : 360.;
+                    phi[idx] = trkPars ? toDeg(trkPars->get<Acts::eBoundPhi>()) : 360.;
+                    mom[idx] = trkPars ? trkPars->absoluteMomentum() : -1._GeV;
+                    return trkPars != std::nullopt;
                 }));
-
+        }
         {
             auto& dX0{m_tree.newMatrix<float>(std::format("{:}_segTagDx0", m_idTracks->name()))};
             auto& dY0{m_tree.newMatrix<float>(std::format("{:}_segTagDy0", m_idTracks->name()))};
             auto& dTheta{m_tree.newMatrix<float>(std::format("{:}_segTagDtheta", m_idTracks->name()))};
             auto& dPhi{m_tree.newMatrix<float>(std::format("{:}_segTagDphi", m_idTracks->name()))};
             auto& segments{m_tree.newMatrix<std::uint8_t>(std::format("{:}_segTagSegments", m_idTracks->name()))};
-            auto& goodExtp{m_tree.newMatrix<std::uint8_t>(std::format("{:}_segExtpGood",m_idTracks->name()))};
+            auto& goodExtp{m_tree.newMatrix<std::uint8_t>(std::format("{:}_segTagExtpGood",m_idTracks->name()))};
+            auto& taggedSeg{m_tree.newMatrix<std::uint8_t>(std::format("{:}_segTagOnTag", m_idTracks->name()))};
             m_idTracks->addVariable(
             std::make_unique<GenericPartDecorBranch<xAOD::TrackParticle, std::vector<float>>>(m_tree, 
                 std::format("{:}_segTagScore", m_idTracks->name()), 
-                    [&dX0, &dY0, &dTheta, &dPhi, &segments, &goodExtp, this] (const xAOD::TrackParticle& idTrack) -> std::vector<float> {
-                    auto result = calcMuTagIMOScore(idTrack, Gaudi::Hive::currentContext());
+                    [&dX0, &dY0, &dTheta, &dPhi, &segments, 
+                     &goodExtp, &taggedSeg,this] (const xAOD::TrackParticle& idTrack) -> std::vector<float> {
+                    auto result = calcSegTagVariables(idTrack, Gaudi::Hive::currentContext());
 
                     segments.push_back(std::move(result.recoSegs));
                     dX0.push_back(std::move(result.deltaX0));
@@ -353,6 +397,7 @@ namespace MuonValR4 {
                     dTheta.push_back(std::move(result.deltaTheta));
                     dPhi.push_back(std::move(result.deltaPhi));
                     goodExtp.push_back(std::move(result.goodExtp));
+                    taggedSeg.push_back(std::move(result.taggedSeg));
                     return std::move(result.matchScores);
             }));
         }
@@ -377,20 +422,43 @@ namespace MuonValR4 {
                     return idx;
                 }));
         /// Link the associated seed
-        m_muonTrks->addVariable(std::make_unique<GenericPartDecorBranch<xAOD::Muon, unsigned short>>(m_tree, 
-                    std::format("{:}_seedLink", m_muonTrks->name()), [&] (const xAOD::Muon& p) -> unsigned short {
-                        using enum xAOD::Muon::TrackParticleType;
-                        const xAOD::TrackParticle* msTrack = p.trackParticle(MuonSpectrometerTrackParticle);
-                        if (!msTrack) {
-                            return -1;
-                        }
-                        auto actsTrk = ActsTrk::getActsTrack(*msTrack);
+        msTracks->addVariable(std::make_unique<GenericPartDecorBranch<xAOD::TrackParticle, unsigned short>>(m_tree, 
+                    std::format("{:}_seedLink", msTracks->name()), [&] (const xAOD::TrackParticle& p) -> unsigned short {
+                        auto actsTrk = ActsTrk::getActsTrack(p);
                         if (!actsTrk) {
                             THROW_EXCEPTION("Cannot find the associated ms track from the primary track");
                         }
                         return actsTrk->component<std::size_t>("parentSeed");
                 }));
 
+        msTracks->addVariable(std::make_unique<GenericPartDecorBranch<xAOD::TrackParticle, float>>(m_tree, 
+                    std::format("{:}_loc0", msTracks->name()), [&] (const xAOD::TrackParticle& p){
+                        auto actsTrk = ActsTrk::getActsTrack(p);
+                        if (!actsTrk) {
+                            THROW_EXCEPTION("Cannot find the associated ms track from the primary track");
+                        }
+                        auto refPars = actsTrk->createParametersAtReference();
+                        return isOnCaloExit(refPars) ? MuonCombinedR4::longitudinalParam(refPars, logger())
+                                                     : refPars.get<Acts::eBoundLoc0>();
+                }));
+        msTracks->addVariable(std::make_unique<GenericPartDecorBranch<xAOD::TrackParticle, float>>(m_tree, 
+                    std::format("{:}_loc1", msTracks->name()), [&] (const xAOD::TrackParticle& p){
+                        auto actsTrk = ActsTrk::getActsTrack(p);
+                        if (!actsTrk) {
+                            THROW_EXCEPTION("Cannot find the associated ms track from the primary track");
+                        }
+                        auto refPars = actsTrk->createParametersAtReference();
+                        return isOnCaloExit(refPars) ? toDeg(MuonCombinedR4::localPolarAngle(refPars, logger()))
+                                                     : refPars.get<Acts::eBoundLoc0>(); 
+                }));
+        msTracks->addVariable(std::make_unique<GenericPartDecorBranch<xAOD::TrackParticle, std::uint8_t>>(m_tree, 
+                    std::format("{:}_isOnCaloExit", msTracks->name()), [&] (const xAOD::TrackParticle& p){
+                        auto actsTrk = ActsTrk::getActsTrack(p);
+                        if (!actsTrk) {
+                            THROW_EXCEPTION("Cannot find the associated ms track from the primary track");
+                        }
+                        return isOnCaloExit(actsTrk->referenceSurface());
+                }));
         if (m_isMC) {
             BilateralLinkerBranch::connectCollections(m_muonTrks, m_truthTrks, 
                 [](const xAOD::IParticle* trk) -> const xAOD::TruthParticle* { 
@@ -422,6 +490,16 @@ namespace MuonValR4 {
         }
         return nullptr;
     }
+
+    const MuonR4::MuonTag* MsTrackTester::findBaseIdTag(const xAOD::TrackParticle& idTrack,
+                                                        const EventContext& ctx) const {
+        return findTagMatchingToId(idTrack, m_idTagKey, ctx);
+    }
+    const MuonR4::MuonTag* MsTrackTester::findMuTagIMO(const xAOD::TrackParticle& idTrack,
+                                                        const EventContext& ctx) const {
+        return findTagMatchingToId(idTrack, m_segTagKey, ctx);
+    }
+
     std::vector<const xAOD::MuonSegment*> 
         MsTrackTester::getAssociatedSegments(const xAOD::TrackParticle& idTrack,
                                              const EventContext& ctx) const {
@@ -452,43 +530,112 @@ namespace MuonValR4 {
         return compatibleSegs;
     }
 
-
-    MsTrackTester::SegmentTagVariables 
-        MsTrackTester::calcMuTagIMOScore(const xAOD::TrackParticle& idTrack,
-                                         const EventContext& ctx)  {
+    const MuonGMR4::SpectrometerSector* MsTrackTester::getEnvelope(const xAOD::MuonSegment& segment) const {
+        return m_detMgr->getSectorEnvelope(segment.chamberIndex(), segment.sector(), segment.etaIndex()); 
+    }
         
-        std::vector<const xAOD::MuonSegment*> compatibleSegs = getAssociatedSegments(idTrack, ctx);
+    MsTrackTester::SegmentTagVariables 
+        MsTrackTester::calcSegTagVariables(const xAOD::TrackParticle& idTrack,
+                                           const EventContext& ctx)  {
+
         SegmentTagVariables result{};
-        /// Still nothing. Return -1 as default value
+        /// No associated segments found
+        const std::vector<const xAOD::MuonSegment*> compatibleSegs = getAssociatedSegments(idTrack, ctx);
+        if (compatibleSegs.empty()) {
+            return result;
+        } 
+        /// Calo extension does not work
         const ActsTrk::CaloExtension* caloExt = ActsTrk::getCaloExtension(idTrack);
-        std::optional<Acts::BoundTrackParameters> startPars = caloExt->lastParameters();
-        if (compatibleSegs.empty() || !startPars) {
+        if (!caloExt) {
             return result; 
         }
-   
+        std::optional<Acts::BoundTrackParameters> startPars = caloExt->lastParameters();
+        if (!startPars) {
+            return result;
+        }
+
+        const MuonR4::MuonTag* muTag = findMuTagIMO(idTrack, ctx);
+    
         const Acts::GeometryContext tgContext = m_ctxProvider.getGeometryContext(ctx);
 
-        for (const  xAOD::MuonSegment* seg :compatibleSegs) {
-            result.recoSegs.push_back(m_recoSegs->push_back(*seg));
-            const MuonGMR4::SpectrometerSector* msSector = m_detMgr->getSectorEnvelope(seg->chamberIndex(), seg->sector(), seg->etaIndex());
-            const Acts::Surface& targetSurface{msSector->surface()};
-            auto extpPars = m_extrapolationTool->propagate(ctx, *startPars, targetSurface);
+        auto nextParameters = [&](const xAOD::MuonSegment& segment) {
+            /// In case that there is already a 
+            const MuonGMR4::SpectrometerSector* msSector = getEnvelope(segment);
+            const Acts::Surface& target{msSector->surface()};
+            if (target.geometryId() == startPars->referenceSurface().geometryId()) {
+                return true;
+            }
+            if (muTag) {
+                auto surfPars = muTag->extrapolatedParsID(Acts::toUnderlying(segment.chamberIndex()));
+                if (surfPars) {
+                    startPars = surfPars;
+                    ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<" - Recycle cached parameters from muTag\n"
+                                    <<(*startPars));
+                    return true;
+                }
+                ATH_MSG_DEBUG(__func__<<"() "<<__LINE__<<" - Extrapolation to "<<printID(segment)<<" failed somehow");
+            }
+
+            auto extpPars = m_extrapolationTool->propagate(ctx, *startPars, target);
             if (!extpPars.ok()) {
+                ATH_MSG_DEBUG(__func__<<"() "<<__LINE__<<" - Extrapolation keeps failing");
+                return false;
+            }
+            ATH_MSG_DEBUG(__func__<<"() "<<__LINE__<<" - Updated parameters to \n"<<(*extpPars));
+            startPars = *extpPars;
+            return true;
+        };
+
+        const xAOD::MuonSegment* bestSeg{nullptr};
+        float bestMatchScore{std::numeric_limits<float>::max()};
+        Acts::BoundVector bestPars{Acts::BoundVector::Zero()};
+
+        auto dumpBestSeg = [&]() {
+            if (!bestSeg) {
+                return;
+            }
+            result.recoSegs.push_back(m_recoSegs->push_back(*bestSeg));
+            result.matchScores.push_back(bestMatchScore);
+            result.deltaPhi.push_back(toDeg(bestPars[Acts::eBoundPhi]));
+            result.deltaTheta.push_back(toDeg(bestPars[Acts::eBoundTheta]));
+            result.deltaY0.push_back(bestPars[Acts::eBoundLoc1]);
+            result.deltaX0.push_back(bestPars[Acts::eBoundLoc0]);
+            result.goodExtp.push_back(1);
+            result.taggedSeg.push_back(muTag && Acts::rangeContainsValue(muTag->segments(), bestSeg));
+            bestSeg = nullptr;
+            bestMatchScore = std::numeric_limits<float>::max();
+            bestPars = Acts::BoundVector::Zero();
+        };
+
+        for (auto segItr = compatibleSegs.begin(); segItr != compatibleSegs.end(); ) {
+            const xAOD::MuonSegment* testMe{*segItr};
+            /// Store in the tree that the segment cannot be associated due to extrapolation failure
+            if (!nextParameters(*testMe)) {
+                result.recoSegs.push_back(m_recoSegs->push_back(*testMe));
                 result.matchScores.push_back(-1.f);
                 result.deltaX0.push_back(1._m);
                 result.deltaY0.push_back(1._m);
                 result.deltaTheta.push_back(180.);
                 result.deltaPhi.push_back(180.);
                 result.goodExtp.push_back(0);
-                continue;
+                result.taggedSeg.push_back(0);
+                segItr = std::find_if(std::next(segItr),compatibleSegs.end(), [&](const xAOD::MuonSegment* assocSeg){
+                    return getEnvelope(*testMe) != getEnvelope(*assocSeg);
+                });
+            } else {
+                ++segItr;
+            } 
+            /// If there is a best segment dump the best segment to the tree
+            if (bestSeg && getEnvelope(*testMe) != getEnvelope(*bestSeg)) {
+                dumpBestSeg();
             }
-            const Acts::BoundTrackParameters segmentPars{MuonR4::SegmentFit::boundSegmentPars(tgContext, *m_detMgr, *seg)};
-            Acts::BoundVector dPars = segmentPars.parameters() - extpPars->parameters();
+            const Acts::BoundTrackParameters segmentPars{MuonR4::SegmentFit::boundSegmentPars(tgContext, *m_detMgr, *testMe)};
+            Acts::BoundVector dPars = segmentPars.parameters() - startPars->parameters();
             /** The segment does not measure phi. Reset anything in loc0 and non-precision direction */
-            if (!seg->nPhiLayers()) {
+            if (!testMe->nPhiLayers()) {
                 dPars[Acts::eBoundPhi] = dPars[Acts::eBoundLoc0] = 0.;
             } else {
-                dPars[Acts::eBoundPhi] = P4Helpers::deltaPhi(extpPars->phi(), segmentPars.phi());
+                dPars[Acts::eBoundPhi] = P4Helpers::deltaPhi(dPars[Acts::eBoundPhi], 0.);
             }
             
             dPars[Acts::eBoundQOverP] = dPars[Acts::eBoundTime] = 0.;
@@ -497,22 +644,23 @@ namespace MuonValR4 {
             covariance(Acts::eBoundLoc1, Acts::eBoundLoc1) = Acts::square(m_toleranceY0.value());
             covariance(Acts::eBoundTheta, Acts::eBoundTheta) = Acts::square(m_toleranceTheta.value());
             covariance(Acts::eBoundPhi, Acts::eBoundPhi) = Acts::square(m_tolerancePhi.value());
-            if (extpPars->covariance()) {
-                covariance += (*extpPars->covariance());
+            if (startPars->covariance()) {
+                covariance += (*startPars->covariance());
             }
             if (segmentPars.covariance()) {
                 covariance += (*segmentPars.covariance());
             }
             const float chi2 = dPars.dot(covariance.inverse()*dPars);
-            ATH_MSG_DEBUG(__func__<<"() "<<__LINE__<<" - Difference: "<<Acts::toString(dPars)
+            ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<" - Difference: "<<Acts::toString(dPars)
                         <<", covariance: \n"<<Acts::toString(covariance)<<",\nchi2: "<<chi2);
-            result.matchScores.push_back(chi2);
-            result.deltaPhi.push_back(toDeg(dPars[Acts::eBoundPhi]));
-            result.deltaTheta.push_back(toDeg(dPars[Acts::eBoundTheta]));
-            result.deltaY0.push_back(dPars[Acts::eBoundLoc1]);
-            result.deltaX0.push_back(dPars[Acts::eBoundLoc0]);
-            result.goodExtp.push_back(1);
+            if (chi2 < bestMatchScore) {
+                ATH_MSG_DEBUG(__func__<<"() "<<__LINE__<<" - Best parameters on surface thus far");
+                bestMatchScore = chi2;
+                bestSeg = testMe;
+                bestPars = std::move(dPars);
+            }
         }
+        dumpBestSeg();
         return result;
     }
 
@@ -620,6 +768,9 @@ namespace MuonValR4 {
         const xAOD::TrackParticleContainer* idTracks{nullptr};
         ATH_CHECK(SG::get(idTracks, m_idTrackKey, ctx));
 
+        const MuonR4::MuonTagContainer* idTags{nullptr};
+        ATH_CHECK(SG::get(idTags, m_idTagKey, ctx));
+
         const Acts::GeometryContext tgContext = m_ctxProvider.getGeometryContext(ctx);
         const Acts::MagneticFieldContext mfContext = m_ctxProvider.getMagneticFieldContext(ctx);
 
@@ -696,12 +847,22 @@ namespace MuonValR4 {
 
         /// Collect only the ID tracks that belong to a truth muon of interest.
         if (idTracks) {
+            m_nIdTracks = idTracks->size();
             for (const xAOD::TrackParticle* idTrk : *idTracks) {
                 if (m_truthTrks->find([idTrk](const xAOD::IParticle* p){
                     return xAOD::TruthHelpers::getTruthParticle(*idTrk) == 
                           xAOD::TruthHelpers::getTruthParticle(*p);
                 }) < m_truthTrks->size()) {
                     m_idTracks->push_back(idTrk);
+                }
+            }
+        }
+        if (idTags) {
+            m_nIdTags = idTags->size();
+            for (const MuonR4::MuonTag* idTag : *idTags) {
+                /// Select only the id tags that are extrapolated to the calo exit
+                if (idTag->extrapolatedParsID(Acts::hashString("@CaloExit"))){
+                    m_idTracks->push_back(idTag->idTrack());
                 }
             }
         }

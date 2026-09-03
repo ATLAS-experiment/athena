@@ -16,6 +16,7 @@
 #include "Acts/Surfaces/DiscBounds.hpp"
 #include "Acts/Utilities/VectorHelpers.hpp"
 #include "Acts/Definitions/Units.hpp"
+#include "ActsInterop/Logger.h"
 
 
 #include "xAODMuonViews/FillContainer.h"
@@ -24,6 +25,9 @@
 #include "MuonReadoutGeometryR4/SpectrometerSector.h"
 #include "MuonTrackEvent/TrackingHelpers.h"
 #include "ActsEvent/CaloExtension.h"
+
+
+#include "MuonTrackEvent/TrackMatchingUtils.h"
 
 using namespace MuonR4::SegmentFit;
 using namespace Acts::VectorHelpers;
@@ -55,13 +59,14 @@ namespace MuonCombinedR4 {
         ATH_CHECK(m_trackingGeometrySvc.retrieve());
         ATH_CHECK(m_extrapolationTool.retrieve());
         ATH_CHECK(m_writeKey.initialize());
-        ATH_CHECK(m_segmentKey.initialize());
+        ATH_CHECK(m_segmentKey.initialize(m_matchWithSegs));
         ATH_CHECK(detStore()->retrieve(m_detMgr));
         if (m_trackingGeometrySvc->trackingGeometry()->geometryVersion() !=
             Acts::TrackingGeometry::GeometryVersion::Gen3){
             ATH_MSG_ERROR("The ID track selection alg requires the Gen 3 geometry format");
             return StatusCode::FAILURE;
         }
+        m_logger = makeActsAthenaLogger(this, name());
         return StatusCode::SUCCESS;
     }
     StatusCode InDetTrackSelectionAlg::execute(const EventContext& ctx) const {
@@ -74,23 +79,24 @@ namespace MuonCombinedR4 {
 
         const Acts::GeometryContext tgContext{m_ctxProvider.getGeometryContext(ctx)};
 
-        std::vector<const xAOD::MuonSegment*> uncombinedSegments{};
-        uncombinedSegments.reserve(msSegments->size());
-        std::copy_if(msSegments->begin(), msSegments->end(), 
-                std::back_inserter(uncombinedSegments),
+        using SegVec_t = std::vector<const xAOD::MuonSegment*>;
+        SegVec_t uncombinedSegments{};
+        if (msSegments) {
+            uncombinedSegments.reserve(msSegments->size());
+            std::copy_if(msSegments->begin(), msSegments->end(), 
+                         std::back_inserter(uncombinedSegments),
                 [msTracks, this](const xAOD::MuonSegment* segment){
                 return !msTracks || std::none_of(msTracks->begin(), msTracks->end(),
                     [&segment, this](const xAOD::TrackParticle* msTrack) {
-                        auto actsTrk = ActsTrk::getActsTrack(*msTrack);
-                        if (!actsTrk) {
-                            ATH_MSG_WARNING(__func__<<"() "<<__LINE__<<" - No acts track");
-                            return false;
-                        }
-                        return Acts::rangeContainsValue(actsTrk->component<std::vector<const xAOD::MuonSegment*>>("muonSegLinks"), 
-                                                        segment);
-                    });
+                    auto actsTrk = ActsTrk::getActsTrack(*msTrack);
+                    if (!actsTrk) {
+                        ATH_MSG_WARNING(__func__<<"() "<<__LINE__<<" - No acts track");
+                        return false;
+                    }
+                    return Acts::rangeContainsValue(actsTrk->component<SegVec_t>("muonSegLinks"), segment);
+                });
             });
-
+        }
         ATH_MSG_DEBUG(__func__<<"() "<<__LINE__
             <<" - Select track candidates suitable for combined reconstruction amongst "
             <<idTracks->size()<<" ID tracks.");
@@ -177,40 +183,6 @@ namespace MuonCombinedR4 {
         return std::nullopt;
     }
 
-    inline double InDetTrackSelectionAlg::longitudinalParam(const Acts::BoundTrackParameters& pars) const{
-        switch (pars.referenceSurface().type()) {
-            using enum Acts::Surface::SurfaceType;
-            case Disc:
-                return pars.get<Acts::eBoundLoc0>();
-            case Cylinder:
-                return pars.get<Acts::eBoundLoc1>();
-            default:
-                ATH_MSG_WARNING(__func__<<"() "<<__LINE__<<" Surface type "<<pars.referenceSurface().type()
-                                <<" is not implemented");
-                break;
-        }
-        return -1._km;
-    }
-    inline bool InDetTrackSelectionAlg::closeToBoundary(const Acts::BoundTrackParameters& pars) const {
-        const double loc{std::abs(longitudinalParam(pars))};
-        const Acts::SurfaceBounds& bounds{pars.referenceSurface().bounds()};
-        switch (bounds.type()) {
-            using enum Acts::SurfaceBounds::BoundsType;
-            case eCylinder:{
-                using BoundEnum = Acts::CylinderBounds::BoundValues;
-                return std::abs(static_cast<const Acts::CylinderBounds&>(bounds).get(BoundEnum::eHalfLengthZ) - loc) < m_dLoc0CutMsTrk ;
-            }
-            case eDisc: {
-                return std::abs(static_cast<const Acts::DiscBounds&>(bounds).rMax() - loc) < m_dLoc0CutMsTrk;
-            } default: {
-                ATH_MSG_WARNING(__func__<<" - The bounds "<<bounds<<" are not implemented. "
-                    <<"Cannot perform bound check for \n"<<pars); 
-                break;
-            }
-        }
-        return false;
-    }
-
     bool InDetTrackSelectionAlg::parametersCompatible(const Acts::GeometryContext& tgContext, 
                                                       const Acts::BoundTrackParameters& caloExitPars,
                                                       const Acts::BoundTrackParameters& msTrackPars) const {
@@ -228,40 +200,20 @@ namespace MuonCombinedR4 {
             ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<" - Same surface requirement disabled");
             return true;
         }
-        if (msTrackPars.referenceSurface().geometryId() == 
-            caloExitPars.referenceSurface().geometryId()) {
-            const double dLoc0 = std::abs(longitudinalParam(msTrackPars) - 
-                                          longitudinalParam(caloExitPars));
-            ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<" - Evaluate local surface distance "
-                            <<dLoc0<<" vs. "<<m_dLoc0CutMsTrk<<".");
-            return dLoc0 < m_dLoc0CutMsTrk;
-        }
         if (msTrackPars.referenceSurface().geometryId().withBoundary(0) !=
             caloExitPars.referenceSurface().geometryId().withBoundary(0)) {
             ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<" - Reference surfaces do not belong "
                             <<" to the same volume. ");
             return false;
         }
-        if (!closeToBoundary(msTrackPars) || !closeToBoundary(caloExitPars)) {
-            ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<" - Parameters are not close to the bondary");
+        auto diffTrkPars = makeDiffParameters(tgContext, caloExitPars, 
+                                              msTrackPars, logger(), m_dLoc0CutMsTrk);
+        if (!diffTrkPars) {
+            ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<" - Parameters cannot be expressed on same surface");
             return false;
         }
-        auto msAtCalo = caloExitPars.referenceSurface().intersect(tgContext,
-                                                                  msTrackPars.position(tgContext),
-                                                                  msTrackPars.direction()).closest();
-        if (!msAtCalo.isValid()) {
-            ATH_MSG_DEBUG(__func__<<"() "<<__LINE__<<" - Intersection failed ");
-            return false;
-        }
-        auto res = caloExitPars.referenceSurface().globalToLocal(tgContext, msAtCalo.position(), 
-                                                                  msTrackPars.direction());
-        if (!res.ok()){
-            ATH_MSG_DEBUG(__func__<<"() "<<__LINE__<<" - Transform failed");
-            return false;
-        }
-        using enum Acts::Surface::SurfaceType;
-        return std::abs((*res)[caloExitPars.referenceSurface().type() == Cylinder] - 
-                         longitudinalParam(caloExitPars)) <m_dLoc0CutMsTrk;
+        return std::abs(longitudinalParam(*diffTrkPars, logger())) < m_dLoc0CutMsTrk &&
+               std::abs(localPolarAngle(*diffTrkPars, logger())) < m_dLoc1CutMsTrk;
     }
 
     bool InDetTrackSelectionAlg::compatibleWithMsTrk(const Acts::GeometryContext& tgContext,

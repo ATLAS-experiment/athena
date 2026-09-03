@@ -48,12 +48,23 @@ namespace MuonCombinedR4 {
             SG::WriteHandleKey<xAOD::TrackParticleContainer> m_cmbTrkKey{this, "writeTrkKey", 
                                                                          "STACOTrackParticles"};
             /** @brief Upper cut on the delta eta between ID and MS track  */
-            Gaudi::Property<float> m_match_dEta{this, "maxDEta", 0.1};
+            Gaudi::Property<float> m_match_dTheta{this, "maxDTheta", 2.*Gaudi::Units::deg};
             /** @brief Upper cut on the delat phi between ID and MS track */
-            Gaudi::Property<float> m_match_dPhi{this, "maxDPhi", 2.*Gaudi::Units::deg};
+            Gaudi::Property<float> m_match_dPhi{this, "maxDPhi", 5.*Gaudi::Units::deg};
+
+            /** @brief Upper cut on the boundary tolerance. Ms tracks that are close 
+              *        to the surface bounds are extrapolated to the ID surface if they
+              *        differ. */
+            Gaudi::Property<float> m_match_boundTol{this, "matchBoundol", 20. * Gaudi::Units::cm};
             /** @brief Switch toggling whether the energy loss from the associated calorimeter
              *         cluster shall be taken */
             Gaudi::Property<bool> m_useMeasELoss{this,"useMeasELoss", true};
+
+            /** @brief Instance to the Acts logger */
+            std::unique_ptr<const Acts::Logger> m_logger{};
+            /** @brief Return the reference to the Acts logger */
+            const Acts::Logger& logger() const { return *m_logger; }
+
     };
 }
 #endif
