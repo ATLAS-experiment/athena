@@ -165,10 +165,10 @@ private: // member functions
 private: // data
    /// decoded storage tech requested in "StorageTechnology" property
    std::string                   m_lastInputFileName;
-   ServiceHandle<IPoolSvc>       m_poolSvc{this,"PoolSvc","PoolSvc"};
    ServiceHandle<IClassIDSvc>    m_clidSvc{this,"ClassIDSvc","ClassIDSvc"};
 
 protected: // shared with derived services
+   ServiceHandle<IPoolSvc>       m_poolSvc{this,"PoolSvc","PoolSvc"};
    /// Map that holds chrono information
    PMonUtils::BasicStopWatchResultMap_t m_chronoMap{};
 
