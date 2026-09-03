@@ -275,18 +275,5 @@ if len(flags.GlobalSim.poolOutputs):
     for stream,items in itemLists.items():
         print(stream,":",items)
         cfg.merge(OutputStreamCfg(flags, stream, ItemList=items,takeItemsFromInput=False,disableEventTag=True))
+        cfg.getEventAlgo(f"Stream{stream}").WritingTool.SubLevelBranchName = "<key>"
 
-    def storeOutput(algName):
-        # this helper method should probably be relocated to python folder for general use t some point
-        from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
-        from GaudiKernel.DataHandle import DataHandle
-        algo = cfg.getEventAlgo(algName)
-        items = []
-        for propName in algo.getDefaultProperties().keys():
-            p = algo.__getattribute__(propName)
-            if isinstance(p,DataHandle) and p.Mode=='W':
-                items += [f"{p.Type}#{p.Path.split('+')[-1]}",f"xAOD::AuxContainerBase#{p.Path.split('+')[-1]}Aux."]
-        cfg.merge(OutputStreamCfg(flags, 'AOD', ItemList=items,takeItemsFromInput=False,disableEventTag=True))
-
-    for r in readerNames: storeOutput(r)
-    for a in algos: storeOutput(a.name)
