@@ -11,7 +11,7 @@ the image with:
 
 ```bash
 apptainer pull --disable-cache <PATH_TO_EOS>/traccc-aas.sif \
-    docker://milescb/traccc-aas:traccc_v1.6.0
+    docker://milescb/traccc-aas:send_cell_buffer_traccc_v1.6.0_triton26.06
 ```
 
 You'll need to get the `ITk` geometry files, which is possible by being a memeber of the 

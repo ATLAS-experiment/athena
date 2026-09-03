@@ -28,54 +28,18 @@ StatusCode TracccTritonTool::initialize() {
 }
 
 StatusCode TracccTritonTool::getTracks(
-    std::vector<TracccCell>& cells,
+    std::vector<uint8_t>& cellBytes,
     std::vector<TracccTrackParameters>& TracccTrackParams,
     std::vector<LocalMeasurementInfoInTracks>& TracccMeasurementInfoInTracks
 ) const {
 
     auto start_prep = std::chrono::high_resolution_clock::now();
-    int numCells = cells.size();
 
-    std::vector<int64_t> CellPositions;
-    std::vector<float> CellProperties;
-
-    for (const auto& cell : cells)
-    {
-        CellPositions.push_back(cell.geometry_id);
-        CellPositions.push_back(cell.measurement_id);
-        CellPositions.push_back(cell.channel0);
-        CellPositions.push_back(cell.channel1);
-
-        CellProperties.push_back(cell.timestamp);
-        CellProperties.push_back(cell.value);
-    }
-
-    if (m_saveEventsToCSV && m_eventCounter.load() < m_maxEventsToSave) {
-        // header: geometry_id, measurement_id, channel0, channel1, timestamp, value
-        std::string csv_filename = "events/event" +
-            std::to_string(m_eventCounter.fetch_add(1)) + "-cells.csv";
-        std::ofstream csv_file(csv_filename);
-        if (!csv_file.is_open()) {
-            ATH_MSG_ERROR("Failed to open CSV file: " << csv_filename);
-            return StatusCode::FAILURE;
-        }
-        csv_file << "geometry_id,measurement_id,channel0,channel1,timestamp,value\n";
-        for (const auto& cell : cells) {
-            csv_file << cell.geometry_id << ","
-                    << cell.measurement_id << ","
-                    << cell.channel0 << ","
-                    << cell.channel1 << ","
-                    << cell.timestamp << ","
-                    << cell.value << "\n";
-        }
-        csv_file.close();
-    }
-
+    // Forward the serialized traccc silicon_cell_collection as a single UINT8
     AthInfer::InputDataMap inputData;
-    inputData["CELL_POSITIONS"] = std::make_pair(
-        std::vector<int64_t>{numCells, 4}, std::move(CellPositions));
-    inputData["CELL_PROPERTIES"] = std::make_pair(
-        std::vector<int64_t>{numCells, 2}, std::move(CellProperties));
+    inputData["CELLS"] = std::make_pair(
+        std::vector<int64_t>{static_cast<int64_t>(cellBytes.size())},
+        std::move(cellBytes));
 
     AthInfer::OutputDataMap outputData;
     outputData["TRK_PARAMS"] = std::make_pair(
@@ -185,7 +149,7 @@ StatusCode TracccTritonTool::getTracks(
     // Push the last track (no trailing separator in GEOMETRY_IDS)
     if (!measurement.athena_id.empty())
     {
-        TracccMeasurementInfoInTracks.push_back(std::move(measurement));
+        TracccMeasurementInfoInTracks.push_back(measurement);
 
         TracccTrackParameters params;
         params.chi2 = trkParamsVec.at(track * numTrkFeatures + 0);

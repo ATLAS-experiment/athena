@@ -32,15 +32,16 @@ public:
     ///////////////////////////////////////////////////////////////////
 
     /**
-     * @brief Get track candidates from a list of space points.
-     * @param spacepoints a list of spacepoints as inputs to the GNN-based track
-     * finder.
-     * @param tracks a list of fitted tracks
+     * @brief Get track candidates from serialized traccc cells.
+     * @param cellBytes serialized traccc silicon_cell_collection, forwarded to
+     * the server as a single UINT8 tensor.
+     * @param TracccTrackParameters a list of fitted track parameters
+     * @param TracccMeasurementsInfoInTracks measurements per fitted track
      *
      * @return
      */
     virtual StatusCode getTracks(
-        std::vector<TracccCell>& cells,
+        std::vector<uint8_t>& cellBytes,
         std::vector<TracccTrackParameters>& TracccTrackParameters,
         std::vector<LocalMeasurementInfoInTracks>& TracccMeasurementsInfoInTracks) const override;
 
@@ -49,17 +50,6 @@ private:
     ToolHandle<AthInfer::IAthInferenceTool> m_TracccTritonTool{
         this, "TritonTool", "AthInfer::TritonTool"};
 
-    Gaudi::Property<bool> m_saveEventsToCSV{
-        this, "SaveEventsToCSV", false,
-        "Whether to save input/output of each event to CSV files for debugging"};
-
-    Gaudi::Property<int> m_maxEventsToSave{
-        this, "MaxEventsToSave", 10,
-        "Maximum number of events to save to CSV files if SaveEventsToCSV is true"};
-
-    mutable std::atomic<int> m_eventCounter{0};
-
-    // TODO: add variable to specify which pipeline to run
 };
 
 #endif  // TracccTritonTool_H

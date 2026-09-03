@@ -27,6 +27,7 @@
 #include "ActsGeometry/DetectorElementToActsGeometryIdMap.h"
 #include "ActsCalibBase/MeasurementCalibratorBase.h"
 #include "Acts/EventData/BoundTrackParameters.hpp"
+#include "ActsGPUEvent/TracccSiliconCellCollection.h"
 
 #include "TrkEventPrimitives/PdgToParticleHypothesis.h"
 #include "AthenaBaseComps/AthAlgTool.h"
@@ -38,13 +39,7 @@
 #include "InDetIdentifier/SCT_ID.h"
 #include "InDetPrepRawData/PixelClusterContainer.h"
 #include "InDetPrepRawData/SCT_ClusterContainer.h"
-#include "InDetRawData/PixelRDO_Container.h"
-#include "InDetRawData/SCT_RDO_Container.h"
-#include "InDetReadoutGeometry/SiDetectorDesign.h"
-#include "InDetReadoutGeometry/SiDetectorManager.h"
-#include "PixelReadoutGeometry/PixelDetectorManager.h"
-#include "PixelReadoutGeometry/PixelModuleDesign.h"
-#include "SCT_ReadoutGeometry/SCT_DetectorManager.h"
+#include "InDetReadoutGeometry/SiDetectorElementCollection.h"
 #include "SCT_ReadoutGeometry/StripStereoAnnulusDesign.h"
 
 #include "xAODInDetMeasurement/PixelClusterContainer.h"
@@ -84,30 +79,17 @@ protected:
     //@{
 
     // Input helpers
-    SG::ReadHandleKey<PixelRDO_Container> m_pixelRDOKey{this, "PixelRDO",
-                                                        "ITkPixelRDOs"};
-    SG::ReadHandleKey<SCT_RDO_Container> m_stripRDOKey{this, "StripRDO",
-                                                       "ITkStripRDOs"};
+    SG::ReadHandleKey<traccc::edm::silicon_cell_collection::const_view>
+        m_tracccCellsKey{
+            this, "TracccCells", "TracccCells",
+            "Input traccc cell collection (from RDOtoTracccCellConverterAlg)"};
+
+    StatusCode serializeCells(
+        const traccc::edm::silicon_cell_collection::const_device& cells,
+        std::vector<uint8_t>& out) const;
 
     const PixelID* m_pixelID{nullptr};
     const SCT_ID* m_stripID{nullptr};
-    const InDetDD::PixelDetectorManager* m_pixelManager{nullptr};
-    const InDetDD::SCT_DetectorManager* m_stripManager{nullptr};
-
-    // Read input data to hits for Traccc use!
-    std::vector<int> map_index(int index,
-                               int low_bound,
-                               int high_bound,
-                               int threshold,
-                               int shift) const;
-
-    std::vector<std::pair<int, int>> correct_indices(
-            int phiIndex, int etaIndex, int rows,
-            int columns) const;
-
-    StatusCode read_cells(std::vector<TracccCell>& cells,
-                        const EventContext& evtcontext) const;
-
 
     std::unordered_map<int64_t, int> readAndConvertClusters(
         const EventContext& eventContext) const;
