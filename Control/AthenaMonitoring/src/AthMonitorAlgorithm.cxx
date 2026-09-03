@@ -102,7 +102,7 @@ void AthMonitorAlgorithm::fill( const ToolHandle<GenericMonitoringTool>& groupHa
 }
 
 
-void AthMonitorAlgorithm::fill( const std::string& groupName,
+void AthMonitorAlgorithm::fill( std::string_view groupName,
                                 MonVarVec_t&& variables ) const {
    this->fill(getGroup(groupName),std::move(variables));
 }
