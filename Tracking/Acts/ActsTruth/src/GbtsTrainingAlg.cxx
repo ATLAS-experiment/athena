@@ -13,7 +13,7 @@ namespace ActsTrk{
   static std::vector<Acts::Experimental::GbtsLayerConnectionTool::LayerDescription> geometryParser(
   const std::string& geometryInformation) {
 
-    std::ifstream inStream(geometryInformation.c_str());
+    std::ifstream inStream(geometryInformation);
 
     if (!inStream) {
       throw std::runtime_error("File does not exist or could not be opened");
