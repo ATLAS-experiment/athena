@@ -92,6 +92,11 @@ namespace MuonCombinedR4 {
             Gaudi::Property<double> m_tolerancePhi{this, "tolerancePhi", 2.*Gaudi::Units::deg};
             /** @brief Selection cut to match a segment to the ID track */
             Gaudi::Property<double> m_matchChi2{this, "matchChi2", 10.};
+
+            /** @brief Instance to the Acts logger */
+            std::unique_ptr<const Acts::Logger> m_logger{};
+            /** @brief Return the reference to the Acts logger */
+            const Acts::Logger& logger() const { return *m_logger; }
     };
 }
 #endif

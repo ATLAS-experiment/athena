@@ -65,11 +65,31 @@ namespace MuonValR4{
          *         only works downstream the dumpTruthContent call
          *  @param part: Reference to the particle of interest */
         const xAOD::TruthParticle* truthTreeParticle(const xAOD::IParticle& part) const;
-
+        /** @brief Returns the collection of reconstructed segments that can be associated to the id track
+         *         If the track is connected with a truth muon, the list of reconstructed segments matched
+         *         to the truth muon is returned. Otherwise, the list of segments associated with the
+         *         MuTagIMO tag is returned.
+         *  @param idTrack: The inner detector track of interest
+         *  @param ctx: The current event context to access the segment tag collection from store gate */
         std::vector<const xAOD::MuonSegment*> getAssociatedSegments(const xAOD::TrackParticle& idTrack,
                                                                     const EventContext& ctx) const;
 
+        /** @brief Searches the Id track in the basline collection of all ID tracks selected for the
+         *         combined muon reconstructiion (STACO/MuidCo/MuTagIMO/Calo) 
+          * @param idTrack: The inner detector track of interest
+          * @param ctx: The current event context to access the segment tag collection from store gate */
+        const MuonR4::MuonTag* findBaseIdTag(const xAOD::TrackParticle& idTrack,
+                                            const EventContext& ctx) const;
 
+        const MuonR4::MuonTag* findMuTagIMO(const xAOD::TrackParticle& idTrack,
+                                            const EventContext& ctx) const;
+
+
+        const MuonGMR4::SpectrometerSector* getEnvelope(const xAOD::MuonSegment& segment) const;
+
+                                            
+        /** @brief Searched the MuTagIMO tag  */
+        /** @brief Associated sement tag variables */
         struct SegmentTagVariables{
             /** @brief  Indices of the matched segments in the tree*/
             std::vector<std::uint8_t> recoSegs{};
@@ -85,9 +105,12 @@ namespace MuonValR4{
             std::vector<float> deltaX0{};
             /** @brief Is the extrapolation to the surface good */
             std::vector<std::uint8_t> goodExtp{};
+            /** @brief Flags indicating whether the segment made it onto MuTagIMO */
+            std::vector<std::uint8_t> taggedSeg{};
+
         };
       
-        SegmentTagVariables calcMuTagIMOScore(const xAOD::TrackParticle& idTrack,
+        SegmentTagVariables calcSegTagVariables(const xAOD::TrackParticle& idTrack,
                                               const EventContext& ctx); 
 
         /** @brief Dumps the legacy containers to the TTree */
@@ -144,26 +167,32 @@ namespace MuonValR4{
         TrackKey_t m_legacyTrackKey{this,"LegacyTrackKey", "MuonSpectrometerTrackParticles"};
         /** @brief  The collection of ID tracks associated with the truth particle*/
         TrackKey_t m_idTrackKey{this, "IdTrackKey", "InDetTrackParticles"};
-
+        /** @brief The collection of all ID tracks that are selected for combined reconstruction */
         MuonTagKey_t m_idTagKey{this, "IdTagKey", "MuonInDetCandidates"};
-
+        /** @brief The collection of the original segment tags */
         MuonTagKey_t m_segTagKey{this, "SegTagKey", "SegmentTags"};
 
         /** @brief Extra tolerance applied on the non-bending intercept when calculating
          *         the matching score */
-        Gaudi::Property<double> m_toleranceX0{this, "toleranceX0", 15.*Gaudi::Units::cm};
+        Gaudi::Property<double> m_toleranceX0{this, "toleranceX0", 20.*Gaudi::Units::cm};
         /** @brief Extra tolerance applied on the bending intercept when calculating
          *         the matching score */
         Gaudi::Property<double> m_toleranceY0{this, "toleranceY0", 5.*Gaudi::Units::cm};
         /** @brief Extra tolerance applied on the bending direction when calculating the
          *         matching score */
-        Gaudi::Property<double> m_toleranceTheta{this, "toleranceTheta", 0.05*Gaudi::Units::deg};
+        Gaudi::Property<double> m_toleranceTheta{this, "toleranceTheta", 1.*Gaudi::Units::deg};
         /** @brief Extra tolerance applied on the bending direction when calculating the
          *         matching score */
         Gaudi::Property<double> m_tolerancePhi{this, "tolerancePhi", 2.*Gaudi::Units::deg};
 
         /** @brief Legacy muons  */
         MuonKey_t m_legacyMuonKey{this,"LegacyMuonKey", "Muons"};
+
+        /** @brief Instance to the Acts logger */
+        std::unique_ptr<const Acts::Logger> m_logger{};
+        /** @brief Return the reference to the Acts logger */
+        const Acts::Logger& logger() const { return *m_logger; }
+
         
         using ParticleBranchPtr_t = std::shared_ptr<MuonVal::IParticleFourMomBranch>;
         ParticleBranchPtr_t m_truthTrks{};
@@ -177,29 +206,32 @@ namespace MuonValR4{
         SegmentBranchPtr_t m_truthSegs{};
         SegmentBranchPtr_t m_recoSegs{};
         SegmentBranchPtr_t m_legacyRecoSegs{};
-
+        /** @brief The number of ID tracks in the event */
+        MuonVal::ScalarBranch<std::uint16_t>& m_nIdTracks{m_tree.newScalar<std::uint16_t>("nIdTracks", 0)};
+        /** @brief The number of selected ID tracks in the event */
+        MuonVal::ScalarBranch<std::uint16_t>& m_nIdTags{m_tree.newScalar<std::uint16_t>("nIdTags", 0)};
         /** @brief Simple seed information */
-        MuonVal::ThreeVectorBranch m_seedPos{m_tree, "MsTrkSeed_position"};
+        MuonVal::ThreeVectorBranch m_seedPos{m_tree, "TrkSeed_position"};
         /** @brief Seed direction vector */
-        MuonVal::UnitThreeVectorBranch m_seedDir{m_tree, "MsTrkSeed_direction"};
+        MuonVal::UnitThreeVectorBranch m_seedDir{m_tree, "TrkSeed_direction"};
         /** @brief Is the seed in the encap or in the barrel chambers */
-        MuonVal::VectorBranch<char>& m_seedType{m_tree.newVector<char>("MsTrkSeed_type")};
+        MuonVal::VectorBranch<char>& m_seedType{m_tree.newVector<char>("TrkSeed_type")};
         /** @brief Sector of the seed, even center, odd overlap regions, for details see:  */
-        MuonVal::VectorBranch<int>& m_seedSector{m_tree.newVector<int>("MsTrkSeed_sector")};
+        MuonVal::VectorBranch<int>& m_seedSector{m_tree.newVector<int>("TrkSeed_sector")};
         /** @brief Maximum separation between the segments on the reference plane */
-        MuonVal::VectorBranch<float>& m_seedLength{m_tree.newVector<float>("MsTrkSeed_length")};
+        MuonVal::VectorBranch<float>& m_seedLength{m_tree.newVector<float>("TrkSeed_length")};
         /** @brief Maximum angular difference between the segments part of the seed */
-        MuonVal::VectorBranch<float>& m_seedThetaCone{m_tree.newVector<float>("MsTrkSeed_thetaCone")};
+        MuonVal::VectorBranch<float>& m_seedThetaCone{m_tree.newVector<float>("TrkSeed_thetaCone")};
         /** @brief Does the seeding tool construct valid parameters from the seed */
-        MuonVal::VectorBranch<char>& m_seedGood{m_tree.newVector<char>("MsTrkSeed_goodSeed")};
+        MuonVal::VectorBranch<char>& m_seedGood{m_tree.newVector<char>("TrkSeed_goodSeed")};
         /** @brief Estimated momentum times charge from the track seed */
-        MuonVal::VectorBranch<float>& m_seedQP{m_tree.newVector<float>("MsTrkSeed_qTimesP")};
+        MuonVal::VectorBranch<float>& m_seedQP{m_tree.newVector<float>("TrkSeed_qTimesP")};
         /** @brief Link to the truth muon */
-        MuonVal::VectorBranch<unsigned short>& m_seedTruthLink{m_tree.newVector<unsigned short>("MsTrkSeed_truthLink", -1)};
+        MuonVal::VectorBranch<unsigned short>& m_seedTruthLink{m_tree.newVector<unsigned short>("TrkSeed_truthLink", -1)};
         /** @brief Hit summary on the track seed */
         std::shared_ptr<TrackSummaryModule> m_seedSummary{};
         /** @brief Link of the track seed to the building segment  */
-        MuonVal::MatrixBranch<unsigned short>& m_seedRecoSegMatch{m_tree.newMatrix<unsigned short>("MsTrkSeed_segmentLinks")};
+        MuonVal::MatrixBranch<unsigned short>& m_seedRecoSegMatch{m_tree.newMatrix<unsigned short>("TrkSeed_segmentLinks")};
         /** @brief Link of the truth segments to the matchin reco segments */
         MuonVal::MatrixBranch<unsigned short>& m_truthSegToRecoLink{m_tree.newMatrix<unsigned short>("TruthSegments_recoSegLinks",-1)};
 

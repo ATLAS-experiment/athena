@@ -104,7 +104,7 @@ def createMuonConfigFlags():
     mcf.addFlag("Muon.enableMLBucketFilter", False)
     #### Express the MS track parameters at the MS entrance and perform 
     #### matching with the ID tracks on this surface
-    mcf.addFlag("Muon.expressMsTrackAtEntrance", False)
+    mcf.addFlag("Muon.expressMsTrackAtEntrance", lambda prevFlags: prevFlags.Reco.EnableTracking )
     #### Toggle whether the combined reconstruction builds a MuonSpectrometer Extrapolated track
     #### Uncombned MS tracks are extrapolated back to the beamspot and then refitted with the beam spot
     #### as an additional measurement. Combined tracks are refitted stripping off the ID measurements but

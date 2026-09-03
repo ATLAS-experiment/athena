@@ -23,6 +23,7 @@
 
 #include "GaudiKernel/SystemOfUnits.h"
 
+#include "Acts/Utilities/Logger.hpp"
 #include <span>
 
 namespace MuonCombinedR4 {
@@ -67,17 +68,6 @@ namespace MuonCombinedR4 {
             bool parametersCompatible(const Acts::GeometryContext& tgContext, 
                                       const Acts::BoundTrackParameters& caloExitPatrs,
                                       const Acts::BoundTrackParameters& msTrackPars) const;
-
-             /** @brief Returns the longitudinal local track parameter which is defined as
-              *           - radial parameter in case of discs
-              *           - displacement along the cylinder axis for cylinders
-              * @param pars: Reference to the parameters of interest */
-            double longitudinalParam(const Acts::BoundTrackParameters& pars) const;
-            /** @brief Checks whether the longitudinal parameter is close to the surface boundary.
-             *         The interval size is given by @ref m_dLoc0CutMsTrk.
-             * @param pars: Reference to the local track parameters to check */
-            bool closeToBoundary(const Acts::BoundTrackParameters& pars) const;
-           
             /** @brief Checks whether the ID track is compatible with a reconstructed 
                        segment which is not part of a reconstructed MS track. Matching
                        is based on straight line extrapolations and sector correspondence  */
@@ -100,7 +90,7 @@ namespace MuonCombinedR4 {
             /** @brief Track quality selection tool (optional) */
             ToolHandle<InDet::IInDetTrackSelectionTool> m_selectionTool{this, "TackSelectionTool" , ""};
             /** @brief Tracking geometry tool */
-           ServiceHandle<ActsTrk::ITrackingGeometrySvc> m_trackingGeometrySvc{this, "TrackingGeometrySvc", "ActsTrackingGeometrySvc"};
+            ServiceHandle<ActsTrk::ITrackingGeometrySvc> m_trackingGeometrySvc{this, "TrackingGeometrySvc", "ActsTrackingGeometrySvc"};
             /** @brief Track extrapolation tool */
             ToolHandle<ActsTrk::IExtrapolationTool> m_extrapolationTool{this, "ExtrapolationTool" ,"" };
             /** @brief Context provider for geometry, magnetic field and calibration contexts */
@@ -118,12 +108,21 @@ namespace MuonCombinedR4 {
              *         surface */
             Gaudi::Property <bool>  m_trackSameSurf{this, "matchTracksOnSameSurface", true};
             /** @brief Selection cuts to test compability with the MS track */
-            Gaudi::Property <float> m_dEtaCutMsTrk{this, "dEtaMaxMsTrk", 0.2};
+            Gaudi::Property <float> m_dEtaCutMsTrk{this, "dEtaMaxMsTrk", 0.25};
             Gaudi::Property <float> m_dPhiCutMsTrk{this, "dPhiMsTrk", 5*Gaudi::Units::deg};
-            Gaudi::Property <float> m_dLoc0CutMsTrk{this, "dLoc0MsTrk", 50.*Gaudi::Units::cm};
+            Gaudi::Property <float> m_dLoc0CutMsTrk{this, "dLoc0MsTrk", 20.*Gaudi::Units::cm};
+            Gaudi::Property <float> m_dLoc1CutMsTrk{this, "dLoc1MsTrk", 5.*Gaudi::Units::deg};
+            
+            /** @brief Use the segments directly to match the ID track with MS activity  */
+            Gaudi::Property <bool> m_matchWithSegs{this, "matchWithSegments", true};
             /** @brief Selection cuts for the Muon segments */
             Gaudi::Property <float> m_dEtaCutMsSeg{this, "dEtaMaxMsSegment",  0.3};
             Gaudi::Property <float> m_dY0CutMsSeg{this, "dY0MaxMsSegment", 40 * Gaudi::Units::cm};
+            /** @brief Instance to the Acts logger */
+            std::unique_ptr<const Acts::Logger> m_logger{};
+            /** @brief Return the reference to the Acts logger */
+            const Acts::Logger& logger() const { return *m_logger; }
+
     };
 }
 

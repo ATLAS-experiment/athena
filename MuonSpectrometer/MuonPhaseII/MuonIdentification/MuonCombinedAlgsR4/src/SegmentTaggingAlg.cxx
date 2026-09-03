@@ -3,6 +3,7 @@
 */
 #include "SegmentTaggingAlg.h"
 
+#include "ActsInterop/Logger.h"
 #include "Acts/Utilities/Helpers.hpp"
 #include "Acts/Surfaces/PlaneSurface.hpp"
 #include "Acts/Utilities/StringHelpers.hpp"
@@ -12,6 +13,8 @@
 #include "MuonPatternEvent/SegmentFitterEventData.h"
 #include "xAODMuonViews/FillContainer.h"
 #include "FourMomUtils/P4Helpers.h"
+
+#include "MuonTrackEvent/TrackMatchingUtils.h"
 
 namespace{
     constexpr Acts::HashedString caloExitParKey = Acts::hashString("@CaloExit");
@@ -29,6 +32,7 @@ namespace MuonCombinedR4  {
         ATH_CHECK(detStore()->retrieve(m_detMgr));
         ATH_CHECK(m_ctxProvider.initialize());
         ATH_CHECK(m_extrapolationTool.retrieve());
+        m_logger = makeActsAthenaLogger(this, name());
         return StatusCode::SUCCESS;
     }
     std::vector<const xAOD::MuonSegment*> SegmentTaggingAlg::prepareSegments(const EventContext& ctx) const {
@@ -71,9 +75,6 @@ namespace MuonCombinedR4  {
             if (!caloSector.isNeighbour(MuonR4::ExpandedSector{matchMe->position().phi()})){
                 continue;
             }
-            if (matchMe->position().z() * globExit.z() < 0.) {
-                continue;
-            }
             /// Check that the surface is indeed in front of the exit parameters
             if ((getSurface(*matchMe).center(tgContext) - globExit).dot(globDir) < 0.){
                 continue;
@@ -102,30 +103,30 @@ namespace MuonCombinedR4  {
     double SegmentTaggingAlg::matchingScore(const Acts::GeometryContext& tgContext,
                                             const xAOD::MuonSegment& segment,
                                             const Acts::BoundTrackParameters& extpIdPars) const  {
+        const Acts::BoundTrackParameters segPars =  MuonR4::SegmentFit::boundSegmentPars(tgContext, *m_detMgr, segment);
+        ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<" - Match segment "<<MuonR4::printID(segment)<<"@\n"<<segPars<<"\n\n & ID parameters: \n"
+                    <<extpIdPars<<", "<<Amg::toString(extpIdPars.referenceSurface().localToGlobalTransform(tgContext)));
         
-        Acts::BoundTrackParameters segmentPars{MuonR4::SegmentFit::boundSegmentPars(tgContext, *m_detMgr, segment)};
-        Acts::BoundVector dPars = segmentPars.parameters() - extpIdPars.parameters();
+        std::optional<Acts::BoundTrackParameters> diffPars = makeDiffParameters(tgContext, extpIdPars, segPars, logger(), 0.);
+        
+        if (!diffPars) {
+            return m_matchChi2 + Acts::s_epsilon;
+        }
+        Acts::Vector4 dPars = diffPars->parameters().block<4,1>(0,0);
         /** The segment does not measure phi. Reset anything in loc0 and non-precision direction */
         if (!segment.nPhiLayers()) {
             dPars[Acts::eBoundPhi] = dPars[Acts::eBoundLoc0] = 0.;
-        } else {
-            /** Wrap delta phi around at -pi */
-            dPars[Acts::eBoundPhi] = P4Helpers::deltaPhi(segmentPars.phi(), extpIdPars.phi());
-        }
-        dPars[Acts::eBoundQOverP] = dPars[Acts::eBoundTime] = 0.;
-        Acts::BoundMatrix covariance{Acts::BoundMatrix::Identity()};
+        } 
+        Acts::SquareMatrix4 covariance{Acts::SquareMatrix4::Identity()};
         covariance(Acts::eBoundLoc0, Acts::eBoundLoc0) = Acts::square(m_toleranceX0.value());
         covariance(Acts::eBoundLoc1, Acts::eBoundLoc1) = Acts::square(m_toleranceY0.value());
         covariance(Acts::eBoundTheta, Acts::eBoundTheta) = Acts::square(m_toleranceTheta.value());
         covariance(Acts::eBoundPhi, Acts::eBoundPhi) = Acts::square(m_tolerancePhi.value());
-        if (extpIdPars.covariance()) {
-            covariance += (*extpIdPars.covariance());
-        }
-        if (segmentPars.covariance()) {
-            covariance += (*segmentPars.covariance());
+        if (diffPars->covariance()) {
+            covariance += (*diffPars->covariance()).block<4,4>(0,0);
         }
         const double chi2 = dPars.dot(covariance.inverse()*dPars);
-        ATH_MSG_DEBUG(__func__<<"() "<<__LINE__<<" - Difference: "<<Acts::toString(dPars)
+        ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<" - Difference: "<<Acts::toString(dPars)
                         <<", covariance: \n"<<Acts::toString(covariance)<<",\nchi2: "
                         <<chi2);
         return chi2;
@@ -165,7 +166,7 @@ namespace MuonCombinedR4  {
                 auto surfPars = m_extrapolationTool->propagate(ctx, *currentPars, target);
                 /** Extrapolation failed. */
                 if (!surfPars.ok()) {
-                    ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__
+                    ATH_MSG_DEBUG(__func__<<"() "<<__LINE__
                         <<" - Extrapolation failed. Skip all other segments on the surface.");
                     segIter = std::find_if(segIter, selectedCandidates.end(),
                         [&](const xAOD::MuonSegment* failedSeg) {
