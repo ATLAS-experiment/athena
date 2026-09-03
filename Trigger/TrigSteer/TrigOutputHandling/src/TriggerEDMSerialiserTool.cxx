@@ -165,12 +165,15 @@ StatusCode TriggerEDMSerialiserTool::addCollectionToSerialise(const std::string&
         }
         sel.selectAux( variableNames );
       }
-      addressVec.push_back( {transientType, persistentType, std::move(classDesc), clid, std::string(key), moduleIdVec, Address::Category::xAODAux, truncationMode, sel} );
+      addressVec.push_back( {transientType, std::move(persistentType), std::move(classDesc), clid, 
+       std::string(key), std::move(moduleIdVec), Address::Category::xAODAux, truncationMode, std::move(sel)} );
     } else {
-      addressVec.push_back( {transientType, persistentType, std::move(classDesc), clid, std::string(key), moduleIdVec, Address::Category::xAODInterface, truncationMode} );
+      addressVec.push_back( {transientType, std::move(persistentType), std::move(classDesc), clid, 
+       std::string(key), std::move(moduleIdVec), Address::Category::xAODInterface, truncationMode} );
     }
   } else { // an old T/P type
-    addressVec.push_back( {transientType, persistentType, std::move(classDesc), clid, std::string(key), moduleIdVec, Address::Category::OldTP, truncationMode} );
+    addressVec.push_back( {transientType, std::move(persistentType), std::move(classDesc), clid, 
+     std::string(key), std::move(moduleIdVec), Address::Category::OldTP, truncationMode} );
   }
   return StatusCode::SUCCESS;
 }
@@ -206,7 +209,7 @@ StatusCode TriggerEDMSerialiserTool::serialiseDynAux( DataObject* dObj, const Ad
   ATH_MSG_DEBUG( "About to start streaming aux data of " << address.key );
   DataBucketBase* dObjAux = dynamic_cast<DataBucketBase*>(dObj);
   ATH_CHECK( dObjAux != nullptr );
-
+  //coverity[FORWARD_NULL:FALSE]
   const SG::IAuxStoreIO* auxStoreIO = dObjAux->template cast<SG::IAuxStoreIO> (nullptr, true);
   if ( auxStoreIO == nullptr ) {
     ATH_MSG_DEBUG( "Can't obtain AuxContainerBase of " << address.key <<  " no dynamic variables presumably" );
@@ -451,6 +454,7 @@ StatusCode TriggerEDMSerialiserTool::fill( HLT::HLTResultMT& resultToFill, const
 
     buffer.clear();
     ATH_MSG_DEBUG( "Streaming " << address.persTypeName() );
+    //coverity[FORWARD_NULL:FALSE]
     ATH_CHECK( serialise(address, buffer, evtStore) );
     if (buffer.empty()) {
       ATH_MSG_DEBUG("Streaming of " << address.persTypeName() << " is skipped");
@@ -510,7 +514,7 @@ StatusCode TriggerEDMSerialiserTool::tryAddData(HLT::HLTResultMT& hltResult,
                                     ? 0 : hltResult.getSerialisedData().at(id).size()*sizeof(uint32_t);
   // Total size
   size_t currentTotalSizeWords = 0;
-  for (const auto& [id, data] : hltResult.getSerialisedData()) currentTotalSizeWords += data.size();
+  for (const auto& [i, data] : hltResult.getSerialisedData()) currentTotalSizeWords += data.size();
   const uint32_t currentTotalSizeBytes = currentTotalSizeWords*sizeof(uint32_t);
   // Size to be added
   const uint32_t extraSizeBytes = data.size()*sizeof(uint32_t);
