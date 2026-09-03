@@ -12,13 +12,13 @@ def PhotonSingleBDTCalculator_Cfg(
 
     modelFile = "ElectronPhotonSelectorTools/offline/"
     if flags.GeoModel.Run >= LHCPeriod.Run3:
-        modelFile += "mc23_20260310/" + (
-            "NFs/LightGBM_model_mc23ade_v23NF" if useNFs else
-            "FudgeFactors/LightGBM_model_mc23ade_v23")
+        modelFile += "mc23_20260824/" + (
+            "NFs/LightGBM_model_mc23ade_v23NF_DeltaE_fix" if useNFs else
+            "FudgeFactors/LightGBM_model_mc23ade_v23FF_DeltaE_fix")
     else:
-        modelFile += "mc20_20260310/" + (
-            "NFs/LightGBM_model_mc20ade_v15NF" if useNFs else
-            "FudgeFactors/LightGBM_model_mc20ade_v15")
+        modelFile += "mc20_20260824/" + (
+            "NFs/LightGBM_model_mc20ade_v15NF_DeltaE_fix" if useNFs else
+            "FudgeFactors/LightGBM_model_mc20ade_v15FF_DeltaE_fix")
     modelFile += ("_converted" if isConv else "_unconverted") + ".root"
 
     kwargs.setdefault("ModelFile", modelFile)
