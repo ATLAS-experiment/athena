@@ -25,9 +25,6 @@
 #include "detray/core/detector.hpp"
 #include "detray/detectors/itk_metadata.hpp"
 
-
-#include "vecmem/utils/cuda/copy.hpp"
-
 #include <memory>
 #include <string>
 #include <unordered_map>
@@ -101,7 +98,7 @@ private:
         "Traccc conditions config JSON file"};
     Gaudi::Property<std::string> m_mapFile{
         this, "MapFile", "",
-        "Path to the athena<->detray ID map CSV file"};   
+        "Path to the athena<->detray ID map CSV file"};
     /// @}
 
     /// @name The output object names
@@ -123,7 +120,7 @@ private:
         "Detray device detector object"};
     Gaudi::Property<std::string> m_hostDetectorName{
         this, "HostDetectorName", "",
-        "Detray host detector object"};    
+        "Detray host detector object"};
     /// @}
 
     /// Helper function to load Athena<->detray ID maps from csv

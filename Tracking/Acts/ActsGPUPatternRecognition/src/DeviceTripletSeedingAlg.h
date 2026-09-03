@@ -16,8 +16,6 @@
 #include "ActsGPUEvent/TracccSpacepointCollection.h"
 #include "ActsGPUEvent/TracccSeedCollection.h"
 
-#include "vecmem/utils/cuda/copy.hpp"
-
 template <typename scalar_t>
 using unit = detray::unit<scalar_t>;
 
@@ -71,7 +69,7 @@ private:
         this, "OutputTracccPixelSeeds", "",
         "Output traccc pixel seed collection buffer"};
     /// @}
-    
+
     traccc::seedfinder_config m_seedfinder;
     traccc::seedfilter_config m_seedfilter;
 

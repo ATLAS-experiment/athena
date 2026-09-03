@@ -17,8 +17,6 @@
 #include "ActsGPUEvent/TracccSpacepointCollection.h"
 #include "ActsGPUEvent/TracccMeasurementCollection.h"
 
-#include "vecmem/utils/cuda/copy.hpp"
-
 template <typename scalar_t>
 using unit = detray::unit<scalar_t>;
 
@@ -70,11 +68,11 @@ private:
     SG::ReadHandleKey<traccc::edm::seed_collection::const_view> m_inputSeedsKey{
         this, "InputTracccSeeds", "",
         "Input traccc seeds collection buffer"};
-    
+
     /// @name The name of device resident input traccc inhom. mag. field
     Gaudi::Property<std::string> m_inputMagFieldKey{
         this, "InputTracccMagField", "",
-        "Input traccc inhom. mag. field"};        
+        "Input traccc inhom. mag. field"};
 
     /// @name The name of device resident output traccc track parameter collection
     /// {@
@@ -82,7 +80,7 @@ private:
         this, "OutputTracccTrackParameters", "",
         "Output traccc track parameter collection buffer"};
     /// @}
-    
+
     traccc::track_params_estimation_config m_trkparam_config;
     const traccc::magnetic_field* m_deviceMagField{nullptr};
 
