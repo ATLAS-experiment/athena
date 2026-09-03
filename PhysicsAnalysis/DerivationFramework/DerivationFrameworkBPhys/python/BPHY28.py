@@ -193,7 +193,7 @@ def BPHY28Kernel(flags):
 
    for t in  augList + skimList + thinList : acc.addPublicTool(t)
     for tool in augList:
-        acc.addEventAlgo(CompFactory.DerivationFramework.CommonAugmentation(tool.name+"Aug", AugmentationTools = [tool]))
+        acc.addEventAlgo(CompFactory.DerivationFramework.CommonAugmentation(tool.name+"Aug", AugmentationTools = [tool])) # TODO Migrate public tool to AthReentrantAlgorithm
    acc.addEventAlgo(CompFactory.DerivationFramework.DerivationKernel("BPHY28Kernel",
                                                     #Only skim if not MC
                                                     SkimmingTools     = skimList,

@@ -491,7 +491,7 @@ def BPHY15Cfg(flags):
    for t in  augTools : acc.addPublicTool(t)
 
    for tool in augTools:
-      acc.addEventAlgo(CompFactory.DerivationFramework.CommonAugmentation(tool.name+"Aug", AugmentationTools = [tool]))
+      acc.addEventAlgo(CompFactory.DerivationFramework.CommonAugmentation(tool.name+"Aug", AugmentationTools = [tool])) # TODO Migrate public tool to AthReentrantAlgorithm
    acc.addEventAlgo(CompFactory.DerivationFramework.DerivationKernel("BPHY15Kernel",
                                                     #Only skim if not MC
                                                     SkimmingTools     = [BPHY15SkimmingOR] if not isSimulation else [],

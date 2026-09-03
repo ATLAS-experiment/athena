@@ -691,7 +691,7 @@ def BPHY25Cfg(flags):
     for t in augmentation_tools : acc.addPublicTool(t)
 
     for tool in augmentation_tools:
-        acc.addEventAlgo(CompFactory.DerivationFramework.CommonAugmentation(tool.name+"Aug", AugmentationTools = [tool]))
+        acc.addEventAlgo(CompFactory.DerivationFramework.CommonAugmentation(tool.name+"Aug", AugmentationTools = [tool])) # TODO Migrate public tool to AthReentrantAlgorithm
     acc.addEventAlgo(CompFactory.DerivationFramework.DerivationKernel(
         "BPHY25Kernel",
         SkimmingTools     = [BPHY25_SelectEvent]

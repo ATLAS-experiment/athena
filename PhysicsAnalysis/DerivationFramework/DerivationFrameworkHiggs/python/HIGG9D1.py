@@ -181,7 +181,7 @@ def HIGG9D1KernelCfg(flags, name='HIGG9D1Kernel', **kwargs):
     acc.addPublicTool(HIGG9D1_onia_skim)
 
     for tool in [ HIGG9D1_AugOriginalCounts, HIGG9D1_Jpsi, HIGG9D1_Upsi, HIGG9D1_JpsiVtxTrkIsoDecor, HIGG9D1_UpsiVtxTrkIsoDecor ]:
-        acc.addEventAlgo(CompFactory.DerivationFramework.CommonAugmentation(tool.name+"Aug", AugmentationTools = [tool]), sequenceName="HIGG9D1Sequence")
+        acc.addEventAlgo(CompFactory.DerivationFramework.CommonAugmentation(tool.name+"Aug", AugmentationTools = [tool]), sequenceName="HIGG9D1Sequence") # TODO Migrate public tool to AthReentrantAlgorithm
     HIGG9D1_onia_skimKernel = CompFactory.DerivationFramework.DerivationKernel(
         "HIGG9D1_onia_skimKernel",
         SkimmingTools     = [ HIGG9D1_onia_skim ])

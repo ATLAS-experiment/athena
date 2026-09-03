@@ -232,7 +232,7 @@ def BPHY10Cfg(flags):
     for t in  augTools : acc.addPublicTool(t)
     #from AthenaCommon.Constants import DEBUG
     for tool in augTools:
-        acc.addEventAlgo(CompFactory.DerivationFramework.CommonAugmentation(tool.name+"Aug", AugmentationTools = [tool]))
+        acc.addEventAlgo(CompFactory.DerivationFramework.CommonAugmentation(tool.name+"Aug", AugmentationTools = [tool])) # TODO Migrate public tool to AthReentrantAlgorithm
     acc.addEventAlgo(CompFactory.DerivationFramework.DerivationKernel("BPHY10Kernel",
                                                      #OutputLevel = DEBUG,
                                                      #Only skim if not MC

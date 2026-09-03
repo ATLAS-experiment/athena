@@ -149,7 +149,7 @@ def BPHY1Kernel(flags):
         flags, name = "BPHY1_SelectEvent", expression = SelectExpression))
 
     for tool in augTools:
-        acc.addEventAlgo(CompFactory.DerivationFramework.CommonAugmentation(tool.name+"Aug", AugmentationTools = [tool]))
+        acc.addEventAlgo(CompFactory.DerivationFramework.CommonAugmentation(tool.name+"Aug", AugmentationTools = [tool])) # TODO Migrate public tool to AthReentrantAlgorithm
     acc.addEventAlgo(CompFactory.DerivationFramework.DerivationKernel("BPHY1Kernel",
                                                                       SkimmingTools = [BPHY1_SelectEvent],
                                                                       ThinningTools     = BPHY1ThinningTools))

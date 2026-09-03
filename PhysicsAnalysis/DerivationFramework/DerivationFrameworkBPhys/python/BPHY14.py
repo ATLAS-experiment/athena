@@ -169,7 +169,7 @@ def BPHY14Cfg(flags):
                               BPHY14_Select_Psi2mumu, BPHY14_Select_Upsi2mumu]
        for t in BPHY14ThinningTools + BPHY14SlimTools + BPHY14AugTools: acc.addPublicTool(t)
        for tool in BPHY14AugTools:
-              acc.addEventAlgo(CompFactory.DerivationFramework.CommonAugmentation(tool.name+"Aug", AugmentationTools = [tool]))
+              acc.addEventAlgo(CompFactory.DerivationFramework.CommonAugmentation(tool.name+"Aug", AugmentationTools = [tool])) # TODO Migrate public tool to AthReentrantAlgorithm
        acc.addEventAlgo(CompFactory.DerivationFramework.DerivationKernel("BPHY14Kernel",
                                                                          SkimmingTools     = BPHY14SlimTools,  ThinningTools  = BPHY14ThinningTools  ))
        from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
