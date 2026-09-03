@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 // HLTSeeding includes
 #include "EMRoIsUnpackingTool.h"
@@ -92,14 +92,14 @@ StatusCode EMRoIsUnpackingTool::unpack(const EventContext& ctx,
           addChainsToDecision( HLT::Identifier( thresholdProbeName ), decisionProbe, activeChains );
         }
       }
-
-      decisionMain->setDetail( "thresholds", passedThresholdIDs );
+      static const std::string thresholdsStr{"thresholds"};
+      decisionMain->setDetail( thresholdsStr, passedThresholdIDs );
       decisionMain->setObjectLink( initialRoIString(),
                                    ElementLink<TrigRoiDescriptorCollection>(m_trigRoIsKey.key(), trigRoIs->size()-1, ctx) );
       decisionMain->setObjectLink( initialRecRoIString(),
                                    ElementLink<DataVector<LVL1::RecEmTauRoI>>(m_recRoIsKey.key(), recRoIs->size()-1, ctx) );
 
-      decisionProbe->setDetail( "thresholds", passedThresholdIDs );
+      decisionProbe->setDetail( thresholdsStr, passedThresholdIDs );
       decisionProbe->setObjectLink( initialRoIString(),
                                     ElementLink<TrigRoiDescriptorCollection>(m_trigRoIsKey.key(), trigRoIs->size()-1, ctx) );
       decisionProbe->setObjectLink( initialRecRoIString(),
@@ -111,8 +111,9 @@ StatusCode EMRoIsUnpackingTool::unpack(const EventContext& ctx,
   if (overflow) {
     ATH_MSG_WARNING("L1Calo overflow for EM TOBs to CMX detected");
   }
+  const std::string overflowStr{"overflow"};
   for (Decision* decision : *decisionOutput) {
-    decision->setDetail("overflow", static_cast<char>(overflow));
+    decision->setDetail(overflowStr, static_cast<char>(overflow));
   }
 
   for ( auto roi: *trigRoIs ) {

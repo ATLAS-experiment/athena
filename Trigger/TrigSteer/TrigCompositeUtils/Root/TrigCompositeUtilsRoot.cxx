@@ -268,7 +268,7 @@ namespace TrigCompositeUtils {
   }
 
   const Decision* getNodeByName(const DecisionContainer& container, const std::string& nodeName) {
-    const auto it = std::find_if(container.begin(), container.end(), [&nodeName](const Decision* d){return d->name()==nodeName;});
+    const auto it = std::ranges::find(container,nodeName,[](const Decision* d) { return d->name(); });
     if (it==container.end()) {return nullptr;}
     return *it;
   }
