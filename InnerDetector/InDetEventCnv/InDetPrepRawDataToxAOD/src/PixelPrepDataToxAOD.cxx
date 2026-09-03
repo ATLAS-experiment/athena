@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -836,9 +836,21 @@ void PixelPrepDataToxAOD::addNNInformation(xAOD::TrackMeasurementValidation* xpr
     Identifier rId =  *rdosBegin;
     int absphiPixelIndex = m_PixelHelper->phi_index(rId)-phiPixelIndexWeightedPosition    + centralIndexX;
     int absetaPixelIndex = m_PixelHelper->eta_index(rId)-etaPixelIndexWeightedPosition + centralIndexY;
-    if (charge != chList.end()){
-      ATH_MSG_VERBOSE( " Phi Index: " << m_PixelHelper->phi_index(rId) << " absphiPixelIndex: " << absphiPixelIndex << " eta Idx: " << m_PixelHelper->eta_index(rId) << " absetaPixelIndex: " << absetaPixelIndex << " charge " << *charge );
-    }
+
+    // rdos, chList and totList are parallel: take this RDO's charge and ToT
+    // before the window checks below, or the entries of an RDO outside the
+    // window are shifted onto the RDOs that follow it.
+    float thisCharge = -1.f;
+    int   thisToT    = -1;
+    if ((not chList.empty()) && charge != chList.end()) { thisCharge = *charge; ++charge; }
+    if ((not totList.empty()) && tot    != totList.end()) { thisToT   = *tot;    ++tot;    }
+
+    ATH_MSG_VERBOSE( " Phi Index: " << m_PixelHelper->phi_index(rId)
+                     << " absphiPixelIndex: " << absphiPixelIndex
+                     << " eta Idx: " << m_PixelHelper->eta_index(rId)
+                     << " absetaPixelIndex: " << absetaPixelIndex
+                     << " charge " << thisCharge );
+
     if (absphiPixelIndex <0 || absphiPixelIndex >= (int)sizeX)
     {
       ATH_MSG_DEBUG(" problem with index: " << absphiPixelIndex << " min: " << 0 << " max: " << sizeX);
@@ -856,15 +868,8 @@ void PixelPrepDataToxAOD::addNNInformation(xAOD::TrackMeasurementValidation* xpr
     float pitchY = diodeParameters.width().xEta();
     float pitchX = diodeParameters.width().xPhi();
   
-    if ( (not totList.empty()) && tot    != totList.end()) {
-      matrixOfToT[absphiPixelIndex][absetaPixelIndex]   =*tot;
-      ++tot;
-    } else matrixOfToT[absphiPixelIndex][absetaPixelIndex]   = -1;
-
-    if ( (not chList.empty()) && charge != chList.end()){
-     matrixOfCharge[absphiPixelIndex][absetaPixelIndex]=*charge;
-     ++charge;
-    } else matrixOfCharge[absphiPixelIndex][absetaPixelIndex] = -1;
+    matrixOfToT[absphiPixelIndex][absetaPixelIndex]    = thisToT;
+    matrixOfCharge[absphiPixelIndex][absetaPixelIndex] = thisCharge;
   
     // Store the real per-cell pitch, built the same way as
     // NnClusterizationFactory::createInput so the dumped training inputs match
