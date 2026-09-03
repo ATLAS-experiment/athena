@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigTLAMonitorAlgorithm.h"
@@ -74,7 +74,9 @@ StatusCode TrigTLAMonitorAlgorithm::fillHistograms( const EventContext& ctx ) co
 
   const std::vector<std::string> jetCalibStates = {"JetConstitScaleMomentum_pt", "JetPileupScaleMomentum_pt", "JetEtaJESScaleMomentum_pt"};
   const std::vector<std::string> pfjetCalibStates = {"JetConstitScaleMomentum_pt", "JetPileupScaleMomentum_pt", "JetEtaJESScaleMomentum_pt", "JetGSCScaleMomentum_pt"};
-
+  const std::string jetStr{"jet"};
+  const std::string pfJetStr{"pfjet"};
+  const std::string trkStr{"trk"};
   for ( const std::string& trigName : m_allChains ) {
     //Test if trigName has fired
     if(m_trigDecisionTool->isPassed(trigName, TrigDefs::requireDecision)){
@@ -84,37 +86,37 @@ StatusCode TrigTLAMonitorAlgorithm::fillHistograms( const EventContext& ctx ) co
       //
       // jets
       using J = xAOD::Jet;
-      ANA_CHECK(fillParticleHistograms<J>(jets, "jet", trigName));
+      ANA_CHECK(fillParticleHistograms<J>(jets, jetStr, trigName));
       if (jets->size()>0){
         for (const auto& calibState: jetCalibStates){
-          ANA_CHECK(fillJetPtCalibStatesHistograms(jets,calibState, "jet", trigName));
+          ANA_CHECK(fillJetPtCalibStatesHistograms(jets,calibState, jetStr, trigName));
         }
-        ANA_CHECK( (fillObjectVariableHistogram<J,float>(jets,"N90Constituents", "jet", trigName     )) );
-        ANA_CHECK( (fillObjectVariableHistogram<J,float>(jets,"Timing",          "jet", trigName, -99)) );
-        ANA_CHECK( (fillObjectVariableHistogram<J,float>(jets,"EMFrac",          "jet", trigName, -99)) );
-        ANA_CHECK( (fillObjectVariableHistogram<J,float>(jets,"HECFrac",         "jet", trigName, -99)) );
+        ANA_CHECK( (fillObjectVariableHistogram<J,float>(jets,"N90Constituents", jetStr, trigName     )) );
+        ANA_CHECK( (fillObjectVariableHistogram<J,float>(jets,"Timing",          jetStr, trigName, -99)) );
+        ANA_CHECK( (fillObjectVariableHistogram<J,float>(jets,"EMFrac",          jetStr, trigName, -99)) );
+        ANA_CHECK( (fillObjectVariableHistogram<J,float>(jets,"HECFrac",         jetStr, trigName, -99)) );
       }
 
       //
       // particle flow jets
-      ANA_CHECK(fillParticleHistograms<J>(pfjets, "pfjet", trigName));
+      ANA_CHECK(fillParticleHistograms<J>(pfjets, pfJetStr, trigName));
       if (pfjets->size()>0){
         for (const auto& calibState: pfjetCalibStates){
-          ANA_CHECK(fillJetPtCalibStatesHistograms(pfjets, calibState, "pfjet", trigName));
+          ANA_CHECK(fillJetPtCalibStatesHistograms(pfjets, calibState, pfJetStr, trigName));
         }
-        ANA_CHECK( fillJetTrackVariableHistogram<float>(pfjets,"TrackWidthPt1000",     "pfjet", trigName) );
-        ANA_CHECK( fillJetTrackVariableHistogram<int>  (pfjets,"NumTrkPt1000",         "pfjet", trigName) );
-        ANA_CHECK( fillJetTrackVariableHistogram<float>(pfjets,"SumPtTrkPt500",        "pfjet", trigName) );
-        ANA_CHECK( fillJetTrackVariableHistogram<float>(pfjets,"SumPtChargedPFOPt500", "pfjet", trigName) );
-        ANA_CHECK( (fillObjectVariableHistogram<J,float>(pfjets,"ActiveArea",          "pfjet", trigName)) );
-        ANA_CHECK( (fillObjectVariableHistogram<J,float>(pfjets,"Jvt",                 "pfjet", trigName, -99)) );
-        ANA_CHECK( (fillObjectVariableHistogram<J,float>(pfjets,"JvtRpt",              "pfjet", trigName, -99)) );
-        ANA_CHECK( (fillObjectVariableHistogram<J,float>(pfjets,"fastDIPS20211215_pu", "pfjet", trigName)) );
-        ANA_CHECK( (fillObjectVariableHistogram<J,float>(pfjets,"fastDIPS20211215_pb", "pfjet", trigName)) );
-        ANA_CHECK( (fillObjectVariableHistogram<J,float>(pfjets,"fastDIPS20211215_pc", "pfjet", trigName)) );
-        ANA_CHECK( (fillObjectVariableHistogram<J,float>(pfjets,"GN120230331_pu",      "pfjet", trigName)) );
-        ANA_CHECK( (fillObjectVariableHistogram<J,float>(pfjets,"GN120230331_pb",      "pfjet", trigName)) );
-        ANA_CHECK( (fillObjectVariableHistogram<J,float>(pfjets,"GN120230331_pc",      "pfjet", trigName)) );
+        ANA_CHECK( fillJetTrackVariableHistogram<float>(pfjets,"TrackWidthPt1000",     pfJetStr, trigName) );
+        ANA_CHECK( fillJetTrackVariableHistogram<int>  (pfjets,"NumTrkPt1000",         pfJetStr, trigName) );
+        ANA_CHECK( fillJetTrackVariableHistogram<float>(pfjets,"SumPtTrkPt500",        pfJetStr, trigName) );
+        ANA_CHECK( fillJetTrackVariableHistogram<float>(pfjets,"SumPtChargedPFOPt500", pfJetStr, trigName) );
+        ANA_CHECK( (fillObjectVariableHistogram<J,float>(pfjets,"ActiveArea",          pfJetStr, trigName)) );
+        ANA_CHECK( (fillObjectVariableHistogram<J,float>(pfjets,"Jvt",                 pfJetStr, trigName, -99)) );
+        ANA_CHECK( (fillObjectVariableHistogram<J,float>(pfjets,"JvtRpt",              pfJetStr, trigName, -99)) );
+        ANA_CHECK( (fillObjectVariableHistogram<J,float>(pfjets,"fastDIPS20211215_pu", pfJetStr, trigName)) );
+        ANA_CHECK( (fillObjectVariableHistogram<J,float>(pfjets,"fastDIPS20211215_pb", pfJetStr, trigName)) );
+        ANA_CHECK( (fillObjectVariableHistogram<J,float>(pfjets,"fastDIPS20211215_pc", pfJetStr, trigName)) );
+        ANA_CHECK( (fillObjectVariableHistogram<J,float>(pfjets,"GN120230331_pu",      pfJetStr, trigName)) );
+        ANA_CHECK( (fillObjectVariableHistogram<J,float>(pfjets,"GN120230331_pb",      pfJetStr, trigName)) );
+        ANA_CHECK( (fillObjectVariableHistogram<J,float>(pfjets,"GN120230331_pc",      pfJetStr, trigName)) );
       }
 
       //
@@ -128,15 +130,15 @@ StatusCode TrigTLAMonitorAlgorithm::fillHistograms( const EventContext& ctx ) co
       //
       // Tracks
       using TP = xAOD::TrackParticle;
-      if (tracks->size()>0 && trigName.find("pf_ftf") != std::string::npos) {
-        ANA_CHECK( fillParticleHistograms<TP>(tracks, "trk", trigName) );
-        ANA_CHECK( (fillObjectVariableHistogram<TP,float>(tracks, "qOverP",                       "trk", trigName)) );
-        ANA_CHECK( (fillObjectVariableHistogram<TP,float>(tracks, "chiSquared",                   "trk", trigName)) );
-        ANA_CHECK( (fillObjectVariableHistogram<TP,float>(tracks, "numberDoF",                    "trk", trigName)) );
-        ANA_CHECK( (fillObjectVariableHistogram<TP,float>(tracks, "btagIp_d0",                    "trk", trigName)) );
-        ANA_CHECK( (fillObjectVariableHistogram<TP,float>(tracks, "btagIp_d0Uncertainty",         "trk", trigName)) );
-        ANA_CHECK( (fillObjectVariableHistogram<TP,float>(tracks, "btagIp_z0SinTheta",            "trk", trigName)) );
-        ANA_CHECK( (fillObjectVariableHistogram<TP,float>(tracks, "btagIp_z0SinThetaUncertainty", "trk", trigName)) );
+      if ( !tracks->empty() && trigName.contains("pf_ftf")) {
+        ANA_CHECK( fillParticleHistograms<TP>(tracks, trkStr, trigName) );
+        ANA_CHECK( (fillObjectVariableHistogram<TP,float>(tracks, "qOverP",                       trkStr, trigName)) );
+        ANA_CHECK( (fillObjectVariableHistogram<TP,float>(tracks, "chiSquared",                   trkStr, trigName)) );
+        ANA_CHECK( (fillObjectVariableHistogram<TP,float>(tracks, "numberDoF",                    trkStr, trigName)) );
+        ANA_CHECK( (fillObjectVariableHistogram<TP,float>(tracks, "btagIp_d0",                    trkStr, trigName)) );
+        ANA_CHECK( (fillObjectVariableHistogram<TP,float>(tracks, "btagIp_d0Uncertainty",         trkStr, trigName)) );
+        ANA_CHECK( (fillObjectVariableHistogram<TP,float>(tracks, "btagIp_z0SinTheta",            trkStr, trigName)) );
+        ANA_CHECK( (fillObjectVariableHistogram<TP,float>(tracks, "btagIp_z0SinThetaUncertainty", trkStr, trigName)) );
       }
 
       //

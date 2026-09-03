@@ -188,7 +188,7 @@ void TrigTauMonitorTandPAlgorithm::fillTAndPHLTEfficiencies(const EventContext& 
     // ...and require 1 offline lepton and 1 online lepton
     if(online_lep_vec.size() != 1 || offline_lep_vec.size() != 1) return;
     
-    auto monGroup = getGroup(trigger+"_TAndPHLT_Efficiency");
+    const auto & monGroup = getGroup(trigger+"_TAndPHLT_Efficiency");
 
     auto tauPt = Monitored::Scalar<float>("tauPt", 0.0);
     auto tauEta = Monitored::Scalar<float>("tauEta", 0.0);
@@ -232,7 +232,7 @@ void TrigTauMonitorTandPAlgorithm::fillTagAndProbeVars(const std::string& trigge
 {
     ATH_MSG_DEBUG("Fill Tag & Probe Variables: " << trigger); 
 
-    auto monGroup = getGroup(trigger+"_TAndPVars");
+    const auto & monGroup = getGroup(trigger+"_TAndPVars");
 
     // Require 1 tau and 1 lepton
     if(tau_vec.empty() || lep_vec.empty()) return; 
