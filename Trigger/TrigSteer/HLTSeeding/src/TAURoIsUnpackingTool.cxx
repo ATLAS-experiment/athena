@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #include "TAURoIsUnpackingTool.h"
 #include "TrigT1Result/RoIBResult.h"
@@ -22,15 +22,16 @@ StatusCode TAURoIsUnpackingTool::initialize() {
 
 StatusCode TAURoIsUnpackingTool::start() {
   ATH_CHECK(decodeMapping([](const std::string& name ){
-    return name.find("TAU") == 0 or name.find(getProbeThresholdName("TAU")) == 0;
+    return name.starts_with("TAU") or name.starts_with(getProbeThresholdName("TAU"));
   }));
   // For Taus, since there is threshold name change from HA to TAU we need to fill the mapping with same threshold
   // but prefixed by HA
   // TODO: Remove once L1 configuration switches to TAU
+  const std::string tauStr{"TAU"};
   for ( const auto& [threshold, chains] : m_thresholdToChainMapping ) {
-    if ( threshold.name().find("TAU") != std::string::npos ) {
+    if ( auto pos = threshold.name().find(tauStr); pos != std::string::npos ) {
       std::string newThresholdName = threshold.name();
-      newThresholdName.replace(threshold.name().find("TAU"), 3, "HA");
+      newThresholdName.replace(pos, 3, "HA");
       ATH_MSG_INFO("Temporary fix due to renaming the HA to TAU thresholds, adding decoding of " << newThresholdName );
       m_thresholdToChainMapping[HLT::Identifier(newThresholdName)] = chains;
     }
@@ -103,14 +104,14 @@ StatusCode TAURoIsUnpackingTool::unpack(const EventContext& ctx,
           addChainsToDecision( HLT::Identifier( thresholdProbeName ), decisionProbe, activeChains );
         }
       }
-
-      decisionMain->setDetail("thresholds", passedThresholdIDs);
+      static const std::string thresholdsStr{"thresholds"};
+      decisionMain->setDetail(thresholdsStr, passedThresholdIDs);
       decisionMain->setObjectLink( initialRoIString(),
                                    ElementLink<TrigRoiDescriptorCollection>(m_trigRoIsKey.key(), trigRoIs->size()-1, ctx) );
       decisionMain->setObjectLink( initialRecRoIString(),
                                    ElementLink<DataVector<LVL1::RecEmTauRoI>>(m_recRoIsKey.key(), recRoIs->size()-1, ctx) );
 
-      decisionProbe->setDetail("thresholds", passedThresholdIDs);
+      decisionProbe->setDetail(thresholdsStr, passedThresholdIDs);
       decisionProbe->setObjectLink( initialRoIString(),
                                     ElementLink<TrigRoiDescriptorCollection>(m_trigRoIsKey.key(), trigRoIs->size()-1, ctx) );
       decisionProbe->setObjectLink( initialRecRoIString(),
