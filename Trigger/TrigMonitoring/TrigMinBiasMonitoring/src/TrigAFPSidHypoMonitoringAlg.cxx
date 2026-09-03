@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigAFPSidHypoMonitoringAlg.h"
@@ -44,6 +44,7 @@ StatusCode TrigAFPSidHypoMonitoringAlg::fillHistograms(const EventContext& conte
   auto xDiff = Monitored::Scalar("xDiff",-999.);
   auto yDiff = Monitored::Scalar("yDiff",-999.);
 
+  const std::string hName{"AFPCoarse"};
   // Match online track to offline
   for(const auto* track: *tracksAFP){
     float dRmin = 9e9;
@@ -60,7 +61,7 @@ StatusCode TrigAFPSidHypoMonitoringAlg::fillHistograms(const EventContext& conte
       }
     } // End of loop over offline tracks
 
-    fill("AFPCoarse", xDiff, yDiff);
+    fill(hName, xDiff, yDiff);
 
   }// End of loop over online tracks
 
@@ -74,7 +75,7 @@ StatusCode TrigAFPSidHypoMonitoringAlg::fillHistograms(const EventContext& conte
   }
   if ( passedAFPChains.size() > 1) passedAFPChains.emplace_back("AFP");
   auto whichTrigger = Monitored::Collection("TrigCounts", passedAFPChains);
-  fill("AFPCoarse", whichTrigger);
+  fill(hName, whichTrigger);
 
   return StatusCode::SUCCESS;
 }

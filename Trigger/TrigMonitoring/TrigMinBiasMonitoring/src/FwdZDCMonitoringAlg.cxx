@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "FwdZDCMonitoringAlg.h"
@@ -39,6 +39,7 @@ StatusCode FwdZDCMonitoringAlg::fillHistograms(const EventContext &context) cons
     ATH_MSG_WARNING("Error in LUCROD decoding, cannot write monitoring histograms.  Skipping this event");
     return StatusCode::SUCCESS;
   }
+  const std::string allStr{"ZDCall"};
   for (const auto &trig : m_triggerList)
   {
      if (!trigDecTool->isPassed(trig, TrigDefs::Physics))
@@ -49,14 +50,14 @@ StatusCode FwdZDCMonitoringAlg::fillHistograms(const EventContext &context) cons
     ATH_MSG_DEBUG("Chain " << trig << " is passed: YES");
 
     auto TrigCounts = Monitored::Scalar<std::string>("TrigCounts", trig);
-    fill("ZDCall", TrigCounts);
+    fill(allStr, TrigCounts);
 
     // declare the quantities which should be monitored
     auto e_A = Monitored::Scalar<float>("e_A", 0.0);     // ZDC ADC on Side A
     auto e_C = Monitored::Scalar<float>("e_C", 0.0);     // ZDC ADC on Side C
     auto moduleEnergy = Monitored::Scalar<float>("moduleEnergy", 0.0);
     auto moduleNum = Monitored::Scalar<float>("moduleNum", 0.0);
-
+    const std::string trigExpertStr = trig + "_expert";
     // read single modules
     for (const auto zdcModule : *zdcModules)
     {
@@ -68,8 +69,8 @@ StatusCode FwdZDCMonitoringAlg::fillHistograms(const EventContext &context) cons
           moduleEnergy = zdcModuleCalibEnergyHandle(*zdcModule);
           moduleNum = zdcModule->zdcModule();
           e_A += zdcModuleCalibEnergyHandle(*zdcModule);
-          fill(trig + "_expert", moduleEnergy, moduleNum);
-          fill("ZDCall", moduleEnergy, moduleNum);
+          fill(trigExpertStr, moduleEnergy, moduleNum);
+          fill(allStr, moduleEnergy, moduleNum);
         }
         // Side C
         if (zdcModule->zdcSide() < 0)
@@ -77,13 +78,13 @@ StatusCode FwdZDCMonitoringAlg::fillHistograms(const EventContext &context) cons
           moduleEnergy = zdcModuleCalibEnergyHandle(*zdcModule);
           moduleNum = zdcModule->zdcModule() + 4.;
           e_C += zdcModuleCalibEnergyHandle(*zdcModule);
-          fill(trig + "_expert", moduleEnergy, moduleNum);
-          fill("ZDCall", moduleEnergy, moduleNum);
+          fill(trigExpertStr, moduleEnergy, moduleNum);
+          fill(allStr, moduleEnergy, moduleNum);
         }
       }
     }
-    fill(trig + "_expert", e_A, e_C);
-    fill("ZDCall", e_A, e_C);
+    fill(trigExpertStr, e_A, e_C);
+    fill(allStr, e_A, e_C);
     }
   return StatusCode::SUCCESS;
 }

@@ -47,7 +47,7 @@ StatusCode HLTMBTSMonitoringAlgMT::fillHistograms(const EventContext &context) c
   // static constexpr double energyCut = 40. / 222.;
   static constexpr double timeCut = 10e-4;         // minimal cut-off : copy from TileMBTSMonitorAlg
   static constexpr double energyCut = 60. / 222.;  // copy from TileMBTSMonitorAlgorithm
-
+  const std::string allStr{"MBTSall"};
   for (const auto &trig : m_triggerList) {
     if (not trigDecTool->isPassed(trig, TrigDefs::requireDecision)) {
       continue;
@@ -68,7 +68,7 @@ StatusCode HLTMBTSMonitoringAlgMT::fillHistograms(const EventContext &context) c
     int ebcCounters = 0;
 
     auto TrigCounts = Scalar<std::string>("TrigCounts", trig);
-    fill("MBTSall", TrigCounts);
+    fill(allStr, TrigCounts);
 
     // There always should be only one element in this collection
     const auto mbts_itr = mbtsbits->front();

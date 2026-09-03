@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigSignatureMoni.h"
@@ -49,8 +49,10 @@ StatusCode TrigSignatureMoni::start() {
 
   std::unordered_map<std::string,std::string> mapStrNameToTypeName; // e.g. {Main -> physics_Main}
   try {
+    const std::string nameStr{"name"};
+    const std::string typeStr{"type"};
     for (const TrigConf::DataStructure& stream : hltMenuHandle->streams()) {
-      mapStrNameToTypeName.insert({stream.getAttribute("name"), stream.getAttribute("type")+"_"+stream.getAttribute("name")});
+      mapStrNameToTypeName.insert({stream.getAttribute(nameStr), stream.getAttribute(typeStr)+"_"+stream.getAttribute(nameStr)});
     }
   } catch (const std::exception& ex) {
     ATH_MSG_ERROR("Exception reading stream tag configuration from the HLT menu: " << ex.what());

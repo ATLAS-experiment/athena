@@ -444,7 +444,7 @@ class MuonMatchingTool : public AthAlgTool {
    * @todo Consider improving the argument list.
    */
   template<class T, class OFFL> const T* matchReadHandle(const OFFL* offl, float reqdR,
-                                                         SG::ReadHandleKey<DataVector<T> > ReadHandleKey, const EventContext& ctx,
+                                                         const SG::ReadHandleKey<DataVector<T> > & ReadHandleKey, const EventContext& ctx,
                                                          std::tuple<bool,double,double> (*trigPosForMatchFunc)(const T*) = &MuonMatchingTool::trigPosForMatch<T>) const;
 
 

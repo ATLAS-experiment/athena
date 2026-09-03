@@ -339,11 +339,11 @@ StatusCode EFMuonMon::fillVariables(const EventContext &ctx) const {
 StatusCode EFMuonMon::fillVariablesPerOfflineMuon(const EventContext &ctx, const xAOD::Muon* mu) const {
 
   ATH_CHECK( fillVariablesRatioPlots<xAOD::Muon>(ctx, mu, "EFSA", xAOD::Muon::TrackParticleType::ExtrapolatedMuonSpectrometerTrackParticle,
-                                                 [this](const EventContext &ctx, const xAOD::Muon *mu){ return m_matchTool->matchEFSAReadHandle(ctx,mu); }
+                                                 [this](const EventContext &c, const xAOD::Muon *m){ return m_matchTool->matchEFSAReadHandle(c,m); }
                                                  )); 
 
   ATH_CHECK( fillVariablesRatioPlots<xAOD::Muon>(ctx, mu, "EFCB", xAOD::Muon::TrackParticleType::CombinedTrackParticle,
-                                                 [this](const EventContext &ctx, const xAOD::Muon *mu){ return m_matchTool->matchEFCBReadHandle(ctx,mu); }
+                                                 [this](const EventContext &c, const xAOD::Muon *m){ return m_matchTool->matchEFCBReadHandle(c,m); }
                                                  )); 
 
   return StatusCode::SUCCESS;
