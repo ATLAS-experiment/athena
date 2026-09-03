@@ -1,7 +1,6 @@
 # Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 from G4AtlasServices.G4AtlasServicesConfig import PhysicsListSvcCfg
 from ISF_Services.ISF_ServicesConfig import TruthServiceCfg, InputConverterCfg
-from ISF_Services.ISF_ServicesCoreConfig import GeoIDSvcCfg
 from G4AtlasTools.G4GeometryToolConfig import G4AtlasDetectorConstructionToolCfg
 from G4AtlasTools.G4AtlasToolsConfig import G4ThreadPoolSvcCfg, SensitiveDetectorMasterToolCfg, FastSimulationMasterToolCfg
 from G4AtlasServices.G4AtlasUserActionConfig import UserActionSvcCfg
@@ -92,7 +91,6 @@ def G4AtlasAlgCfg(flags, name="G4AtlasAlg", **kwargs):
         kwargs.setdefault("Cardinality", flags.Concurrency.NumThreads)
 
     kwargs.setdefault("TruthRecordService", result.getPrimaryAndMerge(TruthServiceCfg(flags)))
-    kwargs.setdefault("GeoIDSvc", result.getPrimaryAndMerge(GeoIDSvcCfg(flags)))
 
     #input converter
     kwargs.setdefault("InputConverter", result.getPrimaryAndMerge(InputConverterCfg(flags)))
