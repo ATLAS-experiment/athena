@@ -31,8 +31,8 @@ namespace ActsTrk {
 /// seeding does not have to reach into the trigger for its geometry. The
 /// grouping is unchanged - modules are keyed by (side, technology, volume,
 /// layer) and each group becomes one GBTS layer - but the result is handed out
-/// as `Acts::Experimental::GbtsLayerDescription` directly, rather than as a
-/// `TrigInDetSiLayer` the caller has to convert.
+/// as `Acts::Experimental::GbtsLayerDescription` directly, with the layer's
+/// technology filled in rather than left to be decoded from its id.
 class GbtsLayerTool final : public extends<AthAlgTool, IGbtsLayerTool> {
  public:
   GbtsLayerTool(const std::string& type, const std::string& name,

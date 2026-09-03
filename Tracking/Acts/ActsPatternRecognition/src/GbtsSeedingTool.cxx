@@ -50,6 +50,12 @@ namespace ActsTrk {
     m_pixelHashToLayer = &m_layerTool->pixelLayers();
     m_stripHashToLayer = &m_layerTool->stripLayers();
 
+    if (!m_usePixelLayers && !m_useStripLayers) {
+      ATH_MSG_ERROR("Neither pixel nor strip layers are enabled, there is "
+                    "nothing to seed on.");
+      return StatusCode::FAILURE;
+    }
+
     std::vector<Acts::Experimental::GbtsLayerConnection> connections;
     float etaBinWidth = 0.0f;
     ATH_CHECK(readConnections(layers, technologies, connections, etaBinWidth));
@@ -115,7 +121,12 @@ namespace ActsTrk {
       const xAOD::SpacePoint* sp = tmpSpacePoints[idx];
       const std::vector<xAOD::DetectorIDHashType>& elementlist = sp->elementIdList();
 
+      // a strip space point is made of one cluster on each side of a stereo pair
       const bool isPixel(elementlist.size() == 1);
+
+      if (isPixel ? !m_usePixelLayers : !m_useStripLayers) {
+        continue;
+      }
 
       const std::vector<short>& hashToLayer =
         isPixel ? *m_pixelHashToLayer : *m_stripHashToLayer;
