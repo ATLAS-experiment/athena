@@ -547,9 +547,10 @@ std::vector<SiHit> PixelPrepDataToxAOD::findAllHitsCompatibleWithCluster( const 
   std::vector<const SiHit* >  multiMatchingHits;
   
   for ( const SiHit* siHit : *sihits) {
-    // Now we have all hits in the module that match lets check to see if they match the cluster
-    // Must be within +/- 1 hits of any hit in the cluster to be included
-    
+    // Match by geometry (SiHit centroid within +/-1 cell of a cluster RDO) or,
+    // failing that, by the SiHit's truth particle having deposited charge in
+    // one of the cluster's RDOs.
+    bool matched = false;
     if ( m_useSiHitsGeometryMatching )
     {
 	HepGeom::Point3D<double>  averagePosition =  siHit->localStartPosition() + siHit->localEndPosition();
@@ -564,11 +565,12 @@ std::vector<SiHit> PixelPrepDataToxAOD::findAllHitsCompatibleWithCluster( const 
 		&& abs( int(diode.phiIndex()) - m_PixelHelper->phi_index( hitIdentifier ) ) <=1 ) 
 	    {
 		multiMatchingHits.push_back(siHit);
+		matched = true;
 		break;
 	    }
 	}
     }
-    else
+    if (!matched)
     {
       auto uid = HepMC::uniqueID(siHit->particleLink());
       for ( const auto& uniqueIDSDOColl : trkUIDs ) {
