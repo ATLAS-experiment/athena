@@ -13,6 +13,7 @@
   <class name="InSituCalibStep" />
   <class name="GSCCalibStep" />
   <class name="Generic4VecCorrectionStep" />
+  <class name="JetDNNCalibStep" />
 
   
 <!-- <class name="JetCalibratorAthena" /> -->

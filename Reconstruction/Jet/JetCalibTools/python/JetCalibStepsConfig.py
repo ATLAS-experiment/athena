@@ -286,6 +286,53 @@ def mc2mcStep(flags, **configDic):
 
     return [CompFactory.Generic4VecCorrectionStep("MC2MC", **configDic)]
 
+def jetDNNCalibStep(flags, **configDic):
+    configDic.setdefault('OutScale', 'JetDNNScaleMomentum')
+
+    onnxModelPath = PathResolver.FindCalibFile(configDic.pop('ONNXInput'))
+
+    #Retrieving variables from YAML
+    inputVarArray = configDic.pop('InputVars')
+    eScales = configDic.pop('EScales')
+
+    list_of_inputVarTools = []
+
+    for i, v in enumerate(inputVarArray):
+        if v in ["NPV", "mu"]:
+            list_of_inputVarTools.append(VarToolCfg(flags, v, f'{v}', isJetVar=False))
+        elif v in ["log_e", "log_m"]:
+            # InputVariable.cpp's log_e/log_m already compute log(e*scale)/log(m*scale) with the
+            # right scale-before-log semantics, so just pass eScale through as this VarTool's Scale.
+            list_of_inputVarTools.append(VarToolCfg(flags, v, f'{v}', isJetVar=True, Scale=eScales[i]))
+        else:
+            list_of_inputVarTools.append(VarToolCfg(flags, v, f'{v}', isJetVar=True))
+
+    #Add to configDic
+    configDic["InputVarTool"] = list_of_inputVarTools
+    configDic["EScales"] = eScales
+    configDic["NormOffsets"] = configDic.pop('NormOffsets')
+    configDic["NormScales"] = configDic.pop('NormScales')
+    configDic["onnxInputShape"] = configDic.pop('onnxInputShape')
+    configDic["onnxOutputShape"] = configDic.pop('onnxOutputShape')
+
+    # Set-up the ONNX inference tool, pointing its session at the calibration model from the YAML.
+    # OnnxRuntimeInferenceToolCfg is ComponentAccumulator-based (picks CPU/CUDA via
+    # flags.AthOnnx.ExecutionProvider), but this file builds plain Configurables throughout with no
+    # accumulator to merge into, so we use a throwaway local one and keep only the tool. Its
+    # OnnxRuntimeSvc registration is discarded here; the service still resolves via Gaudi's
+    # auto-create-by-name behaviour, same as before this change.
+    from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
+    from AthOnnxComps.OnnxRuntimeInferenceConfig import OnnxRuntimeInferenceToolCfg
+    onnxAcc = ComponentAccumulator()
+    configDic["ORTInferenceTool"] = onnxAcc.popToolsAndMerge(
+        OnnxRuntimeInferenceToolCfg(flags, model_fname=onnxModelPath, name="ORTInferenceTool_DNN")
+    )
+
+    # Set-up the calibration step
+    DNNCalibStep = CompFactory.JetDNNCalibStep("JetDNNCalib", **configDic)
+    return [DNNCalibStep]
+
+
 #####################
     
 calibStepDic = dict(
@@ -299,6 +346,7 @@ calibStepDic = dict(
     AF3 = af3Step,
     PtResidual = ptResidualStep,
     MC2MC = mc2mcStep,
+    DNNCalib = jetDNNCalibStep
 
 )
 

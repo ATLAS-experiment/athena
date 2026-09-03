@@ -13,6 +13,7 @@
 #include "JetCalibTools/Pileup1DResidualCalibStep.h"
 #include "JetCalibTools/PileupCalibStep.h"
 #include "JetCalibTools/SmearingCalibStep.h"
+#include "JetCalibTools/JetDNNCalibStep.h"
 
 #ifndef XAOD_STANDALONE
 #include "CalibratedJetCopyAlg.h"
@@ -37,6 +38,7 @@ DECLARE_COMPONENT( PileupCalibStep )
 DECLARE_COMPONENT( Pileup1DResidualCalibStep )
 DECLARE_COMPONENT( MuonInJetCorrectionTool )
 DECLARE_COMPONENT( SmearingCalibStep )
+DECLARE_COMPONENT( JetDNNCalibStep )
 
 #ifndef XAOD_STANDALONE
 DECLARE_COMPONENT( CalibratedJetCopyAlg )
