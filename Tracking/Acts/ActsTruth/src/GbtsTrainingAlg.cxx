@@ -19,18 +19,7 @@ namespace ActsTrk{
       throw std::runtime_error("File does not exist or could not be opened");
     }
 
-    // define how many lines there are for reserving
-    std::uint32_t lines{};
-    std::string line{};
-    while (std::getline(inStream, line)) {
-      lines++;
-    }
-    inStream.clear();
-    inStream.seekg(0);
-
     std::vector<Acts::Experimental::GbtsLayerConnectionTool::LayerDescription> detectorGeometry{};
-    detectorGeometry.reserve(lines);
-
     // create geometry objects
     float minR{};
     float maxR{};
@@ -40,10 +29,8 @@ namespace ActsTrk{
 
     std::int32_t gbtsId{};
 
-    for (std::uint32_t l = 0; l < lines; l++) {
-        inStream >> minR >> maxR >> minZ >> maxZ >> gbtsId;
-
-        detectorGeometry.emplace_back(minR, maxR, minZ, maxZ, gbtsId);
+    while (inStream >> minR >> maxR >> minZ >> maxZ >> gbtsId) {
+      detectorGeometry.emplace_back(minR, maxR, minZ, maxZ, gbtsId);
     }
         
     return detectorGeometry;
