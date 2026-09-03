@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 namespace Trk {
@@ -211,7 +211,7 @@ inline constexpr ParametersType PatternTrackParameters::type() const {
   return Pattern;
 }
 
-inline SurfaceType PatternTrackParameters::surfaceType() const {
+inline constexpr SurfaceType PatternTrackParameters::surfaceType() const {
   return m_surface->type();
 }
 

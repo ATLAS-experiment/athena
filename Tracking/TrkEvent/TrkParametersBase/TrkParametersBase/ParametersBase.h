@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -75,18 +75,6 @@ public:
   /** equality operator */
   virtual bool operator==(const ParametersBase<DIM, T>&) const;
 
-  /** Test to see if there's a not null surface ptr. */
-  virtual bool hasSurface() const override = 0;
-
-  /** Access to the Surface associated to the Parameters*/
-  virtual const Surface& associatedSurface() const override = 0;
-
-  /** Return the measurement frame - this is needed for alignment, in
-     particular for StraightLine and Perigee Surface
-      - the default implementation is the RotationMatrix3D of the
-     transform */
-  virtual Amg::RotationMatrix3D measurementFrame() const override = 0;
-
   /** clone method for polymorphic deep copy
        @return new object copied from the concrete type of this object.*/
   virtual ParametersBase<DIM, T>* clone() const override = 0;
@@ -97,13 +85,6 @@ public:
   std::unique_ptr<ParametersBase<DIM, T>> uniqueClone() const{
     return std::unique_ptr<ParametersBase<DIM, T>>(this->clone());
   }
-
-  /** Return the ParametersType enum */
-  constexpr virtual ParametersType type() const override = 0;
-
-  /** Returns the Surface Type enum for the surface used
-   * to define the derived class*/
-  constexpr virtual SurfaceType surfaceType() const override = 0;
 
   /** Dumps relevant information about the track parameters into the ostream */
   virtual MsgStream& dump(MsgStream& out) const;
@@ -130,7 +111,6 @@ protected:
   ParametersBase(const AmgVector(DIM) & parameters,
                  std::optional<AmgSymMatrix(DIM)>&& covariance = std::nullopt);
 
-  virtual void updateParametersHelper(const AmgVector(DIM) &) override = 0;
   /*
    * Add dependent names into scope
    */
