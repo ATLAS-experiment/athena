@@ -6,6 +6,8 @@
 #define ACTSTOOLINTERFACES_IGBTSLAYERTOOL_H
 
 // Athena
+#include "ActsToolInterfaces/GbtsLayerTechnology.h"
+
 #include "GaudiKernel/IAlgTool.h"
 
 // ACTS
@@ -19,8 +21,9 @@ namespace ActsTrk {
 ///
 /// GBTS groups the silicon modules into layers of its own and addresses them
 /// by a dense index. This tool owns that grouping: it hands out the layer
-/// descriptions in dense-index order, and the wafer hash to dense index maps
-/// that turn a space point's module into the layer it belongs to.
+/// descriptions in dense-index order, what each layer is made of, and the
+/// wafer hash to dense index maps that turn a space point's module into the
+/// layer it belongs to.
 class IGbtsLayerTool : virtual public IAlgTool {
  public:
   DeclareInterfaceID(IGbtsLayerTool, 1, 0);
@@ -37,6 +40,11 @@ class IGbtsLayerTool : virtual public IAlgTool {
 
   /// Strip wafer hash to dense GBTS layer index, `kNoLayer` where unused.
   virtual const std::vector<short>& stripLayers() const = 0;
+
+  /// What each GBTS layer is made of, indexed by the dense GBTS layer index
+  /// and so parallel to `layerDescriptions()`. The grouping decides this, so
+  /// nothing downstream has to read it back off the layer id.
+  virtual const std::vector<GbtsTechnology>& layerTechnologies() const = 0;
 };
 
 }  // namespace ActsTrk

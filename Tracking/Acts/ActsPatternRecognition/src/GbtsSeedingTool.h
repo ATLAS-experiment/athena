@@ -67,6 +67,14 @@ namespace ActsTrk {
     /// sets configs based on gaudi properties defined below
     StatusCode prepareConfiguration();
 
+    /// Reads the connection table and keeps the connections this pass is for:
+    /// both layers have to be layers this detector has, of one technology,
+    /// and that technology has to be one the pass asked for.
+    StatusCode readConnections(
+      const std::vector<Acts::Experimental::GbtsLayerDescription>& layers,
+      const std::vector<GbtsTechnology>& technologies,
+      Acts::Experimental::GbtsLayerConnectionMap& connections) const;
+
     /// Private access to the logger
     const Acts::Logger &logger() const { return *m_logger; }
 
@@ -100,6 +108,8 @@ namespace ActsTrk {
 
     // Config settings                                                              
     Gaudi::Property<std::string> m_connectorInputFile {this, "connectorInputFile","binTables_ITK_RUN4.txt", "input file for making connector object"};
+    Gaudi::Property<bool> m_pixelConnections {this, "usePixelConnections", true, "keep the pixel to pixel connections of the table"};
+    Gaudi::Property<bool> m_stripConnections {this, "useStripConnections", false, "keep the strip to strip connections of the table"};
     Gaudi::Property<std::string> m_lutFile {this, "lutInputFile", "gbts_ml_pixel_barrel_loose.lut", "file to LUT"}; 
     
     // GraphBasedTrackSeeder: feature option
