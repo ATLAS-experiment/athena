@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -7,7 +7,7 @@ from LArCellRec.LArCellBuilderConfig import LArCellBuilderCfg,LArCellCorrectorCf
 from TileRecUtils.TileCellBuilderConfig import TileCellBuilderCfg
 from CaloCellCorrection.CaloCellCorrectionConfig import CaloCellPedestalCorrCfg, CaloCellNeighborsAverageCorrCfg, CaloCellTimeCorrCfg, CaloEnergyRescalerCfg
 
-def CaloCellMakerCfg(flags):
+def CaloCellMakerCfg(flags, doDigiHSTruth=False):
     result=ComponentAccumulator()
    
     from LArGeoAlgsNV.LArGMConfig import LArGMCfg
@@ -16,9 +16,9 @@ def CaloCellMakerCfg(flags):
     result.merge(LArGMCfg(flags))
     result.merge(TileGMCfg(flags))
 
-    larCellBuilder     = result.popToolsAndMerge(LArCellBuilderCfg(flags))
+    larCellBuilder     = result.popToolsAndMerge(LArCellBuilderCfg(flags, doDigiHSTruth=doDigiHSTruth))
     larCellCorrectors  = result.popToolsAndMerge(LArCellCorrectorCfg(flags))
-    tileCellBuilder = result.popToolsAndMerge(TileCellBuilderCfg(flags))
+    tileCellBuilder = result.popToolsAndMerge(TileCellBuilderCfg(flags, doDigiHSTruth=doDigiHSTruth))
     cellFinalizer  = CompFactory.CaloCellContainerFinalizerTool()
 
     cellMakerTools=[larCellBuilder,tileCellBuilder,cellFinalizer]+larCellCorrectors
@@ -51,8 +51,16 @@ def CaloCellMakerCfg(flags):
         theLArDeadOTXCorr=LArDeadOTXCorrCfg(flags)
         cellMakerTools.append(result.popToolsAndMerge(theLArDeadOTXCorr))
 
-    cellAlgo = CompFactory.CaloCellMaker(CaloCellMakerToolNames=cellMakerTools,
-                                         CaloCellsOutputName="AllCalo",
+    cellOutputName = "AllCalo"
+    toolName = "CaloCellMaker"
+
+    if doDigiHSTruth:
+        cellOutputName = "AllCalo_DigiHSTruth"
+        toolName = "CaloCellMaker_DigiHSTruth"
+
+    cellAlgo = CompFactory.CaloCellMaker(toolName,
+                                         CaloCellMakerToolNames=cellMakerTools,
+                                         CaloCellsOutputName=cellOutputName,
                                          EnableChronoStat=(flags.Concurrency.NumThreads == 0))
 
     result.addEventAlgo(cellAlgo, primary=True)

@@ -8,14 +8,19 @@ from LArBadChannelTool.LArBadChannelConfig import LArBadChannelCfg, LArBadFebCfg
 from LArCalibUtils.LArHVScaleConfig import LArHVScaleCfg
 from LArConfiguration.LArConfigFlags import RawChannelSource 
 
-def LArCellBuilderCfg(configFlags):
+def LArCellBuilderCfg(configFlags, doDigiHSTruth=False):
     result=ComponentAccumulator()
     result.merge(LArOnOffIdMappingCfg(configFlags))
     result.merge(LArBadFebCfg(configFlags))
-    theLArCellBuilder = LArCellBuilderFromLArRawChannelTool()
+    name = "LArCellBuilderFromLArRawChannelTool"
+    if doDigiHSTruth:
+        name = "LArCellBuilderFromLArRawChannelTool_DigiHSTruth"
+    theLArCellBuilder = LArCellBuilderFromLArRawChannelTool(name)
     theLArCellBuilder.LArCablingKey = "ConditionStore+LArOnOffIdMap"
     theLArCellBuilder.MissingFebKey = "ConditionStore+LArBadFeb"
-    if configFlags.LAr.RawChannelSource is RawChannelSource.Calculated:
+    if doDigiHSTruth:
+        theLArCellBuilder.RawChannelsName="LArRawChannels_DigiHSTruth"
+    elif configFlags.LAr.RawChannelSource is RawChannelSource.Calculated:
        theLArCellBuilder.RawChannelsName="LArRawChannels_FromDigits"
     else:
        theLArCellBuilder.RawChannelsName = "LArRawChannels"

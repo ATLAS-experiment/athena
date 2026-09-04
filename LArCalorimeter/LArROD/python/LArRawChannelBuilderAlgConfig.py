@@ -6,11 +6,15 @@ from LArConfiguration.LArElecCalibDBConfig import LArElecCalibDBCfg
 from LArRecUtils.LArRecUtilsConfig import LArOFCCondAlgCfg
 from LArConfiguration.LArConfigFlags import RawChannelSource
 
-def LArRawChannelBuilderAlgCfg(flags, **kwargs):
+def LArRawChannelBuilderAlgCfg(flags, doDigiTruth=False, **kwargs):
 
     acc = LArADC2MeVCondAlgCfg(flags)
 
-    kwargs.setdefault("name", "LArRawChannelBuilder")
+    if not doDigiTruth:
+        kwargs.setdefault("name", "LArRawChannelBuilder")
+    else:
+        kwargs.setdefault("name", "LArRawChannelBuilder_DigiHSTruth")
+
     kwargs.setdefault("firstSample", flags.LAr.ROD.nPreceedingSamples if flags.LAr.ROD.nPreceedingSamples!=0 else flags.LAr.ROD.FirstSample)
     obj = "AthenaAttributeList"
     dspkey = 'Run2DSPThresholdsKey'
@@ -18,7 +22,12 @@ def LArRawChannelBuilderAlgCfg(flags, **kwargs):
     if flags.Input.isMC and flags.Input.Format != Format.BS:
         # need OFC configuration, which includes appropriate ElecCalibDb
         acc.merge(LArOFCCondAlgCfg(flags))
-        kwargs.setdefault("LArRawChannelKey", "LArRawChannels")
+
+        if not doDigiTruth:
+            kwargs.setdefault("LArRawChannelKey", "LArRawChannels")
+        else:
+            kwargs.setdefault("LArRawChannelKey", "LArRawChannels_DigiHSTruth")
+
         kwargs.setdefault("ShapeKey", "LArShapeSym")
         if flags.GeoModel.Run is LHCPeriod.Run1:  # back to flat threshold
            kwargs.setdefault("useDB", False)
@@ -32,6 +41,8 @@ def LArRawChannelBuilderAlgCfg(flags, **kwargs):
 
         if flags.Common.ProductionStep in [ProductionStep.PileUpPresampling, ProductionStep.PileUpPretracking]:
             kwargs.setdefault("LArDigitKey", flags.Overlay.BkgPrefix + "LArDigitContainer_MC")
+        elif doDigiTruth:
+            kwargs.setdefault("LArDigitKey", "LArDigitContainer_DigiHSTruth")
         else:
             kwargs.setdefault("LArDigitKey", "LArDigitContainer_MC")
     else:

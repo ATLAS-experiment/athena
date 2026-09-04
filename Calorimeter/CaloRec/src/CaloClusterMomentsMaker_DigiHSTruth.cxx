@@ -1,20 +1,23 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
+
 //-----------------------------------------------------------------------
 // File and Version Information:
 //
-// Description: see CaloClusterMomentsMaker.h
+// Description: see CaloClusterMomentsMaker_DigiHSTruth.h
 // 
 // Environment:
 //      Software developed for the ATLAS Detector at CERN LHC
 //
 // Author List:
 //      Sven Menke
+//      Peter Loch
 //
 //-----------------------------------------------------------------------
 
 #include "CaloClusterMomentsMaker_DigiHSTruth.h"
+#include "CaloEvent/CaloCell.h"
 #include "CaloEvent/CaloClusterContainer.h"
 #include "CaloEvent/CaloCluster.h"
 #include "CaloGeoHelpers/proxim.h"
@@ -35,85 +38,111 @@
 #include <limits>
 #include <sstream>
 
+#include <map>
+#include <vector>
+#include <tuple>
+#include <string>
+#include <cstdio>
+#include <cmath>
 
 using CLHEP::deg;
 using CLHEP::cm;
 
+
+// Known moments
 namespace {
-
-
-  //FIXME, somehow make sure these names are in sync with the xAOD variable names
-struct MomentName
-{
-  const char* name;
-  xAOD::CaloCluster::MomentType mom;
-};
-
-
-// Must be sorted by name.
-const MomentName moment_names[] = {
-  { "ENERGY_DigiHSTruth",            xAOD::CaloCluster::ENERGY_DigiHSTruth },
-  { "ETA_DigiHSTruth",               xAOD::CaloCluster::ETA_DigiHSTruth },
-  { "PHI_DigiHSTruth",               xAOD::CaloCluster::PHI_DigiHSTruth },
-  { "AVG_LAR_Q_DigiHSTruth",         xAOD::CaloCluster::AVG_LAR_Q_DigiHSTruth },
-  { "AVG_TILE_Q_DigiHSTruth",        xAOD::CaloCluster::AVG_TILE_Q_DigiHSTruth },
-  { "BADLARQ_FRAC_DigiHSTruth",      xAOD::CaloCluster::BADLARQ_FRAC_DigiHSTruth },
-  { "BAD_CELLS_CORR_E_DigiHSTruth",  xAOD::CaloCluster::BAD_CELLS_CORR_E_DigiHSTruth },
-  { "CELL_SIGNIFICANCE_DigiHSTruth", xAOD::CaloCluster::CELL_SIGNIFICANCE_DigiHSTruth },
-  { "CELL_SIG_SAMPLING_DigiHSTruth", xAOD::CaloCluster::CELL_SIG_SAMPLING_DigiHSTruth },
-  { "CENTER_LAMBDA_DigiHSTruth",     xAOD::CaloCluster::CENTER_LAMBDA_DigiHSTruth },
-  { "CENTER_MAG_DigiHSTruth",        xAOD::CaloCluster::CENTER_MAG_DigiHSTruth },
-  { "CENTER_X_DigiHSTruth",          xAOD::CaloCluster::CENTER_X_DigiHSTruth },
-  { "CENTER_Y_DigiHSTruth",          xAOD::CaloCluster::CENTER_Y_DigiHSTruth },
-  { "CENTER_Z_DigiHSTruth",          xAOD::CaloCluster::CENTER_Z_DigiHSTruth },
-  { "DELTA_ALPHA_DigiHSTruth",       xAOD::CaloCluster::DELTA_ALPHA_DigiHSTruth },
-  { "DELTA_PHI_DigiHSTruth",         xAOD::CaloCluster::DELTA_PHI_DigiHSTruth },
-  { "DELTA_THETA_DigiHSTruth",       xAOD::CaloCluster::DELTA_THETA_DigiHSTruth },
-  { "ENG_BAD_CELLS_DigiHSTruth",     xAOD::CaloCluster::ENG_BAD_CELLS_DigiHSTruth },
-  { "ENG_BAD_HV_CELLS_DigiHSTruth",  xAOD::CaloCluster::ENG_BAD_HV_CELLS_DigiHSTruth },
-  { "ENG_FRAC_CORE_DigiHSTruth",     xAOD::CaloCluster::ENG_FRAC_CORE_DigiHSTruth },
-  { "ENG_FRAC_EM_DigiHSTruth",       xAOD::CaloCluster::ENG_FRAC_EM_DigiHSTruth },
-  { "ENG_FRAC_MAX_DigiHSTruth",      xAOD::CaloCluster::ENG_FRAC_MAX_DigiHSTruth },
-  { "ENG_POS_DigiHSTruth",           xAOD::CaloCluster::ENG_POS_DigiHSTruth },
-  { "FIRST_ENG_DENS_DigiHSTruth",    xAOD::CaloCluster::FIRST_ENG_DENS_DigiHSTruth },
-  { "FIRST_ETA_DigiHSTruth",         xAOD::CaloCluster::FIRST_ETA_DigiHSTruth },
-  { "FIRST_PHI_DigiHSTruth",         xAOD::CaloCluster::FIRST_PHI_DigiHSTruth },
-  { "ISOLATION_DigiHSTruth",         xAOD::CaloCluster::ISOLATION_DigiHSTruth },
-  { "LATERAL_DigiHSTruth",           xAOD::CaloCluster::LATERAL_DigiHSTruth },
-  { "LONGITUDINAL_DigiHSTruth",      xAOD::CaloCluster::LONGITUDINAL_DigiHSTruth },
-  { "N_BAD_CELLS_DigiHSTruth",       xAOD::CaloCluster::N_BAD_CELLS_DigiHSTruth },
-  { "N_BAD_HV_CELLS_DigiHSTruth",    xAOD::CaloCluster::N_BAD_HV_CELLS_DigiHSTruth },
-  { "N_BAD_CELLS_CORR_DigiHSTruth",  xAOD::CaloCluster::N_BAD_CELLS_CORR_DigiHSTruth },
-  { "SECOND_ENG_DENS_DigiHSTruth",   xAOD::CaloCluster::SECOND_ENG_DENS_DigiHSTruth },
-  { "SECOND_LAMBDA_DigiHSTruth",     xAOD::CaloCluster::SECOND_LAMBDA_DigiHSTruth },
-  { "SECOND_R_DigiHSTruth",          xAOD::CaloCluster::SECOND_R_DigiHSTruth },
-  { "SIGNIFICANCE_DigiHSTruth",      xAOD::CaloCluster::SIGNIFICANCE_DigiHSTruth },
-};
-
-const MomentName* const moment_names_end =
-  moment_names + sizeof(moment_names)/sizeof(moment_names[0]);
-
-#if 0
-bool operator< (const std::string& v, const MomentName& m)
-{
-  return strcmp (v.c_str(), m.name) < 0;
+  // name -> enum translator
+  const std::map<std::string,xAOD::CaloCluster::MomentType> momentNameToEnumMap = {
+    { "AVG_LAR_Q_DigiHSTruth",         xAOD::CaloCluster::AVG_LAR_Q_DigiHSTruth },
+    { "AVG_TILE_Q_DigiHSTruth",        xAOD::CaloCluster::AVG_TILE_Q_DigiHSTruth },
+    { "BADLARQ_FRAC_DigiHSTruth",      xAOD::CaloCluster::BADLARQ_FRAC_DigiHSTruth },
+    { "BAD_CELLS_CORR_E_DigiHSTruth",  xAOD::CaloCluster::BAD_CELLS_CORR_E_DigiHSTruth },
+    { "CELL_SIGNIFICANCE_DigiHSTruth", xAOD::CaloCluster::CELL_SIGNIFICANCE_DigiHSTruth },
+    { "CELL_SIG_SAMPLING_DigiHSTruth", xAOD::CaloCluster::CELL_SIG_SAMPLING_DigiHSTruth },
+    { "CENTER_LAMBDA_DigiHSTruth",     xAOD::CaloCluster::CENTER_LAMBDA_DigiHSTruth },
+    { "CENTER_MAG_DigiHSTruth",        xAOD::CaloCluster::CENTER_MAG_DigiHSTruth },
+    { "CENTER_X_DigiHSTruth",          xAOD::CaloCluster::CENTER_X_DigiHSTruth },
+    { "CENTER_Y_DigiHSTruth",          xAOD::CaloCluster::CENTER_Y_DigiHSTruth },
+    { "CENTER_Z_DigiHSTruth",          xAOD::CaloCluster::CENTER_Z_DigiHSTruth },
+    { "DELTA_ALPHA_DigiHSTruth",       xAOD::CaloCluster::DELTA_ALPHA_DigiHSTruth },
+    { "DELTA_PHI_DigiHSTruth",         xAOD::CaloCluster::DELTA_PHI_DigiHSTruth },
+    { "DELTA_THETA_DigiHSTruth",       xAOD::CaloCluster::DELTA_THETA_DigiHSTruth },
+    { "ENG_BAD_CELLS_DigiHSTruth",     xAOD::CaloCluster::ENG_BAD_CELLS_DigiHSTruth },
+    { "ENG_BAD_HV_CELLS_DigiHSTruth",  xAOD::CaloCluster::ENG_BAD_HV_CELLS_DigiHSTruth },
+    { "ENG_FRAC_CORE_DigiHSTruth",     xAOD::CaloCluster::ENG_FRAC_CORE_DigiHSTruth },
+    { "ENG_FRAC_EM_DigiHSTruth",       xAOD::CaloCluster::ENG_FRAC_EM_DigiHSTruth },
+    { "ENG_FRAC_MAX_DigiHSTruth",      xAOD::CaloCluster::ENG_FRAC_MAX_DigiHSTruth },
+    { "ENG_POS_DigiHSTruth",           xAOD::CaloCluster::ENG_POS_DigiHSTruth },
+    { "FIRST_ENG_DENS_DigiHSTruth",    xAOD::CaloCluster::FIRST_ENG_DENS_DigiHSTruth },
+    { "FIRST_ETA_DigiHSTruth",         xAOD::CaloCluster::FIRST_ETA_DigiHSTruth },
+    { "FIRST_PHI_DigiHSTruth",         xAOD::CaloCluster::FIRST_PHI_DigiHSTruth },
+    { "ISOLATION_DigiHSTruth",         xAOD::CaloCluster::ISOLATION_DigiHSTruth },
+    { "LATERAL_DigiHSTruth",           xAOD::CaloCluster::LATERAL_DigiHSTruth },
+    { "LONGITUDINAL_DigiHSTruth",      xAOD::CaloCluster::LONGITUDINAL_DigiHSTruth },
+    { "MASS_DigiHSTruth",              xAOD::CaloCluster::MASS_DigiHSTruth },
+    { "N_BAD_CELLS_DigiHSTruth",       xAOD::CaloCluster::N_BAD_CELLS_DigiHSTruth },
+    { "N_BAD_HV_CELLS_DigiHSTruth",    xAOD::CaloCluster::N_BAD_HV_CELLS_DigiHSTruth },
+    { "N_BAD_CELLS_CORR_DigiHSTruth",  xAOD::CaloCluster::N_BAD_CELLS_CORR_DigiHSTruth },
+    { "PTD_DigiHSTruth",               xAOD::CaloCluster::PTD_DigiHSTruth },
+    { "SECOND_ENG_DENS_DigiHSTruth",   xAOD::CaloCluster::SECOND_ENG_DENS_DigiHSTruth },
+    { "SECOND_LAMBDA_DigiHSTruth",     xAOD::CaloCluster::SECOND_LAMBDA_DigiHSTruth },
+    { "SECOND_R_DigiHSTruth",          xAOD::CaloCluster::SECOND_R_DigiHSTruth },
+    { "SECOND_TIME_DigiHSTruth",       xAOD::CaloCluster::SECOND_TIME_DigiHSTruth },
+    { "SIGNIFICANCE_DigiHSTruth",      xAOD::CaloCluster::SIGNIFICANCE_DigiHSTruth },
+    { "ENERGY_DigiHSTruth",            xAOD::CaloCluster::ENERGY_DigiHSTruth },
+    { "ETA_DigiHSTruth",               xAOD::CaloCluster::ETA_DigiHSTruth },
+    { "PHI_DigiHSTruth",               xAOD::CaloCluster::PHI_DigiHSTruth }
+  };
+  // enum -> name translator
+  const std::map<xAOD::CaloCluster::MomentType,std::string> momentEnumToNameMap = {
+    { xAOD::CaloCluster::AVG_LAR_Q_DigiHSTruth,          "AVG_LAR_Q_DigiHSTruth"        },
+    { xAOD::CaloCluster::AVG_TILE_Q_DigiHSTruth,         "AVG_TILE_Q_DigiHSTruth"       },
+    { xAOD::CaloCluster::BADLARQ_FRAC_DigiHSTruth,       "BADLARQ_FRAC_DigiHSTruth"     },
+    { xAOD::CaloCluster::BAD_CELLS_CORR_E_DigiHSTruth,   "BAD_CELLS_CORR_E_DigiHSTruth" },
+    { xAOD::CaloCluster::CELL_SIGNIFICANCE_DigiHSTruth,  "CELL_SIGNIFICANCE_DigiHSTruth"},
+    { xAOD::CaloCluster::CELL_SIG_SAMPLING_DigiHSTruth,  "CELL_SIG_SAMPLING_DigiHSTruth"},
+    { xAOD::CaloCluster::CENTER_LAMBDA_DigiHSTruth,      "CENTER_LAMBDA_DigiHSTruth"    },
+    { xAOD::CaloCluster::CENTER_MAG_DigiHSTruth,         "CENTER_MAG_DigiHSTruth"       },
+    { xAOD::CaloCluster::CENTER_X_DigiHSTruth,           "CENTER_X_DigiHSTruth"         },
+    { xAOD::CaloCluster::CENTER_Y_DigiHSTruth,           "CENTER_Y_DigiHSTruth"         },
+    { xAOD::CaloCluster::CENTER_Z_DigiHSTruth,           "CENTER_Z_DigiHSTruth"         },
+    { xAOD::CaloCluster::DELTA_ALPHA_DigiHSTruth,        "DELTA_ALPHA_DigiHSTruth"      },
+    { xAOD::CaloCluster::DELTA_PHI_DigiHSTruth,          "DELTA_PHI_DigiHSTruth"        },
+    { xAOD::CaloCluster::DELTA_THETA_DigiHSTruth,        "DELTA_THETA_DigiHSTruth"      },
+    { xAOD::CaloCluster::ENG_BAD_CELLS_DigiHSTruth,      "ENG_BAD_CELLS_DigiHSTruth"    },
+    { xAOD::CaloCluster::ENG_BAD_HV_CELLS_DigiHSTruth,   "ENG_BAD_HV_CELLS_DigiHSTruth" },
+    { xAOD::CaloCluster::ENG_FRAC_CORE_DigiHSTruth,      "ENG_FRAC_CORE_DigiHSTruth"    },
+    { xAOD::CaloCluster::ENG_FRAC_EM_DigiHSTruth,        "ENG_FRAC_EM_DigiHSTruth"      },
+    { xAOD::CaloCluster::ENG_FRAC_MAX_DigiHSTruth,       "ENG_FRAC_MAX_DigiHSTruth"     },
+    { xAOD::CaloCluster::ENG_POS_DigiHSTruth,            "ENG_POS_DigiHSTruth"          },
+    { xAOD::CaloCluster::FIRST_ENG_DENS_DigiHSTruth,     "FIRST_ENG_DENS_DigiHSTruth"   },
+    { xAOD::CaloCluster::FIRST_ETA_DigiHSTruth,          "FIRST_ETA_DigiHSTruth"        },
+    { xAOD::CaloCluster::FIRST_PHI_DigiHSTruth,          "FIRST_PHI_DigiHSTruth"        },
+    { xAOD::CaloCluster::ISOLATION_DigiHSTruth,          "ISOLATION_DigiHSTruth"        },
+    { xAOD::CaloCluster::LATERAL_DigiHSTruth,            "LATERAL_DigiHSTruth"          },
+    { xAOD::CaloCluster::LONGITUDINAL_DigiHSTruth,       "LONGITUDINAL_DigiHSTruth"     },
+    { xAOD::CaloCluster::MASS_DigiHSTruth,               "MASS_DigiHSTruth"             },
+    { xAOD::CaloCluster::N_BAD_CELLS_DigiHSTruth,        "N_BAD_CELLS_DigiHSTruth"      },
+    { xAOD::CaloCluster::N_BAD_HV_CELLS_DigiHSTruth,     "N_BAD_HV_CELLS_DigiHSTruth"   },
+    { xAOD::CaloCluster::N_BAD_CELLS_CORR_DigiHSTruth,   "N_BAD_CELLS_CORR_DigiHSTruth" },
+    { xAOD::CaloCluster::PTD_DigiHSTruth,                "PTD_DigiHSTruth"              },
+    { xAOD::CaloCluster::SECOND_ENG_DENS_DigiHSTruth,    "SECOND_ENG_DENS_DigiHSTruth"  },
+    { xAOD::CaloCluster::SECOND_LAMBDA_DigiHSTruth,      "SECOND_LAMBDA_DigiHSTruth"    },
+    { xAOD::CaloCluster::SECOND_R_DigiHSTruth,           "SECOND_R_DigiHSTruth"         },
+    { xAOD::CaloCluster::SECOND_TIME_DigiHSTruth,        "SECOND_TIME_DigiHSTruth"      },
+    { xAOD::CaloCluster::SIGNIFICANCE_DigiHSTruth,       "SIGNIFICANCE_DigiHSTruth"     },
+    { xAOD::CaloCluster::ENERGY_DigiHSTruth,             "ENERGY_DigiHSTruth"           },
+    { xAOD::CaloCluster::ETA_DigiHSTruth,                "ETA_DigiHSTruth"              },
+    { xAOD::CaloCluster::PHI_DigiHSTruth,                "PHI_DigiHSTruth"              }
+  };
 }
-#endif
-bool operator< (const MomentName& m, const std::string& v)
-{
-  return strcmp (m.name, v.c_str()) < 0;
-}
-
-
-}
-
 
 //###############################################################################
 
 CaloClusterMomentsMaker_DigiHSTruth::CaloClusterMomentsMaker_DigiHSTruth(const std::string& type, 
 						 const std::string& name,
 						 const IInterface* parent)
-  :AthAlgTool(type, name, parent),
+  : AthAlgTool(type, name, parent),
     m_calo_id(nullptr),
     m_maxAxisAngle(20*deg),
     m_minRLateral(4*cm),
@@ -127,135 +156,154 @@ CaloClusterMomentsMaker_DigiHSTruth::CaloClusterMomentsMaker_DigiHSTruth(const s
     m_larHVFraction("LArHVFraction",this),
     m_absOpt(false) 
 {
+  declareInterface<CaloClusterCollectionProcessor> (this);
   // Name(s) of Moments to calculate
   declareProperty("MomentsNames",m_momentsNames);
 
-  // Name(s) of Moments which can be stored on the AOD - all others go to ESD
-  // m_momentsNamesAOD.push_back(std::string("FIRST_PHI"));
-  // m_momentsNamesAOD.push_back(std::string("FIRST_ETA"));
-  // m_momentsNamesAOD.push_back(std::string("SECOND_R"));
-  // m_momentsNamesAOD.push_back(std::string("SECOND_LAMBDA"));
-  // m_momentsNamesAOD.push_back(std::string("CENTER_LAMBDA"));
-  // m_momentsNamesAOD.push_back(std::string("FIRST_ENG_DENS"));
-  // m_momentsNamesAOD.push_back(std::string("ENG_BAD_CELLS"));
-  // m_momentsNamesAOD.push_back(std::string("N_BAD_CELLS"));
-
-  //declareProperty("AODMomentsNames",m_momentsNamesAOD);
-  // maximum allowed angle between shower axis and the vector pointing
-  // to the shower center from the IP in degrees. This property is need
+  // Maximum allowed angle between shower axis and the vector pointing
+  // to the shower center from the IP in degrees. This property is needed
   // to protect against cases where all significant cells are in one sampling
-  // and the shower axis can not be defined from them
+  // and the shower axis can thus not be defined.
   declareProperty("MaxAxisAngle",m_maxAxisAngle);
   declareProperty("MinRLateral",m_minRLateral);
   declareProperty("MinLLongitudinal",m_minLLongitudinal);
   declareProperty("MinBadLArQuality",m_minBadLArQuality);
-  // use 2-gaussian noise for Tile
+  // Use 2-gaussian noise for Tile
   declareProperty("TwoGaussianNoise",m_twoGaussianNoise);
   declareProperty("LArHVFraction",m_larHVFraction,"Tool Handle for LArHVFraction");
-
-  /// Not used anymore (with xAOD), but required when configured from COOL.
+  // Not used anymore (with xAOD), but required when configured from  COOL.
   declareProperty("AODMomentsNames",m_momentsNamesAOD);
   // Use weighting of neg. clusters option?
   declareProperty("WeightingOfNegClusters", m_absOpt);
+  // Set eta boundary for transition from outer to inner wheel in EME2
+  declareProperty("EMECAbsEtaWheelTransition",m_etaInnerWheel);
 }
 
 //###############################################################################
 
 StatusCode CaloClusterMomentsMaker_DigiHSTruth::initialize()
 {
+  xAOD::CaloCluster dummyCluster;
 
-  //FIXME: All that could be done at initialize!
-  m_calculateSignificance = false;
-  m_calculateIsolation = false;
+  // loop list of requested moments
+  std::string::size_type nstr(0); int nmom(0);
+  for (const auto& mom : m_momentsNames) {
+    ATH_MSG_DEBUG("Moment " << mom << " requested");
+    // check if moment is known (enumerator available)
+    auto fmap(momentNameToEnumMap.find(mom));
+    if (fmap != momentNameToEnumMap.end()) {
+      // valid moment found
+      nstr = std::max(nstr, mom.length());
+      ++nmom;
+      if (fmap->second == xAOD::CaloCluster::SECOND_TIME_DigiHSTruth) {
+        // special flag for second moment of cell times - this moment is not
+        // calculated in this tool! Do not add to internal (!) valid moments
+        // list. Its value is available from xAOD::CaloCluster::secondTime()!
+        m_secondTime = true;
 
-  // translate all moment names specified in MomentsNames property to moment enums,
-  // check that they are all valid and there are no repeating names
-  for(const auto& name: m_momentsNames) {
-    const MomentName* it =
-      std::lower_bound (moment_names, moment_names_end, name);
-      //std::find(moment_names, moment_names_end, name);
-      //moment_names.find(name);
+        // Make sure the variable used for the moment is declared
+        // to the auxiliary variable registry.  Otherwise, if we don't
+        // set the moment for the first event (perhaps because there
+        // are no clusters), then we can get warnings from AuxSelection.
+        (void)dummyCluster.getMomentValue (fmap->second);
+      } else if (fmap->second == xAOD::CaloCluster::EM_PROBABILITY_DigiHSTruth) {
+        ATH_MSG_WARNING(mom
+                        << " not calculated in this tool - misconfiguration?");
+      } else {
+        // Make sure the variable used for the moment is declared
+        // to the auxiliary variable registry.
+        (void)dummyCluster.getMomentValue (fmap->second);
 
-		for(const auto& testName: moment_names){
-			if(name == testName.name) it = &testName;
-		}
-    if (it != moment_names_end) {
-      m_validMoments.push_back (it->mom);
-      switch (it->mom) {
-      case xAOD::CaloCluster::SIGNIFICANCE_DigiHSTruth:
-      case xAOD::CaloCluster::CELL_SIGNIFICANCE_DigiHSTruth:
-        m_calculateSignificance = true;
-        break;
-      case xAOD::CaloCluster::ISOLATION_DigiHSTruth:
-        m_calculateIsolation = true;
-        break;
-      case xAOD::CaloCluster::ENG_BAD_HV_CELLS_DigiHSTruth:
-        m_calculateLArHVFraction = true;
-      default:
-        break;
+        // all other valid moments
+        m_validMoments.push_back(fmap->second);
+        // flag some special requests
+        switch (fmap->second) {
+          case xAOD::CaloCluster::SIGNIFICANCE_DigiHSTruth:
+          case xAOD::CaloCluster::CELL_SIGNIFICANCE_DigiHSTruth:
+            m_calculateSignificance = true;
+            break;
+          case xAOD::CaloCluster::ISOLATION_DigiHSTruth:
+            m_calculateIsolation = true;
+            break;
+          case xAOD::CaloCluster::ENG_BAD_HV_CELLS_DigiHSTruth:
+            m_calculateLArHVFraction = true;
+            break;
+          default:
+            break;
+        }  // set special processing flags
+      }    // moment calculated with this tool
+    } else {
+      ATH_MSG_ERROR("Moment name " << mom << " not known; known moments are:");
+      char buffer[128];
+      std::string::size_type lstr(nstr);
+      // determine field size
+      for (const auto& fmom : momentNameToEnumMap) {
+        lstr = std::max(lstr, fmom.first.length());
       }
-    }
-    else {
-      msg(MSG::ERROR) << "Moment " << name
-		      << " is not a valid Moment name and will be ignored! "
-		      << "Valid names are:";
-      int count = 0;
-      for (const MomentName& m : moment_names)
-	msg() << ((count++)==0?" ":", ") << m.name;
-      msg() << endmsg;
-    }
+      // print available moments
+      for (const auto& fmom : momentNameToEnumMap) {
+        sprintf(buffer, "moment name: %-*.*s - enumerator: %i", (int)lstr,
+                (int)lstr, fmom.first.c_str(), (int)fmom.second);
+        ATH_MSG_ERROR(buffer);
+      }
+      auto fmom(momentNameToEnumMap.find("SECOND_TIME_DigiHSTruth"));
+      sprintf(buffer, "moment name: %-*.*s - enumerator: %i", (int)nstr,
+              (int)nstr, fmom->first.c_str(), (int)fmom->second);
+      ATH_MSG_ERROR(buffer);
+      fmom = momentNameToEnumMap.find("NCELL_SAMPLING_DigiHSTruth");
+      sprintf(buffer, "moment name: %-*.*s - enumerator: %i", (int)nstr,
+              (int)nstr, fmom->first.c_str(), (int)fmom->second);
+      ATH_MSG_ERROR(buffer);
+      return StatusCode::FAILURE;
+    }  // found unknown moment name
+  }    // loop configured moment names
+
+  // sort and remove duplicates
+  std::sort(m_validMoments.begin(), m_validMoments.end());
+  m_validMoments.erase(
+      std::unique(m_validMoments.begin(), m_validMoments.end()),
+      m_validMoments.end());
+
+  // print configured moments
+  ATH_MSG_INFO("Construct and save " << nmom << " cluster moments: ");
+  char buffer[128];
+  for (auto menum : m_validMoments) {
+    sprintf(buffer, "moment name: %-*.*s - enumerator: %i", (int)nstr,
+            (int)nstr, momentEnumToNameMap.at(menum).c_str(), (int)menum);
+    ATH_MSG_INFO(buffer);
+  }
+  if (m_secondTime) {
+    auto fmom(momentNameToEnumMap.find("SECOND_TIME_DigiHSTruth"));
+    sprintf(buffer, "moment name: %-*.*s - enumerator: %i (save only)",
+            (int)nstr, (int)nstr, fmom->first.c_str(), (int)fmom->second);
+    ATH_MSG_INFO(buffer);
   }
 
-  // sort and remove duplicates, order is not required for any of the code below
-  // but still may be useful property
-  std::stable_sort(m_validMoments.begin(), m_validMoments.end());
-/*
-  m_validMoments.erase(std::unique(m_validMoments.begin(),
-                                   m_validMoments.end()),
-                       m_validMoments.end());
-*/
+  // retrieve CaloCell ID server
+  CHECK(detStore()->retrieve(m_calo_id,"CaloCell_ID"));
 
-  
-  /*
-  // translate moment names in AODMomentsNames property into set of enums,
-  // only take valid names which are also in MomentsNames property
-  m_momentsAOD.reserve(m_momentsNamesAOD.size());
-  for(const auto& name: m_momentsNamesAOD) {
-    const MomentName* it =
-      std::lower_bound (moment_names, moment_names_end, name);
-    if (it != moment_names_end) {
-      if (std::find(m_validMoments.begin(), m_validMoments.end(), it->mom)
-          != m_validMoments.end())
-      {
-        m_momentsAOD.push_back(it->mom);
-      }
-    }
-  }
-  */
-  
-  ATH_CHECK(detStore()->retrieve(m_calo_id,"CaloCell_ID"));
-  
-  ATH_CHECK(m_caloDepthTool.retrieve());
+  // retrieve the calo depth tool
+  CHECK(m_caloDepthTool.retrieve());
   ATH_CHECK(m_caloMgrKey.initialize());
 
-  if (m_calculateSignificance) {
-    ATH_CHECK(m_noiseCDOKey.initialize());
-  }
+  // retrieve specific servers and tools for selected processes
+  ATH_CHECK(m_noiseCDOKey.initialize(m_calculateSignificance));
+  if (m_calculateLArHVFraction) { ATH_CHECK(m_larHVFraction.retrieve()); } else { m_larHVFraction.disable(); }
 
-  if (m_calculateLArHVFraction) {
-    ATH_CHECK(m_larHVFraction.retrieve());
-  }
-  else {
-    m_larHVFraction.disable();
-  }
+  ATH_CHECK(m_signalCellKey.initialize());
 
   return StatusCode::SUCCESS;
-  
+}
+
+StatusCode CaloClusterMomentsMaker_DigiHSTruth::finalize()
+{
+  return StatusCode::SUCCESS;
 }
 
 //#############################################################################
 
 namespace CaloClusterMomentsMaker_DigiHSTruth_detail {
+
 
 struct cellinfo {
   double x;
@@ -268,6 +316,23 @@ struct cellinfo {
   double lambda;
   double volume;
   CaloCell_ID::CaloSample sample;
+  unsigned int identifier;
+  cellinfo(const bool useGPUCriteria = false)
+  {
+    if (useGPUCriteria) {
+      x = 0;
+      y = 0;
+      z = 0;
+      energy = 0;
+      eta = 0;
+      phi = 0;
+      r = 0;
+      lambda = 0;
+      volume = 0;
+      sample = CaloCell_ID::Unknown;
+      identifier = 0;
+    }
+  }
 };
 
 } // namespace CaloClusterMomentsMaker_DigiHSTruth_detail
@@ -277,7 +342,6 @@ CaloClusterMomentsMaker_DigiHSTruth::execute(const EventContext& ctx,
                                  xAOD::CaloClusterContainer *theClusColl)
   const
 {
-
   ATH_MSG_DEBUG("Executing " << name());
 
   SG::ReadHandle<CaloCellContainer> signalCells(m_signalCellKey,ctx);
@@ -297,9 +361,8 @@ CaloClusterMomentsMaker_DigiHSTruth::execute(const EventContext& ctx,
 
   SG::ReadCondHandle<CaloDetDescrManager> caloMgrHandle{ m_caloMgrKey, ctx };
   const CaloDetDescrManager* caloDDMgr = *caloMgrHandle;
- 
-  // Counters for number of empty and non-empty neighbor cells per sampling layer
-  // Only used when cluster isolation moment is calculated.
+  // Counters for number of empty and non-empty neighbor cells per sampling
+  // layer Only used when cluster isolation moment is calculated.
   int nbEmpty[CaloCell_ID::Unknown];
   int nbNonEmpty[CaloCell_ID::Unknown];
 
@@ -317,36 +380,37 @@ CaloClusterMomentsMaker_DigiHSTruth::execute(const EventContext& ctx,
     clusterIdx.resize(m_calo_id->calo_cell_hash_max(),
                       clusterPair_t(noCluster, noCluster));
 
-    int iCluster = 0;
+    int iClus = 0;
     for (xAOD::CaloCluster* theCluster : *theClusColl) {
       // loop over all cell members and fill cell vector for used cells
       xAOD::CaloCluster::cell_iterator cellIter    = theCluster->cell_begin();
       xAOD::CaloCluster::cell_iterator cellIterEnd = theCluster->cell_end();
       for(; cellIter != cellIterEnd; cellIter++ ){
         CxxUtils::prefetchNext(cellIter, cellIterEnd);
-        const CaloCell* myCell = *cellIter;
+        const CaloCell* pCell = *cellIter;
+	const CaloDetDescrElement * caloDDE = pCell->caloDDE();
 
-        const CaloDetDescrElement * caloDDE = myCell->caloDDE();
+	// Specific DigiHSTruth part
         IdentifierHash hashid=caloDDE->calo_hash() ;
         if(! hashid.is_valid() ) continue;
         if(hashid >= (signalCells)->size()) continue;
-        myCell = (*signalCells).findCell(hashid);
-        if(!myCell) continue;
+        pCell = (*signalCells).findCell(hashid);
+        if(!pCell) continue;
+	// End specific DigiHSTruth part
 
-
-	Identifier myId = myCell->ID();
+	Identifier myId = pCell->ID();
 	IdentifierHash myHashId = m_calo_id->calo_cell_hash(myId); 
 	if ( clusterIdx[(unsigned int)myHashId].first != noCluster) {
 	  // check weight and assign to current cluster if weight is > 0.5
 	  double weight = cellIter.weight();
 	  if ( weight > 0.5 )
-	    clusterIdx[(unsigned int)myHashId].first = iCluster;
+	    clusterIdx[(unsigned int)myHashId].first = iClus;
 	}
 	else {
-	  clusterIdx[(unsigned int)myHashId].first = iCluster;
+	  clusterIdx[(unsigned int)myHashId].first = iClus;
 	}
       }
-      ++iCluster;
+      ++iClus;
     }
   }
 
@@ -358,6 +422,7 @@ CaloClusterMomentsMaker_DigiHSTruth::execute(const EventContext& ctx,
   std::vector<double> maxSampE (CaloCell_ID::Unknown);
   std::vector<double> myMoments(m_validMoments.size(),0);
   std::vector<double> myNorms(m_validMoments.size(),0);
+  std::vector<std::tuple<int,int> > nCellsSamp; nCellsSamp.reserve(CaloCell_ID::Unknown);
   std::vector<IdentifierHash> theNeighbors;
   // loop over individual clusters
   xAOD::CaloClusterContainer::iterator clusIter = theClusColl->begin();
@@ -366,7 +431,7 @@ CaloClusterMomentsMaker_DigiHSTruth::execute(const EventContext& ctx,
   for( ;clusIter!=clusIterEnd;++clusIter,++iClus) {
     xAOD::CaloCluster * theCluster = *clusIter;
 
-    double w(0),xc(0),yc(0),zc(0);
+    double w(0),xc(0),yc(0),zc(0),mx(0),my(0),mz(0),mass(0);
     double eBad(0),ebad_dac(0),ePos(0),eBadLArQ(0),sumSig2(0),maxAbsSig(0);
     double eLAr2(0),eLAr2Q(0);
     double eTile2(0),eTile2Q(0);
@@ -374,23 +439,24 @@ CaloClusterMomentsMaker_DigiHSTruth::execute(const EventContext& ctx,
     int nbad(0),nbad_dac(0),nBadLArHV(0);
     unsigned int ncell(0),i,nSigSampl(0);
     unsigned int theNumOfCells = theCluster->size();
-		double theClusterEnergy = 0;
-		double theClusterAbsEnergy = 0;
-		double theClusterEta = 0;
-		double theClusterPhi = 0;
-    
+    double theClusterEnergy = 0;
+    double theClusterAbsEnergy = 0;
+    double theClusterEta = 0;
+    double theClusterPhi = 0;
+    double theNewTime(0),theNewSecondTime(0),timeNorm(0);
+
     // these two are needed for the LATERAL moment
     int iCellMax(-1);
     int iCellScndMax(-1);
 
     if (cellinfo.capacity() == 0)
       cellinfo.reserve (theNumOfCells*2);
-    cellinfo.resize (theNumOfCells);
-    
-    double phi0 = theCluster->phi();;
+    cellinfo.resize (theNumOfCells, CaloClusterMomentsMaker_DigiHSTruth_detail::cellinfo(m_useGPUCriteria));
+
+    double phi0 = theCluster->phi();
     for(i=0;i<(unsigned int)CaloCell_ID::Unknown;i++) 
       maxSampE[i] = 0;
-    
+
     if ( !m_momentsNames.empty() ) {
       std::fill (myMoments.begin(), myMoments.end(), 0);
       std::fill (myNorms.begin(),   myNorms.end(),   0);
@@ -398,45 +464,48 @@ CaloClusterMomentsMaker_DigiHSTruth::execute(const EventContext& ctx,
         std::fill_n(nbNonEmpty, CaloCell_ID::Unknown, 0);
         std::fill_n(nbEmpty, CaloCell_ID::Unknown, 0);
       }
-      
+
       // loop over all cell members and calculate the center of mass
       xAOD::CaloCluster::cell_iterator cellIter    = theCluster->cell_begin();
       xAOD::CaloCluster::cell_iterator cellIterEnd = theCluster->cell_end();
       for(; cellIter != cellIterEnd; cellIter++ ){
         CaloPrefetch::nextDDE(cellIter, cellIterEnd);
-        const CaloCell* pCell = (*cellIter);
-        const CaloDetDescrElement * caloDDE = pCell->caloDDE();
-        IdentifierHash hashid=caloDDE->calo_hash() ;
-        if(! hashid.is_valid() ) continue;
 
+        const CaloCell* pCell = (*cellIter);
+	const CaloDetDescrElement* caloDDE = pCell->caloDDE();
+
+	// specific DigiHSTruth part
+	IdentifierHash hashid=caloDDE->calo_hash() ;
+        if(! hashid.is_valid() ) continue;
         if(hashid >= (signalCells)->size()) continue;
         pCell = (*signalCells).findCell(hashid);
+	// end specific DigiHSTruth part
 
       	Identifier myId = pCell->ID();
+	const CaloDetDescrElement* myCDDE = pCell->caloDDE();
 
-      	const CaloDetDescrElement* myCDDE = pCell->caloDDE();
-      	double ene = pCell->e();
-        if(m_absOpt) ene = std::abs(ene);
-      	double weight = cellIter.weight();//theCluster->getCellWeight(cellIter);
+	double ene = pCell->e();
+        if(m_absOpt) ene = std::abs(ene);  
+	double weight = cellIter.weight();
 
-        double thePhi;
         double cellPhi = myCDDE->phi();
-        thePhi = proxim (cellPhi, phi0);
+        double thePhi = proxim (cellPhi, phi0);
 
         theClusterEnergy += weight * ene;
         theClusterAbsEnergy += weight*std::abs(ene);
-        theClusterEta += weight*std::abs(ene)*pCell->eta(); 
-        theClusterPhi += weight*std::abs(ene)* thePhi; 
-      	if ( pCell->badcell() )       {
-      	  eBad += ene*weight;
-      	  nbad++;
-      	  if(ene!=0){
-      	    ebad_dac+=ene*weight;
-      	    nbad_dac++;
-	        }
-      	}
-  	else {
-	  if ( ! (myCDDE->is_tile()) 
+        theClusterEta += weight*std::abs(ene)*pCell->eta();
+        theClusterPhi += weight*std::abs(ene)* thePhi;
+
+	if ( pCell->badcell() ) {
+	  eBad += ene*weight;
+	  nbad++;
+	  if(ene!=0){
+	    ebad_dac+=ene*weight;
+	    nbad_dac++;
+	  }
+	}
+	else {
+	  if ( myCDDE && ! (myCDDE->is_tile()) 
 	       && ((pCell->provenance() & 0x2000) == 0x2000) 
 	       && !((pCell->provenance() & 0x0800) == 0x0800)) {
 	    if ( pCell->quality() > m_minBadLArQuality ) {
@@ -445,7 +514,7 @@ CaloClusterMomentsMaker_DigiHSTruth::execute(const EventContext& ctx,
 	    eLAr2  += ene*weight*ene*weight;
 	    eLAr2Q += ene*weight*ene*weight*pCell->quality();
 	  }
-	  if ( myCDDE->is_tile() ) {
+	  if ( myCDDE && myCDDE->is_tile() ) {
 	    uint16_t tq = pCell->quality();
 	    uint8_t tq1 = (0xFF00&tq)>>8; // quality in channel 1
 	    uint8_t tq2 = (0xFF&tq); // quality in channel 2
@@ -458,19 +527,33 @@ CaloClusterMomentsMaker_DigiHSTruth::execute(const EventContext& ctx,
 	    }
 	  } 
 	}
+
 	if ( ene > 0 ) {
 	  ePos += ene*weight;
 	}
+
 	if ( m_calculateSignificance ) {
-	  const float sigma = m_twoGaussianNoise ?			\
+	  const float sigma = m_twoGaussianNoise ?\
 	    noise->getEffectiveSigma(pCell->ID(),pCell->gain(),pCell->energy()) : \
 	    noise->getNoise(pCell->ID(),pCell->gain());
+
 	  sumSig2 += sigma*sigma;
 	  // use geomtery weighted energy of cell for leading cell significance
 	  double Sig = (sigma>0?ene*weight/sigma:0);
-	  if ( std::abs(Sig) > std::abs(maxAbsSig) ) {
-	    maxAbsSig = Sig;
-            nSigSampl = myCDDE->getSampling();
+	  if (m_useGPUCriteria) {
+	    unsigned int thisSampl = myCDDE->getSampling();
+	    if ( ( std::abs(Sig) > std::abs(maxAbsSig) )                                                 ||
+		 ( std::abs(Sig) == std::abs(maxAbsSig) && thisSampl > nSigSampl )                       ||
+		 ( std::abs(Sig) == std::abs(maxAbsSig) && thisSampl == nSigSampl && Sig > maxAbsSig )      ) {
+	      maxAbsSig = Sig;
+	      nSigSampl = thisSampl;
+	    }
+	  }
+	  else {
+	    if ( std::abs(Sig) > std::abs(maxAbsSig) ) {
+	      maxAbsSig = Sig;
+	      nSigSampl = myCDDE->getSampling();
+	    }
 	  }
 	}
 	if ( m_calculateIsolation ) {
@@ -498,54 +581,114 @@ CaloClusterMomentsMaker_DigiHSTruth::execute(const EventContext& ctx,
 	  }
 	}
 
-	if ( myCDDE && ene > 0. && weight > 0) {
-	  // get all geometric information needed ...
-          CaloClusterMomentsMaker_DigiHSTruth_detail::cellinfo& ci = cellinfo[ncell];
-	  ci.x      = myCDDE->x();
-	  ci.y      = myCDDE->y();
-	  ci.z      = myCDDE->z();
-	  ci.eta    = myCDDE->eta();
-	  ci.phi    = myCDDE->phi();
-	  ci.energy = ene*weight;
-	  ci.volume = myCDDE->volume();
-	  ci.sample = myCDDE->getSampling();
-	  if ( ci.energy > maxSampE[(unsigned int)ci.sample] )
-	    maxSampE[(unsigned int)ci.sample] = ci.energy;
-	  
-	  if (iCellMax < 0 || ci.energy > cellinfo[iCellMax].energy ) {
-	    iCellScndMax = iCellMax;
-	    iCellMax = ncell;
+	if(m_secondTime){
+	  CaloSampling::CaloSample sam = pCell->caloDDE()->getSampling();
+	  if (sam != CaloSampling::PreSamplerB &&
+	      sam != CaloSampling::PreSamplerE){
+	    unsigned int pmask = myCDDE->is_tile() ? 0x8080 : 0x2000;
+	    // Is time defined?
+	    if ( pCell->provenance() & pmask ) {
+	      // keep the sign of weight for the time norm in case a cell is removed
+	      double theTimeNorm = std::abs(weight) * weight * ene * ene;
+	      theNewTime       += theTimeNorm * pCell->time();
+	      theNewSecondTime += theTimeNorm * pCell->time() * pCell->time();
+	      timeNorm         += theTimeNorm;
+	    }
 	  }
-	  else if (iCellScndMax < 0 ||
-                   ci.energy > cellinfo[iCellScndMax].energy )
-          {
-	    iCellScndMax = ncell;
-	  }
-	  
-	  xc += ci.energy*ci.x;
-	  yc += ci.energy*ci.y;
-	  zc += ci.energy*ci.z;
-	  w  += ci.energy;
-	 
-	  ncell++;
 	}
+	
+	if ( myCDDE != nullptr ) { 
+	  if ( ene > 0. && weight > 0) {
+	    // get all geometric information needed ...
+	    CaloClusterMomentsMaker_DigiHSTruth_detail::cellinfo& ci = cellinfo[ncell];
+	    ci.x          = myCDDE->x();
+	    ci.y          = myCDDE->y();
+	    ci.z          = myCDDE->z();
+	    ci.eta        = myCDDE->eta();
+	    ci.phi        = myCDDE->phi();
+	    ci.energy     = ene*weight;
+	    ci.volume     = myCDDE->volume();
+	    ci.sample     = myCDDE->getSampling();
+	    ci.identifier = m_calo_id->calo_cell_hash(myId);
+
+	    if ( ci.energy > maxSampE[(unsigned int)ci.sample] )
+	      maxSampE[(unsigned int)ci.sample] = ci.energy;
+
+	    if (m_useGPUCriteria) {
+	      if (iCellMax < 0                                                                              ||
+		  ci.energy > cellinfo[iCellMax].energy                                                     ||
+		  (ci.energy == cellinfo[iCellMax].energy && ci.identifier > cellinfo[iCellMax].identifier)    ) {
+		iCellScndMax = iCellMax;
+		iCellMax = ncell;
+	      }
+	      else if (iCellScndMax < 0                                                                                  ||
+		       ci.energy > cellinfo[iCellScndMax].energy                                                         ||
+		       (ci.energy == cellinfo[iCellScndMax].energy && ci.identifier > cellinfo[iCellScndMax].identifier)    )
+		{
+		  iCellScndMax = ncell;
+		}
+	    }
+	    else {
+	      if (iCellMax < 0 || ci.energy > cellinfo[iCellMax].energy ) {
+		iCellScndMax = iCellMax;
+		iCellMax = ncell;
+	      }
+	      else if (iCellScndMax < 0 ||
+		       ci.energy > cellinfo[iCellScndMax].energy )
+		{
+		  iCellScndMax = ncell;
+		}
+	    }
+	  
+	    xc += ci.energy*ci.x;
+	    yc += ci.energy*ci.y;
+	    zc += ci.energy*ci.z;
+
+	    double dir = ci.x*ci.x+ci.y*ci.y+ci.z*ci.z;
+	    
+	    if ( dir > 0) {
+	      dir = sqrt(dir);
+	      dir = 1./dir;
+	    }
+	    mx += ci.energy*ci.x*dir;
+	    my += ci.energy*ci.y*dir;
+	    mz += ci.energy*ci.z*dir;
+	    
+	    w  += ci.energy;
+
+	    ncell++;
+	  } // cell has E>0 and weight != 0
+	} // cell has valid DDE
       } //end of loop over all cells
+      if (m_calculateLArHVFraction) {
+	const auto hvFrac=m_larHVFraction->getLArHVFrac(theCluster->getCellLinks(),ctx);
+	eBadLArHV= hvFrac.first;
+	nBadLArHV=hvFrac.second;
+      }
 
       if ( w > 0 ) {
+	mass = w*w - mx*mx - my*my - mz*mz;
+	if ( mass > 0) {
+	  mass = sqrt(mass);
+	}
+	else {
+	  // make mass negative if m^2 was negative
+	  mass = -sqrt(-mass);
+	}
+
 	xc/=w;
 	yc/=w;
 	zc/=w;
-  Amg::Vector3D showerCenter(xc,yc,zc);
+	Amg::Vector3D showerCenter(xc,yc,zc);
 	w=0;
 	
-
 	//log << MSG::WARNING << "Found bad cells " <<  xbad_dac << " " << ybad_dac << " " << zbad_dac << " " << ebad_dac <<  endmsg;
 	//log << MSG::WARNING << "Found Cluster   " <<  xbad_dac << " " << ybad_dac << " " << zbad_dac << " " <<  endmsg;
 	// shower axis is just the vector pointing from the IP to the shower center
 	// in case there are less than 3 cells in the cluster
 	
-  Amg::Vector3D showerAxis(xc,yc,zc);
-  Amg::setMag(showerAxis,1.0);
+	Amg::Vector3D showerAxis(xc,yc,zc);
+	Amg::setMag(showerAxis,1.0);
 
 	// otherwise the principal direction with the largest absolute 
 	// eigenvalue will be used unless it's angle w.r.t. the vector pointing
@@ -558,21 +701,19 @@ CaloClusterMomentsMaker_DigiHSTruth::execute(const EventContext& ctx,
 	  for(i=0;i<ncell;i++) {
             const CaloClusterMomentsMaker_DigiHSTruth_detail::cellinfo& ci = cellinfo[i];
             const double e2 = ci.energy * ci.energy;
-            
+
 	    C(0,0) += e2*(ci.x-xc)*(ci.x-xc);
 	    C(1,0) += e2*(ci.x-xc)*(ci.y-yc);
 	    C(2,0) += e2*(ci.x-xc)*(ci.z-zc);
-	    
+
 	    C(1,1) += e2*(ci.y-yc)*(ci.y-yc);
 	    C(2,1) += e2*(ci.y-yc)*(ci.z-zc);
-	    
+
 	    C(2,2) += e2*(ci.z-zc)*(ci.z-zc);
 	    w += e2;
 	  } 
-
 	  C/=w;
 	  
-
 	  Eigen::SelfAdjointEigenSolver<Eigen::Matrix3d> eigensolver(C);
 	  if (eigensolver.info() != Eigen::Success) {
 	    msg(MSG::WARNING) << "Failed to compute Eigenvalues -> Can't determine shower axis" << endmsg;
@@ -581,67 +722,68 @@ CaloClusterMomentsMaker_DigiHSTruth::execute(const EventContext& ctx,
 	    // don't use the principal axes if at least one of the 3 
 	    // diagonal elements is 0
 
-
-      const Eigen::Vector3d& S=eigensolver.eigenvalues();
-      const Eigen::Matrix3d& U=eigensolver.eigenvectors();
+	    const Eigen::Vector3d& S=eigensolver.eigenvalues(); 
+	    const Eigen::Matrix3d& U=eigensolver.eigenvectors();
 
             const double epsilon = 1.E-6;
 
-      if ( std::abs(S[0]) >= epsilon && std::abs(S[1]) >= epsilon && std::abs(S[2]) >= epsilon ) {
+	    if ( std::abs(S[0]) >= epsilon && std::abs(S[1]) >= epsilon && std::abs(S[2]) >= epsilon ) { 
 
-        Amg::Vector3D prAxis(showerAxis);
-
+	      Amg::Vector3D prAxis(showerAxis);
 	      int iEigen = -1;
-	    
+
 	      for (i=0;i<3;i++) {
-      Amg::Vector3D tmpAxis=U.col(i);
+		Amg::Vector3D tmpAxis=U.col(i);
 
-      // calculate the angle    
-      double tmpAngle=Amg::angle(tmpAxis,showerAxis);
+		// calculate the angle		
+		double tmpAngle=Amg::angle(tmpAxis,showerAxis);
 
-      if ( tmpAngle > 90*deg ) {
-        tmpAngle = 180*deg - tmpAngle;
-        tmpAxis = -tmpAxis;
-      }
+		if ( tmpAngle > 90*deg ) { 
+		  tmpAngle = 180*deg - tmpAngle;
+		  tmpAxis = -tmpAxis;
+		}
 
-      if ( iEigen == -1 || tmpAngle < angle ) {
-        iEigen = i;
-        angle = tmpAngle;
-        prAxis = tmpAxis;
-      }
+		if ( iEigen == -1 || tmpAngle < angle ) {
+		  iEigen = i;
+		  angle = tmpAngle;
+		  prAxis = tmpAxis;
+		}
+	      }//end for loop
 
-	      }//end for loop 	  
-	    
 	      // calculate theta and phi angle differences
 	      
 	      deltaPhi = CaloPhiRange::diff(showerAxis.phi(),prAxis.phi());
-	    
+
 	      deltaTheta = showerAxis.theta() - prAxis.theta();
-	    
+
 	      // check the angle
-	    
+
 	      if ( angle < m_maxAxisAngle ) {
 		showerAxis = prAxis;
-        }
+	      }
 	      else 
-    ATH_MSG_DEBUG("principal Direction (" << prAxis[Amg::x] << ", "
-            << prAxis[Amg::y] << ", " << prAxis[Amg::z] << ") deviates more than "
-            << m_maxAxisAngle*(1./deg)
-            << " deg from IP-to-ClusterCenter-axis (" << showerAxis[Amg::x] << ", "
-            << showerAxis[Amg::y] << ", " << showerAxis[Amg::z] << ")");
-	    }//end if !S[i]==0
-	  }// end else got Eigenvalues
+		ATH_MSG_DEBUG("principal Direction (" << prAxis[Amg::x] << ", " 
+			      << prAxis[Amg::y] << ", " << prAxis[Amg::z] << ") deviates more than " 
+			      << m_maxAxisAngle*(1./deg) 
+			      << " deg from IP-to-ClusterCenter-axis (" << showerAxis[Amg::x] << ", "
+			      << showerAxis[Amg::y] << ", " << showerAxis[Amg::z] << ")");
+	    }//end if std::abs(S)<epsilon
+	    else {
+	      ATH_MSG_DEBUG("Eigenvalues close to 0, do not use principal axis");
+	    }
+	  }//end got eigenvalues
 	} //end if ncell>2
       
-	ATH_MSG_DEBUG("Shower Axis = (" << showerAxis.x() << ", "
-		      << showerAxis.y() << ", " << showerAxis.z() << ")");
+	ATH_MSG_DEBUG("Shower Axis = (" << showerAxis[Amg::x] << ", "
+		      << showerAxis[Amg::y] << ", " << showerAxis[Amg::z] << ")");
 	
+
 	// calculate radial distance from and the longitudinal distance
 	// along the shower axis for each cell. The cluster center is 
 	// at r=0 and lambda=0
 	
-  for (auto& ci : cellinfo) {
-    const Amg::Vector3D currentCell(ci.x,ci.y,ci.z);
+	for (auto& ci : cellinfo) {
+	  const Amg::Vector3D currentCell(ci.x,ci.y,ci.z);
 	  // calculate distance from shower axis r
 	  ci.r = ((currentCell-showerCenter).cross(showerAxis)).mag();
 	  // calculate distance from shower center along shower axis
@@ -653,24 +795,25 @@ CaloClusterMomentsMaker_DigiHSTruth::execute(const EventContext& ctx,
 	// define common norm for all simple moments
 	double commonNorm = 0;
         double phi0 = ncell > 0 ? cellinfo[0].phi : 0;
-	for(i=0;i<ncell;i++) {
-          const CaloClusterMomentsMaker_DigiHSTruth_detail::cellinfo& ci = cellinfo[i];
+
+	for(unsigned i=0;i<ncell;i++) {
+	  const CaloClusterMomentsMaker_DigiHSTruth_detail::cellinfo& ci = cellinfo[i];
 	  // loop over all valid moments
 	  commonNorm += ci.energy;
-	  for(size_t iMoment = 0, size = m_validMoments.size();
+ 	  for(size_t iMoment = 0, size = m_validMoments.size();
               iMoment != size;
               ++ iMoment)
           {
 	    // now calculate the actual moments
 	    switch (m_validMoments[iMoment]) {
-       case xAOD::CaloCluster::FIRST_ETA_DigiHSTruth:
-        myMoments[iMoment] += ci.energy*ci.eta;
-        break;
+	    case xAOD::CaloCluster::FIRST_ETA_DigiHSTruth:
+	      myMoments[iMoment] += ci.energy*ci.eta;
+	      break;
 	    case xAOD::CaloCluster::FIRST_PHI_DigiHSTruth:
 	      // first cell decides the sign in order to avoid
 	      // overlap problem at phi = -pi == +pi
 	      // need to be normalized to the range [-pi,+pi] in the end
-        myMoments[iMoment] += ci.energy * proxim (ci.phi, phi0);
+              myMoments[iMoment] += ci.energy * proxim (ci.phi, phi0);
 	      break;
 	    case xAOD::CaloCluster::SECOND_R_DigiHSTruth:
 	      myMoments[iMoment] += ci.energy*ci.r*ci.r;
@@ -728,18 +871,20 @@ CaloClusterMomentsMaker_DigiHSTruth::execute(const EventContext& ctx,
 	      if ( (int)i == iCellMax ) 
 		myMoments[iMoment] = ci.energy;
 	      break;
+	    case xAOD::CaloCluster::PTD_DigiHSTruth:
+	      // do not convert to pT since clusters are small and
+	      // there is virtually no difference and cosh just costs
+	      // time ...
+	      myMoments[iMoment] += ci.energy*ci.energy;
+	      myNorms[iMoment] += ci.energy;
+	      break;
 	    default:
 	      // nothing to be done for other moments
 	      break;
 	    }
 	  }
 	} //end of loop over cell
-
-	const auto hvFrac=m_larHVFraction->getLArHVFrac(theCluster->getCellLinks(),ctx);
-	eBadLArHV= hvFrac.first;
-	nBadLArHV=hvFrac.second;
-
-	
+      
 	// assign moments which don't need the loop over the cells
         for (size_t iMoment = 0, size = m_validMoments.size();
              iMoment != size;
@@ -901,30 +1046,36 @@ CaloClusterMomentsMaker_DigiHSTruth::execute(const EventContext& ctx,
 	  case xAOD::CaloCluster::N_BAD_HV_CELLS_DigiHSTruth:
 	    myMoments[iMoment] = nBadLArHV;
             break;
+	  case xAOD::CaloCluster::PTD_DigiHSTruth:
+	    myMoments[iMoment] = sqrt(myMoments[iMoment]);
+            break;
+	  case xAOD::CaloCluster::MASS_DigiHSTruth:
+	    myMoments[iMoment] = mass;
+	    break;
 	  case xAOD::CaloCluster::ENERGY_DigiHSTruth:
 	    myMoments[iMoment] = theClusterEnergy;
             break;
 	  case xAOD::CaloCluster::ETA_DigiHSTruth:
-      if(theClusterAbsEnergy > 0)
-	    myMoments[iMoment] = theClusterEta / theClusterAbsEnergy;
-      else{
-	    myMoments[iMoment] = 0;
-			}
+	    if(theClusterAbsEnergy > 0)
+	      myMoments[iMoment] = theClusterEta / theClusterAbsEnergy;
+	    else{
+	      myMoments[iMoment] = 0;
+	    }
             break;
 	  case xAOD::CaloCluster::PHI_DigiHSTruth:
-      if(theClusterAbsEnergy > 0)
-	    myMoments[iMoment] = CaloPhiRange::fix(theClusterPhi / theClusterAbsEnergy);
-      else{
-	    myMoments[iMoment] = 0;
-			}
-            break;
+	    if(theClusterAbsEnergy > 0)
+	      myMoments[iMoment] = CaloPhiRange::fix(theClusterPhi / theClusterAbsEnergy);
+	    else{
+	      myMoments[iMoment] = 0;
+	    }
+	    break;
 	  default:
 	    // nothing to be done for other moments
 	    break;
 	  }
 	}
       }
-      
+
       // normalize moments and copy to Cluster Moment Store
       size_t size= m_validMoments.size();
       for (size_t iMoment = 0; iMoment != size; ++iMoment) {
@@ -933,16 +1084,18 @@ CaloClusterMomentsMaker_DigiHSTruth::execute(const EventContext& ctx,
 	  myMoments[iMoment] /= myNorms[iMoment];
 	if ( moment == xAOD::CaloCluster::FIRST_PHI_DigiHSTruth ) 
 	  myMoments[iMoment] = CaloPhiRange::fix(myMoments[iMoment]);
-	
 	theCluster->insertMoment(moment,myMoments[iMoment]);
+      } // loop on moments for cluster
+    } // check on requested moments
+    // check on second moment of time if requested
+    if ( m_secondTime ) {
+      double secondTime(0.0);
+      if (timeNorm > 0){
+	secondTime = theNewSecondTime/timeNorm-theCluster->time()*theCluster->time();
       }
+      theCluster->insertMoment(xAOD::CaloCluster::SECOND_TIME_DigiHSTruth,secondTime);
     }
-  }
+  } // loop on clusters
 
-  return StatusCode::SUCCESS;
-}
-
-StatusCode CaloClusterMomentsMaker_DigiHSTruth::finalize()
-{
   return StatusCode::SUCCESS;
 }
