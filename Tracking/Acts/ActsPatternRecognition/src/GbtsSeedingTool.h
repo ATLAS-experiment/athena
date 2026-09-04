@@ -20,7 +20,7 @@
 #include "Acts/EventData/SpacePointContainer.hpp"
 
 //for det elements, not sure which need: 
-#include "TrigInDetToolInterfaces/ITrigL2LayerNumberTool.h"
+#include "ActsToolInterfaces/IGbtsLayerTool.h"
 #include "AthenaBaseComps/AthReentrantAlgorithm.h"
 #include "GaudiKernel/ToolHandle.h"
 #include "AthenaMonitoringKernel/GenericMonitoringTool.h"
@@ -88,14 +88,15 @@ namespace ActsTrk {
     /// region of interest for pixel seeding
     std::optional<Acts::Experimental::GbtsRoiDescriptor> m_internalRoi;
 
-    /// lists of layers that pixel and strip modules are apart of (index defines hash ID of module), 
-    /// used to sort Spacepoints based on the type of module its assigned to 
-    const std::vector<short>* m_sct_h2l = nullptr;
-    const std::vector<short>* m_pix_h2l = nullptr;
+    /// Wafer hash to dense GBTS layer index, one map per technology. Used to
+    /// put a space point on the layer its module belongs to.
+    const std::vector<short>* m_stripHashToLayer = nullptr;
+    const std::vector<short>* m_pixelHashToLayer = nullptr;
+    /// Whether each dense GBTS layer index is a pixel layer.
     std::vector<bool> m_are_pixels;
 
-    /// used to create the detector layers and which modules correspond to pixels and strips 
-    ToolHandle<ITrigL2LayerNumberTool> m_layerNumberTool {this, "layerNumberTool", "TrigL2LayerNumberToolITk"}; 
+    /// Builds the GBTS layers out of the ITk readout geometry.
+    ToolHandle<IGbtsLayerTool> m_layerTool {this, "layerTool", "ActsTrk::GbtsLayerTool/ActsGbtsLayerTool"}; 
 
     // Config settings                                                              
     Gaudi::Property<std::string> m_connectorInputFile {this, "connectorInputFile","binTables_ITK_RUN4.txt", "input file for making connector object"};

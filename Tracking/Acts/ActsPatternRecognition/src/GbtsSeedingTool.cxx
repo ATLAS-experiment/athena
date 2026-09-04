@@ -20,7 +20,7 @@ namespace ActsTrk {
   {}
 
   StatusCode GbtsSeedingTool::initialize() {
-    ATH_CHECK(m_layerNumberTool.retrieve());
+    ATH_CHECK(m_layerTool.retrieve());
     ATH_MSG_DEBUG("Initializing " << name() << "...");
 
     // Make the logger And Propagate to ACTS routines
@@ -32,24 +32,21 @@ namespace ActsTrk {
     ATH_CHECK( prepareConfiguration());
     printGbtsConfig();
 
-    // layer geometry creation 
-    const std::vector<TrigInDetSiLayer>* pVL = m_layerNumberTool->layerGeometry(); 
-    
-    // layer objects used by GBTS
-    std::vector<Acts::Experimental::GbtsLayerDescription> layers;
-    layers.reserve(pVL->size());
+    // The layer tool builds the GBTS layers, in dense layer index order, and
+    // knows which layer each module hash belongs to.
+    const std::vector<Acts::Experimental::GbtsLayerDescription>& layers =
+      m_layerTool->layerDescriptions();
 
-    // convert from trigindetsilayer to acts::experimental::trigindetsilayer
-    for (const TrigInDetSiLayer&s : *pVL) {
-      const Acts::Experimental::GbtsLayerType type = s.m_type == 0 ? Acts::Experimental::GbtsLayerType::Barrel : Acts::Experimental::GbtsLayerType::Endcap;
-      layers.emplace_back(s.m_subdet, type, s.m_refCoord, s.m_minBound, s.m_maxBound);
+    m_pixelHashToLayer = &m_layerTool->pixelLayers();
+    m_stripHashToLayer = &m_layerTool->stripLayers();
+
+    // a layer is a pixel layer unless a strip module claims it
+    m_are_pixels.assign(layers.size(), true);
+    for (const short layer : *m_stripHashToLayer) {
+      if (layer != IGbtsLayerTool::kNoLayer) {
+        m_are_pixels[layer] = false;
+      }
     }
-
-    // fill which has id for each module belongs to what layer
-    m_sct_h2l = m_layerNumberTool->sctLayers();
-    m_pix_h2l = m_layerNumberTool->pixelLayers();
-    m_are_pixels.resize(m_layerNumberTool->maxNumberOfUniqueLayers(), true);
-    for(const auto& l : *m_sct_h2l) m_are_pixels[l] = false;
 
     // parse connection 
     auto layerConnectionMap = Acts::Experimental::GbtsLayerConnectionMap::fromFile(m_finderCfg.connectorInputFile, m_finderCfg.lrtMode);
@@ -98,6 +95,11 @@ namespace ActsTrk {
     // create the node storage and fill it from the xAOD space points
     Acts::Experimental::GbtsNodeStorage nodeStorage = m_finder->makeNodeStorage(m_are_pixels);
 
+    // space points GBTS has no layer for, counted rather than reported per
+    // space point: the loop runs over the whole event
+    std::size_t nUnmappedHashes = 0;
+    std::size_t nUngroupedModules = 0;
+
     // add spacepoints to node storage
     for(std::size_t idx = 0; idx < tmpSpacePoints.size(); ++idx){
       // obtain module hash for spacepoint
@@ -106,7 +108,20 @@ namespace ActsTrk {
 
       const bool isPixel(elementlist.size() == 1);
 
-	    const short layer = (isPixel ? m_pix_h2l : m_sct_h2l)->operator[](static_cast<int>(elementlist[0]));
+      const std::vector<short>& hashToLayer =
+        isPixel ? *m_pixelHashToLayer : *m_stripHashToLayer;
+      const auto hash = static_cast<std::size_t>(elementlist[0]);
+      if (hash >= hashToLayer.size()) [[unlikely]] {
+        ++nUnmappedHashes;
+        continue;
+      }
+
+      const short layer = hashToLayer[hash];
+      if (layer == IGbtsLayerTool::kNoLayer) {
+        // a wafer GBTS does not group into any of its layers
+        ++nUngroupedModules;
+        continue;
+      }
 
       float clusterWidth = 0.0f;
       float localPositionY = 0.0f;
@@ -130,6 +145,15 @@ namespace ActsTrk {
           std::hypot(new_x, new_y), static_cast<float>(std::atan2(sp->y(), sp->x())),
           static_cast<std::uint32_t>(layer), clusterWidth, localPositionY);
       }
+    }
+
+    if (nUnmappedHashes != 0) [[unlikely]] {
+      ATH_MSG_WARNING(nUnmappedHashes << " space points sit on a wafer hash "
+                      "outside the GBTS layer map and were dropped");
+    }
+    if (nUngroupedModules != 0) {
+      ATH_MSG_DEBUG(nUngroupedModules << " space points sit on a wafer GBTS "
+                    "does not group into a layer");
     }
 
     // order the nodes and build the derived per-node data
