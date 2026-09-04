@@ -143,9 +143,9 @@ def _get_flip_config(nn_path):
     """
     Schedule NN-based IP 'flip' taggers.
 
-    FlipConfig is "STANDARD" by default - for flip tagger set up with
-    option "NEGATIVE_IP_ONLY" (flip sign of d0 and use only (flipped)
-    positive d0 values).
+    FlipConfig is "STANDARD" by default. The flip variants invert the sign
+    of the track impact parameters, and "NEGATIVE_IP_ONLY" additionally
+    keeps only the tracks with a negative one. See FlipTagEnums.h.
 
     Returns a list of flip configurations, or [] for things we don't flip.
     """

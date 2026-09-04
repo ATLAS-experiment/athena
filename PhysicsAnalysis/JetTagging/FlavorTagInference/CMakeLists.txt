@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 #
 # This package is a collection of 'duel-use' tools to calculate
 # high-level flavor tagging discriminants. Because it should work both
@@ -117,5 +117,10 @@ atlas_add_dictionary( FlavorTagInferenceDict
    FlavorTagInference/FlavorTagInferenceDict.h
    FlavorTagInference/selection.xml
    LINK_LIBRARIES FlavorTagInference )
+
+atlas_add_test( FlipVariables
+   SOURCES test/test_flip_variables.cxx
+   LINK_LIBRARIES FlavorTagInference
+   POST_EXEC_SCRIPT noerror.sh )
 
 atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
