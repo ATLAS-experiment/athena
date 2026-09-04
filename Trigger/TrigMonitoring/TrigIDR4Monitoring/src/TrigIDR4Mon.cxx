@@ -6,7 +6,7 @@
  **     @author  Mark Sutton (sutt@cern.ch)
  **     @date    Tue  29 Sep 2025 09:08:26 GMT
  **
- **     Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+ **     Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
  **/
 
 // #include "TrigInDetAnalysis/Filter_AcceptAll.h"
@@ -219,7 +219,7 @@ StatusCode TrigIDR4Mon::bookHistograms() {
 	//     toolitr->setPath( m_sliceTag+"/"+chainName );
 
 	if (std::find(chains.begin(), chains.end(), selectChain) == chains.end()) { // deduplicate
-  	  chains.push_back( selectChain );
+  	  chains.push_back( std::move(selectChain) );
 	  monTools.push_back( &(*toolitr) );
 	}
       }
@@ -268,7 +268,7 @@ StatusCode TrigIDR4Mon::bookHistograms() {
 
   }
 	
-  m_chainNames = chains;
+  m_chainNames = std::move(chains);
 
   
   //  ATH_MSG_DEBUG( " configured " << m_sequences.size() << " sequences" );

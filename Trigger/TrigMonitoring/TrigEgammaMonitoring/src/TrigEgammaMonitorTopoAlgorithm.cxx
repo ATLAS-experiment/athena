@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <utility>
@@ -62,14 +62,17 @@ StatusCode TrigEgammaMonitorTopoAlgorithm::fillHistograms( const EventContext& c
       return StatusCode::SUCCESS;
     }
     
-
+    const std::string numeratorStr{"trigger_num"};
+    const std::string denominatorStr{"trigger_den"};
+    const std::string key0Str{"leg0_key"};
+    const std::string key1Str{"leg1_key"};
     for ( auto &d : m_trigListConfig)
     {
-      std::string trigger_num = d.at("trigger_num");
-      std::string trigger_den = d.at("trigger_den");
+      std::string trigger_num = d.at(numeratorStr);
+      std::string trigger_den = d.at(denominatorStr);
 
-      auto monGroup_online  = getGroup( trigger_num + "_Efficiency_HLT" );
-      auto monGroup_offline = getGroup( trigger_num + "_Efficiency_Offline" );
+      const auto & monGroup_online  = getGroup( trigger_num + "_Efficiency_HLT" );
+      const auto & monGroup_offline = getGroup( trigger_num + "_Efficiency_Offline" );
 
       std::vector<float> mass_vec, mass_off_vec, match_mass_vec, match_mass_off_vec;
       std::vector<float> dphi_vec, dphi_off_vec, match_dphi_vec, match_dphi_off_vec;
@@ -85,9 +88,10 @@ StatusCode TrigEgammaMonitorTopoAlgorithm::fillHistograms( const EventContext& c
       
 
       std::vector<Legs> legs_den_vec, legs_num_vec;
-
-      make_legs( trigger_num , d.at("leg0_key"), d.at("leg1_key"), legs_num_vec);
-      make_legs( trigger_den , d.at("leg0_key"), d.at("leg1_key"), legs_den_vec);
+      const auto & k0 = d.at(key0Str);
+      const auto & k1 = d.at(key1Str);
+      make_legs( trigger_num , k0, k1, legs_num_vec);
+      make_legs( trigger_den , k0, k1, legs_den_vec);
 
       
       // Fill denominator histograms
