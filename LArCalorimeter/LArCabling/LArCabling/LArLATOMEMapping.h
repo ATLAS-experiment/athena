@@ -1,7 +1,7 @@
 //Dear emacs, this is -*-c++-*-
 
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef LARLATOMEMAPPING_H
@@ -14,7 +14,6 @@
 #include <vector>
 //#include <algorithm>
 #include <unordered_map>
-#include "CxxUtils/AthUnlikelyMacros.h"
 /**
   * fixed number of channels on one LATOME board<br>
   *
@@ -59,11 +58,11 @@ class LArLATOMEMapping {
 //Inline methods:
 inline HWIdentifier LArLATOMEMapping::getChannelID(const unsigned int sourceID, const unsigned int chan) const {
   auto it = m_map.find(sourceID);
-  if (ATH_UNLIKELY(it == m_map.end())) {
+  if (it == m_map.end()) [[unlikely]] {
     return m_hwidEmpty;
   }
   const std::vector<HWIdentifier>& chanVec = it->second;
-  if (ATH_UNLIKELY(chan >= chanVec.size())) {
+  if (chan >= chanVec.size()) [[unlikely]] {
     return m_hwidEmpty;
   }
   return chanVec[chan];
