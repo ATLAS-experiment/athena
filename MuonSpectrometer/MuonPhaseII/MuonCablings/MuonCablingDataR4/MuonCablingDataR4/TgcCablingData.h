@@ -50,9 +50,6 @@ struct TgcCablingData : public TgcCablingOfflineID,
                static_cast<const TgcCablingReadoutID&>(*this) == other;
     }
 
-    bool operator!=(const TgcCablingData& other) const {
-        return !(*this == other);
-    }
 };
 
 std::ostream& operator<<(std::ostream& ostr,
