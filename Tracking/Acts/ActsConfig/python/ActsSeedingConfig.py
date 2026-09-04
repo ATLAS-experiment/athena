@@ -273,19 +273,29 @@ def ActsLargeRadiusStripSeedingToolCfg(flags,
 
     return ActsStripSeedingToolCfg(flags, name, **kwargs)
 
+def ActsGbtsLayerToolCfg(flags,
+                         name: str = "ActsGbtsLayerTool",
+                         **kwargs) -> ComponentAccumulator:
+    """The GBTS layer geometry, built from the ITk readout geometry.
+
+    One instance is shared by every GBTS seeding tool: the layer indices it
+    hands out have to agree with the connection table they all read.
+    """
+    acc = ComponentAccumulator()
+    kwargs.setdefault("dumpGbtsGeometry", flags.Acts.Gbts.dumpGbtsGeometry)
+    kwargs.setdefault("geometryDump", flags.Acts.Gbts.geometryDump)
+    acc.setPrivateTools(CompFactory.ActsTrk.GbtsLayerTool(name, **kwargs))
+    return acc
+
+
 def ActsPixelGbtsSeedingToolCfg(flags,
                                 name: str = "ActsPixelGbtsSeedingTool",
                                 **kwargs) -> ComponentAccumulator:
     acc = ComponentAccumulator()
-    if "layerNumberTool" not in kwargs:
-        from TrigFastTrackFinder.TrigFastTrackFinderConfig import ITkTrigL2LayerNumberToolCfg
-        ntargs = {"UseNewLayerScheme" : True,
-                  "dumpGbtsGeometry": flags.Acts.Gbts.dumpGbtsGeometry,
-                  "geometryDump": flags.Acts.Gbts.geometryDump,
-        }
+    if "layerTool" not in kwargs:
         kwargs.setdefault(
-            "layerNumberTool",
-            acc.popToolsAndMerge(ITkTrigL2LayerNumberToolCfg(flags, **ntargs))
+            "layerTool",
+            acc.popToolsAndMerge(ActsGbtsLayerToolCfg(flags))
         )
     ## For ITkPixel, use default values for ActsTrk::GbtsSeedingTool
     kwargs.setdefault("connectorInputFile" , find_datafile(flags.Acts.Gbts.connectionTable))
@@ -299,15 +309,10 @@ def ActsStripGbtsSeedingToolCfg(flags,
                                 name: str = "ActsStripGbtsSeedingTool",
                                 **kwargs) -> ComponentAccumulator:
     acc = ComponentAccumulator()
-    if "layerNumberTool" not in kwargs:
-        from TrigFastTrackFinder.TrigFastTrackFinderConfig import ITkTrigL2LayerNumberToolCfg
-        ntargs = {"UseNewLayerScheme" : True,
-                  "dumpGbtsGeometry": flags.Acts.Gbts.dumpGbtsGeometry,
-                  "geometryDump": flags.Acts.Gbts.geometryDump,
-        }
+    if "layerTool" not in kwargs:
         kwargs.setdefault(
-            "layerNumberTool",
-            acc.popToolsAndMerge(ITkTrigL2LayerNumberToolCfg(flags, **ntargs))
+            "layerTool",
+            acc.popToolsAndMerge(ActsGbtsLayerToolCfg(flags))
         )
     ## For ITkStrip LRT, enable LRT mode and use the LRT connector file
     kwargs.setdefault("LRTmode", True)
