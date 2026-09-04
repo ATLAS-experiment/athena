@@ -11,7 +11,7 @@
 #include <iosfwd>
 
 class TgcIdHelper;
-
+class Identifier;
 namespace Muon{
 class IMuonIdHelperSvc;
 }
