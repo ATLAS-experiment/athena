@@ -37,10 +37,10 @@ pool::ImplicitCollectionIterator::next()
 }
 
 
-Token*
-pool::ImplicitCollectionIterator::token() const
+const Token&
+pool::ImplicitCollectionIterator::eventRef() const
 {
-  return m_token;
+  return *m_token;
 }
 
 const pool::CollectionRowBuffer&
