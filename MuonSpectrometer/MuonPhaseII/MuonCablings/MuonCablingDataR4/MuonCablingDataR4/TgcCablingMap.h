@@ -7,7 +7,8 @@
 
 #include "MuonCablingDataR4/TgcCablingData.h"
 #include "Identifier/Identifier.h"
-#include "Identifier/IdentifierHash.h"
+
+#include <iosfwd>
 
 class TgcIdHelper;
 
