@@ -278,20 +278,12 @@ namespace xAOD {
     if(m_DoTimingSel &&  input.particle->type() == xAOD::Type::ObjectType::TrackParticle)
       {
 	const xAOD::TrackParticle* tp = static_cast<const xAOD::TrackParticle*>(input.particle);
-	static const SG::AuxElement::Accessor<uint8_t> accValid("hasValidTime");
-	static const SG::AuxElement::Accessor<float> accValidRes("timeResolution");
-	if (accValid.isAvailable(*tp) && accValidRes.isAvailable(*tp) && accValid.isAvailable(tp2) && accValidRes.isAvailable(tp2))
-	  {
-	    if (accValid(*tp) && accValid(tp2) && accValidRes(*tp) && accValidRes(tp2) )
-	      {
-		dT_Sig = abs(tp->time() - tp2.time()) / sqrt( pow(tp2.timeResolution(),2)+pow(tp->timeResolution(),2));// + find out how to get the resolution
-	      }
-	    else
-	      {
-		ATH_MSG_DEBUG("No valid time for the track while doing track->time()" );
-		dT_Sig=0;
-	      }
-	  }
+        if(tp->hasValidTime() && tp2.hasValidTime()) {
+          dT_Sig = abs(tp->time() - tp2.time()) / sqrt( pow(tp2.timeResolution(),2)+pow(tp->timeResolution(),2));// + find out how to get the resolution
+        } else {
+           ATH_MSG_DEBUG("No valid time for the track while doing track->time()" );
+           dT_Sig=0;
+        }
       }
     if( dT_Sig > m_maxTime) return;
 
