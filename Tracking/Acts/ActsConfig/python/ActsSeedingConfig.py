@@ -316,6 +316,8 @@ def ActsStripGbtsSeedingToolCfg(flags,
         )
     ## For ITkStrip LRT, enable LRT mode and use the LRT connector file
     kwargs.setdefault("LRTmode", True)
+    kwargs.setdefault("usePixelConnections", False)
+    kwargs.setdefault("useStripConnections", True)
     kwargs.setdefault("useML", False)
     kwargs.setdefault("connectorInputFile", find_datafile(flags.Acts.Gbts.connectionTableLrt))
     kwargs.setdefault("minPt", flags.Tracking.ActiveConfig.minPTSeed / GaudiUnits.GeV * ActsUnits.GeV)
