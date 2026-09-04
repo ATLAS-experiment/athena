@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArEventTest/FakeLArOFCs.h"
@@ -37,8 +37,6 @@ StatusCode FakeLArOFCs::initialize() {
     }
   }//End loop over gains.
   ATH_CHECK( detStore()->record(larOFCComplete,m_keyOFC) );
-  const ILArOFC* iLArOFC=larOFCComplete;
-  ATH_CHECK (detStore()->symLink(larOFCComplete,iLArOFC) );
   return StatusCode::SUCCESS;
 }
 
