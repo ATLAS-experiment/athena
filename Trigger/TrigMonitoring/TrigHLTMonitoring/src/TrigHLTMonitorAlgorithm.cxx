@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigHLTMonitorAlgorithm.h"
@@ -31,7 +31,7 @@ StatusCode TrigHLTMonitorAlgorithm::fillHistograms( const EventContext& ctx ) co
   using namespace Monitored;
 
   //Fetch the general tool
-  auto tool = getGroup("TrigHLTMonitor");
+  const auto & tool = getGroup("TrigHLTMonitor");
 
 
   ////////////////////////////////////////
@@ -90,25 +90,25 @@ StatusCode TrigHLTMonitorAlgorithm::fillHistograms( const EventContext& ctx ) co
     //Open the right group
     std::string toolname = "Trig"+signaturename+"Monitor";
     ATH_MSG_DEBUG("Initializing tool " << toolname );
-    auto thisTool = getGroup(toolname);
+    const auto & thisTool = getGroup(toolname);
 
     //RAW and PS
     std::string histname_raw = signaturename+"RAW";
     std::string histname_ps = signaturename+"PS";
-    auto HLT_RAW = Monitored::Scalar<std::string>(histname_raw);
-    auto HLT_PS  = Monitored::Scalar<std::string>(histname_ps);
+    auto HLT_RAW = Monitored::Scalar<std::string>(std::move(histname_raw));
+    auto HLT_PS  = Monitored::Scalar<std::string>(std::move(histname_ps));
 
     //eta and phi
     std::string histname_eta=signaturename+"_eta";
     std::string histname_phi=signaturename+"_phi";
-    auto RoI_eta = Monitored::Scalar(histname_eta,0.0);
-    auto RoI_phi = Monitored::Scalar(histname_phi,0.0);
+    auto RoI_eta = Monitored::Scalar(std::move(histname_eta),0.0);
+    auto RoI_phi = Monitored::Scalar(std::move(histname_phi),0.0);
 
 
     //Number of RoIs
     roiN.push_back(0); //initialize roiN at 0 for each signature
     std::string histname_roiN=signaturename+"RoI_N";
-    auto RoI_N = Monitored::Scalar(histname_roiN,0);
+    auto RoI_N = Monitored::Scalar(std::move(histname_roiN),0);
 
     //Loop over HLT chains
     ATH_MSG_DEBUG( "Filling HLT" << signaturename << " and RoI information for " << thisregex );
@@ -250,7 +250,7 @@ StatusCode TrigHLTMonitorAlgorithm::fillResultAndConsistencyHistograms( const Ev
   // Fill. First argument is the tool (GMT) name as defined in the py file, 
   // all others are the variables to be saved.
   // Alternative fill method. Get the group yourself, and pass it to the fill function.
-  auto tool = getGroup("TrigHLTMonitor");
+  const auto & tool = getGroup("TrigHLTMonitor");
 
   ATH_MSG_DEBUG("Fetching keys from TrigConfKeysOnline");     
   if(sc_onlineKeys == StatusCode::SUCCESS) {
