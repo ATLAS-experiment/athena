@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 import sys
 
@@ -54,7 +54,7 @@ def fromRunArgs(runArgs):
                 raise ValueError(f"Unknown validation flag '{name}'")
 
             logDerivation.info("Enabling validation flag '%s'", name)
-            flags._set(name, True)
+            flags[name] = True
     else:
         raise ValueError('Output file name needs to be set using --outputNTUP_PHYSVALFile')
 
