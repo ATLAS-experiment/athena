@@ -5,19 +5,6 @@
 #include <cstdint>
 #include <iostream>
 #include <set>
-#define CABLING_OPERATORS(CL_NAME)\
-    bool operator<(const CL_NAME& other) const { return m_cache.hash < other.m_cache.hash; } \
-    bool operator==(const CL_NAME& other) const { return m_cache.hash == other.m_cache.hash; } \
-    bool operator!=(const CL_NAME& other) const { return m_cache.hash != other.m_cache.hash; } \
-    bool operator!() const { return !m_cache.hash; }\
-    CL_NAME() = default;\
-    CL_NAME(const CL_NAME& other) : CL_NAME{} {\
-        m_cache.hash = other.m_cache.hash;\
-    }\
-    CL_NAME& operator=(const CL_NAME& other) {\
-        if (&other != this) m_cache.hash = other.m_cache.hash;\
-        return *this;\
-    }
 
 namespace MuonR4 {
 
