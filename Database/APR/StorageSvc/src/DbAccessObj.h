@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //====================================================================
@@ -44,42 +44,36 @@ namespace pool    {
     * @author  M.Frank
     * @version 1.0
     */
-  template <class KEY, class TYPE> class DbAccessObj {
-  public:
-    /// Type definitions
-    typedef DbAccessObj< KEY , TYPE >     Base;
-    typedef std::map< KEY, TYPE* >        Keys;
-    typedef typename Keys::iterator       iterator;
-    typedef typename Keys::const_iterator const_iterator;
+
+/// Base class for all access objects with reference counting and common members but no container functionality
+class DbAccessObjBase {
   private:
     /// Reference counter
     mutable std::atomic<int> m_refCount;
     /// Access mode
-    Io::IoFlag          m_mode;
+    Io::IoFlag            m_mode;
     /// Name of the instance
     std::string           m_name;
     /// Database type
     DbType                m_type;
-    /// Key entry buffer
-    Keys                  m_keys;
     /// Pointer to specific pool implementation
     IOODatabase*          m_pool;
 
   public:
     /// Constructor with initializing arguments
-    DbAccessObj(const std::string& n, Io::IoFlag m, const DbType& t, IOODatabase* s=0)
+    DbAccessObjBase(const std::string& n, Io::IoFlag m, const DbType& t, IOODatabase* s=0)
     : m_refCount(0), m_mode(m), m_name(n), m_type(t), m_pool(s)
     { if( m_pool )  m_pool->addRef(); }
     /// Standard destructor
-    virtual ~DbAccessObj()            {      releasePtr( m_pool );    }
+    virtual ~DbAccessObjBase()        {      releasePtr( m_pool );    }
     /// Access the instance name
     const std::string& name()  const  {      return m_name;           }
     /// Access the instance name
     void setName(const std::string& n){      m_name = n;              }
     /// Access mode
-    Io::IoFlag mode()   const       {      return m_mode;           }
+    Io::IoFlag mode()   const         {      return m_mode;           }
     /// Set Access mode
-    void setMode(Io::IoFlag m)      {      m_mode = m;              }
+    void setMode(Io::IoFlag m)        {      m_mode = m;              }
     // Inline functions
     const DbType& type()  const       {      return m_type;           }
     /// Allow access to the Database implementation
@@ -115,6 +109,25 @@ namespace pool    {
       }
       return count;
     }
+  };
+
+
+  template <class KEY, class TYPE> class DbAccessObj : public DbAccessObjBase {
+  public:
+    /// Type definitions
+    typedef DbAccessObj< KEY , TYPE >     Base;
+    typedef std::map< KEY, TYPE* >        Keys;
+    typedef typename Keys::iterator       iterator;
+    typedef typename Keys::const_iterator const_iterator;
+
+  private:
+    /// Key entry buffer
+    Keys                  m_keys;
+
+  public:
+    /// Constructor from the base class
+    using DbAccessObjBase::DbAccessObjBase;
+
     /// Object size
     size_t size()  const    {
       return m_keys.size();
