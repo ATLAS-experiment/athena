@@ -3,8 +3,7 @@
 
 #include <compare>
 #include <cstdint>
-#include <iostream>
-#include <set>
+#include <iosfwd>
 
 namespace MuonR4 {
 
