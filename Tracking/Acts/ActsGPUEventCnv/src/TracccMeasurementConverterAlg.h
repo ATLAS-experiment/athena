@@ -11,6 +11,7 @@
 #include "ActsGPUEvent/TracccMeasurementCollection.h"
 #include "ActsGPUEvent/TracccSiliconClusterCollection.h"
 #include "ActsGPUEvent/TracccSiliconCellCollection.h"
+#include "ActsGPUEvent/GeometryIdMapping.h"
 #include "traccc/edm/measurement_collection.hpp"
 #include "AthDeviceInterfaces/IMemoryResourceTool.h"
 #include "AthDeviceInterfaces/ICopyTool.h"
@@ -34,9 +35,6 @@
 #include "SCT_ReadoutGeometry/SCT_ForwardModuleSideDesign.h"
 #include "SCT_ReadoutGeometry/SCT_ModuleSideDesign.h"
 #include "SCT_ReadoutGeometry/StripStereoAnnulusDesign.h"
-
-
-#include "ActsGPUInterfaces/IDeviceDetectorDescriptionProviderSvc.h"
 
 #include "GaudiKernel/ToolHandle.h"
 
@@ -97,7 +95,10 @@ private:
       "Output xAOD pixel space point container"};
   SG::WriteHandleKey<std::vector<unsigned int>> m_outputMeasToPixelSPKey{
       this, "OutputMeasToPixelSP", "ITkTracccMeasToPixelSP",
-      "Output mapping from traccc measurement index to pixel spacepoint index"};        
+      "Output mapping from traccc measurement index to pixel spacepoint index"};
+  SG::WriteHandleKey<std::vector<unsigned int>> m_outputMeasToStripClKey{
+      this, "OutputMeasToStripCl", "ITkTracccMeasToStripCl",
+      "Output mapping from traccc measurement index to strip cluster index"};             
   SG::WriteHandleKey<xAOD::StripClusterContainer> m_outputStripKey{
       this, "OutputStripClusters", "ITkTracccStripClusters",
       "Output xAOD strip cluster container"};
@@ -109,9 +110,9 @@ private:
   /// @name The copy tool used for copying data from device
   ToolHandle<AthDevice::ICopyTool> m_copy{
       this, "CopyProviderTool", "", "Vecmem copy provider tool"};
-  /// @name The detector description service providing the Athena<->Detray ID map
-  ServiceHandle<ActsTrk::IDeviceDetectorDescriptionProviderSvc> m_detDescSvc{
-    this, "DetectorDescriptionSvc", "ActsTrk::JSONDeviceDetectorDescriptionProviderSvc"};
+  /// @name The map object providing the Athena<->Detray ID map
+  Gaudi::Property<std::string> m_geoIdMappingObjectName{this, "GeoIdMapping", "", "ID mapping between the three detector description realms."};
+  const ActsTrk::GeometryIdMapping* m_idMapping{nullptr};
 
   /// The object counters for debug prints in finalize method
   /// {@
@@ -119,9 +120,6 @@ private:
   mutable std::atomic<int> m_nStrip = 0;
   mutable std::atomic<int> m_nMeas = 0;
   /// @}
-
-  /// The athena <-> detray identifier map
-  const std::unordered_map<uint64_t, Identifier>* m_detrayToAthena{};
 
   /// Conversion helpers (to retrieve module design, hash, etc.)
   /// {@

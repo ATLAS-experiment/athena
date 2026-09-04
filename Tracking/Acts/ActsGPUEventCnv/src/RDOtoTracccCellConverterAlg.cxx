@@ -29,6 +29,9 @@ StatusCode RDOtoTracccCellConverterAlg::execute(const EventContext& ctx) const
 {
   using size_type = traccc::edm::silicon_cell_collection::buffer::size_type;
 
+  // ---- -1. Make sure the detray→detcond index map has been built ----
+  ATH_CHECK(m_common.buildDetrayMaps());
+
   // ---- 0. Init
   auto pixelRDOHandle = SG::makeHandle(m_pixelRDOKey, ctx);
   ATH_CHECK(pixelRDOHandle.isValid());
@@ -97,7 +100,12 @@ StatusCode RDOtoTracccCellConverterAlg::execute(const EventContext& ctx) const
       if (!el) continue;
       const Identifier modId = el->identify();
       const InDetDD::SiCellId cellId = el->cellIdFromIdentifier(rdoId);
-      const uint64_t geoId = m_common.m_athenaToDetray->at(modId);
+      const auto geoIdOpt = m_common.m_geoIdMapping->athenaToDetray(modId);
+      if (!geoIdOpt.has_value()) {
+        ATH_MSG_FATAL("No detray id found for Athena identifier " << modId);
+        return StatusCode::FAILURE;
+      }
+      const uint64_t geoId = *geoIdOpt;
 
       if (geoId != current_geometry_id) {
         current_geometry_id = geoId;
@@ -141,7 +149,12 @@ StatusCode RDOtoTracccCellConverterAlg::execute(const EventContext& ctx) const
       if (!el) continue;
       const Identifier modId = el->identify();
       const InDetDD::SiCellId cellId = el->cellIdFromIdentifier(rdoId);
-      const uint64_t geoId = m_common.m_athenaToDetray->at(modId);
+      const auto geoIdOpt = m_common.m_geoIdMapping->athenaToDetray(modId);
+      if (!geoIdOpt.has_value()) {
+        ATH_MSG_FATAL("No detray id found for Athena identifier " << modId);
+        return StatusCode::FAILURE;
+      }
+      const uint64_t geoId = *geoIdOpt;
 
       if (geoId != current_geometry_id) {
         current_geometry_id = geoId;

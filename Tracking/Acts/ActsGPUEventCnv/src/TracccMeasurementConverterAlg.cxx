@@ -30,6 +30,7 @@ StatusCode TracccMeasurementConverterAlg::initialize()
     ATH_CHECK(m_outputPixelKey.initialize());
     ATH_CHECK(m_outputPixelSpacePointsKey.initialize());
     ATH_CHECK(m_outputMeasToPixelSPKey.initialize());
+     ATH_CHECK(m_outputMeasToStripClKey.initialize());
     ATH_CHECK(m_outputStripKey.initialize());
 
     ATH_CHECK(detStore()->retrieve(m_pixelID, m_idHelperName) );
@@ -37,7 +38,7 @@ StatusCode TracccMeasurementConverterAlg::initialize()
     ATH_CHECK(detStore()->retrieve(m_pixelManager, "ITkPixel"));
     ATH_CHECK(detStore()->retrieve(m_stripManager, "ITkStrip"));
 
-    m_detrayToAthena = &m_detDescSvc->detrayToAthenaMap();
+     ATH_CHECK(detStore()->retrieve(m_idMapping, m_geoIdMappingObjectName.value()));
 
     ATH_MSG_DEBUG("Successfully initialized");
     return StatusCode::SUCCESS;
@@ -159,9 +160,21 @@ StatusCode TracccMeasurementConverterAlg::execute(const EventContext& ctx) const
   std::optional<traccc::edm::silicon_cell_collection::const_device> traccc_cells;
 
   // ---- Create mapping from traccc measurement index to pixel spacepoint index ----
+  // for pixel the index maps to cluster container or spacepoint containe
+  // because every pixel measurement makes one spacepoint
   std::vector<unsigned int> measToPixelSP(traccc_measurements.size(),
                                          std::numeric_limits<unsigned int>::max());
 
+  // ---- Create mapping from traccc measurement index to strip cluster index ----    
+  // every strip measurement does not map to one strip spacepoint therefore this map 
+  // is only valid between traccc measurements and strip clusters
+  // The reason why we have two maps is that during traccc track conversion
+  // we need to figure out if a track state is coming from pixel or strip
+  // since we don't want to copy/write to SG the measurements twice
+  // we can figure this out by creating two maps at conversion, 
+  // then if the meas index is not in pixel map, has to be a strip meas                                     
+  std::vector<unsigned int> measToStripCl(traccc_measurements.size(),
+                                          std::numeric_limits<unsigned int>::max()); 
   if (m_convertClustersWithCells) {
     ATH_MSG_DEBUG("Read " << traccc_measurements.size() << " traccc measurements from " << m_inputMeasKey.key());
     ATH_MSG_DEBUG("Read traccc clusters from '"
@@ -216,7 +229,12 @@ StatusCode TracccMeasurementConverterAlg::execute(const EventContext& ctx) const
   for (std::size_t i = 0; i < traccc_measurements.size(); ++i) {
     const auto& meas = traccc_measurements.at(i);
     const uint64_t detrayId = meas.surface_link().value();
-    const Identifier athenaId = m_detrayToAthena->at(detrayId);
+    auto athenaIdOpt = m_idMapping->detrayToAthena(detrayId);
+    if (!athenaIdOpt.has_value()) {
+        ATH_MSG_FATAL("No Athena module found for detray id " << detrayId << " — skipping measurement.");
+        return StatusCode::FAILURE;  
+    }
+    const Identifier athenaId = *athenaIdOpt;
 
     // ---- Pixel ----
     if (meas.dimensions() == 2u) {
@@ -396,6 +414,7 @@ StatusCode TracccMeasurementConverterAlg::execute(const EventContext& ctx) const
 
       }
       ++strip_idx;
+      measToStripCl[i] = strip_idx;
     }
   }
 
@@ -417,6 +436,9 @@ StatusCode TracccMeasurementConverterAlg::execute(const EventContext& ctx) const
 
   SG::WriteHandle<std::vector<unsigned int>> measToPixelSPHandle{m_outputMeasToPixelSPKey, ctx};
   ATH_CHECK(measToPixelSPHandle.record(std::make_unique<std::vector<unsigned int>>(std::move(measToPixelSP))));
+
+  SG::WriteHandle<std::vector<unsigned int>> measToStripClHandle{m_outputMeasToStripClKey, ctx};
+  ATH_CHECK(measToStripClHandle.record(std::make_unique<std::vector<unsigned int>>(std::move(measToStripCl))));
 
   SG::WriteHandle<xAOD::StripClusterContainer> stripHandle{m_outputStripKey,
                                                            ctx};
