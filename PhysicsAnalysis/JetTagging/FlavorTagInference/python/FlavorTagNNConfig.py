@@ -424,6 +424,7 @@ def getDependencySet(tagger_name: str, override: set[str] | None = None) -> set[
         "GN2XTauV00": {"X", "L"},
         "GN3XV00": {"X"},
         "GN3XPV01": {"X"},
+        "tautauJRv00": {"X", "L"},  # H->tautau truth-subjet regressor (tracks+flow, needs leptonID)
     }
 
     if tagger_name not in tagger_dep_dict:
