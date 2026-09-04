@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // AthExIParticles.h 
@@ -21,47 +21,9 @@
 // AthExThinning includes
 #include "AthExThinning/AthExIParticle.h"
 
-// Forward declaration
 
+using AthExIParticles = DataVector<AthExIParticle>;
 
-//typedef DataVector<AthExIParticle> AthExIParticles;
-class AthExIParticles : public DataVector<AthExIParticle>
-{ 
-  /////////////////////////////////////////////////////////////////// 
-  // Public methods: 
-  /////////////////////////////////////////////////////////////////// 
- public: 
-
-  /** Default constructor: 
-   */
-  AthExIParticles();
-
-  /** Copy constructor: 
-   */
-  AthExIParticles( const AthExIParticles& rhs );
-
-  /** Assignment operator: 
-   */
-  AthExIParticles& operator=( const AthExIParticles& rhs ); 
-
-  /** Constructor with parameters: 
-   */
-  AthExIParticles( const SG::OwnershipPolicy own );
-
-  /** Destructor: 
-   */
-  virtual ~AthExIParticles();
-
-  /////////////////////////////////////////////////////////////////// 
-  // Protected data: 
-  /////////////////////////////////////////////////////////////////// 
- protected: 
-
-}; 
-
-/////////////////////////////////////////////////////////////////// 
-/// Inline methods: 
-/////////////////////////////////////////////////////////////////// 
 
 CLASS_DEF( AthExIParticles , 141971559, 1 )
 
