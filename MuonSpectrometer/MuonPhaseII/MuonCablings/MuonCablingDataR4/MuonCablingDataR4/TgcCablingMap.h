@@ -3,7 +3,6 @@
 
 #include <cstdint>
 #include <map>
-#include <set>
 #include <string>
 
 #include "MuonCablingDataR4/TgcCablingData.h"
