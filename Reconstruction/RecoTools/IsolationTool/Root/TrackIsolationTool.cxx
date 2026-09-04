@@ -279,7 +279,7 @@ namespace xAOD {
       {
 	const xAOD::TrackParticle* tp = static_cast<const xAOD::TrackParticle*>(input.particle);
         if(tp->hasValidTime() && tp2.hasValidTime()) {
-          dT_Sig = abs(tp->time() - tp2.time()) / sqrt( pow(tp2.timeResolution(),2)+pow(tp->timeResolution(),2));// + find out how to get the resolution
+          dT_Sig = abs(tp->time() - tp2.time()) / sqrt( pow(tp2.timeResolution(),2)+pow(tp->timeResolution(),2));
         } else {
            ATH_MSG_DEBUG("No valid time for the track while doing track->time()" );
            dT_Sig=0;
