@@ -741,10 +741,6 @@ StatusCode LArRampBuilder::stop()
     if (sc.isFailure()) {
       ATH_MSG_ERROR( "Failed to record LArRampComplete object");
     }
-    sc=detStore()->symLink(ClassID_traits<LArRampComplete>::ID(),m_keyoutput,ClassID_traits<ILArRamp>::ID());
-    if (sc.isFailure()) {
-      ATH_MSG_ERROR( "Failed to symlink LArRawRamp object");
-    }
   }
   m_ramps.reset();//Not needed any more. Free memory.
   ATH_MSG_INFO( "LArRampBuilder has finished.");
