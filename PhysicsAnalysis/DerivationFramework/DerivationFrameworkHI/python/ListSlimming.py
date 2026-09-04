@@ -562,6 +562,7 @@ def HION7ExtraContainersTrigger():
 def HION8SmartCollections():
     variables  = []
     variables += ["EventInfo"]
+    variables += ["Electrons"]
     variables += ["Photons"]
     variables += ["InDetTrackParticles"]
 
@@ -576,6 +577,8 @@ def HION8AllVarTruthContent():
     variables += ["AntiKt4TruthJets"]
     variables += ["TruthEvents"]
     variables += ["TruthParticles"]
+    variables += ["TruthElectrons"]
+    variables += ["TruthPhotons"]
     variables += ["TruthVertices"]
     variables += ["TruthPrimaryVertices"]
 
@@ -590,6 +593,7 @@ def HION8BasicJetVars(JetColl):
 def HION9SmartCollections():
     variables  = []
     variables += ["EventInfo"]
+    variables += ["Electrons"]
     variables += ["Photons"]
     variables += ["InDetTrackParticles"]
 
@@ -608,6 +612,7 @@ def HION9AllVarTruthContent():
     variables += ["AntiKt8TruthJets"]
     variables += ["AntiKt10TruthJets"]
     variables += ["TruthEvents"]
+    variables += ["TruthElectrons"]
     variables += ["TruthParticles"]
     variables += ["TruthVertices"]
     variables += ["TruthPrimaryVertices"]
