@@ -48,6 +48,40 @@ namespace {
     "muon_momentumBalanceSignificance", "muon_scatteringNeighbourSignificance"
   };
 
+  const std::vector<std::string> gn3epclv01_electrons {
+    "pt", "ptfrac", "ptrel", "dr", "abs_eta", "eta", "phi", "ftag_et",
+    "qOverP", "d0RelativeToBeamspot", "d0RelativeToBeamspotSignificance",
+    "ftag_ptVarCone30OverPt", "numberOfPixelHits", "numberOfSCTHitsInclDead",
+    "ftag_deltaPOverP", "eProbabilityHT", "deltaEta1", "deltaPhiRescaled2",
+    "ftag_energyOverP", "Rhad", "Rhad1", "Eratio", "weta2", "Rphi", "Reta",
+    "wtots1", "f1", "f3"
+  };
+
+  // bJR4v01, the only deployed network with a muon node
+  const std::vector<std::string> bjr4_electrons {
+    "pt", "eta", "phi", "deltaEta1", "deltaPhiRescaled2", "Rhad", "Eratio",
+    "weta2", "Rphi", "Reta", "wtots1", "f1", "f3", "ptfrac", "dr",
+    "numberOfPixelHits", "eProbabilityHT", "qOverP",
+    "numberOfSCTHitsInclDead", "d0RelativeToBeamspot"
+  };
+
+  const std::vector<std::string> bjr4_muons {
+    "quality", "pt", "eta", "phi", "scatteringCurvatureSignificance",
+    "scatteringNeighbourSignificance", "EnergyLoss", "MeasEnergyLoss",
+    "segmentDeltaEta", "d0RelativeToBeamspot_MuonPrimaryTrack",
+    "z0SinThetaRelativeToBeamspot_MuonPrimaryTrack",
+    "d0RelativeToBeamspotVariance_MuonPrimaryTrack", "qOverP_MuonPrimaryTrack",
+    "thetaVariance_MuonPrimaryTrack"
+  };
+
+  // the lifetime-signed impact parameters foreseen for the muon inputs
+  const std::vector<std::string> lifetime_signed_muons {
+    "pt", "eta", "phi", "quality", "qOverPratio", "ptfrac", "dr",
+    "lifetimeSignedD0", "lifetimeSignedZ0SinTheta",
+    "lifetimeSignedD0Significance", "lifetimeSignedZ0SinThetaSignificance",
+    "numberOfPixelHits", "eProbabilityHT"
+  };
+
   std::set<std::string> flippedVariables(
     const std::string& node,
     const std::vector<std::string>& variables,
@@ -79,6 +113,13 @@ int main() {
     "lifetimeSignedD0Significance", "lifetimeSignedZ0SinThetaSignificance"
   };
   const std::set<std::string> perigee {"d0", "z0SinTheta"};
+  const std::set<std::string> muon_lifetime_signed {
+    "lifetimeSignedD0", "lifetimeSignedZ0SinTheta",
+    "lifetimeSignedD0Significance", "lifetimeSignedZ0SinThetaSignificance"
+  };
+  const std::set<std::string> electron_beamspot {
+    "d0RelativeToBeamspot", "d0RelativeToBeamspotSignificance"
+  };
 
   auto with_perigee = [&perigee](std::set<std::string> signed_ips) {
     signed_ips.insert(perigee.begin(), perigee.end());
@@ -94,6 +135,18 @@ int main() {
     {"tracks_r22loose_sd0sort", gn3epclv01_tracks, FlipTagConfig::FLIP_SIGN, v01_signed},
     {"tracks_r22loose_sd0sort", gn3epclv01_tracks, FlipTagConfig::NEGATIVE_IP_ONLY, v01_signed},
     {"tracks_r22loose_sd0sort", gn3epclv01_tracks, FlipTagConfig::SIMPLE_FLIP, with_perigee(v01_signed)},
+    {"electrons_r22default", gn3epclv01_electrons, FlipTagConfig::STANDARD, {}},
+    {"electrons_r22default", gn3epclv01_electrons, FlipTagConfig::FLIP_SIGN, {}},
+    {"electrons_r22default", gn3epclv01_electrons, FlipTagConfig::SIMPLE_FLIP, electron_beamspot},
+    {"electrons_r22bjr_ptsort", bjr4_electrons, FlipTagConfig::SIMPLE_FLIP, {"d0RelativeToBeamspot"}},
+    {"muons_r22bjr_ptsort", bjr4_muons, FlipTagConfig::STANDARD, {}},
+    {"muons_r22bjr_ptsort", bjr4_muons, FlipTagConfig::FLIP_SIGN, {}},
+    {"muons_r22bjr_ptsort", bjr4_muons, FlipTagConfig::SIMPLE_FLIP,
+     {"d0RelativeToBeamspot_MuonPrimaryTrack",
+      "z0SinThetaRelativeToBeamspot_MuonPrimaryTrack"}},
+    {"muons_r22default", lifetime_signed_muons, FlipTagConfig::STANDARD, {}},
+    {"muons_r22default", lifetime_signed_muons, FlipTagConfig::FLIP_SIGN, muon_lifetime_signed},
+    {"muons_r22default", lifetime_signed_muons, FlipTagConfig::SIMPLE_FLIP, muon_lifetime_signed},
   };
 
   int failures = 0;
