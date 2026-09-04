@@ -1,30 +1,33 @@
 #!/usr/bin/env python
 # Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
-"""Tune ``muonEdgeRecoChain.py --edgeThreshold`` against a no-ML baseline.
+"""Tune GraphBucketFilter --score-threshold using relative muon-track efficiency.
 
-For every scan stage, this script runs the standard no-ML reconstruction once:
-``muonEdgeRecoChain.py --skip-onnx --useStandardSeeder``.  It then runs the
-ML edge-classifier chain at a sequence of ``--edgeThreshold`` values and
-compares each point with that stage's no-ML track efficiency.
+For every scan stage, this script first runs the no-bucket-filter reconstruction
+once (``muonBucketRecoChain.py --skip-onnx``).  Every score-threshold point is
+then compared to that stage's no-ML result.
 
-The tested ML configuration matches the current ``muonEdgeRecoChain.py``:
+The truth-muon selection is intentionally the executable selection from
+``plot_edge_vs_noml.ipynb``:
 
-* ``--enableBucketFilter`` (enabled by default, configurable);
-* ``--enableEdgeClassifier --useMlSeeder``;
-* ``--filterSegmentsWithoutMlConnections`` (enabled by default);
-* a required ``--edgeModel`` and a scanned ``--edgeThreshold``.
+  denominator:
+      len(TruthMuons_truthSegLinks[i]) > 0
+      and abs(TruthMuons_eta[i]) < 2.5
 
-The baseline mirrors ``reco_chain_noml.sh``.  The same executable truth-muon
-selection used by ``muonBFTuner.py`` is evaluated from ``MsTrackValidTest``
-through PyROOT, so no uproot/awkward/numpy dependency is required.
+  numerator:
+      denominator muon with
+      0 <= TruthMuons_ActsMuonLink[i] < len(ActsMuons_pt)
+
+No uproot/awkward/numpy dependency is required: ROOT is read through PyROOT,
+which is available in a configured Athena environment.
 
 Stages:
-  * coarse: 10 events; threshold 0.0..1.0 in 0.05 steps;
-  * medium: 100 events; start at the last passing coarse point; 0.01 steps;
-  * fine: 1000 events; start at the last passing medium point; 0.005 steps.
+  * coarse: 10 events; threshold -1.0..1.0 in 0.1 steps, stopping at the
+    first threshold below the target;
+  * medium: 100 events; start at the last passing coarse threshold; 0.025 steps;
+  * fine:   1000 events; start at the last passing medium threshold; 0.01 steps.
 
-By default, a point passes when:
-    edgeTrackEfficiency / noMlTrackEfficiency >= 0.995
+By default, a threshold passes when:
+    bucketTrackEfficiency / noMlTrackEfficiency >= 0.995
 """
 
 from __future__ import annotations
@@ -162,7 +165,7 @@ def _read_notebook_efficiency(root_file: Path, tree_name: str) -> dict[str, int 
         import ROOT
     except ImportError as error:
         raise RuntimeError(
-            "PyROOT is unavailable. Run muonEdgeTuner.py from a configured Athena "
+            "PyROOT is unavailable. Run muonBFTuner.py from a configured Athena "
             "environment so that `import ROOT` works."
         ) from error
 
@@ -234,7 +237,7 @@ def _read_notebook_efficiency(root_file: Path, tree_name: str) -> dict[str, int 
 
 
 def _reco_launcher(args: argparse.Namespace) -> list[str]:
-    """Resolve muonEdgeRecoChain.py, preferring an explicit/local source."""
+    """Resolve muonBucketRecoChain.py, preferring an explicit/local source."""
 
     if args.recoChain:
         chain = Path(args.recoChain).expanduser().resolve()
@@ -242,7 +245,7 @@ def _reco_launcher(args: argparse.Namespace) -> list[str]:
             raise RuntimeError(f"--recoChain does not point to a file: {chain}")
         return [sys.executable, str(chain)]
 
-    sibling_chain = Path(__file__).with_name("muonEdgeRecoChain.py")
+    sibling_chain = Path(__file__).with_name("muonBucketRecoChain.py")
     if sibling_chain.is_file():
         return [sys.executable, str(sibling_chain)]
 
@@ -255,9 +258,9 @@ def _common_chain_command(
     n_events: int,
     out_root: Path,
 ) -> list[str]:
-    """Build arguments common to edge-classifier and no-ML jobs."""
+    """Build arguments common to bucket-filter and no-ML jobs."""
 
-    return [
+    command = [
         *_reco_launcher(args),
         "--threads", str(args.threads),
         "--nEvents", str(n_events),
@@ -268,70 +271,33 @@ def _common_chain_command(
         "--noPerfMon",
     ]
 
+    if args.noMonitorPlots:
+        command.append("--noMonitorPlots")
 
-def _edge_chain_command(
+    return command
+
+
+def _bucket_chain_command(
     args: argparse.Namespace,
     *,
     threshold: float,
     n_events: int,
     out_root: Path,
 ) -> list[str]:
-    """Build one ML edge-classifier reconstruction command."""
+    """Build the bucket-filter reconstruction command for one score point."""
 
     command = _common_chain_command(args, n_events=n_events, out_root=out_root)
-    command += [
-        "--edgeModel", args.edgeModel,
-        "--edgeThreshold", str(threshold),
-        "--enableEdgeClassifier",
-        "--useMlSeeder",
-    ]
-    command.append(
-        "--enableBucketFilter" if args.enableBucketFilter else "--disableBucketFilter"
-    )
+    command += ["--score-threshold", str(threshold)]
 
-    if args.filterSegmentsWithoutMlConnections:
-        command.append("--filterSegmentsWithoutMlConnections")
     if args.bucketModelPath:
-        command += ["--bucketModel", args.bucketModelPath]
-    if args.bucketThreshold is not None:
-        command += ["--bucketThreshold", str(args.bucketThreshold)]
+        command += ["--bucket-model-path", args.bucketModelPath]
     if args.outputName:
         command += ["--output-name", args.outputName]
     if args.singleOutputMode:
         command += ["--single-output-mode", args.singleOutputMode]
     if args.use_cpu:
         command.append("--use-cpu")
-    if args.athenaDebug:
-        command.append("--athenaDebug")
 
-    optional_int_arguments = (
-        ("maxEdgesPerSegment", "--maxEdgesPerSegment"),
-        ("maxSegmentsPerBucket", "--maxSegmentsPerBucket"),
-        ("maxEdgesBeforeInference", "--maxEdgesBeforeInference"),
-        ("maxEdgesPerTargetChamber", "--maxEdgesPerTargetChamber"),
-        ("seedAnchorsPerComponent", "--seedAnchorsPerComponent"),
-        ("minSegmentsPerComponent", "--minSegmentsPerComponent"),
-    )
-    for attribute, option in optional_int_arguments:
-        value = getattr(args, attribute)
-        if value is not None:
-            command += [option, str(value)]
-
-    optional_flags = (
-        ("keepSameChamberEdgesBeforeInference", "--keepSameChamberEdgesBeforeInference"),
-        ("keepIsolatedNodesBeforeInference", "--keepIsolatedNodesBeforeInference"),
-        ("useDegreeCappedMlComponents", "--useDegreeCappedMlComponents"),
-        ("allowOneSidedMlEdges", "--allowOneSidedMlEdges"),
-        ("disableOrphanRecovery", "--disableOrphanRecovery"),
-        ("keepAllSegmentsPerChamber", "--keepAllSegmentsPerChamber"),
-    )
-    for attribute, option in optional_flags:
-        if getattr(args, attribute):
-            command.append(option)
-
-    # Escape hatch for chain switches introduced after this tuner.  Each use
-    # appends one argv token; use it repeatedly for an option and its value.
-    command.extend(args.chainArg)
     return command
 
 
@@ -341,11 +307,10 @@ def _noml_chain_command(
     n_events: int,
     out_root: Path,
 ) -> list[str]:
-    """Build the no-ML baseline command from reco_chain_noml.sh."""
+    """Build the stage's no-bucket-filter baseline command."""
 
     command = _common_chain_command(args, n_events=n_events, out_root=out_root)
-    command += ["--skip-onnx", "--useStandardSeeder"]
-    command.extend(args.baselineChainArg)
+    command.append("--skip-onnx")
     return command
 
 
@@ -388,48 +353,37 @@ def _write_json(payload: dict[str, Any], path: Path) -> None:
 def _parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description=(
-            "Tune muonEdgeRecoChain.py --edgeThreshold using relative track "
-            "efficiency against a --skip-onnx --useStandardSeeder baseline "
-            "at every scan stage."
+            "Tune muonBucketRecoChain.py --score-threshold using relative "
+            "track efficiency against a --skip-onnx no-ML baseline per stage."
         ),
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
     )
     parser.add_argument(
         "--inputFile",
         required=True,
-        help="Input HITS file/list forwarded to muonEdgeRecoChain.py.",
-    )
-    parser.add_argument(
-        "--edgeModel",
-        required=True,
-        help="ONNX segment-edge classifier model forwarded to --edgeModel.",
+        help="Input HITS file/list forwarded to muonBucketRecoChain.py.",
     )
     parser.add_argument(
         "--recoChain",
         default=None,
-        help="Explicit path to muonEdgeRecoChain.py. Defaults to a sibling file.",
+        help="Explicit path to muonBucketRecoChain.py. Defaults to a sibling file.",
     )
     parser.add_argument(
         "--recoModule",
-        default="MuonInference.muonEdgeRecoChain",
+        default="MuonInference.muonBucketRecoChain",
         help="Module fallback when no local reco-chain source file is present.",
     )
     parser.add_argument(
         "--workDir",
-        default="edge_threshold_tuning",
+        default="bucket_filter_threshold_tuning",
         help="Directory where roots/, logs/, CSV and JSON outputs are written.",
     )
     parser.add_argument("--treeName", default=TREE_DEFAULT)
     parser.add_argument("--threads", type=int, default=1)
     parser.add_argument("--skipEvents", type=int, default=0)
     parser.add_argument("--defaultGeoFile", default="RUN4")
+    parser.add_argument("--noMonitorPlots", action="store_true", default=False)
     parser.add_argument("--use-cpu", dest="use_cpu", action="store_true", default=False)
-    parser.add_argument(
-        "--athenaDebug",
-        action="store_true",
-        default=False,
-        help="Forward --athenaDebug to every ML edge-classifier reconstruction job.",
-    )
     parser.add_argument(
         "--skipExisting",
         action="store_true",
@@ -437,67 +391,25 @@ def _parse_args() -> argparse.Namespace:
         help="Reuse an existing ROOT output when its exact point is requested again.",
     )
 
-    parser.set_defaults(
-        enableBucketFilter=True,
-        filterSegmentsWithoutMlConnections=True,
-    )
-    bucket_filter = parser.add_mutually_exclusive_group()
-    bucket_filter.add_argument(
-        "--enableBucketFilter",
-        dest="enableBucketFilter",
-        action="store_true",
-        help="Run the bucket-filter preselection in every ML scan job.",
-    )
-    bucket_filter.add_argument(
-        "--disableBucketFilter",
-        dest="enableBucketFilter",
-        action="store_false",
-        help="Disable bucket filtering while tuning the edge threshold.",
-    )
-    segment_filter = parser.add_mutually_exclusive_group()
-    segment_filter.add_argument(
-        "--filterSegmentsWithoutMlConnections",
-        dest="filterSegmentsWithoutMlConnections",
-        action="store_true",
-        help=(
-            "Use the ML-connected segment view in track finding, matching "
-            "reco_chain_ecfilter.sh."
-        ),
-    )
-    segment_filter.add_argument(
-        "--keepSegmentsWithoutMlConnections",
-        dest="filterSegmentsWithoutMlConnections",
-        action="store_false",
-        help="Do not restrict the track-finder segment container to ML-connected segments.",
-    )
-
     parser.add_argument(
-        "--bucketModel",
         "--bucket-model-path",
+        "--bucketModel",
         dest="bucketModelPath",
         default=None,
         help="Optional bucket-filter ONNX model; otherwise use the chain default.",
     )
     parser.add_argument(
-        "--bucketThreshold",
-        "--score-threshold",
-        dest="bucketThreshold",
-        type=float,
-        default=None,
-        help="Optional fixed bucket-filter score threshold for every ML scan job.",
-    )
-    parser.add_argument(
         "--output-name",
         dest="outputName",
         default=None,
-        help="Optional bucket-filter ONNX output tensor name.",
+        help="Optional ONNX output tensor name.",
     )
     parser.add_argument(
         "--single-output-mode",
         choices=("logit", "prob"),
         dest="singleOutputMode",
         default=None,
-        help="Optional bucket-filter scalar ONNX-output interpretation.",
+        help="Optional scalar ONNX output interpretation.",
     )
 
     parser.add_argument(
@@ -508,58 +420,18 @@ def _parse_args() -> argparse.Namespace:
         type=float,
         default=0.995,
         help=(
-            "An edge-threshold point passes when edgeTrackEfficiency / "
-            "noMlTrackEfficiency is at least this value."
+            "A bucket-filter point passes when "
+            "bucketTrackEfficiency / noMlTrackEfficiency is at least this value."
         ),
     )
-    parser.add_argument(
-        "--minThreshold",
-        type=float,
-        default=0.0,
-        help="Lowest edge probability threshold considered.",
-    )
-    parser.add_argument(
-        "--maxThreshold",
-        type=float,
-        default=1.0,
-        help="Highest edge probability threshold considered.",
-    )
+    parser.add_argument("--minThreshold", type=float, default=-1.0)
+    parser.add_argument("--maxThreshold", type=float, default=1.0)
     parser.add_argument("--coarseEvents", type=int, default=10)
-    parser.add_argument("--coarseStep", type=float, default=0.05)
+    parser.add_argument("--coarseStep", type=float, default=0.1)
     parser.add_argument("--mediumEvents", type=int, default=100)
-    parser.add_argument("--mediumStep", type=float, default=0.01)
+    parser.add_argument("--mediumStep", type=float, default=0.025)
     parser.add_argument("--fineEvents", type=int, default=1000)
-    parser.add_argument("--fineStep", type=float, default=0.005)
-
-    edge_graph = parser.add_argument_group(
-        "Fixed SegmentEdgeInferenceAlg settings forwarded to every ML scan job"
-    )
-    edge_graph.add_argument("--maxEdgesPerSegment", type=int, default=None)
-    edge_graph.add_argument("--maxSegmentsPerBucket", type=int, default=None)
-    edge_graph.add_argument("--maxEdgesBeforeInference", type=int, default=None)
-    edge_graph.add_argument("--maxEdgesPerTargetChamber", type=int, default=None)
-    edge_graph.add_argument("--seedAnchorsPerComponent", type=int, default=None)
-    edge_graph.add_argument("--minSegmentsPerComponent", type=int, default=None)
-    edge_graph.add_argument("--keepSameChamberEdgesBeforeInference", action="store_true")
-    edge_graph.add_argument("--keepIsolatedNodesBeforeInference", action="store_true")
-    edge_graph.add_argument("--useDegreeCappedMlComponents", action="store_true")
-    edge_graph.add_argument("--allowOneSidedMlEdges", action="store_true")
-    edge_graph.add_argument("--disableOrphanRecovery", action="store_true")
-    edge_graph.add_argument("--keepAllSegmentsPerChamber", action="store_true")
-    parser.add_argument(
-        "--chainArg",
-        action="append",
-        default=[],
-        metavar="ARG",
-        help="Append one extra argv token to each ML edge-classifier command.",
-    )
-    parser.add_argument(
-        "--baselineChainArg",
-        action="append",
-        default=[],
-        metavar="ARG",
-        help="Append one extra argv token to each no-ML baseline command.",
-    )
+    parser.add_argument("--fineStep", type=float, default=0.01)
 
     return parser.parse_args()
 
@@ -567,34 +439,16 @@ def _parse_args() -> argparse.Namespace:
 def _validate_args(args: argparse.Namespace) -> None:
     if args.threads <= 0:
         raise SystemExit("--threads must be positive")
-    if args.skipEvents < 0:
-        raise SystemExit("--skipEvents must not be negative")
+    if args.minThreshold >= args.maxThreshold:
+        raise SystemExit("--minThreshold must be smaller than --maxThreshold")
     if not 0.0 <= args.minRelativeEfficiency <= 1.0:
         raise SystemExit("--minRelativeEfficiency must be between 0 and 1")
-    if not 0.0 <= args.minThreshold < args.maxThreshold <= 1.0:
-        raise SystemExit(
-            "edge thresholds must satisfy 0.0 <= --minThreshold < "
-            "--maxThreshold <= 1.0"
-        )
-    if args.bucketThreshold is not None and not 0.0 <= args.bucketThreshold <= 1.0:
-        raise SystemExit("--bucketThreshold must be between 0 and 1")
     for name in ("coarseEvents", "mediumEvents", "fineEvents"):
         if getattr(args, name) <= 0:
             raise SystemExit(f"--{name} must be positive")
     for name in ("coarseStep", "mediumStep", "fineStep"):
         if getattr(args, name) <= 0.0:
             raise SystemExit(f"--{name} must be positive")
-    for name in (
-        "maxEdgesPerSegment",
-        "maxSegmentsPerBucket",
-        "maxEdgesBeforeInference",
-        "maxEdgesPerTargetChamber",
-        "seedAnchorsPerComponent",
-        "minSegmentsPerComponent",
-    ):
-        value = getattr(args, name)
-        if value is not None and value < 0:
-            raise SystemExit(f"--{name} must not be negative")
 
 
 def main() -> None:
@@ -604,7 +458,7 @@ def main() -> None:
     work_dir = Path(args.workDir).expanduser().resolve()
     roots_dir = work_dir / "roots"
     logs_dir = work_dir / "logs"
-    csv_path = work_dir / "edge_threshold_scan.csv"
+    csv_path = work_dir / "bucket_threshold_scan.csv"
     summary_path = work_dir / "summary.json"
 
     # Athena/THistSvc will not create parent directories itself.
@@ -633,19 +487,10 @@ def main() -> None:
             "treeName": args.treeName,
             "workDir": str(work_dir),
             "recoLauncher": _reco_launcher(args),
-            "edgeModel": args.edgeModel,
-            "mlConfiguration": {
-                "bucketFilterEnabled": args.enableBucketFilter,
-                "filterSegmentsWithoutMlConnections": (
-                    args.filterSegmentsWithoutMlConnections
-                ),
-                "bucketModel": args.bucketModelPath,
-                "bucketThreshold": args.bucketThreshold,
-            },
             "target": {
                 "minimumRelativeEfficiency": args.minRelativeEfficiency,
                 "acceptedWhen": (
-                    "edgeTrackEfficiency / noMlTrackEfficiency >= "
+                    "bucketTrackEfficiency / noMlTrackEfficiency >= "
                     "minimumRelativeEfficiency"
                 ),
             },
@@ -752,8 +597,8 @@ def main() -> None:
         )
         return row
 
-    def evaluate_edge(stage: ScanStage, threshold: float) -> dict[str, Any]:
-        """Run/reuse and compare one edge-classifier threshold point."""
+    def evaluate_bucket(stage: ScanStage, threshold: float) -> dict[str, Any]:
+        """Run/reuse and compare one bucket-filter threshold point."""
 
         baseline = evaluate_baseline(stage)
 
@@ -763,7 +608,7 @@ def main() -> None:
         )
         out_root = roots_dir / f"{tag}.root"
         out_log = logs_dir / f"{tag}.log"
-        command = _edge_chain_command(
+        command = _bucket_chain_command(
             args,
             threshold=threshold,
             n_events=stage.n_events,
@@ -772,7 +617,7 @@ def main() -> None:
         row: dict[str, Any] = {
             "stage": stage.name,
             "nEvents": stage.n_events,
-            "mode": "edge",
+            "mode": "bucket",
             "threshold": threshold,
             "minRelativeEfficiency": args.minRelativeEfficiency,
             "rootFile": str(out_root),
@@ -786,7 +631,7 @@ def main() -> None:
             if return_code != 0:
                 row.update({
                     "status": "failed",
-                    "error": f"edge-classifier reconstruction returned {return_code}",
+                    "error": f"bucket reconstruction returned {return_code}",
                 })
                 rows.append(row)
                 persist("failed")
@@ -800,7 +645,7 @@ def main() -> None:
         if not out_root.is_file():
             row.update({
                 "status": "missing_output",
-                "error": "edge-classifier ROOT output is missing after reconstruction",
+                "error": "bucket ROOT output is missing after reconstruction",
             })
             rows.append(row)
             persist("failed")
@@ -849,7 +694,7 @@ def main() -> None:
         print(
             f"[{stage.name:6s} | {stage.n_events:4d} events] "
             f"threshold={threshold: .6f}  "
-            f"edge={metrics['trackEfficiency']:.6f} "
+            f"bucket={metrics['trackEfficiency']:.6f} "
             f"({metrics['matchedTruthMuonCount']}/{metrics['truthMuonCount']})  "
             f"relative={relative_efficiency:.6f}  "
             f"{'PASS' if row['passesTarget'] else 'FAIL'}",
@@ -863,7 +708,7 @@ def main() -> None:
     ) -> tuple[dict[str, Any] | None, str]:
         """Find the highest passing point, with first-point recovery downward."""
 
-        first = evaluate_edge(stage, start_threshold)
+        first = evaluate_bucket(stage, start_threshold)
         if bool(first["passesTarget"]):
             best = first
             for threshold in _ascending_thresholds(
@@ -872,7 +717,7 @@ def main() -> None:
                 stage.step,
                 include_start=False,
             ):
-                candidate = evaluate_edge(stage, threshold)
+                candidate = evaluate_bucket(stage, threshold)
                 if not bool(candidate["passesTarget"]):
                     return best, "stopped_at_first_below_target"
                 best = candidate
@@ -886,7 +731,7 @@ def main() -> None:
             stage.step,
             include_start=False,
         ):
-            candidate = evaluate_edge(stage, threshold)
+            candidate = evaluate_bucket(stage, threshold)
             if bool(candidate["passesTarget"]):
                 return candidate, "recovered_by_lowering_threshold"
 
@@ -905,7 +750,7 @@ def main() -> None:
             args.maxThreshold,
             coarse.step,
         ):
-            candidate = evaluate_edge(coarse, threshold)
+            candidate = evaluate_bucket(coarse, threshold)
             if not bool(candidate["passesTarget"]):
                 coarse_note = "stopped_at_first_below_target"
                 break
@@ -916,7 +761,7 @@ def main() -> None:
             stage_notes[coarse.name] = "no_passing_threshold_in_range"
             persist("no_passing_threshold")
             raise RuntimeError(
-                "No coarse edge threshold met the relative-efficiency target. "
+                "No coarse threshold met the relative-efficiency target. "
                 "Lower --minRelativeEfficiency or extend --minThreshold."
             )
 
@@ -933,7 +778,7 @@ def main() -> None:
         if medium_best is None:
             persist("no_passing_threshold")
             raise RuntimeError(
-                "No medium-stage edge threshold met the relative-efficiency target."
+                "No medium-stage threshold met the relative-efficiency target."
             )
         persist("running")
 
@@ -946,7 +791,7 @@ def main() -> None:
         if fine_best is None:
             persist("no_passing_threshold")
             raise RuntimeError(
-                "No fine-stage edge threshold met the relative-efficiency target."
+                "No fine-stage threshold met the relative-efficiency target."
             )
 
     except KeyboardInterrupt:
@@ -960,7 +805,7 @@ def main() -> None:
 
     persist("completed")
     final = summary("completed")
-    print(f"\nRecommended --edgeThreshold: {final['recommendedThreshold']:.6f}")
+    print(f"\nRecommended --score-threshold: {final['recommendedThreshold']:.6f}")
     print(f"Scan CSV: {csv_path}")
     print(f"Summary:  {summary_path}")
 
