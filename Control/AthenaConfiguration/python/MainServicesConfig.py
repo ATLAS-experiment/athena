@@ -178,12 +178,13 @@ def AthenaHiveEventLoopMgrCfg(flags):
 def AthenaMpEventLoopMgrCfg(flags):
     cfg = ComponentAccumulator()
     if flags.Common.isOverlay and not flags.Overlay.DataOverlay:
+        # Configure the AthenaEventLoopMgr, which is used by AthMpEvtLoopMgr,
+        # but do NOT set it as the main EventLoopMgr:
         elmgr = CompFactory.AthenaEventLoopMgr(
             EventPrintoutInterval = flags.Exec.EventPrintoutInterval,
             RequireInputAttributeList = True,
             UseSecondaryEventNumber = True)
         cfg.addService( elmgr )
-        cfg.setAppProperty('EventLoop', elmgr.name)
 
     from AthenaMP.AthenaMPConfig import AthenaMPCfg
     mploop = AthenaMPCfg(flags)
