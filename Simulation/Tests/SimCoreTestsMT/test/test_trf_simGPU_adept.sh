@@ -38,7 +38,7 @@ timeout 10800 AtlasG4_tf.py  \
   --multithreaded \
   --simulator 'AtlasG4_QS' \
   --conditionsTag "${conditionsTag}" \
-  --geometryVersion 'default:${geometryTag}' \
+  --geometryVersion "default:${geometryTag}" \
   --preInclude 'AtlasG4Tf:Campaigns.MC23PhaseIISimulation' \
   --preExec 'flags.Sim.G4Commands+=["/adept/CallUserTrackingAction true", "/adept/CallUserSteppingAction false","/adept/setCovfieBfieldFile /cvmfs/atlas.cern.ch/repo/sw/database/GroupData/MagneticFieldMaps/bmagatlas_09_fullAsym20400_forGPU_v1.cvf", "/adept/setVerbosity 0", "/adept/addGPURegion EMB", "/adept/addGPURegion EMEC", "/adept/addGPURegion HEC", "/adept/addGPURegion PreSampLAr", "/adept/setTrackInAllRegions false", "/adept/setMillionsOfTrackSlots 4", "/adept/setMillionsOfHitSlots 7", "/adept/setCUDAStackLimit 32192", "/adept/setCUDAHeapLimit 84857600"];flags.GeoModel.EMECStandard=True' \
   --physicsList 'FTFP_BERT_ATL_AdePT' \
