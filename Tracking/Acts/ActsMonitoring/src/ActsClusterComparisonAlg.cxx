@@ -1022,9 +1022,9 @@ StatusCode ActsClusterComparisonAlg::validateSeeds(const EventContext& eventCont
                     this_seed_original.push_back(monitored_pixel);
                     this_seed.push_back(referenceCluster);
 
-                    ATH_MSG_DEBUG("Monitored cluster: " << monitored_pixel->globalPosition().x() << "," << monitored_pixel->globalPosition().y()
+                    ATH_MSG_VERBOSE("Monitored cluster: " << monitored_pixel->globalPosition().x() << "," << monitored_pixel->globalPosition().y()
                                         << "," << monitored_pixel->globalPosition().z());
-                    ATH_MSG_DEBUG("Reference cluster: " << referenceCluster->globalPosition().x() << "," << referenceCluster->globalPosition().y()
+                    ATH_MSG_VERBOSE("Reference cluster: " << referenceCluster->globalPosition().x() << "," << referenceCluster->globalPosition().y()
                                         << "," << referenceCluster->globalPosition().z());                    
 
                     break;
@@ -1086,11 +1086,10 @@ StatusCode ActsClusterComparisonAlg::validateSeeds(const EventContext& eventCont
 
     // Compute overlap between two seed cluster vectors, only unique seeds (deduplicated)
     auto overlap = [](const std::vector<const xAOD::PixelCluster*>& a,
-                      const std::vector<const xAOD::PixelCluster*>& b) {
-        std::unordered_set<const xAOD::PixelCluster*> set_a(a.begin(), a.end());
+                  const std::vector<const xAOD::PixelCluster*>& b) {
         int count = 0;
-        for (const auto& cluster : b) {
-            if (set_a.count(cluster))
+        for (const auto* cluster : b) {
+            if (std::find(a.begin(), a.end(), cluster) != a.end())
                 ++count;
         }
         return count;
