@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArCalibUtils/LArPhysWavePredictor.h"
@@ -717,15 +717,6 @@ StatusCode LArPhysWavePredictor::stop()
     ATH_MSG_FATAL( "Cannot record LArMphysOverMcalComplete to StoreGate! key=" << m_keyMphysMcali );
     return StatusCode::FAILURE;
   }
-  
-  // Symlink LArMphysOverMcalComplete to ILArMphysOverMcal for further use
-  ATH_MSG_DEBUG("Trying to symlink ILArMphysOverMcal with LArMphysOverMcalComplete...");
-  sc = detStore()->symLink(ClassID_traits<LArMphysOverMcalComplete>::ID(),m_keyMphysMcali,ClassID_traits<ILArMphysOverMcal>::ID());
-  if (sc.isFailure()) {
-      ATH_MSG_FATAL( "Could not symlink ILArMphysOverMcal with LArMphysOverMcalComplete." );
-      return StatusCode::FAILURE;
-  } 
-  ATH_MSG_INFO( "ILArMphysOverMcal symlink with LArMphysOverMcalComplete successfully" ) ;
   
   ATH_MSG_INFO( "LArPhysWavePredictor finalized!" );  
   
