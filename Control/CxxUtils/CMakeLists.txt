@@ -185,7 +185,7 @@ foreach( test sincos_test ArrayScanner_test Arrayrep_test
       ConcurrentToValMap_test ConcurrentStrToValMap_test
       SimpleUpdater_test hexdump_test
       FPControl_test LockedPointer_test nodiscard_test span_test
-      reverse_wrapper_test atomic_bounded_decrement_test
+       atomic_bounded_decrement_test
       releasing_iterator_test SizedUInt_test UIntConv_test
       normalizeFunctionName_test pputils_test StringParse_test
       range_with_at_test range_with_conv_test
