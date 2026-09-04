@@ -473,16 +473,3 @@ def JobOptionsDumpCfg(flags, fileName="JobOptsConfig.txt"):
     acc = ComponentAccumulator()
     acc.addService(CompFactory.JobOptionsSvc(DUMPFILE=fileName))
     return acc
-
-
-if __name__=="__main__":
-    from AthenaConfiguration.AllConfigFlags import initConfigFlags
-    flags = initConfigFlags()
-    try:
-        flags.Input.RunNumbers = [284500] # Set to either MC DSID or MC Run Number
-        flags.Input.TimeStamps = [1] # dummy value
-        cfg = MainEvgenServicesCfg(flags, withSequences=True)
-    except ModuleNotFoundError:
-        #  The McEventSelector package required by MainEvgenServicesCfg is not part of the AthAnalysis project
-        cfg = MainServicesCfg(flags)
-    cfg.wasMerged()   # to avoid errror that CA was not merged
