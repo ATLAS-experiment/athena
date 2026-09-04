@@ -196,7 +196,7 @@ asg::AcceptData TrigEgammaMonitorBaseAlgorithm::setAccept(const EventContext& ct
     bool passedEF=false;
     
     if (dec) {
-        auto trigger = info.trigger;
+        const auto & trigger = info.trigger;
         if (!onlyHLT){
             // Step 1
             passedL1Calo = match()->ancestorPassed<TrigRoiDescriptorCollection>(ctx, dec , trigger , "initialRois", condition);
@@ -360,8 +360,8 @@ float TrigEgammaMonitorBaseAlgorithm::rTRT  (const xAOD::Electron* eg) const{
         eg->trackParticleSummaryValue(trtHTHits,xAOD::numberOfTRTHighThresholdHits);
         if (fabs(trtHits) < 1e-6) {
             return -99.;
-        }
-        else{
+        } else {
+            //coverity[DIVIDE_BY_ZERO:FALSE]
             return ( (double)trtHTHits / (double)trtHits );
         }
     }
@@ -746,8 +746,9 @@ void TrigEgammaMonitorBaseAlgorithm::setTrigInfo(const std::string& trigger){
     ATH_MSG_DEBUG( "L1Seed      : " << l1seed << " (Is Legacy? " << (l1legacy?"Yes":"No") << ")");
     ATH_MSG_DEBUG("========================================================");
 
-    TrigInfo info{l1legacy,l1seed,trigger,signature,threshold,pidname,idperf,etcut,nogsf,lrt,ion,isolation,isolated};
-    m_trigInfo[trigger] = info;
+    TrigInfo info{l1legacy,std::move(l1seed),trigger,std::move(signature),threshold,
+      std::move(pidname),idperf,etcut,nogsf,lrt,ion,std::move(isolation),isolated};
+    m_trigInfo[trigger] = std::move(info);
 
 }
 
@@ -914,8 +915,8 @@ void TrigEgammaMonitorBaseAlgorithm::setTrigInfoR3(const std::string& trigger){
     ATH_MSG_DEBUG( "L1Seed      : " << l1seed << " (Is Legacy? " << (l1legacy?"Yes":"No") << ")");
     ATH_MSG_DEBUG("========================================================");
 
-    TrigInfo info{l1legacy,l1seed,trigger,signature,threshold,pidname,idperf,etcut,nogsf,lrt,ion,isolation,isolated};
-    m_trigInfoR3[trigger] = info;
+    TrigInfo info{l1legacy,std::move(l1seed),trigger,std::move(signature),threshold,std::move(pidname),idperf,etcut,nogsf,lrt,ion,std::move(isolation),isolated};
+    m_trigInfoR3[trigger] = std::move(info);
 
 }
 
