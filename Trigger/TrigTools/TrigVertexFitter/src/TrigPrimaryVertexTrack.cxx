@@ -1,61 +1,17 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "TrigInDetEvent/TrigInDetTrack.h"
 #include "TrigInDetEvent/TrigL2Vertex.h"
 #include "TrigPrimaryVertexTrack.h"
 #include "TrkParameters/TrackParameters.h"
 #include "TrkTrack/Track.h"
 
-TrigPrimaryVertexTrack::TrigPrimaryVertexTrack(const TrigInDetTrack* pT)
-{
-  m_nTrackType=1;m_active=true;
-  m_pTrigTrack=pT;m_pTrkTrack=NULL;m_dChi2=-100.0;
-  double Ck[5][5];
-  int i,j;
-
-  const TrigInDetTrackFitPar* p=pT->param();
-
-  double a=-2.0*exp(-p->eta())/(1.0+exp(-2.0*p->eta()));
-  m_u[0]=p->a0();
-  m_u[1]=p->z0();
-  m_q[0]=p->phi0();
-  m_q[1]=2.0*atan(exp(-p->eta()));
-  m_q[2]=p->pT()*1e-3;
-
-
-  Ck[0][0]=(*p->cov())[0];Ck[0][1]=Ck[1][0]=(*p->cov())[2];
-  Ck[0][2]=Ck[2][0]=(*p->cov())[1];Ck[0][3]=Ck[3][0]=(*p->cov())[3];
-  Ck[0][4]=Ck[4][0]=(*p->cov())[4];Ck[1][1]=(*p->cov())[9];
-  Ck[1][2]=Ck[2][1]=(*p->cov())[6];Ck[1][3]=Ck[3][1]=(*p->cov())[10];
-  Ck[1][4]=Ck[4][1]=(*p->cov())[11];Ck[2][2]=(*p->cov())[5];
-  Ck[2][3]=Ck[3][2]=(*p->cov())[7];Ck[2][4]=Ck[4][2]=(*p->cov())[8];
-  Ck[3][3]=(*p->cov())[12];Ck[3][4]=Ck[4][3]=(*p->cov())[13];
-  Ck[4][4]=(*p->cov())[14];
-  for(i=0;i<5;i++)
-    {
-      Ck[3][i]=a*Ck[3][i];Ck[i][3]=Ck[3][i];
-    }
-  Ck[3][3]*=a;
-  for(i=0;i<5;i++)                    
-    {
-      Ck[4][i]=Ck[4][i]*1e-3;   Ck[i][4]=Ck[4][i];
-    }
-  Ck[4][4]*=1e-3;
-
-
-  for(i=0;i<2;i++) for(j=0;j<2;j++) m_Vuu[i][j]=Ck[i][j];
-  for(i=0;i<2;i++) for(j=0;j<3;j++) m_Vuq[i][j]=Ck[i][j+2];
-  for(i=0;i<3;i++) for(j=0;j<3;j++) m_Vqq[i][j]=Ck[i+2][j+2];
-
-  m_Perigee[0]=m_u[0];m_Perigee[1]=m_u[1];m_Perigee[2]=m_q[0];m_Perigee[3]=m_q[1];m_Perigee[4]=m_q[2];
-}
 
 TrigPrimaryVertexTrack::TrigPrimaryVertexTrack(const Trk::Track* pT)
 {
   m_nTrackType=2;m_active=true;
-  m_pTrkTrack=pT;m_pTrigTrack=NULL;m_dChi2=-100.0;
+  m_pTrkTrack=pT;m_dChi2=-100.0;
 
   const Trk::Perigee* pP= pT->perigeeParameters();
 
@@ -115,11 +71,6 @@ int TrigPrimaryVertexTrack::getTrackType()
   return m_nTrackType;
 }
 
-
-const TrigInDetTrack* TrigPrimaryVertexTrack::getTrigTrack()
-{
-  return m_pTrigTrack;
-}
 
 const Trk::Track* TrigPrimaryVertexTrack::getTrkTrack()
 {

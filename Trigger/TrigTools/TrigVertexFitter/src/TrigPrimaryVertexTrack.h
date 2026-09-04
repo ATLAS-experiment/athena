@@ -1,12 +1,11 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRIGVERTEXFITTER_TRIGPRIMARYVERTEXTRACK_H
 #define TRIGVERTEXFITTER_TRIGPRIMARYVERTEXTRACK_H
 
 class TrigL2Vertex;
-class TrigInDetTrack;
 namespace Trk {
   class Track;
 }
@@ -14,10 +13,8 @@ namespace Trk {
 class TrigPrimaryVertexTrack : public TrigVertexFittingNode
 {
   public:
-  TrigPrimaryVertexTrack(const TrigInDetTrack*);//!< constructor for L2 tracks 
   TrigPrimaryVertexTrack(const Trk::Track*);//!< constructor for EF (offline) tracks
   ~TrigPrimaryVertexTrack();
-  const TrigInDetTrack* getTrigTrack();//!< getter for L2 tracks 
   const Trk::Track* getTrkTrack();//!< getter for EF (offline) tracks
 
   virtual double getChi2Distance(TrigL2Vertex*);//!< implementation of abstract method from the base class
@@ -33,7 +30,6 @@ class TrigPrimaryVertexTrack : public TrigVertexFittingNode
   double PerigeeCovariance(int,int) const;//!< covariance of track parameters at the perigee
   double getChi2Contribution();//!< chi2-contribution to the vertex fit
  private:
-  const TrigInDetTrack* m_pTrigTrack;
   const Trk::Track* m_pTrkTrack;
   int m_nTrackType;
   int m_index = 0;
