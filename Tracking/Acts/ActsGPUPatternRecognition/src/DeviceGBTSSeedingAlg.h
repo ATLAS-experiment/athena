@@ -12,7 +12,7 @@
 #include "IDeviceSeedingAlgProviderTool.h"
 #include "AthDeviceInterfaces/IMemoryResourceTool.h"
 #include "TrigInDetToolInterfaces/ITrigL2LayerNumberTool.h"
-#include "ActsGPUInterfaces/IDeviceDetectorDescriptionProviderSvc.h"
+#include "ActsGPUEvent/GeometryIdMapping.h"
 
 #include "ActsGPUEvent/TracccMeasurementCollection.h"
 #include "ActsGPUEvent/TracccSpacepointCollection.h"
@@ -84,9 +84,9 @@ private:
         "Output traccc pixel seed collection buffer"};
     /// @}
 
-    /// @name The detector description service providing the Athena<->Detray ID map
-    ServiceHandle<ActsTrk::IDeviceDetectorDescriptionProviderSvc> m_detDescSvc{
-        this, "DetectorDescriptionSvc", "ActsTrk::JSONDeviceDetectorDescriptionProviderSvc"};
+    /// @name The detector mapping object providing the Athena<->Detray ID map
+    Gaudi::Property<std::string> m_geoIdMappingObjectName{this, "GeoIdMapping", "", "ID mapping between the three detector description realms."};
+    const ActsTrk::GeometryIdMapping* m_idMapping{nullptr};
         
     const InDetDD::PixelDetectorManager* m_pixelManager{nullptr};
     const PixelID* m_pixelID{nullptr};    
