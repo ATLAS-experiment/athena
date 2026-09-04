@@ -30,14 +30,14 @@ std::vector<McUtils::Strings> process_block(std::string_view cmd)
   }
 
   std::vector<std::string> slots;
-  for (auto const& token : cmd | std::views::split('+')) {
+  for (auto const token : cmd | std::views::split('+')) {
     slots.emplace_back(token.begin(), token.end());
   }
 
   result.reserve(slots.size());
   for (auto const& slot : slots) {
     McUtils::Strings candidates;
-    for (auto const& token : slot | std::views::split('|')) {
+    for (auto const token : slot | std::views::split('|')) {
       candidates.emplace_back(token.begin(), token.end());
     }
     std::ranges::sort(candidates);
