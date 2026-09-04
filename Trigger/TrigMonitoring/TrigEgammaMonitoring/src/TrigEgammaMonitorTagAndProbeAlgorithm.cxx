@@ -129,7 +129,7 @@ StatusCode TrigEgammaMonitorTagAndProbeAlgorithm::fillHistograms( const EventCon
 bool TrigEgammaMonitorTagAndProbeAlgorithm::executeTandP( const EventContext& ctx, std::vector<std::shared_ptr<const xAOD::Electron>> &probeElectrons) const
 {
    
-    auto monGroup = getGroup( m_anatype );
+    const auto & monGroup = getGroup( m_anatype );
     
     fillLabel(monGroup, "CutCounter", "Events");
 
@@ -204,16 +204,20 @@ bool TrigEgammaMonitorTagAndProbeAlgorithm::executeTandP( const EventContext& ct
         
         for(const auto *const elProbe : *offElectrons)
         {  // Dress the probes with updated Pid decision
-           
-            fillLabel(monGroup, "ProbeCutCounter", "Electrons");
+            static const std::string hName{"ProbeCutCounter"};
+            static const std::string electronsStr{"Electrons"};
+            fillLabel(monGroup, hName, electronsStr);
 
             if(elProbe==elTag) continue;
-            fillLabel(monGroup, "ProbeCutCounter", "NotTag");
+            static const std::string notTagStr{"NotTag"};
+            fillLabel(monGroup, hName, notTagStr);
             // Check opposite charge
             if(m_oppositeCharge && (elProbe->charge() == elTag->charge()) ) continue;
-            fillLabel(monGroup, "ProbeCutCounter", "OS");
+            static const std::string osStr{"OS"};
+            fillLabel(monGroup, hName, osStr);
             if(!m_oppositeCharge && (elProbe->charge() != elTag->charge()) ) continue;
-            fillLabel(monGroup, "ProbeCutCounter", "SS");
+            static const std::string ssStr{"SS"};
+            fillLabel(monGroup, hName, ssStr);
 
             ATH_MSG_DEBUG("Execute TandP BaseTool OS"); 
             
