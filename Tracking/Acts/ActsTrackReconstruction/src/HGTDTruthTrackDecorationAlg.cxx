@@ -130,7 +130,7 @@ namespace ActsTrk{
         layerClusterShadowedHandle(*trackParticle) = {false, false, false, false};
         layerClusterMergedHandle(*trackParticle)  = {false, false, false, false};
         layerPrimaryExpectedHandle(*trackParticle) = {false, false, false, false};
-        ATH_MSG_WARNING("TrackParticle " << trackParticle->index() << ": invalid truth link");
+        ATH_MSG_DEBUG("TrackParticle " << trackParticle->index() << ": invalid truth link");
         continue;
       }
       else {
