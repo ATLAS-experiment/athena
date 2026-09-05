@@ -145,7 +145,7 @@ NNClusterCalibrator<calib_data_t, traj_t>::weightedClusterCenter(
   double sum = 0;
   InDetDD::SiLocalPosition position(0, 0);
   auto idvals = Acts::zip(cluster.rdoList(), cluster.chargeList());
-  for (const auto & [rdoID, charge] : idvals) {
+  for (const auto [rdoID, charge] : idvals) {
     const Identifier singlePixelID(rdoID);
     const int x = static_cast<int>(this->pixelID().phi_index(singlePixelID));
     const int y = static_cast<int>(this->pixelID().eta_index(singlePixelID));
@@ -192,7 +192,7 @@ void NNClusterCalibrator<calib_data_t, traj_t>::fillClusterData(
   const int yCenter = nn.centerCell.etaIndex();
 
   auto idvals = Acts::zip(cluster.rdoList(), cluster.chargeList());
-  for (const auto & [rdoID, charge] : idvals) {
+  for (const auto [rdoID, charge] : idvals) {
     const Identifier singlePixelID(rdoID);
     const int x = static_cast<int>(this->pixelID().phi_index(singlePixelID));
     const int y = static_cast<int>(this->pixelID().eta_index(singlePixelID));
