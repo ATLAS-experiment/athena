@@ -43,7 +43,7 @@ EGPhotonBDTToolDecorator::addBranches(const EventContext& ctx) const
     m_decoratorScore, ctx
   };
 
-  for (const auto& photon : *particles) {
+  for (const xAOD::Egamma* photon : *particles) {
     // compute the BDT score with the fudged photon
     const float score = m_observableTool->evaluate(photon);
 
