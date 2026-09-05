@@ -197,14 +197,6 @@ StatusCode CreateData::makeData( const std::string& test )
 		    << elephantinoOutputName << "]");
   }
 
-  {
-    const AthExIParticles* iparticles = 0;
-    if ( !evtStore()->symLink( particles, iparticles ).isSuccess() ) {
-      ATH_MSG_WARNING("Could not symlink AthExParticles to AthExIParticles !!");
-      return StatusCode::RECOVERABLE;
-    }
-  }
-
   const AthExIParticles* iparticles = 0;
   if ( !evtStore()->retrieve( iparticles, particlesOutputName).isSuccess() ||
        0 == iparticles ) {

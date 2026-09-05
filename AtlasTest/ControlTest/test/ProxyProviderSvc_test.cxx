@@ -156,7 +156,7 @@ void testOverwrite(StoreGateSvc& rSG, IProxyProviderSvc& rPPS) {
     //check we can not retrieve a non const pointer from the PPS
     assert(!(wFB.isValid()));
     //overwrite an object coming from the PPS
-    assert(rSG.overwrite(std::make_unique<FooBar>(), KEY, true));
+    assert(rSG.overwrite(new FooBar(), KEY));
     //check contents of the overwritten object
     assert(rFB.isValid());
     cout << "Overwritten FooBar i="<< rFB->i() << endl;

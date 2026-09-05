@@ -113,6 +113,7 @@ def getNNs(flags):
              "BTagging/20240925/GN2Xv02/antikt10ufo/network.onnx",
              "BTagging/20250310/GN2XTauV00/antikt10ufo/network.onnx",
              "BTagging/20250912/GN3XPV01/antikt10ufo/network.onnx",
+             "BTagging/20260803/tautauJRv00/antikt10ufo/network.onnx",
              "JetCalibTools/CalibArea-00-04-83/CalibrationFactors/bbJESJMS_calibFactors_R22_MC20_CSSKUFO_bJR10v00Ext_20260513.onnx", # bJR10v00Ext
              "JetCalibTools/CalibArea-00-04-83/CalibrationFactors/bbJESJMS_calibFactors_R22_MC20MC23_CSSKUFO_bJR10v01_20260513.onnx" # bJR10v01
     ]

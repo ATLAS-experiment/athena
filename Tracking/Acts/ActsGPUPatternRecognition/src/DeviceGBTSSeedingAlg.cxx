@@ -40,6 +40,7 @@ StatusCode DeviceGBTSSeedingAlg::initialize()
   ATH_CHECK(m_inputPixelSPKey.initialize());
   ATH_CHECK(m_inputMeasKey.initialize());
   ATH_CHECK(m_outputPixelSeedsKey.initialize());
+  ATH_CHECK(detStore()->retrieve(m_idMapping, m_geoIdMappingObjectName.value()));
 
   ATH_CHECK(detStore()->retrieve(m_pixelManager, "ITkPixel"));
   ATH_CHECK(detStore()->retrieve(m_pixelID, "PixelID") );
@@ -86,7 +87,6 @@ StatusCode DeviceGBTSSeedingAlg::execute(const EventContext& ctx) const
 StatusCode DeviceGBTSSeedingAlg::configureGBTS()
 {
 
-    const std::unordered_map<uint64_t, Identifier> detrayToAthena = m_detDescSvc->detrayToAthenaMap();
     // traccc-gbts defaults are ITk tuned
     // get layer linking scheme from the athena tools
     std::string conn_fileName =
@@ -135,17 +135,18 @@ StatusCode DeviceGBTSSeedingAlg::configureGBTS()
 
 
     std::vector<std::pair<std::uint64_t, short>> identifierBinning;
-    identifierBinning.reserve(detrayToAthena.size());
+    identifierBinning.reserve(m_idMapping->size());
 
     // construct identifier -> layer table
     IdContext pixel_context = m_pixelID->wafer_context();
-    for (std::pair<std::uint64_t, Identifier> dToI : detrayToAthena) {
-        if (m_pixelManager->identifierBelongs(dToI.second)) {
+    for (const auto& [detrayId, compactId] : m_idMapping->detrayToAthenaMap()) {
+        Identifier athenaId(compactId);
+        if (m_pixelManager->identifierBelongs(athenaId)) {
             IdentifierHash idHash{};//default c'tor produces detectable invalid hash
-            int rc = m_pixelID->get_hash(dToI.second, idHash, &pixel_context); //rc=0 is ok
+            int rc = m_pixelID->get_hash(athenaId, idHash, &pixel_context); //rc=0 is ok
             if (rc!=0)[[unlikely]] continue;
             identifierBinning.push_back(std::make_pair(
-                dToI.first, pixel_h2l->at(static_cast<int>(idHash))));
+                detrayId, pixel_h2l->at(static_cast<int>(idHash))));
         }
     }
     ATH_MSG_INFO(identifierBinning.size() << " identifiers with a layer");

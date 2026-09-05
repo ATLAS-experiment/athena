@@ -35,6 +35,7 @@ def RDOtoTracccCellConverterAlgCfg(flags,
     kwargs.setdefault("StripRDO",    "ITkStripRDOs")
     kwargs.setdefault("TracccCells", "TracccCells")
     kwargs.setdefault("HostConditionsObjectName", "TracccHostCondConfig")
+    kwargs.setdefault("GeoIdMappingObjectName",     "TracccGeometryIdMapping")
     kwargs.setdefault("CPUCellSorting", not flags.Acts.Device.doCellSorting)
     kwargs.setdefault("UsePixelToTForCellActivation", not flags.Tracking.doPixelDigitalClustering)
     acc.addEventAlgo(
@@ -62,6 +63,7 @@ def PhaseIIRDOtoTracccCellConverterAlgCfg(flags,
     kwargs.setdefault("StripRDO", "ITkStripRDOs")
     kwargs.setdefault("TracccCells", "TracccCellsFromPh2RDO")
     kwargs.setdefault("HostConditionsObjectName", "TracccHostCondConfig")
+    kwargs.setdefault("GeoIdMappingObjectName",     "TracccGeometryIdMapping")
     kwargs.setdefault("CPUCellSorting", not flags.Acts.Device.doCellSorting)
     kwargs.setdefault("UsePixelToTForCellActivation", not flags.Tracking.doPixelDigitalClustering)
     acc.addEventAlgo(

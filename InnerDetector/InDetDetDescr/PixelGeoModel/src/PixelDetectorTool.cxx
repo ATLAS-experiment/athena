@@ -284,10 +284,6 @@ StatusCode PixelDetectorTool::create()
   // Add the manager to the experiment
   theExpt->addManager(m_manager);
 
-  // Symlink the manager
-  const SiDetectorManager * siDetManager = m_manager;
-  ATH_CHECK(detStore()->symLink(m_manager, siDetManager));
-
   return StatusCode::SUCCESS;
 }
 

@@ -14,8 +14,8 @@
 
 // Framework include files
 #include "PersistentDataModel/Token.h"
-#include "StorageSvc/DbAccessObj.h"
 #include "StorageSvc/DbPrint.h"
+#include "DbAccessObj.h"
 
 /*
  *  POOL namespace declaration

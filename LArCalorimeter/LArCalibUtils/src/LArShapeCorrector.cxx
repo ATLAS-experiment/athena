@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArCalibUtils/LArShapeCorrector.h"
@@ -169,14 +169,6 @@ StatusCode LArShapeCorrector::stop() {
     return sc;
   }
   ATH_MSG_INFO( "Successfully registered LArShapeComplete object with key " << m_keyShape_newcorr );
-
-  sc=detStore()->symLink(ClassID_traits<LArShapeComplete>::ID(),m_keyShape_newcorr,ClassID_traits<ILArShape>::ID());
-  if (sc.isFailure()) {
-    ATH_MSG_ERROR( "Failed to sym-link LArShapeComplete object" );
-    return sc;
-  }
-
-  //ATH_MSG_INFO( detStore()->dump() );
 
   return StatusCode::SUCCESS;
   

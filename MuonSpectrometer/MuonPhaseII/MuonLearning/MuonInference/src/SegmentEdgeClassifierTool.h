@@ -90,7 +90,19 @@ namespace MuonML {
 
     Gaudi::Property<float> m_maxDeltaThetaDeg{this, "MaxDeltaThetaDeg", 35.f};
     Gaudi::Property<int> m_maxDeltaSector{this, "MaxDeltaSector", 1};
-    Gaudi::Property<int> m_sectorModulo{this, "SectorModulo", 16};
+    Gaudi::Property<int> m_sectorModulo{this, "SectorModulo", 16,
+        "Number of muon sectors used when applying wrap-around sector distance"};
+    Gaudi::Property<unsigned int> m_maxSegmentsPerBucket{this, "MaxSegmentsPerBucket", 0,
+        "Keep at most this many quality-ranked segments per (sector, chamber, eta) bucket before inference; 0 keeps all"};
+    Gaudi::Property<unsigned int> m_maxEdgesPerNodeBeforeInference{this, "MaxEdgesPerNodeBeforeInference", 0,
+        "Keep at most this many geometrical neighbour pairs per node before ONNX inference; 0 keeps all"};
+    Gaudi::Property<unsigned int> m_maxEdgesPerTargetChamberBeforeInference{
+        this, "MaxEdgesPerTargetChamberBeforeInference", 0,
+        "Keep at most this many pre-ONNX neighbours from one target chamber per node; 0 keeps all"};
+    Gaudi::Property<bool> m_dropSameChamberEdgesBeforeInference{this, "DropSameChamberEdgesBeforeInference", true,
+        "Drop same-chamber segment pairs before ONNX inference"};
+    Gaudi::Property<bool> m_dropIsolatedNodesBeforeInference{this, "DropIsolatedNodesBeforeInference", true,
+        "Remove nodes without a retained pre-ONNX edge before creating ONNX tensors"};
     Gaudi::Property<std::string> m_inputNodeName{this, "InputNodeName", "x"};
     Gaudi::Property<std::string> m_inputEdgeIndexName{this, "InputEdgeIndexName", "edge_index"};
     Gaudi::Property<std::string> m_inputEdgeAttrName{this, "InputEdgeAttrName", "edge_attr"};
@@ -102,7 +114,6 @@ namespace MuonML {
     /// Node feature order expected by the model metadata (resolved at initialize).
     std::vector<std::string> m_nodeFeatureNames{};
     std::vector<SegmentNodeFeatureId> m_nodeFeatureIds{};
-
     mutable std::mutex m_debugDumpMutex;
     mutable std::atomic<unsigned int> m_debugDumpEvents{0};
   };

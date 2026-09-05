@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //====================================================================
@@ -28,8 +28,6 @@
 using namespace std;
 using namespace pool;
 
-int DbObjectHolder::release() {  return 1;    }
-
 // Enable this to force regular retirement
 void retireDatabase(DbContainerObj* c)  {
   static std::atomic<int> i=0;
@@ -44,7 +42,7 @@ DbContainerObj::DbContainerObj( DbDatabase&       dbH,
                                 const string&     nam, 
                                 const DbType&     dbtyp,
                                 Io::IoFlag      mod)   
-: Base(nam, mod, dbtyp, dbH.db()),
+: DbAccessObjBase(nam, mod, dbtyp, dbH.db()),
   APRMessaging( dbH.logon() ),
   m_info(0), m_tokH(0)
 {
@@ -74,7 +72,6 @@ DbContainerObj::DbContainerObj( DbDatabase&       dbH,
 // Destructor
 DbContainerObj::~DbContainerObj()     {
    string id = m_dbH.isValid() ? m_dbH.logon() : name();
-   clearEntries();
    releasePtr(m_info);
    m_dbH.remove(this).ignore();
    ATH_MSG_DEBUG("--> Deaccess DbContainer  " 

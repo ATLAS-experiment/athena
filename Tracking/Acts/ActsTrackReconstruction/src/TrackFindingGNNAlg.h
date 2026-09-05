@@ -39,6 +39,7 @@
 #include "AthenaKernel/Chrono.h"
 #include "AthenaMonitoringKernel/GenericMonitoringTool.h"
 #include "GaudiKernel/EventContext.h"
+#include "InDetIdentifier/PixelID.h"
 #include "InDetIdentifier/SCT_ID.h"
 #include "InDetReadoutGeometry/SiDetectorElementCollection.h"
 #include "xAODMeasurementBase/UncalibratedMeasurement.h"
@@ -158,6 +159,7 @@ private:
 
   std::unique_ptr<ActsPlugins::GnnPipeline> m_gnnPipeline;
   
+  const PixelID *m_pixelIdHelper = nullptr;
   const SCT_ID *m_stripIdHelper = nullptr;
 
   Acts::TrackSelector::EtaBinnedConfig m_trackSelectorConfig;
