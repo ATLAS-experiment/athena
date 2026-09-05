@@ -203,6 +203,9 @@ StatusCode GbtsLayerTool::buildLayers() {
     layer.id = combinedId;
     layer.type = barrelEc == 0 ? Acts::Experimental::GbtsLayerType::Barrel
                                : Acts::Experimental::GbtsLayerType::Endcap;
+    layer.technology = technology == kPixel
+                           ? Acts::Experimental::GbtsLayerTechnology::Pixel
+                           : Acts::Experimental::GbtsLayerTechnology::Strip;
     layer.refCoord = refCoordSum / nModules;
     // The bounds span the coordinate the layer extends along.
     layer.minBound = barrelEc == 0 ? minZ : minR;
