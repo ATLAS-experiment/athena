@@ -138,14 +138,16 @@ StatusCode GbtsLayerTool::buildLayers() {
   // volumes, 10 * 7 + disk, only run into the barrel's 80 at disk 10.
   // Nothing enforces that though, and two layers carrying the same id would
   // silently become one layer in GbtsGeometry.
-  std::set<int> layerIds;
+  std::set<Acts::Experimental::GbtsExperimentLayerId> layerIds;
 
   short layerIndex = 0;
   for (const auto& [key, modules] : hashMap) {
     const auto& [sideKey, technology, volId, layId] = key;
 
     const short barrelEc = sideKey == kBarrelSideKey ? 0 : sideKey;
-    const int combinedId = static_cast<int>(volId) * 1000 + layId;
+    const auto combinedId =
+        static_cast<Acts::Experimental::GbtsExperimentLayerId>(volId) * 1000 +
+        static_cast<Acts::Experimental::GbtsExperimentLayerId>(layId);
 
     if (!layerIds.insert(combinedId).second) {
       ATH_MSG_ERROR("Two GBTS layers carry the id "
