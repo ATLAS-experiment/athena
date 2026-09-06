@@ -553,7 +553,7 @@ protected:
          //       the former has the advantage that part of the state creation code is independent of the
          //       the measurement.
 
-         Acts::BoundSubspaceIndices boundSubspaceIndices;
+         Acts::BoundSubspaceIndices boundSubspaceIndices{};
          std::copy(parameter_map.begin(), parameter_map.end(), boundSubspaceIndices.begin());
          createStates( selected_measurements.size(),
                        boundState,

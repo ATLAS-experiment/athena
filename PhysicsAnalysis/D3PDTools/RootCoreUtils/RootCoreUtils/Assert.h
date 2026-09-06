@@ -40,9 +40,6 @@
 
 
 
-//protect
-#include <RootCoreUtils/Global.h>
-
 namespace RCU
 {
   namespace Check
@@ -81,7 +78,7 @@ namespace RCU
     /// requires: type < typeNum
     /// requires: error != 0
     /// availability: experts only
-    void fail (const char *package, const char *file, unsigned line,
+    void fail (const char *file, unsigned line,
 	       Type type, const char *error);
 
 
@@ -129,15 +126,11 @@ namespace RCU
 
 
 
-#ifndef ROOTCORE_PACKAGE
-#define ROOTCORE_PACKAGE 0
-#endif
-
 /// effects: perform a check
 /// guarantee: strong
 /// failures: !condition
 #define RCU_CHECK(type,condition,message)				\
-  (condition) ? (void) 0 : ::RCU::Check::fail (ROOTCORE_PACKAGE, __FILE__, __LINE__, ::RCU::Check::type, message)
+  (condition) ? (void) 0 : ::RCU::Check::fail (__FILE__, __LINE__, ::RCU::Check::type, message)
 
 /// effects: join together two tokens
 #define RCU_CHECK_JOIN2(a,b)         RCU_CHECK_JOIN2_HIDDEN(a,b)
@@ -191,14 +184,14 @@ namespace RCU
 
 
 
-#ifndef NDEBUG
-
 #define RCU_INVARIANT(x)			\
   RCU_CHECK (invariant, x, #x)
 #define RCU_INVARIANT2(x,y)			\
   RCU_CHECK (invariant, x,  y)
 #define RCU_INVARIANT0(y)			\
   RCU_CHECK (invariant, 0,  y)
+
+#ifndef NDEBUG
 
 #define RCU_REQUIRE(x)				\
   RCU_CHECK (require_hard,   x, #x)
@@ -230,16 +223,8 @@ namespace RCU
 #define RCU_DESTROY_INVARIANT(x)		\
   (x)->testInvariant ()
 
-
-
 #else
 
-#define RCU_INVARIANT(x)			\
-  (void) 0
-#define RCU_INVARIANT2(x,y)			\
-  (void) 0
-#define RCU_INVARIANT0(y)			\
-  (void) 0
 #define RCU_REQUIRE(x)				\
   (void) 0
 #define RCU_REQUIRE2(x,y)			\

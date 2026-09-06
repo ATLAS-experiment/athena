@@ -71,6 +71,7 @@ StatusCode ReadSiDetectorElements::initialize(){
     // If common pixel/SCT code can copy to pointer to AtlasDetectorID
     m_idHelper = m_sctIdHelper;
   }
+  //from now on, don't check the names, just whether the corresponding helper is valid
 
   if (m_useConditionsTools) {
     ATH_CHECK(m_siLorentzAngleTool.retrieve());
@@ -169,7 +170,7 @@ void ReadSiDetectorElements::printAllElements(const bool accessDuringInitializat
         // Make some consistency tests for the identifier.
         Identifier idTest;
         IdentifierHash idHashTest;
-        if (m_managerName == "Pixel" || m_managerName == "ITkPixel") {
+        if (m_pixelIdHelper) {
           idTest = m_pixelIdHelper->wafer_id(hashId);
           idHashTest = m_pixelIdHelper->wafer_hash(idTest);
         } else if (m_sctIdHelper) {
@@ -250,9 +251,9 @@ void ReadSiDetectorElements::printAllElements(const bool accessDuringInitializat
           if (!iEta && siNumerology.skipEtaZeroForLayer(iLayer)) continue;
           for (int iSide = 0; iSide < nSides; iSide++) {
             Identifier id;
-            if (m_managerName == "Pixel" || m_managerName == "ITkPixel"){
+            if (m_pixelIdHelper){
               id = m_pixelIdHelper->wafer_id(iBarrel,iLayer,iPhi,iEta);
-            } else {
+            } else if (m_sctIdHelper){
               id = m_sctIdHelper->wafer_id(iBarrel,iLayer,iPhi,iEta,iSide);
             }
             const SiDetectorElement * element = nullptr;

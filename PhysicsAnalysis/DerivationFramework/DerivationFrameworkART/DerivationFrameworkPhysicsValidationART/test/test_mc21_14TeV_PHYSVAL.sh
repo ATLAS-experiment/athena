@@ -3,15 +3,18 @@
 # art-include: main/Athena
 # art-description: DAOD building PHYSVAL mc21_14TeV_
 # art-type: grid
+# art-memory: 4096
 # art-output: *.pool.root
 # art-output: checkFile*.txt
 # art-output: checkxAOD*.txt
 # art-output: checkIndexRefs*.txt
 
+AOD_File=$(python -c "from AthenaConfiguration.TestDefaults import defaultTestFiles; print(defaultTestFiles.AOD_RUN4_MC[0])")
+
 set -e
 
 Derivation_tf.py \
---inputAODFile /cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/PhaseIIUpgrade/AOD/ATLAS-P2-RUN4-04-00-00/mc21_14TeV.601229.PhPy8EG_A14_ttbar_hdamp258p75_SingleLep.recon.AOD.e8481_s4494_r16436/AOD.44098360._000011.pool.root.1 \
+--inputAODFile ${AOD_File} \
 --outputDAODFile art.pool.root \
 --formats PHYSVAL \
 --maxEvents -1 \

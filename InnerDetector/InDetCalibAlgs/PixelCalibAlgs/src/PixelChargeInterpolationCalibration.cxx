@@ -1,14 +1,11 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef PixelChargeInterpolationCalibration_cxx
 #define PixelChargeInterpolationCalibration_cxx
 
-#include <iostream>
-#include <fstream>
-#include <vector>
-#include <string>
+
 
 #include <TDirectory.h>
 
@@ -16,6 +13,7 @@
 #include "PixelCalibAlgs/PixelChargeInterpolationHistograms.h"
 #include "PixelConditionsData/PixelChargeInterpolationParameters.h"
 #include "PixelCalibAlgs/PixelChargeInterpolationPlot.h"
+#include <fstream>
 
 namespace PixelCalib{
 
@@ -129,10 +127,8 @@ int PixelChargeInterpolationCalibration::Analyze( const std::string& output,
 	m_plots = new PixelChargeInterpolationPlot(*DigitalParameters);
 	m_plots->AddReference(*AnalogParameters,
 			std::string("Fit on analog residual (should give 0)").c_str(),3,std::string("P"));
-	//std::cout << reference_names.size() << std::endl;
 	for(unsigned int i = 0 ; i < reference_names.size() ; i++ ){
-		//std::cout << reference_names[i] << std::endl;
-                std::ifstream fin((reference_names[i]).c_str());
+    std::ifstream fin((reference_names[i]).c_str());
 		if(!fin.fail()){
 			fin.close();
 			PixelChargeInterpolationParameters *RefParameters =

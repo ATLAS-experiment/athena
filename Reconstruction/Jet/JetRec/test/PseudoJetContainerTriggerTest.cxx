@@ -174,7 +174,7 @@ TEST_F(PseudoJetContainerTriggerTest, test_append) {
   // check that the jets have the appropriate constituents or associated
   // objects set.
 
-  bool debug{true};
+  static constexpr bool debug{true};
   
   // create the PseudoContainers
   PseudoJetContainer psc0(std::move(m_pExtractor_noghost), m_pjVec0);

@@ -13,7 +13,6 @@
 #include "DerivationFrameworkInterfaces/IAugmentationTool.h"
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "EgammaAnalysisInterfaces/IPhotonObservableTool.h"
-#include "EgammaAnalysisInterfaces/IElectronPhotonShowerShapeFudgeTool.h"
 #include "GaudiKernel/ToolHandle.h"
 #include "xAODEgamma/EgammaContainer.h"
 //
@@ -33,10 +32,10 @@ namespace DerivationFramework {
   private:
     // photon observable tool (for calculating the BDT score)
     ToolHandle<IPhotonObservableTool> m_observableTool{this, "PhotonObservableTool", "", "Observable tool",};
-    // shower shape correction tool
-    ToolHandle<IElectronPhotonShowerShapeFudgeTool> m_fudgeMCTool{ this, "EGammaFudgeMCTool", "", "Fudging tool" };
     // photon container name
-    SG::ReadHandleKey<xAOD::EgammaContainer> m_ContainerName{ this, "ContainerName", "", "Input" };
+    SG::ReadHandleKey<xAOD::EgammaContainer> m_ContainerName{ this, "ContainerName", "", "Input to decorate" };
+    // Fudged photon container name
+    SG::ReadHandleKey<xAOD::EgammaContainer> m_fudgedContainerName{ this, "FudgedContainerName", "", "Input with fudge factors applied" };
 
     // Write decoration handle keys
     SG::WriteDecorHandleKey<xAOD::EgammaContainer> m_decoratorScore{ this,

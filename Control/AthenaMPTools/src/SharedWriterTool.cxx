@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "SharedWriterTool.h"
@@ -26,9 +26,7 @@ SharedWriterTool::SharedWriterTool(const std::string& type
   m_subprocDirPrefix = "shared_writer";
 }
 
-SharedWriterTool::~SharedWriterTool()
-{
-}
+SharedWriterTool::~SharedWriterTool() = default;
 
 StatusCode SharedWriterTool::initialize()
 {
@@ -45,7 +43,6 @@ StatusCode SharedWriterTool::finalize()
 {
   ATH_MSG_DEBUG("In finalize");
 
-  delete m_sharedRankQueue;
   return StatusCode::SUCCESS;
 }
 
@@ -58,11 +55,12 @@ int SharedWriterTool::makePool(int /*maxevt*/, int nprocs, const std::string& to
     return -1;
   }
 
-  m_nprocs = (nprocs==-1?sysconf(_SC_NPROCESSORS_ONLN):nprocs) + 1;
+  m_nprocs = (nprocs == -1 ? sysconf(_SC_NPROCESSORS_ONLN) : nprocs) + 1;
   m_subprocTopDir = topdir;
 
   // Create rank queue and fill it
-  m_sharedRankQueue = new AthenaInterprocess::SharedQueue("SharedWriterTool_RankQueue_"+m_randStr,1,sizeof(int));
+  m_sharedRankQueue = std::make_unique<AthenaInterprocess::SharedQueue>(
+    "SharedWriterTool_RankQueue_" + m_randStr, 1, sizeof(int));
   if(!m_sharedRankQueue->send_basic<int>(0)) {
     ATH_MSG_ERROR("Unable to send int to the ranks queue!");
     return -1;
@@ -97,8 +95,8 @@ void SharedWriterTool::subProcessLogs(std::vector<std::string>& filenames)
 {
   filenames.clear();
   std::filesystem::path writer_rundir(m_subprocTopDir);
-  writer_rundir/= std::filesystem::path(m_subprocDirPrefix);
-  filenames.push_back(writer_rundir.string()+std::string("/AthenaMP.log"));
+  writer_rundir /= m_subprocDirPrefix;
+  filenames.push_back((writer_rundir / "AthenaMP.log").string());
 }
 
 AthenaMP::AllWorkerOutputs_ptr SharedWriterTool::generateOutputReport()
@@ -130,9 +128,9 @@ std::unique_ptr<AthenaInterprocess::ScheduledWork> SharedWriterTool::bootstrap_f
   // behavior so please keep this in mind.
   if(m_debug) waitForSignal();
 
-  std::unique_ptr<AthenaInterprocess::ScheduledWork> outwork(new AthenaInterprocess::ScheduledWork);
+  auto outwork = std::make_unique<AthenaInterprocess::ScheduledWork>();
   outwork->data = CxxUtils::xmalloc(sizeof(int));
-  *(int*)(outwork->data) = 1; // Error code: for now use 0 success, 1 failure
+  *static_cast<int*>(outwork->data) = 1; // Error code: for now use 0 success, 1 failure
   outwork->size = sizeof(int);
 
   // ...
@@ -211,25 +209,26 @@ std::unique_ptr<AthenaInterprocess::ScheduledWork> SharedWriterTool::bootstrap_f
   }
 
   // Declare success and return
-  *(int*)(outwork->data) = 0;
+  *static_cast<int*>(outwork->data) = 0;
   return outwork;
 }
 
 std::unique_ptr<AthenaInterprocess::ScheduledWork> SharedWriterTool::exec_func()
 {
   ATH_MSG_INFO("Exec function in the AthenaMP Shared Writer PID=" << getpid());
-  bool all_ok=true;
+  bool all_ok = true;
 
   SmartIF<IAthenaSharedWriterSvc> sharedWriterSvc(serviceLocator()->service("AthenaRootSharedWriterSvc"));
   if(!sharedWriterSvc) {
     ATH_MSG_ERROR("Error retrieving AthenaRootSharedWriterSvc");
     all_ok=false;
-  } else if(!sharedWriterSvc->share(m_nprocs, m_nMotherProcess.value()).isSuccess()) {
+  }
+  else if(!sharedWriterSvc->share(m_nprocs, m_nMotherProcess.value()).isSuccess()) {
     ATH_MSG_ERROR("Exec function could not share data");
     all_ok=false;
   }
   AthCnvSvc* cnvSvc = dynamic_cast<AthCnvSvc*>(m_cnvSvc.get());
-  if (cnvSvc == 0 || !cnvSvc->disconnectOutput("").isSuccess()) {
+  if (cnvSvc == nullptr || !cnvSvc->disconnectOutput("").isSuccess()) {
     ATH_MSG_ERROR("Exec function could not disconnectOutput");
     all_ok=false;
   }
@@ -245,9 +244,9 @@ std::unique_ptr<AthenaInterprocess::ScheduledWork> SharedWriterTool::exec_func()
     }
   }
 
-  std::unique_ptr<AthenaInterprocess::ScheduledWork> outwork(new AthenaInterprocess::ScheduledWork);
+  auto outwork = std::make_unique<AthenaInterprocess::ScheduledWork>();
   outwork->data = CxxUtils::xmalloc(sizeof(int));
-  *(int*)(outwork->data) = (all_ok?0:1); // Error code: for now use 0 success, 1 failure
+  *static_cast<int*>(outwork->data) = (all_ok ? 0 : 1); // Error code: for now use 0 success, 1 failure
   outwork->size = sizeof(int);
 
   // ...
@@ -260,9 +259,9 @@ std::unique_ptr<AthenaInterprocess::ScheduledWork> SharedWriterTool::exec_func()
 std::unique_ptr<AthenaInterprocess::ScheduledWork> SharedWriterTool::fin_func()
 {
   // Dummy
-  std::unique_ptr<AthenaInterprocess::ScheduledWork> outwork(new AthenaInterprocess::ScheduledWork);
+  auto outwork = std::make_unique<AthenaInterprocess::ScheduledWork>();
   outwork->data = CxxUtils::xmalloc(sizeof(int));
-  *(int*)(outwork->data) = 0; // Error code: for now use 0 success, 1 failure
+  *static_cast<int*>(outwork->data) = 0; // Error code: for now use 0 success, 1 failure
   outwork->size = sizeof(int);
   return outwork;
 }

@@ -6,21 +6,20 @@
 #include "StoreGate/ReadDecorHandle.h"
 #include "StoreGate/ReadHandle.h"
 #include "StoreGate/WriteDecorHandle.h"
-#include "DerivationFrameworkMuons/Utils.h"
 #include "MuonTruthHelpers/MuonSimHitHelpers.h"
 #include "xAODMuonPrepData/UtilFunctions.h"
 #include "xAODMuonViews/ChamberViewer.h"
+#include "xAODMuonViews/ContainerDecorator.h"
 
 namespace MuonR4 {
     using PrdCont_t = xAOD::MuonMeasurementContainer;
     using SegLink_t = ElementLink<xAOD::MuonSegmentContainer>;
     using SegLinkVec_t = std::vector<SegLink_t>;
 
-    using MarkerHandle_t = SG::WriteDecorHandle<PrdCont_t, bool>;
-    using LinkHandle_t = SG::WriteDecorHandle<PrdCont_t, SegLinkVec_t>;
+    using MarkerHandle_t = xAOD::ContainerDecorator<PrdCont_t, std::uint8_t>;
+    using LinkHandle_t = xAOD::ContainerDecorator<PrdCont_t, SegLinkVec_t>;
     
     using WriteDecorKey_t = SG::WriteDecorHandleKey<xAOD::MuonMeasurementContainer>;
-    using namespace DerivationFramework;
 
     StatusCode TruthMeasMarkerAlg::initialize() {
         ATH_CHECK(m_segKey.initialize());
@@ -56,8 +55,7 @@ namespace MuonR4 {
             if (measContainer->empty()) {
                 continue;
             }
-            MarkerHandle_t decor{makeHandle(ctx, key, false)};
-            markers.insert(std::make_pair(measContainer, std::move(decor)));
+            markers.insert(std::make_pair(measContainer, MarkerHandle_t{key, ctx}));
             const TechnologyIndex techIdx = m_idHelperSvc->technologyIndex(measContainer->at(0)->identify());
             techConts[Acts::toUnderlying(techIdx)].emplace_back(ChamberView_t{*measContainer});
         }
@@ -68,8 +66,7 @@ namespace MuonR4 {
             if (measContainer->empty()) {
                 continue;
             }
-            LinkHandle_t decor{makeHandle(ctx, key,SegLinkVec_t{})};
-            links.insert(std::make_pair(measContainer, std::move(decor)));
+            links.insert(std::make_pair(measContainer, LinkHandle_t{key, ctx}));
         }
         
         auto fetchPrd = [&](const xAOD::MuonSimHit* hit) -> std::vector<const xAOD::MuonMeasurement*> {

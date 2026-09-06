@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 from AthenaConfiguration.ComponentFactory import CompFactory
 import collections
 
@@ -72,20 +72,25 @@ def checkSequenceConsistency( seq ):
 
 
 def isSequence( obj ):
-    return isinstance(obj, AthSequencer)
+    return type(obj) is AthSequencer  # faster than isinstance and we do not care about inheritance
 
 
 def findSubSequence( start, nameToLookFor ):
     """ Traverse sequences tree to find a sequence of a given name. The first one is returned. """
-    if start.getName() == nameToLookFor:
-        return start
-    for c in getSequenceChildren(start):
-        if isSequence( c ):
-            if  c.getName() == nameToLookFor:
-                return c
-            found = findSubSequence( c, nameToLookFor )
-            if found:
-                return found
+    # Implemented as an iterative Depth-First search, which is faster than recursion in Python.
+
+    stack = [start]
+    while stack:
+        current = stack.pop()
+
+        if current.getName() == nameToLookFor:
+            return current
+
+        # Collect child sequences (plain loop is faster than generator expression)
+        for c in getSequenceChildren(current):
+            if isSequence(c):
+                stack.append(c)
+
     return None
 
 

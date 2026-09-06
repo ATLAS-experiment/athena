@@ -121,17 +121,16 @@ def runHLTCfg(flags, checkMT=True):
 
 
 def athenaHLTCfg(flags):
-   """Top-level cfg function when running in athenaHLT"""
+   """Top-level cfg function when running in athenaEF"""
 
    # Set default flags for running HLT
    set_flags(flags)
 
-   # Decoding the flags from the command line is already done in athenaHLT.
+   # Decoding the flags from the command line is already done in athenaEF.
    # But we have to do it again in case some of the flags from set_flags
    # get overwritten by the user.
-   from TrigPSC import PscConfig
-   for flag_arg in PscConfig.unparsedArguments:
-      flags.fillFromString(flag_arg)
+   from TrigCommon.AthHLT import fillFromUnparsedArgs
+   fillFromUnparsedArgs(flags)
 
    # Lock flags
    lock_and_restrict(flags)

@@ -127,8 +127,11 @@ def InDetPhysValTruthDecoratorAlgCfg(
         kwargs.setdefault("PixelClusterContainerName", "PixelMeasurements")
         kwargs.setdefault("SCTClusterContainerName", "SCT_Measurements")
 
+    kwargs.setdefault("decorateTime", flags.Reco.EnableHGTDExtension)
+
     kwargs.setdefault('TruthParticleIndexDecoration',
                       'origTruthIndex' if flags.PhysVal.IDPVM.doTechnicalEfficiency else '')
+    kwargs.setdefault('UseTruthPVAsPerigee', flags.Tracking.perigeeExpression=="Vertex")
 
     acc.addEventAlgo(CompFactory.InDetPhysValTruthDecoratorAlg(name, **kwargs))
     return acc

@@ -21,7 +21,7 @@ _onnx_to_triton_map = {
     "BTagging/20240925/GN2Xv02/antikt10ufo/network.onnx"             : "BTagging_network_09c2dddf15bf",
     "BTagging/20250310/GN2XTauV00/antikt10ufo/network.onnx"          : "BTagging_network_e8d5e9a3059b",
     "BTagging/20250912/GN3XPV01/antikt10ufo/network.onnx"            : "BTagging_network_08105bb8c1d6",
-    "BTagging/20250912/GN3EPCLV01/antikt4empflow/network.onnx"       : "BTagging_network_8085e6c5717c",
+    "BTagging/20260805/GN3EPCLV01/antikt4empflow/network.onnx"       : "BTagging_network_c87686aa79c5",
     # "BTagging/20230705/gn2xv01/antikt10ufo/network.onnx"           : "BTagging_network_9f8aadb82b76", # This model is commented out because at the time of submitting, it did not work on Triton. The code falls back to direct ONNX reading
     "JetCalibTools/CalibArea-00-04-83/CalibrationFactors/bbJESJMS_calibFactors_R22_MC20_CSSKUFO_bJR10v00Ext_20250212.onnx"  : "JetCalibTools_bbJESJMS_calibFactor_80138d800ac5",
     "JetCalibTools/CalibArea-00-04-83/CalibrationFactors/bbJESJMS_calibFactors_R22_MC20MC23_CSSKUFO_bJR10v01_20250212.onnx" : "JetCalibTools_bbJESJMS_calibFactor_fefb85f452f9",
@@ -424,6 +424,7 @@ def getDependencySet(tagger_name: str, override: set[str] | None = None) -> set[
         "GN2XTauV00": {"X", "L"},
         "GN3XV00": {"X"},
         "GN3XPV01": {"X"},
+        "tautauJRv00": {"X", "L"},  # H->tautau truth-subjet regressor (tracks+flow, needs leptonID)
     }
 
     if tagger_name not in tagger_dep_dict:
@@ -441,7 +442,8 @@ def PassThroughModelCfg(flags, JetCollection,
                         variableRemapping=None,
                         electrons='Electrons',
                         muons='',
-                        jsonPath=None):
+                        jsonPath=None,
+                        nameSuffix=''):
     """Configure a pass-through model for jet and constituent variables.
 
     jsonPath: PathResolver-resolvable path (relative to DATAPATH) or an
@@ -454,6 +456,9 @@ def PassThroughModelCfg(flags, JetCollection,
     variables (tracks, electrons, muons, flows). Constituent loading
     uses the existing GNN loader infrastructure (TracksLoader,
     ElectronsLoader, MuonsLoader, FlowElementsLoader).
+
+    nameSuffix: appended to the svc/tool/alg names so more than one
+    instance can be scheduled for the same jet collection.
 
     variableRemapping: dict mapping default link names to actual names,
         e.g. {"BTagTrackToJetAssociator": "GhostTrack",
@@ -472,14 +477,14 @@ def PassThroughModelCfg(flags, JetCollection,
     # Unique svc/tool names per jet collection so multiple instances
     # can coexist (e.g. small-R + large-R running side-by-side).
     svc = FTI.PassThroughModelSvc(
-        f'FTagPassThroughSvc_{JetCollection}',
+        f'FTagPassThroughSvc_{JetCollection}{nameSuffix}',
         JsonFile=json_path,
         VariableRemapping=remap,
     )
     acc.addService(svc)
 
     tool = FTI.GNNTool(
-        name=f'passthrough_decorator_{JetCollection}',
+        name=f'passthrough_decorator_{JetCollection}{nameSuffix}',
         nnFile='passthrough',
         nnSharingService=svc,
         variableRemapping=remap,
@@ -487,7 +492,7 @@ def PassThroughModelCfg(flags, JetCollection,
 
     acc.addEventAlgo(
         FTI.JetTagDecoratorAlg(
-            name=f'FtagPassThrough_{JetCollection}_Jet',
+            name=f'FtagPassThrough_{JetCollection}{nameSuffix}_Jet',
             container=JetCollection,
             constituentContainer=TrackCollection,
             electronContainer=electrons,

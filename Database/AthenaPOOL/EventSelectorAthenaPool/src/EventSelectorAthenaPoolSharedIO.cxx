@@ -21,7 +21,6 @@
 
 // Pool
 #include "CollectionSvc/ICollectionCursor.h"
-#include "CollectionSvc/CollectionRowBuffer.h"
 
 namespace {
    /// Helper to suppress thread-checker warnings for single-threaded execution

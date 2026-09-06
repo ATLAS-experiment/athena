@@ -5,57 +5,25 @@ atlas_subdir( ActsMonitoring )
 
 # External dependencies
 find_package( Acts COMPONENTS Core )
+find_package( CLHEP )
 find_package( ROOT COMPONENTS Core Tree TreePlayer )
 
 # Component(s) in the package:
 atlas_add_component( ActsMonitoring
-                     src/*.h src/*.cxx
-                     src/components/*.cxx
-                     LINK_LIBRARIES 
-                Acts::Core
-                ActsEventLib
-                ActsGeometryLib
-                ActsGeometryInterfacesLib
-                ActsToolInterfacesLib
-                AthenaMonitoringLib
-                AthenaMonitoringKernelLib
-                ActsCalibratorsLib
-                BeamSpotConditionsData
-                GaudiKernel
-                GeoPrimitives
-                InDetIdentifier
-                InDetPrepRawData
-                InDetReadoutGeometry
-                InDetRecToolInterfaces
-                MagFieldConditions
-                MagFieldElements
-                PixelReadoutGeometryLib
-                ReadoutGeometryBase
-                SiSPSeededTrackFinderData
-                StoreGateLib
-                TrkTruthData
-                TrkValHistUtils
-                xAODEventInfo
-                xAODInDetMeasurement
-                xAODMeasurementBase
-		ActsTruthLib
-                InDetMeasurementUtilitiesLib
-                HGTD_ReadoutGeometry
-                MuonTesterTreeLib
-                TrkSurfaces )
+   src/*.h src/*.cxx
+   src/components/*.cxx
+   INCLUDE_DIRS ${CLHEP_INCLUDE_DIRS}
+   LINK_LIBRARIES ${CLHEP_LIBRARIES} Acts::Core ActsCalibratorsLib ActsEventLib ActsGeometryInterfacesLib ActsGeometryLib
+   ActsInteropLib ActsToolInterfacesLib ActsTruthLib AsgDataHandlesLib AthAllocators AthContainers AthenaBaseComps
+   AthenaKernel AthenaMonitoringKernelLib AthenaMonitoringLib BeamSpotConditionsData CxxUtils GaudiKernel GeoPrimitives
+   HGTD_Identifier HGTD_ReadoutGeometry Identifier InDetCondTools InDetIdentifier InDetMeasurementUtilitiesLib InDetPrepRawData
+   InDetRawData InDetReadoutGeometry MagFieldConditions MagFieldElements MuonTesterTreeLib PixelReadoutGeometryLib
+   ReadoutGeometryBase SCT_ReadoutGeometry SGTools StoreGateLib TrkSurfaces TrkTruthData TrkValHistUtils TruthUtils
+   xAODEventInfo xAODInDetMeasurement xAODMeasurementBase xAODTracking )
 
 atlas_install_scripts( test/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
 
-file(GLOB_RECURSE files "util/*.cxx")
-foreach(_exeFile ${files})
-  get_filename_component(_theExec ${_exeFile} NAME_WE)
-  get_filename_component(_theLoc ${_exeFile} DIRECTORY)
-  # we specify a folder for programs we do not want to compile. Useful during r21 transition...
-  if(${_theLoc} MATCHES "DoNotBuild")
-    continue()
-  endif() 
-  atlas_add_executable( ${_theExec} ${_exeFile}
-                       INCLUDE_DIRS ${ROOT_INCLUDE_DIRS} 
-                       LINK_LIBRARIES ${ROOT_LIBRARIES}  PathResolver Acts::Core  ActsGeometryInterfacesLib GeoPrimitives)
- 
-endforeach()
+atlas_add_executable( runActsGeoComparison
+   util/runActsGeoComparison.cxx
+   INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
+   LINK_LIBRARIES ${ROOT_LIBRARIES} PathResolver Acts::Core ActsGeometryInterfacesLib GeoPrimitives Identifier )

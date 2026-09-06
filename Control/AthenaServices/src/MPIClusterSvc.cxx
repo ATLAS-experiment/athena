@@ -6,7 +6,6 @@
 #include <mpi.h>
 
 #include <bit>
-#include <boost/serialization/variant.hpp>
 
 #include "CxxUtils/XXH.h"
 #include "GaudiKernel/FileIncident.h"

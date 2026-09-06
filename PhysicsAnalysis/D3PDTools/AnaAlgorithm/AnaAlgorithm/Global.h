@@ -14,7 +14,7 @@ namespace EL
   class AnaAlgorithm;
   class AnaReentrantAlgorithm;
 
-#ifdef ROOTCORE
+#ifdef XAOD_STANDALONE
   struct AlgorithmWorkerData;
   class AnaAlgorithmConfig;
   class AnaAlgorithmWrapper;

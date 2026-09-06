@@ -32,7 +32,7 @@ CMXJetHitsCollection * CMXJetHitsCollectionCnv::createTransient(const Token* tok
   
   //mlog << MSG::DEBUG << "CMXJetHitsCollectionCnv::createTransient called" << endmsg;
 
-  static const pool::Guid tlp1_guid( "29388465-59FE-452C-9462-45C3022F5F2B" );
+  static const Guid tlp1_guid( "29388465-59FE-452C-9462-45C3022F5F2B" );
  
   CMXJetHitsCollection *p_collection = 0;
   if( compareClassGuid(token,  tlp1_guid ) )     

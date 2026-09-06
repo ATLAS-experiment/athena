@@ -63,12 +63,6 @@ namespace EL
 
 
 
-  AnaAlgorithm ::
-  ~AnaAlgorithm () noexcept
-  {}
-
-
-
   AnaAlgorithm::ConstMetaStorePtr_t AnaAlgorithm::inputMetaStore() const
   {
 #ifdef XAOD_STANDALONE

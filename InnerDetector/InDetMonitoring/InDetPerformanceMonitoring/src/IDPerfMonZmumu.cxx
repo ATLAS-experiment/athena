@@ -2349,7 +2349,7 @@ StatusCode IDPerfMonZmumu::CheckTriggerStatusAndPrescale ()
 
   // event prescale
   thisEventTriggerPrescale = std::move(thisHLTTriggerPrescale);
-  thisEventTriggerName = thisHLTTriggerName;
+  thisEventTriggerName = std::move(thisHLTTriggerName);
   ATH_MSG_DEBUG("CheckTriggerStatusAndPrescale -- Event trigger prescale = " << thisEventTriggerPrescale);
   ATH_MSG_DEBUG("CheckTriggerStatusAndPrescale -- Event trigger name = " << thisEventTriggerName);
   

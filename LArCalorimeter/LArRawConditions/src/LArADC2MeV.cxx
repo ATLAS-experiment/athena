@@ -9,7 +9,8 @@
 LArADC2MeV::LArADC2MeV(const LArOnlineID_Base* onlineID, const LArOnOffIdMapping* cabling, const size_t nGains, const unsigned rampSize=2) :
   m_onlineID(onlineID),
   m_cabling(cabling),
-  m_rampDegree(rampSize){
+  m_rampDegree(rampSize),
+  m_nGains(nGains) {
   assert(m_onlineID); 
   assert(nGains<=CaloGain::LARNGAIN && nGains>0);
 

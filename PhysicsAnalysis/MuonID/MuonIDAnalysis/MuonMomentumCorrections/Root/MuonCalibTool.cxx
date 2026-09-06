@@ -564,8 +564,8 @@ namespace CP
         static const std::set<int> MCperiods17{300000, 304000, 305000};
         static const std::set<int> MCperiods18{310000};
         static const std::set<int> MCperiods22{330000, 410000};
-        static const std::set<int> MCperiods23{450000};
-	static const std::set<int> MCperiods24{470000};
+        static const std::set<int> MCperiods23{450000, 460000};
+	static const std::set<int> MCperiods24{470000, 488000, 488600};
 
         static const std::set<int> MCperiodsRun4{350000, 350060, 350140, 350200};
 

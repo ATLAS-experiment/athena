@@ -88,12 +88,7 @@ namespace JetPileupTag {
           std::vector<int> numTrk;
           std::vector<float> trkWidth;
           std::vector<float> rpt;
-          
-
-          
-          OrderedTrackMoment(std::vector<int> n = {}, std::vector<float> w = {}, std::vector<float> r = {})
-              : numTrk(std::move(n)), trkWidth(std::move(w)), rpt(std::move(r)) {}
-
+         
       };
 
       struct ClassicHandleHolder {

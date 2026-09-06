@@ -635,6 +635,10 @@ StatusCode JSSTaggerUtils::ReadScaler(){
 
     auto Image = std::make_unique<TH2D>("Image_" + TagImage, "Image_" + TagImage, 
 			   m_nbins_eta, m_min_eta, m_max_eta, m_nbins_phi, m_min_phi, m_max_phi);
+    if (constituents.empty()){
+      ATH_MSG_DEBUG("Empty constituents list for jet with pt = " << jet->pt() << " and eta = " << jet->eta());
+      return *Image;
+    }
     if (SumPT == 0.)[[unlikely]]{
       throw std::runtime_error("SumPT is zero in JSSTaggerUtils::MakeJetImage");
     }
@@ -780,7 +784,7 @@ StatusCode JSSTaggerUtils::GetTopConstScore(const xAOD::JetContainer& jets) cons
 
       // pack: mask variable
       vars = {1.};
-      masks_vars.push_back(vars);
+      masks_vars.push_back(std::move(vars));
       
       // explict interaction variables
       // calculate variables: interactions
@@ -944,7 +948,7 @@ StatusCode JSSTaggerUtils::GetWConstScore(const xAOD::JetContainer& jets) const 
 
       // pack: mask variable
       vars = {1.};
-      masks_vars.push_back(vars);
+      masks_vars.push_back(std::move(vars));
 
       // explict interaction variables
       // calculate variables: interactions
@@ -1101,7 +1105,7 @@ StatusCode JSSTaggerUtils::GetPolarisationScore(const xAOD::JetContainer& jets) 
         inter_vars_int.push_back(std::move(vars));
       }
 
-      inter_vars.push_back(inter_vars_int);
+      inter_vars.push_back(std::move(inter_vars_int));
     }
 
     // adjust
@@ -1122,7 +1126,7 @@ StatusCode JSSTaggerUtils::GetPolarisationScore(const xAOD::JetContainer& jets) 
 
       // pack: mask variable
       vars = {0.};
-      masks_vars.push_back(vars);
+      masks_vars.push_back(std::move(vars));
     }
 
     for(long unsigned int i=0; i<constituents.size(); i++){

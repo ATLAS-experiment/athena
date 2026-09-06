@@ -60,8 +60,8 @@ namespace MuonValR4{
             const Amg::Transform3D& trf = sp.msSector()->localToGlobalTransform(tgContext);
             const Acts::Surface& target = xAOD::muonSurface(sp.primaryMeasurement());
             const Amg::Vector3D n = target.normal(tgContext, 
-                                                  Amg::Vector3D::Zero(), 
-                                                  Amg::Vector3D::Zero());
+                                                  Amg::Vector3D::Zero(),
+                                                  {1e-12, 0, 0});
                                                       
             auto lambda = sp.isStraw() ? Amg::intersect<3>(trf * sp.localPosition(),
                                                            trf.linear() * sp.sensorDirection(),

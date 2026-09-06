@@ -7,6 +7,7 @@
 #include "./eEmSelector.h"
 
 #include <fstream>
+#include <sstream>
 
 namespace GlobalSim {
 
@@ -51,7 +52,10 @@ namespace GlobalSim {
   }
 
   
-  StatusCode eEmMultAlgTool::countPassingTOBs(const EventContext& ctx, unsigned int& N_pass_tobs) const {
+  StatusCode
+  eEmMultAlgTool::countPassingTOBs(const EventContext& ctx,
+				   const std::unique_ptr<IDataCollector>& dc, 
+				   unsigned int& N_pass_tobs) const {
 
     auto tobs =
       SG::ReadHandle<GlobalSim::IOBitwise::eEmTOBContainer>(m_eEmTOBContainerKey,
@@ -60,6 +64,15 @@ namespace GlobalSim {
     CHECK(tobs.isValid());
 
     // check if any of the incoming tobs is selected.
+
+    if(dc){
+      std::stringstream ss;
+      ss << "nummber of  tobs "<< tobs->size() << '\n';
+      dc->collect(*this, ss.str());
+      for (const GlobalSim::IOBitwise::eEmTOB* t : *tobs){
+	dc->collect(*this, t->to_string());
+      }
+    }
 
     std::vector<bool> tob_pass(tobs->size(), false);
     for (uint tob_it = 0; const GlobalSim::IOBitwise::eEmTOB* t : *tobs){
@@ -102,4 +115,4 @@ namespace GlobalSim {
     return ss.str();
   }
 
-}
+  }

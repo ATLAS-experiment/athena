@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "PanTauAlgs/Tool_InputConverter.h"
@@ -130,7 +130,7 @@ StatusCode PanTau::Tool_InputConverter::ConvertToTauConstituent(const xAOD::PFO*
       continue;
     }
     
-    const xAOD::PFO*        curShot         = dynamic_cast<const xAOD::PFO*>(list_TauShots.at(iShot));
+    const xAOD::PFO*        curShot         = static_cast<const xAOD::PFO*>(list_TauShots.at(iShot));
     TLorentzVector          shotMomentum;
     PanTau::SetP4EEtaPhiM( shotMomentum, curShot->e(), curShot->eta(), curShot->phi(), curShot->m());
     std::vector<int>        shotTypeFlags   = std::vector<int>((unsigned int)PanTau::TauConstituent::t_nTypes, 0);

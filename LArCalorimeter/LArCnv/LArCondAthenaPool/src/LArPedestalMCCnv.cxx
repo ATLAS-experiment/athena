@@ -27,8 +27,8 @@ LArPedestalMCCnv::createPersistent (LArPedestalMCTransType* transObj)
 LArPedestalMC*
 LArPedestalMCCnv::createTransient(const Token* token)
 {
-    static const pool::Guid   p1_guid("3891D5E0-82D1-45AB-97B1-CE4CF25D6E16");
-    static const pool::Guid   p0_guid("C147EFC8-5283-4DAE-AD20-0E2CB79E54B6");
+    static const Guid   p1_guid("3891D5E0-82D1-45AB-97B1-CE4CF25D6E16");
+    static const Guid   p0_guid("C147EFC8-5283-4DAE-AD20-0E2CB79E54B6");
     if( compareClassGuid(token, p1_guid) ) {
         // using unique_ptr ensures deletion of the persistent object
         std::unique_ptr< LArPedestalMC_p1 > col_vect( poolReadObject< LArPedestalMC_p1 >(token) );

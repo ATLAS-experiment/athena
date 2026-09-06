@@ -327,7 +327,7 @@ def configureAndRunMadGraph(flags):
                'params'         : MadGraph_param_blocks,
                'fixEventWeightsForBridgeMode': fixEventWeightsForBridgeMode,
                'madspin_card'   : madspin_card,
-               'keepOutput'     : keepMadGraphOutput,
+               'keepOutput'     : True,
                'run_settings'   : MadGraph_run_settings, # All goes into the run card
                'writeGridpack'  : MadGraph_writeGridpack,
                'syst_mod'       : MadGraph_syst_mod,
@@ -348,6 +348,14 @@ def configureAndRunMadGraph(flags):
     from MadGraphControl.MadGraphUtils import modify_param_card
     modify_param_card(param_card_input='param_card.dat', params={'MASS': masses,'DECAY':decays}, output_location='SLHA_INPUT.DAT')
 
+    # Now if the user didn't ask to keep it, get rid of the directory
+    if not keepMadGraphOutput:
+        from shutil import rmtree
+        from glob import glob
+        for adir in glob('PROC_*'):
+            rmtree(adir,ignore_errors=True)
+
+    # Return what we need for the next step
     return ktdurham, MadGraph_process, _nQuarksMerge, gluinoBallProbability
 
 

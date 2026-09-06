@@ -114,14 +114,14 @@ bool EtaJESCalibStep::readMCJESFromText()
       TString key=Form("JES.%s_Bin%d",jetAlgo.c_str(),ieta);
       ATH_MSG_VERBOSE("reading: " << key << " = "<< config.GetValue(key,""));
       std::vector<double> params = VectorizeD(config.GetValue(key,"")," ");
-      m_nPar = params.size();	
+      m_nPar = std::ssize(params);	
       ATH_MSG_VERBOSE("Number of parameters: " << m_nPar);
-      for (uint ipar=0;ipar<m_nPar;++ipar) m_JESFactors[ieta][ipar] = params[ipar];
+      for (int ipar=0;ipar<m_nPar;++ipar) m_JESFactors[ieta][ipar] = params[ipar];
       if(m_lowPtExtrap > 0) {
 	//Calculate the slope of the response curve at the minPt for each eta bin
 	//Used in the GetLowPtJES method when Pt < minPt
 	const double *factors = m_JESFactors[ieta];
-	double Ecutoff = m_minPt_JES*cosh(etaBins[ieta]);
+	double Ecutoff = m_minPt_JES*std::cosh(etaBins[ieta]);
 	if(m_useSecondaryminPt_JES && std::abs(etaBins[ieta]) >= m_etaSecondaryminPt_JES) Ecutoff = m_secondaryminPt_JES*cosh(etaBins[ieta]);
 	const double Rcutoff = getLogPolN(factors,Ecutoff);
 	const double Slope = getLogPolNSlope(factors,Ecutoff);
@@ -142,9 +142,9 @@ bool EtaJESCalibStep::readMCJESFromText()
       key=Form("EtaCorr.%s_Bin%d",jetAlgo.c_str(),ieta);
       ATH_MSG_VERBOSE("reading: " << key << " = "<< config.GetValue(key,""));
       params = VectorizeD(config.GetValue(key,"")," ");
-      m_nPar = params.size();	
+      m_nPar = std::ssize(params);	
       ATH_MSG_VERBOSE("Number of parameters: " << m_nPar);            
-      for (uint ipar=0;ipar<m_nPar;++ipar) m_etaCorrFactors[ieta][ipar] = params[ipar];
+      for (int ipar=0;ipar<m_nPar;++ipar) m_etaCorrFactors[ieta][ipar] = params[ipar];
 
       if(m_freezeJESatHighE){
 	key=Form("EmaxJES.%s_Bin%d",jetAlgo.c_str(),ieta);
@@ -204,9 +204,9 @@ bool EtaJESCalibStep::readMCJESFromHists()
     TString key=Form("EtaCorr.%s_Bin%d",jetAlgo.c_str(),ieta);
     ATH_MSG_VERBOSE("reading: " << key << " = "<< config.GetValue(key,""));
     std::vector<double> params = VectorizeD(config.GetValue(key,"")," ");
-    m_nPar = params.size();	
+    m_nPar = std::ssize(params);	
     ATH_MSG_VERBOSE("Number of parameters: " << m_nPar);            
-    for (uint ipar=0;ipar<m_nPar;++ipar) m_etaCorrFactors[ieta][ipar] = params[ipar];
+    for (int ipar=0;ipar<m_nPar;++ipar) m_etaCorrFactors[ieta][ipar] = params[ipar];
 
     if(m_freezeJESatHighE){
       key=Form("EmaxJES.%s_Bin%d",jetAlgo.c_str(),ieta);
@@ -222,46 +222,33 @@ bool EtaJESCalibStep::readMCJESFromHists()
 
 double EtaJESCalibStep::getJES(const double X, const double Y, const double Emax) const
 {
+  const double pt = X / std::cosh(Y);
 
-  if(!m_useSecondaryminPt_JES){
-    if ( X/cosh(Y) < m_minPt_JES ) { // WARNING !! Won't work if X is actually pT
-      double R = getLowPtJES(X,Y);
-      return 1.0/R;
-    }
-  }
-  else{
-    if(std::abs(Y) < m_etaSecondaryminPt_JES && X/cosh(Y) < m_minPt_JES){
-      double R = getLowPtJES(X,Y);
-      return 1.0/R;
-    }
-    if(std::abs(Y) >= m_etaSecondaryminPt_JES && X/cosh(Y) < m_secondaryminPt_JES){
-      double R = getLowPtJES(X,Y);
-      return 1.0/R;
-    }
-  }
-  
-  double JES_R;
-  int binEta = getEtaBin(Y);
-  const double *factors = m_JESFactors[binEta];
+  const double minPt =
+    m_useSecondaryminPt_JES && std::abs(Y) >= m_etaSecondaryminPt_JES
+      ? m_secondaryminPt_JES
+      : m_minPt_JES;
 
-  
-  double E = X;
-  if( m_freezeJESatHighE && (E>Emax) && (Emax!=-1)) {
-    E = Emax;
+  const auto inverseOrZero = [](double response) {
+    return response != 0.0 ? 1.0 / response : 0.0;
+  };
+
+  if (pt < minPt) {
+    return inverseOrZero(getLowPtJES(X, Y));
   }
 
-  double R = 1.;
+  const int binEta = getEtaBin(Y);
 
-  if(m_useSpline){
-    R = getSplineCorr(binEta, E);
-    return 1.0/R;
-  } else { 
-    R = getLogPolN(factors,E);
-  }
-  
-  JES_R = 1/R;
-  
-  return JES_R;
+  const double E =
+    m_freezeJESatHighE && Emax != -1.0 && X > Emax
+      ? Emax
+      : X;
+
+  const double response = m_useSpline
+    ? getSplineCorr(binEta, E)
+    : getLogPolN(m_JESFactors[binEta], E);
+
+  return inverseOrZero(response);
 }
 
 
@@ -310,8 +297,8 @@ double EtaJESCalibStep::getEmaxJES(const double Y) const
 double EtaJESCalibStep::getLogPolN(const double *factors, double x) const
 {
   double y=0;
-  for ( uint i=0; i<m_nPar; ++i )
-    y += factors[i]*TMath::Power(log(x),Int_t(i));
+  for ( int i=0; i<m_nPar; ++i )
+    y += factors[i]*std::pow(std::log(x),i);
   return y;
 }
 
@@ -328,8 +315,8 @@ int EtaJESCalibStep::getEtaBin(double eta_det) const
 double EtaJESCalibStep::getLogPolNSlope(const double *factors, double x) const {
   double y=0;
   const double inv_x = 1. / x;
-  for ( uint i=0; i<m_nPar; ++i )
-    y += i*factors[i]*TMath::Power(log(x),Int_t(i-1))*inv_x;
+  for ( int i=0; i<m_nPar; ++i )
+    y += i*factors[i]*std::pow(std::log(x),i-1)*inv_x;
   return y;
 }
 

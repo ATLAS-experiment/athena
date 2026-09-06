@@ -39,11 +39,6 @@ namespace InDetDD {
         ATH_MSG_ERROR("Could not retrieve PLR_ID helper");
       }
       m_idHelper = plr_idHelper;
-      // make the symlink
-      sc = detStore->symLink(plr_idHelper, m_idHelper);
-      if (sc.isFailure()) {
-        ATH_MSG_ERROR("Could not make PLR_ID symlink");
-      }
     } else {
       StatusCode sc = detStore->retrieve(m_idHelper, pixelIDName);
       if (sc.isFailure()) {

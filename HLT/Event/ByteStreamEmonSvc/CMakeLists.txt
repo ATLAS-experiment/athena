@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( ByteStreamEmonSvc )
@@ -20,7 +20,7 @@ atlas_install_python_modules( python/*.py )
 atlas_add_test(
     test_extract_histogram_tag
     SOURCES test/test_extract_histogram_tag.cxx src/extract_histogram_tag.cxx
-    POST_EXEC_SCRIPT nopost.sh
+    POST_EXEC_SCRIPT noerror.sh
     INCLUDE_DIRS ${Boost_INCLUDE_DIRS}
     LINK_LIBRARIES ${Boost_LIBRARIES}
 )

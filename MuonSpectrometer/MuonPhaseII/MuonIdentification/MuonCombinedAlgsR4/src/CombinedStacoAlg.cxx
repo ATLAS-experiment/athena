@@ -9,7 +9,8 @@
 #include "ActsEvent/Decoration.h"
 #include "ActsEvent/CaloExtension.h"
 #include "Acts/Utilities/VectorHelpers.hpp"
-#include "FourMomUtils/P4Helpers.h"
+#include "MuonTrackEvent/TrackMatchingUtils.h"
+#include "ActsInterop/Logger.h"
 
 namespace {
     constexpr Acts::HashedString caloExitParKey = Acts::hashString("@CaloExit");
@@ -27,6 +28,7 @@ namespace MuonCombinedR4 {
         ATH_CHECK(m_stacoKey.initialize());
         ATH_CHECK(m_cmbTrkKey.initialize());
         ATH_CHECK(m_ctxProvider.initialize());
+        m_logger = makeActsAthenaLogger(this, name());
         return StatusCode::SUCCESS;
     }
 
@@ -70,6 +72,8 @@ namespace MuonCombinedR4 {
         const xAOD::TrackParticleContainer *msTracks{nullptr};
         ATH_CHECK(SG::get(idTracks, m_idTrkKey, ctx));
         ATH_CHECK(SG::get(msTracks, m_msTrackKey, ctx));
+
+        const Acts::GeometryContext tgContext = m_ctxProvider.getGeometryContext(ctx);
    
         for (const MuonR4::MuonTag* idTag : *idTracks) {
             auto caloExitPars = idTag->extrapolatedParsID(caloExitParKey);
@@ -86,11 +90,13 @@ namespace MuonCombinedR4 {
             for (const xAOD::TrackParticle* saTag : *msTracks) {
                 const auto msTrk = ActsTrk::getActsTrack(*saTag);
                 const Acts::BoundTrackParameters msPerigeePars = msTrk->createParametersAtReference();
+                const std::optional<Acts::BoundTrackParameters> matchPars = makeDiffParameters(tgContext,
+                                                                                         *caloExitPars, msPerigeePars, logger(),
+                                                                                         m_match_boundTol);
                 /// Basic parameter match
-                using namespace P4Helpers;
-                if (std::abs(Acts::VectorHelpers::eta(msPerigeePars) -
-                             Acts::VectorHelpers::eta(*caloExitPars)) >  m_match_dEta ||
-                    std::abs(deltaPhi(msPerigeePars.phi(), caloExitPars->phi())) > m_match_dPhi) {
+                if (!matchPars || 
+                    std::abs(matchPars->get<Acts::eBoundTheta>()) > m_match_dTheta ||
+                    std::abs(matchPars->get<Acts::eBoundPhi>()) > m_match_dPhi) {
                     continue;
                 }
                 ATH_MSG_DEBUG(__func__<<"() "<<__LINE__<<" - Ms track "<<msPerigeePars<<", rel:"<<
@@ -110,7 +116,16 @@ namespace MuonCombinedR4 {
                 combinedTrk->setDefiningParameters(idTrk->d0(), idTrk->z0(), idTrk->phi0(), 
                                                    idTrk->theta(), combinedQoverP / Gaudi::Units::GeV);
 
+                Acts::BoundMatrix matchCov{Acts::BoundMatrix::Zero()};
+                if (matchPars->covariance()) {
+                    matchCov = (*matchPars->covariance()).inverse();
+                }
+                const float matchQuality = matchPars->parameters().dot(matchCov * matchPars->parameters());
+                
+                combinedTrk->setFitQuality(idTrk->chiSquared() + saTag->chiSquared() + matchQuality,
+                                           idTrk->numberDoF() + saTag->numberDoF());
                 auto stacoTag  = stacoTags->push_back(std::make_unique<MuonR4::MuonTag>());
+                stacoTag->setParameter(MuonR4::MuonTag::ParamDef::msInnerMatchChi2, matchQuality);
                 stacoTag->setAuthor(xAOD::Muon::Author::STACO);
                 stacoTag->setIdTrack(idTrk);
                 stacoTag->setCbTrack(combinedTrk);

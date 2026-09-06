@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef DERIVATIONFRAMEWORKMUONS_CALOISOLATIONDECORALG_H_
 #define DERIVATIONFRAMEWORKMUONS_CALOISOLATIONDECORALG_H_
@@ -17,7 +17,7 @@ namespace DerivationFramework {
 class CaloIsolationDecorAlg : public AthReentrantAlgorithm {
 public:
     /// Constructor with parameters:
-    CaloIsolationDecorAlg(const std::string& name, ISvcLocator* pSvcLocator);
+    using AthReentrantAlgorithm::AthReentrantAlgorithm;
 
     /// Destructor:
     ~CaloIsolationDecorAlg() = default;

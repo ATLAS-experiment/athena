@@ -12,9 +12,6 @@
 // STL includes
 #include <cmath>
 
-// Boost includes
-#include <boost/numeric/interval/compare/explicit.hpp>
-
 // AnalysisUtils includes
 #include "AnalysisUtils/FilterRange.h"
 

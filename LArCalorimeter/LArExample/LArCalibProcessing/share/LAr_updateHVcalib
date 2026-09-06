@@ -1,0 +1,370 @@
+#!/usr/bin/env python3
+# Copyright (C) 2026 CERN for the benefit of the ATLAS collaboration
+# Replacing LAr_updateHVcalib_online.sh and LAr_updateHVcalibNoise.sh
+from concurrent.futures import ThreadPoolExecutor
+from hashlib import md5
+from importlib import reload
+from itertools import chain
+import os
+from shutil import copyfile
+from subprocess import run, DEVNULL, PIPE, STDOUT
+import sys
+from tempfile import NamedTemporaryFile, TemporaryDirectory
+from traceback import format_exception
+
+
+class _FileOutputs:
+    def initialize(self, suffix):
+        self.athena_log = f"athena{suffix}.log"
+        self.calonoise_db = f"caloSqlite_UPD1_online{suffix}.db"
+        self.calonoise_diff = f"noise_summary{suffix}.txt"
+        self.calonoise_root = f"cellnoise_data{suffix}.root"
+        self.calonoise_txt = f"calonoise{suffix}.txt"  # keep consistent with CaloCellNoiseAlg.cxx
+        self.calonoise_log = f"makedb{suffix}.log"
+        self.coolcopy_log = f"mergedb{suffix}.log"
+        self.hlt_log = f"hlt{suffix}.log"
+        self.hvcorr_diff = f"hvlist{suffix}.txt"
+        self.hvcorr_file_prefix = f"hvcorr{suffix}"  # the CA config appends _ntuple.root to it
+        self.hvcorr_db = f"{self.hvcorr_file_prefix}.sqlite"  # keep consistent with LArCalib_HVCorrConfig.py
+        self.hvcorr_ntuple = f"{self.hvcorr_file_prefix}_ntuple.root"  # idem
+        self.larnoise_db = f"larnoisesqlite{suffix}.db"
+    def cleanup(self, quiet=False):
+        for  _ in self.__dict__.values():
+            if isinstance(_, str) and os.path.isfile(_):
+                if not quiet: print(f"WARNING: deleting existing file {_}")
+                os.remove(_)
+    @staticmethod
+    def files_exist(*files):
+        return not any(not os.access(_, os.R_OK) for _ in files)
+    def is_clean_dir(self):
+        return not any(isinstance(_, str) and os.path.isfile(_) for _ in self.__dict__.values())
+
+
+# all COOL folders affected by forceRunNumber (option -b) or provided in the custom sqlite (option -s)
+_coolFolders = ("/LAR/NoiseOfl/CellNoise",
+                "/LAR/ElecCalibFlat/HVScaleCorr",
+                "/LAR/ElecCalibFlatSC/HVScaleCorr")
+_dbname = "CONDBR2"
+_out = _FileOutputs()
+_tree_hvcorr = "HVSCALE"  # keep consistent with LArCalib_HVScale2NtupleConfig.py
+_tree_hvcorr_sc = "HVSCALESC"  # idem
+_tree_old_hvcorr = f"OLD_{_tree_hvcorr}"  # but here, free choice
+_tree_old_hvcorr_sc = f"OLD_{_tree_hvcorr_sc}"  # idem
+
+
+def _parallel(func):
+    def _impl(dependencies=[], **kwargs):
+        try:
+            for t in dependencies:
+                if t.result()[-1] is not None:
+                    return None, "Skipped scheduled operation(s) due to upstream failures"
+            info = func(**kwargs)
+            return info, None
+        except Exception as x:
+            return None, "".join(format_exception(x))
+    return _impl
+
+
+def _athena(args, hvprops):
+    if args.resume and _out.files_exist(_out.hvcorr_ntuple, _out.hvcorr_db, _out.calonoise_txt):
+        return "WARNING: using previously-computed scale corrections and cell noises as the output files exist."
+    from AthenaCommon import Logging
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
+    from AthenaConfiguration.MainServicesConfig import MainEvgenServicesCfg
+    from AthenaConfiguration.TestDefaults import defaultGeometryTags
+    from CaloCondPhysAlgs.CaloScaleNoiseConfig import CaloScaleNoiseCfg
+    from LArCalibTools.LArCalib_HVScale2NtupleConfig import LArHVScaleCorr2NtupleCfg
+    from LArCalibProcessing.LArCalibConfigFlags import addLArCalibFlags
+    from LArCalibProcessing.LArCalib_HVCorrConfig import HVCorrConfig
+    from LArCalibProcessing.TimeStampToRunLumi import fillInputFlags
+    from LArCalibUtils.LArHVScaleConfig import setConsistentHVScaleOutputKeys
+    flags = initConfigFlags()
+    addLArCalibFlags(flags)
+    flags.Input.Files = []
+    flags.IOVDb.DatabaseInstance = _dbname
+    flags.GeoModel.AtlasVersion = defaultGeometryTags.RUN3
+    flags.IOVDb.GlobalTag = args.global_tag
+    if args.sqlite:
+        flags.IOVDb.SqliteInput = args.sqlite
+        flags.IOVDb.SqliteFolders = _coolFolders
+    fillInputFlags(flags, args.measurementTime)
+    print(f"Reference HV scale corrections and calo noise are read at run number {flags.Input.RunNumbers}")
+    flags.lock()
+    cfg = MainEvgenServicesCfg(flags)
+    cfg.getService("EventSelector").FirstLB = flags.Input.LumiBlockNumbers[0]
+    ca1 = LArHVScaleCorr2NtupleCfg(flags, rootfile=_out.hvcorr_ntuple,
+                                   treename=_tree_old_hvcorr, treenameSC=_tree_old_hvcorr_sc)
+    cfg.merge(ca1)
+    ca2 = HVCorrConfig(flags, outputName=_out.hvcorr_file_prefix, runOut=args.iovStartRun, 
+                       lbOut=args.iovStartLB, isHI=args.hi, hipatch=args.patchhi, **hvprops)
+    ca3 = CaloScaleNoiseCfg(flags, absolute=args.ab_initio, output=_out.calonoise_root,
+                            mu=args.pileup, dt=args.bunch_spacing, **hvprops)
+    setConsistentHVScaleOutputKeys(ca2, ca3)
+    cfg.merge(ca2)
+    cfg.merge(ca3)
+    if args.base is not None:
+        from IOVDbSvc.IOVDbSvcConfig import addOverride
+        for f in _coolFolders:
+            cfg.merge(addOverride(flags, f, tag=str(args.base), tagType="forceRunNumber"))
+    sc = cfg.run(1)
+    assert sc.isSuccess(), f"Athena failure, consult {_out.athena_log}"
+
+
+def _atlcoolcopy(commands, log, digest=""):
+    with open(log, "w") as f:
+        for c in commands:
+            run(["AtlCoolCopy"] + c, stdout=f, stderr=STDOUT, check=True)
+    if digest != "":
+        with open(log, "r") as f: txt = f.read()
+        for i, a in enumerate(filter(lambda _: len(_)>8, chain.from_iterable(commands))):
+            txt = txt.replace(a, f"${i}")  # make digest invariant
+        m = md5(txt.encode()).hexdigest()
+        assert m == digest, f"ERROR: unexpected AtlCoolCopy output (MD5={m}), check {log} for errors!"
+
+
+@_parallel
+def _checkHardwareMapping(args):
+    from LArCalibProcessing.TimeStampToRunLumi import TimeStampToRunLumi
+    from LArConditionsCommon.getCurrentFolderTag import getCurrentFolderTag
+    from PyCool import cool
+    run = TimeStampToRunLumi(args.measurementTime)
+    if run is not None: run = run[0]
+    source = "/LAR/IdentifierOfl/HVLineToElectrodeMap"
+    # purposedly check the CURRENT global tag rather than the one specified as argument
+    tag = getCurrentFolderTag("COOLOFL_LAR/CONDBR2", source, verbose=False)[0]
+    dbSvc = cool.DatabaseSvcFactory.databaseService()
+    db = dbSvc.openDatabase("COOLOFL_LAR/CONDBR2")
+    folder = db.getFolder(source)
+    itr = folder.browseObjects(2**62, (2**63 - 1), cool.ChannelSelection.all(), tag)
+    while itr.goToNext(): lastrun = (itr.currentRef().since() >> 32)
+    itr.close()
+    db.closeDatabase()
+    if run is None or lastrun <= run:
+        info = f"The latest HV mapping change is valid from run {lastrun}"
+    else:
+        info = (f"WARNING: BE CAREFUL the used run ({run})) is older than the latest HV mapping change ({lastrun})... "
+                f"Check that you know what you are doing before any db upload ")
+    return info
+
+
+@_parallel
+def _copyNewConditions(args):
+    if args.resume and _out.files_exist(_out.calonoise_db, _out.larnoise_db, _out.coolcopy_log):
+        return "WARNING: not filling the other COOL noise folders/tags as the sqlite files & log already exist."
+    from LArConditionsCommon.getCurrentFolderTag import getFolderTag, getCurrentFolderTag
+    larFolder = "/LAR/NoiseOfl/CellNoise"
+    caloFolder = "/CALO/Noise/CellNoise"
+    upd4 = getFolderTag("COOLOFL_LAR/CONDBR2", larFolder, args.global_tag)
+    upd1 = getCurrentFolderTag("COOLOFL_LAR/CONDBR2", larFolder, ES=True, verbose=False)[0]
+    caloTag = getCurrentFolderTag("COOLONL_CALO/CONDBR2", caloFolder, ES=True, verbose=False)[0]
+    with NamedTemporaryFile("wb") as f: tmp = f.name
+    hvdb = _out.hvcorr_db
+    copyfile(_out.larnoise_db, tmp)
+    conn = lambda _: f"sqlite://;schema={_};dbname=CONDBR2"
+    acc = [[conn(tmp), conn(_out.larnoise_db), "-c", "-f", larFolder, "-t", upd4, "-ot", upd1],
+           [conn(tmp), conn(_out.calonoise_db), "-c", "-f", larFolder, "-t", upd4, "-of", caloFolder, "-ot", caloTag]]
+    _atlcoolcopy(commands=acc, log=_out.coolcopy_log,
+                 digest="" if args.ignore_errors else "9ce2ca49296c2c5275ff61a6054951e4")
+    os.remove(tmp)
+    acm = "/afs/cern.ch/user/a/atlcond/utilsproxy/AtlCoolMerge.py"
+    return f"""Copied cell noise from {upd4} to {upd1} and {caloTag}
+{_out.coolcopy_log} contains the log file of the related AtlCoolCopy operations
+
+After checking that everything is OK you can proceed with the database update
+(0) export COOL_FLASK=https://cool-proxy-app.cern.ch
+(1) {acm} --online {hvdb}  CONDBR2 ATONR_COOL  ATLAS_COOLONL_LAR_W  <password>
+(2) {acm} --online {_out.calonoise_db}  CONDBR2 ATONR_COOL ATLAS_COOLONL_CALO_W <password>
+(3) {acm} --flask {_out.larnoise_db} CONDBR2 ATONR_COOLOFL_GPN ATLAS_COOLOFL_LAR_W 0"""
+
+
+@_parallel
+def _fillCaloNoiseDB(args):
+    if args.resume and _out.files_exist(_out.larnoise_db, _out.calonoise_log):
+        return "WARNING: not filling the other COOL noise folders/tags as the sqlite files already exist."
+    from AthenaPython.PyAthena import StatusCode
+    from PyCool import cool
+    from logging import basicConfig, INFO
+    # overrule logging settings from CaloCondLogger; must be done before the import
+    basicConfig(format="%(name)-15s: %(levelname)-8s %(message)s", level=INFO, filename=_out.calonoise_log)
+    from CaloCondPhysAlgs.CaloNoise_fillDB import fillLArNoiseDB
+    since = args.iovStartRun<<32 | args.iovStartLB
+    until = cool.ValidityKeyMax
+    sc = fillLArNoiseDB( since, until, "", inputFile=_out.calonoise_txt,
+                        filename=_out.larnoise_db)
+    assert sc == StatusCode.Success, f"{_out.larnoise_db} wasn't filled correctly, check {_out.calonoise_log}"
+    return f"{_out.larnoise_db} successfully built from {_out.calonoise_txt}"
+
+
+def _globalTag(args):
+    if args.global_tag not in (None, "", "CURRENT"):
+        return args.global_tag
+    try:
+        utilsproxy = "/afs/cern.ch/user/a/atlcond/utilsproxy"
+        if utilsproxy not in sys.path: sys.path.append(utilsproxy)
+        else: utilsproxy = ""
+        from CondUtilsLib.AtlCoolBKLib import resolveAlias
+        tag = resolveAlias().getCurrent().replace("*", "ST")
+        if utilsproxy != "": del sys.path[sys.path.index(utilsproxy)]
+    except:
+        from AthenaConfiguration.TestDefaults import defaultConditionsTags
+        tag = defaultConditionsTags.RUN3_DATA
+        print(f"WARNING: using {tag} instead of CURRENT, this is likely not what you want.")
+    return tag
+
+
+@_parallel
+def _listHVCorrBigChanges(args):
+    if args.resume and _out.files_exist(_out.hvcorr_diff):
+        return f"WARNING: not checking changes in HV scale corrections since {_out.hvcorr_diff} already exists"
+    from ROOT import TFile, TTree
+    f = TFile.Open(_out.hvcorr_ntuple, "READ")
+    t1, t2 = f.Get(_tree_old_hvcorr), f.Get(_tree_hvcorr)
+    assert t1 is not None and t2 is not None, f"{_tree_hvcorr} trees not found in root files"
+    t2.AddFriend(t1, "old")
+    t2.GetPlayer().SetScanRedirect(True)
+    t2.GetPlayer().SetScanFileName(_out.hvcorr_diff)
+    n = t2.Scan("barrel_ec:pos_neg:FT:layer:ieta:iphi:hvcorr:old.hvcorr", 
+                "abs(hvcorr-old.hvcorr)>0.005")
+    f.Close()
+    return (f" -----> Number of channels which changed HV correction more than 0.5\%: {n}\n"
+            f"        Look at the file {_out.hvcorr_diff} for the full list of these channels")
+
+
+@_parallel
+def _listNoiseBigChanges(args):
+    if args.resume and _out.files_exist(_out.calonoise_diff):
+        return f"WARNING: not checking changes in HV scale corrections since {_out.calonoise_diff} already exists"
+    p = run(["wc", "-l", _out.calonoise_txt], capture_output=True, check=True)
+    cells = int(p.stdout.decode("utf-8").split(" ")[0].strip())
+    assert cells == 547404, (f"Number of lines in {_out.calonoise_txt} is not correct, "
+                             f"check {_out.athena_log} to investigate possible problem or disk space")
+    p = run(f"grep DifferentNoise {_out.athena_log} | tee {_out.calonoise_diff} | wc -l",
+            shell=True, capture_output=True)
+    diffs = int(p.stdout.decode("utf-8").split(" ")[0].strip())
+    return (f" ---> Number of cells*Number of gains(3) for which noise changed more than 5\% {diffs}\n"
+            f"      Check file {_out.calonoise_txt} for the full list\n"
+            f"      You can also look at cellnoise_data.root for ntuple information.")
+
+
+@_parallel
+def _testHLT(args):
+    with TemporaryDirectory() as wd:
+        copyfile(_out.calonoise_db, os.path.join(wd, "noise.db"))  # a symlink doesn't seem to work
+        p = run(["athena.py" ,"--CA", "--evtMax=6", "TriggerJobOpts/test_hltConditions.py"],
+                 stdout=PIPE, stderr=STDOUT, cwd=wd)
+    if p.returncode != 0:
+        with open(_out.hlt_log, 'w') as f: f.write(p.stdout.decode("utf8"))
+        raise RuntimeError(f"Testing job reported an error!\n"
+                           f"Please, do not upload constants to online!\n"
+                           f"Check {_out.hlt_log} for details.")
+    return ""
+
+
+def _wait(args, subtasks, waitmsgs={}):
+    for i, t in enumerate(subtasks):
+        if t is None: continue
+        print("=======")
+        if i in waitmsgs: print(waitmsgs[i])
+        info, error = t.result()
+        if error is None:
+            if info is not None:
+                print(info)
+            continue
+        # If an error occurred, also display errors reported by other completed tasks and abort immediately.
+        print(error)
+        if args.ignore_errors: continue
+        running = 0
+        for j, u in enumerate(subtasks[i+1:]):
+            if u is None: continue
+            if u.done():
+                _, error = u.result()
+                if error is not None:
+                    print(error)
+            else:
+                running += 1
+        print(f"ERROR: terminating with reported errors [{i}] and {running} subtask(s) still running!")
+        sys.exit(-1)
+
+
+if __name__=="__main__":
+    sys.path = [_ for _ in sys.path if "MCGenerators" not in _]  # to find the correct py module
+    from LArCalibProcessing.LArCalib_HVCorrConfig import addHVCorrToSCHVCorrParserArgs
+    from LArCalibUtils.LArHVScaleConfig import addHvScaleParserArgs, buildHvScaleProps
+    from argparse import ArgumentParser, ArgumentDefaultsHelpFormatter
+    from py.io import StdCaptureFD
+    descr = """This script will compute the HV scale correction for the given time (UTC). 
+The new HV setting should be correct / stable for this time. 
+In case of HV mapping change, the new mapping should be valid (in the UPD4 tag) for this specified time.
+It will also produce new noise tables for online/offline databases.
+This assumes that the current state of the UPD1 offline noise database is in synch with the HV corrections 
+used in DSP before this new setting, at the time specified by measurementTime. 
+Usage of the --base argument alleviates this constraint (use with care!).
+"""
+    parser = ArgumentParser(description=descr, formatter_class=ArgumentDefaultsHelpFormatter)
+    parser.add_argument("measurementTime", type=str,
+                        help="time point at which HV was measured and recorded in DCS; "
+                              "specified as e.g. \"2007-05-25:14:01:00\" (UTC)")
+    parser.add_argument("iovStartRun", type=int,
+                        help="Run number starting the new IOV to be created with the updated constants")
+    parser.add_argument("iovStartLB", type=int, nargs="?", default=0,
+                        help="Lumiblock starting the new IOV to be created with the updated constants")
+    parser.add_argument("-a", "--ab-initio", action="store_true",
+                        help="calculate cell noise ab initio instead of scaling previous constants")
+    parser.add_argument("-b", "--base", type=int, default=None,
+                        help="Reference run for the previous HV and noise condition IOV, "
+                             "which if left unspecified is the combined run containing measurementTime "
+                             "if it exists, else the last IOV in COOL folder")
+    parser.add_argument("-g", "--global-tag", type=str, default="CURRENT",
+                        help="Global conditions tag")
+    parser.add_argument("-s", "--sqlite", type=str,
+                        help="sqlite with CellNoise and HVCorr folders to be scaled")
+    parser.add_argument("-o", "--output-suffix", type=str, default="",
+                        help="extra base name suffix for ALL files produced by the script")
+    parser.add_argument("--pileup", type=int, default=60,
+                        help="<mu> value assumed to calculate pileup noise")
+    parser.add_argument("--bunch-spacing", type=int, default=25,
+                        help="in ns, for pileup noise calculation")
+    parser.add_argument("-i", "--ignore-errors", action="store_true",
+                        help="skip some of the checks such as digests of AtlCoolCopy operations")
+    parser.add_argument("-f", "--force", action="store_true",
+                        help="overwrite all existing output files instead of interrupting execution")
+    parser.add_argument("-r", "--resume", action="store_true",
+                        help="if all output files exist for a given subtask, skip it")
+    parser.add_argument("--serial", action="store_true",
+                        help="execute all operations sequentially instead of concurrently")
+    addHvScaleParserArgs(parser)
+    addHVCorrToSCHVCorrParserArgs(parser)
+    args = parser.parse_args()
+    _out.initialize(suffix=args.output_suffix)
+    if args.force:
+        _out.cleanup()
+    elif not (args.resume or _out.is_clean_dir()):
+        print("ERROR: output file(s) already exist; delete them or run with the --force flag")
+        sys.exit(-1)  
+    args.global_tag = _globalTag(args)
+    print(f"Using global conditions tag {args.global_tag}")
+    if "/" not in args.measurementTime: args.measurementTime += "/UTC"
+    hvprops = buildHvScaleProps(args)
+    executor = ThreadPoolExecutor(max_workers=1 if args.serial else None)
+    subtasks = [None]*6
+    subtasks[0] = executor.submit(_checkHardwareMapping, args=args)  # pure DB query, can start immediately
+    # === main athena job ===
+    try:
+        athlog = open(_out.athena_log, "w")
+        stdout2log = StdCaptureFD(out=athlog, mixed=True)
+        _athena(args, hvprops)
+    finally:
+        stdout2log.done()
+        athlog.close()
+    # === postprocessing of the athena output by concurrent subtasks ===
+    import logging
+    logging.shutdown()
+    reload(logging)  # otherwise CaloNoise_fillDB cannot configure its logger correctly
+    subtasks[1] = executor.submit(_listHVCorrBigChanges, args=args)
+    subtasks[2] = executor.submit(_listNoiseBigChanges, args=args)
+    subtasks[3] = executor.submit(_fillCaloNoiseDB, args=args)
+    subtasks[4] = executor.submit(_copyNewConditions, dependencies=subtasks[3:4], args=args)
+    subtasks[5] = executor.submit(_testHLT, dependencies=subtasks[3:5], args=args)
+    _wait(args, subtasks, waitmsgs={
+        5: "Doing check of the noise sqlite against P1HLT cache.....\nWill take 3-5 minutes, be patient......"})
+    sys.exit(0)

@@ -97,7 +97,7 @@ namespace JetPileupTag {
 
         // Single input block
         node_order.emplace_back(cfg.inputs[0].name,inputs);
-        order.scalar = node_order;
+        order.scalar = std::move(node_order);
         ATH_MSG_DEBUG( "Network NLayers: " << cfg.layers.size() );
 
         // Primarily using double to take advantage of build_vector later
@@ -186,10 +186,10 @@ namespace JetPileupTag {
         lwt::VectorX<double> inputvals = lwt::build_vector(features_double);
 
         // Wrap inputs into a vector of scalars as required by FastGraph
-        std::vector<lwt::VectorX<double>> scalars{inputvals};
+        std::vector<lwt::VectorX<double>> scalars{std::move(inputvals)};
 
         // Compute the output using the NN model
-        lwt::VectorX<double> output = m_lwnn->compute(scalars);
+        lwt::VectorX<double> output = m_lwnn->compute(std::move(scalars));
 
         // Return the first output node value
         return output(0);
@@ -304,7 +304,7 @@ namespace JetPileupTag {
 
                 }
 
-                return OrderedTrackMoment(numTrk_sorted, trkWidth_sorted, rpt_sorted);
+                return OrderedTrackMoment(std::move(numTrk_sorted), std::move(trkWidth_sorted), std::move(rpt_sorted));
 
             }
 
@@ -352,7 +352,7 @@ namespace JetPileupTag {
             dRpt[ivx - 1] = leadingRpt - sortedTrackMoments.rpt[ivx];
         }
 
-        return DTrackMomentStruct(dNumTrk, dTrkWidth, dRpt);
+        return DTrackMomentStruct(std::move(dNumTrk), std::move(dTrkWidth), std::move(dRpt));
     }
 
 

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "tauRecTools/TauCombinedTES.h"
@@ -110,11 +110,11 @@ StatusCode TauCombinedTES::initialize() {
 
       // MVA resolution, optional
       if(m_useMvaResolution) {
-	graphName = "FinalCalib/Graph_from_ResolutionEt_FinalCalib_" + m_decayModeNames[decayModeIndex] + "_" + m_etaBinNames[etaIndex];
+	graphName = "FinalCalib/Graph_from_ResolutionEt_FinalCalib_" + m_decayModeNames[decayModeIndex] + "_" + m_etaBinNames.at(etaIndex);
 	graph = dynamic_cast<TGraph*> (calFile->Get(graphName.c_str()));
 	if(graph){
-	  m_mvaResMaxEt[decayModeIndex][etaIndex] = TMath::MaxElement(graph->GetN(), graph->GetX());
-	  m_mvaRes[decayModeIndex][etaIndex] = std::unique_ptr<TGraph>(graph);
+	  m_mvaResMaxEt.at(decayModeIndex).at(etaIndex) = TMath::MaxElement(graph->GetN(), graph->GetX());
+	  m_mvaRes.at(decayModeIndex).at(etaIndex) = std::unique_ptr<TGraph>(graph);
 	  ATH_MSG_DEBUG("Adding graph: " << graphName);
 	}
 	else {
@@ -158,11 +158,11 @@ StatusCode TauCombinedTES::execute(xAOD::TauJet& tau) const {
 bool TauCombinedTES::getTESCompatibility(const xAOD::TauJet& tau) const {
   if (! isValid(tau)) return false;
 
-  xAOD::TauJetParameters::DecayMode decayMode = getDecayMode(tau);
+  xAOD::TauJetParameters::DecayMode decayMode = getDecayMode(tau); //can return 7
   int decayModeIndex = getDecayModeIndex(decayMode);
 
   int etaIndex = getEtaIndex(tau.etaTauEnergyScale());
-
+  
   double caloSigma = tau.ptTauEnergyScale() * getCaloResolution(tau.ptTauEnergyScale(), decayModeIndex, etaIndex);
   double deltaEt = tau.ptFinalCalib() - tau.ptTauEnergyScale();
 
@@ -238,7 +238,7 @@ bool TauCombinedTES::isValid(const xAOD::TauJet& tau) const {
 
 
 double TauCombinedTES::getCorrelation(int decayModeIndex, int etaIndex) const {
-  return m_correlationHists[decayModeIndex]->GetBinContent(etaIndex);
+  return m_correlationHists.at(decayModeIndex)->GetBinContent(etaIndex);
 }
 
 
@@ -251,8 +251,8 @@ double TauCombinedTES::getCaloCalEt(double caloEt,
 
   // FIXME: If caloEt is larger than max et, could we use the ratio at
   // max et, instead of setting it to zero
-  if (caloEt <= m_caloRelBiasMaxEt[decayModeIndex][etaIndex]) {
-    ratio = m_caloRelBias[decayModeIndex][etaIndex]->Eval(caloEt);
+  if (caloEt <= m_caloRelBiasMaxEt.at(decayModeIndex).at(etaIndex)) {
+    ratio = m_caloRelBias.at(decayModeIndex).at(etaIndex)->Eval(caloEt);
   }
 
   double caloCalEt = caloEt - ratio * caloEt;
@@ -269,8 +269,8 @@ double TauCombinedTES::getPanTauCalEt(double panTauEt,
   double ratio = 0.0;
 
   // Substructure is badly determined at high pt, as track momentum is pooryly measured
-  if (panTauEt <= m_panTauRelBiasMaxEt[decayModeIndex][etaIndex]) {
-    ratio = m_panTauRelBias[decayModeIndex][etaIndex]->Eval(panTauEt);
+  if (panTauEt <= m_panTauRelBiasMaxEt.at(decayModeIndex).at(etaIndex)) {
+    ratio = m_panTauRelBias.at(decayModeIndex).at(etaIndex)->Eval(panTauEt);
   }
 
   double panTauCalEt = panTauEt - ratio * panTauEt;
@@ -290,8 +290,8 @@ double TauCombinedTES::getMvaEnergyResolution(const xAOD::TauJet& tau) const {
 
   int etaIndex = getEtaIndex(tau.etaFinalCalib());
 
-  double pt = std::min(tau.ptFinalCalib(), m_mvaResMaxEt[decayModeIndex][etaIndex]);
-  double resolution = m_mvaRes[decayModeIndex][etaIndex]->Eval(pt);
+  double pt = std::min(tau.ptFinalCalib(), m_mvaResMaxEt.at(decayModeIndex).at(etaIndex));
+  double resolution = m_mvaRes.at(decayModeIndex).at(etaIndex)->Eval(pt);
 
   return resolution;
 }
@@ -299,8 +299,8 @@ double TauCombinedTES::getMvaEnergyResolution(const xAOD::TauJet& tau) const {
 
 
 double TauCombinedTES::getCaloResolution(double et, int decayModeIndex, int etaIndex) const {
-  double x = std::min(et, m_caloResMaxEt[decayModeIndex][etaIndex]);
-  double resolution = m_caloRes[decayModeIndex][etaIndex]->Eval(x);
+  double x = std::min(et, m_caloResMaxEt.at(decayModeIndex).at(etaIndex));
+  double resolution = m_caloRes.at(decayModeIndex).at(etaIndex)->Eval(x);
 
   return resolution;
 }
@@ -308,8 +308,8 @@ double TauCombinedTES::getCaloResolution(double et, int decayModeIndex, int etaI
 
 
 double TauCombinedTES::getPanTauResolution(double et, int decayModeIndex, int etaIndex) const {
-  double x = std::min(et, m_panTauResMaxEt[decayModeIndex][etaIndex]);
-  double resolution = m_panTauRes[decayModeIndex][etaIndex]->Eval(x);
+  double x = std::min(et, m_panTauResMaxEt.at(decayModeIndex).at(etaIndex));
+  double resolution = m_panTauRes.at(decayModeIndex).at(etaIndex)->Eval(x);
 
   return resolution;
 }
@@ -364,7 +364,7 @@ double TauCombinedTES::getCombinedEt(double caloEt,
   double caloSigma = caloEt * getCaloResolution(caloEt, decayModeIndex, etaIndex);
   if (0. == caloSigma) {
     ATH_MSG_WARNING("Calo TES: Et resolution at " << caloEt << " is 0");
-    m_caloRes[decayModeIndex][etaIndex]->Print("all");
+    m_caloRes.at(decayModeIndex)[etaIndex]->Print("all");
     return 0.;
   }
 
@@ -372,7 +372,7 @@ double TauCombinedTES::getCombinedEt(double caloEt,
   double panTauSigma = panTauEt * getPanTauResolution(panTauEt, decayModeIndex, etaIndex);
   if (0. == panTauSigma) {
     ATH_MSG_WARNING("PanTau: Et resolution at " << panTauEt << " is 0");
-    m_panTauRes[decayModeIndex][etaIndex]->Print("all");
+    m_panTauRes.at(decayModeIndex).at(etaIndex)->Print("all");
     return 0.;
   }
 

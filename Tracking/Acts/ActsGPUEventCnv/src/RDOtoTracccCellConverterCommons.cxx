@@ -11,6 +11,7 @@
 #include <GaudiKernel/IMessageSvc.h>
 
 #include <algorithm>
+#include <cstddef>
 
 namespace ActsTrk {
 
@@ -22,13 +23,15 @@ RDOtoTracccCellConverterCommons::RDOtoTracccCellConverterCommons(
   , m_hostMR{&parent, "HostMR", "", "The host memory resource tool to use"}
   , m_deviceMR{&parent, "DeviceMR", "", "The device memory resource tool to use"}
   , m_copiesTool{&parent, "CopiesTool", "", "Tool that provides host and device copy objects"}
-  , m_detDescSvc{&parent, "DetectorDescriptionSvc", "ActsTrk::JSONDeviceDetectorDescriptionProviderSvc"}
+  , m_geoIdMappingObjectName{&parent, "GeoIdMappingObjectName", "",
+      "StoreGate name for the detray/acts/athena geo id mapping"} 
   , m_hostCondObjectName{&parent, "HostConditionsObjectName", "",
       "Traccc host conditions object"}
   , m_CPUCellSorting{&parent, "CPUCellSorting", false,
       "Whether to sort traccc cells on CPU or GPU"}
   , m_UsePixelToTForCellActivation{&parent, "UsePixelToTForCellActivation", true,
       "Use Pixel hit time over threshold value to set traccc cell activation value, otherwise defaults to 1"}
+  , m_stripRDOTimeBinStr{&parent, "timeBins", "Allowed time bins pattern for Strip RDOs"} 
 {
 }
 
@@ -41,13 +44,29 @@ StatusCode RDOtoTracccCellConverterCommons::initialize()
   ATH_CHECK(m_tracccCellsKey.initialize());
   ATH_CHECK(m_copiesTool.retrieve());
 
-  m_athenaToDetray = &m_detDescSvc->athenaToDetrayMap();
+  ATH_CHECK(m_parent.detStore()->retrieve(m_geoIdMapping, m_geoIdMappingObjectName.value()));
   ATH_CHECK(m_parent.detStore()->retrieve(m_hostCond, m_hostCondObjectName.value()));
 
+  ATH_MSG_INFO("Built detray→detcond map with "
+      << m_DetrayIdToDetDescrIndexMap.size() << " entries");
+
+  ATH_CHECK(decodeTimeBins());
+
+  return StatusCode::SUCCESS;
+}
+
+StatusCode RDOtoTracccCellConverterCommons::buildDetrayMaps() const
+{
+  
   const auto& gids = m_hostCond->geometry_id();
-  m_DetrayIdToDetDescrIndexMap.reserve(gids.size());
+  // NOTE: m_DetrayIdToDetDescrIndexMap is built once here; 
+  // meaning it is only valid as long as the geometry does not change.
+  // if the job ever spans multiple IOVs with a
+  // genuinely different geometry_id() payload, this caching strategy
+  // would need to become IOV-aware instead.
+  const_cast<RDOtoTracccCellConverterCommons*>(this)->m_DetrayIdToDetDescrIndexMap.reserve(gids.size());
   for (unsigned int i = 0; i < gids.size(); ++i) {
-    m_DetrayIdToDetDescrIndexMap[gids[i].value()] = i;
+    const_cast<RDOtoTracccCellConverterCommons*>(this)->m_DetrayIdToDetDescrIndexMap[gids[i].value()] = i;
   }
   ATH_MSG_INFO("Built detray→detcond map with "
       << m_DetrayIdToDetDescrIndexMap.size() << " entries");
@@ -118,6 +137,37 @@ void sort_traccc_soa(
   for (size_type i : indices) {
     sorted_cells.at(s++) = cells.at(i);
   }
+}
+
+StatusCode RDOtoTracccCellConverterCommons::decodeTimeBins()
+{
+  static const size_t MAX_BINS = 2;
+  if (m_stripRDOTimeBinStr.size() > MAX_BINS) {
+    ATH_MSG_WARNING("Time bin string has excess characters");
+  }
+
+  for (size_t i = 0; i < MAX_BINS; ++i) {
+    switch (std::toupper(m_stripRDOTimeBinStr[i])) {
+      case 'X': m_stripRDOTimeBinBits[i] = -1; break;
+      case '0': m_stripRDOTimeBinBits[i] =  0; break;
+      case '1': m_stripRDOTimeBinBits[i] =  1; break;
+      default:
+          ATH_MSG_FATAL("Invalid time bin string: " << m_stripRDOTimeBinStr);
+          return StatusCode::FAILURE;
+    }
+  }
+  return StatusCode::SUCCESS;
+}
+
+bool RDOtoTracccCellConverterCommons::passTiming(const std::bitset<3>& timePattern) const
+{
+  // Convert the given timebin to a bit set and test each bit
+  // if bit is -1 (i.e. X) it always passes, otherwise require exact match of 0/1
+  // N.B. bitset has opposite order to the bit pattern we define
+  if (m_stripRDOTimeBinBits[0] != -1 and timePattern.test(2) != static_cast<bool>(m_stripRDOTimeBinBits[0])) return false;
+  if (m_stripRDOTimeBinBits[1] != -1 and timePattern.test(1) != static_cast<bool>(m_stripRDOTimeBinBits[1])) return false;
+  if (m_stripRDOTimeBinBits[2] != -1 and timePattern.test(0) != static_cast<bool>(m_stripRDOTimeBinBits[2])) return false;
+  return true;
 }
 
 } // namespace ActsTrk

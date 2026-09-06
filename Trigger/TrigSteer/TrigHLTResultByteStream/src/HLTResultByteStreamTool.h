@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /**********************************************************************************
@@ -52,13 +52,13 @@ namespace HLT {
 	should be called from createObj
      **/
     StatusCode convert(IROBDataProviderSvc& dataProvider, HLTResult*& result,
-                       std::string objName);
+                       const std::string & objName);
 
     /** @brief convert HLTResult to ByteStream
 	this function should be called from createRep
      **/
     StatusCode convert(HLTResult* result, RawEventWrite* re,
-                       std::string objName);
+                       const std::string & objName);
 
   private:
 

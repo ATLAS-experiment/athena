@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef HLTSEEDING_L1DATACONSISTENCYCHECKER_H
 #define HLTSEEDING_L1DATACONSISTENCYCHECKER_H
@@ -65,7 +65,7 @@ private:
   std::set<TrigCompositeUtils::DecisionID> m_monitoredThresholds;
 
   /// Shorter alias for a check whether we are in DEBUG logging mode
-  bool doDebug() const {return ATH_UNLIKELY(msgLevel(MSG::DEBUG));}
+  bool doDebug() const {return msgLevel(MSG::DEBUG);}
 };
 
 #endif // HLTSEEDING_L1DATACONSISTENCYCHECKER_H

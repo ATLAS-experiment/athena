@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -15,6 +15,7 @@
 //
 #include "CxxUtils/phihelper.h"
 #include <cmath>
+#include <stdexcept>
 
 #include<boost/container/static_vector.hpp>
 
@@ -261,6 +262,9 @@ findRoot(double& result,
       double p = 0;
       double q = 0;
       double r = 0;
+      if (fa == 0.)[[unlikely]]{
+        throw std::runtime_error{"findRoot: divisor fa is zero."};
+      }
       const double s = fb / fa;
 
       if (ac_equal) {

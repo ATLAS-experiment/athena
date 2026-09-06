@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -284,7 +284,7 @@ StatusCode Trk::ReFitTrackWithTruth::execute(const EventContext& ctx)
       HepGeom::Point3D<double> smearedPosition = smearTruthPosition( averagePosition, bec, layer_disk, design );
       ATH_MSG_DEBUG (" Smeared position : " << smearedPosition );
 
-      auto locparOrig = rio->localParameters();
+      const auto & locparOrig = rio->localParameters();
       ATH_MSG_DEBUG(" Original locpar " << locparOrig);
 
       Trk::LocalParameters locpar = element->hitLocalToLocal(smearedPosition.z(), smearedPosition.y()); // eta, phi
@@ -362,12 +362,16 @@ StatusCode Trk::ReFitTrackWithTruth::execute(const EventContext& ctx)
           double phi0 = aMeasPer->parameters()[Trk::phi0];
           double theta = aMeasPer->parameters()[Trk::theta];
           double qOverP = aMeasPer->parameters()[Trk::qOverP];
-          ATH_MSG_DEBUG ("Refitted parameters differences "
+          if ((od0 == 0) or (oz0 == 0) or (ophi0 == 0) or (otheta == 0) or (oqOverP == 0)){
+            ATH_MSG_WARNING("A divisor is zero.");
+          } else {
+            ATH_MSG_DEBUG ("Refitted parameters differences "
               << (od0-d0)/od0  << " "
               << (oz0-z0)/oz0  << " "
               << (ophi0-phi0)/ophi0 << " "
               << (otheta-theta)/otheta << " "
               << (oqOverP-qOverP)/oqOverP );
+          }
         } // aMeasPer exists
       } // newtrack exists
     } // if debug
@@ -592,7 +596,7 @@ HepGeom::Point3D<double> Trk::ReFitTrackWithTruth::smearTruthPosition( const Hep
   if (smeared.z()>design->length()/2) {
     smeared.setZ(design->length()/2-1e-6);
   } else if (smeared.z()<-design->length()/2) {
-    smeared.setZ(-design->width()/2+1e-6);
+    smeared.setZ(-design->length()/2+1e-6);
   }
 
 

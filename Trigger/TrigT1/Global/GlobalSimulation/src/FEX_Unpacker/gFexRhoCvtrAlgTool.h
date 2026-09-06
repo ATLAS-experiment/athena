@@ -50,7 +50,7 @@ namespace GlobalSim {
     SG::WriteHandleKey<GlobalSim::IOBitwise::gFexRhoTOBContainer>
     m_gFexRhoTOBContainerKey {
       this,
-      "gFexRhoTOBs",
+      "gFexRhoTOBContainerKey",
       "gFexRhoTOBs",
       "Key for GlobalSim gFexRhoTOB container"};
 

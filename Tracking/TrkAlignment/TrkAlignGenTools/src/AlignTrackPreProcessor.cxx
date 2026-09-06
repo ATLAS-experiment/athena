@@ -163,7 +163,8 @@ namespace Trk {
         }
 
         // store fit matrices
-        if (m_storeFitMatricesAfterRefit) {
+        if (m_storeFitMatricesAfterRefit and alignCache.m_fullCovarianceMatrix and 
+          alignCache.m_derivMatrix) {
           at->setFullCovarianceMatrix(alignCache.m_fullCovarianceMatrix.get());
           at->setDerivativeMatrix(alignCache.m_derivMatrix.get());
         }

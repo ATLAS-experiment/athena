@@ -174,6 +174,10 @@ namespace MuonGMR4 {
     const Acts::Surface* topBoundary(const Acts::TrackingVolume& volume) {
         return volumeLidBounadry(volume, false);
     }
+    const Acts::TrackingVolume* highestAlignable(const Acts::TrackingVolume* volume) {
+        return !volume || !volume->motherVolume() || !volume->motherVolume()->isAlignable()
+            ? volume : highestAlignable(volume->motherVolume());
+    }
 
 #endif
 }

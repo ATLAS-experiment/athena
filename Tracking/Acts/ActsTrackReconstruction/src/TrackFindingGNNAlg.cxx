@@ -20,6 +20,7 @@
 // ActsTrk
 #include "ActsCalibBase/MeasurementCalibratorBase.h"
 #include "ActsEvent/TrackContainer.h"
+#include "ActsEvent/TrackContainerUtils.h"
 #include "ActsGeometry/SurfaceOfMeasurementUtil.h"
 #include "ActsGeometryInterfaces/GeometryContext.h"
 #include "ActsInterop/Logger.h"
@@ -160,13 +161,14 @@ StatusCode TrackFindingGNNAlg::initialize() {
           tbCfg, m_logger->cloneWithSuffix("GraphSeg"));
 
   m_gnnPipeline = std::make_unique<ActsPlugins::GnnPipeline>(
-      gc, std::vector{gnn}, tb, m_logger->cloneWithSuffix("Pipeline"));
+      gc, std::vector{std::move(gnn)}, tb, m_logger->cloneWithSuffix("Pipeline"));
 
   // Limit the total number of instances on the GPU to avoid out of memory
   m_gpuInstanceCount.emplace(m_maxGpuInstances.value());
 
   // Parameter estimation and fitter come from Athena tools now
 
+  ATH_CHECK(detStore()->retrieve(m_pixelIdHelper, "PixelID"));
   ATH_CHECK(detStore()->retrieve(m_stripIdHelper, "SCT_ID"));
   ACTS_INFO("Use phi overlap spacepoints: " << std::boolalpha
                                             << m_usePhiOverlapSps.value());
@@ -258,16 +260,12 @@ StatusCode TrackFindingGNNAlg::execute(const EventContext &ctx) const {
   moduleIds.reserve(nSP);
   std::vector<const xAOD::SpacePoint *> allSPPtrs;
   allSPPtrs.reserve(nSP);
-  std::vector<Acts::GeometryIdentifier> geoIds, sortedGeoIds(nSP);
-  geoIds.reserve(nSP);
 
   std::size_t skipped = 0;
   for (const auto &spc :
        {pixelSPContainer, stripSPContainer, stripSPOVContainer}) {
     for (auto sp : spc) {
       auto cl1 = sp->measurements().front();
-      auto geoIdCl1 =
-          ActsTrk::getSurfaceGeometryIdOfMeasurement(*detElToGeoIdMap, *cl1);
       Identifier atlasIdCl1(static_cast<Identifier::value_type>(cl1->identifier()));
 
       if (/*!m_usePhiOverlapSps.value() &&*/ sp->measurements().size() == 2) {
@@ -288,8 +286,11 @@ StatusCode TrackFindingGNNAlg::execute(const EventContext &ctx) const {
         }
       }
 
-      geoIds.push_back(geoIdCl1);
-      moduleIds.push_back(atlasIdCl1.get_compact());
+      Identifier waferIdCl1 =
+          cl1->type() == xAOD::UncalibMeasType::PixelClusterType
+              ? m_pixelIdHelper->wafer_id(atlasIdCl1)
+              : m_stripIdHelper->wafer_id(atlasIdCl1);
+      moduleIds.push_back(waferIdCl1.get_compact());
       allSPPtrs.push_back(sp);
     }
   }
@@ -317,6 +318,7 @@ StatusCode TrackFindingGNNAlg::execute(const EventContext &ctx) const {
     auto i = idxs.at(k);
 
     std::span<float> f(features.data() + k * nFeatures, nFeatures);
+    ACTS_DEBUG("SP " << k << " (idx=" << i << ") moduleId=" << moduleIds.at(i));
     const auto &sp = *allSPPtrs.at(i);
 
     using namespace Acts::VectorHelpers;
@@ -352,8 +354,6 @@ StatusCode TrackFindingGNNAlg::execute(const EventContext &ctx) const {
     for (const xAOD::UncalibratedMeasurement* m : sp.measurements()) {
       sourceLinks.at(k).push_back(detail::MeasurementCalibratorBase::pack(m));
     }
-
-    sortedGeoIds.at(k) = geoIds.at(i);
   }
 
   timer.reset();
@@ -389,23 +389,23 @@ StatusCode TrackFindingGNNAlg::execute(const EventContext &ctx) const {
   trackBackend.reserve(nTracksExpected);
   trackStateBackend.reserve(nTracksExpected * 30);
   detail::RecoTrackContainer tracks(trackBackend, trackStateBackend);
+  TrackContainerUtils::addFitterTypeProperty(tracks);
 
   // v45: Create SeedContainer to hold seeds (Seeds are now proxy objects)
   ActsTrk::SeedContainer seedContainer;
+  auto R_of = [](const xAOD::SpacePoint* sp) {
+    return Acts::fastHypot(sp->x(), sp->y(), sp->z());
+  };
 
   auto makeSeedFromCandidate = [&](const std::vector<int> &cand) -> std::optional<boost::container::small_vector<const xAOD::SpacePoint*, 3>> {
     // Select at least 3 SPs with deltaR spacing in cylindrical coordinates
     boost::container::small_vector<const xAOD::SpacePoint*, 3> picked;
     if (cand.empty()) return std::nullopt;
-    auto r_of = [&](const xAOD::SpacePoint* sp) {
-      Acts::Vector3 v{sp->x(), sp->y(), sp->z()};
-      return v.perp();
-    };
     const xAOD::SpacePoint* last = allSPPtrs.at(cand.front());
     picked.push_back(last);
     for (std::size_t i = 1; i < cand.size() && picked.size() < 3; ++i) {
       const xAOD::SpacePoint* sp = allSPPtrs.at(cand.at(i));
-      if (std::abs(r_of(sp) - r_of(last)) > m_minDeltaR.value()) {
+      if (std::abs(R_of(sp) - R_of(last)) > m_minDeltaR.value()) {
         picked.push_back(sp);
         last = sp;
       }
@@ -424,10 +424,6 @@ StatusCode TrackFindingGNNAlg::execute(const EventContext &ctx) const {
     return *surface;
   };
 
-  auto R_of = [](const xAOD::SpacePoint* sp) {
-    return Acts::fastHypot(sp->x(), sp->y(), sp->z());
-  };
-
   for (const auto &cand : candidates) {
     auto pickedOpt = makeSeedFromCandidate(cand);
     if (!pickedOpt.has_value()) continue;
@@ -440,8 +436,8 @@ StatusCode TrackFindingGNNAlg::execute(const EventContext &ctx) const {
     ActsTrk::Seed seed = seedContainer.push_back(
         ActsTrk::SpacePointRange(picked.data(), picked.size()), 0.f, 0.f);
 
-    auto initialParamsOpt = m_paramEstimationTool->estimateTrackParameters(
-        seed, /*useTopSp=*/true, gctx, mctx, retrieveSurface);
+    const auto& [initialParamsOpt, estimationStatus] = m_paramEstimationTool->estimateTrackParameters(
+        seed, /*useTopSp=*/true, gctx, mctx, cctx, retrieveSurface);
     if (!initialParamsOpt.has_value()) continue;
 
     boost::container::small_vector<const xAOD::SpacePoint*, 16> sortedSP;
@@ -486,6 +482,7 @@ StatusCode TrackFindingGNNAlg::execute(const EventContext &ctx) const {
   Acts::VectorTrackContainer selTrackBackend;
   selTrackBackend.reserve(trackBackend.size());
   detail::RecoTrackContainer selectedTracks(selTrackBackend, trackStateBackend);
+  TrackContainerUtils::addFitterTypeProperty(selectedTracks);
 
   Acts::TrackSelector selector(m_trackSelectorConfig);
   for (auto track : tracks) {

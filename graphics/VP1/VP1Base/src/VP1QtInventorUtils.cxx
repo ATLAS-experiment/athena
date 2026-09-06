@@ -16,7 +16,6 @@
 #include "VP1Base/VP1QtInventorUtils.h"
 #include "VP1Base/VP1ExaminerViewer.h"
 #include "VP1Base/VP1Msg.h"
-#include "CxxUtils/byteswap.h"
 
 #include "Inventor/nodes/SoMaterial.h"
 #include <Inventor/nodes/SoPerspectiveCamera.h>
@@ -127,7 +126,7 @@ public:
 	static void ConvertLong(unsigned *array, long length)
 	{
 		while (length--) {
-			*array = CxxUtils::byteswap (*array);
+			*array = std::byteswap (*array);
 			++array;
 		}
 	}
@@ -162,12 +161,12 @@ public:
        
     
 		if (swapFlag) {
-			image->imagic = CxxUtils::byteswap (image->imagic);
-			image->type   = CxxUtils::byteswap (image->type);
-			image->dim    = CxxUtils::byteswap (image->dim);
-			image->xsize  = CxxUtils::byteswap (image->xsize);
-			image->ysize  = CxxUtils::byteswap (image->ysize);
-			image->zsize  = CxxUtils::byteswap (image->zsize);
+			image->imagic = std::byteswap (image->imagic);
+			image->type   = std::byteswap (image->type);
+			image->dim    = std::byteswap (image->dim);
+			image->xsize  = std::byteswap (image->xsize);
+			image->ysize  = std::byteswap (image->ysize);
+			image->zsize  = std::byteswap (image->zsize);
 		}
 
         

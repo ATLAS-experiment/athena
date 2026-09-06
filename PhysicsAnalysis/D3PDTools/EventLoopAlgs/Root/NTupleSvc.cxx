@@ -22,7 +22,8 @@
 #include <EventLoop/IWorker.h>
 #include <EventLoopAlgs/WhiteBoardSvc.h>
 #include <RootCoreUtils/Assert.h>
-#include <RootCoreUtils/ThrowMsg.h>
+#include <format>
+#include <stdexcept>
 
 //
 // method implementations
@@ -52,9 +53,7 @@ namespace EL
 
   void NTupleSvc ::
   testInvariant () const
-  {
-    RCU_INVARIANT (this != 0);
-  }
+  {}
 
 
 
@@ -353,7 +352,7 @@ namespace EL
 	}
       }
       if (count == 0)
-	RCU_THROW_MSG ("could not find any branch that matches pattern \"" + *iter + "\"");
+        throw std::runtime_error ("could not find any branch that matches pattern \"" + *iter + "\"");
     }
   }
 
@@ -374,7 +373,7 @@ namespace EL
     info.name = branchName;
     info.source = wk()->tree()->FindBranch (branchName.c_str());
     if (info.source == 0)
-      RCU_THROW_MSG ("could not find input branch: " + branchName);
+      throw std::runtime_error ("could not find input branch: " + branchName);
 
     const char *className = info.source->GetClassName();
     if (strlen (className) > 0)
@@ -405,20 +404,20 @@ namespace EL
       {
 	TLeaf *myleaf = dynamic_cast<TLeaf*>(object);
 	if (myleaf == 0)
-	  RCU_THROW_MSG ("found non-leaf object in leaf list");
+	  throw std::runtime_error ("found non-leaf object in leaf list");
 
 	std::string typeName = myleaf->GetTypeName();
 	std::map<std::string,std::string>::const_iterator type
 	  = types.find (typeName);
 	if (type == types.end())
-	  RCU_THROW_MSG ("unknown leaf type " + typeName);
+	  throw std::runtime_error ("unknown leaf type " + typeName);
 
 	if (!leaves.empty())
 	  leaves += ":";
 	leaves = leaves + myleaf->GetTitle() + "/" + type->second;
       }
       if (leaves.empty())
-	RCU_THROW_MSG ("failed to scan leaves of branch " + branchName);
+        throw std::runtime_error ("failed to scan leaves of branch " + branchName);
 
       for (std::string::size_type pos = 0;
 	   (pos = leaves.find ("[", pos)) != std::string::npos; )
@@ -426,7 +425,7 @@ namespace EL
 	++ pos;
 	std::string::size_type pos2 = leaves.find ("]", pos);
 	if (pos2 == std::string::npos)
-	  RCU_THROW_MSG ("failed to scan leaf dimensions for " + leaves);
+	  throw std::runtime_error ("failed to scan leaf dimensions for " + leaves);
 	std::string dim = leaves.substr (pos, pos2 - pos);
 	if (!(dim[0] >= '0' && dim[0] <= '9'))
 	  initOutput (dim);
@@ -482,7 +481,7 @@ namespace EL
 	  if (countleaf)
 	    countval = countleaf->GetMaximum();
 	  if (countval < 0)
-	    RCU_THROW_MSG (std::string ("could not determine size of leaf ") + myleaf->GetName() + " in branch " + info->name);
+	    throw std::runtime_error (std::format ("could not determine size of leaf {} in branch {}", myleaf->GetName(), info->name));
 	  if (countval == 0)
 	    countval = 1;
 	  const std::size_t mysize

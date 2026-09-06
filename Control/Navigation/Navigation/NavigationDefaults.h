@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef NAVIGATION_NAVIGATIONDEFAULTS_H
@@ -172,7 +172,9 @@ namespace NavigationDefaults
       {
         if (sizeHint && cont.capacity() < sizeHint)
           cont.reserve(sizeHint);
-        cont.emplace_back (*aChildContainer,anIndex, aPar);
+        cont.emplace_back (std::piecewise_construct,
+                           std::forward_as_tuple(*aChildContainer,anIndex),
+                           std::forward_as_tuple(aPar));
       }
 
       // insertion of ElementLink by object index
@@ -184,7 +186,9 @@ namespace NavigationDefaults
       {
         if (sizeHint && cont.capacity() < sizeHint)
           cont.reserve(sizeHint);
-        cont.emplace_back (*aChildContainer,anIndex, sg, aPar);
+        cont.emplace_back (std::piecewise_construct,
+                           std::forward_as_tuple(*aChildContainer,anIndex,sg),
+                           std::forward_as_tuple(aPar));
       }
 
       // insertion of ElementLink by ElementLink

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef DERIVATIONFRAMEWORK_EGSELECTIONTOOLWRAPPER_H
@@ -15,7 +15,6 @@
 #include "AsgTools/IAsgTool.h"
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "EgammaAnalysisInterfaces/IAsgEGammaIsEMSelector.h"
-#include "EgammaAnalysisInterfaces/IElectronPhotonShowerShapeFudgeTool.h"
 #include "GaudiKernel/ToolHandle.h"
 #include "xAODEgamma/EgammaContainer.h"
 //
@@ -39,11 +38,10 @@ namespace DerivationFramework {
         "",
         "Selector tool",
         };
-    ToolHandle<IElectronPhotonShowerShapeFudgeTool>
-    m_fudgeMCTool{ this, "EGammaFudgeMCTool", "", "Fudging tool" };
 
     SG::ReadHandleKey<xAOD::EgammaContainer> m_ContainerName{ this,
-      "ContainerName", "", "Input" };
+      "ContainerName", "", "Input to decorate" };
+    SG::ReadHandleKey<xAOD::EgammaContainer> m_fudgedContainerName{ this, "FudgedContainerName", "", "Input with fudge factors applied" };
 
     // Write decoration handle keys
     // these are not really configuarable

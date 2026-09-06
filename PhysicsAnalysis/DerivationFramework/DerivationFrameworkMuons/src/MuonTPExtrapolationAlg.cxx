@@ -1,13 +1,13 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonTPExtrapolationAlg.h"
-#include "DerivationFrameworkMuons/Utils.h"
 #include "FourMomUtils/xAODP4Helpers.h"
 #include "TrkSurfaces/CylinderSurface.h"
 #include "TrkSurfaces/DiscSurface.h"
 #include "xAODEventInfo/EventInfo.h"
+#include "xAODMuonViews/ContainerDecorator.h"
 namespace {
     constexpr float min_warn_pt = 3500;
     constexpr float dummy_result = 5.;
@@ -20,8 +20,6 @@ namespace {
 }  // namespace
 
 namespace DerivationFramework{
-MuonTPExtrapolationAlg::MuonTPExtrapolationAlg(const std::string& name, ISvcLocator* pSvcLocator) :
-    AthReentrantAlgorithm(name, pSvcLocator) {}
 
 StatusCode MuonTPExtrapolationAlg::initialize() {
     ATH_CHECK(m_extrapolator.retrieve());
@@ -38,17 +36,15 @@ StatusCode MuonTPExtrapolationAlg::initialize() {
 }
 
 StatusCode MuonTPExtrapolationAlg::execute(const EventContext& ctx) const {
-    SG::ReadHandle<xAOD::IParticleContainer> muons{m_partKey, ctx};
-    if (!muons.isValid()) {
-        ATH_MSG_FATAL("Failed to retrieve " << m_partKey.fullKey());
-        return StatusCode::FAILURE;
-    }
+    const xAOD::IParticleContainer* muons{nullptr};
+    ATH_CHECK(SG::get(muons, m_partKey, ctx));
+
+
+    xAOD::ContainerDecorator<xAOD::IParticleContainer, float> dec_Eta{m_extEtaKey, ctx, dummy_result};
+    xAOD::ContainerDecorator<xAOD::IParticleContainer, float> dec_Phi{m_extPhiKey, ctx, dummy_result};
+    xAOD::ContainerDecorator<xAOD::IParticleContainer, char> dec_Decorated{m_extStatKey, ctx, ExtStatus::NotPresent};
     
-    auto dec_Eta = makeHandle<float>(ctx, m_extEtaKey, dummy_result);
-    auto dec_Phi = makeHandle<float>(ctx, m_extPhiKey, dummy_result);
-    auto dec_Decorated = makeHandle<char>(ctx, m_extStatKey, ExtStatus::NotPresent);
-    
-    using SelDecorator = SG::ReadDecorHandle<xAOD::IParticleContainer, bool>;
+    using SelDecorator = SG::ReadDecorHandle<xAOD::IParticleContainer, std::uint8_t>;
     
     std::vector<SelDecorator> selDecors;
     for (const SG::ReadDecorHandleKey<xAOD::IParticleContainer>& key : m_trkSelKeys) {

@@ -149,6 +149,7 @@ MsgStream& InDet::SiDetElementsRoadMaker_xk::dumpConditions(MsgStream& out) cons
   if (!layer[0].empty()) ++maps;
   if (!layer[1].empty()) ++maps;
   if (!layer[2].empty()) ++maps;
+  auto prec = out.precision();
   out<<"|----------------------------------------------------------------------"
      <<"-------------------|"
      <<"\n";
@@ -265,6 +266,7 @@ MsgStream& InDet::SiDetElementsRoadMaker_xk::dumpConditions(MsgStream& out) cons
        <<"\n";
   }
   out<<"\n";
+  out.precision(prec);
   return out;
 }
 

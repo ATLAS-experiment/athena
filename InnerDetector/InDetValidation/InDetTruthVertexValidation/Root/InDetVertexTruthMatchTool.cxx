@@ -249,9 +249,9 @@ StatusCode InDetVertexTruthMatchTool::matchVertices( const xAOD::VertexContainer
     if ( trkWeights.size() != ntracks ) {
       ATH_MSG_DEBUG("Vertex without same number of tracks and trackWeights, setting fake");
       matchinfo.emplace_back( ElementLink<xAOD::TruthEventBaseContainer>(), 1., 0. );
-      matchInfoDecor( *vxit ) = matchinfo;
+      matchInfoDecor( *vxit ) = std::move(matchinfo);
       rawMatchinfo.emplace_back( ElementLink<xAOD::TruthEventBaseContainer>(), 1., 0. );
-      rawMatchInfoDecor( *vxit ) = rawMatchinfo;
+      rawMatchInfoDecor( *vxit ) = std::move(rawMatchinfo);
       nHSTrkDecor( *vxit ) = 0;
       continue;
     }
@@ -330,8 +330,8 @@ StatusCode InDetVertexTruthMatchTool::matchVertices( const xAOD::VertexContainer
     }
     std::sort( matchinfo.begin(), matchinfo.end(), compareMatchPair );
     std::sort( rawMatchinfo.begin(), rawMatchinfo.end(), compareMatchPair );
-    matchInfoDecor( *vxit ) = matchinfo;
-    rawMatchInfoDecor( *vxit ) = rawMatchinfo;
+    matchInfoDecor( *vxit ) = std::move(matchinfo);
+    rawMatchInfoDecor( *vxit ) = std::move(rawMatchinfo);
     nHSTrkDecor( *vxit ) = nHSTrk;
   }
   m_nVtx             += vxContainer.stdcont().size();

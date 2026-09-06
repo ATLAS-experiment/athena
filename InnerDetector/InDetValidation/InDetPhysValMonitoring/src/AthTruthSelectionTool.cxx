@@ -241,11 +241,12 @@ AthTruthSelectionTool::initialize() {
         }, "SelectDisc"));
   } //m_zDisc > 0
 
-  std::string msg = std::to_string(m_cutList.size()) + " truth acceptance cuts are used:\n";
-  for (const auto& i:m_cutList.names()) {
-    msg += i + "\n";
-  }
+  std::string msg = std::to_string(m_cutList.size()) + " truth acceptance cuts are used:";
   ATH_MSG_INFO(msg);
+  for (const auto& name : m_cutList.names()) {
+    msg = "\t" + name;
+    ATH_MSG_INFO(msg);
+  }
 
   ATH_CHECK(m_extrapolator.retrieve(EnableTool{ m_radiusCylinder > 0 || m_zDisc >0 }));
 

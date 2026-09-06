@@ -81,7 +81,7 @@ void TrigTauMonitorL1Algorithm::fillL1eTauVars(const std::string& trigger, const
 {
     ATH_MSG_DEBUG("Fill L1 variables: " << trigger);
 
-    auto monGroup = getGroup(trigger+"_L1Vars");
+    const auto & monGroup =getGroup(trigger+"_L1Vars");
 
     auto L1RoIEt        = Monitored::Collection("L1RoIEt"       , rois, [](const xAOD::eFexTauRoI* L1roi){ return L1roi->et()/Gaudi::Units::GeV; });
     auto L1RoIEta       = Monitored::Collection("L1RoIEta"      , rois, [](const xAOD::eFexTauRoI* L1roi){ return L1roi->eta(); });
@@ -99,7 +99,7 @@ void TrigTauMonitorL1Algorithm::fillL1cTauVars(const std::string& trigger, const
 {
     ATH_MSG_DEBUG("Fill L1 variables: " << trigger);
 
-    auto monGroup = getGroup(trigger+"_L1Vars");
+    const auto & monGroup =getGroup(trigger+"_L1Vars");
 
     auto L1RoIEt        = Monitored::Collection("L1RoIEt"       , rois, [](const auto L1roi){ return L1roi.first->et()/Gaudi::Units::GeV; });
     auto L1RoIEta       = Monitored::Collection("L1RoIEta"      , rois, [](const auto L1roi){ return L1roi.first->eta(); });

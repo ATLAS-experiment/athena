@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //////////////////////////////////////////////////////////////////
@@ -18,23 +18,6 @@
 #include <unistd.h>
 #endif
 
-
-Trk::TrackingGeometryTest::TrackingGeometryTest(const std::string& name, ISvcLocator* pSvcLocator) :
- Trk::TrkDetDescrUnitTestBase(name, pSvcLocator),
-#ifdef TRKDETDESCR_MEMUSAGE   
-   m_memoryLogger(),
-#endif
-   m_executed(false),
-   m_trackingGeometrySvc("TrackingGeometrySvc","AtlasTrackingGeometrySvc"),
-   m_trackingGeometry(nullptr),
-   m_trackingGeometryName("AtlasTrackingGeometry"),
-   m_trackingGeometryProcessors()
- {
-     // get the service handle for the TrackingGeometry
-     declareProperty("TrackingGeometrySvc"          , m_trackingGeometrySvc);
-     // get the tools for display and recording
-     declareProperty("TrackingGeometryProcessors"   , m_trackingGeometryProcessors);     
- }
 
 StatusCode Trk::TrackingGeometryTest::initializeTest() 
 {

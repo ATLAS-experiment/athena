@@ -33,10 +33,10 @@ TileDigitsContainer* TileDigitsContainerCnv::createTransient(const Token* token)
 
     TileDigitsContainer       *trans_cont(0);
 
-    static const pool::Guid   p3_guid("8CC01C7A-B330-413E-BEF9-DFA18F15B1FA");
-    static const pool::Guid   p2_guid("2F82DE4C-65FA-4F01-BCB5-15330224E357");
-    static const pool::Guid   p1_guid("F9386A42-43A7-4482-8A5B-F33EDE586FB2");
-    static const pool::Guid   p0_guid("EB51ED70-5EC0-4F31-97D3-14453F77C88B");
+    static const Guid   p3_guid("8CC01C7A-B330-413E-BEF9-DFA18F15B1FA");
+    static const Guid   p2_guid("2F82DE4C-65FA-4F01-BCB5-15330224E357");
+    static const Guid   p1_guid("F9386A42-43A7-4482-8A5B-F33EDE586FB2");
+    static const Guid   p0_guid("EB51ED70-5EC0-4F31-97D3-14453F77C88B");
 
     if( this->compareClassGuid(token, p3_guid)) {
         std::unique_ptr< TileDigitsContainer_p3 >   cont( this->poolReadObject< TileDigitsContainer_p3 >(token) );

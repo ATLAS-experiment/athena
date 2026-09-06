@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 from collections import defaultdict
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
@@ -30,8 +30,10 @@ def getUsedInVertexFitTrackDecoratorAlg(
     return alg
 
 def UsedInVertexFitTrackDecoratorCfg(
-        flags, trackCont = 'InDetTrackParticles', vtxCont = 'PrimaryVertices'):
+        flags, trackCont = 'InDetTrackParticles', vtxCont = 'PrimaryVertices',
+        vertexDeco = "TTVA_AMVFVertices_forReco", weightDeco = "TTVA_AMVFWeights_forReco"):
     """ Create the ComponentAccumulator  to decorate the used-in-fit information for AMVF """
     acc = ComponentAccumulator()
-    acc.addEventAlgo( getUsedInVertexFitTrackDecoratorAlg( trackCont, vtxCont ) )
+    acc.addEventAlgo( getUsedInVertexFitTrackDecoratorAlg( trackCont, vtxCont,
+                                                           vertexDeco, weightDeco ) )
     return acc

@@ -25,6 +25,7 @@ class ConfigurationError(RuntimeError):
 
 # Always create these services in this order:
 _basicServicesToCreateOrder=("CoreDumpSvc/CoreDumpSvc",
+                             "DBReplicaSvc/DBReplicaSvc",
                              "GeoModelSvc/GeoModelSvc",
                              "DetDescrCnvSvc/DetDescrCnvSvc")
 
@@ -988,6 +989,12 @@ class ComponentAccumulator(AccumulatorCachable):
         for k, v in appPropsToSet.items():
             self._msg.debug("Setting property %s : %s", k, v)
             app.setProperty(k, v)
+
+        # An EventLoopMgr always needs to be explicitly configured as the default
+        # Gaudi one will certainly not work in athena.
+        if "EventLoop" not in appPropsToSet:
+            raise Exception("No EventLoopMgr has been configured. If you are using a custom "
+                            "EventLoopMgr, make sure to set the 'EventLoop' App property.")
 
         app.configure()
 

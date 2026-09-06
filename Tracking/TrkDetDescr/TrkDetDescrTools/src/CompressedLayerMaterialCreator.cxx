@@ -68,7 +68,7 @@ Trk::LayerMaterialProperties* Trk::CompressedLayerMaterialCreator::convertLayerM
                 materialVector.push_back(mProperties);
             }
             // now pus the vector into the matrix
-            materialMatrix.push_back(materialVector);
+            materialMatrix.push_back(std::move(materialVector));
         }
         
         // create the material
@@ -103,7 +103,7 @@ Trk::LayerMaterialProperties* Trk::CompressedLayerMaterialCreator::createCompres
     materialBins.reserve(nSecondBins);
     for (size_t isec = 0; isec < nSecondBins; ++isec) {
         std::vector<unsigned short int> firstbins(nFirstBins,0);
-        materialBins.push_back(firstbins);
+        materialBins.push_back(std::move(firstbins));
         // loop over the bins
         for (size_t ifir = 0; ifir < nFirstBins; ++ifir) {
             // get the current material properties
@@ -130,9 +130,9 @@ Trk::LayerMaterialProperties* Trk::CompressedLayerMaterialCreator::createCompres
         x0materialbins.reserve(m_compressedMaterialX0Bins);
         for (size_t ix0 = 0; ix0 < m_compressedMaterialX0Bins; ++ix0) {
             std::vector < Trk::IndexedMaterial > materialBin;
-            x0materialbins.push_back( materialBin );
+            x0materialbins.push_back( std::move(materialBin) );
         }
-        materialHistogram.push_back(x0materialbins);
+        materialHistogram.push_back(std::move(x0materialbins));
     }
     // fill the histogram
     for (size_t isec = 0; isec < nSecondBins; ++isec) {
@@ -192,6 +192,9 @@ Trk::LayerMaterialProperties* Trk::CompressedLayerMaterialCreator::createCompres
                 avRho *= measure;
                 avT   *= measure;
                 // compress to a model thickness [ rho affected ]
+                if ((tinX0 == 0) or (tinL0 == 0)) [[unlikely]]{
+                  throw std::runtime_error("createCompressedLayerMaterial: divisor is zero.");
+                }
                 avRho *= avT/m_compressedMaterialThickness;
                 materialVector.push_back(new Trk::MaterialProperties(m_compressedMaterialThickness,
                                                                      m_compressedMaterialThickness/tinX0,

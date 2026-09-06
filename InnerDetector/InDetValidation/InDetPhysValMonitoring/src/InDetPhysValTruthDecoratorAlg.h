@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef INDETPHYSVALMONITORING_INDETPHYSVALTRUTHDECORATORTOOL_H
@@ -48,8 +48,9 @@ private:
   bool decorateTruth(const xAOD::TruthParticle& particle,
                      std::vector< std::pair<SG::WriteDecorHandle<xAOD::TruthParticleContainer,float>,
                                             bool > > &float_decor,
-                     const Amg::Vector3D& beamPos,
+                     const Amg::Vector3D& perigeePos,
                      const std::vector<std::array<uint16_t, kNClusterTypes> > &counts) const;
+  const xAOD::TruthEvent* getTruthHSEvent() const;
   bool decorateTruthTime(std::vector<std::pair<SG::WriteDecorHandle<xAOD::TruthParticleContainer, float>, bool>>& float_decor) const;
 
   PublicToolHandle<Trk::IExtrapolator> m_extrapolator
@@ -68,6 +69,8 @@ private:
 
   Gaudi::Property<std::string> m_prefix
     {this, "Prefix", "", "Decoration prefix to avoid clashes."};
+
+  Gaudi::Property<bool> m_decoTime{this, "decorateTime", false};
   
   ///TruthPixelClusterContainer and TruthSCTClusterContainer needed for truth silicon hit cut
   SG::ReadHandleKey<xAOD::TrackMeasurementValidationContainer> m_truthPixelClusterName
@@ -84,6 +87,9 @@ private:
 
   SG::ReadHandleKey<xAOD::TruthPileupEventContainer> m_truthPileupEventName
     {this, "TruthPileupEventContainerName", "TruthPileupEvents", ""};
+
+  Gaudi::Property<bool> m_useTruthPVAsPerigee
+    {this, "UseTruthPVAsPerigee", false, "Use the truth PV to calculate the perigee parameters instead of the BS"};
 
   // decoration helper
   enum EDecorations {

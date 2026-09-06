@@ -1,5 +1,5 @@
 #
-#  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 #
 
 from TriggerMenuMT.HLT.Egamma.TrigEgammaKeys import getTrigEgammaKeys
@@ -20,11 +20,6 @@ def fastElectronSequenceGenCfg(flags, name='FastElectron', variant='', is_probe_
 
     # Configure the reconstruction algorithm sequence
     from TriggerMenuMT.HLT.Electron.FastElectronRecoSequences import fastElectronRecoSequence
-
-    from TrigGenericAlgs.TrigGenericAlgsConfig import ROBPrefetchingAlgCfg_Si
- 
-    robPrefetchAlg = ROBPrefetchingAlgCfg_Si(flags, nameSuffix='IM_'+reco.name)
-
     reco.mergeReco(fastElectronRecoSequence(flags, name, InViewRoIs, variant))
     
     theFastElectronHypo = CompFactory.TrigEgammaFastElectronHypoAlg("TrigEgammaFastElectronHypoAlg"+variant)
@@ -34,7 +29,7 @@ def fastElectronSequenceGenCfg(flags, name='FastElectron', variant='', is_probe_
     from TrigEgammaHypo.TrigEgammaFastElectronHypoTool import TrigEgammaFastElectronHypoToolFromDict
 
     selAcc = SelectionCA('FastElectronMenuSequence'+variant,isProbe=is_probe_leg)
-    selAcc.mergeReco(reco, robPrefetchCA=robPrefetchAlg)
+    selAcc.mergeReco(reco)
     selAcc.addHypoAlgo(theFastElectronHypo)
 
     return MenuSequence(flags,selAcc,HypoToolGen=TrigEgammaFastElectronHypoToolFromDict)

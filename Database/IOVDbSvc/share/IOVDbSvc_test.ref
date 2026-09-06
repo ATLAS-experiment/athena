@@ -19,6 +19,7 @@ EventLoopMgr      WARNING No events will be processed from external input.
 ApplicationMgr       INFO Application Manager Initialized successfully
 ApplicationMgr Ready
 IOVDbSvc             INFO Only 5 POOL conditions files will be open at once
+IOVDbSvc             INFO IOVDbSvc configured to use a COOL database
 IOVDbFolder          INFO Extensible folder /key2
 IOVDbSvc             INFO Initialised with 2 connections and 2 folders
 IOVDbSvc             INFO Service IOVDbSvc initialised successfully

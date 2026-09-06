@@ -36,19 +36,6 @@ def AthenaStackingActionToolCfg(flags, name='G4UA::AthenaStackingActionTool', **
     return result
 
 
-def AthenaTrackingActionToolCfg(flags, name='G4UA::AthenaTrackingActionTool', **kwargs):
-    result = ComponentAccumulator()
-    kwargs.setdefault('SecondarySavingLevel', 2)
-    
-    subDetLevel=1
-    if "ATLAS" in flags.GeoModel.AtlasVersion and flags.Detector.GeometryCavern:
-        subDetLevel=2
-
-    kwargs.setdefault('SubDetVolumeLevel', subDetLevel)
-    result.setPrivateTools( CompFactory.G4UA.AthenaTrackingActionTool(name,**kwargs) )
-    return result
-
-
 def LooperKillerToolCfg(flags, name='G4UA::LooperKillerTool', **kwargs):
     result = ComponentAccumulator()
     result.setPrivateTools(CompFactory.G4UA.LooperKillerTool(name, **kwargs))

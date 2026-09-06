@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 // Local includes
 #include "L1DataConsistencyChecker.h"
@@ -100,9 +100,11 @@ StatusCode L1DataConsistencyChecker::consistencyCheck(const HLT::IDVec& l1Seeded
     }
     size_t idec{0}; /// Counter for debug printouts
     // Loop over TOBs of the given threshold type (one decision = one TOB)
+    
     for (const TrigCompositeUtils::Decision* d : *decisions) {
       std::vector<TrigCompositeUtils::DecisionID> passedThresholdIDs;
-      const bool hasDetail = d->getDetail("thresholds", passedThresholdIDs);
+      static const std::string thresholdsStr{"thresholds"};
+      const bool hasDetail = d->getDetail(thresholdsStr, passedThresholdIDs);
       if (!hasDetail) {
         ATH_MSG_ERROR("Detail \"thresholds\" missing from Decision in the container " << decisionsKey);
         return StatusCode::FAILURE;

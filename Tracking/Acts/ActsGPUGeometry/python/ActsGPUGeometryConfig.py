@@ -12,6 +12,18 @@ def JSONDeviceDetectorDescriptionProviderSvcCfg(flags, **kwargs) -> ComponentAcc
 
     acc = ComponentAccumulator()
 
+    geoTag = flags.GeoModel.AtlasVersion
+    if geoTag not in ["ATLAS-P2-RUN4-03-00-01","ATLAS-P2-RUN4-03-00-00"]:
+        from AthenaCommon.Logging import logging
+        log = logging.getLogger("JSONDeviceDetectorDescriptionCfg")
+        log.warning(
+            "detray<->Athena id mapping (athenaIdentifierToDetrayMap.txt) is only "
+            "validated against geo tag %s — this job is using '%s'. The detray/"
+            "Athena identifier map will likely be incomplete or wrong for this "
+            "geometry, and RDOtoTracccCellConverterAlg may fail with "
+            "'No detray id found for Athena identifier ...' partway through the job.",
+            "ATLAS-P2-RUN4-03-00-*", geoTag,
+        )
 
     kwargs.setdefault("MemoryResourcesTool", acc.popToolsAndMerge(MemoryResourcesToolCfg(flags)))
     kwargs.setdefault("CopyProviderTool", acc.popToolsAndMerge(CopyToolCfg(flags)))
@@ -19,10 +31,13 @@ def JSONDeviceDetectorDescriptionProviderSvcCfg(flags, **kwargs) -> ComponentAcc
     kwargs.setdefault("DigitizationFile", "dev/ACTS/detray-itk/ITk_digitization_config.json")
     kwargs.setdefault("ConditionsFile",   "dev/ACTS/detray-itk/ITk_conditions_config.json")
     kwargs.setdefault("MapFile",          "dev/ACTS/detray-itk/athenaIdentifierToDetrayMap.txt")
+    kwargs.setdefault("GeoIdMappingObjectName",     "TracccGeometryIdMapping")
     kwargs.setdefault("DeviceDigitizationObjectName", "TracccDeviceDigitizationConfig")
     kwargs.setdefault("HostDigitizationObjectName", "TracccHostDigitizationConfig")
     kwargs.setdefault("DeviceConditionsObjectName", "TracccDeviceCondConfig")
     kwargs.setdefault("HostConditionsObjectName", "TracccHostCondConfig")
+    kwargs.setdefault("DeviceDetectorName", "TracccDeviceDetectorGeometry")
+    kwargs.setdefault("HostDetectorName", "TracccHostDetectorGeometry")
     svc = CompFactory.ActsTrk.JSONDeviceDetectorDescriptionProviderSvc(**kwargs)
     acc.addService(svc, primary=True, create=True)
     return acc

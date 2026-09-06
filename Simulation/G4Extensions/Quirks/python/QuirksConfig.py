@@ -38,12 +38,11 @@ def load_files_for_quirks_scenario(flags):
             else:
                 f.write("0\n")
             f.close()
-        del quirk_firststring, quirk_maxboost, quirk_maxmerge, quirk_debugenabled, quirk_debugdist, quirk_debugsteps, doG4SimConfig, simdict, f, quirk_mass, quirk_charge, quirk_pdgid, quirk_stringforce
 
 
-def QuirkPhysicsToolCfg(flags, name="QuirkPhysicsTool", **kwargs):
+def QuirksPhysicsToolCfg(flags, name="QuirksPhysicsTool", **kwargs):
     result = ComponentAccumulator()
-    result.setPrivateTools( CompFactory.QuirkPhysicsToolTool(name, **kwargs) )
+    result.setPrivateTools( CompFactory.QuirksPhysicsTool(name, **kwargs) )
     return result
 
 
@@ -58,12 +57,38 @@ def DebugSteppingActionToolCfg(flags, name="DebugSteppingActionTool", **kwargs):
     return result
 
 
+def QuirksPreInclude(flags):
+    """Declare the quirk to the EVNT->G4 input filter, before the flags lock."""
+    simdict = flags.Input.SpecialConfiguration
+    if "InteractingPDGCodes" not in simdict:
+        assert "PDGID" in simdict
+        CODE = int(simdict["PDGID"])
+        simdict['InteractingPDGCodes'] = str([CODE, -CODE])
+        flags.Input.SpecialConfiguration = simdict
+
+    killer = 'G4UserActions.G4UserActionsConfig.MonopoleLooperKillerToolCfg'
+    if killer not in flags.Sim.OptionalUserActionList:
+        flags.Sim.OptionalUserActionList += [killer]
+
+
 def QuirksCfg(flags):
     result = ComponentAccumulator()
     if flags.Common.ProductionStep == ProductionStep.Simulation:
         from G4AtlasServices.G4AtlasServicesConfig import PhysicsListSvcCfg
         result.merge(PhysicsListSvcCfg(flags))
+
+    simdict = flags.Input.SpecialConfiguration
+    assert "MASS" in simdict
+    assert "CHARGE" in simdict
+    assert "PDGID" in simdict
+    assert "STRINGFORCE" in simdict
     load_files_for_quirks_scenario(flags)
+    pdgcodes = eval(simdict['InteractingPDGCodes']) if 'InteractingPDGCodes' in simdict else []
+    from ExtraParticles.PDGHelpers import updateExtraParticleAcceptList
+    updateExtraParticleAcceptList('G4particle_acceptlist_ExtraParticles.txt', pdgcodes)
+
     if flags.Common.ProductionStep == ProductionStep.Simulation:
-        result.getService("PhysicsListSvc").PhysOption += [ result.popToolsAndMerge(QuirkPhysicsToolCfg(flags)) ]
+        from GaudiKernel.GaudiHandles import PrivateToolHandleArray
+        physicsOptions = PrivateToolHandleArray([ result.popToolsAndMerge(QuirksPhysicsToolCfg(flags)) ])
+        result.getService("PhysicsListSvc").PhysOption = physicsOptions + result.getService("PhysicsListSvc").PhysOption
     return result

@@ -7,13 +7,13 @@ from AthenaConfiguration.ComponentFactory import CompFactory
 from TrigEDMConfig.TriggerEDM import recordable
 from TrigMuonHypo.TrigMuonHypoConfig import TrigMuonEFMSonlyHypoToolFromDict
 from TrigMuonHypo.TrigMuonHypoMonitoring import TrigMuonTLAHypoMonitoring
-from .MuonRecoSequences import muonNames
+from .TrigMuonKeys import muonNames
 
 def getMuonCollections (chainPart):
     muNames = muonNames().getNames('RoI')
-    muonName = muNames.EFCBName
+    muonName = muNames.EFCBMuons
     if 'msonly' in chainPart['msonlyInfo']:
-        muonName = muNames.EFSAName
+        muonName = muNames.EFSAMuons
 
     return muonName
 

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // SimulationEnergies.cc
@@ -119,7 +119,6 @@
 #include "G4TouchableHistory.hh"
 #include "G4ios.hh"
 
-#include "CxxUtils/AthUnlikelyMacros.h"
 #include "TruthUtils/HepMCHelpers.h"
 
 #include <vector>
@@ -511,7 +510,7 @@ namespace CaloG4
       // procedure for non-sensitive volumes.  Let's use that (for now).
 
       eep = registry->GetProcessing( "LAr::" );
-      if (ATH_LIKELY(eep)) {
+      if (eep) [[likely]] {
         return eep->Process( fakeStep );
       }
 
@@ -525,7 +524,7 @@ namespace CaloG4
         });
 
       eep = registry->GetProcessing( "Tile::" );
-      if (ATH_LIKELY(eep)) {
+      if (eep) [[likely]] {
         std::call_once(warning3OnceFlag, [](){
             G4cout << "  Using TileGeoG4CalibSD for escaped energy processing," << G4endl
                    << "  since LAr SD is not available" << G4endl;
@@ -545,7 +544,7 @@ namespace CaloG4
       //  Let's use that (for now).
 
       eep = registry->GetProcessing( "LAr::" );
-      if (ATH_LIKELY(eep)) {
+      if (eep) [[likely]] {
         return eep->Process( fakeStep );
       }
 
@@ -560,7 +559,7 @@ namespace CaloG4
         });
 
       eep = registry->GetProcessing( "Tile::" );
-      if (ATH_LIKELY(eep)) {
+      if (eep) [[likely]] {
         std::call_once(warning4OnceFlag, [](){
             G4cout << "  Using TileGeoG4CalibSD for escaped energy processing," << G4endl
                    << "  since LAr SD is not available" << G4endl;

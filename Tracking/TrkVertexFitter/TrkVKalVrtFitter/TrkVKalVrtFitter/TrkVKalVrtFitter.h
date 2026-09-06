@@ -376,7 +376,7 @@ namespace Trk{
           int TrkID = 0;
           const TrackParameters* TrkPnt = nullptr;
           double prtMass = 0;
-          Amg::Vector3D trkSavedLocalVertex; // Local VKalVrtCore vertex
+          Amg::Vector3D trkSavedLocalVertex = Amg::Vector3D::Zero(); // Local VKalVrtCore vertex
         };
 
       class CascadeState

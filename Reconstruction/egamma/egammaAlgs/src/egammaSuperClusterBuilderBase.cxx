@@ -408,7 +408,7 @@ egammaSuperClusterBuilderBase::createNewCluster(
     static const SG::AuxElement::Accessor<
       std::vector<ElementLink<xAOD::CaloClusterContainer>>>
       caloClusterLinks(linkStr);
-    caloClusterLinks(*newCluster) = constituentLinks;
+    caloClusterLinks(*newCluster) = std::move(constituentLinks);
   }
   // return the new cluster
   return newCluster;

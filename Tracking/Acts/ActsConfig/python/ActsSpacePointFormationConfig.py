@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -51,6 +51,21 @@ def ActsPixelSpacePointToolCfg(flags,
     acc.setPrivateTools(CompFactory.ActsTrk.PixelSpacePointFormationTool(name, **kwargs))
     return acc
 
+def ActsCorePixelSpacePointToolCfg(flags,
+                                   name: str = "ActsCorePixelSpacePointTool",
+                                   **kwargs: dict) -> ComponentAccumulator:
+    from InDetConfig.ITkActsHelpers import isFastPrimaryPass
+
+    acc = ComponentAccumulator()
+    if isFastPrimaryPass(flags):
+        kwargs.setdefault('UseMaxVariance', True)
+
+    from ActsConfig.ActsGeometryConfig import ActsTrackingGeometrySvcCfg
+    acc.merge(ActsTrackingGeometrySvcCfg(flags))
+
+    acc.setPrivateTools(CompFactory.ActsTrk.CorePixelSpacePointFormationTool(name, **kwargs))
+    return acc
+
 def ActsStripSpacePointToolCfg(flags,
                                name: str = "ActsStripSpacePointTool",
                                **kwargs: dict) -> ComponentAccumulator:
@@ -59,12 +74,44 @@ def ActsStripSpacePointToolCfg(flags,
     kwargs.setdefault("useSCTLayerDep_OverlapCuts", False)
 
     kwargs.setdefault("useBeamSpotConstraint", flags.Acts.SpacePoints.useBeamSpotConstraintStrips)
-    
+
+    # Cosmic cut values are taken from InDetConfig.SiSpacePointFormationConfig
+    from AthenaConfiguration.Enums import BeamType
+    if flags.Beam.Type is BeamType.Cosmics:
+        kwargs.setdefault("StripLengthTolerance", 0.05)
+        kwargs.setdefault("OverlapLimitOpposite", 5)
+
     if 'LorentzAngleTool' not in kwargs:
         from SiLorentzAngleTool.ITkStripLorentzAngleConfig import ITkStripLorentzAngleToolCfg
         kwargs.setdefault("LorentzAngleTool", acc.popToolsAndMerge(ITkStripLorentzAngleToolCfg(flags)) )
 
     acc.setPrivateTools(CompFactory.ActsTrk.StripSpacePointFormationTool(name, **kwargs))
+    return acc
+
+def ActsCoreStripSpacePointToolCfg(flags,
+                                   name: str = "ActsCoreStripSpacePointTool",
+                                   **kwargs: dict) -> ComponentAccumulator:
+    acc = ComponentAccumulator()
+
+    kwargs.setdefault("useSCTLayerDep_OverlapCuts", False)
+
+    # This tool has no equivalent of the Athena tool's useBeamSpotConstraint=False
+    if not flags.Acts.SpacePoints.useBeamSpotConstraintStrips:
+        raise RuntimeError("Acts.SpacePoints.useBeamSpotConstraintStrips=False is not supported "
+                           "by CoreStripSpacePointFormationTool, use Acts.SpacePointStrategy.ActsTrk")
+
+    # Cosmic cut values are taken from InDetConfig.SiSpacePointFormationConfig
+    from AthenaConfiguration.Enums import BeamType
+    if flags.Beam.Type is BeamType.Cosmics:
+        kwargs.setdefault("Mode", "Cosmic")
+        kwargs.setdefault("StripLengthTolerance", 0.05)
+        kwargs.setdefault("OverlapLimitOpposite", 5)
+
+    if 'LorentzAngleTool' not in kwargs:
+        from SiLorentzAngleTool.ITkStripLorentzAngleConfig import ITkStripLorentzAngleToolCfg
+        kwargs.setdefault("LorentzAngleTool", acc.popToolsAndMerge(ITkStripLorentzAngleToolCfg(flags)) )
+
+    acc.setPrivateTools(CompFactory.ActsTrk.CoreStripSpacePointFormationTool(name, **kwargs))
     return acc
 
 def ActsPixelSpacePointPreparationAlgCfg(flags,
@@ -145,8 +192,17 @@ def ActsPixelSpacePointFormationAlgCfg(flags,
         kwargs.setdefault('SPCache', 'ActsPixelSpacePointCache')
     
     if 'SpacePointFormationTool' not in kwargs:
-        kwargs.setdefault("SpacePointFormationTool", acc.popToolsAndMerge(ActsPixelSpacePointToolCfg(flags)))
-        
+        from ActsConfig.ActsConfigFlags import SpacePointStrategy
+        if flags.Acts.PixelSpacePointStrategy is SpacePointStrategy.ActsCore:
+            # The algorithm holds the geometry context this tool needs
+            from ActsAlignmentAlgs.AlignmentAlgsConfig import ActsGeometryContextAlgCfg
+            acc.merge(ActsGeometryContextAlgCfg(flags))
+            # ContextUtility also carries a magnetic field key, which is unused here
+            kwargs.setdefault('MagneticContextKey', '')
+            kwargs.setdefault("SpacePointFormationTool", acc.popToolsAndMerge(ActsCorePixelSpacePointToolCfg(flags)))
+        else:
+            kwargs.setdefault("SpacePointFormationTool", acc.popToolsAndMerge(ActsPixelSpacePointToolCfg(flags)))
+
     if flags.Acts.doMonitoring and 'MonTool' not in kwargs:
         from ActsConfig.ActsMonitoringConfig import ActsPixelSpacePointFormationMonitoringToolCfg
         kwargs.setdefault("MonTool", acc.popToolsAndMerge(ActsPixelSpacePointFormationMonitoringToolCfg(flags)))
@@ -190,8 +246,24 @@ def ActsStripSpacePointFormationAlgCfg(flags,
         kwargs.setdefault('OSPCacheBackend', 'ActsStripOverlapSpacePointCache_Back')
         kwargs.setdefault('OSPCache', 'ActsStripOverlapSpacePointCache')
 
+    from ActsConfig.ActsConfigFlags import SpacePointStrategy
+    useActsCore = flags.Acts.SpacePointStrategy is SpacePointStrategy.ActsCore
+
     if 'SpacePointFormationTool' not in kwargs:
-        kwargs.setdefault('SpacePointFormationTool', acc.popToolsAndMerge(ActsStripSpacePointToolCfg(flags)))
+        if useActsCore:
+            kwargs.setdefault('SpacePointFormationTool', acc.popToolsAndMerge(ActsCoreStripSpacePointToolCfg(flags)))
+        else:
+            kwargs.setdefault('SpacePointFormationTool', acc.popToolsAndMerge(ActsStripSpacePointToolCfg(flags)))
+
+    from AthenaConfiguration.Enums import BeamType
+    if flags.Beam.Type is BeamType.Cosmics:
+        kwargs.setdefault('OverrideBeamSpot', True)
+        kwargs.setdefault('VertexX', 0)
+        kwargs.setdefault('VertexZ', 0)
+        # The Athena implementation needs the far-away point for the vertical track
+        # hypothesis; ActsCore in cosmic mode ignores the vertex and must stay at the origin
+        kwargs.setdefault('VertexY', 0 if useActsCore else 99999999)
+        kwargs.setdefault('ProcessOverlapForStrip', False)
 
     if flags.Acts.doMonitoring and 'MonTool' not in kwargs:
         from ActsConfig.ActsMonitoringConfig import ActsStripSpacePointFormationMonitoringToolCfg
@@ -316,7 +388,8 @@ def ActsSpacePointFormationCfg(flags,
 
     # Overlap Space Points may not be required
     processOverlapSpacePoints = processStrips
-    if flags.Tracking.ActiveConfig.extension in ['ActsConversion']:
+    from AthenaConfiguration.Enums import BeamType
+    if flags.Tracking.ActiveConfig.extension in ['ActsConversion'] or flags.Beam.Type is BeamType.Cosmics:
         processOverlapSpacePoints = False
     kwargs.setdefault('processOverlapSpacePoints', processOverlapSpacePoints)
         
@@ -454,7 +527,7 @@ def ActsSpacePointFormationCfg(flags,
 
 
     # Persistification
-    if flags.Acts.EDM.PersistifySpacePoints and kwargs['runReconstruction']:        
+    if kwargs['runReconstruction']:        
         from ActsConfig.ActsPersistificationConfig import PersistifySpacePoints
         pixelSpacePointCollections = None if not kwargs['processPixels'] else [kwargs['PixelSpacePointFormationAlg.PixelSpacePoints']]
         stripSpacePointCollections = []

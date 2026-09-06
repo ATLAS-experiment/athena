@@ -1,15 +1,15 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef MUONTRUTHSEGMENTMAKER_TruthSegToTruthPartAssocAlg_H
 #define MUONTRUTHSEGMENTMAKER_TruthSegToTruthPartAssocAlg_H
 
-#include <AthenaBaseComps/AthReentrantAlgorithm.h>
+#include "AthenaBaseComps/AthReentrantAlgorithm.h"
 
-#include <StoreGate/ReadHandleKey.h>
-#include <StoreGate/ReadDecorHandleKeyArray.h>
-#include <StoreGate/WriteDecorHandleKey.h>
-#include <StoreGate/WriteDecorHandle.h>
+#include "StoreGate/ReadHandleKey.h"
+#include "StoreGate/ReadDecorHandleKeyArray.h"
+#include "StoreGate/WriteDecorHandleKey.h"
+
 
 #include "xAODTruth/TruthParticleContainer.h"
 #include "xAODMuon/MuonSegmentContainer.h"
@@ -17,6 +17,7 @@
 #include "MuonReadoutGeometryR4/MuonDetectorManager.h"
 #include "ActsGeometryInterfaces/IExtrapolationTool.h"
 #include "ActsEvent/ContextUtility.h"
+#include "xAODMuonViews/ContainerDecorator.h"
 
 namespace MuonR4{
     /** @brief The TruthSegToTruthPartAssocAlg associates the TruthSegments with the primary TruthParticle
@@ -32,9 +33,9 @@ namespace MuonR4{
             virtual StatusCode execute(const EventContext& ctx) const override final;
         private:
             using TruthPartLink_t = ElementLink<xAOD::TruthParticleContainer>;
-            using TruthPartDecor_t = SG::WriteDecorHandle<xAOD::MuonSegmentContainer, TruthPartLink_t>;
+            using TruthPartDecor_t = xAOD::ContainerDecorator<xAOD::MuonSegmentContainer, TruthPartLink_t>;
             using TruthSegLinkVec_t = std::vector<ElementLink<xAOD::MuonSegmentContainer>>;
-            using TruthSegLinkDecor_t = SG::WriteDecorHandle<xAOD::TruthParticleContainer, TruthSegLinkVec_t>;
+            using TruthSegLinkDecor_t = xAOD::ContainerDecorator<xAOD::TruthParticleContainer, TruthSegLinkVec_t>;
 
             /** @brief Match truth muons without any HEPMC link with truth segments reconstructed
              *         in the MS

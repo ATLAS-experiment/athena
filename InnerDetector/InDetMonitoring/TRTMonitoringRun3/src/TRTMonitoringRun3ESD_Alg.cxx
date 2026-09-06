@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TRTMonitoringRun3/TRTMonitoringRun3ESD_Alg.h"
@@ -387,6 +387,7 @@ StatusCode TRTMonitoringRun3ESD_Alg::fillTRTTracks(const EventContext& ctx,
                                                    const xAOD::EventInfo& eventInfo) const {
 //----------------------------------------------------------------------------------//
     ATH_MSG_VERBOSE("Filling TRT Tracks Histos");
+    
 
     // TProfile
     auto ValidRawDriftTimeonTrkS_x      = Monitored::Scalar<float>("ValidRawDriftTimeonTrkS_x", 0.0);
@@ -1110,10 +1111,11 @@ for (; p_trk != trackCollection.end(); ++p_trk) {
     }
 
     if (comTimeObject) {
+        static const std::string histoName{"ShiftTRTTrackHistograms0"};
         if (std::abs(timeCor) > 1e-8) {
             if (m_doShift) {
                 EvtPhase = timeCor;
-                fill("ShiftTRTTrackHistograms0", EvtPhase);
+                fill(histoName, EvtPhase);
             }
 
             if (m_doShift && trigDecision) {
@@ -1133,7 +1135,7 @@ for (; p_trk != trackCollection.end(); ++p_trk) {
                 for (unsigned int j = 0; j < trigid.size(); ++j) {
                     EvtPhaseVsTrig_x = timeCor;
                     EvtPhaseVsTrig_y = trigid[j];
-                    fill("ShiftTRTTrackHistograms0", EvtPhaseVsTrig_x, EvtPhaseVsTrig_y);
+                    fill(histoName, EvtPhaseVsTrig_x, EvtPhaseVsTrig_y);
                 }
             }
         }

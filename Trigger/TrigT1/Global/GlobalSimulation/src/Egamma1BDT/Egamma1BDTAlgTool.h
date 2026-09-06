@@ -63,15 +63,15 @@ namespace GlobalSim {
     m_BDTScoreKey {
       this,
       "BDTScoreKey",
-      "eGamma1BDT"};    
+      "L1_eGamma1BDT"};    
         
     // input to the  BDT Algorithm
     SG::ReadHandleKey<eEmNbhoodTOBContainer>
     m_nbhdTOBContainerReadKey {
       this,
-      "LArNeighborhoodTOBContainerReadKey",
+      "LArNeighborhoodTOBContainerKey",
       "stripNeighborhoodTOBContainer",
-      "key to read inLArNeighborhoodTOBsReadKeys"};
+      "key to read inLArNeighborhoodTOBs"};
 
     SG::WriteHandleKey<eEmEg1BDTTOBContainer>
     m_eEmEg1BDTTOBContainerKey {

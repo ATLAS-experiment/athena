@@ -2,183 +2,102 @@
   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef TRIG_EDM_CHECKER_H
-#define TRIG_EDM_CHECKER_H
+#ifndef TRIGVALALGS_TRIGEDMCHECKER_H
+#define TRIGVALALGS_TRIGEDMCHECKER_H
 
 #include "GaudiKernel/IClassIDSvc.h"
 #include "GaudiKernel/ToolHandle.h"
 
 #include "AthAnalysisBaseComps/AthAnalysisAlgorithm.h"
-#include "CxxUtils/checker_macros.h"
 #include "MuonCombinedToolInterfaces/IMuonPrintingTool.h"
 #include "StoreGate/ReadHandleKey.h"
 #include "StoreGate/WriteHandleKey.h"
 #include "TrigCompositeUtils/TrigCompositeUtils.h"
 #include "TrigDecisionTool/TrigDecisionTool.h"
-#include "TrigNavigation/Navigation.h"
-#include "xAODTrigger/TrigCompositeContainer.h"
 #include "xAODTracking/TrackParticleContainer.h"
+#include "xAODTrigger/TrigCompositeContainer.h"
 #include "xAODTrigger/TrigNavigation.h"
 
 #include <string>
 
-// forward declarations of muon track classes used in TrigMuonEFInfo
-class TrigMuonEFTrack;
-class TrigMuonEFCbTrack;
-
-// fwd declare muon printing tool
-namespace Rec {
-  class IMuonPrintingTool;
-}
-
 class TrigEDMChecker : public AthAnalysisAlgorithm  {
 
  public:
-
-   TrigEDMChecker(const std::string& name, ISvcLocator* pSvcLocator);
-   virtual ~TrigEDMChecker();
+   using AthAnalysisAlgorithm::AthAnalysisAlgorithm;
 
    virtual StatusCode initialize() override;
    virtual StatusCode execute(const EventContext& ctx) override;
 
  private:
-   StatusCode do_execute ATLAS_NOT_THREAD_SAFE(const EventContext& ctx);
+   Gaudi::Property<bool> m_doDumpAll{this, "doDumpAll", true};
 
-   /** a handle on Store Gate for access to the Event Store */
-   bool m_doDumpAll;
-
-   bool m_doDumpTrigPassBits;
+   Gaudi::Property<bool> m_doDumpTrigPassBits{this, "doDumpTrigPassBits", false};
    StatusCode dumpTrigPassBits();
-   bool m_doDumpLVL1_ROI;
-  StatusCode dumpLVL1_ROI();
 
-   bool m_doDumpTrackParticleContainer;
-   StatusCode dumpTrackParticleContainer();
+   Gaudi::Property<bool> m_doDumpLVL1_ROI{this, "doDumpLVL1_ROI", false};
+   StatusCode dumpLVL1_ROI();
 
-   bool m_doDumpTrigMissingET;
-   StatusCode dumpTrigMissingET ATLAS_NOT_THREAD_SAFE();
-
-   bool m_doDumpxAODTrigMissingET;
+   Gaudi::Property<bool> m_doDumpxAODTrigMissingET{this, "doDumpxAODTrigMissingET", false};
    StatusCode dumpxAODTrigMissingET();
 
-   bool m_doDumpxAODJetContainer;
+   Gaudi::Property<bool> m_doDumpxAODJetContainer{this, "doDumpxAODJetContainer", false};
    StatusCode dumpxAODJetContainer();
 
-   bool m_doDumpTrigL2BphysContainer;
+   Gaudi::Property<bool> m_doDumpTrigL2BphysContainer{this, "doDumpTrigL2BphysContainer", false};
    StatusCode dumpTrigL2BphysContainer();
 
-   bool m_doDumpTrigEFBphysContainer;
+   Gaudi::Property<bool> m_doDumpTrigEFBphysContainer{this, "doDumpTrigEFBphysContainer", false};
    StatusCode dumpTrigEFBphysContainer();
 
-   bool m_doDumpTrigEFBjetContainer;
-   StatusCode dumpTrigEFBjetContainer ATLAS_NOT_THREAD_SAFE();
+   Gaudi::Property<bool> m_doDumpxAODTrigEMCluster{this, "doDumpxAODTrigEMCluster", false};
+   StatusCode dumpxAODTrigEMCluster();
 
-   bool m_doDumpTrigL2BjetContainer;
-   StatusCode dumpTrigL2BjetContainer ATLAS_NOT_THREAD_SAFE();
+   Gaudi::Property<bool> m_doDumpxAODTrigEMClusterContainer{this, "doDumpxAODTrigEMClusterContainer", false};
+   StatusCode dumpxAODTrigEMClusterContainer();
 
-   bool m_doDumpTrigTauClusterContainer;
-   StatusCode dumpTrigTauClusterContainer ATLAS_NOT_THREAD_SAFE();
-
-   bool m_doDumpTrigEMCluster;
-   StatusCode dumpTrigEMCluster ATLAS_NOT_THREAD_SAFE();
-
-   bool m_doDumpTrigEMClusterContainer;
-   StatusCode dumpTrigEMClusterContainer ATLAS_NOT_THREAD_SAFE();
-
-
-   bool m_doDumpxAODTrigEMCluster;
-   StatusCode dumpxAODTrigEMCluster ATLAS_NOT_THREAD_SAFE();
-
-   bool m_doDumpxAODTrigEMClusterContainer;
-   StatusCode dumpxAODTrigEMClusterContainer ATLAS_NOT_THREAD_SAFE();
-
-   bool m_doDumpCombinedMuonFeature;
-   StatusCode dumpCombinedMuonFeature ATLAS_NOT_THREAD_SAFE();
-   StatusCode dumpCombinedMuonFeatureContainer ATLAS_NOT_THREAD_SAFE();
-
-   bool m_doDumpMuonFeature;
-   StatusCode dumpMuonFeature ATLAS_NOT_THREAD_SAFE();
-
-   bool m_doDumpTileMuFeature;
-   StatusCode dumpTileMuFeatureContainer ATLAS_NOT_THREAD_SAFE();
-
-   bool m_doDumpTileTrackMuFeature;
-   StatusCode dumpTileTrackMuFeatureContainer ATLAS_NOT_THREAD_SAFE();
-
-   bool m_doDumpTrigPhotonContainer;
-   StatusCode dumpTrigPhotonContainer ATLAS_NOT_THREAD_SAFE();
-
-   bool m_doDumpTrigMuonEFContainer;
-   StatusCode dumpTrigMuonEFContainer ATLAS_NOT_THREAD_SAFE();
-
-   bool m_doDumpTrigMuonEFInfoContainer;
-   StatusCode dumpTrigMuonEFInfoContainer ATLAS_NOT_THREAD_SAFE();
-   void printMuonTrk(const TrigMuonEFTrack* muonTrack);
-   void printMuonTrk(const TrigMuonEFCbTrack* muonTrack);
-
-   bool m_doDumpxAODMuonContainer;
+   Gaudi::Property<bool> m_doDumpxAODMuonContainer{this, "doDumpxAODMuonContainer", false};
    StatusCode dumpxAODMuonContainer();
 
-   bool m_doDumpTrigMuonEFIsolationContainer;
-   StatusCode dumpTrigMuonEFIsolationContainer ATLAS_NOT_THREAD_SAFE();
-
-   bool m_doDumpTrigElectronContainer;
-   StatusCode dumpTrigElectronContainer ATLAS_NOT_THREAD_SAFE();
-
-   bool m_doDumpxAODTrigElectronContainer;
+   Gaudi::Property<bool> m_doDumpxAODTrigElectronContainer{this, "doDumpxAODTrigElectronContainer", false};
    StatusCode dumpxAODTrigElectronContainer();
    
-   bool m_doDumpxAODTrigPhotonContainer;
+   Gaudi::Property<bool> m_doDumpxAODTrigPhotonContainer{this, "doDumpxAODTrigPhotonContainer", false};
    StatusCode dumpxAODTrigPhotonContainer();
    
-   bool m_doDumpxAODElectronContainer;
+   Gaudi::Property<bool> m_doDumpxAODElectronContainer{this, "doDumpxAODElectronContainer", false};
    StatusCode dumpxAODElectronContainer();
    
-   bool m_doDumpxAODPhotonContainer;
+   Gaudi::Property<bool> m_doDumpxAODPhotonContainer{this, "doDumpxAODPhotonContainer", false};
    StatusCode dumpxAODPhotonContainer();
    
-   bool m_doDumpTrigTauContainer;
-   StatusCode dumpTrigTauContainer ATLAS_NOT_THREAD_SAFE();
-
-   bool m_doDumpTrigTauTracksInfo;
-   StatusCode dumpTrigTauTracksInfo ATLAS_NOT_THREAD_SAFE();
-
-   bool m_doDumpHLTResult;
-   StatusCode dumpHLTResult();
-
-   bool m_doDumpTrigVertexCollection;
-   StatusCode dumpTrigVertexCollection ATLAS_NOT_THREAD_SAFE();
-
-   bool m_doDumpxAODTauJetContainer;
-   StatusCode dumpxAODTauJetContainer ATLAS_NOT_THREAD_SAFE();
+   Gaudi::Property<bool> m_doDumpxAODTauJetContainer{this, "doDumpxAODTauJetContainer", false};
+   StatusCode dumpxAODTauJetContainer();
  
-   bool m_doDumpTauJetContainer;
-   StatusCode dumpTauJetContainer ATLAS_NOT_THREAD_SAFE ();
-
-   bool m_doDumpxAODTrackParticle;
+   Gaudi::Property<bool> m_doDumpxAODTrackParticle{this, "doDumpxAODTrackParticle", false};
    StatusCode dumpxAODTrackParticle();
 
-   bool m_doDumpxAODVertex;
+   Gaudi::Property<bool> m_doDumpxAODVertex{this, "doDumpxAODVertex", false};
    StatusCode dumpxAODVertex();
 
-   bool m_doDumpStoreGate;
+   Gaudi::Property<bool> m_doDumpStoreGate{this, "doDumpStoreGate", false };
    StatusCode dumpStoreGate();
 
-   bool m_doTDTCheck;
+   Gaudi::Property<bool> m_doTDTCheck{this, "doTDTCheck", false };
    StatusCode dumpTDT(const EventContext& ctx);
 
-   bool m_doDumpxAODTrigMinBias;
+   Gaudi::Property<bool> m_doDumpxAODTrigMinBias{this, "doDumpxAODTrigMinBias", false};
    StatusCode dumpxAODTrigMinBias();
    void dumpTrigSpacePointCounts();
    void dumpTrigT2MBTSBits();
    void dumpTrigVertexCounts();
    void dumpTrigTrackCounts();
 
-   bool m_doDumpAllTrigComposite;
-   std::vector<std::string> m_dumpTrigCompositeContainers;
+   Gaudi::Property<bool> m_doDumpAllTrigComposite{this, "doDumpAllTrigComposite", false };
+   Gaudi::Property<std::vector<std::string>> m_dumpTrigCompositeContainers{this, "dumpTrigCompositeContainers", false, "List of TCs to dump" };
 
-   bool m_doDumpNavigation;
+   Gaudi::Property<bool> m_doDumpNavigation{this, "doDumpNavigation", false };
    StatusCode dumpNavigation(const EventContext& ctx);
+
    Gaudi::Property<std::string> m_dumpNavForChain {this, "DumpNavigationForChain", "", "Optional chain to restrict navigation dump info."};
    Gaudi::Property<bool> m_excludeFailedHypoNodes {this, "excludeFailedHypoNodes", false,
     "Optional flag to exclude nodes which fail the hypothesis tool for a chain when dumping navigation graphs."};
@@ -197,7 +116,7 @@ class TrigEDMChecker : public AthAnalysisAlgorithm  {
     */
    StatusCode checkTrigCompositeElementLink(const xAOD::TrigComposite* tc, size_t element); 
 
-   bool m_doDumpTrigCompsiteNavigation;
+   Gaudi::Property<bool> m_doDumpTrigCompsiteNavigation{this, "doDumpTrigCompsiteNavigation",false };
 
    /**
     * @brief Construct graph of HLT navigation in Run-3
@@ -209,8 +128,7 @@ class TrigEDMChecker : public AthAnalysisAlgorithm  {
    StatusCode TrigCompositeNavigationToDot(std::string& returnValue, bool& pass);
 
    ToolHandle<Rec::IMuonPrintingTool> m_muonPrinter{this, "MuonPrinter", "Rec::MuonPrintingTool/MuonPrintingTool"};
-
-   ServiceHandle< ::IClassIDSvc > m_clidSvc;
+   ServiceHandle<IClassIDSvc > m_clidSvc{this, "ClassIDSvc", "ClassIDSvc", "Service providing CLID info"};
 
    SG::ReadHandleKey< xAOD::TrackParticleContainer > m_muonTracksKey{ this, "MuonTracksKey", "HLT_IDTrack_Muon_FTF"};
    SG::ReadHandleKey< xAOD::TrigNavigation > m_navigationHandleKey{ this, "TrigNavigation", "TrigNavigation", "" };
@@ -218,9 +136,6 @@ class TrigEDMChecker : public AthAnalysisAlgorithm  {
    ToolHandle< HLT::Navigation > m_navigationTool{ this, "NavigationTool", "HLT::Navigation/Navigation", "" };
    PublicToolHandle< Trig::TrigDecisionTool > m_trigDec{ this, "TriggerDecisionTool", "Trig::TrigDecisionTool/TrigDecisionTool", ""};
 
-   int m_trackWarningNum{0};
-   int m_vertexWarningNum{0};
 };
 
-#endif // TRIG_EDM_CHECKER_H
-
+#endif

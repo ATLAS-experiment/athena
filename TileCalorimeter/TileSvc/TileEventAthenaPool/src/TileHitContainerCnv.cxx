@@ -20,8 +20,8 @@ TileHitContainer* TileHitContainerCnv::createTransient(const Token* token) {
 
     TileHitContainer       *trans_cont(0);
 
-    static const pool::Guid   p1_guid("E347580F-BBF0-441E-A799-9AC0256F69DF");
-    static const pool::Guid   p0_guid("704A373C-EA65-4721-A9B8-F577B683699E");
+    static const Guid   p1_guid("E347580F-BBF0-441E-A799-9AC0256F69DF");
+    static const Guid   p0_guid("704A373C-EA65-4721-A9B8-F577B683699E");
 
     if( this->compareClassGuid(token, p1_guid)) {
         std::unique_ptr< TileHitContainer_p1 >   cont( this->poolReadObject< TileHitContainer_p1 >(token) );

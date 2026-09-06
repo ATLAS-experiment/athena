@@ -41,6 +41,11 @@ public:
 
     void buildReadoutGeometryFromSqlite(IRDBAccessSvc * rdbAccessSvc, GeoModelIO::ReadGeoModel* sqlreader);
 
+    virtual void addAlignable(int level,
+                            std::map<std::string, int> &index,
+                            GeoVFullPhysVol *fpv,
+                            GeoAlignableTransform *transform) override final;
+
 private:
     void makeLgadModule(const std::string &typeName,
                         const std::map<std::string, std::string> &parameters);

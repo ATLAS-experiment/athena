@@ -26,9 +26,9 @@ LUCID_DigitContainer* LUCID_DigitContainerCnv::createTransient(const Token* toke
   
   LUCID_DigitContainer* trans_cont(nullptr);
   
-  static const pool::Guid p2_guid ("08BBB3C5-BCAE-4540-8F3A-76D873045585");
-  static const pool::Guid p1_guid ("681CDB46-D6D0-4C59-98C9-398B43873B50");
-  static const pool::Guid old_guid("49672224-A5AB-4D4C-802E-CA0749038ECC");
+  static const Guid p2_guid ("08BBB3C5-BCAE-4540-8F3A-76D873045585");
+  static const Guid p1_guid ("681CDB46-D6D0-4C59-98C9-398B43873B50");
+  static const Guid old_guid("49672224-A5AB-4D4C-802E-CA0749038ECC");
   
   if (this->compareClassGuid(token, p2_guid)) {
     

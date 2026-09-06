@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //////////////////////////////////////////////////////////////////////////////
@@ -519,6 +519,9 @@ namespace Rec {
             double w = landau(x, MopLoss, MopLossSigma, true);
             sum += x * w;
             weight += w;
+        }
+        if (weight == 0.)[[unlikely]]{
+          throw std::runtime_error("MuidCaloEnergyTool::paramCorrection: weight is zero.");
         }
         double MopStat = sum / weight;
         return MopStat;

@@ -55,7 +55,7 @@ standardmods_ufo = (
 
 clustermods      = ("ECPSFrac","ClusterMoments",) 
 truthmods        = ("PartonTruthLabel","JetDeltaRLabel:5000", "JetGhostLabel")
-pflowmods        = ()
+pflowmods        = ("JetIRCSafeLabel",)
 
 substrmods = ("nsubjettiness","ecorr")
 
@@ -118,6 +118,13 @@ AntiKt4EMPFlow_noMuons = JetDefinition("AntiKt",0.4,cst.GPFlow_noMuons,
 )
 
 AntiKt4EMPFlow_noLeptons = JetDefinition("AntiKt",0.4,cst.GPFlow_noLeptons,
+                                    ghostdefs = standardghosts+flavourghosts,
+                                    modifiers = calibmods+truthmods+standardmods+("Filter_calibThreshold:10000","JetGhostLabel","LArHVCorr","jetiso"),
+                                    lock = True
+)
+
+#Same as AntiKt4EMPFlow but with charged and neutrals linked to muons included.
+AntiKt4EMPFlow_inclMuons = JetDefinition("AntiKt",0.4,cst.GPFlow_inclMuons,
                                     ghostdefs = standardghosts+flavourghosts,
                                     modifiers = calibmods+truthmods+standardmods+("Filter_calibThreshold:10000","JetGhostLabel","LArHVCorr","jetiso"),
                                     lock = True

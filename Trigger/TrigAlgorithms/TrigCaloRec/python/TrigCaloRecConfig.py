@@ -337,6 +337,10 @@ def hltTopoClusterMakerCfg(flags, name, clustersKey="HLT_TopoCaloClustersFS", ce
     clustermakername = name + suffix
     doMonCells = "FS" in clustermakername
     
+    clustersKey_final = clustersKey
+    if flags.Trigger.Calo.TopoCluster.applyClusterTimingCut:
+        clustersKey = f"{clustersKey}BeforeTimingCut"
+
     alg = CompFactory.CaloClusterMaker(
           clustermakername,
           ClustersOutputName=clustersKey if "CaloMon" in clustermakername else recordable(clustersKey),
@@ -346,12 +350,16 @@ def hltTopoClusterMakerCfg(flags, name, clustersKey="HLT_TopoCaloClustersFS", ce
           SaveUncalibratedSignalState = True,
           WriteTriggerSpecificInfo = True)
 
+    if flags.Trigger.Calo.TopoCluster.applyClusterTimingCut:
+        from CaloRec.CaloTopoClusterConfig import CaloClusterTimingFilterCfg
+        acc.merge(CaloClusterTimingFilterCfg(flags, name = f"{clustersKey}Filter", InputClusters = clustersKey, OutputClusters = clustersKey_final))
+
     from CaloTools.CaloNoiseCondAlgConfig import CaloNoiseCondAlgCfg
     acc.merge(CaloNoiseCondAlgCfg(flags))
     acc.addEventAlgo(alg, primary=True)
     monitor = CompFactory.TrigCaloClusterMonitor(name + 'Monitoring' + suffix,
                                                  CellsName = cells,
-                                                 ClustersName = clustersKey,
+                                                 ClustersName = clustersKey_final,
                                                  MonitorCells = doMonCells,
                                                  MonitoringTool = trigCaloClusterMonitoringTool(flags, doMonCells))
     acc.addEventAlgo(monitor, primary=False)

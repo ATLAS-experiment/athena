@@ -36,7 +36,7 @@ TriggerPhotonIsEMMapCurrent = {
 
 def TriggerPhotonIsEMMap(quality, menu):
     # These are the "current menus" (non-legacy)
-    if menu == triggerPhotonPIDmenu.menuCurrentCuts and quality in TriggerPhotonIsEMMapCurrent.keys():
+    if menu == triggerPhotonPIDmenu.menuCurrentCuts and quality in TriggerPhotonIsEMMapCurrent:
         return TriggerPhotonIsEMMapCurrent[quality]
     else:
         raise ValueError("Requested menu is undefined: %d" % menu)

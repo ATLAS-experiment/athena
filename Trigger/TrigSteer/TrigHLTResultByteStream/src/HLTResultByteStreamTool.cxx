@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -7,7 +7,6 @@
 #include "HLTSrcIdMap.h"
 #include "eformat/SourceIdentifier.h"
 #include "ByteStreamCnvSvcBase/IROBDataProviderSvc.h"
-#include <iostream>
 #include <stdlib.h>
 
 HLT::HLTResultByteStreamTool::HLTResultByteStreamTool( const std::string& type,
@@ -24,7 +23,7 @@ HLT::HLTResultByteStreamTool::HLTResultByteStreamTool( const std::string& type,
     this is called from the createRep method.
 */
 StatusCode HLT::HLTResultByteStreamTool::convert( HLTResult* result, RawEventWrite* re,
-                                                  std::string objName)
+                                                  const std::string & objName)
 {
   // find the ROB ID for the given HLTResult name
   const auto itr = m_robIDMap.find(objName);
@@ -56,7 +55,7 @@ StatusCode HLT::HLTResultByteStreamTool::convert( HLTResult* result, RawEventWri
     this is called from the createObj method.
 */
 StatusCode HLT::HLTResultByteStreamTool::convert(IROBDataProviderSvc& dataProvider,
-                                                 HLT::HLTResult*& result, std::string objName)
+                                                 HLT::HLTResult*& result, const std::string & objName)
 {
   // find the ROB ID for the given HLTResult name
   const auto itr = m_robIDMap.find(objName);

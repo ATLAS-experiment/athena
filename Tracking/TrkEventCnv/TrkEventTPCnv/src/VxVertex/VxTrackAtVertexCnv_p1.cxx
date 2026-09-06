@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //-----------------------------------------------------------------------------
@@ -37,7 +37,7 @@ void VxTrackAtVertexCnv_p1::persToTrans(const Trk::VxTrackAtVertex_p1 * persObj,
  fillTransFromPStore( &m_fqCnv, persObj->m_fitQuality, &fitq, log );
 
  ITPConverterFor<Trk::TrackParameters> * paramsCnv = nullptr;
- Trk::TrackParameters* perigeeAtVertex      = dynamic_cast<Trk::TrackParameters*>(createTransFromPStore(&paramsCnv, persObj->m_perigeeAtVertex,log ));
+ Trk::TrackParameters* perigeeAtVertex      = static_cast<Trk::TrackParameters*>(createTransFromPStore(&paramsCnv, persObj->m_perigeeAtVertex,log ));
 
  *transObj = Trk::VxTrackAtVertex(fitq.chiSquared(),
                                   perigeeAtVertex,
@@ -50,7 +50,6 @@ void VxTrackAtVertexCnv_p1::persToTrans(const Trk::VxTrackAtVertex_p1 * persObj,
 
 void  VxTrackAtVertexCnv_p1::transToPers(const Trk::VxTrackAtVertex * transObj, Trk::VxTrackAtVertex_p1 * persObj, MsgStream &log){
     
-          // std::cout<<"ILIJA write VxTrackAtVertexCnv_p1 "<<std::endl;
           
  const Trk::FitQuality fq = transObj->trackQuality();
  persObj->m_fitQuality = toPersistent( &m_fqCnv, &fq, log );
@@ -64,19 +63,15 @@ void  VxTrackAtVertexCnv_p1::transToPers(const Trk::VxTrackAtVertex * transObj, 
  if (trLink!=nullptr){
    persObj->m_typeOfLink = 0;
    m_elementLinkConverterForTrack.resetForCnv(persObj->m_origTrackNames);
-   ElementLink< TrackCollection >* el = dynamic_cast< ElementLink< TrackCollection >* >(trLink);
+   ElementLink< TrackCollection >* el = static_cast< ElementLink< TrackCollection >* >(trLink);
    m_elementLinkConverterForTrack.transToPers(el,&persObj->m_origTrack,log);
  } else {
    Trk::LinkToTrackParticleBase *trPBLink = dynamic_cast<Trk::LinkToTrackParticleBase*>(const_cast<Trk::ITrackLink*>(transObj->trackOrParticleLink()));
    if (trPBLink!=nullptr) {
     persObj->m_typeOfLink = 1;
     m_elementLinkConverterForTrackParticle.resetForCnv(persObj->m_origTrackNames);
-    ElementLink< Trk::TrackParticleBaseCollection >* el = dynamic_cast< ElementLink< Trk::TrackParticleBaseCollection >* >(trPBLink);
+    ElementLink< Trk::TrackParticleBaseCollection >* el = static_cast< ElementLink< Trk::TrackParticleBaseCollection >* >(trPBLink);
     m_elementLinkConverterForTrackParticle.transToPers(el,&persObj->m_origTrack,log);
    } 
  }
-//  log << "transToPers() Type of link is: " << persObj->m_typeOfLink << endmsg;
-//  log << "link saved at: " << persObj->m_origTrackNames.m_names.front() 
-//                           << "\tcontIndex: " << persObj->m_origTrack.m_contIndex 
-//                           << "\telIndex : " << persObj->m_origTrack.m_elementIndex << endmsg; 
 }

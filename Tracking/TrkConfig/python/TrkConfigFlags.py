@@ -51,11 +51,6 @@ class TrackingComponent(FlagEnum):
     ActsChain = "ActsChain"  # full Acts Chain
     ActsLegacyChain = "ActsLegacyChain" # Acts Chain - legacy like
     ActsHeavyIon = "ActsHeavyIon"
-    # Validation options
-    ActsValidateClusters = "ActsValidateClusters"
-    ActsValidateLargeRadiusStandalone = "ActsValidateLargeRadiusStandalone"
-    ActsValidateTracks = "ActsValidateTracks"
-    ActsValidateAmbiguityResolution = "ActsValidateAmbiguityResolution"
         
     # GNN
     GNNChain = "GNNChain"
@@ -109,7 +104,8 @@ def createTrackingConfigFlags():
     icf.addFlag("Tracking.doTIDE_Ambi", lambda prevFlags:
                 prevFlags.Beam.Type is not BeamType.Cosmics)
     # Use simple position and error estimate for on-track pixel cluster
-    icf.addFlag("Tracking.doPixelDigitalClustering", False)
+    icf.addFlag("Tracking.doPixelDigitalClustering", lambda prevFlags:
+                prevFlags.GeoModel.Run >= LHCPeriod.Run4)
     # Try to split pixel clusters
     icf.addFlag("Tracking.doPixelClusterSplitting",
                 lambda prevFlags: prevFlags.Beam.Type is not BeamType.Cosmics)
@@ -440,7 +436,7 @@ def createTrackingConfigFlags():
     # The following flags are only used in ITk configurations
 
     # Turn running of ITk FastTracking on and off
-    icf.addFlag("Tracking.doITkFastTracking", False)
+    icf.addFlag("Tracking.doITkFastTracking", True)
 
     # Turn running of Conversion second tracking pass on and off
     icf.addFlag("Tracking.doITkConversion", lambda prevFlags: (
@@ -455,7 +451,9 @@ def createTrackingConfigFlags():
     icf.join(createGNNTrackingConfigFlags())
 
     # enable reco steps
-    icf.addFlag("Tracking.recoChain", [TrackingComponent.AthenaChain])
+    icf.addFlag("Tracking.recoChain", lambda prevFlags:
+                [TrackingComponent.AthenaChain] if prevFlags.GeoModel.Run <= LHCPeriod.Run3
+                else [TrackingComponent.ActsChain])
 
     ####################################################################
 
@@ -596,10 +594,6 @@ def createTrackingConfigFlags():
         createActsLargeRadiusTrackingPassFlags,
         createActsConversionTrackingPassFlags,
         createActsLowPtTrackingPassFlags,
-        createActsValidateClustersTrackingPassFlags,
-        createActsValidateLargeRadiusStandaloneTrackingPassFlags,
-        createActsValidateTracksTrackingPassFlags,
-        createActsValidateAmbiguityResolutionTrackingPassFlags,
         createActsHeavyIonTrackingPassFlags,
         createEFValidateF100TrackingPassFlags,
         createEFValidateF150TrackingPassFlags,
@@ -618,14 +612,6 @@ def createTrackingConfigFlags():
                           createActsConversionTrackingPassFlags, prefix=True)
     icf.addFlagsCategory ('Tracking.ITkActsLowPtPass',
                           createActsLowPtTrackingPassFlags, prefix=True)
-    icf.addFlagsCategory ("Tracking.ITkActsValidateClustersPass",
-                          createActsValidateClustersTrackingPassFlags, prefix=True)
-    icf.addFlagsCategory ("Tracking.ITkActsValidateLargeRadiusStandalonePass",
-                          createActsValidateLargeRadiusStandaloneTrackingPassFlags, prefix=True)
-    icf.addFlagsCategory ("Tracking.ITkActsValidateTracksPass",
-                          createActsValidateTracksTrackingPassFlags, prefix=True)
-    icf.addFlagsCategory ("Tracking.ITkActsValidateAmbiguityResolutionPass",
-                          createActsValidateAmbiguityResolutionTrackingPassFlags, prefix=True)
     icf.addFlagsCategory ("Tracking.ITkActsHeavyIonPass",
                           createActsHeavyIonTrackingPassFlags, prefix=True)
 

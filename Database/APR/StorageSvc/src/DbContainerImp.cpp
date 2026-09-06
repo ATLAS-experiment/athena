@@ -106,7 +106,7 @@ StatusCode DbContainerImp::transAct(Transaction::Action action)
 // Fetch next object address to set token
 StatusCode DbContainerImp::next(Token::OID_t& linkH) {
    linkH.second++;
-   if( linkH.second >= 0 && (uint64_t)linkH.second  < size() )  {
+   if( linkH.second >= 0 && static_cast<uint64_t>(linkH.second)  < size() )  {
       return StatusCode::SUCCESS;
    }
    return StatusCode::FAILURE;
@@ -120,9 +120,9 @@ StatusCode DbContainerImp::load( void** ptr, ShapeH shape,
    StatusCode sc = StatusCode::FAILURE;
    oid.second = linkH.second;
    if( any_next ) {
-      while( (uint64_t)oid.second < size() ) {
+      while( static_cast<uint64_t>(oid.second) < size() ) {
 	 oid.second = linkH.second;
-         if( linkH.second >= 0 && (uint64_t)linkH.second < size() )  {
+         if( linkH.second >= 0 && static_cast<uint64_t>(linkH.second) < size() )  {
             sc = loadObject(ptr, shape, oid);
             if( sc.isSuccess() )  {
                return sc;
@@ -130,7 +130,7 @@ StatusCode DbContainerImp::load( void** ptr, ShapeH shape,
          }
          oid.second++;
       }
-      if( linkH.second < 0 || (uint64_t)linkH.second <= size() ) {
+      if( linkH.second < 0 || static_cast<uint64_t>(linkH.second) <= size() ) {
          ATH_MSG_DEBUG("No objects passing selection criteria..."
                        << " Container has " << size() << " Entries in total.");
       }

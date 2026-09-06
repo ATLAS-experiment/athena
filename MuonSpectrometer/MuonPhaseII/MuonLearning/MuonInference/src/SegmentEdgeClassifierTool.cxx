@@ -2,12 +2,19 @@
 #include "InferenceUtils.h"
 #include "MuonInferenceInterfaces/GraphData.h"
 #include "xAODMuon/MuonSegment.h"
+#include "MuonPatternEvent/Segment.h"
+#include "MuonPatternEvent/SegmentSeed.h"
+#include "MuonSpacePoint/SpacePointContainer.h"
+#include "MuonSpacePoint/SpacePointPerLayerSorter.h"
+#include "MuonTrackEvent/TrackingHelpers.h"
+#include "Acts/Utilities/Helpers.hpp"
 #include "CxxUtils/checker_macros.h"
 #include "GaudiKernel/SystemOfUnits.h"
 #include <nlohmann/json.hpp>
 #include <algorithm>
 #include <array>
 #include <cmath>
+#include <cstdint>
 #include <fstream>
 #include <mutex>
 #include <map>
@@ -18,14 +25,28 @@
 #include <unordered_set>
 
 namespace {
-using SegmentGroupKey = std::tuple<int, int, int>; // sector, chamberIndex, etaIndex
+/// Segments with the same detector bucket contribute to one occupancy value.
+using SegmentBucketKey =
+    std::tuple<int, int, int>;  // sector, chamberIndex, etaIndex
 
-SegmentGroupKey segmentGroupKey(const xAOD::MuonSegment& seg) {
+SegmentBucketKey segmentBucketKey(const xAOD::MuonSegment& seg) {
   return {seg.sector(), static_cast<int>(seg.chamberIndex()), seg.etaIndex()};
 }
 
-int segmentLayerCount(const xAOD::MuonSegment& seg) {
-  return seg.nPrecisionHits() + seg.nPhiLayers() + seg.nTrigEtaLayers();
+/// Number of unique layers among the space points of a bucket: the quantity
+/// SegmentDumperAlg::countLayersInBucket writes to the bucket_layers branch
+/// the edge models are trained on.
+int layersInBucket(const MuonR4::SpacePointBucket& bucket) {
+  MuonR4::SpacePointPerLayerSorter sorter{};
+  std::vector<unsigned int> uniqueLayers;
+  uniqueLayers.reserve(bucket.size());
+  for (const MuonR4::SpacePointBucket::value_type& sp : bucket) {
+    const unsigned int layNum = sorter.sectorLayerNum(*sp);
+    if (!Acts::rangeContainsValue(uniqueLayers, layNum)) {
+      uniqueLayers.push_back(layNum);
+    }
+  }
+  return static_cast<int>(uniqueLayers.size());
 }
 
 /// Compute the minimum angular distance between sectors in a circular modulo space.
@@ -77,6 +98,14 @@ float nodeFeatureValue(MuonML::SegmentNodeFeatureId feature,
 namespace MuonML {
 
 StatusCode SegmentEdgeClassifierTool::initialize() {
+  if (m_sectorModulo.value() > 0 &&
+      2ULL * static_cast<unsigned long long>(m_maxDeltaSector.value()) + 1ULL >
+          static_cast<unsigned long long>(m_sectorModulo.value())) {
+    ATH_MSG_ERROR("MaxDeltaSector=" << m_maxDeltaSector.value()
+                  << " spans duplicate sectors for SectorModulo="
+                  << m_sectorModulo.value());
+    return StatusCode::FAILURE;
+  }
   ATH_CHECK(setupModel());
 
   // Resolve node feature names from model metadata, matching the ONNX exporter.
@@ -199,49 +228,80 @@ StatusCode SegmentEdgeClassifierTool::runGraphInference(const EventContext&, Gra
   return StatusCode::FAILURE;
 }
 
-StatusCode SegmentEdgeClassifierTool::buildGraph(const EventContext&, const xAOD::MuonSegmentContainer& segments, SegmentEdgeGraph& graph) const {
+StatusCode SegmentEdgeClassifierTool::buildGraph(
+    const EventContext&, const xAOD::MuonSegmentContainer& segments,
+    SegmentEdgeGraph& graph) const {
   graph = SegmentEdgeGraph{};
-  graph.nNodes = segments.size();
-  graph.segments.reserve(graph.nNodes);
-  graph.nodeFeatures.reserve(graph.nNodes * kNodeFeatureCount);
+  graph.segments.reserve(segments.size());
+  graph.nodeFeatures.reserve(segments.size() * kNodeFeatureCount);
 
-  std::vector<Amg::Vector3D> pos, dir;
-  std::vector<BucketSegmentFeatures> bucket;
-  pos.reserve(graph.nNodes); dir.reserve(graph.nNodes); bucket.reserve(graph.nNodes);
-
-  std::map<SegmentGroupKey, int> segmentMultiplicity{};
-  for (const xAOD::MuonSegment* seg : segments) {
-    if (!seg) continue;
-    ++segmentMultiplicity[segmentGroupKey(*seg)];
+  /*
+   * Keep the original bucket multiplicity in the node feature even when the
+   * speed configuration retains only the best representatives of a bucket.
+   * This preserves the model's occupancy input while removing duplicate node
+   * and edge work before tensor construction.
+   */
+  std::map<SegmentBucketKey, std::vector<const xAOD::MuonSegment*>>
+      segmentsByBucket;
+  for (const xAOD::MuonSegment* segment : segments) {
+    segmentsByBucket[segmentBucketKey(*segment)].push_back(segment);
   }
 
-  for (const xAOD::MuonSegment* seg : segments) {
-    if (!seg) continue;
-    const Amg::Vector3D p = seg->position();
-    Amg::Vector3D d = seg->direction();
+  const InferenceUtils::SegmentQualityOrder betterSegment{};
 
-    const int chamberIdx = static_cast<int>(seg->chamberIndex());
-    const int layers = segmentLayerCount(*seg);
-    const int sec = seg->sector();
-    const auto multIt = segmentMultiplicity.find(segmentGroupKey(*seg));
-    const int nSeg = (multIt != segmentMultiplicity.end()) ? multIt->second : 1;
+  std::unordered_set<const xAOD::MuonSegment*> retainedSegments;
+  retainedSegments.reserve(segments.size());
+  for (auto& [_, bucketSegments] : segmentsByBucket) {
+    std::ranges::sort(bucketSegments, betterSegment);
+    const std::size_t nKeep = m_maxSegmentsPerBucket.value() == 0
+                                  ? bucketSegments.size()
+                                  : std::min<std::size_t>(
+                                        bucketSegments.size(),
+                                        m_maxSegmentsPerBucket.value());
+    retainedSegments.insert(bucketSegments.begin(),
+                            bucketSegments.begin() + nKeep);
+  }
 
-    graph.segments.push_back(seg);
-    pos.emplace_back(p.x() / Gaudi::Units::m,
-                     p.y() / Gaudi::Units::m,
-                     p.z() / Gaudi::Units::m);
-    dir.emplace_back(d.x(), d.y(), d.z());
-    bucket.emplace_back(BucketSegmentFeatures{chamberIdx, layers, sec, nSeg});
+  std::vector<Amg::Vector3D> pos;
+  std::vector<Amg::Vector3D> dir;
+  std::vector<BucketSegmentFeatures> bucket;
+  pos.reserve(retainedSegments.size());
+  dir.reserve(retainedSegments.size());
+  bucket.reserve(retainedSegments.size());
+
+  for (const xAOD::MuonSegment* segment : segments) {
+    if (!retainedSegments.contains(segment)) continue;
+
+    const Amg::Vector3D position = segment->position();
+    const Amg::Vector3D direction = segment->direction();
+    const SegmentBucketKey key = segmentBucketKey(*segment);
+    const auto bucketIt = segmentsByBucket.find(key);
+    const int multiplicity =
+        bucketIt == segmentsByBucket.end()
+            ? 1
+            : static_cast<int>(bucketIt->second.size());
+
+    const int chamberIndex = static_cast<int>(segment->chamberIndex());
+    const int layers = layersInBucket(*MuonR4::detailedSegment(*segment)->parent()->parentBucket());
+    const int sector = segment->sector();
+
+    graph.segments.push_back(segment);
+    pos.emplace_back(position / Gaudi::Units::m);
+    dir.emplace_back(direction);
+    bucket.emplace_back(BucketSegmentFeatures{
+        chamberIndex, layers, sector, multiplicity});
     for (const SegmentNodeFeatureId featureId : m_nodeFeatureIds) {
-      graph.nodeFeatures.push_back(nodeFeatureValue(featureId, pos.back(), dir.back(), bucket.back()));
+      graph.nodeFeatures.push_back(
+          nodeFeatureValue(featureId, pos.back(), dir.back(), bucket.back()));
     }
   }
   graph.nNodes = graph.segments.size();
 
-  // Consistency check: all vectors must have same size
-  if (pos.size() != graph.nNodes || dir.size() != graph.nNodes || bucket.size() != graph.nNodes) {
-    ATH_MSG_ERROR("Inconsistent vector sizes during graph building: nodes=" << graph.nNodes
-                  << ", pos=" << pos.size() << ", dir=" << dir.size() << ", bucket=" << bucket.size());
+  if (pos.size() != graph.nNodes || dir.size() != graph.nNodes ||
+      bucket.size() != graph.nNodes) {
+    ATH_MSG_ERROR("Inconsistent vector sizes during graph building: nodes="
+                  << graph.nNodes << ", pos=" << pos.size()
+                  << ", dir=" << dir.size() << ", bucket=" << bucket.size());
     return StatusCode::FAILURE;
   }
 
@@ -250,57 +310,284 @@ StatusCode SegmentEdgeClassifierTool::buildGraph(const EventContext&, const xAOD
     return StatusCode::SUCCESS;
   }
 
-  std::unordered_map<int, std::vector<std::size_t>> nodesBySector;
-  nodesBySector.reserve(graph.nNodes);
-  for (std::size_t i = 0; i < graph.nNodes; ++i) {
-    nodesBySector[bucket[i].sector].push_back(i);
-  }
-
-  auto normalizeSector = [&](int s) {
-    // m_sectorModulo > 0: wrap sector to [0, modulo); <=0: disable wrapping
+  const auto wrapRegularSector = [&](int sector) {
+    // MuonSegment::sector() is a regular sector number, not an ExpandedSector
+    // coordinate. Wrap it to [0, modulo); <= 0 disables wrapping.
     if (m_sectorModulo.value() > 0) {
-      s %= m_sectorModulo.value();
-      if (s < 0) s += m_sectorModulo.value();
+      sector %= m_sectorModulo.value();
+      if (sector < 0) sector += m_sectorModulo.value();
     }
-    return s;
+    return sector;
   };
 
-  const std::size_t maxEdges = graph.nNodes * (graph.nNodes - 1);
-  graph.edgeIndex.reserve(2 * maxEdges);
-  graph.edgeFeatures.reserve(kEdgeFeatureCount * maxEdges);
+  // The lookup key must use the same wrapping as the target sectors below:
+  // ATLAS sectors are 1-based (1..16), so a raw key of 16 can never match a
+  // wrapped target of 0, which silently dropped every edge into sector 16.
+  // The per-pair sectorDistance check below enforces the true circular
+  // distance on the raw sector numbers.
+  std::unordered_map<int, std::vector<std::size_t>> nodesBySector;
+  nodesBySector.reserve(graph.nNodes);
+  for (std::size_t node = 0; node < graph.nNodes; ++node) {
+    nodesBySector[wrapRegularSector(bucket[node].sector)].push_back(node);
+  }
 
-  for (std::size_t i = 0; i < graph.nNodes; ++i) {
-    std::unordered_set<int> targetSectors;
+  std::unordered_map<int, std::vector<int>> targetSectorsBySourceSector;
+  targetSectorsBySourceSector.reserve(nodesBySector.size());
+  std::size_t sectorLocalEdgeUpperBound = 0;
+  for (const auto& [sourceSector, sourceNodes] : nodesBySector) {
+    std::vector<int> targetSectors;
     targetSectors.reserve(2 * m_maxDeltaSector.value() + 1);
-    for (int delta = -m_maxDeltaSector.value(); delta <= m_maxDeltaSector.value(); ++delta) {
-      targetSectors.insert(normalizeSector(bucket[i].sector + delta));
+    for (int delta = -m_maxDeltaSector.value();
+         delta <= m_maxDeltaSector.value(); ++delta) {
+      targetSectors.push_back(wrapRegularSector(sourceSector + delta));
+    }
+    for (const int targetSector : targetSectors) {
+      const auto found = nodesBySector.find(targetSector);
+      if (found == nodesBySector.end()) continue;
+      sectorLocalEdgeUpperBound += sourceNodes.size() * found->second.size();
+      if (targetSector == sourceSector) {
+        sectorLocalEdgeUpperBound -= sourceNodes.size();
+      }
+    }
+    targetSectorsBySourceSector.emplace(sourceSector,
+                                        std::move(targetSectors));
+  }
+
+  /*
+   * The model receives a directed graph, but the geometric candidate relation
+   * is undirected.  Build each pair once, then emit both directions.  With a
+   * non-zero input cap, each endpoint nominates its best candidates and the
+   * union is made bidirectional before inference; this preserves the message
+   * passing symmetry expected by the GNN.
+   */
+  struct UndirectedEdge {
+    std::size_t first{0};
+    std::size_t second{0};
+    float dx{0.f};
+    float dy{0.f};
+    float dz{0.f};
+    float distance{0.f};
+    float cosAngle{0.f};
+  };
+  const auto betterEdge = [](const UndirectedEdge& first,
+                             const UndirectedEdge& second) {
+    const int cosOrder = InferenceUtils::compareFloatDescending(
+        first.cosAngle, second.cosAngle);
+    if (cosOrder != 0) {
+      return cosOrder < 0;
     }
 
-    for (const int sec : targetSectors) {
-      auto it = nodesBySector.find(sec);
-      if (it == nodesBySector.end()) continue;
-      for (const std::size_t j : it->second) {
-        if (i == j) continue;
-        if (sectorDistance(bucket[i].sector, bucket[j].sector, m_sectorModulo.value()) > m_maxDeltaSector.value()) continue;
-        const float cosang = static_cast<float>(dir[i].dot(dir[j]));
-        if (cosang < m_cosMin) continue;
+    const int distanceOrder =
+        InferenceUtils::compareFloat(first.distance, second.distance);
+    if (distanceOrder != 0) {
+      return distanceOrder < 0;
+    }
+    if (first.first != second.first) return first.first < second.first;
+    return first.second < second.second;
+  };
+  const auto edgeKey = [](const UndirectedEdge& edge) {
+    return (static_cast<std::uint64_t>(edge.first) << 32) |
+           static_cast<std::uint64_t>(edge.second);
+  };
 
-        graph.edgeIndex.push_back(static_cast<int64_t>(i));
-        graph.edgeIndex.push_back(static_cast<int64_t>(j));
+  const unsigned int maxEdgesPerNode =
+      m_maxEdgesPerNodeBeforeInference.value();
+  const unsigned int maxEdgesPerTargetChamber =
+      m_maxEdgesPerTargetChamberBeforeInference.value();
+  const bool usePreInferenceSelection =
+      maxEdgesPerNode != 0 || maxEdgesPerTargetChamber != 0;
+  std::vector<std::vector<UndirectedEdge>> bestEdgesByNode;
+  if (usePreInferenceSelection) {
+    bestEdgesByNode.resize(graph.nNodes);
+    const unsigned int reservePerNode =
+        maxEdgesPerNode != 0 ? maxEdgesPerNode : maxEdgesPerTargetChamber;
+    for (std::vector<UndirectedEdge>& edges : bestEdgesByNode) {
+      edges.reserve(reservePerNode);
+    }
+  } else {
+    graph.edgeIndex.reserve(2 * sectorLocalEdgeUpperBound);
+    graph.edgeFeatures.reserve(kEdgeFeatureCount * sectorLocalEdgeUpperBound);
+  }
+  const auto appendDirectedPair = [&](const UndirectedEdge& edge) {
+    graph.edgeIndex.push_back(static_cast<int64_t>(edge.first));
+    graph.edgeIndex.push_back(static_cast<int64_t>(edge.second));
+    graph.edgeFeatures.insert(
+        graph.edgeFeatures.end(),
+        {edge.dx, edge.dy, edge.dz, edge.distance, edge.cosAngle,
+         float(bucket[edge.first].chamberIndex ==
+               bucket[edge.second].chamberIndex),
+         float(bucket[edge.first].sector == bucket[edge.second].sector)});
 
-        const Amg::Vector3D delta = pos[j] - pos[i];
-        const float dx = static_cast<float>(delta.x());
-        const float dy = static_cast<float>(delta.y());
-        const float dz = static_cast<float>(delta.z());
-        const float dist = static_cast<float>(delta.mag());
-        graph.edgeFeatures.insert(graph.edgeFeatures.end(), {dx,dy,dz,dist,cosang, float(bucket[i].chamberIndex==bucket[j].chamberIndex), float(bucket[i].sector==bucket[j].sector)});
+    graph.edgeIndex.push_back(static_cast<int64_t>(edge.second));
+    graph.edgeIndex.push_back(static_cast<int64_t>(edge.first));
+    graph.edgeFeatures.insert(
+        graph.edgeFeatures.end(),
+        {-edge.dx, -edge.dy, -edge.dz, edge.distance, edge.cosAngle,
+         float(bucket[edge.first].chamberIndex ==
+               bucket[edge.second].chamberIndex),
+         float(bucket[edge.first].sector == bucket[edge.second].sector)});
+  };
+
+  const auto retainForNode = [&](std::size_t node,
+                                 const UndirectedEdge& candidate) {
+    std::vector<UndirectedEdge>& retained = bestEdgesByNode[node];
+    const std::size_t other = candidate.first == node ? candidate.second
+                                                       : candidate.first;
+    const int targetChamber = bucket[other].chamberIndex;
+
+    if (maxEdgesPerTargetChamber != 0) {
+      unsigned int sameChamberCount = 0;
+      auto worstSameChamber = retained.end();
+      for (auto it = retained.begin(); it != retained.end(); ++it) {
+        const std::size_t retainedOther =
+            it->first == node ? it->second : it->first;
+        if (bucket[retainedOther].chamberIndex != targetChamber) continue;
+        ++sameChamberCount;
+        if (worstSameChamber == retained.end() ||
+            betterEdge(*worstSameChamber, *it)) {
+          worstSameChamber = it;
+        }
+      }
+      if (sameChamberCount >= maxEdgesPerTargetChamber) {
+        if (!betterEdge(candidate, *worstSameChamber)) return;
+        *worstSameChamber = candidate;
+      } else {
+        retained.push_back(candidate);
+      }
+    } else {
+      retained.push_back(candidate);
+    }
+
+    if (maxEdgesPerNode != 0 && retained.size() > maxEdgesPerNode) {
+      auto worst = retained.begin();
+      for (auto it = std::next(retained.begin()); it != retained.end(); ++it) {
+        if (betterEdge(*worst, *it)) worst = it;
+      }
+      retained.erase(worst);
+    }
+  };
+
+  std::size_t candidatePairs = 0;
+  for (std::size_t first = 0; first < graph.nNodes; ++first) {
+    const auto sectorsIt =
+        targetSectorsBySourceSector.find(wrapRegularSector(bucket[first].sector));
+    if (sectorsIt == targetSectorsBySourceSector.end()) continue;
+    for (const int sector : sectorsIt->second) {
+      const auto targetIt = nodesBySector.find(sector);
+      if (targetIt == nodesBySector.end()) continue;
+
+      for (const std::size_t second : targetIt->second) {
+        // Every valid pair will be visited from the lower-index endpoint.
+        if (second <= first) continue;
+        if (sectorDistance(bucket[first].sector, bucket[second].sector,
+                           m_sectorModulo.value()) >
+            m_maxDeltaSector.value()) {
+          continue;
+        }
+        if (m_dropSameChamberEdgesBeforeInference.value() &&
+            bucket[first].chamberIndex == bucket[second].chamberIndex) {
+          continue;
+        }
+        const float cosAngle = static_cast<float>(dir[first].dot(dir[second]));
+        if (cosAngle < m_cosMin) continue;
+
+        const Amg::Vector3D delta = pos[second] - pos[first];
+        const UndirectedEdge candidate{
+            first,
+            second,
+            static_cast<float>(delta.x()),
+            static_cast<float>(delta.y()),
+            static_cast<float>(delta.z()),
+            static_cast<float>(delta.mag()),
+            cosAngle};
+        ++candidatePairs;
+
+        if (!usePreInferenceSelection) {
+          appendDirectedPair(candidate);
+        } else {
+          retainForNode(first, candidate);
+          retainForNode(second, candidate);
+        }
       }
     }
   }
+  std::size_t retainedPairs = candidatePairs;
+  if (usePreInferenceSelection) {
+    const unsigned int selectedReservePerNode =
+        maxEdgesPerNode != 0 ? maxEdgesPerNode : maxEdgesPerTargetChamber;
+    std::unordered_set<std::uint64_t> selectedKeys;
+    selectedKeys.reserve(graph.nNodes * selectedReservePerNode);
+    std::vector<UndirectedEdge> selectedEdges;
+    selectedEdges.reserve(graph.nNodes * selectedReservePerNode);
+
+    for (const std::vector<UndirectedEdge>& nodeEdges : bestEdgesByNode) {
+      for (const UndirectedEdge& edge : nodeEdges) {
+        if (selectedKeys.insert(edgeKey(edge)).second) {
+          selectedEdges.push_back(edge);
+        }
+      }
+    }
+    std::sort(selectedEdges.begin(), selectedEdges.end(),
+              [](const UndirectedEdge& first,
+                 const UndirectedEdge& second) {
+                if (first.first != second.first) {
+                  return first.first < second.first;
+                }
+                return first.second < second.second;
+              });
+
+    retainedPairs = selectedEdges.size();
+    graph.edgeIndex.reserve(4 * retainedPairs);
+    graph.edgeFeatures.reserve(2 * kEdgeFeatureCount * retainedPairs);
+    for (const UndirectedEdge& edge : selectedEdges) {
+      appendDirectedPair(edge);
+    }
+  }
   graph.nEdges = graph.edgeIndex.size() / 2;
+  const std::size_t nodesBeforeIsolatedNodeDrop = graph.nNodes;
+  if (m_dropIsolatedNodesBeforeInference.value() && graph.nEdges != 0) {
+    std::vector<unsigned char> active(graph.nNodes, 0);
+    for (const int64_t index : graph.edgeIndex) {
+      active[static_cast<std::size_t>(index)] = 1;
+    }
+    const std::size_t activeNodes =
+        std::count(active.begin(), active.end(), static_cast<unsigned char>(1));
+    if (activeNodes != graph.nNodes) {
+      std::vector<std::size_t> oldToNew(graph.nNodes, graph.nNodes);
+      std::vector<const xAOD::MuonSegment*> compactedSegments;
+      std::vector<float> compactedNodeFeatures;
+      compactedSegments.reserve(activeNodes);
+      compactedNodeFeatures.reserve(activeNodes * kNodeFeatureCount);
+      for (std::size_t oldNode = 0; oldNode < graph.nNodes; ++oldNode) {
+        if (!active[oldNode]) continue;
+        oldToNew[oldNode] = compactedSegments.size();
+        compactedSegments.push_back(graph.segments[oldNode]);
+        const auto featureBegin = graph.nodeFeatures.begin() +
+            oldNode * kNodeFeatureCount;
+        compactedNodeFeatures.insert(compactedNodeFeatures.end(),
+                                     featureBegin,
+                                     featureBegin + kNodeFeatureCount);
+      }
+      for (int64_t& index : graph.edgeIndex) {
+        index = static_cast<int64_t>(oldToNew[static_cast<std::size_t>(index)]);
+      }
+      graph.segments = std::move(compactedSegments);
+      graph.nodeFeatures = std::move(compactedNodeFeatures);
+      graph.nNodes = activeNodes;
+    }
+  }
   ATH_MSG_DEBUG("buildGraph: input segments=" << segments.size()
                 << ", kept nodes=" << graph.nNodes
-                << ", built edges=" << graph.nEdges);
+                << ", nodes before isolated-node drop=" << nodesBeforeIsolatedNodeDrop
+                << ", bucket cap=" << m_maxSegmentsPerBucket.value()
+                << ", candidate pairs=" << candidatePairs
+                << ", retained pairs=" << retainedPairs
+                << ", built directed edges=" << graph.nEdges
+                << ", pre-inference node cap=" << m_maxEdgesPerNodeBeforeInference.value()
+                << ", per-target-chamber cap=" << maxEdgesPerTargetChamber
+                << ", drop same chamber=" << m_dropSameChamberEdgesBeforeInference.value()
+                << ", drop isolated nodes=" << m_dropIsolatedNodesBeforeInference.value()
+                << ", sector-local reserve=" << sectorLocalEdgeUpperBound);
   return StatusCode::SUCCESS;
 }
 
@@ -332,24 +619,23 @@ StatusCode SegmentEdgeClassifierTool::classifyEdges(const EventContext& ctx,
 
   GraphRawData raw{};
   raw.graph = std::make_unique<InferenceGraph>();
-  raw.featureLeaves = graph.nodeFeatures;
-  raw.edgeIndexPacked.reserve(2 * graph.nEdges);
-  raw.srcEdges.reserve(graph.nEdges);
-  raw.desEdges.reserve(graph.nEdges);
+  raw.edgeIndexPacked.resize(2 * graph.nEdges);
   for (std::size_t e = 0; e < graph.nEdges; ++e) {
-    raw.srcEdges.push_back(graph.edgeIndex[2 * e]);
-    raw.desEdges.push_back(graph.edgeIndex[2 * e + 1]);
+    raw.edgeIndexPacked[e] = graph.edgeIndex[2 * e];
+    raw.edgeIndexPacked[graph.nEdges + e] = graph.edgeIndex[2 * e + 1];
   }
-  raw.edgeIndexPacked.insert(raw.edgeIndexPacked.end(), raw.srcEdges.begin(), raw.srcEdges.end());
-  raw.edgeIndexPacked.insert(raw.edgeIndexPacked.end(), raw.desEdges.begin(), raw.desEdges.end());
 
   Ort::MemoryInfo memInfo = Ort::MemoryInfo::CreateCpu(OrtDeviceAllocator, OrtMemTypeCPU);
 
   const std::vector<int64_t> nodeShape{static_cast<int64_t>(graph.nNodes), static_cast<int64_t>(kNodeFeatureCount)};
+  // The graph outlives the synchronous ONNX call below.  Use its node
+  // buffer directly instead of allocating and copying featureLeaves per event.
+  ATLAS_THREAD_SAFE float* nodeFeaturesData =
+      const_cast<float*>(graph.nodeFeatures.data());
   raw.graph->dataTensor.emplace_back(
       Ort::Value::CreateTensor<float>(memInfo,
-                                      raw.featureLeaves.data(),
-                                      raw.featureLeaves.size(),
+                                      nodeFeaturesData,
+                                      graph.nodeFeatures.size(),
                                       nodeShape.data(),
                                       nodeShape.size()));
 

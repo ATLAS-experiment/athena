@@ -1,7 +1,6 @@
 # Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 from G4AtlasServices.G4AtlasServicesConfig import PhysicsListSvcCfg
 from ISF_Services.ISF_ServicesConfig import TruthServiceCfg, InputConverterCfg
-from ISF_Services.ISF_ServicesCoreConfig import GeoIDSvcCfg
 from G4AtlasTools.G4GeometryToolConfig import G4AtlasDetectorConstructionToolCfg
 from G4AtlasTools.G4AtlasToolsConfig import G4ThreadPoolSvcCfg, SensitiveDetectorMasterToolCfg, FastSimulationMasterToolCfg
 from G4AtlasServices.G4AtlasUserActionConfig import UserActionSvcCfg
@@ -37,7 +36,7 @@ def G4AtlasAlgCfg(flags, name="G4AtlasAlg", **kwargs):
     kwargs.setdefault("ExtraOutputs", SimHitContainerListCfg(flags) )
     kwargs.setdefault("ExtraInputs" , InputContainerListCfg(flags))
 
-    from SimulationConfig.SimEnums import LArParameterization
+    from SimulationConfig.SimEnums import LArParameterization, InDetParameterization
     # Configure fast simulation
     if flags.Sim.LArParameterization is LArParameterization.FastCaloSim:
         from G4AtlasTools.G4AtlasToolsConfig import PunchThroughG4ToolCfg
@@ -47,6 +46,20 @@ def G4AtlasAlgCfg(flags, name="G4AtlasAlg", **kwargs):
         if flags.Sim.SimplifiedGeoPath:
             kwargs.setdefault('SimplifiedGeoPath', flags.Sim.SimplifiedGeoPath)
 
+    if flags.Sim.InDetParameterization is InDetParameterization.FatrasG4:
+        from G4AtlasTools.G4AtlasToolsConfig import ActsFatrasG4ToolCfg
+
+        # Add to physics initialization
+        physics_initialization_tools = kwargs.setdefault("PhysicsInitializationTools", [])
+        physics_initialization_tools.append(result.addPublicTool(result.popToolsAndMerge(ActsFatrasG4ToolCfg(flags))))
+    
+    if flags.Sim.InDetParameterization is InDetParameterization.AFatrasG4:
+        from G4AtlasTools.G4AtlasToolsConfig import ActsFatrasG4ToolCfg
+
+        # Add to physics initialization
+        physics_initialization_tools = kwargs.setdefault("PhysicsInitializationTools", [])
+        physics_initialization_tools.append(result.addPublicTool(result.popToolsAndMerge(ActsFatrasG4ToolCfg(flags)))) 
+    
     # Set the path to the simplified calorimeter geometry for particle transport if provided
     if flags.Sim.LArParameterization is LArParameterization.FastCaloSim and flags.Sim.SimplifiedGeoPath:
         kwargs.setdefault("SimplifiedGeoPath", flags.Sim.SimplifiedGeoPath)
@@ -78,7 +91,6 @@ def G4AtlasAlgCfg(flags, name="G4AtlasAlg", **kwargs):
         kwargs.setdefault("Cardinality", flags.Concurrency.NumThreads)
 
     kwargs.setdefault("TruthRecordService", result.getPrimaryAndMerge(TruthServiceCfg(flags)))
-    kwargs.setdefault("GeoIDSvc", result.getPrimaryAndMerge(GeoIDSvcCfg(flags)))
 
     #input converter
     kwargs.setdefault("InputConverter", result.getPrimaryAndMerge(InputConverterCfg(flags)))

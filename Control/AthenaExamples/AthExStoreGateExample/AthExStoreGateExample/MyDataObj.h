@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ATHEXSTOREGATEEXAMPLE_MYDATAOBJ_H
@@ -48,8 +48,10 @@ private:
 //to the type MyDataObj
 //This is required and checked at compile time when you try to record/retrieve
 #include "AthenaKernel/CLASS_DEF.h"
+#include "AthenaKernel/BaseInfo.h"
 CLASS_DEF(MyDataObj, 8000, 1)
 CLASS_DEF(BaseClass, 1434, 1)
 CLASS_DEF(TestDataObject, 289238765, 1)
+SG_BASES( MyDataObj, BaseClass );
 
 #endif

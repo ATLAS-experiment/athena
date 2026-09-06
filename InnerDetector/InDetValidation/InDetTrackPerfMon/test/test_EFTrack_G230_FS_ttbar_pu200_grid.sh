@@ -2,7 +2,7 @@
 # art-description: Nightly test to compare G-230 vs C-230 (Full-scan) for EFTrack studies using ttbar pu200 sample
 # art-type: grid
 # art-include: main/Athena/x86_64-el9-gcc15-opt
-# art-pathena-flags-add: --site=UKI-LT2-QMUL_GPU,UKI-NORTHGRID-MAN-HEP_GPU,FZK-LCG2_GPU
+# art-pathena-flags-add: --site=UKI-LT2-QMUL_GPU,UKI-NORTHGRID-MAN-HEP_GPU
 # art-architecture: '#&nvidia'
 # art-memory: 4095
 # art-output: IDTPM.*.root
@@ -69,12 +69,12 @@ if [ ! -f "${InputRDOfiles}" ]; then
     exit 1
 fi
 
-## Track reconstruction step
+## Track reconstruction step. See runReco_G230_FS.sh --help for list of supported options.
 run "${pipelineName}" \
   runReco_G230_FS.sh \
     -i ${InputRDOfiles} \
-    -o "${OutSampleName}.AOD.pool.root"
-    #-n 10
+    -o "${OutSampleName}.AOD.pool.root" \
+    "$@"
 
 ## Don't run if IDTPM json config is not found
 if [ ! -f "$IDTPMjsonConfig_absPath" ]; then

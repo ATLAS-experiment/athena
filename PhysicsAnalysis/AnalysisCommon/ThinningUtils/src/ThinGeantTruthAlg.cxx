@@ -22,7 +22,7 @@
 
 // EventUtils includes
 #include "ThinGeantTruthAlg.h"
-#include "MCTruthClassifier/MCTruthClassifierDefs.h"
+#include "TruthUtils/TruthClasses.h"
 #include "xAODTruth/xAODTruthHelpers.h"
 // STL includes
 #include <algorithm>

@@ -32,7 +32,7 @@ Sim_tf.py \
     --simulator 'FullG4MT_QS'  \
     --inputEVNTFile ${INPUT_EVNT_FILE} \
     --outputHITSFile 'test.CA.HITS.pool.root' \
-    --maxEvents '1000' \
+    --maxEvents '10000' \
     --skipEvents '0' \
     --conditionsTag "default:${conditions}" \
     --geometryVersion "default:${geometry}" \
@@ -44,7 +44,7 @@ SimValid_tf.py --inputHITSFile test.CA.HITS.pool.root --outputHIST_SIMFile test.
 
 
 
-R_FILE="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/SimCoreTests/athena_25.0.47_newGeant4_Validation_calhits.root"
+R_FILE="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/SimCoreTests/athena_25.0.70_newGeant4_Validation_calhits.root"
 X_FILE="test.CA.HITS_SIM.pool.root"
 
 

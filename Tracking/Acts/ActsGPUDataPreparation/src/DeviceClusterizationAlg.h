@@ -18,8 +18,6 @@
 #include "ActsGPUEvent/TracccDetectorConditionsDescription.h"
 #include "ActsGPUEvent/TracccDetectorDesignDescription.h"
 
-#include "vecmem/utils/cuda/copy.hpp"
-
 namespace ActsTrk {
 /**
  * @class DeviceClusterizationAlg

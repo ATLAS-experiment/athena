@@ -1,8 +1,9 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "PFOHistUtils/PFOAlgPropertyPlots.h"
+#include "AthenaKernel/Units.h"
 
 namespace PFO {
 
@@ -29,37 +30,37 @@ namespace PFO {
 
  void PFOAlgPropertyPlots::fill(const xAOD::FlowElement& FE, const xAOD::EventInfo& eventInfo){
 
-   static const SG::AuxElement::ConstAccessor<int> acc_IsInDenseEnvironment("IsInDenseEnvironment");
+   static const SG::ConstAccessor<int> acc_IsInDenseEnvironment("IsInDenseEnvironment");
    // dump the "isInDenseEnvironment
    if(acc_IsInDenseEnvironment.isAvailable(FE)){
      int isInDenseEnvironment=acc_IsInDenseEnvironment(FE);
      m_FE_isInDenseEnvironment->Fill(isInDenseEnvironment,eventInfo.beamSpotWeight());
-     if (fabs(FE.eta()) < 1) m_FE_isInDenseEnvironment_etaBinA->Fill(isInDenseEnvironment,eventInfo.beamSpotWeight());
-     else if (fabs(FE.eta()) < 2) m_FE_isInDenseEnvironment_etaBinB->Fill(isInDenseEnvironment,eventInfo.beamSpotWeight());
+     if (std::abs(FE.eta()) < 1) m_FE_isInDenseEnvironment_etaBinA->Fill(isInDenseEnvironment,eventInfo.beamSpotWeight());
+     else if (std::abs(FE.eta()) < 2) m_FE_isInDenseEnvironment_etaBinB->Fill(isInDenseEnvironment,eventInfo.beamSpotWeight());
      else m_FE_isInDenseEnvironment_etaBinC->Fill(isInDenseEnvironment,eventInfo.beamSpotWeight());
    }     
    else{ 
      m_FE_isInDenseEnvironment->Fill(-1.0,eventInfo.beamSpotWeight());
-     if (fabs(FE.eta()) < 1) m_FE_isInDenseEnvironment_etaBinA->Fill(-1.0,eventInfo.beamSpotWeight());
-     else if (fabs(FE.eta()) < 2) m_FE_isInDenseEnvironment_etaBinB->Fill(-1.0,eventInfo.beamSpotWeight());
+     if (std::abs(FE.eta()) < 1) m_FE_isInDenseEnvironment_etaBinA->Fill(-1.0,eventInfo.beamSpotWeight());
+     else if (std::abs(FE.eta()) < 2) m_FE_isInDenseEnvironment_etaBinB->Fill(-1.0,eventInfo.beamSpotWeight());
      else m_FE_isInDenseEnvironment_etaBinC->Fill(-1.0,eventInfo.beamSpotWeight());     
    }
-   static const SG::AuxElement::ConstAccessor<float> acc_FE_tracksExpectedEnergyDeposit("TracksExpectedEnergyDeposit");
+   static const SG::ConstAccessor<float> acc_FE_tracksExpectedEnergyDeposit("TracksExpectedEnergyDeposit");
    
    if(acc_FE_tracksExpectedEnergyDeposit.isAvailable(FE)){
      float expectedEnergy=acc_FE_tracksExpectedEnergyDeposit(FE);
-     m_FE_tracksExpectedEnergyDeposit->Fill(expectedEnergy/1000.0,eventInfo.beamSpotWeight());
-     if(fabs(FE.eta())<1) 
-       m_FE_tracksExpectedEnergyDeposit_etaBinA->Fill(expectedEnergy/1000.0,eventInfo.beamSpotWeight());
-     else if(fabs(FE.eta())<2)
-       m_FE_tracksExpectedEnergyDeposit_etaBinB->Fill(expectedEnergy/1000.0,eventInfo.beamSpotWeight());
+     m_FE_tracksExpectedEnergyDeposit->Fill(expectedEnergy/Athena::Units::GeV,eventInfo.beamSpotWeight());
+     if(std::abs(FE.eta())<1) 
+       m_FE_tracksExpectedEnergyDeposit_etaBinA->Fill(expectedEnergy/Athena::Units::GeV,eventInfo.beamSpotWeight());
+     else if(std::abs(FE.eta())<2)
+       m_FE_tracksExpectedEnergyDeposit_etaBinB->Fill(expectedEnergy/Athena::Units::GeV,eventInfo.beamSpotWeight());
      else
-       m_FE_tracksExpectedEnergyDeposit_etaBinC->Fill(expectedEnergy/1000.0,eventInfo.beamSpotWeight());
+       m_FE_tracksExpectedEnergyDeposit_etaBinC->Fill(expectedEnergy/Athena::Units::GeV,eventInfo.beamSpotWeight());
    }// end of accessor block on tracks expected energy deposit
    else{
      m_FE_tracksExpectedEnergyDeposit->Fill(-1.0,eventInfo.beamSpotWeight());
-     if( fabs(FE.eta())<1) m_FE_tracksExpectedEnergyDeposit_etaBinA->Fill(-1.0,eventInfo.beamSpotWeight());
-     else if ((fabs(FE.eta())<2)) m_FE_tracksExpectedEnergyDeposit_etaBinB->Fill(-1.0,eventInfo.beamSpotWeight());
+     if( std::abs(FE.eta())<1) m_FE_tracksExpectedEnergyDeposit_etaBinA->Fill(-1.0,eventInfo.beamSpotWeight());
+     else if ((std::abs(FE.eta())<2)) m_FE_tracksExpectedEnergyDeposit_etaBinB->Fill(-1.0,eventInfo.beamSpotWeight());
      else
        m_FE_tracksExpectedEnergyDeposit_etaBinC->Fill(-1.0,eventInfo.beamSpotWeight());
    }

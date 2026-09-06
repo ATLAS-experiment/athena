@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ACTSTRKPRIVTXFINDERTOOL_ADAPTIVEMULTIPRIVTXFINDERTOOL_H
@@ -105,12 +105,12 @@ namespace ActsTrk {
     using VertexSeedFinder= Acts::TrackDensityVertexFinder;
     using VertexFinder = Acts::AdaptiveMultiVertexFinder;
 
-    void initializeVertexFinder(VertexFinder::Config& finderConfig);
+    void initializeVertexFinder(VertexFinder::Config&& finderConfig);
 
     std::shared_ptr<VertexFinder> m_vertexFinder = nullptr;
     std::shared_ptr<Propagator> m_propagator = nullptr;
 
-    // optional because of late initializatio
+    // optional because of late initialization
     std::optional<TrackLinearizer> m_linearizer = std::nullopt;
 
     /** @brief Auxiliary class to access the magnetic field, geometry and calibration context */

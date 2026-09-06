@@ -17,7 +17,7 @@
 #include <EventLoop/ManagerData.h>
 #include <EventLoop/MessageCheck.h>
 #include <RootCoreUtils/Assert.h>
-#include <RootCoreUtils/ThrowMsg.h>
+#include <RootCoreUtils/ShellExec.h>
 #include <TSystem.h>
 #include <fstream>
 #include <memory>
@@ -33,9 +33,7 @@ namespace EL
 {
   //****************************************************
   void SlurmDriver :: testInvariant () const
-  {
-    RCU_INVARIANT (this != 0);
-  }
+  {}
   //****************************************************
   SlurmDriver :: SlurmDriver ()
   {
@@ -66,7 +64,7 @@ namespace EL
         auto all_set = m_b_job_name && m_b_account && m_b_run_time;
         if (!all_set)
         {
-          ANA_MSG_INFO ("Job Name" << m_job_name);
+          ANA_MSG_INFO ("Job Name " << m_job_name);
           ANA_MSG_INFO ("Account " << m_account);
           ANA_MSG_INFO ("Run Time " << m_run_time);
 
@@ -74,20 +72,32 @@ namespace EL
           return ::StatusCode::FAILURE;
         }
 
-        RCU_READ_INVARIANT (this);
-
         if (data.resubmit)
-          RCU_THROW_MSG ("resubmission not supported for this driver");
+        {
+          ANA_MSG_ERROR ("resubmission not supported for the Slurm driver");
+          return StatusCode::FAILURE;
+        }
 
-        assert (!data.batchJobIndices.empty());
-        assert (data.batchJobIndices.back() + 1 == data.batchJobIndices.size());
+        if (data.batchJobIndices.empty())
+        {
+          ANA_MSG_ERROR ("no job indices to submit");
+          return ::StatusCode::FAILURE;
+        }
+        if (data.batchJobIndices.back() + 1 != data.batchJobIndices.size())
+        {
+          ANA_MSG_ERROR ("submitting a non-contiguous set of job indices is not supported");
+          return ::StatusCode::FAILURE;
+        }
         const std::size_t njob = data.batchJobIndices.size();
 
-        if(!data.options.castBool(Job::optBatchSharedFileSystem,true))
+        if(!data.sharedFileSystem)
         {
           int status=gSystem->CopyFile("RootCore.par",(data.submitDir+"/submit/RootCore.par").c_str());
           if(status != 0)
-            RCU_THROW_MSG ("failed to copy RootCore.par");
+          {
+            ANA_MSG_ERROR ("failed to copy RootCore.par");
+            return StatusCode::FAILURE;
+          }
         }
 
         {
@@ -113,9 +123,12 @@ namespace EL
 
         {
           std::ostringstream cmd;
-          cmd << "cd " << data.submitDir << "/submit && sbatch --array=0-" << njob-1 << " " << data.options.castString (Job::optSubmitFlags) << " submit";
+          cmd << "cd " << RCU::Shell::quote (data.submitDir) << "/submit && sbatch --array=0-" << njob-1 << " " << data.options.castString (Job::optSubmitFlags) << " submit";
           if (gSystem->Exec (cmd.str().c_str()) != 0)
-            RCU_THROW_MSG (("failed to execute: " + cmd.str()).c_str());
+          {
+            ANA_MSG_ERROR ("failed to execute: " << cmd.str());
+            return StatusCode::FAILURE;
+          }
         }
         data.submitted = true;
       }

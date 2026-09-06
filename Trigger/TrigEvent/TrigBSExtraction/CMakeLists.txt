@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( TrigBSExtraction )
@@ -7,4 +7,4 @@ atlas_subdir( TrigBSExtraction )
 atlas_add_component( TrigBSExtraction
                      src/*.cxx
                      src/components/*.cxx
-                     LINK_LIBRARIES AthenaBaseComps CaloEvent GaudiKernel JetEvent Particle StoreGateLib TrigCaloEvent TrigInDetEvent TrigMissingEtEvent TrigMuonEvent TrigNavigationLib TrigNavStructure TrigParticle TrigSerializeCnvSvcLib TrigSteeringEvent TrigStorageDefinitions TrkTrack egammaEvent tauEvent xAODBTagging xAODBTaggingCnvLib xAODCaloEvent xAODCaloEventCnvLib xAODEgamma xAODEgammaCnvLib xAODJet xAODJetCnvLib xAODMuon xAODTau xAODTauCnvLib xAODTracking xAODTrackingCnvLib xAODTrigBphys xAODTrigBphysCnvLib xAODTrigCalo xAODTrigCaloCnvLib xAODTrigMinBias xAODTrigMinBiasCnvLib xAODTrigMissingET xAODTrigMissingETCnvLib xAODTrigMuon xAODTrigMuonCnvLib xAODTrigger xAODTriggerCnvLib )
+                     LINK_LIBRARIES AthenaBaseComps GaudiKernel StoreGateLib TrigNavigationLib TrigSerializeCnvSvcLib TrigSteeringEvent )

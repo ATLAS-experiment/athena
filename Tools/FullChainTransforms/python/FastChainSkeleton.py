@@ -158,7 +158,7 @@ def fromRunArgs(runArgs):
 
     if flags.Digitization.PileUp:
         from DigitizationConfig.PileUpConfig import PileUpEventLoopMgrCfg
-        cfg = MainServicesCfg(flags, LoopMgr="PileUpEventLoopMgr")
+        cfg = MainServicesCfg(flags, createEventLoopMgr=False)
         cfg.merge(PileUpEventLoopMgrCfg(flags))
     else:
         cfg = MainServicesCfg(flags)

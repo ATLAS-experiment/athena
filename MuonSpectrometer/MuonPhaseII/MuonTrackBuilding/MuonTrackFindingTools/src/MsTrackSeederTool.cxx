@@ -19,6 +19,7 @@
 #include "xAODMuonPrepData/UtilFunctions.h"
 #include "MuonSpacePoint/SpacePointHelpers.h"
 #include "FourMomUtils/P4Helpers.h"
+#include "CxxUtils/trapping_fp.h"
 #include "GaudiKernel/PhysicalConstants.h"
 
 namespace {
@@ -33,6 +34,8 @@ namespace {
         return std::abs(PtimesQ1 - PtimesQ2) / denom;
     };
     float reducedChi2(const xAOD::MuonSegment& seg) {
+        // Tell clang to optimize assuming that FP operations may trap.
+        CXXUTILS_TRAPPING_FP;
         return seg.chiSquared() / std::max(1.f, seg.numberDoF());
     }
     std::string print(const xAOD::MuonSegment& seg) {
@@ -93,7 +96,7 @@ namespace MuonR4{
                     refSeg = segment;
                     ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<" - Set reference segment to "<<::print(*segment));
                 }
-                Acts::BoundTrackParameters boundPars = MuonR4::SegmentFit::boundSegmentPars(tgContext, *m_detMgr, *segment);
+                Acts::BoundTrackParameters boundPars = SegmentFit::boundSegmentPars(tgContext, *m_detMgr, *segment);
                 if (!boundPars.covariance()) {
                     continue;
                 }
@@ -131,15 +134,12 @@ namespace MuonR4{
             const Acts::GeometryIdentifier volId = volumeId(firstSurf);
       
             // Find the first measurement
-            const Acts::TrackingVolume* volume{m_trackingGeometrySvc->trackingGeometry()->findVolume(volId)};
+            const Acts::TrackingVolume* volume{MuonGMR4::highestAlignable(m_trackingGeometrySvc->trackingGeometry()->findVolume(volId))};
                        
             if (!volume) {
                 ATH_MSG_WARNING(__func__<<"() "<<__LINE__
                                 <<" - Failed to find tracking volume for seed measurement "<<volId);
                 return Acts::Result<Acts::BoundTrackParameters>::failure(std::make_error_code(std::errc::invalid_argument));
-            }
-            if (volume->motherVolume() && volume->motherVolume()->isAlignable()) {
-                volume = volume->motherVolume();
             }
             ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__
                             <<" - Bounding volume "<<volume->volumeName()
@@ -159,7 +159,15 @@ namespace MuonR4{
                                     <<", bounds: "<<volume->volumeBounds()<<", "
                                     <<SegmentFit::localSegmentPars(*frontSegment));
                 }
-
+                /** Update the local seed direction */
+                {
+                    const Amg::Transform3D& toLoc{volume->globalToLocalTransform(tgContext)};
+                    const Amg::Vector3D locSeedDir = toLoc.linear() * seedDir;
+                    const Amg::Vector3D frontSeedDir = toLoc.linear() * frontSegment->direction();
+                    seedDir = volume->localToGlobalTransform(tgContext).linear() *
+                              Acts::makeDirectionFromAxisTangents(houghTanAlpha(locSeedDir), 
+                                                                  houghTanBeta(frontSeedDir));
+                }
                 /** Extrapolate the seed segment onto the inner plane. We want to take the precision 
                     intercept from the inner segment and the non-precision intercept from the extrapolated
                     segment */
@@ -387,7 +395,7 @@ namespace MuonR4{
         }
         if (msgLvl(MSG::VERBOSE)) {
             std::vector<std::string> names {"Pair01", "Pair12", "Pair02Seg", "Pair02Pos"};
-            for (const auto& [i, est] : Acts::enumerate(estimates)) {
+            for (const auto [i, est] : Acts::enumerate(estimates)) {
                 ATH_MSG_VERBOSE(__func__<<"() Estimate "<<names[i]<<": PtimesQ: "<<est.PtimesQ*1e-3
                     <<", weight: "<<est.weight<<", score: "<<est.score);
             }

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrkJiveXML/TrackRetriever.h"
@@ -562,55 +562,57 @@ namespace JiveXML {
       //Now fill everything in a datamap
     DataMap DataMap;
     // Start with mandatory entries
+    const std::size_t nId = id.size();
     DataMap["id"] = id;
-    DataMap["chi2"] = chi2;
-    DataMap["numDoF"] = numDoF;
-    DataMap["trackAuthor"] = trackAuthor;
-    DataMap["barcode"] = barcode;
+    DataMap["chi2"] = std::move(chi2);
+    DataMap["numDoF"] = std::move(numDoF);
+    DataMap["trackAuthor"] = std::move(trackAuthor);
+    DataMap["barcode"] = std::move(barcode);
+    //numhits also used below, don't move
     DataMap["numHits"] = numHits;
-    DataMap["nBLayerHits"] = nBLayerHits;
-    DataMap["nPixHits"] = nPixHits;
-    DataMap["nSCTHits"] = nSCTHits;
-    DataMap["nTRTHits"] = nTRTHits;
-    DataMap["numPolyline"] = numPolyline;
+    DataMap["nBLayerHits"] = std::move(nBLayerHits);
+    DataMap["nPixHits"] = std::move(nPixHits);
+    DataMap["nSCTHits"] = std::move(nSCTHits);
+    DataMap["nTRTHits"] = std::move(nTRTHits);
+    DataMap["numPolyline"] = std::move(numPolyline);
 
     // if perigee parameters are not available, leave the corresponding subtags empty.
     // This way atlantis knows that such tracks can only be displayed as polylines.
     if (!pt.empty()){
-      DataMap["pt"] = pt;
-      DataMap["d0"] = d0;
-      DataMap["z0"] = z0;
-      DataMap["phi0"] = phi0;
-      DataMap["cotTheta"] = cotTheta;
-      DataMap["covMatrix multiple=\"15\""] = covMatrix;
+      DataMap["pt"] = std::move(pt);
+      DataMap["d0"] = std::move(d0);
+      DataMap["z0"] = std::move(z0);
+      DataMap["phi0"] = std::move(phi0);
+      DataMap["cotTheta"] = std::move(cotTheta);
+      DataMap["covMatrix multiple=\"15\""] = std::move(covMatrix);
     }
 
     // vectors with measurement- or TrackStateOnSurface-wise entries
     if ( !polylineX.empty()){
       std::string numPolyPerTrack = DataType(polylineX.size()/((double)id.size())).toString();
-      DataMap["polylineX multiple=\"" + numPolyPerTrack + "\""] = polylineX;
-      DataMap["polylineY multiple=\"" + numPolyPerTrack + "\""] = polylineY;
-      DataMap["polylineZ multiple=\"" + numPolyPerTrack + "\""] = polylineZ;
+      DataMap["polylineX multiple=\"" + numPolyPerTrack + "\""] = std::move(polylineX);
+      DataMap["polylineY multiple=\"" + numPolyPerTrack + "\""] = std::move(polylineY);
+      DataMap["polylineZ multiple=\"" + numPolyPerTrack + "\""] = std::move(polylineZ);
     }
 
     if ( !hits.empty()){
       std::string numHitsPerTrack = DataType(hits.size()/((double)id.size())).toString();
-      DataMap["hits multiple=\"" + numHitsPerTrack + "\""] = hits;
-      DataMap["isOutlier multiple=\""+numHitsPerTrack+"\""] = isOutlier;
-      DataMap["driftSign multiple=\""+numHitsPerTrack+"\""] = driftSign;
+      DataMap["hits multiple=\"" + numHitsPerTrack + "\""] = std::move(hits);
+      DataMap["isOutlier multiple=\""+numHitsPerTrack+"\""] = std::move(isOutlier);
+      DataMap["driftSign multiple=\""+numHitsPerTrack+"\""] = std::move(driftSign);
 
       if (m_doWriteResiduals){
 	// hits counter in principle not needed anymore:
-	DataMap["numTsos"] = numHits;
-	DataMap["tsosResLoc1 multiple=\""+numHitsPerTrack+"\""] = tsosResLoc1;
-	DataMap["tsosResLoc2 multiple=\""+numHitsPerTrack+"\""] = tsosResLoc2;
-	DataMap["tsosPullLoc1 multiple=\""+numHitsPerTrack+"\""] = tsosPullLoc1;
-	DataMap["tsosPullLoc2 multiple=\""+numHitsPerTrack+"\""] = tsosPullLoc2;
-	DataMap["tsosDetType multiple=\""+numHitsPerTrack+"\""] = tsosDetType;
+	DataMap["numTsos"] = std::move(numHits);
+	DataMap["tsosResLoc1 multiple=\""+numHitsPerTrack+"\""] = std::move(tsosResLoc1);
+	DataMap["tsosResLoc2 multiple=\""+numHitsPerTrack+"\""] = std::move(tsosResLoc2);
+	DataMap["tsosPullLoc1 multiple=\""+numHitsPerTrack+"\""] = std::move(tsosPullLoc1);
+	DataMap["tsosPullLoc2 multiple=\""+numHitsPerTrack+"\""] = std::move(tsosPullLoc2);
+	DataMap["tsosDetType multiple=\""+numHitsPerTrack+"\""] = std::move(tsosDetType);
       }
     }
       
-    ATH_MSG_DEBUG(dataTypeName() << " collection " << collectionName << " retrieved with " << id.size() << " entries");
+    ATH_MSG_DEBUG(dataTypeName() << " collection " << collectionName << " retrieved with " << nId << " entries");
 
     return DataMap;
   }

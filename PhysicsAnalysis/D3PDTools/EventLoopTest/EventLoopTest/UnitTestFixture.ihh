@@ -9,7 +9,7 @@
 // includes
 //
 
-#include <RootCoreUtils/ThrowMsg.h>
+#include <stdexcept>
 
 //
 // method implementations
@@ -25,7 +25,7 @@ namespace EL
     T *hist = dynamic_cast<T*>
       (getTObject (sampleName, objectName, isMandatory));
     if (isMandatory && hist == nullptr)
-      RCU_THROW_MSG ("object " + objectName + " in sample " + sampleName + " not of right type");
+      throw std::runtime_error ("object " + objectName + " in sample " + sampleName + " not of right type");
     return hist;
   }
 }

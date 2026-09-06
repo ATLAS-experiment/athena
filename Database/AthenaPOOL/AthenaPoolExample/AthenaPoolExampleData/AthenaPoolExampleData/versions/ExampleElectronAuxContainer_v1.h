@@ -15,7 +15,7 @@ class ExampleElectronAuxContainer_v1 : public xAOD::AuxContainerBase {
   ExampleElectronAuxContainer_v1();
 
  private:
-  AUXVAR_DECL(double, pt);
+  AUXVAR_DECL(float, pt);
   AUXVAR_DECL(float, charge);
 };
 

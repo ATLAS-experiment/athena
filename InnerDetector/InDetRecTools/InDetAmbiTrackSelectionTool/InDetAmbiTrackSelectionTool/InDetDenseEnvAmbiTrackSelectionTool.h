@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -238,12 +238,12 @@ namespace InDet
     struct lessTrkTrack {
       bool operator() (const Trk::Track* x, const Trk::Track* y) const
       {
-        if (ATH_UNLIKELY(!x and !y)) return false;
-        if (ATH_UNLIKELY(!x)) return true;
-        if (ATH_UNLIKELY(!y)) return false;
-        if (ATH_UNLIKELY(!x->trackParameters()  and !y->trackParameters())) return false;
-        if (ATH_UNLIKELY(!x->trackParameters() || x->trackParameters()->size() <= 0) ) return true;
-        if (ATH_UNLIKELY(!y->trackParameters() || y->trackParameters()->size() <= 0) ) return false;
+        if (!x and !y) [[unlikely]] return false;
+        if (!x) [[unlikely]] return true;
+        if (!y) [[unlikely]] return false;
+        if (!x->trackParameters()  and !y->trackParameters()) [[unlikely]] return false;
+        if (!x->trackParameters() || x->trackParameters()->size() <= 0) [[unlikely]] return true;
+        if (!y->trackParameters() || y->trackParameters()->size() <= 0) [[unlikely]] return false;
         return std::fabs( (*x->trackParameters())[0]->parameters()[Trk::qOverP]) < std::fabs( (*y->trackParameters())[0]->parameters()[Trk::qOverP]) ;
       }
     };

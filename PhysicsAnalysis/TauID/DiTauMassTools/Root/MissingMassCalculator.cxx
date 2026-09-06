@@ -3184,13 +3184,13 @@ bool MissingMassCalculator::MassCollinear(const xAOD::IParticle *p0, const xAOD:
     /// redefine tau vectors if necessary - MMC sychronization
     if (kMMCsynchronize) {
         if (p0->type() == xAOD::Type::Tau) {
-            const xAOD::TauJet *tau0 = dynamic_cast<const xAOD::TauJet *>(p0);
+            const xAOD::TauJet *tau0 = static_cast<const xAOD::TauJet *>(p0);
             k1.SetPtEtaPhiM(k1.Pt(), k1.Eta(), k1.Phi(),
                             tau0->nTracks() < 3 ? 800. : 1200.);  // MeV
         }
 
         if (p1->type() == xAOD::Type::Tau) {
-            const xAOD::TauJet *tau1 = dynamic_cast<const xAOD::TauJet *>(p1);
+            const xAOD::TauJet *tau1 = static_cast<const xAOD::TauJet *>(p1);
             k2.SetPtEtaPhiM(k2.Pt(), k2.Eta(), k2.Phi(),
                             tau1->nTracks() < 3 ? 800. : 1200.);  // MeV
         }

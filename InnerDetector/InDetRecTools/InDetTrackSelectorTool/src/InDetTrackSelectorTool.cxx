@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "InDetTrackSelectorTool/InDetTrackSelectorTool.h"
@@ -137,6 +137,7 @@ bool InDetTrackSelectorTool::decision(const Trk::TrackParameters * track, const 
 
   if(nullptr == perigee || !perigee->covariance() ) {
    ATH_MSG_INFO( "Track preselection: cannot make a measured perigee. This track will not pass." );
+   delete perigee;
    return false;
   }
 

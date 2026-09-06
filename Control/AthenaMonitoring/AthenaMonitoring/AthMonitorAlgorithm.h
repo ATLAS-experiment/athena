@@ -31,6 +31,10 @@
 #include "LumiBlockData/LuminosityCondData.h"
 #include "LumiBlockData/LBDurationCondData.h"
 #include "LumiBlockData/TrigLiveFractionCondData.h"
+#include "CxxUtils/transparent_string_hash.h"
+#include <string_view>
+#include <concepts>
+
 
 namespace Trig {
 class TrigDecisionTool;
@@ -123,6 +127,8 @@ public:
      *
      * @param groupHandle Reference to the GenericMonitoringTool
      * @param variables... Variadic list of monitored variables to be saved
+     * note: The ToolHandle constructors include a non-explicit converting
+     * constructor from std::string.
      */
     template <typename... T>
     void fill( const ToolHandle<GenericMonitoringTool>& groupHandle, T&&... variables ) const {
@@ -137,7 +143,7 @@ public:
      *                  the vector will not be valid after calling this function! Use
      *                  const lvalue variant if you want to keep your vectors.
      */
-    void fill( const std::string& groupName,
+    void fill( std::string_view groupName,
                std::vector<std::reference_wrapper<Monitored::IMonitoredVariable>>&& variables ) const;
 
     /**
@@ -146,7 +152,7 @@ public:
      * @param groupHandle Reference to the GenericMonitoringTool
      * @param variables Vector of monitored variables to be saved
      */
-    void fill( const std::string& groupName,
+    void fill( std::string_view groupName,
                const std::vector<std::reference_wrapper<Monitored::IMonitoredVariable>>& variables ) const {
         fill( getGroup(groupName), std::vector<std::reference_wrapper<Monitored::IMonitoredVariable>>{variables});
     }
@@ -156,10 +162,13 @@ public:
      *
      * @param groupName The string name of the GenericMonitoringTool
      * @param variables... Variadic list of monitored variables to be saved
+     * note: The ToolHandle constructors include a non-explicit converting
+     * constructor from std::string; the 'requires' condition disambiguates this.
      */
-    template <typename... T>
-    void fill( const std::string& groupName, T&&... variables ) const {
-        fill(getGroup(groupName), std::vector<std::reference_wrapper<Monitored::IMonitoredVariable>>{std::forward<T>(variables)...});
+    template <typename S, typename... T>
+    requires std::convertible_to<S, std::string_view>
+    void fill( S&& groupName, T&&... variables ) const {
+        fill(getGroup(std::forward<S>(groupName)), std::vector<std::reference_wrapper<Monitored::IMonitoredVariable>>{std::forward<T>(variables)...});
     }
     /** @} */ // end of fill group
 
@@ -242,7 +251,7 @@ public:
      * @param name string name of the desired tool
      * @return reference to the desired monitoring tool
      */
-    const ToolHandle<GenericMonitoringTool>& getGroup( const std::string& name ) const;
+    const ToolHandle<GenericMonitoringTool>& getGroup( std::string_view name ) const;
 
 
     /** 
@@ -369,7 +378,7 @@ protected:
 private:
     typedef std::vector<std::reference_wrapper<Monitored::IMonitoredVariable>> MonVarVec_t;
     std::string m_name;
-    std::unordered_map<std::string, size_t> m_toolLookupMap;
+    std::unordered_map<std::string, size_t, CxxUtils::TransparentStringHash, std::equal_to<>> m_toolLookupMap;
 
     const ToolHandle<GenericMonitoringTool> m_dummy;
 

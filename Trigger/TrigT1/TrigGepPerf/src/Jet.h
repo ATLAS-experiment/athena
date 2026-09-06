@@ -2,8 +2,8 @@
  *   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
  */
 
-#ifndef TRIGL0GEPPERF_JET_H
-#define TRIGL0GEPPERF_JET_H
+#ifndef TRIGGEPPERF_JET_H
+#define TRIGGEPPERF_JET_H
 
 #include "TLorentzVector.h"
 
@@ -11,7 +11,12 @@ namespace Gep{
   struct Jet
   {
    
-    TLorentzVector vec;    
+    TLorentzVector vec;
+    // Raw eta/phi as delivered by the seed source, before the TLorentzVector
+    // (SetPtEtaPhiM) round-trip. JetTaggerLRJ digitizes these to match the
+    // emulation, which reads the same values as written (float) to the ntuple.
+    double etaInput {0};
+    double phiInput {0};
     std::vector<int> constituentsIndices;
     int nConstituents {0};
     float radius {0};
@@ -33,4 +38,4 @@ namespace Gep{
   };
 }
 
-#endif //TRIGL0GEPPERF_CUSTOMJET_H
+#endif //TRIGGEPPERF_CUSTOMJET_H

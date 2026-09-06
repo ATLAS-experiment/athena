@@ -218,25 +218,25 @@ private:
     "The extra correction types to store but not apply for muons"
   };
 
-  Gaudi::Property<std::vector<std::vector<int>>> m_feisoInts{
+  Gaudi::Property<std::vector<std::vector<int>>> m_fwdelisoInts{
     this,
-    "FeIsoTypes",
+    "FwdElIsoTypes",
     {},
     "The isolation types to do for forward electron: vector of vector of enum "
     "type Iso::IsolationType"
   };
 
-  Gaudi::Property<std::vector<std::vector<int>>> m_fecorInts{
+  Gaudi::Property<std::vector<std::vector<int>>> m_fwdelcorInts{
     this,
-    "FeCorTypes",
+    "FwdElCorTypes",
     {},
     "The correction types to do for forward electron iso: vector of vector of "
     "enum type Iso::IsolationCalo/TrackCorrection"
   };
 
-  Gaudi::Property<std::vector<std::vector<int>>> m_fecorIntsExtra{
+  Gaudi::Property<std::vector<std::vector<int>>> m_fwdelcorIntsExtra{
     this,
-    "FeCorTypesExtra",
+    "FwdElCorTypesExtra",
     {},
     "The extra correction types to store but not apply for forward electrons"
   };
@@ -278,7 +278,7 @@ private:
   std::vector<std::pair<xAOD::Iso::IsolationFlavour, CaloIsoHelpKey>>
     m_phCaloIso;
   std::vector<std::pair<xAOD::Iso::IsolationFlavour, CaloIsoHelpKey>>
-    m_feCaloIso;
+    m_fwdelCaloIso;
   std::vector<std::pair<xAOD::Iso::IsolationFlavour, CaloIsoHelpKey>>
     m_muCaloIso;
 
@@ -314,6 +314,8 @@ private:
     m_elTrackIso;
   std::vector<std::pair<xAOD::Iso::IsolationFlavour, TrackIsoHelpKey>>
     m_phTrackIso;
+  std::vector<std::pair<xAOD::Iso::IsolationFlavour, TrackIsoHelpKey>>
+    m_fwdelTrackIso;
   std::vector<std::pair<xAOD::Iso::IsolationFlavour, TrackIsoHelpKey>>
     m_muTrackIso;
 

@@ -13,8 +13,6 @@
 #include "GeoPrimitives/GeoPrimitivesHelpers.h"
 #include "GeoPrimitives/GeoPrimitivesToStringConverter.h"
 
-// Trk
-#include <fstream>
 
 #include "GeoModelKernel/GeoBox.h"
 #include "GeoModelKernel/GeoShape.h"
@@ -67,6 +65,8 @@
 #include <cmath>  //for std::abs
 #include <map>
 #include <memory>
+#include <fstream>
+
 
 const InterfaceID& Muon::MuonStationTypeBuilder::interfaceID() {
     static const InterfaceID IID_IMuonStationTypeBuilder("MuonStationTypeBuilder", 1, 0);
@@ -153,10 +153,10 @@ std::unique_ptr<Trk::TrackingVolumeArray>
         }
         xpos = transf.translation().x();
         if (clv->getShape()->type() == "Trd") {
-            const GeoTrd* trd = dynamic_cast<const GeoTrd*>(clv->getShape());
+            const GeoTrd* trd = static_cast<const GeoTrd*>(clv->getShape());
             xh = std::max(trd->getXHalfLength1(), trd->getXHalfLength2());
         } else if (clv->getShape()->type() == "Box") {
-            const GeoBox* box = dynamic_cast<const GeoBox*>(clv->getShape());
+            const GeoBox* box = static_cast<const GeoBox*>(clv->getShape());
             xh = box->getXHalfLength();
         } else {
             xh = get_x_size(cv);
@@ -196,13 +196,13 @@ std::unique_ptr<Trk::TrackingVolumeArray>
         std::shared_ptr<Trk::VolumeBounds> volBounds{};
         std::unique_ptr<Trk::Volume> vol{};
         if (clv->getShape()->type() == "Trd") {
-            const GeoTrd* trd = dynamic_cast<const GeoTrd*>(clv->getShape());
+            const GeoTrd* trd = static_cast<const GeoTrd*>(clv->getShape());
             const double halfX1{trd->getXHalfLength1()}, halfX2{trd->getXHalfLength2()},
                          halfY1{trd->getYHalfLength1()}, halfY2{trd->getYHalfLength2()},
                          halfZ{trd->getZHalfLength()};
             volBounds = std::make_unique<Trk::CuboidVolumeBounds>(std::max(halfX1, halfX2), std::max(halfY1, halfY2), halfZ);
         } else if (clv->getShape()->type() == "Box") {
-            const GeoBox* box = dynamic_cast<const GeoBox*>(clv->getShape());
+            const GeoBox* box = static_cast<const GeoBox*>(clv->getShape());
             volBounds = Trk::GeoShapeConverter::convert(box);
         } else {
             double xSize = get_x_size(cv);
@@ -219,7 +219,7 @@ std::unique_ptr<Trk::TrackingVolumeArray>
         // order in X
         if (compVol.empty() || vol->center().x() >= compVol.back()->center().x()) {
             compVol.push_back(std::move(vol));
-            compName.push_back(cname);
+            compName.push_back(std::move(cname));
             compGeo.push_back(cv);
             compTransf.push_back(transf);
         } else {
@@ -425,7 +425,7 @@ std::unique_ptr<Trk::TrackingVolumeArray>
             Amg::Transform3D spacerTrf{Amg::getTranslateX3D(currX + spacerBounds->halflengthX())};
             Trk::Volume spacerVol(makeTransform(spacerTrf),
                                   std::move(spacerBounds));
-            std::unique_ptr<Trk::TrackingVolume> spacerTrkVol{processSpacer(spacerVol, geoSpacer, transfSpacer)};
+            std::unique_ptr<Trk::TrackingVolume> spacerTrkVol{processSpacer(spacerVol, std::move(geoSpacer), std::move(transfSpacer))};
             trkVols.emplace_back(std::move(spacerTrkVol));
             currX = maxX;
             volSteps.push_back(currX);
@@ -478,7 +478,7 @@ std::unique_ptr<Trk::TrackingVolumeArray>
         std::shared_ptr<Trk::VolumeBounds> bounds{};
         Amg::Transform3D boxTrf{transf};
         if (clv->getShape()->type() == "Trd") {
-            const GeoTrd* trd = dynamic_cast<const GeoTrd*>(clv->getShape());
+            const GeoTrd* trd = static_cast<const GeoTrd*>(clv->getShape());
             const double halfX1 = trd->getXHalfLength1();
             const double halfX2 = trd->getXHalfLength2();
             const double halfY1 = trd->getYHalfLength1();
@@ -501,7 +501,7 @@ std::unique_ptr<Trk::TrackingVolumeArray>
                 ATH_MSG_WARNING("volume shape for component not recognized");
             }
         } else if (clv->getShape()->type() == "Box") {
-            const GeoBox* box = dynamic_cast<const GeoBox*>(clv->getShape());
+            const GeoBox* box = static_cast<const GeoBox*>(clv->getShape());
             const double halfX1 = box->getXHalfLength();
             const double halfY1 = box->getYHalfLength();
             const double halfZ = box->getZHalfLength();
@@ -528,7 +528,7 @@ std::unique_ptr<Trk::TrackingVolumeArray>
         // order in X
         if (compVol.empty() || vol->center().x() >= compVol.back()->center().x()) {
             compVol.emplace_back(std::move(vol));
-            compName.push_back(cname);
+            compName.push_back(std::move(cname));
             compGeo.push_back(cv);
             compTransf.push_back(transf);
         } else {
@@ -683,7 +683,7 @@ std::unique_ptr<Trk::TrackingVolumeArray>
                                          Amg::getTranslateZ3D(currX + spacerBounds->halflengthZ());
             Trk::Volume spacerVol(makeTransform(spacerTrf), std::move(spacerBounds));
 
-            std::unique_ptr<Trk::TrackingVolume> spacerTrkVol{processSpacer(spacerVol, geoSpacer, transfSpacer)};
+            std::unique_ptr<Trk::TrackingVolume> spacerTrkVol{processSpacer(spacerVol, std::move(geoSpacer), std::move(transfSpacer))};
             trkVols.push_back(std::move(spacerTrkVol));
             currX = maxX;
             volSteps.push_back(currX);
@@ -877,7 +877,7 @@ std::unique_ptr<Trk::TrackingVolume>
         double xv{0.};
         int active{0};
         if (clv->getShape()->type() == "Trd") {
-            const GeoTrd* trd = dynamic_cast<const GeoTrd*>(clv->getShape());
+            const GeoTrd* trd = static_cast<const GeoTrd*>(clv->getShape());
             double x1v = trd->getXHalfLength1();
             double x2v = trd->getXHalfLength2();
             if (x1v == x2v)
@@ -887,7 +887,7 @@ std::unique_ptr<Trk::TrackingVolume>
         if ((clv->getName()).compare(0, 3, "MDT") == 0) {
             xv = 13.0055;  // the half-thickness
             if (!cache.m_mdtTubeMat) {
-                const GeoTube* tube = dynamic_cast<const GeoTube*>(clv->getShape());
+                const GeoTube* tube = static_cast<const GeoTube*>(clv->getShape());
                 double volume = 8 * (tube->getRMax()) * (tube->getZHalfLength()) * xv;
                 cache.m_mdtTubeMat = std::make_unique<Trk::MaterialProperties>(getAveragedLayerMaterial(cv, volume, 2 * xv));
             }
@@ -903,11 +903,7 @@ std::unique_ptr<Trk::TrackingVolume>
                 }
             }
             if (!mdtMat) {
-                const Trk::TrapezoidVolumeBounds* trd = dynamic_cast<const Trk::TrapezoidVolumeBounds*>(&(vol.volumeBounds()));
-                // check return to comply with coverity
-                if (!trd) {
-                    ATH_MSG_ERROR("trd station component does not return trapezoid shape");
-                }
+                const Trk::TrapezoidVolumeBounds* trd = static_cast<const Trk::TrapezoidVolumeBounds*>(&(vol.volumeBounds()));
                 double volume = 4 * (trd->minHalflengthX() + trd->maxHalflengthX()) * (trd->halflengthY()) * xv;
                 cache.m_mdtFoamMat.push_back(std::make_unique<Trk::MaterialProperties>(getAveragedLayerMaterial(cv, volume, 2 * xv)));
                 mdtMat = cache.m_mdtFoamMat.back().get();
@@ -1015,7 +1011,7 @@ std::unique_ptr<Trk::TrackingVolume> Muon::MuonStationTypeBuilder::processRpc(co
             shape = subt;
         }
         if (shape && shape->type() == "Box") {
-            const GeoBox* box = dynamic_cast<const GeoBox*>(shape);
+            const GeoBox* box = static_cast<const GeoBox*>(shape);
             double xs = box->getXHalfLength();
             double ys = box->getYHalfLength();
             double zs = box->getZHalfLength();
@@ -1064,7 +1060,7 @@ std::unique_ptr<Trk::TrackingVolume> Muon::MuonStationTypeBuilder::processRpc(co
             }
             layers.push_back(std::move(layer));
         } else if (shape && shape->type() == "Trd") {
-            const GeoTrd* trd = dynamic_cast<const GeoTrd*>(shape);
+            const GeoTrd* trd = static_cast<const GeoTrd*>(shape);
             double xs1 = trd->getXHalfLength1();
             double xs2 = trd->getXHalfLength2();
             double ys1 = trd->getYHalfLength1();
@@ -1111,10 +1107,10 @@ std::unique_ptr<Trk::TrackingVolume> Muon::MuonStationTypeBuilder::processRpc(co
                         const GeoLogVol* gclv = gcv->getLogVol();
                         const GeoShape* lshape = gclv->getShape();
                         while (lshape->type() == "Subtraction") {
-                            const GeoShapeSubtraction* sub = dynamic_cast<const GeoShapeSubtraction*>(lshape);
+                            const GeoShapeSubtraction* sub = static_cast<const GeoShapeSubtraction*>(lshape);
                             lshape = sub->getOpA();
                         }
-                        const GeoTrd* gtrd = dynamic_cast<const GeoTrd*>(lshape);
+                        const GeoTrd* gtrd = static_cast<const GeoTrd*>(lshape);
                         double gx = gtrd->getXHalfLength1();
                         double gy = gtrd->getYHalfLength1();
                         double gz = gtrd->getZHalfLength();
@@ -1190,12 +1186,12 @@ std::unique_ptr<Trk::TrackingVolume> Muon::MuonStationTypeBuilder::processSpacer
     // Don't use iterators; they'll be invalidated by the push_back's.
     size_t idx{0};
     while (idx < gv.size()) {
-        const GeoVPhysVol* vol = gv[idx];
+        const GeoVPhysVol* thisVol = gv[idx];
         const Amg::Transform3D& tf = transf[idx];
-        if (vol->getNChildVols()) {
-            for (unsigned int ich = 0; ich < vol->getNChildVols(); ++ich) {
-                gv.push_back(vol->getChildVol(ich));
-                transf.emplace_back(tf * vol->getXToChildVol(ich));
+        if (thisVol->getNChildVols()) {
+            for (unsigned int ich = 0; ich < thisVol->getNChildVols(); ++ich) {
+                gv.push_back(thisVol->getChildVol(ich));
+                transf.emplace_back(tf * thisVol->getXToChildVol(ich));
             }
             gv.erase(gv.begin() + idx);
             transf.erase(transf.begin() + idx);
@@ -1211,7 +1207,7 @@ std::unique_ptr<Trk::TrackingVolume> Muon::MuonStationTypeBuilder::processSpacer
                         << cmat.X0 << " L0 " << cmat.L0 << " A " << cmat.A
                         << " Z " << cmat.Z << " rho " << cmat.rho);
         if (clv->getShape()->type() == "Box") {
-            const GeoBox* box = dynamic_cast<const GeoBox*>(clv->getShape());
+            const GeoBox* box = static_cast<const GeoBox*>(clv->getShape());
             double xs = box->getXHalfLength();
             double ys = box->getYHalfLength();
             double zs = box->getZHalfLength();
@@ -1242,8 +1238,8 @@ std::unique_ptr<Trk::TrackingVolume> Muon::MuonStationTypeBuilder::processSpacer
                 dynamic_cast<const GeoShapeSubtraction*>(clv->getShape());
             if (sub && sub->getOpA()->type() == "Box" && sub->getOpB()->type() == "Box") {
                 // LB
-                const GeoBox* boxA = dynamic_cast<const GeoBox*>(sub->getOpA());
-                const GeoBox* boxB = dynamic_cast<const GeoBox*>(sub->getOpB());
+                const GeoBox* boxA = static_cast<const GeoBox*>(sub->getOpA());
+                const GeoBox* boxB = static_cast<const GeoBox*>(sub->getOpB());
                 auto bounds = std::make_shared<Trk::RectangleBounds>(boxA->getYHalfLength(), boxA->getZHalfLength());
                 double thickness = (boxA->getXHalfLength() - boxB->getXHalfLength());
                 double shift = 0.5 * (boxA->getXHalfLength() + boxB->getXHalfLength());
@@ -1298,7 +1294,7 @@ std::unique_ptr<Trk::TrackingVolume> Muon::MuonStationTypeBuilder::processSpacer
                     subVs.emplace_back(shift->getOp(), shift->getX());
                 const GeoShape* shape = sub->getOpA();
                 while (shape->type() == "Subtraction") {
-                    const GeoShapeSubtraction* subtr = dynamic_cast<const GeoShapeSubtraction*>(shape);
+                    const GeoShapeSubtraction* subtr = static_cast<const GeoShapeSubtraction*>(shape);
                     const GeoShapeShift* shift = dynamic_cast<const GeoShapeShift*>(subtr->getOpB());
                     if (shift)
                         subVs.emplace_back(shift->getOp(), shift->getX());
@@ -1399,22 +1395,22 @@ std::unique_ptr<Trk::TrackingVolume> Muon::MuonStationTypeBuilder::processCscSta
     // Amg::CLHEPTransformToEigen(mv->getXToChildVol(0));
     if (clv->getShape()->type() == "Shift") {
         const GeoShapeShift* shift =
-            dynamic_cast<const GeoShapeShift*>(clv->getShape());
+            static_cast<const GeoShapeShift*>(clv->getShape());
         if (shift->getOp()->type() == "Union") {
             // that would be the union making the diamond/double trapezoid
             // shape, let's retrieve the parameters
             isDiamond = true;
-            const GeoShapeUnion* uni = dynamic_cast<const GeoShapeUnion*>(shift->getOp());
+            const GeoShapeUnion* uni = static_cast<const GeoShapeUnion*>(shift->getOp());
             if (uni->getOpA()->type() == "Trd") {
-                const GeoTrd* trdA = dynamic_cast<const GeoTrd*>(uni->getOpA());
+                const GeoTrd* trdA = static_cast<const GeoTrd*>(uni->getOpA());
                 xMin = trdA->getYHalfLength1();
                 xMed = trdA->getYHalfLength2();
                 y1 = trdA->getZHalfLength();
                 z = trdA->getXHalfLength1();
             }
             if (uni->getOpB()->type() == "Shift") {
-                const GeoShapeShift* sh = dynamic_cast<const GeoShapeShift*>(uni->getOpB());
-                const GeoTrd* trdB = dynamic_cast<const GeoTrd*>(sh->getOp());
+                const GeoShapeShift* sh = static_cast<const GeoShapeShift*>(uni->getOpB());
+                const GeoTrd* trdB = static_cast<const GeoTrd*>(sh->getOp());
                 if (trdB->getYHalfLength1() != xMed || trdB->getXHalfLength1() != z) {
                     ATH_MSG_DEBUG(mv->getLogVol()->getName() <<
                                   ": something is wrong: dimensions of 2 trapezoids do not match");
@@ -1425,7 +1421,7 @@ std::unique_ptr<Trk::TrackingVolume> Muon::MuonStationTypeBuilder::processCscSta
         }  // end Union
         if (shift->getOp()->type() == "Trd") {
             // that would be the trapezoid shape, let's retrieve the parameters
-            const GeoTrd* trd = dynamic_cast<const GeoTrd*>(shift->getOp());
+            const GeoTrd* trd = static_cast<const GeoTrd*>(shift->getOp());
             xMin = trd->getYHalfLength1();
             xMed = trd->getYHalfLength2();
             y1 = trd->getZHalfLength();
@@ -1434,7 +1430,7 @@ std::unique_ptr<Trk::TrackingVolume> Muon::MuonStationTypeBuilder::processCscSta
     } else {
         if (clv->getShape()->type() == "Trd") {
             // that would be the trapezoid shape, let's retrieve the parameters
-            const GeoTrd* trd = dynamic_cast<const GeoTrd*>(clv->getShape());
+            const GeoTrd* trd = static_cast<const GeoTrd*>(clv->getShape());
             xMin = trd->getYHalfLength1();
             xMed = trd->getYHalfLength2();
             y1 = trd->getZHalfLength();
@@ -1455,13 +1451,13 @@ std::unique_ptr<Trk::TrackingVolume> Muon::MuonStationTypeBuilder::processCscSta
         compName.push_back(clv->getName());
         compGeoVol.push_back(cv);
         if (clv->getShape()->type() == "Shift") {
-            const GeoShapeShift* shift = dynamic_cast<const GeoShapeShift*>(clv->getShape());
+            const GeoShapeShift* shift = static_cast<const GeoShapeShift*>(clv->getShape());
             if (shift->getOp()->type() == "Union") {
                 // that would be the union making the diamond/double trapezoid
                 // shape, let's retrieve the parameters
-                const GeoShapeUnion* uni = dynamic_cast<const GeoShapeUnion*>(shift->getOp());
+                const GeoShapeUnion* uni = static_cast<const GeoShapeUnion*>(shift->getOp());
                 if (uni->getOpA()->type() == "Trd") {
-                    const GeoTrd* trdA = dynamic_cast<const GeoTrd*>(uni->getOpA());
+                    const GeoTrd* trdA = static_cast<const GeoTrd*>(uni->getOpA());
                     double xSize = trdA->getXHalfLength1();
                     if (!xSizes.empty()){
                         xSizes.push_back((std::abs(transform.translation().x() - compTransf[ich - 1].translation().x()) - xSizes.back()));
@@ -1475,7 +1471,7 @@ std::unique_ptr<Trk::TrackingVolume> Muon::MuonStationTypeBuilder::processCscSta
             }  // end Union
         }      // end Shift
         if (clv->getShape()->type() == "Trd") {
-            const GeoTrd* trd = dynamic_cast<const GeoTrd*>(clv->getShape());
+            const GeoTrd* trd = static_cast<const GeoTrd*>(clv->getShape());
             double xSize = trd->getXHalfLength1();
             if (!xSizes.empty()) {
                 xSizes.push_back( std::abs(transform.translation().x() -  compTransf[ich - 1].translation().x()) - xSizes.back());
@@ -1580,7 +1576,7 @@ std::unique_ptr<Trk::TrackingVolume> Muon::MuonStationTypeBuilder::processTgcSta
     }
 
     if (baseShape->type() == "Trd") {
-        const GeoTrd* trd = dynamic_cast<const GeoTrd*>(baseShape);
+        const GeoTrd* trd = static_cast<const GeoTrd*>(baseShape);
         double x1 = trd->getXHalfLength1();
         double y1 = trd->getYHalfLength1();
         double y2 = trd->getYHalfLength2();
@@ -1828,7 +1824,7 @@ std::unique_ptr<Trk::LayerArray> Muon::MuonStationTypeBuilder::processCSCTrdComp
         }
         if (x_array.empty()) {
             x_array.push_back(0.);
-            x_mat.push_back(matCSC);
+            x_mat.push_back(std::move(matCSC));
             x_thickness.push_back(thickness);
             x_active.push_back(1);
         } else if (x_array.size() == 1) {
@@ -1837,7 +1833,7 @@ std::unique_ptr<Trk::LayerArray> Muon::MuonStationTypeBuilder::processCSCTrdComp
             Trk::MaterialProperties xmatCSC(xthick, scale * matCSC.x0(), scale * matCSC.l0(),
                                             matCSC.averageA(), matCSC.averageZ(),
                                             matCSC.averageRho() / scale);
-            x_mat.push_back(xmatCSC);
+            x_mat.push_back(std::move(xmatCSC));
             x_thickness.push_back(xthick);
             x_active.push_back(1);
         } else {
@@ -1979,7 +1975,7 @@ std::unique_ptr<Trk::LayerArray>
         }
         matCSC = Trk::MaterialProperties(*cache.m_matCSCspacer2);
         x_array.push_back(0.);
-        x_mat.push_back(matCSC);
+        x_mat.push_back(std::move(matCSC));
         x_thickness.push_back(thickness);
         x_active.push_back(0);
     }
@@ -2090,6 +2086,9 @@ std::unique_ptr<Trk::LayerArray> Muon::MuonStationTypeBuilder::processTGCCompone
     }
     // rescale material to match the combined thickness of active layers
     double scale = activeThick / thickness;
+    if (scale == 0.)[[unlikely]]{
+      throw std::runtime_error("MuonStationTypeBuilder::processTGCComponent:Scale is zero.");
+    }
     matTGC = Trk::MaterialProperties(activeThick, scale * matTGC.x0(), scale * matTGC.l0(),
                                      matTGC.averageA(), matTGC.averageZ(), matTGC.averageRho() / scale);
     // create layers

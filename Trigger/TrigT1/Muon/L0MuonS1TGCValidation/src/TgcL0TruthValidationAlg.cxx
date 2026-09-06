@@ -21,8 +21,8 @@
 #include <array>
 #include <cmath>
 #include <cstdint>
-#include <limits>
 #include <memory>
+#include <numbers>
 #include <vector>
 
 namespace {
@@ -102,12 +102,78 @@ struct CandidateMatch {
   std::size_t candidate{0U};
 };
 
+struct FinalCandidateMatch {
+  float residual{L0Muon::TgcL0ValidationInvalidValue};
+  std::size_t truth{0U};
+  std::size_t candidate{0U};
+};
+
 struct SegmentMatch {
   float residual{L0Muon::TgcL0ValidationInvalidValue};
   std::size_t truth{0U};
   std::size_t segment{0U};
 };
 
+bool matchesTgcFields(const xAOD::TGCCandData& input,
+                      const xAOD::SectorLogicCandData& output) {
+  return output.pT() == input.pt() &&
+         output.charge() == input.candCharge() &&
+         output.rawPhi() == input.phi() &&
+         output.rawEta() == input.eta() &&
+         output.ptThresh() == input.threshold() &&
+         output.TCID() == input.tcId() &&
+         output.coinType() == input.coinType();
+}
+
+bool hasOnlyTgcFields(const xAOD::SectorLogicCandData& candidate) {
+  return candidate.isMDT() == 0U && candidate.mdtFlag() == 0U &&
+         candidate.numMDTSeg() == 0U && candidate.mdtSegQual() == 0U &&
+         candidate.tileCoin() == 0U && candidate.exotTrig() == 0U;
+}
+
+float decodeEta(const xAOD::TGCCandData& candidate) {
+  const float fraction =
+      static_cast<float>(candidate.eta()) /
+      static_cast<float>(xAOD::TGCCandData::etaBitRange());
+  return fraction * (2.F * xAOD::TGCCandData::etaRange()) -
+         xAOD::TGCCandData::etaRange();
+}
+
+float decodePhi(const xAOD::TGCCandData& candidate) {
+  const float fraction =
+      static_cast<float>(candidate.phi()) /
+      static_cast<float>(xAOD::TGCCandData::phiBitRange());
+  return fraction * xAOD::TGCCandData::phiRange() -
+         std::numbers::pi_v<float>;
+}
+
+int sourceCandidateIndex(const xAOD::TGCCandData& candidate,
+                         const L0Muon::TgcL0CandidateContainer& sources,
+                         const float eta, const float phi) {
+  const float etaTolerance =
+      0.51F * 2.F * xAOD::TGCCandData::etaRange() /
+      static_cast<float>(xAOD::TGCCandData::etaBitRange());
+  const float phiTolerance =
+      1.01F * xAOD::TGCCandData::phiRange() /
+      static_cast<float>(xAOD::TGCCandData::phiBitRange());
+  int result{-1};
+  for (std::size_t index = 0U; index < sources.size(); ++index) {
+    const L0Muon::TgcL0Candidate& source = sources[index];
+    if (source.subdetectorId != candidate.subdetectorId() ||
+        source.sectorId != candidate.sectorId() ||
+        source.bcTag != candidate.bcTag() ||
+        (source.charge > 0 ? 1U : 0U) != candidate.candCharge() ||
+        source.goodMagneticField != candidate.goodMagneticField() ||
+        std::abs(source.eta - eta) > etaTolerance ||
+        std::abs(static_cast<float>(
+            xAOD::P4Helpers::deltaPhi(source.phi, phi))) > phiTolerance) {
+      continue;
+    }
+    if (result >= 0) return -2;
+    result = static_cast<int>(index);
+  }
+  return result;
+}
 
 }  // namespace
 
@@ -117,6 +183,9 @@ StatusCode TgcL0TruthValidationAlg::initialize() {
   ATH_CHECK(m_candidateKey.initialize());
   ATH_CHECK(m_segmentKey.initialize());
   ATH_CHECK(m_truthEventKey.initialize());
+  ATH_CHECK(m_finalCandidateKey.initialize(
+      m_validateFinalCandidates.value() || m_validateSectorLogic.value()));
+  ATH_CHECK(m_sectorLogicKey.initialize(m_validateSectorLogic));
   ATH_CHECK(m_outputKey.initialize());
   ATH_CHECK(m_extrapolator.retrieve());
 
@@ -131,12 +200,6 @@ StatusCode TgcL0TruthValidationAlg::initialize() {
   }
   if (m_validationPlaneToleranceZ.value() < 0.0) {
     ATH_MSG_ERROR("ValidationPlaneToleranceZ must be non-negative");
-    return StatusCode::FAILURE;
-  }
-  if (m_requiredBcTag.value() < -1 ||
-      m_requiredBcTag.value() >
-          static_cast<int>(std::numeric_limits<std::uint16_t>::max())) {
-    ATH_MSG_ERROR("RequiredBcTag must be -1 or a uint16 value");
     return StatusCode::FAILURE;
   }
   return StatusCode::SUCCESS;
@@ -158,12 +221,154 @@ StatusCode TgcL0TruthValidationAlg::execute(const EventContext& ctx) const {
     ATH_MSG_ERROR("Failed to retrieve " << m_truthEventKey.fullKey());
     return StatusCode::FAILURE;
   }
-
   auto output = std::make_unique<TgcL0ValidationEvent>();
   output->event.runNumber = ctx.eventID().run_number();
   output->event.eventNumber = ctx.eventID().event_number();
   output->event.lumiBlock = ctx.eventID().lumi_block();
   output->event.bcid = ctx.eventID().bunch_crossing_id();
+
+  const bool readFinalCandidates = m_validateFinalCandidates.value() ||
+                                   m_validateSectorLogic.value();
+  const xAOD::TGCCandDataContainer* finalCandidateContainer{nullptr};
+  if (readFinalCandidates) {
+    SG::ReadHandle<xAOD::TGCCandDataContainer> finalCandidates{
+        m_finalCandidateKey, ctx};
+    if (!finalCandidates.isValid()) {
+      ATH_MSG_ERROR("Failed to retrieve " << m_finalCandidateKey.fullKey());
+      return StatusCode::FAILURE;
+    }
+    finalCandidateContainer = finalCandidates.cptr();
+    for (std::size_t inputIndex = 0U;
+         inputIndex < finalCandidateContainer->size(); ++inputIndex) {
+      const xAOD::TGCCandData* inputCandidate =
+          (*finalCandidateContainer)[inputIndex];
+      if (inputCandidate == nullptr) {
+        ATH_MSG_ERROR("Null final TGC candidate at index " << inputIndex);
+        return StatusCode::FAILURE;
+      }
+
+      const float eta = decodeEta(*inputCandidate);
+      const float phi = decodePhi(*inputCandidate);
+      int sourceIndex{-1};
+      int station{-1};
+      if (inputCandidate->tcId() != 0U) {
+        sourceIndex =
+            sourceCandidateIndex(*inputCandidate, *candidates, eta, phi);
+        if (sourceIndex < 0) {
+          ATH_MSG_ERROR("Final TGC candidate " << inputIndex
+                        << (sourceIndex == -2 ? " has ambiguous"
+                                              : " has no")
+                        << " pre-Inner source candidate");
+          return StatusCode::FAILURE;
+        }
+        station = pivotStation(
+            (*candidates)[static_cast<std::size_t>(sourceIndex)]
+                .positionStationMask);
+        if (station < 0) {
+          ATH_MSG_ERROR("Final TGC candidate " << inputIndex
+                        << " has no valid reference station");
+          return StatusCode::FAILURE;
+        }
+      }
+
+      output->finalCandidates.sourceCandidateIndex.emplace_back(sourceIndex);
+      output->finalCandidates.referenceStation.emplace_back(
+          station < 0
+              ? static_cast<std::uint8_t>(TgcL0ValidationStation::Invalid)
+              : static_cast<std::uint8_t>(station));
+      output->finalCandidates.subdetectorId.emplace_back(
+          inputCandidate->subdetectorId());
+      output->finalCandidates.triggerSector.emplace_back(
+          inputCandidate->sectorId());
+      output->finalCandidates.bcTag.emplace_back(inputCandidate->bcTag());
+      output->finalCandidates.tcId.emplace_back(inputCandidate->tcId());
+      output->finalCandidates.rawEta.emplace_back(inputCandidate->eta());
+      output->finalCandidates.rawPhi.emplace_back(inputCandidate->phi());
+      output->finalCandidates.eta.emplace_back(eta);
+      output->finalCandidates.phi.emplace_back(phi);
+      output->finalCandidates.ptCode.emplace_back(inputCandidate->pt());
+      output->finalCandidates.pt.emplace_back(inputCandidate->ptValueGeV());
+      output->finalCandidates.threshold.emplace_back(
+          inputCandidate->threshold());
+      output->finalCandidates.charge.emplace_back(
+          inputCandidate->candCharge() != 0U ? 1 : -1);
+      output->finalCandidates.innerCoincidence.emplace_back(
+          inputCandidate->hasInnerCoincidence() ? 1U : 0U);
+      output->finalCandidates.goodMagneticField.emplace_back(
+          inputCandidate->goodMagneticField() ? 1U : 0U);
+      output->finalCandidates.truthIndex.emplace_back(-1);
+      output->finalCandidates.truthMatchDeltaR.emplace_back(
+          TgcL0ValidationInvalidValue);
+    }
+  }
+
+  if (m_validateSectorLogic) {
+    SG::ReadHandle<xAOD::SectorLogicCandDataContainer> sectorLogicCandidates{
+        m_sectorLogicKey, ctx};
+    if (!sectorLogicCandidates.isValid()) {
+      ATH_MSG_ERROR("Failed to retrieve " << m_sectorLogicKey.fullKey());
+      return StatusCode::FAILURE;
+    }
+    if (!finalCandidateContainer)[[unlikely]]{
+      ATH_MSG_ERROR("finalCandidateContainer is null.");
+      return StatusCode::FAILURE;
+    }
+    std::size_t sectorLogicIndex{0U};
+    for (std::size_t inputIndex = 0U;
+         inputIndex < finalCandidateContainer->size();
+         ++inputIndex) {
+      const xAOD::TGCCandData* inputCandidate =
+          (*finalCandidateContainer)[inputIndex];
+      if (inputCandidate->tcId() == 0U) continue;
+      if (sectorLogicIndex >= sectorLogicCandidates->size()) {
+        ATH_MSG_ERROR(
+            "Fewer Sector Logic candidates than non-empty TGC candidates");
+        return StatusCode::FAILURE;
+      }
+      const xAOD::SectorLogicCandData* sectorLogicCandidate =
+          (*sectorLogicCandidates)[sectorLogicIndex];
+      if (sectorLogicCandidate == nullptr) {
+        ATH_MSG_ERROR("Null Sector Logic candidate at index "
+                      << sectorLogicIndex);
+        return StatusCode::FAILURE;
+      }
+      if (!matchesTgcFields(*inputCandidate, *sectorLogicCandidate)) {
+        ATH_MSG_ERROR("Sector Logic candidate " << sectorLogicIndex
+                      << " does not preserve TGC candidate " << inputIndex);
+        return StatusCode::FAILURE;
+      }
+      if (!hasOnlyTgcFields(*sectorLogicCandidate)) {
+        ATH_MSG_ERROR("Sector Logic candidate " << sectorLogicIndex
+                      << " contains non-TGC payload");
+        return StatusCode::FAILURE;
+      }
+      if (sectorLogicCandidate->boardID() != 0U ||
+          sectorLogicCandidate->fiberID() != 0U ||
+          sectorLogicCandidate->BCIDOffset() != 0 ||
+          sectorLogicCandidate->veto() != 0U) {
+        ATH_MSG_ERROR("Sector Logic candidate " << sectorLogicIndex
+                      << " has unexpected placeholder metadata");
+        return StatusCode::FAILURE;
+      }
+      output->sectorLogic.inputCandidateIndex.emplace_back(
+          static_cast<std::uint32_t>(inputIndex));
+      output->sectorLogic.candWord.emplace_back(
+          sectorLogicCandidate->candWord());
+      output->sectorLogic.candExtraWord.emplace_back(
+          sectorLogicCandidate->candExtraWord());
+      output->sectorLogic.boardId.emplace_back(sectorLogicCandidate->boardID());
+      output->sectorLogic.fiberId.emplace_back(sectorLogicCandidate->fiberID());
+      output->sectorLogic.bcidOffset.emplace_back(
+          sectorLogicCandidate->BCIDOffset());
+      output->sectorLogic.veto.emplace_back(sectorLogicCandidate->veto());
+      ++sectorLogicIndex;
+    }
+    if (sectorLogicIndex != sectorLogicCandidates->size()) {
+      ATH_MSG_ERROR(
+          "More Sector Logic candidates than non-empty TGC candidates");
+      return StatusCode::FAILURE;
+    }
+  }
 
   const auto processParticle = [&](const auto& particle) -> StatusCode {
     if (!particle || std::abs(particle->pdg_id()) != 13 ||
@@ -239,6 +444,16 @@ StatusCode TgcL0TruthValidationAlg::execute(const EventContext& ctx) const {
                   TgcL0ValidationUnmatchedReason::NoCandidateInWindow)
             : static_cast<std::uint8_t>(
                   TgcL0ValidationUnmatchedReason::NotFullyExtrapolated));
+    output->truth.finalCandidateMatched.emplace_back(0U);
+    output->truth.matchedFinalCandidateIndex.emplace_back(-1);
+    output->truth.finalCandidateMatchDeltaR.emplace_back(
+        TgcL0ValidationInvalidValue);
+    output->truth.finalCandidateUnmatchedReason.emplace_back(
+        stationMask == 0x7U
+            ? static_cast<std::uint8_t>(
+                  TgcL0ValidationUnmatchedReason::NoCandidateInWindow)
+            : static_cast<std::uint8_t>(
+                  TgcL0ValidationUnmatchedReason::NotFullyExtrapolated));
     output->truth.wireSegmentMatched.emplace_back(0U);
     output->truth.stripSegmentMatched.emplace_back(0U);
     output->truth.matchedWireSegmentIndex.emplace_back(-1);
@@ -276,6 +491,12 @@ StatusCode TgcL0TruthValidationAlg::execute(const EventContext& ctx) const {
     output->candidates.phi.emplace_back(candidate.phi);
     output->candidates.deltaTheta.emplace_back(candidate.deltaTheta);
     output->candidates.deltaPhi.emplace_back(candidate.deltaPhi);
+    output->candidates.pt.emplace_back(candidate.preInnerCoincidencePt);
+    output->candidates.threshold.emplace_back(
+        candidate.preInnerCoincidenceThreshold);
+    output->candidates.charge.emplace_back(candidate.charge);
+    output->candidates.goodMagneticField.emplace_back(
+        candidate.goodMagneticField ? 1U : 0U);
     output->candidates.truthIndex.emplace_back(-1);
   }
 
@@ -287,8 +508,8 @@ StatusCode TgcL0TruthValidationAlg::execute(const EventContext& ctx) const {
     for (std::size_t candidate = 0U; candidate < candidates->size();
          ++candidate) {
       const TgcL0Candidate& inputCandidate = (*candidates)[candidate];
-      if (m_requiredBcTag.value() >= 0 &&
-          inputCandidate.bcTag != static_cast<std::uint16_t>(m_requiredBcTag.value())) {
+      if (m_requiredBcTagMask.value() != 0U &&
+          (inputCandidate.bcTag & m_requiredBcTagMask.value()) == 0U) {
         continue;
       }
       if (output->truth.eta[truth] * inputCandidate.eta < 0.F) continue;
@@ -331,6 +552,80 @@ StatusCode TgcL0TruthValidationAlg::execute(const EventContext& ctx) const {
             : TgcL0ValidationUnmatchedReason::NoCandidateInWindow);
   }
 
+  if (m_validateFinalCandidates) {
+    std::vector<FinalCandidateMatch> finalCandidateMatches;
+    std::vector<bool> hasFinalCandidateInWindow(output->truth.pt.size(),
+                                                false);
+    for (std::size_t truth = 0U; truth < output->truth.pt.size(); ++truth) {
+      if (output->truth.extrapolatedStationMask[truth] != 0x7U) continue;
+      const StationPositions positions = truthPositions(*output, truth);
+      for (std::size_t candidate = 0U;
+           candidate < output->finalCandidates.tcId.size(); ++candidate) {
+        if (output->finalCandidates.tcId[candidate] == 0U) continue;
+        if (m_requiredBcTagMask.value() != 0U &&
+            (output->finalCandidates.bcTag[candidate] &
+             m_requiredBcTagMask.value()) == 0U) {
+          continue;
+        }
+        if (output->truth.eta[truth] *
+                output->finalCandidates.eta[candidate] <
+            0.F) {
+          continue;
+        }
+        const std::size_t station =
+            output->finalCandidates.referenceStation[candidate];
+        if (station >= positions.size() || !positions[station].valid) continue;
+        const float deltaEta = output->finalCandidates.eta[candidate] -
+                               positions[station].eta;
+        const float deltaPhi = static_cast<float>(
+            xAOD::P4Helpers::deltaPhi(output->finalCandidates.phi[candidate],
+                                      positions[station].phi));
+        const float residual = std::hypot(deltaEta, deltaPhi);
+        if (residual > m_maxFinalCandidateDeltaR.value()) {
+          continue;
+        }
+        hasFinalCandidateInWindow[truth] = true;
+        finalCandidateMatches.push_back({residual, truth, candidate});
+      }
+    }
+    std::stable_sort(
+        finalCandidateMatches.begin(), finalCandidateMatches.end(),
+        [](const FinalCandidateMatch& lhs, const FinalCandidateMatch& rhs) {
+          if (lhs.residual != rhs.residual) {
+            return lhs.residual < rhs.residual;
+          }
+          if (lhs.truth != rhs.truth) return lhs.truth < rhs.truth;
+          return lhs.candidate < rhs.candidate;
+        });
+    for (const FinalCandidateMatch& match : finalCandidateMatches) {
+      if (output->truth.matchedFinalCandidateIndex[match.truth] >= 0 ||
+          output->finalCandidates.truthIndex[match.candidate] >= 0) {
+        continue;
+      }
+      output->truth.finalCandidateMatched[match.truth] = 1U;
+      output->truth.matchedFinalCandidateIndex[match.truth] =
+          static_cast<int>(match.candidate);
+      output->truth.finalCandidateMatchDeltaR[match.truth] = match.residual;
+      output->truth.finalCandidateUnmatchedReason[match.truth] =
+          TgcL0ValidationNoUnmatchedReason;
+      output->finalCandidates.truthIndex[match.candidate] =
+          static_cast<int>(match.truth);
+      output->finalCandidates.truthMatchDeltaR[match.candidate] =
+          match.residual;
+    }
+    for (std::size_t truth = 0U; truth < output->truth.pt.size(); ++truth) {
+      if (output->truth.finalCandidateMatched[truth] != 0U ||
+          output->truth.extrapolatedStationMask[truth] != 0x7U) {
+        continue;
+      }
+      output->truth.finalCandidateUnmatchedReason[truth] =
+          static_cast<std::uint8_t>(
+              hasFinalCandidateInWindow[truth]
+                  ? TgcL0ValidationUnmatchedReason::CandidateCompetition
+                  : TgcL0ValidationUnmatchedReason::NoCandidateInWindow);
+    }
+  }
+
   for (const TgcL0Segment& segment : *segments) {
     output->segments.subdetectorId.emplace_back(segment.subdetectorId);
     output->segments.triggerSector.emplace_back(segment.triggerSector);
@@ -359,9 +654,9 @@ StatusCode TgcL0TruthValidationAlg::execute(const EventContext& ctx) const {
       for (std::size_t segment = 0U;
            segment < output->segments.projection.size(); ++segment) {
         if (output->segments.projection[segment] != projectionValue) continue;
-        if (m_requiredBcTag.value() >= 0 &&
-            output->segments.bcTag[segment] !=
-                static_cast<std::uint16_t>(m_requiredBcTag.value())) {
+        if (m_requiredBcTagMask.value() != 0U &&
+            (output->segments.bcTag[segment] &
+             m_requiredBcTagMask.value()) == 0U) {
           continue;
         }
         if (output->truth.eta[truth] * output->segments.eta[segment] < 0.F) {

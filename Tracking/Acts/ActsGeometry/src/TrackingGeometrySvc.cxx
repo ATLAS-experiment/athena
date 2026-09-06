@@ -48,6 +48,7 @@
 #include <Acts/Surfaces/LineSurface.hpp>
 #include <Acts/Surfaces/RectangleBounds.hpp>
 #include <Acts/Visualization/ObjVisualization3D.hpp>
+#include <Acts/Visualization/ViewConfig.hpp>
 #include <Acts/Geometry/detail/TrackingGeometryPrintVisitor.hpp>
 
 // PACKAGE
@@ -67,6 +68,25 @@
 #include <stdexcept>
 
 using namespace Acts::UnitLiterals;
+
+namespace {
+  /// Build a ViewConfigFunc selecting one of three configurations per geometry
+  /// object, replacing the deprecated three-ViewConfig visualize() overload.
+  Acts::ViewConfigFunc viewConfigFunc(const Acts::ViewConfig& volumeCfg,
+                                      const Acts::ViewConfig& portalCfg,
+                                      const Acts::ViewConfig& sensitiveCfg) {
+    //coverity[AUTO_CAUSES_COPY]
+    return [volumeCfg, portalCfg, sensitiveCfg](const Acts::GeometryObject& geoObj) {
+      if (geoObj.geometryId().boundary() != 0) {
+        return portalCfg;
+      }
+      if (geoObj.geometryId().sensitive() != 0) {
+        return sensitiveCfg;
+      }
+      return volumeCfg;
+    };
+  }
+}
 
 namespace ActsTrk{
 TrackingGeometrySvc::TrackingGeometrySvc(const std::string &name,
@@ -100,7 +120,7 @@ StatusCode TrackingGeometrySvc::initialize() {
                << Acts::VersionPatch << " [" << Acts::CommitHash.value_or("unknown hash") << "]");
 
   // load which subdetectors to build from property
-  std::set<std::string> buildSubdet(m_buildSubdetectors.begin(),
+  std::set<std::string, std::less<>> buildSubdet(m_buildSubdetectors.begin(),
                                     m_buildSubdetectors.end());
   ATH_MSG_INFO("Configured to build " << buildSubdet.size()
                                       << " subdetectors:");
@@ -109,23 +129,23 @@ StatusCode TrackingGeometrySvc::initialize() {
   }
 
   ATH_MSG_DEBUG("Loading detector manager(s)");
-  if (buildSubdet.find("Pixel") != buildSubdet.end()) {
+  if (buildSubdet.contains("Pixel") ) {
     ATH_CHECK(m_detStore->retrieve(p_pixelManager, "Pixel"));
   }
-  if (buildSubdet.find("SCT") != buildSubdet.end()) {
+  if (buildSubdet.contains("SCT") ) {
     ATH_CHECK(m_detStore->retrieve(p_SCTManager, "SCT"));
   }
-  if (buildSubdet.find("TRT") != buildSubdet.end()) {
+  if (buildSubdet.contains("TRT") ) {
     ATH_CHECK(m_detStore->retrieve(p_TRTManager, "TRT"));
     ATH_CHECK(m_detStore->retrieve(m_TRT_idHelper, "TRT_ID"));
   }
-  if (buildSubdet.find("ITkPixel") != buildSubdet.end()) {
+  if (buildSubdet.contains("ITkPixel") ) {
     ATH_CHECK(m_detStore->retrieve(p_ITkPixelManager, "ITkPixel"));
   }
-  if (buildSubdet.find("ITkStrip") != buildSubdet.end()) {
+  if (buildSubdet.contains("ITkStrip") ) {
     ATH_CHECK(m_detStore->retrieve(p_ITkStripManager, "ITkStrip"));
   }
-  if (buildSubdet.find("HGTD") != buildSubdet.end()) {
+  if (buildSubdet.contains("HGTD") ) {
     ATH_CHECK(m_detStore->retrieve(p_HGTDManager, "HGTD"));
     ATH_CHECK(m_detStore->retrieve(m_HGTD_idHelper, "HGTD_ID"));
   }
@@ -157,7 +177,7 @@ StatusCode TrackingGeometrySvc::initialize() {
 
 
     ATH_MSG_INFO("Using Blueprint API for geometry construction");
-    std::set<std::string> buildSubdet(m_buildSubdetectors.begin(),
+    std::set<std::string, std::less<>> buildSubdet(m_buildSubdetectors.begin(),
                                      m_buildSubdetectors.end());
 
     ATH_CHECK(m_blueprintNodeBuilders.retrieve());
@@ -204,18 +224,18 @@ StatusCode TrackingGeometrySvc::initialize() {
 
     if (m_objDebugOutput) {
       Acts::ObjVisualization3D vis;
-      m_trackingGeometry->visualize(vis, getNominalContext().context(), {.visible = false},
-                                  {.visible = false}, {.visible = true});
+      m_trackingGeometry->visualize(vis, getNominalContext().context(),
+                                  viewConfigFunc({.visible = false}, {.visible = false}, {.visible = true}));
       vis.write("blueprint_sensitive.obj");
       vis.clear();
 
-      m_trackingGeometry->visualize(vis, getNominalContext().context(), {.visible = true},
-                                  {.visible = false}, {.visible = false});
+      m_trackingGeometry->visualize(vis, getNominalContext().context(),
+                                  viewConfigFunc({.visible = true}, {.visible = false}, {.visible = false}));
       vis.write("blueprint_volume.obj");
       vis.clear();
 
-      m_trackingGeometry->visualize(vis, getNominalContext().context(), {.visible = false},
-                                  {.visible = true}, {.visible = false});
+      m_trackingGeometry->visualize(vis, getNominalContext().context(),
+                                  viewConfigFunc({.visible = false}, {.visible = true}, {.visible = false}));
       vis.write("blueprint_portals.obj");
     }
     if (m_printGeo) {
@@ -270,7 +290,7 @@ StatusCode TrackingGeometrySvc::initialize() {
       matDeco = std::make_shared<const Acts::JsonMaterialDecorator>(
 	   jsonGeoConvConfig, matFileFullPath, ActsTrk::actsLevelVector(msg().level()));
     }
-    tgbConfig.materialDecorator = matDeco;
+    tgbConfig.materialDecorator = std::move(matDeco);
   }
 
   std::array<double, 2> sctECEnvelopeZ{20_mm, 20_mm};
@@ -295,7 +315,7 @@ StatusCode TrackingGeometrySvc::initialize() {
 
 
     // PIXEL
-    if (buildSubdet.count("Pixel") > 0) {
+    if (buildSubdet.contains("Pixel")) {
       tgbConfig.trackingVolumeBuilders.push_back([&](const auto &gctx,
                                                      const auto &inner,
                                                      const auto &) {
@@ -319,7 +339,7 @@ StatusCode TrackingGeometrySvc::initialize() {
     }
 
     // ITK PIXEL
-    if (buildSubdet.count("ITkPixel") > 0) {
+    if (buildSubdet.contains("ITkPixel") ) {
       tgbConfig.trackingVolumeBuilders.push_back(
           [&](const auto &gctx, const auto &inner, const auto &) {
             auto cfg = makeLayerBuilderConfig(p_ITkPixelManager);
@@ -378,7 +398,7 @@ StatusCode TrackingGeometrySvc::initialize() {
     }
 
     // ITK STRIP
-    if (buildSubdet.count("ITkStrip") > 0) {
+    if (buildSubdet.contains("ITkStrip")) {
       tgbConfig.trackingVolumeBuilders.push_back(
           [&](const auto &gctx, const auto &inner, const auto &) {
             auto cfg = makeLayerBuilderConfig(p_ITkStripManager);
@@ -397,7 +417,7 @@ StatusCode TrackingGeometrySvc::initialize() {
             cvbConfig.volumeName = "ITkStrip";
             cvbConfig.layerBuilder = lb;
             cvbConfig.buildToRadiusZero = 
-              buildSubdet.count("ITkPixel") == 0 && !m_buildBeamPipe;
+              !buildSubdet.contains("ITkPixel") && !m_buildBeamPipe;
 
             Acts::CylinderVolumeBuilder cvb(
                 cvbConfig,
@@ -407,8 +427,8 @@ StatusCode TrackingGeometrySvc::initialize() {
           });
     }
 
-    bool buildSCT = buildSubdet.count("SCT") > 0;
-    bool buildTRT = buildSubdet.count("TRT") > 0;
+    bool buildSCT = buildSubdet.contains("SCT") ;
+    bool buildTRT = buildSubdet.contains("TRT");
 
     if (buildSCT && buildTRT) {
       // building both we need to take care
@@ -459,7 +479,7 @@ StatusCode TrackingGeometrySvc::initialize() {
             cvbConfig.layerEnvelopeZ = 2_mm;
             cvbConfig.trackingVolumeHelper = cylinderVolumeHelper;
             cvbConfig.volumeName = "TRT";
-            cvbConfig.layerBuilder = lb;
+            cvbConfig.layerBuilder = std::move(lb);
             cvbConfig.buildToRadiusZero = false;
 
             Acts::CylinderVolumeBuilder cvb(
@@ -471,7 +491,7 @@ StatusCode TrackingGeometrySvc::initialize() {
     }
 
     //HGTD
-    if(buildSubdet.count("HGTD") > 0) {
+    if(buildSubdet.contains("HGTD") ) {
       tgbConfig.trackingVolumeBuilders.push_back(
           [&](const auto &gctx, const auto &inner, const auto &) {
             auto lb = makeHGTDLayerBuilder(p_HGTDManager); //using ActsHGTDLayerBuilder
@@ -480,7 +500,7 @@ StatusCode TrackingGeometrySvc::initialize() {
             cvbConfig.layerEnvelopeZ = 1_mm;
             cvbConfig.trackingVolumeHelper = cylinderVolumeHelper;
             cvbConfig.volumeName = "HGTD";
-            cvbConfig.layerBuilder = lb;
+            cvbConfig.layerBuilder = std::move(lb);
             cvbConfig.buildToRadiusZero = false;
 
             Acts::CylinderVolumeBuilder cvb(
@@ -1272,8 +1292,12 @@ std::unique_ptr<ActsTrk::DetectorElementToActsGeometryIdMap>
             return;
         }
 
-        auto insert_id = [&detector_element_to_geoid, &surface, &counter](const xAOD::UncalibMeasType type,
-                                                                          const IdentifierHash& hash) {
+        auto insert_id = [&detector_element_to_geoid, &surface, &counter](const xAOD::UncalibMeasType type) {
+            auto * possibleElement = getActsDetectorElement(surface);
+            if (!possibleElement){
+              return;
+            } 
+            auto hash = possibleElement->identifyHash();
             detector_element_to_geoid->insert(std::make_pair(makeDetectorElementKey(type, hash),
                                                              DetectorElementToActsGeometryIdMap::makeValue(surface->geometryId())));
             ++counter.n_detector_elements;
@@ -1281,16 +1305,13 @@ std::unique_ptr<ActsTrk::DetectorElementToActsGeometryIdMap>
         switch(placement->detectorType()) {
             using enum DetectorType;
             case Pixel:
-                insert_id(xAOD::UncalibMeasType::PixelClusterType,
-                          getActsDetectorElement(surface)->identifyHash());
+                insert_id(xAOD::UncalibMeasType::PixelClusterType);
                 break;
             case Sct:
-                insert_id(xAOD::UncalibMeasType::StripClusterType,
-                          getActsDetectorElement(surface)->identifyHash());
+                insert_id(xAOD::UncalibMeasType::StripClusterType);
                 break;
             case Hgtd:
-                insert_id(xAOD::UncalibMeasType::HGTDClusterType, 
-                         getActsDetectorElement(surface)->identifyHash());
+                insert_id(xAOD::UncalibMeasType::HGTDClusterType);
                 break;
             case Trt: {
                 break;

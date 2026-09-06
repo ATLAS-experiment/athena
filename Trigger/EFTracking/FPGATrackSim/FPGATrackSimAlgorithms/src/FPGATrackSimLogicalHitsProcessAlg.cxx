@@ -778,8 +778,8 @@ bool FPGATrackSimLogicalHitsProcessAlg::passesChi2Cut(const FPGATrackSimTrack& t
 
 void FPGATrackSimLogicalHitsProcessAlg::MakeSeedTracks(std::vector<FPGATrackSimTrack>& tracks)
 {
-    for (auto &track : tracks) {        
-      const auto& hitptrs = track.getFPGATrackSimHitPtrs();
+    for (auto &track : tracks) {
+      const auto hitptrs = track.getFPGATrackSimHitPtrs();
       layer_bitmask_t hitmask = 0x0;
       for (unsigned ihit = 0; ihit < hitptrs.size(); ihit++) { // can't just use hit mask directly from track because that is for coordinates
 	if (hitptrs[ihit] && hitptrs[ihit]->isReal()) hitmask |= (0x1 << ihit);

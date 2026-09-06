@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRACKING_ACTS_CACHE_H
@@ -21,6 +21,8 @@
 
 #include "StoreGate/UpdateHandle.h"
 #include "StoreGate/UpdateHandleKey.h"
+#include <vector>
+#include <utility>
 
 namespace ActsTrk::Cache {
 
@@ -29,8 +31,8 @@ namespace ActsTrk::Cache {
         public:
         CacheEntry(){}
         CacheEntry(DataVector<OT>* dv, unsigned int s, unsigned int e): container(dv){ranges.emplace_back(std::move(s),std::move(e));}
-        CacheEntry(DataVector<OT>* dv, std::vector<std::pair<unsigned int, unsigned int>>& r): container(dv), ranges(std::move(r)) {}
-        DataVector<OT>* container;
+        CacheEntry(DataVector<OT>* dv, const std::vector<std::pair<unsigned int, unsigned int>>& r): container(dv), ranges(r) {}
+        DataVector<OT>* container{};
         std::vector<std::pair<unsigned int, unsigned int>> ranges;
     };
 

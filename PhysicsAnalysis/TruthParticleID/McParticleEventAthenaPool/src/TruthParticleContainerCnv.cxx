@@ -56,8 +56,8 @@ TruthParticleContainer* TruthParticleContainerCnv::createTransient(const Token* 
 
    TruthParticleContainer *trans = 0;
 
-   static const pool::Guid p5_guid("2D25E3D9-950B-49E0-A51F-2B6EC93D1A23");
-   static const pool::Guid p6_guid("97AC2CEE-7E8A-4E2E-B6B5-FD8545D77FC4");
+   static const Guid p5_guid("2D25E3D9-950B-49E0-A51F-2B6EC93D1A23");
+   static const Guid p6_guid("97AC2CEE-7E8A-4E2E-B6B5-FD8545D77FC4");
 
    if ( compareClassGuid(token, p6_guid) ) {
      

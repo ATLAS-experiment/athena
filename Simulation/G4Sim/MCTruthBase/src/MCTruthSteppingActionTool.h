@@ -10,10 +10,15 @@
 
 // Infrastructure includes
 #include "G4AtlasTools/UserActionToolBase.h"
+#include "Gaudi/Property.h"
+#include "GaudiKernel/ServiceHandle.h"
+
+// ISF includes
+#include "ISF_Interfaces/IGeoIDSvc.h"
+#include "ISF_Interfaces/ITruthSvc.h"
 
 // STL includes
 #include <string>
-#include <map>
 
 namespace G4UA
 {
@@ -49,7 +54,27 @@ namespace G4UA
     private:
 
       /// Map of volume name to output collection name
-      std::map<std::string, std::string> m_volumeCollectionMap;
+      Gaudi::Property<MCTruthSteppingAction::VolumeCollectionMap_t>
+        m_volumeCollectionMap{this, "VolumeCollectionMap", {},
+                              "Map of volume name to output collection name"};
+
+      /// The saving level for secondaries
+      Gaudi::Property<int> m_secondarySavingLevel{
+        this, "SecondarySavingLevel", 2,
+        "Three valid options: 1 - Primaries; 2 - StoredSecondaries(default); 3 - All"};
+
+      /// The level in the G4 volume hierarchy at which we find the sub-detector
+      Gaudi::Property<int> m_subDetVolLevel{
+        this, "SubDetVolumeLevel", 1,
+        "The level in the G4 volume hierarchy at which we find the sub-detector name"};
+
+      /// Central Truth Service
+      ServiceHandle<ISF::ITruthSvc> m_truthRecordSvc{
+        this, "TruthRecordSvc", "ISF_TruthRecordSvc", "ISF Particle Truth Service"};
+
+      /// Geo ID Service
+      ServiceHandle<ISF::IGeoIDSvc> m_geoIDSvc{
+        this, "GeoIDSvc", "ISF_GeoIDSvc", "ISF GeoID Service"};
 
   }; // class MCTruthSteppingActionTool
 

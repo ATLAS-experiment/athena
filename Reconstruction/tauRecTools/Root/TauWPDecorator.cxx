@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "tauRecTools/TauWPDecorator.h"
@@ -44,6 +44,10 @@ StatusCode TauWPDecorator::retrieveHistos(int nProng) {
   }
   else {
     ATH_MSG_ERROR("nProng " << nProng << " not supported.");
+    return StatusCode::FAILURE;
+  }
+  if (!histArray)[[unlikely]]{
+    ATH_MSG_ERROR("histArray pointer is null.");
     return StatusCode::FAILURE;
   }
 
@@ -94,7 +98,10 @@ StatusCode TauWPDecorator::storeLimits(int nProng) {
     ATH_MSG_ERROR("nProng " << nProng << " not supported.");
     return StatusCode::FAILURE;
   }
-
+  if (!histArray)[[unlikely]]{
+    ATH_MSG_ERROR("histArray pointer is null.");
+    return StatusCode::FAILURE;
+  }
   std::shared_ptr<TH2> firstHist = histArray->at(0).second;
   m_xMin[nProng] = firstHist->GetXaxis()->GetXmin();
   m_xMax[nProng] = firstHist->GetXaxis()->GetBinCenter(firstHist->GetNbinsX());
@@ -168,12 +175,16 @@ StatusCode TauWPDecorator::initialize() {
   // 2p is optional
   if (!m_file2p.empty()) {
     m_hists2p = std::make_shared<std::vector<m_pair_t>>();
+    //coverity[NULL_FIELD:FALSE]
     ATH_CHECK(retrieveHistos(2));
+    //coverity[NULL_FIELD:FALSE]
     ATH_CHECK(storeLimits(2));
   }
   
   m_hists3p = std::make_shared<std::vector<m_pair_t>>();
+  //coverity[NULL_FIELD:FALSE]
   ATH_CHECK(retrieveHistos(3));
+  //coverity[NULL_FIELD:FALSE]
   ATH_CHECK(storeLimits(3));  
 
   return StatusCode::SUCCESS;

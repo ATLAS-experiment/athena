@@ -16,7 +16,6 @@ triggermenu = 'PhysicsP1_pp_run3_v1_HLTReprocessing_prescale'
 # HLT BS_RDO->RAW
 hlt = ExecStep.ExecStep('BSRDOtoRAW')
 hlt.type = 'Trig_reco_tf'
-hlt.forks = 1
 hlt.threads = 4
 hlt.concurrent_events = 4
 hlt.input = 'data'

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRIGCONFDATA_DATASTRUCTURE_H
@@ -170,7 +170,7 @@ namespace TrigConf {
          auto v = obj.get().get_value_optional<T>();
          return v ? std::optional(std::move(*v)) : std::nullopt;
       }
-
+      //coverity[UNNECESSARY_STRING_COPY]
       const std::string & getAttribute(const std::string & key, bool ignoreIfMissing = false, const std::string & def = "") const;
 
       /** Access to array structure

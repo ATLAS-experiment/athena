@@ -9,6 +9,7 @@
 
 #include <SampleHandler/Global.h>
 
+#include <memory>
 #include <string>
 
 namespace SH
@@ -80,15 +81,29 @@ namespace SH
 
     /// \brief make a new list object for the sub-directory
     ///
-    /// \return a new list object for the sub-directory, or \c NULL if
-    ///   it is not a directory
+    /// \return a new list object for the sub-directory, or \c nullptr
+    ///   if it is not a directory
     /// \pre (soft) next() has been called successfully
     /// \par Guarantee
     ///   strong
     /// \par Failures
     ///   out of memory III
   public:
+    [[deprecated("use openDirUnique() instead")]]
     DiskList *openDir () const;
+
+
+    /// \brief make a new list object for the sub-directory
+    ///
+    /// \return a new list object for the sub-directory, or \c nullptr
+    ///   if it is not a directory
+    /// \pre (soft) next() has been called successfully
+    /// \par Guarantee
+    ///   strong
+    /// \par Failures
+    ///   out of memory III
+  public:
+    std::unique_ptr<DiskList> openDirUnique () const;
 
 
     /// \brief the base path for the directory listed

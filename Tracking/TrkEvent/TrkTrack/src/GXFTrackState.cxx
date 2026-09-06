@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //////////////////////////////////////////////////////////////////
@@ -101,7 +101,7 @@ namespace Trk {
   {
     m_measerror[0] = m_measerror[1] = m_measerror[2] = m_measerror[3] = m_measerror[4] = -1;
 
-    if (m_materialEffects->sigmaDeltaTheta() == 0) {
+    if (m_materialEffects && (m_materialEffects->sigmaDeltaTheta() == 0)) {
       setStateType(TrackStateOnSurface::BremPoint);
     } else {
       setStateType(TrackStateOnSurface::Scatterer);

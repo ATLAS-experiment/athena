@@ -137,7 +137,6 @@ StatusCode LArAutoCorrAlgToDB::stop() {
   // Record LArAutoCorrComplete
   ATH_CHECK( detStore()->record(std::move(larAutoCorrComplete),m_acContName) );
   ATH_MSG_INFO ( "Recorded LArAutCorrComplete object with key " << m_acContName );
-  ATH_CHECK(detStore()->symLink(ClassID_traits<LArAutoCorrComplete>::ID(),m_acContName,ClassID_traits<ILArAutoCorr>::ID()));
   ATH_MSG_INFO(detStore()->dump());
   
   return StatusCode::SUCCESS;

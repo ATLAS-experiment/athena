@@ -8,6 +8,7 @@ from AthDeviceComps.AthDeviceCompsConfig import (
     CopyToolCfg,
     CopiesToolCfg,
 )
+from AthenaConfiguration.Enums import BeamType
 
 # ============================================================
 # Algorithm configurations
@@ -21,6 +22,11 @@ def RDOtoTracccCellConverterAlgCfg(flags,
         raise ValueError("clusterization on device is not compatible "
             "with analog clustering at the moment due to incorrent "
             "ToT values for Pixel hits in the simulation data.")
+
+    if flags.ITk.selectStripIntimeHits and 'timeBins' not in kwargs:
+        coll_25ns = flags.Beam.BunchSpacing<=25 and flags.Beam.Type is BeamType.Collisions
+        kwargs.setdefault("timeBins", "01X" if coll_25ns else "X1X")
+
     acc = ComponentAccumulator()
     kwargs.setdefault("HostMR", acc.popToolsAndMerge(HostMemoryResourceToolCfg(flags)))
     kwargs.setdefault("DeviceMR", acc.popToolsAndMerge(DeviceMemoryResourceToolCfg(flags)))
@@ -29,6 +35,7 @@ def RDOtoTracccCellConverterAlgCfg(flags,
     kwargs.setdefault("StripRDO",    "ITkStripRDOs")
     kwargs.setdefault("TracccCells", "TracccCells")
     kwargs.setdefault("HostConditionsObjectName", "TracccHostCondConfig")
+    kwargs.setdefault("GeoIdMappingObjectName",     "TracccGeometryIdMapping")
     kwargs.setdefault("CPUCellSorting", not flags.Acts.Device.doCellSorting)
     kwargs.setdefault("UsePixelToTForCellActivation", not flags.Tracking.doPixelDigitalClustering)
     acc.addEventAlgo(
@@ -43,6 +50,11 @@ def PhaseIIRDOtoTracccCellConverterAlgCfg(flags,
         raise ValueError("clusterization on device is not compatible "
             "with analog clustering at the moment due to incorrent "
             "ToT values for Pixel hits in the simulation data.")
+
+    if flags.ITk.selectStripIntimeHits and 'timeBins' not in kwargs:
+        coll_25ns = flags.Beam.BunchSpacing<=25 and flags.Beam.Type is BeamType.Collisions
+        kwargs.setdefault("timeBins", "01X" if coll_25ns else "X1X")
+
     acc = ComponentAccumulator()
     kwargs.setdefault("HostMR", acc.popToolsAndMerge(HostMemoryResourceToolCfg(flags)))
     kwargs.setdefault("DeviceMR", acc.popToolsAndMerge(DeviceMemoryResourceToolCfg(flags)))
@@ -51,6 +63,7 @@ def PhaseIIRDOtoTracccCellConverterAlgCfg(flags,
     kwargs.setdefault("StripRDO", "ITkStripRDOs")
     kwargs.setdefault("TracccCells", "TracccCellsFromPh2RDO")
     kwargs.setdefault("HostConditionsObjectName", "TracccHostCondConfig")
+    kwargs.setdefault("GeoIdMappingObjectName",     "TracccGeometryIdMapping")
     kwargs.setdefault("CPUCellSorting", not flags.Acts.Device.doCellSorting)
     kwargs.setdefault("UsePixelToTForCellActivation", not flags.Tracking.doPixelDigitalClustering)
     acc.addEventAlgo(
@@ -84,3 +97,16 @@ def TracccMeasurementConverterAlgCfg(flags,
     acc.addEventAlgo(
         CompFactory.ActsTrk.TracccMeasurementConverterAlg(name, **kwargs))
     return acc
+
+def TracccSeedConverterAlgCfg(flags,
+                                     name="TracccSeedConverterAlg",
+                                     **kwargs) -> ComponentAccumulator:
+    acc = ComponentAccumulator()
+    kwargs.setdefault("HostMR", acc.popToolsAndMerge(HostMemoryResourceToolCfg(flags)))
+    kwargs.setdefault("CopyProviderTool", acc.popToolsAndMerge(CopyToolCfg(flags)))
+    kwargs.setdefault("InputSpacepoints", "TracccMeasurements")
+    kwargs.setdefault("InputSeeds", "TracccClusterCollection")
+    kwargs.setdefault("OutputSeeds", "ITkTracccSeeds")
+    acc.addEventAlgo(
+        CompFactory.ActsTrk.TracccSeedConverterAlg(name, **kwargs))
+    return acc    

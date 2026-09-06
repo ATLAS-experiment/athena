@@ -979,154 +979,152 @@ void ZdcNtuple::processZdcNtupleFromModules()
   
   ANA_MSG_DEBUG(  "accessing ZdcModules" );
   
-  if (zdcModules.ptr())
-    {
-      for (const auto zdcMod : *zdcModules)
-	{
-	  int iside = 0;
-	  if (zdcMod->zdcSide() > 0) iside = 1;
-	  int imod = zdcMod->zdcModule();
-	  
-	  if (m_isMC){
-	    //Calib hits are only stored in channel 0 of the RPD
-	    if(!(imod == 4 && zdcMod->zdcChannel() != 0)){
-	      t_ZdcModuleTruthTotal  [iside][imod] = TruthTotalEnergyAcc(*zdcMod);
-	      t_ZdcModuleTruthInvis  [iside][imod] = TruthInvisibleEnergyAcc(*zdcMod);
-	      t_ZdcModuleTruthEM     [iside][imod] = TruthEMEnergyAcc(*zdcMod);
-	      t_ZdcModuleTruthNonEM  [iside][imod] = TruthNonEMEnergyAcc(*zdcMod);
-	      t_ZdcModuleTruthEscaped[iside][imod] = TruthEscapedEnergyAcc(*zdcMod);
-	      t_ZdcModuleTruthNphotons[iside][imod] = nPhotonsAcc(*zdcMod);
-	    }
-	    //Calib hits are stored for all modules
-	    //Other data is only valid for module 1-4
-	    if(imod > 4) continue;
-	  }
-	  
-	  ANA_MSG_VERBOSE ("Module " << zdcMod->zdcSide() << " " << zdcMod->zdcModule() << " amp:" << AmplitudeAcc(*zdcMod));
-	  
-	  if (zdcMod->zdcType() == 0 && !zdcErr)
-	    {
-	      // ZDC energy type modules
-	      t_ZdcModuleCalibAmp[iside][imod] = CalibEnergyAcc(*zdcMod);
-	      t_ZdcModuleCalibTime[iside][imod] = CalibTimeAcc(*zdcMod);
-	      t_ZdcModuleStatus[iside][imod] = StatusAcc(*zdcMod);
-	      if (t_ZdcModuleAmp[iside][imod] != 0.)
-		Warning("processZdcNtupleFromModules", "overwriting side %d module %d!", iside, imod);
-	      t_ZdcModuleAmp[iside][imod] = AmplitudeAcc(*zdcMod);
-	      t_ZdcModuleAmpUncorr[iside][imod] = AmplitudeNoNonLinAcc(*zdcMod);
-	      t_ZdcModuleTime[iside][imod] = TimeAcc(*zdcMod);
-	      
-	      t_ZdcModuleChisq[iside][imod] = ChisqAcc(*zdcMod);
-	      t_ZdcModuleChisqRatio[iside][imod] = ChisqRatioAcc(*zdcMod);
-	      t_ZdcModuleFitAmp[iside][imod] = FitAmpAcc(*zdcMod);
-	      t_ZdcModuleAmpError[iside][imod] = FitAmpErrorAcc(*zdcMod);
-	      t_ZdcModuleFitT0[iside][imod] = FitT0Acc(*zdcMod);
-	      t_ZdcModuleBkgdMaxFraction[iside][imod] = BkgdMaxFractionAcc(*zdcMod);
-	      t_ZdcModuleMinDeriv2nd[iside][imod] = MinDeriv2ndAcc(*zdcMod);
-	      t_ZdcModulePresample[iside][imod] = PresampleAcc(*zdcMod);
-	      t_ZdcModulePreSampleAmp[iside][imod] = PreSampleAmpAcc(*zdcMod);
-	      
-	      if (AmpLGRefitAcc.isAvailable(*zdcMod)) {
-		t_ZdcModuleAmpLGRefit[iside][imod] = AmpLGRefitAcc(*zdcMod);
-		t_ZdcModuleT0LGRefit[iside][imod] = T0LGRefitAcc(*zdcMod);
-		t_ZdcModuleT0SubLGRefit[iside][imod] = T0SubLGRefitAcc(*zdcMod);
-		t_ZdcModuleChisqLGRefit[iside][imod] = ChisqLGRefitAcc(*zdcMod);
-	      }
-	      
-	      if (LucrodTriggerAmpAcc.isAvailable(*zdcMod))
-		t_ZdcLucrodTriggerAmp[iside][imod] = LucrodTriggerAmpAcc(*zdcMod);
-	      if (LucrodTriggerAmpLGAcc.isAvailable(*zdcMod))
-		t_ZdcLucrodTriggerAmpLG[iside][imod] = LucrodTriggerAmpLGAcc(*zdcMod);
-
-	      if (MaxADCAcc.isAvailable(*zdcMod))
-		t_ZdcModuleMaxADC[iside][imod] = MaxADCAcc(*zdcMod);
-	      if (MaxADCHGAcc.isAvailable(*zdcMod))
-		t_ZdcModuleMaxADCHG[iside][imod] = MaxADCHGAcc(*zdcMod);
-	      if (MaxADCLGAcc.isAvailable(*zdcMod))
-		t_ZdcModuleMaxADCLG[iside][imod] = MaxADCLGAcc(*zdcMod);
-	      if (PeakADCHGAcc.isAvailable(*zdcMod))
-		t_ZdcModulePeakADCHG[iside][imod] = PeakADCHGAcc(*zdcMod);
-	      if (PeakADCLGAcc.isAvailable(*zdcMod))
-		t_ZdcModulePeakADCLG[iside][imod] = PeakADCLGAcc(*zdcMod);
-
-	      if (enableOutputSamples && !zdcErr)
-		{
-		  for (unsigned int isamp = 0; isamp < nsamplesZdc; isamp++) // 7 samples
-		    {
-		      if (nsamplesZdc == 7)
-			{
-			  t_raw7[iside][imod][0][0][isamp] = g0d0DataAcc(*zdcMod).at(isamp);
-			  t_raw7[iside][imod][0][1][isamp] = g0d1DataAcc(*zdcMod).at(isamp);
-			  t_raw7[iside][imod][1][0][isamp] = g1d0DataAcc(*zdcMod).at(isamp);
-			  t_raw7[iside][imod][1][1][isamp] = g1d1DataAcc(*zdcMod).at(isamp);
-			}
-		      
-		      if (nsamplesZdc == 15)
-			{
-			  t_raw15[iside][imod][0][0][isamp] = g0d0DataAcc(*zdcMod).at(isamp);
-			  t_raw15[iside][imod][0][1][isamp] = g0d1DataAcc(*zdcMod).at(isamp);
-			  t_raw15[iside][imod][1][0][isamp] = g1d0DataAcc(*zdcMod).at(isamp);
-			  t_raw15[iside][imod][1][1][isamp] = g1d1DataAcc(*zdcMod).at(isamp);
-			}
-		      
-		      if (nsamplesZdc == 24)
-			{
-			  t_raw24[iside][imod][0][0][isamp] = g0dataAcc(*zdcMod).at(isamp);
-			  t_raw24[iside][imod][1][0][isamp] = g1dataAcc(*zdcMod).at(isamp);
-			}
-		      if (nsamplesZdc == 32)
-			{
-			  t_raw32[iside][imod][0][0][isamp] = g0dataAcc(*zdcMod).at(isamp);
-			  t_raw32[iside][imod][1][0][isamp] = g1dataAcc(*zdcMod).at(isamp);
-			}
-		      if (nsamplesZdc == 40)
-			{
-			  t_raw40[iside][imod][0][0][isamp] = g0dataAcc(*zdcMod).at(isamp);
-			  t_raw40[iside][imod][1][0][isamp] = g1dataAcc(*zdcMod).at(isamp);
-			}
-		    }
-		}
-	    }
-	  else if (zdcMod->zdcType() == 1 && nsamplesZdc == 24)
-	    {
-	      // this is the RPD
-	      if (enableRPD)
-		{
-		  if (enableRPDAmp && !rpdErr)
-		    {
-		      t_RpdChannelBaseline[iside][zdcMod->zdcChannel()] = RPDChannelBaselineAcc(*zdcMod);
-		      std::vector<float> const &rpdChannelPileupExpFitParams = RPDChannelPileupExpFitParamsAcc(*zdcMod);
-		      std::copy(rpdChannelPileupExpFitParams.begin(), rpdChannelPileupExpFitParams.end(), t_RpdChannelPileupExpFitParams[iside][zdcMod->zdcChannel()]);
-		      std::vector<float> const &rpdChannelPileupExpFitParamErrs = RPDChannelPileupExpFitParamErrsAcc(*zdcMod);
-		      std::copy(rpdChannelPileupExpFitParamErrs.begin(), rpdChannelPileupExpFitParamErrs.end(), t_RpdChannelPileupExpFitParamErrs[iside][zdcMod->zdcChannel()]);
-		      std::vector<float> const &rpdChannelPileupStretchedExpFitParams = RPDChannelPileupStretchedExpFitParamsAcc(*zdcMod);
-		      std::copy(rpdChannelPileupStretchedExpFitParams.begin(), rpdChannelPileupStretchedExpFitParams.end(), t_RpdChannelPileupStretchedExpFitParams[iside][zdcMod->zdcChannel()]);
-		      std::vector<float> const &rpdChannelPileupStretchedExpFitParamErrs = RPDChannelPileupStretchedExpFitParamErrsAcc(*zdcMod);
-		      std::copy(rpdChannelPileupStretchedExpFitParamErrs.begin(), rpdChannelPileupStretchedExpFitParamErrs.end(), t_RpdChannelPileupStretchedExpFitParamErrs[iside][zdcMod->zdcChannel()]);
-		      t_RpdChannelPileupExpFitMSE[iside][zdcMod->zdcChannel()] = RPDChannelPileupExpFitMSEAcc(*zdcMod);
-		      t_RpdChannelPileupStretchedExpFitMSE[iside][zdcMod->zdcChannel()] = RPDChannelPileupStretchedExpFitMSEAcc(*zdcMod);
-		      t_RpdChannelAmplitude[iside][zdcMod->zdcChannel()] = RPDChannelAmplitudeAcc(*zdcMod);
-		      t_RpdChannelAmplitudeCalib[iside][zdcMod->zdcChannel()] = RPDChannelAmplitudeCalibAcc(*zdcMod);
-		      t_RpdChannelMaxADC[iside][zdcMod->zdcChannel()] = RPDChannelMaxADCAcc(*zdcMod);
-		      t_RpdChannelMaxADCCalib[iside][zdcMod->zdcChannel()] = RPDChannelMaxADCCalibAcc(*zdcMod);
-		      t_RpdChannelMaxSample[iside][zdcMod->zdcChannel()] = RPDChannelMaxSampleAcc(*zdcMod);
-		      t_RpdChannelStatus[iside][zdcMod->zdcChannel()] = RPDChannelStatusAcc(*zdcMod);
-		      t_RpdChannelPileupFrac[iside][zdcMod->zdcChannel()] = RPDChannelPileupFracAcc(*zdcMod);
-		      if(m_isMC){
-			t_RpdModuleTruthNphotons[iside][zdcMod->zdcChannel()] = nPhotonsAcc(*zdcMod);
-		      }
-		    }
-		  if (enableOutputSamples)
-		    {
-		      std::vector<uint16_t> const &rpdChannelRaw = g0dataAcc(*zdcMod);
-		      std::copy(rpdChannelRaw.begin(), rpdChannelRaw.end(), t_rpdRaw[iside][zdcMod->zdcChannel()]);
-		    }
-		}
-	    }
-	}
-    }
-  else
-    {
+  if (zdcModules.ptr()){
+    for (const auto zdcMod : *zdcModules) {
+        int iside = 0;
+        if (zdcMod->zdcSide() > 0) iside = 1;
+        int imod = zdcMod->zdcModule();
+        
+        if (m_isMC){
+          //Calib hits are only stored in channel 0 of the RPD
+          if(!(imod == 4 && zdcMod->zdcChannel() != 0)){
+            t_ZdcModuleTruthTotal  [iside][imod] = TruthTotalEnergyAcc(*zdcMod);
+            t_ZdcModuleTruthInvis  [iside][imod] = TruthInvisibleEnergyAcc(*zdcMod);
+            t_ZdcModuleTruthEM     [iside][imod] = TruthEMEnergyAcc(*zdcMod);
+            t_ZdcModuleTruthNonEM  [iside][imod] = TruthNonEMEnergyAcc(*zdcMod);
+            t_ZdcModuleTruthEscaped[iside][imod] = TruthEscapedEnergyAcc(*zdcMod);
+            t_ZdcModuleTruthNphotons[iside][imod] = nPhotonsAcc(*zdcMod);
+          }
+          //Calib hits are stored for all modules
+          //Other data is only valid for module 0-3
+          //c-style arrays accessed below are dimensioned as float cArray[2][4]
+          //so iside must be in range 0-1 and imod must be in range 0-3
+          if(imod >= 4) continue;
+        }
+        
+        ANA_MSG_VERBOSE ("Module " << zdcMod->zdcSide() << " " << zdcMod->zdcModule() << " amp:" << AmplitudeAcc(*zdcMod));
+        
+        if (zdcMod->zdcType() == 0 && !zdcErr)
+          {
+            // ZDC energy type modules
+            t_ZdcModuleCalibAmp[iside][imod] = CalibEnergyAcc(*zdcMod);
+            t_ZdcModuleCalibTime[iside][imod] = CalibTimeAcc(*zdcMod);
+            t_ZdcModuleStatus[iside][imod] = StatusAcc(*zdcMod);
+            if (t_ZdcModuleAmp[iside][imod] != 0.)
+        Warning("processZdcNtupleFromModules", "overwriting side %d module %d!", iside, imod);
+            t_ZdcModuleAmp[iside][imod] = AmplitudeAcc(*zdcMod);
+            t_ZdcModuleAmpUncorr[iside][imod] = AmplitudeNoNonLinAcc(*zdcMod);
+            t_ZdcModuleTime[iside][imod] = TimeAcc(*zdcMod);
+            
+            t_ZdcModuleChisq[iside][imod] = ChisqAcc(*zdcMod);
+            t_ZdcModuleChisqRatio[iside][imod] = ChisqRatioAcc(*zdcMod);
+            t_ZdcModuleFitAmp[iside][imod] = FitAmpAcc(*zdcMod);
+            t_ZdcModuleAmpError[iside][imod] = FitAmpErrorAcc(*zdcMod);
+            t_ZdcModuleFitT0[iside][imod] = FitT0Acc(*zdcMod);
+            t_ZdcModuleBkgdMaxFraction[iside][imod] = BkgdMaxFractionAcc(*zdcMod);
+            t_ZdcModuleMinDeriv2nd[iside][imod] = MinDeriv2ndAcc(*zdcMod);
+            t_ZdcModulePresample[iside][imod] = PresampleAcc(*zdcMod);
+            t_ZdcModulePreSampleAmp[iside][imod] = PreSampleAmpAcc(*zdcMod);
+            
+            if (AmpLGRefitAcc.isAvailable(*zdcMod)) {
+        t_ZdcModuleAmpLGRefit[iside][imod] = AmpLGRefitAcc(*zdcMod);
+        t_ZdcModuleT0LGRefit[iside][imod] = T0LGRefitAcc(*zdcMod);
+        t_ZdcModuleT0SubLGRefit[iside][imod] = T0SubLGRefitAcc(*zdcMod);
+        t_ZdcModuleChisqLGRefit[iside][imod] = ChisqLGRefitAcc(*zdcMod);
+            }
+            
+            if (LucrodTriggerAmpAcc.isAvailable(*zdcMod))
+        t_ZdcLucrodTriggerAmp[iside][imod] = LucrodTriggerAmpAcc(*zdcMod);
+            if (LucrodTriggerAmpLGAcc.isAvailable(*zdcMod))
+        t_ZdcLucrodTriggerAmpLG[iside][imod] = LucrodTriggerAmpLGAcc(*zdcMod);
+    
+            if (MaxADCAcc.isAvailable(*zdcMod))
+        t_ZdcModuleMaxADC[iside][imod] = MaxADCAcc(*zdcMod);
+            if (MaxADCHGAcc.isAvailable(*zdcMod))
+        t_ZdcModuleMaxADCHG[iside][imod] = MaxADCHGAcc(*zdcMod);
+            if (MaxADCLGAcc.isAvailable(*zdcMod))
+        t_ZdcModuleMaxADCLG[iside][imod] = MaxADCLGAcc(*zdcMod);
+            if (PeakADCHGAcc.isAvailable(*zdcMod))
+        t_ZdcModulePeakADCHG[iside][imod] = PeakADCHGAcc(*zdcMod);
+            if (PeakADCLGAcc.isAvailable(*zdcMod))
+        t_ZdcModulePeakADCLG[iside][imod] = PeakADCLGAcc(*zdcMod);
+    
+            if (enableOutputSamples && !zdcErr)
+        {
+          for (unsigned int isamp = 0; isamp < nsamplesZdc; isamp++) // 7 samples
+            {
+              if (nsamplesZdc == 7)
+          {
+            t_raw7[iside][imod][0][0][isamp] = g0d0DataAcc(*zdcMod).at(isamp);
+            t_raw7[iside][imod][0][1][isamp] = g0d1DataAcc(*zdcMod).at(isamp);
+            t_raw7[iside][imod][1][0][isamp] = g1d0DataAcc(*zdcMod).at(isamp);
+            t_raw7[iside][imod][1][1][isamp] = g1d1DataAcc(*zdcMod).at(isamp);
+          }
+              
+              if (nsamplesZdc == 15)
+          {
+            t_raw15[iside][imod][0][0][isamp] = g0d0DataAcc(*zdcMod).at(isamp);
+            t_raw15[iside][imod][0][1][isamp] = g0d1DataAcc(*zdcMod).at(isamp);
+            t_raw15[iside][imod][1][0][isamp] = g1d0DataAcc(*zdcMod).at(isamp);
+            t_raw15[iside][imod][1][1][isamp] = g1d1DataAcc(*zdcMod).at(isamp);
+          }
+              
+              if (nsamplesZdc == 24)
+          {
+            t_raw24[iside][imod][0][0][isamp] = g0dataAcc(*zdcMod).at(isamp);
+            t_raw24[iside][imod][1][0][isamp] = g1dataAcc(*zdcMod).at(isamp);
+          }
+              if (nsamplesZdc == 32)
+          {
+            t_raw32[iside][imod][0][0][isamp] = g0dataAcc(*zdcMod).at(isamp);
+            t_raw32[iside][imod][1][0][isamp] = g1dataAcc(*zdcMod).at(isamp);
+          }
+              if (nsamplesZdc == 40)
+          {
+            t_raw40[iside][imod][0][0][isamp] = g0dataAcc(*zdcMod).at(isamp);
+            t_raw40[iside][imod][1][0][isamp] = g1dataAcc(*zdcMod).at(isamp);
+          }
+            }
+        }
+          }
+        else if (zdcMod->zdcType() == 1 && nsamplesZdc == 24)
+          {
+            // this is the RPD
+            if (enableRPD)
+        {
+          if (enableRPDAmp && !rpdErr)
+            {
+              t_RpdChannelBaseline[iside][zdcMod->zdcChannel()] = RPDChannelBaselineAcc(*zdcMod);
+              std::vector<float> const &rpdChannelPileupExpFitParams = RPDChannelPileupExpFitParamsAcc(*zdcMod);
+              std::copy(rpdChannelPileupExpFitParams.begin(), rpdChannelPileupExpFitParams.end(), t_RpdChannelPileupExpFitParams[iside][zdcMod->zdcChannel()]);
+              std::vector<float> const &rpdChannelPileupExpFitParamErrs = RPDChannelPileupExpFitParamErrsAcc(*zdcMod);
+              std::copy(rpdChannelPileupExpFitParamErrs.begin(), rpdChannelPileupExpFitParamErrs.end(), t_RpdChannelPileupExpFitParamErrs[iside][zdcMod->zdcChannel()]);
+              std::vector<float> const &rpdChannelPileupStretchedExpFitParams = RPDChannelPileupStretchedExpFitParamsAcc(*zdcMod);
+              std::copy(rpdChannelPileupStretchedExpFitParams.begin(), rpdChannelPileupStretchedExpFitParams.end(), t_RpdChannelPileupStretchedExpFitParams[iside][zdcMod->zdcChannel()]);
+              std::vector<float> const &rpdChannelPileupStretchedExpFitParamErrs = RPDChannelPileupStretchedExpFitParamErrsAcc(*zdcMod);
+              std::copy(rpdChannelPileupStretchedExpFitParamErrs.begin(), rpdChannelPileupStretchedExpFitParamErrs.end(), t_RpdChannelPileupStretchedExpFitParamErrs[iside][zdcMod->zdcChannel()]);
+              t_RpdChannelPileupExpFitMSE[iside][zdcMod->zdcChannel()] = RPDChannelPileupExpFitMSEAcc(*zdcMod);
+              t_RpdChannelPileupStretchedExpFitMSE[iside][zdcMod->zdcChannel()] = RPDChannelPileupStretchedExpFitMSEAcc(*zdcMod);
+              t_RpdChannelAmplitude[iside][zdcMod->zdcChannel()] = RPDChannelAmplitudeAcc(*zdcMod);
+              t_RpdChannelAmplitudeCalib[iside][zdcMod->zdcChannel()] = RPDChannelAmplitudeCalibAcc(*zdcMod);
+              t_RpdChannelMaxADC[iside][zdcMod->zdcChannel()] = RPDChannelMaxADCAcc(*zdcMod);
+              t_RpdChannelMaxADCCalib[iside][zdcMod->zdcChannel()] = RPDChannelMaxADCCalibAcc(*zdcMod);
+              t_RpdChannelMaxSample[iside][zdcMod->zdcChannel()] = RPDChannelMaxSampleAcc(*zdcMod);
+              t_RpdChannelStatus[iside][zdcMod->zdcChannel()] = RPDChannelStatusAcc(*zdcMod);
+              t_RpdChannelPileupFrac[iside][zdcMod->zdcChannel()] = RPDChannelPileupFracAcc(*zdcMod);
+              if(m_isMC){
+          t_RpdModuleTruthNphotons[iside][zdcMod->zdcChannel()] = nPhotonsAcc(*zdcMod);
+              }
+            }
+          if (enableOutputSamples)
+            {
+              std::vector<uint16_t> const &rpdChannelRaw = g0dataAcc(*zdcMod);
+              std::copy(rpdChannelRaw.begin(), rpdChannelRaw.end(), t_rpdRaw[iside][zdcMod->zdcChannel()]);
+            }
+        }
+          }
+      }
+    } else {
       ANA_MSG_INFO("No ZdcModules" << auxSuffix << " when expected!");
     }
   

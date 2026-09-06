@@ -43,10 +43,10 @@ namespace ActsTrk{
                     /** @brief Default move constructor */
                     MeasurementProvider(MeasurementProvider&& other) = default;
                     /** @brief Default move assignment operator */
-                    MeasurementProvider& operator=(MeasurementProvider&& other) = delete;
-                    /** @brief Delete the copy constructor */
+                    MeasurementProvider& operator=(MeasurementProvider&& other) = default;
+                    /** @brief Default copy constructor */
                     MeasurementProvider(const MeasurementProvider& other) = delete;
-                    /** @brief Delete the copy assignment */
+                    /** @brief Default copy assignment operator */
                     MeasurementProvider& operator=(const MeasurementProvider& other) = delete;
 
                     using ProjectorType = xAOD::AuxiliaryMeasurement::ProjectorType;
@@ -82,8 +82,8 @@ namespace ActsTrk{
                         StatusCode recordContainer(SG::WriteHandle<Cont_t>& handle);
 
 
-                    const EventContext& m_ctx;
-                    const Acts::GeometryContext m_gctx;
+                    std::reference_wrapper<const EventContext> m_ctx;
+                    std::reference_wrapper<const Acts::GeometryContext> m_gctx;
                     const AuxiliaryMeasurementHandler* m_parent{};
                     /** @brief Abrivation of the WriteHandle */
                     using WriteHandle_t = SG::WriteHandle<xAOD::AuxiliaryMeasurementContainer>;

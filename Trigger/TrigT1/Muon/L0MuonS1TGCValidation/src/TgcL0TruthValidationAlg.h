@@ -12,15 +12,20 @@
 #include "StoreGate/ReadHandleKey.h"
 #include "StoreGate/WriteHandleKey.h"
 #include "TrkExInterfaces/IExtrapolator.h"
+#include "xAODL0MuonCand/TGCCandDataContainer.h"
+#include "xAODTrigL0Muon/SectorLogicCandDataContainer.h"
 
+#include <cstdint>
 #include <vector>
 
 namespace L0Muon {
 
-/** @brief Calculates event-local TGC truth-validation quantities.
+/** @brief Calculates event-local TGC validation quantities.
  *
  * The algorithm has no ROOT or histogram dependency. Its transient output can
- * be consumed by replaceable validation-output backends.
+ * be consumed by replaceable validation-output backends. The optional Sector
+ * Logic check validates the downstream conversion without affecting normal
+ * truth-validation users.
  */
 class TgcL0TruthValidationAlg final : public AthReentrantAlgorithm {
  public:
@@ -38,6 +43,12 @@ class TgcL0TruthValidationAlg final : public AthReentrantAlgorithm {
       "Projection segments published by reconstruction"};
   SG::ReadHandleKey<McEventCollection> m_truthEventKey{
       this, "TruthEventKey", "TruthEvent", "Input truth-event collection"};
+  SG::ReadHandleKey<xAOD::TGCCandDataContainer> m_finalCandidateKey{
+      this, "FinalCandidateKey", "L0MuonTGCCandData",
+      "Final TGC candidates sent to L0MuonEndcap"};
+  SG::ReadHandleKey<xAOD::SectorLogicCandDataContainer> m_sectorLogicKey{
+      this, "SectorLogicKey", "L0MuonTGCSectorLogicCandData",
+      "TGC Sector Logic candidates sent towards MuCTPI"};
   SG::WriteHandleKey<TgcL0ValidationEvent> m_outputKey{
       this, "OutputKey", "L0MuonTGCValidationEvent",
       "Calculated event-local truth-validation data"};
@@ -47,6 +58,15 @@ class TgcL0TruthValidationAlg final : public AthReentrantAlgorithm {
   Gaudi::Property<float> m_maxMeanDeltaR{
       this, "TruthMatchMaxMeanDeltaR", 0.08F,
       "Maximum station-averaged deltaR for truth matching"};
+  Gaudi::Property<bool> m_validateFinalCandidates{
+      this, "ValidateFinalCandidates", false,
+      "Validate and truth-match final post-selection TGC candidates"};
+  Gaudi::Property<float> m_maxFinalCandidateDeltaR{
+      this, "FinalCandidateTruthMatchMaxDeltaR", 0.08F,
+      "Maximum pivot-station deltaR for final-candidate truth matching"};
+  Gaudi::Property<bool> m_validateSectorLogic{
+      this, "ValidateSectorLogic", false,
+      "Validate and publish the TGC Sector Logic conversion"};
   Gaudi::Property<float> m_maxWireSegmentDeltaEta{
       this, "TruthWireSegmentMaxDeltaEta", 0.08F,
       "Maximum |delta eta| for truth-to-wire-segment matching"};
@@ -65,9 +85,9 @@ class TgcL0TruthValidationAlg final : public AthReentrantAlgorithm {
   Gaudi::Property<int> m_maxAbsBarcode{
       this, "MaxAbsBarcode", 9999,
       "Maximum absolute HepMC barcode for selected truth muons"};
-  Gaudi::Property<int> m_requiredBcTag{
-      this, "RequiredBcTag", 0,
-      "BC tag used for truth matching; set to -1 to disable the filter"};
+  Gaudi::Property<std::uint16_t> m_requiredBcTagMask{
+      this, "RequiredBcTagMask", 0x2U,
+      "Required BC-tag bit mask for truth matching; zero disables the filter"};
   Gaudi::Property<std::vector<double>> m_stationAbsZ{
       this, "StationAbsZ", {13436.5, 14728.2, 15148.2},
       "Nominal absolute z positions of the M1, M2, and M3 validation planes"};

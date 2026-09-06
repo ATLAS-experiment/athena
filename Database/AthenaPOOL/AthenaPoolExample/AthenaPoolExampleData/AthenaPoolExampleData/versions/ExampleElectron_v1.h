@@ -14,11 +14,11 @@ namespace xAOD {
 class ExampleElectron_v1 : public SG::AuxElement {
  public:
   // getter
-  double pt() const;
+  float pt() const;
   float charge() const;
 
   // setter
-  void setPt(double p);
+  void setPt(float p);
   void setCharge(float c);
 
 };  // class

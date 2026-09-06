@@ -1,5 +1,5 @@
 
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -96,7 +96,6 @@ def ActsInDetMainTrackFindingAlgCfg(flags,
         kwargs.setdefault("MaximumIterations", 10000)
         kwargs.setdefault("NMeasurementsMin", 7)
     
-    kwargs.setdefault("refitSeeds", seedOrder(flags, pixel=[False], strip=[False]))
     kwargs.setdefault("doTwoWay", flags.Acts.doTwoWayCKF)
     kwargs.setdefault("inflateCovarianceTwoWay", True)
     kwargs.setdefault("twoWayinflateCovarianceFactor", 100.0)
@@ -148,7 +147,7 @@ def ActsInDetMainTrackFindingAlgCfg(flags,
     ### kwargs.setdefault("maxSharedHits", tolist(flags.Tracking.ActiveConfig.maxShared))
 
     # GBTS produces much purer seeds, so the branch stopper selections aren't needed with GBTS seeds.
-    if flags.Acts.SeedingStrategy is not SeedingStrategy.Gbts:
+    if flags.Tracking.ActiveConfig.SeedingStrategy is not SeedingStrategy.Gbts:
         kwargs.setdefault("ptMinMeasurements", seedOrder(flags, pixel=[3], strip=[6]))
         kwargs.setdefault("absEtaMaxMeasurements", seedOrder(flags, pixel=[3], strip=[999999]))
 
@@ -157,7 +156,8 @@ def ActsInDetMainTrackFindingAlgCfg(flags,
 
     if 'TrackParamsEstimationTool' not in kwargs:
         from ActsConfig.ActsTrackParamsEstimationConfig import ActsTrackParamsEstimationToolCfg
-        kwargs.setdefault('TrackParamsEstimationTool', acc.popToolsAndMerge(ActsTrackParamsEstimationToolCfg(flags)))
+        tpe = acc.popToolsAndMerge(ActsTrackParamsEstimationToolCfg(flags))
+        kwargs.setdefault('TrackParamsEstimationTool', seedOrder(flags, pixel=[tpe], strip=[tpe]))
         
     if flags.Acts.doPrintTrackStates and 'TrackStatePrinter' not in kwargs:
         kwargs.setdefault(
@@ -165,47 +165,28 @@ def ActsInDetMainTrackFindingAlgCfg(flags,
             acc.popToolsAndMerge(ActsInDetTrackStatePrinterToolCfg(flags)),
         )
 
-    if 'FitterTool' not in kwargs:
-        from ActsConfig.ActsTrackFittingConfig import ActsFitterCfg 
-        kwargs.setdefault(
-            'FitterTool',
-            acc.popToolsAndMerge(ActsFitterCfg(flags, 
-                                               ReverseFilteringPt=0,
-                                               OutlierChi2Cut=float('inf')))
-        )
-
     # !!! Calibrator is not used for Inner Detector yet
     if 'PixelCalibrator' not in kwargs:
         from AthenaConfiguration.Enums import BeamType
 
-        if flags.Beam.Type is not BeamType.Cosmics:
-            from ActsConfig.ActsConfigFlags import PixelCalibrationStrategy
+        if flags.Beam.Type is not BeamType.Cosmics and flags.Acts.PixelCalibrationStrategy.usesCalibration():
             from ActsConfig.ActsMeasurementCalibrationConfig import ActsAnalogueClusteringToolCfg
-            
-            if flags.Acts.PixelCalibrationStrategy in (PixelCalibrationStrategy.AnalogueClustering,
-                                                       PixelCalibrationStrategy.AnalogueClusteringAfterSelection,
-                                                       PixelCalibrationStrategy.NNClustering):
 
-                kwargs.setdefault(
-                    'PixelCalibrator',
-                    acc.popToolsAndMerge(ActsAnalogueClusteringToolCfg(flags,
-                                                                       CalibrateAfterMeasurementSelection = flags.Acts.PixelCalibrationStrategy is PixelCalibrationStrategy.AnalogueClusteringAfterSelection))
-                )
+            kwargs.setdefault(
+                'PixelCalibrator',
+                acc.popToolsAndMerge(ActsAnalogueClusteringToolCfg(flags))
+            )
     # !!! Calibrator is not used for Inner Detector yet
     if 'StripCalibrator' not in kwargs:
         from AthenaConfiguration.Enums import BeamType
-        if flags.Beam.Type is not BeamType.Cosmics:
+
+        if flags.Beam.Type is not BeamType.Cosmics and flags.Acts.StripCalibrationStrategy.usesCalibration():
             from ActsConfig.ActsMeasurementCalibrationConfig import ActsStripCalibrationToolCfg
-            from ActsConfig.ActsConfigFlags import StripCalibrationStrategy
 
-            if flags.Acts.StripCalibrationStrategy in (StripCalibrationStrategy.DigitalCalibration,
-                                                       StripCalibrationStrategy.DigitalCalibrationAfterSelection) :
-
-                kwargs.setdefault(
-                    'StripCalibrator',
-                    acc.popToolsAndMerge(ActsStripCalibrationToolCfg(flags,
-                                                                     CalibrateAfterMeasurementSelection = flags.Acts.StripCalibrationStrategy is StripCalibrationStrategy.DigitalCalibrationAfterSelection))
-                )
+            kwargs.setdefault(
+                'StripCalibrator',
+                acc.popToolsAndMerge(ActsStripCalibrationToolCfg(flags))
+            )
 
     if flags.Acts.doMonitoring and 'MonTool' not in kwargs:
         from ActsConfig.ActsMonitoringConfig import ActsTrackFindingMonitoringToolCfg
@@ -292,7 +273,7 @@ def ActsInDetTrackFindingCfg(flags,
     #                                                 InputDestinyCollection = f'{seedKey}Destiny'))
 
     # Persistification
-    if flags.Acts.EDM.PersistifyTracks:
+    if flags.Acts.EDM.PersistifyTracks or flags.Output.doWriteESD:
         trackColl = kwargs['ACTSTracksLocation']
         from ActsConfig.ActsEventCnvConfig import ActsToXAODTrackConverterAlgCfg
         acc.merge(ActsToXAODTrackConverterAlgCfg(flags,

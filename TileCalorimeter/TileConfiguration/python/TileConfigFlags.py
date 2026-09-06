@@ -58,6 +58,7 @@ def createTileConfigFlags():
      tcf.addFlag('Tile.doWiener', False)
      tcf.addFlag('Tile.doOpt2', _doOpt2)
      tcf.addFlag('Tile.doOptATLAS', _doOptATLAS)
+     tcf.addFlag('Tile.doTileNN', False)
      tcf.addFlag('Tile.NoiseFilter', lambda prevFlags : -1 if prevFlags.Input.isMC else 1)
      tcf.addFlag('Tile.RunType', _getRunType, type=TileRunType)
      tcf.addFlag('Tile.correctTime', lambda prevFlags : not prevFlags.Input.isMC and not prevFlags.Overlay.DataOverlay and prevFlags.Beam.Type is BeamType.Collisions)

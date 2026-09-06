@@ -20,6 +20,15 @@
 // Message Stream Member
 #include "AthenaBaseComps/AthMessaging.h"
 
+// Add storage for alignable transforms
+#include "DetDescrConditions/AlignableTransform.h"
+#include "DetDescrConditions/AlignableTransformContainer.h"
+#include "GeoModelKernel/GeoAlignableTransform.h"
+#include "GeoModelKernel/GeoVAlignmentStore.h"
+#include "InDetReadoutGeometry/ExtendedAlignableTransform.h"
+
+#include "GaudiKernel/StatusCode.h"
+
 class StoreGateSvc;
 
 /** @class HGTD_DetectorManager
@@ -68,6 +77,22 @@ public:
     /** Add elememts */
     void addDetectorElement(InDetDD::HGTD_DetectorElement * element);
 
+    /** Register alignable transform */
+    void addAlignableTransform(int level,
+                               const Identifier& id,
+                               GeoAlignableTransform* transform,
+                               const GeoVFullPhysVol* child);
+    
+    /** Apply alignment correction */
+    bool setAlignableTransformDelta(int level,
+                                    const Identifier& id,
+                                    const Amg::Transform3D& delta,
+                                    GeoVAlignmentStore* alignStore) const;
+
+    /// Apply alignment constants from an AlignableTransformContainer
+    StatusCode align(const AlignableTransformContainer* container,
+                    GeoVAlignmentStore* alignStore) const;
+
     /** Invalidate cache for all detector elements */
     void invalidateAll();
 
@@ -90,6 +115,9 @@ private:
     // Note that the elements can be altered
     InDetDD::HGTD_DetectorElementCollection          m_elementCollection;
     const HGTD_ID*                                   m_idHelper;
+    
+    // Alignment storage
+    std::vector<std::unique_ptr<InDetDD::ExtendedAlignableTransform>> m_alignableTransforms;
 
     std::unique_ptr<const InDetDD::SiCommonItems> m_commonItems;
 

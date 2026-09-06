@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // class header include
@@ -77,7 +77,7 @@ StatusCode Simulation::ZeroLifetimePositioner::manipulate(HepMC::GenEvent& ge, b
     if(!nextVtx) { continue; }
     ATH_MSG_DEBUG("Found a vertex to correct with incoming PDG code = " << pdgIn);
     ATH_MSG_VERBOSE("Next Vertex:");
-    if (ATH_UNLIKELY(this->msgLvl (MSG::VERBOSE))) {
+    if (this->msgLvl (MSG::VERBOSE)) [[unlikely]] {
       HepMC::Print::line(nextVtx);
     }
     // NB Doing this check to explicitly avoid the fallback mechanism in
@@ -86,13 +86,13 @@ StatusCode Simulation::ZeroLifetimePositioner::manipulate(HepMC::GenEvent& ge, b
     const HepMC::FourVector &nextVec = (nextVtx->has_set_position()) ? nextVtx->position() : HepMC::FourVector::ZERO_VECTOR();
     const CLHEP::HepLorentzVector nextPos( nextVec.x(), nextVec.y(), nextVec.z(), nextVec.t() );
     ATH_MSG_VERBOSE("Current Vertex:");
-    if (ATH_UNLIKELY(this->msgLvl (MSG::VERBOSE))) {
+    if (this->msgLvl (MSG::VERBOSE)) [[unlikely]] {
        HepMC::Print::line(curVtx);
     }
     if (applyPatch) {
       HepMC::GenVertexPtr prevVtx = curVtx->particles_in().front()->production_vertex();
       ATH_MSG_VERBOSE("Previous Vertex:");
-      if (ATH_UNLIKELY(this->msgLvl (MSG::VERBOSE))) {
+      if (this->msgLvl (MSG::VERBOSE)) [[unlikely]] {
         HepMC::Print::line(prevVtx);
       }
       // NB Doing this check to explicitly avoid the fallback mechanism in
@@ -103,7 +103,7 @@ StatusCode Simulation::ZeroLifetimePositioner::manipulate(HepMC::GenEvent& ge, b
       CLHEP::HepLorentzVector newPos = 0.5*(prevPos+nextPos);
       curVtx->set_position(HepMC::FourVector(newPos.x(),newPos.y(),newPos.z(),newPos.t()));
       ATH_MSG_DEBUG("Revised current Vertex");
-      if (ATH_UNLIKELY(this->msgLvl (MSG::VERBOSE))) {
+      if (this->msgLvl (MSG::VERBOSE)) [[unlikely]] {
         HepMC::Print::line(curVtx);
       }
     }
@@ -111,7 +111,7 @@ StatusCode Simulation::ZeroLifetimePositioner::manipulate(HepMC::GenEvent& ge, b
       CLHEP::HepLorentzVector newPos = nextPos;
       curVtx->set_position(HepMC::FourVector(newPos.x(),newPos.y(),newPos.z(),newPos.t()));
       ATH_MSG_DEBUG("Revised current Vertex");
-      if (ATH_UNLIKELY(this->msgLvl (MSG::VERBOSE))) {
+      if (this->msgLvl (MSG::VERBOSE)) [[unlikely]] {
         HepMC::Print::line(curVtx);
       }
     }

@@ -20,7 +20,6 @@ storage.
   - MuonFeature                  : used by muFast
   - TileMuFeature                : muon candidates from TileCal and the combined tracks from Inner-Detector.
   - TileTrackMuFeature           : used by tile track muon trigger
-  - TrigDiMuon                   : used by di muon trigger
   - TrigMuonClusterFeature       : used by muon ROI cluster trigger
   - IsoMuonFeature               : used by muon isolation trigger
   - TrigMuonEF                   : used by muon EF, legacy. Use TrigMuonEFInfo instead.

@@ -253,16 +253,6 @@ StatusCode AthenaOutputStreamTool::connectOutput(const std::string& outputName) 
             } else {
                m_dataHeader->setAttributeList(attrList2);
             }
-/*
-            SG::WriteHandle<AthenaAttributeList> attrWrite(m_attrListWrite);
-            std::unique_ptr<AthenaAttributeList> uptr = std::make_unique<AthenaAttributeList>(*newone);
-            if ( attrWrite.record(std::move(uptr)).isFailure() ) {
-               ATH_MSG_ERROR("Unable to record att list " << m_attrListWrite);
-            } else {
-               ATH_MSG_DEBUG("Decisions already added by a different stream");
-            }
-*/
-            //m_dataHeader->setAttributeList(newone);
          }    // list extend check
       }       // list retrieve check
    }          // list property check

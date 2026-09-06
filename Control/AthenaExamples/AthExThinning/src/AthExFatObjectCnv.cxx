@@ -62,7 +62,7 @@ AthExFatObject* AthExFatObjectCnv::createTransient(const Token* token)
 
    AthExFatObject *transObj = 0;
 
-   static const pool::Guid p1_guid("C757B4CB-7C1F-4E79-895E-C77D76FB960B");
+   static const Guid p1_guid("C757B4CB-7C1F-4E79-895E-C77D76FB960B");
 
    if ( compareClassGuid(token, p1_guid) ) {
 

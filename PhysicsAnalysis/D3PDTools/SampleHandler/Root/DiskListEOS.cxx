@@ -11,12 +11,9 @@
 #include <SampleHandler/DiskListEOS.h>
 
 #include <sstream>
-#include <vector>
+#include <stdexcept>
 #include <RootCoreUtils/Assert.h>
 #include <RootCoreUtils/ShellExec.h>
-#include <RootCoreUtils/ThrowMsg.h>
-
-#include <iostream>
 
 //
 // method implementations
@@ -56,35 +53,53 @@ namespace SH
 
     if (!m_isRead)
     {
-      m_list = RCU::Shell::exec_read ("eos ls -l " + m_dir);
+      m_list = RCU::Shell::exec_read ("eos ls -l " + RCU::Shell::quote (m_dir));
       m_isRead = true;
+      m_pos = 0;
     }
 
-    while (!m_list.empty())
+    // rationale: we advance a running index through m_list rather than
+    //   repeatedly copying its tail, so that listing N entries costs
+    //   O(N) rather than O(N^2).  a final line without a trailing
+    //   newline is still processed.
+    while (m_pos < m_list.size())
     {
-      std::string::size_type split1 = m_list.find ('\n');
+      std::string::size_type split1 = m_list.find ('\n', m_pos);
+      std::string line;
       if (split1 == std::string::npos)
-	return false;
-
-      std::string line (m_list.substr (0, split1));
-      m_list = m_list.substr (split1 + 1);
+      {
+	line = m_list.substr (m_pos);
+	m_pos = m_list.size();
+      } else
+      {
+	line = m_list.substr (m_pos, split1 - m_pos);
+	m_pos = split1 + 1;
+      }
 
       // rationale: this should handle it correctly if there is a
       //   formatting escape sequence at the beginning of the line.
-      std::string::size_type split2 = line.find ("r");
+      std::string::size_type split2 = line.find ('r');
+      if (split2 == std::string::npos || split2 == 0)
+	throw std::runtime_error ("failed to parse EOS listing line: " + line);
       m_isDir = line[split2-1] == 'd';
       line = line.substr (split2);
 
+      // rationale: the listing has eight fixed whitespace-separated
+      //   columns (permissions, links, user, group, size and three
+      //   date/time fields), followed by the file name.  we skip the
+      //   columns individually and then take the remainder of the line
+      //   as the name, so that names containing spaces are preserved.
       std::istringstream str (line);
-      std::string fields [9];
-      for (unsigned iter = 0, end = 9; iter != end; ++ iter)
+      std::string field;
+      for (unsigned iter = 0, end = 8; iter != end; ++ iter)
       {
-	if (!(str >> fields[iter]))
-	  RCU_THROW_MSG ("failed to parse line: " + line);
+	if (!(str >> field))
+	  throw std::runtime_error ("failed to parse EOS listing line: " + line);
       }
-      if (fields[0].empty())
-	  RCU_THROW_MSG ("failed to parse line: " + line);
-      m_file = fields[8];
+      std::string name;
+      if (!(str >> std::ws) || !std::getline (str, name) || name.empty())
+	throw std::runtime_error ("failed to parse EOS listing line: " + line);
+      m_file = name;
       return true;
     }
     return false;
@@ -107,7 +122,7 @@ namespace SH
     RCU_READ_INVARIANT (this);
 
     if (m_file.empty() || !m_isDir)
-      return 0;
+      return nullptr;
 
     return new DiskListEOS (m_dir + "/" + m_file, m_prefix + "/" + m_file);
   }

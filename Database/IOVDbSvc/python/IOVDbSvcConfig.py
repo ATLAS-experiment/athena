@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator, ConfigurationError
 import os
@@ -20,7 +20,7 @@ def DBReplicaSvcCfg(flags, vetoDBRelease=False, **kwargs):
         kwargs.setdefault('COOLSQLiteVetoPattern', '/DBRelease/')
 
     result = ComponentAccumulator()
-    result.addService(CompFactory.DBReplicaSvc(**kwargs))
+    result.addService(CompFactory.DBReplicaSvc(**kwargs),create=True)
     return result
 
 
@@ -31,7 +31,6 @@ def IOVDbSvcCfg(flags, **kwargs):
 
     kwargs.setdefault('OnlineMode', flags.Common.isOnline)
     kwargs.setdefault('dbConnection', flags.IOVDb.DBConnection)
-    kwargs.setdefault('crestServer', flags.IOVDb.CrestServer)
     # setup knowledge of dbinstance in IOVDbSvc, for global tag x-check
     kwargs.setdefault('DBInstance', flags.IOVDb.DatabaseInstance)
 
@@ -53,6 +52,7 @@ def IOVDbSvcCfg(flags, **kwargs):
     # Select CREST backend if needed
     if flags.IOVDb.UseCREST:
         kwargs.setdefault('Source', 'CREST')
+        checkGlobalTag(flags.IOVDb.DBConnection,flags.IOVDb.GlobalTag)
 
     result.addService(CompFactory.IOVDbSvc(**kwargs), primary=True)
 
@@ -68,8 +68,8 @@ def IOVDbSvcCfg(flags, **kwargs):
     result.addService(CompFactory.CondSvc())
     result.addService(CompFactory.ProxyProviderSvc(ProviderNames=['IOVDbSvc']))
 
-    if not flags.Input.isMC:
-        result.merge(DBReplicaSvcCfg(flags, vetoDBRelease=True))
+    if not flags.IOVDb.UseCREST:
+        result.merge(DBReplicaSvcCfg(flags, vetoDBRelease=not flags.Input.isMC))
 
     # Get TagInfoMgr
     from EventInfoMgt.TagInfoMgrConfig import TagInfoMgrCfg
@@ -114,12 +114,15 @@ def addFolderList(flags, listOfFolderInfoTuple, extensible=False, db=None, modif
     This allows the possibility of later adding a new IOV using IOVSvc::setRange."""
     loadFolders = set()
     folders = []
-    if flags.IOVDb.UseCREST:
-        sqliteFolders=getCrestDirContent(flags)
-    else:
-        sqliteFolders=getSqliteContent(flags.IOVDb.SqliteInput,
-                                       flags.IOVDb.SqliteFolders,
-                                       flags.IOVDb.DatabaseInstance)
+    sqliteFolders = dict()
+
+    if flags.IOVDb.SqliteInput:
+        if flags.IOVDb.UseCREST:
+            sqliteFolders = getCrestDirContent(flags)
+        else:
+            sqliteFolders = getSqliteContent(flags.IOVDb.SqliteInput,
+                                             flags.IOVDb.SqliteFolders,
+                                             flags.IOVDb.DatabaseInstance)
 
     for (fs, detDb, className) in listOfFolderInfoTuple:
         fse= _extractFolder(fs)
@@ -129,7 +132,7 @@ def addFolderList(flags, listOfFolderInfoTuple, extensible=False, db=None, modif
 
         if fse in sqliteFolders:
             msg.warning(f'Reading folder {fs} from local storage, bypassing production database')
-            fs+=sqliteFolders[fse]
+            fs += sqliteFolders[fse]
         elif detDb is not None and fs.find('<db>') == -1:
 
             if db:  # override database name if provided
@@ -375,7 +378,7 @@ def getCrestDirContent(flags):
         localtags=set(localdb.find_tags())
     
         try:
-            proddb=chai.Database("crest:"+flags.IOVDb.CrestServer+"/api-v6.0")
+            proddb=chai.Database("crest:"+flags.IOVDb.DBConnection)
         except Exception as e:
             msg.error("Failed to connect to crest server %s",flags.IOVDb.CrestServer)
             raise e
@@ -443,6 +446,38 @@ def blockFolder(ca,folder):
         condInputLoader=ca.getCondAlgo("CondInputLoader")
         condInputLoader.Load=set([x for x in condInputLoader.Load if x[1].find(folder)==-1])
         return
+
+
+@cache
+def checkGlobalTag(connStr,currGlobalTag):
+    fail=False
+    if connStr.startswith("http"):
+       connStr1="crest:"+connStr
+    else: #Assume local file
+        connStr1="crest_fs:"+connStr 
+    import chai
+    try:
+        db=chai.Database(connStr1)
+        allGlobalTags=set(db.find_global_tags())
+    except chai._chai.NotFoundError as e:
+        msg.error(str(e))
+        msg.error(f"Could not load data from crest URL {connStr}")
+        fail=True
+    except chai._chai.BackendError as e:
+        msg.error(str(e))
+        msg.error(f"Could not load data from crest URL {connStr}")
+        fail=True
+
+    if fail: raise ConfigurationError()
+
+    if currGlobalTag not in allGlobalTags:
+        from difflib import get_close_matches
+        m1=get_close_matches(currGlobalTag,allGlobalTags,1)
+        msg.error(f"Global tag {currGlobalTag} does not exist"+(f". Did you mean '{m1[0]}'?" if m1 else "")) 
+        raise ConfigurationError() 
+    del db
+    return None
+
 
 
 

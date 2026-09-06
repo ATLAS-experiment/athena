@@ -6,6 +6,10 @@
 #include "MCTruth/AtlasG4EventUserInfo.h"
 #include "MCTruth/TrackHelper.h"
 #include "MCTruth/TrackInformation.h"
+#include "ISF_Geant4Event/Geant4TruthIncident.h"
+#include "ISF_Geant4Event/ISFG4GeoHelper.h"
+#include "ISF_Interfaces/IGeoIDSvc.h"
+#include "ISF_Interfaces/ITruthSvc.h"
 
 #include "G4Event.hh"
 #include "G4Step.hh"
@@ -23,9 +27,17 @@ namespace G4UA
   //---------------------------------------------------------------------------
   MCTruthSteppingAction::
   MCTruthSteppingAction(const VolumeCollectionMap_t& volCollMap,
+                        int secondarySavingLevel,
+                        int subDetVolLevel,
+                        ISF::ITruthSvc& truthRecordSvc,
+                        ISF::IGeoIDSvc& geoIDSvc,
                         IMessageSvc* msgSvc, MSG::Level level)
     : AthMessaging(msgSvc, "MCTruthSteppingAction"),
       m_isInitialized(false),
+      m_secondarySavingLevel(secondarySavingLevel),
+      m_subDetVolLevel(subDetVolLevel),
+      m_truthRecordSvc(truthRecordSvc),
+      m_geoIDSvc(geoIDSvc),
       m_volumeCollectionMap(volCollMap)
   {
     msg().setLevel(level);
@@ -89,10 +101,22 @@ namespace G4UA
   //---------------------------------------------------------------------------
   void MCTruthSteppingAction::UserSteppingAction(const G4Step* aStep)
   {
+    TrackHelper trackHelper(aStep->GetTrack());
+    const std::vector<const G4Track*>* secondaries = aStep->GetSecondaryInCurrentStep();
+
+    // info must be propagated to secondaries before MC truth incident can be created
     propagatePrimaryInfoToSecondaries(aStep);
 
+    // A saved primary is reclassified, but its old trajectory stayed active.
+    const bool processTruth =
+      trackHelper.IsPrimary() || trackHelper.IsRegeneratedPrimary() ||
+      (trackHelper.IsRegisteredSecondary() && m_secondarySavingLevel > 1);
+
+    if (secondaries && !secondaries->empty() && processTruth) {
+      createTruthIncident(aStep);
+    }
+
     if (m_recordingEnvelopes.size() == 0) return;
-    TrackHelper trackHelper(aStep->GetTrack());
     if (trackHelper.IsSecondary()) return;
 
     G4StepPoint* preStep = aStep->GetPreStepPoint();
@@ -133,6 +157,14 @@ namespace G4UA
         break;
       }
     }
+  }
+
+  void MCTruthSteppingAction::createTruthIncident(const G4Step* aStep) const
+  {
+    const AtlasDetDescr::AtlasRegion geoID =
+      iGeant4::ISFG4GeoHelper::nextGeoId(aStep, m_subDetVolLevel, &m_geoIDSvc);
+    iGeant4::Geant4TruthIncident truth(aStep, geoID);
+    m_truthRecordSvc.registerTruthIncident(truth);
   }
 
   void MCTruthSteppingAction::propagatePrimaryInfoToSecondaries(const G4Step* aStep) const

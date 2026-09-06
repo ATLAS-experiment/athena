@@ -11,7 +11,7 @@ PoolSvc                                             DEBUG POOL ReadCatalog is fi
 EventSelector                                       DEBUG Initializing EventSelector
 EventSelector                                       DEBUG reinitialization...
 EventSelector                                       DEBUG Try item: "SimplePoolFile_xAOD.root" from the collection list.
-PoolSvc                                             DEBUG createCollection() type=POOL, connection=PFN:SimplePoolFile_xAOD.root, name=Input, contextID=0
+PoolSvc                                             DEBUG connectCollection() type=POOL, connection=PFN:SimplePoolFile_xAOD.root, name=Input, contextID=0
 SimplePoolFile_xAOD.root                            DEBUG --> Access   DbContainer  READ      [ROOT_All] ##Shapes
 SimplePoolFile_xAOD.root                            DEBUG --> Access   DbContainer  READ      [ROOT_All] ##Shapes
 ##Shapes                                            DEBUG Opening
@@ -41,7 +41,7 @@ SimplePoolFile_xAOD.root                            DEBUG --> Access   DbContain
 SimplePoolFile_xAOD.root                            DEBUG --->Reading Param:PFN=[SimplePoolFile_xAOD.root]
 SimplePoolFile_xAOD.root                            DEBUG --->Reading Param:POOL_CONTAINERNAME_EVENTTAG=[POOLCollectionTree]
 SimplePoolFile_xAOD.root                            DEBUG --->Reading Param:POOL_CONTAINERNAME_DATAHEADER=[POOLContainer]
-##Params                                            DEBUG No objects passing selection criteria... Container has 6 Entries in total.
+##Params                                            DEBUG No objects passing selection criteria... Container has 5 Entries in total.
 SimplePoolFile_xAOD.root                            DEBUG --> Access   DbContainer  READ      [ROOT_TreeIndex] POOLContainer(DataHeader)
 POOLContainer(DataHeader)                           DEBUG Opening
 POOLContainer(DataHeader)                           DEBUG    attributes# = 1
@@ -67,7 +67,7 @@ AthenaEventLoopMgr                                   INFO Setup EventSelector se
 ApplicationMgr                                       INFO Application Manager Initialized successfully
 RootDatabase                                        DEBUG Closing DB SimplePoolFile_xAOD.root
 EventSelector                                       DEBUG Try item: "SimplePoolFile_xAOD.root" from the collection list.
-PoolSvc                                             DEBUG createCollection() type=POOL, connection=PFN:SimplePoolFile_xAOD.root, name=Input, contextID=0
+PoolSvc                                             DEBUG connectCollection() type=POOL, connection=PFN:SimplePoolFile_xAOD.root, name=Input, contextID=0
 SimplePoolFile_xAOD.root                            DEBUG --> Access   DbContainer  READ      [ROOT_All] ##Shapes
 SimplePoolFile_xAOD.root                            DEBUG --> Access   DbContainer  READ      [ROOT_All] ##Shapes
 ##Shapes                                            DEBUG Opening
@@ -97,7 +97,7 @@ SimplePoolFile_xAOD.root                            DEBUG --> Access   DbContain
 SimplePoolFile_xAOD.root                            DEBUG --->Reading Param:PFN=[SimplePoolFile_xAOD.root]
 SimplePoolFile_xAOD.root                            DEBUG --->Reading Param:POOL_CONTAINERNAME_EVENTTAG=[POOLCollectionTree]
 SimplePoolFile_xAOD.root                            DEBUG --->Reading Param:POOL_CONTAINERNAME_DATAHEADER=[POOLContainer]
-##Params                                            DEBUG No objects passing selection criteria... Container has 6 Entries in total.
+##Params                                            DEBUG No objects passing selection criteria... Container has 5 Entries in total.
 SimplePoolFile_xAOD.root                            DEBUG --> Access   DbContainer  READ      [ROOT_TreeIndex] POOLContainer(DataHeader)
 POOLContainer(DataHeader)                           DEBUG Opening
 POOLContainer(DataHeader)                           DEBUG    attributes# = 1

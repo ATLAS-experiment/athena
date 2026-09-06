@@ -1,14 +1,14 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-#include <vector>
 #include "TrigZFinderAlg.h"
 #include "TrigZFinder.h"
 #include "TrigSteeringEvent/TrigRoiDescriptor.h"
 #include "TrigInDetEvent/TrigSiSpacePointBase.h"
 // To add identifier
 #include "InDetPrepRawData/PixelCluster.h"
+#include <vector>
 
 using namespace std;
 
@@ -81,6 +81,9 @@ StatusCode TrigZFinderAlg::execute(const EventContext& context) const
   zVertexContainer->setStore(zVertexContainerAux.get());
 
   int toolIndex=0;
+  const std::string toolStr{"zfinder_tool"};
+  const std::string vtxZStr{"zfinder_vtx_z"};
+  const std::string vtxWeight{"zfinder_vtx_weight"};
   for ( auto& tool: m_zFinderTools ) {
     TrigVertexCollection* vertices = tool->findZ(spVec, TrigRoiDescriptor(true));
   
@@ -92,9 +95,9 @@ StatusCode TrigZFinderAlg::execute(const EventContext& context) const
 
       xAOD::TrigComposite *outputVertex = new xAOD::TrigComposite();
       zVertexContainer->push_back(outputVertex);
-      outputVertex->setDetail<int>("zfinder_tool", toolIndex );
-      outputVertex->setDetail<float>("zfinder_vtx_z", vertex->z() );
-      outputVertex->setDetail<float>("zfinder_vtx_weight", vertex->cov()[5] );
+      outputVertex->setDetail<int>(toolStr, toolIndex );
+      outputVertex->setDetail<float>(vtxZStr, vertex->z() );
+      outputVertex->setDetail<float>(vtxWeight, vertex->cov()[5] );
       // Adding monitoring histograms
       auto ZVertex = Monitored::Scalar("ZVertex",vertex->z());
       auto ZVertexWeight = Monitored::Scalar("ZVertexWeight",vertex->cov()[5]);
@@ -107,9 +110,9 @@ StatusCode TrigZFinderAlg::execute(const EventContext& context) const
   if ( zVertexContainer->empty() ) {
     xAOD::TrigComposite *emptyVertex = new xAOD::TrigComposite();
     zVertexContainer->push_back(emptyVertex);
-    emptyVertex->setDetail<int>("zfinder_tool", -1 );
-    emptyVertex->setDetail<float>("zfinder_vtx_z", -1000.0 );
-    emptyVertex->setDetail<float>("zfinder_vtx_weight", -1.0 );
+    emptyVertex->setDetail<int>(toolStr, -1 );
+    emptyVertex->setDetail<float>(vtxZStr, -1000.0 );
+    emptyVertex->setDetail<float>(vtxWeight, -1.0 );
   }
 
   SG::WriteHandle<xAOD::TrigCompositeContainer> vertexHandle(m_vertexKey, context);

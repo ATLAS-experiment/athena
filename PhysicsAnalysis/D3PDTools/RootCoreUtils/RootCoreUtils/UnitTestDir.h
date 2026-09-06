@@ -12,8 +12,6 @@
 
 
 
-#include <RootCoreUtils/Global.h>
-
 #include <string>
 
 namespace RCU
@@ -24,12 +22,6 @@ namespace RCU
     // public interface
     //
 
-    /// effects: test the invariant of this object
-    /// guarantee: no-fail
-  public:
-    void testInvariant () const;
-
-
     /// effects: standard constructor
     /// guarantee: strong
     /// failures: out of memory
@@ -38,10 +30,10 @@ namespace RCU
     UnitTestDir (const std::string& package, const std::string& name);
 
 
-    /// rationale: I'm making these private to avoid copying
-  private:
-    UnitTestDir (const UnitTestDir&);
-    UnitTestDir& operator = (const UnitTestDir&);
+    /// rationale: deleted to avoid copying
+  public:
+    UnitTestDir (const UnitTestDir&) = delete;
+    UnitTestDir& operator = (const UnitTestDir&) = delete;
 
 
     /// effects: standard destructor

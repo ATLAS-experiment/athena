@@ -15,7 +15,7 @@
 #include "xAODPFlow/FlowElement.h"
 
 #include <memory>
-#include <vector>
+#include <sstream>
 
 //**********************************************************************
 
@@ -518,7 +518,7 @@ void JetCaloEnergies::fillEperSamplingFEClusterBased(const xAOD::Jet& jet, std::
       //If we have a PFO, we should still get the associated cluster first
       else {
         const xAOD::FlowElement* pfo = dynamic_cast<const xAOD::FlowElement*>(fe);
-        if(!pfo->otherObjects().empty() && pfo->otherObject(0) && pfo->otherObject(0)->type() == xAOD::Type::CaloCluster){
+        if(pfo && !pfo->otherObjects().empty() && pfo->otherObject(0) && pfo->otherObject(0)->type() == xAOD::Type::CaloCluster){
           cluster = dynamic_cast<const xAOD::CaloCluster*> (pfo->otherObject(0));
         }
       }

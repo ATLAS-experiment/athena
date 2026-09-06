@@ -3,7 +3,7 @@
 from pickle import dump, loads
 from functools import wraps
 from os import environ
-from pkg_resources import resource_string
+from importlib.resources import files
 
 def invariant(test_data_name):
     def wrapper(func):
@@ -16,7 +16,7 @@ def invariant(test_data_name):
                     dump(result, fd)
                 print("Wrote updated test data")
             else:
-                test_data = loads(resource_string("testdata", testfile))
+                test_data = loads(files("testdata").joinpath(testfile).read_bytes())
                 assert result == test_data, "Data considered 'invariant' has changed"
         return check_invariant           
             

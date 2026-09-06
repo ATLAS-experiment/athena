@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -83,8 +83,12 @@ void TrigInDetRoadPredictorTool::addNewElement(unsigned int layerID, short phi_i
     ded.m_c[ic][1] = z;
     ded.m_c[ic][2] = std::atan2(y,x);//phi
   }
-
-  auto& L = (*m_layerMap.find(layerID)).second;
+  const auto pPair = m_layerMap.find(layerID);
+  if (pPair == m_layerMap.end())[[unlikely]]{
+    ATH_MSG_WARNING("addNewElement: Layer ID not found in map.");
+    return;
+  }
+  auto& L = pPair->second;
   
   short prim_idx = L.m_mappingType != 2 ? phi_idx : eta_idx;
   short sec_idx  = L.m_mappingType != 2 ? eta_idx : phi_idx;
@@ -297,7 +301,7 @@ void TrigInDetRoadPredictorTool::createHitBoxes() {
       lb.m_r = {maxR, maxR, minR, minR, maxR};  
     }
 
-    m_lBoundaries.push_back(lb);
+    m_lBoundaries.push_back(std::move(lb));
   
     bool volExists = false;
   
@@ -321,7 +325,7 @@ void TrigInDetRoadPredictorTool::createHitBoxes() {
       vb.m_zr[1] = maxZ;
       vb.m_zr[2] = minR;
       vb.m_zr[3] = maxR;
-      m_vBoundaries.push_back(vb);
+      m_vBoundaries.push_back(std::move(vb));
     }
   }
 }
@@ -340,8 +344,12 @@ void TrigInDetRoadPredictorTool::findDetectorElements(unsigned int layerID, cons
   
   float phi_min = phi_test - phi_res;
   float phi_max = phi_test + phi_res;
-    
-  const auto& L = (*m_layerMap.find(layerID)).second;
+  const auto pPair = m_layerMap.find(layerID);
+  if (pPair == m_layerMap.end())[[unlikely]]{
+    ATH_MSG_WARNING("findDetectorElements: layerID not found.");
+    return;
+  }
+  const auto& L = pPair->second;
 
   if(L.m_mappingType != 2) { // primary index is Phi, secondary is Z or R
 
@@ -464,7 +472,7 @@ int TrigInDetRoadPredictorTool::getRoad(const std::vector<const Trk::SpacePoint*
   for(unsigned int spIdx=0;spIdx<nSP;spIdx++) {
     const auto& sp = seed.at(spIdx);
     const Trk::PrepRawData* prd  = sp->clusterList().first;
-    const InDet::PixelCluster* pPixelHit = dynamic_cast<const InDet::PixelCluster*>(prd);
+    const InDet::PixelCluster* pPixelHit = static_cast<const InDet::PixelCluster*>(prd);
     unsigned int hash = pPixelHit->detectorElement()->identifyHash();
     seedHashes.push_back(hash);
   }

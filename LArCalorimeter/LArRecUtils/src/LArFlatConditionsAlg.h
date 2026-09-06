@@ -98,4 +98,8 @@ typedef LArFlatConditionsAlg<LAruA2MeVSC> LArCondAlguA2MeVSC;
 #include "LArCOOLConditions/LArOFCweightSC.h"
 typedef LArFlatConditionsAlg<LArOFCweightSC> LArCondAlgOFCweightSC;
 
+#include "LArCOOLConditions/LArNoiseFlat.h"
+typedef LArFlatConditionsAlg<LArNoiseFlat> LArCondAlgNoiseFlat;
+
+
 #endif

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+ * Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
  */
 /**
  * @file TrkExSolenoidalIntersector/test/SolenoidParametrization_test.cxx
@@ -84,7 +84,7 @@ std::unique_ptr<MagField::AtlasFieldMap> getFieldMap(const std::string& mapFile,
 
 }
 
-
+//coverity[UNCAUGHT_EXCEPT]
 int main()
 {
   std::cout << "SolenoidParametrization_test\n";
@@ -94,7 +94,8 @@ int main()
 
     // initialize cond obj with current scale factors and the field svc (needed to setup cache)
   fieldCondObj->initialize(1. /*solenoid current scale factor*/, 1. /*toroid current scale factor*/, fieldMap.get());
-
+  //Local variable sol uses 117536 bytes of stack space
+  //coverity[STACK_USE]
   Trk::SolenoidParametrization sol (*fieldCondObj);
   test1 (sol, *fieldCondObj);
   

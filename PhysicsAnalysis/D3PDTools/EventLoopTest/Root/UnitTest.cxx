@@ -17,7 +17,6 @@
 #include <EventLoop/OutputStream.h>
 #include <EventLoopTest/UnitTestAlg.h>
 #include <RootCoreUtils/Assert.h>
-#include <RootCoreUtils/ThrowMsg.h>
 #include <SampleHandler/MetaFields.h>
 #include <SampleHandler/MetaObject.h>
 #include <SampleHandler/SampleGrid.h>
@@ -30,6 +29,7 @@
 #include <iostream>
 #include <memory>
 #include <sstream>
+#include <stdexcept>
 
 using namespace EL::msgEventLoop;
 
@@ -145,7 +145,7 @@ namespace EL
 	sh.setMetaString ("mymeta", "test");
 	job.sampleHandler (sh);
       }
-      job.algsAdd (new UnitTestAlg (alg));
+      job.algsAddClone (alg);
       bool outputDone = outputDisk == 0;
       for (Job::outputMIter outputStream = job.outputBegin(),
 	     end = job.outputEnd(); outputStream != end; ++ outputStream)
@@ -172,7 +172,7 @@ namespace EL
 	  sh.load ((output + "/hist").c_str());
 	  SH::Sample *sample = sh.get (samples[iter]->name());
 	  if (sample == nullptr)
-	    RCU_THROW_MSG ("could not find histogram sample " + samples[iter]->name());
+	    throw std::runtime_error ("could not find histogram sample " + samples[iter]->name());
 
 	  if (testFileExecute)
 	  {
@@ -192,9 +192,9 @@ namespace EL
 	    RCU_ASSERT_SOFT (dynamic_cast<TList*>(sample->readHist ("alpha")));
 	    RCU_ASSERT_SOFT (sample->readHist ("beta/dir/hist"));
 	    if (hist == 0)
-	      RCU_THROW_MSG ("didn't find histogram el_n in sample " + sample->name());
+	      throw std::runtime_error ("didn't find histogram el_n in sample " + sample->name());
 	    if (hist->GetNbinsX() != ref_hist->GetNbinsX())
-	      RCU_THROW_MSG ("bin missmatch between histograms");
+	      throw std::runtime_error ("bin missmatch between histograms");
 	    for (int bin = 0, end = hist->GetNbinsX()+2; bin != end; ++ bin)
 	    {
 	      if (hist->GetBinContent (bin) != ref_hist->GetBinContent (bin))
@@ -203,13 +203,13 @@ namespace EL
 		str << "bin content missmatch in bin " << bin
 		    << " found " << hist->GetBinContent (bin)
 		    << " expected " << ref_hist->GetBinContent (bin);
-		RCU_THROW_MSG (str.str());
+		throw std::runtime_error (str.str());
 	      }
 	    }
 	  }
 	  TH1 *count = dynamic_cast<TH1*>(sample->readHist ("EventLoop_EventCount"));
 	  if (samples[iter]->getNumEntries() > 0 && count == 0)
-	    RCU_THROW_MSG ("didn't find histogram EventLoop_EventCount");
+	    throw std::runtime_error ("didn't find histogram EventLoop_EventCount");
 	}
 	if (testOutput && samples[iter]->getNumEntries() > 0)
 	{
@@ -217,14 +217,14 @@ namespace EL
 	  sh.load ((output + "/output-out").c_str());
 	  SH::Sample *const sample = sh.get (samples[iter]->name());
 	  if (!sample)
-	    RCU_THROW_MSG ("output dataset not found for " + samples[iter]->name());
+	    throw std::runtime_error ("output dataset not found for " + samples[iter]->name());
 	  sample->meta()->setString (SH::MetaFields::treeName, "tree");
 	  if (ref_hist && samples[iter]->getNumEntries() != ref_hist->GetEntries())
 	  {
 	    std::ostringstream str;
 	    str << "tree entries missmatch found " << samples[iter]->getNumEntries()
 		<< " expected " << ref_hist->GetEntries();
-	    RCU_THROW_MSG (str.str());
+	    throw std::runtime_error (str.str());
 	  }
 	}
       }

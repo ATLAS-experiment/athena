@@ -9,7 +9,7 @@ from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 
 # Jet related
-from DerivationFrameworkJetEtMiss.JetCommonConfig import AddBadBatmanCfg, AddDistanceInTrainCfg, AddSidebandEventShapeCfg, AddEventCleanFlagsCfg
+from DerivationFrameworkJetEtMiss.JetCommonConfig import AddBadBatmanCfg, AddDistanceInTrainCfg, AddNeutralEventShapeCfg, AddEventCleanFlagsCfg
 
 ## These jet related functions are a copy of the ones in the JetCommonConfig file
 ## but we remove the jet collections we don't need
@@ -24,7 +24,7 @@ def TLAJetCommonCfg(ConfigFlags):
     if "McEventCollection#GEN_EVENT" not in ConfigFlags.Input.TypedCollections:
         acc.merge(AddBadBatmanCfg(ConfigFlags))
     acc.merge(AddDistanceInTrainCfg(ConfigFlags))
-    acc.merge(AddSidebandEventShapeCfg(ConfigFlags))
+    acc.merge(AddNeutralEventShapeCfg(ConfigFlags))
     acc.merge(AddEventCleanFlagsCfg(ConfigFlags))
 
     return acc

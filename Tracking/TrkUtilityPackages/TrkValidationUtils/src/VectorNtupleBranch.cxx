@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrkValidationUtils/VectorNtupleBranch.h"
@@ -7,24 +7,24 @@
 #include <TString.h>
 
 namespace Trk {
-  bool VectorNtupleBranch::initForWrite(TTree& tree, const std::string& varname, int nrow, const std::string& prefix ) {
+  bool VectorNtupleBranch::initForWrite(TTree& tree, std::string_view varname, int nrow, std::string_view prefix ) {
     if( nrow >= ROWMAX ) return false;
     m_nrows = nrow;
     for( int i=0;i<nrow;++i ){
-      TString bname = prefix.c_str();
-      bname += varname;
+      TString bname{prefix.data(), static_cast<Ssiz_t>(prefix.size())};
+      bname.Append(varname.data(), static_cast<Ssiz_t>(varname.size()));
       bname += i;
       tree.Branch(bname,&m_vector[i]);
     }
     return true;
   }
 
-  bool VectorNtupleBranch::initForRead(TTree& tree, const std::string& varname, int nrow, const std::string& prefix ) { 
+  bool VectorNtupleBranch::initForRead(TTree& tree, std::string_view varname, int nrow, std::string_view prefix ) { 
     if( nrow >= ROWMAX ) return false;
     m_nrows = nrow;
     for( int i=0;i<nrow;++i ){
-      TString bname = prefix.c_str();
-      bname += varname;
+      TString bname{prefix.data(), static_cast<Ssiz_t>(prefix.size())};
+      bname.Append(varname.data(), static_cast<Ssiz_t>(varname.size()));
       bname += i;
       tree.SetBranchAddress(bname,&m_vector[i]);
     }

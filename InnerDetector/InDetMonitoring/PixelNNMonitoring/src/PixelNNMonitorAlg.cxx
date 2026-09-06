@@ -103,9 +103,9 @@ std::vector<Amg::Vector2D> PixelNNMonitorAlg::truthPositions(
 StatusCode PixelNNMonitorAlg::fillHistograms(const EventContext& ctx) const {
   using namespace Monitored;
 
-  auto numberGroup = getGroup("PixelNNNumber");
-  auto posSummary  = getGroup("PixelNNPosSummary");
-  auto splitGroup  = getGroup("PixelNNSplitFrac");
+  const auto & numberGroup = getGroup("PixelNNNumber");
+  const auto & posSummary  = getGroup("PixelNNPosSummary");
+  const auto & splitGroup  = getGroup("PixelNNSplitFrac");
 
   SG::ReadHandle<InDet::PixelClusterContainer> pixelClusters(m_pixelClusterKey, ctx);
   if (!pixelClusters.isValid()) {
@@ -279,8 +279,8 @@ StatusCode PixelNNMonitorAlg::fillHistograms(const EventContext& ctx) const {
       //      (predN == trueN) on simulation. ----
       const int numberOfSubclusters = predN;
 
-      auto posDQ = getGroup("PixelNNPosDQ");
-      auto posGroup = getGroup("PixelNNPosN" + std::to_string(numberOfSubclusters));
+      const auto & posDQ = getGroup("PixelNNPosDQ");
+      const auto & posGroup = getGroup("PixelNNPosN" + std::to_string(numberOfSubclusters));
       for (const OnTrackInfo& trk : it->second) {
         if (!trk.params || !trk.surface) { continue; }
         std::vector<Amg::MatrixX> errors;
@@ -378,7 +378,7 @@ StatusCode PixelNNMonitorAlg::fillHistograms(const EventContext& ctx) const {
   fill(numberGroup, monNClusters);
 
   if (evtHasPos) {
-    auto extremes = getGroup("PixelNNExtremes");
+    const auto & extremes = getGroup("PixelNNExtremes");
     auto monMinErrX = Scalar<float>("evtMinErrX", evtMinErrX);
     auto monMaxErrX = Scalar<float>("evtMaxErrX", evtMaxErrX);
     auto monMinErrY = Scalar<float>("evtMinErrY", evtMinErrY);

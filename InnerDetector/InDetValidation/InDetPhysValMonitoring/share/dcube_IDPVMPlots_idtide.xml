@@ -142,50 +142,6 @@
       <graph name="fakerate_vs_smalldR" plotopts="" type="TEfficiency"/>
       <graph name="fakerate_vs_jetpT" plotopts="" type="TEfficiency"/>
      </TDirectory>
-     <TDirectory name="TruthFromB">
-      <hist1D name="nInnerMostPixelHits_vs_dR" plotopts="" tests="meany" type="TProfile"/>
-      <hist1D name="nNextToInnerMostPixelHits_vs_dR" plotopts="" tests="meany" type="TProfile"/>
-      <hist1D name="nPixelHits_vs_dR" plotopts="" tests="meany" type="TProfile"/>
-      <hist1D name="nSCTHits_vs_dR" plotopts="" tests="meany" type="TProfile"/>
-      <hist1D name="nTRTHits_vs_dR" plotopts="" tests="meany" type="TProfile"/>
-      <hist1D name="nPixelHoles_vs_dR" plotopts="" tests="meany" type="TProfile"/>
-      <hist1D name="nSCTHoles_vs_dR" plotopts="" tests="meany" type="TProfile"/>
-      <hist1D name="nTRTHighThresholdHits_vs_dR" plotopts="" tests="meany" type="TProfile"/>
-      <hist1D name="nInnerMostPixelOutliers_vs_dR" plotopts="" tests="meany" type="TProfile"/>
-      <hist1D name="nInnerMostPixelSharedHits_vs_dR" plotopts="" tests="meany" type="TProfile"/>
-      <hist1D name="nInnerMostPixelSplitHits_vs_dR" plotopts="" tests="meany" type="TProfile"/>
-      <hist1D name="nExpectedInnerMostPixelHits_vs_dR" plotopts="" tests="meany" type="TProfile"/>
-      <hist1D name="nExpectedNextToInnerMostPixelHits_vs_dR" plotopts="" tests="meany" type="TProfile"/>
-      <hist1D name="nPixelOutliers_vs_dR" plotopts="" tests="meany" type="TProfile"/>
-      <hist1D name="nPixelContribLayers_vs_dR" plotopts="" tests="meany" type="TProfile"/>
-      <hist1D name="nPixelSharedHits_vs_dR" plotopts="" tests="meany" type="TProfile"/>
-      <hist1D name="nPixelSplitHits_vs_dR" plotopts="" tests="meany" type="TProfile"/>
-      <hist1D name="nPixelGangedHits_vs_dR" plotopts="" tests="meany" type="TProfile"/>
-      <hist1D name="nPixelGangedHitsFlaggedFakes_vs_dR" plotopts="" tests="meany" type="TProfile"/>
-      <hist1D name="nSCTOutliers_vs_dR" plotopts="" tests="meany" type="TProfile"/>
-      <hist1D name="nSCTDoubleHoles_vs_dR" plotopts="" tests="meany" type="TProfile"/>
-      <hist1D name="nSCTSharedHits_vs_dR" plotopts="" tests="meany" type="TProfile"/>
-      <hist1D name="nTRTOutliers_vs_dR" plotopts="" tests="meany" type="TProfile"/>
-      <hist1D name="nTRTHighThresholdOutliers_vs_dR" plotopts="" tests="meany" type="TProfile"/>
-      <hist1D name="nPixelDeadSensors_vs_dR" plotopts="" tests="meany" type="TProfile"/>
-      <hist1D name="nSCTDeadSensors_vs_dR" plotopts="" tests="meany" type="TProfile"/>
-      <hist1D name="reco_d0_vs_dR" plotopts="" tests="meany" type="TProfile"/>
-      <hist1D name="reco_z0_vs_dR" plotopts="" tests="meany" type="TProfile"/>
-      <hist1D name="reco_z0sin_vs_dR" plotopts="" tests="meany" type="TProfile"/>
-      <hist1D name="reco_phi_vs_dR" plotopts="" tests="meany" type="TProfile"/>
-      <hist1D name="reco_theta_vs_dR" plotopts="" tests="meany" type="TProfile"/>
-      <hist1D name="reco_eta_vs_dR" plotopts="" tests="meany" type="TProfile"/>
-      <hist1D name="reco_pt_vs_dR" plotopts="" tests="meany" type="TProfile"/>
-      <hist1D name="reco_track_pt_vs_jet_pt" plotopts="" tests="meany" type="TProfile"/>
-      <hist1D name="reco_lowpt_vs_dR" plotopts="" tests="meany" type="TProfile"/>
-      <hist1D name="reco_chi2Overndof_vs_dR" plotopts="" tests="meany" type="TProfile"/>
-      <graph name="efficiency_vs_dR" plotopts="" type="TEfficiency"/>
-      <graph name="efficiency_vs_smalldR" plotopts="" type="TEfficiency"/>
-      <graph name="efficiency_vs_jetpT" plotopts="" type="TEfficiency"/>
-      <graph name="fakerate_vs_dR" plotopts="" type="TEfficiency"/>
-      <graph name="fakerate_vs_smalldR" plotopts="" type="TEfficiency"/>
-      <graph name="fakerate_vs_jetpT" plotopts="" type="TEfficiency"/>
-     </TDirectory>
     </TDirectory>
    </TDirectory>
   </TDirectory>

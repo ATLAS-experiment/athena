@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "PFOHistUtils/PFOAttributePlots.h"
@@ -20,7 +20,7 @@ namespace PFO {
  
   void PFOAttributePlots::fill(const xAOD::FlowElement& FE, const xAOD::EventInfo& eventInfo){
     float timing=-50;
-    static const SG::AuxElement::ConstAccessor<float>acc_FE_Timing("TIMING");
+    static const SG::ConstAccessor<float>acc_FE_Timing("TIMING");
     if(acc_FE_Timing.isAvailable(FE)){
       timing=acc_FE_Timing(FE);
       m_FE_TIMING->Fill(timing,eventInfo.beamSpotWeight());
@@ -30,7 +30,7 @@ namespace PFO {
     }
 
     float E_tile0 = -50;
-    static const SG::AuxElement::ConstAccessor<float>acc_FE_LAYER_ENERGY_Tile0("LAYERENERGY_TILE0");
+    static const SG::ConstAccessor<float>acc_FE_LAYER_ENERGY_Tile0("LAYERENERGY_TILE0");
     if(acc_FE_LAYER_ENERGY_Tile0.isAvailable(FE)){
       E_tile0 =acc_FE_LAYER_ENERGY_Tile0(FE);
       m_FE_LAYER_ENERGY_Tile0->Fill(E_tile0 ,eventInfo.beamSpotWeight());

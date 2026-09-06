@@ -46,10 +46,10 @@ TrigEFBphysContainer * TrigEFBphysContainerCnv::createTransient(const Token* tok
   
   mlog << MSG::DEBUG << "TrigEFBphysContainerCnv::createTransient called" << endmsg;
   
-  static const pool::Guid tlp2_guid( "D93906C2-4F81-44A7-98BE-71302891FE44" );
-  static const pool::Guid tlp1_guid( "5F5B068F-32DB-4CC9-BA9E-C74C076AAAA1" );
-  static const pool::Guid p0_guid( "033EAD89-6721-46F2-9D32-2670BA63B901" );
-  static const pool::Guid p0_guid2( "760BB4E7-61C1-4365-BE20-C8251E808BA4" );
+  static const Guid tlp2_guid( "D93906C2-4F81-44A7-98BE-71302891FE44" );
+  static const Guid tlp1_guid( "5F5B068F-32DB-4CC9-BA9E-C74C076AAAA1" );
+  static const Guid p0_guid( "033EAD89-6721-46F2-9D32-2670BA63B901" );
+  static const Guid p0_guid2( "760BB4E7-61C1-4365-BE20-C8251E808BA4" );
  
   TrigEFBphysContainer *p_collection = 0;
   if( compareClassGuid(token,  tlp2_guid ) ) {

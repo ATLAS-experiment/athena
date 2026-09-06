@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef G4AtlasDetectorConstructionTool_H
@@ -44,6 +44,8 @@ class G4AtlasDetectorConstructionTool final : public extends<AthAlgTool, IDetect
         G4AtlasDetectorConstructionTool* detConstructionTool)
         : AthMessaging("G4AtlasDetectorConstruction"),
           m_detConstructionTool(detConstructionTool) {}
+
+    ~G4AtlasDetectorConstruction() override;
 
     virtual G4VPhysicalVolume* Construct() override final;
     virtual void ConstructSDandField() override final;

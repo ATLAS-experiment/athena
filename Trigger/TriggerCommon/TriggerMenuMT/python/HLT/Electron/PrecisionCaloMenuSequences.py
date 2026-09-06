@@ -1,5 +1,5 @@
 #
-#  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 #
 
 # menu components   
@@ -40,10 +40,7 @@ def precisionCaloSequenceGenCfg(flags, ion=False, is_probe_leg=False, variant=''
         from TriggerMenuMT.HLT.HeavyIon.HeavyIonMenuSequences import egammaFSHIEventShapeMakerCfg
         pedestalCA = egammaFSHIEventShapeMakerCfg(flags)
 
-    from TrigGenericAlgs.TrigGenericAlgsConfig import ROBPrefetchingAlgCfg_Calo
-    robPrefetchAlg = ROBPrefetchingAlgCfg_Calo( flags, nameSuffix=InViewRoIs+hiInfo+'_probe'+variant if is_probe_leg else InViewRoIs+hiInfo+variant)
-
-    selAcc.mergeReco(recoAcc, robPrefetchCA=robPrefetchAlg, upSequenceCA=pedestalCA)
+    selAcc.mergeReco(recoAcc, upSequenceCA=pedestalCA)
 
     hypoAlg = CompFactory.TrigEgammaPrecisionCaloHypoAlg('Electron' + tag(ion) + 'Hypo' + variant)
 

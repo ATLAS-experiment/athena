@@ -3,6 +3,7 @@
 */
 #include "RDOtoTracccCellConverterAlg.h"
 #include "StoreGate/ReadHandle.h"
+#include <InDetRawData/SCT3_RawData.h>
 
 namespace ActsTrk {
 
@@ -15,6 +16,9 @@ StatusCode RDOtoTracccCellConverterAlg::initialize()
   ATH_CHECK(m_pixelRDOKey.initialize());
   ATH_CHECK(m_stripRDOKey.initialize());
 
+  ATH_MSG_DEBUG("Reading from Pixel RDO key: " << m_pixelRDOKey.key());
+  ATH_MSG_DEBUG("Reading from Strip RDO key: " << m_stripRDOKey.key());
+
   ATH_CHECK(detStore()->retrieve(m_pixelManager, m_pixelManagerKey));
   ATH_CHECK(detStore()->retrieve(m_stripManager, m_stripManagerKey));
 
@@ -24,6 +28,9 @@ StatusCode RDOtoTracccCellConverterAlg::initialize()
 StatusCode RDOtoTracccCellConverterAlg::execute(const EventContext& ctx) const
 {
   using size_type = traccc::edm::silicon_cell_collection::buffer::size_type;
+
+  // ---- -1. Make sure the detray→detcond index map has been built ----
+  ATH_CHECK(m_common.buildDetrayMaps());
 
   // ---- 0. Init
   auto pixelRDOHandle = SG::makeHandle(m_pixelRDOKey, ctx);
@@ -44,11 +51,22 @@ StatusCode RDOtoTracccCellConverterAlg::execute(const EventContext& ctx) const
   for (const auto* coll : *stripRDOHandle) {
     if (coll) {
       for (const SCT_RDORawData* rdo : *coll) {
+        //Check type in debug build otherwise assume it is correct
+        assert(dynamic_cast<const SCT3_RawData*>(rdo)!=nullptr);
+        const SCT3_RawData* raw3 = static_cast<const SCT3_RawData*>(rdo);
+
+        std::bitset<3> timePattern(raw3->getTimeBin());
+        if (!m_common.passTiming(timePattern)) {
+            ATH_MSG_DEBUG("Strip failed timing check");
+            continue;
+        }
         nStrip += rdo->getGroupSize();
       }
     }
   }
 
+  ATH_MSG_DEBUG("Found " << nPix << " Pixel RDOs and " << nStrip
+                << " Strip RDOs, total " << (nPix + nStrip) << " RDOs");
   size_type const nCells = nPix + nStrip;
 
   if (nCells == 0) {
@@ -82,7 +100,12 @@ StatusCode RDOtoTracccCellConverterAlg::execute(const EventContext& ctx) const
       if (!el) continue;
       const Identifier modId = el->identify();
       const InDetDD::SiCellId cellId = el->cellIdFromIdentifier(rdoId);
-      const uint64_t geoId = m_common.m_athenaToDetray->at(modId);
+      const auto geoIdOpt = m_common.m_geoIdMapping->athenaToDetray(modId);
+      if (!geoIdOpt.has_value()) {
+        ATH_MSG_FATAL("No detray id found for Athena identifier " << modId);
+        return StatusCode::FAILURE;
+      }
+      const uint64_t geoId = *geoIdOpt;
 
       if (geoId != current_geometry_id) {
         current_geometry_id = geoId;
@@ -110,13 +133,28 @@ StatusCode RDOtoTracccCellConverterAlg::execute(const EventContext& ctx) const
   // Convert Strip RDOs
   for (const auto* coll : *stripRDOHandle) {
     for (const SCT_RDORawData* rdo : *coll) {
+      //Check type in debug build otherwise assume it is correct
+      assert(dynamic_cast<const SCT3_RawData*>(rdo)!=nullptr);
+      const SCT3_RawData* raw3 = static_cast<const SCT3_RawData*>(rdo);
+
+      std::bitset<3> timePattern(raw3->getTimeBin());
+      if (!m_common.passTiming(timePattern)) {
+          ATH_MSG_DEBUG("Strip failed timing check");
+          continue;
+      }
+
       const Identifier rdoId = rdo->identify();
       const InDetDD::SiDetectorElement* el =
           m_stripManager->getDetectorElement(rdoId);
       if (!el) continue;
       const Identifier modId = el->identify();
       const InDetDD::SiCellId cellId = el->cellIdFromIdentifier(rdoId);
-      const uint64_t geoId = m_common.m_athenaToDetray->at(modId);
+      const auto geoIdOpt = m_common.m_geoIdMapping->athenaToDetray(modId);
+      if (!geoIdOpt.has_value()) {
+        ATH_MSG_FATAL("No detray id found for Athena identifier " << modId);
+        return StatusCode::FAILURE;
+      }
+      const uint64_t geoId = *geoIdOpt;
 
       if (geoId != current_geometry_id) {
         current_geometry_id = geoId;
@@ -125,21 +163,25 @@ StatusCode RDOtoTracccCellConverterAlg::execute(const EventContext& ctx) const
 
       if (m_common.m_stripID->barrel_ec(modId) == 0) {
         for (int i = 0; i < rdo->getGroupSize(); ++i) {
+          
           traccc::edm::silicon_cell cell = cells.at(cell_index++);
           cell.channel0() = static_cast<uint32_t>(cellId.phiIndex() + i);
           cell.channel1() = 0;
           cell.module_index() = current_det_cond_idx;
           cell.activation() = 1.;
           cell.time() = 0;
+           
         }
       } else {
         for (int i = 0; i < rdo->getGroupSize(); ++i) {
+          
           traccc::edm::silicon_cell cell = cells.at(cell_index++);
           cell.channel0() = 0;
           cell.channel1() = static_cast<uint32_t>(cellId.phiIndex() + i);
           cell.module_index() = current_det_cond_idx;
           cell.activation() = 1.;
           cell.time() = 0;
+          
         }
       }
     }

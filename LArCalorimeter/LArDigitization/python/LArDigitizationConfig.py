@@ -3,6 +3,7 @@
 Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 """
 # utilities
+from AthenaCommon.Logging import logging
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.Enums import BeamType, LHCPeriod, ProductionStep
@@ -21,10 +22,14 @@ from LArROD.LArRawChannelBuilderAlgConfig import LArRawChannelBuilderAlgCfg
 from LArROD.LArDigitThinnerConfig import LArDigitThinnerCfg
 from LArROD.LArNNChannelBuilder import LArNNRawChannelBuilderCfg
 from LArROD.LArOFFCChannelBuilder import LArOFFCRawChannelBuilderCfg
+
+from LArROD.LArRODBCIDCorrAlgConfig import LArRODBCIDCorrAlgCfg
+
 from DigitizationConfig.TruthDigitizationOutputConfig import TruthDigitizationOutputCfg
 # for Trigger Tower
 from CaloConditions.CaloConditionsConfig import CaloTriggerTowerCfg
 from SGComps.AddressRemappingConfig import InputOverwriteCfg
+
 
 # Enum of CaloGains
 from ROOT.CaloGain import CaloGain
@@ -194,12 +199,26 @@ def LArHitEMapToDigitAlgCfg(flags, name="LArHitEMapToDigitAlg", **kwargs):
         kwargs.setdefault("NoiseOnOff", flags.Digitization.DoCaloNoise)
     kwargs.setdefault("DoDigiTruthReconstruction", flags.Digitization.EnableCaloHSTruthRecoInputs)
     kwargs.setdefault("RandomSeedOffset", flags.Digitization.RandomSeedOffset)
-    if (not flags.Digitization.HighGainFCal) and (not flags.Common.isOverlay):
-        kwargs.setdefault("HighGainThreshFCAL", 0)
-        kwargs.setdefault("GainRangeFCAL",[int(CaloGain.LARMEDIUMGAIN),int(CaloGain.LARLOWGAIN)])
-    if (not flags.Digitization.HighGainEMECIW) and (not flags.Common.isOverlay):
-        kwargs.setdefault("HighGainThreshEMECIW", 0)
-        kwargs.setdefault("GainRangeEMECIW",[int(CaloGain.LARMEDIUMGAIN),int(CaloGain.LARLOWGAIN)])
+
+    if flags.GeoModel.Run==LHCPeriod.Run4 and flags.IOVDb.UseCREST:
+        #The run 4 readout electronics has only 2 gains
+        for subdet in ("EM","HEC","FCAL","EMECIW"):
+           kwargs.setdefault("GainRange"+subdet,(0,1))
+           kwargs.setdefault("LowGainThresh"+subdet,0xFFFFFFFF) #Low gains doesn't exist any more in R 4
+           #Gain switching threshold in the lower gain (aka MEDIUM)
+           #Assume gain switch at 80% of pre-amp saturation in HG. -> 9000 ADC counts in the lower gain
+           kwargs.setdefault("HighGainThresh"+subdet,9000)
+           kwargs.setdefault("maxADC",32767)
+    else:
+        #Run 1/2/3 case:
+        if (not flags.Digitization.HighGainFCal) and (not flags.Common.isOverlay):
+           kwargs.setdefault("HighGainThreshFCAL", 0)
+           kwargs.setdefault("GainRangeFCAL",[int(CaloGain.LARMEDIUMGAIN),int(CaloGain.LARLOWGAIN)])
+        if (not flags.Digitization.HighGainEMECIW) and (not flags.Common.isOverlay):
+           kwargs.setdefault("HighGainThreshEMECIW", 0)
+           kwargs.setdefault("GainRangeEMECIW",[int(CaloGain.LARMEDIUMGAIN),int(CaloGain.LARLOWGAIN)])
+
+
     kwargs.setdefault("RndmEvtOverlay", flags.Common.isOverlay)
     if flags.Common.ProductionStep == ProductionStep.PileUpPresampling:
         kwargs.setdefault("DigitContainer", flags.Overlay.BkgPrefix + "LArDigitContainer_MC")
@@ -211,6 +230,8 @@ def LArHitEMapToDigitAlgCfg(flags, name="LArHitEMapToDigitAlg", **kwargs):
     kwargs.setdefault("Nsamples", flags.LAr.ROD.nSamples)
     kwargs.setdefault("firstSample", #Need to set a negative value to include preceeding samples
                       -flags.LAr.ROD.nPreceedingSamples if flags.LAr.ROD.nPreceedingSamples!=0 else flags.LAr.ROD.FirstSample)
+    
+
     LArHitEMapToDigitAlg = CompFactory.LArHitEMapToDigitAlg
     acc.addEventAlgo(LArHitEMapToDigitAlg(name, **kwargs))
     return acc
@@ -246,6 +267,17 @@ def LArDigitizationBasicCfg(flags, **kwargs):
     acc.merge(PileUpToolsCfg(flags, **kwargs))
 
     acc.merge(LArHitEMapToDigitAlgCfg(flags))
+
+    if flags.LAr.ROD.ApplyRODBCIDCorr:
+        mlog = logging.getLogger('LArDigitizationBasicCfg')
+        mlog.info('LAr.ROD.ApplyRODBCIDCorr is set: scheduling LArRODBCIDCorrAlg '
+                  'to subtract the BCID-dependent pile-up offset from the digits')
+        if (flags.hasFlag('Calo.Cell.doPileupOffsetBCIDCorr')
+                and flags.Calo.Cell.doPileupOffsetBCIDCorr):
+            mlog.warning('Calo.Cell.doPileupOffsetBCIDCorr is also enabled: the '
+                         'pile-up offset will be subtracted twice')
+        acc.merge(LArRODBCIDCorrAlgCfg(flags))
+
     if flags.LAr.ROD.NNRawChannelBuilding:
         acc.merge(LArNNRawChannelBuilderCfg(flags))
     elif flags.LAr.ROD.OFFCRawChannelBuilding:

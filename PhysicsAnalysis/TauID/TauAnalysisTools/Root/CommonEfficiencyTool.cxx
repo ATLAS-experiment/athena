@@ -152,9 +152,11 @@ CP::CorrectionCode CommonEfficiencyTool::getEfficiencyScaleFactor(columnar::TauJ
 {
   const Accessors& acc = *m_accessors;
 
-  // check which true state is requested
+  // check which true state is requested or if we are running on data
   // need columnar migration
-  if (!m_bSkipTruthMatchCheck and acc.m_truthParticleType(tau) != m_eCheckTruth)
+  if(m_applyToData){
+    ATH_MSG_DEBUG("retrieving the SFs while running on data ...");
+  } else if (!m_bSkipTruthMatchCheck and acc.m_truthParticleType(tau) != m_eCheckTruth) 
   {
     dEfficiencyScaleFactor = 1.;
     return CP::CorrectionCode::Ok;

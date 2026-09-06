@@ -5,7 +5,7 @@
 ### Basic concepts
 Each Trigger ART test is represented by an instance of the class `Test`. It consists of several steps in two categories
 stored in two member variables `exec_steps` and `check_steps`. The exec steps constitute the main part of the
-test and correspond to one athena job each. They can also execute athenaHLT or a transform. The check steps are
+test and correspond to one athena job each. They can also execute athenaEF or a transform. The check steps are
 additional post-processing steps analysing and verifying the logs and outputs from the exec steps. All steps share
 a common base class `Step`. 
 
@@ -46,7 +46,7 @@ from TrigValTools.TrigValSteering import Test, ExecStep, CheckSteps
 
 # Define the main exec step
 ex = ExecStep.ExecStep()
-ex.type = 'athena' # can be also athenaHLT, Reco_tf, Trig_reco_tf or 'other'
+ex.type = 'athena' # can be also athenaEF, Reco_tf, Trig_reco_tf or 'other'
 ex.job_options = 'PackageName/myJobOptionsFile.py'
 ex.input = 'ttbar' # select input from common samples by keyword; explicit input is also possible
 

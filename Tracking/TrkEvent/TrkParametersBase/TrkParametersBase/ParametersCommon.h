@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /* @brief ParametersCommon common base class
@@ -111,7 +111,7 @@ class ParametersCommon {
 
   /** Returns the Surface Type enum for the surface used
    * to define the derived class*/
-  virtual SurfaceType surfaceType() const = 0;
+  constexpr virtual SurfaceType surfaceType() const = 0;
 
   /** virtual Destructor */
   virtual ~ParametersCommon() = default;

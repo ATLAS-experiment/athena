@@ -17,7 +17,6 @@
 #include <MultiDraw/Formula.h>
 #include <MultiDraw/FormulaSvc.h>
 #include <RootCoreUtils/Assert.h>
-#include <RootCoreUtils/ThrowMsg.h>
 
 //
 // method implementations
@@ -30,8 +29,6 @@ namespace EL
   void AlgSelect ::
   testInvariant () const
   {
-    RCU_INVARIANT (this != 0);
-
     RCU_INVARIANT (!m_outputStream.empty());
     for (std::size_t form = 0, end = m_cuts.size(); form != end; ++ form)
       RCU_INVARIANT (!m_cuts[form].empty());
@@ -165,16 +162,17 @@ namespace EL
       if (m_index[form]) switch (m_index[form]->ndim())
       {
       case -1:
-	RCU_THROW_MSG ("formula not valid: " + m_cuts[form]);
-	break;
+        ATH_MSG_ERROR ("formula not valid: " << m_cuts[form]);
+        return StatusCode::FAILURE;
       case 0:
 	myweight = m_index[form]->value (0);
 	break;
       case 1:
-	RCU_THROW_MSG ("formula is an array: " + m_cuts[form]);
-	break;
+        ATH_MSG_ERROR ("formula is an array: " << m_cuts[form]);
+        return StatusCode::FAILURE;
       default:
-	RCU_THROW_MSG ("unknown formula dimension: " + m_cuts[form]);
+        ATH_MSG_ERROR ("unknown formula dimension: " << m_cuts[form]);
+        return StatusCode::FAILURE;
       }
 
       weight *= myweight;

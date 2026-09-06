@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( TrigTauMonitoring )
@@ -16,7 +16,7 @@ atlas_add_dictionary( TrigTauMonitoringDict
 atlas_add_component( TrigTauMonitoring
                      src/*.cxx
                      src/components/*.cxx
-                     LINK_LIBRARIES TrigTauMonitoringLib AthenaMonitoringKernelLib AthenaMonitoringLib CxxUtils xAODTau xAODTrigger xAODTruth LArRecEvent TruthUtils )
+                     LINK_LIBRARIES AthContainers AthenaMonitoringKernelLib AthenaMonitoringLib CxxUtils GaudiKernel LArRecEvent StoreGateLib TrigCompositeUtilsLib TrigDecisionToolLib TrigTauMonitoringLib TruthUtils xAODEgamma xAODMuon xAODTau xAODTrigger xAODTruth )
 
 # Suppress spurious warnings seen in the LTO build originating 
 # in the boost parser code.

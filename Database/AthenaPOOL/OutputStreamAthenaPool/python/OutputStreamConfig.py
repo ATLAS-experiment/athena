@@ -21,6 +21,8 @@ def OutputStreamCfg(
     keepProvenanceTagsRegEx=None,
     AcceptAlgs=None,
     HelperTools=None,
+    CompressionListHigh=None,
+    CompressionListLow=None,
 ):
    """Configure an output stream for writing data to POOL files.
 
@@ -39,6 +41,11 @@ def OutputStreamCfg(
                                (see extendProvenanceRecord).
        AcceptAlgs: List of algorithms that must accept the event for it to be written
        HelperTools: List of helper tools to attach to the stream
+       CompressionListHigh: Aux container entries whose floats are stored with a truncated
+                           mantissa, keeping CompressionBitsHigh bits (7 by default).
+       CompressionListLow: Aux container entries whose floats are stored with a truncated
+                           mantissa, keeping CompressionBitsLow bits (15 by default).
+
 
    Returns:
        ComponentAccumulator: Configured output stream and associated services
@@ -52,6 +59,10 @@ def OutputStreamCfg(
       AcceptAlgs = []
    if HelperTools is None:
       HelperTools = []
+   if CompressionListHigh is None:
+      CompressionListHigh = []
+   if CompressionListLow is None:
+      CompressionListLow = []
 
    eventInfoKey = "EventInfo"
    if flags.Common.ProductionStep in [ProductionStep.PileUpPresampling, ProductionStep.PileUpPretracking, ProductionStep.MinbiasPreprocessing]:
@@ -126,6 +137,10 @@ def OutputStreamCfg(
       # C++ defaults to '.*' which means all. Overwrite only on request.
       outputStream.KeepProvenanceTagsRegEx = keepProvenanceTagsRegEx
    outputStream.AcceptAlgs += AcceptAlgs
+   if CompressionListHigh:
+      outputStream.CompressionListHigh += CompressionListHigh
+   if CompressionListLow:
+      outputStream.CompressionListLow += CompressionListLow
    outputStream.ExtraOutputs.add(("DataHeader", f"StoreGateSvc+{outputStreamName(streamName)}"))
    if flags.Scheduler.CheckOutputUsage and flags.Concurrency.NumThreads > 0:
       outputStream.ExtraInputs = {tuple(l.split('#')) for l in finalItemList if '*' not in l and 'Aux' not in l}

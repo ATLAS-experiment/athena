@@ -3,23 +3,27 @@
 from AthenaConfiguration.ComponentFactory import CompFactory 
 from AthenaConfiguration.MainServicesConfig import MainEvgenServicesCfg
 
-def LArHVScaleCorr2NtupleCfg(flags, rootfile="hvcorr_read.root", addSC=False):
+def LArHVScaleCorr2NtupleCfg(flags, rootfile="hvcorr_read.root", hvcorr="LArHVScaleCorr", hvcorrSC="LArHVScaleCorrSC",
+                             treename="HVSCALE", treenameSC="HVSCALESC"):
 
     from LArGeoAlgsNV.LArGMConfig import LArGMCfg
     result=LArGMCfg(flags)
 
-    from LArCabling.LArCablingConfig import LArOnOffIdMappingCfg
-    result.merge(LArOnOffIdMappingCfg(flags))
+    if hvcorr != "" and treename != "":
+        from LArCabling.LArCablingConfig import LArOnOffIdMappingCfg
+        result.merge(LArOnOffIdMappingCfg(flags))
 
-    from LArBadChannelTool.LArBadChannelConfig import LArBadChannelCfg
-    result.merge(LArBadChannelCfg(flags))
+        from LArBadChannelTool.LArBadChannelConfig import LArBadChannelCfg
+        result.merge(LArBadChannelCfg(flags))
 
-    from LArConfiguration.LArElecCalibDBConfig import LArElecCalibDBCfg
-    result.merge(LArElecCalibDBCfg(flags,["HVScaleCorr"]))
+        from LArConfiguration.LArElecCalibDBConfig import LArElecCalibDBCfg
+        result.merge(LArElecCalibDBCfg(flags,["HVScaleCorr"]))
 
-    result.addEventAlgo(CompFactory.LArHVScaleCorr2Ntuple("LArHVScaleCorr2Ntuple", AddFEBTempInfo = False, OffId=True))
+        result.addEventAlgo(CompFactory.LArHVScaleCorr2Ntuple(
+            f"LArHVScaleCorr2Ntuple-{hvcorr}", ContainerKey=hvcorr, AddFEBTempInfo=False, OffId=True,
+            NtuplePath=f"/NTUPLES/FILE1/{treename}"))
 
-    if addSC:
+    if hvcorrSC != "" and treenameSC != "":
        from LArConfiguration.LArElecCalibDBConfig import LArElecCalibDBSCCfg
        result.merge(LArElecCalibDBSCCfg(flags,["HVScaleCorr"]))
 
@@ -28,9 +32,9 @@ def LArHVScaleCorr2NtupleCfg(flags, rootfile="hvcorr_read.root", addSC=False):
 
        result.merge(LArBadChannelCfg(flags, isSC=True))
 
-       result.addEventAlgo(CompFactory.LArHVScaleCorr2Ntuple("LArSCHVScaleCorr2Ntuple", AddFEBTempInfo = False, OffId=True, 
-                                                             ContainerKey="LArHVScaleCorrSC",isSC = True, BadChanKey = "LArBadChannelSC"))
-
+       result.addEventAlgo(CompFactory.LArHVScaleCorr2Ntuple(
+           f"LArHVScaleCorr2Ntuple-{hvcorrSC}", AddFEBTempInfo=False, OffId=True, ContainerKey=hvcorrSC, 
+           isSC=True, BadChanKey = "LArBadChannelSC", NtuplePath=f"/NTUPLES/FILE1/{treenameSC}"))
 
     import os
     if os.path.exists(rootfile):
@@ -83,7 +87,7 @@ if __name__=="__main__":
 
     rootfile="hvcorr_read.root"
     if len(sys.argv)>2:
-        rootFile=sys.argv[2]
+        rootfile=sys.argv[2]
 
     if len(sys.argv)>3:
         flags.IOVDb.GlobalTag=sys.argv[3]
@@ -95,7 +99,7 @@ if __name__=="__main__":
 
     flags.lock()
     cfg=MainEvgenServicesCfg(flags)
-    cfg.merge(LArHVScaleCorr2NtupleCfg(flags))
+    cfg.merge(LArHVScaleCorr2NtupleCfg(flags, rootfile=rootfile))
     
     
     print("Start running...")

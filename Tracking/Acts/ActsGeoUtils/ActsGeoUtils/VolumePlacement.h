@@ -13,6 +13,7 @@
 #include "GeoModelKernel/GeoAlignableTransform.h"
 #include "GeoModelKernel/GeoIntrusivePtr.h"
 
+#include <optional>
 #include <variant>
 
 namespace ActsTrk{
@@ -37,19 +38,19 @@ namespace ActsTrk{
              *  @param addShift: Additional optional shift to be applied on top of the alignable reference */
             explicit VolumePlacement(const DetectorType detType,
                                      const AlignableNode_t parentNode,
-                                     std::optional<Amg::Transform3D> addShift = std::nullopt);
+                                     const std::optional<Amg::Transform3D> & addShift = std::nullopt);
             /** @brief Constructor taking the reference to a Detector element. The life time of the 
              *         detector element must be ensured to exceed the Placement's lifetime
              *  @param parentElement: The detector element which alignment the volume is following
              *  @param addShift: Additional optional shift to be applied on top of the alignable reference */
             explicit VolumePlacement(const IDetectorElement& parentElement,
-                                     std::optional<Amg::Transform3D> addShift = std::nullopt);
+                                     const std::optional<Amg::Transform3D> & addShift = std::nullopt);
             /** @brief Constructor taking the reference to another placement The life time of the 
              *       object must be ensured to exceed the Placement's lifetime
              *  @param parentPlacement: The parent placement moving according to the alignment
              *  @param addShift: Additional optional shift to be applied on top of the alignable reference */
             explicit VolumePlacement(const VolumePlacement& parentPlacement,
-                                     std::optional<Amg::Transform3D> addShift = std::nullopt);
+                                     const std::optional<Amg::Transform3D> & addShift = std::nullopt);
             /** @brief Add a child volume placement to this placement. The object takes
              *         ownership and fills the alignment cache
              *  @param child: The child to be appended  */

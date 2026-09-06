@@ -31,6 +31,7 @@ inputRDO=""
 outputAOD=""
 nEvents="-1"
 skipCheck=0
+storeTrackSeeds=True
 
 ## parsing flags
 while [ $# -ge 1 ];do
@@ -40,6 +41,7 @@ while [ $# -ge 1 ];do
         -o  | --outputAOD )     if [ $# -lt 2 ] ; then usage ; fi ; outputAOD="$2" ; shift ;;
         -n  | --nEvents )       if [ $# -lt 2 ] ; then usage ; fi ; nEvents="$2"   ; shift ;;
         -s  | --skipCheck )     if [ $# -lt 1 ] ; then usage ; fi ; skipCheck=1    ;;
+        -t  | --noStoreSeeds )  if [ $# -lt 1 ] ; then usage ; fi ; storeTrackSeeds=False ;;
         -h  | --help )          usage 0 ;;
         *) shift ;;
     esac
@@ -56,24 +58,24 @@ if [ ! -f $inputRDO ]; then
 fi
 
 ## running reconstruction
-run Reco_tf.py --CA \
+ignore_pattern='ERROR Locating dev file .+ Do not let this propagate to a release'
+run Reco_tf.py \
     --maxEvents ${nEvents} \
-    --preInclude 'InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude,ActsConfig.ActsCIFlags.actsProductionFlags' \
+    --preInclude 'InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude' \
     --postInclude 'ActsConfig.ActsPostIncludes.ACTSClusterPostInclude' \
-    --preExec 'flags.Detector.EnableHGTD=False; \
+    --preExec "flags.Detector.EnableHGTD=False; \
                flags.Acts.doLargeRadius=False; \
                flags.Acts.Device.doClusterization=True; \
                flags.Tracking.doPixelDigitalClustering=True; \
+               flags.Tracking.ITkActsPass.storeTrackSeeds=${storeTrackSeeds}; \
                from ActsConfig.ActsConfigFlags import SeedingStrategy; \
-               flags.Acts.SeedingStrategy=SeedingStrategy.Gbts;' \
-    --steering 'doRAWtoALL' \
+               flags.Tracking.ITkActsPass.SeedingStrategy=SeedingStrategy.Gbts;" \
     --inputRDOFile ${inputRDO} \
     --outputAODFile ${outputAOD} \
+    --ignorePatterns "${ignore_pattern}" \
     --perfmon fullmonmt
 
 rc=$?
-# 24/07/2026: temporarily ignore known ERRORs detected in logfile (rc=68)
-if [ $rc = 68 ]; then rc=0; fi
 echo "Reco_tf.py result: $rc"
 # don't exit only for ERRORs detected in logfile (rc=68)
 if [ $rc != 0 -a $rc != 68 ]; then exit $rc; fi

@@ -3,9 +3,7 @@
 #
 # Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 #
-# athenaEF.py - A modified version of athenaHLT.py that runs the HLT configuration
-# directly without using HLTMPPy/HLTMPPU. It creates the configuration like
-# athenaHLT but executes it like athena.py does.
+# athenaEF.py - executable to run the EF online and offline.
 #
 """date"
 
@@ -39,11 +37,8 @@ import sys
 import os
 import argparse
 import json
-import pickle
 import traceback
 from datetime import datetime as dt
-
-from TrigConfStorage.TriggerCrestUtil import TriggerCrestUtil
 
 # Use single-threaded oracle client library to avoid extra
 # threads when forking (see ATR-21890, ATDBOPS-115)
@@ -53,6 +48,9 @@ from TrigCommon import AthHLT
 from AthenaCommon.Logging import logging
 log = logging.getLogger('athenaEF')
 
+# Fraction of the hard timeout to be used for soft timeout. NB: athenaEF only enforces the soft
+# timeout: HltEventLoopMgr never acts on HardTimeout itself, it only uses it to compute the soft timeout
+SOFT_TIMEOUT_FRACTION = 0.95
 
 # =============================================================================
 # Run Parameters Configuration
@@ -92,7 +90,6 @@ class RunParams:
                 run_type=None,
                 trigger_type=None,
                 recording_enabled=None,
-                conditions_run=None,
                 T0_project_tag='',
                 stream='',
                 lumiblock=0):
@@ -108,7 +105,6 @@ class RunParams:
       self.run_type = run_type if run_type is not None else self.DEFAULT_RUN_TYPE
       self.trigger_type = trigger_type if trigger_type is not None else self.DEFAULT_TRIGGER_TYPE
       self.recording_enabled = recording_enabled if recording_enabled is not None else self.DEFAULT_RECORDING_ENABLED
-      self.conditions_run = conditions_run  # Reference run for conditions lookup (None = use run_number)
       self.T0_project_tag = T0_project_tag
       self.stream = stream
       self.lumiblock = lumiblock
@@ -127,7 +123,6 @@ class RunParams:
          'run_type': self.run_type,
          'trigger_type': self.trigger_type,
          'recording_enabled': self.recording_enabled,
-         'conditions_run': self.conditions_run,
          'T0_project_tag': self.T0_project_tag,
          'stream': self.stream,
          'lumiblock': self.lumiblock,
@@ -145,7 +140,6 @@ class RunParams:
          toroids_current=getattr(args, 'toroids_current', None),
          beam_type=getattr(args, 'beam_type', None),
          beam_energy=getattr(args, 'beam_energy', None),
-         conditions_run=getattr(args, 'conditions_run', None),
          T0_project_tag=getattr(args, 'T0_project_tag', ''),
          stream=getattr(args, 'stream', ''),
          lumiblock=getattr(args, 'lumiblock', 0),
@@ -519,17 +513,77 @@ def get_run_params(args=None, from_is=False, partition=None, webdaq_base=None, s
       return RunParams()
 
 
+class RuntimeOverrides:
+   """
+   Changes applied to the configuration after ApplicationMgr::configure() and before initialize(). 
+   Built entirely in main() from the command line and applied once in ConfigRunner.run(), adding a new override is a single line.
+   NB: we bypass the ComponentAccumulator. They must not end up in the generated JobOptions.
+   """
+   def __init__(self):
+      self.service_types = {}    # service name -> type
+      self.create_services = []  # (name, type) to create 
+      self.drop_services = []    # service names to remove
+      self.properties = {}       # "Component.Property" -> value
+      self.commands = []         # Post commands to execute (--postcommand)
+
+   def declare_type(self, name, type_):
+      """Schedule the service registered as 'name' to be of type 'type_'"""
+      self.service_types[name] = type_
+
+   def drop_service(self, name):
+      """Schedule the removal of a service already created by configure()"""
+      self.drop_services.append(name)
+
+   def create_service(self, name, type_=None):
+      """Schedule the creation of a service the configuration does not list"""
+      self.create_services.append((name, type_ or name))
+
+   def set(self, key, value):
+      """Schedule 'Component.Property' = value"""
+      self.properties[key] = value
+
+   def add_command(self, cmd):
+      """Schedule a Python command to be executed after configure()"""
+      self.commands.append(cmd)
+
+   def apply(self):
+      """Apply all overrides."""
+      from GaudiPython import InterfaceCast, gbl
+      from GaudiPython.Bindings import iProperty
+
+      if self.service_types or self.create_services or self.drop_services:
+         svcMgr = InterfaceCast(gbl.ISvcManager)(gbl.Gaudi.svcLocator())
+         for name, type_ in self.service_types.items():
+            log.info("Configuring %s under the name %s", type_, name)
+            svcMgr.declareSvcType(name, type_)
+         for name, type_ in self.create_services:
+            # For services not listed in the configuration. 
+            if svcMgr.addService(gbl.Gaudi.Utils.TypeNameString(f"{type_}/{name}")).isSuccess():
+               log.info("Created service %s/%s", type_, name)
+            else:
+               log.error("Failed to create service %s/%s", type_, name)
+         for name in self.drop_services:
+            # Services are instantiated by configure(), they have to be taken out before initialize(). 
+            if svcMgr.removeService(name).isSuccess():
+               log.info("Removed service %s", name)
+            else:
+               log.debug("Service %s not present, nothing to remove", name)
+
+      for key, value in self.properties.items():
+         component, _, prop = key.rpartition('.')
+         log.info("Overriding %s.%s = %s (from command line)", component, prop, value)
+         setattr(iProperty(component), prop, value)
+
+
 class ConfigRunner:
    """
    Runner class that executes Gaudi configuration from JSON file or database.
    Uses TrigConf::JobOptionsSvc with TYPE="FILE" or TYPE="DB" to load configuration.
-   Same approach used by PSC (Psc.cxx) - it sets JobOptionsType and
-   JobOptionsPath on the ApplicationMgr, and TrigConf::JobOptionsSvc handles both
-   FILE and DB modes transparently.
+   It sets JobOptionsType and JobOptionsPath on the ApplicationMgr, and TrigConf::JobOptionsSvc
+   handles both FILE and DB modes transparently.
    """
    def __init__(self, job_options_type, job_options_path, run_params=None,
-                properties=None, db_server=None, smk=None,
-                num_threads=1, num_slots=1, ef_overrides=None):
+                properties=None, db_server=None, smk=None, overrides=None):
       """
       Args:
          job_options_type: "FILE" or "DB"
@@ -538,9 +592,7 @@ class ConfigRunner:
          properties: Pre-loaded properties dict (optional, for FILE mode)
          db_server: DB server alias (for store() in DB mode)
          smk: Super Master Key (for store() in DB mode)
-         num_threads: Number of threads for AvalancheSchedulerSvc.ThreadPoolSize
-         num_slots: Number of event slots for EventDataSvc.NSlots
-         ef_overrides: EFInterfaceSvc properties overriding the DB/JSON configuration
+         overrides: RuntimeOverrides applied between configure() and initialize()
       """
       self.job_options_type = job_options_type
       self.job_options_path = job_options_path
@@ -548,21 +600,16 @@ class ConfigRunner:
       self.properties = properties
       self.db_server = db_server  # For store() in DB mode
       self.smk = smk              # For store() in DB mode
-      self.num_threads = num_threads
-      self.num_slots = num_slots
-      self.ef_overrides = ef_overrides or {}  # CLI overrides for EFInterfaceSvc
+      self.overrides = overrides or RuntimeOverrides()
       self._app = None
    
    @classmethod
-   def from_json(cls, json_file, run_params=None, properties=None,
-                 num_threads=1, num_slots=1, ef_overrides=None):
+   def from_json(cls, json_file, run_params=None, properties=None, overrides=None):
       """Create runner for JSON file (TYPE=FILE)"""
-      return cls("FILE", os.path.abspath(json_file), run_params, properties,
-                 num_threads=num_threads, num_slots=num_slots, ef_overrides=ef_overrides)
+      return cls("FILE", os.path.abspath(json_file), run_params, properties, overrides=overrides)
    
    @classmethod
-   def from_database(cls, db_server, smk, l1psk=None, hltpsk=None, run_params=None,
-                     num_threads=1, num_slots=1, ef_overrides=None):
+   def from_database(cls, db_server, smk, l1psk=None, hltpsk=None, run_params=None, overrides=None):
       """Create runner for database (TYPE=DB)"""
       # Build the DB connection string: server=X;smkey=Y;lvl1key=Z;hltkey=W
       db_path = f"server={db_server};smkey={smk}"
@@ -570,12 +617,10 @@ class ConfigRunner:
          db_path += f";lvl1key={l1psk}"
       if hltpsk is not None:
          db_path += f";hltkey={hltpsk}"
-      return cls("DB", db_path, run_params, db_server=db_server, smk=smk,
-                 num_threads=num_threads, num_slots=num_slots, ef_overrides=ef_overrides)
+      return cls("DB", db_path, run_params, db_server=db_server, smk=smk, overrides=overrides)
       
    def run(self, maxEvents=None):
       """
-      This follows the same pattern as PSC (Psc.cxx):
       1. Create ApplicationMgr via BootstrapHelper
       2. Set JobOptionsSvcType, JobOptionsType, JobOptionsPath
       3. configure() -> initialize() -> prepareForStart() -> start() ->
@@ -592,6 +637,8 @@ class ConfigRunner:
       bsh = BootstrapHelper()
       app = bsh.createApplicationMgr()
       self._app = app
+      #Set trigger defaults here, see ATR-32996
+      app.setProperty("MessageSvcType", "TrigMessageSvc")
       
       # For FILE mode, set ApplicationMgr properties from JSON before configure
       if self.job_options_type == "FILE" and self.properties:
@@ -601,7 +648,7 @@ class ConfigRunner:
                log.debug("Setting ApplicationMgr.%s = %s", k, v)
                app.setProperty(k, str(v) if not isinstance(v, str) else v)
       
-      # Set JobOptionsSvc properties like PSC does in Psc.cxx
+      # Set JobOptionsSvc properties
       log.info("Configuring TrigConf::JobOptionsSvc with TYPE=%s, PATH=%s",
                self.job_options_type, self.job_options_path)
       app.setProperty("JobOptionsSvcType", "TrigConf::JobOptionsSvc")
@@ -617,35 +664,25 @@ class ConfigRunner:
          log.info("Setting EvtMax=%d (overriding DB value)", maxEvents)
          app.setProperty('EvtMax', str(maxEvents))
       
-      # All property overrides below use iProperty and must be done after configure()
-      # but before initialize() - this is the same pattern as PSC (Psc.cxx)
-      from GaudiPython.Bindings import iProperty
+      # Overrides must be applied after configure() but before initialize().
+      self.overrides.apply()
 
-      # Set threading configuration
-      log.info("Setting threading: ThreadPoolSize=%d, NSlots=%d", self.num_threads, self.num_slots)
-      iProperty("AvalancheSchedulerSvc").ThreadPoolSize = self.num_threads
-      iProperty("EventDataSvc").NSlots = self.num_slots
-      
-      # Override EFInterfaceSvc properties explicitly given on the command line.
-      ef_svc = iProperty("EFInterfaceSvc")
-      for prop, value in self.ef_overrides.items():
-         log.info("Overriding EFInterfaceSvc.%s = %s (from command line)", prop, value)
-         setattr(ef_svc, prop, value)
-      
-      # If HLT PSK is set on command line, read it from DB instead of COOL (ATR-25974)
-      # This is the same logic as TrigPSCPythonDbSetup.py
-      from TrigPSC import PscConfig
-      if PscConfig.forcePSK:
-         log.info("PscConfig.forcePSK is set - configuring HLTPrescaleCondAlg to read from DB instead of COOL")
-         iProperty("HLTPrescaleCondAlg").Source = "DB"
-      
-      # Set forceRunNumber on HltEventLoopMgr if conditions_run is specified
-      # This overrides the run number used for IOV lookup in conditions loading
-      conditions_run = self.run_params.get('conditions_run')
-      if conditions_run is not None:
-         log.info("Setting HltEventLoopMgr.forceRunNumber=%d for conditions lookup", conditions_run)
-         iProperty("HltEventLoopMgr").forceRunNumber = conditions_run
-      
+      # THistSvc.Output cannot be scheduled in main(): setTHistSvcOutput() has to run
+      # against the service that configure() actually created.
+      if self.overrides.service_types.get('THistSvc') == 'THistSvc':
+         from GaudiPython.Bindings import iProperty
+         from TriggerJobOpts.TriggerHistSvcConfig import setTHistSvcOutput
+         output = []
+         setTHistSvcOutput(output)
+         iProperty("THistSvc").Output = output
+
+      # Postcommands run last.
+      if self.overrides.commands:
+         log.info("Executing postcommand(s)")
+         for cmd in self.overrides.commands:
+            log.info("  %s", cmd)
+            exec(cmd, globals(), {'app': app})
+
       # Initialize
       sc = app.initialize()
       if not sc.isSuccess():
@@ -661,7 +698,7 @@ class ConfigRunner:
          log.error("Cannot proceed without TrigServicesHelper - required for HLTEventLoopMgr lifecycle")
          raise RuntimeError("TrigServicesHelper not available") from e
       
-      # Call prepareForStart to set up ByteStreamMetadata (like PSC does)
+      # Call prepareForStart to set up ByteStreamMetadata
       try:
          run_number = self.run_params['run_number']
          det_mask = self.run_params['detector_mask']
@@ -714,7 +751,7 @@ class ConfigRunner:
          traceback.print_exc()
          raise
       
-      # hltUpdateAfterFork initializes the scheduler (like PSC does after fork)
+      # hltUpdateAfterFork initializes the scheduler
       # worker_id=1 for single-worker, non-forked mode
       try:
          log.info("Calling hltUpdateAfterFork to initialize scheduler (worker_id=1)")
@@ -754,7 +791,7 @@ class ConfigRunner:
       return sc
 
 
-def load_from_json(json_file, run_params=None, num_threads=1, num_slots=1, ef_overrides=None):
+def load_from_json(json_file, run_params=None, overrides=None):
    """
    Load configuration from a Gaudi joboptions JSON file.
    
@@ -768,26 +805,18 @@ def load_from_json(json_file, run_params=None, num_threads=1, num_slots=1, ef_ov
       raise ValueError(f"Invalid JSON file type: {jocat.get('filetype')}, expected 'joboptions'")
    
    properties = jocat.get('properties', {})
-   return ConfigRunner.from_json(json_file, run_params, properties,
-                                  num_threads=num_threads,
-                                  num_slots=num_slots,
-                                  ef_overrides=ef_overrides)
+   return ConfigRunner.from_json(json_file, run_params, properties, overrides=overrides)
 
 
-def load_from_database(db_server, smk, l1psk=None, hltpsk=None, run_params=None,
-                       num_threads=1, num_slots=1, ef_overrides=None):
+def load_from_database(db_server, smk, l1psk=None, hltpsk=None, run_params=None, overrides=None):
    """
    Load configuration from trigger database using the Super Master Key (SMK).
    
    Returns a ConfigRunner that uses TrigConf::JobOptionsSvc with TYPE="DB"
-   to load configuration directly from the database, same as athenaHLT.
+   to load configuration directly from the database.
    """
    log.info("Loading job options from database %s with SMK %d", db_server, smk)
-   return ConfigRunner.from_database(db_server, smk, l1psk, hltpsk, run_params,
-                                      num_threads=num_threads,
-                                      num_slots=num_slots,
-                                      ef_overrides=ef_overrides)
-
+   return ConfigRunner.from_database(db_server, smk, l1psk, hltpsk, run_params, overrides=overrides)
 
 ##
 ## The following arg_* methods are used as custom types in argparse
@@ -810,10 +839,13 @@ def arg_detector_mask(s):
 
 
 def check_args(parser, args):
-   """Consistency check of command line arguments (same as athenaHLT.py)"""
+   """Consistency check of command line arguments"""
 
    if not args.jobOptions and not args.use_database:
       parser.error("No job options file specified")
+
+   if args.jobOptions and args.jobOptions.endswith('.pkl'):
+      parser.error("Running from a pickle file is not supported in athenaEF.")
 
    if (not args.file and not args.dump_config_exit
        and (args.efdf_interface_library or 'TrigDFEmulator') == 'TrigDFEmulator'):
@@ -825,7 +857,10 @@ def check_args(parser, args):
    if args.oh_monitoring and args.online_environment:
       parser.error("--oh-monitoring (-M) and --online-environment are mutually exclusive.")
 
-def update_run_params(args, flags):
+   if args.timeout is not None and args.timeout <= 0:
+      parser.error("--timeout must be a positive number of milliseconds")
+
+def update_run_params(args):
    """Update run parameters from IS, file, or conditions DB"""
 
    # If --online-environment is specified, try to read from Information Service first
@@ -919,7 +954,7 @@ def update_run_params(args, flags):
       log.debug("Using default toroids_current=%.1f", args.toroids_current)
 
 
-def update_trigconf_keys(args, flags):
+def update_trigconf_keys(args):
    """Update trigger configuration keys from OKS, COOL, or CREST.
    
    Priority order:
@@ -957,9 +992,8 @@ def update_trigconf_keys(args, flags):
       # Fall back to CREST or COOL only if NOT in online-environment mode
       if trigconf is None:
          if args.use_crest:
-            crest_server = args.crest_server or flags.Trigger.crestServer
             log.info("Reading trigger configuration keys from CREST for run %s", args.run_number)
-            trigconf = AthHLT.get_trigconf_keys_crest(args.run_number, args.lb_number, crest_server)
+            trigconf = AthHLT.get_trigconf_keys_crest(args.run_number, args.lb_number, args.crest_server)
             log.info("Retrieved trigger keys from CREST: %s", trigconf)
          else:
             log.info("Reading trigger configuration keys from COOL for run %s", args.run_number)
@@ -1105,6 +1139,117 @@ class MyHelp(argparse.Action):
       sys.exit(0)
 
 
+def configure_from_ca(args, unparsed_args):
+   """Configure the job from a CA module and re-execute athenaEF from the resulting JSON.
+
+   This function never returns: athenaEF either exits (--dump-config-exit) or replaces
+   itself with a new athenaEF running from the JSON file it just created.
+   """
+   from AthenaCommon import Constants
+   from AthenaConfiguration.AllConfigFlags import initConfigFlags
+   from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
+   from AthenaConfiguration.ComponentFactory import CompFactory
+   from AthenaConfiguration.MainServicesConfig import addMainSequences
+   from TrigServices.TrigServicesConfig import commonServicesCfg, setDefaultOnlineFlags
+
+   # Create flags with online defaults
+   flags = initConfigFlags()
+   setDefaultOnlineFlags(flags)
+
+   # set MessageSvc OutputLevel
+   flags.Exec.OutputLevel = getattr(Constants, args.log_level)
+
+   # Enable WebdaqHistSvc for online histogram publishing if requested
+   if args.oh_monitoring:
+      flags.Trigger.Online.useOnlineWebdaqHistSvc = True
+      log.info("Enabled WebdaqHistSvc for online histogram publishing")
+
+   # Fill flags from the command line.
+   AthHLT.unparsedArguments = unparsed_args
+   AthHLT.fillFromUnparsedArgs(flags)
+
+   # NOTE: Do NOT set flags.Input.Files here!
+   # We keep Input.Files=[] during configuration to ensure the configuration
+   # is portable and doesn't depend on specific input file metadata.
+   # Input files are passed to EFInterface for runtime use only.
+
+   # Set conditions run number override (for test partitions with fake run numbers)
+   if args.conditions_run is not None:
+      log.info("Using conditions from reference run %d (overriding run %s for IOV lookup)",
+               args.conditions_run, args.run_number)
+      flags.Input.ConditionsRunNumber = args.conditions_run
+
+   # Set number of events
+   if args.number_of_events is not None and args.number_of_events > 0:
+      flags.Exec.MaxEvents = args.number_of_events
+
+   # Set skip events
+   if args.skip_events is not None and args.skip_events > 0:
+      flags.Exec.SkipEvents = args.skip_events
+
+   # NOTE: Do NOT set flags.Concurrency.NumThreads or NumConcurrentEvents here.
+   # Threading is set at runtime via iProperty after configure() - see ConfigRunner.run()
+
+   # Enable PerfMon if requested
+   flags.PerfMon.doFastMonMT = args.perfmon
+
+   # Execute precommands
+   if args.precommand:
+      log.info("Executing precommand(s)")
+      for cmd in args.precommand:
+         log.info("  %s", cmd)
+         exec(cmd, globals(), {'flags': flags})
+
+   # Load from CA module:
+   # 1. Build the full configuration with services
+   # 2. Dump to JSON file
+   # 3. Use AthHLT.reload_from_json to re-exec and reload from JSON
+   log.info("Loading CA configuration from: %s", args.jobOptions)
+
+   # Clone and lock flags for services configuration
+   locked_flags = flags.clone()
+   locked_flags.lock()
+
+   # Create base CA with framework services
+   cfg = ComponentAccumulator(CompFactory.AthSequencer("AthMasterSeq", Sequential=True))
+   cfg.setAppProperty('ExtSvcCreates', False)
+   cfg.setAppProperty("MessageSvcType", "TrigMessageSvc")
+   cfg.setAppProperty("JobOptionsSvcType", "TrigConf::JobOptionsSvc")
+
+   # Add main sequences and common services (includes TrigServicesCfg)
+   addMainSequences(locked_flags, cfg)
+   cfg.merge(commonServicesCfg(locked_flags))
+
+   # Now merge user CA config (with unlocked flags)
+   cfg_func = AthHLT.getCACfg(args.jobOptions)
+   cfg.merge(cfg_func(flags))
+
+   # Execute postcommands before dumping
+   if args.postcommand:
+      log.info("Executing postcommand(s)")
+      for cmd in args.postcommand:
+         log.info("  %s", cmd)
+         exec(cmd, globals(), {'flags': flags, 'cfg': cfg})
+
+   # Dump configuration to JSON
+   fname = "HLTJobOptions"
+   log.info("Dumping configuration to %s.pkl and %s.json", fname, fname)
+   with open(f"{fname}.pkl", "wb") as f:
+      cfg.store(f)
+
+   from TrigConfIO.JsonUtils import create_joboptions_json
+   create_joboptions_json(f"{fname}.pkl", f"{fname}.json")
+
+   # Check for dump-and-exit
+   if args.dump_config_exit:
+      log.info("Configuration dumped to %s.json. Exiting...", fname)
+      sys.exit(0)
+
+   # Re-exec from the JSON. Replaces the process image freeing up the configuration heap.
+   log.info("Configuration dumped to %s.json. Re-exec...", fname)
+   AthHLT.reload_from_json(f"{fname}.json", suppress_args=unparsed_args + ['--dump-config'], jobOptions=args.jobOptions)
+
+
 def main():
    parser = argparse.ArgumentParser(prog='athenaEF.py', formatter_class=
                                     lambda prog : argparse.ArgumentDefaultsHelpFormatter(prog, max_help_position=32, width=100),
@@ -1114,7 +1259,7 @@ def main():
 
    ## Global options
    g = parser.add_argument_group('Options')
-   g.add_argument('jobOptions', nargs='?', help='job options: CA module (package.module:function), pickle file (.pkl), or JSON file (.json)')
+   g.add_argument('jobOptions', nargs='?', help='job options: CA module (package.module:function) or JSON file (.json)')
    g.add_argument('--threads', metavar='N', type=int, default=1, help='number of threads')
    g.add_argument('--concurrent-events', metavar='N', type=int, help='number of concurrent events if different from --threads')
    g.add_argument('--log-level', '-l', metavar='LVL', default='INFO', help='OutputLevel of athena')
@@ -1144,7 +1289,9 @@ def main():
    g.add_argument('--stdcmalloc', action='store_true', help='use stdcmalloc')
    g.add_argument('--stdcmath', action='store_true', help='use stdcmath library')
    g.add_argument('--imf', action='store_true', default=True, help='use Intel math library')
-   g.add_argument('--show-includes', '-s', action='store_true', help='show printout of included files')
+   g.add_argument('--timeout', metavar='MSEC', type=int, default=None,
+                  help='event processing timeout (HardTimeout) in milliseconds. '
+                       f'NB: only the soft timeout ({SOFT_TIMEOUT_FRACTION*100:.0f}%% of it) is enforced')
 
    ## Conditions
    g = parser.add_argument_group('Conditions')
@@ -1173,7 +1320,7 @@ def main():
    g.add_argument('--use-crest', action='store_true', default=False,
                   help='Use CREST for trigger configuration')
    g.add_argument('--crest-server', metavar='URL', default=None,
-                  help='CREST server URL (defaults to flags.Trigger.crestServer)')
+                  help='CREST server URL (default: $CREST_SERVER or crest.cern.ch)')
    g.add_argument('--dump-config', action='store_true', help='Dump joboptions JSON file')
    g.add_argument('--dump-config-exit', action='store_true', help='Dump joboptions JSON file and exit')
 
@@ -1217,147 +1364,117 @@ def main():
    import AthenaCommon.Logging
    AthenaCommon.Logging.log.setLevel(getattr(logging, args.log_level))
    AthenaCommon.Logging.log.setFormat("%(asctime)s  Py:%(name)-31s %(levelname)7s %(message)s")
-   if args.show_includes:
-      from AthenaCommon.Include import include
-      include.setShowIncludes( True )
 
    # consistency checks for arguments
    if not args.concurrent_events:
       args.concurrent_events = args.threads
 
-   # Update args and set athena flags
-   from TrigPSC import PscConfig
-   from TrigPSC.PscDefaultFlags import defaultOnlineFlags
-   
-   # Get flags with online defaults (same as athenaHLT)
-   flags = defaultOnlineFlags()
+   # Determine the source of the configuration. 
+   is_database = args.use_database
+   is_json   = bool(args.jobOptions) and not is_database and args.jobOptions.endswith('.json')
+   is_ca     = not (is_database or is_json)
 
-   # set MessageSvc OutputLevel
-   from AthenaCommon import Constants
-   flags.Exec.OutputLevel = getattr(Constants, args.log_level)
-
-   # Enable WebdaqHistSvc for online histogram publishing if requested
-   if args.oh_monitoring:
-      flags.Trigger.Online.useOnlineWebdaqHistSvc = True
-      log.info("Enabled WebdaqHistSvc for online histogram publishing")
-
-   # CREST configuration (same as athenaHLT)
+   # CREST configuration (only used with --use-database, see check_args)
    log.info("Using CREST for trigger configuration: %s", args.use_crest)
-   if args.use_crest:
-      flags.Trigger.useCrest = True
-      if args.crest_server:
-         flags.Trigger.crestServer = args.crest_server
-      else:
-         args.crest_server = flags.Trigger.crestServer
+   if args.use_crest and args.crest_server is None:
+      from IOVDbSvc.IOVDbAutoCfgFlags import getCrestConnection
+      args.crest_server = getCrestConnection()
+      log.info("Using default CREST server: %s", args.crest_server)
 
-   update_run_params(args, flags)
+   update_run_params(args)
+
+   # If the HLT PSK was given on the command line OR from OKS (--online-environment), ignore what is
+   # stored in COOL and read that key directly from the DB (ATR-25974).
+   # This is needed because COOL may point to a different HLTPSK for the forced run number.
+   # NB: must be evaluated before update_trigconf_keys, which fills args.hltpsk from COOL/OKS.
+   force_psk = args.use_database and ((args.hltpsk is not None) or args.online_environment)
 
    if args.use_database:
-      # If HLTPSK was given on the command line OR from OKS (--online-environment),
-      # we ignore what is stored in COOL and use the specified key directly from the DB.
-      # This is needed because COOL may point to a different HLTPSK for the forced run number.
-      PscConfig.forcePSK = (args.hltpsk is not None) or args.online_environment
       # Read trigger config keys from COOL/OKS if not specified
-      update_trigconf_keys(args, flags)
+      update_trigconf_keys(args)
 
-   # Fill flags from command line (if not running from DB/JSON)
-   if not args.use_database and args.jobOptions and not args.jobOptions.endswith('.json'):
-      PscConfig.unparsedArguments = unparsed_args
-      for flag_arg in unparsed_args:
-         flags.fillFromString(flag_arg)
+   # Configure from a CA module: athenaEF is re-executed from the JSON (or exits for --dump-config-exit).
+   if is_ca:
+      configure_from_ca(args, unparsed_args)
 
-   PscConfig.interactive = args.interactive
-   PscConfig.exitAfterDump = args.dump_config_exit
+   ##
+   ## From here on the configuration comes from the trigger database or a JSON file:
+   ## anything that needs to be changed from the command line is applied via RuntimeOverrides.
+   ##
+   config_source = "the trigger database" if is_database else "a JSON file"
 
-   # NOTE: Do NOT set flags.Input.Files here!
-   # Like athenaHLT, we keep Input.Files=[] during configuration to ensure the
-   # configuration is portable and doesn't depend on specific input file metadata.
-   # Input files are passed to EFInterface for runtime use only.
+   if unparsed_args:
+      log.warning("Ignoring flag(s) given on the command line, the configuration is read from %s: %s",
+                  config_source, ' '.join(unparsed_args))
 
-   # Set conditions run number override (for test partitions with fake run numbers)
-   if args.conditions_run is not None:
-      log.info("Using conditions from reference run %d (overriding run %s for IOV lookup)",
-               args.conditions_run, args.run_number)
-      flags.Input.ConditionsRunNumber = args.conditions_run
+   # Overrides applied to the configuration at runtime.
+   # Only options explicitly given on the command line are collected, anything else keeps its DB/jobOptions value.
+   # NB: Do NOT set the corresponding flags here, that would put them in the SMK.
+   overrides = RuntimeOverrides()
 
-   # Set number of events
-   if args.number_of_events is not None and args.number_of_events > 0:
-      flags.Exec.MaxEvents = args.number_of_events
+   overrides.set('AvalancheSchedulerSvc.ThreadPoolSize', args.threads)
+   overrides.set('EventDataSvc.NSlots', args.concurrent_events)
 
-   # Set skip events
-   if args.skip_events is not None and args.skip_events > 0:
-      flags.Exec.SkipEvents = args.skip_events
-
-   # NOTE: Do NOT set flags.Concurrency.NumThreads or NumConcurrentEvents here.
-   # Threading is set at runtime via iProperty after configure() - see ConfigRunner.run()
-
-   # Enable PerfMon if requested
-   flags.PerfMon.doFastMonMT = args.perfmon
-
-   # Configure EF ByteStream services (mandatory to run without HLTMPPU)
-   # This provides the data flow interface that would normally come from HLTMPPU
-   flags.Trigger.Online.useEFByteStreamSvc = True
-   # EFInterfaceSvc settings from the command line. 
-   # Only options explicitly given are collected, anything else keeps the value from the DB/jobOptions configuration
    ef_files = args.file if args.file else []
-   ef_overrides = {}
    if ef_files:
-      ef_overrides['Files'] = ef_files
-      # Metadata read from the input file - always more accurate than DB values
-      ef_overrides.update({
-         'T0ProjectTag' : args.T0_project_tag,
-         'BeamType'     : args.beam_type,
-         'BeamEnergy'   : args.beam_energy,
-         'TriggerType'  : args.trigger_type,
-         'Stream'       : args.stream,
-         'Lumiblock'    : args.lumiblock,
-         'DetMask'      : args.file_detector_mask,
-      })
+      overrides.set('EFInterfaceSvc.Files', ef_files)
+      overrides.set('EFInterfaceSvc.T0ProjectTag', args.T0_project_tag)
+      overrides.set('EFInterfaceSvc.BeamType', args.beam_type)
+      overrides.set('EFInterfaceSvc.BeamEnergy', args.beam_energy)
+      overrides.set('EFInterfaceSvc.TriggerType', args.trigger_type)
+      overrides.set('EFInterfaceSvc.Stream', args.stream)
+      overrides.set('EFInterfaceSvc.Lumiblock', args.lumiblock)
+      overrides.set('EFInterfaceSvc.DetMask', args.file_detector_mask)
    if args.run_number is not None:          # from -R, IS, or the input file
-      ef_overrides['RunNumber'] = args.run_number
+      overrides.set('EFInterfaceSvc.RunNumber', args.run_number)
    if args.save_output is not None:
-      ef_overrides['OutputFileName'] = args.save_output
+      overrides.set('EFInterfaceSvc.OutputFileName', args.save_output)
    if args.loop_files is not None:
-      ef_overrides['LoopOverFiles'] = args.loop_files
+      overrides.set('EFInterfaceSvc.LoopOverFiles', args.loop_files)
    if args.number_of_events is not None:
-      ef_overrides['NumEvents'] = args.number_of_events
+      overrides.set('EFInterfaceSvc.NumEvents', args.number_of_events)
    if args.skip_events is not None:
-      ef_overrides['SkipEvents'] = args.skip_events
+      overrides.set('EFInterfaceSvc.SkipEvents', args.skip_events)
    if args.efdf_interface_library is not None:
-      ef_overrides['EFDFInterfaceLibraryName'] = args.efdf_interface_library
+      overrides.set('EFInterfaceSvc.EFDFInterfaceLibraryName', args.efdf_interface_library)
 
-   # Apply to the flags for the CA-module path (getEFInterfaceSvc reads these)
-   _prop2flag = {'Files': 'Files', 'OutputFileName': 'OutputFileName',
-                 'LoopOverFiles': 'LoopFiles', 'NumEvents': 'NumEvents',
-                 'SkipEvents': 'SkipEvents', 'RunNumber': 'RunNumber',
-                 'T0ProjectTag': 'T0ProjectTag', 'BeamType': 'BeamType',
-                 'BeamEnergy': 'BeamEnergy', 'TriggerType': 'TriggerType',
-                 'Stream': 'Stream', 'Lumiblock': 'Lumiblock', 'DetMask': 'DetMask',
-                 'EFDFInterfaceLibraryName': 'LibraryName'}
-   for prop, value in ef_overrides.items():
-      setattr(flags.Trigger.Online.EFInterface, _prop2flag[prop], value)
+   if args.timeout is not None:
+      overrides.set('HltEventLoopMgr.HardTimeout', float(args.timeout))
+      overrides.set('HltEventLoopMgr.SoftTimeoutFraction', SOFT_TIMEOUT_FRACTION)
+   if args.conditions_run is not None:
+      # Run number used for the conditions IOV lookup 
+      overrides.set('HltEventLoopMgr.forceRunNumber', args.conditions_run)
+
+   if force_psk:
+      overrides.set('HLTPrescaleCondAlg.Source', 'DB')
+
+   # Histogram service:  
+   # Offline the command line decides and overrides the SMK/JSON conf (offline behaviour never depends on the SMK). 
+   # Online (--online-environment) we leave the configuration exactly as it is.
+   if not args.online_environment:
+      if args.oh_monitoring:
+         overrides.declare_type('THistSvc', 'WebdaqHistSvc')
+         overrides.create_service('WebdaqInfoSvc')
+      else:
+         overrides.declare_type('THistSvc', 'THistSvc')
+         overrides.drop_service('WebdaqInfoSvc')
+
+   # Postcommands are applied by ConfigRunner.run() after configure(). NB: do not run for --dump-config-exit.
+   for cmd in args.postcommand:
+      overrides.add_command(cmd)
 
    # Execute precommands
    if args.precommand:
       log.info("Executing precommand(s)")
       for cmd in args.precommand:
          log.info("  %s", cmd)
-         exec(cmd, globals(), {'flags': flags})
-
-   # Determine input type
-   is_database = args.use_database
-   is_pickle = False
-   is_json = False
-   
-   if not is_database and args.jobOptions:
-      jobOptions = args.jobOptions
-      is_pickle = jobOptions.endswith('.pkl')
-      is_json = jobOptions.endswith('.json')
+         exec(cmd, globals(), {})
 
    if is_database:
       # Load configuration from trigger database
-      # Handle CREST vs standard DB access (same as athenaHLT)
+      # Handle CREST vs standard DB access
       if args.use_crest:
+         from TrigConfStorage.TriggerCrestUtil import TriggerCrestUtil
          crestconn = TriggerCrestUtil.getCrestConnection(args.db_server)
          db_alias = f"{args.crest_server}/{crestconn}"
          log.info("Loading configuration via CREST from %s with SMK %d", db_alias, args.smk)
@@ -1367,92 +1484,16 @@ def main():
       
       # Get run parameters for prepareForStart
       run_params = get_run_params(args).to_dict()
-      acc = load_from_database(db_alias, args.smk, args.l1psk, args.hltpsk, run_params,
-                               num_threads=args.threads, num_slots=args.concurrent_events,
-                               ef_overrides=ef_overrides)
+      acc = load_from_database(db_alias, args.smk, args.l1psk, args.hltpsk, run_params, overrides=overrides)
       log.info("Configuration loaded from database")
 
-   elif is_pickle:
-      # Load ComponentAccumulator from pickle file
-      log.info("Loading configuration from pickle file: %s", jobOptions)
-      with open(jobOptions, 'rb') as f:
-         acc = pickle.load(f)
-      log.info("Configuration loaded from pickle")
-
-   elif is_json:
+   else:   # is_json
       # Load configuration from JSON file
-      log.info("Loading configuration from JSON file: %s", jobOptions)
+      log.info("Loading configuration from JSON file: %s", args.jobOptions)
       # Get run parameters for prepareForStart
       run_params = get_run_params(args).to_dict()
-      acc = load_from_json(jobOptions, run_params,
-                           num_threads=args.threads, num_slots=args.concurrent_events,
-                           ef_overrides=ef_overrides)
+      acc = load_from_json(args.jobOptions, run_params, overrides=overrides)
       log.info("Configuration loaded from JSON")
-
-   else:
-      # Load from CA module - follow the same pattern as athenaHLT/TrigPSCPythonCASetup:
-      # 1. Build the full configuration with services
-      # 2. Dump to JSON file
-      # 3. Use AthHLT.reload_from_json to re-exec and reload from JSON
-      # This preserves the ability to use the same JobOptionsSvc as athenaHLT
-      log.info("Loading CA configuration from: %s", jobOptions)
-      
-      # Clone and lock flags for services configuration (as done in TrigPSCPythonCASetup)
-      from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
-      from AthenaConfiguration.MainServicesConfig import addMainSequences
-      from TrigServices.TriggerUnixStandardSetup import commonServicesCfg
-      from AthenaConfiguration.ComponentFactory import CompFactory
-      
-      locked_flags = flags.clone()
-      locked_flags.lock()
-      
-      # Create base CA with framework services (like TrigPSCPythonCASetup)
-      cfg = ComponentAccumulator(CompFactory.AthSequencer("AthMasterSeq", Sequential=True))
-      cfg.setAppProperty('ExtSvcCreates', False)
-      cfg.setAppProperty("MessageSvcType", "TrigMessageSvc")
-      cfg.setAppProperty("JobOptionsSvcType", "TrigConf::JobOptionsSvc")
-      
-      # Add main sequences and common services (includes TrigServicesCfg)
-      addMainSequences(locked_flags, cfg)
-      cfg.merge(commonServicesCfg(locked_flags))
-      
-      # Now merge user CA config (with unlocked flags, as in TrigPSCPythonCASetup)
-      cfg_func = AthHLT.getCACfg(jobOptions)
-      cfg.merge(cfg_func(flags))
-      
-      # Execute postcommands before dumping (like TrigPSCPythonCASetup)
-      if args.postcommand:
-         log.info("Executing postcommand(s)")
-         for cmd in args.postcommand:
-            log.info("  %s", cmd)
-            exec(cmd, globals(), {'flags': flags, 'cfg': cfg})
-         args.postcommand = []  # Clear so we don't run them again later
-      
-      # Dump configuration to JSON (like TrigPSCPythonCASetup)
-      fname = "HLTJobOptions"
-      log.info("Dumping configuration to %s.pkl and %s.json", fname, fname)
-      with open(f"{fname}.pkl", "wb") as f:
-         cfg.store(f)
-      
-      from TrigConfIO.JsonUtils import create_joboptions_json
-      create_joboptions_json(f"{fname}.pkl", f"{fname}.json")
-      
-      # Check for dump-and-exit
-      if args.dump_config_exit:
-         log.info("Configuration dumped to %s.json. Exiting...", fname)
-         sys.exit(0)
-
-      # Re-exec from the JSON (same as athenaHLT TrigPSCPythonCASetup -> AthHLT.reload_from_json -> os.execvp). 
-      # This replaces the process image freeing up the configuration heap 
-      log.info("Configuration dumped to %s.json. Re-exec...", fname)
-      AthHLT.reload_from_json(f"{fname}.json", suppress_args=PscConfig.unparsedArguments + ['--dump-config'], jobOptions=args.jobOptions)
-      
-   # Execute postcommands
-   if args.postcommand:
-      log.info("Executing postcommand(s)")
-      for cmd in args.postcommand:
-         log.info("  %s", cmd)
-         exec(cmd, globals(), {'flags': flags, 'acc': acc})
 
    # Dump configuration if requested
    if args.dump_config or args.dump_config_exit:
@@ -1480,22 +1521,7 @@ def main():
                json.dump(hlt_json, f, indent=4, sort_keys=True, ensure_ascii=True)
          else:
             log.warning("No properties available to dump")
-            
-      elif is_pickle:
-         # For pickle-loaded ComponentAccumulator, gather properties
-         app_props, msg_props, comp_props = acc.gatherProps()
-         props = {"ApplicationMgr": app_props, "MessageSvc": msg_props}
-         for comp, name, value in comp_props:
-            props.setdefault(comp, {})[name] = value
-         
-         log.info("Dumping configuration to %s.json", fname)
-         hlt_json = {'filetype': 'joboptions', 'properties': props}
-         with open(f"{fname}.json", "w") as f:
-            json.dump(hlt_json, f, indent=4, sort_keys=True, ensure_ascii=True)
-      
-      # Note: For CA module, dumping is already handled earlier 
-      # before converting to ConfigRunner
-      
+
       if args.dump_config_exit:
          log.info("Configuration dumped. Exiting...")
          sys.exit(0)
@@ -1517,7 +1543,7 @@ def main():
    if args.interactive:
       log.info("Interactive mode - call acc.run() to execute")
       import code
-      code.interact(local={'acc': acc, 'flags': flags})
+      code.interact(local={'acc': acc})
    else:
       # Run the application
       from AthenaCommon import ExitCodes

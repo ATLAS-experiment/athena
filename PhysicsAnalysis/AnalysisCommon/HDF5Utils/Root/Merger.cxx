@@ -66,7 +66,7 @@ namespace H5Utils {
             }
             H5::Group tg = found ?
               target.openGroup(childName) :
-              createFrom(target, sg);
+              target.createGroup(sg.getObjName());
             try {
               merge(tg, sg);
             }
@@ -86,7 +86,7 @@ namespace H5Utils {
             }
             H5::DataSet td = found ?
               target.openDataSet(childName) :
-              createFrom(target, sd);
+              createDataSet(target, sd, m_mergeAxis, m_chunkSize);
             try {
               merge(td, sd);
             }
@@ -119,20 +119,14 @@ namespace H5Utils {
     mergeDatasets(target, source, m_mergeAxis, bufferSize);
   }
 
-  H5::Group Merger::createFrom(
-      H5::H5Location& targetLocation,
-      const H5::Group& source)
+  H5::Group Merger::convert(const H5::Group& group)
   {
-    H5::Group newGroup = targetLocation.createGroup(source.getObjName());
-    merge(newGroup, source);
-    return newGroup;
+    return group;
   }
 
-  H5::DataSet Merger::createFrom(
-      H5::H5Location& targetLocation,
-      const H5::DataSet& source)
+  H5::Group Merger::convert(const H5::H5File& file)
   {
-    return createDataSet(targetLocation, source, m_mergeAxis, m_chunkSize);
+    return file.openGroup("/");
   }
 
   void Merger::flush(H5::Group& dst)

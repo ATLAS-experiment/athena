@@ -4,7 +4,7 @@
 
 #include <set>
 
-#include <MCTruthClassifier/MCTruthClassifierDefs.h>
+#include "TruthUtils/TruthClasses.h"
 #include <xAODTruth/TruthParticle.h>
 #include <xAODTruth/xAODTruthHelpers.h>
 #include <FourMomUtils/xAODP4Helpers.h>
@@ -508,7 +508,8 @@ StatusCode TruthClassificationTool::classifyMuon(const xAOD::IParticle &muon,
       MCTruthPartClassifier::DiBoson,
       MCTruthPartClassifier::CCbarMeson, // PromptQuarkoniumDecay
       MCTruthPartClassifier::BBbarMeson,
-      MCTruthPartClassifier::HeavyBoson
+      MCTruthPartClassifier::HeavyBoson,
+      MCTruthPartClassifier::MultiBoson
   });
   if (type == MCTruthPartClassifier::IsoMuon && isInSet(origin, promptOrigin))
   {

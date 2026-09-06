@@ -1,5 +1,5 @@
 #
-#  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 #
 
 '''@file InDetTrackPerfMonConfig.py
@@ -130,8 +130,8 @@ def TrackAnalysisDefinitionSvcCfg( flags, name="TrkAnaDefSvc", **kwargs ):
     kwargs.setdefault( "isITk", flags.Detector.GeometryITk )
     kwargs.setdefault( "plotTracksInJets", "Jet" in flags.PhysVal.IDTPM.currentTrkAna.SelectOfflineObject )
 
-    kwargs.setdefault("EtaBins", flags.Tracking.ITkMainPass.etaBins if flags.Detector.GeometryITk else [-1, 9999.]) # for technical efficiencies
-    kwargs.setdefault("MinSilHits", flags.Tracking.ITkMainPass.minClusters if flags.Detector.GeometryITk else [flags.Tracking.MainPass.minClusters]) # for technical efficiencies
+    kwargs.setdefault("EtaBins", flags.Tracking.ITkActsPass.etaBins if flags.Detector.GeometryITk else [-1, 9999.]) # for technical efficiencies
+    kwargs.setdefault("MinSilHits", flags.Tracking.ITkActsPass.minClusters if flags.Detector.GeometryITk else [flags.Tracking.MainPass.minClusters]) # for technical efficiencies
 
     trkAnaSvc = CompFactory.IDTPM.TrackAnalysisDefinitionSvc( name, **kwargs )
     acc.addService( trkAnaSvc )

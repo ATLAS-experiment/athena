@@ -16,6 +16,8 @@
 #include "StoreGate/VarHandleKey.h"
 #include "AthenaKernel/StoreID.h"
 
+#include "PersistentDataModel/DataHeader.h"
+
 //---------------------------------------------------------------------------------
 
 
@@ -155,7 +157,23 @@ SGInputLoader::execute(const EventContext& /*ctx*/)
   bool b = loadObjs( m_load );
 
   if (m_dump.value()) {
-    ATH_MSG_DEBUG(evtStore()->dump()); 
+    ATH_MSG_DEBUG(evtStore()->dump());
+  }
+
+  if (m_preLoad.value()) {
+    SG::ReadHandle<DataHeader> eventDataHeader(m_dataHeaderKey.value(), evtStore()->name());
+    if (!eventDataHeader.isValid()) {
+      ATH_MSG_ERROR("Cannot retrieve DataHeader from StoreGate: " << m_dataHeaderKey);
+      return StatusCode::FAILURE;
+    }
+    for (const auto& element : *eventDataHeader) {
+      SG::DataProxy* dp = evtStore()->proxy(element.getPrimaryClassID(), element.getKey());
+      if (dp != 0 && dp->isValid()) {
+        if (nullptr == dp->accessData()) {
+          ATH_MSG_WARNING("unable to load proxy for " << element.getKey());
+        }
+      }
+    }
   }
 
   if (m_failEvt.value() && !b) {

@@ -478,7 +478,7 @@ namespace SH
   private:
     Sample& operator = (const Sample& that) = delete;
 
-    ClassDef(Sample, 2);
+    ClassDefOverride(Sample, 2);
   };
 }
 

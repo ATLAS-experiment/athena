@@ -17,7 +17,7 @@ HGTD_ALTIROC_RDO_ContainerCnv::HGTD_ALTIROC_RDO_ContainerCnv(ISvcLocator* svcloc
 
 HGTD_ALTIROC_RDO_Container* HGTD_ALTIROC_RDO_ContainerCnv::createTransient(const Token* token) {
 
-  static const pool::Guid p1_guid(
+  static const Guid p1_guid(
     "2EE1819F-7EFE-ACB8-5D5F-9EFBFAEBC11E"); // with HGTD_ALTIROC_RDO_p1
   ATH_MSG_DEBUG("createTransient(const Token* token): main converter");
 

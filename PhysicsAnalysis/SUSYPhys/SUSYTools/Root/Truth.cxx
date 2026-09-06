@@ -9,7 +9,7 @@
 #include "SUSYTools/SUSYObjDef_xAOD.h"
 
 // For using the MCTruthClassifier definitions
-#include "MCTruthClassifier/MCTruthClassifierDefs.h"
+#include "TruthUtils/TruthClasses.h"
 
 #include "TruthUtils/MagicNumbers.h"
 #include "TruthUtils/HepMCHelpers.h"

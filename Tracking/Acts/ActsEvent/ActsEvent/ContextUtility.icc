@@ -6,7 +6,8 @@
 #ifndef ACTSEVENT_CONTEXTUTILITY_ICC
 #define ACTSEVENT_CONTEXTUTILITY_ICC
 
-#include "ActsEvent/ContextUtility.h"
+//this file is included at the end of ContextUtility.h
+
 namespace ActsTrk{
 
    template <class PropOwner> 

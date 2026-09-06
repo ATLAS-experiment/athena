@@ -575,15 +575,17 @@ void PixelChargeInterpolationValidation::WriteErrorsFile(const std::string& name
 
 	int ntotyconstnx = ncsx * nalpha;
 	globalindex = 0;
+	const std::string phiStr{"#phi_{i} [#circ]"};
+	const std::string etaStr{"#eta_{i}"};
 	for(int i = 0; i < nalpha && globalindex < ntotyconstnx; i++)
 		for(int j = 0; j < ncsx && globalindex < ntotyconstnx; j++, globalindex++){
-			double value = m_phi_Clustersize[j]->GetRMSProfile("#phi_{i} [#circ]")->GetBinContent(i+1)/1000;
+			double value = m_phi_Clustersize[j]->GetRMSProfile(phiStr)->GetBinContent(i+1)/1000;
 			if (value == 0) value = (j+1)*50/sqrt(12)/1000;
 			parameters->setPixelBarrelPhiError(globalindex,value);
 		}
 	int ntotyconstny = ncsx * ncsy * neta;
 	globalindex = 0;
-	const static std::string etaStr{"#eta_{i}"};
+	
 	for(int i = 0; i < neta && globalindex < ntotyconstny; i++)
 		for(int j = 0; j < ncsx && globalindex < ntotyconstny; j++)
 			for(int k = 0; k < ncsy  && globalindex < ntotyconstny; k++, globalindex++){

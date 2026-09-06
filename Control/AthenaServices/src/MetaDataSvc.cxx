@@ -28,9 +28,7 @@
 
 #include <vector>
 #include <sstream>
-
-#include "boost/bind/bind.hpp"
-
+#include <functional>
 
 namespace {
   /**
@@ -306,8 +304,13 @@ StatusCode MetaDataSvc::prepareOutput(const std::string& outputName)
 }
 
 
-StatusCode MetaDataSvc::shmProxy(const std::string& filename)
+StatusCode MetaDataSvc::shmProxy(const std::string& tokenStr)
 {
+   if (m_addrCrtr.name() != "AthenaPoolSharedIOCnvSvc") {
+      ATH_MSG_ERROR("shmProxy failed: unsupported AddressCreator " << m_addrCrtr.name());
+      return StatusCode::FAILURE;
+   }
+
    if (!m_clearedInputDataStore) {
       ATH_CHECK(m_inputDataStore->clearStore(true));
       m_clearedInputDataStore = true;
@@ -316,7 +319,8 @@ StatusCode MetaDataSvc::shmProxy(const std::string& filename)
       ATH_CHECK(m_outputDataStore->clearStore(true));
       m_clearedOutputDataStore = true;
    }
-   ATH_CHECK(addProxyToInputMetaDataStore(filename));
+
+   ATH_CHECK(addProxyToInputMetaDataStore(tokenStr));
    return StatusCode::SUCCESS;
 }
 
@@ -332,8 +336,8 @@ void MetaDataSvc::handle(const Incident& inc) {
 
    if (inc.type() == "FirstInputFile") {
       // Register open/close callback actions
-     using namespace boost::placeholders;
-      Io::bfcn_action_t boa = boost::bind(&MetaDataSvc::rootOpenAction, this, _1,_2);
+      using namespace std::placeholders;
+      Io::bfcn_action_t boa = std::bind(&MetaDataSvc::rootOpenAction, this, _1, _2);
       if (m_fileMgr->regAction(std::move(boa), Io::OPEN).isFailure()) {
          ATH_MSG_FATAL("Cannot register ROOT file open action with FileMgr.");
       }

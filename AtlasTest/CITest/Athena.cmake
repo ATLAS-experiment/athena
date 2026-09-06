@@ -368,51 +368,30 @@ atlas_add_citest( ACTS_Propagation_ITk_Muon_Gen3
 
 atlas_add_citest( ACTS_Propagation_ID
    SCRIPT ActsExtrapolationAlgTest.py )
-
- atlas_add_citest( ACTS_Production
-   SCRIPT ActsProduction.sh )
  
 atlas_add_citest( ACTS_Workflow
    SCRIPT ActsWorkflow.sh )
 
+atlas_add_citest( Athena_Tracking_Workflow_Legacy
+   SCRIPT AthenaTrackingWorkflowLegacy.sh )
+ 
 atlas_add_citest( ACTS_Workflow_Legacy
    SCRIPT ActsWorkflowLegacy.sh )
 
-atlas_add_citest( ACTS_Workflow_Cached_Legacy
-   SCRIPT ActsWorkflowCachedLegacy.sh )
+atlas_add_citest( ACTS_Workflow_Cached
+   SCRIPT ActsWorkflowCached.sh )
  
 atlas_add_citest( ACTS_Workflow_HeavyIons
    SCRIPT ActsWorkflowHeavyIons.sh )
- 
-atlas_add_citest( ACTS_ValidateClusters
-   SCRIPT ActsValidateClusters.sh )
 
 atlas_add_citest( ACTS_ActsPersistifyEDM 
    SCRIPT ActsPersistifyEDM.sh )
 
-atlas_add_citest( ACTS_ValidateTracks
-   SCRIPT ActsValidateTracks.sh )
-
-atlas_add_citest( ACTS_ValidateResolvedTracks
-   SCRIPT ActsValidateResolvedTracks.sh )
-
-atlas_add_citest( ACTS_ValidateAmbiguityResolution
-   SCRIPT ActsValidateAmbiguityResolution.sh )
-
 atlas_add_citest( ACTS_WorkflowWithScoreBasedAmbiguity
    SCRIPT ActsWorkflowWithScoreBasedAmbiguity.sh )
 
-atlas_add_citest( ACTS_ActsGx2fRefitting
-   SCRIPT ActsGx2fRefitting.sh )
-   
-atlas_add_citest( ACTS_ActsKfRefitting
-   SCRIPT ActsKfRefitting.sh )
-
 atlas_add_citest( ACTS_ActsEFTrackFit
    SCRIPT ActsEFTrackFit.sh )
-
-atlas_add_citest( ACTS_ActsGSFRefitting
-   SCRIPT ActsGSFRefitting.sh )
 
 atlas_add_citest( ACTS_ActsGSFRefittingWithActsElectronExtrapolation
    SCRIPT ActsGSFRefitWithActsElectronExtrapolation.sh )
@@ -428,13 +407,9 @@ atlas_add_citest( ACTS_ActsPersistifySeeds
 
 atlas_add_citest( ACTS_ActsDumpGeometryIdentifiers
    SCRIPT ActsDumpGeometryIdentifiers.sh )
- 
-atlas_add_citest( ACTS_ActsBenchmarkLegacyWithSpot
-   SCRIPT ActsBenchmarkLegacyWithSpot.sh 8 100
-   PROPERTIES PROCESSOR 8 )
 
-atlas_add_citest( ACTS_ActsBenchmarkLegacyWithSpot_Cached
-   SCRIPT ActsBenchmarkLegacyWithSpotCached.sh 8 100
+atlas_add_citest( ACTS_ActsBenchmarkWithSpot_Cached
+   SCRIPT ActsBenchmarkWithSpotCached.sh 8 100
    PROPERTIES PROCESSOR 8 )
 
 atlas_add_citest( ACTS_ActsBenchmarkTrackingWithSpot
@@ -454,15 +429,6 @@ atlas_add_citest( ACTS_ActsAnalogueClustering
 
 atlas_add_citest( ACTS_ActsNNClustering
   SCRIPT ActsNNClustering.sh )
-   
-atlas_add_citest( ACTS_CheckObjectCounts_Workflow_Legacy
-  SCRIPT CheckCountTest.sh ActsCheckObjectCountsLegacy )
-
-atlas_add_citest( ACTS_CheckObjectCounts_WorkflowCached_Legacy
-  SCRIPT CheckCountTest.sh ActsCheckObjectCountsCachedLegacy )
-
-atlas_add_citest( ACTS_CheckObjectCounts_WorkflowHgtd_Legacy
-  SCRIPT CheckCountTest.sh ActsCheckObjectCountsHgtdLegacy )
 
 atlas_add_citest( ACTS_CheckObjectCounts_Workflow
   SCRIPT CheckCountTest.sh ActsCheckObjectCounts )
@@ -503,16 +469,16 @@ atlas_add_citest( TriggerMC_HI
 atlas_add_citest( TriggerData
    SCRIPT test_trig_data_v1Dev_build.py )
 
-atlas_add_citest( Trigger_athenaHLT_v1Dev
+atlas_add_citest( Trigger_athenaEF_v1Dev
    SCRIPT test_trigP1_v1Dev_decodeBS_build.py )
 
-atlas_add_citest( Trigger_athenaHLT_v1PhysP1
+atlas_add_citest( Trigger_athenaEF_v1PhysP1
    SCRIPT test_trigP1_v1PhysP1_build.py )
 
-atlas_add_citest( Trigger_athenaHLT_v1Cosmic
+atlas_add_citest( Trigger_athenaEF_v1Cosmic
    SCRIPT test_trigP1_v1Cosmic_build.py )
 
-atlas_add_citest( Trigger_athenaHLT_v1PhysP1_HI
+atlas_add_citest( Trigger_athenaEF_v1PhysP1_HI
    SCRIPT test_trigP1_v1PhysP1_HI_run3_build.py )
 
 atlas_add_citest( TriggerConfigFlags

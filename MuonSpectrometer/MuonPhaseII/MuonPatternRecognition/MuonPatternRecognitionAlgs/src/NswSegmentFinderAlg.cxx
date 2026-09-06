@@ -752,6 +752,9 @@ NswSegmentFinderAlg::findSegmentsFromMaximum(const HoughMaximum &max,
         MuonValR4::IPatternVisualizationTool::PrimitiveVec primitives{};
         constexpr double legX{0.2};
         double legY{0.8};       
+        primitives.push_back(MuonValR4::drawLabel("TrueHits matched with reco houghmax hits", legX, legY, 8));
+        legY -= 0.02;
+
         for (const SpacePoint* sp : max.getHitsInMax()) {
             const xAOD::MuonSimHit* simHit = getTruthMatchedHit(*sp->primaryMeasurement());
             if (!simHit) {
@@ -773,7 +776,7 @@ NswSegmentFinderAlg::findSegmentsFromMaximum(const HoughMaximum &max,
                 std::string stereoDesign{!design.hasStereoAngle() ? "X" : design.stereoAngle() >0 ? "U": "V"};
                 primitives.push_back(MuonValR4::drawLabel(std::format("ml: {:1d}, gap: {:1d}, {:}, pull: {:.2f}", 
                                                                       mmEle->multilayer(), mmClust->gasGap(),
-                                     stereoDesign, pull), legX, legY, 14));
+                                     stereoDesign, pull), legX, legY, 8));
             } else if(sp->type() == xAOD::UncalibMeasType::sTgcStripType) {
                 const auto* sTgcMeas = static_cast<const xAOD::sTgcMeasurement*>(sp->primaryMeasurement());          
                 std::string channelString = sp->secondaryMeasurement() == nullptr ?
@@ -782,12 +785,12 @@ NswSegmentFinderAlg::findSegmentsFromMaximum(const HoughMaximum &max,
                                                          sTgcChannelType(static_cast<const xAOD::sTgcMeasurement*>(sp->secondaryMeasurement())->channelType()));
                 primitives.push_back(MuonValR4::drawLabel(std::format("ml: {:1d}, gap: {:1d}, type: {:}, pull: {:.2f}", 
                                             sTgcMeas->readoutElement()->multilayer(), sTgcMeas->gasGap(), 
-                                            channelString, pull), legX, legY, 14));
+                                            channelString, pull), legX, legY, 8));
             }
-            legY-=0.05;           
+            legY-=0.02;           
         }
         m_visionTool->visualizeBucket(ctx, *max.parentBucket(),
-                                      "truth", std::move(primitives));
+                                      "bucket", std::move(primitives));
     }
 
     //dump spacepoints associated with truth sim hits to an obj file

@@ -118,7 +118,7 @@ are available for tool steering:
    * - ``JetIDLevel``
      - ``int``
      - ``JETIDNONE``
-     - ``JETIDRNNLOOSE``, ``JETIDRNNMEDIUM``, ``JETIDRNNTIGHT``
+     - ``JETIDRNNLOOSE``, ``JETIDRNNMEDIUM``, ``JETIDRNNTIGHT`` (for Run2 and Run3), ``JETIDGNTAULOOSE``, ``JETIDGNTAUMEDIUM``, ``JETIDGNTAUTIGHT`` (for Run2 and Run3)
 
    * - ``EleIDLevel``
      - ``int``
@@ -128,12 +128,17 @@ are available for tool steering:
    * - ``TriggerName``
      - ``std::string``
      - ``""``
-     - ``"HLT_tau25_mediumRNN_tracktwoMVA"``, ``"HLT_tau35_mediumRNN_tracktwoMVA"``,``"HLT_tau40_mediumRNN_tracktwoMVA"``,``"HLT_tau60_mediumRNN_tracktwoMVA"``,``"HLT_tau80_mediumRNN_tracktwoMVA"``,``"HLT_tau160_mediumRNN_tracktwoMVA"``,``"HLT_tau80L1TAU60_medium1_tracktwoEF"``,``HLT_tau35_medium1_tracktwoEF"``,``"HLT_tau25_medium1_tracktwoEF"``,``"HLT_tau160L1TAU100_medium1_tracktwoEF"``,``HLT_tau80L1TAU60_medium1_tracktwo"``,``HLT_tau50L1TAU12_medium1_tracktwo"``,``"HLT_tau35_medium1_tracktwo"``,``HLT_tau25_medium1_tracktwo"``,``HLT_tau160_medium1_tracktwo"``
+     - ``"HLT_tau25_mediumRNN_tracktwoMVA"``, ``"HLT_tau35_mediumRNN_tracktwoMVA"``, ``"HLT_tau40_mediumRNN_tracktwoMVA"``, ``"HLT_tau60_mediumRNN_tracktwoMVA"``, ``"HLT_tau80_mediumRNN_tracktwoMVA"``, ``"HLT_tau160_mediumRNN_tracktwoMVA"``, ``"HLT_tau80L1TAU60_medium1_tracktwoEF"``, ``HLT_tau35_medium1_tracktwoEF"``, ``"HLT_tau25_medium1_tracktwoEF"``, ``"HLT_tau160L1TAU100_medium1_tracktwoEF"``, ``HLT_tau80L1TAU60_medium1_tracktwo"``, ``HLT_tau50L1TAU12_medium1_tracktwo"``, ``"HLT_tau35_medium1_tracktwo"``, ``HLT_tau25_medium1_tracktwo"``, ``HLT_tau160_medium1_tracktwo"``
 
    * - ``TriggerSFMeasurement``
      - ``std::string``
      - ``"combined"``
      - ``""``
+ 
+   * - ``useGNTau``
+     - ``bool``
+     - ``false``
+     - ``set to true to use GNTAU based recommendations - for Run2, only Tau ID scale factors are currently available; not available for TauTrigger for both Run2 and Run3``
 
 In addition the following properties are available for further configurations:
      

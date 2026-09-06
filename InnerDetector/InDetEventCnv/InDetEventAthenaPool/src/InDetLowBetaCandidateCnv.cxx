@@ -28,7 +28,7 @@ InDetLowBetaCandidate_PERS* InDetLowBetaCandidateCnv::createPersistent(InDet::In
 InDet::InDetLowBetaCandidate* InDetLowBetaCandidateCnv::createTransient(const Token* token) {
   ATH_MSG_DEBUG("InDetLowBetaCandidateCnv::createTransient ");
   
-  static const pool::Guid tlp1_guid("8C24589F-FBAA-4686-9254-B5C360A94733");
+  static const Guid tlp1_guid("8C24589F-FBAA-4686-9254-B5C360A94733");
 
   InDet::InDetLowBetaCandidate *trans_cont(nullptr);
   

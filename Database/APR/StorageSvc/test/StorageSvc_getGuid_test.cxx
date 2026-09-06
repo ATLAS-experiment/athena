@@ -12,7 +12,7 @@ using namespace std;
 bool testGuid( const string& guid, bool shouldwork, DbPrint& mylog )
 {
    
-   TypeH typ = DbReflex::forGuid( Guid(guid) );
+   RootType typ = DbReflex::forGuid( Guid(guid) );
    if( shouldwork ) {
       if( typ ) mylog << MSG::INFO  << "GetGuid (" << guid << ") worked as expected" << endmsg;
       else      mylog << MSG::ERROR << "GetGuid did NOT work as expected" << endmsg;

@@ -5,5 +5,5 @@
 void resubmit (const char *location)
 {
   // do the actual resubmit
-  EL::Driver::resubmit (location);
+  EL::Driver::resubmit (location, "");
 }

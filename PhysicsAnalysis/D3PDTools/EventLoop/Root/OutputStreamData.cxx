@@ -61,7 +61,7 @@ namespace EL
 
         ~MyWriter ()
         {
-          if (m_file != 0)
+          if (m_file != nullptr)
             close();
         }
         //cppcheck-suppress returnByReference
@@ -72,16 +72,16 @@ namespace EL
 
         TFile *getFile ()
         {
-          RCU_REQUIRE2_SOFT (m_file != 0, "file already closed");
+          RCU_REQUIRE2_SOFT (m_file != nullptr, "file already closed");
           return m_file.get();
         }
 
         void doClose ()
         {
-          RCU_REQUIRE2_SOFT (m_file != 0, "file already closed");
+          RCU_REQUIRE2_SOFT (m_file != nullptr, "file already closed");
           m_file->Write ();
           m_file->Close ();
-          m_file = 0;
+          m_file = nullptr;
         }
         /// \brief the path being used
         private:
@@ -105,7 +105,6 @@ namespace EL
     void OutputStreamData ::
     testInvariant () const
     {
-      RCU_INVARIANT (this != nullptr);
       RCU_INVARIANT (m_writer != nullptr);
     }
 
@@ -205,13 +204,18 @@ namespace EL
             named->SetName (name.c_str());
         }
 
-        if (!RCU::SetDirectory (object.get(), dir))
+        if (RCU::SetDirectory (object.get(), dir))
         {
+          // SetDirectory transferred ownership to the directory, so release
+          // it here to avoid a double delete.
+          //placate cppcheck using std::ignore
+          std::ignore = object.release();
+        } else
+        {
+          // WriteObject writes a copy and takes no ownership, so we keep
+          // owning the object and let the unique_ptr delete it below.
           dir->WriteObject (object.get(), name.c_str());
         }
-        //release object which was consumed by SetDirectory or WriteObject
-        //placate cppcheck using std::ignore
-        std::ignore = object.release();
       }
       m_outputHistMap.clear ();
       m_outputTreeMap.clear ();

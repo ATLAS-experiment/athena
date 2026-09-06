@@ -1233,7 +1233,7 @@ bool InDet::SiTrajectory_xk::backwardExtension(int itmax, const EventContext& ct
     int    fl = F;
     if (fl<0) fl = 0;
 
-    int    m  = m_elementsMap[l];
+    int    m  = m_elementsMap.at(l);
     int    nc = m_elements[m].nclustersB();
 
     if (it==0 && nc==m_nclusters) return true;
@@ -1253,7 +1253,7 @@ bool InDet::SiTrajectory_xk::backwardExtension(int itmax, const EventContext& ct
       hbestb  = m_elements[m_elementsMap[lastElementWithExpHit]].nholesB()-nh  ;
       itbest  = it                                         ;
       Xi2best = X                                          ;
-      PA      = m_elements[m_elementsMap[l]].parametersUB();
+      PA      = m_elements[m_elementsMap.at(l)].parametersUB();
  
       if (fl==0 && nd < ndcut) ndcut = nd;
 
@@ -1321,7 +1321,7 @@ bool InDet::SiTrajectory_xk::backwardExtension(int itmax, const EventContext& ct
     double Xn = 0.;
 
     for (; l < L; ++l) {
-      InDet::SiTrajectoryElement_xk& Ei = m_elements[m_elementsMap[l]];
+      InDet::SiTrajectoryElement_xk& Ei = m_elements[m_elementsMap.at(l)];
 
       if (Ei.cluster() && Ei.isNextClusterHoleB(cl,Xn))  {
         int nm = l+Ei.nclustersB();
@@ -1504,7 +1504,7 @@ bool InDet::SiTrajectory_xk::forwardExtension(bool smoother,int itmax, const Eve
   double f0             = m_elements[m_elementsMap[m_firstElement]].parametersUF().parameters()[2];
 
 
-  m_elements[m_elementsMap[index_currentElement]].setNdist(0);
+  m_elements[m_elementsMap.at(index_currentElement)].setNdist(0);
 
   /// start to iterate 
   for (; iteration!=itmax; ++iteration) {
@@ -1525,8 +1525,8 @@ bool InDet::SiTrajectory_xk::forwardExtension(bool smoother,int itmax, const Eve
     for (++index_currentElement; index_currentElement!=m_nElements; ++index_currentElement) {
       
       /// 
-      InDet::SiTrajectoryElement_xk& prevElement    = m_elements[m_elementsMap[index_previousElement]];
-      InDet::SiTrajectoryElement_xk& currentElement = m_elements[m_elementsMap[index_currentElement ]];
+      InDet::SiTrajectoryElement_xk& prevElement    = m_elements[m_elementsMap.at(index_previousElement)];
+      InDet::SiTrajectoryElement_xk& currentElement = m_elements[m_elementsMap.at(index_currentElement )];
 
       /// propagate forward to the current element, and search for matching clusters
       if (!currentElement.ForwardPropagationWithSearch(prevElement, ctx)) {
@@ -1833,8 +1833,8 @@ bool InDet::SiTrajectory_xk::forwardExtension(bool smoother,int itmax, const Eve
   /// otherwise, if we had to update a cluster along the way, need one more forward propagation run
   /// to make sure all the counters and chi2 etc reflect the best track's cluster configuration
   for (++index_currentElement; index_currentElement<=m_lastElement; ++index_currentElement) {
-    InDet::SiTrajectoryElement_xk& prevElement = m_elements[m_elementsMap[index_currentElement-1]];
-    InDet::SiTrajectoryElement_xk& currentElement = m_elements[m_elementsMap[index_currentElement  ]];
+    InDet::SiTrajectoryElement_xk& prevElement = m_elements[m_elementsMap.at(index_currentElement-1)];
+    InDet::SiTrajectoryElement_xk& currentElement = m_elements[m_elementsMap.at(index_currentElement)];
     if (!currentElement.ForwardPropagationWithoutSearch(prevElement, ctx)) return false;
   }
   /// now we can finally exit

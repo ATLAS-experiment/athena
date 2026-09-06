@@ -15,7 +15,7 @@
 #include <EventLoop/Job.h>
 #include <EventLoop/ManagerData.h>
 #include <EventLoop/MessageCheck.h>
-#include <RootCoreUtils/ThrowMsg.h>
+#include <RootCoreUtils/ShellExec.h>
 #include <TSystem.h>
 #include <sstream>
 
@@ -29,9 +29,7 @@ namespace EL
 {
   void LSFDriver ::
   testInvariant () const
-  {
-    RCU_INVARIANT (this != 0);
-  }
+  {}
 
 
 
@@ -57,16 +55,19 @@ namespace EL
         // safely ignoring: resubmit
 
         std::ostringstream cmd;
-        cmd << "cd " << data.submitDir << "/submit";
+        cmd << "cd " << RCU::Shell::quote (data.submitDir) << "/submit";
         for (std::size_t iter : data.batchJobIndices)
         {
           cmd << " && bsub " << data.options.castString (Job::optSubmitFlags);
           if (data.options.castBool (Job::optResetShell, true))
             cmd << " -L /bin/bash";
-          cmd << " " << data.submitDir << "/submit/run " << iter;
+          cmd << " " << RCU::Shell::quote (data.submitDir) << "/submit/run " << iter;
         }
         if (gSystem->Exec (cmd.str().c_str()) != 0)
-          RCU_THROW_MSG (("failed to execute: " + cmd.str()).c_str());
+        {
+          ANA_MSG_ERROR ("failed to execute: " << cmd.str());
+          return StatusCode::FAILURE;
+        }
         data.submitted = true;
       }
       break;

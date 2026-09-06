@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -16,6 +16,7 @@
 //STD
 #include <iostream>
 #include <iomanip>
+#include <sstream>
 
 Trk::JacobianLocalToCurvilinear::JacobianLocalToCurvilinear( const Trk::CurvilinearUVT& curvUVT,
                                                              const Amg::Vector3D& locX,
@@ -81,27 +82,19 @@ Trk::JacobianLocalToCurvilinear::JacobianLocalToCurvilinear( const Amg::Vector3D
 /**Overload of << operator for both, MsgStream and std::ostream for debug output*/ 
 MsgStream& Trk::operator << ( MsgStream& sl, const Trk::JacobianLocalToCurvilinear& jac)
 { 
-	sl << std::setiosflags(std::ios::fixed);
-        sl << std::setprecision(6);
-        sl << MSG::DEBUG << "Trk::JacobianLocalToCurvilinear"                          << std::endl;
-        sl << "______________________________________________________________________" << std::endl;
-	for (int irow = 0; irow<5; irow++){
-            for (int icol =0; icol<5; icol++){
-                sl <<  (jac)(irow,icol);
-                if (irow < 4 || icol < 4 ) { sl << "     ";}
-            }
-            sl << std::endl;        
-        }
-        sl << "______________________________________________________________________";      
-        return sl;
+  std::ostringstream os;
+  os << jac;
+  sl << MSG::DEBUG <<os.str();    
+  return sl;
 }
 
 std::ostream& Trk::operator << ( std::ostream& sl, const Trk::JacobianLocalToCurvilinear& jac)
 {  
+  auto p = sl.precision();
 	sl << std::setiosflags(std::ios::fixed);
-        sl << std::setprecision(7);        
-        sl << "Trk::JacobianLocalToCurvilinear " << std::endl;
-        sl << "______________________________________________________________________" << std::endl;
+        sl << std::setprecision(6);        
+        sl << "Trk::JacobianLocalToCurvilinear \n";
+        sl << "______________________________________________________________________\n";
 	for (int irow = 0; irow<5; irow++){
             for (int icol =0; icol<5; icol++){
                 sl <<  (jac)(irow,icol);
@@ -110,6 +103,7 @@ std::ostream& Trk::operator << ( std::ostream& sl, const Trk::JacobianLocalToCur
             sl << std::endl;        
         }
        sl << "______________________________________________________________________";	
+       sl << std::setprecision(p);
        return sl;   
 }
 

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef LARFEBTIMEOFFSET_H
@@ -7,6 +7,7 @@
 
 #include "LArElecCalib/ILArFEBTimeOffset.h"
 #include "AthenaKernel/CLASS_DEF.h" 
+#include "AthenaKernel/BaseInfo.h"
 #include "Identifier/HWIdentifier.h"
 #include <map>
 
@@ -50,5 +51,6 @@ inline float LArFEBTimeOffset::TimeOffset(const HWIdentifier fId,
 }
 
 CLASS_DEF( LArFEBTimeOffset, 83217154, 1) 
+SG_BASES( LArFEBTimeOffset, ILArFEBTimeOffset );
 #endif 
 

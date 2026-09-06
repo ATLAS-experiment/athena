@@ -182,11 +182,12 @@ def get_2D_counts(hist):
 
     return counts
 
+
 def make_counts_json_dict(in_counts, ref_counts):
     counts = {}
     all_keys = set(in_counts)
     all_keys.update(ref_counts)
-    for k in sorted(all_keys):
+    for k in sorted(all_keys,key=lambda chain : (chain[7:],chain[:6]) if chain.startswith('leg') else (chain,'')):
         v = in_counts[k] if k in in_counts else 'n/a'
         ref_v = ref_counts[k] if k in ref_counts else 'n/a'
         counts[k] = {
@@ -498,13 +499,13 @@ def main():
     if args.json:
         logging.info('Writing results to %s', args.json)
         with open(args.json, 'w') as outfile:
-            json.dump(json_dict, outfile, sort_keys=True)
+            json.dump(json_dict, outfile, sort_keys=False) # Key order defined above
 
     if args.yaml:
         logging.info('Writing results extract to %s', args.yaml)
         light_dict = make_light_dict(json_dict, includeL1Counts = args.yamlL1)
         with open(args.yaml, 'w') as outfile:
-            yaml.dump(light_dict, outfile, sort_keys=True)
+            yaml.dump(light_dict, outfile, sort_keys=False) # Key order defined above
 
     return retcode
 

@@ -17,7 +17,6 @@
 #include "MuonRDO/TgcRdoContainer.h"
 #include "MuonRDO/TgcRdoIdHash.h"
 #include "MuonDQAUtils/MuonChamberNameConverter.h"
-#include "MuonDQAUtils/MuonChambersRange.h"
 #include "MuonDQAUtils/MuonCosmicSetup.h"
 #include "MuonRIO_OnTrack/MuonClusterOnTrack.h"
 #include "TrkSegment/SegmentCollection.h"

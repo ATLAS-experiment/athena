@@ -246,11 +246,11 @@ namespace OverlayTesting {
 
     static unsigned int encodeDigit(const std::vector<unsigned int>& bits)
     {
+      assert(bits.size() <= 32);
       unsigned digit(0);
-      const unsigned one(1);
-      for (unsigned int bit=0; bit < bits.size(); ++bit) {
+      for (std::size_t bit=0; bit < bits.size(); ++bit) {
         if (bits[bit]==1) {
-          digit += one << (31-bit);
+          digit |= 1u << (31-bit);
         }
       }
       return digit;

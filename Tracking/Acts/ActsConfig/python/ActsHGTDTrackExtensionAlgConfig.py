@@ -20,15 +20,6 @@ def ActsHGTDTrackExtensionAlgCfg(flags,
         from ActsConfig.ActsTrackFindingConfig import ActsTrackStatePrinterToolCfg
         kwargs.setdefault("TrackStatePrinter", acc.popToolsAndMerge(ActsTrackStatePrinterToolCfg(flags)))
 
-    if 'FitterTool' not in kwargs:
-        from ActsConfig.ActsTrackFittingConfig import ActsFitterCfg 
-        kwargs.setdefault(
-            'FitterTool',
-            acc.popToolsAndMerge(ActsFitterCfg(flags, 
-                                               ReverseFilteringPt=0,
-                                               OutlierChi2Cut=float('inf')))
-        )
-
     kwargs.setdefault('ACTSTracksLocation', 'HgtdTracks')
     kwargs.setdefault("etaBins", [0])
 

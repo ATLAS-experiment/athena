@@ -7,7 +7,7 @@ from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaCommon.Logging import logging
 from LArCabling.LArCablingConfig import LArOnOffIdMappingCfg
 from LArConfiguration.LArElecCalibDBConfig import LArElecCalibDBCfg
-
+from AthenaConfiguration.Enums import LHCPeriod
 
 def LArMCSymCondAlgCfg(flags, name="LArMCSymCondAlg", **kwargs):
     """Return ComponentAccumulator with configured LArMCSymCondAlg"""
@@ -86,6 +86,8 @@ def LArAutoCorrTotalCondAlgCfg (flags, name = 'LArAutoCorrTotalCondAlg', **kwarg
     mlog.info(" entering LArAutoCorrTotalCondAlgCfg")
     from AthenaCommon.SystemOfUnits import ns
 
+
+    kwargs.setdefault('NGains', 2 if flags.GeoModel.Run==LHCPeriod.Run4 and flags.IOVDb.UseCREST else 3)
     kwargs.setdefault('Nsamples', flags.LAr.ROD.nSamples)
     kwargs.setdefault('firstSample',flags.LAr.ROD.FirstSample)
     mlog.info("Nsamples %d",flags.LAr.ROD.nSamples)

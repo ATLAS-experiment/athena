@@ -27,9 +27,9 @@ TrigSpacePointCountsCollection * TrigSpacePointCountsCollectionCnv::createTransi
   
   mlog << MSG::DEBUG << "TrigSpacePointCountsCollectionCnv::createTransient called" << endmsg;
   
-  static const pool::Guid p4_guid( "ACEDF654-09D7-49F6-9054-8E2CEE767367" );
-  static const pool::Guid tlp1_guid( "55733D7E-0054-4785-ADA8-3EA70D7477F2" );
-  static const pool::Guid p0_guid( "633C9739-C3D1-4F5D-9678-887445DA42B6" );
+  static const Guid p4_guid( "ACEDF654-09D7-49F6-9054-8E2CEE767367" );
+  static const Guid tlp1_guid( "55733D7E-0054-4785-ADA8-3EA70D7477F2" );
+  static const Guid p0_guid( "633C9739-C3D1-4F5D-9678-887445DA42B6" );
   
   if( compareClassGuid(token,  p4_guid ) ) {
          std::unique_ptr< TrigSpacePointCountsCollection_p4 > col_vect( poolReadObject< TrigSpacePointCountsCollection_p4 >(token) );

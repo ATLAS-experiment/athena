@@ -209,7 +209,9 @@ private:
     ToolHandle<IInDetVertexTruthMatchTool> m_vtxValidTool{this, "VertexTruthMatchTool", "InDetVertexTruthMatchTool/VtxTruthMatchTool", "Vertex truth matching tool to use"};
     ToolHandle<IAthSelectionTool> m_truthSelectionTool{this, "TruthSelectionTool","AthTruthSelectionTool", "Truth selection tool (for efficiencies and resolutions)"};
     ToolHandle<InDet::IInDetTrackTruthOriginTool> m_trackTruthOriginTool{this, "trackTruthOriginTool", "InDet::InDetTrackTruthOriginTool","truth track origin tool"};
-    ToolHandle<InDet::IInDetHardScatterSelectionTool> m_hardScatterSelectionTool{this, "hardScatterSelectionTool", "InDet::InDetHardScatterSelectionTool","tool to select the hard scatter reco vertex"};
+    ToolHandle<InDet::IInDetHardScatterSelectionTool> m_hardScatterSelectionTool
+      {this, "hardScatterSelectionTool", "",
+       "tool to select the hard scatter reco vertex"};
     ToolHandle<IGoodRunsListSelectionTool> m_grlTool{this, "GoodRunsListSelectionTool", "GoodRunsListSelectionTool/GoodRunsListSelectionTool", "GRL selection tool"};
 
     SG::ReadDecorHandleKey<xAOD::EventInfo> m_weight_pileup_key{this, "PileupWeight_NOSYS", m_eventInfoContainerName, "PileupWeight_NOSYS"};

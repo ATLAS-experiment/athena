@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TauBuilderAlg.h"
@@ -177,12 +177,6 @@ StatusCode TauBuilderAlg::execute(const EventContext& ctx) const {
     // sort the cell container by hash 
     // basically call the finalizer
     ATH_CHECK( m_cellMakerTool->process(Pi0CellContainer, ctx) );
-    //Since this is recorded we can retrieve it later as const DV
-    //do it here due to symlink below
-    const CaloCellContainer* cellPtrs = Pi0CellContainer->asDataVector(); 
-    // Check this is needed for the cell container?
-    // symlink as INavigable4MomentumCollection (as in CaloRec/CaloCellMaker)
-    ATH_CHECK(evtStore()->symLink(cellPtrs, static_cast<INavigable4MomentumCollection*> (nullptr)));
  }
 
   ATH_MSG_VERBOSE("The tau candidate container has been modified");

@@ -84,7 +84,7 @@ StripRDO_Container_PERS* PhaseIIStripRawDataContainerCnv::createPersistent(Phase
 PhaseIIStripRawDataContainer* PhaseIIStripRawDataContainerCnv::createTransient(const Token* token) {
   //  @TODO support  p0_guid 7F2C09B6-0B47-4957-8BBA-EDC665A290AC i.e. initial container
   //  @TOOD support TP1_guid DA76970C-E019-43D2-B2F9-25660DCECD9D i.e. t/p separated version with InDetRawDataContainer_p1
-  static const pool::Guid   SCT_TP4_guid("6C7540BE-E85C-4777-BC1C-A9FF11460F54"); // for t/p separated version with SCT_RawDataContainer_p4
+  static const Guid   SCT_TP4_guid("6C7540BE-E85C-4777-BC1C-A9FF11460F54"); // for t/p separated version with SCT_RawDataContainer_p4
 
   if( compareClassGuid(token, SCT_TP4_guid) ) {
      std::unique_ptr< SCT_RawDataContainer_p4 >   persCont( poolReadObject< SCT_RawDataContainer_p4 >(token) );

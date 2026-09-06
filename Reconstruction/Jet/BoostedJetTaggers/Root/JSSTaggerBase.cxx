@@ -584,34 +584,50 @@ void JSSTaggerBase::decorateJSSRatios( const xAOD::JetContainer& jets ) const {
       float ECF2 = (*readECF2)(*jet);
       float ECF3 = (*readECF3)(*jet);
 
-      if ( ECF2 > 1e-8 ) {
-	C2 = ECF3 * ECF1 / std::pow( ECF2, 2.0 );
-	D2 = ECF3 * std::pow( ECF1, 3.0 ) / std::pow( ECF2, 3.0 );
+      if(!decC2.isAvailable()){
+	if ( ECF2 > 1e-8 )
+	  C2 = ECF3 * ECF1 / std::pow( ECF2, 2.0 );
       }
 
-      e3 = ECF3 / std::pow( ECF1, 3.0 );
+      if(!decD2.isAvailable()){
+	if ( ECF2 > 1e-8 )
+	  D2 = ECF3 * std::pow( ECF1, 3.0 ) / std::pow( ECF2, 3.0 );
+      }
+
+      if(!decE3.isAvailable())
+	e3 = ECF3 / std::pow( ECF1, 3.0 );
 
       // L-series for UFO top taggers
-      if((*readECFG331).isAvailable() && (*readECFG212).isAvailable()){
-        if((*readECFG212)(*jet) > 1e-8){
-          L2 = (*readECFG331)(*jet) / std::pow((*readECFG212)(*jet), 1.5);
-        }
+      if(!decL2.isAvailable()){
+	if((*readECFG331).isAvailable() && (*readECFG212).isAvailable()){
+	  if((*readECFG212)(*jet) > 1e-8){
+	    L2 = (*readECFG331)(*jet) / std::pow((*readECFG212)(*jet), 1.5);
+	  }
+	}
       }
 
-      if((*readECFG331).isAvailable() && (*readECFG311).isAvailable()){
-        if((*readECFG331)(*jet) > 1e-8){
-          L3 = (*readECFG311)(*jet) / std::pow((*readECFG331)(*jet), 1./3.);
-        }
+      if(!decL3.isAvailable()){
+	if((*readECFG331).isAvailable() && (*readECFG311).isAvailable()){
+	  if((*readECFG331)(*jet) > 1e-8){
+	    L3 = (*readECFG311)(*jet) / std::pow((*readECFG331)(*jet), 1./3.);
+	  }
+	}
       }
+
     }
 
     decTau21WTA(*jet) = tau21_wta;
     decTau32WTA(*jet) = tau32_wta;
     decTau42WTA(*jet) = tau42_wta;
 
-    decC2(*jet) = C2;
-    decD2(*jet) = D2;
-    decE3(*jet) = e3;
+    if(!decC2.isAvailable())
+      decC2(*jet) = C2;
+
+    if(!decD2.isAvailable())
+      decD2(*jet) = D2;
+
+    if(!decE3.isAvailable())
+      decE3(*jet) = e3;
 
     static const SG::AuxElement::ConstAccessor<float> accL2("L2");
     if(!accL2.isAvailable(*jet)) decL2(*jet) = L2;

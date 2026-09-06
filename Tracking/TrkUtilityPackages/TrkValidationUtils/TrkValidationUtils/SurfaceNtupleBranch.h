@@ -5,13 +5,13 @@
 #ifndef TRK_SURFACENTUPLEBRANCH_H
 #define TRK_SURFACENTUPLEBRANCH_H
 
-#include <string>
-class TTree;
+
 
 #include "GeoPrimitives/GeoPrimitives.h"
 #include "TrkValidationUtils/TransformNtupleBranch.h"
 #include "TrkValidationUtils/VectorNtupleBranch.h"
-
+#include <string_view>
+class TTree;
 
 
 namespace Trk {
@@ -36,10 +36,10 @@ namespace Trk {
   struct SurfaceNtupleBranch {
 
     /** initialize class for writing */
-    void initForWrite(TTree& tree, const std::string& prefix = "" );
+    void initForWrite(TTree& tree, std::string_view prefix = "" );
 
     /** initialize class for reading */
-    void initForRead(TTree& tree, const std::string& prefix = "" );
+    void initForRead(TTree& tree, std::string_view prefix = "" );
     
     /** fill a vector */
     void fill( const Trk::Surface& surface );

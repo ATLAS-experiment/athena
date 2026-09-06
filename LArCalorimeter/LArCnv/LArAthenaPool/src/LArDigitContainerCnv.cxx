@@ -47,10 +47,10 @@ LArDigitContainerPERS* LArDigitContainerCnv::createPersistent(LArDigitContainer*
 
 LArDigitContainer* LArDigitContainerCnv::createTransient(const Token* token) {
 
-   constexpr pool::Guid p0_guid("B15FFDA0-206D-4062-8B5F-582A1ECD5502");
-   constexpr pool::Guid p1_guid("F1876026-CDFE-4110-AA59-E441BAA5DE44");
-   constexpr pool::Guid p2_guid("66F5B7AF-595C-4F79-A2B7-56590777C313");
-   constexpr pool::Guid p3_guid("24480EBA-1AF1-4646-95A7-11285F09717C");
+   constexpr Guid p0_guid("B15FFDA0-206D-4062-8B5F-582A1ECD5502");
+   constexpr Guid p1_guid("F1876026-CDFE-4110-AA59-E441BAA5DE44");
+   constexpr Guid p2_guid("66F5B7AF-595C-4F79-A2B7-56590777C313");
+   constexpr Guid p3_guid("24480EBA-1AF1-4646-95A7-11285F09717C");
 
    if (compareClassGuid(token, p0_guid)) {
      ATH_MSG_DEBUG("Read version p0 of LArDigitContainer. token=" << token->toString());

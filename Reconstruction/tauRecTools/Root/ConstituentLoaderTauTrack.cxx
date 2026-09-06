@@ -1,5 +1,5 @@
 /*
-Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "tauRecTools/ConstituentsLoaderTauTrack.h"
@@ -64,7 +64,7 @@ namespace FlavorTagInference {
     }
 
     Inputs ConstituentLoaderTauTrack::getData(const xAOD::IParticle& i_tau) const {
-        auto tau = dynamic_cast<const xAOD::TauJet*>(&i_tau);
+        auto tau = static_cast<const xAOD::TauJet*>(&i_tau);
         std::vector<const xAOD::TauTrack*> sorted_tau_trks = getTauTracks(tau);
         return getFeatures(tau, sorted_tau_trks);
     }
@@ -76,6 +76,7 @@ namespace FlavorTagInference {
         } catch (const std::out_of_range &e) {
             throw std::runtime_error("Variable '" + var_name + "' not defined");
         }
+        //coverity[COPY_INSTEAD_OF_MOVE]
         return [func_as_ref](const xAOD::TauTrack& trk, const xAOD::TauJet& tau) {
             float out;
             bool success = func_as_ref(tau, trk, out);

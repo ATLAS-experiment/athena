@@ -1,9 +1,9 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TruthTrackRecordsAlg.h"
-#include "MuonTruthAlgs/DecorUtils.h"
+
 
 #include "EventPrimitives/EventPrimitivesHelpers.h"
 #include "EventPrimitives/EventPrimitivesCovarianceHelpers.h"
@@ -79,21 +79,21 @@ namespace Muon {
         ATH_CHECK(muonTruthContainer.isPresent());
 
         SummaryDecors myDecors;
-        myDecors.xDecor  = makeHandles<float>(ctx, m_muonSnapShotX);
-        myDecors.yDecor  = makeHandles<float>(ctx, m_muonSnapShotY);
-        myDecors.zDecor  = makeHandles<float>(ctx, m_muonSnapShotZ);
-        myDecors.pxDecor = makeHandles<float>(ctx, m_muonSnapShotPx);
-        myDecors.pyDecor = makeHandles<float>(ctx, m_muonSnapShotPy);
-        myDecors.pzDecor = makeHandles<float>(ctx, m_muonSnapShotPz);
-        myDecors.matchedDecor = makeHandles<char>(ctx, m_muonSnapShotMtc);
-        myDecors.exDecor = makeHandles<float>(ctx, m_muonSnapShotEX);
-        myDecors.eyDecor = makeHandles<float>(ctx, m_muonSnapShotEY);
-        myDecors.ezDecor = makeHandles<float>(ctx, m_muonSnapShotEZ);
-        myDecors.epxDecor = makeHandles<float>(ctx, m_muonSnapShotEPx);
-        myDecors.epyDecor = makeHandles<float>(ctx, m_muonSnapShotEPy);
-        myDecors.epzDecor = makeHandles<float>(ctx, m_muonSnapShotEPz);
-        myDecors.ecovDecor = makeHandles<std::vector<float>>(ctx, m_muonSnapShotEcov);
-        myDecors.eisDecor = makeHandles<char>(ctx, m_muonSnapShotEis);
+        myDecors.yDecor  = createDecorators(m_muonSnapShotY, ctx, float{});
+        myDecors.xDecor  = createDecorators(m_muonSnapShotX, ctx, float{});
+        myDecors.zDecor  = createDecorators(m_muonSnapShotZ, ctx, float{});
+        myDecors.pxDecor = createDecorators(m_muonSnapShotPx, ctx, float{});
+        myDecors.pyDecor = createDecorators(m_muonSnapShotPy, ctx, float{});
+        myDecors.pzDecor = createDecorators(m_muonSnapShotPz, ctx, float{});
+        myDecors.matchedDecor = createDecorators(m_muonSnapShotMtc, ctx, char{});
+        myDecors.exDecor = createDecorators(m_muonSnapShotEX, ctx, float{});
+        myDecors.eyDecor = createDecorators(m_muonSnapShotEY, ctx, float{});
+        myDecors.ezDecor = createDecorators(m_muonSnapShotEZ, ctx, float{});
+        myDecors.epxDecor = createDecorators(m_muonSnapShotEPx, ctx, float{});
+        myDecors.epyDecor = createDecorators(m_muonSnapShotEPy, ctx, float{});
+        myDecors.epzDecor = createDecorators(m_muonSnapShotEPz, ctx, float{});
+        myDecors.ecovDecor = createDecorators(m_muonSnapShotEcov, ctx, std::vector<float>{});
+        myDecors.eisDecor = createDecorators(m_muonSnapShotEis, ctx, char{});
 
         // loop over truth coll
         for (const xAOD::TruthParticle* truthParticle : *muonTruthContainer) {
@@ -120,25 +120,25 @@ namespace Muon {
             ATH_CHECK(trackRecordCollection.isPresent());
     
             const std::string r_name = trackRecordCollection.key();
-            float& x = (*myDecors.xDecor[idx])(truthParticle);
-            float& y = (*myDecors.yDecor[idx])(truthParticle);
-            float& z = (*myDecors.zDecor[idx])(truthParticle);
-            float& px = (*myDecors.pxDecor[idx])(truthParticle);
-            float& py = (*myDecors.pyDecor[idx])(truthParticle);
-            float& pz = (*myDecors.pzDecor[idx])(truthParticle);
+            float& x =  myDecors.xDecor[idx](truthParticle);
+            float& y =  myDecors.yDecor[idx](truthParticle);
+            float& z =  myDecors.zDecor[idx](truthParticle);
+            float& px = myDecors.pxDecor[idx](truthParticle);
+            float& py = myDecors.pyDecor[idx](truthParticle);
+            float& pz = myDecors.pzDecor[idx](truthParticle);
 
-            char& found_truth = (*myDecors.matchedDecor[idx])(truthParticle);
+            char& found_truth = myDecors.matchedDecor[idx](truthParticle);
 
             x = y = z = px = py = pz = dummy_val;
             found_truth = false;
 
             // Need to always make these, to avoid crashes later
-            float& ex = (*myDecors.exDecor[idx])(truthParticle);
-            float& ey = (*myDecors.eyDecor[idx])(truthParticle);
-            float& ez = (*myDecors.ezDecor[idx])(truthParticle);
-            float& epx = (*myDecors.epxDecor[idx])(truthParticle);
-            float& epy = (*myDecors.epyDecor[idx])(truthParticle);
-            float& epz = (*myDecors.epzDecor[idx])(truthParticle);
+            float& ex = myDecors.exDecor[idx](truthParticle);
+            float& ey = myDecors.eyDecor[idx](truthParticle);
+            float& ez = myDecors.ezDecor[idx](truthParticle);
+            float& epx = myDecors.epxDecor[idx](truthParticle);
+            float& epy = myDecors.epyDecor[idx](truthParticle);
+            float& epz = myDecors.epzDecor[idx](truthParticle);
 
             ex = ey = ez = epx = epy = epz = dummy_val;
 
@@ -192,14 +192,14 @@ namespace Muon {
             const Trk::TrackingVolume* volume = end_pars.volume;
             const std::string& r_name = end_pars.record_name;    
 
-            float& ex = (*myDecors.exDecor[end_pars.idx])(truthParticle);
-            float& ey = (*myDecors.eyDecor[end_pars.idx])(truthParticle);
-            float& ez = (*myDecors.ezDecor[end_pars.idx])(truthParticle);
-            float& epx = (*myDecors.epxDecor[end_pars.idx])(truthParticle);  
-            float& epy = (*myDecors.epyDecor[end_pars.idx])(truthParticle);
-            float& epz = (*myDecors.epzDecor[end_pars.idx])(truthParticle);
+            float& ex = myDecors.exDecor[end_pars.idx](truthParticle);
+            float& ey = myDecors.eyDecor[end_pars.idx](truthParticle);
+            float& ez = myDecors.ezDecor[end_pars.idx](truthParticle);
+            float& epx = myDecors.epxDecor[end_pars.idx](truthParticle);  
+            float& epy = myDecors.epyDecor[end_pars.idx](truthParticle);
+            float& epz = myDecors.epzDecor[end_pars.idx](truthParticle);
             
-            std::vector<float>& covMat = (*myDecors.ecovDecor[end_pars.idx])(truthParticle);
+            std::vector<float>& covMat = myDecors.ecovDecor[end_pars.idx](truthParticle);
 
             std::unique_ptr<Trk::TrackParameters> exPars{
                 m_extrapolator->extrapolateToVolume(ctx, pars, *volume, Trk::alongMomentum, Trk::muon)};
@@ -207,7 +207,7 @@ namespace Muon {
                 ATH_MSG_VERBOSE("Extrapolation to "<<r_name<<" failed. ");
                 continue;
             }
-            (*myDecors.eisDecor[end_pars.idx])(truthParticle) = true;
+            myDecors.eisDecor[end_pars.idx](truthParticle) = true;
             ex = exPars->position().x();
             ey = exPars->position().y();
             ez = exPars->position().z();

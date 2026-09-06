@@ -102,9 +102,6 @@ StatusCode LArOFCBin_PhysCaliTdiffFromStdNtuple::stop()
 
   if(m_filltdiff) {
     ATH_CHECK( detStore()->record(larTdiffParams.get(),m_store_key_tdiff) );
-    // and symlink
-    ILArPhysCaliTdiff *ilarTdiff = nullptr;
-    ATH_CHECK( detStore()->symLink(larTdiffParams.release(),ilarTdiff) );
   }
 
 

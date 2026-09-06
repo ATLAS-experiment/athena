@@ -26,7 +26,6 @@
 #include <EventLoop/StatusCode.h>
 #include <RootCoreUtils/Assert.h>
 #include <RootCoreUtils/RootUtils.h>
-#include <RootCoreUtils/ThrowMsg.h>
 #include <RootUtils/WithRootErrorHandler.h>
 #include <SampleHandler/DiskOutput.h>
 #include <SampleHandler/DiskWriter.h>
@@ -43,6 +42,7 @@
 #include <TObjString.h>
 #include <fstream>
 #include <memory>
+#include <stdexcept>
 #include <exception>
 
 //
@@ -68,7 +68,6 @@ namespace EL
   void Worker ::
   testInvariant () const
   {
-    RCU_INVARIANT (this != nullptr);
     for (std::size_t iter = 0, end = m_algs.size(); iter != end; ++ iter)
     {
       RCU_INVARIANT (m_algs[iter].m_algorithm != nullptr);
@@ -122,7 +121,7 @@ namespace EL
     RCU_READ_INVARIANT (this);
 
     TObject *result = m_histOutput->getOutputHist (name);
-    if (result == nullptr) RCU_THROW_MSG ("unknown output histogram: " + name);
+    if (result == nullptr) throw std::runtime_error ("unknown output histogram: " + name);
     return result;
   }
 
@@ -134,7 +133,7 @@ namespace EL
     RCU_READ_INVARIANT (this);
     TFile *result = getOutputFileNull (label);
     if (result == 0)
-      RCU_THROW_MSG ("no output dataset defined with label: " + label);
+      throw std::runtime_error ("no output dataset defined with label: " + label);
     return result;
   }
 
@@ -183,14 +182,12 @@ namespace EL
     auto outputIter = m_outputs.find (stream);
     if (outputIter == m_outputs.end())
     {
-      RCU_THROW_MSG ( "No output file with stream name \"" + stream
-                      + "\" found" );
+      throw std::runtime_error ("No output file with stream name \"" + stream + "\" found");
     }
 
     TTree *result = outputIter->second->getOutputTree( name );
     if( result == nullptr ) {
-      RCU_THROW_MSG ( "No tree with name \"" + name + "\" in stream \"" +
-                      stream + "\"" );
+      throw std::runtime_error ("No tree with name \"" + name + "\" in stream \"" + stream + "\"");
     }
     return result;
   }
@@ -244,6 +241,8 @@ namespace EL
   inputFileName () const
   {
     // no invariant used
+    if (inputFile() == nullptr)
+      throw std::runtime_error ("no input file is currently open");
     std::string path = inputFile()->GetName();
     auto split = path.rfind ('/');
     if (split != std::string::npos)
@@ -258,6 +257,8 @@ namespace EL
   triggerConfig () const
   {
     RCU_READ_INVARIANT (this);
+    if (inputFile() == nullptr)
+      throw std::runtime_error ("no input file is currently open");
     return dynamic_cast<TTree*>(inputFile()->Get("physicsMeta/TrigConfTree"));
   }
 
@@ -269,7 +270,7 @@ namespace EL
     RCU_READ_INVARIANT (this);
 
     if (m_event == nullptr)
-      RCU_THROW_MSG ("Job not configured for xAOD support");
+      throw std::runtime_error ("Worker::xaodEvent: Job not configured for xAOD support");
     return m_event;
   }
 
@@ -281,7 +282,7 @@ namespace EL
     RCU_READ_INVARIANT (this);
 
     if (m_tstore == nullptr)
-      RCU_THROW_MSG ("Job not configured for xAOD support");
+      throw std::runtime_error ("Worker::xaodStore: Job not configured for xAOD support");
     return m_tstore;
   }
 
@@ -657,9 +658,6 @@ namespace EL
       msg += " ";
       msg += s2;
       throw std::runtime_error(msg);
-
-      // No need for further error handling
-      return false;
     }
 
     // Pass to the default error handlers
@@ -740,7 +738,7 @@ namespace EL
     m_inputTree = tree;
     m_inputEntry = 0;
     m_inputFile = std::move (inputFile);
-    m_inputFileUrl = std::move (inputFileUrl);
+    m_inputFileUrl = inputFileUrl;
 
     // onFirstInputFile to setup Event object
     if (m_firstInputFile)
@@ -855,6 +853,9 @@ namespace EL
     ANA_CHECK (initialize ());
     ANA_CHECK (processInputs ());
     ANA_CHECK (finalize ());
+    // the metadata pointer refers to the local `meta`, which is destroyed
+    // when this function returns; clear it now that processing is done
+    setMetaData (nullptr);
     return ::StatusCode::SUCCESS;
   }
 
@@ -922,12 +923,26 @@ namespace EL
       ANA_CHECK (processInputs ());
       ANA_CHECK (finalize ());
 
+      // m_batchJob and the metadata pointer refer into the local `job`,
+      // which is destroyed when this function returns; clear them now that
+      // all the processing that consumes them is done.
+      m_batchJob = nullptr;
+      setMetaData (nullptr);
+
       std::ostringstream job_name;
       job_name << job_id;
-      std::ofstream completed ((job->location + "/status/completed-" + job_name.str()).c_str());
+      const std::string completedName (job->location + "/status/completed-" + job_name.str());
+      std::ofstream completed (completedName.c_str());
+      if (!completed)
+      {
+        ANA_MSG_ERROR ("failed to write completion marker " << completedName);
+        return ::StatusCode::FAILURE;
+      }
       return ::StatusCode::SUCCESS;
     } catch (...)
     {
+      m_batchJob = nullptr;
+      setMetaData (nullptr);
       Detail::report_exception (std::current_exception());
       return ::StatusCode::FAILURE;
     }

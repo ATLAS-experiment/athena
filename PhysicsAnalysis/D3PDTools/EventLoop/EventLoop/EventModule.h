@@ -4,8 +4,8 @@
 
 
 
-#ifndef EVENT_LOOP_EVENT_SVC_H
-#define EVENT_LOOP_EVENT_SVC_H
+#ifndef EVENT_LOOP_EVENT_MODULE_H
+#define EVENT_LOOP_EVENT_MODULE_H
 
 #include <EventLoop/Global.h>
 

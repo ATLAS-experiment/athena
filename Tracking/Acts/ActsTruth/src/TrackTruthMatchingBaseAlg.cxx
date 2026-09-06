@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #include "TrackTruthMatchingBaseAlg.h"
 
@@ -465,8 +465,9 @@ namespace ActsTrk
              break;
           }
        }
+       const std::string labelStr{"pt"};
        for (std::size_t bin_i = 0; bin_i < statPtBins.size() + 2; ++bin_i) {
-          pt_labels.push_back(TableUtils::makeBinLabel("pt",statPtBins, bin_i, true, pt_precision));
+          pt_labels.push_back(TableUtils::makeBinLabel(labelStr,statPtBins, bin_i, true, pt_precision));
        }
        // statistics eta-bins
        {
@@ -582,35 +583,42 @@ namespace ActsTrk
                                                                        // and are to be ignored
 
         assert( stat_per_category.size() % n_rows == 0 );
+        const std::string hitEffStr{"Hit Efficiency"};
+        const std::string hitPurStr{"Hit Purity"};
+        const std::string matchProbStr{"Match probability"};
+        const std::string recoEffStr{"reco efficiency"};
+        const std::string statUncertainty{"stat. uncertainty"};
+        const std::string space{" "};
+        const std::string newline{"\n"};
         for(unsigned int row_i=(print_sub_categories ? 0 : n_rows-1); row_i<n_rows; ++row_i) {
            {
-              std::vector<std::string> stat_labels { std::string("Hit Efficiency") };
+              std::vector<std::string> stat_labels { hitEffStr};
               msg() << makeTable( stat_per_category, row_i*n_cols, kNCategorisedStat, kHitEfficiency, 1u, col_category_labels, stat_labels, top_left)
                          .columnWidth(stat_column_width)
-                         .labelPrefix(row_category_labels.at(row_i)+" ")
+                         .labelPrefix(row_category_labels.at(row_i)+space)
                          .precision(std::vector<unsigned int>{3})
-                    << std::endl;
+                    << newline;
            }
            {
-              std::vector<std::string> stat_labels { std::string("Hit Purity") };
+              std::vector<std::string> stat_labels { hitPurStr };
               msg() << makeTable( stat_per_category, row_i*n_cols, kNCategorisedStat, kHitPurity, 1u, col_category_labels, stat_labels, top_left)
                           .columnWidth(stat_column_width)
-                          .labelPrefix(row_category_labels.at(row_i)+" ")
+                          .labelPrefix(row_category_labels.at(row_i)+space)
                           .precision(std::vector<unsigned int>{3})
-                    << std::endl;
+                    << newline;
            }
            {
-              std::vector<std::string> stat_labels { std::string("Match probability") };
+              std::vector<std::string> stat_labels { matchProbStr };
               msg() << makeTable( stat_per_category, row_i*n_cols, kNCategorisedStat, kMatchProbability, 1u, col_category_labels, stat_labels, top_left)
                           .columnWidth(stat_column_width)
-                          .labelPrefix(row_category_labels.at(row_i)+" ")
+                          .labelPrefix(row_category_labels.at(row_i)+space)
                           .precision(std::vector<unsigned int>{3})
-                    << std::endl;
+                    << newline;
            }
            if (m_showRawCounts.value()) {
               msg() << makeTable( counts_per_category, row_i*n_cols, kNCategorisedCounter, 0u, 1u, col_category_labels, counter_labels, top_left)
-                          .labelPrefix(row_category_labels.at(row_i)+" ")
-                    << std::endl;
+                          .labelPrefix(row_category_labels.at(row_i)+space)
+                    << newline;
            }
 
            if (m_computeTrackRecoEfficiency.value()) {
@@ -620,12 +628,12 @@ namespace ActsTrk
                  eff.push_back( computeRatio( counts_per_category[category_i+row_i*n_cols][kNParticleWithAssociatedTrack],
                                               counts_per_category[category_i+row_i*n_cols][kNTotalParticles] ) );
               }
-              std::vector<std::string> eff_labels { std::string("reco efficiency"),
-                 std::string("stat. uncertainty") };
+              std::vector<std::string> eff_labels { recoEffStr,
+                 statUncertainty };
               msg() << makeTable( eff, 0u, eff.begin()->size(),0u,1u, col_category_labels, eff_labels, top_left)
-                          .labelPrefix(row_category_labels.at(row_i)+" ")
+                          .labelPrefix(row_category_labels.at(row_i)+space)
                           .precision(std::vector<unsigned int>{3,3})
-                    << std::endl;
+                    << newline;
            }
         }
      }

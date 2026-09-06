@@ -26,8 +26,8 @@ LUCID_RawDataContainer* LUCID_RawDataContainerCnv::createTransient(const Token* 
   
   LUCID_RawDataContainer* trans_cont(nullptr);
   
-  static const pool::Guid p0_guid("0C023583-E3D4-4C7D-9B20-B6B2A1018D2F");
-  static const pool::Guid p1_guid("88937AAE-D299-4A80-8608-96EFB3068F9A");
+  static const Guid p0_guid("0C023583-E3D4-4C7D-9B20-B6B2A1018D2F");
+  static const Guid p1_guid("88937AAE-D299-4A80-8608-96EFB3068F9A");
 
   if (this->compareClassGuid(token, p0_guid)) { // Before T/P separation
     trans_cont = this->poolReadObject<LUCID_RawDataContainer>(token);

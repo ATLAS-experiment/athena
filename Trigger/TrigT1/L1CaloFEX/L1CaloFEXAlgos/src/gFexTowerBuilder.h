@@ -63,7 +63,7 @@ namespace LVL1 {
         // property for gFEX mapping
         Gaudi::Property<bool> m_apply_masking{this, "SCellMasking", true, "Applies masking. Only use for data"};
 
-        Gaudi::Property<bool> m_applyTimingCut{this,"ApplyTimingCut", false,
+        Gaudi::Property<bool> m_applyTimingCut{this,"ApplyTimingCut", true,
                 "If true, will apply a timing cut to supercells in MC (but not in HEC). In data this property has no effect"};
 
         Gaudi::Property<bool> m_applyTimingCutAll{this,"ApplyTimingCutAll", false,

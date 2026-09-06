@@ -9,9 +9,8 @@
 #include <bitset>
 #include <vector>
 #include <string>
-namespace MCTruthPartClassifier {
 #include "TruthUtils/TruthClasses.h"
-
+namespace MCTruthPartClassifier {
 inline ParticleOrigin convHadronTypeToOrig(ParticleType pType, int motherPDG)
 {
   if (pType == CCbarMesonPart && abs(motherPDG) == MC::JPSI) return JPsi;

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonGeoModel/RpcLayer.h"
@@ -52,7 +52,7 @@ namespace MuonGM {
         double eps = 0.000001;
         double tol = 1.e-6;
 
-        const RPC *r = dynamic_cast<const RPC*>(mysql.GetTechnology(name));
+        const RPC *r = static_cast<const RPC*>(mysql.GetTechnology(name));
 
         if (m->nGasGaps() == 3 && r->NstripPanels_in_s != 1)
             throw std::runtime_error(Form("File: %s, Line: %d\nRpcLayer::build() - NstripPanels_in_s = %d for BI RPC, not possible", __FILE__, __LINE__, r->NstripPanels_in_s));

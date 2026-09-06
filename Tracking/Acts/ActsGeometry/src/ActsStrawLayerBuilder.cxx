@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // ATHENA
@@ -148,7 +148,7 @@ ActsStrawLayerBuilder::centralLayers(const Acts::GeometryContext& gctx) const
       = m_cfg.layerCreator->cylinderLayer(gctx, std::move(layerSurfaces), 100, 1, pl);
     layers.push_back(layer);
 
-    protoLayers.push_back(pl);
+    protoLayers.push_back(std::move(pl));
 
   }
 
@@ -195,6 +195,7 @@ ActsStrawLayerBuilder::endcapLayers(const Acts::GeometryContext& gctx, int side)
 
         size_t iposneg = side < 0 ? 0 : 1;
         const InDetDD::TRT_EndcapElement* ecElem = m_cfg.mng->getEndcapElement(iposneg, iwheel, ilayer, iphisec);
+        if (!ecElem)[[unlikely]] continue;
         unsigned int nStraws = ecElem->nStraws();
 
         for(unsigned int istraw=0;istraw<nStraws;istraw++) {
@@ -235,11 +236,11 @@ ActsStrawLayerBuilder::endcapLayers(const Acts::GeometryContext& gctx, int side)
           }
         }
       }
-
+      const std::size_t nStraws = wheelSurfaces.size() ;
       std::shared_ptr<Acts::Layer> layer
         = m_cfg.layerCreator->discLayer(gctx, std::move(wheelSurfaces), 1, 100, pl);
       layers.push_back(layer);
-      ACTS_VERBOSE("  - Collected " << wheelSurfaces.size() << " straws");
+      ACTS_VERBOSE("  - Collected " << nStraws << " straws");
     }
 
   }

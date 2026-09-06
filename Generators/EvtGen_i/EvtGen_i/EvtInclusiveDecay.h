@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //*****************************************************************************
@@ -99,8 +99,6 @@ private:
 
   /// Seed for random number engine
   IntegerProperty m_randomSeed{this, "RandomSeed", 1234567, "Random seed for the built-in random engine"}; // FIXME make this into an unsigned long int?
-
-  McEventCollection* m_mcEvtColl{};
 
   // EvtGen interface
   EvtInclusiveAtRndmGen*  m_evtAtRndmGen{};

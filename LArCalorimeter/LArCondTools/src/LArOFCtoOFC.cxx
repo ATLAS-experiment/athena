@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArOFCtoOFC.h"
@@ -180,13 +180,9 @@ StatusCode LArOFCtoOFC::stop()
   } // over gains
   
   ATH_MSG_INFO( "Total number of Cell x gains:" << count );
-  LArOFCComplete *ofcptr = ofc_cont.get();
   CHECK(detStore()->record(std::move(ofc_cont),m_outKey));
-  CHECK(detStore()->symLink(ofcptr,dynamic_cast<ILArOFC*>(ofcptr)));
   if(m_doShape){
-    LArShapeComplete *shapeptr = shape_cont.get();
     CHECK(detStore()->record(std::move(shape_cont),m_outShapeKey));
-    CHECK(detStore()->symLink(shapeptr,dynamic_cast<ILArShape*>(shapeptr)));
   }
 
   return StatusCode::SUCCESS;

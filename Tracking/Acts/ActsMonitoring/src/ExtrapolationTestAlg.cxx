@@ -118,12 +118,12 @@ StatusCode ExtrapolationTestAlg::execute(const EventContext &ctx) {
          ATH_CHECK(writePropagationSteps(ctx, output.first));
       }
 
-      if(m_writeMaterialTracks){
+      if(m_writeMaterialTracks && coll){
         Acts::RecordedMaterialTrack track;
         track.first.first = Acts::Vector3::Zero();
         track.first.second = momentum;
         track.second = std::move(output.second);
-        coll->push_back(track);
+        coll->push_back(std::move(track));
       }
     }
 

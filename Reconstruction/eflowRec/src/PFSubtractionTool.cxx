@@ -182,9 +182,11 @@ unsigned int PFSubtractionTool::matchAndCreateEflowCaloObj(const EventContext& c
         {
           // Narrower cone is a subset of the selected clusters
           // Distance returned is deltaR^2
-          thisEfRecTrack->addAlternativeClusterMatch(trackClusterLink, "cone_015");
+          static const  std::string cone15Str{"cone_015"};
+          thisEfRecTrack->addAlternativeClusterMatch(trackClusterLink, cone15Str);
         }
-        thisEfRecTrack->addAlternativeClusterMatch(trackClusterLink, "cone_02");
+        static const std::string cone2Str{"cone_02"};
+        thisEfRecTrack->addAlternativeClusterMatch(trackClusterLink, cone2Str);
       }//loop over bestClusters_02
 
       //This matching scheme is used to match the calorimeter cluster(s) to be used in the charged showers subtraction for this track.

@@ -34,9 +34,9 @@ StatusCode TRT_DriftCircleContainerCnv::initialize() {
 
 InDet::TRT_DriftCircleContainer* TRT_DriftCircleContainerCnv::createTransient(const Token* token) {
 
-  static const pool::Guid   p0_guid("A99630C5-3D7C-4DB4-9E6C-FC3CEF981895"); // before t/p split
-  static const pool::Guid   p1_guid("42B48D79-AF4E-4D45-AAA9-A2BA5A033534"); // with TRT_DriftCircle_tlp1
-  static const pool::Guid   p2_guid("36195EDE-941C-424B-81A1-E04C867C35D8"); // with TRT_DriftCircle_p2
+  static const Guid   p0_guid("A99630C5-3D7C-4DB4-9E6C-FC3CEF981895"); // before t/p split
+  static const Guid   p1_guid("42B48D79-AF4E-4D45-AAA9-A2BA5A033534"); // with TRT_DriftCircle_tlp1
+  static const Guid   p2_guid("36195EDE-941C-424B-81A1-E04C867C35D8"); // with TRT_DriftCircle_p2
   ATH_MSG_DEBUG("createTransient(const Token* token): main converter");
   InDet::TRT_DriftCircleContainer* p_collection(nullptr);
   if( compareClassGuid(token, p2_guid) ) {

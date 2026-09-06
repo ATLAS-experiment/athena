@@ -6,6 +6,7 @@
 
 #include "AthenaBaseComps/AthMessaging.h"
 #include "StoreGate/WriteHandleKey.h"
+#include "StoreGate/ReadHandleKey.h"
 #include "ActsGPUEvent/TracccSiliconCellCollection.h"
 #include "ActsGPUEvent/TracccDetectorConditionsDescription.h"
 #include "AthDeviceInterfaces/IMemoryResourceTool.h"
@@ -14,13 +15,13 @@
 #include "InDetIdentifier/SCT_ID.h"
 #include "Identifier/Identifier.h"
 #include "GaudiKernel/ToolHandle.h"
-
-#include "ActsGPUInterfaces/IDeviceDetectorDescriptionProviderSvc.h"
+#include "ActsGPUEvent/GeometryIdMapping.h"
 
 #include <traccc/io/csv/cell.hpp>
 
 #include <unordered_map>
 #include <cstdint>
+#include <bitset>
 
 class AthReentrantAlgorithm;
 
@@ -55,7 +56,8 @@ struct RDOtoTracccCellConverterCommons : public AthMessaging
   ToolHandle<AthDevice::IMemoryResourceTool> m_deviceMR;
   ToolHandle<AthDevice::ICopiesTool> m_copiesTool;
 
-  ServiceHandle<ActsTrk::IDeviceDetectorDescriptionProviderSvc> m_detDescSvc;
+  Gaudi::Property<std::string> m_geoIdMappingObjectName;
+  const ActsTrk::GeometryIdMapping* m_geoIdMapping{nullptr};
   Gaudi::Property<std::string> m_hostCondObjectName;
   const traccc::detector_conditions_description::host* m_hostCond{nullptr};
 
@@ -75,6 +77,14 @@ struct RDOtoTracccCellConverterCommons : public AthMessaging
       EventContext const & ctx
     , traccc::edm::silicon_cell_collection::buffer const & cells
   ) const;
+
+  StringProperty m_stripRDOTimeBinStr;
+  int m_stripRDOTimeBinBits[3]{-1, -1, -1};
+  // decode the property string into bits
+  StatusCode decodeTimeBins();
+  // check if the time pattern matches the requirements of strip RDO "timeBins"
+  bool passTiming(const std::bitset<3>& timePattern) const;
+  StatusCode buildDetrayMaps() const;
 };
 
 void sort_traccc_soa(

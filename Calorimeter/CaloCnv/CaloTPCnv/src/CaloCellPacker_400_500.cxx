@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -19,7 +19,6 @@
 #include "CaloDetDescr/CaloDetDescrManager.h"
 #include "AthenaKernel/errorcheck.h"
 #include "AthenaKernel/ThinningDecisionBase.h"
-#include "CxxUtils/AthUnlikelyMacros.h"
 #include "GaudiKernel/SystemOfUnits.h"
 
 #include "StoreGate/ReadCondHandleKey.h"
@@ -675,7 +674,7 @@ double CaloCellPacker_400_500::unpack_time
   // Unpack to a float.
   int underflow;
   double time = pars.m_logat_field.out (data, underflow);
-  if (ATH_UNLIKELY(underflow))
+  if (underflow) [[unlikely]]
     return 0;
 
   // Exponentiate, and restore the sign.

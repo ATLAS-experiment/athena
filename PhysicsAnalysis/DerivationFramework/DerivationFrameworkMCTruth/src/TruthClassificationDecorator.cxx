@@ -63,12 +63,11 @@ StatusCode DerivationFramework::TruthClassificationDecorator::addBranches(const 
     SG::WriteDecorHandle<xAOD::TruthParticleContainer, unsigned int> classificationDecorator(m_classificationDecoratorKey, ctx);
 
     for (unsigned int i=0; i<nParticles; ++i) {
-        MCTruthPartClassifier::Info info;
-        auto classification = m_classifier->particleTruthClassifier((*truthParticles)[i], &info);
-        unsigned int particleOutCome = info.particleOutCome;
+        unsigned int particleType;
+        unsigned int particleOrigin;
+        unsigned int particleOutCome;
+        std::tie(particleType, particleOrigin, std::ignore, particleOutCome) =  m_classifier->particleTruthClassifier_full((*truthParticles)[i]);
         unsigned int result = (unsigned int)( (*truthParticles)[i] ? std::get<0>(MCTruthPartClassifier::defOrigOfParticle((*truthParticles)[i])) : 0 );
-        unsigned int particleType = classification.first;
-        unsigned int particleOrigin = classification.second;
         typeDecorator(*((*truthParticles)[i])) = particleType;
         originDecorator(*((*truthParticles)[i])) = particleOrigin;
         outcomeDecorator(*((*truthParticles)[i])) = particleOutCome;

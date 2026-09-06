@@ -15,7 +15,6 @@
 #include "StorageSvc/DbOption.h"
 #include "StorageSvc/DbColumn.h"
 #include "StorageSvc/DbTypeInfo.h"
-#include "StorageSvc/DbReflex.h"
 
 // Local implementation files
 #include "RootDatabase.h"
@@ -30,6 +29,7 @@
 
 #include "GaudiKernel/StatusCode.h"
 #include "AthenaKernel/errorcheck.h"
+#include "DataModelRoot/RootType.h"
 
 #include <algorithm>
 
@@ -108,7 +108,7 @@ StatusCode RootKeyContainer::next(Token::OID_t& linkH) {
     const TKey* key = (TKey*)m_dir->GetListOfKeys()->FindObject(txt);
     if ( key )    {
       const char* class_name = key->GetClassName();
-      const DbTypeInfo* typ = m_dbH.objectShape( DbReflex::forTypeName(class_name) );
+      const DbTypeInfo* typ = m_dbH.objectShape( RootType(class_name) );
       if ( typ )  {
         return SUCCESS;
       }

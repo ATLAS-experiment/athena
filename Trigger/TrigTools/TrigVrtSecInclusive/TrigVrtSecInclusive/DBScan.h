@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef TRIGTOOLS_TRIG_VSI_DBSCAN
 #define TRIGTOOLS_TRIG_VSI_DBSCAN
@@ -81,7 +81,7 @@ class DBScan {
 */
 template<typename pointType>
 DBScan<pointType>::DBScan( const std::unordered_set<pointType>& set, RegionFunc regionQuery):
-m_regionQuery(regionQuery)
+m_regionQuery(std::move(regionQuery))
 {
    m_pointsVisited.clear();
    for (const auto& point : set) {

@@ -10,8 +10,11 @@
 
 #include "ActsCalibrators/xAODUncalibMeasSurfAcc.h"
 #include "ActsCalibrators/xAODUncalibMeasCalibrator.h"
-#include "StoreGate/WriteDecorHandle.h"
+
+#include "xAODMuonViews/ContainerDecorator.h"
 namespace MuonCombinedR4{
+    using namespace Acts::UnitLiterals;
+
     StatusCode StandaloneMuonTagAlg::initialize(){
         ATH_CHECK(m_msTrackKey.initialize());
 
@@ -117,8 +120,8 @@ namespace MuonCombinedR4{
   
             SG::WriteHandle writeHandle{m_trackAtIpKey, ctx};
             ATH_CHECK(writeHandle.record(std::move(ctc)));
-            SG::WriteDecorHandle<xAOD::TrackParticleContainer,
-                                ElementLink<ActsTrk::TrackContainer>> dec_trackLink{m_trackAtIpActsLinkKey, ctx};
+            xAOD::ContainerDecorator dec_trackLink{m_trackAtIpActsLinkKey, ctx, 
+                                                   ElementLink<ActsTrk::TrackContainer>{}};
             for (std::size_t trk = 0 ; trk < dataShip.msTracksAtIP->size(); ++trk) {
                 const ActsTrk::TrackContainer::ConstTrackProxy convMe = writeHandle->getTrack(trk);
                 xAOD::TrackParticle* convTo = dataShip.msTracksAtIP->at(trk);

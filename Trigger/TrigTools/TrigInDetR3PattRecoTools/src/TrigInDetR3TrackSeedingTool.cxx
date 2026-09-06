@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "InDetIdentifier/SCT_ID.h"
@@ -245,7 +245,8 @@ TrigInDetTrackSeedingResult TrigInDetR3TrackSeedingTool::findSeeds(const IRoiDes
     std::sort(vSeeds.begin(), vSeeds.end(), GNNR3_Edge::CompareLevel());
 
     //backtracking
-
+    //Local variable tFilter uses 320048 bytes of stack space
+    //coverity[STACK_USE]
     TrigFTF_GNNR3_TrackingFilter tFilter(m_layerGeometry, edgeStorage);
 
     output.reserve(vSeeds.size());

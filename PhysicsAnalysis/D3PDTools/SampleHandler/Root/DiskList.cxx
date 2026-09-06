@@ -10,8 +10,8 @@
 
 #include <SampleHandler/DiskList.h>
 
+#include <stdexcept>
 #include <RootCoreUtils/Assert.h>
-#include <RootCoreUtils/ThrowMsg.h>
 
 //
 // method implementations
@@ -58,9 +58,9 @@ namespace SH
 	m_state = S_DONE;
       return m_state == S_VALID;
     case S_DONE:
-      RCU_THROW_MSG ("already finished processing list");
+      throw std::runtime_error ("DiskList::next: already finished processing list");
     case S_BROKEN:
-      RCU_THROW_MSG ("list is in error state");
+      throw std::runtime_error ("DiskList::next: list is in error state");
     };
     return false; // compiler dummy
   }
@@ -96,6 +96,16 @@ namespace SH
     RCU_READ_INVARIANT (this);
     RCU_REQUIRE2_SOFT (m_state == S_VALID, "getNext() has not been called successfully");
     return doOpenDir();
+  }
+
+
+
+  std::unique_ptr<DiskList> DiskList ::
+  openDirUnique () const
+  {
+    RCU_READ_INVARIANT (this);
+    RCU_REQUIRE2_SOFT (m_state == S_VALID, "getNext() has not been called successfully");
+    return std::unique_ptr<DiskList> (doOpenDir());
   }
 
 

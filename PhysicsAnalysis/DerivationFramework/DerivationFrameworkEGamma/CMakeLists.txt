@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( DerivationFrameworkEGamma )
@@ -10,7 +10,7 @@ find_package( ROOT COMPONENTS Core MathCore )
 atlas_add_component( DerivationFrameworkEGamma
                      src/*.cxx src/components/*.cxx
                      INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
-                     LINK_LIBRARIES ${ROOT_LIBRARIES} AsgTools AthContainers AthenaBaseComps CaloCalibHitRecLib DerivationFrameworkInterfaces EgammaAnalysisHelpersLib EgammaAnalysisInterfacesLib ExpressionEvaluationLib egammaInterfacesLib GaudiKernel MCTruthClassifierLib PATCoreLib PhotonVertexSelectionLib TrkToolInterfaces xAODBase xAODCaloEvent xAODEgamma xAODMissingET xAODMuon xAODTracking xAODTruth TruthUtils egammaCaloUtils)
+                     LINK_LIBRARIES ${ROOT_LIBRARIES} AsgTools AthContainers AthenaBaseComps CaloCalibHitRecLib DerivationFrameworkInterfaces EgammaAnalysisHelpersLib EgammaAnalysisInterfacesLib ExpressionEvaluationLib egammaInterfacesLib GaudiKernel MCTruthClassifierLib PATCoreLib PATInterfaces PhotonVertexSelectionLib TrkToolInterfaces xAODBase xAODCaloEvent xAODEgamma xAODMissingET xAODMuon xAODTracking xAODTruth TruthUtils egammaCaloUtils)
 
 # Install files from the package:
 atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )

@@ -783,7 +783,7 @@ StatusCode InDet::DumpObjects::execute(const EventContext& ctx) {
           // find barcodes of the truth particles
           auto pos = sdoCollection->find(rdoID);
           if (pos != sdoCollection->end()) {
-            for (auto deposit : pos->second.getdeposits()) {
+            for (const auto & deposit : pos->second.getdeposits()) {
               const HepMcParticleLink &particleLink = deposit.first;
               std::pair<int, int> barcode(particleLink.eventIndex(), particleLink.barcode());
               // note that we are not filling the map allTruthParticles here - OK, we are not using this map for
@@ -893,7 +893,7 @@ StatusCode InDet::DumpObjects::execute(const EventContext& ctx) {
           m_CLnorm_x[m_nCL] = norm_x;
           m_CLnorm_y[m_nCL] = norm_y;
           m_CLnorm_z[m_nCL] = norm_z;
-          (*m_CLlocal_cov).push_back(v_local_cov);
+          (*m_CLlocal_cov).push_back(std::move(v_local_cov));
         }
 
         m_nCL++;
@@ -1094,10 +1094,10 @@ StatusCode InDet::DumpObjects::execute(const EventContext& ctx) {
 				       sp->topStripCenter().data() +
 				       sp->topStripCenter().size());
 
-	(*m_SPtopStripDirection).push_back(topstripDir);
-	(*m_SPbottomStripDirection).push_back(botstripDir);
-	(*m_SPstripCenterDistance).push_back(DstripCnt);
-	(*m_SPtopStripCenterPosition).push_back(topstripCnt);
+	(*m_SPtopStripDirection).push_back(std:: move(topstripDir));
+	(*m_SPbottomStripDirection).push_back(std::move(botstripDir));
+	(*m_SPstripCenterDistance).push_back(std::move(DstripCnt));
+	(*m_SPtopStripCenterPosition).push_back(std::move(topstripCnt));
 
       }
 

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -157,16 +157,25 @@ InDetPhysValTruthDecoratorAlg::execute(const EventContext &ctx) const {
   m_nMissingTruthParticles += missing_truth_particle;
 
   if (not float_decor.empty()) {
-     SG::ReadDecorHandle<xAOD::EventInfo, float> beamPosX(m_beamSpotDecoKey[0], ctx);
-     SG::ReadDecorHandle<xAOD::EventInfo, float> beamPosY(m_beamSpotDecoKey[1], ctx);
-     SG::ReadDecorHandle<xAOD::EventInfo, float> beamPosZ(m_beamSpotDecoKey[2], ctx);
-     Amg::Vector3D beamPos = Amg::Vector3D(beamPosX(0), beamPosY(0), beamPosZ(0));
-     for (const xAOD::TruthParticle *truth_particle : *ptruth) {
-        decorateTruth(*truth_particle, float_decor, beamPos, tp_clustercount);
-     }
-     if (!decorateTruthTime(float_decor)) {
-        return StatusCode::FAILURE;
-     }
+    Amg::Vector3D perigeePos;
+    const xAOD::TruthVertex* truthVtx = getTruthHSEvent()->signalProcessVertex();
+    if (m_useTruthPVAsPerigee && truthVtx) {
+       perigeePos = Amg::Vector3D(truthVtx->x(), truthVtx->y(), truthVtx->z());
+    }
+    else {
+       SG::ReadDecorHandle<xAOD::EventInfo, float> beamPosX(m_beamSpotDecoKey[0], ctx);
+       SG::ReadDecorHandle<xAOD::EventInfo, float> beamPosY(m_beamSpotDecoKey[1], ctx);
+       SG::ReadDecorHandle<xAOD::EventInfo, float> beamPosZ(m_beamSpotDecoKey[2], ctx);
+       perigeePos = Amg::Vector3D(beamPosX(0), beamPosY(0), beamPosZ(0));
+    }
+    for (const xAOD::TruthParticle *truth_particle : *ptruth) {
+       decorateTruth(*truth_particle, float_decor, perigeePos, tp_clustercount);
+    }
+    if (m_decoTime) {
+      if (!decorateTruthTime(float_decor)) {
+       return StatusCode::FAILURE;
+      }
+    }
   }
 
   return StatusCode::SUCCESS;
@@ -175,7 +184,7 @@ InDetPhysValTruthDecoratorAlg::execute(const EventContext &ctx) const {
 bool
 InDetPhysValTruthDecoratorAlg::decorateTruth(const xAOD::TruthParticle& particle,
                                              std::vector<IDPVM::OptionalDecoration<xAOD::TruthParticleContainer, float> > &float_decor,
-                                             const Amg::Vector3D& beamPos,
+                                             const Amg::Vector3D& perigeePos,
                                              const std::vector<std::array<uint16_t,kNClusterTypes> > &counts) const {
   ATH_MSG_VERBOSE("Decorate truth with d0 etc");
   if (particle.isNeutral()) {
@@ -218,7 +227,7 @@ InDetPhysValTruthDecoratorAlg::decorateTruth(const xAOD::TruthParticle& particle
   // delete ptruthVertex;ptruthVertex=0;
   const Trk::CurvilinearParameters cParameters(position, momentum, charge);
 
-  Trk::PerigeeSurface persf(beamPos);
+  Trk::PerigeeSurface persf(perigeePos);
 
   std::unique_ptr<const Trk::TrackParameters> tP ( m_extrapolator->extrapolate(ctx,
                                                                                cParameters, 
@@ -249,23 +258,38 @@ InDetPhysValTruthDecoratorAlg::decorateTruth(const xAOD::TruthParticle& particle
   }
 }
 
+const xAOD::TruthEvent*
+InDetPhysValTruthDecoratorAlg::getTruthHSEvent() const {
+  const EventContext& ctx = Gaudi::Hive::currentContext();
+  const xAOD::TruthEvent* event = nullptr;
+  if (!m_truthEventName.key().empty()) {
+    ATH_MSG_VERBOSE("Getting TruthEventContainer");
+    SG::ReadHandle<xAOD::TruthEventContainer> truthEventContainer(m_truthEventName, ctx);
+    if (truthEventContainer.isPresent()) {
+      event = (truthEventContainer.isValid()) ? truthEventContainer->at(0) : nullptr;
+    }
+    else {
+      ATH_MSG_WARNING("TruthEventContainer name was specified, but no container is present");
+    }
+  }
+  else {
+    ATH_MSG_ERROR("No valid TruthEvent!");
+  }
+  return event;
+}
+
 bool
 InDetPhysValTruthDecoratorAlg::decorateTruthTime(std::vector<IDPVM::OptionalDecoration<xAOD::TruthParticleContainer, float>>& float_decor) const {
 
   const EventContext& ctx = Gaudi::Hive::currentContext();
 
+  const xAOD::TruthEvent* event = nullptr;
   const xAOD::TruthVertex* truthVtx = nullptr;
   float truthTime;
 
   // First HS event
   if (!m_truthEventName.key().empty()) {
-    ATH_MSG_VERBOSE("Getting TruthEventContainer");
-    SG::ReadHandle<xAOD::TruthEventContainer> truthEventContainer(m_truthEventName, ctx);
-    if (!truthEventContainer.isPresent()) {
-      ATH_MSG_WARNING("TruthEventContainer name was specified, but no container is present");
-      return true;
-    }
-    const xAOD::TruthEvent* event = (truthEventContainer.isValid()) ? truthEventContainer->at(0) : nullptr;
+    event = getTruthHSEvent();
     if (event) {
       truthVtx = event->signalProcessVertex();
       truthTime = (truthVtx) ? truthVtx->t() / Gaudi::Units::c_light : -9999.;
@@ -275,13 +299,9 @@ InDetPhysValTruthDecoratorAlg::decorateTruthTime(std::vector<IDPVM::OptionalDeco
         }
       }
     }
-    else {
-      ATH_MSG_ERROR("No valid TruthEvent!");
-      return false;
-    }
   }
 
-   // Then PU events
+  // Then PU events
   if (!m_truthPileupEventName.key().empty()) {
     ATH_MSG_VERBOSE("Getting TruthPileupEventContainer");
     SG::ReadHandle<xAOD::TruthPileupEventContainer> truthPileupEventContainer(m_truthPileupEventName, ctx);

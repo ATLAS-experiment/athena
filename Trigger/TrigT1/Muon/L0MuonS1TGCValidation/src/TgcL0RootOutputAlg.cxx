@@ -65,6 +65,13 @@ void TgcL0RootOutputAlg::copyToBranches(
   m_truthMatchedCandidateIndex = input.truth.matchedCandidateIndex;
   m_truthMatchMeanDeltaR = input.truth.matchMeanDeltaR;
   m_truthUnmatchedReason = input.truth.unmatchedReason;
+  m_truthFinalCandidateMatched = input.truth.finalCandidateMatched;
+  m_truthMatchedFinalCandidateIndex =
+      input.truth.matchedFinalCandidateIndex;
+  m_truthFinalCandidateMatchDeltaR =
+      input.truth.finalCandidateMatchDeltaR;
+  m_truthFinalCandidateUnmatchedReason =
+      input.truth.finalCandidateUnmatchedReason;
   m_truthWireSegmentMatched = input.truth.wireSegmentMatched;
   m_truthStripSegmentMatched = input.truth.stripSegmentMatched;
   m_truthMatchedWireSegmentIndex = input.truth.matchedWireSegmentIndex;
@@ -99,7 +106,44 @@ void TgcL0RootOutputAlg::copyToBranches(
   m_candidatePhi = input.candidates.phi;
   m_candidateDeltaTheta = input.candidates.deltaTheta;
   m_candidateDeltaPhi = input.candidates.deltaPhi;
+  m_candidatePt = input.candidates.pt;
+  m_candidateThreshold = input.candidates.threshold;
+  m_candidateCharge = input.candidates.charge;
+  m_candidateGoodMagneticField = input.candidates.goodMagneticField;
   m_candidateTruthIndex = input.candidates.truthIndex;
+
+  m_finalCandidateSourceCandidateIndex =
+      input.finalCandidates.sourceCandidateIndex;
+  m_finalCandidateReferenceStation =
+      input.finalCandidates.referenceStation;
+  m_finalCandidateSubdetectorId = input.finalCandidates.subdetectorId;
+  m_finalCandidateTriggerSector = input.finalCandidates.triggerSector;
+  m_finalCandidateBcTag = input.finalCandidates.bcTag;
+  m_finalCandidateTcId = input.finalCandidates.tcId;
+  m_finalCandidateRawEta = input.finalCandidates.rawEta;
+  m_finalCandidateRawPhi = input.finalCandidates.rawPhi;
+  m_finalCandidateEta = input.finalCandidates.eta;
+  m_finalCandidatePhi = input.finalCandidates.phi;
+  m_finalCandidatePtCode = input.finalCandidates.ptCode;
+  m_finalCandidatePt = input.finalCandidates.pt;
+  m_finalCandidateThreshold = input.finalCandidates.threshold;
+  m_finalCandidateCharge = input.finalCandidates.charge;
+  m_finalCandidateInnerCoincidence =
+      input.finalCandidates.innerCoincidence;
+  m_finalCandidateGoodMagneticField =
+      input.finalCandidates.goodMagneticField;
+  m_finalCandidateTruthIndex = input.finalCandidates.truthIndex;
+  m_finalCandidateTruthMatchDeltaR =
+      input.finalCandidates.truthMatchDeltaR;
+
+  m_sectorLogicInputCandidateIndex =
+      input.sectorLogic.inputCandidateIndex;
+  m_sectorLogicCandWord = input.sectorLogic.candWord;
+  m_sectorLogicCandExtraWord = input.sectorLogic.candExtraWord;
+  m_sectorLogicBoardId = input.sectorLogic.boardId;
+  m_sectorLogicFiberId = input.sectorLogic.fiberId;
+  m_sectorLogicBcidOffset = input.sectorLogic.bcidOffset;
+  m_sectorLogicVeto = input.sectorLogic.veto;
 }
 
 }  // namespace L0Muon

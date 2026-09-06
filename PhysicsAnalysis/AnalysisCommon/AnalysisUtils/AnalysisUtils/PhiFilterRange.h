@@ -15,9 +15,6 @@
  *  to take their filtering decisions. It is a specialisation of FilterRange
  *  for the phi angles. It enforces the ATLAS policy for phi angles :
  *  \f$ \phi \in [-\pi,\pi[ \f$
- *
- *  Internally it uses the Boost class interval but maybe one could use a
- *  SEAL class (FML/RangeSet or FML/Bound)
  */
 
 // STL includes

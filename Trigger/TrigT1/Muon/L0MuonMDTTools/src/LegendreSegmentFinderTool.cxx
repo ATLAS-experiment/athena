@@ -35,6 +35,7 @@
 #include "LegendreSegmentFinderTool.h"
 #include "L0MuonMDTTools/L0MDTSegment.h"
 #include "MuonReadoutGeometryR4/MdtReadoutElement.h"
+#include "CxxUtils/trapping_fp.h"
 #include <algorithm>
 #include <cmath>
 #include <numeric>
@@ -239,6 +240,9 @@ namespace L0MDT {
       float thetaMin,
       float rMin) const {
 
+    // Tell clang that FP operations may trap.
+    CXXUTILS_TRAPPING_FP;
+
     FitResult out;
     if (!maxBin.valid) return out;
 
@@ -397,4 +401,4 @@ namespace L0MDT {
   }
 
 } // namespace L0MDT
- 
+

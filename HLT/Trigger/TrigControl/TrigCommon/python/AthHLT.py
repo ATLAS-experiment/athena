@@ -102,6 +102,15 @@ def getCACfg(jopath):
    return getattr(module, fnc_name)
 
 
+## Command line arguments not parsed by athenaEF, i.e. Athena flags.
+unparsedArguments = []
+def fillFromUnparsedArgs(flags):
+   """Re-apply the flags given on the athenaEF command line."""
+
+   for flag_arg in unparsedArguments:
+      flags.fillFromString(flag_arg)
+
+
 def reload_from_json(filename, suppress_args=[], jobOptions=None):
    """Re-launch athenaHLT from the given json file. Optionally suppress
    the list of command line args (e.g. flags).

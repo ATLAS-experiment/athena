@@ -28,6 +28,8 @@
 #include <Acts/Surfaces/LineBounds.hpp>
 #include <Acts/Material/HomogeneousSurfaceMaterial.hpp>
 #include <Acts/Material/ProtoSurfaceMaterial.hpp>
+#include <Acts/Utilities/AxisSpec.hpp>
+#include <Acts/Utilities/MultiAxisSpec.hpp>
 #include <Acts/Surfaces/RectangleBounds.hpp>
 
 #include <MuonReadoutGeometryR4/Chamber.h>
@@ -405,14 +407,18 @@ MuonBlueprintNodeBuilder::BluePrintSurfPairs_t
           if (m_alignableVolumes){
               element.addPlacement(std::move(placement));
           }
-          mwCfg.binning = {{{Acts::AxisDirection::AxisY, Acts::AxisBoundaryType::Bound,
-                            -parameters.halfY,
-                            parameters.halfY,
-                            static_cast<std::size_t>(std::lround(2 * parameters.halfY / parameters.tubePitch))}, 2u},
-                            {{Acts::AxisDirection::AxisZ, Acts::AxisBoundaryType::Bound,
+          mwCfg.binning = {{Acts::AxisSpec::Equidistant(
+                              static_cast<std::size_t>(std::lround(2 * parameters.halfY / parameters.tubePitch)),
+                              -parameters.halfY,
+                              parameters.halfY,
+                              Acts::AxisBoundaryType::Bound,
+                              Acts::AxisDirection::AxisY), 2u},
+                            {Acts::AxisSpec::Equidistant(
+                              static_cast<std::size_t>(std::lround(2 * parameters.halfHeight / parameters.tubePitch)),
                               -parameters.halfHeight,
                               parameters.halfHeight,
-                              static_cast<std::size_t>(std::lround(2 * parameters.halfHeight / parameters.tubePitch))}, 1u}};
+                              Acts::AxisBoundaryType::Bound,
+                              Acts::AxisDirection::AxisZ), 1u}};
           Acts::MultiWireVolumeBuilder mdtBuilder{mwCfg};
           std::unique_ptr<Acts::TrackingVolume> mdtVolume = mdtBuilder.buildVolume();
 
@@ -667,24 +673,27 @@ std::shared_ptr<Acts::ISurfaceMaterial>
       return std::make_shared<Acts::HomogeneousSurfaceMaterial>();
     }
 
-    std::vector<Acts::DirectedProtoAxis> pmBinning = {};
+    // the ranges and boundary types are left to the surface the material ends
+    // up on, they are resolved from its bounds during material mapping
+    auto protoMaterial = [](Acts::AxisDirection dir1, std::size_t bins1,
+                            Acts::AxisDirection dir2, std::size_t bins2) {
+      return std::make_shared<Acts::ProtoGridSurfaceMaterial>(
+          Acts::MultiAxisSpec2D({Acts::AxisSpec::DeferredEquidistant(bins1, dir1),
+                                 Acts::AxisSpec::DeferredEquidistant(bins2, dir2)}));
+    };
 
     switch (bounds.type()) {
        using enum Acts::SurfaceBounds::BoundsType;
       case eCylinder: {
-          pmBinning = {{Acts::AxisDirection::AxisZ, Acts::AxisBoundaryType::Bound, nBins1},
-                       {Acts::AxisDirection::AxisRPhi, Acts::AxisBoundaryType::Bound, nBins2}};        
-          break;
+          return protoMaterial(Acts::AxisDirection::AxisZ, nBins1,
+                               Acts::AxisDirection::AxisRPhi, nBins2);
       } case eDisc: {
-          pmBinning = {{Acts::AxisDirection::AxisR, Acts::AxisBoundaryType::Bound, nBins1},
-                       {Acts::AxisDirection::AxisPhi, Acts::AxisBoundaryType::Bound, nBins2}};
-      
-          break;
+          return protoMaterial(Acts::AxisDirection::AxisR, nBins1,
+                               Acts::AxisDirection::AxisPhi, nBins2);
       } default:
         ATH_MSG_ERROR("Unsupoorted type "<<bounds<<".");
         return nullptr;
     }
-    return std::make_shared<Acts::ProtoGridSurfaceMaterial>(pmBinning);
 }
 std::pair<std::size_t, std::size_t> 
     MuonBlueprintNodeBuilder::getMaterialBins(const ChIndex chIdx) const {

@@ -44,6 +44,7 @@ atlas_add_library( BPhysToolsLib
 		   xAODTracking
 		   xAODBPhysLib
 		   AsgTools
+                   CxxUtils
        ${extra_libs}
 		   xAODEventInfo
 		   )
@@ -56,6 +57,7 @@ atlas_add_component( BPhysTools
 		                 xAODTracking
 		                 xAODBPhysLib
 		                 AsgTools
+                     CxxUtils
                      ${extra_libs}
                      BPhysToolsLib
 		                 xAODEventInfo

@@ -1,12 +1,12 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #include "MeasurementMarkerAlg.h"
 
 #include "StoreGate/ReadDecorHandle.h"
 #include "StoreGate/ReadHandle.h"
 #include "StoreGate/WriteDecorHandle.h"
-#include "DerivationFrameworkMuons/Utils.h"
+#include "xAODMuonViews/ContainerDecorator.h"
 
 namespace MuonR4{
 
@@ -17,11 +17,10 @@ namespace MuonR4{
     using PrdLink_t = ElementLink<PrdCont_t>;
     using PrdLinkVec_t = std::vector<PrdLink_t>;
 
-    using MarkerHandle_t = SG::WriteDecorHandle<PrdCont_t, bool>;
-    using LinkHandle_t = SG::WriteDecorHandle<PrdCont_t, SegLinkVec_t>;
+    using MarkerHandle_t = xAOD::ContainerDecorator<PrdCont_t, std::uint8_t>;
+    using LinkHandle_t = xAOD::ContainerDecorator<PrdCont_t, SegLinkVec_t>;
     
     using WriteDecorKey_t = SG::WriteDecorHandleKey<xAOD::UncalibratedMeasurementContainer>;
-    using namespace DerivationFramework;
 
     StatusCode MeasurementMarkerAlg::initialize() {
         ATH_CHECK(m_segKey.initialize());
@@ -47,7 +46,7 @@ namespace MuonR4{
         const xAOD::MuonSegmentContainer* segments{nullptr};
         ATH_CHECK(SG::get(segments, m_segKey, ctx));
         SG::ReadDecorHandle<xAOD::MuonSegmentContainer, PrdLinkVec_t> prdLinks{m_prdLinkKey, ctx};
-        SG::ReadDecorHandle<xAOD::MuonSegmentContainer, bool> readDecor{m_readMarkKey, ctx};
+        SG::ReadDecorHandle<xAOD::MuonSegmentContainer, std::uint8_t> readDecor{m_readMarkKey, ctx};
         /// Ensure that the decoration is actually written
 
         std::unordered_map<const SG::AuxVectorData*, MarkerHandle_t> writeDecorMap{};
@@ -55,13 +54,13 @@ namespace MuonR4{
         for (const WriteDecorKey_t& decorKey : m_writeMarkKeys) {
             const xAOD::UncalibratedMeasurementContainer* measCont{nullptr};
             ATH_CHECK(SG::get(measCont, decorKey.contHandleKey(), ctx));
-            writeDecorMap.emplace(std::make_pair(measCont,  makeHandle(ctx, decorKey, false)));
+            writeDecorMap.emplace(std::make_pair(measCont,  MarkerHandle_t{decorKey, ctx}));
         }
 
         for (const WriteDecorKey_t& key : m_writeSegLinkKeys) {
             const xAOD::UncalibratedMeasurementContainer* measCont{nullptr};
             ATH_CHECK(SG::get(measCont, key.contHandleKey(), ctx));
-            linkDecorMap.emplace(std::make_pair(measCont,  makeHandle(ctx, key, SegLinkVec_t{})));
+            linkDecorMap.emplace(std::make_pair(measCont,  LinkHandle_t{key, ctx}));
         }
 
         for (const xAOD::MuonSegment* seg : *segments) {

@@ -3,10 +3,10 @@
  * Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration.
  */
 /**
- * @file CxxUtils/test/range_with_at_conv.cxx
+ * @file CxxUtils/test/range_with_conv_test.cxx
  * @author scott snyder <snyder@bnl.gov>
  * @date Jun, 2024
- * @brief Test range_with_cont.
+ * @brief Test range_with_conv.
  */
 
 

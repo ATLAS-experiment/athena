@@ -30,10 +30,10 @@ TrigSpacePointCounts* TrigSpacePointCountsCnv::createTransient(const Token* toke
 
   mlog << MSG::DEBUG << "TrigSpacePointCountsCnv::createTransient " << endmsg;
 
-  static const pool::Guid p3_guid("43E61EDF-2902-4F64-8A89-F625DB7DA7CC");
-  static const pool::Guid p2_guid("3A6CFBCF-E2AE-4E3D-A965-091718A5CB9F");
-  static const pool::Guid p1_guid("8BF48F79-C6C2-4AA7-8180-16BC6C39280F");
-  static const pool::Guid p0_guid("1BCAD9FD-DAFE-4E50-9A37-C75E822E6D02");
+  static const Guid p3_guid("43E61EDF-2902-4F64-8A89-F625DB7DA7CC");
+  static const Guid p2_guid("3A6CFBCF-E2AE-4E3D-A965-091718A5CB9F");
+  static const Guid p1_guid("8BF48F79-C6C2-4AA7-8180-16BC6C39280F");
+  static const Guid p0_guid("1BCAD9FD-DAFE-4E50-9A37-C75E822E6D02");
  
   if(compareClassGuid(token, p3_guid)) {
     std::unique_ptr<TrigSpacePointCounts_p3 > pers_ptr( poolReadObject< TrigSpacePointCounts_p3 >(token) );

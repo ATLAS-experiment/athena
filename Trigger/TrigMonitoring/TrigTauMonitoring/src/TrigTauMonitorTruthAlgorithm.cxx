@@ -67,8 +67,8 @@ std::pair<std::vector<std::shared_ptr<xAOD::TruthParticle>>, std::vector<std::sh
             if(pt < threshold || std::abs(eta) > 2.47) continue;
 
 	    int nTracks = acc_ntracks(*xTruthTau);
-            if(nTracks == 1) true_taus_1p.push_back(xTruthTau);
-            else if(nTracks == 3) true_taus_3p.push_back(xTruthTau);
+            if(nTracks == 1) true_taus_1p.push_back(std::move(xTruthTau));
+            else if(nTracks == 3) true_taus_3p.push_back(std::move(xTruthTau));
         }
     }
 
@@ -118,7 +118,7 @@ StatusCode TrigTauMonitorTruthAlgorithm::examineTruthTau(const std::shared_ptr<x
     acc_phivis(*xTruthTau) = VisSumTLV.Phi();
     acc_mvis(*xTruthTau) = VisSumTLV.M();
 
-    if(acc_childChargeSum(*xTruthTau) != xTruthTau->charge() || acc_ntracks(*xTruthTau)%2 == 0) { 
+    if(decayvtx && (acc_childChargeSum(*xTruthTau) != xTruthTau->charge() || acc_ntracks(*xTruthTau)%2 == 0)) { 
         ATH_MSG_WARNING("Strange tau: charge " << acc_childChargeSum(*xTruthTau) << " and " << acc_ntracks(*xTruthTau)  << " tracks");
         const std::size_t nChildren = decayvtx->nOutgoingParticles();
         for(std::size_t iChild = 0; iChild != nChildren; ++iChild) {
@@ -168,7 +168,7 @@ void TrigTauMonitorTruthAlgorithm::fillTruthEfficiency(const std::vector<const x
     
     const TrigTauInfo& info = getTrigInfo(trigger);
 
-    auto monGroup = getGroup(trigger+"_Truth_Efficiency_"+nProng);
+    const auto &monGroup = getGroup(trigger+"_Truth_Efficiency_"+nProng);
 
     // Truth Tau + HLT Tau / Truth Tau
     auto pt_vis = Monitored::Scalar<float>("pt_vis", 0.0);
@@ -179,9 +179,9 @@ void TrigTauMonitorTruthAlgorithm::fillTruthEfficiency(const std::vector<const x
 
     bool hlt_fires = m_trigDecTool->isPassed(trigger, TrigDefs::Physics | TrigDefs::allowResurrectedDecision);
 
-    static const SG::AuxElement::ConstAccessor<double> acc_ptvis("pt_vis");
-    static const SG::AuxElement::ConstAccessor<double> acc_etavis("eta_vis");
-    static const SG::AuxElement::ConstAccessor<double> acc_phivis("phi_vis");
+    static const SG::ConstAccessor<double> acc_ptvis("pt_vis");
+    static const SG::ConstAccessor<double> acc_etavis("eta_vis");
+    static const SG::ConstAccessor<double> acc_phivis("phi_vis");
 
     for(const std::shared_ptr<xAOD::TruthParticle>& true_tau : true_taus) {
         pt_vis = acc_ptvis(*true_tau)/Gaudi::Units::GeV;
@@ -208,7 +208,7 @@ void TrigTauMonitorTruthAlgorithm::fillTruthVars(const std::vector<const xAOD::T
 {
     ATH_MSG_DEBUG("Fill Truth variables: " << trigger);
 
-    auto monGroup = getGroup(trigger+"_TruthVars_"+nProng);
+    const auto & monGroup = getGroup(trigger+"_TruthVars_"+nProng);
 
     std::vector<float> ratio, ptvis, etavis, phivis, mvis;
 
@@ -220,16 +220,12 @@ void TrigTauMonitorTruthAlgorithm::fillTruthVars(const std::vector<const xAOD::T
 
     float matchedRatio = -999, matchedptvis = -999, matchedetavis = 999, matchedphivis = 999, matchedmvis = -999;
 
-    static const SG::AuxElement::ConstAccessor<double> acc_ptvis("pt_vis");
-    static const SG::AuxElement::ConstAccessor<double> acc_etavis("eta_vis");
-    static const SG::AuxElement::ConstAccessor<double> acc_phivis("phi_vis");
-    static const SG::AuxElement::ConstAccessor<double> acc_mvis("mvis");
-
     // Visible-Truth Tau matching to HLT Tau
-    static const SG::ConstAccessor<double> pt_visAcc("pt_vis");
-    static const SG::ConstAccessor<double> eta_visAcc("eta_vis");
-    static const SG::ConstAccessor<double> phi_visAcc("phi_vis");
-    static const SG::ConstAccessor<double> mvisAcc("mvis");
+    static const SG::ConstAccessor<double> acc_ptvis("pt_vis");
+    static const SG::ConstAccessor<double> acc_etavis("eta_vis");
+    static const SG::ConstAccessor<double> acc_phivis("phi_vis");
+    static const SG::ConstAccessor<double> acc_mvis("mvis");
+
     for(auto& HLTTau : ef_taus) {
         for(const std::shared_ptr<xAOD::TruthParticle>& true_tau : true_taus) {
 	    if(matchTruthObjects(true_tau.get(), {HLTTau}, 0.2)) {

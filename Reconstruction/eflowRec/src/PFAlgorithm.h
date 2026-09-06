@@ -44,13 +44,13 @@ private:
   };
 
   /** List of IPFSubtractionTool, which will be executed by this algorithm */
-  ToolHandleArray<IPFSubtractionTool> m_IPFSubtractionTools;
+  ToolHandleArray<IPFSubtractionTool> m_IPFSubtractionTools{this, "SubtractionToolList", {}, "List of Private Subtraction IPFSubtractionTools"};
 
   /** List of PFBaseAlgTool, which will be executed by this algorithm */
-  ToolHandleArray<IPFBaseTool> m_IPFBaseTools;
+  ToolHandleArray<IPFBaseTool> m_IPFBaseTools{this, "BaseToolList", {}, "List of Private IPFBaseTools"};
 
   /** List of IPFUnifiedBaseTool, which will be executed by this algorithm */
-  ToolHandleArray<IPFUnifiedBaseTool> m_IPFUnifiedBaseTools;
+  ToolHandleArray<IPFUnifiedBaseTool> m_IPFUnifiedBaseTools{this, "UnifiedBaseTools", {}, "List of Private IPFUnifiedBaseTools"};
 
   /** ReadHandleKey for the eflowRecTrackContainer to be read in */
   SG::ReadHandleKey<eflowRecTrackContainer> m_eflowRecTracksReadHandleKey{

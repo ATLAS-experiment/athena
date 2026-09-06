@@ -35,7 +35,6 @@
 
 // ISF includes
 #include "ISF_Interfaces/ITruthSvc.h"
-#include "ISF_Interfaces/IGeoIDSvc.h"
 #include "ISF_Interfaces/IInputConverter.h"
 #include "ISF_Interfaces/IGenEventFilter.h"
 
@@ -108,8 +107,6 @@ private:
 
   /// Central Truth Service
   ServiceHandle<ISF::ITruthSvc> m_truthRecordSvc{this, "TruthRecordService", "ISF_TruthRecordSvc", ""};
-  /// Geo ID Service
-  ServiceHandle<ISF::IGeoIDSvc> m_geoIDSvc{this, "GeoIDSvc", "ISF_GeoIDSvc", ""};
 
   /// Verbosity settings for Geant4
   std::map<std::string,std::string> m_verbosities;

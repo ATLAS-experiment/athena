@@ -19,6 +19,8 @@
 #include "CLHEP/Units/SystemOfUnits.h"
 #include "AthenaMonitoringKernel/Monitored.h"
 
+#include "AsgTools/PropertyWrapper.h"
+
 class eflowRecCluster;
 class eflowRecTrack;
 class eflowRecClusterContainer;
@@ -53,13 +55,13 @@ public:
 private:
 
   /** The type of track position to be used for matching */
-  std::string m_trackPositionType;
+  Gaudi::Property<std::string> m_trackPositionType{this, "TrackPositionType", "EM2EtaPhi"};
   /** The type of cluster position to be used for matching */
-  std::string m_clusterPositionType;
+  Gaudi::Property<std::string> m_clusterPositionType{this, "ClusterPositionType", "GeomCenterEtaPhi"};  
   /** The type of distance measure to be used for matching */
-  std::string m_distanceType;
+  Gaudi::Property<std::string> m_distanceType{this, "DistanceType", "EtaPhiSquareSignificance"}; 
   /** The cut value on the distance measure */
-  double m_matchCut;
+  Gaudi::Property<double> m_matchCut{this, "MatchCut", 1.64*1.64};  
 
   /** The track cluster matcher to perform the actual matching */
   std::unique_ptr<PFMatch::TrackClusterMatcher> m_matcher;

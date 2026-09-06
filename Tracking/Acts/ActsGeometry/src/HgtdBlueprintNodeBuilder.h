@@ -43,7 +43,8 @@ class HgtdBlueprintNodeBuilder
 
   void addHgtdLayers(Acts::BlueprintNode& parent, int bec,
                      int layer, const std::string& name,
-                     std::vector<std::shared_ptr<Acts::Surface>>& surfaces);
+                     std::vector<std::shared_ptr<Acts::Surface>>& surfaces,
+                     bool isInnermost);
 };
 
 }  // namespace ActsTrk

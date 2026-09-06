@@ -125,8 +125,8 @@ KalmanFitterTool::FitterOptions_t
                                    const Acts::Surface* surface,
                                    detail::SourceLinkType slType) const {
   
-  
-  const auto& kfExtensions = m_kfExtensions[Acts::toUnderlying(slType)];
+  //slType = 3 is possible
+  const auto& kfExtensions = m_kfExtensions.at(Acts::toUnderlying(slType));
 
   Acts::PropagatorPlainOptions propagationOption(tgContext, mfContext);
   propagationOption.maxSteps = m_option_maxPropagationStep;

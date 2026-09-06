@@ -19,7 +19,6 @@
 #include "GeoModelInterfaces/IGeoModelSvc.h"
 #include "G4RunManagement/AtlasG4SyncEventUserInfo.h"
 #include "HitManagement/HitCollectionMap.h"
-#include "MCTruthBase/TruthStrategyManager.h"
 #include "PathResolver/PathResolver.h"
 #include "StoreGate/ReadHandle.h"
 #include "StoreGate/WriteHandle.h"
@@ -48,15 +47,9 @@ StatusCode G4RunAlg::initialize ATLAS_NOT_THREAD_SAFE ()
     parser.Read(geoFile, false);
   }
 
-  // Truth services
+  // Truth service
   ATH_CHECK(m_truthRecordSvc.retrieve());
   ATH_MSG_INFO("- Using ISF TruthRecordSvc : " << m_truthRecordSvc.typeAndName());
-  ATH_CHECK(m_geoIDSvc.retrieve());
-  ATH_MSG_INFO("- Using ISF GeoIDSvc       : " << m_geoIDSvc.typeAndName());
-
-  TruthStrategyManager& sManager = TruthStrategyManager::GetStrategyManager_nc();
-  sManager.SetISFTruthSvc(&(*m_truthRecordSvc));
-  sManager.SetISFGeoIDSvc(&(*m_geoIDSvc));
 
   // Retrieve the G4RunTool. This will start the G4 main thread
   ATH_CHECK(m_g4RunTool.retrieve());
@@ -64,7 +57,7 @@ StatusCode G4RunAlg::initialize ATLAS_NOT_THREAD_SAFE ()
   // We have to wait on the Geant4 main thread to finish initializing.
   // Wait has to be done here because Gaudi tool initialization are protected by a recursive mutex
   // which would lead to a deadlock between the Geant4 main thread and the Athena thread
-  m_g4RunTool->WaitBeginRun();
+  ATH_CHECK(m_g4RunTool->WaitBeginRun());
   
   // Initialize algorithm-specific services
   ATH_CHECK(m_rndmGenSvc.retrieve());
@@ -163,14 +156,14 @@ StatusCode G4RunAlg::execute(const EventContext& ctx)
     : HepMC::maxGeneratedParticleBarcode(outputTruthCollection->at(0)); // TODO make this more robust
   const int largestGeneratedVertexBC =  (outputTruthCollection->empty()) ? HepMC::UNDEFINED_ID
     : HepMC::maxGeneratedVertexBarcode(outputTruthCollection->at(0)); // TODO make this more robust
+  using EventOutcome = G4EventSynchronizationInterface::EventOutcome;
+  EventOutcome eventOutcome = EventOutcome::Success;
   {
 
     // called by the Geant4 PrimaryGeneratorAction because primary vertices must be instantiated by Geant4 threads
-    auto prepare_event = [this, &outputTruthCollection, &shadowTruth, largestGeneratedParticleBC, largestGeneratedVertexBC](G4Event& event, std::unique_ptr<AtlasG4SyncEventUserInfo> g4eventInfo) -> StatusCode {
+    auto prepare_event = [this, &outputTruthCollection, &shadowTruth, largestGeneratedParticleBC, largestGeneratedVertexBC](G4Event& event) -> StatusCode {
       // tell TruthService we're starting a new event
       ATH_CHECK( m_truthRecordSvc->initializeTruthCollection(largestGeneratedParticleBC, largestGeneratedVertexBC) );
-      event.SetEventID(g4eventInfo->AthenaEventID());
-      event.SetUserInformation(g4eventInfo.release());
       ATH_CHECK(m_inputConverter->convertHepMCToG4Event(
           *outputTruthCollection, event, *shadowTruth));
       return StatusCode::SUCCESS;
@@ -190,10 +183,11 @@ StatusCode G4RunAlg::execute(const EventContext& ctx)
     ATH_MSG_DEBUG("Pushing Athena event " << ctx.eventID().event_number() << " onto event buffer");
     m_g4RunTool->PushEvent(std::move(eventInfo));
     ATH_MSG_DEBUG("Buffer size=" << m_g4RunTool->Size() << ", waiting for event to finish");
-    //G4 should tell Athena in an EndOfEventAction that the simulation of the event is done
+    // G4 tells Athena after the worker run manager has terminated the event.
     syncInterface->WaitStatusDone();
+    eventOutcome = syncInterface->Outcome();
 
-    if (syncInterface->EventAborted()) {
+    if (eventOutcome == EventOutcome::Aborted) {
       ATH_MSG_WARNING("Event was aborted !! ");
       ATH_MSG_WARNING("Simulation will now go on to the next event ");
       if (m_killAbortedEvents) {
@@ -226,6 +220,15 @@ StatusCode G4RunAlg::execute(const EventContext& ctx)
     for (HepMC::GenEvent* currentGenEvent : *outputTruthCollection ) {
       ATH_CHECK(m_qspatcher->removeWorkaround(*currentGenEvent));
     }
+  }
+
+  if (eventOutcome == EventOutcome::PreparationFailed) {
+    ATH_MSG_ERROR("Failed to prepare Geant4 event");
+    return StatusCode::FAILURE;
+  }
+  if (eventOutcome == EventOutcome::RunTerminated) {
+    ATH_MSG_ERROR("Geant4 terminated before completing this event");
+    return StatusCode::FAILURE;
   }
 
   return StatusCode::SUCCESS;

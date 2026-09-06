@@ -18,10 +18,19 @@ atlas_add_library( JetCalibToolsLib
    xAODJet xAODTracking PATInterfaces JetInterface AsgDataHandlesLib AthOnnxInterfaces AsgServicesLib JetToolHelpersLib MuonAnalysisInterfacesLib JetAnalysisInterfacesLib
    PRIVATE_LINK_LIBRARIES xAODMuon PathResolver AthContainers FourMomUtils)
 
+# Athena-only algorithm(s), not built in AnalysisBase:
+set( component_srcs src/components/JetCalibTools_entries.cxx )
+set( component_libs )
+if( NOT XAOD_STANDALONE )
+   list( APPEND component_srcs src/components/CalibratedJetCopyAlg.cxx
+                               src/components/JetCalibrationDecoratorAlg.cxx)
+   list( APPEND component_libs AthenaBaseComps StoreGateLib xAODBase xAODCore )
+endif()
+
 atlas_add_component( JetCalibTools
-   src/components/*.cxx
+   ${component_srcs}
    INCLUDE_DIRS ${ONNXRUNTIME_INCLUDE_DIRS}
-   LINK_LIBRARIES ${ONNXRUNTIME_LIBRARIES} JetCalibToolsLib )
+   LINK_LIBRARIES ${ONNXRUNTIME_LIBRARIES} JetCalibToolsLib ${component_libs} )
 
 atlas_add_dictionary( JetCalibToolsDict
    JetCalibTools/JetCalibToolsDict.h
@@ -59,5 +68,6 @@ atlas_add_executable( JetCalibTools_SmearingPlots
    xAODCore xAODRootAccess JetCalibToolsLib ${_extraLibs} )
    
 atlas_install_python_modules( python/*.py )
+atlas_install_scripts( util/JetCalibTestAlgConfig.py )
 
 atlas_install_data( data/* )

@@ -14,4 +14,9 @@ def createTrigCaloConfigFlags():
     tccf.addFlag('Trigger.Calo.TopoCluster.useUpperLimitForTimeCut', False)
     tccf.addFlag('Trigger.Calo.TopoCluster.timeCutUpperLimit', 20.0)
 
+    # Enable cluster timing cut
+    tccf.addFlag("Trigger.Calo.TopoCluster.applyClusterTimingCut", False)
+    tccf.addFlag("Trigger.Calo.TopoCluster.clusterTimingCutLower", -7.5)
+    tccf.addFlag("Trigger.Calo.TopoCluster.clusterTimingCutUpper", +7.5)
+
     return tccf

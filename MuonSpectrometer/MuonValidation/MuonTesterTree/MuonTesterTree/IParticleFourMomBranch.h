@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef MUONTESTERTREE_IPARTICLEFOURMOMBRANCH_H
 #define MUONTESTERTREE_IPARTICLEFOURMOMBRANCH_H
@@ -8,6 +8,7 @@
 #include <MuonTesterTree/MuonTesterTree.h>
 #include <MuonTesterTree/AuxElementBranch.h>
 #include <AthenaBaseComps/AthMessaging.h>
+#include <string_view>
 
 namespace MuonVal {
     /** @brief  Helper class to easily to add xAOD::IParticles and associated decorator variables to the 
@@ -81,7 +82,7 @@ namespace MuonVal {
              *                 that the accesor is the same as the variable name */
             template <typename T>
                 bool addVariable(const std::string& variable, 
-                                 const std::string& accName = "");
+                                 std::string_view accName = "");
             /** @brief Write a variable of type <T> to the TTree. If the information is not decorated to the
              *         particle a default value is used
              * @param defValue: Default value to use as a backup option
@@ -91,7 +92,7 @@ namespace MuonVal {
             template <typename T>
                 bool addVariable(T defaultValue, 
                                  const std::string& variable,
-                                 const std::string& accName = "");
+                                 std::string_view accName = "");
             
             /** @brief Write a variable of type <T> to the TTree, but divide it by 1k before dumping. 
              *         Useful for the conversion from MeV to GeV

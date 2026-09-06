@@ -10,9 +10,10 @@
 
 #include "JemMappingTool.h"
 
-#include <cmath>
+#include <numbers>
 namespace LVL1 {
 
+using std::numbers::pi;
 // Static constants
 
 const int    JemMappingTool::s_crates;
@@ -25,9 +26,8 @@ const int    JemMappingTool::s_extremePosModule;
 const int    JemMappingTool::s_etaBinsPerRow;
 
 const double JemMappingTool::s_etaGran = 0.2;
-const double JemMappingTool::s_phiGran = M_PI/16.;
-
-
+const double JemMappingTool::s_phiGran = pi/16.;
+const double pi_2 = pi/2.;
 // Initialise the mappings
 
 StatusCode JemMappingTool::initialize()
@@ -85,10 +85,10 @@ bool JemMappingTool::mapping(const int crate, const int module,
 
   // Phi granularity doubles at FCAL
 
-  constexpr double twoPi   = 2. * M_PI;
+  constexpr double twoPi   = 2. * pi;
   const double phiBase =
-    M_PI_2 * static_cast<double>(crate)
-    + M_PI * static_cast<double>(module / s_modulesPerQuadrant);
+    pi_2 * static_cast<double>(crate)
+    + pi * static_cast<int>(module / s_modulesPerQuadrant); //integer division intended
   phi = phiBase + s_phiGran * (static_cast<double>(phiBin) + 0.5);
   if (((quadMod == s_extremeNegModule) && (etaBin == 0)) ||
       ((quadMod == s_extremePosModule) && (etaBin == s_etaBinsPerRow - 1))) {

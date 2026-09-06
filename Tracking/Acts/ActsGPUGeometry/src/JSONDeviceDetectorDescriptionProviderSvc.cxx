@@ -8,7 +8,10 @@
 #include "PixelReadoutGeometry/PixelModuleDesign.h"
 #include "ActsGPUEvent/TracccDetectorConditionsDescription.h"
 #include "ActsGPUEvent/TracccDetectorDesignDescription.h"
-#include "ActsGPUEvent/TracccDetectorGeometryDescription.h"
+
+#include "detray/geometry/tracking_surface.hpp"
+#include "traccc/geometry/detector.hpp"          
+#include "Acts/Geometry/GeometryIdentifier.hpp"
 
 #include "traccc/io/read_detector_description.hpp"
 #include "traccc/io/read_detector.hpp"
@@ -29,7 +32,6 @@ StatusCode JSONDeviceDetectorDescriptionProviderSvc::initialize()
 
   ATH_CHECK(m_MRs.retrieve());
   ATH_CHECK(m_copy.retrieve());
-  ATH_CHECK(loadIdMaps());
 
   auto hostDesign = std::make_unique<traccc::detector_design_description::host>(*m_MRs->hostMR());
   auto hostCond   = std::make_unique<traccc::detector_conditions_description::host>(*m_MRs->hostMR());
@@ -61,6 +63,8 @@ StatusCode JSONDeviceDetectorDescriptionProviderSvc::initialize()
 
   auto deviceDetector =
         std::make_unique<traccc::detector_buffer>(traccc::buffer_from_host_detector(*hostDetector, m_MRs->mainMR(), const_cast<vecmem::copy&>(*copy)));
+  
+  ATH_CHECK(loadIdMaps(hostDetector));      
   
   // Construct detector description
   traccc::io::read_detector_description(
@@ -115,15 +119,7 @@ StatusCode JSONDeviceDetectorDescriptionProviderSvc::initialize()
   return StatusCode::SUCCESS;
 }
 
-const std::unordered_map<uint64_t, Identifier>& JSONDeviceDetectorDescriptionProviderSvc::detrayToAthenaMap() const {
- return m_detrayToAthena;
-}
-
-const std::unordered_map<Identifier, uint64_t>& JSONDeviceDetectorDescriptionProviderSvc::athenaToDetrayMap() const {
- return m_athenaToDetray;
-}
-
-StatusCode JSONDeviceDetectorDescriptionProviderSvc::loadIdMaps()
+StatusCode JSONDeviceDetectorDescriptionProviderSvc::loadIdMaps(const std::unique_ptr<traccc::host_detector>& hostDetector)
 {
   if (m_mapFile.value().empty()) {
     ATH_MSG_FATAL("MapFile not set — detray<->Athena maps will be empty");
@@ -132,12 +128,15 @@ StatusCode JSONDeviceDetectorDescriptionProviderSvc::loadIdMaps()
 
   ATH_MSG_INFO("Loading detray<->Athena map from "
                        << m_mapFile.value());
-
   std::ifstream mapFile(PathResolverFindCalibFile(m_mapFile.value()));
   if (!mapFile.is_open()) {
     ATH_MSG_FATAL("Cannot open map file: " << m_mapFile.value());
     return StatusCode::FAILURE;
-  }
+  }                     
+
+  // Pass 1: the Athena <-> detray map
+  // Fill it into a temporary lookup keyed by detray id.
+  std::unordered_map<uint64_t, Identifier> detrayToAthenaFromFile;
 
   std::string line;
   while (std::getline(mapFile, line)) {
@@ -148,11 +147,12 @@ StatusCode JSONDeviceDetectorDescriptionProviderSvc::loadIdMaps()
         !std::getline(ss, detrayStr, ',')) continue;
 
     if (athenaStr.empty()) {
-        ATH_MSG_ERROR("Empty Athena identifier string in map file — skipping");
-        return StatusCode::FAILURE;
+      ATH_MSG_ERROR("Empty Athena identifier string in map file — skipping");
+      return StatusCode::FAILURE;
     }
+
     Identifier athenaId;
-    athenaId.set(athenaStr);
+    athenaId.set(athenaStr);          // handles the 0x-prefixed hex correctly
 
     uint64_t detrayId = 0;
     try {
@@ -162,12 +162,43 @@ StatusCode JSONDeviceDetectorDescriptionProviderSvc::loadIdMaps()
         return StatusCode::FAILURE;
     }
 
-    m_athenaToDetray[athenaId] = detrayId;
-    m_detrayToAthena[detrayId] = athenaId;
+    detrayToAthenaFromFile.emplace(detrayId, athenaId);
   }
 
-  ATH_MSG_INFO("Loaded " << m_athenaToDetray.size()
-                       << " detray<->Athena module mappings");
+  ATH_MSG_INFO("Read " << detrayToAthenaFromFile.size()
+                        << " detray<->Athena entries from file");
+
+  // Pass 2: walk the detray surfaces, read off the ACTS geometry id 
+  // and combine with the file-based Athena lookup to fill the
+  // full three-way GeometryIdMapping.
+  m_idMapping = std::make_unique<ActsTrk::GeometryIdMapping>();
+  const auto& itkDetector = hostDetector->as<traccc::itk_detector>();
+  const std::size_t nSurfaces = itkDetector.surfaces().size();
+  m_idMapping->reserve(nSurfaces);
+
+  std::size_t nMatched = 0;
+  for (const auto& surface : itkDetector.surfaces()) {
+    const Acts::GeometryIdentifier acts_geom_id{surface.source};
+
+    auto sf = detray::tracking_surface{itkDetector, surface};
+    const auto detrayId = sf.identifier().value();
+
+    std::optional<Identifier> athenaId; 
+    if (auto it = detrayToAthenaFromFile.find(detrayId);
+        it != detrayToAthenaFromFile.end()) {
+      athenaId = it->second;
+      ++nMatched;
+    }
+
+    m_idMapping->addEntry(detrayId, acts_geom_id.value(), athenaId);
+  }                      
+
+  ATH_MSG_INFO("Built GeometryIdMapping with " << m_idMapping->size()
+               << " detray/ACTS surfaces, " << nMatched
+               << " matched to an Athena module");
+               
+  ATH_CHECK(m_detStore->record(std::move(m_idMapping), m_geoIdMappingObjectName.value(), false));             
+
   return StatusCode::SUCCESS;
 }
 

@@ -1,16 +1,14 @@
 #! /usr/bin/env python
 
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 #
 # Test generation of transform signatures
-# $Id: test_trfSignatures.py 630090 2014-11-21 12:06:31Z graemes $
 #
 
 import os
 import sys
 import subprocess
 import unittest
-import six
 
 from PyJobTransforms.trfLogger import msg
 

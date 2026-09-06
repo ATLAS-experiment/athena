@@ -1,11 +1,15 @@
 /*
   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
+
+// Local include(s).
 #include "CUDASPFormationAlgProviderTool.h"
 
-#include "traccc/cuda/seeding/silicon_pixel_spacepoint_formation_algorithm.hpp"
-
+// Athena Acts include(s).
 #include "ActsInterop/Logger.h"
+
+// Traccc include(s).
+#include "traccc/cuda/seeding/silicon_pixel_spacepoint_formation_algorithm.hpp"
 
 namespace ActsTrk {
 
@@ -21,19 +25,19 @@ StatusCode CUDASPFormationAlgProviderTool::initialize()
   return StatusCode::SUCCESS;
 }
 
-std::pair<std::shared_ptr<const vecmem::copy>, std::shared_ptr<const traccc::device::silicon_pixel_spacepoint_formation_algorithm>>
-CUDASPFormationAlgProviderTool::getPixelSPFormationAlgorithm(const EventContext& ctx) const
+DeviceAlgorithmT<traccc::device::silicon_pixel_spacepoint_formation_algorithm>
+CUDASPFormationAlgProviderTool::getAlgorithm(const EventContext& ctx) const
 {
 
   ATH_MSG_VERBOSE("Constructing CUDA traccc pixel spacepoint formation algorithm");
-  traccc::memory_resource mr{m_MRs->mainMR(), m_MRs->hostMR()};
+
   auto copy = m_copy->copy(ctx);
 
-  return std::make_pair(copy, std::make_shared<traccc::cuda::silicon_pixel_spacepoint_formation_algorithm>(
-    mr,
+  return {copy, std::make_shared<traccc::cuda::silicon_pixel_spacepoint_formation_algorithm>(
+    traccc::memory_resource{m_MRs->mainMR(), m_MRs->hostMR()},
     *copy,
     traccc::cuda::stream_wrapper{m_streamTool->stream(ctx)},
-    makeActsAthenaLogger(this, "TracccSPFormationCUDA")));
+    makeActsAthenaLogger(this, "TracccSPFormationCUDA"))};
 
 }
 

@@ -103,9 +103,8 @@ BkgElectronClassification::addBranches(const EventContext& ctx) const
     const xAOD::TruthParticle* firstElTruth =
       xAOD::EgammaHelpers::getBkgElectronMother(el, false);
 
-    MCTruthPartClassifier::Info mcinfo(ctx);
     if (firstElTruth) {
-      auto res = m_mcTruthClassifier->particleTruthClassifier(firstElTruth, &mcinfo);
+      auto res = m_mcTruthClassifier->particleTruthClassifier(firstElTruth, ctx);
       firstEgMotherTT(*el) = res.first;
       firstEgMotherTO(*el) = res.second;
       firstEgMotherTC(*el) = std::get<0>(MCTruthPartClassifier::defOrigOfParticle(firstElTruth)); // See AGENE-2351
@@ -126,7 +125,7 @@ BkgElectronClassification::addBranches(const EventContext& ctx) const
       xAOD::EgammaHelpers::getBkgElectronMother(el);
 
     if (lastElTruth) {
-      auto res = m_mcTruthClassifier->particleTruthClassifier(lastElTruth, &mcinfo);
+      auto res = m_mcTruthClassifier->particleTruthClassifier(lastElTruth, ctx);
       lastEgMotherTT(*el) = res.first;
       lastEgMotherTO(*el) = res.second;
       lastEgMotherTC(*el) = std::get<0>(MCTruthPartClassifier::defOrigOfParticle(lastElTruth)); // See AGENE-2351

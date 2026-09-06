@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef TRIGEGAMMAHYPO_TRIGPHOTONCALOISOHYPOTOOLINC_H
 #define TRIGEGAMMAHYPO_TRIGPHOTONCALOISOHYPOTOOLINC_H 1
@@ -47,9 +47,9 @@ class TrigEgammaPrecisionPhotonCaloIsoHypoTool : public extends<AthAlgTool, ITri
     
 //    //Calorimeter electron ID  cuts
 	Gaudi::Property< std::vector<float> > m_etabin { this, "EtaBins", {} , "Bins of eta" }; //!<  selection variable for PRECISION calo selection:eta bins
-    Gaudi::Property< std::vector<float> > m_RelEtConeCut { this, "RelEtConeCut", {999., 999., 999.} , "Calo isolation cut on etcone20" };
-    Gaudi::Property< std::vector<float> > m_RelTopoEtConeCut { this, "RelTopoEtConeCut", {999., 999., 999.}, "Calo isolation cut in [TopoEtcone20/pt, TopoEtcone30/pt, TopoEtcone40/pt]" };
-    Gaudi::Property< std::vector<float> > m_CutOffset { this, "Offset", {0., 0., 0.} , "Calo isolation offset cut in [(Topo)Etcone20/pt, (Topo)Etcone30/pt, (Topo)Etcone40/pt]" };
+    Gaudi::Property< int > m_TopoEtConeSize { this, "TopoEtConeSize", -1 , "Calo isolation cone size" };
+    Gaudi::Property< float > m_RelTopoEtConeCut { this, "RelTopoEtConeCut", 999., "Calo isolation cut in [TopoEtcone20/pt, TopoEtcone30/pt, TopoEtcone40/pt]" };
+    Gaudi::Property< float > m_CutOffset { this, "Offset", 0., "Calo isolation offset cut in [(Topo)Etcone20/pt, (Topo)Etcone30/pt, (Topo)Etcone40/pt]" };
     Gaudi::Property< std::string >        m_pidName {this, "PidName", "", "Pid name"}; 
    
     /* Accept all in case of noiso instance */	
@@ -62,6 +62,13 @@ class TrigEgammaPrecisionPhotonCaloIsoHypoTool : public extends<AthAlgTool, ITri
   
   
     int findCutIndex( float eta ) const;
+
+    int m_coneIdx = -1;
+    static const int s_nCones = 3;
+    static constexpr int s_coneSizes[s_nCones] = {20, 30, 40};
+    static constexpr xAOD::Iso::IsolationType s_ptConeIsoTypes[s_nCones]     = {xAOD::Iso::ptcone20,     xAOD::Iso::ptcone30,     xAOD::Iso::ptcone40};
+    static constexpr xAOD::Iso::IsolationType s_etConeIsoTypes[s_nCones]     = {xAOD::Iso::etcone20,     xAOD::Iso::etcone30,     xAOD::Iso::etcone40};
+    static constexpr xAOD::Iso::IsolationType s_topoEtconeIsoTypes[s_nCones] = {xAOD::Iso::topoetcone20, xAOD::Iso::topoetcone30, xAOD::Iso::topoetcone40};
 }; 
 
 #endif //> !TRIGEGAMMAHYPO_TRIGPRECISIONPHOTONHYPOTOOL_H

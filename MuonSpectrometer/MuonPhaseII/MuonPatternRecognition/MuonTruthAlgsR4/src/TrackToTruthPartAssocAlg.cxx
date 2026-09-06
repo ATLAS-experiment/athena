@@ -7,6 +7,7 @@
 #include "StoreGate/ReadDecorHandleKeyArray.h"
 #include "StoreGate/WriteDecorHandle.h"
 #include "xAODTruth/xAODTruthHelpers.h"
+#include "xAODMuonViews/ContainerDecorator.h"
 
 #include <unordered_set>
 namespace {
@@ -44,10 +45,10 @@ namespace MuonR4{
         const xAOD::TrackParticleContainer* tracks{nullptr};
         ATH_CHECK(SG::get(tracks, m_trkKey, ctx));
 
-        SG::WriteDecorHandle<xAOD::TrackParticleContainer, int> acc_truthOrigin{m_originWriteKey, ctx};
-        SG::WriteDecorHandle<xAOD::TrackParticleContainer, int> acc_truthType{m_typeWriteKey, ctx};
-        SG::WriteDecorHandle<xAOD::TrackParticleContainer, TruthLink_t> acc_truthLink{m_linkWriteKey, ctx};
-        SG::WriteDecorHandle<xAOD::TrackParticleContainer, unsigned int> acc_truthClassification{m_classificationWriteKey, ctx};
+        xAOD::ContainerDecorator<xAOD::TrackParticleContainer, int> acc_truthOrigin{m_originWriteKey, ctx};
+        xAOD::ContainerDecorator<xAOD::TrackParticleContainer, int> acc_truthType{m_typeWriteKey, ctx};
+        xAOD::ContainerDecorator<xAOD::TrackParticleContainer, TruthLink_t> acc_truthLink{m_linkWriteKey, ctx};
+        xAOD::ContainerDecorator<xAOD::TrackParticleContainer, unsigned int> acc_truthClassification{m_classificationWriteKey, ctx};
         ///
         /// Initialize the Identifier decorators
         std::vector<IdDecorHandle_t> idDecorHandles{};

@@ -13,12 +13,12 @@
 
 #include <RootCoreUtils/Assert.h>
 #include <RootCoreUtils/StringUtil.h>
-#include <RootCoreUtils/ThrowMsg.h>
 #include <TRandom3.h>
 #include <TRegexp.h>
 #include <cstdint>
 #include <map>
 #include <memory>
+#include <stdexcept>
 
 //
 // method implementations
@@ -62,7 +62,6 @@ namespace CP
   void MakeSystematicsVector ::
   testInvariant () const
   {
-    //RCU_INVARIANT (this != nullptr);
     RCU_INVARIANT (!m_config.empty());
   }
 
@@ -84,7 +83,7 @@ namespace CP
     RCU_REQUIRE2 (!m_result.empty(), "calculate() has been called");
     auto iter = m_result.find (label);
     if (iter == m_result.end())
-      RCU_THROW_MSG ("unknown systematics group: " + label);
+      throw std::runtime_error ("unknown systematics group: " + label);
     return iter->second;
   }
 
@@ -131,7 +130,7 @@ namespace CP
 	  {
 	    // we must have added a new kind of ensemble after I wrote
 	    // this code
-	    RCU_THROW_MSG ("unsupported ensemble systematic: " + sys.first);
+	    throw std::runtime_error ("unsupported ensemble systematic: " + sys.first);
 	  } else
 	  {
 	    // otherwise just add all of them flat
@@ -166,7 +165,7 @@ namespace CP
 	  {
 	    // we must have added a new kind of ensemble after I
 	    // wrote this code
-	    RCU_THROW_MSG ("unsupported ensemble systematic for toys: " + sys.first);
+	    throw std::runtime_error ("unsupported ensemble systematic for toys: " + sys.first);
 	  }
 	}
 	for (auto& toy : toys)
@@ -248,7 +247,7 @@ namespace CP
 	if (mysys.isEnsemble())
 	{
 	  if (!ensemble.empty())
-	    RCU_THROW_MSG ("inconsistent ensembles requested: " + ensemble.name() + " " + mysys.name());
+	    throw std::runtime_error ("inconsistent ensembles requested: " + ensemble.name() + " " + mysys.name());
 	  ensemble = mysys;
 	}
       }
@@ -275,12 +274,12 @@ namespace CP
 	} else if (RCU::match_expr (std::regex (m_config[iter].pattern.c_str()), sys.first))
 	{
 	  if (m_config[iter].toys > 0 && ensemble.empty())
-	    RCU_THROW_MSG ("toys only supported for ensemble systematics");
+	    throw std::runtime_error ("toys only supported for ensemble systematics");
 	  group = iter;
 	}
       }
       if (group == m_config.size())
-	RCU_THROW_MSG ("no systematics group for systematic: " + sys.first);
+	throw std::runtime_error ("no systematics group for systematic: " + sys.first);
 
       if (!ensemble.empty())
       {

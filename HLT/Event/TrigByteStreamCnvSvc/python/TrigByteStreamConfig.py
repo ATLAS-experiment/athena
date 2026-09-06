@@ -119,11 +119,10 @@ def TrigByteStreamCfg(flags, type_names=[]):
     bytestream_input = getTrigByteStreamInputSvc(flags)
     acc.addService(bytestream_input)
 
-    if flags.Trigger.Online.useEFByteStreamSvc:
-        ef_interface = getEFInterfaceSvc(flags)
-        acc.addService(ef_interface)
-        bytestream_conversion.EFInterfaceSvc = ef_interface.name
-        bytestream_input.EFInterfaceSvc = ef_interface.name
+    ef_interface = getEFInterfaceSvc(flags)
+    acc.addService(ef_interface)
+    bytestream_conversion.EFInterfaceSvc = ef_interface.name
+    bytestream_input.EFInterfaceSvc = ef_interface.name
 
     event_selector = CompFactory.TrigEventSelectorByteStream(
         name='EventSelectorByteStream',

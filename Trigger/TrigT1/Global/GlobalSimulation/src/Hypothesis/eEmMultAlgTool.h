@@ -36,7 +36,10 @@ namespace GlobalSim {
 
     using TIPWriterAlgTool::updateTIP;
 
-    virtual StatusCode countPassingTOBs(const EventContext&, unsigned int& N_pass_tobs) const override;
+    virtual StatusCode
+    countPassingTOBs(const EventContext&,
+		     const std::unique_ptr<IDataCollector>& dc, 
+		     unsigned int& N_pass_tobs) const override;
 
     virtual std::string toString() const override;
 

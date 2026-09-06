@@ -1,12 +1,9 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrkDriftCircleMath/SegmentFinder.h"
-
-#include <algorithm>
-#include <iostream>
-#include <iterator>
+#include "TrkDriftCircleMath/CurvedSegmentFinder.h"
 
 #include "TrkDriftCircleMath/DCSLFitter.h"
 #include "TrkDriftCircleMath/DCSLHitSelector.h"
@@ -15,7 +12,12 @@
 #include "TrkDriftCircleMath/SharedHitsSegments.h"
 #include "TrkDriftCircleMath/SortSegBySizeAndChi2.h"
 #include "TrkDriftCircleMath/TangentToCircles.h"
+#include "TrkDriftCircleMath/MatchDCWithLine.h"
 
+
+#include <algorithm>
+#include <iostream>
+#include <iterator>
 namespace TrkDriftCircleMath {
 
     SegmentFinder::SegmentFinder()

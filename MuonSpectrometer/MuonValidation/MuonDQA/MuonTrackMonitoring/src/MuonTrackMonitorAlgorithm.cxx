@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+    Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
     2020 Matthias Schott - Uni Mainz
 */
 
@@ -741,7 +741,7 @@ StatusCode MuonTrackMonitorAlgorithm::fillHistograms(const EventContext& ctx) co
     /// Get the EventInfo
     if ((!m_derEventInfoKey.empty()) &&  (!m_MuonContainerKey.empty()) && (!m_VertexContainerKey.empty())) {
         SG::ReadHandle<xAOD::EventInfo> EventInfo{m_derEventInfoKey, ctx};
-        if (ATH_UNLIKELY(! EventInfo.isValid())) {
+        if (! EventInfo.isValid()) [[unlikely]] {
             ATH_MSG_ERROR("Unable to retrieve Event Info " << m_MuonContainerKey);
             return StatusCode::FAILURE;
         }
@@ -757,7 +757,7 @@ StatusCode MuonTrackMonitorAlgorithm::fillHistograms(const EventContext& ctx) co
         }
 
         SG::ReadHandle<xAOD::MuonContainer> Muons{m_MuonContainerKey, ctx};
-        if (ATH_UNLIKELY(! Muons.isValid())) {
+        if (! Muons.isValid()) [[unlikely]] {
             ATH_MSG_ERROR("Unable to retrieve muon container " << m_MuonContainerKey);
             return StatusCode::FAILURE;
         }

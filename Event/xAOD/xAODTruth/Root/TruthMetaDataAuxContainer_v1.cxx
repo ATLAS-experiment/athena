@@ -18,6 +18,8 @@ namespace xAOD {
       AUX_VARIABLE( generators );
       AUX_VARIABLE( evgenProcess );
       AUX_VARIABLE( evgenTune );
+      AUX_VARIABLE( hadronizationModel );
+      AUX_VARIABLE( partonShowerModel );
       AUX_VARIABLE( hardPDF );
       AUX_VARIABLE( softPDF );
    }

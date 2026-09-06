@@ -1,0 +1,25 @@
+
+
+Initializing Gaudi ApplicationMgr using job opts /home/bpuhan/tilecal-athena/build/TileCalorimeter/TileRecUtils/CMakeFiles/unitTestRun/./TileRawChannelNNMaker_test_generated.txt
+JobOptionsSvc         INFO Job options successfully read in from /home/bpuhan/tilecal-athena/build/TileCalorimeter/TileRecUtils/CMakeFiles/unitTestRun/./TileRawChannelNNMaker_test_generated.txt
+ApplicationMgr     SUCCESS 
+====================================================================================================================================
+                                                   Welcome to ApplicationMgr (GaudiCoreSvc v40r4)
+                                          running on hl02 on Sat Aug  8 10:45:04 2026
+====================================================================================================================================
+ApplicationMgr        INFO Successfully loaded modules : StoreGate
+ApplicationMgr        INFO Application Manager Configured successfully
+ClassIDSvc            INFO getRegistryEntries: read 4999 CLIDRegistry entries for module ALL
+StoreGateSvc         DEBUG Property update for OutputLevel : new value = 2
+StoreGateSvc         DEBUG Service base class initialized successfully
+StoreGateSvc         DEBUG trying to create store SGImplSvc/StoreGateSvc_Impl
+StoreGateSvc_Impl    DEBUG Property update for OutputLevel : new value = 2
+StoreGateSvc_Impl    DEBUG Service base class initialized successfully
+EventLoopMgr          INFO Unable to locate service "EventSelector": No events will be processed from external input.
+ApplicationMgr        INFO Application Manager Initialized successfully
+ApplicationMgr Ready
+TileHWID              INFO initialize_from_dictionary 
+TileTBID              INFO initialize_from_dictionary 
+test1
+TileRawChannelN...    INFO Input digits container: 'TileDigitsCnt'  output container: 'TileRawChannelNN'  weights: 'TileRecUtils/TileRawChannelNN_w9_v1.json' (9 samples)
+TileRawChannelN... WARNING Skipped channels: 1 with only one gain, 0 without 9 samples

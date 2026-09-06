@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -20,6 +20,7 @@
 #include "ReadoutGeometryBase/InDetDD_Defs.h"
 
 #include "InDetIdentifier/SCT_ID.h"
+#include "AthenaKernel/BaseInfo.h"
 
 #include <memory>
 
@@ -197,6 +198,7 @@ namespace InDetDD {
 #ifndef GAUDI_NEUTRAL
 #include "AthenaKernel/CLASS_DEF.h"
 CLASS_DEF(InDetDD::SCT_DetectorManager, 72488296, 1)
+SG_BASES( InDetDD::SCT_DetectorManager, InDetDD::SiDetectorManager );
 #endif
 
 #endif // INDETREADOUTGEOMETRY_SCT_DETECTORMANAGER_H

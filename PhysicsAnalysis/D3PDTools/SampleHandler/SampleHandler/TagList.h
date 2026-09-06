@@ -84,7 +84,7 @@ namespace SH
 
     /// \brief the iterator to use
   public:
-    typedef std::set<std::string>::const_iterator iterator;
+    using iterator = std::set<std::string>::const_iterator;
 
 
     /// \brief the begin iterator to use
@@ -135,10 +135,6 @@ namespace SH
     /// \brief the list of tags
   private:
     std::set<std::string> m_tags;
-
-    /// \brief the iterator for \ref m_tags
-  private:
-    typedef std::set<std::string>::const_iterator TagsIter;
   };
 }
 

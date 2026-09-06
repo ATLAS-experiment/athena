@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "L2MuonSAIOMon.h"
@@ -553,16 +553,16 @@ StatusCode L2MuonSAIOMon :: fillVariablesPerOfflineMuonPerChain(const EventConte
     }
 
     if( pt4to6 ){
-      offlinesegment_exist_pt4to6 = segment_exist;
-      superpoint_exist_pt4to6 = segment_superpoint_exist;
+      offlinesegment_exist_pt4to6 = std::move(segment_exist);
+      superpoint_exist_pt4to6 = std::move(segment_superpoint_exist);
     }
     else if( pt6to8 ){
-      offlinesegment_exist_pt6to8 = segment_exist;
-      superpoint_exist_pt6to8 = segment_superpoint_exist;
+      offlinesegment_exist_pt6to8 = std::move(segment_exist);
+      superpoint_exist_pt6to8 = std::move(segment_superpoint_exist);
     }
     else if( ptover8 ){
-      offlinesegment_exist_ptover8 = segment_exist;
-      superpoint_exist_ptover8 = segment_superpoint_exist;
+      offlinesegment_exist_ptover8 = std::move(segment_exist);
+      superpoint_exist_ptover8 = std::move(segment_superpoint_exist);
     }
 
     fill(m_group+"_"+chain, dRmin, isBarrel, isEndcap);

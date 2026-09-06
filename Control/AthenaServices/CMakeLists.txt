@@ -4,7 +4,7 @@
 atlas_subdir( AthenaServices )
 
 # External dependencies:
-find_package( Boost COMPONENTS thread serialization )
+find_package( Boost )
 find_package( bmpi3 REQUIRED )
 find_package( CLHEP )
 find_package( Eigen )
@@ -18,10 +18,10 @@ find_package( valgrind ) # Note that there is no VALGRIND_LIBRARIES variable.
 # Component(s) in the package:
 atlas_add_component( AthenaServices
    src/*.h src/*.cxx src/components/*.cxx
-   INCLUDE_DIRS ${Boost_INCLUDE_DIRS} ${Python_INCLUDE_DIRS}
+   INCLUDE_DIRS  ${Python_INCLUDE_DIRS}
    ${CLHEP_INCLUDE_DIRS} ${ROOT_INCLUDE_DIRS} ${TBB_INCLUDE_DIRS} ${UUID_INCLUDE_DIRS} ${YAMPL_INCLUDE_DIRS}
    ${VALGRIND_INCLUDE_DIRS} ${EIGEN_INCLUDE_DIRS}
-   LINK_LIBRARIES ${Boost_LIBRARIES} ${Python_LIBRARIES} ${ROOT_LIBRARIES} ${TBB_LIBRARIES} ${UUID_LIBRARIES}
+   LINK_LIBRARIES ${Python_LIBRARIES} ${ROOT_LIBRARIES} ${TBB_LIBRARIES} ${UUID_LIBRARIES}
    ${YAMPL_LIBRARIES} bmpi3::bmpi3 ${CLHEP_LIBRARIES} ${EIGEN_LIBRARIES}
    AthenaBaseComps AthenaKernel RootUtilsPyROOT CxxUtils SQLiteDBSvcLib
    AthContainers AthContainersInterfaces DataModelRoot SGTools SGCoreLib
@@ -37,8 +37,8 @@ atlas_add_tpcnv_library( AthenaServicesTest src/test/*.cxx
 atlas_add_test( AthenaOutputStream_test
    SOURCES test/AthenaOutputStream_test.cxx src/AthenaOutputStream.cxx
    src/OutputStreamSequencerSvc.cxx src/MetaDataSvc.cxx
-   INCLUDE_DIRS ${Boost_INCLUDE_DIRS} ${ROOT_INCLUDE_DIRS}
-   LINK_LIBRARIES ${Boost_LIBRARIES} ${ROOT_LIBRARIES} TestTools AthenaKernel AthContainers
+   INCLUDE_DIRS  ${ROOT_INCLUDE_DIRS}
+   LINK_LIBRARIES  ${ROOT_LIBRARIES} TestTools AthenaKernel AthContainers
                   AthContainersInterfaces CxxUtils SGTools StoreGateLib GaudiKernel AthenaBaseComps
                   PersistentDataModel RootAuxDynIOHeaders xAODCore
    LOG_SELECT_PATTERN "AthenaOutputStream_test"
@@ -60,8 +60,7 @@ atlas_add_test( ConditionsCleanerSvc_test
 
 atlas_add_test( RCUSvc_test
    SOURCES test/RCUSvc_test.cxx
-   INCLUDE_DIRS ${Boost_INCLUDE_DIRS}
-   LINK_LIBRARIES ${Boost_LIBRARIES} TestTools AthenaKernel CxxUtils GaudiKernel AthenaBaseComps )
+   LINK_LIBRARIES  TestTools AthenaKernel CxxUtils GaudiKernel AthenaBaseComps )
 
 atlas_add_test( DelayedConditionsCleanerSvc_test
    SOURCES test/DelayedConditionsCleanerSvc_test.cxx
@@ -77,7 +76,7 @@ atlas_add_test( MetaDataSvc_test
    INCLUDE_DIRS ${Boost_INCLUDE_DIRS} ${ROOT_INCLUDE_DIRS}
    LINK_LIBRARIES ${ROOT_LIBRARIES} TestTools AthenaKernel CxxUtils GaudiKernel
                   StoreGateLib AthenaBaseComps RootAuxDynIOHeaders PersistentDataModel SGTools Boost::unit_test_framework
-   LOG_IGNORE_PATTERN "ERROR Unable to get|ERROR Failing|ERROR Unable to call|tool->endInputFile|Cannot create proxy|FAILURE: addProxyToInputMetaDataStore"
+   LOG_IGNORE_PATTERN "ERROR Unable to get|ERROR Failing|ERROR Unable to call|tool->endInputFile|Cannot create proxy|FAILURE: addProxyToInputMetaDataStore|ERROR shmProxy failed: unsupported AddressCreator AthenaPoolCnvSvc"
    POST_EXEC_SCRIPT noerror.sh)
 
 atlas_add_test( AthTPCnvSvc
@@ -88,6 +87,7 @@ atlas_add_test( AthTPCnvSvc
 atlas_add_test( AthDictLoaderSvc
    SCRIPT test/AthDictLoaderSvc_test.py
    LOG_SELECT_PATTERN "AthDictLoaderTestAlg"
+   LOG_IGNORE_PATTERN "<-- .ElementLink_p1<unsigned int>|<-- .ElementLinkInt_p1"
    PROPERTIES TIMEOUT 300 )
 
 atlas_add_test( ItemListSemanticsTest

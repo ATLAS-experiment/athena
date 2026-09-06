@@ -1,13 +1,14 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TruthMuonMakerAlg.h"
-#include "MuonTruthAlgs/DecorUtils.h"
+
 #include "StoreGate/WriteDecorHandle.h"
 #include "xAODTruth/TruthParticleAuxContainer.h"
 #include "xAODTruth/TruthParticleContainer.h"
 #include "TruthUtils/HepMCHelpers.h"
+#include "xAODMuonViews/ContainerDecorator.h"
 
 namespace {
     using TruthLink_t = ElementLink<xAOD::TruthParticleContainer>;
@@ -39,10 +40,10 @@ namespace Muon {
                                             std::make_unique<xAOD::TruthParticleAuxContainer>()));
         ATH_MSG_DEBUG("Recorded TruthParticleContainer with key: " << m_writeKey);
 
-        SG::WriteDecorHandle<xAOD::TruthParticleContainer, int> truthOrigin{m_truthOriginKey, ctx};
-        SG::WriteDecorHandle<xAOD::TruthParticleContainer, int> truthType{m_truthTypeKey, ctx};
-        SG::WriteDecorHandle<xAOD::TruthParticleContainer, unsigned int> truthClassification{m_truthClassificationKey, ctx};
-        SG::WriteDecorHandle<xAOD::TruthParticleContainer, TruthLink_t> truthLink{m_truthLinkKey, ctx};
+        xAOD::ContainerDecorator<xAOD::TruthParticleContainer, int> truthOrigin{m_truthOriginKey, ctx};
+        xAOD::ContainerDecorator<xAOD::TruthParticleContainer, int> truthType{m_truthTypeKey, ctx};
+        xAOD::ContainerDecorator<xAOD::TruthParticleContainer, unsigned int> truthClassification{m_truthClassificationKey, ctx};
+        xAOD::ContainerDecorator<xAOD::TruthParticleContainer, TruthLink_t> truthLink{m_truthLinkKey, ctx};
 
         // loop over truth coll
         const xAOD::TruthParticleContainer* truthContainer{nullptr};

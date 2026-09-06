@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -57,7 +57,7 @@ const Trk::ComponentParameters& addThis)
 
 /// Method for merging components  and assembling a final state
 Trk::MultiComponentState mergeFullDistArray(
-    Trk::MultiComponentStateAssembler::Cache& cache,
+    Trk::MultiComponentStateAssembler::Cache&& cache,
     Trk::MultiComponentState&& statesToMerge,
     const unsigned int maximumNumberOfComponents) {
 
@@ -136,7 +136,7 @@ merge(Trk::MultiComponentState&& statesToMerge,
     return returnMultiState;
   }
   //Do the full merging of states
-  return mergeFullDistArray(cache, std::move(statesToMerge),maximumNumberOfComponents);
+  return mergeFullDistArray(std::move(cache), std::move(statesToMerge),maximumNumberOfComponents);
 }
 }  // end anonymous namespace
 

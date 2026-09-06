@@ -8,6 +8,7 @@
 #include "StoreGate/ReadHandleKey.h"
 #include "InDetRawData/PixelRDO_Container.h"
 #include "InDetRawData/SCT_RDO_Container.h"
+#include <InDetRawData/SCT_RDORawData.h>
 #include "PixelReadoutGeometry/PixelDetectorManager.h"
 #include "SCT_ReadoutGeometry/SCT_DetectorManager.h"
 #include "RDOtoTracccCellConverterCommons.h"
@@ -51,6 +52,7 @@ private:
       this, "StripManager", "ITkStrip"};
   const InDetDD::PixelDetectorManager* m_pixelManager{nullptr};
   const InDetDD::SCT_DetectorManager*  m_stripManager{nullptr};
+
 };
 
 } // namespace ActsTrk

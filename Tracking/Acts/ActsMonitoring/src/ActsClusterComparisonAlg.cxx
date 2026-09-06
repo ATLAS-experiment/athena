@@ -39,7 +39,7 @@ StatusCode ActsClusterComparisonAlg::initialize()
 
     ATH_CHECK(detStore()->retrieve(m_stripID, "SCT_ID"));
 
-    ATH_CHECK(m_lorentzAngleTool.retrieve());
+    ATH_CHECK(m_stripLorentzAngleTool.retrieve());
     ATH_CHECK(m_pixelLorentzAngleTool.retrieve());
 
     ATH_CHECK(m_monitoredPixelClustersKey.initialize());
@@ -76,12 +76,12 @@ StatusCode ActsClusterComparisonAlg::execute(const EventContext& ctx) const
 }
 
 // Match pixel clusters
-void matchPixelClusters(
+void  ActsClusterComparisonAlg::matchPixelClusters(
     std::vector<const xAOD::PixelCluster*>& monitored_list,
     std::vector<const xAOD::PixelCluster*>& reference_list,
     const std::string& module_id,
     std::vector<
-        std::pair<const xAOD::PixelCluster*, const xAOD::PixelCluster*>>& pairs)
+        std::pair<const xAOD::PixelCluster*, const xAOD::PixelCluster*>>& pairs) const
 {
 
     // Extract RDO sets
@@ -128,35 +128,65 @@ void matchPixelClusters(
 
     // Report mismatches
     if (!unmatched_monitored.empty() || !unmatched_reference.empty()) {
-        std::cout << "\n[ERROR] Module " << module_id
-                  << ": cluster mismatch detected!" << std::endl;
+        ATH_MSG_DEBUG("[ERROR] Module " << module_id
+                  << ": cluster mismatch detected!");
         if (!unmatched_monitored.empty()) {
-            std::cout << "  Unmatched monitored clusters ("
-                      << unmatched_monitored.size() << "):" << std::endl;
+            ATH_MSG_DEBUG("  Unmatched monitored clusters ("
+                      << unmatched_monitored.size() << "):");
             for (int i : unmatched_monitored) {
-                std::cout << "    - #" << i << std::endl;
+                ATH_MSG_DEBUG("    - #" << i);
+                const xAOD::PixelCluster* monitored_cluster = monitored_list.at(i);
+                const auto& monitored_cov = monitored_cluster->localCovariance<1>();
+
+                ATH_MSG_DEBUG("Detailed print of cluster: ");
+
+                ATH_MSG_DEBUG("Local position: ");
+                ATH_MSG_DEBUG(
+                    "  Monitored: ("
+                    << monitored_cluster->localPosition<2>()[Trk::locX] << ", "
+                    << monitored_cluster->localPosition<2>()[Trk::locY] << ")");
+                
+                ATH_MSG_DEBUG("Cluster cov: ");
+                ATH_MSG_DEBUG("  Monitored: (" << monitored_cov(0, 0) << ", "
+                                            << monitored_cov(1, 1) << ")");
             }
+            m_pix_unmatched_mon+= unmatched_monitored.size();
         }
         if (!unmatched_reference.empty()) {
-            std::cout << "  Unmatched reference clusters (" << unmatched_reference.size()
-                      << "):" << std::endl;
+            ATH_MSG_DEBUG("  Unmatched reference clusters (" << unmatched_reference.size()
+                      << "):");
             for (int j : unmatched_reference) {
-                std::cout << "    - #" << j << std::endl;
+                ATH_MSG_DEBUG("    - #" << j);
+                const xAOD::PixelCluster* reference_cluster = reference_list.at(j);
+                const auto& reference_cov = reference_cluster->localCovariance<1>();
+
+                ATH_MSG_DEBUG("Detailed print of cluster: ");
+                
+                ATH_MSG_DEBUG("Local position: ");
+                
+                ATH_MSG_DEBUG("  Reference: ("
+                            << reference_cluster->localPosition<2>()[Trk::locX] << ", "
+                            << reference_cluster->localPosition<2>()[Trk::locY]
+                            << ")");
+                
+                ATH_MSG_DEBUG("Cluster cov: ");
+                
+                ATH_MSG_DEBUG("  Reference: (" << reference_cov(0, 0) << ", "
+                                        << reference_cov(1, 1) << ")");
             }
+            m_pix_unmatched_ref+= unmatched_reference.size();
         }
-        std::cout
-            << "------------------------------------------------------------"
-            << std::endl;
+        ATH_MSG_DEBUG("------------------------------------------------------------");
     }
 }
 
 // Match strip clusters
-void matchStripClusters(
+void  ActsClusterComparisonAlg::matchStripClusters(
     std::vector<const xAOD::StripCluster*>& monitored_list,
     std::vector<const xAOD::StripCluster*>& reference_list,
     const std::string& module_id,
     std::vector<
-        std::pair<const xAOD::StripCluster*, const xAOD::StripCluster*>>& pairs)
+        std::pair<const xAOD::StripCluster*, const xAOD::StripCluster*>>& pairs) const
 {
 
     // Extract RDO sets
@@ -202,25 +232,50 @@ void matchStripClusters(
 
     // Report mismatches
     if (!unmatched_monitored.empty() || !unmatched_reference.empty()) {
-        std::cout << "\n[ERROR] Module " << module_id
-                  << ": cluster mismatch detected!" << std::endl;
+        ATH_MSG_DEBUG("[ERROR] Module " << module_id
+                  << ": cluster mismatch detected!");
         if (!unmatched_monitored.empty()) {
-            std::cout << "  Unmatched monitored clusters ("
-                      << unmatched_monitored.size() << "):" << std::endl;
+            ATH_MSG_DEBUG("  Unmatched monitored clusters ("
+                      << unmatched_monitored.size() << "):");
             for (int i : unmatched_monitored) {
-                std::cout << "    - #" << i << std::endl;
+                ATH_MSG_DEBUG("    - #" << i);
+                const xAOD::StripCluster* monitored_cluster = monitored_list.at(i);
+                const auto& monitored_cov = monitored_cluster->localCovariance<1>();
+
+                ATH_MSG_DEBUG("Detailed print of cluster: ");
+
+                ATH_MSG_DEBUG("Local position: ");
+                ATH_MSG_DEBUG(
+                    "  Monitored: ("
+                    << monitored_cluster->localPosition<1>()[Trk::locX] << ")");
+                
+                ATH_MSG_DEBUG("Cluster cov: ");
+                ATH_MSG_DEBUG("  Monitored: (" << monitored_cov(0, 0) << ")");
             }
+            m_strip_unmatched_mon+= unmatched_monitored.size();
         }
         if (!unmatched_reference.empty()) {
-            std::cout << "  Unmatched reference clusters (" << unmatched_reference.size()
-                      << "):" << std::endl;
+            ATH_MSG_DEBUG("  Unmatched reference clusters (" << unmatched_reference.size()
+                      << "):");
             for (int j : unmatched_reference) {
-                std::cout << "    - #" << j << std::endl;
+                ATH_MSG_DEBUG("    - #" << j);
+                const xAOD::StripCluster* reference_cluster = reference_list.at(j);
+                const auto& reference_cov = reference_cluster->localCovariance<1>();
+
+                ATH_MSG_DEBUG("Detailed print of cluster: ");
+                
+                ATH_MSG_DEBUG("Local position: ");
+                
+                ATH_MSG_DEBUG("  Reference: ("
+                            << reference_cluster->localPosition<1>()[Trk::locX] << ")");
+                
+                ATH_MSG_DEBUG("Cluster cov: ");
+                
+                ATH_MSG_DEBUG("  Reference: (" << reference_cov(0, 0) << ")");
             }
+            m_strip_unmatched_ref+= unmatched_reference.size();
         }
-        std::cout
-            << "------------------------------------------------------------"
-            << std::endl;
+        ATH_MSG_DEBUG("------------------------------------------------------------");
     }
 }
 
@@ -228,7 +283,7 @@ StatusCode ActsClusterComparisonAlg::validateClusters(
     const EventContext& eventContext, std::unordered_map<const xAOD::PixelCluster*, const xAOD::PixelCluster*>& pixel_cluster_matches, std::unordered_map<const xAOD::StripCluster*, const xAOD::StripCluster*>& strip_cluster_matches) const
 {
 
-     ATH_MSG_DEBUG(
+    ATH_MSG_DEBUG(
         "============================================================");
     // retrieve the clusters in form of xAOD containers
     ATH_MSG_INFO("Reading monitored clusters: " << m_monitoredPixelClustersKey.key()
@@ -339,11 +394,10 @@ StatusCode ActsClusterComparisonAlg::validateClusters(
             continue;
 
         if (tpixel.size() != apixel.size()) {
-            std::cout << "\n[ERROR] Pixel Module " << hid
-                      << ": mismatched clusters found!" << std::endl;
-            std::cout << "  Reference found " << apixel.size()
-                      << " and monitored found " << tpixel.size() << " clusters!"
-                      << std::endl;
+            ATH_MSG_DEBUG("[ERROR] Pixel Module " << hid
+                      << ": mismatched clusters found!");
+            ATH_MSG_DEBUG("  Reference found " << apixel.size()
+                      << " and monitored found " << tpixel.size() << " clusters!");
             pixel_unequal++;
             continue;
         }
@@ -392,17 +446,16 @@ StatusCode ActsClusterComparisonAlg::validateClusters(
                 static_cast<const InDetDD::PixelModuleDesign&>(
                     monitored_element->design());
 
+            const Identifier monitored_Pixel_ModuleID =
+                monitored_element->identify();
+            double monitored_lorentz_shift =
+                m_pixelLorentzAngleTool->getLorentzShift(
+                    monitored_element->identifyHash(), eventContext);
+        
+
             if (std::abs(l_dx / (std::sqrt(monitored_cov(0, 0)))) > 0.25 ||
                 std::abs(l_dy / (std::sqrt(monitored_cov(1, 1)))) > 0.25) {
                 pixel_pos_diff_0p25sig++;
-
-                const Identifier monitored_Pixel_ModuleID =
-                    monitored_element->identify();
-                double monitored_lorentz_shift =
-                    m_pixelLorentzAngleTool->getLorentzShift(
-                        monitored_element->identifyHash(), eventContext);
-
-
 
                 ATH_MSG_DEBUG("Detailed print of cluster discrepancy: ");
                 ATH_MSG_DEBUG("On module: " << monitored_Pixel_ModuleID);
@@ -506,7 +559,7 @@ StatusCode ActsClusterComparisonAlg::validateClusters(
             continue;
 
         if (tstrip.size() != astrip.size()) {
-            ATH_MSG_DEBUG("\n[ERROR] Strip Module "
+            ATH_MSG_DEBUG("[ERROR] Strip Module "
                           << hid << ": mismatched clusters found!");
             ATH_MSG_DEBUG("  Reference found " << astrip.size()
                                           << " and monitored found "
@@ -551,7 +604,7 @@ StatusCode ActsClusterComparisonAlg::validateClusters(
                 const Identifier strip_moduleID = m_stripID->module_id(monitored_element->identify());
                 const IdentifierHash Strip_ModuleHash = m_stripID->wafer_hash(strip_moduleID);
                 double monitored_lorentz_shift =
-                    m_lorentzAngleTool->getLorentzShift(Strip_ModuleHash + side, eventContext);
+                    m_stripLorentzAngleTool->getLorentzShift(Strip_ModuleHash + side, eventContext);
 
                 ATH_MSG_DEBUG("Detailed print of cluster discrepancy: ");
                 ATH_MSG_DEBUG("On module: " << strip_moduleID << ", side: " << m_stripID->side(monitored_element->identify()));
@@ -909,87 +962,84 @@ StatusCode ActsClusterComparisonAlg::validatePixelSpacepoints(
 StatusCode ActsClusterComparisonAlg::finalize()
 {
 
-    ATH_MSG_INFO("Validation summary: ");
-
     // Print cluster statistics
-    ATH_MSG_INFO(
-        "============================================================");
-    ATH_MSG_INFO("PIXEL CLUSTER MATCHING STATISTICS: ");
-    ATH_MSG_INFO("  Total matched clusters: " << m_matched_pixel);
-    ATH_MSG_INFO("  Clusters with pos diff > 1 sigma: "
+    ATH_MSG_INFO("Validation Summary");
+    ATH_MSG_INFO("ValSum ============================================================");
+    ATH_MSG_INFO("ValSum PIXEL CLUSTER MATCHING STATISTICS: ");
+    ATH_MSG_INFO("ValSum   Total unmatched clusters mon/ref: " << m_pix_unmatched_mon << " / " << m_pix_unmatched_ref);
+    ATH_MSG_INFO("ValSum   Total matched clusters: " << m_matched_pixel);
+    ATH_MSG_INFO("ValSum   Clusters with pos diff > 1 sigma: "
                  << m_pixel_pos_diff_1sig << " ("
                  << (m_matched_pixel.value() > 0
                          ? 100.0 * m_pixel_pos_diff_1sig.value() / m_matched_pixel.value()
                          : 0.0)
                  << "%)");
-    ATH_MSG_INFO("  Clusters with pos diff > 0.5 sigma: "
+    ATH_MSG_INFO("ValSum  Clusters with pos diff > 0.5 sigma: "
                  << m_pixel_pos_diff_0p5sig << " ("
                  << (m_matched_pixel.value() > 0
                          ? 100.0 * m_pixel_pos_diff_0p5sig.value() / m_matched_pixel.value()
                          : 0.0)
                  << "%)");
-    ATH_MSG_INFO("  Clusters with pos diff > 0.25 sigma: "
+    ATH_MSG_INFO("ValSum Clusters with pos diff > 0.25 sigma: "
                  << m_pixel_pos_diff_0p25sig << " ("
                  << (m_matched_pixel.value() > 0
                          ? 100.0 * m_pixel_pos_diff_0p25sig.value() / m_matched_pixel.value()
                          : 0.0)
                  << "%)");
-    ATH_MSG_INFO(
-        "============================================================");
-    ATH_MSG_INFO(
-        "============================================================");
-    ATH_MSG_INFO("STRIP CLUSTER MATCHING STATISTICS:");
-    ATH_MSG_INFO("  Total matched clusters: " << m_matched_strip);
-    ATH_MSG_INFO("  Clusters with pos diff > 1 sigma: "
+    ATH_MSG_INFO("ValSum ============================================================");
+    ATH_MSG_INFO("ValSum ============================================================");
+    ATH_MSG_INFO("ValSum STRIP CLUSTER MATCHING STATISTICS:");
+    ATH_MSG_INFO("ValSum Total unmatched clusters mon/ref: " << m_strip_unmatched_mon << " / " << m_strip_unmatched_ref);
+    ATH_MSG_INFO("ValSum Total matched clusters: " << m_matched_strip);
+    ATH_MSG_INFO("ValSum Clusters with pos diff > 1 sigma: "
                  << m_strip_pos_diff_1sig << " ("
                  << (m_matched_strip.value() > 0
                          ? 100.0 * m_strip_pos_diff_1sig.value() / m_matched_strip.value()
                          : 0.0)
                  << "%)");
-    ATH_MSG_INFO("  Clusters with pos diff > 0.5 sigma: "
+    ATH_MSG_INFO("ValSum Clusters with pos diff > 0.5 sigma: "
                  << m_strip_pos_diff_0p5sig << " ("
                  << (m_matched_strip.value() > 0
                          ? 100.0 * m_strip_pos_diff_0p5sig.value() / m_matched_strip.value()
                          : 0.0)
                  << "%)");
-    ATH_MSG_INFO("  Clusters with pos diff > 0.25 sigma: "
+    ATH_MSG_INFO("ValSum Clusters with pos diff > 0.25 sigma: "
                  << m_strip_pos_diff_0p25sig << " ("
                  << (m_matched_strip.value() > 0
                          ? 100.0 * m_strip_pos_diff_0p25sig.value() / m_matched_strip.value()
                          : 0.0)
                  << "%)");
-    ATH_MSG_INFO(
-        "============================================================");
+    ATH_MSG_INFO("ValSum ============================================================");
 
     if(m_checkSpacepoints){
-        ATH_MSG_INFO("============================================================");
-        ATH_MSG_INFO("PIXEL SPACEPOINT MATCHING STATISTICS:");
-        ATH_MSG_INFO("  Total monitored spacepoints: " << m_nMonSp);
-        ATH_MSG_INFO("  Total reference spacepoints: " << m_nRefSp);
-        ATH_MSG_INFO("  Matched spacepoints: " << m_nMatchedSp);
-        ATH_MSG_INFO("  Unmatched monitored spacepoints: " << m_nUnmatchedMonSp);
-        ATH_MSG_INFO("  Unmatched reference spacepoints: " << m_nUnmatchedRefSp);
-        ATH_MSG_INFO("============================================================");
-        ATH_MSG_INFO("SPACEPOINT POSITION COMPARISON:");
-        ATH_MSG_INFO("  Spacepoints with global pos diff > 1 mm: "
+        ATH_MSG_INFO("ValSum ============================================================");
+        ATH_MSG_INFO("ValSum PIXEL SPACEPOINT MATCHING STATISTICS:");
+        ATH_MSG_INFO("ValSum   Total monitored spacepoints: " << m_nMonSp);
+        ATH_MSG_INFO("ValSum   Total reference spacepoints: " << m_nRefSp);
+        ATH_MSG_INFO("ValSum   Matched spacepoints: " << m_nMatchedSp);
+        ATH_MSG_INFO("ValSum   Unmatched monitored spacepoints: " << m_nUnmatchedMonSp);
+        ATH_MSG_INFO("ValSum   Unmatched reference spacepoints: " << m_nUnmatchedRefSp);
+        ATH_MSG_INFO("ValSum ============================================================");
+        ATH_MSG_INFO("ValSum SPACEPOINT POSITION COMPARISON:");
+        ATH_MSG_INFO("ValSum   Spacepoints with global pos diff > 1 mm: "
                     << m_nSpPosDiff1mm << " ("
                     << (m_nMatchedSp.value() > 0 ? 100.0 * m_nSpPosDiff1mm.value() / m_nMatchedSp.value() : 0.0)
                     << "%)");
-        ATH_MSG_INFO("  Spacepoints with global pos diff > 5 mm: "
+        ATH_MSG_INFO("ValSum  Spacepoints with global pos diff > 5 mm: "
                     << m_nSpPosDiff5mm << " ("
                     << (m_nMatchedSp.value() > 0 ? 100.0 * m_nSpPosDiff5mm.value() / m_nMatchedSp.value() : 0.0)
                     << "%)");
-        ATH_MSG_INFO("============================================================");
-        ATH_MSG_INFO("SPACEPOINT VARIANCE COMPARISON:");
-        ATH_MSG_INFO("  Spacepoints with >10% variance R difference: "
+        ATH_MSG_INFO("ValSum ============================================================");
+        ATH_MSG_INFO("ValSum SPACEPOINT VARIANCE COMPARISON:");
+        ATH_MSG_INFO("ValSum   Spacepoints with >10% variance R difference: "
                     << m_nSpVarRDiff << " ("
                     << (m_nMatchedSp.value() > 0 ? 100.0 * m_nSpVarRDiff.value() / m_nMatchedSp.value() : 0.0)
                     << "%)");
-        ATH_MSG_INFO("  Spacepoints with >10% variance Z difference: "
+        ATH_MSG_INFO("ValSum  Spacepoints with >10% variance Z difference: "
                     << m_nSpVarZDiff << " ("
                     << (m_nMatchedSp.value() > 0 ? 100.0 * m_nSpVarZDiff.value() / m_nMatchedSp.value() : 0.0)
                     << "%)");
-        ATH_MSG_INFO("============================================================");
+        ATH_MSG_INFO("ValSum ============================================================");
     }
 
     return StatusCode::SUCCESS;

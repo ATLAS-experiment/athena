@@ -18,9 +18,11 @@
 #include <Acts/Geometry/ProtoLayer.hpp>
 #include <Acts/Geometry/VolumeAttachmentStrategy.hpp>
 #include <Acts/Navigation/SurfaceArrayNavigationPolicy.hpp>
+#include <Acts/Navigation/CylinderNavigationPolicy.hpp>
 #include <Acts/Navigation/TryAllNavigationPolicy.hpp>
 #include <Acts/Surfaces/SurfaceArray.hpp>
 #include <Acts/Utilities/AxisDefinitions.hpp>
+#include <Acts/Utilities/AxisSpec.hpp>
 #include <cstddef>
 #include <format>
 #include <ranges>
@@ -40,7 +42,6 @@ namespace {
 
 using enum Acts::CylinderVolumeBounds::Face;
 using enum Acts::AxisDirection;
-using enum Acts::AxisBoundaryType;
 using enum Acts::SurfaceArrayNavigationPolicy::LayerType;
 using AttachmentStrategy = Acts::VolumeAttachmentStrategy;
 using ResizeStrategy = Acts::VolumeResizeStrategy;
@@ -117,7 +118,6 @@ void addStripBarrelLayer(
   using enum Acts::SurfaceArrayNavigationPolicy::LayerType;
   using enum Acts::CylinderVolumeBounds::Face;
   using enum Acts::AxisDirection;
-  using enum Acts::AxisBoundaryType;
 
   auto addLayer = [ilayer, &surfaces](auto& node) {
     node.addLayer("Strip_Brl_" + std::to_string(ilayer), [&](auto& layer) {
@@ -125,9 +125,8 @@ void addStripBarrelLayer(
           Acts::NavigationPolicyFactory{}
               .add<Acts::SurfaceArrayNavigationPolicy>(
                   Acts::SurfaceArrayNavigationPolicy::Config{
-                      .layerType = Cylinder, .bins = {30, 10}})
-              .add<Acts::TryAllNavigationPolicy>(
-                  Acts::TryAllNavigationPolicy::Config{.sensitives = false})
+                      .layerType = Cylinder, .bins = {0, 0}, .numberOfBinsFactor = 5.0})
+              .add<Acts::CylinderNavigationPolicy>()
               .asUniquePtr());
 
       layer.setSurfaces(surfaces);
@@ -138,41 +137,54 @@ void addStripBarrelLayer(
     });
   };
 
-  // Inner 3 layers: add material on inner and outer cylinders
-  // Outermost layer: add material only on inner cylinder
-  parent.addMaterial("Strip_Brl_" + std::to_string(ilayer) + "_Material",
-                     [&addLayer, &ilayer](auto& lmat) {
-                       if (ilayer < 3) {
-                         lmat.configureFace(OuterCylinder,
-                                            {AxisRPhi, Closed, 20},
-                                            {AxisZ, Bound, 20});
-                       }
-                       lmat.configureFace(InnerCylinder, {AxisRPhi, Closed, 20},
-                                          {AxisZ, Bound, 20});
-                       addLayer(lmat);
-                     });
+  // Keep material on each layer's OuterCylinder (the lower-r side of the gap
+  // above it); drop the InnerCylinder so it can fuse with the inner
+  // neighbour's kept OuterCylinder when the inter-layer gap is collapsed. The
+  // innermost layer also drops its InnerCylinder: it is expanded inward onto
+  // the StripMaterial inner shell (382.5), whose full-z InnerCylinder material
+  // (3mm below) is the surviving surface, so keeping the layer's own
+  // InnerCylinder would double-fuse. Surviving material sits at the
+  // lower-radius side of each collapsed gap.
+  // Layer 3 carries no material; skip the MaterialDesignator wrapper to avoid
+  // empty-designator warnings and call addLayer directly on the parent.
+  if (ilayer < 3) {
+    parent.addMaterial("Strip_Brl_" + std::to_string(ilayer) + "_Material",
+                       [&addLayer](auto& lmat) {
+                         lmat.configureFace(
+                             OuterCylinder,
+                             AxisSpec::DeferredEquidistant(20, AxisRPhi),
+                             AxisSpec::DeferredEquidistant(20, AxisZ));
+                         addLayer(lmat);
+                       });
+  } else {
+    addLayer(parent);
+  }
 }
 
 void addStripEndcapLayer(
     Acts::BlueprintNode& parent, const std::string& name,
-    const std::vector<std::shared_ptr<Acts::Surface>>& surfaces) {
+    const std::vector<std::shared_ptr<Acts::Surface>>& surfaces, int bec) {
   using enum Acts::SurfaceArrayNavigationPolicy::LayerType;
   using enum Acts::CylinderVolumeBounds::Face;
   using enum Acts::AxisDirection;
-  using enum Acts::AxisBoundaryType;
 
+  // Keep material only on the disk's outward disc; the inward disc is dropped
+  // so it can fuse with the neighbour's outward disc when the inter-disk gap is
+  // collapsed. The innermost disk also drops its inward disc: it is expanded
+  // toward the barrel and fuses with the barrel end disc (the kept, smaller-|z|
+  // surface). Surviving material sits at the smaller-|z| side of each gap.
+  const auto outwardDisc = (bec > 0) ? PositiveDisc : NegativeDisc;
   parent.addMaterial(name + "_Material", [&](auto& mat) {
-    mat.configureFace(PositiveDisc, {AxisR, Bound, 20}, {AxisPhi, Closed, 40});
-    mat.configureFace(NegativeDisc, {AxisR, Bound, 20}, {AxisPhi, Closed, 40});
+    mat.configureFace(outwardDisc, AxisSpec::DeferredEquidistant(20, AxisR),
+                      AxisSpec::DeferredEquidistant(40, AxisPhi));
 
     mat.addLayer(name, [&surfaces](auto& layer) {
       layer.setNavigationPolicyFactory(
           Acts::NavigationPolicyFactory{}
               .add<Acts::SurfaceArrayNavigationPolicy>(
                   Acts::SurfaceArrayNavigationPolicy::Config{.layerType = Disc,
-                                                             .bins = {30, 30}})
-              .add<Acts::TryAllNavigationPolicy>(
-                  Acts::TryAllNavigationPolicy::Config{.sensitives = false})
+                                                             .bins = {0, 0}, .numberOfBinsFactor = 5.0})
+              .add<Acts::CylinderNavigationPolicy>()
               .asUniquePtr());
 
       layer.setSurfaces(surfaces);
@@ -216,12 +228,25 @@ ItkBlueprintNodeBuilder::buildBlueprintNode(
 
   itk.addMaterial("ItkNodeMain_Material", [&](auto& mat) {
       if (m_buildStrip) {
-        mat.configureFace(NegativeDisc, {AxisR, Bound, 20}, {AxisPhi, Closed, 40});
-        mat.configureFace(PositiveDisc, {AxisR, Bound, 20}, {AxisPhi, Closed, 40});
+        mat.configureFace(NegativeDisc,
+                          AxisSpec::DeferredEquidistant(20, AxisR),
+                          AxisSpec::DeferredEquidistant(40, AxisPhi));
+        mat.configureFace(PositiveDisc,
+                          AxisSpec::DeferredEquidistant(20, AxisR),
+                          AxisSpec::DeferredEquidistant(40, AxisPhi));
       }
 
     auto& innerContainer = mat.addCylinderContainer("ITkInnerContainer", AxisR);
-
+    // The radial dead bands between the R-stacked sub-detectors (beampipe /
+    // InnerPixel / OuterPixel / Strip) are genuine empty space, but the default
+    // Midpoint attachment splits each band at its midpoint and lets BOTH
+    // neighbours fill their half with a ResizeStrategy::Gap volume -> two thin
+    // gap volumes per interface. Second makes a single neighbour own the whole
+    // band -> one gap per interface. Material is unaffected: each sub-detector
+    // keeps ResizeStrategy::Gap, so its material-bearing shell stays frozen at
+    // its true edge and only the empty band is merged.
+    innerContainer.setAttachmentStrategy(AttachmentStrategy::Second);
+    innerContainer.setResizeStrategy(ResizeStrategy::Gap);
     // Beam pipe is passed in as an optional child from BeamPipeBlueprintNodeBuilder
     if (childNode) {
       innerContainer.addChild(std::move(childNode));
@@ -273,13 +298,17 @@ void ItkBlueprintNodeBuilder::buildItkPixelBlueprintNode(
   // Inner pixel: 2 innermost barrel layers + inner endcap disks
   auto& innerPixel = node.addCylinderContainer("InnerPixel", AxisR);
   innerPixel.setAttachmentStrategy(AttachmentStrategy::Gap);
-  innerPixel.setResizeStrategy(ResizeStrategy::Gap);
+  // Inner edge Expand: extend all InnerPixel cylinders (endcaps + barrel_0)
+  // inward onto the beam pipe, removing InnerPixel::Gap1. The InnerCylinder
+  // material (30.9) is dropped below so the expanded face fuses cleanly with
+  // the beam pipe outer material (23.9, the kept lower-r surface). Outer edge
+  // stays Gap.
+  innerPixel.setResizeStrategies(ResizeStrategy::Expand, ResizeStrategy::Gap);
 
   innerPixel.addMaterial("InnerPixelMaterial", [&](auto& mat) {
-    mat.configureFace(OuterCylinder, {AxisRPhi, Closed, 20},
-                      {AxisZ, Bound, 20});
-    mat.configureFace(InnerCylinder, {AxisRPhi, Closed, 20},
-                      {AxisZ, Bound, 20});
+    mat.configureFace(OuterCylinder,
+                      AxisSpec::DeferredEquidistant(20, AxisRPhi),
+                      AxisSpec::DeferredEquidistant(20, AxisZ));
 
     auto& innerPixelContainer = mat.addCylinderContainer("InnerPixel", AxisZ);
 
@@ -301,16 +330,31 @@ void ItkBlueprintNodeBuilder::buildItkPixelBlueprintNode(
         });
 
     auto& brl_mat =
-        barrelGeoId.addMaterial("InnerPixel_Material", [&](auto& mat) {
-          mat.configureFace(NegativeDisc, {AxisR, Bound, 10},
-                            {AxisPhi, Closed, 10});
-          mat.configureFace(PositiveDisc, {AxisR, Bound, 10},
-                            {AxisPhi, Closed, 10});
+        barrelGeoId.addMaterial("InnerPixel_Material", [&](auto& material) {
+          material.configureFace(NegativeDisc,
+                                 AxisSpec::DeferredEquidistant(10, AxisR),
+                                 AxisSpec::DeferredEquidistant(10, AxisPhi));
+          material.configureFace(PositiveDisc,
+                                 AxisSpec::DeferredEquidistant(10, AxisR),
+                                 AxisSpec::DeferredEquidistant(10, AxisPhi));
         });
     auto& barrel = brl_mat.addCylinderContainer("InnerPixel_Brl", AxisR);
 
-    barrel.setAttachmentStrategy(AttachmentStrategy::Gap);
-    barrel.setResizeStrategy(ResizeStrategy::Gap);
+    // Barrel layers carry material only on their OuterCylinder face. Attaching
+    // with Second extends the outer (higher-R) neighbour's material-free inner
+    // face inward to meet each layer's outer face, collapsing the inter-layer
+    // gap volumes while leaving every material surface fixed.
+    barrel.setAttachmentStrategy(AttachmentStrategy::Second);
+    // Inner edge Expand: Brl_0's inner cylinder is material-free, so it extends
+    // inward onto the beam pipe (the InnerPixel container also expands inward,
+    // so the endcaps reach the beam pipe too) removing the barrel's share of the
+    // InnerPixel beam-pipe gap.
+    // Outer edge Expand: the outermost layer grows out onto the InnerPixel
+    // OuterCylinder shell (123.7), removing InnerPixel_Brl::Gap1 (the gap after
+    // the last barrel layer). Its own OuterCylinder material is dropped below
+    // (kept only up to the second-outermost layer) so the expanded face fuses
+    // cleanly with the container shell (the kept surface).
+    barrel.setResizeStrategies(ResizeStrategy::Expand, ResizeStrategy::Expand);
 
     std::map<int, std::vector<std::shared_ptr<Acts::Surface>>> layers{};
 
@@ -330,35 +374,43 @@ void ItkBlueprintNodeBuilder::buildItkPixelBlueprintNode(
 
     ATH_MSG_DEBUG("Adding " << layers.size() << " layers to InnerPixel barrel");
 
+    const int outermostBrlLayer = layers.rbegin()->first;
     for (const auto& [ilayer, surfaces] : layers) {
       ATH_MSG_DEBUG("- Layer " << ilayer << " has " << surfaces.size()
                                << " surfaces");
 
-      barrel.addMaterial(
-          std::format("InnerPixel_Brl_{}_Material", ilayer), [&](auto& lmat) {
-            lmat.configureFace(OuterCylinder, {AxisRPhi, Closed, 40},
-                               {AxisZ, Bound, 20});
+      auto configureLayer = [&](auto& node) {
+        auto& layer = node.addLayer(std::format("InnerPixel_Brl_{}", ilayer));
+        layer.setNavigationPolicyFactory(
+            Acts::NavigationPolicyFactory{}
+                .add<Acts::SurfaceArrayNavigationPolicy>(
+                    Acts::SurfaceArrayNavigationPolicy::Config{
+                        .layerType = Cylinder,
+                        .bins = {0, 0}, .numberOfBinsFactor = 5.0})
+                .add<Acts::CylinderNavigationPolicy>()
+                .asUniquePtr());
+        layer.setSurfaces(surfaces);
+        layer.setEnvelope(Acts::ExtentEnvelope{{
+            .z = {5_mm, 5_mm},
+            .r = {2_mm, 2_mm},
+        }});
+      };
 
-            auto& layer =
-                lmat.addLayer(std::format("InnerPixel_Brl_{}", ilayer));
-
-            layer.setNavigationPolicyFactory(
-                Acts::NavigationPolicyFactory{}
-                    .add<Acts::SurfaceArrayNavigationPolicy>(
-                        Acts::SurfaceArrayNavigationPolicy::Config{
-                            .layerType = Cylinder,
-                            .bins = {30, 10}})
-                    .add<Acts::TryAllNavigationPolicy>(
-                        Acts::TryAllNavigationPolicy::Config{.sensitives =
-                                                                 false})
-                    .asUniquePtr());
-
-            layer.setSurfaces(surfaces);
-            layer.setEnvelope(Acts::ExtentEnvelope{{
-                .z = {5_mm, 5_mm},
-                .r = {2_mm, 2_mm},
-            }});
-          });
+      // Outermost layer expands onto the container OuterCylinder shell, so
+      // drop its own OuterCylinder; skip the MaterialDesignator wrapper to
+      // avoid empty-designator warnings.
+      if (ilayer != outermostBrlLayer) {
+        barrel.addMaterial(
+            std::format("InnerPixel_Brl_{}_Material", ilayer),
+            [&](auto& lmat) {
+              lmat.configureFace(OuterCylinder,
+                                 AxisSpec::DeferredEquidistant(40, AxisRPhi),
+                                 AxisSpec::DeferredEquidistant(20, AxisZ));
+              configureLayer(lmat);
+            });
+      } else {
+        configureLayer(barrel);
+      }
     }
 
     // Add endcap containers
@@ -368,8 +420,21 @@ void ItkBlueprintNodeBuilder::buildItkPixelBlueprintNode(
       ecGeoId.setAllVolumeIdsTo(s_innerPixelVolumeId + std::floor(bec / 2))
           .incrementLayerIds(1);
       auto& ec = ecGeoId.addCylinderContainer("InnerPixel_" + s + "EC", AxisZ);
-      ec.setAttachmentStrategy(AttachmentStrategy::Gap);
-      ec.setResizeStrategy(ResizeStrategy::Gap);
+      // Collapse the inter-disk gaps by extending the outer disk inward onto
+      // its neighbour (Second for +z, First for -z), keeping the material
+      // surface at the smaller-|z| side of each gap (see per-disk material
+      // handling below).
+      ec.setAttachmentStrategy(bec > 0 ? AttachmentStrategy::Second
+                                       : AttachmentStrategy::First);
+      // Barrel-facing edge Expand: extend the innermost disk toward the barrel
+      // (smaller |z|), removing the barrel<->endcap transition gap. That edge is
+      // the low-z (inner) side for +z endcaps and the high-z (outer) side for -z
+      // endcaps. The far (z-end) edge stays Gap. The innermost disk's inward disc
+      // material is dropped below so the expanded face fuses with the barrel end
+      // disc (the kept, smaller-|z| surface).
+      ec.setResizeStrategies(
+          bec > 0 ? ResizeStrategy::Expand : ResizeStrategy::Gap,
+          bec > 0 ? ResizeStrategy::Gap : ResizeStrategy::Expand);
 
       std::map<std::tuple<int, int, int>,
                std::vector<std::shared_ptr<Acts::Surface>>>
@@ -434,9 +499,8 @@ void ItkBlueprintNodeBuilder::buildItkPixelBlueprintNode(
                   .add<Acts::SurfaceArrayNavigationPolicy>(
                       Acts::SurfaceArrayNavigationPolicy::Config{
                           .layerType = Disc,
-                          .bins = {30, 30}})
-                  .add<Acts::TryAllNavigationPolicy>(
-                      Acts::TryAllNavigationPolicy::Config{.sensitives = false})
+                          .bins = {0, 0}, .numberOfBinsFactor = 5.0})
+                  .add<Acts::CylinderNavigationPolicy>()
                   .asUniquePtr());
 
           layer.setSurfaces(pl.surfaces);
@@ -450,11 +514,17 @@ void ItkBlueprintNodeBuilder::buildItkPixelBlueprintNode(
                         << key << " / " << mergedLayers.size()
                         << " at z = " << pl.protoLayer.medium(AxisZ));
         ATH_MSG_VERBOSE("Adding material for layer " << layerName);
+        // Keep material only on each disk's outward disc (away from the IP);
+        // the inward disc is dropped so it can fuse with the adjacent disk's
+        // kept outward disc without the "both portals carry material" fuse
+        // error. The innermost disk drops its inward disc too: it is expanded
+        // toward the barrel and fuses with the barrel end disc (the kept,
+        // smaller-|z| surface).
+        const auto outwardDisc = (bec > 0) ? PositiveDisc : NegativeDisc;
         ec.addMaterial(layerName + "_Material", [&](auto& lmat) {
-          lmat.configureFace(NegativeDisc, {AxisR, Bound, 10},
-                             {AxisPhi, Closed, 40});
-          lmat.configureFace(PositiveDisc, {AxisR, Bound, 10},
-                             {AxisPhi, Closed, 40});
+          lmat.configureFace(outwardDisc,
+                             AxisSpec::DeferredEquidistant(10, AxisR),
+                             AxisSpec::DeferredEquidistant(40, AxisPhi));
           addLayer(lmat);
         });
       }
@@ -464,11 +534,17 @@ void ItkBlueprintNodeBuilder::buildItkPixelBlueprintNode(
   // Outer pixel: 3 outer barrel layers + outer endcaps
   auto& outerPixel = node.addCylinderContainer("OuterPixel", AxisR);
   outerPixel.setAttachmentStrategy(AttachmentStrategy::Gap);
-  outerPixel.setResizeStrategy(ResizeStrategy::Gap);
+  // Inner edge Expand: extend all OuterPixel cylinders inward onto the
+  // InnerPixel outer shell (123.7), removing OuterPixel::Gap1. The InnerCylinder
+  // material (147.7) is dropped below so the expanded face fuses cleanly with
+  // the InnerPixel OuterCylinder (123.7, the kept lower-r surface). Outer edge
+  // stays Gap (the OuterPixel/Strip interface is handled from the Strip side).
+  outerPixel.setResizeStrategies(ResizeStrategy::Expand, ResizeStrategy::Gap);
 
   outerPixel.addMaterial("OuterPixelMaterial", [&](auto& opmat) {
-    opmat.configureFace(OuterCylinder, {AxisRPhi, Bound, 20}, {AxisZ, Bound, 20});
-    opmat.configureFace(InnerCylinder, {AxisRPhi, Bound, 20}, {AxisZ, Bound, 20});
+    opmat.configureFace(OuterCylinder,
+                        AxisSpec::DeferredEquidistant(20, AxisRPhi),
+                        AxisSpec::DeferredEquidistant(20, AxisZ));
 
     auto& outerPixelContainer = opmat.addCylinderContainer("OuterPixel", AxisZ);
 
@@ -477,15 +553,27 @@ void ItkBlueprintNodeBuilder::buildItkPixelBlueprintNode(
 
     auto& brl_mat =
         barrelGeoId.addMaterial("OuterPixel_Material", [&](auto& bmat) {
-          bmat.configureFace(NegativeDisc, {AxisR, Bound, 10},
-                            {AxisPhi, Closed, 10});
-          bmat.configureFace(PositiveDisc, {AxisR, Bound, 10},
-                            {AxisPhi, Closed, 10});
+          bmat.configureFace(NegativeDisc,
+                             AxisSpec::DeferredEquidistant(10, AxisR),
+                             AxisSpec::DeferredEquidistant(10, AxisPhi));
+          bmat.configureFace(PositiveDisc,
+                             AxisSpec::DeferredEquidistant(10, AxisR),
+                             AxisSpec::DeferredEquidistant(10, AxisPhi));
         });
     auto& barrel = brl_mat.addCylinderContainer("OuterPixel_Brl", AxisR);
 
-    barrel.setAttachmentStrategy(AttachmentStrategy::Gap);
-    barrel.setResizeStrategy(ResizeStrategy::Gap);
+    // See InnerPixel_Brl: layers carry material only on OuterCylinder, so
+    // Second attachment removes the inter-layer gaps without moving any
+    // material surface.
+    barrel.setAttachmentStrategy(AttachmentStrategy::Second);
+    // Inner edge Expand: the innermost layer's inner cylinder is material-free,
+    // so it extends inward onto the container inner shell and fuses with the
+    // OuterPixelMaterial InnerCylinder (one material side, nothing moves).
+    // Outer edge Expand: the outermost layer grows out onto the OuterPixel
+    // OuterCylinder shell (316.7), removing the gap after the last barrel layer.
+    // Its own OuterCylinder material is dropped below so the expanded face fuses
+    // cleanly with the container shell (the kept surface).
+    barrel.setResizeStrategies(ResizeStrategy::Expand, ResizeStrategy::Expand);
 
     std::map<int, std::vector<std::shared_ptr<Acts::Surface>>> layers{};
 
@@ -505,35 +593,43 @@ void ItkBlueprintNodeBuilder::buildItkPixelBlueprintNode(
 
     ATH_MSG_DEBUG("Adding " << layers.size() << " layers to OuterPixel barrel");
 
+    const int outermostBrlLayer = layers.rbegin()->first;
     for (const auto& [ilayer, surfaces] : layers) {
       ATH_MSG_DEBUG("- Layer " << ilayer << " has " << surfaces.size()
                                << " surfaces");
 
-      barrel.addMaterial(
-          std::format("OuterPixel_Brl_{}_Material", ilayer), [&](auto& lmat) {
-            lmat.configureFace(OuterCylinder, {AxisRPhi, Closed, 40},
-                               {AxisZ, Bound, 20});
+      auto configureLayer = [&](auto& node) {
+        auto& layer = node.addLayer("OuterPixel_Brl_" + std::to_string(ilayer));
+        layer.setNavigationPolicyFactory(
+            Acts::NavigationPolicyFactory{}
+                .add<Acts::SurfaceArrayNavigationPolicy>(
+                    Acts::SurfaceArrayNavigationPolicy::Config{
+                        .layerType = Cylinder,
+                        .bins = {0, 0}, .numberOfBinsFactor = 5.0})
+                .add<Acts::CylinderNavigationPolicy>()
+                .asUniquePtr());
+        layer.setSurfaces(surfaces);
+        layer.setEnvelope(Acts::ExtentEnvelope{{
+            .z = {5_mm, 5_mm},
+            .r = {2_mm, 2_mm},
+        }});
+      };
 
-            auto& layer =
-                lmat.addLayer("OuterPixel_Brl_" + std::to_string(ilayer));
-
-            layer.setNavigationPolicyFactory(
-                Acts::NavigationPolicyFactory{}
-                    .add<Acts::SurfaceArrayNavigationPolicy>(
-                        Acts::SurfaceArrayNavigationPolicy::Config{
-                            .layerType = Cylinder,
-                            .bins = {30, 10}})
-                    .add<Acts::TryAllNavigationPolicy>(
-                        Acts::TryAllNavigationPolicy::Config{.sensitives =
-                                                                 false})
-                    .asUniquePtr());
-
-            layer.setSurfaces(surfaces);
-            layer.setEnvelope(Acts::ExtentEnvelope{{
-                .z = {5_mm, 5_mm},
-                .r = {2_mm, 2_mm},
-            }});
-          });
+      // Outermost layer expands onto the container OuterCylinder shell, so
+      // drop its own OuterCylinder; skip the MaterialDesignator wrapper to
+      // avoid empty-designator warnings.
+      if (ilayer != outermostBrlLayer) {
+        barrel.addMaterial(
+            std::format("OuterPixel_Brl_{}_Material", ilayer),
+            [&](auto& lmat) {
+              lmat.configureFace(OuterCylinder,
+                                 AxisSpec::DeferredEquidistant(40, AxisRPhi),
+                                 AxisSpec::DeferredEquidistant(20, AxisZ));
+              configureLayer(lmat);
+            });
+      } else {
+        configureLayer(barrel);
+      }
     }
 
     constexpr static auto addEndcapLayer = [](auto& parent, const auto& name,
@@ -543,9 +639,8 @@ void ItkBlueprintNodeBuilder::buildItkPixelBlueprintNode(
             Acts::NavigationPolicyFactory{}
                 .add<Acts::SurfaceArrayNavigationPolicy>(
                     Acts::SurfaceArrayNavigationPolicy::Config{
-                        .layerType = Disc, .bins = {30, 30}})
-                .add<Acts::TryAllNavigationPolicy>(
-                    Acts::TryAllNavigationPolicy::Config{.sensitives = false})
+                        .layerType = Disc, .bins = {0, 0}, .numberOfBinsFactor = 5.0})
+                .add<Acts::CylinderNavigationPolicy>()
                 .asUniquePtr());
 
         layer.setSurfaces(surfaces);
@@ -574,8 +669,9 @@ void ItkBlueprintNodeBuilder::buildItkPixelBlueprintNode(
           material = &ec_outer.addMaterial(
               "OuterPixel_" + s + "EC_" + std::to_string(idx) + "_Material",
               [&](auto& mat) {
-                mat.configureFace(OuterCylinder, {AxisRPhi, Closed, 20},
-                                  {AxisZ, Bound, 20});
+                mat.configureFace(OuterCylinder,
+                                  AxisSpec::DeferredEquidistant(20, AxisRPhi),
+                                  AxisSpec::DeferredEquidistant(20, AxisZ));
               });
         }
 
@@ -586,8 +682,18 @@ void ItkBlueprintNodeBuilder::buildItkPixelBlueprintNode(
                 : ec_outer.addCylinderContainer(
                       "OuterPixel_" + s + "EC_" + std::to_string(idx), AxisZ);
 
-        ec_stack.setAttachmentStrategy(AttachmentStrategy::Gap);
-        ec_stack.setResizeStrategy(ResizeStrategy::Gap);
+        // Collapse inter-disk gaps by extending the outer disk inward (Second
+        // for +z, First for -z); material kept only on outward discs (see
+        // below), so surviving material sits at the smaller-|z| side of each gap.
+        ec_stack.setAttachmentStrategy(bec > 0 ? AttachmentStrategy::Second
+                                               : AttachmentStrategy::First);
+        // Barrel-facing edge Expand: extend the innermost disk of each R-group
+        // toward the barrel (smaller |z|), removing the barrel<->endcap gap; far
+        // (z-end) edge stays Gap. Innermost inward disc dropped below so the
+        // expanded face fuses with the barrel end disc (kept, smaller |z|).
+        ec_stack.setResizeStrategies(
+            bec > 0 ? ResizeStrategy::Expand : ResizeStrategy::Gap,
+            bec > 0 ? ResizeStrategy::Gap : ResizeStrategy::Expand);
 
         std::map<std::tuple<int, int>,
                  std::vector<std::shared_ptr<Acts::Surface>>>
@@ -623,11 +729,11 @@ void ItkBlueprintNodeBuilder::buildItkPixelBlueprintNode(
           auto layerName = "OuterPixel_" + s + "EC_" + std::to_string(idx) +
                            "_" + std::to_string(i);
 
+          const auto outwardDisc = (bec > 0) ? PositiveDisc : NegativeDisc;
           ec_stack.addMaterial(layerName + "_Material", [&](auto& mat) {
-            mat.configureFace(PositiveDisc, {AxisR, Bound, 10},
-                              {AxisPhi, Closed, 40});
-            mat.configureFace(NegativeDisc, {AxisR, Bound, 10},
-                              {AxisPhi, Closed, 40});
+            mat.configureFace(outwardDisc,
+                              AxisSpec::DeferredEquidistant(10, AxisR),
+                              AxisSpec::DeferredEquidistant(40, AxisPhi));
             addEndcapLayer(mat, layerName, surfaces);
           });
         }
@@ -670,13 +776,18 @@ void ItkBlueprintNodeBuilder::buildItkStripBlueprintNode(
 
   auto& strip = node.addCylinderContainer("Strip", AxisR);
   strip.setAttachmentStrategy(AttachmentStrategy::Gap);
-  strip.setResizeStrategy(ResizeStrategy::Gap);
+  // Inner edge Expand: extend all Strip cylinders inward onto the OuterPixel
+  // outer shell (316.7), removing Strip::Gap1. The InnerCylinder material
+  // (382.5) is dropped below so the expanded face fuses cleanly with the
+  // OuterPixel OuterCylinder (316.7, the kept lower-r surface). Outer edge stays
+  // Gap (Strip::Gap2, the resize gap up to the ItkNodeMain envelope, carries
+  // the Strip outer material and must not move).
+  strip.setResizeStrategies(ResizeStrategy::Expand, ResizeStrategy::Gap);
 
   strip.addMaterial("StripMaterial", [&](auto& mat) {
-    mat.configureFace(OuterCylinder, {AxisRPhi, Closed, 20},
-                      {AxisZ, Bound, 20});
-    mat.configureFace(InnerCylinder, {AxisRPhi, Closed, 20},
-                      {AxisZ, Bound, 20});
+    mat.configureFace(OuterCylinder,
+                      AxisSpec::DeferredEquidistant(20, AxisRPhi),
+                      AxisSpec::DeferredEquidistant(20, AxisZ));
 
     auto& stripContainer = mat.addCylinderContainer("Strip", AxisZ);
 
@@ -684,16 +795,29 @@ void ItkBlueprintNodeBuilder::buildItkStripBlueprintNode(
     stripContainer.withGeometryIdentifier([this, &elements](auto& geoId) {
       geoId.setAllVolumeIdsTo(s_stripVolumeId).incrementLayerIds(1);
 
-      auto& brl_mat = geoId.addMaterial("Strip_Brl_Material", [&](auto& mat) {
-        mat.configureFace(NegativeDisc, {AxisR, Bound, 10},
-                          {AxisPhi, Closed, 10});
-        mat.configureFace(PositiveDisc, {AxisR, Bound, 10},
-                          {AxisPhi, Closed, 10});
-      });
+      auto& brl_mat =
+          geoId.addMaterial("Strip_Brl_Material", [&](auto& material) {
+            material.configureFace(NegativeDisc,
+                                   AxisSpec::DeferredEquidistant(10, AxisR),
+                                   AxisSpec::DeferredEquidistant(10, AxisPhi));
+            material.configureFace(PositiveDisc,
+                                   AxisSpec::DeferredEquidistant(10, AxisR),
+                                   AxisSpec::DeferredEquidistant(10, AxisPhi));
+          });
       brl_mat.addCylinderContainer(
           "Strip_Brl", AxisR, [this, &elements](auto& barrel) {
-            barrel.setAttachmentStrategy(AttachmentStrategy::Gap);
-            barrel.setResizeStrategy(ResizeStrategy::Gap);
+            // Collapse the inter-layer gaps by extending the outer layer inward
+            // (Second); material kept only on OuterCylinder faces (see
+            // addStripBarrelLayer) so it stays at the lower-radius side.
+            barrel.setAttachmentStrategy(AttachmentStrategy::Second);
+            // Inner edge: Expand the innermost layer onto the StripMaterial
+            // inner shell (382.5), removing Strip_Brl::Gap1. The layer's own
+            // InnerCylinder material (385.5, redundant with the full-z shell
+            // 3mm below it) is dropped in addStripBarrelLayer so the expanded
+            // face fuses cleanly (one material side). Outer edge stays Gap
+            // (invariant, see OuterPixel_Brl).
+            barrel.setResizeStrategies(ResizeStrategy::Expand,
+                                       ResizeStrategy::Gap);
 
             std::map<int, std::vector<std::shared_ptr<Acts::Surface>>> layers{};
 
@@ -755,14 +879,23 @@ void ItkBlueprintNodeBuilder::buildItkStripBlueprintNode(
             .incrementLayerIds(1);
 
         geoId.addCylinderContainer(
-            "Strip_" + s + "EC", AxisZ, [&sorted_layers, &s](auto& ec) {
-              ec.setAttachmentStrategy(AttachmentStrategy::Gap);
-              ec.setResizeStrategy(ResizeStrategy::Gap);
+            "Strip_" + s + "EC", AxisZ, [&sorted_layers, &s, bec](auto& ec) {
+              // Collapse inter-disk gaps; material kept on outward discs only
+              // (see addStripEndcapLayer), so it stays at the smaller-|z| side.
+              ec.setAttachmentStrategy(bec > 0 ? AttachmentStrategy::Second
+                                               : AttachmentStrategy::First);
+              // Barrel-facing edge Expand: extend the innermost disk toward the
+              // barrel (smaller |z|), removing the barrel<->endcap gap; far edge
+              // stays Gap. Innermost inward disc dropped (addStripEndcapLayer) so
+              // the expanded face fuses with the barrel end disc.
+              ec.setResizeStrategies(
+                  bec > 0 ? ResizeStrategy::Expand : ResizeStrategy::Gap,
+                  bec > 0 ? ResizeStrategy::Gap : ResizeStrategy::Expand);
 
               for (size_t i = 0; i < sorted_layers.size(); ++i) {
                 const auto& surfaces = sorted_layers[i];
                 auto layerName = "Strip_" + s + "EC_" + std::to_string(i);
-                addStripEndcapLayer(ec, layerName, surfaces);
+                addStripEndcapLayer(ec, layerName, surfaces, bec);
               }
             });
       });

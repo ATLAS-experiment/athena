@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /***************************************************************************
@@ -49,7 +49,7 @@ namespace Trk {
     if (this!=&rhs)
       {
         delete m_vertices;
-	m_vertices = m_vertices ? new std::vector<xAOD::Vertex*>(*rhs.m_vertices) : nullptr;
+        m_vertices = rhs.m_vertices ? new std::vector<xAOD::Vertex*>(*rhs.m_vertices) : nullptr;
       }
     return *this;
   }

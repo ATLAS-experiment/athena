@@ -1,13 +1,13 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #undef NDEBUG
 
 #include <chrono>
 #include <iostream>
-#include <CL/sycl.hpp>
+#include <sycl/sycl.hpp>
 
-using namespace cl::sycl;
+using namespace sycl;
 
 void testCopyMechanism(const std::vector<float>& orig, const std::vector<float>& copy)
 {
@@ -45,7 +45,7 @@ void testBufferWriteViaSycl(const uint64_t dataLength)
         {
             buffer<float, 1> xBufferOrig(xOrig.data(), dataLength);
             buffer<float, 1> xBufferCopy(xCopy.data(), dataLength);
-	    queue q{default_selector{}};
+	    queue q;
 
             q.submit([&](handler& handler)
             {

@@ -271,15 +271,15 @@ class SCTCalib : public AthAlgorithm {
       StatusCode getLorentzAngle ATLAS_NOT_THREAD_SAFE (); // Thread unsafe SCTCalibWriteTool::createListLA method is used.
 
       // To handle XML file for DB
-      StatusCode openXML4DB(std::ofstream&, const char*, const char*, const IOVTime&, const IOVTime&) const;
+      StatusCode openXML4DB(std::ofstream&, std::string_view, std::string_view, const IOVTime&, const IOVTime&) const;
       StatusCode closeXML4DB(std::ofstream&) const;
       StatusCode addToXML4DB(std::ofstream&, const Identifier&, std::string_view, float, std::string_view) const;
 
       // To handle XML file for Summary
-      StatusCode openXML4MonSummary(std::ofstream&, const char*) const;
-      StatusCode openXML4DeadSummary(std::ofstream& file, const char* type, int n_Module=0, int n_Link=0, int n_Chip=0, int n_Strip=0) const;
-      StatusCode wrapUpXML4Summary(std::ofstream&, const char*, std::ostringstream&) const;
-      StatusCode addToSummaryStr(std::ostringstream&, const Identifier&, const char*, const char*, const char*) const;
+      StatusCode openXML4MonSummary(std::ofstream&, std::string_view) const;
+      StatusCode openXML4DeadSummary(std::ofstream& file, std::string_view type, int n_Module=0, int n_Link=0, int n_Chip=0, int n_Strip=0) const;
+      StatusCode wrapUpXML4Summary(std::ofstream&, std::string_view, std::ostringstream&) const;
+      StatusCode addToSummaryStr(std::ostringstream&, const Identifier&, std::string_view, std::string_view, std::string_view) const;
 
       template<class S>
       bool retrievedService(S& service) const {

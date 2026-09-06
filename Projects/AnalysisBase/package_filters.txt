@@ -143,7 +143,6 @@
 + Trigger/TrigSteer/TrigCompositeUtils
 + Trigger/TrigT1/TrigT1MuctpiBits
 + Trigger/TrigEmulation/TrigBtagEmulationTool
-#+ Trigger/TrigValidation/TrigAnalysisTest
 
 #
 ### Onnxruntime Service

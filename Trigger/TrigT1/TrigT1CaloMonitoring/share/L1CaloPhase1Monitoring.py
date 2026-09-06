@@ -50,6 +50,7 @@ flags.Output.HISTFileName = os.getenv("L1CALO_ATHENA_JOB_NAME","") + "monitoring
 flags.DQ.useTrigger = False # don't do TrigDecisionTool in MonitorCfg helper methods
 flags.Trigger.L1.doCaloInputs = partition.isValid() # flag for saying if inputs should be decoded or not
 flags.Trigger.enableL1CaloPhase1 = True # used by this script to turn on/off the simulation
+flags.Trigger.enableL1MuonPhase1 = False # used by this script to turn on/off the l1 muon simulation
 # flags for rerunning simulation - on by default only in online environment
 flags.Trigger.L1.doCalo = partition.isValid()
 flags.Trigger.L1.doeFex = partition.isValid()
@@ -120,7 +121,12 @@ parser.add_argument('--dbOverrides',default=None,nargs="+",type=str,help="specif
 parser.add_argument('--postConfig',default=[],nargs="+",type=str,help="specify component properties to apply at the end of the config. Can also specify in the flags section if start with 'cfg.' Use '--postHelp' option to explore the configurables and their properties")
 parser.add_argument('--postInclude',default=[],nargs="+",type=str,help="specify python files to call before configuration completes")
 parser.add_argument('--postHelp',default=None,nargs="*",help="Displays configurables and their properties")
-args,unknown_args = flags.fillFromArgs(parser=parser,return_unknown=True)
+
+# divide args up into preHelp and postHelp ... will call fillFromArgs with just the help a second time after flag setting is done
+sys.argv = ["--help" if x=="-h" else x for x in sys.argv]
+preHelpArgs = sys.argv[0:sys.argv.index("--help")] if "--help" in sys.argv else sys.argv
+postHelpArgs = sys.argv[sys.argv.index("--help"):] if "--help" in sys.argv else []
+args,unknown_args = flags.fillFromArgs(parser=parser,return_unknown=True,listOfArgs=preHelpArgs[1:])
 # check for files in unknown_args list ... will assume are plugins
 # this is copied from Include.py ... seems if I try import it, I get CA behaviour blockage
 try:
@@ -138,8 +144,48 @@ for fn in unknown_args:
     args.postInclude += [fn]
     unknown_args.remove(fn)
 args.postConfig += [x[4:] for x in unknown_args if x.startswith("cfg.")]
-if any([not x.startswith("cfg.") for x in unknown_args]):
+# put unknown_args into a flag, in case plugins want to ingest
+if len(args.postInclude):
+  flags.addFlag("L1CaloAthMon.UnknownArgs",[x for x in unknown_args if not x.startswith("cfg.")])
+  if "--help" in sys.argv: flags.L1CaloAthMon.UnknownArgs += ["--help"] # add to allow plugin to override help
+elif any([not x.startswith("cfg.") for x in unknown_args]):
   raise KeyError("Unknown flags: " + " ".join([x for x in unknown_args if not x.startswith("cfg.")]))
+
+# before doing any postInclude interactions, do the file setup...
+
+# check input files
+if len(flags.Input.Files)>0:
+  # check input files list for alias to default test files ... substituting them
+  from AthenaConfiguration.TestDefaults import defaultTestFiles
+  flags.Input.Files = [getattr(defaultTestFiles,f,f) for f in flags.Input.Files]
+  flags.Input.Files = [item for x in flags.Input.Files for item in (x if isinstance(x,list) else [x])] # flatten mix of str and list
+  # now also check for non-existent input files before continuing
+  for f in flags.Input.Files:
+    if not os.path.exists(f) and not any([os.path.exists(fpart) for fpart in f.split(":")]):
+      log.fatal(f"file '{f}' does not exist")
+      exit(-1)
+
+if args.runNumber is not None:
+  # todo: if an exact event number is provided, we can in theory use the event index and rucio to obtain a filename:
+  # e.g: event-lookup -D RAW "477048 3459682284"
+  # use GUID result to do:
+  # ~/getRucioLFNbyGUID.sh 264A4214-E922-EF11-AB28-B8CEF6444828
+  # gives a filename (last part): data24_13p6TeV.00477048.physics_Main.daq.RAW._lb0975._SFO-13._0001.data
+  from glob import glob
+  if args.lumiBlock is None: args.lumiBlock="*"
+  log.info(" ".join(("Looking up files in atlastier0 for run",args.runNumber,"lb =",args.lumiBlock)))
+  flags.Input.Files = []
+  for lb in args.lumiBlock.split(","):
+    if lb=="*":
+      tryStr = f"/eos/atlas/atlastier0/rucio/data*/{args.stream}/*{args.runNumber}/*RAW/*lb*.*"
+    else:
+      tryStr = f"/eos/atlas/atlastier0/rucio/data*/{args.stream}/*{args.runNumber}/*RAW/*lb{int(lb):04}.*"
+    log.info(" ".join(("Trying",tryStr)))
+    flags.Input.Files += glob(tryStr)
+  log.info(" ".join(("Found",str(len(flags.Input.Files)),"files")))
+
+
+
 
 if len(args.postInclude):
   # call setup methods if any exist in the postIncludes
@@ -169,60 +215,18 @@ if len(args.postInclude):
         if not name: raise RuntimeError( 'plugin file %s can not be found' % fn )
       func = load_function(name,"setup")
       if func:
+        topLog.setLevel(logging.INFO) # take back to info level before doing postInclude setup
         func(flags)
-
-if not any([flags.Trigger.L1.doCalo,flags.Trigger.L1.doCaloInputs,flags.Trigger.L1.doeFex,flags.Trigger.L1.dojFex,flags.Trigger.L1.dogFex,flags.Trigger.L1.doTopo,flags.DQ.useTrigger]):
-  log.info("No steering flags specified, turning on all phase 1 systems (trex,efex,jfex,gfex,topo)")
-  flags.Trigger.L1.doCaloInputs = True # flag for saying if inputs should be decoded or not
-  flags.Trigger.L1.doCalo = True
-  flags.Trigger.L1.doeFex = True
-  flags.Trigger.L1.dojFex = True
-  flags.Trigger.L1.dogFex = True
-  flags.Trigger.L1.doTopo = True
-
-# check input files
-if len(flags.Input.Files)>0:
-  # check input files list for alias to default test files ... substituting them
-  from AthenaConfiguration.TestDefaults import defaultTestFiles
-  flags.Input.Files = [getattr(defaultTestFiles,f,f) for f in flags.Input.Files]
-  flags.Input.Files = [item for x in flags.Input.Files for item in (x if isinstance(x,list) else [x])] # flatten mix of str and list
-  # now also check for non-existent input files before continuing
-  for f in flags.Input.Files:
-    if not os.path.exists(f):
-      log.fatal(f"file '{f}' does not exist")
-      exit(-1)
-
-if args.runNumber is not None:
-  # todo: if an exact event number is provided, we can in theory use the event index and rucio to obtain a filename:
-  # e.g: event-lookup -D RAW "477048 3459682284"
-  # use GUID result to do:
-  # ~/getRucioLFNbyGUID.sh 264A4214-E922-EF11-AB28-B8CEF6444828
-  # gives a filename (last part): data24_13p6TeV.00477048.physics_Main.daq.RAW._lb0975._SFO-13._0001.data
-  from glob import glob
-  if args.lumiBlock is None: args.lumiBlock="*"
-  log.info(" ".join(("Looking up files in atlastier0 for run",args.runNumber,"lb =",args.lumiBlock)))
-  flags.Input.Files = []
-  for lb in args.lumiBlock.split(","):
-    if lb=="*":
-      tryStr = f"/eos/atlas/atlastier0/rucio/data*/{args.stream}/*{args.runNumber}/*RAW/*lb*.*"
-    else:
-      tryStr = f"/eos/atlas/atlastier0/rucio/data*/{args.stream}/*{args.runNumber}/*RAW/*lb{int(lb):04}.*"
-    log.info(" ".join(("Trying",tryStr)))
-    flags.Input.Files += glob(tryStr)
-  log.info(" ".join(("Found",str(len(flags.Input.Files)),"files")))
-
-customMenuFile = ""
-if type(flags.Trigger.triggerConfig)==str and flags.Trigger.triggerConfig.startswith("FILE:"):
-  customMenuFile = flags.Trigger.triggerConfig.split(":",1)[-1]
-  flags.Trigger.triggerConfig="FILE"
+        topLog.setLevel(logging.WARNING)
 
 standalone = False
-# require at least 1 input file if running offline, unless running config-generating mode ....
-if not flags.Common.isOnline and len(flags.Input.Files)==0:
+# require at least 1 input file if running offline, unless running config-generating mode or MC ....
+if not flags.Common.isOnline and len(flags.Input.Files)==0 and not flags.Input.isMC:
   if flags.Exec.MaxEvents==0:
     # this test file is used for generating the han config file
     flags.Input.Files = ["/eos/atlas/atlascerngroupdisk/det-l1calo/OfflineSoftware/TestFiles/data24_13p6TeV/data24_13p6TeV.00477048.physics_Main.daq.RAW._lb0821._SFO-20._0001.data"]
   else:
+    if len(postHelpArgs): flags.fillFromArgs(listOfArgs=postHelpArgs)
     log.fatal("Running in offline mode but no input files provided. Please specify with: --filesInput <file>")
     from AthenaConfiguration.TestDefaults import defaultTestFiles
     log.fatal("You can specify one of the default test files:" + ",".join([f for f in dir(defaultTestFiles) if f[0].isupper()]))
@@ -245,6 +249,23 @@ elif flags.Common.isOnline:
     import time
     log.info("Waiting 2 minutes for LATOME to get their databases in order")
     time.sleep(120)
+
+if len(args.postInclude)==0 and not any([flags.Trigger.L1.doCalo,flags.Trigger.L1.doCaloInputs,flags.Trigger.L1.doeFex,flags.Trigger.L1.dojFex,flags.Trigger.L1.dogFex,flags.Trigger.L1.doTopo,flags.DQ.useTrigger]):
+  log.info("No steering flags specified and no postInclude, turning on all phase 1 systems (trex,efex,jfex,gfex,topo)")
+  flags.Trigger.L1.doCaloInputs = True # flag for saying if inputs should be decoded or not
+  flags.Trigger.L1.doCalo = True
+  flags.Trigger.L1.doeFex = True
+  flags.Trigger.L1.dojFex = True
+  flags.Trigger.L1.dogFex = True
+  flags.Trigger.L1.doTopo = True
+
+
+customMenuFile = ""
+if type(flags.Trigger.triggerConfig)==str and flags.Trigger.triggerConfig.startswith("FILE:"):
+  customMenuFile = flags.Trigger.triggerConfig.split(":",1)[-1]
+  flags.Trigger.triggerConfig="FILE"
+
+
 
 # if running on an input file, change the DQ environment, which will allow debug tree creation from monitoring algs
 if len(flags.Input.Files)>0:
@@ -306,11 +327,13 @@ log.setLevel(logging.INFO)
 
 
 
+if len(postHelpArgs): flags.fillFromArgs(listOfArgs=postHelpArgs)
+
 flags.lock()
 if flags.Exec.MaxEvents == 0: flags.dump(evaluate=True)
 
 # if nothing enabled, exit out here
-if not any([flags.Trigger.L1.doCaloInputs,flags.Trigger.L1.doCalo,flags.Trigger.L1.doeFex,flags.Trigger.L1.dojFex,flags.Trigger.L1.dogFex,flags.Trigger.L1.doTopo]):
+if len(args.postInclude)==0 and not any([flags.Trigger.L1.doCaloInputs,flags.Trigger.L1.doCalo,flags.Trigger.L1.doeFex,flags.Trigger.L1.dojFex,flags.Trigger.L1.dogFex,flags.Trigger.L1.doTopo]):
   log.fatal("You did not set any flags to specify what to run. ")
   log.fatal("Please set at least one of the flags in Trigger.L1.(doCaloInputs, doCalo, doeFex, dojFex, dogFex, doTopo) ")
   log.fatal("or use '--all' option to turn on everything (but that is slow)")
@@ -344,7 +367,7 @@ elif flags.Input.Format == Format.POOL:
   log.info(f"Running Offline on {len(flags.Input.Files)} POOL files: {flags.Input.Files[0]} ...")
   from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
   cfg.merge(PoolReadCfg(flags))
-else:
+elif len(flags.Input.Files)>0:
   log.info(f"Running Offline on {len(flags.Input.Files)} bytestream files: {flags.Input.Files[0]} ...")
   #from ByteStreamCnvSvc.ByteStreamConfig import ByteStreamReadCfg
   #TODO: Figure out why the above line causes CA conflict @ P1 if try to run on a RAW file there
@@ -381,7 +404,9 @@ if flags.Trigger.triggerConfig=="FILE":
     log.fatal(f"L1Menu file does not exist: {menuFilename}")
     exit(1)
   createL1PrescalesFileFromMenu(flags)
-cfg.merge(L1ConfigSvcCfg(flags))
+
+# Add L1 Config unless in inputless offline mode
+if not (not flags.Common.isOnline and len(flags.Input.Files)==0): cfg.merge(L1ConfigSvcCfg(flags))
 
 # -------- CHANGES GO BELOW ------------
 # setup the L1Calo software we want to monitor
@@ -430,7 +455,7 @@ if flags.Trigger.enableL1CaloPhase1:
   # note to self ... could look into input key remapping to avoid conflict with sim from input:
   #   from SGComps.AddressRemappingConfig import InputRenameCfg
   #   acc.merge(InputRenameCfg('xAOD::TriggerTowerContainer', 'xAODTriggerTowers_rerun', 'xAODTriggerTowers'))
-  cfg.merge(L1CaloFEXSimCfg(flags,outputSuffix="_ReSim" if flags.Input.Format == Format.POOL else ""),sequenceName="L1Sim")
+  cfg.merge(L1CaloFEXSimCfg(flags,outputSuffix="_ReSim" if flags.Input.Format == Format.POOL and flags.Input.ProcessingTags != ['StreamRDO'] else ""),sequenceName="L1Sim")
   # scheduling simulation of topo
   if flags.Trigger.L1.doTopo:
     from L1TopoSimulation.L1TopoSimulationConfig import L1TopoSimulationCfg
@@ -470,6 +495,11 @@ if flags.Trigger.enableL1CaloPhase1:
   #
   # cfg.getEventAlgo("L1_eFexEmulatedTowers").LArBadChannelKey = "LArMaskedSC"
 
+if flags.Trigger.enableL1MuonPhase1:
+  # run L1 Muon simulation
+  cfg.addSequence(CompFactory.AthSequencer("L1MuonSim",StopOverride=True),parentName="AthAlgSeq")
+  from TriggerJobOpts.Lvl1MuonSimulationConfig import Lvl1MuonSimulationCfg
+  cfg.merge(Lvl1MuonSimulationCfg(flags), sequenceName='L1MuonSim')
 
 
 if flags.DQ.doMonitoring:
@@ -607,7 +637,8 @@ if type(args.dbOverrides)==list:
 
 
 # configure output AOD if requested
-if flags.Output.AODFileName != "":
+# don't set this up if running in inputless mode (which some plugins use for unusual input jobs like text files)
+if flags.Output.AODFileName != "" and len(flags.Input.Files)>0:
   def addEDM(edmType, edmName):
     if edmName.endswith("Sim") and flags.Input.Format == Format.POOL: edmName = edmName.replace("Sim","_ReSim")
     auxType = edmType.replace('Container','AuxContainer')
@@ -726,11 +757,33 @@ if flags.Trigger.L1.doeFex and (args.evtNumber is not None):
 from AthenaCommon.Include import include
 from AthenaCommon.Configurable import ConfigurableCABehavior
 with ConfigurableCABehavior():
-  for inc in args.postInclude: include(inc)
+  for inc in args.postInclude:
+    try:
+      topLog.setLevel(logging.INFO) # take back to info level before doing postInclude
+      include(inc)
+      topLog.setLevel(logging.WARNING)
+    except Exception as e:
+      import traceback
+      print(f"Exception from {inc}")
+      tb = e.__traceback__
+
+      # Skip frames until we reach a particular file
+      while tb is not None:
+        if tb.tb_frame.f_code.co_filename.endswith(inc):
+          break
+        tb = tb.tb_next
+
+      traceback.print_exception(type(e), e, tb)
+      exit(1)
 
 for conf in args.postConfig:
   compName,propNameAndVal=conf.split(".",1)
   propName,propVal=propNameAndVal.split("=",1)
+  try:
+    ast.literal_eval(propVal)
+  except Exception:  # Can't determine type, assume we got an un-quoted string
+    propVal=f"\"{propVal}\""
+    propNameAndVal = f"{propName}={propVal}"
   applied = False
   from collections import defaultdict
   availableComps = defaultdict(list)

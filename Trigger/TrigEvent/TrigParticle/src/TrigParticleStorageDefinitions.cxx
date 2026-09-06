@@ -18,8 +18,6 @@
 #include "JetEvent/JetMomentMapCollection.h"
 #include "egammaEvent/egammaContainer.h"
 #include "egammaEvent/egDetailContainer.h"
-#include "tauEvent/TauDetailsContainer.h"
-#include "tauEvent/TauJetContainer.h"
 #include "xAODJet/JetContainer.h" 
 #include "xAODTrigEgamma/TrigElectronContainer.h"
 #include "xAODTrigEgamma/TrigElectron.h"

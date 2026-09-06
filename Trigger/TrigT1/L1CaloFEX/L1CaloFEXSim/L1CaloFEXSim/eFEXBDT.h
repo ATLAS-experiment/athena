@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //***************************************************************************
@@ -47,7 +47,7 @@ public:
     j.at("bdt").get_to(o.m_bdt);
   }
 
-  eFEXBDT(std::string filename) {
+  eFEXBDT(const std::string & filename) {
     /* Construct the BDT from conifer cpp backend JSON file */
     std::ifstream ifs(filename);
     nlohmann::json j = nlohmann::json::parse(ifs);

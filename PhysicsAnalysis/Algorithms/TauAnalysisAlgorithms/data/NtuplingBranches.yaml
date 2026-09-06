@@ -130,7 +130,16 @@ DiTauMassBlock:
     toggled_by: saveExtraVariables
   - name: mmc_maxw_tau2_4vect
     description: four-vector of the subleading-$p_\mathrm{T}$ tau-lepton using the maximum-weight estimator
+    toggled_by: saveExtraVariables 
+  - name: mmc_coll_approx_mass 
+    description: the mass of the di-tau resonance using the collinear approximation (if `doCollinearApprox`)  
     toggled_by: saveExtraVariables
+  - name: mmc_coll_approx_x0 
+    description: x0 energy fraction estimated using the Collinear Approximation (if `doCollinearApprox`)  
+    toggled_by: saveExtraVariables
+  - name: mmc_coll_approx_x1 
+    description: x1 energy fraction estimated using the Collinear Approximation (if `doCollinearApprox`)  
+    toggled_by: saveExtraVariables             
 
 TauCalibrationConfig:
   - name: pt

@@ -71,9 +71,15 @@ class FTagJetTrigMatchingBlock(ConfigBlock):
 
                 alg.matchingDecoration = 'ftag_jetTrigMatching_' + chain_out + '_%SYS%'
                 alg.bTagMatchingDecoration = 'ftag_bTagTrigMatching_' + chain_out + '_%SYS%'
-                alg.preselection = config.getPreselection (jetContainer, '')
                 alg.jets = config.readName(jetContainer)
+                alg.preselection = config.getPreselection (jetContainer, '')
+
+                # If there is no systematically varied preselection then only nominal can be written out.
+                noSys = True
+                if alg.preselection:
+                    noSys = False
+
                 config.addOutputVar (jetContainer, alg.matchingDecoration,
-                                     'ftag_jetTrigMatching_' + chain_out)
+                                     'ftag_jetTrigMatching_' + chain_out, noSys=noSys)
                 config.addOutputVar (jetContainer, alg.bTagMatchingDecoration,
-                                     'ftag_bTagTrigMatching_' + chain_out)
+                                     'ftag_bTagTrigMatching_' + chain_out, noSys=noSys)

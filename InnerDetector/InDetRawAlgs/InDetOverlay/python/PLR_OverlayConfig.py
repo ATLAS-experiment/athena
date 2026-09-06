@@ -48,8 +48,15 @@ def PLR_TruthOverlayCfg(flags, name="PLR_SDOOverlay", **kwargs):
     """Return a ComponentAccumulator for the PLR SDO overlay algorithm"""
     acc = ComponentAccumulator()
 
-    # We do not need background PLR SDOs
-    kwargs.setdefault("BkgInputKey", "")
+    # We do not need background PLR SDOs for data overlay
+    if not flags.Input.isMC:
+        kwargs.setdefault("BkgInputKey", "")
+    else:
+        kwargs.setdefault("BkgInputKey", f"{flags.Overlay.BkgPrefix}PLR_SDO_Map")
+
+    if kwargs["BkgInputKey"]:
+        from SGComps.SGInputLoaderConfig import SGInputLoaderCfg
+        acc.merge(SGInputLoaderCfg(flags, [f'InDetSimDataCollection#{kwargs["BkgInputKey"]}']))
 
     kwargs.setdefault("SignalInputKey", f"{flags.Overlay.SigPrefix}PLR_SDO_Map")
     kwargs.setdefault("OutputKey", "PLR_SDO_Map")

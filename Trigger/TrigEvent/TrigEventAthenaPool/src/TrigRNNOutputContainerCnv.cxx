@@ -26,9 +26,9 @@ TrigRNNOutputContainer * TrigRNNOutputContainerCnv::createTransient(const Token*
   
   mlog << MSG::DEBUG << "TrigRNNOutputContainerCnv::createTransient called" << endmsg;
 
-  static const pool::Guid tr_guid("FED72B55-6275-DE11-8F1B-000423DD5A1A");
-  static const pool::Guid tlp1_guid("86A89E9D-F776-DE11-B65D-000423DD5A1A");
-  static const pool::Guid p2_guid("B10FA1AF-F38F-4025-83C4-3A83A3F3AE71");
+  static const Guid tr_guid("FED72B55-6275-DE11-8F1B-000423DD5A1A");
+  static const Guid tlp1_guid("86A89E9D-F776-DE11-B65D-000423DD5A1A");
+  static const Guid p2_guid("B10FA1AF-F38F-4025-83C4-3A83A3F3AE71");
 
   if( compareClassGuid(token,  p2_guid ) ){
       std::unique_ptr< TrigRNNOutputContainer_p2 > col_vect( poolReadObject< TrigRNNOutputContainer_p2 >(token) );

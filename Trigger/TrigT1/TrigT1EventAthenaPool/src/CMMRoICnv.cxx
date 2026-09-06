@@ -34,7 +34,7 @@ CMMRoI * CMMRoICnv::createTransient(const Token* token)
   
   //mlog << MSG::DEBUG << "CMMRoICnv::createTransient called" << endmsg;
 
-  static const pool::Guid p1_guid( "AF2D0BF8-8B28-4BFD-92B1-67F4708039C3" );
+  static const Guid p1_guid( "AF2D0BF8-8B28-4BFD-92B1-67F4708039C3" );
  
   
   if ( compareClassGuid(token, p1_guid) ) {

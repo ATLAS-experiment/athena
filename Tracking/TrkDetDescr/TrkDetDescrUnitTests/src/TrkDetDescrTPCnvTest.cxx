@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //////////////////////////////////////////////////////////////////
@@ -22,20 +22,6 @@
 #include <climits>
 #include <memory>
 
-Trk::TrkDetDescrTPCnvTest::TrkDetDescrTPCnvTest(const std::string& name, ISvcLocator* pSvcLocator) :
- Trk::TrkDetDescrUnitTestBase(name, pSvcLocator),
- m_writeMode(true),
- m_materialStepCollectionName("RandomMaterialSteps"),
- m_layerMaterialCollectionName("RandomLayerMaterialMap"),
- m_elementTableName("RandomElementTable")
-{
-
-    declareProperty("WriteMode",                    m_writeMode);
-    // collection names
-    declareProperty("MaterialStepCollection",       m_materialStepCollectionName);
-    declareProperty("LayerMaterialMap",             m_layerMaterialCollectionName);
-    declareProperty("ElementTable",                 m_elementTableName);
-}
 
 StatusCode Trk::TrkDetDescrTPCnvTest::runTest()
 {
@@ -182,45 +168,45 @@ StatusCode Trk::TrkDetDescrTPCnvTest::runTest()
 				}
 				materialCompositionVector.emplace_back(elements);
 			}
-			thicknessMatrix.push_back(thicknessVector);
-			x0Matrix.push_back(x0Vector);
-			l0Matrix.push_back(l0Vector);
-			aMatrix.push_back(aVector);
-			zMatrix.push_back(zVector);
-			rhoMatrix.push_back(rhoVector);
-			materialCompositionMatrix.push_back(materialCompositionVector);
+			thicknessMatrix.push_back(std::move(thicknessVector));
+			x0Matrix.push_back(std::move(x0Vector));
+			l0Matrix.push_back(std::move(l0Vector));
+			aMatrix.push_back(std::move(aVector));
+			zMatrix.push_back(std::move(zVector));
+			rhoMatrix.push_back(std::move(rhoVector));
+			materialCompositionMatrix.push_back(std::move(materialCompositionVector));
 		}
 
 		Trk::ValueStore thicknessBins;
 		thicknessBins.valueMin  = 0.;
 		thicknessBins.valueStep = TrkDetDescrUnitTestBase::m_flatDist->shoot();
-		thicknessBins.valueBinMatrix = thicknessMatrix;
+		thicknessBins.valueBinMatrix = std::move(thicknessMatrix);
 
 		Trk::ValueStore x0Bins;
 		x0Bins.valueMin  = 0.;
 		x0Bins.valueStep = TrkDetDescrUnitTestBase::m_flatDist->shoot();
-		x0Bins.valueBinMatrix = x0Matrix;
+		x0Bins.valueBinMatrix = std::move(x0Matrix);
 
 
 		Trk::ValueStore l0Bins;
 		l0Bins.valueMin  = 0.;
 		l0Bins.valueStep = TrkDetDescrUnitTestBase::m_flatDist->shoot();
-		l0Bins.valueBinMatrix = l0Matrix;
+		l0Bins.valueBinMatrix = std::move(l0Matrix);
 
 		Trk::ValueStore aBins;
 		aBins.valueMin  = 0.;
 		aBins.valueStep = TrkDetDescrUnitTestBase::m_flatDist->shoot();
-		aBins.valueBinMatrix = aMatrix;
+		aBins.valueBinMatrix = std::move(aMatrix);
 
 		Trk::ValueStore zBins;
 		zBins.valueMin  = 0.;
 		zBins.valueStep = TrkDetDescrUnitTestBase::m_flatDist->shoot();
-		zBins.valueBinMatrix = zMatrix;
+		zBins.valueBinMatrix = std::move(zMatrix);
 
 		Trk::ValueStore rhoBins;
 		rhoBins.valueMin  = 0.;
 		rhoBins.valueStep = TrkDetDescrUnitTestBase::m_flatDist->shoot();
-		rhoBins.valueBinMatrix = rhoMatrix;
+		rhoBins.valueBinMatrix = std::move(rhoMatrix);
 
         (*lmMap)[Trk::LayerIndex(3)] = new Trk::CompoundLayerMaterial(zUtilityC,
                               										  thicknessBins,

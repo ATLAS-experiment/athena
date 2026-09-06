@@ -59,7 +59,7 @@ namespace MuonCombined {
 	  for(auto trkSeg : *segInColl){
 	    auto muonSeg = dynamic_cast<const Muon::MuonSegment*>(trkSeg);
 	    std::shared_ptr<const Muon::MuonSegment> mseg2 = std::make_shared<const Muon::MuonSegment>(*muonSeg);
-	    msegments.push_back(mseg2);
+	    msegments.push_back(std::move(mseg2));
 	  }
 	}
 	

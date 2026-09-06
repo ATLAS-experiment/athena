@@ -21,7 +21,7 @@
 
 #include "../Lar_Preproc/Egamma1_LArStrip_Fex.h"
 #include "../Lar_Preproc/Egamma1_LArStrip_Fex_RowAware.h"
-#include "../Lar_Preproc/Egamma1_OnlineMapNbhood.h"
+#include "../Lar_Preproc/Egamma1_OnlineMapNbhoodAlg.h"
 #include "../Lar_Preproc/EMBE1CellsFromCaloCells.h"
 #include "../Lar_Preproc/LArCellPreparationAlg.h"
 #include "../Lar_Preproc/LArCellMuxAlg.h"
@@ -30,6 +30,10 @@
 #include "../PU1/PU1SuppTestBench.h"
 #include "../PU1/PU1SuppAlgTool.h"
 
+#include "../GraphSvc.h"
+#include "../JET1Alg.h"
+#include "../TOBTextReader.h"
+#include "../TOBTextWriter.h"
 
 DECLARE_COMPONENT(GlobalSim::GlobalSimulationAlg)
 
@@ -50,7 +54,7 @@ DECLARE_COMPONENT(GlobalSim::GlobalJet1AlgTool)
 
 DECLARE_COMPONENT(GlobalSim::Egamma1_LArStrip_Fex)
 DECLARE_COMPONENT(GlobalSim::Egamma1_LArStrip_Fex_RowAware)
-DECLARE_COMPONENT(GlobalSim::Egamma1_OnlineMapNbhood)
+DECLARE_COMPONENT(GlobalSim::Egamma1_OnlineMapNbhoodAlg)
 DECLARE_COMPONENT(GlobalSim::EMBE1CellsFromCaloCells)
 DECLARE_COMPONENT(GlobalSim::LArCellPreparationAlg)
 DECLARE_COMPONENT(GlobalSim::LArCellMuxAlg)
@@ -58,3 +62,10 @@ DECLARE_COMPONENT(GlobalSim::GlobalCellTowerAlgTool)
 
 DECLARE_COMPONENT(GlobalSim::PU1SuppTestBenchAlg)
 DECLARE_COMPONENT(GlobalSim::PU1SuppAlgTool)
+
+
+DECLARE_COMPONENT(GlobalSim::JET1Alg)
+DECLARE_COMPONENT(GlobalSim::TOBTextReader)
+DECLARE_COMPONENT(GlobalSim::TOBTextWriter)
+
+DECLARE_COMPONENT(GlobalSim::GraphSvc)

@@ -52,7 +52,7 @@ private:
     void fillIDScores(const EventContext& ctx, const std::string& trigger, const std::vector<const xAOD::TauJet*>& tau_vec, const std::string& nProng, bool online) const;
     void fillHitZVars(const EventContext& ctx, const std::string& trigger, const std::vector<const xAOD::TauJet*>& tau_vec, const std::string& nProng) const;
 
-    void fillVarPairs(const EventContext& ctx, ToolHandle<GenericMonitoringTool>& mon_group, const VarPropertyMap::mapped_type& vars, const std::string& category, const std::string& match_var_name, const std::string& mon_var_1_name, const std::string& mon_var_2_name, const std::vector<const xAOD::TauJet*>& tau_vec) const;
+    void fillVarPairs(const EventContext& ctx, const ToolHandle<GenericMonitoringTool>& mon_group, const VarPropertyMap::mapped_type& vars, const std::string& category, const std::string& match_var_name, const std::string& mon_var_1_name, const std::string& mon_var_2_name, const std::vector<const xAOD::TauJet*>& tau_vec) const;
 
     std::vector<TLorentzVector> getRoIsVector(const EventContext& ctx, const std::string& trigger) const;
 };

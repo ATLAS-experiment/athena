@@ -22,7 +22,7 @@
 #include "TriggerAnalysisInterfaces/ITrigGlobalEfficiencyCorrectionTool.h"
 #include "TriggerMatchingTool/IMatchingTool.h"
 #include "xAODEgamma/PhotonFwd.h"
-#include "CxxUtils/flat_set.h"
+#include <flat_set>
 
 namespace TrigGlobEffCorr {
 class ImportData;
@@ -193,7 +193,7 @@ class TrigGlobalEfficiencyCorrectionTool
   std::unique_ptr<TrigGlobEffCorr::Calculator> m_calculator;         //!
 
   template <typename Key>
-  using flat_set = CxxUtils::flat_set<Key>;
+  using flat_set = std::flat_set<Key>;
 
   /// Internal methods (I) -- initialization of the tool
   bool loadHierarchies();

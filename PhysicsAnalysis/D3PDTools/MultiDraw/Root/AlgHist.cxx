@@ -20,7 +20,9 @@
 #include <MultiDraw/Formula.h>
 #include <MultiDraw/FormulaSvc.h>
 #include <RootCoreUtils/Assert.h>
-#include <RootCoreUtils/ThrowMsg.h>
+#include <AsgMessaging/MsgStreamMacros.h>
+
+#include <stdexcept>
 
 //
 // method implementations
@@ -33,7 +35,6 @@ namespace MD
   void AlgHist ::
   testInvariant () const
   {
-    RCU_INVARIANT (this != 0);
     if (m_hist != 0)
     {
       RCU_INVARIANT (m_hist->GetDirectory() == 0);
@@ -131,7 +132,7 @@ namespace MD
     else if (m_valnum+1 == m_formulas.size())
       m_cut = true;
     else
-      RCU_THROW_MSG ("invalid number of formulas");
+      throw std::runtime_error ("AlgHist: invalid number of formulas");
 
     RCU_NEW_INVARIANT (this);
   }
@@ -199,8 +200,8 @@ namespace MD
       switch (m_index[form]->ndim())
       {
       case -1:
-	RCU_THROW_MSG ("formula not valid: " + m_formulas[form]);
-	break;
+        ATH_MSG_ERROR ("formula not valid: " << m_formulas[form]);
+        return EL::StatusCode::FAILURE;
       case 0:
 	if (m_index[form]->ndata() > 0)
 	  m_values[form] = m_index[form]->value (0);
@@ -213,7 +214,8 @@ namespace MD
 	  size = m_index[form]->ndata();
 	break;
       default:
-	RCU_THROW_MSG ("unknown formula dimension: " + m_formulas[form]);
+        ATH_MSG_ERROR ("unknown formula dimension: " << m_formulas[form]);
+        return StatusCode::FAILURE;
       }
     }
 
@@ -249,7 +251,8 @@ namespace MD
 	static_cast<TH3*>(m_hist2)->Fill (m_values[0], m_values[1], m_values[2], m_values[3]);
 	break;
       default:
-	RCU_THROW_MSG ("invalid number of values");
+        ATH_MSG_ERROR ("AlgHist: invalid number of values");
+        return StatusCode::FAILURE;
       }
     }
     return EL::StatusCode::SUCCESS;

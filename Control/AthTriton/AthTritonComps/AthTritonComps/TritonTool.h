@@ -55,10 +55,10 @@ class TritonTool : public extends<AthAlgTool, IAthInferenceTool> {
   BooleanProperty m_useSSL{this, "UseSSL", false,
                            "Use SSL for Triton server connection"};
   IntegerProperty m_maxRetries{
-      this, "MaxRetries", 1,
+      this, "MaxRetries", 10,
       "Number of times to retry a failed Triton inference request"};
   IntegerProperty m_retryDelayMs{
-      this, "RetryDelayMs", 0,
+      this, "RetryDelayMs", 20,
       "Delay in milliseconds between Triton inference retry attempts"};
 
   /// @}

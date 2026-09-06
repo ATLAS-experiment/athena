@@ -1766,9 +1766,12 @@ CalibrationDataGlobalEigenVariations::initialize(double min_variance)
     TH1* resultVariedUp   = (TH1*)comb_result->Clone(nameUp);   resultVariedUp->SetDirectory(0);
     TH1* resultVariedDown = (TH1*)comb_result->Clone(nameDown); resultVariedDown->SetDirectory(0);
 
+    // matrix column u maps to histogram bin u+1 (bin 0 is the underflow), matching
+    // the +1 offset used when filling comb_result above.
     for (int u = 0; u < comb_result->GetNbinsX(); ++u) {
-      resultVariedUp->SetBinContent(u,(comb_result->GetBinContent(u) + matrixVariationsWithZeros(i,u)));
-      resultVariedDown->SetBinContent(u,(comb_result->GetBinContent(u) - matrixVariationsWithZeros(i,u)));
+      const int bin = u + 1;
+      resultVariedUp->SetBinContent(bin,(comb_result->GetBinContent(bin) + matrixVariationsWithZeros(i,u)));
+      resultVariedDown->SetBinContent(bin,(comb_result->GetBinContent(bin) - matrixVariationsWithZeros(i,u)));
     }
 
     m_eigen.push_back(std::make_pair(resultVariedUp, resultVariedDown)); //<--- This is currently storing the FULL/combined variations, which aren't binned with proper bin widths etc.

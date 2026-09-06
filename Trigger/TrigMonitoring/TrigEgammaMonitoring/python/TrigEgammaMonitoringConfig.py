@@ -1280,88 +1280,122 @@ class TrigEgammaMonAlgBuilder:
     self._coarseEtbins = coarse_et_bins[0:self._ncoarseEtbins+1]
     self._coarseEtabins = coarse_eta_bins[0:self._ncoarseEtabins+1]
 
-  def getTrigInfo( self, trigger ):
-    class TrigEgammaInfo(object):
-    
-        EM = {"e", "electron"}
-        GAMMA = {"g", "photon"}
-    
-    
-        def __init__(self, trigger):
-            self.__chain = trigger
-            self.__legs = HLTChainInfo(trigger)
-            self.__sigs = {leg.signature for leg in self.__legs}
+  def getTrigInfo(self, trigger):
+    class TrigEgammaInfo:
 
-        for legInfo in HLTChainInfo(trigger):
-            print(legInfo.multiplicity)
-            print(legInfo.signature)
-            print(legInfo.threshold)
-            print(legInfo.legParts)
+      def __init__(self, trigger):
+          self.__chain = trigger
+          self.__legs = HLTChainInfo(trigger)
 
-        def chain(self):
-            return self.__chain
-    
-        def legs(self):
-            return self.__legs
-    
-        def signatures(self):
-            return self.__sigs
-    
-        def isElectron(self):
-            for leg in HLTChainInfo(trigger):
-                if leg.signature == "e" and "probe" not in self.__chain:
-                    return True
-            return False
-    
-        def isPhoton(self):
-            for leg in HLTChainInfo(trigger):
-                if leg.signature == "g" and "probe" not in self.__chain:
-                    return True
-            return False
-    
-        def isTagAndProbeZeeg(self):
-            if "probe" in self.__chain:
-                return True
-            return False
-    
-        def threshold(self):
-            #if self.isElectron() or self.isPhoton():
-            #    for leg in HLTChainInfo(trigger):
-            #        thresholdValue  = leg.threshold
-            #        thresholdString = str(thresholdValue)
-            #        return thresholdString
-    
-            if self.isTagAndProbeZeeg():
-                for leg in HLTChainInfo(trigger):
-                    if leg.signature != "g":
-                        continue
 
-                        thresholdValue  = leg.threshold
-                        thresholdString = str(thresholdValue)
-                        return thresholdString
-            return "Invalid Threshold"
-    
-        def pidname(self):
-            #if self.isElectron() or self.isPhoton():
-            #    for leg in HLTChainInfo(trigger):
-            #        pidValue  = leg.legParts[0]
-            #        return pidValue
-    
-            if self.isTagAndProbeZeeg():
-                for leg in HLTChainInfo(trigger):
-                    if leg.signature != "g":
-                        continue
+      def chain(self):
+          return self.__chain
 
-                    pidValue  = leg.legParts[0]
-                    return pidValue
-            return "Invalid Threshold"
+      def legs(self):
+          return self.__legs
 
-        def isIsolated(self):
-          for part_name in ['iloose', 'ivarloose', 'icaloloose', 'icalovloose', 'icalotight']:
-            if part_name in self.chain():
+
+      def isElectron(self):
+
+          hasElectron = False
+          hasPhoton = False
+
+          for leg in self.__legs:
+
+              if leg.signature == "e":
+                  hasElectron = True
+
+              if leg.signature == "g":
+                  hasPhoton = True
+
+          isElectronTrigger = False
+
+          if hasElectron and not hasPhoton:
+              isElectronTrigger = True
+
+          return isElectronTrigger
+
+
+      def isPhoton(self):
+
+          hasElectron = False
+          hasPhoton = False
+
+          for leg in self.__legs:
+              if leg.signature == "e":
+                  hasElectron = True
+
+              if leg.signature == "g":
+                  hasPhoton = True
+
+          isPhotonTrigger = False
+
+          if hasPhoton and not hasElectron:
+              isPhotonTrigger = True
+
+          return isPhotonTrigger
+
+      def isTagAndProbeZeeg(self):
+          hasProbe = "probe" in self.__chain
+
+          hasTwoElectrons = False
+          hasPhoton = False
+
+          for leg in self.__legs:
+              if leg.signature == "e" and leg.multiplicity == 2:
+                  hasTwoElectrons = True
+
+              if leg.signature == "g":
+                  hasPhoton = True
+
+          if hasProbe and hasTwoElectrons and hasPhoton:
               return True
+
           return False
 
+      def threshold(self):
+
+          if self.isTagAndProbeZeeg():
+              for leg in self.__legs:
+                  if leg.signature == "g":
+                      return str(leg.threshold)
+
+          if self.isElectron():
+              for leg in self.__legs:
+                  if leg.signature == "e":
+                      return str(leg.threshold)
+
+          if self.isPhoton():
+              for leg in self.__legs:
+                  if leg.signature == "g":
+                      return str(leg.threshold)
+
+          return "Invalid Threshold"
+
+
+      def pidname(self):
+
+          if self.isTagAndProbeZeeg():
+              for leg in self.__legs:
+                  if leg.signature == "g":
+                      return leg.legParts[0]
+
+          if self.isElectron():
+              for leg in self.__legs:
+                  if leg.signature == "e":
+                      return leg.legParts[0]
+
+          if self.isPhoton():
+              for leg in self.__legs:
+                  if leg.signature == "g":
+                      return leg.legParts[0]
+
+          return "Invalid PID"
+
+      def isIsolated(self):
+          for part_name in ['iloose', 'ivarloose', 'icaloloose', 'icalovloose', 'icalotight']:
+              if part_name in self.chain():
+                  return True
+          return False
 
     return TrigEgammaInfo(trigger)
-

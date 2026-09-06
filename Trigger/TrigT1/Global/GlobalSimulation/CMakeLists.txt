@@ -8,6 +8,15 @@ find_package( ROOT COMPONENTS Core Hist)
 find_package( GTest )
 find_package( APTypes )
 
+atlas_add_library( GlobalSimulationLib
+		PUBLIC_HEADERS GlobalSimulation
+		LINK_LIBRARIES xAODCore )
+atlas_add_dictionary( GlobalSimulationDict
+		GlobalSimulation/GlobalSimulationDict.h
+		GlobalSimulation/selection.xml
+		LINK_LIBRARIES GlobalSimulationLib )
+
+
 atlas_add_component (GlobalSimulation
    src/Egamma1/*.h src/Egamma1/*.cxx
    src/Egamma1BDT/*.h src/Egamma1BDT/*.cxx
@@ -20,6 +29,7 @@ atlas_add_component (GlobalSimulation
    src/Lar_Preproc/*.h src/Lar_Preproc/*.cxx
    src/PU1/*.h src/PU1/*.cxx
    src/Utilities/*.h src/Utilities/*.cxx
+   src/*.cxx
    src/components/*.cxx
    INCLUDE_DIRS ${APTYPES_INCLUDE_DIRS} ${ROOT_INCLUDE_DIRS}
    LINK_LIBRARIES ${APTYPES_LIBRARIES} ${ROOT_LIBRARIES} GaudiKernel
@@ -43,7 +53,7 @@ add_definitions(-DBITWISE_SIMULATION) # For JET1(WTAConeJet), need extra definit
 # Install files from the package:
 atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
 atlas_install_data( data/* )
-atlas_install_data( share/*.xml )
+atlas_install_data( share/*.xml share/*.json )
 
 atlas_install_joboptions( share/plugin_*.py )
 
@@ -63,3 +73,17 @@ atlas_add_test( AllChains
         PRIVATE_WORKING_DIRECTORY
         POST_EXEC_SCRIPT noerror.sh )
 
+
+atlas_add_test( Object_test
+		SOURCES test/Object_test.cxx
+		INCLUDE_DIRS ${GMOCK_INCLUDE_DIRS} ${GTEST_INCLUDE_DIRS}
+		LINK_LIBRARIES ${GMOCK_LIBRARIES} ${GTEST_LIBRARIES} GlobalSimulationLib
+		POST_EXEC_SCRIPT noerror.sh )
+
+atlas_add_test( JsonConfig
+        SCRIPT "l1calo-ath-mon --evtMax 10 --postInclude GlobalSimulation/plugin_GlobalSimFromJson.py --filesInput RAW_RUN3_DATA24 -- Trigger.L1.doeFex=True Trigger.L1.dogFex=True IOVDb.GlobalTag='CONDBR2-BLKPA-2024-05'"
+        PROPERTIES TIMEOUT 600
+        PRIVATE_WORKING_DIRECTORY
+        POST_EXEC_SCRIPT noerror.sh )
+
+atlas_add_alias( l1global-minisim l1calo-ath-mon GlobalSimulation/plugin_miniSim.py )

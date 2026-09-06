@@ -285,25 +285,6 @@ StatusCode RpcDigitizationTool::initializeRunDependentParameters() {
     return StatusCode::SUCCESS;
 }
 
-template <class CondType> 
-StatusCode RpcDigitizationTool::retrieveCondData(const EventContext& ctx,
-                                                 const SG::ReadCondHandleKey<CondType>& key,
-                                                 const CondType* & condPtr) const {
-
-    if (key.empty()) {
-       ATH_MSG_DEBUG("No key has been configured for object "<<typeid(CondType).name()<<". Clear pointer");
-       condPtr = nullptr;
-       return StatusCode::SUCCESS;
-    }
-    SG::ReadCondHandle<CondType> readHandle{key, ctx};
-    if (!readHandle.isValid()){
-        ATH_MSG_FATAL("Failed to load conditions object "<<key.fullKey()<<".");
-        return StatusCode::FAILURE;
-    }
-    condPtr = readHandle.cptr();
-    return StatusCode::SUCCESS;
-
-}
 //--------------------------------------------
 StatusCode RpcDigitizationTool::prepareEvent(const EventContext& /*ctx*/, unsigned int) {
     ATH_MSG_DEBUG("RpcDigitizationTool::in prepareEvent()");
@@ -489,7 +470,7 @@ StatusCode RpcDigitizationTool::doDigitization(const EventContext& ctx,
     CLHEP::HepRandomEngine* rndmEngine = rngWrapper->getEngine(ctx);
 
     const MuonGM::MuonDetectorManager* detMgr{nullptr};
-    ATH_CHECK(retrieveCondData(ctx, m_detMgrKey, detMgr));
+    ATH_CHECK(SG::get(detMgr, m_detMgrKey, ctx));
 
 
     std::unique_ptr<RPCSimHitCollection> inputSimHitColl{std::make_unique<RPCSimHitCollection>("RPC_Hits")};
@@ -1157,7 +1138,7 @@ std::pair<bool,bool> RpcDigitizationTool::detectionEfficiency(const EventContext
     } else {  // Efficiency from Cool
 
         const RpcCondDbData* readCdo{nullptr};                        
-        if(!retrieveCondData(ctx, m_readKey, readCdo).isSuccess()){
+        if(!SG::get(readCdo,m_readKey, ctx).isSuccess()){
             THROW_EXCEPTION("Failed to retrieve conditions object");
         }
 
@@ -1436,7 +1417,7 @@ int RpcDigitizationTool::determineClusterSize(const EventContext& ctx,
         MeanClusterSizeTail = m_MeanClusterSizeTail_BIS78;
     } else {  // Cluster size from COOL
         const RpcCondDbData* readCdo{nullptr};                        
-        retrieveCondData(ctx, m_readKey, readCdo).ignore();
+        SG::get(readCdo, m_readKey, ctx).ignore();
 
         Identifier Id = m_idHelper->panelID(idRpcStrip);
 

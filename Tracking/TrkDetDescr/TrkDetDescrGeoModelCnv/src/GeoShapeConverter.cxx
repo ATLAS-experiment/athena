@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // Trk
@@ -110,7 +110,7 @@ std::unique_ptr<Volume> GeoShapeConverter::translateGeoShape(const GeoShape* sh,
     ATH_MSG_DEBUG(" translateGeoShape " << sh->type());
 
     if (sh->type() == "Trap") {
-        const GeoTrap* trap = dynamic_cast<const GeoTrap*>(sh);
+        const GeoTrap* trap = static_cast<const GeoTrap*>(sh);
         std::shared_ptr<TrapezoidVolumeBounds> volBounds{};
         if (trap->getDxdyndzp() < trap->getDxdyndzn()) {
             volBounds = std::make_shared<TrapezoidVolumeBounds>(trap->getDxdyndzp(),
@@ -125,7 +125,7 @@ std::unique_ptr<Volume> GeoShapeConverter::translateGeoShape(const GeoShape* sh,
         }
         return std::make_unique<Volume>(makeTransform(transf), std::move(volBounds));
     } else if (sh->type() == "Pgon") {
-        const GeoPgon* pgon = dynamic_cast<const GeoPgon*>(sh);
+        const GeoPgon* pgon = static_cast<const GeoPgon*>(sh);
         double hlz = 0.5 * std::abs(pgon->getZPlane(1) - pgon->getZPlane(0));
         double phiH = pgon->getDPhi() / (2. * pgon->getNSides());
         double hly = 0.5 * std::cos(phiH) * (pgon->getRMaxPlane(0) - pgon->getRMinPlane(0));
@@ -171,7 +171,7 @@ std::unique_ptr<Volume> GeoShapeConverter::translateGeoShape(const GeoShape* sh,
         }
         return vol;
     } else if (sh->type() == "Trd") {
-        const GeoTrd* trd = dynamic_cast<const GeoTrd*>(sh);
+        const GeoTrd* trd = static_cast<const GeoTrd*>(sh);
         //
         double x1 = trd->getXHalfLength1();
         double x2 = trd->getXHalfLength2();
@@ -284,7 +284,7 @@ std::unique_ptr<Volume> GeoShapeConverter::translateGeoShape(const GeoShape* sh,
                             << x1 << "," << x2 << "," << y1 << "," << y2 << ","<< z);
         }
     } else if (sh->type() == "Box") {
-        const GeoBox* box = dynamic_cast<const GeoBox*>(sh);
+        const GeoBox* box = static_cast<const GeoBox*>(sh);
         //
         double x = box->getXHalfLength();
         double y = box->getYHalfLength();
@@ -292,7 +292,7 @@ std::unique_ptr<Volume> GeoShapeConverter::translateGeoShape(const GeoShape* sh,
         auto volBounds = std::make_shared<CuboidVolumeBounds>(x, y, z);
         return std::make_unique<Volume>(makeTransform(transf), std::move(volBounds));
     } else if (sh->type() == "Para") {
-        const GeoPara* para = dynamic_cast<const GeoPara*>(sh);
+        const GeoPara* para = static_cast<const GeoPara*>(sh);
         //
         double x = para->getXHalfLength();
         double y = para->getYHalfLength();
@@ -301,10 +301,10 @@ std::unique_ptr<Volume> GeoShapeConverter::translateGeoShape(const GeoShape* sh,
         return std::make_unique<Volume>(makeTransform(transf), std::move(volBounds));
         //
     } else if (sh->type() == "Tube") {
-        const GeoTube* tube = dynamic_cast<const GeoTube*>(sh);
+        const GeoTube* tube = static_cast<const GeoTube*>(sh);
         return std::make_unique<Volume>(makeTransform(transf), convert(tube));
     } else if (sh->type() == "Tubs") {  // non-trivial case - transform!
-        const GeoTubs* tubs = dynamic_cast<const GeoTubs*>(sh);
+        const GeoTubs* tubs = static_cast<const GeoTubs*>(sh);
         double rMin = tubs->getRMin();
         double rMax = tubs->getRMax();
         double z = tubs->getZHalfLength();
@@ -314,7 +314,7 @@ std::unique_ptr<Volume> GeoShapeConverter::translateGeoShape(const GeoShape* sh,
         Amg::Transform3D totalTransform(transf * Amg::getRotateZ3D(aPhi + 0.5 * dPhi));
         return std::make_unique<Volume>(makeTransform(totalTransform), std::move(volBounds));
     } else if (sh->type() == "Cons") {
-        const GeoCons* cons = dynamic_cast<const GeoCons*>(sh);
+        const GeoCons* cons = static_cast<const GeoCons*>(sh);
         double rMin1 = cons->getRMin1();
         double rMin2 = cons->getRMin2();
         double rMax1 = cons->getRMax1();
@@ -337,7 +337,7 @@ std::unique_ptr<Volume> GeoShapeConverter::translateGeoShape(const GeoShape* sh,
                                             std::move(volBounds));
         }
     } else if (sh->type() == "Pcon") {
-        const GeoPcon* con = dynamic_cast<const GeoPcon*>(sh);
+        const GeoPcon* con = static_cast<const GeoPcon*>(sh);
         std::shared_ptr<CylinderVolumeBounds> volBounds{};
         double aPhi = con->getSPhi();
         double dPhi = con->getDPhi();
@@ -417,7 +417,7 @@ std::unique_ptr<Volume> GeoShapeConverter::translateGeoShape(const GeoShape* sh,
             return combVol;
         }
     } else if (sh->type() == "SimplePolygonBrep") {
-        const GeoSimplePolygonBrep* spb = dynamic_cast<const GeoSimplePolygonBrep*>(sh);
+        const GeoSimplePolygonBrep* spb = static_cast<const GeoSimplePolygonBrep*>(sh);
         unsigned int nv = spb->getNVertices();
         std::vector<std::pair<double, double>> ivtx(nv);
         for (unsigned int iv = 0; iv < nv; iv++) {
@@ -483,7 +483,7 @@ std::unique_ptr<Volume> GeoShapeConverter::translateGeoShape(const GeoShape* sh,
     }
 
     else if (sh->type() == "Subtraction") {
-        const GeoShapeSubtraction* sub = dynamic_cast<const GeoShapeSubtraction*>(sh);
+        const GeoShapeSubtraction* sub = static_cast<const GeoShapeSubtraction*>(sh);
 
         const GeoShape* shA = sub->getOpA();
         const GeoShape* shB = sub->getOpB();
@@ -493,7 +493,7 @@ std::unique_ptr<Volume> GeoShapeConverter::translateGeoShape(const GeoShape* sh,
                                                                   std::move(volB));
         return std::make_unique<Volume>(nullptr, std::move(volBounds));
     } else if (sh->type() == "Union") {
-        const GeoShapeUnion* uni = dynamic_cast<const GeoShapeUnion*>(sh);
+        const GeoShapeUnion* uni = static_cast<const GeoShapeUnion*>(sh);
         const GeoShape* shA = uni->getOpA();
         const GeoShape* shB = uni->getOpB();
         std::unique_ptr<Volume> volA = translateGeoShape(shA, transf);
@@ -502,7 +502,7 @@ std::unique_ptr<Volume> GeoShapeConverter::translateGeoShape(const GeoShape* sh,
                                                                 std::move(volB), false);
         return std::make_unique<Volume>(nullptr, std::move(volBounds));
     } else if (sh->type() == "Intersection") {
-        const GeoShapeIntersection* intersect = dynamic_cast<const GeoShapeIntersection*>(sh);
+        const GeoShapeIntersection* intersect = static_cast<const GeoShapeIntersection*>(sh);
 
         const GeoShape* shA = intersect->getOpA();
         const GeoShape* shB = intersect->getOpB();
@@ -514,7 +514,7 @@ std::unique_ptr<Volume> GeoShapeConverter::translateGeoShape(const GeoShape* sh,
     }
 
     if (sh->type() == "Shift") {
-        const GeoShapeShift* shift = dynamic_cast<const GeoShapeShift*>(sh);
+        const GeoShapeShift* shift = static_cast<const GeoShapeShift*>(sh);
         return translateGeoShape(shift->getOp(), transf * shift->getX());
     }
     ATH_MSG_WARNING("shape " << sh->type() << " not recognized, return 0");
@@ -526,18 +526,17 @@ void GeoShapeConverter::decodeShape(const GeoShape* sh) const {
     ATH_MSG_DEBUG("decoding shape:" << sh->type());
 
     if (sh->type() == "Pgon") {
-        const GeoPgon* pgon = dynamic_cast<const GeoPgon*>(sh);
+        const GeoPgon* pgon = static_cast<const GeoPgon*>(sh);
         if (pgon)
             ATH_MSG_DEBUG("polygon: " << pgon->getNPlanes() << " planes "
                                       << pgon->getSPhi() << " "
                                       << pgon->getDPhi() << " "
                                       << pgon->getNSides());
-        else
-            ATH_MSG_DEBUG("polygon: WARNING: dynamic_cast failed!");
+        
     }
 
     if (sh->type() == "Trd") {
-        const GeoTrd* trd = dynamic_cast<const GeoTrd*>(sh);
+        const GeoTrd* trd = static_cast<const GeoTrd*>(sh);
         ATH_MSG_DEBUG("dimensions:" << trd->getXHalfLength1() << ","
                                     << trd->getXHalfLength2() << ","
                                     << trd->getYHalfLength1() << ","
@@ -545,20 +544,20 @@ void GeoShapeConverter::decodeShape(const GeoShape* sh) const {
                                     << trd->getZHalfLength());
     }
     if (sh->type() == "Box") {
-        const GeoBox* box = dynamic_cast<const GeoBox*>(sh);
+        const GeoBox* box = static_cast<const GeoBox*>(sh);
         ATH_MSG_DEBUG("dimensions:" << box->getXHalfLength() << ","
                                     << box->getYHalfLength() << ","
                                     << box->getZHalfLength());
     }
 
     if (sh->type() == "Tube") {
-        const GeoTube* tube = dynamic_cast<const GeoTube*>(sh);
+        const GeoTube* tube = static_cast<const GeoTube*>(sh);
         ATH_MSG_DEBUG("dimensions:" << tube->getRMin() << "," << tube->getRMax()
                                     << "," << tube->getZHalfLength());
     }
 
     if (sh->type() == "Tubs") {
-        const GeoTubs* tubs = dynamic_cast<const GeoTubs*>(sh);
+        const GeoTubs* tubs = static_cast<const GeoTubs*>(sh);
         ATH_MSG_DEBUG("dimensions:" << tubs->getRMin() << "," << tubs->getRMax()
                                     << "," << tubs->getZHalfLength() << ","
                                     << tubs->getSPhi() << ","
@@ -566,7 +565,7 @@ void GeoShapeConverter::decodeShape(const GeoShape* sh) const {
     }
 
     if (sh->type() == "Cons") {
-        const GeoCons* cons = dynamic_cast<const GeoCons*>(sh);
+        const GeoCons* cons = static_cast<const GeoCons*>(sh);
         ATH_MSG_DEBUG("dimensions:"
                       << cons->getRMin1() << "," << cons->getRMin2() << ","
                       << cons->getRMax1() << "," << cons->getRMax2() << ","
@@ -576,7 +575,7 @@ void GeoShapeConverter::decodeShape(const GeoShape* sh) const {
 
     if (sh->type() == "Subtraction") {
         const GeoShapeSubtraction* sub =
-            dynamic_cast<const GeoShapeSubtraction*>(sh);
+            static_cast<const GeoShapeSubtraction*>(sh);
         const GeoShape* sha = sub->getOpA();
         const GeoShape* shs = sub->getOpB();
         ATH_MSG_DEBUG("decoding subtracted shape:");
@@ -585,7 +584,7 @@ void GeoShapeConverter::decodeShape(const GeoShape* sh) const {
     }
 
     if (sh->type() == "Union") {
-        const GeoShapeUnion* sub = dynamic_cast<const GeoShapeUnion*>(sh);
+        const GeoShapeUnion* sub = static_cast<const GeoShapeUnion*>(sh);
         const GeoShape* shA = sub->getOpA();
         const GeoShape* shB = sub->getOpB();
         ATH_MSG_DEBUG("decoding shape A:");
@@ -594,7 +593,7 @@ void GeoShapeConverter::decodeShape(const GeoShape* sh) const {
         decodeShape(shB);
     }
     if (sh->type() == "Shift") {
-        const GeoShapeShift* shift = dynamic_cast<const GeoShapeShift*>(sh);
+        const GeoShapeShift* shift = static_cast<const GeoShapeShift*>(sh);
         const GeoShape* shA = shift->getOp();
         const GeoTrf::Transform3D& transf = shift->getX();
         ATH_MSG_DEBUG("shifted by:transl:"

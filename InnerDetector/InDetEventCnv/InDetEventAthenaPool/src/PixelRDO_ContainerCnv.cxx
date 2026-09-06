@@ -96,9 +96,9 @@ PixelRDO_Container_PERS* PixelRDO_ContainerCnv::createPersistent(PixelRDO_Contai
 //================================================================
 PixelRDO_Container* PixelRDO_ContainerCnv::createTransient(const Token* token) {
 
-  static const pool::Guid   p0_guid("7F2C09B6-0B47-4957-8BBA-EDC665A290AC"); // with Pixel1RawData
-  static const pool::Guid   TP1_guid("DA76970C-E019-43D2-B2F9-25660DCECD9D"); // for t/p separated version with InDetRawDataContainer_p1
-  static const pool::Guid   TP2_guid("7138342E-0A80-4A32-A387-2842A01C2539"); // for t/p separated version with InDetRawDataContainer_p2
+  static const Guid   p0_guid("7F2C09B6-0B47-4957-8BBA-EDC665A290AC"); // with Pixel1RawData
+  static const Guid   TP1_guid("DA76970C-E019-43D2-B2F9-25660DCECD9D"); // for t/p separated version with InDetRawDataContainer_p1
+  static const Guid   TP2_guid("7138342E-0A80-4A32-A387-2842A01C2539"); // for t/p separated version with InDetRawDataContainer_p2
   ATH_MSG_DEBUG("createTransient(const Token* token): main converter");
 
   if( compareClassGuid(token, TP2_guid) ) {

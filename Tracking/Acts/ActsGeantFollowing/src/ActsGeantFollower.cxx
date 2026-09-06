@@ -8,7 +8,6 @@
 
 #include "ActsGeantFollower.h"
 #include "IActsGeantFollowerHelper.h"
-#include "CxxUtils/AthUnlikelyMacros.h"
 
 #include "G4Event.hh"
 #include "G4Step.hh"
@@ -72,11 +71,11 @@ void ActsGeantFollower::UserSteppingAction(const G4Step* aStep)
 
   // the material information
   const G4TouchableHistory* touchHist = static_cast<const G4TouchableHistory*>(aStep->GetPreStepPoint()->GetTouchable());
-  if(ATH_LIKELY(touchHist))
+  if(touchHist) [[likely]]
     {
       // G4LogicalVolume
       const G4LogicalVolume *lv= touchHist->GetVolume()->GetLogicalVolume();
-      if(ATH_LIKELY(lv))
+      if(lv) [[likely]]
         {
           const G4Material *mat    = lv->GetMaterial();
            // the step information

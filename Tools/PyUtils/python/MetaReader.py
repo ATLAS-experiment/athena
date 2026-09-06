@@ -1414,7 +1414,17 @@ def _extract_fields_tmd(interface=None, aux=None):
             result['evgenTune'] = str(tmd.evgenTune())
         except BadAuxVarException:
             result['evgenTune'] = ''
-    
+
+        try:
+            result['hadronizationModel'] = str(tmd.hadronizationModel())
+        except BadAuxVarException:
+            result['hadronizationModel'] = ''
+
+        try:
+            result['partonShowerModel'] = str(tmd.partonShowerModel())
+        except BadAuxVarException:
+            result['partonShowerModel'] = ''
+
         try:
             result['hardPDF'] = str(tmd.hardPDF())
         except BadAuxVarException:

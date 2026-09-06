@@ -1,5 +1,5 @@
 #
-#  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 #
 
 # menu components
@@ -35,12 +35,9 @@ def fastTrackingSequenceGenCfg(flags, variant='', is_probe_leg = False):
                                  InViewRoIs=inViewRoIs,
                                  isProbe=is_probe_leg)
 
-    from TrigGenericAlgs.TrigGenericAlgsConfig import ROBPrefetchingAlgCfg_Si
-    robPrefetchAlg = ROBPrefetchingAlgCfg_Si(flags, nameSuffix='IM_'+fastInDetReco.name)
-
     fastInDetReco.mergeReco(fastTrackingReco)
     selAcc=SelectionCA('ElectronFTF'+variant, isProbe=is_probe_leg)
-    selAcc.mergeReco(fastInDetReco, robPrefetchCA=robPrefetchAlg)
+    selAcc.mergeReco(fastInDetReco)
     fastElectronHypoAlg = CompFactory.TrigStreamerHypoAlg("ElectronfastTrackingHypo"+variant)
     fastElectronHypoAlg.FeatureIsROI = False
     selAcc.addHypoAlgo(fastElectronHypoAlg)

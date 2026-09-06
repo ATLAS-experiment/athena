@@ -94,9 +94,9 @@ private:
   ToolHandle<JetHelper::IVarTool> m_vartoolEta{this, "VarToolEta", "VarTool", "InputVariable instance eta (or rapididty?)" };
 
   // protected:
-  unsigned int m_nPar{}; // number of parameters in config file
-  const static unsigned int s_nEtaBins = 90;
-  const static unsigned int s_nParMax = 9; 
+  int m_nPar{}; // number of parameters in config file
+  const static  int s_nEtaBins = 90;
+  const static  int s_nParMax = 9; 
   double m_JESFactors[s_nEtaBins][s_nParMax]{};
   double m_etaCorrFactors[s_nEtaBins][s_nParMax]{};
   double m_energyFreezeJES[s_nEtaBins]{};

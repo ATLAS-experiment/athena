@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////////////////////
@@ -57,7 +57,7 @@ namespace Trk {
       virtual Amg::RotationMatrix3D measurementFrame() const override final;
       virtual PatternTrackParameters * clone() const override final;
       constexpr virtual ParametersType type() const override final;
-      virtual SurfaceType surfaceType() const override final;
+      constexpr virtual SurfaceType surfaceType() const override final;
       virtual void updateParametersHelper(const AmgVector(5) &) override final;
 
       // set methods

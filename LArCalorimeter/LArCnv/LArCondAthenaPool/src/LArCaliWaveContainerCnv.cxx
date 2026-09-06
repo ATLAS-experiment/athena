@@ -31,9 +31,9 @@ LArCaliWaveContainerCnv::createTransient(const Token* token)
 {   
     MsgStream log(msgSvc(), "LArCaliWaveContainerCnv" ); 
 
-    static const pool::Guid   p2_guid("6CF01BBF-85A9-45FA-B321-6A98B0D719FB");
-    static const pool::Guid   p1_guid("9E61BE2D-3274-4459-A5C2-3BBFB7056EBA");
-    static const pool::Guid   p0_guid("ECB4AD6C-FF3A-4255-A0E3-7BD566B96A77");
+    static const Guid   p2_guid("6CF01BBF-85A9-45FA-B321-6A98B0D719FB");
+    static const Guid   p1_guid("9E61BE2D-3274-4459-A5C2-3BBFB7056EBA");
+    static const Guid   p0_guid("ECB4AD6C-FF3A-4255-A0E3-7BD566B96A77");
 	
     if( compareClassGuid(token, p2_guid) ) {
         // using unique_ptr ensures deletion of the persistent object

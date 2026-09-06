@@ -19,7 +19,7 @@ def ITkActsDeviceTrackRecoCfg(flags, *, previousExtension=None):
         HostConditionsObjectName="TracccHostCondConfig",
         HostDigitizationObjectName="TracccHostDigitizationConfig",
         DeviceConditionsObjectName="TracccDeviceCondConfig",
-        DeviceDigitizationObjectName="TracccDeviceDigitizationConfig"
+        DeviceDigitizationObjectName="TracccDeviceDigitizationConfig",
     ))
 
     # --- Clusterization ---
@@ -74,7 +74,37 @@ def ITkActsDeviceTrackRecoCfg(flags, *, previousExtension=None):
     # --- Seeding ---
     if flags.Acts.Device.doSeeding:
 
-        raise ValueError("Unsupported: no device seeding yet!")
+        if clustersLocation is not DataLocation.DEVICE:
+            raise ValueError("Device seeding requires device clusterization "
+                "(flags.Acts.Device.doClusterization=True): it reads the "
+                "traccc measurement collection straight out of device memory "
+                "and there is currently no host->device measurement converter.")
+ 
+        # Pixel space point formation on device
+        from ActsGPUDataPreparation.ActsGPUDataPreparationConfig import DeviceSPFormationAlgCfg
+        acc.merge(DeviceSPFormationAlgCfg(flags,
+            name="DeviceSPFormationAlg",
+            InputTracccMeasurements="TracccMeasurementCollection",
+            OutputTracccPixelSpacepoints="TracccPixelSpacepointCollection"))
+
+        from ActsConfig.ActsConfigFlags import SeedingStrategy
+
+        print(f"Performing seeding on device with seeding strategy set to {flags.Tracking.ActiveConfig.SeedingStrategy}")
+        if flags.Acts.Device.seedingStrategy in [SeedingStrategy.Gbts, SeedingStrategy.GbtsFtf]:
+            from ActsGPUPatternRecognition.ActsGPUPatternRecognitionConfig import DeviceGBTSSeedingAlgCfg
+            acc.merge(DeviceGBTSSeedingAlgCfg(flags,
+                name="DeviceGBTSSeedingAlg",
+                InputTracccPixelSpacepoints="TracccPixelSpacepointCollection",
+                InputTracccMeasurements="TracccMeasurementCollection",
+                OutputTracccPixelSeeds="TracccPixelSeedCollection"))
+        else:
+            from ActsGPUPatternRecognition.ActsGPUPatternRecognitionConfig import DeviceTripletSeedingAlgCfg
+            acc.merge(DeviceTripletSeedingAlgCfg(flags,
+                name="DeviceTripletSeedingAlg",
+                InputTracccPixelSpacepoints="TracccPixelSpacepointCollection",
+                OutputTracccPixelSeeds="TracccPixelSeedCollection"))
+
+        seedsLocation = DataLocation.DEVICE
 
     else:
 
@@ -87,13 +117,28 @@ def ITkActsDeviceTrackRecoCfg(flags, *, previousExtension=None):
                 InputClusters="TracccClusterCollection",
                 InputCells="TracccCellCollection",
                 ConvertClustersWithCells = flags.Tracking.doTruth,
+                OutputPixelSpacePoints="ITkPixelSpacePoints",
                 OutputPixelClusters="ITkPixelClusters",
                 OutputStripClusters="ITkStripClusters"
             ))
+
+            from ActsConfig.ActsSpacePointFormationConfig import ActsStripSpacePointFormationAlgCfg
+            acc.merge(ActsStripSpacePointFormationAlgCfg(flags,
+                name=f"{flags.Tracking.ActiveConfig.extension}StripSpacePointFormationAlg",
+                StripClusters="ITkStripClusters",
+                StripSpacePoints="ITkStripSpacePoints",
+                StripOverlapSpacePoints="ITkStripOverlapSpacePoints"))
+
             clustersLocation = DataLocation.HOST
 
-            from ActsConfig.ActsSpacePointFormationConfig import ActsSpacePointFormationCfg
-            acc.merge(ActsSpacePointFormationCfg(flags, previousActsExtension=previousExtension))
+            # Truth (as configured in ITkActsDataPreparationCfg)
+            # this truth must only be done if you do PRD and SpacePointformation
+            # If you only do the latter (== running on ESD) then the needed input (simdata)
+            # is not in ESD but the resulting truth (clustertruth) is already there ...
+            if flags.Tracking.doTruth:
+                from ActsConfig.ActsTruthConfig import ActsTruthAssociationAlgCfg, ActsTruthParticleHitCountAlgCfg
+                acc.merge(ActsTruthAssociationAlgCfg(flags))
+                acc.merge(ActsTruthParticleHitCountAlgCfg(flags))
 
         from ActsConfig.ActsSeedingConfig import ActsSeedingCfg
         acc.merge(ActsSeedingCfg(flags))
@@ -113,15 +158,47 @@ def ITkActsDeviceTrackRecoCfg(flags, *, previousExtension=None):
             acc.merge(TracccMeasurementConverterAlgCfg(flags,
                 InputMeasurements="TracccMeasurementCollection",
                 InputClusters="TracccClusterCollection",
-                InputTracccCells="TracccCellCollection",
+                InputCells="TracccCellCollection",
                 ConvertClustersWithCells = flags.Tracking.doTruth,
                 OutputPixelClusters="ITkPixelClusters",
+                OutputPixelSpacePoints="ITkPixelSpacePoints",
+                OutputMeasToPixelSP="ITkTracccMeasToPixelSP",
                 OutputStripClusters="ITkStripClusters"
             ))
+            from ActsConfig.ActsSpacePointFormationConfig import ActsStripSpacePointFormationAlgCfg
+            acc.merge(ActsStripSpacePointFormationAlgCfg(flags,
+                name=f"{flags.Tracking.ActiveConfig.extension}StripSpacePointFormationAlg",
+                StripClusters="ITkStripClusters",
+                StripSpacePoints="ITkStripSpacePoints",
+                StripOverlapSpacePoints="ITkStripOverlapSpacePoints"))
+            clustersLocation = DataLocation.HOST
 
         if seedsLocation is DataLocation.DEVICE:
-            raise ValueError("Unsupported operation, we do not have this conversion yet")
-
+            from ActsGPUEventCnv.ActsGPUEventCnvConfig import TracccSeedConverterAlgCfg
+            
+            acc.merge(TracccSeedConverterAlgCfg(flags,
+                name="TracccSeedConverterAlg",
+                InputSpacepointsDevice="TracccPixelSpacepointCollection",
+                InputSpacepoints="ITkPixelSpacePoints",
+                InputMeasToPixelSP="ITkTracccMeasToPixelSP",
+                InputSeeds="TracccPixelSeedCollection",
+                OutputSeeds=f'{flags.Tracking.ActiveConfig.extension}PixelSeeds'))
+            seedsLocation = DataLocation.HOST
+           
+        # Extract track parameters from device seeds if requested
+        if flags.Tracking.ActiveConfig.storeTrackSeeds and flags.Acts.Device.doSeeding: # for clustering only pipelines this is controlled via the ActsSeedingConfig file
+            from ActsConfig.ActsSeedingConfig import ActsStoreTrackSeedsCfg
+            from InDetConfig.ITkActsHelpers import isFastPrimaryPass
+            processPixels = flags.Detector.EnableITkPixel
+            processStrips = flags.Detector.EnableITkStrip
+            if flags.Tracking.ActiveConfig.extension == "ActsConversion" or flags.Tracking.ActiveConfig.isLargeD0:
+                processPixels = False
+            elif isFastPrimaryPass(flags):
+                processStrips = False
+            acc.merge(ActsStoreTrackSeedsCfg(flags,
+                                             processPixels=processPixels,
+                                             processStrips=processStrips))
+            
         # CKF
         from ActsConfig.ActsTrackFindingConfig import ActsTrackFindingCfg
         acc.merge(ActsTrackFindingCfg(flags))

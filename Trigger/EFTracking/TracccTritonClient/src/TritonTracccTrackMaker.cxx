@@ -12,29 +12,13 @@
 
 #include <chrono>
 
-struct cell_order {
-    bool operator()(const TracccCell& lhs,
-                    const TracccCell& rhs) const
-    {
-        if (lhs.channel1 != rhs.channel1) {
-            return (lhs.channel1 < rhs.channel1);
-        } else {
-            return (lhs.channel0 < rhs.channel0);
-        }
-    }
-};
-
 StatusCode TritonTracccTrackMaker::initialize()
 {
     // input handles / tools
     ATH_CHECK(detStore()->retrieve(m_pixelID, "PixelID"));
-    ATH_CHECK(m_pixelRDOKey.initialize());
-
     ATH_CHECK(detStore()->retrieve(m_stripID, "SCT_ID"));
-    ATH_CHECK(m_stripRDOKey.initialize());
 
-    ATH_CHECK(detStore()->retrieve(m_pixelManager));
-    ATH_CHECK(detStore()->retrieve(m_stripManager));
+    ATH_CHECK(m_tracccCellsKey.initialize());
 
     // output container
     ATH_CHECK(m_ActsTracccTrackContainerKey.initialize());
@@ -89,9 +73,17 @@ StatusCode TritonTracccTrackMaker::execute(const EventContext& ctx) const
 {
 
     // fill cells struct for sending to traccc
-    std::vector<TracccCell> cells;
     auto cell_start = std::chrono::high_resolution_clock::now();
-    ATH_CHECK(read_cells(cells, ctx));
+
+    // Read the cells produced by RDOtoTracccCellConverterAlg.
+    auto cells_handle = SG::makeHandle(m_tracccCellsKey, ctx);
+    ATH_CHECK(cells_handle.isValid());
+
+    traccc::edm::silicon_cell_collection::const_device cells{*cells_handle};
+
+    std::vector<uint8_t> cells_buffer;
+    ATH_CHECK(serializeCells(cells, cells_buffer));
+
     auto cell_end = std::chrono::high_resolution_clock::now();
     std::chrono::duration<double, std::milli> cell_time = cell_end - cell_start;
     ATH_MSG_INFO("Cell reading time: " << cell_time.count() << " ms");  
@@ -108,7 +100,7 @@ StatusCode TritonTracccTrackMaker::execute(const EventContext& ctx) const
 
     // Run the inference 
     auto traccc_start = std::chrono::high_resolution_clock::now();
-    ATH_CHECK(m_tracccTrackingTool->getTracks(cells, TracccTrackParams, TracccMeasurementsInfoInTracks));
+    ATH_CHECK(m_tracccTrackingTool->getTracks(cells_buffer, TracccTrackParams, TracccMeasurementsInfoInTracks));
     auto traccc_end = std::chrono::high_resolution_clock::now();
     std::chrono::duration<double, std::milli> traccc_time = traccc_end - traccc_start;
     ATH_MSG_INFO("Traccc total inference time: " << traccc_time.count() << " ms");
@@ -125,216 +117,55 @@ StatusCode TritonTracccTrackMaker::execute(const EventContext& ctx) const
     return StatusCode::SUCCESS;
 }
 
-std::vector<int> TritonTracccTrackMaker::map_index(int index,
-                                                    int low_bound,
-                                                    int high_bound,
-                                                    int threshold,
-                                                    int shift) const
+// Serialize the traccc::cells object to a raw uint8 buffer
+inline void appendBytes(std::vector<uint8_t>& out, const uint64_t& value)
 {
-
-    std::vector<int> result;
-
-    if (index == low_bound) {  // 398 -> 398,399 ; 382 -> 382,383
-        result.push_back(index);
-        result.push_back(index + 1);
-    } else if (index == low_bound + 1) {  // 399 -> 400,401 ; 383 -> 384,385
-        result.push_back(index + 1);
-        result.push_back(index + 2);
-    } else if (index == low_bound + 2) {  // 400 -> 402,403 ; 384 -> 386,387
-        result.push_back(index + 2);
-        result.push_back(index + 3);
-    } else if (index == high_bound) {  // 401 -> 404,405 ; 385 -> 388,390
-        result.push_back(index + 3);
-        result.push_back(index + 4);
-    } else if (index > threshold) {
-        result.push_back(index + shift);
-    } else {
-        result.push_back(index);
-    }
-
-    return result;
+    const auto* p = reinterpret_cast<const uint8_t*>(&value);
+    out.insert(out.end(), p, p + sizeof(value));
+}
+inline void appendBytes(std::vector<uint8_t>& out, const uint32_t& value)
+{
+    const auto* p = reinterpret_cast<const uint8_t*>(&value);
+    out.insert(out.end(), p, p + sizeof(value));
+}
+inline void appendBytes(std::vector<uint8_t>& out, const float& value)
+{
+    const auto* p = reinterpret_cast<const uint8_t*>(&value);
+    out.insert(out.end(), p, p + sizeof(value));
 }
 
-std::vector<std::pair<int, int>> TritonTracccTrackMaker::correct_indices(
-    int phiIndex, int etaIndex, int rows,
-    int columns) const
+StatusCode TritonTracccTrackMaker::serializeCells(
+    const traccc::edm::silicon_cell_collection::const_device& cells,
+    std::vector<uint8_t>& out) const
 {
-    // Traccc currently assumes a uniform pitch distributions on the modules
-    // however, in some EC and barel layers (> 0 and >1, respectively), there
-    // are 'quad' modules meaning the middle two rows and middle two columns are
-    // double pitch: 0.05 mm -> 0.1 mm We solve this in G-200 by splitting these
-    // cells into two contributions to ensure a uniform pitch across the module
-    // and therefore the correct cluster position calculation When translating
-    // the Athena cells to Traccc cells, the middle indices then need to get two
-    // contributions, the indices below are unchanged, the indices above get
-    // shifted by 4
+    const uint64_t nCells = cells.size();
 
-    int middle_row = rows / 2;
-    int middle_column = columns / 2;
+    // Reserve: 8-byte header + 5 columns * (4 or 4-byte scalars) per cell.
+    out.clear();
+    out.reserve(sizeof(uint64_t) + nCells * (3 * sizeof(uint32_t) + 2 * sizeof(float)));
 
-    std::vector<std::pair<int, int>> index_vec;
+    // Header: number of cells.
+    appendBytes(out, nCells);
 
-    std::vector<int> mapped_x =
-        map_index(phiIndex, middle_row - 2, middle_row + 1, middle_row + 1, 4);
-    std::vector<int> mapped_y = map_index(
-        etaIndex, middle_column - 2, middle_column + 1, middle_column + 1, 4);
-
-    if ((middle_row - 2 <= phiIndex && phiIndex <= middle_row + 1) and
-        (middle_column - 2 <= etaIndex && etaIndex <= middle_column + 1)) {
-        ATH_MSG_DEBUG("mapping: " << phiIndex << "," << etaIndex);
+    // SoA column blocks, in silicon_cell_collection column order.
+    for (uint64_t i = 0; i < nCells; ++i) {
+        appendBytes(out, static_cast<uint32_t>(cells.channel0()[i]));
+    }
+    for (uint64_t i = 0; i < nCells; ++i) {
+        appendBytes(out, static_cast<uint32_t>(cells.channel1()[i]));
+    }
+    for (uint64_t i = 0; i < nCells; ++i) {
+        appendBytes(out, static_cast<float>(cells.activation()[i]));
+    }
+    for (uint64_t i = 0; i < nCells; ++i) {
+        appendBytes(out, static_cast<float>(cells.time()[i]));
+    }
+    for (uint64_t i = 0; i < nCells; ++i) {
+        appendBytes(out, static_cast<uint32_t>(cells.module_index()[i]));
     }
 
-    for (auto [phi, eta] : std::views::cartesian_product(mapped_x, mapped_y)) {
-        index_vec.emplace_back(phi, eta);
-        if ((middle_row - 2 <= phiIndex && phiIndex <= middle_row + 1) and
-            (middle_column - 2 <= etaIndex &&
-                etaIndex <= middle_column + 1)) {
-            ATH_MSG_DEBUG(phi << "," << eta);
-        }
-    }
-
-    return index_vec;
-}
-
-StatusCode TritonTracccTrackMaker::read_cells(
-    std::vector<TracccCell>& cells,
-    const EventContext& evtcontext) const
-{
-    cells.clear();
-
-    ATH_MSG_DEBUG("Reading pixel hits");
-
-    const PixelRDO_Container* pixelRDOHandle{};
-    ATH_CHECK(SG::get(pixelRDOHandle, m_pixelRDOKey, evtcontext));
-
-    int nPix = 0;
-    for (const InDetRawDataCollection<PixelRDORawData>* pixel_rdoCollection :
-         *pixelRDOHandle) {
-
-        for (const PixelRDORawData* pixelRawData : *pixel_rdoCollection) {
-
-            Identifier rdoId = pixelRawData->identify();
-
-            // get the det element from the det element collection
-            const InDetDD::SiDetectorElement* sielement =
-                m_pixelManager->getDetectorElement(rdoId);
-            assert(sielement);
-            const Identifier Pixel_ModuleID = sielement->identify();
-            InDetDD::SiCellId id = sielement->cellIdFromIdentifier(rdoId);
-
-            int layer_disk = m_pixelID->layer_disk(Pixel_ModuleID);
-            int barrel_ec = m_pixelID->barrel_ec(Pixel_ModuleID);
-
-            int64_t const geometry_id = Pixel_ModuleID.get_compact();
-
-            ATH_MSG_DEBUG("Doing this module: " << geometry_id);
-
-            if ((barrel_ec != 0 && layer_disk > 1) ||
-                (barrel_ec == 0 && layer_disk > 0)) {
-                const InDetDD::PixelModuleDesign* p_design =
-                    static_cast<const InDetDD::PixelModuleDesign*>(
-                        &sielement->design());
-                std::vector<std::pair<int, int>> cell_vec =
-                    correct_indices(id.phiIndex(), id.etaIndex(),
-                                    p_design->rows(), p_design->columns());
-                for (std::size_t c = 0; c < cell_vec.size(); c++) {
-
-                    std::tuple<int, int> indices = cell_vec.at(c);
-                    const int phiIndex = std::get<0>(indices);
-                    const int etaIndex = std::get<1>(indices);
-
-                    cells.push_back({
-                        geometry_id, 0, static_cast<int64_t>(phiIndex),
-                        static_cast<int64_t>(etaIndex),
-                        static_cast<float>(pixelRawData->getToT()),
-                        8  // timestamp is not used
-                    });
-                }
-            } else {
-                cells.push_back({
-                    geometry_id, 0, static_cast<int64_t>(id.phiIndex()),
-                    static_cast<int64_t>(id.etaIndex()),
-                    static_cast<float>(pixelRawData->getToT()),
-                    8  // timestamp is not used
-                });
-            }
-
-            nPix++;
-        }
-    }
-    ATH_MSG_DEBUG("Read " << nPix << " pixel hits");
-
-    ATH_MSG_DEBUG("Reading strip hits");
-
-    const SCT_RDO_Container* stripRDOHandle{};
-    ATH_CHECK(SG::get(stripRDOHandle, m_stripRDOKey, evtcontext));
-
-    int nStrip = 0;
-    for (const InDetRawDataCollection<SCT_RDORawData>* strip_Collection :
-         *stripRDOHandle) {
-        if (strip_Collection == nullptr) {
-            continue;
-        }
-        for (const SCT_RDORawData* stripRawData : *strip_Collection) {
-
-            const Identifier rdoId = stripRawData->identify();
-            const InDetDD::SiDetectorElement* sielement =
-                m_stripManager->getDetectorElement(rdoId);
-
-            const Identifier strip_moduleID = m_stripID->module_id(
-                sielement->identify());  // from wafer id to module id
-            const IdentifierHash Strip_ModuleHash =
-                m_stripID->wafer_hash(strip_moduleID);
-
-            // Extract the correct Strip_ModuleID
-            int side = m_stripID->side(sielement->identify());
-            const Identifier Strip_ModuleID =
-                m_stripID->wafer_id(Strip_ModuleHash + side);
-
-            InDetDD::SiCellId id = sielement->cellIdFromIdentifier(rdoId);
-
-            int64_t const geometry_id = Strip_ModuleID.get_compact();
-
-            if (m_stripID->barrel_ec(Strip_ModuleID) == 0) {
-
-                // if we have barrel modules, then this is in cartesian
-                // coordinates so phi, eta indices hold
-
-                for (int i = 0; i < stripRawData->getGroupSize(); i++) {
-
-                    cells.push_back({
-                        geometry_id, 0,
-                        static_cast<int64_t>(id.phiIndex() + i), 0, 1,
-                        8  // timestamp is not used
-                    });
-                    nStrip++;
-                }
-
-            } else {
-
-                // if we have annulus modules in the endcaps
-                // then we want to make r,phi measurements in the strip local
-                // frame but we cluster in the phi direction, so this has to be
-                // coordinate y
-
-                for (int i = 0; i < stripRawData->getGroupSize(); i++) {
-
-                    cells.push_back({
-                        geometry_id, 0, 0,
-                        static_cast<int64_t>(id.phiIndex() + i), 1,
-                        8  // timestamp is not used
-                    });
-                    nStrip++;
-                }
-            }
-        }
-    }
-    ATH_MSG_DEBUG("Read " << nStrip << " strip hits");
-
-    // Sort the cells. Deduplication or not, they do need to be sorted.
-    std::sort(cells.begin(), cells.end(), ::cell_order());
-
-    ATH_MSG_DEBUG("Sorted the cells container");
+    ATH_MSG_DEBUG("Serialized " << nCells << " traccc cells into "
+                  << out.size() << " bytes");
 
     return StatusCode::SUCCESS;
 }
@@ -526,7 +357,7 @@ StatusCode TritonTracccTrackMaker::convertInDetToXaodCluster(
     const auto& ToTs = indetCluster.totList();
     const auto& charges = indetCluster.chargeList();
     const auto& width = indetCluster.width();
-
+    //coverity[UNINIT]
     xaodCluster.setMeasurement<2>(idHash, localPosition, localCovariance);
     xaodCluster.setIdentifier(indetCluster.identify().get_compact());
     xaodCluster.setRDOlist(RDOs);
@@ -578,7 +409,7 @@ StatusCode TritonTracccTrackMaker::convertInDetToXaodCluster(
 
     const auto& RDOs = indetCluster.rdoList();
     const auto& width = indetCluster.width();
-
+    //coverity[UNINIT]
     xaodCluster.setMeasurement<1>(idHash, localPosition, localCovariance);
     xaodCluster.setIdentifier(indetCluster.identify().get_compact());
     xaodCluster.setRDOlist(RDOs);
@@ -637,7 +468,7 @@ std::optional<Acts::BoundTrackParameters>
 {
     using namespace Acts::UnitLiterals;
     std::shared_ptr<const Acts::Surface> actsSurface;
-    Acts::BoundVector params;
+    Acts::BoundVector params{};
 
     Identifier const atlas_ID(static_cast<Identifier::value_type>(state.athena_id[0]));
 
@@ -656,7 +487,7 @@ std::optional<Acts::BoundTrackParameters>
     Acts::BoundMatrix const cov = buildBoundCovariance(state);
 
     Acts::ParticleHypothesis hypothesis{Acts::ParticleHypothesis::pion()};
-
+    
     return Acts::BoundTrackParameters(actsSurface, params, cov, hypothesis);
 }
 

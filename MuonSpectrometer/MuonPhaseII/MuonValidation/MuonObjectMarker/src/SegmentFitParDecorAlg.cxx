@@ -11,6 +11,7 @@
 #include "MuonReadoutGeometryR4/SpectrometerSector.h"
 #include "TrkCompetingRIOsOnTrack/CompetingRIOsOnTrack.h"
 #include "xAODMuonViews/ChamberViewer.h"
+#include "xAODMuonViews/ContainerDecorator.h"
 
 namespace {
     std::string print(const xAOD::MuonMeasurementContainer& container) {
@@ -67,8 +68,8 @@ namespace MuonR4 {
         ATH_CHECK(SG::get(segmentContainer, m_segmentKey, ctx));
         ATH_CHECK(SG::get(gctx, m_geoCtxKey, ctx));
 
-        SG::WriteDecorHandle<xAOD::MuonSegmentContainer, SegPars_t> parDecor{m_locParKey, ctx};
-        SG::WriteDecorHandle<xAOD::MuonSegmentContainer, PrdLinkVec> prdLinkDecor{m_prdLinkKey, ctx};
+        xAOD::ContainerDecorator<xAOD::MuonSegmentContainer, SegPars_t> parDecor{m_locParKey, ctx};
+        xAOD::ContainerDecorator<xAOD::MuonSegmentContainer, PrdLinkVec> prdLinkDecor{m_prdLinkKey, ctx};
         for (const xAOD::MuonSegment* seg : *segmentContainer) {
             PrdLinkVec& prdLinks{prdLinkDecor(*seg)};
             const Trk::Segment* trkSeg{*seg->muonSegment()};

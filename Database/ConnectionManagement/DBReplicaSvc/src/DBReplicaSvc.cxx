@@ -12,6 +12,11 @@
 #include <fstream>
 #include <cstring>
 
+#include "RelationalAccess/ConnectionService.h"
+#include "RelationalAccess/IConnectionServiceConfiguration.h"
+#include "RelationalAccess/IWebCacheControl.h"
+#include "RelationalAccess/IDatabaseServiceSet.h"
+#include "RelationalAccess/IDatabaseServiceDescription.h"
 
 StatusCode DBReplicaSvc::initialize() {
 
@@ -67,9 +72,38 @@ StatusCode DBReplicaSvc::initialize() {
     ATH_MSG_INFO ("Geometry SQLite replicas will be excluded");
   if (m_nofailover) 
     ATH_MSG_INFO ("Failover to secondary replicas disabled");
+  //Other coral configuration settting:
+
+  m_context = &coral::Context::instance();
+  if (m_context == nullptr) {
+    ATH_MSG_FATAL("Failed to access CORAL Context");
+    return (StatusCode::FAILURE);
+  }
+
+  coral::ConnectionService conSvcH;
+  coral::IConnectionServiceConfiguration& csConfig = conSvcH.configuration();
+  csConfig.setReplicaSortingAlgorithm(*this);
+  ATH_MSG_DEBUG("Successfully setup replica sorting algorithm");
+
+  csConfig.setConnectionRetrialPeriod(m_retrialPeriod);
+  csConfig.setConnectionRetrialTimeOut(m_retrialTimeOut);
+  if (m_connClean) {
+    csConfig.enablePoolAutomaticCleanUp();
+    csConfig.setConnectionTimeOut(m_timeOut);
+  } else {
+    csConfig.disablePoolAutomaticCleanUp();
+    csConfig.setConnectionTimeOut(0);
+  }
+  ATH_MSG_INFO("Set connectionsvc retry/timeout/IDLE timeout to " << m_retrialPeriod << "/" << m_retrialTimeOut << "/" << m_timeOut
+                                                                  << " seconds with connection cleanup "
+                                                                  << (csConfig.isPoolAutomaticCleanUpEnabled() ? "enabled" : "disabled"));
+  // set Frontier web cache compression level
+  coral::IWebCacheControl& webCache = conSvcH.webCacheControl();
+  webCache.setCompressionLevel(m_frontierComp);
+  ATH_MSG_INFO("Frontier compression level set to " << webCache.compressionLevel());
+
   return sc;
 }
-
 
 StatusCode DBReplicaSvc::readConfig() {
 

@@ -4,8 +4,10 @@
 
 #include "TgcL0FloatingCandidateBuilderTool.h"
 
+#include "PathResolver/PathResolver.h"
 #include "StoreGate/ReadCondHandle.h"
 #include "TgcL0FloatingData.h"
+#include "TgcL0FloatingPtLut.h"
 #include "TgcL0RdoDecoder.h"
 #include "TgcL0OverlapClassification.h"
 #include "TgcL0SegmentReconstruction.h"
@@ -53,6 +55,44 @@ StatusCode TgcL0FloatingCandidateBuilderTool::initialize() {
   ATH_CHECK(m_idHelperSvc.retrieve());
   ATH_CHECK(m_cablingKey.initialize());
   ATH_CHECK(m_detectorManagerKey.initialize());
+
+  const std::string calibrationDirectory =
+      PathResolver::find_calib_directory("dev");
+  if (calibrationDirectory.empty()) {
+    ATH_MSG_ERROR("Could not resolve the GroupData development directory");
+    return StatusCode::FAILURE;
+  }
+  const std::string ptCalibrationPath =
+      calibrationDirectory + "/" + m_ptCalibrationFile.value();
+  std::string error;
+  m_ptLut = TgcL0FloatingPtLut::loadAscii(ptCalibrationPath, error);
+  if (!m_ptLut) {
+    ATH_MSG_ERROR("Failed to load Floating-pT calibration: " << error);
+    return StatusCode::FAILURE;
+  }
+  ATH_MSG_INFO("Loaded Floating-pT calibration "
+               << m_ptLut->version() << " from " << ptCalibrationPath
+               << " (eta bins=" << m_ptLut->etaBins()
+               << ", folded-phi bins=" << m_ptLut->phiBinsPerFold()
+               << ", knots=" << m_ptLut->knotCount()
+               << ", mode="
+               << (m_ptLut->isDevelopmentPayload() ? "development"
+                                                    : "production")
+               << ")");
+
+  const std::string goodMagMapPath =
+      calibrationDirectory + "/" + m_goodMagMapFile.value();
+  error.clear();
+  m_goodMagMap = TgcL0GoodMagMap::loadAscii(goodMagMapPath, error);
+  if (!m_goodMagMap) {
+    ATH_MSG_ERROR("Failed to load GoodMag map: " << error);
+    return StatusCode::FAILURE;
+  }
+  ATH_MSG_INFO("Loaded GoodMag map "
+               << m_goodMagMap->version() << " from " << goodMagMapPath
+               << " (eta bins=" << m_goodMagMap->etaBins()
+               << ", folded-phi bins=" << m_goodMagMap->phiBinsPerFold()
+               << ", poor bins=" << m_goodMagMap->poorBinCount() << ")");
   return StatusCode::SUCCESS;
 }
 
@@ -107,6 +147,25 @@ StatusCode TgcL0FloatingCandidateBuilderTool::build(
   TgcL0Floating::OverlapClassificationStatistics overlapStatistics;
   const TgcL0Floating::OverlapClassification overlapClassification;
   overlapClassification.classify(candidates, overlapStatistics);
+
+  std::size_t nValidPtEstimates = 0U;
+  for (TgcL0Candidate& candidate : candidates) {
+    const TgcL0FloatingPtEvaluation evaluation =
+        m_ptLut->evaluate(candidate.eta, candidate.phi, candidate.deltaTheta);
+    candidate.goodMagneticField = m_goodMagMap->isGood(
+        candidate.eta, candidate.phi, m_ptLut->absEtaMin(),
+        m_ptLut->absEtaMax());
+    if (!evaluation.ptEstimateValid) continue;
+    candidate.preInnerCoincidencePt = evaluation.ptEstimateGeV;
+    candidate.preInnerCoincidenceThreshold = evaluation.thresholdCode;
+    candidate.charge = evaluation.estimatedCharge;
+    ++nValidPtEstimates;
+  }
+  const std::size_t nInvalidPtEstimates =
+      candidates.size() - nValidPtEstimates;
+  ATH_MSG_DEBUG("Floating-pT evaluation: valid=" << nValidPtEstimates
+                                                  << ", invalid="
+                                                  << nInvalidPtEstimates);
 
   CoincidenceQualityCounts totalCounts;
   CoincidenceQualityCounts m1WireCounts;
@@ -239,7 +298,15 @@ StatusCode TgcL0FloatingCandidateBuilderTool::build(
                   << ", eta=" << candidate.eta << ", phi="
                   << candidate.phi << ", deltaTheta="
                   << candidate.deltaTheta << ", deltaPhi="
-                  << candidate.deltaPhi << ", wireQuality="
+                  << candidate.deltaPhi << ", preInnerCoincidencePt="
+                  << candidate.preInnerCoincidencePt
+                  << ", preInnerCoincidenceThreshold="
+                  << static_cast<unsigned int>(
+                         candidate.preInnerCoincidenceThreshold)
+                  << ", charge=" << static_cast<int>(candidate.charge)
+                  << ", goodMagneticField="
+                  << candidate.goodMagneticField
+                  << ", wireQuality="
                   << static_cast<unsigned int>(candidate.wireQuality)
                   << ", wireQualities=("
                   << static_cast<unsigned int>(candidate.m1WireQuality)

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //////////////////////////////////////////////////////////////////
@@ -38,7 +38,7 @@ namespace Trk {
      public:
 
        /** Standard Athena-Algorithm Constructor */
-       TrackingGeometryTest(const std::string& name, ISvcLocator* pSvcLocator);
+       using TrkDetDescrUnitTestBase::TrkDetDescrUnitTestBase;
        
        /* specify the test here */
        StatusCode runTest();
@@ -49,14 +49,18 @@ namespace Trk {
        
      private:
 #ifdef TRKDETDESCR_MEMUSAGE
-       Trk::MemoryLogger                            m_memoryLogger;               //!< little memory logger to check the used memory
+      Trk::MemoryLogger m_memoryLogger{}; //!< little memory logger to check the used memory
 #endif                                              
-       bool                                         m_executed;                   //!< Make sure it only runs once 
+       bool m_executed = false; //!< Make sure it only runs once
                                                     
-       ServiceHandle<Trk::ITrackingGeometrySvc>     m_trackingGeometrySvc;        //!< Service handle for retrieving the TrackingGeometry
-       const TrackingGeometry*                      m_trackingGeometry;           //!< The TrackingGeometry to be retrieved
-       std::string                                  m_trackingGeometryName;       //!< The Name of the TrackingGeometry
-       ToolHandleArray<Trk::IGeometryProcessor>     m_trackingGeometryProcessors; //!< Tool to write out a Display format for external viewers
+       ServiceHandle<Trk::ITrackingGeometrySvc> m_trackingGeometrySvc
+        {this, "TrackingGeometrySvc", "TrackingGeometrySvc/AtlasTrackingGeometrySvc",
+         "Service handle for retrieving the TrackingGeometry"};
+       const TrackingGeometry* m_trackingGeometry = nullptr; //!< The TrackingGeometry to be retrieved
+       std::string m_trackingGeometryName = "AtlasTrackingGeometry";
+       ToolHandleArray<Trk::IGeometryProcessor> m_trackingGeometryProcessors
+        {this, "TrackingGeometryProcessors", {},
+         "Tool to write out a Display format for external viewers"};
                                     
    };
 }

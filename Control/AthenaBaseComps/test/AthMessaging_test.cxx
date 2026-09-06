@@ -34,7 +34,7 @@ struct MyObj : public AthMessaging {
 
   void print()
   {
-    ATH_MSG_DEBUG("Good morning");
+    ATH_MSG_DEBUG("Good {}", "morning");
     ATH_MSG_WARNING("Hello");
     ATH_MSG_INFO("World");
   }

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file EventBookkeeperTPCnv/test/SkimDecisionCnv_p1_test.cxx
@@ -11,7 +11,6 @@
 
 #undef NDEBUG
 #include "EventBookkeeperTPCnv/SkimDecisionCnv_p1.h"
-#include "CxxUtils/StrFormat.h"
 #include "CxxUtils/checker_macros.h"
 #include "TestTools/leakcheck.h"
 #include <cassert>

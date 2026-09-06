@@ -26,21 +26,7 @@ class MuonPhaseIITestDefaults:
                             "data26_13p6TeV.00519268.physics_Main.daq.RAW._lb0178._SFO-20._0002.data",
                         ]
     ]
-    ### First files taken from https://gitlab.cern.ch/atlas-nextgen/work-package-2.5/SampleProduction/-/blob/master/FileLists/RDO_MU0/R3/999992.PG_DiMuon_Pt10to100.txt
-    RDO_R3 = [
-        "root://eosatlas.cern.ch:1094//eos/atlas/atlaslocalgroupdisk/dq2/rucio/group/det-muon/9c/69/group.det-muon.48959424.EXT0._000002.RDO.pool.root",
-        "root://eosatlas.cern.ch:1094//eos/atlas/atlaslocalgroupdisk/dq2/rucio/group/det-muon/af/b4/group.det-muon.48959424.EXT0._000003.RDO.pool.root",
-        "root://eosatlas.cern.ch:1094//eos/atlas/atlaslocalgroupdisk/dq2/rucio/group/det-muon/d8/a1/group.det-muon.48959424.EXT0._000004.RDO.pool.root",
-        "root://eosatlas.cern.ch:1094//eos/atlas/atlaslocalgroupdisk/dq2/rucio/group/det-muon/ea/62/group.det-muon.48959424.EXT0._000005.RDO.pool.root",
-        "root://eosatlas.cern.ch:1094//eos/atlas/atlaslocalgroupdisk/dq2/rucio/group/det-muon/53/6e/group.det-muon.48959424.EXT0._000006.RDO.pool.root",
-        "root://eosatlas.cern.ch:1094//eos/atlas/atlaslocalgroupdisk/dq2/rucio/group/det-muon/03/66/group.det-muon.48959424.EXT0._000007.RDO.pool.root",
-        "root://eosatlas.cern.ch:1094//eos/atlas/atlaslocalgroupdisk/dq2/rucio/group/det-muon/30/58/group.det-muon.48959424.EXT0._000008.RDO.pool.root",
-        "root://eosatlas.cern.ch:1094//eos/atlas/atlaslocalgroupdisk/dq2/rucio/group/det-muon/95/1e/group.det-muon.48959424.EXT0._000009.RDO.pool.root",
-        "root://eosatlas.cern.ch:1094//eos/atlas/atlaslocalgroupdisk/dq2/rucio/group/det-muon/e7/64/group.det-muon.48959424.EXT0._000010.RDO.pool.root",
-        "root://eosatlas.cern.ch:1094//eos/atlas/atlaslocalgroupdisk/dq2/rucio/group/det-muon/03/cc/group.det-muon.48959424.EXT0._000011.RDO.pool.root",
-        "root://eosatlas.cern.ch:1094//eos/atlas/atlaslocalgroupdisk/dq2/rucio/group/det-muon/49/61/group.det-muon.48959424.EXT0._000012.RDO.pool.root",
-        "root://eosatlas.cern.ch:1094//eos/atlas/atlaslocalgroupdisk/dq2/rucio/group/det-muon/74/ed/group.det-muon.48959424.EXT0._000013.RDO.pool.root",
-    ]
+    RDO_R3 = [ "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonGeomRTT/myRDO.R3.pool.root"]
     ### First files taken from (https://gitlab.cern.ch/atlas-nextgen/work-package-2.5/SampleProduction/-/blob/master/FileLists/RDO_MU0/R4/999992.PG_DiMuon_Pt10to100.txt)
     RDO_R4 = [   
         "root://eosatlas.cern.ch:1094//eos/atlas/atlaslocalgroupdisk/dq2/rucio/group/det-muon/8b/de/group.det-muon.48959425.EXT0._000002.RDO.pool.root",

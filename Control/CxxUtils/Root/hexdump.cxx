@@ -11,8 +11,7 @@
 
 #include "CxxUtils/hexdump.h"
 #include "CxxUtils/procmaps.h"
-#include "boost/io/ios_state.hpp"
-#include <iomanip>
+#include <format>
 #include <cstdint>
 #include <array>
 #include <bit>
@@ -41,16 +40,12 @@ void hexdump (std::ostream& s, const void* addr, size_t n, size_t offset /*= 0*/
   const char* ptr = reinterpret_cast<const char*> (addr);
   size_t ipos = 0;
 
-  boost::io::ios_all_saver saver (s);
-  std::hex (s);
-  s.fill ('0');
-
   char cbuf[width + 1]{};
   std::array<unsigned char, 4> bbuf{};
 
   while (n-- > 0) {
     if ((ipos % width) == 0) {
-      s << std::setw(16) << reinterpret_cast<uintptr_t>(ptr + ipos) - offset << " ";
+      s << std::format("{:016x} ", reinterpret_cast<uintptr_t>(ptr + ipos) - offset);
     }
     if ((ipos % 4) == 0) {
       s << " ";
@@ -60,7 +55,7 @@ void hexdump (std::ostream& s, const void* addr, size_t n, size_t offset /*= 0*/
 
     ++ipos;
     if ((ipos % 4) == 0) {
-      s << std::setw(8) << static_cast<unsigned int>(std::bit_cast<uint32_t>(bbuf));
+      s << std::format("{:08x}", static_cast<unsigned int>(std::bit_cast<uint32_t>(bbuf)));
     }
     if ((ipos % width) == 0) {
       s << "  " << cbuf << "\n";
@@ -73,7 +68,7 @@ void hexdump (std::ostream& s, const void* addr, size_t n, size_t offset /*= 0*/
       for (unsigned i = ntrail; i < 4; i++) {
         bbuf[i] = 0;
       }
-      s << std::setw(2*ntrail) << static_cast<unsigned int>(std::bit_cast<uint32_t>(bbuf));
+      s << std::format("{:0{}x}", static_cast<unsigned int>(std::bit_cast<uint32_t>(bbuf)), 2*ntrail);
     }
     while ((ipos % width) != 0) {
       if ((ipos % 4) == 0) {
@@ -132,11 +127,8 @@ void safeHexdump (std::ostream& s, const void* addr, size_t n, size_t offset /*=
       hexdump (s, ptr, thispage, offset);
     }
     else {
-      boost::io::ios_all_saver saver (s);
-      std::hex (s);
-      s.fill ('0');
-      s << std::setw(16) << reinterpret_cast<uintptr_t>(ptr) - offset
-        << "  --- is not readable\n";
+      s << std::format("{:016x}  --- is not readable\n",
+                       reinterpret_cast<uintptr_t>(ptr) - offset);
       if (ent) {
         thispage = std::max (ent->endAddress - iptr, thispage);
       }

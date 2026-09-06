@@ -105,10 +105,16 @@ The following table lists other properties for further configurations for "2025-
      - ``std::string``
      - ``"mc23"("mc20")``
      - For ``2025-prerec``, toggle between run-2 (``"mc20"``) and run-3 (``"mc23"``) pre-recommendations
+
    * - ``MVATESQualityCheck``
      - ``bool``
      - ``true``
      - apply a compatibility check between calo TES and MVA TES and decorate the tau with a boolean "TESCompatibility" with the check results.
+
+   * - ``useGNTau``
+     - ``bool``
+     - ``false``
+     - ``set to true to use GNTAU based recommendations - not available for Run2``    
 
 ---
 FAQ

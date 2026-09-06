@@ -147,7 +147,7 @@ def test_tool_call_synthetic():
     # One event, one muon
     assert len(sf_values) == 1
     assert len(sf_values[0]) == 1
-    assert sf_values[0][0] == approx(0.99509060382843018)
+    assert sf_values[0][0] == approx(0.99569094181060791)
     assert valid_values[0][0] == 1
 
 

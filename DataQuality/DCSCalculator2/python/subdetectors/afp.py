@@ -265,8 +265,8 @@ class TDAQC_Array_Variable(TDAQC_Multi_Channel_Variable):
 
 def load_current(filename:str, n_modules:int) -> tuple[list[float],list[tuple[float,...]]]:
     from datetime import datetime, timezone
-    from pkg_resources import resource_string
-    data = resource_string('DCSCalculator2.subdetectors.data', filename).decode().strip().split('\n')
+    from importlib.resources import files
+    data = files('DCSCalculator2.subdetectors.data').joinpath(filename).read_bytes().decode().strip().split('\n')
     result = {}
     for line in data:
         line = line.strip()
@@ -678,3 +678,5 @@ class AFP(DCSC_DefectTranslate_Subdetector):
         if module_tagger is not None:
             list = [f"{module} {module_tagger(orig)}" for module,orig in zip(list,iovs)]
         return comment + f" ({', '.join(list)})"
+
+

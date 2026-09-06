@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -97,7 +97,8 @@ std::vector<Trk::MaterialEffectsOnTrack> Rec::MuidMaterialEffectsOnTrackProvider
             if (!meot) continue;
             double sintheta = std::sin(c_tsos->trackParameters()->parameters()[Trk::theta]);
             double qoverp = c_tsos->trackParameters()->parameters()[Trk::qOverP];
-            const CaloEnergy* eloss = meot ? dynamic_cast<const CaloEnergy*>(meot->energyLoss()) : nullptr;
+            //meot must be valid here
+            const CaloEnergy* eloss = dynamic_cast<const CaloEnergy*>(meot->energyLoss());
 
             std::unique_ptr<Trk::EnergyLoss> neweloss = nullptr;
             std::optional<Trk::ScatteringAngles> newsa = std::nullopt;

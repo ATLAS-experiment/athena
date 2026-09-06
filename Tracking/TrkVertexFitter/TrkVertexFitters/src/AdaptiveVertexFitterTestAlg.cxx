@@ -380,8 +380,8 @@ void setInitialPerigees (xAOD::Vertex& v, const TrackUVec_t& tracks)
 
 void clearInitialPerigees (xAOD::Vertex& v)
 {
-  for (Trk::VxTrackAtVertex& v : v.vxTrackAtVertex()) {
-    v.setInitialPerigee (static_cast<const Trk::Perigee*>(nullptr));
+  for (Trk::VxTrackAtVertex& vtx : v.vxTrackAtVertex()) {
+    vtx.setInitialPerigee (static_cast<const Trk::Perigee*>(nullptr));
   }
 }
 
@@ -396,10 +396,10 @@ void setRefittedPerigee (xAOD::Vertex& v, unsigned i,
   if (vec.size() <= i) vec.resize(i+1);
 
   AmgSymMatrix(5) cov = cov5();
-  for (int i=0; i < 5; i++) {
+  for (int ii=0; ii < 5; ii++) {
     for (int j=0; j < 5; j++) {
-      unsigned ipos = i*5 + j;
-      (cov)(i,j) = ipos < c.size() ? c[ipos] : 0;
+      unsigned ipos = ii*5 + j;
+      (cov)(ii,j) = ipos < c.size() ? c[ipos] : 0;
     }
   }
 

@@ -758,23 +758,6 @@ StatusCode LArCompleteToFlat::stop() {
       }   
     } else {
       pedestalFlat(pedComplete,flatName+"/Pedestal");
-
-      /*
-     CondAttrListCollection* coll=pedestalFlat(pedComplete,"/LAR/ElecCalibFlat/Pedestal");
-     LArPedestalFlat* pf=new LArPedestalFlat(coll);
-  
-     sc=detStore()->record(pf,"PedestalFlat");
-     if (sc.isFailure()) {
-       ATH_MSG_ERROR( "Failed to record LArPedestalFlat" );
-     }
-   
-     ILArPedestal* iped=pf;
-     sc=detStore()->symLink(pf,iped);
-     if (sc.isFailure()) {
-       ATH_MSG_ERROR( "Failed to symlink LArPedestalFlat" );
-     }
-   }
-      */
     }
   }//end if have m_pedestalInput
 
@@ -829,22 +812,6 @@ StatusCode LArCompleteToFlat::stop() {
       }   
     } else {
       shapeFlat(shapeComplete,flatName+"/Shape");
-      /*
-      CondAttrListCollection* coll=shapeFlat(shapeComplete,"/LAR/ElecCalibFlat/Shape");
-
-      LArShapeFlat* sf=new LArShapeFlat(coll);
-     
-      sc=detStore()->record(sf,"ShapeFlat");
-      if (sc.isFailure()) {
-	ATH_MSG_ERROR( "Failed to record LArShapeFlat" );
-      }
-   
-      ILArShape* ishape=sf;
-      sc=detStore()->symLink(sf,ishape);
-      if (sc.isFailure()) {
-	ATH_MSG_ERROR( "Failed to symlink LArShapeFlat" );
-      }
-      */
     }
   }//end if have m_shapeInput
 

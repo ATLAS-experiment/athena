@@ -69,9 +69,6 @@
 #pragma link C++ class SH::MetaData<int>+;
 #pragma link C++ class SH::MetaVector<Long64_t>+;
 #pragma link C++ class SH::MetaObject-;
-#pragma link C++ class std::vector<SH::Sample*>+;
-#pragma link C++ class std::pair<std::string,SH::Sample*>+;
-#pragma link C++ class std::map<std::string,SH::Sample*>+;
 
 #pragma link C++ function SH::dbg (const SH::SampleHandler&, unsigned);
 #pragma link C++ function SH::dbg (const SH::Sample&, unsigned);
@@ -84,12 +81,13 @@
 #pragma link C++ function SH::scanNEvents (SH::SampleHandler&);
 #pragma link C++ function SH::scanNEvents (SH::Sample&);
 #pragma link C++ function SH::makeFromTChain (const std::string&, const TChain&);
+#pragma link C++ function SH::makeFromTChainUnique (const std::string&, const TChain&);
 #pragma link C++ function SH::scanDQ2 (SampleHandler&, const std::string&);
 #pragma link C++ function SH::scanRucio (SampleHandler&, const std::string&, bool);
 #pragma link C++ function SH::readFileList (SampleHandler&, const std::string&, const std::string&);
 #pragma link C++ function SH::addGrid (SampleHandler&, const std::string&);
-#pragma link C++ function SH::addGridCombined (SampleHandler&, const std::string&, const std::vector<std:string>&);
-#pragma link C++ function SH::addGridCombinedFromFile (SampleHandler&, const std::string&, const std:string&);
+#pragma link C++ function SH::addGridCombined (SampleHandler&, const std::string&, const std::vector<std::string>&);
+#pragma link C++ function SH::addGridCombinedFromFile (SampleHandler&, const std::string&, const std::string&);
 #pragma link C++ function SH::makeGridDirect (SampleHandler&, const std::string&, const std::string&, const std::string&, bool);
 #pragma link C++ function SH::printDuplicateEvents (const SH::Sample&);
 #pragma link C++ function SH::printDuplicateEventsSplit (const SH::SampleHandler&);

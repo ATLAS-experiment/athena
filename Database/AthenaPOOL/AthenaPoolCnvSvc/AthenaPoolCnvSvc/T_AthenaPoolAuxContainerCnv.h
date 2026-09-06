@@ -78,10 +78,10 @@ public:
   
 private:
   /// GUID of the object being read.
-  Guid m_guid;
+  Guid m_guid{};
 
   /// List of TP converters.
-  AthenaPoolCnvSvc::TPCnvList<T_AthenaPoolAuxContainerCnv, AUXSTORE, TPCNVS...> m_tpcnvs;
+  AthenaPoolCnvSvc::TPCnvList<T_AthenaPoolAuxContainerCnv, AUXSTORE, TPCNVS...> m_tpcnvs{};
 };
 
 
