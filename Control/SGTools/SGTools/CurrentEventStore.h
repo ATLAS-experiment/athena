@@ -13,6 +13,8 @@
 #ifndef SGTOOLS_CURRENTEVENTSTORE_H
 #define SGTOOLS_CURRENTEVENTSTORE_H
 
+
+#include "GaudiKernel/EventContext.h"
 class IProxyDict;
 
 
@@ -55,14 +57,8 @@ public:
 
   private:
     IProxyDict* m_oldStore;
+    EventContext m_oldCtx;
   };
-
-
-private:
-  /// Update the current EventContext to reference store.
-  static void storeToCtx (IProxyDict* store);
-
-
   /// The current event store.
   static thread_local IProxyDict* m_curStore;
 };

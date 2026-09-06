@@ -33,17 +33,34 @@ IProxyDict* CurrentEventStore::setStore (IProxyDict* store)
 
 
 /**
- * @brief Update the current @c EventContext to reference @c store.
- * @param store The new store to set in the current context.
+ * @brief Temporarily change the current event store.
  */
-void CurrentEventStore::storeToCtx (IProxyDict* store)
+CurrentEventStore::Push::Push (IProxyDict* store)
+  : m_oldStore (setStore (store))
 {
-  EventContext ctx = Gaudi::Hive::currentContext();
-  Atlas::ExtendedEventContext* ectx = Atlas::tryGetExtendedEventContext(ctx);
-  if (ectx) {
-    ectx->setProxy (store);
-    Gaudi::Hive::setCurrentContext (ctx);
+  // Only need up update the context if we're actually changing the store.
+  if (m_oldStore != store) {
+    EventContext ctx = Gaudi::Hive::currentContext();
+    m_oldCtx = ctx;
+    Atlas::ExtendedEventContext* ectx = Atlas::tryGetExtendedEventContext(ctx);
+    if (ectx) {
+      ectx->setProxy (store);
+      Gaudi::Hive::setCurrentContext (ctx);
+    }
   }
+}
+
+
+/**
+ * @brief Restore the current event store.
+ */
+CurrentEventStore::Push::~Push()
+{
+  // Only need up update the context if we're actually changing the store.
+  if (m_oldStore != m_curStore) {
+    Gaudi::Hive::setCurrentContext (m_oldCtx);
+  }
+  setStore (m_oldStore);
 }
 
 
