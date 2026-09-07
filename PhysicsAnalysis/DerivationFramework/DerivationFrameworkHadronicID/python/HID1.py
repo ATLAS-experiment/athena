@@ -58,8 +58,7 @@ from DerivationFrameworkMCTruth.MCTruthCommonConfig import (
 from DerivationFrameworkPhys.PhysCommonConfig import PhysCommonAugmentationsCfg
 from DerivationFrameworkPhys.TriggerListsHelper import TriggerListsHelper
 from InDetConfig.InDetPoolReadConfig import InDetPoolReadCfg
-from JetRecConfig.JetInputConfig import buildEventShapeAlg
-from JetRecConfig.JetRecConfig import JetRecCfg, getConstitPJGAlg, getInputAlgs
+from JetRecConfig.JetRecConfig import JetRecCfg, getInputAlgs
 from JetRecConfig.StandardJetConstits import stdConstitDic as cst
 from JetRecConfig.StandardLargeRJets import AntiKt10TruthDressedWZSoftDrop
 from JetRecConfig.StandardSmallRJets import AntiKt4LCTopo
@@ -238,8 +237,6 @@ def _add_jet_content(
         "Kt4EMTopoOriginEventShape",
         "Kt4EMPFlowEventShape",
         "Kt4EMPFlowNeutEventShape",
-        "Kt4UFOCSSKEventShape",
-        "Kt4UFOCSSKNeutEventShape",
     ]
 
     # Low-level inputs
@@ -483,7 +480,7 @@ def HID1ExtraContentCfg(flags: AthConfigFlags) -> ComponentAccumulator:
     """Configure extra reconstructed jet content for HID1."""
     acc = ComponentAccumulator()
 
-    # CHS R = 0.4 UFO jet inputs
+    # UFO constituents, used for the large-R jets
     for alg in getInputAlgs(cst.UFO, flags=flags):
         if isinstance(alg, ComponentAccumulator):
             acc.merge(alg)
@@ -499,11 +496,6 @@ def HID1ExtraContentCfg(flags: AthConfigFlags) -> ComponentAccumulator:
 
     # Variable-R EMPFlow jets (low-pT-wide, shrinking to 0.4) + soft-lepton association
     acc.merge(VRFtagJetsCfg(flags))
-
-    # UFO CSSK event shapes, for both all and neutral-only constituents
-    acc.addEventAlgo(buildEventShapeAlg(cst.UFOCSSK, "", suffix=None))
-    acc.addEventAlgo(getConstitPJGAlg(cst.UFOCSSK, suffix="Neut"))
-    acc.addEventAlgo(buildEventShapeAlg(cst.UFOCSSK, "", suffix="Neut"))
 
     # More detailed truth information
     if flags.Input.isMC:
