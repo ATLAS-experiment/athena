@@ -264,36 +264,39 @@ namespace asg
 #define ASG_TOOLS_MSGSTREAM_PREFIX \
    __FILE__ << ":" << __LINE__ << " (" << ASG_TOOLS_MSGSTREAM_FNAME << "): "
 
+#define ANA_MSG_OPEN (
+#define ANA_MSG_CLOSE )
+
 /// Macro used to print "serious" messages
-#define ANA_MSG_LVL_SERIOUS( lvl, xmsg )                    \
-   msg( lvl ) << ASG_TOOLS_MSGSTREAM_PREFIX << xmsg << endmsg
+#define ANA_MSG_LVL_SERIOUS( lvl, xmsg, ... )                           \
+   msg( lvl ) << ASG_TOOLS_MSGSTREAM_PREFIX << __VA_OPT__(std::format ANA_MSG_OPEN ) xmsg  __VA_OPT__ (, __VA_ARGS__ ANA_MSG_CLOSE) << endmsg
 
 /// Macro used to print "regular" messages
-#define ANA_MSG_LVL_NOCHK( lvl, xmsg )          \
-   msg( lvl ) << xmsg << endmsg
+#define ANA_MSG_LVL_NOCHK( lvl, xmsg, ... )         \
+   msg( lvl ) << __VA_OPT__(std::format ANA_MSG_OPEN ) xmsg  __VA_OPT__ (, __VA_ARGS__ ANA_MSG_CLOSE) << endmsg
 
 /// Macro used to print "protected" messages
-#define ANA_MSG_LVL( lvl, xmsg )                \
+#define ANA_MSG_LVL( lvl, xmsg, ... )           \
    do {                                         \
       if( msg().level() <= lvl ) {             \
-         ANA_MSG_LVL_NOCHK( lvl, xmsg );        \
+         ANA_MSG_LVL_NOCHK( lvl, xmsg __VA_OPT__(, __VA_ARGS__) );     \
       }                                         \
    } while( 0 )
 
 /// Macro printing verbose messages
-#define ANA_MSG_VERBOSE( xmsg )  ANA_MSG_LVL( MSG::VERBOSE, xmsg )
+#define ANA_MSG_VERBOSE( xmsg, ... )  ANA_MSG_LVL( MSG::VERBOSE, xmsg __VA_OPT__(, __VA_ARGS__) )
 /// Macro printing debug messages
-#define ANA_MSG_DEBUG( xmsg )    ANA_MSG_LVL( MSG::DEBUG, xmsg )
+#define ANA_MSG_DEBUG( xmsg, ... )    ANA_MSG_LVL( MSG::DEBUG, xmsg __VA_OPT__(, __VA_ARGS__) )
 /// Macro printing info messages
-#define ANA_MSG_INFO( xmsg )     ANA_MSG_LVL_NOCHK( MSG::INFO,  xmsg )
+#define ANA_MSG_INFO( xmsg, ... )     ANA_MSG_LVL_NOCHK( MSG::INFO,  xmsg __VA_OPT__(, __VA_ARGS__) )
 /// Macro printing warning messages
-#define ANA_MSG_WARNING( xmsg )  ANA_MSG_LVL_NOCHK( MSG::WARNING, xmsg )
+#define ANA_MSG_WARNING( xmsg, ... )  ANA_MSG_LVL_NOCHK( MSG::WARNING, xmsg __VA_OPT__(, __VA_ARGS__) )
 /// Macro printing error messages
-#define ANA_MSG_ERROR( xmsg )    ANA_MSG_LVL_SERIOUS( MSG::ERROR, xmsg )
+#define ANA_MSG_ERROR( xmsg, ... )    ANA_MSG_LVL_SERIOUS( MSG::ERROR, xmsg __VA_OPT__(, __VA_ARGS__) )
 /// Macro printing fatal messages
-#define ANA_MSG_FATAL( xmsg )    ANA_MSG_LVL_SERIOUS( MSG::FATAL, xmsg )
+#define ANA_MSG_FATAL( xmsg, ... )    ANA_MSG_LVL_SERIOUS( MSG::FATAL, xmsg __VA_OPT__(, __VA_ARGS__) )
 /// Macro printing messages that should always appear
-#define ANA_MSG_ALWAYS( xmsg )   ANA_MSG_LVL_NOCHK( MSG::ALWAYS, xmsg )
+#define ANA_MSG_ALWAYS( xmsg, ... )   ANA_MSG_LVL_NOCHK( MSG::ALWAYS, xmsg __VA_OPT__(, __VA_ARGS__) )
 
 
 
@@ -323,7 +326,7 @@ typedef StatusCode AsgToolsCheckResultType;
   { const auto sc__ = EXP;						\
     typedef typename std::decay<decltype(sc__)>::type scType__;		\
     if (!::asg::CheckHelper<scType__>::isSuccess (sc__)) [[unlikely]] { \
-      ANA_MSG_ERROR ("Failed to call \"" << #EXP << "\"");		\
+      ANA_MSG_ERROR ("Failed to call \"{}\"", #EXP);                    \
       return ::asg::CheckHelper<AsgToolsCheckResultType>::failureCode(); \
     } }
 
@@ -338,10 +341,8 @@ typedef StatusCode AsgToolsCheckResultType;
   { const auto sc__ = EXP;						\
     typedef typename std::decay<decltype(sc__)>::type scType__;		\
     if (!::asg::CheckHelper<scType__>::isSuccess (sc__)) [[unlikely]] { \
-      std::ostringstream str;						\
-      str << #EXP;							\
-      ANA_MSG_ERROR ("Failed to call \"" << str.str() << "\", throwing exception"); \
-      ::asg::detail::throw_check_fail (str.str());			\
+      ANA_MSG_ERROR ("Failed to call \"{}\", throwing exception", #EXP); \
+      ::asg::detail::throw_check_fail (#EXP);                           \
     } }
 
 #endif
