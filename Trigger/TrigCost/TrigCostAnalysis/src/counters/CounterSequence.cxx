@@ -53,7 +53,6 @@ StatusCode CounterSequence::newEvent(const CostData& data, size_t index, const f
     static const std::string historyStr{"robs_history"};
     static const std::string sizeStr{"robs_size"};
     for (size_t requestIdx : data.algToRequestMap().at(algIndex)) {
-      const xAOD::TrigComposite* request = data.rosCollection().at(requestIdx);
       const std::vector<unsigned> robs_history = request->getDetail<std::vector<unsigned>>(historyStr);
       const std::vector<uint32_t> robs_size = request->getDetail<std::vector<uint32_t>>(sizeStr);
 

@@ -32,7 +32,6 @@ CounterROS::CounterROS(const std::string& name, unsigned nRobs, const MonitorBas
 StatusCode CounterROS::newEvent(const CostData& data, size_t index, const float weight) {
 
   // Monitor only ROB data for corresponding ROS
-  const xAOD::TrigComposite* tc = data.rosCollection()[index];
   const std::vector<uint32_t> robIdsPerRequest = tc->getDetail<std::vector<uint32_t>>("robs_id");
   const std::vector<uint32_t> robs_size = tc->getDetail<std::vector<uint32_t>>("robs_size");
   const std::vector<unsigned> robs_history = tc->getDetail<std::vector<unsigned>>("robs_history");

@@ -16,26 +16,6 @@ CostData::CostData() :
   m_typeMapPtr(nullptr) {
 }
 
-
-StatusCode CostData::set(const xAOD::TrigCompositeContainer* costCollection, const xAOD::TrigCompositeContainer* rosCollection, uint32_t onlineSlot) {
-  m_costCollection = costCollection;
-  m_rosCollection = rosCollection;
-
-  setOnlineSlot( onlineSlot );
-  ATH_CHECK(cache());
-
-  // Create mapping from algorithm to associated ROS requests
-  m_algToRos.clear();
-  size_t rosIdx = 0;
-  for (const xAOD::TrigComposite* tc : *rosCollection) {
-    m_algToRos[tc->getDetail<size_t>("alg_idx")].push_back(rosIdx);
-    ++rosIdx;
-  }
-
-  return StatusCode::SUCCESS;
-}
-
-
 StatusCode CostData::cache() {
   for (const xAOD::TrigComposite* tc : costCollection()) {
     if (tc->getDetail<uint32_t>("slot") != onlineSlot()) {
@@ -74,14 +54,6 @@ const xAOD::TrigCompositeContainer& CostData::costCollection() const {
     throw std::runtime_error("nullptr in CostData::costCollection(). Make sure CostData::set() is called.");
   }
   return *m_costCollection;
-}
-
-
-const xAOD::TrigCompositeContainer& CostData::rosCollection() const {
-  if (!m_rosCollection) {
-    throw std::runtime_error("nullptr in CostData::rosCollection(). Make sure CostData::set() is called.");
-  }
-  return *m_rosCollection;
 }
 
 const CostROSData& CostData::costROSData() const {

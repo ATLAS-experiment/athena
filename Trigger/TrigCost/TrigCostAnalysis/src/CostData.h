@@ -46,19 +46,9 @@ class CostData {
     CostData(const CostData&) = delete;
 
     /**
-     * @brief Cache the cost and ros collections, after formally requesting it from storegate.
-     */
-    StatusCode set(const xAOD::TrigCompositeContainer* costCollection, const xAOD::TrigCompositeContainer* rosCollection, uint32_t onlineSlot);
-
-    /**
      * @brief Getter of the cached algorithm cost collection pointer.
      */
     const xAOD::TrigCompositeContainer& costCollection() const;
-
-    /**
-     * @brief Getter of the cached ros cost collection pointer.
-     */
-    const xAOD::TrigCompositeContainer& rosCollection() const;
 
     /**
      * @brief Getter of the ROS to ROB map.
@@ -185,7 +175,6 @@ class CostData {
     StatusCode cache();
 
     const xAOD::TrigCompositeContainer* m_costCollection; //!< Cached non-owning pointer to main algorithm cost collection.
-    const xAOD::TrigCompositeContainer* m_rosCollection = nullptr; //!< Cached non-owning pointer to ros cost collection.
     uint64_t m_algTotalTime; //!< Integrated CPU time of all algorithms in the event. Stored in discrete microseconds.
     float m_liveTime; //!< Effective walltime of either the event or the LB, in seconds (@see m_liveTimeIsPerEvent).
     uint32_t m_lb; //!< Current luminosity block number
