@@ -9,9 +9,15 @@ find_package( ROOT COMPONENTS Core Tree MathCore Hist RIO Graf Gpad )
 find_package( lwtnn )
 find_package( onnxruntime )
 
+# The Athena-only algorithms live in src/ but must not end up in the library,
+# which is also built in AnalysisBase:
+file( GLOB lib_srcs RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} src/*.cxx )
+list( REMOVE_ITEM lib_srcs src/CalibratedJetCopyAlg.cxx
+                           src/JetCalibrationDecoratorAlg.cxx )
+
 # Libraries in the package:
 atlas_add_library( JetCalibToolsLib
-   JetCalibTools/*.h Root/*.cxx src/*.cxx
+   JetCalibTools/*.h Root/*.cxx ${lib_srcs}
    PUBLIC_HEADERS JetCalibTools
    INCLUDE_DIRS ${Boost_INCLUDE_DIRS} ${ROOT_INCLUDE_DIRS} ${LWTNN_INCLUDE_DIRS} ${ONNXRUNTIME_INCLUDE_DIRS}
    LINK_LIBRARIES ${Boost_LIBRARIES} ${ROOT_LIBRARIES} ${LWTNN_LIBRARIES} ${ONNXRUNTIME_LIBRARIES} AsgTools AsgServicesLib xAODEventInfo xAODEventShape xAODMetaData
@@ -22,8 +28,8 @@ atlas_add_library( JetCalibToolsLib
 set( component_srcs src/components/JetCalibTools_entries.cxx )
 set( component_libs )
 if( NOT XAOD_STANDALONE )
-   list( APPEND component_srcs src/components/CalibratedJetCopyAlg.cxx
-                               src/components/JetCalibrationDecoratorAlg.cxx)
+   list( APPEND component_srcs src/CalibratedJetCopyAlg.cxx
+                               src/JetCalibrationDecoratorAlg.cxx )
    list( APPEND component_libs AthenaBaseComps StoreGateLib xAODBase xAODCore )
 endif()
 

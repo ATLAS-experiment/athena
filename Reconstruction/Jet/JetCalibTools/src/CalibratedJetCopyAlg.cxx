@@ -10,13 +10,6 @@
 #include "xAODCore/ShallowCopy.h"
 
 
-CalibratedJetCopyAlg::CalibratedJetCopyAlg(
-  const std::string& name, ISvcLocator* loc)
-  : AthReentrantAlgorithm(name, loc)
-{
-  declareProperty("JetCalibrationTool", m_calibTool, "Jet calibration tool");
-}
-
 StatusCode CalibratedJetCopyAlg::initialize() {
   ATH_CHECK(m_calibTool.retrieve());
   ATH_CHECK(m_jetKey.initialize());

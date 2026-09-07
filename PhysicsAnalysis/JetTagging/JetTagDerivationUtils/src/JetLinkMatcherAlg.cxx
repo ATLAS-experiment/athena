@@ -20,7 +20,9 @@ namespace ftag {
     declareProperty("uintsToCopy", m_uints.toCopy);
     declareProperty("ulongsToCopy", m_ulongs.toCopy);
     declareProperty("charsToCopy", m_chars.toCopy);
+    declareProperty("charVectorsToCopy", m_charVectors.toCopy);
     declareProperty("iparticlesToCopy", m_iparticles.toCopy);
+    declareProperty("trackLinksToCopy", m_trackLinks.toCopy);
   }
 
   StatusCode JetLinkMatcherAlg::initialize() {
@@ -35,7 +37,9 @@ namespace ftag {
     ATH_CHECK(m_uints.initialize(this, sources, target));
     ATH_CHECK(m_ulongs.initialize(this, sources, target));
     ATH_CHECK(m_chars.initialize(this, sources, target));
+    ATH_CHECK(m_charVectors.initialize(this, sources, target));
     ATH_CHECK(m_iparticles.initialize(this, sources, target));
+    ATH_CHECK(m_trackLinks.initialize(this, sources, target));
     ATH_CHECK(m_targetJet.initialize());
     ATH_CHECK(m_sourceJets.initialize());
     ATH_CHECK(m_link.initialize());
@@ -46,17 +50,16 @@ namespace ftag {
   }
 
   StatusCode JetLinkMatcherAlg::execute(const EventContext& cxt) const {
-    using JC = xAOD::JetContainer;
-    SG::ReadHandle<IPC> targetJetGet(m_targetJet, cxt);
-    SG::ReadDecorHandle<IPC, ElementLink<JC>> link(m_link, cxt);
-    std::optional<SG::WriteDecorHandle<IPC,char>> matchDecorator;
+    SG::ReadHandle<JC> targetJetGet(m_targetJet, cxt);
+    SG::ReadDecorHandle<JC, ElementLink<JC>> link(m_link, cxt);
+    std::optional<SG::WriteDecorHandle<JC,char>> matchDecorator;
     if (!m_matchDecorator.empty()) {
       matchDecorator.emplace(m_matchDecorator, cxt);
     }
-    std::vector<MatchedPair<IPC>> matches;
-    for (const xAOD::IParticle* target: *targetJetGet) {
-      const ElementLink<IPC>& sourceLink = link(*target);
-      const xAOD::IParticle* source = sourceLink.isValid() ?
+    std::vector<MatchedPair<JC>> matches;
+    for (const xAOD::Jet* target: *targetJetGet) {
+      const ElementLink<JC>& sourceLink = link(*target);
+      const xAOD::Jet* source = sourceLink.isValid() ?
         *sourceLink : nullptr;
       if (!matchDecorator && !source) {
         throw std::runtime_error("invalid link to source");
@@ -75,7 +78,9 @@ namespace ftag {
     m_uints.copy(matches, cxt);
     m_ulongs.copy(matches, cxt);
     m_chars.copy(matches, cxt);
+    m_charVectors.copy(matches, cxt);
     m_iparticles.copy(matches, cxt);
+    m_trackLinks.copy(matches, cxt);
 
     return StatusCode::SUCCESS;
   }

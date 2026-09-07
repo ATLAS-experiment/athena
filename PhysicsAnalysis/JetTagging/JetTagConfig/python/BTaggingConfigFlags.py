@@ -75,6 +75,68 @@ def isRun3Derivation(flags):
 def runFlipTag(flags):
     return isRun3Derivation(flags)
 
+
+# Frozen calibration applied to the tagged shallow copy, decoupling the
+# listed taggers from changes to the reco-level t0 calibration
+# (aft/open-tasks#105). Deliberately hard-coded: must NOT follow
+# JetCalibToolsConfig updates.
+_frozen_t0_calibration = {
+    'configFile': 'JES_MC15cRecommendation_PFlow_Aug2016_rel21.config',
+    'calibArea': '00-04-77',
+    'calibSequence': 'JetArea_Residual_EtaJES',
+}
+
+_fold_hashes = ['jetFoldHash', 'jetFoldHash_noHits', 'jetFoldRankHash']
+
+
+def _copiedVariables(flags, tagger, probs, track_vars, uints=()):
+    suffixes = [''] + (['SimpleFlip'] if flags.BTagging.RunFlipTaggers else [])
+
+    def names(parts):
+        return [f'{tagger}{s}_{p}' for s in suffixes for p in parts]
+
+    return {
+        'floats': names(probs),
+        'uints': list(uints),
+        'charVectors': names(track_vars),
+        'trackLinks': names(['TrackLinks']),
+    }
+
+
+def getCalibratedCopies(flags):
+    '''
+    Taggers to run on a frozen-calibration shallow copy of their jet
+    collection, as {collection: {tagger: {calibration, copied_variables}}}
+    (aft/open-tasks#105). The copied variables are an explicit opt-in list
+    of the outputs that flow back to the original jets; unlisted taggers
+    run directly on the original collection. Empty outside derivations.
+    '''
+    if not isRun3Derivation(flags):
+        return {}
+    gn3_base = ['pb', 'pc', 'ps', 'pu', 'pud', 'pg', 'ptau',
+                'ptFromTruthDressedWZJet']
+    gn3_probs = gn3_base + ['pquark']
+    gn3_epcl_probs = gn3_base + ['pbquark', 'pantibquark', 'pcquark',
+                                 'panticquark', 'pother']
+    gn2_tracks = ['TrackOrigin', 'VertexIndex']
+    gn3_tracks = ['TrackOrigin', 'TrackType', 'VertexIndex']
+    taggers = {
+        'GN2v01': (['pb', 'pc', 'pu', 'ptau'], gn2_tracks, _fold_hashes),
+        'GN3V00': (gn3_probs, gn3_tracks, ()),
+        'GN3PflowMuonsV00': (gn3_probs, gn3_tracks, ()),
+        'GN3EPCLV01': (gn3_epcl_probs, gn3_tracks, ()),
+    }
+    return {
+        'AntiKt4EMPFlowJets': {
+            tagger: {
+                'calibration': _frozen_t0_calibration,
+                'copied_variables': _copiedVariables(
+                    flags, tagger, probs, tracks, uints),
+            }
+            for tagger, (probs, tracks, uints) in taggers.items()
+        },
+    }
+
 def getNNs(flags):
     '''
     Gets the paths of models to run via MultiFoldTagger.
@@ -229,6 +291,9 @@ def createBTaggingConfigFlags():
     #    ('tracks', 'electrons', 'muons'). A group with no entry follows
     #    ip_prefix, which is itself the tracks prefix.
     btagcf.addFlag("BTagging.NNs", getNNs)
+    # taggers running on a frozen-calibration shallow copy of their jet
+    # collection (see FlavorTaggingConfig.FlavorTaggingCfg)
+    btagcf.addFlag("BTagging.CalibratedCopies", getCalibratedCopies)
     btagcf.addFlag("BTagging.AK4TaggerName", lambda pcf: (
         "GN2HLv01" if pcf.GeoModel.Run>=LHCPeriod.Run4 else "GN2v01"))
 

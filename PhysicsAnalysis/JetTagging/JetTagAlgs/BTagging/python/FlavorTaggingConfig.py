@@ -20,6 +20,11 @@ from JetCalibTools.JetCalibrationDecoratorConfig import JetCalibrationDecoratorC
 from JetTagDerivationUtils.CopyJetParentInfoConfig import (
     CopyJetParentInfoCfg
 )
+from JetTagDerivationUtils.CalibratedCopyTaggingConfig import (
+    CalibratedCopyCfg,
+    FtagScoreCopyCfg,
+    copyCollectionName,
+)
 
 from pathlib import Path
 import re
@@ -43,6 +48,15 @@ _default_ip_prefix = 'btagIp_'
 
 # Constituent groups that can override the general ip_prefix.
 _ip_prefix_groups = ('tracks', 'electrons', 'muons')
+
+# Calibration scale decorated by the 'R' tagger dependency.
+_regression_calibration_scale = 'EtaJES_GSC'
+
+# The lepton associations declare their jet decorations on the base
+# container, the other support algorithms on the jet container. The
+# scheduler only connects a read to a write of the same type.
+_iparticle_decorations = frozenset(
+    {'FTagElectrons', 'FTagMuons', 'FTagMuonsConeMatched'})
 
 
 def _resolve_tagger_name(dirname: str, networks: dict) -> str:
@@ -125,7 +139,7 @@ def _addDepsByTagger(flags, tagger_name: str, jetCollection: str) -> ComponentAc
             configFile=config_file,
             calibSequence=calib_sequence,
             calibArea='00-04-83',
-            calibrationScale='EtaJES_GSC', # For labeling the decorator
+            calibrationScale=_regression_calibration_scale, # For labeling the decorator
             isData=is_data,
             **calib_kwargs,
         ))
@@ -138,6 +152,42 @@ def _addDepsByTagger(flags, tagger_name: str, jetCollection: str) -> ComponentAc
             )
         )
     return acc
+
+
+def _supportDecorations(nns, jetTrackAssociator: str, fast: bool) -> dict:
+    """
+    Jet decorations the support algorithms write for a set of taggers,
+    keyed by the container type they are declared on.
+
+    Follows the algorithms scheduled by ``_FlavorTaggingChainCfg`` and
+    ``_addDepsByTagger``, so it has to be kept in sync with them. Taggers
+    on a calibrated copy read these through the copy's parent store,
+    where the scheduler cannot connect them to their producers.
+    """
+    decorations = set() if fast else {'SecVtx'}
+    for networks in nns:
+        dirname = str(Path(networks['folds'][0]).parent)
+        modset = getDependencySet(_resolve_tagger_name(dirname, networks))
+        decorations.add(
+            jetTrackAssociator if networks.get('cone_association')
+            else 'GhostTrack'
+        )
+        if 'E' in modset:
+            decorations.add('FTagElectrons')
+        if 'M' in modset:
+            decorations.add('FTagMuons')
+        if 'MC' in modset:
+            decorations.add('FTagMuonsConeMatched')
+        if 'R' in modset:
+            decorations.add(f'{_regression_calibration_scale}_pt')
+        if 'X' in modset:
+            decorations.add('jetRank')
+    return {
+        name: ('xAOD::IParticleContainer' if name in _iparticle_decorations
+               else 'xAOD::JetContainer')
+        for name in decorations
+    }
+
 
 def _get_flip_config(nn_path):
     """
@@ -166,15 +216,70 @@ def FlavorTaggingCfg(
           flags,
           JetCollection,
           pv_col='PrimaryVertices',
-          trackAugmenterPrefix=None,
-          fast=False,
-          JetTrackAssociator='TracksForBTagging',
-          trackCollection='InDetTrackParticles',
+          **kwargs,
           ):
 
     """
     Run flavour tagging on jet collection in derivations.
+
+    Taggers listed under flags.BTagging.CalibratedCopies run on a
+    shallow copy with a frozen calibration and their opted-in outputs
+    are copied back to the original collection (aft/open-tasks#105);
+    all other taggers run directly on the original collection.
     """
+
+    copy_taggers = flags.BTagging.CalibratedCopies.get(JetCollection, {})
+    frozen, direct = [], []
+    for networks in flags.BTagging.NNs.get(JetCollection, []):
+        dirname = str(Path(networks['folds'][0]).parent)
+        tagger = _resolve_tagger_name(dirname, networks)
+        (frozen if tagger in copy_taggers else direct).append(networks)
+
+    acc = _FlavorTaggingChainCfg(
+        flags, JetCollection, pv_col=pv_col, nns=direct, **kwargs)
+    if frozen:
+        acc.merge(CalibratedCopyCfg(
+            flags,
+            JetCollection,
+            supportDecorations=_supportDecorations(
+                frozen,
+                jetTrackAssociator=kwargs.get(
+                    'JetTrackAssociator', 'TracksForBTagging'),
+                fast=kwargs.get('fast', False),
+            ),
+        ))
+        # support algs run on the original: the shallow copy reads their
+        # decorations through its parent store
+        acc.merge(_FlavorTaggingChainCfg(
+            flags, copyCollectionName(JetCollection), pv_col=pv_col,
+            nns=frozen, supportCollection=JetCollection, **kwargs))
+        acc.merge(FtagScoreCopyCfg(flags, JetCollection))
+    return acc
+
+
+def _FlavorTaggingChainCfg(
+          flags,
+          JetCollection,
+          nns,
+          pv_col='PrimaryVertices',
+          trackAugmenterPrefix=None,
+          fast=False,
+          JetTrackAssociator='TracksForBTagging',
+          trackCollection='InDetTrackParticles',
+          supportCollection=None,
+          ):
+
+    """
+    Schedule the flavour tagging chain on a jet collection.
+
+    The taggers to schedule are given in nns, so that a subset can be
+    run on its own, e.g. on a frozen-calibration copy. Support
+    algorithms (track association, secondary vertexing, tagger
+    dependencies) run on supportCollection when given, e.g. the source
+    collection of a shallow copy which shares its aux store.
+    """
+
+    support = supportCollection or JetCollection
 
     acc = ComponentAccumulator()
     if fast:
@@ -198,14 +303,14 @@ def FlavorTaggingCfg(
         acc.merge(JetTagVertexDecoratorCfg(
             flags,
             pv_col,
-            JetCollection,
+            support,
             trackCollection,
             JetTrackAssociator,
         ))
 
 
 
-    for networks in flags.BTagging.NNs.get(JetCollection, []):
+    for networks in nns:
         assert isinstance(networks['folds'], list)
         dirnames = [Path(path).parent for path in networks['folds']]
         assert len(set(dirnames)) == 1, 'Different folds should be located in the same dir'
@@ -219,7 +324,7 @@ def FlavorTaggingCfg(
         if is_calibarea and is_bjr10:
             modset = set()
         else:
-            acc.merge(_addDepsByTagger(flags, tagger_name, JetCollection))
+            acc.merge(_addDepsByTagger(flags, tagger_name, support))
             modset = getDependencySet(tagger_name)
 
         args = dict(
@@ -254,7 +359,7 @@ def FlavorTaggingCfg(
         if networks.get('cone_association'):
             acc.merge(JetParticleAssociationAlgCfg(
                 flags,
-                JetCollection,
+                support,
                 trackCollection,
                 JetTrackAssociator,
             ))
