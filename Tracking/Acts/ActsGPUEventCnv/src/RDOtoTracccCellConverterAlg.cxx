@@ -12,6 +12,7 @@ StatusCode RDOtoTracccCellConverterAlg::initialize()
   ATH_MSG_DEBUG("Initializing");
 
   ATH_CHECK(m_common.initialize());
+  ATH_CHECK(m_common.buildDetrayMaps());
 
   ATH_CHECK(m_pixelRDOKey.initialize());
   ATH_CHECK(m_stripRDOKey.initialize());
@@ -28,9 +29,6 @@ StatusCode RDOtoTracccCellConverterAlg::initialize()
 StatusCode RDOtoTracccCellConverterAlg::execute(const EventContext& ctx) const
 {
   using size_type = traccc::edm::silicon_cell_collection::buffer::size_type;
-
-  // ---- -1. Make sure the detray→detcond index map has been built ----
-  ATH_CHECK(m_common.buildDetrayMaps());
 
   // ---- 0. Init
   auto pixelRDOHandle = SG::makeHandle(m_pixelRDOKey, ctx);

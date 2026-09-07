@@ -413,8 +413,8 @@ StatusCode TracccMeasurementConverterAlg::execute(const EventContext& ctx) const
         xaod_scl->setChannelsInPhi(siWidth.colRow()[0]);
 
       }
-      ++strip_idx;
       measToStripCl[i] = strip_idx;
+      ++strip_idx;
     }
   }
 
