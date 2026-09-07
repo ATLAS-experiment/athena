@@ -59,16 +59,17 @@ atlas_add_component( ActsGPUMagField
 atlas_install_python_modules( python/*.py test/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
 atlas_install_scripts( test/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
 
-#Need environment variable to change PathResolver ERROR about using the dev area to a WARNING (Locating dev file dev/ACTS/detray-itk/ITk_bfield.cvf. Do not let this propagate to a release!)
-if (CMAKE_HIP_COMPILER)
-atlas_add_test( HIPGPUMagFieldExample
-   SCRIPT "PATHRESOLVER_DEVAREARESPONSE=WARNING ActsDeviceMagFieldTest.py Device.Backend=DeviceBackend.HIPAMD"
-   POST_EXEC_SCRIPT noerror.sh)
-endif()
 
-if (CMAKE_CUDA_COMPILER)
+#Need environment variable to change PathResolver ERROR about using the dev area to a WARNING (Locating dev file dev/ACTS/detray-itk/ITk_bfield.cvf. Do not let this propagate to a release!)
+
+if (CMAKE_CUDA_COMPILER AND ATLAS_HAS_CUDA_DEVICE)
 atlas_add_test( CUDAGPUMagFieldExample
    SCRIPT "PATHRESOLVER_DEVAREARESPONSE=WARNING ActsDeviceMagFieldTest.py Device.Backend=DeviceBackend.CUDA"
+   POST_EXEC_SCRIPT noerror.sh)
+endif()
+if (CMAKE_HIP_COMPILER AND ATLAS_HAS_HIPAMD_DEVICE)
+atlas_add_test( HIPGPUMagFieldExample
+   SCRIPT "PATHRESOLVER_DEVAREARESPONSE=WARNING ActsDeviceMagFieldTest.py Device.Backend=DeviceBackend.HIPAMD"
    POST_EXEC_SCRIPT noerror.sh)
 endif()
 
