@@ -1383,7 +1383,6 @@ StatusCode TrackingGeometrySvc::buildDetrayGeometry() {
   ATH_MSG_INFO("Successfully built the Detray geometry from the Acts::TrackingGeometry");
   return StatusCode::SUCCESS;
 }
-#endif
 
 void TrackingGeometrySvc::reportDetrayPortalLinks(
     const DetrayDetector& detector, const detray::name_map& names) const {
@@ -1455,6 +1454,7 @@ void TrackingGeometrySvc::reportDetrayPortalLinks(
     }
   }
 }
+#endif
 
 std::unique_ptr<ActsTrk::DetectorElementToActsGeometryIdMap>
     TrackingGeometrySvc::createDetectorElementToGeoIdMap() const {
