@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "./CleanCondition.h"
@@ -7,8 +7,6 @@
 #include "TrigHLTJetHypo/TrigHLTJetHypoUtils/IJet.h"
 
 #include <sstream>
-#include <cmath>
-#include <TLorentzVector.h>
 
 CleanCondition::CleanCondition(const std::string& cName) : m_cName(cName)
 {
