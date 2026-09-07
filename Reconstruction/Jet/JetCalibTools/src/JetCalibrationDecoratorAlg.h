@@ -23,6 +23,7 @@ public:
   virtual StatusCode execute(const EventContext& ctx) const override;
 
 private:
+  // public handle: lets derivation trains share the CP-algorithm tool instance
   ToolHandle<IJetModifier> m_calibTool;
 
   SG::ReadHandleKey<xAOD::JetContainer> m_jetKey {
@@ -30,19 +31,19 @@ private:
       "Input jet container"};
 
   SG::WriteDecorHandleKey<xAOD::JetContainer> m_ptCalibKey {
-    this, "ptCalibratedKey", "AntiKt4EMPFlowJets.pt_calibrated",
+    this, "ptCalibratedKey", m_jetKey, "pt_calibrated",
       "Decorated calibrated pT"};
 
   SG::WriteDecorHandleKey<xAOD::JetContainer> m_etaCalibKey {
-    this, "etaCalibratedKey", "AntiKt4EMPFlowJets.eta_calibrated",
+    this, "etaCalibratedKey", m_jetKey, "eta_calibrated",
       "Decorated calibrated eta"};
 
   SG::WriteDecorHandleKey<xAOD::JetContainer> m_massCalibKey {
-    this, "massCalibratedKey", "AntiKt4EMPFlowJets.mass_calibrated",
+    this, "massCalibratedKey", m_jetKey, "mass_calibrated",
       "Decorated calibrated mass"};
 
   SG::WriteDecorHandleKey<xAOD::JetContainer> m_phiCalibKey {
-    this, "phiCalibratedKey", "AntiKt4EMPFlowJets.phi_calibrated",
+    this, "phiCalibratedKey", m_jetKey, "phi_calibrated",
       "Decorated calibrated phi"};
 };
 

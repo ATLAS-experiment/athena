@@ -17,14 +17,14 @@
 
 class CalibratedJetCopyAlg : public AthReentrantAlgorithm {
 public:
-  CalibratedJetCopyAlg(const std::string& name,
-                       ISvcLocator* pSvcLocator);
+  using AthReentrantAlgorithm::AthReentrantAlgorithm;
 
   virtual StatusCode initialize() override;
   virtual StatusCode execute(const EventContext& ctx) const override;
 
 private:
-  ToolHandle<IJetModifier> m_calibTool;
+  ToolHandle<IJetModifier> m_calibTool {
+    this, "JetCalibrationTool", "", "Jet calibration tool"};
 
   SG::ReadHandleKey<xAOD::JetContainer> m_jetKey {
     this, "JetContainer", "AntiKt4EMPFlowJets",
