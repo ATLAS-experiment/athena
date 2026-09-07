@@ -53,38 +53,5 @@ StatusCode CounterAlgorithm::newEvent(const CostData& data, size_t index, const 
 
   ATH_CHECK( fill("RoIID_perCall", alg->getDetail<int32_t>("roi"), weight) );
 
-  // Monitor data requests per algorithm
-  if (data.algToRequestMap().count(index)) {
-    const std::string historyStr{"robs_history"};
-    const std::string sizeStr{"robs_size"};
-    for (size_t requestIdx : data.algToRequestMap().at(index)) {
-      const std::vector<unsigned> robs_history = request->getDetail<std::vector<unsigned>>(historyStr);
-      const std::vector<uint32_t> robs_size = request->getDetail<std::vector<uint32_t>>(sizeStr);
-
-      bool networkRequestIncremented = false;
-      for (size_t i = 0; i < robs_size.size(); ++i) {
-        // ROB request was fetched over the network
-        if (robs_history[i] == robmonitor::RETRIEVED) {
-          // size is stored in words, should be in kilobytes
-          ATH_CHECK( fill("NetworkROBSize_perEvent", robs_size[i] / 500., weight) );
-          networkRequestIncremented = true;
-        }
-        // ROB request was cached
-        else if (robs_history[i] == robmonitor::HLT_CACHED || robs_history[i] == robmonitor::DCM_CACHED) {
-          ATH_CHECK( fill("CachedROBSize_perEvent", robs_size[i] / 500., weight) );
-        }
-      }
-
-      ATH_CHECK( increment("Request_perEvent", weight) );
-
-      if (networkRequestIncremented) {
-        ATH_CHECK( increment("NetworkRequest_perEvent", weight) );
-      }
-
-      const float rosTime = timeToMilliSec(request->getDetail<uint64_t>("start"), request->getDetail<uint64_t>("stop"));
-      ATH_CHECK( fill("RequestTime_perEvent", rosTime, weight) );
-    }
-  }
-
   return StatusCode::SUCCESS;
 }
