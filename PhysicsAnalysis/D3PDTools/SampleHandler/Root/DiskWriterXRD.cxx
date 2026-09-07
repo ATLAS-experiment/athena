@@ -19,6 +19,7 @@
 #include <format>
 #include <chrono>
 #include <iostream>
+#include <optional>
 #include <random>
 #include <sstream>
 #include <stdexcept>
@@ -128,13 +129,16 @@ namespace SH
 
     if (m_file->IsOpen())
     {
-      if (m_file->Write () < 0)
+      m_file->Write ();
+      if (m_file->TestBit (TFile::kWriteError))
         throw std::runtime_error ("failed to write to file: " + m_path);
       m_file->Close ();
     }
 
-    std::random_device rd;
-    std::mt19937 gen (rd());
+    // rationale: the RNG is only needed on the retry path, and
+    //   constructing std::random_device typically opens /dev/urandom,
+    //   so we construct it lazily on first use.
+    std::optional<std::mt19937> gen;
     bool success = false;
     unsigned tries = 0u;
     while (!success)
@@ -154,11 +158,16 @@ namespace SH
         if (tries < 10u)
         {
           tries += 1;
+          if (!gen)
+          {
+            std::random_device rd;
+            gen.emplace (rd());
+          }
           // sleeping for a random period of time, to reduce the
           // chance that the problem is that multiple jobs finishing
           // at the same time keep overloading the server by
           // repeatedly hitting it at the same time.
-          unsigned seconds = std::uniform_int_distribution<>(30,60) (gen);
+          unsigned seconds = std::uniform_int_distribution<>(30,60) (*gen);
           std::cerr << "sleeping for " << seconds << " seconds before retrying" << std::endl;
           std::this_thread::sleep_for (std::chrono::seconds(seconds));
         } else
@@ -168,7 +177,18 @@ namespace SH
         }
       }
     }
-    RCU::Shell::exec ("rm " + RCU::Shell::quote (m_tmp));
+    // rationale: the upload has succeeded, so release the file handle
+    //   now.  that way a failure to remove the temporary file does not
+    //   leave the writer looking un-closed and trigger a second upload
+    //   from the destructor; a failed cleanup is only a warning.
     m_file.reset ();
+    try
+    {
+      RCU::Shell::exec ("rm " + RCU::Shell::quote (m_tmp));
+    } catch (std::exception& e)
+    {
+      std::cerr << "failed to remove temporary file " << m_tmp << ": "
+                << e.what() << std::endl;
+    }
   }
 }

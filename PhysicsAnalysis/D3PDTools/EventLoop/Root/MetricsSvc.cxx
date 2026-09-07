@@ -21,9 +21,7 @@ namespace EL
 }
 
 void EL::MetricsSvc :: testInvariant () const
-{
-  RCU_INVARIANT (this != 0);
-}
+{}
 
 const char *EL::MetricsSvc :: GetName() const
 {
@@ -54,10 +52,23 @@ EL::StatusCode EL::MetricsSvc :: histInitialize ()
   RCU_CHANGE_INVARIANT (this);
   m_benchmark = new TBenchmark;
   m_benchmark->Start("loopmetrics");
-  wk()->addOutput (m_fileMetrics = new TTree ("EventLoop_Metrics/cacheStats", 
+  wk()->addOutput (m_fileMetrics = new TTree ("EventLoop_Metrics/cacheStats",
 					      "TTree cache stats per file"));
-  wk()->addOutput (m_jobMetrics = new TTree ("EventLoop_Metrics/jobs", 
+  wk()->addOutput (m_jobMetrics = new TTree ("EventLoop_Metrics/jobs",
 					     "event throughput per job"));
+
+  // Create the per-file branches once, pointing at the member buffers, so
+  // that the branch addresses stay valid across every per-file Fill().
+  m_fileMetrics->Branch ("nBranches", &m_nBranches, "nBranches/I");
+  m_fileMetrics->Branch ("learnEntries", &m_nLearn, "learnEntries/I");
+  m_fileMetrics->Branch ("cacheEfficiency", &m_cacheEfficiency, "cacheEfficiency/D");
+  m_fileMetrics->Branch ("cacheEfficiencyRel", &m_cacheEfficiencyRel, "cacheEfficiencyRel/D");
+  m_fileMetrics->Branch ("bytesRead", &m_bytesRead, "bytesRead/L");
+  m_fileMetrics->Branch ("readCalls", &m_readCalls, "readCalls/I");
+  m_fileMetrics->Branch ("noCacheBytesRead", &m_noCacheBytesRead, "noCacheBytesRead/L");
+  m_fileMetrics->Branch ("noCacheReadCalls", &m_noCacheReadCalls, "noCacheReadCalls/I");
+  m_fileMetrics->Branch ("readaheadSize", &m_readaheadSize, "readaheadSize/I");
+  m_fileMetrics->Branch ("bytesReadExtra", &m_bytesReadExtra, "bytesReadExtra/L");
   return EL::StatusCode::SUCCESS;
 }
 
@@ -79,27 +90,18 @@ EL::StatusCode EL::MetricsSvc :: endOfFile ()
   RCU_ASSERT(wk()->inputFile()); 
   RCU_ASSERT(wk()->tree()); 
   TTreeCache *tc = (TTreeCache*)wk()->inputFile()->GetCacheRead(wk()->tree());
-  if (tc) {	
-    Int_t nBranches = tc->GetCachedBranches()->GetEntries();
-    m_fileMetrics->Branch ("nBranches", &nBranches, "nBranches/I");
-    Int_t nLearn = tc->GetLearnEntries();
-    m_fileMetrics->Branch ("learnEntries", &nLearn, "learnEntries/I");
-    Double_t eff = tc->GetEfficiency ();
-    m_fileMetrics->Branch ("cacheEfficiency", &eff, "cacheEfficiency/D");
-    Double_t effRel = tc->GetEfficiencyRel ();
-    m_fileMetrics->Branch ("cacheEfficiencyRel", &effRel, "cacheEfficiencyRel/D");
-    Long64_t bytesRead = tc->GetBytesRead ();
-    m_fileMetrics->Branch ("bytesRead", &bytesRead, "bytesRead/L");
-    Int_t readCalls = tc->GetReadCalls ();
-    m_fileMetrics->Branch ("readCalls", &readCalls, "readCalls/I");
-    Long64_t ncBytesRead = tc->GetNoCacheBytesRead ();
-    m_fileMetrics->Branch ("noCacheBytesRead", &ncBytesRead, "noCacheBytesRead/L");
-    Int_t ncReadCalls = tc->GetNoCacheReadCalls ();
-    m_fileMetrics->Branch ("noCacheReadCalls", &ncReadCalls, "noCacheReadCalls/I");
-    Int_t readahead = TFile::GetReadaheadSize ();
-    m_fileMetrics->Branch ("readaheadSize", &readahead, "readaheadSize/I");
-    Long64_t bytesReadExtra = tc->GetBytesReadExtra ();
-    m_fileMetrics->Branch ("bytesReadExtra", &bytesReadExtra, "bytesReadExtra/L");
+  if (tc) {
+    // update the member buffers wired to the branches in histInitialize
+    m_nBranches = tc->GetCachedBranches()->GetEntries();
+    m_nLearn = tc->GetLearnEntries();
+    m_cacheEfficiency = tc->GetEfficiency ();
+    m_cacheEfficiencyRel = tc->GetEfficiencyRel ();
+    m_bytesRead = tc->GetBytesRead ();
+    m_readCalls = tc->GetReadCalls ();
+    m_noCacheBytesRead = tc->GetNoCacheBytesRead ();
+    m_noCacheReadCalls = tc->GetNoCacheReadCalls ();
+    m_readaheadSize = TFile::GetReadaheadSize ();
+    m_bytesReadExtra = tc->GetBytesReadExtra ();
     m_fileMetrics->Fill ();
   }
   return EL::StatusCode::SUCCESS;

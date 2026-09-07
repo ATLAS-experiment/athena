@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArDeadOTXCondAlg.h"
@@ -106,7 +106,7 @@ StatusCode LArDeadOTXCondAlg::execute(const EventContext& ctx) const {
         }
         const unsigned nCell = (m_scidtool->superCellToOfflineID(scID)).size();
         const CaloDetDescrElement* dde = caloDDM->get_element(hashId);
-        if (ATH_UNLIKELY(!dde)) {
+        if (!dde) [[unlikely]] {
           ATH_MSG_ERROR("No DetDescElement for cell hash " << hashId);
           return StatusCode::FAILURE;
         }

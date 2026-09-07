@@ -25,8 +25,7 @@
 
 #ifndef _VKalVrt_NewVrtSecInclusiveTool_H
 #define _VKalVrt_NewVrtSecInclusiveTool_H
-// Normal STL and physical vectors
-#include <vector>
+
 // Gaudi includes
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "GaudiKernel/ToolHandle.h"
@@ -47,6 +46,9 @@
 #include "StoreGate/WriteDecorHandleKey.h"
 
 #include "Math/LorentzVector.h"
+
+// Normal STL and physical vectors
+#include <vector>
 
 class TH1D;
 class TH2D;
@@ -314,7 +316,7 @@ namespace Rec {
       struct WrkVrt 
       {  bool Good=true;
          std::deque<long int> selTrk;
-         Amg::Vector3D     vertex;
+         Amg::Vector3D     vertex{0.,0.,0.};
          TLorentzVector    vertexMom;
          long int   vertexCharge{};
          std::vector<double> vertexCov;
@@ -369,7 +371,7 @@ namespace Rec {
                           Trk::IVKalState& istate,
                           bool ifCovV0) const;
 
-      static int mostHeavyTrk(WrkVrt V, std::vector<const xAOD::TrackParticle*> AllTracks) ;
+      static int mostHeavyTrk(const WrkVrt & V, std::vector<const xAOD::TrackParticle*> AllTracks) ;
       double refineVerticesWithCommonTracks( WrkVrt &v1, WrkVrt &v2, std::vector<const xAOD::TrackParticle*> & allTrackList,
                                                         Trk::IVKalState& istate) const;
       double mergeAndRefitVertices( WrkVrt & v1, WrkVrt & v2, WrkVrt & newvrt,
@@ -408,7 +410,7 @@ namespace Rec {
     { 
       std::vector<int> new_clique(0);
       for(auto i = clq.begin(); i != clq.end(); ++i) new_clique.push_back(*i);
-      m_allCliques.push_back(new_clique);
+      m_allCliques.push_back(std::move(new_clique));
     }
 
     std::vector< std::vector<int> > & m_allCliques;

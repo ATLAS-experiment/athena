@@ -36,7 +36,6 @@ namespace pool  {
     */
   class DbStorageSvc  : virtual public IStorageSvc, virtual public APRMessaging
   {
-    typedef std::vector<const Token*> TokenVec;
   private:
     /// Service Name                               
     std::string         m_name;

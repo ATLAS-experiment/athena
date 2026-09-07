@@ -43,7 +43,7 @@ def TMDBConfig(flags):
 
 def MuonBytestream2RdoConfig(flags):
     acc = ComponentAccumulator()
-    if flags.Input.isMC:
+    if flags.Input.Format is Format.POOL:
         return acc
 
     postFix = "_L1MuonSim"
@@ -140,7 +140,7 @@ def MuonRdo2PrdConfig(flags):
     if not flags.Trigger.L1MuonSim.EmulateNSW or not flags.Trigger.L1MuonSim.NSWVetoMode:
         return acc
     postFix = "_L1MuonSim"
-    suffix = "" if flags.Input.isMC else "_L1"
+    suffix = "" if flags.Input.Format is Format.POOL else "_L1"
     if flags.Input.Format is Format.POOL:
         rdoInputs = [
             ('RpcPadContainer','RPCPAD'),
@@ -318,7 +318,7 @@ def TGCTriggerConfig(flags):
     acc = ComponentAccumulator()
     tgcAlg = CompFactory.LVL1TGCTrigger.LVL1TGCTrigger("LVL1TGCTrigger",
                                                        InputData_perEvent  = "TGC_DIGITS_L1",
-                                                       InputRDO = "TGCRDO" if flags.Input.isMC else "TGCRDO_L1",
+                                                       InputRDO = "TGCRDO" if flags.Input.Format is Format.POOL  else "TGCRDO_L1",
                                                        useRun3Config = True,
                                                        TileMuRcv_Input = "rerunTileMuRcvCnt",
                                                        TILEMU = True)

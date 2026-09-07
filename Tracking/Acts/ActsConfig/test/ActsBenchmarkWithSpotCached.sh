@@ -18,7 +18,7 @@ ATHENA_CORE_NUMBER=${NTHREADS} Reco_tf.py \
     --multithreaded 'True' \
     --conditionsTag "all:${conditions}" \
     --postInclude 'all:PyJobTransforms.UseFrontier' \
-    --preInclude 'InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude,ActsConfig.ActsCIFlags.actsProductionFlags' \
+    --preInclude 'InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude' \
     --preExec 'all:flags.Exec.FPE=-1;flags.Acts.useCache=True' \
     --postExec 'all:cfg.getService("AlgResourcePool").CountAlgorithmInstanceMisses = True;' \
     --inputRDOFile ${input_rdo} \

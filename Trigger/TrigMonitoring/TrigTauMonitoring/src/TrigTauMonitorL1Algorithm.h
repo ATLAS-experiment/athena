@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRIGTAUMONITORING_TRIGTAUMONITORL1ALGORITHM_H
@@ -33,7 +33,7 @@ private:
 
         const TrigTauInfo& info = getTrigInfo(trigger);
 
-        auto monGroup = getGroup(trigger+"_L1_Efficiency_"+nProng);
+        const auto & monGroup = getGroup(trigger+"_L1_Efficiency_"+nProng);
 
         auto tauPt = Monitored::Scalar<float>("tauPt", 0.0);
         auto tauEta = Monitored::Scalar<float>("tauEta", 0.0);

@@ -3,7 +3,7 @@
 */
 #include "TgcL0FloatingPtLut.h"
 
-#include "CxxUtils/StringUtils.h"
+#include "CxxUtils/StringUtilsTemplates.h"
 
 #include <algorithm>
 #include <array>
@@ -17,30 +17,22 @@
 
 namespace {
 
-template <typename T>
-bool parseInteger(const std::string& text, T& value) {
+template <std::integral T>
+bool parseInteger(std::string_view text, T& value)
+{
   try {
-    const int parsed = CxxUtils::atoi(text);
-    if constexpr (std::is_unsigned_v<T>) {
-      if (parsed < 0 || static_cast<unsigned int>(parsed) >
-                            std::numeric_limits<T>::max()) {
-        return false;
-      }
-    } else if (parsed < std::numeric_limits<T>::lowest() ||
-               parsed > std::numeric_limits<T>::max()) {
-      return false;
-    }
-    value = static_cast<T>(parsed);
+    CxxUtils::convertToNumber(text, value);
     return true;
   } catch (const std::exception&) {
     return false;
   }
 }
 
-template <typename T>
-bool parseFloatingPoint(const std::string& text, T& value) {
+template <std::floating_point T>
+bool parseFloatingPoint(std::string_view text, T& value)
+{
   try {
-    value = static_cast<T>(CxxUtils::atof(text));
+    CxxUtils::convertToNumber(text, value);
     return true;
   } catch (const std::exception&) {
     return false;
@@ -247,7 +239,6 @@ std::unique_ptr<TgcL0FloatingPtLut> TgcL0FloatingPtLut::loadAscii(
       return nullptr;
     }
     bin.knotOffset = static_cast<std::uint32_t>(lut->m_knots.size());
-    bin.knotCount = static_cast<std::uint32_t>(indexedKnots.size());
     unsigned int expectedIndex = 0U;
     float previousInversePt = -1.F;
     float previousResponse = -1.F;
@@ -265,7 +256,23 @@ std::unique_ptr<TgcL0FloatingPtLut> TgcL0FloatingPtLut::loadAscii(
       }
       previousInversePt = knot.inversePtGeVInv;
       previousResponse = knot.responseMagnitudeRad;
-      lut->m_knots.push_back(knot);
+      if (lut->m_knots.size() > bin.knotOffset &&
+          knot.responseMagnitudeRad ==
+              lut->m_knots.back().responseMagnitudeRad) {
+        // A monotonic calibration can contain a response plateau. Its
+        // inverse is ambiguous, so retain the largest inverse-pT value and
+        // therefore the most conservative pT estimate.
+        lut->m_knots.back() = knot;
+      } else {
+        lut->m_knots.push_back(knot);
+      }
+    }
+    bin.knotCount = static_cast<std::uint32_t>(lut->m_knots.size() -
+                                               bin.knotOffset);
+    if (bin.knotCount < 2U) {
+      error = "fewer than two distinct knot responses for bin " +
+              std::to_string(index);
+      return nullptr;
     }
   }
 

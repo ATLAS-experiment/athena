@@ -13,6 +13,7 @@ using L0Muon::TgcL0ValidationEvent;
 using L0Muon::TgcL0ValidationInvalidValue;
 using L0Muon::TgcL0ValidationNoUnmatchedReason;
 using L0Muon::TgcL0ValidationProjection;
+using L0Muon::TgcL0ValidationStation;
 using L0Muon::TgcL0ValidationUnmatchedReason;
 
 TgcL0ValidationEvent makeValidEvent() {
@@ -35,6 +36,11 @@ TgcL0ValidationEvent makeValidEvent() {
   event.truth.matchedCandidateIndex = {0};
   event.truth.matchMeanDeltaR = {0.01F};
   event.truth.unmatchedReason = {TgcL0ValidationNoUnmatchedReason};
+  event.truth.finalCandidateMatched = {1U};
+  event.truth.matchedFinalCandidateIndex = {0};
+  event.truth.finalCandidateMatchDeltaR = {0.02F};
+  event.truth.finalCandidateUnmatchedReason = {
+      TgcL0ValidationNoUnmatchedReason};
   event.truth.wireSegmentMatched = {1U};
   event.truth.stripSegmentMatched = {1U};
   event.truth.matchedWireSegmentIndex = {0};
@@ -77,6 +83,26 @@ TgcL0ValidationEvent makeValidEvent() {
   event.candidates.goodMagneticField = {1U};
   event.candidates.truthIndex = {0};
 
+  event.finalCandidates.sourceCandidateIndex = {0};
+  event.finalCandidates.referenceStation = {
+      static_cast<std::uint8_t>(TgcL0ValidationStation::M3)};
+  event.finalCandidates.subdetectorId = {1U};
+  event.finalCandidates.triggerSector = {2U};
+  event.finalCandidates.bcTag = {0U};
+  event.finalCandidates.tcId = {1U};
+  event.finalCandidates.rawEta = {12742U};
+  event.finalCandidates.rawPhi = {276U};
+  event.finalCandidates.eta = {1.5F};
+  event.finalCandidates.phi = {0.25F};
+  event.finalCandidates.ptCode = {50U};
+  event.finalCandidates.pt = {25.F};
+  event.finalCandidates.threshold = {6U};
+  event.finalCandidates.charge = {-1};
+  event.finalCandidates.innerCoincidence = {0U};
+  event.finalCandidates.goodMagneticField = {1U};
+  event.finalCandidates.truthIndex = {0};
+  event.finalCandidates.truthMatchDeltaR = {0.02F};
+
   event.sectorLogic.inputCandidateIndex = {0U};
   event.sectorLogic.candWord = {0x12345678U};
   event.sectorLogic.candExtraWord = {0x9abcdef0U};
@@ -107,6 +133,12 @@ void appendUnmatchedTruth(TgcL0ValidationEvent& event,
   event.truth.matchedCandidateIndex.emplace_back(-1);
   event.truth.matchMeanDeltaR.emplace_back(TgcL0ValidationInvalidValue);
   event.truth.unmatchedReason.emplace_back(static_cast<std::uint8_t>(reason));
+  event.truth.finalCandidateMatched.emplace_back(0U);
+  event.truth.matchedFinalCandidateIndex.emplace_back(-1);
+  event.truth.finalCandidateMatchDeltaR.emplace_back(
+      TgcL0ValidationInvalidValue);
+  event.truth.finalCandidateUnmatchedReason.emplace_back(
+      static_cast<std::uint8_t>(reason));
   event.truth.wireSegmentMatched.emplace_back(0U);
   event.truth.stripSegmentMatched.emplace_back(0U);
   event.truth.matchedWireSegmentIndex.emplace_back(-1);
@@ -115,6 +147,40 @@ void appendUnmatchedTruth(TgcL0ValidationEvent& event,
       TgcL0ValidationInvalidValue);
   event.truth.stripSegmentMatchResidual.emplace_back(
       TgcL0ValidationInvalidValue);
+}
+
+void duplicateFinalCandidate(TgcL0ValidationEvent& event) {
+  event.finalCandidates.sourceCandidateIndex.emplace_back(
+      event.finalCandidates.sourceCandidateIndex.front());
+  event.finalCandidates.referenceStation.emplace_back(
+      event.finalCandidates.referenceStation.front());
+  event.finalCandidates.subdetectorId.emplace_back(
+      event.finalCandidates.subdetectorId.front());
+  event.finalCandidates.triggerSector.emplace_back(
+      event.finalCandidates.triggerSector.front());
+  event.finalCandidates.bcTag.emplace_back(event.finalCandidates.bcTag.front());
+  event.finalCandidates.tcId.emplace_back(event.finalCandidates.tcId.front());
+  event.finalCandidates.rawEta.emplace_back(
+      event.finalCandidates.rawEta.front());
+  event.finalCandidates.rawPhi.emplace_back(
+      event.finalCandidates.rawPhi.front());
+  event.finalCandidates.eta.emplace_back(event.finalCandidates.eta.front());
+  event.finalCandidates.phi.emplace_back(event.finalCandidates.phi.front());
+  event.finalCandidates.ptCode.emplace_back(
+      event.finalCandidates.ptCode.front());
+  event.finalCandidates.pt.emplace_back(event.finalCandidates.pt.front());
+  event.finalCandidates.threshold.emplace_back(
+      event.finalCandidates.threshold.front());
+  event.finalCandidates.charge.emplace_back(
+      event.finalCandidates.charge.front());
+  event.finalCandidates.innerCoincidence.emplace_back(
+      event.finalCandidates.innerCoincidence.front());
+  event.finalCandidates.goodMagneticField.emplace_back(
+      event.finalCandidates.goodMagneticField.front());
+  event.finalCandidates.truthIndex.emplace_back(
+      event.finalCandidates.truthIndex.front());
+  event.finalCandidates.truthMatchDeltaR.emplace_back(
+      event.finalCandidates.truthMatchDeltaR.front());
 }
 
 bool expectValid(const TgcL0ValidationEvent& event, const std::string& label) {
@@ -197,6 +263,48 @@ int main() {
   }
   {
     auto event = makeValidEvent();
+    event.finalCandidates.pt.clear();
+    success &= expectInvalid(
+        event, "Final-candidate block size mismatch for pt",
+        "final-candidate-size mismatch");
+  }
+  {
+    auto event = makeValidEvent();
+    event.finalCandidates.referenceStation[0] =
+        static_cast<std::uint8_t>(TgcL0ValidationStation::Invalid);
+    success &= expectInvalid(event,
+                             "Final-candidate reference station is invalid",
+                             "invalid final-candidate station");
+  }
+  {
+    auto event = makeValidEvent();
+    event.finalCandidates.sourceCandidateIndex[0] = 1;
+    success &= expectInvalid(event,
+                             "Final-candidate source index is out of range",
+                             "final-candidate source range");
+  }
+  {
+    auto event = makeValidEvent();
+    event.finalCandidates.sourceCandidateIndex[0] = -1;
+    success &= expectInvalid(event,
+                             "Final-candidate source index is out of range",
+                             "negative final-candidate source index");
+  }
+  {
+    auto event = makeValidEvent();
+    event.finalCandidates.charge[0] = 0;
+    success &= expectInvalid(event, "Final-candidate charge is invalid",
+                             "invalid final-candidate charge");
+  }
+  {
+    auto event = makeValidEvent();
+    duplicateFinalCandidate(event);
+    success &= expectInvalid(
+        event, "Source candidate is linked to more than one final candidate",
+        "duplicate final-candidate source link");
+  }
+  {
+    auto event = makeValidEvent();
     event.sectorLogic.candExtraWord.clear();
     success &= expectInvalid(
         event, "Sector Logic block size mismatch for candExtraWord",
@@ -208,6 +316,13 @@ int main() {
     success &= expectInvalid(
         event, "Sector Logic placeholder metadata is not zero",
         "sector-logic placeholder metadata");
+  }
+  {
+    auto event = makeValidEvent();
+    event.sectorLogic.inputCandidateIndex[0] = 1U;
+    success &= expectInvalid(
+        event, "Sector Logic input-candidate index is out of range",
+        "sector-logic final-candidate range");
   }
   {
     auto event = makeValidEvent();
@@ -227,6 +342,22 @@ int main() {
     event.truth.matchedCandidateIndex[0] = -1;
     success &= expectInvalid(event, "Matched truth has no candidate index",
                              "missing matched candidate");
+  }
+  {
+    auto event = makeValidEvent();
+    event.truth.matchedFinalCandidateIndex[0] = -1;
+    success &= expectInvalid(
+        event, "Final-candidate-matched truth has no candidate index",
+        "missing matched final candidate");
+  }
+  {
+    auto event = makeValidEvent();
+    event.finalCandidates.truthIndex[0] = -1;
+    event.finalCandidates.truthMatchDeltaR[0] =
+        TgcL0ValidationInvalidValue;
+    success &= expectInvalid(
+        event, "Truth-final-candidate matching indices are not reciprocal",
+        "non-reciprocal truth-final-candidate indices");
   }
   {
     auto event = makeValidEvent();

@@ -67,7 +67,7 @@ def precisionTracks_GSFRefitted(flags, RoIs, ion=False, variant=''):
     acc.addEventAlgo(precisionGsfVDV)
 
     ## EMBremCollectionBuilder ##
-    if flags.Acts.GsfRefitActs:
+    if flags.Trigger.useActsTracking and flags.Acts.GsfRefitActs:
         from egammaAlgs.ActsEMBremCollectionBuilderConfig import (
             TrigActsEMBremCollectionBuilderCfg)
         acc.merge(TrigActsEMBremCollectionBuilderCfg(trkflags, name='TrigActsEMBremCollectionBuilder'+variant,

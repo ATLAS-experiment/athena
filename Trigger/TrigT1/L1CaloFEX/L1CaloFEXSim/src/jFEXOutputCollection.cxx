@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //***************************************************************************  
@@ -75,33 +75,33 @@ void LVL1::jFEXOutputCollection::clear()
 
 void LVL1::jFEXOutputCollection::addValue_smallRJet(std::string key, int value)
 {
-    m_values_tem_smallRJet.insert(std::make_pair(key, value));
+    m_values_tem_smallRJet.try_emplace(std::move(key), value);
 }
 
 void LVL1::jFEXOutputCollection::addValue_largeRJet(std::string key, int value)
 {
-    m_values_tem_largeRJet.insert(std::make_pair(key, value));
+    m_values_tem_largeRJet.try_emplace(std::move(key), value);
 }
 
 void LVL1::jFEXOutputCollection::addValue_tau(std::string key, int value)
 {
-    m_values_tem_tau.insert(std::make_pair(key, value));
+    m_values_tem_tau.try_emplace(std::move(key), value);
 }
 
 void LVL1::jFEXOutputCollection::addValue_fwdEl(std::string key, int value)
 {
-  m_values_tem_fwdEl.insert(std::make_pair(key, value));
+  m_values_tem_fwdEl.try_emplace(std::move(key), value);
 }
 
 
 void LVL1::jFEXOutputCollection::addValue_pileup(std::string key, int value)
 {
-    m_values_tem_pileup.insert(std::make_pair(key, value));
+    m_values_tem_pileup.try_emplace(std::move(key), value);
 }
 
 void LVL1::jFEXOutputCollection::addValue_pileup(std::string key, std::vector<int>  value)
 {
-    m_values_tem_pileup_maps.insert(std::make_pair(key, value));
+    m_values_tem_pileup_maps.try_emplace(std::move(key), value);
 }
 
 void LVL1::jFEXOutputCollection::fill_smallRJet()

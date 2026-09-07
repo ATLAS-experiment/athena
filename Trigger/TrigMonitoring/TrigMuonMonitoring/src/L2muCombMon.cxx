@@ -28,13 +28,14 @@ StatusCode L2muCombMon :: fillVariablesPerChain(const EventContext &ctx, const s
 
 
   std::vector< TrigCompositeUtils::LinkInfo<xAOD::L2CombinedMuonContainer> > featureCont = getTrigDecisionTool()->features<xAOD::L2CombinedMuonContainer>( chain, TrigDefs::includeFailedDecisions );
+  const std::string featureStr{"feature"};
   for(const TrigCompositeUtils::LinkInfo<xAOD::L2CombinedMuonContainer>& muLinkInfo : featureCont){
     ATH_CHECK( muLinkInfo.isValid() );
     const ElementLink<xAOD::L2CombinedMuonContainer> muEL = muLinkInfo.link;
 
     // get L2SA feature
     const TrigCompositeUtils::Decision* muDecision = muLinkInfo.source;
-    const std::vector<TrigCompositeUtils::LinkInfo<xAOD::L2StandAloneMuonContainer>> saLinkInfo = TrigCompositeUtils::findLinks<xAOD::L2StandAloneMuonContainer>(ctx, muDecision, "feature");
+    const std::vector<TrigCompositeUtils::LinkInfo<xAOD::L2StandAloneMuonContainer>> saLinkInfo = TrigCompositeUtils::findLinks<xAOD::L2StandAloneMuonContainer>(ctx, muDecision, featureStr);
     if(saLinkInfo.size()>1){
        ATH_MSG_DEBUG("More than one L2SA linked to L2 comb muon");
     }
@@ -255,7 +256,7 @@ StatusCode L2muCombMon :: fillVariables(const EventContext &ctx) const {
 StatusCode L2muCombMon :: fillVariablesPerOfflineMuon(const EventContext &ctx, const xAOD::Muon* mu) const {
 
   ATH_CHECK( fillVariablesRatioPlots<xAOD::L2CombinedMuon>(ctx, mu, "L2CB", xAOD::Muon::TrackParticleType::CombinedTrackParticle,
-                                                           [this](const EventContext &ctx, const xAOD::Muon *mu){ return m_matchTool->matchL2CBReadHandle(ctx,mu); }
+                                                           [this](const EventContext &c, const xAOD::Muon *m){ return m_matchTool->matchL2CBReadHandle(c,m); }
                                                            ));
 
   return StatusCode::SUCCESS;

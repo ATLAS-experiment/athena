@@ -207,7 +207,7 @@ int JetFinder::_find(const PseudoJetContainer& pjContainer,
   ATH_MSG_DEBUG("Calling fastjet");
   PseudoJetVector outs = sorted_by_pt(pcs->inclusive_jets(m_ptmin));
   ATH_MSG_DEBUG("Found jet count: " << outs.size());
-  // for ( PseudoJetVector::const_iterator ijet=outs.begin(); ijet!=outs.end(); ++ijet ) {
+  const std::string jetGhostAreaStr{"JetGhostArea"};
   for (const auto &  pj: outs ) {
     xAOD::Jet* pjet = m_bld->add(pj, pjContainer, jets, inputtype);
 
@@ -222,7 +222,7 @@ int JetFinder::_find(const PseudoJetContainer& pjContainer,
       pjet->setAttribute("VariableRMinRadius", m_minrad);
       pjet->setAttribute("VariableRMassScale", m_massscale);
     }
-    pjet->setAttribute("JetGhostArea", m_ghostarea);
+    pjet->setAttribute(jetGhostAreaStr, m_ghostarea);
   }
   ATH_MSG_DEBUG("Reconstructed jet count: " << jets.size() <<  "  clusterseq="<<pcs);
 

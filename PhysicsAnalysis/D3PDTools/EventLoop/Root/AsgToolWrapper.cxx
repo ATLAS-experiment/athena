@@ -119,6 +119,7 @@ namespace EL
   ::StatusCode AsgToolWrapper ::
   endInputFile ()
   {
+    RCU_READ_INVARIANT (this);
     // no-op
     return StatusCode::SUCCESS;
   }

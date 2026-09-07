@@ -31,9 +31,8 @@ namespace SH
 {
   void scanNEvents (SampleHandler& sh)
   {
-    for (SampleHandler::iterator sample = sh.begin(),
-	   end = sh.end(); sample != end; ++ sample)
-      scanNEvents (**sample);
+    for (auto *sample : sh)
+      scanNEvents (*sample);
   }
 
 
@@ -109,7 +108,7 @@ namespace SH
       {
 	std::ostringstream name;
 	name << sample.name() << "_" << result.size();
-	res.reset (new SampleLocal (name.str()));
+	res = std::make_unique<SampleLocal> (name.str());
 	res->tags (sample.tags());
 	res->meta()->fetch (*sample.meta());
 	if (!meta_tree.empty())

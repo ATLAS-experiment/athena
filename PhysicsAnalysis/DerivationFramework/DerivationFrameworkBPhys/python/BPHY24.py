@@ -478,8 +478,8 @@ def BPHY24Cfg(flags):
       acc.merge(InDetPhysValTruthDecoratorAlgCfg(flags, BPHYDerivationName))
     
       # Keep all muons and electrons
-      keepParticles = ('abs(TruthParticles.pdgId) == 11 || ' # mu
-                       'abs(TruthParticles.pdgId) == 13')    # e
+      keepParticles = ('TruthParticles.isElectron || ' # e
+                       'TruthParticles.isMuon')    # mu
       # Keep only the potentially signal b-hadrons
       
       keepParticles += (' || '

@@ -10,10 +10,8 @@
 #include <filesystem>
 
 #include "PersistentDataModel/Token.h"
-#include "PersistencySvc/IFileCatalog.h"
-#include "PersistencySvc/ISession.h"
-#include "PersistencySvc/ITransaction.h"
-#include "PersistencySvc/IDatabase.h"
+#include "PoolSvc/IFileCatalog.h"
+#include "PoolSvc/ISession.h"
 
 #include "StorageSvc/DbType.h"
 

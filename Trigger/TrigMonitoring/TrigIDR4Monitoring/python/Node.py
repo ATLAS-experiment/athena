@@ -12,6 +12,7 @@
 ## Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 ##
 
+import warnings
 
 from AthenaConfiguration.AthConfigFlags import CfgFlag
 
@@ -73,7 +74,6 @@ class Node:
             return value.get(flags)
         return value
 
-
     def __getattr__(self, name):
         """ will attempt a dynamic load from flags if need be """
         if name in self._children : return self._children[name]
@@ -109,12 +109,12 @@ class Node:
             # ensure the lock state is restored if something goes wrong ...
             if lockstate != _UNLOCKED : self.lock(lockstate)
 
-        
     def _addDynaFlags(self, name) :
         flags = self._flags
         self._flags._loadDynaFlags(name)
         for key, val in self._flags._flagdict.items() :
-            if key == name or key.startswith(name+".") : self._addFlagUnlock( key, val, flags )
+            if self._hasFlagPath(key) : continue
+            self._addFlagUnlock( key, val, flags )
         return True
         
     def _rootnode(self):
@@ -152,7 +152,6 @@ class Node:
 
     def _addFlagUnlock(self, tag, value, flags=None):
         self._addFlagImpl( tag, value, flags, True )
-
         
     def addNewNode(self, name, flags=None):
         """ add a new child node """
@@ -179,13 +178,26 @@ class Node:
 
     def hasFlag(self, name ):
         return name in self.__dict__
-             
-    def nodes(self):
-        return self._children.values()
 
     def hasNode(self, name):
         return name in self._children
 
+    def _hasFlagPath(self, name):
+        parts = name.split('.')
+        node = self._rootnode()       
+        for part in parts[:-1]:
+            if not node.hasNode(part) : return False
+            node = node.node(part)
+        return node.hasFlag(parts[-1])
+
+    def nodes(self):
+        return self._children.values()
+
+    def node_flags(self):
+        for key, value in self.__dict__.items():
+            if not key.startswith("_"):
+                yield key, getattr(self, key)
+      
     def node(self, name):
         if self.hasNode(name) : return self._children[name]
         raise RuntimeError(f"So such child: {name}")
@@ -230,9 +242,16 @@ class Node:
             print( spacer, key, " : ", value )
         for node in self.nodes() : node.print( spacer )
 
-    def dump(self):
-        self.print()
         
+    def dump(self): self.print()
+
+        
+    def cloneAndReplace(self, targetname, flagname ) :
+        # we really, really, should not have this ...
+        warnings.warn( "cloneAndReplace() is unnecessary for Node flags; "
+                       "use the appropriate Node directly",
+                       RuntimeWarning,  stacklevel=2 )
+        return self._rootnode()._flags.cloneAndReplace( targetname, flagname )
 
         
 def notDefined(flags, name):
@@ -246,7 +265,12 @@ def notDefined(flags, name):
 
 
 def decode_flags( flags, domain=None ) :
-    """ take an egregious  flags list and convert to a lovely tree """
+    """ take an egregious  flags list and convert to a lovely tree
+        or, if it is a lovely tree already, just  hand it back 
+    """
+
+    if isinstance( flags, Node ) : return flags
+    
     root = Node("root")
 
     for tag, value in flags._flagdict.items():

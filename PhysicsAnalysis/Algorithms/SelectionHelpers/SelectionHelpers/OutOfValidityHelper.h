@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Nils Krumnack
@@ -10,7 +10,6 @@
 
 #include <AsgMessaging/AsgMessagingForward.h>
 #include <AthContainers/AuxElement.h>
-#include <CxxUtils/AthUnlikelyMacros.h>
 #include <SelectionHelpers/ISelectionWriteAccessor.h>
 #include <SelectionHelpers/ISelectionReadAccessor.h>
 #include <xAODBase/IParticle.h>
@@ -130,7 +129,7 @@ namespace CP
 
 /// \brief a helper check macro to work with \ref OutOfValidityHelper
 #define ANA_CHECK_CORRECTION(helper,object,expr)                \
-  { if (ATH_UNLIKELY((helper).check ((object), (expr), #expr).isFailure())) \
+  { if ((helper).check ((object), (expr), #expr).isFailure()) [[unlikely]] \
       return StatusCode::FAILURE; }
 
 #endif

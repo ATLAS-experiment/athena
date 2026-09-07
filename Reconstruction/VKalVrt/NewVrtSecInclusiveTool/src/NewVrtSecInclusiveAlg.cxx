@@ -140,7 +140,7 @@ namespace Rec {
        std::vector< ElementLink< xAOD::TrackParticleContainer > > newLinkVec;
        for(auto &it : iv->trackParticleLinks()){
          ElementLink< xAOD::TrackParticleContainer > tmpLnk=it;
-         const xAOD::TrackParticleContainer* tp_cont = dynamic_cast<const xAOD:: TrackParticleContainer*>((*it)->container());
+         const xAOD::TrackParticleContainer* tp_cont = static_cast<const xAOD:: TrackParticleContainer*>((*it)->container());
          tmpLnk.setStorableObject(*tp_cont);
          newLinkVec.push_back(tmpLnk);
        }

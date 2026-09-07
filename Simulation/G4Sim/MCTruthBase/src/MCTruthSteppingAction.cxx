@@ -6,7 +6,10 @@
 #include "MCTruth/AtlasG4EventUserInfo.h"
 #include "MCTruth/TrackHelper.h"
 #include "MCTruth/TrackInformation.h"
-#include "MCTruthBase/TruthStrategyManager.h"
+#include "ISF_Geant4Event/Geant4TruthIncident.h"
+#include "ISF_Geant4Event/ISFG4GeoHelper.h"
+#include "ISF_Interfaces/IGeoIDSvc.h"
+#include "ISF_Interfaces/ITruthSvc.h"
 
 #include "G4Event.hh"
 #include "G4Step.hh"
@@ -26,11 +29,15 @@ namespace G4UA
   MCTruthSteppingAction(const VolumeCollectionMap_t& volCollMap,
                         int secondarySavingLevel,
                         int subDetVolLevel,
+                        ISF::ITruthSvc& truthRecordSvc,
+                        ISF::IGeoIDSvc& geoIDSvc,
                         IMessageSvc* msgSvc, MSG::Level level)
     : AthMessaging(msgSvc, "MCTruthSteppingAction"),
       m_isInitialized(false),
       m_secondarySavingLevel(secondarySavingLevel),
       m_subDetVolLevel(subDetVolLevel),
+      m_truthRecordSvc(truthRecordSvc),
+      m_geoIDSvc(geoIDSvc),
       m_volumeCollectionMap(volCollMap)
   {
     msg().setLevel(level);
@@ -106,9 +113,7 @@ namespace G4UA
       (trackHelper.IsRegisteredSecondary() && m_secondarySavingLevel > 1);
 
     if (secondaries && !secondaries->empty() && processTruth) {
-      const TruthStrategyManager& sManager =
-        TruthStrategyManager::GetStrategyManager();
-      sManager.CreateTruthIncident(aStep, m_subDetVolLevel);
+      createTruthIncident(aStep);
     }
 
     if (m_recordingEnvelopes.size() == 0) return;
@@ -152,6 +157,14 @@ namespace G4UA
         break;
       }
     }
+  }
+
+  void MCTruthSteppingAction::createTruthIncident(const G4Step* aStep) const
+  {
+    const AtlasDetDescr::AtlasRegion geoID =
+      iGeant4::ISFG4GeoHelper::nextGeoId(aStep, m_subDetVolLevel, &m_geoIDSvc);
+    iGeant4::Geant4TruthIncident truth(aStep, geoID);
+    m_truthRecordSvc.registerTruthIncident(truth);
   }
 
   void MCTruthSteppingAction::propagatePrimaryInfoToSecondaries(const G4Step* aStep) const

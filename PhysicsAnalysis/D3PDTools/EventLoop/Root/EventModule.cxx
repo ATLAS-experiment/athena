@@ -16,7 +16,6 @@
 #include <xAODRootAccess/Event.h>
 #include <xAODRootAccess/tools/TFileAccessTracer.h>
 #include <xAODRootAccess/TStore.h>
-// #include <xAODRootAccess/D3PDPerfStats.h>
 #include <EventLoop/Job.h>
 #include <EventLoop/StatusCode.h>
 #include <EventLoop/Worker.h>
@@ -67,7 +66,7 @@ namespace EL
       // during initialisation. Only the in-file metadata...
       m_event = xAOD::Event::createAndReadFrom(*data.m_inputFile.get());
       if (!m_event) {
-          ATH_MSG_ERROR( "cannot read from file: " << *data.m_inputFile->GetName());
+          ATH_MSG_ERROR( "cannot read from file: " << data.m_inputFile->GetName());
           return StatusCode::FAILURE;
       }
       // Set event in module data
@@ -141,7 +140,10 @@ namespace EL
 
     StatusCode EventModule::postFinalize (ModuleData& data) {
 
-      if (m_useStats.value())       {
+      // Only stop the stats if we actually started them, which happens in
+      // onFirstInputFile once m_event is created.  With an empty file list
+      // start() is never called, so stop() must be skipped too.
+      if (m_useStats.value() && m_event != nullptr)       {
         xAOD::PerfStats::instance().stop();
         std::unique_ptr<xAOD::ReadStats> stats
           (new xAOD::ReadStats (xAOD::IOStats::instance().stats()));

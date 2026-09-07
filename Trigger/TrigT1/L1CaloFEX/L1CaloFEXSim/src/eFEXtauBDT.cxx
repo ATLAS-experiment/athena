@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //*************************************************************************
@@ -16,7 +16,7 @@
 #define PARAM_WIDTH 8
 
 // default constructor for persistency
-LVL1::eFEXtauBDT::eFEXtauBDT(AthAlgTool *log, std::string config_path)
+LVL1::eFEXtauBDT::eFEXtauBDT(AthAlgTool *log, const std::string & config_path)
     : m_bdt(config_path), m_log(log) {
   m_log->msg(MSG::DEBUG) << "Configured BDT with this file: " << config_path
                          << endmsg;

@@ -1,8 +1,7 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 /*
- * Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration.
  */
-// $Id$
 /**
  * @file CxxUtils/atomic_fetch_minmax.h
  * @author scott snyder <snyder@bnl.gov>
@@ -10,11 +9,6 @@
  * @brief Atomic min/max functions.
  *
  * These add atomic operations for finding the minimum or maximum.
- * These have been proposed for addition to the standard, but have not
- * yet made it in:
- *
- *   http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2013/n3696.htm
- *   http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2016/p0493r0.pdf
  */
 
 
@@ -27,6 +21,19 @@
 
 
 namespace CxxUtils {
+
+
+#if __cpp_lib_atomic_min_max
+
+
+// As of C++26, these are available in stdlib.
+
+
+using std::atomic_fetch_min;
+using std::atomic_fetch_max;
+
+
+#else
 
 
 /**
@@ -69,6 +76,9 @@ T atomic_fetch_min (std::atomic<T>* a, T v,
   }
   return orig;
 }
+
+
+#endif
 
 
 } // namespace CxxUtils

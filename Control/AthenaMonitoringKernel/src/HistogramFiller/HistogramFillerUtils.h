@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef AthenaMonitoringKernel_HistogramFillerUtils_h
@@ -11,7 +11,6 @@
 #include "AthenaMonitoringKernel/IMonitoredVariable.h"
 #include "AthenaMonitoringKernel/OHLockedHist.h"
 #include "HistogramFactory.h"
-#include "CxxUtils/AthUnlikelyMacros.h"
 
 #include "TH1.h"
 #include "TProfile.h"
@@ -173,8 +172,8 @@ namespace Monitored {
           doFill(hist, weight, i, m..., m1.getString(j).c_str());
       } else {
         // In case re-binning occurs need to take the OH lock for online (no-op offline)
-        if ( ATH_UNLIKELY(fillWillRebinHistogram(hist, std::index_sequence_for<M, Ms...>{},
-                                                 m1, m...)) ){
+        if (fillWillRebinHistogram(hist, std::index_sequence_for<M, Ms...>{},
+                                                 m1, m...)) [[unlikely]] {
           oh_scoped_lock_histogram lock;
           // Rebinning requires a lock on the global ROOT directory state
           std::scoped_lock<std::mutex> dirLock(HistogramFactory::globalROOTMutex());

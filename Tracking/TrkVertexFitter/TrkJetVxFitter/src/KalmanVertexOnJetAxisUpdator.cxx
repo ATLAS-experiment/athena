@@ -262,7 +262,7 @@ namespace Trk{
     if (S.determinant() == 0.0) {
       ATH_MSG_WARNING ("The S matrix is not invertible");
       ATH_MSG_WARNING ("A copy of initial vertex returned");
-      return Trk::RecVertexPositions(myPosition);
+      return Trk::RecVertexPositions(std::move(myPosition));
     }
     S = S.inverse().eval();
 

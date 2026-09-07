@@ -35,6 +35,7 @@ def RDOtoTracccCellConverterAlgCfg(flags,
     kwargs.setdefault("StripRDO",    "ITkStripRDOs")
     kwargs.setdefault("TracccCells", "TracccCells")
     kwargs.setdefault("HostConditionsObjectName", "TracccHostCondConfig")
+    kwargs.setdefault("GeoIdMappingObjectName",     "TracccGeometryIdMapping")
     kwargs.setdefault("CPUCellSorting", not flags.Acts.Device.doCellSorting)
     kwargs.setdefault("UsePixelToTForCellActivation", not flags.Tracking.doPixelDigitalClustering)
     acc.addEventAlgo(
@@ -62,6 +63,7 @@ def PhaseIIRDOtoTracccCellConverterAlgCfg(flags,
     kwargs.setdefault("StripRDO", "ITkStripRDOs")
     kwargs.setdefault("TracccCells", "TracccCellsFromPh2RDO")
     kwargs.setdefault("HostConditionsObjectName", "TracccHostCondConfig")
+    kwargs.setdefault("GeoIdMappingObjectName",     "TracccGeometryIdMapping")
     kwargs.setdefault("CPUCellSorting", not flags.Acts.Device.doCellSorting)
     kwargs.setdefault("UsePixelToTForCellActivation", not flags.Tracking.doPixelDigitalClustering)
     acc.addEventAlgo(
@@ -95,3 +97,16 @@ def TracccMeasurementConverterAlgCfg(flags,
     acc.addEventAlgo(
         CompFactory.ActsTrk.TracccMeasurementConverterAlg(name, **kwargs))
     return acc
+
+def TracccSeedConverterAlgCfg(flags,
+                                     name="TracccSeedConverterAlg",
+                                     **kwargs) -> ComponentAccumulator:
+    acc = ComponentAccumulator()
+    kwargs.setdefault("HostMR", acc.popToolsAndMerge(HostMemoryResourceToolCfg(flags)))
+    kwargs.setdefault("CopyProviderTool", acc.popToolsAndMerge(CopyToolCfg(flags)))
+    kwargs.setdefault("InputSpacepoints", "TracccMeasurements")
+    kwargs.setdefault("InputSeeds", "TracccClusterCollection")
+    kwargs.setdefault("OutputSeeds", "ITkTracccSeeds")
+    acc.addEventAlgo(
+        CompFactory.ActsTrk.TracccSeedConverterAlg(name, **kwargs))
+    return acc    

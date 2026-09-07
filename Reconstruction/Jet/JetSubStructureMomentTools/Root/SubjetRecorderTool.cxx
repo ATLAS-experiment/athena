@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "JetSubStructureMomentTools/SubjetRecorderTool.h"
@@ -73,7 +73,8 @@ std::vector<xAOD::Jet *> SubjetRecorderTool::recordSubjets(const std::vector<fas
     // Set association to parent
     const xAOD::JetContainer *parent_container = dynamic_cast<const xAOD::JetContainer*>(jet.container());
     ElementLink<xAOD::JetContainer> el_parent(*parent_container, jet.index());
-    subj->setAttribute("Parent", el_parent);
+    static const std::string parentStr{"Parent"};
+    subj->setAttribute(parentStr, el_parent);
   }
   
   // Set association to subjets

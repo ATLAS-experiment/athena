@@ -31,7 +31,8 @@ T_AthenaPoolViewVectorCnv<DV>::initGuids (const std::type_info& ti) const
   
   // Make a list of all the guids that this converter can read.
   // First, add the entry for pers_t.
-  pool::TypeH typ = pool::DbReflex::forTypeInfo (ti);
+  RootType temp = RootType(ti);
+  RootType typ = (temp) ? temp : RootType(pool::DbTypeInfo::typeName(ti));
   if (!typ)
     AthenaPoolCnvSvc::throwExcNoDictForClass (ti);
   guids.push_back (pool::DbReflex::guid (typ));
@@ -55,7 +56,7 @@ T_AthenaPoolViewVectorCnv<DV>::initGuids (const std::type_info& ti) const
         int vers = atoi (name.substr (vpos, vpos2-vpos).c_str());
         while (--vers > 0) {
           std::string name2 = name.substr(0,vpos) + CxxUtils::strformat("%d", vers) + name.substr(vpos2,std::string::npos);
-          pool::TypeH typ2 = pool::DbReflex::forTypeName (name2);
+          RootType typ2 = RootType(name2);
           if (typ2)
             guids.push_back (pool::DbReflex::guid (typ2));
         }

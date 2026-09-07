@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonGeoModel/StandardComponent.h"
@@ -28,16 +28,16 @@ namespace MuonGM {
         const Technology *tec = mysql.GetTechnology(name);
 
         if (name.compare(0, 3,"CHV") == 0) {
-            const CHV *chv = dynamic_cast<const CHV*>(tec);
+            const CHV *chv = static_cast<const CHV*>(tec);
             return chv->height;
         } else if (name.compare(0, 3,"CRO") == 0) {
-            const CRO *chv = dynamic_cast<const CRO*>(tec);
+            const CRO *chv = static_cast<const CRO*>(tec);
             return chv->height;
         } else if (name.compare(0, 3,"CMI") == 0) {
-            const CMI *chv = dynamic_cast<const CMI*>(tec);
+            const CMI *chv = static_cast<const CMI*>(tec);
             return chv->height;
         } else if (name.compare(0, 3,"LBI") == 0 || name.compare(0, 2,"LB") == 0) {
-            const LBI *chv = dynamic_cast<const LBI*>(tec);
+            const LBI *chv = static_cast<const LBI*>(tec);
             return chv->height;
         }
         return mysql.GetTechnology(name)->thickness;

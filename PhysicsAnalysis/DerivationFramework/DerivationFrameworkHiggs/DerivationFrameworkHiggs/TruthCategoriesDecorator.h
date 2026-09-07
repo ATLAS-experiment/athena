@@ -41,6 +41,8 @@ namespace DerivationFramework {
         struct HTXSSample {
             /// Higgs production modes, corresponding to input sample
             HTXS::HiggsProdMode prod{HTXS::HiggsProdMode::UNKNOWN};
+            /// Higgs decay modes, corresponding to input sample
+            HTXS::HiggsDecayMode decay{HTXS::HiggsDecayMode::UNKNOWNDecay};
             /// Additional identifier flag for TH production modes
             HTXS::tH_type th_type{HTXS::tH_type::noTH};
             // DSIDs satisfying this production mode
@@ -67,6 +69,8 @@ namespace DerivationFramework {
           { this, "ErrorCodeDecorKey", m_evtInfoKey, "HTXS_errorCore", "" };
         EvtInfoDecorKey m_dec_stage0CatKey
           { this, "Stage0CatDecorKey", m_evtInfoKey, "HTXS_Stage0_Category", "" };
+        EvtInfoDecorKey m_dec_stage0DecayCatKey
+          { this, "Stage0DecayCatDecorKey", m_evtInfoKey, "HTXS_Stage0_DecayCategory", "" };
         // Stage 1 binning
         EvtInfoDecorKey m_dec_stage1CatPt25Key
           { this, "Stage1CatPt25Key", m_evtInfoKey, "HTXS_Stage1_Category_pTjet25", "" };
@@ -123,6 +127,32 @@ namespace DerivationFramework {
           { this, "NJets30Key", m_evtInfoKey, "HTXS_Njets_pTjet30", "" };
         EvtInfoDecorKey m_dec_isZnunuKey
           { this, "IsZnunuKey", m_evtInfoKey, "HTXS_isZ2vvDecay", "" };
+
+        // Decay side observables
+        EvtInfoDecorKey m_dec_4ldecay_m12
+          { this, "DecayZ1mKey", m_evtInfoKey, "HTXS_Decay_m12", "" };
+        EvtInfoDecorKey m_dec_4ldecay_m34
+          { this, "DecayZ2mKey", m_evtInfoKey, "HTXS_Decay_m34", "" };
+        EvtInfoDecorKey m_dec_4ldecay_phi
+          { this, "DecayPhiKey", m_evtInfoKey, "HTXS_Decay_phi", "" };
+        EvtInfoDecorKey m_dec_4ldecay_phi1
+          { this, "DecayPhi1Key", m_evtInfoKey, "HTXS_Decay_phi1", "" };
+        EvtInfoDecorKey m_dec_4ldecay_costhstr
+          { this, "DecayCosthstrKey", m_evtInfoKey, "HTXS_Decay_costhstr", "" };
+        EvtInfoDecorKey m_dec_4ldecay_costh1
+          { this, "DecayCosth1Key", m_evtInfoKey, "HTXS_Decay_costh1", "" };
+        EvtInfoDecorKey m_dec_4ldecay_costh2
+          { this, "DecayCosth2Key", m_evtInfoKey, "HTXS_Decay_costh2", "" };
+        EvtInfoDecorKey m_dec_4ldecay_m14
+          { this, "DecayCrossMass14Key", m_evtInfoKey, "HTXS_Decay_m14", "" };
+        EvtInfoDecorKey m_dec_4ldecay_m23
+          { this, "DecayCrossMass23Key", m_evtInfoKey, "HTXS_Decay_m23", "" };
+        EvtInfoDecorKey m_dec_4ldecay_m13
+          { this, "DecayCrossMass13Key", m_evtInfoKey, "HTXS_Decay_m13", "" };
+        EvtInfoDecorKey m_dec_4ldecay_m24
+          { this, "DecayCrossMass24Key", m_evtInfoKey, "HTXS_Decay_m24", "" };
+        EvtInfoDecorKey m_dec_4ldecay_cutflow_passed
+          { this, "DecayCutflowKey", m_evtInfoKey, "HTXS_Decay_HZZ4l_cutflow_passed", "" };
 
         /// Set of DecorHandleKeys to write the four momenta needed for the HTXS categorization.
         struct FourMomDecorationKeys {

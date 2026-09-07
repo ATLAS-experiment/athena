@@ -8,7 +8,6 @@
 // includes
 //
 
-//protect
 #include <SampleHandler/TagList.h>
 
 #include <format>
@@ -25,13 +24,12 @@ namespace SH
   {
     std::string result;
 
-    for (TagList::iterator tag = obj.begin(), end = obj.end();
-	 tag != end; ++ tag)
+    for (const auto& tag : obj)
     {
       if (!result.empty())
 	result += ",";
-      result += *tag;
-    };
+      result += tag;
+    }
     return "(" + result + ")";
   }
 
@@ -40,12 +38,11 @@ namespace SH
   void TagList ::
   testInvariant () const
   {
-    for (TagsIter tag = m_tags.begin(),
-	   end = m_tags.end(); tag != end; ++ tag)
+    for (const auto& tag : m_tags)
     {
-      RCU_INVARIANT (!tag->empty());
+      RCU_INVARIANT (!tag.empty());
       //RCU_INVARIANT (tag->find (':') == std::string::npos);
-    };
+    }
   }
 
 
@@ -65,13 +62,13 @@ namespace SH
 
     while (pos2 != end)
     {
-      for (pos1 = pos2; pos2 != end && *pos2 != separator; ++ pos2) {};
+      for (pos1 = pos2; pos2 != end && *pos2 != separator; ++ pos2) {}
 
       if (pos2 != pos1)
 	m_tags.insert (std::string (pos1, pos2));
       if (pos2 != end)
 	++ pos2;
-    };
+    }
 
     RCU_NEW_INVARIANT (this);
   }
@@ -112,15 +109,14 @@ namespace SH
     RCU_READ_INVARIANT (this);
 
     std::string result;
-    for (TagsIter tag = m_tags.begin(), end = m_tags.end();
-	 tag != end; ++ tag)
+    for (const auto& tag : m_tags)
     {
-      if (tag->find (separator) != std::string::npos)
-        throw std::runtime_error (std::format ("can't use separator {} it is part of tag {}", separator, *tag));
+      if (tag.find (separator) != std::string::npos)
+        throw std::runtime_error (std::format ("can't use separator {} it is part of tag {}", separator, tag));
       if (!result.empty())
 	result += separator;
-      result += *tag;
-    };
+      result += tag;
+    }
     return result;
   }
 

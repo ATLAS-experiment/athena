@@ -2,8 +2,8 @@
  *   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
  */
 
-#ifndef TRIGL0GEPPERF_GEPMETPUFITALG_H
-#define TRIGL0GEPPERF_GEPMETPUFITALG_H
+#ifndef TRIGGEPPERF_GEPMETPUFITALG_H
+#define TRIGGEPPERF_GEPMETPUFITALG_H
 
 /* construct MET objects from CalClusters. The origin of these may be
    standard ATLAS reconstruction, or by Gep Algorithms */
@@ -37,4 +37,4 @@ class GepMETPufitAlg: public ::AthReentrantAlgorithm {
 
 }; 
 
-#endif //> !TRIGL0GEPPERF_MISSINGETGEPPUFIT_H
+#endif //> !TRIGGEPPERF_MISSINGETGEPPUFIT_H

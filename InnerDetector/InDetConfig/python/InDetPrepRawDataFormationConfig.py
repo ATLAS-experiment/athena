@@ -25,10 +25,9 @@ def HGTDInDetToXAODClusterConversionCfg(flags, name="HGTDInDetToXAODClusterConve
     acc.addEventAlgo(CompFactory.InDet.InDetToXAODClusterConversion(name, **kwargs))
 
     # persistification
-    if flags.Acts.EDM.PersistifyClusters:
-        from ActsConfig.ActsPersistificationConfig import PersistifyClusters
-        acc.merge(PersistifyClusters(flags,
-                                     hgtdClusterCollections=['HGTD_Clusters']))
+    from ActsConfig.ActsPersistificationConfig import PersistifyClusters
+    acc.merge(PersistifyClusters(flags,
+                                 hgtdClusterCollections=['HGTD_Clusters']))
     return acc
 
 def HGTDXAODToInDetClusterConversionCfg(flags, name="HGTDXAODToInDetClusterConversion", **kwargs):
@@ -45,13 +44,12 @@ def ITkInDetToXAODClusterConversionCfg(flags, name="ITkInDetToXAODClusterConvers
     acc.addEventAlgo(CompFactory.InDet.InDetToXAODClusterConversion(name, **kwargs))
 
     # persistification
-    if flags.Acts.EDM.PersistifyClusters:
-        pixelClusterCollections = None if not kwargs['ProcessPixel'] else ['ITkPixelClusters']
-        stripClusterCollections = None if not kwargs['ProcessStrip'] else ['ITkStripClusters']
-        from ActsConfig.ActsPersistificationConfig import PersistifyClusters
-        acc.merge(PersistifyClusters(flags,
-                                     pixelClusterCollections=pixelClusterCollections,
-                                     stripClusterCollections=stripClusterCollections))
+    pixelClusterCollections = None if not kwargs['ProcessPixel'] else ['ITkPixelClusters']
+    stripClusterCollections = None if not kwargs['ProcessStrip'] else ['ITkStripClusters']
+    from ActsConfig.ActsPersistificationConfig import PersistifyClusters
+    acc.merge(PersistifyClusters(flags,
+                                 pixelClusterCollections=pixelClusterCollections,
+                                 stripClusterCollections=stripClusterCollections))
     return acc
 
 
@@ -73,13 +71,12 @@ def IDInDetToXAODClusterConversionCfg(flags, name="IDInDetToXAODClusterConversio
     acc.addEventAlgo(CompFactory.InDet.InDetToXAODClusterConversion(name, **kwargs))
 
     # persistification
-    if flags.Acts.EDM.PersistifyClusters:
-        pixelClusterCollections = None if not kwargs['ProcessPixel'] else ['PixelClusters']
-        stripClusterCollections = None if not kwargs['ProcessStrip'] else ['SCT_Clusters']
-        from ActsConfig.ActsPersistificationConfig import PersistifyClusters
-        acc.merge(PersistifyClusters(flags,
-                                     pixelClusterCollections=pixelClusterCollections,
-                                     stripClusterCollections=stripClusterCollections))
+    pixelClusterCollections = None if not kwargs['ProcessPixel'] else ['PixelClusters']
+    stripClusterCollections = None if not kwargs['ProcessStrip'] else ['SCT_Clusters']
+    from ActsConfig.ActsPersistificationConfig import PersistifyClusters
+    acc.merge(PersistifyClusters(flags,
+                                 pixelClusterCollections=pixelClusterCollections,
+                                 stripClusterCollections=stripClusterCollections))
     return acc
 
 

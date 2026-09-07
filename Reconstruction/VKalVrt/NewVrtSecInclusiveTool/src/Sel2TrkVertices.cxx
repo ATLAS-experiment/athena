@@ -140,7 +140,8 @@ namespace Rec{
              double vrtR=tmpVrt.fitVertex.perp();
              double dstMatSignif=1.e4;
              if(m_removeTrkMatSignif>0. && vrtR>20.){
-                double vrtRErr=vrtRadiusError(tmpVrt.fitVertex,tmpVrt.errorMatrix );               
+                double vrtRErr=vrtRadiusError(tmpVrt.fitVertex,tmpVrt.errorMatrix );
+                if (vrtRErr == 0.)[[unlikely]] throw std::runtime_error("NewVrtSecInclusiveTool::select2TrVrt: Division by zero.");           
                 if(vrtR<30.){ dstMatSignif=std::abs(vrtR-m_beampipeR)/vrtRErr;}
                 else        { dstMatSignif=distToMatLayerSignificance(tmpVrt);}     //Material in Pixel volume
                 if(dstMatSignif<m_removeTrkMatSignif)continue;

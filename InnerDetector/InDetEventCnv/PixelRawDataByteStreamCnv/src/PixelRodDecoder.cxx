@@ -3,7 +3,6 @@
 */
 
 #include "PixelRodDecoder.h"
-#include "CxxUtils/AthUnlikelyMacros.h"
 #include "InDetIdentifier/PixelID.h"
 #include "PixelReadoutGeometry/PixelDetectorManager.h"
 #include "ExtractCondensedIBLhits.h"
@@ -163,7 +162,7 @@ StatusCode PixelRodDecoder::fillCollection( const ROBFragment *robFrag, IPixelRD
     const uint32_t* rob_status;
     robFrag->status(rob_status);
     // check the ROD status for truncation
-    if (ATH_UNLIKELY((*rob_status)!=0)) {
+    if (*rob_status != 0) [[unlikely]] {
       ATH_MSG_DEBUG( "ROB status word for robid 0x"<< std::hex << robId << " is non-zero 0x" << (*rob_status) << std::dec);
       /*
         Definition of the status words in a ROB fragment header is found in
@@ -1268,15 +1267,15 @@ uint32_t PixelRodDecoder::getDataType(unsigned int rawDataWord, bool link_start)
 
 
 bool PixelRodDecoder::checkDataWordsCorruption( uint32_t rawDataWord) const {
-    if ( ATH_UNLIKELY( rawDataWord==0xaa1234aa )) {
+    if ( rawDataWord==0xaa1234aa ) [[unlikely]] {
       generalwarning("Evt marker encountered during loop on ROD datawords");
       return true;
     } 
-    else if ( ATH_UNLIKELY( rawDataWord==0xdd1234dd ) ){
+    else if ( rawDataWord==0xdd1234dd ) [[unlikely]] {
       generalwarning("ROB marker encountered during loop on ROD datawords");
       return true;
     } 
-    else if ( ATH_UNLIKELY( rawDataWord==0xee1234ee) ){
+    else if ( rawDataWord==0xee1234ee) [[unlikely]] {
       generalwarning("ROD marker encountered during loop on ROD datawords");
       return true;
     }

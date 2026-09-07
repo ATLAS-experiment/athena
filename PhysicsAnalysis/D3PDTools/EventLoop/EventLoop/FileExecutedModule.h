@@ -12,11 +12,9 @@
 #include <EventLoop/Global.h>
 
 #include <EventLoop/Module.h>
+#include <TString.h>
 #include <TTree.h>
 #include <memory>
-
-class TString;
-class TTree;
 
 namespace EL
 {
@@ -33,8 +31,6 @@ namespace EL
     public:
 
       using Module::Module;
-
-      virtual ~FileExecutedModule () noexcept;
 
       virtual StatusCode onInitialize (ModuleData& data) override;
       virtual StatusCode onFileExecute (ModuleData& data) override;
@@ -54,7 +50,15 @@ namespace EL
       /// \brief the name of the file being executed, to be stored
       /// inside \ref m_fileExecutedTree
     private:
-      TString *m_fileExecutedName {nullptr}; //!
+      TString m_fileExecutedName; //!
+
+      /// \brief pointer to \ref m_fileExecutedName used as the branch
+      /// address
+      ///
+      /// This is a member (rather than a local) so that the address handed
+      /// to the branch stays valid for as long as the tree lives.
+    private:
+      TString *m_fileExecutedNamePtr {&m_fileExecutedName}; //!
     };
   }
 }

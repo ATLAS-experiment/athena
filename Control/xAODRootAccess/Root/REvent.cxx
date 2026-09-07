@@ -1861,19 +1861,12 @@ StatusCode REvent::setUpDynamicStore(RObjectManager& mgr,
     return StatusCode::FAILURE;
   }
 
-  // If we read an auxiliary store, call toTransient on it.
-  const EventContext& ctx = this->currentContext();
-#ifndef XAOD_STANDALONE
-  if (SG::IAuxStore* istore = dynamic_cast<SG::IAuxStore*> (storeHolder)) {
-    istore->toTransient( ctx );
-  }
-#endif
-
   // Create an RAuxStore instance that will read the dynamic variables
   // of this container. Notice that the RAuxManager doesn't own the
   // RAuxStore object. It will be owned by the SG::IAuxStoreHolder
   // object.
   static constexpr bool TOP_STORE = false;
+  const EventContext& ctx = this->currentContext();
   auto store = std::make_unique<RAuxStore>(
       ctx,
       fieldName, TOP_STORE,

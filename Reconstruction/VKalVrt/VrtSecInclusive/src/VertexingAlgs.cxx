@@ -21,7 +21,6 @@
 #include "TROOT.h"
 #include "TLorentzVector.h"
 
-#include <iostream>
 #include "TrkVKalVrtCore/PGraph.h"
 #include <algorithm>
 #include <array>
@@ -287,8 +286,8 @@ namespace VKalVrtAthena {
         }
 
         if( m_FillHist ) {
-          dynamic_cast<TH2F*>( m_hists["vPosDist"] )->Fill( wrkvrt.vertex.perp(), vPos );
-          dynamic_cast<TH2F*>( m_hists["vPosMomAngTDist"] )->Fill( wrkvrt.vertex.perp(), vPosMomAngT );
+          static_cast<TH2F*>( m_hists["vPosDist"] )->Fill( wrkvrt.vertex.perp(), vPos );
+          static_cast<TH2F*>( m_hists["vPosMomAngTDist"] )->Fill( wrkvrt.vertex.perp(), vPosMomAngT );
           m_hists["vPosMomAngT"] ->Fill( vPosMomAngT );
           m_hists["vPosMomAng3D"] ->Fill(  vPosMomAng3D );
         }
@@ -595,13 +594,13 @@ namespace VKalVrtAthena {
                                       *state);
 
             if( sc.isFailure() ) {
-              tmp = backup;
+              tmp = std::move(backup);
               continue;
             }
 
           }
 
-          wrkvrt = tmp;
+          wrkvrt = std::move(tmp);
           ATH_MSG_DEBUG(" > " << __FUNCTION__ << ": VKalVrtFit succeeded; register the vertex to the list.");
           wrkvrt.isGood                = true;
           wrkvrt.closestWrkVrtIndex    = AlgConsts::invalidUnsigned;
@@ -874,8 +873,8 @@ namespace VKalVrtAthena {
 
             if( sc.isFailure() ) {
               // revert to the original
-              workVerticesContainer->at( indexPair.first  ) = vertex_backup1;
-              workVerticesContainer->at( indexPair.second ) = vertex_backup2;
+              workVerticesContainer->at( indexPair.first  ) = std::move(vertex_backup1);
+              workVerticesContainer->at( indexPair.second ) = std::move(vertex_backup2);
               badPairs.emplace_back( indexPair );
             }
 
@@ -937,7 +936,7 @@ namespace VKalVrtAthena {
           StatusCode sc = refitVertex( ctx, wrkvrt );
           if( sc.isFailure() ) {
             ATH_MSG_WARNING(" > " << __FUNCTION__ << ": detected vertex fitting failure!" );
-            wrkvrt = wrkvrt_backup;
+            wrkvrt = std::move(wrkvrt_backup);
           }
 
         } else {
@@ -962,7 +961,7 @@ namespace VKalVrtAthena {
 
       WrkVrt backup = wrkvrt;
       improveVertexChi2( ctx, wrkvrt );
-      if( wrkvrt.fitQuality() > backup.fitQuality() ) wrkvrt = backup;
+      if( wrkvrt.fitQuality() > backup.fitQuality() ) wrkvrt = std::move(backup);
 
       if( wrkvrt.nTracksTotal() < 2 ) wrkvrt.isGood = false;
 
@@ -1279,7 +1278,7 @@ namespace VKalVrtAthena {
 
         if( sc.isFailure() ) {
           ATH_MSG_DEBUG(" > " << __FUNCTION__ << ": VKalVrtFit failure. Revert to backup");
-          wrkvrt = wrkvrt_backup;
+          wrkvrt = std::move(wrkvrt_backup);
 
           if( m_FillHist ) m_hists["associateMonitor"]->Fill( 1 );
 
@@ -1441,8 +1440,8 @@ namespace VKalVrtAthena {
 
           StatusCode sc = mergeVertices( ctx, vertexToMerge, wrkvrt );
           if( sc.isFailure() ) {
-            vertexToMerge = vertexToMerge_backup;
-            wrkvrt        = wrkvrt_backup;
+            vertexToMerge = std::move(vertexToMerge_backup);
+            wrkvrt        = std::move(wrkvrt_backup);
             continue;
           }
 
@@ -1616,7 +1615,7 @@ namespace VKalVrtAthena {
 
           improveVertexChi2( ctx, wrkvrt );
 
-          if( wrkvrt.fitQuality() > backup.fitQuality() ) wrkvrt = backup;
+          if( wrkvrt.fitQuality() > backup.fitQuality() ) wrkvrt = std::move(backup);
 
         }
 
@@ -2298,8 +2297,8 @@ namespace VKalVrtAthena {
     for( auto& vertex : *workVerticesContainer ) {
       auto ntrk = vertex.selectedTrackIndices.size() + vertex.associatedTrackIndices.size();
       if( vertex.isGood && ntrk >= 2 ) {
-        dynamic_cast<TH2F*>( m_hists["vertexYieldNtrk"] )->Fill( ntrk, m_vertexingAlgorithmStep );
-        dynamic_cast<TH2F*>( m_hists["vertexYieldChi2"] )->Fill( vertex.Chi2/(vertex.ndof() + AlgConsts::infinitesimal), m_vertexingAlgorithmStep );
+        static_cast<TH2F*>( m_hists["vertexYieldNtrk"] )->Fill( ntrk, m_vertexingAlgorithmStep );
+        static_cast<TH2F*>( m_hists["vertexYieldChi2"] )->Fill( vertex.Chi2/(vertex.ndof() + AlgConsts::infinitesimal), m_vertexingAlgorithmStep );
       }
     }
     m_hists["vertexYieldNtrk"]->GetYaxis()->SetBinLabel( m_vertexingAlgorithmStep+1, name.c_str() );
@@ -2313,7 +2312,7 @@ namespace VKalVrtAthena {
       if( vertex.isGood && ntrk >= 2 ) {
         m_hists["finalVtxNtrk"] ->Fill( ntrk );
         m_hists["finalVtxR"]    ->Fill( vertex.vertex.perp() );
-        dynamic_cast<TH2F*>( m_hists["finalVtxNtrkR"] )->Fill( ntrk, vertex.vertex.perp() );
+        static_cast<TH2F*>( m_hists["finalVtxNtrkR"] )->Fill( ntrk, vertex.vertex.perp() );
       }
     }
 

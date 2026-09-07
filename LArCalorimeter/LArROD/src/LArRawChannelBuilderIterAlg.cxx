@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArRawChannelBuilderIterAlg.h" 
@@ -88,7 +88,7 @@ StatusCode LArRawChannelBuilderIterAlg::execute(const EventContext& ctx) const {
     if (!m_run2DSPThresholdsKey.empty()) {
       SG::ReadCondHandle<AthenaAttributeList> dspThrshAttr (m_run2DSPThresholdsKey, ctx);
       run2DSPThresh = std::make_unique<LArDSPThresholdsFlat>(*dspThrshAttr);
-      if (ATH_UNLIKELY(!run2DSPThresh->good())) {
+      if (!run2DSPThresh->good()) [[unlikely]] {
         ATH_MSG_ERROR( "Failed to initialize LArDSPThresholdFlat from attribute list loaded from " << m_run2DSPThresholdsKey.key()
                        << ". Aborting." ); 
         return StatusCode::FAILURE;
@@ -125,14 +125,14 @@ StatusCode LArRawChannelBuilderIterAlg::execute(const EventContext& ctx) const {
     //The following autos will resolve either into vectors or vector-proxies
     const auto& adc2mev=adc2MeVs->ADC2MEV(id,gain);
     
-    if (ATH_UNLIKELY(p==ILArPedestal::ERRORCODE)) {
+    if (p==ILArPedestal::ERRORCODE) [[unlikely]] {
       if (!connected) continue; //No conditions for disconencted channel, who cares?
       ATH_MSG_ERROR("No valid pedestal for connected channel " << m_onlineId->channel_name(id) 
 		    << " gain " << gain);
       return StatusCode::FAILURE;
     }
 
-    if(ATH_UNLIKELY(adc2mev.size()<2)) {
+    if(adc2mev.size()<2) [[unlikely]] {
       if (!connected) continue; //No conditions for disconencted channel, who cares?
       ATH_MSG_ERROR("No valid ADC2MeV for connected channel " << m_onlineId->channel_name(id) 
 		    << " gain " << gain);

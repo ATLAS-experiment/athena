@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
@@ -127,18 +127,13 @@ if __name__ == "__main__":
         # For Spacepoint formation
         if flags.FPGADataPrep.PassThrough.ClusterOnly:
             flags.Acts.useCache = False
-            flags.Tracking.ITkMainPass.doActsSeed = True
-        
-        flags.Tracking.ITkMainPass.doAthenaToActsCluster = True
-        flags.Tracking.ITkMainPass.doAthenaToActsSpacePoint = True
-        flags.Tracking.ITkMainPass.doAthenaSpacePoint = True
     else:
         flags.Tracking.doTruth=False
         flags.ITk.doTruth=False
         flags.InDet.doTruth=False
 
     flags.lock()
-    flags = flags.cloneAndReplace("Tracking.ActiveConfig", "Tracking.ITkMainPass", keepOriginal=True)
+    flags = flags.cloneAndReplace("Tracking.ActiveConfig", "Tracking.ITkActsPass", keepOriginal=True)
     
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg
     cfg = MainServicesCfg(flags)

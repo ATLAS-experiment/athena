@@ -18,7 +18,7 @@ Reco_tf.py \
     	       flags.DQ.useTrigger=False; \
 	       flags.Output.HISTFileName=\"ActsMonitoringOutput.root\"; \
 	       ${extraArgs}" \
-    --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude,ActsConfig.ActsCIFlags.actsProductionFlags" \
+    --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude" \
     --ignorePatterns "${ignore_pattern}" \
     --conditionsTag ${conditions_tag} \
     --inputRDOFile ${input_rdo} \

@@ -40,7 +40,21 @@ def setupHiggsSlimmingVariables(ConfigFlags, slimmingHelper):
             "HTXS_Stage1_3_Fine_FineIndex_pTjet25",
             "HTXS_Njets_pTjet25",
             "HTXS_Njets_pTjet30",
-            "HTXS_isZ2vvDecay","HTXS_Higgs_pt"]
+            "HTXS_isZ2vvDecay",
+            "HTXS_Higgs_pt",
+            "HTXS_Stage0_DecayCategory",
+            "HTXS_Decay_m12", 
+            "HTXS_Decay_m34", 
+            "HTXS_Decay_phi", 
+            "HTXS_Decay_phi1", 
+            "HTXS_Decay_costhstr", 
+            "HTXS_Decay_costh1", 
+            "HTXS_Decay_costh2", 
+            "HTXS_Decay_HZZ4l_cutflow_passed",
+            "HTXS_Decay_m14", 
+            "HTXS_Decay_m23", 
+            "HTXS_Decay_m13", 
+            "HTXS_Decay_m24"]
         for p4_var in ["HTXS_Higgs", "HTXS_V", "HTXS_V_jets25", "HTXS_V_jets30", "HTXS_Higgs_decay", "HTXS_V_decay" ]:
             htxs_vars += [p4_var+"_eta", p4_var+"_phi", p4_var+"_pt",p4_var+"_m"]
         slimmingHelper.ExtraVariables += ["EventInfo." + ".".join(htxs_vars)] 

@@ -5,9 +5,9 @@
 #include "ImplicitCollection.h"
 #include "ImplicitCollectionIterator.h"
 
-#include "PersistencySvc/ISession.h"
-#include "PersistencySvc/IDatabase.h"
-#include "PersistencySvc/IContainer.h"
+#include "PoolSvc/ISession.h"
+#include "PoolSvc/IContainer.h"
+
 #include "StorageSvc/DbType.h"
 #include "StorageSvc/APRDefaults.h"
 

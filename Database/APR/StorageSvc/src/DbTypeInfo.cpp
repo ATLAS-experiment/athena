@@ -21,6 +21,7 @@
 
 #include "PersistentDataModel/Token.h"
 #include "GaudiKernel/StatusCode.h"
+#include "DataModelRoot/RootType.h"
 
 #include <cstdio>
 
@@ -124,7 +125,7 @@ using namespace pool;
 using namespace std;
 
 /// Standard Constructor
-DbTypeInfo::DbTypeInfo(const Guid& guid, TypeH type, Columns& cols)
+DbTypeInfo::DbTypeInfo(const Guid& guid, RootType type, Columns& cols)
       : Shape(),
         m_refCount( 0 ),
         m_columns(),
@@ -135,7 +136,7 @@ DbTypeInfo::DbTypeInfo(const Guid& guid, TypeH type, Columns& cols)
    }
    setShapeID(guid);
    if( cols.size() == 0 )   {
-      std::string nam = DbReflex::fullTypeName(type);
+      std::string nam = type.Name();
       if (nam.starts_with ("::")) {
         nam.erase (0, 2);
       }
@@ -185,14 +186,14 @@ DbTypeInfo::~DbTypeInfo()    {
 }
 
 /// Access to reflection class (if availible)
-TypeH DbTypeInfo::clazz( bool noIdScan )  const  {
+RootType DbTypeInfo::clazz( bool noIdScan )  const  {
   if ( m_class.isValid() ) {
     return *m_class.ptr();
   }
   if ( noIdScan || m_columns.size() == 0 ) {
-    return TypeH();
+    return RootType();
   }
-  TypeH cls;
+  RootType cls;
   try {
     cls = DbReflex::forGuid (m_id);
     if (cls.Class()) {
@@ -221,11 +222,11 @@ const std::string DbTypeInfo::toString() const   {
   rep = "{ID=";
   rep += shapeID().toString();
   rep += "}";
-  TypeH cls = clazz();
+  RootType cls = clazz();
   if ( !cls )
     rep += "{CL=<no_class>}";
   else
-    rep += "{CL=" + DbReflex::fullTypeName(cls) + "}";
+    rep += "{CL=" + cls.Name() + "}";
   sprintf(txt,"{NCOL=%ld}{CNT=%d}", static_cast<long>(m_columns.size()), m_mult);
   rep += txt;
   for(Columns::const_iterator i=m_columns.begin(); i<m_columns.end();++i) {
@@ -270,7 +271,7 @@ Again:
           // this->clazz();
           break;
         case 1: {
-          TypeH cls = DbReflex::forTypeName(s);
+          RootType cls(s);
           if (cls) {
             m_class.store (cls);
           }
@@ -328,7 +329,7 @@ const DbTypeInfo* DbTypeInfo::fromString(const std::string& string_rep)
       // find existing typeinfo or create a fresh one based on transient dictionary
       // do this first to ensure current type is first in the DbTransform list
       //cout << " -- fromDbString DbTypeInfo: " << string_rep << "  GUID=" << new_type_info->shapeID() <<  endl;
-      TypeH cls;
+      RootType cls;
       if (new_type_info->m_class.isValid()) {
         cls = *new_type_info->m_class.ptr();
       }
@@ -396,7 +397,7 @@ const DbTypeInfo* DbTypeInfo::createEx(const Guid& guid)  {
 
 
 // small helper method to add a new shape
-DbTypeInfo* DbTypeInfo::regShape(const Guid& guid, const TypeH& type, Columns& cols)
+DbTypeInfo* DbTypeInfo::regShape(const Guid& guid, const RootType& type, Columns& cols)
 {
    DbTypeInfo* typ_info = new DbTypeInfo(guid, type, cols); 
    DbTransform::regShape(typ_info).ignore();
@@ -406,7 +407,7 @@ DbTypeInfo* DbTypeInfo::regShape(const Guid& guid, const TypeH& type, Columns& c
 
 /// Create type information using name
 const DbTypeInfo* DbTypeInfo::create(const std::string& cl_name, Columns& cols)   {
-  TypeH type = DbReflex::forTypeName(cl_name);
+  RootType type(cl_name);
   if ( type )    {
     Guid guid(DbReflex::guid(type));
     const DbTypeInfo* typ_info = 0;
@@ -429,7 +430,7 @@ const DbTypeInfo* DbTypeInfo::create(const Guid& guid, Columns& cols)   {
     clearColumns(cols);
     return typ_info;
   }
-  TypeH type = DbReflex::forGuid(guid);
+  RootType type = DbReflex::forGuid(guid);
   if( type )    {
      return regShape(guid, type, cols); 
   }
@@ -444,7 +445,7 @@ const DbTypeInfo* DbTypeInfo::createEx(const Guid& guid, Columns& cols)   {
     clearColumns(cols);
     return typ_info;
   }
-  TypeH type = DbReflex::forGuid(guid);
+  RootType type = DbReflex::forGuid(guid);
   if( !(cols.size() == 0 && !type) ) {
      return regShape(guid, type, cols); 
   }

@@ -68,8 +68,7 @@ namespace SH
 	       ) const
   {
     RCU_READ_INVARIANT (this);
-
-    RCU_INVARIANT (index == static_cast<std::size_t>(0));
+    RCU_REQUIRE (index == static_cast<std::size_t>(0));
     return m_file;
   }
 
@@ -99,9 +98,18 @@ namespace SH
   void SampleHist ::
   doUpdateLocation (const std::string& from, const std::string& to)
   {
-    RCU_READ_INVARIANT (this);
-    if (strncmp (m_file.c_str(), from.c_str(), from.size()) == 0)
-      m_file = to + "/" + m_file.substr (from.size());
+    RCU_CHANGE_INVARIANT (this);
+    // rationale: only replace the prefix on a path boundary (so that
+    //   "/a/b" does not also match "/a/bc") and join without inserting
+    //   a duplicate '/'.
+    if (m_file.starts_with (from) &&
+	(m_file.size() == from.size() || m_file[from.size()] == '/'))
+    {
+      std::string rest = m_file.substr (from.size());
+      if (!rest.empty() && rest.front() == '/')
+	rest.erase (0, 1);
+      m_file = rest.empty() ? to : to + "/" + rest;
+    }
   }
 
 
@@ -112,11 +120,11 @@ namespace SH
     RCU_READ_INVARIANT (this);
 
     std::unique_ptr<TFile> file (TFile::Open (m_file.c_str(), "READ"));
-    if (file.get() == 0)
+    if (file.get() == nullptr)
       throw std::runtime_error ("could not open file " + m_file);
     TObject *object = file->Get (name.c_str());
-    if (object != 0)
-      RCU::SetDirectory (object, 0);
+    if (object != nullptr)
+      RCU::SetDirectory (object, nullptr);
     return object;
   }
 }

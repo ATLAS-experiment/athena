@@ -55,6 +55,8 @@ if [ ! -f $inputRDO ]; then
     exit 1
 fi
 
+# Use G-200/ART repo to run G230 pipeline.
+# THIS METHOD IS NOW DEPRECIATED AND WILL BE SOON BE REPLACED.
 source "$(dirname "$0")/setup_G200_ART.sh"
 
 ## running reconstruction
@@ -68,7 +70,7 @@ run Reco_tf.py --CA \
                flags.Trigger.EFTracking.GPU.pipeline="g230"; \
                flags.Trigger.EFTracking.GPU.checkSeeds=True; \
                from ActsConfig.ActsConfigFlags import SeedingStrategy; \
-               flags.Acts.SeedingStrategy=SeedingStrategy.GbtsFtf;' \
+               flags.Tracking.ITkActsPass.SeedingStrategy=SeedingStrategy.GbtsFtf;' \
     --steering 'doRAWtoALL' \
     --inputRDOFile ${inputRDO} \
     --outputAODFile ${outputAOD} \

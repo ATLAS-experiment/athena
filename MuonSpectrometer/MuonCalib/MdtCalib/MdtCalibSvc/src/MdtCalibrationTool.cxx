@@ -104,7 +104,7 @@ MdtCalibOutput MdtCalibrationTool::calibrate(const EventContext& ctx,
   const Identifier& id{calibIn.identify()};
   
   const MuonCalib::MdtCalibDataContainer* calibData{nullptr};
-  if (ATH_UNLIKELY(!SG::get(calibData, m_calibDbKey, ctx).isSuccess())) {
+  if (!SG::get(calibData, m_calibDbKey, ctx).isSuccess()) [[unlikely]] {
       THROW_EXCEPTION("Failed to retrieve the Mdt calibration constants "<<m_calibDbKey.fullKey());
   }
 
@@ -175,7 +175,7 @@ MdtCalibOutput MdtCalibrationTool::calibrate(const EventContext& ctx,
       if (m_doField && corrections->bField()) {
         MagField::AtlasFieldCache fieldCache{};
         const AtlasFieldCacheCondObj* bFieldCondCache{nullptr};
-        if (ATH_UNLIKELY(!SG::get(bFieldCondCache, m_fieldCacheCondObjInputKey, ctx).isSuccess())) {
+        if (!SG::get(bFieldCondCache, m_fieldCacheCondObjInputKey, ctx).isSuccess()) [[unlikely]] {
           THROW_EXCEPTION("calibrate: Failed to retrieve AtlasFieldCacheCondObj with key " << m_fieldCacheCondObjInputKey.key());
         }
         bFieldCondCache->getInitializedCache(fieldCache);
@@ -319,7 +319,7 @@ MdtCalibTwinOutput MdtCalibrationTool::calibrateTwinTubes(const EventContext& ct
 
   // get calibration constants from DbTool
   const MuonCalib::MdtCalibDataContainer* constantHandle{nullptr};
-  if (ATH_UNLIKELY(!SG::get(constantHandle, m_calibDbKey, ctx).isSuccess())) {
+  if (!SG::get(constantHandle, m_calibDbKey, ctx).isSuccess()) [[unlikely]] {
     THROW_EXCEPTION("Failed to retrieve the Mdt calibration constants "<<m_calibDbKey.fullKey());
   }
 

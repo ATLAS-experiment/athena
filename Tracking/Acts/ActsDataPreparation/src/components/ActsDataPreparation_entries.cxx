@@ -13,7 +13,9 @@
 #include "src/PixelClusteringTool.h"
 #include "src/StripClusteringTool.h"
 #include "src/PixelSpacePointFormationTool.h"
+#include "src/CorePixelSpacePointFormationTool.h"
 #include "src/StripSpacePointFormationTool.h"
+#include "src/CoreStripSpacePointFormationTool.h"
 
 #include "src/CacheCreator.h"
 #include "src/CollectionDataPreparationAlg.h"
@@ -41,7 +43,9 @@ DECLARE_COMPONENT(ActsTrk::PixelClusteringTool)
 DECLARE_COMPONENT(ActsTrk::PhaseIIPixelClusteringTool)
 DECLARE_COMPONENT(ActsTrk::StripClusteringTool)
 DECLARE_COMPONENT(ActsTrk::PixelSpacePointFormationTool)
+DECLARE_COMPONENT(ActsTrk::CorePixelSpacePointFormationTool)
 DECLARE_COMPONENT(ActsTrk::StripSpacePointFormationTool)
+DECLARE_COMPONENT(ActsTrk::CoreStripSpacePointFormationTool)
 
 //Cache related algs
 DECLARE_COMPONENT(ActsTrk::Cache::CreatorAlg)

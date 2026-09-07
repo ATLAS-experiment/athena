@@ -16,8 +16,6 @@
 #include "ActsGPUEvent/TracccSpacepointCollection.h"
 #include "ActsGPUEvent/TracccSeedCollection.h"
 
-#include "vecmem/utils/cuda/copy.hpp"
-
 template <typename scalar_t>
 using unit = detray::unit<scalar_t>;
 
@@ -55,10 +53,6 @@ private:
     ToolHandle<IDeviceSeedingAlgProviderTool> m_seedingAlgProviderTool{
         this, "SeedingAlgProviderTool", "",
         "Tool providing the appropriate backend device seeding algorithm"};
-    /// @name The device memory resource tool to use for memory allocations
-    ToolHandle<AthDevice::IMemoryResourceTool> m_deviceMR{
-        this, "DeviceMR", "",
-        "Device memory resource tool"};
 
     /// @name The name of device resident input traccc spacepoint collection
     SG::ReadHandleKey<traccc::edm::spacepoint_collection::const_view> m_inputPixelSPKey{
@@ -71,7 +65,7 @@ private:
         this, "OutputTracccPixelSeeds", "",
         "Output traccc pixel seed collection buffer"};
     /// @}
-    
+
     traccc::seedfinder_config m_seedfinder;
     traccc::seedfilter_config m_seedfilter;
 

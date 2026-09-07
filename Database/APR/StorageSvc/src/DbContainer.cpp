@@ -16,7 +16,6 @@
 // Framework include files
 #include "StorageSvc/DbTypeInfo.h"
 #include "StorageSvc/DbContainer.h"
-#include "StorageSvc/DbReflex.h"
 #include "DbContainerObj.h"
 
 #include "CxxUtils/checker_macros.h"

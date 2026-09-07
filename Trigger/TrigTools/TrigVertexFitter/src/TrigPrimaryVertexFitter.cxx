@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -65,7 +65,6 @@ TrigPrimaryVertexFitter::~TrigPrimaryVertexFitter()
 
 }
 
-//TrigVertex has associated TrigInDetTracks, but we want Trk::Tracks
 TrigVertex* TrigPrimaryVertexFitter::fit(const TrackCollection* tc, TrackCollection& output_tc, double z0) const
 {
 

@@ -1,11 +1,10 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "EventContainers/InternalOfflineMap.h"
 #include <algorithm>
 #include "EventContainers/IDC_WriteHandleBase.h"
-#include "CxxUtils/AthUnlikelyMacros.h"
 
 using namespace EventContainers;
 typedef I_InternalIDC::InternalConstItr InternalConstItr;
@@ -100,7 +99,7 @@ const void* InternalOfflineMap::findIndexPtr(IdentifierHash hashId) const noexce
 
 StatusCode InternalOfflineMap::addLock(IdentifierHash hashId, const void* ptr) {
     bool added = insert(hashId, ptr);
-    if(ATH_UNLIKELY(!added)) {
+    if (!added) [[unlikely]] {
       throw std::runtime_error("IDC WARNING Deletion shouldn't occur in addLock paradigm");
     }
     return StatusCode::SUCCESS;

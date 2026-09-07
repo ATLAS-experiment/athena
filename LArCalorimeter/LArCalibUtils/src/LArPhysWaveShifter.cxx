@@ -1,7 +1,7 @@
 //Dear emacs, this is -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -463,13 +463,6 @@ StatusCode LArPhysWaveShifter::ComputeTimeShiftByFEB(unsigned mode=2)
   if(sc.isFailure()) {
      ATH_MSG_ERROR( "Can't record LArFEBTimeOffset to DetectorStore" );
      return StatusCode::FAILURE;
-  }
-
-  const ILArFEBTimeOffset* ilarFEBTimeOffset=nullptr;
-  sc=detStore()->symLink(m_larFEBTstart,ilarFEBTimeOffset);
-  if(sc.isFailure()) {
-    ATH_MSG_ERROR( "Can't symlink LArFEBTimeOffset to abstract interface in  DetectorStore" );
-    return StatusCode::FAILURE;
   }
 
   return StatusCode::SUCCESS;

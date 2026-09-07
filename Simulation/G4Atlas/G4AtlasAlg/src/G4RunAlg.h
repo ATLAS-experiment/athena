@@ -33,7 +33,6 @@
 
 // ISF includes
 #include "ISF_Interfaces/ITruthSvc.h"
-#include "ISF_Interfaces/IGeoIDSvc.h"
 #include "ISF_Interfaces/IInputConverter.h"
 #include "ISF_Interfaces/IGenEventFilter.h"
 
@@ -87,8 +86,6 @@ private:
   SG::ReadHandleKey<McEventCollection> m_inputTruthCollectionKey{this, "InputTruthCollection", "BeamTruthEvent", "Input hard scatter collection"};
   SG::WriteHandleKey<McEventCollection> m_outputTruthCollectionKey{this, "OutputTruthCollection", "TruthEvent", "Output hard scatter truth collection"};
 
-  /// Geo ID Service
-  ServiceHandle<ISF::IGeoIDSvc> m_geoIDSvc{this, "GeoIDSvc", "ISF_GeoIDSvc", ""};
   /// Service to convert ISF_Particles into a G4Event
   ServiceHandle<ISF::IInputConverter> m_inputConverter{this, "InputConverter", "ISF_InputConverter", ""};
   /// Central Truth Service

@@ -92,11 +92,6 @@ StatusCode StripDetectorTool::create()
   ATH_CHECK(detStore()->record(m_detManager, m_detManager->getName()));
   theExpt->addManager(m_detManager);
 
-  // Create a symLink to the SiDetectorManager base class so it can be accessed as either SiDetectorManager or
-  // SCT_DetectorManager
-  const InDetDD::SiDetectorManager *siDetManager = m_detManager;
-  ATH_CHECK(detStore()->symLink(m_detManager, siDetManager));
-
   return StatusCode::SUCCESS;
 }
 

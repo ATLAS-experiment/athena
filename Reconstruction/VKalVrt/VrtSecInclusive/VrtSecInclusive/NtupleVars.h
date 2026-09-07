@@ -171,13 +171,13 @@ namespace VKalVrtAthena {
         varHolder<T>* holder = static_cast< varHolder<T>* >( m_varHolder.at( varname ) );
         return holder->get();
       
-      } catch( std::string& varname ) {
-        std::cerr << "Variable " << varname << " is not found in the list!" << std::endl;
+      } catch( std::string& theName ) {
+        std::cerr << "Variable " << theName << " is not found in the list!" << std::endl;
         std::cerr << "Candidates are..." << std::endl;
         int stat(0);
-        for( auto pair :  m_varHolder ) {
+        for( const auto &pair :  m_varHolder ) {
           char* name = abi::__cxa_demangle(typeid( T ).name(), 0, 0, &stat);
-          if( pair.second->get_typename() == name ) {
+          if( pair.second->get_typename() == theName ) {
             std::cerr << "  " << pair.second->get_typename() << " : " << pair.first << std::endl;
           }
           delete name;

@@ -71,7 +71,7 @@ namespace SH
   mergeFiles (const Sample& sample, const std::string& location,
 	      bool overwrite)
   {
-    std::unique_ptr<SampleLocal> result (new SampleLocal (sample.name()));
+    auto result = std::make_unique<SampleLocal> (sample.name());
     result->add (location);
     *result->meta() = *sample.meta();
     if (overwrite || gSystem->AccessPathName (location.c_str()) != 0)

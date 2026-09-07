@@ -58,6 +58,12 @@ class TgcL0TruthValidationAlg final : public AthReentrantAlgorithm {
   Gaudi::Property<float> m_maxMeanDeltaR{
       this, "TruthMatchMaxMeanDeltaR", 0.08F,
       "Maximum station-averaged deltaR for truth matching"};
+  Gaudi::Property<bool> m_validateFinalCandidates{
+      this, "ValidateFinalCandidates", false,
+      "Validate and truth-match final post-selection TGC candidates"};
+  Gaudi::Property<float> m_maxFinalCandidateDeltaR{
+      this, "FinalCandidateTruthMatchMaxDeltaR", 0.08F,
+      "Maximum pivot-station deltaR for final-candidate truth matching"};
   Gaudi::Property<bool> m_validateSectorLogic{
       this, "ValidateSectorLogic", false,
       "Validate and publish the TGC Sector Logic conversion"};

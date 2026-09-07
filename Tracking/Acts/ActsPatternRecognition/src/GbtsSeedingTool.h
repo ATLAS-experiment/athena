@@ -20,7 +20,7 @@
 #include "Acts/EventData/SpacePointContainer.hpp"
 
 //for det elements, not sure which need: 
-#include "TrigInDetToolInterfaces/ITrigL2LayerNumberTool.h"
+#include "ActsToolInterfaces/IGbtsLayerTool.h"
 #include "AthenaBaseComps/AthReentrantAlgorithm.h"
 #include "GaudiKernel/ToolHandle.h"
 #include "AthenaMonitoringKernel/GenericMonitoringTool.h"
@@ -36,7 +36,6 @@
 #include "xAODInDetMeasurement/SpacePointContainer.h"
 #include "xAODInDetMeasurement/SpacePointAuxContainer.h"
 
-#include <numbers>
 #include <memory>
 
 namespace ActsTrk {
@@ -68,6 +67,14 @@ namespace ActsTrk {
     /// sets configs based on gaudi properties defined below
     StatusCode prepareConfiguration();
 
+    /// Reads the connection table and keeps the connections this pass is for:
+    /// both layers have to be layers this detector has, of one technology,
+    /// and that technology has to be one the pass asked for.
+    StatusCode readConnections(
+      const std::vector<Acts::Experimental::GbtsLayerDescription>& layers,
+      const std::vector<GbtsTechnology>& technologies,
+      Acts::Experimental::GbtsLayerConnectionMap& connections) const;
+
     /// Private access to the logger
     const Acts::Logger &logger() const { return *m_logger; }
 
@@ -89,17 +96,20 @@ namespace ActsTrk {
     /// region of interest for pixel seeding
     std::optional<Acts::Experimental::GbtsRoiDescriptor> m_internalRoi;
 
-    /// lists of layers that pixel and strip modules are apart of (index defines hash ID of module), 
-    /// used to sort Spacepoints based on the type of module its assigned to 
-    const std::vector<short>* m_sct_h2l = nullptr;
-    const std::vector<short>* m_pix_h2l = nullptr;
+    /// Wafer hash to dense GBTS layer index, one map per technology. Used to
+    /// put a space point on the layer its module belongs to.
+    const std::vector<short>* m_stripHashToLayer = nullptr;
+    const std::vector<short>* m_pixelHashToLayer = nullptr;
+    /// Whether each dense GBTS layer index is a pixel layer.
     std::vector<bool> m_are_pixels;
 
-    /// used to create the detector layers and which modules correspond to pixels and strips 
-    ToolHandle<ITrigL2LayerNumberTool> m_layerNumberTool {this, "layerNumberTool", "TrigL2LayerNumberToolITk"}; 
+    /// Builds the GBTS layers out of the ITk readout geometry.
+    ToolHandle<IGbtsLayerTool> m_layerTool {this, "layerTool", "ActsTrk::GbtsLayerTool/ActsGbtsLayerTool"}; 
 
     // Config settings                                                              
     Gaudi::Property<std::string> m_connectorInputFile {this, "connectorInputFile","binTables_ITK_RUN4.txt", "input file for making connector object"};
+    Gaudi::Property<bool> m_pixelConnections {this, "usePixelConnections", true, "keep the pixel to pixel connections of the table"};
+    Gaudi::Property<bool> m_stripConnections {this, "useStripConnections", false, "keep the strip to strip connections of the table"};
     Gaudi::Property<std::string> m_lutFile {this, "lutInputFile", "gbts_ml_pixel_barrel_loose.lut", "file to LUT"}; 
     
     // GraphBasedTrackSeeder: feature option
@@ -153,7 +163,7 @@ namespace ActsTrk {
     Gaudi::Property<float> m_edgeMaskMinEta {this, "edgeMaskMinEta", 1.5, "minimum eta allowed for masking edges in graph so they are not used again"};
     Gaudi::Property<float> m_hitShareThreshold {this, "hitShareThreshold", 0.49, "threshold of hits that are shared between seeds before one seed is labelled a clone"};
 
-    // GbtsDataStorage
+    // GbtsNodeStorage
     Gaudi::Property<float> m_maxEndcapClusterwidth {this, "maxEndcapClusterwidth", 0.35, "discards any spacepoints which dr/dz cant be accurately modelled"};
   };
   

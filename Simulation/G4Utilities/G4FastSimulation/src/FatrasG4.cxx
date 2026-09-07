@@ -27,8 +27,12 @@
 
 
 FatrasG4::FatrasG4(const std::string& name,
-		   G4Region* region)
-  : G4VFastSimulationModel(name, region)
+                         G4Region* region,
+                         const PublicToolHandle<IActsFatrasG4Tool>& ActsFatrasG4Tool,
+                         FatrasG4Tool * /*FatrasG4Tool*/)
+
+: G4VFastSimulationModel(name, region),
+  m_ActsFatrasG4Tool(ActsFatrasG4Tool)
 {
 }
 
@@ -58,7 +62,7 @@ G4bool FatrasG4::ModelTrigger(const G4FastTrack& fastTrack)
 {
 
   #ifdef FATRASG4_DEBUG
-    G4cout<<"[FatrasG4::ModelTrigger] Got particle with "                                                      <<"\n"
+    G4cout<<"[FatrasG4::ModelTrigger] Got particle with "                                                         <<"\n"
                                     <<" pdg=" <<fastTrack.GetPrimaryTrack() -> GetDefinition()->GetPDGEncoding()  <<"\n"
                                     <<" Ekin="<<fastTrack.GetPrimaryTrack() -> GetKineticEnergy()                 <<"\n"
                                     <<" p="   <<fastTrack.GetPrimaryTrack() -> GetMomentum().mag()                <<"\n"
@@ -80,7 +84,7 @@ G4bool FatrasG4::ModelTrigger(const G4FastTrack& fastTrack)
 
   // Pass all photons, electrons and positrons to FatrasG4
   if (isPhoton || isElectron || isPositron){
-    #ifdef FATRASG4_DEBUG
+    #ifdef FATRASG4_DEBUG 
       G4cout<<"[FatrasG4::ModelTrigger] Photons, electrons or positron. Model triggered."<<G4endl;
     #endif
     return true;
@@ -91,21 +95,17 @@ G4bool FatrasG4::ModelTrigger(const G4FastTrack& fastTrack)
 
 void FatrasG4::DoIt(const G4FastTrack& fastTrack, G4FastStep& fastStep)
 {
-    
-    // VERY trivial  DoIt method to get things work
-    // Get Geant4 primary track
-    const G4Track * G4PrimaryTrack = fastTrack.GetPrimaryTrack();
+  #ifdef FATRASG4_DEBUG 
+    G4cout<<"FatrasG4::DoIt called"<<G4endl;
+  #endif
 
-#ifdef FATRASG4_DEBUG
-    G4cout<<"[FatrasG4::DoIt] Handling particle with Ekin: " << G4PrimaryTrack->GetKineticEnergy() <<" MeV. Killing the primary track."<<G4endl;
-#endif
-    
-   // Just Kill particles below 10 MeV
-   if(G4PrimaryTrack -> GetKineticEnergy() < 10){
-	   fastStep.KillPrimaryTrack();
-   }
-   
-   return;
-    
+  if (!m_ActsFatrasG4Tool.isValid()) {
+      G4cerr << "ActsFatrasG4Tool not valid!" << G4endl;
+      fastStep.KillPrimaryTrack();
+      return;
+  }
+
+  m_ActsFatrasG4Tool->simulateFatrasTrack(fastTrack, fastStep);
 }
+
 

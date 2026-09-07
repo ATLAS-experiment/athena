@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "SGTools/DataStore.h"
@@ -13,7 +13,6 @@
 #include "GaudiKernel/ISvcLocator.h"
 #include "CxxUtils/ConcurrentPtrSet.h"
 #include "CxxUtils/checker_macros.h"
-#include "CxxUtils/AthUnlikelyMacros.h"
 
 using namespace std;
 using SG::DataStore;
@@ -85,7 +84,7 @@ void DataStore::clearStore(bool force, bool hard, MsgStream* /*pmlog*/)
   /// removed, we should not bump the index.
   for (size_t i = 0; i < m_proxies.size(); ) {
     SG::DataProxy* dp = m_proxies[i];
-    if (ATH_UNLIKELY (dp->requestRelease (force, hard))) {
+    if (dp->requestRelease (force, hard)) [[unlikely]] {
       removed.insert (dp);
       if (removeProxyImpl (dp, i).isFailure()) {
         ++i;

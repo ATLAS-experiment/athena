@@ -39,17 +39,16 @@ StatusCode DeviceSPFormationAlg::execute(const EventContext& ctx) const
   auto inputTracccMeas = SG::makeHandle(m_inputMeasKey, ctx);
   ATH_CHECK(inputTracccMeas.isValid());
   ATH_MSG_DEBUG("Read traccc measurements from '"
-                         << m_inputMeasKey.key() << "'");         
+                         << m_inputMeasKey.key() << "'");
 
   // ---- 2. Get traccc spacepoint formation alg ---------------------------------------------
-  auto sp_pair = m_spAlgProviderTool->getPixelSPFormationAlgorithm(ctx);
-  std::shared_ptr<const traccc::device::silicon_pixel_spacepoint_formation_algorithm> sp_alg = sp_pair.second;
+  auto sp_alg = m_spAlgProviderTool->getAlgorithm(ctx);
 
   // ---- 3. Run traccc pixel spacepoint formation ---------------------------------------------
-  
+
   traccc::edm::spacepoint_collection::buffer pixel_spacepoints_gpu_buffer = (*sp_alg)(*m_deviceDetector, *inputTracccMeas);
 
-  ATH_MSG_DEBUG("Reconstructed " << (sp_pair.first)->get_size(pixel_spacepoints_gpu_buffer) << " pixel spacepoints.");
+  ATH_MSG_DEBUG("Reconstructed " << sp_alg.copy().get_size(pixel_spacepoints_gpu_buffer) << " pixel spacepoints.");
 
   // ---- 4. Write output traccc spacepoints to StoreGate -------------------------
   auto outputTracccPixelSP = SG::makeHandle(m_outputPixelSPKey, ctx);

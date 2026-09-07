@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArCalibUtils/LArTimePhysPrediction.h"
@@ -462,25 +462,6 @@ StatusCode LArTimePhysPrediction::stop()
       }// end of loop over Channels
       
     } // end of loop over Gains
-    
-    // Record LArPhysCaliTdiffComplete (needed to fill the DB)
-    /**sc = detStore->record(larPhysCaliTdiffComplete,m_keyoutput);
-       if (sc != StatusCode::SUCCESS) 
-       {
-       log << MSG::ERROR	
-       << " Cannot store LArPhysCaliTdiffComplete in TDS " 
-       << endmsg;
-       return sc;
-       }
-       // Make symlink
-       sc = detStore->symLink(larPhysCaliTdiffComplete,(ILArPhysCaliTdiff*)larPhysCaliTdiffComplete);
-       if (sc != StatusCode::SUCCESS) 
-       {
-       log << MSG::ERROR 
-       << " Cannot make link for Data Object "
-       << endmsg;
-       return sc;
-       }*/ 
     
     //-----------------------------------end of the main loop-------------------------------------------------------------------------
     //--------------------------------------------------------------------------------------------------------------------------------

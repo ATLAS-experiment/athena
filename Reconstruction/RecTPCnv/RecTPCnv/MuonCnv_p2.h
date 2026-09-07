@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // MuonCnv_p2.h 
@@ -11,8 +11,7 @@
 #ifndef RECTPCNV_MUONCNV_P2_H 
 #define RECTPCNV_MUONCNV_P2_H 
 
-// STL includes
-#include <string>
+
 
 // Gaudi includes
 #include "GaudiKernel/ToolHandle.h"
@@ -23,6 +22,8 @@
 
 // RecTPCnv includes
 #include "RecTPCnv/Muon_p2.h"
+// STL includes
+#include <string>
 
 // Forward declaration
 class MsgStream;
@@ -57,7 +58,7 @@ class MuonCnv_p2 : public T_AthenaPoolTPCnvConstBase<Analysis::Muon, Muon_p2>
                             MsgStream& msg ) const override;
 
   void setKey ( const std::string& key ) { m_muonCaloEnergyContainerName=key; }
-  void setEventStore( const StoreGateSvc_t storeGate ) { m_storeGate=storeGate; }
+  void setEventStore( const StoreGateSvc_t & storeGate ) { m_storeGate=storeGate; }
 
  protected: 
 

@@ -9,8 +9,8 @@
 # Create empty pool file
 art.py createpoolfile
 
-echo "Running SUSYTools test: 'share/athena SUSYTools/jobOptions.py --evtMax 20000 - --testCampaign data18 --testFormat PHYSLITE'"
-athena SUSYTools/jobOptions.py --evtMax 20000 - --testCampaign data18 --testFormat PHYSLITE
+echo "Running SUSYTools test: 'python -m SUSYTools.SUSYToolsConfig --evtMax 20000 --evtMax 2000 --testCampaign data18 --testFormat PHYSLITE'"
+python -m SUSYTools.SUSYToolsConfig --evtMax 20000 --evtMax 2000 --testCampaign data18 --testFormat PHYSLITE
 echo  "art-result: $? TEST"
 
 echo "Running DCube post-processing"

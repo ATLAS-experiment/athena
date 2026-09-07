@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef AthenaMonitoringKernel_HistogramFiller_HistogramFillerTree_h
@@ -33,7 +33,7 @@ namespace Monitored {
         // Abort if no cut entries or first (and only) entry is false
         if (maskSize == 0 || (maskSize == 1 && !vars.cut->get(0))) { return 0; }
 
-        if (ATH_UNLIKELY(maskSize > 1)) {
+        if (maskSize > 1) [[unlikely]] {
           MsgStream log(Athena::getMessageSvc(), "HistogramFillerTree");
           log << MSG::WARNING << "HistogramFillerTree (" << m_histDef->alias
               << ") does not support more than a single entry being filled at a time\n"
@@ -42,7 +42,7 @@ namespace Monitored {
         }
       }
 
-      if (ATH_UNLIKELY(vars.size() != m_branchDefs.size())) {
+      if (vars.size() != m_branchDefs.size()) [[unlikely]] {
         MsgStream log(Athena::getMessageSvc(), "HistogramFillerTree");
         log << MSG::ERROR << "Mismatch of passed variables and expected variables for " << m_histDef->alias 
                           << "(" << vars.size() << ", " << m_branchDefs.size() << ")" << endmsg;
@@ -57,7 +57,7 @@ namespace Monitored {
       // following logic allows us to skip branches that were badly-defined
       size_t idx = 0, idxgood = 0;
       for (const auto& brdef : m_branchDefs) {
-        if (ATH_UNLIKELY(brdef.second == "IGNORE")) {
+        if (brdef.second == "IGNORE") [[unlikely]] {
           ++idx; continue;
         }
         TBranch* branch = static_cast<TBranch*>(branchList->At(idxgood));
@@ -160,7 +160,7 @@ namespace Monitored {
   // helper functions for filling branches
   template <typename T>
   void scalarFillerFunc(TBranch* branch, const IMonitoredVariable& var) {
-    if (ATH_UNLIKELY(var.size() == 0)) {
+    if (var.size() == 0) [[unlikely]] {
       MsgStream log(Athena::getMessageSvc(), "HistogramFillerTree"); 
       log << MSG::WARNING << "Tree " << branch->GetTree()->GetName() << ": Empty value passed to scalar branch fill for" 
                           << branch->GetName() << endmsg;
@@ -175,7 +175,7 @@ namespace Monitored {
   // specialization for string
   template <>
   void scalarFillerFunc<std::string>(TBranch* branch, const IMonitoredVariable& var) {
-    if (ATH_UNLIKELY(var.size() == 0)) { 
+    if (var.size() == 0) [[unlikely]] { 
       MsgStream log(Athena::getMessageSvc(), "HistogramFillerTree"); 
       log << MSG::WARNING << "Tree " << branch->GetTree()->GetName() << ": Empty value passed to scalar branch fill for" 
                           << branch->GetName() << endmsg;

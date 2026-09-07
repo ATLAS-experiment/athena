@@ -1,6 +1,6 @@
 #  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
  
-def TrigMuonTruthMonConfig(helper):
+def TrigMuonTruthMonConfig(helper, isPhaseII=False, **kwargs):
 
     from AthenaConfiguration.ComponentFactory import CompFactory
 
@@ -8,9 +8,17 @@ def TrigMuonTruthMonConfig(helper):
     
     from MuonSelectorTools.MuonSelectorToolsConfig import MuonLoosenedNonCalibratedSelectionToolCfg
     from .MuonMatchingToolConfig import MuonMatchingToolConfig
+
+    # Set the offline muon container
+    kwargs.setdefault("MuonContainerName", "Muons")
+
     monAlg = helper.addAlgorithm(CompFactory.TrigMuonTruthMon,'TrigMuonTruthMon',
-                                 MuonSelectionTool = helper.result().popToolsAndMerge(MuonLoosenedNonCalibratedSelectionToolCfg(helper.flags, MuQuality=1)), 
-                                 MuonMatchingTool = helper.result().popToolsAndMerge(MuonMatchingToolConfig(helper.flags)))
+                                 MuonSelectionTool = helper.result().popToolsAndMerge(MuonLoosenedNonCalibratedSelectionToolCfg(helper.flags, 
+                                                                                                                                MuQuality=1)), 
+                                 MuonMatchingTool = helper.result().popToolsAndMerge(MuonMatchingToolConfig(helper.flags, 
+                                                                                                            isPhaseII=isPhaseII, 
+                                                                                                            MuonContainerName = kwargs["MuonContainerName"])),
+                                 **kwargs)
 
     ### monitorig groups
     from TrigConfigSvc.TriggerConfigAccess import getHLTMonitoringAccess

@@ -2,8 +2,8 @@
  *   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
  */
 
-#ifndef TRIGL0GEPPERF_GEPCLUSTERTIMINGALG_H
-#define TRIGL0GEPPERF_GEPCLUSTERTIMINGALG_H
+#ifndef TRIGGEPPERF_GEPCLUSTERTIMINGALG_H
+#define TRIGGEPPERF_GEPCLUSTERTIMINGALG_H
 
 #include "AthenaBaseComps/AthReentrantAlgorithm.h"
 #include "xAODCaloEvent/CaloClusterContainer.h"

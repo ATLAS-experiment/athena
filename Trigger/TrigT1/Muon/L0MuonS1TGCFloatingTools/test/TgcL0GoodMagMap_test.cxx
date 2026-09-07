@@ -7,6 +7,8 @@
 #include <filesystem>
 #include <fstream>
 #include <iostream>
+#include <limits>
+#include <numbers>
 #include <string>
 #include <string_view>
 
@@ -95,6 +97,35 @@ int main() {
   success &= check(!map->isGood(-1, 0), "negative eta bin is rejected");
   success &= check(!map->isGood(2, 0), "high eta bin is rejected");
   success &= check(!map->isGood(0, 3), "high phi bin is rejected");
+
+  constexpr float absEtaMin = 1.F;
+  constexpr float absEtaMax = 2.F;
+  constexpr float phiPeriod = 2.F * std::numbers::pi_v<float> / 8.F;
+  success &= check(map->isGood(1.1F, 0.F, absEtaMin, absEtaMax),
+                   "physical coordinates use the map eta and phi binning");
+  success &= check(!map->isGood(1.1F, phiPeriod / 2.F, absEtaMin,
+                                absEtaMax),
+                   "physical coordinates find the first poor bin");
+  success &= check(!map->isGood(1.1F, -phiPeriod / 2.F, absEtaMin,
+                                absEtaMax),
+                   "negative physical phi is folded into the map");
+  success &= check(!map->isGood(-1.9F, 5.F * phiPeriod / 6.F, absEtaMin,
+                                absEtaMax),
+                   "absolute eta and folded phi find the second poor bin");
+  success &= check(map->isGood(2.F, phiPeriod, absEtaMin, absEtaMax),
+                   "upper eta edge and repeated phi sector are accepted");
+  success &= check(!map->isGood(0.9F, 0.F, absEtaMin, absEtaMax),
+                   "physical eta below the calibrated range is rejected");
+  success &= check(
+      !map->isGood(std::numeric_limits<float>::quiet_NaN(), 0.F,
+                   absEtaMin, absEtaMax),
+      "non-finite physical eta is rejected");
+  success &= check(
+      !map->isGood(1.1F, std::numeric_limits<float>::infinity(),
+                   absEtaMin, absEtaMax),
+      "non-finite physical phi is rejected");
+  success &= check(!map->isGood(1.1F, 0.F, absEtaMax, absEtaMin),
+                   "invalid physical eta range is rejected");
 
   constexpr std::array malformedPayloads{
       Malformation::UnsupportedSchema, Malformation::MissingVersion,

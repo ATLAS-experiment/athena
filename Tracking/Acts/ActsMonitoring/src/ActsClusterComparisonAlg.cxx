@@ -962,89 +962,84 @@ StatusCode ActsClusterComparisonAlg::validatePixelSpacepoints(
 StatusCode ActsClusterComparisonAlg::finalize()
 {
 
-    ATH_MSG_INFO("Validation summary: ");
-
     // Print cluster statistics
-    ATH_MSG_INFO(
-        "============================================================");
-    ATH_MSG_INFO("PIXEL CLUSTER MATCHING STATISTICS: ");
-    ATH_MSG_INFO("  Total unmatched clusters mon/ref: " << m_pix_unmatched_mon << " / " << m_pix_unmatched_ref);
-    ATH_MSG_INFO("  Total matched clusters: " << m_matched_pixel);
-    ATH_MSG_INFO("  Clusters with pos diff > 1 sigma: "
+    ATH_MSG_INFO("Validation Summary");
+    ATH_MSG_INFO("ValSum ============================================================");
+    ATH_MSG_INFO("ValSum PIXEL CLUSTER MATCHING STATISTICS: ");
+    ATH_MSG_INFO("ValSum   Total unmatched clusters mon/ref: " << m_pix_unmatched_mon << " / " << m_pix_unmatched_ref);
+    ATH_MSG_INFO("ValSum   Total matched clusters: " << m_matched_pixel);
+    ATH_MSG_INFO("ValSum   Clusters with pos diff > 1 sigma: "
                  << m_pixel_pos_diff_1sig << " ("
                  << (m_matched_pixel.value() > 0
                          ? 100.0 * m_pixel_pos_diff_1sig.value() / m_matched_pixel.value()
                          : 0.0)
                  << "%)");
-    ATH_MSG_INFO("  Clusters with pos diff > 0.5 sigma: "
+    ATH_MSG_INFO("ValSum  Clusters with pos diff > 0.5 sigma: "
                  << m_pixel_pos_diff_0p5sig << " ("
                  << (m_matched_pixel.value() > 0
                          ? 100.0 * m_pixel_pos_diff_0p5sig.value() / m_matched_pixel.value()
                          : 0.0)
                  << "%)");
-    ATH_MSG_INFO("  Clusters with pos diff > 0.25 sigma: "
+    ATH_MSG_INFO("ValSum Clusters with pos diff > 0.25 sigma: "
                  << m_pixel_pos_diff_0p25sig << " ("
                  << (m_matched_pixel.value() > 0
                          ? 100.0 * m_pixel_pos_diff_0p25sig.value() / m_matched_pixel.value()
                          : 0.0)
                  << "%)");
-    ATH_MSG_INFO(
-        "============================================================");
-    ATH_MSG_INFO(
-        "============================================================");
-    ATH_MSG_INFO("STRIP CLUSTER MATCHING STATISTICS:");
-    ATH_MSG_INFO("  Total unmatched clusters mon/ref: " << m_strip_unmatched_mon << " / " << m_strip_unmatched_ref);
-    ATH_MSG_INFO("  Total matched clusters: " << m_matched_strip);
-    ATH_MSG_INFO("  Clusters with pos diff > 1 sigma: "
+    ATH_MSG_INFO("ValSum ============================================================");
+    ATH_MSG_INFO("ValSum ============================================================");
+    ATH_MSG_INFO("ValSum STRIP CLUSTER MATCHING STATISTICS:");
+    ATH_MSG_INFO("ValSum Total unmatched clusters mon/ref: " << m_strip_unmatched_mon << " / " << m_strip_unmatched_ref);
+    ATH_MSG_INFO("ValSum Total matched clusters: " << m_matched_strip);
+    ATH_MSG_INFO("ValSum Clusters with pos diff > 1 sigma: "
                  << m_strip_pos_diff_1sig << " ("
                  << (m_matched_strip.value() > 0
                          ? 100.0 * m_strip_pos_diff_1sig.value() / m_matched_strip.value()
                          : 0.0)
                  << "%)");
-    ATH_MSG_INFO("  Clusters with pos diff > 0.5 sigma: "
+    ATH_MSG_INFO("ValSum Clusters with pos diff > 0.5 sigma: "
                  << m_strip_pos_diff_0p5sig << " ("
                  << (m_matched_strip.value() > 0
                          ? 100.0 * m_strip_pos_diff_0p5sig.value() / m_matched_strip.value()
                          : 0.0)
                  << "%)");
-    ATH_MSG_INFO("  Clusters with pos diff > 0.25 sigma: "
+    ATH_MSG_INFO("ValSum Clusters with pos diff > 0.25 sigma: "
                  << m_strip_pos_diff_0p25sig << " ("
                  << (m_matched_strip.value() > 0
                          ? 100.0 * m_strip_pos_diff_0p25sig.value() / m_matched_strip.value()
                          : 0.0)
                  << "%)");
-    ATH_MSG_INFO(
-        "============================================================");
+    ATH_MSG_INFO("ValSum ============================================================");
 
     if(m_checkSpacepoints){
-        ATH_MSG_INFO("============================================================");
-        ATH_MSG_INFO("PIXEL SPACEPOINT MATCHING STATISTICS:");
-        ATH_MSG_INFO("  Total monitored spacepoints: " << m_nMonSp);
-        ATH_MSG_INFO("  Total reference spacepoints: " << m_nRefSp);
-        ATH_MSG_INFO("  Matched spacepoints: " << m_nMatchedSp);
-        ATH_MSG_INFO("  Unmatched monitored spacepoints: " << m_nUnmatchedMonSp);
-        ATH_MSG_INFO("  Unmatched reference spacepoints: " << m_nUnmatchedRefSp);
-        ATH_MSG_INFO("============================================================");
-        ATH_MSG_INFO("SPACEPOINT POSITION COMPARISON:");
-        ATH_MSG_INFO("  Spacepoints with global pos diff > 1 mm: "
+        ATH_MSG_INFO("ValSum ============================================================");
+        ATH_MSG_INFO("ValSum PIXEL SPACEPOINT MATCHING STATISTICS:");
+        ATH_MSG_INFO("ValSum   Total monitored spacepoints: " << m_nMonSp);
+        ATH_MSG_INFO("ValSum   Total reference spacepoints: " << m_nRefSp);
+        ATH_MSG_INFO("ValSum   Matched spacepoints: " << m_nMatchedSp);
+        ATH_MSG_INFO("ValSum   Unmatched monitored spacepoints: " << m_nUnmatchedMonSp);
+        ATH_MSG_INFO("ValSum   Unmatched reference spacepoints: " << m_nUnmatchedRefSp);
+        ATH_MSG_INFO("ValSum ============================================================");
+        ATH_MSG_INFO("ValSum SPACEPOINT POSITION COMPARISON:");
+        ATH_MSG_INFO("ValSum   Spacepoints with global pos diff > 1 mm: "
                     << m_nSpPosDiff1mm << " ("
                     << (m_nMatchedSp.value() > 0 ? 100.0 * m_nSpPosDiff1mm.value() / m_nMatchedSp.value() : 0.0)
                     << "%)");
-        ATH_MSG_INFO("  Spacepoints with global pos diff > 5 mm: "
+        ATH_MSG_INFO("ValSum  Spacepoints with global pos diff > 5 mm: "
                     << m_nSpPosDiff5mm << " ("
                     << (m_nMatchedSp.value() > 0 ? 100.0 * m_nSpPosDiff5mm.value() / m_nMatchedSp.value() : 0.0)
                     << "%)");
-        ATH_MSG_INFO("============================================================");
-        ATH_MSG_INFO("SPACEPOINT VARIANCE COMPARISON:");
-        ATH_MSG_INFO("  Spacepoints with >10% variance R difference: "
+        ATH_MSG_INFO("ValSum ============================================================");
+        ATH_MSG_INFO("ValSum SPACEPOINT VARIANCE COMPARISON:");
+        ATH_MSG_INFO("ValSum   Spacepoints with >10% variance R difference: "
                     << m_nSpVarRDiff << " ("
                     << (m_nMatchedSp.value() > 0 ? 100.0 * m_nSpVarRDiff.value() / m_nMatchedSp.value() : 0.0)
                     << "%)");
-        ATH_MSG_INFO("  Spacepoints with >10% variance Z difference: "
+        ATH_MSG_INFO("ValSum  Spacepoints with >10% variance Z difference: "
                     << m_nSpVarZDiff << " ("
                     << (m_nMatchedSp.value() > 0 ? 100.0 * m_nSpVarZDiff.value() / m_nMatchedSp.value() : 0.0)
                     << "%)");
-        ATH_MSG_INFO("============================================================");
+        ATH_MSG_INFO("ValSum ============================================================");
     }
 
     return StatusCode::SUCCESS;

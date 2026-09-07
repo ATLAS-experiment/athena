@@ -18,6 +18,7 @@
 #include "Gaudi/Parsers/Factory.h" // Needed to declare less common Property types
 #include "GaudiKernel/SystemOfUnits.h"
 #include "CxxUtils/phihelper.h"
+#include "CxxUtils/transparent_string_hash.h"
 
 #include "TrigTauMonitoring/TrigTauInfo.h"
 
@@ -118,7 +119,7 @@ protected:
 
     // StorageGate keys, accessible by subclasses
     SG::ReadHandleKey<xAOD::TauJetContainer> m_offlineTauJetKey{this, "OfflineTauJetKey", "TauJets", "Offline taujet container key"};
-    std::unordered_map<std::string, SG::ReadHandleKey<xAOD::TauJetContainer>> m_hltTauJetKeysMap;
+    std::unordered_map<std::string, SG::ReadHandleKey<xAOD::TauJetContainer>, CxxUtils::TransparentStringHash, std::equal_to<>> m_hltTauJetKeysMap;
 
     const SG::ReadHandleKey<xAOD::TauJetContainer>& getOnlineContainerKey(const std::string& container_suffix) const;
 

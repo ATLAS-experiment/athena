@@ -10,12 +10,8 @@
 
 #include <EventLoop/BatchJob.h>
 
-#include <TChain.h>
-#include <EventLoop/Algorithm.h>
-#include <EventLoop/BatchDriver.h>
 #include <EventLoop/BatchSample.h>
 #include <EventLoop/BatchSegment.h>
-#include <EventLoop/OutputStream.h>
 
 //
 // method implementations

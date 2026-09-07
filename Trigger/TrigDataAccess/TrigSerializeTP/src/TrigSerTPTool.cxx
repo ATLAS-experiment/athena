@@ -10,7 +10,6 @@
 #include "AthenaKernel/IDictLoaderSvc.h"
 #include "AthenaKernel/ITPCnvBase.h"
 #include "AthenaKernel/errorcheck.h"
-#include "CxxUtils/AthUnlikelyMacros.h"
 
 // Local include(s):
 #include "TrigSerializeTP/TrigSerTPTool.h"
@@ -61,7 +60,7 @@ ITPCnvBase* TrigSerTPTool::getConverter( const std::string& persistent ) const
 {
    std::lock_guard<std::mutex> lock(m_convertersCacheMutex);
    ITPCnvBase* cnvtr = m_convertesCache[persistent];
-   if ( ATH_LIKELY( cnvtr ) )
+   if ( cnvtr ) [[likely]]
       return cnvtr;
 
    // no converter, we need to find it, first the trigger specific one

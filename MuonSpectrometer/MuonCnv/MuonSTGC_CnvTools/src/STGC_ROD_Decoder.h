@@ -19,15 +19,15 @@ namespace Muon
 class STGC_RawData;
 class STGC_RawDataCollection;
 
-class STGC_ROD_Decoder : virtual public ISTGC_ROD_Decoder, public AthAlgTool
-{
+class STGC_ROD_Decoder : public extends<AthAlgTool, ISTGC_ROD_Decoder> {
   public:
-    STGC_ROD_Decoder(const std::string& t, const std::string& n, const IInterface* p);
+    using base_class::base_class;
     virtual ~STGC_ROD_Decoder() = default;
     virtual StatusCode initialize() override;
     virtual StatusCode fillCollection(const EventContext& ctx,
-                                      const OFFLINE_FRAGMENTS_NAMESPACE::ROBFragment&, 
-                                      const std::vector<IdentifierHash>&, std::unordered_map<IdentifierHash, std::unique_ptr<STGC_RawDataCollection>>& rdo_map) const override;
+                                      const OFFLINE_FRAGMENTS_NAMESPACE::ROBFragment& fragment, 
+                                      const std::vector<IdentifierHash>& chamberToDecode, 
+                                      std::vector<std::unique_ptr<STGC_RawDataCollection>>& rdo_map) const override;
 
   protected:
     const sTgcIdHelper* m_stgcIdHelper{nullptr};

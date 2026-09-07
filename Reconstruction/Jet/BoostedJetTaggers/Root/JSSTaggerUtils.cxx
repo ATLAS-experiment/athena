@@ -784,7 +784,7 @@ StatusCode JSSTaggerUtils::GetTopConstScore(const xAOD::JetContainer& jets) cons
 
       // pack: mask variable
       vars = {1.};
-      masks_vars.push_back(vars);
+      masks_vars.push_back(std::move(vars));
       
       // explict interaction variables
       // calculate variables: interactions
@@ -948,7 +948,7 @@ StatusCode JSSTaggerUtils::GetWConstScore(const xAOD::JetContainer& jets) const 
 
       // pack: mask variable
       vars = {1.};
-      masks_vars.push_back(vars);
+      masks_vars.push_back(std::move(vars));
 
       // explict interaction variables
       // calculate variables: interactions
@@ -1105,7 +1105,7 @@ StatusCode JSSTaggerUtils::GetPolarisationScore(const xAOD::JetContainer& jets) 
         inter_vars_int.push_back(std::move(vars));
       }
 
-      inter_vars.push_back(inter_vars_int);
+      inter_vars.push_back(std::move(inter_vars_int));
     }
 
     // adjust
@@ -1126,7 +1126,7 @@ StatusCode JSSTaggerUtils::GetPolarisationScore(const xAOD::JetContainer& jets) 
 
       // pack: mask variable
       vars = {0.};
-      masks_vars.push_back(vars);
+      masks_vars.push_back(std::move(vars));
     }
 
     for(long unsigned int i=0; i<constituents.size(); i++){

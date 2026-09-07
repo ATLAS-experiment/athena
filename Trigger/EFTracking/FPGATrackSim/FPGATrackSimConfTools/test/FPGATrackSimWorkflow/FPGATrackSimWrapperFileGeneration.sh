@@ -7,7 +7,7 @@ echo "... RDO to AOD with sim"
 Reco_tf.py \
     --steering doRAWtoALL \
     --preExec "flags.Trigger.FPGATrackSim.wrapperFileName='wrapper.root'" \
-    --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude,ActsConfig.ActsCIFlags.actsValidateTracksFlags" \
+    --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude" \
     --postInclude "FPGATrackSimSGInput.FPGATrackSimSGInputConfig.FPGATrackSimSGInputCfg" \
     --inputRDOFile ${RDO_SINGLE_MUON} \
     --outputAODFile AOD.pool.root \

@@ -23,8 +23,7 @@ namespace Barcode {
 
   /** @class ValidationBarcodeSvc
 
-      This BarcodeService reproduces the barcode treatmend for MC12:
-      http://acode-browser.usatlas.bnl.gov/lxr/source/atlas/Simulation/G4Sim/MCTruth/src/TruthStrategyManager.cxx
+      This BarcodeService reproduces the barcode treatment for MC12.
 
       @author Andreas.Salzburger -at- cern.ch , Elmar.Ritsch -at- cern.ch
   */

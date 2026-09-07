@@ -93,6 +93,10 @@ atlas_add_test( testR3SensitiveDetectors
                 SCRIPT python -m MuonGeoModelTestR4.testSensitiveDetectors  --nEvents 2 
                 PROPERTIES TIMEOUT 1800
                 PRIVATE_WORKING_DIRECTORY
+                # Ignore spurious FPEs originating from inside Geant (G4Tubs)
+                # in the clang build (due to Geant not being compiled
+                # with trapping FP).
+                LOG_IGNORE_PATTERN "FPE .*G4AtlasAlg"
                 POST_EXEC_SCRIPT noerror.sh)
 
 ##### Simulation test R4
@@ -100,6 +104,10 @@ atlas_add_test( testR4SensitiveDetectors
                 SCRIPT python -m MuonGeoModelTestR4.testSensitiveDetectors  --nEvents 2 --defaultGeoFile RUN4
                 PROPERTIES TIMEOUT 1800
                 PRIVATE_WORKING_DIRECTORY
+                # Ignore spurious FPEs originating from inside Geant (G4Tubs)
+                # in the clang build (due to Geant not being compiled
+                # with trapping FP).
+                LOG_IGNORE_PATTERN "FPE .*G4AtlasAlg"
                 POST_EXEC_SCRIPT noerror.sh)
 
 

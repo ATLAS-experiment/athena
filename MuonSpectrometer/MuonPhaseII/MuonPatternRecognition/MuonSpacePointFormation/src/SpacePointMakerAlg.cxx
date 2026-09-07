@@ -404,7 +404,7 @@ template <typename ContType>
                 std::array<double, 3> cov{Acts::filledArray<double,3>(0.)};
                 cov[Acts::toUnderlying(CovIdx::etaCov)] = prd->driftRadiusCov();
                 cov[Acts::toUnderlying(CovIdx::phiCov)] = Acts::square(sensorHalfLength(*prd));
-                if  (ATH_UNLIKELY(prd->numDimensions() == 2)){
+                if  (prd->numDimensions() == 2) [[unlikely]] {
                     cov[Acts::toUnderlying(CovIdx::phiCov)] = static_cast<const xAOD::MdtTwinDriftCircle*>(prd)->posAlongWireCov();
                 }
                 sp.setCovariance(std::move(cov));

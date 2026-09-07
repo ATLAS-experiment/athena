@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //====================================================================
@@ -15,9 +15,10 @@
 // Framework include files
 #include "PersistentDataModel/Token.h"
 #include "StorageSvc/DbDatabase.h"
-#include "StorageSvc/DbAccessObj.h"
 #include "StorageSvc/DbContainer.h"
 #include "StorageSvc/DbPrint.h"
+#include "DbAccessObj.h"
+
 /*
  *  POOL namespace declaration
  */
@@ -41,12 +42,7 @@ namespace pool  {
     * @author  M.Frank
     * @version 1.0
     */
-  struct DbObjectHolder  {
-    DbObject* m_obj;
-    explicit DbObjectHolder(DbObject* p) : m_obj(p) {}
-    int release();
-  };
-  class DbContainerObj : public  DbAccessObj<DbObject*, DbObjectHolder >, public APRMessaging {
+  class DbContainerObj : public  DbAccessObjBase, public APRMessaging {
   private:
     /// Pointer to interface of the technology dependent part
     IDbContainer*                 m_info;
@@ -71,7 +67,7 @@ namespace pool  {
     DbContainerObj( DbDatabase&        dbH,
                     const std::string& nam,
                     const DbType&      dbtyp,
-                    Io::IoFlag       mod);
+                    Io::IoFlag         mod);
     /// Standard destructor
     virtual ~DbContainerObj();
     /// Access to internals

@@ -87,6 +87,7 @@ atlas_add_test( AthTPCnvSvc
 atlas_add_test( AthDictLoaderSvc
    SCRIPT test/AthDictLoaderSvc_test.py
    LOG_SELECT_PATTERN "AthDictLoaderTestAlg"
+   LOG_IGNORE_PATTERN "<-- .ElementLink_p1<unsigned int>|<-- .ElementLinkInt_p1"
    PROPERTIES TIMEOUT 300 )
 
 atlas_add_test( ItemListSemanticsTest

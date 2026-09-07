@@ -31,6 +31,7 @@ atlas_add_component( ActsGPUEventCnv
     ActsGeometryInterfacesLib
     ActsGPUInterfacesLib
     ActsGPUEventLib
+    ActsEventLib
     InDetRawData
     InDetPrepRawData
     InDetIdentifier

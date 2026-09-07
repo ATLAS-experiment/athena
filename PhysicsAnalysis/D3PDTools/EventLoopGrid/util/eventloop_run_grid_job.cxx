@@ -3,8 +3,7 @@
 */
 
 #include <EventLoop/Worker.h>
-#include <TROOT.h>
-#include <iostream>
+#include <exception>
 #include <string>
 #include <xAODRootAccess/Init.h>
 #include <AsgMessaging/MessageCheck.h>
@@ -28,8 +27,16 @@ int main (int argc, char **argv)
 
   if (argc == 4)
   {
-    SkipEvents = std::stol(argv[2]);
-    nEventsPerJob = std::stol(argv[3]);
+    try
+    {
+      SkipEvents = std::stol(argv[2]);
+      nEventsPerJob = std::stol(argv[3]);
+    } catch (const std::exception& e)
+    {
+      ANA_MSG_ERROR ("could not parse SkipEvents/nEventsPerJob arguments \""
+                     << argv[2] << "\" \"" << argv[3] << "\": " << e.what());
+      return -1;
+    }
   }
 
   EL::Worker worker;

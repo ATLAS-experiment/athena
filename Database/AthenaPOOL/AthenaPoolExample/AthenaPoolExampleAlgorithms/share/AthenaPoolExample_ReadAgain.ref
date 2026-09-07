@@ -18,7 +18,7 @@ EventSelector                                       DEBUG Events to skip: 9, 10
 IoComponentMgr                                       INFO IoComponent EventSelector has already had file EmptyPoolFile.root registered with i/o mode READ
 EventSelector                                       DEBUG reinitialization...
 EventSelector                                       DEBUG Try item: "EmptyPoolFile.root" from the collection list.
-PoolSvc                                             DEBUG createCollection() type=POOL, connection=PFN:EmptyPoolFile.root, name=Input, contextID=0
+PoolSvc                                             DEBUG connectCollection() type=POOL, connection=PFN:EmptyPoolFile.root, name=Input, contextID=0
 EmptyPoolFile.root                                  DEBUG --> Access   DbContainer  READ      [ROOT_All] ##Shapes
 EmptyPoolFile.root                                  DEBUG --> Access   DbContainer  READ      [ROOT_All] ##Shapes
 ##Shapes                                            DEBUG Opening
@@ -43,11 +43,11 @@ EmptyPoolFile.root                                  DEBUG --> Access   DbContain
 EmptyPoolFile.root                                  DEBUG --->Reading Param:PFN=[EmptyPoolFile.root]
 EmptyPoolFile.root                                  DEBUG --->Reading Param:POOL_CONTAINERNAME_EVENTTAG=[POOLCollectionTree]
 EmptyPoolFile.root                                  DEBUG --->Reading Param:POOL_CONTAINERNAME_DATAHEADER=[POOLContainer]
-##Params                                            DEBUG No objects passing selection criteria... Container has 6 Entries in total.
+##Params                                            DEBUG No objects passing selection criteria... Container has 5 Entries in total.
 EventSelector                                       DEBUG No events found in: EmptyPoolFile.root skipped!!!
 RootDatabase                                        DEBUG Closing DB EmptyPoolFile.root
 EventSelector                                       DEBUG Try item: "SimplePoolReplica1.root" from the collection list.
-PoolSvc                                             DEBUG createCollection() type=POOL, connection=PFN:SimplePoolReplica1.root, name=Input, contextID=0
+PoolSvc                                             DEBUG connectCollection() type=POOL, connection=PFN:SimplePoolReplica1.root, name=Input, contextID=0
 SimplePoolReplica1.root                             DEBUG --> Access   DbContainer  READ      [ROOT_All] ##Shapes
 SimplePoolReplica1.root                             DEBUG --> Access   DbContainer  READ      [ROOT_All] ##Shapes
 ##Shapes                                            DEBUG Opening
@@ -76,7 +76,7 @@ SimplePoolReplica1.root                             DEBUG --> Access   DbContain
 SimplePoolReplica1.root                             DEBUG --->Reading Param:PFN=[SimplePoolReplica1.root]
 SimplePoolReplica1.root                             DEBUG --->Reading Param:POOL_CONTAINERNAME_EVENTTAG=[POOLCollectionTree]
 SimplePoolReplica1.root                             DEBUG --->Reading Param:POOL_CONTAINERNAME_DATAHEADER=[POOLContainer]
-##Params                                            DEBUG No objects passing selection criteria... Container has 6 Entries in total.
+##Params                                            DEBUG No objects passing selection criteria... Container has 5 Entries in total.
 SimplePoolReplica1.root                             DEBUG --> Access   DbContainer  READ      [ROOT_TreeIndex] POOLContainer(DataHeader)
 POOLContainer(DataHeader)                           DEBUG Opening
 POOLContainer(DataHeader)                           DEBUG    attributes# = 1
@@ -103,7 +103,7 @@ AthenaEventLoopMgr                                   INFO Setup EventSelector se
 ApplicationMgr                                       INFO Application Manager Initialized successfully
 RootDatabase                                        DEBUG Closing DB SimplePoolReplica1.root
 EventSelector                                       DEBUG Try item: "EmptyPoolFile.root" from the collection list.
-PoolSvc                                             DEBUG createCollection() type=POOL, connection=PFN:EmptyPoolFile.root, name=Input, contextID=0
+PoolSvc                                             DEBUG connectCollection() type=POOL, connection=PFN:EmptyPoolFile.root, name=Input, contextID=0
 EmptyPoolFile.root                                  DEBUG --> Access   DbContainer  READ      [ROOT_All] ##Shapes
 EmptyPoolFile.root                                  DEBUG --> Access   DbContainer  READ      [ROOT_All] ##Shapes
 ##Shapes                                            DEBUG Opening
@@ -128,7 +128,7 @@ EmptyPoolFile.root                                  DEBUG --> Access   DbContain
 EmptyPoolFile.root                                  DEBUG --->Reading Param:PFN=[EmptyPoolFile.root]
 EmptyPoolFile.root                                  DEBUG --->Reading Param:POOL_CONTAINERNAME_EVENTTAG=[POOLCollectionTree]
 EmptyPoolFile.root                                  DEBUG --->Reading Param:POOL_CONTAINERNAME_DATAHEADER=[POOLContainer]
-##Params                                            DEBUG No objects passing selection criteria... Container has 6 Entries in total.
+##Params                                            DEBUG No objects passing selection criteria... Container has 5 Entries in total.
 EventSelector                                       DEBUG No events found in: EmptyPoolFile.root skipped!!!
 MetaDataSvc                                         DEBUG handle() BeginInputFile for EmptyPoolFile.root
 MetaDataSvc                                         DEBUG initInputMetaDataStore: file name EmptyPoolFile.root
@@ -160,7 +160,7 @@ MetaDataSvc                                         DEBUG handle() EndInputFile 
 MetaDataSvc                                         DEBUG retireMetadataSource: eventless EmptyPoolFile.root
 RootDatabase                                        DEBUG Closing DB EmptyPoolFile.root
 EventSelector                                       DEBUG Try item: "SimplePoolReplica1.root" from the collection list.
-PoolSvc                                             DEBUG createCollection() type=POOL, connection=PFN:SimplePoolReplica1.root, name=Input, contextID=0
+PoolSvc                                             DEBUG connectCollection() type=POOL, connection=PFN:SimplePoolReplica1.root, name=Input, contextID=0
 SimplePoolReplica1.root                             DEBUG --> Access   DbContainer  READ      [ROOT_All] ##Shapes
 SimplePoolReplica1.root                             DEBUG --> Access   DbContainer  READ      [ROOT_All] ##Shapes
 ##Shapes                                            DEBUG Opening
@@ -189,7 +189,7 @@ SimplePoolReplica1.root                             DEBUG --> Access   DbContain
 SimplePoolReplica1.root                             DEBUG --->Reading Param:PFN=[SimplePoolReplica1.root]
 SimplePoolReplica1.root                             DEBUG --->Reading Param:POOL_CONTAINERNAME_EVENTTAG=[POOLCollectionTree]
 SimplePoolReplica1.root                             DEBUG --->Reading Param:POOL_CONTAINERNAME_DATAHEADER=[POOLContainer]
-##Params                                            DEBUG No objects passing selection criteria... Container has 6 Entries in total.
+##Params                                            DEBUG No objects passing selection criteria... Container has 5 Entries in total.
 SimplePoolReplica1.root                             DEBUG --> Access   DbContainer  READ      [ROOT_TreeIndex] POOLContainer(DataHeader)
 POOLContainer(DataHeader)                           DEBUG Opening
 POOLContainer(DataHeader)                           DEBUG    attributes# = 1
@@ -577,7 +577,7 @@ ReadData                                             INFO Hit x = 2030.12 y = 46
 AthenaEventLoopMgr                                   INFO   ===>>>  done processing event #4294967316, run #1 10 events processed so far  <<<===
 RootDatabase                                        DEBUG Closing DB SimplePoolReplica1.root
 EventSelector                                       DEBUG Try item: "EmptyPoolFile.root" from the collection list.
-PoolSvc                                             DEBUG createCollection() type=POOL, connection=PFN:EmptyPoolFile.root, name=Input, contextID=0
+PoolSvc                                             DEBUG connectCollection() type=POOL, connection=PFN:EmptyPoolFile.root, name=Input, contextID=0
 EmptyPoolFile.root                                  DEBUG --> Access   DbContainer  READ      [ROOT_All] ##Shapes
 EmptyPoolFile.root                                  DEBUG --> Access   DbContainer  READ      [ROOT_All] ##Shapes
 ##Shapes                                            DEBUG Opening
@@ -602,7 +602,7 @@ EmptyPoolFile.root                                  DEBUG --> Access   DbContain
 EmptyPoolFile.root                                  DEBUG --->Reading Param:PFN=[EmptyPoolFile.root]
 EmptyPoolFile.root                                  DEBUG --->Reading Param:POOL_CONTAINERNAME_EVENTTAG=[POOLCollectionTree]
 EmptyPoolFile.root                                  DEBUG --->Reading Param:POOL_CONTAINERNAME_DATAHEADER=[POOLContainer]
-##Params                                            DEBUG No objects passing selection criteria... Container has 6 Entries in total.
+##Params                                            DEBUG No objects passing selection criteria... Container has 5 Entries in total.
 EventSelector                                       DEBUG No events found in: EmptyPoolFile.root skipped!!!
 MetaDataSvc                                         DEBUG handle() BeginInputFile for EmptyPoolFile.root
 MetaDataSvc                                         DEBUG initInputMetaDataStore: file name EmptyPoolFile.root
@@ -626,7 +626,7 @@ MetaDataSvc                                         DEBUG handle() EndInputFile 
 MetaDataSvc                                         DEBUG retireMetadataSource: eventless EmptyPoolFile.root
 RootDatabase                                        DEBUG Closing DB EmptyPoolFile.root
 EventSelector                                       DEBUG Try item: "SimplePoolFile2.root" from the collection list.
-PoolSvc                                             DEBUG createCollection() type=POOL, connection=PFN:SimplePoolFile2.root, name=Input, contextID=0
+PoolSvc                                             DEBUG connectCollection() type=POOL, connection=PFN:SimplePoolFile2.root, name=Input, contextID=0
 SimplePoolFile2.root                                DEBUG --> Access   DbContainer  READ      [ROOT_All] ##Shapes
 SimplePoolFile2.root                                DEBUG --> Access   DbContainer  READ      [ROOT_All] ##Shapes
 ##Shapes                                            DEBUG Opening
@@ -655,7 +655,7 @@ SimplePoolFile2.root                                DEBUG --> Access   DbContain
 SimplePoolFile2.root                                DEBUG --->Reading Param:PFN=[SimplePoolFile2.root]
 SimplePoolFile2.root                                DEBUG --->Reading Param:POOL_CONTAINERNAME_EVENTTAG=[POOLCollectionTree]
 SimplePoolFile2.root                                DEBUG --->Reading Param:POOL_CONTAINERNAME_DATAHEADER=[POOLContainer]
-##Params                                            DEBUG No objects passing selection criteria... Container has 6 Entries in total.
+##Params                                            DEBUG No objects passing selection criteria... Container has 5 Entries in total.
 SimplePoolFile2.root                                DEBUG --> Access   DbContainer  READ      [ROOT_TreeIndex] POOLContainer(DataHeader)
 POOLContainer(DataHeader)                           DEBUG Opening
 POOLContainer(DataHeader)                           DEBUG    attributes# = 1
@@ -1355,7 +1355,7 @@ ReadData                                             INFO Hit x = 2030.12 y = 46
 AthenaEventLoopMgr                                   INFO   ===>>>  done processing event #4294967316, run #1 30 events processed so far  <<<===
 RootDatabase                                        DEBUG Closing DB SimplePoolFile2.root
 EventSelector                                       DEBUG Try item: "SimplePoolFile4.root" from the collection list.
-PoolSvc                                             DEBUG createCollection() type=POOL, connection=PFN:SimplePoolFile4.root, name=Input, contextID=0
+PoolSvc                                             DEBUG connectCollection() type=POOL, connection=PFN:SimplePoolFile4.root, name=Input, contextID=0
 SimplePoolFile4.root                                DEBUG --> Access   DbContainer  READ      [ROOT_All] ##Shapes
 SimplePoolFile4.root                                DEBUG --> Access   DbContainer  READ      [ROOT_All] ##Shapes
 ##Shapes                                            DEBUG Opening
@@ -1384,7 +1384,7 @@ SimplePoolFile4.root                                DEBUG --> Access   DbContain
 SimplePoolFile4.root                                DEBUG --->Reading Param:PFN=[SimplePoolFile4.root]
 SimplePoolFile4.root                                DEBUG --->Reading Param:POOL_CONTAINERNAME_EVENTTAG=[POOLCollectionTree]
 SimplePoolFile4.root                                DEBUG --->Reading Param:POOL_CONTAINERNAME_DATAHEADER=[POOLContainer]
-##Params                                            DEBUG No objects passing selection criteria... Container has 6 Entries in total.
+##Params                                            DEBUG No objects passing selection criteria... Container has 5 Entries in total.
 SimplePoolFile4.root                                DEBUG --> Access   DbContainer  READ      [ROOT_TreeIndex] POOLContainer(DataHeader)
 POOLContainer(DataHeader)                           DEBUG Opening
 POOLContainer(DataHeader)                           DEBUG    attributes# = 1

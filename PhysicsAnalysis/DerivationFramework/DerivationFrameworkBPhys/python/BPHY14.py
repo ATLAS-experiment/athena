@@ -156,7 +156,7 @@ def BPHY14Cfg(flags):
        BPHY14ThinningTools.append(BPHY14PhotonTPThinningTool)
        BPHY14TruthThinTool = CompFactory.DerivationFramework.GenericTruthThinning(name  = "BPHY14TruthThinTool",
                                                                 StreamName = streamName,
-                                                                ParticleSelectionString = "TruthParticles.pdgId == 22 || TruthParticles.pdgId == 443 || TruthParticles.pdgId == 100443 || TruthParticles.pdgId == 553 || TruthParticles.pdgId == 100553 || TruthParticles.pdgId == 200553",
+                                                                ParticleSelectionString = "TruthParticles.isPhoton || TruthParticles.pdgId == 443 || TruthParticles.pdgId == 100443 || TruthParticles.pdgId == 553 || TruthParticles.pdgId == 100553 || TruthParticles.pdgId == 200553",
                                                                 PreserveDescendants     = True,
                                                                 PreserveAncestors      = True)
        if isSimulation:

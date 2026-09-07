@@ -1,5 +1,5 @@
 /*
-Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TRTMonitoringAlg.h"
@@ -51,7 +51,7 @@ StatusCode TRTMonitoringAlg::fillHistograms(const EventContext& context) const {
   auto passedL1 = [](unsigned int bits) { return (bits & TrigDefs::L1_isPassedBeforePrescale) != 0; };
   auto activeHLT = [](unsigned int bits) { return (bits & TrigDefs::EF_prescaled) == 0; };
   auto isHLT = [](const std::string& name) { return name.compare(0, 4, "HLT_") == 0; };
-  auto isRefPassed = [trigDecTool](const std::string& ref) { return trigDecTool->isPassed(ref, TrigDefs::requireDecision); };
+  auto isRefPassed = [&trigDecTool](const std::string& ref) { return trigDecTool->isPassed(ref, TrigDefs::requireDecision); };
 
   for (const auto& trig : m_triggerList) {
     // make an "or" of all reference triggers

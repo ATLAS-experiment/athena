@@ -48,6 +48,7 @@
 #include <Acts/Surfaces/LineSurface.hpp>
 #include <Acts/Surfaces/RectangleBounds.hpp>
 #include <Acts/Visualization/ObjVisualization3D.hpp>
+#include <Acts/Visualization/ViewConfig.hpp>
 #include <Acts/Geometry/detail/TrackingGeometryPrintVisitor.hpp>
 
 // PACKAGE
@@ -67,6 +68,25 @@
 #include <stdexcept>
 
 using namespace Acts::UnitLiterals;
+
+namespace {
+  /// Build a ViewConfigFunc selecting one of three configurations per geometry
+  /// object, replacing the deprecated three-ViewConfig visualize() overload.
+  Acts::ViewConfigFunc viewConfigFunc(const Acts::ViewConfig& volumeCfg,
+                                      const Acts::ViewConfig& portalCfg,
+                                      const Acts::ViewConfig& sensitiveCfg) {
+    //coverity[AUTO_CAUSES_COPY]
+    return [volumeCfg, portalCfg, sensitiveCfg](const Acts::GeometryObject& geoObj) {
+      if (geoObj.geometryId().boundary() != 0) {
+        return portalCfg;
+      }
+      if (geoObj.geometryId().sensitive() != 0) {
+        return sensitiveCfg;
+      }
+      return volumeCfg;
+    };
+  }
+}
 
 namespace ActsTrk{
 TrackingGeometrySvc::TrackingGeometrySvc(const std::string &name,
@@ -204,18 +224,18 @@ StatusCode TrackingGeometrySvc::initialize() {
 
     if (m_objDebugOutput) {
       Acts::ObjVisualization3D vis;
-      m_trackingGeometry->visualize(vis, getNominalContext().context(), {.visible = false},
-                                  {.visible = false}, {.visible = true});
+      m_trackingGeometry->visualize(vis, getNominalContext().context(),
+                                  viewConfigFunc({.visible = false}, {.visible = false}, {.visible = true}));
       vis.write("blueprint_sensitive.obj");
       vis.clear();
 
-      m_trackingGeometry->visualize(vis, getNominalContext().context(), {.visible = true},
-                                  {.visible = false}, {.visible = false});
+      m_trackingGeometry->visualize(vis, getNominalContext().context(),
+                                  viewConfigFunc({.visible = true}, {.visible = false}, {.visible = false}));
       vis.write("blueprint_volume.obj");
       vis.clear();
 
-      m_trackingGeometry->visualize(vis, getNominalContext().context(), {.visible = false},
-                                  {.visible = true}, {.visible = false});
+      m_trackingGeometry->visualize(vis, getNominalContext().context(),
+                                  viewConfigFunc({.visible = false}, {.visible = true}, {.visible = false}));
       vis.write("blueprint_portals.obj");
     }
     if (m_printGeo) {

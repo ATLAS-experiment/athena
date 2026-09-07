@@ -22,7 +22,6 @@ StatusCode DeviceTripletSeedingAlg::initialize()
   ATH_MSG_DEBUG("Initializing " << name());
 
   ATH_CHECK(m_seedingAlgProviderTool.retrieve());
-  ATH_CHECK(m_deviceMR.retrieve());
   ATH_CHECK(m_inputPixelSPKey.initialize());
   ATH_CHECK(m_outputPixelSeedsKey.initialize());
 
@@ -85,17 +84,15 @@ StatusCode DeviceTripletSeedingAlg::execute(const EventContext& ctx) const
   auto inputTracccPixelSpacepoints = SG::makeHandle(m_inputPixelSPKey, ctx);
   ATH_CHECK(inputTracccPixelSpacepoints.isValid());
   ATH_MSG_DEBUG("Read traccc spacepoints from '"
-                         << inputTracccPixelSpacepoints.key() << "'");         
+                         << inputTracccPixelSpacepoints.key() << "'");
 
   // ---- 2. Get traccc seeding alg ---------------------------------------------
-  
-  auto seeding_pair = m_seedingAlgProviderTool->getTripletSeedingAlgorithm(ctx, m_seedfinder, m_seedfilter);
-  std::shared_ptr<const traccc::device::triplet_seeding_algorithm> seeding_alg = seeding_pair.second;
-  
+  auto seeding_alg = m_seedingAlgProviderTool->getTripletSeedingAlgorithm(ctx, m_seedfinder, m_seedfilter);
+
   // ---- 3. Run traccc pixel seed formation ---------------------------------------------
   traccc::edm::seed_collection::buffer pixel_seeds_gpu_buffer = (*seeding_alg)(*inputTracccPixelSpacepoints);
 
-  ATH_MSG_DEBUG("Reconstructed " << (seeding_pair.first)->get_size(pixel_seeds_gpu_buffer) << " pixel seeds.");
+  ATH_MSG_DEBUG("Reconstructed " << seeding_alg.copy().get_size(pixel_seeds_gpu_buffer) << " pixel seeds.");
 
   // ---- 4. Write output traccc seeds to StoreGate -------------------------
   auto outputTracccPixelSeeds = SG::makeHandle(m_outputPixelSeedsKey, ctx);

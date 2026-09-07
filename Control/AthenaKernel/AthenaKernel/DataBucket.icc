@@ -9,7 +9,6 @@
 #include "AthenaKernel/BaseInfo.h"
 #include "AthenaKernel/tools/safe_clid.h"
 #include "SGCore/ILockable.h"
-#include "CxxUtils/AthUnlikelyMacros.h"
 #include "CxxUtils/checker_macros.h"
 
 #include <type_traits>
@@ -110,7 +109,7 @@ SG::DataBucket<T>::cast (CLID clid,
                          bool isConst /*=true*/)
 {
   // First see if we're asking for class T.
-  if (ATH_LIKELY (clid == classID())) {
+  if  (clid == classID()) [[likely]] {
     return m_ptr;
   }
 
@@ -165,7 +164,7 @@ void* SG::DataBucket<T>::cast (const std::type_info& tinfo,
                                bool isConst /*= true*/)
 {
   // First see if we're asking for class T.
-  if (ATH_LIKELY (tinfo == typeid(T))) {
+  if (tinfo == typeid(T)) [[likely]] {
     return m_ptr;
   }
 

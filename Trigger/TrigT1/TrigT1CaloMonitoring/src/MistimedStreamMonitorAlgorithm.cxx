@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -7,7 +7,7 @@
 #include "AthContainers/ConstAccessor.h"
 #include <iostream>
 #include <vector>
-#include <TMath.h>
+#include <cmath>
 
 MistimedStreamMonitorAlgorithm::MistimedStreamMonitorAlgorithm( const std::string& name, ISvcLocator* pSvcLocator )
   : AthMonitorAlgorithm(name,pSvcLocator)
@@ -325,7 +325,7 @@ StatusCode MistimedStreamMonitorAlgorithm::fillHistograms( const EventContext& c
                 dPhi = dPhi1;
               }
             }
-            dR = TMath::Sqrt(dEta*dEta+dPhi*dPhi);
+            dR = std::sqrt(dEta*dEta+dPhi*dPhi);
             if ((dR < .2) and (etIn > 160.))  {
               overlap = true; 
             }
@@ -366,7 +366,7 @@ StatusCode MistimedStreamMonitorAlgorithm::fillHistograms( const EventContext& c
                     dPhi = dPhi1;
                   }
                 }
-                dR = TMath::Sqrt(dEta*dEta+dPhi*dPhi);
+                dR = std::sqrt(dEta*dEta+dPhi*dPhi);
                 if ((dR < .2) and (etIn > 100.))  {
                   overlap = true; 
                 }
@@ -476,7 +476,7 @@ StatusCode MistimedStreamMonitorAlgorithm::fillHistograms( const EventContext& c
             dPhi = dPhi1;
           }
         }
-        dR = TMath::Sqrt(dEta*dEta+dPhi*dPhi);
+        dR = std::sqrt(dEta*dEta+dPhi*dPhi);
         if ((dR < .2) and (etIn > 26.) and (etOut > 26.)){ 
           overlap = true; 
         }
@@ -1095,7 +1095,7 @@ StatusCode  MistimedStreamMonitorAlgorithm::makeTowerCPM( const xAOD::CPMTower* 
   monCPM.etaScaled = etaMod;
 
 
-  vecMonCPM.push_back(monCPM);
+  vecMonCPM.push_back(std::move(monCPM));
    
   return StatusCode::SUCCESS; 
 }
@@ -1157,7 +1157,7 @@ StatusCode  MistimedStreamMonitorAlgorithm::makeTowerJE( const xAOD::JetElement*
     monJE.phiScaled.push_back(phiMod + phiOffset);
   }      
 
-  vecMonJE.push_back(monJE);
+  vecMonJE.push_back(std::move(monJE));
 
   return StatusCode::SUCCESS; 
 }

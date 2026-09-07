@@ -12,11 +12,13 @@ atlas_add_component( ActsDataPreparation
    LINK_LIBRARIES
    Acts::Core
    ActsCalibratorsLib
+   ActsEventLib
    ActsGeometryLib
    ActsGeometryInterfacesLib
    ActsToolInterfacesLib
    AthContainers
    AthenaBaseComps
+   AthenaKernel
    AthenaMonitoringKernelLib
    BeamSpotConditionsData
    GaudiKernel

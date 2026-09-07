@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "PadEmulatorTool.h"
@@ -541,7 +541,7 @@ namespace NSWL1 {
 
         if(problematicSectors.empty()) continue;
         for(const auto& sectoritr : problematicSectors) {
-          const auto sector = sectoritr.first;
+          const auto & sector = sectoritr.first;
           m_maskedPatterns.try_emplace(sector, std::vector<std::tuple<uint32_t, uint32_t>>());
           m_maskedPatterns.at(sector).push_back(std::make_tuple(patternitter, sectoritr.second));
         }

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -8,7 +8,6 @@
 
 #include "TrkG4UserActions/GeantFollowerMS.h"
 #include "TrkG4UserActions/IGeantFollowerMSHelper.h"
-#include "CxxUtils/AthUnlikelyMacros.h"
 
 #include "G4Event.hh"
 #include "G4Step.hh"
@@ -79,11 +78,11 @@ namespace G4UA
     const G4TouchableHistory* touchHist =
       static_cast<const G4TouchableHistory*>(aStep->GetPreStepPoint()->GetTouchable());
 
-    if(ATH_LIKELY(touchHist)) {
+    if(touchHist) [[likely]] {
       // G4LogicalVolume
       const G4LogicalVolume *lv= touchHist->GetVolume()->GetLogicalVolume();
 
-      if(ATH_LIKELY(lv)) {
+      if(lv) [[likely]] {
         const G4Material *mat    = lv->GetMaterial();
         // the step information
         double steplength     = aStep->GetStepLength();

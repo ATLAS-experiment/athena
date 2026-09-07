@@ -21,7 +21,7 @@ namespace MuonGM {
     class RDBReaderAtlas : public DBReader, public AthMessaging {
       public:
         RDBReaderAtlas(StoreGateSvc *pDetStore, IRDBAccessSvc *m_pRDBAccess, const std::string& geoTag, const std::string& geoNode, 
-                       const std::map<std::string, std::string>& asciiFileDBMap);
+                       const std::map<std::string, std::string, std::less<>>& asciiFileDBMap);
         virtual ~RDBReaderAtlas() = default;
         virtual StatusCode ProcessDB(MYSQL& mysql) override;
 

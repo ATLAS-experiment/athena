@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "ZDC_EscapedEnergyProcessing.h"
@@ -64,7 +64,7 @@ G4bool ZDC_EscapedEnergyProcessing::Process( G4Step* fakeStep ) {
   G4VPhysicalVolume* physicalVolume = a_touchableHandle->GetVolume();
 
   // If the volume is valid...
-  if (ATH_LIKELY(physicalVolume))
+  if (physicalVolume) [[likely]]
     {
 #ifdef DEBUG_PROCESS
       G4cout << "ZdcG4::ZDC_EscapedEnergyProcessing::Process - "
@@ -84,7 +84,7 @@ G4bool ZDC_EscapedEnergyProcessing::Process( G4Step* fakeStep ) {
       G4VSensitiveDetector* sensitiveDetector =
         logicalVolume->GetSensitiveDetector();
 
-      if (ATH_LIKELY(sensitiveDetector)){
+      if (sensitiveDetector) [[likely]] {
 #ifdef DEBUG_PROCESS
           G4cout << "   ... which has sensitive detector '" << sensitiveDetector->GetName() << "'" << G4endl;
 #endif
@@ -104,7 +104,7 @@ G4bool ZDC_EscapedEnergyProcessing::Process( G4Step* fakeStep ) {
                       zdcG4CalibSD->SpecialHit(fakeStep,energies);
                     }
                 }// -- for (1)
-              if(ATH_UNLIKELY(!found)){
+              if (!found) [[unlikely]] {
 #ifdef DEBUG_PROCESS
                   G4cout << "ZdcG4::ZDC_EscapedEnergyProcessing::Process - "
                          << " particle (x,y,z)=("
@@ -127,7 +127,7 @@ G4bool ZDC_EscapedEnergyProcessing::Process( G4Step* fakeStep ) {
             } else { // zdcG4MultSD == 0
               // Next possibility: ZDC_G4CalibSD
               zdcG4CalibSD = dynamic_cast<ZDC_G4CalibSD*>(sensitiveDetector);
-              if(ATH_UNLIKELY(zdcG4CalibSD)){
+              if (zdcG4CalibSD) [[unlikely]] {
 #ifdef DEBUG_PROCESS
                   G4cout << "   ... which is a ZDC_G4CalibSD " << G4endl;
 #endif

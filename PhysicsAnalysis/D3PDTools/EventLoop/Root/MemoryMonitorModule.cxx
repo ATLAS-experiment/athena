@@ -48,7 +48,10 @@ namespace EL
       {
         m_executeNext += m_executeStep;
         if (m_executeNext == m_executeTarget)
-          m_executeStep *= 10, m_executeTarget *= 10;
+        {
+          m_executeStep *= 10;
+          m_executeTarget *= 10;
+        }
 
         ANA_CHECK (printMemoryUsage ("onExecute(" + std::to_string (m_numExecute) + ")"));
       }

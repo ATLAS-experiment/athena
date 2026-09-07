@@ -233,109 +233,109 @@ StatusCode ISF::ActsFatrasSimTool::simulateVector(
               fisfp->updatePosition(ActsTrk::convertPosFromActs(itr->fourPosition()).first);
               ATH_MSG_DEBUG(name() << " After simulation, primary particle state: " << *fisfp);
               if (!m_particleFilter.empty() && !m_particleFilter->passFilter(*fisfp)) {
-                ATH_MSG_VERBOSE("ISFParticle" << fisfp << "  after simulation does not pass selection. Ignoring for boundary check.");
-                continue;
-              }
-              ATH_MSG_DEBUG(name() << " [ISF] original GeoID: " <<  m_geoIDSvc->identifyGeoID(*isfp) 
-                            << " new particle GeoID: " << m_geoIDSvc->identifyGeoID(*fisfp) 
-                            << ", nextGeoID: " << m_geoIDSvc->identifyNextGeoID(*fisfp));
+                ATH_MSG_VERBOSE("ISFParticle" << fisfp << " after simulation does not pass selection. Ignoring for boundary check.");
+              } else {
+                ATH_MSG_DEBUG(name() << " [ISF] original GeoID: " <<  m_geoIDSvc->identifyGeoID(*isfp) 
+                              << " new particle GeoID: " << m_geoIDSvc->identifyGeoID(*fisfp) 
+                              << ", nextGeoID: " << m_geoIDSvc->identifyNextGeoID(*fisfp));
 
-              // Use ActsExtrapolationTool
-              ATH_MSG_DEBUG(name() << " Extrapolating using ActsExtrapolationTool");
-              
-              // Convert to ACTS BoundTrackParameters for extrapolation
-              Acts::BoundTrackParameters startParams = Acts::BoundTrackParameters::createCurvilinear(
-                  itr->fourPosition(), itr->direction(), itr->qOverP(), std::nullopt, itr->hypothesis());
+                // Use ActsExtrapolationTool
+                ATH_MSG_DEBUG(name() << " Extrapolating using ActsExtrapolationTool");
+                
+                // Convert to ACTS BoundTrackParameters for extrapolation
+                Acts::BoundTrackParameters startParams = Acts::BoundTrackParameters::createCurvilinear(
+                    itr->fourPosition(), itr->direction(), itr->qOverP(), std::nullopt, itr->hypothesis());
 
-              //=============== try if a starting surface exist before passing to Extrapolator ==
-              auto do_exit_startsurface = checkStartSurface(mctx, anygctx, surfaceCheckPropagator, startParams);
-              ATH_MSG_DEBUG(name() << " checkStartSurface returned: " << do_exit_startsurface);
-              if (do_exit_startsurface) {
-                ATH_MSG_DEBUG(name() << " Particle starts at a valid surface, doing extrapolation...");
-              
-                // Extrapolate and get propagation steps
-                auto nextGeoID = AtlasDetDescr::fUndefinedAtlasRegion;
-                Amg::Vector3D entryPos{Amg::Vector3D::Zero()};
-                try {
-                  auto stepsResult = m_extrapolationTool->propagationSteps(ctx, startParams, Acts::Direction::Forward());
-                  auto steps = stepsResult.value().first;
-                  ATH_MSG_DEBUG(name() << " Number of propagation steps: " << steps.size());
-                  if (steps.size() != 0) {
-                    for (const auto& step : steps) {
-                      ATH_MSG_DEBUG(name() << " [Acts] Step at position " << step.position 
-                                    << " (eta " << Acts::VectorHelpers::eta(step.position) 
-                                    << ") with GeoID " << step.geoID);
-                      entryPos = convertPos3FromActs(step.position);
-                      nextGeoID = m_geoIDSvc->identifyGeoID(entryPos);
-                      ATH_MSG_DEBUG(name() << " [Acts] GeoID from service: " << nextGeoID);
-                      if (nextGeoID > AtlasDetDescr::fAtlasID) { // Valid boundary crossing
-                        ATH_MSG_DEBUG(name() << " Boundary crossing detected at GeoID " << nextGeoID);
-                        break;
+                //=============== try if a starting surface exist before passing to Extrapolator ==
+                auto do_exit_startsurface = checkStartSurface(mctx, anygctx, surfaceCheckPropagator, startParams);
+                ATH_MSG_DEBUG(name() << " checkStartSurface returned: " << do_exit_startsurface);
+                if (do_exit_startsurface) {
+                  ATH_MSG_DEBUG(name() << " Particle starts at a valid surface, doing extrapolation...");
+                
+                  // Extrapolate and get propagation steps
+                  auto nextGeoID = AtlasDetDescr::fUndefinedAtlasRegion;
+                  Amg::Vector3D entryPos{Amg::Vector3D::Zero()};
+                  try {
+                    auto stepsResult = m_extrapolationTool->propagationSteps(ctx, startParams, Acts::Direction::Forward());
+                    auto steps = stepsResult.value().first;
+                    ATH_MSG_DEBUG(name() << " Number of propagation steps: " << steps.size());
+                    if (steps.size() != 0) {
+                      for (const auto& step : steps) {
+                        ATH_MSG_DEBUG(name() << " [Acts] Step at position " << step.position 
+                                      << " (eta " << Acts::VectorHelpers::eta(step.position) 
+                                      << ") with GeoID " << step.geoID);
+                        entryPos = convertPos3FromActs(step.position);
+                        nextGeoID = m_geoIDSvc->identifyGeoID(entryPos);
+                        ATH_MSG_DEBUG(name() << " [Acts] GeoID from service: " << nextGeoID);
+                        if (nextGeoID > AtlasDetDescr::fAtlasID) { // Valid boundary crossing
+                          ATH_MSG_DEBUG(name() << " Boundary crossing detected at GeoID " << nextGeoID);
+                          break;
+                        }
                       }
+                    } else {
+                      ATH_MSG_WARNING(name() << " No propagation steps returned by ActsExtrapolationTool");
                     }
-                  } else {
-                    ATH_MSG_WARNING(name() << " No propagation steps returned by ActsExtrapolationTool");
                   }
-                }
-                catch (const std::exception& e) {
-                  ATH_MSG_WARNING(name() << " extrapolation [" << m_extrapolationTool.name() << "] failed: " << e.what() << "\nSkip boundary check for " << *fisfp);
-                  break; // Skip boundary check for this particle and continue with next one
-                }
+                  catch (const std::exception& e) {
+                    ATH_MSG_WARNING(name() << " extrapolation [" << m_extrapolationTool.name() << "] failed: " << e.what() << "\nSkip boundary check for " << *fisfp);
+                    break; // Skip boundary check for this particle and continue with next one
+                  }
 
-                if (fisfp && nextGeoID > AtlasDetDescr::fAtlasID){
-                  const auto mom = ActsTrk::convertMomFromActs(itr->fourMomentum()).first;
-                  double mass = itr->mass() / Acts::UnitConstants::MeV;
-                  double charge = itr->charge();
-                  int pdgid = itr->pdg();
-                  auto properTime = ActsTrk::timeToAthena(itr->time());
-                  
-                  // Create boundary crossing particle
-                  newisfp = std::make_unique<ISF::ISFParticle>(entryPos, mom, mass, charge, pdgid, isfp->status(), properTime, *isfp, isfp->id(), isfp->barcode());
-                  newisfp->setNextGeoID(nextGeoID);
-                  ATH_MSG_DEBUG(name() << " Truthbinding of parent ISFParticle: " << (isfp->getTruthBinding() ? "exists" : "null"));
-                  if (isfp->getTruthBinding()) {
-                    ATH_MSG_DEBUG(name() << " Current GenParticle: " << isfp->getTruthBinding()->getCurrentGenParticle());
+                  if (fisfp && nextGeoID > AtlasDetDescr::fAtlasID){
+                    const auto mom = ActsTrk::convertMomFromActs(itr->fourMomentum()).first;
+                    double mass = itr->mass() / Acts::UnitConstants::MeV;
+                    double charge = itr->charge();
+                    int pdgid = itr->pdg();
+                    auto properTime = ActsTrk::timeToAthena(itr->time());
+                    
+                    // Create boundary crossing particle
+                    newisfp = std::make_unique<ISF::ISFParticle>(entryPos, mom, mass, charge, pdgid, isfp->status(), properTime, *isfp, isfp->id(), isfp->barcode());
+                    newisfp->setNextGeoID(nextGeoID);
+                    ATH_MSG_DEBUG(name() << " Truthbinding of parent ISFParticle: " << (isfp->getTruthBinding() ? "exists" : "null"));
+                    if (isfp->getTruthBinding()) {
+                      ATH_MSG_DEBUG(name() << " Current GenParticle: " << isfp->getTruthBinding()->getCurrentGenParticle());
+                    }
+                    ATH_MSG_DEBUG(name() << " Created new ISFParticle at boundary with nextGeoID: " 
+                                    << AtlasDetDescr::AtlasRegionHelper::getName(nextGeoID) 
+                                    << "(" << nextGeoID << ")");
                   }
-                  ATH_MSG_DEBUG(name() << " Created new ISFParticle at boundary with nextGeoID: " 
-                                  << AtlasDetDescr::AtlasRegionHelper::getName(nextGeoID) 
-                                  << "(" << nextGeoID << ")");
-                }
 
-                // Handle boundary crossing particle separately - DON'T add to vecsecisfp yet
-                if (newisfp && nextGeoID > AtlasDetDescr::fAtlasID) {
-                  ATH_MSG_DEBUG(name() << " [ISF] Processing boundary particle with nextGeoID: " 
-                                << AtlasDetDescr::AtlasRegionHelper::getName(newisfp->nextGeoID()) 
-                                << "(" << newisfp->nextGeoID() << ")");
-                  
-                  // Identify Entrylayer
-                  ISF::EntryLayer entryLayer = ISF::fUnsetEntryLayer;
-                  
-                  switch(nextGeoID) {
-                    case AtlasDetDescr::fAtlasCalo:
-                      entryLayer = ISF::fAtlasCaloEntry;
-                      ATH_MSG_DEBUG("Particle crossing to Calorimeter");
-                      break;
-                    case AtlasDetDescr::fAtlasMS:
-                      entryLayer = ISF::fAtlasMuonEntry;
-                      ATH_MSG_DEBUG("Particle crossing to Muon System");
-                      break;
-                    default:
-                      ATH_MSG_DEBUG("Particle at unspecified boundary");
-                      break;
-                  }
-                  
-                  if (entryLayer != ISF::fUnsetEntryLayer) {
-                        vecsecisfp->push_back(newisfp.release()); // Add boundary crossing particle to secondaries vector
-                  } else {
-                    ATH_MSG_WARNING("Invalid entry layer for boundary particle");
+                  // Handle boundary crossing particle separately - DON'T add to vecsecisfp yet
+                  if (newisfp && nextGeoID > AtlasDetDescr::fAtlasID) {
+                    ATH_MSG_DEBUG(name() << " [ISF] Processing boundary particle with nextGeoID: " 
+                                  << AtlasDetDescr::AtlasRegionHelper::getName(newisfp->nextGeoID()) 
+                                  << "(" << newisfp->nextGeoID() << ")");
+                    
+                    // Identify Entrylayer
+                    ISF::EntryLayer entryLayer = ISF::fUnsetEntryLayer;
+                    
+                    switch(nextGeoID) {
+                      case AtlasDetDescr::fAtlasCalo:
+                        entryLayer = ISF::fAtlasCaloEntry;
+                        ATH_MSG_DEBUG("Particle crossing to Calorimeter");
+                        break;
+                      case AtlasDetDescr::fAtlasMS:
+                        entryLayer = ISF::fAtlasMuonEntry;
+                        ATH_MSG_DEBUG("Particle crossing to Muon System");
+                        break;
+                      default:
+                        ATH_MSG_DEBUG("Particle at unspecified boundary");
+                        break;
+                    }
+                    
+                    if (entryLayer != ISF::fUnsetEntryLayer) {
+                          vecsecisfp->push_back(newisfp.release()); // Add boundary crossing particle to secondaries vector
+                    } else {
+                      ATH_MSG_WARNING("Invalid entry layer for boundary particle");
+                    }
                   }
                 }
-              }
-              else {
-                ATH_MSG_DEBUG(name() << " No starting surface found, skipping boundary check and extrapolation.");
-              }
-            } // end of !isKilled
-          } // end of primary vs secondary
+                else {
+                  ATH_MSG_DEBUG(name() << " No starting surface found, skipping boundary check and extrapolation.");
+                }
+              }  // end of !m_particleFilter.empty() check
+            }  // end of !isKilled
+          } // end of primary particle handling
           ++itr;
         } // end of while loop over particles in generation
 

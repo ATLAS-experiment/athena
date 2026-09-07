@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -547,9 +547,10 @@ std::vector<SiHit> PixelPrepDataToxAOD::findAllHitsCompatibleWithCluster( const 
   std::vector<const SiHit* >  multiMatchingHits;
   
   for ( const SiHit* siHit : *sihits) {
-    // Now we have all hits in the module that match lets check to see if they match the cluster
-    // Must be within +/- 1 hits of any hit in the cluster to be included
-    
+    // Match by geometry (SiHit centroid within +/-1 cell of a cluster RDO) or,
+    // failing that, by the SiHit's truth particle having deposited charge in
+    // one of the cluster's RDOs.
+    bool matched = false;
     if ( m_useSiHitsGeometryMatching )
     {
 	HepGeom::Point3D<double>  averagePosition =  siHit->localStartPosition() + siHit->localEndPosition();
@@ -564,11 +565,12 @@ std::vector<SiHit> PixelPrepDataToxAOD::findAllHitsCompatibleWithCluster( const 
 		&& abs( int(diode.phiIndex()) - m_PixelHelper->phi_index( hitIdentifier ) ) <=1 ) 
 	    {
 		multiMatchingHits.push_back(siHit);
+		matched = true;
 		break;
 	    }
 	}
     }
-    else
+    if (!matched)
     {
       auto uid = HepMC::uniqueID(siHit->particleLink());
       for ( const auto& uniqueIDSDOColl : trkUIDs ) {
@@ -815,11 +817,21 @@ void PixelPrepDataToxAOD::addNNInformation(xAOD::TrackMeasurementValidation* xpr
 
   std::vector< std::vector<float> > matrixOfToT (sizeX, std::vector<float>(sizeY,0) );
   std::vector< std::vector<float> > matrixOfCharge(sizeX, std::vector<float>(sizeY,0));
-  // Seed with the module's nominal pitch (from the design), as in
-  // NnClusterizationFactory::createInput; correct for ITk (25x100 / 50x50 um)
-  // where the old literal 0.4 (eta) seed and the >0.1 fill guard were both wrong.
-  std::vector<float> vectorOfPitchesY(sizeY, design->etaPitch());
-  std::vector<float> vectorOfPitchesX(sizeX, design->phiPitch());
+  // Fill the pitch of every window cell from the design, not only the cells
+  // with an RDO, so padding cells carry their real pitch. Cells beyond the
+  // sensor edge resolve to the nearest sub-matrix and take its pitch.
+  std::vector<float> vectorOfPitchesY(sizeY, 0.f);
+  std::vector<float> vectorOfPitchesX(sizeX, 0.f);
+  for (unsigned int iy = 0; iy < sizeY; ++iy) {
+    const int etaIdx = etaPixelIndexWeightedPosition + (static_cast<int>(iy) - centralIndexY);
+    const InDetDD::SiCellId cellId(phiPixelIndexWeightedPosition, etaIdx);
+    vectorOfPitchesY[iy] = design->parameters(cellId).width().xEta();
+  }
+  for (unsigned int ix = 0; ix < sizeX; ++ix) {
+    const int phiIdx = phiPixelIndexWeightedPosition + (static_cast<int>(ix) - centralIndexX);
+    const InDetDD::SiCellId cellId(phiIdx, etaPixelIndexWeightedPosition);
+    vectorOfPitchesX[ix] = design->parameters(cellId).width().xPhi();
+  }
 
 
   //Itererate over all elements hits in the cluster and fill the charge and tot matrices 
@@ -836,9 +848,21 @@ void PixelPrepDataToxAOD::addNNInformation(xAOD::TrackMeasurementValidation* xpr
     Identifier rId =  *rdosBegin;
     int absphiPixelIndex = m_PixelHelper->phi_index(rId)-phiPixelIndexWeightedPosition    + centralIndexX;
     int absetaPixelIndex = m_PixelHelper->eta_index(rId)-etaPixelIndexWeightedPosition + centralIndexY;
-    if (charge != chList.end()){
-      ATH_MSG_VERBOSE( " Phi Index: " << m_PixelHelper->phi_index(rId) << " absphiPixelIndex: " << absphiPixelIndex << " eta Idx: " << m_PixelHelper->eta_index(rId) << " absetaPixelIndex: " << absetaPixelIndex << " charge " << *charge );
-    }
+
+    // rdos, chList and totList are parallel: take this RDO's charge and ToT
+    // before the window checks below, or the entries of an RDO outside the
+    // window are shifted onto the RDOs that follow it.
+    float thisCharge = -1.f;
+    int   thisToT    = -1;
+    if ((not chList.empty()) && charge != chList.end()) { thisCharge = *charge; ++charge; }
+    if ((not totList.empty()) && tot    != totList.end()) { thisToT   = *tot;    ++tot;    }
+
+    ATH_MSG_VERBOSE( " Phi Index: " << m_PixelHelper->phi_index(rId)
+                     << " absphiPixelIndex: " << absphiPixelIndex
+                     << " eta Idx: " << m_PixelHelper->eta_index(rId)
+                     << " absetaPixelIndex: " << absetaPixelIndex
+                     << " charge " << thisCharge );
+
     if (absphiPixelIndex <0 || absphiPixelIndex >= (int)sizeX)
     {
       ATH_MSG_DEBUG(" problem with index: " << absphiPixelIndex << " min: " << 0 << " max: " << sizeX);
@@ -851,26 +875,8 @@ void PixelPrepDataToxAOD::addNNInformation(xAOD::TrackMeasurementValidation* xpr
       continue;
     }
 
-    InDetDD::SiCellId  cellId = de->cellIdFromIdentifier(*rdosBegin);
-    InDetDD::SiDiodesParameters diodeParameters = design->parameters(cellId);
-    float pitchY = diodeParameters.width().xEta();
-    float pitchX = diodeParameters.width().xPhi();
-  
-    if ( (not totList.empty()) && tot    != totList.end()) {
-      matrixOfToT[absphiPixelIndex][absetaPixelIndex]   =*tot;
-      ++tot;
-    } else matrixOfToT[absphiPixelIndex][absetaPixelIndex]   = -1;
-
-    if ( (not chList.empty()) && charge != chList.end()){
-     matrixOfCharge[absphiPixelIndex][absetaPixelIndex]=*charge;
-     ++charge;
-    } else matrixOfCharge[absphiPixelIndex][absetaPixelIndex] = -1;
-  
-    // Store the real per-cell pitch, built the same way as
-    // NnClusterizationFactory::createInput so the dumped training inputs match
-    // the runtime inference inputs.
-    vectorOfPitchesY[absetaPixelIndex]=pitchY;
-    vectorOfPitchesX[absphiPixelIndex]=pitchX;
+    matrixOfToT[absphiPixelIndex][absetaPixelIndex]    = thisToT;
+    matrixOfCharge[absphiPixelIndex][absetaPixelIndex] = thisCharge;
   }//end iteration on rdos
   
 

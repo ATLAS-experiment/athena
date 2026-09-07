@@ -31,8 +31,10 @@ void InfracolorForce::StartTracking(const G4Track* dest) {
     }
     if (dest->GetCurrentStepNumber() != 0) return;
 
-    // Clear old stuff
-    if (m_initialized && m_reactionForce->m_initialized) {
+    // at step 0 this track can't have initialized its own string yet or have a kill flag
+    // if either string has a kill flag, this is residue from an earlier event e.g. a quirk terminated by the looper killer or some other edge case
+    // here we ensure to clear both strings together so that no stale state remains leaving one quirk with a string and the other without
+    if (m_initialized || m_killed || m_reactionForce->m_killed) {
         Clear();
         m_reactionForce->Clear();
     }

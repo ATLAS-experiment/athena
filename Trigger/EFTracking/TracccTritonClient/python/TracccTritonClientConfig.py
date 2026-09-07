@@ -6,8 +6,6 @@ from AthenaConfiguration.ComponentFactory import CompFactory
 
 writeOutput = True
 doTruth = True
-saveTracccEventsToCSV = False
-nEventsToSave = 10
 
 
 def TracccTritonToolCfg(flags, name="TracccTritonTool", **kwargs):
@@ -106,9 +104,7 @@ def TritonTracccTrackMakerCfg(flags, name="TritonTracccTrackMaker", **kwargs):
     track_particles_name = f"{prefix}TrackParticles"
 
     # Configure the TracccTritonTool
-    kwargs.setdefault("TracccTritonTool", acc.popToolsAndMerge(TracccTritonToolCfg(flags,
-                      SaveEventsToCSV=saveTracccEventsToCSV,
-                      MaxEventsToSave=nEventsToSave)))
+    kwargs.setdefault("TracccTritonTool", acc.popToolsAndMerge(TracccTritonToolCfg(flags)))
 
     from ActsConfig.ActsGeometryConfig import ActsTrackingGeometrySvcCfg
     kwargs.setdefault("TrackingGeometrySvc", acc.getPrimaryAndMerge(ActsTrackingGeometrySvcCfg(flags)))
@@ -125,6 +121,33 @@ def TritonTracccTrackMakerCfg(flags, name="TritonTracccTrackMaker", **kwargs):
     except AttributeError:
         flags = flags.cloneAndReplace("Tracking.ActiveConfig",
                                       "Tracking.ITkActsPass")
+
+    # Traccc device detector description needed for the below conversions
+    from ActsGPUGeometry.ActsGPUGeometryConfig import JSONDeviceDetectorDescriptionProviderSvcCfg
+    acc.merge(JSONDeviceDetectorDescriptionProviderSvcCfg(flags,
+        HostConditionsObjectName="TracccHostCondConfig",
+        HostDigitizationObjectName="TracccHostDigitizationConfig",
+        DeviceConditionsObjectName="TracccDeviceCondConfig",
+        DeviceDigitizationObjectName="TracccDeviceDigitizationConfig",
+    ))
+
+    # Convert the Pixel/Strip RDOs into traccc cells
+    from ActsGPUEventCnv.ActsGPUEventCnvConfig import RDOtoTracccCellConverterAlgCfg
+    from AthDeviceComps.AthDeviceCompsConfig import HostCopyToolCfg, HostMemoryResourceToolCfg
+
+    host_mr_for_converter = acc.popToolsAndMerge(HostMemoryResourceToolCfg(flags))
+    device_mr_for_converter = acc.popToolsAndMerge(HostMemoryResourceToolCfg(flags))
+    copies_tool = CompFactory.AthDevice.CopiesAdaptorTool(
+        "TracccCellsHostCopiesTool",
+        HostCopyTool=acc.popToolsAndMerge(HostCopyToolCfg(flags)),
+        DeviceCopyTool=acc.popToolsAndMerge(HostCopyToolCfg(flags)))
+
+    acc.merge(RDOtoTracccCellConverterAlgCfg(flags,
+        HostMR=host_mr_for_converter,
+        DeviceMR=device_mr_for_converter,
+        CopiesTool=copies_tool))
+
+    kwargs.setdefault("TracccCells", "TracccCells")
 
     # Main tracking alg
     acc.addEventAlgo(CompFactory.TritonTracccTrackMaker(name, doTruth=doTruth, **kwargs))

@@ -25,7 +25,7 @@ StatusCode TrigMuonTruthMon :: initialize(){
 }
 
 StatusCode TrigMuonTruthMon :: fillVariablesPerChain(const EventContext &ctx, const std::string &chain) const {
-  ATH_MSG_DEBUG("Filling muon truth monitoring histograms for " << name() << "...");
+  ATH_MSG_DEBUG("Filling muon truth monitoring histograms for " << name() << ", chain " << chain << "...");
 
   SG::ReadHandle<xAOD::TruthParticleContainer> truthMuons(m_muonTruthParticlesKey, ctx); // Access truth muons
   SG::ReadHandle<xAOD::EventInfo> eventInfo(m_EventInfoKey, ctx);                        // Access event info
@@ -84,7 +84,7 @@ StatusCode TrigMuonTruthMon :: fillVariablesPerChain(const EventContext &ctx, co
 
     using var_t = Monitored::Scalar<float>;
     auto fillTruthVars = [&] (var_t& truthEtaVar, var_t& truthPhiVar, var_t& truthPtVar, 
-                                        var_t& truthEndcapPtVar, var_t& truthBarrelPtVar, var_t& truthIntPerBCVar) {
+                              var_t& truthEndcapPtVar, var_t& truthBarrelPtVar, var_t& truthIntPerBCVar) {
       truthPtVar = truthMu->pt()/1e3;
       fill(m_group+"_"+chain,truthPtVar);
       if(std::abs(eta) < 1.05){ 
@@ -108,7 +108,7 @@ StatusCode TrigMuonTruthMon :: fillVariablesPerChain(const EventContext &ctx, co
 
     // Find match truth muons - EFSA matching for msonly chains, otherwise EFCB matching
     const xAOD::Muon* efmuon;
-    if(chain.find("msonly") != std::string::npos){ // Find EFCB muons
+    if(chain.contains("msonly")){ // Find EFCB muons
       efmuon = m_matchTool->matchEFSA(truthMu, chain, passed_EF);
     }
     else{ // Find EFCB muons
@@ -127,24 +127,24 @@ StatusCode TrigMuonTruthMon :: fillVariablesPerChain(const EventContext &ctx, co
       fillTruthVars(MatchedL1truthEta, MatchedL1truthPhi, MatchedL1truthPt, 
         MatchedL1truthEndcapPt, MatchedL1truthBarrelPt, MatchedL1truthIntPerBC);
     }
-    
-    if((l1muon && passed_L1) && !(passed_EF && efmuon)){
-      ATH_MSG_DEBUG("MuonTruthMon: passed L1 but not HLT");
+
+    if (msgLevel(MSG::DEBUG)) {
+        if((l1muon && passed_L1) && !(passed_EF && efmuon)){
+            ATH_MSG_DEBUG("MuonTruthMon: passed L1 but not HLT");
+        }
+
+        if(!(passed_L1 && l1muon) && (passed_EF && efmuon)){
+            ATH_MSG_DEBUG("MuonTruthMon: passed HLT but not L1");
+        }
     }
 
-    if(!(passed_L1 && l1muon) && (passed_EF && efmuon)){
-      ATH_MSG_DEBUG("MuonTruthMon: passed HLT but not L1");
-    }
-
-    const bool isPh2FastReco = chain.find("newFast") != std::string::npos;
     bool isFound = false;
-    // PhaseII fast reco CB is not yet implemented, so for now we will use the L2SA matching for these chains
-    if(chain.find("msonly") != std::string::npos || isPh2FastReco){ // Find L2SA muons
-      isFound = isPh2FastReco 
+    if(chain.contains("msonly")){ // Find L2SA muons
+      isFound = chain.contains("newFast") 
         ? m_matchTool->matchFastRecoSA(truthMu, chain, passed_L2CB) != nullptr
         : m_matchTool->matchL2SA(truthMu, chain, passed_L2CB) != nullptr;
 
-    } else{ // Find EFCB muons
+    } else{ // Find L2CB muons
       isFound = m_matchTool->matchL2CB(truthMu, chain, passed_L2CB) != nullptr;
     }
     ATH_MSG_VERBOSE("L2CB matching: passed: " << passed_L2CB << ", found:" << isFound);

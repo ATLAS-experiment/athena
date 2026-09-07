@@ -16,7 +16,6 @@
 #include "StorageSvc/DbDatabase.h"
 #include "StorageSvc/DbColumn.h"
 #include "StorageSvc/DbTypeInfo.h"
-#include "StorageSvc/DbReflex.h"
 #include "CxxUtils/checker_macros.h"
 
 #include "Gaudi/PluginService.h"
@@ -352,10 +351,11 @@ StatusCode RootTreeContainer::open( DbDatabase& dbH,
                                   const DbTypeInfo* info, 
                                   Io::IoFlag mode)  
 {
+   std::string err_msg;
    m_branches.clear();
    m_name = nam;
    ATH_MSG_DEBUG("Opening");
-   if ( dbH.isValid() && info )    {
+   if ( dbH.isValid() && info ) {
       const DbTypeInfo::Columns& cols = info->columns();
       DbTypeInfo::Columns::const_iterator i;
       std::string treeName(nam);
@@ -567,21 +567,19 @@ StatusCode RootTreeContainer::open( DbDatabase& dbH,
                m_rootDb->registerBranchContainer(this);
                return SUCCESS;
             }
-            debugBreak(nam, "Cannot open ROOT container(Tree/Branch)", false);
-            return res;
          }
-         catch( const std::exception& e )    {
-            debugBreak(nam, "Cannot open ROOT container(Tree/Branch)", e, false);
-            res = FAILURE;
+         catch( const std::exception& e ) {
+            err_msg = e.what();
          }
-         catch (...)   {
-            ATH_MSG_FATAL("Unknown exception occurred. Cannot give more details.");
-            debugBreak(nam, "Cannot open ROOT container(Tree/Branch)");
-            res = FAILURE;
+         catch (...) {
+            err_msg = "Unknown exception occurred. Cannot give more details.";
          }
       }
+   } else {
+      err_msg = "invalid Database handle.";
    }
-   ATH_MSG_ERROR("Cannot open container '" << nam << "', invalid Database handle.");
+   ATH_MSG_FATAL("Cannot open container " << m_name
+      << " of type " << ROOTTREE_StorageType.storageName() << "; " << err_msg);
    return FAILURE;
 }
 
@@ -610,6 +608,7 @@ StatusCode  RootTreeContainer::addObject(DbDatabase& dbH,
                                        int bufferSize,
                                        int branchOffsetTabLen)
 {
+   std::string err_msg;
    try {
       dsc.buffer  = nullptr;
       dsc.object  = nullptr;
@@ -657,18 +656,18 @@ StatusCode  RootTreeContainer::addObject(DbDatabase& dbH,
                return SUCCESS;
             }
          }
+      } else {
+         err_msg = "Class " + typ + " is unknown.";
       }
    }
-   catch( const std::exception& e )    {
-      debugBreak(m_name, "Cannot attach ROOT object branch.", e);
+   catch( const std::exception& e ) {
+      err_msg = e.what();
    }
-   catch (...)   {
-      ATH_MSG_FATAL("Unknown exception occurred. Cannot give more details.");
-      debugBreak(m_name, "Cannot attach ROOT object branch.", true);
+   catch (...) {
+      err_msg = "Unknown exception occurred. Cannot give more details.";
    }
-   ATH_MSG_ERROR("Failed to open the container " << m_name << " of type "
-       << ROOTTREE_StorageType.storageName()
-       << " Class " << typ << " is unknown.");
+   ATH_MSG_ERROR("Failed to open container " << m_name << " of type "
+       << ROOTTREE_StorageType.storageName() << "; " << err_msg);
    return FAILURE;
 }
 

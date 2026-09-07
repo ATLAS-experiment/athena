@@ -8,11 +8,18 @@ n_events=100
 
 ignore_pattern=""
 
+# Switch to ACTS-based electron extrapolation
+# Only works with new ACTS TrackingGeometry UseBlueprint=True
+# HGTD reco. should be disabled to avoid crash for now
+
 export ATHENA_CORE_NUMBER=1
 Reco_tf.py \
-    --preExec "flags.Exec.FPE=-1; flags.Acts.TrackingGeometry.UseBlueprint=True;" \
-    --preInclude "egammaConfig.ConfigurationHelpers.egammaOnlyFromRaw,ActsConfig.ActsCIFlags.actsGSFEgammaFlags" \
-   --conditionsTag ${conditions_tag} \
+    --preExec "flags.Exec.FPE=-1; \
+    	       flags.Acts.extrapolateElectronsLegacy=False; \
+	       flags.Acts.TrackingGeometry.UseBlueprint=True; \
+	       flags.Reco.EnableHGTDExtension=False;" \
+    --preInclude "egammaConfig.ConfigurationHelpers.egammaOnlyFromRaw" \
+    --conditionsTag ${conditions_tag} \
     --inputRDOFile ${input_rdo} \
     --outputAODFile AOD.pool.root \
     --maxEvents ${n_events} \

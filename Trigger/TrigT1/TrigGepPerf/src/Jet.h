@@ -2,8 +2,8 @@
  *   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
  */
 
-#ifndef TRIGL0GEPPERF_JET_H
-#define TRIGL0GEPPERF_JET_H
+#ifndef TRIGGEPPERF_JET_H
+#define TRIGGEPPERF_JET_H
 
 #include "TLorentzVector.h"
 
@@ -38,4 +38,4 @@ namespace Gep{
   };
 }
 
-#endif //TRIGL0GEPPERF_CUSTOMJET_H
+#endif //TRIGGEPPERF_CUSTOMJET_H

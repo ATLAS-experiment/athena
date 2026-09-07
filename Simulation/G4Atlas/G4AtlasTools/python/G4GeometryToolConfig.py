@@ -534,6 +534,8 @@ def ATLAS_RegionCreatorListCfg(flags):
         # FIXME dislike the ordering here, but try to maintain the same ordering as in the old configuration.
         if flags.Sim.InDetParameterization is InDetParameterization.FatrasG4:
                 regionCreatorList += [result.popToolsAndMerge(InDetPhysicsRegionToolCfg(flags))]
+        if flags.Sim.InDetParameterization is InDetParameterization.AFatrasG4:
+                regionCreatorList += [result.popToolsAndMerge(InDetPhysicsRegionToolCfg(flags))]
         if flags.Detector.GeometryBpipe:
             if flags.Sim.BeamPipeSimMode is not BeamPipeSimMode.Normal:
                 regionCreatorList += [result.popToolsAndMerge(BeampipeFwdCutPhysicsRegionToolCfg(flags))]

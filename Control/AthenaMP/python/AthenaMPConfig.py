@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.AllConfigFlags import initConfigFlags, GetFileMD
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
@@ -193,6 +193,7 @@ def AthenaMPCfg(flags):
     else:
         msg.warning("Unknown strategy %s. No MP tools will be configured", myStrategy)
 
+    result.setAppProperty("EventLoop", mpevtloop.name)
     result.addService(mpevtloop, primary=True)
 
     return result

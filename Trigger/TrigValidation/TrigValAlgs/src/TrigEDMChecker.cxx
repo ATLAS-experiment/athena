@@ -1960,9 +1960,10 @@ StatusCode TrigEDMChecker::dumpTDT(const EventContext& ctx) {
     chain = "HLT_.*";
   }
   std::vector<std::string> confChains = m_trigDec->getListOfTriggers(chain);
+  const std::string IdentifierStr{"Identifier"};
   for (const auto& item : confChains) {
     bool passed = m_trigDec->isPassed(item);
-    ATH_MSG_INFO("  HLT Item " << item << " (numeric ID " << TrigConf::HLTUtils::string2hash(item, "Identifier") << ") passed raw? " << passed);
+    ATH_MSG_INFO("  HLT Item " << item << " (numeric ID " << TrigConf::HLTUtils::string2hash(item, IdentifierStr) << ") passed raw? " << passed);
     if (m_trigDec->getNavigationFormat() == "TriggerElement") {
       ATH_MSG_DEBUG("    Skipping Run 2 features in this dumper");
       continue;
@@ -2199,7 +2200,7 @@ StatusCode TrigEDMChecker::TrigCompositeNavigationToDot(std::string& returnValue
   ss << "digraph {" << std::endl;
   ss << "  node [shape=rectangle]" << std::endl;
   ss << "  rankdir = BT" << std::endl;
-
+  const std::string seedStr{"seed"};
   // Now process them
   for (const std::string& key : keys) {
     if ( not m_doDumpAllTrigComposite ) {
@@ -2209,13 +2210,13 @@ StatusCode TrigEDMChecker::TrigCompositeNavigationToDot(std::string& returnValue
     }
     ATH_CHECK( evtStore()->retrieve( container, key ) );
     ATH_MSG_DEBUG("Processing collection " << key << " to be added to the navigation graph");
-    // ss << "    rank=same" << std::endl; // dot cannot handle this is seems
     bool writtenHeader = false;
+
     for (const Decision* tc : *container ) {
       // Output my ID in the graph. 
-      const DecisionContainer* container = dynamic_cast<const DecisionContainer*>( tc->container() );
+      const DecisionContainer* container = static_cast<const DecisionContainer*>( tc->container() );
       const ElementLink<DecisionContainer> selfEL = ElementLink<DecisionContainer>(*container, tc->index());
-      std::vector<ElementLink<DecisionContainer>> seedELs = tc->objectCollectionLinks<DecisionContainer>("seed");
+      std::vector<ElementLink<DecisionContainer>> seedELs = tc->objectCollectionLinks<DecisionContainer>(seedStr);
       const bool isHypoAlgNode = tc->name() == "H";
       const bool isComboHypoAlgNode = tc->name() == "CH";
       const std::vector<DecisionID>& decisions = tc->decisions();
@@ -2251,7 +2252,7 @@ StatusCode TrigEDMChecker::TrigCompositeNavigationToDot(std::string& returnValue
         ss << "  subgraph " << key << " {" << std::endl;
         ss << "    label=\"" << key << "\"" << std::endl;
       }
-      const std::string scheme = "rdpu9";
+      static const std::string scheme = "rdpu9";
       std::string color = "1";
       if      (tc->name() == "L1") { color = "1"; }
       else if (tc->name() == "F")  { color = "2"; }

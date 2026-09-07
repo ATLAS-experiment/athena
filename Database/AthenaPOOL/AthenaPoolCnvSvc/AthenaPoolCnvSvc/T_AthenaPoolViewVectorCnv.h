@@ -21,6 +21,7 @@
 #include "AthenaPoolCnvSvc/exceptions.h"
 #include "AthenaPoolCnvSvc/debug.h"
 #include "StorageSvc/DbReflex.h"
+#include "StorageSvc/DbTypeInfo.h"
 #include "AthContainers/ViewVector.h"
 #include "AthContainers/dataVectorAsELV.h"
 #include "AthContainers/ConstDataVector.h"
@@ -28,6 +29,7 @@
 #include "AthenaKernel/errorcheck.h"
 #include "AthenaKernel/ClassID_traits.h"
 #include "CxxUtils/StrFormat.h"
+#include "DataModelRoot/RootType.h"
 #include <vector>
 #include <cstdlib>
 

@@ -7,6 +7,11 @@ def PersistifyClusters(flags,
                        pixelClusterCollections: list[str] = None,
                        stripClusterCollections: list[str] = None,
                        hgtdClusterCollections: list[str] = None) -> ComponentAccumulator:
+
+    acc = ComponentAccumulator()
+    if not flags.Acts.EDM.PersistifyClusters:
+        return acc
+
     toESD = []
     toAOD = []
     if pixelClusterCollections is not None:
@@ -32,8 +37,6 @@ def PersistifyClusters(flags,
             toAOD += [f"xAOD::HGTDClusterContainer#{hgtdClusterCollection}",
                       f"xAOD::HGTDClusterAuxContainer#{hgtdClusterCollection}Aux.{hgtd_cluster_variables}"]
 
-    acc = ComponentAccumulator()
-
     from OutputStreamAthenaPool.OutputStreamConfig import addToESD, addToAOD
     acc.merge(addToESD(flags, toESD + toAOD))
     acc.merge(addToAOD(flags, toAOD))
@@ -44,6 +47,11 @@ def PersistifySpacePoints(flags,
                           *,
                           pixelSpacePointCollections: list[str] = None,
                           stripSpacePointCollections: list[str] = None) -> ComponentAccumulator:
+
+    acc = ComponentAccumulator()
+    if not flags.Acts.EDM.PersistifySpacePoints:
+        return acc
+
     toESD = []
     toAOD = []
     aux_container_type = "xAOD::SpacePointAuxContainer"
@@ -74,8 +82,6 @@ def PersistifySpacePoints(flags,
         for stripSpacePointCollection in stripSpacePointCollections:
             toAOD += [f'xAOD::SpacePointContainer#{stripSpacePointCollection}',
                       f"{aux_container_type}#{stripSpacePointCollection}Aux.{strip_spacepoint_variables}"]
-            
-    acc = ComponentAccumulator()
 
     from OutputStreamAthenaPool.OutputStreamConfig import addToESD, addToAOD
     acc.merge(addToESD(flags, toESD + toAOD))
@@ -109,7 +115,8 @@ def PersistifyTracks(flags,
 
     from OutputStreamAthenaPool.OutputStreamConfig import addToESD, addToAOD
     acc.merge(addToESD(flags, toESD + toAOD))
-    acc.merge(addToAOD(flags, toAOD))
+    if flags.Acts.EDM.PersistifyTracks:
+        acc.merge(addToAOD(flags, toAOD))
     return acc
 
 
@@ -120,18 +127,19 @@ def PersistifyTrackParticles(flags,
     toAOD = []
     if trackParticleCollections is not None:
         trackparticles_shortlist = ['-clusterAssociation',
-                                    '-TTVA_AMVFVertices_forReco',
                                     '-AssoClustersUFO',
-                                    '-TTVA_AMVFWeights_forReco',
                                     '-trackParameterCovarianceMatrices',
                                     '-caloExtensionLink',
-                                     '-parameterX', '-parameterY', '-parameterZ',
-                                     '-parameterPX', '-parameterPY', '-parameterPZ',
-                                     '-parameterPosition']
+                                    '-parameterX', '-parameterY', '-parameterZ',
+                                    '-parameterPX', '-parameterPY', '-parameterPZ',
+                                    '-parameterPosition',
+                                    '-truthHitEfficiency', '-truthHitPurity']
 
         # exclude TTVA decorations
         trackparticles_shortlist += ['-TTVA_AMVFVertices',
-                                     '-TTVA_AMVFWeights']
+                                     '-TTVA_AMVFWeights',
+                                     '-TTVA_AMVFVertices_forReco',
+                                     '-TTVA_AMVFWeights_forReco']
         # acts track link
         if not flags.Acts.EDM.PersistifyTracks:
             trackparticles_shortlist += ['-actsTrack',

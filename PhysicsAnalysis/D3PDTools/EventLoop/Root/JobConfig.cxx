@@ -29,9 +29,7 @@ namespace EL
 {
   void JobConfig :: 
   testInvariant () const
-  {
-    RCU_INVARIANT (this != nullptr);
-  }
+  {}
 
 
 
@@ -181,6 +179,10 @@ namespace EL
       if (sequenceStartIndex < result.size())
         result[sequenceStartIndex].m_sequenceStart = true;
     }
+    // clear the sequence starts as well, so that reusing this JobConfig
+    // after extraction does not reapply the old starts to newly added
+    // algorithms
+    m_algSequenceStartIndices.clear();
     return result;
   }
 

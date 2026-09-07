@@ -59,7 +59,8 @@ StatusCode Muon::STGC_RawDataProviderTool::convertIntoContainer(const EventConte
                                                                 STGC_RawDataContainer& stgcRdoContainer) const
 {
   // Since there can be multiple ROBFragments contributing to the same RDO collection a temporary cache is setup and passed to fillCollection by reference. Once all ROBFragments are processed the collections are added into the rdo container
-  std::unordered_map<IdentifierHash, std::unique_ptr<STGC_RawDataCollection>> rdo_map;
+  // const sTgcIdHelper& idH
+  std::vector<std::unique_ptr<STGC_RawDataCollection>> rdo_map{};
 
 
   // Loop on the passed ROB fragments, and call the decoder for each one to fill the RDO container.
@@ -68,30 +69,27 @@ StatusCode Muon::STGC_RawDataProviderTool::convertIntoContainer(const EventConte
 
   
   // error counters
-  int nerr_duplicate{0}, nerr_rdo{0};
+  int nerr_duplicate{0};
 
   // add the RDO collections created from the data of this ROB into the identifiable container.
-  for (auto& [hash, collection]: rdo_map) {
-
+  for (std::uint32_t hash = 0 ; hash < rdo_map.size(); ++hash) {
+    auto& collection = rdo_map[hash];
     if ((!collection) or collection->empty()) continue; // skip empty collections
 
-    STGC_RawDataContainer::IDC_WriteHandle lock = stgcRdoContainer.getWriteHandle(hash);
+    STGC_RawDataContainer::IDC_WriteHandle lock = stgcRdoContainer.getWriteHandle(IdentifierHash{hash});
 
     if (lock.alreadyPresent()) {
       ++nerr_duplicate;
-    } else if (!lock.addOrDelete(std::move(collection)).isSuccess()) {
-      // since we prevent duplicates above, this error should never happen.
-      ++nerr_rdo;
-    }
+    } else{
+       ATH_CHECK(lock.addOrDelete(std::move(collection)));
+    } 
   }
 
 
   // error summary (to reduce the number of messages)
-  if (nerr_duplicate) ATH_MSG_WARNING(nerr_duplicate << " elinks skipped since the same module hash has been added by a previous ROB fragment");
-  if (nerr_rdo) {
-      ATH_MSG_ERROR("Failed to add "<<nerr_rdo<<" RDOs into the identifiable container");
-      return StatusCode::FAILURE;
-   }
+  if (nerr_duplicate) {
+    ATH_MSG_WARNING(nerr_duplicate << " elinks skipped since the same module hash has been added by a previous ROB fragment");
+  }
 
   ATH_MSG_DEBUG("Size of sTgcRdoContainer is " << stgcRdoContainer.size());
   return StatusCode::SUCCESS;

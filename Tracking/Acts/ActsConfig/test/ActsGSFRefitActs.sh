@@ -11,7 +11,7 @@ ignore_pattern=""
 export ATHENA_CORE_NUMBER=1
 Reco_tf.py \
     --preExec "flags.Exec.FPE=-1;" \
-    --preInclude "egammaConfig.ConfigurationHelpers.egammaOnlyFromRaw,ActsConfig.ActsCIFlags.actsGSFEgammaFlags" \
+    --preInclude "egammaConfig.ConfigurationHelpers.egammaOnlyFromRaw" \
     --conditionsTag ${conditions_tag} \
     --inputRDOFile ${input_rdo} \
     --outputAODFile AOD.pool.root \

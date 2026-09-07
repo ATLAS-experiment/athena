@@ -2,8 +2,8 @@
  *   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
  */
 
-#ifndef TRIGL0GEPPERF_CLUSTER_H
-#define TRIGL0GEPPERF_CLUSTER_H
+#ifndef TRIGGEPPERF_CLUSTER_H
+#define TRIGGEPPERF_CLUSTER_H
 
 #include <vector>
 #include "TLorentzVector.h"
@@ -44,4 +44,4 @@ namespace Gep{
   };
 }
 
-#endif //TRIGL0GEPPERF_CUSTOMTOPOCLUSTER_H
+#endif //TRIGGEPPERF_CUSTOMTOPOCLUSTER_H

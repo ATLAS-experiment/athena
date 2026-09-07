@@ -1,0 +1,72 @@
+/*
+  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+*/
+
+#ifndef POOLSVC_DATABASEREGISTRY_H
+#define POOLSVC_DATABASEREGISTRY_H
+
+#include <string>
+#include <set>
+#include <map>
+
+namespace pool {
+  
+  // Forward declarations
+  class DatabaseHandler;
+
+  class DatabaseRegistry {
+  public:
+    /// Constructor
+    explicit DatabaseRegistry();
+
+    /// Destructor
+    ~DatabaseRegistry();
+
+    /// Registers a database.
+    void registerDatabaseHandler( DatabaseHandler* dbHandler );
+
+    /// Registers a database with an LFN
+    void registerDatabaseHandler( DatabaseHandler* dbHandler,
+                                  const std::string& lfn );
+
+    /// Deregisters a database.
+    void deregisterDatabaseHandler( DatabaseHandler* dbHandler );
+
+    /// Looks up a database by its file id
+    DatabaseHandler* lookupByFID( const std::string& fid );
+
+    /// Looks up a database by its physical file name
+    DatabaseHandler* lookupByPFN( const std::string& pfn );
+
+    /// Looks up a database by its logical file name
+    DatabaseHandler* lookupByLFN( const std::string& lfn );
+
+    typedef std::set< DatabaseHandler* >::iterator iterator;
+    typedef std::set< DatabaseHandler* >::const_iterator const_iterator;
+
+    /// The begin iterators
+    iterator begin();
+    const_iterator begin() const;
+
+    /// The end iterators
+    iterator end();
+    const_iterator end() const;
+
+    /// The number of elements registered
+    std::size_t size() const;
+
+  private:
+    std::set< DatabaseHandler* >                     m_databases;
+    std::map< std::string, DatabaseHandler* >        m_fidToDb;
+    std::map< std::string, DatabaseHandler* >        m_pfnToDb;
+    std::map< std::string, DatabaseHandler* >        m_lfnToDb;
+    std::map< std::string, std::set< std::string > > m_fidToLfns;
+
+    // Registers a database
+    std::set< DatabaseHandler* >::iterator registerDbHandler( DatabaseHandler* dbHandler );
+  };
+}
+
+#include "DatabaseRegistry.inl"
+
+#endif

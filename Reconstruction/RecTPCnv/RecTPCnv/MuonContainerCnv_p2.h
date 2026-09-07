@@ -44,7 +44,7 @@ class MuonContainerCnv_p2 : public MuonContainerCnvBase_p2
     MuonContainerCnv_p2() {}
     virtual void  persToTrans(const MuonContainer_p2* persColl, Analysis::MuonContainer* transColl, MsgStream &log) const;
     void setKey ( const std::string& key) { m_cnv.setKey( key ); }
-    void setEventStore( const StoreGateSvc_t storeGate ) { m_cnv.setEventStore( storeGate ); }
+    void setEventStore( const StoreGateSvc_t & storeGate ) { m_cnv.setEventStore( storeGate ); }
   private:
     MuonCnv_p2 m_cnv;
 };

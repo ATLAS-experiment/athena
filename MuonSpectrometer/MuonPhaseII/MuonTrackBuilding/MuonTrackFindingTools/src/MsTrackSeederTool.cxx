@@ -395,7 +395,7 @@ namespace MuonR4{
         }
         if (msgLvl(MSG::VERBOSE)) {
             std::vector<std::string> names {"Pair01", "Pair12", "Pair02Seg", "Pair02Pos"};
-            for (const auto& [i, est] : Acts::enumerate(estimates)) {
+            for (const auto [i, est] : Acts::enumerate(estimates)) {
                 ATH_MSG_VERBOSE(__func__<<"() Estimate "<<names[i]<<": PtimesQ: "<<est.PtimesQ*1e-3
                     <<", weight: "<<est.weight<<", score: "<<est.score);
             }

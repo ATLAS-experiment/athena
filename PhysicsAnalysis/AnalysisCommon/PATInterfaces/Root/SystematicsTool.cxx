@@ -163,8 +163,6 @@ namespace CP {
    }
 
    void SystematicsTool::testInvariant() const {
-
-     //RCU_INVARIANT( this != 0 );
    }
 
 } // namespace CP

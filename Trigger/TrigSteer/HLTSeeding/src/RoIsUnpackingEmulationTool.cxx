@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #include "RoIsUnpackingEmulationTool.h"
 #include "TrigT1Interfaces/TrigT1CaloDefs.h"
@@ -186,8 +186,8 @@ StatusCode RoIsUnpackingEmulationTool::unpack(const EventContext& ctx,
       decision->setObjectLink( initialRoIString(),
                                ElementLink<TrigRoiDescriptorCollection>(m_trigRoIsKey.key(), trigRoIs->size()-1, ctx) );
     }
-
-    decision->setDetail( "thresholds", passedThresholdIDs );
+    static const std::string thresholdsStr{"thresholds"};
+    decision->setDetail( thresholdsStr, passedThresholdIDs );
   }
 
   for ( auto roi: *trigRoIs ) {

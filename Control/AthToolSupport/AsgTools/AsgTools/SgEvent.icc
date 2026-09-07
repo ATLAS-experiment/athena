@@ -8,8 +8,6 @@
 // System include(s):
 #include <iostream>
 
-#include <CxxUtils/AthUnlikelyMacros.h>
-
 // xAOD include(s):
 #ifdef XAOD_STANDALONE
 #   include "xAODRootAccess/Event.h"
@@ -25,10 +23,12 @@ namespace asg {
    bool SgEvent::contains( const std::string& name ) const {
 
       // Make sure the object is initialised:
-      if( ATH_UNLIKELY ( ! m_pevm ) && initialize().isFailure() ) {
-         std::cout << ERROR_SRC << "Couldn't initialise the tool"
-                   << std::endl;
-         return false;
+      if ( ! m_pevm )  [[unlikely]] {
+         if ( initialize().isFailure() ) {
+            std::cout << ERROR_SRC << "Couldn't initialise the tool"
+                      << std::endl;
+            return false;
+         }
       }
 
       // Check if the object is in the transient store:
@@ -44,10 +44,12 @@ namespace asg {
    bool SgEvent::transientContains( const std::string& name ) const {
 
       // Make sure the object is initialised:
-      if( ATH_UNLIKELY ( ! m_pevm ) && initialize().isFailure() ) {
-         std::cout << ERROR_SRC << "Couldn't initialise the tool"
-                   << std::endl;
-         return false;
+      if ( ! m_pevm ) [[unlikely]] {
+         if ( initialize().isFailure() ) {
+            std::cout << ERROR_SRC << "Couldn't initialise the tool"
+                      << std::endl;
+            return false;
+         }
       }
 
       // Check if the object is in the transient store:
@@ -63,10 +65,12 @@ namespace asg {
    T* SgEvent::retrieve( const std::string& name ) const {
 
       // Make sure the object is initialised:
-      if( ATH_UNLIKELY ( ! m_pevm ) && initialize().isFailure() ) {
-         std::cout << ERROR_SRC << "Couldn't initialise the tool"
-                   << std::endl;
-         return 0;
+      if ( ! m_pevm ) [[unlikely]] {
+         if ( initialize().isFailure() ) {
+            std::cout << ERROR_SRC << "Couldn't initialise the tool"
+                      << std::endl;
+            return 0;
+         }
       }
 
       // Pointer used in the retrieval:
@@ -93,7 +97,7 @@ namespace asg {
    StatusCode SgEvent::retrieve( T*& pobj, const std::string& name ) {
 
       pobj = retrieve< T >( name );
-      if( ATH_LIKELY( pobj ) ) {
+      if(  pobj ) [[likely]] {
          return StatusCode::SUCCESS;
       } else {
          return StatusCode::FAILURE;
@@ -105,7 +109,7 @@ namespace asg {
                                   const std::string& name ) const {
 
       pobj = retrieve< const T >( name );
-      if( ATH_LIKELY( pobj ) ) {
+      if ( pobj ) [[likely]] {
          return StatusCode::SUCCESS;
       } else {
          return StatusCode::FAILURE;
@@ -116,10 +120,12 @@ namespace asg {
    StatusCode SgEvent::record( std::unique_ptr<T> pobj, const std::string& name ) {
 
       // Make sure the object is initialised:
-      if( ATH_UNLIKELY ( ! m_pevm ) && initialize().isFailure() ) {
-         std::cout << ERROR_SRC << "Couldn't initialise the tool"
-                   << std::endl;
-         return StatusCode::FAILURE;
+      if  ( ! m_pevm ) [[unlikely]] {
+         if ( initialize().isFailure() ) {
+            std::cout << ERROR_SRC << "Couldn't initialise the tool"
+                      << std::endl;
+            return StatusCode::FAILURE;
+         }
       }
 
       // If a transient store is available, try recording it there:

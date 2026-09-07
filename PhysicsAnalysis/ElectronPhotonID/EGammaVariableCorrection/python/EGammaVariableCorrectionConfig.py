@@ -75,14 +75,14 @@ def ElectronPhotonVariableNFCorrectionToolCfg(
     isRun2 = flags.GeoModel.Run is LHCPeriod.Run2
 
     if isFullSim and isRun3:
-        default_conf = "EGammaVariableCorrection/NF_y_TUNE1/Run3FS/ElectronPhotonVariableNFCorrectionTool.conf"
+        default_conf = "EGammaVariableCorrection/NF_y_TUNE2/Run3FS/ElectronPhotonVariableNFCorrectionTool.conf"
     elif isFullSim and isRun2:
-        default_conf = "EGammaVariableCorrection/NF_y_TUNE1/Run2FS/ElectronPhotonVariableNFCorrectionTool.conf"
+        default_conf = "EGammaVariableCorrection/NF_y_TUNE2/Run2FS/ElectronPhotonVariableNFCorrectionTool.conf"
     elif not isFullSim and isRun3:
-        default_conf = "EGammaVariableCorrection/NF_y_TUNE1/Run3AF3/ElectronPhotonVariableNFCorrectionTool.conf"
+        default_conf = "EGammaVariableCorrection/NF_y_TUNE2/Run3AF3/ElectronPhotonVariableNFCorrectionTool.conf"
     elif not isFullSim and isRun2:
         # temporary the same Run3 AF3 models are applied to Run2 AF3
-        default_conf = "EGammaVariableCorrection/NF_y_TUNE1/Run3AF3/ElectronPhotonVariableNFCorrectionTool.conf"
+        default_conf = "EGammaVariableCorrection/NF_y_TUNE2/Run3AF3/ElectronPhotonVariableNFCorrectionTool.conf"
     else:
         raise RuntimeError(
             f"ElectronPhotonVariableNFCorrectionToolCfg: no NF correction config available for Run period {flags.GeoModel.Run} "

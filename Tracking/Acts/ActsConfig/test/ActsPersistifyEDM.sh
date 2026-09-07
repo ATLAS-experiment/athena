@@ -13,7 +13,7 @@ Reco_tf.py \
   	     flags.Tracking.ITkActsPass.storeSeparateContainer=True; \
   	     flags.Acts.EDM.PersistifySpacePoints=True; \
 	     flags.Acts.EDM.PersistifyTracks=True;" \
-  --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude,ActsConfig.ActsCIFlags.actsProductionFlags" \
+  --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude" \
   --conditionsTag ${conditions_tag} \
   --postExec "cfg.printConfig(withDetails=True, summariseProps=True);" \
   --inputRDOFile ${input_rdo} \

@@ -33,7 +33,7 @@ set( _libraries
   ActsGeometryInterfacesLib
   ActsGPUEventLib
   ActsGPUInterfacesLib
-  TrigInDetToolInterfacesLib
+  ActsToolInterfacesLib
   TrigInDetPattRecoToolsLib
 )
 

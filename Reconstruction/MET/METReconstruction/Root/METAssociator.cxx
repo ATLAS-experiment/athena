@@ -327,7 +327,7 @@ namespace met {
           }else{
             std::map<const IParticle*,MissingETBase::Types::constvec_t> momentumOverride;
             ATH_CHECK( this->extractPFO(obj,constlist,constits,momentumOverride, ctx) );
-            MissingETComposition::insert(metMap,obj,constlist,momentumOverride);
+            MissingETComposition::insert(metMap,obj,constlist,std::move(momentumOverride));
           }
         }
       } else {

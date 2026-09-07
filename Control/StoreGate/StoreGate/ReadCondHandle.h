@@ -11,7 +11,6 @@
 #include "StoreGate/ReadHandle.h"
 #include "StoreGate/ReadCondHandleKey.h"
 #include "StoreGate/exceptions.h"
-#include "CxxUtils/AthUnlikelyMacros.h"
 
 #include "GaudiKernel/DataObjID.h"
 #include "GaudiKernel/EventIDBase.h"
@@ -118,12 +117,12 @@ namespace SG {
       throw SG::ExcBadContext (ctx, key.objKey());
     }
 
-    if (ATH_UNLIKELY(!key.isInit())) {
+    if (!key.isInit()) [[unlikely]] {
       throw SG::ExcUninitKey (key.clid(), key.key(), key.storeHandle().name(),
                               "", "ReadCond");
     }
 
-    if (ATH_UNLIKELY(m_cc == 0)) {
+    if (m_cc == 0) [[unlikely]] {
       // try to retrieve it
       CondContBase *cb(nullptr);
       if (m_hkey.getCS()->retrieve(cb, m_hkey.key()).isFailure()) {
@@ -145,7 +144,7 @@ namespace SG {
 
     if (m_obj != 0) return true;
 
-    if ( ATH_UNLIKELY(!m_cc->find(m_eid, m_obj, &m_range)) ) {
+    if (!m_cc->find(m_eid, m_obj, &m_range)) [[unlikely]] {
       ReadCondHandleNotFound (*m_cc, m_eid, m_hkey.objKey());
       m_obj = nullptr;
       return false;

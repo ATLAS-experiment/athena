@@ -20,7 +20,6 @@
 #include <map>
 
 class TFile;
-class TList;
 class TObject;
 class TTree;
 

@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 
@@ -94,8 +94,6 @@ def xAODtoTrkConverterAlgCfg(flags, name ="xAODToTrkConversionAlg",
                              setupMuon = False, setupITk = True, **kwargs):
     result = ComponentAccumulator()
     if setupITk:
-        if flags.Tracking.ITkMainPass.doAthenaToActsCluster:
-            return result
         from InDetConfig.InDetPrepRawDataFormationConfig import ITkXAODToInDetClusterConversionCfg
         result.merge(ITkXAODToInDetClusterConversionCfg(flags))
     if 'ATLASConverterTool' not in kwargs:
@@ -214,13 +212,6 @@ def RunTrackConversion(flags, track_collections = [], outputfile='dump.json', se
     )
     cfg.merge(acc)
     cfg.printConfig(withDetails=True, summariseProps=True)
-    from AthenaCommon.Constants import FATAL
-    ### The translation of the Phase-II stlye muon geometry throws a ton
-    ### of error messages which degrades the physics performance but does
-    ### not harm the technical execution. In order, to make the tests pass
-    ### silence the algorithm until the tracking geometry translation understands
-    ### the new style of geometry building.
-    cfg.getCondAlgo("AtlasTrackingGeometryCondAlg").OutputLevel = FATAL
 
     sc = cfg.run()
     if not sc.isSuccess():

@@ -1,0 +1,16 @@
+GPU_ActsClusterComparisonAlg                                      INFO ValSum ============================================================
+GPU_ActsClusterComparisonAlg                                      INFO ValSum PIXEL CLUSTER MATCHING STATISTICS: 
+GPU_ActsClusterComparisonAlg                                      INFO ValSum   Total unmatched clusters mon/ref: #=0       / #=0      
+GPU_ActsClusterComparisonAlg                                      INFO ValSum   Total matched clusters: #=253654 
+GPU_ActsClusterComparisonAlg                                      INFO ValSum   Clusters with pos diff > 1 sigma: #=0       (0%)
+GPU_ActsClusterComparisonAlg                                      INFO ValSum  Clusters with pos diff > 0.5 sigma: #=0       (0%)
+GPU_ActsClusterComparisonAlg                                      INFO ValSum Clusters with pos diff > 0.25 sigma: #=0       (0%)
+GPU_ActsClusterComparisonAlg                                      INFO ValSum ============================================================
+GPU_ActsClusterComparisonAlg                                      INFO ValSum ============================================================
+GPU_ActsClusterComparisonAlg                                      INFO ValSum STRIP CLUSTER MATCHING STATISTICS:
+GPU_ActsClusterComparisonAlg                                      INFO ValSum Total unmatched clusters mon/ref: #=2556    / #=2556   
+GPU_ActsClusterComparisonAlg                                      INFO ValSum Total matched clusters: #=8126   
+GPU_ActsClusterComparisonAlg                                      INFO ValSum Clusters with pos diff > 1 sigma: #=0       (0%)
+GPU_ActsClusterComparisonAlg                                      INFO ValSum Clusters with pos diff > 0.5 sigma: #=822     (10.1157%)
+GPU_ActsClusterComparisonAlg                                      INFO ValSum Clusters with pos diff > 0.25 sigma: #=868     (10.6818%)
+GPU_ActsClusterComparisonAlg                                      INFO ValSum ============================================================

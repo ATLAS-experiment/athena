@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "HIClusterSubtraction.h"
@@ -163,7 +163,7 @@ int HIClusterSubtraction::execute() const
 			m_subtractorTool->subtract(p4,cl,shape,es_index,m_modulatorTool,eshape);
 			HIJetRec::setClusterP4(p4,cl,HIJetRec::subtractedClusterState());
 
-			if(isOriginPossible && m_originCorrection)
+			if(primVertex && isOriginPossible && m_originCorrection)
 			{
 				ATH_MSG_DEBUG("Applying origin correction"
 							<< std::setw(12) << "Before:"
