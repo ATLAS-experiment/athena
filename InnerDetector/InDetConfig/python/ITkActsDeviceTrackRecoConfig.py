@@ -89,7 +89,7 @@ def ITkActsDeviceTrackRecoCfg(flags, *, previousExtension=None):
 
         from ActsConfig.ActsConfigFlags import SeedingStrategy
 
-        print(f"Performing seeding on device with seeding strategy set to {flags.Tracking.ActiveConfig.SeedingStrategy}")
+        print(f"Performing seeding on device with seeding strategy set to {flags.Acts.Device.seedingStrategy}")
         if flags.Acts.Device.seedingStrategy in [SeedingStrategy.Gbts, SeedingStrategy.GbtsFtf]:
             from ActsGPUPatternRecognition.ActsGPUPatternRecognitionConfig import DeviceGBTSSeedingAlgCfg
             acc.merge(DeviceGBTSSeedingAlgCfg(flags,
