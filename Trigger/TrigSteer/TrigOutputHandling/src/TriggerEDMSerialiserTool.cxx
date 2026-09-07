@@ -514,7 +514,7 @@ StatusCode TriggerEDMSerialiserTool::tryAddData(HLT::HLTResultMT& hltResult,
                                     ? 0 : hltResult.getSerialisedData().at(id).size()*sizeof(uint32_t);
   // Total size
   size_t currentTotalSizeWords = 0;
-  for (const auto& [i, data] : hltResult.getSerialisedData()) currentTotalSizeWords += data.size();
+  for (const auto& [i, d] : hltResult.getSerialisedData()) currentTotalSizeWords += d.size();
   const uint32_t currentTotalSizeBytes = currentTotalSizeWords*sizeof(uint32_t);
   // Size to be added
   const uint32_t extraSizeBytes = data.size()*sizeof(uint32_t);

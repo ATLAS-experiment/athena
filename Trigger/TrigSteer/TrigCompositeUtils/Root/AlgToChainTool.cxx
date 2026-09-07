@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigCompositeUtils/AlgToChainTool.h"
@@ -263,6 +263,10 @@ StatusCode TrigCompositeUtils::AlgToChainTool::getChainInfo(const EventContext& 
     SG::ReadHandle<TrigCompositeUtils::DecisionContainer> dc = getDecisionFromStore(eventStore, "HLTNav_Summary");
 
     const TrigCompositeUtils::Decision* passRaw = TrigCompositeUtils::getTerminusNode(dc);
+    if (!passRaw)[[unlikely]]{
+      ATH_MSG_ERROR("getTerminusNode returned a nullptr.");
+      return StatusCode::FAILURE;
+    }
     TrigCompositeUtils::DecisionIDContainer chainsID;
     TrigCompositeUtils::decisionIDs( passRaw, chainsID );
     info.isPassRaw = std::find(chainsID.begin(), chainsID.end(), id) != chainsID.end();
