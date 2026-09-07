@@ -39,10 +39,13 @@ if(IS_DIRECTORY ${ATLAS_ACTS_SOURCE_DIR})
     set(ACTS_USE_SYSTEM_VECMEM ON CACHE BOOL "Use system vecmem")
     set(DETRAY_BUILD_CUDA ON CACHE BOOL "Turn on CUDA support in Detray") # Workaround for EFTRACK-1010
     set(TRACCC_SUPPORTED_DETECTORS "default_detector;itk_detector" CACHE STRING "Supported detectors for TRACCC")
-    # Make sure that find_package(traccc) calls would not actually look for
-    # traccc. Since in this setup that will be provided by this Acts build.
+    # Make sure that find_package(traccc) and find_package(detray) calls would
+    # not actually look for traccc or detray. Since in this setup both will be
+    # provided by this Acts build.
     file(COPY "${CMAKE_CURRENT_LIST_DIR}/traccc-config.cmake"
               "${CMAKE_CURRENT_LIST_DIR}/traccc-config-version.cmake"
+              "${CMAKE_CURRENT_LIST_DIR}/detray-config.cmake"
+              "${CMAKE_CURRENT_LIST_DIR}/detray-config-version.cmake"
          DESTINATION "${CMAKE_FIND_PACKAGE_REDIRECTS_DIR}" )
   endif()
 
