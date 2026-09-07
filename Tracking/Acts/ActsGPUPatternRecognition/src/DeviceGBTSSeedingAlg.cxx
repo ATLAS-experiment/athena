@@ -36,7 +36,6 @@ StatusCode DeviceGBTSSeedingAlg::initialize()
   ATH_MSG_DEBUG("Initializing " << name());
 
   ATH_CHECK(m_seedingAlgProviderTool.retrieve());
-  ATH_CHECK(m_deviceMR.retrieve());
   ATH_CHECK(m_inputPixelSPKey.initialize());
   ATH_CHECK(m_inputMeasKey.initialize());
   ATH_CHECK(m_outputPixelSeedsKey.initialize());
@@ -102,13 +101,24 @@ StatusCode DeviceGBTSSeedingAlg::configureGBTS()
     ATH_MSG_INFO("Layer connections are initialized from file for GBTS "
                  << conn_fileName);
 
-    const std::vector<TrigInDetSiLayer>* pVL =
-        m_layerNumberTool->layerGeometry();
+    const std::vector<Acts::Experimental::GbtsLayerDescription>& layerDescs =
+        m_layerNumberTool->layerDescriptions();
+
     std::vector<TrigInDetSiLayer> layerGeometry;
-    std::copy(pVL->begin(), pVL->end(), std::back_inserter(layerGeometry));
+    layerGeometry.reserve(layerDescs.size());
+    for (const auto& layer : layerDescs) {
+        TrigInDetSiLayer converted;
+        converted.m_subdet = layer.id;
+        converted.m_type =
+            (layer.type == Acts::Experimental::GbtsLayerType::Endcap) ? 1 : 0;
+        converted.m_refCoord = layer.refCoord;
+        converted.m_minBound = layer.minBound;
+        converted.m_maxBound = layer.maxBound;
+        layerGeometry.push_back(converted);
+    }
 
     std::unique_ptr<TrigFTF_GNN_Geometry> GBTS_geo =
-        std::make_unique<TrigFTF_GNN_Geometry>(layerGeometry, gbts_connector);
+        std::make_unique<TrigFTF_GNN_Geometry>(layerGeometry, gbts_connector);   
 
     traccc::device::gbts_layerInfo layerInfo;
     // convert save and convert layer info to SoA
@@ -131,8 +141,7 @@ StatusCode DeviceGBTSSeedingAlg::configureGBTS()
                            layer->m_minEta, layer->m_etaBin);
     }
 
-    const std::vector<short>* pixel_h2l = m_layerNumberTool->pixelLayers();
-
+    const std::vector<short>& pixel_h2l = m_layerNumberTool->pixelLayers();
 
     std::vector<std::pair<std::uint64_t, short>> identifierBinning;
     identifierBinning.reserve(m_idMapping->size());
@@ -145,8 +154,10 @@ StatusCode DeviceGBTSSeedingAlg::configureGBTS()
             IdentifierHash idHash{};//default c'tor produces detectable invalid hash
             int rc = m_pixelID->get_hash(athenaId, idHash, &pixel_context); //rc=0 is ok
             if (rc!=0)[[unlikely]] continue;
+            const short layer = pixel_h2l.at(static_cast<int>(idHash));
+            if (layer == IGbtsLayerTool::kNoLayer) [[unlikely]] continue;
             identifierBinning.push_back(std::make_pair(
-                detrayId, pixel_h2l->at(static_cast<int>(idHash))));
+                detrayId, pixel_h2l.at(static_cast<int>(idHash))));
         }
     }
     ATH_MSG_INFO(identifierBinning.size() << " identifiers with a layer");

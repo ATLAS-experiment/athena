@@ -11,14 +11,12 @@
 
 #include "IDeviceSeedingAlgProviderTool.h"
 #include "AthDeviceInterfaces/IMemoryResourceTool.h"
-#include "TrigInDetToolInterfaces/ITrigL2LayerNumberTool.h"
+#include "ActsToolInterfaces/IGbtsLayerTool.h"
 #include "ActsGPUEvent/GeometryIdMapping.h"
 
 #include "ActsGPUEvent/TracccMeasurementCollection.h"
 #include "ActsGPUEvent/TracccSpacepointCollection.h"
 #include "ActsGPUEvent/TracccSeedCollection.h"
-
-
 
 class PixelID;
 namespace InDetDD{
@@ -63,10 +61,6 @@ private:
     ToolHandle<IDeviceSeedingAlgProviderTool> m_seedingAlgProviderTool{
         this, "SeedingAlgProviderTool", "",
         "Tool providing the appropriate backend device seeding algorithm"};
-    /// @name The device memory resource tool to use for memory allocations
-    ToolHandle<AthDevice::IMemoryResourceTool> m_deviceMR{
-        this, "DeviceMR", "",
-        "Device memory resource tool"};
 
     /// @name The name of device resident input traccc spacepoint collection
     SG::ReadHandleKey<traccc::edm::spacepoint_collection::const_view> m_inputPixelSPKey{
@@ -91,9 +85,7 @@ private:
     const InDetDD::PixelDetectorManager* m_pixelManager{nullptr};
     const PixelID* m_pixelID{nullptr};    
 
-    ToolHandle<ITrigL2LayerNumberTool> m_layerNumberTool{
-        this, "layerNumberTool", "TrigL2LayerNumberToolITk"};
-
+    ToolHandle<IGbtsLayerTool> m_layerNumberTool{this, "layerNumberTool", "ActsTrk::GbtsLayerTool/ActsGbtsLayerTool"};
 
     traccc::gbts_seedfinder_config m_gbts_config;
 
