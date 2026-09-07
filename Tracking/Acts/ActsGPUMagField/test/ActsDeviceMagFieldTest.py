@@ -32,6 +32,7 @@ if __name__ == "__main__":
     flags.fillFromArgs()
 
     flags.lock()
+    flags.dump()
 
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg
     acc = MainServicesCfg(flags)

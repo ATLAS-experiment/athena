@@ -11,3 +11,10 @@ DECLARE_COMPONENT(ActsTrk::JSONDeviceMagFieldProviderSvc)
 DECLARE_COMPONENT(ActsTrk::CUDAMagFieldProviderTool)
 
 #endif
+
+#ifdef ACTSTRACK_HAVE_HIP
+
+#include "../hip/HIPMagFieldProviderTool.h"
+DECLARE_COMPONENT(ActsTrk::HIPMagFieldProviderTool)
+
+#endif
