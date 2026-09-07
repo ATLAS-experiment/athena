@@ -201,10 +201,6 @@ StatusCode TrigCostAnalysis::execute(const EventContext& ctx) {
   SG::ReadHandle<xAOD::TrigCompositeContainer> costDataHandle(m_costDataKey, context);
   ATH_CHECK( costDataHandle.isValid() );
 
-  SG::ReadHandle<xAOD::TrigCompositeContainer> rosDataHandle(m_rosDataKey, context);
-  ATH_CHECK( rosDataHandle.isValid() );
-
-
   if (!m_metadataDataKey.empty()){
     SG::ReadHandle<xAOD::TrigCompositeContainer> metadataDataHandle(m_metadataDataKey, context);
     if (metadataDataHandle.isValid()){
@@ -276,7 +272,7 @@ StatusCode TrigCostAnalysis::execute(const EventContext& ctx) {
 
   const uint32_t onlineSlot = getOnlineSlot( costDataHandle.get() );
   CostData costData;
-  ATH_CHECK( costData.set(costDataHandle.get(), rosDataHandle.get(), onlineSlot) );
+  ATH_CHECK( costData.set(costDataHandle.get(), onlineSlot) );
   costData.setCostROSData(m_costROSData);
   costData.setChainToAlgMap(chainToAlgIdx);
   costData.setChainToUniqAlgMap(chainToUniqAlgs);
