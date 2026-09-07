@@ -135,10 +135,10 @@ ITk::StripClusterOnTrackTool::correct
     if (distance*cosAlpha > boundsy){
       ATH_MSG_VERBOSE("DISTANCE TO LARGE COMPARED TO BOUNDS, SETTING TO MAXIMUM");
       distance = boundsy/cosAlpha - 1.; // use 1 mm as tolerance parameter
-      // if local position is negative, also the distance has to be negative
-      if (loct.y() < 0)
-        distance = -distance;
     }
+    // if local position is negative, also the distance has to be negative
+    if (loct.y() < 0)
+      distance = -distance;
   } else {
     // endcap treatment:
     // for annuli do something different, since we already have in-sensor
