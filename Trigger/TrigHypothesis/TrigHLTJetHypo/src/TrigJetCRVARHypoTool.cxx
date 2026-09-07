@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // ********************************************************************
@@ -88,7 +88,7 @@ bool TrigJetCRVARHypoTool::emf_dis(const xAOD::Jet* jet  ) const {
       size_t nClusters = jet->numConstituents();
       double clusterPU_sumEEM = 0; double clusterPU_sumE = 0;
       for (size_t clust = 0; clust < nClusters; clust++) {
-        const xAOD::CaloCluster * aCluster = dynamic_cast<const xAOD::CaloCluster*> (jet->rawConstituent(clust));
+        const xAOD::CaloCluster * aCluster = static_cast<const xAOD::CaloCluster*> (jet->rawConstituent(clust));
         double clusEEM = 0;
         clusEEM+=(aCluster)->eSample(CaloSampling::EMB1);
         clusEEM+=(aCluster)->eSample(CaloSampling::EMB2);
