@@ -2,12 +2,12 @@
   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef INCLUDE_PERSISTENCYSVC_CONTAINER_H
-#define INCLUDE_PERSISTENCYSVC_CONTAINER_H
+#ifndef POOLSVC_CONTAINER_H
+#define POOLSVC_CONTAINER_H
 
 // includes
-#include "PersistencySvc/IContainer.h"
-#include "PersistencySvc/ITechnologySpecificAttributes.h"
+#include "PoolSvc/IContainer.h"
+#include "ITechnologySpecificAttributes.h"
 
 namespace pool {
 
@@ -42,7 +42,6 @@ namespace pool {
     virtual ITokenIterator* tokens() override;
 
     /// Returns the object holding the technology specific attributes for a given technology domain
-    virtual const ITechnologySpecificAttributes& technologySpecificAttributes() const override final { return *this; }
     virtual ITechnologySpecificAttributes& technologySpecificAttributes() override final { return *this; }
 
   protected:

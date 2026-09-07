@@ -2,8 +2,8 @@
   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef INCLUDE_PERSISTENCYSVC_DATABASEHANDLER_H
-#define INCLUDE_PERSISTENCYSVC_DATABASEHANDLER_H
+#ifndef POOLSVC_DATABASEHANDLER_H
+#define POOLSVC_DATABASEHANDLER_H
 
 #include "StorageSvc/FileDescriptor.h"
 #include "StorageSvc/DbDatabase.h"

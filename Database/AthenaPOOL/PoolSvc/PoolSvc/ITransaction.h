@@ -2,8 +2,8 @@
   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef INCLUDE_PERSISTENCYSVC_ITRANSACTION_H
-#define INCLUDE_PERSISTENCYSVC_ITRANSACTION_H
+#ifndef POOLSVC_ITRANSACTION_H
+#define POOLSVC_ITRANSACTION_H
 
 #include "StorageSvc/pool.h"
 
@@ -12,7 +12,7 @@
  */
 namespace pool {
 
-  /** @class ITransaction ITransaction.h PersistencySvc/ITransaction.h
+  /** @class ITransaction ITransaction.h PoolSvc/ITransaction.h
    *
    *  ITransaction is the interface class for user (macroscopic transactions)
    *  Every operation with the pool storage system should be performed within a transaction.

@@ -178,17 +178,6 @@ pool::UserSession::microSessionManager( long technology )
   return *mgr;
 }
 
-
-const pool::ITechnologySpecificAttributes&
-pool::UserSession::technologySpecificAttributes( long technology ) const
-{
-  auto iManager = m_technologies.find( pool::DbType( technology ).majorType() );
-  if( iManager == m_technologies.end() ) {
-    throw std::runtime_error( "Technology not found, reading APR attributes " );
-  }
-  return *(iManager->second);
-}
-
 pool::ITechnologySpecificAttributes&
 pool::UserSession::technologySpecificAttributes( long technology )
 {

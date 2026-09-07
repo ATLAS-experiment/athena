@@ -9,7 +9,7 @@
 #include "GaudiKernel/ISvcLocator.h"
 #include "GaudiKernel/IMessageSvc.h"
 
-#include "PersistencySvc/IFileCatalog.h"
+#include "PoolSvc/IFileCatalog.h"
 #include "StorageSvc/DbPrint.h"
 
 #include <exception>

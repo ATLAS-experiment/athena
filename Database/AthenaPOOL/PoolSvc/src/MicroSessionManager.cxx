@@ -5,7 +5,7 @@
 #include "MicroSessionManager.h"
 #include "DatabaseRegistry.h"
 #include "DatabaseHandler.h"
-#include "PersistencySvc/ITransaction.h"
+
 #include "StorageSvc/IStorageSvc.h"
 #include "StorageSvc/DbConnection.h"
 #include "StorageSvc/DbDatabase.h"
@@ -119,14 +119,6 @@ pool::MicroSessionManager::disconnectAll()
   }
   return ret;
 }
-
-
-long
-pool::MicroSessionManager::technology() const
-{
-  return m_technology;
-}
-
 
 std::string
 pool::MicroSessionManager::fidForPfn( const std::string& pfn )

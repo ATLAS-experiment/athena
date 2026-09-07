@@ -2,11 +2,11 @@
   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef INCLUDE_PERSISTENCYSVC_USERSESSION_H
-#define INCLUDE_PERSISTENCYSVC_USERSESSION_H
+#ifndef POOLSVC_USERSESSION_H
+#define POOLSVC_USERSESSION_H
 
 #include "AthenaBaseComps/AthMessaging.h"
-#include "PersistencySvc/ISession.h"
+#include "PoolSvc/ISession.h"
 #include "StorageSvc/DbPrint.h"
 
 #include <map>
@@ -64,7 +64,6 @@ namespace pool {
 
     // Signatures needed for the PersistencySvc
     DatabaseRegistry& registry();
-    //TechnologyDispatcher& technologyDispatcher();
 
     /** Explicitly disconnects all the databases.
      *  If a transaction is active, then all the changes since the last commit are aborted.
@@ -104,9 +103,6 @@ namespace pool {
     void setFileCatalog(IFileCatalog& catalog);
 
     /// Returns the object holding the technology specific attributes for a given technology domain
-    virtual const ITechnologySpecificAttributes&
-    technologySpecificAttributes( long technology ) const override final;
-
     virtual  ITechnologySpecificAttributes&
     technologySpecificAttributes( long technology ) override final;
 

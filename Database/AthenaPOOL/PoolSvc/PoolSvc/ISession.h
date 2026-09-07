@@ -2,11 +2,11 @@
   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef INCLUDE_PERSISTENCYSVC_ISESSION_H
-#define INCLUDE_PERSISTENCYSVC_ISESSION_H
+#ifndef POOLSVC_ISESSION_H
+#define POOLSVC_ISESSION_H
 
-#include "PersistencySvc/IDatabase.h"
-#include "PersistencySvc/ITransaction.h"
+#include "PoolSvc/IDatabase.h"
+#include "PoolSvc/ITransaction.h"
 
 #include "DataModelRoot/RootType.h"
 
@@ -26,7 +26,7 @@ namespace pool {
   class ISession;
   std::unique_ptr<ISession> createSession( IFileCatalog& catalog, int ageLimit = -1 );
 
-  /** @class ISession ISession.h PersistencySvc/ISession.h
+  /** @class ISession ISession.h PoolSvc/ISession.h
   *
   *  ISession is the interface class for user (macroscopic) sessions
   *  Every transaction and connection to a database and object reading
@@ -76,7 +76,6 @@ namespace pool {
     virtual IFileCatalog& fileCatalog() = 0;
 
     /// Returns the object holding the technology specific attributes for a given technology domain
-    virtual const ITechnologySpecificAttributes& technologySpecificAttributes( long technology ) const = 0;
     virtual ITechnologySpecificAttributes& technologySpecificAttributes( long technology ) = 0;
 
     /// virtual destructor for the interface

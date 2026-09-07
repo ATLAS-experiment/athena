@@ -2,13 +2,13 @@
   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef INCLUDE_PERSISTENCYSVC_MICROSESSIONMANAGER_H
-#define INCLUDE_PERSISTENCYSVC_MICROSESSIONMANAGER_H
+#ifndef POOLSVC_MICROSESSIONMANAGER_H
+#define POOLSVC_MICROSESSIONMANAGER_H
 
 #include <string>
 #include <set>
 
-#include "PersistencySvc/ITechnologySpecificAttributes.h"
+#include "ITechnologySpecificAttributes.h"
 #include "StorageSvc/pool.h"
 
 namespace pool {
@@ -48,9 +48,6 @@ namespace pool {
 
     /// Disconnects from all the databases
     bool disconnectAll();
-
-    /// Returns the technology
-    long technology() const;
 
     /// Fetches the FID by trying to temporatily connect to a database.
     std::string fidForPfn( const std::string& pfn );

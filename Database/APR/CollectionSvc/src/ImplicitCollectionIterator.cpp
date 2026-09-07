@@ -5,8 +5,8 @@
 #include "ImplicitCollectionIterator.h"
 #include "CollectionSvc/CollectionDescription.h"
 
-#include "PersistencySvc/IContainer.h"
-#include "PersistencySvc/ITokenIterator.h"
+#include "PoolSvc/IContainer.h"
+#include "PoolSvc/ITokenIterator.h"
 
 #include "PersistentDataModel/Token.h"
 

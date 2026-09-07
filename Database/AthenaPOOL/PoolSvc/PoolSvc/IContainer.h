@@ -2,8 +2,8 @@
   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef INCLUDE_PERSISTENCYSVC_ICONTAINER_H
-#define INCLUDE_PERSISTENCYSVC_ICONTAINER_H
+#ifndef POOLSVC_ICONTAINER_H
+#define POOLSVC_ICONTAINER_H
 
 // includes
 #include <string>
@@ -14,7 +14,7 @@ namespace pool {
   class ITokenIterator;
   class ITechnologySpecificAttributes;
 
-  /** @class IContainer IContainer.h PersistencySvc/IContainer.h
+  /** @class IContainer IContainer.h PoolSvc/IContainer.h
    *
    *  IContainer is the base class for container objects
    *
@@ -34,7 +34,6 @@ namespace pool {
     virtual ITokenIterator* tokens() = 0;
 
     /// Returns the object holding the technology specific attributes for a given technology domain
-    virtual const ITechnologySpecificAttributes& technologySpecificAttributes() const = 0;
     virtual ITechnologySpecificAttributes& technologySpecificAttributes() = 0;
 
     /// Virtual destructor for the interface
