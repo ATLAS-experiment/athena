@@ -59,7 +59,9 @@ StatusCode JSONDeviceDetectorDescriptionProviderSvc::initialize()
   auto hostDetector = std::make_unique<traccc::host_detector>();
   traccc::io::read_detector(
       *hostDetector, *m_MRs->hostMR(),
-      PathResolverFindCalibFile(m_geometryFile.value()));
+      PathResolverFindCalibFile(m_geometryFile.value()),
+      PathResolverFindCalibFile(m_materialFile.value()),
+      PathResolverFindCalibFile(m_surfaceGridFile.value()));
 
   auto deviceDetector =
         std::make_unique<traccc::detector_buffer>(traccc::buffer_from_host_detector(*hostDetector, m_MRs->mainMR(), const_cast<vecmem::copy&>(*copy)));

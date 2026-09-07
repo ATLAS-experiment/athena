@@ -148,7 +148,88 @@ def ITkActsDeviceTrackRecoCfg(flags, *, previousExtension=None):
     # --- Track Reconstruction ---
     if flags.Acts.Device.doTrackReconstruction:
 
-        raise ValueError("Unsupported operation, we do not have this step on device yet")
+        if clustersLocation is not DataLocation.DEVICE or seedsLocation is not DataLocation.DEVICE:
+            raise ValueError("Device track reconstruction requires device clusterization "
+                "(flags.Acts.Device.doClusterization=True) and device seeding "
+                "(flags.Acts.Device.doSeeding=True): it reads the traccc measurement "
+                "and seed collections straight out of device memory and there is "
+                "currently no host->device converter for these yet.")
+
+
+        from ActsGPUMagField.ActsGPUMagFieldConfig import JSONDeviceMagFieldProviderSvcCfg
+        acc.merge(JSONDeviceMagFieldProviderSvcCfg(flags,
+            DeviceMagFieldObjectName="TracccMagneticField",
+            HostMagFieldObjectName="TracccHostMagField",
+        ))
+
+        from ActsGPUPatternRecognition.ActsGPUPatternRecognitionConfig import DeviceTrkParamEstimationAlgCfg, DeviceTrackFindingAlgCfg
+        acc.merge(DeviceTrkParamEstimationAlgCfg(flags,
+            InputTracccSpacepoints="TracccPixelSpacepointCollection",
+            InputTracccMeasurements="TracccMeasurementCollection",
+            InputTracccSeeds="TracccPixelSeedCollection",
+            InputTracccMagField="TracccMagneticField",
+            OutputTracccTrackParameters="TracccTrackParameterCollection",
+        ))
+
+        acc.merge(DeviceTrackFindingAlgCfg(flags,
+            InputTracccMeasurements="TracccMeasurementCollection",
+            InputTracccMagField="TracccMagneticField",
+            InputTracccTrackParameters="TracccTrackParameterCollection",
+            InputTracccDetectorGeometry="TracccDeviceDetectorGeometry",
+            OutputTracccTracks="TracccTrackCollection",
+        ))
+            
+        if clustersLocation is not DataLocation.DEVICE:
+            acc.merge(TracccMeasurementConverterAlgCfg(flags,
+                InputMeasurements="TracccMeasurementCollection",
+                InputClusters="TracccClusterCollection",
+                InputCells="TracccCellCollection",
+                ConvertClustersWithCells = flags.Tracking.doTruth,
+                OutputPixelClusters="ITkPixelClusters",
+                OutputPixelSpacePoints="ITkPixelSpacePoints",
+                OutputMeasToPixelSP="ITkTracccMeasToPixelSP",
+                OutputMeasToStripCl="ITkTracccMeasToStripCl",
+                OutputStripClusters="ITkStripClusters",
+                GeoIdMapping="TracccGeoIdMapping",
+            ))
+
+        from ActsGPUEventCnv.ActsGPUEventCnvConfig import TracccTrackConverterAlgCfg, TracccMeasurementConverterAlgCfg
+        if clustersLocation is DataLocation.DEVICE:
+            acc.merge(TracccMeasurementConverterAlgCfg(flags,
+                    InputMeasurements="TracccMeasurementCollection",
+                    InputClusters="TracccClusterCollection",
+                    InputCells="TracccCellCollection",
+                    ConvertClustersWithCells = flags.Tracking.doTruth,
+                    OutputPixelClusters="ITkPixelClusters",
+                    OutputPixelSpacePoints="ITkPixelSpacePoints",
+                    OutputMeasToPixelSP="ITkTracccMeasToPixelSP",
+                    OutputMeasToStripCl="ITkTracccMeasToStripCl",
+                    OutputStripClusters="ITkStripClusters"
+            ))
+
+            # Strip clusters were just produced above, but nothing forms strip
+            # space points on the device path — mirror the host-side flow
+            from ActsConfig.ActsSpacePointFormationConfig import (
+                ActsStripSpacePointFormationAlgCfg,
+                reconstructStripSpacePointsInPrimaryPass,
+            )
+            if reconstructStripSpacePointsInPrimaryPass(flags):
+                acc.merge(ActsStripSpacePointFormationAlgCfg(flags,
+                    name=f"{flags.Tracking.ActiveConfig.extension}StripSpacePointFormationAlg",
+                    StripClusters="ITkStripClusters",
+                    StripSpacePoints="ITkStripSpacePoints",
+                    StripOverlapSpacePoints="ITkStripOverlapSpacePoints"))
+
+        acc.merge(TracccTrackConverterAlgCfg(flags,
+            InputPixelClusters="ITkPixelClusters",
+            InputStripClusters="ITkStripClusters",
+            InputMeasToPixelSP="ITkTracccMeasToPixelSP",
+            InputMeasToStripCl="ITkTracccMeasToStripCl",
+            InputTracks="TracccTrackCollection",
+            OutputTracks=f"{flags.Tracking.ActiveConfig.extension}Tracks",
+        ))
+
+
 
     else:
 
@@ -163,6 +244,7 @@ def ITkActsDeviceTrackRecoCfg(flags, *, previousExtension=None):
                 OutputPixelClusters="ITkPixelClusters",
                 OutputPixelSpacePoints="ITkPixelSpacePoints",
                 OutputMeasToPixelSP="ITkTracccMeasToPixelSP",
+                OutputMeasToStripCl="ITkTracccMeasToStripCl",
                 OutputStripClusters="ITkStripClusters"
             ))
             from ActsConfig.ActsSpacePointFormationConfig import ActsStripSpacePointFormationAlgCfg

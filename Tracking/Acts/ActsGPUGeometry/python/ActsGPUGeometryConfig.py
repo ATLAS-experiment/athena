@@ -31,6 +31,8 @@ def JSONDeviceDetectorDescriptionProviderSvcCfg(flags, **kwargs) -> ComponentAcc
     kwargs.setdefault("DigitizationFile", "dev/ACTS/detray-itk/ITk_digitization_config.json")
     kwargs.setdefault("ConditionsFile",   "dev/ACTS/detray-itk/ITk_conditions_config.json")
     kwargs.setdefault("MapFile",          "dev/ACTS/detray-itk/athenaIdentifierToDetrayMap.txt")
+    kwargs.setdefault("SurfaceGridFile",  "dev/ACTS/detray-itk/detray_detector_surface_grids.json")
+    kwargs.setdefault("MaterialFile",     "dev/ACTS/detray-itk/detray_detector_material_maps.json")
     kwargs.setdefault("GeoIdMappingObjectName",     "TracccGeometryIdMapping")
     kwargs.setdefault("DeviceDigitizationObjectName", "TracccDeviceDigitizationConfig")
     kwargs.setdefault("HostDigitizationObjectName", "TracccHostDigitizationConfig")
