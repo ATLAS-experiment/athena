@@ -50,10 +50,7 @@ from DerivationFrameworkJetEtMiss.CommonJETMXContent import (
     TrackingVariablesHGTD,
     UFOVariables,
 )
-from DerivationFrameworkJetEtMiss.JetCommonConfig import (
-    addJetsToSlimmingTool,
-    addOriginCorrectedClustersToSlimmingTool,
-)
+from DerivationFrameworkJetEtMiss.JetCommonConfig import addOriginCorrectedClustersToSlimmingTool
 from DerivationFrameworkMCTruth.MCTruthCommonConfig import (
     AddTopQuarkAndDownstreamParticlesCfg,
     AddTruthCollectionNavigationDecorationsCfg,
@@ -65,14 +62,7 @@ from JetRecConfig.JetInputConfig import buildEventShapeAlg
 from JetRecConfig.JetRecConfig import JetRecCfg, getConstitPJGAlg, getInputAlgs
 from JetRecConfig.StandardJetConstits import stdConstitDic as cst
 from JetRecConfig.StandardLargeRJets import AntiKt10TruthDressedWZSoftDrop
-from JetRecConfig.StandardSmallRJets import (
-    AntiKt4EMPFlowML,
-    AntiKt4EMPFlowNoPtCut,
-    AntiKt4EMTopoNoPtCut,
-    AntiKt4LCTopo,
-    AntiKt4MLTopo,
-    AntiKt4UFOCSSKNoPtCut,
-)
+from JetRecConfig.StandardSmallRJets import AntiKt4LCTopo
 from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
 from xAODMetaDataCnv.InfileMetaDataConfig import SetupMetaDataForStreamCfg
 
@@ -91,14 +81,6 @@ GN3_LATENT_VARS = [
     "GN3EPCLV01SimpleFlip_Latent128",
     "GN3EPCLV01SimpleFlip_Latent64",
     "GN3EPCLV01SimpleFlip_Latent32",
-]
-
-# Jets reconstructed without a pT cut, used for jet calibration and tagger development
-NO_PT_CUT_JETS = [
-    "AntiKt4UFOCSSKNoPtCutJets",
-    "AntiKt4EMPFlowNoPtCutJets",
-    "AntiKt4EMPFlowMLJets",
-    "AntiKt4MLTopoJets",
 ]
 
 
@@ -214,10 +196,7 @@ def _add_ftag_content(
 
     # Extra ITk, HGTD and EMTopo jet content available with Run-4 inputs
     if flags.GeoModel.Run >= LHCPeriod.Run4:
-        slimming_helper.SmartCollections += [
-            "AntiKt4EMTopoJets",
-            "MET_Baseline_AntiKt4EMTopo",
-        ]
+        slimming_helper.SmartCollections += ["MET_Baseline_AntiKt4EMTopo"]
         slimming_helper.AllVariables += [
             "AntiKt4EMTopoJets",
             "AntiKt4TruthJets",
@@ -252,12 +231,10 @@ def _add_jet_content(
     slimming_helper.SmartCollections += [
         "EventInfo",
         "Photons",
-        "AntiKt4EMTopoNoPtCutJets",
+        "AntiKt4EMTopoJets",
     ]
 
     slimming_helper.AllVariables += [
-        "CHSGlobalClusterMLCorrectedChargedParticleFlowObjects",
-        "CHSGlobalClusterMLCorrectedNeutralParticleFlowObjects",
         "Kt4EMTopoOriginEventShape",
         "Kt4EMPFlowEventShape",
         "Kt4EMPFlowNeutEventShape",
@@ -267,23 +244,13 @@ def _add_jet_content(
 
     # Low-level inputs
     slimming_helper.ExtraVariables += [
-        ".".join(["CaloCalTopoClusters"] + ClusterVariables + ["clusterE_ML.clusterE_ML_unc"]),
+        ".".join(["CaloCalTopoClusters"] + ClusterVariables),
         ".".join(["EMOriginTopoClusters"] + ["calM"]),
         ".".join(
             ["GlobalChargedParticleFlowObjects"] + FlowElementVariables + ["otherObjectWeights"]
         ),
         ".".join(
             ["GlobalNeutralParticleFlowObjects"] + FlowElementVariables + ["otherObjectWeights"]
-        ),
-        ".".join(
-            ["GlobalClusterMLCorrectedChargedParticleFlowObjects"]
-            + FlowElementVariables
-            + ["otherObjectWeights"]
-        ),
-        ".".join(
-            ["GlobalClusterMLCorrectedNeutralParticleFlowObjects"]
-            + FlowElementVariables
-            + ["otherObjectWeights"]
         ),
         ".".join(["UFO"] + UFOVariables),
         ".".join(["UFOCSSK"] + UFOVariables),
@@ -306,7 +273,7 @@ def _add_jet_content(
                 "constituentLinks",
             ]
         ),
-        "AntiKt4EMTopoNoPtCutJets.IsoFixedCone5Pt.IsoFixedCone5PtPUsub.constituentLinks",
+        "AntiKt4EMTopoJets.IsoFixedCone5Pt.IsoFixedCone5PtPUsub.constituentLinks",
         f"{LARGE_R_JETS}.SizeParameter.GhostTrack.constituentLinks",
         "GSFTrackParticles.particleHypothesis.vx.vy.vz",
         "PrimaryVertices.x.y.z.covariance.trackWeights",
@@ -370,10 +337,6 @@ def _add_jet_content(
             ),
             f"{LARGE_R_JETS}.GhostBHadronsFinalPt.GhostCHadronsFinalPt",
         ]
-
-    # Must run once the smart collections are complete, as it decides per jet
-    # collection between smart slimming and writing all variables
-    addJetsToSlimmingTool(slimming_helper, NO_PT_CUT_JETS, slimming_helper.SmartCollections)
 
 
 def _drop_track_covariance_offdiag(item_list: list[str]) -> list[str]:
@@ -527,14 +490,7 @@ def HID1ExtraContentCfg(flags: AthConfigFlags) -> ComponentAccumulator:
         else:
             acc.addEventAlgo(alg)
 
-    jet_list = [
-        AntiKt4LCTopo,
-        AntiKt4UFOCSSKNoPtCut,
-        AntiKt4EMPFlowNoPtCut,
-        AntiKt4EMPFlowML,
-        AntiKt4EMTopoNoPtCut,
-        AntiKt4MLTopo,
-    ]
+    jet_list = [AntiKt4LCTopo]
     if flags.Input.isMC:
         jet_list += [AntiKt10TruthDressedWZSoftDrop]
 
