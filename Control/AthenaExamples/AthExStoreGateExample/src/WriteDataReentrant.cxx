@@ -249,20 +249,9 @@ StatusCode WriteDataReentrant::execute (const EventContext& ctx) const
   linkVector->push_back(mLink);
 
   // Part 4
-  // make a link to dobj as its base class after it has been registered 
-  // this allows later to retrieve different concrete types as a common ABC
+  // MyDataObj includes a SG_BASES declaration.  So when a MyDataObj is 
+  // recorded, a symlink for BaseClass will be made automatically.
 
-  const BaseClass * pDO = 0; 
-  if ( (evtStore()->symLink(dobj.cptr(), pDO)).isFailure() ) {
-    ATH_MSG_ERROR (" could not make link to BaseClass");
-    return( onError() );
-  }
-   
-  // make a link as its base class,  with the same name
-  if ( ( evtStore()->symLink(dobj3.cptr(), pDO)).isFailure() ) {
-    ATH_MSG_ERROR (" could not make link to BaseClass");
-    return( onError() );
-  }
 
   // Part 5
   // finally dump the structure of the StoreGate before returning

@@ -12,6 +12,7 @@ StatusCode RDOtoTracccCellConverterAlg::initialize()
   ATH_MSG_DEBUG("Initializing");
 
   ATH_CHECK(m_common.initialize());
+  ATH_CHECK(m_common.buildDetrayMaps());
 
   ATH_CHECK(m_pixelRDOKey.initialize());
   ATH_CHECK(m_stripRDOKey.initialize());
@@ -66,16 +67,18 @@ StatusCode RDOtoTracccCellConverterAlg::execute(const EventContext& ctx) const
                 << " Strip RDOs, total " << (nPix + nStrip) << " RDOs");
   size_type const nCells = nPix + nStrip;
 
-  if (nCells == 0) {
-    ATH_MSG_DEBUG("no input hits");
-    return StatusCode::SUCCESS;
-  }
 
   // ---- 2. Create the output cell buffer.
   auto host_copy = m_common.m_copiesTool->hostCopy(ctx);
   traccc::edm::silicon_cell_collection::buffer traccc_cells_host_buffer{
     nCells, m_common.m_hostMR->mr()};
   host_copy->setup(traccc_cells_host_buffer)->wait();
+
+  if (nCells == 0) {
+    ATH_MSG_DEBUG("no input hits — writing empty cell collection");
+    ATH_CHECK(m_common.copyToGpuAndRecordToSG(ctx, traccc_cells_host_buffer));
+    return StatusCode::SUCCESS;
+  }
 
   // Create a "device" collection around the buffer to work on it
   traccc::edm::silicon_cell_collection::device cells{traccc_cells_host_buffer};
@@ -97,7 +100,12 @@ StatusCode RDOtoTracccCellConverterAlg::execute(const EventContext& ctx) const
       if (!el) continue;
       const Identifier modId = el->identify();
       const InDetDD::SiCellId cellId = el->cellIdFromIdentifier(rdoId);
-      const uint64_t geoId = m_common.m_athenaToDetray->at(modId);
+      const auto geoIdOpt = m_common.m_geoIdMapping->athenaToDetray(modId);
+      if (!geoIdOpt.has_value()) {
+        ATH_MSG_FATAL("No detray id found for Athena identifier " << modId);
+        return StatusCode::FAILURE;
+      }
+      const uint64_t geoId = *geoIdOpt;
 
       if (geoId != current_geometry_id) {
         current_geometry_id = geoId;
@@ -141,7 +149,12 @@ StatusCode RDOtoTracccCellConverterAlg::execute(const EventContext& ctx) const
       if (!el) continue;
       const Identifier modId = el->identify();
       const InDetDD::SiCellId cellId = el->cellIdFromIdentifier(rdoId);
-      const uint64_t geoId = m_common.m_athenaToDetray->at(modId);
+      const auto geoIdOpt = m_common.m_geoIdMapping->athenaToDetray(modId);
+      if (!geoIdOpt.has_value()) {
+        ATH_MSG_FATAL("No detray id found for Athena identifier " << modId);
+        return StatusCode::FAILURE;
+      }
+      const uint64_t geoId = *geoIdOpt;
 
       if (geoId != current_geometry_id) {
         current_geometry_id = geoId;

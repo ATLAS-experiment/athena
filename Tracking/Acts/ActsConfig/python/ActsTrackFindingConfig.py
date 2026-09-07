@@ -336,14 +336,20 @@ def ActsTrackFindingGNNCfg(flags, **kwargs) -> ComponentAccumulator:
     # Adopt standard convention
     kwargs.setdefault('ACTSTracksLocation', f"{flags.Tracking.ActiveConfig.extension}Tracks")
 
-    kwargs.setdefault("moduleMapPath", flags.Acts.GNN.ModuleMapPath)
-    kwargs.setdefault("gnnPath", flags.Acts.GNN.ModelPath)
-    kwargs.setdefault("numTrtContexts", flags.Acts.GNN.NumTrtContexts)
-    kwargs.setdefault("maxGpuInstances", flags.Acts.GNN.MaxGpuInstances)
+    # The GNN inference (graph construction, edge classification, track building)
+    if 'GnnPipelineTool' not in kwargs:
+        kwargs.setdefault('GnnPipelineTool', CompFactory.ActsTrk.GnnPipelineTool(
+            "GnnPipeline",
+            moduleMapPath=flags.Acts.GNN.ModuleMapPath,
+            gnnPath=flags.Acts.GNN.ModelPath,
+            numTrtContexts=flags.Acts.GNN.NumTrtContexts,
+            maxGpuInstances=flags.Acts.GNN.MaxGpuInstances,
+            edgeCut=flags.Acts.GNN.EdgeCut,
+            minCandidateMeasurements=flags.Acts.GNN.MinCandidateMeasurements,
+        ))
+
     kwargs.setdefault("varianceInflation", flags.Acts.GNN.VarianceInflation)
     kwargs.setdefault("tightSeeds", flags.Acts.GNN.TightSeeds)
-    kwargs.setdefault("edgeCut", flags.Acts.GNN.EdgeCut)
-    kwargs.setdefault("minCandidateMeasurements", flags.Acts.GNN.MinCandidateMeasurements)
     kwargs.setdefault("minDeltaR", flags.Acts.GNN.MinDeltaR)
     kwargs.setdefault("relaxCentralHoleSel", flags.Acts.GNN.RelaxCentralHoleSel)
     kwargs.setdefault("relaxMeasurementSel", flags.Acts.GNN.RelaxMeasurementSel)
@@ -353,6 +359,13 @@ def ActsTrackFindingGNNCfg(flags, **kwargs) -> ComponentAccumulator:
     if 'TrackParamsEstimationTool' not in kwargs:
         from ActsConfig.ActsTrackParamsEstimationConfig import ActsTrackParamsEstimationToolCfg
         kwargs.setdefault('TrackParamsEstimationTool', acc.popToolsAndMerge(ActsTrackParamsEstimationToolCfg(flags)))
+
+    # The fitter tool is used in the GNN track finding to fit the track candidates after the GNN has selected the measurements.
+    if 'FitterTool' not in kwargs:
+        from ActsConfig.ActsTrackFittingConfig import ActsFitterCfg
+        kwargs.setdefault('FitterTool', acc.popToolsAndMerge(ActsFitterCfg(flags, 
+                                                                           ReverseFilteringPt=0, 
+                                                                           OutlierChi2Cut=float('inf'))))
 
     from ActsAlignmentAlgs.AlignmentAlgsConfig import ActsGeometryContextAlgCfg
     from ActsConfig.ActsGeometryConfig import ActsTrackingGeometrySvcCfg

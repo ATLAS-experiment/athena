@@ -7,8 +7,6 @@
 #include "TrigHLTJetHypo/TrigHLTJetHypoUtils/IJet.h"
 
 #include <sstream>
-#include <cmath>
-#include <TLorentzVector.h>
 
 bool 
 AcceptAllCondition::isSatisfied(const HypoJetVector& ips,

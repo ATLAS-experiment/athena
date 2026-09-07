@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
   * Trigger Hypo Tool, that is aimed at triggering disappearing tracks
   * author Kunihiro Nagano <kunihiro.nagano@cern.ch> 
@@ -135,7 +135,7 @@ StatusCode TrigDisappearingTrackHypoAlg::execute( const EventContext& context ) 
       ATH_CHECK( newDecision->setObjectLink<xAOD::TrigCompositeContainer>(TrigCompositeUtils::featureString(), distrkEL) );
 
       TrigDisappearingTrackHypoTool::DisTrkHypoInfo hypoInfo{ newDecision, distrk, previousDecisionIDs };
-      disTrkHypoInputs.push_back( hypoInfo );
+      disTrkHypoInputs.push_back( std::move(hypoInfo) );
    }
 
    // Loop over all hypoToolinputs and get their decisions

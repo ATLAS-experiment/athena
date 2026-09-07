@@ -62,6 +62,7 @@ def createActsTrackingPassFlags():
     # Override acts default values
     icf.Xi2max = [50]
     icf.Xi2maxNoAdd = [100]
+    icf.useITkStripSeeding = False
     return icf
 
 # Main ACTS Tracking pass with Heavy Ion configuration
@@ -98,6 +99,7 @@ def createActsLargeRadiusTrackingPassFlags():
     deactivateAthenaComponents(icf)
     activateActsComponents(icf)
     setActsDefaultTunings(icf)
+    icf.useITkPixelSeeding = False
     # Store the output track particles in InDetLargeD0TrackParticles
     # (instead of InDetActsLargeRadiusTrackParticles) so that downstream
     # LRT clients can rely on the same container name as in Run 3
@@ -123,6 +125,7 @@ def createActsConversionTrackingPassFlags():
     deactivateAthenaComponents(icf)
     activateActsComponents(icf)
     setActsDefaultTunings(icf)
+    icf.useITkPixelSeeding = False
     # Mark as secondary pass
     icf.isSecondaryPass = True
     # Conversion pass is usually merged with main pass
@@ -159,6 +162,7 @@ def createEFValidateF100TrackingPassFlags():
     # Override acts default values
     icf.Xi2max = [50]
     icf.Xi2maxNoAdd = [100]
+    icf.useITkStripSeeding = False
     return icf
 
 def createEFValidateF150TrackingPassFlags():
@@ -176,6 +180,7 @@ def createEFValidateF150TrackingPassFlags():
     icf.Xi2max = [50]
     icf.Xi2maxNoAdd = [100]
     icf.SeedingStrategy = SeedingStrategy.F150
+    icf.useITkStripSeeding = False
     return icf
 
 # Main Inner Detector ACTS Tracking pass

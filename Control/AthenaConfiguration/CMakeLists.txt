@@ -52,7 +52,7 @@ if( NOT XAOD_STANDALONE )
                     POST_EXEC_SCRIPT noerror.sh )
 
     atlas_add_test( MainServicesConfig
-                    SCRIPT python -m AthenaConfiguration.MainServicesConfig
+                    SCRIPT test/testMainServicesConfig.py
                     POST_EXEC_SCRIPT noerror.sh )
 endif()
 

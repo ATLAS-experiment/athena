@@ -130,7 +130,7 @@ namespace MuonR4{
                 Amg::Vector3D closestApproach{locToGlob* locClosestApproach};
                 const double timeOfArrival = closestApproach.mag() * c_inv  + ActsTrk::timeToAthena(timeDelay);
 
-                if (ATH_LIKELY(spacePoint->dimension() == 1)) {
+                if (spacePoint->dimension() == 1) [[likely]] {
                     auto* dc = static_cast<const xAOD::MdtDriftCircle*>(spacePoint->primaryMeasurement());
                     MdtCalibInput calibInput{*dc, *gctx};
                     calibInput.setTrackDirection(locToGlob.linear() * dirInChamb,
@@ -498,7 +498,7 @@ namespace MuonR4{
                                          Acts::copySign(1.,trackPars.parameters()[Acts::eBoundLoc0]);
 
                 /** Vast majority of the measurements are ordinary drift tubes */
-                if (ATH_LIKELY(muonMeas->numDimensions() == 1)) {
+                if (muonMeas->numDimensions() == 1) [[likely]] {
                     MdtCalibOutput calibOutput = m_mdtCalibrationTool->calibrate(*ctx, calibInput);
                     ATH_MSG_VERBOSE("Returned calibration object "<<calibOutput);
                     AmgVector(1) pos{AmgVector(1)::Zero()};
@@ -543,7 +543,7 @@ namespace MuonR4{
             } case RpcStripType: {
                 const auto* rpcClust = static_cast<const xAOD::RpcMeasurement*>(muonMeas);
                 /** Legacy BM / BO chambers */
-                if (ATH_LIKELY(rpcClust->numDimensions() == 1)) {
+                if (rpcClust->numDimensions() == 1) [[likely]] {
 
                     if (!m_useRpcTime) {
                         const auto proj = rpcClust->measuresPhi() ? ProjectorType::e1DimRotNoTime

@@ -59,6 +59,7 @@ StatusCode TrackParticleTruthAlg::execute(const EventContext& ctx) const {
       particlesType(*particle) = 0;
       particlesOrigin(*particle) = 0;
       particlesClassification(*particle) = 0;
+      partInd++;
       continue;
     }
 

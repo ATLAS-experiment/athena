@@ -25,6 +25,7 @@
 
 #include "starlight.h"
 #include "upcevent.h"
+#include "upcXevent.h" // not compatible with Starlight older than r330
 #include "inputParameters.h"
 
 class Starlight_i:public GenModule {
@@ -52,7 +53,10 @@ protected:
   std::shared_ptr<randomGenerator> m_randomGenerator{};
   inputParameters  m_inputParameters;   // parameter instance
   double           m_axionMass{1.};
-  upcEvent        *m_event{}; // TODO convert to unique_ptr
+  std::variant<
+      std::unique_ptr<upcEvent>,  // Starting from version r330 m_event can be either
+      std::unique_ptr<upcXEvent>  // upcEvent or upcXEvent depending on the process
+  >                m_event{};
 
   unsigned int m_beam1Z{0};
   unsigned int m_beam1A{0};

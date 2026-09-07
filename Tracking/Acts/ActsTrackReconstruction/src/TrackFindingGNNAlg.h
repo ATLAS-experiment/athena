@@ -13,53 +13,37 @@
 
 
 // Tools
-#include "ActsGeometryInterfaces/IExtrapolationTool.h"
+#include "ActsToolInterfaces/IGnnPipelineTool.h"
 #include "ActsGeometryInterfaces/ITrackingGeometrySvc.h"
 #include "ActsToolInterfaces/ITrackParamsEstimationTool.h"
-#include "src/TrackStatePrinterTool.h"
 #include "ActsCalibrators/xAODUncalibMeasSurfAcc.h"
 
 // ACTS
-#include "Acts/EventData/ProxyAccessor.hpp"
-#include "Acts/EventData/TrackContainer.hpp"
-#include "Acts/EventData/VectorTrackContainer.hpp"
+#include "Acts/TrackFinding/TrackSelector.hpp"
 
 // ActsTrk
 #include "ActsEvent/SeedContainer.h"
 #include "ActsEvent/TrackContainer.h"
-#include "ActsEvent/TrackParameters.h"
-#include "ActsEvent/TrackParametersContainer.h"
 #include "ActsEvent/ContextUtility.h"
-#include "ActsGeometry/DetectorElementToActsGeometryIdMap.h"
+#include "ActsInterop/Logger.h"
 #include "ActsToolInterfaces/IFitterTool.h"
-#include "ActsToolInterfaces/IOnTrackCalibratorTool.h"
-#include "IMeasurementSelector.h"
 
 // Athena
-#include "AthenaKernel/Chrono.h"
 #include "AthenaMonitoringKernel/GenericMonitoringTool.h"
 #include "GaudiKernel/EventContext.h"
-#include "InDetIdentifier/SCT_ID.h"
-#include "InDetReadoutGeometry/SiDetectorElementCollection.h"
-#include "xAODMeasurementBase/UncalibratedMeasurement.h"
+#include "GaudiKernel/IChronoStatSvc.h"
+#include "GaudiKernel/ServiceHandle.h"
+#include "GaudiKernel/ToolHandle.h"
 
 // STL
 #include <memory>
-#include <optional>
-#include <semaphore>
 #include <string>
 
 // Handle Keys
-#include "ActsEvent/TrackContainerHandlesHelper.h"
-#include "StoreGate/CondHandleKeyArray.h"
+#include "StoreGate/ReadHandleKey.h"
 #include "StoreGate/WriteHandleKey.h"
 #include "src/detail/Definitions.h"
-#include "src/detail/DuplicateSeedDetector.h"
 #include "src/detail/OnTrackCalibrator.h"
-
-namespace ActsPlugins {
-class GnnPipeline;
-}
 
 namespace ActsTrk {
 class TrackFindingGNNAlg : public AthReentrantAlgorithm {
@@ -79,6 +63,8 @@ private:
       this, "TrackParamsEstimationTool", "", "Track Param Estimation from Seeds"};
   ToolHandle<IFitterTool> m_fitterTool{
       this, "FitterTool", "", "Track fitting tool"};
+  ToolHandle<ActsTrk::IGnnPipelineTool> m_gnnPipelineTool{
+      this, "GnnPipelineTool", "", "GNN seeding pipeline"};
 
   /** @brief Utility to fetch the geometry, magnetic field and calibration context in the event */
   ContextUtility m_ctxProvider{this};
@@ -109,22 +95,6 @@ private:
       this, "maxPropagationStep", 1000,
       "Maximum number of steps for one propagate call"};
 
-  Gaudi::Property<std::string> m_moduleMapPath{this, "moduleMapPath", "",
-                                               "Path to the module map files"};
-
-  Gaudi::Property<std::string> m_gnnPath{this, "gnnPath", "",
-                                         "Path to the gnn file"};
-
-  Gaudi::Property<bool> m_usePhiOverlapSps{
-      this, "usePhiOverlapSps", false, "Wether to use phi overlap spacepoints"};
-
-  Gaudi::Property<unsigned int> m_maxGpuInstances{
-      this, "maxGpuInstances", 1,
-      "Number of events that can be on GPU in parallel"};
-
-  Gaudi::Property<unsigned int> m_numTrtContexts{
-      this, "numTrtContexts", 1, "Number of TensorRT contexts to allocate"};
-
   Gaudi::Property<double> m_varianceInflation{
       this, "varianceInflation", 1.0,
       "Factor that is multiplied to all initial variances"};
@@ -132,13 +102,6 @@ private:
   Gaudi::Property<bool> m_tightSeeds{
       this, "tightSeeds", false,
       "Use tight seeds instead of spread seeds for param estimation"};
-
-  Gaudi::Property<double> m_edgeCut{this, "edgeCut", 0.5,
-                                    "Edge cut to apply after the GNN"};
-
-  Gaudi::Property<unsigned int> m_minCandidateMeasurements{
-      this, "minCandidateMeasurements", 7,
-      "Minimum number of spacepoints to cut for in the GNN candidates"};
 
   Gaudi::Property<double> m_minDeltaR{
       this, "minDeltaR", 10.0,
@@ -153,13 +116,6 @@ private:
   Gaudi::Property<bool> m_offlineZ0Sel{
       this, "offlineZ0Sel", false, "Apply offline z0 selection"};
 
-  Gaudi::Property<int> m_cudaDeviceIndex{this, "cudaDeviceIndex", 0,
-                                         "CUDA device index for GNN inference"};
-
-  std::unique_ptr<ActsPlugins::GnnPipeline> m_gnnPipeline;
-  
-  const SCT_ID *m_stripIdHelper = nullptr;
-
   Acts::TrackSelector::EtaBinnedConfig m_trackSelectorConfig;
 
   /// Private access to the logger
@@ -167,9 +123,6 @@ private:
 
   /// logging instance
   std::unique_ptr<const Acts::Logger> m_logger;
-
-  mutable std::optional<std::counting_semaphore<>> m_gpuInstanceCount
-      ATLAS_THREAD_SAFE{};
 };
 
 } // namespace ActsTrk

@@ -1,16 +1,14 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #include "ActsEvent/ParticleHypothesisEncoding.h"
 
 #include <stdexcept>
 
-#include "CxxUtils/AthUnlikelyMacros.h"
-
 namespace ActsTrk::ParticleHypothesis {
 
 Trk::ParticleHypothesis convertTrk(Acts::ParticleHypothesis h) {
-    if (ATH_LIKELY(h == Acts::ParticleHypothesis::pion())) {
+    if (h == Acts::ParticleHypothesis::pion()) [[likely]] {
     return Trk::ParticleHypothesis::pion;
   } else if ( h == Acts::ParticleHypothesis::muon()) {
     return Trk::ParticleHypothesis::muon;
@@ -25,7 +23,7 @@ Trk::ParticleHypothesis convertTrk(Acts::ParticleHypothesis h) {
   return Trk::ParticleHypothesis::noHypothesis;
   }
 xAOD::ParticleHypothesis convert(Acts::ParticleHypothesis h) {
-  if (ATH_LIKELY(h == Acts::ParticleHypothesis::pion())) {
+  if (h == Acts::ParticleHypothesis::pion()) [[likely]] {
     return xAOD::pion;
   } else if ( h == Acts::ParticleHypothesis::muon()) {
     return xAOD::muon;

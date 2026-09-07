@@ -11,8 +11,7 @@ fi
 joblog=${ATLAS_CTEST_TESTNAME}.log
 if [ ${ATLAS_CTEST_TESTSTATUS} != 0 ]; then
     echo "$RED nopost.sh> ERROR: Test ${ATLAS_CTEST_TESTNAME} failed with exit code: ${ATLAS_CTEST_TESTSTATUS}$RESET"
-    tail $joblog
-    echo  " noerror.sh> Please check ${PWD}/${joblog}"
+    echo  " nopost.sh> Please check ${PWD}/${joblog}"
 fi
 
 exit $ATLAS_CTEST_TESTSTATUS

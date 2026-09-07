@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRIGHLTJETHYPO_ACCEPTALL_H
@@ -13,8 +13,10 @@
  * AUTHOR:   P. Sherwood
  *********************************************************************/
 
-#include <string>
+
 #include "./ICondition.h"
+#include <string>
+#include <memory>
 
 namespace HypoJet{
   class IJet;

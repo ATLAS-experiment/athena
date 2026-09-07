@@ -157,7 +157,6 @@ def createActsConfigFlags():
     actscf.addFlag('Acts.doAnalysis', False)
     actscf.addFlag('Acts.doAnalysisNtuples', lambda pcf: pcf.Acts.doAnalysis)
     actscf.addFlag('Acts.Clusters.doAnalysis', lambda pcf: pcf.Acts.doAnalysis)
-    actscf.addFlag('Acts.SpacePoints.doAnalysis', lambda pcf: pcf.Acts.doAnalysis)
     actscf.addFlag('Acts.Seeds.doAnalysis', lambda pcf: pcf.Acts.doAnalysis)
     actscf.addFlag('Acts.Tracks.doAnalysis', lambda pcf: pcf.Acts.doAnalysis)
     actscf.addFlag('Acts.Particles.doAnalysis', lambda pcf: pcf.Acts.doAnalysis)
@@ -174,6 +173,14 @@ def createActsConfigFlags():
     
     # SpacePoint
     actscf.addFlag('Acts.SpacePoints.useBeamSpotConstraintStrips', True)
+    actscf.addFlag('Acts.SpacePoints.doPixel', lambda pcf: pcf.Detector.EnableITkPixel)
+    actscf.addFlag('Acts.SpacePoints.doStrip', lambda pcf: (
+        pcf.Detector.EnableITkStrip and (
+            not pcf.Tracking.doITkFastTracking or
+            pcf.Acts.doLargeRadius or pcf.Acts.doLowPt or
+            pcf.Acts.doITkConversion)))
+    actscf.addFlag('Acts.SpacePoints.doAnalysis', lambda pcf: pcf.Acts.doAnalysis)
+
     # Strip and pixel are chosen separately so that either can be validated on its own
     actscf.addFlag('Acts.SpacePointStrategy', SpacePointStrategy.ActsTrk, type=SpacePointStrategy)
     actscf.addFlag('Acts.PixelSpacePointStrategy', SpacePointStrategy.ActsTrk, type=SpacePointStrategy)

@@ -10,7 +10,6 @@ import importlib
 import os
 from AthenaCommon.Logging import logging
 from PyUtils.moduleExists import moduleExists
-from PyUtils.Decorators import deprecate
 
 _msg = logging.getLogger('AthConfigFlags')
 
@@ -253,9 +252,6 @@ class AthConfigFlags(object):
             self._hash = self._calculateHash()
         return self._hash
 
-    def __hash__(self):
-        raise DeprecationWarning("__hash__ method in AthConfigFlags is deprecated. Probably called from function decorator, use AccumulatorCache decorator instead.")
-
     def _calculateHash(self):
         # Once we've hashed a flags instance, we need to be sure that
         # it never goes away.  Otherwise, since we base the hash
@@ -487,10 +483,6 @@ class AthConfigFlags(object):
             closestMatch = get_close_matches(name,self._flagdict.keys(),1)
             raise KeyError(f"No flag with name '{name}' found" +
                            (f". Did you mean '{closestMatch[0]}'?" if closestMatch else ""))
-
-    @deprecate("Use '[...]' rather than '(...)' to access flags", print_context=True)
-    def __call__(self,name):
-        return self._get(name)
 
     def lock(self):
         if not self._locked:

@@ -56,7 +56,7 @@ def collectSimulationMetadata(flags):
                 continue
 
             key = flag.split(".")[-1] #use final part of flag as the key
-            value = flags._get(flag)
+            value = flags[flag]
             if isinstance(value, FlagEnum):
                 value = value.value
             if not isinstance(value, str):

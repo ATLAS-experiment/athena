@@ -817,11 +817,21 @@ void PixelPrepDataToxAOD::addNNInformation(xAOD::TrackMeasurementValidation* xpr
 
   std::vector< std::vector<float> > matrixOfToT (sizeX, std::vector<float>(sizeY,0) );
   std::vector< std::vector<float> > matrixOfCharge(sizeX, std::vector<float>(sizeY,0));
-  // Seed with the module's nominal pitch (from the design), as in
-  // NnClusterizationFactory::createInput; correct for ITk (25x100 / 50x50 um)
-  // where the old literal 0.4 (eta) seed and the >0.1 fill guard were both wrong.
-  std::vector<float> vectorOfPitchesY(sizeY, design->etaPitch());
-  std::vector<float> vectorOfPitchesX(sizeX, design->phiPitch());
+  // Fill the pitch of every window cell from the design, not only the cells
+  // with an RDO, so padding cells carry their real pitch. Cells beyond the
+  // sensor edge resolve to the nearest sub-matrix and take its pitch.
+  std::vector<float> vectorOfPitchesY(sizeY, 0.f);
+  std::vector<float> vectorOfPitchesX(sizeX, 0.f);
+  for (unsigned int iy = 0; iy < sizeY; ++iy) {
+    const int etaIdx = etaPixelIndexWeightedPosition + (static_cast<int>(iy) - centralIndexY);
+    const InDetDD::SiCellId cellId(phiPixelIndexWeightedPosition, etaIdx);
+    vectorOfPitchesY[iy] = design->parameters(cellId).width().xEta();
+  }
+  for (unsigned int ix = 0; ix < sizeX; ++ix) {
+    const int phiIdx = phiPixelIndexWeightedPosition + (static_cast<int>(ix) - centralIndexX);
+    const InDetDD::SiCellId cellId(phiIdx, etaPixelIndexWeightedPosition);
+    vectorOfPitchesX[ix] = design->parameters(cellId).width().xPhi();
+  }
 
 
   //Itererate over all elements hits in the cluster and fill the charge and tot matrices 
@@ -865,19 +875,8 @@ void PixelPrepDataToxAOD::addNNInformation(xAOD::TrackMeasurementValidation* xpr
       continue;
     }
 
-    InDetDD::SiCellId  cellId = de->cellIdFromIdentifier(*rdosBegin);
-    InDetDD::SiDiodesParameters diodeParameters = design->parameters(cellId);
-    float pitchY = diodeParameters.width().xEta();
-    float pitchX = diodeParameters.width().xPhi();
-  
     matrixOfToT[absphiPixelIndex][absetaPixelIndex]    = thisToT;
     matrixOfCharge[absphiPixelIndex][absetaPixelIndex] = thisCharge;
-  
-    // Store the real per-cell pitch, built the same way as
-    // NnClusterizationFactory::createInput so the dumped training inputs match
-    // the runtime inference inputs.
-    vectorOfPitchesY[absetaPixelIndex]=pitchY;
-    vectorOfPitchesX[absphiPixelIndex]=pitchX;
   }//end iteration on rdos
   
 

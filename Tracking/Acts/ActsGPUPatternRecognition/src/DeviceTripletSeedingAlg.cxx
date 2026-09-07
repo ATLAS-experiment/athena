@@ -22,7 +22,6 @@ StatusCode DeviceTripletSeedingAlg::initialize()
   ATH_MSG_DEBUG("Initializing " << name());
 
   ATH_CHECK(m_seedingAlgProviderTool.retrieve());
-  ATH_CHECK(m_deviceMR.retrieve());
   ATH_CHECK(m_inputPixelSPKey.initialize());
   ATH_CHECK(m_outputPixelSeedsKey.initialize());
 

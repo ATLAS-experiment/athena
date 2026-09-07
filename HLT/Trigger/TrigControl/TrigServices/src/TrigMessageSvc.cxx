@@ -11,7 +11,6 @@
 #include "GaudiKernel/System.h"
 #include "AthenaInterprocess/Incidents.h"
 #include "AthenaMonitoringKernel/OHLockedHist.h"
-#include "CxxUtils/AthUnlikelyMacros.h"
 
 #include "ers/ers.h"
 
@@ -358,7 +357,7 @@ void TrigMessageSvc::i_reportMessage(const Message& msg, int outputLevel)
   // Publish message statistics if enabled and only while RUNNING
   if ( m_doPublish && key>=static_cast<int>(m_publishLevel) ) {
     m_msgCountHist->Fill(key-m_publishLevel, 1);
-    if (ATH_UNLIKELY(m_msgCountSrcHist->GetYaxis()->FindFixBin(msg.getSource().c_str())<0)) {
+    if (m_msgCountSrcHist->GetYaxis()->FindFixBin(msg.getSource().c_str())<0) [[unlikely]] {
       // Adding bins on the fly needs to be protected by mutex
       oh_scoped_lock_histogram lock;
       m_msgCountSrcHist->Fill(key-m_publishLevel, msg.getSource().c_str(), 1);

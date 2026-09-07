@@ -1,156 +1,254 @@
+Wed Aug 12 11:07:48 EDT 2026
+Preloading libexcabort.so
 Py:AutoConfigFlags    INFO Running an input-less job. Will have empty metadata.
-ApplicationMgr       INFO Application Manager Configured successfully
-AthenaEventLoopMgr   INFO Initializing AthenaEventLoopMgr
-EventInfoCnvAlg   INFO Initializing EventInfoCnvAlg
-EventInfoCnvAlg.EventInfoCnvTool   INFO Beam spot information not available
-EventInfoCnvAlg.EventInfoCnvTool   INFO Will not fill beam spot information into xAOD::EventInfo
-WriteData            INFO in initialize()
-ReadData             INFO in initialize()
-ReadData             INFO Data Object producer: WriteData
-ApplicationMgr       INFO Application Manager Initialized successfully
-ApplicationMgr       INFO Application Manager Started successfully
-AthenaEventLoopMgr   INFO   ===>>>  start of run 1    <<<===
-AthenaEventLoopMgr   INFO   ===>>>  start processing event #1, run #1 0 events processed so far  <<<===
-WriteData            INFO in execute()
-WriteData         WARNING we expect  an error message here
-StoreGateSvc_Impl WARNING  setupProxy:: error setting up proxy for key  and clid 8000
-WriteData         WARNING end of error message
-WriteData            INFO  registered all data objects
-WriteData            INFO  StoreGate structure before returning from execute 
+ApplicationMgr     SUCCESS 
+====================================================================================================================================
+                                                   Welcome to ApplicationMgr (GaudiCoreSvc v27r1p99)
+                                          running on karma on Wed Aug 12 11:07:49 2026
+====================================================================================================================================
+ApplicationMgr        INFO Application Manager Configured successfully
+Py:ComponentAccumulator    INFO Athena job with pid 2737848
+CoreDumpSvc                                          INFO Handling signals: 11(Segmentation fault) 7(Bus error) 4(Illegal instruction) 6(Aborted) 14(Alarm clock) 
+AthenaEventLoopMgr                                   INFO Initializing AthenaEventLoopMgr
+EventInfoCnvAlg                                      INFO Initializing EventInfoCnvAlg
+ClassIDSvc                                           INFO getRegistryEntries: read 4175 CLIDRegistry entries for module ALL
+EventInfoCnvAlg.EventInfoCnvTool                     INFO Beam spot information not available
+EventInfoCnvAlg.EventInfoCnvTool                     INFO Will not fill beam spot information into xAOD::EventInfo
+WriteData                                            INFO in initialize()
+ReadData                                             INFO in initialize()
+ReadData                                             INFO Data Object producer: WriteData
+ApplicationMgr                                       INFO Application Manager Initialized successfully
+ApplicationMgr                                       INFO Application Manager Started successfully
+AthenaEventLoopMgr                                   INFO   ===>>>  start of run 1    <<<===
+AthenaEventLoopMgr                                   INFO   ===>>>  start processing event #1, run #1 0 events processed so far  <<<===
+WriteData                                            INFO in execute()
+WriteData                                         WARNING we expect  an error message here
+StoreGateSvc_Impl                                 WARNING  setupProxy:: error setting up proxy for key  and clid 8000
+ Pre-existing valid DataProxy @0x55eb7a6f07b0 found in Store for key  with clid 8000
+ClassIDSvc                                           INFO getRegistryEntries: read 313 CLIDRegistry entries for module ALL
+StoreGateSvc_Impl                                 WARNING record_impl: Problem setting up the proxy for object @0x55eb7a6f03c0
+ recorded with key  of type MyDataObj (CLID 8000) in DataObject @0x55eb7a6f0b00
+WriteData                                         WARNING end of error message
+WriteData                                            INFO  registered all data objects
+WriteData                                            INFO  StoreGate structure before returning from execute 
 StoreGateSvc_Impl: <<<<<<<<<<<<<<<<< Data Store Dump >>>>>>>>>>>>>>> 
 StoreGateSvc_Impl: SGImplSvc()::dump() which is NOT LOADED 
-StoreGateSvc_Impl: Found 2 proxies for ClassID 1434 (BaseClass): 
+StoreGateSvc_Impl: Found 3 proxies for ClassID 1434 (BaseClass): 
+StoreGateSvc_Impl: flags: (valid  , locked  , reset ) --- data: 0x55eb7a6f0710 --- key: 
+StoreGateSvc_Impl: flags: (valid  , UNLOCKED, reset ) --- data: 0x55eb7a6ffe40 --- key: WriteData
+StoreGateSvc_Impl: flags: (valid  , UNLOCKED, reset ) --- data: 0x55eb7a702ba0 --- key: dobj2
 StoreGateSvc_Impl: Found 1 proxy for ClassID 2101 (EventInfo): 
+StoreGateSvc_Impl: flags: (valid  , UNLOCKED, reset ) --- data: 0x55eb7a729bf0 --- key: 
 StoreGateSvc_Impl: Found 3 proxies for ClassID 8000 (MyDataObj): 
+StoreGateSvc_Impl: flags: (valid  , locked  , reset ) --- data: 0x55eb7a6f0710 --- key: 
+StoreGateSvc_Impl: flags: (valid  , UNLOCKED, reset ) --- data: 0x55eb7a6ffe40 --- key: WriteData
+StoreGateSvc_Impl: flags: (valid  , UNLOCKED, reset ) --- data: 0x55eb7a702ba0 --- key: dobj2
 StoreGateSvc_Impl: Found 1 proxy for ClassID 9967 (DataVector<MyContObj>): 
+StoreGateSvc_Impl: flags: (valid  , locked  , reset ) --- data: 0x55eb7a6f2750 --- key: 
 StoreGateSvc_Impl: Found 1 proxy for ClassID 9983 (std::vector< ElementLink<MapStringFloat> >): 
+StoreGateSvc_Impl: flags: (valid  , locked  , reset ) --- data: 0x55eb7a6f2f60 --- key: 
 StoreGateSvc_Impl: Found 1 proxy for ClassID 9984 (std::list< ElementLink< std::vector<float> > >): 
+StoreGateSvc_Impl: flags: (valid  , locked  , reset ) --- data: 0x55eb7a6fde60 --- key: WriteData
 StoreGateSvc_Impl: Found 1 proxy for ClassID 33347479 (SG::AuxVectorBase): 
+StoreGateSvc_Impl: flags: (valid  , locked  , reset ) --- data: 0x55eb7a6f2750 --- key: 
 StoreGateSvc_Impl: Found 1 proxy for ClassID 38853911 (xAOD::EventAuxInfo): 
+StoreGateSvc_Impl: flags: (valid  , locked  , reset ) --- data: 0x55eb7a6f0100 --- key: EventInfoAux.
 StoreGateSvc_Impl: Found 1 proxy for ClassID 45903698 (xAOD::EventInfo): 
+StoreGateSvc_Impl: flags: (valid  , locked  , reset ) --- data: 0x55eb7a6f3ea0 --- key: EventInfo
 StoreGateSvc_Impl: Found 1 proxy for ClassID 55596997 (EventContext): 
+StoreGateSvc_Impl: flags: (valid  , UNLOCKED, reset ) --- data: 0x55eb7a6e1930 --- key: EventContext
 StoreGateSvc_Impl: Found 1 proxy for ClassID 55879233 (SG::IAuxStoreIO): 
+StoreGateSvc_Impl: flags: (valid  , locked  , reset ) --- data: 0x55eb7a6f0100 --- key: EventInfoAux.
 StoreGateSvc_Impl: Found 1 proxy for ClassID 178378299 (SG::IAuxStore): 
+StoreGateSvc_Impl: flags: (valid  , locked  , reset ) --- data: 0x55eb7a6f0100 --- key: EventInfoAux.
 StoreGateSvc_Impl: Found 1 proxy for ClassID 187169987 (SG::IConstAuxStore): 
+StoreGateSvc_Impl: flags: (valid  , locked  , reset ) --- data: 0x55eb7a6f0100 --- key: EventInfoAux.
 StoreGateSvc_Impl: Found 1 proxy for ClassID 193758082 (std::map<std::string,float>): 
+StoreGateSvc_Impl: flags: (valid  , locked  , reset ) --- data: 0x55eb7a6f0fb0 --- key: 
 StoreGateSvc_Impl: Found 1 proxy for ClassID 202242136 (std::vector<float>): 
+StoreGateSvc_Impl: flags: (valid  , locked  , reset ) --- data: 0x55eb7a6f3530 --- key: 
 StoreGateSvc_Impl: Found 1 proxy for ClassID 225182422 (SG::AuxElement): 
+StoreGateSvc_Impl: flags: (valid  , locked  , reset ) --- data: 0x55eb7a6f3ea0 --- key: EventInfo
 StoreGateSvc_Impl: Found 1 proxy for ClassID 226113180 (xAOD::AuxInfoBase): 
+StoreGateSvc_Impl: flags: (valid  , locked  , reset ) --- data: 0x55eb7a6f0100 --- key: EventInfoAux.
 StoreGateSvc_Impl: <<<<<<<<<<<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>>>>>>>>> 
 
-ReadData             INFO in execute()
-ReadData             INFO Get the MyDataObj recorded by WriteData
-ReadData          WARNING FIXME loop of ConstIterator bombs
-ReadData             INFO Retrieved DataVector of MyContObj using a const pointer
-ReadData             INFO Time: 11.3  ID: 132
-ReadData             INFO Time: 41.7  ID: 291
-ReadData             INFO pVec [0] = 1
-ReadData             INFO pVec [1] = 2
-ReadData             INFO pVec [2] = 3
-ReadData             INFO event store does not contain MyDataObj with FunnyNonExistingKey
-ReadData             INFO Retrieved list of links
-ReadData             INFO ListVecLinks::linked element 1
-ReadData             INFO ListVecLinks::linked element 3
-ReadData             INFO Retrieved vector of links
-ReadData             INFO  retrieve as BaseClass, print its address: 
-ReadData             INFO  EventInfo :  event: 1 run: 1
-AthenaEventLoopMgr   INFO   ===>>>  done processing event #1, run #1 1 events processed so far  <<<===
-AthenaEventLoopMgr   INFO   ===>>>  start processing event #2, run #1 1 events processed so far  <<<===
-WriteData            INFO in execute()
-WriteData         WARNING we expect  an error message here
-StoreGateSvc_Impl WARNING  setupProxy:: error setting up proxy for key  and clid 8000
-WriteData         WARNING end of error message
-WriteData            INFO  registered all data objects
-WriteData            INFO  StoreGate structure before returning from execute 
+ReadData                                             INFO in execute()
+ReadData                                             INFO Get the MyDataObj recorded by WriteData
+ReadData                                          WARNING FIXME loop of ConstIterator bombs
+ReadData                                             INFO Retrieved DataVector of MyContObj using a const pointer
+ReadData                                             INFO Time: 11.3  ID: 132
+ReadData                                             INFO Time: 41.7  ID: 291
+ReadData                                             INFO pVec [0] = 1
+ReadData                                             INFO pVec [1] = 2
+ReadData                                             INFO pVec [2] = 3
+ReadData                                             INFO event store does not contain MyDataObj with FunnyNonExistingKey
+ReadData                                             INFO Retrieved list of links
+ReadData                                             INFO ListVecLinks::linked element 1
+ReadData                                             INFO ListVecLinks::linked element 3
+ReadData                                             INFO Retrieved vector of links
+ReadData                                             INFO VectorMapLinks::linked element: key uno - value 1 - stored as 0x55eb7a6f1c28
+ReadData                                             INFO VectorMapLinks::linked element: key due - value 2 - stored as 0x55eb7a6f1c68
+ReadData                                             INFO  retrieve as BaseClass, print its address: 
+ReadData                                             INFO 0x55eb7a6f0670
+ReadData                                             INFO 0x55eb7a6f1bd0
+ReadData                                             INFO 0x55eb7a6f1bb0
+ReadData                                             INFO  EventInfo :  event: 1 run: 1
+AthenaEventLoopMgr                                   INFO   ===>>>  done processing event #1, run #1 1 events processed so far  <<<===
+AthenaEventLoopMgr                                   INFO   ===>>>  start processing event #2, run #1 1 events processed so far  <<<===
+WriteData                                            INFO in execute()
+WriteData                                         WARNING we expect  an error message here
+StoreGateSvc_Impl                                 WARNING  setupProxy:: error setting up proxy for key  and clid 8000
+ Pre-existing valid DataProxy @0x55eb7a6f07b0 found in Store for key  with clid 8000
+StoreGateSvc_Impl                                 WARNING record_impl: Problem setting up the proxy for object @0x55eb7a6ff7e0
+ recorded with key  of type MyDataObj (CLID 8000) in DataObject @0x55eb7a6f3530
+WriteData                                         WARNING end of error message
+WriteData                                            INFO  registered all data objects
+WriteData                                            INFO  StoreGate structure before returning from execute 
 StoreGateSvc_Impl: <<<<<<<<<<<<<<<<< Data Store Dump >>>>>>>>>>>>>>> 
 StoreGateSvc_Impl: SGImplSvc()::dump() which is NOT LOADED 
-StoreGateSvc_Impl: Found 2 proxies for ClassID 1434 (BaseClass): 
+StoreGateSvc_Impl: Found 3 proxies for ClassID 1434 (BaseClass): 
+StoreGateSvc_Impl: flags: (valid  , locked  , reset ) --- data: 0x55eb7a6f1f00 --- key: 
+StoreGateSvc_Impl: flags: (valid  , UNLOCKED, reset ) --- data: 0x55eb7a6ffe40 --- key: WriteData
+StoreGateSvc_Impl: flags: (valid  , UNLOCKED, reset ) --- data: 0x55eb7a729bf0 --- key: dobj2
 StoreGateSvc_Impl: Found 1 proxy for ClassID 2101 (EventInfo): 
+StoreGateSvc_Impl: flags: (valid  , UNLOCKED, reset ) --- data: 0x55eb7a6f2f60 --- key: 
 StoreGateSvc_Impl: Found 3 proxies for ClassID 8000 (MyDataObj): 
+StoreGateSvc_Impl: flags: (valid  , locked  , reset ) --- data: 0x55eb7a6f1f00 --- key: 
+StoreGateSvc_Impl: flags: (valid  , UNLOCKED, reset ) --- data: 0x55eb7a6ffe40 --- key: WriteData
+StoreGateSvc_Impl: flags: (valid  , UNLOCKED, reset ) --- data: 0x55eb7a729bf0 --- key: dobj2
 StoreGateSvc_Impl: Found 1 proxy for ClassID 9967 (DataVector<MyContObj>): 
+StoreGateSvc_Impl: flags: (valid  , locked  , reset ) --- data: 0x55eb7a6f2250 --- key: 
 StoreGateSvc_Impl: Found 1 proxy for ClassID 9983 (std::vector< ElementLink<MapStringFloat> >): 
+StoreGateSvc_Impl: flags: (valid  , locked  , reset ) --- data: 0x55eb7a700fa0 --- key: 
 StoreGateSvc_Impl: Found 1 proxy for ClassID 9984 (std::list< ElementLink< std::vector<float> > >): 
+StoreGateSvc_Impl: flags: (valid  , locked  , reset ) --- data: 0x55eb7a6f0b00 --- key: WriteData
 StoreGateSvc_Impl: Found 1 proxy for ClassID 33347479 (SG::AuxVectorBase): 
+StoreGateSvc_Impl: flags: (valid  , locked  , reset ) --- data: 0x55eb7a6f2250 --- key: 
 StoreGateSvc_Impl: Found 1 proxy for ClassID 38853911 (xAOD::EventAuxInfo): 
+StoreGateSvc_Impl: flags: (valid  , locked  , reset ) --- data: 0x55eb7a6f1030 --- key: EventInfoAux.
 StoreGateSvc_Impl: Found 1 proxy for ClassID 45903698 (xAOD::EventInfo): 
+StoreGateSvc_Impl: flags: (valid  , locked  , reset ) --- data: 0x55eb7a6f0fb0 --- key: EventInfo
 StoreGateSvc_Impl: Found 1 proxy for ClassID 55596997 (EventContext): 
+StoreGateSvc_Impl: flags: (valid  , UNLOCKED, reset ) --- data: 0x55eb7a702ba0 --- key: EventContext
 StoreGateSvc_Impl: Found 1 proxy for ClassID 55879233 (SG::IAuxStoreIO): 
+StoreGateSvc_Impl: flags: (valid  , locked  , reset ) --- data: 0x55eb7a6f1030 --- key: EventInfoAux.
 StoreGateSvc_Impl: Found 1 proxy for ClassID 178378299 (SG::IAuxStore): 
+StoreGateSvc_Impl: flags: (valid  , locked  , reset ) --- data: 0x55eb7a6f1030 --- key: EventInfoAux.
 StoreGateSvc_Impl: Found 1 proxy for ClassID 187169987 (SG::IConstAuxStore): 
+StoreGateSvc_Impl: flags: (valid  , locked  , reset ) --- data: 0x55eb7a6f1030 --- key: EventInfoAux.
 StoreGateSvc_Impl: Found 1 proxy for ClassID 193758082 (std::map<std::string,float>): 
+StoreGateSvc_Impl: flags: (valid  , locked  , reset ) --- data: 0x55eb7a6e1930 --- key: 
 StoreGateSvc_Impl: Found 1 proxy for ClassID 202242136 (std::vector<float>): 
+StoreGateSvc_Impl: flags: (valid  , locked  , reset ) --- data: 0x55eb7a6f0710 --- key: 
 StoreGateSvc_Impl: Found 1 proxy for ClassID 225182422 (SG::AuxElement): 
+StoreGateSvc_Impl: flags: (valid  , locked  , reset ) --- data: 0x55eb7a6f0fb0 --- key: EventInfo
 StoreGateSvc_Impl: Found 1 proxy for ClassID 226113180 (xAOD::AuxInfoBase): 
+StoreGateSvc_Impl: flags: (valid  , locked  , reset ) --- data: 0x55eb7a6f1030 --- key: EventInfoAux.
 StoreGateSvc_Impl: <<<<<<<<<<<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>>>>>>>>> 
 
-ReadData             INFO in execute()
-ReadData             INFO Get the MyDataObj recorded by WriteData
-ReadData          WARNING FIXME loop of ConstIterator bombs
-ReadData             INFO Retrieved DataVector of MyContObj using a const pointer
-ReadData             INFO Time: 11.3  ID: 132
-ReadData             INFO Time: 41.7  ID: 291
-ReadData             INFO pVec [0] = 1
-ReadData             INFO pVec [1] = 2
-ReadData             INFO pVec [2] = 3
-ReadData             INFO event store does not contain MyDataObj with FunnyNonExistingKey
-ReadData             INFO Retrieved list of links
-ReadData             INFO ListVecLinks::linked element 1
-ReadData             INFO ListVecLinks::linked element 3
-ReadData             INFO Retrieved vector of links
-ReadData             INFO  retrieve as BaseClass, print its address: 
-ReadData             INFO  EventInfo :  event: 2 run: 1
-AthenaEventLoopMgr   INFO   ===>>>  done processing event #2, run #1 2 events processed so far  <<<===
-AthenaEventLoopMgr   INFO   ===>>>  start processing event #3, run #1 2 events processed so far  <<<===
-WriteData            INFO in execute()
-WriteData         WARNING we expect  an error message here
-StoreGateSvc_Impl WARNING  setupProxy:: error setting up proxy for key  and clid 8000
-WriteData         WARNING end of error message
-WriteData            INFO  registered all data objects
-WriteData            INFO  StoreGate structure before returning from execute 
+ReadData                                             INFO in execute()
+ReadData                                             INFO Get the MyDataObj recorded by WriteData
+ReadData                                          WARNING FIXME loop of ConstIterator bombs
+ReadData                                             INFO Retrieved DataVector of MyContObj using a const pointer
+ReadData                                             INFO Time: 11.3  ID: 132
+ReadData                                             INFO Time: 41.7  ID: 291
+ReadData                                             INFO pVec [0] = 1
+ReadData                                             INFO pVec [1] = 2
+ReadData                                             INFO pVec [2] = 3
+ReadData                                             INFO event store does not contain MyDataObj with FunnyNonExistingKey
+ReadData                                             INFO Retrieved list of links
+ReadData                                             INFO ListVecLinks::linked element 1
+ReadData                                             INFO ListVecLinks::linked element 3
+ReadData                                             INFO Retrieved vector of links
+ReadData                                             INFO VectorMapLinks::linked element: key uno - value 1 - stored as 0x55eb7a48e038
+ReadData                                             INFO VectorMapLinks::linked element: key due - value 2 - stored as 0x55eb7a48e078
+ReadData                                             INFO  retrieve as BaseClass, print its address: 
+ReadData                                             INFO 0x55eb7a6e3330
+ReadData                                             INFO 0x55eb7a6f2bf0
+ReadData                                             INFO 0x55eb7a6f2fb0
+ReadData                                             INFO  EventInfo :  event: 2 run: 1
+AthenaEventLoopMgr                                   INFO   ===>>>  done processing event #2, run #1 2 events processed so far  <<<===
+AthenaEventLoopMgr                                   INFO   ===>>>  start processing event #3, run #1 2 events processed so far  <<<===
+WriteData                                            INFO in execute()
+WriteData                                         WARNING we expect  an error message here
+StoreGateSvc_Impl                                 WARNING  setupProxy:: error setting up proxy for key  and clid 8000
+ Pre-existing valid DataProxy @0x55eb7a6f07b0 found in Store for key  with clid 8000
+StoreGateSvc_Impl                                 WARNING record_impl: Problem setting up the proxy for object @0x55eb7a6e22c0
+ recorded with key  of type MyDataObj (CLID 8000) in DataObject @0x55eb7a6f0100
+WriteData                                         WARNING end of error message
+WriteData                                            INFO  registered all data objects
+WriteData                                            INFO  StoreGate structure before returning from execute 
 StoreGateSvc_Impl: <<<<<<<<<<<<<<<<< Data Store Dump >>>>>>>>>>>>>>> 
 StoreGateSvc_Impl: SGImplSvc()::dump() which is NOT LOADED 
-StoreGateSvc_Impl: Found 2 proxies for ClassID 1434 (BaseClass): 
+StoreGateSvc_Impl: Found 3 proxies for ClassID 1434 (BaseClass): 
+StoreGateSvc_Impl: flags: (valid  , locked  , reset ) --- data: 0x55eb7a6f3ea0 --- key: 
+StoreGateSvc_Impl: flags: (valid  , UNLOCKED, reset ) --- data: 0x55eb7a6f0710 --- key: WriteData
+StoreGateSvc_Impl: flags: (valid  , UNLOCKED, reset ) --- data: 0x55eb7a702ba0 --- key: dobj2
 StoreGateSvc_Impl: Found 1 proxy for ClassID 2101 (EventInfo): 
+StoreGateSvc_Impl: flags: (valid  , UNLOCKED, reset ) --- data: 0x55eb7a700fa0 --- key: 
 StoreGateSvc_Impl: Found 3 proxies for ClassID 8000 (MyDataObj): 
+StoreGateSvc_Impl: flags: (valid  , locked  , reset ) --- data: 0x55eb7a6f3ea0 --- key: 
+StoreGateSvc_Impl: flags: (valid  , UNLOCKED, reset ) --- data: 0x55eb7a6f0710 --- key: WriteData
+StoreGateSvc_Impl: flags: (valid  , UNLOCKED, reset ) --- data: 0x55eb7a702ba0 --- key: dobj2
 StoreGateSvc_Impl: Found 1 proxy for ClassID 9967 (DataVector<MyContObj>): 
+StoreGateSvc_Impl: flags: (valid  , locked  , reset ) --- data: 0x55eb7a6f2300 --- key: 
 StoreGateSvc_Impl: Found 1 proxy for ClassID 9983 (std::vector< ElementLink<MapStringFloat> >): 
+StoreGateSvc_Impl: flags: (valid  , locked  , reset ) --- data: 0x55eb7a6f3530 --- key: 
 StoreGateSvc_Impl: Found 1 proxy for ClassID 9984 (std::list< ElementLink< std::vector<float> > >): 
+StoreGateSvc_Impl: flags: (valid  , locked  , reset ) --- data: 0x55eb7a6f2f60 --- key: WriteData
 StoreGateSvc_Impl: Found 1 proxy for ClassID 33347479 (SG::AuxVectorBase): 
+StoreGateSvc_Impl: flags: (valid  , locked  , reset ) --- data: 0x55eb7a6f2300 --- key: 
 StoreGateSvc_Impl: Found 1 proxy for ClassID 38853911 (xAOD::EventAuxInfo): 
+StoreGateSvc_Impl: flags: (valid  , locked  , reset ) --- data: 0x55eb7a6e1930 --- key: EventInfoAux.
 StoreGateSvc_Impl: Found 1 proxy for ClassID 45903698 (xAOD::EventInfo): 
+StoreGateSvc_Impl: flags: (valid  , locked  , reset ) --- data: 0x55eb7a729bf0 --- key: EventInfo
 StoreGateSvc_Impl: Found 1 proxy for ClassID 55596997 (EventContext): 
+StoreGateSvc_Impl: flags: (valid  , UNLOCKED, reset ) --- data: 0x55eb7a6f0b00 --- key: EventContext
 StoreGateSvc_Impl: Found 1 proxy for ClassID 55879233 (SG::IAuxStoreIO): 
+StoreGateSvc_Impl: flags: (valid  , locked  , reset ) --- data: 0x55eb7a6e1930 --- key: EventInfoAux.
 StoreGateSvc_Impl: Found 1 proxy for ClassID 178378299 (SG::IAuxStore): 
+StoreGateSvc_Impl: flags: (valid  , locked  , reset ) --- data: 0x55eb7a6e1930 --- key: EventInfoAux.
 StoreGateSvc_Impl: Found 1 proxy for ClassID 187169987 (SG::IConstAuxStore): 
+StoreGateSvc_Impl: flags: (valid  , locked  , reset ) --- data: 0x55eb7a6e1930 --- key: EventInfoAux.
 StoreGateSvc_Impl: Found 1 proxy for ClassID 193758082 (std::map<std::string,float>): 
+StoreGateSvc_Impl: flags: (valid  , locked  , reset ) --- data: 0x55eb7a6f0fb0 --- key: 
 StoreGateSvc_Impl: Found 1 proxy for ClassID 202242136 (std::vector<float>): 
+StoreGateSvc_Impl: flags: (valid  , locked  , reset ) --- data: 0x55eb7a6ffe40 --- key: 
 StoreGateSvc_Impl: Found 1 proxy for ClassID 225182422 (SG::AuxElement): 
+StoreGateSvc_Impl: flags: (valid  , locked  , reset ) --- data: 0x55eb7a729bf0 --- key: EventInfo
 StoreGateSvc_Impl: Found 1 proxy for ClassID 226113180 (xAOD::AuxInfoBase): 
+StoreGateSvc_Impl: flags: (valid  , locked  , reset ) --- data: 0x55eb7a6e1930 --- key: EventInfoAux.
 StoreGateSvc_Impl: <<<<<<<<<<<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>>>>>>>>> 
 
-ReadData             INFO in execute()
-ReadData             INFO Get the MyDataObj recorded by WriteData
-ReadData          WARNING FIXME loop of ConstIterator bombs
-ReadData             INFO Retrieved DataVector of MyContObj using a const pointer
-ReadData             INFO Time: 11.3  ID: 132
-ReadData             INFO Time: 41.7  ID: 291
-ReadData             INFO pVec [0] = 1
-ReadData             INFO pVec [1] = 2
-ReadData             INFO pVec [2] = 3
-ReadData             INFO event store does not contain MyDataObj with FunnyNonExistingKey
-ReadData             INFO Retrieved list of links
-ReadData             INFO ListVecLinks::linked element 1
-ReadData             INFO ListVecLinks::linked element 3
-ReadData             INFO Retrieved vector of links
-ReadData             INFO  retrieve as BaseClass, print its address: 
-ReadData             INFO  EventInfo :  event: 3 run: 1
-AthenaEventLoopMgr   INFO   ===>>>  done processing event #3, run #1 3 events processed so far  <<<===
-ApplicationMgr       INFO Application Manager Stopped successfully
-ToolSvc              INFO Removing all tools created by ToolSvc
+ReadData                                             INFO in execute()
+ReadData                                             INFO Get the MyDataObj recorded by WriteData
+ReadData                                          WARNING FIXME loop of ConstIterator bombs
+ReadData                                             INFO Retrieved DataVector of MyContObj using a const pointer
+ReadData                                             INFO Time: 11.3  ID: 132
+ReadData                                             INFO Time: 41.7  ID: 291
+ReadData                                             INFO pVec [0] = 1
+ReadData                                             INFO pVec [1] = 2
+ReadData                                             INFO pVec [2] = 3
+ReadData                                             INFO event store does not contain MyDataObj with FunnyNonExistingKey
+ReadData                                             INFO Retrieved list of links
+ReadData                                             INFO ListVecLinks::linked element 1
+ReadData                                             INFO ListVecLinks::linked element 3
+ReadData                                             INFO Retrieved vector of links
+ReadData                                             INFO VectorMapLinks::linked element: key uno - value 1 - stored as 0x55eb7a6f1c28
+ReadData                                             INFO VectorMapLinks::linked element: key due - value 2 - stored as 0x55eb7a6f1c68
+ReadData                                             INFO  retrieve as BaseClass, print its address: 
+ReadData                                             INFO 0x55eb7a6e2360
+ReadData                                             INFO 0x55eb7a6f0cf0
+ReadData                                             INFO 0x55eb7a6de9b0
+ReadData                                             INFO  EventInfo :  event: 3 run: 1
+AthenaEventLoopMgr                                   INFO   ===>>>  done processing event #3, run #1 3 events processed so far  <<<===
+ApplicationMgr                                       INFO Application Manager Stopped successfully
+ToolSvc                                              INFO Removing all tools created by ToolSvc
 FPEAuditor                                           INFO FPE summary for this job
 FPEAuditor                                           INFO  FPE OVERFLOWs  : 0
 FPEAuditor                                           INFO  FPE INVALIDs   : 0
 FPEAuditor                                           INFO  FPE DIVBYZEROs : 0
-ApplicationMgr       INFO Application Manager Finalized successfully
-ApplicationMgr       INFO Application Manager Terminated successfully
+ApplicationMgr                                       INFO Application Manager Finalized successfully
+ApplicationMgr                                       INFO Application Manager Terminated successfully
 Py:Athena            INFO leaving with code 0: "successful run"

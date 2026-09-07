@@ -12,19 +12,19 @@
 
 export ATHENA_CORE_NUMBER=8
 
-# Only a limited subset of detectors are supported as they require update in the sensitive detector code
+geometry=$(python -c "from AthenaConfiguration.TestDefaults import defaultGeometryTags; print(defaultGeometryTags.RUN3)")
+conditions=$(python -c "from AthenaConfiguration.TestDefaults import defaultConditionsTags; print(defaultConditionsTags.RUN3_MC)")
+
 AtlasG4_tf.py \
-    --CA \
     --multithreaded \
-    --detectors 'Tile,BCM,Pixel,SCT,TRT' \
     --useG4Workers True \
     --inputEVNTFile '/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/SimCoreTests/ttbar_muplusjets-pythia6-7000.evgen.pool.root' \
     --outputHITSFile 'test.MT.HITS.pool.root' \
     --maxEvents '20' \
     --skipEvents '0' \
     --randomSeed '10' \
-    --geometryVersion 'default:ATLAS-R3S-2021-03-00-00' \
-    --conditionsTag 'default:OFLCOND-MC21-SDR-RUN3-07' \
+    --geometryVersion "default:${geometry}" \
+    --conditionsTag "default:${conditions}" \
     --DataRunNumber '284500' \
     --physicsList 'FTFP_BERT_ATL' \
     --postInclude 'PyJobTransforms.UseFrontier' \
@@ -34,18 +34,16 @@ echo  "art-result: $rc MTsim"
 status=$rc
 
 unset ATHENA_CORE_NUMBER
-# Only a limited subset of detectors are supported as they require update in the sensitive detector code
+
 AtlasG4_tf.py \
-    --CA \
-    --detectors 'Tile,BCM,Pixel,SCT,TRT' \
     --useG4Workers True \
     --inputEVNTFile '/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/SimCoreTests/ttbar_muplusjets-pythia6-7000.evgen.pool.root' \
     --outputHITSFile 'test.ST.HITS.pool.root' \
     --maxEvents '20' \
     --skipEvents '0' \
     --randomSeed '10' \
-    --geometryVersion 'default:ATLAS-R3S-2021-03-00-00' \
-    --conditionsTag 'default:OFLCOND-MC21-SDR-RUN3-07' \
+    --geometryVersion "default:${geometry}" \
+    --conditionsTag "default:${conditions}" \
     --DataRunNumber '284500' \
     --physicsList 'FTFP_BERT_ATL' \
     --postInclude 'PyJobTransforms.UseFrontier' \

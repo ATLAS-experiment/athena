@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file CxxUtils/tests/span_test.cxx
@@ -11,11 +11,11 @@
 
 #undef NDEBUG
 #include "CxxUtils/span.h"
-#include "CxxUtils/reverse_wrapper.h"
 #include "TestTools/expect_exception.h"
 #include <vector>
 #include <cassert>
 #include <iostream>
+#include <ranges>
 
 
 template <class ELT, class T>
@@ -44,7 +44,7 @@ void test1a(T& s2)
   }
   assert (acc == 247);
   acc = 0;
-  for (float f : CxxUtils::make_reverse_wrapper (s2)) {
+  for (float f : std::views::reverse (s2)) {
     acc = 2*acc + f;
   }
   assert (acc == 1538);

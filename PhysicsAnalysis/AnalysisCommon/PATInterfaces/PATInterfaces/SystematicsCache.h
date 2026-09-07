@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Nils Krumnack
@@ -10,7 +10,6 @@
 
 #include <AsgMessaging/AsgMessagingForward.h>
 #include <AsgMessaging/MessageCheck.h>
-#include <CxxUtils/AthUnlikelyMacros.h>
 #include <CxxUtils/checker_macros.h>
 #include <PATInterfaces/SystematicSet.h>
 #include <functional>
@@ -190,7 +189,7 @@ namespace CP
   {
     // fast-path, check if we already calculated this
     auto iter = m_cache.find (sys);
-    if (ATH_LIKELY (iter != m_cache.end())) //[[likely]], removed until C++20 support
+    if (iter != m_cache.end()) [[likely]]
     {
       result = iter->second.get();
       return StatusCode::SUCCESS;

@@ -159,19 +159,11 @@ StatusCode LArR4ElecCalibCalculator::stop() {
   if (sc.isFailure()) {
     ATH_MSG_ERROR("Failed to record LArRampSym object with key " << m_keyoutput);
   }
-  sc = detStore()->symLink(ClassID_traits<LArRampMC>::ID(), m_keyoutput, ClassID_traits<ILArRamp>::ID());
-  if (sc.isFailure()) {
-    ATH_MSG_ERROR("Failed to symlink LArRampMC to ILArRamp base-class");
-  }
 
   m_keyoutput += "Sym";
   sc = detStore()->record(std::move(rampSym), m_keyoutput);
   if (sc.isFailure()) {
     ATH_MSG_ERROR("Failed to record LArRampSym object with key " << m_keyoutput);
-  }
-  sc = detStore()->symLink(ClassID_traits<LArRampSym>::ID(), m_keyoutput, ClassID_traits<ILArRamp>::ID());
-  if (sc.isFailure()) {
-    ATH_MSG_ERROR("Failed to symlink LArRampSym to ILArRamp base-class");
   }
 
 
@@ -214,21 +206,11 @@ StatusCode LArR4ElecCalibCalculator::stop() {
   std::unique_ptr<LArNoiseSym> noiseSym = std::make_unique<LArNoiseSym>(*larMCsymHdl, noisePtr.get());
 
   ATH_CHECK(detStore()->record(std::move(noisePtr), "LArNoise"));
-  sc = detStore()->symLink(ClassID_traits<LArNoiseMC>::ID(), "LArNoise", ClassID_traits<ILArNoise>::ID());
-  if (sc.isFailure()) {
-    ATH_MSG_ERROR("Failed to symlink LArNoiseMC to ILArNoise base-class");
-  }
 
   sc = detStore()->record(std::move(noiseSym), "LArNoiseSym");
   if (sc.isFailure()) {
     ATH_MSG_ERROR("Failed to record LArNoiseSym object with key " << m_keyoutput);
   }
-  sc = detStore()->symLink(ClassID_traits<LArNoiseSym>::ID(), "LArNoiseSym", ClassID_traits<ILArNoise>::ID());
-  if (sc.isFailure()) {
-    ATH_MSG_ERROR("Failed to symlink LArNoiseSym to ILArNoise base-class");
-  }
-
-
 
 
   //If a CREST database is also given, we store the calibration constants in CREST
