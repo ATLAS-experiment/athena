@@ -2,7 +2,33 @@
 ##
 ##    @file  Node.py
 ##
-##           Node class to represent flags as an actual tree
+##           Node class to represent flags as an actual tree.
+##           When requesting a feature (node or flag) from a node, 
+##           the precendence is:
+##
+##            1. Node or flag from this current local node
+##            2. Dynamically loaded node or flag on this local node
+##            3. Node or flag on the top level node 
+##            4. Dynamically loaded node or flag on the top level node
+##
+##           because of this, a local node with the same name as a
+##           top level node will always mask the top level node, so if you 
+##           have a local node and you want to explicitly access that top 
+##           level node, then use the idiom
+##
+##              topnode(flags).MyNode
+##
+##           or, should you have a lot of such nodes
+##
+##              topflags = topnode(Mode)
+##              topflasgs.MyNode
+##
+##           If you need to configure a sub-algorithm where that algorithm
+##           configuration lives outside the domain of the current node, then
+##           you can do things like
+##
+##              # on node flags.SomeDomain, 
+##              AlgConfig( flags.TopDomain.NewDomain ) 
 ##
 ##   @author  sutt
 ##   @date    Tue 11 Aug 2026 19:04:50 BST
@@ -13,8 +39,6 @@
 ##
 
 import warnings
-
-from AthenaConfiguration.AthConfigFlags import CfgFlag
 
 # locked state, allows transitions, locked forever,
 # means it can not later be unlocked
@@ -39,7 +63,50 @@ class Node:
         object.__setattr__(self, "_children", {})
         object.__setattr__(self, "_flags", flags)
         object.__setattr__(self, "_root", root)
-        
+
+    def __setattr__(self, name, value):
+        self._fail_if_locked()
+        if name in self._children : raise AttributeError(f"node {name} already exists")  
+        current = self.__dict__.get(name)
+        if type(current).__name__ == "CfgFlag":
+            current.set(value)
+        else:
+            object.__setattr__(self, name, value) 
+            
+    def __getattribute__(self, name):
+        value = object.__getattribute__(self, name)        
+        if type(value).__name__ == "CfgFlag": 
+            flags = object.__getattribute__(self, "_flags")
+            return value.get(flags)
+        return value
+
+    def __getattr__(self, name):
+        """ will attempt a dynamic load from flags if need be """
+        if name in self._children : return self._children[name]
+        if self._root :
+            if self._root._loadflags( f"{self.name()}.{name}" ) :
+                if name in self._children : return self._children[name]
+            if name in self._root._children : return self._root._children[name]
+            if self._root._loadflags( name ) :
+                if name in self._root._children : return self._root._children[name]
+        else:
+            if self._loadflags( name ) :
+                if name in self._children : return self._children[name]
+                
+        raise AttributeError(f"no attribute {name}")
+
+    def __contains__(self, name):
+        return self.has(name)
+
+    def __copy__(self):
+        return self.clone()
+
+    def __delattr__(self, name):
+        self.delete(name)
+
+    def __delitem__(self, name):
+        self.delete(name)
+
     def lock(self, lockstate=_LOCKED):
         for node in self.nodes() : node.lock(lockstate)
         object.__setattr__(self, "_lockstate", lockstate)
@@ -56,40 +123,15 @@ class Node:
     def islocked(self):
         return self._lockstate != _UNLOCKED
 
+    def locked(self):
+        return self.islocked()
+
     def _fail_if_locked_forever(self):
-        if self._lockstate == _LOCKED_FOREVER : raise RuntimeError(f"Node '{self._name}' is permanently locked; ")
+        if self._lockstate == _LOCKED_FOREVER : raise RuntimeError(f"Node {self._name} is permanently locked; ")
 
     def _fail_if_locked(self):
-        if self._lockstate == _LOCKED : raise RuntimeError(f"Node '{self._name}' is locked; ")
-        if self._lockstate == _LOCKED_FOREVER : raise RuntimeError(f"Node '{self._name}' is permanently locked; ")
-
-    def __setattr__(self, name, value):
-        self._fail_if_locked()
-        object.__setattr__(self, name, value) 
-
-    def __getattribute__(self, name):
-        value = object.__getattribute__(self, name)        
-        if isinstance(value, CfgFlag):
-            flags = object.__getattribute__(self, "_flags")
-            return value.get(flags)
-        return value
-
-    def __getattr__(self, name):
-        """ will attempt a dynamic load from flags if need be """
-        if name in self._children : return self._children[name]
-        if self._root :
-            if self._root._loadflags( f"{self.name()}.{name}" ) :
-                if name in self._children : return self._children[name]
-
-            if name in self._root._children : return self._root._children[name]
-            if self._root._loadflags( name ) :
-                if name in self._root._children : return self._root._children[name]
-        else:
-            if self._loadflags( name ) :
-                if name in self._children : return self._children[name]
-                
-        raise AttributeError(f"no attribute {name}")
-
+        if self._lockstate == _LOCKED : raise RuntimeError(f"Node {self._name} is locked; ")
+        if self._lockstate == _LOCKED_FOREVER : raise RuntimeError(f"Node {self._name} is permanently locked; ")
 
     def _loadflags(self, name ) :
         """ load dynamic flags - can only load flags on the root node """
@@ -101,6 +143,7 @@ class Node:
         lockstate = self._lockstate
         object.__setattr__(self, "_lockstate", _UNLOCKED)
         try:
+            if name in flags._loaded    : return self._stragglers(flags)
             if name in flags._dynaflags : return self._addDynaFlags(name)
             for key in flags._dynaflags :
                 if name in key : return self._addDynaFlags(key)
@@ -112,6 +155,9 @@ class Node:
     def _addDynaFlags(self, name) :
         flags = self._flags
         self._flags._loadDynaFlags(name)
+        return self._stragglers(flags)
+        
+    def _stragglers(self, flags, dbg="") :
         for key, val in self._flags._flagdict.items() :
             if self._hasFlagPath(key) : continue
             self._addFlagUnlock( key, val, flags )
@@ -139,39 +185,48 @@ class Node:
         if flags is not None and self._flags is None : node._flags = flags
         names = tag.split(".")
         for name in names[:-1]:
-            node = node.addNewNode(name, flags )
+            node = node._addNewNode(name, flags )
             if unlock : object.__setattr__( node, "_lockstate", _UNLOCKED )
         if flags is not None : node._flags = flags
         if names[-1] in node.__dict__ : return False
+        # just use a value at the moment, can use CfgFlag(value, type) if we really have to(
         setattr(node, names[-1], value)
         return True
 
     def addFlag(self, tag, value, flags=None):
         if not self._addFlagImpl( tag, value, flags, False ):
-            raise  KeyError(f"node: {tag} already exists")
+            raise  KeyError(f"flag {tag} already exists")
 
     def _addFlagUnlock(self, tag, value, flags=None):
         self._addFlagImpl( tag, value, flags, True )
+
+    def addNode( self, item, flags=None):
+        if isinstance(item, Node) : return self._addNode(item)
+        if isinstance(item, str)  : return self._addNewNode(item, flags)
+        raise TypeError(f"Cannot construct node from type {type(item).__name__}, value {item}")
         
-    def addNewNode(self, name, flags=None):
+    def _addNewNode(self, name : str, flags=None):
         """ add a new child node """
         self._fail_if_locked()
+        if name in self.__dict__: raise AttributeError(f"attribute {name} already exists")
         rootnode = self._rootnode()
         if name not in self._children :
             self._children[name] = ( node := Node(name, root=rootnode) )
             if flags is not None : node._flags = flags
         return self._children[name]
 
-    def addNode(self, node):
+    def _addNode(self, node ):
         """ an en existing node as a child node """
         self._fail_if_locked()
+        name = node.name()
+        if name in self.__dict__: raise AttributeError(f"attribute {name} already exists")
         rootnode = self._rootnode()
-        if node.name() not in self._children :
-            if node._root and rootnode is not node.root :
-                raise RuntimeError(f"cannot add node {node.name()} from a different tree")
+        if name not in self._children :
+            if node._root and rootnode is not node._root :
+                raise RuntimeError(f"cannot add node {name} from a different tree")
             self._children[node.name()] = node
-            if not node._root : node.setrootnode( rootnode )
-        return self._children[node.name()]
+            if not node._root : node._setrootnode( rootnode )
+        return  self._children[node.name()]
 
     def has(self, name ):
         return hasattr( self, name )
@@ -204,8 +259,9 @@ class Node:
 
     def delete(self, name):
         self._fail_if_locked()
-        if name in self._children  : del ( self._children[name] )
-        elif name in self.__dict__ : delattr( self, name )
+        if name in self._children  : del  self._children[name]
+        elif name in self.__dict__ : object.__delattr__(self, name) # delattr( self, name )
+        else : raise AttributeError(f"Node {self._name} has no member {name}")
 
     def rename( self, name, newname ):
         if newname in self._children or newname in self.__dict__ :
@@ -218,28 +274,29 @@ class Node:
     
     def clone(self, name=None):
         """Return an independent copy" of this node"""
-        
+
         if name is not None : newnode = Node(name)
         else:                 newnode = Node(self._name)
-        
+
         for key, value in self.__dict__.items():
             if key in {"_name", "_children", "_lockstate", "_root" } : continue
-            
             setattr(newnode, key, value)
-            
+
         for node in self.nodes():
-            newnode.addNode(node.clone())
-                
+            child = node.clone()
+            child._root = None
+            newnode._addNode(child)
+
         return newnode
 
     
     def print(self, spacer=""):
-        print( f"{spacer}", self._name, "(Node)" )
-        if    spacer=="" : spacer = "|__"
+        print( f"{spacer}{self._name} (Node)" )
+        if    spacer=="" : spacer = "|__ "
         else: spacer=f"    {spacer}"
         for key, value in self.__dict__.items():
-            if key in {"_name","_children","_lockstate", "_flags", "_root"} : continue
-            print( spacer, key, " : ", value )
+            if key in {"_name","_children","_lockstate", "_flags", "_root"} : continue 
+            print( f"{spacer}{key}\t:  {value}" )
         for node in self.nodes() : node.print( spacer )
 
         
@@ -251,6 +308,8 @@ class Node:
         warnings.warn( "cloneAndReplace() is unnecessary for Node flags; "
                        "use the appropriate Node directly",
                        RuntimeWarning,  stacklevel=2 )
+        # eventually, instead of delegation, should raise an exception ...
+        # raise RuntimeError( "cloneAndReplace() should not be used for node flags" )
         return self._rootnode()._flags.cloneAndReplace( targetname, flagname )
 
         
@@ -294,3 +353,10 @@ def update_flags( flags, node, domain="" ) :
         if domain=="" : update_flags( flags, n, f"{n.name()}" )
         else:           update_flags( flags, n, f"{domain}.{n.name()}" )
 
+        
+        
+def topnode(flags) :
+    """ Escape hatch in case the user needs to access a node 
+        from the top node that has the Same Name, as a node 
+        on the local node""" 
+    return flags._rootnode()
