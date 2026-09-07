@@ -198,7 +198,7 @@ int main( int argc, char* argv[] ) {
 	  if(ph->pt()<10000.0) continue;
 	  const xAOD::CaloCluster* cluster  = ph->caloCluster();
 	  if (!cluster){
-	    ATH_MSG_ERROR("No  cluster associated to the Photon \n");
+	    ANA_MSG_ERROR("No  cluster associated to the Photon \n");
 	    return  1;
 	  }
 	  if( std::abs(cluster->etaBE(2))>2.37) continue;
