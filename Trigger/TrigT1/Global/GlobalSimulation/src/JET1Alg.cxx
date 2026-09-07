@@ -57,7 +57,11 @@ namespace GlobalSim {
 	  jets->push_back( std::make_unique<SG::AuxElement>() );
 	  auto jet = Object<main_output_type>( *jets->back());
 	  
-	  jet.ptt = std::clamp(static_cast<int>(WTAJet.pt()), 0, (1 << jet.ptt.width) - 1); 
+	  // Assigned through the bits overload, not the value one: ptt carries a 0.25 encoder,
+	  // so handing it the raw count would store a count where a physical value is expected
+	  // and multiply it by four on the way back out. The reference implementation writes
+	  // the count straight into the field (GoldenGate: obj.pt() & 0x1FFF).
+	  jet.ptt = std::bitset<jet.ptt.width>(std::clamp(static_cast<int>(WTAJet.pt()), 0, (1 << jet.ptt.width) - 1));
 	  jet.eta = std::clamp(static_cast<int>(WTAJet.eta()), 0, (1 << jet.eta.width) - 1);
 	  jet.phi = std::clamp(static_cast<int>(WTAJet.phi()), 0, (1 << jet.phi.width) - 1);
 	  //AM: The widths are not encoded anywhere here? This would be needed/nice
