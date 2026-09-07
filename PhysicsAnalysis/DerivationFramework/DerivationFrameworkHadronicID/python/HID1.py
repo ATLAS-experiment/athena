@@ -169,11 +169,7 @@ def _add_ftag_content(
         slimming_helper=slimming_helper,
     )
 
-    slimming_helper.ExtraVariables += [
-        "AntiKt10TruthSoftDropBeta100Zcut10Jets.constituentLinks",
-        "AntiKt4TruthDressedWZJets.constituentLinks",
-        "AntiKt4TruthJets.constituentLinks",
-    ]
+    slimming_helper.ExtraVariables += ["AntiKt4TruthJets.constituentLinks"]
 
     # Truth labelling for the topo-cluster jets, which are not smart-slimmed here
     for jet_collection in ["AntiKt4EMTopoJets", "AntiKt4LCTopoJets"]:
