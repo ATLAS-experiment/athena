@@ -4,7 +4,7 @@
 
 #include "JET1Alg.h"
 #include "GlobalSimulation/topoc_pu_type.h"
-#include "GlobalSimulation/main_output.h"
+#include "GlobalSimulation/JET1Jet.h"
 #include "xAODCore/AuxContainerBase.h"
 
 namespace GlobalSim {
@@ -55,7 +55,7 @@ namespace GlobalSim {
 	
 	for(const auto& WTAJet: WTAJetList){
 	  jets->push_back( std::make_unique<SG::AuxElement>() );
-	  auto jet = Object<main_output_type>( *jets->back());
+	  auto jet = Object<JET1Jet>( *jets->back());
 	  
 	  // Assigned through the bits overload, not the value one: ptt carries a 0.25 encoder,
 	  // so handing it the raw count would store a count where a physical value is expected
