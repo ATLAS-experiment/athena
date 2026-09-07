@@ -69,16 +69,18 @@ StatusCode RDOtoTracccCellConverterAlg::execute(const EventContext& ctx) const
                 << " Strip RDOs, total " << (nPix + nStrip) << " RDOs");
   size_type const nCells = nPix + nStrip;
 
-  if (nCells == 0) {
-    ATH_MSG_DEBUG("no input hits");
-    return StatusCode::SUCCESS;
-  }
 
   // ---- 2. Create the output cell buffer.
   auto host_copy = m_common.m_copiesTool->hostCopy(ctx);
   traccc::edm::silicon_cell_collection::buffer traccc_cells_host_buffer{
     nCells, m_common.m_hostMR->mr()};
   host_copy->setup(traccc_cells_host_buffer)->wait();
+
+  if (nCells == 0) {
+    ATH_MSG_DEBUG("no input hits — writing empty cell collection");
+    ATH_CHECK(m_common.copyToGpuAndRecordToSG(ctx, traccc_cells_host_buffer));
+    return StatusCode::SUCCESS;
+  }
 
   // Create a "device" collection around the buffer to work on it
   traccc::edm::silicon_cell_collection::device cells{traccc_cells_host_buffer};
