@@ -70,7 +70,7 @@ run Reco_tf.py \
                flags.Acts.Device.doSeeding=True; \
                flags.Tracking.doPixelDigitalClustering=True; \
                from ActsConfig.ActsConfigFlags import SeedingStrategy; \
-               flags.Tracking.ITkActsPass.SeedingStrategy=SeedingStrategy.Gbts; \
+               flags.Acts.Device.seedingStrategy=SeedingStrategy.Gbts; \
                flags.Tracking.ITkActsPass.storeTrackSeeds=${storeTrackSeeds}; \
                flags.Concurrency.NumThreads=${numThreads}; \
                flags.Concurrency.NumConcurrentEvents=${numThreads};" \
