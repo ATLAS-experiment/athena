@@ -2,8 +2,8 @@
   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef INCLUDE_PERSISTENCYSVC_ITOKENITERATOR_H
-#define INCLUDE_PERSISTENCYSVC_ITOKENITERATOR_H
+#ifndef POOLSVC_ITOKENITERATOR_H
+#define POOLSVC_ITOKENITERATOR_H
 
 #include <cstddef>
 
@@ -12,7 +12,7 @@ class Token;
 
 namespace pool {
 
-  /** @class ITokenIterator ITokenIterator.h PersistencySvc/ITokenIterator.h
+  /** @class ITokenIterator ITokenIterator.h PoolSvc/ITokenIterator.h
    *
    *  ITokenIterator is the interface class for iterators of tokens
    *

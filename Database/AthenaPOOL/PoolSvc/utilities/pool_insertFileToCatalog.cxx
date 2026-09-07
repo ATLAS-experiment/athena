@@ -5,7 +5,7 @@
 #include <memory>
 
 #include "CxxUtils/checker_macros.h"
-#include "PersistencySvc/IFileCatalog.h"
+#include "PoolSvc/IFileCatalog.h"
 #include "StorageSvc/SimpleUtilityBase.h"
 
 using namespace pool;

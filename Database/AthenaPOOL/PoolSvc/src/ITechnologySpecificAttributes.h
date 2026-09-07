@@ -2,8 +2,8 @@
   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef INCLUDE_PERSISTENCYSVC_ITECHNOLOGYSPECIFICATTRIBUTES_H
-#define INCLUDE_PERSISTENCYSVC_ITECHNOLOGYSPECIFICATTRIBUTES_H
+#ifndef POOLSVC_ITECHNOLOGYSPECIFICATTRIBUTES_H
+#define POOLSVC_ITECHNOLOGYSPECIFICATTRIBUTES_H
 
 // includes
 #include <exception>
@@ -13,7 +13,7 @@
 
 namespace pool {
 
-  /** @class ITechnologySpecificAttributes ITechnologySpecificAttributes.h PersistencySvc/ITechnologySpecificAttributes.h
+  /** @class ITechnologySpecificAttributes ITechnologySpecificAttributes.h PoolSvc/ITechnologySpecificAttributes.h
    *
    *  ITechnologySpecificAttributes is the interface for an object holding technology-specific attributes
    *

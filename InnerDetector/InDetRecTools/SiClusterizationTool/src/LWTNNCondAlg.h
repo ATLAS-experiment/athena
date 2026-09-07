@@ -9,14 +9,10 @@
 #include "StoreGate/ReadCondHandleKey.h"
 #include "StoreGate/WriteCondHandleKey.h"
 
-#include "PoolSvc/IPoolSvc.h"
-
 //#include "TrkNeuralNetworkUtils/NeuralNetworkToHistoTool.h"
 #include "SiClusterizationTool/LWTNNCollection.h"
 #include "AthenaPoolUtilities/CondAttrListCollection.h"
 #include <string>
-
-class IPoolSvc;
 
 namespace lwt {
   class NanReplacer;    

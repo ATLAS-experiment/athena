@@ -7,8 +7,9 @@
 #include "DatabaseHandler.h"
 #include "MicroSessionManager.h"
 #include "DatabaseRegistry.h"
-#include "PersistencySvc/ITransaction.h"
-#include "PersistencySvc/IFileCatalog.h"
+
+#include "PoolSvc/IFileCatalog.h"
+
 #include "StorageSvc/DbType.h"
 #include "StorageSvc/pool.h"
 
@@ -83,12 +84,11 @@ pool::UserDatabase::connectForRead()
       };
 
       // Now we have all the usefull information to open the file.
-      pool::MicroSessionManager& sessionManager = m_session.microSessionManager( m_technology );
       // Check the registry now that we have the FID (in case of ambiguous PFNs)
       m_databaseHandler = m_registry.lookupByFID( m_the_fid );
       if( !m_databaseHandler ) {
          // still no luck - make a new connection
-         m_databaseHandler = sessionManager.connect( m_transactionType, m_the_fid, m_the_pfn );
+         m_databaseHandler = m_session.microSessionManager( m_technology ).connect( m_transactionType, m_the_fid, m_the_pfn );
       }
       if( m_databaseHandler ) {
         m_openMode = Io::READ;
@@ -204,7 +204,7 @@ pool::UserDatabase::fid()
                return m_the_fid;
             }
             m_the_pfn = m_name;
-            this->setTechnologyIdentifier( technology );
+            m_technology = pool::DbType::getType( technology ).majorType();
             m_alreadyConnected = true;
          }
          else {
@@ -263,7 +263,7 @@ pool::UserDatabase::pfn()
      m_catalog.getFirstPFN( m_name, m_the_pfn, technology );
      if( !m_the_pfn.empty() ) {
         m_the_fid = m_name;
-        setTechnologyIdentifier( technology );
+        m_technology = pool::DbType::getType( technology ).majorType();
         m_alreadyConnected = true;
      }
      return m_the_pfn; 
@@ -349,20 +349,6 @@ pool::UserDatabase::checkInRegistry()
     return true;
   }
   else return false;
-}
-
-
-void
-pool::UserDatabase::setTechnologyIdentifier( const std::string& sTechnology )
-{
-  m_technology = pool::DbType::getType( sTechnology ).majorType();
-}
-
-
-const pool::ITechnologySpecificAttributes&
-pool::UserDatabase::technologySpecificAttributes() const
-{
-  return static_cast< const pool::ITechnologySpecificAttributes& >( *this );
 }
 
 

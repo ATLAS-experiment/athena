@@ -9,15 +9,13 @@
 
 #include "PoolCollectionConverter.h"
 #include "PoolSvc/IPoolSvc.h"
+#include "PoolSvc/ISession.h"
 #include "PersistentDataModel/Token.h"
 
 // Pool
 #include "CollectionSvc/ICollection.h"
 #include "CollectionSvc/ICollectionCursor.h"
 #include "CollectionSvc/CollectionService.h"
-
-#include "PersistencySvc/ISession.h"
-
 #include "StorageSvc/DbType.h"
 
 // Gaudi

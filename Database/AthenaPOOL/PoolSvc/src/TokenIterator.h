@@ -2,10 +2,10 @@
   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef PERSISTENCYSVC_TOKENITERATOR_H
-#define PERSISTENCYSVC_TOKENITERATOR_H
+#ifndef POOLSVC_TOKENITERATOR_H
+#define POOLSVC_TOKENITERATOR_H
 
-#include "PersistencySvc/ITokenIterator.h"
+#include "PoolSvc/ITokenIterator.h"
 
 #include <string>
 

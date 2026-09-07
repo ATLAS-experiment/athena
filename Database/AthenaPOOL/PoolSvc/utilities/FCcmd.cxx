@@ -6,7 +6,7 @@
    FCcmd.cpp -- FileCatalog command line tool to list or manipulate entries in a FileCatalog XML file
 */
 
-#include "PersistencySvc/IFileCatalog.h"
+#include "PoolSvc/IFileCatalog.h"
 #include "StorageSvc/SimpleUtilityBase.h"
 
 #include <exception>

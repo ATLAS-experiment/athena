@@ -2,12 +2,13 @@
   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef INCLUDE_PERSISTENCYSVC_USERDATABASE_H
-#define INCLUDE_PERSISTENCYSVC_USERDATABASE_H
+#ifndef POOLSVC_USERDATABASE_H
+#define POOLSVC_USERDATABASE_H
 
-#include "PersistencySvc/IDatabase.h"
-#include "PersistencySvc/ISession.h"
-#include "PersistencySvc/ITechnologySpecificAttributes.h"
+#include "ITechnologySpecificAttributes.h"
+
+#include "PoolSvc/IDatabase.h"
+#include "PoolSvc/ISession.h"
 #include "StorageSvc/DbPrint.h"
 #include "StorageSvc/pool.h"
 
@@ -75,7 +76,6 @@ namespace pool {
     virtual IContainer* containerHandle( const std::string& name ) override;
 
     /// Returns the object holding the technology specific attributes
-    virtual const ITechnologySpecificAttributes& technologySpecificAttributes() const override;
     virtual ITechnologySpecificAttributes& technologySpecificAttributes() override;
 
   protected:
@@ -119,9 +119,6 @@ namespace pool {
 
     /// Checks in the registry if the database handler already exists
     bool checkInRegistry();
-
-    /// Converts a technology string to the technology (long) identifier
-    void setTechnologyIdentifier( const std::string& sTechnology );
   };
 }
 

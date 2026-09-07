@@ -2,8 +2,8 @@
   Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef INCLUDE_PERSISTENCYSVC_DATABASEREGISTRY_H
-#define INCLUDE_PERSISTENCYSVC_DATABASEREGISTRY_H
+#ifndef POOLSVC_DATABASEREGISTRY_H
+#define POOLSVC_DATABASEREGISTRY_H
 
 #include <string>
 #include <set>

@@ -2,8 +2,8 @@
   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef INCLUDE_PERSISTENCYSVC_IDATABASE_H
-#define INCLUDE_PERSISTENCYSVC_IDATABASE_H
+#ifndef POOLSVC_IDATABASE_H
+#define POOLSVC_IDATABASE_H
 
 #include "StorageSvc/pool.h"
 
@@ -28,7 +28,7 @@ namespace pool {
     };
   };
 
-  /** @class IDatabase IDatabase.h PersistencySvc/IDatabase.h
+  /** @class IDatabase IDatabase.h PoolSvc/IDatabase.h
    *
    *  IDatabase is the base class for database objects
    *
@@ -73,7 +73,6 @@ namespace pool {
     virtual IContainer* containerHandle( const std::string& name ) = 0;
 
     /// Returns the object holding the technology specific attributes
-    virtual const ITechnologySpecificAttributes& technologySpecificAttributes() const = 0;
     virtual ITechnologySpecificAttributes& technologySpecificAttributes() = 0;
   };
 
