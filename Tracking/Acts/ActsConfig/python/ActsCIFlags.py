@@ -42,7 +42,6 @@ def actsInnerDetectorWorkflowFlags(flags) -> None:
     flags.Tracking.recoChain = [TrackingComponent.ActsChain]
         
 def actsHeavyIonFlags(flags) -> None:
-    flags.Reco.EnableHGTDExtension = False
     flags.Tracking.recoChain = [TrackingComponent.ActsHeavyIon]
     flags.Tracking.doITkFastTracking = False
 

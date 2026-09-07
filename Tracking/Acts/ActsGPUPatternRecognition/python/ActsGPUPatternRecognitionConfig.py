@@ -3,7 +3,7 @@
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 
-from AthDeviceComps.AthDeviceCompsConfig import MemoryResourcesToolCfg, CopyToolCfg, DeviceMemoryResourceToolCfg
+from AthDeviceComps.AthDeviceCompsConfig import MemoryResourcesToolCfg, CopyToolCfg
 from AthDeviceComps.DeviceConfigFlags import DeviceBackend
 
 # ============================================================
@@ -76,14 +76,12 @@ def DeviceGBTSSeedingAlgCfg(flags,
     assert previousExtension is None or isinstance(previousExtension, str)                           
     acc = ComponentAccumulator()
 
-    kwargs.setdefault("DeviceMR", acc.popToolsAndMerge(DeviceMemoryResourceToolCfg(flags)))
     kwargs.setdefault("InputTracccPixelSpacepoints", "TracccPixelSpacepoints")
     kwargs.setdefault("InputTracccMeasurements", "TracccMeasurements")
     kwargs.setdefault("OutputTracccPixelSeeds", "TracccPixelSeeds")
 
-    from TrigFastTrackFinder.TrigFastTrackFinderConfig import ITkTrigL2LayerNumberToolCfg
-    layerNumberArgs = {"UseNewLayerScheme" : True}
-    kwargs.setdefault("layerNumberTool", acc.popToolsAndMerge(ITkTrigL2LayerNumberToolCfg(flags, **layerNumberArgs)))
+    from ActsConfig.ActsSeedingConfig import ActsGbtsLayerToolCfg
+    kwargs.setdefault("layerNumberTool", acc.popToolsAndMerge(ActsGbtsLayerToolCfg(flags)))
 
     kwargs.setdefault("SeedingAlgProviderTool", acc.popToolsAndMerge(DeviceSeedingProviderToolCfg(flags)))
     
@@ -100,7 +98,6 @@ def DeviceTripletSeedingAlgCfg(flags,
     assert previousExtension is None or isinstance(previousExtension, str)                           
     acc = ComponentAccumulator()
 
-    kwargs.setdefault("DeviceMR", acc.popToolsAndMerge(DeviceMemoryResourceToolCfg(flags)))
     kwargs.setdefault("InputTracccPixelSpacepoints", "TracccPixelSpacepoints")
     kwargs.setdefault("OutputTracccPixelSeeds", "TracccPixelSeeds")
     
@@ -118,7 +115,6 @@ def DeviceTrkParamEstimationAlgCfg(flags,
     assert previousExtension is None or isinstance(previousExtension, str)                           
     acc = ComponentAccumulator()
 
-    kwargs.setdefault("DeviceMR", acc.popToolsAndMerge(DeviceMemoryResourceToolCfg(flags)))
     kwargs.setdefault("InputTracccSpacepoints", "TracccPixelSpacepoints")
     kwargs.setdefault("InputTracccSeeds", "TracccPixelSeeds")
     kwargs.setdefault("InputTracccMeasurements", "TracccMeasurements")

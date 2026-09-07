@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 import os,sys
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
@@ -62,7 +62,7 @@ def mergeDBCfg(flags, InputKeys=[], InputSQLiteFiles=[]):
       #if FlagInput in flags._flagdict.keys():       
       if   [i for i in flags._flagdict.keys() if FlagInput in i]:
          try: 
-            Folder  = flags._get('LArCalib.'+FlagInput+'.Folder')  
+            Folder  = flags['LArCalib.'+FlagInput+'.Folder']
          except Exception as e:
             print(e)
             print(flags._flagdict)
