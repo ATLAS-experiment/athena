@@ -386,13 +386,13 @@ def ActsPixelSeedingAlgCfg(flags,
     useFastTracking = kwargs.get("useFastTracking", isFastPrimaryPass(flags))
 
     if "SeedTool" not in kwargs:
-        if flags.Tracking.ActiveConfig.SeedingStrategy is SeedingStrategy.Gbts:
+        if flags.Tracking.ActiveConfig.PixelSeedingStrategy is SeedingStrategy.Gbts:
             kwargs.setdefault('SeedTool', acc.popToolsAndMerge(
               ActsPixelGbtsSeedingToolCfg(flags)))
-        elif flags.Tracking.ActiveConfig.SeedingStrategy is SeedingStrategy.GbtsFtf:
+        elif flags.Tracking.ActiveConfig.PixelSeedingStrategy is SeedingStrategy.GbtsFtf:
             kwargs.setdefault('SeedTool', acc.popToolsAndMerge(
               ActsGbtsFtfSeedingTrigToolCfg(flags)))
-        elif flags.Tracking.ActiveConfig.SeedingStrategy is SeedingStrategy.GridTriplet:
+        elif flags.Tracking.ActiveConfig.PixelSeedingStrategy is SeedingStrategy.GridTriplet:
             if useFastTracking:
                 kwargs.setdefault('SeedTool', acc.popToolsAndMerge(
                   ActsFastPixelSeedingToolCfg(flags)))
@@ -440,10 +440,10 @@ def ActsStripSeedingAlgCfg(flags,
     acc.merge(ITkStripReadoutGeometryCfg(flags))
 
     if "SeedTool" not in kwargs:
-        if flags.Tracking.ActiveConfig.SeedingStrategy in [
+        if flags.Tracking.ActiveConfig.StripSeedingStrategy in [
             SeedingStrategy.Gbts, SeedingStrategy.GbtsFtf]:
             kwargs.setdefault('SeedTool', acc.popToolsAndMerge(ActsStripGbtsSeedingToolCfg(flags)))
-        elif flags.Tracking.ActiveConfig.SeedingStrategy is SeedingStrategy.GridTriplet:
+        elif flags.Tracking.ActiveConfig.StripSeedingStrategy is SeedingStrategy.GridTriplet:
             if flags.Tracking.ActiveConfig.isLargeD0:
                 kwargs.setdefault('SeedTool', acc.popToolsAndMerge(
                   ActsLargeRadiusStripSeedingToolCfg(flags)))
