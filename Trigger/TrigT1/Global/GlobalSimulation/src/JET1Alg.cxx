@@ -4,7 +4,7 @@
 
 #include "JET1Alg.h"
 #include "GlobalSimulation/topoc_pu_type.h"
-#include "GlobalSimulation/main_output.h"
+#include "GlobalSimulation/JET1Jet.h"
 #include "xAODCore/AuxContainerBase.h"
 
 namespace GlobalSim {
@@ -55,7 +55,7 @@ namespace GlobalSim {
 	
 	for(const auto& WTAJet: WTAJetList){
 	  jets->push_back( std::make_unique<SG::AuxElement>() );
-	  auto jet = Object<main_output_type>( *jets->back());
+	  auto jet = Object<JET1Jet>( *jets->back());
 	  
 	  jet.ptt = std::clamp(static_cast<int>(WTAJet.pt()), 0, (1 << jet.ptt.width) - 1); 
 	  jet.eta = std::clamp(static_cast<int>(WTAJet.eta()), 0, (1 << jet.eta.width) - 1);
