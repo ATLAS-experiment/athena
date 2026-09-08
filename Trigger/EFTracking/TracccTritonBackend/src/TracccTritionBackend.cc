@@ -26,7 +26,10 @@
 
 #include <cuda_runtime_api.h>
 
+#include <array>
 #include <chrono>
+#include <cmath>
+#include <set>
 
 #include "TracccTritonInitializer.hpp"
 #include "TracccTritonRunner.hpp"
@@ -40,14 +43,14 @@
 namespace triton { namespace backend { namespace traccc {
 
 //
-// Backend that demonstrates the TRITONBACKEND API. This backend works
-// for any model that has 1 input with any datatype and any shape and
-// 1 output with the same shape and datatype as the input. The backend
-// supports both batching and non-batching models.
+// Backend serving the Traccc GPU track-reconstruction chain: one UINT8
+// CELLS input tensor in, the fitted tracks out as four tensors -- see
+// README.md for the wire format on both sides.
 //
-// For each batch of requests, the backend returns the input tensor
-// value in the output tensor.
-//
+
+/// The output tensors this backend writes, by name.
+const std::array<std::string, 4> kOutputNames = {
+    "TRK_PARAMS", "MEASUREMENTS", "COVARIANCES", "GEOMETRY_IDS"};
 
 /////////////
 
@@ -162,16 +165,11 @@ class ModelState : public BackendModel {
       TRITONBACKEND_Model* triton_model, ModelState** state);
   virtual ~ModelState() = default;
 
-    // Name of the input and output tensor
+    // Name of the input tensor
     const std::string &InputCellsTensorName() const { return input_cells_name_; }
-    const std::string &OutputTensorName() const { return output_name_; }
 
-    // Datatype of the input and output tensor
+    // Datatype of the input tensor
     TRITONSERVER_DataType InputCellsTensorDataType() const { return input_cells_datatype_; }
-    TRITONSERVER_DataType OutputTensorDataType() const
-    {
-        return output_datatype_;
-    }
 
     // Shape of the input and output tensor as given in the model
     // configuration file. This shape will not include the batch
@@ -188,10 +186,6 @@ class ModelState : public BackendModel {
     {
         return input_cells_nb_shape_;
     }
-    const std::vector<int64_t> &OutputTensorNonBatchShape() const
-    {
-        return output_nb_shape_;
-    }
 
     // Validate that this model is supported by this backend.
     TRITONSERVER_Error *ValidateModelConfig();
@@ -203,15 +197,10 @@ class ModelState : public BackendModel {
   ModelState(TRITONBACKEND_Model* triton_model);
 
     std::string input_cells_name_;
-    std::string output_name_;
 
     TRITONSERVER_DataType input_cells_datatype_;
-    TRITONSERVER_DataType output_datatype_;
 
     std::vector<int64_t> input_cells_nb_shape_;
-    std::vector<int64_t> input_cells_shape_;
-    std::vector<int64_t> output_nb_shape_;
-    std::vector<int64_t> output_shape_;
 
     bool shape_initialized_;
 };
@@ -261,42 +250,58 @@ ModelState::ValidateModelConfig()
     RETURN_IF_ERROR(ModelConfig().MemberAsArray("input", &inputs));
     RETURN_IF_ERROR(ModelConfig().MemberAsArray("output", &outputs));
 
-    // The model must have exactly 1 input and 1 output.
+    // The model must have exactly 1 input (CELLS) and the 4 outputs the
+    // client reads back (see the wire format in README.md).
     RETURN_ERROR_IF_FALSE(
         inputs.ArraySize() == 1, TRITONSERVER_ERROR_INVALID_ARG,
         std::string("model configuration must have 1 input"));
     RETURN_ERROR_IF_FALSE(
-        outputs.ArraySize() == 1, TRITONSERVER_ERROR_INVALID_ARG,
-        std::string("model configuration must have 1 output"));
+        outputs.ArraySize() == kOutputNames.size(), TRITONSERVER_ERROR_INVALID_ARG,
+        std::string("model configuration must have ") +
+            std::to_string(kOutputNames.size()) + " outputs");
 
-    common::TritonJson::Value input_cells, output;
+    common::TritonJson::Value input_cells;
     RETURN_IF_ERROR(inputs.IndexAsObject(0, &input_cells));
-    RETURN_IF_ERROR(outputs.IndexAsObject(0, &output));
 
-    // Record the input and output name in the model state.
+    // Record the input name in the model state.
     const char *input_cells_name;
     size_t input_cells_len;
     RETURN_IF_ERROR(input_cells.MemberAsString("name", &input_cells_name, &input_cells_len));
-    input_cells_name_ = std::string(input_cells_name);
+    // MemberAsString hands back a pointer into the parsed JSON plus its
+    // length; that buffer is not guaranteed to be NUL-terminated, so the
+    // length must be used. Building the name with the const char* overload
+    // instead can append trailing garbage, which then makes
+    // TRITONBACKEND_RequestInput fail to find the tensor at execute time.
+    input_cells_name_ = std::string(input_cells_name, input_cells_len);
 
-    const char *output_name;
-    size_t output_name_len;
-    RETURN_IF_ERROR(
-        output.MemberAsString("name", &output_name, &output_name_len));
-    output_name_ = std::string(output_name);
+    LOG_MESSAGE(TRITONSERVER_LOG_INFO,
+                (std::string("'traccc' backend: input tensor is '") +
+                 input_cells_name_ + "' (" +
+                 std::to_string(input_cells_name_.size()) + " chars)").c_str());
 
-    std::string input_cells_dtype, output_dtype;
+    std::string input_cells_dtype;
     RETURN_IF_ERROR(input_cells.MemberAsString("data_type", &input_cells_dtype));
-    RETURN_IF_ERROR(output.MemberAsString("data_type", &output_dtype));
     input_cells_datatype_ = ModelConfigDataTypeToTritonServerDataType(input_cells_dtype);
-    output_datatype_ = ModelConfigDataTypeToTritonServerDataType(output_dtype);
 
-    std::vector<int64_t> input_cells_shape, output_shape;
-    RETURN_IF_ERROR(backend::ParseShape(input_cells, "dims", &input_cells_shape));
-    RETURN_IF_ERROR(backend::ParseShape(output, "dims", &output_shape));
+    RETURN_IF_ERROR(backend::ParseShape(input_cells, "dims", &input_cells_nb_shape_));
 
-    input_cells_nb_shape_ = input_cells_shape;
-    output_nb_shape_ = output_shape;
+    // The output tensors are written by fixed name, so the configured names
+    // must be exactly the expected set (order is irrelevant).
+    std::set<std::string> configured_outputs;
+    for (size_t i = 0; i < outputs.ArraySize(); ++i) {
+        common::TritonJson::Value output;
+        RETURN_IF_ERROR(outputs.IndexAsObject(i, &output));
+        const char *output_name;
+        size_t output_name_len;
+        RETURN_IF_ERROR(
+            output.MemberAsString("name", &output_name, &output_name_len));
+        configured_outputs.emplace(output_name, output_name_len);
+    }
+    for (const auto &expected : kOutputNames) {
+        RETURN_ERROR_IF_FALSE(
+            configured_outputs.count(expected) == 1, TRITONSERVER_ERROR_INVALID_ARG,
+            std::string("model configuration is missing output '") + expected + "'");
+    }
 
     return nullptr; // success
 }
@@ -578,6 +583,23 @@ TRITONBACKEND_ModelInstanceExecute(
     // manage it. ProcessTensor does NOT support TRITONSERVER_TYPE_BYTES
     // data type.
 
+    // BackendInputCollector::ProcessTensor leaves its TRITONBACKEND_Input
+    // handle uninitialized when TRITONBACKEND_RequestInput fails, and then
+    // dereferences it anyway -- one request that does not carry the input
+    // would take the whole server down. Check every request up front and skip
+    // the collector entirely unless they all have it, so such a request comes
+    // back as a normal error response.
+    bool all_inputs_present = true;
+    for (uint32_t r = 0; r < request_count; ++r) {
+        TRITONBACKEND_Input* input = nullptr;
+        TRITONSERVER_Error* input_err = TRITONBACKEND_RequestInput(
+            requests[r], model_state->InputCellsTensorName().c_str(), &input);
+        if (input_err != nullptr) {
+            all_inputs_present = false;
+            RESPOND_AND_SET_NULL_IF_ERROR(&responses[r], input_err);
+        }
+    }
+
     BackendInputCollector collector(
         requests, request_count, &responses, model_state->TritonMemoryManager(),
         false /* pinned_enabled */, nullptr /* stream*/);
@@ -594,41 +616,52 @@ TRITONBACKEND_ModelInstanceExecute(
     TRITONSERVER_MemoryType input_cells_buffer_memory_type;
     int64_t input_cells_buffer_memory_type_id;
 
-    RESPOND_ALL_AND_SET_NULL_IF_ERROR(
-        responses, request_count,
-        collector.ProcessTensor(
-            model_state->InputCellsTensorName().c_str(), nullptr /* existing_buffer */,
-            0 /* existing_buffer_byte_size */, allowed_input_types, &input_cells_buffer,
-            &input_cells_buffer_byte_size, &input_cells_buffer_memory_type,
-            &input_cells_buffer_memory_type_id));
-
-    // Finalize the collector. If 'true' is returned, 'input_buffer'
-    // will not be valid until the backend synchronizes the CUDA
-    // stream or event that was used when creating the collector. For
-    // this backend, GPU is not supported and so no CUDA sync should
-    // be needed; so if 'true' is returned simply log an error.
-    const bool need_cuda_input_sync = collector.Finalize();
-    if (need_cuda_input_sync)
+    if (all_inputs_present)
     {
-        LOG_MESSAGE(
-            TRITONSERVER_LOG_ERROR,
-            "'Traccc' backend: unexpected CUDA sync required by collector");
+        RESPOND_ALL_AND_SET_NULL_IF_ERROR(
+            responses, request_count,
+            collector.ProcessTensor(
+                model_state->InputCellsTensorName().c_str(), nullptr /* existing_buffer */,
+                0 /* existing_buffer_byte_size */, allowed_input_types, &input_cells_buffer,
+                &input_cells_buffer_byte_size, &input_cells_buffer_memory_type,
+                &input_cells_buffer_memory_type_id));
+
+        // Finalize the collector. If 'true' is returned, 'input_buffer'
+        // will not be valid until the backend synchronizes the CUDA
+        // stream or event that was used when creating the collector. For
+        // this backend, GPU is not supported and so no CUDA sync should
+        // be needed; so if 'true' is returned simply log an error.
+        const bool need_cuda_input_sync = collector.Finalize();
+        if (need_cuda_input_sync)
+        {
+            LOG_MESSAGE(
+                TRITONSERVER_LOG_ERROR,
+                "'Traccc' backend: unexpected CUDA sync required by collector");
+        }
     }
 
-    bool print_stats = false;
+    bool print_stats = true;
 
     // run the reco chain: deserialize CELLS, drive the device algorithms
-    // (clusterization -> spacepoint formation -> seeding) and copy the seeds
-    // back to the host. All of that lives in TracccTritonRunner.
+    // (clusterization -> spacepoint formation -> seeding -> track parameter
+    // estimation -> track finding) and copy the fitted tracks and their
+    // measurements back to the host. All of that lives in TracccTritonRunner.
     uint64_t compute_start_ns = 0;
     SET_TIMESTAMP(compute_start_ns);
 
     TracccTritonRunner::Output traccc_result;
+    bool run_succeeded = false;
     try
     {
+        if (!all_inputs_present) {
+            throw std::runtime_error(
+                "request is missing the '" +
+                model_state->InputCellsTensorName() + "' input tensor");
+        }
         traccc_result = instance_state->traccc_triton_runner_->run(
             reinterpret_cast<const uint8_t*>(input_cells_buffer),
             input_cells_buffer_byte_size, print_stats);
+        run_succeeded = true;
     }
     catch (const std::exception& e)
     {
@@ -660,23 +693,187 @@ TRITONBACKEND_ModelInstanceExecute(
 
     auto output_proc_start = std::chrono::high_resolution_clock::now();
 
-    // The 'responders's ProcessTensor function will copy the portion of
-    // 'output_buffer' corresponding to each request's output into the
-    // response for that request.
+    // Process the outputs. Skipped when the chain threw: every response has
+    // already been failed above and there is no result to unpack.
+    if (run_succeeded)
+    {
+        // --------------- Process 'TRK_PARAMS', 'MEASUREMENTS',
+        //                 'COVARIANCES' and 'GEOMETRY_IDS' ---------------
+        const auto tracks_and_states = traccc_result.tracksAndStates();
+        const auto measurement_collection = traccc_result.measurementCollection();
+        const auto& geo_id_mapping =
+            TracccTritonInitializer::instance().geometryIdMapping();
 
-    // The runner already serialized the reconstruction result into a single
-    // UINT8 buffer (see TracccTritonRunner::Output::buffer).
-    std::vector<int64_t> tracks_shape =
-        {static_cast<int64_t>(traccc_result.buffer.size())};
-    // Unlike BackendInputCollector::ProcessTensor, the responder's
-    // ProcessTensor returns void: errors are recorded directly into the
-    // per-request response objects rather than returned, so this is a plain
-    // call, not wrapped in RESPOND_ALL_AND_SET_NULL_IF_ERROR.
-    responder.ProcessTensor(
-        model_state->OutputTensorName().c_str(), TRITONSERVER_TYPE_UINT8,
-        tracks_shape,
-        reinterpret_cast<const char*>(traccc_result.buffer.data()),
-        TRITONSERVER_MEMORY_CPU, 0);
+        const size_t num_tracks = tracks_and_states.tracks.size();
+
+        // Buffers for the output tensors
+        std::vector<float> trk_params_buffer;
+        std::vector<float> measurements_buffer;
+        std::vector<float> covariances_buffer;
+        std::vector<int64_t> geometry_ids_buffer;
+
+        trk_params_buffer.reserve(num_tracks * 8);
+        measurements_buffer.reserve(num_tracks * 15 * 6);
+        covariances_buffer.reserve(num_tracks * 15 * 25);
+        geometry_ids_buffer.reserve(num_tracks * 15);
+
+        // Track exclusion counters
+        int excluded_non_positive_ndf = 0;
+        int excluded_unknown = 0;
+        int excluded_no_state = 0;
+        int included_tracks = 0;
+
+        // Process all tracks
+        for (size_t i = 0; i < num_tracks; ++i) {
+            const auto& track = tracks_and_states.tracks.at(i);
+
+            // Check track fit outcome
+            if (track.fit_outcome() != ::traccc::track_fit_outcome::SUCCESS) {
+                ++excluded_unknown;
+                continue;
+            }
+            if (track.ndf() < 0) {
+                ++excluded_non_positive_ndf;
+                continue;
+            }
+            if (track.constituent_links().size() < 3) {
+                ++excluded_no_state;
+                continue;
+            }
+
+            // Add separator before this track's measurements, if it's not the
+            // first included track. This is done only for geometry ids, and
+            // splits on the track are then done on this variable from the
+            // client side.
+            if (included_tracks > 0) {
+                geometry_ids_buffer.push_back(0);
+            }
+
+            // --- Process Track Parameters ---
+            trk_params_buffer.push_back(static_cast<float>(track.chi2()));
+            trk_params_buffer.push_back(static_cast<float>(track.ndf()));
+
+            const auto& fitted_params = track.params();
+            trk_params_buffer.push_back(static_cast<float>(fitted_params.bound_local()[0]));
+            trk_params_buffer.push_back(static_cast<float>(fitted_params.bound_local()[1]));
+            trk_params_buffer.push_back(static_cast<float>(fitted_params.phi()));
+            trk_params_buffer.push_back(static_cast<float>(fitted_params.theta()));
+            trk_params_buffer.push_back(static_cast<float>(fitted_params.qop()));
+            trk_params_buffer.push_back(static_cast<float>(fitted_params.time()));
+
+            if (included_tracks < 3 && print_stats)
+            {
+                std::cout << "Track " << included_tracks << " parameters: ";
+                std::cout << static_cast<float>(track.chi2()) << " ";
+                std::cout << static_cast<float>(track.ndf()) << " ";
+                std::cout << static_cast<float>(fitted_params.bound_local()[0]) << " ";
+                std::cout << static_cast<float>(fitted_params.bound_local()[1]) << " ";
+                std::cout << static_cast<float>(fitted_params.phi()) << " ";
+                std::cout << static_cast<float>(fitted_params.theta()) << " ";
+                std::cout << static_cast<float>(fitted_params.qop()) << " ";
+                std::cout << static_cast<float>(fitted_params.time()) << std::endl;
+            }
+
+            // --- Process Measurements for this track ---
+            const auto& constituent_links = track.constituent_links();
+            for (size_t j = 0; j < constituent_links.size(); ++j) {
+                const auto& link = constituent_links[j];
+
+                if (link.type != ::traccc::edm::track_constituent_link::track_state) {
+                    continue;
+                }
+
+                auto const& state = tracks_and_states.states.at(link.index);
+                auto const& measurement =
+                    measurement_collection.at(state.measurement_index());
+
+                // Use the measurement local position and the smoothed state
+                measurements_buffer.push_back(measurement.local_position()[0]); // local x
+                measurements_buffer.push_back(measurement.local_position()[1]); // local y
+
+                auto const& smoothed_params = state.smoothed_params();
+                measurements_buffer.push_back(smoothed_params.phi());
+                measurements_buffer.push_back(smoothed_params.theta());
+                measurements_buffer.push_back(smoothed_params.qop());
+                measurements_buffer.push_back(smoothed_params.time());
+
+                auto const& cov = smoothed_params.covariance();
+                // Covariance matrix (5x5) flattened in row-major order
+                // TODO: only need to send upper triangle since symmetric
+                for (size_t row = 0; row < 5; ++row) {
+                    for (size_t col = 0; col < 5; ++col) {
+                        const float value = static_cast<float>(cov[row][col]);
+                        if (std::isnan(value) || std::isinf(value) || (value > 1e8)) {
+                            covariances_buffer.push_back(0.0f); // fallback to 0.0f
+                        } else {
+                            covariances_buffer.push_back(value);
+                        }
+                    }
+                }
+
+                const uint64_t detray_id = measurement.surface_link().value();
+                const auto athena_id = geo_id_mapping.detrayToAthena(detray_id);
+                if (athena_id.has_value()) {
+                    geometry_ids_buffer.push_back(
+                        static_cast<int64_t>(athena_id->get_compact()));
+                } else {
+                    LOG_MESSAGE(TRITONSERVER_LOG_ERROR,
+                                ("Missing reverse mapping for Detray ID: "
+                                    + std::to_string(detray_id)).c_str());
+                    geometry_ids_buffer.push_back(
+                        static_cast<int64_t>(detray_id)); // Fallback
+                }
+            }
+
+            ++included_tracks;
+        }
+
+        if (print_stats)
+        {
+            // Log exclusion statistics
+            LOG_MESSAGE(TRITONSERVER_LOG_INFO,
+                        (std::string("Track Exclusion Summary - Total: ") + std::to_string(num_tracks) +
+                        ", Excluded (non-positive NDF): " + std::to_string(excluded_non_positive_ndf) +
+                        ", Excluded (unknown): " + std::to_string(excluded_unknown) +
+                        ", Excluded (no state): " + std::to_string(excluded_no_state) +
+                        ", Included: " + std::to_string(included_tracks)).c_str());
+        }
+
+        // Unlike BackendInputCollector::ProcessTensor, the responder's
+        // ProcessTensor returns void: errors are recorded directly into the
+        // per-request response objects rather than returned, so these are
+        // plain calls, not wrapped in RESPOND_ALL_AND_SET_NULL_IF_ERROR.
+
+        // --- Send 'TRK_PARAMS' tensor ---
+        std::vector<int64_t> trk_params_shape = {static_cast<int64_t>(included_tracks), 8};
+        responder.ProcessTensor(
+            "TRK_PARAMS", TRITONSERVER_TYPE_FP32, trk_params_shape,
+            reinterpret_cast<const char*>(trk_params_buffer.data()),
+            TRITONSERVER_MEMORY_CPU, 0);
+
+        // --- Send 'MEASUREMENTS' tensor ---
+        std::vector<int64_t> measurements_shape
+            = {static_cast<int64_t>(measurements_buffer.size() / 6), 6};
+        responder.ProcessTensor(
+            "MEASUREMENTS", TRITONSERVER_TYPE_FP32, measurements_shape,
+            reinterpret_cast<const char*>(measurements_buffer.data()),
+            TRITONSERVER_MEMORY_CPU, 0);
+
+        // --- Send 'COVARIANCES' tensor ---
+        std::vector<int64_t> covariances_shape
+            = {static_cast<int64_t>(covariances_buffer.size() / 25), 25};
+        responder.ProcessTensor(
+            "COVARIANCES", TRITONSERVER_TYPE_FP32, covariances_shape,
+            reinterpret_cast<const char*>(covariances_buffer.data()),
+            TRITONSERVER_MEMORY_CPU, 0);
+
+        // --- Send 'GEOMETRY_IDS' tensor ---
+        std::vector<int64_t> geometry_ids_shape = {static_cast<int64_t>(geometry_ids_buffer.size())};
+        responder.ProcessTensor(
+            "GEOMETRY_IDS", TRITONSERVER_TYPE_INT64, geometry_ids_shape,
+            reinterpret_cast<const char*>(geometry_ids_buffer.data()),
+            TRITONSERVER_MEMORY_CPU, 0);
+    }
 
     if (print_stats)
     {
@@ -685,8 +882,6 @@ TRITONBACKEND_ModelInstanceExecute(
                 << std::chrono::duration_cast<std::chrono::milliseconds>(
                         output_proc_end - output_proc_start).count()
                 << " ms" << std::endl;
-        std::cout << "DEBUG: seeds returned: " << traccc_result.nSeeds
-                  << std::endl;
     }
 
     // Finalize the responder. If 'true' is returned, the output

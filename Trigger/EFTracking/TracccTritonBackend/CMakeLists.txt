@@ -1,6 +1,5 @@
 # Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
-# Declare the package name:
 atlas_subdir( TracccTritonBackend )
 
 find_package( Acts )
@@ -62,6 +61,7 @@ atlas_add_library( traccc
    NO_PUBLIC_HEADERS
    DEFINITIONS
       -DTRITON_ENABLE_STATS
+      -DTRITON_ENABLE_GPU
       -DTRACCC_TRITON_PYTHON_LIBRARY="${TRACCC_PYTHON_SHARED_LIBRARY}"
    INCLUDE_DIRS
       ${CMAKE_CURRENT_SOURCE_DIR}/src

@@ -11,7 +11,9 @@
 #include <cuda_runtime.h>
 
 // Gaudi / Athena.
+#include "AthenaKernel/ExtendedEventContext.h"
 #include "GaudiKernel/EventContext.h"
+#include "GaudiKernel/ThreadLocalContext.h"
 #include "GaudiKernel/IAlgManager.h"
 #include "GaudiKernel/IAlgorithm.h"
 #include "GaudiKernel/ISvcLocator.h"
@@ -21,8 +23,6 @@
 
 // traccc / vecmem EDM
 #include "ActsGPUEvent/TracccSiliconCellCollection.h"
-#include "ActsGPUEvent/TracccSeedCollection.h"
-#include "ActsGPUEvent/TracccSpacepointCollection.h"
 
 #include "vecmem/memory/cuda/device_memory_resource.hpp"
 #include "vecmem/memory/host_memory_resource.hpp"
@@ -36,6 +36,8 @@ namespace {
 constexpr const char* kClusterizationAlg = "DeviceClusterizationAlg";
 constexpr const char* kSPFormationAlg = "DeviceSPFormationAlg";
 constexpr const char* kTripletSeedingAlg = "DeviceTripletSeedingAlg";
+constexpr const char* kTrkParamEstimationAlg = "DeviceTrkParamEstimationAlg";
+constexpr const char* kTrackFindingAlg = "DeviceTrackFindingAlg";
 }  // namespace
 
 struct StreamGuard {
@@ -55,7 +57,7 @@ struct TracccTritonRunner::Impl {
     TracccTritonInitializer& initializer;
 
     // Self-contained device resources for the H2D of the incoming cells and
-    // the D2H of the outgoing seeds. The device algorithms use their own
+    // the D2H of the outgoing tracks. The device algorithms use their own
     // memory resources (from their provider tools) internally; the cell
     // buffer only has to live in device memory, so it need not share them.
     vecmem::host_memory_resource host_mr;
@@ -70,6 +72,8 @@ struct TracccTritonRunner::Impl {
     SmartIF<IAlgorithm> clusterization;
     SmartIF<IAlgorithm> spFormation;
     SmartIF<IAlgorithm> seeding;
+    SmartIF<IAlgorithm> trkParamEstimation;
+    SmartIF<IAlgorithm> trackFinding;
 
     explicit Impl(TracccTritonInitializer& init)
         : initializer(init)
@@ -111,8 +115,13 @@ TracccTritonRunner::TracccTritonRunner(TracccTritonInitializer& initializer)
         algMgr->algorithm(std::string(kSPFormationAlg), /*createIf*/ false);
     m_impl->seeding =
         algMgr->algorithm(std::string(kTripletSeedingAlg), /*createIf*/ false);
+    m_impl->trkParamEstimation = algMgr->algorithm(
+        std::string(kTrkParamEstimationAlg), /*createIf*/ false);
+    m_impl->trackFinding =
+        algMgr->algorithm(std::string(kTrackFindingAlg), /*createIf*/ false);
 
-    if (!m_impl->clusterization || !m_impl->spFormation || !m_impl->seeding) {
+    if (!m_impl->clusterization || !m_impl->spFormation || !m_impl->seeding ||
+        !m_impl->trkParamEstimation || !m_impl->trackFinding) {
         throw std::runtime_error(
             "TracccTritonRunner: could not retrieve one of the device "
             "algorithms");
@@ -176,7 +185,17 @@ TracccTritonRunner::run(const uint8_t* buffer,
         throw std::runtime_error("TracccTritonRunner: clearStore() failed");
     }
 
-    EventContext ctx;
+    // The device algorithms and the tools under them index per-slot state
+    // (AthenaKernel's SlotSpecificObj, used by the CUDA stream tools) with
+    // ctx.slot(), and that lookup has no fallback for an invalid slot. A
+    // default-constructed EventContext therefore indexes with
+    // INVALID_CONTEXT_ID and throws. There is no event loop here to hand us a
+    // context, so build the single-slot one the algorithms expect, and publish
+    // it as the current context for anything that reads it implicitly.
+    EventContext ctx(0, 0);
+    ctx.setExtension(
+        Atlas::ExtendedEventContext(m_impl->eventStore->hiveProxyDict()));
+    Gaudi::Hive::setCurrentContext(ctx);
     {
         auto deviceCells =
             std::make_unique<::traccc::edm::silicon_cell_collection::buffer>(
@@ -195,10 +214,12 @@ TracccTritonRunner::run(const uint8_t* buffer,
 
     auto t2 = std::chrono::high_resolution_clock::now();
 
-    // Run the device chain: clusterization -> SP -> seeding
+    // Run the device chain: clusterization -> SP -> seeding -> track
+    // parameter estimation -> track finding (which also fits)
     for (IAlgorithm* alg :
          {m_impl->clusterization.get(), m_impl->spFormation.get(),
-          m_impl->seeding.get()}) {
+          m_impl->seeding.get(), m_impl->trkParamEstimation.get(),
+          m_impl->trackFinding.get()}) {
         if (alg->sysExecute(ctx).isFailure()) {
             throw std::runtime_error(
                 "TracccTritonRunner: algorithm '" + alg->name() +
@@ -209,77 +230,41 @@ TracccTritonRunner::run(const uint8_t* buffer,
 
     auto t3 = std::chrono::high_resolution_clock::now();
 
-    // Copy the seeds and the spacepoints they point at back to the host
-    const ::traccc::edm::seed_collection::buffer* seedsDevice = nullptr;
-    if (m_impl->eventStore
-                ->retrieve(seedsDevice, keys.seedsKey)
-                .isFailure() ||
-        seedsDevice == nullptr) {
+    // Copy the fitted tracks and the measurements their states point at back
+    // to the host. The track container's own `measurements` view still refers
+    // to device memory after the copy, hence the separate measurement copy.
+    const traccc_track_container::buffer* tracksDevice = nullptr;
+    if (m_impl->eventStore->retrieve(tracksDevice, keys.tracksKey).isFailure() ||
+        tracksDevice == nullptr) {
         throw std::runtime_error(
-            "TracccTritonRunner: could not retrieve seeds under '" +
-            keys.seedsKey + "'");
+            "TracccTritonRunner: could not retrieve tracks under '" +
+            keys.tracksKey + "'");
     }
 
-    const std::size_t nSeeds = m_impl->copy.get_size(*seedsDevice);
+    output.tracks.tracks =
+        m_impl->copy.to(tracksDevice->tracks, m_impl->host_mr, nullptr,
+                        vecmem::copy::type::device_to_host);
+    output.tracks.states =
+        m_impl->copy.to(tracksDevice->states, m_impl->host_mr, nullptr,
+                        vecmem::copy::type::device_to_host);
 
-    ::traccc::edm::seed_collection::buffer seedsHostBuffer(
-        static_cast<unsigned int>(nSeeds), m_impl->host_mr);
-    m_impl->copy.setup(seedsHostBuffer)->ignore();
-    m_impl->copy(*seedsDevice, seedsHostBuffer)->wait();
-    m_impl->stream.synchronize();
-
-    ::traccc::edm::seed_collection::const_device seedsHost(seedsHostBuffer);
-    output.nSeeds = seedsHost.size();
-
-    const ::traccc::edm::spacepoint_collection::buffer* spacepointsDevice =
+    const ::traccc::edm::measurement_collection::buffer* measurementsDevice =
         nullptr;
     if (m_impl->eventStore
-                ->retrieve(spacepointsDevice, keys.spacepointsKey)
+                ->retrieve(measurementsDevice, keys.measurementsKey)
                 .isFailure() ||
-        spacepointsDevice == nullptr) {
+        measurementsDevice == nullptr) {
         throw std::runtime_error(
-            "TracccTritonRunner: could not retrieve spacepoints under '" +
-            keys.spacepointsKey + "'");
+            "TracccTritonRunner: could not retrieve measurements under '" +
+            keys.measurementsKey + "'");
     }
 
-    ::traccc::edm::spacepoint_collection::buffer spacepointsHostBuffer(
-        static_cast<unsigned int>(m_impl->copy.get_size(*spacepointsDevice)),
-        m_impl->host_mr);
-    m_impl->copy.setup(spacepointsHostBuffer)->ignore();
-    m_impl->copy(*spacepointsDevice, spacepointsHostBuffer)->wait();
+    output.measurements =
+        m_impl->copy.to(*measurementsDevice, m_impl->host_mr, nullptr,
+                        vecmem::copy::type::device_to_host);
     m_impl->stream.synchronize();
 
-    ::traccc::edm::spacepoint_collection::const_device spacepointsHost(
-        spacepointsHostBuffer);
-
-    // Pack the output tensor
-    const std::size_t n = seedsHost.size();
-    output.buffer.assign(
-        sizeof(std::uint64_t) + n * 9u * sizeof(float), uint8_t{0});
-
-    const std::uint64_t nSeeds64 = static_cast<std::uint64_t>(n);
-    std::memcpy(output.buffer.data(), &nSeeds64, sizeof(std::uint64_t));
-
-    if (n != 0u) {
-        auto* columns = reinterpret_cast<float*>(
-            output.buffer.data() + sizeof(std::uint64_t));
-        for (std::size_t i = 0; i < n; ++i) {
-            const auto& seed = seedsHost.at(i);
-            const auto& bottom = spacepointsHost.at(seed.bottom_index());
-            const auto& middle = spacepointsHost.at(seed.middle_index());
-            const auto& top = spacepointsHost.at(seed.top_index());
-
-            columns[0 * n + i] = bottom.x();
-            columns[1 * n + i] = bottom.y();
-            columns[2 * n + i] = bottom.z();
-            columns[3 * n + i] = middle.x();
-            columns[4 * n + i] = middle.y();
-            columns[5 * n + i] = middle.z();
-            columns[6 * n + i] = top.x();
-            columns[7 * n + i] = top.y();
-            columns[8 * n + i] = top.z();
-        }
-    }
+    output.nTracks = output.tracksAndStates().tracks.size();
 
     if (printStats) {
         auto ms = [](auto a, auto b) {
@@ -288,8 +273,8 @@ TracccTritonRunner::run(const uint8_t* buffer,
         };
         std::cout << "[TIMING] Cell deserialization : " << ms(t0, t1) << " ms\n"
                   << "[TIMING] Cell H2D + record    : " << ms(t1, t2) << " ms\n"
-                  << "[TIMING] Device chain (3 alg) : " << ms(t2, t3) << " ms\n"
-                  << "[TIMING] Seeds: " << output.nSeeds << std::endl;
+                  << "[TIMING] Device chain (5 alg) : " << ms(t2, t3) << " ms\n"
+                  << "[TIMING] Tracks: " << output.nTracks << std::endl;
     }
 
     return output;

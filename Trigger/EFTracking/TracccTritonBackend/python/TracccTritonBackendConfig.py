@@ -17,6 +17,13 @@ def TracccTritonDeviceRecoCfg(flags, **kwargs) -> ComponentAccumulator:
     measKey = kwargs.pop("TracccMeasurementsLocation", "TracccTritonMeasurements")
     spKey = kwargs.pop("TracccSpacepointsLocation", "TracccTritonSpacepoints")
     seedsKey = kwargs.pop("TracccSeedsLocation", "TracccTritonSeeds")
+    trkParamsKey = kwargs.pop("TracccTrackParametersLocation",
+                              "TracccTritonTrackParameters")
+    tracksKey = kwargs.pop("TracccTracksLocation", "TracccTritonTracks")
+
+    # ---- DetectorStore object names (device geometry + magnetic field) ----
+    deviceGeometry = "TracccDeviceDetectorGeometry"
+    deviceMagField = "TracccDeviceMagField"
 
     # Device detector description (geometry + digitization + conditions +
     # athena<->detray id map) loaded once into the DetectorStore.
@@ -29,6 +36,19 @@ def TracccTritonDeviceRecoCfg(flags, **kwargs) -> ComponentAccumulator:
         HostDigitizationObjectName="TracccHostDigitizationConfig",
         DeviceConditionsObjectName="TracccDeviceCondConfig",
         DeviceDigitizationObjectName="TracccDeviceDigitizationConfig",
+        DeviceDetectorName=deviceGeometry,
+        GeoIdMappingObjectName="TracccGeometryIdMapping",
+    ))
+
+    # Device magnetic field, needed by track parameter estimation and by the
+    # track finder's propagator.
+    from ActsGPUMagField.ActsGPUMagFieldConfig import (
+        JSONDeviceMagFieldProviderSvcCfg,
+    )
+    acc.merge(JSONDeviceMagFieldProviderSvcCfg(
+        flags,
+        DeviceMagFieldObjectName=deviceMagField,
+        HostMagFieldObjectName="TracccHostMagField",
     ))
 
     # ---- Clusterization: cells -> measurements ----
@@ -57,12 +77,36 @@ def TracccTritonDeviceRecoCfg(flags, **kwargs) -> ComponentAccumulator:
     # ---- Triplet seeding: spacepoints -> seeds ----
     from ActsGPUPatternRecognition.ActsGPUPatternRecognitionConfig import (
         DeviceTripletSeedingAlgCfg,
+        DeviceTrkParamEstimationAlgCfg,
+        DeviceTrackFindingAlgCfg,
     )
     acc.merge(DeviceTripletSeedingAlgCfg(
         flags,
         name="DeviceTripletSeedingAlg",
         InputTracccPixelSpacepoints=spKey,
         OutputTracccPixelSeeds=seedsKey,
+    ))
+
+    # ---- Track parameter estimation: seeds -> initial track parameters ----
+    acc.merge(DeviceTrkParamEstimationAlgCfg(
+        flags,
+        name="DeviceTrkParamEstimationAlg",
+        InputTracccSpacepoints=spKey,
+        InputTracccMeasurements=measKey,
+        InputTracccSeeds=seedsKey,
+        InputTracccMagField=deviceMagField,
+        OutputTracccTrackParameters=trkParamsKey,
+    ))
+
+    # ---- Track finding (fitting through finding): parameters -> tracks ----
+    acc.merge(DeviceTrackFindingAlgCfg(
+        flags,
+        name="DeviceTrackFindingAlg",
+        InputTracccMeasurements=measKey,
+        InputTracccTrackParameters=trkParamsKey,
+        InputTracccMagField=deviceMagField,
+        InputTracccDetectorGeometry=deviceGeometry,
+        OutputTracccTracks=tracksKey,
     ))
 
     return acc

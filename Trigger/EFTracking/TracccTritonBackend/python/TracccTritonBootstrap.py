@@ -18,8 +18,7 @@ def bootstrap() -> None:
     flags.Acts.Device.doClusterization = True
     flags.Acts.Device.doSpacePointFormation = True
     flags.Acts.Device.doSeeding = True
-    # We stop after seeding: no track finding / fitting on device yet.
-    flags.Acts.Device.doTrackReconstruction = False
+    flags.Acts.Device.doTrackReconstruction = True
 
     # No input / no event loop needed; the Runner drives the algorithms
     # directly, so instance_group { count: 1 } pins the process to one GPU

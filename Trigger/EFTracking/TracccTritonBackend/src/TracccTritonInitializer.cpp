@@ -26,8 +26,10 @@
 #include "GaudiKernel/SmartIF.h"
 #include "GaudiKernel/StateMachine.h"
 
-// Device detector description service interface.
-#include "ActsGPUInterfaces/IDeviceDetectorDescriptionProviderSvc.h"
+// The detray/ACTS/Athena surface id mapping the detector description service
+// records to the DetectorStore.
+#include "ActsGPUEvent/GeometryIdMapping.h"
+#include "StoreGate/StoreGateSvc.h"
 
 namespace triton { namespace backend { namespace traccc {
 
@@ -38,16 +40,18 @@ namespace {
 constexpr const char* kClusterizationAlg = "DeviceClusterizationAlg";
 constexpr const char* kSPFormationAlg = "DeviceSPFormationAlg";
 constexpr const char* kTripletSeedingAlg = "DeviceTripletSeedingAlg";
+constexpr const char* kTrkParamEstimationAlg = "DeviceTrkParamEstimationAlg";
+constexpr const char* kTrackFindingAlg = "DeviceTrackFindingAlg";
 
 /// Triton dlopen()s this backend with RTLD_LOCAL. For any C++ class we
 /// only ever see through a header-only/INTERFACE library (e.g.
-/// ActsTrk::IDeviceDetectorDescriptionProviderSvc, declared in the
-/// INTERFACE-only ActsGPUInterfacesLib) but that is *also* compiled into
+/// ActsTrk::GeometryIdMapping, declared in the header-only part of
+/// ActsGPUEventLib) but that is *also* compiled into
 /// another, separately dlopen()'d Gaudi component library (via
 /// Gaudi::PluginService -- the actual device-description service
 /// implementation lives in one), RTLD_LOCAL can in principle leave the two
 /// DSOs' copies of that class's vtable/RTTI unmerged, so a dynamic_cast or
-/// Gaudi queryInterface() between them would silently fail despite being
+/// StoreGate CLID lookup between them would silently fail despite being
 /// nominally "the same" C++ class -- the C++-type analogue of the
 /// libpython/RTLD_GLOBAL issue handled in bootstrapPython() below.
 /// Promoting our own already-loaded module to RTLD_GLOBAL (re-dlopen with
@@ -78,7 +82,7 @@ struct TracccTritonInitializer::Impl {
     Config config;
     SmartIF<IAppMgrUI> app;
     SmartIF<ISvcLocator> svcLocator;
-    const ActsTrk::IDeviceDetectorDescriptionProviderSvc* detDescSvc = nullptr;
+    const ActsTrk::GeometryIdMapping* geoIdMapping = nullptr;
     bool ready = false;
     // Set once bootstrapPython() hands the GIL back; used to reacquire it
     // (if ever needed) during finalize(). Never set back to nullptr: we
@@ -247,27 +251,30 @@ TracccTritonInitializer::initialize(const Config& config) {
             "TracccTritonInitializer: could not obtain ISvcLocator");
     }
 
-    // ---- 3. Resolve the detector description provider service. ----
-    // JSONDeviceDetectorDescriptionProviderSvcCfg() instantiates this via
-    // CompFactory.ActsTrk.JSONDeviceDetectorDescriptionProviderSvc(**kwargs)
-    // with no explicit `name=`, so Gaudi registers it under the fully
-    // qualified C++ class name, "ActsTrk::JSONDeviceDetectorDescriptionProviderSvc"
-    // -- not the unqualified class name.
-    SmartIF<ActsTrk::IDeviceDetectorDescriptionProviderSvc> svc =
-        m_impl->svcLocator
-            ->service<ActsTrk::IDeviceDetectorDescriptionProviderSvc>(
-                "ActsTrk::JSONDeviceDetectorDescriptionProviderSvc", /*createIf*/ false);
-    if (!svc) {
+    // ---- 3. Fetch the surface id mapping from the DetectorStore. ----
+    // JSONDeviceDetectorDescriptionProviderSvc records it there during its
+    // own initialize(), which the Python bootstrap has already run.
+    SmartIF<StoreGateSvc> detStore =
+        m_impl->svcLocator->service<StoreGateSvc>("DetectorStore",
+                                                 /*createIf*/ false);
+    if (!detStore) {
         throw std::runtime_error(
-            "TracccTritonInitializer: device detector description service "
-            "'ActsTrk::JSONDeviceDetectorDescriptionProviderSvc' not available");
+            "TracccTritonInitializer: DetectorStore not available");
     }
-    m_impl->detDescSvc = svc.get();
+    if (detStore->retrieve(m_impl->geoIdMapping, config.geoIdMappingKey)
+                .isFailure() ||
+        m_impl->geoIdMapping == nullptr) {
+        throw std::runtime_error(
+            "TracccTritonInitializer: no ActsTrk::GeometryIdMapping in the "
+            "DetectorStore under '" + config.geoIdMappingKey + "'");
+    }
 
-    // ---- 4. Sanity-check that the three algorithms exist. ----
+    // ---- 4. Sanity-check that every algorithm of the chain exists. ----
     m_impl->algorithm(kClusterizationAlg);
     m_impl->algorithm(kSPFormationAlg);
     m_impl->algorithm(kTripletSeedingAlg);
+    m_impl->algorithm(kTrkParamEstimationAlg);
+    m_impl->algorithm(kTrackFindingAlg);
 
     m_impl->ready = true;
 }
@@ -280,9 +287,10 @@ TracccTritonInitializer::finalize() {
         m_impl->app->finalize().ignore();
         m_impl->app->terminate().ignore();
     }
-    // Release in dependency order: the service interface first, then the
-    // locator, then the application manager itself (SmartIF owns the refcount).
-    m_impl->detDescSvc = nullptr;
+    // Release in dependency order: the DetectorStore-owned mapping first, then
+    // the locator, then the application manager itself (SmartIF owns the
+    // refcount).
+    m_impl->geoIdMapping = nullptr;
     m_impl->svcLocator = nullptr;
     m_impl->app = nullptr;
     m_impl->ready = false;
@@ -319,22 +327,13 @@ TracccTritonInitializer::serviceLocator() const {
     return *m_impl->svcLocator;
 }
 
-const std::unordered_map<uint64_t, Identifier>&
-TracccTritonInitializer::detrayToAthenaMap() const {
-    if (!m_impl->detDescSvc) {
+const ActsTrk::GeometryIdMapping&
+TracccTritonInitializer::geometryIdMapping() const {
+    if (!m_impl->geoIdMapping) {
         throw std::runtime_error(
-            "TracccTritonInitializer::detrayToAthenaMap: not initialized");
+            "TracccTritonInitializer::geometryIdMapping: not initialized");
     }
-    return m_impl->detDescSvc->detrayToAthenaMap();
-}
-
-const ActsTrk::IDeviceDetectorDescriptionProviderSvc&
-TracccTritonInitializer::detectorService() const {
-    if (!m_impl->detDescSvc) {
-        throw std::runtime_error(
-            "TracccTritonInitializer::detectorService: not initialized");
-    }
-    return *m_impl->detDescSvc;
+    return *m_impl->geoIdMapping;
 }
 
 }}}  // namespace triton::backend::traccc

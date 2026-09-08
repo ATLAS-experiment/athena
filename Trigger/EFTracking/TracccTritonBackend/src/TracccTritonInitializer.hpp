@@ -4,15 +4,10 @@
 
 #include <memory>
 #include <string>
-#include <unordered_map>
 
-#include "Identifier/Identifier.h"
+#include "ActsGPUEvent/GeometryIdMapping.h"
 
 class ISvcLocator;
-
-namespace ActsTrk {
-class IDeviceDetectorDescriptionProviderSvc;
-}  // namespace ActsTrk
 
 namespace triton { namespace backend { namespace traccc {
 
@@ -22,14 +17,15 @@ namespace triton { namespace backend { namespace traccc {
 ///        backend, plus the process-wide device infrastructure it brings up.
 ///
 /// The device reconstruction algorithms
-/// (@c ActsTrk::DeviceClusterizationAlg, @c ActsTrk::DeviceSPFormationAlg and
-/// @c ActsTrk::DeviceTripletSeedingAlg) are ordinary Gaudi
+/// (@c ActsTrk::DeviceClusterizationAlg, @c ActsTrk::DeviceSPFormationAlg,
+/// @c ActsTrk::DeviceTripletSeedingAlg, @c ActsTrk::DeviceTrkParamEstimationAlg
+/// and @c ActsTrk::DeviceTrackFindingAlg) are ordinary Gaudi
 /// @c AthReentrantAlgorithm components: they read/write StoreGate and depend
 /// on provider tools and DetectorStore services. They therefore cannot be
 /// constructed as plain C++ objects; a Gaudi kernel has to be running.
 ///
 /// This class boots that kernel exactly once per process (Gaudi's @c ToolSvc,
-/// @c DetectorStore and the two device-description provider services are all
+/// @c DetectorStore and the device-description provider services are all
 /// singletons, so a second kernel in the same process is not possible). The
 /// Triton model must consequently be configured with
 /// @c instance_group { count: 1 }.
@@ -67,6 +63,12 @@ public:
         std::string measurementsKey = "TracccTritonMeasurements";
         std::string spacepointsKey = "TracccTritonSpacepoints";
         std::string seedsKey = "TracccTritonSeeds";
+        std::string trkParamsKey = "TracccTritonTrackParameters";
+        std::string tracksKey = "TracccTritonTracks";
+        /// DetectorStore (not event store) key of the surface id mapping;
+        /// must match the GeoIdMappingObjectName the detector description
+        /// service is configured with.
+        std::string geoIdMappingKey = "TracccGeometryIdMapping";
     };
 
     /// Get the process-wide singleton.
@@ -93,12 +95,9 @@ public:
     /// ready). Used by @c TracccTritonRunner to look up the device algorithms.
     ISvcLocator& serviceLocator() const;
 
-    /// The cached detray -> Athena identifier map, owned by the
-    /// @c IDeviceDetectorDescriptionProviderSvc brought up during init.
-    const std::unordered_map<uint64_t, Identifier>& detrayToAthenaMap() const;
-
-    /// The detector description provider service (never null once ready).
-    const ActsTrk::IDeviceDetectorDescriptionProviderSvc& detectorService() const;
+    /// The detray <-> ACTS <-> Athena surface identifier mapping, recorded to
+    /// the DetectorStore by the detector description service during init.
+    const ActsTrk::GeometryIdMapping& geometryIdMapping() const;
 
     ~TracccTritonInitializer();
 

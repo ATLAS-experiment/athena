@@ -5,7 +5,9 @@
 #include <cstddef>
 #include <cstdint>
 #include <memory>
-#include <vector>
+
+#include "ActsGPUEvent/TracccMeasurementCollection.h"
+#include "ActsGPUEvent/TracccTrackContainer.h"
 
 namespace triton { namespace backend { namespace traccc {
 
@@ -21,28 +23,42 @@ class TracccTritonInitializer;
 ///      @c traccc::edm::silicon_cell_collection;
 ///   2. it is copied to the device and recorded in StoreGate under the key the
 ///      clusterization algorithm reads;
-///   3. the three device algorithms (clusterization -> spacepoint formation ->
-///      triplet seeding) are executed in order on a fresh @c EventContext;
-///   4. the resulting seeds and the spacepoints they point at are copied back
-///      to the host and packed into the single UINT8 output tensor expected
-///      by @c TracccTritonClient: an 8-byte seed count followed by 9 column
-///      blocks of N floats each (the global x/y/z of each seed's bottom,
-///      middle and top spacepoint).
+///   3. the device algorithms (clusterization -> spacepoint formation ->
+///      triplet seeding -> track parameter estimation -> track finding) are
+///      executed in order on a fresh @c EventContext;
+///   4. the resulting track container (tracks + track states) and the
+///      measurement collection its states point at are copied back to the
+///      host and handed to the caller, which turns them into the
+///      TRK_PARAMS / MEASUREMENTS / COVARIANCES / GEOMETRY_IDS output
+///      tensors expected by @c TracccTritonClient.
 ///
 /// The runner holds no GPU state of its own: memory resources, copies and
 /// streams all come from the embedded Gaudi kernel owned by
 /// @c TracccTritonInitializer.
 class TracccTritonRunner {
 public:
-    /// @brief The packed result, ready to hand to BackendOutputResponder.
+    /// @brief The host-resident reconstruction result of one request.
+    ///
+    /// The @c const_device views handed out below alias the buffers held
+    /// here, so they must not outlive the @c Output object.
     struct Output {
-        /// Serialized seed collection for the single UINT8 output tensor:
-        /// uint64 N, then 9 column blocks of N floats
-        /// (bottom.x/y/z, middle.x/y/z, top.x/y/z), matching the CELLS
-        /// input's SoA layout. See README.md's Wire format section.
-        std::vector<uint8_t> buffer;
-        /// Number of seeds produced (for logging / statistics).
-        std::size_t nSeeds = 0;
+        /// Fitted tracks and their track states.
+        traccc_track_container::buffer tracks;
+        /// The measurements the track states reference by index.
+        ::traccc::edm::measurement_collection::buffer measurements;
+
+        /// Number of tracks found (before any quality selection).
+        std::size_t nTracks = 0;
+
+        traccc_track_container::const_device tracksAndStates() const {
+            return traccc_track_container::const_device{
+                traccc_track_container::const_view{tracks}};
+        }
+        ::traccc::edm::measurement_collection::const_device
+        measurementCollection() const {
+            return ::traccc::edm::measurement_collection::const_device{
+                measurements};
+        }
     };
 
     /// Construct a runner bound to an already-initialized kernel.
