@@ -24,6 +24,13 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+/**
+ * @file  Trigger/EFTracking/TracccTritonBackend/src/TracccTritonBackend.cc
+ * @author Miles Cochran-Branson
+ * @date September 2026
+ * @brief Implementation of the Triton traccc-aaS backend
+ */
+
 #include <cuda_runtime_api.h>
 
 #include <array>
@@ -187,6 +194,8 @@ class ModelState : public BackendModel {
         return input_cells_nb_shape_;
     }
 
+    size_t TotalInstanceCount() const { return total_instance_count_; }
+
     // Validate that this model is supported by this backend.
     TRITONSERVER_Error *ValidateModelConfig();
 
@@ -201,6 +210,8 @@ class ModelState : public BackendModel {
     TRITONSERVER_DataType input_cells_datatype_;
 
     std::vector<int64_t> input_cells_nb_shape_;
+
+    size_t total_instance_count_ = 1;
 
     bool shape_initialized_;
 };
@@ -302,6 +313,42 @@ ModelState::ValidateModelConfig()
             configured_outputs.count(expected) == 1, TRITONSERVER_ERROR_INVALID_ARG,
             std::string("model configuration is missing output '") + expected + "'");
     }
+
+    // Count the instances Triton is going to create, so the embedded Gaudi
+    // kernel can be brought up with one event-store slot per instance.
+    total_instance_count_ = 0;
+    common::TritonJson::Value instance_groups;
+    if (ModelConfig().Find("instance_group", &instance_groups)) {
+        for (size_t i = 0; i < instance_groups.ArraySize(); ++i) {
+            common::TritonJson::Value group;
+            RETURN_IF_ERROR(instance_groups.IndexAsObject(i, &group));
+
+            int64_t count = 1;
+            if (group.Find("count")) {
+                RETURN_IF_ERROR(group.MemberAsInt("count", &count));
+            }
+            RETURN_ERROR_IF_FALSE(
+                count >= 0, TRITONSERVER_ERROR_INVALID_ARG,
+                std::string("instance_group count must not be negative"));
+
+            size_t devices = 1;
+            common::TritonJson::Value gpus;
+            if (group.Find("gpus", &gpus) && gpus.ArraySize() > 0) {
+                devices = gpus.ArraySize();
+            }
+            total_instance_count_ += static_cast<size_t>(count) * devices;
+        }
+    }
+    // No instance_group at all, or one that resolves to nothing, still means
+    // Triton creates a single instance.
+    if (total_instance_count_ == 0) {
+        total_instance_count_ = 1;
+    }
+
+    LOG_MESSAGE(TRITONSERVER_LOG_INFO,
+                (std::string("'traccc' backend: model configured with ") +
+                 std::to_string(total_instance_count_) +
+                 " instance(s), one event slot each").c_str());
 
     return nullptr; // success
 }
@@ -444,11 +491,19 @@ TRITONBACKEND_ModelInstanceInitialize(TRITONBACKEND_ModelInstance* instance)
     {
         TracccTritonInitializer::Config config;
         config.deviceId = instance_state->DeviceId();
+        config.nSlots = model_state->TotalInstanceCount();
+
         TracccTritonInitializer::instance().initialize(config);
 
+        const size_t slot = TracccTritonInitializer::instance().acquireSlot();
         instance_state->traccc_triton_runner_ =
             std::make_unique<TracccTritonRunner>(
-                TracccTritonInitializer::instance());
+                TracccTritonInitializer::instance(), slot);
+
+        LOG_MESSAGE(TRITONSERVER_LOG_INFO,
+                    (std::string("'traccc' backend: instance '") +
+                     instance_state->Name() + "' bound to event slot " +
+                     std::to_string(slot)).c_str());
     }
     catch (const std::exception& e)
     {

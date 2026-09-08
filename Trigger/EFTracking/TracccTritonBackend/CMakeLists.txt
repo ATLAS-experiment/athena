@@ -55,7 +55,7 @@ find_path( RAPIDJSON_INCLUDE_DIR
    NAMES rapidjson/document.h
    HINTS ${RAPIDJSON_LCGROOT}/include )
 
-atlas_add_library( traccc
+atlas_add_library( triton_traccc
    src/*.hpp src/*.h src/*.cpp src/*.cxx src/*.cc
    SHARED
    NO_PUBLIC_HEADERS
@@ -77,3 +77,31 @@ atlas_add_library( traccc
 )
 
 atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
+
+# Install the Triton model repository for this backend.
+set( _tracccModelDest
+   "${CMAKE_INSTALL_DATADIR}/TracccTritonBackend/models/traccc-gpu" )
+
+atlas_install_generic( models/traccc-gpu/config.pbtxt
+   DESTINATION ${_tracccModelDest}
+   TYPENAME TritonModel )
+
+# The backend library goes next to config.pbtxt
+set( _tracccModelBuildDir
+   "${CMAKE_BINARY_DIR}/${ATLAS_PLATFORM}/${_tracccModelDest}" )
+add_custom_target( TracccTritonBackendModelRepo ALL
+   COMMAND ${CMAKE_COMMAND} -E make_directory "${_tracccModelBuildDir}/1"
+   COMMAND ${CMAKE_COMMAND} -E copy_if_different
+      "$<TARGET_FILE:triton_traccc>"
+      "${_tracccModelBuildDir}/$<TARGET_FILE_NAME:triton_traccc>"
+   COMMENT "Populating the traccc-gpu Triton model repository"
+   VERBATIM )
+add_dependencies( TracccTritonBackendModelRepo triton_traccc )
+add_dependencies( Package_TracccTritonBackend TracccTritonBackendModelRepo )
+
+install( PROGRAMS "$<TARGET_FILE:triton_traccc>"
+   DESTINATION "${_tracccModelDest}" )
+install( DIRECTORY DESTINATION "${_tracccModelDest}/1" )
+
+unset( _tracccModelBuildDir )
+unset( _tracccModelDest )

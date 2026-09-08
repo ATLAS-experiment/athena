@@ -1,4 +1,14 @@
-// Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
+/*
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
+*/
+
+/**
+ * @file  Trigger/EFTracking/TracccTritonBackend/src/TracccTritonRunner.hpp
+ * @author Miles Cochran-Branson
+ * @date September 2026
+ * @brief Call the device reconstruction algs. once per-event in the Triton backend
+ */
+
 #ifndef TRACCC_TRITON_RUNNER_H
 #define TRACCC_TRITON_RUNNER_H
 
@@ -16,25 +26,7 @@ class TracccTritonInitializer;
 /// @class TracccTritonRunner
 ///
 /// @brief Drives the device reconstruction chain for a single Triton request.
-///
-/// Per call to @c run() the following happens:
-///
-///   1. the raw @c CELLS byte buffer is deserialized into a host
-///      @c traccc::edm::silicon_cell_collection;
-///   2. it is copied to the device and recorded in StoreGate under the key the
-///      clusterization algorithm reads;
-///   3. the device algorithms (clusterization -> spacepoint formation ->
-///      triplet seeding -> track parameter estimation -> track finding) are
-///      executed in order on a fresh @c EventContext;
-///   4. the resulting track container (tracks + track states) and the
-///      measurement collection its states point at are copied back to the
-///      host and handed to the caller, which turns them into the
-///      TRK_PARAMS / MEASUREMENTS / COVARIANCES / GEOMETRY_IDS output
-///      tensors expected by @c TracccTritonClient.
-///
-/// The runner holds no GPU state of its own: memory resources, copies and
-/// streams all come from the embedded Gaudi kernel owned by
-/// @c TracccTritonInitializer.
+
 class TracccTritonRunner {
 public:
     /// @brief The host-resident reconstruction result of one request.
@@ -42,9 +34,8 @@ public:
     /// The @c const_device views handed out below alias the buffers held
     /// here, so they must not outlive the @c Output object.
     struct Output {
-        /// Fitted tracks and their track states.
+
         traccc_track_container::buffer tracks;
-        /// The measurements the track states reference by index.
         ::traccc::edm::measurement_collection::buffer measurements;
 
         /// Number of tracks found (before any quality selection).
@@ -61,9 +52,10 @@ public:
         }
     };
 
-    /// Construct a runner bound to an already-initialized kernel.
-    /// @throws std::runtime_error if the initializer is not ready.
-    explicit TracccTritonRunner(TracccTritonInitializer& initializer);
+    /// @c TracccTritonInitializer::acquireSlot().
+    /// @throws std::runtime_error if the initializer is not ready or @p slot
+    ///         is not one of the slots the kernel was brought up with.
+    TracccTritonRunner(TracccTritonInitializer& initializer, std::size_t slot);
 
     ~TracccTritonRunner();
 
@@ -71,15 +63,6 @@ public:
     TracccTritonRunner& operator=(const TracccTritonRunner&) = delete;
 
     /// Run the full chain for one request.
-    ///
-    /// The @p buffer is the raw @c CELLS tensor gathered by
-    /// BackendInputCollector. Its byte layout (native endianness, length
-    /// 8 + 20*N) is:
-    ///   offset 0      : uint64_t N              (cell count)
-    ///   then 5 column blocks of N entries each:
-    ///     channel0 (u32), channel1 (u32), activation (f32),
-    ///     time (f32), module_index (u32)
-    /// which mirrors @c TritonTracccTrackMaker::serializeCells on the client.
     ///
     /// @param buffer     pointer to the gathered CELLS byte buffer.
     /// @param byteSize   size of @p buffer in bytes.

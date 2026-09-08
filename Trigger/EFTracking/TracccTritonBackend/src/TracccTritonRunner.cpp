@@ -1,4 +1,14 @@
-// Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
+/*
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
+*/
+
+/**
+ * @file  Trigger/EFTracking/TracccTritonBackend/src/TracccTritonRunner.cpp
+ * @author Miles Cochran-Branson
+ * @date September 2026
+ * @brief Call the device reconstruction algs. once per-event in the Triton backend
+ */
+
 #include "TracccTritonRunner.hpp"
 
 #include "TracccTritonInitializer.hpp"
@@ -7,6 +17,7 @@
 #include <cstring>
 #include <iostream>
 #include <stdexcept>
+#include <string>
 
 #include <cuda_runtime.h>
 
@@ -16,6 +27,7 @@
 #include "GaudiKernel/ThreadLocalContext.h"
 #include "GaudiKernel/IAlgManager.h"
 #include "GaudiKernel/IAlgorithm.h"
+#include "GaudiKernel/IHiveWhiteBoard.h"
 #include "GaudiKernel/ISvcLocator.h"
 #include "GaudiKernel/ServiceHandle.h"
 #include "GaudiKernel/SmartIF.h"
@@ -31,13 +43,12 @@
 namespace triton { namespace backend { namespace traccc {
 
 namespace {
-// Algorithm names must match the ones the bootstrap jobOptions creates (see
-// TracccTritonInitializer.cpp and python/TracccTritonBackendConfig.py).
-constexpr const char* kClusterizationAlg = "DeviceClusterizationAlg";
-constexpr const char* kSPFormationAlg = "DeviceSPFormationAlg";
-constexpr const char* kTripletSeedingAlg = "DeviceTripletSeedingAlg";
-constexpr const char* kTrkParamEstimationAlg = "DeviceTrkParamEstimationAlg";
-constexpr const char* kTrackFindingAlg = "DeviceTrackFindingAlg";
+    // Algorithm names must match the ones the bootstrap jobOptions creates.
+    constexpr const char* kClusterizationAlg = "DeviceClusterizationAlg";
+    constexpr const char* kSPFormationAlg = "DeviceSPFormationAlg";
+    constexpr const char* kTripletSeedingAlg = "DeviceTripletSeedingAlg";
+    constexpr const char* kTrkParamEstimationAlg = "DeviceTrkParamEstimationAlg";
+    constexpr const char* kTrackFindingAlg = "DeviceTrackFindingAlg";
 }  // namespace
 
 struct StreamGuard {
@@ -54,20 +65,19 @@ struct StreamGuard {
 };
 
 struct TracccTritonRunner::Impl {
+
     TracccTritonInitializer& initializer;
 
-    // Self-contained device resources for the H2D of the incoming cells and
-    // the D2H of the outgoing tracks. The device algorithms use their own
-    // memory resources (from their provider tools) internally; the cell
-    // buffer only has to live in device memory, so it need not share them.
     vecmem::host_memory_resource host_mr;
     vecmem::cuda::device_memory_resource device_mr;
     StreamGuard stream;
-    // async_copy is bound to our own stream so that wait()/synchronize()
-    // only ever touch this runner's work.
     vecmem::cuda::async_copy copy;
 
     ServiceHandle<StoreGateSvc> eventStore;
+    SmartIF<IHiveWhiteBoard> whiteboard;
+
+    const std::size_t slot;
+    std::size_t eventCounter = 0;
 
     SmartIF<IAlgorithm> clusterization;
     SmartIF<IAlgorithm> spFormation;
@@ -75,17 +85,19 @@ struct TracccTritonRunner::Impl {
     SmartIF<IAlgorithm> trkParamEstimation;
     SmartIF<IAlgorithm> trackFinding;
 
-    explicit Impl(TracccTritonInitializer& init)
+    Impl(TracccTritonInitializer& init, std::size_t theSlot)
         : initializer(init)
         , host_mr()
         , device_mr(init.deviceId())
         , stream()
         , copy(stream.stream)
-        , eventStore("StoreGateSvc", "TracccTritonRunner") {}
+        , eventStore("StoreGateSvc", "TracccTritonRunner")
+        , slot(theSlot) {}
 };
 
-TracccTritonRunner::TracccTritonRunner(TracccTritonInitializer& initializer)
-    : m_impl(std::make_unique<Impl>(initializer)) {
+TracccTritonRunner::TracccTritonRunner(TracccTritonInitializer& initializer,
+                                       std::size_t slot)
+    : m_impl(std::make_unique<Impl>(initializer, slot)) {
 
     if (!initializer.isReady()) {
         throw std::runtime_error(
@@ -104,6 +116,22 @@ TracccTritonRunner::TracccTritonRunner(TracccTritonInitializer& initializer)
     }
 
     SmartIF<ISvcLocator> svcLocator(&initializer.serviceLocator());
+
+    // plumbing to allow multi-model-inst. per GPU
+    m_impl->whiteboard =
+        svcLocator->service<IHiveWhiteBoard>("EventDataSvc", /*createIf*/ false);
+    if (!m_impl->whiteboard) {
+        throw std::runtime_error(
+            "TracccTritonRunner: EventDataSvc is not an IHiveWhiteBoard");
+    }
+    if (slot >= m_impl->whiteboard->getNumberOfStores()) {
+        throw std::runtime_error(
+            "TracccTritonRunner: slot " + std::to_string(slot) +
+            " is out of range, the whiteboard has only " +
+            std::to_string(m_impl->whiteboard->getNumberOfStores()) +
+            " store(s)");
+    }
+
     IAlgManager* algMgr = svcLocator.as<IAlgManager>();
     if (!algMgr) {
         throw std::runtime_error(
@@ -180,19 +208,18 @@ TracccTritonRunner::run(const uint8_t* buffer,
 
     auto t1 = std::chrono::high_resolution_clock::now();
 
+    if (m_impl->whiteboard->selectStore(m_impl->slot).isFailure()) {
+        throw std::runtime_error(
+            "TracccTritonRunner: could not select store for slot " +
+            std::to_string(m_impl->slot));
+    }
+
     // Copy cells to the device and record them in StoreGate
     if (m_impl->eventStore->clearStore().isFailure()) {
         throw std::runtime_error("TracccTritonRunner: clearStore() failed");
     }
 
-    // The device algorithms and the tools under them index per-slot state
-    // (AthenaKernel's SlotSpecificObj, used by the CUDA stream tools) with
-    // ctx.slot(), and that lookup has no fallback for an invalid slot. A
-    // default-constructed EventContext therefore indexes with
-    // INVALID_CONTEXT_ID and throws. There is no event loop here to hand us a
-    // context, so build the single-slot one the algorithms expect, and publish
-    // it as the current context for anything that reads it implicitly.
-    EventContext ctx(0, 0);
+    EventContext ctx(m_impl->eventCounter++, m_impl->slot);
     ctx.setExtension(
         Atlas::ExtendedEventContext(m_impl->eventStore->hiveProxyDict()));
     Gaudi::Hive::setCurrentContext(ctx);
@@ -214,8 +241,7 @@ TracccTritonRunner::run(const uint8_t* buffer,
 
     auto t2 = std::chrono::high_resolution_clock::now();
 
-    // Run the device chain: clusterization -> SP -> seeding -> track
-    // parameter estimation -> track finding (which also fits)
+    // Run the device chain
     for (IAlgorithm* alg :
          {m_impl->clusterization.get(), m_impl->spFormation.get(),
           m_impl->seeding.get(), m_impl->trkParamEstimation.get(),
@@ -230,9 +256,7 @@ TracccTritonRunner::run(const uint8_t* buffer,
 
     auto t3 = std::chrono::high_resolution_clock::now();
 
-    // Copy the fitted tracks and the measurements their states point at back
-    // to the host. The track container's own `measurements` view still refers
-    // to device memory after the copy, hence the separate measurement copy.
+    // Copy the fitted tracks and the measurements their states point at back to the host
     const traccc_track_container::buffer* tracksDevice = nullptr;
     if (m_impl->eventStore->retrieve(tracksDevice, keys.tracksKey).isFailure() ||
         tracksDevice == nullptr) {
@@ -271,10 +295,13 @@ TracccTritonRunner::run(const uint8_t* buffer,
             return std::chrono::duration_cast<std::chrono::milliseconds>(b - a)
                 .count();
         };
-        std::cout << "[TIMING] Cell deserialization : " << ms(t0, t1) << " ms\n"
-                  << "[TIMING] Cell H2D + record    : " << ms(t1, t2) << " ms\n"
-                  << "[TIMING] Device chain (5 alg) : " << ms(t2, t3) << " ms\n"
-                  << "[TIMING] Tracks: " << output.nTracks << std::endl;
+        
+        const std::string tag =
+            "[TIMING][slot " + std::to_string(m_impl->slot) + "] ";
+        std::cout << tag << "Cell deserialization : " << ms(t0, t1) << " ms\n"
+                  << tag << "Cell H2D + record    : " << ms(t1, t2) << " ms\n"
+                  << tag << "Device chain (5 alg) : " << ms(t2, t3) << " ms\n"
+                  << tag << "Tracks: " << output.nTracks << std::endl;
     }
 
     return output;

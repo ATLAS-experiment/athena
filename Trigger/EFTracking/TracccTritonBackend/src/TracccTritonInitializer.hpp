@@ -1,7 +1,18 @@
-// Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
+/*
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
+*/
+
+/**
+ * @file  Trigger/EFTracking/TracccTritonBackend/src/TracccTritonInitializer.hpp
+ * @author Miles Cochran-Branson
+ * @date September 2026
+ * @brief Initialization of GPU tracking algs. for use in Triton as-a-Service implementation
+ */
+
 #ifndef TRACCC_TRITON_INITIALIZER_H
 #define TRACCC_TRITON_INITIALIZER_H
 
+#include <cstddef>
 #include <memory>
 #include <string>
 
@@ -23,40 +34,14 @@ namespace triton { namespace backend { namespace traccc {
 /// @c AthReentrantAlgorithm components: they read/write StoreGate and depend
 /// on provider tools and DetectorStore services. They therefore cannot be
 /// constructed as plain C++ objects; a Gaudi kernel has to be running.
-///
-/// This class boots that kernel exactly once per process (Gaudi's @c ToolSvc,
-/// @c DetectorStore and the device-description provider services are all
-/// singletons, so a second kernel in the same process is not possible). The
-/// Triton model must consequently be configured with
-/// @c instance_group { count: 1 }.
-///
-/// Bringing the kernel up requires resolving the same @c ComponentAccumulator
-/// wiring (~20 Gaudi properties across the device algorithms, their provider
-/// tools and the memory-resource/copy/stream tools underneath) that
-/// @c TracccTritonDeviceRecoCfg produces for a normal athena job. Rather than
-/// re-deriving that wiring as literal C++ property-setting calls -- which
-/// would silently drift from the real Athena defaults -- this class embeds a
-/// Python interpreter and calls @c TracccTritonBootstrap.bootstrap()
-/// (python/TracccTritonBootstrap.py), which builds the real
-/// ComponentAccumulator and drives it up through
-/// @c ApplicationMgr.initialize() (mirroring @c ComponentAccumulator.run(),
-/// stopping short of the event-loop-only @c start()/run()/stop() calls --
-/// see @c AtlasTest/TestTools/src/initGaudi.cxx for the equivalent minimal
-/// C++ bootstrap, which likewise never calls @c start() before algorithms
-/// have @c sysExecute() called on them directly). Because the
-/// @c ApplicationMgr is a process singleton, this class then retrieves the
-/// very same kernel instance Python just configured via
-/// @c Gaudi::createApplicationMgr() on the C++ side.
-///
-/// Everything heavy (Gaudi, Python, vecmem, traccc, detray) is hidden behind
-/// a pimpl, so this header stays cheap to include from the backend
-/// translation unit.
 class TracccTritonInitializer {
 public:
     /// @brief Construction parameters, normally read from the model config.
     struct Config {
         /// CUDA device id this instance is pinned to.
         int deviceId = 0;
+        /// Number of event-store slots to create, one per Triton model instance
+        std::size_t nSlots = 1;
         /// StoreGate keys shared with @c TracccTritonRunner. These must match
         /// the values used in @c TracccTritonDeviceRecoCfg.
         std::string cellsKey = "TracccTritonCells";
@@ -65,17 +50,13 @@ public:
         std::string seedsKey = "TracccTritonSeeds";
         std::string trkParamsKey = "TracccTritonTrackParameters";
         std::string tracksKey = "TracccTritonTracks";
-        /// DetectorStore (not event store) key of the surface id mapping;
-        /// must match the GeoIdMappingObjectName the detector description
-        /// service is configured with.
         std::string geoIdMappingKey = "TracccGeometryIdMapping";
     };
 
     /// Get the process-wide singleton.
     static TracccTritonInitializer& instance();
 
-    /// Boot the Gaudi kernel and resolve all cached handles. Idempotent and
-    /// thread-safe: subsequent calls with the same config are no-ops.
+    /// Boot the Gaudi kernel and resolve all cached handles.
     /// @throws std::runtime_error on any failure to bring the kernel up.
     void initialize(const Config& config);
 
@@ -95,9 +76,12 @@ public:
     /// ready). Used by @c TracccTritonRunner to look up the device algorithms.
     ISvcLocator& serviceLocator() const;
 
-    /// The detray <-> ACTS <-> Athena surface identifier mapping, recorded to
-    /// the DetectorStore by the detector description service during init.
     const ActsTrk::GeometryIdMapping& geometryIdMapping() const;
+
+    /// Claim the next free event-store slot for a Triton model instance.
+    /// @throws std::runtime_error if more slots are claimed than the kernel
+    ///         was brought up with.
+    std::size_t acquireSlot();
 
     ~TracccTritonInitializer();
 
