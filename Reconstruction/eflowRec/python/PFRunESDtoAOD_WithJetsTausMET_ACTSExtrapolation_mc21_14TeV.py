@@ -15,6 +15,7 @@ if __name__=="__main__":
     cfgFlags.Acts.TrackingGeometry.UseBlueprint = True
     cfgFlags.Detector.GeometryITk = True
     cfgFlags.Detector.GeometryBpipe = True
+    cfgFlags.PF.useActsExtrapolation=True #Toggle usage of ACTS extrapolation for track propagation to calorimeter
     cfgFlags.fillFromArgs()
     cfgFlags.lock()
 

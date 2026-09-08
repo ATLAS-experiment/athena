@@ -3,6 +3,7 @@
 #include "PFTrackCaloExtensionTool.h"
 
 #include "Acts/Geometry/TrackingGeometry.hpp"
+#include "ActsGeometryInterfaces/GeometryDefs.h"
 #include "Acts/Material/MaterialInteraction.hpp"
 #include "Acts/Propagator/detail/SteppingLogger.hpp"
 #include "Acts/Surfaces/CurvilinearSurface.hpp"
@@ -40,6 +41,8 @@ StatusCode PFTrackCaloExtensionTool::initialize() {
 
 std::unique_ptr<eflowTrackCaloPoints> PFTrackCaloExtensionTool::execute(const EventContext& ctx, const xAOD::TrackParticle* track) const {
 
+    const Acts::TrackingVolume* caloExit = m_trackingGeometrySvc->getEnvelope(ActsTrk::SystemEnvelope::CaloExit);
+
     unsigned int lastMeasIdx = 0;
     if (!track->indexOfParameterAtPosition(lastMeasIdx, xAOD::LastMeasurement)) {
         ATH_MSG_ERROR("TrackParticle has no last measurement parameters");
@@ -65,7 +68,7 @@ std::unique_ptr<eflowTrackCaloPoints> PFTrackCaloExtensionTool::execute(const Ev
         std::move(lastSurface),
         lastBoundParams,
         std::nullopt,
-        Acts::ParticleHypothesis::electron()
+        Acts::ParticleHypothesis::pion()
     };
 
     Acts::Result<std::pair<std::vector<Acts::detail::Step>, Acts::RecordedMaterial>> result = m_extrapolationTool.get()->propagationSteps(ctx, boundPars);
@@ -77,6 +80,38 @@ std::unique_ptr<eflowTrackCaloPoints> PFTrackCaloExtensionTool::execute(const Ev
 
     const auto &[steps, _] = result.value();
 
+    ATH_MSG_DEBUG("Have extrapolated track with pt, eta and phi: " << track->pt() << ", " << track->eta() << " and " << track->phi());
+
+    for(const auto &step : steps) {
+
+
+        if( step.surface == nullptr || step.surface->geometryId().sensitive() == 0 ) {
+          continue;
+        }
+
+        Acts::GeometryIdentifier thisGeoID = step.geoID;
+        ATH_MSG_DEBUG("Got step with geoID " << thisGeoID);
+        bool exists = std::ranges::any_of(m_caloNameGeoIDMap, [&](const auto& pair) {
+            return pair.second == thisGeoID; 
+        });
+        if (exists){
+            const auto &p = step.position;
+            auto eta = Acts::VectorHelpers::eta(p);
+            auto phi = Acts::VectorHelpers::phi(p);
+
+            auto it = std::find_if(m_caloNameGeoIDMap.begin(), m_caloNameGeoIDMap.end(),
+                [&](const auto& pair) { return pair.second == thisGeoID; });
+
+            if (it != m_caloNameGeoIDMap.end()){
+                ATH_MSG_DEBUG("Eta and Phi in caloLayer " << it->first << " are " << eta << " and " << phi);
+            }
+            else ATH_MSG_ERROR("Could not find this GeometryIdentifier");
+        }
+        
+    }
+
+    ATH_MSG_DEBUG("Finished steps loop");
+    ATH_MSG_DEBUG("");
 
     return std::make_unique<eflowTrackCaloPoints>();
 }
