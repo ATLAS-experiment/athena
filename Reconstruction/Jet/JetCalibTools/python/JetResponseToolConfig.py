@@ -29,7 +29,7 @@ def getJetResponseTool(jetdef, modspec=''):
 
     jetPtAssociation = CompFactory.JetResponseTool(
         'jetResponse',
-        JetMatchedTruthJetName = f'{label}_MatchedTruthJet',
+        JetMatchedTruthJetName = 'TruthMatch_Jet',
         TruthJetContainer = truthJetAlg,
         )
 
