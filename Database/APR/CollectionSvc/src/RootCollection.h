@@ -82,7 +82,7 @@ namespace pool {
         std::string                          m_fileName;
         /// The common prefix for branch container names for attributes
         std::string                          m_containerPrefix;
-        Io::IoFlag                           m_mode;
+        bool                                 m_open;
 
         std::unique_ptr<IStorageSvc>         m_storageSvc;
         pool::FileDescriptor                 m_fileDescr;

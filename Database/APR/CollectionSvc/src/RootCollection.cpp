@@ -105,7 +105,7 @@ namespace pool {
 
 
     // throw all errors as exceptions, because this method is called from the constructor
-   void RootCollection::open( Io::IoFlag mode, ISession* session )
+   void RootCollection::open( Io::IoFlag mode, ISession* /*session*/ )
    {
       if( m_fileName.starts_with ( "PFN:") ) {
         m_fileName = m_fileName.substr(4);
