@@ -3,11 +3,11 @@
 # art-include: main/Athena
 # art-description: DAOD building TLA2 data24
 # art-type: grid
+# art-memory: 4096
 # art-output: *.pool.root
 # art-output: checkFile*.txt
 # art-output: checkxAOD*.txt
 # art-output: checkIndexRefs*.txt
-# art-memory: 4096
 
 set -e
 
