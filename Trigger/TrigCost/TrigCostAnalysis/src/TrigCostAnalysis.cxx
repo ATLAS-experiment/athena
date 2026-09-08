@@ -16,7 +16,6 @@
 #include "monitors/MonitorAlgorithmClass.h"
 #include "monitors/MonitorGlobal.h"
 #include "monitors/MonitorThreadOccupancy.h"
-#include "monitors/MonitorROS.h"
 #include "monitors/MonitorChain.h"
 #include "monitors/MonitorChainAlgorithm.h"
 #include "monitors/MonitorSequence.h"
