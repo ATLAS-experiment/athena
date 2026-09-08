@@ -31,7 +31,8 @@ Condition TrigJetConditionConfig_dipzmlpl::getCondition() const {
     a2d(m_min),
     a2d(m_capacity), 
     m_decName_z,
-    m_decName_negLogSigma2);
+    m_decName_sigma,
+    m_sigmaIsStdDev);
 }
 
 

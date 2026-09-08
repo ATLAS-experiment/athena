@@ -58,7 +58,10 @@ def get_hitz_mlpl_from_matchdict(groupdict, njets):
 
     vals = defaults('dipz_mlpl', lo = groupdict['WP']) # Note: scale factor of -0.1 applied by default
     vals['decName_z']='HitZ_z0'
-    vals['decName_sigma']='HitZ_negLogSigma2'
+    # the regression writes the standard deviation itself; the condition
+    # forms sigma^2 and -2*log(sigma) from it, so no extra decoration is needed
+    vals['decName_sigma']='HitZ_z0_sigma'
+    vals['sigmaIsStdDev']=True
     vals['capacity']=njets
 
     condargs.append(('dipz_mlpl', vals))

@@ -14,10 +14,11 @@
 DipzMLPLCondition::DipzMLPLCondition(double wp,
                             unsigned int capacity,
                             const std::string &decName_z,
-                            const std::string &decName_negLogSigma2) :
+                            const std::string &decName_sigma,
+                            bool sigmaIsStdDev) :
   m_workingPoint(wp),
   m_capacity(capacity),
-  m_likelihoodCalculator(decName_z, decName_negLogSigma2)
+  m_likelihoodCalculator(decName_z, decName_sigma, sigmaIsStdDev)
 {
 
 }

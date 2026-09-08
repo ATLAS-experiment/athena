@@ -6,12 +6,15 @@
 #include "TrigHLTJetHypo/TrigHLTJetHypoUtils/HypoJetDefs.h"
 
 #include <cmath>
+#include <limits>
 #include <numeric>
 
 DipzLikelihood::DipzLikelihood(const std::string &decName_z,
-			       const std::string &decName_negLogSigma2):
+			       const std::string &decName_sigma,
+			       bool sigmaIsStdDev):
   m_decName_z(decName_z),
-  m_decName_negLogSigma2(decName_negLogSigma2){
+  m_decName_sigma(decName_sigma),
+  m_sigmaIsStdDev(sigmaIsStdDev){
 }
 
 double DipzLikelihood::checkedRatio(double num, double den) const {
@@ -39,10 +42,26 @@ double DipzLikelihood::getDipzMLPLDecValue(const pHypoJet &ip,
   return momentValue;
 }
 
+DipzLikelihood::Width DipzLikelihood::getWidth(const pHypoJet &ip) const {
+
+  const double dec = getDipzMLPLDecValue(ip, m_decName_sigma);
+
+  if (!m_sigmaIsStdDev) {
+    // decorated as the log precision -2*log(sigma)
+    return {std::exp(-1 * dec), dec};
+  }
+
+  // decorated as the standard deviation itself
+  if (!(std::isfinite(dec) && dec > 0.)) {
+    const double nan = std::numeric_limits<double>::quiet_NaN();
+    return {nan, nan};
+  }
+  return {dec * dec, -2. * std::log(dec)};
+}
+
 double DipzLikelihood::calcNum(double acml, const pHypoJet &ip) const {
   
-  double sigma_squared =
-    std::exp(-1 * getDipzMLPLDecValue(ip, m_decName_negLogSigma2));
+  double sigma_squared = getWidth(ip).sigma2;
   
   double muoversigmasq =
     checkedRatio( getDipzMLPLDecValue(ip, m_decName_z), sigma_squared);
@@ -52,8 +71,7 @@ double DipzLikelihood::calcNum(double acml, const pHypoJet &ip) const {
 
 
 double DipzLikelihood::calcDenom(double acml, const pHypoJet &ip) const { 
-  double sigma_squared =
-    std::exp(-1 * getDipzMLPLDecValue(ip, m_decName_negLogSigma2));
+  double sigma_squared = getWidth(ip).sigma2;
 
   double oneoversigmasq = checkedRatio(1, sigma_squared);
   
@@ -66,15 +84,12 @@ double DipzLikelihood::calcLogTerm(double acml,
 
   double dipz_mu = getDipzMLPLDecValue(ip, m_decName_z);
 
-  double dipz_negLogSigmaSq =
-    getDipzMLPLDecValue(ip, m_decName_negLogSigma2);
-
-  double sigma_squared = std::exp(-1 * dipz_negLogSigmaSq); 
+  const Width w = getWidth(ip);
   
   double logterm =
     -0.5 * std::log(2.0 * M_PI)
-    + 0.5 * dipz_negLogSigmaSq
-    - checkedRatio(std::pow(zhat - dipz_mu, 2), (2.0 * sigma_squared) );
+    + 0.5 * w.negLogSigma2
+    - checkedRatio(std::pow(zhat - dipz_mu, 2), (2.0 * w.sigma2) );
   
   return acml + logterm;
 
@@ -109,8 +124,9 @@ double DipzLikelihood::operator()(const HypoJetVector& ips) const {
 
 
 DipzLikelihoodCmp::DipzLikelihoodCmp(const std::string &decName_z,
-				     const std::string &decName_negLogSigma2):
-  m_likelihoodCalculator(decName_z, decName_negLogSigma2) {
+				     const std::string &decName_sigma,
+				     bool sigmaIsStdDev):
+  m_likelihoodCalculator(decName_z, decName_sigma, sigmaIsStdDev) {
 }
 
 bool DipzLikelihoodCmp::operator()(const HypoJetVector& l,

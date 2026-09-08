@@ -39,7 +39,6 @@ MAX_ABS_JET_ETA = 4.0
 # Map the MDN output names onto the (z, sigma) pair the menu side expects
 Z_DECOR = 'HitZ_z0'
 SIGMA_DECOR = 'HitZ_z0_sigma'
-NEG_LOG_SIGMA2_DECOR = 'HitZ_negLogSigma2'
 
 OUTPUT_REMAP = {
     'HitZV01_TruthJetPVz': Z_DECOR,
@@ -172,14 +171,6 @@ def hitZInferenceCfg(flags, inputJets, nnFile, remap=None):
                 nnSharingService=nnSvc,
             ),
             ExtraInputs=[hitAssociationDataObjID(inputJets)],
-        ))
-    # the hypo condition recovers the variance as exp(-negLogSigma2)
-    ca.addEventAlgo(
-        CompFactory.FlavorTagDiscriminants.NegLogSigma2DecoratorAlg(
-            name='HitZNegLogSigma2Alg',
-            jetContainer=inputJets,
-            sigmaDecor=SIGMA_DECOR,
-            negLogSigma2Decor=NEG_LOG_SIGMA2_DECOR,
         ))
     return ca
 
