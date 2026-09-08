@@ -137,6 +137,9 @@ namespace TrigConf {
       /// Function called when a new input file is opened
       virtual StatusCode beginInputFile() override;
 
+      /// Invalidate the cached menu objects when the current input file is closed
+      virtual StatusCode endInputFile() override;
+
       /// Function called when a new event is loaded
       virtual StatusCode beginEvent() override;
 
