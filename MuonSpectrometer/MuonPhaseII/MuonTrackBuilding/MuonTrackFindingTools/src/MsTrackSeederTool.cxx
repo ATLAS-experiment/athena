@@ -50,14 +50,7 @@ namespace {
                toStationIndex(seg.chamberIndex()) == StIndex::EE;
     }
 
-    /// MsTrackSeederTool::estimateQtimesP(gctx, seed, magField) buckets the
-    /// seed's segments into the inner/middle/outer layer slots (backfilling
-    /// from Extended/BarrelExtended when a base slot is empty) and, whenever
-    /// fewer than 3 slots end up filled, unconditionally dereferences the
-    /// first two. A seed whose segments can't fill at least two slots (e.g.
-    /// all in one layer -- reachable from ML-built seeds that don't share
-    /// MsTrackSeederTool's own layer-diversity guarantees) crashes it --
-    /// check the topology before calling.
+    /// A seed whose segments can't fill at least two slots crashes it. Check the topology before calling.
     bool canEstimateQtimesP(const MuonR4::MsTrackSeed& seed) {
         using namespace Muon::MuonStationIndex;
         bool hasInner{false}, hasMiddle{false}, hasOuter{false};
