@@ -491,6 +491,17 @@ namespace MuonR4{
                                               MagField::AtlasFieldCache& magField) const {
         using namespace Muon::MuonStationIndex;
 
+        // Guard here, not only at call sites: this function unconditionally
+        // dereferences the first two of the inner/middle/outer(/extended)
+        // slots below, and estimateStartParameters() is not its only
+        // caller -- MsTrackTester also calls it directly on both truth and
+        // reco seeds for validation-tree dumps.
+        if (!canEstimateQtimesP(seed)) {
+            ATH_MSG_WARNING(__func__<<"() "<<__LINE__<<" Cannot estimate q*p from seed "<<seed
+                            <<" - insufficient inner/middle/outer layer coverage.");
+            return 0.;
+        }
+
         /** Calculate the averaged phi from the segments */
         double deltaPhiAcc {0.};
         std::optional<double> centralPhi {};
