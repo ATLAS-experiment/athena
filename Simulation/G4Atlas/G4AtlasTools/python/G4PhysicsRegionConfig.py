@@ -197,6 +197,12 @@ def CALOPhysicsRegionToolCfg(flags, name='CALOPhysicsRegionTool', **kwargs):
     return RegionCreatorCfg(flags, name, **kwargs)
 
 
+def ITkCALOPhysicsRegionToolCfg(flags, name='ITkCALOPhysicsRegionTool', **kwargs):
+    kwargs.setdefault("RegionName", 'ITkCALO')
+    kwargs.setdefault("VolumeList", ['ITkCALO::ITkCALO'])
+    return RegionCreatorCfg(flags, name, **kwargs)
+
+
 def EMBPhysicsRegionToolCfg(flags, name='EMBPhysicsRegionTool', **kwargs):
     kwargs.setdefault("RegionName", 'EMB')
     volumeList = ['LArMgr::LAr::EMB::STAC']

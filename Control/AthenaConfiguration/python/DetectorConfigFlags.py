@@ -68,6 +68,7 @@ def createDetectorConfigFlags():
                                                              or prevFlags.Detector.GeometryRPC or prevFlags.Detector.GeometryTGC
                                                              or prevFlags.Detector.GeometrysTGC or prevFlags.Detector.GeometryMM))
 
+    dcf.addFlag('Detector.GeometryITkCalo', False)
     ### Special workflow configuration flag which allows to setup a G4 material writer only with
     ### the passive material. This flag is *never* intended to be used in production workflow 
     ### and can probably removed once the Geo -> G4 workflow is streamlined

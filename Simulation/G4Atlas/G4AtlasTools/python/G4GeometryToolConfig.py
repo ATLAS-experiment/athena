@@ -9,7 +9,7 @@ from AthenaCommon import Logging
 from SimulationConfig.SimEnums import BeamPipeSimMode, CalibrationRun, CavernBackground, InDetParameterization, LArParameterization
 
 #the physics region tools
-from G4AtlasTools.G4PhysicsRegionConfig import SX1PhysicsRegionToolCfg, BedrockPhysicsRegionToolCfg, CavernShaftsConcretePhysicsRegionToolCfg, PixelPhysicsRegionToolCfg, SCTPhysicsRegionToolCfg, TRTPhysicsRegionToolCfg, TRT_ArPhysicsRegionToolCfg,ITkPixelPhysicsRegionToolCfg,ITkStripPhysicsRegionToolCfg,HGTDPhysicsRegionToolCfg,BeampipeFwdCutPhysicsRegionToolCfg, FWDBeamLinePhysicsRegionToolCfg, InDetPhysicsRegionToolCfg, CALOPhysicsRegionToolCfg, EMBPhysicsRegionToolCfg, EMECPhysicsRegionToolCfg, HECPhysicsRegionToolCfg, FCALPhysicsRegionToolCfg, FCAL2ParaPhysicsRegionToolCfg, EMECParaPhysicsRegionToolCfg, FCALParaPhysicsRegionToolCfg, PreSampLArPhysicsRegionToolCfg, DeadMaterialPhysicsRegionToolCfg #, FwdRegionPhysicsRegionToolCfg
+from G4AtlasTools.G4PhysicsRegionConfig import SX1PhysicsRegionToolCfg, BedrockPhysicsRegionToolCfg, CavernShaftsConcretePhysicsRegionToolCfg, PixelPhysicsRegionToolCfg, SCTPhysicsRegionToolCfg, TRTPhysicsRegionToolCfg, TRT_ArPhysicsRegionToolCfg,ITkPixelPhysicsRegionToolCfg,ITkStripPhysicsRegionToolCfg,HGTDPhysicsRegionToolCfg,BeampipeFwdCutPhysicsRegionToolCfg, FWDBeamLinePhysicsRegionToolCfg, InDetPhysicsRegionToolCfg, CALOPhysicsRegionToolCfg, ITkCALOPhysicsRegionToolCfg, EMBPhysicsRegionToolCfg, EMECPhysicsRegionToolCfg, HECPhysicsRegionToolCfg, FCALPhysicsRegionToolCfg, FCAL2ParaPhysicsRegionToolCfg, EMECParaPhysicsRegionToolCfg, FCALParaPhysicsRegionToolCfg, PreSampLArPhysicsRegionToolCfg, DeadMaterialPhysicsRegionToolCfg #, FwdRegionPhysicsRegionToolCfg
 from G4AtlasTools.G4PhysicsRegionConfig import DriftWallPhysicsRegionToolCfg, DriftWall1PhysicsRegionToolCfg, DriftWall2PhysicsRegionToolCfg, MuonSystemFastPhysicsRegionToolCfg
 
 #the field config tools
@@ -323,6 +323,31 @@ def CALOEnvelopeCfg(flags, name="CALO", **kwargs):
     result.setPrivateTools(PolyconicalEnvelope(name, **kwargs))
     return result
 
+def ITkCALOEnvelopeCfg(flags, name="ITkCALO", **kwargs):
+    result = ComponentAccumulator()
+
+    kwargs.setdefault("DetectorName", "ITkCALO")
+    if flags.GeoModel.Run >= LHCPeriod.Run4:
+        kwargs.setdefault("NSurfaces", 22)
+        kwargs.setdefault("InnerRadii", [41.,41.,41.,41.,41.,41.,64.,64.,120.,120.,28.8,28.8,120.,120.,64.,64.,41.,41.,41.,41.,41.,41.]) #FIXME Units?
+        kwargs.setdefault("OuterRadii", [415.,415.,3795.,3795.,4251.,4251.,4251.,4251.,4251.,4251.,4251.,4251.,4251.,4251.,4251.,4251.,4251.,4251.,3795.,3795.,415.,415.]) #FIXME Units?
+        kwargs.setdefault("ZSurfaces", [-6781.,-6747.,-6747.,-6530.,-6530.,-4587.,-4587.,-4472.,-4472.,-3545.,-3545.,3545.,3545.,4472.,4472.,4587.,4587.,6530.,6530.,6747.,6747.,6781.]) #FIXME Units?
+    else:
+        kwargs.setdefault("NSurfaces", 18)
+        kwargs.setdefault("InnerRadii", [41.,41.,41.,41.,41.,41.,120.,120.,28.8,28.8,120.,120.,41.,41.,41.,41.,41.,41.]) #FIXME Units?
+        kwargs.setdefault("OuterRadii", [415.,415.,3795.,3795.,4251.,4251.,4251.,4251.,4251.,4251.,4251.,4251.,4251.,4251.,3795.,3795.,415.,415.]) #FIXME Units?
+        kwargs.setdefault("ZSurfaces", [-6781.,-6747.,-6747.,-6530.,-6530.,-4587.,-4587.,-3475.,-3475.,3475.,3475.,4587.,4587.,6530.,6530.,6747.,6747.,6781.]) #FIXME Units?
+
+    SubDetectorList=[]
+    if flags.Detector.GeometryITk or flags.Detector.GeometryHGTD:
+        toolITK = result.popToolsAndMerge(ITKEnvelopeCfg(flags))
+        SubDetectorList += [ toolITK ]
+    if flags.Detector.GeometryCalo:
+        toolCALO = result.popToolsAndMerge(CALOEnvelopeCfg(flags))
+        SubDetectorList += [ toolCALO ]
+    kwargs.setdefault("SubDetectors", SubDetectorList)
+    result.setPrivateTools(PolyconicalEnvelope(name, **kwargs))
+    return result
 
 def ForwardRegionEnvelopeCfg(flags, name='ForwardRegion', **kwargs):
     result = ComponentAccumulator()
@@ -392,12 +417,16 @@ def generateSubDetectorList(flags):
     if flags.Detector.GeometryID:
         toolIDET = result.popToolsAndMerge(IDETEnvelopeCfg(flags))
         SubDetectorList += [ toolIDET ]
-    if flags.Detector.GeometryITk or flags.Detector.GeometryHGTD:  # TODO: HGTD is also here for now
-        toolITK = result.popToolsAndMerge(ITKEnvelopeCfg(flags))
-        SubDetectorList += [ toolITK ]
-    if flags.Detector.GeometryCalo:
-        toolCALO = result.popToolsAndMerge(CALOEnvelopeCfg(flags))
-        SubDetectorList += [ toolCALO ]
+    if flags.Detector.GeometryITkCalo:
+        toolITkCALO = result.popToolsAndMerge(ITkCALOEnvelopeCfg(flags))
+        SubDetectorList += [ toolITkCALO ]
+    else:
+        if flags.Detector.GeometryITk or flags.Detector.GeometryHGTD:  # TODO: HGTD is also here for now
+            toolITK = result.popToolsAndMerge(ITKEnvelopeCfg(flags))
+            SubDetectorList += [ toolITK ]
+        if flags.Detector.GeometryCalo:
+            toolCALO = result.popToolsAndMerge(CALOEnvelopeCfg(flags))
+            SubDetectorList += [ toolCALO ]
     if flags.Detector.GeometryBpipe:
         toolBpipe = result.popToolsAndMerge(BeamPipeGeoDetectorToolCfg(flags))
         SubDetectorList += [ toolBpipe ]
@@ -433,7 +462,7 @@ def ATLASEnvelopeCfg(flags, name="Atlas", **kwargs):
     if not (flags.Detector.GeometryMuon or flags.Detector.GeometryCavern):
         AtlasOuterR1 = 4251.
         AtlasOuterR2 = 4251.
-        if not flags.Detector.GeometryCalo:
+        if not (flags.Detector.GeometryCalo or flags.Detector.GeometryITkCalo):
             AtlasOuterR1 = 1150.
             AtlasOuterR2 = 1150.
 
@@ -548,6 +577,8 @@ def ATLAS_RegionCreatorListCfg(flags):
             regionCreatorList += [result.popToolsAndMerge(ITkStripPhysicsRegionToolCfg(flags))]
     if flags.Detector.GeometryHGTD:
         regionCreatorList += [result.popToolsAndMerge(HGTDPhysicsRegionToolCfg(flags))]
+    if flags.Detector.GeometryITkCalo:
+        regionCreatorList += [result.popToolsAndMerge(ITkCALOPhysicsRegionToolCfg(flags))]
     if flags.Detector.GeometryITk or flags.Detector.GeometryHGTD:  # TODO: I do not know why this is only for ITk (and HGTD)
         # FIXME dislike the ordering here, but try to maintain the same ordering as in the old configuration.
         if flags.Detector.GeometryBpipe:
