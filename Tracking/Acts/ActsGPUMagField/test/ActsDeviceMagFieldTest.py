@@ -6,7 +6,6 @@
 # CVF magnetic field -> covfie magnetic field (required)
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
-from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaCommon.Constants import DEBUG
 
 from ActsGPUMagField.ActsGPUMagFieldConfig import JSONDeviceMagFieldProviderSvcCfg
