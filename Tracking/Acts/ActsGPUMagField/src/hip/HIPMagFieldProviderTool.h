@@ -35,9 +35,9 @@ public:
   /// Function constructing the traccc device hip magnetic field
   /// @return hip magnetic field 
   virtual traccc::magnetic_field getDeviceMagneticField(traccc::magnetic_field const& host_bfield) const override;
-  traccc::hip::magnetic_field_storage m_storage{};
 
   private:
+  traccc::hip::magnetic_field_storage m_storage{};
   Gaudi::Property<std::string> m_magFieldStorage{
     this, "MagFieldStorage", "global_memory",
     "Storage method for the HIP device magnetic field; global or texture memory"};
