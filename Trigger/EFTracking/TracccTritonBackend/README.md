@@ -67,8 +67,10 @@ A successful start ends with
 +------------+---------+--------+
 ```
 
+### TracccTritonClient
+
 The [TracccTritonClient](https://gitlab.cern.ch/atlas/athena/-/tree/main/Trigger/EFTracking/TracccTritonClient?ref_type=heads) 
-can then be run as before, using the setup server (instructions in [cleint README](https://gitlab.cern.ch/atlas/athena/-/blob/main/Trigger/EFTracking/TracccTritonClient/README.md?ref_type=heads)).
+can then be run as before, using the setup server (instructions in [client README](https://gitlab.cern.ch/atlas/athena/-/blob/main/Trigger/EFTracking/TracccTritonClient/README.md?ref_type=heads)).
 
 ## StoreGate key contract
 

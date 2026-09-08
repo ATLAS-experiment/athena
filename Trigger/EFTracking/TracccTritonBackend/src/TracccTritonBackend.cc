@@ -1,5 +1,8 @@
 // Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 //
+// Derived from the NVIDIA Triton backend examples, licensed under
+// BSD-3-Clause under the following notice:
+//
 // Copyright 2021, NVIDIA CORPORATION & AFFILIATES. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
