@@ -17,7 +17,6 @@ import PyJobTransforms.trfArgClasses as trfArgClasses
 from AthenaConfiguration.TestDefaults import defaultConditionsTags, defaultGeometryTags, defaultTestFiles
 
 from AthenaCommon.Logging import logging
-msg = logging.getLogger('IDAlign')
 
 from AthenaConfiguration.Enums import Format, LHCPeriod
 
@@ -25,6 +24,45 @@ from AthenaConfiguration.Enums import Format, LHCPeriod
 from AthenaCommon import JobProperties
 import AthenaCommon.Constants
 JobProperties.jobPropertiesDisallowed = True
+
+
+def commonFlagsConfig(runArgs, flags):
+    ## Disable all non-track related flag parameter
+    from InDetConfig.ConfigurationHelpers import OnlyTrackingPreInclude
+    OnlyTrackingPreInclude(flags)
+
+    flags.Exec.MaxEvents = runArgs.maxEvents if not runArgs.solve else 1
+
+    flags.IOVDb.GlobalTag = runArgs.globalTag
+
+    if not flags.Input.isMC and runArgs.isCosmics:
+        from AthenaConfiguration.Enums import BeamType
+        
+        flags.Beam.NumberOfCollisions = 0
+        flags.Beam.Type = BeamType.Cosmics
+        flags.Beam.Energy = 0.
+        flags.Beam.BunchSpacing = 50
+
+    if runArgs.isHeavyIon:
+        flags.Beam.BunchSpacing = 50
+        flags.Reco.EnableHI = True
+        flags.HeavyIon.doGlobal = True
+        
+    else:
+        flags.Beam.BunchSpacing = 25
+                
+    if not runArgs.isBFieldOff:
+        flags.BField.solenoidOn = True
+        flags.BField.barrelToroidOn = True
+        flags.BField.endcapToroidOn = True
+            
+    else:
+        flags.BField.solenoidOn = False
+        flags.BField.barrelToroidOn = False
+        flags.BField.endcapToroidOn = False
+
+    return flags
+
 
 def getT0SolveDB(runArgs):
     # Check which file to use to extract metadata
@@ -70,44 +108,6 @@ def getT0SolveDB(runArgs):
         raise Exception(f"Could not find local database from wildcard: {localDatabaseWildcard}")
     
     return latestLocalDataBase
-
-
-def commonFlagsConfig(runArgs, flags):
-    ## Disable all non-track related flag parameter
-    from InDetConfig.ConfigurationHelpers import OnlyTrackingPreInclude
-    OnlyTrackingPreInclude(flags)
-
-    flags.Exec.MaxEvents = runArgs.maxEvents if not runArgs.solve else 1
-
-    flags.IOVDb.GlobalTag = runArgs.globalTag
-
-    if not flags.Input.isMC and runArgs.isCosmics:
-        from AthenaConfiguration.Enums import BeamType
-        
-        flags.Beam.NumberOfCollisions = 0
-        flags.Beam.Type = BeamType.Cosmics
-        flags.Beam.Energy = 0.
-        flags.Beam.BunchSpacing = 50
-
-    if runArgs.isHeavyIon:
-        flags.Beam.BunchSpacing = 50
-        flags.Reco.EnableHI = True
-        flags.HeavyIon.doGlobal = True
-        
-    else:
-        flags.Beam.BunchSpacing = 25
-                
-    if not runArgs.isBFieldOff:
-        flags.BField.solenoidOn = True
-        flags.BField.barrelToroidOn = True
-        flags.BField.endcapToroidOn = True
-            
-    else:
-        flags.BField.solenoidOn = False
-        flags.BField.barrelToroidOn = False
-        flags.BField.endcapToroidOn = False
-
-    return flags
 
 
 def configureInDetFlags(runArgs, flags):
@@ -218,6 +218,8 @@ def configureInDetFlags(runArgs, flags):
 
     return flags
 
+
+
 def configureITkFlags(runArgs, flags):
 
     ## Detector defaults
@@ -288,6 +290,8 @@ def configureITkFlags(runArgs, flags):
 
     return flags
 
+    
+
 def fromRunArgsITk(runArgs, flags):
 
     DBName="OFLCOND"
@@ -310,8 +314,6 @@ def fromRunArgsITk(runArgs, flags):
 
         cfg.merge(acc)
 
-        
-    
 
     from MuonConfig.MuonGeometryConfig import MuonIdHelperSvcCfg
     cfg.getPrimaryAndMerge(MuonIdHelperSvcCfg(flags))
@@ -428,9 +430,8 @@ def fromRunArgs(runArgs):
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
     flags = initConfigFlags()
 
-
-    # Check if the input file is specified as RDO (parser argument)
-    # If not, it is assumed to be the RAW file as default
+    # Check if the input file is RDO 
+    # If not, RAW file is set as default
     if hasattr(runArgs, "inputRDOFile"):
         flags.Input.Files = [os.path.abspath(inputFile) for inputFile in runArgs.inputRDOFile]
     else:
@@ -438,10 +439,12 @@ def fromRunArgs(runArgs):
 
     # Configure flags based on the detector geometry
     if isITkGeometry(flags):
+        msg = logging.getLogger('ITkAlign')
         flags.GeoModel.Align.Dynamic = False
         flags = configureITkFlags(runArgs, flags)
         return fromRunArgsITk(runArgs, flags)
     else:
+        msg = logging.getLogger('IDAlign')
         flags.GeoModel.Align.Dynamic = True
         flags = configureInDetFlags(runArgs, flags)
         return fromRunArgsInDet(runArgs, flags)

@@ -11,7 +11,6 @@ import PyJobTransforms.trfArgClasses as trfArgClasses
 
 def addIDAlignArguments(parser):
 
-    print("in addIDAlignArguments !!!!!")
     parser.defineArgGroup('ID alignment', 'ID alignment job flags')
     
     ## Type of running mode
@@ -28,9 +27,6 @@ def addIDAlignArguments(parser):
     # parser.add_argument("--inputTracksCollection", default = trfArgClasses.argString("CombinedInDetTracks"), type = trfArgClasses.argFactory(trfArgClasses.argString), group = "ID alignment", help='Name of the track collection to use')
     parser.add_argument("--inputTracksCollection", default = None, type = trfArgClasses.argFactory(trfArgClasses.argString), group = "ID alignment", help='Name of the track collection to use')
 
-    ## IO for ITk
-    # parser.add_argument("-i", "--input", default = defaultTestFiles.RDO_RUN4, nargs = "+", help='Input file(s)')
-
     ## Output files created in Accumulate/Solve step
     parser.add_argument("--inputTFile", nargs = "+", type = trfArgClasses.argFactory(trfArgClasses.argFile, io = "input", type = "misc"), group = "ID alignment", help='ROOT file produced in MatrixTool in the accumulation step')
     parser.add_argument("--outputTFile", type = trfArgClasses.argFactory(trfArgClasses.argFile, io = "output", type = "misc"), group = "ID alignment", help='ROOT file name outputted in MatrixTool in the accumulation step')
@@ -42,8 +38,6 @@ def addIDAlignArguments(parser):
     ## Local database file to use after initial iteration
     parser.add_argument("--localDatabase", type = trfArgClasses.argFactory(trfArgClasses.argFile, io = "input", type = "db"), group = "ID alignment", help='Local database to use')
     
-    ## Local DB File (ITk ??)
-    # parser.add_argument("--localDB", default = "MisalignmentSet3.db", help='Use local DB file rather than from conditions tag')
     parser.add_argument("--localDB", default=trfArgClasses.argString(""), type=trfArgClasses.argFactory(trfArgClasses.argString), group="ID alignment", help="Use local DB file rather than from conditions tag")
     ## Tier0 specific tags
     parser.add_argument("--eosT0Dir", default = trfArgClasses.argString(""), type = trfArgClasses.argFactory(trfArgClasses.argString), group = "ID alignment", help='Tier0 eos output dir, used to determine solve output while running the CL on Tier0')
@@ -56,10 +50,6 @@ def addIDAlignArguments(parser):
     parser.add_argument("--alignITk", const = trfArgClasses.argBool(True), default = trfArgClasses.argBool(False), nargs='?', type = trfArgClasses.argFactory(trfArgClasses.argBool), group = "ID alignment", help='Align ITk')
     parser.add_argument("--alignITkPixel", const = trfArgClasses.argBool(True), default = trfArgClasses.argBool(False), nargs='?', type = trfArgClasses.argFactory(trfArgClasses.argBool), group = "ID alignment", help='Align ITkPixel')
     parser.add_argument("--alignITkStrip", const = trfArgClasses.argBool(True), default = trfArgClasses.argBool(False), nargs='?', type = trfArgClasses.argFactory(trfArgClasses.argBool), group = "ID alignment", help='Align ITkStrip')
-    # parser.add_argument("--alignITk", default = trfArgClasses.argBool(True), action="store_true", help='Align whole ITk')
-    # parser.add_argument("--alignITkPixel", default = trfArgClasses.argBool(True), action="store_true", help='Align ITkPixel')
-    # parser.add_argument("--alignITkStrip", default = trfArgClasses.argBool(False), action="store_true", help='Align ITkStrip')
-
     ## Local Geometry
     parser.add_argument("--localgeo", default = trfArgClasses.argBool(False), action="store_true", help='Use local geometry XML files')
 
