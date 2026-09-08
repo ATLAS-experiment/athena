@@ -54,7 +54,7 @@ namespace DerivationFramework {
     }
 
 
-    StatusCode JpsiPlusDs1Cascade::addBranches(const EventContext& ctx) const
+    StatusCode JpsiPlusDs1Cascade::execute(const EventContext& ctx) const
     {
       std::vector<Trk::VxCascadeInfo*> cascadeinfoContainer;
       constexpr int topoN = 3;
@@ -491,7 +491,7 @@ namespace DerivationFramework {
     }
 
 
-    JpsiPlusDs1Cascade::JpsiPlusDs1Cascade(const std::string& t, const std::string& n, const IInterface* p)  : base_class(t,n,p),
+    JpsiPlusDs1Cascade::JpsiPlusDs1Cascade(const std::string& name, ISvcLocator* svcLoc)  : AthReentrantAlgorithm(name, svcLoc),
     m_vertexContainerKey(""),
     m_vertexD0ContainerKey(""),
     m_vertexK0ContainerKey(""),

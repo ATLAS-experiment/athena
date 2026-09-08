@@ -26,7 +26,7 @@ namespace DerivationFramework {
 
   using Analysis::JpsiUpsilonCommon;
 
-  JpsiXPlus2V0::JpsiXPlus2V0(const std::string& type, const std::string& name, const IInterface* parent) : base_class(type,name,parent),
+  JpsiXPlus2V0::JpsiXPlus2V0(const std::string& name, ISvcLocator* svcLoc) : AthReentrantAlgorithm(name, svcLoc),
     m_vertexJXContainerKey("InputJXVertices"),
     m_vertexV0ContainerKey{""},
     m_cascadeOutputKeys({"JpsiXPlus2V0_SubVtx1", "JpsiXPlus2V0_SubVtx2", "JpsiXPlus2V0_SubVtx3", "JpsiXPlus2V0_MainVtx"}),
@@ -435,7 +435,7 @@ namespace DerivationFramework {
     return StatusCode::SUCCESS;
   }
 
-  StatusCode JpsiXPlus2V0::addBranches(const EventContext& ctx) const {
+  StatusCode JpsiXPlus2V0::execute(const EventContext& ctx) const {
     size_t topoN = 4;
     if(!m_JXSubVtx) topoN--;
 

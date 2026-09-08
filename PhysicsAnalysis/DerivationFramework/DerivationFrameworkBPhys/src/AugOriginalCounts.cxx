@@ -14,10 +14,8 @@
 using namespace xAOD;
 namespace DerivationFramework {
  
-  AugOriginalCounts::AugOriginalCounts(const std::string& t,
-                                       const std::string& n,
-                                       const IInterface* p) :
-    base_class(t,n,p),
+  AugOriginalCounts::AugOriginalCounts(const std::string& name, ISvcLocator* svcLoc) :
+    AthReentrantAlgorithm(name, svcLoc),
     m_TrackContainername("InDetTrackParticles"),
     m_TrackContainerLRTname("InDetLargeD0TrackParticles"),
     m_PVContainername("PrimaryVertices")
@@ -86,7 +84,7 @@ namespace DerivationFramework {
      return StatusCode::SUCCESS;
   }
  
-  StatusCode AugOriginalCounts::addBranches(const EventContext& ctx) const
+  StatusCode AugOriginalCounts::execute(const EventContext& ctx) const
   {
 
     

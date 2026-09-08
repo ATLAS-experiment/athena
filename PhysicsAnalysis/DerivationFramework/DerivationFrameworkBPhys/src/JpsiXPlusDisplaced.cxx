@@ -53,7 +53,7 @@ namespace DerivationFramework {
     return m_vector;
   }
 
-  JpsiXPlusDisplaced::JpsiXPlusDisplaced(const std::string& type, const std::string& name, const IInterface* parent) : base_class(type,name,parent),
+  JpsiXPlusDisplaced::JpsiXPlusDisplaced(const std::string& name, ISvcLocator* svcLoc) : AthReentrantAlgorithm(name, svcLoc),
     m_vertexJXContainerKey("InputJXVertices"),
     m_vertexV0ContainerKey(""),
     m_cascadeOutputKeys({"JpsiXPlusDisVtx1_sub", "JpsiXPlusDisVtx1", "JpsiXPlusDisVtx2", "JpsiXPlusDisVtx3"}),
@@ -543,7 +543,7 @@ namespace DerivationFramework {
     return StatusCode::SUCCESS;
   }
 
-  StatusCode JpsiXPlusDisplaced::addBranches(const EventContext& ctx) const {
+  StatusCode JpsiXPlusDisplaced::execute(const EventContext& ctx) const {
     size_t topoN = (m_disVDaug_num==2 ? 3 : 4);
     if(!m_JXSubVtx) topoN--;
     if(m_extraTrk1MassHypo>0 && m_extraTrk2MassHypo>0) { // special cases

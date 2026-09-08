@@ -22,7 +22,7 @@ namespace DerivationFramework {
   typedef std::vector<const xAOD::TrackParticle*> TrackBag;
 
 
-  JpsiPlusV0Cascade::JpsiPlusV0Cascade(const std::string& t, const std::string& n, const IInterface* p)  : base_class(t,n,p)
+  JpsiPlusV0Cascade::JpsiPlusV0Cascade(const std::string& name, ISvcLocator* svcLoc)  : AthReentrantAlgorithm(name, svcLoc)
   {
   }
 
@@ -68,7 +68,7 @@ namespace DerivationFramework {
   }
 
 
-  StatusCode JpsiPlusV0Cascade::addBranches(const EventContext& ctx) const
+  StatusCode JpsiPlusV0Cascade::execute(const EventContext& ctx) const
   {
     std::vector<Trk::VxCascadeInfo*> cascadeinfoContainer;
     constexpr int topoN = 2;

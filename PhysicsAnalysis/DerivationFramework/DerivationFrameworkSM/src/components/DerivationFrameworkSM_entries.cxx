@@ -1,4 +1,4 @@
-#include "DerivationFrameworkSM/DStarSelectionTool.h"
+#include "DerivationFrameworkSM/DStarSelectionAlg.h"
 
 using namespace DerivationFramework;
-DECLARE_COMPONENT( DStarSelectionTool )
+DECLARE_COMPONENT( DStarSelectionAlg )

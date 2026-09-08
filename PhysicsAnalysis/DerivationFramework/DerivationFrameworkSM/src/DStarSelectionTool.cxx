@@ -1,12 +1,12 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //==================================================
 // Selection of D*+ -> pi+ + D0
 //==================================================
 
-#include "DerivationFrameworkSM/DStarSelectionTool.h"
+#include "DerivationFrameworkSM/DStarSelectionAlg.h"
 #include "xAODTracking/TrackParticleContainer.h"
 #include "StoreGate/ThinningHandle.h"
 #include "Gaudi/Property.h"
@@ -25,7 +25,7 @@ namespace{
 
 namespace DerivationFramework {
   
-StatusCode DStarSelectionTool::initialize() {
+StatusCode DStarSelectionAlg::initialize() {
     ATH_MSG_DEBUG("in initialize()");
     ATH_CHECK(m_trackKey.initialize());
     ATH_CHECK(m_inputVtxContainerName.initialize());    
@@ -35,7 +35,7 @@ StatusCode DStarSelectionTool::initialize() {
     
 }
 
-StatusCode DStarSelectionTool::addBranches(const EventContext& ctx) const {
+StatusCode DStarSelectionAlg::execute(const EventContext& ctx) const {
   
   // Track container
   const xAOD::TrackParticleContainer* trackParticleContainer{nullptr};

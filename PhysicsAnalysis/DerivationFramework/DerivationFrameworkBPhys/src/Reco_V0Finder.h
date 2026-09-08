@@ -10,22 +10,21 @@
 
 #include <string>
 
-#include "AthenaBaseComps/AthAlgTool.h"
+#include "AthenaBaseComps/AthReentrantAlgorithm.h"
 #include "GaudiKernel/ToolHandle.h"
-#include "DerivationFrameworkInterfaces/IAugmentationTool.h"
 #include "InDetV0Finder/InDetV0FinderTool.h"
 #include "InDetV0Finder/V0MainDecorator.h"
 
 
 namespace DerivationFramework {
 
-  class Reco_V0Finder : public extends<AthAlgTool, IAugmentationTool> {
+  class Reco_V0Finder : public AthReentrantAlgorithm {
     public: 
-      Reco_V0Finder(const std::string& t, const std::string& n, const IInterface* p);
+      Reco_V0Finder(const std::string& name, ISvcLocator* svcLoc);
 
       StatusCode initialize() override;
       
-      virtual StatusCode addBranches(const EventContext& ctx) const override;
+      virtual StatusCode execute(const EventContext& ctx) const override;
       
     private:
       

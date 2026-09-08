@@ -91,7 +91,7 @@ namespace DerivationFramework {
     }
 
 
-    StatusCode MuPlusDsCascade::addBranches(const EventContext& ctx) const
+    StatusCode MuPlusDsCascade::execute(const EventContext& ctx) const
     {
       std::vector<Trk::VxCascadeInfo*> cascadeinfoContainer;
       constexpr int topoN = 2;
@@ -514,7 +514,7 @@ namespace DerivationFramework {
     }
 
 
-    MuPlusDsCascade::MuPlusDsCascade(const std::string& t, const std::string& n, const IInterface* p)  : base_class(t,n,p),
+    MuPlusDsCascade::MuPlusDsCascade(const std::string& name, ISvcLocator* svcLoc)  : AthReentrantAlgorithm(name, svcLoc),
     m_vertexDxContainerKey(""),
     m_cascadeOutputsKeys{ "MuPlusDsCascadeVtx1", "MuPlusDsCascadeVtx2" },
     m_VxPrimaryCandidateName("PrimaryVertices"),

@@ -18,10 +18,8 @@
 
 namespace DerivationFramework {
 
-  Reco_4mu::Reco_4mu(const std::string& t,
-                     const std::string& n,
-                     const IInterface* p) :
-    base_class(t,n,p)
+  Reco_4mu::Reco_4mu(const std::string&  name, ISvcLocator* svcLoc) :
+    AthReentrantAlgorithm(name, svcLoc)
   {
   }
 
@@ -50,7 +48,7 @@ namespace DerivationFramework {
 
   // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
-  StatusCode Reco_4mu::addBranches(const EventContext & ctx) const
+  StatusCode Reco_4mu::execute(const EventContext & ctx) const
   {
     // Output containers and its auxilliary store
     SG::WriteHandle<xAOD::VertexContainer> pairContainer{m_pairName, ctx};

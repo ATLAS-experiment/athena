@@ -1,14 +1,11 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "BPhysBGammaFinder.h"
 #include "xAODBPhys/BPhysHypoHelper.h"
 #include "xAODTracking/VertexContainer.h"
 #include "xAODTracking/VertexAuxContainer.h"
-#include "TrkVertexAnalysisUtils/V0Tools.h"
-#include "TrkVertexFitterInterfaces/IVertexFitter.h"
-#include "TrkVKalVrtFitter/TrkVKalVrtFitter.h"
 #include "AthContainers/ConstAccessor.h"
 #include "StoreGate/WriteHandle.h"
 #include "StoreGate/ReadHandle.h"
@@ -20,30 +17,7 @@ using VertexLink = ElementLink<xAOD::VertexContainer>;
 namespace DerivationFramework {
 
 BPhysBGammaFinder::BPhysBGammaFinder(const std::string& t, const std::string& n, const IInterface* p)
-    : base_class(t,n,p),
-      m_v0Tools("Trk::V0Tools"),
-      m_vertexFitter("Trk::TrkVKalVrtFitter", this),
-      m_vertexEstimator("InDet::VertexPointEstimator", this),
-      m_inputTrackParticleContainerName("InDetTrackParticles"),
-      m_inputLowPtTrackContainerName("LowPtRoITrackParticles"),
-      m_conversionContainerName("BPhysConversionCandidates"),
-      m_maxDeltaQ(700.0),
-      m_Chi2Cut(20.0),
-      m_maxGammaMass(100.0) {
-
-
-  // Declare user-defined properties
-  declareProperty("BVertexContainers", m_BVertexCollectionsToCheck);
-  declareProperty("PassFlagsToCheck", m_passFlagsToCheck);
-  declareProperty("V0Tools", m_v0Tools);
-  declareProperty("VertexFitterTool", m_vertexFitter);
-  declareProperty("VertexEstimator", m_vertexEstimator);
-  declareProperty("InputTrackParticleContainerName", m_inputTrackParticleContainerName);
-  declareProperty("InputLowPtTrackContainerName", m_inputLowPtTrackContainerName);
-  declareProperty("ConversionContainerName", m_conversionContainerName);
-  declareProperty("MaxDeltaQ", m_maxDeltaQ = 700.0); // Maximum mass difference between di-muon+conversion and di-muon
-  declareProperty("Chi2Cut", m_Chi2Cut = 20.0);
-  declareProperty("MaxGammaMass", m_maxGammaMass = 100.0);
+    : base_class(t,n,p) {
 }
 
 
@@ -62,12 +36,7 @@ StatusCode BPhysBGammaFinder::initialize() {
 }
 
 
-StatusCode BPhysBGammaFinder::finalize() {
-  return StatusCode::SUCCESS;
-}
-
-
-StatusCode BPhysBGammaFinder::addBranches(const EventContext& ctx) const {
+StatusCode BPhysBGammaFinder::execute(const EventContext& ctx) const {
 
   std::vector<const xAOD::Vertex*> BVertices;
   std::vector<const xAOD::TrackParticle*> BVertexTracks;

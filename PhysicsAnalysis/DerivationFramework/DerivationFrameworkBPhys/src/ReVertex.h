@@ -13,9 +13,8 @@
 #ifndef DERIVATIONFRAMEWORK_ReVertex_H
 #define DERIVATIONFRAMEWORK_ReVertex_H
 
-#include "AthenaBaseComps/AthAlgTool.h"
+#include "AthenaBaseComps/AthReentrantAlgorithm.h"
 #include "GaudiKernel/ToolHandle.h"
-#include "DerivationFrameworkInterfaces/IAugmentationTool.h"
 #include "xAODTracking/Vertex.h"
 #include "xAODEventInfo/EventInfo.h"
 #include "StoreGate/ReadHandleKeyArray.h"
@@ -39,14 +38,14 @@ namespace InDet { class VertexPointEstimator; }
 
 namespace DerivationFramework {
 
-class ReVertex : public extends<AthAlgTool, IAugmentationTool> {
+class ReVertex : public AthReentrantAlgorithm {
 public:
 
-    ReVertex(const std::string& t, const std::string& n, const IInterface* p);
+    ReVertex(const std::string& name, ISvcLocator* svcLoc);
 
     virtual StatusCode initialize() override;
 
-    virtual StatusCode addBranches(const EventContext& ctx) const override;
+    virtual StatusCode execute(const EventContext& ctx) const override;
 
     void fitAndStore(const EventContext& ctx,
 		    xAOD::VertexContainer* vtxContainer,

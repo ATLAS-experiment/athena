@@ -19,10 +19,8 @@
 
 namespace DerivationFramework {
 
-  Reco_mumu::Reco_mumu(const std::string& t,
-      const std::string& n,
-      const IInterface* p) : 
-    base_class(t,n,p) {
+  Reco_mumu::Reco_mumu(const std::string& name, ISvcLocator* svcLoc) : 
+    AthReentrantAlgorithm(name, svcLoc) {
   }
 
   // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
@@ -55,7 +53,7 @@ namespace DerivationFramework {
 
   // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
   
-  StatusCode Reco_mumu::addBranches(const EventContext& ctx) const
+  StatusCode Reco_mumu::execute(const EventContext& ctx) const
   {
     bool callJpsiFinder = true;
     if(m_checkCollections) {

@@ -54,7 +54,7 @@ namespace DerivationFramework {
     return StatusCode::SUCCESS;
   }
 
-  StatusCode JpsiPlusPsiCascade::addBranches(const EventContext& ctx) const {
+  StatusCode JpsiPlusPsiCascade::execute(const EventContext& ctx) const {
     if (m_vtx1Daug_num != 3 && m_vtx1Daug_num != 4) {
       ATH_MSG_FATAL("Incorrect number of Psi daughters (should be 3 or 4)");
       return StatusCode::FAILURE;
@@ -244,7 +244,7 @@ namespace DerivationFramework {
     return StatusCode::SUCCESS;
   }
 
-  JpsiPlusPsiCascade::JpsiPlusPsiCascade(const std::string& type, const std::string& name, const IInterface* parent) : base_class(type,name,parent),
+  JpsiPlusPsiCascade::JpsiPlusPsiCascade(const std::string& name, ISvcLocator* svcLoc) : AthReentrantAlgorithm(name, svcLoc),
     m_vertexContainerKey(""),
     m_vertexPsiContainerKey(""),
     m_cascadeOutputsKeys({"JpsiPlusPsiCascadeVtx1", "JpsiPlusPsiCascadeVtx2", "JpsiPlusPsiCascadeVtx3"}),

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////
@@ -18,36 +18,6 @@
 
 namespace DerivationFramework {
 
-  Reco_Vertex::Reco_Vertex(const std::string& t,
-      const std::string& n,
-      const IInterface* p) : 
-    base_class(t,n,p),
-    m_v0Tools("Trk::V0Tools"),
-    m_SearchTool("",this),
-    m_pvRefitter("Analysis::PrimaryVertexRefitter")
-  {
-    
-    // Declare tools    
-    declareProperty("V0Tools"   , m_v0Tools);
-    declareProperty("VertexSearchTool", m_SearchTool);
-    declareProperty("PVRefitter", m_pvRefitter);
-    
-    // Declare user-defined properties
-    declareProperty("OutputVtxContainerName", m_outputVtxContainerName = "OniaCandidates");
-    declareProperty("PVContainerName"       , m_pvContainerName        = "PrimaryVertices");
-    declareProperty("RefPVContainerName"    , m_refPVContainerName     = "RefittedPrimaryVertices");
-    declareProperty("RefitPV"               , m_refitPV                = false);
-    declareProperty("MaxPVrefit"            , m_PV_max                 = 1000);
-    declareProperty("DoVertexType"          , m_DoVertexType           = 7);
-    // minimum number of tracks for PV to be considered for PV association
-    declareProperty("MinNTracksInPV"        , m_PV_minNTracks          = 0);
-    declareProperty("Do3d"                  , m_do3d                   = false);
-    declareProperty("CheckCollections"      , m_checkCollections       = false);
-    declareProperty("CheckVertexContainers" , m_CollectionsToCheck);
-  }
-
-  // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
-  
   StatusCode Reco_Vertex::initialize()
   {
   
@@ -78,7 +48,7 @@ namespace DerivationFramework {
 
   // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
   
-  StatusCode Reco_Vertex::addBranches(const EventContext& ctx) const
+  StatusCode Reco_Vertex::execute(const EventContext& ctx) const
   {
     bool callTool = true;
     if(m_checkCollections) {

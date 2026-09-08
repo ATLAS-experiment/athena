@@ -23,15 +23,9 @@
 
 namespace DerivationFramework {
 
-  Select_onia2mumu::Select_onia2mumu(const std::string& t,
-      const std::string& n,
-      const IInterface* p) : 
-    base_class(t,n,p),
-    m_v0Tools("Trk::V0Tools")
+  Select_onia2mumu::Select_onia2mumu(const std::string& name, ISvcLocator* svcLoc):
+    AthReentrantAlgorithm(name, svcLoc)
   {
-
-    // Declare tools    
-    declareProperty("V0Tools", m_v0Tools);
 
     // Declare user-defined properties
     
@@ -131,7 +125,7 @@ namespace DerivationFramework {
   }
   
   
-  StatusCode Select_onia2mumu::addBranches(const EventContext& ctx) const
+  StatusCode Select_onia2mumu::execute(const EventContext& ctx) const
   {
     SG::ReadHandle<xAOD::VertexContainer> oniaContainer(m_inputVtxContainerName, ctx);
     SG::auxid_set_t decor_auxids;

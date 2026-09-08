@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -10,17 +10,13 @@
 #define DERIVATIONFRAMEWORK_Select_onia2mumu_H
 
 
-#include "AthenaBaseComps/AthAlgTool.h"
-#include "DerivationFrameworkInterfaces/IAugmentationTool.h"
+#include "AthenaBaseComps/AthReentrantAlgorithm.h"
 #include "xAODBPhys/BPhysHelper.h"
 #include <string>
 #include "xAODTracking/VertexContainerFwd.h"
+#include "TrkVertexAnalysisUtils/V0Tools.h"
 /** forward declarations
  */
-namespace Trk {
-  class V0Tools;
-}
-
 namespace xAOD {
   class BPhysHypoHelper;
 }
@@ -29,9 +25,9 @@ namespace xAOD {
  */
 namespace DerivationFramework {
 
-  class Select_onia2mumu : public extends<AthAlgTool, IAugmentationTool> {
+  class Select_onia2mumu : public AthReentrantAlgorithm {
     public: 
-      Select_onia2mumu(const std::string& t, const std::string& n, const IInterface* p);
+      Select_onia2mumu(const std::string& name, ISvcLocator* svcLoc);
 
       /** inirialization and finalization
        */
@@ -44,13 +40,13 @@ namespace DerivationFramework {
        *  passed the selection. This flag is then used by the event selection tool
        *  and by the vertex thinning tool.
        */
-      virtual StatusCode addBranches(const EventContext& ctx) const override;
+      virtual StatusCode execute(const EventContext& ctx) const override;
 
     private:
       void ProcessVertex(xAOD::BPhysHypoHelper&, xAOD::BPhysHelper::pv_type) const;
       /** tools
        */
-      ToolHandle<Trk::V0Tools> m_v0Tools;
+    PublicToolHandle<Trk::V0Tools> m_v0Tools{this, "V0Tools", "Trk::V0Tools"};
       
       /** job options
        */

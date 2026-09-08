@@ -5,9 +5,8 @@
 #define PSIPLUSPSISINGLEVERTEX_H
 // Xin Chen <xin.chen@cern.ch>
 
-#include "AthenaBaseComps/AthAlgTool.h"
+#include "AthenaBaseComps/AthReentrantAlgorithm.h"
 #include "GaudiKernel/ToolHandle.h"
-#include "DerivationFrameworkInterfaces/IAugmentationTool.h"
 #include "JpsiUpsilonTools/PrimaryVertexRefitter.h"
 #include "xAODTracking/VertexContainer.h"
 #include "xAODEventInfo/EventInfo.h"
@@ -20,13 +19,13 @@ namespace Trk {
 
 namespace DerivationFramework {
 
-  class PsiPlusPsiSingleVertex : public extends<AthAlgTool, IAugmentationTool>
+  class PsiPlusPsiSingleVertex : public AthReentrantAlgorithm
   {
   public:
-    PsiPlusPsiSingleVertex(const std::string& t, const std::string& n, const IInterface* p);
+    PsiPlusPsiSingleVertex(const std::string& name, ISvcLocator* svcLoc);
     virtual ~PsiPlusPsiSingleVertex() = default;
     virtual StatusCode initialize() override;
-    virtual StatusCode addBranches(const EventContext& ctx) const override;
+    virtual StatusCode execute(const EventContext& ctx) const override;
 
   private:
     SG::ReadHandleKey<xAOD::VertexContainer> m_vertexPsi1ContainerKey;

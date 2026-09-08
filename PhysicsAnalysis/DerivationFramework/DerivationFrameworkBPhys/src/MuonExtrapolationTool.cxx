@@ -14,9 +14,9 @@
 
 namespace DerivationFramework {
 
-MuonExtrapolationTool::MuonExtrapolationTool(const std::string &t, const std::string& n, const IInterface* p)
+MuonExtrapolationTool::MuonExtrapolationTool(const std::string& name, ISvcLocator* svcLoc)
   :
-    base_class(t, n, p)
+    AthReentrantAlgorithm(name, svcLoc)
 {
 }
 
@@ -86,7 +86,7 @@ const xAOD::TrackParticle* MuonExtrapolationTool::getPreferredTrackParticle (con
 
 }
 
-StatusCode MuonExtrapolationTool::addBranches(const EventContext& ctx) const
+StatusCode MuonExtrapolationTool::execute(const EventContext& ctx) const
 {
     SG::ReadHandle<xAOD::MuonContainer> muonContainer{m_muonContainerName, ctx};
     if (!muonContainer.isValid()) {
