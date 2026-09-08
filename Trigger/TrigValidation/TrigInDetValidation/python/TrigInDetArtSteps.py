@@ -46,7 +46,7 @@ class TrigInDetReco(ExecStep):
             'flags.Reco.EnableMet=False',
             'flags.Reco.EnableBTagging=False',
             'flags.Reco.EnablePFlow=False',
-            'flags.Reco.EnableTau=True',
+            'flags.Reco.EnableTau=False',
             'flags.Reco.EnablePostProcessing=False',
         ])
         self.preexec_all = ';'.join([
