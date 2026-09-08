@@ -69,7 +69,7 @@ private:
 
     /// @name The name of device resident input traccc track parameter collection
     /// {@
-    SG::WriteHandleKey<traccc::bound_track_parameters_collection_types::buffer> m_inputTrkParamKey{
+    SG::ReadHandleKey<traccc::bound_track_parameters_collection_types::buffer> m_inputTrkParamKey{
         this, "InputTracccTrackParameters", "",
         "Input traccc track parameter collection buffer"};
     /// @}

@@ -79,7 +79,7 @@ private:
     /// @}
 
     /// @name The detector mapping object providing the Athena<->Detray ID map
-    Gaudi::Property<std::string> m_geoIdMappingObjectName{this, "GeoIdMapping", "", "ID mapping between the three detector description realms."};
+    Gaudi::Property<std::string> m_geoIdMappingObjectName{this, "GeoIdMappingObjectName", "", "ID mapping between the three detector description realms."};
     const ActsTrk::GeometryIdMapping* m_idMapping{nullptr};
         
     const InDetDD::PixelDetectorManager* m_pixelManager{nullptr};

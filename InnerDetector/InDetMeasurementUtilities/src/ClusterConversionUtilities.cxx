@@ -146,15 +146,26 @@ namespace TrackingUtilities {
     return StatusCode::SUCCESS;
   }
 
+  const InDetDD::PixelModuleDesign* pixelModuleDesign(const InDetDD::SiDetectorElement& element)
+  {
+    return dynamic_cast<const InDetDD::PixelModuleDesign*>(&element.design());
+  }
+
+  const InDetDD::SCT_ModuleSideDesign* stripModuleSideDesign(const InDetDD::SiDetectorElement& element)
+  {
+    if (not element.isBarrel()) {
+      return dynamic_cast<const InDetDD::StripStereoAnnulusDesign*>(&element.design());
+    }
+    return dynamic_cast<const InDetDD::SCT_ModuleSideDesign*>(&element.design());
+  }
+
   StatusCode convertXaodToInDetCluster(const xAOD::PixelCluster& xaodCluster,
                const InDetDD::SiDetectorElement& element,
+               const InDetDD::PixelModuleDesign& moduleDesign,
                const PixelID& pixelID,
                InDet::PixelCluster*& indetCluster)
   {
-    const InDetDD::PixelModuleDesign* design(dynamic_cast<const InDetDD::PixelModuleDesign*>(&element.design()));
-    if (design == nullptr) {
-      return StatusCode::FAILURE;
-    }
+    const InDetDD::PixelModuleDesign* design = &moduleDesign;
 
     Amg::Vector2D localPosition = xAOD::toEigen(xaodCluster.localPosition<2>());
     
@@ -256,21 +267,13 @@ namespace TrackingUtilities {
 
   StatusCode convertXaodToInDetCluster(const xAOD::StripCluster& xaodCluster,
                                        const InDetDD::SiDetectorElement& element,
+                                       const InDetDD::SCT_ModuleSideDesign& moduleDesign,
                                        const SCT_ID& stripID,
                                        InDet::SCT_Cluster*& indetCluster,
                                        double shift)
   {
     bool isBarrel = element.isBarrel();
-    const InDetDD::SCT_ModuleSideDesign* design = nullptr;
-    if (not isBarrel) {
-      design = dynamic_cast<const InDetDD::StripStereoAnnulusDesign*>(&element.design());
-    } else {
-      design = dynamic_cast<const InDetDD::SCT_ModuleSideDesign*>(&element.design());
-    }
-
-    if (design == nullptr) {
-      return StatusCode::FAILURE;
-    }
+    const InDetDD::SCT_ModuleSideDesign* design = &moduleDesign;
 
     const auto designShape = design->shape();
 

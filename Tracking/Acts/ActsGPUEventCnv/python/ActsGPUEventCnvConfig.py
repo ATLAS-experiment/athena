@@ -109,4 +109,16 @@ def TracccSeedConverterAlgCfg(flags,
     kwargs.setdefault("OutputSeeds", "ITkTracccSeeds")
     acc.addEventAlgo(
         CompFactory.ActsTrk.TracccSeedConverterAlg(name, **kwargs))
-    return acc    
+    return acc   
+
+def TracccTrackConverterAlgCfg(flags,
+                                     name="TracccTrackConverterAlg",
+                                     **kwargs) -> ComponentAccumulator:
+    acc = ComponentAccumulator()
+    kwargs.setdefault("HostMR", acc.popToolsAndMerge(HostMemoryResourceToolCfg(flags)))
+    kwargs.setdefault("CopyProviderTool", acc.popToolsAndMerge(CopyToolCfg(flags)))
+    kwargs.setdefault("InputTracks", "TracccMeasurements")
+    kwargs.setdefault("OutputTracks", "ITkTracccSeeds")
+    acc.addEventAlgo(
+        CompFactory.ActsTrk.TracccTrackConverterAlg(name, **kwargs))
+    return acc 

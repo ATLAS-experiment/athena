@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Nils Krumnack
@@ -46,7 +46,7 @@ int main (int argc, char **argv)
 {
   if (argc != 3)
   {
-    ATH_MSG_ERROR ("usage: " << argv[0] << " <module path> <output file>");
+    ANA_MSG_ERROR ("usage: " << argv[0] << " <module path> <output file>");
     return 1;
   }
 
@@ -76,7 +76,7 @@ int main (int argc, char **argv)
     return 1;
   }
 
-  ATH_MSG_DEBUG ("loading component factory preloader module from " << modulePath << " with name " << moduleName);
+  ANA_MSG_DEBUG ("loading component factory preloader module from " << modulePath << " with name " << moduleName);
   loadComponentFactoryModule (moduleName, modulePath);
 
   std::ofstream outputStream (outputFile);

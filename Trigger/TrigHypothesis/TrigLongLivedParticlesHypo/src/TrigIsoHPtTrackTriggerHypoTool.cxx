@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
   * Trigger Hypo Tool, that is aimed at triggering high pt isolated tracks 
   * author Ismet Siral <ismet.siral@cern.ch> - University of Oregon
@@ -225,14 +225,12 @@ bool TrigIsoHPtTrackTriggerHypoTool::decideOnSingleObject( const xAOD::TrackPart
 }
 
 StatusCode TrigIsoHPtTrackTriggerHypoTool::inclusiveSelection( std::vector<TrackInfo>& input ) const {
-    for ( auto i: input ) {
-
-      if ( i.previousDecisionsIDs.count( m_decisionId.numeric() ) == 0 ) {
+    for ( const auto & i: input ) {
+      if ( !i.previousDecisionsIDs.contains( m_decisionId.numeric() )) {
 	continue;
       }
 
-      auto objDecision = decideOnSingleObject( i.track, i.AllTracks, 0 );
-      if ( objDecision == true ) {
+      if ( decideOnSingleObject( i.track, i.AllTracks, 0 )) {
 
 	addDecisionID( m_decisionId.numeric(), i.decision  );
       }

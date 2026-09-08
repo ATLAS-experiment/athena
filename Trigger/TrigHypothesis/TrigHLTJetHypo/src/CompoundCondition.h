@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRIGHLTJETHYPO_COMPOUNDCONDITION_H
@@ -13,10 +13,12 @@
  * AUTHOR:   P. Sherwood
  *********************************************************************/
 
-#include <string>
+
 #include "./ICondition.h"
 #include "./ConditionsDefs.h"
-
+#include <string>
+#include <memory>
+#include <vector>
 class ITrigJetHypoInfoCollector;
 
 class CompoundCondition: public ICondition{

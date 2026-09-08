@@ -32,7 +32,7 @@ def collectDigitizationMetadata(flags):
     logDigitizationWriteMetadata.info('Filling Digitization MetaData')
     for testKey, testFlag in digitMetaDataKeys.items():
         if flags.hasFlag(testFlag):
-            testValue = flags._get(testFlag)
+            testValue = flags[testFlag]
             if isinstance(testValue, FlagEnum):
                 testValue = testValue.value
             if not isinstance(testValue, str):

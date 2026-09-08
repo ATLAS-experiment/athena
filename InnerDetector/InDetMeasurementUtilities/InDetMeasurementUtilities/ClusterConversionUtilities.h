@@ -18,6 +18,8 @@
 
 #include "InDetReadoutGeometry/SiDetectorElement.h"
 #include "SCT_ReadoutGeometry/StripStereoAnnulusDesign.h"
+#include "SCT_ReadoutGeometry/SCT_ModuleSideDesign.h"
+#include "PixelReadoutGeometry/PixelModuleDesign.h"
 
 #include "InDetIdentifier/PixelID.h"
 #include "InDetIdentifier/SCT_ID.h"
@@ -34,13 +36,22 @@ namespace TrackingUtilities {
 				       xAOD::StripCluster& xaodCluster,
                bool isITk = true);
   
+  /// Resolve the readout design of a pixel/strip detector element. The result only
+  /// depends on the element, so callers converting many clusters of the same element
+  /// should hoist this out of their loop: the cast is not free and the conversion is
+  /// run once per cluster in the event.
+  const InDetDD::PixelModuleDesign* pixelModuleDesign(const InDetDD::SiDetectorElement& element);
+  const InDetDD::SCT_ModuleSideDesign* stripModuleSideDesign(const InDetDD::SiDetectorElement& element);
+
   StatusCode convertXaodToInDetCluster(const xAOD::PixelCluster& xaodCluster,
 				       const InDetDD::SiDetectorElement& element,
+				       const InDetDD::PixelModuleDesign& design,
 				       const PixelID& pixelID,
 				       InDet::PixelCluster*& indetCluster);
 
   StatusCode convertXaodToInDetCluster(const xAOD::StripCluster& xaodCluster,
                                        const InDetDD::SiDetectorElement& element,
+                                       const InDetDD::SCT_ModuleSideDesign& design,
                                        const SCT_ID& stripID,
                                        InDet::SCT_Cluster*& indetCluster,
                                        double shift = 0.);  

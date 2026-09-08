@@ -2,15 +2,16 @@
  *   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
  */
 
-#ifndef GLOBALSIM_MAINOUTPUTTYPE_H
-#define GLOBALSIM_MAINOUTPUTTYPE_H
+#ifndef GLOBALSIM_JET1JET_H
+#define GLOBALSIM_JET1JET_H
 
 #include "BitSpec.h"
 #include "Object.h"
 
 namespace GlobalSim {
-    //This is a dumb name for something only used for jets...
-    class main_output_type : public BitSpec<main_output_type, 128> {
+
+    class JET1Jet : public BitSpec<JET1Jet, 128> {
+        /** BitSpec for the output jets of the JET1 algorithm */
 
         // Example of a custom encoding/decoding for one of the bitfields
         static constexpr float s_ET_UNIT = 0.25f; // suppose 0.25 GeV per count
@@ -22,11 +23,6 @@ namespace GlobalSim {
         }
 
     public:
-        // syntax is:
-        // BitField<Lo,Hi, AuxType [, ValueType=AuxType]> name{"name","auxvar", "description" [, encoder, decoder]}
-        // auxvar can optionally include bitpacking-specifiers, in form of either auxvar[i] or auxvar[a:b]
-        // this will map the bitfield into subbits of the auxvar. AuxType will need to be an integral type,
-        // e.g. you cannot use bitpacking-specifiers on AuxType=float fields
         static inline const BitField<0, 12, float> ptt{"ptt","et", "Transverse energy", et_encoder, et_decoder};
         static inline const BitField<13, 22, float> eta{"eta","eta", "Eta coordinate"};
         static inline const BitField<23, 31, float> phi{"phi","phi", "Phi coordinate"};

@@ -5,6 +5,12 @@
 // System include(s):
 #include <stdexcept>
 
+// Gaudi include(s):
+#ifndef XAOD_STANDALONE
+#   include "GaudiKernel/IIncidentSvc.h"
+#   include "GaudiKernel/ServiceHandle.h"
+#endif // not XAOD_STANDALONE
+
 // Trigger include(s):
 #include "TrigConfL1Data/BunchGroup.h"
 #include "TrigConfHLTData/HLTSequenceList.h"
@@ -107,6 +113,16 @@ namespace TrigConf {
       m_currentL1psJson = nullptr;
       m_currentBgJson = nullptr;
 
+#ifndef XAOD_STANDALONE
+      // AsgMetadataTool only subscribes to BeginEvent in Athena, so input-file
+      // incidents never reach this tool. Priority 0: after MetaDataSvc has loaded
+      // the new file's metadata, before TrigDecisionTool's -1.
+      ServiceHandle< IIncidentSvc > incSvc( "IncidentSvc", name() );
+      ATH_CHECK( incSvc.retrieve() );
+      incSvc->addListener( this, IncidentType::BeginInputFile, 0, true );
+      incSvc->addListener( this, IncidentType::EndInputFile, 0, true );
+#endif // not XAOD_STANDALONE
+
       // Return gracefully:
       return StatusCode::SUCCESS;
    }
@@ -136,6 +152,10 @@ namespace TrigConf {
    uint32_t xAODConfigTool::lvl1PrescaleKey() const {
       if ( m_menuJSONContainerAvailable ) {
 
+         if( ! m_currentL1psJson ) {
+            ATH_MSG_FATAL( "Trigger configuration not loaded for the current event" );
+            throw std::runtime_error( "Tool not initialised correctly" );
+         }
          return m_currentL1psJson->key();
 
       } else {
@@ -187,6 +207,10 @@ namespace TrigConf {
    uint32_t xAODConfigTool::masterKey() const {
       if (m_menuJSONContainerAvailable) {
 
+         if( ! m_currentHltJson ) {
+            ATH_MSG_FATAL( "Trigger configuration not loaded for the current event" );
+            throw std::runtime_error( "Tool not initialised correctly" );
+         }
          return m_currentHltJson->key();
 
       } else {
@@ -206,6 +230,10 @@ namespace TrigConf {
    uint32_t xAODConfigTool::hltPrescaleKey() const {
       if (m_menuJSONContainerAvailable) {
 
+         if( ! m_currentHltpsJson ) {
+            ATH_MSG_FATAL( "Trigger configuration not loaded for the current event" );
+            throw std::runtime_error( "Tool not initialised correctly" );
+         }
          return m_currentHltpsJson->key();
 
       } else {
@@ -417,6 +445,27 @@ namespace TrigConf {
       return StatusCode::FAILURE; // Should never get here as checked that one or the other is true above
    }
 
+   StatusCode xAODConfigTool::endInputFile() {
+#ifndef XAOD_STANDALONE
+      ATH_MSG_DEBUG( "Input file closed, invalidating the cached trigger configuration" );
+      m_tmc = nullptr;
+      m_menu = nullptr;
+      m_hltJson = nullptr;
+      m_hltmonitoringJson = nullptr;
+      m_l1Json = nullptr;
+      m_hltpsJson = nullptr;
+      m_l1psJson = nullptr;
+      m_bgJson = nullptr;
+      m_currentHltJson = nullptr;
+      m_currentHltmonitoringJson = nullptr;
+      m_currentL1Json = nullptr;
+      m_currentHltpsJson = nullptr;
+      m_currentL1psJson = nullptr;
+      m_currentBgJson = nullptr;
+#endif // not XAOD_STANDALONE
+      return StatusCode::SUCCESS;
+   }
+
    StatusCode xAODConfigTool::beginEvent() {
 
       // It may be that the input file opening event is missed in standalone
@@ -454,6 +503,11 @@ namespace TrigConf {
          return StatusCode::SUCCESS;
       }
 
+      if( !m_tmc ) {
+         ATH_MSG_ERROR( "Trigger menu metadata not loaded for the current input file" );
+         return StatusCode::FAILURE;
+      }
+
       // If not, let's look for the correct configuration:
       xAOD::TriggerMenuContainer::const_iterator menu_itr = m_tmc->begin();
       xAOD::TriggerMenuContainer::const_iterator menu_end = m_tmc->end();
@@ -484,27 +538,37 @@ namespace TrigConf {
          return StatusCode::FAILURE;
       }
 
-      // Check if we have the correct menu already:
+      // Cached pointers are null right after initialize() or endInputFile(): not valid.
       bool validConfig = true;
-      if (m_currentHltJson->key() != keys->smk()) {
+      if( !m_currentHltJson || !m_currentL1Json || !m_currentHltpsJson || !m_currentL1psJson ) {
          validConfig = false;
-      }
-      // m_currentHltminitoringJson is checked by the m_currentHltJson check
-      if (m_currentL1Json->key() != keys->smk()) {
-         validConfig = false;
-      }
-      if (m_currentHltpsJson->key() != keys->hltpsk()) {
-         validConfig = false;
-      }
-      if (m_currentL1psJson->key() != keys->l1psk()) {
-         validConfig = false;
-      }
-      if (m_bgJson && m_currentBgJson && bgKey && m_currentBgJson->key() != static_cast<unsigned int>(bgKey->id())) {
-          validConfig = false;
+      } else {
+         if (m_currentHltJson->key() != keys->smk()) {
+            validConfig = false;
+         }
+         // m_currentHltminitoringJson is checked by the m_currentHltJson check
+         if (m_currentL1Json->key() != keys->smk()) {
+            validConfig = false;
+         }
+         if (m_currentHltpsJson->key() != keys->hltpsk()) {
+            validConfig = false;
+         }
+         if (m_currentL1psJson->key() != keys->l1psk()) {
+            validConfig = false;
+         }
+         if (m_bgJson && m_currentBgJson && bgKey && m_currentBgJson->key() != static_cast<unsigned int>(bgKey->id())) {
+             validConfig = false;
+         }
       }
 
       if (validConfig) {
          return StatusCode::SUCCESS;
+      }
+
+      // Re-retrieved in beginInputFile(); still missing here means this file's metadata never loaded.
+      if( !m_hltJson || !m_l1Json || !m_hltpsJson || !m_l1psJson ) {
+         ATH_MSG_ERROR( "Trigger menu metadata not loaded for the current input file" );
+         return StatusCode::FAILURE;
       }
 
       // If not, load correct JSON menus from their respective containers, matching against the event's keys ...

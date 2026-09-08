@@ -37,7 +37,7 @@ namespace GlobalSim {
         SG::ReadHandleKey<xAOD::BaseContainer> m_inputTowersKey{this, "topoc_pu_type", "GlobalSim_CellTowers", "type=topoc_pu_type; Key for the topoc_pu_type input"};
 
         /** @brief Key for the output jets. Name of property is taken from TeamGate */
-        SG::WriteHandleKey<xAOD::BaseContainer> m_outputKey{this, "main_output", "GlobalSim_JET1Jets", "type=main_output_type; Key for the output container"};
+        SG::WriteHandleKey<xAOD::BaseContainer> m_outputKey{this, "main_output", "GlobalSim_JET1Jets", "type=JET1Jet; Key for the output container"};
 
     };
 

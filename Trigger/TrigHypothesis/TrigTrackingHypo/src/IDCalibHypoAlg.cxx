@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
   * Trigger Hypo algorithm for IDCalib stream trigger
   * author Kunihiro Nagano <kunihiro.nagano@cern.ch> 
@@ -104,7 +104,7 @@ StatusCode IDCalibHypoAlg::execute( const EventContext& context ) const
       ATH_CHECK( newDecision->setObjectLink<xAOD::TrackParticleContainer>(TrigCompositeUtils::featureString(), trackEL) );
 
       IDCalibHypoTool::IDCalibHypoInfo hypoInfo{ newDecision, track, trackContainer, previousDecisionIDs };
-      IDCalibHypoInputs.push_back( hypoInfo );
+      IDCalibHypoInputs.push_back( std::move(hypoInfo) );
    }
    ATH_MSG_DEBUG( "nr tracks = " << trackContainer->size() << " -> selected nr = " << itrk_passed );
 

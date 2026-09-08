@@ -48,7 +48,6 @@ Starlight_i::Starlight_i(const std::string& name, ISvcLocator* pSvcLocator):
 
 Starlight_i::~Starlight_i(){
   if (m_starlight) delete m_starlight;
-  if (m_event) delete m_event;
 }
 
 StatusCode Starlight_i::genInitialize()
@@ -102,17 +101,20 @@ StatusCode Starlight_i::callGenerator()
     m_randomGenerator->SetSeed(seeds[0]);
 
     // Generate event
-    m_event = new upcEvent;
-#ifdef UPCXEVENT_H
-    (*m_event) = m_starlight->produceUpcEvent();
-#else
-    (*m_event) = m_starlight->produceEvent();
-#endif
+    if(m_productionMode >= starlightConstants::PHOTONUCLEARSINGLE)
+      m_event = std::make_unique<upcEvent>(m_starlight->produceUpcEvent());
+    else
+      m_event = std::make_unique<upcXEvent>(m_starlight->produceEvent());
+
+    // get particle vector from m_event whether it is upcEvent or upcXEvent
+    const std::vector<starlightParticle>* particleCollection = std::visit(
+      [](auto& evt) { return evt->getParticles(); }, m_event
+    );
 
     // update event counter
     ++m_events;
 
-    int numberofTracks = m_event->getParticles()->size();
+    int numberofTracks = particleCollection->size();
     int numberOfVertices = 1; //m_event->getVertices()->size();
 
     ATH_MSG_DEBUG( "EVENT: " << m_events << " "
@@ -123,9 +125,9 @@ StatusCode Starlight_i::callGenerator()
 
     int ipart = 0;
     std::vector<starlightParticle>::const_iterator part =
-      (m_event->getParticles())->begin();
-    for (part = m_event->getParticles()->begin();
-         part != m_event->getParticles()->end(); ++part, ++ipart) {
+      particleCollection->begin();
+    for (part = particleCollection->begin();
+         part != particleCollection->end(); ++part, ++ipart) {
       ATH_MSG_DEBUG( "TRACK: " << " "
                      << starlightParticleCodes::jetsetToGeant((*part).getCharge() * (*part).getPdgCode()) << " "
                      << (*part).GetPx() << " " << (*part).GetPy() << " "<< (*part).GetPz()
@@ -159,16 +161,21 @@ Starlight_i::fillEvt(HepMC::GenEvent* evt)
     HepMC::GenVertexPtr v1 = HepMC::newGenVertexPtr();
     evt->add_vertex( v1 );
 
+    // get all final particles
+    const std::vector<starlightParticle>* particleCollection = std::visit(
+      [](auto& evt) { return evt->getParticles(); }, m_event
+    );
+
     // Loop on all final particles and
     // put them all as outgoing from the event vertex
     int ipart = 0;
     std::vector<starlightParticle>::const_iterator part =
-      (m_event->getParticles())->begin();
+      particleCollection->begin();
     double px_tot=0;
     double py_tot=0;
     double pz_tot=0;
-    for (part = m_event->getParticles()->begin();
-         part != m_event->getParticles()->end(); ++part, ++ipart)
+    for (part = particleCollection->begin();
+         part != particleCollection->end(); ++part, ++ipart)
       {
         int pid = (*part).getPdgCode();
         int charge = (*part).getCharge();
@@ -262,21 +269,31 @@ Starlight_i::starlight2lhef()
     lheStream << "  1.000000e+00  0.000000e+00  1.000000e+00   9999\n";
     lheStream << "</init>\n";
 
-
-    std::unique_ptr<upcEvent> uevent(new upcEvent);
+    // Starting from version r330 uevent can be either
+    // upcEvent or upcXEvent depending on the process
+    std::variant<
+        std::unique_ptr<upcEvent>,
+        std::unique_ptr<upcXEvent>> uevent;
 
     for(unsigned int i=0; i<m_maxevents; i++) {
       lheStream << "<event>\n";
-#ifdef UPCXEVENT_H
-      (*uevent) = m_starlight->produceUpcEvent();
-#else
-      (*uevent) = m_starlight->produceEvent();
-#endif
+
+      // Generate event
+      if(m_productionMode >= starlightConstants::PHOTONUCLEARSINGLE)
+        uevent = std::make_unique<upcEvent>(m_starlight->produceUpcEvent());
+      else
+        uevent = std::make_unique<upcXEvent>(m_starlight->produceEvent());
+
+      // get particle vector from m_event whether it is upcEvent or upcXEvent
+      const std::vector<starlightParticle>* particleCollection = std::visit(
+        [](auto& evt) { return evt->getParticles(); }, uevent
+      );
+  
       int ipart = 0;
       CLHEP::HepLorentzVector photon_system(0);
       double ptscale =0;
-      std::vector<starlightParticle>::const_iterator part = (uevent->getParticles())->begin();
-      for (part = uevent->getParticles()->begin(); part != uevent->getParticles()->end(); ++part, ++ipart)
+      std::vector<starlightParticle>::const_iterator part = particleCollection->begin();
+      for (part = particleCollection->begin(); part != particleCollection->end(); ++part, ++ipart)
       {
          CLHEP::HepLorentzVector particle_sl((*part).GetPx(), (*part).GetPy(), (*part).GetPz(), (*part).GetE());
          photon_system += particle_sl;
@@ -314,7 +331,7 @@ Starlight_i::starlight2lhef()
                   <<"  0.0000000000e+00 0. 9.\n";
       }
 
-      for (part = uevent->getParticles()->begin(); part != uevent->getParticles()->end(); ++part, ++ipart)
+      for (part = particleCollection->begin(); part != particleCollection->end(); ++part, ++ipart)
       {
         int pid = (*part).getPdgCode();
         int charge = (*part).getCharge();
