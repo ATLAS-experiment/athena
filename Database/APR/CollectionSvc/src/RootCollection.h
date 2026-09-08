@@ -39,14 +39,15 @@ namespace pool {
         /// @param mode The open mode of the collection
         /// @param session If you want to access the referenced objects you have to provide an ISession
         RootCollection( const pool::CollectionDescription* description,
-                        Io::IoFlag mode );
+                        Io::IoFlag mode,
+                        ISession* session );
 
         /// Destructor
         ~RootCollection();
 
 
         /// Explicitly re-opens the collection after it has been closed.
-        virtual void open() final override;
+        virtual void open() final override {};
 
         /// Adds a new row of data to the collection.
         virtual void insertRow( const pool::CollectionRowBuffer& inputRowBuffer ) final override;
@@ -63,6 +64,9 @@ namespace pool {
         /// Returns a cursor for the collection.
         virtual std::unique_ptr<ICollectionCursor> cursor() final override;
 
+     protected:
+       void open( Io::IoFlag mode, ISession* session );
+
      private:
 
         /// copying unimplemented in this class.
@@ -78,9 +82,7 @@ namespace pool {
         std::string                          m_fileName;
         /// The common prefix for branch container names for attributes
         std::string                          m_containerPrefix;
-        Io::IoFlag                m_mode;
-
-        bool                                 m_open;
+        Io::IoFlag                           m_mode;
 
         std::unique_ptr<IStorageSvc>         m_storageSvc;
         pool::FileDescriptor                 m_fileDescr;
