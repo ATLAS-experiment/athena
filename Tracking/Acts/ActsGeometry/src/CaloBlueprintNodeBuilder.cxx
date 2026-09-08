@@ -102,49 +102,28 @@ std::shared_ptr<BlueprintNode> ActsTrk::CaloBlueprintNodeBuilder::buildBlueprint
     volumeCounter++;
   }
 
-  //now do asymmetric cylinders, first negative z
-  
-  CylinderContainerBlueprintNode& caloBarrelCylinderNegativeZNode = caloNode->addCylinderContainer("CaloBarrelNegativeZAsymmetricCylinders", AxisDirection::AxisR);
-  caloBarrelCylinderNegativeZNode.setAttachmentStrategy(VolumeAttachmentStrategy::Gap);
-  caloBarrelCylinderNegativeZNode.setResizeStrategy(ResizeStrategy::Gap);
-
-  //then positive z
-  CylinderContainerBlueprintNode& caloBarrelCylinderPositiveZNode = caloNode->addCylinderContainer("CaloBarrelPositiveZAsymmetricCylinders", AxisDirection::AxisR);
-  caloBarrelCylinderPositiveZNode.setAttachmentStrategy(VolumeAttachmentStrategy::Gap);
-  caloBarrelCylinderPositiveZNode.setResizeStrategy(ResizeStrategy::Gap);
-
+  //now do asymmetric cylinders
   for (unsigned int sampleIndex = 0; sampleIndex < m_caloCylinderAsymmetricSampleList.size(); ++sampleIndex) {
     auto& sampleName = m_caloCylinderAsymmetricSampleList.at(sampleIndex).first;
-    //We only add TileGap1 and 2 here, because the TileExt0,1,2
-    //will need a special treatment to avoid clashes in Z.
-    if (sampleIndex < 2){
-      addCylindricalTrackingVolumeToCaloNode(caloBarrelCylinderNegativeZNode, sampleName+"NegZ", caloRegionSampleSurfaceMap[caloRegion::CylinderNegativeZ].at({sampleName, getSampleEnum(sampleName)}), volumeCounter, false);
-      volumeCounter++;
-      addCylindricalTrackingVolumeToCaloNode(caloBarrelCylinderPositiveZNode, sampleName+"PosZ", caloRegionSampleSurfaceMap[caloRegion::CylinderPositiveZ].at({sampleName, getSampleEnum(sampleName)}), volumeCounter, false);
-      volumeCounter++;
-    }
-    else{
-      //Tile extended barrel surfaces must be added to top level node directly because they always overlap in R
-      //or Z with other calorimeter surfaces, volumes etc.
-      //Note there is a speed penalty to do it this way.
-      itkCaloNode->addLayer(sampleName+"NegZ" + "_Layer", [&](auto& layer) {
-        layer.setSurfaces(caloRegionSampleSurfaceMap[caloRegion::CylinderNegativeZ].at({sampleName, getSampleEnum(sampleName)}));
-        layer.setEnvelope(Acts::ExtentEnvelope{{
-            .z = {0.1_mm, 0.1_mm},
-            .r = {2_mm, 2_mm},
-        }});
-      });
-      itkCaloNode->addLayer(sampleName+"PosZ" + "_Layer", [&](auto& layer) {
-        layer.setSurfaces(caloRegionSampleSurfaceMap[caloRegion::CylinderPositiveZ].at({sampleName, getSampleEnum(sampleName)}));
-        layer.setEnvelope(Acts::ExtentEnvelope{{
-            .z = {0.1_mm, 0.1_mm},
-            .r = {2_mm, 2_mm},
-        }});
-      });
-    }
+    //The tile extended barrel and gap must be added to top level node directly because they always overlap in R
+    //or Z with other calorimeter surfaces, volumes etc.
+    //Note there is a speed penalty to do it this way.
+    itkCaloNode->addLayer(sampleName+"NegZ" + "_Layer", [&](auto& layer) {
+      layer.setSurfaces(caloRegionSampleSurfaceMap[caloRegion::CylinderNegativeZ].at({sampleName, getSampleEnum(sampleName)}));
+      layer.setEnvelope(Acts::ExtentEnvelope{{
+          .z = {0.1_mm, 0.1_mm},
+          .r = {2_mm, 2_mm},
+      }});
+    });
+    itkCaloNode->addLayer(sampleName+"PosZ" + "_Layer", [&](auto& layer) {
+      layer.setSurfaces(caloRegionSampleSurfaceMap[caloRegion::CylinderPositiveZ].at({sampleName, getSampleEnum(sampleName)}));
+      layer.setEnvelope(Acts::ExtentEnvelope{{
+          .z = {0.1_mm, 0.1_mm},
+          .r = {2_mm, 2_mm},
+      }});
+    });
   }
   
-
   CylinderContainerBlueprintNode& caloEndCapDiscNegativeZNode = caloNode->addCylinderContainer("CaloEndCapDiscNegativeZ", AxisDirection::AxisZ);
   caloEndCapDiscNegativeZNode.setAttachmentStrategy(VolumeAttachmentStrategy::Gap);
   // The -z end of this container defines the calorimeter's global minZ, so the
