@@ -32,7 +32,7 @@ StatusCode HGTD_TrkTimePerformanceStudies::initialize() {
                     "m_eff_gt50pcprimes_vs_eta_mistag", ";|#eta| ;frequency",
                     32, 2.4, 4.0);
 
-      for (auto primes_fraction_i : m_primes_fractions) {
+      for (const auto& primes_fraction_i : m_primes_fractions) {
         std::string name = "m_eff_vs_eta_primesfrac" + primes_fraction_i;
         bookEffSubdir(track_tool->name(), time_tool->name(), name,
                       ";|#eta| ;frequency", 32, 2.4, 4.0);
