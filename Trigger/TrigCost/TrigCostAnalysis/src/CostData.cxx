@@ -26,10 +26,6 @@ StatusCode CostData::cache() {
   return StatusCode::SUCCESS;
 }
 
-void CostData::setCostROSData(const CostROSData& costROSData) {
-  m_costROSData = &costROSData;
-}
-
 void CostData::setLb(uint32_t lb) {
   m_lb = lb;
 }
