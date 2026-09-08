@@ -47,7 +47,6 @@ Starlight_i::Starlight_i(const std::string& name, ISvcLocator* pSvcLocator):
 }
 
 Starlight_i::~Starlight_i(){
-  if (m_starlight) delete m_starlight;
 }
 
 StatusCode Starlight_i::genInitialize()
@@ -69,7 +68,7 @@ StatusCode Starlight_i::genInitialize()
     }
 
     // create the starlight object
-    m_starlight = new starlight();
+    m_starlight = std::make_unique<starlight>();
     // Set random generator to prevent crash in tests.
     m_randomGenerator = std::make_shared<randomGenerator>();
     m_randomGenerator->SetSeed(seeds[0]);
